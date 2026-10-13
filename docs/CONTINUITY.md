@@ -6,7 +6,16 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 - **Wave:** 0 and 1 complete (04, 05, 06, 07 done, CP-2..CP-5 green). Wave 2 (task 08) next.
 - **Last checkpoints:** CP-1 GREEN (pytest, `doctor`, `version`). CP-0 COMPLETE (all measurements clean). CP-2 (task 04) GREEN. CP-4 (task 06) GREEN: 78 passed.
 - **Next action:** see the newest entry below.
-- **Blockers:** `gh` not authenticated (issues/labels); dof caps need replacing (plan caps unsafe on this 8 GB card).
+- **Blockers:** none for task 08. Open decisions: senior review of 06/07 conventions; questions #7-#11 for Collin.
+
+## 2026-10-13 (01:10) — GitHub live (orchestrator: Claude)
+
+- `gh` authenticated (account llevaachingada). Repo: https://github.com/llevaachingada/Hornfab. Labels created (wave-1, wave-2, senior-review, phase-2, blocked, question).
+- Issues created: #1-#4 (tasks 04-07, closed with CP results), #5 (task 08, open, in progress), #6 (task 09, blocked by #5), #7-#11 (questions for Collin). Mirror in `docs/ISSUES.md`.
+- CI: green on the latest commit (0a96c58). Two earlier red runs were my broken commits (missing `hornlab_search/dataset` because of an unanchored `.gitignore`; a test tied to the old frequency grid), both fixed. Lesson: always check the pytest exit code before committing (a `| tail` hid a failure once).
+- Task 08 dispatched with exclusive GPU use; no solver jobs run by the orchestrator meanwhile.
+
+**Next action:** when task 08 reports, commit it, run/verify CP-6 numbers, then hand CP-7a-f (issue #6) to the senior verifier. Questions #7-#11 are for the user to send to Collin.
 
 ## 2026-10-13 (01:00) — task 05 done, example bands capped (orchestrator: Claude)
 
@@ -51,7 +60,6 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 **Open issues**
 1. **Decision needed (task 04 finding):** the baseline seed horn is large (quarter area 0.282 m^2, bbox 0.40 x 0.32 x 0.26 m, vs the plan's 0.125 m^2 assumption). With a 5,000-dof cap, `screen` at f_max 10 kHz is refused (`MeshTooLargeError`); 5,000 quarter dofs buys roughly 6 kHz for this horn. Options: lower `band_hi_hz`/screen grid top, use fewer elements per wavelength in screen (epw 4), or a smaller seed. Not decided; `osse_baseline.yaml` unchanged beyond caps.
 2. `config.mesh_spec` uses `ceil(2*cap*qf*slack)` and ignores `dof_per_triangle`, while `sizing.max_triangles_for` uses it (2% apart at 0.51). Task 03 file; fix pending.
-3. `gh` unauthenticated: labels and the GitHub issues (bodies in `.github/issues/`) are not created. `git push` works via the credential manager.
 4. Task 06 conventions awaiting senior review (half-pressure -6 dB threshold; `di_from_cuts` clamp; ddof=1 ripple).
 6. Mesh time: 0.3 s -> 12 s over the f_max range for the baseline horn (task 04 table); mesh fraction of a screening candidate is small versus solve above 5k dofs.
 
