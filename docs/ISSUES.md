@@ -29,3 +29,5 @@ Local-only, added 2026-10-13 (local GPU box): CP-8 evidence lives in `docs/evide
 CP-8a..d (local GPU box, see `docs/HANDOFF_LOCAL.md`): CP-8a **PASS** (480 offline + 18 GPU-marked tests, doctor 10/10, outputs pasted in CONTINUITY 2026-10-13); CP-8b **PASS** (`a_deg` lo 25→5, `exponent` lo 2→1 in `search_smoke`/`osse_baseline`, rerun no longer pinned, report table pasted); CP-8c (multi-family dataset) and CP-8d (train/gate/propose, ≥ 500 held-out) pending user go-ahead on GPU hours.
 
 CP-9a..d (cloud GPU pod proof, cap study, campaign, train/gate; see `docs/CLOUD_GPU_REPORT.md` section 6): proposed, awaiting user decisions on provider and spend cap; no GitHub issue yet.
+
+CP-10a..d (high-frequency options, 12 kHz; see `docs/HIGH_FREQUENCY_OPTIONS.md` section 6): proposed, none run; CP-10d needs the user to approve contacting Collin.
