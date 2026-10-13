@@ -22,6 +22,8 @@ Local-only items (no GitHub issue): band edges capped by the measured dof cap (c
 
 Local-only, added 2026-10-13 (cloud): Phase 2 Stage A code complete but gates unvalidated on real data (needs >= 500 held-out multi-family BEM records, GPU box); widen `a_deg`/`exponent` bounds and run the other 4 configs (GPU box); ISMO selection + `surrogate` CLI built (synthetic-tested); solving proposals with BEM and Stage B-D not started.
 
+Local-only, added 2026-10-13 (local GPU box, data digest): `osse_baseline` bound-pinning follow-up — the best designs sit at the LOWER bound of `n` (2.0; top-6 6/6) and 5/6 at `q` lo (0.9), while `a_deg`/`exponent` are interior. The mesher only needs `n > 0`, `q > 0` while `s != 0`, so a future widening of `n`/`q` is indicated (CP-8b handled `a_deg`/`exponent` only). Evidence: `docs/evidence/CP-8c_data_summary.md`.
+
 Local-only, added 2026-10-13 (local GPU box): CP-8 evidence lives in `docs/evidence/` — verbatim checkpoint output (`CP-8a.md`, `CP-8b.md`, `CP-8c_*.md`), live monitor logs (`logs/`), and `manifest.sha256` (SHA-256 + size of every raw artifact). Raw `dataset/`, `runs/`, `cache/` stay local and gitignored by design (dataset already 180.6 MB at 1128 records; CP-5 projects 0.78-1.4 GB at 10k) — verify against the manifest instead of committing blobs; use a data branch/release asset to move raw data.
 
 CP-8a..d (local GPU box, see `docs/HANDOFF_LOCAL.md`): CP-8a **PASS** (480 offline + 18 GPU-marked tests, doctor 10/10, outputs pasted in CONTINUITY 2026-10-13); CP-8b **PASS** (`a_deg` lo 25→5, `exponent` lo 2→1 in `search_smoke`/`osse_baseline`, rerun no longer pinned, report table pasted); CP-8c (multi-family dataset) and CP-8d (train/gate/propose, ≥ 500 held-out) pending user go-ahead on GPU hours.
