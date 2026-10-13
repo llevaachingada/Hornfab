@@ -15,7 +15,7 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 
-from conftest import FAKE_FREQS, cardioid_mag, make_fake_response
+from conftest import cardioid_mag, make_fake_response
 from hornlab_search.config import solve_spec
 from hornlab_search.constants import C_AIR, REF_P, RHO_AIR
 from hornlab_search.solve import base, worker
@@ -211,7 +211,7 @@ def test_solve_makes_one_call_per_frequency_and_returns_a_valid_response(fakebea
     assert r.spl_h_db.shape == r.spl_v_db.shape == (12, 73)
     assert np.array_equal(r.h_angles_deg, arc_angles_deg(73)) and r.axis_index == 36
     assert r.n_dof == 1234                                                       # always captured
-    assert np.allclose(r.freqs_hz, FAKE_FREQS)
+    assert np.allclose(r.freqs_hz, spec.freqs_hz)                                # follows the config grid (band_hi_hz is a YAML default)
     assert r.p_h.shape == (12, 73) and r.p_h.dtype == np.complex128
     assert np.all(np.isfinite(r.spl_h_db)) and r.meta["n_dof_source"]
     assert r.meta["native_diagnostics"][0]["message"] == "Julia direct dense solve"
