@@ -1,0 +1,56 @@
+name: freeform_hv
+family: FREEFORM
+
+# FREEFORM profile from hornlab-waveguide-mesher examples/freeform-bare.toml,
+# with a superellipse cross-section schedule (per 03_TASK_SCAFFOLD step 5).
+seed_params:
+  profileH:
+    points: [[0.0, 12.7], [60.0, 80.0], [120.0, 160.0]]
+    throatAngleDeg: 15.5
+    mouthAngleDeg: 70.0
+  profileV:
+    points: [[0.0, 12.7], [60.0, 60.0], [120.0, 110.0]]
+    throatAngleDeg: 15.5
+    mouthAngleDeg: 60.0
+  crossSections:
+    - {t: 0.0, shape: circle}
+    - {t: 1.0, shape: superellipse, exponent: 4.0}
+
+# NOTE: how FREEFORM control-point lists map onto search dimensions is task 04's
+# call (UNRESOLVED here). For Wave 0 the H/V mouth angles and the superellipse
+# exponent are exposed as scalar search bounds; the rest is pinned.
+bounds:
+  profileH.mouthAngleDeg: {lo: 40.0, hi: 90.0}
+  profileV.mouthAngleDeg: {lo: 40.0, hi: 80.0}
+  exponent:              {lo: 2.0,  hi: 8.0}
+
+target:
+  coverage_h_deg: 75.0
+  coverage_v_deg: 45.0
+  band_lo_hz: 700.0
+  band_hi_hz: 13000.0
+  di_target_db: null
+  di_slope_target: 0.0
+
+weights: {cov: 1.0, rip: 1.0, di: 0.3, dislope: 0.5, flat: 0.5, load: 0.0}
+
+mesh:
+  epw: 6.0
+  quadrants: "1234"            # FREEFORM H/V differ; full domain
+  dof_cap_screen: 8000
+  dof_cap_verify: 16000
+  dof_cap_final:  24000
+  dof_per_triangle: 0.50       # measured M1: 0.500 full domain, ~0.51 quarter (hornlab-beat-bem 0.2.0)
+
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73             # must be ODD
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-5
+  timeout_s: 900
+
+search: {algorithm: cma, sigma0: 0.25, seed: 1234, budget: 200,
+         popsize: null, tolfun: 1.0e-3}
