@@ -3,10 +3,28 @@
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
 ## Status
-- **Wave:** 0, 1, 2 and 3 complete; Phase 2 Stage A code landed (untrained on real data) (tasks 04-08 done; CP-7a-f all PASS). This is the end of the plan's Wave ladder.
-- **Last checkpoints:** CP-7 (senior physics gate) GREEN — noise floor **0.039 dB**. CP-1/CP-2/CP-4/CP-5/CP-6 all green.
-- **Next action (needs the Windows GPU box):** widen `a_deg`/`exponent` bounds (check mesher validity first), run the other 4 example configs for a multi-family dataset, then train/gate the Stage A surrogate on >= 500 held-out real records. Runbook: `docs/HANDOFF_LOCAL.md` (CP-8a..d).
-- **Blockers:** none. Issues #6-#11 closed.
+- **Wave:** 0, 1, 2 and 3 complete; Phase 2 Stage A code landed (synthetic-tested only) (tasks 04-08 done; CP-7a-f all PASS). This is the end of the plan's Wave ladder.
+- **Last checkpoints:** CP-7 (senior physics gate) GREEN — noise floor **0.039 dB**. **CP-8a PASS, CP-8b PASS** (local GPU box, 2026-10-13: 480 offline + 18 GPU-marked tests, doctor 10/10; bounds widened `a_deg` 25→5 / `exponent` 2→1, rerun no longer pinned). CP-1/CP-2/CP-4/CP-5/CP-6 all green.
+- **Next action:** CP-8c — multi-family dataset runs (osse_baseline 1500, icw_termination 800, freeform_hv 800, throat_adapter 400; one at a time, ~15-17 h GPU serial estimated; user consulted before starting; runs resumable). Then CP-8d train/gate (≥ 500 held-out per family, else report "indicative only"). Dataset now 134 records, 100 % OSSE.
+- **Blockers:** none. Issue **#13** open (hardening review — circle-back before/with CP-8d; do not weaken gate thresholds). Issues #1-#11 closed.
+
+## 2026-10-13 (local GPU box) — CP-8a PASS, CP-8b PASS, bounds widened; hardening review filed as #13 (local agent)
+
+**CP-8a PASS (real box, mesher tests unskipped):**
+- `pytest -m "not slow and not gpu and not crosscheck"`: **480 passed, 18 deselected** in 164.42 s, `$LASTEXITCODE=0` (the cloud suite's 30 skips were mesher-gated → all unskipped here, matching the expected ~480).
+- `hornlab-search doctor`: **10/10 PASS** (python 3.12.10, pinned SHAs, gpu check, beat_cuda ready, config round-trip, gpu-hygiene 0 hosts, VRAM 395 MiB).
+- `pytest -m "slow or gpu or crosscheck"` (hygiene first: no julia, VRAM 395 MiB): **18 passed, 480 deselected** in 500.62 s, exit 0. Post-run: stray julia host killed (`taskkill /F /IM julia.exe`, PID 28464), VRAM back to 395 MiB. Consistent with CP-7: beat vs bempp ≤ 0.055 dB on the 2,316-dof quarter mesh; full-vs-quarter ≤ 0.031 dB ≤ 3 kHz.
+- `dataset stats` before CP-8b: 134 records (119 ok, 15 failed), 100 % OSSE, traces 3.7 %, GPU solve 566.9 s total.
+
+**CP-8b PASS — widen from the mesher's own limits (empirically verified, not guessed):**
+- Acceptance probe (`hornlab_mesher` 0.2.4, profile level + REAL `build_mesh` at search_smoke screen settings): `a_deg` = 0.0/2.0/5.0/10.0/15.0/25.0 all mesh (crossing `a0=30` fine; radius monotone); `exponent` 1.0/1.5/2.0/4.0 mesh, 0.5 refuses (azimuth chord). Worst combined corner → clean `MeshTooLargeError`/`GeometryInvalidError` (refusal OK, no consistency crash). **Correction to the handoff:** "must keep `a_deg > a0_deg`" is NOT enforced anywhere — the OSSE radicand can only fail with a NEGATIVE `a0` steeper than `a`; repo bounds keep `a0_deg ≥ 2` so it cannot fire. Mesher floors: `a_deg ≥ 0` (coverage_angle non-negative, `profile_formulas.py:1231`), OSSE `exponent` unvalidated (clamp max(e,1e-6) at `profile_sampling.py:481`; itself overflow-broken at 1e-6), FREEFORM-station `exponent` hard [2,16] (`freeform.py:968`, mirrored `families.py:389-392`).
+- Edits (`examples/search_smoke.yaml`, `examples/osse_baseline.yaml`): `a_deg` lo 25.0 → **5.0**, `exponent` lo 2.0 → **1.0** (5 has margin over the degenerate ~0 floor; 1.0 is 2× the empirically refused 0.5). `freeform_hv.yaml` exponent stays 2.0 (mesher hard [2,16] for FREEFORM stations — widening below would only produce rejected designs); `throat_adapter.yaml` stays pinned.
+- Dry-run both configs: seed still meshes (search_smoke 2,598/3,000 screen dofs; osse_baseline 3,850/5,000).
+- Rerun `search_smoke --budget 60` (`runs\20261013T121958Z-screen-9e5a5c`): 60 new evals in 254.5 s GPU (5.2 s/candidate, 690/h), seed J=22.0678 → best J=10.7776, failures {invalid_geometry: 1, mesh_too_large: 7} (classified, no crash); julia host killed after.
+- Report bounds table: **no key pinned** — `a_deg` best 33.54 (0/6 of top-6 near lo 5), `exponent` best 4.67 (0/6 near lo 1). Old pins (a_deg=25.0, exponent=2.0) gone → pass criterion met with one widening.
+- Honest caveat: this rerun's best J (10.78) is HIGHER than the old run's (9.66) at equal budget — 60-eval CMA variance, not a regression; the actionable outcome is the bounds are no longer active constraints.
+
+**Hardening review (senior reviewer/oracle, read-only) → filed as issue #13; circle-back before/with CP-8d.** Top risks (full table + ready-to-paste fixes in #13): 1) gate verdict not persisted — `surrogate propose` accepts a failed/never-rated bundle and a failed retrain silently overwrites a passing `--out`; 2) rank gate compares stored objectives (solve-time weights) against predictions under current weights; 3) bundle does not freeze the bounds/family/keys/freqs it was trained under (bounds edited TODAY — commit before training); 4) pooling `search_smoke` (500-4500 grid) with `osse_baseline` (500-5500) silently drops all search_smoke records in `to_training_arrays` without printed counts — the ≥ 500 held-out arithmetic must use the printed post-filter count; 5) no `di_source` guard on the surrogate path; 6) duplicate seed rows can straddle the cluster holdout. **Do NOT weaken any gate threshold.**
 
 ## 2026-10-13 (cloud, handoff) — local-agent handoff written; CP-8 defined (orchestrator: Claude)
 
