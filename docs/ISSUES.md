@@ -7,9 +7,9 @@ GitHub issues are **not created yet** (blocked on `gh auth login`; bodies are dr
 
 | ID | Title | Status | Owner | Plan ref |
 |---|---|---|---|---|
-| — | Wave 0: finish CP-0 measurements (M2–M5) on an exclusive GPU | open (local) | 02 | `docs/plan/02_TASK_ENV.md` |
+| — | Wave 0: finish CP-0 measurements (M2–M5) on an exclusive GPU | **done** | 02 | `docs/plan/02_TASK_ENV.md` |
 | — | Wave 0: create GitHub repo, labels, and Wave 1 issues | blocked (`gh auth login`) | 03 | `docs/HANDOFF.md` |
-| #04 (planned) | design + mesh | in progress (agent running) | 04 | `docs/plan/04_TASK_DESIGN_MESH.md` |
+| #04 (planned) | design + mesh | **done locally, CP-2 green** | 04 | `docs/plan/04_TASK_DESIGN_MESH.md` |
 | #05 (planned) | solve | next (waits for free GPU) | 05 | `docs/plan/05_TASK_SOLVE.md` |
 | #06 (planned) | metrics (cardioid threshold −6.0206 dB, not −6.0) | **done locally, CP-4 green (78 tests); awaiting senior review of 3 conventions** | 06 | `docs/plan/06_TASK_METRICS.md` |
 | #07 (planned) | dataset | in progress (agent running) | 07 | `docs/plan/07_TASK_DATASET.md` |
@@ -25,3 +25,5 @@ GitHub issues are **not created yet** (blocked on `gh auth login`; bodies are dr
 | Point-grid public-API access (`build_point_grid`, phi-major) | planned |
 | Driver excitation definition on tag `SD1D1001` (single unit normal-acceleration source) | planned |
 | Final package name (`hornlab-search`) | planned |
+
+| — | Decision: baseline seed horn is too large for the measured dof caps at 10 kHz screen (see CONTINUITY 2026-10-13) | open (needs user) | orchestrator | `docs/CONTINUITY.md` |

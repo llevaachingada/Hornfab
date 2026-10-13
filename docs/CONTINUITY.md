@@ -3,10 +3,30 @@
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
 ## Status
-- **Wave:** 0 essentially complete (M4 CPU + final caps pending); Wave 1 in progress: 06 done, 04 and 07 running, 05 next.
-- **Last checkpoints:** CP-1 GREEN (pytest, `doctor`, `version`). CP-0 PARTIAL: M1/M2/M3/M5/M6/M7 and C1-C5 measured clean; M4 pending. CP-4 (task 06) GREEN: 78 passed.
+- **Wave:** 0 complete; Wave 1 in progress: 04 and 06 done, 07 running, 05 next.
+- **Last checkpoints:** CP-1 GREEN (pytest, `doctor`, `version`). CP-0 COMPLETE (all measurements clean). CP-2 (task 04) GREEN. CP-4 (task 06) GREEN: 78 passed.
 - **Next action:** see the newest entry below.
 - **Blockers:** `gh` not authenticated (issues/labels); dof caps need replacing (plan caps unsafe on this 8 GB card).
+
+## 2026-10-13 (00:15) — task 04 done, caps set, CPU provisioned (orchestrator: Claude)
+
+**Done**
+- Task 04 (design + mesh) DONE: 87 offline tests + 27 mesher-gated tests pass (CP-2). Files: `design/{families,space,custom}.py`, `mesh/{sizing,build}.py` + 4 test files. Contract deviations (all in NOTES_FOR_SENIOR): `to_mesher_config` returns a *sectioned* dict (the mesher silently ignores a top-level `max_triangles`); pre-mesh dof estimate added so over-cap designs are refused in <100 ms; new exceptions `MeshConsistencyError/MeshUnitsError/SymmetryMismatchError` that task 08 must not swallow.
+- I edited one task-04 test (`test_over_cap_but_inside_mesher_slack_is_caught_after_meshing`) so it reads the screen cap from the config instead of the hard-coded plan value 8000; same intent, no tolerance loosened.
+- **dof caps replaced** (quarter domain): screen 5,000 / verify 7,000 / final 8,900; full-domain (`freeform_hv`) 3,000 / 4,500 / 5,400. Basis: per-frequency cost 0.4 s @2.4k, 2.8 s @5.1k, 7.5 s @7.0k, 45 s @8.9k; 15.7k quarter and 9.2k full OOM.
+- **Finding for task 05**: one multi-frequency `solve_frequencies` call falls off a cliff above ~2.4k dofs (689 s at 5.1k; 1,151 s with pipelining off) while 12 separate single-frequency calls take 33 s. The CUDA adapter must loop one frequency per call.
+- M4 done: cuda 0.8 s vs cpu 1.45 s per frequency at 2.4k dofs; CPU cold start 3.7 s vs CUDA 29 s. `HORNLAB_BEAT_FORCE_CPU` does not redirect an explicit cuda request.
+- First push done: https://github.com/llevaachingada/Hornfab (commit ef30d36).
+
+**Open issues**
+1. **Decision needed (task 04 finding):** the baseline seed horn is large (quarter area 0.282 m^2, bbox 0.40 x 0.32 x 0.26 m, vs the plan's 0.125 m^2 assumption). With a 5,000-dof cap, `screen` at f_max 10 kHz is refused (`MeshTooLargeError`); 5,000 quarter dofs buys roughly 6 kHz for this horn. Options: lower `band_hi_hz`/screen grid top, use fewer elements per wavelength in screen (epw 4), or a smaller seed. Not decided; `osse_baseline.yaml` unchanged beyond caps.
+2. `config.mesh_spec` uses `ceil(2*cap*qf*slack)` and ignores `dof_per_triangle`, while `sizing.max_triangles_for` uses it (2% apart at 0.51). Task 03 file; fix pending.
+3. `gh` unauthenticated: labels and the GitHub issues (bodies in `.github/issues/`) are not created. `git push` works via the credential manager.
+4. Task 06 conventions awaiting senior review (half-pressure -6 dB threshold; `di_from_cuts` clamp; ddof=1 ripple).
+5. Task 07 (dataset) still running; one of its tests currently failing mid-work.
+6. Mesh time: 0.3 s -> 12 s over the f_max range for the baseline horn (task 04 table); mesh fraction of a screening candidate is small versus solve above 5k dofs.
+
+**Next action:** collect task 07; dispatch task 05 (solve) now that the GPU is free of measurements; then task 08 once 04-07 are in.
 
 ## 2026-10-12 (night) — clean GPU measurements, Wave 1 started (orchestrator: Claude)
 

@@ -41,9 +41,9 @@ weights: {cov: 1.0, rip: 1.0, di: 0.3, dislope: 0.5, flat: 0.5, load: 0.0}
 mesh:
   epw: 6.0
   quadrants: "1"              # ICW is axisymmetric; quarter domain
-  dof_cap_screen: 8000
-  dof_cap_verify: 16000
-  dof_cap_final:  24000
+  dof_cap_screen: 5000   # measured 8GB RTX 4060 (TOOLCHAIN.md M3); plan default was 8000
+  dof_cap_verify: 7000
+  dof_cap_final:  8900
   dof_per_triangle: 0.51       # measured M1: 0.500 full domain, ~0.51 quarter (hornlab-beat-bem 0.2.0)
 
 solve:

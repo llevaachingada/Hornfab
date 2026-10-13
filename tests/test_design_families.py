@@ -84,6 +84,14 @@ def test_unknown_family_rejected():
         validate(Design("NOPE", {}))
 
 
+def test_quadrants_belong_to_meshspec_not_design():
+    """04 step-0 answer 6: quadrants / resolutions / max_triangles are mesh settings."""
+    for key in ("quadrants", "max_triangles", "throat_res_mm", "mouth_res_mm", "rear_res_mm",
+                "allow_large_mesh", "scale_to_metres"):
+        with pytest.raises(GeometryInvalidError, match=key):
+            validate(Design("OSSE", {**OSSE, key: 1}))
+
+
 # ------------------------------------------------------------------ test 6
 
 

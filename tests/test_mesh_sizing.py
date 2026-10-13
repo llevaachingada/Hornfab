@@ -94,9 +94,12 @@ def test_f_max_for_dofs_inverts_the_chain(quadrants, dpt):
 
 def test_f_max_for_dofs_contract_arithmetic():
     """01_CONTRACTS section 6 table: a 0.125 m^2 quarter surface at epw 6 and 8000 dofs buys
-    'about 13 kHz' with the mesher's 2.3 triangles per h^2."""
+    'about 13 kHz' with the uniform 2.3 triangles per h^2 (and ~12 kHz with the measured
+    effective 3.0 that is the default)."""
+    f_uniform = f_max_for_dofs(8000, 0.125 * 4, 6.0, "1", 0.5, tri_per_area_h2=2.3)
+    assert 12_000 < f_uniform < 14_000
     f = f_max_for_dofs(8000, 0.125 * 4, 6.0, "1", 0.5)
-    assert 11_000 < f < 15_000
+    assert 11_000 < f < f_uniform
     # more dofs, higher frequency; bigger horn, lower frequency; more epw, lower frequency
     assert f_max_for_dofs(16000, 0.5, 6.0, "1", 0.5) > f
     assert f_max_for_dofs(8000, 2.0, 6.0, "1", 0.5) < f
@@ -148,4 +151,4 @@ def test_example_config_caps_are_not_hardcoded_in_sizing(cfg):
     import inspect
     src = inspect.getsource(sizing)
     for banned in ("8000", "16000", "24000"):
-        assert banned not in src.replace("8000 dofs", "")   # only prose may mention a number
+        assert banned not in src

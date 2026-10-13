@@ -1,0 +1,353 @@
+"""Drive hornlab_mesher: Design -> .msh in METRES on disk, with the guards.
+
+We never write a mesher, a gmsh writer or a triangulation. ``hornlab_mesher.build_from_config``
+does the geometry and the meshing; this module builds its config, enforces the dof budget,
+checks the mesh came back in metres, and caches by hash.
+
+Guards, in the order they can fire:
+  * ``families.validate``                          -> GeometryInvalidError   (no mesher call)
+  * cache lookup                                   -> hit returns, no mesher call
+  * pre-mesh triangle estimate over the dof cap    -> MeshTooLargeError      (no mesh written)
+  * mesher ConfigError / ValueError / MesherError  -> GeometryInvalidError   (message verbatim)
+  * mesher TriangleBudgetExceeded                  -> MeshTooLargeError
+  * mesh bbox extent outside [0.02, 5.0] m         -> MeshUnitsError         (units bug, HARD)
+  * mesher's symmetry flag != sizing.SYMMETRY_PLANE-> SymmetryMismatchError  (silent killer #2)
+  * source tag 2 (SD1D1001) empty                  -> GeometryInvalidError
+  * estimated/vertex dofs over the mode cap        -> MeshTooLargeError      (mesh deleted)
+"""
+from __future__ import annotations
+
+import copy
+import json
+import logging
+import shutil
+import time
+from pathlib import Path
+
+import numpy as np
+
+from ..types import (Design, GeometryInvalidError, MeshResult, MeshSpec, MeshTooLargeError)
+from . import sizing
+from ..design import families
+
+log = logging.getLogger("hornlab_search.mesh.build")
+
+# bbox sanity band for the largest extent of the solved mesh, metres (01_CONTRACTS section 3 /
+# 04 step 8). A 1000x error in either direction lands far outside it.
+BBOX_MIN_M = 0.02
+BBOX_MAX_M = 5.0
+
+SOURCE_TAG = 2          # SD1D1001, hornlab_mesher.tags.PhysicalGroup.PRIMARY_SOURCE
+
+# Pre-mesh estimate: a coarse geometry resolve (cheap, no gmsh) gives the wall areas.
+_COARSE_RES_MM = 20.0
+# Reject before meshing only when the area-based estimate is this many times over the cap. The
+# estimate runs 0.81x to 1.13x of the real count (measured, 4 horns, 3-12 kHz), so 1.5x cannot
+# reject a mesh the cap would accept (1.13 * 1.15 slack < 1.5); the exact
+# post-mesh check below is the authoritative one.
+PREMESH_MARGIN = 1.5
+# Effective throat->mouth element size as a fraction of the mouth size, for a throat that is
+# half the mouth resolution (calibrated against real builds, see CP-2).
+_H_INNER_FRACTION = 0.75
+
+
+class MeshConsistencyError(RuntimeError):
+    """The mesher's output contradicts what we asked for. A bug or a units error, NOT a bad
+    candidate: do not swallow it as an invalid design."""
+
+
+class MeshUnitsError(MeshConsistencyError):
+    """Mesh bounding box outside [0.02, 5.0] m: ``scale_to_metres`` / ``mesh_scale`` mismatch."""
+
+
+class SymmetryMismatchError(MeshConsistencyError):
+    """Quadrants and the native symmetry flag disagree."""
+
+
+# ------------------------------------------------------------------ .msh reader
+
+
+def read_msh_summary(path: Path) -> dict:
+    """{'n_triangles', 'n_nodes', 'n_nodes_used', 'bbox_m', 'area_m2', 'tags': {id: count},
+        'tag_names': {id: name}, 'format'}
+
+    Parses the gmsh ASCII v2.2 $Nodes and $Elements blocks. Read only. We never write a .msh.
+    ``bbox_m`` is (xmin, ymin, zmin, xmax, ymax, zmax) over the nodes the triangles use.
+    """
+    path = Path(path)
+    lines = path.read_text(encoding="utf-8").splitlines()
+    idx = {ln.strip(): i for i, ln in enumerate(lines) if ln.startswith("$")}
+    for need in ("$MeshFormat", "$Nodes", "$EndNodes", "$Elements", "$EndElements"):
+        if need not in idx:
+            raise ValueError(f"{path}: missing {need} (not a gmsh ASCII .msh)")
+    fmt = lines[idx["$MeshFormat"] + 1].split()
+    if not fmt[0].startswith("2") or fmt[1] != "0":
+        raise ValueError(f"{path}: only ASCII MSH 2.x is supported, got {' '.join(fmt)}")
+
+    tag_names: dict[int, str] = {}
+    if "$PhysicalNames" in idx:
+        i0 = idx["$PhysicalNames"]
+        for ln in lines[i0 + 2: i0 + 2 + int(lines[i0 + 1])]:
+            dim, tag, name = ln.split(None, 2)
+            if int(dim) == 2:
+                tag_names[int(tag)] = name.strip().strip('"')
+
+    i0 = idx["$Nodes"]
+    n_nodes = int(lines[i0 + 1])
+    raw = np.array([ln.split() for ln in lines[i0 + 2: i0 + 2 + n_nodes]], dtype=float)
+    node_ids = raw[:, 0].astype(np.int64)
+    xyz = raw[:, 1:4]
+    row_of = np.full(int(node_ids.max()) + 1, -1, dtype=np.int64)
+    row_of[node_ids] = np.arange(n_nodes)
+
+    i0 = idx["$Elements"]
+    n_el = int(lines[i0 + 1])
+    tris: list[list[int]] = []
+    phys: list[int] = []
+    for ln in lines[i0 + 2: i0 + 2 + n_el]:
+        f = ln.split()
+        if int(f[1]) != 2:               # 3-node triangle only; lines/points are ignored
+            continue
+        nt = int(f[2])
+        phys.append(int(f[3]) if nt >= 1 else 0)
+        tris.append([int(v) for v in f[3 + nt: 6 + nt]])
+    tri = row_of[np.array(tris, dtype=np.int64).reshape(-1, 3)]
+    phys_a = np.array(phys, dtype=np.int64)
+
+    p0, p1, p2 = xyz[tri[:, 0]], xyz[tri[:, 1]], xyz[tri[:, 2]]
+    area = 0.5 * np.linalg.norm(np.cross(p1 - p0, p2 - p0), axis=1).sum()
+    used = np.unique(tri)
+    pts = xyz[used]
+    bbox = tuple(float(v) for v in (*pts.min(axis=0), *pts.max(axis=0)))
+    ids, counts = np.unique(phys_a, return_counts=True)
+    return {
+        "n_triangles": int(tri.shape[0]),
+        "n_nodes": int(n_nodes),
+        "n_nodes_used": int(used.size),
+        "bbox_m": bbox,
+        "area_m2": float(area),
+        "tags": {int(i): int(c) for i, c in zip(ids, counts)},
+        "tag_names": tag_names,
+        "format": " ".join(fmt),
+    }
+
+
+# ------------------------------------------------------------------ pre-mesh estimate
+
+
+def _quad_grid_area(P: np.ndarray) -> float:
+    a, b, c, d = P[:-1, :-1], P[1:, :-1], P[1:, 1:], P[:-1, 1:]
+    return float(0.5 * np.linalg.norm(np.cross(b - a, c - a), axis=-1).sum()
+                 + 0.5 * np.linalg.norm(np.cross(c - a, d - a), axis=-1).sum())
+
+
+def estimate_triangles_premesh(mcfg: dict) -> float | None:
+    """Solved-domain triangle estimate from wall AREAS, without gmsh.
+
+    A coarse (20 mm) geometry resolve is a few tens of ms and gives the inner/outer wall point
+    grids; ``N ~= 2.3 * sum(A / h^2)`` with the mesher's own constant. Returns None when the
+    estimate cannot be made (any exception), in which case the mesher's own checks apply.
+    """
+    try:
+        from hornlab_mesher.config_builder import resolve_geometry
+        coarse = copy.deepcopy(mcfg)
+        coarse["mesh"].update(throat_res_mm=_COARSE_RES_MM, mouth_res_mm=_COARSE_RES_MM,
+                              rear_res_mm=_COARSE_RES_MM, allow_large_mesh=True)
+        geom = resolve_geometry(coarse).geometry
+        a_in = _quad_grid_area(np.asarray(geom.inner_points, dtype=float))
+        out = getattr(geom, "outer_points", None)
+        a_out = _quad_grid_area(np.asarray(out, dtype=float)) if out is not None else 0.0
+    except Exception as exc:          # estimator is advisory; never let it kill a candidate
+        log.debug("pre-mesh estimate unavailable: %r", exc)
+        return None
+    m = mcfg["mesh"]
+    h_in = _H_INNER_FRACTION * float(m["mouth_res_mm"])
+    h_out = float(m["rear_res_mm"])
+    c = sizing.TRIANGLES_PER_AREA_OVER_H2
+    return c * (a_in / (h_in * h_in) + a_out / (h_out * h_out))
+
+
+# ------------------------------------------------------------------ cache
+
+
+def _meta_path(d: Path) -> Path:
+    return d / "mesh_meta.json"
+
+
+def _result_to_json(r: MeshResult) -> dict:
+    return {"path": r.path, "n_triangles": r.n_triangles, "n_dof": r.n_dof,
+            "quadrants": r.quadrants, "symmetry_plane": r.symmetry_plane,
+            "res_mm": r.res_mm, "bbox_m": list(r.bbox_m), "seconds": r.seconds}
+
+
+def _result_from_json(d: dict, path: Path, seconds: float) -> MeshResult:
+    return MeshResult(path=str(path), n_triangles=int(d["n_triangles"]), n_dof=d.get("n_dof"),
+                      quadrants=d["quadrants"], symmetry_plane=d["symmetry_plane"],
+                      res_mm=dict(d["res_mm"]), bbox_m=tuple(d["bbox_m"]), seconds=seconds)
+
+
+def _load_cached(d: Path, key: str) -> dict | None:
+    mp, msh = _meta_path(d), d / "mesh.msh"
+    if not (mp.is_file() and msh.is_file()):
+        return None
+    try:
+        meta = json.loads(mp.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    return meta if meta.get("key") == key else None
+
+
+def _copy_entry(src: Path, dst: Path) -> None:
+    """Copy, never symlink: symlinks on Windows need elevation (01_CONTRACTS section 14)."""
+    dst.mkdir(parents=True, exist_ok=True)
+    if src.resolve() == dst.resolve():
+        return
+    shutil.copyfile(src / "mesh.msh", dst / "mesh.msh")
+    shutil.copyfile(_meta_path(src), _meta_path(dst))
+
+
+# ------------------------------------------------------------------ guards
+
+
+def _check_dofs(n_tri: int, n_nodes_used: int, mesh: MeshSpec, cfg, mode: str | None) -> int:
+    dpt = float(cfg.mesh.dof_per_triangle)
+    cap = sizing.dof_cap_for(mesh, cfg.mesh, mode)
+    est = max(sizing.estimate_dofs(n_tri, mesh.quadrants, dpt), int(n_nodes_used))
+    if est > cap:
+        raise MeshTooLargeError(
+            f"{est} dofs ({n_tri} triangles, {n_nodes_used} vertices) exceeds the dof cap {cap}"
+            f" for quadrants {mesh.quadrants!r}; lower f_max or epw")
+    return est
+
+
+def _check_bbox(bbox_m: tuple) -> None:
+    extent = max(bbox_m[3] - bbox_m[0], bbox_m[4] - bbox_m[1], bbox_m[5] - bbox_m[2])
+    if not BBOX_MIN_M <= extent <= BBOX_MAX_M:
+        raise MeshUnitsError(
+            f"mesh bounding box largest extent {extent:.6g} m is outside "
+            f"[{BBOX_MIN_M}, {BBOX_MAX_M}] m; bbox={bbox_m}. This is a UNITS bug "
+            "(scale_to_metres / SolveConfig mesh_scale), not a bad candidate. The mesher must "
+            "write metres (scale_to_metres=True) and the solve must use mesh_scale=1.0.")
+
+
+# ------------------------------------------------------------------ build
+
+
+def build_mesh(design: Design, mesh: MeshSpec, cfg, out_dir: Path, *, mode: str | None = None,
+               cache_dir: Path | None = None) -> MeshResult:
+    """Design + MeshSpec -> ``out_dir/mesh.msh`` (metres) + ``out_dir/mesh_meta.json``.
+
+    ``cfg`` is a ``hornlab_search.config.Config`` (dof caps and dof_per_triangle come from
+    ``cfg.mesh``). ``mode`` ("screen"|"verify"|"final") selects the cap; if omitted it is
+    inferred from ``mesh.max_triangles`` (see ``sizing.dof_cap_for``). ``cache_dir`` adds a
+    shared cache at ``cache_dir/<design hash>-<mesh hash>/``; hits are COPIED into ``out_dir``.
+    """
+    import hornlab_mesher as hm
+    from hornlab_mesher.config_parser import ConfigError
+    from hornlab_mesher.mesher import MesherError, TriangleBudgetExceeded
+
+    t0 = time.perf_counter()
+    out_dir = Path(out_dir)
+    families.validate(design)
+    res = sizing.res_mm_for(mesh.epw, mesh.f_max_hz)
+    out_path = out_dir / "mesh.msh"
+    mcfg = families.to_mesher_config(design, mesh, res, out_path)
+    # Copy-pasteable at 2 a.m.: paste into a REPL and call hornlab_mesher.build_from_config.
+    log.debug("mesher config for %s: %r", design.hash(), mcfg)
+
+    key = f"{design.hash()}-{mesh.hash()}"
+
+    # ---- cache (local, then shared)
+    hit = _load_cached(out_dir, key)
+    if hit is None and cache_dir is not None:
+        shared = Path(cache_dir) / key
+        if _load_cached(shared, key) is not None:
+            _copy_entry(shared, out_dir)
+            hit = _load_cached(out_dir, key)
+    if hit is not None:
+        _check_dofs(int(hit["result"]["n_triangles"]), int(hit["summary"]["n_nodes_used"]),
+                    mesh, cfg, mode)
+        log.info("mesh cache hit %s", key)
+        return _result_from_json(hit["result"], out_path, time.perf_counter() - t0)
+
+    # ---- cheap pre-mesh guard: no mesh written, no gmsh started
+    cap = sizing.dof_cap_for(mesh, cfg.mesh, mode)
+    est_tri = estimate_triangles_premesh(mcfg)
+    if est_tri is not None:
+        est_dof = est_tri * float(cfg.mesh.dof_per_triangle)
+        if est_dof > PREMESH_MARGIN * cap:
+            raise MeshTooLargeError(
+                f"pre-mesh estimate ~{int(est_tri)} triangles (~{int(est_dof)} dofs) is over "
+                f"{PREMESH_MARGIN}x the dof cap {cap} at f_max={mesh.f_max_hz:g} Hz, "
+                f"epw={mesh.epw:g}, quadrants={mesh.quadrants!r}; no mesh was generated")
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+    try:
+        built = hm.build_from_config(mcfg, out_path)
+    except TriangleBudgetExceeded as exc:
+        raise MeshTooLargeError(str(exc)) from exc
+    except (ConfigError, ValueError, MesherError) as exc:
+        raise families.wrap_mesher_error(exc) from exc
+
+    # ---- read back and verify
+    summary = read_msh_summary(out_path)
+    try:
+        _check_bbox(summary["bbox_m"])
+        if built.quadrants != mesh.quadrants:
+            raise SymmetryMismatchError(
+                f"asked for quadrants {mesh.quadrants!r}, mesher built {built.quadrants!r}")
+        want = sizing.SYMMETRY_PLANE[mesh.quadrants]
+        if built.native_symmetry_plane != want:
+            raise SymmetryMismatchError(
+                f"quadrants {mesh.quadrants!r} requires native_symmetry_plane={want!r} "
+                f"(sizing.SYMMETRY_PLANE) but the mesher reports {built.native_symmetry_plane!r}")
+        if built.n_triangles != summary["n_triangles"]:
+            raise MeshConsistencyError(
+                f"mesher reports {built.n_triangles} triangles, the .msh holds "
+                f"{summary['n_triangles']}")
+        if summary["tags"].get(SOURCE_TAG, 0) <= 0:
+            raise GeometryInvalidError(
+                f"mesh has no elements on physical tag {SOURCE_TAG} (SD1D1001, the source); "
+                f"tags present: {summary['tags']}")
+        _check_dofs(summary["n_triangles"], summary["n_nodes_used"], mesh, cfg, mode)
+    except (MeshConsistencyError, GeometryInvalidError, MeshTooLargeError):
+        out_path.unlink(missing_ok=True)     # never leave an unusable mesh to be picked up later
+        raise
+
+    result = MeshResult(
+        path=str(out_path), n_triangles=summary["n_triangles"], n_dof=None,
+        quadrants=mesh.quadrants, symmetry_plane=sizing.SYMMETRY_PLANE[mesh.quadrants],
+        res_mm=dict(res), bbox_m=tuple(summary["bbox_m"]),
+        seconds=time.perf_counter() - t0)
+    _meta_path(out_dir).write_text(json.dumps(
+        {"key": key, "result": _result_to_json(result), "summary": summary,
+         "mesher_config": mcfg}, indent=1, sort_keys=True), encoding="utf-8")
+    if cache_dir is not None:
+        _copy_entry(out_dir, Path(cache_dir) / key)
+    log.info("mesh %s: %d triangles, %d vertices, %.2f s", key, result.n_triangles,
+             summary["n_nodes_used"], result.seconds)
+    return result
+
+
+# ------------------------------------------------------------------ STEP
+
+
+def export_step(design: Design, mesh: MeshSpec, cfg, out: Path):
+    """Closed B-rep solid in millimetres (driver membrane removed, symmetry-reduced designs
+    expanded to all four quadrants). Returns ``(path, info)``; ``info`` is the mesher's CadInfo
+    with ``.body`` and ``.volume_mm3``."""
+    import hornlab_mesher as hm
+    from hornlab_mesher.config_parser import ConfigError
+    from hornlab_mesher.mesher import MesherError
+
+    families.validate(design)
+    res = sizing.res_mm_for(mesh.epw, mesh.f_max_hz)
+    out = Path(out)
+    mcfg = families.to_mesher_config(design, mesh, res, out)
+    log.debug("mesher config for STEP %s: %r", design.hash(), mcfg)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        path, info = hm.write_step_from_config(mcfg, out, open_throat=True, full_model=True)
+    except (ConfigError, ValueError, MesherError) as exc:
+        raise families.wrap_mesher_error(exc) from exc
+    return Path(path), info

@@ -103,14 +103,34 @@ Warm worker, quarter meshes (`native_symmetry_plane="yz+xz"`), observation 73 an
 | **screen-like** | 2,369 | 12 + balloon | **5.04** | 3.85 | 0.20 |
 | second solve (warm) | 5,140 | 1 | 3.21 | 1.65 | 0.07 |
 | screen-like (pipelining ON, default) | 5,140 | 12 + balloon | **688.9** | 672.4 | 14.8 |
-PIPELINE_PLACEHOLDER
-seconds per screening candidate: **5.0 s solve at ~2.4k dofs (quarter); 689 s at ~5.1k with default settings** (cliff, not a smooth curve)
-candidates per hour: **~700 at 2.4k dofs** (solve only); mesh time MESHTIME_PLACEHOLDER
-mesh fraction of that: MESHFRAC_PLACEHOLDER
-verify-like (~16k dofs, 25 freqs): **not runnable**: 15.7k quarter dofs OOM (M2).
+| screen-like, `BLAB_METAL_PIPELINE=0` | 5,140 | 12 + balloon | **1,151** | 1,126 | 23.7 |
+| **12 single-frequency calls in a loop** | 5,140 | 12 x 1 + balloon | **33.3** (2.3-3.0 s each) | | |
+| 3-4 single-frequency calls | 7,001 | 3 | 7.5 s each | | |
+| 4 single-frequency calls | 8,941 | 4 | 45 s each | | |
+
+**Finding: a multi-frequency `solve_frequencies` sweep falls off a cliff above ~2.4k dofs on this card (689 s at 5.1k), and `BLAB_METAL_PIPELINE=0` does not help. The same work as one call per frequency takes 33 s.** Task 05's CUDA adapter must loop one frequency per call.
+Per-frequency cost, quarter meshes, warm worker, one call per frequency: 2,369 dofs 0.4 s; 5,140 dofs 2.8 s; 7,001 dofs 7.5 s; 8,941 dofs 45 s (memory pressure).
+seconds per screening candidate (12 frequencies + balloon, solve only, looped per frequency): **5.0 s at ~2.4k dofs (sweep call), 33 s at ~5.1k dofs**; candidates per hour: **~700 at 2.4k, ~110 at 5.1k**
+mesh time: meshing the 2.4k-dof quarter horn is a few seconds of CPU (not separately timed this pass; see CONTINUITY open items)
+mesh fraction of that: small versus solve at >= 5k dofs
+verify-like (16k dofs, 25 freqs): **not runnable** (15.7k quarter dofs OOM, M2). Verify at the 7,000 cap: 25 x 7.5 s ~ 3 min per candidate.
+
+**dof caps in force (quarter domain, set from the per-frequency cost curve): screen 5,000 / verify 7,000 / final 8,900.** Full-domain meshes cannot exceed ~5,500 solved dofs, so full-domain verify/final are not available on this card. The plan's 8,000 / 16,000 / 24,000 are withdrawn.
 
 ## M4 cuda vs cpu
-M4_PLACEHOLDER
+CPU runtime provisioned this session (`python -m hornlab_beat_bem.provision --backend cpu`, ready).
+Quarter mesh, 2,369 dofs, one frequency per call, warm worker (i7-14650HX, 24 threads):
+
+| backend | cold first solve | warm per frequency |
+|---|---|---|
+| cuda | 29.0 s | 0.78-0.82 s (1.4 s at 500 Hz) |
+| cpu | 3.7 s | 1.42-1.53 s |
+| cuda + `HORNLAB_BEAT_FORCE_CPU=1` | 28.7 s | 0.84-0.86 s |
+
+cuda: 0.8 s   cpu: 1.45 s   ratio cpu/cuda: **~1.8x** at this size.
+**`HORNLAB_BEAT_FORCE_CPU=1` does not redirect an explicit `beat_backend="cuda"` request** (the run above still used CUDA); the variable only makes `beat_engine_status()` report CPU available without a provisioning record. To use CPU, pass `beat_backend="cpu"`.
+CPU at larger dofs (no VRAM cliff): see the table below if present.
+
 
 ## M5 worker warmth
 First / second / after `detach_workers()` (quarter mesh, 2,369 dofs, 1 kHz, one process): **27.2 s / 1.42 s / 0.84 s**. The persistent host survives `detach_workers()`, so a later solve in the same process pays no cold start. A *new* process connects to a surviving host in about the same way (see hygiene note: that is also how stale hosts accumulate).
