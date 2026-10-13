@@ -5,8 +5,13 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 ## Status
 - **Wave:** 0, 1, 2 and 3 complete; Phase 2 Stage A code landed (untrained on real data) (tasks 04-08 done; CP-7a-f all PASS). This is the end of the plan's Wave ladder.
 - **Last checkpoints:** CP-7 (senior physics gate) GREEN — noise floor **0.039 dB**. CP-1/CP-2/CP-4/CP-5/CP-6 all green.
-- **Next action (needs the Windows GPU box):** widen `a_deg`/`exponent` bounds (check mesher validity first), run the other 4 example configs for a multi-family dataset, then train/gate the Stage A surrogate on >= 500 held-out real records. Runbook in `docs/HANDOFF.md`.
+- **Next action (needs the Windows GPU box):** widen `a_deg`/`exponent` bounds (check mesher validity first), run the other 4 example configs for a multi-family dataset, then train/gate the Stage A surrogate on >= 500 held-out real records. Runbook: `docs/HANDOFF_LOCAL.md` (CP-8a..d).
 - **Blockers:** none. Issues #6-#11 closed.
+
+## 2026-10-13 (cloud, handoff) — local-agent handoff written; CP-8 defined (orchestrator: Claude)
+
+- `docs/HANDOFF_LOCAL.md`: step-by-step for the Windows GPU agent. Defines the next checkpoints: **CP-8a** run the full suite on the real box (mesher tests unskipped) + `doctor`; **CP-8b** widen `a_deg`/`exponent` bounds within mesher limits and re-run `search_smoke`; **CP-8c** multi-family dataset (`dataset verify` OK, all four families); **CP-8d** train and gate Stage A, solve proposals with BEM, `round_report` working.
+- Finding for planning: the held-out set is 15 % of a family's records and the gate needs >= 500, so one family needs ~3,400 records (~4 h of `search_smoke`-rate GPU time) before a gate can pass.
 
 ## 2026-10-13 (cloud, later) — ISMO selection + `surrogate` CLI (orchestrator: Claude)
 
