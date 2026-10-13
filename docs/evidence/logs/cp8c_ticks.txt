@@ -1,0 +1,110 @@
+=== TICK 2026-10-13T11:48:22.8383954-04:00 ===
+=== processes ===
+
+   Id ProcessName    StartTime            
+   -- -----------    ---------            
+25224 hornlab-search 10/13/2026 8:31:36 AM
+21880 julia          10/13/2026 8:31:40 AM
+
+
+
+=== VRAM ===
+memory.used [MiB]
+543 MiB
+
+=== watchdog tail ===
+2026-10-13 11:11:39 run=20261013T123136Z-screen-ca15be rows=663 last_kind=ok last_J=7.113116600989736 vram=543 MiB julia=1 hornlab=1 python=4
+2026-10-13 11:16:39 run=20261013T123136Z-screen-ca15be rows=678 last_kind=ok last_J=7.591540185069697 vram=1727 MiB julia=1 hornlab=1 python=4
+2026-10-13 11:21:39 run=20261013T123136Z-screen-ca15be rows=694 last_kind=ok last_J=6.691903875466646 vram=1855 MiB julia=1 hornlab=1 python=4
+2026-10-13 11:26:39 run=20261013T123136Z-screen-ca15be rows=707 last_kind=ok last_J=6.4908558467161415 vram=3135 MiB julia=1 hornlab=1 python=4
+2026-10-13 11:31:39 run=20261013T123136Z-screen-ca15be rows=723 last_kind=ok last_J=7.113700662251991 vram=543 MiB julia=1 hornlab=1 python=4
+2026-10-13 11:36:39 run=20261013T123136Z-screen-ca15be rows=737 last_kind=ok last_J=6.407221530244236 vram=1599 MiB julia=1 hornlab=1 python=4
+2026-10-13 11:41:39 run=20261013T123136Z-screen-ca15be rows=752 last_kind=ok last_J=6.7742655286162305 vram=4245 MiB julia=1 hornlab=1 python=4
+2026-10-13 11:46:39 run=20261013T123136Z-screen-ca15be rows=766 last_kind=ok last_J=6.230898191735098 vram=3573 MiB julia=1 hornlab=1 python=4
+
+=== health digest ===
+HEALTH run=20261013T123136Z-screen-ca15be rows=771 ok=677 failed=94 torn=0 kinds={'mesh_too_large': 92, 'invalid_geometry': 2}
+HEALTH ok-J: min=6.17 median=8.67 max=180.45 best=6.17
+HEALTH penalty-or-failed rows (J>=1000): 94
+HEALTH median seconds: solve=15.70 mesh=1.70 total=16.25
+HEALTH span 2026-10-13T12:32:16Z -> 2026-10-13T15:48:01Z (3.26 h) rate=236 rows/h
+HEALTH top design_hash dups: [('8443a5763be5', 1), ('c54661892c59', 1), ('16905720dfc2', 1)]
+HEALTH ok rows with metrics=null: 0
+HEALTH last-ok: n=770 J=6.29628748563363 a_deg=9.9561772199 exponent=3.1253757827 a0_deg=24.4327606499 L_mm=380.0271296034 n_dof=4111
+
+=== stderr tail ===
+08:36:51 WARNING hornlab_mesher.density: [hornlab-mesher] outer wall clearance wants 2.962 mm on 30 of 196 rings, finer than the 5.197 mm this build requests anywhere; holding at 5.197 mm. The outer shell may still chord through its own wall there -- reduce the wall thickness or open the throat curvature. The acoustic (inner) surface is unaffected.
+
+=== TICK 2026-10-13T12:19:19.7478211-04:00 ===
+=== processes ===
+
+   Id ProcessName    StartTime            
+   -- -----------    ---------            
+25224 hornlab-search 10/13/2026 8:31:36 AM
+21880 julia          10/13/2026 8:31:40 AM
+
+
+
+=== VRAM ===
+memory.used [MiB]
+1855 MiB
+
+=== watchdog tail ===
+2026-10-13 11:41:39 run=20261013T123136Z-screen-ca15be rows=752 last_kind=ok last_J=6.7742655286162305 vram=4245 MiB julia=1 hornlab=1 python=4
+2026-10-13 11:46:39 run=20261013T123136Z-screen-ca15be rows=766 last_kind=ok last_J=6.230898191735098 vram=3573 MiB julia=1 hornlab=1 python=4
+2026-10-13 11:51:39 run=20261013T123136Z-screen-ca15be rows=780 last_kind=ok last_J=6.499723435129642 vram=1823 MiB julia=1 hornlab=1 python=4
+2026-10-13 11:56:40 run=20261013T123136Z-screen-ca15be rows=793 last_kind=ok last_J=6.865294741595156 vram=2015 MiB julia=1 hornlab=1 python=4
+2026-10-13 12:01:40 run=20261013T123136Z-screen-ca15be rows=806 last_kind=ok last_J=6.587814756955402 vram=1823 MiB julia=1 hornlab=1 python=4
+2026-10-13 12:06:40 run=20261013T123136Z-screen-ca15be rows=819 last_kind=ok last_J=6.242384692510223 vram=511 MiB julia=1 hornlab=1 python=4
+2026-10-13 12:11:40 run=20261013T123136Z-screen-ca15be rows=832 last_kind=ok last_J=6.292765996458399 vram=3935 MiB julia=1 hornlab=1 python=4
+2026-10-13 12:16:40 run=20261013T123136Z-screen-ca15be rows=846 last_kind=ok last_J=6.314715718474637 vram=1919 MiB julia=1 hornlab=1 python=4
+
+=== health digest ===
+HEALTH run=20261013T123136Z-screen-ca15be rows=853 ok=758 failed=95 torn=0 kinds={'mesh_too_large': 93, 'invalid_geometry': 2}
+HEALTH ok-J: min=6.15 median=7.99 max=180.45 best=6.15
+HEALTH penalty-or-failed rows (J>=1000): 95
+HEALTH median seconds: solve=16.51 mesh=1.74 total=17.21
+HEALTH span 2026-10-13T12:32:16Z -> 2026-10-13T16:19:13Z (3.78 h) rate=226 rows/h
+HEALTH top design_hash dups: [('8443a5763be5', 1), ('c54661892c59', 1), ('16905720dfc2', 1)]
+HEALTH ok rows with metrics=null: 0
+HEALTH last-ok: n=852 J=6.227642736250603 a_deg=11.4139475102 exponent=3.1863014828 a0_deg=23.3987534836 L_mm=402.7234782349 n_dof=4260
+
+=== stderr tail ===
+08:36:51 WARNING hornlab_mesher.density: [hornlab-mesher] outer wall clearance wants 2.962 mm on 30 of 196 rings, finer than the 5.197 mm this build requests anywhere; holding at 5.197 mm. The outer shell may still chord through its own wall there -- reduce the wall thickness or open the throat curvature. The acoustic (inner) surface is unaffected.
+
+=== TICK 2026-10-13T12:50:19.8868218-04:00 ===
+=== processes ===
+
+   Id ProcessName    StartTime            
+   -- -----------    ---------            
+25224 hornlab-search 10/13/2026 8:31:36 AM
+21880 julia          10/13/2026 8:31:40 AM
+
+
+
+=== VRAM ===
+memory.used [MiB]
+511 MiB
+
+=== watchdog tail ===
+2026-10-13 12:11:40 run=20261013T123136Z-screen-ca15be rows=832 last_kind=ok last_J=6.292765996458399 vram=3935 MiB julia=1 hornlab=1 python=4
+2026-10-13 12:16:40 run=20261013T123136Z-screen-ca15be rows=846 last_kind=ok last_J=6.314715718474637 vram=1919 MiB julia=1 hornlab=1 python=4
+2026-10-13 12:21:40 run=20261013T123136Z-screen-ca15be rows=859 last_kind=ok last_J=6.299258132797868 vram=511 MiB julia=1 hornlab=1 python=4
+2026-10-13 12:26:40 run=20261013T123136Z-screen-ca15be rows=872 last_kind=ok last_J=6.449176943810491 vram=4341 MiB julia=1 hornlab=1 python=4
+2026-10-13 12:31:40 run=20261013T123136Z-screen-ca15be rows=885 last_kind=ok last_J=6.370310879701562 vram=703 MiB julia=1 hornlab=1 python=4
+2026-10-13 12:36:40 run=20261013T123136Z-screen-ca15be rows=898 last_kind=ok last_J=6.380477339029129 vram=2015 MiB julia=1 hornlab=1 python=4
+2026-10-13 12:41:40 run=20261013T123136Z-screen-ca15be rows=911 last_kind=ok last_J=6.342419615476015 vram=1727 MiB julia=1 hornlab=1 python=4
+2026-10-13 12:46:41 run=20261013T123136Z-screen-ca15be rows=924 last_kind=ok last_J=6.274152004440275 vram=511 MiB julia=1 hornlab=1 python=4
+
+=== health digest ===
+HEALTH run=20261013T123136Z-screen-ca15be rows=932 ok=837 failed=95 torn=0 kinds={'mesh_too_large': 93, 'invalid_geometry': 2}
+HEALTH ok-J: min=6.15 median=7.59 max=180.45 best=6.15
+HEALTH penalty-or-failed rows (J>=1000): 95
+HEALTH median seconds: solve=17.45 mesh=1.79 total=18.15
+HEALTH span 2026-10-13T12:32:16Z -> 2026-10-13T16:49:44Z (4.29 h) rate=217 rows/h
+HEALTH top design_hash dups: [('8443a5763be5', 1), ('c54661892c59', 1), ('16905720dfc2', 1)]
+HEALTH ok rows with metrics=null: 0
+HEALTH last-ok: n=931 J=6.216930924041877 a_deg=12.1562588425 exponent=2.8134454213 a0_deg=23.5009042663 L_mm=401.8240964859 n_dof=4371
+
+=== stderr tail ===
+08:36:51 WARNING hornlab_mesher.density: [hornlab-mesher] outer wall clearance wants 2.962 mm on 30 of 196 rings, finer than the 5.197 mm this build requests anywhere; holding at 5.197 mm. The outer shell may still chord through its own wall there -- reduce the wall thickness or open the throat curvature. The acoustic (inner) surface is unaffected.

@@ -8,6 +8,13 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 - **Next action:** CP-8c — multi-family dataset runs (osse_baseline 1500, icw_termination 800, freeform_hv 800, throat_adapter 400; one at a time, ~15-17 h GPU serial estimated; user consulted before starting; runs resumable). Then CP-8d train/gate (≥ 500 held-out per family, else report "indicative only"). Dataset now 134 records, 100 % OSSE.
 - **Blockers:** none. Issue **#13** open (hardening review — circle-back before/with CP-8d; do not weaken gate thresholds). Issues #1-#11 closed.
 
+## 2026-10-13 (local GPU box, ~13:20) — CP-8 evidence committed to git; CP-8c run 1 progress (local agent)
+
+- **New: `docs/evidence/`** — durable checkpoint evidence in git (user request): `CP-8a.md`, `CP-8b.md`, `CP-8c_osse_baseline.md` (verbatim terminal output), `logs/` (copies of the live monitor logs: 5-min watchdog + 30-min review ticks), and **`manifest.sha256`** (SHA-256 + byte size of every raw local artifact: both run dirs' `search.ndjson`/`best.json`/`config.yaml`/`run.json`, the CP-8b `report_cp8b.html`, and the dataset `index.jsonl` + 3 shards).
+- **Raw-data policy (why not everything is in git):** `dataset/`, `runs/`, `cache/` are gitignored by design (`.gitignore` lines 4-6) and now large — `dataset/` is 1069 files / **180.6 MB / 1128 records** (~160 KB per record; CP-5 projected 0.78-1.4 GB at 10k records). Committing the blobs would bloat the repo and break the convention; the manifest makes them verifiable without committing them. To move raw data, use a data branch / release asset, not the code branch.
+- **CP-8c run 1 of 4 (`osse_baseline`, budget 1500) — snapshot 13:11 local** (`runs/20261013T123136Z-screen-ca15be`, still running): 988 rows, ok 893 / failed 95 (`mesh_too_large` 93, `invalid_geometry` 2), torn 0, ok rows with `metrics=null` 0, no duplicate design hashes, best J **6.11** (seed 22.07, -72%), median solve 18.05 s, 213 rows/h. Live monitoring: 5-min watchdog + 30-min ticks (ticks 1-3 all clear: no stall, no junk, single `julia` host, VRAM ≤ 4.3 GiB).
+- Dataset at 13:13 local: 1128 records (1018 ok, 110 failed), 3 shards, 100 % OSSE. Remaining runs: `icw_termination` 800, `freeform_hv` 800, `throat_adapter` 400.
+
 ## 2026-10-13 (local GPU box) — CP-8a PASS, CP-8b PASS, bounds widened; hardening review filed as #13 (local agent)
 
 **CP-8a PASS (real box, mesher tests unskipped):**
