@@ -8,6 +8,11 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 - **Next action (needs the Windows GPU box):** widen `a_deg`/`exponent` bounds (check mesher validity first), run the other 4 example configs for a multi-family dataset, then train/gate the Stage A surrogate on >= 500 held-out real records. Runbook: `docs/HANDOFF_LOCAL.md` (CP-8a..d).
 - **Blockers:** none. Issues #6-#11 closed.
 
+## 2026-10-13 (cloud, research) — cloud GPU rental report (orchestrator: Claude)
+
+- `docs/CLOUD_GPU_REPORT.md`: web and code research on renting GPUs. Verdict: feasible, moderate effort, cheap (RTX 4090 about $0.34 to $0.69 per hour; L40S 48 GB about $0.79; A100/H100 poor value for a Float32 solver). Campaign estimate 5 to 40 GPU-hours, roughly $3 to $30 [inferred, unmeasured].
+- Key risks: CUDA on Linux unverified by us or the beat authors; `solve/worker.py` host cleanup is Windows-tuned (POSIX branch never run on a real host). New proposed checkpoints CP-9a..d (pod proof, optional cap study, campaign, train/gate). No code changed. Needs user decisions: provider, spend cap, whether an agent may drive a pod.
+
 ## 2026-10-13 (cloud, handoff) — local-agent handoff written; CP-8 defined (orchestrator: Claude)
 
 - `docs/HANDOFF_LOCAL.md`: step-by-step for the Windows GPU agent. Defines the next checkpoints: **CP-8a** run the full suite on the real box (mesher tests unskipped) + `doctor`; **CP-8b** widen `a_deg`/`exponent` bounds within mesher limits and re-run `search_smoke`; **CP-8c** multi-family dataset (`dataset verify` OK, all four families); **CP-8d** train and gate Stage A, solve proposals with BEM, `round_report` working.

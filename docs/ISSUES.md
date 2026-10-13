@@ -22,3 +22,5 @@ Local-only items (no GitHub issue): band edges capped by the measured dof cap (c
 Local-only, added 2026-10-13 (cloud): Phase 2 Stage A code complete but gates unvalidated on real data (needs >= 500 held-out multi-family BEM records, GPU box); widen `a_deg`/`exponent` bounds and run the other 4 configs (GPU box); ISMO selection + `surrogate` CLI built (synthetic-tested); solving proposals with BEM and Stage B-D not started.
 
 CP-8a..d (local GPU box, see `docs/HANDOFF_LOCAL.md`): all pending; no GitHub issue created yet.
+
+CP-9a..d (cloud GPU pod proof, cap study, campaign, train/gate; see `docs/CLOUD_GPU_REPORT.md` section 6): proposed, awaiting user decisions on provider and spend cap; no GitHub issue yet.
