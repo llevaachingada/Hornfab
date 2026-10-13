@@ -43,18 +43,21 @@ PNG_DPI = 110
 PINNED_FRACTION_FLAG = 0.5
 PINNED_WITHIN = 0.02
 
-#: Measured noise-floor inputs (CP-7f). value_db None means "not measured yet". Provenance is the
-#: orchestrator's CONTINUITY.md entry of 2026-10-13 00:25 (task 05 report) unless noted. A run's
-#: run.json may override the list under the key ``noise_floor``.
+#: Measured noise-floor inputs (CP-7, docs/CONTINUITY.md entry of 2026-10-13 06:20). value_db None
+#: means "not measured yet". The floor is the largest value: today that is the two-solver disagreement
+#: (beat vs bempp), which is NOT mesh-limited. A run's run.json may override the list under the key
+#: ``noise_floor``.
 NOISE_FLOOR_INPUTS = [
     {"name": "solver idempotence (two identical solves)", "value_db": 3.6e-5,
-     "source": "task 05 test 13"},
-    {"name": "full domain vs quarter domain (symmetry / mesh)", "value_db": 0.031,
-     "source": "task 05 test 12b, band up to 3 kHz"},
-    {"name": "beat (Burton-Miller, LU) vs bempp (STANDARD) on one mesh", "value_db": 0.055,
-     "source": "task 05 test 17"},
-    {"name": "discretization error at epw = 6 versus epw = 18", "value_db": None,
-     "source": "CP-7c, NOT YET MEASURED"},
+     "source": "CP-7 measured"},
+    {"name": "left/right symmetry (max asymmetry)", "value_db": 4e-6,
+     "source": "CP-7d measured"},
+    {"name": "full domain vs quarter domain (symmetry / mesh)", "value_db": 0.023,
+     "source": "CP-7d measured, band up to 3 kHz"},
+    {"name": "discretization error at epw = 6 versus epw = 18 (DI)", "value_db": 0.028,
+     "source": "CP-7c measured on band 500-2500 Hz only; error above 2.5 kHz NOT measured"},
+    {"name": "two solvers: beat (Burton-Miller, LU) vs bempp (STANDARD) on one mesh", "value_db": 0.039,
+     "source": "CP-7b measured"},
 ]
 
 PALETTE = ["#2f6db5", "#c4562b", "#3e8e5a", "#8a5cb5", "#b59a2f", "#4aa3a8", "#a8486b", "#6b6b6b"]
@@ -143,8 +146,9 @@ def _svg_lines(series, *, width=620, height=250, xlabel="", ylabel="", xlog=Fals
     for v, lab, col in vlines:
         if np.isfinite(v) and (v > 0 or not xlog):
             o.append(f'<line x1="{X(v):.1f}" x2="{X(v):.1f}" y1="{mt}" y2="{mt + ph}" stroke="{col}" '
-                     f'stroke-dasharray="5 3"/><text x="{X(v) + 3:.1f}" y="{mt + 11}" class="tick" '
-                     f'fill="{col}">{_html.escape(lab)}</text>')
+                     f'stroke-dasharray="5 3"/><text x="{X(v) + (-3 if X(v) > ml + pw - 28 else 3):.1f}" '
+                     f'y="{mt + 11}" text-anchor="{"end" if X(v) > ml + pw - 28 else "start"}" '
+                     f'class="tick" fill="{col}">{_html.escape(lab)}</text>')
     for v, lab, col in hlines:
         if np.isfinite(v):
             o.append(f'<line x1="{ml}" x2="{ml + pw}" y1="{Y(v):.1f}" y2="{Y(v):.1f}" stroke="{col}" '
@@ -335,7 +339,7 @@ main{max-width:980px;margin:0 auto;padding:16px}
 h1{font-size:1.5rem;margin:.2em 0}h2{font-size:1.15rem;margin:1.6em 0 .5em;border-bottom:1px solid var(--line);padding-bottom:.2em}h3{font-size:1rem;margin:1.2em 0 .4em}
 .muted{color:var(--muted)}.box{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:12px 14px;margin:.8em 0}
 .warn{background:var(--warn);border-color:var(--warnline)}.bad{background:var(--bad);border-color:var(--badline)}.good{background:var(--good);border-color:var(--goodline)}
-table{border-collapse:collapse;width:100%;font-size:.9rem;margin:.4em 0}th,td{border:1px solid var(--line);padding:3px 7px;text-align:right}th:first-child,td:first-child{text-align:left}th{background:var(--card)}
+table{display:block;overflow-x:auto;max-width:100%;border-collapse:collapse;width:100%;font-size:.9rem;margin:.4em 0}th,td{border:1px solid var(--line);padding:3px 7px;text-align:right;white-space:nowrap}th:first-child,td:first-child{text-align:left}th{background:var(--card)}
 td.l{text-align:left}code,.mono{font-family:ui-monospace,Consolas,monospace;font-size:.85em}
 .chart{width:100%;height:auto}.chart .tick{font:10px sans-serif;fill:var(--muted)}.chart .axl{font:11px sans-serif;fill:var(--muted)}
 .legend{font-size:.8rem;color:var(--muted);margin:2px 0 8px}.key{margin-right:12px;white-space:nowrap}.key i{display:inline-block;width:10px;height:10px;margin-right:4px;border-radius:2px}
@@ -349,6 +353,7 @@ pre{background:var(--card);border:1px solid var(--line);padding:8px;overflow:aut
 <!-- 2. the noise floor, at the top, in a box -->
 <div class="box warn" id="noise-floor"><b>Noise floor: {{ nf.floor_txt }}</b>
 <p>The largest of the measured solver / mesh / discretization disagreements is the smallest difference this tool can resolve. <b>No claimed improvement smaller than this number means anything.</b>
+The floor is set by the two-solver disagreement, not by mesh refinement. Caveat: the epw = 6 discretization error was measured only on 500-2500 Hz; its error above 2.5 kHz is <b>not measured</b>.
 {% if not nf.complete %}Some inputs are not measured yet, so the true floor is at least this large.{% endif %}</p>
 <table><tr><th>source of disagreement</th><th>dB</th><th>from</th></tr>
 {% for i in nf['items'] %}<tr><td>{{ i.name }}</td><td>{{ i.val }}</td><td class="l">{{ i.source }}</td></tr>{% endfor %}</table>

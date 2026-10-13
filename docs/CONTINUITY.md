@@ -3,10 +3,23 @@
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
 ## Status
-- **Wave:** 0, 1, 2 and 3 complete (tasks 04-08 done; CP-7a-f all PASS). This is the end of the plan's Wave ladder.
+- **Wave:** 0, 1, 2 and 3 complete; Phase 2 Stage A code landed (untrained on real data) (tasks 04-08 done; CP-7a-f all PASS). This is the end of the plan's Wave ladder.
 - **Last checkpoints:** CP-7 (senior physics gate) GREEN — noise floor **0.039 dB**. CP-1/CP-2/CP-4/CP-5/CP-6 all green.
-- **Next action:** post-Wave-3 follow-ups (phase 2 is "separately and later"): widen `a_deg`/`exponent` bounds, run the other 4 example configs for a multi-family dataset, browser-check `report.html`. Residual risks logged in NOTES_FOR_SENIOR task-09 block.
+- **Next action (needs the Windows GPU box):** widen `a_deg`/`exponent` bounds (check mesher validity first), run the other 4 example configs for a multi-family dataset, then train/gate the Stage A surrogate on >= 500 held-out real records. Runbook in `docs/HANDOFF.md`.
 - **Blockers:** none. Issues #6-#11 closed.
+
+## 2026-10-13 (cloud session) — Wave-3 review, report fixes, Phase 2 Stage A code (orchestrator: Claude, Haiku helpers)
+
+**Environment:** Linux cloud container, NO GPU, NO mesher/beat installed. Offline suite: 447 passed, 30 skipped (mesher-gated), 18 deselected. Nothing GPU-side was run or claimed.
+
+**Review of 73548a5 / 2a7bafb:** CP-7 numbers in docs are internally consistent with NOTES task-09. One finding fixed: `config.QUADRANT_FACTOR` duplicated `sizing.QUADRANT_FACTOR` (silent-killer rule: one source) -> now aliases it. Not fixable here: residual risks 1-4 (need GPU).
+
+**Done**
+- Report: noise-floor box refreshed to CP-7 values (floor 0.039 dB, two-solver; epw=6 above 2.5 kHz still flagged unmeasured). Browser check (Chromium, fake-backend run, 1280 and 390 px): no console errors, 24/24 images load, noise box first. Fixed: tables overflowed on phones (now scroll), `f11` label clipped at chart edge, numbers wrapping. Left as is (cosmetic/by design): convergence y-limit clips early outliers (p90), hornlab_plots PNGs small on narrow screens, unrounded table values, dark mode and empty-run render unchecked.
+- Phase 2 Stage A (`hornlab_search/surrogate/`): `gates.py` (6 plan gates; refuses to pass with < 500 held-out), `features.py` (unit-cube encoding, cluster holdout), `model.py` (MLP + frozen save/load), `train.py` (ensemble, masked Huber, validity head, gate report), `predict.py` (batched surrogate evaluator). `search/nsga.py`: real NSGA-II + `search_pareto` (was a stub). Tests: `test_search_nsga.py`, `test_surrogate_stage_a.py` (SYNTHETIC labels: proves plumbing only; scrambled labels correctly fail the rank gate). CI now installs CPU torch.
+- NOT done / honest limits: the real gates are untested (dataset is 74 single-family records; plan wants >= 500 held-out, multi-family). Superposition test not applicable to Stage A. No CLI subcommand yet. ISMO active-learning loop, Stage B/C/D not started.
+
+**Next action:** on the GPU box, follow `docs/HANDOFF.md` runbook, then `to_training_arrays(..., ok_only=False, keys=space.keys())` -> `train_surrogate`.
 
 ## 2026-10-13 (06:20) — Wave 3 complete: CP-7a-f all PASS, rulings applied (orchestrator: OpenCode)
 

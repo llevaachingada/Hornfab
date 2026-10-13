@@ -91,3 +91,10 @@ acceleration note in `record.py`; pin guard test; `mesh/grid.py` seam). See the 
 - beat uses dense LU: `gmres_tol` is recorded as requested, not applied.
 - The `report.html` noise-floor box says 0.055 dB "limited by beat vs bempp, epw=6 not measured" — superseded by CP-7 (0.039 dB floor, mesh not limiting); it can be refreshed from run.json["noise_floor"] on the next report run.
 - `hornlab_search.egg-info/` and `.opencode/` are gitignored local artifacts.
+## Update (cloud session): GPU-box runbook for what remains
+Phase 2 Stage A code exists (`hornlab_search/surrogate/`, `search/nsga.py`) and is tested on synthetic labels only.
+On the Windows GPU box, one GPU job at a time, hygiene rules first:
+1. Widen `a_deg` and `exponent` bounds in the examples. Check the mesher's accepted ranges first (do not guess), run `search_smoke` again.
+2. `run`/`search` each of `osse_baseline`, `throat_adapter`, `icw_termination`, `freeform_hv` (budget >= 200 each) to build a multi-family dataset. Back up `dataset/`.
+3. `pip install -e ".[surrogate]"`, then in Python: `to_training_arrays(store, family=F, keys=space.keys(), ok_only=False, lib_sha=...)` -> `train_surrogate(...)`. Read `report["gates"]`; if `pass` is false do not use the surrogate.
+4. Only a passing surrogate may feed `search_pareto(cfg, run_dir, sur.evaluator(space, target, weights))`; re-solve the front with real BEM.

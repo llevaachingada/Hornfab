@@ -56,6 +56,7 @@ Create and edit **only** your own paths. Read anything.
 | `hornlab_search/solve/**` | 05 |
 | `hornlab_search/metrics/**`, `targets/**` | 06 |
 | `hornlab_search/dataset/**` | 07 |
+| `hornlab_search/surrogate/**`, `tests/test_surrogate_*.py` | phase 2 (orchestrator) |
 | `hornlab_search/objective/**`, `search/**`, `report/**` | 08 |
 | `tests/test_design_*.py`, `test_mesh_*.py` | 04 |
 | `tests/test_solve_*.py` | 05 |
