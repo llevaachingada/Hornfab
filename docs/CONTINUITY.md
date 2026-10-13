@@ -8,6 +8,17 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 - **Next action:** CP-8c — multi-family dataset runs (osse_baseline 1500, icw_termination 800, freeform_hv 800, throat_adapter 400; one at a time, ~15-17 h GPU serial estimated; user consulted before starting; runs resumable). Then CP-8d train/gate (≥ 500 held-out per family, else report "indicative only"). Dataset now 134 records, 100 % OSSE.
 - **Blockers:** none. Issue **#13** open (hardening review — circle-back before/with CP-8d; do not weaken gate thresholds). Issues #1-#11 closed.
 
+## 2026-10-13 (local GPU box, ~19:50) — CP-8c run 2/4 COMPLETE (icw_termination 800): best J 12.20 (-78 % vs seed); dataset now two families (local agent)
+
+- Run `runs/20261013T204408Z-screen-6bdcbd`, budget stop: **800 rows = 787 ok + 13 failed** (`invalid_geometry` 5, `mesh_too_large` 8), torn 0, ok rows with metrics null 0, zero in-run dups. **Seed J 55.7357 → best J 12.2009 (-78 %)**; median ok-J 12.87; best `n_dof` 2823.
+- Throughput: **13.0 s/candidate (278/h)**, GPU solve 8688 s (~2.4 h), wall 2.9 h; VRAM never exceeded ~2 GiB on this family. Zero monitoring alarms; post-run reaped BOTH idle worker hosts (incl. one `julialauncher.exe`), VRAM 411 MiB.
+- Dataset: **2434 records (2311 ok, 123 failed), 5 shards, 395.3 MB** — OSSE 1634 + **ICW 800**; the single-family warning is GONE (2 of 4 families present). `dataset verify` re-runs after runs 3-4.
+- **ICW data-quality note (bounded):** mesher warning `outer wall self-intersects ... normal flip near azimuth row 0 ... the acoustic (inner) surface is unaffected` — 24 occurrences, ZERO new after 17:06 local (a few % of designs; rows still validate). Recorded as a caveat on ICW records; senior/oracle pass warranted before trusting ICW exterior physics beyond the inner surface. `termination` is categorical (`flat_baffle` in all ok rows) — the digest generator now handles categorical params (was crashing on `float('flat_baffle')`; fixed and re-run).
+- **ICW bound pinning (new finding, follow-up):** best designs **fully pinned at the `hold_end` LOWER bound 0.55** (top-6 6/6, Spearman vs J +0.64) and 4/6 near `kappa0` lo = 0.0 (median 0.0016 — the search wants κ₀ ≈ 0; 0.0 is already the schema floor). Candidate: widen `hold_end` lo below 0.55 subject to the repo's `hold_start < hold_end` rule + mesher validation. Recorded, NOT changed mid-campaign.
+- Issue #13 note: CP-8d trains on OSSE, so the ICW pool does not enter the OSSE gate arithmetic (digest OSSE pool unchanged: kept 1501 of 1634, held-out 225.2 < 500 → Stage A remains "indicative only").
+- Evidence: new `docs/evidence/CP-8c_icw_termination.md`; digest/log/manifest copies refreshed (manifest includes the icw run's ndjson/json files).
+- **Next: run 3/4 `freeform_hv --budget 800`** (full H/V domain — expect a slower candidate), then `throat_adapter` 400, then final stats/verify + digest to close CP-8c; then CP-8d.
+
 ## 2026-10-13 (local GPU box, ~16:50) — CP-8c run 1/4 COMPLETE (`osse_baseline` 1500): best J 6.106 (-73 % vs seed); `dataset verify` OK (local agent)
 
 - Run `runs/20261013T123136Z-screen-ca15be`, budget stop: **1500 rows = 1405 ok + 95 failed** (`mesh_too_large` 93, `invalid_geometry` 2), torn 0, ok rows with metrics null 0, zero in-run duplicate designs. **Seed J 22.5921 → best J 6.10609 (-73 %)**; median ok-J 6.45.

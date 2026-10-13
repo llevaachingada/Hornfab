@@ -12,6 +12,40 @@ Machine-readable twin: `data_summary.json`. Raw artifacts are local (gitignored)
   their frequency grid differs from the majority grid (the majority grid is `freqs_hz`).
 - `held_out_at_15pct` vs `held_out_formal_floor` 500: the Stage A gate refuses below 500.
 
+## Run `20261013T204408Z-screen-6bdcbd` — icw_termination (ICW, screen)
+- command: `hornlab-search search --config examples\icw_termination.yaml --budget 800`; config budget 200, CLI --budget 800; status at snapshot: finished
+- **bound pinning (top-6)**: fully pinned at LOWER bound: ['hold_end']; at UPPER bound: none
+- rows 800 = ok 787 + failed 13 (torn 0); kinds {'invalid_geometry': 5, 'mesh_too_large': 8}
+- J over ok rows: min 12.200862 / median 12.867557 / mean 19.042996 / max 224.088189; seed J 55.735745
+- best: J 12.200862 at n=190 (bf6cb40a5d5c), n_dof 2823
+- timing medians: solve 11.041775 s, mesh 1.962985 s, total 13.053283 s; rate 277.911802 rows/h over 2.879 h
+- di_source {'balloon': 787}; quadrants {'1': 787}
+
+| key | seed | lo | hi | ok min | median | max | spearman vs J | frac 2% lo | frac 2% hi | top6 lo/hi |
+|---|---|---|---|---|---|---|---|---|---|---|
+| L_mm | 160.0 | 160.0 | 160.0 | 160.0 | 160.0 | 160.0 | - | - | - | -/- |
+| R_mm | 130.0 | 80.0 | 220.0 | 80.13245 | 138.854811 | 219.990341 | 0.329211 | 0.003812 | 0.010165 | 0/0 |
+| a0_deg | 14.5 | 14.5 | 14.5 | 14.5 | 14.5 | 14.5 | - | - | - | -/- |
+| coverage_angle_deg | 50.0 | 20.0 | 80.0 | 20.048172 | 57.068038 | 79.92899 | -0.199714 | 0.006353 | 0.003812 | 0/0 |
+| dkappa_ds_abs_max | 10.0 | - | - | 10.0 | 10.0 | 10.0 | - | - | - | -/- |
+| hold_end | 0.7 | 0.55 | 0.9 | 0.55 | 0.550678 | 0.899706 | 0.640544 | 0.753494 | 0.002541 | 6/0 |
+| hold_start | 0.3 | 0.1 | 0.45 | 0.106708 | 0.344056 | 0.449979 | 0.153429 | 0.001271 | 0.027954 | 0/0 |
+| kappa0 | 0.25 | 0.0 | 0.5 | 0.0 | 0.001563 | 0.300683 | 0.55779 | 0.740788 | 0.0 | 4/0 |
+| kappa_abs_max | 1.0 | - | - | 1.0 | 1.0 | 1.0 | - | - | - | -/- |
+| r0_mm | 12.7 | 12.7 | 12.7 | 12.7 | 12.7 | 12.7 | - | - | - | -/- |
+| theta1_deg | 16.0 | 2.0 | 30.0 | 2.296906 | 16.477297 | 28.614085 | -0.209677 | 0.003812 | 0.0 | 0/0 |
+| theta_max_deg | 91.0 | - | - | 91.0 | 91.0 | 91.0 | - | - | - | -/- |
+
+Categorical params (ok rows): {'termination': {'flat_baffle': 787}}
+
+Failure detail (what the search refused, and where it sits):
+- `invalid_geometry`: 5 rows; e.g. invalid_geometry: ICW target set is infeasible: max|dkappa/dsigma| 32.8701 exceeds cap 10.0 (hint: {'dkappa_ds_abs_max': 'raise dkappa_ds_abs_max or relax the g
+  - median params of these failures: {'L_mm': 160.0, 'a0_deg': 14.5}
+- `mesh_too_large`: 8 rows; e.g. mesh_too_large: 5176 dofs (10086 triangles, 5176 vertices) exceeds the dof cap 5000 for quadrants '1'; lower f_max or epw
+  - median params of these failures: {'L_mm': 160.0, 'a0_deg': 14.5}
+
+Term medians over ok rows: cov=6.357764, di=0.835041, di_estimated=0.0, dislope=0.112263, flat=3.994997, load=0.0, n_in_band=10.0, n_nan=0.0, penalty=0.0, rip=4.236229, total=12.867557
+
 ## Run `20261013T123136Z-screen-ca15be` — osse_baseline (OSSE, screen)
 - command: `hornlab-search search --config examples\osse_baseline.yaml --budget 1500`; config budget 200, CLI --budget 1500; status at snapshot: finished
 - **bound pinning (top-6)**: fully pinned at LOWER bound: ['n']; at UPPER bound: none
@@ -129,12 +163,11 @@ Term medians over ok rows: cov=19.22029, di=0.285641, di_estimated=0.0, dislope=
 ## Dataset
 
 ```
-records 1634 (ok 1524, failed 110), shards 4, 273.4 MB
-families {'OSSE': 1634, 'R-OSSE': 0, 'ICW': 0, 'FREEFORM': 0}
-backends {'beat_cuda': 1634}  lib_sha {'b922e807a5+38544d214b': 1634}
-traces 4.0% of records, gpu solve seconds 26634.1
-dates 2026-10-13T05:37:51Z .. 2026-10-13T20:33:10Z
-WARNING: dataset is 100% OSSE (1634/1634): a surrogate trained on it cannot be tested on other families; run the other example configs
+records 2434 (ok 2311, failed 123), shards 5, 395.3 MB
+families {'OSSE': 1634, 'R-OSSE': 0, 'ICW': 800, 'FREEFORM': 0}
+backends {'beat_cuda': 2434}  lib_sha {'b922e807a5+38544d214b': 2434}
+traces 4.1% of records, gpu solve seconds 35322.5
+dates 2026-10-13T05:37:51Z .. 2026-10-13T23:37:45Z
 ```
 
 ### OSSE training pool (what `surrogate train --config osse_baseline.yaml` will see)

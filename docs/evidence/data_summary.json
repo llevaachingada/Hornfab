@@ -1,6 +1,756 @@
 {
- "generated_local": "2026-10-13T16:43:04",
+ "generated_local": "2026-10-13T19:46:47",
  "runs": {
+  "20261013T204408Z-screen-6bdcbd": {
+   "run_id": "20261013T204408Z-screen-6bdcbd",
+   "config_name": "icw_termination",
+   "family": "ICW",
+   "mode": "screen",
+   "command": "hornlab-search search --config examples\\icw_termination.yaml --budget 800",
+   "started_utc": "2026-10-13T20:44:35Z",
+   "status_at_snapshot": "finished",
+   "config_sha": "0279dc6d4dab",
+   "lib_shas": {
+    "hornlab_beat_bem": "38544d214ba2e8a4977bb82170d2fb4a3f9fa8b0",
+    "hornlab_bempp_bem": "8e6910602ece9abb2e9ce0db7a637f4bedf17f53",
+    "hornlab_mesher": "b922e807a5cf10cf732c4557ec0b9b495762afd7",
+    "hornlab_plots": "9e4a6d0dd2ccb6e735dd00233dccccb50d12ed44",
+    "hornlab_search": "cd3fb5815c89e607fc0b2d7cb0c431577429379e"
+   },
+   "declared_budget": 200,
+   "cli_budget": 800,
+   "pinning_summary": {
+    "fully_pinned_at_lo": [
+     "hold_end"
+    ],
+    "fully_pinned_at_hi": []
+   },
+   "rows": 800,
+   "ok": 787,
+   "failed": 13,
+   "torn_lines": 0,
+   "failure_kinds": {
+    "invalid_geometry": 5,
+    "mesh_too_large": 8
+   },
+   "failure_examples": {
+    "invalid_geometry": [
+     "invalid_geometry: ICW target set is infeasible: max|dkappa/dsigma| 32.8701 exceeds cap 10.0 (hint: {'dkappa_ds_abs_max': 'raise dkappa_ds_abs_max or relax the g",
+     "invalid_geometry: ICW target set is infeasible: radius is not monotone (non-decreasing) along the meridian; max|dkappa/dsigma| 10.1077 exceeds cap 10.0 (hint: {"
+    ],
+    "mesh_too_large": [
+     "mesh_too_large: 5176 dofs (10086 triangles, 5176 vertices) exceeds the dof cap 5000 for quadrants '1'; lower f_max or epw",
+     "mesh_too_large: mesh build failed: generated mesh contains 17,742 triangles, exceeding the effective limit 11,275; increase the relevant mm resolution, raise ma"
+    ]
+   },
+   "failure_param_stats": {
+    "invalid_geometry": {
+     "L_mm": {
+      "n": 5,
+      "min": 160.0,
+      "p10": 160.0,
+      "median": 160.0,
+      "mean": 160.0,
+      "p90": 160.0,
+      "max": 160.0,
+      "std": 0.0
+     },
+     "R_mm": {
+      "n": 5,
+      "min": 116.075592,
+      "p10": 119.740961,
+      "median": 133.593498,
+      "mean": 139.96705,
+      "p90": 162.939169,
+      "max": 164.841552,
+      "std": 19.244925
+     },
+     "a0_deg": {
+      "n": 5,
+      "min": 14.5,
+      "p10": 14.5,
+      "median": 14.5,
+      "mean": 14.5,
+      "p90": 14.5,
+      "max": 14.5,
+      "std": 0.0
+     },
+     "coverage_angle_deg": {
+      "n": 5,
+      "min": 37.547637,
+      "p10": 38.70941,
+      "median": 41.671799,
+      "mean": 47.249152,
+      "p90": 58.932231,
+      "max": 61.512646,
+      "std": 9.337112
+     },
+     "dkappa_ds_abs_max": {
+      "n": 5,
+      "min": 10.0,
+      "p10": 10.0,
+      "median": 10.0,
+      "mean": 10.0,
+      "p90": 10.0,
+      "max": 10.0,
+      "std": 0.0
+     },
+     "hold_end": {
+      "n": 5,
+      "min": 0.632791,
+      "p10": 0.660224,
+      "median": 0.710959,
+      "mean": 0.747232,
+      "p90": 0.856289,
+      "max": 0.899371,
+      "std": 0.091254
+     },
+     "hold_start": {
+      "n": 5,
+      "min": 0.106457,
+      "p10": 0.142288,
+      "median": 0.250406,
+      "mean": 0.266625,
+      "p90": 0.390396,
+      "max": 0.391522,
+      "std": 0.110818
+     },
+     "kappa0": {
+      "n": 5,
+      "min": 0.280589,
+      "p10": 0.300173,
+      "median": 0.357968,
+      "mean": 0.357592,
+      "p90": 0.41316,
+      "max": 0.426094,
+      "std": 0.050431
+     },
+     "kappa_abs_max": {
+      "n": 5,
+      "min": 1.0,
+      "p10": 1.0,
+      "median": 1.0,
+      "mean": 1.0,
+      "p90": 1.0,
+      "max": 1.0,
+      "std": 0.0
+     },
+     "r0_mm": {
+      "n": 5,
+      "min": 12.7,
+      "p10": 12.7,
+      "median": 12.7,
+      "mean": 12.7,
+      "p90": 12.7,
+      "max": 12.7,
+      "std": 0.0
+     },
+     "theta1_deg": {
+      "n": 5,
+      "min": 12.286573,
+      "p10": 13.430073,
+      "median": 15.719712,
+      "mean": 17.226169,
+      "p90": 21.780477,
+      "max": 22.943911,
+      "std": 3.783725
+     },
+     "theta_max_deg": {
+      "n": 5,
+      "min": 91.0,
+      "p10": 91.0,
+      "median": 91.0,
+      "mean": 91.0,
+      "p90": 91.0,
+      "max": 91.0,
+      "std": 0.0
+     }
+    },
+    "mesh_too_large": {
+     "L_mm": {
+      "n": 8,
+      "min": 160.0,
+      "p10": 160.0,
+      "median": 160.0,
+      "mean": 160.0,
+      "p90": 160.0,
+      "max": 160.0,
+      "std": 0.0
+     },
+     "R_mm": {
+      "n": 8,
+      "min": 129.779512,
+      "p10": 131.500668,
+      "median": 139.349649,
+      "mean": 156.324916,
+      "p90": 195.658632,
+      "max": 219.618323,
+      "std": 30.699803
+     },
+     "a0_deg": {
+      "n": 8,
+      "min": 14.5,
+      "p10": 14.5,
+      "median": 14.5,
+      "mean": 14.5,
+      "p90": 14.5,
+      "max": 14.5,
+      "std": 0.0
+     },
+     "coverage_angle_deg": {
+      "n": 8,
+      "min": 45.158038,
+      "p10": 45.689698,
+      "median": 55.149323,
+      "mean": 58.078739,
+      "p90": 76.487796,
+      "max": 79.610753,
+      "std": 11.852114
+     },
+     "dkappa_ds_abs_max": {
+      "n": 8,
+      "min": 10.0,
+      "p10": 10.0,
+      "median": 10.0,
+      "mean": 10.0,
+      "p90": 10.0,
+      "max": 10.0,
+      "std": 0.0
+     },
+     "hold_end": {
+      "n": 8,
+      "min": 0.563164,
+      "p10": 0.565561,
+      "median": 0.761038,
+      "mean": 0.742281,
+      "p90": 0.865831,
+      "max": 0.88163,
+      "std": 0.117593
+     },
+     "hold_start": {
+      "n": 8,
+      "min": 0.268639,
+      "p10": 0.308267,
+      "median": 0.391093,
+      "mean": 0.377782,
+      "p90": 0.432853,
+      "max": 0.449343,
+      "std": 0.05631
+     },
+     "kappa0": {
+      "n": 8,
+      "min": 0.174451,
+      "p10": 0.186413,
+      "median": 0.236848,
+      "mean": 0.225453,
+      "p90": 0.255362,
+      "max": 0.259525,
+      "std": 0.029997
+     },
+     "kappa_abs_max": {
+      "n": 8,
+      "min": 1.0,
+      "p10": 1.0,
+      "median": 1.0,
+      "mean": 1.0,
+      "p90": 1.0,
+      "max": 1.0,
+      "std": 0.0
+     },
+     "r0_mm": {
+      "n": 8,
+      "min": 12.7,
+      "p10": 12.7,
+      "median": 12.7,
+      "mean": 12.7,
+      "p90": 12.7,
+      "max": 12.7,
+      "std": 0.0
+     },
+     "theta1_deg": {
+      "n": 8,
+      "min": 2.463625,
+      "p10": 5.537891,
+      "median": 13.388664,
+      "mean": 13.811583,
+      "p90": 21.460456,
+      "max": 29.996965,
+      "std": 7.617432
+     },
+     "theta_max_deg": {
+      "n": 8,
+      "min": 91.0,
+      "p10": 91.0,
+      "median": 91.0,
+      "mean": 91.0,
+      "p90": 91.0,
+      "max": 91.0,
+      "std": 0.0
+     }
+    }
+   },
+   "J_ok": {
+    "n": 787,
+    "min": 12.200862,
+    "p10": 12.64066,
+    "median": 12.867557,
+    "mean": 19.042996,
+    "p90": 23.829545,
+    "max": 224.088189,
+    "std": 22.896929
+   },
+   "seed_J": 55.735745,
+   "best": {
+    "n": 190,
+    "design_hash": "bf6cb40a5d5c",
+    "objective": 12.200862,
+    "params": {
+     "termination": "flat_baffle",
+     "kappa0": 0.0151718163,
+     "theta1_deg": 15.4382535391,
+     "r0_mm": 12.7,
+     "a0_deg": 14.5,
+     "L_mm": 160.0,
+     "R_mm": 168.2916991155,
+     "coverage_angle_deg": 57.8938768599,
+     "hold_start": 0.3048735126,
+     "hold_end": 0.5502774032,
+     "kappa_abs_max": 1.0,
+     "dkappa_ds_abs_max": 10.0,
+     "theta_max_deg": 91.0
+    },
+    "terms": {
+     "cov": 6.423272356192156,
+     "rip": 3.821001385353559,
+     "di": 0.7460036344344855,
+     "dislope": 0.16626592670704374,
+     "flat": 3.299307855493438,
+     "load": 0.0,
+     "penalty": 0.0,
+     "total": 12.2008617229763,
+     "n_nan": 0,
+     "n_in_band": 10,
+     "di_estimated": 0.0
+    },
+    "n_dof": 2823
+   },
+   "per_key": {
+    "L_mm": {
+     "seed": 160.0,
+     "lo": 160.0,
+     "hi": 160.0,
+     "stats": {
+      "n": 787,
+      "min": 160.0,
+      "p10": 160.0,
+      "median": 160.0,
+      "mean": 160.0,
+      "p90": 160.0,
+      "max": 160.0,
+      "std": 0.0
+     },
+     "spearman_vs_J": null
+    },
+    "R_mm": {
+     "seed": 130.0,
+     "lo": 80.0,
+     "hi": 220.0,
+     "stats": {
+      "n": 787,
+      "min": 80.13245,
+      "p10": 133.303638,
+      "median": 138.854811,
+      "mean": 144.993983,
+      "p90": 169.842891,
+      "max": 219.990341,
+      "std": 19.739272
+     },
+     "spearman_vs_J": 0.329211,
+     "frac_within_2pct_lo": 0.003812,
+     "frac_within_2pct_hi": 0.010165
+    },
+    "a0_deg": {
+     "seed": 14.5,
+     "lo": 14.5,
+     "hi": 14.5,
+     "stats": {
+      "n": 787,
+      "min": 14.5,
+      "p10": 14.5,
+      "median": 14.5,
+      "mean": 14.5,
+      "p90": 14.5,
+      "max": 14.5,
+      "std": 0.0
+     },
+     "spearman_vs_J": null
+    },
+    "coverage_angle_deg": {
+     "seed": 50.0,
+     "lo": 20.0,
+     "hi": 80.0,
+     "stats": {
+      "n": 787,
+      "min": 20.048172,
+      "p10": 53.380787,
+      "median": 57.068038,
+      "mean": 56.269861,
+      "p90": 58.331441,
+      "max": 79.92899,
+      "std": 5.910746
+     },
+     "spearman_vs_J": -0.199714,
+     "frac_within_2pct_lo": 0.006353,
+     "frac_within_2pct_hi": 0.003812
+    },
+    "dkappa_ds_abs_max": {
+     "seed": 10.0,
+     "lo": null,
+     "hi": null,
+     "stats": {
+      "n": 787,
+      "min": 10.0,
+      "p10": 10.0,
+      "median": 10.0,
+      "mean": 10.0,
+      "p90": 10.0,
+      "max": 10.0,
+      "std": 0.0
+     },
+     "spearman_vs_J": null
+    },
+    "hold_end": {
+     "seed": 0.7,
+     "lo": 0.55,
+     "hi": 0.9,
+     "stats": {
+      "n": 787,
+      "min": 0.55,
+      "p10": 0.550014,
+      "median": 0.550678,
+      "mean": 0.574952,
+      "p90": 0.631395,
+      "max": 0.899706,
+      "std": 0.060531
+     },
+     "spearman_vs_J": 0.640544,
+     "frac_within_2pct_lo": 0.753494,
+     "frac_within_2pct_hi": 0.002541
+    },
+    "hold_start": {
+     "seed": 0.3,
+     "lo": 0.1,
+     "hi": 0.45,
+     "stats": {
+      "n": 787,
+      "min": 0.106708,
+      "p10": 0.316046,
+      "median": 0.344056,
+      "mean": 0.345834,
+      "p90": 0.386427,
+      "max": 0.449979,
+      "std": 0.040309
+     },
+     "spearman_vs_J": 0.153429,
+     "frac_within_2pct_lo": 0.001271,
+     "frac_within_2pct_hi": 0.027954
+    },
+    "kappa0": {
+     "seed": 0.25,
+     "lo": 0.0,
+     "hi": 0.5,
+     "stats": {
+      "n": 787,
+      "min": 0.0,
+      "p10": 7.6e-05,
+      "median": 0.001563,
+      "mean": 0.019845,
+      "p90": 0.066721,
+      "max": 0.300683,
+      "std": 0.044646
+     },
+     "spearman_vs_J": 0.55779,
+     "frac_within_2pct_lo": 0.740788,
+     "frac_within_2pct_hi": 0.0
+    },
+    "kappa_abs_max": {
+     "seed": 1.0,
+     "lo": null,
+     "hi": null,
+     "stats": {
+      "n": 787,
+      "min": 1.0,
+      "p10": 1.0,
+      "median": 1.0,
+      "mean": 1.0,
+      "p90": 1.0,
+      "max": 1.0,
+      "std": 0.0
+     },
+     "spearman_vs_J": null
+    },
+    "r0_mm": {
+     "seed": 12.7,
+     "lo": 12.7,
+     "hi": 12.7,
+     "stats": {
+      "n": 787,
+      "min": 12.7,
+      "p10": 12.7,
+      "median": 12.7,
+      "mean": 12.7,
+      "p90": 12.7,
+      "max": 12.7,
+      "std": 0.0
+     },
+     "spearman_vs_J": null
+    },
+    "theta1_deg": {
+     "seed": 16.0,
+     "lo": 2.0,
+     "hi": 30.0,
+     "stats": {
+      "n": 787,
+      "min": 2.296906,
+      "p10": 11.165243,
+      "median": 16.477297,
+      "mean": 15.775242,
+      "p90": 18.019092,
+      "max": 28.614085,
+      "std": 3.555913
+     },
+     "spearman_vs_J": -0.209677,
+     "frac_within_2pct_lo": 0.003812,
+     "frac_within_2pct_hi": 0.0
+    },
+    "theta_max_deg": {
+     "seed": 91.0,
+     "lo": null,
+     "hi": null,
+     "stats": {
+      "n": 787,
+      "min": 91.0,
+      "p10": 91.0,
+      "median": 91.0,
+      "mean": 91.0,
+      "p90": 91.0,
+      "max": 91.0,
+      "std": 0.0
+     },
+     "spearman_vs_J": null
+    }
+   },
+   "categorical_params": {
+    "termination": {
+     "flat_baffle": 787
+    }
+   },
+   "top6_pinning": {
+    "R_mm": {
+     "at_lo": 0,
+     "at_hi": 0,
+     "n": 6
+    },
+    "coverage_angle_deg": {
+     "at_lo": 0,
+     "at_hi": 0,
+     "n": 6
+    },
+    "hold_end": {
+     "at_lo": 6,
+     "at_hi": 0,
+     "n": 6
+    },
+    "hold_start": {
+     "at_lo": 0,
+     "at_hi": 0,
+     "n": 6
+    },
+    "kappa0": {
+     "at_lo": 4,
+     "at_hi": 0,
+     "n": 6
+    },
+    "theta1_deg": {
+     "at_lo": 0,
+     "at_hi": 0,
+     "n": 6
+    }
+   },
+   "terms_over_ok": {
+    "cov": {
+     "n": 787,
+     "min": 5.538662,
+     "p10": 6.094672,
+     "median": 6.357764,
+     "mean": 8.928883,
+     "p90": 12.856323,
+     "max": 75.290504,
+     "std": 8.339882
+    },
+    "di": {
+     "n": 787,
+     "min": 0.589734,
+     "p10": 0.8164,
+     "median": 0.835041,
+     "mean": 1.086074,
+     "p90": 1.334878,
+     "max": 10.534087,
+     "std": 0.922778
+    },
+    "di_estimated": {
+     "n": 787,
+     "min": 0.0,
+     "p10": 0.0,
+     "median": 0.0,
+     "mean": 0.0,
+     "p90": 0.0,
+     "max": 0.0,
+     "std": 0.0
+    },
+    "dislope": {
+     "n": 787,
+     "min": 4e-06,
+     "p10": 0.006264,
+     "median": 0.112263,
+     "mean": 6.577358,
+     "p90": 5.487129,
+     "max": 322.194147,
+     "std": 29.885279
+    },
+    "flat": {
+     "n": 787,
+     "min": 1.706641,
+     "p10": 3.515719,
+     "median": 3.994997,
+     "mean": 3.952718,
+     "p90": 4.124431,
+     "max": 8.819659,
+     "std": 0.547143
+    },
+    "load": {
+     "n": 787,
+     "min": 0.0,
+     "p10": 0.0,
+     "median": 0.0,
+     "mean": 0.0,
+     "p90": 0.0,
+     "max": 0.0,
+     "std": 0.0
+    },
+    "n_in_band": {
+     "n": 787,
+     "min": 10.0,
+     "p10": 10.0,
+     "median": 10.0,
+     "mean": 10.0,
+     "p90": 10.0,
+     "max": 10.0,
+     "std": 0.0
+    },
+    "n_nan": {
+     "n": 787,
+     "min": 0.0,
+     "p10": 0.0,
+     "median": 0.0,
+     "mean": 0.0,
+     "p90": 0.0,
+     "max": 0.0,
+     "std": 0.0
+    },
+    "penalty": {
+     "n": 787,
+     "min": 0.0,
+     "p10": 0.0,
+     "median": 0.0,
+     "mean": 0.0,
+     "p90": 0.0,
+     "max": 0.0,
+     "std": 0.0
+    },
+    "rip": {
+     "n": 787,
+     "min": 3.416684,
+     "p10": 4.130548,
+     "median": 4.236229,
+     "mean": 4.523252,
+     "p90": 5.066381,
+     "max": 10.803114,
+     "std": 0.931607
+    },
+    "total": {
+     "n": 787,
+     "min": 12.200862,
+     "p10": 12.64066,
+     "median": 12.867557,
+     "mean": 19.042996,
+     "p90": 23.829545,
+     "max": 224.088189,
+     "std": 22.896929
+    }
+   },
+   "n_dof": {
+    "n": 787,
+    "min": 764.0,
+    "p10": 2219.6,
+    "median": 2502.0,
+    "mean": 2493.212198,
+    "p90": 2657.4,
+    "max": 4549.0,
+    "std": 358.88196
+   },
+   "seconds_solve": {
+    "n": 800,
+    "min": 0.0,
+    "p10": 8.800189,
+    "median": 11.041775,
+    "mean": 10.860471,
+    "p90": 11.959529,
+    "max": 27.171155,
+    "std": 2.486963
+   },
+   "seconds_mesh": {
+    "n": 800,
+    "min": 0.0,
+    "p10": 1.42121,
+    "median": 1.962985,
+    "mean": 1.906965,
+    "p90": 2.244738,
+    "max": 9.410718,
+    "std": 0.504392
+   },
+   "seconds_total": {
+    "n": 800,
+    "min": 0.145276,
+    "p10": 10.866748,
+    "median": 13.053283,
+    "mean": 12.964556,
+    "p90": 14.111749,
+    "max": 28.642928,
+    "std": 2.460387
+   },
+   "peak_vram_mb": {
+    "n": 787,
+    "min": 150.0,
+    "p10": 1046.0,
+    "median": 1302.0,
+    "mean": 1332.742058,
+    "p90": 1494.0,
+    "max": 4278.0,
+    "std": 370.802284
+   },
+   "di_source": {
+    "balloon": 787
+   },
+   "quadrants": {
+    "1": 787
+   },
+   "symmetry_plane": {
+    "yz+xz": 787
+   },
+   "span_hours": 2.879,
+   "rows_per_hour": 277.911802
+  },
   "20261013T123136Z-screen-ca15be": {
    "run_id": "20261013T123136Z-screen-ca15be",
    "config_name": "osse_baseline",
@@ -471,6 +1221,7 @@
      "frac_within_2pct_hi": 0.017794
     }
    },
+   "categorical_params": {},
    "top6_pinning": {
     "L_mm": {
      "at_lo": 0,
@@ -1159,6 +1910,7 @@
      "frac_within_2pct_hi": 0.115385
     }
    },
+   "categorical_params": {},
    "top6_pinning": {
     "L_mm": {
      "at_lo": 0,
@@ -1847,6 +2599,7 @@
      "frac_within_2pct_hi": 0.047619
     }
    },
+   "categorical_params": {},
    "top6_pinning": {
     "L_mm": {
      "at_lo": 0,
@@ -2319,6 +3072,7 @@
      "frac_within_2pct_hi": 0.0
     }
    },
+   "categorical_params": {},
    "top6_pinning": {
     "L_mm": {
      "at_lo": 0,
@@ -2543,39 +3297,39 @@
  },
  "dataset": {
   "stats_report": [
-   "records 1634 (ok 1524, failed 110), shards 4, 273.4 MB",
-   "families {'OSSE': 1634, 'R-OSSE': 0, 'ICW': 0, 'FREEFORM': 0}",
-   "backends {'beat_cuda': 1634}  lib_sha {'b922e807a5+38544d214b': 1634}",
-   "traces 4.0% of records, gpu solve seconds 26634.1",
-   "dates 2026-10-13T05:37:51Z .. 2026-10-13T20:33:10Z",
-   "WARNING: dataset is 100% OSSE (1634/1634): a surrogate trained on it cannot be tested on other families; run the other example configs"
+   "records 2434 (ok 2311, failed 123), shards 5, 395.3 MB",
+   "families {'OSSE': 1634, 'R-OSSE': 0, 'ICW': 800, 'FREEFORM': 0}",
+   "backends {'beat_cuda': 2434}  lib_sha {'b922e807a5+38544d214b': 2434}",
+   "traces 4.1% of records, gpu solve seconds 35322.5",
+   "dates 2026-10-13T05:37:51Z .. 2026-10-13T23:37:45Z"
   ],
   "stats": {
-   "n": 1634,
-   "n_ok": 1524,
-   "n_failed": 110,
+   "n": 2434,
+   "n_ok": 2311,
+   "n_failed": 123,
    "by_family": {
-    "OSSE": 1634
+    "OSSE": 1634,
+    "ICW": 800
    },
    "by_backend": {
-    "beat_cuda": 1634
+    "beat_cuda": 2434
    },
    "by_lib_sha": {
-    "b922e807a5+38544d214b": 1634
+    "b922e807a5+38544d214b": 2434
    },
    "date_first": "2026-10-13T05:37:51Z",
-   "date_last": "2026-10-13T20:33:10Z",
-   "total_gpu_seconds": 26634.089942099963,
-   "disk_mb": 273.43816661834717,
-   "trace_fraction": 0.04039167686658507,
+   "date_last": "2026-10-13T23:37:45Z",
+   "total_gpu_seconds": 35322.46680309983,
+   "disk_mb": 395.29343700408936,
+   "trace_fraction": 0.04149548069022186,
    "family_balance": {
     "OSSE": 1634,
     "R-OSSE": 0,
-    "ICW": 0,
+    "ICW": 800,
     "FREEFORM": 0
    },
-   "family_warning": "dataset is 100% OSSE (1634/1634): a surrogate trained on it cannot be tested on other families; run the other example configs",
-   "n_shards": 4
+   "family_warning": "None",
+   "n_shards": 5
   },
   "osse_pool": {
    "key_names": [

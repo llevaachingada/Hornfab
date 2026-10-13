@@ -412,3 +412,77 @@ search OK: 1500 rows in C:\Users\hunte\Hrns\hornlab-search\runs\20261013T123136Z
 === STATUS ===
 COMPLETED: hornlab-search process gone; rows=1500/1500 budget; final summary now present in osse_stdout.log
 
+=== TICK 2026-10-13T19:32:20.0483134-04:00 ===
+=== processes ===
+
+   Id ProcessName    StartTime            
+   -- -----------    ---------            
+11556 hornlab-search 10/13/2026 4:44:07 PM
+27696 julia          10/13/2026 4:44:11 PM
+
+
+
+=== VRAM ===
+984 MiB
+
+=== watchdog tail 8 ===
+2026-10-13 18:56:49 run=20261013T204408Z-screen-6bdcbd rows=613 last_kind=ok last_J=12.721098922116697 vram=1807 MiB julia=1 hornlab=1 python=4
+2026-10-13 19:01:50 run=20261013T204408Z-screen-6bdcbd rows=636 last_kind=ok last_J=12.872027704718766 vram=982 MiB julia=1 hornlab=1 python=4
+2026-10-13 19:06:50 run=20261013T204408Z-screen-6bdcbd rows=659 last_kind=ok last_J=12.648916077642397 vram=534 MiB julia=1 hornlab=1 python=4
+2026-10-13 19:11:50 run=20261013T204408Z-screen-6bdcbd rows=681 last_kind=ok last_J=12.657705827561964 vram=521 MiB julia=1 hornlab=1 python=4
+2026-10-13 19:16:50 run=20261013T204408Z-screen-6bdcbd rows=704 last_kind=ok last_J=12.630839025290895 vram=568 MiB julia=1 hornlab=1 python=4
+2026-10-13 19:21:50 run=20261013T204408Z-screen-6bdcbd rows=727 last_kind=ok last_J=12.699444625610337 vram=952 MiB julia=1 hornlab=1 python=4
+2026-10-13 19:26:50 run=20261013T204408Z-screen-6bdcbd rows=750 last_kind=ok last_J=12.812541830894965 vram=952 MiB julia=1 hornlab=1 python=4
+2026-10-13 19:31:50 run=20261013T204408Z-screen-6bdcbd rows=773 last_kind=ok last_J=12.890102648985964 vram=984 MiB julia=1 hornlab=1 python=4
+
+=== newest run dir ===
+C:\Users\hunte\Hrns\hornlab-search\runs\20261013T204408Z-screen-6bdcbd
+=== health digest ===
+HEALTH run=20261013T204408Z-screen-6bdcbd rows=775 ok=762 failed=13 torn=0 kinds={'invalid_geometry': 5, 'mesh_too_large': 8}
+HEALTH ok-J: min=12.20 median=12.87 max=224.09 best=12.20
+HEALTH penalty-or-failed rows (J>=1000): 13
+HEALTH median seconds: solve=11.04 mesh=1.96 total=13.04
+HEALTH span 2026-10-13T20:45:02Z -> 2026-10-13T23:32:11Z (2.79 h) rate=278 rows/h
+HEALTH top design_hash dups: [('7f30144cbfa6', 1), ('6f2e184b4b87', 1), ('f3cd131cfd3c', 1)]
+HEALTH ok rows with metrics=null: 0
+HEALTH last-ok: n=774 J=12.879272130072437 a_deg=None exponent=None a0_deg=14.5 L_mm=160.0 n_dof=2480
+
+=== icw stderr self-intersect warning count ===
+24
+
+=== stderr tail 3 ===
+17:06:25 WARNING hornlab_mesher.profile_sampling: [hornlab-mesher] outer wall self-intersects: ICW generated outer offset grid has a normal flip near azimuth row 0, axial interval 0 Reduce the wall thickness or open the local curvature; the acoustic (inner) surface is unaffected.
+17:06:25 WARNING hornlab_mesher.profile_sampling: [hornlab-mesher] outer wall self-intersects: ICW generated outer offset grid has a normal flip near azimuth row 0, axial interval 0 Reduce the wall thickness or open the local curvature; the acoustic (inner) surface is unaffected.
+17:06:25 WARNING hornlab_mesher.profile_sampling: [hornlab-mesher] outer wall self-intersects: ICW generated outer offset grid has a normal flip near azimuth row 0, axial interval 0 Reduce the wall thickness or open the local curvature; the acoustic (inner) surface is unaffected.
+
+
+
+================= TICK 2026-10-13 19:45:36 =================
+processes: julia.exe PID 27696 + julialauncher PID 29432 (solver worker, --worker); hornlab-search MAIN GONE
+nvidia-smi: 0 NVIDIA GeForce RTX 4060 Laptop GPU, 504 MiB / 8188 MiB, util 30%
+watchdog tail 5:
+2026-10-13 19:21:50 run=20261013T204408Z-screen-6bdcbd rows=727 last_kind=ok last_J=12.699444625610337 vram=952 MiB julia=1 hornlab=1 python=4
+2026-10-13 19:26:50 run=20261013T204408Z-screen-6bdcbd rows=750 last_kind=ok last_J=12.812541830894965 vram=952 MiB julia=1 hornlab=1 python=4
+2026-10-13 19:31:50 run=20261013T204408Z-screen-6bdcbd rows=773 last_kind=ok last_J=12.890102648985964 vram=984 MiB julia=1 hornlab=1 python=4
+2026-10-13 19:36:50 run=20261013T204408Z-screen-6bdcbd rows=795 last_kind=ok last_J=12.863920521097128 vram=952 MiB julia=1 hornlab=1 python=4
+2026-10-13 19:41:50 run=20261013T204408Z-screen-6bdcbd rows=800 last_kind=ok last_J=12.83631761994636 vram=504 MiB julia=1 hornlab=0 python=2
+health_check.py (newest runs\* with run.json = 20261013T204408Z-screen-6bdcbd):
+HEALTH run=20261013T204408Z-screen-6bdcbd rows=800 ok=787 failed=13 torn=0 kinds={'invalid_geometry': 5, 'mesh_too_large': 8}
+HEALTH ok-J: min=12.20 median=12.87 max=224.09 best=12.20
+HEALTH penalty-or-failed rows (J>=1000): 13
+HEALTH median seconds: solve=11.05 mesh=1.97 total=13.05
+HEALTH span 2026-10-13T20:45:02Z -> 2026-10-13T23:37:45Z (2.88 h) rate=278 rows/h
+HEALTH top design_hash dups: [('7f30144cbfa6', 1), ('6f2e184b4b87', 1), ('f3cd131cfd3c', 1)]
+HEALTH ok rows with metrics=null: 0
+HEALTH last-ok: n=799 J=12.83631761994636 a_deg=None exponent=None a0_deg=14.5 L_mm=160.0 n_dof=2490
+icw_stderr self-intersect warning count: 24
+icw_stdout.log tail 8:
+
+
+
+
+
+  evaluations 800 (800 new, 0 cached), failures {'invalid_geometry': 5, 'mesh_too_large': 8}, GPU 8688.4 s, 13.0 s/candidate, 278/h, projected 1,000 = 3.6 h, 10,000 = 36.0 h
+  seed J=55.7357  best J=12.2009 (improved on the seed); stop: budget
+search OK: 800 rows in C:\Users\hunte\Hrns\hornlab-search\runs\20261013T204408Z-screen-6bdcbd\search.ndjson; best in C:\Users\hunte\Hrns\hornlab-search\runs\20261013T204408Z-screen-6bdcbd\best.json; report with: hornlab-search report C:\Users\hunte\Hrns\hornlab-search\runs\20261013T204408Z-screen-6bdcbd
+===========================================
