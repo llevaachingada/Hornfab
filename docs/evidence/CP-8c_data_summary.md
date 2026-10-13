@@ -13,26 +13,26 @@ Machine-readable twin: `data_summary.json`. Raw artifacts are local (gitignored)
 - `held_out_at_15pct` vs `held_out_formal_floor` 500: the Stage A gate refuses below 500.
 
 ## Run `20261013T123136Z-screen-ca15be` — osse_baseline (OSSE, screen)
-- command: `hornlab-search search --config examples\osse_baseline.yaml --budget 1500`; config budget 200, CLI --budget 1500; status at snapshot: running
+- command: `hornlab-search search --config examples\osse_baseline.yaml --budget 1500`; config budget 200, CLI --budget 1500; status at snapshot: finished
 - **bound pinning (top-6)**: fully pinned at LOWER bound: ['n']; at UPPER bound: none
-- rows 1038 = ok 943 + failed 95 (torn 0); kinds {'mesh_too_large': 93, 'invalid_geometry': 2}
-- J over ok rows: min 6.109354 / median 7.212181 / mean 13.1277 / max 180.453986; seed J 22.592077
-- best: J 6.109354 at n=1020 (c592c114bea0), n_dof 4242
-- timing medians: solve 17.543789 s, mesh 1.777564 s, total 19.436334 s; rate 209.180475 rows/h over 4.962 h
-- di_source {'balloon': 943}; quadrants {'1': 943}
+- rows 1500 = ok 1405 + failed 95 (torn 0); kinds {'mesh_too_large': 93, 'invalid_geometry': 2}
+- J over ok rows: min 6.106092 / median 6.449177 / mean 10.821545 / max 180.453986; seed J 22.592077
+- best: J 6.106092 at n=1477 (1dc5af689b1c), n_dof 4213
+- timing medians: solve 20.326738 s, mesh 1.873973 s, total 22.224207 s; rate 187.149095 rows/h over 8.015 h
+- di_source {'balloon': 1405}; quadrants {'1': 1405}
 
 | key | seed | lo | hi | ok min | median | max | spearman vs J | frac 2% lo | frac 2% hi | top6 lo/hi |
 |---|---|---|---|---|---|---|---|---|---|---|
-| L_mm | 260.0 | 140.0 | 420.0 | 140.03436 | 383.046493 | 419.999774 | -0.638676 | 0.005302 | 0.068929 | 0/0 |
-| a0_deg | 15.5 | 2.0 | 30.0 | 4.671601 | 24.63306 | 29.999801 | 0.118387 | 0.0 | 0.080594 | 0/0 |
-| a_deg | 37.5 | 5.0 | 55.0 | 5.00015 | 12.535002 | 50.775831 | 0.148742 | 0.07105 | 0.0 | 0/0 |
-| aspect_ratio | 1.25 | 1.0 | 2.0 | 1.001607 | 1.872248 | 2.0 | -0.519574 | 0.007423 | 0.116649 | 0/0 |
-| exponent | 4.0 | 1.0 | 8.0 | 1.000425 | 2.87905 | 7.999244 | 0.192041 | 0.015907 | 0.00106 | 0/0 |
-| k | 1.0 | 0.3 | 2.5 | 0.318156 | 2.201046 | 2.499706 | -0.341571 | 0.00106 | 0.066808 | 0/0 |
-| n | 4.0 | 2.0 | 8.0 | 2.0 | 2.175889 | 7.995176 | 0.755178 | 0.45175 | 0.007423 | 6/0 |
-| q | 0.995 | 0.9 | 1.0 | 0.9 | 0.906355 | 0.999611 | 0.565797 | 0.250265 | 0.005302 | 5/0 |
+| L_mm | 260.0 | 140.0 | 420.0 | 140.03436 | 396.314404 | 419.999774 | -0.541983 | 0.003559 | 0.046263 | 0/0 |
+| a0_deg | 15.5 | 2.0 | 30.0 | 4.671601 | 22.850012 | 29.999801 | 0.328085 | 0.0 | 0.054093 | 0/0 |
+| a_deg | 37.5 | 5.0 | 55.0 | 5.00015 | 13.534254 | 50.775831 | -0.06574 | 0.047687 | 0.0 | 0/0 |
+| aspect_ratio | 1.25 | 1.0 | 2.0 | 1.001607 | 1.886798 | 2.0 | -0.352387 | 0.004982 | 0.078292 | 0/0 |
+| exponent | 4.0 | 1.0 | 8.0 | 1.000425 | 2.840486 | 7.999244 | 0.164442 | 0.010676 | 0.000712 | 0/0 |
+| k | 1.0 | 0.3 | 2.5 | 0.318156 | 2.275041 | 2.499706 | -0.497823 | 0.000712 | 0.04484 | 0/0 |
+| n | 4.0 | 2.0 | 8.0 | 2.0 | 2.036305 | 7.995176 | 0.617185 | 0.632028 | 0.004982 | 6/0 |
+| q | 0.995 | 0.9 | 1.0 | 0.9 | 0.903327 | 0.999611 | 0.487483 | 0.230605 | 0.003559 | 0/0 |
 | r0_mm | 17.78 | 17.78 | 17.78 | 17.78 | 17.78 | 17.78 | - | - | - | -/- |
-| s | 0.7 | 0.0 | 1.0 | 0.010654 | 0.489569 | 0.99998 | 0.408998 | 0.002121 | 0.026511 | 0/0 |
+| s | 0.7 | 0.0 | 1.0 | 0.010654 | 0.436229 | 0.99998 | 0.536083 | 0.001423 | 0.017794 | 0/0 |
 
 Failure detail (what the search refused, and where it sits):
 - `mesh_too_large`: 93 rows; e.g. mesh_too_large: pre-mesh estimate ~15386 triangles (~7847 dofs) is over 1.5x the dof cap 5000 at f_max=5500 Hz, epw=6, quadrants='1'; no mesh was generated
@@ -40,7 +40,7 @@ Failure detail (what the search refused, and where it sits):
 - `invalid_geometry`: 2 rows; e.g. invalid_geometry: cannot fit the acoustic geometry to the requested mm resolution (throat 5.19697 mm, mouth 10.3939 mm): the axial chord is still 2.48x its limi
   - median params of these failures: {'a_deg': 34.155477, 'exponent': 1.9166, 'L_mm': 284.493181, 'a0_deg': 25.832904, 'k': 1.36656, 'aspect_ratio': 1.737548}
 
-Term medians over ok rows: cov=1.451689, di=0.201763, di_estimated=0.0, dislope=0.208549, flat=4.076674, load=0.0, n_in_band=10.0, n_nan=0.0, penalty=0.0, rip=3.399257, total=7.212181
+Term medians over ok rows: cov=0.845744, di=0.175149, di_estimated=0.0, dislope=0.028743, flat=4.173958, load=0.0, n_in_band=10.0, n_nan=0.0, penalty=0.0, rip=3.314984, total=6.449177
 
 ## Run `20261013T121958Z-screen-9e5a5c` — search_smoke (OSSE, screen)
 - command: `hornlab-search search --config examples\search_smoke.yaml --budget 60`; config budget 60, CLI --budget 60; status at snapshot: finished
@@ -129,19 +129,19 @@ Term medians over ok rows: cov=19.22029, di=0.285641, di_estimated=0.0, dislope=
 ## Dataset
 
 ```
-records 1172 (ok 1062, failed 110), shards 3, 189.6 MB
-families {'OSSE': 1172, 'R-OSSE': 0, 'ICW': 0, 'FREEFORM': 0}
-backends {'beat_cuda': 1172}  lib_sha {'b922e807a5+38544d214b': 1172}
-traces 4.2% of records, gpu solve seconds 16585.1
-dates 2026-10-13T05:37:51Z .. 2026-10-13T17:30:00Z
-WARNING: dataset is 100% OSSE (1172/1172): a surrogate trained on it cannot be tested on other families; run the other example configs
+records 1634 (ok 1524, failed 110), shards 4, 273.4 MB
+families {'OSSE': 1634, 'R-OSSE': 0, 'ICW': 0, 'FREEFORM': 0}
+backends {'beat_cuda': 1634}  lib_sha {'b922e807a5+38544d214b': 1634}
+traces 4.0% of records, gpu solve seconds 26634.1
+dates 2026-10-13T05:37:51Z .. 2026-10-13T20:33:10Z
+WARNING: dataset is 100% OSSE (1634/1634): a surrogate trained on it cannot be tested on other families; run the other example configs
 ```
 
 ### OSSE training pool (what `surrogate train --config osse_baseline.yaml` will see)
-- considered 1172 → kept 1039 (skipped_grid_mismatch **133**, skipped_bad_arrays 0)
+- considered 1634 → kept 1501 (skipped_grid_mismatch **133**, skipped_bad_arrays 0)
 - majority frequency grid (12 pts): [500.0, 621.79, 773.24, 961.58, 1195.8, 1487.07, 1849.28, 2299.72, 2859.87, 3556.47, 4422.73, 5500.0]
-- ok/failed in kept: 944/95; di_source {'balloon': 944, '': 95}
-- held-out at 15% = **155.8** vs formal floor 500 → gate will REFUSE (indicative only)
+- ok/failed in kept: 1406/95; di_source {'balloon': 1406, '': 95}
+- held-out at 15% = **225.2** vs formal floor 500 → gate will REFUSE (indicative only)
 - X NaN fraction per key: {'L_mm': 0.0, 'a0_deg': 0.0, 'a_deg': 0.0, 'aspect_ratio': 0.0, 'exponent': 0.0, 'k': 0.0, 'n': 0.0, 'q': 0.0, 's': 0.0}
 - y-metric NaN fraction on ok rows: {'bw_h_deg': 0.0, 'bw_v_deg': 0.0, 'di_db': 0.0, 'ripple_h_db': 0.0, 'ripple_v_db': 0.0, 'on_axis_db': 0.0}
 - ok rows with ALL metrics NaN: 0

@@ -1,5 +1,5 @@
 {
- "generated_local": "2026-10-13T13:30:02",
+ "generated_local": "2026-10-13T16:43:04",
  "runs": {
   "20261013T123136Z-screen-ca15be": {
    "run_id": "20261013T123136Z-screen-ca15be",
@@ -8,7 +8,7 @@
    "mode": "screen",
    "command": "hornlab-search search --config examples\\osse_baseline.yaml --budget 1500",
    "started_utc": "2026-10-13T12:31:55Z",
-   "status_at_snapshot": "running",
+   "status_at_snapshot": "finished",
    "config_sha": "830f2877c73d",
    "lib_shas": {
     "hornlab_beat_bem": "38544d214ba2e8a4977bb82170d2fb4a3f9fa8b0",
@@ -25,8 +25,8 @@
     ],
     "fully_pinned_at_hi": []
    },
-   "rows": 1038,
-   "ok": 943,
+   "rows": 1500,
+   "ok": 1405,
    "failed": 95,
    "torn_lines": 0,
    "failure_kinds": {
@@ -250,46 +250,46 @@
     }
    },
    "J_ok": {
-    "n": 943,
-    "min": 6.109354,
-    "p10": 6.189343,
-    "median": 7.212181,
-    "mean": 13.1277,
-    "p90": 24.208665,
+    "n": 1405,
+    "min": 6.106092,
+    "p10": 6.107197,
+    "median": 6.449177,
+    "mean": 10.821545,
+    "p90": 18.795556,
     "max": 180.453986,
-    "std": 16.884982
+    "std": 14.220023
    },
    "seed_J": 22.592077,
    "best": {
-    "n": 1020,
-    "design_hash": "c592c114bea0",
-    "objective": 6.109354,
+    "n": 1477,
+    "design_hash": "1dc5af689b1c",
+    "objective": 6.106092,
     "params": {
      "r0_mm": 17.78,
-     "a_deg": 13.5488850534,
-     "a0_deg": 22.5686598622,
-     "L_mm": 396.2624931551,
-     "n": 2.0000011994,
-     "s": 0.4271176593,
-     "q": 0.901054242,
-     "k": 2.2227261894,
-     "exponent": 2.7492281565,
-     "aspect_ratio": 1.884027663
+     "a_deg": 13.826449555,
+     "a0_deg": 22.4397581153,
+     "L_mm": 397.33313089,
+     "n": 2.0304531662,
+     "s": 0.4171194202,
+     "q": 0.9037467634,
+     "k": 2.3427655575,
+     "exponent": 2.828987332,
+     "aspect_ratio": 1.8862929168
     },
     "terms": {
-     "cov": 0.6791262689053444,
-     "rip": 3.2884563435906307,
-     "di": 0.16805967650105688,
-     "dislope": 0.004424112921001492,
-     "flat": 4.178282597276665,
+     "cov": 0.6476388552119674,
+     "rip": 3.3090217516731095,
+     "di": 0.17363367017055267,
+     "dislope": 0.002691206670720863,
+     "flat": 4.19199134443525,
      "load": 0.0,
      "penalty": 0.0,
-     "total": 6.109353870545125,
+     "total": 6.106091983489228,
      "n_nan": 0,
      "n_in_band": 10,
      "di_estimated": 0.0
     },
-    "n_dof": 4242
+    "n_dof": 4213
    },
    "per_key": {
     "L_mm": {
@@ -297,53 +297,53 @@
      "lo": 140.0,
      "hi": 420.0,
      "stats": {
-      "n": 943,
+      "n": 1405,
       "min": 140.03436,
-      "p10": 265.485838,
-      "median": 383.046493,
-      "mean": 361.1911,
-      "p90": 411.221975,
+      "p10": 296.569833,
+      "median": 396.314404,
+      "mean": 373.0341,
+      "p90": 406.992078,
       "max": 419.999774,
-      "std": 59.535689
+      "std": 51.636984
      },
-     "spearman_vs_J": -0.638676,
-     "frac_within_2pct_lo": 0.005302,
-     "frac_within_2pct_hi": 0.068929
+     "spearman_vs_J": -0.541983,
+     "frac_within_2pct_lo": 0.003559,
+     "frac_within_2pct_hi": 0.046263
     },
     "a0_deg": {
      "seed": 15.5,
      "lo": 2.0,
      "hi": 30.0,
      "stats": {
-      "n": 943,
+      "n": 1405,
       "min": 4.671601,
-      "p10": 20.361376,
-      "median": 24.63306,
-      "mean": 24.245612,
-      "p90": 29.231741,
+      "p10": 21.264969,
+      "median": 22.850012,
+      "mean": 23.710968,
+      "p90": 28.341224,
       "max": 29.999801,
-      "std": 3.985498
+      "std": 3.35878
      },
-     "spearman_vs_J": 0.118387,
+     "spearman_vs_J": 0.328085,
      "frac_within_2pct_lo": 0.0,
-     "frac_within_2pct_hi": 0.080594
+     "frac_within_2pct_hi": 0.054093
     },
     "a_deg": {
      "seed": 37.5,
      "lo": 5.0,
      "hi": 55.0,
      "stats": {
-      "n": 943,
+      "n": 1405,
       "min": 5.00015,
-      "p10": 6.631209,
-      "median": 12.535002,
-      "mean": 14.526584,
-      "p90": 26.539819,
+      "p10": 7.409356,
+      "median": 13.534254,
+      "mean": 14.21089,
+      "p90": 21.064276,
       "max": 50.775831,
-      "std": 8.694696
+      "std": 7.143073
      },
-     "spearman_vs_J": 0.148742,
-     "frac_within_2pct_lo": 0.07105,
+     "spearman_vs_J": -0.06574,
+     "frac_within_2pct_lo": 0.047687,
      "frac_within_2pct_hi": 0.0
     },
     "aspect_ratio": {
@@ -351,97 +351,97 @@
      "lo": 1.0,
      "hi": 2.0,
      "stats": {
-      "n": 943,
+      "n": 1405,
       "min": 1.001607,
-      "p10": 1.365835,
-      "median": 1.872248,
-      "mean": 1.763457,
-      "p90": 1.983676,
+      "p10": 1.510781,
+      "median": 1.886798,
+      "mean": 1.804317,
+      "p90": 1.969648,
       "max": 2.0,
-      "std": 0.242523
+      "std": 0.207142
      },
-     "spearman_vs_J": -0.519574,
-     "frac_within_2pct_lo": 0.007423,
-     "frac_within_2pct_hi": 0.116649
+     "spearman_vs_J": -0.352387,
+     "frac_within_2pct_lo": 0.004982,
+     "frac_within_2pct_hi": 0.078292
     },
     "exponent": {
      "seed": 4.0,
      "lo": 1.0,
      "hi": 8.0,
      "stats": {
-      "n": 943,
+      "n": 1405,
       "min": 1.000425,
-      "p10": 1.995081,
-      "median": 2.87905,
-      "mean": 3.198834,
-      "p90": 4.855287,
+      "p10": 2.240606,
+      "median": 2.840486,
+      "mean": 3.079871,
+      "p90": 4.491164,
       "max": 7.999244,
-      "std": 1.146641
+      "std": 0.95555
      },
-     "spearman_vs_J": 0.192041,
-     "frac_within_2pct_lo": 0.015907,
-     "frac_within_2pct_hi": 0.00106
+     "spearman_vs_J": 0.164442,
+     "frac_within_2pct_lo": 0.010676,
+     "frac_within_2pct_hi": 0.000712
     },
     "k": {
      "seed": 1.0,
      "lo": 0.3,
      "hi": 2.5,
      "stats": {
-      "n": 943,
+      "n": 1405,
       "min": 0.318156,
-      "p10": 1.612766,
-      "median": 2.201046,
-      "mean": 2.082674,
-      "p90": 2.419939,
+      "p10": 1.768337,
+      "median": 2.275041,
+      "mean": 2.162469,
+      "p90": 2.3738,
       "max": 2.499706,
-      "std": 0.350087
+      "std": 0.309484
      },
-     "spearman_vs_J": -0.341571,
-     "frac_within_2pct_lo": 0.00106,
-     "frac_within_2pct_hi": 0.066808
+     "spearman_vs_J": -0.497823,
+     "frac_within_2pct_lo": 0.000712,
+     "frac_within_2pct_hi": 0.04484
     },
     "n": {
      "seed": 4.0,
      "lo": 2.0,
      "hi": 8.0,
      "stats": {
-      "n": 943,
+      "n": 1405,
       "min": 2.0,
-      "p10": 2.002489,
-      "median": 2.175889,
-      "mean": 2.709945,
-      "p90": 4.086068,
+      "p10": 2.004646,
+      "median": 2.036305,
+      "mean": 2.485428,
+      "p90": 3.585765,
       "max": 7.995176,
-      "std": 1.183222
+      "std": 1.021067
      },
-     "spearman_vs_J": 0.755178,
-     "frac_within_2pct_lo": 0.45175,
-     "frac_within_2pct_hi": 0.007423
+     "spearman_vs_J": 0.617185,
+     "frac_within_2pct_lo": 0.632028,
+     "frac_within_2pct_hi": 0.004982
     },
     "q": {
      "seed": 0.995,
      "lo": 0.9,
      "hi": 1.0,
      "stats": {
-      "n": 943,
+      "n": 1405,
       "min": 0.9,
-      "p10": 0.900423,
-      "median": 0.906355,
-      "mean": 0.915325,
-      "p90": 0.947982,
+      "p10": 0.90071,
+      "median": 0.903327,
+      "mean": 0.911151,
+      "p90": 0.929476,
       "max": 0.999611,
-      "std": 0.022029
+      "std": 0.019014
      },
-     "spearman_vs_J": 0.565797,
-     "frac_within_2pct_lo": 0.250265,
-     "frac_within_2pct_hi": 0.005302
+     "spearman_vs_J": 0.487483,
+     "frac_within_2pct_lo": 0.230605,
+     "frac_within_2pct_hi": 0.003559
     },
     "r0_mm": {
      "seed": 17.78,
      "lo": 17.78,
      "hi": 17.78,
      "stats": {
-      "n": 943,
+      "n": 1405,
       "min": 17.78,
       "p10": 17.78,
       "median": 17.78,
@@ -457,18 +457,18 @@
      "lo": 0.0,
      "hi": 1.0,
      "stats": {
-      "n": 943,
+      "n": 1405,
       "min": 0.010654,
-      "p10": 0.396004,
-      "median": 0.489569,
-      "mean": 0.533957,
-      "p90": 0.815326,
+      "p10": 0.408585,
+      "median": 0.436229,
+      "mean": 0.496818,
+      "p90": 0.704843,
       "max": 0.99998,
-      "std": 0.170276
+      "std": 0.149318
      },
-     "spearman_vs_J": 0.408998,
-     "frac_within_2pct_lo": 0.002121,
-     "frac_within_2pct_hi": 0.026511
+     "spearman_vs_J": 0.536083,
+     "frac_within_2pct_lo": 0.001423,
+     "frac_within_2pct_hi": 0.017794
     }
    },
    "top6_pinning": {
@@ -508,7 +508,7 @@
      "n": 6
     },
     "q": {
-     "at_lo": 5,
+     "at_lo": 0,
      "at_hi": 0,
      "n": 6
     },
@@ -520,27 +520,27 @@
    },
    "terms_over_ok": {
     "cov": {
-     "n": 943,
+     "n": 1405,
      "min": 0.411772,
-     "p10": 0.636042,
-     "median": 1.451689,
-     "mean": 4.142434,
-     "p90": 11.081049,
+     "p10": 0.632206,
+     "median": 0.845744,
+     "mean": 2.996358,
+     "p90": 8.055763,
      "max": 54.59459,
-     "std": 6.709911
+     "std": 5.735818
     },
     "di": {
-     "n": 943,
+     "n": 1405,
      "min": 0.022659,
-     "p10": 0.095088,
-     "median": 0.201763,
-     "mean": 0.36504,
-     "p90": 0.867021,
+     "p10": 0.115189,
+     "median": 0.175149,
+     "mean": 0.302112,
+     "p90": 0.585728,
      "max": 3.841473,
-     "std": 0.449785
+     "std": 0.379311
     },
     "di_estimated": {
-     "n": 943,
+     "n": 1405,
      "min": 0.0,
      "p10": 0.0,
      "median": 0.0,
@@ -550,27 +550,27 @@
      "std": 0.0
     },
     "dislope": {
-     "n": 943,
+     "n": 1405,
      "min": 0.0,
-     "p10": 0.003234,
-     "median": 0.208549,
-     "mean": 6.604942,
-     "p90": 12.645659,
+     "p10": 0.00115,
+     "median": 0.028743,
+     "mean": 4.434468,
+     "p90": 5.71671,
      "max": 290.800067,
-     "std": 25.075451
+     "std": 20.77584
     },
     "flat": {
-     "n": 943,
+     "n": 1405,
      "min": 0.892843,
-     "p10": 3.297595,
-     "median": 4.076674,
-     "mean": 3.913377,
-     "p90": 4.27252,
+     "p10": 3.537516,
+     "median": 4.173958,
+     "mean": 4.003909,
+     "p90": 4.233307,
      "max": 5.101559,
-     "std": 0.515245
+     "std": 0.4416
     },
     "load": {
-     "n": 943,
+     "n": 1405,
      "min": 0.0,
      "p10": 0.0,
      "median": 0.0,
@@ -580,7 +580,7 @@
      "std": 0.0
     },
     "n_in_band": {
-     "n": 943,
+     "n": 1405,
      "min": 10.0,
      "p10": 10.0,
      "median": 10.0,
@@ -590,7 +590,7 @@
      "std": 0.0
     },
     "n_nan": {
-     "n": 943,
+     "n": 1405,
      "min": 0.0,
      "p10": 0.0,
      "median": 0.0,
@@ -600,7 +600,7 @@
      "std": 0.0
     },
     "penalty": {
-     "n": 943,
+     "n": 1405,
      "min": 0.0,
      "p10": 0.0,
      "median": 0.0,
@@ -610,87 +610,87 @@
      "std": 0.0
     },
     "rip": {
-     "n": 943,
+     "n": 1405,
      "min": 0.906154,
-     "p10": 2.569959,
-     "median": 3.399257,
-     "mean": 3.616593,
-     "p90": 4.993704,
+     "p10": 2.819114,
+     "median": 3.314984,
+     "mean": 3.515365,
+     "p90": 4.550397,
      "max": 8.107834,
-     "std": 1.052048
+     "std": 0.874067
     },
     "total": {
-     "n": 943,
-     "min": 6.109354,
-     "p10": 6.189343,
-     "median": 7.212181,
-     "mean": 13.1277,
-     "p90": 24.208665,
+     "n": 1405,
+     "min": 6.106092,
+     "p10": 6.107197,
+     "median": 6.449177,
+     "mean": 10.821545,
+     "p90": 18.795556,
      "max": 180.453986,
-     "std": 16.884982
+     "std": 14.220023
     }
    },
    "n_dof": {
-    "n": 943,
+    "n": 1405,
     "min": 637.0,
-    "p10": 2275.6,
-    "median": 4030.0,
-    "mean": 3717.901379,
-    "p90": 4570.6,
+    "p10": 2773.0,
+    "median": 4214.0,
+    "mean": 3885.974377,
+    "p90": 4454.6,
     "max": 4998.0,
-    "std": 893.820947
+    "std": 770.82558
    },
    "seconds_solve": {
-    "n": 1038,
+    "n": 1500,
     "min": 0.0,
-    "p10": 3.092631,
-    "median": 17.543789,
-    "mean": 15.431789,
-    "p90": 23.029485,
+    "p10": 5.309902,
+    "median": 20.326738,
+    "mean": 17.378152,
+    "p90": 24.542366,
     "max": 27.652504,
-    "std": 7.497676
+    "std": 6.968096
    },
    "seconds_mesh": {
-    "n": 1038,
+    "n": 1500,
     "min": 0.0,
-    "p10": 0.574411,
-    "median": 1.777564,
-    "mean": 1.588811,
-    "p90": 2.155447,
+    "p10": 0.94343,
+    "median": 1.873973,
+    "mean": 1.71301,
+    "p90": 2.184895,
     "max": 9.492528,
-    "std": 0.698101
+    "std": 0.625207
    },
    "seconds_total": {
-    "n": 1038,
+    "n": 1500,
     "min": 0.033851,
-    "p10": 3.841428,
-    "median": 19.436334,
-    "mean": 17.213669,
-    "p90": 25.095921,
-    "max": 30.070542,
-    "std": 7.739183
+    "p10": 6.31339,
+    "median": 22.224207,
+    "mean": 19.232098,
+    "p90": 26.676791,
+    "max": 30.415986,
+    "std": 7.205504
    },
    "peak_vram_mb": {
-    "n": 943,
+    "n": 1405,
     "min": 118.0,
-    "p10": 1046.0,
-    "median": 3286.0,
-    "mean": 2985.95122,
-    "p90": 4310.0,
+    "p10": 1430.0,
+    "median": 3638.0,
+    "mean": 3185.470463,
+    "p90": 4086.0,
     "max": 5142.0,
-    "std": 1197.125657
+    "std": 1048.302183
    },
    "di_source": {
-    "balloon": 943
+    "balloon": 1405
    },
    "quadrants": {
-    "1": 943
+    "1": 1405
    },
    "symmetry_plane": {
-    "yz+xz": 943
+    "yz+xz": 1405
    },
-   "span_hours": 4.962,
-   "rows_per_hour": 209.180475
+   "span_hours": 8.015,
+   "rows_per_hour": 187.149095
   },
   "20261013T121958Z-screen-9e5a5c": {
    "run_id": "20261013T121958Z-screen-9e5a5c",
@@ -2543,39 +2543,39 @@
  },
  "dataset": {
   "stats_report": [
-   "records 1172 (ok 1062, failed 110), shards 3, 189.6 MB",
-   "families {'OSSE': 1172, 'R-OSSE': 0, 'ICW': 0, 'FREEFORM': 0}",
-   "backends {'beat_cuda': 1172}  lib_sha {'b922e807a5+38544d214b': 1172}",
-   "traces 4.2% of records, gpu solve seconds 16585.1",
-   "dates 2026-10-13T05:37:51Z .. 2026-10-13T17:30:00Z",
-   "WARNING: dataset is 100% OSSE (1172/1172): a surrogate trained on it cannot be tested on other families; run the other example configs"
+   "records 1634 (ok 1524, failed 110), shards 4, 273.4 MB",
+   "families {'OSSE': 1634, 'R-OSSE': 0, 'ICW': 0, 'FREEFORM': 0}",
+   "backends {'beat_cuda': 1634}  lib_sha {'b922e807a5+38544d214b': 1634}",
+   "traces 4.0% of records, gpu solve seconds 26634.1",
+   "dates 2026-10-13T05:37:51Z .. 2026-10-13T20:33:10Z",
+   "WARNING: dataset is 100% OSSE (1634/1634): a surrogate trained on it cannot be tested on other families; run the other example configs"
   ],
   "stats": {
-   "n": 1172,
-   "n_ok": 1062,
+   "n": 1634,
+   "n_ok": 1524,
    "n_failed": 110,
    "by_family": {
-    "OSSE": 1172
+    "OSSE": 1634
    },
    "by_backend": {
-    "beat_cuda": 1172
+    "beat_cuda": 1634
    },
    "by_lib_sha": {
-    "b922e807a5+38544d214b": 1172
+    "b922e807a5+38544d214b": 1634
    },
    "date_first": "2026-10-13T05:37:51Z",
-   "date_last": "2026-10-13T17:30:00Z",
-   "total_gpu_seconds": 16585.058402799965,
-   "disk_mb": 189.5828218460083,
-   "trace_fraction": 0.041808873720136516,
+   "date_last": "2026-10-13T20:33:10Z",
+   "total_gpu_seconds": 26634.089942099963,
+   "disk_mb": 273.43816661834717,
+   "trace_fraction": 0.04039167686658507,
    "family_balance": {
-    "OSSE": 1172,
+    "OSSE": 1634,
     "R-OSSE": 0,
     "ICW": 0,
     "FREEFORM": 0
    },
-   "family_warning": "dataset is 100% OSSE (1172/1172): a surrogate trained on it cannot be tested on other families; run the other example configs",
-   "n_shards": 3
+   "family_warning": "dataset is 100% OSSE (1634/1634): a surrogate trained on it cannot be tested on other families; run the other example configs",
+   "n_shards": 4
   },
   "osse_pool": {
    "key_names": [
@@ -2605,8 +2605,8 @@
    ],
    "meta": {
     "schema_version": 1,
-    "n_considered": 1172,
-    "n_selected": 1039,
+    "n_considered": 1634,
+    "n_selected": 1501,
     "skipped_grid_mismatch": 133,
     "skipped_bad_arrays": 0,
     "skipped_keys": [],
@@ -2614,13 +2614,13 @@
     "lib_sha": null,
     "ok_only": false
    },
-   "n_kept": 1039,
-   "held_out_at_15pct": 155.8,
+   "n_kept": 1501,
+   "held_out_at_15pct": 225.2,
    "held_out_formal_floor": 500,
-   "ok_in_kept": 944,
+   "ok_in_kept": 1406,
    "failed_in_kept": 95,
    "di_source": {
-    "balloon": 944,
+    "balloon": 1406,
     "": 95
    },
    "x_nan_frac_per_key": {

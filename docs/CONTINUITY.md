@@ -8,6 +8,16 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 - **Next action:** CP-8c — multi-family dataset runs (osse_baseline 1500, icw_termination 800, freeform_hv 800, throat_adapter 400; one at a time, ~15-17 h GPU serial estimated; user consulted before starting; runs resumable). Then CP-8d train/gate (≥ 500 held-out per family, else report "indicative only"). Dataset now 134 records, 100 % OSSE.
 - **Blockers:** none. Issue **#13** open (hardening review — circle-back before/with CP-8d; do not weaken gate thresholds). Issues #1-#11 closed.
 
+## 2026-10-13 (local GPU box, ~16:50) — CP-8c run 1/4 COMPLETE (`osse_baseline` 1500): best J 6.106 (-73 % vs seed); `dataset verify` OK (local agent)
+
+- Run `runs/20261013T123136Z-screen-ca15be`, budget stop: **1500 rows = 1405 ok + 95 failed** (`mesh_too_large` 93, `invalid_geometry` 2), torn 0, ok rows with metrics null 0, zero in-run duplicate designs. **Seed J 22.5921 → best J 6.10609 (-73 %)**; median ok-J 6.45.
+- Throughput: **19.2 s/candidate (187/h)**, GPU solve 26,067 s (~7.2 h), wall 8.0 h. Live monitoring: 5-min watchdog + 30-min review ticks (11 ticks); **zero alarms the whole run** — no stall, no junk, exactly one `julia` host, VRAM cycles 511 MiB–4.3 GiB on the 8 GB card. Post-run: idle host reaped, VRAM 419 MiB.
+- Dataset: **1634 records (1524 ok, 110 failed), 4 shards, 273.4 MB**, 100 % OSSE. **`dataset verify` OK — 1634 records re-read, 0 bad** (will re-run after runs 2-4).
+- Bound pinning on the final data: best designs fully pinned at the `n` lower bound (2.0) and 5/6 near `q` lo (0.9); `a_deg`/`exponent` interior — the CP-8b widening held, and the active constraints for this objective are `n`/`q` (follow-up: widen `n`/`q`, mesher needs only `> 0`; recorded in ISSUES, NOT changed mid-campaign).
+- Issue #13 arithmetic, final: OSSE pool kept **1501** of 1634 (`skipped_grid_mismatch` **133** = the 4500 Hz smoke records), held-out at 15 % = **225.2** < 500 → the CP-8d OSSE gate will refuse → reported as **indicative only**, as predicted. A formal OSSE pass would need ~3,400 osse_baseline-grid records (~17 h more GPU).
+- Evidence refreshed and pushed this commit: `docs/evidence/{CP-8c_data_summary.md, data_summary.json, logs/*, manifest.sha256}` + the final block in `CP-8c_osse_baseline.md`.
+- **Next: run 2/4 `icw_termination --budget 800`** (est ~4-4.5 h at icw's expected ~20 s/candidate), then `freeform_hv` 800, `throat_adapter` 400, then `dataset stats` + `verify` close CP-8c, then CP-8d.
+
 ## 2026-10-13 (local GPU box, ~13:40) — agent-readable data digest committed; new `n`/`q` pinning finding (local agent)
 
 - **New: `docs/evidence/CP-8c_data_summary.md` (12 KB) + `data_summary.json` (56 KB)** — a read-only digest of every run dir + the dataset, so a cloud agent with no access to the gitignored blobs can understand the outputs: per-run row/ok/fail/torn counts; J stats (min/median/mean/max, seed vs best); a per-key table (seed/lo/hi/min/median/max, **Spearman vs J**, fraction within 2% of each bound, **top-6 pinning**); objective-term medians; failure kinds with a sample message and the median params of the refused designs; timing/throughput; `di_source`/quadrants; and a dataset section with the pool composition. Generator: temp `data_summary.py` (read-only, CPU; regenerate at the end of CP-8c).

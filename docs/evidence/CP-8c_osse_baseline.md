@@ -51,4 +51,17 @@ Expected CP-8d effect: pooling `search_smoke` (500–4500 Hz grid) with `osse_ba
 count comes from `osse_baseline` records alone (~15% × 1500 ≈ 225 < 500) → the gate refuses and
 the Stage A result will be reported as **indicative only**.
 
-Final numbers for this run are appended here when it completes.
+## Run 1 FINAL (completed 2026-10-13T20:33:10Z / 16:33 local)
+
+```
+evaluations 1500 (1500 new, 0 cached), failures {'invalid_geometry': 2, 'mesh_too_large': 93},
+  GPU 26067.2 s, 19.2 s/candidate, 187/h, projected 1,000 = 5.3 h, 10,000 = 53.4 h
+seed J=22.5921  best J=6.10609 (improved on the seed); stop: budget
+search OK: 1500 rows in runs\20261013T123136Z-screen-ca15be\search.ndjson; best in \best.json
+```
+- Wall span 8.02 h (12:32–20:33 UTC); GPU solve 26,067 s (7.2 h); median seconds: solve 20.42 / mesh 1.90 / total 22.21; median ok-J 6.45.
+- Quality: torn 0; ok rows with metrics null 0; zero in-run duplicate designs; failures all classified — the 93 `mesh_too_large` sit at the wide-L/wide-throat corner (median L_mm 392, a0 26.0, k 1.98, aspect_ratio 1.84), the 2 `invalid_geometry` at the near-pinched-exponent corner.
+- Bound pinning (FINAL data): the best designs are **fully pinned at the LOWER bound of `n`** (2.0) and 5/6 near `q` lo (0.9); `a_deg`/`exponent` interior — the CP-8b fix held, and the active constraints for this objective are `n`/`q` (follow-up recorded in ISSUES). Details in `CP-8c_data_summary.md`.
+- Post-run hygiene: idle julia host killed; VRAM back to 419 MiB.
+- Dataset after run 1: **1634 records (1524 ok, 110 failed), 4 shards, 273.4 MB**, 100 % OSSE.
+- **`dataset verify`: OK — 1634 records re-read, 0 bad** (re-run at the end of CP-8c after all four configs).
