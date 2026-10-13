@@ -1,62 +1,67 @@
-# HANDOFF — Wave 0 bootstrap, session 3, 2026-10-12
+# HANDOFF — Waves 0-2 complete, Wave 3 (senior physics checkpoints) next
 
-Supersedes the two earlier handoffs. Repo: `C:\Users\hunte\Hrns\hornlab-search` (git on `main`, **still no commits, no remote**).
+Written 2026-10-13 ~06:00 EDT by the orchestrator (Claude). Supersedes all earlier handoffs.
+Repo: https://github.com/llevaachingada/Hornfab (local: `C:\Users\hunte\Hrns\hornlab-search`, branch `main`, CI green on `b5bc811`).
+The Python package and CLI are still named `hornlab_search` / `hornlab-search` (issue #11 asks Collin about the name).
 
-**Stop after Wave 0. Do not start Wave 1 modules.**
+## Read first, in this order
+1. `docs/CONTINUITY.md` (newest entry on top: state, numbers, open issues, next action).
+2. `CLAUDE.md` and `AGENTS.md` (rules; includes the **GPU / Julia hygiene** section, mandatory).
+3. `TOOLCHAIN.md` (every measured number and the real solver API).
+4. `NOTES_FOR_SENIOR.md` (append-only; the task 04-08 blocks hold every contract deviation awaiting a ruling).
+5. `docs/plan/01_CONTRACTS.md` (frozen) and `docs/plan/09_CHECKPOINTS.md` (your task).
 
-## ⚠️ READ THIS FIRST — a second agent is working the same repo
+**Standing rule:** every push updates `docs/CONTINUITY.md` and `docs/ISSUES.md` in the same commit. **Check the real pytest exit code before committing** (a `| tail` once hid a failure).
 
-While this session ran, **a separate Claude session** (process tree rooted at a `.claude/shell-snapshots` bash, running `m2_driver2.py` / `m2_one.py` / `m2_driver3.py`) was doing the **same Wave 0 task** in the same scratch dir (`C:\Users\hunte\AppData\Local\Temp\opencode\hornlab-scratch`) and editing the same repo files. Consequences:
+## Where things stand
+| Wave | Tasks | Status |
+|---|---|---|
+| 0 | 02 env, 03 scaffold | done, CP-0 and CP-1 green |
+| 1 | 04 design+mesh, 05 solve, 06 metrics, 07 dataset | done, CP-2..CP-5 green (issues #1-#4 closed) |
+| 2 | 08 pipeline | done, CP-6 green (issue #5 closed) |
+| 3 | 09 senior checkpoints CP-7a..f | **not started** (issue #6, open) |
 
-- It **updated `examples/*.yaml` `dof_per_triangle`** to 0.51/0.50 (matching this session's M1 numbers) and **drafted `.github/issues/*.md`** (04–09 + question issues).
-- It ran **concurrent BEM solves on the single GPU**, which **invalidated every M2/M3/M4 number** and caused `Out of GPU memory` and `ConnectionResetError`.
-- **Two agents editing the same files will collide.** Before continuing, decide which session owns the repo; kill the other, or serialize. **One GPU, one BEM solve at a time** (`docs/plan/00_ORCHESTRATOR.md`).
+Tests: 479 pass locally (462 offline, rest need the GPU/bempp). CI runs the offline set on Python 3.12 and installs the pinned `hornlab-plots`.
 
-## FIRST ACTIONS FOR THE NEXT AGENT
+## What to do next (in order)
+1. **Wave 3 / issue #6.** Run `docs/plan/09_CHECKPOINTS.md` CP-7a..CP-7f as a verifier (writes no code, per the plan). Use a high-reasoning model; this is the physics gate. Inputs already gathered:
+   - CP-7a analytic sphere: `selftest --analytic` PASS, R(ka) spread 0.020 dB (limit 0.5), sub 3/4/5 convergence 0.0204 / 0.0051 / 0.0013 dB.
+   - CP-7b two solvers: beat vs bempp 0.039-0.055 dB on the same quarter mesh.
+   - CP-7d symmetry: full vs quarter 0.031 dB (<= 3 kHz), 0.058 dB (<= 4 kHz); quarter without the flag is ~11 dB wrong on axis, 29.9 dB max.
+   - **CP-7c (epw=6 mesh convergence on a real horn) is NOT measured**, nor is CP-7e (plausibility vs published horn behaviour) or the discretization input of CP-7f. The report's noise floor (0.055 dB, "limited by beat vs bempp") is therefore a lower bound.
+2. **Senior rulings** (all in `NOTES_FOR_SENIOR.md`):
+   - Task 08 item 1: the analytic test multiplies by omega because beat drives unit *acceleration* (TOOLCHAIN C5); confirm that reading.
+   - Task 08 items 4, 5, 6c, 7: raw terms + 30.0 for unmeasurable terms; DI from the theta-phi balloon with sin(theta) weights; budget counts non-cached evaluations only; dataset choices.
+   - Task 06: -6 dB threshold implemented as half pressure (-6.0206 dB); `di_from_cuts` clamp at 180 deg; ripple uses ddof=1.
+   - Task 07: one `.npz` per record in `shard-NNNN/` (not the contract's single shard npz); `traces.sample_fraction` field added; `lib_shas` needs 5 entries.
+   - Task 04: sectioned mesher config dict (the mesher silently ignores a top-level `max_triangles`); `config.mesh_spec` ignores `dof_per_triangle` while `sizing.max_triangles_for` uses it (2% apart; task 03 file, fix pending).
+3. **User actions:** send questions #7-#11 to Collin (Robin BC in BEAT; surface_traces ordering; `build_point_grid` public API; excitation on tag 2; package name). Confirm or override the band-edge caps below.
+4. After Wave 3: widen `a_deg` and `exponent` bounds (the best design sat at their lower bounds), run the other four example configs to get a multi-family dataset, then `docs/plan/11_PHASE2_SURROGATE.md` if wanted.
 
-1. **Ask the user to run `gh auth login`.** `gh` is installed (v2.102.0) but not authenticated; `GITHUB_TOKEN`/`GH_TOKEN` are unset. Repo creation + push are blocked on this.
-2. **Ensure exclusive GPU access** (no other agent solving) before any M2–M5 measurement.
-3. To recover from the orphaned workers this session hit: kill stray `julia.exe` / `julia_beat` worker hosts, delete `%LOCALAPPDATA%\HornLab\BEAT\workers`, or set `HORNLAB_BEAT_WORKER_DIR` to a fresh dir.
+## Decisions made that the user may override
+- **dof caps (quarter domain): screen 5,000 / verify 7,000 / final 8,900; full domain (freeform_hv) 3,000 / 4,500 / 5,400.** The plan's 8,000 / 16,000 / 24,000 do not hold on this 8 GB RTX 4060 Laptop.
+- **`band_hi_hz` lowered per example** so every config meshes within its cap: osse_baseline 5500, throat_adapter 6500, icw_termination 7000, freeform_hv 5500, search_smoke 4500. Consequence: verify and final meshes equal the screen mesh (they differ only in frequency count and balloon size). A higher band needs a smaller seed horn or fewer elements per wavelength, not a higher cap.
+- GPU is an RTX 4060 Laptop (plan said 4070); approved deviation.
 
-## Environment (verified)
+## Measured facts you will need (full tables in `TOOLCHAIN.md`)
+- Real solver API: `hornlab_beat_bem` 0.2.0 returns `SolveResult` (not the plan's `Response`); dofs = `mesh_info.n_vertices`; dof/triangle 0.500 full, ~0.51 quarter.
+- **A multi-frequency `solve_frequencies` call thrashes above ~2.4k dofs** (689 s at 5.1k; 1,151 s with pipelining off); one call per frequency takes 2.8 s. The CUDA adapter loops per frequency.
+- Per-frequency warm cost (quarter, CUDA): 2.4k dofs 0.4-0.8 s, 5.1k 2.8 s, 7.0k 7.5 s, 8.9k 45 s. OOM: full-domain 9.2k, quarter 15.7k. CPU backend is slower at every size (1.8x at 2.4k, 2.3x at 5.1k, 1.3x at 8.9k) but has no memory ceiling.
+- Throughput: `search_smoke` 4.25 s/candidate (~847/h); the `osse_baseline` seed ~18 s. Cold start 17-29 s, warm 0.6-0.8 s.
+- Impedance (Robin) BCs exist only in bempp (`impedance_sources`), not in beat. Traces: 111 kB/frequency at 2.4k dofs. Balloon: theta 0-180, phi 0-348.75, theta-major, not equal-area. Structured point grid: `hornlab_mesher.config_builder.build_point_grid` (not stable API).
+- `HORNLAB_BEAT_FORCE_CPU=1` does not redirect an explicit `beat_backend="cuda"`.
 
-- venv interpreter: `C:\Users\hunte\Hrns\hornlab-search\.venv\Scripts\python.exe` (Python 3.12.10).
-- `pip install -e ".[dev,crosscheck]"` succeeds. Machine: Win 11 Pro build 26200, i7-14650HX (16c/24t), 31.7 GB, **RTX 4060 Laptop 8 GB**, driver 610.62, CUDA 13.3.
-- CUDA `ready` (beat 0.2.0). **cpu backend unprovisioned**; rocm/metal n/a. bempp available (bempp-cl 0.4.2).
-- Installed SHAs (= `pyproject.toml`): mesher `b922e807…`, beat `38544d21…`, plots `9e4a6d0d…`, bempp `8e691060…`.
-- Mesher CLI: `hornlab-waveguide <config.toml> -o <out.msh>`. Examples are NOT in site-packages; use the source clone
-  `C:\Users\hunte\AppData\Local\Temp\claude\C--Users-hunte-Hrns\a6d40e1e-5753-40e0-bc82-45dfdc35e6c1\scratchpad\src\`.
-- Scratch: `C:\Users\hunte\AppData\Local\Temp\opencode\hornlab-scratch` (contains M1 meshes + probe scripts, but is shared with the other agent — use a fresh dir).
+## Environment and how to run things
+- Interpreter: always `C:\Users\hunte\Hrns\hornlab-search\.venv\Scripts\python.exe`. Tests: `.venv\Scripts\python.exe -m pytest -q -m "not slow and not gpu and not crosscheck"` (add `-o addopts="" -v` for names). Check `$?`.
+- CLI: `.venv\Scripts\hornlab-search.exe doctor | version | selftest --analytic | selftest --crosscheck | run --config ... --mode screen | search --config examples/search_smoke.yaml --budget 60 | verify | report runs\<dir> --out report.html | dataset stats|verify|export`.
+- `gh` is at `C:\Program Files\GitHub CLI\gh.exe` (logged in as llevaachingada; add it to PATH in bash). `runs/`, `cache/`, `dataset/`, `scratch/`, `report.html` are gitignored; `dataset/` is precious (back it up).
+- **Hygiene (from AGENTS.md):** one GPU job at a time; `taskkill /F /IM julia.exe` and confirm VRAM ~0.15-0.45 GB before and after any solver run; `shutdown_workers()` does not reliably end the Julia host (a `hornlab_beat_bem.worker_host` Python process also lingers: kill it by command-line match on `python.exe`, never with a filter that matches your own shell). Do not run provisioning while measuring. Never leave a host running.
+- Two agent sessions once collided on the GPU and the repo; keep to one orchestrator.
 
-## Agent routing reality
-
-- **@fixer works.** **@explorer is broken**: configured to `deepseek/deepseek-v4-flash`, which does not exist → `Model not found`. @librarian likely same. Fix `.opencode/oh-my-opencode-slim.json` or do recon yourself.
-- @fixer has file tools but **no shell/GPU**; all measurements must be run by the orchestrator.
-- Parallelizable: GPU measurements (orchestrator, serial) **‖** @fixer writing lanes.
-
-## DONE (this session)
-
-- gh installed (not authed).
-- Owner-03 scaffold: `pyproject.toml`, `.gitignore`, `README.md`, `hornlab_search/__init__.py`, `hornlab_search/cli.py`, `examples/{icw_termination,freeform_hv,search_smoke}.yaml`, `.github/workflows/ci.yml`.
-- `pip install -e ".[dev,crosscheck]"`.
-- First mesh + solve; real schema is **`SolveResult`** (not `Response`; dof = `mesh_info.n_vertices`).
-- **CP-1 is green:** `pytest -q` → **18 passed**; **`doctor` → exit 0, all 9 PASS**; `version` → `0.1.0`; CI selection `-m "not slow and not gpu and not crosscheck"` → 18 passed.
-- **`TOOLCHAIN.md` written** (partial; M2/M3/M4 UNRESOLVED — see below).
-- **`docs/CONTINUITY.md`** and **`docs/ISSUES.md`** written; `docs/HANDOFF.md` (this file) refreshed.
-- **M1** (dof/tri: 0.500 full, ~0.51 quarter), **M6** (≤0.26 dB at 1/2/4 kHz; 8 kHz under-resolved), **M7** (18k is a default; 200k built 70460 tri) measured.
-- **C1–C5 answered:** C1 balloon via `ObservationConfig.sphere_grid` (theta-major, full sphere), C2 complex pressure `pressure_complex` on both, C2b traces on both + `evaluate_exterior_from_traces(...)` signature recorded, **C3 impedance/Robin BCs = bempp YES / beat NO**, C4 point grid reachable via public API (phi-major, `(grid_n_phi, grid_n_length+1, 3)`), C5 source tag 2 = `SD1D1001`, single unit normal-acceleration source.
-
-## NOT DONE — next agent
-
-1. **CP-0 GPU measurements** on an exclusive GPU: **M2** (VRAM vs dofs at ~2k/6k/9k/13k/17k + the 8 GB dof ceiling), **M3** (s per screening candidate + mesh fraction), **M4** (cuda vs cpu; provision cpu or record UNRESOLVED), **M5** (after-detach sample). Then update `TOOLCHAIN.md` (replace the UNRESOLVED entries) and the dof caps.
-   - Known: dense **8·N²** storage confirmed (N=20193 → exactly 3.038 GiB). Caps `verify 16000`/`final 24000` must be validated; the true ceiling is between ~9k and ~20k dofs and is **unmeasured**.
-2. **GitHub**: after `gh auth login`, `gh repo create hornlab-search --private --source . --push`; labels `wave-1, wave-2, senior-review, phase-2, blocked, question`; issues 04/05/06/07 (wave-1), 08 (wave-2 blocked by 04–07), 09 (review blocked by 08) + question issues. Drafts for all of these already exist in `.github/issues/` (written by the other session) — review and use them.
-3. **Push everything** (CommitBot: conventional commits ending `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`); CONTINUITY.md + ISSUES.md in every pushed commit.
-
-## Key deviations (also in `NOTES_FOR_SENIOR.md`)
-
-1. GPU is RTX 4060 Laptop, not 4070 (approved).
-2. Solver API drift: `SolveResult` / `mesh_info.n_vertices`, no `p1_dof_count`/`native_diagnostics`.
-3. M2/M6 OOM observations are **contaminated by the concurrent session** — re-measure. The 20k-dof OOM in particular may be contention, not a hard limit.
-4. ICW `termination` categorical; `coverage_angle` half-vs-total unconfirmed.
-5. CP-1 angle test (0.01° step) and cardioid −6.0206 dB deviations.
+## Known loose ends
+- The report HTML was never viewed in a browser (the pane refused `file://`); rendering is unchecked.
+- `timeout_s` is checked between frequencies only; bempp makes one call.
+- beat uses dense LU: `gmres_tol` is recorded as requested, not applied.
+- Task 07's test `test_append_500_typical_records_is_fast` (5 s limit) passes in 1.4-1.7 s but can flake under heavy disk load; do not loosen it, investigate if it fails.
+- `hornlab_search.egg-info/` and `.opencode/` are gitignored local artifacts.
+- The mesher's `resolve_geometry` (used by task 04's pre-mesh estimate) is not stable API; the mesher is pinned at b922e80.

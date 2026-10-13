@@ -8,6 +8,16 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 - **Next action:** see the newest entry below.
 - **Blockers:** none for task 08. Open decisions: senior review of 06/07 conventions; questions #7-#11 for Collin.
 
+## 2026-10-13 (06:05) — wrap-up and handoff (orchestrator: Claude)
+
+- Per user request, work stopped after Wave 2. Final state: Waves 0-2 done (CP-0..CP-6 green), CI green on b5bc811 (the task-08 push first failed because CI lacked `hornlab_plots`; fixed by installing the pinned package rather than skipping the report tests).
+- GitHub: issues #1-#5 closed; #6 (Wave 3 senior checkpoints) open and unblocked; #7-#11 are questions for Collin. `docs/ISSUES.md` is synced.
+- No Julia host or solver process left running; VRAM idle (~0.28 GB).
+- `docs/HANDOFF.md` rewritten: next agent runs CP-7a-f (issue #6) and rules on the `NOTES_FOR_SENIOR.md` items.
+- Not done: CP-7c/7e/7f, browser check of the report, senior rulings, Collin questions.
+
+**Next action:** read `docs/HANDOFF.md`, then run Wave 3 (issue #6) with a high-reasoning verifier.
+
 ## 2026-10-13 (05:40) — task 08 done, CP-6 green (orchestrator: Claude)
 
 **Done**
