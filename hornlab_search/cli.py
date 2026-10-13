@@ -1,7 +1,15 @@
-"""Command-line entry point: ``doctor`` and ``version``.
+"""Command-line entry point (owned by task 08 since Wave 2; task 03 wrote doctor and version).
 
-Owned by task 03 until Wave 2 (task 08) adds run / search / verify / report /
-selftest below.
+    hornlab-search doctor | version
+    hornlab-search selftest --analytic [--tol-db 0.5] [--subdivisions 3] | --crosscheck
+    hornlab-search run      --config <yaml> [--mode screen|verify|final] [--dry-run]
+    hornlab-search search   --config <yaml> [--budget N] [--mode screen] [--resume DIR]
+    hornlab-search verify   --run <dir> [--top 5]
+    hornlab-search report   <run_dir> [--out report.html] [--top 5]
+    hornlab-search dataset  stats|verify|export
+
+Every command exits 0 or 1 and prints one clear final line saying what happened and where the
+output is (argparse usage errors exit 2). Heavy imports are lazy so doctor/version stay cheap.
 """
 from __future__ import annotations
 
@@ -203,8 +211,45 @@ class Doctor:
         self.run("configs", fn)
 
     def check_roundtrip(self):
-        # Reserved: filled by task 04 (mesh round-trip). Always passes in Wave 0.
-        self.results.append(("round-trip", True, "reserved for task 04"))
+        """Mesh round trip: mesh the seed design small, read the .msh back, check units, the
+        source tag and the quadrants <-> symmetry-flag pairing (silent killers 1 and 2)."""
+        def fn():
+            if not _have("hornlab_mesher"):
+                return False, "hornlab_mesher not importable"
+            import tempfile
+            from hornlab_search.config import load_config
+            from hornlab_search.design.space import DesignSpace
+            from hornlab_search.mesh import build, sizing
+            from hornlab_search.types import MeshSpec
+            cfg = load_config(EXAMPLES / "osse_baseline.yaml")
+            design = DesignSpace.from_config(cfg).seed
+            spec = MeshSpec(epw=cfg.mesh.epw, f_max_hz=1500.0, quadrants=cfg.mesh.quadrants,
+                            max_triangles=10 ** 6)
+            with tempfile.TemporaryDirectory(prefix="hs-doctor-") as td:
+                m = build.build_mesh(design, spec, cfg, Path(td), mode="final")
+                s = build.read_msh_summary(Path(m.path))
+            ext = max(m.bbox_m[3] - m.bbox_m[0], m.bbox_m[4] - m.bbox_m[1], m.bbox_m[5] - m.bbox_m[2])
+            want = sizing.SYMMETRY_PLANE[cfg.mesh.quadrants]
+            if m.symmetry_plane != want:
+                return False, f"symmetry flag {m.symmetry_plane!r} != {want!r}"
+            if s["tags"].get(2, 0) <= 0:
+                return False, f"no triangles on source tag 2: {s['tags']}"
+            return True, (f"seed meshed at 1.5 kHz: {s['n_triangles']} tris, {s['n_nodes_used']} nodes, "
+                          f"largest extent {ext:.3f} m (metres), source tag 2 present, "
+                          f"quadrants {m.quadrants!r} <-> symmetry {m.symmetry_plane!r}")
+        self.run("round-trip", fn)
+
+    def check_gpu_hygiene(self):
+        """Informational: stale BEAT hosts and VRAM baseline (AGENTS.md GPU / Julia hygiene)."""
+        def fn():
+            from hornlab_search.solve import worker
+            hosts = worker.list_beat_hosts()
+            vram = worker.vram_used_mib()
+            txt = f"{len(hosts)} BEAT host(s) alive, VRAM used {vram if vram is not None else 'n/a'} MiB"
+            if hosts or (vram is not None and vram > 1000):
+                txt = "WARNING: " + txt + " (a search starts by clearing stale hosts)"
+            return True, txt
+        self.run("gpu-hygiene", fn)
 
 
 def _cmd_doctor() -> int:
@@ -218,12 +263,15 @@ def _cmd_doctor() -> int:
     d.check_backend()
     d.check_configs()
     d.check_roundtrip()
+    d.check_gpu_hygiene()
     any_fail = False
     for label, ok, reason in d.results:
         mark = "PASS" if ok else "FAIL"
         if not ok:
             any_fail = True
         print(f"{mark:4}  {label:16}  {reason}")
+    n_bad = sum(1 for _, ok, _ in d.results if not ok)
+    print(f"doctor {'FAILED' if any_fail else 'OK'}: {len(d.results)} checks, {n_bad} failed")
     return 1 if any_fail else 0
 
 
@@ -232,21 +280,448 @@ def _cmd_version() -> int:
     return 0
 
 
+
+
+# ====================================================================== Wave 2 (task 08)
+
+import argparse
+import logging
+import math
+
+log = logging.getLogger("hornlab_search.cli")
+
+#: Warm per-frequency solve cost versus dofs, quarter-domain meshes, one call per frequency, RTX 4060
+#: Laptop 8 GB (TOOLCHAIN.md M3). Used only by ``run --dry-run`` to estimate wall time; the real
+#: numbers come from run.json after a run.
+COST_CURVE_DOFS_S = ((2369, 0.4), (5140, 2.8), (7001, 7.5), (8941, 45.0))
+COLD_START_S = 30.0
+
+
+def estimate_seconds_per_frequency(n_dof: float) -> float:
+    """Log-log interpolation (and extrapolation) of TOOLCHAIN M3's per-frequency cost."""
+    xs = [math.log(d) for d, _ in COST_CURVE_DOFS_S]
+    ys = [math.log(t) for _, t in COST_CURVE_DOFS_S]
+    x = math.log(max(float(n_dof), 1.0))
+    if x <= xs[0]:
+        i = 0
+    elif x >= xs[-1]:
+        i = len(xs) - 2
+    else:
+        i = max(k for k in range(len(xs) - 1) if xs[k] <= x)
+    slope = (ys[i + 1] - ys[i]) / (xs[i + 1] - xs[i])
+    return math.exp(ys[i] + slope * (x - xs[i]))
+
+
+def _setup_logging(verbose: int) -> None:
+    level = logging.WARNING if verbose <= 0 else (logging.INFO if verbose == 1 else logging.DEBUG)
+    logging.basicConfig(level=level, format="%(asctime)s %(levelname)-7s %(name)s: %(message)s",
+                        datefmt="%H:%M:%S", force=True)
+    logging.getLogger("matplotlib").setLevel(logging.ERROR)
+
+
+def _dirs(args) -> dict:
+    return {"runs": Path(args.runs_dir or REPO / "runs"), "cache": Path(args.cache_dir or REPO / "cache"),
+            "dataset": Path(args.dataset_dir or REPO / "dataset")}
+
+
+def _load_cfg(args):
+    from hornlab_search.config import load_config
+    cfg = load_config(args.config)
+    if getattr(args, "backend", None):
+        cfg.solve.backend = args.backend             # the override is part of the effective config
+    return cfg
+
+
+def _command_string(argv) -> str:
+    return "hornlab-search " + " ".join(argv)
+
+
+def _backend(cfg):
+    from hornlab_search.solve.base import get_backend
+    return get_backend(cfg.solve.backend, timeout_s=float(cfg.solve.timeout_s))
+
+
+def _print_terms(ev) -> None:
+    from hornlab_search.objective import WEIGHTED_KEYS
+    t = ev.terms
+    print("  terms (raw): " + "  ".join(f"{k}={t.get(k, 0.0):.4g}" for k in WEIGHTED_KEYS)
+          + f"  penalty={t.get('penalty', 0.0):.4g}  total J={ev.objective:.6g}"
+          + f"  n_nan={t.get('n_nan', 0)}  DI source={ev.metrics.di_source if ev.metrics else 'n/a'}")
+
+
+# ---------------------------------------------------------------------- selftest
+
+
+def _cmd_selftest(args) -> int:
+    from hornlab_search.config import load_config
+    from hornlab_search.search import selftest
+    from hornlab_search.solve import worker
+    cfg = load_config(args.config or EXAMPLES / "osse_baseline.yaml")
+    if args.backend:
+        cfg.solve.backend = args.backend
+    worker.install_handlers()
+    try:
+        return _selftest_body(args, cfg, selftest)
+    finally:
+        # a self-test is a measurement: leave no Julia host holding VRAM behind it (AGENTS.md rule 6)
+        try:
+            worker.shutdown(verify=True)
+        except Exception as exc:  # noqa: BLE001
+            print(f"WARNING: could not verify the BEAT host is gone: {exc}")
+
+
+def _selftest_body(args, cfg, selftest) -> int:
+    if args.analytic:
+        levels = () if args.no_convergence else tuple(int(v) for v in args.convergence.split(","))
+        res = selftest.run_analytic(cfg, tol_db=args.tol_db, subdivisions=args.subdivisions,
+                                    convergence_levels=levels)
+        print(selftest.format_analytic(res))
+        ok = bool(res["passed"])
+        print(f"selftest --analytic: {'PASS' if ok else 'FAIL'} (R(ka) spread {res['r_spread_db']:.3f} dB "
+              f"vs {args.tol_db} dB; convergence monotone: {res['convergence']['monotone_decreasing']})")
+        return 0 if ok else 1
+    res = selftest.run_crosscheck(cfg, n_freqs=args.n_freqs)
+    print(selftest.format_crosscheck(res))
+    if not res.get("available", False):
+        print("selftest --crosscheck: NOT RUN (" + str(res.get("reason", "")) + ")")
+        return 1
+    print(f"selftest --crosscheck: done, overall max normalized difference {res['overall_max_db']:.4f} dB")
+    return 0
+
+
+# ---------------------------------------------------------------------- run
+
+
+def _dry_run(cfg, mode: str) -> int:
+    from hornlab_search.config import mesh_spec, solve_spec
+    from hornlab_search.design.space import DesignSpace
+    from hornlab_search.mesh import build, sizing
+    import tempfile
+    space = DesignSpace.from_config(cfg)
+    mspec, sspec = mesh_spec(mode, cfg), solve_spec(mode, cfg)
+    cap = cfg.mesh.dof_cap(mode)
+    with tempfile.TemporaryDirectory(prefix="hs-dry-") as td:
+        try:
+            m = build.build_mesh(space.seed, mspec, cfg, Path(td), mode=mode)
+        except Exception as exc:  # noqa: BLE001
+            print(f"dry-run FAILED: seed cannot be meshed in {mode} mode: {type(exc).__name__}: {exc}")
+            return 1
+        s = build.read_msh_summary(Path(m.path))
+    n_dof = s["n_nodes_used"]
+    nf = len(sspec.freqs_hz)
+    per_f = estimate_seconds_per_frequency(n_dof)
+    per_cand = nf * per_f + m.seconds
+    print(f"dry-run [{mode}] {cfg.name}: mesh {m.n_triangles} triangles, {n_dof} dofs "
+          f"(estimate {sizing.estimate_dofs(m.n_triangles, m.quadrants, cfg.mesh.dof_per_triangle)}, "
+          f"cap {cap}), quadrants {m.quadrants!r} <-> symmetry {m.symmetry_plane!r}")
+    print(f"  mesh built in {m.seconds:.1f} s; f_max {mspec.f_max_hz:g} Hz at epw {mspec.epw:g}; "
+          f"res_mm {m.res_mm}; bbox_m {tuple(round(v, 4) for v in m.bbox_m)}")
+    print(f"  {nf} frequencies {sspec.freqs_hz[0]:g}..{sspec.freqs_hz[-1]:g} Hz, "
+          f"{sspec.observation.angle_count}-angle cuts, balloon {sspec.observation.balloon_points} points")
+    print(f"  estimated solve {per_f:.1f} s per frequency -> {per_cand:.0f} s per candidate "
+          f"({3600 / per_cand:.0f} candidates/hour); a {cfg.search.budget}-evaluation search = "
+          f"{cfg.search.budget * per_cand / 60:.0f} min plus a {COLD_START_S:.0f} s cold start "
+          f"(estimate from TOOLCHAIN M3, not a measurement of this design)")
+    print(f"dry-run OK: no solver was launched (mode {mode}, {n_dof} of {cap} dofs)")
+    return 0
+
+
+def _cmd_run(args, argv) -> int:
+    from hornlab_search.dataset.store import DatasetStore
+    from hornlab_search.search import cma, rundir
+    from hornlab_search.solve import worker
+    from hornlab_search.types import BackendUnavailableError
+    cfg = _load_cfg(args)
+    worker.install_handlers()
+    if args.dry_run:
+        return _dry_run(cfg, args.mode)
+    d = _dirs(args)
+    try:
+        backend = _backend(cfg)
+    except BackendUnavailableError as exc:
+        print(f"run FAILED: {exc}")
+        return 1
+    store = DatasetStore(d["dataset"])
+    run_dir = rundir.new_run_dir(d["runs"], args.mode)
+    worker.warm(backend)
+    ev = cma.run_once(cfg, run_dir, args.mode, backend=backend, store=store, cache_dir=d["cache"],
+                      trace_fraction=args.trace_fraction, command=_command_string(argv),
+                      config_path=args.config)
+    _print_terms(ev)
+    if ev.error:
+        print(f"run FAILED: {ev.error.splitlines()[0][:200]} (output: {run_dir})")
+        return 1
+    secs = ev.outcome.seconds if ev.outcome else float("nan")
+    print(f"run OK: seed J={ev.objective:.6g}, {ev.mesh.n_dof} dofs, solve {secs:.1f} s; output {run_dir}")
+    return 0
+
+
+# ---------------------------------------------------------------------- search
+
+
+def _cmd_search(args, argv) -> int:
+    from hornlab_search.config import load_config
+    from hornlab_search.dataset.store import DatasetStore
+    from hornlab_search.search import cma, rundir
+    from hornlab_search.search.evaluate import read_ndjson
+    from hornlab_search.solve import worker
+    from hornlab_search.types import BackendUnavailableError
+    d = _dirs(args)
+    if args.resume:
+        run_dir = Path(args.resume)
+        if not run_dir.is_dir():
+            print(f"search FAILED: --resume {run_dir} is not a directory")
+            return 1
+        cfg_path = args.config or run_dir / "config.yaml"
+    else:
+        if not args.config:
+            print("search FAILED: --config is required (or --resume DIR)")
+            return 2
+        cfg_path = args.config
+        run_dir = rundir.new_run_dir(d["runs"], args.mode)
+    cfg = load_config(cfg_path)
+    if args.backend:
+        cfg.solve.backend = args.backend
+    worker.install_handlers()
+    try:
+        backend = _backend(cfg)
+    except BackendUnavailableError as exc:
+        print(f"search FAILED: {exc}")
+        return 1
+    store = DatasetStore(d["dataset"])
+    worker.warm(backend)
+    budget = args.budget if args.budget is not None else cfg.search.budget
+    print(f"search: {cfg.name} mode {args.mode}, budget {budget} new evaluations, "
+          f"{len(cfg.bounds_raw)} bounded keys, output {run_dir}")
+    try:
+        best = cma.search(cfg, run_dir, args.mode, backend=backend, budget=budget, store=store,
+                          cache_dir=d["cache"], trace_fraction=args.trace_fraction,
+                          command=_command_string(argv), config_path=cfg_path)
+    except KeyboardInterrupt:
+        print(f"search INTERRUPTED: partial results are in {run_dir} (resume with --resume)")
+        return 1
+    except Exception as exc:  # noqa: BLE001 - MeshConsistencyError and friends: stop, say why
+        print(f"search ABORTED: {type(exc).__name__}: {exc} (partial results in {run_dir})")
+        return 1
+    run = rundir.read_json(run_dir / "run.json", {}) or {}
+    st = run.get("stats", {})
+    seed = (run.get("seed") or {}).get("objective")
+    def g(v, spec=".1f"):
+        return "n/a" if v is None else format(v, spec)
+    ph = st.get("projected_hours") or {}
+    print(f"  evaluations {st.get('evaluations')} ({st.get('non_cached')} new, {st.get('cache_hits')} cached), "
+          f"failures {st.get('failures_by_reason')}, GPU {g(st.get('total_gpu_seconds'))} s, "
+          f"{g(st.get('mean_seconds_per_candidate'))} s/candidate, "
+          f"{g(st.get('candidates_per_hour'), '.0f')}/h, projected 1,000 = {g(ph.get('1000'))} h, "
+          f"10,000 = {g(ph.get('10000'))} h")
+    if seed is not None and best is not None:
+        verdict = ("improved on the seed" if best.objective < seed - 1e-12 else "did NOT improve on the seed")
+        print(f"  seed J={seed:.6g}  best J={best.objective:.6g} ({verdict}); stop: {run.get('stop_reason')}")
+    rows = read_ndjson(run_dir / "search.ndjson")
+    print(f"search OK: {len(rows)} rows in {run_dir / 'search.ndjson'}; best in {run_dir / 'best.json'}; "
+          f"report with: hornlab-search report {run_dir}")
+    return 0
+
+
+# ---------------------------------------------------------------------- verify
+
+
+def _cmd_verify(args, argv) -> int:
+    from hornlab_search.config import load_config
+    from hornlab_search.dataset.store import DatasetStore
+    from hornlab_search.design.space import DesignSpace
+    from hornlab_search.search.evaluate import evaluate, make_context, read_ndjson
+    from hornlab_search.solve import worker
+    from hornlab_search.types import BackendUnavailableError, Design
+    run_dir = Path(args.run)
+    rows = read_ndjson(run_dir / "search.ndjson")
+    if not (run_dir / "config.yaml").exists() or not rows:
+        print(f"verify FAILED: {run_dir} has no config.yaml / search.ndjson")
+        return 1
+    cfg = load_config(run_dir / "config.yaml")
+    if args.backend:
+        cfg.solve.backend = args.backend
+    d = _dirs(args)
+    seen, top = set(), []
+    for r in sorted((r for r in rows if r.get("ok")), key=lambda r: r["objective"]):
+        if r["design_hash"] not in seen:
+            seen.add(r["design_hash"])
+            top.append(r)
+    top = top[: args.top]
+    if not top:
+        print("verify FAILED: no successful evaluation to verify")
+        return 1
+    worker.install_handlers()
+    try:
+        backend = _backend(cfg)
+    except BackendUnavailableError as exc:
+        print(f"verify FAILED: {exc}")
+        return 1
+    store = DatasetStore(d["dataset"])
+    worker.warm(backend)
+    vdir = run_dir / "verify"
+    vdir.mkdir(exist_ok=True)
+    ctx = make_context(cfg, store, cache_dir=d["cache"], trace_fraction=args.trace_fraction,
+                       ndjson=vdir / "search.ndjson")
+    space = DesignSpace.from_config(cfg)
+    print("verify: re-solving the top designs at verify fidelity "
+          "(note: with the current band/caps the verify mesh equals the screen mesh; only the "
+          "frequency count and balloon size differ)")
+    print("  design        screen J     verify J    DI source")
+    bad = 0
+    for r in top:
+        ev = evaluate(Design(r["family"], dict(r["params"])), space, cfg, "verify", vdir, store, backend,
+                      ctx=ctx)
+        bad += bool(ev.error)
+        print(f"  {r['design_hash']}  {r['objective']:10.5f}  "
+              f"{('FAILED: ' + ev.error.splitlines()[0][:60]) if ev.error else format(ev.objective, '10.5f')}"
+              f"  {ev.metrics.di_source if ev.metrics else 'n/a'}")
+    print(f"verify {'FAILED' if bad else 'OK'}: {len(top)} designs, {bad} failed; output {vdir}")
+    return 1 if bad else 0
+
+
+# ---------------------------------------------------------------------- report
+
+
+def _cmd_report(args) -> int:
+    from hornlab_search.report.html import build_report
+    run_dir = Path(args.run_dir)
+    if not run_dir.is_dir():
+        print(f"report FAILED: {run_dir} is not a directory")
+        return 1
+    out = build_report(run_dir, args.out, top_n=args.top)
+    print(f"report OK: {out} ({Path(out).stat().st_size / 1e6:.2f} MB)")
+    return 0
+
+
+# ---------------------------------------------------------------------- dataset
+
+
+def _cmd_dataset(args) -> int:
+    from hornlab_search.dataset import store as dstore
+    d = _dirs(args)
+    if not d["dataset"].exists():
+        print(f"dataset FAILED: {d['dataset']} does not exist yet (run `search` first)")
+        return 1
+    store = dstore.DatasetStore(d["dataset"])
+    s = store.stats()
+    code = 0
+    if args.action == "stats":
+        print(dstore.stats_report(store))
+        line = f"dataset stats OK: {s['n']} records ({s['n_ok']} ok, {s['n_failed']} failed) in {d['dataset']}"
+    elif args.action == "verify":
+        rep = dstore.verify_store(store)
+        for b in rep["bad"][:20]:
+            print(f"  BAD shard {b['shard']} row {b['row']} {b['design_hash']}: {b['problem']}")
+        code = 1 if rep["n_bad"] else 0
+        line = f"dataset verify {'FAILED' if code else 'OK'}: {rep['n']} records re-read, {rep['n_bad']} bad"
+    else:
+        out = Path(args.out)
+        kw = {}
+        if args.family:
+            kw["family"] = args.family
+        if args.lib_sha:
+            kw["lib_sha"] = args.lib_sha
+        res = dstore.export_training_npz(store, out, **kw)
+        n = int(res["X"].shape[0])
+        line = f"dataset export OK: {n} records x {res['X'].shape[1]} design keys -> {out}"
+        if n == 0:
+            line = f"dataset export FAILED: nothing matched the filters (output {out})"
+            code = 1
+    if s["family_warning"] and args.action != "stats":      # stats_report already prints it
+        print("WARNING: " + s["family_warning"])
+    print(line)
+    return code
+
+
+# ---------------------------------------------------------------------- parser / main
+
+
+def build_parser() -> argparse.ArgumentParser:
+    common = argparse.ArgumentParser(add_help=False)
+    common.add_argument("-v", "--verbose", action="count", default=0, help="-v INFO, -vv DEBUG")
+    common.add_argument("--runs-dir", help="default <repo>/runs")
+    common.add_argument("--cache-dir", help="default <repo>/cache")
+    common.add_argument("--dataset-dir", help="default <repo>/dataset")
+    common.add_argument("--backend", choices=("beat_cuda", "beat_cpu", "bempp_cpu"),
+                        help="override solve.backend in the config")
+    common.add_argument("--trace-fraction", type=float, default=0.05,
+                        help="fraction of designs that also record boundary traces (default 0.05)")
+    p = argparse.ArgumentParser(prog="hornlab-search", description=__doc__.splitlines()[0])
+    sub = p.add_subparsers(dest="cmd")
+    sub.add_parser("doctor", parents=[common])
+    sub.add_parser("version", parents=[common])
+    s = sub.add_parser("selftest", parents=[common], help="compare against physics")
+    g = s.add_mutually_exclusive_group(required=True)
+    g.add_argument("--analytic", action="store_true", help="pulsating sphere vs its exact solution")
+    g.add_argument("--crosscheck", action="store_true", help="beat vs bempp on one mesh")
+    s.add_argument("--config", help="default examples/osse_baseline.yaml")
+    s.add_argument("--tol-db", type=float, default=0.5)
+    s.add_argument("--subdivisions", type=int, default=3)
+    s.add_argument("--convergence", default="3,4,5", help="icosphere levels for the convergence check")
+    s.add_argument("--no-convergence", action="store_true")
+    s.add_argument("--n-freqs", type=int, default=5)
+    r = sub.add_parser("run", parents=[common], help="evaluate the seed design once")
+    r.add_argument("--config", required=True)
+    r.add_argument("--mode", choices=("screen", "verify", "final"), default="screen")
+    r.add_argument("--dry-run", action="store_true", help="mesh and estimate; launch no solver")
+    q = sub.add_parser("search", parents=[common], help="CMA-ES from the seed")
+    q.add_argument("--config")
+    q.add_argument("--budget", type=int, help="cap on NON-CACHED evaluations (the seed counts)")
+    q.add_argument("--mode", choices=("screen", "verify", "final"), default="screen")
+    q.add_argument("--resume", metavar="DIR")
+    v = sub.add_parser("verify", parents=[common], help="re-solve a run's top designs at verify fidelity")
+    v.add_argument("--run", required=True)
+    v.add_argument("--top", type=int, default=5)
+    rp = sub.add_parser("report", parents=[common], help="HTML report of a run directory")
+    rp.add_argument("run_dir")
+    rp.add_argument("--out")
+    rp.add_argument("--top", type=int, default=5)
+    ds = sub.add_parser("dataset", parents=[common])
+    ds.add_argument("action", choices=("stats", "verify", "export"))
+    ds.add_argument("--out", default="train.npz")
+    ds.add_argument("--family")
+    ds.add_argument("--lib-sha")
+    return p
+
+
 def main(argv: list[str] | None = None) -> int:
-    args = list(sys.argv[1:] if argv is None else argv)
-    if not args:
-        print("usage: hornlab-search <doctor|version>", file=sys.stderr)
+    argv = list(sys.argv[1:] if argv is None else argv)
+    parser = build_parser()
+    if not argv:
+        parser.print_usage(sys.stderr)
         return 2
-    cmd = args[0]
-    if cmd == "doctor":
+    try:
+        args = parser.parse_args(argv)
+    except SystemExit as e:                       # argparse: 0 for --help, 2 for a usage error
+        return int(e.code or 0)
+    _setup_logging(args.verbose)
+    if args.cmd == "doctor":
         return _cmd_doctor()
-    if cmd == "version":
+    if args.cmd == "version":
         return _cmd_version()
-    print(f"unknown command {cmd!r}", file=sys.stderr)
+    try:
+        if args.cmd == "selftest":
+            return _cmd_selftest(args)
+        if args.cmd == "run":
+            return _cmd_run(args, argv)
+        if args.cmd == "search":
+            return _cmd_search(args, argv)
+        if args.cmd == "verify":
+            return _cmd_verify(args, argv)
+        if args.cmd == "report":
+            return _cmd_report(args)
+        if args.cmd == "dataset":
+            return _cmd_dataset(args)
+    except KeyboardInterrupt:
+        print(f"{args.cmd} INTERRUPTED")
+        return 1
+    except Exception as exc:  # noqa: BLE001 - one clear final line, exit 1
+        log.debug("unhandled", exc_info=True)
+        print(f"{args.cmd} FAILED: {type(exc).__name__}: {exc}")
+        return 1
+    parser.print_usage(sys.stderr)
     return 2
-
-
-# --- Wave 2 adds run / search / verify / report / selftest below (task 08) ---
 
 
 if __name__ == "__main__":

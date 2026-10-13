@@ -3,10 +3,35 @@
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
 ## Status
-- **Wave:** 0 and 1 complete (04, 05, 06, 07 done, CP-2..CP-5 green). Wave 2 (task 08) next.
+- **Wave:** 0, 1 and 2 complete (tasks 04-08 done, CP-2..CP-6 green). Wave 3 (senior CP-7a-f) next.
 - **Last checkpoints:** CP-1 GREEN (pytest, `doctor`, `version`). CP-0 COMPLETE (all measurements clean). CP-2 (task 04) GREEN. CP-4 (task 06) GREEN: 78 passed.
 - **Next action:** see the newest entry below.
 - **Blockers:** none for task 08. Open decisions: senior review of 06/07 conventions; questions #7-#11 for Collin.
+
+## 2026-10-13 (05:40) — task 08 done, CP-6 green (orchestrator: Claude)
+
+**Done**
+- Task 08 (objective, search, report, CLI) DONE: 479 tests pass (462 offline). Files: `objective/{terms,scalar}.py`, `search/{evaluate,cma,selftest,rundir,nsga}.py`, `report/html.py`, `cli.py` (doctor, version, run, search, verify, report, selftest, dataset), 8 test files. `doctor` has a real round-trip check and a new `gpu-hygiene` check.
+- Live checkpoints on the RTX 4060 (agent report; logs in local `scratch/`):
+  - `selftest --analytic` PASS: pulsating sphere, R(ka) spread 0.020 dB (limit 0.5), omnidirectionality <= 0.005 dB, spreading 6.0206 dB; convergence sub 3/4/5 = 0.0204/0.0051/0.0013 dB. Needed a port-drive correction (beat drives unit *acceleration*, so pressure carries 1/omega): needs senior confirmation (NOTES item 1).
+  - `selftest --crosscheck` PASS: beat_cuda vs bempp_cpu 0.039 dB max (2,396 dofs).
+  - `run` screen: seed J = 22.59, 3,850 dofs, solve 18 s (first solve). Coverage term dominates (seed ~95 x 84 deg vs 75 x 45 target): not a wrong divisor.
+  - `search` (search_smoke): 60 new evaluations in 4 m 28 s (4.25 s/candidate, ~847/h); seed J 22.07 -> best 9.66 (-56%), resume extension to 7.36 (-67%); reproducible; 5 `mesh_too_large` + 1 `invalid_geometry` rows. `a_deg` and `exponent` sit near their lower bounds: widen.
+  - Resume: zero re-solves for cached rows, first 60 ndjson rows byte-identical.
+  - `verify`: screen vs verify J differ by up to 0.4 (12-point grid mis-ranks).
+  - `report`: HTML written (5.3 MB), noise-floor box first (0.055 dB, limited by beat vs bempp; epw=6 discretization not yet measured). Not viewed in a browser.
+  - `dataset`: 71 records (64 ok, 7 failed), 100% OSSE, 5.6% with traces; verify OK.
+- Live bug found and fixed by the agent: the Julia host resolved relative mesh paths against its own cwd, so `search --resume runs\<dir>` failed; paths are now absolute with a test.
+- Cleaned up a leftover BEAT worker host after the agent finished (hygiene rule 6 in practice).
+
+**Open issues**
+1. Senior rulings needed (NOTES_FOR_SENIOR, task-08 block): item 1 acceleration-drive reading of the analytic test; 4 (raw terms, 30.0 for unmeasurable terms, `Target.freq_weights` unused); 5 (DI from theta-phi balloon with sin(theta) weights); 6c (budget counts only non-cached evaluations); 7 (dataset choices).
+2. CP-7c (epw=6 discretization error on a real horn) not measured; the report's noise floor is a lower bound.
+3. verify/final meshes equal the screen mesh (band clipped); revisit with a smaller seed or higher cap.
+4. Dataset is single-family; run the other example configs before any surrogate work.
+5. Questions #7-#11 are for the user to send to Collin.
+
+**Next action:** Wave 3: run the senior physics checkpoints CP-7a..f (issue #6) with a high-effort verifier; then summarize for the user.
 
 ## 2026-10-13 (01:10) — GitHub live (orchestrator: Claude)
 

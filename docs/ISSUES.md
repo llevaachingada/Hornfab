@@ -9,8 +9,8 @@ Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 20
 | #2 | [05] Solve backends and warm worker | closed, CP-3 green | 05 | `docs/plan/05_TASK_SOLVE.md` |
 | #3 | [06] Metrics and targets | closed, CP-4 green (3 conventions await senior review) | 06 | `docs/plan/06_TASK_METRICS.md` |
 | #4 | [07] Dataset record and store | closed, CP-5 green | 07 | `docs/plan/07_TASK_DATASET.md` |
-| #5 | [08] Objective, search, report, CLI | **open, in progress** (agent running) | 08 | `docs/plan/08_TASK_PIPELINE.md` |
-| #6 | [09] Physics checkpoints CP-7a to CP-7f | open, blocked by #5 (senior-review) | 09 | `docs/plan/09_CHECKPOINTS.md` |
+| #5 | [08] Objective, search, report, CLI | closed, CP-6 green (5 items await senior ruling) | 08 | `docs/plan/08_TASK_PIPELINE.md` |
+| #6 | [09] Physics checkpoints CP-7a to CP-7f | **open, unblocked, next** (senior-review) | 09 | `docs/plan/09_CHECKPOINTS.md` |
 | #7 | [Q] Collin: is a Robin/admittance BC planned for BEAT? | open (question) | user | `docs/plan/02_TASK_ENV.md` C3 |
 | #8 | [Q] Collin: surface_traces ordering and bempp field recovery | open (question) | user | `docs/plan/02_TASK_ENV.md` C2b |
 | #9 | [Q] Collin: can build_point_grid be public API? | open (question) | user | `docs/plan/02_TASK_ENV.md` C4 |
