@@ -70,8 +70,11 @@ DEFAULT_EXCITATION = {
     "amplitude": 1.0,
     "units": "m/s",
     "frequency_dependent": False,
-    "notes": "velocity_sources={2: 1.0}; unit normal velocity basis on the source tag "
-             "(TOOLCHAIN.md C5)",
+    "notes": "velocity_sources={2: 1.0}: the solver solves a 1 m/s normal-velocity basis on the "
+             "source tag, and hornlab-beat-bem then rescales every stored output to UNIT NORMAL "
+             "ACCELERATION (p_accel = p_vel/(-i*omega)); spl_*_db, balloon, traces and z_throat in "
+             "this record are in that convention, so absolute levels fall 6 dB per octave versus a "
+             "constant-velocity drive (TOOLCHAIN.md C5; senior ruling 2026-10-13)",
 }
 
 

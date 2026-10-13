@@ -173,3 +173,51 @@ DECISIONS the contract left open (all minimal; rule on them if you disagree):
 11. verify mode: verify and final meshes still equal the screen mesh (bands are clipped to band_hi), so `verify` differs from `screen` only by the 25-point frequency grid and the larger balloon; screen vs verify J differed by 0.04-0.35 on the top 3 designs, which is a measure of how much the 12-point screen grid can mis-rank.
 12. search_smoke is much cheaper than the plan assumed: 580-2,880 dofs, 4.2 s/candidate (mesh 0.45 s, solve 4.15 s), 847 candidates/h => 1,000 evaluations = 1.2 h, 10,000 = 11.8 h. osse_baseline's seed alone is 3,850 dofs / 18 s (first solve, includes JIT).
 What I need decided: item 1 (acceleration reading), items 4, 5, 6c, 7 as listed.
+
+## 2026-10-13  task-09  Wave 3 senior rulings + CP-7 results (RESOLUTIONS, append-only record)
+What I was doing: Wave 3 — the CP-7 physics gate (verifier lane, oracle) and the senior rulings over every open
+NOTES_FOR_SENIOR block (rulings lane, oracle). Both ran; the user confirmed/adjusted the rulings. This block is the
+durable record so no future agent has to re-derive any of it from chat.
+CP-7 results (all PASS, pasted output in the verifier report, mirrored in docs/CONTINUITY.md):
+  - CP-7a analytic sphere PASS: R(ka) spread 0.020 dB (<0.5), omnidirectionality <=0.005 dB, spreading 6.0205-6.0206 dB,
+    convergence sub3/4/5 = 0.0204/0.0051/0.0013 dB (monotone). Acceleration-drive reading CONFIRMED (the raw
+    24.06 dB/octave constant-velocity spread is expected, NOT a failure).
+  - CP-7b two solvers PASS: beat_cuda vs bempp_cpu 0.039 dB overall (<0.2 dB).
+  - CP-7c mesh convergence PASS on a REDUCED band 500-2500 Hz (quarter, symmetry) because the seed at epw=18 over the
+    full band needs ~40k quarter dofs (OOM). GATE met: epw=6 vs epw=18 -> mean|dbw_h|=0.287 deg (<2), mean|dDI|=0.028 dB (<0.3).
+  - CP-7d symmetry PASS: max asymmetry 4e-6 dB (imposed symmetry -> solver noise floor); M6 full-vs-quarter on the SEED
+    = 0.023 dB (<=3 kHz).
+  - CP-7e plausibility PASS (borderline): f0 = 343 Hz (H) / 480 Hz (V) from mesh bbox + measured beamwidth, both below
+    the 500 Hz band floor; DI-vs-beamwidth max diff 2.15 dB (slightly over the 1.5 dB guideline, well under the 3 dB
+    "computed wrong" threshold); f11 = 5653 Hz sits just ABOVE the clipped 5500 Hz band -> onset NOT resolved.
+  - CP-7f noise floor = 0.039 dB (two-solver disagreement dominates; epw=6 DI discretization 0.028 dB just below it;
+    idempotence 3.6e-5 and asymmetry 4e-6 are ~1000x smaller). Report's prior "0.055 dB, epw=6 unmeasured" is superseded:
+    the floor is NOT mesh-limited and was already the floor.
+RULINGS (each block -> outcome -> change applied):
+  1. task-08 item 1 (acceleration drive) -> CONFIRM (no waiver; the absolute unit-acceleration match 0.016-0.036 dB is the stronger evidence).
+  2. task-06 "-6 dB" half-pressure (-6.0206) -> CONFIRM.
+  3. task-06 di_from_cuts clamp (bw>=180 saturation; both>=180 -> omni DI=0) -> CONFIRM.
+  4. task-06 ripple ddof=1 (sample std) -> CONFIRM; the earlier tiling study's sigma convention is NOT recorded anywhere (evidence gap, no code change).
+  5. task-06 small items -> CONFIRM: constants.py comment now says "throat diameter" (edited); coverage_from_room band kwarg ok; 512-pt DI quadrature bias (narrow-beam +0.23 dB) affects no gate.
+  6. task-03 no YAML freq-grid key -> CONFIRM (grid shape is frozen; a user key would silently split the dataset label space).
+  7. task-03 CP-1 test 3 angle step (18000 % (n-1) == 0) -> CONFIRM.
+  8. task-03 ICW coverage_angle_deg -> CONFIRM HALF-angle (read from mesher source: theta0 < coverage_angle < 90); "UNCONFIRMED" removed from families.py + YAML.
+  9. task-04 sectioned to_mesher_config -> CONFIRM (mesher silently ignores top-level max_triangles; tests pin it).
+  10. task-04 vs task-03 mesh_spec -> OVERRULE: config.mesh_spec now calls sizing.max_triangles_for (single source, honours dof_per_triangle=0.51). EDITED config.py + docstring (was a 2% drift). Pass mode= to build_mesh -> CONFIRM.
+  11. dof caps + band_hi lowered -> CONFIRM (user: "keep the lowered top band edges; override only with a smaller seed or fewer epw").
+  12. task-04 midpoint-fill -> USER OVERRULED the silent fill for kappa0/theta1_deg: explicit seeds added to examples/icw_termination.yaml (kappa0 0.25, theta1_deg 16.0 keep geometry); the fill remains only as a defensive net (test rewritten: test_design_space.py).
+  13. MeshConsistencyError taxonomy (not swallowed) -> CONFIRM.
+  14. task-07 traces.sample_fraction / lib_shas=5 / one-npz-per-record -> all CONFIRM (phase-2 must use DatasetStore).
+  15. task-08 raw terms + NAN_TERM_FILL 30.0; sin(theta)-weighted balloon DI; cache/resume/budget semantics; dataset record choices -> all CONFIRM; Target.freq_weights stays unused (contract defines the field with no semantics - gap).
+Also applied: record.py excitation note now states the unit-ACCELERATION convention (user edit); new tests/test_mesh_pin.py (fails on a silent HornLab pin bump) and hornlab_search/mesh/grid.py + tests/test_mesh_grid.py (single seam over build_point_grid, issue #9).
+RESIDUAL RISKS (recorded, NOT resolved - for phase 2 / post-Wave-3):
+  1. epw=6 discretization above ~2.5 kHz is UNMEASURED (the epw=18 reference cannot be built there on this 8 GB card); a
+     systematic epw=6 bias in the 2.5-5.5 kHz screening band would bias every ranking, and no test catches it.
+  2. The higher-order throat mode f11 (5653 Hz on the 1.4 in seed throat) is never exercised - the screen band clips at 5500 Hz.
+  3. DI-vs-beamwidth is NOT a regression test (only the analytic cardioid/dipole closed forms are); the real seed shows
+     2.15 dB max balloon-vs-cuts difference, the known non-separable-rectangular signature.
+  4. Secondary: the cross-run solve cache did not dedup the seed across separate `run` then `search` invocations (both
+     cached:False), so the seed was solved twice and the dataset holds two seed records.
+What I need decided: nothing blocking. Phase 2 (11_PHASE2_SURROGATE) is "separately and later"; post-Wave-3 follow-ups
+(widen a_deg/exponent bounds, run the other 4 example configs for a multi-family dataset, browser-check report.html) are
+the natural next work, not part of Wave 3.

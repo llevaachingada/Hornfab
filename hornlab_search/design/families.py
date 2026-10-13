@@ -119,7 +119,7 @@ _ICW = {
     "a0_deg": _f(note="throat half-angle, deg"),
     "L_mm": _f(note="axial length, mm"),
     "R_mm": _f(note="mouth radius, mm"),
-    "coverage_angle_deg": _f(0.0, None, "coverage angle; half-vs-total convention UNCONFIRMED"),
+    "coverage_angle_deg": _f(0.0, None, "ICW wall half-angle (mesher enforces theta0_deg < coverage_angle_deg < 90.0); target coverage_*_deg is the TOTAL included angle"),
     "hold_start": _f(0.0, 1.0),
     "hold_end": _f(0.0, 1.0),
     "kappa0": _f(note="initial curvature, 1/mm"),

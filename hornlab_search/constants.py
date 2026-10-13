@@ -11,7 +11,8 @@ KEELE_K = 25400.0    # m * deg * Hz
 
 # First non-axisymmetric duct mode in a circular throat of radius a:
 #   f11 = BESSEL_J1P_11 * C_AIR / (2 * pi * a)
-# 1.0 in -> 7914 Hz, 1.4 in -> 5653 Hz, 2.0 in -> 3957 Hz.
+# The sizes below are throat DIAMETERS (compute_metrics takes throat_radius_m):
+# 0.5 in radius = 1.0 in dia -> 7914 Hz, 0.7 in dia -> 5653 Hz, 1.0 in dia -> 3957 Hz.
 BESSEL_J1P_11 = 1.8412
 
 # MEH quarter-wavelength entry rule: d <= C_AIR / (4 * f_crossover)

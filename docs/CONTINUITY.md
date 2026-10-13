@@ -3,12 +3,35 @@
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
 ## Status
-- **Wave:** 0, 1 and 2 complete (tasks 04-08 done, CP-2..CP-6 green). Wave 3 (senior CP-7a-f) next.
-- **Last checkpoints:** CP-1 GREEN (pytest, `doctor`, `version`). CP-0 COMPLETE (all measurements clean). CP-2 (task 04) GREEN. CP-4 (task 06) GREEN: 78 passed.
-- **Next action:** see the newest entry below.
-- **Blockers:** none for task 08. Open decisions: senior review of 06/07 conventions; questions #7-#11 for Collin.
+- **Wave:** 0, 1, 2 and 3 complete (tasks 04-08 done; CP-7a-f all PASS). This is the end of the plan's Wave ladder.
+- **Last checkpoints:** CP-7 (senior physics gate) GREEN — noise floor **0.039 dB**. CP-1/CP-2/CP-4/CP-5/CP-6 all green.
+- **Next action:** post-Wave-3 follow-ups (phase 2 is "separately and later"): widen `a_deg`/`exponent` bounds, run the other 4 example configs for a multi-family dataset, browser-check `report.html`. Residual risks logged in NOTES_FOR_SENIOR task-09 block.
+- **Blockers:** none. Issues #6-#11 closed.
 
-## 2026-10-13 (06:05) — wrap-up and handoff (orchestrator: Claude)
+## 2026-10-13 (06:20) — Wave 3 complete: CP-7a-f all PASS, rulings applied (orchestrator: OpenCode)
+
+**Done**
+- **CP-7 physics gate GREEN** (senior verifier, oracle, high-reasoning). All six checkpoints PASS with pasted output:
+  - CP-7a analytic sphere: R(ka) spread **0.020 dB** (<0.5), omnidirectionality ≤0.005 dB, spreading 6.0205–6.0206 dB, convergence sub3/4/5 = 0.0204/0.0051/0.0013 dB monotone. Acceleration-drive reading confirmed (raw constant-velocity spread 24.06 dB/octave is expected, not a failure).
+  - CP-7b two solvers: beat_cuda vs bempp_cpu **0.039 dB** (<0.2 → "both very likely right").
+  - CP-7c mesh convergence **PASS on reduced band 500–2500 Hz** (the epw=18 full-band reference needs ~40k quarter dofs → OOM): epw=6 vs epw=18 mean|Δbw_h| **0.287°** (<2), mean|ΔDI| **0.028 dB** (<0.3).
+  - CP-7d symmetry: max asymmetry **4e-6 dB**; M6 full-vs-quarter on the seed **0.023 dB** (≤3 kHz).
+  - CP-7e plausibility: f0 = 343 Hz (H) / 480 Hz (V) below the 500 Hz band floor; DI-vs-beamwidth max **2.15 dB** (borderline vs the 1.5 dB guideline, far under the 3 dB "wrong" threshold); f11 (5653 Hz) sits just above the clipped 5500 Hz band → onset unresolved.
+  - CP-7f **noise floor = 0.039 dB** (two-solver disagreement dominates; epw=6 DI discretization 0.028 dB just below it). The report's prior "0.055 dB, epw=6 not measured" is superseded — the floor is NOT mesh-limited.
+- **Senior rulings** (verifier + rulings lane + user confirmations) recorded verbatim in a `NOTES_FOR_SENIOR.md` task-09 block. One code change: `config.mesh_spec` now calls `sizing.max_triangles_for` (was a 2% drift vs the contract-literal `ceil(2·cap·qf·slack)`).
+- **Collin questions #7–#11 answered by the user and closed** (bempp-only Robin BC; trace ordering answered by test; use build_point_grid privately + pin; excitation is tag 2 / unit-acceleration; keep the name).
+- Code/doc edits applied this session: `constants.py` throat-diameter comment; `families.py` + `examples/icw_termination.yaml` ICW wall-half-angle convention + explicit `kappa0`/`theta1_deg` seeds; `record.py` unit-acceleration note; `test_design_space.py` rewritten to pin the explicit-seed convention (fill demoted to defensive net); new `tests/test_mesh_pin.py` (fails on a silent HornLab pin bump) and `hornlab_search/mesh/grid.py` + `tests/test_mesh_grid.py` (single seam over `build_point_grid`).
+- Full offline suite green (462+ tests; the earlier "71 records" is now 74: the verify run added three).
+
+**Residual risks (phase-2 / post-Wave-3, not resolved here)**
+1. epw=6 discretization above ~2.5 kHz unmeasured (epw=18 reference cannot be built there on 8 GB).
+2. f11 (higher-order throat mode) never exercised — screen band clips below it.
+3. DI-vs-beamwidth is not a regression test; real seed shows 2.15 dB balloon-vs-cuts (non-separable-rectangular signature).
+4. Cross-run solve cache does not dedup the seed across separate `run` then `search` (two seed records, both cached:False).
+
+**Next action:** post-Wave-3 follow-ups (widen `a_deg`/`exponent` bounds, run the other 4 example configs, browser-check `report.html`), then phase 2 (`11_PHASE2_SURROGATE`) if wanted. Awaiting the user's go-ahead.
+
+
 
 - Per user request, work stopped after Wave 2. Final state: Waves 0-2 done (CP-0..CP-6 green), CI green on b5bc811 (the task-08 push first failed because CI lacked `hornlab_plots`; fixed by installing the pinned package rather than skipping the report tests).
 - GitHub: issues #1-#5 closed; #6 (Wave 3 senior checkpoints) open and unblocked; #7-#11 are questions for Collin. `docs/ISSUES.md` is synced.

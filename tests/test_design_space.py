@@ -183,16 +183,35 @@ def test_illegal_bound_key_rejected_at_construction():
         DesignSpace.from_config(cfg)
 
 
-def test_icw_missing_searchable_keys_filled_with_midpoint(caplog):
+# Senior ruling 2026-10-13 (user-confirmed): the shipped ICW example carries an EXPLICIT
+# kappa0/theta1_deg seed; the silent midpoint fill is only a defensive net for a genuinely
+# missing key, never something a shipped example relies on.
+def test_icw_example_seed_is_explicit_no_fill(caplog):
     cfg = load_config(EXAMPLES / "icw_termination.yaml")
     with caplog.at_level(logging.WARNING, logger="hornlab_search.design.space"):
         sp = DesignSpace.from_config(cfg)
-    assert "kappa0" not in cfg.seed_params and "theta1_deg" not in cfg.seed_params
+    assert cfg.seed_params["kappa0"] == pytest.approx(0.25)       # explicit in the example
+    assert cfg.seed_params["theta1_deg"] == pytest.approx(16.0)
+    assert sp.seed.params["kappa0"] == pytest.approx(0.25)
+    assert sp.seed.params["theta1_deg"] == pytest.approx(16.0)
+    assert "kappa0" not in caplog.text and "theta1_deg" not in caplog.text
+    assert "termination" not in sp.keys()                        # categorical, not searchable
+
+
+def test_missing_searchable_keys_filled_with_midpoint_is_defensive_net(caplog):
+    cfg = load_config(EXAMPLES / "icw_termination.yaml")
+    raw = SimpleNamespace(
+        family="ICW",
+        seed_params={k: copy.deepcopy(v) for k, v in cfg.seed_params.items()
+                     if k not in ("kappa0", "theta1_deg")},
+        bounds_raw=copy.deepcopy(cfg.bounds_raw))
+    with caplog.at_level(logging.WARNING, logger="hornlab_search.design.space"):
+        sp = DesignSpace.from_config(raw)
+    assert "kappa0" not in raw.seed_params and "theta1_deg" not in raw.seed_params
     assert sp.seed.params["kappa0"] == pytest.approx(0.25)       # (0.0 + 0.5) / 2
     assert sp.seed.params["theta1_deg"] == pytest.approx(16.0)   # (2 + 30) / 2
     assert "kappa0" in caplog.text and "theta1_deg" in caplog.text
-    assert "termination" not in sp.keys()                        # categorical, not searchable
-    assert cfg.seed_params.get("kappa0") is None                  # input not mutated
+    assert raw.seed_params.get("kappa0") is None                  # input not mutated
 
 
 def test_freeform_dotted_and_alias_keys():

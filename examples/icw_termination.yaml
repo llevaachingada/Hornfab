@@ -6,11 +6,15 @@ family: ICW
 # bound, so it lives in seed_params only (see NOTES_FOR_SENIOR.md).
 seed_params:
   termination: flat_baffle
+  # Explicit seed for the two bounded keys below (senior ruling 2026-10-13: no silent
+  # midpoint fill — these values keep the exact geometry the mesher tests expect).
+  kappa0: 0.25                    # midpoint of the [0.0, 0.5] bound, now explicit
+  theta1_deg: 16.0                # midpoint of the [2.0, 30.0] bound, now explicit
   r0_mm: 12.7
   a0_deg: 14.5
   L_mm: 160.0
   R_mm: 130.0
-  coverage_angle_deg: 50.0        # convention (half vs total) UNCONFIRMED — flagged
+  coverage_angle_deg: 50.0        # ICW wall HALF-angle (mesher: theta0 < coverage_angle < 90); target coverage 100 deg is the TOTAL angle
   hold_start: 0.30
   hold_end: 0.70
   kappa_abs_max: 1.0

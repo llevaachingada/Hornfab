@@ -1,8 +1,9 @@
 """YAML -> Config.
 
 Wave 0 keeps the design space and target as raw dicts (03_TASK_SCAFFOLD step 4, "the dict
-approach"): this module imports nothing from Wave 1. The pipeline (task 08) builds the typed
-DesignSpace and Target from `bounds_raw` and `target_raw`.
+approach"). The only Wave-1 import is `mesh.sizing` (a pure numpy/math module) so the triangle
+ceiling has a single source of truth (senior ruling 2026-10-13); the pipeline (task 08) builds
+the typed DesignSpace and Target from `bounds_raw` and `target_raw`.
 """
 from __future__ import annotations
 
@@ -13,6 +14,7 @@ from pathlib import Path
 import numpy as np
 import yaml
 
+from .mesh import sizing
 from .types import MeshSpec, Mode, ObservationSpec, SolveSpec
 
 log = logging.getLogger("hornlab_search.config")
@@ -172,8 +174,11 @@ def mesh_spec(mode: Mode, cfg: Config) -> MeshSpec:
     if mode not in MODES:
         raise ConfigError(f"unknown mode {mode!r}")
     cap = cfg.mesh.dof_cap(mode)
-    qf = QUADRANT_FACTOR[cfg.mesh.quadrants]
-    max_tri = int(np.ceil(2 * cap * qf * cfg.mesh.max_triangle_slack))
+    # Single source of truth for the triangle ceiling (senior ruling 2026-10-13): the section-6
+    # literal ceil(2*cap*qf*slack) assumes dof_per_triangle == 0.5; the measured value is 0.51
+    # (quarter), so use sizing.max_triangles_for to honour it instead of drifting 2% away.
+    max_tri = sizing.max_triangles_for(
+        cap, cfg.mesh.quadrants, cfg.mesh.dof_per_triangle, cfg.mesh.max_triangle_slack)
     return MeshSpec(
         epw=float(cfg.mesh.epw),
         f_max_hz=float(max(mode_freqs(mode, cfg))),
