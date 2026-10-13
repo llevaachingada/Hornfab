@@ -634,6 +634,58 @@ def _cmd_dataset(args) -> int:
     return code
 
 
+# ---------------------------------------------------------------------- surrogate (phase 2, stage A)
+
+
+def _cmd_surrogate(args) -> int:
+    try:
+        import torch  # noqa: F401
+    except ImportError:
+        print('surrogate FAILED: torch is not installed (pip install -e ".[surrogate]")')
+        return 1
+    from hornlab_search.config import load_config
+    from hornlab_search.dataset import store as dstore
+    from hornlab_search.design.space import DesignSpace
+    from hornlab_search.objective.scalar import resolve_weights
+    from hornlab_search.surrogate import ismo
+    from hornlab_search.surrogate.predict import Surrogate
+    from hornlab_search.surrogate.train import train_surrogate
+    from hornlab_search.targets.spec import Target
+    cfg = load_config(args.config)
+    space, target = DesignSpace.from_config(cfg), Target.from_dict(cfg.target_raw)
+    weights = resolve_weights(cfg.weights)
+    out = Path(args.out)
+    if args.action == "train":
+        d = _dirs(args)
+        if not d["dataset"].exists():
+            print(f"surrogate train FAILED: {d['dataset']} does not exist")
+            return 1
+        arrays = dstore.to_training_arrays(dstore.DatasetStore(d["dataset"]), family=cfg.family,
+                                           keys=space.keys(), ok_only=False, lib_sha=args.lib_sha)
+        n = int(arrays["X"].shape[0])
+        if n < 50:
+            print(f"surrogate train FAILED: only {n} {cfg.family} records (need data first)")
+            return 1
+        _, rep = train_surrogate(arrays, space, target, weights, ensemble=args.ensemble,
+                                 epochs=args.epochs, out_path=out, lib_sha=args.lib_sha)
+        for k, g in rep["gates"].items():
+            print(f"  {'PASS' if g['pass'] else 'FAIL'}  {k:18s} {g['value']!s:>10}  need {g['threshold']}")
+        for w in rep["warnings"]:
+            print("  WARNING: " + w)
+        print(f"surrogate train {'GATES PASSED' if rep['pass'] else 'GATES NOT PASSED: do not use this model'}"
+              f": {n} records, {rep['n_heldout']} held out -> {out}")
+        return 0 if rep["pass"] else 1
+    sur = Surrogate.load(out)
+    props = ismo.propose(sur, space, target, weights, n_top=args.n_top, n_var=args.n_var)
+    dest = Path(args.proposals)
+    dest.write_text(json.dumps([{"family": p["design"].family, "params": p["design"].params,
+                                 "kind": p["kind"], "pred_J": p["pred_J"], "std": p["std"]}
+                                for p in props], indent=1, default=float))
+    print(f"surrogate propose OK: {len(props)} designs -> {dest}. Solve each with real BEM "
+          "(a surrogate prediction is not a result) and run ismo.round_report on the outcome.")
+    return 0
+
+
 # ---------------------------------------------------------------------- parser / main
 
 
@@ -682,6 +734,16 @@ def build_parser() -> argparse.ArgumentParser:
     ds.add_argument("--out", default="train.npz")
     ds.add_argument("--family")
     ds.add_argument("--lib-sha")
+    sg = sub.add_parser("surrogate", parents=[common], help="phase 2 stage A: train / propose")
+    sg.add_argument("action", choices=("train", "propose"))
+    sg.add_argument("--config", required=True)
+    sg.add_argument("--out", default="surrogate.pt")
+    sg.add_argument("--lib-sha")
+    sg.add_argument("--ensemble", type=int, default=5)
+    sg.add_argument("--epochs", type=int, default=300)
+    sg.add_argument("--n-top", type=int, default=30)
+    sg.add_argument("--n-var", type=int, default=10)
+    sg.add_argument("--proposals", default="proposals.json")
     return p
 
 
@@ -713,6 +775,8 @@ def main(argv: list[str] | None = None) -> int:
             return _cmd_report(args)
         if args.cmd == "dataset":
             return _cmd_dataset(args)
+        if args.cmd == "surrogate":
+            return _cmd_surrogate(args)
     except KeyboardInterrupt:
         print(f"{args.cmd} INTERRUPTED")
         return 1

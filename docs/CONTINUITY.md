@@ -8,6 +8,12 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 - **Next action (needs the Windows GPU box):** widen `a_deg`/`exponent` bounds (check mesher validity first), run the other 4 example configs for a multi-family dataset, then train/gate the Stage A surrogate on >= 500 held-out real records. Runbook in `docs/HANDOFF.md`.
 - **Blockers:** none. Issues #6-#11 closed.
 
+## 2026-10-13 (cloud, later) — ISMO selection + `surrogate` CLI (orchestrator: Claude)
+
+- `surrogate/ismo.py`: `propose` (NSGA-II on the surrogate; top-30 exploit + 10 highest-ensemble-variance explore, deduped) and `round_report` (plan step 5: do BEM-solved proposals beat random designs, rank correlation on them; `working` False otherwise).
+- CLI: `hornlab-search surrogate train|propose --config ...`. `train` exits 1 unless every gate passes (and says do not use the model); `propose` writes `proposals.json` for real-BEM solving. Tests on synthetic data; offline suite green.
+- Still GPU-box only: solve the proposals, feed `round_report`, retrain. Stage B/C/D not started.
+
 ## 2026-10-13 (cloud session) — Wave-3 review, report fixes, Phase 2 Stage A code (orchestrator: Claude, Haiku helpers)
 
 **Environment:** Linux cloud container, NO GPU, NO mesher/beat installed. Offline suite: 447 passed, 30 skipped (mesher-gated), 18 deselected. Nothing GPU-side was run or claimed.

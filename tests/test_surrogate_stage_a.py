@@ -99,3 +99,28 @@ def test_scrambled_labels_fail_rank_gate(setup):
     _, rep = train_surrogate(arrays, space, target, cfg.weights, ensemble=1, epochs=200)
     assert not rep["gates"]["spearman"]["pass"]
     assert not rep["pass"]
+
+
+@pytest.mark.timeout(600)
+def test_propose_returns_unique_valid_designs(setup):
+    from hornlab_search.surrogate import ismo
+    cfg, space = setup
+    arrays, target, _ = _synthetic(space, 600, 5)
+    sur, _ = train_surrogate(arrays, space, target, cfg.weights, ensemble=2, epochs=200)
+    props = ismo.propose(sur, space, target, cfg.weights, n_top=5, n_var=3, pop=24, gens=3)
+    hashes = [p["design"].hash() for p in props]
+    assert len(hashes) == len(set(hashes)) and {"exploit", "explore"} >= {p["kind"] for p in props}
+    assert any(p["kind"] == "exploit" for p in props)
+
+
+def test_cli_surrogate_errors_and_propose(setup, tmp_path, capsys):
+    from hornlab_search.cli import main
+    cfg, space = setup
+    rc = main(["surrogate", "train", "--config", str(EX), "--dataset-dir", str(tmp_path / "nope")])
+    assert rc == 1 and "does not exist" in capsys.readouterr().out
+    arrays, target, _ = _synthetic(space, 400, 7)
+    train_surrogate(arrays, space, target, cfg.weights, ensemble=1, epochs=100,
+                    out_path=tmp_path / "s.pt")
+    rc = main(["surrogate", "propose", "--config", str(EX), "--out", str(tmp_path / "s.pt"),
+               "--proposals", str(tmp_path / "p.json"), "--n-top", "3", "--n-var", "2"])
+    assert rc == 0 and (tmp_path / "p.json").exists()
