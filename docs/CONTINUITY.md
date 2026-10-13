@@ -3,10 +3,21 @@
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
 ## Status
-- **Wave:** 0 complete; Wave 1 in progress: 04 and 06 done, 07 running, 05 next.
+- **Wave:** 0 complete; Wave 1 in progress: 04, 06, 07 done; 05 running.
 - **Last checkpoints:** CP-1 GREEN (pytest, `doctor`, `version`). CP-0 COMPLETE (all measurements clean). CP-2 (task 04) GREEN. CP-4 (task 06) GREEN: 78 passed.
 - **Next action:** see the newest entry below.
 - **Blockers:** `gh` not authenticated (issues/labels); dof caps need replacing (plan caps unsafe on this 8 GB card).
+
+## 2026-10-13 (00:25) — task 07 done (orchestrator: Claude)
+
+**Done**
+- Task 07 (dataset) DONE: 64 tests pass (CP-5). Files: `dataset/record.py` (415), `dataset/store.py` (694), 3 test files. Layout: one uncompressed `.npz` per record in `shard-NNNN/` + `shard-NNNN.jsonl` + `index.jsonl` (deviates from contract section 13's single `shard-NNNN.npz`; the phase-2 loader must go through `DatasetStore`). Crash recovery tested (torn index line, torn shard line, uncommitted row).
+- Disk projection for 10,000 screen records: 0.78 GB without traces, 1.40 GB with traces at 1 in 20.
+- Contract gaps to rule on (NOTES_FOR_SENIOR): added `traces.sample_fraction`; `lib_shas` requires 5 entries; NaN written as JSON null.
+- Test `test_append_500_typical_records_is_fast` (5 s limit) measured 1.4-1.7 s on a quiet disk but failed at 6-9 s when the disk was loaded. Not loosened; may flake under load (recorded).
+- Wiring for task 08: pass `solve_spec=`, `area_m2=`, `grid=` to `build_record`; catch `ValueError` from `append`; call `reset_warning_state()` at startup; subcommand hooks `stats_report`, `verify_store`, `export_training_npz`.
+
+**Next action:** task 05 (solve) running; when it lands, dispatch task 08 (pipeline) using the verbatim template.
 
 ## 2026-10-13 (00:15) — task 04 done, caps set, CPU provisioned (orchestrator: Claude)
 
@@ -23,7 +34,6 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 2. `config.mesh_spec` uses `ceil(2*cap*qf*slack)` and ignores `dof_per_triangle`, while `sizing.max_triangles_for` uses it (2% apart at 0.51). Task 03 file; fix pending.
 3. `gh` unauthenticated: labels and the GitHub issues (bodies in `.github/issues/`) are not created. `git push` works via the credential manager.
 4. Task 06 conventions awaiting senior review (half-pressure -6 dB threshold; `di_from_cuts` clamp; ddof=1 ripple).
-5. Task 07 (dataset) still running; one of its tests currently failing mid-work.
 6. Mesh time: 0.3 s -> 12 s over the f_max range for the baseline horn (task 04 table); mesh fraction of a screening candidate is small versus solve above 5k dofs.
 
 **Next action:** collect task 07; dispatch task 05 (solve) now that the GPU is free of measurements; then task 08 once 04-07 are in.
