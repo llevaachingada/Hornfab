@@ -19,6 +19,8 @@ jobs:
           # heavy git deps with --no-deps so the HornLab packages resolve as
           # importable-but-inert (their tests are gated by requires_* markers).
           python -m pip install numpy scipy cma pyyaml jinja2 pytest pytest-timeout
+          # The report tests render real figures through hornlab_plots (pinned SHA, same as pyproject.toml).
+          python -m pip install "hornlab-plots @ git+https://github.com/m3gnus/hornlab-plots.git@9e4a6d0dd2ccb6e735dd00233dccccb50d12ed44"
           python -m pip install -e . --no-deps
       - name: Test
         run: python -m pytest -m "not slow and not gpu and not crosscheck"
