@@ -1,7 +1,7 @@
 # ISSUES
 
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
-Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-10-13 06:20.
+Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-10-13 06:45.
 
 | ID | Title | Status | Owner | Plan ref |
 |---|---|---|---|---|

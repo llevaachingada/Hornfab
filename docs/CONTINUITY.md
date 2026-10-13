@@ -31,6 +31,10 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 
 **Next action:** post-Wave-3 follow-ups (widen `a_deg`/`exponent` bounds, run the other 4 example configs, browser-check `report.html`), then phase 2 (`11_PHASE2_SURROGATE`) if wanted. Awaiting the user's go-ahead.
 
+- Addendum 06:45: `docs/HANDOFF.md` rewritten for the post-Wave-3 state (wave ladder complete,
+  CP-7 numbers, rulings applied, all issues closed, residual risks, BEAT stale-registry hazard,
+  next-work list). No code changes in that doc commit.
+
 
 
 - Per user request, work stopped after Wave 2. Final state: Waves 0-2 done (CP-0..CP-6 green), CI green on b5bc811 (the task-08 push first failed because CI lacked `hornlab_plots`; fixed by installing the pinned package rather than skipping the report tests).
