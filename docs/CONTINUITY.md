@@ -3,10 +3,29 @@
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
 ## Status
-- **Wave:** 0 complete; Wave 1 in progress: 04, 06, 07 done; 05 running.
+- **Wave:** 0 and 1 complete (04, 05, 06, 07 done, CP-2..CP-5 green). Wave 2 (task 08) next.
 - **Last checkpoints:** CP-1 GREEN (pytest, `doctor`, `version`). CP-0 COMPLETE (all measurements clean). CP-2 (task 04) GREEN. CP-4 (task 06) GREEN: 78 passed.
 - **Next action:** see the newest entry below.
 - **Blockers:** `gh` not authenticated (issues/labels); dof caps need replacing (plan caps unsafe on this 8 GB card).
+
+## 2026-10-13 (01:00) — task 05 done, example bands capped (orchestrator: Claude)
+
+**Done**
+- Task 05 (solve) DONE, CP-3 green. 86 offline + 28 worker tests; slow (10), crosscheck (2) and trace (5) tests pass on the RTX 4060. Backends: `beat_cuda` (loops ONE frequency per `solve_frequencies` call because of the multi-frequency cliff), `beat_cpu` (single multi-frequency call; no cliff seen at 4.5k dofs), `bempp_cpu` (gated; Burton-Miller is refused with native symmetry, so it runs STANDARD formulation). Worker hygiene (stale Julia host detection/clear, verified release, SIGINT/atexit) implemented and tested in `solve/worker.py`.
+- Numbers: cold 17.6 s / warm 0.80 s / post-detach 0.63 s; full vs quarter 0.031 dB (<= 3 kHz); beat vs bempp <= 0.055 dB; boundary-trace recovery 8e-5 dB; idempotence 3.6e-5 dB; mismatch (quarter without flag) 29.9 dB max, ~11 dB on axis; asymmetry sign check 100%.
+- Resolved the "seed horn too large for the cap" decision (flagged by 04 and 05): all five `examples/*.yaml` failed at screen resolution (seed horn 0.80 x 0.64 x 0.27 m). Set `band_hi_hz` per config from the measured caps: osse_baseline 5500, throat_adapter 6500, icw_termination 7000, freeform_hv 5500, search_smoke 4500. All 15 config x mode combinations now build (2.5k-3.8k est. dofs). **User may override**: raising a band edge requires a smaller seed or fewer elements per wavelength, not a higher cap.
+  Consequence: verify/final grids are also clipped to band_hi, so verify and final meshes equal the screen mesh; they differ only in frequency count and balloon size until a larger cap or a smaller seed is chosen.
+- Fixed `.gitignore`: `dataset/` ignored the source package; anchored to `/dataset/` (commit d70ba06).
+
+**Open issues**
+1. Task 08 must call `solve.worker.install_handlers()` and `worker.warm(backend)` from the CLI.
+2. Balloon is a theta-phi grid: DI needs `weights=sin_theta_weights(...)` (grid shape in `Response.meta['balloon_grid']`); not equal-area.
+3. `timeout_s` is checked between frequencies only (CPU makes one call).
+4. beat uses direct dense LU; `gmres_tol` recorded as requested, not applied.
+5. The `gh`-gated GitHub labels/issues are still not created.
+6. Senior-review items: tasks 04, 05, 06, 07 `NOTES_FOR_SENIOR.md` blocks.
+
+**Next action:** dispatch task 08 (pipeline) with the verbatim template; then CP-6/7 live runs (`selftest`, `run`, `search`) one GPU job at a time.
 
 ## 2026-10-13 (00:25) — task 07 done (orchestrator: Claude)
 

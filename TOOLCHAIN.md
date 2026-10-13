@@ -129,7 +129,16 @@ Quarter mesh, 2,369 dofs, one frequency per call, warm worker (i7-14650HX, 24 th
 
 cuda: 0.8 s   cpu: 1.45 s   ratio cpu/cuda: **~1.8x** at this size.
 **`HORNLAB_BEAT_FORCE_CPU=1` does not redirect an explicit `beat_backend="cuda"` request** (the run above still used CUDA); the variable only makes `beat_engine_status()` report CPU available without a provisioning record. To use CPU, pass `beat_backend="cpu"`.
-CPU at larger dofs (no VRAM cliff): see the table below if present.
+CPU at larger dofs (quarter meshes, one frequency per call, warm; no VRAM limit):
+
+| dofs | cpu warm per frequency | cuda warm per frequency |
+|---|---|---|
+| 2,369 | 1.45 s | 0.8 s |
+| 5,140 | 6.6-7.6 s | 2.8 s |
+| 7,001 | 12.6-37.4 s (rising run to run) | 7.5 s |
+| 8,941 | 56.6-57.8 s | 45 s |
+
+CUDA is faster than the CPU backend at every size measured (about 1.3x at 8.9k, 2.3x at 5.1k, 1.8x at 2.4k). The CPU backend has no OOM limit and would run meshes beyond the CUDA ceiling (full-domain 9.2k+, quarter 15.7k+), but at roughly 1 minute per frequency from 9k dofs up; not measured above 8.9k.
 
 
 ## M5 worker warmth

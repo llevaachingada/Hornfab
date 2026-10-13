@@ -32,7 +32,7 @@ target:
   coverage_h_deg: 75.0
   coverage_v_deg: 45.0
   band_lo_hz: 700.0
-  band_hi_hz: 6000.0       # clipped band keeps the smoke run small
+  band_hi_hz: 4500.0   # limited by the measured dof cap on the 8 GB card (TOOLCHAIN.md); was a higher default       # clipped band keeps the smoke run small
   di_target_db: null
   di_slope_target: 0.0
 

@@ -35,7 +35,7 @@ target:
   coverage_h_deg: 75.0        # TOTAL included angle, -6 dB
   coverage_v_deg: 45.0
   band_lo_hz: 2000.0
-  band_hi_hz: 16000.0
+  band_hi_hz: 6500.0   # limited by the measured dof cap on the 8 GB card (TOOLCHAIN.md); was a higher default
   di_target_db: null          # derive from coverage
   di_slope_target: 0.0        # flat DI with frequency
 
