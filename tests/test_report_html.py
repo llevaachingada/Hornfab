@@ -98,8 +98,11 @@ def test_noise_floor_box_and_feasibility_contain_numbers(cfg, tmp_path, monkeypa
         .read_text(encoding="utf-8")
     nf = html.split('id="noise-floor"')[1].split("</div>")[0]
     assert "No claimed improvement smaller than this number means anything" in nf
-    assert re.search(r"Noise floor: 0\.055 dB", nf), nf[:200]
-    assert "NOT YET MEASURED" in nf and "tolfun" in nf
+    assert re.search(r"Noise floor: 0\.039 dB \(limited by: two solvers", nf), nf[:200]
+    assert "not by mesh refinement" in nf
+    assert "above 2.5 kHz" in nf and "<b>not measured</b>" in nf
+    assert "NOT YET MEASURED" not in nf and "0.055" not in nf
+    assert "tolfun" in nf
     fe = html.split('id="feasibility"')[1].split("</div>")[0]
     assert re.search(r"needs about \d+\.\d+ m of mouth width", fe)
     assert re.search(r"<td>\d+\.\d+</td>", fe)

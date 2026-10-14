@@ -20,7 +20,7 @@ from .types import MeshSpec, Mode, ObservationSpec, SolveSpec
 log = logging.getLogger("hornlab_search.config")
 
 # 01_CONTRACTS section 6: max_triangles = ceil(2 * dof_cap * quadrant_factor * 1.15)
-QUADRANT_FACTOR = {"1234": 1, "12": 2, "14": 2, "1": 4}
+QUADRANT_FACTOR = sizing.QUADRANT_FACTOR  # one source (silent-killer rule)
 
 # 01_CONTRACTS section 8: frozen grid shape per mode (f_low, f_high, points).
 FREQ_GRIDS: dict[str, tuple[float, float, int]] = {

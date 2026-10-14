@@ -18,14 +18,14 @@ seed_params:
 
 bounds:
   r0_mm:        {lo: 17.78, hi: 17.78, search: false}
-  a_deg:        {lo: 25.0,  hi: 55.0}
+  a_deg:        {lo: 5.0,   hi: 55.0}   # was 25.0 (CP-8 pinned); mesher accepts a_deg>=0, 5 keeps the coverage angle non-degenerate
   a0_deg:       {lo: 2.0,   hi: 30.0}
   L_mm:         {lo: 140.0, hi: 420.0}
   n:            {lo: 2.0,   hi: 8.0}
   s:            {lo: 0.0,   hi: 1.0}
   q:            {lo: 0.90,  hi: 1.00}
   k:            {lo: 0.3,   hi: 2.5}
-  exponent:     {lo: 2.0,   hi: 8.0}
+  exponent:     {lo: 1.0,   hi: 8.0}   # was 2.0 (CP-8 pinned); OSSE cross-section exponent is unvalidated, 1.0 meshes (0.5 refused)
   aspect_ratio: {lo: 1.0,   hi: 2.0}
 
 target:

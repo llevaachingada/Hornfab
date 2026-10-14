@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -482,6 +483,23 @@ def _cmd_search(args, argv) -> int:
     cfg = load_config(cfg_path)
     if args.backend:
         cfg.solve.backend = args.backend
+    if args.resume:
+        # A resume replays the CMA sequence from search.ndjson and the solve cache; if the config
+        # (weights, bounds, target, ...) changed, the replayed work and the stored rows no longer
+        # share one J. Refuse unless the caller explicitly accepts the mix.
+        prev = rundir.read_json(run_dir / "run.json", {}) or {}
+        stored_sha = prev.get("config_sha")
+        current_sha = rundir.config_sha(cfg.raw)
+        if stored_sha and stored_sha != current_sha:
+            if not args.allow_config_change:
+                print(f"search REFUSED: --resume {run_dir} was created with config_sha {stored_sha}, "
+                      f"but the current config ({cfg_path}) has config_sha {current_sha}. Resuming a "
+                      "run with a DIFFERENT config mixes old-J and new-J rows (the CMA replay and "
+                      "the cache would be invalid). Pass --allow-config-change to override.")
+                return 1
+            print(f"search WARNING: resuming {run_dir} with a CHANGED config "
+                  f"(stored config_sha {stored_sha} != current config_sha {current_sha}) because "
+                  "--allow-config-change was given; old and new rows may not be comparable.")
     worker.install_handlers()
     try:
         backend = _backend(cfg)
@@ -613,8 +631,11 @@ def _cmd_dataset(args) -> int:
         rep = dstore.verify_store(store)
         for b in rep["bad"][:20]:
             print(f"  BAD shard {b['shard']} row {b['row']} {b['design_hash']}: {b['problem']}")
-        code = 1 if rep["n_bad"] else 0
-        line = f"dataset verify {'FAILED' if code else 'OK'}: {rep['n']} records re-read, {rep['n_bad']} bad"
+        for b in rep["bad_arrays"][:20]:
+            print(f"  BAD-ARRAY shard {b['shard']} row {b['row']} {b['design_hash']}: {b['problem']}")
+        code = 1 if (rep["n_bad"] or rep["n_bad_arrays"]) else 0
+        line = (f"dataset verify {'FAILED' if code else 'OK'}: {rep['n']} records re-read, "
+                f"{rep['n_bad']} bad, {rep['n_bad_arrays']} bad arrays")
     else:
         out = Path(args.out)
         kw = {}
@@ -632,6 +653,129 @@ def _cmd_dataset(args) -> int:
         print("WARNING: " + s["family_warning"])
     print(line)
     return code
+
+
+# ---------------------------------------------------------------------- surrogate (phase 2, stage A)
+
+
+def _cmd_surrogate(args) -> int:
+    try:
+        import torch  # noqa: F401
+    except ImportError:
+        print('surrogate FAILED: torch is not installed (pip install -e ".[surrogate]")')
+        return 1
+    from hornlab_search.config import load_config, mode_freqs
+    from hornlab_search.dataset import store as dstore
+    from hornlab_search.design.space import DesignSpace
+    from hornlab_search.objective.scalar import resolve_weights
+    from hornlab_search.surrogate import gates as gates_mod
+    from hornlab_search.surrogate import ismo
+    from hornlab_search.surrogate.predict import Surrogate
+    from hornlab_search.surrogate.train import train_surrogate
+    from hornlab_search.targets.spec import Target
+    cfg = load_config(args.config)
+    space, target = DesignSpace.from_config(cfg), Target.from_dict(cfg.target_raw)
+    weights = resolve_weights(cfg.weights)
+    out = Path(args.out)
+    if args.action == "round":
+        from hornlab_search.surrogate.round import run_round
+        if not args.out_dir:
+            print("surrogate round FAILED: --out-dir is required")
+            return 1
+        props = Path(args.proposals)
+        if not props.is_file():
+            print(f"surrogate round FAILED: --proposals {props} does not exist")
+            return 1
+        d = _dirs(args)
+        store = dstore.DatasetStore(d["dataset"]) if d["dataset"].exists() else None
+        try:
+            result = run_round(props, cfg, mode=args.mode, out_dir=Path(args.out_dir),
+                               bundle_path=out, store=store, cache_dir=d["cache"],
+                               random_run=args.random_run, trace_fraction=args.trace_fraction)
+        except ValueError as exc:
+            print(f"surrogate round FAILED: {exc}")
+            return 1
+        print(f"  round report working={result['report']['working']}; "
+              f"ismo_round1.json under {args.out_dir}")
+        return 0
+    if args.action == "train":
+        d = _dirs(args)
+        if not d["dataset"].exists():
+            print(f"surrogate train FAILED: {d['dataset']} does not exist")
+            return 1
+        arrays = dstore.to_training_arrays(dstore.DatasetStore(d["dataset"]), family=cfg.family,
+                                           keys=space.keys(), ok_only=False, lib_sha=args.lib_sha)
+        ameta = arrays.get("meta", {})
+        skipped = int(ameta.get("skipped_grid_mismatch", 0) or 0)
+        print(f"  training arrays: considered {ameta.get('n_considered')}, selected "
+              f"{ameta.get('n_selected')}, skipped_grid_mismatch {skipped}, "
+              f"skipped_bad_arrays {ameta.get('skipped_bad_arrays')}, "
+              f"skipped_keys {ameta.get('skipped_keys')}")
+        if skipped > 0:
+            print(f"  WARNING: {skipped} record(s) were dropped for a DIFFERENT frequency grid "
+                  "than the training grid; concatenating them would train on a lie "
+                  "(see to_training_arrays).")
+        n = int(arrays["X"].shape[0])
+        if n < 50:
+            print(f"surrogate train FAILED: only {n} {cfg.family} records (need data first)")
+            return 1
+        _, rep = train_surrogate(arrays, space, target, weights, ensemble=args.ensemble,
+                                 epochs=args.epochs, out_path=out, lib_sha=args.lib_sha)
+        for k, g in rep["gates"].items():
+            print(f"  {'PASS' if g['pass'] else 'FAIL'}  {k:18s} {g['value']!s:>10}  need {g['threshold']}")
+        for w in rep["warnings"]:
+            print("  WARNING: " + w)
+        if rep["n_duplicates_dropped"]:
+            print(f"  dropped {rep['n_duplicates_dropped']} duplicate design(s) before the "
+                  "cluster holdout split")
+        print(f"  objective delta (recomputed vs stored): max {rep['objective_delta_max']:.4g}, "
+              f"mean {rep['objective_delta_mean']:.4g}")
+        if rep.get("kept_existing_bundle"):
+            print(f"  KEPT the existing passing bundle at {out}; this run FAILED its gates and was "
+                  "NOT written over it.")
+        if rep["pass"]:
+            headline = "GATES PASSED"
+        else:
+            failing = [k for k, g in rep["gates"].items() if not g["pass"]]
+            if failing:
+                headline = "GATES FAILED: " + ", ".join(failing)
+            else:
+                headline = (f"GATES REFUSED (indicative only): all {len(rep['gates'])} measured "
+                            f"gates pass; held-out {rep['n_heldout']} < {gates_mod.MIN_HELDOUT} "
+                            "formal floor")
+        print(f"surrogate train {headline}: {n} records, {rep['n_heldout']} held out -> {out}")
+        return 0 if rep["pass"] else 1
+    # -- propose: the bundle must match the config it is proposed with, and must carry a verdict.
+    sur = Surrogate.load(out)
+    mismatch = sur.config_mismatch(space, freqs_hz=mode_freqs(args.mode, cfg))
+    if mismatch is not None:
+        print(f"surrogate propose REFUSED: {out} does not match --config: {mismatch}")
+        return 1
+    gr = sur.meta.get("gate_report")
+    if not args.allow_unvalidated:
+        if gr is None:
+            print(f"surrogate propose REFUSED: {out} has no gate verdict in its meta; retrain with "
+                  "'surrogate train' (or pass --allow-unvalidated to propose anyway).")
+            return 1
+        if not gr.get("gates_passed"):
+            print(f"surrogate propose REFUSED: {out} did NOT pass its acceptance gates "
+                  "(gates_passed=False). Pass --allow-unvalidated to propose anyway; those "
+                  "predictions are NOT validated.")
+            return 1
+    elif gr is not None and not gr.get("gates_passed"):
+        print(f"  WARNING: {out} did not pass its gates; proposing anyway (--allow-unvalidated)")
+    props = ismo.propose(sur, space, target, weights, n_top=args.n_top, n_var=args.n_var)
+    dest = Path(args.proposals)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    text = json.dumps([{"family": p["design"].family, "params": p["design"].params,
+                        "kind": p["kind"], "pred_J": p["pred_J"], "std": p["std"]}
+                       for p in props], indent=1, default=float)
+    tmp = dest.with_name(dest.name + ".tmp")
+    tmp.write_text(text, encoding="utf-8")
+    os.replace(tmp, dest)
+    print(f"surrogate propose OK: {len(props)} designs -> {dest}. Solve each with real BEM "
+          "(a surrogate prediction is not a result) and run ismo.round_report on the outcome.")
+    return 0
 
 
 # ---------------------------------------------------------------------- parser / main
@@ -670,6 +814,9 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument("--budget", type=int, help="cap on NON-CACHED evaluations (the seed counts)")
     q.add_argument("--mode", choices=("screen", "verify", "final"), default="screen")
     q.add_argument("--resume", metavar="DIR")
+    q.add_argument("--allow-config-change", action="store_true",
+                   help="resume even if the run's config_sha differs from the current config "
+                        "(mixes old-J and new-J rows; off by default)")
     v = sub.add_parser("verify", parents=[common], help="re-solve a run's top designs at verify fidelity")
     v.add_argument("--run", required=True)
     v.add_argument("--top", type=int, default=5)
@@ -682,6 +829,25 @@ def build_parser() -> argparse.ArgumentParser:
     ds.add_argument("--out", default="train.npz")
     ds.add_argument("--family")
     ds.add_argument("--lib-sha")
+    sg = sub.add_parser("surrogate", parents=[common], help="phase 2 stage A: train / propose / round")
+    sg.add_argument("action", choices=("train", "propose", "round"))
+    sg.add_argument("--config", required=True)
+    sg.add_argument("--out", default="surrogate.pt")
+    sg.add_argument("--lib-sha")
+    sg.add_argument("--ensemble", type=int, default=5)
+    sg.add_argument("--epochs", type=int, default=300)
+    sg.add_argument("--n-top", type=int, default=30)
+    sg.add_argument("--n-var", type=int, default=10)
+    sg.add_argument("--proposals", default="proposals.json")
+    sg.add_argument("--out-dir", help="round: directory for the fresh round1/ run and ismo_round1.json")
+    sg.add_argument("--random-run", help="round: search run dir whose early SOLVED evaluations are "
+                                         "the random_true_J baseline (default: --out-dir if it "
+                                         "holds a search.ndjson)")
+    sg.add_argument("--mode", choices=("screen", "verify", "final"), default="screen",
+                    help="frequency grid the config would solve on; propose checks it against the "
+                         "bundle's frozen training grid")
+    sg.add_argument("--allow-unvalidated", action="store_true",
+                    help="propose even if the bundle failed (or lacks) its gate verdict")
     return p
 
 
@@ -713,6 +879,8 @@ def main(argv: list[str] | None = None) -> int:
             return _cmd_report(args)
         if args.cmd == "dataset":
             return _cmd_dataset(args)
+        if args.cmd == "surrogate":
+            return _cmd_surrogate(args)
     except KeyboardInterrupt:
         print(f"{args.cmd} INTERRUPTED")
         return 1
