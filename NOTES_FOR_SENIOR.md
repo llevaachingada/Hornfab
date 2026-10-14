@@ -221,3 +221,27 @@ RESIDUAL RISKS (recorded, NOT resolved - for phase 2 / post-Wave-3):
 What I need decided: nothing blocking. Phase 2 (11_PHASE2_SURROGATE) is "separately and later"; post-Wave-3 follow-ups
 (widen a_deg/exponent bounds, run the other 4 example configs for a multi-family dataset, browser-check report.html) are
 the natural next work, not part of Wave 3.
+
+## 2026-10-14  cp-8d (local GPU box)  Stage A train failed twice on real data: epochs 300 then 600; propose/round NOT run
+What I was doing: CP-8d step 1 of the runbook — `surrogate train --config examples/osse_baseline.yaml` on the real OSSE
+pool (all 8 gate inputs are real BEM records; 5 gate measurements per table). CPU-only torch.
+What happened (exact gate tables):
+- epochs 300:  spearman 0.96734 PASS | topk_overlap 5 (need >= 12 of 20) FAIL | bw_mae_deg 2.11007 (need < 2.0) FAIL |
+  di_mae_db 0.28669 PASS | invalid_accuracy 0.85714 PASS | monotonic_flips 0 PASS. Held-out 285 (< 500). Exit 1.
+- epochs 600:  spearman 0.98613 PASS | topk_overlap 15 PASS | bw_mae_deg 1.70415 PASS | di_mae_db 0.23190 PASS |
+  invalid_accuracy 0.95238 PASS | monotonic_flips 1 (need == 0) FAIL. Same pool. Exit 1.
+Both: pool considered 2034 (all OSSE-family records incl. throat_adapter), selected 1501,
+skipped_grid_mismatch 533 (133 search_smoke-grid + 400 throat_adapter-grid records), skipped_bad_arrays 0,
+1 duplicate dropped before the cluster holdout, objective delta (recomputed vs stored) 0 — zero weight/target drift.
+What I tried: the runbook's own fix list in order — more epochs (300 -> 600: every measured gate IMPROVED, but
+monotonic_flips went 0 -> 1); --lib-sha is moot (every record carries one lib_sha, b922e807a5+38544d214b).
+`propose` / `surrogate round` were NOT run (runbook: propose only when gates pass; "do NOT use the model" otherwise).
+Per hard rule 8 (failed twice on the same step): stopped and appended this block.
+What I need decided: (1) approve the remaining runbook fix — an OSSE top-up of ~1900 records
+(`search --config examples/osse_baseline.yaml --resume runs/20261013T123136Z-screen-ca15be --budget 1900`,
+~10.2 h at the measured 187/h) taking the OSSE pool to ~3400 so held-out clears the 500 floor and the formal
+gates can legitimately pass; (2) is monotonic_flips = 1 at 600 epochs expected sweep-boundary/validity-boundary
+noise (the oracle's earlier reading of sweep_sign_flips' tolerance vs invalid-region crossings), or a genuine
+model defect to fix in code (NOT by touching gates.py thresholds)? Repro command is the epochs-600 line above;
+training is seeded/deterministic. (3) Should the built `surrogate round` helper ever be run as a clearly-labelled
+DIAGNOSTIC on a gate-failed model, or stay unusable until a formal pass (current behaviour per the runbook)?
