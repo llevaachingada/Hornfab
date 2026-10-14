@@ -7,6 +7,7 @@
     hornlab-search verify   --run <dir> [--top 5]
     hornlab-search report   <run_dir> [--out report.html] [--top 5]
     hornlab-search dataset  stats|verify|export
+    hornlab-search compare  <run_a> <run_b>       (report metric differences, e.g. full vs quarter)
 
 Every command exits 0 or 1 and prints one clear final line saying what happened and where the
 output is (argparse usage errors exit 2). Heavy imports are lazy so doctor/version stay cheap.
@@ -719,8 +720,12 @@ def _cmd_surrogate(args) -> int:
         if n < 50:
             print(f"surrogate train FAILED: only {n} {cfg.family} records (need data first)")
             return 1
-        _, rep = train_surrogate(arrays, space, target, weights, ensemble=args.ensemble,
-                                 epochs=args.epochs, out_path=out, lib_sha=args.lib_sha)
+        try:
+            _, rep = train_surrogate(arrays, space, target, weights, ensemble=args.ensemble,
+                                     epochs=args.epochs, out_path=out, lib_sha=args.lib_sha)
+        except ValueError as e:          # DI provenance / unresolved keys: refuse, never guess
+            print(f"surrogate train FAILED: {e}")
+            return 1
         for k, g in rep["gates"].items():
             print(f"  {'PASS' if g['pass'] else 'FAIL'}  {k:18s} {g['value']!s:>10}  need {g['threshold']}")
         for w in rep["warnings"]:
@@ -765,6 +770,9 @@ def _cmd_surrogate(args) -> int:
     elif gr is not None and not gr.get("gates_passed"):
         print(f"  WARNING: {out} did not pass its gates; proposing anyway (--allow-unvalidated)")
     props = ismo.propose(sur, space, target, weights, n_top=args.n_top, n_var=args.n_var)
+    if not props:
+        print("surrogate propose FAILED: 0 designs (everything predicted invalid?)")
+        return 1
     dest = Path(args.proposals)
     dest.parent.mkdir(parents=True, exist_ok=True)
     text = json.dumps([{"family": p["design"].family, "params": p["design"].params,
@@ -775,6 +783,70 @@ def _cmd_surrogate(args) -> int:
     os.replace(tmp, dest)
     print(f"surrogate propose OK: {len(props)} designs -> {dest}. Solve each with real BEM "
           "(a surrogate prediction is not a result) and run ismo.round_report on the outcome.")
+    return 0
+
+
+# ---------------------------------------------------------------------- compare (two solved runs)
+
+_COMPARE_KEYS = (("bw_h_deg", "deg"), ("bw_v_deg", "deg"), ("di_db", "dB"),
+                 ("on_axis_db", "dB"), ("ripple_h_db", "dB"), ("ripple_v_db", "dB"))
+
+
+def _first_ok_metrics(path: Path):
+    from hornlab_search.search.evaluate import metrics_from_json, read_ndjson
+    f = path / "search.ndjson" if path.is_dir() else path
+    for row in read_ndjson(f):
+        if row.get("metrics"):
+            return row, metrics_from_json(row["metrics"])
+    return None, None
+
+
+def compare_metrics(a, b) -> dict:
+    """Per-metric max and mean |a - b| on a shared frequency grid (curves of two MetricSets)."""
+    import numpy as np
+    fa, fb = np.asarray(a.freqs_hz, float), np.asarray(b.freqs_hz, float)
+    if fa.shape != fb.shape or not np.allclose(fa, fb, rtol=1e-6, atol=1e-3):
+        raise ValueError(f"frequency grids differ: {fa.tolist()} vs {fb.tolist()}")
+    out = {}
+    for k, unit in _COMPARE_KEYS:
+        d = np.abs(np.asarray(getattr(a, k), float) - np.asarray(getattr(b, k), float))
+        d = d[np.isfinite(d)]
+        out[k] = {"unit": unit, "max": float(d.max()) if d.size else float("nan"),
+                  "mean": float(d.mean()) if d.size else float("nan"), "n": int(d.size)}
+    return out
+
+
+def _cmd_compare(args) -> int:
+    """Report how far two solved runs disagree, e.g. the same design meshed as a quarter and as
+    the full domain. Report only: it does not judge. Reference (CP-7d, OSSE seed, <= 3 kHz):
+    full vs quarter agreed to 0.023 dB."""
+    rows = []
+    for p in (Path(args.run_a), Path(args.run_b)):
+        row, m = _first_ok_metrics(p)
+        if m is None:
+            print(f"compare FAILED: no solved row with metrics in {p}")
+            return 1
+        rows.append((p, row, m))
+    (pa, ra, ma), (pb, rb, mb) = rows
+    if ma.di_source != "balloon" or mb.di_source != "balloon":
+        print(f"compare FAILED: DI must come from the balloon in both runs "
+              f"({ma.di_source!r} / {mb.di_source!r})")
+        return 1
+    try:
+        res = compare_metrics(ma, mb)
+    except ValueError as e:
+        print(f"compare FAILED: {e}")
+        return 1
+    qa = (ra.get("mesh") or {}).get("quadrants")
+    qb = (rb.get("mesh") or {}).get("quadrants")
+    print(f"compare A={pa} (design {ra.get('design_hash')}, quadrants {qa!r})")
+    print(f"        B={pb} (design {rb.get('design_hash')}, quadrants {qb!r})")
+    if ra.get("design_hash") != rb.get("design_hash"):
+        print("  NOTE: the two rows are different designs")
+    print(f"  {len(ma.freqs_hz)} frequencies {ma.freqs_hz[0]:g}..{ma.freqs_hz[-1]:g} Hz")
+    for k, r in res.items():
+        print(f"  {k:12s} max |diff| {r['max']:.4g} {r['unit']:3s}  mean {r['mean']:.4g}  (n={r['n']})")
+    print("compare OK (report only; reference: OSSE full vs quarter 0.023 dB, CP-7d)")
     return 0
 
 
@@ -829,6 +901,10 @@ def build_parser() -> argparse.ArgumentParser:
     ds.add_argument("--out", default="train.npz")
     ds.add_argument("--family")
     ds.add_argument("--lib-sha")
+    cp = sub.add_parser("compare", parents=[common],
+                        help="report metric differences between two solved runs")
+    cp.add_argument("run_a", help="run directory (or its search.ndjson)")
+    cp.add_argument("run_b", help="run directory (or its search.ndjson)")
     sg = sub.add_parser("surrogate", parents=[common], help="phase 2 stage A: train / propose / round")
     sg.add_argument("action", choices=("train", "propose", "round"))
     sg.add_argument("--config", required=True)
@@ -881,6 +957,8 @@ def main(argv: list[str] | None = None) -> int:
             return _cmd_dataset(args)
         if args.cmd == "surrogate":
             return _cmd_surrogate(args)
+        if args.cmd == "compare":
+            return _cmd_compare(args)
     except KeyboardInterrupt:
         print(f"{args.cmd} INTERRUPTED")
         return 1

@@ -151,8 +151,22 @@ def mouth_dims_m(mesh: MeshResult) -> tuple[float, float]:
 
 
 def throat_radius_m(design: Design) -> float | None:
+    """Throat radius in metres for the f11 throat-mode estimate. FREEFORM has no ``r0_mm``: its
+    throat is anchor 0 of the two meridians (the smaller radius bounds the first mode)."""
     r0 = design.params.get("r0_mm")
-    return float(r0) / 1000.0 if isinstance(r0, (int, float)) and r0 > 0 else None
+    if isinstance(r0, (int, float)) and not isinstance(r0, bool) and r0 > 0:
+        return float(r0) / 1000.0
+    if design.family == "FREEFORM":
+        radii = []
+        for plane in ("profileH", "profileV"):
+            try:
+                r = float(design.params[plane]["points"][0][1])
+            except (KeyError, IndexError, TypeError, ValueError):
+                return None
+            radii.append(r)
+        r = min(radii)
+        return r / 1000.0 if r > 0 else None
+    return None
 
 
 def metrics_from_response(resp: Response, target: Target, *, mesh: MeshResult | None = None,

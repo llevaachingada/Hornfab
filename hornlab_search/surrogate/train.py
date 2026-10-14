@@ -81,6 +81,7 @@ def train_surrogate(arrays: dict, space, target, weights: dict, *, ensemble: int
     holds the gates on the cluster-held-out set, and the SAME verdict is frozen into the bundle meta
     (``meta['gate_report']``) so ``surrogate propose`` can refuse an unvalidated model. A model
     failing a gate must not be used."""
+    _check_di_source(arrays)
     arrays, dropped = _dedup_by_design_hash(arrays)
     U = unit_matrix(arrays["X"], arrays["key_names"], space)
     Y, ok = _targets(arrays), np.asarray(arrays["ok"], bool)
@@ -174,3 +175,20 @@ def evaluate_heldout(sur: Surrogate, arrays: dict, U: np.ndarray, held: np.ndarr
     rep["objective_delta_max"] = float(delta.max()) if delta.size else 0.0
     rep["objective_delta_mean"] = float(delta.mean()) if delta.size else 0.0
     return rep
+
+
+def _check_di_source(arrays: dict) -> None:
+    """No gate may pass on a cuts_estimate DI (CLAUDE.md silent killer 3): every successful
+    record must carry di_source 'balloon', or training refuses. Arrays without the field (old
+    synthetic callers) are not checked."""
+    src = arrays.get("di_source")
+    if src is None:
+        return
+    ok = np.asarray(arrays["ok"], bool)
+    src = np.asarray(src, str)
+    bad = ok & (src != "balloon")
+    if bad.any():
+        kinds = sorted(set(src[bad].tolist()))
+        raise ValueError(f"{int(bad.sum())} successful records have di_source {kinds} (not "
+                         "'balloon'); a surrogate must not learn estimated DI. Filter them out "
+                         "or re-solve with a balloon.")

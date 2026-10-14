@@ -588,3 +588,30 @@ def test_search_resume_refuses_a_changed_config(tmp_path, capsys):
     assert rc == 1
     assert "REFUSED" in out and "deadbeef0000" in out and "--allow-config-change" in out
 
+def _freeform_params(i: int) -> dict:
+    return {"profileH": {"points": [[0.0, 12.7], [60.0, 40.0 + i], [120.0, 150.0]],
+                         "mouthAngleDeg": 50.0 + i},
+            "profileV": {"points": [[0.0, 12.7], [60.0, 35.0 + i], [120.0, 110.0]],
+                         "mouthAngleDeg": 45.0},
+            "crossSections": [{"t": 0.0, "shape": "circle"},
+                              {"t": 1.0, "shape": "superellipse", "exponent": 3.0 + i}]}
+
+
+def test_freeform_path_and_alias_keys_fill_X(tmp_path):
+    # FREEFORM search keys are paths (profileH.points.1.1) or the 'exponent' alias. X must be read
+    # through the design layer's path rules, not params.get, or every column comes back NaN.
+    st = DatasetStore(tmp_path / "ds")
+    for i in range(4):
+        meta, arrays = rec(i, nf=3)
+        meta["family"], meta["params"] = "FREEFORM", _freeform_params(i)
+        meta["design_hash"] = f"ff{i:010x}"
+        st.append(meta, arrays)
+    keys = ["exponent", "profileH.mouthAngleDeg", "profileH.points.1.1", "profileV.points.1.1"]
+    d = to_training_arrays(st, family="FREEFORM", keys=keys)
+    assert not np.isnan(d["X"]).any()
+    assert d["X"][:, 0].tolist() == [3.0, 4.0, 5.0, 6.0]
+    assert d["X"][:, 1].tolist() == [50.0, 51.0, 52.0, 53.0]
+    assert d["X"][:, 2].tolist() == [40.0, 41.0, 42.0, 43.0]
+    assert d["X"][:, 3].tolist() == [35.0, 36.0, 37.0, 38.0]
+    d = to_training_arrays(st, family="FREEFORM", keys=["profileH.points.9.1"])  # no such anchor
+    assert np.isnan(d["X"]).all()
