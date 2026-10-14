@@ -245,3 +245,27 @@ noise (the oracle's earlier reading of sweep_sign_flips' tolerance vs invalid-re
 model defect to fix in code (NOT by touching gates.py thresholds)? Repro command is the epochs-600 line above;
 training is seeded/deterministic. (3) Should the built `surrogate round` helper ever be run as a clearly-labelled
 DIAGNOSTIC on a gate-failed model, or stay unusable until a formal pass (current behaviour per the runbook)?
+
+## 2026-10-14  cp-8d  ADDENDUM: monotonic_flips diagnosed - mixed causes; the gate is marginal (1-2 of 50), not a hard defect
+What I was doing: answering this file's cp-8d question (2) with a read-only sweep replay on the saved epochs-600
+bundle (no gates/code touched; throwaway script in temp; CPU only).
+What happened (exact numbers): `sweep_sign_flips` seed 0 reproduces flips = 1/50. The flagged sweep (dim 0):
+  y    = 18.0778, 17.0189, 16.4122, 16.4233, 17.1195, 18.2263, 18.5035, 16.9034, 1000, 1000, 1000
+  p_ok = 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.996, 0.569, 0.021, 0.001, 0.0
+  tol = 1.0 (INFLATED to 1 J by the 1000-penalty row scaling max|y|); kept diffs -1.06, +1.11, -1.60, +983
+  -> sig [-1, 1, -1, 1] -> 3 sign changes -> flip. The zig-zag happens in the predicted-validity TRANSITION
+  band (p_ok 0.996 -> 0.569): the metric predictions degenerate as the line approaches the invalid pocket.
+Seed-stability (seeds 1-5, still read-only): flips = 1, 1, 2, 2, 2 of 50 every time. The flagged sweeps are
+THREE distinct kinds: (a) invalid-transition degeneracy as above; (b) GENUINE model undulation on fully-valid
+lines (p_ok >= 0.98 throughout): +1.35 J / +3.7 J shapes (seed 1 #6: 12.6 -> 15.3 -> 13.0; seed 3 #41:
+10.4 -> 11.1 -> 10.0), 1.4-2.2 J (seed 4 #3) — real wiggles worth 10-30 % of the local y range; (c) tiny-wiggle
+sensitivity: the tolerance 1e-3 * max(1, max|y|) lands at 0.021-0.023 J on near-flat tails, so +-0.05-0.3 J
+undulations count as sign changes (seed 4 #30: 3 changes from wiggles all under 0.35 J).
+What I conclude: the failure is NOT purely an invalid-boundary artifact — kinds (b) and (c) are real. The model
+is slightly rough on valid lines AND the flat tolerance makes the gate marginal. Flip rate 2-4 % of sweeps; the
+gate demands zero. Five of six gates have real margins; this one is a hair over.
+What I need decided: (i) confirm "more data + retrain" as the fix for (b) — my recommendation, tied to question
+(1) of the prior block (the ~10.2 h OSSE top-up); (ii) a ruling on the sweep-tolerance SEMANTICS for (c) — e.g. a
+tolerance based on the sweep's LOCAL y-range rather than the 1e3-inflated global max — that is a gates.py
+semantics change (NOT a threshold change) and gates.py is frozen, so it is the owner's call; (iii) whether (a)
+should be reported as its own category (invalid-boundary crossing) instead of masquerading as a zig-zag.

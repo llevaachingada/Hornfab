@@ -59,3 +59,28 @@ TRAIN600_EXIT=1
   --budget 1900` ≈ **10.2 h** at the measured 187/h — a user/GPU-hours decision (also the
   CP-9 cloud path). The `monotonic_flips = 1` cause (sweep invalid-boundary vs genuine)
   is question (2) in the NOTES block.
+
+## Flip diagnosis (read-only sweep replay on the saved bundle, 2026-10-14 ~01:30 local)
+
+`sweep_sign_flips` seed 0 reproduces flips = 1/50. The flagged sweep (dim 0):
+
+```
+y    = 18.0778, 17.0189, 16.4122, 16.4233, 17.1195, 18.2263, 18.5035, 16.9034, 1000, 1000, 1000
+p_ok = 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.996, 0.569, 0.021, 0.001, 0.0
+tol = 1.0 J (inflated by the 1000-penalty row); kept diffs: -1.06, +1.11, -1.60, +983 -> 3 sign changes
+```
+
+Seed-stability (seeds 1-5, same procedure): flips = **1, 1, 2, 2, 2 of 50**. Three distinct causes
+among the flagged sweeps:
+
+1. **Invalid-transition degeneracy**: the zig-zag sits in the predicted-validity transition band
+   (`p_ok` 0.996 → 0.569 → 0.02) — metric predictions degenerate as the sweep approaches a pocket.
+2. **Genuine model undulation on fully-valid lines** (`p_ok ≥ 0.98` throughout): +1.35 J / +3.7 J
+   shapes (12.6→15.3→13.0; 10.4→11.1→10.0), 1.4–2.2 J elsewhere — real wiggles, 10-30 % of the
+   local y range.
+3. **Tiny-wiggle sensitivity**: the tolerance `1e-3 · max(1, max|y|)` = 0.021-0.023 J on near-flat
+   tails, so ±0.05-0.3 J undulations register as sign changes.
+
+Verdict: **marginal gate, mixed causes — not a hard defect**. 2-4 % flip rate under seed variation;
+the gate demands zero. Fix candidates: more data + retrain (kind 2), a LOCAL-range tolerance or an
+invalid-crossing category (kinds 1/3 — a `gates.py` SEMANTICS ruling for the owner; thresholds untouched).
