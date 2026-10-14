@@ -429,7 +429,12 @@ class DatasetStore:
         """Cheap: reads only the in-memory copy of index.jsonl (plus one directory walk for
         disk_mb). Keys: n, n_ok, n_failed, by_family, by_backend, by_lib_sha, date_first,
         date_last, total_gpu_seconds, disk_mb, plus trace_fraction, family_balance,
-        family_warning (a message or None) and n_shards."""
+        family_warning (a message or None), n_shards, n_duplicate_designs and missing_families.
+
+        ``n_duplicate_designs`` counts distinct ``design_hash`` values that appear MORE THAN ONCE
+        in the index (a repeated design can straddle a cluster holdout split and inflate a gate).
+        ``missing_families`` lists which of record.FAMILIES have zero records: the 80 % share
+        warning below can never flag a MISSING family, so it is reported directly."""
         idx = self._index
         n = len(idx)
         n_ok = sum(1 for e in idx if e.get("ok"))
@@ -437,6 +442,9 @@ class DatasetStore:
         gpu = sum(float(e.get("solve_seconds") or 0.0) for e in idx
                   if str(e.get("backend", "")).endswith("cuda"))
         bal = self.family_balance()
+        dh_counts = Counter(e.get("design_hash") for e in idx)
+        n_duplicate = sum(1 for c in dh_counts.values() if c > 1)
+        missing_families = [f for f in FAMILIES if bal.get(f, 0) == 0]
         warning = None
         if n >= FAMILY_WARN_MIN_RECORDS:
             fam, cnt = max(bal.items(), key=lambda kv: kv[1])
@@ -457,6 +465,8 @@ class DatasetStore:
             "family_balance": bal,
             "family_warning": warning,
             "n_shards": len({e.get("shard") for e in idx}),
+            "n_duplicate_designs": n_duplicate,
+            "missing_families": missing_families,
         }
 
 
@@ -629,9 +639,15 @@ def to_training_arrays(store: DatasetStore,
 
 def verify_store(store: DatasetStore, check_arrays: bool = True) -> dict:
     """Re-read and re-validate every record. A dataset you have never read back is a dataset you
-    do not have. Returns {'n', 'n_bad', 'bad': [{'shard','row','design_hash','problem'}],
-    'recovery': store.recovery}. Called by `hornlab-search dataset verify`."""
-    bad = []
+    do not have. Returns {'n', 'n_bad', 'bad', 'n_bad_arrays', 'bad_arrays',
+    'recovery': store.recovery}. Called by `hornlab-search dataset verify`.
+
+    ``bad`` lists records that fail validation or existence checks. ``bad_arrays`` lists OK records
+    whose present per-frequency metric arrays are not 1-D with ``len == len(solve.freqs_hz)`` —
+    reported separately because they would otherwise pass here and then silently vanish from the
+    training pool via ``to_training_arrays``' ``skipped_bad_arrays``. Each entry has the same
+    {'shard','row','design_hash','problem'} shape as ``bad``."""
+    bad, bad_arrays = [], []
     for e in store.index:
         s, r, h = e.get("shard"), e.get("row"), e.get("design_hash")
         try:
@@ -649,10 +665,23 @@ def verify_store(store: DatasetStore, check_arrays: bool = True) -> dict:
                 if meta["traces"]["captured"]:
                     if not store.read_traces(meta):
                         raise ValueError("trace file is missing or empty")
+                if meta["ok"]:                  # shape problems: separate list, never a silent drop
+                    nf = len(meta["solve"].get("freqs_hz") or [])
+                    for k in Y_METRIC_KEYS:
+                        if k not in arrays:
+                            continue
+                        a = np.asarray(arrays[k])
+                        if a.ndim != 1 or a.shape[0] != nf:
+                            bad_arrays.append({"shard": s, "row": r, "design_hash": h,
+                                               "problem": f"array '{k}' has shape {a.shape}; "
+                                                          f"expected 1-D length {nf} "
+                                                          f"(len(solve.freqs_hz))"})
         except Exception as ex:                      # noqa: BLE001 - report every bad row
             bad.append({"shard": s, "row": r, "design_hash": h,
                         "problem": f"{type(ex).__name__}: {ex}"})
-    return {"n": len(store), "n_bad": len(bad), "bad": bad, "recovery": dict(store.recovery)}
+    return {"n": len(store), "n_bad": len(bad), "bad": bad,
+            "n_bad_arrays": len(bad_arrays), "bad_arrays": bad_arrays,
+            "recovery": dict(store.recovery)}
 
 
 def stats_report(store: DatasetStore) -> str:
@@ -662,6 +691,8 @@ def stats_report(store: DatasetStore) -> str:
     lines = [f"records {s['n']} (ok {s['n_ok']}, failed {s['n_failed']}), shards {s['n_shards']}, "
              f"{s['disk_mb']:.1f} MB",
              f"families {s['family_balance']}",
+             f"missing families {s['missing_families'] or 'none'}, "
+             f"duplicate designs {s['n_duplicate_designs']}",
              f"backends {s['by_backend']}  lib_sha {s['by_lib_sha']}",
              f"traces {100.0 * s['trace_fraction']:.1f}% of records, "
              f"gpu solve seconds {s['total_gpu_seconds']:.1f}",

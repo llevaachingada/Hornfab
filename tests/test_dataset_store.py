@@ -6,6 +6,7 @@ import hashlib
 import json
 import os
 import time
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -518,3 +519,72 @@ def test_arrays_of_an_uncommitted_row_are_deleted_on_reopen(tmp_path):
     assert not (root / "shard-0000" / "rec-0003.npz").exists()
     assert st.append(*make(3)) == (0, 3)
     assert st.read(0, 3)[1]                                            # the new row's own arrays
+
+
+# ---- small data-pipeline fixes (senior review queue) ------------------------------------------
+
+def test_stats_reports_duplicate_designs_and_missing_families(tmp_path):
+    st = DatasetStore(tmp_path / "ds")
+    for i in range(3):
+        st.append(*rec(i, nf=3))
+    st.append(*rec(0, nf=3))                       # design_hash 0 twice
+    st.append(*rec(1, nf=3))
+    st.append(*rec(1, nf=3))                       # design_hash 1 three times
+    s = st.stats()
+    assert s["n_duplicate_designs"] == 2           # distinct hashes seen more than once
+    assert s["missing_families"] == ["R-OSSE", "ICW", "FREEFORM"]
+    rep = stats_report(st)
+    assert "duplicate designs 2" in rep
+    assert "missing families ['R-OSSE', 'ICW', 'FREEFORM']" in rep
+    # an empty store is not a special case: every family is missing, no duplicates
+    empty = DatasetStore(tmp_path / "empty").stats()
+    assert empty["n_duplicate_designs"] == 0
+    assert empty["missing_families"] == ["OSSE", "R-OSSE", "ICW", "FREEFORM"]
+
+
+def test_verify_store_reports_bad_metric_array_shapes_separately(tmp_path):
+    st = DatasetStore(tmp_path / "ds")
+    st.append(*rec(1, nf=12))
+    st.append(*rec(2, nf=12))
+    p = st.record_npz(0, 0)                        # record 0 == design_hash 000000000001
+    with np.load(p, allow_pickle=False) as z:
+        arrays = {k: z[k] for k in z.files}
+    arrays["bw_h_deg"] = arrays["bw_h_deg"][None, :]      # (1, 12): no longer 1-D
+    with open(p, "wb") as f:
+        np.savez(f, **arrays)
+
+    rep = verify_store(DatasetStore(tmp_path / "ds"))
+    assert rep["n_bad"] == 0                       # the record itself is still valid
+    assert rep["n_bad_arrays"] == 1
+    b = rep["bad_arrays"][0]
+    assert (b["shard"], b["row"], b["design_hash"]) == (0, 0, f"{1:012x}")
+    assert "bw_h_deg" in b["problem"] and "1-D" in b["problem"]
+    # the shape problem is exactly what to_training_arrays would otherwise silently drop
+    assert to_training_arrays(DatasetStore(tmp_path / "ds"))["meta"]["skipped_bad_arrays"] == 1
+    # a wrong LENGTH (still 1-D) is caught too; start from fresh arrays so only di_db is wrong
+    _, fresh = rec(1, nf=12)
+    fresh = {k: v for k, v in fresh.items() if v is not None}
+    fresh["di_db"] = np.zeros(5)
+    with open(p, "wb") as f:
+        np.savez(f, **fresh)
+    rep2 = verify_store(DatasetStore(tmp_path / "ds"))
+    assert rep2["n_bad_arrays"] == 1 and "di_db" in rep2["bad_arrays"][0]["problem"]
+
+
+def test_search_resume_refuses_a_changed_config(tmp_path, capsys):
+    """The resume guard: a stored run.json config_sha that disagrees with the current config must
+    REFUSE (exit 1, both SHAs named) before any backend/solver is touched. The escape hatch
+    --allow-config-change is deliberately NOT exercised here (it would reach the backend)."""
+    from hornlab_search.cli import main
+    ex = Path(__file__).resolve().parents[1] / "examples" / "search_smoke.yaml"
+    run_dir = tmp_path / "run"
+    run_dir.mkdir()
+    (run_dir / "run.json").write_text(json.dumps({"config_sha": "deadbeef0000"}))
+    (run_dir / "config.yaml").write_text(ex.read_text(encoding="utf-8"))
+    common = ["--runs-dir", str(tmp_path / "runs"), "--cache-dir", str(tmp_path / "cache"),
+              "--dataset-dir", str(tmp_path / "dataset")]
+    rc = main(["search", "--resume", str(run_dir), "--config", str(ex), "--budget", "0", *common])
+    out = capsys.readouterr().out
+    assert rc == 1
+    assert "REFUSED" in out and "deadbeef0000" in out and "--allow-config-change" in out
+
