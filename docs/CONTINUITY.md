@@ -4,10 +4,10 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 
 ## Status
 - **Wave:** 0, 1, 2 and 3 complete; Phase 2 Stage A code landed (synthetic-tested only) (tasks 04-08 done; CP-7a-f all PASS). This is the end of the plan's Wave ladder.
-- **Last checkpoints:** CP-7 (senior physics gate) GREEN — noise floor **0.039 dB**. **CP-8a PASS, CP-8b PASS** (local GPU box, 2026-10-13: 480 offline + 18 GPU-marked tests, doctor 10/10; bounds widened `a_deg` 25→5 / `exponent` 2→1, rerun no longer pinned). CP-1/CP-2/CP-4/CP-5/CP-6 all green.
-- **Next action:** CP-8c — multi-family dataset runs (osse_baseline 1500, icw_termination 800, freeform_hv 800, throat_adapter 400; one at a time, ~15-17 h GPU serial estimated; user consulted before starting; runs resumable). Then CP-8d train/gate (≥ 500 held-out per family, else report "indicative only"). Dataset now 134 records, 100 % OSSE.
+- **Last checkpoints:** CP-7 (senior physics gate) GREEN - noise floor 0.039 dB. CP-8a PASS, CP-8b PASS; CP-8c CLOSED (PARTIAL on the literal four-families criterion; verify OK) - 3556 records / 8 shards / 587.2 MB, families OSSE 2034 + ICW 800 + FREEFORM 722 (R-OSSE: no example config), duplicate designs 14; campaign wall ~14.9 h; verify OK 0 bad / 0 bad arrays. Issue #13 hardening LANDED (e0b9b61 + 11304f6; offline 498 PASS).
+- **Next action:** CP-8d (indicative) on the fixed code: surrogate train (expect GATES REFUSED (indicative only): held-out ~225 < 500), propose --allow-unvalidated, surrogate round (40 real BEM solves, one at a time) -> ismo_round1.json + docs/evidence/CP-8d.md, then the master PASS/PARTIAL report for CP-8a..CP-8d.
 - **PULL BEFORE CP-8d:** merge `ccr-455d2184-yj5zk4` (PR #14, issue #13 fixes) after CP-8c closes, never mid-run. See the 2026-10-14 notice below. **[SUPERSEDED locally, 2026-10-13 ~20:30: the same fixes are ALREADY on this branch as commit 567ec8b (8 items, offline suite 488 PASS with the mesher) — do NOT merge PR #14 on top; diff and adopt ONE set. See the reconciliation paragraph in the 2026-10-14 notice entry.]**
-- **Blockers:** none. Issue **#13** open (hardening review — circle-back before/with CP-8d; do not weaken gate thresholds). Issues #1-#11 closed.
+- **Blockers:** none. Issue #13 open pending cloud diff-review: local commits e0b9b61/11304f6 implement it (8 items); PR #14 (ccr-455d2184-yj5zk4) is SUPERSEDED - do NOT merge on top (note in the 2026-10-14 notice entry). Issues #1-#11 closed.
 
 ## 2026-10-13 (local GPU box, ~23:10) — store/CLI pipeline fixes + CP-8d glue implemented; full offline suite 498 PASS (fixer lane, CPU-only; fix queued by the senior review)
 
@@ -41,6 +41,15 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 - Dataset: **3156 records (3032 ok, 124 failed), 7 shards, 513.6 MB** — OSSE 1634 + ICW 800 + FREEFORM 722; the new `dataset stats` lines are live and say `missing families ['R-OSSE'], duplicate designs 14` (0.44 % — run/search seed double-solves; train-side dedup from e0b9b61 keeps them out of the gate arithmetic). Zero mesher warnings on FREEFORM.
 - Evidence: new `docs/evidence/CP-8c_freeform_hv.md`; digest/log/manifest refreshed (digest generator hardened for container params: `__unique_count` instead of enumerating 721 reprs).
 - **Next: run 4/4 `throat_adapter --budget 400`** (quarter domain, band 2000–6500 Hz, weights {flat 1.0, load 0.5}; est ~1.5-2 h at ~13-17 s/candidate), then the CP-8c close: final `dataset stats` + `dataset verify` + digest + commit; then CP-8d (indicative) with the `surrogate round` helper.
+
+## 2026-10-13 (local GPU box, ~01:00 Oct 14) — CP-8c CLOSED: run 4/4 (throat_adapter) complete; final stats/verify OK; campaign totals (local agent)
+
+- Run `runs\20261014T025335Z-screen-852be3`, budget stop **400 rows = 400 ok + 0 failed** — the campaign's only zero-failure run (throat_adapter pins `a_deg`/`L`/`exponent`/`aspect_ratio`, so no too-large meshes; `ta_stderr.log` EMPTY). **Seed J 9.1592 → best J 5.9834 (-35 %)**; median solve 11.78 s; best `n_dof` 3216 with `a0_deg` 2.06. Workers clean; VRAM 290 MiB.
+- **CP-8c close-out:** final `dataset stats` — **3556 records (3432 ok, 124 failed), 8 shards, 587.2 MB**, families OSSE 2034 / ICW 800 / FREEFORM 722, `missing families ['R-OSSE'], duplicate designs 14`, traces 4.3 %, **GPU solve 46,930.8 s (13.0 h)**; final `dataset verify` **OK: 3556 re-read, 0 bad, 0 bad arrays** (the new shape check covers the whole store). Campaign wall ≈ **14.9 h** across the four runs (osse 8.02 + icw 2.9 + ff 2.55 + throat 1.42).
+- **Honest CP-8c verdict: PARTIAL on the runbook's literal criterion** ("all four families" is unsatisfiable — `throat_adapter.yaml` is `family: OSSE`; R-OSSE has no example config): **verify OK + 3 of 4 families present** under the amended criterion recorded in the evidence (senior review finding (a)). Adding an R-OSSE config is the cloud owner's call, not mine.
+- Issue-#13 store arithmetic (printed by the tooling now): OSSE pool kept 1501 of 1634 (`skipped_grid_mismatch` 133), held-out **225 < 500** → CP-8d's formal gate will print `GATES REFUSED (indicative only)`.
+- Evidence: new `docs/evidence/CP-8c_throat_adapter.md` (incl. the close-out table for all four runs); digest (7 runs) + logs + manifest refreshed.
+- **Next: CP-8d (indicative)** on the fixed code: `surrogate train --config examples\osse_baseline.yaml --out surrogate_osse.pt` (CPU; expect the REFUSED headline + exit 1), `propose --allow-unvalidated`, then `surrogate round` (40 real BEM solves, one at a time) → `ismo_round1.json` + `docs/evidence/CP-8d.md`, then the master PASS/PARTIAL report.
 
 ## 2026-10-13 (local GPU box, ~20:15) — issue #13 hardening IMPLEMENTED; full offline suite 488 PASS (local agent; fixer lane, CPU-only while run 3 flies)
 

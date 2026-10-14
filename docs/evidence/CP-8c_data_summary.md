@@ -12,6 +12,33 @@ Machine-readable twin: `data_summary.json`. Raw artifacts are local (gitignored)
   their frequency grid differs from the majority grid (the majority grid is `freqs_hz`).
 - `held_out_at_15pct` vs `held_out_formal_floor` 500: the Stage A gate refuses below 500.
 
+## Run `20261014T025335Z-screen-852be3` — throat_adapter (OSSE, screen)
+- command: `hornlab-search search --config examples\throat_adapter.yaml --budget 400`; config budget 200, CLI --budget 400; status at snapshot: finished
+- **bound pinning (top-6)**: fully pinned at LOWER bound: ['a0_deg']; at UPPER bound: ['k', 'throat_ext_angle_deg']
+- rows 400 = ok 400 + failed 0 (torn 0); kinds {}
+- J over ok rows: min 5.983442 / median 6.065277 / mean 6.45816 / max 10.669781; seed J 9.159176
+- best: J 5.983442 at n=310 (27172f71fd46), n_dof 3219
+- timing medians: solve 11.784148 s, mesh 0.613684 s, total 12.403362 s; rate 281.524927 rows/h over 1.421 h
+- di_source {'balloon': 400}; quadrants {'1': 400}
+
+| key | seed | lo | hi | ok min | median | max | spearman vs J | frac 2% lo | frac 2% hi | top6 lo/hi |
+|---|---|---|---|---|---|---|---|---|---|---|
+| L_mm | 260.0 | 260.0 | 260.0 | 260.0 | 260.0 | 260.0 | - | - | - | -/- |
+| a0_deg | 15.5 | 2.0 | 30.0 | 2.000152 | 3.03377 | 23.55025 | 0.699889 | 0.4275 | 0.0 | 6/0 |
+| a_deg | 37.5 | 37.5 | 37.5 | 37.5 | 37.5 | 37.5 | - | - | - | -/- |
+| aspect_ratio | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | - | - | - | -/- |
+| exponent | 2.0 | 2.0 | 2.0 | 2.0 | 2.0 | 2.0 | - | - | - | -/- |
+| k | 1.0 | 0.3 | 2.5 | 0.354572 | 2.473543 | 2.5 | -0.821214 | 0.0 | 0.575 | 0/6 |
+| n | 4.0 | 4.0 | 4.0 | 4.0 | 4.0 | 4.0 | - | - | - | -/- |
+| q | 0.995 | 0.995 | 0.995 | 0.995 | 0.995 | 0.995 | - | - | - | -/- |
+| r0_mm | 17.78 | 17.78 | 17.78 | 17.78 | 17.78 | 17.78 | - | - | - | -/- |
+| s | 0.7 | 0.7 | 0.7 | 0.7 | 0.7 | 0.7 | - | - | - | -/- |
+| slot_length_mm | 0.0 | 0.0 | 30.0 | 0.0 | 24.812453 | 29.999904 | -0.16132 | 0.01 | 0.175 | 0/0 |
+| throat_ext_angle_deg | 5.0 | 0.0 | 15.0 | 0.993515 | 14.930549 | 15.0 | -0.876216 | 0.0 | 0.6375 | 0/6 |
+| throat_ext_length_mm | 10.0 | 0.0 | 40.0 | 0.222095 | 24.337973 | 39.837327 | -0.155433 | 0.0025 | 0.005 | 0/0 |
+
+Term medians over ok rows: cov=6.86769, di=0.118055, di_estimated=0.0, dislope=6.916962, flat=1.523276, load=0.0, n_in_band=6.0, n_nan=0.0, penalty=0.0, rip=3.170427, total=6.065277
+
 ## Run `20261013T234724Z-screen-ff569c` — freeform_hv (FREEFORM, screen)
 - command: `hornlab-search search --config examples\freeform_hv.yaml --budget 800`; config budget 200, CLI --budget 800; status at snapshot: finished
 - **bound pinning (top-6)**: fully pinned at LOWER bound: none; at UPPER bound: none
@@ -182,16 +209,16 @@ Term medians over ok rows: cov=19.22029, di=0.285641, di_estimated=0.0, dislope=
 ## Dataset
 
 ```
-records 3156 (ok 3032, failed 124), shards 7, 513.6 MB
-families {'OSSE': 1634, 'R-OSSE': 0, 'ICW': 800, 'FREEFORM': 722}
+records 3556 (ok 3432, failed 124), shards 8, 587.2 MB
+families {'OSSE': 2034, 'R-OSSE': 0, 'ICW': 800, 'FREEFORM': 722}
 missing families ['R-OSSE'], duplicate designs 14
-backends {'beat_cuda': 3156}  lib_sha {'b922e807a5+38544d214b': 3156}
-traces 4.2% of records, gpu solve seconds 42056.3
-dates 2026-10-13T05:37:51Z .. 2026-10-14T02:21:07Z
+backends {'beat_cuda': 3556}  lib_sha {'b922e807a5+38544d214b': 3556}
+traces 4.3% of records, gpu solve seconds 46930.8
+dates 2026-10-13T05:37:51Z .. 2026-10-14T04:19:42Z
 ```
 
 ### OSSE training pool (what `surrogate train --config osse_baseline.yaml` will see)
-- considered 1634 → kept 1501 (skipped_grid_mismatch **133**, skipped_bad_arrays 0)
+- considered 2034 → kept 1501 (skipped_grid_mismatch **533**, skipped_bad_arrays 0)
 - majority frequency grid (12 pts): [500.0, 621.79, 773.24, 961.58, 1195.8, 1487.07, 1849.28, 2299.72, 2859.87, 3556.47, 4422.73, 5500.0]
 - ok/failed in kept: 1406/95; di_source {'balloon': 1406, '': 95}
 - held-out at 15% = **225.2** vs formal floor 500 → gate will REFUSE (indicative only)
