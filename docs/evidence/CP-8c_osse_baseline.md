@@ -15,7 +15,7 @@ Plan (HANDOFF_LOCAL §5): one config at a time, bigger budgets, GPU hygiene befo
 Snapshot at 13:11 local (988 rows, run still active):
 ```
 rows=988 ok=893 failed=95 torn=0 kinds={'mesh_too_large': 93, 'invalid_geometry': 2}
-ok-J: min=6.11 median=7.34 max=180.45 best=6.11        (seed J 22.07 -> best 72% lower)
+ok-J: min=6.11 median=7.34 max=180.45 best=6.11        (seed J 22.59 -> best 73% lower) [corrected: an earlier line here said 22.07 - that was the search_smoke seed; this run's seed is 22.592]
 median seconds: solve=18.05 mesh=1.81 total=18.89
 rate=213 rows/h (4.65 h)   ok rows with metrics=null: 0
 top design_hash dups: all count=1
@@ -43,8 +43,14 @@ WARNING: dataset is 100% OSSE (1128/1128)
 ## Remaining runs (planned)
 
 `icw_termination` 800 · `freeform_hv` 800 · `throat_adapter` 400, one GPU job at a time, each
-with hygiene + `dataset stats` + a CONTINUITY entry. `dataset verify` runs at the end (CP-8c pass
-= verify OK + all four families present).
+with hygiene + `dataset stats` + a CONTINUITY entry. `dataset verify` runs at the end.
+
+**Family-count correction (senior review 2026-10-13):** `throat_adapter.yaml` is `family: OSSE`,
+so the campaign can only yield OSSE + ICW + FREEFORM — **R-OSSE has no example config and gets
+zero records.** The runbook §5 criterion "all four families present" is unsatisfiable as written,
+and `dataset stats` will NOT warn (its warning fires only when one family exceeds 80 %; OSSE will
+be ~56 % after run 4). Amended criterion used for CP-8c: **verify OK AND OSSE+ICW+FREEFORM
+present (3 of 4 deliberate; R-OSSE absence recorded as a gap for the cloud owner).**
 
 Expected CP-8d effect: pooling `search_smoke` (500–4500 Hz grid) with `osse_baseline`
 (500–5500 Hz) silently drops the search_smoke records (issue #13, M1), so the OSSE held-out
@@ -61,7 +67,7 @@ search OK: 1500 rows in runs\20261013T123136Z-screen-ca15be\search.ndjson; best 
 ```
 - Wall span 8.02 h (12:32–20:33 UTC); GPU solve 26,067 s (7.2 h); median seconds: solve 20.42 / mesh 1.90 / total 22.21; median ok-J 6.45.
 - Quality: torn 0; ok rows with metrics null 0; zero in-run duplicate designs; failures all classified — the 93 `mesh_too_large` sit at the wide-L/wide-throat corner (median L_mm 392, a0 26.0, k 1.98, aspect_ratio 1.84), the 2 `invalid_geometry` at the near-pinched-exponent corner.
-- Bound pinning (FINAL data): the best designs are **fully pinned at the LOWER bound of `n`** (2.0) and 5/6 near `q` lo (0.9); `a_deg`/`exponent` interior — the CP-8b fix held, and the active constraints for this objective are `n`/`q` (follow-up recorded in ISSUES). Details in `CP-8c_data_summary.md`.
+- Bound pinning (FINAL data): the best designs are **fully pinned at the LOWER bound of `n`** (2.0, top-6 6/6); `q` is strongly *attracted* to its lower bound (23 % of ok rows within 2 % of 0.9, Spearman +0.49) but is NOT in the top-6 there (0/6); `a_deg`/`exponent` interior — the CP-8b fix held. Correction (senior review): an earlier line in this file said "5/6 near `q` lo" — that came from the in-flight 13:40 snapshot, not the final data. The `n` case is the strong pinning signal; `q` is supporting evidence. Follow-up recorded in ISSUES. Details in `CP-8c_data_summary.md`.
 - Post-run hygiene: idle julia host killed; VRAM back to 419 MiB.
 - Dataset after run 1: **1634 records (1524 ok, 110 failed), 4 shards, 273.4 MB**, 100 % OSSE.
 - **`dataset verify`: OK — 1634 records re-read, 0 bad** (re-run at the end of CP-8c after all four configs).

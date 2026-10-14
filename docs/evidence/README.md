@@ -15,8 +15,12 @@ datasets/runs. The raw artifacts are large and are gitignored **by design** (see
 What IS committed here:
 - `CP-8a.md`, `CP-8b.md`, `CP-8c_*.md` — the checkpoint terminal output, verbatim.
 - `logs/` — copies of the live monitor logs used during the long CP-8c runs.
-- `manifest.sha256` — SHA-256 + size of every raw local artifact, so the committed record is
-  verifiable against the local store (and detects silent corruption).
+- `manifest.sha256` — SHA-256 + size of the **metadata layer** of the raw artifacts (run books
+  `run.json`/`config.yaml`/`best.json`, the per-run `search.ndjson`, the store `index.jsonl` +
+  shard JSONLs, committed log copies). It does **NOT** hash the per-record `.npz` label arrays or
+  `traces/` (the bulk of the GBs): those are covered by **`dataset verify`** for existence and
+  validity, not bit-identity. So the manifest detects tampering/renaming of run books and store
+  structure, not silent float corruption inside a label array — worded honestly after review.
 
 Rule: this folder holds **evidence about** the data, never the data itself. If a raw blob must
 travel, push it to a data branch / release asset / external store, not to the code branch.

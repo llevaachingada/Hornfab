@@ -25,8 +25,7 @@ WARNING hornlab_mesher.profile_sampling: outer wall self-intersects: ICW generat
 grid has a normal flip near azimuth row 0, axial interval 0 ... the acoustic (inner) surface
 is unaffected
 ```
-- 24 occurrences total, **zero new after 17:06 local** (~a few % of designs; the mesher emits it
-  as a warning and the rows still validate). It concerns the freestanding OUTER shell offset;
+- 24 warning LINES, **zero new after 17:06 local**. Correction (senior review): all 24 lines share one timestamp, so they plausibly come from a **single design** — per-design attribution is not recorded (mesher warnings are not logged into dataset rows/ndjson). Honest scope: "at least one design of 800 emitted the warning; the count of affected designs is unknown." The mesher emits it as a warning and the rows still validate. It concerns the freestanding OUTER shell offset;
   the acoustic inner surface is unaffected, so the computed metrics stand.
 - Recorded as a caveat for ICW-family records. If ICW exterior physics beyond the inner surface
   are ever trusted (CP-7 physics gates were OSSE-only), a senior/oracle pass over this warning is

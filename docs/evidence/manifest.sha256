@@ -1,6 +1,6 @@
 ﻿# CP-8 evidence manifest -- SHA256  bytes  path (local, gitignored artifacts)
 # snapshot refreshed 2026-10-13T19:45 local after CP-8c run 2 (icw_termination) completed
-  # dataset keeps growing during runs 3-4; hashes refreshed at checkpoint commits
+# dataset keeps growing during runs 3-4; hashes refreshed at checkpoint commits
 3B80B2C0E116FF30203A395E0C89674ECFA36CA9A1619CA023FD9749026ED55B  4738425  runs\20261013T123136Z-screen-ca15be\search.ndjson
 6406D263609BAF9D9B4DF6C6B741CB6FC100D87E07AE1B3C6C22F0B27B8C1552  772  runs\20261013T123136Z-screen-ca15be\best.json
 5B3131188A36485A3E4B6F077A8899A3E1A3858E607C94AE09633579DD2DA023  1243  runs\20261013T123136Z-screen-ca15be\config.yaml

@@ -28,7 +28,42 @@ Local-only, added 2026-10-13 (local GPU box): CP-8 evidence lives in `docs/evide
 
 CP-8a..d (local GPU box, see `docs/HANDOFF_LOCAL.md`): CP-8a **PASS** (480 offline + 18 GPU-marked tests, doctor 10/10, outputs pasted in CONTINUITY 2026-10-13); CP-8b **PASS** (`a_deg` lo 25→5, `exponent` lo 2→1 in `search_smoke`/`osse_baseline`, rerun no longer pinned, report table pasted); **CP-8c runs 1-2/4 done** — `osse_baseline` 1500 (best J 6.106 vs seed 22.592; verify OK at 1634) and `icw_termination` 800 (best J 12.201 vs seed 55.736; dataset 2434 records / 2 families); runs 3/4 `freeform_hv` 800 and 4/4 `throat_adapter` 400 in flight; CP-8d afterwards — the OSSE gate will **refuse** below 500 held-out (kept pool 1501 → held-out 225.2), so Stage A will be reported **indicative only** unless the user opts into ~17 h more OSSE GPU time.
 
-Local-only, added 2026-10-13 (local GPU box, icw run): (a) ICW mesher warning "outer wall self-intersects / normal flip near azimuth row 0" appeared 24× during run 2 and STOPPED occurring after 17:06 local; rows still validate and the acoustic (inner) surface is unaffected — caveat on ICW records; senior/oracle pass warranted before trusting ICW exterior physics beyond the inner surface. (b) ICW bound-pinning follow-up: best designs fully pinned at the `hold_end` LOWER bound (0.55, top-6 6/6) and 4/6 near `kappa0` lo = 0.0 (median 0.0016); candidate `hold_end` widening subject to the repo's `hold_start < hold_end` rule + mesher validation. (c) OSSE bound-pinning follow-up from run 1: `n` fully pinned at lo 2.0 (top-6 6/6) and `q` 5/6 near lo 0.9; mesher needs only `n>0, q>0` while `s≠0`. Both (b)/(c) recorded, NOT changed mid-campaign.
+Local-only, added 2026-10-13 (local GPU box, icw run): (a) ICW mesher warning "outer wall self-intersects / normal flip near azimuth row 0" — 24 warning LINES, all timestamped 17:06:25, plausibly ONE design of 800 (per-design attribution not recorded); zero new after 17:06; rows still validate and the acoustic (inner) surface is unaffected — caveat on ICW records; senior/oracle pass warranted before trusting ICW exterior physics beyond the inner surface. (b) ICW bound-pinning follow-up: best designs fully pinned at the `hold_end` LOWER bound (0.55, top-6 6/6) and 4/6 near `kappa0` lo = 0.0 (median 0.0016); candidate `hold_end` widening subject to the repo's `hold_start < hold_end` rule + mesher validation. (c) OSSE bound-pinning follow-up from run 1 — **corrected per senior review**: `n` fully pinned at lo 2.0 (top-6 6/6; the strong signal); `q` strongly attracted to lo (23 % of ok rows within 2 % of 0.9, Spearman +0.49) but top-6 0/6 (an earlier "5/6" was a stale in-flight snapshot); mesher needs only `n>0, q>0` while `s≠0`. Both (b)/(c) recorded, NOT changed mid-campaign.
+
+Local-only, added 2026-10-13 (senior read-only review of CP-8c/CP-8d readiness, glm-5.3 oracle, branch claude/wave-3-implementation-review-2dk4qe):
+
+**(a) CP-8c yields THREE families, not four** — `examples/throat_adapter.yaml` is `family: OSSE`,
+so after run 4 the store holds OSSE+ICW+FREEFORM and R-OSSE stays 0. HANDOFF_LOCAL §5's pass
+criterion ("all four families present") is unsatisfiable as planned, and `stats()`'s family
+warning (fires only when one family >80%) will never flag a MISSING family (OSSE ≈56% after
+run 4). Fix: re-scope the criterion to "OSSE+ICW+FREEFORM present; R-OSSE deliberately absent
+(no example config)"; add `missing_families` to `dataset stats` (store.py:441-446, 658).
+
+**(b) CP-8d misreading guards (14-item list in the review)** — (1) CLI must distinguish
+"GATES REFUSED (indicative only): held-out 225 < 500" from "GATES FAILED" (cli.py:675 vs
+gates.py:115); (2) `round_report`'s `random_true_J` = CMA gen-0 samples, not random, and J=1000
+penalty rows inflate medians — pass solved rows only and print the baseline provenance
+(ismo.py:56-72); (3) print exploit vs explore medians separately; (4) print the proposals'
+parameter spread (the 30 exploits are near-clones of one basin); (5) freeze `pred_J` from
+proposals.json and record bundle/config_sha/store count at train; (6) write `ismo_round1.json`
+into a run dir and paste it into a new `docs/evidence/CP-8d.md`. Items overlapping #13
+(skipped-count printing, verdict persistence, dedupe-by-hash before the holdout split) LANDED
+in commit e0b9b61 — none of CP-8d's numbers are quoted before that.
+
+**(c) Data-pipeline integrity at 10k (new, queued as the next implementation lane)** —
+`verify_store` never checks array shapes vs `solve.freqs_hz` (wrong-length metrics pass verify,
+then vanish from the training pool via `skipped_bad_arrays`); duplicate `(design_hash, mode)`
+records are invisible (digest already shows 1: the seed) and can straddle the holdout — report
+`n_duplicate_designs` from the index; resume does not compare `run.json["config_sha"]` to the
+current config, so a mid-campaign weight/bound edit silently mixes old-J and new-J rows;
+`manifest.sha256` covers only ~6.5 MB of 395.3 MB (no record .npz, no traces) — README reworded;
+manifest line 3 indent fixed for `sha256sum -c`.
+
+**(d) Evidence corrections** — CP-8c_osse_baseline.md "5/6 near q lo" contradicted its own table
+(fixed: top-6 0/0, median 0.9033 — stale snapshot claim); the 13:11 snapshot's "seed J 22.07" was
+the smoke seed (fixed: 22.592); ICW warning "~a few % of designs" unsupported (fixed: 24 lines,
+one timestamp, plausibly one design of 800); `data_summary.json` `generated_local` lacks a
+timezone (add `generated_utc`).
 
 CP-9a..d (cloud GPU pod proof, cap study, campaign, train/gate; see `docs/CLOUD_GPU_REPORT.md` section 6): proposed, awaiting user decisions on provider and spend cap; no GitHub issue yet.
 
