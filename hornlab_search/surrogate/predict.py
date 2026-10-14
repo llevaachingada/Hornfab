@@ -26,6 +26,42 @@ class Surrogate:
         b = load_bundle(path)
         return cls(b["states"], b["meta"], b["mu"], b["sd"])
 
+    def config_mismatch(self, space, *, freqs_hz=None, family: str | None = None) -> str | None:
+        """First way the frozen config contract in ``meta`` disagrees with the config being
+        proposed with (family, key order, per-key bounds, and -- when ``freqs_hz`` is given -- the
+        frequency grid). Returns a message naming the mismatched field, or None when they agree.
+
+        Old bundles that predate the contract (no ``bounds``) are reported as mismatched so the
+        caller refuses rather than silently proposing off a different contract."""
+        fam = family if family is not None else space.family
+        exp_fam = self.meta.get("family")
+        if exp_fam is not None and exp_fam != fam:
+            return f"family: bundle was trained for {exp_fam!r}, config proposes {fam!r}"
+        exp_keys = self.meta.get("keys")
+        if exp_keys is not None and list(exp_keys) != list(space.keys()):
+            return f"keys: bundle keys {list(exp_keys)} != config keys {list(space.keys())}"
+        bounds = self.meta.get("bounds")
+        if not bounds:
+            return "bounds: bundle has no recorded bounds (retrain to freeze the config contract)"
+        for k in space.keys():
+            b = space.bounds[k]
+            e = bounds.get(k)
+            if e is None:
+                return f"bounds[{k}]: missing from the bundle"
+            if (float(e["lo"]) != float(b.lo) or float(e["hi"]) != float(b.hi)
+                    or bool(e["log"]) != bool(b.log)):
+                return (f"bounds[{k}]: bundle lo/hi/log={e['lo']}/{e['hi']}/{e['log']} != "
+                        f"config {b.lo}/{b.hi}/{b.log}")
+        exp_freqs = self.meta.get("freqs_hz")
+        if freqs_hz is not None and exp_freqs is not None:
+            a = np.asarray(exp_freqs, float)
+            b = np.asarray(freqs_hz, float)
+            if a.shape != b.shape or not np.allclose(a, b, rtol=0.0, atol=1e-3):
+                return (f"freqs_hz: bundle grid has {a.size} points "
+                        f"({a.min():g}..{a.max():g} Hz), config wants {b.size} points "
+                        f"({b.min():g}..{b.max():g} Hz)")
+        return None
+
     @torch.no_grad()
     def predict(self, U: np.ndarray) -> dict:
         x = torch.tensor(np.asarray(U, np.float32))

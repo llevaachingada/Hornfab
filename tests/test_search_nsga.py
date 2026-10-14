@@ -35,6 +35,23 @@ def test_nsga2_deterministic():
     assert np.array_equal(a["X"], b["X"])
 
 
+def test_nsga2_nonfinite_objective_becomes_penalty():
+    """A NaN objective must never be treated as non-dominated (NaN compares False, which would
+    otherwise put a broken row on rank 0)."""
+    from hornlab_search.objective.terms import PENALTY_FAILED
+
+    def f(U):
+        F = np.stack([U[:, 0], 1 - U[:, 0]], 1)
+        F[0, 0] = np.nan
+        return F
+
+    r = nsga2(f, 2, pop=20, gens=5, seed=0)
+    assert np.isfinite(r["F"]).all()
+    assert (r["F"] <= PENALTY_FAILED + 1e-9).all()
+    assert np.isfinite(r["F"][r["front"]]).all()
+
+
+
 def test_gates_perfect_and_broken():
     rng = np.random.default_rng(0)
     t = rng.random(600)

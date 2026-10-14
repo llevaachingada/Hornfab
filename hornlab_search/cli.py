@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -643,7 +644,7 @@ def _cmd_surrogate(args) -> int:
     except ImportError:
         print('surrogate FAILED: torch is not installed (pip install -e ".[surrogate]")')
         return 1
-    from hornlab_search.config import load_config
+    from hornlab_search.config import load_config, mode_freqs
     from hornlab_search.dataset import store as dstore
     from hornlab_search.design.space import DesignSpace
     from hornlab_search.objective.scalar import resolve_weights
@@ -662,6 +663,16 @@ def _cmd_surrogate(args) -> int:
             return 1
         arrays = dstore.to_training_arrays(dstore.DatasetStore(d["dataset"]), family=cfg.family,
                                            keys=space.keys(), ok_only=False, lib_sha=args.lib_sha)
+        ameta = arrays.get("meta", {})
+        skipped = int(ameta.get("skipped_grid_mismatch", 0) or 0)
+        print(f"  training arrays: considered {ameta.get('n_considered')}, selected "
+              f"{ameta.get('n_selected')}, skipped_grid_mismatch {skipped}, "
+              f"skipped_bad_arrays {ameta.get('skipped_bad_arrays')}, "
+              f"skipped_keys {ameta.get('skipped_keys')}")
+        if skipped > 0:
+            print(f"  WARNING: {skipped} record(s) were dropped for a DIFFERENT frequency grid "
+                  "than the training grid; concatenating them would train on a lie "
+                  "(see to_training_arrays).")
         n = int(arrays["X"].shape[0])
         if n < 50:
             print(f"surrogate train FAILED: only {n} {cfg.family} records (need data first)")
@@ -672,15 +683,45 @@ def _cmd_surrogate(args) -> int:
             print(f"  {'PASS' if g['pass'] else 'FAIL'}  {k:18s} {g['value']!s:>10}  need {g['threshold']}")
         for w in rep["warnings"]:
             print("  WARNING: " + w)
+        if rep["n_duplicates_dropped"]:
+            print(f"  dropped {rep['n_duplicates_dropped']} duplicate design(s) before the "
+                  "cluster holdout split")
+        print(f"  objective delta (recomputed vs stored): max {rep['objective_delta_max']:.4g}, "
+              f"mean {rep['objective_delta_mean']:.4g}")
+        if rep.get("kept_existing_bundle"):
+            print(f"  KEPT the existing passing bundle at {out}; this run FAILED its gates and was "
+                  "NOT written over it.")
         print(f"surrogate train {'GATES PASSED' if rep['pass'] else 'GATES NOT PASSED: do not use this model'}"
               f": {n} records, {rep['n_heldout']} held out -> {out}")
         return 0 if rep["pass"] else 1
+    # -- propose: the bundle must match the config it is proposed with, and must carry a verdict.
     sur = Surrogate.load(out)
+    mismatch = sur.config_mismatch(space, freqs_hz=mode_freqs(args.mode, cfg))
+    if mismatch is not None:
+        print(f"surrogate propose REFUSED: {out} does not match --config: {mismatch}")
+        return 1
+    gr = sur.meta.get("gate_report")
+    if not args.allow_unvalidated:
+        if gr is None:
+            print(f"surrogate propose REFUSED: {out} has no gate verdict in its meta; retrain with "
+                  "'surrogate train' (or pass --allow-unvalidated to propose anyway).")
+            return 1
+        if not gr.get("gates_passed"):
+            print(f"surrogate propose REFUSED: {out} did NOT pass its acceptance gates "
+                  "(gates_passed=False). Pass --allow-unvalidated to propose anyway; those "
+                  "predictions are NOT validated.")
+            return 1
+    elif gr is not None and not gr.get("gates_passed"):
+        print(f"  WARNING: {out} did not pass its gates; proposing anyway (--allow-unvalidated)")
     props = ismo.propose(sur, space, target, weights, n_top=args.n_top, n_var=args.n_var)
     dest = Path(args.proposals)
-    dest.write_text(json.dumps([{"family": p["design"].family, "params": p["design"].params,
-                                 "kind": p["kind"], "pred_J": p["pred_J"], "std": p["std"]}
-                                for p in props], indent=1, default=float))
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    text = json.dumps([{"family": p["design"].family, "params": p["design"].params,
+                        "kind": p["kind"], "pred_J": p["pred_J"], "std": p["std"]}
+                       for p in props], indent=1, default=float)
+    tmp = dest.with_name(dest.name + ".tmp")
+    tmp.write_text(text, encoding="utf-8")
+    os.replace(tmp, dest)
     print(f"surrogate propose OK: {len(props)} designs -> {dest}. Solve each with real BEM "
           "(a surrogate prediction is not a result) and run ismo.round_report on the outcome.")
     return 0
@@ -744,6 +785,11 @@ def build_parser() -> argparse.ArgumentParser:
     sg.add_argument("--n-top", type=int, default=30)
     sg.add_argument("--n-var", type=int, default=10)
     sg.add_argument("--proposals", default="proposals.json")
+    sg.add_argument("--mode", choices=("screen", "verify", "final"), default="screen",
+                    help="frequency grid the config would solve on; propose checks it against the "
+                         "bundle's frozen training grid")
+    sg.add_argument("--allow-unvalidated", action="store_true",
+                    help="propose even if the bundle failed (or lacks) its gate verdict")
     return p
 
 

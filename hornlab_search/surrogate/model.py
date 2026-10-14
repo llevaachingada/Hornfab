@@ -1,6 +1,7 @@
 """The MLP (needs torch) and a frozen save/load format."""
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import numpy as np
@@ -29,9 +30,16 @@ class MetricMLP(nn.Module):
 
 
 def save_bundle(path, *, states, meta: dict, mu: np.ndarray, sd: np.ndarray) -> None:
-    """``meta``: family, keys, freqs_hz, metric_names, hidden, layers, lib_sha, n_train."""
+    """``meta``: family, keys, freqs_hz, metric_names, hidden, layers, lib_sha, n_train.
+
+    Written atomically (tmp file + ``os.replace``): a half-written bundle at ``path`` is never
+    observable, so an interrupted train cannot corrupt the previously good bundle."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(path.name + ".tmp")
     torch.save({"format": FORMAT_VERSION, "states": states, "meta": meta,
-                "mu": np.asarray(mu), "sd": np.asarray(sd)}, Path(path))
+                "mu": np.asarray(mu), "sd": np.asarray(sd)}, tmp)
+    os.replace(tmp, path)
 
 
 def load_bundle(path) -> dict:
@@ -39,6 +47,18 @@ def load_bundle(path) -> dict:
     if d.get("format") != FORMAT_VERSION:
         raise ValueError(f"surrogate format {d.get('format')!r} != {FORMAT_VERSION}")
     return d
+
+
+def bundle_gates_passed(path) -> bool:
+    """True iff ``path`` holds a bundle whose stored gate verdict says PASSED. Any read error, a
+    missing verdict, or ``gates_passed`` False is treated as NOT passing (used to avoid
+    overwriting a known-good bundle with a failed retrain)."""
+    try:
+        b = load_bundle(path)
+    except Exception:  # noqa: BLE001 - absent/corrupt destination is simply "not passing"
+        return False
+    gr = (b.get("meta") or {}).get("gate_report") or {}
+    return bool(gr.get("gates_passed"))
 
 
 def build_models(bundle: dict) -> list[MetricMLP]:

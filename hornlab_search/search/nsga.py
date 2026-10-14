@@ -10,14 +10,28 @@ the design space: the evaluator is an argument, so a surrogate swaps in without 
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from typing import Callable
 
 import numpy as np
 
+from ..objective.terms import PENALTY_FAILED
 from ..types import Evaluation
 
 DEFAULT_OBJECTIVES = ("cov", "rip", "flat")
+
+
+def _finite_or_penalty(F: np.ndarray) -> np.ndarray:
+    """Replace any non-finite objective with ``PENALTY_FAILED``. A NaN compares False to
+    everything, so ``NaN <= x`` and ``NaN < x`` are both False and a broken row would look
+    NON-DOMINATED (rank 0). The penalty makes it dominated instead."""
+    F = np.asarray(F, float)
+    bad = ~np.isfinite(F)
+    if bad.any():
+        F = F.copy()
+        F[bad] = PENALTY_FAILED
+    return F
 
 
 def fast_nondominated_sort(F: np.ndarray) -> list[np.ndarray]:
@@ -86,12 +100,12 @@ def nsga2(f: Callable[[np.ndarray], np.ndarray], n_dim: int, pop: int = 100, gen
     if init is not None and len(init):
         init = np.clip(np.atleast_2d(init), 0, 1)[:pop]
         P[:len(init)] = init
-    F = np.asarray(f(P), float)
+    F = _finite_or_penalty(np.asarray(f(P), float))
     n_evals = pop
     for _ in range(gens):
         rank, crowd = _rank_and_crowd(F)
         Q = _variation(P, rank, crowd, rng)
-        FQ = np.asarray(f(Q), float)
+        FQ = _finite_or_penalty(np.asarray(f(Q), float))
         n_evals += len(Q)
         R, FR = np.vstack([P, Q]), np.vstack([F, FQ])
         keep = []
@@ -115,7 +129,6 @@ def search_pareto(cfg, run_dir, evaluator, *, objectives=DEFAULT_OBJECTIVES, pop
     writes ``<run_dir>/pareto.json``. Nothing here knows whether the evaluator is BEM or a
     surrogate; a surrogate front MUST be re-solved with real BEM before it is believed."""
     from ..design.space import DesignSpace
-    from ..objective.scalar import PENALTY_FAILED
 
     space = DesignSpace.from_config(cfg)
     k = len(space.keys())
@@ -138,12 +151,15 @@ def search_pareto(cfg, run_dir, evaluator, *, objectives=DEFAULT_OBJECTIVES, pop
     front = list(evaluator(designs))
     out_dir = Path(run_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    (out_dir / "pareto.json").write_text(json.dumps({
+    text = json.dumps({
         "objectives": list(objectives), "n_evals": res["n_evals"], "pop": pop, "gens": gens,
         "seed": seed, "keys": space.keys(),
         "front": [{"design": e.design.params, "family": e.design.family,
                    "design_hash": e.design_hash, "objective": e.objective,
                    "terms": {n: float(e.terms.get(n, float("nan"))) for n in objectives}}
                   for e in front],
-    }, indent=1, default=float))
+    }, indent=1, default=float)
+    tmp = out_dir / "pareto.json.tmp"
+    tmp.write_text(text, encoding="utf-8")
+    os.replace(tmp, out_dir / "pareto.json")
     return front

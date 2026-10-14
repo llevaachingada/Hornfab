@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 
+from ..objective.terms import PENALTY_FAILED
 from . import gates
 
 
@@ -58,8 +59,14 @@ def round_report(pred_J, true_J, random_true_J, *, n_top: int | None = None) -> 
     proposals, and are they better than random designs? ``random_true_J`` are BEM objectives of
     random (non-surrogate) designs, e.g. the search's early evaluations. ``working`` is False
     unless the proposals' median beats the random median AND the rank correlation on the
-    proposals is positive; if False, more iterations will not fix it."""
-    pj, tj = np.asarray(pred_J, float), np.asarray(true_J, float)
+    proposals is positive; if False, more iterations will not fix it.
+
+    CONVENTION: a proposal whose solve FAILED carries ``PENALTY_FAILED`` (1.0e3), not NaN. Any
+    ``true_J >= PENALTY_FAILED`` is therefore coerced to NaN here (an unsolved proposal), so a
+    penalty cannot masquerade as a real objective and drag the median. Pass NaN for unsolved
+    proposals too; both are treated as failed and counted in ``n_solved_failed``."""
+    pj, tj = np.asarray(pred_J, float), np.asarray(true_J, float).astype(float, copy=True)
+    tj[tj >= PENALTY_FAILED] = np.nan
     rj = np.asarray(random_true_J, float)
     rj = rj[np.isfinite(rj)]
     m = np.isfinite(tj)
