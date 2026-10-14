@@ -22,7 +22,7 @@ Local-only items (no GitHub issue): band edges capped by the measured dof cap (c
 
 Local-only, added 2026-10-13 (cloud): Phase 2 Stage A code complete but gates unvalidated on real data (needs >= 500 held-out multi-family BEM records, GPU box); widen `a_deg`/`exponent` bounds and run the other 4 configs (GPU box); ISMO selection + `surrogate` CLI built (synthetic-tested); solving proposals with BEM and Stage B-D not started.
 
-Local-only, added 2026-10-13 (local GPU box, data digest): `osse_baseline` bound-pinning follow-up — the best designs sit at the LOWER bound of `n` (2.0; top-6 6/6) and 5/6 at `q` lo (0.9), while `a_deg`/`exponent` are interior. The mesher only needs `n > 0`, `q > 0` while `s != 0`, so a future widening of `n`/`q` is indicated (CP-8b handled `a_deg`/`exponent` only). Evidence: `docs/evidence/CP-8c_data_summary.md`.
+Local-only, added 2026-10-13 (local GPU box, data digest): `osse_baseline` bound-pinning follow-up — **corrected per senior review** — the best designs sit at the LOWER bound of `n` (2.0; top-6 6/6 — the strong signal), while `q` is attracted to its lower bound (23 % of ok rows within 2 % of 0.9, Spearman +0.49) but is top-6 0/6 (an earlier "5/6" here was the in-flight 13:40 snapshot, not final data); `a_deg`/`exponent` are interior. The mesher only needs `n > 0`, `q > 0` while `s != 0`, so a future widening of `n`/`q` is indicated (CP-8b handled `a_deg`/`exponent` only). Evidence: `docs/evidence/CP-8c_data_summary.md`.
 
 Local-only, added 2026-10-13 (local GPU box): CP-8 evidence lives in `docs/evidence/` — verbatim checkpoint output (`CP-8a.md`, `CP-8b.md`, `CP-8c_*.md`), live monitor logs (`logs/`), and `manifest.sha256` (SHA-256 + size of every raw artifact). Raw `dataset/`, `runs/`, `cache/` stay local and gitignored by design (dataset already 180.6 MB at 1128 records; CP-5 projects 0.78-1.4 GB at 10k) — verify against the manifest instead of committing blobs; use a data branch/release asset to move raw data.
 
@@ -50,14 +50,17 @@ into a run dir and paste it into a new `docs/evidence/CP-8d.md`. Items overlappi
 (skipped-count printing, verdict persistence, dedupe-by-hash before the holdout split) LANDED
 in commit e0b9b61 — none of CP-8d's numbers are quoted before that.
 
-**(c) Data-pipeline integrity at 10k (new, queued as the next implementation lane)** —
-`verify_store` never checks array shapes vs `solve.freqs_hz` (wrong-length metrics pass verify,
-then vanish from the training pool via `skipped_bad_arrays`); duplicate `(design_hash, mode)`
-records are invisible (digest already shows 1: the seed) and can straddle the holdout — report
-`n_duplicate_designs` from the index; resume does not compare `run.json["config_sha"]` to the
-current config, so a mid-campaign weight/bound edit silently mixes old-J and new-J rows;
-`manifest.sha256` covers only ~6.5 MB of 395.3 MB (no record .npz, no traces) — README reworded;
-manifest line 3 indent fixed for `sha256sum -c`.
+**(c) Data-pipeline integrity at 10k — IMPLEMENTED (commit 11304f6; full offline suite 498 PASS)** —
+`verify_store` now checks metric array shapes vs each record's own `solve.freqs_hz` (reported as
+`bad_arrays`; `dataset verify` exits 1 on `bad` OR `bad_arrays`); `dataset stats` gained
+`n_duplicate_designs` + a `missing families` line in `stats_report` (R-OSSE expected); `search
+--resume` compares `run.json["config_sha"]` and REFUSES on mismatch unless `--allow-config-change`;
+`surrogate train` splits `GATES FAILED: <names>` from `GATES REFUSED (indicative only): held-out
+<X> < 500`; new `surrogate round` subcommand solves proposals through the normal `evaluate` path
+into a fresh run dir with its own ndjson and writes atomic `ismo_round1.json` (report + rows +
+`random_true_J` provenance + exploit/explore medians + exploit spread + store counts + bundle gate
+status + config_sha). `manifest.sha256` README reworded (metadata layer only) and line 3 indent
+fixed for `sha256sum -c`.
 
 **(d) Evidence corrections** — CP-8c_osse_baseline.md "5/6 near q lo" contradicted its own table
 (fixed: top-6 0/0, median 0.9033 — stale snapshot claim); the 13:11 snapshot's "seed J 22.07" was
@@ -70,3 +73,4 @@ CP-9a..d (cloud GPU pod proof, cap study, campaign, train/gate; see `docs/CLOUD_
 CP-10a..d (high-frequency options, 12 kHz; see `docs/HIGH_FREQUENCY_OPTIONS.md` section 6): proposed, none run; CP-10d needs the user to approve contacting Collin.
 
 Added 2026-10-14 (cloud): **#13 fixes F1-F6 ready on `ccr-455d2184-yj5zk4` (draft PR #14). Merge into this branch AFTER CP-8c, BEFORE CP-8d.** #13 stays open until then.
+**[SUPERSEDED locally, 2026-10-13 ~23:00: the SAME issue-#13 fixes are already on this branch — local commits e0b9b61 (8 items) + 11304f6 (store/CLI follow-ups), full offline suite WITH the mesher: 498 PASS / 0 failures. Do NOT merge PR #14 on top — that would double-apply overlapping changes in `surrogate/**`. Cloud owner: diff e0b9b61+11304f6 against PR #14 and adopt ONE set. CP-8d proceeds on this branch's fixed code either way; `propose` here refuses unvalidated bundles by default with `--allow-unvalidated` for the runbook's indicative round.]**
