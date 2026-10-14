@@ -7,7 +7,8 @@ import numpy as np
 
 def unit_matrix(X: np.ndarray, key_names: list[str], space) -> np.ndarray:
     """Raw parameter matrix (n, len(key_names)) from ``to_training_arrays`` -> (n, k) in [0,1]
-    for ``space.keys()``. Raises if a searchable key is missing; clips like ``Bound.to_unit``."""
+    for ``space.keys()``. Raises if a searchable key is missing or has NaN values; clips like
+    ``Bound.to_unit``."""
     cols = {k: i for i, k in enumerate(key_names)}
     keys = space.keys()
     missing = [k for k in keys if k not in cols]
@@ -16,8 +17,15 @@ def unit_matrix(X: np.ndarray, key_names: list[str], space) -> np.ndarray:
                        "to to_training_arrays")
     U = np.empty((X.shape[0], len(keys)), dtype=np.float32)
     for j, k in enumerate(keys):
+        col = np.asarray(X[:, cols[k]], float)
+        nan = ~np.isfinite(col)
+        if nan.any():
+            # A searched key is always set on every record (ok or failed); a NaN means the column
+            # was not read (e.g. a path key), and filling it would train on invented inputs.
+            raise ValueError(f"searchable key '{k}' is missing in {int(nan.sum())} of {len(col)} "
+                             "records; the training arrays did not resolve it")
         b = space.bounds[k]
-        U[:, j] = [b.to_unit(float(v))[0] if np.isfinite(v) else 0.5 for v in X[:, cols[k]]]
+        U[:, j] = [b.to_unit(float(v))[0] for v in col]
     return U
 
 

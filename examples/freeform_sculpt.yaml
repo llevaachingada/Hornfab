@@ -1,0 +1,90 @@
+name: freeform_sculpt
+family: FREEFORM
+
+# Sculpted FREEFORM waveguide: the wall control points themselves are searched, not only the
+# mouth angles (freeform_hv.yaml searches 3 knobs; this one searches 11). Target and size are
+# inspired by a 90 x 90 deg multiple-entry DIY waveguide (JW Sound Solana: 37.6 x 37.6 x 19.5 cm,
+# 90 x 90 deg down to 700 Hz). The woofer entry ports of such a design are NOT modelled: the
+# mesher has no wall-port feature (feature request in NOTES_FOR_SENIOR.md, 2026-10-14).
+#
+# Geometry rules (mesher hornlab_mesher/freeform.py, pinned b922e807a5):
+#   anchors are [z_mm, r_mm]; z strictly increasing; r > 0; both meridians share the z span;
+#   the spline may not overshoot its anchors' radius range; angles in [-90, 90] deg.
+# How this file keeps every candidate legal:
+#   - every z is PINNED (only radii move), so z stays strictly increasing and the H/V span equal;
+#   - the throat radius is PINNED (driver exit, 1" = 12.7 mm radius) and equal in H and V;
+#   - each anchor's radius range does NOT overlap the next one's, so radii always increase
+#     outward (no pinch / waist) whatever the search picks.
+# Search keys are the mesher's own field names, addressed by path (rule 3: no invented names):
+#   profileH.points.<i>.1 = radius of anchor i in the horizontal meridian, mm.
+#
+# Symmetry: a FREEFORM horn is mirror-symmetric about both the H and V planes by construction
+# (H and V profiles differ, but each is mirrored), so the quarter domain applies. Measured in the
+# cloud (mesh only): the freeform_hv seed meshes to 710 quarter dofs vs 2655 full. The
+# full-vs-quarter SOLVE agreement for FREEFORM is NOT yet measured on the GPU (CP-7d was OSSE):
+# run the check in docs/HANDOFF_LOCAL.md before trusting a long run.
+seed_params:
+  profileH:
+    points: [[0.0, 12.7], [45.0, 38.0], [95.0, 80.0], [145.0, 130.0], [195.0, 185.0]]
+    throatAngleDeg: 10.0
+    mouthAngleDeg: 70.0
+  profileV:
+    points: [[0.0, 12.7], [45.0, 38.0], [95.0, 80.0], [145.0, 130.0], [195.0, 185.0]]
+    throatAngleDeg: 10.0
+    mouthAngleDeg: 70.0
+  crossSections:
+    - {t: 0.0, shape: circle}
+    - {t: 1.0, shape: superellipse, exponent: 4.0}
+
+bounds:
+  # horizontal meridian radii (anchor 0 = throat, pinned by not being listed)
+  profileH.points.1.1:   {lo: 22.0,  hi: 55.0}
+  profileH.points.2.1:   {lo: 58.0,  hi: 105.0}
+  profileH.points.3.1:   {lo: 108.0, hi: 160.0}
+  profileH.points.4.1:   {lo: 163.0, hi: 200.0}   # mouth half-width, mm (Solana ~188)
+  # vertical meridian radii
+  profileV.points.1.1:   {lo: 22.0,  hi: 55.0}
+  profileV.points.2.1:   {lo: 58.0,  hi: 105.0}
+  profileV.points.3.1:   {lo: 108.0, hi: 160.0}
+  profileV.points.4.1:   {lo: 163.0, hi: 200.0}   # mouth half-height, mm
+  # throat angles stay PINNED at the seed's 10 deg in both planes: the mesher warns when the H/V
+  # throat tangents differ by > 5 deg ("circular source-cap transition may be inconsistent"), and
+  # two bounds cannot be tied together, so they are not searched.
+  # mouth wall angles (deg from the axis)
+  # mouth angle 35-70: measured 2026-10-14 (cloud, real mesher, 41 samples): 40-90 failed 14/41 on the
+  # mesher's outer-shell curvature guard at the mouth (t~1); 35-70 failed 1/41; with throat angles pinned (final file) 41/41 mesh.
+  profileH.mouthAngleDeg:  {lo: 35.0, hi: 70.0}
+  profileV.mouthAngleDeg:  {lo: 35.0, hi: 70.0}
+  # mouth squareness: superellipse exponent (mesher hard range for FREEFORM stations [2, 16])
+  exponent:              {lo: 2.0,  hi: 8.0}
+
+target:
+  coverage_h_deg: 90.0        # TOTAL included angle, -6 dB
+  coverage_v_deg: 90.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0          # 8 GB card dof cap (TOOLCHAIN.md); same screen grid as osse_baseline
+  di_target_db: null
+  di_slope_target: 0.0
+
+weights: {cov: 2.0, rip: 1.5, di: 0.3, dislope: 0.5, flat: 0.5, load: 0.0}
+
+mesh:
+  epw: 6.0
+  quadrants: "1"              # mirror-symmetric in H and V; see the symmetry note above
+  dof_cap_screen: 5000        # measured 8GB RTX 4060 quarter cap (TOOLCHAIN.md M3)
+  dof_cap_verify: 7000
+  dof_cap_final:  8900
+  dof_per_triangle: 0.51       # measured M1: ~0.51 quarter
+
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73             # must be ODD
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-5
+  timeout_s: 900
+
+search: {algorithm: cma, sigma0: 0.25, seed: 1234, budget: 400,
+         popsize: null, tolfun: 1.0e-3}

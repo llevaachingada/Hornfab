@@ -113,6 +113,29 @@ dataset. Then call `hornlab_search.surrogate.ismo.round_report(pred_J, true_J, r
 surrogate-picked). Pass for CP-8d: `round_report["working"]` is True. If False, say so plainly:
 more iterations will not fix it; collect more data instead.
 
+## 6b. Evening test plan after merging `ccr-455d2184-yj5zk4` (FREEFORM sculpt + hardening) — added 2026-10-14
+
+State when written: CP-8c CLOSED, CP-8d FAILED its gates twice (model not used; NOTES `2026-10-14 cp-8d`). This plan does
+NOT retrain the surrogate; it tests the new FREEFORM path. GPU hygiene (CLAUDE.md) before EVERY GPU step:
+`Get-Process julia`, `taskkill /F /IM julia.exe` (only this project's), `nvidia-smi --query-gpu=memory.used --format=csv`
+near idle; record the baseline. One GPU job at a time.
+1. Offline suite: `pytest -m "not slow and not gpu and not crosscheck"` -> cloud with the mesher: 514 passed, 1 skipped,
+   18 deselected, exit 0. Expect about the same. Paste.
+2. `hornlab-search doctor` -> 10/10.
+3. Dry-runs (no GPU): `hornlab-search run --config examples\freeform_sculpt.yaml --dry-run` (cloud: 1354 of 5000 dofs,
+   quadrants '1' <-> symmetry 'yz+xz'); `freeform_sculpt_symcheck_quarter.yaml` (~452); `freeform_sculpt_symcheck_full.yaml`
+   (~1638 of 5400). Paste.
+4. FREEFORM symmetry check (GPU; two fresh processes, julia cleared between):
+   `hornlab-search run --config examples\freeform_sculpt_symcheck_quarter.yaml`, then
+   `hornlab-search run --config examples\freeform_sculpt_symcheck_full.yaml`, then
+   `hornlab-search compare runs\<quarter run dir> runs\<full run dir>`. Paste all three. Reference: OSSE full vs quarter
+   0.023 dB (CP-7d). The bar is NOT frozen (NOTES 2026-10-14 senior reviewer block): report "consistent" only if every dB
+   metric's max |diff| < 0.1 dB and beamwidth is within 1 deg; otherwise STOP, report the numbers, skip step 5.
+5. Short sculpt search: `hornlab-search search --config examples\freeform_sculpt.yaml --budget 60`, then
+   `hornlab-search report runs\<dir>`. Report: failures by kind, best J vs seed, bounds/pinning table, s/candidate.
+   Budget 400 only with the user's OK.
+6. Clear julia, confirm VRAM idle, then the progress report (section 8).
+
 ## 7. Finish
 1. Commit in small commits (conventional commits: `feat(...)`, `fix(...)`, `docs: ...`), each with the
    CONTINUITY + ISSUES update. Push to the SAME branch. Do not merge PR #12 yourself; tell the user it is

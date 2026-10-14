@@ -480,6 +480,20 @@ def _grid_of(meta: dict) -> tuple:
     return tuple(round(float(f), 4) for f in (meta["solve"].get("freqs_hz") or []))
 
 
+def _param_value(meta: dict, key: str):
+    """A design parameter by search key. Plain keys are top-level; FREEFORM search keys are paths
+    (``profileH.points.2.1``) or aliases (``exponent``), resolved by the design layer's own rules
+    so X matches what DesignSpace searched. Missing -> None."""
+    params = meta["params"]
+    if key in params:
+        return params[key]
+    from ..design import families
+    try:
+        return families.param_get(meta.get("family", ""), params, key)
+    except (KeyError, IndexError, TypeError):
+        return None
+
+
 def to_training_arrays(store: DatasetStore,
                        family: str | None = None,
                        lib_sha: str | None = None,
@@ -565,7 +579,7 @@ def to_training_arrays(store: DatasetStore,
     X = np.full((n, len(key_names)), np.nan, dtype=np.float32)
     for i, (m, _) in enumerate(kept):
         for j, k in enumerate(key_names):
-            v = m["params"].get(k)
+            v = _param_value(m, k)
             if v is None:
                 continue
             if not _is_number(v):

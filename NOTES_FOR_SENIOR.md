@@ -269,3 +269,43 @@ What I need decided: (i) confirm "more data + retrain" as the fix for (b) — my
 tolerance based on the sweep's LOCAL y-range rather than the 1e3-inflated global max — that is a gates.py
 semantics change (NOT a threshold change) and gates.py is frozen, so it is the owner's call; (iii) whether (a)
 should be reported as its own category (invalid-boundary crossing) instead of masquerading as a zig-zag.
+
+## 2026-10-14  senior reviewer (cloud)  FREEFORM sculpt, hardening, mesher feature request, naming question
+
+What happened: user asked (in chat, 2026-10-14) to unlock FREEFORM wall control points, file a wall-port feature
+request, and harden before the local merge; user explicitly authorized edits outside phase-2 ownership for this.
+Edits outside the reviewer's own paths, made on that authorization (each tested):
+  - dataset/store.py (task 07): to_training_arrays read X with params.get(key), so FREEFORM search keys (paths such as
+    profileH.points.2.1, and the 'exponent' alias) came back NaN; the surrogate then filled them with 0.5. Now resolved via
+    families.param_get. Test: tests/test_dataset_store.py::test_freeform_path_and_alias_keys_fill_X (fails on old code).
+  - search/evaluate.py (task 08): throat_radius_m returned None for FREEFORM (no r0_mm) so f11 was never computed; now
+    uses anchor 0 of the two meridians (min). Test: tests/test_design_freeform_sculpt.py.
+  - cli.py (task 08): new `compare <run_a> <run_b>` (report-only metric differences between two solved runs).
+  - surrogate/features.py: unit_matrix raises on NaN instead of filling 0.5 (issue #13 item 10; not in local e0b9b61).
+  - surrogate/train.py + cli.py: training refuses ok records whose di_source != 'balloon' (issue #13 item 5; not in
+    e0b9b61); propose with 0 designs exits 1. Test: tests/test_surrogate_hardening.py.
+  RECONCILIATION: the cloud's own F1-F4/F6/F7 duplicates were DROPPED in favour of local e0b9b61/11304f6 (what CP-8d ran
+  on); branch ccr-455d2184-yj5zk4 was rebuilt on top of 622776a with only the non-duplicate items above.
+  - examples/ (03/04): new freeform_sculpt.yaml + two symcheck configs. freeform_hv.yaml NOT touched (CP-8c run 3 uses it).
+FREEFORM findings (cloud, real mesher b922e807a5 installed, mesh only, no solve):
+  1. Dotted-path bounds into profileH/profileV points already worked in DesignSpace; "UNRESOLVED" in freeform_hv.yaml
+     was about policy, not mechanics. freeform_sculpt.yaml searches 8 anchor radii + 2 mouth angles + the superellipse
+     exponent (11 knobs). z, throat radius and throat angles pinned; anchor radius ranges disjoint and increasing.
+  2. Mouth angle 40-90 deg failed 14/41 samples (outer-shell curvature guard at t~1); 35-70 failed 1/41; with throat
+     angles pinned 41/41 mesh. Unpinned H/V throat angles trigger the mesher warning "throat tangent angles differ by
+     more than 5 degrees; the circular source-cap transition may be inconsistent" -> pinned.
+  3. FREEFORM is mirror-symmetric about both planes by construction, so quadrants "1" applies (mesher reports native
+     symmetry yz+xz, build.py's check passes). freeform_hv seed: 710 quarter dofs vs 2655 full. freeform_hv.yaml's comment
+     "FREEFORM H/V differ; full domain" is a misreading (H != V does not break the mirror symmetry) -- change it only
+     after CP-8c and after the GPU symmetry check below. UNMEASURED: full-vs-quarter SOLVE agreement for FREEFORM
+     (CP-7d was OSSE: 0.023 dB). Check: examples/freeform_sculpt_symcheck_{quarter,full}.yaml + `hornlab-search compare`.
+     No pass threshold is frozen for this; the reviewer proposes "every dB metric max |diff| < 0.1 dB (the ~0.1 dB noise-floor
+     scale named in 11_PHASE2_SURROGATE section 3) and beamwidth within 1 deg" as a provisional bar -- USER/SENIOR TO RULE.
+FEATURE REQUEST for the mesher author (do not modify the mesher; rule 1): wall ports / side entries (holes in the horn
+wall feeding secondary drivers, as in multiple-entry horns such as JW Sound's Solana). The mesher has no such feature,
+so multiple-entry designs cannot be modelled. Needs: port position (z, phi), size, shape, and a separate source tag per
+port so BEAT can drive it.
+NAMING QUESTION (unresolved, flagged by the user): docs call the HornLab author "Collin"; the packages live under GitHub
+user m3gnus and the user refers to the author as Magnus, and says a different person (Colin) proposed the NN surrogate.
+docs/plan/** is frozen; a correction must go in a non-plan doc. Who is who: USER TO CONFIRM.
+What I need decided: (a) the FREEFORM full-vs-quarter bar above; (b) the naming correction.
