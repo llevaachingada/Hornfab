@@ -1,6 +1,313 @@
 {
- "generated_local": "2026-10-13T19:46:47",
+ "generated_local": "2026-10-13T22:52:54 (UTC-4)",
+ "generated_utc": "2026-10-14T02:52:54Z",
  "runs": {
+  "20261013T234724Z-screen-ff569c": {
+   "run_id": "20261013T234724Z-screen-ff569c",
+   "config_name": "freeform_hv",
+   "family": "FREEFORM",
+   "mode": "screen",
+   "command": "hornlab-search search --config examples\\freeform_hv.yaml --budget 800",
+   "started_utc": "2026-10-13T23:48:05Z",
+   "status_at_snapshot": "finished",
+   "config_sha": "c33a8f3ed7dc",
+   "lib_shas": {
+    "hornlab_beat_bem": "38544d214ba2e8a4977bb82170d2fb4a3f9fa8b0",
+    "hornlab_bempp_bem": "8e6910602ece9abb2e9ce0db7a637f4bedf17f53",
+    "hornlab_mesher": "b922e807a5cf10cf732c4557ec0b9b495762afd7",
+    "hornlab_plots": "9e4a6d0dd2ccb6e735dd00233dccccb50d12ed44",
+    "hornlab_search": "caa5438991d8a9d312dbd373c0b3fd01a3e6ce82"
+   },
+   "declared_budget": 200,
+   "cli_budget": 800,
+   "pinning_summary": {
+    "fully_pinned_at_lo": [],
+    "fully_pinned_at_hi": []
+   },
+   "rows": 722,
+   "ok": 721,
+   "failed": 1,
+   "torn_lines": 0,
+   "failure_kinds": {
+    "invalid_geometry": 1
+   },
+   "failure_examples": {
+    "invalid_geometry": [
+     "invalid_geometry: FREEFORM outward wall offset fails the surface-curvature guard near t=0.9998, phi=26.96 deg: max(0, -wallThickness*kappa_i)=0.447 >= margin=0."
+    ]
+   },
+   "failure_param_stats": {
+    "invalid_geometry": {}
+   },
+   "J_ok": {
+    "n": 721,
+    "min": 30.543433,
+    "p10": 30.543511,
+    "median": 30.545342,
+    "mean": 30.610275,
+    "p90": 30.605328,
+    "max": 36.346565,
+    "std": 0.367737
+   },
+   "seed_J": 33.308642,
+   "best": {
+    "n": 253,
+    "design_hash": "8c40f5583635",
+    "objective": 30.543433,
+    "params": {
+     "profileH": {
+      "points": [
+       [
+        0.0,
+        12.7
+       ],
+       [
+        60.0,
+        80.0
+       ],
+       [
+        120.0,
+        160.0
+       ]
+      ],
+      "throatAngleDeg": 15.5,
+      "mouthAngleDeg": 53.8231718965
+     },
+     "profileV": {
+      "points": [
+       [
+        0.0,
+        12.7
+       ],
+       [
+        60.0,
+        60.0
+       ],
+       [
+        120.0,
+        110.0
+       ]
+      ],
+      "throatAngleDeg": 15.5,
+      "mouthAngleDeg": 62.2450434204
+     },
+     "crossSections": [
+      {
+       "t": 0.0,
+       "shape": "circle"
+      },
+      {
+       "t": 1.0,
+       "shape": "superellipse",
+       "exponent": 5.5235780649
+      }
+     ]
+    },
+    "terms": {
+     "cov": 26.554753592150497,
+     "rip": 2.4175075547200278,
+     "di": 0.6134169822985783,
+     "dislope": 0.04809993512073008,
+     "flat": 2.7261935112016205,
+     "load": 0.0,
+     "penalty": 0.0,
+     "total": 30.543432964721273,
+     "n_nan": 0,
+     "n_in_band": 10,
+     "di_estimated": 0.0
+    },
+    "n_dof": 2744
+   },
+   "per_key": {},
+   "categorical_params": {
+    "crossSections": {
+     "__unique_count": 721,
+     "__note": "non-numeric container key (nested dict/list); values not enumerated"
+    },
+    "profileH": {
+     "__unique_count": 721,
+     "__note": "non-numeric container key (nested dict/list); values not enumerated"
+    },
+    "profileV": {
+     "__unique_count": 721,
+     "__note": "non-numeric container key (nested dict/list); values not enumerated"
+    }
+   },
+   "top6_pinning": {},
+   "terms_over_ok": {
+    "cov": {
+     "n": 721,
+     "min": 26.398055,
+     "p10": 26.551865,
+     "median": 26.556392,
+     "mean": 26.601467,
+     "p90": 26.600456,
+     "max": 29.889578,
+     "std": 0.240565
+    },
+    "di": {
+     "n": 721,
+     "min": 0.555941,
+     "p10": 0.612072,
+     "median": 0.613222,
+     "mean": 0.615518,
+     "p90": 0.616432,
+     "max": 1.073971,
+     "std": 0.023552
+    },
+    "di_estimated": {
+     "n": 721,
+     "min": 0.0,
+     "p10": 0.0,
+     "median": 0.0,
+     "mean": 0.0,
+     "p90": 0.0,
+     "max": 0.0,
+     "std": 0.0
+    },
+    "dislope": {
+     "n": 721,
+     "min": 0.00016,
+     "p10": 0.041845,
+     "median": 0.047033,
+     "mean": 0.06555,
+     "p90": 0.064075,
+     "max": 1.782341,
+     "std": 0.120372
+    },
+    "flat": {
+     "n": 721,
+     "min": 2.449929,
+     "p10": 2.721541,
+     "median": 2.726082,
+     "mean": 2.736621,
+     "p90": 2.738972,
+     "max": 4.124987,
+     "std": 0.090481
+    },
+    "load": {
+     "n": 721,
+     "min": 0.0,
+     "p10": 0.0,
+     "median": 0.0,
+     "mean": 0.0,
+     "p90": 0.0,
+     "max": 0.0,
+     "std": 0.0
+    },
+    "n_in_band": {
+     "n": 721,
+     "min": 10.0,
+     "p10": 10.0,
+     "median": 10.0,
+     "mean": 10.0,
+     "p90": 10.0,
+     "max": 10.0,
+     "std": 0.0
+    },
+    "n_nan": {
+     "n": 721,
+     "min": 0.0,
+     "p10": 0.0,
+     "median": 0.0,
+     "mean": 0.0,
+     "p90": 0.0,
+     "max": 0.0,
+     "std": 0.0
+    },
+    "penalty": {
+     "n": 721,
+     "min": 0.0,
+     "p10": 0.0,
+     "median": 0.0,
+     "mean": 0.0,
+     "p90": 0.0,
+     "max": 0.0,
+     "std": 0.0
+    },
+    "rip": {
+     "n": 721,
+     "min": 2.358984,
+     "p10": 2.416899,
+     "median": 2.417888,
+     "mean": 2.423067,
+     "p90": 2.419383,
+     "max": 3.181132,
+     "std": 0.042527
+    },
+    "total": {
+     "n": 721,
+     "min": 30.543433,
+     "p10": 30.543511,
+     "median": 30.545342,
+     "mean": 30.610275,
+     "p90": 30.605328,
+     "max": 36.346565,
+     "std": 0.367737
+    }
+   },
+   "n_dof": {
+    "n": 721,
+    "min": 2539.0,
+    "p10": 2745.0,
+    "median": 2747.0,
+    "mean": 2750.023578,
+    "p90": 2756.0,
+    "max": 2907.0,
+    "std": 20.155863
+   },
+   "seconds_solve": {
+    "n": 722,
+    "min": 0.0,
+    "p10": 9.167234,
+    "median": 9.344578,
+    "mean": 9.326571,
+    "p90": 9.552473,
+    "max": 10.894598,
+    "std": 0.423203
+   },
+   "seconds_mesh": {
+    "n": 722,
+    "min": 0.0,
+    "p10": 3.109364,
+    "median": 3.358861,
+    "mean": 3.350833,
+    "p90": 3.639552,
+    "max": 5.467068,
+    "std": 0.380839
+   },
+   "seconds_total": {
+    "n": 722,
+    "min": 0.60642,
+    "p10": 12.423842,
+    "median": 12.723466,
+    "mean": 12.697715,
+    "p90": 13.080519,
+    "max": 15.031508,
+    "std": 0.69662
+   },
+   "peak_vram_mb": {
+    "n": 721,
+    "min": 1398.0,
+    "p10": 1622.0,
+    "median": 1622.0,
+    "mean": 1622.285714,
+    "p90": 1622.0,
+    "max": 1814.0,
+    "std": 22.648467
+   },
+   "di_source": {
+    "balloon": 721
+   },
+   "quadrants": {
+    "1234": 721
+   },
+   "symmetry_plane": {
+    "null": 721
+   },
+   "span_hours": 2.547,
+   "rows_per_hour": 283.507853
+  },
   "20261013T204408Z-screen-6bdcbd": {
    "run_id": "20261013T204408Z-screen-6bdcbd",
    "config_name": "icw_termination",
@@ -3297,39 +3604,45 @@
  },
  "dataset": {
   "stats_report": [
-   "records 2434 (ok 2311, failed 123), shards 5, 395.3 MB",
-   "families {'OSSE': 1634, 'R-OSSE': 0, 'ICW': 800, 'FREEFORM': 0}",
-   "backends {'beat_cuda': 2434}  lib_sha {'b922e807a5+38544d214b': 2434}",
-   "traces 4.1% of records, gpu solve seconds 35322.5",
-   "dates 2026-10-13T05:37:51Z .. 2026-10-13T23:37:45Z"
+   "records 3156 (ok 3032, failed 124), shards 7, 513.6 MB",
+   "families {'OSSE': 1634, 'R-OSSE': 0, 'ICW': 800, 'FREEFORM': 722}",
+   "missing families ['R-OSSE'], duplicate designs 14",
+   "backends {'beat_cuda': 3156}  lib_sha {'b922e807a5+38544d214b': 3156}",
+   "traces 4.2% of records, gpu solve seconds 42056.3",
+   "dates 2026-10-13T05:37:51Z .. 2026-10-14T02:21:07Z"
   ],
   "stats": {
-   "n": 2434,
-   "n_ok": 2311,
-   "n_failed": 123,
+   "n": 3156,
+   "n_ok": 3032,
+   "n_failed": 124,
    "by_family": {
     "OSSE": 1634,
-    "ICW": 800
+    "ICW": 800,
+    "FREEFORM": 722
    },
    "by_backend": {
-    "beat_cuda": 2434
+    "beat_cuda": 3156
    },
    "by_lib_sha": {
-    "b922e807a5+38544d214b": 2434
+    "b922e807a5+38544d214b": 3156
    },
    "date_first": "2026-10-13T05:37:51Z",
-   "date_last": "2026-10-13T23:37:45Z",
-   "total_gpu_seconds": 35322.46680309983,
-   "disk_mb": 395.29343700408936,
-   "trace_fraction": 0.04149548069022186,
+   "date_last": "2026-10-14T02:21:07Z",
+   "total_gpu_seconds": 42056.250942899875,
+   "disk_mb": 513.5817356109619,
+   "trace_fraction": 0.042458808618504436,
    "family_balance": {
     "OSSE": 1634,
     "R-OSSE": 0,
     "ICW": 800,
-    "FREEFORM": 0
+    "FREEFORM": 722
    },
    "family_warning": "None",
-   "n_shards": 5
+   "n_shards": 7,
+   "n_duplicate_designs": 14,
+   "missing_families": [
+    "R-OSSE"
+   ]
   },
   "osse_pool": {
    "key_names": [

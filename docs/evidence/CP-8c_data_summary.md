@@ -12,6 +12,25 @@ Machine-readable twin: `data_summary.json`. Raw artifacts are local (gitignored)
   their frequency grid differs from the majority grid (the majority grid is `freqs_hz`).
 - `held_out_at_15pct` vs `held_out_formal_floor` 500: the Stage A gate refuses below 500.
 
+## Run `20261013T234724Z-screen-ff569c` — freeform_hv (FREEFORM, screen)
+- command: `hornlab-search search --config examples\freeform_hv.yaml --budget 800`; config budget 200, CLI --budget 800; status at snapshot: finished
+- **bound pinning (top-6)**: fully pinned at LOWER bound: none; at UPPER bound: none
+- rows 722 = ok 721 + failed 1 (torn 0); kinds {'invalid_geometry': 1}
+- J over ok rows: min 30.543433 / median 30.545342 / mean 30.610275 / max 36.346565; seed J 33.308642
+- best: J 30.543433 at n=253 (8c40f5583635), n_dof 2744
+- timing medians: solve 9.344578 s, mesh 3.358861 s, total 12.723466 s; rate 283.507853 rows/h over 2.547 h
+- di_source {'balloon': 721}; quadrants {'1234': 721}
+
+| key | seed | lo | hi | ok min | median | max | spearman vs J | frac 2% lo | frac 2% hi | top6 lo/hi |
+|---|---|---|---|---|---|---|---|---|---|---|
+
+Categorical params (ok rows): {'crossSections': {'__unique_count': 721, '__note': 'non-numeric container key (nested dict/list); values not enumerated'}, 'profileH': {'__unique_count': 721, '__note': 'non-numeric container key (nested dict/list); values not enumerated'}, 'profileV': {'__unique_count': 721, '__note': 'non-numeric container key (nested dict/list); values not enumerated'}}
+
+Failure detail (what the search refused, and where it sits):
+- `invalid_geometry`: 1 rows; e.g. invalid_geometry: FREEFORM outward wall offset fails the surface-curvature guard near t=0.9998, phi=26.96 deg: max(0, -wallThickness*kappa_i)=0.447 >= margin=0.
+
+Term medians over ok rows: cov=26.556392, di=0.613222, di_estimated=0.0, dislope=0.047033, flat=2.726082, load=0.0, n_in_band=10.0, n_nan=0.0, penalty=0.0, rip=2.417888, total=30.545342
+
 ## Run `20261013T204408Z-screen-6bdcbd` — icw_termination (ICW, screen)
 - command: `hornlab-search search --config examples\icw_termination.yaml --budget 800`; config budget 200, CLI --budget 800; status at snapshot: finished
 - **bound pinning (top-6)**: fully pinned at LOWER bound: ['hold_end']; at UPPER bound: none
@@ -163,11 +182,12 @@ Term medians over ok rows: cov=19.22029, di=0.285641, di_estimated=0.0, dislope=
 ## Dataset
 
 ```
-records 2434 (ok 2311, failed 123), shards 5, 395.3 MB
-families {'OSSE': 1634, 'R-OSSE': 0, 'ICW': 800, 'FREEFORM': 0}
-backends {'beat_cuda': 2434}  lib_sha {'b922e807a5+38544d214b': 2434}
-traces 4.1% of records, gpu solve seconds 35322.5
-dates 2026-10-13T05:37:51Z .. 2026-10-13T23:37:45Z
+records 3156 (ok 3032, failed 124), shards 7, 513.6 MB
+families {'OSSE': 1634, 'R-OSSE': 0, 'ICW': 800, 'FREEFORM': 722}
+missing families ['R-OSSE'], duplicate designs 14
+backends {'beat_cuda': 3156}  lib_sha {'b922e807a5+38544d214b': 3156}
+traces 4.2% of records, gpu solve seconds 42056.3
+dates 2026-10-13T05:37:51Z .. 2026-10-14T02:21:07Z
 ```
 
 ### OSSE training pool (what `surrogate train --config osse_baseline.yaml` will see)

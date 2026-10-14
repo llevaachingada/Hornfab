@@ -486,3 +486,39 @@ icw_stdout.log tail 8:
   seed J=55.7357  best J=12.2009 (improved on the seed); stop: budget
 search OK: 800 rows in C:\Users\hunte\Hrns\hornlab-search\runs\20261013T204408Z-screen-6bdcbd\search.ndjson; best in C:\Users\hunte\Hrns\hornlab-search\runs\20261013T204408Z-screen-6bdcbd\best.json; report with: hornlab-search report C:\Users\hunte\Hrns\hornlab-search\runs\20261013T204408Z-screen-6bdcbd
 ===========================================
+=== TICK 2026-10-13 22:22:06 ===
+=== processes ===
+=== VRAM ===
+290 MiB
+=== watchdog tail 8 ===
+2026-10-13 22:16:54 run=20261013T234724Z-screen-ff569c rows=698 last_kind=ok last_J=30.543499278415517 vram=1048 MiB julia=1 hornlab=1 python=4
+2026-10-13 22:21:54 run=20261013T234724Z-screen-ff569c rows=722 last_kind=ok last_J=30.543496444025667 vram=532 MiB julia=1 hornlab=0 python=2
+2026-10-13 22:26:54 run=20261013T234724Z-screen-ff569c rows=722 last_kind=ok last_J=30.543496444025667 vram=532 MiB julia=1 hornlab=0 python=2
+2026-10-13 22:31:54 run=20261013T234724Z-screen-ff569c rows=722 last_kind=ok last_J=30.543496444025667 vram=421 MiB julia=1 hornlab=0 python=4
+2026-10-13 22:36:54 run=20261013T234724Z-screen-ff569c rows=722 last_kind=ok last_J=30.543496444025667 vram=421 MiB julia=1 hornlab=0 python=2
+2026-10-13 22:41:55 run=20261013T234724Z-screen-ff569c rows=722 last_kind=ok last_J=30.543496444025667 vram=415 MiB julia=1 hornlab=0 python=2
+2026-10-13 22:46:55 run=20261013T234724Z-screen-ff569c rows=722 last_kind=ok last_J=30.543496444025667 vram=415 MiB julia=1 hornlab=0 python=2
+2026-10-13 22:51:55 run=20261013T234724Z-screen-ff569c rows=722 last_kind=ok last_J=30.543496444025667 vram=290 MiB julia=0 hornlab=0 python=0
+=== newest run dir ===
+C:\Users\hunte\Hrns\hornlab-search\runs\20261013T234724Z-screen-ff569c
+=== health digest ===
+HEALTH run=20261013T234724Z-screen-ff569c rows=722 ok=721 failed=1 torn=0 kinds={'invalid_geometry': 1}
+HEALTH ok-J: min=30.54 median=30.55 max=36.35 best=30.54
+HEALTH penalty-or-failed rows (J>=1000): 1
+HEALTH median seconds: solve=9.35 mesh=3.36 total=12.72
+HEALTH span 2026-10-13T23:48:19Z -> 2026-10-14T02:21:07Z (2.55 h) rate=284 rows/h
+HEALTH top design_hash dups: [('1cb896775b30', 1), ('f3a996d8bfa0', 1), ('462aeac94e0a', 1)]
+HEALTH ok rows with metrics=null: 0
+HEALTH last-ok: n=721 J=30.543496444025667 a_deg=None exponent=None a0_deg=None L_mm=None n_dof=2747
+=== stderr tail 3 (ff_stderr.log) ===
+
+
+--- TICK ADDENDUM 2026-10-13 22:52:22 (completion evidence; resolves the 722-row freeze) ---
+run.json: name=freeform_hv mode=screen budget=800 status=finished stop_reason="cma: tolfun" started=2026-10-13T23:48:05Z finished=2026-10-14T02:21:07Z
+ff_stderr.log: 0 bytes (empty)
+ff_stdout tail 3:
+  evaluations 722 (722 new, 0 cached), failures {'invalid_geometry': 1}, GPU 6733.8 s, 12.7 s/candidate, 284/h, projected 1,000 = 3.5 h, 10,000 = 35.3 h
+  seed J=33.3086  best J=30.5434 (improved on the seed); stop: cma: tolfun
+search OK: 722 rows in C:\Users\hunte\Hrns\hornlab-search\runs\20261013T234724Z-screen-ff569c\search.ndjson; best in C:\Users\hunte\Hrns\hornlab-search\runs\20261013T234724Z-screen-ff569c\best.json; report with: hornlab-search report C:\Users\hunte\Hrns\hornlab-search\runs\20261013T234724Z-screen-ff569c
+VERDICT: STALL=NO (finished/cma tolfun at 722/800); JUNK=NO (torn0 metrics-null0 no exception failed=1 stable); HYGIENE=GOOD (julia/hornlab gone, VRAM 290MiB, stale hosts cleared); PROGRESS=722/800 (90.3%), seed J=33.3086 -> best J=30.5434, 284 rows/h
+
