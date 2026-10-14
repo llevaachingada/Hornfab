@@ -6,7 +6,16 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 - **Wave:** 0, 1, 2 and 3 complete; Phase 2 Stage A code landed (synthetic-tested only) (tasks 04-08 done; CP-7a-f all PASS). This is the end of the plan's Wave ladder.
 - **Last checkpoints:** CP-7 (senior physics gate) GREEN — noise floor **0.039 dB**. **CP-8a PASS, CP-8b PASS** (local GPU box, 2026-10-13: 480 offline + 18 GPU-marked tests, doctor 10/10; bounds widened `a_deg` 25→5 / `exponent` 2→1, rerun no longer pinned). CP-1/CP-2/CP-4/CP-5/CP-6 all green.
 - **Next action:** CP-8c — multi-family dataset runs (osse_baseline 1500, icw_termination 800, freeform_hv 800, throat_adapter 400; one at a time, ~15-17 h GPU serial estimated; user consulted before starting; runs resumable). Then CP-8d train/gate (≥ 500 held-out per family, else report "indicative only"). Dataset now 134 records, 100 % OSSE.
+- **PULL BEFORE CP-8d:** merge `ccr-455d2184-yj5zk4` (PR #14, issue #13 fixes) after CP-8c closes, never mid-run. See the 2026-10-14 notice below.
 - **Blockers:** none. Issue **#13** open (hardening review — circle-back before/with CP-8d; do not weaken gate thresholds). Issues #1-#11 closed.
+
+## 2026-10-14 (cloud, ~02:05 UTC) — NOTICE: surrogate fixes waiting on `ccr-455d2184-yj5zk4`; merge AFTER CP-8c, BEFORE CP-8d (senior reviewer: Claude)
+
+> **LOCAL AGENT: do not run CP-8d (`surrogate train` / `propose`) on this branch's current code.** Issue #13 fixes F1-F6 are on `ccr-455d2184-yj5zk4` (draft PR #14 into this branch), with offline suite 455 passed / 30 skipped. They touch only `surrogate/**`, `_cmd_surrogate`, surrogate tests and `HANDOFF_LOCAL.md`, so the running CP-8c search is unaffected. **Do not pull mid-run.** When CP-8c is closed and julia is cleared:
+> 1. `git fetch origin ccr-455d2184-yj5zk4` then `git merge origin/ccr-455d2184-yj5zk4` (conflicts expected in `docs/CONTINUITY.md` / `docs/ISSUES.md` only: keep every entry, newest first).
+> 2. Run `pytest -m "not slow and not gpu and not crosscheck"` (expect ~485 with the mesher), paste it, push.
+> 3. Then CP-8d. Note: `propose` now refuses a gate-failing bundle, so with ~225 held-out CP-8d stops after `train` ("indicative only"), as HANDOFF already says.
+> Review: `docs/SENIOR_REVIEW_2026-10-14.md` (on the fix branch). This entry is docs-only.
 
 ## 2026-10-13 (local GPU box, ~19:50) — CP-8c run 2/4 COMPLETE (icw_termination 800): best J 12.20 (-78 % vs seed); dataset now two families (local agent)
 
