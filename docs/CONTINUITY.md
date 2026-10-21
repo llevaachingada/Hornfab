@@ -7,7 +7,16 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 - **Last checkpoints:** CP-7 (senior physics gate) GREEN - noise floor 0.039 dB. CP-8a PASS, CP-8b PASS; CP-8c CLOSED (PARTIAL on the literal four-families criterion; verify OK) - 3556 records / 8 shards / 587.2 MB, families OSSE 2034 + ICW 800 + FREEFORM 722 (R-OSSE: no example config), duplicate designs 14; campaign wall ~14.9 h; verify OK 0 bad / 0 bad arrays. Issue #13 hardening LANDED (e0b9b61 + 11304f6; offline 498 PASS).
 - **Next action:** CP-8d (indicative) on the fixed code: surrogate train (expect GATES REFUSED (indicative only): held-out ~225 < 500), propose --allow-unvalidated, surrogate round (40 real BEM solves, one at a time) -> ismo_round1.json + docs/evidence/CP-8d.md, then the master PASS/PARTIAL report for CP-8a..CP-8d.
 - **MERGE NOW:** `ccr-455d2184-yj5zk4` (PR #14) was rebuilt on top of `622776a` (no longer superseded): FREEFORM sculpt config, FREEFORM training-export fix, `compare`, DI guard. Then `docs/HANDOFF_LOCAL.md` section 6b. See the 2026-10-14 ~05:00 UTC entry.
+- **Proposed next (cloud):** Boundary Lab 0.5.0 integration, `docs/BOUNDARY_LAB_INTEGRATION_PLAN.md` (awaiting user approval; nothing started).
 - **Blockers:** none. Issue #13 open pending cloud diff-review: local commits e0b9b61/11304f6 implement it (8 items); PR #14 (ccr-455d2184-yj5zk4) is SUPERSEDED - do NOT merge on top (note in the 2026-10-14 notice entry). Issues #1-#11 closed.
+
+## 2026-10-21 (cloud) — Boundary Lab 0.5.0 research + integration plan (docs only; senior reviewer: Claude, 2 research subagents)
+
+- Boundary Lab (JWSound) **0.5.0 released 2026-10-20**: adds Generator Plugins (geometry-provider API 1, `provider.json` in `<BL>/geometry_providers/`), plugin host services (queue solves, read results; GUI-only), a headless `blab project validate|solve`, project schema 10, BEAT Engine pinned (hard) to 0.6.0.
+- New `docs/BOUNDARY_LAB_0.5_RESEARCH.md` (findings, conventions table, spot checks) + appendices `docs/research/boundary_lab_0.5/{bl_inventory,beat_compat}.md`; new `docs/BOUNDARY_LAB_INTEGRATION_PLAN.md` (PROPOSED: BL-0 env, BL-1 `.blab.json` export, BL-2 BL-headless cross-check via the frozen CP-7b rule, BL-3 hornlab geometry-provider plugin; checkpoints CP-11a..d; D/E/F deferred).
+- Key facts: our mesher's MSH 2.2 + Ath names (`SD1D1001` driven) already match BL; BL defaults mesh scale to 0.001 (silent killer 1); BL symmetry `xy/x/off` maps from `sizing.SYMMETRY_PLANE` (quadrants `12` unsupported); BL phasor `exp(+i wt)` vs our vendored engine `exp(-i wt)`; BL port is 1 m/s velocity vs our unit acceleration (normalized metrics comparable, absolute level/phase need conversion); BL CLI never shuts down its Julia worker (hygiene wrapper required); BL must not be installed in our venv (BEAT pin).
+- Correction recorded (plan files frozen): `blab project solve` now IS Boundary Lab's CLI (12_RESEARCH_BASIS s1 / plan README row 3 predate it).
+- No code changed. Decisions for the user in the plan, section 5.
 
 ## 2026-10-14 (cloud, ~05:00 UTC) — PR #14 REBUILT on the local head (622776a): local issue-#13 set adopted, cloud duplicates dropped; FREEFORM sculpt + export fix + `compare` added (senior reviewer: Claude)
 
