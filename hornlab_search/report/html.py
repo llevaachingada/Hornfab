@@ -399,6 +399,7 @@ The floor is set by the two-solver disagreement, not by mesh refinement. Caveat:
 <table><tr><th>parameter</th><th>value</th><th>lo</th><th>hi</th><th>fraction of range</th></tr>
 {% for p in d.params %}<tr><td>{{ p.key }}</td><td>{{ p.value }}</td><td>{{ p.lo }}</td><td>{{ p.hi }}</td><td>{{ p.frac }}</td></tr>{% endfor %}</table>
 <p class="muted">f_break (H, V) = {{ d.f_break }} Hz &middot; f11 = {{ d.f11 }} Hz &middot; mouth ~ {{ d.mouth }} m &middot; {{ d.n_dof }} dofs</p>
+<p class="muted">report-only (not in J): SPDI band mean {{ d.spdi }} dB, range {{ d.spdi_range }} dB &middot; listening window re on-axis {{ d.lw }} dB &middot; forward beam shape p = {{ d.beam_p }} (2 round, ~4 rounded square; qualitative at screen balloon resolution)</p>
 {% if d.note %}<p class="muted">{{ d.note }}</p>{% endif %}
 {% for title, svg in d.svgs %}<h4>{{ title }}</h4>{{ svg }}{% endfor %}
 <div class="grid">{% for title, uri in d.pngs %}<figure style="margin:0"><img alt="{{ title }}" src="{{ uri }}"><figcaption class="muted">{{ title }}</figcaption></figure>{% endfor %}</div>
@@ -645,6 +646,8 @@ def _designs(show, run_dir, target, weights, bounds, family, figures) -> list[di
              "params": params, "n_dof": row.get("n_dof"),
              "f_break": f"{_fmt(sc.get('f_break_h_hz'), 4)}, {_fmt(sc.get('f_break_v_hz'), 4)}",
              "f11": _fmt(sc.get("f11_hz"), 4),
+             "spdi": _fmt(sc.get("spdi_mean_db"), 3), "spdi_range": _fmt(sc.get("spdi_range_db"), 3),
+             "lw": _fmt(sc.get("lw_minus_on_axis_mean_db"), 3), "beam_p": _fmt(sc.get("beam_p_mean"), 3),
              "mouth": "n/a", "pngs": [], "svgs": [], "note": ""}
         if row.get("bbox_m"):
             mw, mh = mouth_dims_m(MeshResult("", 0, None, row.get("quadrants") or "",

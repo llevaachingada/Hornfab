@@ -27,7 +27,7 @@ from pathlib import Path
 import numpy as np
 
 from ..types import (Design, GeometryInvalidError, MeshResult, MeshSpec, MeshTooLargeError)
-from . import sizing
+from . import sizing, topology
 from ..design import families
 
 log = logging.getLogger("hornlab_search.mesh.build")
@@ -67,11 +67,13 @@ class SymmetryMismatchError(MeshConsistencyError):
 # ------------------------------------------------------------------ .msh reader
 
 
-def read_msh_summary(path: Path) -> dict:
+def read_msh_summary(path: Path, *, return_arrays: bool = False):
     """{'n_triangles', 'n_nodes', 'n_nodes_used', 'bbox_m', 'area_m2', 'tags': {id: count},
         'tag_names': {id: name}, 'format'}
 
     Parses the gmsh ASCII v2.2 $Nodes and $Elements blocks. Read only. We never write a .msh.
+    ``return_arrays=True`` returns ``(summary, xyz, triangles)`` (node coordinates and zero-based
+    triangle rows into ``xyz``) for the surface checks in ``mesh/topology.py``.
     ``bbox_m`` is (xmin, ymin, zmin, xmax, ymax, zmax) over the nodes the triangles use.
     """
     path = Path(path)
@@ -120,7 +122,7 @@ def read_msh_summary(path: Path) -> dict:
     pts = xyz[used]
     bbox = tuple(float(v) for v in (*pts.min(axis=0), *pts.max(axis=0)))
     ids, counts = np.unique(phys_a, return_counts=True)
-    return {
+    summary = {
         "n_triangles": int(tri.shape[0]),
         "n_nodes": int(n_nodes),
         "n_nodes_used": int(used.size),
@@ -130,6 +132,7 @@ def read_msh_summary(path: Path) -> dict:
         "tag_names": tag_names,
         "format": " ".join(fmt),
     }
+    return (summary, xyz, tri) if return_arrays else summary
 
 
 # ------------------------------------------------------------------ pre-mesh estimate
@@ -267,6 +270,9 @@ def build_mesh(design: Design, mesh: MeshSpec, cfg, out_dir: Path, *, mode: str 
     if hit is not None:
         _check_dofs(int(hit["result"]["n_triangles"]), int(hit["summary"]["n_nodes_used"]),
                     mesh, cfg, mode)
+        # Cached meshes predating the surface checks are checked too (cheap, CPU, no rebuild).
+        _, xyz, tri = read_msh_summary(out_path, return_arrays=True)
+        topology.check_surface(xyz, tri, sizing.SYMMETRY_PLANE[mesh.quadrants])
         log.info("mesh cache hit %s", key)
         return _result_from_json(hit["result"], out_path, time.perf_counter() - t0)
 
@@ -290,7 +296,7 @@ def build_mesh(design: Design, mesh: MeshSpec, cfg, out_dir: Path, *, mode: str 
         raise families.wrap_mesher_error(exc) from exc
 
     # ---- read back and verify
-    summary = read_msh_summary(out_path)
+    summary, xyz, tri = read_msh_summary(out_path, return_arrays=True)
     try:
         _check_bbox(summary["bbox_m"])
         if built.quadrants != mesh.quadrants:
@@ -310,6 +316,8 @@ def build_mesh(design: Design, mesh: MeshSpec, cfg, out_dir: Path, *, mode: str 
                 f"mesh has no elements on physical tag {SOURCE_TAG} (SD1D1001, the source); "
                 f"tags present: {summary['tags']}")
         _check_dofs(summary["n_triangles"], summary["n_nodes_used"], mesh, cfg, mode)
+        # Closed/manifold surface, no unwelded seams, reduced mesh inside its symmetry domain.
+        topology.check_surface(xyz, tri, want)
     except (MeshConsistencyError, GeometryInvalidError, MeshTooLargeError):
         out_path.unlink(missing_ok=True)     # never leave an unusable mesh to be picked up later
         raise

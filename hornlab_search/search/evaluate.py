@@ -187,6 +187,7 @@ def metrics_from_response(resp: Response, target: Target, *, mesh: MeshResult | 
         kw["mouth_h_m"], kw["mouth_v_m"] = mouth_dims_m(mesh)
     if design is not None:
         kw["throat_radius_m"] = throat_radius_m(design)
+    raw = resp
     has_balloon = resp.spl_balloon_db is not None and resp.balloon_dirs is not None
     if has_balloon and resp.meta.get("balloon_grid") is not None:
         bal = np.asarray(resp.spl_balloon_db, dtype=float)
@@ -199,7 +200,52 @@ def metrics_from_response(resp: Response, target: Target, *, mesh: MeshResult | 
             collapsed[i, 0] = float(resp.spl_h_db[i, ax]) - di
         resp = dataclasses.replace(resp, spl_balloon_db=collapsed,
                                    balloon_dirs=np.array([[0.0, 0.0, 1.0]]))
-    return compute_metrics(resp, target, **kw)
+    m = compute_metrics(resp, target, **kw)
+    m.scalars.update(directivity_extras(raw, m, target))
+    return m
+
+
+#: Report-only scalars added by ``directivity_extras`` (never weighted into J).
+EXTRA_SCALAR_KEYS = ("spdi_mean_db", "spdi_range_db", "lw_minus_on_axis_mean_db",
+                     "beam_p_mean", "beam_p_residual_pct_mean", "beam_p_n_valid")
+
+
+def directivity_extras(resp: Response, m: MetricSet, target: Target) -> dict:
+    """CEA-2034 subset (listening window, sound-power DI) and forward beam shape, as REPORT-ONLY
+    scalars over the target band (ideas after Boundary Lab 0.5.0; see metrics/spinorama.py and
+    metrics/beam_shape.py). Never raises: a failure here must not fail a solve; the keys are then
+    NaN. ``beam_p_mean`` is qualitative at screen balloon resolution (it reads low for square
+    beams, p > 4); use it to compare designs, not as an absolute."""
+    from ..metrics.beam_shape import band_mean, forward_beam_shape
+    from ..metrics.spinorama import listening_window_db, spdi_db
+
+    out = {k: float("nan") for k in EXTRA_SCALAR_KEYS}
+    f = np.asarray(resp.freqs_hz, dtype=float)
+    lo, hi = target.band_lo_hz, target.band_hi_hz
+    try:
+        ax = resp.axis_index
+        on_axis = np.asarray(resp.spl_h_db, dtype=float)[:, ax]
+        lw = listening_window_db(resp.h_angles_deg, resp.spl_h_db, resp.v_angles_deg, resp.spl_v_db)
+        if m.di_source == "balloon":
+            spdi = spdi_db(lw, on_axis, m.di_db)
+            band = (f >= lo) & (f <= hi) & np.isfinite(spdi)
+            out["spdi_mean_db"] = band_mean(spdi, f, lo, hi)
+            out["spdi_range_db"] = float(np.ptp(spdi[band])) if band.any() else float("nan")
+        out["lw_minus_on_axis_mean_db"] = band_mean(lw - on_axis, f, lo, hi)
+    except Exception:  # noqa: BLE001 - report-only metric; never fail the solve
+        log.debug("listening-window/SPDI extras failed", exc_info=True)
+    try:
+        if resp.spl_balloon_db is not None and resp.balloon_dirs is not None:
+            bs = forward_beam_shape(resp.balloon_dirs, resp.spl_balloon_db,
+                                    on_axis_db=np.asarray(resp.spl_h_db, dtype=float)[:, resp.axis_index])
+            p = np.asarray(bs["p"], dtype=float)
+            band = (f >= lo) & (f <= hi) & np.isfinite(p)
+            out["beam_p_mean"] = band_mean(p, f, lo, hi)
+            out["beam_p_residual_pct_mean"] = band_mean(bs["residual_pct"], f, lo, hi)
+            out["beam_p_n_valid"] = float(band.sum())
+    except Exception:  # noqa: BLE001 - report-only metric; never fail the solve
+        log.debug("beam-shape extras failed", exc_info=True)
+    return out
 
 
 # ------------------------------------------------------------------ rows (search.ndjson)

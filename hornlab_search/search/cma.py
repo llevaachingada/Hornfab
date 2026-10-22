@@ -99,6 +99,7 @@ def _prepare(cfg, run_dir: Path, mode: str, backend, store, cache_dir, trace_fra
             "config": cfg.raw, "config_sha": rundir.config_sha(cfg.raw),
             "backend": cfg.solve.backend, "lib_shas": lib_shas,
             "toolchain": rundir.toolchain_snapshot(),
+            "runtime": rundir.runtime_provenance(),
             "cma_seed": cfg.search.seed, "trace_fraction": trace_fraction,
             "command": command, "status": "running", "started_utc": rundir.utc_now(),
             "dataset_dir": None if store is None else str(store.root)}

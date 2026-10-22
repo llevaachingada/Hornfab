@@ -8,7 +8,19 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 - **Next action:** **Do NOT re-run CP-8d** — it already ran and FAILED its gates (2026-10-14; held-out 285 < 500, model not used); re-run only after the OSSE data top-up (senior report s3 item 5, needs user OK). HANDOFF 6b DONE 2026-10-22 (all 5 steps PASS; FREEFORM quarter == full within 0.0043 dB; sculpt 60: J 30.945 -> 24.213; sculpt 400: -> 16.789 with 3 anchors PINNED). STEP-export CLI DONE. Awaiting user decisions (senior report s4 + review): revised priority, OSSE top-up, bound widening (OSSE `n`, ICW `hold_end`/`kappa0`, throat_adapter 3 keys, sculpt anchors / monotone reparametrisation), objective normalisation. Next code work (no GPU): BL-1 once approved. Boundary Lab, top-up and bound widening NOT started.
 - **MERGE NOW:** DONE (2026-10-22, local merge lane): `main` fast-forwarded 2a7bafb -> 6d1d5c7 (ccr-455d2184-yj5zk4 tip), zero conflicts, oracle sign-off, full offline suite 533 PASS in a sandbox worktree at the merged tree. See the 2026-10-22 entry.
 - **Proposed next (cloud):** Boundary Lab 0.5.0 integration, `docs/BOUNDARY_LAB_INTEGRATION_PLAN.md` (awaiting user approval; nothing started).
+- **Merge + test tonight:** Boundary Lab learnings PR (mesh/symmetry checks, phasor, runtime provenance, report-only SPDI/beam shape); plan + test steps in `docs/BL_LEARNINGS_IMPLEMENTATION.md`.
 - **Blockers:** none. Issue #13: fixes now MERGED on main (152a829 carried the cloud reconciliation; oracle sign-off 2026-10-22); GitHub issue kept open for owner closure. Issues #1-#11 closed.
+
+## 2026-10-22 (cloud, PM) — Boundary Lab 0.5.0 learnings IMPLEMENTED: pre-solve mesh checks, symmetry-domain check, phasor module, live runtime provenance, CEA-2034 subset + beam shape (report-only) (senior reviewer: Claude + 1 Sonnet subagent)
+
+> **LOCAL AGENT:** merge this PR (into `main`), then run `docs/BL_LEARNINGS_IMPLEMENTATION.md` section 4 (tonight's test plan). No objective, gate, threshold, plan file or contract field changed.
+
+- New `hornlab_search/mesh/topology.py` wired into `mesh/build.py` (after read-back and on cache hits): open edges off symmetry planes / non-manifold / near-coincident vertices -> `GeometryInvalidError`; reduced mesh outside x>=0 / y>=0 -> `SymmetryMismatchError`. Measured on real meshes of 6 configs: all pass (0 bad edges, closest vertex pair ~1.5 mm vs ~0.3 um tolerance).
+- New `hornlab_search/solve/phasor.py` (ours exp(-i w t) + unit acceleration vs Boundary Lab exp(+i w t) + 1 m/s velocity), tested against time-domain signals.
+- `run.json` gains a live `runtime` block (Python, platform, nvidia-smi GPU/driver/memory, julia --version, source fingerprints of hornlab_beat_bem / hornlab_mesher / hornlab_bempp_bem).
+- New `metrics/spinorama.py` (listening window, SPDI; honest subset, cuts stop at +-90 deg) and `metrics/beam_shape.py` (superellipse fit of the forward -6 dB balloon contour). Six REPORT-ONLY scalars via `search/evaluate.py::directivity_extras` (never in J, never fail a solve, ~0.07 s/candidate) and one report line per design.
+- Deferred with direction + required rulings: coarse-to-fine early rejection (largest GPU saver; offline replay first) and a CPU-vs-CUDA qualification screen (frozen CP-7b rule).
+- Offline suite (cloud, mesher installed): **553 passed, 1 skipped, 18 deselected, exit 0**.
 
 ## 2026-10-22 (local GPU box, ~11:40 EDT) — sculpt 400 (J -45.7 %, 3 anchors PINNED); `export-step` CLI; compare quadrants fix; beta quickstart; review page tooling
 

@@ -91,3 +91,14 @@ Added 2026-10-22 (cloud): senior architecture report `docs/SENIOR_ARCHITECTURE_R
 Local-only, added 2026-10-22 (local GPU box, HANDOFF 6b): FREEFORM quarter-vs-full symmetry check PASSED (max 0.0043 dB, beamwidth 0.051 deg; bar 0.1 dB / 1 deg, not frozen - owner may freeze it); `freeform_sculpt` 60-eval search 0 failures, J 30.945 -> 24.213. Follow-ups (non-blocking): (1) `compare` header prints `quadrants None` for both runs although they solved 451 vs 1636 dofs (reads the wrong field; cosmetic); (2) dry-run throughput estimate 2 s/candidate vs measured 6.7 s for `freeform_sculpt` (TOOLCHAIN M3 extrapolation under-predicts; affects budget planning only); (3) watch `profileH.mouthAngleDeg` (2/6 at hi 70) and `profileV.points.3.1` (2/6 at lo 108) on any longer sculpt run before widening. CP-8d must not be re-run before the OSSE top-up (CONTINUITY Next action corrected). Evidence `docs/evidence/HANDOFF_6b.md`.
 
 Local-only, added 2026-10-22 ~11:40 (local GPU box): follow-up (1) `compare` quadrants label FIXED (regression test). New `export-step` CLI (senior report s3 item 4) DONE. Sculpt budget 400: J 30.945 -> 16.789, **3 wall anchors PINNED** (`profileH/V.points.3.1` at lo, `profileV.points.4.1` at hi) - the disjoint per-anchor radius boxes now bind; options for the owner: widen/overlap the boxes with a mesher monotonicity check, or reparametrise as positive increments. Bound-limited families awaiting a widening decision: OSSE `n` (6/6 lo), ICW `hold_end` (6/6 lo) + `kappa0` (4/6 lo), throat_adapter `throat_ext_angle_deg`/`k` (6/6 hi) + `a0_deg` (6/6 lo), FREEFORM sculpt anchors above. No widening done (user OK required).
+
+Added 2026-10-22 PM (cloud): Boundary Lab learnings implemented (`docs/BL_LEARNINGS_IMPLEMENTATION.md`): pre-solve topology + symmetry-domain checks, `solve/phasor.py`, runtime provenance, report-only SPDI / beam shape. 
+
+TO-DO (no GitHub issue yet; owner / plan ref):
+- [ ] Merge the learnings PR, run its section-4 test plan on the GPU box (local agent).
+- [ ] Early rejection (coarse-to-fine frequencies): offline replay of CP-8c ndjson first; needs rulings on partial-bound fitness and dataset policy (senior/user; `docs/BL_LEARNINGS_IMPLEMENTATION.md` s2 item 4).
+- [ ] CPU-vs-CUDA qualification screen per pinned-library change (GPU box; frozen CP-7b rule; s2 item 8).
+- [x] STEP-export CLI: DONE locally 2026-10-22 (`hornlab-search export-step`, b822dd5).
+- [ ] OSSE data top-up for the surrogate gates (GPU, overnight; user OK needed).
+- [ ] Boundary Lab BL-1 export (cloud; `docs/BOUNDARY_LAB_INTEGRATION_PLAN.md`).
+- [ ] `compare` IndexError on empty frequency list (oracle follow-up; the quadrants-label part was fixed in b822dd5).

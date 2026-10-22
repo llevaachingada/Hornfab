@@ -318,3 +318,12 @@ What happened (exact output): fast-forward 2a7bafb -> 6d1d5c7 (22 commits, +1060
 What I tried: normal FF merge only (strict ancestor), no rewrites; PRs #12/#14 closed as superseded.
 What I need decided: (a) whether to delete the merged remote branches (claude/wave-3-... and ccr-455d2184-yj5zk4) now that main contains them - defaulting to KEEP; (2) Boundary Lab 0.5.0 integration plan (PROPOSED, docs/BOUNDARY_LAB_INTEGRATION_PLAN.md) awaits user approval; (3) oracle follow-ups recorded in ISSUES 2026-10-22 (compare empty-freqs edge, exponent alias first-station doc note).
 NOTE: user-approved exception committed - docs/evidence/runs/ holds the summarized layer of all 7 GPU run dirs (108 files ~16.6 MB + manifest; designs/ raw blobs remain gitignored).
+
+## 2026-10-22  senior reviewer (cloud)  Boundary Lab learnings: edits outside own paths (user-authorized)
+
+User authorized (chat, 2026-10-22: "make these changes in the cloud ... merge into local") edits beyond phase-2 ownership:
+- task 04: `mesh/build.py` (read_msh_summary return_arrays; topology checks after read-back and on cache hits), NEW `mesh/topology.py`, `tests/test_mesh_topology.py`.
+- task 05: NEW `solve/phasor.py`, `tests/test_solve_phasor.py`.
+- task 06: NEW `metrics/spinorama.py`, `metrics/beam_shape.py` (+ tests; written by a Sonnet subagent, reviewed and wired by the reviewer).
+- task 08: `search/evaluate.py` (`directivity_extras`, report-only scalars), `search/rundir.py` + `search/cma.py` (runtime provenance), `report/html.py` (one line per design), `tests/test_search_directivity_extras.py`, `tests/test_search_provenance.py`.
+Rulings requested: (1) early rejection policy (BL_LEARNINGS s2 item 4) before any implementation; (2) whether `beam_p_mean` / `spdi_*` should ever enter J (reviewer: NO until a verify-resolution balloon validates p).
