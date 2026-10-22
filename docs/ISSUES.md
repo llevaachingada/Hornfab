@@ -1,7 +1,7 @@
 # ISSUES
 
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
-Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-10-22 (local merge/push lane; main fast-forwarded to cloud tip 6d1d5c7).
+Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-10-22 (local GPU box, HANDOFF 6b run on f3704a3; no GitHub issue state changed).
 
 | ID | Title | Status | Owner | Plan ref |
 |---|---|---|---|---|
@@ -87,3 +87,5 @@ Added 2026-10-14 ~05:00 UTC (cloud): PR #14 REBUILT on `622776a` — local issue
 Added 2026-10-21 (cloud): Boundary Lab 0.5.0 integration PROPOSED (`docs/BOUNDARY_LAB_INTEGRATION_PLAN.md`; research `docs/BOUNDARY_LAB_0.5_RESEARCH.md`). No GitHub issue yet; open decisions: phase order A->B->C, ownership rows, BL env on the GPU box, contacting JW Sound / HornLab author.
 
 Added 2026-10-22 (cloud): senior architecture report `docs/SENIOR_ARCHITECTURE_REPORT_2026-10-22.md` (Boundary Lab: sidechain, plugin parked; priority and to-do list). On `main` (`2311f92` + this commit).
+
+Local-only, added 2026-10-22 (local GPU box, HANDOFF 6b): FREEFORM quarter-vs-full symmetry check PASSED (max 0.0043 dB, beamwidth 0.051 deg; bar 0.1 dB / 1 deg, not frozen - owner may freeze it); `freeform_sculpt` 60-eval search 0 failures, J 30.945 -> 24.213. Follow-ups (non-blocking): (1) `compare` header prints `quadrants None` for both runs although they solved 451 vs 1636 dofs (reads the wrong field; cosmetic); (2) dry-run throughput estimate 2 s/candidate vs measured 6.7 s for `freeform_sculpt` (TOOLCHAIN M3 extrapolation under-predicts; affects budget planning only); (3) watch `profileH.mouthAngleDeg` (2/6 at hi 70) and `profileV.points.3.1` (2/6 at lo 108) on any longer sculpt run before widening. CP-8d must not be re-run before the OSSE top-up (CONTINUITY Next action corrected). Evidence `docs/evidence/HANDOFF_6b.md`.

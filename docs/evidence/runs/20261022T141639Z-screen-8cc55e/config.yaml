@@ -1,0 +1,108 @@
+name: freeform_sculpt_symcheck_full
+family: FREEFORM
+seed_params:
+  profileH:
+    points:
+    - - 0.0
+      - 12.7
+    - - 45.0
+      - 38.0
+    - - 95.0
+      - 80.0
+    - - 145.0
+      - 130.0
+    - - 195.0
+      - 185.0
+    throatAngleDeg: 10.0
+    mouthAngleDeg: 70.0
+  profileV:
+    points:
+    - - 0.0
+      - 12.7
+    - - 45.0
+      - 38.0
+    - - 95.0
+      - 80.0
+    - - 145.0
+      - 130.0
+    - - 195.0
+      - 185.0
+    throatAngleDeg: 10.0
+    mouthAngleDeg: 70.0
+  crossSections:
+  - t: 0.0
+    shape: circle
+  - t: 1.0
+    shape: superellipse
+    exponent: 4.0
+bounds:
+  profileH.points.1.1:
+    lo: 22.0
+    hi: 55.0
+  profileH.points.2.1:
+    lo: 58.0
+    hi: 105.0
+  profileH.points.3.1:
+    lo: 108.0
+    hi: 160.0
+  profileH.points.4.1:
+    lo: 163.0
+    hi: 200.0
+  profileV.points.1.1:
+    lo: 22.0
+    hi: 55.0
+  profileV.points.2.1:
+    lo: 58.0
+    hi: 105.0
+  profileV.points.3.1:
+    lo: 108.0
+    hi: 160.0
+  profileV.points.4.1:
+    lo: 163.0
+    hi: 200.0
+  profileH.mouthAngleDeg:
+    lo: 35.0
+    hi: 70.0
+  profileV.mouthAngleDeg:
+    lo: 35.0
+    hi: 70.0
+  exponent:
+    lo: 2.0
+    hi: 8.0
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 90.0
+  band_lo_hz: 700.0
+  band_hi_hz: 3000.0
+  di_target_db: null
+  di_slope_target: 0.0
+weights:
+  cov: 2.0
+  rip: 1.5
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 6.0
+  quadrants: '1234'
+  dof_cap_screen: 5400
+  dof_cap_verify: 7000
+  dof_cap_final: 8900
+  dof_per_triangle: 0.5
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+search:
+  algorithm: cma
+  sigma0: 0.25
+  seed: 1234
+  budget: 400
+  popsize: null
+  tolfun: 0.001

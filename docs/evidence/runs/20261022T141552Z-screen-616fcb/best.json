@@ -1,0 +1,88 @@
+{
+ "design_hash": "892bb3551903",
+ "di_source": "balloon",
+ "eval_no": 0,
+ "family": "FREEFORM",
+ "mode": "screen",
+ "objective": 41.78131898814223,
+ "ok": true,
+ "params": {
+  "crossSections": [
+   {
+    "shape": "circle",
+    "t": 0.0
+   },
+   {
+    "exponent": 4.0,
+    "shape": "superellipse",
+    "t": 1.0
+   }
+  ],
+  "profileH": {
+   "mouthAngleDeg": 70.0,
+   "points": [
+    [
+     0.0,
+     12.7
+    ],
+    [
+     45.0,
+     38.0
+    ],
+    [
+     95.0,
+     80.0
+    ],
+    [
+     145.0,
+     130.0
+    ],
+    [
+     195.0,
+     185.0
+    ]
+   ],
+   "throatAngleDeg": 10.0
+  },
+  "profileV": {
+   "mouthAngleDeg": 70.0,
+   "points": [
+    [
+     0.0,
+     12.7
+    ],
+    [
+     45.0,
+     38.0
+    ],
+    [
+     95.0,
+     80.0
+    ],
+    [
+     145.0,
+     130.0
+    ],
+    [
+     195.0,
+     185.0
+    ]
+   ],
+   "throatAngleDeg": 10.0
+  }
+ },
+ "terms": {
+  "cov": 11.472563915958807,
+  "di": 1.6390927924042793,
+  "di_estimated": 0.0,
+  "dislope": 15.85085147163035,
+  "flat": 2.7269338492723647,
+  "load": 0.0,
+  "n_in_band": 9,
+  "n_nan": 0,
+  "penalty": 0.0,
+  "rip": 6.037047105367985,
+  "total": 41.78131898814223
+ },
+ "written_utc": "2026-10-22T14:16:17Z"
+}

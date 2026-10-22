@@ -5,10 +5,21 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 ## Status
 - **Wave:** 0, 1, 2 and 3 complete; Phase 2 Stage A code landed (synthetic-tested only) (tasks 04-08 done; CP-7a-f all PASS). This is the end of the plan's Wave ladder.
 - **Last checkpoints:** CP-7 (senior physics gate) GREEN - noise floor 0.039 dB. CP-8a PASS, CP-8b PASS; CP-8c CLOSED (PARTIAL on the literal four-families criterion; verify OK) - 3556 records / 8 shards / 587.2 MB, families OSSE 2034 + ICW 800 + FREEFORM 722 (R-OSSE: no example config), duplicate designs 14; campaign wall ~14.9 h; verify OK 0 bad / 0 bad arrays. Issue #13 hardening MERGED TO MAIN (2026-10-22: FF to 6d1d5c7 includes e0b9b61 + 11304f6 + cloud 152a829).
-- **Next action:** PRs #12/#14 closed as superseded by the merge. Then CP-8d (indicative) on the fixed code: surrogate train (expect GATES REFUSED (indicative only): held-out ~225-285 < 500), propose --allow-unvalidated, surrogate round (40 real BEM solves, one at a time) -> ismo_round1.json + docs/evidence/CP-8d.md, then the master PASS/PARTIAL report for CP-8a..CP-8d. Boundary Lab 0.5.0 integration awaits user approval (`docs/BOUNDARY_LAB_INTEGRATION_PLAN.md`, marked PROPOSED).
+- **Next action:** **Do NOT re-run CP-8d** — it already ran and FAILED its gates (2026-10-14; held-out 285 < 500, model not used); re-run only after the OSSE data top-up (senior report s3 item 5, needs user OK). HANDOFF 6b DONE 2026-10-22 (all 5 steps PASS; FREEFORM quarter == full within 0.0043 dB; sculpt 60: J 30.945 -> 24.213). Awaiting user decisions (senior report s4): revised priority, OSSE top-up, sculpt budget 400, `n`/`hold_end` widening. Next code work (no GPU): STEP-export CLI (s3 item 4), then BL-1 once approved. Boundary Lab, top-up and bound widening NOT started.
 - **MERGE NOW:** DONE (2026-10-22, local merge lane): `main` fast-forwarded 2a7bafb -> 6d1d5c7 (ccr-455d2184-yj5zk4 tip), zero conflicts, oracle sign-off, full offline suite 533 PASS in a sandbox worktree at the merged tree. See the 2026-10-22 entry.
 - **Proposed next (cloud):** Boundary Lab 0.5.0 integration, `docs/BOUNDARY_LAB_INTEGRATION_PLAN.md` (awaiting user approval; nothing started).
 - **Blockers:** none. Issue #13: fixes now MERGED on main (152a829 carried the cloud reconciliation; oracle sign-off 2026-10-22); GitHub issue kept open for owner closure. Issues #1-#11 closed.
+
+## 2026-10-22 (local GPU box, ~10:30 EDT) — HANDOFF 6b run: offline 515 PASS, doctor 10/10, FREEFORM symmetry consistent, sculpt 60 J -21.8 %; CP-8c reports generated; Next-action line corrected
+
+- On `main` `f3704a3`. Evidence: `docs/evidence/HANDOFF_6b.md`; summary layers of the 3 new runs in `docs/evidence/runs/` (manifest appended).
+- Corrected the Status "Next action": CP-8d already ran and FAILED (2026-10-14); not re-run, and must not be before the OSSE top-up.
+- `hornlab-search report` generated for the four CP-8c runs (ca15be, 6bdcbd, ff569c, 852be3) - local `runs/<dir>/report.html`, gitignored.
+- 6b step 1: offline suite **515 passed, 0 skipped, exit 0**. Step 2: doctor **10/10**. Step 3: dry-runs 1362 / 451 / 1636 dofs (cloud 1354 / ~452 / ~1638).
+- 6b step 4: quarter (451 dofs, J 41.7813) vs full (1636 dofs, J 41.7537): max |diff| di 0.0043 dB, on-axis 0.0042, ripple 0.0042, beamwidth 0.051 deg -> **consistent** (bar 0.1 dB / 1 deg; OSSE CP-7d ref 0.023 dB).
+- 6b step 5: `freeform_sculpt` budget 60, 0 failures, seed J 30.945 -> best 24.213 (-21.8 %, eval 26) vs freeform_hv -8.3 % over 722 evals; 6.7 s/candidate (541/h); no key pinned (max 2/6: profileH.mouthAngleDeg at hi, profileV.points.3.1 at lo). Dataset 3618 records (FREEFORM 784).
+- GPU hygiene each step: julia none before, killed after (one host per step), VRAM baseline 546-627 MiB; end state: no julia, 613 MiB.
+- Not started (needs user OK): Boundary Lab work, OSSE top-up, any bound widening, sculpt budget 400.
 
 ## 2026-10-22 (local merge lane) — main fast-forwarded to cloud tip 6d1d5c7 (oracle-approved); GPU-run summary layer committed to docs/evidence/runs/ (orchestrator)
 

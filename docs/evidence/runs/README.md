@@ -22,6 +22,9 @@ including these meta copies).
 | `20261013T204408Z-screen-6bdcbd` | `search --config examples/icw_termination.yaml` | 800 | 12.201 | CP-8c run 2/4 (icw_termination) |
 | `20261013T234724Z-screen-ff569c` | `search --config examples/freeform_hv.yaml` | 800 | 30.543 | CP-8c run 3/4 (freeform_hv) |
 | `20261014T025335Z-screen-852be3` | `search --config examples/throat_adapter.yaml` | 400 | 5.983 | CP-8c run 4/4 (throat_adapter) |
+| `20261022T141552Z-screen-616fcb` | `run --config examples/freeform_sculpt_symcheck_quarter.yaml` | — | 41.781 | HANDOFF 6b step 4 (quarter, 451 dofs) |
+| `20261022T141639Z-screen-8cc55e` | `run --config examples/freeform_sculpt_symcheck_full.yaml` | — | 41.754 | HANDOFF 6b step 4 (full, 1636 dofs) |
+| `20261022T141729Z-screen-babb6b` | `search --config examples/freeform_sculpt.yaml` | 60 | 24.213 | HANDOFF 6b step 5 (sculpt, seed 30.945) |
 
 Note: this commits the summary/log layer of the runs to the code branch as an admitted,
 user-approved exception to the "evidence about the data, never the data itself" rule in
