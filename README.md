@@ -33,7 +33,8 @@ measured machine numbers.
 .\.venv\Scripts\hornlab-search.exe version    # print the version
 ```
 
-`run` / `search` / `verify` / `report` / `selftest` arrive in Wave 2.
+Also: `run`, `search`, `verify`, `report`, `compare`, `export-step` (STEP solids for CAD / 3D
+printing), `selftest`, `dataset`, `surrogate`. New users start at `docs/BETA_QUICKSTART.md`.
 
 ## The one artifact to back up
 

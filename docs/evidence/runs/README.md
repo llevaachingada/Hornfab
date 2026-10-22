@@ -25,6 +25,7 @@ including these meta copies).
 | `20261022T141552Z-screen-616fcb` | `run --config examples/freeform_sculpt_symcheck_quarter.yaml` | — | 41.781 | HANDOFF 6b step 4 (quarter, 451 dofs) |
 | `20261022T141639Z-screen-8cc55e` | `run --config examples/freeform_sculpt_symcheck_full.yaml` | — | 41.754 | HANDOFF 6b step 4 (full, 1636 dofs) |
 | `20261022T141729Z-screen-babb6b` | `search --config examples/freeform_sculpt.yaml` | 60 | 24.213 | HANDOFF 6b step 5 (sculpt, seed 30.945) |
+| `20261022T142919Z-screen-1db72d` | `search --config examples/freeform_sculpt.yaml --budget 400` | 400 (+60 cached) | 16.789 | sculpt budget 400 (user OK 2026-10-22) |
 
 Note: this commits the summary/log layer of the runs to the code branch as an admitted,
 user-approved exception to the "evidence about the data, never the data itself" rule in

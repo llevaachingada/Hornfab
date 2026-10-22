@@ -837,8 +837,8 @@ def _cmd_compare(args) -> int:
     except ValueError as e:
         print(f"compare FAILED: {e}")
         return 1
-    qa = (ra.get("mesh") or {}).get("quadrants")
-    qb = (rb.get("mesh") or {}).get("quadrants")
+    qa = ra.get("quadrants") or (ra.get("mesh") or {}).get("quadrants")
+    qb = rb.get("quadrants") or (rb.get("mesh") or {}).get("quadrants")
     print(f"compare A={pa} (design {ra.get('design_hash')}, quadrants {qa!r})")
     print(f"        B={pb} (design {rb.get('design_hash')}, quadrants {qb!r})")
     if ra.get("design_hash") != rb.get("design_hash"):
@@ -848,6 +848,58 @@ def _cmd_compare(args) -> int:
         print(f"  {k:12s} max |diff| {r['max']:.4g} {r['unit']:3s}  mean {r['mean']:.4g}  (n={r['n']})")
     print("compare OK (report only; reference: OSSE full vs quarter 0.023 dB, CP-7d)")
     return 0
+
+
+# ---------------------------------------------------------------------- export-step
+
+
+def _cmd_export_step(args) -> int:
+    """Write closed STEP solids (millimetres, full model, throat open) for CAD and 3D printing:
+    the top N distinct successful designs of a run, or the seed of a config. No solver."""
+    from hornlab_search.config import load_config, mesh_spec
+    from hornlab_search.mesh.build import export_step
+    from hornlab_search.search.evaluate import read_ndjson
+    from hornlab_search.types import Design
+    if bool(args.run) == bool(args.config):
+        print("export-step FAILED: give exactly one of --run or --config")
+        return 1
+    if args.run:
+        run_dir = Path(args.run)
+        rows = read_ndjson(run_dir / "search.ndjson") if (run_dir / "search.ndjson").exists() else []
+        if not (run_dir / "config.yaml").exists() or not rows:
+            print(f"export-step FAILED: {run_dir} has no config.yaml / search.ndjson")
+            return 1
+        cfg = load_config(run_dir / "config.yaml")
+        seen, picks = set(), []
+        for r in sorted((r for r in rows if r.get("ok")), key=lambda r: r["objective"]):
+            if r["design_hash"] not in seen:
+                seen.add(r["design_hash"])
+                picks.append((f"rank{len(picks) + 1}", r["design_hash"], r["family"], r["params"],
+                              r["objective"]))
+        picks = picks[: args.top]
+        out_dir = Path(args.out) if args.out else run_dir / "step"
+    else:
+        cfg = load_config(args.config)
+        d = Design(cfg.family, dict(cfg.seed_params))
+        picks = [("seed", d.hash(), cfg.family, dict(cfg.seed_params), None)]
+        out_dir = Path(args.out) if args.out else Path("step") / cfg.name
+    if not picks:
+        print("export-step FAILED: no successful design to export")
+        return 1
+    ms = mesh_spec(args.mode, cfg)
+    bad = 0
+    for tag, h, fam, params, J in picks:
+        out = out_dir / f"{cfg.name}_{tag}_{h}.step"
+        try:
+            path, info = export_step(Design(fam, dict(params)), ms, cfg, out)
+        except Exception as exc:  # noqa: BLE001 - report per design, keep going
+            bad += 1
+            print(f"  {tag:6s} {h}  FAILED: {type(exc).__name__}: {str(exc).splitlines()[0][:80]}")
+            continue
+        jtxt = "" if J is None else f"J {J:.4f}  "
+        print(f"  {tag:6s} {h}  {jtxt}volume {getattr(info, 'volume_mm3', float('nan')) / 1000:.1f} cm3  {path}")
+    print(f"export-step {'FAILED' if bad else 'OK'}: {len(picks) - bad} of {len(picks)} written to {out_dir}")
+    return 1 if bad else 0
 
 
 # ---------------------------------------------------------------------- parser / main
@@ -905,6 +957,14 @@ def build_parser() -> argparse.ArgumentParser:
                         help="report metric differences between two solved runs")
     cp.add_argument("run_a", help="run directory (or its search.ndjson)")
     cp.add_argument("run_b", help="run directory (or its search.ndjson)")
+    xs = sub.add_parser("export-step", parents=[common],
+                        help="STEP solids (mm) of a run's top designs or a config's seed, for CAD / 3D printing")
+    xg = xs.add_mutually_exclusive_group(required=True)
+    xg.add_argument("--run", help="run directory: export its top distinct designs")
+    xg.add_argument("--config", help="config: export its seed design")
+    xs.add_argument("--top", type=int, default=3)
+    xs.add_argument("--mode", choices=("screen", "verify", "final"), default="screen")
+    xs.add_argument("--out", help="output directory (default <run>/step or step/<config name>)")
     sg = sub.add_parser("surrogate", parents=[common], help="phase 2 stage A: train / propose / round")
     sg.add_argument("action", choices=("train", "propose", "round"))
     sg.add_argument("--config", required=True)
@@ -959,6 +1019,8 @@ def main(argv: list[str] | None = None) -> int:
             return _cmd_surrogate(args)
         if args.cmd == "compare":
             return _cmd_compare(args)
+        if args.cmd == "export-step":
+            return _cmd_export_step(args)
     except KeyboardInterrupt:
         print(f"{args.cmd} INTERRUPTED")
         return 1

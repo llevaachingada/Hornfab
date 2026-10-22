@@ -10,3 +10,7 @@ report.html
 .pytest_cache/
 .opencode/
 *.egg-info/
+
+# review page build outputs (regenerate with tools/review)
+tools/review/review_data.json
+tools/review/hornlab_review.html

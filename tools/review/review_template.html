@@ -1,0 +1,443 @@
+<meta charset="utf-8">
+<title>Hornlab Search Review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Spline+Sans:wght@400;500;600&family=Spline+Sans+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a lab notebook. Narrow reading column for the maths and findings, wide figure bands for each run. */
+:root {
+  --bg: #f4f6f7;
+  --surface: #ffffff;
+  --ink: #15202a;
+  --muted: #5a6873;
+  --rule: #d7dee3;
+  --accent: #0d6e7a;
+  --accent-soft: #d6ecee;
+  --seed: #a3713a;
+  --best: #0d6e7a;
+  --band: rgba(13,110,122,0.08);
+  --good: #2f7d3b;
+  --warn: #a8661b;
+  --bad: #b23a3a;
+  --f-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Spline Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "Spline Sans Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0e1418; --surface: #151d23; --ink: #e3eaee; --muted: #93a3ad; --rule: #2a363e;
+  --accent: #5cc3cf; --accent-soft: #163a40; --seed: #d9a466; --best: #5cc3cf; --band: rgba(92,195,207,0.09);
+  --good: #6cc27a; --warn: #e0a050; --bad: #ec7b7b; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0e1418; --surface: #151d23; --ink: #e3eaee; --muted: #93a3ad; --rule: #2a363e;
+  --accent: #5cc3cf; --accent-soft: #163a40; --seed: #d9a466; --best: #5cc3cf; --band: rgba(92,195,207,0.09);
+  --good: #6cc27a; --warn: #e0a050; --bad: #ec7b7b; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.6; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-inline: 20px; padding-block: 40px 80px; display: grid; gap: 56px; }
+.prose { max-width: 70ch; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; line-height: 1.15; margin: 0; }
+h1 { font-size: clamp(2rem, 5vw, 3.1rem); font-weight: 700; letter-spacing: -0.02em; }
+h2 { font-size: 1.6rem; font-weight: 700; }
+h3 { font-size: 1.1rem; font-weight: 500; }
+p { margin: 0; }
+.stack { display: grid; gap: 14px; }
+.eyebrow { font-family: var(--f-mono); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+.lede { font-size: 1.12rem; color: var(--muted); }
+code, .mono { font-family: var(--f-mono); font-size: 0.86em; }
+.num { font-variant-numeric: tabular-nums; }
+a { color: var(--accent); }
+
+header.top { display: grid; gap: 16px; border-bottom: 1px solid var(--rule); padding-bottom: 32px; }
+.facts { display: flex; flex-wrap: wrap; gap: 10px 28px; font-family: var(--f-mono); font-size: 0.8rem; color: var(--muted); }
+.facts b { color: var(--ink); font-weight: 500; }
+
+/* Equations */
+.eq { font-family: "Cambria Math", "STIX Two Math", "Latin Modern Math", Georgia, serif; font-size: 1.08rem; background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 16px 18px; overflow-x: auto; line-height: 2; }
+.eq i { font-style: italic; }
+.defs { display: grid; grid-template-columns: max-content 1fr; gap: 6px 18px; font-size: 0.93rem; }
+.defs dt { font-family: var(--f-mono); color: var(--accent); }
+.defs dd { margin: 0; min-width: 0; }
+
+/* Tables */
+.tbl-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 0.88rem; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+th { font-family: var(--f-mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+td.r, th.r { text-align: right; }
+tbody tr:hover { background: var(--accent-soft); }
+
+.pill { display: inline-block; font-family: var(--f-mono); font-size: 0.7rem; padding: 2px 8px; border-radius: 99px; border: 1px solid currentColor; }
+.pill.good { color: var(--good); } .pill.warn { color: var(--warn); } .pill.bad { color: var(--bad); }
+
+/* Run explorer */
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.tab { font: inherit; font-size: 0.86rem; background: var(--surface); color: var(--ink); border: 1px solid var(--rule); border-radius: 6px; padding: 8px 12px; cursor: pointer; display: grid; text-align: left; gap: 2px; }
+.tab small { font-family: var(--f-mono); font-size: 0.68rem; color: var(--muted); }
+.tab[aria-selected="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.tab:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; }
+.kpi { background: var(--surface); padding: 12px 14px; display: grid; gap: 2px; }
+.kpi span { font-family: var(--f-mono); font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.kpi b { font-family: var(--f-display); font-size: 1.35rem; font-weight: 500; font-variant-numeric: tabular-nums; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr)); gap: 20px; }
+.fig { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 14px 14px 10px; display: grid; gap: 8px; min-width: 0; }
+.fig h3 { font-size: 0.95rem; }
+.fig .cap { font-size: 0.8rem; color: var(--muted); }
+.fig svg { width: 100%; height: auto; display: block; overflow: visible; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.76rem; color: var(--muted); }
+.legend i { display: inline-block; width: 18px; height: 0; border-top: 2px solid; vertical-align: middle; margin-right: 5px; }
+.legend i.dash { border-top-style: dashed; }
+.maps { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 12px; }
+.map { display: grid; gap: 4px; min-width: 0; }
+.map canvas { width: 100%; height: auto; aspect-ratio: 73 / 40; border-radius: 3px; image-rendering: auto; }
+.map .lbl { font-family: var(--f-mono); font-size: 0.7rem; color: var(--muted); display: flex; justify-content: space-between; }
+.map canvas.cbar { height: 10px; aspect-ratio: auto; border-radius: 2px; }
+svg text { fill: var(--muted); font-family: var(--f-mono); font-size: 10px; }
+svg .grid line { stroke: var(--rule); }
+svg .axis { stroke: var(--muted); }
+
+/* Findings */
+.finding { display: grid; grid-template-columns: 6px 1fr; gap: 14px; }
+.finding::before { content: ""; border-radius: 3px; background: var(--sev, var(--accent)); }
+.finding.warn { --sev: var(--warn); } .finding.bad { --sev: var(--bad); } .finding.good { --sev: var(--good); }
+.findings { display: grid; gap: 18px; }
+ol.q { margin: 0; padding-left: 1.3em; display: grid; gap: 12px; }
+ol.q li::marker { font-family: var(--f-mono); color: var(--accent); }
+footer { color: var(--muted); font-size: 0.82rem; border-top: 1px solid var(--rule); padding-top: 18px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">hornlab-search · solve review · 22 Oct 2026</div>
+  <h1>Hornlab Search Review</h1>
+  <p class="lede prose">Every boundary-element solve the horn optimiser has run so far, laid out for a mathematical review: the objective being minimised, how far the solver can be trusted, what each search found, and where the setup itself limits the answer.</p>
+  <div class="facts">
+    <span>solver <b>BEM, BEAT engine on CUDA</b></span>
+    <span>GPU <b>RTX 4060 8 GB</b></span>
+    <span>optimiser <b>CMA-ES</b></span>
+    <span>solves <b>4,018</b></span>
+    <span>GPU solve time <b>13.8 h</b></span>
+  </div>
+</header>
+
+<section class="stack prose" id="problem">
+  <div class="eyebrow">The problem</div>
+  <h2>What is being optimised</h2>
+  <p>A horn is a parametric surface. A design vector <i>x</i> (5 to 11 searched numbers, depending on the family) is meshed, solved with a boundary-element method at 12 log-spaced frequencies, and turned into polar cuts (73 angles from −90° to +90°, horizontal and vertical, at 2 m) plus a 512-point Fibonacci balloon. From those, six per-frequency metrics are computed, and CMA-ES minimises one scalar <i>J</i>. Lower is better.</p>
+  <div class="eq">
+    <i>J</i>(<i>x</i>) = <i>w</i><sub>cov</sub>·cov + <i>w</i><sub>rip</sub>·rip + <i>w</i><sub>di</sub>·di + <i>w</i><sub>slope</sub>·dislope + <i>w</i><sub>flat</sub>·flat + <i>w</i><sub>load</sub>·load + penalty<br>
+    cov = (1/100)·mean<sub><i>f</i>∈B</sub>[(θ<sub>h</sub>(<i>f</i>) − θ<sub>h</sub>*)² + (θ<sub>v</sub>(<i>f</i>) − θ<sub>v</sub>*)²]<br>
+    rip = mean<sub><i>f</i>∈B</sub>[σ<sub>h</sub>(<i>f</i>) + σ<sub>v</sub>(<i>f</i>)]<br>
+    di = (1/10)·mean<sub><i>f</i>∈B</sub>[(DI(<i>f</i>) − DI*)²]&nbsp;&nbsp;&nbsp; dislope = (<i>s</i> − <i>s</i>*)², <i>s</i> = slope of DI vs log<sub>10</sub><i>f</i><br>
+    flat = std<sub><i>f</i>∈B</sub>[SPL<sub>axis</sub>(<i>f</i>)]&nbsp;&nbsp;&nbsp; load = mean<sub><i>f</i>∈B</sub>[max(0, <i>z</i><sub>min</sub> − Re <i>Z</i><sub>throat</sub>(<i>f</i>))]
+  </div>
+  <dl class="defs">
+    <dt>B</dt><dd>The target band, e.g. 700–5500 Hz. Solved frequencies outside it are shown in plots but never scored.</dd>
+    <dt>θ<sub>h</sub>, θ<sub>v</sub></dt><dd>−6 dB beamwidth (total included angle) of each cut; the edge is the exact half-pressure level 20·log<sub>10</sub>0.5 = −6.0206 dB.</dd>
+    <dt>σ<sub>h</sub>, σ<sub>v</sub></dt><dd>Ripple: sample standard deviation (ddof = 1) of the on-axis-normalised dB inside the target coverage, ignoring samples more than 40 dB down.</dd>
+    <dt>DI</dt><dd>10·log<sub>10</sub>(<i>p</i><sub>axis</sub>² / mean <i>p</i>²) over the full-sphere balloon, averaged in linear power. DI* comes from the target angles: Ω = 4·arcsin(sin(θ<sub>h</sub>*/2)·sin(θ<sub>v</sub>*/2)), DI* = 10·log<sub>10</sub>(4π/Ω).</dd>
+    <dt>weights</dt><dd>Default <span class="mono">cov 1, rip 1, di 0.3, dislope 0.5, flat 0.5, load 0</span> (throat-load term off in every run so far).</dd>
+    <dt>penalty</dt><dd>10³ for a design that fails to mesh or solve. Finite on purpose: an infinite value breaks the CMA-ES covariance update.</dd>
+  </dl>
+</section>
+
+<section class="stack" id="trust">
+  <div class="prose stack">
+    <div class="eyebrow">Can the numbers be trusted</div>
+    <h2>Solver validation so far</h2>
+    <p>These checks were run before any search result was taken seriously. All are measured on this machine.</p>
+  </div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Check</th><th>What it compares</th><th class="r">Result</th><th>Verdict</th></tr></thead>
+    <tbody>
+      <tr><td>Noise floor (CP-7)</td><td>Same design solved repeatedly; metric scatter</td><td class="r">0.039 dB</td><td><span class="pill good">pass</span></td></tr>
+      <tr><td>Second solver (CP-7b)</td><td>GPU BEAT vs CPU bempp on the same mesh</td><td class="r">&lt; 0.2 dB rule</td><td><span class="pill good">pass</span></td></tr>
+      <tr><td>OSSE symmetry (CP-7d)</td><td>Quarter-domain mesh vs full mesh</td><td class="r">0.023 dB</td><td><span class="pill good">pass</span></td></tr>
+      <tr><td>FREEFORM symmetry (today)</td><td>Quarter (451 dofs) vs full (1,636 dofs); worst of DI, on-axis, ripple</td><td class="r">0.0043 dB · 0.05°</td><td><span class="pill good">pass</span></td></tr>
+      <tr><td>Closed-form metrics</td><td>Cardioid and dipole beamwidths, DI quadrature at 128–4096 points</td><td class="r">exact · 4×10⁻⁶ dB at 512</td><td><span class="pill good">pass</span></td></tr>
+      <tr><td>Mesh resolution</td><td>6 elements per wavelength above 2.5 kHz</td><td class="r">unmeasured</td><td><span class="pill warn">open</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="stack" id="results">
+  <div class="prose stack">
+    <div class="eyebrow">Results</div>
+    <h2>Six searches at a glance</h2>
+    <p>Each row is one CMA-ES run, started from a hand-set seed design. “Pinned” counts the searched parameters where most of the six best designs sit within 2% of a search bound, which means the bound, not the physics, stopped the search.</p>
+  </div>
+  <div class="tbl-wrap"><table id="summary"></table></div>
+</section>
+
+<section class="stack" id="explorer">
+  <div class="prose stack">
+    <div class="eyebrow">Run explorer</div>
+    <h2>Seed versus best, per run</h2>
+    <p>Choose a run. Amber is the starting design, teal the best one found. The shaded strip is the scored band.</p>
+  </div>
+  <div class="tabs" role="tablist" id="tabs"></div>
+  <div class="kpis" id="kpis"></div>
+  <div class="grid2">
+    <div class="fig"><h3>Convergence</h3><div class="cap">Objective of every evaluation (dots) and the running best (line). Failures are not drawn.</div><svg id="c-conv"></svg></div>
+    <div class="fig"><h3>Where the objective comes from</h3><div class="cap">Weighted contribution of each term, seed vs best.</div><svg id="c-terms"></svg></div>
+    <div class="fig"><h3>Beamwidth</h3><div class="legend"><span><i style="color:var(--seed)" class="dash"></i>seed H</span><span><i style="color:var(--seed)"></i>seed V</span><span><i style="color:var(--best)" class="dash"></i>best H</span><span><i style="color:var(--best)"></i>best V</span><span><i style="color:var(--muted)"></i>targets</span></div><svg id="c-bw"></svg></div>
+    <div class="fig"><h3>Directivity index</h3><div class="legend"><span><i style="color:var(--seed)"></i>seed</span><span><i style="color:var(--best)"></i>best</span><span><i style="color:var(--muted)" class="dash"></i>target DI*</span></div><svg id="c-di"></svg></div>
+    <div class="fig"><h3>On-axis response, mean removed</h3><div class="legend"><span><i style="color:var(--seed)"></i>seed</span><span><i style="color:var(--best)"></i>best</span></div><svg id="c-axis"></svg></div>
+    <div class="fig"><h3>Wall profile</h3><div class="cap">Mesh nodes on the two symmetry planes: radius vs depth, in mm. Includes the outer shell.</div><div class="legend"><span><i style="color:var(--seed)"></i>seed</span><span><i style="color:var(--best)"></i>best</span></div><svg id="c-prof"></svg></div>
+  </div>
+  <div class="fig">
+    <h3>Polar maps</h3>
+    <div class="cap">Level relative to on-axis, angle (−90° to +90°, horizontal axis) against frequency (rows, low at the bottom). Clipped at −40 dB.</div>
+    <div class="maps" id="maps"></div>
+    <div class="map"><canvas class="cbar" id="cbar" width="400" height="10"></canvas><div class="lbl"><span>−40 dB</span><span>−20</span><span>−6</span><span>0 dB</span></div></div>
+  </div>
+  <div class="fig">
+    <h3>Parameter sensitivity</h3>
+    <div class="cap">Spearman rank correlation of each searched parameter with <i>J</i> over all successful evaluations of this run (positive: larger value, worse design), and how many of the six best designs sit at each bound.</div>
+    <div class="tbl-wrap"><table id="sens"></table></div>
+  </div>
+</section>
+
+<section class="stack prose" id="findings">
+  <div class="eyebrow">Reading of the results</div>
+  <h2>What the data says</h2>
+  <div class="findings">
+    <div class="finding good"><div class="stack"><h3>The pipeline works end to end</h3><p>4,018 solves, 125 failures (3.1%), every one classified. Searches improved on the seed in every run, by 8% to 78%. The solver agrees with itself and with an independent solver to well under the size of the improvements.</p></div></div>
+    <div class="finding bad"><div class="stack"><h3>Three of four early searches hit a wall, not an optimum</h3><p>OSSE pinned <span class="mono">n</span> at its lower bound in all six best designs; ICW pinned <span class="mono">hold_end</span> (6/6) and nearly <span class="mono">kappa0</span> (4/6); the throat adapter pinned three of five parameters. Their best <i>J</i> values are lower bounds on what those families can do, and the search space should be widened before more GPU time is spent on them.</p></div></div>
+    <div class="finding warn"><div class="stack"><h3>The first FREEFORM setup searched almost nothing</h3><p>With 3 free parameters the sensitivity of every one is near zero (|ρ| &lt; 0.07): a flat plateau, 8% gain in 722 solves. The 11-parameter sculpt version gained 22% in 60 solves with no failures and nothing pinned.</p></div></div>
+    <div class="finding warn"><div class="stack"><h3>Given 400 solves, the sculpt search found its own wall</h3><p><i>J</i> fell from 30.9 to 16.8 (−46%) with 1 failure in 400. The best designs push the wall radius at 145 mm depth to its lower bound in both planes and the vertical mouth radius to its upper bound: the optimiser wants a slower flare through the middle and a larger mouth than the configuration allows. The configuration keeps each wall anchor in its own non-overlapping radius range so the wall can never pinch; relaxing that needs a monotonicity constraint instead of box bounds.</p></div></div>
+    <div class="finding warn"><div class="stack"><h3>The surrogate model is not ready</h3><p>A neural surrogate trained on 1,501 OSSE records passed 5 of 6 accuracy gates but had too few held-out designs (285 of the 500 required) and one non-monotonic sweep. It is not used. It needs about 1,900 more OSSE solves, roughly 10 GPU hours.</p></div></div>
+  </div>
+</section>
+
+<section class="stack prose" id="questions">
+  <div class="eyebrow">For the reviewer</div>
+  <h2>Questions worth a mathematician’s time</h2>
+  <ol class="q">
+    <li><b>Is a weighted sum the right scalarisation?</b> The six terms have different units and scales (cov is deg²/100, rip is dB, dislope is (dB/decade)²). The weights were set by hand. Would a normalised, Chebyshev, or Pareto (NSGA-II is already in the code) formulation give more defensible optima?</li>
+    <li><b>Is the ripple metric well posed?</b> A sample standard deviation over angles inside the target coverage, which itself depends on the target. Does that make <i>J</i> discontinuous as the beamwidth crosses the coverage edge?</li>
+    <li><b>Beamwidth is a threshold crossing.</b> θ(<i>f</i>) jumps when a side lobe crosses −6 dB. Is there a smoother surrogate quantity (energy-weighted width, a moment of the pattern) that CMA-ES would handle better?</li>
+    <li><b>How should bounds be chosen?</b> Several runs are bound-limited. Is there a principled way to set bounds from the mesher’s validity region rather than by hand, or to let the search reparametrise? For the sculpt family in particular: the wall radii must increase with depth. A reparametrisation in positive increments (r<sub><i>i</i>+1</sub> = r<sub><i>i</i></sub> + e<sup>u<sub><i>i</i></sub></sup>) would enforce that without the disjoint boxes that now pin the search.</li>
+    <li><b>Is 12 log-spaced frequencies enough?</b> Narrow resonances between samples are invisible to the objective. What sampling density would bound the error in each term?</li>
+    <li><b>Surrogate acceptance.</b> The gates require Spearman &gt; 0.9, top-20 overlap ≥ 12, beamwidth MAE &lt; 2°, DI MAE &lt; 0.3 dB, and zero monotonicity flips on 1-D sweeps. Are these the right tests for deciding that a surrogate can replace the solver inside the loop?</li>
+  </ol>
+</section>
+
+<section class="stack prose" id="next">
+  <div class="eyebrow">Proposed next steps</div>
+  <h2>Before more GPU time</h2>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Step</th><th>Why</th><th class="r">GPU</th></tr></thead>
+    <tbody>
+      <tr><td>Agree the objective and its normalisation</td><td>Every later solve inherits it</td><td class="r">0</td></tr>
+      <tr><td>Widen pinned bounds, probe with dry-runs</td><td>OSSE, ICW and throat-adapter results are bound-limited</td><td class="r">0</td></tr>
+      <tr><td>Re-run the pinned families at a modest budget</td><td>Find real optima</td><td class="r">≈ 3 h</td></tr>
+      <tr><td>Export winners to CAD (STEP)</td><td>Physical prototypes for beta testing</td><td class="r">0</td></tr>
+      <tr><td>OSSE data top-up for the surrogate</td><td>Only after the objective is settled</td><td class="r">≈ 10 h</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<footer>Generated from the run directories in <span class="mono">runs/</span> of hornlab-search on 22 Oct 2026. Best designs of the sculpt runs are exported as STEP solids with <span class="mono">hornlab-search export-step</span>. Search logs and per-design summaries are committed under <span class="mono">docs/evidence/runs/</span>.</footer>
+</div>
+
+<script>
+const DATA = /*__DATA__*/null;
+const NS = "http://www.w3.org/2000/svg";
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const fmt = (v, d = 2) => v == null ? "–" : Number(v).toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+const TERMS = ["cov", "rip", "di", "dislope", "flat", "load"];
+const DEFW = { cov: 1, rip: 1, di: 0.3, dislope: 0.5, flat: 0.5, load: 0 };
+
+function diFromCuts(h, v) {
+  if (h >= 180 && v >= 180) return 0;
+  const sh = Math.sin(Math.min(h, 180) * Math.PI / 360), sv = Math.sin(Math.min(v, 180) * Math.PI / 360);
+  const om = 4 * Math.asin(Math.min(Math.max(sh * sv, 1e-12), 1));
+  return 10 * Math.log10(4 * Math.PI / om);
+}
+function pinned(run) { return run.sens.filter(s => Math.max(s.at_lo, s.at_hi) >= 4); }
+
+function el(tag, attrs = {}, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+
+/* Generic 2-D chart: x linear or log, series of {pts, color, dash, dots} */
+function chart(svg, { W = 460, H = 240, xlog = false, xlim, ylim, xticks, yticks, xlabel, ylabel, band, hlines = [], series }) {
+  svg.innerHTML = "";
+  const m = { l: 44, r: 10, t: 8, b: 32 };
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  const tx = xlog ? v => Math.log10(v) : v => v;
+  const [x0, x1] = xlim.map(tx), [y0, y1] = ylim;
+  const X = v => m.l + (tx(v) - x0) / (x1 - x0) * (W - m.l - m.r);
+  const Y = v => H - m.b - (v - y0) / (y1 - y0) * (H - m.t - m.b);
+  const g = el("g", { class: "grid" }, svg);
+  if (band) el("rect", { x: X(band[0]), y: m.t, width: Math.max(0, X(band[1]) - X(band[0])), height: H - m.t - m.b, fill: css("--band") }, svg);
+  for (const t of yticks) { el("line", { x1: m.l, x2: W - m.r, y1: Y(t), y2: Y(t) }, g); const tt = el("text", { x: m.l - 6, y: Y(t) + 3, "text-anchor": "end" }, svg); tt.textContent = t; }
+  for (const t of xticks) { el("line", { x1: X(t), x2: X(t), y1: m.t, y2: H - m.b }, g); const tt = el("text", { x: X(t), y: H - m.b + 13, "text-anchor": "middle" }, svg); tt.textContent = t >= 1000 ? (t / 1000) + "k" : t; }
+  if (xlabel) { const t = el("text", { x: W - m.r, y: H - 3, "text-anchor": "end" }, svg); t.textContent = xlabel; }
+  if (ylabel) { const t = el("text", { x: 4, y: m.t + 2, "dominant-baseline": "hanging" }, svg); t.textContent = ylabel; }
+  for (const h of hlines) el("line", { x1: m.l, x2: W - m.r, y1: Y(h.y), y2: Y(h.y), stroke: h.color, "stroke-width": 1.2, "stroke-dasharray": h.dash ? "5 4" : "none" }, svg);
+  const clipY = v => Math.min(Math.max(v, y0), y1);
+  for (const s of series) {
+    const pts = s.pts.filter(p => p[1] != null && isFinite(p[1]));
+    if (s.dots) {
+      for (const p of pts) el("circle", { cx: X(p[0]), cy: Y(clipY(p[1])), r: s.r || 1.6, fill: s.color, opacity: s.opacity ?? 0.45 }, svg);
+    } else if (pts.length) {
+      el("path", { d: pts.map((p, i) => (i ? "L" : "M") + X(p[0]).toFixed(1) + "," + Y(clipY(p[1])).toFixed(1)).join(""), fill: "none", stroke: s.color, "stroke-width": s.w || 1.8, "stroke-dasharray": s.dash ? "5 4" : "none", "stroke-linejoin": "round" }, svg);
+    }
+  }
+}
+function niceTicks(lo, hi, n = 5) {
+  const step0 = (hi - lo) / n, p = Math.pow(10, Math.floor(Math.log10(step0)));
+  const step = [1, 2, 2.5, 5, 10].map(k => k * p).find(s => s >= step0);
+  const out = []; for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-9; v += step) out.push(+v.toFixed(6));
+  return out;
+}
+const FT = [500, 1000, 2000, 5000];
+
+function renderSummary() {
+  const t = document.getElementById("summary");
+  let h = `<thead><tr><th>Run</th><th>Family</th><th class="r">Searched</th><th class="r">Evals</th><th class="r">Fail</th><th class="r">Seed J</th><th class="r">Best J</th><th class="r">Change</th><th class="r">s / eval</th><th>Bounds</th></tr></thead><tbody>`;
+  for (const r of DATA.runs) {
+    const nf = r.n - r.n_ok, pin = pinned(r);
+    const ch = (r.best_J / r.seed_J - 1) * 100;
+    const pill = pin.length ? `<span class="pill bad">${pin.length} pinned</span>` : `<span class="pill good">clear</span>`;
+    h += `<tr><td><b>${r.name}</b><br><span class="mono" style="color:var(--muted)">${r.label}</span></td><td>${r.family}</td><td class="r">${r.searched}</td><td class="r">${r.n.toLocaleString()}</td><td class="r">${nf} (${(nf / r.n * 100).toFixed(1)}%)</td><td class="r">${fmt(r.seed_J)}</td><td class="r"><b>${fmt(r.best_J)}</b></td><td class="r">${ch.toFixed(1)}%</td><td class="r">${fmt(r.s_per, 1)}</td><td>${pill}</td></tr>`;
+  }
+  t.innerHTML = h + "</tbody>";
+}
+
+let current = 0;
+function renderTabs() {
+  const box = document.getElementById("tabs"); box.innerHTML = "";
+  DATA.runs.forEach((r, i) => {
+    const b = document.createElement("button");
+    b.className = "tab"; b.id = "tab-" + i; b.setAttribute("role", "tab"); b.setAttribute("aria-selected", i === current);
+    b.innerHTML = `<span>${r.name}</span><small>${r.family} · ${r.n} evals</small>`;
+    b.onclick = () => { current = i; try { localStorage.setItem("hsr-run", i); } catch (e) {} renderTabs(); renderRun(); };
+    box.appendChild(b);
+  });
+}
+
+function heat(canvas, rows) {
+  const nf = rows.length, na = rows[0].length;
+  canvas.width = na; canvas.height = nf;
+  const ctx = canvas.getContext("2d"), img = ctx.createImageData(na, nf);
+  for (let fi = 0; fi < nf; fi++) for (let a = 0; a < na; a++) {
+    const v = rows[fi][a] == null ? -40 : rows[fi][a];
+    const c = cmap((v + 40) / 40), o = ((nf - 1 - fi) * na + a) * 4;
+    img.data[o] = c[0]; img.data[o + 1] = c[1]; img.data[o + 2] = c[2]; img.data[o + 3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+}
+/* Perceptual ramp, dark navy -> teal -> pale yellow; -6 dB lands in the yellow-green */
+const STOPS = [[0, [18, 22, 48]], [0.35, [36, 70, 120]], [0.6, [24, 134, 140]], [0.85, [120, 196, 120]], [0.95, [230, 220, 110]], [1, [255, 248, 200]]];
+function cmap(t) {
+  t = Math.min(1, Math.max(0, t));
+  for (let i = 1; i < STOPS.length; i++) if (t <= STOPS[i][0]) {
+    const [a, ca] = STOPS[i - 1], [b, cb] = STOPS[i], u = (t - a) / (b - a);
+    return ca.map((c, k) => Math.round(c + (cb[k] - c) * u));
+  }
+  return STOPS[STOPS.length - 1][1];
+}
+
+function renderRun() {
+  const r = DATA.runs[current], t = r.target, S = r.seed, B = r.best, w = Object.assign({}, DEFW, r.weights || {});
+  const pin = pinned(r), ch = (r.best_J / r.seed_J - 1) * 100;
+  const fails = Object.entries(r.fails).map(([k, v]) => `${v} ${k.replace(/_/g, " ")}`).join(", ") || "none";
+  document.getElementById("kpis").innerHTML = [
+    ["Target", `${t.coverage_h_deg}° × ${t.coverage_v_deg}°`], ["Band", `${t.band_lo_hz / 1000}–${t.band_hi_hz / 1000} kHz`],
+    ["Seed J", fmt(r.seed_J)], ["Best J", fmt(r.best_J)], ["Change", ch.toFixed(1) + "%"],
+    ["Best at eval", r.best_eval ?? "–"], ["Median dofs", (r.dofs_med || 0).toLocaleString()], ["Failures", fails.length > 22 ? (r.n - r.n_ok) : fails],
+  ].map(([k, v]) => `<div class="kpi"><span>${k}</span><b>${v}</b></div>`).join("");
+
+  // convergence
+  const Js = r.J.map((j, i) => [i, j]).filter(p => p[1] != null);
+  let rb = Infinity; const run = Js.map(p => [p[0], rb = Math.min(rb, p[1])]);
+  const ymax = Math.max(r.seed_J * 1.6, r.best_J * 2), ymin = 0;
+  chart(document.getElementById("c-conv"), { xlim: [0, r.n], ylim: [ymin, ymax], xticks: niceTicks(0, r.n, 5), yticks: niceTicks(ymin, ymax, 5), xlabel: "evaluation", ylabel: "J",
+    series: [{ pts: Js, color: css("--muted"), dots: true, opacity: 0.35 }, { pts: run, color: css("--best"), w: 2.2 }],
+    hlines: [{ y: r.seed_J, color: css("--seed"), dash: true }] });
+
+  // terms (horizontal bars)
+  const svg = document.getElementById("c-terms"); svg.innerHTML = "";
+  const W = 460, rowH = 32, H = TERMS.length * rowH + 30; svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  const vals = TERMS.map(k => [w[k] * (r.terms_seed[k] || 0), w[k] * (r.terms_best[k] || 0)]);
+  const vmax = Math.max(...vals.flat(), 1e-9), L = 70, R = 54, X = v => L + v / vmax * (W - L - R);
+  TERMS.forEach((k, i) => {
+    const y = 6 + i * rowH; const lab = el("text", { x: L - 8, y: y + 15, "text-anchor": "end" }, svg); lab.textContent = k + (w[k] ? "" : " (w=0)");
+    [[vals[i][0], "--seed", 0], [vals[i][1], "--best", 12]].forEach(([v, c, dy]) => {
+      el("rect", { x: L, y: y + dy, width: Math.max(0.5, X(v) - L), height: 10, rx: 2, fill: css(c) }, svg);
+      const tv = el("text", { x: X(v) + 4, y: y + dy + 9 }, svg); tv.textContent = v.toFixed(2);
+    });
+  });
+  const lg = el("text", { x: L, y: H - 4 }, svg); lg.textContent = "upper bar seed · lower bar best · weighted";
+
+  // beamwidth
+  const F = S.freqs, band = [t.band_lo_hz, t.band_hi_hz];
+  const bwAll = [...S.bw_h, ...S.bw_v, ...B.bw_h, ...B.bw_v, t.coverage_h_deg, t.coverage_v_deg].filter(v => v != null);
+  const bmax = Math.min(200, Math.max(...bwAll) * 1.08);
+  chart(document.getElementById("c-bw"), { xlog: true, xlim: [F[0], F[F.length - 1]], ylim: [0, bmax], xticks: FT, yticks: niceTicks(0, bmax, 5), xlabel: "Hz", ylabel: "deg", band,
+    hlines: [{ y: t.coverage_h_deg, color: css("--muted") }, { y: t.coverage_v_deg, color: css("--muted") }],
+    series: [{ pts: F.map((f, i) => [f, S.bw_h[i]]), color: css("--seed"), dash: true }, { pts: F.map((f, i) => [f, S.bw_v[i]]), color: css("--seed") },
+             { pts: F.map((f, i) => [f, B.bw_h[i]]), color: css("--best"), dash: true, w: 2.2 }, { pts: F.map((f, i) => [f, B.bw_v[i]]), color: css("--best"), w: 2.2 }] });
+
+  // DI
+  const dit = t.di_target_db ?? diFromCuts(t.coverage_h_deg, t.coverage_v_deg);
+  const dall = [...S.di, ...B.di, dit].filter(v => v != null);
+  const dlo = Math.floor(Math.min(...dall) - 1), dhi = Math.ceil(Math.max(...dall) + 1);
+  chart(document.getElementById("c-di"), { xlog: true, xlim: [F[0], F[F.length - 1]], ylim: [dlo, dhi], xticks: FT, yticks: niceTicks(dlo, dhi, 5), xlabel: "Hz", ylabel: "dB", band,
+    hlines: [{ y: dit, color: css("--muted"), dash: true }],
+    series: [{ pts: F.map((f, i) => [f, S.di[i]]), color: css("--seed") }, { pts: F.map((f, i) => [f, B.di[i]]), color: css("--best"), w: 2.2 }] });
+
+  // on-axis
+  const aall = [...S.on_axis, ...B.on_axis].filter(v => v != null);
+  const alo = Math.floor(Math.min(...aall) - 1), ahi = Math.ceil(Math.max(...aall) + 1);
+  chart(document.getElementById("c-axis"), { xlog: true, xlim: [F[0], F[F.length - 1]], ylim: [alo, ahi], xticks: FT, yticks: niceTicks(alo, ahi, 5), xlabel: "Hz", ylabel: "dB", band,
+    series: [{ pts: F.map((f, i) => [f, S.on_axis[i]]), color: css("--seed") }, { pts: F.map((f, i) => [f, B.on_axis[i]]), color: css("--best"), w: 2.2 }] });
+
+  // profile: H on the right (+r), V mirrored to the left (-r)
+  const pts = (d, key, sgn) => (d.profile[key] || []).map(p => [sgn * Math.abs(p[0]), p[1]]);
+  const all = [...pts(S, "h", 1), ...pts(S, "v", -1), ...pts(B, "h", 1), ...pts(B, "v", -1)];
+  if (all.length) {
+    const rx = Math.max(...all.map(p => Math.abs(p[0]))) * 1.08, zs = all.map(p => p[1]);
+    const zlo = Math.min(...zs) - 5, zhi = Math.max(...zs) + 5;
+    chart(document.getElementById("c-prof"), { H: 260, xlim: [-rx, rx], ylim: [zlo, zhi], xticks: niceTicks(-rx, rx, 6), yticks: niceTicks(zlo, zhi, 5), xlabel: "← vertical plane · radius mm · horizontal plane →", ylabel: "z mm",
+      series: [{ pts: [...pts(S, "h", 1), ...pts(S, "v", -1)], color: css("--seed"), dots: true, r: 1.8, opacity: 0.8 },
+               { pts: [...pts(B, "h", 1), ...pts(B, "v", -1)], color: css("--best"), dots: true, r: 1.8, opacity: 0.9 }] });
+  }
+
+  // polar maps
+  const maps = document.getElementById("maps"); maps.innerHTML = "";
+  [["Seed · horizontal", S.polar_h], ["Best · horizontal", B.polar_h], ["Seed · vertical", S.polar_v], ["Best · vertical", B.polar_v]].forEach(([lab, rows]) => {
+    const d = document.createElement("div"); d.className = "map";
+    const c = document.createElement("canvas"); d.appendChild(c); heat(c, rows);
+    const l = document.createElement("div"); l.className = "lbl"; l.innerHTML = `<span>${lab}</span><span>${F[0]}–${F[F.length - 1] / 1000}k Hz</span>`;
+    d.appendChild(l); maps.appendChild(d);
+  });
+
+  // sensitivity
+  let s = `<thead><tr><th>Parameter</th><th class="r">lo</th><th class="r">hi</th><th class="r">best</th><th class="r">ρ with J</th><th></th><th class="r">top-6 at lo</th><th class="r">at hi</th></tr></thead><tbody>`;
+  for (const p of r.sens) {
+    const bar = `<svg width="90" height="10" viewBox="0 0 90 10"><rect x="45" y="0" width="0.8" height="10" fill="${css("--muted")}"/><rect x="${p.rho < 0 ? 45 + p.rho * 45 : 45}" y="2" width="${Math.abs(p.rho) * 45}" height="6" rx="1" fill="${css(p.rho > 0 ? "--seed" : "--best")}"/></svg>`;
+    const flag = v => v >= 4 ? `<span class="pill bad">${v}/6</span>` : v >= 2 ? `<span class="pill warn">${v}/6</span>` : `${v}/6`;
+    s += `<tr><td class="mono">${p.key}</td><td class="r">${p.lo}</td><td class="r">${p.hi}</td><td class="r">${fmt(p.best, 3)}</td><td class="r">${p.rho.toFixed(2)}</td><td>${bar}</td><td class="r">${flag(p.at_lo)}</td><td class="r">${flag(p.at_hi)}</td></tr>`;
+  }
+  document.getElementById("sens").innerHTML = s + "</tbody>";
+}
+
+(function init() {
+  const cb = document.getElementById("cbar"), cx = cb.getContext("2d");
+  for (let i = 0; i < 400; i++) { const c = cmap(i / 399); cx.fillStyle = `rgb(${c})`; cx.fillRect(i, 0, 1, 10); }
+  current = DATA.runs.length - 1;
+  try { const v = localStorage.getItem("hsr-run") === null ? -1 : +localStorage.getItem("hsr-run"); if (v >= 0 && v < DATA.runs.length) current = v; } catch (e) {}
+  const total = DATA.runs.reduce((a, r) => a + r.n, 0);
+  renderSummary(); renderTabs(); renderRun();
+  matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", renderRun);
+  new MutationObserver(renderRun).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+})();
+</script>

@@ -89,6 +89,26 @@ Bounds report (top 6 within 2 % of a bound):
 No key is pinned (max 2/6); watch `profileH.mouthAngleDeg` (hi) and `profileV.points.3.1` (lo) on a longer run.
 Budget 400 was NOT run (needs the user's OK).
 
+## Follow-up — `freeform_sculpt` budget 400 (user: "be aggressive and continue", 2026-10-22)
+
+`runs/20261022T142919Z-screen-1db72d`, CMA seed 1234 (the config's own; the 60 run used 12), config sha unchanged.
+
+| Item | Value |
+|---|---|
+| Evaluations | 460 rows = 400 new + 60 cache hits; **1 failure** (invalid_geometry: outer-shell curvature guard) |
+| Seed J → best J | 30.945 → **16.789 (−45.7 %)**, `415eaf6fc79f` |
+| Throughput | GPU 2373 s; 6.9 s/candidate, 521/h; wall 10:29 → 11:16 EDT |
+| GPU hygiene | julia none / VRAM 575 MiB before; one host killed after; 0 julia / 578 MiB after |
+| Dataset after | 4018 records (3893 ok, 125 failed), 645.8 MB; FREEFORM 1184 |
+
+Bounds (report denominator = top 46): **PINNED** `profileH.points.3.1` lo 28/46, `profileV.points.3.1` lo 39/46,
+`profileV.points.4.1` hi 32/46; near: `profileH.points.4.1` hi 22/46, `profileV.mouthAngleDeg` lo 15/46.
+Reading: the optimiser wants a slower flare at 145 mm depth and a larger vertical mouth than the disjoint anchor
+boxes allow. Widening is NOT done (needs the user's OK); a monotone reparametrisation is proposed for review.
+
+STEP solids of the top 3 (`hornlab-search export-step --run ... --top 3`): rank1 `415eaf6fc79f` 1151.0 cm³,
+rank2 `71268e12aeb6` 1152.9 cm³, rank3 `91a3a7c78e5c` 1137.4 cm³ in `runs/<dir>/step/` (local).
+
 ## Reports generated (gitignored, local only)
 
 - `runs/20261013T123136Z-screen-ca15be/report.html` (CP-8c osse_baseline 1500)
@@ -96,5 +116,8 @@ Budget 400 was NOT run (needs the user's OK).
 - `runs/20261013T234724Z-screen-ff569c/report.html` (CP-8c freeform_hv 722)
 - `runs/20261014T025335Z-screen-852be3/report.html` (CP-8c throat_adapter 400)
 - `runs/20261022T141729Z-screen-babb6b/report.html` (6b sculpt 60)
+- `runs/20261022T142919Z-screen-1db72d/report.html` (sculpt 400)
+
+Review page for the collaborator (all 6 runs): built by `tools/review/` from the local run dirs.
 
 Summary layers of the three new runs are in `docs/evidence/runs/` (manifest appended).

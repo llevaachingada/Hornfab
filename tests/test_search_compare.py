@@ -46,3 +46,17 @@ def test_cli_compare_reports_and_refuses_bad_inputs(tmp_path, capsys):
     (tmp_path / "empty").mkdir()
     assert main(["compare", str(a), str(tmp_path / "empty")]) == 1
     assert "no solved row" in capsys.readouterr().out
+
+
+def test_cli_compare_reads_top_level_quadrants(tmp_path, capsys):
+    """Real search.ndjson rows carry ``quadrants`` at the top level, not under ``mesh``."""
+    rows = {}
+    for name, q in (("q", "1"), ("f", "1234")):
+        d = tmp_path / name
+        d.mkdir()
+        row = {"design_hash": "abc", "metrics": metrics_to_json(_ms()), "quadrants": q}
+        (d / "search.ndjson").write_text(json.dumps(row) + "\n")
+        rows[name] = d
+    assert main(["compare", str(rows["q"]), str(rows["f"])]) == 0
+    out = capsys.readouterr().out
+    assert "quadrants '1')" in out and "quadrants '1234')" in out
