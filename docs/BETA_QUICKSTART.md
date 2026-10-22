@@ -13,6 +13,29 @@ the first full loop.
 Expect `doctor OK: 10 checks, 0 failed`. If `gpu-hygiene` reports BEAT hosts alive, clear them:
 `Get-Process julia`, then `taskkill /F /IM julia.exe` (only julia processes this project started).
 
+## 0b. Compare typologies in one command (recommended start)
+
+A **brief** (`examples/briefs/*.yaml`) fixes the driver exit, the size envelope, the target and the weights, so every
+typology is scored on the same objective. Pick any combination of typologies by name or group:
+
+```powershell
+.\.venv\Scripts\hornlab-search.exe families --brief examples\briefs\hifi_90x60_1in.yaml
+.\.venv\Scripts\hornlab-search.exe campaign --brief examples\briefs\axi_90x90_1in.yaml --families conical,exponential,tractrix --tier dry-run
+.\.venv\Scripts\hornlab-search.exe campaign --brief examples\briefs\axi_90x90_1in.yaml --families classical --tier screen
+.\.venv\Scripts\hornlab-search.exe campaign --brief examples\briefs\hifi_90x60_1in.yaml --families hybrid,rosse_baseline --tier compare
+```
+
+`--families` takes names (see `families`), groups (`classical`, `magnus`, `hybrid`, `legacy`) or `all`. Tiers:
+`dry-run` meshes every seed and solves nothing; `screen` = one CMA-ES run per family, budget max(40, 10 × knobs);
+`compare` = two CMA-ES seeds, budget max(150, 25 × knobs), median and spread reported (only `compare` supports
+"family A beats family B"). Families that cannot meet the brief (an axisymmetric family on a 90×60 brief) are
+skipped with the reason. Results: `runs\campaign_<time>\leaderboard.md`; each family's run has its own report.
+
+Typologies available: conical, exponential, hyperbolic-exponential (hypex), tractrix, OSSE meridian (classical);
+OSSE-H × hypex-V, OSSE-H × tractrix-V, convex blends, perturbed OSSE / tractrix (hybrids); OSSE, R-OSSE, ICW,
+FREEFORM (Magnus's families). Le Cléac'h is disabled until a verifiable published construction is available.
+Adding a typology run is a new YAML in `examples/typologies/` plus a catalog line.
+
 ## 1. Describe the horn you want
 
 Copy an example and edit only the `target:` block (and `bounds:` if you know what you are doing):

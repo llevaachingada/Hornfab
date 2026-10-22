@@ -12,6 +12,12 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 - **Typology work (next):** implement `docs/TYPOLOGY_PLAN.md` (classical typologies via FREEFORM anchors, hybrids, `campaign` family selection). Solver re-verified 2026-10-22 (GPU 18/18, analytic PASS, crosscheck 0.039 dB).
 - **Blockers:** none. Issue #13: fixes now MERGED on main (152a829 carried the cloud reconciliation; oracle sign-off 2026-10-22); GitHub issue kept open for owner closure. Issues #1-#11 closed.
 
+## 2026-10-22 (local, ~17:45 EDT) — typology V4/V5 PASS on GPU; screen campaigns RUNNING (results not yet reviewed)
+
+- `docs/evidence/TYPOLOGY_VERIFY.md`: V4 16 vs 48 anchors: dB metrics within 0.1 dB, beamwidth <= 1.1 deg; V5 exponential / conical / tractrix match textbook loading and beamwidth behaviour. Julia cleared after each solve.
+- V7 screen campaigns launched 17:31 (axi brief: 10 families; hifi 90x60 brief: 6 families; script `campaign` x2, hygiene per search). **Not reviewed or committed yet**: outputs in `runs/campaign_*` (leaderboard.md). Next session: read both leaderboards, confirm no julia left, commit a summary to evidence, then `compare` tier on the top 3 families + top 2 hybrids.
+- `docs/BETA_QUICKSTART.md`: typology selection with `families` / `campaign`.
+
 ## 2026-10-22 (local, ~17:35 EDT) — TYPOLOGY_PLAN implemented (generators, hybrids, briefs, campaign); offline + mesher checks green; GPU checks next
 
 - **Lane A (Sonnet)**: `design/generators/profiles.py`: conical, exponential, hypex, tractrix (Voigt), blend, anchor selection, monotone-increment perturbation, Hermite reference; 69 tests (defining properties; anchor fidelity max 0.036 mm). **Le Cléac'h / spherical-wave DISABLED** (R9 gate: primary sources unreachable; `GeneratorUnavailable` with citations).
