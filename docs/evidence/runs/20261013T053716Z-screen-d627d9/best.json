@@ -1,0 +1,35 @@
+{
+ "design_hash": "8443a5763be5",
+ "di_source": "balloon",
+ "eval_no": 0,
+ "family": "OSSE",
+ "mode": "screen",
+ "objective": 22.592076075823766,
+ "ok": true,
+ "params": {
+  "L_mm": 260.0,
+  "a0_deg": 15.5,
+  "a_deg": 37.5,
+  "aspect_ratio": 1.25,
+  "exponent": 4.0,
+  "k": 1.0,
+  "n": 4.0,
+  "q": 0.995,
+  "r0_mm": 17.78,
+  "s": 0.7
+ },
+ "terms": {
+  "cov": 19.220289750857475,
+  "di": 0.28564108005135236,
+  "di_estimated": 0.0,
+  "dislope": 0.19294984823191744,
+  "flat": 3.3879677800298613,
+  "load": 0.0,
+  "n_in_band": 10,
+  "n_nan": 0,
+  "penalty": 0.0,
+  "rip": 1.4956351868199949,
+  "total": 22.592076075823766
+ },
+ "written_utc": "2026-10-13T05:37:51Z"
+}

@@ -1,0 +1,202 @@
+{
+ "backend": "beat_cuda",
+ "best": {
+  "design_hash": "8c40f5583635",
+  "eval_no": 253,
+  "objective": 30.543432964721273
+ },
+ "budget": 800,
+ "cma_seed": 1234,
+ "command": "hornlab-search search --config examples\\freeform_hv.yaml --budget 800",
+ "config": {
+  "bounds": {
+   "exponent": {
+    "hi": 8.0,
+    "lo": 2.0
+   },
+   "profileH.mouthAngleDeg": {
+    "hi": 90.0,
+    "lo": 40.0
+   },
+   "profileV.mouthAngleDeg": {
+    "hi": 80.0,
+    "lo": 40.0
+   }
+  },
+  "family": "FREEFORM",
+  "mesh": {
+   "dof_cap_final": 5400,
+   "dof_cap_screen": 3000,
+   "dof_cap_verify": 4500,
+   "dof_per_triangle": 0.5,
+   "epw": 6.0,
+   "quadrants": "1234"
+  },
+  "name": "freeform_hv",
+  "search": {
+   "algorithm": "cma",
+   "budget": 200,
+   "popsize": null,
+   "seed": 1234,
+   "sigma0": 0.25,
+   "tolfun": 0.001
+  },
+  "seed_params": {
+   "crossSections": [
+    {
+     "shape": "circle",
+     "t": 0.0
+    },
+    {
+     "exponent": 4.0,
+     "shape": "superellipse",
+     "t": 1.0
+    }
+   ],
+   "profileH": {
+    "mouthAngleDeg": 70.0,
+    "points": [
+     [
+      0.0,
+      12.7
+     ],
+     [
+      60.0,
+      80.0
+     ],
+     [
+      120.0,
+      160.0
+     ]
+    ],
+    "throatAngleDeg": 15.5
+   },
+   "profileV": {
+    "mouthAngleDeg": 60.0,
+    "points": [
+     [
+      0.0,
+      12.7
+     ],
+     [
+      60.0,
+      60.0
+     ],
+     [
+      120.0,
+      110.0
+     ]
+    ],
+    "throatAngleDeg": 15.5
+   }
+  },
+  "solve": {
+   "angle_count": 73,
+   "backend": "beat_cuda",
+   "balloon": true,
+   "balloon_points_screen": 512,
+   "balloon_points_verify": 1024,
+   "distance_m": 2.0,
+   "gmres_tol": 1e-05,
+   "timeout_s": 900
+  },
+  "target": {
+   "band_hi_hz": 5500.0,
+   "band_lo_hz": 700.0,
+   "coverage_h_deg": 75.0,
+   "coverage_v_deg": 45.0,
+   "di_slope_target": 0.0,
+   "di_target_db": null
+  },
+  "weights": {
+   "cov": 1.0,
+   "di": 0.3,
+   "dislope": 0.5,
+   "flat": 0.5,
+   "load": 0.0,
+   "rip": 1.0
+  }
+ },
+ "config_name": "freeform_hv",
+ "config_path": "examples\\freeform_hv.yaml",
+ "config_sha": "c33a8f3ed7dc",
+ "created_utc": "2026-10-13T23:48:05Z",
+ "dataset_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\dataset",
+ "family": "FREEFORM",
+ "finished_utc": "2026-10-14T02:21:07Z",
+ "last_invocation": {
+  "cache_hits": 0,
+  "candidates_per_hour": 283.1005019343929,
+  "evaluations": 722,
+  "failures": 1,
+  "failures_by_reason": {
+   "invalid_geometry": 1
+  },
+  "mean_seconds_per_candidate": 12.716332099030616,
+  "non_cached": 722,
+  "projected_hours": {
+   "1000": 3.532314471952949,
+   "10000": 35.323144719529495
+  },
+  "total_gpu_seconds": 6733.7841398000455,
+  "total_mesh_seconds": 2419.301633600393
+ },
+ "lib_shas": {
+  "hornlab_beat_bem": "38544d214ba2e8a4977bb82170d2fb4a3f9fa8b0",
+  "hornlab_bempp_bem": "8e6910602ece9abb2e9ce0db7a637f4bedf17f53",
+  "hornlab_mesher": "b922e807a5cf10cf732c4557ec0b9b495762afd7",
+  "hornlab_plots": "9e4a6d0dd2ccb6e735dd00233dccccb50d12ed44",
+  "hornlab_search": "caa5438991d8a9d312dbd373c0b3fd01a3e6ce82"
+ },
+ "mode": "screen",
+ "run_id": "20261013T234724Z-screen-ff569c",
+ "seed": {
+  "design_hash": "1cb896775b30",
+  "objective": 33.30864186320538,
+  "terms": {
+   "cov": 28.145303122355827,
+   "di": 0.7670070501572936,
+   "di_estimated": 0.0,
+   "dislope": 1.199549455060489,
+   "flat": 3.3393503776424183,
+   "load": 0.0,
+   "n_in_band": 10,
+   "n_nan": 0,
+   "penalty": 0.0,
+   "rip": 2.663786709450913,
+   "total": 33.30864186320538
+  }
+ },
+ "started_utc": "2026-10-13T23:48:05Z",
+ "stats": {
+  "cache_hits": 0,
+  "candidates_per_hour": 283.5155839651693,
+  "evaluations": 722,
+  "failures": 1,
+  "failures_by_reason": {
+   "invalid_geometry": 1
+  },
+  "mean_seconds_per_candidate": 12.69771470637138,
+  "non_cached": 722,
+  "projected_hours": {
+   "1000": 3.52714297399205,
+   "10000": 35.2714297399205
+  },
+  "total_gpu_seconds": 6733.7841398000455,
+  "total_mesh_seconds": 2419.301633600393
+ },
+ "status": "finished",
+ "stop_reason": "cma: tolfun",
+ "toolchain": {
+  "beat_status": "`{'available': True, 'reason': 'NVIDIA GPU detected and Julia CUDA.functional() confirmed a usable device', 'state': 'ready', 'version': '0.2.0', 'backend': 'cuda'}`",
+  "cpu": "Intel(R) Core(TM) i7-14650HX, 16 cores / 24 threads",
+  "driver": "610.62; CUDA UMD version 13.3",
+  "gpu": "NVIDIA GeForce RTX 4060 Laptop, 8 GB (8188 MiB)",
+  "os": "Microsoft Windows 11 Pro 10.0.26200, build 26200",
+  "present": true,
+  "python": "`C:\\Users\\hunte\\Hrns\\hornlab-search\\.venv\\Scripts\\python.exe` 3.12.10",
+  "ram": "31.7 GB",
+  "sha256": "e6ff57f117201845"
+ },
+ "trace_fraction": 0.05
+}

@@ -22,5 +22,9 @@ What IS committed here:
   validity, not bit-identity. So the manifest detects tampering/renaming of run books and store
   structure, not silent float corruption inside a label array — worded honestly after review.
 
+- Added 2026-10-22 (user-approved exception): `runs/` — the summarized metadata+log layer
+  (run.json/config.yaml/best.json/search.ndjson/cma/*) of all 7 local GPU run dirs, with its own
+  index README + `runs/manifest.sha256`. Raw `designs/` blobs are still NOT committed.
+
 Rule: this folder holds **evidence about** the data, never the data itself. If a raw blob must
 travel, push it to a data branch / release asset / external store, not to the code branch.

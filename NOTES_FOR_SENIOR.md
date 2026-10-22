@@ -309,3 +309,12 @@ NAMING QUESTION (unresolved, flagged by the user): docs call the HornLab author 
 user m3gnus and the user refers to the author as Magnus, and says a different person (Colin) proposed the NN surrogate.
 docs/plan/** is frozen; a correction must go in a non-plan doc. Who is who: USER TO CONFIRM.
 What I need decided: (a) the FREEFORM full-vs-quarter bar above; (b) the naming correction.
+
+---
+
+## 2026-10-22  orchestrator-merge-lane  main FF to cloud tip 6d1d5c7; GPU-run summary layer committed
+What I was doing: senior inventory of remote branches/PRs (Hornfab; Hrns repo is empty and holds nothing), then sandbox-merge of the Claude Code cloud branch ccr-455d2184-yj5zk4 (6d1d5c7) into main and push.
+What happened (exact output): fast-forward 2a7bafb -> 6d1d5c7 (22 commits, +10601/-44... see commit msg); oracle pre-merge review: SIGN OFF (152a829 correct/additive, chain clean, nothing lost: git log --all --not 6d1d5c7 empty); sandbox worktree at 6d1d5c7: compileall clean, pytest 533 passed / 0 failed (436.9 s).
+What I tried: normal FF merge only (strict ancestor), no rewrites; PRs #12/#14 closed as superseded.
+What I need decided: (a) whether to delete the merged remote branches (claude/wave-3-... and ccr-455d2184-yj5zk4) now that main contains them - defaulting to KEEP; (2) Boundary Lab 0.5.0 integration plan (PROPOSED, docs/BOUNDARY_LAB_INTEGRATION_PLAN.md) awaits user approval; (3) oracle follow-ups recorded in ISSUES 2026-10-22 (compare empty-freqs edge, exponent alias first-station doc note).
+NOTE: user-approved exception committed - docs/evidence/runs/ holds the summarized layer of all 7 GPU run dirs (108 files ~16.6 MB + manifest; designs/ raw blobs remain gitignored).

@@ -1,0 +1,199 @@
+{
+ "backend": "beat_cuda",
+ "best": {
+  "design_hash": "5b7ada586de1",
+  "eval_no": 69,
+  "objective": 7.363233601522686
+ },
+ "budget": 0,
+ "cma_seed": 1234,
+ "command": "hornlab-search search --config examples/search_smoke.yaml --resume runs/20261013T053757Z-screen-7e6e5b --budget 0",
+ "config": {
+  "bounds": {
+   "L_mm": {
+    "hi": 420.0,
+    "lo": 140.0
+   },
+   "a0_deg": {
+    "hi": 30.0,
+    "lo": 2.0
+   },
+   "a_deg": {
+    "hi": 55.0,
+    "lo": 25.0
+   },
+   "aspect_ratio": {
+    "hi": 2.0,
+    "lo": 1.0
+   },
+   "exponent": {
+    "hi": 8.0,
+    "lo": 2.0
+   },
+   "k": {
+    "hi": 2.5,
+    "lo": 0.3
+   },
+   "n": {
+    "hi": 8.0,
+    "lo": 2.0
+   },
+   "q": {
+    "hi": 1.0,
+    "lo": 0.9
+   },
+   "r0_mm": {
+    "hi": 17.78,
+    "lo": 17.78,
+    "search": false
+   },
+   "s": {
+    "hi": 1.0,
+    "lo": 0.0
+   }
+  },
+  "family": "OSSE",
+  "mesh": {
+   "dof_cap_final": 6000,
+   "dof_cap_screen": 3000,
+   "dof_cap_verify": 6000,
+   "dof_per_triangle": 0.51,
+   "epw": 6.0,
+   "quadrants": "1"
+  },
+  "name": "search_smoke",
+  "search": {
+   "algorithm": "cma",
+   "budget": 60,
+   "popsize": null,
+   "seed": 1234,
+   "sigma0": 0.25,
+   "tolfun": 0.001
+  },
+  "seed_params": {
+   "L_mm": 260.0,
+   "a0_deg": 15.5,
+   "a_deg": 37.5,
+   "aspect_ratio": 1.25,
+   "exponent": 4.0,
+   "k": 1.0,
+   "n": 4.0,
+   "q": 0.995,
+   "r0_mm": 17.78,
+   "s": 0.7
+  },
+  "solve": {
+   "angle_count": 73,
+   "backend": "beat_cuda",
+   "balloon": true,
+   "balloon_points_screen": 256,
+   "balloon_points_verify": 512,
+   "distance_m": 2.0,
+   "gmres_tol": 1e-05,
+   "timeout_s": 900
+  },
+  "target": {
+   "band_hi_hz": 4500.0,
+   "band_lo_hz": 700.0,
+   "coverage_h_deg": 75.0,
+   "coverage_v_deg": 45.0,
+   "di_slope_target": 0.0,
+   "di_target_db": null
+  },
+  "weights": {
+   "cov": 1.0,
+   "di": 0.3,
+   "dislope": 0.5,
+   "flat": 0.5,
+   "load": 0.0,
+   "rip": 1.0
+  }
+ },
+ "config_name": "search_smoke",
+ "config_path": "examples/search_smoke.yaml",
+ "config_sha": "c6b6b9353f1a",
+ "created_utc": "2026-10-13T05:38:15Z",
+ "dataset_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\dataset",
+ "family": "OSSE",
+ "finished_utc": "2026-10-13T05:58:35Z",
+ "last_invocation": {
+  "cache_hits": 1,
+  "candidates_per_hour": null,
+  "evaluations": 1,
+  "failures": 0,
+  "failures_by_reason": {},
+  "mean_seconds_per_candidate": null,
+  "non_cached": 0,
+  "projected_hours": {
+   "1000": null,
+   "10000": null
+  },
+  "total_gpu_seconds": 0,
+  "total_mesh_seconds": 0
+ },
+ "lib_shas": {
+  "hornlab_beat_bem": "38544d214ba2e8a4977bb82170d2fb4a3f9fa8b0",
+  "hornlab_bempp_bem": "8e6910602ece9abb2e9ce0db7a637f4bedf17f53",
+  "hornlab_mesher": "b922e807a5cf10cf732c4557ec0b9b495762afd7",
+  "hornlab_plots": "9e4a6d0dd2ccb6e735dd00233dccccb50d12ed44",
+  "hornlab_search": "3a67b6ce28ef25257e7786bf1517aacb2d1a0f63"
+ },
+ "mode": "screen",
+ "resumes": [
+  "2026-10-13T05:42:53Z",
+  "2026-10-13T05:43:54Z",
+  "2026-10-13T05:55:43Z",
+  "2026-10-13T05:58:35Z"
+ ],
+ "run_id": "20261013T053757Z-screen-7e6e5b",
+ "seed": {
+  "design_hash": "8443a5763be5",
+  "objective": 22.067756077637185,
+  "terms": {
+   "cov": 18.75822817787867,
+   "di": 0.25778918898467296,
+   "di_estimated": 0.0,
+   "dislope": 0.402279415929157,
+   "flat": 2.8685108550288567,
+   "load": 0.0,
+   "n_in_band": 10,
+   "n_nan": 0,
+   "penalty": 0.0,
+   "rip": 1.596796007584106,
+   "total": 22.067756077637185
+  }
+ },
+ "started_utc": "2026-10-13T05:38:15Z",
+ "stats": {
+  "cache_hits": 0,
+  "candidates_per_hour": 847.440445474493,
+  "evaluations": 70,
+  "failures": 7,
+  "failures_by_reason": {
+   "invalid_geometry": 1,
+   "mesh_too_large": 6
+  },
+  "mean_seconds_per_candidate": 4.2480861271429085,
+  "non_cached": 70,
+  "projected_hours": {
+   "1000": 1.1800239242063635,
+   "10000": 11.800239242063634
+  },
+  "total_gpu_seconds": 261.19236940001065,
+  "total_mesh_seconds": 28.266822499997943
+ },
+ "status": "finished",
+ "stop_reason": "budget",
+ "toolchain": {
+  "beat_status": "`{'available': True, 'reason': 'NVIDIA GPU detected and Julia CUDA.functional() confirmed a usable device', 'state': 'ready', 'version': '0.2.0', 'backend': 'cuda'}`",
+  "cpu": "Intel(R) Core(TM) i7-14650HX, 16 cores / 24 threads",
+  "driver": "610.62; CUDA UMD version 13.3",
+  "gpu": "NVIDIA GeForce RTX 4060 Laptop, 8 GB (8188 MiB)",
+  "os": "Microsoft Windows 11 Pro 10.0.26200, build 26200",
+  "present": true,
+  "python": "`C:\\Users\\hunte\\Hrns\\hornlab-search\\.venv\\Scripts\\python.exe` 3.12.10",
+  "ram": "31.7 GB",
+  "sha256": "e6ff57f117201845"
+ },
+ "trace_fraction": 0.05
+}

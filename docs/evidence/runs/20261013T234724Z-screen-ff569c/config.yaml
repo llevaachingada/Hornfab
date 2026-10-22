@@ -1,0 +1,76 @@
+name: freeform_hv
+family: FREEFORM
+seed_params:
+  profileH:
+    points:
+    - - 0.0
+      - 12.7
+    - - 60.0
+      - 80.0
+    - - 120.0
+      - 160.0
+    throatAngleDeg: 15.5
+    mouthAngleDeg: 70.0
+  profileV:
+    points:
+    - - 0.0
+      - 12.7
+    - - 60.0
+      - 60.0
+    - - 120.0
+      - 110.0
+    throatAngleDeg: 15.5
+    mouthAngleDeg: 60.0
+  crossSections:
+  - t: 0.0
+    shape: circle
+  - t: 1.0
+    shape: superellipse
+    exponent: 4.0
+bounds:
+  profileH.mouthAngleDeg:
+    lo: 40.0
+    hi: 90.0
+  profileV.mouthAngleDeg:
+    lo: 40.0
+    hi: 80.0
+  exponent:
+    lo: 2.0
+    hi: 8.0
+target:
+  coverage_h_deg: 75.0
+  coverage_v_deg: 45.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 6.0
+  quadrants: '1234'
+  dof_cap_screen: 3000
+  dof_cap_verify: 4500
+  dof_cap_final: 5400
+  dof_per_triangle: 0.5
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+search:
+  algorithm: cma
+  sigma0: 0.25
+  seed: 1234
+  budget: 200
+  popsize: null
+  tolfun: 0.001

@@ -1,0 +1,38 @@
+{
+ "design_hash": "bf6cb40a5d5c",
+ "di_source": "balloon",
+ "eval_no": 190,
+ "family": "ICW",
+ "mode": "screen",
+ "objective": 12.2008617229763,
+ "ok": true,
+ "params": {
+  "L_mm": 160.0,
+  "R_mm": 168.2916991155,
+  "a0_deg": 14.5,
+  "coverage_angle_deg": 57.8938768599,
+  "dkappa_ds_abs_max": 10.0,
+  "hold_end": 0.5502774032,
+  "hold_start": 0.3048735126,
+  "kappa0": 0.0151718163,
+  "kappa_abs_max": 1.0,
+  "r0_mm": 12.7,
+  "termination": "flat_baffle",
+  "theta1_deg": 15.4382535391,
+  "theta_max_deg": 91.0
+ },
+ "terms": {
+  "cov": 6.423272356192156,
+  "di": 0.7460036344344855,
+  "di_estimated": 0.0,
+  "dislope": 0.16626592670704374,
+  "flat": 3.299307855493438,
+  "load": 0.0,
+  "n_in_band": 10,
+  "n_nan": 0,
+  "penalty": 0.0,
+  "rip": 3.821001385353559,
+  "total": 12.2008617229763
+ },
+ "written_utc": "2026-10-13T21:24:20Z"
+}

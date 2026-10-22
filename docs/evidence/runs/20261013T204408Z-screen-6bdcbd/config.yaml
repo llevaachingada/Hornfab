@@ -1,0 +1,84 @@
+name: icw_termination
+family: ICW
+seed_params:
+  termination: flat_baffle
+  kappa0: 0.25
+  theta1_deg: 16.0
+  r0_mm: 12.7
+  a0_deg: 14.5
+  L_mm: 160.0
+  R_mm: 130.0
+  coverage_angle_deg: 50.0
+  hold_start: 0.3
+  hold_end: 0.7
+  kappa_abs_max: 1.0
+  dkappa_ds_abs_max: 10.0
+  theta_max_deg: 91.0
+bounds:
+  kappa0:
+    lo: 0.0
+    hi: 0.5
+  theta1_deg:
+    lo: 2.0
+    hi: 30.0
+  hold_start:
+    lo: 0.1
+    hi: 0.45
+  hold_end:
+    lo: 0.55
+    hi: 0.9
+  R_mm:
+    lo: 80.0
+    hi: 220.0
+  coverage_angle_deg:
+    lo: 20.0
+    hi: 80.0
+  r0_mm:
+    lo: 12.7
+    hi: 12.7
+    search: false
+  a0_deg:
+    lo: 14.5
+    hi: 14.5
+    search: false
+  L_mm:
+    lo: 160.0
+    hi: 160.0
+    search: false
+target:
+  coverage_h_deg: 100.0
+  coverage_v_deg: 100.0
+  band_lo_hz: 700.0
+  band_hi_hz: 7000.0
+  di_target_db: null
+  di_slope_target: 0.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 5000
+  dof_cap_verify: 7000
+  dof_cap_final: 8900
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+search:
+  algorithm: cma
+  sigma0: 0.25
+  seed: 1234
+  budget: 200
+  popsize: null
+  tolfun: 0.001
