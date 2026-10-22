@@ -21,6 +21,12 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 - **Oracle non-blocking follow-ups recorded in ISSUES:** (1) `_cmd_compare` uncaught IndexError if freqs_hz empty (cosmetic realism edge); (2) `exponent` alias resolves to the FIRST superellipse station only — pre-existing design-layer semantics, document before any multi-station config; (3) Boundary Lab docs are PROPOSED, not accepted scope — do not treat as backlog.
 - No plan files touched; no thresholds changed; nothing rewound — every historical commit is in main's history.
 
+## 2026-10-22 (cloud) — senior architecture report: sidechain Boundary Lab, do not become a plugin; status + to-do (senior reviewer: Claude)
+
+- New `docs/SENIOR_ARCHITECTURE_REPORT_2026-10-22.md` (read first): where hornlab-search sits vs Boundary Lab / HornLab; decision: use Boundary Lab as is in its own environment (export projects, optional headless cross-check), keep Magnus's libraries as our engine, park the plugin; revised priority; CP-8c results table; to-do list (view reports, merge PR #14, HANDOFF 6b, STEP-export CLI, OSSE top-up, BL-1).
+- Pushed to `main` on top of the local merge lane's `2311f92` (main already carried the Boundary Lab research/plan via the 6d1d5c7 fast-forward). Report section 3 corrects the stale "Next action" (CP-8d already ran and failed; do not re-run before the OSSE top-up).
+- No code changed.
+
 ## 2026-10-21 (cloud) — Boundary Lab 0.5.0 research + integration plan (docs only; senior reviewer: Claude, 2 research subagents)
 
 - Boundary Lab (JWSound) **0.5.0 released 2026-10-20**: adds Generator Plugins (geometry-provider API 1, `provider.json` in `<BL>/geometry_providers/`), plugin host services (queue solves, read results; GUI-only), a headless `blab project validate|solve`, project schema 10, BEAT Engine pinned (hard) to 0.6.0.

@@ -1,6 +1,6 @@
 # Boundary Lab 0.5.0 integration plan for hornlab-search
 
-Date 2026-10-21. Status: **PROPOSED, not started.** Read `docs/BOUNDARY_LAB_0.5_RESEARCH.md` first (findings,
+Date 2026-10-21. Status: **PROPOSED, not started.** **Priority revised 2026-10-22** (`docs/SENIOR_ARCHITECTURE_REPORT_2026-10-22.md` s2): core work first, then BL-1 export, BL-2 cross-check, the engine question; BL-3 plugin PARKED. Read `docs/BOUNDARY_LAB_0.5_RESEARCH.md` first (findings,
 evidence, conventions table). This plan adds to the project; it changes no frozen contract, no gate, no solver.
 
 ## 1. Decision and reasoning
