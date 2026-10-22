@@ -1,7 +1,7 @@
 # ISSUES
 
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
-Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-10-22 (local GPU box, sculpt 400 + export-step; no GitHub issue state changed).
+Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-10-22 (local GPU box, PR #15 merged + its GPU test plan; no GitHub issue state changed).
 
 | ID | Title | Status | Owner | Plan ref |
 |---|---|---|---|---|
@@ -95,8 +95,9 @@ Local-only, added 2026-10-22 ~11:40 (local GPU box): follow-up (1) `compare` qua
 Added 2026-10-22 PM (cloud): Boundary Lab learnings implemented (`docs/BL_LEARNINGS_IMPLEMENTATION.md`): pre-solve topology + symmetry-domain checks, `solve/phasor.py`, runtime provenance, report-only SPDI / beam shape. 
 
 TO-DO (no GitHub issue yet; owner / plan ref):
-- [ ] Merge the learnings PR, run its section-4 test plan on the GPU box (local agent).
-- [ ] Early rejection (coarse-to-fine frequencies): offline replay of CP-8c ndjson first; needs rulings on partial-bound fitness and dataset policy (senior/user; `docs/BL_LEARNINGS_IMPLEMENTATION.md` s2 item 4).
+- [x] Merge the learnings PR, run its section-4 test plan on the GPU box: DONE 2026-10-22 (FF to 265133f; `docs/evidence/BL_LEARNINGS_GPU.md`).
+- [x] Early rejection offline replay: DONE 2026-10-22 (`docs/evidence/EARLY_REJECTION_REPLAY.md`): < 0.1 % GPU saved at K = 4 / 25 % margin, no top-20 lost; recommend NOT implementing as specified (owner ruling).
+- [ ] Search budget counts uncached failures: a re-run with the same CMA seed replays cached successes for free but re-evaluates every earlier failure, which consumes budget without solving (OSSE budget 40 -> 0 new solves, 2026-10-22). Options for the owner: cache failures by design hash, or count only solver-reaching evaluations (task 08; `search/cma.py`).
 - [ ] CPU-vs-CUDA qualification screen per pinned-library change (GPU box; frozen CP-7b rule; s2 item 8).
 - [x] STEP-export CLI: DONE locally 2026-10-22 (`hornlab-search export-step`, b822dd5).
 - [ ] OSSE data top-up for the surrogate gates (GPU, overnight; user OK needed).
