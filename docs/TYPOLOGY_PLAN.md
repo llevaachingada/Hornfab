@@ -113,6 +113,9 @@ From the existing `z_throat_real`: `f_load_hz` (lowest frequency with Re z ≥ 0
 (std of Re z above `f_load_hz`), `z_mean_band`. Added to `MetricSet.scalars` (open dict, no contract change), shown in
 the report and the review page. A brief may set `weights.load > 0` with `z_min`, using the existing term.
 
+Time-domain behaviour (ringing, internal reflections, waterfalls) is a separate, later stage on finalists; see
+`docs/research/TIME_DOMAIN_RINGING.md`. The loading metrics above double as its cheap in-loop proxy.
+
 ## 7. Choosing what runs, and how to compare fairly
 
 - `hornlab-search families` lists generators, Magnus families, hybrids, and the briefs each is compatible with.
