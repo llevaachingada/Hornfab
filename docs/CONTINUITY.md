@@ -12,6 +12,11 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 - **Typology work (next):** implement `docs/TYPOLOGY_PLAN.md` (classical typologies via FREEFORM anchors, hybrids, `campaign` family selection). Solver re-verified 2026-10-22 (GPU 18/18, analytic PASS, crosscheck 0.039 dB).
 - **Blockers:** none. Issue #13: fixes now MERGED on main (152a829 carried the cloud reconciliation; oracle sign-off 2026-10-22); GitHub issue kept open for owner closure. Issues #1-#11 closed.
 
+## 2026-10-22 (local, ~15:45 EDT) — TYPOLOGY_PLAN v2 after a senior adversarial review (docs only)
+
+- 12 findings against v1, each resolved in `docs/TYPOLOGY_PLAN.md` s2. Blockers/high: a new `TYPOLOGY` family would break the frozen `Family` literal (`01_CONTRACTS.md:168`) -> typologies become **generators** that emit ordinary FREEFORM designs with a provenance block; cross-typology comparison needs a shared **design brief** (driver exit, size envelope, target, symmetry) and fixed-size parametrisations; classical horns must also be judged on **throat loading** (`z_throat_real` exists and is physical: OSSE seed Re z 0.08 -> 1.0) -> report-only loading metrics, optional `load` weight; axisymmetric typologies vs asymmetric targets refused or routed to H/V hybrids; throat junction tied to the driver exit angle and the mesher's spherical source cap (`auto` = r0/sin theta, ATH convention); fidelity measured on the mesher's own sampled profile; budget-40 comparisons replaced by tiers (screen / compare with 2 CMA seeds, budgets scaled by knob count); failure cache keyed by design + mesh spec; Le Cléac'h gated on an independent reference.
+- Added: non-goals, briefs (3 to start), curated hybrid list, verification ladder V1-V7 with acceptance, risk register, lanes with done-criteria. No code changed.
+
 ## 2026-10-22 (local GPU box, ~14:50 EDT) — solver re-verified on GPU; typology research; TYPOLOGY_PLAN (classical horns + hybrids + family selection) for the next turn
 
 - **Solver verification** (`docs/evidence/SOLVER_VERIFY_2026-10-22.md`): GPU-marked tests 18/18 PASS; `selftest --analytic` PASS (0.020 dB); `selftest --crosscheck` beat_cuda vs bempp 0.039 dB (< 0.2 dB rule). Julia cleared after each.

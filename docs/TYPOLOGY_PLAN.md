@@ -1,135 +1,171 @@
-# Typology plan: classical horns, Magnus's families, hybrids, and family selection
+# Typology plan v2: classical horns, Magnus's families, hybrids, and family selection
 
-Date 2026-10-22. Status: **PLAN, approved for implementation on the next turn.** Author: local senior (applied
-maths / horn design). Grounding: `docs/research/typologies/MESHER_TYPOLOGIES.md` (what the mesher implements, file:line)
-and `docs/research/typologies/SEARCH_LAYER_GAPS.md` (what our search layer exposes).
+Date 2026-10-22. Status: **PLAN v2 (hardened after a senior adversarial review), ready to implement.**
+Grounding: `docs/research/typologies/MESHER_TYPOLOGIES.md` (mesher internals, file:line) and
+`docs/research/typologies/SEARCH_LAYER_GAPS.md` (our search layer). v1 is superseded; section 2 lists what changed.
 
-## 0. What we are trying to do
+## 0. Goal and non-goals
 
-Find horn shapes that meet a directivity target (coverage, smooth DI, low ripple) better than the shapes we already
-know, by searching **established typologies and principled hybrids of them**, with every surface built by Magnus's
-mesher and solved by the verified BEM. We are not generating arbitrary blobs: every candidate is either a published
-formula, Magnus's own family, or a bounded, documented combination of those.
+**Goal.** Find horn shapes that meet a stated acoustic brief better than known shapes, by searching established
+typologies and principled hybrids of them. Every surface is built by Magnus's mesher and solved by the verified BEM
+(`docs/evidence/SOLVER_VERIFY_2026-10-22.md`: GPU tests 18/18, analytic sphere 0.020 dB, GPU vs CPU BEM 0.039 dB).
 
-## 1. Facts this plan rests on
+**Non-goals (this round).** No new solver, mesher or meshing code; no change to the frozen contract
+(`docs/plan/01_CONTRACTS.md`), gates or thresholds; no rollback beyond 90° outside R-OSSE / ICW; no enclosure,
+baffle, room or woofer-port modelling; no surrogate retraining; no widening of existing configs' bounds.
+
+## 1. Facts the plan rests on
 
 | Fact | Source |
 |---|---|
-| The mesher implements exactly five profile formulas: `OSSE`, `R-OSSE`, `ICW`, `FREEFORM`, `LOOKUP` | `hornlab_mesher/config_parser.py` (type check), research doc s1 |
-| No conical, exponential, tractrix, Le Cléac'h, hyperbolic-exponential, or spherical-wave family exists in the mesher | research doc s1 |
-| `FREEFORM`: independent H and V cubic-Hermite meridians, 2–64 anchors each, anchors `[z, r]` or `[z, r, angleDeg]` (exact wall tangent), z strictly increasing, wall angle in [−90°, 90°], overshoot-free tangent speeds; 2–32 cross-section stations (ellipse/circle, superellipse, rounded rectangle) blended along t | `freeform.py:1-18, 524-913` |
-| `LOOKUP`: exact `[z, r]` table, linear interpolation, axisymmetric only, no morph | `profile_formulas.py:1346-1392` |
-| Morph system (`morphTarget` 1–3, `morphFixed`, `morphRate`, `morphCorner`, …) works for OSSE, R-OSSE, ICW, FREEFORM | `profile_morph.py:639-682` |
-| OSSE/R-OSSE parameters may be azimuth expressions (`a = "60+10*cos(2*p)"`) | research doc s6 |
-| The mesher can fit OSSE / R-OSSE / any polyline into an ICW curve (`seed_from_osse`, `seed_from_rosse`, `fit_from_points`) | `icw/seed.py:138-256` |
-| No built-in OSSE/R-OSSE → FREEFORM conversion | research doc s3 |
-| Solver verified today: GPU tests 18/18; analytic pulsating sphere PASS (0.020 dB); beat_cuda vs bempp 0.039 dB | `docs/evidence/SOLVER_VERIFY_2026-10-22.md` |
+| Mesher formulas: `OSSE`, `R-OSSE`, `ICW`, `FREEFORM`, `LOOKUP`. No conical, exponential, hypex, tractrix, Le Cléac'h or spherical-wave family | research s1 |
+| `FREEFORM`: H and V cubic-Hermite meridians, 2–64 anchors `[z, r]` or `[z, r, angleDeg]`, z strictly increasing, both meridians share the z span and the throat radius, wall angle in [−90°, 90°], overshoot guard adjusts tangent speeds; 2–32 cross-section stations (circle/ellipse, superellipse 2–16, rounded rectangle) blended by smootherstep; outer-shell curvature guard near the mouth | `freeform.py`, research s3 |
+| `LOOKUP`: exact `[z, r]` table, linear interpolation, axisymmetric, no morph | `profile_formulas.py:1346-1392` |
+| **The contract freezes `Family = Literal["OSSE","R-OSSE","ICW","FREEFORM"]`**; `design/custom.py` is the reserved home for "geometry beyond this" | `01_CONTRACTS.md:168, 368`; `types.py:11` |
+| Throat source is a **spherical cap**: radius `source_radius_mm`, or ATH-style auto radius r₀/sin(θ_throat), else 3.75·r₀ | `builders/point_grid_sources.py` (`_source_cap_radius`) |
+| `z_throat_real` (Re p/(ρc·u) at the throat) is computed for every solve; OSSE seed: 0.08 at 500 Hz → 1.0 at 3.5 kHz (physical) | `metrics/impedance.py`; run `ccef24` |
+| The objective has a `load` term (Re z below `z_min`), weight 0 in every config so far | `objective/terms.py` |
+| Mesh is a free-standing horn with an outer shell (wall offset), not an infinite baffle | mesher shell/offset code; research s3 |
 
-## 2. Classical typologies: realised as FREEFORM anchors from textbook formulas
+## 2. Adversarial review of v1 (what was wrong, and the fix)
 
-New pure-maths module `hornlab_search/design/typologies.py` (no mesher import). Each function returns the
-analytic meridian r(z) **and** its wall angle θ(z) = atan(dr/dz), sampled at N anchors; the anchors are passed to
-Magnus's FREEFORM as `[z, r, angleDeg]`, so the mesher's Hermite spline reproduces both position and slope at every
-anchor. The axisymmetric variants are also emitted as `LOOKUP` tables for verification (s7).
-
-| Typology | Profile (radius r, axial z from throat, throat radius r₀) | Searched knobs | Defining property (unit test) |
+| # | Finding | Severity | Resolution in v2 |
 |---|---|---|---|
-| Conical | r = r₀ + z·tan α | α, L | constant wall angle α |
-| Exponential | r = r₀·e^{mz}, m = 2π f_c / c | f_c, L | area S(z)/S₀ = e^{2mz} |
-| Hyperbolic-exponential (hypex, Salmon) | r = r₀·(cosh mz + T·sinh mz) | f_c, T ∈ [0, 1], L | T = 1 reduces to exponential; T = 0 catenoidal |
-| Tractrix (Voigt) | z(r) = a·ln((a + √(a²−r²))/r) − √(a²−r²) measured back from the mouth, a = c/(2π f_c) | f_c (sets mouth radius a) | tangent segment to the axis has constant length a |
-| Le Cléac'h | spherical-wavefront construction: the area of the spherical cap normal to the wall follows the hypex law in f_c, T; wall built by marching along the cap arc length | f_c, T | cap area matches the hypex law at every step |
-| Spherical-wave (Keele) | Le Cléac'h with T = 1 (exponential cap-area law); documented as that special case, not a separate formula | f_c | as Le Cléac'h |
-| "Axisymmetric" | **not a family**: a cross-section mode. `axisymmetric: true` = one meridian for H and V and circular stations; otherwise H/V and stations are free | — | H == V meridians, circle stations |
+| R1 | A new `TYPOLOGY` family breaks the frozen `Family` literal and would ripple into the dataset and surrogate | blocker | Typologies become **generators** that materialise an ordinary `FREEFORM` (or `LOOKUP`-for-verification) design. The record's family stays `FREEFORM`; the generator spec is stored as provenance (s5) |
+| R2 | v1 compared typologies at arbitrary sizes. Horn behaviour scales with mouth size and length relative to wavelength, so cross-typology J was meaningless | high | A shared **design brief** fixes the driver exit and the size envelope; every generator is parametrised **at fixed size** (s3, s4) |
+| R3 | v1 scored only directivity. Exponential, tractrix and Le Cléac'h exist for **throat loading** and mouth-reflection control; directivity-only scoring biases the comparison | high | Loading metrics from `z_throat_real` reported for every design; the brief can weight the existing `load` term (s6) |
+| R4 | Axisymmetric typologies cannot meet an asymmetric target (75×45); a shared target silently penalises them | high | Briefs declare their symmetry; campaign refuses incompatible family/brief pairs or routes them to H/V hybrids (s7) |
+| R5 | The throat junction was uncontrolled: the source cap's curvature and the driver exit angle must agree with each typology's throat wall angle, or the junction diffraction differs per typology | high | Throat wall angle and source cap tied to the brief's driver exit angle for every generator (s3) |
+| R6 | "Hermite anchors reproduce the formula" was asserted, but the mesher's overshoot guard may change tangent speeds | medium | Fidelity measured on the **mesher's own sampled profile**, not on our reconstruction; acceptance ≤ 0.2 mm (s9 V2) |
+| R7 | 40 evaluations per family is a seed lottery: CMA-ES with λ≈10 gets 4 generations, and families have 2 to 11 knobs | high | Tiered protocol with budgets scaled by dimension and ≥ 2 CMA seeds for any family comparison (s7) |
+| R8 | Shared dataset mixes objectives from different briefs | medium | Records carry the brief hash; leaderboards and any surrogate filter by it; metrics stay target-free as before (s5) |
+| R9 | Le Cléac'h has no reference implementation here | medium | Gate: implement from the published construction, cross-check against an independent reference (a 1-D horn tool such as Hornresp, whose horn-type list must be confirmed to include Le Cléac'h before relying on it, or published profile tables); ship disabled otherwise (s4) |
+| R10 | Blend hybrid needs a common axial coordinate; v1 implied equal z | low | Blend on normalised t = z/L at the brief's length; both parents generated at that length (s4) |
+| R11 | Failure caching keyed only by design hash would cache `mesh_too_large`, which depends on mode and dof cap | low | Failure-cache key = design hash + mesh spec (mode, epw, cap, quadrants) |
+| R12 | Webster-equation intuition (f_c, area flare) is a 1-D plane-wave model; BEM results will differ near and below cutoff | info | Used only for parametrisation and sanity bands, never as acceptance thresholds (s9 V5) |
 
-Truncation rule (FREEFORM requires z strictly increasing and |wall angle| ≤ 90°): tractrix and Le Cléac'h profiles
-are truncated where the wall angle reaches `max_wall_deg` (default 80°, configurable ≤ 85°). Their rollback beyond
-90° cannot be represented by FREEFORM; R-OSSE and ICW-rollback remain the families that model rollback. This is
-stated in each config and in the report.
+## 3. The design brief (makes every comparison fair)
 
-Le Cléac'h gate: the construction is implemented from the published method and **must reproduce a published
-reference profile** (to within 1 mm at the mouth) before its config is enabled; if no reference can be matched,
-it ships disabled with an ISSUES entry, not with invented numbers.
+`examples/briefs/<name>.yaml`, referenced by every typology config:
 
-Anchor placement: N = 12–24 anchors per meridian (≤ 64), placed by equal arc-length in (z, θ) so curvature is
-resolved; a unit test bounds the max radial error of the Hermite reconstruction against the analytic curve
-(target ≤ 0.2 mm, i.e. below the throat mesh resolution of ~5 mm by a factor of 25).
-
-## 3. Magnus's families, used natively
-
-| Family | Status today | Action |
+| Field | Meaning | Example `hifi_90x60_1in` |
 |---|---|---|
-| OSSE | searched (CP-8c) | keep; add one config exercising the morph to a rounded-rectangle mouth and one with azimuth-dependent `a` |
-| R-OSSE | validator exists, **0 records, no config** | add `examples/rosse_baseline.yaml` (parameters and ranges from the mesher's own checks) |
-| ICW | flat-baffle searched | add an ICW **rollback** config; `termination` is categorical, so it is a separate config, not a searched knob |
-| FREEFORM | sculpt searched, anchors pinned by disjoint boxes | new monotone parametrisation (s4) |
-| LOOKUP | unused | verification only (s7) |
+| `driver.exit_radius_mm`, `driver.exit_angle_deg` | compression driver exit; throat wall angle at z = 0 is tied to it | 12.7, 0–10 |
+| `envelope.max_mouth_w_mm`, `max_mouth_h_mm`, `max_depth_mm` | size class; generators place the mouth inside it | 400, 300, 220 |
+| `target.coverage_h_deg/v_deg`, band, DI slope, `weights` (incl. `load`) | acoustic objective, existing schema | 90, 60, 700–5500 Hz |
+| `symmetry` | `axisymmetric` or `hv` | `hv` |
+| `source.cap` | `auto` (r₀/sin θ_throat, ATH convention) or a radius | auto |
 
-## 4. Hybrids (all built by Magnus's mesher as FREEFORM)
+Three briefs to start: an axisymmetric 90×90 (fair to classical horns), an H/V 90×60 (hi-fi waveguide), and the
+existing OSSE 75×45 (continuity with CP-8c).
 
-1. **H/V hybrid**: `profileH` from typology A, `profileV` from typology B (e.g. OSSE horizontal for wide constant
-   directivity, Le Cléac'h vertical). OSSE and R-OSSE meridians are sampled by calling the mesher's own profile
-   functions, not by re-implementing them.
-2. **Blend hybrid**: r(z) = (1 − w)·r_A(z) + w·r_B(z) on a common z grid, w ∈ [0, 1] searched. A convex blend of
-   two monotone, increasing profiles is monotone and increasing, so every blend is a legal FREEFORM wall; the wall
-   angle is blended consistently from the derivatives.
-3. **Perturbed typology**: a typology profile plus a bounded perturbation in a **monotone increment**
-   parametrisation, r_{i+1} = r_i + Δ_i with Δ_i = Δ_i^{base}·e^{u_i}, u_i ∈ [−u_max, u_max] searched. This replaces
-   the disjoint per-anchor boxes that pinned three anchors in the sculpt runs, and it can never pinch the wall.
-4. **Cross-section hybrid**: circle at the throat → superellipse or rounded rectangle at the mouth via FREEFORM
-   stations, with the station t and exponent searched (the mesher blends stations with smootherstep).
-5. **ICW seeded from OSSE/R-OSSE** via the mesher's `icw_seed` (already native).
+## 4. Generators (typologies realised through Magnus's mesher)
 
-One new design family `TYPOLOGY` in `hornlab_search/design/families.py` carries `typology_h`, `typology_v`
-(fixed per run), the numeric knobs of s2, `blend_w`, the increments u_i, and the station knobs; `to_mesher_config`
-emits a FREEFORM config. CMA-ES only ever sees numeric knobs.
+Pure maths in `hornlab_search/design/custom.py` (the contract's reserved module) plus a `generators/` subpackage;
+no mesher import except for sampling Magnus's own OSSE / R-OSSE formulas. Every generator takes the brief (r₀, throat
+angle, length L, mouth limits) and a few shape knobs, and returns H and V meridians as `[z, r, angleDeg]` anchors.
 
-## 5. Selecting what runs on the GPU
+| Typology | Profile at fixed size (r₀, r_m, L) | Shape knobs searched | Defining-property unit test |
+|---|---|---|---|
+| Conical | r = r₀ + z·tan α, α = atan((r_m − r₀)/L) | r_m | constant wall angle |
+| Exponential | r = r₀·e^{mz}, m = ln(r_m/r₀)/L; report f_c = m·c/2π | r_m | S(z)/S₀ = e^{2mz} |
+| Hypex (Salmon) | r = r₀(cosh mz + T sinh mz), m solved so r(L) = r_m | r_m, T ∈ [0, 1] | T = 1 → exponential; T = 0 → catenoidal |
+| Tractrix (Voigt) | mouth radius a = c/2πf_c; z(r) from a·ln((a+√(a²−r²))/r) − √(a²−r²); truncated at wall angle `max_wall_deg` (default 80°), so L follows from f_c | f_c | constant tangent length a |
+| Le Cléac'h | spherical-wavefront construction, cap area follows the hypex law (f_c, T); truncated at `max_wall_deg` | f_c, T | cap area matches the law at every step (gated, R9) |
+| Spherical-wave | Le Cléac'h with T = 1 | f_c | as Le Cléac'h |
+| OSSE, R-OSSE meridians | sampled from the mesher's own formula functions (pinned SHA, guard test), for use in hybrids | their native knobs | equals the mesher's OSSE/R-OSSE mesh within 0.2 mm |
 
-- `examples/targets/*.yaml`: shared targets (coverage, band, weights). Every family config can take
-  `target_file:` so different typologies are scored on the **same** objective and their J values are comparable.
-- `examples/typologies/*.yaml`: one config per typology and per hybrid, all on the same throat (25.4 mm exit) and
-  size class so results compare.
-- New CLI `hornlab-search campaign --families <list | all | classical | magnus | hybrids> --target <file>
-  --budget N [--dry-run] [--seed S]`: runs one search per selected config, sequentially, with GPU/Julia hygiene
-  before and after each (CLAUDE.md), then writes `campaign.json` and a cross-family leaderboard (best J, terms,
-  failures, s/candidate, pinned bounds). `--dry-run` meshes the seed of every selected family and solves nothing.
-- `hornlab-search families` lists every available typology/family/hybrid config with its knobs.
+Throat rule (R5): every generator's wall angle at z = 0 equals the brief's `driver.exit_angle_deg` where the formula
+allows it (conical: α is the result, so the brief's exit angle is reported, and a mismatch is a recorded junction
+angle; exponential/hypex: the throat slope r₀·m is reported). The source cap is set by the brief (`auto`) for every
+design in a campaign.
 
-## 6. Search-quality fixes folded in
+Truncation is explicit: FREEFORM cannot roll back past 90°. Tractrix and Le Cléac'h stop at `max_wall_deg`; real
+rollback stays with R-OSSE and ICW-rollback.
 
-| Fix | Why |
+Anchors: 12–24 per meridian (≤ 64), placed by equal arc length in (z, θ); exact angle at each anchor.
+
+### Hybrids (all FREEFORM)
+
+| Hybrid | Construction | Rule that keeps it physical |
+|---|---|---|
+| H/V | `profileH` from typology A, `profileV` from typology B, same r₀ and L | brief symmetry `hv`; both meridians monotone |
+| Blend | r(t) = (1 − w)·r_A(t) + w·r_B(t) on t = z/L; angle from the blended derivative | convex blend of increasing profiles is increasing; w ∈ [0, 1] |
+| Perturbed typology | r_{i+1} = r_i + Δ_i^{base}·e^{u_i}, u_i ∈ [−u_max, u_max] | increments positive by construction; no disjoint boxes |
+| Cross-section | stations circle → superellipse / rounded rectangle, station t and exponent searched | mesher's own station blending |
+| ICW seeded from OSSE/R-OSSE | mesher's native `icw_seed` | native |
+
+Curated hybrid list for the first campaign (each with a one-line rationale in its config): OSSE-H × Le Cléac'h-V,
+OSSE-H × exponential-V, blend OSSE ↔ Le Cléac'h, blend conical ↔ exponential, perturbed OSSE, perturbed tractrix.
+Not all 49 pairs.
+
+## 5. Representation and provenance (R1, R8)
+
+- The search vector maps to generator knobs; the generator materialises a `Design(family="FREEFORM", params=...)`.
+  The design hash is the geometry, so identical shapes from different generators deduplicate.
+- Each evaluation row and dataset record gains a `generator` block: `{name, version, knobs, brief_hash}`. No
+  contract field changes (`params` stays the mesher's keys; provenance is an additional row key / record metadata).
+- Leaderboards and any future surrogate select by `brief_hash`.
+
+## 6. Metrics added (report-only first, R3)
+
+From the existing `z_throat_real`: `f_load_hz` (lowest frequency with Re z ≥ 0.7 and staying above it), `z_ripple`
+(std of Re z above `f_load_hz`), `z_mean_band`. Added to `MetricSet.scalars` (open dict, no contract change), shown in
+the report and the review page. A brief may set `weights.load > 0` with `z_min`, using the existing term.
+
+## 7. Choosing what runs, and how to compare fairly
+
+- `hornlab-search families` lists generators, Magnus families, hybrids, and the briefs each is compatible with.
+- `hornlab-search campaign --brief <file> --families <names | classical | magnus | hybrids | all> --tier screen|compare
+  [--dry-run] [--seeds N]`, sequential, GPU hygiene before and after every search (CLAUDE.md), writes `campaign.json`
+  and a leaderboard (best J, terms, loading metrics, failures, s/candidate, pinned bounds, CMA seed spread).
+  - Incompatible family/brief pairs are refused with the reason (R4).
+- Tiers (R7):
+  - `dry-run`: mesh every seed, no solve.
+  - `screen`: budget = max(40, 10·N_knobs) per family, 1 CMA seed. Ranks only coarsely.
+  - `compare`: budget = max(150, 25·N_knobs), **2 CMA seeds**, report the median and spread of best J. Only this tier
+    supports a claim that one typology beats another.
+- Failure cache keyed by design hash + mesh spec, so a replay does not burn budget re-failing (R11, ISSUES).
+
+## 8. Search-quality fixes folded in
+
+`freeform_hv.yaml` to the quarter domain; R-OSSE example config (ranges from the mesher's own checks); ICW-rollback
+config; analytic mouth-size pre-screen against the dof cap.
+
+## 9. Verification ladder (nothing is trusted before it passes)
+
+| Step | What | Acceptance |
+|---|---|---|
+| V1 | Unit tests: each formula's defining property; fixed-size parametrisation hits r(L) = r_m; blend and increments monotone; generator → FREEFORM passes `families.validate` | all pass, offline |
+| V2 | Fidelity on the **mesher's own sampled profile** vs the analytic curve, every generator | max radial error ≤ 0.2 mm |
+| V3 | Mesher acceptance: `campaign --families all --dry-run` per brief | every seed meshes under its dof cap; topology checks pass |
+| V4 | FREEFORM vs LOOKUP (dense exact table) for exponential and tractrix seeds, GPU, `compare` | metric differences reported; expected well under 0.1 dB |
+| V5 | Textbook physics sanity, GPU: exponential beamwidth narrows with frequency; conical beamwidth follows its included angle 2α over a mid band before narrowing; Re z of exponential and tractrix rises through ~f_c and approaches 1 | qualitative; a violation is a bug to investigate |
+| V6 | Le Cléac'h gate (R9) | matches the reference profile within 1 mm at the mouth, else disabled |
+| V7 | `screen` campaign on each brief, then `compare` on the top 3 families + top 2 hybrids | leaderboard in the review page |
+
+Expected result, stated in advance: on directivity briefs, OSSE/R-OSSE should lead and pure classical horns should
+trail (they beam at high frequency). On the axisymmetric brief with `load` weighted, tractrix / Le Cléac'h /
+hypex should become competitive. New shapes are most likely among the hybrids. Any result that contradicts these
+expectations is checked against V4–V5 before it is believed.
+
+## 10. Risk register
+
+| Risk | Mitigation |
 |---|---|
-| Failed evaluations are cached by design hash (or not counted against `--budget` on replay) | a re-run with the same seed spent its whole OSSE budget re-failing 40 designs (ISSUES) |
-| `freeform_hv.yaml` to the quarter domain | FREEFORM symmetry verified (0.0043 dB); the full domain wastes ~4× dofs |
-| Analytic pre-screen of mouth size vs dof cap | cheap rejection of `mesh_too_large` before calling the mesher |
+| Mesher private sampling API changes on a pin bump | pin SHA; guard test like `build_point_grid` |
+| Outer-shell curvature guard rejects high mouth angles (tractrix/Le Cléac'h at 80°) | `max_wall_deg` configurable; V3 measures the rejection rate; lower it if needed |
+| Dimension mismatch makes CMA comparisons unfair | tiered budgets scaled by knob count; 2 seeds in `compare` |
+| Briefs too large for the 8 GB dof cap at 5.5 kHz | envelope chosen against TOOLCHAIN M3; dry-run reports dofs |
+| Loading metric misread | report-only until a brief explicitly weights it |
 
-## 7. Verification (before any result is trusted)
+## 11. Implementation lanes and order
 
-1. Unit tests: each formula's defining property (s2 table); Hermite-anchor reconstruction error ≤ 0.2 mm; blend
-   monotonicity; increment parametrisation can never produce a decreasing radius; TYPOLOGY → FREEFORM config passes
-   `families.validate` and the mesher's own validation.
-2. Mesher acceptance: `campaign --families all --dry-run`, every seed meshes under the dof cap, topology checks pass.
-3. Acoustic fit check (GPU): tractrix and exponential seeds solved as FREEFORM (Hermite anchors) and as LOOKUP (exact
-   table), compared with `hornlab-search compare`; the shape approximation must not move metrics beyond the 0.039 dB
-   noise floor by more than a reported margin.
-4. Physics sanity (GPU): an exponential horn's beamwidth must narrow with frequency and a conical horn's must
-   approach its wall angle at high frequency; an OSSE seed must hold its coverage. These are expected textbook
-   behaviours; a violation is a bug.
-5. Campaign at budget 40 per family on one shared target; leaderboard into the review page.
+| Lane | Owner | Deliverable | Done when |
+|---|---|---|---|
+| A. Generators + tests (s4, V1, V2) | Sonnet subagent 1 | `design/custom.py` + `design/generators/`, `tests/test_design_generators.py` | V1, V2 pass |
+| B. Campaign / families CLI, briefs, tiers, failure cache, R-OSSE + ICW-rollback configs, `freeform_hv` quarter | Sonnet subagent 2 | `cli.py`, `search/cma.py`, `examples/briefs/`, configs, tests | offline suite green; `campaign --dry-run` works |
+| C. Wiring: search vector → generator → FREEFORM design, provenance block, loading metrics, hybrid configs, V3–V7, review page | orchestrator | `design/space.py`, `search/evaluate.py`, `examples/typologies/`, evidence | V3–V7 done, evidence committed |
 
-Expected outcome, stated in advance: classical axisymmetric horns (exponential, tractrix, Le Cléac'h) are
-loading devices, not directivity controllers; their beamwidth narrows with frequency, so they will score worse than
-OSSE/R-OSSE on a constant-directivity target. Their value here is as building blocks: the hybrids (OSSE horizontal
-with a loading-optimised vertical, blends, perturbed typologies) are where new shapes can appear.
-
-## 8. Work split for the implementation turn
-
-| Lane | Who | Files |
-|---|---|---|
-| A. Formula library + tests (s2), anchor fit, LOOKUP emission | Sonnet subagent 1 | `design/typologies.py`, `tests/test_design_typologies.py` |
-| B. `campaign` + `families` CLI, shared targets, budget/failure-cache fix, R-OSSE + ICW-rollback configs | Sonnet subagent 2 | `cli.py` (new subcommands), `search/cma.py`, `examples/targets/`, `examples/rosse_baseline.yaml`, `examples/icw_rollback.yaml`, tests |
-| C. TYPOLOGY family, hybrids, increment parametrisation, OSSE/R-OSSE sampling via the mesher, configs, GPU verification (s7), review page | orchestrator (this agent) | `design/families.py`, `design/space.py`, `examples/typologies/`, evidence |
-
-Every commit updates CONTINUITY and ISSUES. No gate threshold, plan file, or frozen contract changes. Bound
-widening on existing configs remains the user's call; the new parametrisation is a new config, not a widening.
+Order: A and B in parallel → C wiring → V3 → V4/V5/V6 (GPU) → V7 screen → compare. Every commit updates CONTINUITY
+and ISSUES. Ownership: edits to task-04/05/08 paths are user-authorised and listed in NOTES_FOR_SENIOR.
