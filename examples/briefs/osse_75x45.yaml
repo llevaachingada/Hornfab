@@ -1,0 +1,30 @@
+# Brief: OSSE 75x45 degrees - continuity with the CP-8c osse_baseline results
+# Driver and target copied from examples/osse_baseline.yaml (TYPOLOGY_PLAN.md s3).
+# This brief lets any typology be compared against the existing OSSE baseline runs.
+name: osse_75x45
+description: OSSE 75x45 degree brief matching osse_baseline, 1.4-inch driver, 750x600x420 mm envelope
+driver:
+  exit_radius_mm: 17.78         # 1.4-inch driver (same as osse_baseline.yaml)
+  exit_angle_deg: 15.5          # throat half-angle from osse_baseline.yaml seed a0_deg
+envelope:
+  max_mouth_w_mm: 750.0         # generous: at 75 deg H, tan(37.5)*420 = 322 mm half-width
+  max_mouth_h_mm: 600.0         # at 45 deg V, tan(22.5)*420 = 174 mm half-height; room to vary
+  max_depth_mm: 420.0           # osse_baseline.yaml L_mm upper bound
+symmetry: hv                    # H != V; axisymmetric families skipped
+source:
+  cap: auto
+target:
+  coverage_h_deg: 75.0          # copied from osse_baseline.yaml
+  coverage_v_deg: 45.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0            # limited by 8 GB RTX 4060 dof cap (TOOLCHAIN.md)
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.0
+weights:
+  cov: 1.0                      # copied from osse_baseline.yaml
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0

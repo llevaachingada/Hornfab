@@ -1,0 +1,68 @@
+name: icw_rollback
+family: ICW
+
+# ICW rollback, seeded from a rolled-back R-OSSE profile.
+# TYPOLOGY_PLAN.md s3b: "ICW seeded from OSSE/R-OSSE: mesher's native icw_seed".
+#
+# Uses icw_seed (targets mode with depth/x_aperture requires adding those
+# keys to _ICW in families.py, which is deferred; icw_seed is the supported
+# route today). The R-OSSE seed with tmax=1.0 and R_mm=160 rolls back
+# naturally (theta_end ≈ 180 deg, confirmed via seed_from_rosse).  The ICW
+# B-spline fit inherits that rollback.  Search vector: R_mm, tmax, q, m, r
+# nested in icw_seed; all are valid _ICW path keys via icw_seed.<param>.
+
+seed_params:
+  icw_seed:
+    type: R-OSSE
+    r0_mm: 12.7              # throat radius mm
+    a0_deg: 5.0              # throat half-angle deg (driver exit angle)
+    a_deg: 45.0              # 90° H coverage half-angle for the R-OSSE shape
+    R_mm: 160.0              # aperture radius mm; drives rollback with tmax=1.0
+    tmax: 1.0                # full saturation -> wall reaches theta=180 deg (rollback)
+    k: 1.0
+    q: 1.0                   # R-OSSE blend exponent
+    m: 0.85                  # default from profile_common.py _DEFAULTS
+    r: 0.4
+    b: 0.2
+    exponent: 4.0
+
+bounds:
+  icw_seed.R_mm:   {lo: 80.0,  hi: 220.0}  # aperture radius drives rollback depth
+  icw_seed.tmax:   {lo: 0.7,   hi: 1.0}    # saturation; 1.0 = full rollback potential
+  icw_seed.q:      {lo: 0.5,   hi: 2.0}    # blend exponent (R-OSSE)
+  icw_seed.m:      {lo: 0.3,   hi: 1.5}    # shape
+  icw_seed.r:      {lo: 0.1,   hi: 1.0}    # shape
+  icw_seed.r0_mm:  {lo: 12.7,  hi: 12.7, search: false}
+  icw_seed.a0_deg: {lo: 5.0,   hi: 5.0,  search: false}
+  icw_seed.a_deg:  {lo: 45.0,  hi: 45.0, search: false}
+
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 90.0     # ICW is phi-independent; same H and V target
+  band_lo_hz: 700.0
+  band_hi_hz: 7000.0
+  di_target_db: null
+  di_slope_target: 0.0
+
+weights: {cov: 1.0, rip: 1.0, di: 0.3, dislope: 0.5, flat: 0.5, load: 0.0}
+
+mesh:
+  epw: 6.0
+  quadrants: "1"              # ICW is phi-independent; quarter domain (HANDOFF_6b.md)
+  dof_cap_screen: 5000
+  dof_cap_verify: 7000
+  dof_cap_final:  8900
+  dof_per_triangle: 0.51
+
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-5
+  timeout_s: 900
+
+search: {algorithm: cma, sigma0: 0.25, seed: 1234, budget: 200,
+         popsize: null, tolfun: 1.0e-3}

@@ -1,0 +1,89 @@
+# perturbed_tractrix: tractrix with monotone increment perturbation (axisymmetric)
+# Typology generator config (docs/TYPOLOGY_PLAN.md s4). Knobs in mm / Hz / deg; the brief
+# fixes the driver exit (throat radius and angle), the size envelope, target and weights.
+# Magnus's mesher builds the surface from FREEFORM anchors [z, r, wall angle].
+name: perturbed_tractrix
+family: FREEFORM
+brief_file: ../briefs/axi_90x90_1in.yaml
+generator:
+  name: typology
+  profile_h:
+    type: tractrix
+  perturb:
+    u_max: 0.35
+  profile_v: same
+  n_anchors: 8
+  max_wall_deg: 80.0
+  mouth: ellipse
+seed_params:
+  L_mm: 220.0
+  h_fc_hz: 600.0
+  h_u0: 0.0
+  h_u1: 0.0
+  h_u2: 0.0
+  h_u3: 0.0
+  h_u4: 0.0
+  h_u5: 0.0
+  h_u6: 0.0
+bounds:
+  h_fc_hz:
+    lo: 330.0
+    hi: 1400.0
+  h_u0:
+    lo: -0.35
+    hi: 0.35
+  h_u1:
+    lo: -0.35
+    hi: 0.35
+  h_u2:
+    lo: -0.35
+    hi: 0.35
+  h_u3:
+    lo: -0.35
+    hi: 0.35
+  h_u4:
+    lo: -0.35
+    hi: 0.35
+  h_u5:
+    lo: -0.35
+    hi: 0.35
+  h_u6:
+    lo: -0.35
+    hi: 0.35
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 90.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 5000
+  dof_cap_verify: 7000
+  dof_cap_final: 8900
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+search:
+  algorithm: cma
+  sigma0: 0.25
+  seed: 1234
+  budget: 200
+  popsize: null
+  tolfun: 0.001

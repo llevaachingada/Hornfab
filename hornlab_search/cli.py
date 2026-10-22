@@ -328,7 +328,14 @@ def _dirs(args) -> dict:
 
 def _load_cfg(args):
     from hornlab_search.config import load_config
-    cfg = load_config(args.config)
+    kwargs = {}
+    brief = getattr(args, "brief", None)
+    cma_seed = getattr(args, "cma_seed", None)
+    if brief is not None:
+        kwargs["brief"] = Path(brief)
+    if cma_seed is not None:
+        kwargs["cma_seed"] = int(cma_seed)
+    cfg = load_config(args.config, **kwargs)
     if getattr(args, "backend", None):
         cfg.solve.backend = args.backend             # the override is part of the effective config
     return cfg
@@ -902,6 +909,100 @@ def _cmd_export_step(args) -> int:
     return 1 if bad else 0
 
 
+# ---------------------------------------------------------------------- families
+
+
+def _cmd_families(args) -> int:
+    from hornlab_search.search.campaign import (
+        load_brief, load_catalog, is_compatible, _count_keys,
+    )
+    catalog_path = EXAMPLES / "catalog.yaml"
+    if not catalog_path.exists():
+        print(f"families FAILED: {catalog_path} not found")
+        return 1
+    try:
+        catalog = load_catalog(catalog_path)
+    except Exception as exc:  # noqa: BLE001
+        print(f"families FAILED: {exc}")
+        return 1
+
+    brief = None
+    brief_path = getattr(args, "brief", None)
+    if brief_path:
+        try:
+            brief = load_brief(brief_path)
+        except Exception as exc:  # noqa: BLE001
+            print(f"families FAILED: could not load brief {brief_path}: {exc}")
+            return 1
+
+    from hornlab_search.config import load_config
+    from hornlab_search.design.space import DesignSpace
+
+    print(f"{'Name':<22} {'Group':<10} {'Sym':<14} {'Keys':>4}  {'Description'}")
+    print("-" * 90)
+    for entry in catalog:
+        name = entry["name"]
+        group = entry.get("group", "")
+        sym = entry.get("symmetry", "")
+        desc = entry.get("description", "")
+
+        # Count searchable keys
+        try:
+            cfg_path = EXAMPLES / entry["config"]
+            cfg = load_config(cfg_path)
+            space = DesignSpace.from_config(cfg)
+            n_keys = len(space.keys())
+            keys_str = str(n_keys)
+        except Exception as exc:  # noqa: BLE001
+            keys_str = "?"
+            desc = f"[load error: {exc!s:.40}] {desc}"
+
+        compat_note = ""
+        if brief is not None:
+            ok, reason = is_compatible(entry, brief)
+            if not ok:
+                compat_note = f"  [INCOMPAT: {reason[:60]}]"
+
+        print(f"  {name:<20} {group:<10} {sym:<14} {keys_str:>4}  {desc}{compat_note}")
+
+    print(f"\nfamilies OK: {len(catalog)} entries in {catalog_path}")
+    return 0
+
+
+# ---------------------------------------------------------------------- campaign
+
+
+def _cmd_campaign(args) -> int:
+    from hornlab_search.search.campaign import (
+        run_campaign, print_compact_table,
+    )
+    brief_path = Path(args.brief)
+    if not brief_path.exists():
+        print(f"campaign FAILED: --brief {brief_path} not found")
+        return 1
+    runs_dir = Path(args.runs_dir or REPO / "runs")
+    try:
+        results = run_campaign(
+            brief_path=brief_path,
+            families_spec=args.families,
+            tier=args.tier,
+            runs_dir=runs_dir,
+            n_seeds=args.seeds,
+            budget_override=args.budget,
+        )
+    except ValueError as exc:
+        print(f"campaign FAILED: {exc}")
+        return 1
+    except Exception as exc:  # noqa: BLE001
+        log.debug("campaign unhandled", exc_info=True)
+        print(f"campaign FAILED: {type(exc).__name__}: {exc}")
+        return 1
+    print_compact_table(results)
+    campaign_dir = results["campaign_dir"]
+    print(f"campaign OK: campaign.json + leaderboard.md in {campaign_dir}")
+    return 0
+
+
 # ---------------------------------------------------------------------- parser / main
 
 
@@ -933,6 +1034,10 @@ def build_parser() -> argparse.ArgumentParser:
     r.add_argument("--config", required=True)
     r.add_argument("--mode", choices=("screen", "verify", "final"), default="screen")
     r.add_argument("--dry-run", action="store_true", help="mesh and estimate; launch no solver")
+    r.add_argument("--brief", metavar="PATH",
+                   help="brief YAML; overrides config target/weights and is folded into config_sha")
+    r.add_argument("--cma-seed", type=int, metavar="INT",
+                   help="override search.seed in the config")
     q = sub.add_parser("search", parents=[common], help="CMA-ES from the seed")
     q.add_argument("--config")
     q.add_argument("--budget", type=int, help="cap on NON-CACHED evaluations (the seed counts)")
@@ -941,9 +1046,17 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument("--allow-config-change", action="store_true",
                    help="resume even if the run's config_sha differs from the current config "
                         "(mixes old-J and new-J rows; off by default)")
+    q.add_argument("--brief", metavar="PATH",
+                   help="brief YAML; overrides config target/weights and is folded into config_sha")
+    q.add_argument("--cma-seed", type=int, metavar="INT",
+                   help="override search.seed in the config")
     v = sub.add_parser("verify", parents=[common], help="re-solve a run's top designs at verify fidelity")
     v.add_argument("--run", required=True)
     v.add_argument("--top", type=int, default=5)
+    v.add_argument("--brief", metavar="PATH",
+                   help="brief YAML; overrides config target/weights")
+    v.add_argument("--cma-seed", type=int, metavar="INT",
+                   help="override search.seed (informational; verify does not run CMA)")
     rp = sub.add_parser("report", parents=[common], help="HTML report of a run directory")
     rp.add_argument("run_dir")
     rp.add_argument("--out")
@@ -984,6 +1097,25 @@ def build_parser() -> argparse.ArgumentParser:
                          "bundle's frozen training grid")
     sg.add_argument("--allow-unvalidated", action="store_true",
                     help="propose even if the bundle failed (or lacks) its gate verdict")
+    # ---------------------------------------------------------------------- families
+    fam = sub.add_parser("families", parents=[common],
+                         help="list catalog entries with key counts; mark brief-incompatible entries")
+    fam.add_argument("--brief", metavar="PATH",
+                     help="brief YAML; marks entries incompatible with this brief")
+    # ---------------------------------------------------------------------- campaign
+    cmp = sub.add_parser("campaign", parents=[common],
+                         help="multi-family typology search campaign (TYPOLOGY_PLAN.md s7)")
+    cmp.add_argument("--brief", required=True, metavar="PATH",
+                     help="brief YAML that every family search is compared under")
+    cmp.add_argument("--families", required=True, metavar="SPEC",
+                     help="comma-separated list of names/groups or 'all'")
+    cmp.add_argument("--tier", required=True, choices=("dry-run", "screen", "compare"),
+                     help="dry-run: mesh only; screen: max(40,10k) budget 1 seed; "
+                          "compare: max(150,25k) budget 2 seeds")
+    cmp.add_argument("--seeds", type=int, metavar="N",
+                     help="override the number of CMA seeds (default: 1 for screen, 2 for compare)")
+    cmp.add_argument("--budget", type=int, metavar="N",
+                     help="override the per-search budget for this campaign")
     return p
 
 
@@ -1021,6 +1153,10 @@ def main(argv: list[str] | None = None) -> int:
             return _cmd_compare(args)
         if args.cmd == "export-step":
             return _cmd_export_step(args)
+        if args.cmd == "families":
+            return _cmd_families(args)
+        if args.cmd == "campaign":
+            return _cmd_campaign(args)
     except KeyboardInterrupt:
         print(f"{args.cmd} INTERRUPTED")
         return 1

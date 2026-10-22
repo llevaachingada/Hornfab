@@ -1,0 +1,129 @@
+# perturbed_osse_hv: OSSE H and V (separate coverage) with monotone increment perturbation, rounded-rectangle mouth
+# Typology generator config (docs/TYPOLOGY_PLAN.md s4). Knobs in mm / Hz / deg; the brief
+# fixes the driver exit (throat radius and angle), the size envelope, target and weights.
+# Magnus's mesher builds the surface from FREEFORM anchors [z, r, wall angle].
+name: perturbed_osse_hv
+family: FREEFORM
+brief_file: ../briefs/hifi_90x60_1in.yaml
+generator:
+  name: typology
+  profile_h:
+    type: osse
+  profile_v:
+    type: osse
+  perturb:
+    u_max: 0.25
+  n_anchors: 8
+  max_wall_deg: 80.0
+  mouth: rounded_rectangle
+seed_params:
+  L_mm: 120.0
+  h_a_deg: 45.0
+  v_a_deg: 30.0
+  mouth_corner_mm: 30.0
+  h_u0: 0.0
+  h_u1: 0.0
+  h_u2: 0.0
+  h_u3: 0.0
+  h_u4: 0.0
+  h_u5: 0.0
+  h_u6: 0.0
+  v_u0: 0.0
+  v_u1: 0.0
+  v_u2: 0.0
+  v_u3: 0.0
+  v_u4: 0.0
+  v_u5: 0.0
+  v_u6: 0.0
+bounds:
+  L_mm:
+    lo: 90.0
+    hi: 140.0
+  h_a_deg:
+    lo: 35.0
+    hi: 50.0
+  v_a_deg:
+    lo: 20.0
+    hi: 35.0
+  mouth_corner_mm:
+    lo: 5.0
+    hi: 60.0
+  h_u0:
+    lo: -0.25
+    hi: 0.25
+  h_u1:
+    lo: -0.25
+    hi: 0.25
+  h_u2:
+    lo: -0.25
+    hi: 0.25
+  h_u3:
+    lo: -0.25
+    hi: 0.25
+  h_u4:
+    lo: -0.25
+    hi: 0.25
+  h_u5:
+    lo: -0.25
+    hi: 0.25
+  h_u6:
+    lo: -0.25
+    hi: 0.25
+  v_u0:
+    lo: -0.25
+    hi: 0.25
+  v_u1:
+    lo: -0.25
+    hi: 0.25
+  v_u2:
+    lo: -0.25
+    hi: 0.25
+  v_u3:
+    lo: -0.25
+    hi: 0.25
+  v_u4:
+    lo: -0.25
+    hi: 0.25
+  v_u5:
+    lo: -0.25
+    hi: 0.25
+  v_u6:
+    lo: -0.25
+    hi: 0.25
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 90.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 5000
+  dof_cap_verify: 7000
+  dof_cap_final: 8900
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+search:
+  algorithm: cma
+  sigma0: 0.25
+  seed: 1234
+  budget: 200
+  popsize: null
+  tolfun: 0.001

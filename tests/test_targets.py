@@ -86,8 +86,10 @@ def test_feasibility_note_says_whether_it_fits():
 
 
 # 30
-@pytest.mark.parametrize("path", sorted(EXAMPLES.glob("*.yaml")), ids=lambda p: p.name)
+@pytest.mark.parametrize("path", sorted([p for p in EXAMPLES.glob("*.yaml") if p.name != "catalog.yaml"]
+                                        + list((EXAMPLES / "briefs").glob("*.yaml"))), ids=lambda p: p.name)
 def test_from_dict_round_trips_example_targets(path):
+    # every search config AND every design brief carries a target block (catalog.yaml is an index)
     block = yaml.safe_load(path.read_text(encoding="utf-8"))["target"]
     t = Target.from_dict(block)
     for k in REQUIRED:

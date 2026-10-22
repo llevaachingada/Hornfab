@@ -156,7 +156,11 @@ class DesignSpace:
     # ------------------------------------------------------------------ construction
     @classmethod
     def from_config(cls, cfg) -> "DesignSpace":
-        """Build from a hornlab_search.config.Config (seed_params + bounds_raw)."""
+        """Build from a hornlab_search.config.Config (seed_params + bounds_raw). A config with a
+        ``generator:`` block gets a GeneratedSpace (same interface, knobs -> FREEFORM design)."""
+        if getattr(cfg, "generator", None):
+            from .generated import GeneratedSpace
+            return GeneratedSpace.from_config(cfg)
         bounds: dict[str, Bound] = {}
         for k, b in cfg.bounds_raw.items():
             bounds[str(k)] = Bound(lo=float(b["lo"]), hi=float(b["hi"]),

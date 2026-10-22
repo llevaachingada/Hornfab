@@ -202,7 +202,43 @@ def metrics_from_response(resp: Response, target: Target, *, mesh: MeshResult | 
                                    balloon_dirs=np.array([[0.0, 0.0, 1.0]]))
     m = compute_metrics(resp, target, **kw)
     m.scalars.update(directivity_extras(raw, m, target))
+    m.scalars.update(loading_extras(m.freqs_hz, m.z_throat_real, target))
     return m
+
+
+#: Report-only throat-loading scalars (docs/TYPOLOGY_PLAN.md s6). Never weighted into J (the
+#: existing ``load`` term does that when a brief asks for it).
+LOADING_KEYS = ("f_load_hz", "z_ripple", "z_mean_band")
+LOAD_THRESHOLD = 0.7     # Re(z)/rho*c that counts as "loaded" (plane-wave duct = 1.0)
+
+
+def loading_extras(freqs_hz, z_real, target: Target) -> dict:
+    """``f_load_hz``: lowest solved frequency from which Re z stays >= LOAD_THRESHOLD (NaN if it
+    never does); ``z_ripple``: std of Re z at and above f_load inside the band (coarse on a 12-point
+    grid: a screen for mouth reflections, not a measurement); ``z_mean_band``: mean Re z in the
+    band. Never raises."""
+    out = {k: float("nan") for k in LOADING_KEYS}
+    try:
+        if z_real is None:
+            return out
+        f = np.asarray(freqs_hz, dtype=float)
+        z = np.asarray(z_real, dtype=float)
+        ok = np.isfinite(z)
+        above = (z >= LOAD_THRESHOLD) & ok
+        for i in range(len(z)):
+            if above[i:].all():
+                out["f_load_hz"] = float(f[i])
+                break
+        band = (f >= target.band_lo_hz) & (f <= target.band_hi_hz) & ok
+        if band.any():
+            out["z_mean_band"] = float(np.mean(z[band]))
+        if np.isfinite(out["f_load_hz"]):
+            sel = band & (f >= out["f_load_hz"])
+            if sel.sum() >= 2:
+                out["z_ripple"] = float(np.std(z[sel]))
+    except Exception:  # noqa: BLE001 - report-only
+        log.debug("loading extras failed", exc_info=True)
+    return out
 
 
 #: Report-only scalars added by ``directivity_extras`` (never weighted into J).
@@ -429,6 +465,19 @@ def evaluate(design: Design, space, cfg, mode: str, run_dir, store, backend, *,
         log.error("evaluation %s raised: %s", dh, st["err"][:2000])
 
     kind = st["kind"]
+    if kind in DETERMINISTIC_KINDS and not st.get("fail_cached"):
+        marker = _failure_marker(ctx, key)
+        if marker is not None:
+            try:
+                marker.parent.mkdir(parents=True, exist_ok=True)
+                marker.write_text(json.dumps({"kind": kind, "error": str(st["err"])[:4000]}), encoding="utf-8")
+            except Exception as exc:  # noqa: BLE001 - bookkeeping only
+                log.warning("could not write failure marker %s: %s", marker, exc)
+    if hasattr(space, "provenance"):
+        try:
+            st["generator"] = space.provenance(design)
+        except Exception:  # noqa: BLE001 - provenance is bookkeeping
+            log.debug("generator provenance failed", exc_info=True)
     if kind:
         err = f"{kind}: {st['err']}"
         J, terms = penalty_result(PENALTY_INVALID if kind in DETERMINISTIC_KINDS else PENALTY_FAILED)
@@ -439,7 +488,7 @@ def evaluate(design: Design, space, cfg, mode: str, run_dir, store, backend, *,
         outcome = SolveOutcome(False, None, 0.0, None, err)
     ev = Evaluation(design_hash=dh, design=design, mesh_hash=mh, solve_hash=sh, objective=float(J),
                     terms=terms, metrics=None if kind else st["metrics"], mesh=mesh, outcome=outcome,
-                    cached=bool(st["from_disk"] and not kind), error=err)
+                    cached=bool((st["from_disk"] and not kind) or st.get("fail_cached")), error=err)
     seconds = {"mesh": 0.0 if mesh is None else float(mesh.seconds),
                "solve": 0.0 if (outcome is None or st["from_disk"]) else float(outcome.seconds),
                "total": time.perf_counter() - t_start}
@@ -459,8 +508,29 @@ def evaluate(design: Design, space, cfg, mode: str, run_dir, store, backend, *,
     return ev
 
 
+def _failure_marker(ctx: EvalContext, key: str) -> Path | None:
+    """Where a DETERMINISTIC failure of this exact (design, mesh spec, solve spec) key is
+    remembered across runs, so a replay with the same CMA seed does not spend budget re-failing
+    it (ISSUES 2026-10-22). The key already includes the mesh spec (mode, epw, dof cap)."""
+    root = ctx.solve_cache_root
+    return None if root is None else Path(root) / "failures" / f"{key}.json"
+
+
 def _compute(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx, st) -> None:
     """Mesh, solve, metrics, objective. Fills ``st``; sets st['kind'] on an expected failure."""
+    from ..design.generated import GENERATOR_ERROR_KEY
+    marker = _failure_marker(ctx, key)
+    if marker is not None and marker.exists():
+        try:
+            rec = json.loads(marker.read_text(encoding="utf-8"))
+            if rec.get("kind") in DETERMINISTIC_KINDS:
+                st["kind"], st["err"], st["fail_cached"] = rec["kind"], str(rec.get("error", "")), True
+                return
+        except Exception as exc:  # noqa: BLE001 - a bad marker is ignored, the design re-runs
+            log.warning("failure marker %s unreadable: %s", marker, exc)
+    if GENERATOR_ERROR_KEY in design.params:            # typology knobs gave no legal horn
+        st["kind"], st["err"] = KIND_INVALID, f"generator: {design.params[GENERATOR_ERROR_KEY]}"
+        return
     try:
         mesh = build_mesh(design, mspec, cfg, design_dir, mode=mode, cache_dir=ctx.mesh_cache_root)
     except GeometryInvalidError as exc:
@@ -517,8 +587,10 @@ def _persist(ev: Evaluation, mode: str, sspec, design_dir: Path, ctx: EvalContex
              seconds: dict) -> None:
     """design dir files, boundary traces, DATASET RECORD, then the ndjson row (in that order)."""
     design_dir.mkdir(parents=True, exist_ok=True)
-    _write_json(design_dir / "design.json", {"family": ev.design.family, "params": ev.design.params,
-                                             "design_hash": ev.design_hash})
+    dj = {"family": ev.design.family, "params": ev.design.params, "design_hash": ev.design_hash}
+    if st.get("generator"):
+        dj["generator"] = st["generator"]
+    _write_json(design_dir / "design.json", dj)
     ok = not ev.error
     _write_json(design_dir / "status.json", {
         "ok": ok, "error": ev.error, "kind": error_kind(ev.error), "objective": ev.objective,
@@ -540,7 +612,9 @@ def _persist(ev: Evaluation, mode: str, sspec, design_dir: Path, ctx: EvalContex
             log.warning("trace capture for %s failed: %s", ev.design_hash, exc)
     if store is not None:
         seen = (ev.design_hash, mode, ok)
-        if st["from_disk"] and seen in ctx.store_seen:
+        if st.get("fail_cached"):
+            log.debug("failure of %s replayed from the failure cache; no new dataset record", ev.design_hash)
+        elif st["from_disk"] and seen in ctx.store_seen:
             log.debug("dataset already holds %s (%s); not duplicating a cache hit", *seen[:2])
         else:
             try:
@@ -555,6 +629,8 @@ def _persist(ev: Evaluation, mode: str, sspec, design_dir: Path, ctx: EvalContex
 
     # ---- the ndjson row, last
     row = evaluation_to_row(ev, mode, ctx.n_rows, seconds)
+    if st.get("generator"):
+        row["generator"] = to_jsonable(st["generator"])
     if ctx.write_ndjson:
         append_ndjson(design_dir.parent.parent / "search.ndjson", row)
     ctx.n_rows += 1

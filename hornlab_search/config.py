@@ -91,6 +91,64 @@ class Config:
     solve: SolveSettings
     search: SearchSettings
     raw: dict
+    brief: dict | None = None        # design brief (docs/TYPOLOGY_PLAN.md s3), if one was applied
+    generator: dict | None = None    # typology generator block (s4); family is then FREEFORM
+
+
+# ------------------------------------------------------------------ briefs
+
+BRIEF_SYMMETRY = ("hv", "axisymmetric")
+
+
+def _resolve_path(p, *bases) -> Path:
+    p = Path(p)
+    if p.is_absolute() or p.exists():
+        return p
+    for b in bases:
+        if b is not None and (Path(b) / p).exists():
+            return Path(b) / p
+    return p
+
+
+def load_brief(path) -> dict:
+    """A design brief: driver exit, size envelope, symmetry class, source cap, target and weights
+    (docs/TYPOLOGY_PLAN.md s3). It makes J comparable across typologies. Raises ConfigError."""
+    path = Path(path)
+    raw = yaml.safe_load(path.read_text(encoding="utf-8"))
+    where = f"brief {path.name}"
+    if not isinstance(raw, dict):
+        raise ConfigError(f"{where}: top level must be a mapping")
+    allowed = {"name", "description", "driver", "envelope", "symmetry", "source", "target", "weights"}
+    unknown = set(raw) - allowed
+    if unknown:
+        raise ConfigError(f"{where}: unknown key(s) {sorted(unknown)}")
+    for k in ("name", "driver", "envelope", "symmetry", "target", "weights"):
+        _require(raw, k, where)
+    drv, env = raw["driver"], raw["envelope"]
+    for k in ("exit_radius_mm", "exit_angle_deg"):
+        if not isinstance(drv.get(k), (int, float)):
+            raise ConfigError(f"{where}: driver.{k} must be a number")
+    if not 0 < float(drv["exit_radius_mm"]) < 100 or not 0 <= float(drv["exit_angle_deg"]) < 45:
+        raise ConfigError(f"{where}: driver exit radius must be in (0, 100) mm and angle in [0, 45) deg")
+    for k in ("max_mouth_w_mm", "max_mouth_h_mm", "max_depth_mm"):
+        if not isinstance(env.get(k), (int, float)) or not float(env[k]) > 0:
+            raise ConfigError(f"{where}: envelope.{k} must be a positive number")
+    if raw["symmetry"] not in BRIEF_SYMMETRY:
+        raise ConfigError(f"{where}: symmetry must be one of {list(BRIEF_SYMMETRY)}")
+    cap = (raw.get("source") or {}).get("cap", "auto")
+    if not (cap == "auto" or (isinstance(cap, (int, float)) and float(cap) > 0)):
+        raise ConfigError(f"{where}: source.cap must be 'auto' or a positive radius in mm")
+    from .targets.spec import Target
+    try:
+        t = Target.from_dict(dict(raw["target"]))
+    except ValueError as exc:
+        raise ConfigError(f"{where}: {exc}") from None
+    if raw["symmetry"] == "axisymmetric" and t.coverage_h_deg != t.coverage_v_deg:
+        raise ConfigError(f"{where}: an axisymmetric brief needs coverage_h_deg == coverage_v_deg")
+    out = dict(raw)
+    out["source"] = {"cap": cap}
+    out["path"] = str(path)
+    return out
 
 
 # ------------------------------------------------------------------ loading
@@ -119,12 +177,36 @@ def _build(cls, section: dict, where: str, optional: tuple[str, ...] = ()):
     return cls(**kwargs)
 
 
-def load_config(path) -> Config:
+def load_config(path, *, brief=None, cma_seed: int | None = None) -> Config:
+    """YAML -> Config. ``brief`` (a path; or the config's own ``brief:`` key) replaces the target
+    and weights with the brief's and records the brief in ``raw`` so ``config_sha`` covers it.
+    ``cma_seed`` overrides ``search.seed``. A ``generator:`` block makes this a typology config
+    (family must be FREEFORM; ``seed_params``/``bounds`` then hold generator knobs)."""
     path = Path(path)
     raw = yaml.safe_load(path.read_text(encoding="utf-8"))
     if not isinstance(raw, dict):
         raise ConfigError(f"{path}: top level must be a mapping")
     where = path.name
+
+    brief_path = brief if brief is not None else raw.get("brief_file")
+    brief_d = None
+    if brief_path is not None:
+        bp = _resolve_path(brief_path, path.parent, Path(__file__).resolve().parents[1])
+        brief_d = load_brief(bp)
+        raw["target"] = dict(brief_d["target"])
+        raw["weights"] = dict(brief_d["weights"])
+        raw["brief"] = {k: v for k, v in brief_d.items() if k != "path"}
+    if cma_seed is not None:
+        raw.setdefault("search", {})
+        raw["search"] = dict(raw["search"], seed=int(cma_seed))
+    gen = raw.get("generator")
+    if gen is not None:
+        if not isinstance(gen, dict) or "name" not in gen:
+            raise ConfigError(f"{where}: generator must be a mapping with a 'name'")
+        if raw.get("family") != "FREEFORM":
+            raise ConfigError(f"{where}: a generator config must have family: FREEFORM")
+        if brief_d is None:
+            raise ConfigError(f"{where}: a generator config needs a brief (brief_file: or --brief)")
 
     mesh = _build(MeshSettings, _require(raw, "mesh", where), f"{where}:mesh",
                   optional=("max_triangle_slack",))
@@ -155,6 +237,8 @@ def load_config(path) -> Config:
         solve=solve,
         search=search,
         raw=raw,
+        brief=brief_d,
+        generator=None if gen is None else dict(gen),
     )
 
 

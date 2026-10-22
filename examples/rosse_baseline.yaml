@@ -1,0 +1,78 @@
+name: rosse_baseline
+family: R-OSSE
+
+# R-OSSE baseline: 90 x 60 deg H/V, 1-inch compression driver, matched to hifi_90x60_1in brief.
+# All keys from the _ROSSE table in hornlab_search/design/families.py only (R-OSSE and shared).
+# Parameter meanings and ranges from docs/research/typologies/MESHER_TYPOLOGIES.md s2 and
+# .venv/Lib/site-packages/hornlab_mesher/profile_formulas.py (validity guards at lines 863-868).
+#
+# R-OSSE specifics vs OSSE:
+#  - R_mm is the "nominal mouth / reference radius" (not L_mm; length is derived by the formula)
+#  - q is the BLEND EXPONENT (default 1.0 per MESHER_TYPOLOGIES s2b), NOT the OSSE superellipse saturation
+#  - No s, n, rot_deg, L_mm, h (OSSE-only; refused by families.py _REFUSED_HINTS)
+#  - tmax > 0 required (profile_formulas.py:863-868); 1.0 = full rollback to mouth
+
+seed_params:
+  r0_mm:       12.7    # 1-inch throat radius; pinned to match hifi_90x60_1in brief driver
+  a_deg:       45.0    # coverage half-angle in mesher convention; 2*45=90 deg H coverage
+  a0_deg:       5.0    # throat wall angle; matches driver.exit_angle_deg in hifi_90x60_1in brief
+  R_mm:       155.0    # nominal mouth radius (derived length ~185 mm, within 220 mm envelope)
+  tmax:         1.0    # no truncation; mouth at the full R-OSSE blended radius (MESHER_TYPOLOGIES s2a)
+  k:            1.0    # shape factor; 1.0 = standard OSSE-like base (profile_common.py _DEFAULTS)
+  q:            1.0    # blend exponent; R-OSSE default is 1.0 (MESHER_TYPOLOGIES s2b, NOT 0.995)
+  m:            0.85   # axial curve shape; default from profile_common.py _DEFAULTS line 18
+  r:            0.4    # axial curve shape; default from profile_common.py _DEFAULTS line 19
+  b:            0.2    # secondary axial blend weight; default from profile_common.py _DEFAULTS line 20
+  exponent:     4.0    # superellipse cross-section exponent; 4.0 is a rounded-square (moderate)
+  aspect_ratio: 1.33   # H/V cross-section ratio; 200mm / 150mm ≈ 1.33 for 90x60 deg coverage
+
+bounds:
+  # Throat radius pinned to 1-inch driver (hifi_90x60_1in brief)
+  r0_mm:        {lo: 12.7,  hi: 12.7,  search: false}
+  # Coverage and throat angles
+  a_deg:        {lo: 5.0,   hi: 55.0}   # coverage half-angle; 5 keeps coverage non-degenerate
+  a0_deg:       {lo: 2.0,   hi: 30.0}   # throat wall angle; mesher accepts any finite value
+  # R-OSSE size (derived length stays within envelope when R_mm <= 220)
+  R_mm:         {lo: 80.0,  hi: 220.0}  # nominal mouth radius; upper bound within 220 mm depth envelope
+  tmax:         {lo: 0.5,   hi: 1.0}    # truncation; > 0 required (profile_formulas.py:867-868)
+  # Shape factors
+  k:            {lo: 0.3,   hi: 2.5}    # same range as osse_baseline.yaml
+  q:            {lo: 0.5,   hi: 2.0}    # blend exponent; R-OSSE specific (not OSSE saturation)
+  m:            {lo: 0.3,   hi: 1.5}    # axial shape (profile_formulas.py:627)
+  r:            {lo: 0.1,   hi: 1.0}    # axial shape (profile_formulas.py:628)
+  b:            {lo: 0.0,   hi: 0.5}    # secondary blend weight (profile_formulas.py:629)
+  # Cross-section
+  exponent:     {lo: 2.0,   hi: 8.0}    # superellipse exponent; hard range [2,16] in FREEFORM; OSSE-like unvalidated but 2-8 meshes
+  aspect_ratio: {lo: 1.0,   hi: 2.0}    # H/V ratio; 1.0 = circular, 2.0 = wide
+
+target:
+  coverage_h_deg: 90.0        # TOTAL included angle, -6 dB; hifi_90x60_1in brief
+  coverage_v_deg: 60.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0          # limited by 8 GB RTX 4060 dof cap (TOOLCHAIN.md)
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.0                  # loading threshold; not weighted below (load: 0.0)
+
+weights: {cov: 1.0, rip: 1.0, di: 0.3, dislope: 0.5, flat: 0.5, load: 0.0}
+
+mesh:
+  epw: 6.0
+  quadrants: "1"              # R-OSSE with aspect_ratio!=1 is symmetric in H and V => quarter domain
+  dof_cap_screen: 5000        # measured 8 GB RTX 4060 quarter cap (TOOLCHAIN.md M3)
+  dof_cap_verify: 7000
+  dof_cap_final:  8900
+  dof_per_triangle: 0.51      # measured M1: ~0.51 quarter (hornlab-beat-bem 0.2.0)
+
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73             # must be ODD
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-5
+  timeout_s: 900
+
+search: {algorithm: cma, sigma0: 0.25, seed: 1234, budget: 200,
+         popsize: null, tolfun: 1.0e-3}

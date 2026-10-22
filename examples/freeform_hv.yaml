@@ -36,11 +36,12 @@ weights: {cov: 1.0, rip: 1.0, di: 0.3, dislope: 0.5, flat: 0.5, load: 0.0}
 
 mesh:
   epw: 6.0
-  quadrants: "1234"            # FREEFORM H/V differ; full domain
-  dof_cap_screen: 3000   # full domain: ceiling ~5.5k (TOOLCHAIN.md M2); plan default was 8000
-  dof_cap_verify: 4500
-  dof_cap_final:  5400
-  dof_per_triangle: 0.50       # measured M1: 0.500 full domain, ~0.51 quarter (hornlab-beat-bem 0.2.0)
+  quadrants: "1"               # quarter domain; FREEFORM H/V-symmetric about both planes.
+                               # Quarter vs full FREEFORM: max 0.0043 dB diff verified (HANDOFF_6b.md).
+  dof_cap_screen: 5000   # measured 8GB RTX 4060 quarter cap (TOOLCHAIN.md M3)
+  dof_cap_verify: 7000
+  dof_cap_final:  8900
+  dof_per_triangle: 0.51       # measured M1: ~0.51 quarter (hornlab-beat-bem 0.2.0)
 
 solve:
   backend: beat_cuda

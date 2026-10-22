@@ -1,0 +1,134 @@
+﻿# Typology catalog for hornlab-search campaign (TYPOLOGY_PLAN.md s7, LANE B).
+# Each entry names a config under examples/ plus its group, symmetry and a one-line description.
+# Groups:
+#   magnus   - Magnus mesher native families (OSSE, R-OSSE, ICW, FREEFORM); no generator code needed
+#   legacy   - utility configs not intended for typology comparison (smoke tests, adapters)
+#   classical - generator-based classical horns: conical, exponential, hypex, tractrix, OSSE meridian (Le Cleach gated off)
+#   hybrid   - generator-based hybrids: H/V, blend, perturbed
+# The orchestrator will append classical and hybrid entries; keep this format simple.
+#
+# Fields:
+#   name:        unique identifier for --families SPEC and in leaderboard output
+#   config:      path relative to examples/  (the config must load with load_config)
+#   group:       one of magnus | legacy | classical | hybrid
+#   symmetry:    hv | axisymmetric  (must match the config's mesh.quadrants and the design's symmetry)
+#   description: one-line human description
+
+entries:
+  - name: osse_baseline
+    config: osse_baseline.yaml
+    group: magnus
+    symmetry: hv
+    description: OSSE baseline 75x45 deg, 1.4-inch driver, 10 searchable knobs (CP-8c reference)
+
+  - name: rosse_baseline
+    config: rosse_baseline.yaml
+    group: magnus
+    symmetry: hv
+    description: R-OSSE baseline 90x60 deg, 1-inch driver, rollback mouth; loading term active
+
+  - name: icw_termination
+    config: icw_termination.yaml
+    group: magnus
+    symmetry: axisymmetric   # ICW is phi-independent (same curve all azimuths)
+    description: ICW flat-baffle termination, 100x100 deg, 1-inch driver; 6 searchable knobs
+
+  - name: icw_rollback
+    config: icw_rollback.yaml
+    group: magnus
+    symmetry: axisymmetric   # ICW is phi-independent
+    description: ICW rollback (icw_seed from R-OSSE, tmax=1.0 natural rollback), 1-inch driver; 5 searchable knobs
+
+  - name: freeform_sculpt
+    config: freeform_sculpt.yaml
+    group: magnus
+    symmetry: hv
+    description: FREEFORM sculpted waveguide 90x90 deg, 11 searchable control-point knobs
+
+  - name: freeform_hv
+    config: freeform_hv.yaml
+    group: magnus
+    symmetry: hv
+    description: FREEFORM H/V waveguide 75x45 deg, 3 searchable knobs (mouth angles + exponent)
+
+  - name: throat_adapter
+    config: throat_adapter.yaml
+    group: legacy
+    symmetry: hv
+    description: OSSE throat adapter (extension length/angle/slot search); not for typology comparison
+
+  - name: search_smoke
+    config: search_smoke.yaml
+    group: legacy
+    symmetry: hv
+    description: Small smoke-test copy of osse_baseline with clipped budget; not for typology comparison
+
+  # ---- typology generators (docs/TYPOLOGY_PLAN.md s4; config under examples/typologies/) ----
+  - name: conical
+    config: typologies/conical.yaml
+    group: classical
+    symmetry: axisymmetric
+    description: conical horn r = r0 + z tan(alpha), fixed depth and mouth radius (2 knobs)
+
+  - name: exponential
+    config: typologies/exponential.yaml
+    group: classical
+    symmetry: axisymmetric
+    description: exponential horn r = r0 exp(m z), f_c = m c / 2 pi (2 knobs)
+
+  - name: hypex
+    config: typologies/hypex.yaml
+    group: classical
+    symmetry: axisymmetric
+    description: hyperbolic-exponential (Salmon) horn, T in [0, 1] (3 knobs)
+
+  - name: tractrix
+    config: typologies/tractrix.yaml
+    group: classical
+    symmetry: axisymmetric
+    description: Voigt tractrix, mouth radius c / 2 pi f_c, cut at an 80 deg wall (1 knob)
+
+  - name: osse_axi
+    config: typologies/osse_axi.yaml
+    group: classical
+    symmetry: axisymmetric
+    description: Magnus's OSSE meridian sampled from his formula, axisymmetric FREEFORM (4 knobs)
+
+  - name: hyb_osse_h_hypex_v
+    config: typologies/hyb_osse_h_hypex_v.yaml
+    group: hybrid
+    symmetry: hv
+    description: H/V hybrid, OSSE horizontal (coverage control) x hypex vertical (loading)
+
+  - name: hyb_osse_h_tractrix_v
+    config: typologies/hyb_osse_h_tractrix_v.yaml
+    group: hybrid
+    symmetry: hv
+    description: H/V hybrid, OSSE horizontal x tractrix vertical, 75 deg wall cap
+
+  - name: blend_osse_tractrix
+    config: typologies/blend_osse_tractrix.yaml
+    group: hybrid
+    symmetry: axisymmetric
+    description: convex blend (1-w) OSSE + w tractrix, axisymmetric
+
+  - name: blend_conical_exponential
+    config: typologies/blend_conical_exponential.yaml
+    group: hybrid
+    symmetry: axisymmetric
+    description: convex blend of conical and exponential at the same size, axisymmetric
+
+  - name: perturbed_osse_hv
+    config: typologies/perturbed_osse_hv.yaml
+    group: hybrid
+    symmetry: hv
+    description: OSSE H and V (separate coverage) + monotone increment perturbation, rounded-rectangle mouth (18 knobs)
+
+  - name: perturbed_tractrix
+    config: typologies/perturbed_tractrix.yaml
+    group: hybrid
+    symmetry: axisymmetric
+    description: tractrix + monotone increment perturbation (8 knobs)
+
+  # lecleach / spherical_wave: generator DISABLED (TYPOLOGY_PLAN R9 gate: no verifiable published
+  # construction was reachable); examples/typologies/lecleach.yaml is kept but not listed.
