@@ -1,7 +1,7 @@
 # ISSUES
 
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
-Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-10-22 (local GPU box, PR #15 merged + its GPU test plan; no GitHub issue state changed).
+Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-10-22 (local GPU box, solver re-verification + typology plan; no GitHub issue state changed).
 
 | ID | Title | Status | Owner | Plan ref |
 |---|---|---|---|---|
@@ -98,7 +98,11 @@ TO-DO (no GitHub issue yet; owner / plan ref):
 - [x] Merge the learnings PR, run its section-4 test plan on the GPU box: DONE 2026-10-22 (FF to 265133f; `docs/evidence/BL_LEARNINGS_GPU.md`).
 - [x] Early rejection offline replay: DONE 2026-10-22 (`docs/evidence/EARLY_REJECTION_REPLAY.md`): < 0.1 % GPU saved at K = 4 / 25 % margin, no top-20 lost; recommend NOT implementing as specified (owner ruling).
 - [ ] Search budget counts uncached failures: a re-run with the same CMA seed replays cached successes for free but re-evaluates every earlier failure, which consumes budget without solving (OSSE budget 40 -> 0 new solves, 2026-10-22). Options for the owner: cache failures by design hash, or count only solver-reaching evaluations (task 08; `search/cma.py`).
-- [ ] CPU-vs-CUDA qualification screen per pinned-library change (GPU box; frozen CP-7b rule; s2 item 8).
+- [ ] CPU-vs-CUDA qualification screen per pinned-library change (GPU box; frozen CP-7b rule; s2 item 8). Note: beat_cuda vs bempp_cpu re-run 2026-10-22: 0.039 dB (`docs/evidence/SOLVER_VERIFY_2026-10-22.md`).
+- [ ] Typology plan (`docs/TYPOLOGY_PLAN.md`): classical typologies via FREEFORM anchors (conical, exponential, hypex, tractrix, Le Cléac'h [gated on matching a published reference profile], spherical-wave = Le Cléac'h T=1; axisymmetric = cross-section mode), hybrids, TYPOLOGY family, `campaign` family selection, shared targets. Next turn.
+- [ ] R-OSSE: validator exists, no example config, 0 dataset records (`docs/research/typologies/SEARCH_LAYER_GAPS.md`). In the typology plan.
+- [ ] ICW rollback termination never exercised (categorical; needs its own config). In the typology plan.
+- [ ] `freeform_hv.yaml` solves the full domain although FREEFORM quarter == full within 0.0043 dB (4x dofs wasted). In the typology plan.
 - [x] STEP-export CLI: DONE locally 2026-10-22 (`hornlab-search export-step`, b822dd5).
 - [ ] OSSE data top-up for the surrogate gates (GPU, overnight; user OK needed).
 - [ ] Boundary Lab BL-1 export (cloud; `docs/BOUNDARY_LAB_INTEGRATION_PLAN.md`).
