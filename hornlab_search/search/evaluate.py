@@ -150,6 +150,31 @@ def mouth_dims_m(mesh: MeshResult) -> tuple[float, float]:
     return float(w), float(h)
 
 
+#: Allowance on the brief's max depth for the outer shell and the source cap, which the meshed
+#: bounding box includes but a generator's inner depth L does not.
+ENVELOPE_DEPTH_ALLOWANCE_MM = 15.0
+
+
+def envelope_violation(mesh: MeshResult, brief: dict | None) -> str:
+    """'' if the meshed horn (outer envelope, shell included) fits the brief's size envelope,
+    else a message. Applies to EVERY family, so typologies and Magnus's families compete inside
+    the same box (a bigger mouth controls directivity lower; comparing across sizes is unfair)."""
+    if not brief or mesh is None:
+        return ""
+    env = brief.get("envelope") or {}
+    w, h = mouth_dims_m(mesh)
+    b = mesh.bbox_m
+    depth = (b[5] - b[2]) * 1000.0
+    msgs = []
+    if w * 1000.0 > float(env.get("max_mouth_w_mm", 1e9)) + 0.5:
+        msgs.append(f"width {w * 1000:.0f} > {env['max_mouth_w_mm']} mm")
+    if h * 1000.0 > float(env.get("max_mouth_h_mm", 1e9)) + 0.5:
+        msgs.append(f"height {h * 1000:.0f} > {env['max_mouth_h_mm']} mm")
+    if depth > float(env.get("max_depth_mm", 1e9)) + ENVELOPE_DEPTH_ALLOWANCE_MM:
+        msgs.append(f"depth {depth:.0f} > {env['max_depth_mm']} + {ENVELOPE_DEPTH_ALLOWANCE_MM:.0f} mm")
+    return ("outside the brief envelope (" + ", ".join(msgs) + ")") if msgs else ""
+
+
 def throat_radius_m(design: Design) -> float | None:
     """Throat radius in metres for the f11 throat-mode estimate. FREEFORM has no ``r0_mm``: its
     throat is anchor 0 of the two meridians (the smaller radius bounds the first mode)."""
@@ -465,7 +490,7 @@ def evaluate(design: Design, space, cfg, mode: str, run_dir, store, backend, *,
         log.error("evaluation %s raised: %s", dh, st["err"][:2000])
 
     kind = st["kind"]
-    if kind in DETERMINISTIC_KINDS and not st.get("fail_cached"):
+    if kind in DETERMINISTIC_KINDS and not st.get("fail_cached") and not st.get("no_marker"):
         marker = _failure_marker(ctx, key)
         if marker is not None:
             try:
@@ -541,6 +566,11 @@ def _compute(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx, st)
         return
     st["mesh"] = mesh
     st["area"], st["grid"] = _grid_info(design_dir)
+    why = envelope_violation(mesh, getattr(cfg, "brief", None))
+    if why:
+        # Brief-dependent, NOT a pure function of (design, mesh spec): never failure-cached.
+        st["kind"], st["err"], st["no_marker"] = KIND_INVALID, why, True
+        return
 
     resp = None
     root = ctx.solve_cache_root

@@ -970,7 +970,7 @@ def _cmd_families(args) -> int:
         if brief is not None:
             ok, reason = is_compatible(entry, brief)
             if not ok:
-                compat_note = f"  [INCOMPAT: {reason[:60]}]"
+                compat_note = f"  [INCOMPAT: {reason}]"
 
         print(f"  {name:<20} {group:<10} {sym:<14} {keys_str:>4}  {desc}{compat_note}")
 
@@ -989,6 +989,12 @@ def _cmd_campaign(args) -> int:
     if not brief_path.exists():
         print(f"campaign FAILED: --brief {brief_path} not found")
         return 1
+    if args.budget is not None and args.budget < 1:
+        print(f"campaign FAILED: --budget must be a positive number of evaluations, got {args.budget}")
+        return 2
+    if args.seeds is not None and args.seeds < 1:
+        print(f"campaign FAILED: --seeds must be at least 1, got {args.seeds}")
+        return 2
     runs_dir = Path(args.runs_dir or REPO / "runs")
     try:
         results = run_campaign(

@@ -105,6 +105,19 @@ ol.q { margin: 0; padding-left: 1.3em; display: grid; gap: 12px; }
 ol.q li::marker { font-family: var(--f-mono); color: var(--accent); }
 footer { color: var(--muted); font-size: 0.82rem; border-top: 1px solid var(--rule); padding-top: 18px; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* Typology campaigns */
+.camp-block { display: grid; gap: 28px; }
+.camp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.camp-prof { background: var(--surface); border: 1px solid var(--rule); border-radius: 5px; padding: 8px 8px 5px; display: grid; gap: 4px; min-width: 0; }
+.camp-prof h4 { font-family: var(--f-mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 500; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.camp-prof svg { width: 100%; height: auto; display: block; overflow: visible; }
+.camp-prof .pill { margin-top: 2px; }
+.bw-toggle { display: flex; gap: 6px; align-items: center; }
+.bw-toggle button { font: inherit; font-size: 0.8rem; padding: 3px 10px; border-radius: 4px; border: 1px solid var(--rule); background: var(--surface); color: var(--ink); cursor: pointer; }
+.bw-toggle button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+.camp-section { border-top: 1px solid var(--rule); padding-top: 24px; display: grid; gap: 20px; }
+@media (max-width: 480px) { .camp-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); } }
 </style>
 
 <div class="wrap">
@@ -197,6 +210,15 @@ footer { color: var(--muted); font-size: 0.82rem; border-top: 1px solid var(--ru
     <div class="cap">Spearman rank correlation of each searched parameter with <i>J</i> over all successful evaluations of this run (positive: larger value, worse design), and how many of the six best designs sit at each bound.</div>
     <div class="tbl-wrap"><table id="sens"></table></div>
   </div>
+</section>
+
+<section class="stack" id="campaigns">
+  <div class="prose stack">
+    <div class="eyebrow">Typology campaigns</div>
+    <h2>Family rankings from campaign searches</h2>
+    <p>Each entry is one family, one CMA-ES run (seed 1234), with a budget of max(40, 10·knobs) evaluations — a <em>screen</em> tier: fast enough to rank every family against the same target, but coarse. A single run can be unlucky; the <em>compare</em> tier (two seeds, same budget) is needed before claiming that one family consistently beats another. Tables are sorted by best <i>J</i>; lower is better.</p>
+  </div>
+  <div id="camp-list"></div>
 </section>
 
 <section class="stack prose" id="findings">
@@ -430,14 +452,232 @@ function renderRun() {
   document.getElementById("sens").innerHTML = s + "</tbody>";
 }
 
+// ---------------------------------------------------------------------------
+// Group colour palette (deterministic, 8 slots)
+// ---------------------------------------------------------------------------
+const GROUP_COLORS = ["#0d6e7a","#a3713a","#2f7d3b","#b23a3a","#7a4a9a","#2a6d9a","#9a6a2a","#5a7a3a"];
+const groupIdx = {};
+function groupColor(g) {
+  if (!(g in groupIdx)) groupIdx[g] = Object.keys(groupIdx).length % GROUP_COLORS.length;
+  return GROUP_COLORS[groupIdx[g]];
+}
+
+// ---------------------------------------------------------------------------
+// renderCampaigns
+// ---------------------------------------------------------------------------
+function renderCampaigns() {
+  const wrap = document.getElementById("camp-list");
+  if (!wrap) return;
+  const camps = (DATA.campaigns || []);
+  if (!camps.length) { wrap.innerHTML = "<p style='color:var(--muted)'>No campaign data loaded.</p>"; return; }
+
+  wrap.innerHTML = "";
+  camps.forEach((camp, ci) => {
+    const sec = document.createElement("div");
+    sec.className = "camp-section";
+
+    // --- heading ---
+    const hdr = document.createElement("div");
+    hdr.className = "prose stack";
+    const tier = camp.tier === "screen" ? "screen" : camp.tier;
+    hdr.innerHTML = `<h3>${camp.brief_name} <span class="pill" style="font-size:0.68rem;border-color:var(--muted);color:var(--muted)">${tier}</span></h3>`;
+    sec.appendChild(hdr);
+
+    const entries = camp.entries || [];
+    if (!entries.length) { const p = document.createElement("p"); p.textContent = "No entries."; p.style.color = "var(--muted)"; sec.appendChild(p); wrap.appendChild(sec); return; }
+
+    // --- leaderboard table ---
+    const target = (entries[0] || {}).target || {};
+    let tbl = `<div class="tbl-wrap"><table><thead><tr>
+      <th>#</th><th>Name</th><th>Group</th><th>Sym</th><th class="r">Knobs</th><th class="r">Evals</th><th>Fails</th>
+      <th class="r">Best J</th><th class="r">cov</th><th class="r">rip</th><th class="r">di</th><th class="r">flat</th>
+      <th class="r">f<sub>load</sub> Hz</th><th class="r">Z̄<sub>band</sub></th><th class="r">Z ripple</th>
+    </tr></thead><tbody>`;
+    entries.forEach((e, idx) => {
+      const tb = e.terms_best || {};
+      const ld = e.loading || {};
+      const nf = e.n_evals - e.n_ok;
+      const failStr = nf > 0 ? Object.entries(e.fails || {}).map(([k,v]) => `${v} ${k.replace(/_/g," ")}`).join("; ") : "—";
+      const gc = groupColor(e.group);
+      const pillHtml = `<span class="pill" style="border-color:${gc};color:${gc}">${e.group}</span>`;
+      const floadVal = ld.f_load_hz != null ? Math.round(ld.f_load_hz) : "—";
+      const zmeanVal = ld.z_mean_band != null ? ld.z_mean_band.toFixed(3) : "—";
+      const zripVal = ld.z_ripple != null ? ld.z_ripple.toFixed(4) : "—";
+      tbl += `<tr>
+        <td class="r mono">${idx+1}</td>
+        <td><b>${e.name}</b></td>
+        <td>${pillHtml}</td>
+        <td class="mono">${e.symmetry}</td>
+        <td class="r">${e.n_knobs}</td>
+        <td class="r">${e.n_evals}</td>
+        <td style="font-size:0.82em;color:${nf>0?'var(--warn)':'var(--muted)'}">${failStr}</td>
+        <td class="r"><b>${fmt(e.best_j)}</b></td>
+        <td class="r">${fmt(tb.cov,3)}</td><td class="r">${fmt(tb.rip,3)}</td>
+        <td class="r">${fmt(tb.di,3)}</td><td class="r">${fmt(tb.flat,3)}</td>
+        <td class="r">${floadVal}</td><td class="r">${zmeanVal}</td><td class="r">${zripVal}</td>
+      </tr>`;
+    });
+    tbl += "</tbody></table></div>";
+    const tblWrap = document.createElement("div");
+    tblWrap.innerHTML = tbl;
+    sec.appendChild(tblWrap);
+
+    // --- small-multiples wall profiles ---
+    const profHeader = document.createElement("div");
+    profHeader.className = "prose";
+    profHeader.innerHTML = "<h3 style='font-size:0.95rem'>Wall profiles — best design per family</h3><p class='cap' style='font-size:0.8rem;color:var(--muted)'>H on the right (positive radius), V mirrored to the left. Shared mm scale across all entries in this campaign.</p>";
+    sec.appendChild(profHeader);
+
+    // compute common scale across all entries
+    let allR = [], allZ = [];
+    entries.forEach(e => {
+      const p = (e.best || {}).profile || {};
+      [["h",1],["v",-1]].forEach(([k,sgn]) => {
+        (p[k] || []).forEach(pt => { allR.push(Math.abs(pt[1])); allZ.push(pt[0]); });
+      });
+    });
+    const sharedRmax = allR.length ? Math.max(...allR) * 1.1 : 150;
+    const sharedZmin = allZ.length ? Math.min(...allZ) - 5 : 0;
+    const sharedZmax = allZ.length ? Math.max(...allZ) + 5 : 200;
+
+    const grid = document.createElement("div");
+    grid.className = "camp-grid";
+    entries.forEach(e => {
+      const cell = document.createElement("div");
+      cell.className = "camp-prof";
+      const h4 = document.createElement("h4");
+      h4.textContent = e.name;
+      cell.appendChild(h4);
+
+      const svgEl = document.createElementNS(NS, "svg");
+      const W = 150, H = 110, m = {l:28,r:4,t:4,b:22};
+      svgEl.setAttribute("viewBox", `0 0 ${W} ${H}`);
+      // axes
+      const Xp = v => m.l + (v + sharedRmax) / (2 * sharedRmax) * (W - m.l - m.r);
+      const Yp = v => H - m.b - (v - sharedZmin) / (sharedZmax - sharedZmin) * (H - m.t - m.b);
+      // grid lines
+      const gg = document.createElementNS(NS, "g"); gg.setAttribute("class","grid");
+      const gYticks = niceTicks(sharedZmin, sharedZmax, 4);
+      gYticks.forEach(t => {
+        const ln = document.createElementNS(NS,"line");
+        ln.setAttribute("x1",m.l); ln.setAttribute("x2",W-m.r);
+        ln.setAttribute("y1",Yp(t)); ln.setAttribute("y2",Yp(t));
+        gg.appendChild(ln);
+        const tx = document.createElementNS(NS,"text");
+        tx.setAttribute("x",m.l-3); tx.setAttribute("y",Yp(t)+3); tx.setAttribute("text-anchor","end");
+        tx.setAttribute("style","font-size:8px");
+        tx.textContent = Math.round(t);
+        svgEl.appendChild(tx);
+      });
+      svgEl.appendChild(gg);
+      // center axis
+      const cln = document.createElementNS(NS,"line");
+      cln.setAttribute("x1",Xp(0)); cln.setAttribute("x2",Xp(0));
+      cln.setAttribute("y1",m.t); cln.setAttribute("y2",H-m.b);
+      cln.setAttribute("stroke","var(--rule)"); cln.setAttribute("stroke-width","1");
+      svgEl.appendChild(cln);
+      // draw profile
+      const p = (e.best || {}).profile || {};
+      const gc = groupColor(e.group);
+      [["h",1],["v",-1]].forEach(([k,sgn]) => {
+        const pts = (p[k] || []).map(pt => [Xp(sgn * Math.abs(pt[1])), Yp(pt[0])]).filter(pt => isFinite(pt[0]) && isFinite(pt[1]));
+        if (pts.length > 1) {
+          const path = document.createElementNS(NS,"path");
+          path.setAttribute("d", pts.map((pt,i) => (i?"L":"M")+pt[0].toFixed(1)+","+pt[1].toFixed(1)).join(""));
+          path.setAttribute("fill","none"); path.setAttribute("stroke",gc); path.setAttribute("stroke-width","1.4");
+          if (k==="v") path.setAttribute("stroke-dasharray","3 2");
+          svgEl.appendChild(path);
+        }
+      });
+      // x-axis label
+      const xl = document.createElementNS(NS,"text");
+      xl.setAttribute("x",W/2); xl.setAttribute("y",H-4); xl.setAttribute("text-anchor","middle");
+      xl.setAttribute("style","font-size:8px"); xl.textContent = "← V · r mm · H →";
+      svgEl.appendChild(xl);
+
+      cell.appendChild(svgEl);
+      // group pill
+      const pillDiv = document.createElement("div");
+      pillDiv.innerHTML = `<span class="pill" style="border-color:${gc};color:${gc};font-size:0.62rem">${e.group}</span>`;
+      cell.appendChild(pillDiv);
+      grid.appendChild(cell);
+    });
+    sec.appendChild(grid);
+
+    // --- beamwidth overlay chart ---
+    const bwHeader = document.createElement("div");
+    bwHeader.className = "prose";
+    bwHeader.innerHTML = "<h3 style='font-size:0.95rem'>Best-design beamwidth vs target — all families</h3>";
+    sec.appendChild(bwHeader);
+
+    // toggle H/V
+    const toggleRow = document.createElement("div");
+    toggleRow.className = "bw-toggle";
+    const btnH = document.createElement("button"); btnH.textContent = "Horizontal"; btnH.setAttribute("aria-pressed","true");
+    const btnV = document.createElement("button"); btnV.textContent = "Vertical"; btnV.setAttribute("aria-pressed","false");
+    toggleRow.appendChild(btnH); toggleRow.appendChild(btnV);
+    sec.appendChild(toggleRow);
+
+    const bwFig = document.createElement("div");
+    bwFig.className = "fig";
+    const bwSvg = document.createElementNS(NS,"svg"); bwSvg.style.width="100%"; bwSvg.style.height="auto";
+    bwFig.appendChild(bwSvg);
+
+    const legendDiv = document.createElement("div");
+    legendDiv.className = "legend";
+    entries.forEach(e => {
+      const gc = groupColor(e.group);
+      legendDiv.innerHTML += `<span><i style="color:${gc};border-top-color:${gc}"></i>${e.name}</span>`;
+    });
+    bwFig.appendChild(legendDiv);
+    sec.appendChild(bwFig);
+
+    let bwPlane = "h";
+    function drawBW() {
+      const freqsRef = (entries.find(e => e.best && e.best.freqs) || {best:{freqs:[]}}).best.freqs;
+      if (!freqsRef || !freqsRef.length) return;
+      const tgtH = (target.coverage_h_deg || 90), tgtV = (target.coverage_v_deg || tgtH);
+      const tgtBW = bwPlane === "h" ? tgtH : tgtV;
+      const allBW = [];
+      entries.forEach(e => {
+        const b = e.best || {};
+        const bwArr = bwPlane === "h" ? (b.bw_h||[]) : (b.bw_v||[]);
+        bwArr.forEach(v => { if (v != null) allBW.push(v); });
+      });
+      allBW.push(tgtBW);
+      const bwmax = Math.min(200, Math.max(...allBW) * 1.05);
+      const series = entries.map(e => {
+        const b = e.best || {};
+        const bwArr = bwPlane === "h" ? (b.bw_h||[]) : (b.bw_v||[]);
+        const F2 = b.freqs || freqsRef;
+        return { pts: F2.map((f,i) => [f, bwArr[i] != null ? bwArr[i] : null]), color: groupColor(e.group), w: 1.6 };
+      });
+      chart(bwSvg, {
+        W: 600, H: 220, xlog: true,
+        xlim: [freqsRef[0], freqsRef[freqsRef.length-1]], ylim: [0, bwmax],
+        xticks: FT, yticks: niceTicks(0, bwmax, 5),
+        xlabel: "Hz", ylabel: "deg",
+        band: [target.band_lo_hz || 700, target.band_hi_hz || 5500],
+        hlines: [{ y: tgtBW, color: css("--muted"), dash: true }],
+        series
+      });
+    }
+    drawBW();
+    btnH.onclick = () => { bwPlane = "h"; btnH.setAttribute("aria-pressed","true"); btnV.setAttribute("aria-pressed","false"); drawBW(); };
+    btnV.onclick = () => { bwPlane = "v"; btnH.setAttribute("aria-pressed","false"); btnV.setAttribute("aria-pressed","true"); drawBW(); };
+
+    wrap.appendChild(sec);
+  });
+}
+
 (function init() {
   const cb = document.getElementById("cbar"), cx = cb.getContext("2d");
   for (let i = 0; i < 400; i++) { const c = cmap(i / 399); cx.fillStyle = `rgb(${c})`; cx.fillRect(i, 0, 1, 10); }
   current = DATA.runs.length - 1;
   try { const v = localStorage.getItem("hsr-run") === null ? -1 : +localStorage.getItem("hsr-run"); if (v >= 0 && v < DATA.runs.length) current = v; } catch (e) {}
   const total = DATA.runs.reduce((a, r) => a + r.n, 0);
-  renderSummary(); renderTabs(); renderRun();
-  matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", renderRun);
-  new MutationObserver(renderRun).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  renderSummary(); renderTabs(); renderRun(); renderCampaigns();
+  matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", () => { renderRun(); renderCampaigns(); });
+  new MutationObserver(() => { renderRun(); renderCampaigns(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 })();
 </script>

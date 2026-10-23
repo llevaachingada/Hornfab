@@ -531,6 +531,94 @@ def test_cli_campaign_unknown_family(monkeypatch, capsys, tmp_path):
     assert rc != 0
 
 
+def test_cli_families_incompat_reason_not_truncated(capsys):
+    """INCOMPAT reason shown in full — not cut mid-word at 60 chars (regression for cli.py reason[:60])."""
+    from hornlab_search import cli
+    brief_path = str(EXAMPLES / "briefs" / "hifi_90x60_1in.yaml")  # 90 != 60 → axisym incompatible
+    rc = cli.main(["families", "--brief", brief_path])
+    out = capsys.readouterr().out
+    assert rc == 0
+    # The full reason must include the coverage values, not be cut at "cov"
+    assert "coverage_h" in out
+    assert "coverage_v" in out
+    assert "axisymmetric families require" in out
+
+
+def test_cli_campaign_single_ok_line(monkeypatch, tmp_path, capsys):
+    """campaign prints exactly one 'campaign OK' line (no duplicate from print_compact_table)."""
+    from hornlab_search import cli
+    from hornlab_search.search import campaign as camp_mod
+    from hornlab_search.search.campaign import (
+        load_brief, load_catalog, resolve_families, seeds_for_tier,
+    )
+
+    brief_path = str(EXAMPLES / "briefs" / "hifi_90x60_1in.yaml")
+
+    def fake_run_campaign(brief_path, families_spec, tier, runs_dir, **kwargs):
+        catalog = load_catalog()
+        br = load_brief(brief_path)
+        camp_dir = runs_dir / "campaign_TEST"
+        camp_dir.mkdir(parents=True, exist_ok=True)
+        (camp_dir / "campaign.json").write_text("{}", encoding="utf-8")
+        (camp_dir / "leaderboard.md").write_text("# test\n", encoding="utf-8")
+        from hornlab_search.search.campaign import EntryResult
+        return {
+            "campaign_dir": camp_dir,
+            "brief": br,
+            "entries": [],
+            "catalog": catalog,
+            "tier": tier,
+            "seeds": seeds_for_tier(tier),
+        }
+
+    monkeypatch.setattr(camp_mod, "run_campaign", fake_run_campaign)
+    monkeypatch.setattr("hornlab_search.cli.run_campaign", fake_run_campaign, raising=False)
+
+    cli.main([
+        "campaign", "--brief", brief_path,
+        "--families", "magnus", "--tier", "dry-run",
+        "--runs-dir", str(tmp_path),
+    ])
+    out = capsys.readouterr().out
+    ok_lines = [l for l in out.splitlines() if "campaign OK" in l]
+    assert len(ok_lines) == 1, f"expected exactly 1 'campaign OK' line, got {len(ok_lines)}: {ok_lines}"
+
+
+def test_seeds_zero_treated_as_one():
+    """--seeds 0 is silently clipped to 1 (documented safe floor in seeds_for_tier)."""
+    s = seeds_for_tier(TIER_SCREEN, n_seeds=0)
+    assert len(s) == 1, "seeds=0 should floor to 1 seed"
+
+
+def test_load_config_brief_file_missing_gives_clear_error(tmp_path):
+    """A config with brief_file pointing outside the repo gives a ConfigError naming brief_file."""
+    from hornlab_search.config import load_config, ConfigError
+    # Write a config with a relative brief_file that does not exist relative to the config
+    cfg_yaml = (
+        "name: test_oob\nfamily: FREEFORM\n"
+        "brief_file: ../briefs/does_not_exist.yaml\n"
+        "generator: {name: typology, profile_h: {type: conical}, profile_v: same, "
+        "n_anchors: 16, max_wall_deg: 80.0, mouth: ellipse}\n"
+        "seed_params: {L_mm: 180.0, h_rm_mm: 120.0}\n"
+        "bounds: {L_mm: {lo: 120.0, hi: 220.0}, h_rm_mm: {lo: 60.0, hi: 175.0}}\n"
+        "target: {coverage_h_deg: 90, coverage_v_deg: 90, band_lo_hz: 700, band_hi_hz: 5500}\n"
+        "weights: {cov: 1.0, rip: 1.0, di: 0.3, dislope: 0.5, flat: 0.5, load: 0.0}\n"
+        "mesh: {epw: 6.0, quadrants: '1', dof_cap_screen: 5000, dof_cap_verify: 7000, "
+        "dof_cap_final: 8900, dof_per_triangle: 0.51}\n"
+        "solve: {backend: beat_cuda, distance_m: 2.0, angle_count: 73, balloon: true, "
+        "balloon_points_screen: 512, balloon_points_verify: 1024, gmres_tol: 1.0e-05, "
+        "timeout_s: 900}\n"
+        "search: {algorithm: cma, sigma0: 0.25, seed: 1234, budget: 200, tolfun: 0.001}\n"
+    )
+    cfg_file = tmp_path / "test_oob.yaml"
+    cfg_file.write_text(cfg_yaml, encoding="utf-8")
+    with pytest.raises((ConfigError, ValueError)) as exc_info:
+        load_config(cfg_file)
+    msg = str(exc_info.value)
+    assert "brief_file" in msg or "brief" in msg.lower(), (
+        f"error message should mention brief_file; got: {msg!r}")
+
+
 def test_cli_campaign_dry_run_no_solve(monkeypatch, tmp_path, capsys):
     """campaign --tier dry-run runs subprocesses (mocked) and writes campaign.json."""
     from hornlab_search import cli
@@ -578,3 +666,11 @@ def test_cli_campaign_dry_run_no_solve(monkeypatch, tmp_path, capsys):
     # With mocked run_campaign the command should succeed (or at worst print a non-fatal error)
     # The main assertion is that it doesn't crash with an exception
     assert rc in (0, 1)  # 0 = OK, 1 = some jobs failed (acceptable)
+
+
+@pytest.mark.parametrize("flag,value", [("--budget", "0"), ("--budget", "-5"), ("--seeds", "0")])
+def test_cli_campaign_rejects_non_positive_budget_and_seeds(flag, value, capsys):
+    from hornlab_search.cli import main
+    rc = main(["campaign", "--brief", str(EXAMPLES / "briefs" / "axi_90x90_1in.yaml"),
+               "--families", "conical", "--tier", "dry-run", flag, value])
+    assert rc == 2 and "campaign FAILED" in capsys.readouterr().out

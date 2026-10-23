@@ -161,6 +161,19 @@ def test_mesher_freeform_reproduces_the_analytic_meridian(name):
     assert err <= 0.2, f"{name}: mesher FREEFORM deviates {err:.3f} mm from the analytic meridian"
 
 
+def test_envelope_violation_applies_to_any_mesh():
+    from hornlab_search.search.evaluate import envelope_violation
+    from hornlab_search.types import MeshResult
+    brief = load_brief(BRIEFS / "hifi_90x60_1in.yaml")          # 400 x 300 x 220 mm
+    ok = MeshResult(path="", n_triangles=1, n_dof=1, quadrants="1", symmetry_plane="yz+xz", res_mm={},
+                    bbox_m=(0, 0, -0.006, 0.19, 0.14, 0.2), seconds=0.0)
+    assert envelope_violation(ok, brief) == "" and envelope_violation(ok, None) == ""
+    big = MeshResult(path="", n_triangles=1, n_dof=1, quadrants="1", symmetry_plane="yz+xz", res_mm={},
+                     bbox_m=(0, 0, -0.006, 0.34, 0.20, 0.30), seconds=0.0)
+    msg = envelope_violation(big, brief)
+    assert "width 680" in msg and "height 400" in msg and "depth" in msg
+
+
 def test_loading_extras():
     t = Target(90, 90, 700, 5500, None)
     f = np.array([500, 700, 1000, 2000, 4000, 5500.0])

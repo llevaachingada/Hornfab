@@ -197,6 +197,12 @@ def load_config(path, *, brief=None, cma_seed: int | None = None) -> Config:
         brief_path = None
     if brief_path is not None:
         bp = _resolve_path(brief_path, path.parent, Path(__file__).resolve().parents[1])
+        if not Path(bp).exists():
+            raise ConfigError(
+                f"{where}: brief_file {brief_path!r} could not be found; "
+                f"tried relative to config dir ({path.parent}) and repo root. "
+                f"Use an absolute path or a path relative to the config file."
+            )
         brief_d = load_brief(bp)
         raw["target"] = dict(brief_d["target"])
         raw["weights"] = dict(brief_d["weights"])

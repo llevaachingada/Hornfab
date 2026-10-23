@@ -657,4 +657,4 @@ def print_compact_table(results: dict) -> None:
             j0 = er.jobs[0]
             evals = str(j0.stats.get("evaluations", "n/a"))
         print(f"  {name:<18} {sym:5} {keys:4} {best_str:>10} {evals:>6} {err_count:>4}")
-    print(f"\ncampaign OK: output in {results['campaign_dir']}")
+    print(f"\ncampaign: output in {results['campaign_dir']}")
