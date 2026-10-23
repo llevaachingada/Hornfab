@@ -3,6 +3,10 @@
 Base-level instructions for every agent working in this repo, whether dispatched by OpenCode,
 Claude Code, or a human. This file orients you. The numbered plan in `docs/plan/` commands you.
 
+**Find anything:** [`docs/INDEX.md`](docs/INDEX.md) lists every doc; [`docs/CODE_MAP.md`](docs/CODE_MAP.md) maps every
+module and config folder. Current state: `docs/CONTINUITY.md`; open work: `docs/ISSUES.md`; next round:
+`docs/NEXT_DEV_PRIORITIES.md`. Keep the index and code map current in the same commit as any new doc or module.
+
 ---
 
 ## What this is

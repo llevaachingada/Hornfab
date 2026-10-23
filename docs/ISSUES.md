@@ -125,3 +125,5 @@ TO-DO (no GitHub issue yet; owner / plan ref):
 - [ ] OSSE data top-up for the surrogate gates (GPU, overnight; user OK needed).
 - [ ] Boundary Lab BL-1 export (cloud; `docs/BOUNDARY_LAB_INTEGRATION_PLAN.md`).
 - [ ] `compare` IndexError on empty frequency list (oracle follow-up; the quadrants-label part was fixed in b822dd5).
+
+- [x] Docs index `docs/INDEX.md` and code map `docs/CODE_MAP.md` added 2026-10-22, linked from CLAUDE.md / AGENTS.md / .claude/CLAUDE.md; keep them current.

@@ -2,6 +2,8 @@
 
 ## Start here
 
+0. **Find anything:** `docs/INDEX.md` (every doc, what it is) and `docs/CODE_MAP.md` (every module and config
+   folder). Keep both current: a new doc or module gets a line there in the same commit.
 1. **Read `docs/CONTINUITY.md` first.** It says which wave we are in, the last checkpoint passed,
    what is next, open blockers, and the measured numbers.
 2. Read `docs/plan/01_CONTRACTS.md` completely (frozen), then **only your own task file**.

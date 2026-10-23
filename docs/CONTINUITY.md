@@ -12,6 +12,10 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 - **Typology work (next):** implement `docs/TYPOLOGY_PLAN.md` (classical typologies via FREEFORM anchors, hybrids, `campaign` family selection). Solver re-verified 2026-10-22 (GPU 18/18, analytic PASS, crosscheck 0.039 dB).
 - **Blockers:** none. Issue #13: fixes now MERGED on main (152a829 carried the cloud reconciliation; oracle sign-off 2026-10-22); GitHub issue kept open for owner closure. Issues #1-#11 closed.
 
+## 2026-10-22 (local, ~22:45 EDT) — docs index and code map
+
+- New `docs/INDEX.md` (every doc, one line each) and `docs/CODE_MAP.md` (every module, config folder, external dependency); pointers added to `CLAUDE.md` (Start here, step 0), `AGENTS.md` and a new `.claude/CLAUDE.md`. Rule: a new doc or module gets a line in the index/map in the same commit.
+
 ## 2026-10-22 (local, ~22:35 EDT) — NEXT DEVELOPMENT ROUND PRIORITIES recorded (docs only)
 
 - New `docs/NEXT_DEV_PRIORITIES.md` (user decision): **P1 fused / direct CUDA Burton-Miller assembly** in the exterior driver (fused path is CPU/Metal only at `hornlab_beat_bem/julia/BeatEngineDriver.jl` ~l.1215; the CUDA single-matrix assembler at `julia/src/BeatEngineCudaBurtonMiller.jl:350` is only exercised by `runtests.jl`); engine work in Magnus's package (his OK or a pinned fork), expected 8 GB ceiling ~9k -> ~20k quarter dofs [inferred], validation ladder listed. **Not enabled for the 2026-10-22/23 overnight queue** (one solver for the compare tier and the surrogate top-up). P2 12 kHz finalist verify pass on the 4060; P3 `beat_metal` backend for the collaborator's MacBook. ISSUES TO-DO and HANDOFF_BETA point to it.
