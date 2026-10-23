@@ -26,7 +26,7 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 - **Every control exercised in the browser** (scripted): run actions, isobar toggle, compare-with prefill, campaign H/V toggle, runs filter + sort, compare, brief select / invalid-name refusal / families, launch select-all + server preview + GPU-busy disable, evolution play / pause / keys / mode, 3D canvas; Generate report and Export STEP end to end through the API (report 5.2 MB served; 3 STEP solids written and downloadable).
 - **Bugs fixed**: a slow view finishing after navigation painted over the new page (views now keep their own container; helpers bail if superseded); report / STEP export used alert() and jumped to Launch (now inline progress, download links for STEP files, Open report); caption used a variable before definition (run page blank); remaining alert()s replaced with toasts; download glyph.
 - Home: "How to use this" four-step guide (collapsible, remembered). STEP files and report are the only run files the server serves (strict names, tested).
-- Offline suite: see the commit (GUI tests 31 passed).
+- Offline suite: 795 passed, 18 deselected, exit 0 (before the final glyph-only change); GUI tests after it: 30 passed (the d0a04ea message says 31: miscount).
 
 ## 2026-10-23 (local, ~10:40 EDT) - GUI: search time-lapse ("Evolution") player
 
