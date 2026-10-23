@@ -621,6 +621,10 @@ def _write_leaderboard_md(results: dict, path: Path) -> None:
         note = ""
         if er.jobs and er.jobs[0].error:
             note = f"ERR: {er.jobs[0].error[:30]}"
+        elif not best_vals and er.jobs:
+            # every evaluation invalid: CMA-ES stops on a flat penalty landscape after ~1 generation
+            note = ("NO VALID DESIGN: seed is invalid under this brief (usually outside its size "
+                    "envelope); needs a config sized for the brief")
         lines.append(f"| {name} | {group} | {sym} | {keys} | {best_j} | {med_j} | {spread} | {evals} | {failures} | {pinned} | {note} |")
 
     lines += ["", f"Generated {datetime.now(timezone.utc).isoformat()}", ""]

@@ -12,6 +12,13 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 - **Typology work (next):** implement `docs/TYPOLOGY_PLAN.md` (classical typologies via FREEFORM anchors, hybrids, `campaign` family selection). Solver re-verified 2026-10-22 (GPU 18/18, analytic PASS, crosscheck 0.039 dB).
 - **Blockers:** none. Issue #13: fixes now MERGED on main (152a829 carried the cloud reconciliation; oracle sign-off 2026-10-22); GitHub issue kept open for owner closure. Issues #1-#11 closed.
 
+## 2026-10-22 (local, ~21:30 EDT) — first FAIR typology screen campaigns; pre-beta hardening done; review page updated
+
+- More fixes after the 20:30 entry: brief size envelope enforced for EVERY family on the outer mesh bbox (brief-dependent, never failure-cached); `campaign --budget/--seeds < 1` refused; knob counts read from YAML bounds (no silent fallback); failure markers bound to library SHAs; generator provenance last-wins; leaderboard says "NO VALID DESIGN" when a native seed is outside the brief. Pre-beta bug hunt (Sonnet): truncated incompat reasons, duplicate "campaign OK", unclear missing brief_file error - fixed with tests. Correctness review (Sonnet, read-only): 3 findings, all fixed.
+- Clean screen campaigns (`campaign_20261023T005133Z` axi, `…T010225Z` hifi; superseding all earlier ones): `docs/evidence/TYPOLOGY_SCREEN_2026-10-22.md`. Axi 90x90 (load-weighted): osse_axi 10.71, blend_osse_tractrix 11.04 (DI slope 4x flatter), hypex 12.27, exponential 12.59, blend_conical_exponential 12.98, freeform_sculpt 15.81, icw_termination 21.45, icw_rollback 25.22, conical 28.21, perturbed_tractrix 89.75, tractrix 103.72. Hifi 90x60: perturbed_osse_hv 11.22 (new hybrid; L_mm pinned), hyb_osse_h_hypex_v 15.78, freeform_hv 18.80, rosse_baseline 19.41, hyb_osse_h_tractrix_v 46.40; freeform_sculpt and osse_baseline seeds are outside the 400x300 envelope (no valid design). Screen tier = coarse ranking; compare tier next.
+- Review page republished with a campaign section (leaderboards, best-design profiles, beamwidth overlays); overflow at desktop width fixed.
+- GPU end state: no julia, no worker host, VRAM ~550 MiB.
+
 ## 2026-10-22 (local, ~20:30 EDT) — screen campaigns reviewed: 3 bugs found and fixed; native-family entries re-running
 
 - First screen campaigns finished (axi 17:31-18:16, hifi 18:16-18:54). Review found:

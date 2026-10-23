@@ -1,0 +1,426 @@
+{
+  "tier": "screen",
+  "brief_name": "hifi_90x60_1in",
+  "seeds": [
+    1234
+  ],
+  "entries": [
+    {
+      "name": "hyb_osse_h_hypex_v",
+      "group": "hybrid",
+      "symmetry": "hv",
+      "skipped": false,
+      "skip_reason": "",
+      "jobs": [
+        {
+          "seed": 1234,
+          "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261023T010226Z-screen-f4ec66",
+          "returncode": 0,
+          "best_j": 15.782108799839238,
+          "error": null,
+          "stats": {
+            "cache_hits": 48,
+            "candidates_per_hour": 34397.621212328566,
+            "evaluations": 50,
+            "failures": 2,
+            "failures_by_reason": {
+              "invalid_geometry": 2
+            },
+            "mean_seconds_per_candidate": 0.10465840000324533,
+            "non_cached": 2,
+            "projected_hours": {
+              "1000": 0.02907177777867926,
+              "10000": 0.29071777778679264
+            },
+            "total_gpu_seconds": 0.0,
+            "total_mesh_seconds": 0.0
+          },
+          "pinned_bounds": [],
+          "loading_scalars": {
+            "f_load_hz": 2859.87,
+            "z_ripple": 0.08237256231458152,
+            "z_mean_band": 0.5871545422243082
+          },
+          "wall_seconds": 10.794068336486816,
+          "hygiene_before": {
+            "label": "before:hyb_osse_h_hypex_v:1234",
+            "julia_project_procs": 2,
+            "julia_pids": [
+              7792,
+              7564
+            ],
+            "vram_used_mib": 669.0
+          },
+          "hygiene_after": {
+            "label": "after:hyb_osse_h_hypex_v:1234",
+            "julia_project_procs": 2,
+            "julia_pids": [
+              7792,
+              7564
+            ],
+            "vram_used_mib": 669.0
+          }
+        }
+      ],
+      "median_best_j": 15.782108799839238,
+      "spread_best_j": null
+    },
+    {
+      "name": "hyb_osse_h_tractrix_v",
+      "group": "hybrid",
+      "symmetry": "hv",
+      "skipped": false,
+      "skip_reason": "",
+      "jobs": [
+        {
+          "seed": 1234,
+          "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261023T010239Z-screen-94b76e",
+          "returncode": 0,
+          "best_j": 46.396498261675326,
+          "error": null,
+          "stats": {
+            "cache_hits": 32,
+            "candidates_per_hour": 20335.952764156682,
+            "evaluations": 40,
+            "failures": 8,
+            "failures_by_reason": {
+              "invalid_geometry": 8
+            },
+            "mean_seconds_per_candidate": 0.1770263749995138,
+            "non_cached": 8,
+            "projected_hours": {
+              "1000": 0.0491739930554205,
+              "10000": 0.491739930554205
+            },
+            "total_gpu_seconds": 0.0,
+            "total_mesh_seconds": 0.0
+          },
+          "pinned_bounds": [],
+          "loading_scalars": {
+            "f_load_hz": 2299.72,
+            "z_ripple": 0.12280834460068016,
+            "z_mean_band": 0.6382206988507371
+          },
+          "wall_seconds": 10.099081039428711,
+          "hygiene_before": {
+            "label": "before:hyb_osse_h_tractrix_v:1234",
+            "julia_project_procs": 2,
+            "julia_pids": [
+              7792,
+              7564
+            ],
+            "vram_used_mib": 669.0
+          },
+          "hygiene_after": {
+            "label": "after:hyb_osse_h_tractrix_v:1234",
+            "julia_project_procs": 2,
+            "julia_pids": [
+              7792,
+              7564
+            ],
+            "vram_used_mib": 669.0
+          }
+        }
+      ],
+      "median_best_j": 46.396498261675326,
+      "spread_best_j": null
+    },
+    {
+      "name": "perturbed_osse_hv",
+      "group": "hybrid",
+      "symmetry": "hv",
+      "skipped": false,
+      "skip_reason": "",
+      "jobs": [
+        {
+          "seed": 1234,
+          "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261023T010250Z-screen-e2bb20",
+          "returncode": 0,
+          "best_j": 11.221011122256773,
+          "error": null,
+          "stats": {
+            "cache_hits": 115,
+            "candidates_per_hour": 69027.06179371025,
+            "evaluations": 180,
+            "failures": 65,
+            "failures_by_reason": {
+              "invalid_geometry": 65
+            },
+            "mean_seconds_per_candidate": 0.05215345846182362,
+            "non_cached": 65,
+            "projected_hours": {
+              "1000": 0.014487071794951007,
+              "10000": 0.14487071794951006
+            },
+            "total_gpu_seconds": 0.0,
+            "total_mesh_seconds": 0.0
+          },
+          "pinned_bounds": [
+            "L_mm"
+          ],
+          "loading_scalars": {
+            "f_load_hz": 2299.72,
+            "z_ripple": 0.06195004461752668,
+            "z_mean_band": 0.6616969339060927
+          },
+          "wall_seconds": 22.685436487197876,
+          "hygiene_before": {
+            "label": "before:perturbed_osse_hv:1234",
+            "julia_project_procs": 2,
+            "julia_pids": [
+              7792,
+              7564
+            ],
+            "vram_used_mib": 669.0
+          },
+          "hygiene_after": {
+            "label": "after:perturbed_osse_hv:1234",
+            "julia_project_procs": 2,
+            "julia_pids": [
+              7792,
+              7564
+            ],
+            "vram_used_mib": 669.0
+          }
+        }
+      ],
+      "median_best_j": 11.221011122256773,
+      "spread_best_j": null
+    },
+    {
+      "name": "rosse_baseline",
+      "group": "magnus",
+      "symmetry": "hv",
+      "skipped": false,
+      "skip_reason": "",
+      "jobs": [
+        {
+          "seed": 1234,
+          "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261023T010314Z-screen-f44538",
+          "returncode": 0,
+          "best_j": 19.414998422307708,
+          "error": null,
+          "stats": {
+            "cache_hits": 3,
+            "candidates_per_hour": 1249.1348350906908,
+            "evaluations": 110,
+            "failures": 46,
+            "failures_by_reason": {
+              "invalid_geometry": 40,
+              "mesh_too_large": 6
+            },
+            "mean_seconds_per_candidate": 2.881994720560835,
+            "non_cached": 107,
+            "projected_hours": {
+              "1000": 0.8005540890446764,
+              "10000": 8.005540890446763
+            },
+            "total_gpu_seconds": 226.14426589998766,
+            "total_mesh_seconds": 50.15517279999767
+          },
+          "pinned_bounds": [],
+          "loading_scalars": {
+            "f_load_hz": 2859.87,
+            "z_ripple": 0.07467097370341177,
+            "z_mean_band": 0.5799428889682234
+          },
+          "wall_seconds": 314.27552103996277,
+          "hygiene_before": {
+            "label": "before:rosse_baseline:1234",
+            "julia_project_procs": 2,
+            "julia_pids": [
+              7792,
+              7564
+            ],
+            "vram_used_mib": 669.0
+          },
+          "hygiene_after": {
+            "label": "after:rosse_baseline:1234",
+            "julia_project_procs": 2,
+            "julia_pids": [
+              7792,
+              7564
+            ],
+            "vram_used_mib": 669.0
+          }
+        }
+      ],
+      "median_best_j": 19.414998422307708,
+      "spread_best_j": null
+    },
+    {
+      "name": "freeform_sculpt",
+      "group": "magnus",
+      "symmetry": "hv",
+      "skipped": false,
+      "skip_reason": "",
+      "jobs": [
+        {
+          "seed": 1234,
+          "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261023T010830Z-screen-4ddc5e",
+          "returncode": 0,
+          "best_j": null,
+          "error": null,
+          "stats": {
+            "cache_hits": 0,
+            "candidates_per_hour": 232960.57843056452,
+            "evaluations": 12,
+            "failures": 12,
+            "failures_by_reason": {
+              "invalid_geometry": 12
+            },
+            "mean_seconds_per_candidate": 0.015453258333460932,
+            "non_cached": 12,
+            "projected_hours": {
+              "1000": 0.004292571759294703,
+              "10000": 0.042925717592947034
+            },
+            "total_gpu_seconds": 0.0,
+            "total_mesh_seconds": 0.1107679999913671
+          },
+          "pinned_bounds": [],
+          "loading_scalars": null,
+          "wall_seconds": 5.568078279495239,
+          "hygiene_before": {
+            "label": "before:freeform_sculpt:1234",
+            "julia_project_procs": 2,
+            "julia_pids": [
+              7792,
+              7564
+            ],
+            "vram_used_mib": 669.0
+          },
+          "hygiene_after": {
+            "label": "after:freeform_sculpt:1234",
+            "julia_project_procs": 2,
+            "julia_pids": [
+              7792,
+              7564
+            ],
+            "vram_used_mib": 669.0
+          }
+        }
+      ],
+      "median_best_j": null,
+      "spread_best_j": null
+    },
+    {
+      "name": "freeform_hv",
+      "group": "magnus",
+      "symmetry": "hv",
+      "skipped": false,
+      "skip_reason": "",
+      "jobs": [
+        {
+          "seed": 1234,
+          "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261023T010836Z-screen-d65b56",
+          "returncode": 0,
+          "best_j": 18.80431954710007,
+          "error": null,
+          "stats": {
+            "cache_hits": 0,
+            "candidates_per_hour": 922.661090960613,
+            "evaluations": 40,
+            "failures": 1,
+            "failures_by_reason": {
+              "invalid_geometry": 1
+            },
+            "mean_seconds_per_candidate": 3.901757682500647,
+            "non_cached": 40,
+            "projected_hours": {
+              "1000": 1.083821578472402,
+              "10000": 10.838215784724019
+            },
+            "total_gpu_seconds": 128.35293950004416,
+            "total_mesh_seconds": 23.341521700021985
+          },
+          "pinned_bounds": [],
+          "loading_scalars": {
+            "f_load_hz": 2859.87,
+            "z_ripple": 0.053797312650053976,
+            "z_mean_band": 0.5456987599621222
+          },
+          "wall_seconds": 161.71345019340515,
+          "hygiene_before": {
+            "label": "before:freeform_hv:1234",
+            "julia_project_procs": 2,
+            "julia_pids": [
+              7792,
+              7564
+            ],
+            "vram_used_mib": 669.0
+          },
+          "hygiene_after": {
+            "label": "after:freeform_hv:1234",
+            "julia_project_procs": 2,
+            "julia_pids": [
+              7792,
+              7564
+            ],
+            "vram_used_mib": 669.0
+          }
+        }
+      ],
+      "median_best_j": 18.80431954710007,
+      "spread_best_j": null
+    },
+    {
+      "name": "osse_baseline",
+      "group": "magnus",
+      "symmetry": "hv",
+      "skipped": false,
+      "skip_reason": "",
+      "jobs": [
+        {
+          "seed": 1234,
+          "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261023T011119Z-screen-5c01bf",
+          "returncode": 0,
+          "best_j": null,
+          "error": null,
+          "stats": {
+            "cache_hits": 0,
+            "candidates_per_hour": 56223.96447048661,
+            "evaluations": 11,
+            "failures": 11,
+            "failures_by_reason": {
+              "invalid_geometry": 9,
+              "mesh_too_large": 2
+            },
+            "mean_seconds_per_candidate": 0.06402963636421853,
+            "non_cached": 11,
+            "projected_hours": {
+              "1000": 0.017786010101171815,
+              "10000": 0.17786010101171815
+            },
+            "total_gpu_seconds": 0.0,
+            "total_mesh_seconds": 0.19682590000593336
+          },
+          "pinned_bounds": [],
+          "loading_scalars": null,
+          "wall_seconds": 6.057235240936279,
+          "hygiene_before": {
+            "label": "before:osse_baseline:1234",
+            "julia_project_procs": 2,
+            "julia_pids": [
+              7792,
+              7564
+            ],
+            "vram_used_mib": 669.0
+          },
+          "hygiene_after": {
+            "label": "after:osse_baseline:1234",
+            "julia_project_procs": 2,
+            "julia_pids": [
+              7792,
+              7564
+            ],
+            "vram_used_mib": 669.0
+          }
+        }
+      ],
+      "median_best_j": null,
+      "spread_best_j": null
+    }
+  ],
+  "timestamp_utc": "2026-10-23T01:11:26.035849+00:00"
+}
