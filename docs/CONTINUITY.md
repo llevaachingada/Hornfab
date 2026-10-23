@@ -12,6 +12,10 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 - **Typology work (next):** implement `docs/TYPOLOGY_PLAN.md` (classical typologies via FREEFORM anchors, hybrids, `campaign` family selection). Solver re-verified 2026-10-22 (GPU 18/18, analytic PASS, crosscheck 0.039 dB).
 - **Blockers:** none. Issue #13: fixes now MERGED on main (152a829 carried the cloud reconciliation; oracle sign-off 2026-10-22); GitHub issue kept open for owner closure. Issues #1-#11 closed.
 
+## 2026-10-22 (local, ~21:40 EDT) — HANDOFF for the beta-readiness pass
+
+- `docs/HANDOFF_BETA.md`: next agent runs as Opus (medium effort), orchestrator and decision maker, with at most 2 Haiku/Sonnet subagents at a time for menial work (repo ingest, tests, small coding, docs, read-only review). Work items A-G: dependency/upstream grounding audit, data integrity (R8 brief provenance in records), physics audit (incl. the unmeasured epw-6 resolution above 2.5 kHz), GPU lock + `gpu-clean` + Ctrl-C safety for two testers on one GPU, compare tier on the screen leaders, timed beta rehearsal, beta session pack. Stop conditions listed. Docs only.
+
 ## 2026-10-22 (local, ~21:30 EDT) — first FAIR typology screen campaigns; pre-beta hardening done; review page updated
 
 - More fixes after the 20:30 entry: brief size envelope enforced for EVERY family on the outer mesh bbox (brief-dependent, never failure-cached); `campaign --budget/--seeds < 1` refused; knob counts read from YAML bounds (no silent fallback); failure markers bound to library SHAs; generator provenance last-wins; leaderboard says "NO VALID DESIGN" when a native seed is outside the brief. Pre-beta bug hunt (Sonnet): truncated incompat reasons, duplicate "campaign OK", unclear missing brief_file error - fixed with tests. Correctness review (Sonnet, read-only): 3 findings, all fixed.

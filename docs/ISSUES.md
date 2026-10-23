@@ -109,6 +109,7 @@ TO-DO (no GitHub issue yet; owner / plan ref):
 - [x] Hygiene left BEAT `worker_host` processes (which respawn julia) alive; now cleared with their julia children (fixed 2026-10-22).
 - [ ] `perturbed_osse_hv`: 36 % invalid in the screen run and `L_mm` pinned; revisit its bounds/u_max before a compare run (widening needs user OK).
 - [x] Brief size envelope now enforced for every family (outer mesh bbox); native configs sized for other targets (osse_baseline, freeform_sculpt under the 400x300 brief) have no valid design and are labelled so in the leaderboard. Beta users: use typology configs or size a native config for the brief.
+- [ ] Beta-readiness pass per `docs/HANDOFF_BETA.md` (A-G): upstream audit, R8 brief provenance in dataset records, epw convergence above 2.5 kHz, GPU lock / gpu-clean, rehearsal, session pack.
 - [ ] `compare` tier (2 CMA seeds) on the screen leaders: osse_axi, blend_osse_tractrix, hypex (axi); perturbed_osse_hv, hyb_osse_h_hypex_v, rosse_baseline (hifi).
 - [x] Failure cache: deterministic failures cached by design+mesh+solve key across runs (fixes the OSSE seed-replay budget burn).
 - [ ] Stage 2 transient analysis (impulse, step, CSD waterfall, group delay, dense throat impedance) on finalists: research + design in `docs/research/TIME_DOMAIN_RINGING.md`; needs a dense uniform frequency list per evaluation (today only 12/25/36-point log grids, too sparse: Magnus's `plot_impulse_response` interpolates over resonances). After the typology campaign; not in the search loop.
