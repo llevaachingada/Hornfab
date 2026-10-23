@@ -232,16 +232,56 @@ def mesh_nodes_tris(msh: Path) -> tuple[np.ndarray, np.ndarray] | None:
     return np.asarray(pts, float), np.asarray(tris, int).reshape(-1, 3)
 
 
+def _plane_chains(pts: np.ndarray, tris: np.ndarray, ax: int, tol: float = 1e-6) -> list[list[int]]:
+    """Ordered node chains along the symmetry plane where coordinate (1 - ax) == 0 and coordinate ax >= 0.
+    In a quarter-model mesh the symmetry planes are open boundaries, so the mesh edges lying in a plane
+    form the horn's cross-section outline (throat cap, acoustic wall, mouth lip, outer shell, rear)."""
+    on = (np.abs(pts[:, 1 - ax]) < tol) & (pts[:, ax] >= -tol)
+    adj: dict[int, set[int]] = {}
+    for t in tris:
+        for i, j in ((t[0], t[1]), (t[1], t[2]), (t[2], t[0])):
+            if on[i] and on[j]:
+                adj.setdefault(int(i), set()).add(int(j))
+                adj.setdefault(int(j), set()).add(int(i))
+    chains, seen = [], set()
+    starts = [n for n, nb in adj.items() if len(nb) == 1] + list(adj)
+    for s0 in starts:
+        if s0 in seen:
+            continue
+        chain, prev, cur = [s0], None, s0
+        seen.add(s0)
+        while True:
+            nxt = [n for n in adj[cur] if n != prev and n not in seen]
+            if not nxt:
+                break
+            prev, cur = cur, nxt[0]
+            seen.add(cur)
+            chain.append(cur)
+        if len(chain) > 2:
+            chains.append(chain)
+    return chains
+
+
 def _profile_from_mesh(msh: Path) -> dict:
+    """Wall cross-section in the H (x-z) and V (y-z) planes, in mm as [z, r] points.
+    kind 'section': ordered outline from the plane's boundary edges (quarter meshes);
+    kind 'nodes': unordered plane nodes (full meshes, where the planes are not mesh boundaries)."""
     nt = mesh_nodes_tris(msh)
     if nt is None:
         return {}
-    pts, _ = nt
-    prof = {}
+    pts, tris = nt
+    prof: dict = {}
     for key, ax in (("h", 0), ("v", 1)):
-        sel = pts[np.abs(pts[:, 1 - ax]) < 1e-4]
-        sel = sel[np.argsort(sel[:, 2])]
-        prof[key] = [[round(float(z) * 1000, 2), round(float(a) * 1000, 2)] for a, z in zip(sel[:, ax], sel[:, 2])]
+        chains = _plane_chains(pts, tris, ax) if len(tris) else []
+        if chains:
+            chain = max(chains, key=len)
+            prof[key] = [[round(float(pts[i, 2]) * 1000, 2), round(float(pts[i, ax]) * 1000, 2)] for i in chain]
+            prof["kind"] = "section"
+        else:
+            sel = pts[np.abs(pts[:, 1 - ax]) < 1e-4]
+            sel = sel[np.argsort(sel[:, 2])]
+            prof[key] = [[round(float(z) * 1000, 2), round(float(a) * 1000, 2)] for a, z in zip(sel[:, ax], sel[:, 2])]
+            prof.setdefault("kind", "nodes")
     return prof
 
 
@@ -268,6 +308,9 @@ def design_curves(run_dir: Path, h: str) -> dict | None:
             out["angles"] = _rnd(z["h_angles_deg"], 1)
             out["polar_h"] = [_rnd(r, 2) for r in _norm_polar(np.asarray(z["spl_h_db"], float))]
             out["polar_v"] = [_rnd(r, 2) for r in _norm_polar(np.asarray(z["spl_v_db"], float))]
+            if "z_throat" in z.files:
+                zt = np.asarray(z["z_throat"], dtype=complex)
+                out["z_re"], out["z_im"] = _rnd(zt.real, 3), _rnd(zt.imag, 3)   # exp(-i w t): mass-like < 0
     except (OSError, KeyError, ValueError):
         pass
     out["profile"] = _profile_from_mesh(d / "mesh.msh")
@@ -353,6 +396,21 @@ def mesh_surface(runs: Path, run_id: str, h: str, max_tris: int = 60000) -> dict
 # ---------------------------------------------------------------------------- campaigns
 
 
+def _evidence_campaigns(runs: Path) -> set[str]:
+    """Campaign ids committed as evidence (docs/evidence/campaigns/<id>.campaign.json)."""
+    d = runs.parent / "docs" / "evidence" / "campaigns"
+    return {p.name.split(".")[0] for p in d.glob("campaign_*.campaign.json")} if d.is_dir() else set()
+
+
+def superseded(runs: Path, cid: str) -> bool:
+    """A campaign is superseded if it is older than the newest committed evidence campaign and is not
+    itself committed evidence. The committed set is the reviewed record (campaigns before the
+    2026-10-22 fixes scored native configs on their own targets without the size envelope; see
+    docs/evidence/TYPOLOGY_SCREEN_2026-10-22.md); anything newer was run with the current code."""
+    ev = _evidence_campaigns(runs)
+    return bool(ev) and cid not in ev and cid < max(ev)
+
+
 def list_campaigns(runs: Path) -> list[dict]:
     out = []
     if not runs.is_dir():
@@ -363,6 +421,7 @@ def list_campaigns(runs: Path) -> list[dict]:
         if not c:
             continue
         out.append(clean({"id": p.name, "tier": c.get("tier"), "brief": c.get("brief_name"),
+                          "superseded": superseded(runs, p.name),
                           "seeds": c.get("seeds"), "n_entries": len(c.get("entries", [])),
                           "families": [e.get("name") for e in c.get("entries", [])]}))
     return out
@@ -404,8 +463,11 @@ def campaign_detail(runs: Path, cid: str) -> dict:
             "best": best, "dims": dims, "best_run_id": best_run,
         })
     entries.sort(key=lambda e: (e["best_j"] is None, e["median_j"] if e["median_j"] is not None else 0))
+    brief_raw = next((b["brief"] for b in list_briefs(runs.parent) if b["name"] == c.get("brief_name")), {})
     lb = runs / cid / "leaderboard.md"
     return clean({"id": cid, "tier": c.get("tier"), "brief": c.get("brief_name"), "seeds": c.get("seeds"),
+                  "superseded": superseded(runs, cid),
+                  "target": (brief_raw or {}).get("target"),       # from the brief file named by the campaign
                   "entries": entries,
                   "leaderboard_md": lb.read_text(encoding="utf-8") if lb.exists() else None})
 
@@ -598,7 +660,7 @@ def leaders(runs: Path) -> list[dict]:
     chosen: dict[str, dict] = {}
     for c in list_campaigns(runs):                       # newest first
         tier, brief = c.get("tier"), c.get("brief")
-        if not brief or tier not in TIER_RANK:
+        if not brief or tier not in TIER_RANK or c.get("superseded"):
             continue
         cur = chosen.get(brief)
         if cur is None or TIER_RANK[tier] > TIER_RANK[cur["tier"]]:
@@ -622,4 +684,69 @@ def leaders(runs: Path) -> list[dict]:
                           "best_j": lead.get("best_j"), "spread": lead.get("spread"), "dims": lead.get("dims"),
                           "best_run_id": lead.get("best_run_id"), "runner_up": nxt["name"] if nxt else None,
                           "gap": gap, "clearly_ahead": clearly, "n_families": len(scored)}))
+    return out
+
+
+# ---------------------------------------------------------------------------- typologies
+
+
+def typologies(root: Path, runs: Path) -> list[dict]:
+    """Every catalog family (classical, hybrid, Magnus-native, legacy) with: parameter count, brief
+    compatibility (the CLI's own ``campaign.is_compatible``), the budgets a campaign would give it
+    (``campaign.budget_for_tier``), and its best result in the latest campaign of the strongest tier per
+    brief, with the best design's size and wall cross-section."""
+    from hornlab_search.search.campaign import budget_for_tier, is_compatible
+    briefs = [b for b in list_briefs(root) if b["kind"] == "shipped" or b["kind"] == "user"]
+    cfgs = {c["catalog_name"]: c for c in list_configs(root) if c.get("catalog_name")}
+    # per family: its result in the newest campaign of each scored tier per brief THAT CONTAINS IT
+    # (a later campaign that re-ran only some families must not hide the others' last result)
+    results: dict[str, list[dict]] = {}
+    seen: set[tuple] = set()
+    for c in list_campaigns(runs):                       # newest first
+        tier, brief = c.get("tier"), c.get("brief")
+        if not brief or tier not in TIER_RANK or c.get("superseded"):
+            continue
+        try:
+            d = campaign_detail(runs, c["id"])
+        except (FileNotFoundError, ValueError):
+            continue
+        ranked = sorted((e for e in d["entries"] if e.get("median_j") is not None), key=lambda e: e["median_j"])
+        for e in d["entries"]:                           # ran, but nothing valid under this brief
+            key = (e["name"], brief, tier)
+            if e.get("median_j") is None and not e.get("skipped") and key not in seen:
+                seen.add(key)
+                results.setdefault(e["name"], []).append({
+                    "brief": brief, "tier": d["tier"], "campaign_id": c["id"], "rank": None, "of": len(ranked),
+                    "median_j": None, "no_valid": True, "failures": e.get("failures")})
+        for rank, e in enumerate(ranked, 1):
+            key = (e["name"], brief, tier)
+            if key in seen:
+                continue
+            seen.add(key)
+            results.setdefault(e["name"], []).append({
+                "brief": brief, "tier": d["tier"], "campaign_id": c["id"], "rank": rank, "of": len(ranked),
+                "median_j": e["median_j"], "spread": e.get("spread"), "dims": e.get("dims"),
+                "best_run_id": e.get("best_run_id"), "pinned": e.get("pinned"),
+                "profile": (e.get("best") or {}).get("profile"),
+                # measured wall time per evaluation in that campaign (includes cache hits and failures)
+                "s_per_eval": (sum((j.get("wall_min") or 0) for j in e.get("jobs") or []) * 60 / e["evals"])
+                              if e.get("evals") else None})
+    for v in results.values():
+        v.sort(key=lambda r: (r["brief"], -TIER_RANK[r["tier"]]))
+    out = []
+    for e in catalog(root):
+        cfg = cfgs.get(e.get("name"), {})
+        k = int(cfg.get("n_knobs") or 0)
+        compat = {}
+        for b in briefs:
+            ok, why = is_compatible(e, b["brief"])
+            compat[b["name"]] = {"ok": ok, "reason": why}
+        out.append(clean({
+            "name": e.get("name"), "group": e.get("group"), "symmetry": e.get("symmetry"),
+            "description": e.get("description"), "config": cfg.get("path"), "n_knobs": k,
+            "disabled": bool(cfg.get("disabled")),
+            "budget": {"screen": budget_for_tier("screen", k), "compare": budget_for_tier("compare", k)},
+            "compat": compat, "results": results.get(e.get("name"), [])}))
+    order = {"classical": 0, "hybrid": 1, "magnus": 2, "legacy": 3}
+    out.sort(key=lambda t: (order.get(t["group"], 9), t["name"] or ""))
     return out

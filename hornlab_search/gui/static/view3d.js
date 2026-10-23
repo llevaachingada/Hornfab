@@ -27,7 +27,7 @@ async function loadThree() {
  * Returns { verts: Float32Array, tris: Uint32Array }
  */
 function mirrorMesh(verts, tris, quadrants) {
-  if (quadrants !== 1) return { verts: new Float32Array(verts), tris: new Uint32Array(tris) };
+  if (String(quadrants) !== "1") return { verts: new Float32Array(verts), tris: new Uint32Array(tris) };
 
   const nOrig = verts.length / 3;
   // Four copies: original (x,y,z), flip x (-x,y,z), flip y (x,-y,z), flip both (-x,-y,z)

@@ -123,7 +123,8 @@ class JobManager:
             budget = ["--budget", self._int(a.get("budget", 60), 1, 5000, "budget")]
             return ["search", "--config", self._repo_file(a.get("config")), *budget, *brief, *seed], True
         if kind == "campaign":
-            fams = str(a.get("families", "")).replace(" ", "")
+            f = a.get("families", "")
+            fams = (",".join(str(x) for x in f) if isinstance(f, (list, tuple)) else str(f)).replace(" ", "") or "all"
             if not FAMILIES.match(fams):
                 raise JobError("families: comma-separated names or groups (letters, digits, _)")
             tier = a.get("tier", "dry-run")

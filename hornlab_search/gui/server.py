@@ -50,6 +50,8 @@ class App:
             return D.mesh_surface(self.runs, parts[1], parts[2])
         if head == "briefs":
             return D.list_briefs(self.root)
+        if head == "typologies":
+            return D.typologies(self.root, self.runs)
         if head == "leaders":
             return D.leaders(self.runs)
         if head == "configs":
@@ -101,6 +103,11 @@ class App:
             if head == "brief":
                 p = D.save_user_brief(self.root, str(body.get("name", "")), body.get("brief") or {})
                 return {"ok": True, "path": p.relative_to(self.root).as_posix()}
+            if head == "preview":                       # the exact command a launch would run (same validation)
+                argv, gpu = self.jobs.build_argv(str(body.get("kind", "")), body.get("args") or {})
+                from .jobs import _quote
+                return {"command": "hornlab-search " + " ".join(_quote(x) for x in argv), "gpu": gpu,
+                        "gpu_busy": self.jobs.gpu_busy() if gpu else None}
             if head == "jobs":
                 return {"id": self.jobs.launch(str(body.get("kind", "")), body.get("args") or {}).id}
             if head == "job" and len(parts) == 3 and parts[2] == "cancel":

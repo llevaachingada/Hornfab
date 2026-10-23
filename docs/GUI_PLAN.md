@@ -76,6 +76,10 @@ API (JSON): `GET /api/status`, `/api/campaigns`, `/api/campaign/<id>`, `/api/run
 - macOS: not testable on this machine; the server is pure stdlib and paths use `pathlib`. Mark it "should work,
   untested" until the collaborator tries it.
 
+## Status (2026-10-23)
+
+Built: Home, Status, Campaigns, Runs / run detail, Compare, Briefs, Typologies, Launch (family picker, server-side command preview), Glossary, 3D. API: status, runs, run, campaigns, campaign, leaders, typologies, configs, catalog, briefs, families, compare, mesh, jobs, preview, gpu-clean. Superseded campaigns are flagged by comparing against the committed evidence set.
+
 ## Prior art (survey 2026-10-23, read-only)
 
 - Magnus's `m3gnus/waveguide-generator` (AGPL-3.0-or-later): FastAPI server + React/TypeScript/Vite frontend,

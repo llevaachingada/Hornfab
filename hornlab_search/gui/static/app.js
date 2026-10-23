@@ -2,7 +2,7 @@
 // Single-page app with hash routing. No build step, vanilla ES modules.
 
 import { chart, heat, cmap, drawCbar, niceTicks, diFromCuts, groupColor,
-         el, NS, css, fmt, FT, DEFW } from "./charts.js";
+         el, NS, css, fmt, FT, DEFW, polarMap, wallSection, familyColor, measuredWidth } from "./charts.js";
 import { TERMS as GLOSSARY, TERM_ORDER, tip } from "./glossary.js";
 import { init3d } from "./view3d.js";
 
@@ -53,6 +53,7 @@ const ROUTES = [
   { re: /^#\/compare$/,                 fn: () => viewCompare() },
   { re: /^#\/briefs$/,                  fn: () => viewBriefs() },
   { re: /^#\/launch$/,                  fn: () => viewLaunch() },
+  { re: /^#\/typologies$/,              fn: () => viewTypologies() },
   { re: /^#\/glossary$/,                fn: () => viewGlossary() },
 ];
 
@@ -478,8 +479,8 @@ async function viewCampaignsList() {
     return;
   }
 
-  let rows = camps.map(c => `<tr class="clickable" onclick="location.hash='#/campaign/${esc(c.id)}'">
-    <td><b>${esc(c.id)}</b></td>
+  let rows = camps.map(c => `<tr class="clickable ${c.superseded ? "superseded" : ""}" onclick="location.hash='#/campaign/${esc(c.id)}'">
+    <td><b>${esc(c.id)}</b>${c.superseded ? ` ${pill("superseded", "warn")}` : ""}</td>
     <td>${pill(c.tier || "–", c.tier === "compare" ? "warn" : c.tier === "screen" ? "info" : "good")}</td>
     <td>${esc(c.brief || "–")}</td>
     <td class="r">${esc(c.n_entries)}</td>
@@ -585,6 +586,7 @@ async function viewCampaignDetail(id) {
         <h2>${esc(camp.id)}</h2>
         <p class="muted" style="font-size:0.85rem">Brief: ${esc(camp.brief || "–")} · Seeds: ${esc((camp.seeds || []).join(", "))}</p>
         ${tierDesc ? `<p class="muted" style="font-size:0.82rem;margin-top:4px">${esc(tierDesc)}</p>` : ""}
+        ${camp.superseded ? `<div class="alert warn" style="margin-top:8px"><b>Superseded.</b> This campaign ran before the 22 Oct fixes (native configs were scored on their own targets and the brief's size envelope was not enforced). Kept for the record; it is excluded from Home, Typologies and rankings.</div>` : ""}
       </div>
       <div>
         <p class="muted" style="font-size:0.78rem;margin-bottom:8px">
@@ -614,106 +616,89 @@ async function viewCampaignDetail(id) {
         <div class="camp-grid" id="wall-profiles"></div>
       </div>
       <div>
-        <h3 style="margin-bottom:8px">Beamwidth vs target — all families</h3>
-        <div class="toggle-row" id="bw-toggle" style="margin-bottom:8px">
-          <button aria-pressed="true" id="btn-bw-h">Horizontal</button>
-          <button aria-pressed="false" id="btn-bw-v">Vertical</button>
-        </div>
-        <div class="fig">
-          <svg id="bw-chart" style="min-height:160px"></svg>
-          <div class="legend" id="bw-legend"></div>
+        <h3 style="margin-bottom:8px">Best design of each family</h3>
+        <div class="legend" id="bw-legend" style="margin-bottom:8px"></div>
+        <div class="grid2">
+          <div class="fig">
+            <div class="fig-head"><h3>Beamwidth (−6 dB) vs target</h3>
+              <div class="toggle-row" id="bw-toggle">
+                <button aria-pressed="true" id="btn-bw-h">Horizontal</button>
+                <button aria-pressed="false" id="btn-bw-v">Vertical</button>
+              </div></div>
+            <div class="cap">Shaded: target ±10 %. Lighter panel: scored band.</div>
+            <svg id="bw-chart"></svg>
+          </div>
+          <div class="fig">
+            <h3>Directivity index vs target</h3>
+            <div class="cap">Dashed: target DI from the brief's coverage angles.</div>
+            <svg id="di-overlay"></svg>
+          </div>
         </div>
       </div>
     </div>`;
 
-  // Wall profiles
+  // Wall cross-sections, one card per family, all on ONE shared mm scale so sizes compare directly
   const profGrid = document.getElementById("wall-profiles");
-  entries.forEach(e => {
+  let ext = { rmax: 1, z0: Infinity, z1: -Infinity };
+  entries.forEach(e => { const p = (e.best || {}).profile || {};
+    for (const k of ["h", "v"]) for (const [z, r] of (p[k] || [])) {
+      ext.rmax = Math.max(ext.rmax, Math.abs(r)); ext.z0 = Math.min(ext.z0, z); ext.z1 = Math.max(ext.z1, z); } });
+  entries.forEach((e, idx) => {
     const cell = document.createElement("div"); cell.className = "camp-prof";
-    if (e.best_run_id) cell.onclick = () => { location.hash = "#/run/" + e.best_run_id; };
-    const h4 = document.createElement("h4"); h4.textContent = e.name; cell.appendChild(h4);
-    const gc = groupColor(e.group || "");
-    const W = 150, H = 110, m = { l: 28, r: 4, t: 4, b: 22 };
-    const svgEl = document.createElementNS(NS, "svg");
-    svgEl.setAttribute("viewBox", `0 0 ${W} ${H}`);
-    const Xp = v => m.l + (v + sharedRmax) / (2 * sharedRmax) * (W - m.l - m.r);
-    const Yp = v => H - m.b - (v - sharedZmin) / (sharedZmax - sharedZmin) * (H - m.t - m.b);
-    const gg = document.createElementNS(NS, "g"); gg.setAttribute("class", "grid");
-    niceTicks(sharedZmin, sharedZmax, 4).forEach(t => {
-      const ln = document.createElementNS(NS, "line");
-      ln.setAttribute("x1", m.l); ln.setAttribute("x2", W - m.r);
-      ln.setAttribute("y1", Yp(t)); ln.setAttribute("y2", Yp(t)); gg.appendChild(ln);
-      const tx = document.createElementNS(NS, "text");
-      tx.setAttribute("x", m.l - 3); tx.setAttribute("y", Yp(t) + 3); tx.setAttribute("text-anchor", "end");
-      tx.setAttribute("style", "font-size:8px"); tx.textContent = Math.round(t); svgEl.appendChild(tx);
-    });
-    svgEl.appendChild(gg);
-    const cl = document.createElementNS(NS, "line");
-    cl.setAttribute("x1", Xp(0)); cl.setAttribute("x2", Xp(0));
-    cl.setAttribute("y1", m.t); cl.setAttribute("y2", H - m.b);
-    cl.setAttribute("stroke", "var(--rule)"); svgEl.appendChild(cl);
-    const prof = ((e.best || {}).profile) || {};
-    [["h", 1], ["v", -1]].forEach(([k, sgn]) => {
-      const pts = (prof[k] || []).map(pt => [Xp(sgn * Math.abs(pt[1])), Yp(pt[0])]).filter(p => isFinite(p[0]) && isFinite(p[1]));
-      if (pts.length > 1) {
-        const path = document.createElementNS(NS, "path");
-        path.setAttribute("d", pts.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + "," + p[1].toFixed(1)).join(""));
-        path.setAttribute("fill", "none"); path.setAttribute("stroke", gc); path.setAttribute("stroke-width", "1.4");
-        if (k === "v") path.setAttribute("stroke-dasharray", "3 2");
-        svgEl.appendChild(path);
-      }
-    });
-    if (e.dims) {
-      const ds = document.createElementNS(NS, "text");
-      ds.setAttribute("x", W / 2); ds.setAttribute("y", H - 4); ds.setAttribute("text-anchor", "middle");
-      ds.setAttribute("style", "font-size:7px"); ds.textContent = `${Math.round(e.dims.mouth_w_mm)}×${Math.round(e.dims.mouth_h_mm)}×${Math.round(e.dims.depth_mm)} mm`;
-      svgEl.appendChild(ds);
-    } else {
-      const xl = document.createElementNS(NS, "text");
-      xl.setAttribute("x", W / 2); xl.setAttribute("y", H - 4); xl.setAttribute("text-anchor", "middle");
-      xl.setAttribute("style", "font-size:8px"); xl.textContent = "← V · r mm · H →"; svgEl.appendChild(xl);
-    }
-    cell.appendChild(svgEl);
+    if (e.best_run_id) { cell.onclick = () => { location.hash = "#/run/" + e.best_run_id; }; cell.tabIndex = 0; cell.setAttribute("role", "link"); }
+    const col = familyColor(idx);
+    cell.innerHTML = `<h4><span class="swatch" style="background:${col}"></span>${esc(e.name)}</h4>`;
+    const sv = document.createElementNS(NS, "svg"); sv.setAttribute("class", "camp-sec");
+    cell.appendChild(sv);
+    const cap = document.createElement("div"); cap.className = "camp-dims";
+    cap.textContent = e.dims ? `${Math.round(e.dims.mouth_w_mm)} × ${Math.round(e.dims.mouth_h_mm)} × ${Math.round(e.dims.depth_mm)} mm` : "no solved design";
+    cell.appendChild(cap);
     profGrid.appendChild(cell);
+    requestAnimationFrame(() => wallSection(sv, (e.best && e.best.profile) ? [{ profile: e.best.profile, color: col, filled: true }] : [],
+                                            { H: 130, compact: true, extent: isFinite(ext.z0) ? ext : null }));
   });
 
-  // BW chart
-  const target = (entries[0] || {}).target || {};
+  // Overlays of each family's best design: beamwidth (H or V) and DI, one colour per family
+  const target = camp.target || (entries.find(e => e.best && e.best.target) || {}).target || {};
   let bwPlane = "h";
   function drawBW() {
-    const bwSvg = document.getElementById("bw-chart");
+    const bwSvg = document.getElementById("bw-chart"), diSvg = document.getElementById("di-overlay");
     const legDiv = document.getElementById("bw-legend");
     if (!bwSvg) return;
     const freqsRef = (entries.find(e => e.best && e.best.freqs) || { best: { freqs: [] } }).best.freqs || [];
     if (!freqsRef.length) { bwSvg.innerHTML = "<text x='10' y='20'>No frequency data</text>"; return; }
-    const tgt = bwPlane === "h" ? (target.coverage_h_deg || 90) : (target.coverage_v_deg || 90);
+    const tgtH = target.coverage_h_deg, tgtV = target.coverage_v_deg;
+    const tgt = bwPlane === "h" ? tgtH : tgtV;
     const allBW = [];
-    entries.forEach(e => {
-      const b = e.best || {}, arr = bwPlane === "h" ? (b.bw_h || []) : (b.bw_v || []);
-      arr.forEach(v => { if (v != null) allBW.push(v); });
-    });
-    allBW.push(tgt);
-    const bwmax = Math.min(200, Math.max(...allBW) * 1.05) || 180;
-    const tgtBand = [tgt * 0.9, tgt * 1.1];
-    const series = entries.map(e => {
-      const b = e.best || {}, F2 = b.freqs || freqsRef;
-      const arr = bwPlane === "h" ? (b.bw_h || []) : (b.bw_v || []);
-      return { pts: F2.map((f, i) => [f, arr[i] ?? null]), color: groupColor(e.group || ""), w: 1.6 };
-    });
+    entries.forEach(e => { const b = e.best || {}; (bwPlane === "h" ? (b.bw_h || []) : (b.bw_v || [])).forEach(v => v != null && allBW.push(v)); });
+    if (tgt) allBW.push(tgt);
+    const bwmax = Math.min(200, Math.ceil(Math.max(...allBW) * 1.08 / 10) * 10) || 180;
+    const band = [target.band_lo_hz || freqsRef[0], target.band_hi_hz || freqsRef[freqsRef.length - 1]];
+    const xlim = [freqsRef[0], freqsRef[freqsRef.length - 1]];
     chart(bwSvg, {
-      W: 600, H: 220, xlog: true, xlim: [freqsRef[0], freqsRef[freqsRef.length - 1]],
-      ylim: [0, bwmax], xticks: FT, yticks: niceTicks(0, bwmax, 5),
-      xlabel: "Hz", ylabel: "°",
-      band: [target.band_lo_hz || 700, target.band_hi_hz || 5500],
-      hlines: [{ y: tgt, color: css("--muted"), dash: true },
-               { y: tgtBand[0], color: css("--accent-soft"), dash: true },
-               { y: tgtBand[1], color: css("--accent-soft"), dash: true }],
-      series,
+      H: 260, xlog: true, xlim, ylim: [0, bwmax], xticks: FT, yticks: niceTicks(0, bwmax, 5),
+      xlabel: "Hz", ylabel: "deg", band,
+      fill: tgt ? [{ y0: tgt * 0.9, y1: tgt * 1.1, color: css("--best"), opacity: 0.10 }] : [],
+      hlines: tgt ? [{ y: tgt, color: css("--muted"), dash: true }] : [],
+      series: entries.map((e, idx) => { const b = e.best || {}, F2 = b.freqs || freqsRef;
+        const arr = bwPlane === "h" ? (b.bw_h || []) : (b.bw_v || []);
+        return { pts: F2.map((f, i) => [f, arr[i] ?? null]), color: familyColor(idx), w: idx === 0 ? 2.4 : 1.6 }; }),
     });
-    legDiv.innerHTML = entries.map(e => {
-      const gc = groupColor(e.group || "");
-      return `<span><i style="color:${gc};border-top-color:${gc}"></i>${esc(e.name)}</span>`;
-    }).join("");
+    if (diSvg) {
+      const dit = target.di_target_db ?? (tgtH && tgtV ? diFromCuts(tgtH, tgtV) : null);
+      const dall = []; entries.forEach(e => ((e.best || {}).di || []).forEach(v => v != null && dall.push(v)));
+      if (dit != null) dall.push(dit);
+      const dlo = Math.floor(Math.min(...dall) - 1), dhi = Math.ceil(Math.max(...dall) + 1);
+      chart(diSvg, {
+        H: 260, xlog: true, xlim, ylim: [dlo, dhi], xticks: FT, yticks: niceTicks(dlo, dhi, 5),
+        xlabel: "Hz", ylabel: "dB", band,
+        hlines: dit != null ? [{ y: dit, color: css("--muted"), dash: true }] : [],
+        series: entries.map((e, idx) => { const b = e.best || {}, F2 = b.freqs || freqsRef;
+          return { pts: F2.map((f, i) => [f, (b.di || [])[i] ?? null]), color: familyColor(idx), w: idx === 0 ? 2.4 : 1.6 }; }),
+      });
+    }
+    legDiv.innerHTML = entries.map((e, idx) => `<span><i style="color:${familyColor(idx)};border-top-color:${familyColor(idx)}"></i>${esc(e.name)}${idx === 0 ? " (rank 1)" : ""}</span>`).join("")
+      + `<span><i style="color:var(--muted)" class="dash"></i>target</span>`;
   }
   drawBW();
   document.getElementById("btn-bw-h").onclick = () => {
@@ -857,7 +842,7 @@ async function viewRunDetail(id) {
   ROOT.innerHTML = `
     <div class="stack" style="gap:24px">
       <div>
-        <div class="eyebrow">Run · ${esc(sum.family || "")} · ${esc(sum.mode || "")}</div>
+        <div class="eyebrow">Run · ${esc(sum.generator ? "typology generator" : "mesher family")} · ${esc(sum.family || "")} mesh · ${esc(sum.mode || "")} fidelity${sum.brief ? " · brief " + esc(sum.brief) : ""}${sum.cma_seed != null ? " · random seed " + esc(sum.cma_seed) : ""}</div>
         <h2>${esc(sum.name || id)}</h2>
         <p class="mono muted" style="font-size:0.78rem">${esc(id)}</p>
       </div>
@@ -879,13 +864,14 @@ async function viewRunDetail(id) {
       <div class="grid2">
         <div class="fig">
           <h3>${tip("bw", "Beamwidth (−6 dB)")} vs target</h3>
-          <div class="cap">Target ±10 % band shaded. Scored band background.</div>
+          <div class="cap">Total angle between the −6 dB points. Shaded: target ±10 %; lighter panel: the scored band.</div>
           <div class="legend">
-            <span><i style="color:var(--seed)" class="dash"></i>start H</span>
-            <span><i style="color:var(--seed)"></i>start V</span>
-            <span><i style="color:var(--best)" class="dash"></i>best H</span>
-            <span><i style="color:var(--best)"></i>best V</span>
-            <span><i style="color:var(--muted)"></i>target</span>
+            <span><i style="color:var(--best)"></i>best, horizontal</span>
+            <span><i style="color:var(--best)" class="dash"></i>best, vertical</span>
+            <span><i style="color:var(--seed)"></i>start H</span>
+            <span><i style="color:var(--seed)" class="dash"></i>start V</span>
+            <span><i style="color:var(--muted)"></i>target H</span>
+            <span><i style="color:var(--muted)" class="dash"></i>target V</span>
           </div>
           <svg id="c-bw"></svg>
         </div>
@@ -907,12 +893,12 @@ async function viewRunDetail(id) {
           <svg id="c-axis"></svg>
         </div>
         <div class="fig">
-          <h3>${tip("z_re", "Throat resistance")} Re Z</h3>
-          <div class="cap">Near 1 = good horn loading. Threshold at 0.7.</div>
+          <h3>${tip("z_re", "Throat impedance")}</h3>
+          <div class="cap">Normalised to ρc. Resistance near 1 = the horn loads the driver well; below 0.7 counts as poor loading. Reactance: + = mass-like.</div>
           <div class="legend">
+            <span><i style="color:var(--best)"></i>resistance (best)</span>
+            <span><i style="color:var(--best)" class="dash"></i>reactance (best)</span>
             <span><i style="color:var(--seed)"></i>start</span>
-            <span><i style="color:var(--best)"></i>best</span>
-            <span><i style="color:var(--muted)" class="dash"></i>1.0 ref</span>
             <span><i style="color:var(--warn)" class="dash"></i>0.7 threshold</span>
           </div>
           <svg id="c-zre"></svg>
@@ -922,7 +908,7 @@ async function viewRunDetail(id) {
       <!-- Polar maps -->
       <div class="fig">
         <h3>${tip("polar", "Polar maps")}</h3>
-        <div class="cap">Level rel. on-axis; angle −90°…+90° × frequency (low = bottom). −40…0 dB.</div>
+        <div class="cap">Level relative to on-axis at 2 m, by angle (across) and frequency (up). White lines: −3 dB (dotted), −6 dB (solid, the beamwidth edge), −10 dB (dashed). One row per solved frequency.</div>
         <div class="maps" id="polar-maps"></div>
         <div class="map">
           <canvas class="cbar" id="polar-cbar" width="400" height="10"></canvas>
@@ -932,13 +918,11 @@ async function viewRunDetail(id) {
 
       <!-- Wall profile -->
       <div class="fig">
-        <h3>Wall profile</h3>
-        <div class="cap">Mesh nodes in mm; radius vs depth. H right, V mirrored left. Equal aspect.</div>
+        <h3>Wall cross-section</h3>
+        <div class="cap">Section through the solved mesh, true scale in mm: horizontal plane to the right, vertical plane mirrored to the left, throat at the bottom. Includes the outer shell and rear.</div>
         <div class="legend">
-          <span><i style="color:var(--seed)"></i>start H</span>
-          <span><i style="color:var(--seed)" class="dash"></i>start V</span>
-          <span><i style="color:var(--best)"></i>best H</span>
-          <span><i style="color:var(--best)" class="dash"></i>best V</span>
+          <span><i style="color:var(--best)"></i>best (filled)</span>
+          <span><i style="color:var(--seed)" class="dash"></i>start</span>
         </div>
         <svg id="c-prof"></svg>
       </div>
@@ -990,28 +974,30 @@ async function viewRunDetail(id) {
   const F = S.freqs || B.freqs || [];
   const band = [t.band_lo_hz || 700, t.band_hi_hz || 5500];
 
-  // Beamwidth with ±10% target band
+  // One convention on every chart: horizontal plane solid, vertical plane dashed; start amber, best teal.
+  const series2 = (key, w) => [
+    ...(S[key + "_h"] ? [{ pts: F.map((f, i) => [f, S[key + "_h"][i] ?? null]), color: css("--seed"), w: 1.4 }] : []),
+    ...(S[key + "_v"] ? [{ pts: F.map((f, i) => [f, S[key + "_v"][i] ?? null]), color: css("--seed"), w: 1.4, dash: true }] : []),
+    ...(B[key + "_h"] ? [{ pts: F.map((f, i) => [f, B[key + "_h"][i] ?? null]), color: css("--best"), w }] : []),
+    ...(B[key + "_v"] ? [{ pts: F.map((f, i) => [f, B[key + "_v"][i] ?? null]), color: css("--best"), w, dash: true }] : []),
+  ];
+
+  // Beamwidth vs target, target ±10 % shaded per plane
   if (F.length && (S.bw_h || B.bw_h)) {
-    const bwAll = [...(S.bw_h || []), ...(S.bw_v || []), ...(B.bw_h || []), ...(B.bw_v || []),
-                   t.coverage_h_deg, t.coverage_v_deg].filter(v => v != null);
-    const bmax = Math.min(200, Math.max(...bwAll) * 1.08) || 180;
     const th = t.coverage_h_deg, tv = t.coverage_v_deg;
-    const hlines = [];
-    if (th) { hlines.push({ y: th, color: css("--muted") }, { y: th * 0.9, color: css("--accent-soft"), dash: true }, { y: th * 1.1, color: css("--accent-soft"), dash: true }); }
-    if (tv) { hlines.push({ y: tv, color: css("--muted"), dash: true }); }
+    const bwAll = [...(S.bw_h || []), ...(S.bw_v || []), ...(B.bw_h || []), ...(B.bw_v || []), th, tv].filter(v => v != null);
+    const bmax = Math.min(200, Math.ceil(Math.max(...bwAll) * 1.08 / 10) * 10) || 180;
+    const fill = [], hlines = [];
+    if (th) { fill.push({ y0: th * 0.9, y1: th * 1.1, color: css("--best"), opacity: 0.10 }); hlines.push({ y: th, color: css("--muted") }); }
+    if (tv && tv !== th) { fill.push({ y0: tv * 0.9, y1: tv * 1.1, color: css("--best"), opacity: 0.07 }); hlines.push({ y: tv, color: css("--muted"), dash: true }); }
     chart(document.getElementById("c-bw"), {
-      xlog: true, xlim: [F[0], F[F.length - 1]], ylim: [0, bmax],
-      xticks: FT, yticks: niceTicks(0, bmax, 5), xlabel: "Hz", ylabel: "°", band, hlines,
-      series: [
-        { pts: F.map((f, i) => [f, (S.bw_h || [])[i] ?? null]), color: css("--seed"), dash: true },
-        { pts: F.map((f, i) => [f, (S.bw_v || [])[i] ?? null]), color: css("--seed") },
-        { pts: F.map((f, i) => [f, (B.bw_h || [])[i] ?? null]), color: css("--best"), dash: true, w: 2.2 },
-        { pts: F.map((f, i) => [f, (B.bw_v || [])[i] ?? null]), color: css("--best"), w: 2.2 },
-      ],
+      xlog: true, xlim: [F[0], F[F.length - 1]], ylim: [0, bmax], fill,
+      xticks: FT, yticks: niceTicks(0, bmax, 5), xlabel: "Hz", ylabel: "deg", band, hlines,
+      series: series2("bw", 2.2),
     });
   }
 
-  // DI
+  // DI vs target
   if (F.length && (S.di || B.di)) {
     const dit = t.di_target_db ?? diFromCuts(t.coverage_h_deg || 90, t.coverage_v_deg || 90);
     const dall = [...(S.di || []), ...(B.di || []), dit].filter(v => v != null);
@@ -1021,78 +1007,65 @@ async function viewRunDetail(id) {
       xticks: FT, yticks: niceTicks(dlo, dhi, 5), xlabel: "Hz", ylabel: "dB", band,
       hlines: [{ y: dit, color: css("--muted"), dash: true }],
       series: [
-        { pts: F.map((f, i) => [f, (S.di || [])[i] ?? null]), color: css("--seed") },
+        { pts: F.map((f, i) => [f, (S.di || [])[i] ?? null]), color: css("--seed"), w: 1.4 },
         { pts: F.map((f, i) => [f, (B.di || [])[i] ?? null]), color: css("--best"), w: 2.2 },
       ],
     });
   }
 
-  // On-axis
+  // On-axis (relative, mean removed)
   if (F.length && (S.on_axis || B.on_axis)) {
     const aall = [...(S.on_axis || []), ...(B.on_axis || [])].filter(v => v != null);
-    const alo = Math.floor(Math.min(...aall) - 1), ahi = Math.ceil(Math.max(...aall) + 1);
+    const alo = Math.floor(Math.min(...aall, -3) - 1), ahi = Math.ceil(Math.max(...aall, 3) + 1);
     chart(document.getElementById("c-axis"), {
       xlog: true, xlim: [F[0], F[F.length - 1]], ylim: [alo, ahi],
       xticks: FT, yticks: niceTicks(alo, ahi, 5), xlabel: "Hz", ylabel: "dB", band,
+      hlines: [{ y: 0, color: css("--muted") }],
       series: [
-        { pts: F.map((f, i) => [f, (S.on_axis || [])[i] ?? null]), color: css("--seed") },
+        { pts: F.map((f, i) => [f, (S.on_axis || [])[i] ?? null]), color: css("--seed"), w: 1.4 },
         { pts: F.map((f, i) => [f, (B.on_axis || [])[i] ?? null]), color: css("--best"), w: 2.2 },
       ],
     });
   }
 
-  // Throat resistance z_re
+  // Throat impedance, normalised to rho*c: resistance (solid) and reactance (dashed, engineering sign:
+  // + = mass-like). The solver works in exp(-i w t), so reactance X = -Im Z here.
   if (F.length && (S.z_re || B.z_re)) {
-    const zall = [...(S.z_re || []), ...(B.z_re || [])].filter(v => v != null);
-    const zlo = 0, zhi = Math.min(2, Math.ceil(Math.max(...zall, 1.1) * 1.1));
+    const X = d => (d.z_im || []).map(v => v == null ? null : -v);
+    const zall = [...(S.z_re || []), ...(B.z_re || []), ...X(B), ...X(S)].filter(v => v != null);
+    const zlo = Math.min(0, Math.floor(Math.min(...zall) * 10) / 10), zhi = Math.max(1.2, Math.ceil(Math.max(...zall) * 10) / 10);
     chart(document.getElementById("c-zre"), {
       xlog: true, xlim: [F[0], F[F.length - 1]], ylim: [zlo, zhi],
       xticks: FT, yticks: niceTicks(zlo, zhi, 5), xlabel: "Hz", ylabel: "×ρc", band,
-      hlines: [
-        { y: 1.0, color: css("--muted"), dash: true },
-        { y: 0.7, color: css("--warn"), dash: true },
-      ],
+      hlines: [{ y: 1.0, color: css("--muted"), dash: true }, { y: 0.7, color: css("--warn"), dash: true }, { y: 0, color: css("--muted") }],
       series: [
-        { pts: F.map((f, i) => [f, (S.z_re || [])[i] ?? null]), color: css("--seed") },
+        { pts: F.map((f, i) => [f, (S.z_re || [])[i] ?? null]), color: css("--seed"), w: 1.4 },
+        { pts: F.map((f, i) => [f, X(S)[i] ?? null]), color: css("--seed"), w: 1.2, dash: true },
         { pts: F.map((f, i) => [f, (B.z_re || [])[i] ?? null]), color: css("--best"), w: 2.2 },
+        { pts: F.map((f, i) => [f, X(B)[i] ?? null]), color: css("--best"), w: 1.8, dash: true },
       ],
     });
   }
 
-  // Wall profile (equal aspect via shared scale)
-  const ptsOf = (design, key, sgn) => ((design.profile || {})[key] || []).map(p => [sgn * Math.abs(p[1]), p[0]]);
-  const allPts = [...ptsOf(S, "h", 1), ...ptsOf(S, "v", -1), ...ptsOf(B, "h", 1), ...ptsOf(B, "v", -1)];
-  if (allPts.length) {
-    const rx = Math.max(...allPts.map(p => Math.abs(p[0]))) * 1.08 || 100;
-    const zs = allPts.map(p => p[1]);
-    const zlo = Math.min(...zs) - 5, zhi = Math.max(...zs) + 5;
-    const aspect = (zhi - zlo) / (2 * rx);
-    chart(document.getElementById("c-prof"), {
-      H: Math.max(180, Math.min(340, Math.round(460 * aspect))),
-      xlim: [-rx, rx], ylim: [zlo, zhi],
-      xticks: niceTicks(-rx, rx, 6), yticks: niceTicks(zlo, zhi, 5),
-      xlabel: "← V plane · r mm · H plane →", ylabel: "z mm",
-      series: [
-        { pts: ptsOf(S, "h", 1), color: css("--seed"), dots: true, r: 1.8, opacity: 0.7 },
-        { pts: ptsOf(S, "v", -1), color: css("--seed"), dots: true, r: 1.8, opacity: 0.5, dash: true },
-        { pts: ptsOf(B, "h", 1), color: css("--best"), dots: true, r: 1.8, opacity: 0.8 },
-        { pts: ptsOf(B, "v", -1), color: css("--best"), dots: true, r: 1.8, opacity: 0.6, dash: true },
-      ],
-    });
-  }
+  // Wall cross-section (true aspect): best filled, start as an outline
+  wallSection(document.getElementById("c-prof"), [
+    ...(S.profile ? [{ profile: S.profile, color: css("--seed"), dash: true }] : []),
+    ...(B.profile ? [{ profile: B.profile, color: css("--best"), filled: true }] : []),
+  ], { H: 320 });
 
-  // Polar maps
+  // Polar maps with -3 / -6 / -10 dB isobars
   const mapsEl = document.getElementById("polar-maps");
   mapsEl.innerHTML = "";
   drawCbar(document.getElementById("polar-cbar"));
-  [["Start · H", S.polar_h], ["Best · H", B.polar_h], ["Start · V", S.polar_v], ["Best · V", B.polar_v]].forEach(([lbl, rows]) => {
+  [["Best · horizontal", B.polar_h, B], ["Best · vertical", B.polar_v, B],
+   ["Start · horizontal", S.polar_h, S], ["Start · vertical", S.polar_v, S]].forEach(([lbl, rows, D2]) => {
     if (!rows) return;
     const d2 = document.createElement("div"); d2.className = "map";
-    const c = document.createElement("canvas"); d2.appendChild(c); heat(c, rows);
-    const l = document.createElement("div"); l.className = "lbl";
-    const fl = F[0] ?? "", fh = F[F.length - 1] ?? (F[0] || "");
-    l.innerHTML = `<span>${esc(lbl)}</span><span>${fmtHz(fl)} – ${fmtHz(fh)}</span>`;
-    d2.appendChild(l); mapsEl.appendChild(d2);
+    const h = document.createElement("div"); h.className = "lbl"; h.innerHTML = `<span>${esc(lbl)}</span>`;
+    const sv = document.createElementNS(NS, "svg"); sv.setAttribute("class", "polar");
+    d2.appendChild(h); d2.appendChild(sv); mapsEl.appendChild(d2);
+    // draw after the grid has laid the cells out, so every map is measured at its real width
+    requestAnimationFrame(() => polarMap(sv, rows, D2.angles || [], D2.freqs || F));
   });
 
   // Convergence
@@ -1546,11 +1519,11 @@ async function viewLaunch() {
       api("/api/status").catch(() => null),
     ]);
   } catch (e) { ROOT.innerHTML = errBanner(e.message); return; }
-
-  renderLaunch(briefs, jobs, configs, statusData);
+  const typs = await api("/api/typologies").catch(() => []);
+  renderLaunch(briefs, jobs, configs, statusData, typs);
 }
 
-function renderLaunch(briefs, jobs, configs, statusData) {
+function renderLaunch(briefs, jobs, configs, statusData, typs = []) {
   const lock = (statusData || {}).gpu_lock;
   const gpuBusy = lock && lock.alive;
   const busyNote = gpuBusy
@@ -1559,7 +1532,8 @@ function renderLaunch(briefs, jobs, configs, statusData) {
         GPU actions disabled. Dry-run always available.
       </div>` : "";
 
-  const briefOpts = briefs.map(b => `<option value="${esc(b.name)}">${esc(b.name)}</option>`).join("");
+  const briefOpts = briefs.map(b => `<option value="${esc(b.path)}" data-name="${esc(b.name)}">${esc(b.name)}${b.kind === "user" ? " (yours)" : ""}</option>`).join("");
+  const pre = new URLSearchParams((location.hash.split("?")[1]) || "");
 
   // Build config select options grouped by catalog group
   const byGroup = {};
@@ -1610,10 +1584,10 @@ function renderLaunch(briefs, jobs, configs, statusData) {
               <div class="hint" id="tier-hint">One search per family; coarse first ranking.</div>
             </div>
 
-            <label for="lf-families">Families</label>
+            <span class="form-label">Families</span>
             <div>
-              <input id="lf-families" type="text" placeholder="osse_axi, hypex (blank = all)">
-              <div class="hint">Comma-separated family names, or leave blank for all</div>
+              <div id="fam-picker" class="fam-picker" role="group" aria-label="Horn families"></div>
+              <div class="hint" id="fam-summary"></div>
             </div>
           </div>
           <div class="alert warn" id="compare-warn" style="display:none" role="alert">
@@ -1699,36 +1673,108 @@ function renderLaunch(briefs, jobs, configs, statusData) {
     updatePreview();
   });
 
-  // Command preview
-  function updatePreview() {
-    let cmd = "hornlab-search ";
-    if (currentType === "campaign") {
-      const brief = document.getElementById("lf-brief").value;
-      const fam = document.getElementById("lf-families").value;
-      const tier = document.getElementById("lf-tier").value;
-      cmd += `campaign --brief ${brief || "<brief>"}`;
-      if (fam) cmd += ` --families ${fam.split(",").map(s => s.trim()).filter(Boolean).join(",")}`;
-      cmd += ` --tier ${tier}`;
-    } else if (currentType === "search") {
-      const cfg = document.getElementById("lf-config").value;
-      const bud = document.getElementById("lf-budget").value;
-      const seed = document.getElementById("lf-seed").value;
-      const br = document.getElementById("lf-sbrief").value;
-      cmd += `search --config ${cfg || "<config>"} --budget ${bud} --cma-seed ${seed}`;
-      if (br) cmd += ` --brief ${br}`;
-    } else {
-      const cfg = document.getElementById("lf-drconfig").value;
-      cmd += `dry-run --config ${cfg || "<config>"}`;
+  // Family picker: grouped by kind, incompatible families disabled with the CLI's own reason
+  const GROUP_LABEL = { classical: "Classical horns", hybrid: "Hybrids", magnus: "Magnus mesher families", legacy: "Utility / legacy" };
+  const selected = new Set((pre.get("families") || "").split(",").filter(Boolean));
+  if (pre.get("brief")) {
+    const o = [...document.getElementById("lf-brief").options].find(x => x.dataset.name === pre.get("brief"));
+    if (o) document.getElementById("lf-brief").value = o.value;
+  }
+  if (pre.get("tier")) document.getElementById("lf-tier").value = pre.get("tier");
+  const briefName = () => document.getElementById("lf-brief").selectedOptions[0]?.dataset.name || "";
+  function estMinutes(t, tier) {
+    // slowest measured campaign for this family: replayed (cached) campaigns run far faster than fresh
+    // ones, so the maximum is the honest upper estimate; ignore near-zero all-cached campaigns
+    const ms = (t.results || []).map(x => x.s_per_eval).filter(v => v != null && v >= 0.5);
+    if (!ms.length) return null;
+    const n = tier === "compare" ? 2 * t.budget.compare : tier === "screen" ? t.budget.screen : 0;
+    return n * Math.max(...ms) / 60;
+  }
+  function renderFamPicker() {
+    const bn = briefName(), tier = document.getElementById("lf-tier").value;
+    const groups = {};
+    for (const t of typs) (groups[t.group] = groups[t.group] || []).push(t);
+    const box = document.getElementById("fam-picker");
+    box.innerHTML = Object.entries(groups).map(([g, list]) => `
+      <fieldset class="fam-group"><legend>${esc(GROUP_LABEL[g] || g)}
+        <button type="button" class="linkish" data-all="${esc(g)}">select all that fit</button></legend>
+        ${list.map(t => {
+          const c = (t.compat || {})[bn] || { ok: true };
+          const off = !c.ok || t.disabled;
+          const best = (t.results || []).find(r => r.brief === bn);
+          const est = estMinutes(t, tier);
+          return `<label class="fam-row ${off ? "off" : ""}" title="${esc(off ? (c.reason || "disabled") : (t.description || ""))}">
+            <input type="checkbox" value="${esc(t.name)}" ${off ? "disabled" : ""} ${selected.has(t.name) && !off ? "checked" : ""}>
+            <span class="fam-name">${esc(t.name)}</span>
+            <span class="fam-meta">${esc(t.symmetry === "axisymmetric" ? "axisymmetric" : "H/V")} · ${t.n_knobs} params ·
+              ${tier === "compare" ? "2 × " + t.budget.compare : tier === "screen" ? t.budget.screen : "–"} evals${est != null && tier !== "dry-run" ? ` · ≈ ${est < 90 ? Math.round(est) + " min" : (est / 60).toFixed(1) + " h"}` : ""}</span>
+            <span class="fam-best">${off ? `<em>${esc(t.disabled ? "disabled" : "does not fit this brief")}</em>` : !best ? "not run on this brief" : best.no_valid ? `<em class="warn-text">no valid design here (${esc(best.tier)})</em>` : `${esc(best.tier)} #${best.rank}/${best.of} · score ${fmt(best.median_j)}`}</span>
+          </label>`;
+        }).join("")}
+      </fieldset>`).join("");
+    box.querySelectorAll("input[type=checkbox]").forEach(cb => cb.onchange = () => {
+      cb.checked ? selected.add(cb.value) : selected.delete(cb.value); summary(); updatePreview();
+    });
+    box.querySelectorAll("[data-all]").forEach(b => b.onclick = () => {
+      box.querySelectorAll(`fieldset input:not(:disabled)`).forEach(cb => {
+        if (cb.closest("fieldset").querySelector("[data-all]") === b) { cb.checked = true; selected.add(cb.value); }
+      });
+      summary(); updatePreview();
+    });
+    // drop selections that no longer fit the brief
+    for (const n of [...selected]) {
+      const cb = box.querySelector(`input[value="${CSS.escape(n)}"]`);
+      if (!cb || cb.disabled) selected.delete(n);
     }
-    document.getElementById("cmd-preview").textContent = cmd;
+    summary();
+  }
+  function summary() {
+    const tier = document.getElementById("lf-tier").value;
+    const chosen = typs.filter(t => selected.has(t.name));
+    const evals = chosen.reduce((a, t) => a + (tier === "compare" ? 2 * t.budget.compare : tier === "screen" ? t.budget.screen : 0), 0);
+    const mins = chosen.map(t => estMinutes(t, tier));
+    const known = mins.filter(m => m != null);
+    document.getElementById("fam-summary").textContent = !chosen.length
+      ? "Nothing selected = every family that fits the brief."
+      : `${chosen.length} selected · ${evals.toLocaleString()} evaluations` +
+        (tier !== "dry-run" && known.length ? ` · ≈ ${Math.round(known.reduce((a, b) => a + b, 0))} min measured on this machine` +
+         (known.length < chosen.length ? ` (+ ${chosen.length - known.length} never timed)` : "") : "");
+  }
+  const famArg = () => [...selected].join(",");
+
+  // Command preview: asked from the server, which builds the exact argv a launch would run
+  let _pv = null;
+  function currentJob() {
+    if (currentType === "campaign")
+      return { kind: "campaign", args: { brief: document.getElementById("lf-brief").value, families: famArg(),
+                                         tier: document.getElementById("lf-tier").value } };
+    if (currentType === "search")
+      return { kind: "search", args: { config: document.getElementById("lf-config").value,
+                                       budget: +document.getElementById("lf-budget").value,
+                                       cma_seed: document.getElementById("lf-seed").value,
+                                       brief: document.getElementById("lf-sbrief").value || undefined } };
+    return { kind: "dry-run", args: { config: document.getElementById("lf-drconfig").value } };
+  }
+  function updatePreview() {
+    clearTimeout(_pv);
+    _pv = setTimeout(async () => {
+      const out = document.getElementById("cmd-preview");
+      if (!out) return;
+      const r = await post("/api/preview", currentJob());
+      out.textContent = r.error ? "— " + r.error : r.command;
+      out.classList.toggle("muted", !!r.error);
+    }, 150);
   }
 
   // Wire inputs to preview
-  ["lf-brief", "lf-families", "lf-config", "lf-budget", "lf-seed", "lf-sbrief", "lf-drconfig"].forEach(id => {
+  ["lf-brief", "lf-config", "lf-budget", "lf-seed", "lf-sbrief", "lf-drconfig"].forEach(id => {
     const el2 = document.getElementById(id);
     if (el2) el2.addEventListener("input", updatePreview);
     if (el2) el2.addEventListener("change", updatePreview);
   });
+  document.getElementById("lf-brief").addEventListener("change", renderFamPicker);
+  document.getElementById("lf-tier").addEventListener("change", renderFamPicker);
+  renderFamPicker();
   updatePreview();
 
   // Initial launch button state
@@ -1746,24 +1792,12 @@ function renderLaunch(briefs, jobs, configs, statusData) {
         return;
       }
       if (tier === "compare" && !confirm("Compare tier takes hours. Run it now?")) return;
-      kind = "campaign";
-      args = {
-        brief: document.getElementById("lf-brief").value,
-        families: document.getElementById("lf-families").value.split(",").map(s => s.trim()).filter(Boolean),
-        tier,
-      };
+      ({ kind, args } = currentJob());
     } else if (currentType === "search") {
       if (gpuBusy) { errEl.innerHTML = `<div class="alert error">GPU is busy. Wait for the current job to finish.</div>`; return; }
-      kind = "search";
-      args = {
-        config: document.getElementById("lf-config").value,
-        budget: +document.getElementById("lf-budget").value,
-        cma_seed: +document.getElementById("lf-seed").value,
-        brief: document.getElementById("lf-sbrief").value || undefined,
-      };
+      ({ kind, args } = currentJob());
     } else {
-      kind = "dry-run";
-      args = { config: document.getElementById("lf-drconfig").value };
+      ({ kind, args } = currentJob());
     }
     const r = await post("/api/jobs", { kind, args });
     if (r.error) {
@@ -1801,7 +1835,7 @@ function renderJobs(jobs) {
     const sc = `job-status-${j.status || "done"}`;
     const dur = j.started && j.ended
       ? " · " + ((new Date(j.ended) - new Date(j.started)) / 60000).toFixed(1) + "m"
-      : j.started ? " · running…" : "";
+      : j.status === "running" ? " · running…" : "";
 
     const logLines = (j.log_tail || []).join("\n");
     const cancelBtn = j.status === "running"
@@ -1887,3 +1921,79 @@ document.addEventListener("keydown", e => {
   const tr = e.target.closest && e.target.closest("tr[role=link]");
   if (tr && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); tr.click(); }
 });
+
+// ── Charts are drawn 1:1 at their measured width: re-render the view after a real width change ──
+let _lastW = window.innerWidth, _rsz = null;
+window.addEventListener("resize", () => {
+  clearTimeout(_rsz);
+  _rsz = setTimeout(() => {
+    if (Math.abs(window.innerWidth - _lastW) < 40 || !document.querySelector("svg[data-chart]")) return;
+    _lastW = window.innerWidth;
+    const y = window.scrollY; route(); setTimeout(() => window.scrollTo(0, y), 600);
+  }, 350);
+});
+
+
+// ── View: Typologies (every classical horn, hybrid and mesher family) ─────────────────────────────
+const TYP_GROUP = {
+  classical: ["Classical horns", "Textbook profiles (conical, exponential, hyperbolic-exponential, tractrix, OS) built from their formulas and handed to Magnus's FREEFORM mesher as exact wall anchors."],
+  hybrid: ["Hybrids", "Combinations: a different profile in each plane (H/V), a convex blend of two profiles, or small monotone perturbations of a classical wall."],
+  magnus: ["Magnus mesher families", "OSSE, R-OSSE, ICW and FREEFORM as Magnus's mesher defines them."],
+  legacy: ["Utility / legacy", "Test and adapter configs, not meant for typology comparison."],
+};
+
+async function viewTypologies() {
+  skel();
+  let typs, briefs;
+  try { [typs, briefs] = await Promise.all([api("/api/typologies"), api("/api/briefs")]); }
+  catch (e) { ROOT.innerHTML = errBanner("Could not load typologies: " + e.message); return; }
+  const groups = {};
+  for (const t of typs) (groups[t.group] = groups[t.group] || []).push(t);
+  ROOT.innerHTML = `<div class="stack" style="gap:26px">
+    <div>
+      <div class="eyebrow">Horn families</div>
+      <h2>Typologies</h2>
+      <p class="muted prose">Every family the search can run. Pick one or more to screen against a brief; a family that cannot meet a brief (an axisymmetric horn on a 90 × 60° brief) is greyed out there. Results are the latest campaign of each tier per brief; the outline is that family's best design so far. Le Cléac'h is disabled until a verifiable published construction is available.</p>
+    </div>
+    ${Object.entries(groups).map(([g, list]) => `
+      <section class="stack" style="gap:12px">
+        <div><h3>${esc((TYP_GROUP[g] || [g])[0])}</h3><p class="muted" style="margin:2px 0 0">${esc((TYP_GROUP[g] || ["", ""])[1])}</p></div>
+        <div class="typ-grid">${list.map(t => typCard(t, briefs)).join("")}</div>
+      </section>`).join("")}
+  </div>`;
+  requestAnimationFrame(() => {
+    ROOT.querySelectorAll("svg.typ-prof").forEach(sv => {
+      const t = typs.find(x => x.name === sv.dataset.name);
+      const r = (t.results || []).find(x => x.profile);
+      if (r) wallSection(sv, [{ profile: r.profile, color: css("--best"), filled: true }], { H: 120, compact: true });
+    });
+  });
+}
+
+function typCard(t, briefs) {
+  const res = (t.results || []).map(r => r.no_valid
+    ? `<tr><td>${esc(r.brief)}</td><td>${esc(r.tier)}</td><td colspan="3" class="warn-text">no valid design under this brief (starting design outside its size envelope)</td></tr>`
+    : `<tr>
+      <td>${esc(r.brief)}</td><td>${esc(r.tier)}</td>
+      <td class="r">${r.rank}/${r.of}</td>
+      <td class="r">${r.best_run_id ? `<a href="#/run/${esc(r.best_run_id)}" title="open the best run">${fmt(r.median_j)}</a>` : fmt(r.median_j)}</td>
+      <td class="r">${r.dims ? esc(Math.round(r.dims.mouth_w_mm) + "×" + Math.round(r.dims.mouth_h_mm) + "×" + Math.round(r.dims.depth_mm)) : "–"}</td></tr>`).join("");
+  const fits = briefs.map(b => {
+    const c = (t.compat || {})[b.name] || { ok: true };
+    return c.ok && !t.disabled
+      ? `<a class="pill good" href="#/launch?brief=${encodeURIComponent(b.name)}&families=${encodeURIComponent(t.name)}&tier=screen" title="Screen ${esc(t.name)} on ${esc(b.name)}">▶ ${esc(b.name)}</a>`
+      : `<span class="pill" title="${esc(c.reason || "disabled")}" style="opacity:0.55">${esc(b.name)}</span>`;
+  }).join(" ");
+  const hasProf = (t.results || []).some(r => r.profile);
+  return `<article class="card typ-card">
+    <div class="typ-head">
+      <div><div class="typ-name">${esc(t.name)}</div>
+        <div class="muted typ-meta">${esc(t.symmetry === "axisymmetric" ? "axisymmetric" : "H/V (different planes)")} · ${t.n_knobs} shape parameters · screen ${t.budget.screen} / compare 2 × ${t.budget.compare} evals</div></div>
+      ${hasProf ? `<svg class="typ-prof" data-name="${esc(t.name)}" aria-label="best design cross-section"></svg>` : `<div class="typ-prof empty muted">no solved design yet</div>`}
+    </div>
+    <p class="typ-desc">${esc(t.description || "")}</p>
+    ${res ? `<div class="tbl-wrap"><table class="compact"><thead><tr><th>Brief</th><th>Tier</th><th class="r">Rank</th><th class="r">Score</th><th class="r">W×H×D mm</th></tr></thead><tbody>${res}</tbody></table></div>`
+          : `<p class="muted" style="margin:0">Not run in any campaign yet.</p>`}
+    <div class="typ-fits"><span class="muted">Screen on:</span> ${fits}</div>
+  </article>`;
+}

@@ -328,3 +328,49 @@ def test_static_js_parses_as_an_es_module(name, tmp_path):
     mjs.write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
     r = subprocess.run([node, "--check", str(mjs)], capture_output=True, text=True)
     assert r.returncode == 0, r.stderr[-800:]
+
+
+def test_campaign_families_list_or_blank_and_preview(server, repo):
+    jm = J.JobManager(repo, repo / "runs")
+    argv, _ = jm.build_argv("campaign", {"brief": "examples/briefs/axi_90x90_1in.yaml",
+                                         "families": ["conical", "hypex"], "tier": "screen"})
+    assert argv[argv.index("--families") + 1] == "conical,hypex"
+    argv, _ = jm.build_argv("campaign", {"brief": "examples/briefs/axi_90x90_1in.yaml", "families": "", "tier": "dry-run"})
+    assert argv[argv.index("--families") + 1] == "all"
+    code, body = _req(server + "/api/preview", data=json.dumps({"kind": "dry-run", "args": {"config": "examples/cfg.yaml"}}).encode())
+    assert code == 200 and body["command"] == "hornlab-search run --config examples/cfg.yaml --dry-run" and body["gpu"] is False
+    code, body = _req(server + "/api/preview", data=json.dumps({"kind": "campaign", "args": {"brief": "axi_90x90_1in"}}).encode())
+    assert "error" in body                      # a brief NAME is not a path: the GUI must send the path
+
+
+def test_section_outline_from_quarter_mesh_boundary():
+    """Plane boundary edges of a quarter mesh give an ordered cross-section chain."""
+    # a strip of 2 triangles in the x-z plane (y = 0) plus one off-plane triangle
+    pts = np.array([[0, 0, 0], [0.01, 0, 0.0], [0.02, 0, 0.05], [0.03, 0, 0.10], [0.02, 0.02, 0.05]], float)
+    tris = np.array([[0, 1, 4], [1, 2, 4], [2, 3, 4]])
+    [chain] = D._plane_chains(pts, tris, 0)
+    assert chain in ([0, 1, 2, 3], [3, 2, 1, 0])
+
+
+def test_superseded_campaigns_are_excluded(repo):
+    runs = repo / "runs"
+    ev = repo / "docs" / "evidence" / "campaigns"
+    ev.mkdir(parents=True)
+    (ev / f"{CID}.campaign.json").write_text("{}")
+    old = "campaign_20261022T000000Z"
+    (runs / old).mkdir()
+    (runs / old / "campaign.json").write_text(json.dumps({"tier": "compare", "brief_name": "b", "seeds": [1],
+        "entries": [{"name": "bogus", "jobs": [{"seed": 1, "best_j": 0.1, "run_dir": str(runs / RID), "stats": {"evaluations": 1}}]}]}))
+    flags = {c["id"]: c["superseded"] for c in D.list_campaigns(runs)}
+    assert flags == {CID: False, old: True}
+    assert all(l["family"] != "bogus" for l in D.leaders(runs))
+
+
+def test_typologies_compat_uses_the_cli_rule(repo):
+    shutil.copy(ROOT / "examples" / "briefs" / "hifi_90x60_1in.yaml", repo / "examples" / "briefs")
+    (repo / "examples" / "catalog.yaml").write_text(yaml.safe_dump({"entries": [
+        {"name": "axi_one", "config": "cfg.yaml", "group": "classical", "symmetry": "axisymmetric", "description": "d"}]}))
+    [t] = D.typologies(repo, repo / "runs")
+    assert t["compat"]["axi_90x90_1in"]["ok"] is True
+    assert t["compat"]["hifi_90x60_1in"]["ok"] is False and "axisymmetric" in t["compat"]["hifi_90x60_1in"]["reason"]
+    assert t["budget"] == {"screen": 40, "compare": 150}
