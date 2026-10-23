@@ -4,11 +4,19 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 
 ## Status
 - **Phase:** pre-beta hardening (HANDOFF_BETA A-E done except D3; F rehearsal and G session pack in progress). Waves 0-3 and CP-7 complete; CP-8a/b PASS, CP-8c CLOSED, CP-8d FAILED 2026-10-14 (retrain pending, see below).
-- **Running on the GPU box (owner's machine), 2026-10-23 evening:** overnight queue `tools/overnight/queue_20261022.ps1` (sculpt searches until the 15:45 start cutoff, done ~16:00), then the P2 12 kHz finalist verify pass (6 jobs, one at a time). Results land in `runs/` (local, gitignored) and are written up in `docs/evidence/HF12K_VERIFY_2026-10-23.md` (not yet written).
-- **Next (owner's orchestrator, in order):** P2 12 kHz verify + epw check -> surrogate retrain on a dataset copy (expected GATES REFUSED: ~462 held out < 500 at the plan's 15 % holdout; ~250 more OSSE records needed = owner decision) -> D3 Ctrl-C test -> F timed rehearsal (CLI + GUI) -> G session plan numbers.
+- **Done 2026-10-23 PM:** overnight queue finished 15:49 (QUEUE DONE, no hosts left); P2 12 kHz verify DONE (`docs/evidence/HF12K_VERIFY_2026-10-23.md`); surrogate retrain GATES FAILED, model not used (`docs/evidence/CP-8d_retrain_2026-10-23.md`); D3 Ctrl-C PASS on the GPU after a campaign fix.
+- **Next (owner's orchestrator, in order):** F timed rehearsal (CLI quickstart verbatim + GUI path) -> G session plan numbers. GPU free.
 - **Collaborator handoff:** `docs/HANDOFF_COLLABORATOR_2026-10-23.md` (what is safe to edit tonight, what not to touch).
 - **Open owner decisions:** bound proposals (`docs/evidence/TYPOLOGY_COMPARE_2026-10-23.md`; sculpt anchors pinned too), P1 fused CUDA Burton-Miller (post-beta), mesher bump (post-beta), more rosse seeds, surrogate top-up.
 - **Blockers:** none. Issue #13 fixes merged (awaiting owner close).
+
+## 2026-10-23 (local, ~16:20 EDT) - P2 12 kHz verify DONE; surrogate retrain GATES FAILED; D3 PASS after a campaign fix
+
+- **Overnight queue** finished 15:49:36 (QUEUE DONE; sculpt seeds 5101-5125 all exit 0; gpu-clean left no host, VRAM 631 MiB).
+- **P2 12 kHz verify** (`docs/evidence/HF12K_VERIFY_2026-10-23.md`): 6 GPU jobs 15:49-16:06, 14 finalist designs + 2 epw checks, 0 failures, gpu-clean between jobs, nothing left (VRAM 327 MiB). epw converged at 12 kHz (osse_axi 6 vs 8: <= 0.058 dB DI, <= 0.31 deg; perturbed_osse_hv 6 vs 7: <= 0.007 dB, 0.06 deg). Rankings as in the compare tier (osse_axi > blend_osse_tractrix; perturbed_osse_hv > rosse_baseline). perturbed_osse_hv V is 11-22 deg wider than 60 deg at every band; rosse narrows to 59-60 deg H at 12 kHz. Peak VRAM 7,360 MiB above baseline at 6,049 dofs: 12 kHz verify is at the edge of the 8 GB card. f11 = 7,914 Hz: 8-12 kHz compares geometries, not drivers. GUI shows the verify runs (isobars to 12 kHz, 0 console errors).
+- **Surrogate retrain** on a verified dataset snapshot (14,091 records, 0 bad), torch on CPU: 3080 OSSE records (21 solve_failed excluded), held out **463 < 500** (indicative). 600 epochs: spearman 0.963 PASS, topk 11/20 FAIL, bw 1.48 PASS, di 0.21 PASS, invalid_accuracy 0.80 FAIL, flips 4 FAIL; 300 epochs worse (topk 0). GATES FAILED, model NOT used. `docs/evidence/CP-8d_retrain_2026-10-23.md`.
+- **D3 Ctrl-C**: code read first found two bugs in `search/campaign.py`: `subprocess.run` killed the Ctrl-C'd child mid clean-up and the leaderboard was never written; a campaign never cleared its Julia/BEAT hosts (snapshot only, contrary to GPU rule 6 and to the 2026-10-22 docs). Fixed + offline tests (`tests/test_search_campaign_interrupt.py`). Live: real CTRL_C_EVENT into a screen campaign's console after 7 rows: exit 130 in 1.4 s, lock gone, partial leaderboard + campaign.json (interrupted: true), child run.json `interrupted`, hosts cleared, no julia / worker_host left. `docs/evidence/BETA_READINESS.md` D.
+- Offline suite: **811 passed, 18 deselected, exit 0**.
 
 ## 2026-10-23 (local, ~15:10 EDT) - sculpt fill summary; collaborator handoff
 

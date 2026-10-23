@@ -65,6 +65,11 @@ meshes. Guard test: `tests/test_mesh_semipublic_api.py`.
    state (CLAUDE.md GPU rule 7): not a finding.
 3. **Band limit.** Every brief sets `band_hi_hz: 5500` (8 GB dof cap, `TOOLCHAIN.md`). Nothing above 5.5 kHz is
    solved or scored in screen mode. HF horns cannot be judged above that.
+   **12 kHz verify (P2, 2026-10-23):** `examples/briefs/*_12k.yaml` with `verify --brief` re-solves finalists to
+   12 kHz (25 points, verify cap 7,000 unchanged). epw convergence re-checked AT 12 kHz: osse_axi best epw 6 vs 8
+   max 0.058 dB DI / 0.055 dB on-axis / 0.31 deg beamwidth (5.6-12 kHz); perturbed_osse_hv best epw 6 vs 7 max
+   0.007 dB / 0.06 deg. Within the 0.1 dB / 1 deg bar. Finer meshes do not fit the cap (comparisons are down / one
+   step up). Results and the cross-mode caveat (f11 = 7,914 Hz): `docs/evidence/HF12K_VERIFY_2026-10-23.md`.
 4. **Boundary conditions.** Free-standing horn with an outer shell; no baffle, no enclosure; rigid lossless walls;
    no air absorption. The mesher's `infinite-baffle` mode (`families.MODES`) exists but is not enabled: a future
    brief option.
@@ -79,3 +84,18 @@ meshes. Guard test: `tests/test_mesh_semipublic_api.py`.
    horns (`hornlab_mesher/config_builder.py:837`). The brief envelope check uses the outer mesh bbox, shell included.
    The doctor's "outer wall clearance ... holding at 19.056 mm" warning concerns the outer shell only; the mesher
    states the acoustic (inner) surface is unaffected.
+
+## D. GPU lock, hygiene, Ctrl-C
+
+**D3 Ctrl-C on a GPU screen campaign (2026-10-23 16:07 EDT): PASS** (after a fix found by reading the code first).
+- Found: `campaign.run_job` used `subprocess.run`, which on Ctrl-C kills the child ~0.25 s later (mid clean-up) and
+  propagates `KeyboardInterrupt` past the leaderboard write; and a campaign never cleared its Julia / BEAT worker
+  hosts (only snapshots; GPU rule 6). Fixed: `Popen` with a 60 s grace for the child's own clean-up, partial job
+  recorded, `campaign.json` + `leaderboard.md` written marked INTERRUPTED, then `KeyboardInterrupt` re-raised (CLI
+  exit 130, lock released by its context manager); hosts cleared after every job. Offline tests
+  `tests/test_search_campaign_interrupt.py`.
+- Live test: `campaign --tier screen --families conical,exponential --brief axi_90x90_1in` in its own console
+  (scratch runs dir), real `CTRL_C_EVENT` via `GenerateConsoleCtrlEvent` after 7 solved rows (22 s). Campaign exit
+  **130 within 1.4 s**; lock file **gone**; leaderboard.md + campaign.json **written, interrupted: true** (conical
+  best J 35.025 so far); child run.json **status interrupted** (resumable); 2 host processes cleared by the campaign;
+  **no julia / worker_host left**.

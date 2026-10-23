@@ -370,6 +370,31 @@ class EntryResult:
 # ------------------------------------------------------------------ subprocess execution
 
 
+#: Seconds a Ctrl-C'd child search gets to finish its own clean-up before it is killed.
+INTERRUPT_GRACE_S = 60.0
+
+
+class CampaignInterrupted(Exception):
+    """Ctrl-C during a job; carries the partial job so the leaderboard can still be written."""
+
+    def __init__(self, job):
+        super().__init__("campaign interrupted")
+        self.job = job
+
+
+def _after_job_hygiene(hyg, entry: dict, seed: int) -> dict:
+    """Snapshot what the search left behind, then clear this project's Julia / BEAT worker hosts
+    (CLAUDE.md GPU rule 6: a run script ends by clearing its workers; each job starts clean)."""
+    snap = hyg.hygiene_snapshot(f"after:{entry['name']}:{seed}")
+    clear = getattr(hyg, "clear_julia", None)
+    if callable(clear) and snap.get("julia_project_procs"):
+        try:
+            snap["cleared_pids"] = clear()
+        except Exception as exc:  # noqa: BLE001 - hygiene must not end a campaign
+            log.warning("campaign: clearing hosts failed: %s", exc)
+    return snap
+
+
 def _build_search_argv(entry: dict, brief_path: Path, budget: int, seed: int,
                        runs_dir: Path, mode: str = "screen") -> list[str]:
     """Build the argv for a search subprocess."""
@@ -417,20 +442,38 @@ def run_job(entry: dict, brief_path: Path, seed: int, budget: int,
 
     log.info("campaign: running %s", " ".join(argv))
     t0 = time.time()
+    interrupted = False
     try:
-        r = subprocess.run(argv, capture_output=True, text=True)
-        job.returncode = r.returncode
-        job.stdout = r.stdout
-        job.stderr = r.stderr
+        with subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True) as proc:
+            try:
+                out, err = proc.communicate()
+            except KeyboardInterrupt:
+                # Ctrl-C reaches the child too (same console): let it finish its own clean-up (run.json
+                # 'interrupted', lock, detach) instead of killing it mid-write, as subprocess.run would.
+                interrupted = True
+                try:
+                    out, err = proc.communicate(timeout=INTERRUPT_GRACE_S)
+                except subprocess.TimeoutExpired:
+                    proc.kill()
+                    out, err = proc.communicate()
+        job.returncode, job.stdout, job.stderr = proc.returncode, out or "", err or ""
     except Exception as exc:  # noqa: BLE001
         job.returncode = -1
         job.error = str(exc)
         job.wall_seconds = time.time() - t0
-        job.hygiene_after = hyg.hygiene_snapshot(f"after:{entry['name']}:{seed}")
+        job.hygiene_after = _after_job_hygiene(hyg, entry, seed)
         return job
     job.wall_seconds = time.time() - t0
 
-    job.hygiene_after = hyg.hygiene_snapshot(f"after:{entry['name']}:{seed}")
+    job.hygiene_after = _after_job_hygiene(hyg, entry, seed)
+
+    if interrupted:
+        job.error = "interrupted (Ctrl-C)"
+        job.run_dir = find_run_dir(job.stdout, runs_dir, t0)
+        if job.run_dir is not None:
+            job.rows = read_ndjson(job.run_dir / "search.ndjson")
+            job.best_j = best_objective(job.rows)
+        raise CampaignInterrupted(job)
 
     if job.returncode != 0:
         job.error = f"subprocess exited {job.returncode}"
@@ -507,11 +550,19 @@ def run_campaign(
         n_keys = _count_keys(entry)
         budget = budget_for_tier(tier, n_keys, budget_override)
 
-        for seed in seeds:
-            log.info("campaign: %s seed %d budget %d tier %s", entry["name"], seed, budget, tier)
-            job = run_job(entry, brief_path, seed, budget, runs_dir, tier,
-                          hygiene_module=hyg)
-            er.jobs.append(job)
+        try:
+            for seed in seeds:
+                log.info("campaign: %s seed %d budget %d tier %s", entry["name"], seed, budget, tier)
+                job = run_job(entry, brief_path, seed, budget, runs_dir, tier,
+                              hygiene_module=hyg)
+                er.jobs.append(job)
+        except CampaignInterrupted as ci:
+            er.jobs.append(ci.job)
+            entry_results.append(er)
+            results = {"campaign_dir": campaign_dir, "brief": brief, "entries": entry_results,
+                       "catalog": catalog, "tier": tier, "seeds": seeds, "interrupted": True}
+            _write_campaign_output(results, campaign_dir)     # partial leaderboard, marked INTERRUPTED
+            raise KeyboardInterrupt(str(campaign_dir)) from None
 
         entry_results.append(er)
 
@@ -580,6 +631,7 @@ def _write_campaign_json(results: dict, path: Path) -> None:
         "tier": results["tier"],
         "brief_name": results["brief"].get("name"),
         "seeds": results["seeds"],
+        "interrupted": bool(results.get("interrupted")),
         "entries": entry_list,
         "timestamp_utc": datetime.now(timezone.utc).isoformat(),
     }
@@ -593,6 +645,10 @@ def _write_leaderboard_md(results: dict, path: Path) -> None:
         f"**Tier:** {results['tier']}  |  **Brief:** {results['brief'].get('name')}",
         f"**Seeds:** {results['seeds']}",
         f"",
+    ]
+    if results.get("interrupted"):
+        lines += ["**INTERRUPTED (Ctrl-C): partial results; entries after the interrupted one did not run.**", ""]
+    lines += [
         f"| Name | Group | Sym | Keys | Best J | Med J | Spread | Evals | Failures | Pinned | Note |",
         f"|------|-------|-----|------|--------|-------|--------|-------|----------|--------|------|",
     ]

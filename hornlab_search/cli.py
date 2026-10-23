@@ -1194,6 +1194,10 @@ def _campaign_body(args, runs_dir, run_campaign, print_compact_table) -> int:
             n_seeds=args.seeds,
             budget_override=args.budget,
         )
+    except KeyboardInterrupt as exc:
+        print(f"campaign INTERRUPTED: partial campaign.json + leaderboard.md in {exc}; "
+              f"the interrupted search can be continued with search --resume")
+        return 130
     except ValueError as exc:
         print(f"campaign FAILED: {exc}")
         return 1
