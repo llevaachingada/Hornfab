@@ -29,8 +29,8 @@ export const TERMS = {
               long: "Pressure on axis at 2 m for constant diaphragm acceleration, shown relative to its own mean. Not a calibrated SPL." },
   z_re:     { label: "Throat resistance", unit: "×ρc", short: "Re Z at the throat, normalised",
               long: "Real part of the specific acoustic impedance at the throat over ρc. Near 1 = the horn loads the driver like an infinite tube; it falls toward 0 below the horn's cut-off." },
-  polar:    { label: "Polar map", unit: "dB", short: "Level vs angle and frequency",
-              long: "Level relative to on-axis, −90° to +90°, one row per solved frequency; clipped at −40 dB. The −6 dB edge is the beamwidth." },
+  polar:    { label: "Directivity isobars", unit: "dB", short: "Level vs frequency and angle",
+              long: "Level relative to on-axis at 2 m: frequency across (log), angle up (+90° to −90°). Colours are 3 dB bands from −30 dB (navy) to 0 dB (dark red), and white lines mark every 3 dB; the heavier white line is −6 dB, the beamwidth edge. Hover for frequency / angle / level. Values between the solved frequencies are interpolated, so narrow features between them are not shown. Same style as Boundary Lab's isobar plots." },
 
   // ---- search vocabulary
   knob:     { label: "Shape parameter", unit: "", short: "A number the search varies",

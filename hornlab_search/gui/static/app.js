@@ -2,7 +2,7 @@
 // Single-page app with hash routing. No build step, vanilla ES modules.
 
 import { chart, heat, cmap, drawCbar, niceTicks, diFromCuts, groupColor,
-         el, NS, css, fmt, FT, DEFW, polarMap, wallSection, familyColor, measuredWidth } from "./charts.js";
+         el, NS, css, fmt, FT, DEFW, polarMap, wallSection, familyColor, measuredWidth, isobarMap } from "./charts.js";
 import { TERMS as GLOSSARY, TERM_ORDER, tip } from "./glossary.js";
 import { init3d } from "./view3d.js";
 import { viewEvolution } from "./evolution.js";
@@ -41,7 +41,10 @@ async function post(path, body) {
 
 // ── Routing ────────────────────────────────────────────────────────
 
-const ROOT = document.getElementById("view-root");
+// The view container is REPLACED on every navigation: a slow view that finishes after the user has
+// moved on then writes into a detached element instead of painting over the current page.
+let ROOT = document.getElementById("view-root");
+const currentRoot = () => ROOT;
 
 const ROUTES = [
   { re: /^#\/$|^#\/home$/,              fn: () => viewHome() },
@@ -68,6 +71,9 @@ function route() {
     clearStatusTimer();
   }
 
+  const fresh = document.createElement("div");
+  fresh.id = "view-root"; fresh.className = ROOT.className; fresh.setAttribute("role", "main");
+  ROOT.replaceWith(fresh); ROOT = fresh;
   const hash = location.hash || "#/home";
   const path = hash.split("?")[0];
   for (const { re, fn } of ROUTES) {
@@ -130,6 +136,14 @@ function betterPct(seed, best) {
   return `${Math.abs(p).toFixed(0)} % ${p > 0 ? "better" : "worse"}`;
 }
 
+/** Brief, non-blocking message in the corner (replaces alert()). */
+function showToast(msg, kind = "info") {
+  let box = document.getElementById("toasts");
+  if (!box) { box = document.createElement("div"); box.id = "toasts"; box.setAttribute("aria-live", "polite"); document.body.appendChild(box); }
+  const t = document.createElement("div"); t.className = "toast " + kind; t.textContent = msg;
+  box.appendChild(t); setTimeout(() => t.remove(), kind === "error" ? 9000 : 4500);
+}
+
 function pill(text, cls) {
   return `<span class="pill ${cls}">${esc(text)}</span>`;
 }
@@ -158,6 +172,7 @@ function dimStr(dims) {
 // ── View HOME ──────────────────────────────────────────────────────
 
 async function viewHome() {
+  const ROOT = currentRoot();     // this view's own container (see route())
   skel("Loading dashboard…");
   let statusData, campaigns, runs, leaders;
   try {
@@ -265,6 +280,17 @@ async function viewHome() {
     bestBriefHtml = `<div class="card"><div class="eyebrow">Best horn per brief</div><p class="muted">No scored campaigns yet. Run a screen campaign from Launch.</p></div>`;
   }
 
+  const guideHtml = `<details class="card guide" ${(() => { try { return localStorage.getItem("hl-guide-seen") ? "" : "open"; } catch { return "open"; } })()} id="guide">
+    <summary><b>How to use this</b> <span class="muted">— four steps from a target to a printable horn</span></summary>
+    <ol class="guide-steps">
+      <li><b>Pick a brief</b> (<a href="#/briefs">Briefs</a>): the target coverage, frequency band and maximum size. Save a copy to change it.</li>
+      <li><b>Choose horn families</b> (<a href="#/typologies">Typologies</a>): classical horns, hybrids and mesher families. Families that cannot meet the brief are greyed out.</li>
+      <li><b>Run a search</b> (<a href="#/launch">Launch</a>): start with <i>dry-run</i> (checks the shapes mesh, seconds), then <i>screen</i> (minutes per family). Only one GPU job runs at a time.</li>
+      <li><b>Read the results</b> (<a href="#/campaigns">Campaigns</a> → a family → its run): beamwidth and directivity against the target, the horn's size and cross-section, the time-lapse of the search, then <i>Export STEP for CAD</i>.</li>
+    </ol>
+    <p class="muted" style="margin:6px 0 0">Lower score = closer to the brief. Hover any underlined label for what it means, or open the <a href="#/glossary">Glossary</a>.</p>
+  </details>`;
+
   const quickLinks = `<div class="btn-row">
     <a class="btn" href="#/runs">Browse runs</a>
     <a class="btn" href="#/campaigns">Campaigns</a>
@@ -276,11 +302,15 @@ async function viewHome() {
       <div class="eyebrow">Dashboard</div>
       <h2>Home</h2>
     </div>
+    ${guideHtml}
     ${gpuCard}
-    ${timelineHtml}
     ${bestBriefHtml}
+    ${timelineHtml}
     ${quickLinks}
   </div>`;
+  document.getElementById("guide")?.addEventListener("toggle", e => {
+    try { if (!e.target.open) localStorage.setItem("hl-guide-seen", "1"); else localStorage.removeItem("hl-guide-seen"); } catch {}
+  });
 }
 
 // ── View 1: Status ─────────────────────────────────────────────────
@@ -294,6 +324,7 @@ function clearStatusTimer() {
 }
 
 async function viewStatus() {
+  const ROOT = currentRoot();     // this view's own container (see route())
   if (!_statusRendered) skel("Loading status…");
   let data;
   try { data = await api("/api/status"); }
@@ -303,7 +334,8 @@ async function viewStatus() {
   }
 
   if (!_statusRendered) {
-    renderStatus(data);
+    if (ROOT !== currentRoot()) return;   // the user navigated away while this loaded
+  renderStatus(data);
     _statusRendered = true;
   } else {
     updateStatusInPlace(data);
@@ -369,8 +401,8 @@ function renderStatus(data) {
   document.getElementById("btn-gpuclean").onclick = async () => {
     if (!confirm("Run gpu-clean? This kills stale Julia/BEAT processes.")) return;
     const r = await post("/api/gpu-clean", {});
-    if (r.error) alert("Error: " + r.error);
-    else alert("gpu-clean: " + (r.text || "done"));
+    if (r.error) showToast(r.error, "error");
+    else showToast("gpu-clean: " + (r.text || "done").trim().split(String.fromCharCode(10)).slice(-1)[0], "good");
     _statusRendered = false;
     viewStatus();
   };
@@ -468,6 +500,7 @@ function updateStatusInPlace(data) {
 // ── View 2: Campaigns list ─────────────────────────────────────────
 
 async function viewCampaignsList() {
+  const ROOT = currentRoot();     // this view's own container (see route())
   skel();
   let camps;
   try { camps = await api("/api/campaigns"); }
@@ -514,6 +547,7 @@ const TIER_DESC = {
 };
 
 async function viewCampaignDetail(id) {
+  const ROOT = currentRoot();     // this view's own container (see route())
   skel();
   let camp;
   try { camp = await api("/api/campaign/" + id); }
@@ -720,10 +754,12 @@ async function viewCampaignDetail(id) {
 // ── View 3: Runs list ──────────────────────────────────────────────
 
 async function viewRunsList() {
+  const ROOT = currentRoot();     // this view's own container (see route())
   skel();
   let runs;
   try { runs = await api("/api/runs"); }
   catch (e) { ROOT.innerHTML = errBanner(e.message); return; }
+  if (ROOT !== currentRoot()) return;   // the user navigated away while this loaded
   renderRunsList(runs);
 }
 
@@ -822,6 +858,7 @@ function renderRunsList(allRuns) {
 // ── View 3 detail: Run detail ──────────────────────────────────────
 
 async function viewRunDetail(id) {
+  const ROOT = currentRoot();     // this view's own container (see route())
   skel();
   let d;
   try { d = await api("/api/run/" + id); }
@@ -854,14 +891,15 @@ async function viewRunDetail(id) {
 
       <!-- Actions -->
       <div class="btn-row">
-        ${sum.has_report
-          ? `<a class="btn primary" href="/runs/${esc(id)}/report.html" target="_blank" rel="noopener">Open full report ↗</a>`
-          : `<button id="btn-gen-report">Generate report</button>`}
-        <button id="btn-step">Export STEP (top 3)</button>
         <a class="btn primary" href="#/run/${esc(id)}/evolution">▶ Evolution time-lapse</a>
         <a class="btn" href="#/run/${esc(id)}/3d">3D view</a>
         <a class="btn" href="#/compare?a=${esc(id)}">Compare with…</a>
+        <span id="report-slot">${sum.has_report
+          ? `<a class="btn" href="/runs/${esc(id)}/report.html" target="_blank" rel="noopener">Open full report ↗</a>`
+          : `<button id="btn-gen-report" title="Builds the detailed HTML report (about 30 s)">Make full report</button>`}</span>
+        <button id="btn-step" title="Writes closed STEP solids (mm) of the 3 best designs for CAD or 3D printing">Export STEP for CAD (top 3)</button>
       </div>
+      <div id="run-files" class="run-files"></div>
 
       <!-- Acoustic performance charts (designer order) -->
       <div class="grid2">
@@ -910,13 +948,10 @@ async function viewRunDetail(id) {
 
       <!-- Polar maps -->
       <div class="fig">
-        <h3>${tip("polar", "Polar maps")}</h3>
-        <div class="cap">Level relative to on-axis at 2 m, by angle (across) and frequency (up). White lines: −3 dB (dotted), −6 dB (solid, the beamwidth edge), −10 dB (dashed). One row per solved frequency.</div>
-        <div class="maps" id="polar-maps"></div>
-        <div class="map">
-          <canvas class="cbar" id="polar-cbar" width="400" height="10"></canvas>
-          <div class="lbl"><span>−40 dB</span><span>−20</span><span>−6</span><span>0 dB</span></div>
-        </div>
+        <div class="fig-head"><h3>${tip("polar", "Directivity (isobars)")}</h3>
+          <label class="evo-opt"><input type="checkbox" id="iso-start"> also show the starting design</label></div>
+        <div class="cap">Level relative to on-axis at 2 m, in 3 dB colour bands from −30 to 0 dB, with white contour lines every 3 dB (the heavier line is −6 dB: the beamwidth edge). Frequency across, angle up. Hover for a readout. Interpolated between the ${((d.best || {}).freqs || []).length} solved frequencies.</div>
+        <div class="maps iso-maps" id="polar-maps"></div>
       </div>
 
       <!-- Wall profile -->
@@ -1056,20 +1091,24 @@ async function viewRunDetail(id) {
     ...(B.profile ? [{ profile: B.profile, color: css("--best"), filled: true }] : []),
   ], { H: 320 });
 
-  // Polar maps with -3 / -6 / -10 dB isobars
+  // Directivity isobars (Boundary Lab style): best design H and V; the start design on request
   const mapsEl = document.getElementById("polar-maps");
-  mapsEl.innerHTML = "";
-  drawCbar(document.getElementById("polar-cbar"));
-  [["Best · horizontal", B.polar_h, B], ["Best · vertical", B.polar_v, B],
-   ["Start · horizontal", S.polar_h, S], ["Start · vertical", S.polar_v, S]].forEach(([lbl, rows, D2]) => {
-    if (!rows) return;
-    const d2 = document.createElement("div"); d2.className = "map";
-    const h = document.createElement("div"); h.className = "lbl"; h.innerHTML = `<span>${esc(lbl)}</span>`;
-    const sv = document.createElementNS(NS, "svg"); sv.setAttribute("class", "polar");
-    d2.appendChild(h); d2.appendChild(sv); mapsEl.appendChild(d2);
-    // draw after the grid has laid the cells out, so every map is measured at its real width
-    requestAnimationFrame(() => polarMap(sv, rows, D2.angles || [], D2.freqs || F));
-  });
+  function drawIsobars() {
+    mapsEl.innerHTML = "";
+    const withStart = document.getElementById("iso-start")?.checked && S.polar_h;
+    const plots = [["Best design · horizontal", B.polar_h, B], ["Best design · vertical", B.polar_v, B]];
+    if (withStart) plots.push(["Starting design · horizontal", S.polar_h, S], ["Starting design · vertical", S.polar_v, S]);
+    for (const [lbl, rows, D2] of plots) {
+      if (!rows) continue;
+      const sv = document.createElementNS(NS, "svg"); sv.setAttribute("class", "polar");
+      sv.setAttribute("role", "img"); sv.setAttribute("aria-label", lbl + " isobar plot");
+      mapsEl.appendChild(sv);
+      // drawn after layout, so each plot is measured at its real width
+      requestAnimationFrame(() => isobarMap(sv, rows, D2.angles || [], D2.freqs || F, { title: lbl, H: 300 }));
+    }
+  }
+  drawIsobars();
+  document.getElementById("iso-start").onchange = drawIsobars;
 
   // Convergence
   if (d.J && F.length) {
@@ -1137,28 +1176,47 @@ async function viewRunDetail(id) {
     sensT.innerHTML = "<tr><td class='muted'>No sensitivity data.</td></tr>";
   }
 
-  // Export STEP button
-  document.getElementById("btn-step").onclick = async () => {
-    const r = await post("/api/jobs", { kind: "export-step", args: { run: id, top: 3 } });
-    if (r.error) alert("Error: " + r.error);
-    else { alert(`Export job started: ${r.id}`); location.hash = "#/launch"; }
-  };
-
-  // Generate report button (if needed)
-  const rBtn = document.getElementById("btn-gen-report");
-  if (rBtn) {
-    rBtn.onclick = async () => {
-      rBtn.disabled = true; rBtn.textContent = "Generating…";
-      const r = await post("/api/jobs", { kind: "report", args: { run: id } });
-      if (r.error) { alert("Error: " + r.error); rBtn.disabled = false; rBtn.textContent = "Generate report"; }
-      else { location.hash = "#/launch"; }
-    };
+  // Files the user can take away: STEP downloads (after an export) and the full report.
+  function renderFiles(files) {
+    const box = document.getElementById("run-files");
+    if (!box) return;
+    box.innerHTML = files && files.length
+      ? `<span class="muted">STEP solids (mm, full horn, throat open; add the driver flange in CAD):</span> ` +
+        files.map(f => `<a class="pill" href="/runs/${esc(id)}/step/${encodeURIComponent(f)}" download>↓ ${esc(f.replace(/^.*_(rank\d+)_.*$/, "$1"))}</a>`).join(" ")
+      : "";
   }
+  renderFiles(d.step_files);
+
+  // Run a CPU job (report / STEP export) in place: progress on the button, result on this page.
+  async function runInline(btn, kind, args, busyLabel, onDone) {
+    const label = btn.textContent;
+    btn.disabled = true;
+    const r = await post("/api/jobs", { kind, args });
+    if (r.error) { btn.disabled = false; btn.textContent = label; showToast("Could not start: " + r.error, "error"); return; }
+    const t0 = Date.now();
+    while (ROOT === currentRoot()) {
+      btn.textContent = `${busyLabel} ${Math.round((Date.now() - t0) / 1000)} s`;
+      await new Promise(res => setTimeout(res, 1500));
+      let j; try { j = await api("/api/job/" + r.id); } catch { continue; }
+      if (j.status === "running") continue;
+      btn.disabled = false; btn.textContent = label;
+      if (j.status === "done") onDone(j); else showToast(`${kind} failed: ` + ((j.log_tail || []).slice(-1)[0] || j.status), "error");
+      return;
+    }
+  }
+  document.getElementById("btn-step").onclick = e => runInline(e.currentTarget, "export-step", { run: id, top: 3 }, "Exporting…",
+    async () => { const dd = await api("/api/run/" + id); renderFiles(dd.step_files); showToast("STEP files ready: download them below the buttons.", "good"); });
+  const rBtn = document.getElementById("btn-gen-report");
+  if (rBtn) rBtn.onclick = e => runInline(e.currentTarget, "report", { run: id }, "Building report…", () => {
+    document.getElementById("report-slot").innerHTML = `<a class="btn" href="/runs/${esc(id)}/report.html" target="_blank" rel="noopener">Open full report ↗</a>`;
+    showToast("Report ready.", "good");
+  });
 }
 
 // ── View 3 / 7: 3D view ────────────────────────────────────────────
 
 async function viewRun3D(id) {
+  const ROOT = currentRoot();     // this view's own container (see route())
   skel();
   let runD, meshD;
   try { runD = await api("/api/run/" + id); }
@@ -1191,6 +1249,7 @@ async function viewRun3D(id) {
 // ── View 4: Compare ────────────────────────────────────────────────
 
 async function viewCompare() {
+  const ROOT = currentRoot();     // this view's own container (see route())
   skel();
   let allRuns = [];
   try { allRuns = await api("/api/runs"); } catch {}
@@ -1313,6 +1372,7 @@ async function viewCompare() {
 // ── View 5: Briefs ─────────────────────────────────────────────────
 
 async function viewBriefs() {
+  const ROOT = currentRoot();     // this view's own container (see route())
   skel();
   let briefs;
   try { briefs = await api("/api/briefs"); }
@@ -1512,6 +1572,7 @@ async function showBriefDetail(b, allBriefs) {
 let _launchPollTimer = null;
 
 async function viewLaunch() {
+  const ROOT = currentRoot();     // this view's own container (see route())
   skel();
   let briefs = [], jobs = [], configs = [], statusData = null;
   try {
@@ -1523,6 +1584,7 @@ async function viewLaunch() {
     ]);
   } catch (e) { ROOT.innerHTML = errBanner(e.message); return; }
   const typs = await api("/api/typologies").catch(() => []);
+  if (ROOT !== currentRoot()) return;   // the user navigated away while this loaded
   renderLaunch(briefs, jobs, configs, statusData, typs);
 }
 
@@ -1870,7 +1932,7 @@ function renderJobs(jobs) {
     btn.onclick = async () => {
       if (!confirm("Cancel this job?")) return;
       const r = await post("/api/job/" + btn.dataset.jobId + "/cancel", {});
-      if (r.error) alert("Error: " + r.error);
+      if (r.error) showToast(r.error, "error");
       refreshJobs();
     };
   });
@@ -1879,6 +1941,7 @@ function renderJobs(jobs) {
 // ── View G: Glossary ───────────────────────────────────────────────
 
 function viewGlossary() {
+  const ROOT = currentRoot();     // this view's own container (see route())
   ROOT.innerHTML = `
     <div class="stack" style="gap:24px">
       <div>
@@ -1946,6 +2009,7 @@ const TYP_GROUP = {
 };
 
 async function viewTypologies() {
+  const ROOT = currentRoot();     // this view's own container (see route())
   skel();
   let typs, briefs;
   try { [typs, briefs] = await Promise.all([api("/api/typologies"), api("/api/briefs")]); }

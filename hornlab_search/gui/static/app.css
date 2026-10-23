@@ -471,3 +471,15 @@ svg.camp-sec { width: 100%; height: 130px; display: block; }
 .evo-kval { text-align: right; color: var(--muted); }
 @media (prefers-reduced-motion: reduce) { .evo-kmark { transition: none; } }
 .evo-grid .fig { align-content: start; }
+.iso-maps { grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr)) !important; gap: 16px; }
+svg.polar text { font-size: 11px; }
+svg .iso-title { font-family: var(--f-body); font-size: 12px; font-weight: 600; fill: var(--ink); }
+.run-files { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 0.82rem; }
+.run-files:empty { display: none; }
+.run-files a.pill { text-decoration: none; }
+#toasts { position: fixed; right: 16px; bottom: 16px; display: grid; gap: 8px; z-index: 50; max-width: min(420px, calc(100vw - 32px)); }
+.toast { padding: 10px 14px; border-radius: 6px; background: var(--surface); border: 1px solid var(--rule);
+         box-shadow: 0 6px 20px rgba(0,0,0,0.25); font-size: 0.88rem; }
+.toast.good { border-color: var(--good); } .toast.error { border-color: var(--bad); }
+.guide summary { cursor: pointer; list-style: revert; }
+.guide-steps { margin: 10px 0 0; padding-left: 1.3em; display: grid; gap: 6px; font-size: 0.9rem; }

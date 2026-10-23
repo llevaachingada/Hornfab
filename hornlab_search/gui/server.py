@@ -206,13 +206,24 @@ def make_handler(app: App, port: int):
             self._send(200, p.read_bytes(), ctype + ("; charset=utf-8" if ctype.startswith("text") else ""))
 
         def _report(self, path: str) -> None:
-            parts = path.strip("/").split("/")          # runs/<id>/report.html
-            if len(parts) != 3 or parts[2] != "report.html" or not D.RUN_ID.match(parts[1]):
-                raise FileNotFoundError(path)
-            p = app.runs / parts[1] / "report.html"
-            if not p.is_file():
-                raise FileNotFoundError(path)
-            self._send(200, p.read_bytes(), "text/html; charset=utf-8")
+            """Only two kinds of run files are served: runs/<id>/report.html and runs/<id>/step/<name>.step."""
+            parts = [unquote(x) for x in path.strip("/").split("/")]
+            if len(parts) == 3 and parts[2] == "report.html" and D.RUN_ID.match(parts[1]):
+                p = app.runs / parts[1] / "report.html"
+                if p.is_file():
+                    return self._send(200, p.read_bytes(), "text/html; charset=utf-8")
+            if len(parts) == 4 and parts[2] == "step" and D.RUN_ID.match(parts[1]) and D.STEP_NAME.match(parts[3]):
+                p = app.runs / parts[1] / "step" / parts[3]
+                if p.is_file():
+                    body = p.read_bytes()
+                    self.send_response(200)
+                    self.send_header("Content-Type", "application/step")
+                    self.send_header("Content-Disposition", f'attachment; filename="{parts[3]}"')
+                    self.send_header("Content-Length", str(len(body)))
+                    self.end_headers()
+                    self.wfile.write(body)
+                    return
+            raise FileNotFoundError(path)
 
     return Handler
 

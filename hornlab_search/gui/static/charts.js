@@ -273,3 +273,133 @@ export function wallSection(svg, designs, { H = 300, compact = false, extent = n
     }
   }
 }
+
+// ── Isobar (directivity) plot in the Boundary Lab style ───────────────────────────────────────────
+// Frequency on a log x-axis, angle on y, level relative to on-axis in DISCRETE 3 dB colour bands from
+// -30 to 0 dB (10 bands, navy -> dark red), white contour lines every 3 dB (-6 dB drawn heavier: the
+// beamwidth edge), a labelled colour bar, and a hover crosshair that reads frequency / angle / dB.
+export const ISOBAR_COLORS = ["#00008F", "#0000FF", "#006FFF", "#00DFFF", "#4FFFBF",
+                              "#BFFF4F", "#FFDF00", "#FF6F00", "#FF0000", "#8F0000"];
+export const ISOBAR_MIN = -30, ISOBAR_MAX = 0, ISOBAR_STEP = 3;
+
+function bandColor(v) {
+  const n = ISOBAR_COLORS.length;
+  const t = (Math.min(Math.max(v, ISOBAR_MIN), ISOBAR_MAX - 1e-9) - ISOBAR_MIN) / (ISOBAR_MAX - ISOBAR_MIN);
+  return ISOBAR_COLORS[Math.min(n - 1, Math.floor(t * n))];
+}
+function hexRgb(h) { const n = parseInt(h.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; }
+
+/** Bilinear sample of rows[fi][ai] at fractional indices (fi, ai). */
+function sample(rows, fi, ai) {
+  const f0 = Math.max(0, Math.min(rows.length - 1, Math.floor(fi))), f1 = Math.min(rows.length - 1, f0 + 1);
+  const a0 = Math.max(0, Math.min(rows[0].length - 1, Math.floor(ai))), a1 = Math.min(rows[0].length - 1, a0 + 1);
+  const tf = fi - f0, ta = ai - a0;
+  const g = (f, a) => { const v = rows[f][a]; return v == null ? ISOBAR_MIN - 10 : v; };
+  return (g(f0, a0) * (1 - ta) + g(f0, a1) * ta) * (1 - tf) + (g(f1, a0) * (1 - ta) + g(f1, a1) * ta) * tf;
+}
+
+// Marching-squares segment table: which cell edges a contour crosses for each corner pattern.
+const MS = { 1: ["l", "t"], 2: ["t", "r"], 3: ["l", "r"], 4: ["r", "b"], 5: ["l", "t", "r", "b"], 6: ["t", "b"], 7: ["l", "b"],
+             8: ["l", "b"], 9: ["t", "b"], 10: ["t", "r", "l", "b"], 11: ["r", "b"], 12: ["l", "r"], 13: ["t", "r"], 14: ["l", "t"] };
+
+export function isobarMap(svg, rows, angles, freqs, { H = 300, title = "" } = {}) {
+  svg.innerHTML = "";
+  if (!rows || !rows.length || !angles || !angles.length || !freqs || freqs.length < 2) return;
+  const W = measuredWidth(svg, 520);
+  const m = { l: 46, r: 64, t: title ? 22 : 10, b: 34 };
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.setAttribute("width", W); svg.setAttribute("height", H);
+  svg.dataset.chart = "1";
+  const pw = W - m.l - m.r, ph = H - m.t - m.b;
+  const lf = freqs.map(Math.log10), lf0 = lf[0], lf1 = lf[lf.length - 1];
+  const a0 = angles[0], a1 = angles[angles.length - 1];
+  const X = f => m.l + (Math.log10(f) - lf0) / (lf1 - lf0) * pw;
+  const Y = a => m.t + (a1 - a) / (a1 - a0) * ph;                     // +90 at the top
+  // fractional row index of a log-frequency (rows are on the solved, log-spaced grid)
+  const fIndex = l => { let i = 0; while (i < lf.length - 2 && l > lf[i + 1]) i++; return i + Math.max(0, Math.min(1, (l - lf[i]) / (lf[i + 1] - lf[i]))); };
+  const aIndex = a => (a - a0) / (a1 - a0) * (angles.length - 1);
+  // raster: smooth (bilinear) data shown in discrete colour bands, one canvas pixel per ~2 screen pixels
+  const cw = Math.max(80, Math.round(pw / 2)), chh = Math.max(60, Math.round(ph / 2));
+  const cv = document.createElement("canvas"); cv.width = cw; cv.height = chh;
+  const ctx = cv.getContext("2d"), img = ctx.createImageData(cw, chh);
+  const vals = new Float32Array(cw * chh);
+  for (let py = 0; py < chh; py++) {
+    const ai = aIndex(a1 - (py + 0.5) / chh * (a1 - a0));
+    for (let px = 0; px < cw; px++) {
+      const v = sample(rows, fIndex(lf0 + (px + 0.5) / cw * (lf1 - lf0)), ai);
+      vals[py * cw + px] = v;
+      const c = hexRgb(bandColor(v)), o = (py * cw + px) * 4;
+      img.data[o] = c[0]; img.data[o + 1] = c[1]; img.data[o + 2] = c[2]; img.data[o + 3] = 255;
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+  el("image", { href: cv.toDataURL(), x: m.l, y: m.t, width: pw, height: ph, preserveAspectRatio: "none" }, svg);
+  // contour lines every 3 dB (marching squares on the raster grid), white as in Boundary Lab
+  const sx = pw / cw, sy = ph / chh;
+  for (let L = ISOBAR_MIN + ISOBAR_STEP; L < ISOBAR_MAX; L += ISOBAR_STEP) {
+    let d = "";
+    for (let py = 0; py < chh - 1; py++) for (let px = 0; px < cw - 1; px++) {
+      const v0 = vals[py * cw + px], v1 = vals[py * cw + px + 1], v2 = vals[(py + 1) * cw + px + 1], v3 = vals[(py + 1) * cw + px];
+      const c = (v0 > L) | ((v1 > L) << 1) | ((v2 > L) << 2) | ((v3 > L) << 3);
+      if (c === 0 || c === 15) continue;
+      const it = (va, vb) => (L - va) / (vb - va);
+      const P = { t: () => [px + it(v0, v1), py], r: () => [px + 1, py + it(v1, v2)],
+                  b: () => [px + it(v3, v2), py + 1], l: () => [px, py + it(v0, v3)] };
+      const segs = MS[c];
+      for (let k = 0; k < segs.length; k += 2) {
+        const p1 = P[segs[k]](), p2 = P[segs[k + 1]]();
+        d += "M" + (m.l + (p1[0] + 0.5) * sx).toFixed(1) + "," + (m.t + (p1[1] + 0.5) * sy).toFixed(1) +
+             "L" + (m.l + (p2[0] + 0.5) * sx).toFixed(1) + "," + (m.t + (p2[1] + 0.5) * sy).toFixed(1);
+      }
+    }
+    if (d) el("path", { d, fill: "none", stroke: "#fff", "stroke-opacity": L === -6 ? 0.95 : 0.55,
+                        "stroke-width": L === -6 ? 1.7 : 0.8 }, svg);
+  }
+  // grid and axes
+  const g = el("g", {}, svg);
+  for (const t of [200, 500, 1000, 2000, 5000, 10000, 20000]) {
+    if (Math.log10(t) < lf0 - 1e-9 || Math.log10(t) > lf1 + 1e-9) continue;
+    el("line", { x1: X(t), x2: X(t), y1: m.t, y2: m.t + ph, stroke: "#808080", "stroke-opacity": 0.6, "stroke-width": 0.8 }, g);
+    el("text", { x: X(t), y: m.t + ph + 14, "text-anchor": "middle" }, svg).textContent = t >= 1000 ? t / 1000 + "k" : String(t);
+  }
+  for (let a = -90; a <= 90; a += 30) {
+    if (a < a0 || a > a1) continue;
+    el("line", { x1: m.l, x2: m.l + pw, y1: Y(a), y2: Y(a), stroke: "#808080", "stroke-opacity": a === 0 ? 0.9 : 0.6, "stroke-width": 0.8 }, g);
+    el("text", { x: m.l - 6, y: Y(a) + 3, "text-anchor": "end" }, svg).textContent = (a > 0 ? "+" : "") + a + "°";
+  }
+  el("rect", { x: m.l, y: m.t, width: pw, height: ph, fill: "none", stroke: css("--rule") }, svg);
+  el("text", { x: m.l + pw / 2, y: H - 4, "text-anchor": "middle" }, svg).textContent = "Frequency (Hz)";
+  if (title) el("text", { x: m.l, y: 14, class: "iso-title" }, svg).textContent = title;
+  // colour bar: the same discrete bands, 3 dB ticks
+  const bx = m.l + pw + 12, bw = 12, bandH = ph / ISOBAR_COLORS.length;
+  ISOBAR_COLORS.forEach((c, i) => el("rect", { x: bx, y: m.t + ph - (i + 1) * bandH, width: bw, height: bandH + 0.5, fill: c }, svg));
+  for (let L = ISOBAR_MIN; L <= ISOBAR_MAX; L += ISOBAR_STEP) {
+    const y = m.t + ph - (L - ISOBAR_MIN) / (ISOBAR_MAX - ISOBAR_MIN) * ph;
+    el("line", { x1: bx + bw, x2: bx + bw + 3, y1: y, y2: y, stroke: css("--muted") }, svg);
+    el("text", { x: bx + bw + 5, y: y + 3 }, svg).textContent = String(L);
+  }
+  el("text", { x: bx, y: m.t - 3 }, svg).textContent = "dB";
+  // hover crosshair with a frequency / angle / level readout (Boundary Lab has the same)
+  const cross = el("g", { style: "pointer-events:none;display:none" }, svg);
+  const vl = el("line", { stroke: "#fff", "stroke-width": 1, "stroke-dasharray": "3 2" }, cross);
+  const hl = el("line", { stroke: "#fff", "stroke-width": 1, "stroke-dasharray": "3 2" }, cross);
+  const box = el("rect", { rx: 3, fill: "rgba(0,0,0,0.78)" }, cross);
+  const txt = el("text", { style: "fill:#fff;font-size:11px" }, cross);
+  const hit = el("rect", { x: m.l, y: m.t, width: pw, height: ph, fill: "transparent", style: "cursor:crosshair" }, svg);
+  const move = ev => {
+    const r = svg.getBoundingClientRect(), k = W / r.width;
+    const x = (ev.clientX - r.left) * k, y = (ev.clientY - r.top) * k;
+    if (x < m.l || x > m.l + pw || y < m.t || y > m.t + ph) { cross.style.display = "none"; return; }
+    const f = Math.pow(10, lf0 + (x - m.l) / pw * (lf1 - lf0)), a = a1 - (y - m.t) / ph * (a1 - a0);
+    const v = sample(rows, fIndex(Math.log10(f)), aIndex(a));
+    vl.setAttribute("x1", x); vl.setAttribute("x2", x); vl.setAttribute("y1", m.t); vl.setAttribute("y2", m.t + ph);
+    hl.setAttribute("x1", m.l); hl.setAttribute("x2", m.l + pw); hl.setAttribute("y1", y); hl.setAttribute("y2", y);
+    txt.textContent = (f >= 1000 ? (f / 1000).toFixed(2) + " kHz" : Math.round(f) + " Hz") + " · " +
+      (a >= 0 ? "+" : "") + a.toFixed(0) + "° · " + (v < ISOBAR_MIN ? "below " + ISOBAR_MIN : v.toFixed(1)) + " dB";
+    const tx = x + 190 > m.l + pw ? x - 188 : x + 10, ty = y < m.t + 24 ? y + 22 : y - 8;
+    txt.setAttribute("x", tx + 6); txt.setAttribute("y", ty);
+    box.setAttribute("x", tx); box.setAttribute("y", ty - 13); box.setAttribute("width", 178); box.setAttribute("height", 18);
+    cross.style.display = "";
+  };
+  hit.addEventListener("mousemove", move);
+  hit.addEventListener("mouseleave", () => { cross.style.display = "none"; });
+}

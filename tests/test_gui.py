@@ -399,3 +399,16 @@ def test_evolution_frames_cache_and_growth(repo):
         fh.write(json.dumps(_row(9, "aaaaaaaaaaaa", True, 1.0, 120.0)) + "\n")
     e2 = D.evolution(runs, RID)
     assert len(e2["frames"]) == 10 and e2["frames"][9]["improved"] and e2["frames"][9]["best_j"] == 1.0
+
+
+def test_step_files_listed_and_served_only_by_strict_name(server, repo):
+    step = repo / "runs" / RID / "step"
+    step.mkdir()
+    (step / "fake_rank1_aaaaaaaaaaaa.step").write_text("ISO-10303-21;")
+    (step / "notes.txt").write_text("x")
+    code, body = _req(server + f"/api/run/{RID}")
+    assert body["step_files"] == ["fake_rank1_aaaaaaaaaaaa.step"]
+    with urllib.request.urlopen(server + f"/runs/{RID}/step/fake_rank1_aaaaaaaaaaaa.step", timeout=10) as r:
+        assert r.status == 200 and r.read() == b"ISO-10303-21;" and "attachment" in r.headers["Content-Disposition"]
+    assert _req(server + f"/runs/{RID}/step/notes.txt")[0] == 404
+    assert _req(server + f"/runs/{RID}/step/..%2F..%2Fconfig.yaml")[0] == 404

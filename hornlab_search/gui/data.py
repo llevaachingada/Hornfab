@@ -19,6 +19,7 @@ import yaml
 RUN_ID = re.compile(r"^[0-9]{8}T[0-9]{6}Z-[a-z]+-[0-9a-f]{6}$")
 CAMPAIGN_ID = re.compile(r"^campaign_[0-9]{8}T[0-9]{6}Z$")
 HASH = re.compile(r"^[0-9a-f]{6,40}$")
+STEP_NAME = re.compile(r"^[A-Za-z0-9_\-]{1,80}_rank\d+_[0-9a-f]{6,40}\.step$")
 BRIEF_NAME = re.compile(r"^[A-Za-z0-9_\-]{1,64}$")
 TOP_K = 6                       # "pinned" = most of the TOP_K best designs within 2 % of a bound
 PIN_FRAC = 0.02
@@ -374,6 +375,8 @@ def run_detail(runs: Path, run_id: str) -> dict:
         "best": design_curves(d, best_hash) if best_hash else None,
         "seed": design_curves(d, seed_hash) if seed_ok and seed_hash and seed_hash != best_hash else None,
         "command": (_read_json(d / "run.json") or {}).get("command"),
+        "step_files": sorted(p.name for p in (d / "step").glob("*.step") if STEP_NAME.match(p.name))
+                      if (d / "step").is_dir() else [],
     })
 
 
