@@ -1590,12 +1590,15 @@ async function viewLaunch() {
 
 function renderLaunch(briefs, jobs, configs, statusData, typs = []) {
   const lock = (statusData || {}).gpu_lock;
-  const gpuBusy = lock && lock.alive;
-  const busyNote = gpuBusy
+  // Live: re-read from /api/status while the page is open (the server re-checks on every launch).
+  let gpuBusy = !!(lock && lock.alive);
+  const ROOT_LAUNCH = currentRoot();
+  const busyNoteHtml = (lk) => (lk && lk.alive)
     ? `<div class="gpu-busy-note" role="status">
-        ⚠ GPU busy: ${esc(lock.user || "")} running <em>${esc(lock.command || "")}</em> since ${esc(timeSince(lock.start_time))}.
+        ⚠ GPU busy: ${esc(lk.user || "")} running <em>${esc(lk.command || "")}</em> since ${esc(timeSince(lk.start_time))}.
         GPU actions disabled. Dry-run always available.
       </div>` : "";
+  const busyNote = busyNoteHtml(lock);
 
   const briefOpts = briefs.map(b => `<option value="${esc(b.path)}" data-name="${esc(b.name)}">${esc(b.name)}${b.kind === "user" ? " (yours)" : ""}</option>`).join("");
   const pre = new URLSearchParams((location.hash.split("?")[1]) || "");
@@ -1623,7 +1626,7 @@ function renderLaunch(briefs, jobs, configs, statusData, typs = []) {
       <div>
         <div class="eyebrow">Launch jobs</div>
         <h2>Launch</h2>
-        ${busyNote}
+        <div id="launch-busy">${busyNote}</div>
       </div>
       <div class="card stack" style="gap:16px">
         <h3>Job type</h3>
@@ -1662,7 +1665,7 @@ function renderLaunch(briefs, jobs, configs, statusData, typs = []) {
 
         <!-- Search form -->
         <div id="launch-form-search" class="launch-form stack" style="display:none;gap:12px" ${gpuBusy ? "aria-disabled='true'" : ""}>
-          ${gpuBusy ? `<div class="alert warn">GPU busy — search disabled while a job is running.</div>` : ""}
+          <div id="search-busy" class="alert warn" ${gpuBusy ? "" : "style='display:none'"}>GPU busy — search disabled while a job is running.</div>
           <div class="form-grid">
             <label for="lf-config">Config</label>
             <select id="lf-config">${configSelectOpts}</select>
@@ -1879,9 +1882,23 @@ function renderLaunch(briefs, jobs, configs, statusData, typs = []) {
 
   // Poll running jobs every 2s
   clearInterval(_launchPollTimer);
+  let tick = 0;
   _launchPollTimer = setInterval(async () => {
     if (!location.hash.startsWith("#/launch")) { clearInterval(_launchPollTimer); _launchPollTimer = null; return; }
     refreshJobs();
+    if (++tick % 3) return;                               // GPU state every ~6 s
+    const st = await api("/api/status").catch(() => null);
+    if (!st || ROOT_LAUNCH !== currentRoot()) return;
+    const lk = st.gpu_lock, busy = !!(lk && lk.alive);
+    if (busy === gpuBusy) return;
+    gpuBusy = busy;
+    const nb = document.getElementById("launch-busy");
+    if (nb) nb.innerHTML = busyNoteHtml(lk);
+    const sb = document.getElementById("search-busy");
+    if (sb) sb.style.display = busy ? "" : "none";
+    const lb = document.getElementById("btn-launch");
+    if (lb) { lb.disabled = busy && currentType === "search"; lb.title = lb.disabled ? "GPU busy — only dry-run is available" : ""; }
+    showToast(busy ? "GPU is now busy: GPU actions disabled" : "GPU is free: GPU actions available", busy ? "info" : "good");
   }, 2000);
 }
 
