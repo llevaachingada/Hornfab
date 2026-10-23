@@ -3,14 +3,17 @@
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
 ## Status
-- **Wave:** 0, 1, 2 and 3 complete; Phase 2 Stage A code landed (synthetic-tested only) (tasks 04-08 done; CP-7a-f all PASS). This is the end of the plan's Wave ladder.
-- **Last checkpoints:** CP-7 (senior physics gate) GREEN - noise floor 0.039 dB. CP-8a PASS, CP-8b PASS; CP-8c CLOSED (PARTIAL on the literal four-families criterion; verify OK) - 3556 records / 8 shards / 587.2 MB, families OSSE 2034 + ICW 800 + FREEFORM 722 (R-OSSE: no example config), duplicate designs 14; campaign wall ~14.9 h; verify OK 0 bad / 0 bad arrays. Issue #13 hardening MERGED TO MAIN (2026-10-22: FF to 6d1d5c7 includes e0b9b61 + 11304f6 + cloud 152a829).
-- **Next action:** **Do NOT re-run CP-8d** — it already ran and FAILED its gates (2026-10-14; held-out 285 < 500, model not used); re-run only after the OSSE data top-up (senior report s3 item 5, needs user OK). HANDOFF 6b DONE 2026-10-22 (all 5 steps PASS; FREEFORM quarter == full within 0.0043 dB; sculpt 60: J 30.945 -> 24.213; sculpt 400: -> 16.789 with 3 anchors PINNED). STEP-export CLI DONE. Awaiting user decisions (senior report s4 + review): revised priority, OSSE top-up, bound widening (OSSE `n`, ICW `hold_end`/`kappa0`, throat_adapter 3 keys, sculpt anchors / monotone reparametrisation), objective normalisation. Next code work (no GPU): BL-1 once approved. Boundary Lab, top-up and bound widening NOT started.
-- **MERGE NOW:** DONE (2026-10-22, local merge lane): `main` fast-forwarded 2a7bafb -> 6d1d5c7 (ccr-455d2184-yj5zk4 tip), zero conflicts, oracle sign-off, full offline suite 533 PASS in a sandbox worktree at the merged tree. See the 2026-10-22 entry.
-- **Proposed next (cloud):** Boundary Lab 0.5.0 integration, `docs/BOUNDARY_LAB_INTEGRATION_PLAN.md` (awaiting user approval; nothing started).
-- **Merge + test tonight:** DONE 2026-10-22 ~12:50 EDT: PR #15 fast-forwarded into `main` (265133f); section-4 plan run: offline 559 PASS, doctor 10/10, runtime block + report-only line present, failure kinds unchanged, no mesh-step slowdown. Evidence `docs/evidence/BL_LEARNINGS_GPU.md`. Item 4 (early rejection) offline replay: saves < 0.1 % GPU as specified (`docs/evidence/EARLY_REJECTION_REPLAY.md`) -> recommend not implementing.
-- **Typology work (next):** implement `docs/TYPOLOGY_PLAN.md` (classical typologies via FREEFORM anchors, hybrids, `campaign` family selection). Solver re-verified 2026-10-22 (GPU 18/18, analytic PASS, crosscheck 0.039 dB).
-- **Blockers:** none. Issue #13: fixes now MERGED on main (152a829 carried the cloud reconciliation; oracle sign-off 2026-10-22); GitHub issue kept open for owner closure. Issues #1-#11 closed.
+- **Phase:** pre-beta hardening (HANDOFF_BETA A-E done except D3; F rehearsal and G session pack in progress). Waves 0-3 and CP-7 complete; CP-8a/b PASS, CP-8c CLOSED, CP-8d FAILED 2026-10-14 (retrain pending, see below).
+- **Running on the GPU box (owner's machine), 2026-10-23 evening:** overnight queue `tools/overnight/queue_20261022.ps1` (sculpt searches until the 15:45 start cutoff, done ~16:00), then the P2 12 kHz finalist verify pass (6 jobs, one at a time). Results land in `runs/` (local, gitignored) and are written up in `docs/evidence/HF12K_VERIFY_2026-10-23.md` (not yet written).
+- **Next (owner's orchestrator, in order):** P2 12 kHz verify + epw check -> surrogate retrain on a dataset copy (expected GATES REFUSED: ~462 held out < 500 at the plan's 15 % holdout; ~250 more OSSE records needed = owner decision) -> D3 Ctrl-C test -> F timed rehearsal (CLI + GUI) -> G session plan numbers.
+- **Collaborator handoff:** `docs/HANDOFF_COLLABORATOR_2026-10-23.md` (what is safe to edit tonight, what not to touch).
+- **Open owner decisions:** bound proposals (`docs/evidence/TYPOLOGY_COMPARE_2026-10-23.md`; sculpt anchors pinned too), P1 fused CUDA Burton-Miller (post-beta), mesher bump (post-beta), more rosse seeds, surrogate top-up.
+- **Blockers:** none. Issue #13 fixes merged (awaiting owner close).
+
+## 2026-10-23 (local, ~15:10 EDT) - sculpt fill summary; collaborator handoff
+
+- Overnight sculpt fill (freeform_sculpt, 150 evals each, cma seeds 5101-5120 finished, 5121 running at 15:00): every seed improved on the seed design (J 30.945) to 17.23-22.01 (best 17.234, seed 5112; median ~18.5); failures only 0-2 `invalid_geometry` per run, **no solver failures**. Pinned at the best design (within 2 % of a bound): `profileH/V.points.3.1` at lo in 14 of 20 runs; `mouthAngleDeg` at hi (H or V) in 4; `points.1.1` at lo in 5; `points.4.1` at hi in 2. Same picture as the 400-eval run (disjoint per-anchor boxes bind): bound / reparametrisation decision stays with the owner.
+- `docs/HANDOFF_COLLABORATOR_2026-10-23.md` for the collaborator pulling tonight; status block refreshed.
 
 ## 2026-10-23 (local, ~14:35 EDT) - GUI Launch GPU state live; beta session plan GUI-first; 12 kHz pre-mesh
 

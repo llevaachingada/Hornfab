@@ -1,7 +1,7 @@
 # ISSUES
 
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
-Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-10-22 (local GPU box, solver re-verification + typology plan; no GitHub issue state changed).
+Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-10-23 (local GPU box, pre-beta hardening; no GitHub issue state changed).
 
 | ID | Title | Status | Owner | Plan ref |
 |---|---|---|---|---|
@@ -137,6 +137,7 @@ TO-DO (no GitHub issue yet; owner / plan ref):
 - [ ] Boundary Lab BL-1 export (cloud; `docs/BOUNDARY_LAB_INTEGRATION_PLAN.md`).
 - [x] `compare` IndexError on empty frequency list: fixed 2026-10-23 (merged).
 - [x] `verify --brief` was parsed and silently IGNORED (found 2026-10-23 preparing P2; would have re-verified at 5.5 kHz). Fixed: the brief is applied and the results go to their own run dir `runs/<ts>-verify-<id>` (listed by the GUI; `run.json.verify_of`); `verify` without `--brief` unchanged. Test `tests/test_search_verify_brief.py`.
+- [ ] Collaborator pulling `main` 2026-10-23 evening: `docs/HANDOFF_COLLABORATOR_2026-10-23.md` (branch + PR; owner merges after the GPU jobs).
 - [ ] P2 12 kHz finalist verify pass (briefs `examples/briefs/*_12k.yaml`): after the overnight queue; result goes in `docs/evidence/HF12K_VERIFY_2026-10-23.md`.
 
 - [x] Docs index `docs/INDEX.md` and code map `docs/CODE_MAP.md` added 2026-10-22, linked from CLAUDE.md / AGENTS.md / .claude/CLAUDE.md; keep them current.
