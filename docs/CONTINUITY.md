@@ -20,6 +20,15 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 
 - New `docs/NEXT_DEV_PRIORITIES.md` (user decision): **P1 fused / direct CUDA Burton-Miller assembly** in the exterior driver (fused path is CPU/Metal only at `hornlab_beat_bem/julia/BeatEngineDriver.jl` ~l.1215; the CUDA single-matrix assembler at `julia/src/BeatEngineCudaBurtonMiller.jl:350` is only exercised by `runtests.jl`); engine work in Magnus's package (his OK or a pinned fork), expected 8 GB ceiling ~9k -> ~20k quarter dofs [inferred], validation ladder listed. **Not enabled for the 2026-10-22/23 overnight queue** (one solver for the compare tier and the surrogate top-up). P2 12 kHz finalist verify pass on the 4060; P3 `beat_metal` backend for the collaborator's MacBook. ISSUES TO-DO and HANDOFF_BETA point to it.
 
+## 2026-10-23 (local, ~03:50 EDT) - compare tier DONE unattended; OSSE top-up running; compare evidence + review page
+
+- Overnight queue phase 1 all exit 0, watchdog idle: axi screen epw 8 (22:16-22:44), axi compare (-00:33), hifi compare (-02:19). OSSE top-up seed 4101 running (275/950 at 03:20, ~265/h); then seed 4102, then sculpt fill to the 15:45 start cutoff.
+- `docs/evidence/TYPOLOGY_COMPARE_2026-10-23.md`: axi osse_axi 9.63 (spread 0.02) < blend_osse_tractrix 10.05 (0.03) < exponential 11.37 ~ hypex 11.40 (not separated; both pinned at L_mm lo / h_rm_mm hi = envelope corner). Hifi perturbed_osse_hv 10.31 (0.03) beats rosse_baseline 13.33 (2.0) and hyb_osse_h_hypex_v 15.13 (0.12); rosse vs hybrid not separated. Bound proposals tabled, NOT applied (owner decision). Leaderboards + campaign.json copied to `docs/evidence/campaigns/`.
+- Review page rebuilt and republished (version 4, same URL): compare campaigns, C2 mesh row, new findings, updated next steps.
+- D5 PASS: families / campaign dry-run / report / export-step from another cwd with absolute paths.
+- Branch `beta-fixes` (worktree `../hornlab-beta-wt`, NOT merged until QUEUE DONE because every queue step imports the live tree): surrogate refusal wired into `surrogate train/propose/round`; `compare` empty-frequency-list ValueError; tests pass.
+- After the queue: merge beta-fixes, full offline suite, surrogate retrain + CP-8d gates, D3 Ctrl-C test, F rehearsal.
+
 ## 2026-10-22 (local, ~22:17 EDT) - beta pass in progress; OVERNIGHT GPU QUEUE RUNNING (UNCOMMITTED WORK)
 
 - Detached queue `runs/overnight/queue_20261022.ps1` (log `runs/overnight/queue_20261022.log`), no step starts after 2026-10-23 15:45: axi screen at epw 8 -> axi compare (osse_axi, blend_osse_tractrix, hypex, exponential) -> hifi compare (perturbed_osse_hv, hyb_osse_h_hypex_v, rosse_baseline) -> OSSE top-up 2 x 950 (cma seeds 4101/4102; owner asked for surrogate data 22:14) -> freeform_sculpt 150-eval searches from seed 5101 until the cutoff. Holds `runs/.gpu.lock`.
