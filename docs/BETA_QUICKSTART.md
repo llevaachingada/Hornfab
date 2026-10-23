@@ -13,6 +13,17 @@ the first full loop.
 Expect `doctor OK: 10 checks, 0 failed`. If `gpu-hygiene` reports BEAT hosts alive, clear them:
 `Get-Process julia`, then `taskkill /F /IM julia.exe` (only julia processes this project started).
 
+## 0a. Or use the browser GUI
+
+```powershell
+.\.venv\Scripts\hornlab-search.exe gui
+```
+
+Opens http://127.0.0.1:8765 (local only). Every view reads the same run folders as the CLI; Launch runs the same CLI
+commands (shown before they start) and is refused with `GPU busy: ...` while another GPU job holds the lock. Ctrl-C in
+the terminal stops the GUI, not running jobs. The 3D view loads three.js from a CDN (needs internet; otherwise it
+falls back to the 2D wall profile). macOS: should work (stdlib + browser), untested.
+
 ## 0b. Compare typologies in one command (recommended start)
 
 A **brief** (`examples/briefs/*.yaml`) fixes the driver exit, the size envelope, the target and the weights, so every

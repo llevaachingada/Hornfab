@@ -30,6 +30,9 @@ hornlab-search = "hornlab_search.cli:main"
 [tool.setuptools.packages.find]
 include = ["hornlab_search*"]
 
+[tool.setuptools.package-data]
+"hornlab_search.gui" = ["static/*"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]

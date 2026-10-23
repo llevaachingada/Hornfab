@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>hornlab-search</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600&family=Spline+Sans:wght@400;500&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="app.css">
+
+  <!-- Three.js r160 via importmap (CDN) -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three":                              "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/controls/OrbitControls.js": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js"
+    }
+  }
+  </script>
+</head>
+<body>
+
+<div id="app-shell">
+
+  <!-- Left / top navigation -->
+  <nav id="app-nav" aria-label="Main navigation">
+    <div id="nav-brand">hornlab</div>
+    <a href="#/status"    aria-label="Status">Status</a>
+    <a href="#/campaigns" aria-label="Campaigns">Campaigns</a>
+    <a href="#/runs"      aria-label="Runs">Runs</a>
+    <a href="#/compare"   aria-label="Compare">Compare</a>
+    <a href="#/briefs"    aria-label="Briefs">Briefs</a>
+    <a href="#/launch"    aria-label="Launch">Launch</a>
+    <div id="nav-spacer"></div>
+    <button id="btn-theme" aria-label="Toggle dark mode" title="Toggle dark/light mode">
+      <span id="theme-icon">◑</span>
+    </button>
+  </nav>
+
+  <!-- Main content area -->
+  <main id="app-main">
+    <div id="view-root" role="main">
+      <p class="muted">Loading…</p>
+    </div>
+  </main>
+
+</div>
+
+<script type="module">
+  // ── Theme toggle ─────────────────────────────────────────────────
+  (function () {
+    const stored = localStorage.getItem("hl-theme");
+    if (stored) document.documentElement.setAttribute("data-theme", stored);
+    const icon = document.getElementById("theme-icon");
+    function setIcon() {
+      const t = document.documentElement.getAttribute("data-theme");
+      icon.textContent = t === "dark" ? "☀" : "◑";
+    }
+    setIcon();
+    document.getElementById("btn-theme").addEventListener("click", () => {
+      const cur = document.documentElement.getAttribute("data-theme");
+      const next = cur === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      localStorage.setItem("hl-theme", next);
+      setIcon();
+    });
+  })();
+</script>
+
+<script type="module" src="app.js"></script>
+
+</body>
+</html>

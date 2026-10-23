@@ -12,6 +12,7 @@ Keep this file current: a new doc gets a line here in the same commit.
 | [HANDOFF_BETA.md](HANDOFF_BETA.md) | Current agent handoff: beta-readiness pass, items A–G, stop conditions. |
 | [BETA_QUICKSTART.md](BETA_QUICKSTART.md) | First loop for beta testers: brief → campaign → report → STEP. |
 | [BETA_SESSION_PLAN.md](BETA_SESSION_PLAN.md) | Beta session agenda, GPU etiquette, known limits, what not to try. |
+| [GUI_PLAN.md](GUI_PLAN.md) | Local web GUI: goals, constraints, views, API, prior art (waveguide-generator, Boundary Lab). |
 | [BETA_SESSION_PLAN.md](BETA_SESSION_PLAN.md) | Beta-day agenda (if present; written by the beta pass). |
 
 ## Design and plans

@@ -118,6 +118,8 @@ TO-DO (no GitHub issue yet; owner / plan ref):
 - [x] R8 brief provenance: dataset records carry optional `provenance` {config, brief, brief_hash, generator} (2026-10-22).
 - [x] C2 epw 6 vs 8: axi seed DI 0.124 dB > 0.1 -> axi typologies at epw 8 (owner); H/V within 0.05 dB stays epw 6.
 - [x] GPU lock + `gpu-clean` (2026-10-22); overnight queue + watchdog in `tools/overnight/`.
+- [x] GPU lock liveness on Windows: `os.kill(pid, 0)` made a live holder in another console look stale (takeover / gpu-clean would hit a running solve). Fixed 2026-10-23 with OpenProcess/GetExitCodeProcess + tests.
+- [x] Local web GUI `hornlab-search gui` (2026-10-23, `docs/GUI_PLAN.md`). Open: macOS untested; 3D view needs the three.js CDN.
 - [x] Wire `surrogate.features.require_surrogate_config` into `cli._cmd_surrogate`: done 2026-10-23 (merged).
 - [ ] Beta-readiness pass per `docs/HANDOFF_BETA.md` (A-G; A-D done except D3 Ctrl-C test and D5 paths; E running overnight; F, G pending): upstream audit, R8 brief provenance in dataset records, epw convergence above 2.5 kHz, GPU lock / gpu-clean, rehearsal, session pack.
 - [x] `compare` tier (2 CMA seeds) on the leaders: DONE 2026-10-23 (`docs/evidence/TYPOLOGY_COMPARE_2026-10-23.md`).

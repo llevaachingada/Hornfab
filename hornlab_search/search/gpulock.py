@@ -44,15 +44,41 @@ class GpuBusyError(RuntimeError):
 
 
 def _pid_alive(pid: int) -> bool:
-    """Return True if the process with *pid* is currently running.
+    """Return True if the process with *pid* is currently running. Sends nothing to it.
 
-    Uses ``os.kill(pid, 0)`` which works on Windows (raises OSError when the
-    process does not exist) and POSIX.  Does not require psutil.
+    Windows: ``OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION)`` + ``GetExitCodeProcess`` (STILL_ACTIVE).
+    NOT ``os.kill(pid, 0)``: on Windows signal 0 is CTRL_C_EVENT, so that call tries to send Ctrl-C to
+    the pid's console group and fails for a process in another console, which made a live lock holder
+    look stale (2026-10-23). POSIX: ``os.kill(pid, 0)`` is the standard existence probe.
     """
+    if pid <= 0:
+        return False
+    if os.name == "nt":
+        import ctypes
+        from ctypes import wintypes
+        k32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        k32.OpenProcess.restype = wintypes.HANDLE
+        k32.OpenProcess.argtypes = (wintypes.DWORD, wintypes.BOOL, wintypes.DWORD)
+        k32.GetExitCodeProcess.argtypes = (wintypes.HANDLE, ctypes.POINTER(wintypes.DWORD))
+        k32.CloseHandle.argtypes = (wintypes.HANDLE,)
+        h = k32.OpenProcess(0x1000, False, pid)            # PROCESS_QUERY_LIMITED_INFORMATION
+        if not h:
+            return ctypes.get_last_error() == 5            # ERROR_ACCESS_DENIED: exists, not ours
+        try:
+            code = wintypes.DWORD()
+            if not k32.GetExitCodeProcess(h, ctypes.byref(code)):
+                return True                                # opened but unreadable: assume alive
+            return code.value == 259                       # STILL_ACTIVE
+        finally:
+            k32.CloseHandle(h)
     try:
         os.kill(pid, 0)
         return True
-    except (OSError, ProcessLookupError):
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    except OSError:
         return False
 
 

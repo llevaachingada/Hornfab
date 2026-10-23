@@ -28,6 +28,7 @@ bempp_cpu) → `metrics` (beamwidth, ripple, DI, impedance) → `objective` (sca
 | `search/cma.py` | CMA-ES search (`budget`, `max_evals`, resume). |
 | `search/campaign.py`, `hygiene.py` | Multi-family campaigns and leaderboards; Julia/worker-host cleanup. |
 | `search/gpulock.py` | Process-wide GPU lock (`runs/.gpu.lock`); `gpu-clean` CLI refuses while a live job holds it. |
+| `gui/` (`server.py`, `data.py`, `jobs.py`, `static/`) | Local web GUI (`hornlab-search gui`, 127.0.0.1): read-only views of runs/campaigns/briefs, allow-listed CLI launcher; stdlib server + vanilla JS, no build step. |
 | `search/gpulock.py` | One-GPU-job lock (if present; beta pass). |
 | `search/rundir.py`, `selftest.py`, `nsga.py` | Run directories / run.json; analytic + crosscheck selftests; NSGA-II. |
 | `dataset/record.py`, `store.py` | Record schema and the sharded dataset store. |

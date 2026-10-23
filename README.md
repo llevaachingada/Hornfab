@@ -68,6 +68,7 @@ resonances.
 | `selftest` | analytic sphere and GPU-vs-CPU cross-check |
 | `dataset`, `surrogate` | dataset verify / stats; phase-2 surrogate (inactive) |
 | `gpu-clean` | clear stale solver hosts |
+| `gui` | local web GUI at http://127.0.0.1:8765: status, campaigns, runs, compare, briefs, launch, 3D view |
 
 Only one GPU job runs at a time: a second GPU command fails fast with `GPU busy: ...`.
 New users start at `docs/BETA_QUICKSTART.md`.

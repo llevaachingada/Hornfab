@@ -1294,6 +1294,9 @@ def build_parser() -> argparse.ArgumentParser:
                         help="kill stale Julia/BEAT processes and report VRAM usage")
     gc.add_argument("--force", action="store_true",
                     help="DANGEROUS: skip the GPU-lock check and kill Julia even if a search is running")
+    gui = sub.add_parser("gui", parents=[common], help="local web GUI (127.0.0.1) over runs, briefs and jobs")
+    gui.add_argument("--port", type=int, default=8765)
+    gui.add_argument("--no-browser", action="store_true", help="do not open a browser tab")
     return p
 
 
@@ -1337,6 +1340,10 @@ def main(argv: list[str] | None = None) -> int:
             return _cmd_campaign(args)
         if args.cmd == "gpu-clean":
             return _cmd_gpu_clean(args)
+        if args.cmd == "gui":
+            from hornlab_search.gui.server import serve
+            return serve(REPO, args.port, not args.no_browser,
+                         runs=Path(args.runs_dir) if args.runs_dir else None)
     except KeyboardInterrupt:
         print(f"{args.cmd} INTERRUPTED")
         return 1
