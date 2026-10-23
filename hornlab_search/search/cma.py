@@ -39,6 +39,17 @@ log = logging.getLogger("hornlab_search.search.cma")
 
 EVALS_PER_PROJECTION = (1000, 10000)
 
+# Consecutive non-cached ``solve_failed`` evaluations (each already retried once by the backend
+# after a worker-host recovery) that stop a search. A string of solver failures says the solver
+# is unhealthy, not that the designs are bad: scoring them as 1000-penalties flattens the landscape
+# and CMA-ES then ends on ``tolflatfitness`` (OSSE seed 4101, 2026-10-23). Stopping instead keeps
+# the run resumable: ``solve_failed`` rows are never memoised, so ``--resume`` re-solves them.
+MAX_CONSECUTIVE_SOLVE_FAILURES = 3
+
+
+class SolverUnhealthyError(RuntimeError):
+    """Too many consecutive solver failures; the run stops (resumable) instead of scoring them."""
+
 
 def summarize(evals: list[Evaluation], wall_seconds: list[float]) -> dict:
     """The honest answer to "how fast is this": counts, failures by reason, GPU seconds, mean
@@ -151,7 +162,8 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
 
     evals: list[Evaluation] = []
     wall: list[float] = []
-    state = {"best": None, "best_no": None, "seed_ev": None, "n_new": 0, "stop": ""}
+    state = {"best": None, "best_no": None, "seed_ev": None, "n_new": 0, "stop": "",
+             "solve_fail_streak": 0}
 
     # On a resume the best so far is already on disk in search.ndjson: start from it, so a short
     # (or zero-budget) resume can never overwrite best.json with something worse.
@@ -175,6 +187,15 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
         if b is None or ev.objective < b.objective or (b.error and not ev.error):
             state["best"], state["best_no"] = ev, len(evals) - 1
             rundir.write_best(run_dir, ev, mode, state["best_no"])      # after EVERY improvement
+        if not ev.cached and error_kind(ev.error) == "solve_failed":
+            state["solve_fail_streak"] += 1
+            if state["solve_fail_streak"] >= MAX_CONSECUTIVE_SOLVE_FAILURES:
+                raise SolverUnhealthyError(
+                    f"{state['solve_fail_streak']} consecutive solve_failed evaluations (last: "
+                    f"{ev.error.splitlines()[0][:200]}); the solver is unhealthy, not the designs. "
+                    f"Clear hosts (gpu-clean) and continue with --resume")
+        elif not ev.cached:
+            state["solve_fail_streak"] = 0
         return ev
 
     def finish(status: str) -> None:
@@ -241,7 +262,7 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
         state["stop"] = "interrupted"
         finish("interrupted")
         raise
-    except MeshConsistencyError as exc:
+    except (MeshConsistencyError, SolverUnhealthyError) as exc:
         state["stop"] = f"aborted: {type(exc).__name__}: {exc}"
         finish("aborted")
         raise

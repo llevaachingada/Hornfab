@@ -695,7 +695,10 @@ def _verify_body(args, argv, d) -> int:
     if not (run_dir / "config.yaml").exists() or not rows:
         print(f"verify FAILED: {run_dir} has no config.yaml / search.ndjson")
         return 1
-    cfg = load_config(run_dir / "config.yaml")
+    # --brief was parsed but never applied (found 2026-10-23, same class as the 2026-10-22 search
+    # bug): a 12 kHz verify (NEXT_DEV_PRIORITIES P2) would have re-solved at 5.5 kHz.
+    brief = getattr(args, "brief", None)
+    cfg = load_config(run_dir / "config.yaml", brief=Path(brief) if brief else None)
     if args.backend:
         cfg.solve.backend = args.backend
     d = _dirs(args)
@@ -716,23 +719,53 @@ def _verify_body(args, argv, d) -> int:
         return 1
     store = DatasetStore(d["dataset"])
     worker.warm(backend)
-    vdir = run_dir / "verify"
-    vdir.mkdir(exist_ok=True)
+    if brief:
+        # Another brief = another frequency grid / target: its own run directory (listed by the
+        # GUI like any run), never mixed into the source run's verify/ rows.
+        from hornlab_search.search import rundir
+        from hornlab_search.search.evaluate import collect_lib_shas
+        vdir = rundir.new_run_dir(d["runs"], "verify")
+        rundir.write_config_snapshot(vdir, cfg)
+        rundir.write_json_atomic(vdir / "run.json", {
+            "run_id": vdir.name, "config_name": cfg.name, "family": cfg.family, "mode": "verify",
+            "config": cfg.raw, "config_sha": rundir.config_sha(cfg.raw), "backend": cfg.solve.backend,
+            "lib_shas": collect_lib_shas(), "toolchain": rundir.toolchain_snapshot(),
+            "runtime": rundir.runtime_provenance(), "command": _command_string(argv),
+            "verify_of": {"run": str(run_dir.resolve()), "top": len(top), "brief": str(brief)},
+            "status": "running", "started_utc": rundir.utc_now(), "dataset_dir": str(store.root)})
+    else:
+        vdir = run_dir / "verify"
+        vdir.mkdir(exist_ok=True)
     ctx = make_context(cfg, store, cache_dir=d["cache"], trace_fraction=args.trace_fraction,
                        ndjson=vdir / "search.ndjson")
     space = DesignSpace.from_config(cfg)
-    print("verify: re-solving the top designs at verify fidelity "
-          "(note: with the current band/caps the verify mesh equals the screen mesh; only the "
-          "frequency count and balloon size differ)")
+    if brief:
+        print(f"verify: re-solving the top {len(top)} designs of {run_dir.name} under brief {brief} "
+              f"(band {cfg.target_raw.get('band_lo_hz')}-{cfg.target_raw.get('band_hi_hz')} Hz); "
+              f"J is NOT comparable with the source run's J (different band and grid)")
+    else:
+        print("verify: re-solving the top designs at verify fidelity "
+              "(note: with the current band/caps the verify mesh equals the screen mesh; only the "
+              "frequency count and balloon size differ)")
     print("  design        screen J     verify J    DI source")
-    bad = 0
-    for r in top:
+    bad, best, best_no = 0, None, None
+    for i, r in enumerate(top):
         ev = evaluate(Design(r["family"], dict(r["params"])), space, cfg, "verify", vdir, store, backend,
                       ctx=ctx)
         bad += bool(ev.error)
+        if not ev.error and (best is None or ev.objective < best.objective):
+            best, best_no = ev, i
         print(f"  {r['design_hash']}  {r['objective']:10.5f}  "
               f"{('FAILED: ' + ev.error.splitlines()[0][:60]) if ev.error else format(ev.objective, '10.5f')}"
               f"  {ev.metrics.di_source if ev.metrics else 'n/a'}")
+    if brief:
+        if best is not None:
+            rundir.write_best(vdir, best, "verify", best_no)
+        rundir.update_run_json(vdir, status="finished", finished_utc=rundir.utc_now(),
+                               stop_reason=f"verify: {len(top)} designs, {bad} failed",
+                               best=None if best is None else {"design_hash": best.design_hash,
+                                                              "objective": best.objective,
+                                                              "eval_no": best_no})
     print(f"verify {'FAILED' if bad else 'OK'}: {len(top)} designs, {bad} failed; output {vdir}")
     return 1 if bad else 0
 

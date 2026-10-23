@@ -20,12 +20,12 @@ bempp_cpu) → `metrics` (beamwidth, ripple, DI, impedance) → `objective` (sca
 | `design/generators/profiles.py` | Classical meridians (conical, exponential, hypex, tractrix; Le Cléac'h disabled), blend, anchors, perturbation. |
 | `design/generators/registry.py` | Typology spec + knobs + brief → FREEFORM params (H/V hybrids, OSSE via Magnus's `profile_points`, envelope). |
 | `mesh/build.py`, `sizing.py`, `topology.py`, `grid.py` | Mesh build + cache, dof caps, STEP export; pre-solve surface/symmetry checks. |
-| `solve/beat.py`, `bempp.py`, `worker.py`, `cache.py`, `traces.py`, `phasor.py`, `base.py` | BEM backends, persistent Julia host, solve cache, boundary traces, phase conventions. |
+| `solve/beat.py`, `bempp.py`, `worker.py`, `cache.py`, `traces.py`, `phasor.py`, `base.py` | BEM backends, persistent Julia host (a dead host is recovered: library clients dropped, re-warmed, candidate retried once), solve cache, boundary traces, phase conventions. |
 | `metrics/` | `compute.py` (MetricSet), `polar.py`, `smoothness.py`, `di.py`, `impedance.py`; report-only `spinorama.py`, `beam_shape.py`. |
 | `objective/terms.py`, `scalar.py` | The six J terms and the weighted sum. |
 | `targets/spec.py`, `venue.py` | Target dataclass; venue helpers. |
 | `search/evaluate.py` | One candidate end to end: failure cache, envelope check, loading scalars, ndjson rows. |
-| `search/cma.py` | CMA-ES search (`budget`, `max_evals`, resume). |
+| `search/cma.py` | CMA-ES search (`budget`, `max_evals`, resume; stops resumably after 3 consecutive `solve_failed`). |
 | `search/campaign.py`, `hygiene.py` | Multi-family campaigns and leaderboards; Julia/worker-host cleanup. |
 | `search/gpulock.py` | Process-wide GPU lock (`runs/.gpu.lock`); `gpu-clean` CLI refuses while a live job holds it. |
 | `gui/` (`server.py`, `data.py`, `jobs.py`, `static/`) | Local web GUI (`hornlab-search gui`, 127.0.0.1): read-only views of runs/campaigns/briefs, allow-listed CLI launcher; stdlib server + vanilla JS, no build step. |
@@ -39,7 +39,7 @@ bempp_cpu) → `metrics` (beamwidth, ripple, DI, impedance) → `objective` (sca
 | Path | What it is |
 |---|---|
 | `examples/catalog.yaml` | Every family/typology the `campaign` command can run (name, group, symmetry). |
-| `examples/briefs/*.yaml` | Design briefs: driver, size envelope, target, weights. |
+| `examples/briefs/*.yaml` | Design briefs: driver, size envelope, target, weights. `*_12k.yaml`: 12 kHz VERIFY-only copies (NEXT_DEV_PRIORITIES P2; `verify --brief` writes its own `runs/<ts>-verify-<id>`). |
 | `examples/typologies/*.yaml` | Generator configs (classical + hybrids). |
 | `examples/*.yaml` | Native-family configs (OSSE, R-OSSE, ICW, FREEFORM) and legacy smoke/adapter configs. |
 | `tools/review/` | Builds the self-contained review page (`build_review_data.py`, `review_template.html`, `assemble.py`). |

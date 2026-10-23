@@ -388,6 +388,29 @@ class BeatBackend:
         return _stack(raws, freqs)
 
     def _solve(self, mesh: MeshResult, spec: SolveSpec, *, surface_traces: bool):
+        """One solve; a dead worker host (``worker_exit``) is recovered, re-warmed and the
+        candidate retried ONCE, so a host crash is not scored as the design's failure. OOM and
+        other failures are not retried (an OOM would recur on the same mesh)."""
+        outcome, traces = self._attempt(mesh, spec, surface_traces=surface_traces)
+        if outcome.ok or not outcome.message.startswith("[worker_exit]"):
+            return outcome, traces
+        log.warning("BEAT worker host died (%s); re-warming once and retrying this candidate",
+                    outcome.message.splitlines()[0][:200])
+        try:
+            worker.warm(self)        # _failure already recovered: clients dropped, hosts killed
+        except Exception as exc:     # noqa: BLE001 - a failed re-warm is this candidate's failure
+            log.error("re-warm after worker_exit failed: %r", exc)
+            return SolveOutcome(False, None, outcome.seconds, outcome.peak_vram_mb,
+                                f"{outcome.message}\n(re-warm after worker_exit failed: {exc!r})"), None
+        retry, traces = self._attempt(mesh, spec, surface_traces=surface_traces)
+        if retry.ok:
+            retry.response.meta["worker_exit_retries"] = 1
+            return retry, traces
+        return SolveOutcome(False, None, outcome.seconds + retry.seconds, retry.peak_vram_mb,
+                            f"{retry.message}\n(after one re-warm and retry; first attempt: "
+                            f"{outcome.message.splitlines()[0][:300]})"), None
+
+    def _attempt(self, mesh: MeshResult, spec: SolveSpec, *, surface_traces: bool):
         t0 = time.perf_counter()
         check_symmetry_pairing(mesh)         # raises: a bug, not a failed candidate
         mon = worker.VramMonitor() if self.track_vram else None

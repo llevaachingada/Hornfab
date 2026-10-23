@@ -69,7 +69,11 @@ def test_report_states_an_improvement_when_there_is_one(cfg, tmp_path, monkeypat
 # 21
 def test_report_renders_a_run_with_zero_successful_evaluations(cfg, tmp_path, monkeypatch):
     be = SyntheticBackend(fail_on={i: "fail" for i in range(1, 40)})
-    run_dir, store = make_run(cfg, tmp_path, monkeypatch, budget=10, backend=be)
+    # every solve failing now stops the search (resumably) after MAX_CONSECUTIVE_SOLVE_FAILURES
+    with pytest.raises(cma_mod.SolverUnhealthyError):
+        make_run(cfg, tmp_path, monkeypatch, budget=10, backend=be)
+    run_dir, store = tmp_path / "20261013T000000Z-screen-abc123", DatasetStore(tmp_path / "ds")
+    assert len(read_ndjson(run_dir / "search.ndjson")) == cma_mod.MAX_CONSECUTIVE_SOLVE_FAILURES
     html = build_report(run_dir, tmp_path / "r.html", store=store).read_text(encoding="utf-8")
     assert "No evaluation succeeded" in html and "solve_failed" in html
     assert "noise-floor" in html

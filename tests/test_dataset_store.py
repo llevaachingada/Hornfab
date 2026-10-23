@@ -359,6 +359,24 @@ def test_ok_only_excludes_failures_and_ok_only_false_returns_them_with_nan_label
     assert (d["excitation"]["port_tag"] == 2).all()
 
 
+def test_solve_failed_records_are_not_validity_labels(tmp_path):
+    """A solver crash is not the design's fault: it must not teach the validity head 'invalid'.
+    Deterministic failures (invalid_geometry) stay as labels."""
+    st = DatasetStore(tmp_path / "ds")
+    for i in range(10):
+        st.append(*rec(i, nf=12))
+    for i, err in zip(range(10, 16), ["invalid_geometry: self-intersecting wall"] * 2
+                      + ["solve_failed: [worker_exit] ConnectionResetError(10054)"] * 4):
+        meta, arrays = rec(i, ok=False)
+        meta["error"] = err
+        st.append(meta, arrays)
+    d = to_training_arrays(st, ok_only=False)
+    assert d["X"].shape[0] == 12 and d["ok"].sum() == 10 and (~d["ok"]).sum() == 2
+    assert d["meta"]["skipped_solve_failed"] == 4
+    assert d["meta"]["n_considered"] == 16 and d["meta"]["n_selected"] == 12
+    assert to_training_arrays(st)["meta"]["skipped_solve_failed"] == 0      # ok_only never sees them
+
+
 # 16
 def test_lib_sha_filter(tmp_path):
     st = DatasetStore(tmp_path / "ds")

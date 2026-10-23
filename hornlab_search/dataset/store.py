@@ -62,6 +62,8 @@ _HASH_RE = re.compile(r"^[A-Za-z0-9_-]+$")
 
 #: Per-frequency metric arrays exported by to_training_arrays.
 Y_METRIC_KEYS = ("bw_h_deg", "bw_v_deg", "di_db", "ripple_h_db", "ripple_v_db", "on_axis_db")
+#: Failure kind of a solver crash (``search.evaluate.KIND_SOLVE``); a record's error starts with it.
+SOLVE_FAILED_PREFIX = "solve_failed"
 
 
 # ------------------------------------------------------------------ low-level io
@@ -541,6 +543,12 @@ def to_training_arrays(store: DatasetStore,
             return len(lib_sha) >= 7 and any(str(v).startswith(lib_sha) for v in m["lib_shas"].values())
         pairs = [(m, a) for m, a in pairs if lib_match(m)]
     n_considered = len(pairs)
+    # A solver crash (worker host died, CUDA error) says nothing about the design: it must not
+    # become an "invalid" validity label. OSSE seed 4101 (2026-10-23) left 21 such records after
+    # one host reset. Deterministic failures (invalid_geometry, mesh_too_large) stay as labels.
+    n_before = len(pairs)
+    pairs = [(m, a) for m, a in pairs if m["ok"] or not str(m.get("error", "")).startswith(SOLVE_FAILED_PREFIX)]
+    skipped_solve_failed = n_before - len(pairs)
 
     # The frequency grid: majority among successful records, first seen wins a tie.
     ok_grids = [_grid_of(m) for m, _ in pairs if m["ok"]]
@@ -641,6 +649,7 @@ def to_training_arrays(store: DatasetStore,
             "n_selected": n,
             "skipped_grid_mismatch": skipped_grid,
             "skipped_bad_arrays": skipped_bad,
+            "skipped_solve_failed": skipped_solve_failed,
             "skipped_keys": skipped_keys,
             "family": family,
             "lib_sha": lib_sha,

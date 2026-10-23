@@ -187,6 +187,41 @@ def test_one_candidate_raising_does_not_stop_the_loop(cfg, tmp_path, monkeypatch
     assert all(np.isfinite(r["objective"]) for r in rows)
 
 
+def test_consecutive_solver_failures_stop_the_search_resumably(cfg, tmp_path, monkeypatch):
+    """OSSE seed 4101 (2026-10-23): a dead host gave 21 solve_failed in a row, scored 1000 each,
+    and CMA-ES ended on tolflatfitness. Now 3 in a row abort the run; a resume re-solves them."""
+    n = cma_mod.MAX_CONSECUTIVE_SOLVE_FAILURES
+    be = SyntheticBackend(fail_on={k: "fail" for k in range(3, 3 + n)})
+    install_fakes(monkeypatch, be)
+    store = DatasetStore(tmp_path / "ds")
+    with pytest.raises(cma_mod.SolverUnhealthyError, match="consecutive solve_failed"):
+        run(cfg, tmp_path / "r", be, store, 20)
+    rows = read_ndjson(tmp_path / "r" / "search.ndjson")
+    assert len(rows) == 2 + n and [r["kind"] for r in rows].count("solve_failed") == n
+    meta = json.loads((tmp_path / "r" / "run.json").read_text(encoding="utf-8"))
+    assert meta["status"] == "aborted" and "SolverUnhealthyError" in meta["stop_reason"]
+    # resume with a healthy solver: the failed candidates are solved again, nothing is lost
+    be2 = SyntheticBackend()
+    install_fakes(monkeypatch, be2)
+    cma_mod.search(cfg, None, "screen", resume=tmp_path / "r", backend=be2, budget=20, store=store,
+                   lib_shas=LIBS)
+    failed = {r["design_hash"] for r in rows if r["kind"] == "solve_failed"}
+    rows = read_ndjson(tmp_path / "r" / "search.ndjson")
+    later = rows[2 + n:]
+    assert be2.calls == 20 and all(r["ok"] for r in later)
+    assert failed <= {r["design_hash"] for r in later}                   # re-solved, now ok
+
+
+def test_isolated_solver_failures_do_not_stop_the_search(cfg, tmp_path, monkeypatch):
+    n = cma_mod.MAX_CONSECUTIVE_SOLVE_FAILURES
+    fails = {k: "fail" for k in range(3, 30, n)}             # never n in a row
+    be = SyntheticBackend(fail_on=fails)
+    install_fakes(monkeypatch, be)
+    run(cfg, tmp_path / "r", be, DatasetStore(tmp_path / "ds"), 20)
+    rows = read_ndjson(tmp_path / "r" / "search.ndjson")
+    assert len(rows) == 20 and [r["kind"] for r in rows].count("solve_failed") >= 2
+
+
 def test_penalties_are_finite_for_invalid_and_oversize_designs(cfg, tmp_path, monkeypatch):
     be = SyntheticBackend()
     install_fakes(monkeypatch, be, invalid_if=lambda p: p["a_deg"] > 40.0,

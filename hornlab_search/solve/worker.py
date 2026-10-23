@@ -413,10 +413,19 @@ def shutdown(*, verify: bool = True, timeout_s: float = 20.0,
     return forced
 
 
-def recover_after_failure(name: str, *, lister=None, killer: Callable[[int], bool] = kill_tree) -> None:
+def recover_after_failure(name: str, *, lister=None, killer: Callable[[int], bool] = kill_tree,
+                          drop_clients: Callable[[], None] | None = None) -> None:
     """After a CUDA OOM or a worker crash the host is poisoned (stuck pool, half-dead process).
-    Drop warm state and kill project BEAT hosts so the next ``warm`` starts clean."""
+    Drop warm state, drop the library's cached worker clients, and kill project BEAT hosts so the
+    next ``warm`` / solve starts clean.
+
+    Dropping the clients matters: ``hornlab_beat_bem.worker.get_worker`` caches one
+    ``HostedBeatWorker`` per key, and that object keeps its socket after a send fails. Killing the
+    host alone left every later solve of the process writing to the dead socket (measured
+    2026-10-23, OSSE seed 4101: 21 ``ConnectionResetError`` failures in 63 s after one reset).
+    ``detach`` (``detach_workers``) empties that cache; the next solve connects or spawns afresh."""
     mark_cold(name)
+    (drop_clients or detach)()
     try:
         clear_stale_hosts(force=True, lister=lister, killer=killer)
     except Exception as exc:

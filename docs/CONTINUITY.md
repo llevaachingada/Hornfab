@@ -12,6 +12,16 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 - **Typology work (next):** implement `docs/TYPOLOGY_PLAN.md` (classical typologies via FREEFORM anchors, hybrids, `campaign` family selection). Solver re-verified 2026-10-22 (GPU 18/18, analytic PASS, crosscheck 0.039 dB).
 - **Blockers:** none. Issue #13: fixes now MERGED on main (152a829 carried the cloud reconciliation; oracle sign-off 2026-10-22); GitHub issue kept open for owner closure. Issues #1-#11 closed.
 
+## 2026-10-23 (local, ~14:30 EDT) - dead-worker-host recovery fixed (root cause found); `verify --brief` bug fixed; 12 kHz briefs
+
+- **Root cause of the OSSE seed-4101 cascade (03:58)**: after the host died, `hornlab_beat_bem.worker.get_worker` kept handing out the SAME cached `HostedBeatWorker`, whose `submit` releases its slot on a send error but keeps the dead socket in `_connection`; our `recover_after_failure` killed hosts and marked cold but never dropped that client, so all 21 later candidates failed in ~1 s with `ConnectionResetError` at `BeatSolveSession(...)` (row tracebacks, `worker_client.py:122`). Fix (our layer only, no library edit): recovery calls `detach_workers` first (empties the library cache); `BeatBackend._solve` re-warms and retries a `worker_exit` candidate once (OOM / other not retried); `search` raises `SolverUnhealthyError` after 3 consecutive non-cached `solve_failed` -> run `aborted`, resumable (`solve_failed` rows are never memoised, so `--resume` re-solves them); a campaign records that entry as a failed job. Why the host died is still unknown (GPU rule 7).
+- **Surrogate labels**: `to_training_arrays` drops `solve_failed` records (solver crash, not the design) and reports `meta.skipped_solve_failed`; deterministic failures stay as validity labels.
+- **Bug: `verify --brief` was parsed and ignored** (same class as the 2026-10-22 search bug); a 12 kHz verify would have silently re-solved at 5.5 kHz. Now applied; with `--brief` the results go to a new run dir `runs/<ts>-verify-<id>` (config/run.json with `verify_of`/ndjson/best.json; the GUI lists it), without it the old `run/verify/` behaviour.
+- New VERIFY-only briefs `examples/briefs/axi_90x90_1in_12k.yaml`, `hifi_90x60_1in_12k.yaml` (copies, `band_hi_hz: 12000`, P2 comment + cross-mode caveat); verify grid 300-12,000 Hz, 25 points, config verify dof cap (7,000) unchanged.
+- The overnight queue's later sculpt seeds (new subprocess per seed) import these modules; each edit was compile-checked before saving and only failure paths change.
+- `tests/test_report_html.py` zero-success test: setup now expects the resumable stop (3 failure rows instead of 10); its assertions are unchanged plus one on the row count.
+- Offline suite: **808 passed, 18 deselected, exit 0**.
+
 ## 2026-10-22 (local, ~22:45 EDT) — docs index and code map
 
 - New `docs/INDEX.md` (every doc, one line each) and `docs/CODE_MAP.md` (every module, config folder, external dependency); pointers added to `CLAUDE.md` (Start here, step 0), `AGENTS.md` and a new `.claude/CLAUDE.md`. Rule: a new doc or module gets a line in the index/map in the same commit.

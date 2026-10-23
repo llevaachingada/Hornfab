@@ -1,0 +1,34 @@
+# P2 (docs/NEXT_DEV_PRIORITIES.md): copy of hifi_90x60_1in.yaml with band_hi_hz 12000 for the 12 kHz finalist
+# VERIFY pass on the 8 GB card. Not for search/screen/compare. Above ~7.9 kHz (first cross mode of a
+# 1-inch exit) a real compression driver is not a uniform cap: 8-12 kHz compares GEOMETRIES, not drivers.
+# Its records form their own frequency grid (kept apart from the 5.5 kHz data by the grid check).
+# Brief: hi-fi waveguide, 90 x 60 degrees H/V, 1-inch compression driver
+# Used as the reference size class for LANE B typology comparisons (TYPOLOGY_PLAN.md s3).
+# symmetry: hv - H and V differ; axisymmetric families are rejected by the campaign.
+name: hifi_90x60_1in_12k
+description: Hi-fi waveguide 90x60 degrees H/V, 1-inch driver, 400x300x220 mm envelope
+driver:
+  exit_radius_mm: 12.7          # 1-inch (1/2" = 0.5" radius = 12.7 mm); pinned for every config
+  exit_angle_deg: 5.0           # typical 1" driver exit taper; throat wall angle follows this
+envelope:
+  max_mouth_w_mm: 400.0         # half-width 200 mm at 90 deg H coverage
+  max_mouth_h_mm: 300.0         # half-height 150 mm at 60 deg V coverage
+  max_depth_mm: 220.0           # generous depth for R-OSSE / ICW
+symmetry: hv                    # H != V; axisymmetric families skipped in campaign
+source:
+  cap: auto                     # r_source = r0 / sin(theta_throat), ATH convention
+target:
+  coverage_h_deg: 90.0          # TOTAL included angle, -6 dB
+  coverage_v_deg: 60.0
+  band_lo_hz: 700.0
+  band_hi_hz: 12000.0           # P2 12 kHz VERIFY pass only (docs/NEXT_DEV_PRIORITIES.md P2); never search at 12 kHz on 8 GB
+  di_target_db: null            # derive from coverage
+  di_slope_target: 0.0          # flat DI with frequency
+  z_min: 0.0                    # loading: not weighted for this brief (load: 0.0 below)
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
