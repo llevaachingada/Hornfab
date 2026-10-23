@@ -27,6 +27,7 @@ bempp_cpu) → `metrics` (beamwidth, ripple, DI, impedance) → `objective` (sca
 | `search/evaluate.py` | One candidate end to end: failure cache, envelope check, loading scalars, ndjson rows. |
 | `search/cma.py` | CMA-ES search (`budget`, `max_evals`, resume). |
 | `search/campaign.py`, `hygiene.py` | Multi-family campaigns and leaderboards; Julia/worker-host cleanup. |
+| `search/gpulock.py` | Process-wide GPU lock (`runs/.gpu.lock`); `gpu-clean` CLI refuses while a live job holds it. |
 | `search/gpulock.py` | One-GPU-job lock (if present; beta pass). |
 | `search/rundir.py`, `selftest.py`, `nsga.py` | Run directories / run.json; analytic + crosscheck selftests; NSGA-II. |
 | `dataset/record.py`, `store.py` | Record schema and the sharded dataset store. |
@@ -41,6 +42,7 @@ bempp_cpu) → `metrics` (beamwidth, ripple, DI, impedance) → `objective` (sca
 | `examples/typologies/*.yaml` | Generator configs (classical + hybrids). |
 | `examples/*.yaml` | Native-family configs (OSSE, R-OSSE, ICW, FREEFORM) and legacy smoke/adapter configs. |
 | `tools/review/` | Builds the self-contained review page (`build_review_data.py`, `review_template.html`, `assemble.py`). |
+| `tools/overnight/` | Unattended GPU queue (`queue_20261022.ps1`) and stall watchdog (`watchdog.ps1`, keeps Windows awake). |
 | `tests/` | Offline suite; `requires_*` / `gpu` / `slow` markers in `tests/conftest.py`. |
 
 ## External code we depend on (never edited; pinned in `pyproject.toml` / `TOOLCHAIN.md`)

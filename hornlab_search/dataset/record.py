@@ -254,7 +254,8 @@ def build_record(ev: Evaluation, target, lib_shas: dict, *,
                  traces: dict | None = None,
                  trace_sample_fraction: float = DEFAULT_TRACE_FRACTION,
                  excitation: dict | None = None,
-                 created_utc: str | None = None) -> tuple[dict, dict]:
+                 created_utc: str | None = None,
+                 provenance: dict | None = None) -> tuple[dict, dict]:
     """Returns (metadata_dict, arrays_dict).
 
     metadata is JSON-serializable with NO numpy types anywhere and no NaN/Inf (those become null).
@@ -277,6 +278,10 @@ def build_record(ev: Evaluation, target, lib_shas: dict, *,
                    reader can tell "not sampled" from "capture failed".
       excitation   overrides DEFAULT_EXCITATION (phase 1 never needs to).
       created_utc  ISO-8601 "YYYY-MM-DDTHH:MM:SSZ"; now if omitted.
+      provenance   optional, additive (plan R8): {"config", "brief", "brief_hash", "generator"} -
+                   which config / design brief scored this record and which typology generator (if
+                   any) produced the design. Older records lack it; readers must treat it as optional.
+                   The metric curves are target-free; only ``objective``/``terms`` depend on the brief.
     """
     out = ev.outcome
     resp = None if out is None else out.response
@@ -329,6 +334,8 @@ def build_record(ev: Evaluation, target, lib_shas: dict, *,
         "created_utc": created_utc or _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "lib_shas": {str(k): str(v) for k, v in lib_shas.items()},
     }
+    if provenance:
+        meta["provenance"] = to_jsonable(provenance, "$.provenance")
     arrays = _arrays_for(ev) if ok else {}
     return meta, arrays
 

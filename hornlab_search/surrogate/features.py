@@ -45,3 +45,22 @@ def cluster_holdout(U: np.ndarray, frac: float = 0.15, n_clusters: int = 40,
             break
         held |= lab == c
     return held
+
+
+class UnsupportedConfigError(ValueError):
+    """The surrogate cannot be trained or used for this config."""
+
+
+def require_surrogate_config(cfg) -> None:
+    """Refuse typology (``generator:``) configs before any data is read.
+
+    A generator config searches over typology KNOBS (e.g. ``L_mm``, ``h_u0``) that are turned into
+    FREEFORM anchors; dataset records store the resulting FREEFORM params, not the knobs, so the
+    surrogate's feature vector cannot be built. Use a native family config (OSSE, R-OSSE, ICW,
+    FREEFORM without ``generator:``)."""
+    gen = getattr(cfg, "generator", None)
+    if gen:
+        raise UnsupportedConfigError(
+            f"the surrogate does not support typology generator configs (generator "
+            f"{gen.get('name')!r} in config {getattr(cfg, 'name', '?')!r}): its knobs are not stored "
+            f"as record params. Use a native family config such as examples/osse_baseline.yaml.")

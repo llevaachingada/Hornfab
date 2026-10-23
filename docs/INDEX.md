@@ -11,6 +11,7 @@ Keep this file current: a new doc gets a line here in the same commit.
 | [NEXT_DEV_PRIORITIES.md](NEXT_DEV_PRIORITIES.md) | Post-beta priorities: P1 fused CUDA assembly, P2 12 kHz pass, P3 Metal backend. |
 | [HANDOFF_BETA.md](HANDOFF_BETA.md) | Current agent handoff: beta-readiness pass, items A–G, stop conditions. |
 | [BETA_QUICKSTART.md](BETA_QUICKSTART.md) | First loop for beta testers: brief → campaign → report → STEP. |
+| [BETA_SESSION_PLAN.md](BETA_SESSION_PLAN.md) | Beta session agenda, GPU etiquette, known limits, what not to try. |
 | [BETA_SESSION_PLAN.md](BETA_SESSION_PLAN.md) | Beta-day agenda (if present; written by the beta pass). |
 
 ## Design and plans
@@ -44,6 +45,7 @@ Keep this file current: a new doc gets a line here in the same commit.
 | [evidence/HANDOFF_6b.md](evidence/HANDOFF_6b.md), [evidence/BL_LEARNINGS_GPU.md](evidence/BL_LEARNINGS_GPU.md), [evidence/EARLY_REJECTION_REPLAY.md](evidence/EARLY_REJECTION_REPLAY.md) | FREEFORM sculpt tests; PR #15 GPU plan; early-rejection replay. |
 | [evidence/CP-8a.md](evidence/CP-8a.md) … [CP-8d.md](evidence/CP-8d.md), `CP-8c_*.md` | CP-8 checkpoint outputs (dataset campaign, surrogate gates). |
 | `evidence/runs/` + `manifest.sha256` | Summary layers of GPU runs (logs, not raw data). |
+| `evidence/BETA_READINESS.md` | Beta readiness pass: SHAs/upstream, data integrity, physics audit (C2 epw 6 vs 8). |
 
 ## Elsewhere in the repo
 `../README.md` (install, commands, known limits) · `../TOOLCHAIN.md` (pinned SHAs, measured machine numbers) ·

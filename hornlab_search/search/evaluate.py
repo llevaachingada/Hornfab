@@ -113,6 +113,7 @@ class EvalContext:
     n_rows: int = 0                                    # rows in search.ndjson (next row number)
     counters: Counter = field(default_factory=Counter)
     write_ndjson: bool = True
+    provenance: dict = field(default_factory=dict)     # config / brief identity for dataset records (R8)
 
     @property
     def solve_cache_root(self) -> Path | None:
@@ -123,12 +124,22 @@ class EvalContext:
         return None if self.cache_dir is None else Path(self.cache_dir) / "mesh"
 
 
+def record_provenance(cfg) -> dict:
+    """Config name and design-brief identity (plan R8), folded into every dataset record."""
+    from ..design.generated import brief_hash
+    raw = getattr(cfg, "raw", None) or {}
+    brief = raw.get("brief") if isinstance(raw.get("brief"), dict) else None
+    return {"config": raw.get("name"), "brief": None if brief is None else brief.get("name"),
+            "brief_hash": None if brief is None else brief_hash(brief)}
+
+
 def make_context(cfg, store=None, *, cache_dir=None, lib_shas=None,
                  trace_fraction: float = DEFAULT_TRACE_FRACTION, ndjson: Path | None = None) -> EvalContext:
     ctx = EvalContext(target=Target.from_dict(cfg.target_raw), weights=dict(cfg.weights),
                       lib_shas=lib_shas if lib_shas is not None else collect_lib_shas(),
                       cache_dir=None if cache_dir is None else Path(cache_dir),
                       trace_fraction=float(trace_fraction))
+    ctx.provenance = record_provenance(cfg)
     if store is not None:
         ctx.store_seen = {(e.get("design_hash"), e.get("mode"), bool(e.get("ok"))) for e in store.index}
     if ndjson is not None:
@@ -616,6 +627,16 @@ def store_wants_traces(ctx: EvalContext, design: Design) -> bool:
     return ctx.trace_fraction > 0 and should_capture_traces(design.hash(), ctx.trace_fraction)
 
 
+def _record_provenance(ctx: EvalContext, st: dict) -> dict:
+    prov = dict(ctx.provenance)
+    gen = st.get("generator")
+    if gen:
+        prov["generator"] = {k: gen.get(k) for k in ("name", "spec", "knobs", "brief", "brief_hash")}
+        prov["brief"] = gen.get("brief") or prov.get("brief")
+        prov["brief_hash"] = gen.get("brief_hash") or prov.get("brief_hash")
+    return prov
+
+
 def _persist(ev: Evaluation, mode: str, sspec, design_dir: Path, ctx: EvalContext, store, st: dict,
              seconds: dict) -> None:
     """design dir files, boundary traces, DATASET RECORD, then the ndjson row (in that order)."""
@@ -653,7 +674,8 @@ def _persist(ev: Evaluation, mode: str, sspec, design_dir: Path, ctx: EvalContex
             try:
                 meta, arrays = build_record(
                     ev, ctx.target, ctx.lib_shas, solve_spec=sspec, area_m2=st["area"],
-                    grid=st["grid"], traces=trace_info, trace_sample_fraction=ctx.trace_fraction)
+                    grid=st["grid"], traces=trace_info, trace_sample_fraction=ctx.trace_fraction,
+                    provenance=_record_provenance(ctx, st))
                 store.append(meta, arrays)
                 ctx.store_seen.add(seen)
             except Exception as exc:  # noqa: BLE001 - ValueError from validate_record, or I/O

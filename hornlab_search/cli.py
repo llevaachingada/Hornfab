@@ -254,6 +254,36 @@ class Doctor:
         self.run("gpu-hygiene", fn)
 
 
+    def check_disk_space(self):
+        """Report free GB for the drives holding runs/, cache/, dataset/."""
+        def fn():
+            import shutil as _shutil
+            dirs = {
+                "runs": REPO / "runs",
+                "cache": REPO / "cache",
+                "dataset": REPO / "dataset",
+            }
+            seen: dict[str, float] = {}  # device root -> free GB
+            msgs: list[str] = []
+            warn = False
+            for name, d in dirs.items():
+                d.mkdir(parents=True, exist_ok=True)
+                usage = _shutil.disk_usage(d)
+                free_gb = usage.free / 1e9
+                # Identify the drive root (Windows: drive letter, POSIX: mountpoint approximation)
+                drive = Path(d).anchor
+                if drive in seen:
+                    continue
+                seen[drive] = free_gb
+                tag = "WARNING: " if free_gb < 10 else ""
+                msgs.append(f"{tag}{name}({drive}) {free_gb:.1f} GB free")
+                if free_gb < 10:
+                    warn = True
+            detail = "; ".join(msgs)
+            return True, detail
+        self.run("disk-space", fn)
+
+
 def _cmd_doctor() -> int:
     d = Doctor()
     d.check_python()
@@ -266,6 +296,7 @@ def _cmd_doctor() -> int:
     d.check_configs()
     d.check_roundtrip()
     d.check_gpu_hygiene()
+    d.check_disk_space()
     any_fail = False
     for label, ok, reason in d.results:
         mark = "PASS" if ok else "FAIL"
@@ -358,19 +389,68 @@ def _print_terms(ev) -> None:
           + f"  n_nan={t.get('n_nan', 0)}  DI source={ev.metrics.di_source if ev.metrics else 'n/a'}")
 
 
+# ---------------------------------------------------------------------- gpu-clean
+
+
+def _cmd_gpu_clean(args) -> int:
+    from hornlab_search.search import hygiene
+    from hornlab_search.search.gpulock import GpuBusyError, _lock_path, _pid_alive, _read_lock
+    import os
+
+    d = _dirs(args) if hasattr(args, "runs_dir") else {"runs": REPO / "runs"}
+    runs_root = d["runs"]
+    lock_path = _lock_path(runs_root)
+
+    # Check if GPU lock is held by a live other process
+    if not getattr(args, "force", False):
+        lock_data = _read_lock(lock_path)
+        if lock_data:
+            holder_pid = lock_data.get("pid")
+            my_pid = os.getpid()
+            if holder_pid and holder_pid != my_pid and _pid_alive(holder_pid):
+                user = lock_data.get("user", "?")
+                cmd = lock_data.get("command", "?")
+                start = lock_data.get("start_time", "?")
+                print(
+                    f'GPU busy: {user} running "{cmd}" (pid {holder_pid}) since {start}',
+                    file=sys.stderr,
+                )
+                return 3
+
+    procs = hygiene.list_project_julia()
+    killed = hygiene.clear_julia(procs)
+    if killed:
+        print(f"gpu-clean: killed {len(killed)} process(es): {killed}")
+    else:
+        print("gpu-clean: no project Julia/BEAT processes found")
+
+    vram = hygiene.vram_used_mib()
+    if vram is None:
+        print("gpu-clean: nvidia-smi not available (VRAM usage unknown)")
+    else:
+        print(f"gpu-clean: VRAM used {vram:.0f} MiB")
+    return 0
+
+
 # ---------------------------------------------------------------------- selftest
 
 
 def _cmd_selftest(args) -> int:
     from hornlab_search.config import load_config
     from hornlab_search.search import selftest
+    from hornlab_search.search.gpulock import GpuBusyError, gpu_lock
     from hornlab_search.solve import worker
     cfg = load_config(args.config or EXAMPLES / "osse_baseline.yaml")
     if args.backend:
         cfg.solve.backend = args.backend
     worker.install_handlers()
+    d = _dirs(args) if hasattr(args, "runs_dir") else {"runs": REPO / "runs"}
     try:
-        return _selftest_body(args, cfg, selftest)
+        with gpu_lock(_command_string(["selftest"] + sys.argv[1:]), runs_root=d["runs"]):
+            return _selftest_body(args, cfg, selftest)
+    except GpuBusyError as exc:
+        print(str(exc), file=sys.stderr)
+        return 3
     finally:
         # a self-test is a measurement: leave no Julia host holding VRAM behind it (AGENTS.md rule 6)
         try:
@@ -438,12 +518,27 @@ def _dry_run(cfg, mode: str) -> int:
 def _cmd_run(args, argv) -> int:
     from hornlab_search.dataset.store import DatasetStore
     from hornlab_search.search import cma, rundir
+    from hornlab_search.search.gpulock import GpuBusyError, gpu_lock
     from hornlab_search.solve import worker
     from hornlab_search.types import BackendUnavailableError
     cfg = _load_cfg(args)
     worker.install_handlers()
     if args.dry_run:
         return _dry_run(cfg, args.mode)
+    d = _dirs(args)
+    try:
+        with gpu_lock(_command_string(argv), runs_root=d["runs"]):
+            return _run_body(args, argv, cfg)
+    except GpuBusyError as exc:
+        print(str(exc), file=sys.stderr)
+        return 3
+
+
+def _run_body(args, argv, cfg) -> int:
+    from hornlab_search.dataset.store import DatasetStore
+    from hornlab_search.search import cma, rundir
+    from hornlab_search.solve import worker
+    from hornlab_search.types import BackendUnavailableError
     d = _dirs(args)
     try:
         backend = _backend(cfg)
@@ -473,9 +568,25 @@ def _cmd_search(args, argv) -> int:
     from hornlab_search.dataset.store import DatasetStore
     from hornlab_search.search import cma, rundir
     from hornlab_search.search.evaluate import read_ndjson
+    from hornlab_search.search.gpulock import GpuBusyError, gpu_lock
     from hornlab_search.solve import worker
     from hornlab_search.types import BackendUnavailableError
     d = _dirs(args)
+    try:
+        with gpu_lock(_command_string(argv), runs_root=d["runs"]):
+            return _search_body(args, argv, d)
+    except GpuBusyError as exc:
+        print(str(exc), file=sys.stderr)
+        return 3
+
+
+def _search_body(args, argv, d) -> int:
+    from hornlab_search.config import load_config
+    from hornlab_search.dataset.store import DatasetStore
+    from hornlab_search.search import cma, rundir
+    from hornlab_search.search.evaluate import read_ndjson
+    from hornlab_search.solve import worker
+    from hornlab_search.types import BackendUnavailableError
     if args.resume:
         run_dir = Path(args.resume)
         if not run_dir.is_dir():
@@ -562,6 +673,17 @@ def _cmd_search(args, argv) -> int:
 
 
 def _cmd_verify(args, argv) -> int:
+    from hornlab_search.search.gpulock import GpuBusyError, gpu_lock
+    d = _dirs(args)
+    try:
+        with gpu_lock(_command_string(argv), runs_root=d["runs"]):
+            return _verify_body(args, argv, d)
+    except GpuBusyError as exc:
+        print(str(exc), file=sys.stderr)
+        return 3
+
+
+def _verify_body(args, argv, d) -> int:
     from hornlab_search.config import load_config
     from hornlab_search.dataset.store import DatasetStore
     from hornlab_search.design.space import DesignSpace
@@ -695,6 +817,7 @@ def _cmd_surrogate(args) -> int:
     weights = resolve_weights(cfg.weights)
     out = Path(args.out)
     if args.action == "round":
+        from hornlab_search.search.gpulock import GpuBusyError, gpu_lock
         from hornlab_search.surrogate.round import run_round
         if not args.out_dir:
             print("surrogate round FAILED: --out-dir is required")
@@ -706,9 +829,13 @@ def _cmd_surrogate(args) -> int:
         d = _dirs(args)
         store = dstore.DatasetStore(d["dataset"]) if d["dataset"].exists() else None
         try:
-            result = run_round(props, cfg, mode=args.mode, out_dir=Path(args.out_dir),
-                               bundle_path=out, store=store, cache_dir=d["cache"],
-                               random_run=args.random_run, trace_fraction=args.trace_fraction)
+            with gpu_lock(f"hornlab-search surrogate round", runs_root=d["runs"]):
+                result = run_round(props, cfg, mode=args.mode, out_dir=Path(args.out_dir),
+                                   bundle_path=out, store=store, cache_dir=d["cache"],
+                                   random_run=args.random_run, trace_fraction=args.trace_fraction)
+        except GpuBusyError as exc:
+            print(str(exc), file=sys.stderr)
+            return 3
         except ValueError as exc:
             print(f"surrogate round FAILED: {exc}")
             return 1
@@ -985,6 +1112,7 @@ def _cmd_campaign(args) -> int:
     from hornlab_search.search.campaign import (
         run_campaign, print_compact_table,
     )
+    from hornlab_search.search.gpulock import GpuBusyError, gpu_lock
     brief_path = Path(args.brief)
     if not brief_path.exists():
         print(f"campaign FAILED: --brief {brief_path} not found")
@@ -996,9 +1124,29 @@ def _cmd_campaign(args) -> int:
         print(f"campaign FAILED: --seeds must be at least 1, got {args.seeds}")
         return 2
     runs_dir = Path(args.runs_dir or REPO / "runs")
+    # dry-run tier does no GPU work; all other tiers need the lock
+    if args.tier != "dry-run":
+        try:
+            # Campaign spawns subprocesses that each acquire the lock via env-var reentrancy
+            cmd = f"hornlab-search campaign --tier {args.tier} --brief {args.brief} --families {args.families}"
+            lock_ctx = gpu_lock(cmd, runs_root=runs_dir)
+        except Exception:  # noqa: BLE001
+            lock_ctx = None
+        if lock_ctx is not None:
+            try:
+                with lock_ctx:
+                    return _campaign_body(args, runs_dir, run_campaign, print_compact_table)
+            except GpuBusyError as exc:
+                print(str(exc), file=sys.stderr)
+                return 3
+        return _campaign_body(args, runs_dir, run_campaign, print_compact_table)
+    return _campaign_body(args, runs_dir, run_campaign, print_compact_table)
+
+
+def _campaign_body(args, runs_dir, run_campaign, print_compact_table) -> int:
     try:
         results = run_campaign(
-            brief_path=brief_path,
+            brief_path=Path(args.brief),
             families_spec=args.families,
             tier=args.tier,
             runs_dir=runs_dir,
@@ -1133,6 +1281,11 @@ def build_parser() -> argparse.ArgumentParser:
                      help="override the number of CMA seeds (default: 1 for screen, 2 for compare)")
     cmp.add_argument("--budget", type=int, metavar="N",
                      help="override the per-search budget for this campaign")
+    # ---------------------------------------------------------------------- gpu-clean
+    gc = sub.add_parser("gpu-clean", parents=[common],
+                        help="kill stale Julia/BEAT processes and report VRAM usage")
+    gc.add_argument("--force", action="store_true",
+                    help="DANGEROUS: skip the GPU-lock check and kill Julia even if a search is running")
     return p
 
 
@@ -1174,6 +1327,8 @@ def main(argv: list[str] | None = None) -> int:
             return _cmd_families(args)
         if args.cmd == "campaign":
             return _cmd_campaign(args)
+        if args.cmd == "gpu-clean":
+            return _cmd_gpu_clean(args)
     except KeyboardInterrupt:
         print(f"{args.cmd} INTERRUPTED")
         return 1

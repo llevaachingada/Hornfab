@@ -46,7 +46,7 @@ weights:
   flat: 0.5
   load: 0.0
 mesh:
-  epw: 6.0
+  epw: 8.0  # beta C2 2026-10-22: epw 6 vs 8 on osse_axi gave DI 0.124 dB > 0.1 dB; axi cost unchanged (docs/evidence/BETA_READINESS.md)
   quadrants: '1'
   dof_cap_screen: 5000
   dof_cap_verify: 7000
