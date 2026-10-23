@@ -1600,7 +1600,8 @@ function renderLaunch(briefs, jobs, configs, statusData, typs = []) {
       </div>` : "";
   const busyNote = busyNoteHtml(lock);
 
-  const briefOpts = briefs.map(b => `<option value="${esc(b.path)}" data-name="${esc(b.name)}">${esc(b.name)}${b.kind === "user" ? " (yours)" : ""}</option>`).join("");
+  // verify_only briefs (12 kHz, P2) are for `verify --brief` only: the CLI refuses them for search/campaign
+  const briefOpts = briefs.filter(b => !(b.brief && b.brief.verify_only)).map(b => `<option value="${esc(b.path)}" data-name="${esc(b.name)}">${esc(b.name)}${b.kind === "user" ? " (yours)" : ""}</option>`).join("");
   const pre = new URLSearchParams((location.hash.split("?")[1]) || "");
 
   // Build config select options grouped by catalog group

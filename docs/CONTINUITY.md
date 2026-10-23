@@ -5,10 +5,16 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 ## Status
 - **Phase:** pre-beta hardening (HANDOFF_BETA A-E done except D3; F rehearsal and G session pack in progress). Waves 0-3 and CP-7 complete; CP-8a/b PASS, CP-8c CLOSED, CP-8d FAILED 2026-10-14 (retrain pending, see below).
 - **Done 2026-10-23 PM:** overnight queue finished 15:49 (QUEUE DONE, no hosts left); P2 12 kHz verify DONE (`docs/evidence/HF12K_VERIFY_2026-10-23.md`); surrogate retrain GATES FAILED, model not used (`docs/evidence/CP-8d_retrain_2026-10-23.md`); D3 Ctrl-C PASS on the GPU after a campaign fix.
-- **Next (owner's orchestrator, in order):** F timed rehearsal (CLI quickstart verbatim + GUI path) -> G session plan numbers. GPU free.
+- **Next:** beta session (`docs/BETA_SESSION_PLAN.md`). F rehearsal and G done 2026-10-23 16:30. GPU free, no host left. Open owner decisions below.
 - **Collaborator handoff:** `docs/HANDOFF_COLLABORATOR_2026-10-23.md` (what is safe to edit tonight, what not to touch).
 - **Open owner decisions:** bound proposals (`docs/evidence/TYPOLOGY_COMPARE_2026-10-23.md`; sculpt anchors pinned too), P1 fused CUDA Burton-Miller (post-beta), mesher bump (post-beta), more rosse seeds, surrogate top-up.
 - **Blockers:** none. Issue #13 fixes merged (awaiting owner close).
+
+## 2026-10-23 (local, ~16:35 EDT) - F timed rehearsal DONE (CLI + GUI); 8 friction points fixed; G refreshed
+
+- CLI quickstart verbatim in a fresh PowerShell: doctor 5 s (11 checks OK), families 1 s, campaign dry-run 8 s, dry-run 2 s, search 60 7.3 min (J 30.94 -> 15.74), report 5 s, export-step 74 s. GUI path Home -> Typologies -> Launch -> campaign -> run -> Evolution -> Export STEP all work, 0 console errors; the shipped-brief screen replays from the cache in 51 s; a live screen on a new 80 x 80 brief copy takes 5.5 min (48 new solves). Table and friction list: `docs/evidence/BETA_READINESS.md` F.
+- Fixed: quickstart (doctor 11 checks, gpu-clean instead of taskkill / Get-Process, cache-reuse counts explained, dry-run estimate caveat, rename `name:`, 12 kHz verify line); `verify_only` brief key (the `*_12k` briefs) refused by search/run/campaign and hidden from Launch; session plan live step on a saved brief copy + 12 kHz readings; surrogate limit line.
+- Offline suite: **813 passed, 18 deselected, exit 0**.
 
 ## 2026-10-23 (local, ~16:20 EDT) - P2 12 kHz verify DONE; surrogate retrain GATES FAILED; D3 PASS after a campaign fix
 

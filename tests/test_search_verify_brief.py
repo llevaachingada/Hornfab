@@ -73,3 +73,29 @@ def test_verify_without_brief_keeps_writing_into_the_run(smoke_cfg, tmp_path, mo
     assert code == 0 and be.calls == 2
     rows = read_ndjson(run_dir / "verify" / "search.ndjson")
     assert len(rows) == 2
+
+
+def test_verify_only_briefs_are_refused_by_search_run_and_campaign(smoke_cfg, tmp_path, monkeypatch, capsys):
+    """The 12 kHz briefs exceed what a search can mesh on 8 GB: only `verify --brief` may use them."""
+    from hornlab_search.config import load_brief
+    assert load_brief(BRIEF_12K)["verify_only"] is True
+    common = ["--runs-dir", str(tmp_path / "runs"), "--dataset-dir", str(tmp_path / "ds"),
+              "--cache-dir", str(tmp_path / "cache")]
+    cfg_file = Path(__file__).resolve().parents[1] / "examples" / "search_smoke.yaml"
+    (tmp_path / "runs").mkdir()
+    assert cli.main(["search", "--config", str(cfg_file), "--brief", str(BRIEF_12K), *common]) == 2
+    assert "verify_only" in capsys.readouterr().out
+    assert list((tmp_path / "runs").glob("*-screen-*")) == []          # no empty run dir left behind
+    assert cli.main(["run", "--config", str(cfg_file), "--brief", str(BRIEF_12K), *common]) == 2
+    assert cli.main(["campaign", "--tier", "screen", "--families", "conical", "--brief", str(BRIEF_12K),
+                     *common]) == 2
+    assert "REFUSED" in capsys.readouterr().out
+
+
+def test_verify_only_must_be_a_boolean(tmp_path):
+    from hornlab_search.config import ConfigError, load_brief
+    bad = tmp_path / "b.yaml"
+    bad.write_text(BRIEF_12K.read_text(encoding="utf-8").replace("verify_only: true", "verify_only: yes please"),
+                   encoding="utf-8")
+    with pytest.raises(ConfigError, match="verify_only"):
+        load_brief(bad)

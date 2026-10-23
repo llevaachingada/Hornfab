@@ -5,6 +5,7 @@
 # Brief: hi-fi waveguide, 90 x 60 degrees H/V, 1-inch compression driver
 # Used as the reference size class for LANE B typology comparisons (TYPOLOGY_PLAN.md s3).
 # symmetry: hv - H and V differ; axisymmetric families are rejected by the campaign.
+verify_only: true              # search / run / campaign refuse this brief; only `verify --brief`
 name: hifi_90x60_1in_12k
 description: Hi-fi waveguide 90x60 degrees H/V, 1-inch driver, 400x300x220 mm envelope
 driver:

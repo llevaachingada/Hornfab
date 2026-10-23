@@ -12,10 +12,10 @@ results. Measured timings are in `docs/evidence/BETA_READINESS.md` (F).
 | 0:00-0:10 | `hornlab-search doctor` (expect 11 checks incl. disk space, 0 failed); `gpu-clean` if a host is listed; start `hornlab-search gui` | owner | no |
 | 0:10-0:30 | What the tool claims and where each claim comes from (below); Known limits; GUI **Glossary** for every term | both | no |
 | 0:30-0:50 | GUI **Typologies** (every family, brief compatibility, best result per brief) and **Campaigns** (compare-tier leaderboards from the night) | both | no |
-| 0:50-1:00 | GUI **Launch**: campaign, tier `screen`, families `conical,exponential`, axi brief (~6 min). Dry-run first if unsure | owner | **yes** |
+| 0:50-1:00 | GUI **Briefs**: save a copy of the axi brief with a new coverage (e.g. 80 x 80). **Launch**: campaign, tier `screen`, families `conical,exponential`, that brief (5.5 min measured, 48 new solves). On the shipped briefs every family was already screened with the same seed, so it replays from the cache in ~1 min | owner | **yes** |
 | 1:00-1:30 | While it runs: Home shows live progress; review the objective (below) and the compare evidence | mathematician | (running) |
 | 1:30-1:45 | Open the finished run: beamwidth vs target, DI, isobars, **Evolution** time-lapse; **Export STEP**; **Compare** two runs | owner | no |
-| 1:45-2:00 | The 12 kHz finalist verify (P2) runs: what 8-12 kHz shows and what it cannot (caveat below) | both | no |
+| 1:45-2:00 | The 12 kHz finalist verify (P2) runs (`...-verify-...` in Runs): rankings hold to 12 kHz; osse_axi stays within 80-101 deg of 90; perturbed_osse_hv's V stays 11-22 deg too wide; rosse narrows to 60 deg H at 12 kHz. What 8-12 kHz shows and what it cannot (caveat below) | both | no |
 | 2:00-2:15 | Open questions (s9 of `docs/TYPOLOGY_PLAN.md`; bound proposals in `docs/evidence/TYPOLOGY_COMPARE_2026-10-23.md`) | both | no |
 | 2:15-2:30 | Write down decisions and problems (format below); `gpu-clean` | owner | no |
 
@@ -62,7 +62,8 @@ actions while the lock is held and re-enables them when it is released (the serv
   uniform cap, so **8-12 kHz results compare geometries, not drivers**. 12 kHz SEARCH and big horns at 12 kHz need
   P1 (a solver change, post-beta).
 - Shell: generated horns 3 mm, native configs 6 mm (mesher default).
-- The surrogate model is inactive (its gates failed for lack of data).
+- The surrogate model is inactive: retrained 2026-10-23 on 3,080 OSSE records, 3 of 6 gates failed and the held-out
+  set (463) is under the plan's 500 (`docs/evidence/CP-8d_retrain_2026-10-23.md`).
 
 ## Do not try (and why)
 

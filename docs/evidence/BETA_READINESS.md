@@ -99,3 +99,42 @@ meshes. Guard test: `tests/test_mesh_semipublic_api.py`.
   **130 within 1.4 s**; lock file **gone**; leaderboard.md + campaign.json **written, interrupted: true** (conical
   best J 35.025 so far); child run.json **status interrupted** (resumable); 2 host processes cleared by the campaign;
   **no julia / worker_host left**.
+
+## F. Timed rehearsal (2026-10-23, 16:12-16:30 EDT, GPU idle and clean before each step)
+
+**CLI path**: `docs/BETA_QUICKSTART.md` verbatim in a fresh `powershell -NoProfile`, from the repo root.
+
+| step | command | result | time |
+|---|---|---|---|
+| 0 | `doctor` | OK, 11 checks, 0 failed (VRAM 381 MiB) | 5 s |
+| 0b | `families --brief hifi_90x60_1in` | OK, 19 entries, axisymmetric ones marked INCOMPAT with the reason | 1 s |
+| 0b | `campaign ... --families conical,exponential,tractrix --tier dry-run` | OK | 8 s |
+| 1 | `Copy-Item examples\freeform_sculpt.yaml examples\my_horn.yaml` | OK | 0 s |
+| 2 | `run --config examples\my_horn.yaml --dry-run` | OK, 1,362 of 5,000 dofs | 2 s |
+| 3 | `search --config examples\my_horn.yaml --budget 60` | OK, J 30.94 -> 15.74; 60 new + 717 cached | 440 s (7.3 min) |
+| 4 | `report runs\<dir>` | OK, 5.67 MB | 5 s |
+| 5 | `export-step --run runs\<dir> --top 3` | OK, 3 solids 7.8-8.3 MB | 74 s |
+
+**GUI path** (`hornlab-search gui`, built-in browser): Home (guide, GPU idle, best horn per brief) -> Typologies ->
+Launch campaign / screen / axi brief / conical + exponential (server preview shows the exact CLI command) -> Start ->
+campaign done in **51 s** (all 40 + 40 evaluations replayed from the cache: the shipped axi brief was already screened
+with the same CMA seed) -> run page -> Evolution (7 improvements, "replayed from cache" shown) -> Export STEP: 3 solids
+with download links in ~20 s. 0 console errors on every page.
+
+**Live screen on a NEW brief** (copy of the axi brief at 80 x 80 deg, CLI): `campaign --families conical,exponential
+--tier screen`: **327 s (5.5 min)**, 48 new solves + 32 reused, exit 0, no host left. This is the realistic live step.
+
+**Friction found and fixed** (all in this commit unless noted):
+1. Quickstart said `doctor OK: 10 checks` (11 now) and cleared hosts with `taskkill`: now `gpu-clean`.
+2. Quickstart step 3 said `Get-Process julia` shows nothing after a search: false by design (the host stays warm);
+   now says run `gpu-clean` when done.
+3. `777 evaluations (60 new, 717 cached)` for `--budget 60` was unexplained: quickstart now explains cache reuse.
+4. Dry-run estimate 2 s/candidate vs measured ~6 s: stated in the quickstart (ISSUES follow-up 2 stays open).
+5. A copied config keeps `name: freeform_sculpt`, so its run, report and STEP files carry that name: quickstart says
+   to edit `name:`.
+6. The new `*_12k` briefs were offered by Launch and accepted by search/campaign (would fail on the screen dof cap):
+   briefs now carry `verify_only: true`; `search`, `run` and non-dry-run `campaign` refuse them (exit 2), Launch hides
+   them; `verify --brief` still uses them. Tests in `tests/test_search_verify_brief.py`.
+7. The session plan's live screen on the shipped axi brief is a cache replay (51 s, nothing new to watch):
+   `docs/BETA_SESSION_PLAN.md` now runs it on a saved copy of the brief with a different coverage (5.5 min measured).
+8. (Earlier today, D3) campaign Ctrl-C and host clearing.

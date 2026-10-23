@@ -515,6 +515,15 @@ def _dry_run(cfg, mode: str) -> int:
     return 0
 
 
+def _verify_only_refusal(brief: dict | None, command: str) -> str | None:
+    """A brief marked ``verify_only`` (the 12 kHz briefs, NEXT_DEV_PRIORITIES P2) exceeds what a search can
+    mesh on the 8 GB card; only ``verify --brief`` may use it."""
+    if brief and brief.get("verify_only"):
+        return (f"{command} REFUSED: brief {brief.get('name')!r} is verify_only (its band exceeds what a search "
+                f"can solve on this GPU). Use it with `verify --run <run> --brief <file>` only.")
+    return None
+
+
 def _cmd_run(args, argv) -> int:
     from hornlab_search.dataset.store import DatasetStore
     from hornlab_search.search import cma, rundir
@@ -525,6 +534,10 @@ def _cmd_run(args, argv) -> int:
     worker.install_handlers()
     if args.dry_run:
         return _dry_run(cfg, args.mode)
+    why = _verify_only_refusal(cfg.brief, "run")
+    if why:
+        print(why)
+        return 2
     d = _dirs(args)
     try:
         with gpu_lock(_command_string(argv), runs_root=d["runs"]):
@@ -608,6 +621,12 @@ def _search_body(args, argv, d) -> int:
     if getattr(args, "cma_seed", None) is not None:
         kw["cma_seed"] = int(args.cma_seed)
     cfg = load_config(cfg_path, **kw)
+    why = _verify_only_refusal(cfg.brief, "search")
+    if why:
+        if not args.resume:
+            run_dir.rmdir()                      # created above, still empty
+        print(why)
+        return 2
     if args.backend:
         cfg.solve.backend = args.backend
     if args.resume:
@@ -1165,6 +1184,16 @@ def _cmd_campaign(args) -> int:
         print(f"campaign FAILED: --seeds must be at least 1, got {args.seeds}")
         return 2
     runs_dir = Path(args.runs_dir or REPO / "runs")
+    if args.tier != "dry-run":
+        from hornlab_search.config import ConfigError, load_brief
+        try:
+            why = _verify_only_refusal(load_brief(brief_path), "campaign")
+        except ConfigError as exc:
+            print(f"campaign FAILED: {exc}")
+            return 1
+        if why:
+            print(why)
+            return 2
     # dry-run tier does no GPU work; all other tiers need the lock
     if args.tier != "dry-run":
         try:

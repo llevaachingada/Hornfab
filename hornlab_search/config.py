@@ -118,7 +118,8 @@ def load_brief(path) -> dict:
     where = f"brief {path.name}"
     if not isinstance(raw, dict):
         raise ConfigError(f"{where}: top level must be a mapping")
-    allowed = {"name", "description", "driver", "envelope", "symmetry", "source", "target", "weights"}
+    allowed = {"name", "description", "driver", "envelope", "symmetry", "source", "target", "weights",
+               "verify_only"}
     unknown = set(raw) - allowed
     if unknown:
         raise ConfigError(f"{where}: unknown key(s) {sorted(unknown)}")
@@ -133,6 +134,8 @@ def load_brief(path) -> dict:
     for k in ("max_mouth_w_mm", "max_mouth_h_mm", "max_depth_mm"):
         if not isinstance(env.get(k), (int, float)) or not float(env[k]) > 0:
             raise ConfigError(f"{where}: envelope.{k} must be a positive number")
+    if not isinstance(raw.get("verify_only", False), bool):
+        raise ConfigError(f"{where}: verify_only must be true or false")
     if raw["symmetry"] not in BRIEF_SYMMETRY:
         raise ConfigError(f"{where}: symmetry must be one of {list(BRIEF_SYMMETRY)}")
     cap = (raw.get("source") or {}).get("cap", "auto")

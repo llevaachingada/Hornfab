@@ -5,6 +5,7 @@
 # Brief: axisymmetric 90x90 degrees, 1-inch compression driver
 # Fair to classical horns (TYPOLOGY_PLAN.md s3): coverage_h == coverage_v => axisymmetric families allowed.
 # load weight 0.5 and z_min 0.7 because loading matters for classical horns (TYPOLOGY_PLAN.md s3).
+verify_only: true              # search / run / campaign refuse this brief; only `verify --brief`
 name: axi_90x90_1in_12k
 description: Axisymmetric 90x90 degree horn, 1-inch driver, 360x360x220 mm envelope
 driver:

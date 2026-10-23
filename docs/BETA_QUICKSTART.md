@@ -10,8 +10,9 @@ the first full loop.
 .\.venv\Scripts\hornlab-search.exe doctor
 ```
 
-Expect `doctor OK: 10 checks, 0 failed`. If `gpu-hygiene` reports BEAT hosts alive, clear them:
-`Get-Process julia`, then `taskkill /F /IM julia.exe` (only julia processes this project started).
+Expect `doctor OK: 11 checks, 0 failed` (the last one is free disk space). If `gpu-hygiene` reports BEAT hosts
+alive, clear them with `.\.venv\Scripts\hornlab-search.exe gpu-clean` (it kills only this project's Julia / BEAT
+worker hosts and refuses while another GPU job is running).
 
 ## 0a. Or use the browser GUI
 
@@ -49,7 +50,8 @@ Adding a typology run is a new YAML in `examples/typologies/` plus a catalog lin
 
 ## 1. Describe the horn you want
 
-Copy an example and edit only the `target:` block (and `bounds:` if you know what you are doing):
+Copy an example and edit the `name:` line (run folders, reports and STEP files are named after it) and the
+`target:` block (and `bounds:` if you know what you are doing):
 
 ```powershell
 Copy-Item examples\freeform_sculpt.yaml examples\my_horn.yaml
@@ -78,7 +80,8 @@ Which example to start from:
 .\.venv\Scripts\hornlab-search.exe run --config examples\my_horn.yaml --dry-run
 ```
 
-Expect `dry-run OK` with the dof count under the cap.
+Expect `dry-run OK` with the dof count under the cap. Its time estimate ("2 s per candidate") is a lower bound
+from small meshes; a real search of `freeform_sculpt` measures about 6 s per candidate.
 
 ## 3. Search (GPU; about 4–7 s per candidate)
 
@@ -86,9 +89,11 @@ Expect `dry-run OK` with the dof count under the cap.
 .\.venv\Scripts\hornlab-search.exe search --config examples\my_horn.yaml --budget 60
 ```
 
-60 candidates take about 7 minutes; 400 about 30–45 minutes. The last line names the run
-directory under `runs\`. An interrupted search continues with `search --resume runs\<dir>`.
-Afterwards confirm `Get-Process julia` shows nothing (kill it as in step 0 if it does).
+60 candidates take about 7 minutes (measured 7.3 min on 2026-10-23); 400 about 30–45 minutes. The last line
+names the run directory under `runs\`. Designs already solved by any earlier run (same shape, mesh and solve settings)
+are reused for free, so the summary can say e.g. `777 evaluations (60 new, 717 cached)`: only the new ones cost GPU
+time. An interrupted search (Ctrl-C) continues with `search --resume runs\<dir>`. A search leaves its Julia host warm
+on purpose (the next run starts faster); when you are done, run `.\.venv\Scripts\hornlab-search.exe gpu-clean`.
 
 ## 4. Look at the result
 
@@ -112,5 +117,7 @@ driver flange and mounting in CAD; the solver did not model them.
 ## What to send back
 
 The run directory name, `report.html`, your config, and a note on anything that surprised you.
-Known limits: no woofer entry ports, no room or baffle, response above 5.5 kHz not scored on
-8 GB cards, and the surrogate (fast-prediction) model is not active yet.
+Known limits: no woofer entry ports, no room or baffle, searches stop at 5.5 kHz on 8 GB cards (finalists can be
+re-solved to 12 kHz with `verify --run runs\<dir> --brief examples\briefs\<brief>_12k.yaml --top 3`; above
+~7.9 kHz that compares geometries, not real drivers; the `_12k` briefs are refused by search/run/campaign), and the
+surrogate (fast-prediction) model is not active yet.
