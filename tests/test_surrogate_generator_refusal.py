@@ -19,3 +19,12 @@ def test_generator_config_is_refused_with_a_clear_message():
 
 def test_native_config_is_accepted():
     require_surrogate_config(load_config(ROOT / "examples" / "osse_baseline.yaml"))
+
+
+def test_cli_surrogate_train_refuses_generator_config(capsys):
+    pytest.importorskip("torch")
+    from hornlab_search import cli
+    rc = cli.main(["surrogate", "train", "--config",
+                   str(ROOT / "examples" / "typologies" / "osse_axi.yaml"), "--out", "unused"])
+    assert rc == 1
+    assert "does not support typology generator configs" in capsys.readouterr().out

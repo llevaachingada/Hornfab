@@ -812,7 +812,13 @@ def _cmd_surrogate(args) -> int:
     from hornlab_search.surrogate.predict import Surrogate
     from hornlab_search.surrogate.train import train_surrogate
     from hornlab_search.targets.spec import Target
+    from hornlab_search.surrogate.features import UnsupportedConfigError, require_surrogate_config
     cfg = load_config(args.config)
+    try:
+        require_surrogate_config(cfg)
+    except UnsupportedConfigError as exc:
+        print(f"surrogate {args.action} FAILED: {exc}")
+        return 1
     space, target = DesignSpace.from_config(cfg), Target.from_dict(cfg.target_raw)
     weights = resolve_weights(cfg.weights)
     out = Path(args.out)
@@ -950,6 +956,8 @@ def compare_metrics(a, b) -> dict:
     fa, fb = np.asarray(a.freqs_hz, float), np.asarray(b.freqs_hz, float)
     if fa.shape != fb.shape or not np.allclose(fa, fb, rtol=1e-6, atol=1e-3):
         raise ValueError(f"frequency grids differ: {fa.tolist()} vs {fb.tolist()}")
+    if fa.size == 0:
+        raise ValueError("both runs have an empty frequency list; nothing to compare")
     out = {}
     for k, unit in _COMPARE_KEYS:
         d = np.abs(np.asarray(getattr(a, k), float) - np.asarray(getattr(b, k), float))
