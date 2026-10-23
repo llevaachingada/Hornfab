@@ -102,7 +102,7 @@ Added 2026-10-22 PM (cloud): Boundary Lab learnings implemented (`docs/BL_LEARNI
 TO-DO (no GitHub issue yet; owner / plan ref):
 - [x] Merge the learnings PR, run its section-4 test plan on the GPU box: DONE 2026-10-22 (FF to 265133f; `docs/evidence/BL_LEARNINGS_GPU.md`).
 - [x] Early rejection offline replay: DONE 2026-10-22 (`docs/evidence/EARLY_REJECTION_REPLAY.md`): < 0.1 % GPU saved at K = 4 / 25 % margin, no top-20 lost; recommend NOT implementing as specified (owner ruling).
-- [ ] Search budget counts uncached failures: a re-run with the same CMA seed replays cached successes for free but re-evaluates every earlier failure, which consumes budget without solving (OSSE budget 40 -> 0 new solves, 2026-10-22). Options for the owner: cache failures by design hash, or count only solver-reaching evaluations (task 08; `search/cma.py`).
+- [x] (closed 2026-10-23 by the failure cache) Search budget counts uncached failures: a re-run with the same CMA seed replays cached successes for free but re-evaluates every earlier failure, which consumes budget without solving (OSSE budget 40 -> 0 new solves, 2026-10-22). Options for the owner: cache failures by design hash, or count only solver-reaching evaluations (task 08; `search/cma.py`).
 - [ ] CPU-vs-CUDA qualification screen per pinned-library change (GPU box; frozen CP-7b rule; s2 item 8). Note: beat_cuda vs bempp_cpu re-run 2026-10-22: 0.039 dB (`docs/evidence/SOLVER_VERIFY_2026-10-22.md`).
 - [x] Typology plan v2 implemented 2026-10-22 (generators, hybrids, briefs, `families`/`campaign`, failure cache, loading metrics). GPU checks V4/V5/V7 in progress.
 - [ ] Le Cléac'h / spherical-wave generator DISABLED (R9): implement only from a verifiable published construction (ETF 2010 lecture PDF too large to fetch, diyaudio thread 403, sphericalhorns.net calculator disclaims fidelity to JMLC). Needs a human-supplied reference.
@@ -118,9 +118,11 @@ TO-DO (no GitHub issue yet; owner / plan ref):
 - [x] R8 brief provenance: dataset records carry optional `provenance` {config, brief, brief_hash, generator} (2026-10-22).
 - [x] C2 epw 6 vs 8: axi seed DI 0.124 dB > 0.1 -> axi typologies at epw 8 (owner); H/V within 0.05 dB stays epw 6.
 - [x] GPU lock + `gpu-clean` (2026-10-22); overnight queue + watchdog in `tools/overnight/`.
-- [ ] Wire `surrogate.features.require_surrogate_config` into `cli._cmd_surrogate` (helper + test exist).
+- [ ] Wire `surrogate.features.require_surrogate_config` into `cli._cmd_surrogate`: done on branch `beta-fixes` (merge after the queue).
 - [ ] Beta-readiness pass per `docs/HANDOFF_BETA.md` (A-G; A-D done except D3 Ctrl-C test and D5 paths; E running overnight; F, G pending): upstream audit, R8 brief provenance in dataset records, epw convergence above 2.5 kHz, GPU lock / gpu-clean, rehearsal, session pack.
-- [ ] `compare` tier (2 CMA seeds) on the screen leaders: osse_axi, blend_osse_tractrix, hypex (axi); perturbed_osse_hv, hyb_osse_h_hypex_v, rosse_baseline (hifi).
+- [x] `compare` tier (2 CMA seeds) on the leaders: DONE 2026-10-23 (`docs/evidence/TYPOLOGY_COMPARE_2026-10-23.md`).
+- [ ] Bound proposals from the compare tier (osse_axi `h_s`, hypex/exponential `L_mm` lo, perturbed_osse_hv `L_mm`/`v_a_deg`, hybrid `v_rm_mm`): owner decision; NOT applied.
+- [ ] rosse_baseline is seed-sensitive (12.3 vs 14.3): more seeds or budget before any ranking claim.
 - [x] Failure cache: deterministic failures cached by design+mesh+solve key across runs (fixes the OSSE seed-replay budget burn).
 - [ ] Stage 2 transient analysis (impulse, step, CSD waterfall, group delay, dense throat impedance) on finalists: research + design in `docs/research/TIME_DOMAIN_RINGING.md`; needs a dense uniform frequency list per evaluation (today only 12/25/36-point log grids, too sparse: Magnus's `plot_impulse_response` interpolates over resonances). After the typology campaign; not in the search loop.
 - [ ] R-OSSE: validator exists, no example config, 0 dataset records (`docs/research/typologies/SEARCH_LAYER_GAPS.md`). In the typology plan.
@@ -129,6 +131,6 @@ TO-DO (no GitHub issue yet; owner / plan ref):
 - [x] STEP-export CLI: DONE locally 2026-10-22 (`hornlab-search export-step`, b822dd5).
 - [ ] OSSE data top-up for the surrogate gates (GPU, overnight; user OK needed).
 - [ ] Boundary Lab BL-1 export (cloud; `docs/BOUNDARY_LAB_INTEGRATION_PLAN.md`).
-- [ ] `compare` IndexError on empty frequency list (oracle follow-up; the quadrants-label part was fixed in b822dd5).
+- [ ] `compare` IndexError on empty frequency list: fixed on branch `beta-fixes` (merge after the overnight queue).
 
 - [x] Docs index `docs/INDEX.md` and code map `docs/CODE_MAP.md` added 2026-10-22, linked from CLAUDE.md / AGENTS.md / .claude/CLAUDE.md; keep them current.

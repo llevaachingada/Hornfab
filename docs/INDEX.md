@@ -42,6 +42,7 @@ Keep this file current: a new doc gets a line here in the same commit.
 | [evidence/TYPOLOGY_VERIFY.md](evidence/TYPOLOGY_VERIFY.md) | Typology ladder V1–V5. |
 | [evidence/TYPOLOGY_SCREEN_2026-10-22.md](evidence/TYPOLOGY_SCREEN_2026-10-22.md) | First fair screen campaigns + reading. Raw: `evidence/campaigns/`. |
 | [evidence/BETA_READINESS.md](evidence/BETA_READINESS.md) | Beta pass audits (if present). |
+| `evidence/TYPOLOGY_COMPARE_2026-10-23.md` | Compare tier (2 seeds): rankings that stand, bound-limited families, bound proposals. |
 | [evidence/HANDOFF_6b.md](evidence/HANDOFF_6b.md), [evidence/BL_LEARNINGS_GPU.md](evidence/BL_LEARNINGS_GPU.md), [evidence/EARLY_REJECTION_REPLAY.md](evidence/EARLY_REJECTION_REPLAY.md) | FREEFORM sculpt tests; PR #15 GPU plan; early-rejection replay. |
 | [evidence/CP-8a.md](evidence/CP-8a.md) … [CP-8d.md](evidence/CP-8d.md), `CP-8c_*.md` | CP-8 checkpoint outputs (dataset campaign, surrogate gates). |
 | `evidence/runs/` + `manifest.sha256` | Summary layers of GPU runs (logs, not raw data). |

@@ -123,7 +123,7 @@ footer { color: var(--muted); font-size: 0.82rem; border-top: 1px solid var(--ru
 
 <div class="wrap">
 <header class="top">
-  <div class="eyebrow">hornlab-search · solve review · 22 Oct 2026</div>
+  <div class="eyebrow">hornlab-search · solve review · 23 Oct 2026</div>
   <h1>Hornlab Search Review</h1>
   <p class="lede prose">Every boundary-element solve the horn optimiser has run so far, laid out for a mathematical review: the objective being minimised, how far the solver can be trusted, what each search found, and where the setup itself limits the answer.</p>
   <div class="facts">
@@ -170,7 +170,7 @@ footer { color: var(--muted); font-size: 0.82rem; border-top: 1px solid var(--ru
       <tr><td>OSSE symmetry (CP-7d)</td><td>Quarter-domain mesh vs full mesh</td><td class="r">0.023 dB</td><td><span class="pill good">pass</span></td></tr>
       <tr><td>FREEFORM symmetry (today)</td><td>Quarter (451 dofs) vs full (1,636 dofs); worst of DI, on-axis, ripple</td><td class="r">0.0043 dB · 0.05°</td><td><span class="pill good">pass</span></td></tr>
       <tr><td>Closed-form metrics</td><td>Cardioid and dipole beamwidths, DI quadrature at 128–4096 points</td><td class="r">exact · 4×10⁻⁶ dB at 512</td><td><span class="pill good">pass</span></td></tr>
-      <tr><td>Mesh resolution</td><td>6 elements per wavelength above 2.5 kHz</td><td class="r">unmeasured</td><td><span class="pill warn">open</span></td></tr>
+      <tr><td>Mesh resolution (beta C2)</td><td>Same design at 6 vs 8 elements per wavelength, 500–5500 Hz; worst dB metric · beamwidth</td><td class="r">axi 0.124 dB · 0.9° &nbsp;|&nbsp; H/V 0.050 dB · 0.4°</td><td><span class="pill good">axi now epw 8</span></td></tr>
     </tbody>
   </table></div>
 </section>
@@ -217,7 +217,7 @@ footer { color: var(--muted); font-size: 0.82rem; border-top: 1px solid var(--ru
   <div class="prose stack">
     <div class="eyebrow">Typology campaigns</div>
     <h2>Family rankings from campaign searches</h2>
-    <p>Each entry is one family, one CMA-ES run (seed 1234), with a budget of max(40, 10·knobs) evaluations — a <em>screen</em> tier: fast enough to rank every family against the same target, but coarse. A single run can be unlucky; the <em>compare</em> tier (two seeds, same budget) is needed before claiming that one family consistently beats another. Tables are sorted by best <i>J</i>; lower is better.</p>
+    <p>Two tiers. <em>Screen</em>: one CMA-ES run per family (seed 1234), budget max(40, 10·knobs); a coarse ordering only. <em>Compare</em>: two seeds (1234, 777), budget max(150, 25·knobs); the median and spread (max − min) are shown, and one family is said to beat another only where the medians differ by more than both spreads. Two seeds is a small sample, so a spread is a lower bound on seed-to-seed variation. Screen and compare numbers are not comparable (different budgets). Axi typologies are meshed at 8 elements per wavelength, H/V at 6. Tables are sorted by best <i>J</i>; lower is better. Full write-up: <span class="mono">docs/evidence/TYPOLOGY_COMPARE_2026-10-23.md</span>.</p>
   </div>
   <div id="camp-list"></div>
 </section>
@@ -230,7 +230,9 @@ footer { color: var(--muted); font-size: 0.82rem; border-top: 1px solid var(--ru
     <div class="finding bad"><div class="stack"><h3>Three of four early searches hit a wall, not an optimum</h3><p>OSSE pinned <span class="mono">n</span> at its lower bound in all six best designs; ICW pinned <span class="mono">hold_end</span> (6/6) and nearly <span class="mono">kappa0</span> (4/6); the throat adapter pinned three of five parameters. Their best <i>J</i> values are lower bounds on what those families can do, and the search space should be widened before more GPU time is spent on them.</p></div></div>
     <div class="finding warn"><div class="stack"><h3>The first FREEFORM setup searched almost nothing</h3><p>With 3 free parameters the sensitivity of every one is near zero (|ρ| &lt; 0.07): a flat plateau, 8% gain in 722 solves. The 11-parameter sculpt version gained 22% in 60 solves with no failures and nothing pinned.</p></div></div>
     <div class="finding warn"><div class="stack"><h3>Given 400 solves, the sculpt search found its own wall</h3><p><i>J</i> fell from 30.9 to 16.8 (−46%) with 1 failure in 400. The best designs push the wall radius at 145 mm depth to its lower bound in both planes and the vertical mouth radius to its upper bound: the optimiser wants a slower flare through the middle and a larger mouth than the configuration allows. The configuration keeps each wall anchor in its own non-overlapping radius range so the wall can never pinch; relaxing that needs a monotonicity constraint instead of box bounds.</p></div></div>
-    <div class="finding warn"><div class="stack"><h3>The surrogate model is not ready</h3><p>A neural surrogate trained on 1,501 OSSE records passed 5 of 6 accuracy gates but had too few held-out designs (285 of the 500 required) and one non-monotonic sweep. It is not used. It needs about 1,900 more OSSE solves, roughly 10 GPU hours.</p></div></div>
+    <div class="finding good"><div class="stack"><h3>Compare tier: two rankings stand, two do not</h3><p>Axi 90×90: osse_axi (median 9.63, spread 0.02) &lt; blend_osse_tractrix (10.05, 0.03) &lt; exponential ≈ hypex (11.37 vs 11.40: not separated). Hifi 90×60: perturbed_osse_hv (10.31, 0.03) beats rosse_baseline (13.33, spread 2.0) and hyb_osse_h_hypex_v (15.13); rosse vs that hybrid is not separated, because R-OSSE was seed-sensitive (12.3 vs 14.3).</p></div></div>
+    <div class="finding warn"><div class="stack"><h3>Several winners are pressed against a bound or the brief envelope</h3><p>exponential and hypex both end at the shortest allowed length and the largest allowed mouth: their tie is the box, not the typology. osse_axi pins its termination <span class="mono">h_s</span>; perturbed_osse_hv pins its length; the hybrid pins its vertical mouth radius at the envelope. Proposed bounds are in the compare write-up. None are applied: widening needs the owner’s decision.</p></div></div>
+    <div class="finding warn"><div class="stack"><h3>The surrogate model is not ready (data being added)</h3><p>A neural surrogate trained on 1,501 OSSE records passed 5 of 6 accuracy gates but had too few held-out designs (285 of the 500 required) and one non-monotonic sweep. It is not used. About 1,900 more OSSE solves, from two fresh CMA seeds, run overnight on 23 Oct; it will be retrained and re-gated on the larger pool.</p></div></div>
   </div>
 </section>
 
@@ -257,12 +259,12 @@ footer { color: var(--muted); font-size: 0.82rem; border-top: 1px solid var(--ru
       <tr><td>Widen pinned bounds, probe with dry-runs</td><td>OSSE, ICW and throat-adapter results are bound-limited</td><td class="r">0</td></tr>
       <tr><td>Re-run the pinned families at a modest budget</td><td>Find real optima</td><td class="r">≈ 3 h</td></tr>
       <tr><td>Export winners to CAD (STEP)</td><td>Physical prototypes for beta testing</td><td class="r">0</td></tr>
-      <tr><td>OSSE data top-up for the surrogate</td><td>Only after the objective is settled</td><td class="r">≈ 10 h</td></tr>
+      <tr><td>OSSE data top-up for the surrogate</td><td>Running overnight 23 Oct (2 seeds × 950); retrain and re-gate after</td><td class="r">≈ 7 h</td></tr>
     </tbody>
   </table></div>
 </section>
 
-<footer>Generated from the run directories in <span class="mono">runs/</span> of hornlab-search on 22 Oct 2026. Best designs of the sculpt runs are exported as STEP solids with <span class="mono">hornlab-search export-step</span>. Search logs and per-design summaries are committed under <span class="mono">docs/evidence/runs/</span>.</footer>
+<footer>Generated from the run directories in <span class="mono">runs/</span> of hornlab-search on 23 Oct 2026. Best designs of the sculpt runs are exported as STEP solids with <span class="mono">hornlab-search export-step</span>. Search logs and per-design summaries are committed under <span class="mono">docs/evidence/runs/</span>.</footer>
 </div>
 
 <script>
