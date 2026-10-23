@@ -80,7 +80,9 @@ class GeneratedSpace:
             params = {GENERATOR_ERROR_KEY: f"{type(exc).__name__}: {exc}",
                       "_knobs": {k: knobs[k] for k in sorted(knobs)}}
         d = Design("FREEFORM", params)
-        self._knobs_by_hash.setdefault(d.hash(), dict(knobs))
+        # last-wins: provenance then names the knobs of the candidate actually being evaluated
+        # (two knob vectors can round to the same anchors); CMA never normalizes loop candidates.
+        self._knobs_by_hash[d.hash()] = dict(knobs)
         return d
 
     def denormalize(self, x) -> Design:

@@ -201,3 +201,22 @@ def test_failure_marker_replays_without_counting(tmp_path):
     assert ev2.error.startswith("invalid_geometry") and ev2.cached
     row = json.loads((tmp_path / "run2" / "search.ndjson").read_text().splitlines()[0])
     assert row["generator"]["knobs"]["h_rm_mm"] == 400.0
+
+
+def test_failure_marker_is_ignored_after_a_library_change(tmp_path):
+    from hornlab_search.search import evaluate as E
+    cfg = _cfg("conical")
+    space = DesignSpace.from_config(cfg)
+    bad = space.design_from_knobs({**space.seed_knobs, "h_rm_mm": 400.0})
+    ctx1 = E.make_context(cfg, None, cache_dir=tmp_path / "c", lib_shas={"hornlab_mesher": "old"})
+    E.evaluate(bad, space, cfg, "screen", tmp_path / "r1", None, None, ctx=ctx1)
+    ctx2 = E.make_context(cfg, None, cache_dir=tmp_path / "c", lib_shas={"hornlab_mesher": "new"})
+    ev = E.evaluate(bad, space, cfg, "screen", tmp_path / "r2", None, None, ctx=ctx2)
+    assert ev.error.startswith("invalid_geometry") and not ev.cached     # re-evaluated, not replayed
+
+
+def test_campaign_counts_keys_from_yaml_bounds():
+    from hornlab_search.search.campaign import _count_keys
+    assert _count_keys({"name": "c", "config": "typologies/conical.yaml"}) == 2
+    assert _count_keys({"name": "p", "config": "typologies/perturbed_osse_hv.yaml"}) == 18
+    assert _count_keys({"name": "o", "config": "osse_baseline.yaml"}) == 9

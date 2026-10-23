@@ -528,17 +528,13 @@ def run_campaign(
 
 
 def _count_keys(entry: dict) -> int:
-    """Return the number of searchable keys for an entry by loading its config."""
-    try:
-        from hornlab_search.config import load_config
-        from hornlab_search.design.space import DesignSpace
-        cfg_path = EXAMPLES / entry["config"]
-        cfg = load_config(cfg_path)
-        space = DesignSpace.from_config(cfg)
-        return len(space.keys())
-    except Exception as exc:  # noqa: BLE001
-        log.warning("could not count keys for %s: %s", entry["name"], exc)
-        return 5  # fallback
+    """Number of searchable keys of an entry, read straight from its YAML ``bounds`` (a bound is
+    searchable unless ``search: false``). Brief-independent: loading the full config would need
+    the brief for generator configs, and a silent fallback once gave them the wrong budget."""
+    cfg_path = EXAMPLES / entry["config"]
+    raw = yaml.safe_load(cfg_path.read_text(encoding="utf-8"))
+    bounds = raw.get("bounds") or {}
+    return sum(1 for b in bounds.values() if isinstance(b, dict) and b.get("search", True))
 
 
 # ------------------------------------------------------------------ output

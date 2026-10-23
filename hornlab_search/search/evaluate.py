@@ -495,7 +495,8 @@ def evaluate(design: Design, space, cfg, mode: str, run_dir, store, backend, *,
         if marker is not None:
             try:
                 marker.parent.mkdir(parents=True, exist_ok=True)
-                marker.write_text(json.dumps({"kind": kind, "error": str(st["err"])[:4000]}), encoding="utf-8")
+                marker.write_text(json.dumps({"kind": kind, "error": str(st["err"])[:4000],
+                                              "lib_shas": ctx.lib_shas}, default=str), encoding="utf-8")
             except Exception as exc:  # noqa: BLE001 - bookkeeping only
                 log.warning("could not write failure marker %s: %s", marker, exc)
     if hasattr(space, "provenance"):
@@ -548,7 +549,9 @@ def _compute(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx, st)
     if marker is not None and marker.exists():
         try:
             rec = json.loads(marker.read_text(encoding="utf-8"))
-            if rec.get("kind") in DETERMINISTIC_KINDS:
+            # a marker is only valid for the library versions that produced it (a mesher fix must
+            # not keep replaying an old geometry failure)
+            if rec.get("kind") in DETERMINISTIC_KINDS and rec.get("lib_shas") == ctx.lib_shas:
                 st["kind"], st["err"], st["fail_cached"] = rec["kind"], str(rec.get("error", "")), True
                 return
         except Exception as exc:  # noqa: BLE001 - a bad marker is ignored, the design re-runs
