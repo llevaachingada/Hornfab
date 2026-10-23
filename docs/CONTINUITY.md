@@ -26,8 +26,10 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 - `docs/evidence/TYPOLOGY_COMPARE_2026-10-23.md`: axi osse_axi 9.63 (spread 0.02) < blend_osse_tractrix 10.05 (0.03) < exponential 11.37 ~ hypex 11.40 (not separated; both pinned at L_mm lo / h_rm_mm hi = envelope corner). Hifi perturbed_osse_hv 10.31 (0.03) beats rosse_baseline 13.33 (2.0) and hyb_osse_h_hypex_v 15.13 (0.12); rosse vs hybrid not separated. Bound proposals tabled, NOT applied (owner decision). Leaderboards + campaign.json copied to `docs/evidence/campaigns/`.
 - Review page rebuilt and republished (version 4, same URL): compare campaigns, C2 mesh row, new findings, updated next steps.
 - D5 PASS: families / campaign dry-run / report / export-step from another cwd with absolute paths.
-- Branch `beta-fixes` (worktree `../hornlab-beta-wt`, NOT merged until QUEUE DONE because every queue step imports the live tree): surrogate refusal wired into `surrogate train/propose/round`; `compare` empty-frequency-list ValueError; tests pass.
-- After the queue: merge beta-fixes, full offline suite, surrogate retrain + CP-8d gates, D3 Ctrl-C test, F rehearsal.
+- Branch `beta-fixes` MERGED to main ~03:36 while the OSSE top-up search was mid-run (its modules already loaded; the changes do not touch the search path); offline suite on the merged tree 712 passed, exit 0: surrogate refusal wired into `surrogate train/propose/round`; `compare` empty-frequency-list ValueError; tests pass.
+- Alongside the queue (no GPU): D3 Ctrl-C test on the CPU backend with a separate runs dir; F rehearsal CPU steps; surrogate retrain + CP-8d gates on a dataset snapshot after OSSE seed 4102 ends (~09:40), torch forced to CPU. Only the F screen step needs the GPU (after ~16:15).
+- Local web GUI planned and in progress: `docs/GUI_PLAN.md`.
+- OWNER 03:26: do NOT republish the review page until the owner says so (version 4 stays). After the beta, start from `docs/NEXT_DEV_PRIORITIES.md`.
 
 ## 2026-10-22 (local, ~22:17 EDT) - beta pass in progress; OVERNIGHT GPU QUEUE RUNNING (UNCOMMITTED WORK)
 

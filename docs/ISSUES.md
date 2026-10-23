@@ -118,7 +118,7 @@ TO-DO (no GitHub issue yet; owner / plan ref):
 - [x] R8 brief provenance: dataset records carry optional `provenance` {config, brief, brief_hash, generator} (2026-10-22).
 - [x] C2 epw 6 vs 8: axi seed DI 0.124 dB > 0.1 -> axi typologies at epw 8 (owner); H/V within 0.05 dB stays epw 6.
 - [x] GPU lock + `gpu-clean` (2026-10-22); overnight queue + watchdog in `tools/overnight/`.
-- [ ] Wire `surrogate.features.require_surrogate_config` into `cli._cmd_surrogate`: done on branch `beta-fixes` (merge after the queue).
+- [x] Wire `surrogate.features.require_surrogate_config` into `cli._cmd_surrogate`: done 2026-10-23 (merged).
 - [ ] Beta-readiness pass per `docs/HANDOFF_BETA.md` (A-G; A-D done except D3 Ctrl-C test and D5 paths; E running overnight; F, G pending): upstream audit, R8 brief provenance in dataset records, epw convergence above 2.5 kHz, GPU lock / gpu-clean, rehearsal, session pack.
 - [x] `compare` tier (2 CMA seeds) on the leaders: DONE 2026-10-23 (`docs/evidence/TYPOLOGY_COMPARE_2026-10-23.md`).
 - [ ] Bound proposals from the compare tier (osse_axi `h_s`, hypex/exponential `L_mm` lo, perturbed_osse_hv `L_mm`/`v_a_deg`, hybrid `v_rm_mm`): owner decision; NOT applied.
@@ -131,6 +131,6 @@ TO-DO (no GitHub issue yet; owner / plan ref):
 - [x] STEP-export CLI: DONE locally 2026-10-22 (`hornlab-search export-step`, b822dd5).
 - [ ] OSSE data top-up for the surrogate gates (GPU, overnight; user OK needed).
 - [ ] Boundary Lab BL-1 export (cloud; `docs/BOUNDARY_LAB_INTEGRATION_PLAN.md`).
-- [ ] `compare` IndexError on empty frequency list: fixed on branch `beta-fixes` (merge after the overnight queue).
+- [x] `compare` IndexError on empty frequency list: fixed 2026-10-23 (merged).
 
 - [x] Docs index `docs/INDEX.md` and code map `docs/CODE_MAP.md` added 2026-10-22, linked from CLAUDE.md / AGENTS.md / .claude/CLAUDE.md; keep them current.
