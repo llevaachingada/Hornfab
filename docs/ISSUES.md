@@ -94,6 +94,11 @@ Local-only, added 2026-10-22 ~11:40 (local GPU box): follow-up (1) `compare` qua
 
 Added 2026-10-22 PM (cloud): Boundary Lab learnings implemented (`docs/BL_LEARNINGS_IMPLEMENTATION.md`): pre-solve topology + symmetry-domain checks, `solve/phasor.py`, runtime provenance, report-only SPDI / beam shape. 
 
+**NEXT DEVELOPMENT ROUND, TOP PRIORITY (user decision 2026-10-22): read `docs/NEXT_DEV_PRIORITIES.md`.**
+- [ ] **P1 Fused / direct CUDA Burton-Miller assembly** in the exterior driver (post-beta; Magnus's OK or a pinned fork). Fused path is CPU/Metal only (`hornlab_beat_bem/julia/BeatEngineDriver.jl` ~l.1215); the CUDA single-matrix assembler `assemble_burton_miller_neumann_system_cuda` (`julia/src/BeatEngineCudaBurtonMiller.jl:350`) is called only by `runtests.jl`. Engine work, not a flag flip. Expected: 8 GB ceiling ~9k -> ~20k quarter dofs (~12.6 kHz at epw 6 on the large OSSE seed) [inferred]. Validate with selftest --analytic, --crosscheck (< 0.2 dB) and an A/B vs today's CUDA path before any data counts. NOT enabled for the 2026-10-22/23 overnight queue (one solver for the compare tier and surrogate top-up).
+- [ ] **P2 12 kHz finalist verify pass on the 4060** (no solver change; typology horns ~3.3k-6.8k dofs at 12 kHz), after the epw-convergence check (HANDOFF_BETA C2).
+- [ ] **P3 `beat_metal` backend** for the collaborator's Apple Silicon MacBook (fused path on, unified memory); Mac selftests + 3-design A/B vs the 4060 before mixing data.
+
 TO-DO (no GitHub issue yet; owner / plan ref):
 - [x] Merge the learnings PR, run its section-4 test plan on the GPU box: DONE 2026-10-22 (FF to 265133f; `docs/evidence/BL_LEARNINGS_GPU.md`).
 - [x] Early rejection offline replay: DONE 2026-10-22 (`docs/evidence/EARLY_REJECTION_REPLAY.md`): < 0.1 % GPU saved at K = 4 / 25 % margin, no top-20 lost; recommend NOT implementing as specified (owner ruling).

@@ -4,6 +4,10 @@ Written 2026-10-22 21:30 EDT by the previous local orchestrator. Continue from `
 `llevaachingada/Hornfab`, local clone `C:\Users\hunte\Hrns\hornlab-search`. The outer folder `C:\Users\hunte\Hrns`
 is a different, empty repo: ignore it.
 
+> **After the beta, the next development round starts with `docs/NEXT_DEV_PRIORITIES.md`** (P1: fused/direct CUDA
+> Burton-Miller assembly to lift the 8 GB memory ceiling; P2: 12 kHz finalist pass; P3: Metal backend for the Mac).
+> Do NOT enable P1 during the overnight queue or the beta: one solver for all comparison and surrogate data.
+
 ## 0. Who you are, how you work, and what "done" means
 
 - **Model and effort: run as Claude Opus at medium effort.** You are the orchestrator and decision maker.
