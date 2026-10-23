@@ -122,9 +122,14 @@ def _detach(backend) -> None:
 
 def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: int | None = None,
            store=None, cache_dir=None, trace_fraction: float = DEFAULT_TRACE_FRACTION,
-           command: str | None = None, config_path=None, lib_shas: dict | None = None) -> Evaluation:
+           command: str | None = None, config_path=None, lib_shas: dict | None = None,
+           max_evals: int | None = None) -> Evaluation:
     """CMA-ES from the seed. Returns the best Evaluation. Writes into ``run_dir`` (or ``resume``,
     an existing run directory to continue): run.json, search.ndjson, best.json, designs/, cma/.
+
+    ``budget`` caps NEW (non-cached) evaluations. ``max_evals`` additionally caps ALL evaluations
+    of this invocation, cached ones included: a campaign comparison must give every family the
+    same amount of search, and a replayed CMA seed would otherwise get its cached prefix for free.
 
     Raises only for things that must stop a run: a mesh units/symmetry bug
     (``MeshConsistencyError``), KeyboardInterrupt, an unusable backend.
@@ -202,7 +207,12 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
         log.info("seed J=%.4f terms=%s", seed_ev.objective,
                  {k: round(v, 4) for k, v in seed_ev.terms.items()})
         gen = 0
-        while state["n_new"] < max_new:
+        cap = int(max_evals) if max_evals else None
+
+        def exhausted() -> bool:
+            return state["n_new"] >= max_new or (cap is not None and len(evals) >= cap)
+
+        while not exhausted():
             stop = es.stop()
             if stop:
                 state["stop"] = "cma: " + ", ".join(sorted(stop))
@@ -210,7 +220,7 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
             X = es.ask()
             F = []
             for x in X:
-                if state["n_new"] >= max_new:
+                if exhausted():
                     break
                 F.append(run_one(space.denormalize(np.asarray(x))).objective)
             if len(F) < len(X):               # budget ran out mid-generation: do not tell

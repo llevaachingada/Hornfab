@@ -60,7 +60,10 @@ def _list_project_julia_windows() -> list[dict[str, Any]]:
     # Use powershell.exe -Command syntax
     r = subprocess.run(
         ["powershell", "-NoProfile", "-NonInteractive", "-Command",
-         "Get-CimInstance Win32_Process -Filter \"Name='julia.exe'\" | "
+         # julia.exe AND the BEAT worker_host python processes: the host respawns julia, so killing
+         # julia alone leaves a warm host behind (found 2026-10-22).
+         "Get-CimInstance Win32_Process -Filter \"Name='julia.exe' OR "
+         "(Name='python.exe' AND CommandLine LIKE '%hornlab_beat_bem.worker_host%')\" | "
          "Select-Object ProcessId,CommandLine | ConvertTo-Json -Depth 1"],
         capture_output=True, text=True, timeout=30,
     )
@@ -86,7 +89,8 @@ def _list_project_julia_posix() -> list[dict[str, Any]]:
     r = subprocess.run(["ps", "aux"], capture_output=True, text=True, timeout=30)
     out = []
     for line in r.stdout.splitlines():
-        if "julia" not in line.lower():
+        low = line.lower()
+        if "julia" not in low and "hornlab_beat_bem.worker_host" not in low:
             continue
         parts = line.split(None, 10)
         if len(parts) < 11:
@@ -96,7 +100,7 @@ def _list_project_julia_posix() -> list[dict[str, Any]]:
         except ValueError:
             continue
         cmdline = parts[10] if len(parts) > 10 else ""
-        if "julia" in cmdline.lower() and _cmdline_matches(cmdline):
+        if ("julia" in cmdline.lower() or "worker_host" in cmdline.lower()) and _cmdline_matches(cmdline):
             out.append({"pid": pid, "cmdline": cmdline})
     return out
 
@@ -130,7 +134,7 @@ def clear_julia(procs: list[dict[str, Any]] | None = None) -> list[int]:
         log.info("clear_julia: killing julia pid %d (%.80s)", pid, cmdline)
         try:
             if _is_windows() or _SIGKILL is None:
-                subprocess.run(["taskkill", "/F", "/PID", str(pid)],
+                subprocess.run(["taskkill", "/F", "/T", "/PID", str(pid)],   # /T: the host's julia child too
                                 capture_output=True, timeout=10)
             else:
                 os.kill(pid, _SIGKILL)

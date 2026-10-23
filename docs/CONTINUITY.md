@@ -12,6 +12,15 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 - **Typology work (next):** implement `docs/TYPOLOGY_PLAN.md` (classical typologies via FREEFORM anchors, hybrids, `campaign` family selection). Solver re-verified 2026-10-22 (GPU 18/18, analytic PASS, crosscheck 0.039 dB).
 - **Blockers:** none. Issue #13: fixes now MERGED on main (152a829 carried the cloud reconciliation; oracle sign-off 2026-10-22); GitHub issue kept open for owner closure. Issues #1-#11 closed.
 
+## 2026-10-22 (local, ~20:30 EDT) — screen campaigns reviewed: 3 bugs found and fixed; native-family entries re-running
+
+- First screen campaigns finished (axi 17:31-18:16, hifi 18:16-18:54). Review found:
+  1. **`search` ignored `--brief` / `--cma-seed`** (only `run` used the brief-aware loader). Generator configs were unaffected (they name their brief in the YAML), but the Magnus-family entries were scored on their OWN targets (ICW 100x100, sculpt 90x90 under the 90x60 brief, OSSE 75x45, no load weight). Fixed in `_cmd_search`; `load_config` now reuses the brief embedded in a run's saved `config.yaml` (resume/verify/report reproduce the run). Regression tests added.
+  2. **Unequal search**: native configs reuse CMA seed 1234, so they replayed 600-850 cached evaluations for free vs 40-180 for typologies. New `search --max-evals` caps ALL evaluations of an invocation (cached included); `campaign` passes it = budget. Test added.
+  3. **Hygiene left the BEAT `worker_host` python processes alive** (they respawn julia). `search/hygiene.py` now lists/kills `hornlab_beat_bem.worker_host` too, with taskkill /T.
+- Valid from the first campaigns (typology entries, correct brief, equal budgets, 1 CMA seed, screen tier = coarse ranking only): axi 90x90 brief: osse_axi 10.71, blend_osse_tractrix 11.04, hypex 12.27, exponential 12.59, blend_conical_exponential 12.98, conical 28.21, perturbed_tractrix 89.75, tractrix 103.72 (tractrix: DI slope term 71 - a 180 mm mouth cannot hold 90 deg down to 700 Hz, then beams); hifi 90x60 brief: perturbed_osse_hv 11.22 (65/180 invalid, L_mm pinned), hyb_osse_h_hypex_v 15.78, hyb_osse_h_tractrix_v 46.40.
+- Native entries (icw_termination, icw_rollback, freeform_sculpt; rosse_baseline, freeform_sculpt, osse_baseline) re-running with the fixes.
+
 ## 2026-10-22 (local, ~17:45 EDT) — typology V4/V5 PASS on GPU; screen campaigns RUNNING (results not yet reviewed)
 
 - `docs/evidence/TYPOLOGY_VERIFY.md`: V4 16 vs 48 anchors: dB metrics within 0.1 dB, beamwidth <= 1.1 deg; V5 exponential / conical / tractrix match textbook loading and beamwidth behaviour. Julia cleared after each solve.

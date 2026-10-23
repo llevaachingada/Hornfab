@@ -190,6 +190,11 @@ def load_config(path, *, brief=None, cma_seed: int | None = None) -> Config:
 
     brief_path = brief if brief is not None else raw.get("brief_file")
     brief_d = None
+    if brief is None and isinstance(raw.get("brief"), dict):
+        # A run directory's config.yaml already holds the merged brief (target/weights applied and
+        # the brief embedded); use it as is, so resume/verify/report reproduce the run exactly.
+        brief_d = dict(raw["brief"])
+        brief_path = None
     if brief_path is not None:
         bp = _resolve_path(brief_path, path.parent, Path(__file__).resolve().parents[1])
         brief_d = load_brief(bp)

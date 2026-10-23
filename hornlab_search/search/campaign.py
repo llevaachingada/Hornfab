@@ -380,6 +380,7 @@ def _build_search_argv(entry: dict, brief_path: Path, budget: int, seed: int,
         "--config", cfg,
         "--brief", str(brief_path),
         "--budget", str(budget),
+        "--max-evals", str(budget),   # equal search per family: cached replays count too
         "--cma-seed", str(seed),
         "--mode", mode,
         "--runs-dir", str(runs_dir),

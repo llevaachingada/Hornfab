@@ -113,6 +113,20 @@ def test_cached_hits_do_not_consume_budget(cfg, tmp_path, monkeypatch):
     assert len(run_json["resumes"]) == 1
 
 
+def test_max_evals_counts_cached_hits_too(cfg, tmp_path, monkeypatch):
+    """Campaign fairness: with max_evals, a replayed CMA seed cannot get its cached prefix for free."""
+    be = SyntheticBackend()
+    install_fakes(monkeypatch, be)
+    store = DatasetStore(tmp_path / "ds")
+    run(cfg, tmp_path / "r", be, store, 12)
+    be2 = SyntheticBackend()
+    install_fakes(monkeypatch, be2)
+    run(cfg, tmp_path / "r", be2, store, 10, max_evals=15)   # 12 replayed + at most 3 new
+    assert be2.calls == 3
+    run_json = json.loads((tmp_path / "r" / "run.json").read_text())
+    assert run_json["last_invocation"]["evaluations"] == 15
+
+
 # 15
 def test_resume_performs_zero_solves_for_finished_work_and_matches_an_uninterrupted_run(
         cfg, tmp_path, monkeypatch):

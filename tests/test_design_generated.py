@@ -44,6 +44,40 @@ def test_brief_and_seed_override_reach_config_and_sha():
     assert a.generator is None and isinstance(DesignSpace.from_config(a), DesignSpace)
 
 
+def test_saved_run_config_reloads_with_its_embedded_brief(tmp_path):
+    """run_dir/config.yaml (merged raw) must reload to the same target, brief and config_sha."""
+    import yaml
+    from hornlab_search.search import rundir
+    for src, brief in ((EXAMPLES / "osse_baseline.yaml", BRIEFS / "axi_90x90_1in.yaml"),
+                       (TYP / "conical.yaml", None)):
+        cfg = load_config(src, **({} if brief is None else {"brief": brief}))
+        p = tmp_path / f"{src.stem}.yaml"
+        p.write_text(yaml.safe_dump(cfg.raw, sort_keys=False))
+        again = load_config(p)
+        assert again.target_raw == cfg.target_raw and again.weights == cfg.weights
+        assert again.brief["name"] == cfg.brief["name"]
+        assert rundir.config_sha(again.raw) == rundir.config_sha(cfg.raw)
+
+
+def test_cli_search_applies_brief_and_seed(monkeypatch, tmp_path):
+    """Regression (2026-10-22): `search --brief/--cma-seed` reached `run` but not `search`."""
+    from hornlab_search import cli
+    from hornlab_search.search import cma as cma_mod
+    seen = {}
+
+    def fake_search(cfg, run_dir, mode, **kw):
+        seen["target"], seen["seed"] = dict(cfg.target_raw), cfg.search.seed
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr(cma_mod, "search", fake_search)
+    monkeypatch.setattr("hornlab_search.solve.worker.warm", lambda b: None)
+    monkeypatch.setattr(cli, "_backend", lambda cfg: object())
+    cli.main(["search", "--config", str(EXAMPLES / "icw_termination.yaml"), "--brief",
+              str(BRIEFS / "axi_90x90_1in.yaml"), "--cma-seed", "777", "--runs-dir", str(tmp_path / "r"),
+              "--dataset-dir", str(tmp_path / "ds"), "--cache-dir", str(tmp_path / "c")])
+    assert seen["target"]["coverage_h_deg"] == 90.0 and seen["target"]["z_min"] == 0.7 and seen["seed"] == 777
+
+
 def test_generator_config_needs_brief_and_freeform(tmp_path):
     txt = (TYP / "conical.yaml").read_text()
     p = tmp_path / "x.yaml"

@@ -488,7 +488,15 @@ def _cmd_search(args, argv) -> int:
             return 2
         cfg_path = args.config
         run_dir = rundir.new_run_dir(d["runs"], args.mode)
-    cfg = load_config(cfg_path)
+    # --brief / --cma-seed must reach the search exactly as they reach `run` (found 2026-10-22: a
+    # plain load_config here silently dropped them, so native-family campaign runs kept their own
+    # target). On a resume of a run without --config, run_dir/config.yaml already holds the merged raw.
+    kw = {}
+    if getattr(args, "brief", None) is not None:
+        kw["brief"] = Path(args.brief)
+    if getattr(args, "cma_seed", None) is not None:
+        kw["cma_seed"] = int(args.cma_seed)
+    cfg = load_config(cfg_path, **kw)
     if args.backend:
         cfg.solve.backend = args.backend
     if args.resume:
@@ -522,7 +530,8 @@ def _cmd_search(args, argv) -> int:
     try:
         best = cma.search(cfg, run_dir, args.mode, backend=backend, budget=budget, store=store,
                           cache_dir=d["cache"], trace_fraction=args.trace_fraction,
-                          command=_command_string(argv), config_path=cfg_path)
+                          command=_command_string(argv), config_path=cfg_path,
+                          max_evals=getattr(args, "max_evals", None))
     except KeyboardInterrupt:
         print(f"search INTERRUPTED: partial results are in {run_dir} (resume with --resume)")
         return 1
@@ -1041,6 +1050,8 @@ def build_parser() -> argparse.ArgumentParser:
     q = sub.add_parser("search", parents=[common], help="CMA-ES from the seed")
     q.add_argument("--config")
     q.add_argument("--budget", type=int, help="cap on NON-CACHED evaluations (the seed counts)")
+    q.add_argument("--max-evals", type=int, dest="max_evals",
+                   help="cap on ALL evaluations incl. cache hits (fair comparisons; campaign sets it)")
     q.add_argument("--mode", choices=("screen", "verify", "final"), default="screen")
     q.add_argument("--resume", metavar="DIR")
     q.add_argument("--allow-config-change", action="store_true",
