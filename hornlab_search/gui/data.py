@@ -129,6 +129,36 @@ def _config(run_dir: Path) -> dict:
         return {}
 
 
+def horn_dims(row: dict | None) -> dict | None:
+    """Outer size of a solved design in mm (mouth width x height, depth), shell included, from the mesh
+    bounding box the search recorded. The meshed domain is a quarter for quadrants '1' (x >= 0, y >= 0),
+    so the full mouth is twice the extent there."""
+    if not row or not row.get("bbox_m"):
+        return None
+    x0, y0, z0, x1, y1, z1 = (float(v) for v in row["bbox_m"])
+    q = str(row.get("quadrants") or "1234")
+    w = 2 * x1 if q in ("1", "14") else x1 - x0
+    h = 2 * y1 if q in ("1", "12") else y1 - y0
+    return {"mouth_w_mm": round(w * 1000, 1), "mouth_h_mm": round(h * 1000, 1),
+            "depth_mm": round((z1 - z0) * 1000, 1), "includes_shell": True}
+
+
+_FLAG = re.compile(r"--(budget|max-evals|cma-seed)\s+(\d+)")
+
+
+def _command_flags(run_dir: Path) -> dict:
+    cmd = (_read_json(run_dir / "run.json") or {}).get("command") or ""
+    return {k.replace("-", "_"): int(v) for k, v in _FLAG.findall(cmd)} | {"command": cmd}
+
+
+def _ts(s: str | None):
+    import datetime as dt
+    try:
+        return dt.datetime.strptime(s, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=dt.timezone.utc)
+    except (TypeError, ValueError):
+        return None
+
+
 def run_summary(run_dir: Path) -> dict:
     rows = read_ndjson(run_dir / "search.ndjson")
     cfg = _config(run_dir)
@@ -152,6 +182,9 @@ def run_summary(run_dir: Path) -> dict:
         "started": rows[0].get("created_utc") if rows else None,
         "last": rows[-1].get("created_utc") if rows else None,
         "has_report": (run_dir / "report.html").exists(),
+        "dims": horn_dims(best),
+        "budget": _command_flags(run_dir).get("max_evals") or _command_flags(run_dir).get("budget"),
+        "cma_seed": _command_flags(run_dir).get("cma_seed"),
     })
 
 
@@ -346,11 +379,12 @@ def campaign_detail(runs: Path, cid: str) -> dict:
         jobs = e.get("jobs") or []
         js = [j.get("best_j") for j in jobs if j.get("best_j") is not None]
         best_job = min((j for j in jobs if j.get("best_j") is not None), key=lambda j: j["best_j"], default=None)
-        best = None
+        best, dims, best_run = None, None, None
         if best_job and best_job.get("run_dir"):
             rd = Path(best_job["run_dir"])
             if rd.parent.resolve() == runs.resolve() and RUN_ID.match(rd.name):
                 s = run_summary(rd)
+                dims, best_run = s.get("dims"), rd.name
                 if s.get("best_hash"):
                     best = design_curves(rd, s["best_hash"])
         entries.append({
@@ -367,7 +401,7 @@ def campaign_detail(runs: Path, cid: str) -> dict:
                       "run_id": Path(j["run_dir"]).name if j.get("run_dir") else None,
                       "returncode": j.get("returncode"), "wall_min": (j.get("wall_seconds") or 0) / 60}
                      for j in jobs],
-            "best": best,
+            "best": best, "dims": dims, "best_run_id": best_run,
         })
     entries.sort(key=lambda e: (e["best_j"] is None, e["median_j"] if e["median_j"] is not None else 0))
     lb = runs / cid / "leaderboard.md"
@@ -409,15 +443,16 @@ def save_user_brief(root: Path, name: str, brief: dict) -> Path:
     user.mkdir(parents=True, exist_ok=True)
     body = dict(brief)
     body["name"] = name
+    import tempfile
     p = user / f"{name}.yaml"
+    text = yaml.safe_dump(body, sort_keys=False)
+    with tempfile.TemporaryDirectory() as td:          # validate under the real name, outside the repo
+        probe = Path(td) / f"{name}.yaml"
+        probe.write_text(text, encoding="utf-8")
+        load_brief(probe)                               # the CLI's own schema check; raises ConfigError
     tmp = user / f".{name}.yaml.tmp"
-    tmp.write_text(yaml.safe_dump(body, sort_keys=False), encoding="utf-8")
-    try:
-        load_brief(tmp)                      # the CLI's own schema check
-    except Exception:
-        tmp.unlink(missing_ok=True)
-        raise
-    tmp.replace(p)
+    tmp.write_text(text, encoding="utf-8")
+    tmp.replace(p)                                      # atomic: never a half-written brief
     return p
 
 
@@ -450,6 +485,141 @@ def status(root: Path, runs: Path) -> dict:
     queue_logs = sorted(ov.glob("queue_*.log")) if ov.is_dir() else []
     return clean({
         "gpu_lock": lock, "vram_mib": vram, "julia_procs": len(procs), "disk": disk,
-        "queue_log": {"name": queue_logs[-1].name, "tail": tail_text(queue_logs[-1], 30)} if queue_logs else None,
+        "queue_log": {"name": queue_logs[-1].name, "tail": tail_text(queue_logs[-1], 30),
+                      "steps": queue_steps(queue_logs[-1])} if queue_logs else None,
+        "current": run_progress(cur) if (lock and lock.get("alive") and (cur := current_run(runs))) else None,
         "watchdog_log": tail_text(ov / "watchdog.log", 10) if ov.is_dir() else [],
     })
+
+
+# ---------------------------------------------------------------------------- configs and catalog
+
+
+def catalog(root: Path) -> list[dict]:
+    try:
+        raw = yaml.safe_load((root / "examples" / "catalog.yaml").read_text(encoding="utf-8-sig")) or {}
+    except (OSError, yaml.YAMLError):
+        return []
+    return [clean(e) for e in raw.get("entries", []) if isinstance(e, dict)]
+
+
+def list_configs(root: Path) -> list[dict]:
+    """Every runnable config under examples/ (not briefs, not the catalog), with its catalog entry."""
+    cat = {e.get("config"): e for e in catalog(root)}
+    ex = root / "examples"
+    out = []
+    for p in sorted(list(ex.glob("*.yaml")) + list((ex / "typologies").glob("*.yaml"))):
+        if p.name == "catalog.yaml":
+            continue
+        try:
+            raw = yaml.safe_load(p.read_text(encoding="utf-8-sig")) or {}
+        except yaml.YAMLError:
+            continue
+        rel = p.relative_to(ex).as_posix()
+        e = cat.get(rel, {})
+        bounds = raw.get("bounds") or {}
+        out.append(clean({
+            "path": p.relative_to(root).as_posix(), "name": raw.get("name") or p.stem,
+            "family": raw.get("family"), "generator": isinstance(raw.get("generator"), dict),
+            "brief_file": raw.get("brief_file"), "catalog_name": e.get("name"), "group": e.get("group"),
+            "symmetry": e.get("symmetry"), "description": e.get("description"),
+            "n_knobs": sum(1 for b in bounds.values() if isinstance(b, dict) and b.get("search", True)),
+            "disabled": "lecleach" in p.stem}))
+    return out
+
+
+# ---------------------------------------------------------------------------- live progress
+
+
+def run_progress(run_dir: Path) -> dict:
+    """Evaluations done vs budget, best so far, rate and ETA from the run's own timestamps."""
+    s = run_summary(run_dir)
+    rows = read_ndjson(run_dir / "search.ndjson")
+    t = [_ts(r.get("created_utc")) for r in rows[-40:]]
+    t = [x for x in t if x]
+    rate = None
+    if len(t) >= 2 and (t[-1] - t[0]).total_seconds() > 0:
+        rate = (len(t) - 1) / (t[-1] - t[0]).total_seconds() * 3600
+    left = (s["budget"] - s["n"]) if s.get("budget") else None
+    return clean({**s, "rate_per_h": rate,
+                  "eta_min": (left / rate * 60) if (rate and left is not None and left > 0) else None})
+
+
+def current_run(runs: Path, max_age_s: float = 1800) -> Path | None:
+    """The run folder written most recently (within max_age_s), i.e. the search in progress."""
+    import time
+    best, best_t = None, 0.0
+    for d in _run_dirs(runs)[:30]:
+        f = d / "search.ndjson"
+        try:
+            m = f.stat().st_mtime
+        except OSError:
+            continue
+        if m > best_t:
+            best, best_t = d, m
+    return best if best and time.time() - best_t < max_age_s else None
+
+
+_STEP = re.compile(r"^=== (\S+) (START|END|SKIP) (\S+)(?: : (.*?))?(?: exit (-?\d+))?(?: \(.*\))?$")
+
+
+def queue_steps(log: Path) -> list[dict]:
+    """START/END/SKIP lines of an overnight queue log as a timeline."""
+    steps: dict[str, dict] = {}
+    order = []
+    for ln in tail_text(log, 100000):
+        m = _STEP.match(ln.strip())
+        if not m:
+            continue
+        ts, kind, name, cmd, rc = m.groups()
+        if name not in steps:
+            steps[name] = {"name": name, "started": None, "ended": None, "exit": None, "command": None,
+                           "skipped": False}
+            order.append(name)
+        st = steps[name]
+        if kind == "START":
+            st["started"], st["command"] = ts, cmd
+        elif kind == "END":
+            st["ended"], st["exit"] = ts, int(rc) if rc is not None else None
+        else:
+            st["skipped"] = True
+    return [steps[n] for n in order]
+
+
+# ---------------------------------------------------------------------------- leaders
+
+TIER_RANK = {"compare": 2, "screen": 1}
+
+
+def leaders(runs: Path) -> list[dict]:
+    """Per brief, the leading family of the latest campaign of the strongest tier (compare beats
+    screen; dry-run has no scores). 'clearly_ahead' applies the ranking rule: the leader's median beats
+    the runner-up's by more than both spreads (screen tier has one repeat: never 'clearly')."""
+    chosen: dict[str, dict] = {}
+    for c in list_campaigns(runs):                       # newest first
+        tier, brief = c.get("tier"), c.get("brief")
+        if not brief or tier not in TIER_RANK:
+            continue
+        cur = chosen.get(brief)
+        if cur is None or TIER_RANK[tier] > TIER_RANK[cur["tier"]]:
+            chosen[brief] = c
+    out = []
+    for brief, c in sorted(chosen.items()):
+        try:
+            d = campaign_detail(runs, c["id"])
+        except (FileNotFoundError, ValueError):
+            continue
+        scored = [e for e in d["entries"] if e.get("median_j") is not None and not e.get("skipped")]
+        scored.sort(key=lambda e: e["median_j"])
+        if not scored:
+            continue
+        lead, nxt = scored[0], (scored[1] if len(scored) > 1 else None)
+        gap = (nxt["median_j"] - lead["median_j"]) if nxt else None
+        sp = [x for x in ((lead.get("spread"), nxt.get("spread")) if nxt else ()) if x is not None]
+        clearly = bool(nxt and d["tier"] == "compare" and len(sp) == 2 and gap > max(sp))
+        out.append(clean({"brief": brief, "campaign_id": c["id"], "tier": d["tier"],
+                          "family": lead["name"], "group": lead.get("group"), "median_j": lead["median_j"],
+                          "best_j": lead.get("best_j"), "spread": lead.get("spread"), "dims": lead.get("dims"),
+                          "best_run_id": lead.get("best_run_id"), "runner_up": nxt["name"] if nxt else None,
+                          "gap": gap, "clearly_ahead": clearly, "n_families": len(scored)}))
+    return out

@@ -236,3 +236,95 @@ def test_static_path_traversal_is_404(server):
 def test_post_job_with_bad_args_returns_error(server):
     code, body = _req(server + "/api/jobs", data=json.dumps({"kind": "shell", "args": {}}).encode())
     assert code == 200 and "unknown job kind" in body["error"]
+
+
+# ------------------------------------------------------------------ designer-facing additions
+
+
+def test_horn_dims_quarter_and_full():
+    q = {"bbox_m": [0, 0, -0.003, 0.18, 0.15, 0.14], "quadrants": "1"}
+    assert D.horn_dims(q) == {"mouth_w_mm": 360.0, "mouth_h_mm": 300.0, "depth_mm": 143.0, "includes_shell": True}
+    f = {"bbox_m": [-0.2, -0.1, 0.0, 0.2, 0.1, 0.3], "quadrants": "1234"}
+    assert D.horn_dims(f)["mouth_w_mm"] == 400.0 and D.horn_dims(f)["mouth_h_mm"] == 200.0
+    assert D.horn_dims(None) is None and D.horn_dims({"bbox_m": None}) is None
+
+
+def test_budget_from_run_command_and_progress(repo):
+    run = repo / "runs" / RID
+    (run / "run.json").write_text(json.dumps({"command": "hornlab-search search --config x.yaml --budget 40 --max-evals 30 --cma-seed 7"}))
+    s = D.run_summary(run)
+    assert s["budget"] == 30 and s["cma_seed"] == 7          # --max-evals caps all evaluations
+    p = D.run_progress(run)
+    assert p["n"] == 9 and p["rate_per_h"] == pytest.approx(3600.0) and p["eta_min"] == pytest.approx(21 / 60)
+
+
+def test_queue_steps_timeline(tmp_path):
+    log = tmp_path / "queue.log"
+    log.write_bytes(("=== 2026-10-22T22:16:38 START axi : campaign --tier screen\nnoise\n"
+                     "=== 2026-10-22T22:44:51 END axi exit 0\n"
+                     "=== 2026-10-23T15:46:00 SKIP late (past start cutoff)\n"
+                     "=== 2026-10-23T02:19:19 START s1 : search --budget 950\n").encode("utf-16"))
+    steps = D.queue_steps(log)
+    assert [s["name"] for s in steps] == ["axi", "late", "s1"]
+    assert steps[0]["exit"] == 0 and steps[0]["command"] == "campaign --tier screen"
+    assert steps[1]["skipped"] and steps[2]["ended"] is None
+
+
+def test_list_configs_reads_catalog(repo):
+    ex = repo / "examples"
+    (ex / "typologies").mkdir()
+    (ex / "typologies" / "conical.yaml").write_text(yaml.safe_dump({"name": "conical", "family": "FREEFORM",
+        "generator": {"name": "typology"}, "bounds": {"a": {"lo": 0, "hi": 1}, "b": {"lo": 0, "hi": 1, "search": False}}}))
+    (ex / "catalog.yaml").write_text(yaml.safe_dump({"entries": [{"name": "conical", "config": "typologies/conical.yaml",
+        "group": "classical", "symmetry": "axisymmetric", "description": "d"}]}))
+    cfgs = {c["name"]: c for c in D.list_configs(repo)}
+    c = cfgs["conical"]
+    assert c["group"] == "classical" and c["generator"] is True and c["n_knobs"] == 1
+    assert c["path"] == "examples/typologies/conical.yaml"
+    assert "catalog" not in cfgs
+
+
+def test_past_jobs_reload_after_restart(repo, monkeypatch):
+    monkeypatch.setattr(J, "CLI_BOOT", "import sys; print('dry-run OK: done', flush=True)")
+    jm = J.JobManager(repo, repo / "runs")
+    job = jm.launch("dry-run", {"config": "examples/cfg.yaml"})
+    job.proc.wait(timeout=30)
+    for _ in range(50):
+        if job.ended:
+            break
+        time.sleep(0.1)
+    jm2 = J.JobManager(repo, repo / "runs")           # a new GUI process
+    assert job.id in jm2.jobs and jm2.jobs[job.id].status == "done"
+    assert jm2.jobs[job.id].argv[:2] == ["run", "--config"]
+
+
+def test_leaders_prefer_compare_tier_and_apply_the_ranking_rule(repo):
+    runs = repo / "runs"
+    run = str(runs / RID)
+    def camp(cid, tier, entries):
+        (runs / cid).mkdir()
+        (runs / cid / "campaign.json").write_text(json.dumps({"tier": tier, "brief_name": "b", "seeds": [1, 2],
+            "entries": [{"name": n, "group": "g", "jobs": [{"seed": i, "best_j": j, "run_dir": run,
+                         "stats": {"evaluations": 5}} for i, j in enumerate(js)]} for n, js in entries]}))
+    camp("campaign_20261024T000000Z", "screen", [("newer_screen_winner", [1.0])])       # newer but weaker tier
+    camp("campaign_20261023T100000Z", "compare", [("a", [10.0, 10.2]), ("b", [11.0, 11.1])])
+    [l] = D.leaders(runs)
+    assert l["campaign_id"] == "campaign_20261023T100000Z" and l["family"] == "a"
+    assert l["median_j"] == pytest.approx(10.1) and l["gap"] == pytest.approx(0.95) and l["clearly_ahead"] is True
+    camp("campaign_20261025T000000Z", "compare", [("a", [10.0, 11.0]), ("b", [10.6, 10.7])])   # gap < spread
+    [l] = D.leaders(runs)
+    assert l["campaign_id"] == "campaign_20261025T000000Z" and l["clearly_ahead"] is False
+
+
+@pytest.mark.parametrize("name", ["app.js", "charts.js", "glossary.js", "view3d.js"])
+def test_static_js_parses_as_an_es_module(name, tmp_path):
+    """A syntax error anywhere in app.js blanks every view ("Loading..." forever); catch it offline."""
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("node not installed")
+    import subprocess
+    src = ROOT / "hornlab_search" / "gui" / "static" / name
+    mjs = tmp_path / (name + ".mjs")                    # .mjs: parse as a module (import/export), not CommonJS
+    mjs.write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
+    r = subprocess.run([node, "--check", str(mjs)], capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr[-800:]

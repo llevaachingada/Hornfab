@@ -50,6 +50,12 @@ class App:
             return D.mesh_surface(self.runs, parts[1], parts[2])
         if head == "briefs":
             return D.list_briefs(self.root)
+        if head == "leaders":
+            return D.leaders(self.runs)
+        if head == "configs":
+            return D.list_configs(self.root)
+        if head == "catalog":
+            return D.catalog(self.root)
         if head == "families":
             argv = ["families"]
             b = (q.get("brief") or [""])[0]

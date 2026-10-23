@@ -64,6 +64,26 @@ class JobManager:
         self.dir = self.runs / "gui_jobs"
         self.jobs: dict[str, Job] = {}
         self._lock = threading.Lock()
+        self._load_past()
+
+    def _load_past(self, keep: int = 30) -> None:
+        """Jobs from earlier GUI sessions (their logs survive a restart). Their final state is not
+        known to this process: status 'ended (GUI restarted)' unless the log says otherwise."""
+        if not self.dir.is_dir():
+            return
+        for meta in sorted(self.dir.glob("*.json"))[-keep:]:
+            m = D._read_json(meta) or {}
+            jid = meta.stem
+            if not m or jid in self.jobs:
+                continue
+            log = self.dir / f"{jid}.log"
+            status = m.get("status")
+            if status in (None, "running"):              # the GUI stopped before the job did
+                status = "ended (GUI restarted)"
+            job = Job(jid, m.get("kind", "?"), list(m.get("argv") or []), log, bool(m.get("gpu")),
+                      started=m.get("started") or "", ended=m.get("ended"), status=status,
+                      returncode=m.get("returncode"))
+            self.jobs[jid] = job
 
     # ------------------------------------------------------------------ validation
 
@@ -151,8 +171,7 @@ class JobManager:
             proc = subprocess.Popen([sys.executable, "-c", CLI_BOOT, *argv], **kw)
             job = Job(jid, kind, argv, log, gpu, proc=proc)
             self.jobs[jid] = job
-            (self.dir / f"{jid}.json").write_text(json.dumps({k: v for k, v in job.view(0).items()
-                                                               if k != "log_tail"}), encoding="utf-8")
+            self._save_meta(job)
         threading.Thread(target=self._wait, args=(job, fh), daemon=True).start()
         return job
 
@@ -162,6 +181,14 @@ class JobManager:
         job.returncode, job.ended = rc, _now()
         if job.status == "running":
             job.status = "done" if rc == 0 else "failed"
+        self._save_meta(job)
+
+    def _save_meta(self, job: Job) -> None:
+        try:
+            (self.dir / f"{job.id}.json").write_text(json.dumps(
+                {k: v for k, v in job.view(0).items() if k != "log_tail"}), encoding="utf-8")
+        except OSError:
+            pass
 
     def cancel(self, jid: str) -> Job:
         job = self.jobs.get(jid)

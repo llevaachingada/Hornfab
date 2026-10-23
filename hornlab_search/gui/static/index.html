@@ -25,17 +25,26 @@
 
   <!-- Left / top navigation -->
   <nav id="app-nav" aria-label="Main navigation">
-    <div id="nav-brand">hornlab</div>
-    <a href="#/status"    aria-label="Status">Status</a>
-    <a href="#/campaigns" aria-label="Campaigns">Campaigns</a>
-    <a href="#/runs"      aria-label="Runs">Runs</a>
-    <a href="#/compare"   aria-label="Compare">Compare</a>
-    <a href="#/briefs"    aria-label="Briefs">Briefs</a>
-    <a href="#/launch"    aria-label="Launch">Launch</a>
-    <div id="nav-spacer"></div>
-    <button id="btn-theme" aria-label="Toggle dark mode" title="Toggle dark/light mode">
-      <span id="theme-icon">◑</span>
-    </button>
+    <div class="nav-brand">
+      hornlab
+      <small>search</small>
+    </div>
+    <ul>
+      <li><a href="#/home"      aria-label="Home"><span class="icon" aria-hidden="true">⌂</span>Home</a></li>
+      <li><a href="#/status"    aria-label="Status"><span class="icon" aria-hidden="true">◉</span>Status</a></li>
+      <li><a href="#/campaigns" aria-label="Campaigns"><span class="icon" aria-hidden="true">◈</span>Campaigns</a></li>
+      <li><a href="#/runs"      aria-label="Runs"><span class="icon" aria-hidden="true">▷</span>Runs</a></li>
+      <li><a href="#/compare"   aria-label="Compare"><span class="icon" aria-hidden="true">⇄</span>Compare</a></li>
+      <li><a href="#/briefs"    aria-label="Briefs"><span class="icon" aria-hidden="true">◎</span>Briefs</a></li>
+      <li><a href="#/launch"    aria-label="Launch"><span class="icon" aria-hidden="true">▶</span>Launch</a></li>
+    </ul>
+    <div class="nav-spacer"></div>
+    <div class="nav-footer">
+      <a href="#/glossary" class="glossary-link" aria-label="Glossary">? Glossary</a>
+      <button id="btn-theme" aria-label="Toggle dark/light mode" title="Toggle dark/light mode">
+        <span id="theme-icon">◑</span>
+      </button>
+    </div>
   </nav>
 
   <!-- Main content area -->
