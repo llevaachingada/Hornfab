@@ -78,7 +78,7 @@ API (JSON): `GET /api/status`, `/api/campaigns`, `/api/campaign/<id>`, `/api/run
 
 ## Status (2026-10-23)
 
-Built: Home, Status, Campaigns, Runs / run detail, Compare, Briefs, Typologies, Launch (family picker, server-side command preview), Glossary, 3D. API: status, runs, run, campaigns, campaign, leaders, typologies, configs, catalog, briefs, families, compare, mesh, jobs, preview, gpu-clean. Superseded campaigns are flagged by comparing against the committed evidence set.
+Built: Home, Evolution time-lapse (per run), Status, Campaigns, Runs / run detail, Compare, Briefs, Typologies, Launch (family picker, server-side command preview), Glossary, 3D. API: status, runs, run, campaigns, campaign, leaders, typologies, configs, catalog, briefs, families, compare, mesh, jobs, preview, gpu-clean. Superseded campaigns are flagged by comparing against the committed evidence set.
 
 ## Prior art (survey 2026-10-23, read-only)
 

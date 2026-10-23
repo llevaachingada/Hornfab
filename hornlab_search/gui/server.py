@@ -50,6 +50,8 @@ class App:
             return D.mesh_surface(self.runs, parts[1], parts[2])
         if head == "briefs":
             return D.list_briefs(self.root)
+        if head == "evolution" and len(parts) == 2:
+            return D.evolution(self.runs, parts[1])
         if head == "typologies":
             return D.typologies(self.root, self.runs)
         if head == "leaders":

@@ -374,3 +374,28 @@ def test_typologies_compat_uses_the_cli_rule(repo):
     assert t["compat"]["axi_90x90_1in"]["ok"] is True
     assert t["compat"]["hifi_90x60_1in"]["ok"] is False and "axisymmetric" in t["compat"]["hifi_90x60_1in"]["reason"]
     assert t["budget"] == {"screen": 40, "compare": 150}
+
+
+def test_mouth_outline_is_the_convex_rim_mirrored_from_a_quarter():
+    # quarter rim of a 200 x 100 mm (outer) rectangle-ish mouth at z = 0.1 m, plus deeper wall nodes
+    rim = [[0.1, 0.0, 0.1], [0.1, 0.03, 0.1], [0.08, 0.05, 0.1], [0.0, 0.05, 0.1], [0.095, 0.02, 0.1]]   # last: inside
+    deep = [[0.01, 0.0, 0.0], [0.0, 0.01, 0.0]]
+    out = D.mouth_outline(np.array(rim + deep, float), "1")
+    xs, ys = [p[0] for p in out], [p[1] for p in out]
+    assert max(xs) == 100.0 and min(xs) == -100.0 and max(ys) == 50.0 and min(ys) == -50.0
+    assert [95.0, 20.0] not in out                              # interior rim node is not on the outline
+
+
+def test_evolution_frames_cache_and_growth(repo):
+    runs = repo / "runs"
+    e = D.evolution(runs, RID)
+    assert len(e["frames"]) == 9 and e["n_improvements"] == 8   # start + 7 strictly better rows
+    f0, f7 = e["frames"][0], e["frames"][7]
+    assert f0["improved"] and f0["geo"] is not None   # 1-triangle fixture: too small for a section or rim outline
+    assert f7["knobs"]["L_mm"] == pytest.approx((139.9 - 90) / 50, abs=1e-4)
+    assert e["frames"][8]["ok"] is False and e["frames"][8]["kind"] == "invalid_geometry"
+    assert (runs / ".gui_cache" / f"evolution_{RID}.json").exists()
+    with open(runs / RID / "search.ndjson", "a") as fh:            # the search grows -> cache refreshes
+        fh.write(json.dumps(_row(9, "aaaaaaaaaaaa", True, 1.0, 120.0)) + "\n")
+    e2 = D.evolution(runs, RID)
+    assert len(e2["frames"]) == 10 and e2["frames"][9]["improved"] and e2["frames"][9]["best_j"] == 1.0

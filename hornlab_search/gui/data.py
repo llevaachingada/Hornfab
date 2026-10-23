@@ -750,3 +750,131 @@ def typologies(root: Path, runs: Path) -> list[dict]:
     order = {"classical": 0, "hybrid": 1, "magnus": 2, "legacy": 3}
     out.sort(key=lambda t: (order.get(t["group"], 9), t["name"] or ""))
     return out
+
+
+# ---------------------------------------------------------------------------- evolution (time-lapse)
+
+EVO_VERSION = 2
+
+
+def _decimate(pts: list, n: int) -> list:
+    if len(pts) <= n:
+        return pts
+    step = (len(pts) - 1) / (n - 1)
+    return [pts[round(i * step)] for i in range(n)]
+
+
+def _hull(points: list[tuple[float, float]]) -> list[tuple[float, float]]:
+    """Convex hull (Andrew's monotone chain), counter-clockwise."""
+    pts = sorted(set(points))
+    if len(pts) < 3:
+        return pts
+    def cross(o, a, b):
+        return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+    lower, upper = [], []
+    for p in pts:
+        while len(lower) >= 2 and cross(lower[-2], lower[-1], p) <= 0:
+            lower.pop()
+        lower.append(p)
+    for p in reversed(pts):
+        while len(upper) >= 2 and cross(upper[-2], upper[-1], p) <= 0:
+            upper.pop()
+        upper.append(p)
+    return lower[:-1] + upper[:-1]
+
+
+def mouth_outline(pts: np.ndarray, quadrants: str) -> list[list[float]] | None:
+    """Front view of the mouth (mm): the convex outline of the mesh nodes within 1.5 % of the depth of the
+    mouth plane, mirrored to the full mouth when the mesh is a quarter. Outer rim, shell included.
+    (Mouths in these families are convex: round, elliptical or rounded-rectangular.)"""
+    if pts is None or not len(pts):
+        return None
+    z0, z1 = float(pts[:, 2].min()), float(pts[:, 2].max())
+    rim = pts[pts[:, 2] >= z1 - 0.015 * max(z1 - z0, 1e-9)]
+    if len(rim) < 3:
+        return None
+    xy = [(float(x), float(y)) for x, y in rim[:, :2]]
+    if str(quadrants) == "1":
+        xy = xy + [(-x, y) for x, y in xy] + [(-x, -y) for x, y in xy] + [(x, -y) for x, y in xy]
+    return [[round(x * 1000, 1), round(y * 1000, 1)] for x, y in _hull([(round(a, 6), round(b, 6)) for a, b in xy])]
+
+
+def _frame_geometry(design_dir: Path) -> dict | None:
+    nt = mesh_nodes_tris(design_dir / "mesh.msh")
+    if nt is None:
+        return None
+    pts, tris = nt
+    meta = _read_json(design_dir / "mesh_meta.json") or {}
+    q = ((meta.get("result") or {}).get("quadrants")) or "1234"
+    sec: dict = {}
+    for key, ax in (("h", 0), ("v", 1)):
+        chains = _plane_chains(pts, tris, ax) if len(tris) else []
+        if chains:
+            ch = max(chains, key=len)
+            sec[key] = _decimate([[round(float(pts[i, 2]) * 1000, 1), round(float(pts[i, ax]) * 1000, 1)] for i in ch], 90)
+            sec["kind"] = "section"
+    return {"section": sec or None, "mouth": mouth_outline(pts, q)}
+
+
+def evolution(runs: Path, run_id: str) -> dict:
+    """Every evaluation of a run in order, for the time-lapse player: score, failure kind, normalised shape
+    parameters, and (when the design was meshed) its wall cross-section and mouth outline. Geometry comes
+    only from the meshes the search saved. Cached in runs/.gui_cache (GUI-owned), keyed on the run's
+    search.ndjson size + mtime, so a running search is re-read as it grows."""
+    d = _resolve_run(runs, run_id)
+    nd = d / "search.ndjson"
+    st = nd.stat()
+    cache = runs / ".gui_cache" / f"evolution_{run_id}.json"
+    old = _read_json(cache) if cache.exists() else None
+    key = [EVO_VERSION, st.st_size, int(st.st_mtime)]
+    if old and old.get("key") == key:
+        return old["data"]
+    rows = read_ndjson(nd)
+    cfg = _config(d)
+    bounds = {k: b for k, b in (cfg.get("bounds") or {}).items()
+              if isinstance(b, dict) and "lo" in b and "hi" in b and b.get("search", True)}
+    same_version = bool(old) and (old.get("key") or [None])[0] == EVO_VERSION
+    prev = ({f["hash"]: f for f in old["data"].get("frames", []) if f.get("geo")}       # reuse geometry while
+            if same_version else {})                                                    # the search grows
+    frames, best = [], None
+    geo_by_hash: dict[str, dict | None] = {}
+    for r in rows:
+        h = r.get("design_hash")
+        ok = bool(r.get("ok")) and r.get("objective") is not None
+        j = float(r["objective"]) if ok else None
+        improved = ok and (best is None or j < best)
+        if improved:
+            best = j
+        kv = _knob_values(r)
+        knobs = {k: (None if k not in kv else round((kv[k] - float(b["lo"])) / ((float(b["hi"]) - float(b["lo"])) or 1), 4))
+                 for k, b in bounds.items()}
+        if h not in geo_by_hash:
+            if h in prev:
+                geo_by_hash[h] = prev[h]["geo"]
+            elif HASH.match(h or "") and (d / "designs" / h / "mesh.msh").exists():
+                geo_by_hash[h] = _frame_geometry(d / "designs" / h)
+            else:
+                geo_by_hash[h] = None
+        frames.append({"n": r.get("n"), "hash": h, "j": j, "ok": ok, "improved": bool(improved), "best_j": best,
+                       "kind": None if ok else _err_kind(r), "cached": bool(r.get("cached")),
+                       "knobs": knobs, "geo": geo_by_hash[h]})
+    # fixed axes for the whole run, so motion on screen is the design changing, not the scale
+    ext = {"rmax": 1.0, "z0": float("inf"), "z1": float("-inf"), "mmax": 1.0}
+    for f in frames:
+        g = f["geo"] or {}
+        for k in ("h", "v"):
+            for z, r_ in ((g.get("section") or {}).get(k) or []):
+                ext["rmax"] = max(ext["rmax"], abs(r_)); ext["z0"] = min(ext["z0"], z); ext["z1"] = max(ext["z1"], z)
+        for x, y in (g.get("mouth") or []):
+            ext["mmax"] = max(ext["mmax"], abs(x), abs(y))
+    data = clean({"run_id": run_id, "name": cfg.get("name"), "bounds": {k: [b["lo"], b["hi"]] for k, b in bounds.items()},
+                  "extent": ext, "frames": frames,
+                  "n_improvements": sum(1 for f in frames if f["improved"])})
+    try:
+        cache.parent.mkdir(parents=True, exist_ok=True)
+        tmp = cache.with_suffix(".tmp")
+        tmp.write_text(json.dumps({"key": key, "data": data}), encoding="utf-8")
+        tmp.replace(cache)
+    except OSError:
+        pass
+    return data

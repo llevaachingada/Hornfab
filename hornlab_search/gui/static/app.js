@@ -5,6 +5,7 @@ import { chart, heat, cmap, drawCbar, niceTicks, diFromCuts, groupColor,
          el, NS, css, fmt, FT, DEFW, polarMap, wallSection, familyColor, measuredWidth } from "./charts.js";
 import { TERMS as GLOSSARY, TERM_ORDER, tip } from "./glossary.js";
 import { init3d } from "./view3d.js";
+import { viewEvolution } from "./evolution.js";
 
 // ── XSS helper ─────────────────────────────────────────────────────
 function esc(s) {
@@ -49,6 +50,7 @@ const ROUTES = [
   { re: /^#\/campaign\/(.+)$/,          fn: m => viewCampaignDetail(m[1]) },
   { re: /^#\/runs$/,                    fn: () => viewRunsList() },
   { re: /^#\/run\/(.+)\/3d$/,           fn: m => viewRun3D(m[1]) },
+  { re: /^#\/run\/(.+)\/evolution$/,    fn: m => viewEvolution(ROOT, m[1]) },
   { re: /^#\/run\/(.+)$/,               fn: m => viewRunDetail(m[1]) },
   { re: /^#\/compare$/,                 fn: () => viewCompare() },
   { re: /^#\/briefs$/,                  fn: () => viewBriefs() },
@@ -856,6 +858,7 @@ async function viewRunDetail(id) {
           ? `<a class="btn primary" href="/runs/${esc(id)}/report.html" target="_blank" rel="noopener">Open full report ↗</a>`
           : `<button id="btn-gen-report">Generate report</button>`}
         <button id="btn-step">Export STEP (top 3)</button>
+        <a class="btn primary" href="#/run/${esc(id)}/evolution">▶ Evolution time-lapse</a>
         <a class="btn" href="#/run/${esc(id)}/3d">3D view</a>
         <a class="btn" href="#/compare?a=${esc(id)}">Compare with…</a>
       </div>
