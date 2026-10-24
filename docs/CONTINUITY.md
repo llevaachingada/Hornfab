@@ -7,8 +7,16 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 - **Done 2026-10-23 PM:** overnight queue finished 15:49 (QUEUE DONE, no hosts left); P2 12 kHz verify DONE (`docs/evidence/HF12K_VERIFY_2026-10-23.md`); surrogate retrain GATES FAILED, model not used (`docs/evidence/CP-8d_retrain_2026-10-23.md`); D3 Ctrl-C PASS on the GPU after a campaign fix.
 - **Next:** beta session (`docs/BETA_SESSION_PLAN.md`). F rehearsal and G done 2026-10-23 16:30. GPU free, no host left. Open owner decisions below.
 - **Collaborator handoff:** `docs/HANDOFF_COLLABORATOR_2026-10-23.md` (what is safe to edit tonight, what not to touch).
+- **Senior pass 2026-10-24:** reports + plan WP1-WP17 in `docs/research/senior_pass_2026-10-24/`; forks of Magnus's packages allowed (`docs/FORKS.md`); Synergy/MEH out of scope.
 - **Open owner decisions:** bound proposals (`docs/evidence/TYPOLOGY_COMPARE_2026-10-23.md`; sculpt anchors pinned too), P1 fused CUDA Burton-Miller (post-beta), mesher bump (post-beta), more rosse seeds, surrogate top-up.
 - **Blockers:** none. Issue #13 fixes merged (awaiting owner close).
+
+## 2026-10-24 (local, ~18:35 EDT) - senior investigative pass; fork policy; pin parser accepts fork URLs
+
+- Reports in `docs/research/senior_pass_2026-10-24/`: 01 audit (ripple term scores beam taper, flat term scores source tilt, DI target 2.5 dB low, `freq_weights` ignored, briefs don't pin the driver for native families, 2 m near-field, coarse grid), 02 typologies + multicell (point-grid door, JMLC-type construction), 03 12 kHz (CUDA footprint ~80 N^2 bytes; fused path ~20k dofs), 04 implementation plan WP1-WP17. Two Sonnet literature surveys as appendices with corrections.
+- Owner amendment: Magnus's packages may be changed via pinned forks (`C:\Users\hunte\Hrns\forks\`, `docs/FORKS.md`); hard rule 1 amended in CLAUDE.md / AGENTS.md / CONTRIBUTING.md / README. Forks cloned at the pinned SHAs (byte-identical to installed). P1 fused CUDA is now our WP15.
+- `cli.py` pin regex accepts any git URL (upstream, GitHub fork, file://); `tests/test_cli_pin_urls.py` added. Synergy/MEH horns out of scope (owner).
+- Offline suite (`-m "not slow and not gpu and not crosscheck"`): exit 0, all passed. Commit 95b45d1 (this entry follows in the next commit).
 
 ## 2026-10-23 (local, ~16:35 EDT) - F timed rehearsal DONE (CLI + GUI); 8 friction points fixed; G refreshed
 

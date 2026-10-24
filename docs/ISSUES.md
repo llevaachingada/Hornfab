@@ -1,7 +1,7 @@
 # ISSUES
 
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
-Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-10-23 (local GPU box, pre-beta hardening; no GitHub issue state changed).
+Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-10-24 (senior pass + fork policy; no GitHub issue state changed).
 
 | ID | Title | Status | Owner | Plan ref |
 |---|---|---|---|---|
@@ -145,3 +145,5 @@ TO-DO (no GitHub issue yet; owner / plan ref):
 - [ ] Surrogate retrain 2026-10-23 (`docs/evidence/CP-8d_retrain_2026-10-23.md`): GATES FAILED (topk 11/20, invalid_accuracy 0.80, monotonic_flips 4) at 600 epochs; held-out 463 < 500 (indicative). Model NOT used. Owner: ~250 more OSSE records for the floor; flips semantics; why the ranking/validity gates got worse with more data.
 - [x] `*_12k` verify-only briefs were accepted by search/run/campaign and offered by Launch (2026-10-23 rehearsal): `verify_only: true` brief key; search/run/campaign refuse (exit 2), Launch hides them; tests in `tests/test_search_verify_brief.py`.
 - [ ] Live demo on a shipped brief replays from the cache (~1 min, same CMA seed): use a saved brief copy (5.5 min measured). A `--cma-seed` option for `campaign` would make fresh live runs possible on shipped briefs (owner, task 08).
+
+Local-only, added 2026-10-24 (senior pass): implementation backlog WP1-WP17 in `docs/research/senior_pass_2026-10-24/04_IMPLEMENTATION_PLAN.md` (objective v2, driver pinning, fused CUDA in our fork, 12 kHz screens, GRID shapes, multicell); owner gates: WP13 third-party axisymmetric solver, GitHub hosting of forks, v2 as default.
