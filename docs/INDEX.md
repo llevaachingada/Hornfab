@@ -8,6 +8,7 @@ Keep this file current: a new doc gets a line here in the same commit.
 |---|---|
 | [CONTINUITY.md](CONTINUITY.md) | Status block + dated log, newest first. The source of truth for "where are we". |
 | [ISSUES.md](ISSUES.md) | Open issues and the TO-DO list (next-round priorities at the top). |
+| [FORKS.md](FORKS.md) | How we change Magnus's solver/mesher: pinned forks in `..\forks`, install by SHA, validation ladder (owner decision 2026-10-24). |
 | [NEXT_DEV_PRIORITIES.md](NEXT_DEV_PRIORITIES.md) | Post-beta priorities: P1 fused CUDA assembly, P2 12 kHz pass, P3 Metal backend. |
 | [HANDOFF_BETA.md](HANDOFF_BETA.md) | Current agent handoff: beta-readiness pass, items A–G, stop conditions. |
 | [HANDOFF_COLLABORATOR_2026-10-23.md](HANDOFF_COLLABORATOR_2026-10-23.md) | For the collaborator pulling `main` on 2026-10-23: setup, what runs on the GPU box, files the owner edits tonight, rules, open questions. |
@@ -34,6 +35,7 @@ Keep this file current: a new doc gets a line here in the same commit.
 |---|---|
 | [research/typologies/MESHER_TYPOLOGIES.md](research/typologies/MESHER_TYPOLOGIES.md) | What Magnus's mesher implements (OSSE, R-OSSE, ICW, FREEFORM, LOOKUP), file:line. |
 | [research/typologies/SEARCH_LAYER_GAPS.md](research/typologies/SEARCH_LAYER_GAPS.md) | Search-layer coverage vs the mesher. |
+| [research/senior_pass_2026-10-24/](research/senior_pass_2026-10-24/README.md) | Senior pass 2026-10-24: objective/assumption audit, new typologies + multi-cell, 12 kHz routes, implementation plan (WP1–WP14). |
 | [research/TIME_DOMAIN_RINGING.md](research/TIME_DOMAIN_RINGING.md) | Ringing / waterfalls: what we can see, stage-2 design. |
 | [BOUNDARY_LAB_0.5_RESEARCH.md](BOUNDARY_LAB_0.5_RESEARCH.md), [research/boundary_lab_0.5/](research/boundary_lab_0.5/) | Boundary Lab 0.5.0 findings and inventories. |
 

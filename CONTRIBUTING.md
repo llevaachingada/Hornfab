@@ -18,6 +18,8 @@ Read `CLAUDE.md` first, then `docs/CONTINUITY.md`. The plan in `docs/plan/` is t
 
 ## The 8 hard rules (verbatim from `docs/plan/00_ORCHESTRATOR.md`)
 
+> **Owner amendment 2026-10-24 to rule 1:** never hand-edit the installed copies in `.venv`; changes to Magnus's packages (Python or Julia) are allowed through our pinned forks, following `docs/FORKS.md` (branch, commit, install by SHA, pin in `pyproject.toml` + `TOOLCHAIN.md`, validate before data counts). Rule 2 still means no new solver/mesher from scratch.
+
 1. **Never modify any installed HornLab, Boundary Lab, BEAT or Julia file.** If one looks broken, write it into `NOTES_FOR_SENIOR.md` and stop that line of work.
 2. **Never write a BEM solver, FEM solver, mesher, gmsh writer, Green's function, or plotting library.** All five exist in the stack. If you are writing one, you are off plan.
 3. **Never invent a parameter name, a config key, a tag number, or a unit.** They come from the mesher's and solver's own schemas, reproduced in `01_CONTRACTS.md`. If you need one that is not there, it is a contract gap: `NOTES_FOR_SENIOR.md`, then stop.

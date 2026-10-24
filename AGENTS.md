@@ -22,8 +22,10 @@ acoustics, score it, iterate (CMA-ES). It is a **search layer over Collin's Horn
 | `hornlab_bempp_bem` | CPU BEM — the independent cross-check |
 | `hornlab_plots` | report figures |
 
-**We never write a solver, mesher, gmsh writer, Green's function, or plotting library, and never
-modify any installed HornLab / Boundary Lab / BEAT / Julia file.** License: AGPL-3.0-or-later.
+**We never write a solver, mesher, gmsh writer, Green's function, or plotting library from scratch,
+and never hand-edit an installed copy in `.venv`.** Changes to Magnus's packages (Python or Julia) go
+through our pinned forks per `docs/FORKS.md` (owner amendment 2026-10-24; supersedes hard rule 1 below).
+License: AGPL-3.0-or-later.
 Every horn number is a YAML default in `examples/` — hardcoded horn numbers are bugs.
 
 Interpreter: always `.venv\Scripts\python.exe` (absolute path in `TOOLCHAIN.md`), never bare `python`.
@@ -45,6 +47,11 @@ Senior verifier additionally reads `docs/plan/09_CHECKPOINTS.md` and `12_RESEARC
 ---
 
 ## The 8 hard rules (verbatim from `docs/plan/00_ORCHESTRATOR.md`)
+
+> **Owner amendment 2026-10-24 to rule 1:** never hand-edit the installed copies in `.venv`; DO change
+> Magnus's packages when it helps (above all, higher-frequency GPU solves) via the pinned forks and the
+> validation ladder in `docs/FORKS.md`. Rule 2 still forbids writing a new solver/mesher from scratch;
+> changing the existing one in our fork is allowed.
 
 1. **Never modify any installed HornLab, Boundary Lab, BEAT or Julia file.** If one looks broken,
    write it into `NOTES_FOR_SENIOR.md` and stop that line of work.

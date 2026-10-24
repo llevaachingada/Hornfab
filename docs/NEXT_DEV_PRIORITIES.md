@@ -30,10 +30,14 @@ CUDA assembler. The work is to call the CUDA direct-system assembler from the ex
 3. keeps the same excitation (unit acceleration on tag 2) and output conventions (exp(−iωt));
 4. keeps the per-frequency call pattern our adapter uses (`solve/beat.py`, TOOLCHAIN M3).
 
-**Ownership.** This is Magnus's package (CLAUDE.md hard rule: we never modify installed HornLab/BEAT/Julia files).
-Route: (a) ask Magnus (m3gnus) to wire it upstream, offering the 4060 as the test bed and our TOOLCHAIN numbers; or
-(b) with his OK, a pinned fork of `hornlab-beat-bem` under our control, with the SHA recorded in `pyproject.toml` and
-`TOOLCHAIN.md` and `doctor`'s pinned-SHA check updated.
+**Ownership (updated 2026-10-24, owner decision).** We do this ourselves in our pinned fork of `hornlab-beat-bem`
+(`C:\Users\hunte\Hrns\forks\hornlab-beat-bem`, branch `hornlab-search/fused-cuda`), following `docs/FORKS.md`;
+`doctor`'s pin check already accepts fork URLs. Offering the change upstream to Magnus is still welcome, but we do not
+wait for it. Exact patch plan: `docs/research/senior_pass_2026-10-24/04_IMPLEMENTATION_PLAN.md` WP15. Finding from
+the 2026-10-24 read: the CUDA direct assembler already handles symmetry images (`symmetry_image_transforms`, image
+singular cache, orbit row weights) and is tested against the 4-operator path on `sample_quarter.msh` in
+`julia/tests/runtests.jl`, so the work is mostly driver wiring.
+~~(a) ask Magnus … (b) with his OK, a pinned fork …~~ (superseded).
 
 **Validation before any data from it counts (all on the GPU, from a clean state).**
 1. `hornlab-search selftest --analytic`: spread ≤ 0.5 dB (today 0.020 dB).

@@ -13,8 +13,10 @@ It is a **search layer** over Collin's HornLab packages, not a solver:
 | `hornlab_bempp_bem` | CPU BEM — the independent cross-check |
 | `hornlab_plots` | report figures |
 
-We never write a solver, mesher, gmsh writer, Green's function, or plotting library, and never
-modify installed HornLab / Boundary Lab / BEAT / Julia files. License: **AGPL-3.0-or-later**.
+We never write a solver, mesher, gmsh writer, Green's function, or plotting library from scratch, and
+never hand-edit the installed copies. When the solver or mesher itself needs a change (for example, to fit
+higher-frequency solves on the GPU), we make it in a pinned fork: see `docs/FORKS.md`.
+License: **AGPL-3.0-or-later**.
 
 ## Install
 

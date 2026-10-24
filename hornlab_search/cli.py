@@ -34,8 +34,10 @@ EXAMPLE_NAMES = ("osse_baseline", "throat_adapter", "icw_termination",
 CORE_IMPORTS = ("numpy", "scipy", "cma", "yaml", "jinja2")
 HORNLAB_IMPORTS = ("hornlab_mesher", "hornlab_beat_bem", "hornlab_plots")
 
-# pyproject dependency git SHAs: package name -> 40-char commit.
-_GIT_URL_RE = re.compile(r"hornlab-(?:waveguide-mesher|beat-bem|plots|bempp-bem)\s*@\s*git\+https://github\.com/m3gnus/([^/@]+)\.git@([0-9a-f]{40})")
+# pyproject dependency git SHAs: package name -> 40-char commit. Any git URL is accepted (Magnus's
+# upstream, a GitHub fork, or a local file:// fork; docs/FORKS.md), keyed by the dependency name.
+_GIT_URL_RE = re.compile(
+    r"(hornlab-(?:waveguide-mesher|beat-bem|plots|bempp-bem))\s*@\s*git\+[^\s\"']+@([0-9a-f]{40})")
 
 
 def _have(module: str) -> bool:

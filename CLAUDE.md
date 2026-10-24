@@ -24,7 +24,11 @@ ripple, throat size, a room), generate candidate geometry, solve each with GPU b
 acoustics, score it, iterate (CMA-ES). It is a **search layer over Collin's HornLab packages**:
 `hornlab_mesher` (geometry + gmsh), `hornlab_beat_bem` (GPU BEM), `hornlab_bempp_bem` (CPU BEM
 cross-check), `hornlab_plots` (figures). We never write a solver, mesher, gmsh writer, Green's
-function or plotting library, and never modify installed HornLab/BEAT/Julia files.
+function or plotting library from scratch, and never hand-edit the *installed* copies in `.venv`.
+**Owner amendment 2026-10-24:** changing Magnus's packages (Python or Julia) IS allowed through our
+pinned forks in `C:\Users\hunte\Hrns\forks\` — branch, commit, install by SHA, pin, validate — exactly
+as `docs/FORKS.md` says. This supersedes hard rule 1 wherever it is quoted (AGENTS.md, CONTRIBUTING.md,
+the frozen plan).
 License: AGPL-3.0-or-later. Every horn number is a YAML default in `examples/`, never hardcoded.
 
 Interpreter: always `.venv\Scripts\python.exe` (absolute path in `TOOLCHAIN.md`), never bare `python`.

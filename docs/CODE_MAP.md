@@ -46,6 +46,6 @@ bempp_cpu) → `metrics` (beamwidth, ripple, DI, impedance) → `objective` (sca
 | `tools/overnight/` | Unattended GPU queue (`queue_20261022.ps1`) and stall watchdog (`watchdog.ps1`, keeps Windows awake). |
 | `tests/` | Offline suite; `requires_*` / `gpu` / `slow` markers in `tests/conftest.py`. |
 
-## External code we depend on (never edited; pinned in `pyproject.toml` / `TOOLCHAIN.md`)
+## External code we depend on (pinned in `pyproject.toml` / `TOOLCHAIN.md`; changed only via our forks, `FORKS.md`)
 `hornlab_mesher` (geometry + gmsh), `hornlab_beat_bem` (GPU/CPU BEM, Julia), `hornlab_bempp_bem` (CPU cross-check),
 `hornlab_plots` — Magnus's (GitHub `m3gnus`) packages, installed in `.venv`.
