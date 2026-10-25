@@ -68,6 +68,81 @@ backend option, macOS process hygiene (`search/hygiene.py` POSIX branch), then o
 and the same 3-design A/B against the 4060 (< 0.2 dB) before mixing data. Metal has no near-correction (same as CUDA
 under symmetry).
 
+## P4 (IDEA, recorded 2026-10-24, owner decision required — not approved for work). Frequency-grid density and a narrow-resonance "safety net"
+
+**Why it matters.** The screen grid is 12 log-spaced points from 500 Hz to the brief's band top (~5.5 kHz on this
+card); verify is 25 log points (300 Hz–12 kHz). A narrow-band horn defect (a mouth-reflection resonance, an
+organ-pipe/quarter-wave mode, a narrow cancellation or dispersion spike — e.g. a collapse at 550 Hz) that is
+NARROWER than the grid gap (about 1/3 octave on screen) can fall entirely BETWEEN two solved frequencies. Nothing
+is simulated between grid points: the plotted polar/beamwidth curves are interpolations that render smoothly
+straight through the defect, and the objective cannot score what was never solved. A horn whose narrow defect
+hides between grid points can therefore OUTRANK an equally good clean horn whose defect happens to land on a grid
+point. This is the one accuracy hazard a designer most plausibly cares about.
+
+**Existing partial mitigations (already in the repo; do not re-derive):** WP4 (landed 2026-10-24) added
+`grid: {verify_points_per_octave: N}` (denser VERIFY grid above 5 kHz only) and objective-v2 `freq_weights`
+(rewrites the importance of points the grid already solves — neither adds new solved frequencies on screen);
+`f11` and `z_ripple` markers exist but are sampled at the same sparse points; `docs/research/
+TIME_DOMAIN_RINGING.md` covers the time-domain alternative.
+
+**Sub-idea P4a — dense finalist resonance net (recommended first; no contract change).** After screen/verify,
+take the short-listed finalists ONLY and re-solve each on a dense uniform in-band grid (e.g. 24–48 in-band
+points, or the WP4 8-points-per-octave pattern extended over the whole band) as a flagged resonance check. Diff
+the dense-grid beamwidth/ripple/on-axis/DI against the sparse-grid values: a large diff means a narrow feature
+the coarse grid missed. Cost is bounded (seconds-to-a-minute per design, a handful of designs). Could also auto-
+flag horn FAMILIES whose dense J degrades vs their screen J, so the search brief for that family can be weighted
+or the grid refined locally. Fits the existing `verify --brief`-style run-dir seam.
+
+**Sub-idea P4b — perceptually weighted non-uniform frequencies (idea only; FROZEN-CONTRACT matter).** Instead of
+even log spacing, add extra solved points in the regions most problematic to human hearing — roughly 2–3 kHz
+(maximum hearing sensitivity / harshness region), the 4–5.5 kHz transition where beamwidth and harshness
+concentrate, and possibly the 0.5–1 kHz mouth-reflection onset region — at the cost of points somewhere broad and
+predictable. IMPORTANT constraint (01_CONTRACTS §8 is FROZEN; senior ruling 2026-10-13 declined per-user YAML
+grid keys): a changed grid changes the solve hash and creates a RECORD GROUP that cannot train or cache with the
+existing grids (`to_training_arrays` drops grid mismatches). The only clean path is a owner-approved contract
+amendment that defines the non-uniform grid as a NEW NAMED grid group (the `*_12k` brief / WP4 `verify_hf`
+pattern), with its exact point list fixed in the contract so every record in the group shares it.
+
+Both sub-ideas are recorded so they are not lost; neither is scheduled. P4a is cheap and self-contained; P4b
+should ride the next contract revision window if wanted at all.
+
+## P5 (added 2026-10-24 late, owner-approved after the M2 pass): easy wins for BUILD-DECISION accuracy/value — NOT in the WP plan
+
+**The lens (owner):** "less concerned about outright speed — the tool should actually guide which horn designs to
+build in real life." Ranked by value per effort. None of these exist in `04_IMPLEMENTATION_PLAN.md`; none
+replace it. GPU cost is small everywhere; W1 is free.
+
+- [ ] **W1 — screen-vs-verify rank-consistency audit (offline, ZERO GPU; do first).** The search loop trusts the
+  12-point screen tier to pick finalists; verify (25 points, more dofs) re-scores survivors. Every stored campaign
+  already holds BOTH scores (dataset + runs/) — compute per campaign/family the rank agreement (winner agreement +
+  the dB/dof gap at every rank flip). Deliverable: `tools/rank_audit/` (the rescore_v2 pattern) + a small evidence
+  doc. Answers: how much to trust a screen ranking before spending verify GPU, and where search budget is
+  misallocated.
+- [ ] **W2 — the dense finalist resonance net = P4a above (tiny GPU).** Before committing to BUILD: re-solve the
+  top 3–5 finalists only, on a dense uniform in-band grid (~24–48 points), and diff beamwidth/ripple/on-axis/DI
+  vs the sparse-grid values — a large diff means a narrow feature the grid missed (the plotting interpolates
+  straight through it). Minutes per design on the fused path. Scheduling note: fold into the brief-design pass as
+  the build-gate on its POC winner (its handoff already plans one fused 12 kHz verify; this rides the same job
+  family with the owner's go).
+- [ ] **W3 — denser screen grid as a NEW NAMED grid group (small code; OWNER-GATED contract matter).** +4 screen
+  points (12→16) ≈ +33 % screen time (small at today's sizes) with better beamwidth/ripple fidelity on exactly
+  the decision-bearing frequencies. Frozen-contract rule (P4b's reasoning applies to screen too): a changed grid
+  must land as a NEW NAMED grid group (the `*_12k`-brief / WP4 `verify_hf` pattern) with its exact point list
+  fixed in the contract; needs the owner's OK in a contract-revision window.
+- [ ] **W4 — `compare --bar` judge mode (mechanical, ~20 lines).** `hornlab-search compare` prints diff tables but
+  never judges; every fork validation ladder eyeballs them. A `--bar` flag that exits nonzero when the CP-7f bars
+  (0.039 dB / 1 deg) are crossed removes a recurring human-error surface (hit three times in the M2 pass); offline
+  tests only.
+- [ ] **W5 — perceptual/frequency emphasis via the LANDED v2 `freq_weights` (configuration only, zero code).** When
+  real owner briefs exist (the brief-design pass), set weight where perception lives (roughly 2–5 kHz: beamwidth
+  and harshness) and down-weight broad, predictable regions — the machinery is already built for exactly this
+  (WP4). Also record the M3/WP5 calibration outcomes (distance_m, screen balloon, source_motion) as adopted
+  baseline defaults with owner sign-off (`docs/HANDOFF_BRIEF_DESIGN_2026-10-24.md` plans this).
+
+Suggested homes: W1 + W2 + W5 → the brief-design pass (its deliverables are exactly the baseline-settings doc and
+the POC build-gate); W4 → any small offline commit (e.g. alongside the in-flight M3/M4 lanes); W3 → the next
+contract-revision window or skip.
+
 ## Not recommended (recorded so nobody re-proposes it without new evidence)
 - Half precision or other "quantization" of the BEM system: the solver is Float32 with a Float64 Krylov space; dense
   high-frequency BEM systems are poorly conditioned.
