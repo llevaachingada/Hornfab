@@ -6,13 +6,15 @@ first place." This pass exists to fix exactly that: study the physics + our mach
 drivers, INTERVIEW the owner about their actual project, and design briefs/baseline settings that encode it —
 with at most ONE small GPU proof-of-concept search, owner-approved, at the very end.
 
-## 0. Sequencing
+## 0. Sequencing (updated 2026-10-24 late: M3 is IN FLIGHT — another session is executing it)
 
-Run this pass AFTER the M3 pass (its handoff was issued in chat 2026-10-24 late: carry-overs + WP5/WP7/WP8 on
-stored designs, zero searches). This brief-design pass needs almost no GPU; M3 does. If M3 has NOT run yet,
-sequencing avoids two agents pushing CONTINUITY/ISSUES at once and avoids proposing defaults that M3 will
-re-measure (WP5's distance/balloon proposals). Do not run the two passes concurrently. If M3 is landed, read
-its evidence (WP5 proposals!) BEFORE the interview — those calibration findings change what "baseline" means.
+The M3 handoff was issued in chat (owner holds it) and the carry-over fixes are ALREADY LANDED
+(`1dda493`: dataset-record `objective_version` + the brief_hash-scoped `invalid_envelope` marker, 6 offline
+tests). You share the machine with that session: **start the STUDY phase (section 1) immediately; do NOT
+begin the interview, write briefs, or push ANY commit until M3's GPU chain has ended** — check
+`git log --oneline` for its carry-over/WP5/WP7/WP8 commits + `docs/evidence/MEASUREMENT_PACK_<date>.md`
+existence + an idle GPU (no julia, no lock). Only then interview the owner, so the baseline settings can
+adopt M3's WP5 calibration proposals. Run the two passes' pushes strictly one at a time.
 
 ## 1. REQUIRED READING (the study list — read completely before the interview)
 
@@ -100,6 +102,29 @@ report/families/doctor/gpu-clean/export-step). The brief YAML schema lives in `c
 Three silent killers + one physics caveat to restate to the owner: mesh_scale (metres!), quadrants ↔
 symmetry pairing, DI provenance (`balloon` vs `cuts_estimate`); and the f11 driver-realism ceiling above.
 
+## 2b. Where the machinery will be as the remaining plan lands — design briefs FORWARD-COMPATIBLE
+
+The repo you are briefing is NOT the repo the owner will optimize in. Per the implementation plan
+(`04_IMPLEMENTATION_PLAN.md`), the parameter and typology space grows through M3–M5:
+
+| Pass | WPs | The machine gains | What briefs must anticipate NOW |
+|---|---|---|---|
+| M3 (IN FLIGHT: carry-overs landed @ `1dda493`) | carry-overs, WP5, WP7, WP8 | WP5 far-field/balloon/source-motion calibration PROPOSALS (distance_m 2→10?; screen balloon 512→1024?; `solve.source_motion` new optional key); WP7 `mesh.rear_res_factor` (opt-in, default = today); WP8 `mesh.band_split: {edges_hz}` (opt-in, per-band meshes + seam checks, wall-time report) | the baseline-settings doc ADOPTS M3's proposals only with owner sign-off; band-split edge choices depend on the owner's band; none of these keys enter the brief YAML (they are config/solve keys) |
+| M4 | WP9 (NEW generators: `splice`, `throat_blend_mm`, `spherical_salmon`, `angle_space`, presets `os_conical`/`qt_rect`/`catenoidal`), WP9b (T1 `lecleach_exact`, T2 `kugelwellen`, T3 `jmlc_elliptical`, T4 `jmlc_iwata`, T5 `x_shape`, T6 `min_phase`, T7 `toroidal_rollback`), WP10 (GRID: point-grid family — G8 even-Fourier cross-sections, G9 φ-varying termination), WP12 (enclosure mounting) | curled-lip JMLC horns; organic/saddle mouths; X-shapes; arbitrary Fourier cross-sections; horns mounted in boxes | **Briefs are family-agnostic**: the family allow-list lives in the LAUNCH/campaign command, not the brief — new typologies do NOT invalidate briefs; only the allow-list choice changes. Curled-lip/organic/multicell horns need a WIDE+SHALLOW envelope (the plan's `organic_rollback_1in` sketch: ~520×420×260) + freestanding closure — if the interview reveals curl appetite, design a variant brief NOW (`organic_rollback`-style). Enclosure mounting later adds a `brief.mounting` key (note appetite; do not hand-write the key — it does not exist yet and unknown keys are refused) |
+| M5 | WP11 (BIPOP restarts + QD archive), WP16 (non-uniform source velocity — phase-plug above f11), WP17 (near-singular CUDA correction), WP14 (multicell prototype, CPU-first validation) | stronger search restarts; REAL driver exit behavior above f11 (lifting part of the 8–12 kHz geometry-only caveat for non-uniform-velocity exits); multicells/vanes on GPU (only after CPU near-correction validation) | band_hi beyond 12 kHz only becomes PHYSICALLY meaningful to score after WP16 — until then keep the owner's band at 12 kHz in briefs regardless of appetite; multicell briefs wait for WP14's CPU validation verdict |
+
+**Forward-compatibility rules (hard for this pass):**
+1. Briefs use ONLY keys that exist in `config.load_brief` TODAY (rule 3 — never invent). Capabilities that
+   land later (mounting, >12 kHz realism, multicell) enter the SESSION FILE as owner appetite notes, and the
+   pass that lands them updates the briefs (briefs are cheap files; designs are not).
+2. The owner briefs state their family allow-list ASSUMPTION explicitly (which families the first campaign
+   will mix) so M4's new typologies plug in without surprise.
+3. If the interview exposes appetite for shapes the plan delivers later (JMLC curls, multicell, boxes),
+   design the VARIANT briefs ahead (envelope shape, band realism, source cap) so each future pass finds its
+   brief ready; mark them "awaiting WPxx" in the baseline doc.
+4. Re-ground EVERY numeric claim in this file against the evidence of the moment (the ceilings/f11 numbers
+   cite M2; M3's evidence supersedes where it measured more).
+
 ## 3. Why the current briefs are "generic" (state of the world you inherit)
 
 `examples/briefs/` holds three demo sheets chosen to make the MACHINERY runnable during the beta: the axi
@@ -158,6 +183,12 @@ Questions (probe the WHY behind each; skip if already answered):
   grid/weights choices + why, `*_fusedcuda` config-copy pattern (solve.cuda_fused: true; caps 5000/12,000/
   12,000; screen 5000 stays), and the M3 measurement-pack recommendations adopted as DEFAULTS ONLY with
   owner sign-off (distance_m, screen balloon).
+- **Future-capability appendix** (part of the baseline doc, per section 2b): for each owner appetite exposed
+  in the interview — planned typologies (WP9 generators; WP9b JMLC/Kugelwellen/organic/X; WP10 GRID Fourier
+  sections; WP12 mounting; WP14 multicell; WP16 >f11 realism) — record (a) whether it plugs into the designed
+  briefs UNCHANGED (briefs are family-agnostic; allow-lists live at launch), or (b) which variant brief /
+  brief-update the future pass must bring (e.g. the wide-shallow `organic_rollback`-style envelope for curls,
+  a `mounting:` key from WP12, band_hi realism from WP16). Each future-dependent item marked "awaiting WPxx".
 - **Offline validation ladder** (no GPU): (1) `load_brief` clean; (2) campaign compatibility per family;
   (3) `run --dry-run` per brief (estimate printed); (4) 1–2 sample mesh builds CPU-only (bbox/symmetry checks);
   (5) the exact OWNER APPROVAL SHEET: the POC command card (family list, `--budget 20`, seed, expected
