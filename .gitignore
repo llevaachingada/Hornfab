@@ -8,7 +8,9 @@ __pycache__/
 *.msh
 report.html
 .pytest_cache/
-.opencode/
+.opencode/*
+!.opencode/skills/
+!.opencode/skills/**
 *.egg-info/
 
 # review page build outputs (regenerate with tools/review)
