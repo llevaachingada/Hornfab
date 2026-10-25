@@ -229,7 +229,7 @@ export function familyColor(i) { return FAMILY_COLORS[i % FAMILY_COLORS.length];
 export function wallSection(svg, designs, { H = 300, compact = false, extent = null } = {}) {
   svg.innerHTML = "";
   const W = measuredWidth(svg, compact ? 150 : 460);
-  const m = compact ? { l: 4, r: 4, t: 4, b: 4 } : { l: 40, r: 10, t: 10, b: 30 };
+  const m = compact ? { l: 4, r: 4, t: 4, b: 4 } : { l: 46, r: 10, t: 10, b: 34 };
   let rmax = 1, z0 = Infinity, z1 = -Infinity;
   for (const d of designs) for (const k of ["h", "v"]) for (const [z, r] of (d.profile?.[k] || [])) {
     rmax = Math.max(rmax, Math.abs(r)); z0 = Math.min(z0, z); z1 = Math.max(z1, z);
@@ -237,11 +237,19 @@ export function wallSection(svg, designs, { H = 300, compact = false, extent = n
   if (extent) ({ rmax, z0, z1 } = extent);              // shared scale across several drawings
   if (!isFinite(z0)) { svg.setAttribute("viewBox", `0 0 ${W} ${H}`); return; }
   const pw = W - m.l - m.r, ph = H - m.t - m.b;
-  const sc = Math.min(pw / (2 * rmax * 1.04), ph / ((z1 - z0) * 1.04));        // equal mm per pixel on both axes
+  const noDash = W < 260;                               // dashed strokes read as texture mush below 260px
+  const sc = Math.min(pw / (2 * rmax * 1.02), ph / ((z1 - z0) * 1.02));        // equal mm per pixel, true aspect
   const cx = m.l + pw / 2, by = m.t + ph - (ph - (z1 - z0) * sc) / 2;
   const X = r => cx + r * sc, Y = z => by - (z - z0) * sc;
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.setAttribute("width", W); svg.setAttribute("height", H);
   svg.dataset.chart = "1";
+  const outline = (d, k, sgn) => {
+    const pts = (d.profile || {})[k] || [];
+    if (pts.length < 3) return null;
+    return pts.map(([z, r], i) => (i ? "L" : "M") + X(sgn * r).toFixed(1) + "," + Y(z).toFixed(1)).join("") + "Z";
+  };
+
+  // pass 1: grid, ticks, axis labels, centerline
   if (!compact) {
     const g = el("g", { class: "grid" }, svg);
     for (const t of niceTicks(-rmax, rmax, 6)) {
@@ -252,24 +260,58 @@ export function wallSection(svg, designs, { H = 300, compact = false, extent = n
       el("line", { x1: m.l, x2: m.l + pw, y1: Y(t), y2: Y(t) }, g);
       const tt = el("text", { x: m.l - 5, y: Y(t) + 3, "text-anchor": "end" }, svg); tt.textContent = t;
     }
-    const a = el("text", { x: m.l + pw, y: H - 2, "text-anchor": "end" }, svg); a.textContent = "r mm (H →)";
-    const b = el("text", { x: m.l, y: H - 2 }, svg); b.textContent = "(← V) r mm";
-    const c = el("text", { x: 2, y: m.t + 2, "dominant-baseline": "hanging" }, svg); c.textContent = "z mm";
+    // plane labels live in the true-aspect slack beside the drawing, at mid-height
+    const a = el("text", { x: W - m.r, y: m.t + ph / 2, "text-anchor": "end" }, svg); a.textContent = "horizontal plane →";
+    const b = el("text", { x: m.l + 2, y: m.t + ph / 2, "text-anchor": "start" }, svg); b.textContent = "← vertical plane";
+    const c = el("text", { x: 2, y: m.t + 2, "dominant-baseline": "hanging" }, svg); c.textContent = "depth z (mm)";
   }
-  el("line", { x1: cx, x2: cx, y1: m.t, y2: m.t + ph, stroke: css("--muted"), "stroke-dasharray": "3 3", "stroke-opacity": 0.6 }, svg);
+  if (W >= 200) el("line", { x1: cx, x2: cx, y1: m.t, y2: m.t + ph, stroke: css("--label"),
+                             "stroke-dasharray": "3 3", "stroke-opacity": 0.6, "stroke-width": 1 }, svg);
+
+  // pass 2: ALL fills beneath every stroke; even-odd fills the wall band, bore stays background
   for (const d of designs) {
+    if (!d.filled || (d.profile || {}).kind !== "section") continue;
+    for (const [k, sgn] of [["h", 1], ["v", -1]]) {
+      const path = outline(d, k, sgn);
+      if (!path) continue;
+      el("path", { d: path, fill: d.color, "fill-rule": "evenodd", "fill-opacity": compact ? 0.32 : 0.30, stroke: "none" }, svg);
+    }
+  }
+
+  // pass 3: strokes, with the dashed (start) outline LAST so it reads over any fill
+  const drawStroke = d => {
     const p = d.profile || {};
     for (const [k, sgn] of [["h", 1], ["v", -1]]) {
       const pts = p[k] || [];
       if (!pts.length) continue;
       if (p.kind === "section") {
-        const path = pts.map(([z, r], i) => (i ? "L" : "M") + X(sgn * r).toFixed(1) + "," + Y(z).toFixed(1)).join("") + "Z";
-        el("path", { d: path, fill: d.filled ? d.color : "none", "fill-opacity": d.filled ? 0.35 : 0,
-                     stroke: d.color, "stroke-width": compact ? 1 : 1.5, "stroke-dasharray": d.dash ? "4 3" : "none",
-                     "stroke-linejoin": "round" }, svg);
+        const path = outline(d, k, sgn);
+        if (!path) continue;
+        // H solid / V dashed on the drawing itself; a design-level dash (start) dashes both planes
+        const dash = (!noDash && (d.dash || k === "v")) ? "6 4" : "none";
+        el("path", { d: path, fill: "none", stroke: d.color,
+                     "stroke-width": compact ? 1.6 : (k === "h" ? 2.25 : 2.0),
+                     "stroke-dasharray": dash, "stroke-linejoin": "round" }, svg);
       } else {
         for (const [z, r] of pts) el("circle", { cx: X(sgn * r), cy: Y(z), r: compact ? 0.8 : 1.4, fill: d.color, opacity: 0.7 }, svg);
       }
+    }
+  };
+  const dashed = designs.filter(d => d.dash), solid = designs.filter(d => !d.dash);
+  for (const d of solid) drawStroke(d);
+  for (const d of dashed) drawStroke(d);
+
+  // throat landmark: the outline's min-z point with |r| > 0 (the aperture's axis end); else min z
+  for (const d of designs) {
+    const p = d.profile || {};
+    for (const [k, sgn] of [["h", 1], ["v", -1]]) {
+      const pts = p[k] || [];
+      if (!pts.length) continue;
+      const withR = pts.filter(pt => pt[1] != null && Math.abs(pt[1]) > 1e-9);
+      const pool = withR.length ? withR : pts;
+      let tz = pool[0][0], tr = pool[0][1];
+      for (const [z, r] of pool) if (z < tz) { tz = z; tr = r; }
+      el("circle", { cx: X(sgn * Math.abs(tr)), cy: Y(tz), r: compact ? 1.5 : 2.5, fill: d.color, stroke: "none" }, svg);
     }
   }
 }

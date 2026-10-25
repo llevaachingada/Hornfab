@@ -58,7 +58,7 @@ function mirrorMesh(verts, tris, quadrants) {
  * Render a 2D wall profile as a fallback SVG.
  * profile: {h:[[z,r],...], v:[[z,r],...]} from run detail.
  */
-function render2DFallback(container, profile) {
+function render2DFallback(container, profile, seedProfile) {
   container.innerHTML = "";
   const msg = document.createElement("div");
   msg.className = "view3d-fallback";
@@ -71,8 +71,9 @@ function render2DFallback(container, profile) {
   const svg = document.createElementNS(NS, "svg");
   svg.style.width = "100%"; svg.style.height = "100%";
 
-  const h = profile.h || [], v = profile.v || [];
-  const all = [...h, ...v];
+  const h = (profile || {}).h || [], v = (profile || {}).v || [];
+  const sh = (seedProfile || {}).h || [], sv = (seedProfile || {}).v || [];
+  const all = [...h, ...v, ...sh, ...sv];
   if (!all.length) { msg.textContent = "No profile data."; container.appendChild(msg); return; }
 
   const rs = all.map(p => Math.abs(p[1])), zs = all.map(p => p[0]);
@@ -96,13 +97,13 @@ function render2DFallback(container, profile) {
   };
   mkLine(X(0),m.t,X(0),H-m.b,"var(--rule)",false);
 
-  const drawPts = (pts, sgn, color, dash) => {
+  const drawPts = (pts, sgn, color, dash, w) => {
     const pp = pts.map(p => [X(sgn * Math.abs(p[1])), Y(p[0])]).filter(p => isFinite(p[0]) && isFinite(p[1]));
     if (pp.length < 2) return;
     const path = document.createElementNS(NS, "path");
     path.setAttribute("d", pp.map((p,i) => (i?"L":"M")+p[0].toFixed(1)+","+p[1].toFixed(1)).join(""));
     path.setAttribute("fill","none"); path.setAttribute("stroke",color);
-    path.setAttribute("stroke-width","2");
+    path.setAttribute("stroke-width", String(w || 2));
     if (dash) path.setAttribute("stroke-dasharray","5 3");
     svg.appendChild(path);
   };
@@ -110,8 +111,10 @@ function render2DFallback(container, profile) {
   const cs = getComputedStyle(document.documentElement);
   const seedCol = cs.getPropertyValue("--seed").trim() || "#a3713a";
   const bestCol = cs.getPropertyValue("--best").trim() || "#0d6e7a";
-  drawPts(h, 1, bestCol, false);
-  drawPts(v, -1, bestCol, true);
+  // dashed start outline first (= under the best stroke), then the solid best outline
+  if (sh.length || sv.length) { drawPts(sh, 1, seedCol, true, 2); drawPts(sv, -1, seedCol, true, 2); }
+  drawPts(h, 1, bestCol, false, 2.5);
+  drawPts(v, -1, bestCol, true, 2.5);
 
   container.appendChild(svg);
   const lbl = document.createElement("div");
@@ -126,18 +129,22 @@ function render2DFallback(container, profile) {
  * meshData: { quadrants, verts: [x,y,z,...], tris: [i,j,k,...] }
  * profile (optional): best design profile for 2D fallback.
  */
-export async function init3d(container, meshData, profile) {
+export async function init3d(container, meshData, profile, seedProfile, shadows = true) {
   container.innerHTML = "";
 
   const ok = await loadThree();
-  if (!ok) { render2DFallback(container, profile); return; }
+  if (!ok) { render2DFallback(container, profile, seedProfile); return; }
 
-  const { verts: rawVerts, tris: rawTris, quadrants } = meshData;
+  const { verts: rawVerts, tris: rawTris, quadrants } = meshData || {};
+  if (!rawVerts || !rawVerts.length || !rawTris || !rawTris.length) {
+    render2DFallback(container, profile, seedProfile); return;
+  }
   const { verts, tris } = mirrorMesh(rawVerts, rawTris, quadrants);
 
+  const cs = getComputedStyle(document.documentElement);
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(
-    getComputedStyle(document.documentElement).getPropertyValue("--surface").trim() || "#ffffff"
+    cs.getPropertyValue("--viz-canvas").trim() || cs.getPropertyValue("--surface").trim() || "#ffffff"
   );
 
   // Geometry
@@ -149,29 +156,7 @@ export async function init3d(container, meshData, profile) {
   // Scale: verts are in mm — scale to metres for display
   geo.scale(0.001, 0.001, 0.001);
 
-  const cs = getComputedStyle(document.documentElement);
-  const accentHex = cs.getPropertyValue("--accent").trim() || "#0d6e7a";
-
-  // Solid mesh
-  const mat = new THREE.MeshPhongMaterial({
-    color: new THREE.Color(accentHex), side: THREE.DoubleSide,
-    transparent: true, opacity: 0.85, shininess: 40,
-  });
-  const mesh = new THREE.Mesh(geo, mat);
-  scene.add(mesh);
-
-  // Wireframe overlay
-  const wmat = new THREE.MeshBasicMaterial({ color: 0x000000, wireframe: true, opacity: 0.08, transparent: true });
-  scene.add(new THREE.Mesh(geo, wmat));
-
-  // Lights
-  scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-  const d1 = new THREE.DirectionalLight(0xffffff, 0.8);
-  d1.position.set(1, 2, 2); scene.add(d1);
-  const d2 = new THREE.DirectionalLight(0xffffff, 0.3);
-  d2.position.set(-1, -1, -1); scene.add(d2);
-
-  // Camera — fit to bounding box
+  // Bounding-box fit first — lights, shadow rig and camera all derive from it
   geo.computeBoundingBox();
   const box = geo.boundingBox;
   const center = new THREE.Vector3();
@@ -179,6 +164,58 @@ export async function init3d(container, meshData, profile) {
   const size = new THREE.Vector3();
   box.getSize(size);
   const maxDim = Math.max(size.x, size.y, size.z);
+  if (!isFinite(maxDim) || maxDim <= 0) { render2DFallback(container, profile, seedProfile); return; }
+
+  // Solid mesh — light neutral grey (form over decoration), opaque.
+  // polygonOffset nudges the surface a hair back so the near-white wireframe ridgelines at
+  // identical coordinates win the depth test; without it the LESS depth test drops fragments
+  // wherever the line depth equals the surface depth (patchy, driver-dependent visibility).
+  const mat = new THREE.MeshStandardMaterial({
+    color: 0xdfe4e8, roughness: 0.55, metalness: 0.05,
+    side: THREE.DoubleSide,   // interior visibility of the open mouth (mirror windings are already consistent)
+    transparent: false,
+    polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1,
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.castShadow = mesh.receiveShadow = shadows;
+  scene.add(mesh);
+
+  // Near-white wireframe ridgelines over the horn — always on (owner override, not shadow-gated)
+  const wireGeo = new THREE.WireframeGeometry(geo);
+  const wireMat = new THREE.LineBasicMaterial({ color: 0xf4f7f9, transparent: true, opacity: 0.28 });
+  scene.add(new THREE.LineSegments(wireGeo, wireMat));
+
+  // Lighting rig: hemisphere keeps the shadow side readable, key models the form,
+  // fill lifts the dark flank, rim traces the far silhouette against the canvas
+  const hemi = new THREE.HemisphereLight(0xffffff, 0x8fa3ad, 0.45);
+  scene.add(hemi);
+  const key = new THREE.DirectionalLight(0xffffff, 1.15);
+  key.position.copy(center).addScaledVector(new THREE.Vector3(1.6, 2.2, 1.8), maxDim);
+  const fillL = new THREE.DirectionalLight(0xffffff, 0.35);
+  fillL.position.copy(center).addScaledVector(new THREE.Vector3(-1.8, 0.6, 1.2), maxDim);
+  const rim = new THREE.DirectionalLight(0xffffff, 0.85);
+  rim.position.copy(center).addScaledVector(new THREE.Vector3(-1.2, -1.0, -2.2), maxDim);
+  scene.add(key, fillL, rim);
+
+  // Shadow rig (optional, toggled): the thin double-sided wall needs a normalBias
+  let ground = null, groundGeo = null, groundMat = null;
+  if (shadows) {
+    key.castShadow = true;
+    key.target.position.copy(center);
+    scene.add(key.target);
+    key.shadow.mapSize.set(1024, 1024);
+    key.shadow.camera.left = -0.8 * maxDim; key.shadow.camera.right = 0.8 * maxDim;
+    key.shadow.camera.top = 0.8 * maxDim;   key.shadow.camera.bottom = -0.8 * maxDim;
+    key.shadow.camera.near = 0.1;           key.shadow.camera.far = 4 * maxDim;
+    key.shadow.normalBias = 0.01 * maxDim;  key.shadow.bias = 0;
+    groundGeo = new THREE.PlaneGeometry(2.6 * maxDim, 2.6 * maxDim);
+    groundMat = new THREE.ShadowMaterial({ opacity: 0.22 });
+    ground = new THREE.Mesh(groundGeo, groundMat);
+    ground.position.set(center.x, box.min.y - 0.02 * maxDim, center.z);
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    scene.add(ground);
+  }
 
   const w = container.clientWidth || 600, h = container.clientHeight || 400;
   const camera = new THREE.PerspectiveCamera(45, w / h, 0.001, 100);
@@ -188,6 +225,7 @@ export async function init3d(container, meshData, profile) {
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(w, h);
+  if (shadows) { renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; }
   container.appendChild(renderer.domElement);
 
   const controls = new OrbitControls(camera, renderer.domElement);
@@ -218,6 +256,10 @@ export async function init3d(container, meshData, profile) {
     cancelAnimationFrame(raf);
     ro.disconnect();
     renderer.dispose();
-    geo.dispose(); mat.dispose(); wmat.dispose();
+    geo.dispose(); mat.dispose();
+    wireGeo.dispose(); wireMat.dispose();
+    hemi.dispose(); key.dispose(); fillL.dispose(); rim.dispose();
+    if (groundGeo) groundGeo.dispose();
+    if (groundMat) groundMat.dispose();
   };
 }

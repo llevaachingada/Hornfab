@@ -1,6 +1,6 @@
 # GUI contrast & form-visibility plan (proposed, 2026-10-24)
 
-Proposed — awaiting owner approval (Oracle-reviewed 2026-10-24: all MUST/SHOULD/NICE items applied) · origin: contrast/visibility audit of rendered dark-theme screenshots.
+Phases 1-5 IMPLEMENTED + pixel-verified 2026-10-24 (see CONTINUITY; Phase 6 semantics/tests pending). Status at authoring: Oracle-reviewed 2026-10-24, all MUST/SHOULD/NICE applied · origin: contrast/visibility audit of rendered dark-theme screenshots. Owner override 2026-10-24: wireframe overlay retained (light-toned).
 
 ## Goal
 
@@ -128,7 +128,7 @@ Accent / seed / good / warn / bad hues unchanged (identity preserved). Type tier
 ## Phase 5 — 3D form, material, lighting, optional shadows
 
 **Material** (replace `view3d.js:156-159`): `MeshStandardMaterial` — not `MeshPhysicalMaterial` (clearcoat/sheen/transmission uniforms are pure cost here, and Standard still reads form well without an env map): `color:0xdfe4e8` (light-neutral grey honoring the owner's white/light-gray preference), **roughness 0.55, metalness 0.05, side:DoubleSide, transparent:false**. Drop `opacity:0.85` (per-frame sorting cost + ghosting). DoubleSide stays: the open mouth must show the interior (view3d.js:46-50 already keeps mirrored windings consistent — DoubleSide is for interior visibility, not winding repair). Cost estimate: Standard ≈ Phong + a few G-buffer slots on a ≤60k-tri mesh — negligible on GPU.
-- **Delete the black wireframe overlay** (`view3d.js:164-165`, incl. `wmat.dispose()` in cleanup at `221`); silhouette separation moves to the rim light.
+- **Wireframe overlay — owner override (2026-10-24): keep a wireframe, light-toned.** Supersedes the earlier "delete the wireframe" item (the old overlay was 8%-black lines over a dark teal horn = noise; on the new light-grey horn a light wire reads as structure). Spec: `LineSegments(new THREE.WireframeGeometry(geo))` + `LineBasicMaterial({ color: 0xf4f7f9, transparent: true, opacity: 0.28 })` — near-white ridge lines, subtle in BOTH themes (the horn material is theme-independent #dfe4e8); added after the mesh, added to the dispose list; always on (NOT gated by the shadows toggle).
 
 **Lighting rig** (replace `168-172`; r160 default light intensity model; all positions `center + dir × maxDim`):
 
@@ -248,4 +248,4 @@ Layout, navigation, IA, fonts, server/data/jobs code, physics, auth, `docs/plan/
 
 ## Status (2026-10-24)
 
-Proposed — awaiting owner approval (Oracle-reviewed 2026-10-24: all MUST/SHOULD/NICE items applied). Not started: no token, chart, view3d, or test changes from this plan exist yet.
+Phases 1-5 implemented + pixel-verified 2026-10-24 (Phase 6 pending). Wireframe overlay retained light-toned per owner override (0xf4f7f9 @ 0.28, always on).

@@ -957,7 +957,7 @@ async function viewRunDetail(id) {
       <!-- Wall profile -->
       <div class="fig">
         <h3>Wall cross-section</h3>
-        <div class="cap">Section through the solved mesh, true scale in mm: horizontal plane to the right, vertical plane mirrored to the left, throat at the bottom. Includes the outer shell and rear.</div>
+        <div class="cap">Section through the solved mesh, true scale in mm: horizontal plane to the right, vertical plane mirrored to the left, throat at the bottom. Includes the outer shell and rear. Band = horn wall, interior = sound bore; dashed amber = starting design; dot = throat.</div>
         <div class="legend">
           <span><i style="color:var(--best)"></i>best (filled)</span>
           <span><i style="color:var(--seed)" class="dash"></i>start</span>
@@ -1237,13 +1237,26 @@ async function viewRun3D(id) {
       <div class="btn-row">
         <a class="btn" href="#/run/${esc(id)}">← Back to run</a>
       </div>
+      <div class="fig-head">
+        <label class="evo-opt" style="color:var(--ink)"><input type="checkbox" id="v3d-shadows" ${(() => { try { return localStorage.getItem("hl-v3d-shadows") === "0" ? "" : "checked"; } catch { return "checked"; } })()}> wall shadows</label>
+      </div>
       <div id="view3d-wrap"><div class="view3d-fallback">Loading 3D…</div></div>
       <p class="muted" style="font-size:0.8rem">Drag to orbit · scroll to zoom · right-drag to pan.</p>
     </div>`;
 
   const wrap = document.getElementById("view3d-wrap");
   const profile = (runD.best || {}).profile;
-  await init3d(wrap, meshD, profile);
+  const seedProfile = (runD.seed || {}).profile;      // dashed under best in the 2D fallback
+  const shadowsBox = document.getElementById("v3d-shadows");
+  let shadows = true;
+  try { shadows = localStorage.getItem("hl-v3d-shadows") !== "0"; } catch {}
+  if (shadowsBox) shadowsBox.checked = shadows;
+  await init3d(wrap, meshD, profile, seedProfile, shadows);
+  if (shadowsBox) shadowsBox.onchange = () => {
+    try { localStorage.setItem("hl-v3d-shadows", shadowsBox.checked ? "1" : "0"); } catch {}
+    if (wrap._dispose3d) wrap._dispose3d();
+    init3d(wrap, meshD, profile, seedProfile, shadowsBox.checked).catch(() => {});
+  };
 }
 
 // ── View 4: Compare ────────────────────────────────────────────────
