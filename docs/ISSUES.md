@@ -1,7 +1,7 @@
 # ISSUES
 
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
-Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-10-24 (senior pass + fork policy; no GitHub issue state changed).
+Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-10-24 (senior pass + fork policy + local GUI-contrast plan docs; no GitHub issue state changed).
 
 | ID | Title | Status | Owner | Plan ref |
 |---|---|---|---|---|
@@ -19,6 +19,8 @@ Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 20
 | #13 | hardening-review: Stage A surrogate gate-integrity and real-data traps | **open — fixes MERGED to main** (FF to 6d1d5c7 on 2026-10-22 carries e0b9b61 + 11304f6 + cloud reconciliation 152a829 verbatim; oracle pre-merge sign-off; full offline suite 533 PASS at the merged tree; awaiting owner close) | phase-2 (cloud) | `docs/plan/11_PHASE2_SURROGATE.md` §4 |
 
 Local-only items (no GitHub issue): band edges capped by the measured dof cap (confirmed, user "keep lowered edges"); task 07 test-17 disk-latency flake risk (do not loosen); residual CP-7 risks (epw=6 above 2.5 kHz unmeasured; f11 unexercised; DI-vs-beamwidth not a regression test) — see `NOTES_FOR_SENIOR.md` task-09 block and CONTINUITY 06:20.
+
+Local-only, added 2026-10-24 (GUI contrast/visibility pass, docs-only): the local web GUI's rendered dark-theme state fails WCAG in spots — primary button text 2.07:1 on `--accent`, hairlines 1.36:1, chart micro-labels dim, `wallSection` "filled" legend a no-op (fill ≡ plot bg, dashed start profile ~90 % occluded), 3D horn shadow side merges into the canvas, isobar white contours lost on warm bands, budget-over-limit unflagged, theme-toggle first-click no-op + stale SVG after toggle. Full measured list + six-phase fix plan (tokens, theme boot + `?theme=` capture, charts, wallSection, 3D light-gray horn + lighting/shadows, semantics/tests): `docs/GUI_CONTRAST_PLAN.md` (designer-authored, Oracle-reviewed — all MUST/SHOULD/NICE applied; proposed, awaiting owner approval). No GitHub issue opened; no code changed.
 
 Local-only, added 2026-10-13 (cloud): Phase 2 Stage A code complete but gates unvalidated on real data (needs >= 500 held-out multi-family BEM records, GPU box); widen `a_deg`/`exponent` bounds and run the other 4 configs (GPU box); ISMO selection + `surrogate` CLI built (synthetic-tested); solving proposals with BEM and Stage B-D not started.
 

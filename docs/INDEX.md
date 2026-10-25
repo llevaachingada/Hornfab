@@ -22,6 +22,7 @@ Keep this file current: a new doc gets a line here in the same commit.
 |---|---|
 | [plan/](plan/README.md) | **Frozen** original plan and contracts (`00_ORCHESTRATOR`, `01_CONTRACTS`, task files 02–12). Never edit. |
 | [TYPOLOGY_PLAN.md](TYPOLOGY_PLAN.md) | v2: classical typologies as generators, hybrids, briefs, campaign tiers, verification ladder. |
+| [GUI_CONTRAST_PLAN.md](GUI_CONTRAST_PLAN.md) | GUI contrast & form-visibility hardening (proposed 2026-10-24, Oracle-reviewed): measured baseline, six phases (tokens/type tiers, theme boot + `?theme=` capture, chart contrast, wallSection redraw, 3D light-gray horn + lighting/shadows, semantics/tests), acceptance criteria, risk register, rollback. Awaiting owner approval. |
 | [SENIOR_ARCHITECTURE_REPORT_2026-10-22.md](SENIOR_ARCHITECTURE_REPORT_2026-10-22.md) | Where the repo sits vs Boundary Lab / HornLab; priority decisions. |
 | [BOUNDARY_LAB_INTEGRATION_PLAN.md](BOUNDARY_LAB_INTEGRATION_PLAN.md) | Proposed Boundary Lab export / cross-check (not started). |
 | [BL_LEARNINGS_IMPLEMENTATION.md](BL_LEARNINGS_IMPLEMENTATION.md) | Boundary Lab learnings implemented (mesh checks, phasor, provenance, SPDI). |
