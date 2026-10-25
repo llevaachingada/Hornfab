@@ -17,9 +17,21 @@ Recorded by task 02 on 2026-10-12. **Status: PARTIAL — M2/M3/M4 and M5-after-d
 
 ## Pinned dependencies (40-char SHAs)
 - hornlab-waveguide-mesher: `b922e807a5cf10cf732c4557ec0b9b495762afd7`
-- hornlab-beat-bem:           `38544d214ba2e8a4977bb82170d2fb4a3f9fa8b0`
+- hornlab-beat-bem:           `fa99ee594087507c2808b9e7db09b38d8d4dcc20` (DEV-BRANCH PIN, below)
 - hornlab-plots:              `9e4a6d0dd2ccb6e735dd00233dccccb50d12ed44`
 - hornlab-bempp-bem:          `8e6910602ece9abb2e9ce0db7a637f4bedf17f53` (installed OK, with bempp-cl 0.4.2 and numba 0.68.0)
+
+### Pinned-fork note 2026-10-24 (M2 / WP15)
+- hornlab-beat-bem is pinned (on the **`dev/fused-cuda-pin` branch ONLY** — a `file://` URL must never reach
+  `main`) to our fork branch `hornlab-search/fused-cuda` @ `fa99ee594087507c2808b9e7db09b38d8d4dcc20` in
+  `C:\Users\hunte\Hrns\forks\hornlab-beat-bem` (parent = the base pin `38544d214ba2…`): an opt-in **fused CUDA
+  Burton-Miller assembly path** (`HORNLAB_BEAT_FUSED_BM_CUDA=1`; exactly one channel; ground-plane symmetry
+  refused). Julia testsets green: flag-off "cuda production pipeline" 27/27, flag-on "cuda fused Burton-Miller
+  driver path" 6/6. Repo-side validation ladder (analytic 0.020 dB, crosscheck 0.0390 dB, 3-arm A/B ≤ 2.9e-6 dB),
+  VRAM ceiling re-measure and the 12 kHz verify: `docs/evidence/FUSED_CUDA_2026-10-24.md`. Replacing the
+  `file://` pin with a hosted-GitHub URL is an **owner action** (`docs/FORKS.md`). Until then, on `main` the
+  `pinned-shas` doctor line and `tests/test_mesh_pin.py` show the expected tripwire (installed fork ≠ main's
+  base pin) — see CONTINUITY 2026-10-24 M2 entry.
 
 ## Backends
 - `beat_engine_status()`: `{'available': True, 'reason': 'NVIDIA GPU detected and Julia CUDA.functional() confirmed a usable device', 'state': 'ready', 'version': '0.2.0', 'backend': 'cuda'}`
