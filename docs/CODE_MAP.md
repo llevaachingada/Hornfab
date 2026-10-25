@@ -48,6 +48,7 @@ bempp_cpu) → `metrics` (beamwidth, ripple, DI, impedance) → `objective` (sca
 | `tools/overnight/` | Unattended GPU queue (`queue_20261022.ps1`) and stall watchdog (`watchdog.ps1`, keeps Windows awake). |
 | `tools/measure_fused_ceiling.py` | WP15 fused-CUDA VRAM ceiling: one solve per fresh process (TOOLCHAIN M2), `nvidia-smi` polled from a daemon thread, verified `worker.shutdown`; `--mesh-only` is the CPU-only res→dof calibration. Numbers: `docs/evidence/FUSED_CUDA_2026-10-24.md`. |
 | `tests/` | Offline suite; `requires_*` / `gpu` / `slow` markers in `tests/conftest.py`. |
+| `.opencode/skills/` | Agent skills (opencode project scope, auto-discovered): `hornlab-gpu-job` (per-GPU-job hygiene/capture recipe; exit-3 + tripwire semantics) + `hornlab-evidence` (evidence-doc assembly + pre-publish byte-check). |
 
 ## External code we depend on (pinned in `pyproject.toml` / `TOOLCHAIN.md`; changed only via our forks, `FORKS.md`)
 `hornlab_mesher` (geometry + gmsh), `hornlab_beat_bem` (GPU/CPU BEM, Julia), `hornlab_bempp_bem` (CPU cross-check),
