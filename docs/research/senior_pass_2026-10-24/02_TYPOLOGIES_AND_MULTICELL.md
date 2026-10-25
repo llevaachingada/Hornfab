@@ -188,3 +188,14 @@ These are hypotheses for the optimizer, each cheap once G6/G7 exist.
    This is the classic "DI match" goal that is usually done by intuition.
 6. **Robust horns.** Score E[J] over ±0.3 mm surface perturbations at finalist stage only, which rewards designs
    whose good behaviour is not a knife-edge resonance alignment (the F10 aliasing makes this matter).
+
+---
+**2026-10-25 COMPILATION POINTER (not a supersession):** the multicell horn work now has a dedicated
+compilation dossier — `docs/research/typologies/MULTICELL_HORN_RESEARCH_2026-10-25.md` — carrying
+what landed (the WP14 category: `tools/cad/multicell.py` + `mesh/step_build.py` + solve keys + record
+honesty), this document's verbatim planning text, the FULL honest record of the deferred first attempt
+(the closed-solid mouth-cap fixture measured diffraction around the body, not horn radiation; gate
+NOT-ALLOWED at 11.28 dB / 14.59 dB; the senior diagnosis + ranked attribution + resume recipe in
+`docs/ISSUES.md`'s deferred-WP14 block), the constraints ledger, and the open questions (mouth
+treatment first) for the eventual implementation plan. WP13 axisymmetric backend: OWNER-DEFERRED
+2026-10-25. This section 4/5 text stands; treat the dossier as the living continuation point.
