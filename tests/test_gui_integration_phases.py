@@ -48,6 +48,32 @@ QD = {"algorithm": "cma_me", "descriptors": {"h": "mean_bw_h_deg", "v": "mean_bw
 INVENTORY = {"tool": "tools/cad/multicell.py", "tool_sha": "deadbeef",
              "faces": [{"label": "driver", "count": 1}, {"label": "wall", "count": 4}],
              "solids": 1, "closed": True, "grid": ["3x3"]}
+# The REAL ``mesh_meta.json["cad"]`` block as ``mesh/step_build.py`` writes it on the current tree:
+# ``face_inventory`` is a label->count mapping, the tool hash key is ``tool_sha256``, and the solid
+# summary is the CAD tool's own dict under ``solid`` (solids/all_shells_closed live there).
+CAD_BLOCK = {
+    "tool": "tools/cad/multicell.py",
+    "tool_path": "C:/repo/tools/cad/multicell.py",
+    "tool_sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    "recipe": {"tool": "multicell", "n_h": 3, "n_v": 3, "alpha_total_deg": 90.0,
+               "beta_total_deg": 90.0, "length_mm": 120.0, "z_s_mm": 30.0,
+               "r_throat_mm": 12.7, "septum_mm": 2.0, "throat_wall_mm": 3.0, "flare_hz": 0.0},
+    "derived": {"throat_w_mm": 12.7, "throat_h_mm": 12.7},
+    "solid": {"faces": 25, "solids": 1, "volume_mm3": 123456.0, "valid": True,
+              "all_shells_closed": True, "degenerate_faces": 0, "driver_faces": 1,
+              "min_face_area_mm2": 1.25},
+    "step_path": "C:/repo/runs/RUN/designs/aaaaaaaaaaaa/cad/multicell.step",
+    "step_sha256": "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210",
+    "step_bytes": 98765,
+    "face_inventory": {"driver": 1, "wall": 24},
+    "gmsh_surfaces": 25,
+    "driver_surfaces": 1,
+    "wall_surfaces": 24,
+    "physical_tags": {"1": "SD1G0", "2": "SD1D1001"},
+    "frequency_validation": {"status": "valid", "per_source": {"driver": {}}},
+    "repair": {"ok": True},
+    "topology": {"ok": True},
+}
 
 # --- 3D evolution time-lapse fixtures (separate run ids from the C-1/G-1 ones) ---------------
 EVO_RID = "20261026T000000Z-screen-aaa111"
@@ -117,6 +143,23 @@ def _write_run(runs: Path, rid: str, *, mesh_extra: dict | None = None,
         if inventory is not None:
             (step / (Path(STEP).stem + ".inventory.json")).write_text(json.dumps(inventory))
     return run
+
+
+def _write_mesh_meta(run: Path, h: str, meta: dict) -> None:
+    """Write one design's mesh_meta.json (the cad-route fallback source)."""
+    dd = run / "designs" / h
+    dd.mkdir(parents=True, exist_ok=True)
+    (dd / "mesh_meta.json").write_text(json.dumps(meta))
+
+
+def _write_rows(run: Path, rows: list[dict]) -> None:
+    """Replace search.ndjson with an ordered row list (provenance proxy tests)."""
+    (run / "search.ndjson").write_text("\n".join(json.dumps(r) for r in rows) + "\n")
+
+
+def _row(n: int, h: str, j: float | None, *, ok: bool = True) -> dict:
+    return {"n": n, "design_hash": h, "ok": ok, "objective": j if ok else None,
+            "mode": "screen", "family": "FREEFORM", "error": None if ok else "solve_failed: x"}
 
 
 def _mesh_text(extra_node: bool = False) -> str:
@@ -515,3 +558,137 @@ def test_static_app_js_parses_as_an_es_module(tmp_path):
     mjs.write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
     r = subprocess.run([node, "--check", str(mjs)], capture_output=True, text=True)
     assert r.returncode == 0, r.stderr[-800:]
+
+
+# ------------------------------------------------------------------ C-5 companion: cma_files
+
+CMA_RID = "20261025T000004Z-screen-eee444"     # isolated cma/ tree for the cma_files cases
+
+
+def test_cma_files_lists_every_served_pycma_log(repo):
+    run = _write_run(repo / "runs", CMA_RID, with_step=False)
+    (run / "cma" / "restart_0").mkdir(parents=True)
+    (run / "cma" / "restart_1").mkdir()
+    (run / "cma" / "version.txt").write_text("3.3\n")
+    (run / "cma" / "outcmaes_progress.txt").write_text("progress\n")
+    (run / "cma" / "restart_0" / "outcmaes_fit.dat").write_text("1 2\n")
+    (run / "cma" / "restart_0" / "parameters.json2").write_text("{}")
+    (run / "cma" / "restart_1" / "x0.q").write_text("q")
+
+    files = D.run_detail(repo / "runs", CMA_RID)["cma_files"]
+    assert files == [
+        {"path": "cma/outcmaes_progress.txt", "name": "outcmaes_progress.txt", "size": 10},
+        {"path": "cma/restart_0/outcmaes_fit.dat", "name": "outcmaes_fit.dat", "size": 5},
+        {"path": "cma/restart_0/parameters.json2", "name": "parameters.json2", "size": 2},
+        {"path": "cma/restart_1/x0.q", "name": "x0.q", "size": 1},
+        {"path": "cma/version.txt", "name": "version.txt", "size": 5},
+    ]
+    assert [f["path"] for f in files] == sorted(f["path"] for f in files)
+    json.dumps(D.run_detail(repo / "runs", CMA_RID), allow_nan=False)
+
+
+def test_cma_files_is_empty_without_a_cma_tree(repo):
+    assert D.run_detail(repo / "runs", RUN_D)["cma_files"] == []
+
+
+def test_cma_files_excludes_extensions_the_raw_route_refuses(repo):
+    run = _write_run(repo / "runs", CMA_RID, with_step=False)
+    (run / "cma" / "restart_0").mkdir(parents=True)
+    for name in ("evil.exe", "evil.py", "notes.md", "archive.bin"):
+        (run / "cma" / name).write_text("x")
+    (run / "cma" / "restart_0" / "evil.exe").write_text("x")
+    assert D.run_detail(repo / "runs", CMA_RID)["cma_files"] == []
+
+
+# ------------------------------------------------------------------ CAD inventory fallback
+
+
+def test_step_inventory_resolves_the_design_cad_block(repo):
+    run = repo / "runs" / RUN_B
+    _write_mesh_meta(run, HASH, {"cad": CAD_BLOCK})
+    [step] = D.run_detail(repo / "runs", RUN_B)["step_files_detail"]
+    assert step["name"] == STEP
+    # The current step_build cad block is projected onto the G4 chip contract, using its REAL
+    # key names: face_inventory -> faces, solid.solids -> solids, solid.all_shells_closed -> closed.
+    assert step["inventory"] == {
+        "faces": [{"label": "driver", "count": 1}, {"label": "wall", "count": 24}],
+        "solids": 1,
+        "closed": True,
+        "tool_sha256": CAD_BLOCK["tool_sha256"],
+        "tool_path": CAD_BLOCK["tool_path"],
+    }
+    assert "tool" not in step["inventory"] and "face_inventory" not in step["inventory"]
+    json.dumps(D.run_detail(repo / "runs", RUN_B), allow_nan=False)
+
+
+def test_step_inventory_fallback_emits_only_the_fields_the_cad_block_carries(repo):
+    run = repo / "runs" / RUN_B
+    _write_mesh_meta(run, HASH, {"cad": {"face_inventory": {"driver": 1, "wall": 4}}})
+    [step] = D.run_detail(repo / "runs", RUN_B)["step_files_detail"]
+    assert step["inventory"] == {"faces": [{"label": "driver", "count": 1},
+                                           {"label": "wall", "count": 4}]}
+
+
+def test_step_inventory_sidecar_wins_over_the_design_cad_block(repo):
+    run = repo / "runs" / RUN_A                 # already has step/<name>.inventory.json = INVENTORY
+    _write_mesh_meta(run, HASH, {"cad": CAD_BLOCK})
+    [step] = D.run_detail(repo / "runs", RUN_A)["step_files_detail"]
+    assert step["inventory"] == INVENTORY       # sidecar wins even when a cad block exists
+
+
+def test_step_inventory_is_null_for_a_non_cad_design(repo):
+    run = repo / "runs" / RUN_D
+    _write_mesh_meta(run, HASH, {"summary": {"area_m2": 1.0},
+                                 "mesher_config": {"mesh": {"epw": 8.0}}})
+    [step] = D.run_detail(repo / "runs", RUN_D)["step_files_detail"]
+    assert step["inventory"] is None
+
+
+# ------------------------------------------------------------------ cad_route solve-group marker
+
+
+def test_cad_route_comes_from_the_best_successful_design(repo):
+    run = repo / "runs" / RUN_D
+    _write_rows(run, [_row(0, H0, 10.0), _row(1, H1, 5.0), _row(2, H2, None, ok=False)])
+    _write_mesh_meta(run, H0, {"summary": {}})       # seed is a formula mesh: no cad block
+    _write_mesh_meta(run, H1, {"cad": CAD_BLOCK})    # the best successful row is the cad design
+    g = D._solve_group_fingerprint(run)
+    assert g["cad_route"] is True
+    json.dumps(g, allow_nan=False)
+
+
+def test_cad_route_falls_back_to_the_seed_row_when_nothing_succeeded(repo):
+    run = repo / "runs" / RUN_D
+    _write_rows(run, [_row(0, H0, None, ok=False)])
+    _write_mesh_meta(run, H0, {"cad": CAD_BLOCK})
+    assert D._solve_group_fingerprint(run)["cad_route"] is True
+
+
+def test_cad_route_is_absent_for_non_cad_runs_and_not_read_from_a_non_best_row(repo):
+    # plain run: no mesh_meta anywhere -> no marker
+    assert "cad_route" not in D._solve_group_fingerprint(repo / "runs" / RUN_B)
+    # the proxy is the BEST row: a cad seed does not badge a run whose best row is non-cad
+    run = repo / "runs" / RUN_D
+    _write_rows(run, [_row(0, H0, 10.0), _row(1, H1, 5.0)])
+    _write_mesh_meta(run, H0, {"cad": CAD_BLOCK})
+    _write_mesh_meta(run, H1, {"summary": {}})
+    assert "cad_route" not in D._solve_group_fingerprint(run)
+
+
+# ------------------------------------------------------------------ WP16 alpha pin test
+
+
+def test_solve_group_pins_a_non_default_source_profile_alpha(repo):
+    run = repo / "runs" / RUN_D
+    cfg = yaml.safe_load((run / "config.yaml").read_text())
+    cfg["solve"]["source_profile_alpha"] = 0.3
+    (run / "config.yaml").write_text(yaml.safe_dump(cfg))
+    g = D._solve_group_fingerprint(run)
+    assert g["source_profile_alpha"] == 0.3
+
+    # an explicit 0.0 is the no-op default: still omitted (only-when-non-default)
+    cfg["solve"]["source_profile_alpha"] = 0.0
+    (run / "config.yaml").write_text(yaml.safe_dump(cfg))
+    assert "source_profile_alpha" not in D._solve_group_fingerprint(run)
+    # a default run (key absent) omits it too
+    assert "source_profile_alpha" not in D._solve_group_fingerprint(repo / "runs" / RUN_B)

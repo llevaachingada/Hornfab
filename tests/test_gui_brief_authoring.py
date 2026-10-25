@@ -227,9 +227,26 @@ def test_provenance_views_are_wired():
     # G4 chips: the UNCHANGED step_files name list + step_files_detail matched by name
     assert "function stepInvByName(detail)" in src and "function stepChipHtml(name, inv, id)" in src
     assert "stepInvByName(detail)" in src and "renderFiles(d.step_files, d.step_files_detail)" in src
+    # deferred items (this round): CAD provenance + direct pycma-log chips — reader-coupled adds
+    assert 'g.cad_route === true' in src and "cad STEP" in src           # geometry-source badge
+    assert "tool_sha256" in src and 'tool_path' in src                   # CAD chip contract fields
+    assert "d.cma_files" in src                                          # reader listing read defensively
+    assert "pycma logs (raw, never parsed; each file serves by its exact name):" in src
     # the pure helpers are exported for the offline node test (view3d.js::mirrorMesh precedent)
     assert "export { runProvenanceGroup, renderProvenanceBadges, restartScheduleHtml, stepChipHtml," in src
     assert "stepInvByName, qdProvenanceCaption, f11CaveatHtml };" in src
+
+
+def test_balloon_entry_point_already_wired():
+    """W6 (26a1de1) surfaces the balloon where the owner needs it — verified, nothing added this
+    round: the run-detail buttons row carries the entry next to QD atlas / 3D view, the dedicated
+    3D page links it, and the route is registered — so no second entry point was built."""
+    src = APPJS.read_text(encoding="utf-8")
+    assert "import { viewBalloon } from \"./balloon.js\";" in src
+    assert re.search(r"re: /\^#\\/run\\/\(\.\+\)\\/balloon\$/", src)          # route registered
+    assert 'href="#/run/${esc(id)}/balloon" title="W6 Balloon:' in src           # run-detail entry
+    assert src.count('href="#/run/${esc(id)}/balloon"') >= 2                     # + the 3D view page
+    assert "◉ Balloon 3D" in src
 
 
 # The node script: imports app.js under an import-time DOM shim (app.js touches document/window at
@@ -432,6 +449,56 @@ assert.ok(note.includes("target.band_hi_hz"), note);
 note = f11CaveatHtml({ target: { band_hi_hz: 12000 }, best: { scalars: { n_hz: 7914 } } });
 assert.ok(note.includes("best.scalars.n_hz"), note);
 assert.ok(!note.includes("f11_hz"), note);
+
+// cad badge (deferred item, reader lands solve_group.cad_route): renders exactly when the key
+// arrives, geometry-source slot, same key-path tooltip as every other badge
+h = renderProvenanceBadges({ cad_route: true });
+assert.match(h, /cad STEP/);
+assert.ok(h.includes(`title="cad_route = true"`), h);
+assert.equal(renderProvenanceBadges({}), "");
+
+// CAD-era STEP chip (contract inventory {faces, solids, closed, tool_sha256, tool_path}):
+// renders ONLY the facts that arrive, joined " · " like the badge summary spec
+const CAD = { faces: [{ label: "driver", count: 1 }, { label: "wall", count: 9 }],
+              solids: 2, closed: true, tool_sha256: "fedcba9876543210fedcba9876543210fedcba98",
+              tool_path: "tools/cad/multicell.py" };
+const cadChip = stepChipHtml("horn_rank1_0001.step", CAD, "R");
+assert.match(cadChip, /driver=1 · wall=9 · solid ✓ · tool fedcba98/);
+assert.ok(!cadChip.includes("STEP"), cadChip);              // no grid field -> no invented segment
+assert.ok(cadChip.includes("tool_sha256=fedcba9876543210fedcba9876543210fedcba98"), cadChip);
+assert.ok(cadChip.includes("tool_path=tools/cad/multicell.py"), cadChip);
+assert.ok(cadChip.includes("faces="), cadChip);             // tooltip names every present key
+// open/not-closed solids disclose as solid ✗; closed absent + solids present -> solids N
+assert.match(stepChipHtml("a.step", { closed: false }, "R"), /solid ✗/);
+assert.match(stepChipHtml("a.step", { solids: 3 }, "R"), /solids 3/);
+// an inventory object carrying nothing renderable stays the plain chip (silent, honest)
+assert.equal(stepChipHtml("horn_rank1_0001.step", {}, "R"), plain);
+
+// restart card gains the per-FILE pycma-log chips when the reader's cma_files listing arrives
+const CMA = [
+  { path: "cma/restart_0/outcmaes_progress.txt", name: "outcmaes_progress.txt", size: 12345 },
+  { path: "cma/restart_1/outcmaes_xrecentbest.dat", name: "outcmaes_xrecentbest.dat", size: 640 },
+];
+const withLogs = restartScheduleHtml({ id: "R", restarts: [RE], cma_files: CMA }, "R");
+assert.match(withLogs, /pycma logs \(raw, never parsed; each file serves by its exact name\):/);
+assert.match(withLogs, /href="\/runs\/R\/cma\/restart_0\/outcmaes_progress\.txt"/);   // live C-5 route
+assert.match(withLogs, /href="\/runs\/R\/cma\/restart_1\/outcmaes_xrecentbest\.dat"/);
+assert.match(withLogs, />↓ outcmaes_progress\.txt</);        // the listed file name, not a guess
+assert.match(withLogs, /12345 bytes/);                       // size in the tooltip
+// junk/absent listings never fabricate chip links: bad records filtered, absent/[] keep the caption
+assert.ok(!restartScheduleHtml({ id: "R", restarts: [RE], cma_files: [{ junk: 1 }, {}, { path: "", name: "x" }] }, "R")
+          .includes('href="/runs/R/'), "bad cma_files records must not produce chips");
+// listing present but empty: the reader RAN — honest "nothing in the cma tree" caption, no stale note
+const emptyList = restartScheduleHtml({ id: "R", restarts: [RE], restart_dirs: ["cma/restart_0"], cma_files: [] }, "R");
+assert.match(emptyList, /pycma logs:/);
+assert.ok(!emptyList.includes("the API lists the directories"), emptyList);   // listing exists now
+// listing absent (reader not landed yet): the committed URL-shape caption, parenthetical kept
+assert.match(restartScheduleHtml({ id: "R", restarts: [RE], restart_dirs: ["cma/restart_0"] }, "R"),
+             /the API lists the directories, not the file names/);
+// the empty state (logs present, no schedule entries) shows the chips too
+const olderLogs = restartScheduleHtml({ id: "R", restart_dirs: ["cma/restart_0"], cma_files: CMA }, "R");
+assert.match(olderLogs, /run\.json predates the restarts block/);
+assert.match(olderLogs, /href="\/runs\/R\/cma\/restart_0\/outcmaes_progress\.txt"/);
 
 console.log("PROV OK");
 '''

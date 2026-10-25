@@ -20,6 +20,10 @@ RUN_ID = re.compile(r"^[0-9]{8}T[0-9]{6}Z-[a-z]+-[0-9a-f]{6}$")
 CAMPAIGN_ID = re.compile(r"^campaign_[0-9]{8}T[0-9]{6}Z$")
 HASH = re.compile(r"^[0-9a-f]{6,40}$")
 STEP_NAME = re.compile(r"^[A-Za-z0-9_\-]{1,80}_rank\d+_[0-9a-f]{6,40}\.step$")
+#: Design hash at the end of an exported STEP (``<config name>_rankN_<hash>.step`` for a run,
+#: ``<config name>_seed_<hash>.step`` for a config). The suffix is the loader's own 12-hex hash
+#: (``types._hash``), so the trailing group is unambiguous.
+STEP_HASH = re.compile(r"_([0-9a-f]{6,40})\.step$")
 BRIEF_NAME = re.compile(r"^[A-Za-z0-9_\-]{1,64}$")
 #: pycma's own verbose-log files (``cma/*`` and ``cma/restart_k/*``), served raw/download-only.
 #: Extensions are the ones pycma writes; anything executable or unknown is refused by the route.
@@ -364,6 +368,114 @@ def sensitivity(rows: list[dict], bounds: dict) -> list[dict]:
     return clean(out)
 
 
+def _band_meta_paths(design_dir: Path) -> list[Path]:
+    """A design's top-level ``mesh_meta.json`` plus any WP8 band meshes, in band order.
+
+    A band-split design (``mesh.band_split``) writes one mesh per band under ``band{k}/`` and no
+    top-level meta; both routes put the same ``cad`` provenance block in each meta.
+    """
+    def _band_index(p: Path) -> int:
+        m = re.match(r"band(\d+)$", p.parent.name)
+        return int(m.group(1)) if m else 10 ** 9
+
+    bands = sorted(design_dir.glob("band*/mesh_meta.json"),
+                   key=lambda p: (_band_index(p), p.as_posix()))
+    return [design_dir / "mesh_meta.json", *bands]
+
+
+def _design_cad_block(design_dir: Path) -> dict | None:
+    """The ``mesh_meta.json["cad"]`` provenance block of one design, or None.
+
+    Read verbatim from what ``mesh/step_build.py`` wrote; no key is renamed or invented. A
+    non-cad design (formula/GRID) has no ``cad`` block, so its answer is None (never fabricated).
+    """
+    for meta_path in _band_meta_paths(design_dir):
+        cad = _as_dict(_read_json(meta_path)).get("cad")
+        if isinstance(cad, dict):
+            return cad
+    return None
+
+
+def _cad_inventory(cad: dict) -> dict | None:
+    """Project the current ``mesh_meta.json["cad"]`` block onto the G4 chip inventory contract.
+
+    The block on disk today (``mesh/step_build.py``) is:
+    ``face_inventory`` = ``{label: count}`` (NOT a ``faces`` list), ``tool_sha256`` (NOT
+    ``tool_sha``), ``tool_path``, and ``solid.solids`` / ``solid.all_shells_closed``. The chip
+    consumer takes the sidecar-shaped ``{faces: [{label, count}], solids, closed, tool_sha256,
+    tool_path}``; only fields the block actually carries are emitted (nothing invented, no empty
+    key), and a block with none of them answers None.
+    """
+    out: dict[str, Any] = {}
+    face_inventory = cad.get("face_inventory")
+    if isinstance(face_inventory, dict) and face_inventory:
+        out["faces"] = [{"label": str(label), "count": count}
+                        for label, count in sorted(face_inventory.items())]
+    solid = _as_dict(cad.get("solid"))
+    if solid.get("solids") is not None:
+        out["solids"] = solid["solids"]
+    if solid.get("all_shells_closed") is not None:
+        out["closed"] = solid["all_shells_closed"]
+    for key in ("tool_sha256", "tool_path"):
+        if cad.get(key) is not None:
+            out[key] = cad[key]
+    return out or None
+
+
+def _step_inventory(step_dir: Path, p: Path) -> Any:
+    """Inventory for one exported STEP: the ``<name>.inventory.json`` sidecar WINS when present
+    (parsed as-is), else the design's ``mesh_meta.json["cad"]`` block projected onto the chip
+    contract, else None.
+
+    The design hash is the trailing component of the exporter's name (``<name>_<tag>_<hash>.step``,
+    ``cli.py export-step``), so a formula-route STEP resolves to its design but stays null unless
+    that design was meshed on the cad route.
+    """
+    sidecar = step_dir / f"{p.stem}.inventory.json"
+    if sidecar.is_file():
+        return _read_json(sidecar)
+    m = STEP_HASH.search(p.name)
+    if m is None:
+        return None
+    cad = _design_cad_block(step_dir.parent / "designs" / m.group(1))
+    return None if cad is None else _cad_inventory(cad)
+
+
+def _cma_files(run_dir: Path) -> list[dict]:
+    """Every pycma log the C-5 route serves: ``cma/`` plus each ``cma/restart_k/`` directory.
+
+    The same ``CMA_LOG_NAME`` allow-list the serving route applies, so this list and the downloadable
+    files cannot disagree. Records are run-relative POSIX paths sorted by path; an absent ``cma/``
+    tree is ``[]``, never an invented row.
+    """
+    cma = run_dir / "cma"
+    if not cma.is_dir():
+        return []
+    dirs = [cma]
+    try:
+        dirs += sorted((p for p in cma.iterdir()
+                        if p.is_dir() and CMA_RESTART_DIR.match(p.name)),
+                       key=lambda p: p.name)
+    except OSError:
+        pass
+    out = []
+    for base in dirs:
+        try:
+            entries = list(base.iterdir())
+        except OSError:
+            continue
+        for p in entries:
+            if not p.is_file() or not CMA_LOG_NAME.match(p.name):
+                continue
+            try:
+                size = int(p.stat().st_size)
+            except OSError:
+                continue
+            out.append({"path": p.relative_to(run_dir).as_posix(),
+                        "name": p.name, "size": size})
+    return sorted(out, key=lambda f: f["path"])
+
+
 def run_detail(runs: Path, run_id: str) -> dict:
     d = _resolve_run(runs, run_id)
     rows = read_ndjson(d / "search.ndjson")
@@ -374,8 +486,9 @@ def run_detail(runs: Path, run_id: str) -> dict:
     seed_ok = bool(rows and rows[0].get("ok"))
     best_row = next((r for r in rows if r.get("design_hash") == best_hash and r.get("ok")), None)
     # C-1/G4: STEP files stay the existing list of names (a frozen consumer contract) and the
-    # optional inventory sidecar is exposed additively per file; without one it is null, never
-    # fabricated. ``step_files_detail`` mirrors ``step_files`` 1:1 in sorted order.
+    # inventory is exposed additively per file; without a sidecar it falls back to the design's own
+    # mesh_meta cad block, and without either it is null, never fabricated. ``step_files_detail``
+    # mirrors ``step_files`` 1:1 in sorted order.
     step_dir = d / "step"
     step_files = []
     step_files_detail = []
@@ -384,7 +497,7 @@ def run_detail(runs: Path, run_id: str) -> dict:
             if STEP_NAME.match(p.name):
                 step_files.append(p.name)
                 step_files_detail.append(
-                    {"name": p.name, "inventory": _read_json(step_dir / f"{p.stem}.inventory.json")})
+                    {"name": p.name, "inventory": _step_inventory(step_dir, p)})
     out = clean({
         "summary": summ,
         "target": cfg.get("target") or (cfg.get("brief") or {}).get("target"),
@@ -421,6 +534,9 @@ def run_detail(runs: Path, run_id: str) -> dict:
     cma_dir = d / "cma"
     out["restart_dirs"] = sorted(p.relative_to(d).as_posix() for p in cma_dir.glob("restart_*")
                                  if p.is_dir()) if cma_dir.is_dir() else []
+    # C-5 companion: the exact pycma log files the raw route can serve, for direct restart-card
+    # file chips. Sorted run-relative paths; [] when the run has no cma/ tree.
+    out["cma_files"] = _cma_files(d)
     return out
 
 
@@ -498,6 +614,16 @@ def _solve_group_fingerprint(run_dir: Path) -> dict:
         ident["verify_points_per_octave"] = grid["verify_points_per_octave"]
     if ident:
         g["freqs_hz"] = ident
+    # WP14: a cad recipe is PER DESIGN (``Design.params["cad"]``; config.yaml carries none), so a
+    # run-level marker cannot come from the config. Proxy: the cad block of the best-objective
+    # SUCCESSFUL row's mesh_meta.json, or of the seed row when nothing succeeded. A non-cad run has
+    # no such block, so the key stays absent (only-when-non-default).
+    rows = read_ndjson(run_dir / "search.ndjson")
+    wins = [r for r in rows if r.get("ok") and r.get("objective") is not None]
+    proxy = min(wins, key=lambda r: r["objective"]) if wins else (rows[0] if rows else None)
+    proxy_hash = str((proxy or {}).get("design_hash") or "")
+    if HASH.match(proxy_hash) and _design_cad_block(run_dir / "designs" / proxy_hash) is not None:
+        g["cad_route"] = True
     qd = rj.get("qd")
     if isinstance(qd, dict) and qd.get("algorithm"):
         g["qd_algorithm"] = qd["algorithm"]

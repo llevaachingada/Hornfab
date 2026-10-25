@@ -1063,6 +1063,7 @@ function renderProvenanceBadges(group, prefix = "", tips = {}) {
     const mnt = (typeof g.mounting === "object" && g.mounting) || { type: String(g.mounting) };
     if (mnt.type) bad("mounting", `${mnt.type}${mnt.depth_mm != null ? ` d=${_trimNum(mnt.depth_mm)} mm` : ""}`);
   }
+  if (g.cad_route === true) bad("cad_route", "cad STEP");   // geometry source: the mesh came from a CAD STEP body
   if (g.objective_version != null && Number(g.objective_version) !== 1) bad("objective_version", `J v${_trimNum(g.objective_version)}`);
   if (g.qd_algorithm) bad("qd_algorithm", g.qd_algorithm === "cma_me" ? "CMA-ME" : String(g.qd_algorithm));
   if (g.restarts_count != null && Number(g.restarts_count) > 0) {
@@ -1101,9 +1102,23 @@ function restartScheduleHtml(d, id) {
   const dirs = Array.isArray(d && d.restart_dirs) ? d.restart_dirs.filter(x => typeof x === "string" && x) : [];
   if (!runs.length && !dirs.length) return "";   // absence = not a restart run — render nothing
   const runId = String(id || (d && d.summary && d.summary.id) || "");
-  const logs = dirs.length
-    ? `<p class="hint" style="margin:6px 0 0">pycma logs: ${dirs.map(x => `<code>${esc(x)}</code>`).join(", ")} — raw, never parsed. Each file downloads at <code>/runs/${esc(runId)}/cma/restart_k/&lt;file&gt;</code> (raw log route; the API lists the directories, not the file names)</p>`
-    : "";
+  // pycma logs: when the reader lands its cma_files listing (contract [{path, name, size}], sorted,
+  // [] when none) the caption becomes clickable chips on the LIVE C-5 raw log route — every name is
+  // a listed file, none invented. Listing absent (reader not landed) => the URL-shape caption with
+  // its parenthetical; listing present but empty => the honest "no files there" caption, no note.
+  const hasCmaListing = !!(d && Array.isArray(d.cma_files));
+  const cmaFiles = hasCmaListing
+    ? d.cma_files.filter(f => f && typeof f === "object" && typeof f.path === "string" && f.path) : [];
+  const logChips = cmaFiles.map(f =>
+    `<a class="pill" href="/runs/${esc(runId)}/${esc(f.path)}" download` +
+    ` title="pycma log · ${esc(f.path)}${f.size != null ? " · " + esc(f.size) + " bytes" : ""}">↓ ${esc(f.name || f.path.split("/").pop())}</a>`)
+    .join(" ");
+  const logs = logChips
+    ? `<div class="hint" style="margin:6px 0 0">pycma logs (raw, never parsed; each file serves by its exact name): ` +
+      `<span class="pill-row" style="display:inline-flex;vertical-align:middle">${logChips}</span></div>`
+    : (dirs.length
+      ? `<p class="hint" style="margin:6px 0 0">pycma logs: ${dirs.map(x => `<code>${esc(x)}</code>`).join(", ")} — raw, never parsed. Each file downloads at <code>/runs/${esc(runId)}/cma/restart_k/&lt;file&gt;</code>${hasCmaListing ? "" : " (raw log route; the API lists the directories, not the file names)"}</p>`
+      : "");
   if (!runs.length) {
     // pycma logs listed but this run.json predates the restarts block: the honest empty state
     return `<div class="fig restart-schedule-card"><h3>Restart schedule</h3>
@@ -1145,9 +1160,11 @@ function stepInvByName(detail) {
 
 /** One STEP chip in the run-detail files row (G4's chip half). `name` comes from the unchanged
  *  C-1 `step_files` list; `inv` is the matched `step_files_detail` inventory (null when the
- *  sidecar is absent). With a sidecar the chip shows the face inventory + tool sha inline;
- *  without one the chip is unchanged (silent absence: the WP14 sidecar simply is not written yet
- *  — nothing invented). Pure; returns HTML. */
+ *  sidecar is absent). With a sidecar the chip renders ONLY the facts it carries — the WP14
+ *  exporter's tool/tool_sha/grid fields or the CAD contract's faces/solids/closed/tool_sha256/
+ *  tool_path (chip summary e.g. "driver=1 · wall=9 · solid ✓ · tool <sha8>") — a segment absent
+ *  from the sidecar renders nothing, nothing is invented; the tooltip names every present key
+ *  with its value. Without a sidecar the chip is unchanged (silent absence). Pure; returns HTML. */
 function stepChipHtml(name, inv, id) {
   name = typeof name === "string" ? name : String((name && name.name) || "");
   if (!name) return "";
@@ -1155,18 +1172,30 @@ function stepChipHtml(name, inv, id) {
   const rank = name.replace(/^.*_(rank\d+)_.*$/, "$1");
   inv = (inv && typeof inv === "object" && inv !== null) ? inv : null;
   if (!inv) return `<a class="pill" href="${href}" download>↓ ${esc(rank)}</a>`;
-  const grid = Array.isArray(inv.grid) && inv.grid.length
-    ? inv.grid.map(x => String(x).replace(/x/g, "×")).join(" + ") : "";
-  const face = label => {
-    const e = (Array.isArray(inv.faces) ? inv.faces : []).find(x => x && x.label === label);
-    return e && e.count != null ? String(e.count) : "–";
-  };
-  const sha = typeof inv.tool_sha === "string" && inv.tool_sha ? inv.tool_sha.slice(0, 8) : "–";
-  const title = `step/${name} · step/${name}.inventory.json · tool=${_jsonish(inv.tool)}` +
-    ` · tool_sha=${_jsonish(inv.tool_sha)} · solids=${_jsonish(inv.solids)} · closed=${_jsonish(inv.closed)}` +
-    (Array.isArray(inv.grid) ? ` · grid=${_jsonish(inv.grid)}` : "");
-  const faceTxt = Array.isArray(inv.faces) ? ` · driver=${esc(face("driver"))} wall=${esc(face("wall"))}` : "";
-  return `<a class="pill" href="${href}" download title="${esc(title)}">↓ ${esc(grid)} STEP${faceTxt} · tool ${esc(sha)} <span class="muted">(${esc(rank)})</span></a>`;
+  const bits = [];                                       // chip face segments (rendered joined " · ")
+  if (Array.isArray(inv.grid) && inv.grid.length)
+    bits.push(inv.grid.map(x => String(x).replace(/x/g, "×")).join(" + ") + " STEP");
+  const faces = (Array.isArray(inv.faces) ? inv.faces : []).filter(x => x && typeof x.label === "string");
+  if (faces.length)
+    bits.push(faces.map(x => `${x.label}=${x.count == null ? "–" : x.count}`).join(" · "));
+  if (inv.closed != null)
+    bits.push(inv.closed ? "solid ✓" : "solid ✗");
+  else if (inv.solids != null)
+    bits.push(`solids ${_trimNum(inv.solids)}`);
+  const shaKey = inv.tool_sha256 != null ? "tool_sha256" : (inv.tool_sha != null ? "tool_sha" : null);
+  const shaRaw = shaKey ? String(inv[shaKey]).trim() : "";
+  if (shaRaw) bits.push(`tool ${shaRaw.slice(0, 8)}`);
+  if (!bits.length) return `<a class="pill" href="${href}" download>↓ ${esc(rank)}</a>`;
+  // tooltip: every present key with its exact value
+  const tipBits = [`step/${name}`, `step/${name}.inventory.json`];
+  if (inv.tool_path != null) tipBits.push(`tool_path=${_jsonish(inv.tool_path)}`);
+  else if (inv.tool != null) tipBits.push(`tool=${_jsonish(inv.tool)}`);
+  if (shaRaw) tipBits.push(`${shaKey}=${shaRaw}`);
+  if (faces.length) tipBits.push(`faces=${_jsonish(faces)}`);
+  if (inv.solids != null) tipBits.push(`solids=${_jsonish(inv.solids)}`);
+  if (inv.closed != null) tipBits.push(`closed=${_jsonish(inv.closed)}`);
+  if (Array.isArray(inv.grid)) tipBits.push(`grid=${_jsonish(inv.grid)}`);
+  return `<a class="pill" href="${href}" download title="${esc(tipBits.join(" · "))}">↓ ${esc(bits.join(" · "))} <span class="muted">(${esc(rank)})</span></a>`;
 }
 
 /** The run.json.qd provenance caption for the atlas header (G2, plan §3.1). Renders each key that
