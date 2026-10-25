@@ -6,9 +6,12 @@ Nothing here solves, meshes or writes: every number comes from files the CLI alr
 """
 from __future__ import annotations
 
+import copy
 import json
 import math
+import os
 import re
+import time
 from collections import Counter
 from pathlib import Path
 from typing import Any
@@ -1465,3 +1468,590 @@ def evolution_frames3d(runs: Path, run_id: str, max_tris_per_frame: int = M3D_DE
     except OSError:
         pass
     return data
+
+
+# ---------------------------------------------------------------------------- sandbox preview
+
+#: Coarse density the 2026-10-25 sandbox spike measured for the formula/native preview route
+#: (65 angular x 24 axial): 17-35 ms including 3D on the idle machine. Grid/rows kinds use the
+#: config's own march arrays instead (their resolution is part of the construction).
+PREVIEW_ANGULAR_SEGMENTS = 65
+PREVIEW_LENGTH_SEGMENTS = 24
+PREVIEW_NOTES_ENVELOPE_NATIVE = (
+    "envelope estimator has FREEFORM-anchor and GRID branches only; OSSE/R-OSSE/ICW params return None"
+)
+PREVIEW_NOTES_CAD = (
+    "CAD/STEP recipe - geometry authored by tools/cad/multicell.py; no on-demand preview in the mesher"
+)
+
+
+def _preview_config(root: Path, name: str) -> dict:
+    """Resolve a config NAME through ``list_configs`` (never a client path); 404 when unknown.
+
+    Process-local memo on the two config-directory stamps: a live sandbox drag calls this on
+    every tick, and re-parsing ~46 YAML files per tick (measured 0.7 s under cProfile) would
+    swamp the 20-30 ms geometry. Adding/removing a config file changes a directory mtime and
+    rebuilds the index; file CONTENT edits do not change name -> path resolution (the seed gate
+    keeps its own per-file stamp cache).
+    """
+    key = str(root.resolve())
+    try:
+        signature = (
+            (root / "examples").stat().st_mtime_ns,
+            (root / "examples" / "typologies").stat().st_mtime_ns,
+        )
+    except OSError:
+        signature = None
+    cached = _PREVIEW_CONFIG_CACHE.get(key)
+    if cached is None or signature is None or cached[0] != signature:
+        cached = (signature, list_configs(root))
+        _PREVIEW_CONFIG_CACHE[key] = cached
+    for entry in cached[1]:
+        if entry.get("name") == name:
+            return entry
+    raise FileNotFoundError(f"unknown config {name!r}")
+
+
+#: ``root -> (directory stamps, list_configs entries)``; see ``_preview_config``.
+_PREVIEW_CONFIG_CACHE: dict[str, tuple] = {}
+
+
+def _preview_brief_path(root: Path, name: str) -> Path:
+    for entry in list_briefs(root):
+        if entry.get("name") == name:
+            return root / entry["path"]
+    raise FileNotFoundError(f"unknown brief {name!r}")
+
+
+def _build_viewport(mcfg: dict) -> dict:
+    """The one viewport call the preview makes (monkeypatched by the silent-OSSE pin test)."""
+    from hornlab_mesher.viewport import build_viewport_geometry_from_config
+    return build_viewport_geometry_from_config(mcfg, point_lists=False)
+
+
+def _preview_knobs(cfg, overrides: dict) -> tuple[dict, list[str]]:
+    """Merge requested knobs per key: valid names win, unknown names are named and ignored."""
+    allowed = set(cfg.bounds_raw) | set(cfg.seed_params)
+    effective = copy.deepcopy(cfg.seed_params)
+    notes: list[str] = []
+    for key, value in overrides.items():
+        if key not in allowed:
+            notes.append(f"unknown knob {key!r} ignored (not in bounds or seed_params)")
+            continue
+        effective[key] = value
+    return effective, notes
+
+
+def _closest_row(angles, target: float) -> int:
+    arr = np.asarray(angles, dtype=float)
+    delta = np.abs(np.angle(np.exp(1j * (arr - float(target)))))
+    return int(np.argmin(delta))
+
+
+def _rows_angles(meta: dict, n_phi: int) -> np.ndarray:
+    span = str(meta.get("row_span") or meta.get("span") or
+               ("half" if meta.get("half_model") else "quarter"))
+    if span == "half":
+        return np.linspace(-0.5 * math.pi, 0.5 * math.pi, n_phi)
+    if span == "full":
+        return np.linspace(0.0, 2.0 * math.pi, n_phi, endpoint=False)
+    return np.linspace(0.0, 0.5 * math.pi, n_phi)
+
+
+def _meridian(row) -> list[list[float]]:
+    arr = np.asarray(row, dtype=float)
+    z = arr[:, 2]
+    r = np.hypot(arr[:, 0], arr[:, 1])
+    return [[round(float(a), 3), round(float(b), 3)] for a, b in zip(z, r)]
+
+
+def _ring(row) -> list[list[float]]:
+    arr = np.asarray(row, dtype=float)
+    return [[round(float(a), 3), round(float(b), 3)] for a, b in zip(arr[:, 0], arr[:, 1])]
+
+
+def _sections(inner, outer, angles) -> tuple[dict, dict]:
+    """H/V meridians at phi=0 and phi=90, plus the mouth ring from the last station.
+
+    The rows are chosen by ANGLE, not by index: the spike's aspect-ratio finding requires the
+    section to come from the REAL grid row (a half model's first row is -90, and a full ring's
+    last row is not the V plane). Quarter/half grids therefore give exactly row 0/last row.
+    """
+    inner = np.asarray(inner, dtype=float)
+    outer_arr = None if outer is None else np.asarray(outer, dtype=float)
+    h = _closest_row(angles, 0.0)
+    v = _closest_row(angles, 0.5 * math.pi)
+    section = {
+        "h": {"inner": _meridian(inner[h]),
+              "outer": [] if outer_arr is None else _meridian(outer_arr[h])},
+        "v": {"inner": _meridian(inner[v]),
+              "outer": [] if outer_arr is None else _meridian(outer_arr[v])},
+    }
+    mouth = {
+        "inner": _ring(inner[:, -1, :]),
+        "outer": [] if outer_arr is None else _ring(outer_arr[:, -1, :]),
+    }
+    return section, mouth
+
+
+def _rows_overshoot_from_arrays(inner, meta: dict, wall_mm: float, brief: dict | None) -> float:
+    """Reuse the rows march already built instead of re-marching (the spike measured 570 ms).
+
+    The arithmetic is the same one ``registry._grid_overshoot_estimate`` applies to
+    ``grid.envelope_extents``: outer width/height include the shell in full, and the depth is the
+    grid's own axial span (the bend is already inside it) plus the shell. Limits are the
+    registry's own constants, not copies of a number.
+    """
+    from hornlab_search.design.generators.registry import _ENVELOPE_MOUTH_TOLERANCE_MM
+    from hornlab_search.search.evaluate import ENVELOPE_DEPTH_ALLOWANCE_MM
+
+    env = (brief or {}).get("envelope") or {}
+    if not env:
+        return 0.0
+    arr = np.asarray(inner, dtype=float)
+    lim_w = float(env.get("max_mouth_w_mm", 1e9)) + _ENVELOPE_MOUTH_TOLERANCE_MM
+    lim_h = float(env.get("max_mouth_h_mm", 1e9)) + _ENVELOPE_MOUTH_TOLERANCE_MM
+    lim_d = float(env.get("max_depth_mm", 1e9)) + float(ENVELOPE_DEPTH_ALLOWANCE_MM)
+    if not (lim_w > 0.0 and lim_h > 0.0 and lim_d > 0.0):
+        return 0.0
+    width = 2.0 * float(np.max(np.abs(arr[..., 0]))) + 2.0 * wall_mm
+    height = 2.0 * float(np.max(np.abs(arr[..., 1]))) + 2.0 * wall_mm
+    depth = float(np.max(arr[..., 2]) - np.min(arr[..., 2])) + wall_mm
+    return max(width / lim_w - 1.0, height / lim_h - 1.0, depth / lim_d - 1.0, 0.0)
+
+
+def _preview_response(*, config: str, brief: str | None, kind: str, quadrants: str,
+                      available: bool, knobs: dict, section: dict, mouth: dict,
+                      envelope: dict, shape3d: dict, slow: bool, timings: dict,
+                      notes: list[str]) -> dict:
+    return clean({
+        "version": 1,
+        "config": config,
+        "brief": brief,
+        "kind": kind,
+        "units": "mm",
+        "quadrants": str(quadrants),
+        "available": bool(available),
+        "knobs": knobs,
+        "section": section,
+        "mouth": mouth,
+        "envelope": envelope,
+        "shape3d": shape3d,
+        "slow": bool(slow),
+        "timings_ms": {k: round(float(v), 3) for k, v in timings.items()},
+        "notes": notes,
+    })
+
+
+def preview_shape(root: Path, config_name: str, q: dict) -> dict:
+    """On-demand 2D/3D preview geometry for one typology config (sandbox backend).
+
+    GET ``/api/preview-shape/<config>?brief=<name>&detail=2d|3d&knobs=<urlencoded JSON>``.
+    Dispatch branches on the params KIND FIRST (the spike's silent-OSSE hazard): a grid block
+    never reaches ``build_preview_geometry``/``to_mesher_config``; a CAD recipe returns
+    ``available:false`` before ``to_mesher_config`` (which raises a bare ``KeyError: 'cad'``).
+    Nothing is written and nothing is meshed: geometry only.
+
+    ``detail=2d`` keeps the ``shape3d`` block present but ``{"available": false, "reason":
+    "detail=2d"}``, so the response shape never changes with the detail flag.
+    """
+    from hornlab_search.config import ConfigError, load_config, mesh_spec
+    from hornlab_search.design import families
+    from hornlab_search.design.generators import grid as grid_gen
+    from hornlab_search.design.generators import registry
+    from hornlab_search.mesh.build import res_mm_for_spec
+    from hornlab_search.types import Design, GeometryInvalidError
+    from . import preview as seam
+
+    started = time.perf_counter()
+    t_params = t_section = t_shape = 0.0
+
+    entry = _preview_config(root, config_name)
+    cfg_path = root / entry["path"]
+    detail_raw = q.get("detail") or ["2d"]
+    detail = str(detail_raw[0] if isinstance(detail_raw, (list, tuple)) else detail_raw).lower()
+    if detail not in ("2d", "3d"):
+        raise ValueError("detail must be '2d' or '3d'")
+    brief_p = None
+    brief_q = q.get("brief")
+    if brief_q:
+        brief_name_raw = brief_q[0] if isinstance(brief_q, (list, tuple)) else brief_q
+        brief_p = _preview_brief_path(root, str(brief_name_raw))
+
+    cfg = load_config(cfg_path, brief=brief_p)
+    brief_name = (cfg.brief or {}).get("name")
+    quadrants = str(cfg.mesh.quadrants)
+
+    raw_knobs = q.get("knobs")
+    knob_text = raw_knobs[0] if isinstance(raw_knobs, (list, tuple)) else raw_knobs
+    if knob_text in (None, ""):
+        overrides = {}
+    else:
+        try:
+            overrides = json.loads(str(knob_text))
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"knobs must be a JSON object: {exc}") from None
+        if not isinstance(overrides, dict):
+            raise ValueError("knobs must be a JSON object")
+
+    effective, notes = _preview_knobs(cfg, overrides)
+    gen = cfg.generator if isinstance(cfg.generator, dict) else None
+    is_grid = bool(gen and gen.get("name") == "grid")
+    is_rows = bool(is_grid and isinstance(gen.get("rows"), dict))
+    kind = "rows" if is_rows else ("grid" if is_grid else
+                                   ("native" if not gen else "generator"))
+    slow = bool(is_rows)
+
+    def unavailable(reason: str, *, envelope: dict | None = None) -> dict:
+        timings = {"params": t_params, "section": t_section, "shape3d": t_shape,
+                   "total": (time.perf_counter() - started) * 1000.0}
+        return _preview_response(
+            config=config_name, brief=brief_name, kind=kind, quadrants=quadrants,
+            available=False, knobs=effective,
+            section={"h": {"inner": [], "outer": []}, "v": {"inner": [], "outer": []}},
+            mouth={"inner": [], "outer": []},
+            envelope=envelope or {"available": False, "reason": reason},
+            shape3d={"available": False, "reason": reason},
+            slow=slow, timings=timings, notes=notes + [reason])
+
+    # (1) CAD recipe: no on-demand preview in the mesher; stop BEFORE to_mesher_config.
+    if "cad" in cfg.seed_params:
+        return unavailable(PREVIEW_NOTES_CAD,
+                           envelope={"available": False, "reason": PREVIEW_NOTES_CAD})
+
+    mesh = mesh_spec("screen", cfg)
+    res_mm = res_mm_for_spec(mesh, cfg)
+    envelope: dict
+    section: dict
+    mouth: dict
+    inner = outer = angles = None
+    t_coords = phi_coords = None
+    closed_phi = False
+
+    try:
+        if is_grid:
+            # (2) GRID/ROWS: the config's own march arrays. NO grid block into the preview.
+            gspec = gen
+            wall_mm = float(gspec.get("wall_thickness_mm", 3.0))
+            inner, meta = grid_gen.grid_points(gspec, effective, cfg.brief)
+            half = bool(meta.get("half_model", False))
+            closed_phi = (not bool(meta.get("quarter", True))) and not half
+            outer = grid_gen.grid_outer_points(inner, wall_mm, half=half, full=closed_phi)
+            angles = _rows_angles(meta, int(inner.shape[0]))
+            t_params = (time.perf_counter() - started) * 1000.0
+            if is_rows:
+                overshoot = _rows_overshoot_from_arrays(inner, meta, wall_mm, cfg.brief)
+                envelope = {"available": True, "overshoot": round(float(overshoot), 6)}
+            else:
+                block = grid_gen.design_params(gspec, effective, cfg.brief)
+                overshoot = registry.envelope_overshoot_estimate(block, cfg.brief)
+                envelope = ({"available": False,
+                             "reason": "envelope estimator returned None for this grid"}
+                            if overshoot is None
+                            else {"available": True, "overshoot": round(float(overshoot), 6)})
+            if envelope.get("available") and float(envelope["overshoot"]) > 0.0:
+                return unavailable(
+                    "invalid_envelope: estimated outside the brief envelope "
+                    f"(max relative overshoot {float(envelope['overshoot']):.4f})",
+                    envelope=envelope)
+        else:
+            # (3) GENERATOR vs (4) NATIVE: materialize the mesher config, then the viewport.
+            if gen:
+                params = registry.materialize(gen, effective, cfg.brief)
+            else:
+                params = copy.deepcopy(cfg.seed_params)
+                for key, value in overrides.items():
+                    if key not in effective:        # an unknown name was named in notes
+                        continue
+                    if key in cfg.seed_params:
+                        families.param_set(cfg.family, params, key, value)
+                    elif "." in key:
+                        notes.append(f"knob {key!r} has no resolvable seed path; ignored")
+                    else:
+                        params[key] = value
+                effective = params
+            design = Design("FREEFORM" if gen else cfg.family, params)
+            mcfg = families.to_mesher_config(
+                design, mesh, res_mm, Path(os.environ.get("TEMP", ".")) / "hornlab-preview.msh")
+            mcfg_coarse = copy.deepcopy(mcfg)
+            mesh_sec = dict(mcfg_coarse.get("mesh") or {})
+            mesh_sec["angular_segments"] = PREVIEW_ANGULAR_SEGMENTS
+            mesh_sec["length_segments"] = PREVIEW_LENGTH_SEGMENTS
+            mcfg_coarse["mesh"] = mesh_sec
+            if gen:
+                overshoot = registry.envelope_overshoot_estimate(params, cfg.brief)
+                envelope = ({"available": False,
+                             "reason": "envelope estimator returned None for these params"}
+                            if overshoot is None
+                            else {"available": True, "overshoot": round(float(overshoot), 6)})
+            else:
+                envelope = {"available": False, "reason": PREVIEW_NOTES_ENVELOPE_NATIVE}
+            t_params = (time.perf_counter() - started) * 1000.0
+            if envelope.get("available") and float(envelope["overshoot"]) > 0.0:
+                return unavailable(
+                    "invalid_envelope: estimated outside the brief envelope "
+                    f"(max relative overshoot {float(envelope['overshoot']):.4f})",
+                    envelope=envelope)
+            viewport = _build_viewport(mcfg_coarse)
+            grid_data = viewport["grid"]
+            inner = np.asarray(grid_data["inner_grid"], dtype=float)
+            outer = (None if grid_data.get("outer_grid") is None
+                     else np.asarray(grid_data["outer_grid"], dtype=float))
+            closed_phi = bool(grid_data.get("full_circle", True))
+            angles = grid_data.get("angle_list")
+            t_coords = np.asarray(grid_data["slice_map"], dtype=float)
+            phi_grid = grid_data.get("phi_grid")
+            phi_coords = (np.asarray(phi_grid, dtype=float).T if phi_grid is not None
+                          else np.broadcast_to(np.asarray(angles, dtype=float),
+                                               inner.shape[1::-1]))
+    except (registry.GeneratorError, GeometryInvalidError, ConfigError) as exc:
+        t_params = t_params or (time.perf_counter() - started) * 1000.0
+        return unavailable(str(exc))
+
+    if angles is None:
+        angles = _rows_angles({}, int(np.asarray(inner).shape[0]))
+
+    t0 = time.perf_counter()
+    section, mouth = _sections(inner, outer, angles)
+    t_section = (time.perf_counter() - t0) * 1000.0
+
+    if detail == "3d":
+        if outer is None:
+            shape3d = {"available": False,
+                       "reason": "no outer shell for this design (wall_thickness_mm=0?)"}
+        else:
+            t0 = time.perf_counter()
+            try:
+                soup = seam.tessellate(
+                    inner, outer, t_coordinates=t_coords, phi_coordinates=phi_coords,
+                    closed_phi=closed_phi)
+            except ValueError as exc:
+                t_shape = (time.perf_counter() - t0) * 1000.0
+                shape3d = {"available": False, "reason": str(exc)}
+            else:
+                t_shape = (time.perf_counter() - t0) * 1000.0
+                shape3d = {
+                    "available": True,
+                    "roles": list(soup["roles"]),
+                    "verts": np.round(np.asarray(soup["positions"], dtype=float), 3).ravel().tolist(),
+                    "tris": np.asarray(soup["indices"], dtype=np.int64).ravel().tolist(),
+                }
+    else:
+        shape3d = {"available": False, "reason": "detail=2d"}
+
+    timings = {"params": t_params, "section": t_section, "shape3d": t_shape,
+               "total": (time.perf_counter() - started) * 1000.0}
+    return _preview_response(
+        config=config_name, brief=brief_name, kind=kind, quadrants=quadrants,
+        available=True, knobs=effective, section=section, mouth=mouth,
+        envelope=envelope, shape3d=shape3d, slow=slow, timings=timings, notes=notes)
+
+
+# ---------------------------------------------------------------------------- bounds writer
+
+
+def _fmt_bound(v: float) -> str:
+    return repr(float(v))
+
+
+def _patch_bounds_lines(text: str, updates: dict) -> tuple[str, set[str]]:
+    """Comment-preserving, indentation-aware patch of ONLY the ``lo:``/``hi:`` lines.
+
+    No YAML round trip (ruamel is not installed): the rest of the file stays byte-identical.
+    Handles both block mappings (``lo: 1.0``) and a flow mapping (``{lo: 1.0, hi: 2.0}``) in a
+    bounds block, because only the value token changes either way.
+    """
+    lines = text.splitlines(keepends=True)
+    start = None
+    for i, line in enumerate(lines):
+        if re.match(r"^bounds\s*:\s*(#.*)?(\r?\n)?$", line):
+            start = i
+            break
+    if start is None:
+        return text, set()
+
+    key_indent = None
+    for line in lines[start + 1:]:
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        if not line[:1].isspace():
+            break
+        key_indent = len(line) - len(line.lstrip())
+        break
+    if key_indent is None:
+        return text, set()
+
+    patched: set[str] = set()
+    key_line = re.compile(
+        r"^(?P<indent>\s*)(?P<q>['\"]?)(?P<key>[^:'\"]+)(?P=q)\s*:(?P<rest>.*)$")
+    leaf = re.compile(r"^(?P<lead>\s*)(?P<kind>lo|hi)\s*:\s*(?P<val>[^\s#]+)(?P<trail>.*)$")
+
+    i = start + 1
+    while i < len(lines):
+        line = lines[i]
+        stripped = line.strip()
+        if stripped and not stripped.startswith("#"):
+            indent = len(line) - len(line.lstrip())
+            if indent == 0:
+                break
+            if indent < key_indent:
+                break
+        if not stripped or stripped.startswith("#") or (len(line) - len(line.lstrip())) != key_indent:
+            i += 1
+            continue
+        m = key_line.match(line)
+        if not m:
+            i += 1
+            continue
+        key = m.group("key")
+        if key not in updates:
+            i += 1
+            continue
+        lo, hi = updates[key]
+        rest = m.group("rest")
+        if "{" in rest:
+            new_rest = re.sub(r"(lo\s*:\s*)([^,}\s]+)", lambda mm: mm.group(1) + _fmt_bound(lo),
+                              rest, count=1)
+            new_rest = re.sub(r"(hi\s*:\s*)([^,}\s]+)", lambda mm: mm.group(1) + _fmt_bound(hi),
+                              new_rest, count=1)
+            if new_rest != rest:
+                lines[i] = line[:m.start("rest")] + new_rest
+                patched.add(key)
+            i += 1
+            continue
+        found = set()
+        j = i + 1
+        while j < len(lines):
+            nxt = lines[j]
+            nxt_stripped = nxt.strip()
+            nxt_indent = len(nxt) - len(nxt.lstrip())
+            if nxt_stripped and not nxt_stripped.startswith("#") and nxt_indent <= key_indent:
+                break
+            lm = leaf.match(nxt)
+            if lm and lm.group("kind") not in found:
+                value = lo if lm.group("kind") == "lo" else hi
+                lines[j] = (nxt[:lm.start("val")] + _fmt_bound(value) + nxt[lm.end("val"):])
+                found.add(lm.group("kind"))
+            j += 1
+        if found == {"lo", "hi"}:
+            patched.add(key)
+        i = j
+    return "".join(lines), patched
+
+
+def save_bounds(root: Path, body: dict) -> dict:
+    """Write edited search bounds back to their YAML home (owner ruling 2026-10-25).
+
+    Resolves the config through ``list_configs``; only ``examples/typologies/**`` is writable in
+    this pass (root-level ``examples/*.yaml`` is reported, never written). Every key is validated
+    as a whole (all-or-nothing): unknown key, non-finite value, lo > hi, or a value outside the
+    parameter catalog's hard schema limit rejects the entire request and writes nothing.
+    """
+    from hornlab_search.design.params import bounds_for
+
+    if not isinstance(body, dict):
+        raise ValueError("JSON object expected")
+    name = body.get("config")
+    updates = body.get("bounds")
+    if not isinstance(name, str) or not name:
+        raise ValueError("body needs a non-empty 'config' name")
+    if not isinstance(updates, dict) or not updates:
+        raise ValueError("body needs a non-empty 'bounds' object")
+    entry = _preview_config(root, name)
+    rel = entry["path"]
+    path = (root / rel).resolve()
+    typologies = (root / "examples" / "typologies").resolve()
+    notes = [
+        "config_sha changes for this config; resume needs --allow-config-change",
+        "a RUNNING search using this config keeps its own snapshot (run config.yaml); "
+        "bounds edits apply to the next launch",
+    ]
+    if typologies not in path.parents:
+        return {"ok": False, "applied": [],
+                "rejected": [{"key": "-",
+                              "reason": f"config_not_writable: {rel} is not under "
+                                        "examples/typologies/; nothing written"}]}
+
+    text = path.read_text(encoding="utf-8")
+    doc = yaml.safe_load(text) or {}
+    known = doc.get("bounds") if isinstance(doc.get("bounds"), dict) else {}
+
+    rejected: list[dict] = []
+    accepted: dict[str, tuple[float, float]] = {}
+    applied: list[dict] = []
+    for raw_key, raw_value in updates.items():
+        key = str(raw_key)
+        if key not in known:
+            rejected.append({"key": key, "reason": "unknown_key"})
+            continue
+        if not isinstance(raw_value, dict) or "lo" not in raw_value or "hi" not in raw_value:
+            rejected.append({"key": key, "reason": "missing_lo_hi"})
+            continue
+        lo_raw, hi_raw = raw_value.get("lo"), raw_value.get("hi")
+        if isinstance(lo_raw, bool) or isinstance(hi_raw, bool):
+            rejected.append({"key": key, "reason": "not_a_finite_number"})
+            continue
+        try:
+            lo, hi = float(lo_raw), float(hi_raw)
+        except (TypeError, ValueError):
+            rejected.append({"key": key, "reason": "not_a_finite_number"})
+            continue
+        if not (math.isfinite(lo) and math.isfinite(hi)):
+            rejected.append({"key": key, "reason": "not_a_finite_number"})
+            continue
+        if lo > hi:
+            rejected.append({"key": key, "reason": "lo_above_hi"})
+            continue
+        hard = {}
+        try:
+            hard = (bounds_for(name, key) or {}).get("hard") or {}
+        except Exception:  # noqa: BLE001 - the catalog is advisory here, never a crash
+            hard = {}
+        hard_lo = hard.get("lo") if isinstance(hard, dict) else None
+        hard_hi = hard.get("hi") if isinstance(hard, dict) else None
+        if (hard_lo is not None and lo < float(hard_lo)) or \
+                (hard_hi is not None and hi > float(hard_hi)):
+            lo_s = "-inf" if hard_lo is None else f"{float(hard_lo):g}"
+            hi_s = "inf" if hard_hi is None else f"{float(hard_hi):g}"
+            rejected.append({"key": key, "reason": f"exceeds_hard_limit {lo_s}..{hi_s}"})
+            continue
+        if hard_lo is None and hard_hi is None:
+            notes.append(f"no hard schema limit known for {key!r}; "
+                         "the config schema validates at build time")
+        accepted[key] = (lo, hi)
+        old = known[key] if isinstance(known[key], dict) else {}
+        applied.append({"key": key,
+                        "from": {"lo": old.get("lo"), "hi": old.get("hi")},
+                        "to": {"lo": lo, "hi": hi}})
+
+    if rejected:
+        return {"ok": False, "rejected": rejected, "applied": [], "notes": notes}
+
+    new_text, patched = _patch_bounds_lines(text, accepted)
+    missing = sorted(set(accepted) - patched)
+    if missing:
+        return {"ok": False, "applied": [],
+                "rejected": [{"key": key,
+                              "reason": "bounds lines could not be located in the YAML"} for key in missing],
+                "notes": notes}
+    try:
+        check = (yaml.safe_load(new_text) or {}).get("bounds") or {}
+        for key, (lo, hi) in accepted.items():
+            if float(check[key]["lo"]) != lo or float(check[key]["hi"]) != hi:
+                raise ValueError(key)
+    except Exception:  # noqa: BLE001 - never leave a half-valid file behind
+        return {"ok": False, "applied": [],
+                "rejected": [{"key": key, "reason": "patched text did not re-parse"}
+                             for key in sorted(accepted)],
+                "notes": notes}
+
+    tmp = path.with_name(path.name + ".tmp")
+    try:
+        with open(tmp, "w", encoding="utf-8", newline="") as fh:
+            fh.write(new_text)
+        os.replace(tmp, path)
+    finally:
+        if tmp.exists():
+            tmp.unlink()
+    return {"ok": True, "file": rel, "applied": applied, "notes": notes}

@@ -48,6 +48,8 @@ class App:
             return D.campaign_detail(self.runs, parts[1])
         if head == "mesh" and len(parts) == 3:
             return D.mesh_surface(self.runs, parts[1], parts[2])
+        if head == "preview-shape" and len(parts) == 2:
+            return D.preview_shape(self.root, parts[1], q)
         if head == "balloon" and len(parts) == 2:
             return D.balloon_designs(self.runs, parts[1])
         if head == "balloon" and len(parts) == 3:
@@ -113,6 +115,11 @@ class App:
     def post(self, path: str, body: dict) -> object:
         parts = [unquote(p) for p in path.strip("/").split("/")][1:]
         head = parts[0] if parts else ""
+        if head == "save-bounds":
+            # Deliberately OUTSIDE the generic handler try: a malformed body raises ValueError
+            # and reaches do_POST's 400 mapping, while an unknown config (FileNotFoundError)
+            # reaches its 404 mapping. Rejections are a normal 200 {ok:false}.
+            return D.save_bounds(self.root, body)
         try:
             if head == "brief":
                 p = D.save_user_brief(self.root, str(body.get("name", "")), body.get("brief") or {})
