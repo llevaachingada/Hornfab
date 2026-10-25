@@ -432,6 +432,16 @@ a.btn, a.btn:hover, .btn-row a { text-decoration: none; }
 .typ-name { font-family: var(--f-display); font-weight: 600; font-size: 1.05rem; }
 .typ-meta { font-size: 0.78rem; margin-top: 2px; }
 .typ-desc { margin: 0; font-size: 0.86rem; }
+/* P9: the typology card's searched-parameter chips — small mono pills, catalog-grounded hover
+   docs on each; theme tokens only (no new hex). Absent chips render no element (no layout shift). */
+.typ-knobs { display:flex; flex-wrap:wrap; gap:4px; min-width:0; }
+.typ-knob {
+  font-family:var(--f-mono); font-size:0.66rem; line-height:1.4;
+  padding:1px 7px; border:1px solid var(--rule); border-radius:999px;
+  background:var(--bg); color:var(--muted); cursor:help; display:inline-block;
+}
+.typ-knob:hover { color:var(--accent); border-color:var(--accent); }
+.typ-knob:focus { outline:2px solid var(--accent); outline-offset:1px; }
 svg.typ-prof { width: 150px; height: 120px; display: block; background: var(--bg); border-radius: 4px; }
 .typ-prof.empty { width: 150px; height: 120px; display: grid; place-items: center; font-size: 0.72rem; text-align: center;
                   border: 1px dashed var(--rule); border-radius: 4px; }

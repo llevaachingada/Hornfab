@@ -4,6 +4,7 @@
 import { chart, heat, cmap, drawCbar, niceTicks, diFromCuts, groupColor,
          el, NS, css, fmt, FT, DEFW, polarMap, wallSection, familyColor, measuredWidth, isobarMap } from "./charts.js";
 import { TERMS as GLOSSARY, TERM_ORDER, tip } from "./glossary.js";
+import { loadParamCatalog, paramTipHtml, typologyTipHtml, typologyChipsHtml } from "./paramtips.js";
 import { init3d } from "./view3d.js";
 import { viewEvolution } from "./evolution.js";
 import { viewBalloon } from "./balloon.js";
@@ -1728,7 +1729,7 @@ function seedDerivationHtml(feas) {
     const flag = r.clamped_to_bound === true
       ? `<span class="pill warn">clamped to bound</span>`
       : `<span class="muted">seeded</span>`;
-    return `<tr><td>${knob}</td><td class="r">${derived}</td><td>${esc(applied)}</td><td>${flag}</td></tr>`;
+    return `<tr><td data-seedknob="${esc(r.knob ?? "")}">${knob}</td><td class="r">${derived}</td><td>${esc(applied)}</td><td>${flag}</td></tr>`;
   }).join("");
   return `<div class="fig seed-derivation-card"><h3>Seed derivation (brief-driven, clamp-only)</h3>
       <div class="cap">${cap}</div>${counts}
@@ -1766,6 +1767,7 @@ async function viewRunDetail(id) {
   let d;
   try { d = await api("/api/run/" + id); }
   catch (e) { ROOT.innerHTML = errBanner(e.message); return; }
+  await loadParamCatalog();       // P9: catalog-grounded geometry-knob hover docs; failure degrades to raw keys
 
   const sum = d.summary || d;
   const t = d.target || {};
@@ -2141,7 +2143,9 @@ async function viewRunDetail(id) {
           fill="${css(p.rho > 0 ? "--seed" : "--best")}"/></svg>`;
       const flag = v => v >= 4 ? `<span class="pill bad">${v}/6</span>` : v >= 2 ? `<span class="pill warn">${v}/6</span>` : `${v}/6`;
       const atHi = p.at_hi != null ? p.at_hi : 0;
-      s += `<tr><td class="mono">${esc(p.key)}</td>
+      // P9: the raw key stays the visible text (it is the vocabulary the rest of the page uses);
+      // hover now carries the catalog's label [unit], meaning and search range for run <sum.name>.
+      s += `<tr><td class="mono">${paramTipHtml(sum.name, p.key, p.key)}</td>
         <td class="r">${fmt(p.lo, 3)}</td><td class="r">${fmt(p.hi, 3)}</td>
         <td class="r">${fmt(p.best, 3)}</td>
         <td class="r">${p.rho != null ? p.rho.toFixed(2) : "–"}</td>
@@ -2151,6 +2155,12 @@ async function viewRunDetail(id) {
   } else {
     sensT.innerHTML = "<tr><td class='muted'>No sensitivity data.</td></tr>";
   }
+
+  // P9 (catalog hover docs): the seed-derivation call site is pinned as seedDerivationHtml(d.feasibility)
+  // with no config-name argument, so the card's knob cells identify themselves via data-seedknob and
+  // this pass attaches the catalog-grounded tooltip using sum.name. Missing docs keep the raw cell.
+  for (const td of ROOT.querySelectorAll(".seed-derivation-card td[data-seedknob]"))
+    if (td.dataset.seedknob) td.innerHTML = paramTipHtml(sum.name, td.dataset.seedknob, td.dataset.seedknob);
 
   // Files the user can take away: STEP downloads (after an export) and the full report.
   // `step_files` is the unchanged name list; the C-1 `step_files_detail` sidecar data is matched
@@ -2951,8 +2961,12 @@ function seedRowsHtml(config) {
   if (!sp || typeof sp !== "object" || Array.isArray(sp)) return "";
   const knobs = Object.keys(sp);
   if (!knobs.length) return "";
+  // naming matches the panel heading (catalog_name wins); the raw key stays the visible cell
+  // text, hover carries the catalog's label [unit], meaning and search range (P9).
+  const nm = (typeof cfg.catalog_name === "string" && cfg.catalog_name) ||
+             (typeof cfg.name === "string" ? cfg.name : "");
   return knobs.slice(0, SEED_PREVIEW_MAX_ROWS).map(k =>
-    `<tr><td>${esc(k)}</td><td class="r">${esc(seedPreviewValue(sp[k]))}</td></tr>`
+    `<tr><td>${paramTipHtml(nm, k, k)}</td><td class="r">${esc(seedPreviewValue(sp[k]))}</td></tr>`
   ).join("") + (knobs.length > SEED_PREVIEW_MAX_ROWS
     ? `<tr><td colspan="2">+${knobs.length - SEED_PREVIEW_MAX_ROWS} more seed knobs — the config's own yaml carries them</td></tr>`
     : "");
@@ -2986,6 +3000,7 @@ async function viewCompose() {
     configs = await api("/api/configs").catch(() => (configsOk = false, []));
   } catch (e) { ROOT.innerHTML = errBanner(e.message); return; }
   if (ROOT !== currentRoot()) return;
+  await loadParamCatalog();       // P9: seed-preview knob hover docs; failure degrades to raw keys
   const gpuLock = (statusData && statusData.gpu_lock) || null;
   const gpuBusy = !!(gpuLock && gpuLock.alive);
 
@@ -3949,6 +3964,7 @@ async function viewTypologies() {
   let typs, briefs;
   try { [typs, briefs] = await Promise.all([api("/api/typologies"), api("/api/briefs")]); }
   catch (e) { ROOT.innerHTML = errBanner("Could not load typologies: " + e.message); return; }
+  await loadParamCatalog();       // P9: typology descriptions + knob-name chips with hover docs
   const groups = {};
   for (const t of typs) (groups[t.group] = groups[t.group] || []).push(t);
   ROOT.innerHTML = `<div class="stack" style="gap:26px">
@@ -3989,11 +4005,12 @@ function typCard(t, briefs) {
   const hasProf = (t.results || []).some(r => r.profile);
   return `<article class="card typ-card">
     <div class="typ-head">
-      <div><div class="typ-name">${esc(t.name)}</div>
+      <div><div class="typ-name">${typologyTipHtml(t)}</div>
         <div class="muted typ-meta">${esc(t.symmetry === "axisymmetric" ? "axisymmetric" : "H/V (different planes)")} · ${t.n_knobs} shape parameters · screen ${t.budget.screen} / compare 2 × ${t.budget.compare} evals</div></div>
       ${hasProf ? `<svg class="typ-prof" data-name="${esc(t.name)}" aria-label="best design cross-section"></svg>` : `<div class="typ-prof empty muted">no solved design yet</div>`}
     </div>
     <p class="typ-desc">${esc(t.description || "")}</p>
+    ${typologyChipsHtml(t.name)}
     ${res ? `<div class="tbl-wrap"><table class="compact"><thead><tr><th>Brief</th><th>Tier</th><th class="r">Rank</th><th class="r">Score</th><th class="r">W×H×D mm</th></tr></thead><tbody>${res}</tbody></table></div>`
           : `<p class="muted" style="margin:0">Not run in any campaign yet.</p>`}
     <div class="typ-fits"><span class="muted">Screen on:</span> ${fits}</div>

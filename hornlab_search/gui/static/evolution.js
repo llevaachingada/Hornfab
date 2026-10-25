@@ -6,6 +6,7 @@
 // select enforce one rule both ways: 3D ⟺ improvements only ('every candidate' stays 2D).
 import { css, niceTicks, NS, el, familyColor } from "./charts.js";
 import { init3dFrames } from "./view3d.js";
+import { loadParamCatalog, paramTitle } from "./paramtips.js";
 
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const fmt = (v, d = 2) => v == null || !isFinite(v) ? "–" : Number(v).toFixed(d);
@@ -19,6 +20,7 @@ export async function viewEvolution(root, runId) {
     if (!r.ok) throw new Error(r.status + " " + (await r.text()));
     E = await r.json();
   } catch (e) { root.innerHTML = `<div class="alert error">Could not load: ${esc(e.message)}</div>`; return; }
+  await loadParamCatalog();   // P9: catalog-grounded knob hover docs; failure degrades to the raw key
   const F = E.frames || [];
   if (!F.length) { root.innerHTML = `<p class="muted">This run has no evaluations yet.</p>`; return; }
 
@@ -91,8 +93,10 @@ export async function viewEvolution(root, runId) {
   let S = {}, Fr = {}, Sc = {};
   function layout() {
     S = sideFrame(side, ext); Fr = frontFrame(front, ext, env); Sc = scoreFrame(score, F);
+    // knobs rows: the raw key stays the visible text; the title gains the catalog's label, unit,
+    // meaning and search bounds (P9) — paramTitle falls back to null, `?? k` keeps today's title.
     knobsEl.innerHTML = Object.entries(E.bounds || {}).map(([k, b]) => `
-      <div class="evo-knob"><span class="mono evo-kname" title="${esc(k)}">${esc(k)}</span>
+      <div class="evo-knob"><span class="mono evo-kname" title="${esc(paramTitle(E.name, k) ?? k)}">${esc(k)}</span>
         <span class="evo-kbar"><span class="evo-kmark" data-k="${esc(k)}"></span></span>
         <span class="mono evo-kval" data-v="${esc(k)}"></span></div>`).join("");
   }
