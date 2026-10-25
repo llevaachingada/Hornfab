@@ -22,9 +22,9 @@ from pathlib import Path
 
 import yaml
 
-#: Domains whose knob prose is authored. Later lanes append "rows" / "native".
+#: Domains whose knob prose is authored. The native lane appends "native" later.
 #: The drift test reads this tuple, so it is the single switch for domain coverage.
-DOMAINS: tuple[str, ...] = ("generators",)
+DOMAINS: tuple[str, ...] = ("generators", "rows")
 
 CATALOG_VERSION = 1
 
@@ -40,13 +40,22 @@ _BLOCK_KNOBS = (
     ("perturb.mode", ("perturb", "mode")),
 )
 
+#: Rows/grid spec keys a user can set and see, with their path inside ``generator:``.
+_ROWS_BLOCK_KNOBS = (
+    ("n_phi", ("n_phi",)),
+    ("n_s", ("n_s",)),
+    ("span", ("span",)),
+    ("wall_thickness_mm", ("wall_thickness_mm",)),
+)
+
 _VALIDATION_AUTHORITY = {
     "search": ("The `search` bounds are the search box copied from this typology's "
                "examples YAML. A design sitting on a bound is at the edge of the box the "
                "search was given; it is not evidence that the value is good."),
-    "hard": ("The `hard` limits are the mesher schema limits from families.KeySpec. They "
-             "exist so the mesher cannot be handed an illegal value; they are not "
-             "plausibility limits and they are not recommendations."),
+    "hard": ("The `hard` limits are the schema clamps: families.KeySpec for the mesher's "
+             "own family keys, and the named grid.py caps for the rows knobs. They exist "
+             "so an illegal value cannot be emitted; they are not plausibility limits and "
+             "they are not recommendations."),
     "recommendation": ("Neither the search box nor the hard limit implies a recommended "
                        "value. Defaults are starting points taken from their own authority, "
                        "not recommendations."),
@@ -75,6 +84,8 @@ def _dig(mapping: dict, path: tuple[str, ...]):
 def _plane_role(prefix: str) -> tuple[str | None, str | None]:
     if not prefix:
         return None, None
+    if prefix == "g":
+        return None, "rows"
     plane = "H" if prefix.startswith("h") else "V" if prefix.startswith("v") else None
     role = None
     if "first" in prefix:
@@ -146,7 +157,82 @@ def _merged(doc, context_id: str) -> dict:
     }
 
 
-def _hard_for(base: str) -> dict:
+def _rows_lookup_key(base: str) -> str:
+    """Map a pattern entry to the key used by ``GRID_DEFAULTS``."""
+    if base == "a{k}_throat":
+        return "a_throat"
+    if base == "a{k}_mouth":
+        return "a_mouth"
+    return base
+
+
+def _rows_default(base: str) -> tuple[object, dict | None]:
+    """Read the live rows default for ``base`` from the named grid.py maps.
+
+    Several maps contain the same name with different values (T, stop_deg, r_lip_mm);
+    in that case there is no single default and this returns ``None`` instead of picking
+    a winner. The per-typology config seed supplies those values.
+    """
+    from ..generators import grid
+
+    key = _rows_lookup_key(base)
+    maps = ("GRID_DEFAULTS", "ROWS_KNOB_DEFAULTS", "ROWS_LECLEACH_KNOB_DEFAULTS",
+            "ROWS_MOD_KNOB_DEFAULTS", "ROWS_AR_KNOB_DEFAULTS",
+            "ROWS_IWATA_KNOB_DEFAULTS", "ROWS_TOROIDAL_KNOB_DEFAULTS")
+    found: dict[str, object] = {}
+    for map_name in maps:
+        table = getattr(grid, map_name, {})
+        if key in table:
+            found[map_name] = table[key]
+    if not found or len(set(found.values())) != 1:
+        return None, None
+    map_name = sorted(found)[0]
+    return next(iter(found.values())), {
+        "file": "hornlab_search/design/generators/grid.py",
+        "key": f"{map_name}.{key}",
+    }
+
+
+def _rows_hard(base: str) -> dict:
+    """Read the named grid.py caps for ``base``. No numeric literal is authored here."""
+    from ..generators import grid
+    from .knobs_rows import ROWS_HARD_SOURCES
+
+    lo = hi = None
+    choices = None
+    kind_name = None
+    if base == "x_amp":
+        lo, hi = -grid.ROWS_MAX_X_AMP, grid.ROWS_MAX_X_AMP
+    elif base == "x_fc":
+        hi = grid.ROWS_MAX_X_FC
+    elif base == "r_lip_mm":
+        hi = grid.ROWS_MAX_R_LIP_MM
+    elif base in ("bend_b1_mm", "bend_sin1_mm"):
+        lo, hi = -grid.ROWS_MAX_BEND_MM, grid.ROWS_MAX_BEND_MM
+    elif base == "eps_m":
+        lo, hi = -grid.ROWS_MAX_EPS, grid.ROWS_MAX_EPS
+    elif base == "ripple_lobes":
+        lo, hi = grid.ROWS_RIPPLE_LOBES_RANGE
+        choices = [int(v) for v in range(int(lo), int(hi) + 1, 2)]
+        kind_name = "int"
+    elif base == "ripple_amp_mm":
+        hi = grid.ROWS_MAX_RIPPLE_AMP_MM
+    elif base == "span":
+        choices = list(grid.ROWS_SPANS)
+        kind_name = "str"
+    source = ROWS_HARD_SOURCES.get(base)
+    note = ("named grid.py cap" if source is not None else
+            "the grid validator enforces this knob without a named cap constant")
+    if base == "pnorm":
+        note = ("the grid validator's minimum is a literal in _shape_knobs, not a named "
+                "constant")
+    return {"lo": lo, "hi": hi, "kind": kind_name, "choices": choices,
+            "section": None, "source": source, "note": note}
+
+
+def _hard_for(base: str, kind: str = "generator") -> dict:
+    if kind == "rows":
+        return _rows_hard(base)
     from .knobs_generators import family_key_spec
 
     spec = family_key_spec(base)
@@ -170,7 +256,7 @@ def _hard_for(base: str) -> dict:
     return hard
 
 
-def _placeholder(name: str, base: str, context_id: str) -> dict:
+def _placeholder(name: str, base: str, context_id: str, kind: str = "generator") -> dict:
     return {
         "knob": name,
         "base_knob": base,
@@ -193,21 +279,25 @@ def _placeholder(name: str, base: str, context_id: str) -> dict:
         "default_source": None,
         "search": None,
         "bounds_source": None,
-        "hard": _hard_for(base),
+        "hard": _hard_for(base, kind),
         "contexts": [],
     }
 
 
 def _default_for(name: str, base: str, seed: dict, bounds: dict, gen: dict,
-                 config_rel: str, doc) -> tuple[object, dict | None]:
+                 config_rel: str, doc, kind: str = "generator"
+                 ) -> tuple[object, dict | None]:
     if name in seed:
         return seed[name], {"file": config_rel, "key": f"seed_params.{name}"}
-    for block_name, path in _BLOCK_KNOBS:
+    blocks = _ROWS_BLOCK_KNOBS if kind == "rows" else _BLOCK_KNOBS
+    for block_name, path in blocks:
         if block_name != name:
             continue
         value = _dig(gen, path)
         if value is not None:
             return value, {"file": config_rel, "key": "generator." + ".".join(path)}
+    if kind == "rows":
+        return _rows_default(base)
     if doc is not None and doc.default is not None:
         return doc.default, {
             "file": "hornlab_search/design/generators/registry.py",
@@ -218,29 +308,57 @@ def _default_for(name: str, base: str, seed: dict, bounds: dict, gen: dict,
 
 def _knob_entries(name: str, *, seed: dict, bounds: dict, gen: dict, config_rel: str,
                   kinds: list[str], kind: str, documented: bool) -> list[dict]:
-    from .knobs_generators import GENERATOR_KNOBS, split_knob
-
     if not documented:
         return []
-    names = set(seed) | set(bounds)
-    for block_name, path in _BLOCK_KNOBS:
-        if _dig(gen, path) is not None:
-            names.add(block_name)
-        elif path[0] == "perturb" and isinstance(gen.get("perturb"), dict):
-            # A perturb block exists, so its mode/clip are visible even when the config
-            # relies on the generator's absence semantics (documented, never invented).
-            names.add(block_name)
+
+    notes: dict = {}
+    if kind == "rows":
+        from .knobs_rows import ROWS_KNOBS, ROWS_TYPOLOGY_NOTES, split_rows_knob
+
+        table = ROWS_KNOBS
+        splitter = split_rows_knob
+        block_spec = _ROWS_BLOCK_KNOBS
+        # The four spec keys are visible even when a config relies on a generator
+        # default/absence rule; their values still come from the config when present.
+        names = set(seed) | set(bounds) | {block_name for block_name, _ in block_spec}
+        notes = ROWS_TYPOLOGY_NOTES.get(name, {})
+    else:
+        from .knobs_generators import GENERATOR_KNOBS, split_knob
+
+        table = GENERATOR_KNOBS
+        splitter = split_knob
+        block_spec = _BLOCK_KNOBS
+        names = set(seed) | set(bounds)
+        for block_name, path in block_spec:
+            if _dig(gen, path) is not None:
+                names.add(block_name)
+            elif path[0] == "perturb" and isinstance(gen.get("perturb"), dict):
+                # A perturb block exists, so its mode/clip are visible even when the
+                # config relies on the generator's absence semantics.
+                names.add(block_name)
 
     out: list[dict] = []
     for knob in sorted(names):
-        base, prefix = split_knob(knob)
+        base, prefix = splitter(knob)
         plane, role = _plane_role(prefix)
-        doc = GENERATOR_KNOBS.get(base)
+        doc = table.get(base)
         if doc is None:
-            out.append(_placeholder(knob, base, _KIND_DOMAIN.get(kind, kind)))
+            out.append(_placeholder(knob, base, _KIND_DOMAIN.get(kind, kind), kind))
             continue
         context_id = _context_id(kind, kinds, base, doc)
         merged = _merged(doc, context_id)
+        note = notes.get(base)
+        if note is not None:
+            # Per-typology meaning (ROWS_TYPOLOGY_NOTES) wins over the shared rows text.
+            merged = dict(merged)
+            merged["label"] = note.label
+            merged["summary"] = note.summary
+            merged["detail"] = note.detail
+            if note.formula is not None:
+                merged["formula"] = note.formula
+            if note.physical:
+                merged["physical"] = note.physical
+            merged["flags"] = sorted(set(merged["flags"]) | set(note.flags))
         label = merged["label"]
         if plane:
             lowered = (f"{label[:1].lower()}{label[1:]}"
@@ -248,7 +366,8 @@ def _knob_entries(name: str, *, seed: dict, bounds: dict, gen: dict, config_rel:
             label = f"{plane}-plane {lowered}"
         if role:
             label = f"{label} ({role})"
-        default, default_source = _default_for(knob, base, seed, bounds, gen, config_rel, doc)
+        default, default_source = _default_for(
+            knob, base, seed, bounds, gen, config_rel, doc, kind)
         bound = bounds.get(knob)
         search = None
         bounds_source = None
@@ -281,11 +400,10 @@ def _knob_entries(name: str, *, seed: dict, bounds: dict, gen: dict, config_rel:
             "default_source": default_source,
             "search": search,
             "bounds_source": bounds_source,
-            "hard": _hard_for(base),
-            "contexts": sorted(doc.contexts),
+            "hard": _hard_for(base, kind),
+            "contexts": sorted(set(doc.contexts) | set(notes)),
         })
     return out
-
 
 def _kind_of(gen: dict) -> str:
     if not isinstance(gen, dict) or not gen:

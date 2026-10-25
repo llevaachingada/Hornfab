@@ -14,7 +14,7 @@ import pytest
 import yaml
 
 from hornlab_search.design import families
-from hornlab_search.design.generators import registry
+from hornlab_search.design.generators import grid, registry
 from hornlab_search.design.params import (
     all_typologies,
     bounds_for,
@@ -25,10 +25,16 @@ from hornlab_search.design.params import (
 )
 from hornlab_search.design.params.catalog import (
     DOMAINS,
+    _rows_default,
     build_catalog,
     catalog_json_bytes,
 )
 from hornlab_search.design.params.knobs_generators import GENERATOR_KNOBS
+from hornlab_search.design.params.knobs_rows import (
+    ROWS_KNOBS,
+    ROWS_TYPOLOGY_NOTES,
+    split_rows_knob,
+)
 from hornlab_search.design.params.schema import (
     FLAGS,
     SUMMARY_LIMIT,
@@ -155,21 +161,24 @@ def test_catalog_resolves_catalog_and_uncatalogued_configs():
 
 def test_metadata_validates():
     problems = validate_knob_docs(GENERATOR_KNOBS)
+    problems += validate_knob_docs(ROWS_KNOBS)
     assert not problems, "\n".join(problems)
 
 
 def test_summaries_are_short_and_placeholder_free():
-    for name, doc in GENERATOR_KNOBS.items():
-        assert len(doc.summary) <= SUMMARY_LIMIT, f"{name}: summary too long"
-        assert validate_knob_doc(doc) == [], f"{name}: invalid"
-        assert doc.flags <= FLAGS
+    for table in (GENERATOR_KNOBS, ROWS_KNOBS):
+        for name, doc in table.items():
+            assert len(doc.summary) <= SUMMARY_LIMIT, f"{name}: summary too long"
+            assert validate_knob_doc(doc) == [], f"{name}: invalid"
+            assert doc.flags <= FLAGS
 
 
 # ------------------------------------------------------------------ anchors resolve
 
 
 def test_code_refs_resolve():
-    refs = {doc.code_ref for doc in GENERATOR_KNOBS.values() if doc.code_ref}
+    refs = {doc.code_ref for table in (GENERATOR_KNOBS, ROWS_KNOBS)
+            for doc in table.values() if doc.code_ref}
     catalog = build_catalog(ROOT)
     for typ in catalog["typologies"].values():
         refs.update(k["code_ref"] for k in typ["knobs"] if k.get("code_ref"))
@@ -181,9 +190,10 @@ def test_code_refs_resolve():
 
 def test_doc_refs_exist_and_headings_are_present():
     refs: set[tuple[str, str]] = set()
-    for doc in GENERATOR_KNOBS.values():
-        if doc.doc_ref and doc.doc_ref[0]:
-            refs.add(tuple(doc.doc_ref))
+    for table in (GENERATOR_KNOBS, ROWS_KNOBS):
+        for doc in table.values():
+            if doc.doc_ref and doc.doc_ref[0]:
+                refs.add(tuple(doc.doc_ref))
     catalog = build_catalog(ROOT)
     for typ in catalog["typologies"].values():
         for knob in typ["knobs"]:
@@ -235,6 +245,135 @@ def test_deferred_native_meaning_is_not_invented():
     assert GENERATOR_KNOBS["exponent"].contexts["generator"].summary
 
 
+# ------------------------------------------------------------------ rows domain
+
+
+def _rows_typologies(catalog: dict) -> dict[str, dict]:
+    return {name: typ for name, typ in catalog["typologies"].items()
+            if typ["kind"] == "rows"}
+
+
+def _live_rows_default(base: str):
+    """Independent read of the live grid.py default (no catalog helper)."""
+    key = ("a_throat" if base == "a{k}_throat"
+           else "a_mouth" if base == "a{k}_mouth" else base)
+    maps = ("GRID_DEFAULTS", "ROWS_KNOB_DEFAULTS", "ROWS_LECLEACH_KNOB_DEFAULTS",
+            "ROWS_MOD_KNOB_DEFAULTS", "ROWS_AR_KNOB_DEFAULTS",
+            "ROWS_IWATA_KNOB_DEFAULTS", "ROWS_TOROIDAL_KNOB_DEFAULTS")
+    found = {}
+    for map_name in maps:
+        table = getattr(grid, map_name, {})
+        if key in table:
+            found[map_name] = table[key]
+    if not found or len(set(found.values())) != 1:
+        return None
+    return next(iter(found.values()))
+
+
+def test_rows_domain_is_claimed_and_all_rows_typologies_resolve_with_knobs():
+    assert "rows" in domains_covered()
+    catalog = build_catalog(ROOT)
+    rows = _rows_typologies(catalog)
+    assert rows, "no rows typologies resolved"
+    for name, typ in rows.items():
+        assert typ["documented"] is True, f"{name}: rows domain is claimed but not documented"
+        assert typ["knobs"], f"{name}: documented rows typology has no knobs"
+
+
+def test_every_rows_config_search_key_has_a_rows_doc():
+    """The gate: every seed/bounds key in every rows config resolves to ROWS_KNOBS."""
+    catalog = build_catalog(ROOT)
+    for name, typ in _rows_typologies(catalog).items():
+        data = yaml.safe_load((ROOT / typ["config_path"]).read_text(encoding="utf-8"))
+        keys = set(data.get("seed_params") or {}) | set(data.get("bounds") or {})
+        for key in sorted(keys):
+            base, _prefix = split_rows_knob(key)
+            doc = ROWS_KNOBS.get(base)
+            assert doc is not None, (
+                f"{name}: search key {key!r} resolves to {base!r}, which has no "
+                "ROWS_KNOBS entry (document it, or flag it as a non-knob)")
+
+
+def test_rows_docs_author_no_defaults_or_hard_numbers():
+    """Prose only: catalog reads every value from grid.py, never from this module."""
+    for name, doc in ROWS_KNOBS.items():
+        assert doc.default is None, f"{name}: ROWS_KNOBS must not author a default"
+        assert doc.hard_lo is None and doc.hard_hi is None, (
+            f"{name}: ROWS_KNOBS must not author a hard limit")
+
+
+def test_rows_default_helper_equals_the_live_grid_default_exactly():
+    for base in ROWS_KNOBS:
+        value, source = _rows_default(base)
+        expected = _live_rows_default(base)
+        assert value == expected, (
+            f"{base}: catalog default {value!r} != live grid.py default {expected!r}")
+        if expected is None:
+            assert source is None, f"{base}: no single grid default, so no source"
+        else:
+            assert source is not None and source["file"].endswith("grid.py"), (
+                f"{base}: a grid default must cite grid.py")
+
+
+def test_rows_emitted_grid_defaults_match_the_live_map():
+    catalog = build_catalog(ROOT)
+    for name, typ in _rows_typologies(catalog).items():
+        for knob in typ["knobs"]:
+            src = knob.get("default_source")
+            if not src or not src["file"].endswith("grid.py"):
+                continue
+            map_name, _, key = src["key"].partition(".")
+            live = getattr(grid, map_name)
+            assert knob["default"] == live[key], (
+                f"{name}.{knob['knob']}: emitted default {knob['default']!r} != "
+                f"{map_name}.{key} {live[key]!r}")
+
+
+def test_rows_span_choices_come_from_grid():
+    catalog = build_catalog(ROOT)
+    for name, typ in _rows_typologies(catalog).items():
+        span = next((k for k in typ["knobs"] if k["knob"] == "span"), None)
+        if span is None:
+            continue
+        assert span["hard"]["choices"] == list(grid.ROWS_SPANS), (
+            f"{name}: span choices must be grid.ROWS_SPANS")
+
+
+def test_rows_hard_caps_are_read_from_named_grid_constants():
+    catalog = build_catalog(ROOT)
+    signed = catalog["typologies"]["salmon_x_signed"]
+    xamp = next(k for k in signed["knobs"] if k["knob"] == "g_x_amp")
+    assert (xamp["hard"]["lo"], xamp["hard"]["hi"]) == (
+        -grid.ROWS_MAX_X_AMP, grid.ROWS_MAX_X_AMP)
+    assert xamp["hard"]["source"]["key"] == "ROWS_MAX_X_AMP"
+
+
+def test_rows_typology_notes_are_valid_prose():
+    bad = ("todo", "tbd", "???", "lorem")
+    for name, notes in ROWS_TYPOLOGY_NOTES.items():
+        assert notes, f"{name}: empty override mapping"
+        for base, ctx in notes.items():
+            assert base in ROWS_KNOBS, f"{name}: override for unknown base {base!r}"
+            assert len(ctx.summary) <= SUMMARY_LIMIT, f"{name}.{base}: summary too long"
+            assert ctx.detail.strip(), f"{name}.{base}: empty detail"
+            assert ctx.physical.strip(), f"{name}.{base}: empty physical effect"
+            text = (ctx.label + " " + ctx.summary + " " + ctx.detail).lower()
+            assert not any(tok in text for tok in bad), f"{name}.{base}: placeholder"
+
+
+def test_rows_typology_notes_are_wired_and_typed():
+    catalog = build_catalog(ROOT)
+    rows = _rows_typologies(catalog)
+    for name in ROWS_TYPOLOGY_NOTES:
+        assert name in rows, f"note for a typology that is not a rows config: {name}"
+    signed = {k["knob"]: k for k in rows["salmon_x_signed"]["knobs"]}["g_x_amp"]
+    shaped = {k["knob"]: k for k in rows["salmon_x_shape"]["knobs"]}["g_x_amp"]
+    assert signed["summary"] != shaped["summary"], "the signed-X override did not apply"
+    assert "negative" in signed["summary"].lower()
+    lecl = {k["knob"]: k for k in rows["lecleach_rollback"]["knobs"]}["g_stop_deg"]
+    assert "fourcade" in lecl["summary"].lower(), "the verified-march override did not apply"
+
+
 # ------------------------------------------------------------------ public API never raises
 
 
@@ -253,9 +392,7 @@ def test_bounds_source_points_at_the_yaml_that_owns_the_box():
     assert rm["bounds_source"] == {
         "file": "examples/typologies/conical.yaml", "key": "bounds.h_rm_mm"}
     rows = catalog["typologies"]["salmon_elliptical"]
-    # Rows prose belongs to another lane, so nothing is fabricated here...
-    assert rows["documented"] is False and rows["knobs"] == []
-    # ...but the REAL bound still carries its exact YAML location for the GUI editor.
+    assert rows["documented"] is True and rows["knobs"]
     rb = bounds_for("salmon_elliptical", "g_stop_deg")
     assert rb["bounds_source"] == {
         "file": "examples/typologies/salmon_elliptical.yaml", "key": "bounds.g_stop_deg"}
@@ -263,4 +400,4 @@ def test_bounds_source_points_at_the_yaml_that_owns_the_box():
         (ROOT / "examples/typologies/salmon_elliptical.yaml").read_text(encoding="utf-8"))
     assert rb["search"]["lo"] == raw["bounds"]["g_stop_deg"]["lo"]
     assert rb["search"]["hi"] == raw["bounds"]["g_stop_deg"]["hi"]
-    assert rb["documented"] is False
+    assert rb["documented"] is True

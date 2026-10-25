@@ -1,7 +1,8 @@
 {
   "catalog_version": 1,
   "domains_covered": [
-    "generators"
+    "generators",
+    "rows"
   ],
   "typologies": {
     "biradial_keele": {
@@ -2000,13 +2001,287 @@
       "brief_tied": null,
       "config_path": "examples/typologies/grid_ellipse.yaml",
       "description": "point-grid adapter, plain ellipse section (pnorm 2, zero modulation), 2 knobs",
-      "documented": false,
+      "documented": true,
       "driver_exit_mm": null,
       "family": "FREEFORM",
       "group": "classical",
       "kind": "rows",
-      "knob_names": [],
-      "knobs": [],
+      "knob_names": [
+        "L_mm",
+        "h_rm_mm",
+        "n_phi",
+        "n_s",
+        "span",
+        "wall_thickness_mm"
+      ],
+      "knobs": [
+        {
+          "base_knob": "L_mm",
+          "bounds_source": {
+            "file": "examples/typologies/grid_ellipse.yaml",
+            "key": "bounds.L_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._meridians",
+          "context": "rows",
+          "contexts": [
+            "L_mm",
+            "h_rm_mm"
+          ],
+          "default": 180.0,
+          "default_source": {
+            "file": "examples/typologies/grid_ellipse.yaml",
+            "key": "seed_params.L_mm"
+          },
+          "detail": "This typology is the plain-ellipse UTILITY comparison for the GRID route: it reuses the conical meridians and adds no modulation. The depth is therefore the same shared span the classical conical config uses.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "z = s L, with s the normalised axial fraction",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "L_mm",
+          "label": "Utility comparison depth",
+          "physical": "Moves the comparison grid's mouth plane along the axis.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": {
+            "hi": 220.0,
+            "lo": 120.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Shared depth of the zero-modulation GRID comparison grid.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "h_rm_mm",
+          "bounds_source": {
+            "file": "examples/typologies/grid_ellipse.yaml",
+            "key": "bounds.h_rm_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._meridians",
+          "context": "rows",
+          "contexts": [
+            "L_mm",
+            "h_rm_mm"
+          ],
+          "default": 120.0,
+          "default_source": {
+            "file": "examples/typologies/grid_ellipse.yaml",
+            "key": "seed_params.h_rm_mm"
+          },
+          "detail": "The grid radius field interpolates the conical meridians; this is the horizontal one. It is a UTILITY comparison, not a new published typology.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "r_H(s) interpolated onto the common z grid",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "h_rm_mm",
+          "label": "Utility comparison mouth radius",
+          "physical": "Sets the comparison grid's horizontal half-width.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": {
+            "hi": 175.0,
+            "lo": 60.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Horizontal meridian mouth radius of the zero-modulation comparison grid.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "n_phi",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [
+            "L_mm",
+            "h_rm_mm"
+          ],
+          "default": 13,
+          "default_source": {
+            "file": "examples/typologies/grid_ellipse.yaml",
+            "key": "generator.n_phi"
+          },
+          "detail": "The row count sets the angular sampling of the point grid. The quarter model, half model and full ring each have their own minimum and parity rules in the generator. It is a count, not a length.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "n_phi",
+          "label": "Azimuth row count",
+          "physical": "Raises angular fidelity at the cost of more grid rows.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Number of azimuth rows in the rows/grid model.",
+          "unit": null
+        },
+        {
+          "base_knob": "n_s",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [
+            "L_mm",
+            "h_rm_mm"
+          ],
+          "default": 32,
+          "default_source": {
+            "file": "examples/typologies/grid_ellipse.yaml",
+            "key": "generator.n_s"
+          },
+          "detail": "Each row is sampled at equal axial (or equal-arc, for the rows march) fractions. This count sets the longitudinal resolution. It is a count, not a length.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "n_s",
+          "label": "Axial station count",
+          "physical": "Raises longitudinal fidelity at the cost of more points.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Number of axial stations along each row.",
+          "unit": null
+        },
+        {
+          "base_knob": "span",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_span_requested",
+          "context": "rows",
+          "contexts": [
+            "L_mm",
+            "h_rm_mm"
+          ],
+          "default": null,
+          "default_source": null,
+          "detail": "The legal spans are the ones the generator handles, and their names are read from the generator's own span constant rather than retyped here. A kind can force a span: an odd-cosine asymmetry forces the full ring and a b-term forces the half model.",
+          "doc_ref": [
+            "docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md",
+            "### 2.5 Up/down-asymmetric saddle"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": [
+              "quarter",
+              "half",
+              "full"
+            ],
+            "hi": null,
+            "kind": "str",
+            "lo": null,
+            "note": "named grid.py cap",
+            "section": null,
+            "source": {
+              "file": "hornlab_search/design/generators/grid.py",
+              "key": "ROWS_SPANS"
+            }
+          },
+          "knob": "span",
+          "label": "Row span",
+          "physical": "Chooses whether the mesh uses mirror planes or a seam-free full ring.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "How much of the azimuth circle the rows model covers.",
+          "unit": null
+        },
+        {
+          "base_knob": "wall_thickness_mm",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [
+            "L_mm",
+            "h_rm_mm"
+          ],
+          "default": 3.0,
+          "default_source": {
+            "file": "examples/typologies/grid_ellipse.yaml",
+            "key": "generator.wall_thickness_mm"
+          },
+          "detail": "The point-grid route builds an explicit outer shell offset from each row's own profile. This is the printed shell thickness, not an acoustic dimension. The generator also uses it in its self-approach guard.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "wall_thickness_mm",
+          "label": "Shell thickness",
+          "physical": "Changes the printed wall thickness, not the acoustic inner surface.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Outer-shell thickness of a freestanding rows model.",
+          "unit": "mm"
+        }
+      ],
       "name": "grid_ellipse",
       "source_status": "catalog",
       "symmetry": "axisymmetric"
@@ -2066,13 +2341,497 @@
       "brief_tied": null,
       "config_path": "examples/typologies/grid_ellipse_mod.yaml",
       "description": "point-grid adapter, G8/G9 modulated mouth (a1 0.06, a2 -0.03, 2 mm side rollback), 2 knobs",
-      "documented": false,
+      "documented": true,
       "driver_exit_mm": null,
       "family": "FREEFORM",
       "group": "classical",
       "kind": "rows",
-      "knob_names": [],
-      "knobs": [],
+      "knob_names": [
+        "L_mm",
+        "g_a1_mouth",
+        "g_a2_mouth",
+        "g_pnorm",
+        "g_term_side_mm",
+        "h_rm_mm",
+        "n_phi",
+        "n_s",
+        "span",
+        "wall_thickness_mm"
+      ],
+      "knobs": [
+        {
+          "base_knob": "L_mm",
+          "bounds_source": {
+            "file": "examples/typologies/grid_ellipse_mod.yaml",
+            "key": "bounds.L_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._meridians",
+          "context": "rows",
+          "contexts": [
+            "a{k}_mouth",
+            "pnorm",
+            "term_side_mm"
+          ],
+          "default": 180.0,
+          "default_source": {
+            "file": "examples/typologies/grid_ellipse_mod.yaml",
+            "key": "seed_params.L_mm"
+          },
+          "detail": "The grid interpolates the horizontal and vertical meridians onto one common z grid, so the depth is shared rather than a per-plane length. It is not the march length of a rows kind; those derive depth from their stop. The brief envelope still bounds the final design.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "z = s L, with s the normalised axial fraction",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "L_mm",
+          "label": "Depth",
+          "physical": "Moves the mouth plane in or out along the horn axis.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": {
+            "hi": 220.0,
+            "lo": 120.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Shared axial depth of both meridians used by the GRID radius field.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "a{k}_mouth",
+          "bounds_source": {
+            "file": "examples/typologies/grid_ellipse_mod.yaml",
+            "key": "bounds.g_a1_mouth"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "a{k}_mouth",
+            "pnorm",
+            "term_side_mm"
+          ],
+          "default": 0.06,
+          "default_source": {
+            "file": "examples/typologies/grid_ellipse_mod.yaml",
+            "key": "seed_params.g_a1_mouth"
+          },
+          "detail": "The shipped comparison pins one low-order pair: a1 is the 2-phi corner fill and a2 the 4-phi lobe. These are UTILITY comparison values, not a search.",
+          "doc_ref": [
+            "docs/research/typologies/SALMON_X_HORN_EXPANSION_2026-10-25.md",
+            "### 3.4 Rows-route shape modulation (G8 on rows) - corner fill, lobes, superellipse-ish"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "a_k(s) = (1 - s) a_k_throat + s a_k_mouth",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_a1_mouth",
+          "label": "G8/G9 comparison mouth modulation (rows)",
+          "physical": "Adds the comparison grid's corner fill and mouth lobes.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 0.06,
+            "lo": 0.06,
+            "log": false,
+            "search": false
+          },
+          "summary": "Even-Fourier mouth coefficient of the G8/G9 modulated comparison grid.",
+          "unit": null
+        },
+        {
+          "base_knob": "a{k}_mouth",
+          "bounds_source": {
+            "file": "examples/typologies/grid_ellipse_mod.yaml",
+            "key": "bounds.g_a2_mouth"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "a{k}_mouth",
+            "pnorm",
+            "term_side_mm"
+          ],
+          "default": -0.03,
+          "default_source": {
+            "file": "examples/typologies/grid_ellipse_mod.yaml",
+            "key": "seed_params.g_a2_mouth"
+          },
+          "detail": "The shipped comparison pins one low-order pair: a1 is the 2-phi corner fill and a2 the 4-phi lobe. These are UTILITY comparison values, not a search.",
+          "doc_ref": [
+            "docs/research/typologies/SALMON_X_HORN_EXPANSION_2026-10-25.md",
+            "### 3.4 Rows-route shape modulation (G8 on rows) - corner fill, lobes, superellipse-ish"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "a_k(s) = (1 - s) a_k_throat + s a_k_mouth",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_a2_mouth",
+          "label": "G8/G9 comparison mouth modulation (rows)",
+          "physical": "Adds the comparison grid's corner fill and mouth lobes.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": -0.03,
+            "lo": -0.03,
+            "log": false,
+            "search": false
+          },
+          "summary": "Even-Fourier mouth coefficient of the G8/G9 modulated comparison grid.",
+          "unit": null
+        },
+        {
+          "base_knob": "pnorm",
+          "bounds_source": {
+            "file": "examples/typologies/grid_ellipse_mod.yaml",
+            "key": "bounds.g_pnorm"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "a{k}_mouth",
+            "pnorm",
+            "term_side_mm"
+          ],
+          "default": 2.0,
+          "default_source": {
+            "file": "examples/typologies/grid_ellipse_mod.yaml",
+            "key": "seed_params.g_pnorm"
+          },
+          "detail": "The shipped comparison keeps the constant-exponent simplification. This is the exponent that the plain grid leaves at its default.",
+          "doc_ref": [
+            "docs/research/typologies/SALMON_X_HORN_EXPANSION_2026-10-25.md",
+            "### 3.4 Rows-route shape modulation (G8 on rows) - corner fill, lobes, superellipse-ish"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "superellipse blend of r_H and r_V at each s",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator's minimum is a literal in _shape_knobs, not a named constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_pnorm",
+          "label": "Utility comparison exponent (rows)",
+          "physical": "Rounds or squares the modulated comparison cross-section.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 2.0,
+            "lo": 2.0,
+            "log": false,
+            "search": false
+          },
+          "summary": "Superellipse exponent of the G8/G9 modulated comparison grid.",
+          "unit": null
+        },
+        {
+          "base_knob": "term_side_mm",
+          "bounds_source": {
+            "file": "examples/typologies/grid_ellipse_mod.yaml",
+            "key": "bounds.g_term_side_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "a{k}_mouth",
+            "pnorm",
+            "term_side_mm"
+          ],
+          "default": 2.0,
+          "default_source": {
+            "file": "examples/typologies/grid_ellipse_mod.yaml",
+            "key": "seed_params.g_term_side_mm"
+          },
+          "detail": "The comparison pins a small positive side rollback. Positive still means rollback; the implementation negates the stored value.",
+          "doc_ref": [
+            "docs/research/typologies/SALMON_X_HORN_EXPANSION_2026-10-25.md",
+            "### 3.4 Rows-route shape modulation (G8 on rows) - corner fill, lobes, superellipse-ish"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "dz_mouth(phi) = -|term_side_mm| cos^2(phi)",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_term_side_mm",
+          "label": "G9 comparison side rollback (rows)",
+          "physical": "Rolls the comparison grid's side mouth edges back.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 2.0,
+            "lo": 2.0,
+            "log": false,
+            "search": false
+          },
+          "summary": "Side rollback depth of the G8/G9 modulated comparison grid.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "h_rm_mm",
+          "bounds_source": {
+            "file": "examples/typologies/grid_ellipse_mod.yaml",
+            "key": "bounds.h_rm_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._meridians",
+          "context": "rows",
+          "contexts": [
+            "a{k}_mouth",
+            "pnorm",
+            "term_side_mm"
+          ],
+          "default": 120.0,
+          "default_source": {
+            "file": "examples/typologies/grid_ellipse_mod.yaml",
+            "key": "seed_params.h_rm_mm"
+          },
+          "detail": "The GRID surface uses the two meridian radii, not a single horn radius. This is the horizontal meridian's target mouth radius; the vertical one comes from its own profile. It is a meridian knob, not a mouth-outline knob.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "r_H(s) interpolated onto the common z grid",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "h_rm_mm",
+          "label": "Horizontal mouth radius",
+          "physical": "Sets the horizontal half-width of the mouth.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": {
+            "hi": 175.0,
+            "lo": 60.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Horizontal meridian's mouth radius fed into the GRID radius field.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "n_phi",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [
+            "a{k}_mouth",
+            "pnorm",
+            "term_side_mm"
+          ],
+          "default": 13,
+          "default_source": {
+            "file": "examples/typologies/grid_ellipse_mod.yaml",
+            "key": "generator.n_phi"
+          },
+          "detail": "The row count sets the angular sampling of the point grid. The quarter model, half model and full ring each have their own minimum and parity rules in the generator. It is a count, not a length.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "n_phi",
+          "label": "Azimuth row count",
+          "physical": "Raises angular fidelity at the cost of more grid rows.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Number of azimuth rows in the rows/grid model.",
+          "unit": null
+        },
+        {
+          "base_knob": "n_s",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [
+            "a{k}_mouth",
+            "pnorm",
+            "term_side_mm"
+          ],
+          "default": 32,
+          "default_source": {
+            "file": "examples/typologies/grid_ellipse_mod.yaml",
+            "key": "generator.n_s"
+          },
+          "detail": "Each row is sampled at equal axial (or equal-arc, for the rows march) fractions. This count sets the longitudinal resolution. It is a count, not a length.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "n_s",
+          "label": "Axial station count",
+          "physical": "Raises longitudinal fidelity at the cost of more points.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Number of axial stations along each row.",
+          "unit": null
+        },
+        {
+          "base_knob": "span",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_span_requested",
+          "context": "rows",
+          "contexts": [
+            "a{k}_mouth",
+            "pnorm",
+            "term_side_mm"
+          ],
+          "default": null,
+          "default_source": null,
+          "detail": "The legal spans are the ones the generator handles, and their names are read from the generator's own span constant rather than retyped here. A kind can force a span: an odd-cosine asymmetry forces the full ring and a b-term forces the half model.",
+          "doc_ref": [
+            "docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md",
+            "### 2.5 Up/down-asymmetric saddle"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": [
+              "quarter",
+              "half",
+              "full"
+            ],
+            "hi": null,
+            "kind": "str",
+            "lo": null,
+            "note": "named grid.py cap",
+            "section": null,
+            "source": {
+              "file": "hornlab_search/design/generators/grid.py",
+              "key": "ROWS_SPANS"
+            }
+          },
+          "knob": "span",
+          "label": "Row span",
+          "physical": "Chooses whether the mesh uses mirror planes or a seam-free full ring.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "How much of the azimuth circle the rows model covers.",
+          "unit": null
+        },
+        {
+          "base_knob": "wall_thickness_mm",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [
+            "a{k}_mouth",
+            "pnorm",
+            "term_side_mm"
+          ],
+          "default": 3.0,
+          "default_source": {
+            "file": "examples/typologies/grid_ellipse_mod.yaml",
+            "key": "generator.wall_thickness_mm"
+          },
+          "detail": "The point-grid route builds an explicit outer shell offset from each row's own profile. This is the printed shell thickness, not an acoustic dimension. The generator also uses it in its self-approach guard.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "wall_thickness_mm",
+          "label": "Shell thickness",
+          "physical": "Changes the printed wall thickness, not the acoustic inner surface.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Outer-shell thickness of a freestanding rows model.",
+          "unit": "mm"
+        }
+      ],
       "name": "grid_ellipse_mod",
       "source_status": "catalog",
       "symmetry": "hv"
@@ -3429,13 +4188,452 @@
       "brief_tied": null,
       "config_path": "examples/typologies/lecleach_asym_odd.yaml",
       "description": "Le Cleac'h (Fourcade 2015) march + odd-cosine one-sided asymmetry, full ring (5 knobs); labeled reconstruction",
-      "documented": false,
+      "documented": true,
       "driver_exit_mm": null,
       "family": "FREEFORM",
       "group": "organic",
       "kind": "rows",
-      "knob_names": [],
-      "knobs": [],
+      "knob_names": [
+        "g_T",
+        "g_eps_m",
+        "g_eps_start",
+        "g_fc_hz",
+        "g_stop_deg",
+        "n_phi",
+        "n_s",
+        "span",
+        "wall_thickness_mm"
+      ],
+      "knobs": [
+        {
+          "base_knob": "T",
+          "bounds_source": {
+            "file": "examples/typologies/lecleach_asym_odd.yaml",
+            "key": "bounds.g_T"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "eps_m",
+            "eps_start",
+            "rows"
+          ],
+          "default": 0.8,
+          "default_source": {
+            "file": "examples/typologies/lecleach_asym_odd.yaml",
+            "key": "seed_params.g_T"
+          },
+          "detail": "The two row families share the spelling but not the equation. The Salmon rows use it in the family area law; the verified Le Cleac'h rows use it in the Fourcade wavefront-area law.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [
+            "overloaded"
+          ],
+          "formula": "Salmon family law; Fourcade eq. 42",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_T",
+          "label": "Rows family factor (rows)",
+          "physical": "Selects the family member and its expansion profile.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 1.0,
+            "lo": 0.3,
+            "log": false,
+            "search": true
+          },
+          "summary": "Salmon family T on the Salmon rows; Fourcade area-law T on the Le Cleac'h rows.",
+          "unit": null
+        },
+        {
+          "base_knob": "eps_m",
+          "bounds_source": {
+            "file": "examples/typologies/lecleach_asym_odd.yaml",
+            "key": "bounds.g_eps_m"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_lecleach_asym_knobs",
+          "context": "rows",
+          "contexts": [
+            "eps_m",
+            "eps_start"
+          ],
+          "default": 0.2,
+          "default_source": {
+            "file": "examples/typologies/lecleach_asym_odd.yaml",
+            "key": "seed_params.g_eps_m"
+          },
+          "detail": "LABELED RECONSTRUCTION/HYPOTHESIS: the verified Fourcade march plus an odd-cosine single-sided term. No published asymmetric-per-azimuth JMLC construction exists. The odd cosine breaks the left-right mirror, so a nonzero value forces the full model.",
+          "doc_ref": [
+            "docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md",
+            "### 2.5 Up/down-asymmetric saddle"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "r *= 1 + eps_m w(s) cos(phi)",
+          "hard": {
+            "choices": null,
+            "hi": 0.3,
+            "kind": null,
+            "lo": -0.3,
+            "note": "named grid.py cap",
+            "section": null,
+            "source": {
+              "file": "hornlab_search/design/generators/grid.py",
+              "key": "ROWS_MAX_EPS"
+            }
+          },
+          "knob": "g_eps_m",
+          "label": "Labeled one-sided asymmetry (rows)",
+          "physical": "Widens one side and narrows the other.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 0.3,
+            "lo": -0.3,
+            "log": false,
+            "search": true
+          },
+          "summary": "Odd-cosine asymmetry amplitude; nonzero forces the seam-free full ring.",
+          "unit": null
+        },
+        {
+          "base_knob": "eps_start",
+          "bounds_source": {
+            "file": "examples/typologies/lecleach_asym_odd.yaml",
+            "key": "bounds.g_eps_start"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_lecleach_asym_knobs",
+          "context": "rows",
+          "contexts": [
+            "eps_m",
+            "eps_start"
+          ],
+          "default": 0.0,
+          "default_source": {
+            "file": "examples/typologies/lecleach_asym_odd.yaml",
+            "key": "seed_params.g_eps_start"
+          },
+          "detail": "The smoothstep window keeps the throat at the driver's exit radius and angle. This is part of the labeled reconstruction, not a published rule.",
+          "doc_ref": [
+            "docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md",
+            "### 2.5 Up/down-asymmetric saddle"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "w(s) = smoothstep from eps_start to the mouth",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_eps_start",
+          "label": "Asymmetry window start (rows)",
+          "physical": "Moves the one-sided widening toward or away from the mouth.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 0.5,
+            "lo": 0.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Arc fraction where the one-sided asymmetry opens; the throat stays exact.",
+          "unit": null
+        },
+        {
+          "base_knob": "fc_hz",
+          "bounds_source": {
+            "file": "examples/typologies/lecleach_asym_odd.yaml",
+            "key": "bounds.g_fc_hz"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_lecleach_knobs",
+          "context": "rows",
+          "contexts": [
+            "eps_m",
+            "eps_start",
+            "rows"
+          ],
+          "default": 800.0,
+          "default_source": {
+            "file": "examples/typologies/lecleach_asym_odd.yaml",
+            "key": "seed_params.g_fc_hz"
+          },
+          "detail": "The verified Fourcade march has no per-azimuth split, so fc_hz is the only cutoff. The iwata and AR stretch keep this axisymmetric base.",
+          "doc_ref": [
+            "docs/research/typologies/JMLC_LECLEACH_RESEARCH_2026-10-25.md",
+            "## 2. Construction comparison"
+          ],
+          "documented": true,
+          "flags": [
+            "overloaded"
+          ],
+          "formula": "m = 4 pi fc / c",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_fc_hz",
+          "label": "Axisymmetric rows cutoff (rows)",
+          "physical": "Sets the rollback size and loading corner.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 1200.0,
+            "lo": 600.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Single cutoff of an axisymmetric Le Cleac'h rows march.",
+          "unit": "Hz"
+        },
+        {
+          "base_knob": "stop_deg",
+          "bounds_source": {
+            "file": "examples/typologies/lecleach_asym_odd.yaml",
+            "key": "bounds.g_stop_deg"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "eps_m",
+            "eps_start",
+            "rows"
+          ],
+          "default": 170.0,
+          "default_source": {
+            "file": "examples/typologies/lecleach_asym_odd.yaml",
+            "key": "seed_params.g_stop_deg"
+          },
+          "detail": "The verified Le Cleac'h rows use the published stop window and allow rollback past vertical. The Salmon rows stop below or above the cap-area asymptote, and modulated Salmon rows keep the plan's rollback window. A per-typology note narrows this.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [
+            "overloaded"
+          ],
+          "formula": "march stops when phi >= stop_deg",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_stop_deg",
+          "label": "Rows march stop (rows)",
+          "physical": "Chooses how far around the rollback each row is followed.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 240.0,
+            "lo": 120.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Wall-angle stop of the per-azimuth rows march; the legal window depends on the kind.",
+          "unit": "deg"
+        },
+        {
+          "base_knob": "n_phi",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [
+            "eps_m",
+            "eps_start"
+          ],
+          "default": 25,
+          "default_source": {
+            "file": "examples/typologies/lecleach_asym_odd.yaml",
+            "key": "generator.n_phi"
+          },
+          "detail": "The row count sets the angular sampling of the point grid. The quarter model, half model and full ring each have their own minimum and parity rules in the generator. It is a count, not a length.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "n_phi",
+          "label": "Azimuth row count",
+          "physical": "Raises angular fidelity at the cost of more grid rows.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Number of azimuth rows in the rows/grid model.",
+          "unit": null
+        },
+        {
+          "base_knob": "n_s",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [
+            "eps_m",
+            "eps_start"
+          ],
+          "default": 32,
+          "default_source": {
+            "file": "examples/typologies/lecleach_asym_odd.yaml",
+            "key": "generator.n_s"
+          },
+          "detail": "Each row is sampled at equal axial (or equal-arc, for the rows march) fractions. This count sets the longitudinal resolution. It is a count, not a length.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "n_s",
+          "label": "Axial station count",
+          "physical": "Raises longitudinal fidelity at the cost of more points.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Number of axial stations along each row.",
+          "unit": null
+        },
+        {
+          "base_knob": "span",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_span_requested",
+          "context": "rows",
+          "contexts": [
+            "eps_m",
+            "eps_start"
+          ],
+          "default": "full",
+          "default_source": {
+            "file": "examples/typologies/lecleach_asym_odd.yaml",
+            "key": "generator.span"
+          },
+          "detail": "The legal spans are the ones the generator handles, and their names are read from the generator's own span constant rather than retyped here. A kind can force a span: an odd-cosine asymmetry forces the full ring and a b-term forces the half model.",
+          "doc_ref": [
+            "docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md",
+            "### 2.5 Up/down-asymmetric saddle"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": [
+              "quarter",
+              "half",
+              "full"
+            ],
+            "hi": null,
+            "kind": "str",
+            "lo": null,
+            "note": "named grid.py cap",
+            "section": null,
+            "source": {
+              "file": "hornlab_search/design/generators/grid.py",
+              "key": "ROWS_SPANS"
+            }
+          },
+          "knob": "span",
+          "label": "Row span",
+          "physical": "Chooses whether the mesh uses mirror planes or a seam-free full ring.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "How much of the azimuth circle the rows model covers.",
+          "unit": null
+        },
+        {
+          "base_knob": "wall_thickness_mm",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [
+            "eps_m",
+            "eps_start"
+          ],
+          "default": 3.0,
+          "default_source": {
+            "file": "examples/typologies/lecleach_asym_odd.yaml",
+            "key": "generator.wall_thickness_mm"
+          },
+          "detail": "The point-grid route builds an explicit outer shell offset from each row's own profile. This is the printed shell thickness, not an acoustic dimension. The generator also uses it in its self-approach guard.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "wall_thickness_mm",
+          "label": "Shell thickness",
+          "physical": "Changes the printed wall thickness, not the acoustic inner surface.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Outer-shell thickness of a freestanding rows model.",
+          "unit": "mm"
+        }
+      ],
       "name": "lecleach_asym_odd",
       "source_status": "catalog",
       "symmetry": "full"
@@ -3889,13 +5087,446 @@
       "brief_tied": null,
       "config_path": "examples/typologies/lecleach_iwata_ar.yaml",
       "description": "Le Cleac'h exact meridian + area-preserving AR evolution (AR_m/AR_p, T=0.5 pinned), our reconstruction; 4 knobs",
-      "documented": false,
+      "documented": true,
       "driver_exit_mm": null,
       "family": "FREEFORM",
       "group": "organic",
       "kind": "rows",
-      "knob_names": [],
-      "knobs": [],
+      "knob_names": [
+        "g_T",
+        "g_ar_m",
+        "g_ar_p",
+        "g_fc_hz",
+        "g_stop_deg",
+        "n_phi",
+        "n_s",
+        "span",
+        "wall_thickness_mm"
+      ],
+      "knobs": [
+        {
+          "base_knob": "T",
+          "bounds_source": {
+            "file": "examples/typologies/lecleach_iwata_ar.yaml",
+            "key": "bounds.g_T"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "ar_m",
+            "ar_p",
+            "rows"
+          ],
+          "default": 0.5,
+          "default_source": {
+            "file": "examples/typologies/lecleach_iwata_ar.yaml",
+            "key": "seed_params.g_T"
+          },
+          "detail": "The two row families share the spelling but not the equation. The Salmon rows use it in the family area law; the verified Le Cleac'h rows use it in the Fourcade wavefront-area law.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [
+            "overloaded"
+          ],
+          "formula": "Salmon family law; Fourcade eq. 42",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_T",
+          "label": "Rows family factor (rows)",
+          "physical": "Selects the family member and its expansion profile.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 0.5,
+            "lo": 0.5,
+            "log": false,
+            "search": false
+          },
+          "summary": "Salmon family T on the Salmon rows; Fourcade area-law T on the Le Cleac'h rows.",
+          "unit": null
+        },
+        {
+          "base_knob": "ar_m",
+          "bounds_source": {
+            "file": "examples/typologies/lecleach_iwata_ar.yaml",
+            "key": "bounds.g_ar_m"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_iwata_ar_knobs",
+          "context": "rows",
+          "contexts": [
+            "ar_m",
+            "ar_p"
+          ],
+          "default": 2.0,
+          "default_source": {
+            "file": "examples/typologies/lecleach_iwata_ar.yaml",
+            "key": "seed_params.g_ar_m"
+          },
+          "detail": "The base march is the verified Fourcade construction. The AR evolution is our reconstruction of the published principle and is explicitly not the Iwata product. T is pinned by this config.",
+          "doc_ref": [
+            "docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md",
+            "### 2.2 Iwata / quasi-Iwata / \"FH-N2\""
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "AR evolution with ar_m at the mouth",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_ar_m",
+          "label": "Reconstructed mouth AR (rows)",
+          "physical": "Makes the mouth wider than tall (or the reverse).",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 2.8,
+            "lo": 1.2,
+            "log": false,
+            "search": true
+          },
+          "summary": "Mouth aspect ratio of our area-preserving stretch; a reconstruction, not the product.",
+          "unit": null
+        },
+        {
+          "base_knob": "ar_p",
+          "bounds_source": {
+            "file": "examples/typologies/lecleach_iwata_ar.yaml",
+            "key": "bounds.g_ar_p"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_iwata_ar_knobs",
+          "context": "rows",
+          "contexts": [
+            "ar_m",
+            "ar_p"
+          ],
+          "default": 1.0,
+          "default_source": {
+            "file": "examples/typologies/lecleach_iwata_ar.yaml",
+            "key": "seed_params.g_ar_p"
+          },
+          "detail": "This shapes where the reconstructed AR change happens. No published AR construction exists for this class; the label stays reconstruction.",
+          "doc_ref": [
+            "docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md",
+            "### 2.2 Iwata / quasi-Iwata / \"FH-N2\""
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "AR(l) = 1 + (ar_m - 1) (l / L0)^ar_p",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_ar_p",
+          "label": "Reconstructed AR exponent (rows)",
+          "physical": "Moves the aspect-ratio change toward the throat or mouth.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 2.0,
+            "lo": 0.5,
+            "log": false,
+            "search": true
+          },
+          "summary": "Exponent of our area-preserving aspect-ratio stretch.",
+          "unit": null
+        },
+        {
+          "base_knob": "fc_hz",
+          "bounds_source": {
+            "file": "examples/typologies/lecleach_iwata_ar.yaml",
+            "key": "bounds.g_fc_hz"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_lecleach_knobs",
+          "context": "rows",
+          "contexts": [
+            "ar_m",
+            "ar_p",
+            "rows"
+          ],
+          "default": 800.0,
+          "default_source": {
+            "file": "examples/typologies/lecleach_iwata_ar.yaml",
+            "key": "seed_params.g_fc_hz"
+          },
+          "detail": "The verified Fourcade march has no per-azimuth split, so fc_hz is the only cutoff. The iwata and AR stretch keep this axisymmetric base.",
+          "doc_ref": [
+            "docs/research/typologies/JMLC_LECLEACH_RESEARCH_2026-10-25.md",
+            "## 2. Construction comparison"
+          ],
+          "documented": true,
+          "flags": [
+            "overloaded"
+          ],
+          "formula": "m = 4 pi fc / c",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_fc_hz",
+          "label": "Axisymmetric rows cutoff (rows)",
+          "physical": "Sets the rollback size and loading corner.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 1200.0,
+            "lo": 800.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Single cutoff of an axisymmetric Le Cleac'h rows march.",
+          "unit": "Hz"
+        },
+        {
+          "base_knob": "stop_deg",
+          "bounds_source": {
+            "file": "examples/typologies/lecleach_iwata_ar.yaml",
+            "key": "bounds.g_stop_deg"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "ar_m",
+            "ar_p",
+            "rows"
+          ],
+          "default": 180.0,
+          "default_source": {
+            "file": "examples/typologies/lecleach_iwata_ar.yaml",
+            "key": "seed_params.g_stop_deg"
+          },
+          "detail": "The verified Le Cleac'h rows use the published stop window and allow rollback past vertical. The Salmon rows stop below or above the cap-area asymptote, and modulated Salmon rows keep the plan's rollback window. A per-typology note narrows this.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [
+            "overloaded"
+          ],
+          "formula": "march stops when phi >= stop_deg",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_stop_deg",
+          "label": "Rows march stop (rows)",
+          "physical": "Chooses how far around the rollback each row is followed.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 240.0,
+            "lo": 120.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Wall-angle stop of the per-azimuth rows march; the legal window depends on the kind.",
+          "unit": "deg"
+        },
+        {
+          "base_knob": "n_phi",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [
+            "ar_m",
+            "ar_p"
+          ],
+          "default": 15,
+          "default_source": {
+            "file": "examples/typologies/lecleach_iwata_ar.yaml",
+            "key": "generator.n_phi"
+          },
+          "detail": "The row count sets the angular sampling of the point grid. The quarter model, half model and full ring each have their own minimum and parity rules in the generator. It is a count, not a length.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "n_phi",
+          "label": "Azimuth row count",
+          "physical": "Raises angular fidelity at the cost of more grid rows.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Number of azimuth rows in the rows/grid model.",
+          "unit": null
+        },
+        {
+          "base_knob": "n_s",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [
+            "ar_m",
+            "ar_p"
+          ],
+          "default": 32,
+          "default_source": {
+            "file": "examples/typologies/lecleach_iwata_ar.yaml",
+            "key": "generator.n_s"
+          },
+          "detail": "Each row is sampled at equal axial (or equal-arc, for the rows march) fractions. This count sets the longitudinal resolution. It is a count, not a length.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "n_s",
+          "label": "Axial station count",
+          "physical": "Raises longitudinal fidelity at the cost of more points.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Number of axial stations along each row.",
+          "unit": null
+        },
+        {
+          "base_knob": "span",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_span_requested",
+          "context": "rows",
+          "contexts": [
+            "ar_m",
+            "ar_p"
+          ],
+          "default": null,
+          "default_source": null,
+          "detail": "The legal spans are the ones the generator handles, and their names are read from the generator's own span constant rather than retyped here. A kind can force a span: an odd-cosine asymmetry forces the full ring and a b-term forces the half model.",
+          "doc_ref": [
+            "docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md",
+            "### 2.5 Up/down-asymmetric saddle"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": [
+              "quarter",
+              "half",
+              "full"
+            ],
+            "hi": null,
+            "kind": "str",
+            "lo": null,
+            "note": "named grid.py cap",
+            "section": null,
+            "source": {
+              "file": "hornlab_search/design/generators/grid.py",
+              "key": "ROWS_SPANS"
+            }
+          },
+          "knob": "span",
+          "label": "Row span",
+          "physical": "Chooses whether the mesh uses mirror planes or a seam-free full ring.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "How much of the azimuth circle the rows model covers.",
+          "unit": null
+        },
+        {
+          "base_knob": "wall_thickness_mm",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [
+            "ar_m",
+            "ar_p"
+          ],
+          "default": 2.0,
+          "default_source": {
+            "file": "examples/typologies/lecleach_iwata_ar.yaml",
+            "key": "generator.wall_thickness_mm"
+          },
+          "detail": "The point-grid route builds an explicit outer shell offset from each row's own profile. This is the printed shell thickness, not an acoustic dimension. The generator also uses it in its self-approach guard.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "wall_thickness_mm",
+          "label": "Shell thickness",
+          "physical": "Changes the printed wall thickness, not the acoustic inner surface.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Outer-shell thickness of a freestanding rows model.",
+          "unit": "mm"
+        }
+      ],
       "name": "lecleach_iwata_ar",
       "source_status": "catalog",
       "symmetry": "hv"
@@ -3931,13 +5562,346 @@
       "brief_tied": null,
       "config_path": "examples/typologies/lecleach_rollback.yaml",
       "description": "Le Cleac'h exact rollback via the GRID rows route, stop 120-240 searched (3 knobs)",
-      "documented": false,
+      "documented": true,
       "driver_exit_mm": null,
       "family": "FREEFORM",
       "group": "organic",
       "kind": "rows",
-      "knob_names": [],
-      "knobs": [],
+      "knob_names": [
+        "g_T",
+        "g_fc_hz",
+        "g_stop_deg",
+        "n_phi",
+        "n_s",
+        "span",
+        "wall_thickness_mm"
+      ],
+      "knobs": [
+        {
+          "base_knob": "T",
+          "bounds_source": {
+            "file": "examples/typologies/lecleach_rollback.yaml",
+            "key": "bounds.g_T"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "T",
+            "rows",
+            "stop_deg"
+          ],
+          "default": 0.8,
+          "default_source": {
+            "file": "examples/typologies/lecleach_rollback.yaml",
+            "key": "seed_params.g_T"
+          },
+          "detail": "This is the published construction's own T, not the Salmon family selector. The rows are the verified Fourcade march on every azimuth.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [
+            "overloaded"
+          ],
+          "formula": "Salmon family law; Fourcade eq. 42",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_T",
+          "label": "Fourcade area-law T (rows)",
+          "physical": "Changes the wavefront-area growth of the verified rollback.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 1.0,
+            "lo": 0.3,
+            "log": false,
+            "search": true
+          },
+          "summary": "T inside the verified Fourcade wavefront-area law.",
+          "unit": null
+        },
+        {
+          "base_knob": "fc_hz",
+          "bounds_source": {
+            "file": "examples/typologies/lecleach_rollback.yaml",
+            "key": "bounds.g_fc_hz"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_lecleach_knobs",
+          "context": "rows",
+          "contexts": [
+            "T",
+            "rows",
+            "stop_deg"
+          ],
+          "default": 800.0,
+          "default_source": {
+            "file": "examples/typologies/lecleach_rollback.yaml",
+            "key": "seed_params.g_fc_hz"
+          },
+          "detail": "The verified Fourcade march has no per-azimuth split, so fc_hz is the only cutoff. The iwata and AR stretch keep this axisymmetric base.",
+          "doc_ref": [
+            "docs/research/typologies/JMLC_LECLEACH_RESEARCH_2026-10-25.md",
+            "## 2. Construction comparison"
+          ],
+          "documented": true,
+          "flags": [
+            "overloaded"
+          ],
+          "formula": "m = 4 pi fc / c",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_fc_hz",
+          "label": "Axisymmetric rows cutoff (rows)",
+          "physical": "Sets the rollback size and loading corner.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 1200.0,
+            "lo": 600.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Single cutoff of an axisymmetric Le Cleac'h rows march.",
+          "unit": "Hz"
+        },
+        {
+          "base_knob": "stop_deg",
+          "bounds_source": {
+            "file": "examples/typologies/lecleach_rollback.yaml",
+            "key": "bounds.g_stop_deg"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "T",
+            "rows",
+            "stop_deg"
+          ],
+          "default": 170.0,
+          "default_source": {
+            "file": "examples/typologies/lecleach_rollback.yaml",
+            "key": "seed_params.g_stop_deg"
+          },
+          "detail": "The base march is the verified Fourcade 2015 construction (R9-J). The rows route permits a stop above vertical, which the FREEFORM meridian cannot represent. The grid's own stop window still applies.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [
+            "overloaded"
+          ],
+          "formula": "march stops when phi >= stop_deg",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_stop_deg",
+          "label": "Verified Fourcade rollback stop (rows)",
+          "physical": "Follows the verified rollback further around the turn.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 240.0,
+            "lo": 120.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Stop of the published Fourcade march; above vertical is legal rollback here.",
+          "unit": "deg"
+        },
+        {
+          "base_knob": "n_phi",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [
+            "T",
+            "stop_deg"
+          ],
+          "default": 15,
+          "default_source": {
+            "file": "examples/typologies/lecleach_rollback.yaml",
+            "key": "generator.n_phi"
+          },
+          "detail": "The row count sets the angular sampling of the point grid. The quarter model, half model and full ring each have their own minimum and parity rules in the generator. It is a count, not a length.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "n_phi",
+          "label": "Azimuth row count",
+          "physical": "Raises angular fidelity at the cost of more grid rows.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Number of azimuth rows in the rows/grid model.",
+          "unit": null
+        },
+        {
+          "base_knob": "n_s",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [
+            "T",
+            "stop_deg"
+          ],
+          "default": 32,
+          "default_source": {
+            "file": "examples/typologies/lecleach_rollback.yaml",
+            "key": "generator.n_s"
+          },
+          "detail": "Each row is sampled at equal axial (or equal-arc, for the rows march) fractions. This count sets the longitudinal resolution. It is a count, not a length.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "n_s",
+          "label": "Axial station count",
+          "physical": "Raises longitudinal fidelity at the cost of more points.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Number of axial stations along each row.",
+          "unit": null
+        },
+        {
+          "base_knob": "span",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_span_requested",
+          "context": "rows",
+          "contexts": [
+            "T",
+            "stop_deg"
+          ],
+          "default": null,
+          "default_source": null,
+          "detail": "The legal spans are the ones the generator handles, and their names are read from the generator's own span constant rather than retyped here. A kind can force a span: an odd-cosine asymmetry forces the full ring and a b-term forces the half model.",
+          "doc_ref": [
+            "docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md",
+            "### 2.5 Up/down-asymmetric saddle"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": [
+              "quarter",
+              "half",
+              "full"
+            ],
+            "hi": null,
+            "kind": "str",
+            "lo": null,
+            "note": "named grid.py cap",
+            "section": null,
+            "source": {
+              "file": "hornlab_search/design/generators/grid.py",
+              "key": "ROWS_SPANS"
+            }
+          },
+          "knob": "span",
+          "label": "Row span",
+          "physical": "Chooses whether the mesh uses mirror planes or a seam-free full ring.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "How much of the azimuth circle the rows model covers.",
+          "unit": null
+        },
+        {
+          "base_knob": "wall_thickness_mm",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [
+            "T",
+            "stop_deg"
+          ],
+          "default": 3.0,
+          "default_source": {
+            "file": "examples/typologies/lecleach_rollback.yaml",
+            "key": "generator.wall_thickness_mm"
+          },
+          "detail": "The point-grid route builds an explicit outer shell offset from each row's own profile. This is the printed shell thickness, not an acoustic dimension. The generator also uses it in its self-approach guard.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "wall_thickness_mm",
+          "label": "Shell thickness",
+          "physical": "Changes the printed wall thickness, not the acoustic inner surface.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Outer-shell thickness of a freestanding rows model.",
+          "unit": "mm"
+        }
+      ],
       "name": "lecleach_rollback",
       "source_status": "catalog",
       "symmetry": "axisymmetric"
@@ -3981,13 +5945,399 @@
       "brief_tied": null,
       "config_path": "examples/typologies/lecleach_toroidal.yaml",
       "description": "Le Cleac'h exact rollback + tangent-continuous toroidal lip (r_lip 6-35 mm), inferred; 4 knobs",
-      "documented": false,
+      "documented": true,
       "driver_exit_mm": null,
       "family": "FREEFORM",
       "group": "organic",
       "kind": "rows",
-      "knob_names": [],
-      "knobs": [],
+      "knob_names": [
+        "g_T",
+        "g_fc_hz",
+        "g_r_lip_mm",
+        "g_stop_deg",
+        "n_phi",
+        "n_s",
+        "span",
+        "wall_thickness_mm"
+      ],
+      "knobs": [
+        {
+          "base_knob": "T",
+          "bounds_source": {
+            "file": "examples/typologies/lecleach_toroidal.yaml",
+            "key": "bounds.g_T"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "r_lip_mm",
+            "rows",
+            "stop_deg"
+          ],
+          "default": 0.8,
+          "default_source": {
+            "file": "examples/typologies/lecleach_toroidal.yaml",
+            "key": "seed_params.g_T"
+          },
+          "detail": "The two row families share the spelling but not the equation. The Salmon rows use it in the family area law; the verified Le Cleac'h rows use it in the Fourcade wavefront-area law.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [
+            "overloaded"
+          ],
+          "formula": "Salmon family law; Fourcade eq. 42",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_T",
+          "label": "Rows family factor (rows)",
+          "physical": "Selects the family member and its expansion profile.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 1.0,
+            "lo": 0.3,
+            "log": false,
+            "search": true
+          },
+          "summary": "Salmon family T on the Salmon rows; Fourcade area-law T on the Le Cleac'h rows.",
+          "unit": null
+        },
+        {
+          "base_knob": "fc_hz",
+          "bounds_source": {
+            "file": "examples/typologies/lecleach_toroidal.yaml",
+            "key": "bounds.g_fc_hz"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_lecleach_knobs",
+          "context": "rows",
+          "contexts": [
+            "r_lip_mm",
+            "rows",
+            "stop_deg"
+          ],
+          "default": 600.0,
+          "default_source": {
+            "file": "examples/typologies/lecleach_toroidal.yaml",
+            "key": "seed_params.g_fc_hz"
+          },
+          "detail": "The verified Fourcade march has no per-azimuth split, so fc_hz is the only cutoff. The iwata and AR stretch keep this axisymmetric base.",
+          "doc_ref": [
+            "docs/research/typologies/JMLC_LECLEACH_RESEARCH_2026-10-25.md",
+            "## 2. Construction comparison"
+          ],
+          "documented": true,
+          "flags": [
+            "overloaded"
+          ],
+          "formula": "m = 4 pi fc / c",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_fc_hz",
+          "label": "Axisymmetric rows cutoff (rows)",
+          "physical": "Sets the rollback size and loading corner.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 1200.0,
+            "lo": 600.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Single cutoff of an axisymmetric Le Cleac'h rows march.",
+          "unit": "Hz"
+        },
+        {
+          "base_knob": "r_lip_mm",
+          "bounds_source": {
+            "file": "examples/typologies/lecleach_toroidal.yaml",
+            "key": "bounds.g_r_lip_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.append_tangent_lip",
+          "context": "rows",
+          "contexts": [
+            "r_lip_mm",
+            "stop_deg"
+          ],
+          "default": 30.0,
+          "default_source": {
+            "file": "examples/typologies/lecleach_toroidal.yaml",
+            "key": "seed_params.g_r_lip_mm"
+          },
+          "detail": "No published torus-lip math exists for this class. The arc is tangent to the verified wall and curls back for half a turn. It is labeled [inferred], not a reproduction of a product.",
+          "doc_ref": [
+            "docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md",
+            "### 2.3 Ferguson / toroidal roll"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "circular arc tangent at the joint, wrap = half a turn",
+          "hard": {
+            "choices": null,
+            "hi": 100.0,
+            "kind": null,
+            "lo": null,
+            "note": "named grid.py cap",
+            "section": null,
+            "source": {
+              "file": "hornlab_search/design/generators/grid.py",
+              "key": "ROWS_MAX_R_LIP_MM"
+            }
+          },
+          "knob": "g_r_lip_mm",
+          "label": "Inferred torus lip (rows)",
+          "physical": "Adds a rolled-back lip at the mouth.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 35.0,
+            "lo": 6.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Tangent-continuous circular lip on the verified rollback; [inferred] analogue.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "stop_deg",
+          "bounds_source": {
+            "file": "examples/typologies/lecleach_toroidal.yaml",
+            "key": "bounds.g_stop_deg"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "r_lip_mm",
+            "rows",
+            "stop_deg"
+          ],
+          "default": 170.0,
+          "default_source": {
+            "file": "examples/typologies/lecleach_toroidal.yaml",
+            "key": "seed_params.g_stop_deg"
+          },
+          "detail": "The base march remains the published Fourcade construction (R9-J). Only the lip continuation is inferred. The grid's stop window applies.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [
+            "overloaded"
+          ],
+          "formula": "march stops when phi >= stop_deg",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_stop_deg",
+          "label": "Toroidal rollback stop (rows)",
+          "physical": "Sets how far the wall turns before the lip begins.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 240.0,
+            "lo": 120.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Stop of the verified Fourcade march before the inferred lip is appended.",
+          "unit": "deg"
+        },
+        {
+          "base_knob": "n_phi",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [
+            "r_lip_mm",
+            "stop_deg"
+          ],
+          "default": 15,
+          "default_source": {
+            "file": "examples/typologies/lecleach_toroidal.yaml",
+            "key": "generator.n_phi"
+          },
+          "detail": "The row count sets the angular sampling of the point grid. The quarter model, half model and full ring each have their own minimum and parity rules in the generator. It is a count, not a length.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "n_phi",
+          "label": "Azimuth row count",
+          "physical": "Raises angular fidelity at the cost of more grid rows.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Number of azimuth rows in the rows/grid model.",
+          "unit": null
+        },
+        {
+          "base_knob": "n_s",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [
+            "r_lip_mm",
+            "stop_deg"
+          ],
+          "default": 32,
+          "default_source": {
+            "file": "examples/typologies/lecleach_toroidal.yaml",
+            "key": "generator.n_s"
+          },
+          "detail": "Each row is sampled at equal axial (or equal-arc, for the rows march) fractions. This count sets the longitudinal resolution. It is a count, not a length.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "n_s",
+          "label": "Axial station count",
+          "physical": "Raises longitudinal fidelity at the cost of more points.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Number of axial stations along each row.",
+          "unit": null
+        },
+        {
+          "base_knob": "span",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_span_requested",
+          "context": "rows",
+          "contexts": [
+            "r_lip_mm",
+            "stop_deg"
+          ],
+          "default": null,
+          "default_source": null,
+          "detail": "The legal spans are the ones the generator handles, and their names are read from the generator's own span constant rather than retyped here. A kind can force a span: an odd-cosine asymmetry forces the full ring and a b-term forces the half model.",
+          "doc_ref": [
+            "docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md",
+            "### 2.5 Up/down-asymmetric saddle"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": [
+              "quarter",
+              "half",
+              "full"
+            ],
+            "hi": null,
+            "kind": "str",
+            "lo": null,
+            "note": "named grid.py cap",
+            "section": null,
+            "source": {
+              "file": "hornlab_search/design/generators/grid.py",
+              "key": "ROWS_SPANS"
+            }
+          },
+          "knob": "span",
+          "label": "Row span",
+          "physical": "Chooses whether the mesh uses mirror planes or a seam-free full ring.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "How much of the azimuth circle the rows model covers.",
+          "unit": null
+        },
+        {
+          "base_knob": "wall_thickness_mm",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [
+            "r_lip_mm",
+            "stop_deg"
+          ],
+          "default": 3.0,
+          "default_source": {
+            "file": "examples/typologies/lecleach_toroidal.yaml",
+            "key": "generator.wall_thickness_mm"
+          },
+          "detail": "The point-grid route builds an explicit outer shell offset from each row's own profile. This is the printed shell thickness, not an acoustic dimension. The generator also uses it in its self-approach guard.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "wall_thickness_mm",
+          "label": "Shell thickness",
+          "physical": "Changes the printed wall thickness, not the acoustic inner surface.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Outer-shell thickness of a freestanding rows model.",
+          "unit": "mm"
+        }
+      ],
       "name": "lecleach_toroidal",
       "source_status": "catalog",
       "symmetry": "axisymmetric"
@@ -8623,13 +10973,401 @@
       "brief_tied": null,
       "config_path": "examples/typologies/salmon_elliptical.yaml",
       "description": "per-azimuth spherical_salmon rows (fc_h 800 / fc_v 1100 seed), rollback stop; 4 knobs; labeled hypothesis",
-      "documented": false,
+      "documented": true,
       "driver_exit_mm": null,
       "family": "FREEFORM",
       "group": "organic",
       "kind": "rows",
-      "knob_names": [],
-      "knobs": [],
+      "knob_names": [
+        "g_T",
+        "g_fc_h_hz",
+        "g_fc_v_hz",
+        "g_stop_deg",
+        "n_phi",
+        "n_s",
+        "span",
+        "wall_thickness_mm"
+      ],
+      "knobs": [
+        {
+          "base_knob": "T",
+          "bounds_source": {
+            "file": "examples/typologies/salmon_elliptical.yaml",
+            "key": "bounds.g_T"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "T",
+            "fc_h_hz",
+            "rows",
+            "stop_deg"
+          ],
+          "default": 0.8,
+          "default_source": {
+            "file": "examples/typologies/salmon_elliptical.yaml",
+            "key": "seed_params.g_T"
+          },
+          "detail": "This is the Salmon family factor used inside the rows area law. The rows are a LABELED HYPOTHESIS-SHAPE EXPERIMENT, not a published construction.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [
+            "overloaded"
+          ],
+          "formula": "Salmon family law; Fourcade eq. 42",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_T",
+          "label": "Salmon family factor (rows)",
+          "physical": "Selects the Salmon family member used on every azimuth.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 1.0,
+            "lo": 0.3,
+            "log": false,
+            "search": true
+          },
+          "summary": "Hyperbolic-exponential family T of the per-azimuth Salmon rows.",
+          "unit": null
+        },
+        {
+          "base_knob": "fc_h_hz",
+          "bounds_source": {
+            "file": "examples/typologies/salmon_elliptical.yaml",
+            "key": "bounds.g_fc_h_hz"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "T",
+            "fc_h_hz",
+            "stop_deg"
+          ],
+          "default": 800.0,
+          "default_source": {
+            "file": "examples/typologies/salmon_elliptical.yaml",
+            "key": "seed_params.g_fc_h_hz"
+          },
+          "detail": "Each row's cutoff is a cosine-squared blend of this value and the vertical one, giving the row family its H/V split. The pair must be supplied together.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "1 / fc(phi) = cos^2(phi) / fc_h + sin^2(phi) / fc_v",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_fc_h_hz",
+          "label": "Salmon H cutoff (rows)",
+          "physical": "Sets the horizontal rollback size.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 1200.0,
+            "lo": 600.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Horizontal endpoint of the per-azimuth Salmon cutoff blend.",
+          "unit": "Hz"
+        },
+        {
+          "base_knob": "fc_v_hz",
+          "bounds_source": {
+            "file": "examples/typologies/salmon_elliptical.yaml",
+            "key": "bounds.g_fc_v_hz"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "T",
+            "fc_h_hz",
+            "stop_deg"
+          ],
+          "default": 1100.0,
+          "default_source": {
+            "file": "examples/typologies/salmon_elliptical.yaml",
+            "key": "seed_params.g_fc_v_hz"
+          },
+          "detail": "The vertical endpoint of the same cutoff blend. Supplying only one of the pair is refused, because the per-azimuth law would otherwise be undefined. It is the H/V split's vertical half.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "1 / fc(phi) = cos^2(phi) / fc_h + sin^2(phi) / fc_v",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_fc_v_hz",
+          "label": "Vertical cutoff frequency (rows)",
+          "physical": "Changes the vertical-plane rollback size and rate.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 1200.0,
+            "lo": 600.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Vertical-plane Salmon cutoff in the per-azimuth cutoff blend.",
+          "unit": "Hz"
+        },
+        {
+          "base_knob": "stop_deg",
+          "bounds_source": {
+            "file": "examples/typologies/salmon_elliptical.yaml",
+            "key": "bounds.g_stop_deg"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "T",
+            "fc_h_hz",
+            "rows",
+            "stop_deg"
+          ],
+          "default": 150.0,
+          "default_source": {
+            "file": "examples/typologies/salmon_elliptical.yaml",
+            "key": "seed_params.g_stop_deg"
+          },
+          "detail": "LABELED HYPOTHESIS-SHAPE EXPERIMENT (WP9b dossier section 2.4): per-azimuth Salmon marches, not an attributed published construction. The shipped seed stops below the asymptote and the plan's modulated window stays a rollback.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [
+            "overloaded"
+          ],
+          "formula": "march stops when phi >= stop_deg",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_stop_deg",
+          "label": "Salmon rows rollback stop (rows)",
+          "physical": "Follows the Salmon wall further or less far around the rollback.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 240.0,
+            "lo": 120.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Stop of the per-azimuth Salmon march; the cap-area law has an asymptote near half a turn.",
+          "unit": "deg"
+        },
+        {
+          "base_knob": "n_phi",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [
+            "T",
+            "fc_h_hz",
+            "stop_deg"
+          ],
+          "default": 15,
+          "default_source": {
+            "file": "examples/typologies/salmon_elliptical.yaml",
+            "key": "generator.n_phi"
+          },
+          "detail": "The row count sets the angular sampling of the point grid. The quarter model, half model and full ring each have their own minimum and parity rules in the generator. It is a count, not a length.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "n_phi",
+          "label": "Azimuth row count",
+          "physical": "Raises angular fidelity at the cost of more grid rows.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Number of azimuth rows in the rows/grid model.",
+          "unit": null
+        },
+        {
+          "base_knob": "n_s",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [
+            "T",
+            "fc_h_hz",
+            "stop_deg"
+          ],
+          "default": 32,
+          "default_source": {
+            "file": "examples/typologies/salmon_elliptical.yaml",
+            "key": "generator.n_s"
+          },
+          "detail": "Each row is sampled at equal axial (or equal-arc, for the rows march) fractions. This count sets the longitudinal resolution. It is a count, not a length.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "n_s",
+          "label": "Axial station count",
+          "physical": "Raises longitudinal fidelity at the cost of more points.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Number of axial stations along each row.",
+          "unit": null
+        },
+        {
+          "base_knob": "span",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_span_requested",
+          "context": "rows",
+          "contexts": [
+            "T",
+            "fc_h_hz",
+            "stop_deg"
+          ],
+          "default": null,
+          "default_source": null,
+          "detail": "The legal spans are the ones the generator handles, and their names are read from the generator's own span constant rather than retyped here. A kind can force a span: an odd-cosine asymmetry forces the full ring and a b-term forces the half model.",
+          "doc_ref": [
+            "docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md",
+            "### 2.5 Up/down-asymmetric saddle"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": [
+              "quarter",
+              "half",
+              "full"
+            ],
+            "hi": null,
+            "kind": "str",
+            "lo": null,
+            "note": "named grid.py cap",
+            "section": null,
+            "source": {
+              "file": "hornlab_search/design/generators/grid.py",
+              "key": "ROWS_SPANS"
+            }
+          },
+          "knob": "span",
+          "label": "Row span",
+          "physical": "Chooses whether the mesh uses mirror planes or a seam-free full ring.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "How much of the azimuth circle the rows model covers.",
+          "unit": null
+        },
+        {
+          "base_knob": "wall_thickness_mm",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [
+            "T",
+            "fc_h_hz",
+            "stop_deg"
+          ],
+          "default": 3.0,
+          "default_source": {
+            "file": "examples/typologies/salmon_elliptical.yaml",
+            "key": "generator.wall_thickness_mm"
+          },
+          "detail": "The point-grid route builds an explicit outer shell offset from each row's own profile. This is the printed shell thickness, not an acoustic dimension. The generator also uses it in its self-approach guard.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "wall_thickness_mm",
+          "label": "Shell thickness",
+          "physical": "Changes the printed wall thickness, not the acoustic inner surface.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Outer-shell thickness of a freestanding rows model.",
+          "unit": "mm"
+        }
+      ],
       "name": "salmon_elliptical",
       "source_status": "catalog",
       "symmetry": "hv"
@@ -8697,13 +11435,574 @@
       "brief_tied": null,
       "config_path": "examples/typologies/salmon_ripple12.yaml",
       "description": "salmon rows + even-lobe mouth ripple (12 lobes, half model) - the pleats experiment (7 knobs); labeled experiment",
-      "documented": false,
+      "documented": true,
       "driver_exit_mm": null,
       "family": "FREEFORM",
       "group": "organic",
       "kind": "rows",
-      "knob_names": [],
-      "knobs": [],
+      "knob_names": [
+        "g_T",
+        "g_fc_h_hz",
+        "g_fc_v_hz",
+        "g_ripple_amp_mm",
+        "g_ripple_lobes",
+        "g_ripple_start",
+        "g_stop_deg",
+        "n_phi",
+        "n_s",
+        "span",
+        "wall_thickness_mm"
+      ],
+      "knobs": [
+        {
+          "base_knob": "T",
+          "bounds_source": {
+            "file": "examples/typologies/salmon_ripple12.yaml",
+            "key": "bounds.g_T"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "ripple_amp_mm",
+            "ripple_lobes",
+            "ripple_start",
+            "rows"
+          ],
+          "default": 0.8,
+          "default_source": {
+            "file": "examples/typologies/salmon_ripple12.yaml",
+            "key": "seed_params.g_T"
+          },
+          "detail": "The two row families share the spelling but not the equation. The Salmon rows use it in the family area law; the verified Le Cleac'h rows use it in the Fourcade wavefront-area law.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [
+            "overloaded"
+          ],
+          "formula": "Salmon family law; Fourcade eq. 42",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_T",
+          "label": "Rows family factor (rows)",
+          "physical": "Selects the family member and its expansion profile.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 1.0,
+            "lo": 0.3,
+            "log": false,
+            "search": true
+          },
+          "summary": "Salmon family T on the Salmon rows; Fourcade area-law T on the Le Cleac'h rows.",
+          "unit": null
+        },
+        {
+          "base_knob": "fc_h_hz",
+          "bounds_source": {
+            "file": "examples/typologies/salmon_ripple12.yaml",
+            "key": "bounds.g_fc_h_hz"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "ripple_amp_mm",
+            "ripple_lobes",
+            "ripple_start"
+          ],
+          "default": 800.0,
+          "default_source": {
+            "file": "examples/typologies/salmon_ripple12.yaml",
+            "key": "seed_params.g_fc_h_hz"
+          },
+          "detail": "Each azimuth's Salmon march gets its own cutoff from a cosine-squared blend of the horizontal and vertical values. This is the horizontal endpoint. The pair must always be supplied together.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "1 / fc(phi) = cos^2(phi) / fc_h + sin^2(phi) / fc_v",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_fc_h_hz",
+          "label": "Horizontal cutoff frequency (rows)",
+          "physical": "Changes the horizontal-plane rollback size and rate.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 1200.0,
+            "lo": 600.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Horizontal-plane Salmon cutoff in the per-azimuth cutoff blend.",
+          "unit": "Hz"
+        },
+        {
+          "base_knob": "fc_v_hz",
+          "bounds_source": {
+            "file": "examples/typologies/salmon_ripple12.yaml",
+            "key": "bounds.g_fc_v_hz"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "ripple_amp_mm",
+            "ripple_lobes",
+            "ripple_start"
+          ],
+          "default": 1100.0,
+          "default_source": {
+            "file": "examples/typologies/salmon_ripple12.yaml",
+            "key": "seed_params.g_fc_v_hz"
+          },
+          "detail": "The vertical endpoint of the same cutoff blend. Supplying only one of the pair is refused, because the per-azimuth law would otherwise be undefined. It is the H/V split's vertical half.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "1 / fc(phi) = cos^2(phi) / fc_h + sin^2(phi) / fc_v",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_fc_v_hz",
+          "label": "Vertical cutoff frequency (rows)",
+          "physical": "Changes the vertical-plane rollback size and rate.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 1200.0,
+            "lo": 600.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Vertical-plane Salmon cutoff in the per-azimuth cutoff blend.",
+          "unit": "Hz"
+        },
+        {
+          "base_knob": "ripple_amp_mm",
+          "bounds_source": {
+            "file": "examples/typologies/salmon_ripple12.yaml",
+            "key": "bounds.g_ripple_amp_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_ripple_knobs",
+          "context": "rows",
+          "contexts": [
+            "ripple_amp_mm",
+            "ripple_lobes",
+            "ripple_start"
+          ],
+          "default": 3.0,
+          "default_source": {
+            "file": "examples/typologies/salmon_ripple12.yaml",
+            "key": "seed_params.g_ripple_amp_mm"
+          },
+          "detail": "LABELED EXPERIMENT (the owner's 'pleats' feature): no published audio mouth-ripple construction exists. The amplitude is delivered at the widest station inside the opening window.",
+          "doc_ref": [
+            "docs/research/typologies/MOUTH_RIPPLE_SERRATION_RESEARCH_2026-10-25.md",
+            "## 6. Knob/scoring scheme for the campaign (proposal, ours)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "delta_r = amp w(s) cos(N phi)",
+          "hard": {
+            "choices": null,
+            "hi": 6.0,
+            "kind": null,
+            "lo": null,
+            "note": "named grid.py cap",
+            "section": null,
+            "source": {
+              "file": "hornlab_search/design/generators/grid.py",
+              "key": "ROWS_MAX_RIPPLE_AMP_MM"
+            }
+          },
+          "knob": "g_ripple_amp_mm",
+          "label": "Pleats amplitude (rows)",
+          "physical": "Deepens or shallows the twelve pleats.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 6.0,
+            "lo": 0.5,
+            "log": false,
+            "search": true
+          },
+          "summary": "Peak radius deviation of the even-lobe mouth ripple, in millimetres.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "ripple_lobes",
+          "bounds_source": {
+            "file": "examples/typologies/salmon_ripple12.yaml",
+            "key": "bounds.g_ripple_lobes"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_ripple_knobs",
+          "context": "rows",
+          "contexts": [
+            "ripple_amp_mm",
+            "ripple_lobes",
+            "ripple_start"
+          ],
+          "default": 12,
+          "default_source": {
+            "file": "examples/typologies/salmon_ripple12.yaml",
+            "key": "seed_params.g_ripple_lobes"
+          },
+          "detail": "The shipped experiment uses an even count so the quarter/half mirror stays valid. Odd counts are refused by the generator. This is a labeled experiment.",
+          "doc_ref": [
+            "docs/research/typologies/MOUTH_RIPPLE_SERRATION_RESEARCH_2026-10-25.md",
+            "## 4. Construction math we can implement (ours, the rows route)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "r *= 1 + amp w(s) cos(N phi), N even",
+          "hard": {
+            "choices": [
+              6,
+              8,
+              10,
+              12,
+              14,
+              16,
+              18,
+              20,
+              22,
+              24
+            ],
+            "hi": 24.0,
+            "kind": "int",
+            "lo": 6.0,
+            "note": "named grid.py cap",
+            "section": null,
+            "source": {
+              "file": "hornlab_search/design/generators/grid.py",
+              "key": "ROWS_RIPPLE_LOBES_RANGE"
+            }
+          },
+          "knob": "g_ripple_lobes",
+          "label": "Pleats lobe count (rows)",
+          "physical": "Sets the number of pleats around the mouth.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 24.0,
+            "lo": 6.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Even lobe count of the mouth ripple; even cosines keep the left-right mirror.",
+          "unit": null
+        },
+        {
+          "base_knob": "ripple_start",
+          "bounds_source": {
+            "file": "examples/typologies/salmon_ripple12.yaml",
+            "key": "bounds.g_ripple_start"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_ripple_knobs",
+          "context": "rows",
+          "contexts": [
+            "ripple_amp_mm",
+            "ripple_lobes",
+            "ripple_start"
+          ],
+          "default": 0.8,
+          "default_source": {
+            "file": "examples/typologies/salmon_ripple12.yaml",
+            "key": "seed_params.g_ripple_start"
+          },
+          "detail": "The shipped experiment keeps the ripple near the mouth. The window is a smoothstep, so the throat is untouched. This is a labeled experiment.",
+          "doc_ref": [
+            "docs/research/typologies/MOUTH_RIPPLE_SERRATION_RESEARCH_2026-10-25.md",
+            "## 4. Construction math we can implement (ours, the rows route)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "w(s) opens at the arc fraction ripple_start",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_ripple_start",
+          "label": "Pleats window start (rows)",
+          "physical": "Moves the pleats closer to the mouth or further back.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 0.95,
+            "lo": 0.7,
+            "log": false,
+            "search": true
+          },
+          "summary": "Arc fraction where the ripple's opening window starts.",
+          "unit": null
+        },
+        {
+          "base_knob": "stop_deg",
+          "bounds_source": {
+            "file": "examples/typologies/salmon_ripple12.yaml",
+            "key": "bounds.g_stop_deg"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "ripple_amp_mm",
+            "ripple_lobes",
+            "ripple_start",
+            "rows"
+          ],
+          "default": 150.0,
+          "default_source": {
+            "file": "examples/typologies/salmon_ripple12.yaml",
+            "key": "seed_params.g_stop_deg"
+          },
+          "detail": "The verified Le Cleac'h rows use the published stop window and allow rollback past vertical. The Salmon rows stop below or above the cap-area asymptote, and modulated Salmon rows keep the plan's rollback window. A per-typology note narrows this.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [
+            "overloaded"
+          ],
+          "formula": "march stops when phi >= stop_deg",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_stop_deg",
+          "label": "Rows march stop (rows)",
+          "physical": "Chooses how far around the rollback each row is followed.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 240.0,
+            "lo": 120.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Wall-angle stop of the per-azimuth rows march; the legal window depends on the kind.",
+          "unit": "deg"
+        },
+        {
+          "base_knob": "n_phi",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [
+            "ripple_amp_mm",
+            "ripple_lobes",
+            "ripple_start"
+          ],
+          "default": 25,
+          "default_source": {
+            "file": "examples/typologies/salmon_ripple12.yaml",
+            "key": "generator.n_phi"
+          },
+          "detail": "The row count sets the angular sampling of the point grid. The quarter model, half model and full ring each have their own minimum and parity rules in the generator. It is a count, not a length.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "n_phi",
+          "label": "Azimuth row count",
+          "physical": "Raises angular fidelity at the cost of more grid rows.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Number of azimuth rows in the rows/grid model.",
+          "unit": null
+        },
+        {
+          "base_knob": "n_s",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [
+            "ripple_amp_mm",
+            "ripple_lobes",
+            "ripple_start"
+          ],
+          "default": 32,
+          "default_source": {
+            "file": "examples/typologies/salmon_ripple12.yaml",
+            "key": "generator.n_s"
+          },
+          "detail": "Each row is sampled at equal axial (or equal-arc, for the rows march) fractions. This count sets the longitudinal resolution. It is a count, not a length.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "n_s",
+          "label": "Axial station count",
+          "physical": "Raises longitudinal fidelity at the cost of more points.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Number of axial stations along each row.",
+          "unit": null
+        },
+        {
+          "base_knob": "span",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_span_requested",
+          "context": "rows",
+          "contexts": [
+            "ripple_amp_mm",
+            "ripple_lobes",
+            "ripple_start"
+          ],
+          "default": "half",
+          "default_source": {
+            "file": "examples/typologies/salmon_ripple12.yaml",
+            "key": "generator.span"
+          },
+          "detail": "The legal spans are the ones the generator handles, and their names are read from the generator's own span constant rather than retyped here. A kind can force a span: an odd-cosine asymmetry forces the full ring and a b-term forces the half model.",
+          "doc_ref": [
+            "docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md",
+            "### 2.5 Up/down-asymmetric saddle"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": [
+              "quarter",
+              "half",
+              "full"
+            ],
+            "hi": null,
+            "kind": "str",
+            "lo": null,
+            "note": "named grid.py cap",
+            "section": null,
+            "source": {
+              "file": "hornlab_search/design/generators/grid.py",
+              "key": "ROWS_SPANS"
+            }
+          },
+          "knob": "span",
+          "label": "Row span",
+          "physical": "Chooses whether the mesh uses mirror planes or a seam-free full ring.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "How much of the azimuth circle the rows model covers.",
+          "unit": null
+        },
+        {
+          "base_knob": "wall_thickness_mm",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [
+            "ripple_amp_mm",
+            "ripple_lobes",
+            "ripple_start"
+          ],
+          "default": 3.0,
+          "default_source": {
+            "file": "examples/typologies/salmon_ripple12.yaml",
+            "key": "generator.wall_thickness_mm"
+          },
+          "detail": "The point-grid route builds an explicit outer shell offset from each row's own profile. This is the printed shell thickness, not an acoustic dimension. The generator also uses it in its self-approach guard.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "wall_thickness_mm",
+          "label": "Shell thickness",
+          "physical": "Changes the printed wall thickness, not the acoustic inner surface.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Outer-shell thickness of a freestanding rows model.",
+          "unit": "mm"
+        }
+      ],
       "name": "salmon_ripple12",
       "source_status": "catalog",
       "symmetry": "hv"
@@ -8747,13 +12046,484 @@
       "brief_tied": null,
       "config_path": "examples/typologies/salmon_saddle.yaml",
       "description": "Salmon rows + explicit HALF span and a fixed C2 a2/b1 stop saddle (top != bottom), labeled hypothesis; 4 knobs",
-      "documented": false,
+      "documented": true,
       "driver_exit_mm": null,
       "family": "FREEFORM",
       "group": "organic",
       "kind": "rows",
-      "knob_names": [],
-      "knobs": [],
+      "knob_names": [
+        "g_T",
+        "g_fc_h_hz",
+        "g_fc_v_hz",
+        "g_stop_cos2k",
+        "g_stop_deg",
+        "g_stop_sin2k1",
+        "n_phi",
+        "n_s",
+        "span",
+        "wall_thickness_mm"
+      ],
+      "knobs": [
+        {
+          "base_knob": "T",
+          "bounds_source": {
+            "file": "examples/typologies/salmon_saddle.yaml",
+            "key": "bounds.g_T"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "rows",
+            "stop_cos2k",
+            "stop_sin2k1"
+          ],
+          "default": 0.8,
+          "default_source": {
+            "file": "examples/typologies/salmon_saddle.yaml",
+            "key": "seed_params.g_T"
+          },
+          "detail": "The two row families share the spelling but not the equation. The Salmon rows use it in the family area law; the verified Le Cleac'h rows use it in the Fourcade wavefront-area law.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [
+            "overloaded"
+          ],
+          "formula": "Salmon family law; Fourcade eq. 42",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_T",
+          "label": "Rows family factor (rows)",
+          "physical": "Selects the family member and its expansion profile.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 1.0,
+            "lo": 0.3,
+            "log": false,
+            "search": true
+          },
+          "summary": "Salmon family T on the Salmon rows; Fourcade area-law T on the Le Cleac'h rows.",
+          "unit": null
+        },
+        {
+          "base_knob": "fc_h_hz",
+          "bounds_source": {
+            "file": "examples/typologies/salmon_saddle.yaml",
+            "key": "bounds.g_fc_h_hz"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "stop_cos2k",
+            "stop_sin2k1"
+          ],
+          "default": 800.0,
+          "default_source": {
+            "file": "examples/typologies/salmon_saddle.yaml",
+            "key": "seed_params.g_fc_h_hz"
+          },
+          "detail": "Each azimuth's Salmon march gets its own cutoff from a cosine-squared blend of the horizontal and vertical values. This is the horizontal endpoint. The pair must always be supplied together.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "1 / fc(phi) = cos^2(phi) / fc_h + sin^2(phi) / fc_v",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_fc_h_hz",
+          "label": "Horizontal cutoff frequency (rows)",
+          "physical": "Changes the horizontal-plane rollback size and rate.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 1200.0,
+            "lo": 600.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Horizontal-plane Salmon cutoff in the per-azimuth cutoff blend.",
+          "unit": "Hz"
+        },
+        {
+          "base_knob": "fc_v_hz",
+          "bounds_source": {
+            "file": "examples/typologies/salmon_saddle.yaml",
+            "key": "bounds.g_fc_v_hz"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "stop_cos2k",
+            "stop_sin2k1"
+          ],
+          "default": 1200.0,
+          "default_source": {
+            "file": "examples/typologies/salmon_saddle.yaml",
+            "key": "seed_params.g_fc_v_hz"
+          },
+          "detail": "The vertical endpoint of the same cutoff blend. Supplying only one of the pair is refused, because the per-azimuth law would otherwise be undefined. It is the H/V split's vertical half.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "1 / fc(phi) = cos^2(phi) / fc_h + sin^2(phi) / fc_v",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_fc_v_hz",
+          "label": "Vertical cutoff frequency (rows)",
+          "physical": "Changes the vertical-plane rollback size and rate.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 1200.0,
+            "lo": 600.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Vertical-plane Salmon cutoff in the per-azimuth cutoff blend.",
+          "unit": "Hz"
+        },
+        {
+          "base_knob": "stop_cos2k",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid.rows_task_harmonics",
+          "context": "rows",
+          "contexts": [
+            "stop_cos2k",
+            "stop_sin2k1"
+          ],
+          "default": [
+            0.25
+          ],
+          "default_source": {
+            "file": "examples/typologies/salmon_saddle.yaml",
+            "key": "seed_params.g_stop_cos2k"
+          },
+          "detail": "The LIST contract adds the cos-2k terms to the stop law. Even cosines are quarter-safe. The saddle is a LABELED HYPOTHESIS over the Salmon rows.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "stop(phi) = stop0 (1 + sum a_2k cos(2k phi))",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_stop_cos2k",
+          "label": "Saddle stop cosines (rows)",
+          "physical": "Deepens the rollback on the cardinal or diagonal planes.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": null,
+          "summary": "Even-cosine stop terms that shape the saddle's cardinal/diagonal rollback.",
+          "unit": null
+        },
+        {
+          "base_knob": "stop_deg",
+          "bounds_source": {
+            "file": "examples/typologies/salmon_saddle.yaml",
+            "key": "bounds.g_stop_deg"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "rows",
+            "stop_cos2k",
+            "stop_sin2k1"
+          ],
+          "default": 160.0,
+          "default_source": {
+            "file": "examples/typologies/salmon_saddle.yaml",
+            "key": "seed_params.g_stop_deg"
+          },
+          "detail": "The verified Le Cleac'h rows use the published stop window and allow rollback past vertical. The Salmon rows stop below or above the cap-area asymptote, and modulated Salmon rows keep the plan's rollback window. A per-typology note narrows this.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [
+            "overloaded"
+          ],
+          "formula": "march stops when phi >= stop_deg",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_stop_deg",
+          "label": "Rows march stop (rows)",
+          "physical": "Chooses how far around the rollback each row is followed.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 240.0,
+            "lo": 120.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Wall-angle stop of the per-azimuth rows march; the legal window depends on the kind.",
+          "unit": "deg"
+        },
+        {
+          "base_knob": "stop_sin2k1",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid.rows_task_harmonics",
+          "context": "rows",
+          "contexts": [
+            "stop_cos2k",
+            "stop_sin2k1"
+          ],
+          "default": [
+            0.2
+          ],
+          "default_source": {
+            "file": "examples/typologies/salmon_saddle.yaml",
+            "key": "seed_params.g_stop_sin2k1"
+          },
+          "detail": "The LIST contract adds the sin-(2k+1) terms. Their presence forces the half model. The saddle is a LABELED HYPOTHESIS over the Salmon rows.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "stop(phi) = stop0 (1 + sum b_(2k+1) sin((2k+1) phi))",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_stop_sin2k1",
+          "label": "Saddle stop sines (rows)",
+          "physical": "Makes the top and bottom rollback differ.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": null,
+          "summary": "Odd-sine stop terms that make the saddle's top and bottom differ.",
+          "unit": null
+        },
+        {
+          "base_knob": "n_phi",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [
+            "stop_cos2k",
+            "stop_sin2k1"
+          ],
+          "default": 25,
+          "default_source": {
+            "file": "examples/typologies/salmon_saddle.yaml",
+            "key": "generator.n_phi"
+          },
+          "detail": "The row count sets the angular sampling of the point grid. The quarter model, half model and full ring each have their own minimum and parity rules in the generator. It is a count, not a length.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "n_phi",
+          "label": "Azimuth row count",
+          "physical": "Raises angular fidelity at the cost of more grid rows.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Number of azimuth rows in the rows/grid model.",
+          "unit": null
+        },
+        {
+          "base_knob": "n_s",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [
+            "stop_cos2k",
+            "stop_sin2k1"
+          ],
+          "default": 32,
+          "default_source": {
+            "file": "examples/typologies/salmon_saddle.yaml",
+            "key": "generator.n_s"
+          },
+          "detail": "Each row is sampled at equal axial (or equal-arc, for the rows march) fractions. This count sets the longitudinal resolution. It is a count, not a length.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "n_s",
+          "label": "Axial station count",
+          "physical": "Raises longitudinal fidelity at the cost of more points.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Number of axial stations along each row.",
+          "unit": null
+        },
+        {
+          "base_knob": "span",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_span_requested",
+          "context": "rows",
+          "contexts": [
+            "stop_cos2k",
+            "stop_sin2k1"
+          ],
+          "default": "half",
+          "default_source": {
+            "file": "examples/typologies/salmon_saddle.yaml",
+            "key": "generator.span"
+          },
+          "detail": "The legal spans are the ones the generator handles, and their names are read from the generator's own span constant rather than retyped here. A kind can force a span: an odd-cosine asymmetry forces the full ring and a b-term forces the half model.",
+          "doc_ref": [
+            "docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md",
+            "### 2.5 Up/down-asymmetric saddle"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": [
+              "quarter",
+              "half",
+              "full"
+            ],
+            "hi": null,
+            "kind": "str",
+            "lo": null,
+            "note": "named grid.py cap",
+            "section": null,
+            "source": {
+              "file": "hornlab_search/design/generators/grid.py",
+              "key": "ROWS_SPANS"
+            }
+          },
+          "knob": "span",
+          "label": "Row span",
+          "physical": "Chooses whether the mesh uses mirror planes or a seam-free full ring.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "How much of the azimuth circle the rows model covers.",
+          "unit": null
+        },
+        {
+          "base_knob": "wall_thickness_mm",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [
+            "stop_cos2k",
+            "stop_sin2k1"
+          ],
+          "default": 3.0,
+          "default_source": {
+            "file": "examples/typologies/salmon_saddle.yaml",
+            "key": "generator.wall_thickness_mm"
+          },
+          "detail": "The point-grid route builds an explicit outer shell offset from each row's own profile. This is the printed shell thickness, not an acoustic dimension. The generator also uses it in its self-approach guard.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "wall_thickness_mm",
+          "label": "Shell thickness",
+          "physical": "Changes the printed wall thickness, not the acoustic inner surface.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Outer-shell thickness of a freestanding rows model.",
+          "unit": "mm"
+        }
+      ],
       "name": "salmon_saddle",
       "source_status": "catalog",
       "symmetry": "hv"
@@ -8813,13 +12583,499 @@
       "brief_tied": null,
       "config_path": "examples/typologies/salmon_x_shape.yaml",
       "description": "the same rows + T5 diagonal term x_amp 0.25 / x_fc 0.15 (6 knobs); labeled hypothesis",
-      "documented": false,
+      "documented": true,
       "driver_exit_mm": null,
       "family": "FREEFORM",
       "group": "organic",
       "kind": "rows",
-      "knob_names": [],
-      "knobs": [],
+      "knob_names": [
+        "g_T",
+        "g_fc_h_hz",
+        "g_fc_v_hz",
+        "g_stop_deg",
+        "g_x_amp",
+        "g_x_fc",
+        "n_phi",
+        "n_s",
+        "span",
+        "wall_thickness_mm"
+      ],
+      "knobs": [
+        {
+          "base_knob": "T",
+          "bounds_source": {
+            "file": "examples/typologies/salmon_x_shape.yaml",
+            "key": "bounds.g_T"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "rows",
+            "x_amp",
+            "x_fc"
+          ],
+          "default": 0.8,
+          "default_source": {
+            "file": "examples/typologies/salmon_x_shape.yaml",
+            "key": "seed_params.g_T"
+          },
+          "detail": "The two row families share the spelling but not the equation. The Salmon rows use it in the family area law; the verified Le Cleac'h rows use it in the Fourcade wavefront-area law.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [
+            "overloaded"
+          ],
+          "formula": "Salmon family law; Fourcade eq. 42",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_T",
+          "label": "Rows family factor (rows)",
+          "physical": "Selects the family member and its expansion profile.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 1.0,
+            "lo": 0.3,
+            "log": false,
+            "search": true
+          },
+          "summary": "Salmon family T on the Salmon rows; Fourcade area-law T on the Le Cleac'h rows.",
+          "unit": null
+        },
+        {
+          "base_knob": "fc_h_hz",
+          "bounds_source": {
+            "file": "examples/typologies/salmon_x_shape.yaml",
+            "key": "bounds.g_fc_h_hz"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "x_amp",
+            "x_fc"
+          ],
+          "default": 800.0,
+          "default_source": {
+            "file": "examples/typologies/salmon_x_shape.yaml",
+            "key": "seed_params.g_fc_h_hz"
+          },
+          "detail": "Each azimuth's Salmon march gets its own cutoff from a cosine-squared blend of the horizontal and vertical values. This is the horizontal endpoint. The pair must always be supplied together.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "1 / fc(phi) = cos^2(phi) / fc_h + sin^2(phi) / fc_v",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_fc_h_hz",
+          "label": "Horizontal cutoff frequency (rows)",
+          "physical": "Changes the horizontal-plane rollback size and rate.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 1200.0,
+            "lo": 600.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Horizontal-plane Salmon cutoff in the per-azimuth cutoff blend.",
+          "unit": "Hz"
+        },
+        {
+          "base_knob": "fc_v_hz",
+          "bounds_source": {
+            "file": "examples/typologies/salmon_x_shape.yaml",
+            "key": "bounds.g_fc_v_hz"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "x_amp",
+            "x_fc"
+          ],
+          "default": 1100.0,
+          "default_source": {
+            "file": "examples/typologies/salmon_x_shape.yaml",
+            "key": "seed_params.g_fc_v_hz"
+          },
+          "detail": "The vertical endpoint of the same cutoff blend. Supplying only one of the pair is refused, because the per-azimuth law would otherwise be undefined. It is the H/V split's vertical half.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "1 / fc(phi) = cos^2(phi) / fc_h + sin^2(phi) / fc_v",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_fc_v_hz",
+          "label": "Vertical cutoff frequency (rows)",
+          "physical": "Changes the vertical-plane rollback size and rate.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 1200.0,
+            "lo": 600.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Vertical-plane Salmon cutoff in the per-azimuth cutoff blend.",
+          "unit": "Hz"
+        },
+        {
+          "base_knob": "stop_deg",
+          "bounds_source": {
+            "file": "examples/typologies/salmon_x_shape.yaml",
+            "key": "bounds.g_stop_deg"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "rows",
+            "x_amp",
+            "x_fc"
+          ],
+          "default": 130.0,
+          "default_source": {
+            "file": "examples/typologies/salmon_x_shape.yaml",
+            "key": "seed_params.g_stop_deg"
+          },
+          "detail": "The verified Le Cleac'h rows use the published stop window and allow rollback past vertical. The Salmon rows stop below or above the cap-area asymptote, and modulated Salmon rows keep the plan's rollback window. A per-typology note narrows this.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [
+            "overloaded"
+          ],
+          "formula": "march stops when phi >= stop_deg",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_stop_deg",
+          "label": "Rows march stop (rows)",
+          "physical": "Chooses how far around the rollback each row is followed.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 240.0,
+            "lo": 120.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Wall-angle stop of the per-azimuth rows march; the legal window depends on the kind.",
+          "unit": "deg"
+        },
+        {
+          "base_knob": "x_amp",
+          "bounds_source": {
+            "file": "examples/typologies/salmon_x_shape.yaml",
+            "key": "bounds.g_x_amp"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "x_amp",
+            "x_fc"
+          ],
+          "default": 0.25,
+          "default_source": {
+            "file": "examples/typologies/salmon_x_shape.yaml",
+            "key": "seed_params.g_x_amp"
+          },
+          "detail": "In this hypothesis config the positive sign opens the mouth along the diagonals. The signed variant records the opposite reading under a negative value; the sign is a reading switch, not a magnitude change.",
+          "doc_ref": [
+            "docs/research/typologies/SALMON_X_HORN_EXPANSION_2026-10-25.md",
+            "### 3.1 X-shape v2 - signed, decoupled, and already half-implemented"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "mouth modulation about the diagonal; sign selects the reading",
+          "hard": {
+            "choices": null,
+            "hi": 0.4,
+            "kind": null,
+            "lo": -0.4,
+            "note": "named grid.py cap",
+            "section": null,
+            "source": {
+              "file": "hornlab_search/design/generators/grid.py",
+              "key": "ROWS_MAX_X_AMP"
+            }
+          },
+          "knob": "g_x_amp",
+          "label": "Diagnostic-out X amplitude (rows)",
+          "physical": "Opens the mouth along the diagonals.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 0.35,
+            "lo": 0.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Positive X amplitude keeps the shipped diagonal-out reading.",
+          "unit": null
+        },
+        {
+          "base_knob": "x_fc",
+          "bounds_source": {
+            "file": "examples/typologies/salmon_x_shape.yaml",
+            "key": "bounds.g_x_fc"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "x_amp",
+            "x_fc"
+          ],
+          "default": 0.15,
+          "default_source": {
+            "file": "examples/typologies/salmon_x_shape.yaml",
+            "key": "seed_params.g_x_fc"
+          },
+          "detail": "The X term is a rows shape hypothesis, not a published construction. This fraction moves its influence along the row.",
+          "doc_ref": [
+            "docs/research/typologies/SALMON_X_HORN_EXPANSION_2026-10-25.md",
+            "### 3.1 X-shape v2 - signed, decoupled, and already half-implemented"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "modulation weight grows with the arc fraction scaled by x_fc",
+          "hard": {
+            "choices": null,
+            "hi": 0.3,
+            "kind": null,
+            "lo": null,
+            "note": "named grid.py cap",
+            "section": null,
+            "source": {
+              "file": "hornlab_search/design/generators/grid.py",
+              "key": "ROWS_MAX_X_FC"
+            }
+          },
+          "knob": "g_x_fc",
+          "label": "X growth fraction (rows)",
+          "physical": "Moves the X-shape influence toward or away from the mouth.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 0.3,
+            "lo": 0.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "How fast the diagonal X term grows toward the mouth in this hypothesis config.",
+          "unit": null
+        },
+        {
+          "base_knob": "n_phi",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [
+            "x_amp",
+            "x_fc"
+          ],
+          "default": 15,
+          "default_source": {
+            "file": "examples/typologies/salmon_x_shape.yaml",
+            "key": "generator.n_phi"
+          },
+          "detail": "The row count sets the angular sampling of the point grid. The quarter model, half model and full ring each have their own minimum and parity rules in the generator. It is a count, not a length.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "n_phi",
+          "label": "Azimuth row count",
+          "physical": "Raises angular fidelity at the cost of more grid rows.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Number of azimuth rows in the rows/grid model.",
+          "unit": null
+        },
+        {
+          "base_knob": "n_s",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [
+            "x_amp",
+            "x_fc"
+          ],
+          "default": 32,
+          "default_source": {
+            "file": "examples/typologies/salmon_x_shape.yaml",
+            "key": "generator.n_s"
+          },
+          "detail": "Each row is sampled at equal axial (or equal-arc, for the rows march) fractions. This count sets the longitudinal resolution. It is a count, not a length.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "n_s",
+          "label": "Axial station count",
+          "physical": "Raises longitudinal fidelity at the cost of more points.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Number of axial stations along each row.",
+          "unit": null
+        },
+        {
+          "base_knob": "span",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_span_requested",
+          "context": "rows",
+          "contexts": [
+            "x_amp",
+            "x_fc"
+          ],
+          "default": null,
+          "default_source": null,
+          "detail": "The legal spans are the ones the generator handles, and their names are read from the generator's own span constant rather than retyped here. A kind can force a span: an odd-cosine asymmetry forces the full ring and a b-term forces the half model.",
+          "doc_ref": [
+            "docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md",
+            "### 2.5 Up/down-asymmetric saddle"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": [
+              "quarter",
+              "half",
+              "full"
+            ],
+            "hi": null,
+            "kind": "str",
+            "lo": null,
+            "note": "named grid.py cap",
+            "section": null,
+            "source": {
+              "file": "hornlab_search/design/generators/grid.py",
+              "key": "ROWS_SPANS"
+            }
+          },
+          "knob": "span",
+          "label": "Row span",
+          "physical": "Chooses whether the mesh uses mirror planes or a seam-free full ring.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "How much of the azimuth circle the rows model covers.",
+          "unit": null
+        },
+        {
+          "base_knob": "wall_thickness_mm",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [
+            "x_amp",
+            "x_fc"
+          ],
+          "default": 3.0,
+          "default_source": {
+            "file": "examples/typologies/salmon_x_shape.yaml",
+            "key": "generator.wall_thickness_mm"
+          },
+          "detail": "The point-grid route builds an explicit outer shell offset from each row's own profile. This is the printed shell thickness, not an acoustic dimension. The generator also uses it in its self-approach guard.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "wall_thickness_mm",
+          "label": "Shell thickness",
+          "physical": "Changes the printed wall thickness, not the acoustic inner surface.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Outer-shell thickness of a freestanding rows model.",
+          "unit": "mm"
+        }
+      ],
       "name": "salmon_x_shape",
       "source_status": "catalog",
       "symmetry": "hv"
@@ -8879,13 +13135,499 @@
       "brief_tied": null,
       "config_path": "examples/typologies/salmon_x_signed.yaml",
       "description": "salmon rows + SIGNED x_amp (cardinal-in vs corner-out readings), quarter model (6 knobs); labeled hypothesis",
-      "documented": false,
+      "documented": true,
       "driver_exit_mm": null,
       "family": "FREEFORM",
       "group": "organic",
       "kind": "rows",
-      "knob_names": [],
-      "knobs": [],
+      "knob_names": [
+        "g_T",
+        "g_fc_h_hz",
+        "g_fc_v_hz",
+        "g_stop_deg",
+        "g_x_amp",
+        "g_x_fc",
+        "n_phi",
+        "n_s",
+        "span",
+        "wall_thickness_mm"
+      ],
+      "knobs": [
+        {
+          "base_knob": "T",
+          "bounds_source": {
+            "file": "examples/typologies/salmon_x_signed.yaml",
+            "key": "bounds.g_T"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "rows",
+            "stop_deg",
+            "x_amp"
+          ],
+          "default": 0.8,
+          "default_source": {
+            "file": "examples/typologies/salmon_x_signed.yaml",
+            "key": "seed_params.g_T"
+          },
+          "detail": "The two row families share the spelling but not the equation. The Salmon rows use it in the family area law; the verified Le Cleac'h rows use it in the Fourcade wavefront-area law.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [
+            "overloaded"
+          ],
+          "formula": "Salmon family law; Fourcade eq. 42",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_T",
+          "label": "Rows family factor (rows)",
+          "physical": "Selects the family member and its expansion profile.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 1.0,
+            "lo": 0.3,
+            "log": false,
+            "search": true
+          },
+          "summary": "Salmon family T on the Salmon rows; Fourcade area-law T on the Le Cleac'h rows.",
+          "unit": null
+        },
+        {
+          "base_knob": "fc_h_hz",
+          "bounds_source": {
+            "file": "examples/typologies/salmon_x_signed.yaml",
+            "key": "bounds.g_fc_h_hz"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "stop_deg",
+            "x_amp"
+          ],
+          "default": 800.0,
+          "default_source": {
+            "file": "examples/typologies/salmon_x_signed.yaml",
+            "key": "seed_params.g_fc_h_hz"
+          },
+          "detail": "Each azimuth's Salmon march gets its own cutoff from a cosine-squared blend of the horizontal and vertical values. This is the horizontal endpoint. The pair must always be supplied together.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "1 / fc(phi) = cos^2(phi) / fc_h + sin^2(phi) / fc_v",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_fc_h_hz",
+          "label": "Horizontal cutoff frequency (rows)",
+          "physical": "Changes the horizontal-plane rollback size and rate.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 1200.0,
+            "lo": 600.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Horizontal-plane Salmon cutoff in the per-azimuth cutoff blend.",
+          "unit": "Hz"
+        },
+        {
+          "base_knob": "fc_v_hz",
+          "bounds_source": {
+            "file": "examples/typologies/salmon_x_signed.yaml",
+            "key": "bounds.g_fc_v_hz"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "stop_deg",
+            "x_amp"
+          ],
+          "default": 1100.0,
+          "default_source": {
+            "file": "examples/typologies/salmon_x_signed.yaml",
+            "key": "seed_params.g_fc_v_hz"
+          },
+          "detail": "The vertical endpoint of the same cutoff blend. Supplying only one of the pair is refused, because the per-azimuth law would otherwise be undefined. It is the H/V split's vertical half.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "1 / fc(phi) = cos^2(phi) / fc_h + sin^2(phi) / fc_v",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_fc_v_hz",
+          "label": "Vertical cutoff frequency (rows)",
+          "physical": "Changes the vertical-plane rollback size and rate.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 1200.0,
+            "lo": 600.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Vertical-plane Salmon cutoff in the per-azimuth cutoff blend.",
+          "unit": "Hz"
+        },
+        {
+          "base_knob": "stop_deg",
+          "bounds_source": {
+            "file": "examples/typologies/salmon_x_signed.yaml",
+            "key": "bounds.g_stop_deg"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "rows",
+            "stop_deg",
+            "x_amp"
+          ],
+          "default": 150.0,
+          "default_source": {
+            "file": "examples/typologies/salmon_x_signed.yaml",
+            "key": "seed_params.g_stop_deg"
+          },
+          "detail": "The signed-X config is still a LABELED HYPOTHESIS. Its seed was reseeded to stay clear of the cap-area asymptote; the plan's rollback window is unchanged.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [
+            "overloaded"
+          ],
+          "formula": "march stops when phi >= stop_deg",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_stop_deg",
+          "label": "Signed-X rows stop (rows)",
+          "physical": "Controls how far the signed-X rows follow the rollback.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 240.0,
+            "lo": 120.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Salmon rows stop under the signed-X reading; keep it away from the area asymptote.",
+          "unit": "deg"
+        },
+        {
+          "base_knob": "x_amp",
+          "bounds_source": {
+            "file": "examples/typologies/salmon_x_signed.yaml",
+            "key": "bounds.g_x_amp"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "stop_deg",
+            "x_amp"
+          ],
+          "default": -0.15,
+          "default_source": {
+            "file": "examples/typologies/salmon_x_signed.yaml",
+            "key": "seed_params.g_x_amp"
+          },
+          "detail": "Signed-X v2 (owner-approved 2026-10-25): a negative value gives the cardinal-in / corner-out reading, while a positive value keeps the earlier diagonal-out reading. The magnitude cap is unchanged.",
+          "doc_ref": [
+            "docs/research/typologies/SALMON_X_HORN_EXPANSION_2026-10-25.md",
+            "### 3.1 X-shape v2 - signed, decoupled, and already half-implemented"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "mouth modulation about the diagonal; sign selects the reading",
+          "hard": {
+            "choices": null,
+            "hi": 0.4,
+            "kind": null,
+            "lo": -0.4,
+            "note": "named grid.py cap",
+            "section": null,
+            "source": {
+              "file": "hornlab_search/design/generators/grid.py",
+              "key": "ROWS_MAX_X_AMP"
+            }
+          },
+          "knob": "g_x_amp",
+          "label": "Signed cardinal-in X amplitude (rows)",
+          "physical": "Opens the mouth along the cardinals when negative.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 0.4,
+            "lo": -0.4,
+            "log": false,
+            "search": true
+          },
+          "summary": "Negative X amplitude opens the mouth along the cardinals (the signed reading).",
+          "unit": null
+        },
+        {
+          "base_knob": "x_fc",
+          "bounds_source": {
+            "file": "examples/typologies/salmon_x_signed.yaml",
+            "key": "bounds.g_x_fc"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "stop_deg",
+            "x_amp"
+          ],
+          "default": 0.15,
+          "default_source": {
+            "file": "examples/typologies/salmon_x_signed.yaml",
+            "key": "seed_params.g_x_fc"
+          },
+          "detail": "The X term is not applied at the throat; it grows toward the mouth. This fraction sets where that growth is strongest. It is dimensionless and is capped by the grid validator.",
+          "doc_ref": [
+            "docs/research/typologies/SALMON_X_HORN_EXPANSION_2026-10-25.md",
+            "### 3.1 X-shape v2 - signed, decoupled, and already half-implemented"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "modulation weight grows with the arc fraction scaled by x_fc",
+          "hard": {
+            "choices": null,
+            "hi": 0.3,
+            "kind": null,
+            "lo": null,
+            "note": "named grid.py cap",
+            "section": null,
+            "source": {
+              "file": "hornlab_search/design/generators/grid.py",
+              "key": "ROWS_MAX_X_FC"
+            }
+          },
+          "knob": "g_x_fc",
+          "label": "X-shape depth fraction (rows)",
+          "physical": "Moves the X-shape's influence toward or away from the mouth.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 0.3,
+            "lo": 0.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "How far along the row the X-shape modulation grows.",
+          "unit": null
+        },
+        {
+          "base_knob": "n_phi",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [
+            "stop_deg",
+            "x_amp"
+          ],
+          "default": 15,
+          "default_source": {
+            "file": "examples/typologies/salmon_x_signed.yaml",
+            "key": "generator.n_phi"
+          },
+          "detail": "The row count sets the angular sampling of the point grid. The quarter model, half model and full ring each have their own minimum and parity rules in the generator. It is a count, not a length.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "n_phi",
+          "label": "Azimuth row count",
+          "physical": "Raises angular fidelity at the cost of more grid rows.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Number of azimuth rows in the rows/grid model.",
+          "unit": null
+        },
+        {
+          "base_knob": "n_s",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [
+            "stop_deg",
+            "x_amp"
+          ],
+          "default": 32,
+          "default_source": {
+            "file": "examples/typologies/salmon_x_signed.yaml",
+            "key": "generator.n_s"
+          },
+          "detail": "Each row is sampled at equal axial (or equal-arc, for the rows march) fractions. This count sets the longitudinal resolution. It is a count, not a length.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "n_s",
+          "label": "Axial station count",
+          "physical": "Raises longitudinal fidelity at the cost of more points.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Number of axial stations along each row.",
+          "unit": null
+        },
+        {
+          "base_knob": "span",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_span_requested",
+          "context": "rows",
+          "contexts": [
+            "stop_deg",
+            "x_amp"
+          ],
+          "default": null,
+          "default_source": null,
+          "detail": "The legal spans are the ones the generator handles, and their names are read from the generator's own span constant rather than retyped here. A kind can force a span: an odd-cosine asymmetry forces the full ring and a b-term forces the half model.",
+          "doc_ref": [
+            "docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md",
+            "### 2.5 Up/down-asymmetric saddle"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": [
+              "quarter",
+              "half",
+              "full"
+            ],
+            "hi": null,
+            "kind": "str",
+            "lo": null,
+            "note": "named grid.py cap",
+            "section": null,
+            "source": {
+              "file": "hornlab_search/design/generators/grid.py",
+              "key": "ROWS_SPANS"
+            }
+          },
+          "knob": "span",
+          "label": "Row span",
+          "physical": "Chooses whether the mesh uses mirror planes or a seam-free full ring.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "How much of the azimuth circle the rows model covers.",
+          "unit": null
+        },
+        {
+          "base_knob": "wall_thickness_mm",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [
+            "stop_deg",
+            "x_amp"
+          ],
+          "default": 3.0,
+          "default_source": {
+            "file": "examples/typologies/salmon_x_signed.yaml",
+            "key": "generator.wall_thickness_mm"
+          },
+          "detail": "The point-grid route builds an explicit outer shell offset from each row's own profile. This is the printed shell thickness, not an acoustic dimension. The generator also uses it in its self-approach guard.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "wall_thickness_mm",
+          "label": "Shell thickness",
+          "physical": "Changes the printed wall thickness, not the acoustic inner surface.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Outer-shell thickness of a freestanding rows model.",
+          "unit": "mm"
+        }
+      ],
       "name": "salmon_x_signed",
       "source_status": "catalog",
       "symmetry": "hv"
@@ -10514,7 +15256,7 @@
     }
   },
   "validation_authority": {
-    "hard": "The `hard` limits are the mesher schema limits from families.KeySpec. They exist so the mesher cannot be handed an illegal value; they are not plausibility limits and they are not recommendations.",
+    "hard": "The `hard` limits are the schema clamps: families.KeySpec for the mesher's own family keys, and the named grid.py caps for the rows knobs. They exist so an illegal value cannot be emitted; they are not plausibility limits and they are not recommendations.",
     "recommendation": "Neither the search box nor the hard limit implies a recommended value. Defaults are starting points taken from their own authority, not recommendations.",
     "search": "The `search` bounds are the search box copied from this typology's examples YAML. A design sitting on a bound is at the edge of the box the search was given; it is not evidence that the value is good."
   }
