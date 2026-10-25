@@ -143,6 +143,21 @@ Suggested homes: W1 + W2 + W5 → the brief-design pass (its deliverables are ex
 the POC build-gate); W4 → any small offline commit (e.g. alongside the in-flight M3/M4 lanes); W3 → the next
 contract-revision window or skip.
 
+- [ ] **W6 — a Boundary Lab-class balloon view in the GUI (designer lane, no GPU).** Owner showed BL's Balloon
+  Plot (2026-10-24): a smooth continuously-shaded 3D sphere colored by normalized SPL (0 → −30 dB) with white
+  isobar rings ON the surface, labeled On-Axis/Horizontal/Vertical axes + a measurement-domain wireframe; a
+  "radar slicer" (angle slider → polar cut at any azimuth/frequency); and a smooth log-frequency × angle
+  (±180°) filled-contour slice. **Recon of BL's actual source (GitHub, done 2026-10-24):** the balloon is NOT a
+  textured sphere — it is a **dB-to-radius BLOB** (radius = max(spl − floor, 0); shape AND color both encode
+  level), PyVista/VTK `smooth_shading` + turbo, isobars = tubed white contour rings offset ~0.2 % of extent,
+  radar slicer = barycentric interpolation along a great-circle meridian, isobar slice = fractional-octave
+  smoothed + resampled freq×angle heatmap. Port of the DESIGN into our web GUI (three.js r160, vanilla JS) is
+  the implementation (designer lane dispatched); GPL attribution carried. We solve and STORE the full balloon
+  per design already (`response.npz`: `spl_balloon_db` + `balloon_grid`/`balloon_layout` + the sin-θ weighting
+  note) — a viewer is a rendering feature, not new computation. Prerequisite chain: data density first —
+  M3/WP5's running 512→1024→2592 ΔDI check decides the verify-balloon upgrade; note the sin(θ) unequal-area
+  layout when shading (interpolate on the sphere, not the index grid).
+
 ## P6 (added 2026-10-25, PROPOSALS from the collaborator conversation — owner decision required; **FULL IMPLEMENTATION PLAN v1.0 written 2026-10-25: `docs/research/ATH_SUPERFORMULA_AND_GSA_2026-10-25.md`** — research basis §2, settled decisions §3 (D1–D20), work packages §4, waves + verbatim dispatch prompts §5, checkpoints §6; execution gates: WP1–WP17 complete + owner GO; research basis summarized in `docs/plan/12_RESEARCH_BASIS.md` §11)
 
 - [ ] **P6a — featured superformula (guiding-curve) search campaign (config-only; realizes the plan README's frozen quick-fork #2).** The OSSE guiding-curve superformula keys (`gcurve_type: 2`, `gcurve_sf_a/b/m1/m2/n1..n3`, `gcurve_se_n`) are mesher-native AND already searchable design-space rows (`design/families.py` gcurve section; `tests/test_design_families.py` "table rows"); superellipse exponents are searched today (`rosse_baseline` 2–8, `freeform_sculpt`). Missing: a catalog family + `examples/` config that SEARCHES the SF knobs, bounds anchored to a verified Ath reference case (a User Guide `GCurve.SF` example or the ATH CORE `sf()` wall-angle script), then one screen-tier campaign. Grounding (typology-research minimum bar): Gielis 2003 + the Ath User Guide — R9 satisfied; `12_RESEARCH_BASIS.md` §11 is the dossier. Cost: config + one screen campaign. Value: star/organic/azimuthally-varying mouth shapes no current config expresses.
