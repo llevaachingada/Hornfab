@@ -51,6 +51,8 @@ class MeshSettings:
     dof_cap_final: int
     dof_per_triangle: float
     max_triangle_slack: float = 1.15
+    rear_res_factor: float = 1.0       # WP7: scale ONLY the outer shell/rear-cap resolution
+    band_split: dict | None = None     # WP8: {"edges_hz": [...]} -> one mesh per band (absent = today)
 
     def dof_cap(self, mode: str) -> int:
         return int(getattr(self, f"dof_cap_{mode}"))
@@ -67,6 +69,7 @@ class SolveSettings:
     gmres_tol: float
     timeout_s: float
     cuda_fused: bool = False   # WP15: opt-in fused CUDA Burton-Miller assembly (beat_cuda only)
+    source_motion: str = "normal"   # WP5: 'normal' (breathing cap, today) | 'axial' (rigid piston)
 
     def balloon_points(self, mode: str) -> int:
         if not self.balloon:
@@ -212,6 +215,57 @@ def _validate_grid_block(block, where: str) -> dict:
     if isinstance(ppo, bool) or not isinstance(ppo, (int, float)) or not ppo > 0:
         raise ConfigError(f"{where}: grid.verify_points_per_octave must be a positive number")
     return {"verify_points_per_octave": float(ppo)}
+
+
+# ------------------------------------------------------------------ WP5/WP7/WP8 blocks
+
+def _validate_rear_res_factor(value, where: str) -> float:
+    """WP7: ``mesh.rear_res_factor`` scales ONLY the rear/outer-shell resolution. Any positive
+    finite factor is legal (values > 1 coarsen); 1.0 is today's mesh."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)) \
+            or not np.isfinite(float(value)) or float(value) <= 0.0:
+        raise ConfigError(f"{where}: rear_res_factor must be a finite positive number, got {value!r}")
+    return float(value)
+
+
+def _validate_band_split(block, where: str, band_lo: float, band_hi: float) -> dict | None:
+    """WP8: ``mesh.band_split: {edges_hz: [...]}``. Edges are strictly increasing and lie strictly
+    inside the target band; at least one edge. Absent/None keeps today's single-mesh policy."""
+    if block is None:
+        return None
+    if not isinstance(block, dict):
+        raise ConfigError(f"{where}: band_split must be a mapping")
+    unknown = set(block) - {"edges_hz"}
+    if unknown:
+        raise ConfigError(f"{where}: band_split unknown key(s) {sorted(unknown)} (allowed: edges_hz)")
+    edges = block.get("edges_hz")
+    if not isinstance(edges, (list, tuple)) or not edges:
+        raise ConfigError(f"{where}: band_split.edges_hz must be a non-empty list of numbers")
+    vals = []
+    for e in edges:
+        if isinstance(e, bool) or not isinstance(e, (int, float)) or not np.isfinite(float(e)):
+            raise ConfigError(f"{where}: band_split.edges_hz must contain finite numbers, got {e!r}")
+        vals.append(float(e))
+    if any(b <= a for a, b in zip(vals, vals[1:])):
+        raise ConfigError(f"{where}: band_split.edges_hz must be strictly increasing, got {vals}")
+    for e in vals:
+        if not (band_lo < e < band_hi):
+            raise ConfigError(
+                f"{where}: band_split edge {e:g} Hz is outside the open target band "
+                f"({band_lo:g}, {band_hi:g}) Hz")
+    return {"edges_hz": vals}
+
+
+def _validate_source_motion(value, backend: str, where: str) -> str:
+    """WP5: ``solve.source_motion`` is 'normal' (today) or 'axial' (rigid piston). Only the beat
+    adapter implements it; a non-beat backend with a non-default value is refused loudly."""
+    if not isinstance(value, str) or value not in ("normal", "axial"):
+        raise ConfigError(f"{where}: source_motion must be 'normal' or 'axial', got {value!r}")
+    if value != "normal" and not str(backend).startswith("beat_"):
+        raise ConfigError(
+            f"{where}: source_motion={value!r} is only implemented for the beat backends "
+            f"(beat_cuda/beat_cpu), got backend {backend!r}")
+    return value
 
 
 # ------------------------------------------------------------------ WP2 driver fairness
@@ -362,12 +416,22 @@ def load_config(path, *, brief=None, cma_seed: int | None = None) -> Config:
     _apply_brief_driver_pins(raw, brief_d, where, embedded=embedded_brief)
 
     mesh = _build(MeshSettings, _require(raw, "mesh", where), f"{where}:mesh",
-                  optional=("max_triangle_slack",))
+                  optional=("max_triangle_slack", "rear_res_factor", "band_split"))
     solve = _build(SolveSettings, _require(raw, "solve", where), f"{where}:solve",
-                   optional=("cuda_fused",))
+                   optional=("cuda_fused", "source_motion"))
     if solve.cuda_fused and str(solve.backend) != "beat_cuda":
         raise ConfigError(f"{where}: solve.cuda_fused is only implemented for backend: beat_cuda "
                           f"(got {solve.backend!r})")
+    mesh.rear_res_factor = _validate_rear_res_factor(mesh.rear_res_factor, f"{where}:mesh")
+    if mesh.band_split is not None:                    # absent = today, no target keys touched
+        try:
+            band_lo = float(raw["target"]["band_lo_hz"])
+            band_hi = float(raw["target"]["band_hi_hz"])
+        except (KeyError, TypeError, ValueError):
+            raise ConfigError(f"{where}: target.band_lo_hz/band_hi_hz are required numbers") from None
+        mesh.band_split = _validate_band_split(mesh.band_split, f"{where}:mesh", band_lo, band_hi)
+    solve.source_motion = _validate_source_motion(
+        solve.source_motion, str(solve.backend), f"{where}:solve")
     search = _build(SearchSettings, _require(raw, "search", where), f"{where}:search",
                     optional=("popsize", "infeasible_penalty"))
     if "popsize" not in raw["search"]:
@@ -460,7 +524,19 @@ def solve_spec(mode: Mode, cfg: Config) -> SolveSpec:
     )
     # WP15: cuda_fused rides in `extra` so the solve-spec hash (cache key, dataset provenance)
     # changes ONLY when the opt-in is actually set; absent leaves every old hash untouched.
-    extra = {"cuda_fused": True} if bool(getattr(s, "cuda_fused", False)) else {}
+    extra: dict = {"cuda_fused": True} if bool(getattr(s, "cuda_fused", False)) else {}
+    # WP5: 'normal' is today's beat source and must NOT enter `extra` (old hashes unchanged).
+    if str(getattr(s, "source_motion", "normal")) != "normal":
+        extra["source_motion"] = str(s.source_motion)
+    # WP8: band-split rides in `extra` too (solve hash + Response.meta provenance via beat).
+    band_split = getattr(cfg.mesh, "band_split", None)
+    if band_split is not None:
+        extra["mesh_policy"] = "band_split_v1"
+        extra["band_edges_hz"] = [float(e) for e in band_split["edges_hz"]]
+    # WP7: a non-1.0 rear_res_factor changes the MESH, so it must change the solve-spec hash too
+    # (solve cache + failure markers + resume memo key off it); absent/1.0 leaves old hashes untouched.
+    if float(getattr(cfg.mesh, "rear_res_factor", 1.0)) != 1.0:
+        extra["rear_res_factor"] = float(cfg.mesh.rear_res_factor)
     return SolveSpec(
         mode=mode,
         freqs_hz=mode_freqs(mode, cfg),

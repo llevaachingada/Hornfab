@@ -236,6 +236,28 @@ def _check_bbox(bbox_m: tuple) -> None:
 # ------------------------------------------------------------------ build
 
 
+def rear_res_factor(cfg) -> float:
+    """WP7's ``mesh.rear_res_factor``; 1.0 when the caller has no such setting (old configs)."""
+    return float(getattr(getattr(cfg, "mesh", None), "rear_res_factor", 1.0))
+
+
+def res_mm_for_spec(mesh: MeshSpec, cfg) -> dict:
+    """``sizing.res_mm_for`` with the WP7 rear/outer-shell coarsening applied."""
+    res = sizing.res_mm_for(mesh.epw, mesh.f_max_hz)
+    # rear_res_mm drives the outer shell + rear cap only (MeshDensity read-first 2026-10-24);
+    # acoustic bore/mouth/throat cap untouched.
+    res["rear"] = res["rear"] * rear_res_factor(cfg)
+    return res
+
+
+def mesh_cache_key(design: Design, mesh: MeshSpec, cfg) -> str:
+    """The mesh cache key. Factor 1.0 keeps TODAY'S string exactly; a non-default factor gets a
+    suffix so it can never collide with (or invalidate) a factor-1.0 cache entry."""
+    base = f"{design.hash()}-{mesh.hash()}"
+    factor = rear_res_factor(cfg)
+    return base if factor == 1.0 else f"{base}-rear{factor:g}"
+
+
 def build_mesh(design: Design, mesh: MeshSpec, cfg, out_dir: Path, *, mode: str | None = None,
                cache_dir: Path | None = None) -> MeshResult:
     """Design + MeshSpec -> ``out_dir/mesh.msh`` (metres) + ``out_dir/mesh_meta.json``.
@@ -252,13 +274,13 @@ def build_mesh(design: Design, mesh: MeshSpec, cfg, out_dir: Path, *, mode: str 
     t0 = time.perf_counter()
     out_dir = Path(out_dir)
     families.validate(design)
-    res = sizing.res_mm_for(mesh.epw, mesh.f_max_hz)
+    res = res_mm_for_spec(mesh, cfg)
     out_path = out_dir / "mesh.msh"
     mcfg = families.to_mesher_config(design, mesh, res, out_path)
     # Copy-pasteable at 2 a.m.: paste into a REPL and call hornlab_mesher.build_from_config.
     log.debug("mesher config for %s: %r", design.hash(), mcfg)
 
-    key = f"{design.hash()}-{mesh.hash()}"
+    key = mesh_cache_key(design, mesh, cfg)
 
     # ---- cache (local, then shared)
     hit = _load_cached(out_dir, key)
@@ -329,7 +351,8 @@ def build_mesh(design: Design, mesh: MeshSpec, cfg, out_dir: Path, *, mode: str 
         seconds=time.perf_counter() - t0)
     _meta_path(out_dir).write_text(json.dumps(
         {"key": key, "result": _result_to_json(result), "summary": summary,
-         "mesher_config": mcfg}, indent=1, sort_keys=True), encoding="utf-8")
+         "mesher_config": mcfg, "rear_res_factor": rear_res_factor(cfg)},
+        indent=1, sort_keys=True), encoding="utf-8")
     if cache_dir is not None:
         _copy_entry(out_dir, Path(cache_dir) / key)
     log.info("mesh %s: %d triangles, %d vertices, %.2f s", key, result.n_triangles,
@@ -349,7 +372,7 @@ def export_step(design: Design, mesh: MeshSpec, cfg, out: Path):
     from hornlab_mesher.mesher import MesherError
 
     families.validate(design)
-    res = sizing.res_mm_for(mesh.epw, mesh.f_max_hz)
+    res = res_mm_for_spec(mesh, cfg)
     out = Path(out)
     mcfg = families.to_mesher_config(design, mesh, res, out)
     log.debug("mesher config for STEP %s: %r", design.hash(), mcfg)

@@ -287,6 +287,7 @@ def _to_response(raw, spec: SolveSpec, mesh: MeshResult) -> Response:
         "n_dof_source": "solver_log[i].native_diagnostics.p1_dof_count (fallback: mesh_info.n_vertices)",
         "cuda_fused": bool((spec.extra or {}).get("cuda_fused")),
         "mesh_policy": (spec.extra or {}).get("mesh_policy"),
+        "source_motion": str((spec.extra or {}).get("source_motion", "normal")),
     }
     return Response(
         freqs_hz=want_f.copy(),
@@ -398,6 +399,10 @@ class BeatBackend:
             # that solves fine and looks smooth.
             mesh_scale=1.0,
             velocity_sources={SOURCE_TAG: 1.0},
+            # WP5: always sent explicitly; 'normal' is the breathing cap (today), 'axial' a rigid
+            # piston along +z. The default is in `extra` only when it differs, so old solve hashes
+            # are untouched.
+            source_motion=str((spec.extra or {}).get("source_motion", "normal")),
             air_density=RHO_AIR,
             sound_speed=C_AIR,
             observation=observation,

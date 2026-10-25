@@ -7,7 +7,7 @@ import pytest
 from hornlab_search.solve import base
 from hornlab_search.solve.base import (ResponseSanityError, arc_angles_deg, balloon_dirs_from_angles,
                                        balloon_grid_shape, check_cuts, classify_failure, get_backend,
-                                       jsonable, theta_deg_from_dirs)
+                                       jsonable, stack_responses, theta_deg_from_dirs)
 from hornlab_search.types import BackendUnavailableError
 
 
@@ -170,3 +170,30 @@ def test_jsonable_handles_numpy_complex_and_big_arrays():
     assert isinstance(out["e"], str) and "ndarray" in out["e"]
     assert out["f"] is None and out["g"] == {"k": 7}
     assert base.meta_roundtrips(out)
+
+# ------------------------------------------------------------------ WP8 stack_responses
+
+def _synth(freqs):
+    from test_search_support import synthetic_response
+    return synthetic_response({"a_deg": 37.5, "aspect_ratio": 1.25, "n": 4.0, "s": 0.7},
+                              freqs, 73, 64)
+
+
+def test_stack_responses_equals_one_solve_on_the_whole_grid():
+    whole = _synth([500.0, 1000.0, 2000.0, 4000.0])
+    stacked = stack_responses([_synth([500.0, 1000.0]), _synth([2000.0, 4000.0])],
+                              whole.freqs_hz)
+    for name in ("freqs_hz", "h_angles_deg", "v_angles_deg", "spl_h_db", "spl_v_db",
+                 "balloon_dirs", "spl_balloon_db", "z_throat"):
+        assert np.array_equal(getattr(stacked, name), getattr(whole, name)), name
+    assert stacked.backend == whole.backend and stacked.n_dof == whole.n_dof
+
+
+def test_stack_responses_refuses_a_gap_overlap_or_wrong_order():
+    a, b = _synth([500.0, 1000.0]), _synth([2000.0, 4000.0])
+    with pytest.raises(ValueError, match="tile"):
+        stack_responses([a, b], [500.0, 1000.0, 1500.0, 2000.0])          # gap
+    with pytest.raises(ValueError, match="tile"):
+        stack_responses([a, b], [500.0, 1000.0, 2000.0])                  # dropped frequency
+    with pytest.raises(ValueError, match="strictly increasing"):
+        stack_responses([a, b], [500.0, 1000.0, 2000.0, 2000.0])          # repeated frequency

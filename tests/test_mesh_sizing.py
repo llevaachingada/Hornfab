@@ -6,6 +6,7 @@ import math
 
 import pytest
 
+from conftest import EXAMPLES
 from hornlab_search.config import QUADRANT_FACTOR as CONFIG_QF
 from hornlab_search.config import mesh_spec
 from hornlab_search.constants import C_AIR
@@ -152,3 +153,43 @@ def test_example_config_caps_are_not_hardcoded_in_sizing(cfg):
     src = inspect.getsource(sizing)
     for banned in ("8000", "16000", "24000"):
         assert banned not in src
+
+# ------------------------------------------------------------------ WP7 rear_res_factor
+
+def test_rear_res_factor_scales_only_rear_and_changes_both_cache_keys():
+    from hornlab_search.config import load_config, mesh_spec, solve_spec
+    from hornlab_search.design import families
+    from hornlab_search.design.space import DesignSpace
+    from hornlab_search.mesh import build
+
+    cfg = load_config(EXAMPLES / "osse_baseline.yaml")
+    cfg15 = dataclasses.replace(cfg, mesh=dataclasses.replace(cfg.mesh, rear_res_factor=1.5))
+    ms = mesh_spec("screen", cfg)
+    design = DesignSpace.from_config(cfg).seed
+
+    base = build.res_mm_for_spec(ms, cfg)
+    scaled = build.res_mm_for_spec(ms, cfg15)
+    assert scaled["throat"] == base["throat"] and scaled["mouth"] == base["mouth"]
+    assert scaled["rear"] == pytest.approx(base["rear"] * 1.5)
+
+    mcfg = families.to_mesher_config(design, ms, scaled, "x.msh")
+    assert mcfg["mesh"]["rear_res_mm"] == pytest.approx(scaled["rear"])
+    assert mcfg["mesh"]["mouth_res_mm"] == pytest.approx(scaled["mouth"])
+    assert mcfg["mesh"]["throat_res_mm"] == pytest.approx(scaled["throat"])
+
+    k0 = build.mesh_cache_key(design, ms, cfg)
+    k15 = build.mesh_cache_key(design, ms, cfg15)
+    assert k0 == f"{design.hash()}-{ms.hash()}"          # factor 1.0 == today's key, exactly
+    assert k15 == k0 + "-rear1.5"
+    assert k15 != k0
+
+    # WP7: the factor must also ride the solve-spec hash (solve cache, failure markers, resume
+    # memo). Factor 1.0 stays byte-identical: no key, and the hash equals the rear-stripped spec.
+    ss0 = solve_spec("screen", cfg)
+    ss15 = solve_spec("screen", cfg15)
+    assert "rear_res_factor" not in ss0.extra
+    assert ss15.extra["rear_res_factor"] == 1.5
+    assert ss15.hash() != ss0.hash()
+    bare = dataclasses.replace(
+        ss15, extra={k: v for k, v in ss15.extra.items() if k != "rear_res_factor"})
+    assert bare.hash() == ss0.hash()

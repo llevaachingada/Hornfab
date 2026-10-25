@@ -55,8 +55,10 @@ def test_evaluate_happy_path_writes_every_artifact(cfg, tmp_path, monkeypatch):
         assert (d / f).exists(), f
     (row,) = read_ndjson(tmp_path / "run" / "search.ndjson")
     assert row["design_hash"] == ev.design_hash and row["objective"] == ev.objective
+    assert "mesh_policy" not in row
     (meta, arrays) = next(store.iter_records(with_arrays=True))
     assert meta["ok"] and meta["objective_version"] == 1
+    assert "mesh_policy" not in (meta.get("provenance") or {})
     assert meta["mesh"]["area_m2"] == 0.1 and meta["mesh"]["grid"]["available"]
     assert meta["mesh"]["grid"]["angular_segments"] == 64 and meta["solve"]["mode"] == "screen"
     assert "spl_h_db" in arrays and meta["solve"]["freqs_hz"] == list(mode_freqs("screen", cfg))
@@ -225,3 +227,125 @@ def test_invalid_envelope_failure_marker_is_scoped_to_the_brief(tmp_path):
     rec = json.loads(marker.read_text(encoding="utf-8"))
     assert rec["kind"] == "invalid_envelope"
     assert rec["brief_hash"] == brief_hash(tight)      # re-evaluated and rewritten under cfg2
+
+# ---- WP8 band-split meshing
+
+class _BandRecorder(SyntheticBackend):
+    def __init__(self):
+        super().__init__()
+        self.specs = []
+
+    def _solve(self, mesh, spec):
+        self.specs.append(spec)
+        return super()._solve(mesh, spec)
+
+
+def _install_recording(monkeypatch, backend, mesh_specs):
+    """Like test_search_support.install_fakes, but also records each mesh's f_max."""
+    from hornlab_search.search import evaluate as ev_mod
+    from test_search_support import fake_build_mesh
+    inner = fake_build_mesh()
+
+    def build_mesh(design, mesh_spec, cfg, out_dir, **kw):
+        backend._params = dict(design.params)
+        backend.designs.append(design.hash())
+        mesh_specs.append(mesh_spec.f_max_hz)
+        return inner(design, mesh_spec, cfg, out_dir, **kw)
+
+    monkeypatch.setattr(ev_mod, "build_mesh", build_mesh)
+
+
+def test_split_freq_bands_covers_the_whole_grid_exactly_once():
+    from hornlab_search.search.evaluate import split_freq_bands
+
+    freqs = (500.0, 1000.0, 2000.0, 3000.0, 4000.0)
+    bands = split_freq_bands(freqs, [2000.0, 3000.0])
+    # bounds are (lo, hi]: an edge frequency belongs to the band BELOW it
+    assert bands == [(500.0, 1000.0, 2000.0), (3000.0,), (4000.0,)]
+    assert [f for b in bands for f in b] == list(freqs)
+    with pytest.raises(ValueError, match="strictly increasing"):
+        split_freq_bands(freqs, [3000.0, 2000.0])
+
+
+def test_band_split_meshes_and_solves_each_band_and_matches_the_single_mesh(
+        monkeypatch, smoke_cfg, tmp_path):
+    from hornlab_search.search.evaluate import split_freq_bands
+    from hornlab_search.solve.cache import load_response
+
+    base = fast_cfg(smoke_cfg)
+    cfg = dataclasses.replace(
+        base, mesh=dataclasses.replace(base.mesh, band_split={"edges_hz": [3000.0]}))
+    space = DesignSpace.from_config(base)
+
+    flat = _BandRecorder()
+    flat_specs = []
+    _install_recording(monkeypatch, flat, flat_specs)
+    flat_store = DatasetStore(tmp_path / "flat_ds")
+    ev_flat = evaluate(space.seed, space, base, "screen", tmp_path / "flat", flat_store, flat,
+                       ctx=_ctx(base, flat_store))
+    assert not ev_flat.error
+
+    band = _BandRecorder()
+    band_specs = []
+    _install_recording(monkeypatch, band, band_specs)
+    store = DatasetStore(tmp_path / "band_ds")
+    ev = evaluate(space.seed, space, cfg, "screen", tmp_path / "band", store, band,
+                  ctx=_ctx(cfg, store))
+    assert not ev.error
+
+    bands = split_freq_bands(mode_freqs("screen", cfg), [3000.0])
+    assert len(bands) == 2
+    assert band_specs == [3000.0, 4500.0]          # one mesh per band, f_max == each band's top
+    assert len(band.specs) == len(bands)
+    assert [f for s in band.specs for f in s.freqs_hz] == list(mode_freqs("screen", cfg))
+    for s in band.specs:
+        assert s.extra["mesh_policy"] == "band_split_v1"
+        assert s.extra["band_edges_hz"] == [3000.0]
+
+    # stacking is bit-identical to one solve on the whole grid: same J, same curves
+    assert ev.objective == ev_flat.objective
+    for name in ("freqs_hz", "bw_h_deg", "bw_v_deg", "di_db", "ripple_h_db", "ripple_v_db",
+                 "on_axis_db"):
+        assert np.array_equal(getattr(ev.metrics, name), getattr(ev_flat.metrics, name)), name
+
+    meta, _ = next(store.iter_records(with_arrays=True))
+    assert meta["solve"]["freqs_hz"] == list(mode_freqs("screen", cfg))
+    assert meta["provenance"]["mesh_policy"] == "band_split_v1"
+    (band_row,) = read_ndjson(tmp_path / "band" / "search.ndjson")
+    assert band_row["mesh_policy"] == "band_split_v1"
+    resp = load_response(tmp_path / "band" / "designs" / ev.design_hash / "response.npz")
+    assert np.array_equal(resp.freqs_hz, ev_flat.metrics.freqs_hz)
+    assert "seam_check" not in resp.meta
+
+
+def test_band_split_seam_check_runs_only_in_verify(monkeypatch, smoke_cfg, tmp_path):
+    from hornlab_search.search.evaluate import split_freq_bands
+    from hornlab_search.solve.cache import load_response
+
+    base = fast_cfg(smoke_cfg)
+    cfg = dataclasses.replace(
+        base, mesh=dataclasses.replace(base.mesh, band_split={"edges_hz": [3000.0]}))
+    space = DesignSpace.from_config(base)
+
+    verify = _BandRecorder()
+    verify_specs = []
+    _install_recording(monkeypatch, verify, verify_specs)
+    ev = evaluate(space.seed, space, cfg, "verify", tmp_path / "verify", None, verify,
+                  ctx=_ctx(cfg, None))
+    assert not ev.error
+    resp = load_response(tmp_path / "verify" / "designs" / ev.design_hash / "response.npz")
+    seam = resp.meta["seam_check"]["3000"]
+    f_seam = next(f for f in mode_freqs("verify", cfg) if f > 3000.0)
+    assert seam["freq_hz"] == f_seam
+    assert seam["on_axis_delta_db"] == pytest.approx(0.0, abs=1e-12)
+    assert seam["bw_h_delta_deg"] == pytest.approx(0.0, abs=1e-12)
+    assert seam["bw_v_delta_deg"] == pytest.approx(0.0, abs=1e-12)
+    assert len(verify.specs) == len(split_freq_bands(mode_freqs("verify", cfg), [3000.0])) + 1
+
+    screen = _BandRecorder()
+    screen_specs = []
+    _install_recording(monkeypatch, screen, screen_specs)
+    ev2 = evaluate(space.seed, space, cfg, "screen", tmp_path / "screen", None, screen,
+                   ctx=_ctx(cfg, None))
+    resp2 = load_response(tmp_path / "screen" / "designs" / ev2.design_hash / "response.npz")
+    assert "seam_check" not in resp2.meta

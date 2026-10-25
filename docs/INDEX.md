@@ -57,6 +57,7 @@ Keep this file current: a new doc gets a line here in the same commit.
 | [evidence/HF12K_VERIFY_2026-10-23.md](evidence/HF12K_VERIFY_2026-10-23.md) | P2 12 kHz finalist verify pass: epw check at 12 kHz, beamwidth/DI to 12 kHz, VRAM; cross-mode caveat. |
 | [evidence/CP-8d_retrain_2026-10-23.md](evidence/CP-8d_retrain_2026-10-23.md) | Surrogate retrain after the OSSE top-up: every gate vs threshold, held-out 463 < 500; model not used. |
 | [evidence/FUSED_CUDA_2026-10-24.md](evidence/FUSED_CUDA_2026-10-24.md) | WP15 fused CUDA Burton-Miller (M2): analytic/cross-check/A-B ladders, flag-off determinism finding (1e-4 dB floor), VRAM ceiling → 12,000-dof caps; 12 kHz verify DONE on the flag. |
+| [evidence/MEASUREMENT_PACK_2026-10-24.md](evidence/MEASUREMENT_PACK_2026-10-24.md) | M3 WP5/WP7/WP8 calibration on existing stored designs (17 GPU jobs, verbatim logs): distance 2/10/50 m from ONE traced solve, balloon 512→1035→2592, source_motion axial; WP7 rear_res_factor proposals 1.5/2.0 (owner-gated); WP8 band-split FAILS the CP-7f gate → no proposal; f11 = 7,914 Hz caveat printed at every 12 kHz number. |
 
 ## Elsewhere in the repo
 `../README.md` (install, commands, known limits) · `../TOOLCHAIN.md` (pinned SHAs, measured machine numbers) ·

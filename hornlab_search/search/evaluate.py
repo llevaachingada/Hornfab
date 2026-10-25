@@ -43,7 +43,7 @@ from ..metrics.di import di_from_balloon, sin_theta_weights
 from ..objective import PENALTY_FAILED, PENALTY_INVALID, objective, penalty_result
 from ..objective.scalar_v2 import objective_v2
 from ..solve import cache as solve_cache
-from ..solve.base import theta_deg_from_dirs
+from ..solve.base import stack_responses, theta_deg_from_dirs
 from ..targets.spec import Target
 from ..types import (Design, Evaluation, GeometryInvalidError, MeshResult, MeshTooLargeError,
                      MetricSet, Response, SolveOutcome)
@@ -60,6 +60,9 @@ KIND_EXC = "exception"
 #: ``invalid_envelope`` is a function of the design params the generator built from a brief, so its
 #: marker carries the brief hash as well (replay-validity, see ``_compute``).
 DETERMINISTIC_KINDS = (KIND_INVALID, KIND_INVALID_ENV, KIND_TOO_LARGE)
+
+#: WP8: the only band-split mesh policy name (rides SolveSpec.extra and the record provenance).
+BAND_SPLIT_POLICY = "band_split_v1"
 
 _FREQ_WEIGHTS_V1_WARNED = False
 
@@ -518,6 +521,89 @@ def _write_json(path: Path, obj) -> None:
     path.write_text(json.dumps(to_jsonable(obj), indent=1, sort_keys=True), encoding="utf-8")
 
 
+# ------------------------------------------------------------------ WP8 band split
+
+
+def band_split_of(cfg) -> dict | None:
+    """The validated ``mesh.band_split`` block, or None (today's single-mesh policy)."""
+    return getattr(getattr(cfg, "mesh", None), "band_split", None)
+
+
+def split_freq_bands(freqs_hz, edges_hz) -> list[tuple[float, ...]]:
+    """Partition the WHOLE mode grid into bands ``(lo_i, hi_i]`` around strictly increasing edges.
+
+    The first band has no lower edge (it keeps the mode grid's sub-band points) and the last band
+    keeps every frequency above the final edge, so the frequency grid and label space are unchanged.
+    """
+    freqs = [float(f) for f in freqs_hz]
+    edges = [float(e) for e in edges_hz]
+    if not freqs:
+        raise ValueError("band_split: no frequencies to partition")
+    if any(b <= a for a, b in zip(edges, edges[1:])):
+        raise ValueError(f"band_split: edges must be strictly increasing, got {edges}")
+    bounds = [float("-inf"), *edges, float("inf")]
+    bands: list[tuple[float, ...]] = []
+    for lo, hi in zip(bounds, bounds[1:]):
+        band = tuple(f for f in freqs if lo < f <= hi)
+        if not band:
+            raise ValueError(f"band_split: no frequencies in band ({lo:g}, {hi:g}]")
+        bands.append(band)
+    return bands
+
+
+def _first_above(freqs_hz, edge_hz: float) -> float:
+    for f in freqs_hz:
+        if float(f) > edge_hz:
+            return float(f)
+    raise ValueError(f"band_split seam check: no frequency above edge {edge_hz:g} Hz")
+
+
+def _seam_check(design_hash: str, sspec, mesh_specs, meshes, merged: Response, backend,
+                ctx) -> dict:
+    """Verify-mode only: solve the first frequency above each edge on the LOWER band's mesh and
+    record the on-axis / beamwidth difference against the upper band's value (WP8 seam gate)."""
+    from ..metrics.polar import beamwidth_deg
+
+    out: dict = {}
+    axis = merged.axis_index
+    resp_freqs = [float(f) for f in merged.freqs_hz]
+    for i, edge in enumerate(sspec.extra["band_edges_hz"]):
+        f = _first_above(sspec.freqs_hz, edge)
+        seam_spec = dataclasses.replace(sspec, freqs_hz=(f,))
+        bkey = solve_cache.key(design_hash, mesh_specs[i].hash(), seam_spec.hash())
+        root = ctx.solve_cache_root
+        resp = solve_cache.lookup(bkey, root) if root is not None else None
+        if resp is None:
+            outcome = backend.solve(meshes[i], seam_spec)
+            if not outcome.ok or outcome.response is None:
+                msg = (outcome.message or "no response")[:300]
+                log.warning("band-split seam check at %.0f Hz failed: %s", edge, msg)
+                # Oracle NICE (M3): write the failure so an absent seam edge is never ambiguous.
+                out[f"{edge:g}"] = {"freq_hz": f, "error": msg}
+                continue
+            resp = outcome.response
+            if root is not None:
+                try:
+                    solve_cache.store(bkey, root, resp, {"ok": True, "objective": None,
+                                                         "n_dof": resp.n_dof, "mode": "verify"})
+                except Exception as exc:  # noqa: BLE001 - seam bookkeeping only
+                    log.warning("seam solve cache write failed: %s", exc)
+        j = resp_freqs.index(f)
+        lower_ax = float(np.asarray(resp.spl_h_db, dtype=float)[0, axis])
+        upper_ax = float(np.asarray(merged.spl_h_db, dtype=float)[j, axis])
+        bw_lh, _ = beamwidth_deg(merged.h_angles_deg, np.asarray(resp.spl_h_db, dtype=float)[0])
+        bw_uh, _ = beamwidth_deg(merged.h_angles_deg, np.asarray(merged.spl_h_db, dtype=float)[j])
+        bw_lv, _ = beamwidth_deg(merged.v_angles_deg, np.asarray(resp.spl_v_db, dtype=float)[0])
+        bw_uv, _ = beamwidth_deg(merged.v_angles_deg, np.asarray(merged.spl_v_db, dtype=float)[j])
+        out[f"{edge:g}"] = {
+            "freq_hz": f,
+            "on_axis_delta_db": lower_ax - upper_ax,
+            "bw_h_delta_deg": float(bw_lh - bw_uh),
+            "bw_v_delta_deg": float(bw_lv - bw_uv),
+        }
+    return out
+
+
 def evaluate(design: Design, space, cfg, mode: str, run_dir, store, backend, *,
              ctx: EvalContext | None = None) -> Evaluation:
     """One candidate, end to end. NEVER raises (except ``MeshConsistencyError``, see module doc).
@@ -636,8 +722,104 @@ def _score(metrics, resp, ctx) -> tuple[float, dict]:
     return objective(metrics, True, ctx.target, ctx.weights)
 
 
+def _compute_band_split(design, cfg, mode, mspec, sspec, design_dir, backend, ctx, st) -> None:
+    """WP8: one mesh per band (f_max = the band top), solve that band's frequencies on it, stack.
+
+    The mesh cache key naturally includes each band's MeshSpec hash; each band's solve also gets
+    its own solve-cache entry, so a resumed/cross-run candidate only pays for the bands it lacks.
+    """
+    bands = split_freq_bands(sspec.freqs_hz, cfg.mesh.band_split["edges_hz"])
+    # Band i's mesh resolves its UPPER BOUND hi_i (the edge, or the mode grid top for the last
+    # band), exactly as the WP8 spec states, not merely its highest solved frequency.
+    band_tops = [float(e) for e in cfg.mesh.band_split["edges_hz"]] + [float(sspec.freqs_hz[-1])]
+    st["mesh_policy"] = BAND_SPLIT_POLICY
+    responses: list[Response] = []
+    mesh_specs = []
+    meshes: list[MeshResult] = []
+    from_disk: list[bool] = []
+    solve_seconds = 0.0
+    peak_vram = None
+    root = ctx.solve_cache_root
+    want_traces = store_wants_traces(ctx, design) and hasattr(backend, "solve_traced")
+    for i, band in enumerate(bands):
+        bdir = design_dir / f"band{i}"
+        bmspec = dataclasses.replace(mspec, f_max_hz=band_tops[i])
+        bsspec = dataclasses.replace(sspec, freqs_hz=tuple(band))
+        try:
+            bmesh = build_mesh(design, bmspec, cfg, bdir, mode=mode, cache_dir=ctx.mesh_cache_root)
+        except GeometryInvalidError as exc:
+            st["kind"], st["err"] = KIND_INVALID, str(exc)
+            return
+        except MeshTooLargeError as exc:
+            st["kind"], st["err"] = KIND_TOO_LARGE, str(exc)
+            return
+        why = envelope_violation(bmesh, getattr(cfg, "brief", None))
+        if why:
+            # Brief-dependent, NOT a pure function of (design, mesh spec): never failure-cached.
+            st["kind"], st["err"], st["no_marker"] = KIND_INVALID, why, True
+            return
+        mesh_specs.append(bmspec)
+        meshes.append(bmesh)
+
+        bkey = solve_cache.key(design.hash(), bmspec.hash(), bsspec.hash())
+        resp = solve_cache.lookup(bkey, root) if root is not None else None
+        cached = resp is not None
+        if resp is None:
+            # Only the top band carries the (optional) surface-trace capture: traces are tied to
+            # one mesh, and the top band is the one the record's mesh block describes.
+            if want_traces and i == len(bands) - 1:
+                outcome, raw = backend.solve_traced(bmesh, bsspec)
+                st["raw_traces"] = raw
+                st["trace_spec"] = bsspec
+                st["trace_mesh"] = bmesh
+            else:
+                outcome = backend.solve(bmesh, bsspec)
+            if not outcome.ok or outcome.response is None:
+                st["kind"], st["err"] = KIND_SOLVE, outcome.message or "solve failed"
+                log.error("band solve failed for %s: %s", design.hash(), st["err"][:2000])
+                return
+            resp = outcome.response
+            solve_seconds += float(outcome.seconds)
+            if outcome.peak_vram_mb is not None:
+                peak_vram = max(peak_vram or 0.0, float(outcome.peak_vram_mb))
+            if root is not None:
+                try:
+                    solve_cache.store(bkey, root, resp, {"ok": True, "objective": None,
+                                                         "n_dof": resp.n_dof, "mode": mode})
+                except Exception as exc:  # noqa: BLE001 - cache write failure is not a solve failure
+                    log.warning("band solve cache write failed for %s: %s", bkey, exc)
+        from_disk.append(cached)
+        responses.append(resp)
+
+    merged = stack_responses(responses, sspec.freqs_hz)
+    if mode == "verify":
+        seam = _seam_check(design.hash(), sspec, mesh_specs, meshes, merged, backend, ctx)
+        if seam:
+            merged.meta["seam_check"] = seam
+    st["resp"] = merged
+    st["mesh"] = meshes[-1]
+    st["area"], st["grid"] = _grid_info(design_dir / f"band{len(bands) - 1}")
+    st["from_disk"] = all(from_disk)
+    st["outcome"] = SolveOutcome(True, merged, solve_seconds, peak_vram,
+                                 "cache hit" if st["from_disk"] else "")
+    if merged.n_dof is not None:
+        st["mesh"].n_dof = int(merged.n_dof)
+    try:
+        st["metrics"] = metrics_from_response(merged, ctx.target, mesh=st["mesh"], design=design)
+    except Exception as exc:  # noqa: BLE001
+        st["kind"], st["err"] = KIND_METRICS, f"{type(exc).__name__}: {exc}\n{traceback.format_exc()}"
+        return
+    mismatch = _throat_angle_mismatch_deg(design, getattr(cfg, "brief", None))
+    if mismatch is not None:
+        st["metrics"].scalars["throat_angle_mismatch_deg"] = mismatch
+    st["J"], st["terms"] = _score(st["metrics"], st["resp"], ctx)
+
+
 def _compute(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx, st) -> None:
-    """Mesh, solve, metrics, objective. Fills ``st``; sets st['kind'] on an expected failure."""
+    """Mesh, solve, metrics, objective. Fills ``st``; sets st['kind'] on an expected failure.
+
+    Pre-M3 deterministic markers carry no brief_hash: they re-evaluate once, conservatively, then
+    are rewritten under configs that carry a brief (so a later brief change is honoured)."""
     from ..design.generated import GENERATOR_ERROR_KEY
     marker = _failure_marker(ctx, key)
     if marker is not None and marker.exists():
@@ -656,6 +838,9 @@ def _compute(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx, st)
         gerr = str(design.params[GENERATOR_ERROR_KEY])
         env_kind = KIND_INVALID_ENV if gerr.startswith("invalid_envelope") else KIND_INVALID
         st["kind"], st["err"] = env_kind, f"generator: {gerr}"
+        return
+    if band_split_of(cfg) is not None:
+        _compute_band_split(design, cfg, mode, mspec, sspec, design_dir, backend, ctx, st)
         return
     try:
         mesh = build_mesh(design, mspec, cfg, design_dir, mode=mode, cache_dir=ctx.mesh_cache_root)
@@ -726,6 +911,8 @@ def _record_provenance(ctx: EvalContext, st: dict) -> dict:
         prov["generator"] = {k: gen.get(k) for k in ("name", "spec", "knobs", "brief", "brief_hash")}
         prov["brief"] = gen.get("brief") or prov.get("brief")
         prov["brief_hash"] = gen.get("brief_hash") or prov.get("brief_hash")
+    if st.get("mesh_policy"):
+        prov["mesh_policy"] = st["mesh_policy"]      # WP8: keep band-split data out of old groups
     return prov
 
 
@@ -751,7 +938,11 @@ def _persist(ev: Evaluation, mode: str, sspec, design_dir: Path, ctx: EvalContex
     if store is not None and ok and st["raw_traces"] is not None and not st["from_disk"]:
         try:
             from ..solve.traces import package_traces
-            packaged = package_traces(ev.mesh, sspec, st["raw_traces"])
+            trace_spec = st.get("trace_spec")
+            trace_mesh = st.get("trace_mesh")
+            packaged = package_traces(trace_mesh if trace_mesh is not None else ev.mesh,
+                                      trace_spec if trace_spec is not None else sspec,
+                                      st["raw_traces"])
             rel = store.append_traces(ev.design_hash, packaged)
             trace_info = {"path": rel, "kind": TRACE_KIND}
         except Exception as exc:  # noqa: BLE001
@@ -778,6 +969,9 @@ def _persist(ev: Evaluation, mode: str, sspec, design_dir: Path, ctx: EvalContex
     # ---- the ndjson row, last
     row = evaluation_to_row(ev, mode, ctx.n_rows, seconds,
                             objective_version=ctx.objective_version)
+    if st.get("mesh_policy"):
+        # WP8 provenance echo: absent on single-mesh rows (old rows byte-identical).
+        row["mesh_policy"] = st["mesh_policy"]
     if st.get("generator"):
         row["generator"] = to_jsonable(st["generator"])
     if ctx.write_ndjson:

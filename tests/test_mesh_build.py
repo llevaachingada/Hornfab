@@ -7,6 +7,7 @@ from __future__ import annotations
 import copy
 import dataclasses
 import hashlib
+import json
 import time
 
 import numpy as np
@@ -94,6 +95,8 @@ def test_seed_reader_summary_and_metres(osse_cfg, osse_seed, tmp_path):
     assert x0 == 0.0 and y0 == 0.0              # quarter domain sits in +x +y
     assert 0.1 < s["area_m2"] < 1.0
     assert (tmp_path / "mesh_meta.json").is_file()
+    meta = json.loads((tmp_path / "mesh_meta.json").read_text(encoding="utf-8"))
+    assert meta["rear_res_factor"] == 1.0               # WP7: default recorded, key/output unchanged
 
 
 # ------------------------------------------------------------------ test 15
@@ -359,3 +362,19 @@ def test_mesher_defaults_are_not_trusted_flat_dict_drops_max_triangles(osse_cfg,
 def test_sizing_constant_mirrors_the_mesher():
     from hornlab_mesher.mesh_sizing import TRIANGLES_PER_AREA_OVER_H2
     assert sizing.TRIANGLES_PER_AREA_OVER_H2 == TRIANGLES_PER_AREA_OVER_H2
+
+# ------------------------------------------------------------------ WP7 rear_res_factor
+
+def test_rear_res_factor_is_recorded_and_scales_only_rear(osse_cfg, osse_seed, tmp_path):
+    cfg15 = dataclasses.replace(
+        osse_cfg, mesh=dataclasses.replace(osse_cfg.mesh, rear_res_factor=1.5))
+    ms = spec(1500.0, max_triangles=10**6)
+    r = build.build_mesh(osse_seed, ms, cfg15, tmp_path)
+    meta = json.loads((tmp_path / "mesh_meta.json").read_text(encoding="utf-8"))
+    assert meta["rear_res_factor"] == 1.5
+    mesh_cfg = meta["mesher_config"]["mesh"]
+    assert mesh_cfg["rear_res_mm"] == pytest.approx(mesh_cfg["mouth_res_mm"] * 1.5)
+    assert mesh_cfg["throat_res_mm"] == pytest.approx(mesh_cfg["mouth_res_mm"] / 2.0)
+    assert r.res_mm["rear"] == pytest.approx(r.res_mm["mouth"] * 1.5)
+    assert r.res_mm["throat"] == pytest.approx(r.res_mm["mouth"] / 2.0)
+    assert meta["key"].endswith("-rear1.5")

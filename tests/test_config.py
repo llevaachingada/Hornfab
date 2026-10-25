@@ -26,7 +26,7 @@ from hornlab_search.types import Design, MeshSpec, ObservationSpec, SolveSpec
 EXAMPLE_NAMES = ["osse_baseline", "throat_adapter", "icw_termination", "freeform_hv", "search_smoke"]
 
 # Config fields that the loader treats as optional (may legitimately be None).
-OPTIONAL_FIELDS = {"search.popsize"}
+OPTIONAL_FIELDS = {"search.popsize", "mesh.band_split"}
 
 
 def _load_example(name):
@@ -275,3 +275,112 @@ def test_fibonacci_512(fibonacci_512):
 
 def test_keele_constant_reproduces_worked_example():
     assert abs(constants.KEELE_K / (0.3048 * 90) - 926) < 1
+
+# ------------------------------------------------------------------ WP5/WP7/WP8 (M3)
+
+def _variant(tmp_path, mutate):
+    """Load an example config, mutate its raw YAML, write it back and load it."""
+    import yaml
+    raw = yaml.safe_load((REPO / "examples" / "search_smoke.yaml").read_text(encoding="utf-8"))
+    mutate(raw)
+    p = tmp_path / "variant.yaml"
+    p.write_text(yaml.safe_dump(raw), encoding="utf-8")
+    return load_config(p)
+
+
+def test_new_optional_keys_absent_keep_mesh_and_solve_specs_bit_identical():
+    """Old runs must reproduce: the added settings are absent from the raw YAML, their defaults
+    add nothing to MeshSpec/SolveSpec, and the hashes equal a manually built CURRENT field set."""
+    from hornlab_search import types as types_mod
+    from hornlab_search.config import mesh_spec, mode_freqs, solve_spec
+    from hornlab_search.mesh import sizing
+
+    for name in ("osse_baseline", "search_smoke"):
+        cfg = _load_example(name)
+        assert cfg.mesh.rear_res_factor == 1.0 and cfg.mesh.band_split is None
+        assert cfg.solve.source_motion == "normal"
+        for mode in ("screen", "verify"):
+            ms = mesh_spec(mode, cfg)
+            max_tri = sizing.max_triangles_for(
+                cfg.mesh.dof_cap(mode), cfg.mesh.quadrants, cfg.mesh.dof_per_triangle,
+                cfg.mesh.max_triangle_slack)
+            manual_mesh = types_mod._hash(types_mod._canon({
+                "epw": float(cfg.mesh.epw),
+                "f_max_hz": float(max(mode_freqs(mode, cfg))),
+                "quadrants": cfg.mesh.quadrants,
+                "max_triangles": max_tri,
+                "allow_large_mesh": False,
+            }))
+            assert ms.hash() == manual_mesh, f"{name}/{mode}: MeshSpec field drift"
+
+            ss = solve_spec(mode, cfg)
+            assert dict(ss.extra) == {}
+            manual_solve = types_mod._canon({
+                "mode": mode,
+                "freqs_hz": [round(float(f), 4) for f in mode_freqs(mode, cfg)],
+                "backend": str(cfg.solve.backend),
+                "observation": {
+                    "distance_m": float(cfg.solve.distance_m),
+                    "angle_count": int(cfg.solve.angle_count),
+                    "balloon": bool(cfg.solve.balloon),
+                    "balloon_points": cfg.solve.balloon_points(mode),
+                },
+                "gmres_tol": float(cfg.solve.gmres_tol),
+                "extra": {},
+            })
+            assert ss.hash() == types_mod._hash(manual_solve), f"{name}/{mode}: SolveSpec field drift"
+
+
+def test_rear_res_factor_loads_and_is_validated(tmp_path):
+    from hornlab_search.config import ConfigError
+
+    cfg = _variant(tmp_path, lambda raw: raw["mesh"].update(rear_res_factor=1.5))
+    assert cfg.mesh.rear_res_factor == 1.5
+    for bad in (0, -1.0, float("nan"), float("inf"), True, "1.5"):
+        with pytest.raises(ConfigError, match="rear_res_factor"):
+            _variant(tmp_path, lambda raw, b=bad: raw["mesh"].update(rear_res_factor=b))
+
+
+def test_source_motion_loads_only_when_it_differs_elsewhere(tmp_path):
+    from hornlab_search.config import ConfigError, solve_spec
+
+    cfg = _variant(tmp_path, lambda raw: raw["solve"].update(source_motion="axial"))
+    assert cfg.solve.source_motion == "axial"
+    assert solve_spec("screen", cfg).extra["source_motion"] == "axial"
+    cfg_normal = _variant(tmp_path, lambda raw: raw["solve"].update(source_motion="normal"))
+    assert solve_spec("screen", cfg_normal).extra == {}
+
+    with pytest.raises(ConfigError, match="source_motion"):
+        _variant(tmp_path, lambda raw: raw["solve"].update(source_motion="sideways"))
+    with pytest.raises(ConfigError, match="source_motion"):
+        _variant(tmp_path, lambda raw: raw["solve"].update(source_motion="axial", backend="bempp_cpu"))
+
+
+@pytest.mark.parametrize("block", [
+    {"edges_hz": []},
+    {"edges_hz": [3000, 2000]},
+    {"edges_hz": [3000, 3000]},
+    {"edges_hz": [600]},                  # below the target band_lo (700 Hz)
+    {"edges_hz": [4500]},                 # at the target band_hi, not inside
+    {"edges_hz": ["x"]},
+    {"edges_hz": [True]},
+    {"edges_hz": [float("nan")]},
+    {"edges_hz": [3000], "extra": 1},
+    [],
+])
+def test_band_split_validation_rejects_bad_edges(tmp_path, block):
+    from hornlab_search.config import ConfigError
+
+    with pytest.raises(ConfigError, match="band_split"):
+        _variant(tmp_path, lambda raw: raw["mesh"].update(band_split=block))
+
+
+def test_band_split_valid_edges_normalized_and_enter_solve_extra(tmp_path):
+    from hornlab_search.config import solve_spec
+
+    cfg = _variant(tmp_path, lambda raw: raw["mesh"].update(
+        band_split={"edges_hz": [2000, 3000]}))
+    assert cfg.mesh.band_split == {"edges_hz": [2000.0, 3000.0]}
+    extra = solve_spec("screen", cfg).extra
+    assert extra["mesh_policy"] == "band_split_v1"
+    assert extra["band_edges_hz"] == [2000.0, 3000.0]

@@ -110,6 +110,7 @@ class FSolveConfig:
     native_symmetry_plane: str | None = None
     mesh_scale: float = 1.0
     velocity_sources: dict = None
+    source_motion: str = "normal"          # real beat SolveConfig field (WP5)
     air_density: float = 1.2041
     sound_speed: float = 343.0
     observation: FObservationConfig = None
@@ -242,6 +243,7 @@ def test_solveconfig_takes_symmetry_from_the_mesh_scale_one_and_the_spec(fakebea
     assert c.native_symmetry_plane == MESH.symmetry_plane == "yz+xz"
     assert c.mesh_scale == 1.0                                  # metres, NOT the README's 0.001
     assert c.velocity_sources == {2: 1.0}
+    assert c.source_motion == "normal"                         # WP5: always explicit
     assert (c.air_density, c.sound_speed) == (RHO_AIR, C_AIR)
     o = c.observation
     assert o.distance_m == spec.observation.distance_m
@@ -475,3 +477,11 @@ def test_frame_origin_is_passed_through_to_the_solver_config(fakebeat, tmp_path,
     fr = fakebeat.calls[0][2].frame_override
     assert np.allclose(fr.origin, [0.1, 0, 0]) and np.allclose(fr.axis, [0, 0, 1])
     assert np.allclose(fr.u, [1, 0, 0]) and np.allclose(fr.v, [0, 1, 0])
+
+def test_response_meta_records_source_motion(fakebeat, tmp_path, cfg):
+    """WP5 provenance: the beat Response.meta states which source motion was solved."""
+    spec = dataclasses.replace(solve_spec("screen", cfg), extra={"source_motion": "axial"})
+    out = _backend(tmp_path).solve(MESH, spec)
+    assert out.ok, out.message
+    assert out.response.meta["source_motion"] == "axial"
+    assert fakebeat.calls[0][2].source_motion == "axial"

@@ -27,7 +27,7 @@ import numpy as np
 
 from ..constants import REF_P
 from ..types import Backend as _ContractBackend
-from ..types import BackendUnavailableError
+from ..types import BackendUnavailableError, Response
 
 log = logging.getLogger("hornlab_search.solve.base")
 
@@ -115,6 +115,97 @@ def spl_from_pressure(p: np.ndarray) -> np.ndarray:
     """Absolute dB SPL re 20 uPa of a complex pressure array. -inf where p == 0 (caller checks)."""
     with np.errstate(divide="ignore"):
         return 20.0 * np.log10(np.abs(np.asarray(p)) / REF_P)
+
+
+# ------------------------------------------------------------------ band-split stacking
+
+def stack_responses(responses: list[Response], freqs_hz) -> Response:
+    """Concatenate per-band ``Response``s into one, in strictly increasing frequency order.
+
+    WP8 requirement: ``freqs_hz`` is the WHOLE mode grid, and the concatenated band frequencies
+    must equal it exactly once (no gap, no overlap). Per-band arrays are concatenated along the
+    frequency axis; the observation grids and balloon directions must agree. Optional arrays are
+    either present on every band or on none. ``meta`` is the first band's, with timings summed and
+    the partial/cancelled/requested-count flags made conservative.
+    """
+    if not responses:
+        raise ValueError("stack_responses: no responses")
+    want = np.asarray(list(freqs_hz), dtype=float)
+    if want.ndim != 1 or want.size == 0:
+        raise ValueError("stack_responses: freqs_hz must be a non-empty 1-D sequence")
+    if not np.all(np.diff(want) > 0):
+        raise ValueError("stack_responses: freqs_hz must be strictly increasing")
+
+    first = responses[0]
+    h_ang = np.asarray(first.h_angles_deg, dtype=float)
+    v_ang = np.asarray(first.v_angles_deg, dtype=float)
+    parts = []
+    for i, r in enumerate(responses):
+        f = np.asarray(r.freqs_hz, dtype=float)
+        if f.ndim != 1 or f.size == 0:
+            raise ValueError(f"stack_responses: band {i} has no frequencies")
+        if not np.array_equal(np.asarray(r.h_angles_deg, dtype=float), h_ang) or \
+                not np.array_equal(np.asarray(r.v_angles_deg, dtype=float), v_ang):
+            raise ValueError(f"stack_responses: band {i} observation grid differs from band 0")
+        if np.asarray(r.spl_h_db).shape != (f.size, h_ang.size) or \
+                np.asarray(r.spl_v_db).shape != (f.size, v_ang.size):
+            raise ValueError(f"stack_responses: band {i} cut arrays do not match its frequencies")
+        parts.append(f)
+    got = np.concatenate(parts)
+    if not np.array_equal(got, want):
+        raise ValueError(
+            f"stack_responses: band frequencies {got.tolist()} do not tile the requested grid "
+            f"{want.tolist()} exactly once (gap, overlap or wrong order)")
+
+    def cat(name):
+        vals = [getattr(r, name) for r in responses]
+        if all(v is None for v in vals):
+            return None
+        if any(v is None for v in vals):
+            raise ValueError(f"stack_responses: '{name}' is present on some bands only")
+        return np.concatenate([np.asarray(v) for v in vals], axis=0)
+
+    dirs = first.balloon_dirs
+    for i, r in enumerate(responses):
+        if (dirs is None) != (r.balloon_dirs is None):
+            raise ValueError(f"stack_responses: band {i} balloon availability differs")
+        if dirs is not None and not np.array_equal(np.asarray(r.balloon_dirs), np.asarray(dirs)):
+            raise ValueError(f"stack_responses: band {i} balloon directions differ")
+
+    backends = {str(r.backend) for r in responses if r.backend}
+    if len(backends) > 1:
+        raise ValueError(f"stack_responses: mixed backends {sorted(backends)}")
+    n_dofs = [r.n_dof for r in responses if r.n_dof is not None]
+
+    meta = dict(first.meta or {})
+    timings: dict[str, float] = {}
+    for r in responses:
+        for k, v in ((r.meta or {}).get("timings") or {}).items():
+            timings[k] = timings.get(k, 0.0) + float(v)
+    if timings:
+        meta["timings"] = timings
+    meta["requested_frequency_count"] = int(sum(
+        int((r.meta or {}).get("requested_frequency_count") or np.asarray(r.freqs_hz).size)
+        for r in responses))
+    meta["is_partial"] = any(bool((r.meta or {}).get("is_partial")) for r in responses)
+    meta["cancelled"] = any(bool((r.meta or {}).get("cancelled")) for r in responses)
+
+    return Response(
+        freqs_hz=want.copy(),
+        h_angles_deg=h_ang.copy(),
+        v_angles_deg=v_ang.copy(),
+        spl_h_db=cat("spl_h_db"),
+        spl_v_db=cat("spl_v_db"),
+        balloon_dirs=None if dirs is None else np.asarray(dirs).copy(),
+        spl_balloon_db=cat("spl_balloon_db"),
+        z_throat=cat("z_throat"),
+        p_h=cat("p_h"),
+        p_v=cat("p_v"),
+        p_balloon=cat("p_balloon"),
+        backend=next(iter(backends), ""),
+        n_dof=max(n_dofs) if n_dofs else None,
+        meta=meta,
+    )
 
 
 # ------------------------------------------------------------------ sanity
