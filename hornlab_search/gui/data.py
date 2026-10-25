@@ -408,7 +408,8 @@ def run_archive(runs: Path, run_id: str) -> dict:
 
 
 def mesh_surface(runs: Path, run_id: str, h: str, max_tris: int = 60000) -> dict:
-    """Triangle surface of a solved design (mm), the meshed domain only (a quarter for quadrants '1')."""
+    """Triangle surface of a solved design (mm), the meshed domain only (a quarter for quadrants '1',
+    an x/y half for '14'/'12')."""
     d = _resolve_run(runs, run_id)
     if not HASH.match(h):
         raise ValueError(f"not a design hash: {h!r}")
@@ -417,10 +418,24 @@ def mesh_surface(runs: Path, run_id: str, h: str, max_tris: int = 60000) -> dict
         raise FileNotFoundError(f"{run_id}/{h}/mesh.msh")
     pts, tris = nt
     meta = _read_json(d / "designs" / h / "mesh_meta.json") or {}
-    q = ((meta.get("result") or {}).get("quadrants")) or "1234"
-    return {"quadrants": q, "n_tris": int(len(tris)),
+    q = (meta.get("result") or {}).get("quadrants") or _row_quadrants(d, h) \
+        or (_config(d).get("mesh") or {}).get("quadrants")
+    return {"quadrants": str(q or "1234"), "n_tris": int(len(tris)),
             "verts": np.round(pts * 1000, 2).ravel().tolist(),
             "tris": tris[:max_tris].ravel().tolist()}
+
+
+def _row_quadrants(run_dir: Path, h: str) -> str | None:
+    """The quadrant string the search recorded for one design (mesh_meta.json may be absent — the
+    GRID route writes none, see the build_mesh docstring in mesh/build.py:273 — but every evaluated
+    row carries it)."""
+    nd = run_dir / "search.ndjson"
+    if not nd.is_file():
+        return None
+    for row in read_ndjson(nd):
+        if row.get("design_hash") == h and row.get("quadrants"):
+            return str(row["quadrants"])
+    return None
 
 
 # ---------------------------------------------------------------------------- campaigns

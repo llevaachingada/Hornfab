@@ -1,6 +1,7 @@
 // view3d.js — hornlab-search GUI   AGPL-3.0-or-later
-// Three.js r160 mesh viewer for quarter-model horn meshes.
-// Mirrors quarter model across x=0 and y=0 to reconstruct full horn.
+// Three.js r160 mesh viewer for quarter/half-model horn meshes.
+// Mirrors quarter models across x=0 and y=0, half models ('14' x-half / '12' y-half) across their
+// one symmetry plane, to reconstruct the full horn.
 // Falls back to a 2D wall-profile SVG if the CDN import fails.
 
 let THREE, OrbitControls;
@@ -20,23 +21,30 @@ async function loadThree() {
 }
 
 /**
- * Mirror a quarter mesh to a full mesh.
- * quadrants: 1 means mirror across x=0 and y=0 (H/V symmetry).
- * verts: flat [x,y,z, x,y,z, ...] in mm
- * tris: flat [i,j,k, ...] indices
- * Returns { verts: Float32Array, tris: Uint32Array }
+ * Mirror a quarter/half mesh to a full mesh.
+ * Quadrant semantics (same source of truth as gui/data.py::horn_dims — search-recorded rows carry the
+ * quadrant string; the GRID route meshes half-models, "14" = the +x half, "12" = the +y half):
+ *   '1'    quarter (x >= 0, y >= 0)  -> mirror across x=0 and y=0 (4 copies)
+ *   '14'   +x half (x >= 0, full y)  -> mirror across x=0        (2 copies)
+ *   '12'   +y half (full x, y >= 0)  -> mirror across y=0        (2 copies)
+ *   anything else ('1234', …) is already a full mesh -> passthrough.
+ * verts: flat [x,y,z, x,y,z, ...] in mm; tris: flat [i,j,k, ...] indices.
+ * Returns { verts: Float32Array, tris: Uint32Array }; verts on the symmetry planes are duplicated
+ * (accepted seam — every mirrored quadrant keeps the original's triangulation).
  */
-function mirrorMesh(verts, tris, quadrants) {
-  if (String(quadrants) !== "1") return { verts: new Float32Array(verts), tris: new Uint32Array(tris) };
+export function mirrorMesh(verts, tris, quadrants) {
+  const q = String(quadrants ?? "");
+  const copies = q === "1" ? [[1, 1], [-1, 1], [1, -1], [-1, -1]]
+               : q === "14" ? [[1, 1], [-1, 1]]
+               : q === "12" ? [[1, 1], [1, -1]]
+               : [[1, 1]];
+  if (copies.length === 1) return { verts: new Float32Array(verts), tris: new Uint32Array(tris) };
 
   const nOrig = verts.length / 3;
-  // Four copies: original (x,y,z), flip x (-x,y,z), flip y (x,-y,z), flip both (-x,-y,z)
-  // We mark each vert to avoid duplicating verts on the x=0 or y=0 plane.
-  // For simplicity, just create all four copies and deduplicate via epsilon later.
-  // Simpler: just add all four quadrants and accept small duplication on seam.
-  const copies = [[1, 1], [-1, 1], [1, -1], [-1, -1]];
   const allVerts = [];
   const allTris = [];
+  // A single reflection flips triangle handedness; two reflections preserve it.
+  // flips when exactly one of sx, sy is -1 (sx * sy < 0).
   for (const [sx, sy] of copies) {
     const offset = allVerts.length / 3;
     for (let i = 0; i < nOrig; i++) {

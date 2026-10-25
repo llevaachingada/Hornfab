@@ -1363,12 +1363,16 @@ async function viewRun3D(id) {
   catch (e) { ROOT.innerHTML = errBanner("Could not load mesh: " + e.message); return; }
 
   const sum = runD.summary || runD;
+  const qNote = (() => { const q = String(meshD.quadrants || "1234");
+    if (q === "1") return "quarter model mirrored to the full horn";
+    if (q === "14" || q === "12") return "half model mirrored to the full horn";
+    return "full model, no mirroring"; })();
   ROOT.innerHTML = `
     <div class="stack" style="gap:16px">
       <div>
         <div class="eyebrow">3D view</div>
         <h2>${esc(sum.name || id)}</h2>
-        <p class="muted" style="font-size:0.82rem">Hash: <span class="mono">${esc(hash)}</span> · ${esc(meshD.n_tris || "?")} triangles (mirrored from quarter model)</p>
+        <p class="muted" style="font-size:0.82rem">Hash: <span class="mono">${esc(hash)}</span> · ${esc(meshD.n_tris || "?")} triangles in the meshed domain (${esc(qNote)})</p>
       </div>
       <div class="btn-row">
         <a class="btn" href="#/run/${esc(id)}">← Back to run</a>
