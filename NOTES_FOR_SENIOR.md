@@ -366,3 +366,26 @@ throat (D_mm 25.4 = DIAMETER), phi0 5 deg half-angle, n_phi 25 quarter rows, dl 
   mouth_res 12 mm (min angle ~5.4 deg) — a quality review/finer mouth res is advisable for T1-T7 configs.
 - Installed mesher == fork pin b922e807 (65/65 files byte-identical). Repo bbox band is [0.02, 5.0] m
   (mesh/build.py:37-38), not the plan's 0.1-1 m wording.
+
+## 2026-10-24 (orchestrator, M2 fused-CUDA pass): flag-off CUDA solves are NOT bit-deterministic — even on the base pin; WP15 determinism test rebarred with evidence
+
+Finding during `tests/test_solve_beat_fused_cuda.py` (M2 work order step 3): test 2 asserted
+`np.array_equal` (zero tolerance) for two back-to-back flag-off solves of the same spec. It FAILS on the
+fork @ fa99ee5 with max |d spl_h_db| ~9e-8 dB — and identically (max ~1.6e-7 dB, same assertion) on the
+BASE PIN 38544d2 after a `pip install --force-reinstall` rollback (`runs/m2_fused_cuda/fused_gpu_test.log`,
+`runs/m2_fused_cuda/det_check_base_pin.log`). The CUDA assembly/solve runs Float32 with order-varying
+reductions: ~1e-7 dB (one float32 ulp at these levels) between identical requests is upstream physics,
+pre-existing, not introduced by the fork (the ladder A/Bs, old-vs-new runs days apart, show the same
+~1e-6 dB floor). NOT rule 8: diagnosed in one pass with the base-pin reproduction.
+
+Action taken (rule 7 evidence trail): the assertion was replaced by a documented floor
+`max |d spl_h_db| <= TOL_DET_DB = 1e-4 dB` with a `[measured]` print of the actual diff
+(test_solve_beat_fused_cuda.py::test_flag_off_reproduces_itself_from_a_clean_host; docstring carries
+both measurements). 1e-4 dB is 3 orders above the measured floor and ~400x below the CP-7f A/B bar
+(0.039 dB), so any real path/cache/host mixup (full-dB moves) still fails. Oracle to adjudicate.
+
+Harness calibration note (fixer lane): the TOOLCHAIN M1 res->dof table came from a SMALLER horn;
+`examples/osse_baseline.yaml` seed at quarter 3/1.5 mm meshes to 87,240 tris / 43,993 dofs. The M2
+ceiling sweep therefore calibrates mouth-res per target (6.72/5.74/5.02/4.45/4.06 mm for ~8.9k/12k/
+15.7k/20k/24k quarter dofs), verified by `--mesh-only` probes (6.655 -> 17,894 tris / 9,117 dofs).
+Harness: `tools/measure_fused_ceiling.py`.

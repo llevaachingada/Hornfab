@@ -1,0 +1,67 @@
+# osse_baseline_fusedcuda: osse_baseline with the WP15 fused CUDA Burton-Miller path ENABLED and the
+# verify/final dof caps raised to the MEASURED safe value (M2, 2026-10-24).
+#
+# Never edit the old caps on the original configs: this is a NEW file. Measured safe value
+# (docs/evidence/FUSED_CUDA_2026-10-24.md): 12,183 quarter dofs solved fused at peak-baseline
+# 4,744 MiB in 13.7 s/freq on the 8 GB RTX 4060 (fast, ~3.4 GB headroom); 15,984 dofs fit but
+# the assembly is already memory-pressured (437 s); 20,237 dofs failed (worker-host death).
+# Verify/final caps raised 7000/8900 -> 12000/12000; screen cap stays 5000.
+# Everything else identical to examples/osse_baseline.yaml (fork @ fa99ee5).
+name: osse_baseline_fusedcuda
+family: OSSE
+
+seed_params:
+  r0_mm:   17.78        # 1.4 in exit radius
+  a_deg:   37.5         # coverage HALF-angle in the mesher's convention
+  a0_deg:  15.5
+  L_mm:    260.0
+  n:       4.0
+  s:       0.7
+  q:       0.995
+  k:       1.0
+  exponent: 4.0         # superellipse cross-section
+  aspect_ratio: 1.25
+
+bounds:
+  r0_mm:        {lo: 17.78, hi: 17.78, search: false}
+  a_deg:        {lo: 5.0,   hi: 55.0}   # was 25.0 (CP-8 pinned); mesher accepts a_deg>=0, 5 keeps the coverage angle non-degenerate
+  a0_deg:       {lo: 2.0,   hi: 30.0}
+  L_mm:         {lo: 140.0, hi: 420.0}
+  n:            {lo: 2.0,   hi: 8.0}
+  s:            {lo: 0.0,   hi: 1.0}
+  q:            {lo: 0.90,  hi: 1.00}
+  k:            {lo: 0.3,   hi: 2.5}
+  exponent:     {lo: 1.0,   hi: 8.0}   # was 2.0 (CP-8 pinned); OSSE cross-section exponent is unvalidated, 1.0 meshes (0.5 refused)
+  aspect_ratio: {lo: 1.0,   hi: 2.0}
+
+target:
+  coverage_h_deg: 75.0        # TOTAL included angle, -6 dB
+  coverage_v_deg: 45.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0   # limited by the measured dof cap on the 8 GB card (TOOLCHAIN.md); was a higher default
+  di_target_db: null          # derive from coverage
+  di_slope_target: 0.0        # flat DI with frequency
+
+weights: {cov: 1.0, rip: 1.0, di: 0.3, dislope: 0.5, flat: 0.5, load: 0.0}
+
+mesh:
+  epw: 6.0
+  quadrants: "1"              # quarter; requires a symmetric design
+  dof_cap_screen: 5000   # measured 8GB RTX 4060 (TOOLCHAIN.md M3); plan default was 8000
+  dof_cap_verify: 12000
+  dof_cap_final:  12000
+  dof_per_triangle: 0.51       # measured M1: 0.500 full domain, ~0.51 quarter (hornlab-beat-bem 0.2.0)
+
+solve:
+  backend: beat_cuda
+  cuda_fused: true
+  distance_m: 2.0
+  angle_count: 73             # must be ODD
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-5
+  timeout_s: 900
+
+search: {algorithm: cma, sigma0: 0.25, seed: 1234, budget: 200,
+         popsize: null, tolfun: 1.0e-3}

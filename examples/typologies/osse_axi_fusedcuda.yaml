@@ -1,0 +1,76 @@
+# osse_axi_fusedcuda: osse_axi with the WP15 fused CUDA Burton-Miller path ENABLED and the
+# verify/final dof caps raised to the MEASURED safe value (M2, 2026-10-24).
+#
+# Never edit the old caps on the original configs: this is a NEW file. Measured safe value
+# (docs/evidence/FUSED_CUDA_2026-10-24.md): 12,183 quarter dofs solved fused at peak-baseline
+# 4,744 MiB in 13.7 s/freq on the 8 GB RTX 4060 (fast, ~3.4 GB headroom); 15,984 dofs fit but
+# the assembly is already memory-pressured (437 s); 20,237 dofs failed (worker-host death).
+# Verify/final caps raised 7000/8900 -> 12000/12000; screen cap stays 5000.
+# Everything else identical to examples/typologies/osse_axi.yaml (fork @ fa99ee5).
+name: osse_axi_fusedcuda
+family: FREEFORM
+brief_file: ../briefs/axi_90x90_1in.yaml
+generator:
+  name: typology
+  profile_h:
+    type: osse
+  profile_v: same
+  n_anchors: 16
+  max_wall_deg: 80.0
+  mouth: ellipse
+seed_params:
+  L_mm: 110.0
+  h_a_deg: 45.0
+  h_s: 0.3
+  h_n: 4.0
+bounds:
+  L_mm:
+    lo: 80.0
+    hi: 140.0
+  h_a_deg:
+    lo: 32.0
+    hi: 50.0
+  h_s:
+    lo: 0.0
+    hi: 0.6
+  h_n:
+    lo: 2.0
+    hi: 8.0
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 90.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 8.0  # beta C2 2026-10-22: epw 6 vs 8 on osse_axi gave DI 0.124 dB > 0.1 dB; axi cost unchanged (docs/evidence/BETA_READINESS.md)
+  quadrants: '1'
+  dof_cap_screen: 5000
+  dof_cap_verify: 12000
+  dof_cap_final: 12000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  cuda_fused: true
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+search:
+  algorithm: cma
+  sigma0: 0.25
+  seed: 1234
+  budget: 200
+  popsize: null
+  tolfun: 0.001

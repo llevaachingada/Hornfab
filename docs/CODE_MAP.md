@@ -42,9 +42,11 @@ bempp_cpu) → `metrics` (beamwidth, ripple, DI, impedance) → `objective` (sca
 | `examples/briefs/*.yaml` | Design briefs: driver, size envelope, target, weights. `*_12k.yaml`: 12 kHz VERIFY-only copies (NEXT_DEV_PRIORITIES P2; `verify --brief` writes its own `runs/<ts>-verify-<id>`). |
 | `examples/typologies/*.yaml` | Generator configs (classical + hybrids). |
 | `examples/*.yaml` | Native-family configs (OSSE, R-OSSE, ICW, FREEFORM) and legacy smoke/adapter configs. |
+| `examples/**/*_fusedcuda.yaml` | WP15 fused-CUDA copies of `osse_axi`, `osse_baseline`, `perturbed_osse_hv`, `freeform_sculpt`: `solve.cuda_fused: true`, verify/final caps 12,000 (screen 5,000 unchanged); originals untouched (`docs/evidence/FUSED_CUDA_2026-10-24.md`). |
 | `tools/review/` | Builds the self-contained review page (`build_review_data.py`, `review_template.html`, `assemble.py`). |
 | `tools/rescore/rescore_v2.py` | WP1 offline re-score: v1 vs v2 J over every stored response (report `docs/evidence/OBJECTIVE_V2_RESCORE.md`; the per-record CSV stays local, regenerate with the tool). |
 | `tools/overnight/` | Unattended GPU queue (`queue_20261022.ps1`) and stall watchdog (`watchdog.ps1`, keeps Windows awake). |
+| `tools/measure_fused_ceiling.py` | WP15 fused-CUDA VRAM ceiling: one solve per fresh process (TOOLCHAIN M2), `nvidia-smi` polled from a daemon thread, verified `worker.shutdown`; `--mesh-only` is the CPU-only res→dof calibration. Numbers: `docs/evidence/FUSED_CUDA_2026-10-24.md`. |
 | `tests/` | Offline suite; `requires_*` / `gpu` / `slow` markers in `tests/conftest.py`. |
 
 ## External code we depend on (pinned in `pyproject.toml` / `TOOLCHAIN.md`; changed only via our forks, `FORKS.md`)

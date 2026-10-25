@@ -33,6 +33,10 @@ F_HZ = 2000.0          # the CP-7 seed quarter mesh at 2 kHz: small, fast, kR in
 TOL_ON_DB = 0.01       # plan step 9: on-axis within 0.01 dB
 TOL_BW_DEG = 0.1       # ... beamwidth within 0.1 deg
 RTOL_Z = 1e-3          # ... z_throat rtol 1e-3
+TOL_DET_DB = 1e-4      # flag-off self-reproduction floor; see the test's docstring and
+                       # NOTES_FOR_SENIOR.md 2026-10-24 (bit-identity is NOT achievable across
+                       # Float32 CUDA reduction order: ~1.6e-7 dB on the base pin, worst
+                       # observed 1.74e-05 dB on a fork rerun)
 
 
 @pytest.fixture(scope="module")
@@ -103,7 +107,21 @@ def test_fused_cuda_matches_default_path(ctx, capsys):
 
 
 def test_flag_off_reproduces_itself_from_a_clean_host(ctx, capsys):
-    """Flag OFF from a clean host: the default path is deterministic for the same solve spec."""
+    """Flag OFF: the default path reproduces itself within the CUDA Float32 floor.
+
+    Bit-for-bit (np.array_equal) is NOT attainable on this stack: the CUDA assembly/solve runs
+    Float32 with order-varying reductions, so two solves of the SAME spec differ at the ulp
+    level, and the spread VARIES BY RUN. Measured with the original zero-tolerance assertion
+    on BOTH installs (pre-existing upstream property, not introduced by the fork):
+      - fork fa99ee5:  max |d spl_h_db| ~9e-8 dB  (runs/m2_fused_cuda/fused_gpu_test.log)
+      - base 38544d2:  max |d spl_h_db| ~1.6e-7 dB (runs/m2_fused_cuda/det_check_base_pin.log)
+      - fork fa99ee5 rerun: 1.74e-05 dB — the WORST observed (fused_gpu_test_rerun.log)
+    The floor below (1e-4 dB) sits ~5.7x above that worst measurement (not three orders of
+    margin — the earlier ~1e-7 numbers oversold it) and ~400x below the CP-7f A/B bar
+    (0.039 dB). If a flake ever crosses the floor, 1e-3 dB is still 39x below the bar — but
+    that decision waits for a REPRODUCED crossing (rule-7 spirit); a real path/cache/host
+    mixup moves results by full dB.
+    """
     worker.shutdown(verify=True)                                # leave the fused host behind
     be = BeatBackend("cuda")
     assert os.environ.get("HORNLAB_BEAT_FUSED_BM_CUDA") == "0"
@@ -113,4 +131,7 @@ def test_flag_off_reproduces_itself_from_a_clean_host(ctx, capsys):
     assert out_b.ok, out_b.message
     a = np.asarray(out_a.response.spl_h_db, dtype=float)
     b = np.asarray(out_b.response.spl_h_db, dtype=float)
-    assert np.array_equal(a, b), "the flag-off path must deterministically reproduce itself"
+    d = float(np.max(np.abs(a - b)))
+    emit(capsys, f"flag-off determinism, same spec twice: max |d spl_h_db| "
+                 f"{d:.2e} dB (floor {TOL_DET_DB}; CP-7f bar 0.039)")
+    assert d <= TOL_DET_DB, "the flag-off path moved beyond its measured determinism floor"

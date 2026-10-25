@@ -55,6 +55,7 @@ Keep this file current: a new doc gets a line here in the same commit.
 | [evidence/OBJECTIVE_V2_RESCORE.md](evidence/OBJECTIVE_V2_RESCORE.md) | WP1 re-score: v1 vs v2 objective over 18,059 stored records; Spearman rho 0.989; both compare-tier claims survive; v1 drift 0. Per-record CSV local (regenerate with tools/rescore). |
 | [evidence/HF12K_VERIFY_2026-10-23.md](evidence/HF12K_VERIFY_2026-10-23.md) | P2 12 kHz finalist verify pass: epw check at 12 kHz, beamwidth/DI to 12 kHz, VRAM; cross-mode caveat. |
 | [evidence/CP-8d_retrain_2026-10-23.md](evidence/CP-8d_retrain_2026-10-23.md) | Surrogate retrain after the OSSE top-up: every gate vs threshold, held-out 463 < 500; model not used. |
+| [evidence/FUSED_CUDA_2026-10-24.md](evidence/FUSED_CUDA_2026-10-24.md) | WP15 fused CUDA Burton-Miller (M2): analytic/cross-check/A-B ladders, flag-off determinism finding (1e-4 dB floor), VRAM ceiling → 12,000-dof caps; 12 kHz verify DONE on the flag. |
 
 ## Elsewhere in the repo
 `../README.md` (install, commands, known limits) · `../TOOLCHAIN.md` (pinned SHAs, measured machine numbers) ·
