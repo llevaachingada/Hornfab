@@ -1004,3 +1004,207 @@ def test_toolbar_run_pill_is_wired():
     assert 'post("/api/stop-current", {})' in src and '"Confirm kill"' in src
     # note: the kill itself lives server-side (jobs.stop_external) — pinned in
     # tests/test_gui_integration_phases.py, not in this app.js source check
+
+
+# ── Compose hybrid disclosure + seed preview (owner ask, 2026-10-25) ─────────────────────────
+# The additive /api/configs keys generator_block / seed_params (gui/data.py list_configs, verbatim
+# yaml passthroughs, C-6 in tests/test_gui_integration_phases.py) are rendered DISPLAY-ONLY in the
+# Compose wizard: a "hybrid — <contributors>" row caption when the block names a composite
+# (splice parents / blend section / per-plane laws / grid rows — by shapes, never title greps),
+# and a seed table for a picked config carrying seed_params. The helpers are pure + exported;
+# the same import-time-DOM-shim node pattern as the provenance block above runs every branch.
+# The view call sites are pinned by source checks (test_compose_view_is_wired style), and the
+# payload-fidelity pairing (no seed/generator fields in the compose POST body) stays pinned.
+
+_COMPOSE_HYBRID_SCRIPT = r'''
+import { pathToFileURL } from "node:url";
+import assert from "node:assert/strict";
+
+const fake = () => ({ className: "", id: "", style: {}, dataset: {}, innerHTML: "", textContent: "",
+  setAttribute() {}, getAttribute: () => null, replaceWith() {}, appendChild() {},
+  addEventListener() {}, removeEventListener() {}, closest: () => null,
+  classList: { toggle() {}, add() {}, remove() {} }, querySelector: () => null, querySelectorAll: () => [] });
+globalThis.document = {
+  getElementById: () => fake(), createElement: () => fake(), createElementNS: () => fake(),
+  querySelector: () => null, querySelectorAll: () => [], addEventListener() {},
+  documentElement: { hasAttribute: () => true, setAttribute() {}, getAttribute: () => null, style: {} },
+  body: { appendChild() {} },
+};
+globalThis.window = { innerWidth: 1280, addEventListener() {}, scrollTo() {} };
+globalThis.matchMedia = () => ({ matches: true, addEventListener() {} });
+globalThis.MutationObserver = class { observe() {} };
+globalThis.location = { hash: "#/glossary" };
+globalThis.requestAnimationFrame = () => 0;
+globalThis.localStorage = { getItem: () => null, setItem() {}, removeItem() {} };
+globalThis.fetch = () => Promise.reject(new Error("offline shim"));
+
+const app = await import(pathToFileURL(process.argv[2]).href);
+const { hybridContributors, hybridCaptionFromBlock, seedPreviewValue, seedRowsHtml, seedPanelHtml } = app;
+assert.equal(typeof hybridContributors, "function");
+assert.equal(typeof hybridCaptionFromBlock, "function");
+assert.equal(typeof seedPreviewValue, "function");
+assert.equal(typeof seedRowsHtml, "function");
+assert.equal(typeof seedPanelHtml, "function");
+
+// caption: honest absences / unexpected shapes caption NOTHING (rows keep today's wording)
+assert.equal(hybridCaptionFromBlock(undefined), "");
+assert.equal(hybridCaptionFromBlock(null), "");
+assert.equal(hybridCaptionFromBlock({}), "");
+assert.equal(hybridCaptionFromBlock(42), "");
+assert.equal(hybridCaptionFromBlock("splice"), "");
+assert.equal(hybridCaptionFromBlock([]), "");
+
+// plain single-profile generators stay uncaptioned — never invented wording
+assert.equal(hybridCaptionFromBlock({ name: "typology", profile_h: { type: "conical" }, profile_v: "same" }), "");
+// same-type planes are ONE construction, not a mix (biradial_keele / qtw_waveguide shapes)
+assert.equal(hybridCaptionFromBlock({ name: "typology",
+  profile_h: { type: "biradial" }, profile_v: { type: "biradial" } }), "");
+// a perturbation of ONE law, both planes (perturbed_osse_hv shape)
+assert.equal(hybridCaptionFromBlock({ name: "typology",
+  profile_h: { type: "osse" }, profile_v: { type: "osse" }, perturb: { u_max: 0.25 } }), "");
+// grid adapter WITHOUT a rows section (grid_ellipse shape): not a mix either
+assert.equal(hybridCaptionFromBlock({ name: "grid", profile_h: { type: "conical" },
+  profile_v: "same", n_phi: 13 }), "");
+
+// the committed splice block: parents straight from the block content
+const SPLICE = { name: "typology",
+  profile_h: { type: "splice", first: { type: "osse" }, second: { type: "tractrix" } },
+  profile_v: "same", n_anchors: 16, max_wall_deg: 80.0, mouth: "ellipse" };
+assert.equal(hybridCaptionFromBlock(SPLICE), "hybrid — osse + tractrix");
+assert.deepEqual(hybridContributors(SPLICE), ["osse", "tractrix"]);
+// blend block (blend_osse_tractrix shape): base profile + blend profile
+assert.equal(hybridCaptionFromBlock({ name: "typology", profile_h: { type: "osse" },
+  blend_h: { type: "tractrix" }, profile_v: "same" }), "hybrid — osse + tractrix");
+// per-plane hybrid (hyb_osse_h_tractrix_v shape): the two plane laws
+assert.equal(hybridCaptionFromBlock({ name: "typology", profile_h: { type: "osse" },
+  profile_v: { type: "tractrix" } }), "hybrid — osse + tractrix");
+// grid rows blocks (lecleach_rollback / salmon_x_signed shapes): the rows carry the types —
+// a rows kind is ONE construction on shaped stations, so the caption is "rows —", not "hybrid —"
+assert.equal(hybridCaptionFromBlock({ name: "grid", rows: { type: "lecleach" }, n_phi: 15 }),
+             "rows — lecleach");
+assert.equal(hybridCaptionFromBlock({ name: "grid",
+  rows: [{ type: "salmon_elliptical" }, { type: "lecleach" }] }),
+             "rows — salmon_elliptical + lecleach");
+assert.equal(hybridCaptionFromBlock({ name: "grid", rows: {} }), "rows — grid");
+// composite-family generator NAME with no derivable sections: the name itself stays honest
+assert.equal(hybridCaptionFromBlock({ name: "throat_blend" }), "hybrid — throat_blend");
+assert.equal(hybridCaptionFromBlock({ name: "hybrid", profile_h: { type: "osse" },
+  profile_v: "same" }), "hybrid — osse");
+// list-shaped block (the reader allows lists): distinct sections joined; one section = not a mix
+assert.equal(hybridCaptionFromBlock([{ type: "osse" }, { type: "hypex" }]), "hybrid — osse + hypex");
+assert.equal(hybridCaptionFromBlock([{ name: "typology" }, { name: "typology" }]), "");
+// duplicate section mentions collapse, section order is kept
+assert.deepEqual(hybridContributors({ name: "typology", profile_h: { type: "osse" },
+  profile_v: { type: "tractrix" }, blend_h: { type: "osse" } }), ["osse", "tractrix"]);
+
+// seed preview value rendering: numbers through the house trim, nested values as JSON
+assert.equal(seedPreviewValue(110), "110");
+assert.equal(seedPreviewValue(110.5), "110.5");
+assert.equal(seedPreviewValue(-0.03), "-0.03");
+assert.equal(seedPreviewValue("n"), "n");
+assert.equal(seedPreviewValue(null), "null");
+assert.equal(seedPreviewValue([0.25]), "[0.25]");
+assert.equal(seedPreviewValue(true), "true");
+
+// seed panel: absent stays absent, honestly
+assert.equal(seedPanelHtml(null), "");
+assert.equal(seedPanelHtml(undefined), "");
+assert.equal(seedPanelHtml([]), "");
+assert.equal(seedPanelHtml({ name: "conical" }), "");
+assert.equal(seedPanelHtml({ seed_params: {} }), "");
+assert.equal(seedPanelHtml({ seed_params: [] }), "");
+
+// present: knob/value rows + the honest caption; catalog_name absent -> the config's own name
+const UNCAT = { name: "splice_osse_tractrix", catalog_name: null,     // the sole-pick shape
+                generator_block: SPLICE,
+                seed_params: { L_mm: 110.0, h_first_a_deg: 25.0, h_first_s: 0.4,
+                               h_second_fc_hz: 750.0, h_zs_frac: 0.5 } };
+const panel = seedPanelHtml(UNCAT);
+assert.ok(panel.startsWith("<div"), panel);
+assert.ok(panel.includes("Seed preview — splice_osse_tractrix"), panel);
+for (const k of ["L_mm", "h_first_a_deg", "h_first_s", "h_second_fc_hz", "h_zs_frac"])
+  assert.ok(panel.includes(`>${k}<`), k);
+assert.ok(panel.includes(">110<") && panel.includes(">750<") && panel.includes(">0.4<") &&
+          panel.includes(">0.5<"), panel);
+assert.ok(panel.includes("the seed the search starts from — bounds stay the config's own"), panel);
+assert.ok(panel.includes("nothing here is sent"), panel);
+assert.ok(panel.includes("config seed geometry (preview only)"), panel);
+// naming prefers the catalog name when one exists
+const catPanel = seedPanelHtml({ name: "x", catalog_name: "y", seed_params: { L_mm: 1.25 } });
+assert.ok(catPanel.includes("Seed preview — y"), catPanel);
+assert.ok(catPanel.includes(">1.25<"), catPanel);
+
+// long listing caps with the literal "+N more" honesty tail (no hidden rows invented)
+const longParams = Object.fromEntries([...Array(10).keys()].map(i => [`knob_${i}`, i]));
+const lp = seedPanelHtml({ name: "long", seed_params: longParams });
+assert.ok(lp.includes("Seed preview — long"), lp);
+assert.match(lp, /\+2 more seed knobs/);
+assert.ok(lp.includes(">knob_7<"), lp);
+assert.ok(!lp.includes("knob_8") && !lp.includes("knob_9"), lp);
+
+// hostile strings never land raw — knob names AND values are escaped
+const wp = seedPanelHtml({ name: "x",
+  seed_params: { "<a>": "<img src=x onerror=alert(1)>", g_stop_cos2k: [0.25] } });
+assert.ok(wp.includes("&lt;a&gt;"), wp);
+assert.ok(wp.includes("&lt;img"), wp);
+assert.ok(!wp.includes("<img") && !wp.includes("<a>"), wp);
+assert.ok(wp.includes("[0.25]"), wp);
+
+console.log("COMPOSE HYBRID OK");
+'''
+
+
+def test_compose_hybrid_and_seed_helpers_behave_offline(tmp_path):
+    """Executes the compose hybrid/seed builders for real: only a generator block that SHAPES a
+    composite (splice parents, blend section, different per-plane profiles, grid rows, or a
+    composite-family generator name) earns a "hybrid — <contributors>" caption; absent/unexpected
+    blocks and same-type planes caption nothing; the seed panel exists only when the config
+    carries seed_params (knob/value rows through the house trim, capped with a literal "+N more"
+    tail, everything escaped), and states it is the config's seed geometry, display-only."""
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("node not installed")   # same environment gate as test_gui.py's ES-module check
+    script = tmp_path / "compose_hybrid_under_test.mjs"
+    script.write_text(_COMPOSE_HYBRID_SCRIPT, encoding="utf-8")
+    r = subprocess.run([node, str(script), str(APPJS)],
+                       capture_output=True, text=True, cwd=str(tmp_path))
+    assert "COMPOSE HYBRID OK" in r.stdout, f"node test failed:\nstdout: {r.stdout}\nstderr: {r.stderr}"
+
+
+def test_compose_hybrid_and_seed_views_are_wired():
+    """The compose view references the executed builders and NOTHING leaks into the payloads:
+    the step-1 row builder carries the hybrid caption call (absent key -> no caption), the seed
+    panel holder renders per picked config, the POST bodies still come only from currentJob's
+    build_argv field set (the pinned pairing test), the run-summary semantics strings and the
+    uncatalogued sole-pick rule stay byte-identical (biradial_keele, qtw_waveguide,
+    lecleach_asym_odd, salmon_x_signed and salmon_ripple12 all ride that rule today), and the
+    helpers are exported for the offline node test."""
+    src = APPJS.read_text(encoding="utf-8")
+    compose = src.split("View 5b: Compose", 1)[1].split("View 6: Launch", 1)[0]
+    # wiring: the caption inside the row builder; the panel holder + per-pick render (step 1)
+    assert "hybridCaptionFromBlock(c.generator_block)" in compose
+    assert 'id="cmp-seed-panel"' in compose
+    assert "pickedConfigs().map(seedPanelHtml)" in compose
+    # payload fidelity: the compose POST args still flow through currentJob, which names ONLY the
+    # build_argv field set — no generator_block/seed_params FIELD is constructed anywhere (the
+    # regex below matches key-construction positions: `x.seed_params : y` ternary reads pass)
+    assert 'post("/api/preview", job)' in compose and 'post("/api/jobs", job)' in compose
+    assert not re.search(r"(?<![.\w])(generator_block|seed_params)\s*:", compose)
+    body = compose.split("function currentJob() {", 1)[1].split("\n  function gateReason()", 1)[0]
+    for f in ("cma_seed: seedRaw", "budget: budRaw", "families: fams", "tier: S.tier",
+              'args: { config, brief: S.briefPath', 'args: { brief: S.briefPath'):
+        assert f in body, f
+    assert not re.search(r"seed_params|generator_block|hybridContributors|seedPanelHtml", body)
+    # run-summary semantics unchanged (0/1/campaign wording byte-identical)
+    assert ("1 picked · single-config run (${c.catalog_name || c.name}) — "
+            "choose dry-run / run / search in step 3") in src
+    assert "${n} picked · campaign over" in src
+    # the uncatalogued sole-pick rule, untouched by the hybrid/seed additions
+    assert "if (!c.catalog_name) return S.picks.size === 0 || S.picks.has(c.path);" in src
+    assert ("is uncatalogued — campaign resolves catalog names only, so it launches alone: "
+            "clear the other picks first.") in src
+    assert "Uncatalogued — single-config runs only" in src
+    # the honest seed caption lives in the panel builder
+    assert "the seed the search starts from — bounds stay the config's own" in src
+    # the pure helpers are exported for the offline node test (renderProvenanceBadges precedent)
+    assert "export { hybridContributors, hybridCaptionFromBlock, seedPreviewValue, seedRowsHtml, seedPanelHtml };" in src

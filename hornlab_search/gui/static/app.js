@@ -2842,6 +2842,140 @@ const COMPOSE_TIER_HINTS = {
 
 const EDITOR_SELECT_CSS = "font:inherit;font-size:0.88rem;background:var(--bg);color:var(--ink);border:1px solid var(--rule);border-radius:5px;padding:6px 10px;max-width:100%;min-width:280px";
 
+// ── Compose hybrid disclosure + seed preview (owner ask 2026-10-25, display-only) ─────────────
+// The additive /api/configs keys (gui/data.py list_configs, verbatim yaml passthroughs) are
+//   generator_block — the config's real generator dict/list (absent when the config has none)
+//   seed_params     — the config's seed geometry dict (absent when empty)
+// Both are read defensively in the view and rendered DISPLAY-ONLY: the compose POST body keeps
+// exactly the field set jobs.build_argv reads (config/brief/budget/cma_seed for single runs,
+// brief/families/tier for campaigns) — the pairing pinned by
+// tests/test_gui_brief_authoring.py::test_campaign_budget_and_seeds_are_not_gui_plumbed.
+// Pure helpers, exported for offline node tests (same precedent as renderProvenanceBadges).
+
+// Composite generator families, detected from the block's OWN generator name key — never from
+// config names, catalog titles or descriptions.
+const COMPOSITE_GENERATOR_NAMES = ["splice", "blend", "throat_blend", "hybrid"];
+
+/** The distinct contributing generators a composite generator block names (["osse", "tractrix"],
+ *  ["grid rows (lecleach)"]), or [] when the block is absent / an unexpected shape / one same-type
+ *  profile. Reads SHAPES only; nothing derivable means nothing is captioned. Order of the
+ *  contributors follows the block's own section order (H before V, base before blend). */
+function hybridContributors(gb) {
+  const isObj = x => !!x && typeof x === "object" && !Array.isArray(x);
+  const typeOf = s => isObj(s) && typeof s.type === "string" ? s.type : "";
+  if (!isObj(gb) && !Array.isArray(gb)) return "";                    // absent / unexpected shape: caption nothing
+
+  const out = [];
+  const push = t => { if (t && !out.includes(t)) out.push(t); };      // distinct + order-stable
+
+  if (Array.isArray(gb)) {                     // generator given as a list: each entry is a section
+    gb.forEach(e => { if (isObj(e)) push(typeof e.name === "string" ? e.name : typeOf(e)); });
+    if (out.length >= 2 ||
+        (out.length === 1 && COMPOSITE_GENERATOR_NAMES.includes(out[0])))
+      return out;
+    return [];                                 // one nondescript section: not a mix
+  }
+
+  const gname = typeof gb.name === "string" ? gb.name : "";
+  const h = isObj(gb.profile_h) ? gb.profile_h : null;
+  const v = isObj(gb.profile_v) ? gb.profile_v : null;
+  const hType = typeOf(h), vType = typeOf(v);
+
+  // grid rows block: the row definitions ARE the contributors
+  if (gb.rows != null) {
+    const parts = [];
+    if (Array.isArray(gb.rows))
+      gb.rows.forEach(r => { if (isObj(r)) { const t = typeof r.name === "string" ? r.name : typeOf(r); if (t && !parts.includes(t)) parts.push(t); } });
+    else if (isObj(gb.rows) && typeof gb.rows.type === "string") parts.push(gb.rows.type);
+    push(parts.length ? `grid rows (${parts.join(" + ")})` : "grid rows");
+  }
+  // splice profile: the spliced parents are named under first/second
+  const sp = (hType === "splice" && h) || (vType === "splice" && v) || null;
+  if (sp) {
+    push(typeOf(sp.first)); push(typeOf(sp.second));
+    if (!out.length) push("splice");               // splice named without parents: the profile itself
+  }
+  // blend section beside a profile: base profile + blend profile name the two mixed generators
+  const blend = (isObj(gb.blend_h) ? gb.blend_h : null) || (isObj(gb.blend_v) ? gb.blend_v : null) || null;
+  if (blend) {
+    push(hType); push(typeOf(blend));
+    if (!out.length) push(gname);                  // blend without a typed base: the name says it
+  }
+  // per-plane hybrid: two DIFFERENT profile laws; same-type planes are one construction, not a mix
+  if (hType && vType && hType !== vType) { push(hType); push(vType); }
+
+  // composite-family name with no other derivable contributor: prefer the profile it does name,
+  // fall back to the family name itself — never caption nothing silently for a named composite
+  if (!out.length && COMPOSITE_GENERATOR_NAMES.includes(gname)) push(hType || vType || gname);
+  return out;
+}
+
+/** The step-1 row caption for a config whose generator block is a composite, or "" plainly
+ *  (absent / unexpected block / single-profile construction keeps the row exactly as today). */
+/**
+ * The step-1 caption for one generator block, honest by construction: a real MIX
+ * (splice parents / blend section / two different plane laws) captions "hybrid — A + B";
+ * a single-construction rows kind captions "rows — {types}" (a rows kind is one
+ * construction on shaped stations, not a hybrid of generators). Or [] when the block is
+ * absent / an unexpected shape / one same-type construction — never invented wording. */
+function hybridCaptionFromBlock(gb) {
+  const c = hybridContributors(gb);
+  if (!c.length) return "";
+  if (typeof gb === "object" && gb && gb.rows != null) {
+    // a grid rows kind is ONE construction on shaped stations, not a hybrid of generators —
+    // caption it "rows — {types}"; strip the redundant "grid rows (...)" wrapper the
+    // contributors push (the empty-rows case captions "rows — grid").
+    const types = c.map(s => String(s).replace(/^grid rows(?: \((.+)\))?$/, "$1"))
+      .filter(Boolean).join(" + ");
+    return types ? `rows — ${types}` : "rows — grid";
+  }
+  return `hybrid — ${c.join(" + ")}`;
+}
+
+/** One seed-preview value: numbers through the house trim, scalars as text, nested values
+ *  compacted to JSON — never "[object Object]". Pure. */
+function seedPreviewValue(v) {
+  if (typeof v === "number") return _trimNum(v);
+  if (v == null || typeof v !== "object") return String(v);
+  try { return JSON.stringify(v); } catch { return String(v); }
+}
+
+const SEED_PREVIEW_MAX_ROWS = 8;
+
+/** The seed-preview knob rows for ONE config (pure; "" when the config carries no seed_params
+ *  — the panel appears only when the config really has seed geometry). Caps the listing at
+ *  SEED_PREVIEW_MAX_ROWS with a literal "+N more" honesty tail. */
+function seedRowsHtml(config) {
+  const cfg = (config && typeof config === "object" && !Array.isArray(config)) ? config : null;
+  const sp = cfg ? cfg.seed_params : null;
+  if (!sp || typeof sp !== "object" || Array.isArray(sp)) return "";
+  const knobs = Object.keys(sp);
+  if (!knobs.length) return "";
+  return knobs.slice(0, SEED_PREVIEW_MAX_ROWS).map(k =>
+    `<tr><td>${esc(k)}</td><td class="r">${esc(seedPreviewValue(sp[k]))}</td></tr>`
+  ).join("") + (knobs.length > SEED_PREVIEW_MAX_ROWS
+    ? `<tr><td colspan="2">+${knobs.length - SEED_PREVIEW_MAX_ROWS} more seed knobs — the config's own yaml carries them</td></tr>`
+    : "");
+}
+
+/** The compose seed panel for ONE config (pure; "" when it carries no seed_params): knob/value
+ *  table + the honest caption. Preview only — renders the config's own seed_params, alters no
+ *  payload (see the display-only rule above). */
+function seedPanelHtml(config) {
+  const rows = seedRowsHtml(config);
+  if (!rows) return "";
+  const cfg = (config && typeof config === "object" && !Array.isArray(config)) ? config : {};
+  const nm = (typeof cfg.catalog_name === "string" && cfg.catalog_name) ||
+             (typeof cfg.name === "string" ? cfg.name : "");
+  return `<div class="card" style="border:1px solid var(--rule);padding:8px 10px" role="note">
+    <h4 style="margin:0 0 6px">Seed preview — ${esc(nm)}</h4>
+    <table class="compact" aria-label="config seed geometry (preview only)"><thead><tr><th>seed knob</th><th class="r">value</th></tr></thead><tbody>${rows}</tbody></table>
+    <p class="hint" style="margin:6px 0 0">the seed the search starts from — bounds stay the config's own. Preview from the config's own seed_params — display-only, nothing here is sent.</p>
+  </div>`;
+}
+
+export { hybridContributors, hybridCaptionFromBlock, seedPreviewValue, seedRowsHtml, seedPanelHtml };
+
 async function viewCompose() {
   const ROOT = currentRoot();     // this view's own container (see route())
   skel("Loading typologies and briefs…");
@@ -2884,7 +3018,7 @@ async function viewCompose() {
             <span id="cmp-shape-note" class="hint" role="status"></span>
             <button type="button" id="cmp-clear" hidden>Clear picks</button>
           </div>
-          ${configsOk ? `<div id="cmp-shapes" class="fam-picker"></div>`
+          ${configsOk ? `<div id="cmp-shapes" class="fam-picker"></div><div id="cmp-seed-panel" class="stack" style="gap:10px" aria-live="polite"></div>`
                       : `<p class="muted">Typology list unavailable — compose on the Briefs page or reuse an existing brief in step 2.</p>`}
         </div>
       </fieldset>
@@ -2973,10 +3107,14 @@ async function viewCompose() {
       const why = c.disabled ? "disabled — the starting design does not materialize (engine seed gate)"
                 : off ? "campaign resolves catalog names only — pick this config alone (clear the other picks first)"
                 : (c.description || "");
+      // Composite disclosure: a caption ONLY when the additive generator_block really names a
+      // mix (splice parents / blend section / per-plane laws / grid rows) — an absent or
+      // unexpected block keeps the row byte-identical to before.
+      const cap = hybridCaptionFromBlock(c.generator_block);
       return `<label class="fam-row ${off ? "off" : ""}" title="${esc(why)}">
         <input type="checkbox" value="${esc(c.path)}" ${off ? "disabled" : ""} ${S.picks.has(c.path) ? "checked" : ""}>
         <span class="fam-name">${esc(c.catalog_name || c.name)}${c.disabled ? ` <span class="pill bad" style="font-size:0.66rem">disabled</span>` : ""}</span>
-        <span class="fam-meta">${esc(c.family || "—")} · ${symLabel(c)} · ${c.n_knobs} params</span>
+        <span class="fam-meta">${esc(c.family || "—")} · ${symLabel(c)} · ${c.n_knobs} params${cap ? `<br>${esc(cap)}` : ""}</span>
         <span class="fam-best">${esc(stem)}</span>
       </label>`;
     };
@@ -3026,6 +3164,10 @@ async function viewCompose() {
     });
     document.getElementById("cmp-clear").hidden = S.picks.size === 0;
     document.getElementById("cmp-shape-summary").textContent = shapeSummary();
+    // Seed preview: every picked config that carries seed_params gets one labelled panel —
+    // each panel names its config, so a campaign's picks stay attributable. Display-only.
+    const sp = document.getElementById("cmp-seed-panel");
+    if (sp) sp.innerHTML = pickedConfigs().map(seedPanelHtml).filter(Boolean).join("");
   }
 
   function pickedConfigs() {

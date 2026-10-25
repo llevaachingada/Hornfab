@@ -949,3 +949,86 @@ def test_campaign_detail_keeps_the_axisymmetric_skip_reason_verbatim(repo):
     assert e["skipped"] is True
     assert e["skip_reason"] == reason
     json.dumps(c, allow_nan=False)
+
+
+# ------------------------------------------------------------------ C-6 compose config payload
+# The Compose wizard's hybrid views read ``d[i].generator_block`` and ``d[i].seed_params`` from
+# ``/api/configs``. Both are additive verbatim passthroughs of the yaml (absent when the yaml has
+# none); these tests pin the contract the views lane codes against.
+
+GENERATOR_BLOCK = {
+    "name": "typology",
+    "profile_h": {"type": "probe", "first": {"type": "osse"}, "second": {"type": "tractrix"}},
+    "profile_v": "same", "n_anchors": 16, "max_wall_deg": 80.0, "mouth": "ellipse",
+}
+SEED_PARAMS = {"L_mm": 111.5, "h_first_a_deg": 27.5, "h_first_s": 0.35,
+               "h_second_fc_hz": 720.0, "h_zs_frac": 0.45}
+
+
+def _typology_cfg(name: str, **extra) -> dict:
+    cfg = {"name": name, "family": "FREEFORM", "brief_file": "../briefs/axi_90x90_1in.yaml",
+           "bounds": {"L_mm": {"lo": 1.0, "hi": 2.0}}}
+    cfg.update(extra)
+    return cfg
+
+
+def _write_typology_config(examples: Path, name: str, cfg: dict) -> Path:
+    (examples / "typologies").mkdir(exist_ok=True)
+    p = examples / "typologies" / f"{name}.yaml"
+    p.write_text(yaml.safe_dump(cfg))
+    return p
+
+
+def test_configs_payload_carries_the_generator_block_and_seed_params_verbatim(repo, server):
+    _write_typology_config(repo / "examples", "hybrid_probe",
+                           _typology_cfg("hybrid_probe", generator=GENERATOR_BLOCK,
+                                         seed_params=SEED_PARAMS))
+    cfg = {c["name"]: c for c in D.list_configs(repo)}["hybrid_probe"]
+    assert cfg["generator"] is True
+    assert cfg["generator_block"] == GENERATOR_BLOCK           # exactly the yaml content
+    assert cfg["seed_params"] == SEED_PARAMS
+    assert "seed_bounds_missing" not in cfg
+    json.dumps(cfg, allow_nan=False)
+
+    code, body = _req(server + "/api/configs")                 # the route never filters keys
+    assert code == 200 and isinstance(body, list)
+    served = {c["name"]: c for c in body}["hybrid_probe"]
+    assert served["generator_block"] == GENERATOR_BLOCK and served["seed_params"] == SEED_PARAMS
+
+
+def test_configs_payload_omits_seed_params_when_absent_or_empty(repo):
+    ex = repo / "examples"
+    _write_typology_config(ex, "empty_seed",
+                           _typology_cfg("empty_seed", generator=GENERATOR_BLOCK, seed_params={}))
+    _write_typology_config(ex, "no_seed",
+                           _typology_cfg("no_seed", generator=GENERATOR_BLOCK))
+    _write_typology_config(ex, "empty_generator",
+                           _typology_cfg("empty_generator", generator={},
+                                         seed_params={"L_mm": 100.0}))
+    cfgs = {c["name"]: c for c in D.list_configs(repo)}
+    assert "seed_params" not in cfgs["empty_seed"]             # empty dict -> absent, not {}
+    assert "seed_params" not in cfgs["no_seed"]
+    assert cfgs["empty_seed"]["generator_block"] == GENERATOR_BLOCK
+    assert "generator_block" not in cfgs["empty_generator"]    # empty block -> absent, not {}
+    assert cfgs["empty_generator"]["seed_params"] == {"L_mm": 100.0}
+
+
+def test_configs_payload_pins_the_shipped_splice_generator_block(repo):
+    """The real committed splice config: its generator block names the spliced parents and the
+    seed params are the geometry preview source. The shape below is what yaml.safe_load yields."""
+    src = ROOT / "examples" / "typologies" / "splice_osse_tractrix.yaml"
+    raw = yaml.safe_load(src.read_text(encoding="utf-8-sig"))
+    dest = repo / "examples" / "typologies" / src.name
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy(src, dest)
+
+    cfg = {c["name"]: c for c in D.list_configs(repo)}["splice_osse_tractrix"]
+    assert cfg["path"] == "examples/typologies/splice_osse_tractrix.yaml"
+    gb = cfg["generator_block"]
+    assert gb == raw["generator"]                              # verbatim passthrough
+    assert gb["name"] == "typology"
+    assert gb["profile_h"] == {"type": "splice", "first": {"type": "osse"},
+                               "second": {"type": "tractrix"}}
+    assert gb["profile_v"] == "same" and gb["n_anchors"] == 16
+    assert cfg["seed_params"] == raw["seed_params"]
+    assert "seed_bounds_missing" not in cfg

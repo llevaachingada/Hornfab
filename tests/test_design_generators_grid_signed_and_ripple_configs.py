@@ -1,0 +1,201 @@
+"""S1a config-gap coverage (2026-10-25): the two shipped-but-never-loaded grid-row configs.
+
+``salmon_x_signed.yaml`` is the signed x_amp SIGN demo (g_x_amp = -0.25 corner-in, bounds
+[-0.4, 0.4], n_phi 15, quarter) and ``salmon_ripple12.yaml`` the even-lobe mouth ripple
+(g_ripple_lobes 12 / g_ripple_amp_mm 3.0 / g_ripple_start 0.8, span half, quadrants '14').
+Before this file no test loaded either YAML as a config. It applies the three layers the
+biradial/qtw config tests use -- the REAL ``load_config`` path with its named brief
+resolving, the pure-Python rows march at the seed (no mesher, no GPU), and the pinned
+envelope/span/penalty truth -- following tests/test_design_generators_biradial.py,
+test_design_generators_qtw.py, test_design_generators_grid_rows.py and
+test_design_generators_grid_full_ring.py.
+
+DEVIATION FROM THE LANE BRIEF'S PREMISE (hard rules 3 and 7: follow the files, never
+invent and never weaken an assertion): the brief expected both seeds to be envelope-true.
+``salmon_ripple12`` is (overshoot 0.0). ``salmon_x_signed`` is NOT: its corner-in seed
+marches the H/V rows to a 332.47 mm z span, while the organic_rollback_1in envelope is
+260 mm deep plus the 15 mm meshing allowance = 275 mm, so the pre-mesh overshoot is
+0.2201. A sibling-style ``overshoot == 0.0`` assertion fails on the shipped YAML; the
+test below pins the real overshoot instead and names it as a finding.
+"""
+from __future__ import annotations
+
+import json
+import math
+from pathlib import Path
+
+import numpy as np
+import pytest
+
+from conftest import EXAMPLES
+from hornlab_search.config import load_config
+from hornlab_search.design import families
+from hornlab_search.design.generated import GeneratedSpace
+from hornlab_search.design.generators import grid as G
+from hornlab_search.design.generators import registry
+from hornlab_search.design.space import DesignSpace
+
+TYP = EXAMPLES / "typologies"
+CONFIGS = ("salmon_x_signed", "salmon_ripple12")
+BRIEF_FILE = "../briefs/organic_rollback_1in.yaml"
+BRIEF_NAME = "organic_rollback_1in"
+
+
+def _march(block, brief):
+    """The pure-Python design march the mesher consumes (no mesher, no GPU)."""
+    return G.rows_grid_points(
+        {k: v for k, v in block.items() if k != "knobs"}, block["knobs"], brief)
+
+
+@pytest.fixture(scope="module")
+def x_signed():
+    """One materialization shared by the SIGN-demo tests (the seed march is not free)."""
+    cfg = load_config(TYP / "salmon_x_signed.yaml")
+    space = DesignSpace.from_config(cfg)
+    assert isinstance(space, GeneratedSpace)
+    return cfg, space
+
+
+@pytest.fixture(scope="module")
+def ripple12():
+    cfg = load_config(TYP / "salmon_ripple12.yaml")
+    space = DesignSpace.from_config(cfg)
+    assert isinstance(space, GeneratedSpace)
+    return cfg, space
+
+
+# ---------------------------------------------------------------- config + brief load
+
+@pytest.mark.parametrize("name", CONFIGS)
+def test_config_loads_and_its_named_brief_file_resolves(name):
+    cfg = load_config(TYP / f"{name}.yaml")
+    assert cfg.name == name
+    assert cfg.family == "FREEFORM"
+    # the REAL load path resolved the relative brief_file against the config's directory
+    assert cfg.raw["brief_file"] == BRIEF_FILE
+    brief = cfg.brief
+    assert brief is not None
+    assert brief["name"] == BRIEF_NAME
+    resolved = Path(brief["path"])
+    assert resolved.is_file()
+    assert resolved.resolve() == (EXAMPLES / "briefs" / "organic_rollback_1in.yaml").resolve()
+    generator = cfg.generator
+    assert generator is not None
+    assert generator["name"] == "grid"
+    assert generator["rows"] == {"type": "salmon_elliptical"}
+
+
+# ------------------------------------------------- signed x_amp (the SIGN demo)
+
+def test_x_signed_seed_march_succeeds_as_a_signed_quarter_model(x_signed):
+    cfg, space = x_signed
+    families.validate(space.seed)
+    json.dumps(space.seed.params)
+    json.dumps(space.provenance(space.seed))
+
+    block = space.seed.params["grid"]
+    G.validate_grid_params(block)
+    assert block["n_phi"] == 15 and block["n_s"] == 32
+    assert "span" not in block                  # the quarter recipe carries no span key
+    assert cfg.mesh.quadrants == "1"
+
+    # the SIGN demo: a NEGATIVE seed knob inside its own signed bounds
+    assert cfg.seed_params["g_x_amp"] == pytest.approx(-0.25)
+    assert cfg.bounds_raw["g_x_amp"] == {"lo": -0.4, "hi": 0.4}
+    x_amp = block["knobs"]["g_x_amp"]
+    assert -0.4 <= x_amp <= 0.4
+    assert x_amp < 0.0
+    assert block["knobs"]["g_x_fc"] == pytest.approx(0.15)
+
+    inner, meta = _march(block, cfg.brief)
+    assert inner.shape == (15, 33, 3) and np.isfinite(inner).all()
+    assert meta["span"] == "quarter" and meta["row_span"] == "quarter"
+    assert meta["quadrants"] == "1" and meta["quarter"] is True
+    assert meta["x_amp"] == pytest.approx(-0.25)
+    assert meta["x_fc"] == pytest.approx(0.15)
+    assert meta["ripple_lobes"] == 0            # no ripple on this config
+    # the mouth fits the brief; the depth does not (pinned by the envelope test below)
+    env = space.brief["envelope"]
+    assert meta["mouth_w_mm"] < env["max_mouth_w_mm"]
+    assert meta["mouth_h_mm"] < env["max_mouth_h_mm"]
+    assert meta["x_span_mm"] > env["max_depth_mm"]
+
+
+def test_x_signed_seed_pins_the_real_envelope_truth(x_signed):
+    """FINDING: this SIGN seed is NOT pre-mesh envelope-true (see the module docstring).
+
+    The corner-in (negative x_amp) reading lengthens the H/V marches: the seed's outer
+    dimensions are 430.41 x 337.43 x 335.52 mm (incl. the 3 mm wall), against the brief's
+    520 x 420 x 260 mm plus the 0.5/15 mm meshing allowances. Width and height fit; the
+    335.52 mm depth does not (limit 275 mm), so ``DesignSpace.design_from_knobs`` will
+    grade the seed ``invalid_envelope``. This is pinned as the shipped truth rather than
+    asserting the sibling tests' ``overshoot == 0.0``, which is false for this YAML.
+    """
+    _cfg, space = x_signed
+    overshoot = registry.envelope_overshoot_estimate(space.seed.params, space.brief)
+    assert overshoot is not None
+    assert overshoot == pytest.approx(0.2201, abs=5e-4)     # (335.52 - 275) / 275
+    assert overshoot > 0.0
+
+
+# ------------------------------------------------ even-lobe mouth ripple (pleats)
+
+def test_ripple12_seed_march_is_a_half_model_with_the_four_samples_per_lobe_bar(ripple12):
+    cfg, space = ripple12
+    families.validate(space.seed)
+    json.dumps(space.seed.params)
+    json.dumps(space.provenance(space.seed))
+    assert set(space.keys()) == {"g_T", "g_fc_h_hz", "g_fc_v_hz", "g_ripple_amp_mm",
+                                 "g_ripple_lobes", "g_ripple_start", "g_stop_deg"}
+
+    block = space.seed.params["grid"]
+    G.validate_grid_params(block)
+    assert block["span"] == "half" and block["n_phi"] == 25
+    assert cfg.mesh.quadrants == "14"
+
+    lobes = block["knobs"]["g_ripple_lobes"]
+    assert block["knobs"]["g_ripple_amp_mm"] == pytest.approx(3.0)
+    assert block["knobs"]["g_ripple_start"] == pytest.approx(0.8)
+    assert cfg.bounds_raw["g_ripple_lobes"] == {"lo": 6.0, "hi": 24.0}
+    assert 6.0 <= lobes <= 24.0 and int(lobes) == lobes and int(lobes) % 2 == 0
+
+    # The honest-resolution bar the full-ring tests enforce: >= 4 phi samples per lobe
+    # period on the row span.  span half = pi over n_phi 25 -> d_phi = pi/24; 12 lobes ->
+    # (2 pi / 12) / (pi / 24) = exactly 4.0.  The guard passes at 12 and refuses 24.
+    span_rad = math.pi
+    per_period = (2.0 * math.pi / lobes) / (span_rad / (block["n_phi"] - 1))
+    assert G.ROWS_RIPPLE_SAMPLES_PER_LOBE == pytest.approx(4.0)
+    assert per_period == pytest.approx(
+        G.ROWS_RIPPLE_SAMPLES_PER_LOBE, rel=0.0, abs=1e-12)
+    G._rows_ripple_resolution_guard(int(lobes), span_rad, block["n_phi"])
+    with pytest.raises(registry.GeneratorError, match="samples per lobe"):
+        G._rows_ripple_resolution_guard(24, span_rad, block["n_phi"])
+
+    inner, meta = _march(block, cfg.brief)
+    assert inner.shape == (25, 33, 3) and np.isfinite(inner).all()
+    assert meta["span"] == "half" and meta["row_span"] == "half"
+    assert meta["half_model"] is True
+    assert meta["quadrants"] == "14" and meta["symmetry_plane"] == "yz"
+    assert meta["ripple_lobes"] == 12
+    assert meta["ripple_amp_mm"] == pytest.approx(3.0)
+    assert meta["ripple_start"] == pytest.approx(0.8)
+    assert "ripple_law" in meta
+
+
+def test_ripple12_seed_is_envelope_true(ripple12):
+    """The sibling envelope fact: the ripple seed materializes inside the brief envelope.
+
+    The pre-mesh estimate includes the shell and the outer radius field, so this single
+    assertion covers all three dimensions (the sibling config tests' ``== 0.0`` shape).
+    """
+    _cfg, space = ripple12
+    assert registry.envelope_overshoot_estimate(space.seed.params, space.brief) == 0.0
+
+
+# ------------------------------------------------------------- graded penalty
+
+@pytest.mark.parametrize("name", CONFIGS)
+def test_configs_record_the_graded_infeasible_penalty(name):
+    cfg = load_config(TYP / f"{name}.yaml")
+    assert cfg.raw["search"]["infeasible_penalty"] == "graded"
+    assert cfg.search.infeasible_penalty == "graded"

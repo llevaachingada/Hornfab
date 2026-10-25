@@ -1040,13 +1040,23 @@ def list_configs(root: Path) -> list[dict]:
         if disabled is None:
             disabled = not _config_seed_materializes(p)
             _SEED_GATE_CACHE[key] = disabled
-        out.append(clean({
+        entry = clean({
             "path": p.relative_to(root).as_posix(), "name": raw.get("name") or p.stem,
             "family": raw.get("family"), "generator": isinstance(raw.get("generator"), dict),
             "brief_file": raw.get("brief_file"), "catalog_name": e.get("name"), "group": e.get("group"),
             "symmetry": e.get("symmetry"), "description": e.get("description"),
             "n_knobs": sum(1 for b in bounds.values() if isinstance(b, dict) and b.get("search", True)),
-            "disabled": disabled}))
+            "disabled": disabled})
+        # Additive, honest passthrough for the Compose wizard's hybrid views: the config's REAL
+        # generator block (splice/blend/grid shapes exactly as yaml.safe_load yields) and the seed
+        # geometry it previews from. Absent when the yaml has none -- never fabricated.
+        gen = raw.get("generator")
+        if isinstance(gen, dict) and gen:
+            entry["generator_block"] = clean(gen)
+        seed = raw.get("seed_params")
+        if isinstance(seed, dict) and seed:
+            entry["seed_params"] = clean(seed)
+        out.append(entry)
     return out
 
 
