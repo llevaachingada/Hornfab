@@ -877,6 +877,40 @@ Keele 1975/1977 AES paper exact titles + e-library ids (his Wikipedia page lists
 - Wikipedia, D. B. Keele, Jr. (fetched 2026-10-25): https://en.wikipedia.org/wiki/D._B._Keele,_Jr.
 - Smith 1953: doi:10.1121/1.1907038 · In-repo: `docs/research/boundary_lab_0.5/bl_inventory.md` (0.5.0-current) · `docs/BOUNDARY_LAB_INTEGRATION_PLAN.md`
 
+### 16.7 Typology citations verified (librarian lane lib-6, recorded 2026-10-25)
+
+Method note: aes.org blocks automated fetch (403), so AES records were verified via Wayback snapshots of the e-library pages; JASA/JAES items via Crossref/OpenAlex. Full table lives in the lane result; the load-bearing subset follows. **All [verified] unless labeled.**
+
+**Corner-loading primary literature — the §14 concept's own anchors (upgrades the §14.2 image-source physics from [inferred] to a cited basis):**
+
+- Klipsch, "A Low Frequency Horn of Small Dimensions", *JASA* 13(2):137–144, 1941, doi:10.1121/1.1916155.
+- Klipsch, "Improved Low Frequency Horn", *JASA* 14(3):179–182, 1943, doi:10.1121/1.1916216.
+- Klipsch, "Corner Speaker Placement", *JAES* 7(3):106–114, 1959 (elib=565).
+- Korn, "A Corner Loudspeaker with Coaxial Acoustical Line", *JAES* 5(3):138–141, 1957 (elib=263).
+- **Allison, "The Influence of Room Boundaries on Loudspeaker Power Output", *JAES* 22(5):314–320, June 1974 (elib=2760) — the standard primary citation for the half/quarter/eighth-space boundary-gain physics** (supersedes §14.2's [inferred] label).
+- Artarski, Valtchev, Dimitrov, Handzhiev, "Multiple Low-Frequency Corner Folded Horn Designs", AES 134th Convention, paper 8848, May 2013 (elib=16749) — modern corner-horn work.
+
+**Negative result, stated explicitly:** no dedicated AES/JASA paper on quarter-/eighth-space *directivity of waveguides* exists in the reachable records — searches on "corner" + "waveguide"/"quarter space" return nothing on point. The corner-concept typology space is a genuine literature gap filled only by secondary/practice sources; cite Allison 1974 for the physics and do not cite an adjacent paper for directivity claims. (Supports the R9 novelty rationale.)
+
+**CD lineage pinned:** Keele's 1975 paper is **"What's So Sacred About Exponential Horns?"**, preprint 1038, 51st AES Convention, May 1975 (elib=2394; no DOI for pre-DOI preprints) — not titled "constant-directivity horn"; the CD-horn content claim rests on the paper plus the patent (US 4,071,112, "Horn loudspeaker", Keele/EV — issued 31 Jan 1978 per Wikipedia; **number secondary-sourced, exact dates [open]** — our §16.1 table's "1975-09-30" reading is unconfirmed). **"Optimum Horn Mouth Size" is 1973, not 1977**: preprint 933, 46th AES Convention, Sept 10–13, 1973, verified from the PDF's own cover page (the audioroundtable.com copy); e-lib elib=1693 (records it as August 1973; discrepancy noted, do not propagate either as gospel).
+
+**CBT pinned (answers §16.1's [open]):** "The Application of Broadband Constant Beamwidth Transducer (CBT) Theory to Loudspeaker Arrays", preprint 5216, 109th AES Convention, Aug 2000 (elib=9122); "Practical Implementation of Constant Beamwidth Transducer (CBT) Loudspeaker Circular-Arc Line Arrays", preprint 5863, 115th AES Convention, 2003 (elib=12369); "Full-Sphere Sound Field of CBT Loudspeaker Line Arrays", *JAES* 51(7):611–624, July 2003; Button & Keele, "Ground-Plane CBT Loudspeaker Circular-Arc Line Arrays", paper 6594, 119th AES Convention, Oct 2005 (elib=13350 — note the boundary/ground-plane member of the CBT family, adjacent to our corner question); US 8,170,223 B2, "Constant-beamwidth loudspeaker array", Keele/Harman, filed 2003-05-27, granted 2012 (Google Patents verified).
+
+**Geddes/OSWG pinned (upgrades §16.1's OSWG row from [reported] to cited):** "Acoustic Waveguide Theory", *JAES* 37(7/8):554–569, 1989; "Acoustic Waveguide Theory Revisited", *JAES* 41(6):452–461, 1993; Bauman, Adamson & Geddes, "Acoustic Waveguides: In Practice", *JAES* 41(6):462–470, 1993; "Computer Simulation of Horn-Loaded Compression Drivers", *JAES* 35:556–566, 1987 (elib=5190, partially verified); Geddes & Lee distortion/perception papers (5890/115th 2003 elib=12464; "Audibility of Linear Distortion…", paper 6888, 121st, Oct 2006, elib=13722 — GedLee's site cites this for HOM audibility); Geddes, Lee & Magalotti, "Subjective Testing of Compression Drivers", *JAES* 53(12):1152–1157, 2005; book *Audio Transducers* (GedLee LLC, ~2002 — year/ISBN unverified); patents US 2005/0008181 A1 (filed 2003-07-11) and US 2007/0102232 A1 (phase plug). **Terminology correction:** the patent's claim language names **elliptic-cylinder and prolate-spheroidal** contours; "oblate spheroidal waveguide" is community usage — keep manufacturers' terms generic in code/config per §13's discipline. **Do-not-cite:** no Geddes paper titled around "honkiness" exists — source the HOM case to the 1989/2002/2006 chain.
+
+**Mantaray pinned:** Henricksen & Ureda, "Blasphemy–The Manta-Ray Horns!", preprint 1288, 58th AES Convention, Oct 1977 (elib=3066); "The Manta-Ray Horns", *JAES* 26(9):629–634, Sept 1978 (elib=3249); patent US 4,187,926 (Altec, 1980 — number/date secondary-sourced; JASA patent-review doi:10.1121/1.384649); Ureda, "Directivity Phase Response of Horns", preprint 3593, 94th AES, Feb 1993 (elib=6571); "Analysis of Loudspeaker Line Arrays", *JAES* 52(5):467–495, 2004. **Do-not-cite:** Ureda's 1981 preprint 1793 ("horn antenna transfer functions") could not be verified in any reachable record — hold at [open].
+
+**Still open after this pass:** diyAudio practitioner threads (Cloudflare-blocked); CD patent dates at Google Patents; *Audio Transducers* ISBN/year; Ureda 1981 preprint.
+
+### 16.8 Consolidated implementation order (research + interop, owner-gated)
+
+1. **Owner Q&A** (§14.5): up-corner confirmation, room dims/listeners, full-band vs multi-way, "Centennial band" reading.
+2. **Route 1 — corner-loading delta A/B** in our own solver (quarter-symmetry vs freestanding, zero new code) — now anchored to Allison 1974 for the physics expectation.
+3. **BL-1 export + BL-2 cross-check** (existing PROPOSED plan, designed against the current BL 0.5.0): get our best designs into BL and third-solver-verified; then `export-speaker --fidelity pattern` → **`.blabsp` handoff** (Deploy verified ready to consume it per §15.7, with the rigid-ground caveat).
+4. **Route 2 — trihedral (`eighth-space`) fork feature**, with Allison 1974 as the published physics reference and §14.1/§16.7 as the corner-anchor set (R9 satisfied for the feature; any coined typology NAME still waits on a published reference).
+5. **Routes 3–5 (coverage-aware brief, asym targets, coverage-map view)** and the §16.4 absent-classes menu, per owner priorities; Pull-in adapters (§15.4) after BL-1/BL-2 numbers exist.
+6. Remaining [open] citations (§16.7) are doc-level debts, not blockers.
+
 ---
 
 hornlab-waveguide-mesher: https://github.com/m3gnus/hornlab-waveguide-mesher
