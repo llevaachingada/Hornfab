@@ -30,6 +30,7 @@ from hornlab_search.design.params.catalog import (
     catalog_json_bytes,
 )
 from hornlab_search.design.params.knobs_generators import GENERATOR_KNOBS
+from hornlab_search.design.params.knobs_native import NATIVE_KNOBS, NATIVE_TYPOLOGY_NOTES
 from hornlab_search.design.params.knobs_rows import (
     ROWS_KNOBS,
     ROWS_TYPOLOGY_NOTES,
@@ -162,11 +163,12 @@ def test_catalog_resolves_catalog_and_uncatalogued_configs():
 def test_metadata_validates():
     problems = validate_knob_docs(GENERATOR_KNOBS)
     problems += validate_knob_docs(ROWS_KNOBS)
+    problems += validate_knob_docs(NATIVE_KNOBS)
     assert not problems, "\n".join(problems)
 
 
 def test_summaries_are_short_and_placeholder_free():
-    for table in (GENERATOR_KNOBS, ROWS_KNOBS):
+    for table in (GENERATOR_KNOBS, ROWS_KNOBS, NATIVE_KNOBS):
         for name, doc in table.items():
             assert len(doc.summary) <= SUMMARY_LIMIT, f"{name}: summary too long"
             assert validate_knob_doc(doc) == [], f"{name}: invalid"
@@ -177,7 +179,7 @@ def test_summaries_are_short_and_placeholder_free():
 
 
 def test_code_refs_resolve():
-    refs = {doc.code_ref for table in (GENERATOR_KNOBS, ROWS_KNOBS)
+    refs = {doc.code_ref for table in (GENERATOR_KNOBS, ROWS_KNOBS, NATIVE_KNOBS)
             for doc in table.values() if doc.code_ref}
     catalog = build_catalog(ROOT)
     for typ in catalog["typologies"].values():
@@ -190,7 +192,7 @@ def test_code_refs_resolve():
 
 def test_doc_refs_exist_and_headings_are_present():
     refs: set[tuple[str, str]] = set()
-    for table in (GENERATOR_KNOBS, ROWS_KNOBS):
+    for table in (GENERATOR_KNOBS, ROWS_KNOBS, NATIVE_KNOBS):
         for doc in table.values():
             if doc.doc_ref and doc.doc_ref[0]:
                 refs.add(tuple(doc.doc_ref))
@@ -372,6 +374,154 @@ def test_rows_typology_notes_are_wired_and_typed():
     assert "negative" in signed["summary"].lower()
     lecl = {k["knob"]: k for k in rows["lecleach_rollback"]["knobs"]}["g_stop_deg"]
     assert "fourcade" in lecl["summary"].lower(), "the verified-march override did not apply"
+
+
+# ------------------------------------------------------------------ native domain
+
+
+def _native_typologies(catalog: dict) -> dict[str, dict]:
+    return {name: typ for name, typ in catalog["typologies"].items()
+            if typ["kind"] == "native"}
+
+
+def test_native_domain_is_claimed_with_the_final_tuple():
+    assert tuple(DOMAINS) == ("generators", "rows", "native")
+    assert tuple(domains_covered()) == ("generators", "rows", "native")
+
+
+def test_every_family_key_has_a_native_doc_or_is_an_explicit_non_knob():
+    for family, table in families.FAMILY_KEYS.items():
+        for key, spec in table.items():
+            doc = NATIVE_KNOBS.get(key)
+            assert doc is not None, f"{family}.{key}: no NATIVE_KNOBS entry"
+            if spec.kind in (dict, list):
+                assert "not_a_knob" in doc.flags or not doc.flags, (
+                    f"{family}.{key}: container key should be flagged or neutral")
+    assert len(NATIVE_KNOBS) == len(set().union(*(
+        set(t) for t in families.FAMILY_KEYS.values())))
+
+
+def test_every_native_config_seed_and_bound_key_resolves():
+    catalog = build_catalog(ROOT)
+    natives = _native_typologies(catalog)
+    assert len(natives) == 9, f"expected the 9 native configs, got {sorted(natives)}"
+    for name, typ in natives.items():
+        data = yaml.safe_load((ROOT / typ["config_path"]).read_text(encoding="utf-8"))
+        keys = set(data.get("seed_params") or {}) | set(data.get("bounds") or {})
+        for key in sorted(keys):
+            root = str(key).split(".", 1)[0]
+            if root not in NATIVE_KNOBS:
+                assert key in typ["non_native_keys"], (
+                    f"{name}: {key!r} is not a native doc and not recorded as non-native")
+                continue
+            assert key in typ["knob_names"], (
+                f"{name}: native key {key!r} resolves to {root!r} but was not emitted")
+
+
+def test_native_docs_author_no_default_or_hard_numbers():
+    for name, doc in NATIVE_KNOBS.items():
+        assert doc.default is None, f"{name}: NATIVE_KNOBS must not author a default"
+        assert doc.hard_lo is None and doc.hard_hi is None, (
+            f"{name}: NATIVE_KNOBS must not author a hard limit")
+
+
+def test_native_emitted_defaults_equal_the_live_yaml_seed():
+    catalog = build_catalog(ROOT)
+    for name, typ in _native_typologies(catalog).items():
+        data = yaml.safe_load((ROOT / typ["config_path"]).read_text(encoding="utf-8"))
+        seed = data.get("seed_params") or {}
+        bounds = data.get("bounds") or {}
+        for knob in typ["knobs"]:
+            key = knob["knob"]
+            value = knob["default"]
+            if value is None:
+                continue
+            if knob["default_source"]["key"].startswith("seed_params."):
+                expected = families.param_get(typ["family"], seed, key)
+                assert value == expected, (
+                    f"{name}.{key}: default {value!r} != live seed {expected!r}")
+            else:
+                bound = bounds[key]
+                assert bound["lo"] == bound["hi"] == value, (
+                    f"{name}.{key}: pinned default {value!r} != bound {bound!r}")
+
+
+def test_native_hard_limits_and_choices_track_family_keyspec():
+    catalog = build_catalog(ROOT)
+    for name, typ in _native_typologies(catalog).items():
+        table = families.FAMILY_KEYS[typ["family"]]
+        for knob in typ["knobs"]:
+            root = knob["base_knob"]
+            spec = table.get(root)
+            hard = knob["hard"]
+            if spec is None:
+                assert hard["lo"] is None and hard["hi"] is None
+                assert hard["choices"] is None
+                continue
+            if spec.kind in (float, int):
+                assert (hard["lo"], hard["hi"]) == (spec.lo, spec.hi), (
+                    f"{name}.{knob['knob']}: hard {hard['lo'], hard['hi']} != "
+                    f"{spec.lo, spec.hi}")
+                if spec.kind is int:
+                    pass
+            assert hard["choices"] == (
+                list(spec.choices) if spec.choices is not None else None), (
+                f"{name}.{knob['knob']}: choices {hard['choices']!r} != {spec.choices!r}")
+
+
+def test_native_choice_keys_read_their_choices_from_keyspec():
+    from hornlab_search.design.params.catalog import _native_hard
+
+    seen = 0
+    for family, table in families.FAMILY_KEYS.items():
+        for key, spec in table.items():
+            if spec.choices is None:
+                continue
+            seen += 1
+            hard = _native_hard(key, family)
+            assert hard["choices"] == list(spec.choices), (
+                f"{family}.{key}: choices {hard['choices']!r} != {spec.choices!r}")
+    assert seen >= 3, "expected mode/termination/inflectionPolicy choice keys"
+
+
+def test_native_exponent_surfaces_doc_mismatch_end_to_end():
+    assert "doc_mismatch" in NATIVE_KNOBS["exponent"].flags
+    catalog = build_catalog(ROOT)
+    seen = 0
+    for name, typ in _native_typologies(catalog).items():
+        for knob in typ["knobs"]:
+            if knob["knob"] == "exponent":
+                seen += 1
+                assert "doc_mismatch" in knob["flags"], (
+                    f"{name}: exponent lost the doc_mismatch flag")
+    assert seen >= 3, "expected exponent in the OSSE, R-OSSE and FREEFORM configs"
+
+
+def test_all_native_typologies_are_documented_and_non_empty_except_multicell():
+    catalog = build_catalog(ROOT)
+    natives = _native_typologies(catalog)
+    for name, typ in natives.items():
+        assert typ["documented"] is True, f"{name}: native domain is claimed"
+        if name == "multicell_3x3":
+            assert typ["knobs"] == [], "CAD-only config has no native family keys"
+            assert typ["non_native_keys"] == ["cad"]
+            assert typ["empty_reason"] and "cad" in typ["empty_reason"]
+        else:
+            assert typ["knobs"], f"{name}: no native knobs emitted"
+
+
+def test_native_typology_notes_are_wired():
+    catalog = build_catalog(ROOT)
+    natives = _native_typologies(catalog)
+    for name in NATIVE_TYPOLOGY_NOTES:
+        assert name in natives, f"note for a non-native typology: {name}"
+    osse = {k["knob"]: k for k in natives["osse_baseline"]["knobs"]}
+    assert "half-angle" in osse["a_deg"]["summary"].lower()
+    assert "termination" in osse["s"]["summary"].lower()
+    sculpt = {k["knob"]: k for k in natives["freeform_sculpt"]["knobs"]}
+    assert "superellipse station" in sculpt["exponent"]["summary"].lower()
+    icw = {k["knob"]: k for k in natives["icw_rollback"]["knobs"]}
+    assert "nested" in icw["icw_seed.tmax"]["summary"].lower()
 
 
 # ------------------------------------------------------------------ public API never raises

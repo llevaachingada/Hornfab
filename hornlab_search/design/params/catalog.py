@@ -22,9 +22,9 @@ from pathlib import Path
 
 import yaml
 
-#: Domains whose knob prose is authored. The native lane appends "native" later.
+#: Domains whose knob prose is authored.
 #: The drift test reads this tuple, so it is the single switch for domain coverage.
-DOMAINS: tuple[str, ...] = ("generators", "rows")
+DOMAINS: tuple[str, ...] = ("generators", "rows", "native")
 
 CATALOG_VERSION = 1
 
@@ -115,8 +115,17 @@ def _generator_types(gen: dict) -> list[str]:
     return sorted(set(types))
 
 
-def _context_id(kind: str, types: list[str], base: str, doc) -> str:
+def _context_id(kind: str, types: list[str], base: str, doc,
+                family: str = "") -> str:
     available = doc.contexts
+    if kind == "native":
+        specific = {"OSSE": "native:osse", "R-OSSE": "native:rosse",
+                    "ICW": "native:icw"}.get(family)
+        if specific is not None and specific in available:
+            return specific
+        if "native" in available:
+            return "native"
+        return sorted(available)[0] if available else "native"
     if kind != "generator":
         for candidate in (kind, "native", "generator"):
             if candidate in available:
@@ -230,9 +239,74 @@ def _rows_hard(base: str) -> dict:
             "section": None, "source": source, "note": note}
 
 
-def _hard_for(base: str, kind: str = "generator") -> dict:
+def _native_root(key: str) -> str:
+    """Root of a nested native config path (``profileH.points.1.1`` -> ``profileH``)."""
+    return str(key).split(".", 1)[0]
+
+
+def _native_non_native_keys(seed: dict, bounds: dict) -> list[str]:
+    """Config keys that are not ``families.FAMILY_KEYS`` knobs at all (the CAD recipe)."""
+    from .knobs_native import NATIVE_KNOBS
+
+    return sorted(k for k in set(seed) | set(bounds)
+                  if _native_root(k) not in NATIVE_KNOBS)
+
+
+def _native_default(key: str, seed: dict, bounds: dict, config_rel: str,
+                    family: str) -> tuple[object, dict | None]:
+    """Read the per-typology default from the YAML seed (nested paths included).
+
+    ``families.param_get`` is the same resolver the validator uses, so a FREEFORM alias
+    such as bare ``exponent`` reads the superellipse station's actual seed value. When the
+    seed has no value, a PINNED bound (lo == hi) is the only honest fallback.
+    """
+    from ..families import param_get
+
+    try:
+        value = param_get(family, seed, key)
+    except Exception:  # noqa: BLE001 - a missing path is simply an absent default
+        value = None
+    if value is not None:
+        return value, {"file": config_rel, "key": f"seed_params.{key}"}
+    bound = bounds.get(key)
+    if isinstance(bound, dict) and bound.get("lo") is not None \
+            and bound.get("lo") == bound.get("hi"):
+        return bound["lo"], {"file": config_rel, "key": f"bounds.{key}.lo"}
+    return None, None
+
+
+def _native_hard(root: str, family: str) -> dict:
+    """Read the family KeySpec for a native key.
+
+    Top-level float/int specs expose ``lo``/``hi``; choice strings expose ``choices``.
+    A container key (dict/list) has no numeric schema clamp, so its hard values stay
+    ``None`` with no invented note.
+    """
+    from ..families import FAMILY_KEYS
+
+    spec = FAMILY_KEYS.get(family, {}).get(root)
+    if spec is None:
+        return {"lo": None, "hi": None, "kind": None, "choices": None,
+                "section": None, "source": None, "note": None}
+    source = {"file": "hornlab_search/design/families.py",
+              "key": f"FAMILY_KEYS.{family}.{root}"}
+    numeric = spec.kind in (float, int)
+    return {
+        "lo": spec.lo if numeric else None,
+        "hi": spec.hi if numeric else None,
+        "kind": spec.kind.__name__,
+        "choices": list(spec.choices) if spec.choices is not None else None,
+        "section": spec.section,
+        "source": source,
+        "note": None,
+    }
+
+
+def _hard_for(base: str, kind: str = "generator", family: str = "") -> dict:
     if kind == "rows":
         return _rows_hard(base)
+    if kind == "native":
+        return _native_hard(base, family)
     from .knobs_generators import family_key_spec
 
     spec = family_key_spec(base)
@@ -256,7 +330,8 @@ def _hard_for(base: str, kind: str = "generator") -> dict:
     return hard
 
 
-def _placeholder(name: str, base: str, context_id: str, kind: str = "generator") -> dict:
+def _placeholder(name: str, base: str, context_id: str, kind: str = "generator",
+                 family: str = "") -> dict:
     return {
         "knob": name,
         "base_knob": base,
@@ -279,14 +354,16 @@ def _placeholder(name: str, base: str, context_id: str, kind: str = "generator")
         "default_source": None,
         "search": None,
         "bounds_source": None,
-        "hard": _hard_for(base, kind),
+        "hard": _hard_for(base, kind, family),
         "contexts": [],
     }
 
 
 def _default_for(name: str, base: str, seed: dict, bounds: dict, gen: dict,
-                 config_rel: str, doc, kind: str = "generator"
-                 ) -> tuple[object, dict | None]:
+                 config_rel: str, doc, kind: str = "generator",
+                 family: str = "") -> tuple[object, dict | None]:
+    if kind == "native":
+        return _native_default(name, seed, bounds, config_rel, family)
     if name in seed:
         return seed[name], {"file": config_rel, "key": f"seed_params.{name}"}
     blocks = _ROWS_BLOCK_KNOBS if kind == "rows" else _BLOCK_KNOBS
@@ -307,12 +384,21 @@ def _default_for(name: str, base: str, seed: dict, bounds: dict, gen: dict,
 
 
 def _knob_entries(name: str, *, seed: dict, bounds: dict, gen: dict, config_rel: str,
-                  kinds: list[str], kind: str, documented: bool) -> list[dict]:
+                  kinds: list[str], kind: str, documented: bool,
+                  family: str = "") -> list[dict]:
     if not documented:
         return []
 
     notes: dict = {}
-    if kind == "rows":
+    if kind == "native":
+        from .knobs_native import NATIVE_KNOBS, NATIVE_TYPOLOGY_NOTES
+
+        table = NATIVE_KNOBS
+        notes = NATIVE_TYPOLOGY_NOTES.get(name, {})
+        block_spec = ()
+        names = {k for k in set(seed) | set(bounds)
+                 if _native_root(k) in NATIVE_KNOBS}
+    elif kind == "rows":
         from .knobs_rows import ROWS_KNOBS, ROWS_TYPOLOGY_NOTES, split_rows_knob
 
         table = ROWS_KNOBS
@@ -339,15 +425,22 @@ def _knob_entries(name: str, *, seed: dict, bounds: dict, gen: dict, config_rel:
 
     out: list[dict] = []
     for knob in sorted(names):
-        base, prefix = splitter(knob)
+        if kind == "native":
+            base, prefix = _native_root(knob), ""
+        else:
+            base, prefix = splitter(knob)
         plane, role = _plane_role(prefix)
         doc = table.get(base)
         if doc is None:
-            out.append(_placeholder(knob, base, _KIND_DOMAIN.get(kind, kind), kind))
+            out.append(_placeholder(knob, base, _KIND_DOMAIN.get(kind, kind), kind, family))
             continue
-        context_id = _context_id(kind, kinds, base, doc)
+        context_id = _context_id(kind, kinds, base, doc, family)
         merged = _merged(doc, context_id)
-        note = notes.get(base)
+        if kind == "native":
+            leaf = str(knob).rsplit(".", 1)[-1]
+            note = notes.get(knob) or notes.get(leaf) or notes.get(base)
+        else:
+            note = notes.get(base)
         if note is not None:
             # Per-typology meaning (ROWS_TYPOLOGY_NOTES) wins over the shared rows text.
             merged = dict(merged)
@@ -359,6 +452,10 @@ def _knob_entries(name: str, *, seed: dict, bounds: dict, gen: dict, config_rel:
             if note.physical:
                 merged["physical"] = note.physical
             merged["flags"] = sorted(set(merged["flags"]) | set(note.flags))
+        if kind == "native" and "." in str(knob):
+            # The container doc may be flagged not_a_knob; a nested PATH is a real
+            # search dimension, so it must not inherit that container-only flag.
+            merged["flags"] = [f for f in merged["flags"] if f != "not_a_knob"]
         label = merged["label"]
         if plane:
             lowered = (f"{label[:1].lower()}{label[1:]}"
@@ -366,8 +463,10 @@ def _knob_entries(name: str, *, seed: dict, bounds: dict, gen: dict, config_rel:
             label = f"{plane}-plane {lowered}"
         if role:
             label = f"{label} ({role})"
+        if kind == "native" and "." in str(knob):
+            label = f"{label} [{knob}]"
         default, default_source = _default_for(
-            knob, base, seed, bounds, gen, config_rel, doc, kind)
+            knob, base, seed, bounds, gen, config_rel, doc, kind, family)
         bound = bounds.get(knob)
         search = None
         bounds_source = None
@@ -400,8 +499,9 @@ def _knob_entries(name: str, *, seed: dict, bounds: dict, gen: dict, config_rel:
             "default_source": default_source,
             "search": search,
             "bounds_source": bounds_source,
-            "hard": _hard_for(base, kind),
-            "contexts": sorted(set(doc.contexts) | set(notes)),
+            "hard": _hard_for(base, kind, family),
+            "contexts": sorted(doc.contexts if kind == "native"
+                               else set(doc.contexts) | set(notes)),
         })
     return out
 
@@ -482,6 +582,7 @@ def build_catalog(root: Path) -> dict:
             kinds=types,
             kind=kind,
             documented=documented,
+            family=family,
         )
         # Raw bound provenance for EVERY knob in the config, authored domain or not.
         # Later lanes need the file/key even before they write prose; nothing is invented
@@ -499,6 +600,13 @@ def build_catalog(root: Path) -> dict:
                 "search": bool(bound.get("search", True)),
                 "log": bool(bound.get("log", False)),
             }
+        non_native = (_native_non_native_keys(seed, bounds)
+                      if kind == "native" else [])
+        empty_reason = None
+        if kind == "native" and not knobs:
+            empty_reason = ("config carries no families.FAMILY_KEYS knobs"
+                            + (f" (non-native key(s): {', '.join(non_native)})"
+                               if non_native else ""))
         typologies[name] = {
             "name": name,
             "group": group,
@@ -515,6 +623,8 @@ def build_catalog(root: Path) -> dict:
             "bounds_index": bounds_index,
             "brief_tied": brief_tied,
             "driver_exit_mm": driver_exit,
+            "non_native_keys": non_native,
+            "empty_reason": empty_reason,
         }
 
     return {
@@ -679,7 +789,7 @@ def render_typologies_markdown(catalog: dict) -> str:
             lines.append("")
         else:
             lines.extend([
-                "No knobs are authored for this typology in the current domains "
+                "No knob prose applies to this typology in the current domains "
                 f"({', '.join(catalog['domains_covered'])}). It is resolved, not fabricated.",
                 "",
             ])
