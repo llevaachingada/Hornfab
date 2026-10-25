@@ -135,9 +135,45 @@ function render2DFallback(container, profile, seedProfile) {
   container.appendChild(lbl);
 }
 
+/** Defensive label for one mounting value: finite numbers as-is, non-empty strings trimmed, anything
+ *  else null (the caption then omits that token rather than printing "undefined"). */
+function mountNum(v) {
+  if (typeof v === "number" && isFinite(v)) return String(v);
+  if (typeof v === "string" && v.trim() !== "") return v.trim();
+  return null;
+}
+
+/** Caption body for `mesh_meta.mounting`: prefer the brief's `normalized` block (depth_mm, edge_mm,
+ *  margins_mm {l,t,r,b}), else the mesher's own `mesher` block (depth_mm, edge_mm, space_*_mm).
+ *  Returns null when neither block carries any of those values. */
+function mountingDetail(mounting) {
+  const norm = mounting && typeof mounting.normalized === "object" && mounting.normalized
+    ? mounting.normalized : null;
+  const mesher = mounting && typeof mounting.mesher === "object" && mounting.mesher
+    ? mounting.mesher : null;
+  for (const src of [norm, mesher]) {
+    if (!src) continue;
+    const parts = [];
+    const depth = mountNum(src.depth_mm), edge = mountNum(src.edge_mm);
+    if (depth != null) parts.push(`depth ${depth} mm`);
+    if (edge != null) parts.push(`edge ${edge} mm`);
+    const mg = src === norm
+      ? (src.margins_mm && typeof src.margins_mm === "object" ? src.margins_mm : null)
+      : { l: src.space_l_mm, t: src.space_t_mm, r: src.space_r_mm, b: src.space_b_mm };
+    const mt = [];
+    if (mg) for (const k of ["l", "t", "r", "b"]) {
+      const val = mountNum(mg[k]);
+      if (val != null) mt.push(`${k} ${val}`);
+    }
+    if (mt.length) parts.push(`margins ${mt.join(" ")} mm`);
+    if (parts.length) return parts.join(" · ");
+  }
+  return null;
+}
+
 /**
  * Init the 3D view in `container`.
- * meshData: { quadrants, verts: [x,y,z,...], tris: [i,j,k,...] }
+ * meshData: { quadrants, verts: [x,y,z,...], tris: [i,j,k,...], mounting? }
  * profile (optional): best design profile for 2D fallback.
  */
 export async function init3d(container, meshData, profile, seedProfile, shadows = true) {
@@ -176,6 +212,28 @@ export async function init3d(container, meshData, profile, seedProfile, shadows 
   box.getSize(size);
   const maxDim = Math.max(size.x, size.y, size.z);
   if (!isFinite(maxDim) || maxDim <= 0) { render2DFallback(container, profile, seedProfile); return; }
+
+  // WP12 enclosure mounting: the dashed outline is deliberately "the solved mesh's own extent" —
+  // sized exactly from the mirrored mesh's bounding box above, never invented enclosure geometry.
+  // Absent `mounting` (every free run) renders nothing, so free-run 3D stays bit-identical.
+  const mounting = (meshData || {}).mounting;
+  const hasMounting = !!mounting && typeof mounting === "object" && Object.keys(mounting).length > 0;
+  let mountEdges = null, mountLineMat = null;
+  if (hasMounting) {
+    const rule = cs.getPropertyValue("--rule").trim();
+    const mountBox = new THREE.BoxGeometry(size.x, size.y, size.z);
+    mountEdges = new THREE.EdgesGeometry(mountBox);
+    mountBox.dispose();
+    mountLineMat = new THREE.LineDashedMaterial({
+      color: rule ? new THREE.Color(rule) : 0x8fa3ad,
+      dashSize: 0.02 * maxDim, gapSize: 0.012 * maxDim,
+      transparent: true, opacity: 0.9,
+    });
+    const mountOutline = new THREE.LineSegments(mountEdges, mountLineMat);
+    mountOutline.position.copy(center);
+    mountOutline.computeLineDistances();
+    scene.add(mountOutline);
+  }
 
   // Solid mesh — light neutral grey (form over decoration), opaque.
   // polygonOffset nudges the surface a hair back so the near-white wireframe ridgelines at
@@ -239,6 +297,22 @@ export async function init3d(container, meshData, profile, seedProfile, shadows 
   if (shadows) { renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; }
   container.appendChild(renderer.domElement);
 
+  // Enclosure caption, OVER the canvas (both host containers are fixed-height with
+  // overflow:hidden — #inline-3d height:300px, #view3d-wrap aspect-ratio — so a block-level
+  // caption appended after the canvas would be clipped): a themed overlay chip in the canvas
+  // corner, pointer-events:none so orbit controls stay live. It joins the container's child
+  // list (route()'s disposal sweep removes the whole container) and carries no data-v3d marker.
+  if (hasMounting) {
+    const cap = document.createElement("div");
+    cap.style.cssText = "position:absolute;left:8px;bottom:6px;max-width:calc(100% - 16px);" +
+      "padding:2px 8px;font-size:0.8rem;border-radius:4px;pointer-events:none;" +
+      "color:var(--ink,#222);background:var(--surface,#fff);border:1px solid var(--rule,#ccc);opacity:0.92";
+    const detail = mountingDetail(mounting);
+    cap.textContent = "enclosure outline = the solved mesh's extent — " +
+      (detail || "enclosure-mounted (mesh_meta.mounting)");
+    container.appendChild(cap);
+  }
+
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.target.copy(center);
   controls.update();
@@ -269,6 +343,8 @@ export async function init3d(container, meshData, profile, seedProfile, shadows 
     renderer.dispose();
     geo.dispose(); mat.dispose();
     wireGeo.dispose(); wireMat.dispose();
+    if (mountEdges) mountEdges.dispose();
+    if (mountLineMat) mountLineMat.dispose();
     hemi.dispose(); key.dispose(); fillL.dispose(); rim.dispose();
     if (groundGeo) groundGeo.dispose();
     if (groundMat) groundMat.dispose();

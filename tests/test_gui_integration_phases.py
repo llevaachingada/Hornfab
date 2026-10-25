@@ -871,3 +871,81 @@ def test_stop_external_refuses_its_own_pid(tmp_path):
     lk.write_text(json.dumps({"pid": os.getpid(), "user": "gui", "command": "gui", "start_time": "t"}))
     with pytest.raises(J.JobError, match="own process"):
         jm.stop_external()
+
+
+# ── WP12/S1a GUI passthrough: enclosure mounting + feasibility + campaign skip reason ─────────
+# All three are committed-block passthroughs: the GUI reader forwards what the writers recorded and
+# invents nothing. The views lane renders them generically; these pin the reader contract.
+
+MOUNT_RID = "20261025T000010Z-screen-aaa999"      # mesh_meta.json carries an enclosure mounting
+FEAS_RID = "20261025T000011Z-screen-bbb000"       # config.yaml carries an S1a feasibility block
+CAMP_RID = "campaign_20261025T000000Z"            # the campaign entry below (skipped, axisymmetric)
+
+MOUNTING = {
+    "mesher": {"depth_mm": 250.0, "edge_mm": 18.0, "plan_type": 1,
+               "space_l_mm": 25.0, "space_t_mm": 25.0, "space_r_mm": 25.0, "space_b_mm": 25.0},
+    "normalized": {"type": "enclosure", "depth_mm": 250.0, "edge_mm": 18.0,
+                   "margins_mm": {"l": 25.0, "t": 25.0, "r": 25.0, "b": 25.0},
+                   "plan": "rounded_rectangle"},
+}
+FEASIBILITY = {
+    "rule": "k_law", "f0_hz": 1000.0,
+    "required_mouth_w_mm": 188.0, "required_mouth_h_mm": 188.0,
+    "envelope_mouth_w_mm": 210.0, "envelope_mouth_h_mm": 210.0,
+    "held_coverage_w_deg": None, "held_coverage_v_deg": None,
+    "feasible_w": True, "feasible_v": True,
+    "screen_freqs_below_f0": 0, "screen_freqs_total": 12,
+    "verify_freqs_below_f0": 0, "verify_freqs_total": 18,
+    "derivation": [{"knob": "rm_mm", "derived_mm": 6.35, "applied": 6.0,
+                    "clamped_to_bound": True, "note": "envelope bound"}],
+}
+
+
+def test_mesh_surface_carries_the_wp12_mounting_block(repo):
+    run = _write_run(repo / "runs", MOUNT_RID, with_step=False)
+    (run / "designs" / HASH / "mesh.msh").write_text(_mesh_text())
+    _write_mesh_meta(run, HASH, {"mounting": MOUNTING})
+    m = D.mesh_surface(repo / "runs", MOUNT_RID, HASH)
+    assert m["mounting"] == MOUNTING                       # both sub-objects, as written
+    assert m["mounting"]["normalized"]["margins_mm"]["b"] == 25.0
+    json.dumps(m, allow_nan=False)
+
+
+def test_mesh_surface_omits_mounting_when_the_meta_has_none(repo):
+    run = _write_run(repo / "runs", MOUNT_RID, with_step=False)
+    (run / "designs" / HASH / "mesh.msh").write_text(_mesh_text())
+    _write_mesh_meta(run, HASH, {"result": {"quadrants": "1"}})
+    assert "mounting" not in D.mesh_surface(repo / "runs", MOUNT_RID, HASH)
+
+
+def test_run_detail_passes_the_s1a_feasibility_block_through(repo):
+    run = _write_run(repo / "runs", FEAS_RID, with_step=False)
+    cfg = yaml.safe_load((run / "config.yaml").read_text())
+    cfg["feasibility"] = FEASIBILITY
+    (run / "config.yaml").write_text(yaml.safe_dump(cfg))
+    d = D.run_detail(repo / "runs", FEAS_RID)
+    assert d["feasibility"] == FEASIBILITY                 # verbatim, derivation included
+    assert d["feasibility"]["derivation"][0]["clamped_to_bound"] is True
+    json.dumps(d, allow_nan=False)
+
+
+def test_run_detail_omits_absent_feasibility(repo):
+    assert "feasibility" not in D.run_detail(repo / "runs", RUN_B)
+
+
+def test_campaign_detail_keeps_the_axisymmetric_skip_reason_verbatim(repo):
+    """The S1a is_compatible refusal (hv entry under an axisymmetric brief) must reach the GUI
+    readable, not sanitized: the views render skip_reason generically."""
+    reason = ("brief symmetry 'axisymmetric' is incompatible with the 'hv' entry; "
+              "the hv sweep cannot satisfy an axisymmetric target")
+    camp = repo / "runs" / CAMP_RID
+    camp.mkdir(parents=True)
+    (camp / "campaign.json").write_text(json.dumps({
+        "tier": "compare", "brief_name": "axi_90x90_1in", "seeds": [1],
+        "entries": [{"name": "hv", "group": "g", "symmetry": "hv", "skipped": True,
+                     "skip_reason": reason, "jobs": []}]}))
+    c = D.campaign_detail(repo / "runs", CAMP_RID)
+    [e] = c["entries"]
+    assert e["skipped"] is True
+    assert e["skip_reason"] == reason
+    json.dumps(c, allow_nan=False)

@@ -1669,12 +1669,95 @@ function f11CaveatHtml(d) {
     `<span class="muted">(f11 = ${esc(fmtHz(f11))}, band_hi = ${esc(fmtHz(t.band_hi_hz))} — ${f11Path} vs target.band_hi_hz)</span></p>`;
 }
 
+/** The scoring-floor KPI (objective v3): rendered ONLY when target.f0_hz is present — v3's cov and
+ *  dislope terms score only f >= f0, everything below is masked. Nothing is rendered when the
+ *  brief carries no f0 (absence stays honest, no "–" placeholder). Pure; returns one KPI div or "". */
+function f0KpiHtml(t) {
+  const f0 = (t && t.f0_hz != null) ? Number(t.f0_hz) : null;
+  if (f0 == null || !isFinite(f0)) return "";
+  const title = "target.f0_hz — cov and dislope score only frequencies f ≥ f0; everything below is masked (objective v3)";
+  return `<div class="kpi" title="${esc(title)}"><span>Scoring floor ` +
+    `<small style="font-family:var(--f-mono);font-size:0.6rem;color:var(--muted)">f≥</small></span>` +
+    `<b>${esc(fmtHz(f0))}</b></div>`;
+}
+
+/** The compare mounting warn: a mounting difference is a different objective landscape (J improves
+ *  under the enclosure), so it is never rankable across. Rendered under the generic mixed banner
+ *  ONLY when mixed_keys carries "mounting". Pure; returns HTML or "". */
+function mountingRankWarnHtml(mixed) {
+  const keys = Array.isArray(mixed) ? mixed : [];
+  if (!keys.includes("mounting")) return "";
+  return `<p class="hint" role="note" style="margin:0"><span class="warn-text">mounting differs — ` +
+    `a different objective landscape (J improves under the enclosure); never rank across mountings.</span></p>`;
+}
+
+/** The brief-driven seed derivation card (S1a feasibility record, written to the run's config.yaml
+ *  under `feasibility`). Rendered ONLY when feasibility.derivation is a non-empty array; every
+ *  sub-key may be absent (never crashes, "–" for missing numbers), and a missing feasibility block
+ *  renders literally nothing. Pure; returns HTML or "". */
+function seedDerivationHtml(feas) {
+  if (!feas || typeof feas !== "object") return "";
+  const rows = (Array.isArray(feas.derivation) ? feas.derivation : []).filter(r => r && typeof r === "object");
+  if (!rows.length) return "";
+  const rule = (feas.rule != null && feas.rule !== "")
+    ? `<code>${esc(feas.rule)}</code>` : `<span class="muted">–</span>`;
+  const cap = `${rule} — derived values clamped into the brief envelope and each knob's existing ` +
+    `bounds; widening never automatic`;
+  // below-f0 counts: only the groups whose screen_/verify_ keys arrived; the mask sentence stays
+  const count = (n, total) =>
+    `${n != null ? esc(n) : "–"}/${total != null ? esc(total) : "–"}`;
+  const groups = [];
+  if (feas.screen_freqs_below_f0 != null || feas.screen_freqs_total != null)
+    groups.push(`screen: ${count(feas.screen_freqs_below_f0, feas.screen_freqs_total)} solved freqs below f0`);
+  if (feas.verify_freqs_below_f0 != null || feas.verify_freqs_total != null)
+    groups.push(`verify: ${count(feas.verify_freqs_below_f0, feas.verify_freqs_total)}`);
+  const counts = groups.length
+    ? `<p class="hint" style="margin:6px 0 0" role="note">${groups.join(" · ")} (masked under v3)</p>` : "";
+  const body = rows.map(r => {
+    const knob = (r.knob != null && r.knob !== "") ? esc(r.knob) : "–";
+    // derived: the number in mm; when it was not derived AND nothing was applied, the entry's own
+    // note explains why (never an invented number); otherwise "–"
+    let derived;
+    if (r.derived_mm != null && isFinite(Number(r.derived_mm)))
+      derived = esc(_trimNum(r.derived_mm) + " mm");
+    else if (r.applied == null && r.note)
+      derived = `<span class="muted">${esc(r.note)}</span>`;
+    else
+      derived = "–";
+    const applied = r.applied == null ? "–" : (r.applied ? "applied" : "not applied");
+    const flag = r.clamped_to_bound === true
+      ? `<span class="pill warn">clamped to bound</span>`
+      : `<span class="muted">seeded</span>`;
+    return `<tr><td>${knob}</td><td class="r">${derived}</td><td>${esc(applied)}</td><td>${flag}</td></tr>`;
+  }).join("");
+  return `<div class="fig seed-derivation-card"><h3>Seed derivation (brief-driven, clamp-only)</h3>
+      <div class="cap">${cap}</div>${counts}
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Knob</th><th class="r">Derived</th><th>Applied</th><th>Result</th></tr></thead>
+        <tbody>${body}</tbody>
+      </table></div></div>`;
+}
+
+/** The brief editor's objective-version options (v3 = the below-f0 scoring floor). Pure; returns
+ *  the three <option> tags, selected per the brief's own objective.version. */
+function objectiveVersionOptionsHtml(sel) {
+  return [
+    [1, "1 — default scoring"],
+    [2, "2 — opt-in updated scoring"],
+    [3, "3 — scoring floor f0 (cov + dislope score only f ≥ f0)"],
+  ].map(([v, label]) => `<option value="${v}" ${sel === v ? "selected" : ""}>${esc(label)}</option>`)
+    .join("\n                ");
+}
+
 // Exported pure helpers for offline node tests (tests/test_gui_brief_authoring.py) — the
 // view3d.js::mirrorMesh precedent; unused by the browser module graph.
 export { runProvenanceGroup, renderProvenanceBadges, restartScheduleHtml, stepChipHtml,
          stepInvByName, qdProvenanceCaption, f11CaveatHtml,
          stopAffordanceFor, stopRegionHtml, currentRunCard,
          toolbarPillFor, toolbarPillHtml, resumeArgsFor, resumeableSearchJob };
+
+
+export { f0KpiHtml, mountingRankWarnHtml, seedDerivationHtml, objectiveVersionOptionsHtml };
 
 
 async function viewRunDetail(id) {
@@ -1719,6 +1802,8 @@ async function viewRunDetail(id) {
       <div class="kpis" id="kpi-strip"></div>
 
       ${restartScheduleHtml(d, id)}
+
+      ${seedDerivationHtml(d.feasibility)}
 
       <!-- Actions -->
       <div class="btn-row">
@@ -1843,7 +1928,7 @@ async function viewRunDetail(id) {
   // KPI strip (designer-first order)
   const budgetPct = sum.budget ? Math.round(((sum.n || 0) / sum.budget) * 100) : 0;
   const overBudget = !!(sum.budget && sum.n > sum.budget);
-  document.getElementById("kpi-strip").innerHTML = [
+  const kpis = [
     [`${tip("bw", "Coverage target")}`, coverTarget],
     [`${tip("band", "Band")}`, bandStr],
     [`${tip("dims", "Horn size")} <small style="font-family:var(--f-mono);font-size:0.6rem;color:var(--muted)">W×H×D outer</small>`, dimsStr],
@@ -1855,7 +1940,9 @@ async function viewRunDetail(id) {
      overBudget ? "bad" : budgetPct >= 90 ? "warn" : ""],
     [`${tip("failures", "Failures")}`, `${nf} (${failPct}%)`],
     [`${tip("pinned", "At limit")}`, pinnedSens.length > 0 ? `<b class="bad">${pinnedSens.length}</b>` : pill("0", "good")],
-  ].map(([k, v, cls]) => `<div class="kpi"><span>${k}</span><b${cls ? ` class="${cls}"` : ""}>${v}</b></div>`).join("");
+  ].map(([k, v, cls]) => `<div class="kpi"><span>${k}</span><b${cls ? ` class="${cls}"` : ""}>${v}</b></div>`);
+  kpis.splice(2, 0, f0KpiHtml(t));          // right after Band; "" when the brief carries no f0
+  document.getElementById("kpi-strip").innerHTML = kpis.filter(Boolean).join("");
 
   const F = S.freqs || B.freqs || [];
   const band = [t.band_lo_hz || 700, t.band_hi_hz || 5500];
@@ -2256,7 +2343,7 @@ async function viewCompare() {
       : (dsA !== "balloon" || dsB !== "balloon")
         ? `<p class="hint" role="note" style="margin:0"><span class="warn-text">DI source unknown on at least one side — not comparable</span></p>`
         : "";
-    const provBlock = [badgeRows, mixedBanner, diNote].filter(Boolean).join("");
+    const provBlock = [badgeRows, mixedBanner, mountingRankWarnHtml(mixed), diNote].filter(Boolean).join("");
 
     res.innerHTML = `
       <div class="stack" style="gap:20px">
@@ -2506,10 +2593,9 @@ async function showBriefDetail(b, allBriefs, opts = {}) {
               <div class="hint">verify_only briefs are refused by search/run/campaign — only <code>verify --brief</code> uses them (the 12 kHz briefs work this way)</div></div>
             <label for="brf-obj">Objective version</label>
             <div><select id="brf-obj" style="${INPUT_CSS};width:220px">
-                <option value="1" ${objVer === 1 ? "selected" : ""}>1 — default scoring</option>
-                <option value="2" ${objVer === 2 ? "selected" : ""}>2 — opt-in updated scoring</option>
+                ${objectiveVersionOptionsHtml(objVer)}
               </select>
-              <div class="hint">Every shipped brief scores with version 1; version 2 is the opt-in update</div></div>
+              <div class="hint">Version 1 ships everywhere; 2 is the opt-in update; 3 additionally masks everything below the brief's scoring floor f0 (target.f0_hz)</div></div>
           </div>
         </fieldset>
 

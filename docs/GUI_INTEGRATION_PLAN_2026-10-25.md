@@ -384,3 +384,48 @@ respected: no WP12/13/P6 code is started by this plan; their hooks are specified
   hosted branch is an owner call, not asserted here.
 - The four docs files (`CONTINUITY.md`, `ISSUES.md`, `INDEX.md`, `CODE_MAP.md`) are modified by
   this pass itself and land in its commit set (companion updates, same-commit discipline).
+
+## 14. Addendum (2026-10-25, later; GUI lane — statuses re-grounded against the CURRENT tree @ `abcbebf`)
+
+This plan was written at M5; its §2 WP status table below is now STALE. Verified current status of
+the table's rows (function/anchor names, not line numbers, for anything GUI-side):
+
+- **WP1/2/3/4/5/7/8/9-10/11/15** — DONE as the table already records; unchanged.
+- **WP14 (multicell STEP) / WP16 (source plug) / WP17 (CUDA near-correction)** — DONE
+  (`94243df`, M5B; fork stack on `ourfork`). §3.7/§3.8 hooks landed as G1/G4 (STEP inventory chips,
+  `cad_route` badge, `source_profile_alpha` fingerprint pin). **§3.8's G-4 naming question is
+  RESOLVED by adoption (b):** the GUI contract keys on the real diagnostics — `source_profile` /
+  `source_profile_alpha` (`solve_group.source_profile_alpha` when α≠0); no `source_plug` field was
+  ever added and none is needed; the ISSUES naming item is closed by this record.
+- **WP12 (enclosure mounting)** — DONE (`27624e1`, M6, measured on two finalists; `-mnt-` cache
+  keys; `mesh_meta.json["mounting"]` + ndjson echo). WP13 OWNER-DEFERRED (remains in the work
+  order for whoever resumes it) — §3.9's `?backend=` filter stays the WP13-era planning hook.
+- **G1–G4** — LANDED (`cad8bcb` and earlier GUI passes; 107 GUI tests green @ `abcbebf`).
+- **G5 (bake-off, §3.12)** — still built ONLY on the P6b owner gate; unchanged (owner gate P6b).
+- **G6 (mounting, §3.11)** — now BUILDING (WP12's gate is met): badge verified live on the
+  enclosure WP12 runs (`solve_group.mounting` carries the normalized block; renders
+  "enclosure d=… mm" from the generic badge builder), enclosure-outline preview in `view3d.js`
+  (dashed outline = the solved mesh's own extent; `mesh_meta.mounting` values in the caption —
+  no invented geometry), and compare's mixed-key banner gains the explicit never-rank-across-
+  mountings line (J improves under the enclosure — a different objective landscape, owner-measured).
+- **§3.11's brief-editor mounting scaffolding**: the brief editor gained full schema-key controls
+  in the briefs pass (no mounting-specific block was needed; `save_user_brief` validates through
+  `load_brief` which accepts the landed `mounting` key). The G6 badge work did not need new editor
+  scaffolding — record the §3.11 scaffolding item as superseded by the full-schema editor.
+- **P8d (GUI hybridization, NEXT_DEV_PRIORITIES P8)** — owned by the backend lane per the owner's
+  split (`compose wizard surfacing` rides there); this GUI lane only verified that the current
+  Compose picker handles the landing configs honestly (uncatalogued configs = group
+  "Uncatalogued — single-config runs only"; catalog entries for the C4 catalog block are pending
+  backend-side; when they land, re-check the compose grouping labels cover the new groups).
+- **W6 (balloon view)** — LANDED (`26a1de1`); W7 (denser balloons) is backend-gated and the view
+  upgrades itself when data densifies — no GUI work pending.
+- **§3.10 (WP17)** — fingerprint covers near-correction via the WP14-era keys; the fork-side
+  discriminative-path diagnostic remains a WP17-lane condition, not GUI work.
+- **New-typology display (S1a `abcbebf`)** — run-detail knob tables render design knobs
+  generically; the new knob names (signed `g_x_amp`, the mouth-ripple `g_ripple_*`, lecleach_asym)
+  surface when their runs carry them; S1a's clamp record is surfaced via the run-detail
+  seed-derivation strip (from the `feasibility.derivation` block, incl. `clamped_to_bound` flags).
+- **Still owner-decided (small items)**: `examples/briefs/user/` stay untracked at this writing —
+  keep-with-sample vs `.gitignore` is the owner's call (runtime-created real briefs live there;
+  nothing staged, nothing ignored without the owner's word); the `z_min` input spinner-bound note
+  stays recorded as harmless.

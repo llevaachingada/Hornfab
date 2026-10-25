@@ -673,6 +673,158 @@ def test_provenance_helpers_behave_offline(tmp_path):
     assert "PROV OK" in r.stdout, f"node test failed:\nstdout: {r.stdout}\nstderr: {r.stderr}"
 
 
+# ── S1a objective v3 surfaces: scoring-floor KPI, mounting rank warn, seed derivation ──────
+# Same node/import-time-DOM-shim pattern as the provenance block above: the four new builders are
+# pure, exported, and executed for real. The view call sites are pinned by source checks (the views
+# themselves need the browser DOM), test_compose_view_is_wired style.
+
+_S1A_SCRIPT = r'''
+import { pathToFileURL } from "node:url";
+import assert from "node:assert/strict";
+
+const fake = () => ({ className: "", id: "", style: {}, dataset: {}, innerHTML: "", textContent: "",
+  setAttribute() {}, getAttribute: () => null, replaceWith() {}, appendChild() {},
+  addEventListener() {}, removeEventListener() {}, closest: () => null,
+  classList: { toggle() {}, add() {}, remove() {} }, querySelector: () => null, querySelectorAll: () => [] });
+globalThis.document = {
+  getElementById: () => fake(), createElement: () => fake(), createElementNS: () => fake(),
+  querySelector: () => null, querySelectorAll: () => [], addEventListener() {},
+  documentElement: { hasAttribute: () => true, setAttribute() {}, getAttribute: () => null, style: {} },
+  body: { appendChild() {} },
+};
+globalThis.window = { innerWidth: 1280, addEventListener() {}, scrollTo() {} };
+globalThis.matchMedia = () => ({ matches: true, addEventListener() {} });
+globalThis.MutationObserver = class { observe() {} };
+globalThis.location = { hash: "#/glossary" };
+globalThis.requestAnimationFrame = () => 0;
+globalThis.localStorage = { getItem: () => null, setItem() {}, removeItem() {} };
+globalThis.fetch = () => Promise.reject(new Error("offline shim"));
+
+const app = await import(pathToFileURL(process.argv[2]).href);
+const { objectiveVersionOptionsHtml, f0KpiHtml, mountingRankWarnHtml, seedDerivationHtml } = app;
+assert.equal(typeof objectiveVersionOptionsHtml, "function");
+assert.equal(typeof f0KpiHtml, "function");
+assert.equal(typeof mountingRankWarnHtml, "function");
+assert.equal(typeof seedDerivationHtml, "function");
+
+// 1. objective select: exactly three options, value 3 present, honest v3 description
+const opts1 = objectiveVersionOptionsHtml(1);
+assert.equal((opts1.match(/<option /g) || []).length, 3);
+for (const v of ["1", "2", "3"]) assert.ok(opts1.includes(`value="${v}"`), v);
+assert.ok(opts1.includes("scoring floor f0"), opts1);
+assert.ok(opts1.includes("cov + dislope score only f ≥ f0"), opts1);
+assert.match(opts1, /value="1" selected/);            // an existing v1 brief still selects 1
+assert.ok(!/value="3" selected/.test(opts1));
+const opts3 = objectiveVersionOptionsHtml(3);
+assert.match(opts3, /value="3" selected/);            // a v3 brief selects 3
+assert.ok(!/value="1" selected/.test(opts3));
+
+// 2. scoring-floor KPI: nothing without f0; the fmtHz floor + the honest title with f0
+assert.equal(f0KpiHtml({}), "");
+assert.equal(f0KpiHtml({ f0_hz: null }), "");
+assert.equal(f0KpiHtml(null), "");
+assert.equal(f0KpiHtml(undefined), "");
+const kpi = f0KpiHtml({ f0_hz: 1000 });
+assert.match(kpi, /Scoring floor/);
+assert.match(kpi, /f≥/);
+assert.ok(kpi.includes(">1.0 kHz<"), kpi);
+assert.ok(kpi.includes('title="target.f0_hz — cov and dislope score only frequencies f ≥ f0; everything below is masked (objective v3)"'), kpi);
+assert.ok(f0KpiHtml({ f0_hz: 500 }).includes(">500 Hz<"));
+assert.ok(!f0KpiHtml({ f0_hz: null }).includes("–"), "absent f0 must render nothing, never a dash KPI");
+
+// 3. compare mounting warn: only with the mounting key in mixed_keys, never a generic duplicate
+assert.equal(mountingRankWarnHtml([]), "");
+assert.equal(mountingRankWarnHtml(["backend", "freqs_hz"]), "");
+assert.equal(mountingRankWarnHtml(null), "");
+assert.equal(mountingRankWarnHtml(undefined), "");
+const mw = mountingRankWarnHtml(["backend", "mounting"]);
+assert.ok(mw.includes("mounting differs"), mw);
+assert.ok(mw.includes("never rank across mountings"), mw);
+assert.ok(mw.includes("J improves under the enclosure"), mw);
+assert.match(mw, /<span class="warn-text">/);
+
+// 4. seed derivation: no feasibility -> nothing; happy path -> knob + clamp pill + below-f0
+assert.equal(seedDerivationHtml(undefined), "");
+assert.equal(seedDerivationHtml(null), "");
+assert.equal(seedDerivationHtml({}), "");
+assert.equal(seedDerivationHtml({ rule: "k_law", derivation: [] }), "");
+assert.equal(seedDerivationHtml({ rule: "k_law", derivation: "nope" }), "");
+const FEAS = {
+  rule: "k_law_feasibility_v1",
+  screen_freqs_below_f0: 4, screen_freqs_total: 9,
+  verify_freqs_below_f0: 2, verify_freqs_total: 6,
+  derivation: [
+    { knob: "mouth_w_mm", derived_mm: 320.0, applied: true, clamped_to_bound: true, note: "envelope" },
+    { knob: "a_deg", derived_mm: 32.5, applied: true, clamped_to_bound: false, note: "coverage/2" },
+    { knob: "fc_hz", applied: null, clamped_to_bound: false, note: "no target fc" },
+    { knob: "g_ar_m", derived_mm: null, applied: false, clamped_to_bound: false, note: "" },
+  ],
+};
+const sd = seedDerivationHtml(FEAS);
+assert.match(sd, /Seed derivation \(brief-driven, clamp-only\)/);
+assert.ok(sd.includes("k_law_feasibility_v1"), sd);
+assert.ok(sd.includes("widening never automatic"), sd);
+assert.ok(sd.includes("screen: 4/9 solved freqs below f0"), sd);
+assert.ok(sd.includes("verify: 2/6"), sd);
+assert.ok(sd.includes("(masked under v3)"), sd);
+for (const knob of ["mouth_w_mm", "a_deg", "fc_hz", "g_ar_m"]) assert.ok(sd.includes(knob), knob);
+assert.ok(sd.includes("320 mm"), sd);                 // derived_mm through the house _trimNum
+assert.ok(sd.includes("32.5 mm"), sd);
+assert.ok(sd.includes("clamped to bound"), sd);       // the pill for the clamped knob
+assert.ok(sd.includes("seeded"), sd);                 // the plain cell for the unclamped knob
+assert.ok(sd.includes("no target fc"), sd);           // applied null + no number -> the note says why
+assert.match(sd, /<td class="r">–<\/td>/, sd);        // absent derived + applied false -> honest dash
+// partial record: only the screen counts arrived; no invented verify line, missing rule still renders
+const partial = seedDerivationHtml({ screen_freqs_below_f0: 1, screen_freqs_total: 3,
+  derivation: [{ knob: "depth_mm" }] });
+assert.ok(partial.includes("screen: 1/3"), partial);
+assert.ok(!partial.includes("verify:"), partial);
+assert.ok(partial.includes("depth_mm"), partial);
+assert.match(partial, /<span class="muted">–<\/span>/, partial);
+
+console.log("S1A OK");
+'''
+
+
+def test_s1a_helpers_behave_offline(tmp_path):
+    """Executes the objective-v3 surfaces' pure builders for real: the three-option objective select
+    (value 3 + honest floor-f0 description), the f0 KPI (nothing without f0, fmtHz floor with it),
+    the mounting rank warn (only on mixed_keys mounting), and the seed-derivation card (nothing
+    without feasibility.derivation, knob/derived/applied/clamp rows, below-f0 counts, honest
+    dashes/notes for the entries with no target)."""
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("node not installed")
+    script = tmp_path / "s1a_under_test.mjs"
+    script.write_text(_S1A_SCRIPT, encoding="utf-8")
+    r = subprocess.run([node, str(script), str(APPJS)],
+                       capture_output=True, text=True, cwd=str(tmp_path))
+    assert "S1A OK" in r.stdout, f"node test failed:\nstdout: {r.stdout}\nstderr: {r.stderr}"
+
+
+def test_s1a_views_are_wired():
+    """The committed views call the executed builders: the KPI lands right after Band, the mounting
+    warn under the generic banner, the seed card after the restart schedule and before Actions.
+    Also pins the single brief-editor mount (the Compose wizard inherits v3; no second select) and
+    the unchanged new-brief default objective_version 1."""
+    src = APPJS.read_text(encoding="utf-8")
+    # task 1: ONE editor select in app.js (the wizard mounts showBriefDetail, it does not copy it)
+    assert src.count('id="brf-obj"') == 1
+    assert "objectiveVersionOptionsHtml(objVer)" in src
+    assert "3 additionally masks everything below the brief's scoring floor f0 (target.f0_hz)" in src
+    assert 'objective: { version: +document.getElementById("brf-obj").value },' in src   # save path unchanged
+    # task 1: the new-brief draft default stays v1
+    assert 'symmetry: "hv", objective_version: 1, verify_only: false,' in src
+    assert "objective: { version: NEW_BRIEF_DEFAULTS.objective_version }," in src
+    # task 2: the pure KPI builder is spliced in right after Band (index 2), absent -> ""
+    assert "kpis.splice(2, 0, f0KpiHtml(t));" in src
+    assert 'kpis.filter(Boolean).join("")' in src
+    # task 3: the mounting warn rides with the generic banner (kept) and the DI guard
+    assert "[badgeRows, mixedBanner, mountingRankWarnHtml(mixed), diNote]" in src
+    # task 4: seed card between the restart schedule and the Actions row, fed d.feasibility
+    assert "${restartScheduleHtml(d, id)}\n\n      ${seedDerivationHtml(d.feasibility)}\n\n      <!-- Actions -->" in src
+
+
 # ── Inline 3D + 3D time-lapse (owner requests, views only) ───────────────────────────────
 # Run detail carries a lazy embedded 3D viewer for the best design (data-v3d tagged, disposed by
 # route()'s marker sweep); the evolution page gains a lazy "3D" mode playing the frames3d

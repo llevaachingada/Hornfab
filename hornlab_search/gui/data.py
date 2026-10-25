@@ -537,6 +537,12 @@ def run_detail(runs: Path, run_id: str) -> dict:
     # C-5 companion: the exact pycma log files the raw route can serve, for direct restart-card
     # file chips. Sorted run-relative paths; [] when the run has no cma/ tree.
     out["cma_files"] = _cma_files(d)
+    # S1a: the K-law feasibility preflight rides in the committed config.yaml (the merged cfg.raw
+    # ``search/rundir.py::write_config_snapshot`` dumps). Pure passthrough — a truthy dict is
+    # forwarded verbatim; an absent block stays absent (no shape invention).
+    feasibility = cfg.get("feasibility")
+    if isinstance(feasibility, dict) and feasibility:
+        out["feasibility"] = clean(feasibility)
     return out
 
 
@@ -678,9 +684,16 @@ def mesh_surface(runs: Path, run_id: str, h: str, max_tris: int = 60000) -> dict
     meta = _read_json(d / "designs" / h / "mesh_meta.json") or {}
     q = (meta.get("result") or {}).get("quadrants") or _row_quadrants(d, h) \
         or (_config(d).get("mesh") or {}).get("quadrants")
-    return {"quadrants": str(q or "1234"), "n_tris": int(len(tris)),
-            "verts": np.round(pts * 1000, 2).ravel().tolist(),
-            "tris": tris[:max_tris].ravel().tolist()}
+    out = {"quadrants": str(q or "1234"), "n_tris": int(len(tris)),
+           "verts": np.round(pts * 1000, 2).ravel().tolist(),
+           "tris": tris[:max_tris].ravel().tolist()}
+    # WP12: ``mesh_meta.json["mounting"]`` (the mesher + normalized blocks) is served additively so
+    # the 3D view can draw the solved mesh's own outline. Absent on every non-enclosure run — the
+    # key then stays absent, never fabricated.
+    mounting = meta.get("mounting")
+    if isinstance(mounting, dict) and mounting:
+        out["mounting"] = clean(mounting)
+    return out
 
 
 def _row_quadrants(run_dir: Path, h: str) -> str | None:
