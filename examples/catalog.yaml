@@ -3,10 +3,15 @@
 # Groups:
 #   magnus   - Magnus mesher native families (OSSE, R-OSSE, ICW, FREEFORM); no generator code needed
 #   legacy   - utility configs not intended for typology comparison (smoke tests, adapters)
-#   classical - generator-based classical horns: conical, exponential, hypex, tractrix, OSSE meridian (Le Cleach gated off)
-#   hybrid   - generator-based hybrids: H/V, blend, perturbed
+#   classical - generator-based classical horns: conical, exponential, hypex, tractrix, OSSE
+#               meridian; biradial (US4308932A) + quadratic-throat (the QTW white-paper rule)
+#               (2026-10-25 correction: Le Cleac'h is LIVE per the owner directive - the R9-J
+#               gate passed at 0.00 mm; the old "gated off" note here was stale)
+#   hybrid   - generator-based hybrids: H/V, blend, perturbed, splice (C1-corrected)
 #   organic  - WP9b per-azimuth rollback rows (LABELED HYPOTHESIS-SHAPE EXPERIMENTS, neutral names;
-#              dossier docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md section 2.4).
+#              dossier docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md section 2.4)
+#              + the 2026-10-25 owner-approved additions: signed-X v2, the even-lobe mouth
+#              ripple (the "pleats"), and the asymmetric Le Cleac'h (odd-cosine, full ring).
 #              hv symmetry: every azimuth has its own fc(phi), so these are NOT axisymmetric.
 # The orchestrator will append classical and hybrid entries; keep this format simple.
 #
@@ -14,7 +19,9 @@
 #   name:        unique identifier for --families SPEC and in leaderboard output
 #   config:      path relative to examples/  (the config must load with load_config)
 #   group:       one of magnus | legacy | classical | hybrid | organic
-#   symmetry:    hv | axisymmetric  (must match the config's mesh.quadrants and the design's symmetry)
+#   symmetry:    hv | axisymmetric | full   (must match the config's mesh.quadrants and the
+#              design's symmetry; "full" = the 2026-10-25 seam-free full-ring rows models,
+#              quadrants '1234', e.g. the odd-cosine lecleach_asym)
 #   description: one-line human description
 
 entries:

@@ -3,8 +3,11 @@
 # docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md section 2.3.
 # Salmon area law A(s) = A0 (cosh(s/x0) + T sinh(s/x0))^2 with x0 = c / (2 pi fc), applied
 # to spherical caps normal to the wall; 0.25 mm march, stop at h_max_wall_deg.
-# Neutral name: this is NOT a claim on the published JMLC construction (R9 rename gate);
-# lecleach / spherical_wave stay disabled. L_mm is required by materialize and may only
+# Neutral name: this is NOT a claim on the published JMLC construction (R9 rename gate).
+# (2026-10-25 corrections pass: lecleach / spherical_wave are LIVE per the owner directive -
+# the R9-J gate passed at 0.00 mm; the old "stay disabled" wording here was stale, see
+# docs/research/typologies/JMLC_LECLEACH_RESEARCH_2026-10-25.md and 12_RESEARCH_BASIS s13.4.)
+# L_mm is required by materialize and may only
 # SHORTEN the intrinsic march length (tractrix precedent).
 # Knob ranges per dossier section 4 for 1-inch briefs: fc 600-1200 Hz, T 0.3-1.0,
 # stop/max_wall [60, 88] (FREEFORM needs < 90).

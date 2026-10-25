@@ -220,6 +220,21 @@ def test_compatibility_hv_entry_always_ok():
     assert ok
 
 
+def test_compatibility_axisymmetric_brief_refuses_hv_entries():
+    """2026-10-25 policy change (owner-approved; the 7040 campaign finding): an axisymmetric
+    brief refuses non-axisymmetric entries - the campaign used to happily run hv families
+    under a symmetric target and return asymmetric bests (458x240 mm mouths)."""
+    entry = {"name": "test", "symmetry": "hv"}
+    brief = {"symmetry": "axisymmetric", "target": {"coverage_h_deg": 50.0, "coverage_v_deg": 50.0}}
+    ok, reason = is_compatible(entry, brief)
+    assert not ok and "axisymmetric" in reason
+    ok, reason = is_compatible({"name": "t2", "symmetry": "axisymmetric"}, brief)
+    assert ok and reason == ""
+    # the mirror case (hv brief, no symmetry field in the entry dict at all) stays eligible
+    ok, reason = is_compatible({"name": "t3"}, {"symmetry": "hv", "target": {"coverage_h_deg": 75.0, "coverage_v_deg": 45.0}})
+    assert ok and reason == ""
+
+
 def test_compatibility_icw_skipped_for_asymmetric_brief():
     catalog = load_catalog(CATALOG_PATH)
     by_name = {e["name"]: e for e in catalog}

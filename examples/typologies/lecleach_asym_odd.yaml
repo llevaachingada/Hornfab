@@ -1,0 +1,90 @@
+# lecleach_asym_odd: the ASYMMETRIC Le Cleac'h — the verified Fourcade march per azimuth +
+# an odd-cosine single-sided asymmetry (owner-named, owner-approved 2026-10-25).
+#
+# LABELED RECONSTRUCTION/HYPOTHESIS: the BASE march is the verified Fourcade 2015
+# construction (R9-J passed, width 467.30 vs published 467.30 mm) but the eps term is
+# OURS: r(phi, s) *= 1 + eps_m * w(s) * cos(phi) with w a smoothstep window on the arc
+# fraction (opening at eps_start; the throat stays exact so every row shares the driver
+# exit). NO published asymmetric-per-azimuth JMLC construction exists
+# (JMLC_FAMILY_VARIANTS 2026-10-25 searched: none).
+#
+# FULL RING (span: full, quadrants '1234'): the odd cos(phi) term breaks the left-right
+# mirror, so only the seam-free full ring represents it honestly. n_phi 25 rows around
+# 360 deg (the half-model resolution rotated to the whole circle); ~4x the quarter dofs
+# (screen mesh ~3-6k tris, inside the unchanged caps). eps_m is SIGNED: +eps widens the
+# +x side, -eps the -x side.
+# Every number here is a YAML default; nothing is hardcoded in the generator.
+#
+# catalog entry lands in the C4 batch (examples/catalog.yaml).
+name: lecleach_asym_odd
+family: FREEFORM
+brief_file: ../briefs/organic_rollback_1in.yaml
+generator:
+  name: grid
+  rows:
+    type: lecleach_asym
+  n_phi: 25                  # full ring: 25 rows over 360 deg (endpoint excluded)
+  n_s: 32
+  wall_thickness_mm: 3.0
+  span: full
+seed_params:
+  g_fc_hz: 800.0
+  g_T: 0.8
+  g_stop_deg: 170.0
+  g_eps_m: 0.25
+  g_eps_start: 0.0
+bounds:
+  g_fc_hz:
+    lo: 600.0
+    hi: 1200.0
+  g_T:
+    lo: 0.3
+    hi: 1.0
+  g_stop_deg:
+    lo: 120.0
+    hi: 240.0
+  g_eps_m:
+    lo: -0.3
+    hi: 0.3
+  g_eps_start:
+    lo: 0.0
+    hi: 0.5
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 8.0
+  quadrants: '1234'
+  dof_cap_screen: 5000
+  dof_cap_verify: 7000
+  dof_cap_final: 8900
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+search:
+  algorithm: cma
+  sigma0: 0.25
+  seed: 1234
+  budget: 200
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded

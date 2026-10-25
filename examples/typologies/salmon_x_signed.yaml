@@ -1,0 +1,85 @@
+# salmon_x_signed: the SIGNED x_amp demo config (owner-approved X v2, 2026-10-25).
+#
+# Same salmon_elliptical rows as salmon_x_shape but with the NEGATIVE x reading:
+# x_amp < 0 opens the mouth along the CARDINAL planes ("corner-in") while the shipped
+# +0.25 seed opens the diagonals ("corner-out", the literal X). The knob contract:
+# x_amp in [-0.4, 0.4] (signed; the magnitude cap unchanged), x_fc in [0, 0.3] applied
+# whenever x_amp != 0, x_amp = 0 still reproduces the plain elliptical rows exactly (P2).
+# LABELED HYPOTHESIS (the x_shape/T5 precedent; audiohorn.net publishes no geometry).
+#
+# catalog entry lands in the C4 batch (examples/catalog.yaml).
+name: salmon_x_signed
+family: FREEFORM
+brief_file: ../briefs/organic_rollback_1in.yaml
+generator:
+  name: grid
+  rows:
+    type: salmon_elliptical
+  n_phi: 15
+  n_s: 32
+  wall_thickness_mm: 3.0
+seed_params:
+  g_fc_h_hz: 800.0
+  g_fc_v_hz: 1100.0
+  g_T: 0.8
+  g_stop_deg: 170.0
+  g_x_amp: -0.25             # the SIGN DEMO: corner-in (the shipped +0.25 is corner-out)
+  g_x_fc: 0.15
+bounds:
+  g_fc_h_hz:
+    lo: 600.0
+    hi: 1200.0
+  g_fc_v_hz:
+    lo: 600.0
+    hi: 1200.0
+  g_T:
+    lo: 0.3
+    hi: 1.0
+  g_stop_deg:
+    lo: 120.0
+    hi: 240.0
+  g_x_amp:
+    lo: -0.4
+    hi: 0.4
+  g_x_fc:
+    lo: 0.0
+    hi: 0.3
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 8.0
+  quadrants: '1'
+  dof_cap_screen: 5000
+  dof_cap_verify: 7000
+  dof_cap_final: 8900
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+search:
+  algorithm: cma
+  sigma0: 0.25
+  seed: 1234
+  budget: 200
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded

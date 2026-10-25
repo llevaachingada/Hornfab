@@ -127,6 +127,11 @@ def is_compatible(entry: dict, brief: dict) -> tuple[bool, str]:
     Current checks:
     - An axisymmetric entry is incompatible with a brief whose coverage_h != coverage_v
       (TYPOLOGY_PLAN.md s7, R4).
+    - 2026-10-25 (owner-approved, the 7040 campaign finding): the reverse direction now binds
+      too. An axisymmetric brief (its config loader already forces coverage_h == coverage_v)
+      refuses non-axisymmetric entries: an asymmetric-mouth family searched under a symmetric
+      brief incoherently produced asymmetric "bests" (the 7040 campaign's hv-family runs
+      returned 458x240 mm mouths under a symmetric target).
     - WP2 (senior pass 2026-10-24): an entry tied to its own driver exit (catalog key
       ``driver_exit_mm``, e.g. osse_baseline's 1.4-inch throat) cannot compete under a brief with
       a different driver — the campaign SKIPs it with the reason printed, instead of comparing
@@ -141,6 +146,12 @@ def is_compatible(entry: dict, brief: dict) -> tuple[bool, str]:
         return False, (
             f"entry symmetry 'axisymmetric' is incompatible with brief coverage_h={h} != coverage_v={v}; "
             "axisymmetric families require coverage_h == coverage_v"
+        )
+    if brief_sym == "axisymmetric" and entry_sym != "axisymmetric":
+        return False, (
+            f"brief symmetry '{brief_sym}' is incompatible with the '{entry_sym}' entry; an "
+            "asymmetric family searched under a symmetric brief produces bests whose mouths "
+            "the brief never asked for (campaign finding 2026-10-25)"
         )
     tied_exit = entry.get("driver_exit_mm")
     if tied_exit is not None:

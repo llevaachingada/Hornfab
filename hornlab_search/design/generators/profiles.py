@@ -225,6 +225,176 @@ def tractrix(r0_mm, fc_hz, max_wall_deg: float = 80.0, n: int = 400) -> Meridian
 
 
 # ---------------------------------------------------------------------------
+# Biradial (Keele/JBL US4308932A) and Quadratic-Throat Waveguide (Hughes/Peavey)
+# ---------------------------------------------------------------------------
+
+def _generator_error(message: str):
+    """``registry.GeneratorError`` without a module-level import cycle (the lecleach pattern)."""
+    from .registry import GeneratorError
+    return GeneratorError(message)
+
+#: The biradial patent's own sizing constant (dossier 4.1/4.3: "W = K/(A*F) with
+#: K ~ 25,000 m-deg-Hz", [verified] US4308932A). The repo's settled KEELE_K (Hughes) is
+#: 25,400 - 1.6% apart. Both are quoted in tests; never silently interchanged.
+_KEELE_PATENT_K_M_DEG_HZ = 25_000.0
+
+#: Flare-rate range from the patent (claim 14: n in [2, 8]; text prefers 4-6).
+_BIRADIAL_N_RANGE = (2.0, 8.0)
+
+
+def biradial_mouth_mm(coverage_deg: float, f_hz: float) -> float:
+    """Keele/JBL Bi-Radial sizing rule in mm: W = K/(A*F) with the patent's own constant.
+
+    [verified] US4308932A design example reproduces: W(80 deg, 400 Hz) = 781.25 mm
+    (printed 780), W(36 deg, 400 Hz) = 1736.11 mm (the rule is NOT applied per-plane
+    in the example - dossier 4.3). Units: coverage in degrees, F in Hz, returns mm.
+    """
+    if float(coverage_deg) <= 0.0 or float(f_hz) <= 0.0:
+        raise ValueError("biradial_mouth_mm: coverage and f must be positive")
+    return _KEELE_PATENT_K_M_DEG_HZ / (float(coverage_deg) * float(f_hz)) * 1000.0
+
+
+def biradial_contour(r0_mm, rm_mm, L_mm, a_deg, n, n_pts: int = 400) -> Meridian:
+    """Keele/JBL Bi-Radial wall contour (US4308932A), per plane, 2-D:
+
+        r(z) = r0 + tan(a_deg)*z + c*z^n,   c = (rm - r0 - tan(a_deg)*L) / L^n
+
+    where ``a_deg`` is the plane's initial wall (half-)angle and ``n`` the flare-rate
+    exponent (claim 14 range [2, 8]; the paper prefers 4-6, larger with larger coverage).
+
+    R9 reference (published construction): US4308932A; dossier
+    ``docs/research/typologies/BIRADIAL_IWATA_300_RESEARCH_2026-10-25.md`` 4.1-4.4.
+
+    VERIFIED against the dossier's own arithmetic (its 4.3 V-plane march, which it measured
+    exactly): at the reference case r0 = 24.4, a = 18 deg, n = 4, L = 815.1, rm = 390 this
+    law gives c = 2.2847e-10, r(516) = 208.2 mm, end wall angle 39.35 deg - all three are
+    pinned by tests.
+
+    HONEST 2-D LIMIT (dossier 4.3, [measured]): the patent's H pair lives in a SWEPT frame
+    (a surface of revolution about a distant vertex); a single axial-frame meridian at the
+    H case (a = 40 deg, n = 5.5) needs negative c / a negative end slope, i.e. it is
+    geometrically impossible. This implementation therefore REFUSES an inward-turning
+    contour instead of silently producing one; the full two-pair assembly (connector +
+    18 mm slot gap + swept H pair) is the deferred GRID-rows work (dossier section 12).
+
+    info keys: c_mm_per_mm_n, cone_slope_deg (a), end_wall_deg, n.
+    """
+    r0_mm, rm_mm, L_mm, a_deg, n = (float(r0_mm), float(rm_mm), float(L_mm),
+                                    float(a_deg), float(n))
+    if r0_mm <= 0.0 or rm_mm <= r0_mm or L_mm <= 0.0:
+        raise ValueError(
+            f"biradial: need 0 < r0 < rm and L > 0 (got r0={r0_mm}, rm={rm_mm}, L={L_mm})")
+    if not (_BIRADIAL_N_RANGE[0] <= n <= _BIRADIAL_N_RANGE[1]):
+        raise ValueError(
+            f"biradial: flare exponent n must be in [{_BIRADIAL_N_RANGE[0]:g}, "
+            f"{_BIRADIAL_N_RANGE[1]:g}] (US4308932A claim 14), got {n:g}")
+    if not (0.0 < a_deg < 89.0):
+        raise ValueError(f"biradial: initial wall angle a must be in (0, 89) deg, got {a_deg:g}")
+
+    tan_a = np.tan(np.radians(a_deg))
+    flat = rm_mm - r0_mm - tan_a * L_mm          # the power-series term's total contribution
+    if flat < -1e-9 * rm_mm:
+        raise _generator_error(
+            f"biradial: rm={rm_mm:.3g} mm cannot close a tan({a_deg:g} deg) cone of depth "
+            f"{L_mm:.3g} mm from r0={r0_mm:.3g} mm (needs rm >= {r0_mm + tan_a * L_mm:.3g} "
+            "mm even at c=0; the US4308932A H-pair case is exactly this - its contour lives "
+            "in a swept frame, dossier 4.3)")
+    c = max(flat, 0.0) / L_mm**n                 # c=0 edge = the pure cone
+    end_slope = tan_a + n * flat / L_mm
+    if end_slope <= 0.0:
+        # The dossier's measured H-plane failure mode (end slope -1.309): refuse, never
+        # ship an inward-turning "flare".
+        raise _generator_error(
+            f"biradial: the contour's end wall slope is {end_slope:.4f} (<= 0): the wall "
+            "would turn inward - the documented single-meridian failure mode of the "
+            "US4308932A H pair (dossier 4.3/4.4 item 5)")
+    z = np.linspace(0.0, L_mm, n_pts)
+    r = r0_mm + tan_a * z + c * z**n
+    theta = np.degrees(np.arctan(tan_a + n * c * z**(n - 1.0)))
+    if not (np.all(np.diff(r) > 0) and np.all(theta < 90.0)):
+        raise _generator_error("biradial: produced a non-monotonic or over-vertical meridian")
+    return Meridian(
+        name="biradial",
+        z_mm=z,
+        r_mm=r,
+        theta_deg=theta,
+        info={
+            "c_mm_per_mm_n": float(c),
+            "cone_slope_deg": float(a_deg),
+            "end_wall_deg": float(theta[-1]),
+            "n": float(n),
+            "source": "US4308932A (Keele/JBL 1980)",
+        },
+    )
+
+
+def qtw_waveguide(r0_mm, L_mm, a_deg, R_arc_mm, n_pts: int = 400) -> Meridian:
+    """Quadratic-Throat Waveguide meridian (Hughes invention / Peavey white paper), per plane.
+
+    Published construction (white paper step 3, read as text; sweep dossier 3.4 S4):
+    a circular arc mates the throat to the straight conical bell - the arc starts at the
+    throat perimeter with the wall PARALLEL to the horn axis, is tangent to the sidewall
+    at its far end, and its included angle equals ONE-HALF the dispersion angle in that
+    plane (== ``a_deg``, the house half-angle convention). Then a straight bell at the
+    same wall angle to the mouth; ``rm`` is therefore DERIVED, not a knob:
+
+        arc:   slope w(z) = asin(z/R);  z* = R*sin(a);  r* = r0 + R*(1 - cos(a))
+        bell:  r(z) = r* + tan(a)*(z - z*)
+
+    The white paper's quadratic-area THROAT coefficients are explicitly not published
+    ("in Hughes' AES paper"), so this is the documented arc/bell RULE labeled honestly:
+    our implementation per the published rule, NOT a claimed replica. Sources: the
+    Peavey white paper (excelsior-audio.com URL in the dossier) + at
+    docs/research/typologies/SHAPE_DISCOVERY_SWEEP_2026-10-25.md 3.4 S4.
+
+    Unlike the OSSE families, the brief's driver exit angle does not pin this profile's
+    start (the published construction starts parallel; the driver's own taper sits
+    upstream of the waveguide). Monotonic and C1 by construction (slope 0 -> a along the
+    arc, then constant a on the bell).
+
+    info keys: a_deg, R_arc_mm, z_arc_end_mm, r_arc_end_mm, rm derived, source.
+    """
+    r0_mm, L_mm, a_deg, R_arc_mm = (float(r0_mm), float(L_mm), float(a_deg), float(R_arc_mm))
+    if r0_mm <= 0.0 or L_mm <= 0.0 or R_arc_mm <= 0.0:
+        raise ValueError(
+            f"qtw: r0, L, R_arc must be positive (got r0={r0_mm}, L={L_mm}, R={R_arc_mm})")
+    if not (0.0 < a_deg < 89.0):
+        raise ValueError(f"qtw: the half-dispersion angle a must be in (0, 89) deg, got {a_deg:g}")
+    z_star = R_arc_mm * np.sin(np.radians(a_deg))
+    r_star = r0_mm + R_arc_mm * (1.0 - np.cos(np.radians(a_deg)))
+    if L_mm <= z_star + 1e-9:
+        raise _generator_error(
+            f"qtw: the arc alone reaches z={z_star:.3g} mm >= the depth L={L_mm:.3g} mm; "
+            "the bell would have no length (grow L_mm or shrink R_arc_mm)")
+    n_arc = max(8, int(np.ceil(n_pts * z_star / L_mm)))
+    n_bell = max(2, n_pts - n_arc)
+    z_a = np.linspace(0.0, float(z_star), n_arc)
+    r_a = r0_mm + R_arc_mm - np.sqrt(R_arc_mm**2 - z_a**2)
+    theta_a = np.degrees(np.arcsin(np.clip(z_a / R_arc_mm, -1.0, 1.0)))
+    z_b = np.linspace(float(z_star), L_mm, n_bell)
+    r_b = r_star + np.tan(np.radians(a_deg)) * (z_b - z_star)
+    theta_b = np.full(n_bell, a_deg)
+    z = np.concatenate([z_a, z_b[1:]])
+    r = np.concatenate([r_a, r_b[1:]])
+    theta = np.concatenate([theta_a, theta_b[1:]])
+    if not (np.all(np.diff(z) > 0) and np.all(np.diff(r) > 0) and np.all(theta < 90.0)):
+        raise _generator_error("qtw: produced a non-monotonic or over-vertical meridian")
+    return Meridian(
+        name="qtw_waveguide",
+        z_mm=z,
+        r_mm=r,
+        theta_deg=theta,
+        info={
+            "a_deg": float(a_deg),
+            "R_arc_mm": float(R_arc_mm),
+            "z_arc_end_mm": float(z_star),
+            "r_arc_end_mm": float(r_star),
+            "source": "Peavey/Hughes QTW white paper (arc rule)",
+        },
+    )
+
+
+# ---------------------------------------------------------------------------
 # Le Cléac'h (JMLC): Fourcade 2015 exact construction (eqs 10-27, 42-43)
 # ---------------------------------------------------------------------------
 
@@ -453,8 +623,12 @@ def spherical_wave(r0_mm, fc_hz, max_wall_deg: float = 80.0, *,
 # ---------------------------------------------------------------------------
 
 #: A wall-angle gap at the radius-matched joint at or below this takes the direct splice;
-#: a larger gap uses the C1 Hermite bridge (Report 4 WP9 step 1: "if no match within 2 deg").
-_SPLICE_MATCH_TOL_DEG = 2.0
+#: a larger gap uses the C1 Hermite bridge. 2026-10-25 R9-audit correction: the shipped
+#: configs and tests document a "< 0.5 deg" C1 ship bar (P1), but this tolerance sat at the
+#: Report-4 wording value 2 deg, so the shipped splice range carried C0 kinks up to 1.876 deg
+#: (measured on the shipped seed at zs_frac 0.425-0.575). The bar the docs and the catalog
+#: actually claim is 0.5 deg; bridging now starts there (the direct path keeps sub-0.5 joints).
+_SPLICE_MATCH_TOL_DEG = 0.5
 #: Hermite bridge length as a fraction of the SECOND parent's length (Report 4 WP9 step 1).
 _SPLICE_BRIDGE_FRAC = 0.10
 _SPLICE_BRIDGE_SAMPLES = 41
@@ -468,10 +642,12 @@ def splice(first: Meridian, second: Meridian, zs_frac: float) -> Meridian:
 
     The second parent is translated in z so that the point where its radius equals
     ``first``'s radius at ``z_s`` sits at ``z_s``; radius continuity at the joint is
-    therefore exact.  The wall-angle gap there is measured; when it is <= 2 deg the
-    two parents are spliced directly.  Otherwise a cubic Hermite bridge over 10 % of
-    the second parent's length joins the parents with matching value and tangent at
-    both ends (Report 4 WP9 step 1's fallback).  [inferred] Plan ambiguity: the plan
+    therefore exact.  The wall-angle gap there is measured; when it is <= 0.5 deg the
+    two parents are spliced directly (the joint keeps a bounded <= 0.5 deg angle step,
+    which is what the shipped catalog/docs C1 bar means).  Otherwise a cubic Hermite
+    bridge over 10 % of the second parent's length joins the parents with matching
+    value and tangent at both ends, making the joint genuinely C1.
+    [inferred] Plan ambiguity: the plan
     does not say which of the two angle-matching points (radius match vs. wall-angle
     search) defines the joint; the radius match is used because a radius step is not
     representable in a single meridian, and the angle gap selects direct vs. bridge.

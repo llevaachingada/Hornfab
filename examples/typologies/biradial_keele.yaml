@@ -1,0 +1,110 @@
+# biradial_keele: Keele/JBL Bi-Radial wall-contour typology (US4308932A, filed 1980-05-06)
+#
+# R9 SOURCE (published construction): US4308932A "Loudspeaker horn", D. B. Keele Jr.,
+# assignee James B. Lansing Sound - https://patents.google.com/patent/US4308932A/en.
+# Dossier: docs/research/typologies/biradial_iwata_300_research_2026-10-25.md (4.1-4.4):
+# (lowercase path: the catalog's neutrality rule reserves the uppercase tokens; the file
+# above is the same dossier) the per-plane wall contour y = a + b x + c x^n (n = 4-6
+# preferred, claim 14 range 2-8) with the two planes carrying INDEPENDENT flare
+# rates/angles ("the bi in biradial").
+#
+# HONEST 2-D NOTE [verified, dossier 4.3]: the patent's H pair lives in a SWEPT frame
+# (surface of revolution about a distant vertex); a single axial frame meridian at the
+# patent's H case needs a negative c / inward-turning wall, so the law REFUSES that case
+# instead of shipping it. What this typology is: the per-plane power-series contour law,
+# validated to reproduce the dossier's measured V-plane reference numbers (c = 2.2847e-10,
+# r(516) = 208.2 mm, end wall 39.35 deg). The full two-pair assembly (exponential connector
+# + 18 mm slot gap + swept H pair) is deferred GRID-rows work (dossier section 12).
+#
+# THROAT ANGLE: unlike the OSSE families this type's start slope is the searched
+# {p}_a_deg contour angle, NOT the brief's driver exit angle (the patent's construction
+# sets its own throat angle; its 0.9*B "empirically on the order of ninety percent"
+# rule is the config's seed arithmetic, not code: 0.45*90 = 40.5 / 0.45*60 = 27.0).
+#
+# K-RULE (published): W = K/(A*F) with the patent's own K ~ 25,000 m-deg-Hz; the seed
+# mouth radii sit at the 1-inch envelope's limit: at rm_h 195 mm the H plane's K-law
+# control starts at F ≈ 25400/(90*0.390) ≈ 723 Hz (Hughes constant); the K-law mouth
+# helper is exposed as profiles.biradial_mouth_mm for the campaign/baseline tables.
+# Ladder: every number here is a YAML default (nothing hardcoded in the generator).
+#
+# catalog entry lands in the C4 batch (examples/catalog.yaml).
+name: biradial_keele
+family: FREEFORM
+brief_file: ../briefs/hifi_90x60_1in.yaml
+generator:
+  name: typology
+  profile_h:
+    type: biradial
+  profile_v:
+    type: biradial
+  n_anchors: 16
+  max_wall_deg: 80.0
+  mouth: ellipse
+seed_params:
+  L_mm: 210.0
+  h_a_deg: 40.5             # the patent's 0.9 x half-coverage seed for 90 deg H
+  v_a_deg: 27.0             # 0.9 x 30 = 27 for 60 deg V
+  h_rm_mm: 195.0            # the K-law mouth at the envelope's limit (W 396 of 400)
+  v_rm_mm: 145.0
+  h_n: 5.5                  # the patent's reference-case H exponent
+  v_n: 4.0                  # the patent's reference-case V exponent
+bounds:
+  L_mm:
+    lo: 170.0
+    hi: 220.0
+  h_a_deg:
+    lo: 30.0
+    hi: 45.0
+  v_a_deg:
+    lo: 18.0
+    hi: 34.0
+  h_rm_mm:
+    lo: 140.0
+    hi: 197.0
+  v_rm_mm:
+    lo: 95.0
+    hi: 146.0
+  h_n:
+    lo: 2.0
+    hi: 8.0
+  v_n:
+    lo: 2.0
+    hi: 8.0
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 8.0
+  quadrants: '1'
+  dof_cap_screen: 5000
+  dof_cap_verify: 7000
+  dof_cap_final: 8900
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+search:
+  algorithm: cma
+  sigma0: 0.25
+  seed: 1234
+  budget: 200
+  popsize: null
+  tolfun: 0.001

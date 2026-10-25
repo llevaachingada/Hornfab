@@ -227,7 +227,8 @@ def _require(section: dict, key: str, where: str):
 # ------------------------------------------------------------------ WP1/WP4 blocks (senior pass)
 
 def _validate_objective_block(block, where: str) -> dict:
-    """Brief/config ``objective: {version: 2}`` selects objective v2 (WP1). Default 1. Unknown
+    """Brief/config ``objective: {version: 2|3}`` (WP1; v3 = the 2026-10-25 owner-approved
+    K-law-masked coverage scoring - see objective/scalar_v2.py objective_v3). Default 1. Unknown
     keys are refused so a YAML typo is never silent."""
     if not isinstance(block, dict):
         raise ConfigError(f"{where}: objective must be a mapping")
@@ -235,8 +236,8 @@ def _validate_objective_block(block, where: str) -> dict:
     if unknown:
         raise ConfigError(f"{where}: objective unknown key(s) {sorted(unknown)} (allowed: version)")
     v = block.get("version", 1)
-    if isinstance(v, bool) or not isinstance(v, int) or v not in (1, 2):
-        raise ConfigError(f"{where}: objective.version must be 1 or 2, got {v!r}")
+    if isinstance(v, bool) or not isinstance(v, int) or v not in (1, 2, 3):
+        raise ConfigError(f"{where}: objective.version must be 1, 2 or 3, got {v!r}")
     return {"version": int(v)}
 
 
@@ -685,6 +686,8 @@ def load_config(path, *, brief=None, cma_seed: int | None = None) -> Config:
             raise ConfigError(f"{where}: a generator config needs a brief (brief_file: or --brief)")
 
     _apply_brief_driver_pins(raw, brief_d, where, embedded=embedded_brief)
+    if not embedded_brief:
+        raw = _brief_preflight_and_derive(raw, brief_d, where)
 
     mesh = _build(MeshSettings, _require(raw, "mesh", where), f"{where}:mesh",
                   optional=("max_triangle_slack", "rear_res_factor", "band_split"))
@@ -848,3 +851,159 @@ def solve_spec(mode: Mode, cfg: Config) -> SolveSpec:
         gmres_tol=float(s.gmres_tol),
         extra=extra,
     )
+
+
+# ------------------------------------------------------------------ S1a brief preflight + derivation
+
+_KEELE_MM_DEG_HZ = 25400.0 * 1000.0     # KEELE_K (m-deg-Hz) -> mm-deg-Hz
+_ROWS_MOUTH_FC_INVARIANT = 1.88e5       # W * fc ~= 1.88e5 mm-Hz (lib-2 s4.3, both throat sizes)
+
+
+def _keele_required_mouth_mm(f0_hz: float, coverage_deg: float) -> float:
+    """``d = KEELE_K / (f0 * coverage)`` in mm: the mouth the K-law needs to hold a
+    coverage angle down to f0 (the same rule targets/venue.required_mouth_m applies)."""
+    return _KEELE_MM_DEG_HZ / (float(f0_hz) * float(coverage_deg))
+
+
+def _clamp_to_bounds(key: str, value: float, bounds: dict) -> tuple[float, bool]:
+    """Clamp ``value`` into the key's EXISTING bounds (never widen). (value, clamped)"""
+    b = bounds.get(key)
+    if not isinstance(b, dict) or "lo" not in b or "hi" not in b:
+        return float(value), False
+    lo, hi = float(b["lo"]), float(b["hi"])
+    v = min(max(float(value), lo), hi)
+    return v, abs(v - float(value)) > 1e-12
+
+
+def _derive_generator_geometry(raw: dict, target: dict, feas: dict) -> list:
+    """Per-family seed/bounds derivation from the brief's coverage (CLAMP-ONLY).
+
+    Applies when a generator typology/grid config meets an f0_hz-carrying brief: the
+    seed's mouth knobs are set from the K-law requirement (d = KEELE_K/(f0*cov)), first
+    clamped to the BRIEF ENVELOPE (a target larger than the envelope cannot be built)
+    and then to each knob's EXISTING bounds (a clamp hitting a bound is flagged as
+    "clamped_to_bound" - widening stays owner-gated and is never automatic).
+    Formula and native-family configs get an honest no-rule note; the feasibility
+    record itself is family-independent.
+    """
+    notes: list = []
+    gen = raw.get("generator")
+    seed = raw.setdefault("seed_params", {})
+    bounds = raw.setdefault("bounds", {})
+    env_w = float(feas["envelope_mouth_w_mm"])
+    env_h = float(feas["envelope_mouth_h_mm"])
+    req_w = float(feas["required_mouth_w_mm"])
+    req_h = float(feas["required_mouth_h_mm"])
+    target_w = min(req_w, env_w) if env_w > 0.0 else req_w
+    target_h = min(req_h, env_h) if env_h > 0.0 else req_h
+
+    def set_seed(key: str, value, note: str) -> None:
+        if value is None:
+            notes.append({"knob": key, "note": "no target (zero envelope axis?)", "applied": None})
+            return
+        v, clamped = _clamp_to_bounds(key, value, bounds)
+        seed[key] = float(v)
+        notes.append({"knob": key, "derived_mm": float(value), "applied": float(v),
+                      "clamped_to_bound": bool(clamped), "note": note})
+
+    def cov_of(axis: str) -> float:
+        return float(target["coverage_h_deg" if axis == "w" else "coverage_v_deg"])
+
+    if isinstance(gen, dict):
+        name = gen.get("name")
+        if name == "typology":
+            prof_h = gen.get("profile_h")
+            prof_v = gen.get("profile_v", "same")
+            explicit_v = prof_v != "same"
+            for prefix, prof, axis in (("h", prof_h, "w"), ("v", prof_v, "h")):
+                if not explicit_v and prefix == "v":
+                    continue                      # profile_v: same -> the H derivation rules
+                if not isinstance(prof, dict):
+                    continue
+                ptype = prof.get("type")
+                if ptype in ("conical", "exponential", "hypex", "biradial"):
+                    set_seed(f"{prefix}_rm_mm", (target_w if axis == "w" else target_h) / 2.0,
+                             "K-law mouth radius (d/2)")
+                elif ptype == "osse":
+                    set_seed(f"{prefix}_a_deg", min(cov_of(axis) / 2.0, 45.0),
+                             "OSSE a_deg is a HALF-angle: coverage/2")
+                elif ptype == "qtw_waveguide":
+                    set_seed(f"{prefix}_a_deg", cov_of(axis) / 2.0,
+                             "the arc rule: arc turn == half the dispersion angle")
+                else:
+                    notes.append({"knob": f"{prefix}_* {ptype}",
+                                  "note": "no derivation rule for this profile type (v1)"})
+        elif name == "grid" and isinstance(gen.get("rows"), dict):
+            rtype = gen["rows"].get("type")
+            fc_w = _ROWS_MOUTH_FC_INVARIANT / target_w if target_w > 0 else None
+            fc_v = _ROWS_MOUTH_FC_INVARIANT / target_h if target_h > 0 else None
+            geo = (target_w * target_h) ** 0.5 if target_w * target_h > 0 else 0.0
+            if rtype in ("salmon_elliptical", "salmon_axisym"):
+                set_seed("g_fc_h_hz", fc_w, "K-law inverse of the W*fc invariant")
+                if rtype == "salmon_elliptical":
+                    set_seed("g_fc_v_hz", fc_v, "K-law inverse of the H*fc invariant")
+            elif rtype in ("lecleach", "lecleach_asym", "toroidal_rollback"):
+                set_seed("g_fc_hz", _ROWS_MOUTH_FC_INVARIANT / geo if geo > 0 else None,
+                         "K-law inverse at the geometric-mean mouth")
+            elif rtype == "iwata_ar":
+                set_seed("g_fc_hz", _ROWS_MOUTH_FC_INVARIANT / geo if geo > 0 else None,
+                         "K-law inverse at the geometric-mean mouth")
+                if target_h > 0 and target_w > 0:
+                    set_seed("g_ar_m", target_w / target_h, "AR target = W/H")
+            else:
+                notes.append({"knob": f"rows {rtype}", "note": "no derivation rule (v1)"})
+        else:
+            notes.append({"knob": "-", "note":
+                          "no generator block (formula/native family): feasibility "
+                          "recorded; derivation lands with the baseline-settings pass"})
+    else:
+        notes.append({"knob": "-", "note": "no generator block in this config"})
+    return notes
+
+
+def _brief_preflight_and_derive(raw: dict, brief_d: dict | None, where: str) -> dict:
+    """S1a (2026-10-25, owner-approved full-repair pass): when the brief's target carries
+    ``target.f0_hz``, (a) record the K-law feasibility (required vs envelope mouth per
+    axis, the held coverage at the envelope's limit, the per-mode screen-frequency count
+    below f0 - the part the objective can never honestly control) and (b) derive the
+    typology's seed/bounds mouth from the coverage (clamped to the envelope and to the
+    config's own bounds; every clamp flagged).  Briefs without f0_hz are untouched:
+    absent = byte-for-byte (the embedded-brief resume path never calls this)."""
+    if brief_d is None:
+        return raw
+    t = dict(brief_d.get("target") or {})
+    f0 = t.get("f0_hz")
+    if f0 is None:
+        return raw
+    f0 = float(f0)
+    cov_h = float(t["coverage_h_deg"])
+    cov_v = float(t["coverage_v_deg"])
+    env = brief_d.get("envelope") or {}
+    env_w = float(env.get("max_mouth_w_mm", 0.0))
+    env_h = float(env.get("max_mouth_h_mm", 0.0))
+    band_hi = float(t["band_hi_hz"])
+    req_w = _keele_required_mouth_mm(f0, cov_h)
+    req_h = _keele_required_mouth_mm(f0, cov_v)
+    feas = {
+        "rule": "d = KEELE_K / (f0 * coverage) mm (KEELE_K = 25,400 m-deg-Hz)",
+        "f0_hz": f0,
+        "required_mouth_w_mm": req_w,
+        "required_mouth_h_mm": req_h,
+        "envelope_mouth_w_mm": env_w,
+        "envelope_mouth_h_mm": env_h,
+        "held_coverage_w_deg": (_KEELE_MM_DEG_HZ / (f0 * env_w)) if env_w > 0 else None,
+        "held_coverage_v_deg": (_KEELE_MM_DEG_HZ / (f0 * env_h)) if env_h > 0 else None,
+        "feasible_w": bool(env_w > 0.0 and req_w <= env_w + 1e-9),
+        "feasible_v": bool(env_h > 0.0 and req_h <= env_h + 1e-9),
+    }
+    for mode in ("screen", "verify"):
+        lo, hi, n = FREQ_GRIDS[mode]
+        hi_eff = min(hi, band_hi)
+        if hi_eff <= lo:
+            continue
+        freqs = np.geomspace(lo, hi_eff, n)
+        feas[f"{mode}_freqs_below_f0"] = int(np.count_nonzero(freqs < f0))
+        feas[f"{mode}_freqs_total"] = int(n)
+    raw["feasibility"] = feas
+    feas["derivation"] = _derive_generator_geometry(raw, t, feas)
+    return raw

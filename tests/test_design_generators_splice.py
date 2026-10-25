@@ -6,7 +6,10 @@ P1 C1 continuity at the joint: the wall-angle gap across the joint is < 0.5 deg,
    osse|tractrix matched-angle case and for the Hermite-bridge fallback.
 P2 both parents are built from the same r0 (a mismatch is refused, never rescaled).
 P3 zs_frac -> z_s is monotone; the [0.2, 0.8] bounds are not widened.
-P4 an unmatched joint (> 2 deg) takes the 10 %-of-L Hermite bridge and still passes P1.
+P4 an unmatched joint (> the direct-splice bar) takes the 10 %-of-L Hermite bridge and
+   still passes P1. (2026-10-25 R9-audit correction: the direct-splice bar moved from the
+   Report-4 wording value 2 deg down to the P1 bar itself, 0.5 deg - the 2 deg direct band
+   was shipping C0 kinks up to 1.876 deg on the shipped seed while everything labeled C1.)
 Plus the existing generator test style: Hermite reconstruction through 16 anchors is
 within 0.2 mm of the analytic pieces away from the joint, and the registry/provenance
 wiring carries the nested first/second spec.
@@ -126,13 +129,31 @@ def test_zs_frac_maps_monotonically_to_zs():
 # ---------------------------------------------------------------------------
 
 @requires_mesher
-def test_matched_case_is_c1():
+def test_matched_or_bridged_case_is_c1():
+    """2026-10-25: with the corrected 0.5 deg bar the old zs=0.5 'matched' fixture (whose
+    measured parent angle gap was 0.602 deg) now bridges - so this test asserts the SHIP
+    BAR (P1) branch-agnostically, and the genuinely-matched direct path gets its own test."""
     m = _spliced(0.5)
-    assert m.info["joint"] == "matched"
-    assert abs(m.info["delta_theta_deg"]) < _JOINT_TOL_DEG
+    assert m.info["joint"] in ("matched", "hermite_bridge")
     assert _joint_gap_deg(m) < _JOINT_TOL_DEG
     assert np.all(np.diff(m.z_mm) > 0)
     assert np.all(np.diff(m.r_mm) > 0)
+
+
+@requires_mesher
+def test_angle_matched_cone_cone_splice_takes_the_direct_path():
+    """2026-10-25: a genuinely angle-matched joint (two cones with the same wall angle,
+    delta == 0) still takes the direct splice under the corrected bar."""
+    a = registry.build_meridian(
+        {"type": "conical"}, {"h_rm_mm": 62.0},
+        "h", r0=R0, a0=A0, L=100.0, max_wall=MAX_WALL, phi=0.0)
+    b = registry.build_meridian(
+        {"type": "conical"}, {"h_second_rm_mm": 62.0},
+        "h_second", r0=R0, a0=A0, L=100.0, max_wall=MAX_WALL, phi=0.0)
+    m = P.splice(a, b, 0.5)
+    assert m.info["joint"] == "matched"
+    assert m.info["delta_theta_deg"] == pytest.approx(0.0, abs=1e-9)
+    assert _joint_gap_deg(m) < 1e-6
 
 
 # ---------------------------------------------------------------------------
@@ -143,7 +164,7 @@ def test_matched_case_is_c1():
 def test_unmatched_joint_takes_the_bridge():
     m = _spliced(0.2)
     assert m.info["joint"] == "hermite_bridge"
-    assert abs(m.info["delta_theta_deg"]) > 2.0          # the fallback condition
+    assert abs(m.info["delta_theta_deg"]) > P._SPLICE_MATCH_TOL_DEG   # the fallback condition (0.5)
     z_s, z_b = m.info["z_s_mm"], m.info["z_bridge_mm"]
     assert 0.0 < z_b - z_s <= 0.10 * m.info["L2_mm"] + 1e-9
     assert np.all(np.diff(m.z_mm) > 0)
@@ -156,7 +177,7 @@ def test_bridge_fallback_passes_p1(zs_frac):
     m = _spliced(zs_frac)
     assert m.info["joint"] == "hermite_bridge"           # these zs values do not match
     z_s, z_b = m.info["z_s_mm"], m.info["z_bridge_mm"]
-    assert abs(m.info["delta_theta_deg"]) > 2.0
+    assert abs(m.info["delta_theta_deg"]) > P._SPLICE_MATCH_TOL_DEG
     # P1 at both bridge ends: the fitted tangent matches the parent angle there.
     i_s = int(np.searchsorted(m.z_mm, z_s, side="left")) - 1
     j_b = int(np.argmin(np.abs(m.z_mm - z_b)))
@@ -167,6 +188,18 @@ def test_bridge_fallback_passes_p1(zs_frac):
 # ---------------------------------------------------------------------------
 # Hermite fidelity away from the joint (existing generator test style, V2)
 # ---------------------------------------------------------------------------
+
+@requires_mesher
+@pytest.mark.parametrize("zs_frac", [0.425, 0.475, 0.525, 0.575])
+def test_shipped_splice_range_carries_c1_after_the_tol_correction(zs_frac):
+    """2026-10-25 R9-audit regression: on the shipped config's own seed these zs_frac
+    values measured parent wall-angle gaps of 1.752 / 0.602 / 0.617 / 1.876 deg - under
+    the old 2-deg rule they shipped DIRECT (C0 kinks) while the catalog labeled C1.
+    Under the corrected bar every zs on the shipped range passes the P1 bar."""
+    m = _spliced(zs_frac)
+    assert m.info["joint"] in ("matched", "hermite_bridge")
+    assert _joint_gap_deg(m) < _JOINT_TOL_DEG
+    assert np.all(np.diff(m.z_mm) > 0) and np.all(np.diff(m.r_mm) > 0)
 
 @requires_mesher
 @pytest.mark.parametrize("zs_frac", [0.2, 0.5, 0.8])

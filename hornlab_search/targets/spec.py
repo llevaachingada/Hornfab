@@ -14,6 +14,13 @@ class Target:
     di_slope_target: float = 0.0   # flat DI
     z_min: float = 0.0
     freq_weights: dict | None = None
+    f0_hz: float | None = None     # 2026-10-25 owner amendment: the K-law pattern-control
+                                   # design frequency (d = KEELE_K/(f0*coverage)); absent =
+                                   # band_lo and every existing YAML behaves as before.
+
+    def f0_effective_hz(self) -> float:
+        """The K-law design frequency in force (an explicit f0 wins over band_lo)."""
+        return float(self.f0_hz) if self.f0_hz is not None else float(self.band_lo_hz)
 
     @classmethod
     def from_dict(cls, d: dict) -> "Target":
@@ -42,11 +49,17 @@ class Target:
         if d.get("freq_weights") is not None:
             kw["freq_weights"] = dict(d["freq_weights"])
             kw["freq_weights"] = validate_freq_weights(kw["freq_weights"])
+        if d.get("f0_hz") is not None:
+            kw["f0_hz"] = float(d["f0_hz"])
         t = cls(**kw)
         if not (t.band_lo_hz > 0 and t.band_hi_hz > t.band_lo_hz):
             raise ValueError("Target.from_dict: need 0 < band_lo_hz < band_hi_hz")
         if not (t.coverage_h_deg > 0 and t.coverage_v_deg > 0):
             raise ValueError("Target.from_dict: coverage angles must be positive")
+        if t.f0_hz is not None and not (t.f0_hz > 0 and t.f0_hz <= t.band_hi_hz):
+            raise ValueError(
+                f"Target.from_dict: f0_hz must be in (0, band_hi_hz], got {t.f0_hz!r} "
+                f"(band_hi {t.band_hi_hz:g})")
         return t
 
 

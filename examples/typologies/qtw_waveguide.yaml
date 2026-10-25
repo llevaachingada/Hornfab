@@ -1,0 +1,95 @@
+# qtw_waveguide: Quadratic-Throat Waveguide (Hughes invention / Peavey white paper)
+#
+# WHITE PAPER (read as text; primary manufacturer source):
+# https://excelsior-audio.com/Publications/QTWaveguide/QTWaveguide_WhitePaper.pdf
+# (archived: https://web.archive.org/web/20160303231128/http://peavey.com/media/pdf/aa/qwp1.pdf)
+# Dossier: docs/research/typologies/SHAPE_DISCOVERY_SWEEP_2026-10-25.md 3.4 S4.
+#
+# PUBLISHED RULE (step 3): a circular arc mates the throat to the straight conical bell:
+# the arc starts at the throat perimeter with the wall PARALLEL to the horn axis, is
+# tangent to the sidewall at its far end, and its included angle equals ONE-HALF the
+# dispersion angle in that plane. This config: {p}_a_deg IS half the dispersion angle
+# (the house half-angle convention), the arc turns exactly a_deg, the bell runs straight
+# at a_deg, and the mouth radius is DERIVED (rm = r* + (L - z*) tan(a_deg)).
+#
+# HONEST LABEL: "per the published rule; not a claimed replica" - the white paper
+# deliberately withholds the quadratic-area throat coefficients ("in Hughes' AES paper"),
+# so only the arc/bell rule is implemented. The white paper's measured claims (2nd
+# harmonic 3-4 dB better, 3rd ~9 dB better vs a standard constant-coverage horn) are
+# scoring references for campaign reads, not geometry.
+# The brief's driver exit angle does NOT pin this profile's start (the published
+# construction starts parallel; the driver taper sits upstream).
+#
+# catalog entry lands in the C4 batch (examples/catalog.yaml).
+name: qtw_waveguide
+family: FREEFORM
+brief_file: ../briefs/hifi_90x60_1in.yaml
+generator:
+  name: typology
+  profile_h:
+    type: qtw_waveguide
+  profile_v:
+    type: qtw_waveguide
+  n_anchors: 16
+  max_wall_deg: 80.0
+  mouth: ellipse
+seed_params:
+  L_mm: 190.0
+  h_a_deg: 45.0             # half of the 90 deg H dispersion; the arc turn and the bell angle
+  v_a_deg: 30.0             # half of the 60 deg V dispersion
+  h_R_arc_mm: 45.0          # the throat arc radius (mesher vocabulary: circArcRadius, mm)
+  v_R_arc_mm: 45.0
+bounds:
+  L_mm:
+    lo: 150.0
+    hi: 215.0
+  h_a_deg:
+    lo: 34.0
+    hi: 46.0
+  v_a_deg:
+    lo: 22.0
+    hi: 33.0
+  h_R_arc_mm:
+    lo: 25.0
+    hi: 80.0
+  v_R_arc_mm:
+    lo: 25.0
+    hi: 80.0
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 8.0
+  quadrants: '1'
+  dof_cap_screen: 5000
+  dof_cap_verify: 7000
+  dof_cap_final: 8900
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+search:
+  algorithm: cma
+  sigma0: 0.25
+  seed: 1234
+  budget: 200
+  popsize: null
+  tolfun: 0.001

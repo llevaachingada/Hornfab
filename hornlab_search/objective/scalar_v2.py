@@ -270,3 +270,111 @@ def _objective_v2(metrics, resp, ok, target, weights):
     t["di_estimated"] = 1.0 if metrics.di_source == "cuts_estimate" else 0.0
     assert set(t) == set(ALL_KEYS)
     return float(total), t
+
+
+def objective_v3(metrics, resp, ok, target, weights):
+    """Objective v3 (2026-10-25, owner-approved full-repair pass): the coverage term joins
+    the frequency weighting (WP4's ``freq_weights`` when set) and BOTH the coverage term
+    and the DI-slope term score only the frequencies AT OR ABOVE the K-law design
+    frequency ``f0`` (``target.f0_hz``; None = band_lo = v2's behavior). The below-f0
+    part of the band cannot hold the pattern inside any physical envelope (d =
+    KEELE_K/(f0*coverage)); v2's equal-weight mean let it dominate J (61-87% of the cov
+    loss measured on the owner's own 75x35 campaign across five designs), and the search
+    reduced the other terms instead. Everything else (rip/di/flat/load, the penalties and
+    the same key set) follows v2 exactly; v1/v2 runs are untouched (non-retroactive).
+    The masked frequency count is reported once per run by the brief's feasibility
+    record (config.py), not per row, so the frozen terms-key contract is untouched."""
+    try:
+        return _objective_v3(metrics, resp, ok, target, weights)
+    except Exception:  # noqa: BLE001 - the contract says never raises
+        log.exception("objective_v3() failed; returning the failure penalty")
+        return penalty_result(PENALTY_FAILED)
+
+
+def _objective_v3(metrics, resp, ok, target, weights):
+    if metrics is None or not ok:
+        return penalty_result(PENALTY_FAILED)
+    w = resolve_weights(weights)
+    f = np.asarray(metrics.freqs_hz, dtype=float)
+    band = (f >= target.band_lo_hz) & (f <= target.band_hi_hz)
+    n_band = int(band.sum())
+    if n_band == 0:
+        log.warning("no solved frequency inside the band [%g, %g] Hz", target.band_lo_hz,
+                    target.band_hi_hz)
+        return penalty_result(PENALTY_FAILED, n_in_band=0)
+
+    def b(x):
+        return np.asarray(x, dtype=float)[band]
+
+    f0 = float(target.f0_hz) if target.f0_hz is not None else float(target.band_lo_hz)
+    score = band & (f >= f0)
+    n_score = int(score.sum())
+    if n_score == 0:
+        log.warning("the whole band [%g, %g] Hz sits below f0 = %g Hz; cov/dislope are "
+                    "unscorable this run", target.band_lo_hz, target.band_hi_hz, f0)
+        return penalty_result(PENALTY_FAILED, n_in_band=n_band)
+
+    def s(x):
+        return np.asarray(x, dtype=float)[score]
+
+    # cov: per-frequency squared error over the SCORE band (v3: below-f0 masked),
+    # frequency-weighted when the brief carries freq_weights (WP4's vector, generalized).
+    e_f = ((np.asarray(metrics.bw_h_deg, float)[score] - target.coverage_h_deg) ** 2
+           + (np.asarray(metrics.bw_v_deg, float)[score] - target.coverage_v_deg) ** 2) / 100.0
+    if target.freq_weights is not None and n_score >= 1:
+        cov, _ = _weighted_mean(e_f, freq_weight_vector(f, target)[score])
+    elif n_score >= 1:
+        cov, _ = _plain_mean(e_f)
+    else:
+        cov = NAN_TERM_FILL
+
+    # dislope: the slope fit over the SCORE band only (the unattainable band stops pulling it).
+    dsl, _ = T.dislope_term(s(f), s(metrics.di_db), target)
+    z = None if metrics.z_throat_real is None else b(metrics.z_throat_real)
+    load, _ = T.load_term(z, target)
+
+    # rip: mean_f(ripple_detrended_h + ripple_detrended_v), weighted under WP4 when asked
+    # (unchanged from v2 - the full in-band set, not the score band).
+    ripple_values, _used_resp = _v2_ripple_values(metrics, resp, target, band)
+    if target.freq_weights is not None:
+        rip, _ = _weighted_mean(ripple_values[band], freq_weight_vector(f, target)[band])
+    else:
+        rip, _ = _plain_mean(ripple_values[band])
+
+    # di: unchanged from v2 (the full in-band set against the Gaussian-beam reference).
+    if float(w["di"]) == 0.0:
+        di = 0.0
+        di_used = False
+    else:
+        ref = (float(target.di_target_db) if target.di_target_db is not None
+               else target_di_gaussian_db(target.coverage_h_deg, target.coverage_v_deg))
+        di_mean, _ = _plain_mean((b(metrics.di_db) - ref) ** 2)
+        di = di_mean / 10.0
+        di_used = True
+
+    flat = _v2_flat_value(metrics, resp, target, band)
+
+    # NaN bookkeeping stays BAND-based exactly as v1/v2 (the frozen n_nan contract):
+    # the scored cov band is a subset, but rip/di/flat/load all score the full band.
+    bad = np.zeros(n_band, dtype=bool)
+    for arr in (metrics.bw_h_deg, metrics.bw_v_deg, metrics.on_axis_db):
+        bad |= ~np.isfinite(b(arr))
+    bad |= ~np.isfinite(ripple_values[band])
+    if di_used:
+        bad |= ~np.isfinite(b(metrics.di_db))
+    if z is not None:
+        bad |= ~np.isfinite(z)
+
+    t = {"cov": cov, "rip": rip, "di": di, "dislope": dsl, "flat": flat, "load": load,
+         "penalty": 0.0}
+    if not all(math.isfinite(t[k]) for k in WEIGHTED_KEYS):
+        return penalty_result(PENALTY_FAILED, n_in_band=n_band)
+    total = sum(w[k] * t[k] for k in WEIGHTED_KEYS)
+    if not math.isfinite(total):
+        return penalty_result(PENALTY_FAILED, n_in_band=n_band)
+    t["total"] = float(total)
+    t["n_nan"] = int(bad.sum())
+    t["n_in_band"] = n_score
+    t["di_estimated"] = 1.0 if metrics.di_source == "cuts_estimate" else 0.0
+    assert set(t) == set(ALL_KEYS)
+    return float(total), t

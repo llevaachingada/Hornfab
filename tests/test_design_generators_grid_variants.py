@@ -394,8 +394,10 @@ def test_example_catalog_entries_are_honest_and_named_neutrally():
 
 
 def test_span_and_kind_consistency_is_enforced():
-    # an explicit span must be one of the two landed values
-    with pytest.raises(registry.GeneratorError, match="span"):
+    # 2026-10-25 (C2, owner-approved): span: full is now a THIRD legal span - the old
+    # "unknown span" refusal is replaced by the honest resolution bar: a full ring at a
+    # quarter-grid row count refuses with the n_phi guard.
+    with pytest.raises(registry.GeneratorError, match="full-ring rows need n_phi >= 25"):
         _grid(_rows_spec("salmon_elliptical", span="full", n_phi=15),
               {"g_fc_h_hz": 800.0, "g_fc_v_hz": 1200.0, "g_T": 0.8,
                "g_stop_deg": 170.0})

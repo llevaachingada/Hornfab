@@ -34,8 +34,22 @@ Generator block::
 Knobs (mm, deg, Hz), per meridian prefix ``h_`` / ``v_`` (blend parents ``hb_`` / ``vb_``):
 ``L_mm`` (shared depth), ``{p}_rm_mm`` (conical / exponential / hypex mouth radius), ``{p}_T``
 (hypex, lecleach), ``{p}_fc_hz`` (tractrix, lecleach, spherical_wave), ``{p}_stop_deg``
-(lecleach, spherical_wave, spherical_salmon; default 88), ``{p}_a_deg``, ``{p}_k``,
-``{p}_s``, ``{p}_n``, ``{p}_q`` (osse; the throat angle a0 is the brief's driver exit angle).
+(lecleach, spherical_wave; default 88), ``{p}_max_wall_deg`` (spherical_salmon; default 80 --
+NOT a ``{p}_stop_deg`` knob; the knob-name mismatch was recorded by the 2026-10-25 R9 audit),
+``{p}_a_deg``, ``{p}_k``, ``{p}_s``, ``{p}_n``, ``{p}_q`` (osse; the throat angle a0 is the
+brief's driver exit angle).
+
+Additional types (2026-10-25 owner-approved expansion):
+``biradial`` (US4308932A, Keele/JBL 1980; dossier
+docs/research/typologies/BIRADIAL_IWATA_300_RESEARCH_2026-10-25.md): per-plane power-series
+contour ``r = r0 + tan(a)z + c z^n`` with ``{p}_a_deg`` the plain initial-wall half-angle
+(THIS type has its own default 25, set explicitly in every config; the inward-turn case the
+patent's H pair needs is refused) + ``{p}_n`` in [2, 8] (claim 14) + ``{p}_rm_mm``/``L_mm``.
+``qtw_waveguide`` (Hughes/Peavey white paper; sweep dossier 3.4 S4): arc-throat rule --
+wall parallel at the throat perimeter, arc turn == ``{p}_a_deg`` (half the dispersion
+angle), straight bell at the same wall angle; ``{p}_R_arc_mm`` (mm) + ``{p}_a_deg`` +
+``L_mm`` searched; ``rm`` is DERIVED. Labeled "per the published rule; not a claimed
+replica" (the white paper's quadratic-area coefficients are not public).
 
 Throat: every meridian starts at the brief's driver exit radius r0. Depth: fixed-size typologies
 use ``L_mm``; length-derived ones (tractrix, Le Cleac'h) end where the wall reaches
@@ -51,7 +65,7 @@ import numpy as np
 from . import profiles as P
 
 TYPES = ("conical", "exponential", "hypex", "tractrix", "lecleach", "spherical_wave", "osse",
-         "splice", "spherical_salmon")
+         "splice", "spherical_salmon", "biradial", "qtw_waveguide")
 FIXED_SIZE = ("conical", "exponential", "hypex", "osse")
 MOUTHS = ("ellipse", "superellipse", "rounded_rectangle")
 
@@ -64,7 +78,7 @@ THROAT_BLEND_TYPES = ("conical", "exponential", "hypex", "tractrix")
 DEFAULT_KNOBS = {"L_mm": 190.0, "rm_mm": 150.0, "T": 0.7, "fc_hz": 800.0, "a_deg": 45.0,
                  "k": 1.0, "s": 0.6, "n": 4.0, "q": 0.995, "w": 0.5, "mouth_exponent": 4.0,
                  "mouth_corner_mm": 30.0, "u": 0.0, "zs_frac": 0.5, "throat_blend_mm": 0.0,
-                 "max_wall_deg": 80.0, "stop_deg": 88.0}
+                 "max_wall_deg": 80.0, "stop_deg": 88.0, "R_arc_mm": 45.0}
 
 _ROUND = 6
 
@@ -172,6 +186,28 @@ def build_meridian(spec: dict, knobs: dict, prefix: str, *, r0: float, a0: float
         # The knob L_mm is required by materialize; for a length-derived typology it may only
         # SHORTEN the intrinsic march length (tractrix precedent: the envelope check still binds).
         return _truncate(m, L)
+    elif t == "biradial":
+        # US4308932A (Keele/JBL 1980) power-series wall contour, per plane:
+        # r = r0 + tan(a_deg)*z + c*z^n, c solved to rm at L.
+        # R9: the patent is the published reference; dossier
+        # docs/research/typologies/BIRADIAL_IWATA_300_RESEARCH_2026-10-25.md (4.1-4.4).
+        # a_deg is THIS type's plain initial-wall half-angle and gets its OWN default here
+        # (25 deg): the OSSE default 45 makes any 1-inch-scale contour turn inward at these
+        # depths, which the law refuses (the patent's H pair lives in a swept frame).
+        a_b = float(knobs.get(f"{prefix}_a_deg", 25.0))
+        m = P.biradial_contour(r0, _knob(knobs, prefix, "rm_mm"), L, a_b,
+                               _knob(knobs, prefix, "n"))
+        return _throat_blended(m, t, knobs, prefix, r0, a0)
+    elif t == "qtw_waveguide":
+        # Hughes/Peavey Quadratic-Throat Waveguide arc rule (white paper; sweep dossier 3.4
+        # S4): circular-arc throat starting parallel to the axis (the brief's exit angle
+        # does NOT pin this start - the published construction), arc turn = a_deg = half the
+        # dispersion angle, then a straight bell at the same wall angle; rm is DERIVED.
+        # "Per the published rule; not a claimed replica" (the quadratic area coefficients
+        # are not published).
+        m = P.qtw_waveguide(r0, L, _knob(knobs, prefix, "a_deg"),
+                            _knob(knobs, prefix, "R_arc_mm"))
+        return _throat_blended(m, t, knobs, prefix, r0, a0)
     else:
         m = _osse(spec, knobs, prefix, r0, a0, L, phi)
     return _throat_blended(m, t, knobs, prefix, r0, a0)

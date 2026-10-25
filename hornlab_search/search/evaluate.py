@@ -38,11 +38,12 @@ import numpy as np
 from .. import config as config_mod
 from ..dataset.record import DEFAULT_TRACE_FRACTION, build_record, should_capture_traces, to_jsonable
 from ..design import families
+from ..design.generators.registry import GeneratorError
 from ..mesh.build import MeshConsistencyError, build_mesh, mounting_of
 from ..metrics.compute import compute_metrics
 from ..metrics.di import di_from_balloon, sin_theta_weights
 from ..objective import PENALTY_FAILED, PENALTY_INVALID, objective, penalty_result
-from ..objective.scalar_v2 import objective_v2
+from ..objective.scalar_v2 import objective_v2, objective_v3
 from ..solve import cache as solve_cache
 from ..solve.base import stack_responses, theta_deg_from_dirs
 from ..targets.spec import Target
@@ -752,9 +753,13 @@ def _failure_marker(ctx: EvalContext, key: str) -> Path | None:
 def _score(metrics, resp, ctx) -> tuple[float, dict]:
     """The objective dispatch (WP1, senior pass 2026-10-24): version 1 keeps the exact v1 path
     (and every old run reproduces bit-for-bit); version 2 (brief/config``objective: {version: 2}``)
-    scores with the detrended terms in ``objective/scalar_v2.py``. Same key set either way."""
+    scores with the detrended terms in ``objective/scalar_v2.py``. Same key set either way.
+    Version 3 (2026-10-25, owner-approved): freq-weighted cov + the below-f0 (K-law design
+    frequency) mask on cov/dislope - see ``objective_v3`` in scalar_v2.py."""
     if ctx.objective_version == 2:
         return objective_v2(metrics, resp, True, ctx.target, ctx.weights)
+    if ctx.objective_version == 3:
+        return objective_v3(metrics, resp, True, ctx.target, ctx.weights)
     return objective(metrics, True, ctx.target, ctx.weights)
 
 
@@ -788,6 +793,17 @@ def _compute_band_split(design, cfg, mode, mspec, sspec, design_dir, backend, ct
             return
         except MeshTooLargeError as exc:
             st["kind"], st["err"] = KIND_TOO_LARGE, str(exc)
+            return
+        except GeneratorError as exc:
+            # S1b (2026-10-25 R9 audit / campaign finding): the grid route re-derives and
+            # re-checks geometry INSIDE build_grid_mesh (self-approach, symmetry pairing),
+            # after the recipe-step wrap in mesh/build.py; those generator errors used to
+            # escape as generic Exception rows (kind 'exception', flat 1000, un-memoized -
+            # a 2026-10-25 salmon campaign burned 29/40 evals that way). Map them onto
+            # KIND_INVALID like the recipe step does so they are deterministic, memoized and
+            # never re-run. build_grid_mesh itself keeps raising bare GeneratorError
+            # (tests/test_mesh_grid_build.py pins that contract).
+            st["kind"], st["err"] = KIND_INVALID, f"generator: {exc}"
             return
         why = envelope_violation(bmesh, getattr(cfg, "brief", None))
         if why:
@@ -888,6 +904,13 @@ def _compute(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx, st)
         return
     except MeshTooLargeError as exc:
         st["kind"], st["err"] = KIND_TOO_LARGE, str(exc)
+        return
+    except GeneratorError as exc:
+        # S1b (2026-10-25): same mapping as the band-split path above - the grid route's
+        # in-build_grid_mesh re-checks (self-approach guard, rows/symmetry pairing) raised
+        # GeneratorError outside the mesh error-mapping and were landing as kind 'exception'
+        # (flat, un-memoized, retried). Deterministic generator errors are invalid_geometry.
+        st["kind"], st["err"] = KIND_INVALID, f"generator: {exc}"
         return
     st["mesh"] = mesh
     st["area"], st["grid"] = _grid_info(design_dir)

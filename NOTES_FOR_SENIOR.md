@@ -473,3 +473,34 @@ evaluation (not dofs), freq count bills linearly per solve; stays OFF the 8 GB 4
 (screen keeps 12 freqs / light balloon). Feeds the W6 web Balloon view: its sin(theta) unequal-area
 layout must be interpolated on the sphere, not the index grid, at any density. Full write-up:
 12_RESEARCH_BASIS.md section 12 (owner-directed appendix; BL source recon; GPL-3.0 attribution carried).
+
+2026-10-25 (owner-directed diagnosis + record request): why the puckered/figure-8/bullet outline
+shapes never appeared in the owners own search passes, and how the machinery actually works.
+
+The owner asked: I thought the software randomly tweaked knobs with a GA and could reach those shapes without
+layers - why have I never seen them? Answer recorded verbatim-detailed in 12_RESEARCH_BASIS section 13.8 +
+P8 in NEXT_DEV_PRIORITIES. Compact form:
+
+1. The owners mental model is correct: ONE CMA-ES run, all knobs as simultaneous genes, sampled inside the
+   configs bounds, scored on balloon/beamwidth/DI - no layering is needed. The shapes knob families exist
+   (the per-azimuth stop/fc harmonic laws, the G8/G9 terms; and the 2026-10-25 additions: signed x_amp,
+   the odd-cosine eps_m (full ring), the even-lobe mouth ripple).
+2. Why the passes still returned smooth shapes, three stacked causes (all measured 2026-10-25):
+   (a) the coverage terms equal-weight mean over the screen band let the physically-uncontrollable low band
+       dominate (61-87 percent of cov loss below the K-law break; dislope took another 30-42 percent) - the
+       search could not reduce it and optimized the wrong margins instead. FIXED 2026-10-25: objective v3
+       (the below-f0 mask + freq-weighted cov) + the K-law feasibility preflight recorded per brief.
+   (b) every shipped typology seed sat at x_amp/bend/ripple = 0 with tight bounds: a short screen run is a
+       seed lottery around a smooth seed (40-110 evals never reach a figure-8 outline combination).
+   (c) no objective term reads the 45/135-degree diagonal directions where the puckered outlines act (the
+       balloon stores them; P8b is the pending scoring decision).
+3. The collaborators staged-gene document (verified against Tritonia/seg-horn primaries, section 13.7) is an
+   OPTIONAL refinement (two sequentially-seeded campaigns), never a requirement; recorded as the owners
+   direction: no layers.
+Investigation items: P8a pucker-hunting demo campaign; P8b the diagonal-consistency term (owner
+decision pending); P8c the Tritonia-law rows kind + the segmentizing genes; P8d the GUI surfacing.
+Also recorded 2026-10-25: three writing-hygiene incidents this session (two chat-prose pastes into
+config.py/12_RESEARCH_BASIS tails; one eaten section header twice) - all caught and repaired same-turn;
+lesson: NEVER anchor an edit on a section HEADER alone; re-run section-header greps after every
+doc-structure edit (the 13.6/13.7/14 header greps) and byte-check tails after appends.
+

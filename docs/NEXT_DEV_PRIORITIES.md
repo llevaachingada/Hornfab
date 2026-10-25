@@ -165,6 +165,35 @@ contract-revision window or skip.
 - [ ] **P6a — featured superformula (guiding-curve) search campaign (config-only; realizes the plan README's frozen quick-fork #2).** The OSSE guiding-curve superformula keys (`gcurve_type: 2`, `gcurve_sf_a/b/m1/m2/n1..n3`, `gcurve_se_n`) are mesher-native AND already searchable design-space rows (`design/families.py` gcurve section; `tests/test_design_families.py` "table rows"); superellipse exponents are searched today (`rosse_baseline` 2–8, `freeform_sculpt`). Missing: a catalog family + `examples/` config that SEARCHES the SF knobs, bounds anchored to a verified Ath reference case (a User Guide `GCurve.SF` example or the ATH CORE `sf()` wall-angle script), then one screen-tier campaign. Grounding (typology-research minimum bar): Gielis 2003 + the Ath User Guide — R9 satisfied; `12_RESEARCH_BASIS.md` §11 is the dossier. Cost: config + one screen campaign. Value: star/organic/azimuthally-varying mouth shapes no current config expresses.
 - [ ] **P6b — GSA vs CMA-ES bake-off (owner-gated experiment; NOT scheduled, NOT in any WP).** No published head-to-head exists (`12_RESEARCH_BASIS.md` §11.5); CMA-ES stays the default regardless of outcome; WP11 restarts + CMA-ME atlas remain the scheduled search upgrades. If run: fixed EVALUATION budget (200–400 sims, NOT iterations), identical bounds/graded penalties/initial seed, 5–10 repeats, Latin-hypercube/random baseline, report best-so-far + median per budget; cheapest on the 2-knob exponential family, or after the metric surrogate makes evaluations ~ms (§11.5 protocol).
 
+## P8 (added 2026-10-25, owner-directed: "why did those shapes never show up in my passes — investigate, record, and set up the next investigation"). The puckered/figure-8/bullet outline class as a SEARCH TARGET, not a layered build
+
+**The honest diagnosis (research basis §13.8, all measured this pass):** the machinery for those shapes has been
+in the search layer (the per-azimuth stop/fc laws, the G8/G9 harmonics, the x-amp; the signed-x/one-sided-eps/
+mouth-ripple families landed 2026-10-25) — but the owner's passes could never SEE them rewarded, for three
+stacking reasons: (a) the coverage objective was an equal-weight mean over the screen band whose low half is
+physically uncontrollable in the envelope (61–87% of the cov loss; the v3 mask + the K-law feasibility preflight
+fix this); (b) `dislope`'s slope-0 target fought coverage for 30–42% of J; (c) no objective term ever read the
+DIAGONAL directions (45/135 deg) where the figure-8/puckered outlines do their work — the balloon data stores
+them already. Also every shipped typology seed sat at x_amp/bend/ripple = 0 with tight bounds, so short runs
+(sample lottery) started and stayed smooth.
+
+**Owner direction recorded: no extra "layers" required — one-run CMA-ES search with fixed objectives/bounds is
+the model; the collaborator's staged-gene plan is an OPTIONAL refinement (two sequentially-seeded campaigns;
+the seeds machinery exists), not a requirement.**
+
+- [ ] **P8a — the pucker-hunting demo campaign** (gated on the v3/derivation machinery landed 2026-10-25):
+  the campaign configs whose seeds/bounds AIM at the figure-8/bullet outline class (the signed-x/eps/ripple
+  families + the harmonic laws), verified first by the GPU smoke, then one compare-tier pair (smooth parent vs
+  puckered family) to SEE the difference the class makes in OUR scoring.
+- [ ] **P8b — the diagonal-consistency objective term** (45/135-balloon vs H/V; no new solves; owner decision
+  pending from the 2026-10-25 gate) — the only scoring change that can DIRECTLY reward the class.
+- [ ] **P8c — the Tritonia-law rows kind** (the published alpha(theta) power laws = 12_RESEARCH_BASIS §13.7's
+  verified formulas, amplitudes as genes) as the dedicated "pucker-discovery" geometry family; and the
+  segmentizing genes (eqs 2-4, seg-horn page) as the follow-on candidate. R9: the laws are published
+  (primary author); the per-azimuth assembly labels itself a reconstruction.
+- [ ] **P8d — GUI: show the candidate class** — the compose wizard surfaces the new families + the
+  feasibility record (§13.5/§14.4's GUI integration; designer lane).
+
 ## Not recommended (recorded so nobody re-proposes it without new evidence)
 - Half precision or other "quantization" of the BEM system: the solver is Float32 with a Float64 Krylov space; dense
   high-frequency BEM systems are poorly conditioned.

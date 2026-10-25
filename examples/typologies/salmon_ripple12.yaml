@@ -1,0 +1,93 @@
+# salmon_ripple12: the MOUTH RIPPLE ("pleats") demo config (owner-directed 2026-10-25).
+#
+# The even-lobe radius ripple on the salmon rows: r *= 1 + (ripple_amp_mm/row_max) *
+# w(s) * cos(ripple_lobes * phi), w = the smoothstep window opening at ripple_start.
+# 12 lobes ("mountains") around the mouth, 3 mm ridge height, the window opening at the
+# last 20% of the arc (throat kept clean). Research:
+# docs/research/typologies/MOUTH_RIPPLE_SERRATION_RESEARCH_2026-10-25.md (the honest
+# verdict on the visible puckers + the honest-resolution bar: >= 4 phi samples per lobe
+# period - this config's half span x n_phi 25 gives exactly 4.0).
+# LABELED EXPERIMENT: no published audio mouth-ripple construction exists; the microwave
+# corrugated-horn class is the theoretical neighbour.
+#
+# catalog entry lands in the C4 batch (examples/catalog.yaml).
+name: salmon_ripple12
+family: FREEFORM
+brief_file: ../briefs/organic_rollback_1in.yaml
+generator:
+  name: grid
+  rows:
+    type: salmon_elliptical
+  n_phi: 25
+  n_s: 32
+  wall_thickness_mm: 3.0
+  span: half
+seed_params:
+  g_fc_h_hz: 800.0
+  g_fc_v_hz: 1100.0
+  g_T: 0.8
+  g_stop_deg: 170.0
+  g_ripple_lobes: 12
+  g_ripple_amp_mm: 3.0
+  g_ripple_start: 0.8
+bounds:
+  g_fc_h_hz:
+    lo: 600.0
+    hi: 1200.0
+  g_fc_v_hz:
+    lo: 600.0
+    hi: 1200.0
+  g_T:
+    lo: 0.3
+    hi: 1.0
+  g_stop_deg:
+    lo: 120.0
+    hi: 240.0
+  g_ripple_lobes:
+    lo: 6.0
+    hi: 24.0
+  g_ripple_amp_mm:
+    lo: 0.5
+    hi: 6.0
+  g_ripple_start:
+    lo: 0.7
+    hi: 0.95
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 8.0
+  quadrants: '14'
+  dof_cap_screen: 5000
+  dof_cap_verify: 7000
+  dof_cap_final: 8900
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+search:
+  algorithm: cma
+  sigma0: 0.25
+  seed: 1234
+  budget: 200
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded

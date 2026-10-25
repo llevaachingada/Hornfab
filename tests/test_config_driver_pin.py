@@ -199,7 +199,7 @@ def test_objective_block_from_config_itself(tmp_path, brief_1in):
 
 
 def test_objective_block_invalid(tmp_path):
-    for bad in ({"version": 3}, {"version": "2"}, {"vresion": 2}):
+    for bad in ({"version": 4}, {"version": "2"}, {"vresion": 2}):   # (S1a 2026-10-25: v3 is now a legal version)
         p = _write_brief(tmp_path, {"objective": bad}, name=f"brief_bad_{sorted(bad)[0]}.yaml")
         with pytest.raises(ConfigError):
             load_brief(p)

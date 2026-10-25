@@ -502,6 +502,383 @@ Source basis: the committed BL source extraction `docs/research/boundary_lab_0.5
 
 ---
 
+## 13. Typology-expansion + scoring research pass (added 2026-10-25, owner-directed)
+
+Owner mission for this pass: understand the existing typologies, research new ones (biradial named must-research; salmon/X expansion; ATH waveguides; a broad shape sweep across web/forums), add per-typology baseline settings, and expand the GUI hybridize workflow. Research FIRST, owner picks, then build. Four lanes ran this pass (three dossier files + one read-only audit lane + one run-forensics investigation); everything below is their consolidated record, append-only. Companion dossiers (all dated 2026-10-25, in `docs/research/typologies/`):
+
+- `BIRADIAL_IWATA_300_RESEARCH_2026-10-25.md` — biradial / Iwata 300 / Joseph Crowe.
+- `SHAPE_DISCOVERY_SWEEP_2026-10-25.md` — the broad shape sweep (70+ shapes, tags asymmetric / organic / rippled / multi-direction-gradient).
+- `SALMON_X_HORN_EXPANSION_2026-10-25.md` — Salmon lineage corrections + X readings + expansion menu.
+- The every-typology R9 audit lane and the scoring/seed investigation lane recorded their verdicts in 13.4 / 13.5 below (they intentionally wrote no files).
+
+### 13.1 Biradial / Iwata 300 / Joseph Crowe
+
+**[verified]** The biradial primary construction exists and is reachable: **US4308932A** (D. B. Keele Jr., JBL, filed 1980). Construction: circular throat -> exponential-area connector -> thin slot gap (~18 x 416 mm, ~23:1 aspect) -> power-series flared walls `y = a + b x + c x^n` (n = 4-6) in each plane; the H pair is a surface of revolution about its vertex, the V pair overlaid. Patent reference case: 80 x 36 deg, mouth 780 x 780 mm (L 815.1, throat 48.8), n_h 5.5 / n_v 4.0, 516 mm throat-to-gap + 299.1 mm gap-to-mouth; the length and mouth sums check, but the published W rule at 36 deg is inconsistent and a naive march on the H plane needs negative c — **the H pair lives in a swept frame**. EQU1/EQU2 are image placeholders in the HTML edition (R9-5). Gate shape for shipping: topology + the two consistent scalar checks + the gap aspect, NOT one scalar equation (R9-4). Attribution note: Keele's bio mentions two JBL Bi-Radial patents; the assignee query returns only this one — cite the one we read.
+
+**[verified, negative]** Premise correction: **Joseph Crowe does not sell Iwata kits** (27 biradial product/CAD slugs on his site, zero Iwata products/articles, 2026-10-25). His "ES" biradial line is self-published: no expansion law, no per-plane angles, no independent measurements, white paper promised not published — **R9-3: do not ship, and do not reconstruct ES from photos**.
+
+**[verified, negative]** Iwata 300 as a construction: **no primary source reachable** (Auto-Tech datasheet only: 590 x 320 x 450 mm, throat 50.8 mm, 450 Hz; marketplace "biradial" labels). **R9-2: STOP** — the in-repo `iwata_ar` stays "our reconstruction of the principle, never the product" (`JMLC_FAMILY_VARIANTS` §2.2), which both today's dossiers confirm.
+
+**[open]** diyAudio threads 140190/166312/230122 were blocked by Cloudflare (direct + proxy) on 2026-10-25 — the practitioner pass is thin by infrastructure, and flagged rather than fabricated. Re-rank the menus when access exists.
+
+### 13.2 The broad shape sweep (web/forums candidate pass)
+
+Infrastructure note for that day: DDG captcha, Bing degraded (quoted terms ignored), Brave 429, Mojeek JS-wall, diyAudio 403 — so practitioner evidence is the weak layer, labeled as such.
+
+**[verified, negative]** **"SIBINIC" resolves to no reachable source** (at-horns.eu `/sibinic.html` 404; no Wayback snapshot; no sitemap entry; zero GitHub hits). **DO NOT SHIP the name.** Batik's real formula-level asymmetric designs are:
+
+- **ATH CORE** (CC-BY-4.0): `a(p) = 5 + 35*sf(4,12,15,16,1,0.618,p) - 15*cos(p)^10` with `n = 6 + 1.5*cos^2 p`, `s = 0.6 + 0.23*cos^2 p` — a superformula-law coverage angle in azimuth over an OS-SE body.
+- **Tritonia**: `alpha = 48.5 - 7*cos^5(2t) - 16*sin^12 t`, `s = 0.7 + 0.2*cos^2 t`, `k = 1, n = 3.7, q = 0.995`, then morphed to a rounded rectangle.
+- **Quadratic-Throat Waveguide** (Hughes/Peavey white paper — read): conical bell + circular-arc throat whose included angle equals half the dispersion angle; round->rect via elliptical fillets; published measured harmonics (second -3..-4 dB, third ~-9 dB). Coefficients are withheld, so implement the documented arc rule, not a claimed replica.
+- **Helical twist** (Batik's report of his lost Tritonia ancestor): cross-section rotates down the horn, `phi0(s) = twist*(s/L)^p` — author claims superior behavior, unpublished formulas; a labeled-experiment candidate only.
+
+The repo's genuinely-absent classes (grep-verified against code + docs): a per-azimuth wall-angle law `a(phi)`; helical twist; odd `cos(phi)` single-sided asymmetry (explicitly refused by `grid.py` symmetry guards today); diffraction slot (Mantaray/Keele-CB are concept rows only); ripples along the length; Bessel/HCD/QT flare laws. Trademark discipline: Bi-Radial / Mantaray / Progressive Transition / Image Control / Complex Conic stay generic descriptors in code/config, manufacturers cited in docs. "Geddes quadratic-lobed" attribution is unresolved — verifiable Geddes is OS/OSWG (already the OSSE lineage), and no such typology was invented. Shortlist of 7 with costs in the dossier's §5: CORE/Tritonia azimuth-modulated OS-SE (~200 LOC), twist (~60, full-360 mesh cost), odd-cosine (~40-80), QTW (~100), slot-loaded dual-radial (~250-350; thin-gap class = deferred WP14 risk), mouth ripple/serration (~50), acoustic lens (large; needs a new mesh route).
+
+### 13.3 Salmon lineage corrections + the X reading
+
+**[verified]** The Salmon family literature, at source: **Vincent Salmon**, JASA 17(3) 1946 — theory pp. 199-211 (doi:10.1121/1.1916316) and the family paper pp. 212-218 (doi:10.1121/1.1916317); precursors 1939 measurements (JASA 10:256) and 1941/1942 abstracts. **J. E. Freehafer** (MIT) published the exact infinite hyperbolic-horn impedance in 1940 (doi:10.1121/1.1916061) — the hyperbolic member's math, not the family. **Harry Olson did not originate it**: Olson 1940 (1st ed.) contains zero "Salmon"/"hyperbolic"; the 1947 2nd ed. §6.19 codifies `S = S0*(cosh a + T sinh a)^2` with a T = 0.5 worked example and footnotes Salmon — Olson is the codifier/popularizer. Salmon's papers are plane-wave (Webster) theory; the spherical-wavefront application is Le Cléac'h -> Fourcade. "Hypex" is **not** a Salmon/Olson word (0 hits in both Olson editions): a modern contraction of hyperbolic-exponential.
+
+Corrections from the lane's fetches (dated tables in the dossier; route to Report 2 §7): appendix A's "hyperbolic horn is T < 0" is wrong — the rule is **T < 1** (T=0 catenoidal, T=1 exponential); "Frehaufer" -> **Freehafer**.
+
+**[verified]** The X-horn question splits into three distinct readings, each with its own knob consequence — the owner must pick:
+
+1. **Rectangular mouth with a smoothed diagonal transition** (the AudioHorn (France) "X-Shape" family X21-X40 reading; their published story is "the diagonal measurement is as perfect as the horizontal"). W/H 1.60-1.65, D/W 0.55-0.61 across the family; dimensions/polar **images** published, geometry not — marketing referent, not a construction source.
+2. **The literal X / star rim** — what `salmon_x_shape` builds today. Measured this pass: with the current knob sign the mouth opens along the diagonals; the **opposite sign is already reachable with zero code** via `g_stop_cos2k: [0, +0.25]` (the a4-depth term), giving the diagonal-IN reading.
+3. **A cross-shaped cross-section** — no audio precedent found; the closest adjacent is the RF quad-ridge flared horn (Flygare & Pantaleev, IEEE TAP 2020, doi:10.1109/TAP.2019.2940529). Labeled-experiment territory only.
+
+Also pinned this pass: the signed `x_amp` axis is cut by the 180 deg asymptote (`x_amp <= 180/stop0 - 1`), and **P-M4-2 is worse than recorded** — `ROWS_SALMON_MOD_STOP_RANGE = (120, 240)` is defined but **never enforced**; the code accepts any stop in (0, 360) except exactly 180. Expansion menu measured in-repo (costs): X v2 signed/decoupled knobs (~20 LOC; the sign-flip version is 0 LOC today), salmon family completion (`hypex` T>1 ~5 LOC, `hypex_angle` ~50 LOC, T-gradient ~45 LOC, spherical T bound config-only), **`fc` harmonics `g_fc_cos2k`/`g_fc_sin2k1`** (~80 LOC — the missing loading direction), rows-route G8 mouth shape (~80 LOC), salmon spindle/tractrix/OSSE splices (0 LOC, config+test).
+
+### 13.4 The every-typology-makes-sense R9 audit
+
+**[verified in-repo; audit lane reran the R9-J tests green, 34/34]** The verified core PASSES: conical, exponential, hypex/Salmon, tractrix, OSSE, the ICW/FREEFORM entries, Le Cléac'h T1/rollback/toroidal, and the salmon hypothesis rows (all explicitly labeled), grid ellipse/mod. The R9-J chain is complete and live: dossier gate (Fourcade fig 7 mouth width 467.30 vs 467.30 mm = 0.00), the test (`test_r9j_fourcade_fig7_validation_table`), the rows-route support, and the evidence echoes; the Fourcade PDF primary resolves.
+
+Defects recorded for the closing commit (no behavior change without owner gates):
+
+1. **`splice_osse_tractrix` claims C1 but is C0 on the shipped range.** The 2.0 deg match tolerance (profiles.py `_SPLICE_MATCH_TOL_DEG`) produces kinks up to 1.876 deg for `zs_frac` 0.425-0.575; the test only checks 0.5 and >2. Fix: bridge whenever |dTheta| > 0.5 deg, or relabel the direct-match band honestly.
+2. **`lecleach_iwata_ar` name decision** (the one R9 flag that touches a shipped name): lib-1's dossier accepts the labeled reconstruction; the sweep says rename-gate ("never as 'Iwata'"). Surfaced to the owner; strict path = neutral rename (e.g. `lecleach_ar_evolve`) with attention to the legacy `lecleach_ar` kind-name collision.
+3. **Six stale "Le Cléac'h disabled" sites** (`BETA_QUICKSTART.md:48`, `BETA_SESSION_PLAN.md:70`, `HANDOFF_BETA.md:43` + its :145 echo, `ISSUES.md:192`, `catalog.yaml:6`, `spherical_salmon.yaml:7`) — all contradicted by the live code/catalog and the R9-J evidence; historical/dated records (CONTINUITY 2026-10-22, TYPOLOGY_PLAN frozen text) stay untouched.
+4. Label hygiene: the `organic` group header mislabels the (verified, axisymmetric) lecleach_rollback/toroidal entries; `throat_adapter` claims `hv` but its pinned seed/bounds are axisymmetric; `osse_baseline` says "10 searchable knobs" vs actual 9; `spherical_salmon`'s registry doc promises `{p}_stop_deg` while the code uses `{p}_max_wall_deg`; the internal `salmon_axisym` rows kind silently accepts `fc_v`/`x_amp` (i.e. a non-axisymmetric shape under an axisym name; unlisted/unconfigured/untested — cleanup candidate); the biradial dossier's C2 "salmon entries removed" sentence is false (superseded by the Salmon dossier's C-4).
+5. **Free v2 candidates riding EXISTING kinds** (config-only; all materialized green by the audit lane; the first three are explicitly named in the frozen TYPOLOGY_PLAN but never shipped): `hyb_osse_h_lecleach_v`, `blend_osse_lecleach`, `splice_osse_lecleach` (after the splice fix), `hyb_osse_h_exponential_v`, `salmon_saddle` v2 parameter set, `lecleach_iwata_ar` 2-inch variant (needs a 2" brief/large envelope, not code), `lecleach_toroidal` JMLC-350 class (same note). Hybrids/blends/splices are OUR constructions — label `[inferred]`/"our hybrid" per the x_shape/T5 precedent.
+
+### 13.5 Dispersion scoring + seed derivation (owner-directed; the "75x35 brief does not look like it" investigation)
+
+The owner symptom: an existing design + a 75 x 35 brief, short run, dispersion nowhere near the target, and the geometry the search starts from ignoring the coverage entirely. Root cause verified from the owner's own run directories plus code reads:
+
+1. **The brief's coverage never sizes the seed or bounds.** `load_brief`/`load_config` replace only target/weights (`config.py:657-659`); `materialize` reads only driver/envelope/shared depth (`registry.py:188-202`); the organic typologies additionally pin their OWN internal brief (e.g. `organic_rollback_1in` = 90 x 60), so the owner's brief only changes scoring, never geometry. Materialized proof: the seed is **byte-identical** for 75 x 35 vs 90 x 15 vs band_lo 300 vs 700 (`freeform_sculpt` seed = 370.2 x 370.2 mm round, aspect 1.00; salmon seeds 1.37-1.57; none near a 75 x 35 or 90 x 15 aspect).
+2. **The K-law exists but has no design-side consumer.** `KEELE_K = 25400` (`constants.py:10`), `required_mouth_m()` (`targets/venue.py:70-76`); consumers are only the venue-map feasibility report (HTML) and report echoes — never `load_brief`, `load_config`, `materialize`, `DesignSpace`, or the GUI.
+3. **The stated target is physically impossible inside the stated envelope.** K-law: 75 x 35 at 300 Hz requires mouths 1128.9 x 2419.0 mm vs the 500 x 400 envelope (13.7x the envelope area); 75 deg from a 500 mm wide mouth only above ~677 Hz; 35 deg V from 400 mm only above ~1814 Hz; a 90 x 15 vertical from 400 mm only above ~4233 Hz. Measured across the owner's own completed 110-eval, 0-failure freeform run: the **minimum mean-V over all 110 valid designs was 71.45 deg** (target 35), and the empirical per-frequency minima average 49.08 deg — the target is outside the reachable set, not under-searched.
+4. **Scoring amplifiers:** `cov` is an equal-weight mean over the 12 screen freqs (`objective/terms.py:49-54`), and 61-87% of the cov loss sits at the five freqs below each best design's V break (irreducible in-envelope); `dislope` is a hostile competitor (slope-0 is unattainable over a decade with a fixed mouth; 30-42% of J in the salmon/lecleach runs); `freq_weights` reweights **only `rip`** (`objective/scalar_v2.py:229-234`), so no brief knob can mask the impossible band today; the screen tier sees exactly 500-10000 Hz (`config.py:26-30,765-785`) so band_lo 300 is never even scored; and there is no coverage-attainment gate/flag — a 43-58 deg V miss is still a ranked "best".
+5. **Secondary defects found in the same forensics:** the grid self-approach `GeneratorError` escapes the mesh error-mapping (`mesh/grid_build.py:138-188` vs the try at `:183-188`) and lands as `kind="exception"`, flat 1000, un-memoized, retried (the 40-eval salmon run wasted 29/40); the GUI seed gate loads the typology's OWN brief, not the selected one (`gui/data.py:958-969`), so `lecleach_iwata_ar`/`lecleach_toroidal` seeds die under the user's 17.4 mm/8 deg driver with zero rows (zombie GUI jobs); campaign `is_compatible` reads `brief_sym` but never uses it, so an axisymmetric brief ran hv families (the 7040 campaign's 458 x 240 mm mouths); native FREEFORM ignores the brief's throat radius entirely (seed 12.7 mm vs brief 17.4); brief data hygiene: `7040.yaml` describes 90 x 90 but targets 50 x 50 (the ~92 x 92 results were CORRECT per target), `75x35.yaml`'s description says "Eighty by 40", and `load: 0.5` with `z_min: 0` is a dead term.
+
+**Proposed fix order** (gated parts go to the owner menu): **(A)** brief-derived seed/bounds/mouth — optional explicit `target.f0_hz` (default band_lo), per-axis `d = KEELE_K/(f0*coverage)`, seed knobs + bounds around it, envelope-clipped targets flagged `feasible=false` + `f_break` (the frozen §11 Target schema gets an ADDITIVE key — owner amendment; derivation warns/flags, never hard-refuses, per the contracts' design-check rule); **(B)** co-score the attainable band — extend frequency weighting to `cov` (or objective v3 with a below-f0 mask) so the impossible band stops dominating the gradient (owner-gated; v3 is the non-retroactive route); **(C)** the pure bug fixes above; **(D)** only then weight/budget tuning — raising the cov weight FIRST is explicitly contraindicated (cov is already 88% of J in the 110-eval run; the target is unreachable, so weights chase the same wall). Validation checks to add (CPU-only): seed-must-materialize-under-the-selected-brief for every family x brief; a seed-mouth vs brief-derived-mouth ratio gate (0.5x-2.0x or `feasible=false`); cov-weighting actually changes cov; axi-brief x hv-family refusal. Latent hazard noted: `Design.hash()` does not bind the brief's driver/envelope, so two briefs can cross caches (fixing keys invalidates caches — owner-gated).
+
+### 13.6 Baseline-settings direction (Phase D, owner-gated as global changes)
+
+The per-typology baseline tables derive from (A)'s rule once approved: per-axis K-law mouth defaults, envelope-aware feasibility flags, and brief weight presets ordered as (B) prescribes. Existing typology defaults (`registry.DEFAULT_KNOBS`) stay untouched; baseline settings ship as typology-side configs until the owner opens the personal-brief session (deferred per the handoff).
+
+### 13.7 The azimuthal-modulation / segmentizing synthesis (added 2026-10-25, owner-provided document, verified this session against the primary pages)
+
+The owner supplied a collaborator's synthesis of how the ATH-class "puckered" horns are defined
+and how a GA should encode them, and asked to verify it against this repo and save it. Every
+load-bearing formula was checked today against the author's own pages (fetched in full); verdicts:
+
+**[verified]** `alpha(theta) = 48.5 - 7 cos^5(2 theta) - 16 sin^12(theta)` and
+`s(theta) = 0.7 + 0.2 cos^2(theta)` with `k = 1, n = 3.7, q = 0.995`
+(at-horns.eu/tritonia.html, "The design of Tritonia" section, verbatim). Corrections to the
+supplied document, all sourced:
+
+1. **Tritonia's base is OS-SE, not R-OSSE.** The page: the design "uses two basic techniques:
+   1) a parametrized OS-SE profile and 2) morphing it to a rounded rectangle", with alpha(theta)
+   the "variable coverage angle parameter of the OS-SE formula". R-OSSE is the segmentizing
+   article's WORKED EXAMPLE base, not Tritonia's. The structure of the claim (azimuthal
+   modulation of an axisymmetric base) is exactly right; the Tritonia instance's base is OS-SE.
+2. **The alpha(theta) law is "purely empirical"** (Batik's own words): a design recipe, not a
+   derived physical law. R9 label: ship-attributable to the published page as an empirical recipe.
+3. The supplied document omitted the mouth-termination law s(theta) and the fixed
+   n = 3.7 / q = 0.995 / k = 1 that complete the published recipe.
+
+**[verified]** The segmentizing math, verbatim (at-horns.eu/seg-horn.html, Batik, February 2024):
+
+- `r'(theta) = r_S sin(theta_S) / (sin(theta_S) cos(theta) + (1 - cos(theta_S)) sin(theta))` (eq. 1,
+  the straight-segment target; the worked example theta_S = 60, r_S ~ r(t_m) ~ 64 mm).
+- `m(t) = sin(pi ((t - t_0)/(t_1 - t_0))^zeta)^kappa` for t in (t_0, t_1), 0 otherwise (eq. 2, the
+  meander weighting; zeta = skew, kappa = sharpness; maximum at
+  `t_m = t_0 + (t_1 - t_0)/2^(1/zeta)`; worked example t_0 = 0.8, kappa = 4, zeta = 0.75 ->
+  t_m ~ 0.32). Lineage: Batik's own meander function from "Spherical Wave Forming" (Ath-AP1.pdf).
+- `r'(t, theta) = r(t) + m(t) (r'(theta) - r(t_m))` (eq. 3, the transformed radius).
+- `r_S` variants: edges-deformed (r_S = r(t_m)/cos(theta_S/2)) or the geometric average
+  `r_S = r(t_m) sqrt(1/cos(theta_S/2))`; and the general target:
+  `r'(theta) = r_S + delta sin(pi (theta/theta_S)^mu)^nu` (eq. 4; delta in mm).
+- Worked-example base: R-OSSE `R = 200, r_0 = 12.7, a = 35, a_0 = 5, k = 1.5, r = 0.35, m = 0.75,
+  q = 3.8, b = 0` (the same numbers a prior lane banked - consistent).
+
+**[reported, unverified here]** The IET spline+GA/PSO paper ("Synthesis and analysis of multi-mode
+profile horn...") and the BEM/GA acoustic shape-optimization paper: not fetched this session; kept
+as the encoding-method precedents with the owner's attribution.
+
+**[verified]** The staged-gene encoding maps ONE-TO-ONE onto this repo's shipped machinery
+(the mapping table of 2026-10-25 chat, the search-layer reading):
+
+| Supplied stage | Our surface | Note |
+|---|---|---|
+| Stage 1: axisymmetric R-OSSE / OS-SE base genes | `rosse_baseline` (the R-OSSE formula family, searched since M1) / OS-SE generator knobs | the mesher's own formulas |
+| Stage 2: alpha(theta) coefficients as sum-of-cos/sine genes | the rows route: `fc(phi)` (the T3 law) + `g_stop_cos2k` / `g_stop_sin2k1` + the signed `g_x_amp` + the bend | shipped |
+| Stage 2b: odd/asymmetric directions | `g_eps_m` (odd-cosine, full ring) + signed x + the ripple | landed 2026-10-25 |
+| Stage 3: segmentizing genes (zeta/kappa/delta/mu/nu) | NOT built; our smoothstep windows (3t^2-2t^3) are the same object at fixed shape. Candidate: a rows modulation family implementing eqs 2-4 verbatim + | |
+| Spline control-point genes | `freeform_sculpt` (11 control-point knobs) | shipped |
+| Fitness (CD error / ripple / impedance / off-axis lobes) | `cov`/`rip`/`flat`/`load` + DI (+ the pending diagonal-consistency term) | shipped + one pending |
+| Coarse-to-fine staged search | campaign practice: the base config first, then a modulation config seeded at the winner | practice |
+
+The visual record of the puckers (TwinRay/Opus 12 mouth renders, analyzed this session via the
+image lane): the rim FRAME is planar; the flare's approach to it undulates smoothly (one pinch per
+edge, corners deepest - consistent with the shipped G9 `dz(phi) = -term cos^2(phi)` law's 2-lobe
+shape plus edge rounding); the "figure-8" = the interior petal rosette, the "bullet" = the
+squircle throat ring; no sharp corrugation facets anywhere. Details:
+`docs/research/typologies/MOUTH_RIPPLE_SERRATION_RESEARCH_2026-10-25.md`.
+
+Links (primary pages, all fetched 2026-10-25): at-horns.eu/tritonia.html (alpha(theta) + s(theta)
++ k/n/q + the published per-model Ath codes: ext/Tritonia.txt, ext/Tritonia-S.txt, ext/Tritonia-M.txt
++ the polars + the DIY gallery post links in the thread 338806);
+at-horns.eu/seg-horn.html (eqs 1-4 + the meander lineage Ath-AP1.pdf);
+release/R-OSSE Waveguide rev7.pdf (the segmentizing example's base) and
+release/OS-SE Waveguide.pdf (the Tritonia base) remain the formula primaries.
+
+---
+
+### 13.8 Why the puckered shapes never appeared in the owner's own passes (added 2026-10-25, owner-directed diagnosis)
+
+Owner question, verbatim intent: "I have not seen any of those types of geometry in any of the passes I've done;
+I thought the software would randomly tweak knobs and do a genetic algorithm and figure out what works, without a
+bunch of layers." The answer, all measured this pass:
+
+1. **Their mental model is correct and needs no layering.** One CMA-ES run, all knobs as simultaneous genes,
+   sampled within the config's bounds, scored by the balloon/beamwidth objectives - that is the whole mechanism,
+   and it CAN reach the figure-8/bullet/puckered outline class, whose knob families exist (the per-azimuth
+   stop/fc harmonic laws; the G8/G9 terms; and since 2026-10-25 the signed x, the odd-cosine eps, the
+   mouth ripple).
+2. **Why the passes still returned smooth shapes - three stacking causes, all measured:**
+   a. *The objective could not reward the class.* `cov` was an equal-weight mean over the screen band, and
+   61-87% of its loss sat below the geometry's K-law break frequency (physically uncontrollable in the
+   envelope; §13.5). The outline/pucker details are 0.2-1 dB-class effects and were invisible under that
+   handicap; `dislope`'s slope-0 target took another 30-42% of J. Fixed today: objective v3 (the below-f0
+   mask + freq-weighted cov) + the K-law feasibility preflight that states honestly, per brief, what the box
+   can hold BEFORE the run.
+   b. *The shipped seeds and bounds never approached the class.* Every shipped typology seed sat at
+   x_amp/bend/ripple = 0 with tight bounds; a short screen run (40-110 evals, sigma0 = 0.25 normalized) is a
+   seed lottery around the seed - it started smooth and stayed smooth. The new-signed/eps/ripple knob families
+   need campaign configs whose seeds/bounds AIM at the class (P8a).
+   c. *No objective term read the diagonals.* The 45/135 deg balloon directions (stored on every design) are
+   where the figure-8/puckered outlines act; nothing scored them (P8b).
+3. **The collaborator's staged-gene document is an OPTIONAL refinement, not a requirement** (the owner's word
+   recorded): coarse-to-fine = run the base config, then a modulation config seeded at its winner; the
+   campaign's own seed plumbing supports the sequence without new machinery. The one-run search remains the
+   model once the objectives/bounds are sane - which is exactly what 2026-10-25's fixes deliver.
+
+## 14. Corner-mounted horns with room-aware asymmetric dispersion (added 2026-10-25, owner-directed)
+
+Owner concept for this pass: a custom horn mounted where two walls meet the ceiling (an "up-corner"), one horn in each of the four corners of a rectangular room, its 3D dispersion shaped — asymmetric, tapering toward the room center — so that the four units together cover the room evenly across the frequency band. The owner's voice note read "Centennial frequency band"; we interpret it as "entire frequency band" — **[open]** confirm with the owner.
+
+Method note, flagged rather than hidden: the librarian route was down today (four background attempts returned empty final results), so web claims below come from direct fetches by the orchestrator, labeled as usual. The practitioner-literature pass (AES/ASA papers on corner/eighth-space directivity) remains **[open]** for a librarian recovery pass.
+
+### 14.1 Precedent: corner loading is the Klipschorn's founding idea
+
+**[verified]** Wikipedia (fetched 2026-10-25): *"The speaker sits in the corner of two adjoining walls, using the walls and floor boundaries as extensions of the horn. Technically speaking, the K-Horn's folded bass 'corner horn' can be described as a bifurcated trihedral (floor and two walls to form the trihedral corner) exponential wave transmission line"* — patented by Paul W. Klipsch in 1946, in continuous production since; *"utilizing the room walls and floor boundaries as extensions of the bass horn helps extend the speaker's frequency response down into the 35 Hz range, considerably lower than would be possible otherwise."* The room's own surfaces are the last horn flare — that is exactly the physics the owner proposes.
+
+**[verified]** Same page: Klipsch, "Modulation Distortion in Loudspeakers", AES Convention 34, April 1968 (elib 1448); Holland/Fahy/Newell, "The Sound of Midrange Horns for Studio Monitors", JAES 44(1/2):23–36, 1996 (honkiness causes still researched — cited there).
+
+Three differences from the Klipschorn, and they are the concept: **(a)** up-corner (ceiling instead of floor), **(b)** the corner loading serves the FULL band, not just bass (the K-Horn's mid/tweeter horns are conventional), **(c)** dispersion is shaped against the four-source SUM over the room's listeners, not against efficiency.
+
+**[inferred]** Image-source physics: each rigid boundary plane adds a mirrored image contribution; the classic loading ladder is full → half → quarter → eighth space (−0/−3/−6/−9 dB relative conventions). Standard acoustics (image-source method), not re-verified from a primary this pass.
+
+### 14.2 What three boundaries buy a design
+
+**[inferred] engineering reasoning, each item testable in our solver:**
+
+1. **The room does the last flare.** The hardware mouth can be smaller for the same effective acoustic termination at the loading frequencies. §13.5 showed the K-law mouth is the binding constraint (75×35° at 300 Hz → mouths 1128.9 × 2419.0 mm, 13.7× the envelope area). Corner mounting moves part of that expansion out of manufactured geometry and into the room's surfaces — it relaxes the constraint exactly where it binds (low frequencies).
+2. **The ceiling plane is free directivity control in the wasted direction.** Danley's stated design goal is the same instinct: *"Put the sound energy in the audience's seats, not sprayed over the side walls, ceiling and floors. Maintain directivity control at the lowest possible frequency"* **[verified]** tech page, fetched 2026-10-25. An up-corner mount removes one entire half-plane of radiation by construction.
+3. **Four sources comb-filter in the low-mid band.** Corners are metres apart; the summed field at a listener is frequency-dependent. An even-coverage objective must therefore co-consider per-unit band/level/timing (or accept a mono-summed, symmetric-pair deployment) — **[open]** design study.
+4. **Walls are rigid only up to their material absorption.** The solver assumes rigid lossless boundaries (`TOOLCHAIN.md:182-183`); a corner brief should carry a wall-treatment assumption. **[open]**.
+
+### 14.3 External software landscape (fetched 2026-10-25 unless noted)
+
+- **AFMG EASE 5 —[verified] product page:** the reference discipline for "even coverage in a room": GLL loudspeaker data format (~3,000 datasets / ~300 brands, "simulation accuracy of up to 1 dB"), Acousteer real-time engine, Direct SPL coverage maps, loudspeaker coverage overlap, loudspeaker density (3/6/10 dB), STI per IEC 60268-16:2020, D/R ratio, critical distance, audience areas + listener seats, DWG import. This is what "coverage engineering" looks like in industry practice — our room-aware objective can mirror its vocabulary.
+- **Danley Synergy Horn / Cohearix —[verified] tech page:** full-range point-source horn; multiple drivers *"behave as a single full range loudspeaker"*; Cohearix Lens (patent-pending, announced 2025-06-11) produces segmented radiation arcs that *"sum into a true single source"* with adjustable focal length. The nearest modern product philosophy to coverage-tapered dispersion.
+- **ATH (Batík) as the practice tool for asymmetry — already verified in this document (§11/§13):** superformula azimuthal coverage-law modulation (ATH CORE formula), Tritonia morphing, superellipse outlines; exports meshes toward ABEC. No new research needed to reuse those findings.
+- **Hornresp —[open]**: site unreachable this pass (direct fetch fails; the Wayback capture list covers 2013–2026 but snapshot content did not render). The practitioner-known quarter/eighth-space radiation-angle modeling is **[reported, unverified]**.
+- **d&b ArrayCalc —[reported, unverified]**: product page unreachable twice today; industry-standard coverage-mapping ecosystem by reputation only.
+- **Neural surrogates (§10) — not usable for design ranking** at our tolerances; corner work stays on the real-solver path.
+
+### 14.4 In-repo reality check — what supports the concept today
+
+All claims **[verified in-repo]** from the recon pass (paths cited):
+
+Support that already exists:
+
+- **Quarter-symmetry already models a two-boundary corner.** `SolveConfig(native_symmetry_plane="yz+xz")` + `quadrants: "1"` mirrors the geometry across two orthogonal rigid planes — the physical equivalent of a horn mouth flush with two walls (or wall + ceiling). The owner's trihedral corner has THREE boundaries; **two of the three are representable today** (`mesh/sizing.py:16-17` single source; `01_CONTRACTS.md:353-368`).
+- `brief.mounting` end-to-end plumbing (block validator, normalized keys, cache/provenance): `config.py:136-149,276-340`, `design/families.py:476-511`, `mesh/build.py:244-274` — a new mounting type rides the existing pattern.
+- Independent H/V asymmetric geometry exists: FREEFORM `profileH`/`profileV` (`design/families.py:141-142,363-371`) and per-azimuth GRID rows (`design/generators/grid.py:107-124,465-484`).
+- `targets/venue.py:18-107` already holds `coverage_from_room` plus the Keele K-law mouth rule (verified §13.5) — but it is unreachable from any brief today.
+
+Gaps (**[verified, negative]**):
+
+1. **No third mirror plane anywhere** — BEAT symmetry modes are `off`/`x`/`xy` only (`forks/hornlab-beat-bem/.../config.py:~104-116`), `ground_plane` (y=0) exists but is refused in combination with native symmetry (`capabilities.py:204-236`, single image-transform set); the bempp path and mesher likewise top out at two planes.
+2. **No wall/ceiling/corner mounting type** — `brief.mounting` supports `enclosure` only; the CAD/STEP route refuses mounting entirely (`mesh/step_build.py:488-499`).
+3. **No room-aware coverage objective** — Target is a single included H/V angle pair (`targets/spec.py:7-16`); no room dims, listener positions, per-azimuth/per-elevation profiles, or SPL-on-map term.
+4. **No asymmetric-dispersion target** — geometry can BE asymmetric (GRID/FREEFORM); nothing can SCORE asymmetry.
+5. **No room/listener coverage visualization** — balloon view exists (`gui/data.py:699-780`); no floor-plane multi-source map.
+6. **Scale** — full-domain CUDA ceiling ~5,500 dofs binds a fully asymmetric mesh at high f (12,000 for fused-CUDA quarter). **[inferred]** An eighth-domain (three mirror planes) would REDUCE dofs to roughly half of the quarter model for the same horn — the missing solver feature is also the cheaper-simulation one.
+
+Note: senior-pass grid row G11 ("up/down asymmetric — listening-axis tilt, floor/ceiling control", `research/senior_pass_2026-10-24/02_TYPOLOGIES_AND_MULTICELL.md:58`) was already flagged "high for real rooms" — this concept is its systematic version.
+
+### 14.5 Implementation menu, ranked (owner-gated per house rules)
+
+- **Route 1 — evidence first, zero new code: measure the corner-loading delta in our own solver.** A/B screen of the same seed horn: quarter-symmetry flush with two planes vs freestanding. Delivers the ΔDI/ΔJ/dofs numbers that justify (or kill) everything else, under existing checkpoint rules and GPU etiquette. Days, not weeks.
+- **Route 2 — the trihedral fork feature (`eighth-space` symmetry).** Add a third mirror plane through the FORKS.md ladder (BEAT symmetry mode + mesher snap axis + our sizing/topology/contract plumbing). Bounded and mechanical; unlocks true trihedral solves and makes them cheap (14.4.6). Naming: nothing ships under a published name without a verifiable published reference (R9) — §14.1 anchors the concept; a coined typology name waits for the practitioner-literature pass.
+- **Route 3 — coverage-aware brief, additive contract keys** (the §13.5 owner-amendment pattern): optional `room` block (dimensions, listener plane) + per-elevation coverage targets + a coverage-map objective term (four-source sum over listener positions). `venue.py` already holds half the machinery.
+- **Route 4 — asymmetric dispersion targets** so the objective can score what GRID/FREEFORM can already build (per-elevation/per-azimuth target profile).
+- **Route 5 — report/GUI: four-source floor-plane coverage map** per frequency band — a rendering feature over stored response data, in the §12 balloon-grammar lineage.
+- **Route 0 — desk study: done (this section).** The next concrete step is the owner Q&A below, then Route 1.
+
+**[open], for a later librarian recovery pass:** AES/ASA literature on corner/eighth-space directivity and corner-array practice; Hornresp help-file verification; quadraphonic-era four-corner practice; wall-absorption sensitivity.
+
+### 14.6 Sources for this section
+
+- Wikipedia, Klipschorn (fetched 2026-10-25): https://en.wikipedia.org/wiki/Klipschorn
+- P. W. Klipsch, "Modulation Distortion in Loudspeakers", AES Convention 34 (1968), elib 1448: http://www.aes.org/e-lib/browse.cfm?elib=1448
+- Holland, Fahy, Newell, "The Sound of Midrange Horns for Studio Monitors", JAES 44(1/2):23–36, 1996: http://www.aes.org/e-lib/browse.cfm?elib=7915
+- Danley Sound Labs, technology page (fetched 2026-10-25): https://www.danleysoundlabs.com/about/danley-technology/
+- AFMG EASE 5 product page (fetched 2026-10-25): https://www.afmg.eu/en/ease
+- audioroundtable.com, Keele "Optimum Horn Mouth Size" PDF (binary fetched this pass; analysis deferred — the K-law's use in this repo is verified from code in §13.5): https://audioroundtable.com/misc/Optimum_Horn_Mouth_Size.pdf
+- hornresp.net — unreachable this pass (direct + Wayback capture index 175 captures 2013–2026):
+- d&b ArrayCalc — unreachable this pass: https://www.dbaudio.com/
+- In-repo anchors already verified in §11/§13: Ath user guide, OS-SE/R-OSSE papers, US4308932A, Salmon JASA 1946.
+
+---
+
+## 15. Boundary Lab interop, refreshed against the newest upstream (added 2026-10-25, owner-directed)
+
+Owner question for this pass: *look at the newest version of Boundary Lab and how we could push our best designs to BL for room modeling, and vice versa.* No code changed — research + plan refresh only.
+
+### 15.1 Version check
+
+**[verified]** The latest published Boundary Lab release is **v0.5.0** (2026-10-20, tag commit `6c9185b`, BEAT 0.6.0 wheel pinned, SHA `10db2ee2…7dd3`; main at 409 commits at fetch time). The repo's `docs/research/boundary_lab_0.5/bl_inventory.md` was written against exactly 0.5.0 — **it remains the current-version inventory**; no new solver/mesh/API surface to relearn, and all of its docs-stale caveats stay valid.
+
+**[verified]** 0.5.0 adds vs our 0.4.x-era knowledge (release notes): geometry-provider plugins + transactional multi-mesh assemblies + a bundled parametric vented-enclosure generator; near-coincident-vertex detect/repair; interface geometry measurements; **axial prescribed sources** (`rigid_translation` motion — piston-driver models); thermoviscous wall loss (supported FEM regions); generic driver text import/export; radiated SPL contributions from coupled interfaces; `.blabsp` speaker-package export (with `--viewport-model`); Deploy moved to a separate app; BEAT 0.6.0's projected FEM-BEM interface correction **changes coupled-model numerics** (exterior-only solves unaffected **[inferred]**); known CUDA low-current 50 Hz caveat (0.134 % vs CPU) — use CPU where low-current accuracy matters (sub-relevance, not horn DI).
+
+### 15.2 Boundary Lab Deploy — the room-modeling bridge
+
+**[verified]** README + release notes: `boundary_lab_deploy` is a **standalone array prediction tool that consumes `.blabsp` speaker packages** and depends directly on BEAT Engine; BL retains speaker-package export. The pipeline for the owner's "push designs to room modeling" is therefore:
+
+```
+hornlab-search best design
+  → export-blab (BL-1, .blab.json schema 10)
+  → blab project solve / BL GUI solve (or export-speaker directly)
+  → .blabsp
+  → Boundary Lab Deploy (array/room prediction)
+```
+
+**[open]** Deploy's actual feature set (rooms, surfaces, delay/level per element) is unverified — its repo was not fetched this pass; it is the first item for the librarian recovery pass.
+
+### 15.3 Push-out (ours → BL), status and mechanics
+
+**[verified in-repo]** `docs/BOUNDARY_LAB_INTEGRATION_PLAN.md` (PROPOSED; priority order BL-1 export → BL-2 cross-check → BL-3 plugin PARKED per the 2026-10-22 senior report) is designed against **exactly this 0.5.0 surface** (project schema 10, request overlay v1, result manifest v2, `provider_api` 1):
+
+- **BL-1 `export-blab`** (~300 LOC, ~15 offline tests, no GPU, CP-11b): minimal exterior fixture pattern + request.json with exact frequencies; symmetry map `yz+xz→xy` from the **single source** `sizing.SYMMETRY_PLANE` (BL has no Y-only symmetry; `"xz"` refuses); boundary roles from `$PhysicalNames`; `metadata.hornlab` provenance survives loading; refusal cases (bbox, scale, unknown groups, `quadrants "12"`).
+- **BL-2 headless cross-check** (~300 LOC, 1 GPU, CP-11c): `blab project solve … --backend beat_cuda --events ndjson` as the third independent solver against the frozen CP-7b < 0.2 dB rule; **GPU hygiene mandatory** — BL does not shut down its Julia worker, so the wrapper must kill and verify per `AGENTS.md` rules.
+- **BL-3 geometry-provider plugin (PARKED)**: the native two-way GUI route (provider manifest + "Load best from hornlab run" + subprocess worker); not the optimization driver, per the plan's own risk analysis.
+- Headless `.blabsp`: `blab project export-speaker --fidelity {pattern,fixed,coupled}` already writes the Deploy-consumable package from the CLI **[verified]** (`bl_inventory.md` §1.2) — no GUI needed for the room-modeling pipeline.
+- **Never-in-venv rule unchanged**: BL hard-pins `beat_engine == 0.6.0` at import; BL gets its own environment and is subprocess-called (`HORNLAB_BLAB_EXE`).
+
+### 15.4 Pull-in (BL → ours), two concrete routes
+
+- **BL project meshes → our scoring**: BL projects carry Gmsh 2.2 ASCII `.msh` (expanded + reduced variants); our mesher's **LOOKUP** typology (`research/typologies/MESHER_TYPOLOGIES.md`) exists for foreign geometry — **[inferred]** a small adapter task makes any BL- or Ath-authored mesh a hornlab-search candidate (score/optimize it against our objectives). Needs a bounded design study before a plan.
+- **Ath `.cfg` authoring**: BL bundles Ath and only interprets `Mesh.Quadrants`; the cfg vocabulary `Coverage.Angle` expressions (`36 + 17*cos(p)^2`), `GCurve.SF` superformula, and `Morph.TargetWidth/TargetHeight` are verified in BL's examples (`bl_inventory.md` §7) — i.e., **asymmetric H/V and azimuth-law coverage are natively authorable on the BL side today**. **[inferred]** An Ath-cfg source row in our search layer would let a BL-authored brief be scored and optimized here, closing the loop both ways.
+- Conversions that must be tested closed-form before either route (plan-mandated): unit acceleration vs `normal_velocity` 1 m/s; `exp(+i ωt)` vs `exp(−i ωt)` conjugation.
+
+### 15.5 Corner-concept tie-in
+
+**[verified]** BL/Ath can author asymmetric coverage today (morph/superformula/coverage-expression keys); our sf-rows do superformula azimuth laws (§11). A corner brief travels both directions through the routes above, and **[verified]** BL itself solves exterior/free-space BEM only — the room boundaries live in Deploy, not in the BL solver — so the corner concept's room modeling rides the `.blabsp`→Deploy pipeline, while the corner *horn geometry* rides the BEM pipelines (ours and BL's **[inferred]**).
+
+### 15.7 Boundary Lab Deploy, verified against its repo (recorded 2026-10-25, librarian lane lib-5)
+
+All claims **[verified]** from the repo/docs/API fetches below unless labeled.
+
+- **What it is**: standalone desktop app (Electron/React + Python/Julia worker), GPL-3.0, for *"loudspeaker-array placement, coverage, and loading analysis"*; BL is the speaker-package *authoring* app, not a runtime dependency. **Current version `0.1.0rc4`** (tag 2026-09-28; BEAT pins: rc4 tag → 0.3.0, `main` → **0.5.1** since 2026-10-15). **No published GitHub Release** — four rc tags only; post-rc4 `main` (Metal/macOS readiness, scene editing, captures, 2026-10-17) is unreleased. Prototype scale: 67 commits, 2 stars.
+- **Three calculation levels** (User Guide): **Pattern L1** = packaged directional responses + distance/phase propagation + coherent array summation + rigid-ground reflections (TypeScript side; no Julia needed); **Boundary L2** = exterior BEM with fixed distributed sources + ground/scene scattering; **Coupled L3** = exterior coupled to reduced interiors (rank-32-per-sector parity Petrov–Galerkin ROM) incl. **mutual loading and transducer feedback** between cabinets.
+- **"Room modeling" is PARTIAL — rigid-boundary only.** There is no feature named room modeling; the physical scene is an **always-on, infinite, perfectly rigid ground plane** (cannot be disabled or assigned a material) plus imported **sound-hard (rigid) objects** ("do not model material absorption or transmission"). No acoustic surface materials anywhere (OBJ/.mtl are viewport-display only). **[inferred] consequence for the corner concept: Deploy does not model an interior room — walls/ceiling cannot be represented (no ceiling plane, no absorbing surfaces); its frame is outdoor/arena-style scenes over rigid ground.** The corner concept's even-coverage study therefore needs OUR room-aware objective (§14.5 Route 3), not Deploy, unless the owner accepts a rigid-floor-only approximation.
+- **Coverage prediction exists**: audience planes (position/orientation/dimensions/resolution; 0.5–10 points/m, 250,000-point ceiling per plane), **single-frequency** SPL / real / imaginary pressure maps, average-and-spread statistics (average = **arithmetic mean of dB values**; spread = P90−P10 — not energy/broadband measures), point-microphone probes with frequency sweeps.
+- **Per-element DSP**: level/delay/polarity/mute per instance (`levels and delays add, polarities multiply`); drive `g(f) = σ·10^(L/20)·exp(+i2πfτ)`; **EQ filter banks implemented on `main`** (schema 10: peq/shelf/allpass LP/HP, max 64 per bank) — the user-guide text calling EQ "placeholders" is contradicted by `docs/filter-banks.md` + code; treat the guide as stale.
+- **`.blabsp` format** (schema `"boundary-lab-speaker-package"` v1, versioned ZIP64; produced by BL's `blab project export-speaker --fidelity {pattern|fixed|coupled}`): L1 `data/patterns.npz` (complex pressure on a Fibonacci sampling sphere), L2 adds `data/fixed-sources.npz` + `geometry/exterior.msh`, L3 adds `data/coupled-rom.npz`; coordinates rotated `(x, y, z) → (x, z, −y)` (BL +Z-forward → package +Y-forward); phasor `exp(+iωt)` preserved; provenance + SHA-256 checksums; Deploy validates strictly (schema v1 only; mixed packages must share medium; solves at the frequency intersection).
+- **Worker hygiene good news**: Deploy's worker calls BEAT directly and *"owns and terminates its own workers"* (extraction doc) — compliant with our GPU rules when/if we ever drive it.
+- **Disclaimer honored in any report**: Deploy is *"intended for array design studies, not rigging approval…"*; no independent accuracy validation exists; single-machine benchmark only.
+- **Pipeline update** (supersedes §15.2's sketch): the room-prediction leg requires **a BL solve first** (packages are authored in BL from a solved physical system; L3 additionally requires a coupled FEM-BEM system and temporarily expands symmetry to full domain before export). Full chain: `export-blab → blab solve → export-speaker (CLI, no GUI) → .blabsp → Deploy`. **[open]** Authoring `.blabsp` directly from our own solves would skip BL, but the manifest/ROM contract makes it a bigger, riskier route — not proposed now.
+
+Sources: https://github.com/JWSound/boundary_lab_deploy (README; `desktop/docs/user-guide.md` last commit 2026-10-17; `desktop/docs/system-model.md` 2026-09-22; `docs/extraction.md` 2026-09-21; `docs/filter-banks.md` 2026-09-22; `docs/solver-backends.md` 2026-10-09; `docs/plane-sampling.md` 2026-09-23; `docs/releases/0.1.0rc1-4.md`; tags/releases API 2026-10-25) · BL side: `docs/Inputs and Outputs.md`, `docs/advanced/cli-workflow.md` 2026-10-07, `src/blab/speaker_package.py`, `src/blab/ui/speaker_package_dialog.py`.
+
+---
+
+## 16. Typology expansion: white papers, formulas, drivers (added 2026-10-25, owner-directed)
+
+### 16.1 The typology map, dated and sourced
+
+**[verified]** unless noted (fetches of 2026-10-25: Wikipedia horn-loudspeaker + compression-driver + Keele pages; SynAudCon Hughes article).
+
+| Typology | Origin | Source | Core idea | In our repo |
+|---|---|---|---|---|
+| Conical / megaphone | oldest | Peavey QTW paper claim: conic sections radiate spherical wavefronts — no phase/amplitude distortion **[reported]** | straight walls; basis of QTW and OS bodies | conical row verified |
+| Exponential | 1924 | Hanna & Slepian, AIEE (JAES 25:573–585 reprint 1977) | `S = S0·e^(mx)`; loading advantage; beaming drawback | verified (salmon/exponential rows) |
+| Multicell | patent **1936** (E. C. Wente, Western Electric); in use since 1933; Altec Duplex 601/604 1943–1998 | | array of narrow cells; lobing up to ~10 dB between lobes **[reported, Eargle]** | WP14 banked (dossier holds deferred first attempt + resume recipe) |
+| Radial / sectoral / diffraction | 1940s–; JBL "Smith" horn (2397, 1978; 2405H 90°×35° @ 20 kHz) | | exponential surfaces on two walls, straight walls set pattern | concept rows only (§13) |
+| Tractrix | patented **1927**, P. G. A. H. Voigt | | tangent-length construction; cutoff sets mouth | lecleach/tractrix entries |
+| Constant Directivity | **May 1975**, AES 51st Convention paper, D. B. Keele (Electro-Voice); first CD patent assigned to EV (US4071112A, 1975-09-30 per the Keele Wikipedia patent list) | | exponential throat (low-f loading) + conical body (constant beamwidth) + mouth flange | K-law verified; direct AES-paper pass **[open]** |
+| Mantaray | 1977-ish | C. A. Henricksen & M. S. Ureda (Altec) | horizontal-diffraction slot: **H/V patterns decoupled**; apparent apex varies with frequency → ellipsoidal wavefront, one-plane arrayability | H/V decoupling = our `hv` brief; slot grep-verified absent (§13) |
+| Bi-Radial | **1980** | Keele (JBL), US4308932A | two radial formulas, smooth hybrid | verified §13.1 |
+| Twin Bessel | ~1980s | Ramsa (Panasonic) | dual-series Bessel flare | absent **[inferred effort ~50 LOC]** |
+| Quadratic-Throat Waveguide | **1999** patent | C. Hughes (Peavey); white paper verified §13 | conic body + circular-arc throat; 3–4 dB lower 2nd / ~9 dB lower 3rd harmonics vs CD horns; no slot → no apex problem | QTW ~100 LOC (§13 shortlist) |
+| Multiple-entry / CoEntrant / Unity / Synergy | 1996 (R. Heinz, Renkus-Heinz); Unity 2001–02 (Danley, Yorkville); Synergy 2002+ (Danley) | | several drivers enter one horn at band-dependent distances; single acoustic source | driver-placement design space, not a mesher typology **[inferred]** |
+| OSWG | 1990s– | E. Geddes — the OSWG section: directivity control above 1 kHz; **higher-order-mode mitigation claim [reported, unverified — gedlee.com unreachable both attempts this pass]** | oblate spheroid body | OSSE lineage verified (§11) |
+| CBT | 2000s | D. B. Keele — "has published on Constant Beamwidth Transducers" **[verified general]**; paper titles/years unverified this pass **[open]** | shaded array with near-constant beamwidth | absent; an array-level alternative to horns (multi-driver) |
+| HCD | Dec 2019 (Voice Coil) / AES 148, Jun 2020 | D. Cinanni | transform any expansion into CD on one plane, preserving acoustic load | absent; needs the Cinanni paper **[open]** |
+| JMLC / Le Cléac'h | 2000s–2010s | Fourcade 2015 (verified, lib-1 in-repo) | | live per R9-J |
+| OS-SE / R-OSSE / superformula | 2020/2022/2026 | Batík PDFs (verified §11) | | live rows |
+
+### 16.2 The formula that rules feasibility — re-verified at source
+
+**[verified]** The Hughes/SynAudCon article (fetched 2026-10-25) gives the Keele 1975 K-law exactly as the repo constant: mouth dimension `d = K/(θ·f0)` with **K = 1×10⁶ in·deg·Hz = 2.54×10⁴ m·deg·Hz** — confirming `KEELE_K = 25400` (`constants.py:10`, §13.5) against a second source. Three designer-facing rules come with it:
+
+1. **The mouth-dimension ratio sets the per-plane loss-of-control frequencies.** A 90°×45° horn with a square 12-inch mouth loses vertical control at 2× the horizontal f0; to equalize both planes, the narrow-coverage axis' mouth must be wider by the coverage ratio (12×24 in example). **→ For an asymmetric corner horn: the envelope's H/V mouth ratio must follow the coverage-angle ratio, or the K-law predicts misaligned per-axis f0s — this is the one-line design rule §13.5's brief-derived-seed fix (A) can encode.**
+2. **"Pattern flip":** a wide-and-short mouth (12×6 in at 90°×45°) throws the VERTICAL beam wider than the horizontal below ~2 kHz — the spec-sheet coverage is not maintained down low. Every corner brief should print the per-axis f0 next to its per-axis coverage target (fix A/B does exactly this).
+3. **"Pick any two"** of {narrow coverage, low f0, small size}. The corner concept's value proposition is precisely that the third boundary buys the third constraint for free.
+
+### 16.3 Drivers — the other half of the typology
+
+**[verified]** History chain (compression-driver page, fetched 2026-10-25): **Hanna & Slepian 1924** (compression concept; AIEE; JAES 25:573–585 reprint 1977) → **Wente & Thuras 1928** (first phase plug; "A High-Efficiency Receiver for a Horn-Type Loudspeaker of Large Power Capacity", Bell System Technical Journal; JAES 26:139–144 reprint 1978) → **Western Electric 555** (first commercial compression driver, 1933) → **Bob Smith 1953** ("An Investigation of the Air Chamber of Horn Type Loudspeakers", JASA 25(2):305–312, doi:10.1121/1.1907038 — the air-chamber resonance-suppression methodology behind most modern phase plugs; popularized by Fancher Murray, AES 61st Convention preprint 1384, 1978) → **Dodd & Oclee-Brown 2007** (AES 123rd Convention preprint 7258 — FEA-confirmed improved plug guidelines).
+
+**[inferred]** For the search layer: the driver is already a brief input (§13.5's 17.4 mm/8° example), so a natural bounded study is the **typology × driver coupling** — the same geometry across 1"/1.4"/2" exits to see how the `load` term ranks throats; no new objective needed.
+
+**[verified]** DSP correction exists as prior art for horn distortion: "Gunness Focusing" (Dave Gunness, Eastern Acoustic Works) reduces diaphragm/phase-plug time-smear while retaining dispersion control.
+
+### 16.4 Absent-classes menu update (grep state unchanged)
+
+§13's shortlist stands unchanged. Additions from this pass: **Twin Bessel** flare (~50 LOC **[inferred]**, needs the Bessel-law definition pinned at source first); **HCD** transform (idea-level; gate = obtain the Cinanni paper); **CBT** is an array-level feature (out of mesher scope today; relevant only to a future multi-driver corner deployment study).
+
+### 16.5 Open items for the librarian recovery pass
+
+Keele 1975/1977 AES paper exact titles + e-library ids (his Wikipedia page lists only two early papers and says "more than forty technical papers"); CBT paper titles/venues; Geddes OSWG primary sources (site unreachable); AES/ASA corner/eighth-space directivity literature; the `boundary_lab_deploy` repository's feature set; diyAudio practitioner pass (Cloudflare-blocked).
+
+### 16.6 Sources for §15/§16
+
+- Boundary Lab README (fetched 2026-10-25): https://github.com/JWSound/boundary-lab
+- Boundary Lab releases — v0.5.0 notes (fetched 2026-10-25): https://github.com/JWSound/boundary-lab/releases
+- Boundary Lab Deploy (NOT fetched this pass; reported, unverified): https://github.com/JWSound/boundary_lab_deploy
+- Hughes, "Understanding Horn Directivity Control", SynAudCon (fetched 2026-10-25): https://www.prosoundtraining.com/2010/05/24/understanding-horn-directivity-control/
+- Wikipedia, Horn loudspeaker (fetched 2026-10-25): https://en.wikipedia.org/wiki/Horn_loudspeaker
+- Wikipedia, Compression driver (fetched 2026-10-25): https://en.wikipedia.org/wiki/Compression_driver
+- Wikipedia, D. B. Keele, Jr. (fetched 2026-10-25): https://en.wikipedia.org/wiki/D._B._Keele,_Jr.
+- Smith 1953: doi:10.1121/1.1907038 · In-repo: `docs/research/boundary_lab_0.5/bl_inventory.md` (0.5.0-current) · `docs/BOUNDARY_LAB_INTEGRATION_PLAN.md`
+
+---
+
 hornlab-waveguide-mesher: https://github.com/m3gnus/hornlab-waveguide-mesher
 hornlab-waveguide-mesher config schema: https://raw.githubusercontent.com/m3gnus/hornlab-waveguide-mesher/main/docs/config-schema.md
 hornlab-waveguide-mesher tags.py: https://raw.githubusercontent.com/m3gnus/hornlab-waveguide-mesher/main/hornlab_mesher/tags.py
@@ -550,3 +927,19 @@ CMA-ES evaluations per dimension, Bajer et al. 2019, Evolutionary Computation 27
 BIPOP-CMA-ES on BBOB (GECCO 2009): doi:10.1145/1570256.1570333
 pycma: https://github.com/CMA-ES/pycma
 CMA-ES portal: https://cma-es.github.io/
+
+Section 13 sources:
+US4308932A — Keele/JBL Bi-Radial horn, filed 1980: https://patents.google.com/patent/US4308932A/en
+Quadratic-Throat Waveguide white paper (Hughes/Peavey; J. Murray): https://excelsior-audio.com/Publications/QTWaveguide/QTWaveguide_WhitePaper.pdf (archived: https://web.archive.org/web/20160303231128/http://peavey.com/media/pdf/aa/qwp1.pdf)
+ATH CORE (Batik, CC-BY-4.0): https://at-horns.eu/core.html
+Tritonia (Batik): https://at-horns.eu/tritonia.html
+TwinRay (Batik): https://at-horns.eu/twinray.html
+Augspurger, Acoustical Lens (Audio magazine): https://www.tnt-audio.com/clinica/acoustic_lens.pdf
+Salmon 1946 theory paper: doi:10.1121/1.1916316
+Salmon 1946 family paper: doi:10.1121/1.1916317
+Freehafer 1940 (exact infinite hyperbolic-horn impedance): doi:10.1121/1.1916061
+Olson, Acoustical Engineering, 1947 2nd edition, s 6.19: verified via library copy (no DOI; per the salmon dossier)
+Flygare & Pantaleev, quad-ridge flared horn, IEEE TAP 2020: doi:10.1109/TAP.2019.2940529
+Joseph Crowe catalogue/products + sitemaps: https://josephcrowe.com (full per-page list in the biradial dossier)
+JBL Pro directivity technology: https://jblpro.com/en/innovation-directivity
+Full per-claim source tables: the three §13 dossiers in docs/research/typologies/ carry every URL/status label; this section records the load-bearing subset only.

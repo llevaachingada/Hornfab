@@ -136,6 +136,42 @@ def test_grid_recipe_disagreeing_with_the_brief_is_invalid_geometry(tmp_path):
         build.build_mesh(design, _low_spec(cfg), cfg, tmp_path)   # ...but the brief refuses it
 
 
+def test_grid_self_approach_classifies_invalid_geometry_and_is_memoized(tmp_path):
+    """S1b (2026-10-25 R9 audit + campaign finding): the rows route's in-build_grid_mesh
+    re-checks (the self-approach guard in _resolve_grid) used to escape build_grid_mesh as a
+    bare GeneratorError and land in evaluate's generic-except as kind 'exception' - flat 1000,
+    never memoized, re-run on every replay (a 2026-10-25 salmon campaign burned 29/40 evals
+    that way). The evaluate boundary now maps GeneratorError onto invalid_geometry, so the
+    failure is deterministic, failure-marker memoized and replayed as cached. build_grid_mesh
+    itself still raises bare GeneratorError (test_mesh_grid_build.py pins that contract);
+    mesh/build.build_mesh_from_design_grid's recipe-step wrap stays as it is. Fixture: the
+    salmon_saddle seed under a 17.4 mm-exit brief (its tuned 12.7 mm brief leaves the outer
+    shell 0.002 mm above the refusal limit; the bigger driver pushes it just under)."""
+    from hornlab_search.search import evaluate as E
+
+    bigger = dict(_cfg("salmon_saddle").brief)
+    bigger.pop("path", None)                               # loader-added runtime key, not schema
+    bigger["name"] = "bigger_driver"
+    bigger["driver"] = {**bigger["driver"], "exit_radius_mm": 17.4}
+    bigger["envelope"] = {**bigger["envelope"],
+                          "max_mouth_w_mm": 520.0, "max_mouth_h_mm": 420.0}
+    brief_yaml = tmp_path / "bigger_driver.yaml"
+    brief_yaml.write_text(json.dumps(bigger), encoding="utf-8")     # JSON is valid YAML 1.2
+    cfg = load_config(TYP / "salmon_saddle.yaml", brief=brief_yaml)
+    space = DesignSpace.from_config(cfg)
+    ctx = E.make_context(cfg, None, cache_dir=tmp_path / "cache")
+    ev1 = E.evaluate(space.seed, space, cfg, "screen", tmp_path / "run1", None, None, ctx=ctx)
+    assert E.error_kind(ev1.error) == E.KIND_INVALID, ev1.error
+    assert "self-approach" in ev1.error, ev1.error                  # it IS the guard that failed
+    markers = list((tmp_path / "cache" / "solve" / "failures").glob("*.json"))
+    assert len(markers) >= 1
+    ctx2 = E.make_context(cfg, None, cache_dir=tmp_path / "cache")
+    ev2 = E.evaluate(space.seed, space, cfg, "screen", tmp_path / "run2", None, None, ctx=ctx2)
+    assert ev2.cached and E.error_kind(ev2.error) == E.KIND_INVALID
+    row = json.loads((tmp_path / "run2" / "search.ndjson").read_text(encoding="utf-8").splitlines()[0])
+    assert row["kind"] == E.KIND_INVALID and row["kind"] != "exception"
+
+
 def test_tiny_dof_cap_raises_mesh_too_large_on_the_grid_route(tmp_path):
     cfg = _cfg()
     cfg = dataclasses.replace(cfg, mesh=dataclasses.replace(cfg.mesh, dof_cap_screen=50))

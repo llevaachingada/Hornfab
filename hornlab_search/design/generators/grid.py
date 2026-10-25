@@ -105,10 +105,15 @@ GRID_BLOCK_KEYS = (*GRID_SPEC_KEYS, "knobs")
 #     LIST harmonic stop/bend contract.
 #
 # Row span (WP9b C2): ``span: quarter`` (default; phi 0..90, quadrants "1", both cardinal
-# mirror planes) or ``span: half`` (phi -90..+90 inclusive, symmetry plane yz, x >= 0,
-# quadrants "14", 2x the quarter dofs).  The phi origin is pinned at the HORIZONTAL (+x)
-# axis in both spans.  The LIST contract selects half EXPLICITLY with ``span: half``; the
-# scalar ``lecleach_mod`` b-term/bend PRESENCE also forces half (its landed rule).
+# mirror planes) or ``span: half`` (phi -90..+90 inclusive, mirror plane yz, x >= 0,
+# quadrants "14", 2x the quarter dofs), or ``span: full`` (phi 0..360 EXCLUSIVE of the
+# seam row, n_phi >= 25, quadrants "1234", NO mirror planes: a closed full-ring point
+# grid - the mesher's PointGridHornGeometry default mode (closed=True, symmetry planes
+# unused); 4x the quarter dofs).  The phi origin is pinned at the HORIZONTAL (+x)
+# axis in every span.  The LIST contract selects half EXPLICITLY with ``span: half``; the
+# scalar ``lecleach_mod`` b-term/bend PRESENCE also forces half (its landed rule); the
+# odd-cosine asymmetry (lecleach_asym with eps_m != 0) FORCES a FULL model (it breaks the
+# left-right mirror, so only the seam-free full ring represents it honestly).
 # Owner ruling 2026-10-25: the Salmon rows are LABELED HYPOTHESIS-SHAPE EXPERIMENTS under
 # neutral names; nothing there is an attributed published construction (R9).  The
 # ``lecleach`` rows ARE the attributed Fourcade 2015 construction (R9-J gate passed).
@@ -127,7 +132,7 @@ GRID_BLOCK_KEYS = (*GRID_SPEC_KEYS, "knobs")
 # The PHI ORIGIN IS PINNED here and in every rows meta's ``sign_conventions``: phi = 0 is
 # the horizontal (+x) axis.  (If phi were measured from vertical the roles swap.)
 ROWS_TYPES = ("salmon_elliptical", "salmon_axisym", "lecleach", "iwata_ar",
-              "toroidal_rollback", "lecleach_mod", "lecleach_ar")
+              "toroidal_rollback", "lecleach_mod", "lecleach_ar", "lecleach_asym")
 #: The persisted spec fields of a rows Design (``design.params["grid"]``).  ``span`` is
 #: accepted everywhere but PERSISTED ONLY FOR A HALF MODEL (kept out of the keys so the
 #: quarter recipe -- and its design hash -- stays byte-identical to before this pass).
@@ -135,28 +140,61 @@ ROWS_SPEC_KEYS = ("rows", "n_phi", "n_s", "wall_thickness_mm")
 ROWS_BLOCK_KEYS = (*ROWS_SPEC_KEYS, "knobs")
 ROWS_ALLOWED_SPEC_KEYS = (*ROWS_SPEC_KEYS, "span")
 ROWS_ALLOWED_BLOCK_KEYS = (*ROWS_BLOCK_KEYS, "span")
-#: The two legal row spans (phi from the HORIZONTAL axis in both).
-ROWS_SPANS = ("quarter", "half")
+#: The three legal row spans (phi from the HORIZONTAL axis in all of them).
+ROWS_SPANS = ("quarter", "half", "full")
 #: Honest minimum row count for a half model when modulation is on (plan 9b.3).
 MIN_PHI_HALF = 25
+#: Honest minimum row count for a full ring (the mesher's AngularSegments scale; a
+#: full ring at n_phi 25 = the half-model resolution rotated to the whole circle).
+MIN_PHI_FULL = 25
 #: Row knobs whose zero value is geometry-identical to absent (design-hash canonicalisation).
 #: The lecleach_mod b-term / bend keys are deliberately NOT here: their PRESENCE is the
 #: implicit half-model flag, so an explicit zero must survive into the recipe.
-ROWS_DEFAULTS: dict[str, float] = {"x_amp": 0.0, "x_fc": 0.0, "bend_sin1_mm": 0.0}
+ROWS_DEFAULTS: dict[str, float] = {"x_amp": 0.0, "x_fc": 0.0, "bend_sin1_mm": 0.0,
+                                   "eps_m": 0.0, "eps_start": 0.0,
+                                   "ripple_lobes": 0.0, "ripple_amp_mm": 0.0,
+                                   "ripple_start": 0.0}
 #: Hard caps from dossier section 2.4 / plan 9b.2 T5 (search bounds are YAML defaults).
+#: 2026-10-25 (owner-approved signed-X v2): x_amp is SIGNED - negative amp opens the mouth
+#: along the CARDINAL axes (the "corners-in" reading); positive keeps today's diagonal-out
+#: reading. The magnitude cap is unchanged.
 ROWS_MAX_X_AMP = 0.4
 ROWS_MAX_X_FC = 0.3
 #: Sanity caps for the lib-2 inferred torus lip and axial bend (search bounds are YAML).
 ROWS_MAX_R_LIP_MM = 100.0
 ROWS_MAX_BEND_MM = 100.0
+#: The odd-cosine single-sided asymmetry amplitude cap (sweep S3) + the window start.
+ROWS_MAX_EPS = 0.3
+#: The even-lobe mouth ripple (owner's "pleats" feature; MOUTH_RIPPLE_SERRATION dossier):
+#: lobes N even in [6, 24], amp in mm, window start as an arc fraction.
+ROWS_RIPPLE_LOBES_RANGE = (6.0, 24.0)
+ROWS_MAX_RIPPLE_AMP_MM = 6.0
+#: Honest ripple resolution bar: >= 4 phi samples per lobe period
+#: (samples_per_period = (2 pi / N) / d_phi over the row's own span).
+ROWS_RIPPLE_SAMPLES_PER_LOBE = 4.0
 ROWS_HYPOTHESIS_LABEL = (
     "LABELED HYPOTHESIS-SHAPE EXPERIMENT (WP9b, dossier section 2.4 / Report 4 9b.2 "
     "T3/T5): per-azimuth spherical_salmon marches; not an attributed published "
     "construction (R9 gate). Published-family names are intentionally not used.")
+ROWS_ASYM_LABEL = (
+    "LABELED RECONSTRUCTION/HYPOTHESIS (owner-approved 2026-10-25): the verified "
+    "Fourcade march (lecleach_exact, R9-J) per azimuth + an odd-cosine single-sided "
+    "asymmetry term; NO published asymmetric-per-azimuth JMLC construction exists "
+    "(docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md searched: "
+    "none). The base march is verified; the eps term is ours.")
+ROWS_RIPPLE_LABEL = (
+    "LABELED EXPERIMENT (owner-directed 'pleats' feature, "
+    "docs/research/typologies/MOUTH_RIPPLE_SERRATION_RESEARCH_2026-10-25.md): an "
+    "even-lobe radius ripple r *= 1 + amp*w(s)*cos(N phi) confined to a mouth window; "
+    "no published audio mouth-ripple construction exists (the microwave corrugated-horn "
+    "class is the theoretical neighbour).")
 #: Defaults used when a salmon shape knob is absent (configs set every number explicitly).
 #: Salmon harmonic stop/bend defaults live in ``rows_task_harmonics`` (list contract).
+#: 2026-10-25: the signed-x pair + the lecleach_asym eps pair + the pleats ripple trio.
 ROWS_KNOB_DEFAULTS = {"fc_h_hz": 800.0, "fc_v_hz": 1100.0, "T": 0.8, "stop_deg": 170.0,
-                      "x_amp": 0.0, "x_fc": 0.0}
+                      "x_amp": 0.0, "x_fc": 0.0,
+                      "eps_m": 0.0, "eps_start": 0.0,
+                      "ripple_lobes": 0.0, "ripple_amp_mm": 0.0, "ripple_start": 0.0}
 #: A salmon saddle stop law is a labeled reconstruction; keep every modulated row inside the
 #: plan's Salmon stop window so the march stays a rollback, not a near-closed spiral.
 ROWS_SALMON_MOD_STOP_RANGE = (120.0, 240.0)
@@ -582,7 +620,7 @@ def check_self_approach(inner: np.ndarray, outer: np.ndarray, wall_thickness_mm:
 
 
 def grid_outer_points(inner: np.ndarray, wall_thickness_mm: float, *,
-                      half: bool = False) -> np.ndarray:
+                      half: bool = False, full: bool = False) -> np.ndarray:
     """Explicit outer shell: in-plane normal offset of each row's ``(rho, z)`` profile.
 
     Fourcade 2015 eqs 28-29 form applied in the row's own meridian half-plane
@@ -618,7 +656,9 @@ def grid_outer_points(inner: np.ndarray, wall_thickness_mm: float, *,
     outer[..., 0] = (rho + t * n_rho) * np.cos(phi)
     outer[..., 1] = (rho + t * n_rho) * np.sin(phi)
     outer[..., 2] = grid[..., 2] + t * n_z
-    if half:
+    if full:
+        pass                       # a closed full ring: no mirror planes, the shell as-is
+    elif half:
         outer[0, :, 0] = 0.0
         outer[-1, :, 0] = 0.0
     else:
@@ -632,7 +672,7 @@ def grid_outer_points(inner: np.ndarray, wall_thickness_mm: float, *,
 
 
 def _rows_declared_span(spec: dict) -> str | None:
-    """The EXPLICIT ``span`` field (``quarter``/``half``), or ``None`` when absent."""
+    """The EXPLICIT ``span`` field (``quarter``/``half``/``full``), or ``None`` when absent."""
     span = spec.get("span")
     if span is None:
         return None
@@ -640,6 +680,133 @@ def _rows_declared_span(spec: dict) -> str | None:
         raise registry.GeneratorError(
             f"grid rows span must be one of {list(ROWS_SPANS)}, got {span!r}")
     return str(span)
+
+
+def _rows_lecleach_asym_knobs(knob_map: dict, prefix: str = "g") -> dict:
+    """Validated ``rows: {type: lecleach_asym}`` knobs (owner-approved 2026-10-25).
+
+    The verified Fourcade march per azimuth + the odd-cosine single-sided asymmetry
+        r(phi, s) *= 1 + eps_m * w(s) * cos(phi)
+    with ``w`` the smoothstep window opening at the arc fraction ``eps_start``
+    (0 stays a legal value: it produces the SYMMETRIC verified rows exactly; only
+    ``eps_m != 0`` forces the full model).  The list harmonic stop/bend contract rides
+    along (on a full model ANY phi basis is representable, so the quarter/half basis
+    restrictions do not bind).  The throat stays EXACT (w(0) = 0 at the window start:
+    every row still shares the driver's exit radius/angle).
+    """
+    allowed = {f"{prefix}_fc_hz", f"{prefix}_T", f"{prefix}_stop_deg",
+               f"{prefix}_r_lip_mm", f"{prefix}_eps_m", f"{prefix}_eps_start",
+               f"{prefix}_stop_cos2k", f"{prefix}_stop_sin2k1",
+               f"{prefix}_bend_sin1_mm"}
+    foreign = sorted(str(k) for k in knob_map
+                     if str(k).startswith(f"{prefix}_") and k not in allowed)
+    if foreign:
+        raise registry.GeneratorError(
+            f"lecleach_asym rows accept only {prefix}_fc_hz / {prefix}_T / "
+            f"{prefix}_stop_deg / {prefix}_eps_m / {prefix}_eps_start / "
+            f"{prefix}_r_lip_mm (+ the list harmonic/bend contract stop_cos2k / "
+            f"stop_sin2k1 / bend_sin1_mm); got foreign knob(s) {foreign}")
+    out = {}
+    for name, default in (("fc_hz", ROWS_LECLEACH_KNOB_DEFAULTS["fc_hz"]),
+                          ("T", ROWS_LECLEACH_KNOB_DEFAULTS["T"]),
+                          ("stop_deg", ROWS_LECLEACH_KNOB_DEFAULTS["stop_deg"]),
+                          ("eps_m", ROWS_KNOB_DEFAULTS["eps_m"]),
+                          ("eps_start", ROWS_KNOB_DEFAULTS["eps_start"])):
+        out[name] = float(knob_map.get(f"{prefix}_{name}", default))
+    for name, value in out.items():
+        if not math.isfinite(value):
+            raise registry.GeneratorError(
+                f"lecleach_asym rows: {name} must be finite, got {value!r}")
+    if out["fc_hz"] <= 0.0:
+        raise registry.GeneratorError(
+            f"lecleach_asym rows: fc_hz must be > 0, got {out['fc_hz']}")
+    if out["T"] < 0.0:
+        raise registry.GeneratorError(f"lecleach_asym rows: T must be >= 0, got {out['T']}")
+    lo, hi = ROWS_LECLEACH_STOP_RANGE
+    if not lo <= out["stop_deg"] <= hi:
+        raise registry.GeneratorError(
+            f"lecleach_asym rows: stop_deg must be in [{lo:g}, {hi:g}], got {out['stop_deg']}")
+    if not -ROWS_MAX_EPS <= out["eps_m"] <= ROWS_MAX_EPS:
+        raise registry.GeneratorError(
+            f"lecleach_asym rows: eps_m must be in [-{ROWS_MAX_EPS:g}, "
+            f"{ROWS_MAX_EPS:g}] (signed; the sign picks which side widens), got {out['eps_m']}")
+    if not 0.0 <= out["eps_start"] < 1.0:
+        raise registry.GeneratorError(
+            f"lecleach_asym rows: eps_start must be in [0, 1) (the window's opening arc "
+            f"fraction), got {out['eps_start']}")
+    out["r_lip_mm"] = _rows_lip_mm(knob_map, prefix)
+    return out
+
+
+def _rows_eps_window(s_frac: np.ndarray, start: float) -> np.ndarray:
+    """Smoothstep window on the arc fraction, opening at ``start`` (0 -> 0, 1 -> 1)."""
+    t = np.clip((np.asarray(s_frac, dtype=float) - float(start))
+                / (1.0 - float(start)), 0.0, 1.0)
+    return 3.0 * t ** 2 - 2.0 * t ** 3
+
+
+def _rows_span_phis(n_phi: int, span: str) -> np.ndarray:
+    """Azimuths for a rows kind: ``quarter`` -> [0, 90]; ``half`` -> [-90, +90];
+
+    ``full`` -> ``[0, 360)`` (n_phi rows, endpoint EXCLUDED - the seam row at 360 deg
+    would duplicate row 0's phi = 0).  The phi ORIGIN is pinned to the horizontal (+x)
+    axis in every span; the span only decides how much of the circle is present.  A half
+    model needs an ODD n_phi >= MIN_PHI_HALF; a full model needs n_phi >= MIN_PHI_FULL.
+    """
+    if span == "half":
+        if n_phi < MIN_PHI_HALF:
+            raise registry.GeneratorError(
+                f"half-model rows need n_phi >= {MIN_PHI_HALF} (honest half-span "
+                f"resolution); got n_phi={n_phi}")
+        if n_phi % 2 == 0:
+            raise registry.GeneratorError(
+                "half-model rows need an ODD n_phi (the phi = 0 horizontal row and both "
+                f"+/-90 deg endpoint rows must exist); got n_phi={n_phi}")
+        return np.linspace(-0.5 * math.pi, 0.5 * math.pi, n_phi)
+    if span == "full":
+        if n_phi < MIN_PHI_FULL:
+            raise registry.GeneratorError(
+                f"full-ring rows need n_phi >= {MIN_PHI_FULL} (honest full-circle "
+                f"resolution); got n_phi={n_phi}")
+        return np.linspace(0.0, 2.0 * math.pi, n_phi, endpoint=False)
+    return np.linspace(0.0, 0.5 * math.pi, n_phi)
+
+
+def _rows_span_requested(kind: str, spec: dict, knob_map: dict, prefix: str = "g") -> str:
+    """Resolve the row span: explicit ``span`` OR the kind's forcing rules (C2, binding).
+
+    Forcing rules (each refuses a contradictory explicit declaration loudly instead of
+    silently mis-meshing):
+    * ``lecleach_mod`` with a b-term / bend knob PRESENT forces ``half``;
+    * ``lecleach_asym`` with ``eps_m != 0`` forces ``full`` (the odd cosine breaks the
+      left-right mirror; only the seam-free full ring represents it).
+    """
+    declared = _rows_declared_span(spec)
+    if kind == "lecleach_mod" and _rows_mod_half(knob_map, prefix):
+        if declared == "quarter":
+            raise registry.GeneratorError(
+                "grid rows: a b-term / axial-bend knob is present, which forces the HALF "
+                "model (phi -90..+90, symmetry plane yz, quadrants '14'); remove "
+                "span: quarter or set span: half")
+        return "half"
+    if kind == "lecleach_asym":
+        eps = float(knob_map.get(f"{prefix}_eps_m", 0.0))
+        if eps != 0.0:
+            if declared in ("quarter", "half"):
+                raise registry.GeneratorError(
+                    "grid rows: the odd-cosine asymmetry (eps_m != 0) breaks the "
+                    "left-right mirror and forces the FULL ring (phi 0..360, quadrants "
+                    "'1234'); remove span or set span: full")
+            return "full"
+        return declared or "quarter"
+    if declared is None:
+        return "half" if (kind == "lecleach_mod" and False) else "quarter"
+    return declared
+
+
+def _rows_half_requested(kind: str, spec: dict, knobs: dict, prefix: str = "g") -> bool:
+    """Legacy half-flag = ``_rows_span_requested(...) == 'half'`` (kept for callers)."""
+    return _rows_span_requested(kind, spec, _knob_map(knobs), prefix) == "half"
 
 
 def _rows_check_spec(spec: dict) -> str:
@@ -681,18 +848,26 @@ def _rows_shape_knobs(knobs: dict, prefix: str = "g") -> dict:
     Salmon harmonics are the LIST contract (``stop_cos2k`` / ``stop_sin2k1`` /
     ``bend_sin1_mm``); the deleted scalar a2/a4/b1/b3 keys are refused as foreign so a
     typed-but-ignored knob can never silently change nothing.
+    2026-10-25 additions (owner-approved): the even-lobe mouth ripple
+    (``ripple_lobes``/``ripple_amp_mm``/``ripple_start`` - the pleats feature,
+    MOUTH_RIPPLE_SERRATION dossier) on this kind; the odd-cosine asymmetry keys
+    (``eps_m``/``eps_start``) are lecleach_asym-only and refused here.
     """
     allowed = {f"{prefix}_fc_h_hz", f"{prefix}_fc_v_hz", f"{prefix}_T",
                f"{prefix}_stop_deg", f"{prefix}_x_amp", f"{prefix}_x_fc",
                f"{prefix}_r_lip_mm", f"{prefix}_stop_cos2k",
-               f"{prefix}_stop_sin2k1", f"{prefix}_bend_sin1_mm"}
+               f"{prefix}_stop_sin2k1", f"{prefix}_bend_sin1_mm",
+               f"{prefix}_ripple_lobes", f"{prefix}_ripple_amp_mm",
+               f"{prefix}_ripple_start"}
     foreign = sorted(str(k) for k in knobs
                      if str(k).startswith(f"{prefix}_") and k not in allowed)
     if foreign:
         raise registry.GeneratorError(
             f"salmon rows accept only {prefix}_fc_h_hz / {prefix}_fc_v_hz / {prefix}_T / "
             f"{prefix}_stop_deg / {prefix}_x_amp / {prefix}_x_fc / {prefix}_r_lip_mm / "
-            f"{prefix}_stop_cos2k / {prefix}_stop_sin2k1 / {prefix}_bend_sin1_mm; "
+            f"{prefix}_stop_cos2k / {prefix}_stop_sin2k1 / {prefix}_bend_sin1_mm "
+            "(salmon kinds + the even-lobe mouth ripple g_ripple_lobes / g_ripple_amp_mm / "
+            "g_ripple_start; the odd-cosine eps keys are lecleach_asym-only); "
             f"got foreign knob(s) {foreign}")
     fc_h = _rows_knob(knobs, prefix, "fc_h_hz")
     fc_v = _rows_knob(knobs, prefix, "fc_v_hz")
@@ -714,14 +889,77 @@ def _rows_shape_knobs(knobs: dict, prefix: str = "g") -> dict:
     if abs(stop - 180.0) < 1e-9:
         raise registry.GeneratorError(
             "stop_deg=180 is the cap-area asymptote; use a stop below or above 180 deg")
-    if not 0.0 <= x_amp <= ROWS_MAX_X_AMP:
+    if not -ROWS_MAX_X_AMP <= x_amp <= ROWS_MAX_X_AMP:
         raise registry.GeneratorError(
-            f"x_amp must be in [0, {ROWS_MAX_X_AMP}], got {x_amp}")
+            f"x_amp must be in [-{ROWS_MAX_X_AMP}, {ROWS_MAX_X_AMP}] (signed), got {x_amp}")
     if not 0.0 <= x_fc <= ROWS_MAX_X_FC:
         raise registry.GeneratorError(
             f"x_fc must be in [0, {ROWS_MAX_X_FC}], got {x_fc}")
+    ripple = _rows_ripple_knobs(knobs, prefix)
     return {"fc_h_hz": fc_h, "fc_v_hz": fc_v, "T": T, "stop_deg": stop,
-            "x_amp": x_amp, "x_fc": x_fc}
+            "x_amp": x_amp, "x_fc": x_fc, **ripple}
+
+
+def _rows_ripple_knobs(knobs: dict, prefix: str = "g") -> dict:
+    """Validated even-lobe mouth ripple knobs (the pleats feature) in base units.
+
+    ``r *= 1 + ripple_amp_mm * w(s) * cos(ripple_lobes * phi)`` with the smoothstep
+    window ``w`` opening at the arc fraction ``ripple_start`` (0.7-0.95 shipped range;
+    empty = the window is the whole profile, as for the x_amp modulation). The lobe
+    count must be an EVEN integer in [6, 24] (a C2-quarter-safe even cosine; odd counts
+    break the left-right mirror and stay refused). Zero/absent knobs = no ripple
+    (geometry identical to today's rows). Rows also get an honest-resolution check
+    against the kind's row span (>= 4 phi samples per lobe period) - enforced by the
+    callers once the span is resolved (see _rows_ripple_resolution_guard).
+    """
+    allowed = {f"{prefix}_ripple_lobes", f"{prefix}_ripple_amp_mm", f"{prefix}_ripple_start"}
+    foreign = sorted(str(k) for k in knobs
+                     if str(k).startswith(f"{prefix}_ripple") and k not in allowed)
+    if foreign:
+        raise registry.GeneratorError(
+            f"ripple knobs accept {prefix}_ripple_lobes / {prefix}_ripple_amp_mm / "
+            f"{prefix}_ripple_start; got foreign knob(s) {foreign}")
+    amp = _rows_knob(knobs, prefix, "ripple_amp_mm")
+    if not math.isfinite(amp) or amp < 0.0 or amp > ROWS_MAX_RIPPLE_AMP_MM:
+        raise registry.GeneratorError(
+            f"ripple_amp_mm must be in [0, {ROWS_MAX_RIPPLE_AMP_MM:g}] mm, got {amp!r}")
+    lobes = _rows_knob(knobs, prefix, "ripple_lobes")
+    if not math.isfinite(lobes) or lobes != int(lobes) or lobes < 0:
+        raise registry.GeneratorError(
+            f"ripple_lobes must be a non-negative integer, got {lobes!r}")
+    lobes = int(lobes)
+    if lobes == 0:
+        if amp > 0.0:
+            raise registry.GeneratorError(
+                "ripple_amp_mm > 0 needs ripple_lobes set (an even integer in "
+                f"[{ROWS_RIPPLE_LOBES_RANGE[0]:g}, {ROWS_RIPPLE_LOBES_RANGE[1]:g}])")
+        return {"ripple_lobes": 0, "ripple_amp_mm": 0.0, "ripple_start": 0.0}
+    lo_n, hi_n = ROWS_RIPPLE_LOBES_RANGE
+    if not (lo_n <= lobes <= hi_n and lobes % 2 == 0):
+        raise registry.GeneratorError(
+            f"ripple_lobes must be an EVEN integer in [{lo_n:g}, {hi_n:g}] "
+            "(even cosines keep the left-right mirror; odd counts are refused), "
+            f"got {lobes}")
+    start = _rows_knob(knobs, prefix, "ripple_start")
+    if not math.isfinite(start) or not 0.0 <= start < 1.0:
+        raise registry.GeneratorError(
+            f"ripple_start must be in [0, 1) (the window's opening arc fraction), got {start!r}")
+    return {"ripple_lobes": lobes, "ripple_amp_mm": float(amp), "ripple_start": float(start)}
+
+
+def _rows_ripple_resolution_guard(lobes: int, span_rad: float, n_phi: int) -> None:
+    """Refuse a ripple the row grid cannot honestly represent (>= 4 samples per lobe)."""
+    if lobes <= 0:
+        return
+    d_phi = span_rad / (n_phi - 1)
+    per_period = (2.0 * math.pi / lobes) / d_phi
+    if per_period < ROWS_RIPPLE_SAMPLES_PER_LOBE:
+        raise registry.GeneratorError(
+            f"the mouth ripple with {lobes} lobes needs >= "
+            f"{ROWS_RIPPLE_SAMPLES_PER_LOBE:g} phi samples per lobe period on this row "
+            f"span (d_phi = {np.degrees(d_phi):.3g} deg over "
+            f"{np.degrees(span_rad):.0f} deg x n_phi {n_phi}); raise n_phi or drop the "
+            "ripple lobes")
 
 
 def _rows_lip_mm(knobs: dict, prefix: str, name: str = "r_lip_mm") -> float:
@@ -806,25 +1044,6 @@ def _rows_mod_half(knobs: dict, prefix: str) -> bool:
     """
     keys = (f"{prefix}_stop_b1_deg", f"{prefix}_stop_b3_deg", f"{prefix}_bend_b1_mm")
     return any(k in knobs for k in keys)
-
-
-def _rows_half_requested(kind: str, spec: dict, knobs: dict, prefix: str = "g") -> bool:
-    """Resolve the row span: explicit ``span`` OR a b-term/bend presence (C2, binding).
-
-    The b-term/bend rule wins: those terms are left-right symmetric but up/down
-    antisymmetric, so a half model is the ONLY mesh that represents them.  An explicit
-    ``span: quarter`` next to a b-term is a contradiction and is refused loudly rather
-    than silently mis-meshed.
-    """
-    declared = _rows_declared_span(spec)
-    forced = (_rows_mod_half(knobs, prefix)
-              if kind == "lecleach_mod" else False)
-    if forced and declared == "quarter":
-        raise registry.GeneratorError(
-            "grid rows: a b-term / axial-bend knob is present, which forces the HALF "
-            "model (phi -90..+90, symmetry plane yz, quadrants '14'); remove "
-            "span: quarter or set span: half")
-    return declared == "half" or forced
 
 
 def _rows_lecleach_mod_knobs(knobs: dict, prefix: str = "g") -> dict:
@@ -1049,7 +1268,11 @@ def x_shape_modulation(stop_deg, x_amp, x_fc, phi):
     ``stop(phi) = stop_deg * (1 + x_amp * cos 4 phi')`` with ``phi' = phi - 45 deg``, so
     the maxima sit on the quarter diagonals (plan 9b.2 T5 verbatim).  ``cos 4 phi'`` is
     even about both cardinal mirror planes, so the quarter model stays valid.
-    ``fc_scale = 1 - x_fc * cos 4 phi'`` is applied only when ``x_amp > 0``; this makes
+    SIGNED X (owner-approved v2, 2026-10-25): a negative ``x_amp`` flips the sign of the
+    stop/width excursions - relative to the positive (literally-X, "corner-out") reading,
+    the negative reading opens the CARDINAL planes instead ("corner-in"); the two signs
+    sample the same knob family. The magnitude cap is unchanged.
+    ``fc_scale = 1 - x_fc * cos 4 phi'`` is applied whenever ``x_amp != 0``; this makes
     ``x_amp = 0`` reproduce the plain elliptical rows EXACTLY (property P2) regardless
     of the ``x_fc`` seed.
 
@@ -1061,14 +1284,15 @@ def x_shape_modulation(stop_deg, x_amp, x_fc, phi):
     fcm = float(x_fc)
     if not math.isfinite(s) or s <= 0.0:
         raise registry.GeneratorError(f"stop_deg must be finite and > 0, got {stop_deg!r}")
-    if not 0.0 <= amp <= ROWS_MAX_X_AMP:
-        raise registry.GeneratorError(f"x_amp must be in [0, {ROWS_MAX_X_AMP}], got {x_amp!r}")
+    if not -ROWS_MAX_X_AMP <= amp <= ROWS_MAX_X_AMP:
+        raise registry.GeneratorError(
+            f"x_amp must be in [-{ROWS_MAX_X_AMP}, {ROWS_MAX_X_AMP}] (signed), got {x_amp!r}")
     if not 0.0 <= fcm <= ROWS_MAX_X_FC:
         raise registry.GeneratorError(f"x_fc must be in [0, {ROWS_MAX_X_FC}], got {x_fc!r}")
     arr = np.asarray(phi, dtype=float)
     cos4 = np.cos(4.0 * (arr - 0.25 * math.pi))
     stop = s * (1.0 + amp * cos4)
-    scale = 1.0 - fcm * cos4 if amp > 0.0 else np.ones_like(cos4)
+    scale = 1.0 - fcm * cos4 if amp != 0.0 else np.ones_like(cos4)
     if np.ndim(phi) == 0:
         return float(stop), float(scale)
     return stop, scale
@@ -1171,8 +1395,10 @@ def _build_rows_grid(profiles_xy: list[tuple[np.ndarray, np.ndarray]], phis: np.
     Row span (TASK B1 / lib-2 C2): the phis decide the model.  A quarter spans
     ``[0, 90]`` (row 0 on the H plane ``y = 0``, last row on ``x = 0``; quadrants "1").
     A half spans ``[-90, +90]`` with both endpoint rows on ``x = 0`` (symmetry plane
-    ``yz``; quadrants "14"); phi = 0 is the horizontal axis in BOTH spans (the phi
-    origin is pinned, never inferred from the span).
+    ``yz``; quadrants "14"); phi = 0 is the horizontal axis in EVERY span (the phi
+    origin is pinned, never inferred from the span).  A FULL ring spans ``[0, 360)``
+    (endpoint excluded; no mirror planes; quadrants "1234"; the mesher's native
+    closed/full-ring mode).
     """
     n_phi = len(profiles_xy)
     if phis.size != n_phi:
@@ -1180,6 +1406,7 @@ def _build_rows_grid(profiles_xy: list[tuple[np.ndarray, np.ndarray]], phis: np.
             f"rows: {n_phi} profiles but {phis.size} azimuths")
     phis = np.asarray(phis, dtype=float).reshape(-1)
     half = bool(phis[0] < -1e-9)
+    full = (not half) and bool(float(phis[-1]) > math.pi + 1e-9)
     if half:
         if n_phi % 2 == 0:
             raise registry.GeneratorError(
@@ -1221,12 +1448,14 @@ def _build_rows_grid(profiles_xy: list[tuple[np.ndarray, np.ndarray]], phis: np.
             "y_max_mm": float(np.max(yr)),
         })
     # Exact mirror planes: float cos/sin noise removed on the symmetry-plane rows.
-    if half:
-        grid[0, :, 0] = 0.0            # phi = -90 -> x = 0 (yz plane)
-        grid[-1, :, 0] = 0.0           # phi = +90 -> x = 0
+    if full:
+        pass                       # closed full ring: no mirror-plane rows to clean
+    elif half:
+        grid[0, :, 0] = 0.0        # phi = -90 -> x = 0 (yz plane)
+        grid[-1, :, 0] = 0.0       # phi = +90 -> x = 0
     else:
-        grid[0, :, 1] = 0.0            # phi = 0 -> y = 0 (H plane)
-        grid[-1, :, 0] = 0.0           # phi = 90 -> x = 0 (V plane)
+        grid[0, :, 1] = 0.0        # phi = 0 -> y = 0 (H plane)
+        grid[-1, :, 0] = 0.0       # phi = 90 -> x = 0 (V plane)
     t = float(meta.get("wall_thickness_mm", 3.0))
     min_station = max(1, n_s // 4)
     meta = dict(meta)
@@ -1234,14 +1463,14 @@ def _build_rows_grid(profiles_xy: list[tuple[np.ndarray, np.ndarray]], phis: np.
         "n_phi": int(n_phi),
         "n_phi_quarter": int((n_phi + 1) // 2) if half else int(n_phi),
         "n_s": int(n_s),
-        "phi_span_deg": 180.0 if half else 90.0,
+        "phi_span_deg": 360.0 if full else (180.0 if half else 90.0),
         "phi_origin_deg": 0.0,
-        "quarter": not half,
+        "quarter": not (half or full),
         "half_model": half,
-        "row_span": "half" if half else "quarter",
-        "span": "half" if half else "quarter",
-        "symmetry_plane": "yz" if half else "yz+xz",
-        "quadrants": "14" if half else "1",
+        "row_span": "full" if full else ("half" if half else "quarter"),
+        "span": "full" if full else ("half" if half else "quarter"),
+        "symmetry_plane": None if full else ("yz" if half else "yz+xz"),
+        "quadrants": "1234" if full else ("14" if half else "1"),
         "rows": list(rows_meta),
         "min_self_approach_mm": float(
             _sheet_min_nonadjacent_gap(grid, _self_approach_limit(meta))),
@@ -1482,35 +1711,16 @@ def append_tangent_lip(x, y, r_lip: float, phi_end_deg: float,
     return np.concatenate((x, x_lip)), np.concatenate((y, y_lip)), meta
 
 
-def _rows_span_phis(n_phi: int, half: bool) -> np.ndarray:
-    """Azimuths for a rows kind.  ``half`` -> ``[-90, +90]`` (odd n_phi), else ``[0, 90]``.
-
-    The phi ORIGIN is pinned to the horizontal (+x) axis in BOTH spans; the span only
-    decides whether the down half is present.  A half model needs an ODD n_phi (so the
-    phi = 0 horizontal row and BOTH +/-90 endpoint rows on the yz plane exist) AND at
-    least ``MIN_PHI_HALF`` rows (honest resolution once the modulation is on).
-    """
-    if half:
-        if n_phi < MIN_PHI_HALF:
-            raise registry.GeneratorError(
-                f"half-model rows need n_phi >= {MIN_PHI_HALF} (honest half-span "
-                f"resolution); got n_phi={n_phi}")
-        if n_phi % 2 == 0:
-            raise registry.GeneratorError(
-                "half-model rows need an ODD n_phi (the phi = 0 horizontal row and both "
-                f"+/-90 deg endpoint rows must exist); got n_phi={n_phi}")
-        return np.linspace(-0.5 * math.pi, 0.5 * math.pi, n_phi)
-    return np.linspace(0.0, 0.5 * math.pi, n_phi)
-
-
 def _rows_marches(spec: dict, knobs: dict, brief: dict, prefix: str = "g") -> list[dict]:
     """Per-azimuth marches for a rows spec (validated; used by grid + estimator).
 
     ``lecleach`` rows are axisymmetric: the SAME verified Fourcade march on every
     azimuth (no fc split, no shape modulation).  ``lecleach_mod`` adds the lib-2
     harmonic stop/cutoff law (and the optional axial bend); ``lecleach_ar`` adds the
-    area-preserving AR stretch.  The Salmon rows keep their per-azimuth ``fc`` / T5
-    modulation.  ``g_r_lip_mm`` appends the inferred torus lip to every kind.
+    area-preserving AR stretch; ``lecleach_asym`` adds the owner-approved odd-cosine
+    single-sided asymmetry (forces the FULL ring when eps_m != 0).  The Salmon rows keep
+    their per-azimuth ``fc`` / T5 modulation + the even-lobe mouth ripple (the pleats).
+    ``g_r_lip_mm`` appends the inferred torus lip to every kind.
     """
     kind = _rows_check_spec(spec)
     r0 = float(brief["driver"]["exit_radius_mm"])
@@ -1519,11 +1729,22 @@ def _rows_marches(spec: dict, knobs: dict, brief: dict, prefix: str = "g") -> li
     n_phi = _spec_int(spec, "n_phi", MIN_PHI_QUARTER, MIN_PHI_QUARTER)
     mod = _rows_lecleach_mod_knobs(knob_map, prefix) if kind == "lecleach_mod" else None
     ar = _rows_lecleach_ar_knobs(knob_map, prefix) if kind == "lecleach_ar" else None
-    half = _rows_half_requested(kind, spec, knob_map, prefix)
-    phis = _rows_span_phis(n_phi, half)
+    asym = _rows_lecleach_asym_knobs(knob_map, prefix) if kind == "lecleach_asym" else None
+    span = _rows_span_requested(kind, spec, knob_map, prefix)
+    half = span == "half"
+    full = span == "full"
+    phis = _rows_span_phis(n_phi, span)
+    span_rad = {"quarter": 0.5 * math.pi, "half": math.pi, "full": 2.0 * math.pi}[span]
+    if full and kind in ("iwata_ar", "toroidal_rollback", "lecleach_ar", "lecleach_mod"):
+        raise registry.GeneratorError(
+            f"{kind} is axisymmetric by construction (or b-term-half-forced): span: full "
+            "would spend 4x the dofs on the same geometry - use quarter")
+    # Harmonic basis: a FULL model has no mirror to violate, so the half-only terms
+    # (odd sines / bend) are representable there; the validation takes half=True for full.
+    harm_half = half or full
     if kind == "lecleach":
         lk = _rows_lecleach_knobs(knob_map, prefix)
-        harm = rows_task_harmonics(knob_map, prefix, half=half)
+        harm = rows_task_harmonics(knob_map, prefix, half=harm_half)
         lo, hi = ROWS_LECLEACH_STOP_RANGE
         out = []
         for phi in phis:
@@ -1541,6 +1762,37 @@ def _rows_marches(spec: dict, knobs: dict, brief: dict, prefix: str = "g") -> li
                 "x": xs,
                 "y": ys,
                 "march": march_meta,
+            })
+        return out
+    if kind == "lecleach_asym":
+        assert asym is not None
+        harm = rows_task_harmonics(knob_map, prefix, half=harm_half)
+        lo, hi = ROWS_LECLEACH_STOP_RANGE
+        out = []
+        for phi in phis:
+            stop = rows_task_stop(asym["stop_deg"], harm, phi, lo=lo, hi=hi)
+            xs, ys, _phi_deg, march_meta = profiles_mod.lecleach_exact(
+                r0, asym["fc_hz"], asym["T"], a0, stop, dl_mm=1.0)
+            if asym["eps_m"] != 0.0:
+                # The single-sided asymmetry scales the row's radius:
+                # r(phi, s) *= 1 + eps_m * w(s) * cos(phi).  The window keeps the throat
+                # exact (w(0) = 0), so every row still shares the driver's exit; the lip
+                # portion saturates the window (s_frac > 1 clips to 1 inside the helper).
+                s_frac = np.arange(xs.size, dtype=float) * float(march_meta["dl_mm"]) \
+                    / float(march_meta["L0_mm"])
+                w = _rows_eps_window(s_frac, asym["eps_start"])
+                ys = ys * (1.0 + asym["eps_m"] * w * math.cos(float(phi)))
+            xs, ys = _append_lip_torus(xs, ys, asym["r_lip_mm"])
+            out.append({
+                "phi": float(phi),
+                "phi_deg": float(np.degrees(phi)),
+                "fc_hz": float(asym["fc_hz"]),
+                "stop_deg": float(stop),
+                "x": xs,
+                "y": ys,
+                "march": march_meta,
+                "eps_m": float(asym["eps_m"]),
+                "eps_start": float(asym["eps_start"]),
             })
         return out
     if kind == "lecleach_mod":
@@ -1609,7 +1861,7 @@ def _rows_marches(spec: dict, knobs: dict, brief: dict, prefix: str = "g") -> li
         return out
     if kind == "toroidal_rollback":
         tk = _rows_toroidal_knobs(knob_map, prefix)
-        harm = rows_task_harmonics(knob_map, prefix, half=half)
+        harm = rows_task_harmonics(knob_map, prefix, half=harm_half)
         if half:
             raise registry.GeneratorError(
                 "toroidal_rollback is axisymmetric (the same torus on every azimuth); use "
@@ -1658,15 +1910,19 @@ def _rows_marches(spec: dict, knobs: dict, brief: dict, prefix: str = "g") -> li
         return out
     pk = _rows_shape_knobs(knob_map, prefix)
     r_lip = _rows_lip_mm(knob_map, prefix)
+    if pk["ripple_lobes"]:
+        # The pleats: refuse a ripple the row grid cannot honestly represent.
+        _rows_ripple_resolution_guard(pk["ripple_lobes"], span_rad, n_phi)
     breaking = [f"{prefix}_{name}" for name in ROWS_LR_BREAKING_KNOBS
                 if f"{prefix}_{name}" in knob_map]
     if breaking:
         raise registry.GeneratorError(
             f"salmon rows: {breaking} breaks the left-right mirror (x -> -x is "
             "phi -> pi - phi; only even cosines and odd sines are invariant). The GRID "
-            "rows route ships quarter/half models only, so an LR-breaking term is refused "
-            "instead of being silently mis-meshed (lib-2 section 2.5)")
-    task_harm = rows_task_harmonics(knob_map, prefix, half=half)
+            "rows route ships quarter/half/full models only, so an LR-breaking term is refused "
+            "instead of being silently mis-meshed (lib-2 section 2.5; the odd-cosine "
+            "asymmetry lives on the lecleach_asym kind, which forces the full ring)")
+    task_harm = rows_task_harmonics(knob_map, prefix, half=harm_half)
     stops, fc_scales = x_shape_modulation(pk["stop_deg"], pk["x_amp"], pk["x_fc"], phis)
     stops = np.atleast_1d(stops).astype(float)
     if task_harm["active"]:
@@ -1695,6 +1951,15 @@ def _rows_marches(spec: dict, knobs: dict, brief: dict, prefix: str = "g") -> li
                 r0, fc, pk["T"], a0, float(stop))
         except ValueError as exc:
             raise registry.GeneratorError(str(exc)) from exc
+        if pk["ripple_lobes"]:
+            # The pleats: r *= 1 + (amp/narrowest) * w(s) * cos(N phi) with an even lobe
+            # count. The absolute amp_mm is delivered at the row's widest station (the
+            # ridge height in mm is constant across azimuths); w opens at ripple_start.
+            l_arc = _arc_length(xs, ys)
+            s_frac = l_arc / float(l_arc[-1])
+            w = _rows_eps_window(s_frac, pk["ripple_start"])
+            ys = ys * (1.0 + (pk["ripple_amp_mm"] / max(float(np.max(ys)), 1e-9))
+                       * w * np.cos(pk["ripple_lobes"] * float(phi)))
         xs, ys = _append_lip_torus(xs, ys, r_lip)
         out.append({
             "phi": float(phi),
@@ -1715,13 +1980,20 @@ def _rows_mouth_radii(grid: np.ndarray, phis: np.ndarray) -> tuple[float, float]
     In a half model row 0 is ``-90`` (vertical), not the horizontal plane, so indexing
     blindly by row 0 would swap the axes.  Horizontal = the row nearest phi = 0;
     vertical = the larger of the two ``|phi| = 90`` endpoint rows (the envelope-relevant
-    top/bottom extent when a sin term makes them differ).
+    top/bottom extent when a sin term makes them differ).  A FULL ring has no exact
+    +/-90 deg endpoint rows (and argmax |phi| points near 180 deg, an H-axis row): there
+    the V radius is the largest y-projection over the ring's mouth stations, labelled
+    accordingly (report consistency, not a new construction).
     """
     p = np.asarray(phis, dtype=float)
     i_h = int(np.argmin(np.abs(p)))
+    if float(p[-1]) > math.pi + 1e-9:                 # a full ring
+        mouth_x = grid[:, -1, 0]
+        mouth_y = np.abs(grid[:, -1, 1])
+        return float(np.max(mouth_x)), float(np.max(mouth_y))
     r_h = float(np.hypot(grid[i_h, -1, 0], grid[i_h, -1, 1]))
     ends = [i for i, phi in enumerate(p) if abs(abs(float(phi)) - 0.5 * math.pi) <= 1e-9]
-    if not ends:                                   # full circles are not built here
+    if not ends:
         ends = [int(np.argmax(np.abs(p)))]
     r_v = max(float(np.hypot(grid[i, -1, 0], grid[i, -1, 1])) for i in ends)
     return r_h, r_v
@@ -1748,24 +2020,30 @@ def rows_per_azimuth(base_spec_with_rows: dict, knobs: dict, brief: dict,
     knob_map = _knob_map(knobs)
     mod = _rows_lecleach_mod_knobs(knob_map, prefix) if kind == "lecleach_mod" else None
     ar = _rows_lecleach_ar_knobs(knob_map, prefix) if kind == "lecleach_ar" else None
+    asym = _rows_lecleach_asym_knobs(knob_map, prefix) if kind == "lecleach_asym" else None
     marches = _rows_marches(base_spec_with_rows, knobs, brief, prefix)
     phis = np.asarray([m["phi"] for m in marches], dtype=float)
-    half = bool(phis[0] < -1e-9)
+    span = _rows_span_requested(kind, base_spec_with_rows, knob_map, prefix)
+    half = span == "half"
+    full = span == "full"
     resample_flags = [bool(m.get("resample", True)) for m in marches]
     if len(set(resample_flags)) != 1:
         raise registry.GeneratorError(
             "rows: a kind must either pre-sample every row at the shared l stations or "
             "none; mixed resampling is not supported")
     resample = resample_flags[0]
-    task_harm = (rows_task_harmonics(_knob_map(knobs), prefix, half=half)
-                 if kind in ("lecleach", "toroidal_rollback", "salmon_elliptical",
-                             "salmon_axisym") else
+    task_harm = (rows_task_harmonics(_knob_map(knobs), prefix, half=(half or full))
+                 if kind in ("lecleach", "lecleach_asym", "toroidal_rollback",
+                             "salmon_elliptical", "salmon_axisym") else
                  {"stop_cos2k": [], "stop_sin2k1": [], "bend_sin1_mm": 0.0,
                   "active": False})
     profiles_xy = [(m["x"], m["y"]) for m in marches]
     a0 = float(brief["driver"]["exit_angle_deg"])
     wt = float(base_spec_with_rows.get("wall_thickness_mm", 3.0))
-    if half:
+    if full:
+        phi_note = ("measured from the HORIZONTAL +x axis; FULL ring phi = 0 .. 360 deg "
+                    "exclusive of the seam row (no mirror planes, quadrants '1234')")
+    elif half:
         phi_note = ("measured from the HORIZONTAL +x axis; HALF model phi = -90 .. +90 "
                     "deg inclusive (phi = 0 row is horizontal, both +/-90 rows lie on "
                     "x = 0 / the yz symmetry plane)")
@@ -1927,6 +2205,42 @@ def rows_per_azimuth(base_spec_with_rows: dict, knobs: dict, brief: dict,
             "row_stop_actual_deg": [float(m["march"]["stop_deg"]) for m in marches],
             "sign_conventions": sign_conventions,
         }
+    elif kind == "lecleach_asym":
+        assert asym is not None
+        march0 = marches[0]["march"]
+        meta = {
+            "family": "grid",
+            "rows_type": kind,
+            "construction_label": ROWS_ASYM_LABEL,
+            "base_construction_label": ROWS_LECLEACH_CONSTRUCTION_LABEL,
+            "source_auto_angle_deg": a0,
+            "wall_thickness_mm": wt,
+            "fc_hz": float(asym["fc_hz"]),
+            "T": float(asym["T"]),
+            "stop_deg": float(asym["stop_deg"]),
+            "eps_m": float(asym["eps_m"]),
+            "eps_start": float(asym["eps_start"]),
+            "eps_law": ("r(phi, s) *= 1 + eps_m * w(s) * cos(phi); w = the smoothstep "
+                        "window on the arc fraction opening at eps_start; the throat "
+                        "stays exact (w(0) = 0)"),
+            "r_lip_mm": float(asym["r_lip_mm"]),
+            "lip_model": _LIP_MODEL_NOTE,
+            "phi1_included_deg": float(march0["phi1_included_deg"]),
+            "L0_mm": float(march0["L0_mm"]),
+            "row_fc_hz": [float(m["fc_hz"]) for m in marches],
+            "row_stop_deg": [float(m["stop_deg"]) for m in marches],
+            "row_stop_actual_deg": [float(m["march"]["stop_deg"]) for m in marches],
+            "sign_conventions": sign_conventions,
+        }
+        if asym["eps_m"] != 0.0:
+            meta["full_ring_reason"] = ("the odd cos(phi) term breaks the left-right "
+                                        "mirror; only the full ring represents it (C2)")
+        if task_harm["active"]:
+            meta.update({
+                "reconstruction_label": ROWS_MOD_RECONSTRUCTION_LABEL,
+                "harmonic_law": ("stop(phi) = stop0 (1 + sum a_2k cos(2k phi) + "
+                                 "sum b_(2k+1) sin((2k+1) phi)), phi from horizontal"),
+            })
     else:
         pk = _rows_shape_knobs(knob_map, prefix)
         meta = {
@@ -1941,6 +2255,9 @@ def rows_per_azimuth(base_spec_with_rows: dict, knobs: dict, brief: dict,
             "stop_deg": float(pk["stop_deg"]),
             "x_amp": float(pk["x_amp"]),
             "x_fc": float(pk["x_fc"]),
+            "ripple_lobes": int(pk["ripple_lobes"]),
+            "ripple_amp_mm": float(pk["ripple_amp_mm"]),
+            "ripple_start": float(pk["ripple_start"]),
             "r_lip_mm": float(_rows_lip_mm(knob_map, prefix)),
             "lip_model": _LIP_MODEL_NOTE,
             "row_fc_hz": [float(m["fc_hz"]) for m in marches],
@@ -1951,6 +2268,11 @@ def rows_per_azimuth(base_spec_with_rows: dict, knobs: dict, brief: dict,
             "bend_sin1_mm": float(task_harm["bend_sin1_mm"]),
             "sign_conventions": sign_conventions,
         }
+        if pk["ripple_lobes"]:
+            meta["ripple_label"] = ROWS_RIPPLE_LABEL
+            meta["ripple_law"] = ("r *= 1 + (ripple_amp_mm / row_max) * w(s) * "
+                                  "cos(ripple_lobes * phi); w opens at ripple_start; "
+                                  "the ridge height in mm is constant across azimuths")
         if task_harm["active"]:
             # A salmon list stop/bend law is a C2 reconstruction: label it so the recipe is
             # never mistaken for a verified construction.
@@ -2011,8 +2333,9 @@ def _rows_envelope_extents(spec: dict, knobs: dict, brief: dict,
     """
     kind = _rows_check_spec(spec)
     knob_map = _knob_map(knobs)
-    half = _rows_half_requested(kind, spec, knob_map, prefix)
-    bend = abs(float(rows_task_harmonics(knob_map, prefix, half=half)["bend_sin1_mm"]))
+    span = _rows_span_requested(kind, spec, knob_map, prefix)
+    bend = abs(float(rows_task_harmonics(knob_map, prefix, half=(span != "quarter"))
+                     ["bend_sin1_mm"]))
     marches = _rows_marches(spec, knobs, brief, prefix)
     width = height = 0.0
     x_min = math.inf
@@ -2081,7 +2404,7 @@ def design_params(spec: dict, knobs: dict, brief: dict) -> dict:
         # recipe and is never demanded.  ``rows`` + ``knobs`` carry the hypothesis labels.
         rows_grid_points(spec, knob_map, brief)     # full march + knob validation
         kind = _rows_check_spec(spec)
-        half = _rows_half_requested(kind, spec, knob_map)
+        span = _rows_span_requested(kind, spec, knob_map)
         block = {
             "rows": copy.deepcopy(spec["rows"]),
             "n_phi": _spec_int(spec, "n_phi", MIN_PHI_QUARTER, MIN_PHI_QUARTER),
@@ -2089,10 +2412,10 @@ def design_params(spec: dict, knobs: dict, brief: dict) -> dict:
             "wall_thickness_mm": float(spec.get("wall_thickness_mm", 3.0)),
             "knobs": _recipe_knobs(knob_map, rows=True),
         }
-        if half:
-            # Persisted only for a half model, so the quarter recipe (and its design
-            # hash) stays byte-identical to the pre-half-route recipe.
-            block["span"] = "half"
+        if span != "quarter":
+            # Persisted only for a non-quarter model, so the quarter recipe (and its design
+            # hash) stays byte-identical to the pre-span-route recipe.
+            block["span"] = span
         return {"grid": block}
 
     grid_points(spec, knob_map, brief)          # full knob + meridian + envelope validation
@@ -2126,22 +2449,26 @@ def validate_grid_params(block: dict) -> None:
                 "grid: knobs are required (the design must carry its generation recipe)")
         kind = _rows_check_spec(block)
         knob_map = _knob_map(block.get("knobs") or {})
-        half = _rows_half_requested(kind, block, knob_map)   # span / b-term consistency
+        span = _rows_span_requested(kind, block, knob_map)   # span / forcing consistency
+        half = span == "half"
         if kind == "lecleach":
             _rows_lecleach_knobs(knob_map)
-            rows_task_harmonics(knob_map, half=half)
+            rows_task_harmonics(knob_map, half=(half or span == "full"))
+        elif kind == "lecleach_asym":
+            _rows_lecleach_asym_knobs(knob_map)
+            rows_task_harmonics(knob_map, half=(half or span == "full"))
         elif kind == "iwata_ar":
             _rows_iwata_ar_knobs(knob_map)
         elif kind == "toroidal_rollback":
             _rows_toroidal_knobs(knob_map)
-            rows_task_harmonics(knob_map, half=half)
+            rows_task_harmonics(knob_map, half=(half or span == "full"))
         elif kind == "lecleach_mod":
             _rows_lecleach_mod_knobs(knob_map)
         elif kind == "lecleach_ar":
             _rows_lecleach_ar_knobs(knob_map)
         else:
             _rows_shape_knobs(knob_map)
-            rows_task_harmonics(knob_map, half=half)
+            rows_task_harmonics(knob_map, half=(half or span == "full"))
         return
     unknown = sorted(set(block) - set(GRID_BLOCK_KEYS))
     if unknown:

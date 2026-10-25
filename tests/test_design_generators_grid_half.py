@@ -389,7 +389,12 @@ def test_catalog_entries_symmetry_and_brief_compatibility():
         assert ok and why == "", (name, why)
     ok, why = is_compatible(catalog["lecleach_toroidal"], organic)
     assert not ok and "coverage_h" in why
-    # the 90x90 axi brief accepts all three (hv is also eligible there)
-    for name in expected:
+    ok, why = is_compatible(catalog["lecleach_toroidal"], axi)
+    assert ok and why == ""
+    # 2026-10-25 POLICY CHANGE (owner-approved; the 7040 campaign finding): an axisymmetric
+    # brief now REFUSES non-axisymmetric entries. The old pin ("hv is also eligible there")
+    # allowed asymmetric families under a symmetric brief, which returned asymmetric bests
+    # (458x240 mm mouths) that never matched the brief's own symmetric intent.
+    for name in ("salmon_saddle", "lecleach_iwata_ar"):
         ok, why = is_compatible(catalog[name], axi)
-        assert ok and why == "", (name, why)
+        assert not ok and "axisymmetric" in why, (name, why)

@@ -63,9 +63,12 @@ DEFAULT_WALL_THICKNESS_MM = 3.0
 
 #: Quadrants -> the mesher's symmetry-plane axes (mirror of ``sizing.SYMMETRY_PLANE``
 #: vocabulary).  "1" is the quarter (G8/G9 even in phi); "14" is the half model the
-#: lecleach_mod b-terms force (left-right mirror only, plane yz, x >= 0).  The mesher's
-#: ``PointGridHornGeometry`` uses the same axis names ("x" = x=0/yz, "y" = y=0/xz).
-_GRID_SYMMETRY_AXES = {"1": ("x", "y"), "14": ("x",)}
+#: lecleach_mod b-terms force (left-right mirror only, plane yz, x >= 0); "1234" is the
+#: FULL ring (no mirror planes; the mesher's native closed/full mode, 2026-10-25:
+#: the odd-cosine lecleach_asym asymmetry requires it -- MOUTH_RIPPLE/SALMON dossiers).
+#: The mesher's ``PointGridHornGeometry`` uses the same axis names
+#: ("x" = x=0/yz, "y" = y=0/xz); an empty tuple + ``closed=True`` is its default mode.
+_GRID_SYMMETRY_AXES = {"1": ("x", "y"), "14": ("x",), "1234": ()}
 
 
 def _resolve_grid(grid: dict, *, enclosure: dict | None = None
@@ -100,7 +103,7 @@ def _resolve_grid(grid: dict, *, enclosure: dict | None = None
                 "topology or the freestanding wall shell")
         return inner, None, t, meta, closed
     if outer is None:
-        outer = grid_gen.grid_outer_points(inner, t, half=half)
+        outer = grid_gen.grid_outer_points(inner, t, half=half, full=closed)
     else:
         outer = np.asarray(outer, dtype=float)
         if outer.shape != inner.shape:
@@ -137,10 +140,13 @@ def build_grid_mesh(grid, mesh, out_path, cfg, *, mode: str | None = None,
     out_path = Path(out_path)
     inner, outer, t, meta, closed = _resolve_grid(grid, enclosure=mounting)
     enclosure = None if mounting is None else families.enclosure_object(mounting)
-    if closed:
-        raise ValueError("build_grid_mesh needs a quarter or half grid (not a full circle)")
     half = bool(meta.get("half_model", False))
-    expected = "14" if half else "1"
+    full = bool(closed)          # a full ring = the mesher's native closed mode (2026-10-25)
+    if full and enclosure is not None:
+        raise ValueError(
+            "the WP12 enclosure route takes the quarter/half rows in this pass; a full "
+            "ring + enclosure needs its own validation pass")
+    expected = "14" if half else ("1234" if full else "1")
     if mesh.quadrants != expected:
         raise ValueError(
             f"grid/symmetry mismatch: this grid is a {meta.get('row_span', 'quarter')} "
@@ -148,7 +154,8 @@ def build_grid_mesh(grid, mesh, out_path, cfg, *, mode: str | None = None,
             f"{meta.get('symmetry_plane')!r}), but mesh.quadrants={mesh.quadrants!r}. "
             f"A {meta.get('row_span', 'quarter')} grid needs quadrants={expected!r} "
             f"(b-terms / the axial bend force the HALF model; all-cosine recipes stay "
-            f"quarter). A full/free model needs the twist/asymmetry pass.")
+            f"quarter; the seam-free FULL ring - the odd-cosine lecleach_asym asymmetry "
+            f"- is '1234').")
     angle = meta.get("source_auto_angle_deg")
     if angle is None:
         raise ValueError("grid meta lacks 'source_auto_angle_deg' (the rounded source cap angle)")
@@ -169,7 +176,7 @@ def build_grid_mesh(grid, mesh, out_path, cfg, *, mode: str | None = None,
     )
     geometry = PointGridHornGeometry(
         inner_points=inner,
-        closed=False,
+        closed=full,                           # the full ring is the mesher's native closed mode
         outer_points=outer,                    # None in enclosure mode (structural guard)
         wall_thickness_mm=float(t) if enclosure is None else 0.0,
         source_shape=1,
