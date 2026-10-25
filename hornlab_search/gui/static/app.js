@@ -58,6 +58,7 @@ const ROUTES = [
   { re: /^#\/run\/(.+)$/,               fn: m => viewRunDetail(m[1]) },
   { re: /^#\/compare$/,                 fn: () => viewCompare() },
   { re: /^#\/briefs$/,                  fn: () => viewBriefs() },
+  { re: /^#\/compose$/,                 fn: () => viewCompose() },
   { re: /^#\/launch$/,                  fn: () => viewLaunch() },
   { re: /^#\/typologies$/,              fn: () => viewTypologies() },
   { re: /^#\/glossary$/,                fn: () => viewGlossary() },
@@ -97,6 +98,7 @@ function updateNav(hash) {
       (h === "#/runs" && (hash === "#/runs" || (hash.startsWith("#/run/") && !hash.endsWith("/3d")))) ||
       (h === "#/compare" && hash === "#/compare") ||
       (h === "#/briefs" && hash === "#/briefs") ||
+      (h === "#/compose" && hash === "#/compose") ||
       (h === "#/launch" && hash === "#/launch") ||
       (h === "#/glossary" && hash === "#/glossary");
     a.classList.toggle("active", isActive);
@@ -1524,6 +1526,24 @@ async function viewCompare() {
 
 // ── View 5: Briefs ─────────────────────────────────────────────────
 
+// Catalog group labels, shared by the Briefs picker, the Compose wizard (step 1) and the
+// Launch family picker so the same group is always capioned the same way.
+const CATALOG_GROUP_LABEL = { classical: "Classical horns", hybrid: "Hybrids", organic: "Organic horns",
+                              magnus: "Magnus mesher families", legacy: "Utility / legacy" };
+
+/** "…/briefs/axi_90x90_1in.yaml" -> "axi_90x90_1in" (configs spell brief_file relative to their
+ *  own directory, e.g. "../briefs/axi_90x90_1in.yaml", so matching goes by the file stem). */
+function briefFileStem(f) {
+  return String(f || "").replace(/\\/g, "/").split("/").pop().replace(/\.(yaml|yml)$/, "");
+}
+
+/** The /api/briefs entry a config's brief_file points at (stem match first, path fallback). */
+function findBriefByFile(briefs, briefFile) {
+  const stem = briefFileStem(briefFile);
+  return briefs.find(x => x.name === stem) ||
+         briefs.find(x => x.path === String(briefFile || "").replace(/\\/g, "/")) || null;
+}
+
 // Starting values for a brand-new brief. They mirror the shipped brief
 // examples/briefs/axi_90x90_1in.yaml (coverage angles, scoring weights, 1-inch driver) with a
 // wider-than-tall envelope; everything else is the schema default in config.py::load_brief.
@@ -1571,13 +1591,11 @@ async function viewBriefs() {
 
   // Typology picker options: grouped by catalog group, captioned with the family, disabled
   // entries kept visible (marker + disabled attribute) so their existence is never hidden.
-  const GROUP_LABEL = { classical: "Classical horns", hybrid: "Hybrids", organic: "Organic horns",
-                        magnus: "Magnus mesher families", legacy: "Utility / legacy" };
   const byGroup = {};
   for (const c of configs) (byGroup[c.group || "Other"] = byGroup[c.group || "Other"] || []).push(c);
   let pickOpts = `<option value="">— pick a typology's brief —</option>`;
   for (const [grp, list] of Object.entries(byGroup)) {
-    pickOpts += `<optgroup label="${esc(GROUP_LABEL[grp] || grp)}">`;
+    pickOpts += `<optgroup label="${esc(CATALOG_GROUP_LABEL[grp] || grp)}">`;
     for (const c of list) {
       const desc = c.description ? ` — ${c.description.slice(0, 60)}` : "";
       pickOpts += `<option value="${esc(c.path)}" ${c.disabled ? "disabled" : ""}>${esc(c.catalog_name || c.name)} · ${esc(c.family || "—")}${esc(desc)}${c.disabled ? " (disabled)" : ""}</option>`;
@@ -1629,9 +1647,7 @@ async function viewBriefs() {
       e.target.value = "";
       return;
     }
-    const stem = String(c.brief_file).replace(/\\/g, "/").split("/").pop().replace(/\.(yaml|yml)$/, "");
-    const br = briefs.find(x => x.name === stem) ||
-               briefs.find(x => x.path === String(c.brief_file).replace(/\\/g, "/"));
+    const br = findBriefByFile(briefs, c.brief_file);
     if (!br) {
       pickMsg.textContent = `Brief file ${c.brief_file} was not found among the briefs on this page.`;
       e.target.value = "";
@@ -1645,7 +1661,9 @@ async function viewBriefs() {
 
 async function showBriefDetail(b, allBriefs, opts = {}) {
   const isNew = opts.mode === "new";
-  const det = document.getElementById("brief-detail");
+  // Briefs page mounts into #brief-detail; the Compose wizard reuses this exact form via opts.mount.
+  const det = opts.mount ? document.getElementById(opts.mount) : document.getElementById("brief-detail");
+  if (!det) return;
   det.innerHTML = `<p class="muted">Loading…</p>`;
   const br = b.brief || {};
   const tgt = br.target || {};
@@ -1814,7 +1832,7 @@ async function showBriefDetail(b, allBriefs, opts = {}) {
 
       </form>
 
-      ${isNew ? "" : `
+      ${(isNew || opts.hideFamilies) ? "" : `
       <div>
         <h4 style="margin-bottom:8px">Families compatible with this brief</h4>
         <button id="btn-families">Show compatible families</button>
@@ -1914,10 +1932,13 @@ async function showBriefDetail(b, allBriefs, opts = {}) {
     };
     const r = await post("/api/brief", { name, brief: newBrief });
     if (r.error) msg.innerHTML = `<div class="alert error">${esc(r.error)}</div>`;
-    else msg.innerHTML = `<div class="alert info">Saved to ${esc(r.path || name)}</div>`;
+    else {
+      msg.innerHTML = `<div class="alert info">Saved to ${esc(r.path || name)}</div>`;
+      if (opts.onSaved) opts.onSaved(r.path || "", name);   // Compose wizard holds the saved path
+    }
   };
 
-  if (!isNew) {
+  if (!isNew && !opts.hideFamilies) {
     // Show families
     document.getElementById("btn-families").onclick = async () => {
       const pre = document.getElementById("families-out");
@@ -1931,6 +1952,497 @@ async function showBriefDetail(b, allBriefs, opts = {}) {
   }
 
   if (opts.scroll) det.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+// ── View 5b: Compose — typology-first run builder ──────────────────
+// Owner UX direction (2026-10-25): pick the shapes first, then the brief constraints, then the
+// run shape. The wizard never builds the argv itself — POST /api/preview returns the exact
+// command jobs.py would run and POST /api/jobs launches it (both allow-listed server-side).
+
+const COMPOSE_KIND_HINTS = {
+  "dry-run": "Meshes the starting design only — no solve, no GPU. The cheap check that the brief + typology combo loads.",
+  "run": "One GPU solve of the starting design — minutes.",
+  "search": "CMA-ES optimization on the GPU — needs the GPU free. Blank budget = the engine default of 60 evaluations.",
+};
+
+const COMPOSE_TIER_HINTS = {
+  "dry-run": "Meshes each picked family's starting design only — no solve, no GPU. Seconds.",
+  "screen": "One search per family — budget max(40, 10×searchable knobs), 1 seed. Minutes.",
+  "compare": "Two seeds per family — budget max(150, 25×searchable knobs). Needed to claim one family beats another. Hours.",
+};
+
+const EDITOR_SELECT_CSS = "font:inherit;font-size:0.88rem;background:var(--bg);color:var(--ink);border:1px solid var(--rule);border-radius:5px;padding:6px 10px;max-width:100%;min-width:280px";
+
+async function viewCompose() {
+  const ROOT = currentRoot();     // this view's own container (see route())
+  skel("Loading typologies and briefs…");
+  let briefs = [], configs = [], statusData = null, configsOk = true;
+  try {
+    statusData = await api("/api/status");
+    briefs = await api("/api/briefs");
+    configs = await api("/api/configs").catch(() => (configsOk = false, []));
+  } catch (e) { ROOT.innerHTML = errBanner(e.message); return; }
+  if (ROOT !== currentRoot()) return;
+  const gpuLock = (statusData && statusData.gpu_lock) || null;
+  const gpuBusy = !!(gpuLock && gpuLock.alive);
+
+  const S = {
+    picks: new Set(),              // config paths
+    briefMode: null,               // null | "new" | "typology" | "existing"
+    briefPath: null,               // repo-relative brief path or null until saved/chosen
+    briefLabel: "",
+    runKind: "dry-run",            // single-config run type
+    tier: "dry-run",               // campaign tier
+    busyReason: null,              // server's gpu_busy string from the latest preview
+  };
+
+  const FAM_RE = /^[a-z0-9_]+(,[a-z0-9_]+)*$/;   // jobs.py FAMILIES (client pre-check only)
+  const symLabel = c => c.symmetry === "axisymmetric" ? "axisymmetric" : "H/V";
+
+  ROOT.innerHTML = `
+    <div class="stack" style="gap:24px">
+      <div>
+        <div class="eyebrow">Compose</div>
+        <h2>Compose a run</h2>
+        <p class="muted" style="font-size:0.85rem">Shape first (which typologies), then the brief (the objective they are scored against), then the run. Every choice shows its exact command before anything executes — nothing is launched from here without a preview.</p>
+      </div>
+
+      <fieldset>
+        <legend>1 · Shape — pick the typologies</legend>
+        <div class="stack" style="gap:10px">
+          <div style="display:flex;align-items:center;flex-wrap:wrap;gap:10px">
+            <span id="cmp-shape-summary" class="hint" role="status">0 picked — pick at least one typology.</span>
+            <span id="cmp-shape-note" class="hint" role="status"></span>
+            <button type="button" id="cmp-clear" hidden>Clear picks</button>
+          </div>
+          ${configsOk ? `<div id="cmp-shapes" class="fam-picker"></div>`
+                      : `<p class="muted">Typology list unavailable — compose on the Briefs page or reuse an existing brief in step 2.</p>`}
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>2 · Brief — the objective the shape is scored against</legend>
+        <div class="stack" style="gap:12px">
+          <div class="btn-row" role="radiogroup" aria-label="brief source">
+            <button type="button" class="job-type-btn" data-src="new" aria-pressed="false">New from scratch</button>
+            <button type="button" class="job-type-btn" data-src="typology" aria-pressed="false">From a typology's brief</button>
+            <button type="button" class="job-type-btn" data-src="existing" aria-pressed="false">Reuse an existing brief</button>
+          </div>
+          <div class="form-grid" id="cmp-brief-picker"></div>
+          <div id="compose-editor"></div>
+          <div id="cmp-brief-status" class="hint" role="status"></div>
+          <div class="hint">The brief does not name the typology — the run binds them: a single run gets <code>--config &lt;path&gt; --brief &lt;path&gt;</code>; a campaign gets <code>--brief</code> and resolves the families you picked in step 1.</div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>3 · Run — what will actually execute</legend>
+        <div class="stack" style="gap:12px">
+          <div id="cmp-run-mode"></div>
+          <div class="gpu-busy-note" id="cmp-busy" style="display:none" role="status"></div>
+          <pre id="cmp-cmd" style="white-space:pre-wrap;word-break:break-all;font-size:0.82rem;background:var(--bg);border:1px solid var(--rule);border-radius:6px;padding:10px 12px;color:var(--ink)">— fill steps 1 and 2 to see the exact command</pre>
+          <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px">
+            <button type="button" id="btn-cmp-launch" class="primary">Launch</button>
+            <span id="cmp-launch-msg" class="hint" role="status"></span>
+          </div>
+          <div id="cmp-launch-error"></div>
+        </div>
+      </fieldset>
+    </div>`;
+
+  // ── Step 1: shape multi-select ─────────────────────────────────
+  // Rules (stated, not hidden): disabled configs stay VISIBLE, marked and unselectable
+  // (never pretend a capability does not exist). Uncatalogued configs (no catalog_name) are
+  // selectable only as the SOLE pick — they launch as one --config run and cannot appear in a
+  // campaign's --families (campaign resolves catalog names only); a second pick drops them with
+  // the reason shown. Real family-vs-brief compatibility is NOT re-implemented here: the
+  // campaign skips per-entry with the reason printed; the preview command is the truth.
+  const shapesEl = document.getElementById("cmp-shapes");
+  const shapeNote = document.getElementById("cmp-shape-note");
+
+  function shapeNoteMsg(msg = "") {
+    shapeNote.innerHTML = msg
+      ? `<span class="warn-text">⚠ ${msg}</span>` : "";
+  }
+
+  function pickAllowed(c) {
+    if (c.disabled) return false;                       // seed gate: never launchable
+    if (!c.catalog_name) return S.picks.size === 0 || S.picks.has(c.path);
+    return true;
+  }
+
+  function addPick(c, inputEl) {
+    if (c.disabled) {
+      if (inputEl) inputEl.checked = false;
+      shapeNoteMsg(`${esc(c.name)} is disabled — the starting design does not materialize, so it cannot launch.`);
+      return;
+    }
+    if (!pickAllowed(c)) {
+      if (inputEl) inputEl.checked = false;
+      shapeNoteMsg(`${esc(c.name)} is uncatalogued — campaign resolves catalog names only, so it launches alone: clear the other picks first.`);
+      return;
+    }
+    if (!S.picks.has(c.path) && S.picks.size >= 1) {    // dropping a sole uncatalogued pick
+      const sole = configs.find(x => x.path === [...S.picks][0]);
+      if (sole && !sole.catalog_name) {
+        S.picks.delete(sole.path);
+        shapeNoteMsg(`${esc(sole.name)} deselected — campaign resolves catalog names only, so it cannot join the picks.`);
+      }
+    }
+    S.picks.add(c.path);
+  }
+
+  function renderShapes() {
+    const groups = {}, uncatalogued = [];
+    for (const c of configs) {
+      if (c.catalog_name) (groups[c.group || "Other"] = groups[c.group || "Other"] || []).push(c);
+      else uncatalogued.push(c);
+    }
+    const row = c => {
+      const stem = c.brief_file ? "brief: " + briefFileStem(c.brief_file) : "no brief_file";
+      const off = c.disabled || (!c.catalog_name && S.picks.size >= 1 && !S.picks.has(c.path));
+      const why = c.disabled ? "disabled — the starting design does not materialize (engine seed gate)"
+                : off ? "campaign resolves catalog names only — pick this config alone (clear the other picks first)"
+                : (c.description || "");
+      return `<label class="fam-row ${off ? "off" : ""}" title="${esc(why)}">
+        <input type="checkbox" value="${esc(c.path)}" ${off ? "disabled" : ""} ${S.picks.has(c.path) ? "checked" : ""}>
+        <span class="fam-name">${esc(c.catalog_name || c.name)}${c.disabled ? ` <span class="pill bad" style="font-size:0.66rem">disabled</span>` : ""}</span>
+        <span class="fam-meta">${esc(c.family || "—")} · ${symLabel(c)} · ${c.n_knobs} params</span>
+        <span class="fam-best">${esc(stem)}</span>
+      </label>`;
+    };
+    let html = "";
+    for (const [g, list] of Object.entries(groups)) {
+      html += `<fieldset class="fam-group"><legend>${esc(CATALOG_GROUP_LABEL[g] || g)}
+        <button type="button" class="linkish" data-all="${esc(g)}">select all in group</button></legend>
+        ${list.map(row).join("")}</fieldset>`;
+    }
+    if (uncatalogued.length) {
+      html += `<fieldset class="fam-group"><legend>Uncatalogued — single-config runs only</legend>
+        <div class="hint" style="margin:0 0 6px 2px">No catalog entry: one <code>--config</code> dry-run/run/search, and a campaign cannot list them (--families resolves catalog names only). Selectable only when nothing else is picked.</div>
+        ${uncatalogued.map(row).join("")}</fieldset>`;
+    }
+    shapesEl.innerHTML = html;
+
+    shapesEl.querySelectorAll("[data-all]").forEach(b => b.onclick = () => {
+      const grp = b.closest("fieldset");
+      grp.querySelectorAll("input[type=checkbox]:not(:disabled)").forEach(cb => {
+        const c = configs.find(x => x.path === cb.value);
+        if (c) addPick(c, cb);
+      });
+      syncShapes(); refreshBriefAndRun();
+    });
+
+    shapesEl.onchange = e => {
+      const input = e.target;
+      if (input.type !== "checkbox") return;
+      const c = configs.find(x => x.path === input.value);
+      if (!c) return;
+      if (input.checked) addPick(c, input);
+      else S.picks.delete(c.path);
+      syncShapes(); refreshBriefAndRun();
+    };
+
+    syncShapes();
+  }
+
+  function syncShapes() {
+    shapesEl.querySelectorAll("input[type=checkbox]").forEach(cb => {
+      const c = configs.find(x => x.path === cb.value);
+      if (!c) return;
+      const disallowed = !pickAllowed(c);
+      cb.disabled = disallowed;
+      cb.checked = S.picks.has(c.path);
+      cb.closest(".fam-row")?.classList.toggle("off", disallowed || c.disabled);
+    });
+    document.getElementById("cmp-clear").hidden = S.picks.size === 0;
+    document.getElementById("cmp-shape-summary").textContent = shapeSummary();
+  }
+
+  function pickedConfigs() {
+    return [...S.picks].map(p => configs.find(x => x.path === p)).filter(Boolean);
+  }
+
+  function familiesArg() {
+    const names = pickedConfigs().filter(c => c.catalog_name).map(c => c.catalog_name);
+    return [...new Set(names)].join(",");
+  }
+
+  function shapeSummary() {
+    const n = S.picks.size;
+    if (!n) return "0 picked — pick at least one typology.";
+    if (n === 1) {
+      const c = pickedConfigs()[0];
+      return `1 picked · single-config run (${c.catalog_name || c.name}) — choose dry-run / run / search in step 3`;
+    }
+    const fams = familiesArg();
+    return `${n} picked · campaign over ${fams ? fams.split(",").length : 0} catalog families — --families ${fams || "(none resolvable)"}`;
+  }
+
+  document.getElementById("cmp-clear").onclick = () => {
+    S.picks.clear();
+    shapeNoteMsg("");
+    syncShapes(); refreshBriefAndRun();
+  };
+
+  function setLaunchMsg(html) {
+    document.getElementById("cmp-launch-msg").innerHTML = html;
+  }
+
+  // ── Step 2: brief source ───────────────────────────────────────
+  // (a) NEW from scratch — the schema-safe draft; (b) one typology's brief_file as the starting
+  // point; (c) an existing brief used AS-IS (no copy needed). (a)/(b) only become launchable
+  // after a save — a brief that was never saved has no path, and jobs.py resolves --brief to a
+  // real file, so preview/launch honestly wait for the one-click save.
+  const pickerEl = document.getElementById("cmp-brief-picker");
+  const editorEl = document.getElementById("compose-editor");
+  const statusEl = document.getElementById("cmp-brief-status");
+  const srcBtns = [...document.querySelectorAll(".job-type-btn[data-src]")];
+  srcBtns.forEach(btn => btn.onclick = () => setBriefSource(btn.dataset.src));
+
+  async function setBriefSource(mode) {
+    S.briefMode = mode;
+    S.briefPath = null;
+    S.briefLabel = "";
+    srcBtns.forEach(b => b.setAttribute("aria-pressed", String(b.dataset.src === mode)));
+    if (mode === "typology") {
+      const cands = configs.filter(c => c.brief_file && !c.disabled);
+      pickerEl.innerHTML = cands.length ? `
+        <label for="cmp-typo-brief">Typology</label>
+        <select id="cmp-typo-brief" style="${EDITOR_SELECT_CSS}">
+          <option value="">— pick a typology to load its brief_file —</option>
+          ${cands.map(c => `<option value="${esc(c.path)}">${esc(c.catalog_name || c.name)} · ${esc(c.family || "—")} — brief_file ${esc(briefFileStem(c.brief_file))}</option>`).join("")}
+        </select>
+        <div class="hint">Loads the typology's own brief into the editor below as your starting point (provenance caption included); saving a copy under your name binds it to the run.</div>`
+        : `<span class="form-label">Typology</span><div class="hint">No catalogued typology carries a brief_file.</div>`;
+      document.getElementById("cmp-typo-brief")?.addEventListener("change", async e => {
+        const c = configs.find(x => x.path === e.target.value);
+        if (!c) return;
+        const br = findBriefByFile(briefs, c.brief_file);
+        if (!br) {
+          editorEl.innerHTML = `<p class="hint">Brief file <code>${esc(c.brief_file)}</code> was not found among the briefs — it names no loadable brief.</p>`;
+          return;
+        }
+        await showBriefDetail(br, briefs, { mode: "typology", origin: c, mount: "compose-editor",
+                                            hideFamilies: true, onSaved: briefSaved });
+      });
+      editorEl.innerHTML = `<p class="muted">Pick a typology above — its brief loads here for editing.</p>`;
+    } else if (mode === "existing") {
+      pickerEl.innerHTML = `
+        <label for="cmp-exist-brief">Existing brief</label>
+        <select id="cmp-exist-brief" style="${EDITOR_SELECT_CSS}">
+          <option value="">— pick a brief —</option>
+          ${briefs.map(b => `<option value="${esc(b.path)}">${esc(b.name)} (${esc(b.kind)}) — ${esc(b.path)}${b.brief?.verify_only ? " · verify_only" : ""}</option>`).join("")}
+        </select>
+        <div class="hint">Used AS-IS for the run — campaigns don't require saving a copy. verify_only briefs are refused by run/campaign — only <code>verify --brief</code> uses them.</div>`;
+      document.getElementById("cmp-exist-brief")?.addEventListener("change", e => {
+        const br = briefs.find(x => x.path === e.target.value);
+        if (!br) { S.briefPath = null; S.briefLabel = ""; editorEl.innerHTML = `<p class="muted">Pick a brief above.</p>`; }
+        else {
+          S.briefPath = br.path; S.briefLabel = br.name;
+          editorEl.innerHTML = `<p class="hint">Using <code>${esc(br.path)}</code> as-is — no editor here. Copy and modify it on the <a href="#/briefs">Briefs page</a> if you want changes.</p>`;
+        }
+        refreshBriefStatus(); refreshRunMode(); updatePreview();
+      });
+      editorEl.innerHTML = `<p class="muted">Pick a brief above — it is used as-is, without editing.</p>`;
+    } else {                                          // new from scratch
+      pickerEl.innerHTML = "";
+      await showBriefDetail(newBriefDraft(), briefs, { mode: "new", mount: "compose-editor",
+                                                       hideFamilies: true, onSaved: briefSaved });
+    }
+    refreshBriefStatus(); refreshRunMode(); updatePreview();
+  }
+
+  function briefSaved(path, name) {
+    S.briefPath = path;
+    S.briefLabel = name;
+    refreshBriefStatus(); refreshRunMode(); updatePreview();
+  }
+
+  function refreshBriefStatus() {
+    if (!S.briefMode) { statusEl.textContent = "Pick a source above — the step-1 shapes are scored against the brief you settle on here."; return; }
+    if (S.briefMode === "existing" && S.briefPath) {
+      statusEl.innerHTML = `✓ using <code>${esc(S.briefPath)}</code> as-is — no copy needed.`;
+    } else if (!S.briefPath) {
+      statusEl.innerHTML = `<span class="warn-text">⚠ not saved yet — a run needs a real file path: set a name and press "Save as new brief" in the editor above.</span>`;
+    } else {
+      statusEl.innerHTML = `✓ saved to <code>${esc(S.briefPath)}</code> — the run uses this file as-is.`;
+    }
+  }
+
+  // ── Step 3: run + launch ───────────────────────────────────────
+  const busyEl = document.getElementById("cmp-busy");
+  const cmdEl = document.getElementById("cmp-cmd");
+  const errEl = document.getElementById("cmp-launch-error");
+  const launchBtn = document.getElementById("btn-cmp-launch");
+
+  function showBusy() {
+    const reason = S.busyReason ||
+      (gpuBusy ? `GPU busy: ${gpuLock.user || "?"} running ${gpuLock.command || "?"}` : null);
+    busyEl.style.display = reason ? "" : "none";
+    if (reason) busyEl.textContent = `⚠ ${reason} — GPU jobs are refused while a job runs; dry-run kinds stay available and the server re-checks on every launch.`;
+  }
+
+  function refreshBriefAndRun() {
+    refreshBriefStatus(); refreshRunMode(); updatePreview();
+  }
+
+  function renderKindRow() {
+    return `
+      <div class="form-grid">
+        <span class="form-label">Run</span>
+        <div class="btn-row" role="radiogroup" aria-label="run type">
+          ${["dry-run", "run", "search"].map(k =>
+            `<button type="button" class="job-type-btn" data-kind="${k}" aria-pressed="${S.runKind === k}">${k}</button>`).join("")}
+        </div>
+        <span class="form-label">What it does</span>
+        <div class="hint">${esc(COMPOSE_KIND_HINTS[S.runKind] || "")}</div>
+        ${S.runKind === "search" ? `
+          <label for="cmp-budget">Budget</label>
+          <div><input id="cmp-budget" type="number" min="1" max="5000" placeholder="60" style="width:120px">
+            <div class="hint">Evaluations — blank means the engine default of 60 (accepted range 1–5000)</div></div>
+          <label for="cmp-seed">CMA seed</label>
+          <div><input id="cmp-seed" type="number" min="0" step="1" placeholder="optional" style="width:120px">
+            <div class="hint">Change for a different random search path; blank = engine default</div></div>` : ""}
+      </div>`;
+  }
+
+  function renderTierRow() {
+    const scr = c => Math.max(40, 10 * (c.n_knobs || 0));       // campaign.budget_for_tier
+    const cmp = c => Math.max(150, 25 * (c.n_knobs || 0));
+    const est = pickedConfigs().map(c =>
+      `${esc(c.catalog_name || c.name)} · ${scr(c)} evals (screen) / 2 × ${cmp(c)} (compare)`).join(" · ") || "—";
+    return `
+      <div class="form-grid">
+        <span class="form-label">Tier</span>
+        <div class="btn-row" role="radiogroup" aria-label="campaign tier">
+          ${["dry-run", "screen", "compare"].map(t =>
+            `<button type="button" class="job-type-btn" data-tier="${t}" aria-pressed="${S.tier === t}">${t}</button>`).join("")}
+        </div>
+        <span class="form-label">What it does</span>
+        <div class="hint">${esc(COMPOSE_TIER_HINTS[S.tier] || "")}</div>
+        <span class="form-label">Families</span>
+        <div><code>--families ${esc(familiesArg() || "")}</code>
+          <div class="hint">The campaign resolves these catalog names; entries that don't fit the brief are skipped per-entry with the reason printed (the real compat gate lives engine-side). The per-entry skips show up in the campaign's results.</div></div>
+        <span class="form-label">Budget</span>
+        <div class="hint">Engine default per picked family (campaign <code>budget_for_tier</code>): ${est}</div>
+      </div>`;
+  }
+
+  function currentJob() {
+    if (!S.picks.size || !S.briefPath) return null;
+    if (S.picks.size === 1) {
+      const config = [...S.picks][0];
+      const seedRaw = S.runKind === "dry-run" ? "" : String(document.getElementById("cmp-seed")?.value ?? "").trim();
+      const seed = seedRaw === "" ? {} : { cma_seed: seedRaw };
+      if (S.runKind === "search") {
+        const budRaw = String(document.getElementById("cmp-budget")?.value ?? "").trim();
+        return { kind: "search", args: { config, brief: S.briefPath,
+                                         ...(budRaw === "" ? {} : { budget: budRaw }), ...seed } };
+      }
+      if (S.runKind === "run") return { kind: "run", args: { config, brief: S.briefPath, ...seed } };
+      return { kind: "dry-run", args: { config, brief: S.briefPath } };
+    }
+    const fams = familiesArg();
+    if (!fams || !FAM_RE.test(fams)) return null;
+    return { kind: "campaign", args: { brief: S.briefPath, families: fams, tier: S.tier } };
+  }
+
+  function gateReason() {
+    if (!S.picks.size) return "pick at least one typology in step 1";
+    if (!S.briefPath) return "save the brief first (step 2) — a run needs a file path";
+    if (S.picks.size > 1 && !FAM_RE.test(familiesArg()))
+      return "the picked configs resolve no catalog family names for a campaign";
+    if (S.picks.size === 1) {
+      if (S.runKind !== "dry-run" && S.busyReason) return "GPU is busy — only dry-run is available";
+    } else if (S.busyReason && S.tier !== "dry-run") {
+      return "GPU is busy — only the dry-run tier is available";
+    }
+    return null;
+  }
+
+  function refreshRunMode() {
+    const modeEl = document.getElementById("cmp-run-mode");
+    const n = S.picks.size;
+    if (!n) {
+      modeEl.innerHTML = `<p class="hint" role="note">pick at least one typology in step 1 — nothing runs until one is picked.</p>`;
+    } else if (n === 1) {
+      const c = pickedConfigs()[0];
+      modeEl.innerHTML = renderKindRow() +
+        (c.catalog_name
+          ? `<div class="hint">Single catalogued config — one <code>--config ${esc(c.path)}</code> run. Need several shapes at once? Pick more in step 1 to switch to a campaign.</div>`
+          : `<div class="hint">Uncatalogued config — launches as a single <code>--config ${esc(c.path)}</code> run; it cannot join a campaign (campaign resolves catalog names only).</div>`);
+    } else {
+      modeEl.innerHTML = `<h4 style="margin:0 0 6px">Campaign across ${n} typologies</h4>` + renderTierRow();
+    }
+    modeEl.querySelectorAll("[data-kind]").forEach(b => b.onclick = () => {
+      S.runKind = b.dataset.kind;
+      refreshRunMode(); updatePreview();
+    });
+    modeEl.querySelectorAll("[data-tier]").forEach(b => b.onclick = () => {
+      S.tier = b.dataset.tier;
+      refreshRunMode(); updatePreview();
+    });
+    ["cmp-budget", "cmp-seed"].forEach(id =>
+      document.getElementById(id)?.addEventListener("input", updatePreview));
+    syncGate();
+    showBusy();
+  }
+
+  function syncGate() {
+    const gate = gateReason();
+    launchBtn.disabled = !!gate;
+    launchBtn.title = gate || "";
+    setLaunchMsg(gate ? `⚠ ${esc(gate)}.` : "");
+  }
+
+  // Preview: asked from the server, which builds the exact argv a launch would run
+  let _pvTimer = null;
+  function updatePreview() {
+    clearTimeout(_pvTimer);
+    _pvTimer = setTimeout(async () => {
+      const job = currentJob();
+      if (!job) {
+        cmdEl.textContent = S.picks.size
+          ? "— save the brief first (step 2) — the run needs a file path"
+          : "— fill steps 1 and 2 to see the exact command";
+        return;
+      }
+      const r = await post("/api/preview", job);
+      if (ROOT !== currentRoot()) return;
+      cmdEl.textContent = r.error ? "— " + r.error : r.command;
+      S.busyReason = (r.gpu && r.gpu_busy) ? r.gpu_busy : null;
+      syncGate();
+      showBusy();
+    }, 150);
+  }
+
+  // Launch: POST /api/jobs — the wizard never builds solver commands itself
+  launchBtn.onclick = async () => {
+    errEl.innerHTML = "";
+    const gate = gateReason();
+    const job = currentJob();
+    if (!job || gate) {
+      errEl.innerHTML = `<div class="alert warn" role="status">⚠ ${esc(gate || "nothing to launch yet")}.</div>`;
+      return;
+    }
+    if (S.busyReason) {
+      errEl.innerHTML = `<div class="alert warn" role="status">⚠ ${esc(S.busyReason)} — a GPU launch is refused while a job runs. dry-run stays available.</div>`;
+      return;
+    }
+    if (S.picks.size > 1 && S.tier === "compare" && !confirm("Compare tier takes hours. Run it now?")) return;
+    const r = await post("/api/jobs", job);
+    if (ROOT !== currentRoot()) return;
+    if (r.error) {
+      errEl.innerHTML = `<div class="alert error" role="alert"><b>Error:</b> ${esc(r.error)}</div>`;
+    } else {
+      errEl.innerHTML = `<div class="alert info">Job started: ${esc(r.id)} — follow it on the <a href="#/launch">Launch page</a> (its job monitor lives there).</div>`;
+    }
+  };
+
+  renderShapes();
+  refreshBriefStatus();
+  refreshRunMode();
 }
 
 // ── View 6: Launch ─────────────────────────────────────────────────
@@ -2109,7 +2621,7 @@ function renderLaunch(briefs, jobs, configs, statusData, typs = []) {
   });
 
   // Family picker: grouped by kind, incompatible families disabled with the CLI's own reason
-  const GROUP_LABEL = { classical: "Classical horns", hybrid: "Hybrids", organic: "Organic horns", magnus: "Magnus mesher families", legacy: "Utility / legacy" };
+  const GROUP_LABEL = CATALOG_GROUP_LABEL;   // shared with the Briefs picker + Compose wizard
   const selected = new Set((pre.get("families") || "").split(",").filter(Boolean));
   if (pre.get("brief")) {
     const o = [...document.getElementById("lf-brief").options].find(x => x.dataset.name === pre.get("brief"));

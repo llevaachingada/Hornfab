@@ -1,24 +1,30 @@
-"""Brief authoring (GUI Briefs page: new-brief-from-scratch + exposed controls).
+"""Brief authoring (GUI Briefs page: new-brief-from-scratch + exposed controls) and the
+Compose wizard (typology-first run builder).
 
-Offline reader-level pins for the client-side authoring capability:
+Offline reader-level pins:
   (a) the server's own ``load_brief`` (via D.save_user_brief) accepts EVERY key the new editor
       saves — verify_only, objective.version, driver.throat_angle_policy, target.freq_weights,
       and axisymmetric with a w != h envelope (mirroring examples/briefs/user/7040.yaml) — and
       nothing the editor sends is silently dropped on the round trip;
   (b) the shipped-name collision and bad-name refusals still hold;
-  (c) list_briefs sees the saved user brief.
+  (c) list_briefs sees the saved user brief;
+  (d) the Compose wizard's POST bodies map 1:1 onto jobs.build_argv's allow-listed kinds, and
+      the campaign kind's budget/seeds reality (the GUI allow-list plumbs neither) is pinned so
+      the wizard's no-override-fields choice stays honest.
 
 Plus the app.js ES-module syntax gate, copied from tests/test_gui.py
 (test_static_js_parses_as_an_es_module) so a syntax error is caught offline.
 """
 from __future__ import annotations
 
+import re
 import shutil
 import subprocess
 from pathlib import Path
 
 import pytest
 
+from hornlab_search.gui import jobs as J
 from hornlab_search.gui.data import list_briefs, save_user_brief
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -98,7 +104,7 @@ def test_save_user_brief_refusals_still_hold(brief_root):
 
 @pytest.mark.parametrize("name", ["app.js"])
 def test_static_js_parses_as_an_es_module(name, tmp_path):
-    """Same offline gate as test_gui.py: a syntax error in app.js blanks the Briefs view."""
+    """Same offline gate as test_gui.py: a syntax error in app.js blanks every view."""
     node = shutil.which("node")
     if node is None:
         pytest.skip("node not installed")
@@ -107,3 +113,71 @@ def test_static_js_parses_as_an_es_module(name, tmp_path):
     mjs.write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
     r = subprocess.run([node, "--check", str(mjs)], capture_output=True, text=True)
     assert r.returncode == 0, r.stderr[-800:]
+
+
+def _job_root(tmp_path):
+    """A minimal repo: one loadable config, one loadable brief (build_argv resolves --config and
+    --brief to real files inside the repository — a path that does not exist is refused)."""
+    root = tmp_path / "repo"
+    (root / "examples" / "briefs").mkdir(parents=True)
+    (root / "examples" / "typologies").mkdir(parents=True)
+    (root / "examples" / "cfg.yaml").write_text("name: cfg\n")
+    (root / "examples" / "typologies" / "conical.yaml").write_text("name: conical\n")
+    shutil.copy(ROOT / "examples" / "briefs" / "axi_90x90_1in.yaml",
+                root / "examples" / "briefs" / "axi_90x90_1in.yaml")
+    return root, "examples/typologies/conical.yaml", "examples/briefs/axi_90x90_1in.yaml"
+
+
+def test_compose_wizard_argv_shapes(tmp_path):
+    """(d) The compose wizard's POST bodies map 1:1 onto the allow-listed kinds it uses
+    (single config: dry-run/run/search; 2+ picks: campaign), read back from jobs.build_argv."""
+    root, cfg, brf = _job_root(tmp_path)
+    jm = J.JobManager(root, root / "runs")
+    # single-config dry-run: {config, brief} -> run --config ... --dry-run --brief ... ; no GPU
+    argv, gpu = jm.build_argv("dry-run", {"config": cfg, "brief": brf})
+    assert argv == ["run", "--config", cfg, "--dry-run", "--brief", brf] and gpu is False
+    # single-config run with an optional seed: {config, brief, cma_seed}
+    argv, gpu = jm.build_argv("run", {"config": cfg, "brief": brf, "cma_seed": "7"})
+    assert argv == ["run", "--config", cfg, "--brief", brf, "--cma-seed", "7"] and gpu is True
+    # single-config search: {config, budget?, brief, cma_seed?} (blank budget -> engine default 60)
+    argv, gpu = jm.build_argv("search", {"config": cfg, "brief": brf})
+    assert argv == ["search", "--config", cfg, "--budget", "60", "--brief", brf] and gpu is True
+    argv, _ = jm.build_argv("search", {"config": cfg, "budget": "120", "brief": brf})
+    assert argv == ["search", "--config", cfg, "--budget", "120", "--brief", brf]
+    # campaign: {brief, families, tier}; families come from the picked CATALOG names, comma-joined
+    argv, gpu = jm.build_argv("campaign", {"brief": brf, "families": "conical,hypex", "tier": "screen"})
+    assert argv == ["campaign", "--brief", brf, "--families", "conical,hypex", "--tier", "screen"] and gpu is True
+    argv, gpu = jm.build_argv("campaign", {"brief": brf, "families": "conical", "tier": "dry-run"})
+    assert gpu is False and argv[-2:] == ["--tier", "dry-run"]
+    # engine refusals the wizard surfaces verbatim: bad families spec, missing brief
+    with pytest.raises(J.JobError, match="families"):
+        jm.build_argv("campaign", {"brief": brf, "families": "Conical X", "tier": "screen"})
+    with pytest.raises(J.JobError, match="campaign needs a brief"):
+        jm.build_argv("campaign", {"families": "conical", "tier": "screen"})
+
+
+def test_campaign_budget_and_seeds_are_not_gui_plumbed(tmp_path):
+    """Pins the allow-list reality behind the wizard's UI choice: jobs.build_argv("campaign")
+    plumbs ONLY brief/families/tier, so --seeds/--budget overrides CANNOT reach the engine from
+    the GUI — campaign runs use the engine's budget_for_tier defaults. The compose wizard
+    therefore ships budget_for_tier captions and NO override fields (fields that silently
+    vanish would lie). If a later lane plumbs seeds/budget, update this pin and the wizard
+    together."""
+    root, cfg, brf = _job_root(tmp_path)
+    jm = J.JobManager(root, root / "runs")
+    argv, _ = jm.build_argv("campaign", {"brief": brf, "families": "conical", "tier": "screen",
+                                         "budget": 99, "seeds": 3, "cma_seed": 5})
+    assert argv == ["campaign", "--brief", brf, "--families", "conical", "--tier", "screen"]
+    assert not any(v in {"--budget", "--seeds", "--cma-seed"} for v in argv)
+
+
+def test_compose_view_is_wired():
+    """The wizard is reachable: route + nav item + view function all exist in the static files."""
+    app = (ROOT / "hornlab_search" / "gui" / "static" / "app.js").read_text(encoding="utf-8")
+    idx = (ROOT / "hornlab_search" / "gui" / "static" / "index.html").read_text(encoding="utf-8")
+    assert "function viewCompose" in app
+    assert re.search(r"re: /\^#\\/compose\$/", app)          # route registered
+    assert 'href="#/compose"' in idx and 'aria-label="Compose"' in idx
+    assert re.search(r'h === "#/compose" && hash === "#/compose"', app)   # nav highlight
+    # the wizard reuses the briefs editor (mount) and the stem-matching loader, not copies
+    assert "opts.mount" in app and "function findBriefByFile" in app and "function newBriefDraft" in app
