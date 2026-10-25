@@ -9,7 +9,7 @@ Keep this file current: a new doc gets a line here in the same commit.
 | [CONTINUITY.md](CONTINUITY.md) | Status block + dated log, newest first. The source of truth for "where are we". |
 | [ISSUES.md](ISSUES.md) | Open issues and the TO-DO list (next-round priorities at the top). |
 | [FORKS.md](FORKS.md) | How we change Magnus's solver/mesher: pinned forks in `..\forks`, install by SHA, validation ladder (owner decision 2026-10-24). |
-| [NEXT_DEV_PRIORITIES.md](NEXT_DEV_PRIORITIES.md) | Post-beta priorities: P1 fused CUDA assembly, P2 12 kHz pass, P3 Metal backend. |
+| [NEXT_DEV_PRIORITIES.md](NEXT_DEV_PRIORITIES.md) | Post-beta priorities: P1 fused CUDA assembly (DONE, M2), P2 12 kHz pass (DONE), P3 Metal backend, P4 grid-density ideas, P5 build-decision easy wins, P6 superformula campaign + GSA-vs-CMA-ES bake-off (proposals, owner-gated). |
 | [HANDOFF_BETA.md](HANDOFF_BETA.md) | Current agent handoff: beta-readiness pass, items A–G, stop conditions. |
 | [HANDOFF_COLLABORATOR_2026-10-23.md](HANDOFF_COLLABORATOR_2026-10-23.md) | For the collaborator pulling `main` on 2026-10-23: setup, what runs on the GPU box, files the owner edits tonight, rules, open questions. |
 | [HANDOFF_BRIEF_DESIGN_2026-10-24.md](HANDOFF_BRIEF_DESIGN_2026-10-24.md) | NEXT PASS (after M3): study list + owner interview protocol + real-driver grounding → 2–4 real briefs + baseline settings; GPU = only the owner-approved POC (budget 20). |
@@ -21,7 +21,7 @@ Keep this file current: a new doc gets a line here in the same commit.
 ## Design and plans
 | Doc | What it is |
 |---|---|
-| [plan/](plan/README.md) | **Frozen** original plan and contracts (`00_ORCHESTRATOR`, `01_CONTRACTS`, task files 02–12). Never edit. |
+| [plan/](plan/README.md) | **Frozen** original plan and contracts (`00_ORCHESTRATOR`, `01_CONTRACTS`, task files 02–12). Never edit. `12_RESEARCH_BASIS.md` additionally carries dated research appendices (§10 neural operators; §11 ATH superformula + GSA vs CMA-ES, added 2026-10-25 owner-directed — append-only). |
 | [TYPOLOGY_PLAN.md](TYPOLOGY_PLAN.md) | v2: classical typologies as generators, hybrids, briefs, campaign tiers, verification ladder. |
 | [GUI_CONTRAST_PLAN.md](GUI_CONTRAST_PLAN.md) | GUI contrast & form-visibility hardening (proposed 2026-10-24, Oracle-reviewed): measured baseline, six phases (tokens/type tiers, theme boot + `?theme=` capture, chart contrast, wallSection redraw, 3D light-gray horn + lighting/shadows, semantics/tests), acceptance criteria, risk register, rollback. Awaiting owner approval. |
 | [SENIOR_ARCHITECTURE_REPORT_2026-10-22.md](SENIOR_ARCHITECTURE_REPORT_2026-10-22.md) | Where the repo sits vs Boundary Lab / HornLab; priority decisions. |
@@ -38,6 +38,7 @@ Keep this file current: a new doc gets a line here in the same commit.
 | [research/typologies/MESHER_TYPOLOGIES.md](research/typologies/MESHER_TYPOLOGIES.md) | What Magnus's mesher implements (OSSE, R-OSSE, ICW, FREEFORM, LOOKUP), file:line. |
 | [research/typologies/SEARCH_LAYER_GAPS.md](research/typologies/SEARCH_LAYER_GAPS.md) | Search-layer coverage vs the mesher. |
 | [research/senior_pass_2026-10-24/](research/senior_pass_2026-10-24/README.md) | Senior pass 2026-10-24: objective/assumption audit, new typologies + multi-cell, 12 kHz routes, implementation plan (WP1–WP14). |
+| [research/ATH_SUPERFORMULA_AND_GSA_2026-10-25.md](research/ATH_SUPERFORMULA_AND_GSA_2026-10-25.md) | **P6 IMPLEMENTATION PLAN v1.0** (rewritten from the research dossier, dossier content folded in): P6a superformula-family campaign (quarter-symmetry math, search box, degeneracy/curvature guards, configs, GPU + GUI) + P6b GSA-vs-CMA-ES bake-off (protocol, library audit → own ~120-line GSA, pre-registered decision rule) + parallel-lane structure with verbatim dispatch prompts. Owner-gated; runs after WP1–WP17 completes. Research basis in `plan/12_RESEARCH_BASIS.md` §11. |
 | [research/TIME_DOMAIN_RINGING.md](research/TIME_DOMAIN_RINGING.md) | Ringing / waterfalls: what we can see, stage-2 design. |
 | [BOUNDARY_LAB_0.5_RESEARCH.md](BOUNDARY_LAB_0.5_RESEARCH.md), [research/boundary_lab_0.5/](research/boundary_lab_0.5/) | Boundary Lab 0.5.0 findings and inventories. |
 

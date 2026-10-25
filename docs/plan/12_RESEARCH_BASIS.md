@@ -427,6 +427,67 @@ But the pass also sharpens the risk. Every verified 3D acoustic result is at an 
 
 ---
 
+## 11. ATH, the Gielis superformula, and GSA vs CMA-ES (added 2026-10-25, owner-directed)
+
+Added after the owner's collaborator (applied mathematician) raised two questions: *"this super equation by ATH or AVE"*, and *"we may want to do a comparison of GSA and CMA-ES"*. One research pass over the primary sources (Batík's OS-SE and R-OSSE papers, the Ath 4.8.2 User Guide, Gielis 2003, the GSA literature, the CMA-ES literature), cross-checked against our own mesher and code. Companion dossier: [`docs/research/ATH_SUPERFORMULA_AND_GSA_2026-10-25.md`](../research/ATH_SUPERFORMULA_AND_GSA_2026-10-25.md) — rewritten later the same day (2026-10-25, owner request) into the **P6 implementation plan v1.0**: the dossier content is folded into its §2–§3, and it adds the quarter-domain symmetry rules, the settled search box and guards (D1–D20), the bake-off protocol with pre-registered statistics, the GSA library audit, and the wave/dispatch structure for four parallel implementation lanes. Labels as in this document. Append-only, like §10; nothing above changed.
+
+### 11.1 Ath, verified — the upstream context for OSSE and R-OSSE
+
+**[verified]** Ath ("ADVANCED TRANSITION HORNS", at-horns.eu) is Marcel Batík's Windows command-line program that generates horn/waveguide **geometry and BEM meshes** from plain-text `.cfg` description files (Ath 4.x). Freeware ("free for non-commercial use"), no published source — "closed-source" is **[inferred]** from the binary-only distribution. It is **not an optimizer and not a solver**: the User Guide has no optimization chapter; it emits meshes, ABEC projects and reports. The search gap this project fills is upstream of Ath, not beside it.
+
+**[verified]** Ath today runs as the geometry engine inside Boundary Lab ("bundled with permission from Marcel Batik"; solver = BEAT Engine) — the ecosystem documented in our `research/boundary_lab_0.5/*`. Community: diyAudio threads 338806 ("Acoustic Horn Design – The Easy Way (Ath4)") and 354772. The `.cfg` conventions (one `ItemKey[:tag] = Value` per line, `;` comments, `ex` expression values, unknown keys silently ignored) match what `bl_inventory.md` recorded from Boundary Lab's examples.
+
+**[verified]** The OS-SE paper gives the profile as one closed-form curve (eq. 5, 0 ≤ z ≤ L):
+
+```
+r(z) = sqrt(k^2·r0^2 + 2·k·r0·z·tan(a0) + z^2·tan(a)^2) + r0·(1-k) + (s·L/q)·[1 - (1 - (q·z/L)^n)^(1/n)]
+```
+
+— a hyperbola (coverage half-angle `a`, throat half-angle `a0`, throat expansion `k`: k=1 pure oblate-spheroid, k=0 cone) plus a superellipse flare term (amount `s`, abruptness `n`, truncation `q`≈0.995) blended in with matching slope and curvature. These are exactly the mesher's OSSE knobs. R-OSSE (rev7, 2022) is a fully parametric `[x(t), y(t)]` construction from conic sections that can fold back — the free-standing rollback — with `R/a/r0/a0/k/r/m/b/q`; **[open]** the "R" is not expanded in the paper.
+
+**[open]** Naming check: our `research/typologies/MESHER_TYPOLOGIES.md` expands OSSE as "Oblique Spherical Surface Element"; the paper's construction is oblate spheroid + superellipse (Freehafer 1940 / Geddes 1989–93 lineage). Verify at source and date-correct the local doc (the corrections-culture pattern).
+
+### 11.2 The "super equation" is the Gielis superformula
+
+**[verified]** Gielis, "A generic geometric transformation that unifies a wide range of natural and abstract shapes", *American Journal of Botany* 90(3):333–338, 2003:
+
+```
+r(φ) = ( |cos(m·φ/4)/a|^n2 + |sin(m·φ/4)/b|^n3 )^(-1/n1)
+```
+
+`m` = rotational symmetry (lobes/points), `n1` = overall blobbiness, `n2`/`n3` shape the two directions, `a`/`b` scale the axes. One formula spans circle → ellipse → rounded square → polygon → star → organic outlines. **The superellipse is the m=4, n1=n2=n3 case**, which is why Ath and our mesher treat superellipse and superformula as one family of outline curves. Gielis's grander "unifies natural shapes" claim is botanical, not acoustic; in horn design it earns its place as a compact, differentiable, few-parameter curve family **[inferred]**.
+
+**[verified]** Ath uses it in two roles:
+
+1. **Guiding curve** — a closed loop the horn surface must pass through at `GCurve.Dist` from the throat: `GCurve.Type` 1 (superellipse) / 2 (superformula), `GCurve.SF = [a, b, m, n1, n2, n3]`, `GCurve.Width`, `GCurve.AspectRatio`, `GCurve.Rot`. The mouth outline — hence the whole 3D form — can be a star, a rounded square, etc., while the profile family fills in everything else.
+2. **Azimuthal wall-angle modulation** — the 2026 ATH CORE design (CC-BY-4.0) modulates coverage angle around the horn with the built-in `sf()`: `a = 5 + 35*sf(4,12,15,16,1,0.618,p) - 15*cos(p)^10`.
+
+**[verified]** This is the same knob vocabulary section 4 recorded ("Gielis superformula, as `gcurve_sf_*` — OSSE only"), and those keys are **already searchable design-space rows** in `hornlab_search/design/families.py` (asserted by `tests/test_design_families.py` as table rows). The plan README's quick fork #2 — "the Gielis superformula the project docs wanted, for the cost of a table row" — is now source-verified. What is missing for a featured campaign is only a catalog family + an `examples/` config with bounds anchored to a verified Ath reference case (proposal **P6a**; R9 satisfied: Gielis 2003 and the Ath User Guide are the published references).
+
+**[inferred]** Relation to novelty item 4 (per-azimuth flare control, section 8): the superformula guiding curve is Ath's outline-level door to the same idea — it constrains the mouth outline the wall must pass through. The Fourier-in-azimuth opening is broader (the wall angle itself varying); they are complementary, and the Ath CORE `sf()` script is evidence practitioners already want exactly this.
+
+### 11.3 "AVE" — unresolved
+
+**[open]** No tool, equation, algorithm or author called "AVE" exists in the Ath literature, the User Guide, or the academic indexes checked. Likely a mishearing of **ABEC** (the BEM solver Ath exports to), **Ath4** itself, or **Gielis**. Action recorded in ISSUES: ask the collaborator to spell it; do not name anything "AVE" in configs or docs before that.
+
+### 11.4 GSA, verified
+
+**[verified]** Rashedi, Nezamabadi-pour & Saryazdi, "GSA: A Gravitational Search Algorithm", *Information Sciences* 179(13):2232–2248, 2009. N candidate solutions = N point masses; **mass ∝ fitness** (better = heavier); masses attract each other by simulated Newtonian gravity; gravity decays `G(t) = G0·exp(−α·t/T)`; only the `Kbest` heaviest agents exert force, Kbest shrinking linearly N → 1; positions update from the accelerations. Early: broad, exploratory pull. Late: weak gravity, one attractor → collapse onto the current best. Cost: O(N²) pairwise forces, **N objective evaluations per iteration**.
+
+**[verified]** Documented weaknesses: `G0`/`α`/N/Kbest "are determined empirically … generality is compromised", with premature convergence the named target (arXiv:2205.06770); diversity loss (Sadhana 2017; *Information Sciences* 2023); local-optimum trapping (arXiv:1706.03608); cannot handle large-scale problems "on their own" without cooperative co-evolution (arXiv:2101.06630). Strengths are all early-run and low-dimensional: simple, broad initial exploration, fast initial descent.
+
+### 11.5 GSA vs CMA-ES for our search layer
+
+**[verified]** CMA-ES (Hansen & Ostermeier 2001; tutorial arXiv:1604.00772) samples a small population from `N(mean, σ²·C)` and updates the mean, the step size and the **full covariance matrix C** — it learns the local shape, scale and rotation of the landscape, i.e. the couplings between design knobs. Reference method on the BBOB/COCO continuous benchmarks (GECCO 2009). Bajer et al. 2019 (*Evolutionary Computation* 27(4)): surrogate-assisted CMA-ES is competitive at **~25–100 evaluations per dimension** (25–250 for ≤10-D). The tutorial's §B.5 treats penalty functions as first-class and warns the penalty must be sized so penalized vs feasible differences have similar magnitude — **our WP3 graded penalty is exactly this pattern**, and the graded (not cliff) form is also what protects the covariance/step-size adaptation.
+
+**[verified — absence]** No published GSA-vs-CMA-ES head-to-head exists (Crossref, OpenAlex, arXiv searched; GSA papers compare against PSO/GA/DE/ABC). A "comparison" is our own experiment, not a literature result.
+
+**[inferred]** For our profile — 3–20 continuous knobs per family, 4–60 s per GPU evaluation, one solve at a time, deterministic geometry failures graded rather than cliffs — CMA-ES remains the defensible default: small population (λ grows only ~logarithmically with dimension), each generation updates a *model* so information is reused, covariance adaptation follows coupled valleys (mouth ↔ length ↔ coverage), penalty handling first-class. GSA burns N evaluations per iteration and needs many iterations for its Kbest/gravity schedule to play out; at a few hundred evaluations it reaches single-digit iterations and then its documented collapse mode. The scheduled search upgrades stay as planned: WP11 restarts (IPOP/BiPOP) + the CMA-ME quality-diversity atlas. **GSA is not in any WP.**
+
+**[inferred]** If the owner wants the comparison anyway (proposal **P6b**), the protocol that makes it meaningful: fix the **evaluation budget**, not iterations (e.g. 200–400 simulations); identical bounds, identical graded penalty, identical initial seed design; 5–10 algorithm-seed repeats; a Latin-hypercube/random-search baseline; report best-so-far and median per budget. Run it on the cheap 2-knob exponential family, or after the metric surrogate (`11_PHASE2_SURROGATE.md`) makes evaluations ~ms — at which point the bake-off is nearly free. Nothing in the plan depends on its outcome.
+
+---
+
 ## Sources
 
 hornlab-waveguide-mesher: https://github.com/m3gnus/hornlab-waveguide-mesher
@@ -454,3 +515,26 @@ Neural operator surrogate for free-form electromagnetic inverse design: https://
 Data driven surrogate modeling of horn antennas: https://onlinelibrary.wiley.com/doi/abs/10.1002/mop.33702
 Neural-operator surrogates for outdoor acoustics, JASA: https://pubs.aip.org/asa/jasa/article/160/3/2653/3405543/Neural-operator-surrogates-for-outdoor-acoustics
 RTX 4070 Laptop GPU specifications: https://www.notebookcheck.net/NVIDIA-GeForce-RTX-4070-Laptop-GPU-Benchmarks-and-Specs.675690.0.html
+
+Section 11 sources:
+Ath (Batík) — at-horns.eu: https://at-horns.eu
+OS-SE Waveguide, M. Batík, Oct 2020: https://at-horns.eu/release/OS-SE%20Waveguide.pdf
+R-OSSE Acoustic Waveguide rev7, Dec 2022: https://at-horns.eu/release/R-OSSE%20Waveguide%20rev7.pdf
+Ath 4.8.2 User Guide: https://at-horns.eu/release/Ath-4.8.2-UserGuide.pdf
+ATH CORE design (2026, CC-BY-4.0): https://at-horns.eu/core.html
+diyAudio "Acoustic Horn Design – The Easy Way (Ath4)": https://www.diyaudio.com/community/threads/acoustic-horn-design-the-easy-way-ath4.338806/
+Gielis 2003, American Journal of Botany 90(3):333-338: doi:10.3732/ajb.90.3.333
+Superformula (summary and plots): https://en.wikipedia.org/wiki/Superformula
+GSA, Rashedi et al. 2009, Information Sciences 179(13):2232-2248: doi:10.1016/j.ins.2009.03.004
+GSA survey, Swarm and Evolutionary Computation 41:141-158: doi:10.1016/j.swevo.2018.02.018
+GSA parameter sensitivity / premature convergence: https://arxiv.org/abs/2205.06770
+GSA diversity (Sadhana 2017): doi:10.1007/s12046-017-0674-0
+GSA diversity / chaos (Information Sciences 2023): doi:10.1016/j.ins.2023.03.138
+GSA local-minimum trapping (GSABC): https://arxiv.org/abs/1706.03608
+GSA large-scale + cooperative co-evolution: https://arxiv.org/abs/2101.06630
+CMA-ES, Hansen & Ostermeier 2001, Evolutionary Computation 9(2):159-195: doi:10.1162/106365601750190398
+CMA-ES tutorial (incl. §B.5 penalties): https://arxiv.org/abs/1604.00772
+CMA-ES evaluations per dimension, Bajer et al. 2019, Evolutionary Computation 27(4):665-697: doi:10.1162/evco_a_00244
+BIPOP-CMA-ES on BBOB (GECCO 2009): doi:10.1145/1570256.1570333
+pycma: https://github.com/CMA-ES/pycma
+CMA-ES portal: https://cma-es.github.io/
