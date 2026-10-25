@@ -12,6 +12,7 @@ Keep this file current: a new doc gets a line here in the same commit.
 | [NEXT_DEV_PRIORITIES.md](NEXT_DEV_PRIORITIES.md) | Post-beta priorities: P1 fused CUDA assembly, P2 12 kHz pass, P3 Metal backend. |
 | [HANDOFF_BETA.md](HANDOFF_BETA.md) | Current agent handoff: beta-readiness pass, items A–G, stop conditions. |
 | [HANDOFF_COLLABORATOR_2026-10-23.md](HANDOFF_COLLABORATOR_2026-10-23.md) | For the collaborator pulling `main` on 2026-10-23: setup, what runs on the GPU box, files the owner edits tonight, rules, open questions. |
+| [HANDOFF_BRIEF_DESIGN_2026-10-24.md](HANDOFF_BRIEF_DESIGN_2026-10-24.md) | NEXT PASS (after M3): study list + owner interview protocol + real-driver grounding → 2–4 real briefs + baseline settings; GPU = only the owner-approved POC (budget 20). |
 | [BETA_QUICKSTART.md](BETA_QUICKSTART.md) | First loop for beta testers: brief → campaign → report → STEP. |
 | [BETA_SESSION_PLAN.md](BETA_SESSION_PLAN.md) | Beta session agenda, GPU etiquette, known limits, what not to try. |
 | [GUI_PLAN.md](GUI_PLAN.md) | Local web GUI: goals, constraints, views, API, prior art (waveguide-generator, Boundary Lab). |
