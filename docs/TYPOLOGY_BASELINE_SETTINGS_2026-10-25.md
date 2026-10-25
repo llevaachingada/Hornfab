@@ -110,3 +110,17 @@ beyond the numbered PROPOSALS above = a new owner-gated proposal; none is applie
   baseline-settings doc). No default changes until the owner says so.
 
 — Phase-D foundation doc; written 2026-10-25; smoke-matrix linkage updates as GPU jobs land.
+
+## Addendum (2026-10-25, later — the S1a driver pass; Oracle-decided, owner-directed)
+
+The two smoke-matrix PROPOSAL items (salmon_x_signed / salmon_ripple12 reseeds) are now
+owner-gated IN and landed: `salmon_x_signed` reseeded (stop 170→150, x_amp −0.25→−0.15 — the
+cardinal rows crossed the 180° cap-area asymptote at the shipped seed), `salmon_ripple12`
+(stop 170→150; seed dofs 5,358→2,852/2,567), `lecleach_asym_odd` eps 0.25→0.20 (full-ring
+self-approach window at r0 ≥ 17.2) and onto its own family brief, `biradial_keele` seed
+L 210→195 + rm bounds widened for the 2-inch class. The brief family landed as shipped
+variants (`{hifi,organic_rollback,lecleach_rollback}_{1in,14in,2in}` — see
+`docs/BRIEF_AND_SCORING_GUIDE_2026-10-25.md` for the physics and the selection table; the
+scoring defaults there are the owner's answer to "is the scoring right" — no weights were
+changed). The per-config tables above remain the parameter record; where this addendum
+differs, the driver-pass values govern.

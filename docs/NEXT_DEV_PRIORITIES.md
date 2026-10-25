@@ -194,6 +194,8 @@ the seeds machinery exists), not a requirement.**
 - [ ] **P8d — GUI: show the candidate class** — the compose wizard surfaces the new families + the
   feasibility record (§13.5/§14.4's GUI integration; designer lane).
 
+- [ ] **W8 — per-typology search-box audit (owner-directed 2026-10-25 evening, from the run-page at-limit finding).** The owner's `perturbed_osse_hv` run under a 680×500×600 envelope showed the config's own `L_mm` box (90–140 mm) binding 4/6 best designs at its ceiling while the brief allowed 3× more depth — the knob boxes (config `bounds:`), not the brief envelopes, cap size ambition. Audit EVERY typology config's bounds against the realistic brief envelopes + the measured mesher caps, surface the over-constrained knobs (at-limit saturation across stored runs is the signal), and propose the widening table (owner-gated per config, never automatic). Guide reference: `docs/BRIEF_AND_SCORING_GUIDE_2026-10-25.md` §4 (the three-layer size-limit model). Related deferred note: the owner earlier suspected "some min/max parameters may be over-constraining" (S1A_DRIVER_PASS_ORACLE_FINAL header note).
+
 ## Not recommended (recorded so nobody re-proposes it without new evidence)
 - Half precision or other "quantization" of the BEM system: the solver is Float32 with a Float64 Krylov space; dense
   high-frequency BEM systems are poorly conditioned.

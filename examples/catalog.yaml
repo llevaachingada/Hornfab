@@ -250,3 +250,41 @@ entries:
     group: organic
     symmetry: axisymmetric   # same tangent lip on every azimuth (no H/V split)
     description: Le Cleac'h exact rollback + tangent-continuous toroidal lip (r_lip 6-35 mm), inferred; 4 knobs
+
+  # ---- S1a typology completion (2026-10-25, owner-directed; the C4 batch) ----
+  # The five expansion configs, previously uncatalogued (R9_AUDIT_2026-10-25 P3: this
+  # commit closes the catalog-prose gap - biradial + QTW were advertised under
+  # `classical` since 2026-10-25 with no entries). NO driver_exit_mm ties: every one of
+  # these typologies marches under 1in / 1.4in / 2in drivers (S1a driver pass, measured
+  # 2026-10-25); the driver class is chosen by the BRIEF (hifi_90x60_{1in,14in,2in} /
+  # organic_rollback_{1in,14in,2in} / lecleach_rollback_{1in,14in,2in}), never by the
+  # catalog entry.
+  - name: biradial_keele
+    config: typologies/biradial_keele.yaml
+    group: classical
+    symmetry: hv
+    description: Keele/JBL Bi-Radial power-series walls (US4308932A), per-plane a/n/rm searched (7 knobs)
+
+  - name: qtw_waveguide
+    config: typologies/qtw_waveguide.yaml
+    group: classical
+    symmetry: hv
+    description: Hughes/Peavey quadratic-throat arc rule, a = coverage/2 per plane, rm derived (5 knobs)
+
+  - name: lecleach_asym_odd
+    config: typologies/lecleach_asym_odd.yaml
+    group: organic
+    symmetry: full              # seam-free full ring: the odd-cosine term breaks the LR mirror (C2)
+    description: Le Cleac'h (Fourcade 2015) march + odd-cosine one-sided asymmetry, full ring (5 knobs); labeled reconstruction
+
+  - name: salmon_x_signed
+    config: typologies/salmon_x_signed.yaml
+    group: organic
+    symmetry: hv
+    description: salmon rows + SIGNED x_amp (cardinal-in vs corner-out readings), quarter model (6 knobs); labeled hypothesis
+
+  - name: salmon_ripple12
+    config: typologies/salmon_ripple12.yaml
+    group: organic
+    symmetry: hv
+    description: salmon rows + even-lobe mouth ripple (12 lobes, half model) - the pleats experiment (7 knobs); labeled experiment

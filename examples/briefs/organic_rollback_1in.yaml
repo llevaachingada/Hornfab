@@ -1,11 +1,17 @@
-# Brief: organic rollback 90x60 degrees, 1-inch compression driver
+# Brief: organic rollback 90x60 degrees, 1-inch compression driver.
 # WP9b (senior pass 2026-10-24, plan 9b.5): the brief the per-azimuth Salmon rows compete under.
 # Rollback adds WIDTH, not depth, so the envelope is wide and shallow (9b.3 step 6).
-# Fields mirrored from examples/briefs/axi_90x90_1in.yaml; coverage_h != coverage_v => only
-# hv-symmetric families are eligible (TYPOLOGY_PLAN.md s7, R4).
-# Objective stays the default v1: objective v2 remains opt-in (do not flip here).
+# coverage_h != coverage_v => only hv-symmetric families are eligible (TYPOLOGY_PLAN s7, R4).
+#
+# S1a repair (2026-10-25, owner-directed): honest f0 + objective v3. The salmon rows'
+# rollback y-extent is ~1.8x their -6 dB mouth (measured extent x fc ~ 3.37e5 mm-Hz at
+# stop 140-170), so the binding quantity is the extent-limited V mouth:
+# (420 - 6)/1.8 = 230 mm, which holds 60 deg only above 25400e3/(60*230) = 1841 Hz.
+# f0 1900 (the derivation then aims fc_v = 843.5; V extent ~400 mm, inside 420).
+# The plain K-law mouth at f0 1900 is W 148.5 x H 222.8 mm - fits trivially; the
+# rollback extent, not the K-law, sets f0 for this family. Below-f0: v3 masks cov/dislope.
 name: organic_rollback_1in
-description: Organic rollback horn, 90x60 degree, 1-inch driver, 520x420x260 mm envelope
+description: Organic rollback horn, 90x60 degree, 1-inch driver, 520x420x260 mm envelope, f0 1900 Hz
 driver:
   exit_radius_mm: 12.7          # 1-inch throat radius
   exit_angle_deg: 5.0           # throat wall angle at z=0 (half-angle)
@@ -21,14 +27,17 @@ target:
   coverage_h_deg: 90.0          # TOTAL included angle, -6 dB
   coverage_v_deg: 60.0
   band_lo_hz: 700.0
-  band_hi_hz: 5500.0            # limited by 8 GB RTX 4060 dof cap (TOOLCHAIN.md)
+  band_hi_hz: 5500.0            # limited by 8 GB RTX 4060 dof cap; below f11 7914 Hz
   di_target_db: null
   di_slope_target: 0.0
   z_min: 0.7                    # loading threshold (mirrored from the axi brief)
+  f0_hz: 1900.0                 # S1a: the rollback-extent break of the binding (V) axis
+objective:
+  version: 3
 weights:
   cov: 1.0
   rip: 1.0
   di: 0.3
   dislope: 0.5
   flat: 0.5
-  load: 0.5                     # loading matters for classical/organic horns (TYPOLOGY_PLAN.md s3)
+  load: 0.5                     # loading matters for classical/organic horns (TYPOLOGY_PLAN s3)

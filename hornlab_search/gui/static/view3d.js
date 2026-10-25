@@ -65,6 +65,142 @@ export function mirrorMesh(verts, tris, quadrants) {
   return { verts: new Float32Array(allVerts), tris: new Uint32Array(allTris) };
 }
 
+// ── Persisted 3D render settings ─────────────────────────────────────────────
+// One key for every 3D surface (dedicated page, run-detail inline viewer, evolution time-lapse):
+// {surface: "satin"|"matte"|"metallic"|"studio", ridges: "on"|"off"|"thin", light: 0.5..2.0}.
+// Defaults are exactly the pre-settings look (owner captures/tests pin it): satin material,
+// near-white ridgelines at 0.28, key/fill/rim at 1.15/0.35/0.85.
+const RENDER_PREF_KEY = "hl-v3d-render";
+const RENDER_SURFACES = ["satin", "matte", "metallic", "studio"];
+const RENDER_RIDGES = ["on", "off", "thin"];
+
+// Existing colour constants, kept in one place so no preset invents a new hex.
+const HORN_BASE_COLOR = 0xdfe4e8;   // light-neutral horn body
+const WIRE_COLOR = 0xf4f7f9;        // near-white ridgelines
+const HEMI_GROUND_COLOR = 0x8fa3ad; // hemisphere shadow-side tint
+const LIGHT_COLOR = 0xffffff;
+
+// Per-surface material + rig mix. `wireOpacity` is the "on" opacity (matte is deliberately
+// "off-ish": calmer lines); "thin" overrides it to 0.12, "off" removes the LineSegments.
+const RENDER_PRESETS = {
+  satin:    { colorScale: 1.0,  roughness: 0.55, metalness: 0.05, wireOpacity: 0.28,
+              light: { hemi: 0.45, key: 1.15, fill: 0.35, rim: 0.85 } },   // today's exact look
+  matte:    { colorScale: 0.88, roughness: 0.85, metalness: 0.02, wireOpacity: 0.18,
+              light: { hemi: 0.45, key: 1.15, fill: 0.35, rim: 0.85 } },
+  metallic: { colorScale: 1.0,  roughness: 0.32, metalness: 0.35, wireOpacity: 0.28,
+              light: { hemi: 0.45, key: 1.15, fill: 0.35, rim: 0.85 } },
+  studio:   { colorScale: 1.0,  roughness: 0.45, metalness: 0.05, wireOpacity: 0.28,
+              light: { hemi: 0.55, key: 1.55, fill: 0.70, rim: 1.15 } },
+};
+
+/** Pure normalizer for the persisted render settings (node-testable, never throws).
+ *  Accepts the parsed object, the raw localStorage string, or junk; returns a fresh,
+ *  in-range object. Unknown enums and non-finite/out-of-range light fall back/clamp. */
+export function normalizeRenderPrefs(raw) {
+  let o = raw;
+  if (typeof o === "string") {
+    try { o = JSON.parse(o); } catch (e) { o = null; }
+  }
+  if (!o || typeof o !== "object" || Array.isArray(o)) o = {};
+  const surface = RENDER_SURFACES.indexOf(o.surface) >= 0 ? o.surface : "satin";
+  const ridges = RENDER_RIDGES.indexOf(o.ridges) >= 0 ? o.ridges : "on";
+  let light = typeof o.light === "number" ? o.light : Number(o.light);
+  if (!isFinite(light)) light = 1.0;
+  light = Math.min(2.0, Math.max(0.5, light));
+  return { surface, ridges, light };
+}
+
+/** Current settings from localStorage; missing, corrupt or disabled storage -> defaults. */
+function loadRenderPrefs() {
+  try { return normalizeRenderPrefs(localStorage.getItem(RENDER_PREF_KEY)); }
+  catch (e) { return normalizeRenderPrefs(null); }
+}
+
+/** Persist the (normalized) settings; storage failure is non-fatal. */
+function saveRenderPrefs(prefs) {
+  const p = normalizeRenderPrefs(prefs);
+  try { localStorage.setItem(RENDER_PREF_KEY, JSON.stringify(p)); } catch (e) { /* private mode */ }
+  return p;
+}
+
+/** Apply a preset in place — material, ridgeline opacity/visibility and the four-light rig.
+ *  No scene rebuild: the same objects are mutated so orbit camera/state stay live. */
+function applyRenderLook(ctx, prefs) {
+  const p = normalizeRenderPrefs(prefs);
+  const preset = RENDER_PRESETS[p.surface] || RENDER_PRESETS.satin;
+  const { mat, wire, wireMat, scene, lights } = ctx;
+  mat.color.setHex(HORN_BASE_COLOR).multiplyScalar(preset.colorScale);
+  mat.roughness = preset.roughness;
+  mat.metalness = preset.metalness;
+  wireMat.opacity = p.ridges === "thin" ? 0.12 : preset.wireOpacity;
+  if (p.ridges === "off") scene.remove(wire);
+  else scene.add(wire);
+  lights.key.intensity = preset.light.key * p.light;
+  lights.fill.intensity = preset.light.fill * p.light;
+  lights.rim.intensity = preset.light.rim * p.light;
+  lights.hemi.intensity = preset.light.hemi;   // ambient-relative, not part of the multiplier
+}
+
+/** Minimal HTML escaper for the control labels (same contract as app.js::esc). */
+function esc(v) {
+  return String(v).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+/**
+ * Append the compact render-settings chip INSIDE `container` (absolute overlay). Both 3D surfaces
+ * (init3d and init3dFrames) call this. Changes apply immediately through onChange(prefs) and are
+ * persisted for every next init. The chip is pointer-events:auto deliberately — unlike the static
+ * enclosure caption (pointer-events:none) — because its selects/slider must stay clickable while
+ * OrbitControls listens on the canvas. app.js's shadows toggle wipes the container via
+ * container.innerHTML = "" before re-calling init3d, so this chip is re-added on every re-init.
+ */
+function applyRenderControls(container, onChange) {
+  const prefs = loadRenderPrefs();
+  if (getComputedStyle(container).position === "static") container.style.position = "relative";
+  const chip = document.createElement("div");
+  chip.style.cssText = "position:absolute;top:8px;right:8px;z-index:2;display:flex;" +
+    "align-items:center;flex-wrap:wrap;gap:4px 10px;max-width:calc(100% - 16px);padding:3px 8px;" +
+    "font-family:var(--f-mono);font-size:0.72rem;line-height:1.5;border-radius:4px;" +
+    "color:var(--ink,#222);background:var(--surface,#fff);border:1px solid var(--rule,#ccc);" +
+    "opacity:0.94;pointer-events:auto";
+  const lblStyle = "display:inline-flex;align-items:center;gap:4px";
+  const selStyle = "font:inherit;font-size:0.72rem;background:var(--surface,#fff);color:var(--ink,#222);" +
+    "border:1px solid var(--rule,#ccc);border-radius:4px;padding:0 3px";
+  const opt = (v, cur, label) =>
+    `<option value="${esc(v)}"${v === cur ? " selected" : ""}>${esc(label)}</option>`;
+  chip.innerHTML =
+    `<label style="${lblStyle}">surface<select data-v3d-pref="surface" style="${selStyle}">` +
+      RENDER_SURFACES.map(s => opt(s, prefs.surface, s === "satin" ? "satin (default)" : s)).join("") +
+    `</select></label>` +
+    `<label style="${lblStyle}">ridges<select data-v3d-pref="ridges" style="${selStyle}">` +
+      RENDER_RIDGES.map(s => opt(s, prefs.ridges, s === "on" ? "on (default)" : s)).join("") +
+    `</select></label>` +
+    `<label style="${lblStyle}">light` +
+      `<input type="range" data-v3d-pref="light" min="0.5" max="2" step="0.1" ` +
+        `value="${esc(prefs.light)}" aria-label="light intensity multiplier" ` +
+        `style="width:72px;accent-color:var(--accent,#0d6e7a)">` +
+      `<span data-v3d-light-val>${esc(prefs.light)}×</span></label>`;
+  container.appendChild(chip);
+
+  const surfaceSel = chip.querySelector('[data-v3d-pref="surface"]');
+  const ridgeSel = chip.querySelector('[data-v3d-pref="ridges"]');
+  const lightRange = chip.querySelector('[data-v3d-pref="light"]');
+  const lightVal = chip.querySelector("[data-v3d-light-val]");
+  const commit = () => {
+    const next = saveRenderPrefs({
+      surface: surfaceSel.value,
+      ridges: ridgeSel.value,
+      light: Number(lightRange.value),
+    });
+    lightVal.textContent = `${next.light}×`;
+    onChange(next);
+  };
+  surfaceSel.addEventListener("change", commit);
+  ridgeSel.addEventListener("change", commit);
+  lightRange.addEventListener("input", commit);
+  return chip;
+}
+
 /**
  * Render a 2D wall profile as a fallback SVG.
  * profile: {h:[[z,r],...], v:[[z,r],...]} from run detail.
@@ -189,6 +325,7 @@ export async function init3d(container, meshData, profile, seedProfile, shadows 
   const { verts, tris } = mirrorMesh(rawVerts, rawTris, quadrants);
 
   const cs = getComputedStyle(document.documentElement);
+  const renderPrefs = loadRenderPrefs();
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(
     cs.getPropertyValue("--viz-canvas").trim() || cs.getPropertyValue("--surface").trim() || "#ffffff"
@@ -240,7 +377,7 @@ export async function init3d(container, meshData, profile, seedProfile, shadows 
   // identical coordinates win the depth test; without it the LESS depth test drops fragments
   // wherever the line depth equals the surface depth (patchy, driver-dependent visibility).
   const mat = new THREE.MeshStandardMaterial({
-    color: 0xdfe4e8, roughness: 0.55, metalness: 0.05,
+    color: HORN_BASE_COLOR, roughness: 0.55, metalness: 0.05,
     side: THREE.DoubleSide,   // interior visibility of the open mouth (mirror windings are already consistent)
     transparent: false,
     polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1,
@@ -249,22 +386,28 @@ export async function init3d(container, meshData, profile, seedProfile, shadows 
   mesh.castShadow = mesh.receiveShadow = shadows;
   scene.add(mesh);
 
-  // Near-white wireframe ridgelines over the horn — always on (owner override, not shadow-gated)
+  // Near-white wireframe ridgelines over the horn — default on (owner override, not shadow-gated);
+  // the ridges setting can thin (0.12) or remove them below.
   const wireGeo = new THREE.WireframeGeometry(geo);
-  const wireMat = new THREE.LineBasicMaterial({ color: 0xf4f7f9, transparent: true, opacity: 0.28 });
-  scene.add(new THREE.LineSegments(wireGeo, wireMat));
+  const wireMat = new THREE.LineBasicMaterial({ color: WIRE_COLOR, transparent: true, opacity: 0.28 });
+  const wire = new THREE.LineSegments(wireGeo, wireMat);
+  scene.add(wire);
 
   // Lighting rig: hemisphere keeps the shadow side readable, key models the form,
   // fill lifts the dark flank, rim traces the far silhouette against the canvas
-  const hemi = new THREE.HemisphereLight(0xffffff, 0x8fa3ad, 0.45);
+  const hemi = new THREE.HemisphereLight(LIGHT_COLOR, HEMI_GROUND_COLOR, 0.45);
   scene.add(hemi);
-  const key = new THREE.DirectionalLight(0xffffff, 1.15);
+  const key = new THREE.DirectionalLight(LIGHT_COLOR, 1.15);
   key.position.copy(center).addScaledVector(new THREE.Vector3(1.6, 2.2, 1.8), maxDim);
-  const fillL = new THREE.DirectionalLight(0xffffff, 0.35);
+  const fillL = new THREE.DirectionalLight(LIGHT_COLOR, 0.35);
   fillL.position.copy(center).addScaledVector(new THREE.Vector3(-1.8, 0.6, 1.2), maxDim);
-  const rim = new THREE.DirectionalLight(0xffffff, 0.85);
+  const rim = new THREE.DirectionalLight(LIGHT_COLOR, 0.85);
   rim.position.copy(center).addScaledVector(new THREE.Vector3(-1.2, -1.0, -2.2), maxDim);
   scene.add(key, fillL, rim);
+
+  // Apply the persisted preset in place (satin + on + 1.0x reproduces the pre-settings look).
+  const lights = { hemi, key, fill: fillL, rim };
+  applyRenderLook({ mat, wire, wireMat, scene, lights }, renderPrefs);
 
   // Shadow rig (optional, toggled): the thin double-sided wall needs a normalBias
   let ground = null, groundGeo = null, groundMat = null;
@@ -312,6 +455,9 @@ export async function init3d(container, meshData, profile, seedProfile, shadows 
       (detail || "enclosure-mounted (mesh_meta.mounting)");
     container.appendChild(cap);
   }
+
+  // Render-settings chip (surface / ridges / light) — additive overlay, clickable.
+  applyRenderControls(container, p => applyRenderLook({ mat, wire, wireMat, scene, lights }, p));
 
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.target.copy(center);
@@ -424,30 +570,35 @@ export async function init3dFrames(container, frames, opts = {}) {
   const shadows = opts.shadows !== false;
 
   const cs = getComputedStyle(document.documentElement);
+  const renderPrefs = loadRenderPrefs();
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(
     cs.getPropertyValue("--viz-canvas").trim() || cs.getPropertyValue("--surface").trim() || "#ffffff");
 
   const mat = new THREE.MeshStandardMaterial({
-    color: 0xdfe4e8, roughness: 0.55, metalness: 0.05,
+    color: HORN_BASE_COLOR, roughness: 0.55, metalness: 0.05,
     side: THREE.DoubleSide, transparent: false,
     polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1,
   });
-  const wireMat = new THREE.LineBasicMaterial({ color: 0xf4f7f9, transparent: true, opacity: 0.28 });
+  const wireMat = new THREE.LineBasicMaterial({ color: WIRE_COLOR, transparent: true, opacity: 0.28 });
   const mesh = new THREE.Mesh(new THREE.BufferGeometry(), mat);          // geometry swapped per frame
   const wire = new THREE.LineSegments(new THREE.BufferGeometry(), wireMat);
   mesh.castShadow = mesh.receiveShadow = shadows;
   scene.add(mesh, wire);
 
-  const hemi = new THREE.HemisphereLight(0xffffff, 0x8fa3ad, 0.45);
+  const hemi = new THREE.HemisphereLight(LIGHT_COLOR, HEMI_GROUND_COLOR, 0.45);
   scene.add(hemi);
-  const key = new THREE.DirectionalLight(0xffffff, 1.15);
+  const key = new THREE.DirectionalLight(LIGHT_COLOR, 1.15);
   key.position.copy(center).addScaledVector(new THREE.Vector3(1.6, 2.2, 1.8), maxDim);
-  const fillL = new THREE.DirectionalLight(0xffffff, 0.35);
+  const fillL = new THREE.DirectionalLight(LIGHT_COLOR, 0.35);
   fillL.position.copy(center).addScaledVector(new THREE.Vector3(-1.8, 0.6, 1.2), maxDim);
-  const rim = new THREE.DirectionalLight(0xffffff, 0.85);
+  const rim = new THREE.DirectionalLight(LIGHT_COLOR, 0.85);
   rim.position.copy(center).addScaledVector(new THREE.Vector3(-1.2, -1.0, -2.2), maxDim);
   scene.add(key, fillL, rim);
+
+  // Same persisted preset as the single-mesh viewer (satin default keeps the pre-settings look).
+  const lights = { hemi, key, fill: fillL, rim };
+  applyRenderLook({ mat, wire, wireMat, scene, lights }, renderPrefs);
 
   let groundGeo = null, groundMat = null;
   if (shadows) {
@@ -486,6 +637,9 @@ export async function init3dFrames(container, frames, opts = {}) {
   frameNote.textContent = "";
   container.style.position = "relative";
   container.appendChild(frameNote);
+
+  // Render-settings chip shared with init3d; mutates the one material/rig in place.
+  applyRenderControls(container, p => applyRenderLook({ mat, wire, wireMat, scene, lights }, p));
 
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.target.copy(center);

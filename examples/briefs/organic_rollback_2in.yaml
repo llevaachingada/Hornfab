@@ -1,0 +1,35 @@
+# Brief: organic rollback 90x60, 2-inch driver. The 2in member of the organic family.
+# f0 from the rollback-extent rule: (500-6)/1.8 = 274 mm -> holds 60 deg above 1541 Hz
+# -> f0 1550 (derived fc_v 688.4 -> V extent ~490 mm, inside 500; measured seeds green:
+# x_signed 2,504 dofs, ripple 3,636 dofs at screen). f11 ~3,960 Hz: band_hi 5500 exceeds
+# it (the G1 caveat binds for every 2-inch brief).
+name: organic_rollback_2in
+description: Organic rollback horn, 90x60 degree, 2-inch driver, 680x500x340 mm envelope, f0 1550 Hz
+driver:
+  exit_radius_mm: 25.4
+  exit_angle_deg: 4.0
+envelope:
+  max_mouth_w_mm: 680.0
+  max_mouth_h_mm: 500.0
+  max_depth_mm: 340.0
+symmetry: hv
+source:
+  cap: auto
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 500.0             # 2-inch drivers cross lower
+  band_hi_hz: 5500.0            # screen-cap-safe; f11 caveat binds (see header)
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.7
+  f0_hz: 1550.0
+objective:
+  version: 3
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.5

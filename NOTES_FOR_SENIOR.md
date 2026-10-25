@@ -504,3 +504,21 @@ config.py/12_RESEARCH_BASIS tails; one eaten section header twice) - all caught 
 lesson: NEVER anchor an edit on a section HEADER alone; re-run section-header greps after every
 doc-structure edit (the 13.6/13.7/14 header greps) and byte-check tails after appends.
 
+## 2026-10-25 (later) - S1a driver pass: oracle decision record + the owner's over-constraint remark (append-only pointer)
+
+The owner directed an oracle decision pass for the typology-completion repair (briefs, per-config
+parameters, driver classes). The complete oracle output is preserved verbatim in
+`docs/research/typologies/S1A_DRIVER_PASS_ORACLE_FINAL_2026-10-25.md` (provenance header + the
+full decision tables, brief YAML texts, derivation hunks, validation plan, risks ledger); the
+applied state is documented in `docs/BRIEF_AND_SCORING_GUIDE_2026-10-25.md` + the research basis
+S16.9 pointer + the smoke-matrix evidence addendum. Decisions applied: brief-driven driver classes
+({hifi_90x60, organic_rollback, lecleach_rollback} x {1in, 14in, 2in}, all f0 + objective v3);
+biradial seed L 195 + closure-aware derivation (rm = max(K-law d/2, r0 + tan(a)L), the ONE
+owner-directed widened_to_closure exception to clamp-only — dated in config.py, flagged per note,
+test-pinned); the salmon demos reseeded (stop 150, x_amp -0.15 — the 180 deg cap-area asymptote
+was crossed at the shipped seed) + lecleach eps 0.20 onto its own family brief; C4 catalog landed.
+**Owner remark on record:** the owner believes some min/max parameters may still be OVER-CONSTRAINING
+the designs — deliberately deferred to a later round (not acted on; the landed bounds are the
+oracle's measured decisions). Anyone revisiting bounds must start from the oracle doc S1/S5 tables
+and re-measure, not widen by hand.
+

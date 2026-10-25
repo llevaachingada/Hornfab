@@ -27,6 +27,14 @@
 # helper is exposed as profiles.biradial_mouth_mm for the campaign/baseline tables.
 # Ladder: every number here is a YAML default (nothing hardcoded in the generator).
 #
+# DRIVER STORY (S1a, 2026-10-25): this typology runs under 1-inch / 1.4-inch / 2-inch
+# exits by BRIEF (hifi_90x60_{1in,14in,2in}; WP2 pins the throat from the brief). The
+# YAML seed is the no-f0 fallback and closes at every driver class (L 195, see seed
+# note). Under an f0-carrying brief the derivation re-aims a (the patent's 0.9 x
+# half-coverage rule) and rm (the K-law mouth FLOORED at the closure line
+# rm = r0 + tan(a)L, bound widened to the closure value when needed - flagged
+# "widened_to_closure"); an f0 brief can no longer produce an un-closeable seed.
+#
 # catalog entry lands in the C4 batch (examples/catalog.yaml).
 name: biradial_keele
 family: FREEFORM
@@ -41,7 +49,10 @@ generator:
   max_wall_deg: 80.0
   mouth: ellipse
 seed_params:
-  L_mm: 210.0
+  L_mm: 195.0               # S1a driver pass: at a 40.5 deg H cone this depth keeps the
+                            # closure line (r0 + tan(a)L) at 179.2/184.3/191.9 mm for the
+                            # 1in/1.4in/2in exits - inside rm 195 for ALL drivers (at 210
+                            # the 1.4in+ drivers refused: "cannot close", measured)
   h_a_deg: 40.5             # the patent's 0.9 x half-coverage seed for 90 deg H
   v_a_deg: 27.0             # 0.9 x 30 = 27 for 60 deg V
   h_rm_mm: 195.0            # the K-law mouth at the envelope's limit (W 396 of 400)
@@ -60,10 +71,12 @@ bounds:
     hi: 34.0
   h_rm_mm:
     lo: 140.0
-    hi: 197.0
+    hi: 210.0              # S1a: widened for the 2in class (K-law/closure region to 210);
+                           # under the 1in brief the mouth above ~197 is envelope-graded
   v_rm_mm:
     lo: 95.0
-    hi: 146.0
+    hi: 230.0              # S1a: the 2in K-law V mouth is 211.7 (f0 1000); 2x230 = 460 =
+                           # the 2in envelope H; under the 1in brief > ~146 is envelope-graded
   h_n:
     lo: 2.0
     hi: 8.0

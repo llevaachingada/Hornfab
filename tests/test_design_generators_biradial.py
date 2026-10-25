@@ -87,10 +87,17 @@ def test_config_materializes_and_is_envelope_true():
 
 
 def test_config_mouth_hits_the_envelope_limit_like_the_seed_note_says():
+    """S1a (2026-10-25, owner-directed): the own brief (hifi_90x60_1in) now carries
+    f0 1450, so the loaded seed is the DERIVED one: the H mouth sits at the closure
+    line rm = r0 + tan(40.5 deg)*195 = 179.25 mm (the K-law mouth at f0 1450 is only
+    194.9/2 = 97.4 mm, far below it), and the V mouth sits at the K-law value
+    25400e3/(1450*60)/2 = 145.98 mm - i.e. 298 mm of the 300 mm envelope limit.
+    (The pre-f0 seed pinned 396/296; the derivation re-aims it - measured.)"""
     cfg = load_config(TYP / "biradial_keele.yaml")
     space = DesignSpace.from_config(cfg)
-    anchors = space.seed.params  # envelope check happens in materialize; here assert the seed
+    anchors = space.seed.params
     w_mm = 2.0 * max(float(row[1]) for row in anchors["profileH"]["points"]) + 6.0
     h_mm = 2.0 * max(float(row[1]) for row in anchors["profileV"]["points"]) + 6.0
-    assert w_mm == pytest.approx(396.0, abs=1.0)     # 2*(195+3), inside the 400 mm envelope
-    assert h_mm == pytest.approx(296.0, abs=1.0)     # 2*(145+3), inside the 300 mm envelope
+    assert w_mm == pytest.approx(364.5, abs=1.5)     # 2*(179.25+3): the closure-line mouth
+    assert h_mm == pytest.approx(298.0, abs=1.0)     # 2*(145.98+3): the K-law mouth at f0
+    assert registry.envelope_overshoot_estimate(space.seed.params, cfg.brief) == 0.0

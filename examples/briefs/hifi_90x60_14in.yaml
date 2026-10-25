@@ -1,0 +1,36 @@
+# Brief: hi-fi waveguide, 90 x 60 degrees H/V, 1.4-inch compression driver.
+# The 1.4-inch member of the hifi driver-class family (12.7 / 17.78 / 25.4 mm exits).
+# Same coverage, band and honest f0 as the 1-inch member: the K-law mouth depends on
+# coverage x f0, not on the throat; the envelope grows only to hold the bigger throat's
+# closure margins (biradial: rm >= r0 + tan(a)L) and the driver class's typical horns.
+# f11 for a 17.78 mm throat is ~5,640 Hz (1-inch: 7,914 Hz) - band_hi 5500 stays below it.
+name: hifi_90x60_14in
+description: Hi-fi waveguide 90x60 degrees H/V, 1.4-inch driver, 420x320x230 mm envelope, f0 1450 Hz
+driver:
+  exit_radius_mm: 17.78         # 1.4-inch exit diameter 35.56 mm (osse_baseline precedent)
+  exit_angle_deg: 5.0
+envelope:
+  max_mouth_w_mm: 420.0
+  max_mouth_h_mm: 320.0
+  max_depth_mm: 230.0
+symmetry: hv
+source:
+  cap: auto
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.0
+  f0_hz: 1450.0                 # K-law mouths 194.9 x 292.0 mm: both fit 414 x 314
+objective:
+  version: 3
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0

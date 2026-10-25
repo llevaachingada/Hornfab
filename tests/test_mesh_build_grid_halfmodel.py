@@ -65,8 +65,22 @@ def test_saddle_half_builds_through_the_full_wire_route(tmp_path):
           f"bbox={tuple(round(v, 4) for v in r.bbox_m)}, res={r.res_mm}")
 
 
-def test_half_model_meta_carries_span_and_labels():
-    cfg = _cfg()
+def test_half_model_meta_carries_span_and_labels(tmp_path):
+    # S1a driver-pass premise fix (2026-10-25): the organic brief now carries f0 1900 +
+    # objective v3, so the saddle loads as a DERIVED seed (fc re-aimed) - this test pins
+    # the TUNED half-model meta (the datasheet-invariant labels), so the fixture brief is
+    # made derivation-inert (f0/objective stripped, dated); every assertion is unchanged.
+    # The derived layer is pinned separately (tests/test_s1a_driver_briefs.py).
+    import json
+
+    base = _cfg("salmon_saddle")
+    body = dict(base.brief)
+    body.pop("path", None)
+    body.pop("objective", None)
+    (body.get("target") or {}).pop("f0_hz", None)
+    p = tmp_path / "tuned_brief.yaml"
+    p.write_text(json.dumps(body), encoding="utf-8")    # JSON is valid YAML 1.2
+    cfg = load_config(TYP / "salmon_saddle.yaml", brief=p)
     space = DesignSpace.from_config(cfg)
     block = space.seed.params["grid"]
     assert block["span"] == "half" and block["n_phi"] == 25

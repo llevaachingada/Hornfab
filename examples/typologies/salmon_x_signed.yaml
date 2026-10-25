@@ -7,6 +7,12 @@
 # whenever x_amp != 0, x_amp = 0 still reproduces the plain elliptical rows exactly (P2).
 # LABELED HYPOTHESIS (the x_shape/T5 precedent; audiohorn.net publishes no geometry).
 #
+# S1a RESEED (2026-10-25, owner-directed): the sign demo now runs under its own and the
+# 1.4in/2in organic briefs (measured green: envelope 0.0 everywhere, dofs 1,792-2,504).
+# The 180 deg cap-area asymptote remains live INSIDE the search bounds (stop up to 240,
+# x_amp to +/-0.4): rows whose stop(phi) crosses 180 explode in size -> graded
+# infeasible, which is the intended penalty path, never a crash.
+#
 # catalog entry lands in the C4 batch (examples/catalog.yaml).
 name: salmon_x_signed
 family: FREEFORM
@@ -22,8 +28,15 @@ seed_params:
   g_fc_h_hz: 800.0
   g_fc_v_hz: 1100.0
   g_T: 0.8
-  g_stop_deg: 170.0
-  g_x_amp: -0.25             # the SIGN DEMO: corner-in (the shipped +0.25 is corner-out)
+  g_stop_deg: 150.0          # S1a reseed: at 170/-0.25 the CARDINAL rows stop at 212.5 deg -
+                             # crossing the 180 deg cap-area asymptote (march explosion: the
+                             # shipped seed's z-span 332.47 mm vs the 275 limit, overshoot
+                             # 0.2201, mesh 14,414 tris > 11,275 - both measured). 150 keeps
+                             # every row stop < 180 at |x_amp| <= 0.15.
+  g_x_amp: -0.15             # the SIGN DEMO (corner-in). -0.25 at stop 150 meshes
+                             # DEFECTIVELY (non-sliver triangles in the x=0 symmetry plane,
+                             # measured); -0.15 is green everywhere (1,994 dofs seed /
+                             # 1,792 derived at screen).
   g_x_fc: 0.15
 bounds:
   g_fc_h_hz:

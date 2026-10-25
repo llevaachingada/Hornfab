@@ -52,4 +52,42 @@ residual, no julia alive).
 dirs + logs + VRAM csvs — **24 checks** (12 success-row: name/J/dofs/config ×3; 6 failure-row:
 run.json failure/J + ndjson detail + quoted log line ×2; 5 VRAM: ≥5 samples + exact peak + exact
 baseline; 1 J-format) — run output quoted in CONTINUITY. `BYTE-CHECK: 24/24 PASS` (exit 0;
-negative control verified failing).
+negative control verified failing). Driver-pass extension (2026-10-25 later): +5 checks covering
+the 15 dry-run-matrix cells (config × 3 brief classes, exact dofs pins + cap guard) —
+**`BYTE-CHECK: 29/29 PASS`** on the post-driver-pass tree.
+
+## Driver-pass re-verification (2026-10-25, later — oracle-decided, owner-directed)
+
+The S1a driver pass (decision record:
+`docs/research/typologies/S1A_DRIVER_PASS_ORACLE_FINAL_2026-10-25.md`) re-anchored the five
+configs and landed the brief family; the matrix above is preserved as the dated record of the
+PRE-repair state (its two mesh_too_large findings + the envelope overshoot are exactly what the
+driver pass fixed). Re-verification evidence, all offline except the owner's live campaign:
+
+- **Offline suite: 1509/0/0/0** (`runs/driver_pass/suite2.xml`; the four premise-failures the
+  first driver-pass run exposed — the salmon family's revised f0 briefs made three test
+  fixtures' premises derivation-active and `salmon_elliptical`'s derived seed graded 4.2% over
+  — were fixed, not weakened: the elliptical seed got the same measured stop-150 reseed as its
+  two siblings, two saddle-invariant tests got derivation-inert fixture briefs with their
+  original assertions intact, and the self-approach fixture strips the new f0 keys — all dated
+  in-file). fixer-side verification: 126/0/0 across the touched test files.
+- **The 15× gmsh dry-run matrix** (`scratch/gsmoke_2026-10-25/dryruns.log`, screen tier,
+  `--dry-run --mode screen`, no solver launched): every combination the brief family supports
+  is under the 5,000-dof screen cap —
+
+| Config | 1in brief | 14in brief | 2in brief |
+|---|---|---|---|
+| biradial_keele (L 195 seed) | 1,846 dofs / 3,522 tris | 2,023 / 3,873 | 2,532 / 4,873 |
+| qtw_waveguide (unchanged) | 1,616 / 3,065 | 1,764 / 3,359 | 1,990 / 3,805 |
+| salmon_x_signed (stop 150, amp −0.15) | 1,792 / 3,407 | 1,887 / 3,601 | 2,504 / 4,811 |
+| salmon_ripple12 (stop 150) | 2,567 / 4,966 | 2,751 / 5,334 | 3,636 / 7,084 |
+| lecleach_asym_odd (eps 0.20, full ring) | 4,190 / 8,376 | 4,152 / 8,300 | 4,141 / 8,278 |
+
+- **Solve-side**: the owner launched their own screen campaign at 16:00:41 EDT
+  (`--brief user/7040use.yaml --families salmon_elliptical,salmon_x_signed,salmon_saddle,
+  salmon_ripple12,lecleach_iwata_ar`, pid 14484) against the repaired tree — the one-GPU rule
+  held (gpu-clean refused while the owner's lock is held; the GPU re-smoke matrix rides AFTER
+  it or is superseded by the campaign's own run evidence). The pre-repair matrix's refusal
+  rows are superseded by this campaign for the salmon family: all five repaired configs
+  materialize and mesh (the dry-run matrix; the seeds march envelope-true under all nine
+  family briefs — probe + `tests/test_s1a_driver_briefs.py`).

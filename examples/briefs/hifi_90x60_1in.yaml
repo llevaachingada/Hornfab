@@ -1,8 +1,15 @@
-# Brief: hi-fi waveguide, 90 x 60 degrees H/V, 1-inch compression driver
+# Brief: hi-fi waveguide, 90 x 60 degrees H/V, 1-inch compression driver.
 # Used as the reference size class for LANE B typology comparisons (TYPOLOGY_PLAN.md s3).
 # symmetry: hv - H and V differ; axisymmetric families are rejected by the campaign.
+#
+# S1a repair (2026-10-25, owner-directed): this brief now carries an HONEST f0 + objective v3.
+# K-law d = 25400e3/(f0*coverage) mm at f0 1450: W 194.9 x H 292.0 mm - both fit the
+# 400x300 envelope with the 3 mm shells (V is the binding axis: 300 mm holds 60 deg
+# only above ~1411 Hz; band_lo 700 could never hold it - the §13.5 measured diagnosis,
+# 61-87% of cov loss sitting below the break). Below-f0 the objective v3 masks cov and
+# dislope; rip/flat/load still score there. Old runs keep their embedded brief exactly.
 name: hifi_90x60_1in
-description: Hi-fi waveguide 90x60 degrees H/V, 1-inch driver, 400x300x220 mm envelope
+description: Hi-fi waveguide 90x60 degrees H/V, 1-inch driver, 400x300x220 mm envelope, f0 1450 Hz
 driver:
   exit_radius_mm: 12.7          # 1-inch (1/2" = 0.5" radius = 12.7 mm); pinned for every config
   exit_angle_deg: 5.0           # typical 1" driver exit taper; throat wall angle follows this
@@ -17,10 +24,13 @@ target:
   coverage_h_deg: 90.0          # TOTAL included angle, -6 dB
   coverage_v_deg: 60.0
   band_lo_hz: 700.0
-  band_hi_hz: 5500.0            # limited by 8 GB RTX 4060 dof cap (TOOLCHAIN.md)
+  band_hi_hz: 5500.0            # limited by 8 GB RTX 4060 dof cap (TOOLCHAIN.md); below f11 7914 Hz
   di_target_db: null            # derive from coverage
   di_slope_target: 0.0          # flat DI with frequency
   z_min: 0.0                    # loading: not weighted for this brief (load: 0.0 below)
+  f0_hz: 1450.0                 # S1a: the honest K-law break of the binding (V) axis
+objective:
+  version: 3                    # v3: freq-weighted cov + the below-f0 mask on cov/dislope
 weights:
   cov: 1.0
   rip: 1.0

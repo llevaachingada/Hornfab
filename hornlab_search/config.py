@@ -894,8 +894,23 @@ def _derive_generator_geometry(raw: dict, target: dict, feas: dict) -> list:
     env_h = float(feas["envelope_mouth_h_mm"])
     req_w = float(feas["required_mouth_w_mm"])
     req_h = float(feas["required_mouth_h_mm"])
-    target_w = min(req_w, env_w) if env_w > 0.0 else req_w
-    target_h = min(req_h, env_h) if env_h > 0.0 else req_h
+    # S1a repair (2026-10-25, owner-directed driver pass): the derived mouth is capped at
+    # the envelope MINUS the two wall thicknesses (the generator block's own
+    # wall_thickness_mm, mesher default 3.0). registry.envelope_overshoot_estimate counts
+    # the freestanding shell, so a derived mouth AT the envelope made the seed
+    # invalid_envelope by 2*wt - 0.5 mm whenever the envelope was the binding side
+    # (measured on this pass). An envelope too small to hold its own shell falls back to
+    # the bare envelope (the overshoot is then honest grading, never a refusal).
+    wt = float(gen.get("wall_thickness_mm", 3.0)) if isinstance(gen, dict) else 3.0
+
+    def _env_cap(env_mm: float, req_mm: float) -> float:
+        if env_mm <= 0.0:
+            return req_mm
+        capped = env_mm - 2.0 * wt
+        return min(req_mm, capped) if capped > 0.0 else min(req_mm, env_mm)
+
+    target_w = _env_cap(env_w, req_w)
+    target_h = _env_cap(env_h, req_h)
 
     def set_seed(key: str, value, note: str) -> None:
         if value is None:
@@ -921,7 +936,53 @@ def _derive_generator_geometry(raw: dict, target: dict, feas: dict) -> list:
                 if not isinstance(prof, dict):
                     continue
                 ptype = prof.get("type")
-                if ptype in ("conical", "exponential", "hypex", "biradial"):
+                if ptype == "biradial":
+                    # S1a repair (2026-10-25, owner-directed driver pass): the biradial
+                    # contour law REFUSES rm < r0 + tan(a)*L (the power-series term would
+                    # need c < 0; design/generators/profiles.py biradial_contour), and the
+                    # K-law mouth alone can sit far below that line (measured under
+                    # axi_2in_large: derived rm 141.1 vs the 192 mm closure need at r0
+                    # 25.4). The derived rm is therefore the MAX of the K-law mouth and
+                    # the closure line; when the knob's own hi bound cannot hold the
+                    # closure value the bound WIDENS to exactly it (note flag
+                    # "widened_to_closure") - a clamped-only rule would re-create the
+                    # un-closeable seed this repair removes. This widening is the one
+                    # owner-directed exception (dated here) to the clamp-only contract.
+                    # The seed's initial wall angle follows the patent's own sizing
+                    # sentence ("empirically on the order of ninety percent" of the half
+                    # coverage; US4308932A) - quoted in the config headers, never a new
+                    # constant.
+                    a_key = f"{prefix}_a_deg"
+                    a_patent = 0.9 * cov_of(axis) / 2.0
+                    a_val, a_clamped = _clamp_to_bounds(a_key, a_patent, bounds)
+                    seed[a_key] = float(a_val)
+                    notes.append({"knob": a_key, "derived_deg": float(a_patent),
+                                  "applied": float(a_val),
+                                  "clamped_to_bound": bool(a_clamped),
+                                  "note": "US4308932A: a ~ 0.9 x half-coverage"})
+                    L_seed = float(seed.get(
+                        "L_mm", (bounds.get("L_mm") or {}).get("hi", 190.0)))
+                    r0 = float(((raw.get("brief") or {}).get("driver") or {})
+                               .get("exit_radius_mm", 0.0))
+                    closure = r0 + float(np.tan(np.radians(float(a_val)))) * L_seed
+                    rm_key = f"{prefix}_rm_mm"
+                    rm_k = (target_w if axis == "w" else target_h) / 2.0
+                    rm_derived = max(rm_k, closure)
+                    b = bounds.get(rm_key)
+                    widened = False
+                    if isinstance(b, dict) and float(b.get("hi", rm_derived)) < rm_derived - 1e-9:
+                        b["hi"] = float(rm_derived)
+                        widened = True
+                    v, clamped = _clamp_to_bounds(rm_key, rm_derived, bounds)
+                    seed[rm_key] = float(v)
+                    note = {"knob": rm_key, "derived_mm": float(rm_derived),
+                            "applied": float(v), "clamped_to_bound": bool(clamped),
+                            "note": "K-law mouth radius (d/2), floored at the closure "
+                                    "line rm = r0 + tan(a)*L (the biradial refusal guard)"}
+                    if widened:
+                        note["widened_to_closure"] = True
+                    notes.append(note)
+                elif ptype in ("conical", "exponential", "hypex"):
                     set_seed(f"{prefix}_rm_mm", (target_w if axis == "w" else target_h) / 2.0,
                              "K-law mouth radius (d/2)")
                 elif ptype == "osse":

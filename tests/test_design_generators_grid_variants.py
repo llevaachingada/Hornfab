@@ -134,11 +134,26 @@ def test_fc_h_equals_fc_v_is_the_axisymmetric_rows():
 
 # ------------------------------------------------------------------ saddle config / invariant
 
-def test_saddle_config_is_a_half_model_with_the_datasheet_invariant():
-    cfg = load_config(TYP / "salmon_saddle.yaml")
+def test_saddle_config_is_a_half_model_with_the_datasheet_invariant(tmp_path):
+    # S1a driver-pass premise fix (2026-10-25): the organic family brief now carries f0_hz
+    # 1900 + objective v3, so loading the saddle through its brief_file DERIVES the seed
+    # (fc re-aimed, tuned invariant report-only drifting to 1.129 - that derived layer is
+    # pinned separately). This test's premise is the saddle's own TUNED datasheet seed, so
+    # the fixture brief is made derivation-inert (f0/objective stripped, dated); every
+    # assertion below is unchanged.
+    base = load_config(TYP / "salmon_saddle.yaml")
+    body = dict(base.brief)
+    body.pop("path", None)
+    body.pop("objective", None)
+    (body.get("target") or {}).pop("f0_hz", None)
+    p = tmp_path / "tuned_brief.yaml"
+    p.write_text(json.dumps(body), encoding="utf-8")    # JSON is valid YAML 1.2
+    cfg = load_config(TYP / "salmon_saddle.yaml", brief=p)
     space = DesignSpace.from_config(cfg)
     assert space.keys() == ["g_T", "g_fc_h_hz", "g_fc_v_hz", "g_stop_deg"]
     block = space.seed.params["grid"]
+    assert block["knobs"]["g_fc_h_hz"] == pytest.approx(800.0)      # the tuned seed, not derived
+    assert block["knobs"]["g_fc_v_hz"] == pytest.approx(1200.0)
     assert block["span"] == "half" and block["n_phi"] == 25
     assert block["knobs"]["g_stop_cos2k"] == [0.25]
     assert block["knobs"]["g_stop_sin2k1"] == [0.2]

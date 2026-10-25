@@ -3,7 +3,7 @@
 # iwata-style large horns 590x450x320; AudioHorn X40 408x248x230 with 23 mm depth):
 # (lowercase references: the catalog's neutrality rule reserves the uppercase tokens)
 # The K-law (d = KEELE_K/(f0*coverage)): at f0 = 1000 Hz the required mouths are
-# 508 (W, 90 deg) x 635 (H, 40 deg) mm - the H axis is envelope-flagged infeasible at
+# 282 (W, 90 deg) x 635 (H, 40 deg) mm - W fits the 640 envelope; the H axis is envelope-flagged infeasible at
 # 1000 Hz and the brief's feasibility record states the honest held coverage instead
 # (W: 25400e3/(1000*640) = 39.7 deg held at 90 target... the config's f0 carries it;
 # campaigns read raw["feasibility"]).

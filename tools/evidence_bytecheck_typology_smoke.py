@@ -256,8 +256,45 @@ def check_j_format():
             problems.append(f'{row["name"]} ndjson J {obj!r} -> {obj:.4f} != doc {row["j"]}')
     return "; ".join(problems) or None
 
-
 add("all quoted successful J values are 4-decimal formatted like the doc", check_j_format)
+
+
+# --- driver-pass re-verification (2026-10-25, later): the 15x gmsh dry-run matrix ---
+#: (config, [1in, 14in, 2in brief screens]) — the addendum table in the evidence doc.
+DRY_RUNS = [
+    ("biradial_keele", [1846, 2023, 2532]),
+    ("qtw_waveguide", [1616, 1764, 1990]),
+    ("salmon_x_signed", [1792, 1887, 2504]),
+    ("salmon_ripple12", [2567, 2751, 3636]),
+    ("lecleach_asym_odd", [4190, 4152, 4141]),
+]
+
+
+def check_dryrun_row(name, expected):
+    """The scratch dry-runs.log re-derivation: the config's three rows carry the doc's
+    dofs (in brief-class order 1in/14in/2in) and all sit under the 5,000 screen cap."""
+    log = R / "scratch" / "gsmoke_2026-10-25" / "dryruns.log"
+    rows = []
+    for m in re.finditer(r"dry-run \[screen\] (\S+): mesh (\d+) triangles, (\d+) dofs", log.read_text(encoding="utf-8", errors="replace")):
+        rows.append((m.group(1), int(m.group(3))))
+    rows = [r for r in rows if r[0] == name]
+    if len(rows) != 3:
+        return f"{log}: {name} has {len(rows)} dry-run rows, expected 3"
+    got = [r[1] for r in rows]
+    for i, (g, e) in enumerate(zip(got, expected)):
+        if g != e:
+            return f"{name} dry-run {i}: dofs {g} != doc {e}"
+        if g > 5000:
+            return f"{name} dry-run {i}: dofs {g} OVER the 5,000 screen cap"
+    return None
+
+
+for _name, _expected in DRY_RUNS:
+    add(
+        f"driver-pass dry-run matrix { _name } (1in/14in/2in) = {_expected}, all <= 5,000 dofs",
+        lambda name=_name, expected=_expected: check_dryrun_row(name, expected),
+    )
+
 
 ok = 0
 bad = []

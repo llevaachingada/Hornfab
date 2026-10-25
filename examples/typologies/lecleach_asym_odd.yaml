@@ -8,6 +8,10 @@
 # exit). NO published asymmetric-per-azimuth JMLC construction exists
 # (JMLC_FAMILY_VARIANTS 2026-10-25 searched: none).
 #
+# FAMILY BRIEF (S1a): lecleach_rollback_{1in,14in,2in} - the Fourcade rows are
+# extent-honest (~1.05x their -6 dB mouth), so they run the lecleach family's own
+# briefs (f0 1200, the dof-honest floor for the full ring; see the brief headers).
+#
 # FULL RING (span: full, quadrants '1234'): the odd cos(phi) term breaks the left-right
 # mirror, so only the seam-free full ring represents it honestly. n_phi 25 rows around
 # 360 deg (the half-model resolution rotated to the whole circle); ~4x the quarter dofs
@@ -18,7 +22,7 @@
 # catalog entry lands in the C4 batch (examples/catalog.yaml).
 name: lecleach_asym_odd
 family: FREEFORM
-brief_file: ../briefs/organic_rollback_1in.yaml
+brief_file: ../briefs/lecleach_rollback_1in.yaml
 generator:
   name: grid
   rows:
@@ -31,7 +35,11 @@ seed_params:
   g_fc_hz: 800.0
   g_T: 0.8
   g_stop_deg: 170.0
-  g_eps_m: 0.25
+  g_eps_m: 0.20             # S1a driver pass: at 0.25 the -x rows' rollback curl dips
+                            # 0.01-0.03 mm below the 2t+2 self-approach limit at r0 >= 17.2
+                            # (mesh-refused at 1.4in/2in, measured; a thinner wall does NOT
+                            # fix it - the gap is ~2t structurally); 0.20 passes at 12.7/
+                            # 17.78/25.4 (measured 4190/4152/4141 screen dofs)
   g_eps_start: 0.0
 bounds:
   g_fc_hz:

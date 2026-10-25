@@ -151,6 +151,13 @@ def test_grid_self_approach_classifies_invalid_geometry_and_is_memoized(tmp_path
 
     bigger = dict(_cfg("salmon_saddle").brief)
     bigger.pop("path", None)                               # loader-added runtime key, not schema
+    # S1a driver-pass premise fix (2026-10-25): the organic family brief now carries f0_hz
+    # 1900 + objective v3, and a copied f0 brief DERIVES the seed (fc re-aimed) - so this
+    # fixture must stay derivation-inert to keep testing its ORIGINAL premise: the saddle's
+    # own TUNED seed (fc 800/1200, ratio 0.9962) under a 17.4 mm-exit brief. Stripping the
+    # f0/objective keys restores exactly that brief; assert on the tuned knobs below.
+    bigger.pop("objective", None)
+    (bigger.get("target") or {}).pop("f0_hz", None)
     bigger["name"] = "bigger_driver"
     bigger["driver"] = {**bigger["driver"], "exit_radius_mm": 17.4}
     bigger["envelope"] = {**bigger["envelope"],
@@ -159,6 +166,9 @@ def test_grid_self_approach_classifies_invalid_geometry_and_is_memoized(tmp_path
     brief_yaml.write_text(json.dumps(bigger), encoding="utf-8")     # JSON is valid YAML 1.2
     cfg = load_config(TYP / "salmon_saddle.yaml", brief=brief_yaml)
     space = DesignSpace.from_config(cfg)
+    assert cfg.raw.get("feasibility") is None              # derivation-inert premise holds
+    assert dict(cfg.seed_params.get("grid", {}).get("knobs")
+                or cfg.seed_params).get("g_fc_h_hz", 800.0) == pytest.approx(800.0)
     ctx = E.make_context(cfg, None, cache_dir=tmp_path / "cache")
     ev1 = E.evaluate(space.seed, space, cfg, "screen", tmp_path / "run1", None, None, ctx=ctx)
     assert E.error_kind(ev1.error) == E.KIND_INVALID, ev1.error

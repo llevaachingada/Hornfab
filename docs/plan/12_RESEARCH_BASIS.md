@@ -911,6 +911,30 @@ Method note: aes.org blocks automated fetch (403), so AES records were verified 
 5. **Routes 3–5 (coverage-aware brief, asym targets, coverage-map view)** and the §16.4 absent-classes menu, per owner priorities; Pull-in adapters (§15.4) after BL-1/BL-2 numbers exist.
 6. Remaining [open] citations (§16.7) are doc-level debts, not blockers.
 
+### 16.9 The S1a driver-pass finalization (added 2026-10-25, owner-directed; oracle decision record)
+
+The owner directed an oracle decision pass for the typology-completion repair (briefs, per-config
+parameters, driver classes) — the complete final output is preserved verbatim in
+`docs/research/typologies/S1A_DRIVER_PASS_ORACLE_FINAL_2026-10-25.md` with a provenance header;
+this section is the pointer. Summary of the applied decisions (all measured on the tree via march
++ envelope + real gmsh dry-runs): **the driver class lives in the BRIEF** (WP2 pins the throat;
+shipped family `hifi_90x60_{1in,14in,2in}` / `organic_rollback_{1in,14in,2in}` /
+`lecleach_rollback_{1in,14in,2in}`, every brief f0-carrying + objective v3 with the K-law break
+of its binding axis — the salmon family additionally uses the measured 1.8× rollback-extent
+correction, the lecleach full ring a measured dof-honest f0 1200 floor); **biradial's un-closeable
+seed repaired two ways** (seed L 210→195 so one seed closes under every driver class; a
+closure-aware derivation `rm = max(K-law d/2, r0 + tan(a)·L)` with the one owner-directed
+`widened_to_closure` exception to the clamp-only contract, flagged per note); **the two failing
+salmon demos reseeded** (stop 150; x_amp −0.15 — the shipped seed crossed the 180° cap-area
+asymptote) and **lecleach eps 0.25→0.20** (the full-ring self-approach window at r0 ≥ 17.2) with
+lecleach moving to its own family brief; **the C4 catalog block landed** (five entries incl.
+`symmetry: full` for the seam-free ring; closes R9-audit P3). The scored-guide and
+which-brief-for-which-typology tables live in `docs/BRIEF_AND_SCORING_GUIDE_2026-10-25.md`.
+**Owner note on record (2026-10-25):** the owner suspects some min/max parameters may
+over-constrain the designs — explicitly deferred to a later round, not acted on in this pass.
+Validation plan applied: the driver-brief test file (offline), the offline suite, then the GPU
+dry-run matrix + re-smokes recorded in the smoke-matrix evidence addendum.
+
 ---
 
 hornlab-waveguide-mesher: https://github.com/m3gnus/hornlab-waveguide-mesher

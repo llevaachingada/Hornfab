@@ -107,6 +107,11 @@ def test_load_catalog():
     assert "freeform_hv" in names
     assert "throat_adapter" in names
     assert "search_smoke" in names
+    assert "biradial_keele" in names
+    assert "qtw_waveguide" in names
+    assert "lecleach_asym_odd" in names
+    assert "salmon_x_signed" in names
+    assert "salmon_ripple12" in names
 
 
 def test_catalog_entry_fields():
@@ -117,8 +122,10 @@ def test_catalog_entry_fields():
         assert "group" in entry
         assert "symmetry" in entry, f"entry {entry['name']} missing 'symmetry'"
         assert "description" in entry
-        assert entry["symmetry"] in ("hv", "axisymmetric"), (
+        assert entry["symmetry"] in ("hv", "axisymmetric", "full"), (
             f"entry {entry['name']} has bad symmetry {entry['symmetry']!r}")
+        # 'full' = the 2026-10-25 seam-free full-ring rows models (catalog header note);
+        # first carried by lecleach_asym_odd in the S1a C4 batch
 
 
 def test_catalog_icw_entries_axisymmetric():

@@ -10,6 +10,11 @@
 # LABELED EXPERIMENT: no published audio mouth-ripple construction exists; the microwave
 # corrugated-horn class is the theoretical neighbour.
 #
+# S1a RESEED (2026-10-25): the demo identity is unchanged (12 lobes, 3 mm ridge, window
+# opening at the last 20%, exactly 4.0 phi samples per lobe at n_phi 25 half-span); only
+# the rollback stop shallowed so the seed fits the screen dof cap under its own and the
+# 1.4in/2in organic briefs (measured 2,567/2,804/3,636 dofs).
+#
 # catalog entry lands in the C4 batch (examples/catalog.yaml).
 name: salmon_ripple12
 family: FREEFORM
@@ -26,7 +31,9 @@ seed_params:
   g_fc_h_hz: 800.0
   g_fc_v_hz: 1100.0
   g_T: 0.8
-  g_stop_deg: 170.0
+  g_stop_deg: 150.0          # S1a reseed: at 170 the seed meshed 10,504 tris = 5,358 dofs,
+                             # over the 5,000 screen cap for quadrants '14' (measured);
+                             # at 150: 2,852 dofs (seed fc) / 2,567 (derived) - green
   g_ripple_lobes: 12
   g_ripple_amp_mm: 3.0
   g_ripple_start: 0.8

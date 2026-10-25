@@ -1,22 +1,20 @@
 """S1a config-gap coverage (2026-10-25): the two shipped-but-never-loaded grid-row configs.
 
-``salmon_x_signed.yaml`` is the signed x_amp SIGN demo (g_x_amp = -0.25 corner-in, bounds
-[-0.4, 0.4], n_phi 15, quarter) and ``salmon_ripple12.yaml`` the even-lobe mouth ripple
-(g_ripple_lobes 12 / g_ripple_amp_mm 3.0 / g_ripple_start 0.8, span half, quadrants '14').
-Before this file no test loaded either YAML as a config. It applies the three layers the
-biradial/qtw config tests use -- the REAL ``load_config`` path with its named brief
-resolving, the pure-Python rows march at the seed (no mesher, no GPU), and the pinned
-envelope/span/penalty truth -- following tests/test_design_generators_biradial.py,
-test_design_generators_qtw.py, test_design_generators_grid_rows.py and
-test_design_generators_grid_full_ring.py.
+``salmon_x_signed.yaml`` is the signed x_amp SIGN demo and ``salmon_ripple12.yaml`` the
+even-lobe mouth ripple (12 lobes / 3 mm / window 0.8, half model, quadrants '14'). It
+applies the REAL ``load_config`` path with the named brief resolving, the pure-Python
+rows march at the seed (no mesher, no GPU), and the pinned envelope/span/penalty truth --
+following tests/test_design_generators_biradial.py conventions.
 
-DEVIATION FROM THE LANE BRIEF'S PREMISE (hard rules 3 and 7: follow the files, never
-invent and never weaken an assertion): the brief expected both seeds to be envelope-true.
-``salmon_ripple12`` is (overshoot 0.0). ``salmon_x_signed`` is NOT: its corner-in seed
-marches the H/V rows to a 332.47 mm z span, while the organic_rollback_1in envelope is
-260 mm deep plus the 15 mm meshing allowance = 275 mm, so the pre-mesh overshoot is
-0.2201. A sibling-style ``overshoot == 0.0`` assertion fails on the shipped YAML; the
-test below pins the real overshoot instead and names it as a finding.
+S1a RESEED (2026-10-25, owner-directed driver pass; the smoke-matrix findings): the
+shipped x_signed seed (stop 170 / x_amp -0.25) was NOT buildable - the cardinal rows
+crossed the 180 deg cap-area asymptote (z-span 332.47 mm vs the 275 limit, overshoot
+0.2201, mesh 14,414 tris > 11,275) - and the shipped ripple seed exceeded the 5,000-dof
+screen cap (5,358 dofs). Both are reseeded (stop 150; x_amp -0.15) and the own brief now
+carries f0 1900 + objective v3, so the loaded seeds are the DERIVED ones (fc 1200/843.5).
+The tests below pin the reseeded truth; the old values are kept in the docstrings as the
+dated record. The organic brief revision also derives the fc knobs at load, so knob
+assertions that the derivation owns (fc) are not pinned here - shape knobs are.
 """
 from __future__ import annotations
 
@@ -99,8 +97,10 @@ def test_x_signed_seed_march_succeeds_as_a_signed_quarter_model(x_signed):
     assert "span" not in block                  # the quarter recipe carries no span key
     assert cfg.mesh.quadrants == "1"
 
-    # the SIGN demo: a NEGATIVE seed knob inside its own signed bounds
-    assert cfg.seed_params["g_x_amp"] == pytest.approx(-0.25)
+    # the SIGN demo: a NEGATIVE seed knob inside its own signed bounds (S1a reseed: -0.15;
+    # -0.25 at stop 150 meshes defectively - non-sliver triangles in the x=0 plane)
+    assert cfg.seed_params["g_x_amp"] == pytest.approx(-0.15)
+    assert cfg.seed_params["g_stop_deg"] == pytest.approx(150.0)
     assert cfg.bounds_raw["g_x_amp"] == {"lo": -0.4, "hi": 0.4}
     x_amp = block["knobs"]["g_x_amp"]
     assert -0.4 <= x_amp <= 0.4
@@ -111,31 +111,24 @@ def test_x_signed_seed_march_succeeds_as_a_signed_quarter_model(x_signed):
     assert inner.shape == (15, 33, 3) and np.isfinite(inner).all()
     assert meta["span"] == "quarter" and meta["row_span"] == "quarter"
     assert meta["quadrants"] == "1" and meta["quarter"] is True
-    assert meta["x_amp"] == pytest.approx(-0.25)
+    assert meta["x_amp"] == pytest.approx(-0.15)
     assert meta["x_fc"] == pytest.approx(0.15)
     assert meta["ripple_lobes"] == 0            # no ripple on this config
-    # the mouth fits the brief; the depth does not (pinned by the envelope test below)
+    # S1a reseed: the mouth AND the depth now fit the brief (the shipped seed's z-span
+    # 332.47 mm exceeded the 260 mm envelope; the reseeded/derived seed fits)
     env = space.brief["envelope"]
     assert meta["mouth_w_mm"] < env["max_mouth_w_mm"]
     assert meta["mouth_h_mm"] < env["max_mouth_h_mm"]
-    assert meta["x_span_mm"] > env["max_depth_mm"]
+    assert meta["x_span_mm"] < env["max_depth_mm"]
 
 
-def test_x_signed_seed_pins_the_real_envelope_truth(x_signed):
-    """FINDING: this SIGN seed is NOT pre-mesh envelope-true (see the module docstring).
-
-    The corner-in (negative x_amp) reading lengthens the H/V marches: the seed's outer
-    dimensions are 430.41 x 337.43 x 335.52 mm (incl. the 3 mm wall), against the brief's
-    520 x 420 x 260 mm plus the 0.5/15 mm meshing allowances. Width and height fit; the
-    335.52 mm depth does not (limit 275 mm), so ``DesignSpace.design_from_knobs`` will
-    grade the seed ``invalid_envelope``. This is pinned as the shipped truth rather than
-    asserting the sibling tests' ``overshoot == 0.0``, which is false for this YAML.
-    """
+def test_x_signed_seed_is_envelope_true_after_the_s1a_reseed(x_signed):
+    """S1a reseed record: the shipped seed (stop 170 / x_amp -0.25) overshot 0.2201
+    (z-span 335.52 mm vs the 275 mm limit; smoke-matrix run 20261025T182430Z). The
+    reseeded seed (stop 150 / -0.15, derived fc 1200/843.5 under the f0-1900 brief) is
+    envelope-true; this pins the repaired truth."""
     _cfg, space = x_signed
-    overshoot = registry.envelope_overshoot_estimate(space.seed.params, space.brief)
-    assert overshoot is not None
-    assert overshoot == pytest.approx(0.2201, abs=5e-4)     # (335.52 - 275) / 275
-    assert overshoot > 0.0
+    assert registry.envelope_overshoot_estimate(space.seed.params, space.brief) == 0.0
 
 
 # ------------------------------------------------ even-lobe mouth ripple (pleats)
@@ -151,6 +144,8 @@ def test_ripple12_seed_march_is_a_half_model_with_the_four_samples_per_lobe_bar(
     block = space.seed.params["grid"]
     G.validate_grid_params(block)
     assert block["span"] == "half" and block["n_phi"] == 25
+    assert cfg.seed_params["g_stop_deg"] == pytest.approx(150.0)   # S1a reseed (was 170:
+    # 5,358 dofs > the 5,000 cap; at 150: 2,852 seed / 2,567 derived, measured)
     assert cfg.mesh.quadrants == "14"
 
     lobes = block["knobs"]["g_ripple_lobes"]

@@ -1,0 +1,37 @@
+# Brief: hi-fi waveguide, 90 x 60 degrees H/V, 2-inch compression driver.
+# The 2-inch member of the hifi driver-class family. Envelope = the established 2-inch
+# class (axi_2in_large's 640x460x340): the bigger box buys the lower honest f0
+# (K-law at f0 1000: W 282.2 x H 423.3 mm - BOTH axes feasible against 634 x 454;
+# the 1-inch box could only hold 60 deg above ~1411 Hz). f11 for a 25.4 mm throat is
+# ~3,960 Hz: band_hi 5500 exceeds it - the f11/G1 caveat binds for every 2-inch brief
+# on this card; treat above-f11 scores as geometry comparisons, not driver predictions.
+name: hifi_90x60_2in
+description: Hi-fi waveguide 90x60 degrees H/V, 2-inch driver, 640x460x340 mm envelope, f0 1000 Hz
+driver:
+  exit_radius_mm: 25.4          # 2-inch exit diameter 50.8 mm
+  exit_angle_deg: 4.0           # slow-expansion throat class (axi_2in_large precedent)
+envelope:
+  max_mouth_w_mm: 640.0
+  max_mouth_h_mm: 460.0
+  max_depth_mm: 340.0
+symmetry: hv
+source:
+  cap: auto
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 600.0             # a 2-inch driver crosses lower than a 1-inch
+  band_hi_hz: 5500.0            # screen-cap-safe; f11 caveat binds (see header)
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.0
+  f0_hz: 1000.0                 # both K-law axes feasible at the 2-inch envelope
+objective:
+  version: 3
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0

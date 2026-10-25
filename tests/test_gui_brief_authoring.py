@@ -943,6 +943,100 @@ def test_3d_frames_prepare_offline(tmp_path):
     assert "FRAMES OK" in r.stdout, f"node test failed:\nstdout: {r.stdout}\nstderr: {r.stderr}"
 
 
+# ── Persisted 3D render settings (surface / ridges / light) ──────────────────────────────────────
+# One localStorage key feeds every 3D surface. The pure normalizer runs for real in node (same
+# direct-import pattern as prepareFrames); the scene half is pinned in source below because WebGL
+# needs a browser. Defaults are exactly the pre-settings look, so existing captures still pin.
+
+_RENDER_PREFS_SCRIPT = r'''
+import { pathToFileURL } from "node:url";
+import assert from "node:assert/strict";
+const v3d = await import(pathToFileURL(process.argv[2]).href);
+const { normalizeRenderPrefs } = v3d;
+assert.equal(typeof normalizeRenderPrefs, "function");
+const defaults = { surface: "satin", ridges: "on", light: 1.0 };
+// absent / corrupt / junk never throw, always default
+assert.deepEqual(normalizeRenderPrefs(null), defaults);
+assert.deepEqual(normalizeRenderPrefs(undefined), defaults);
+assert.deepEqual(normalizeRenderPrefs(""), defaults);
+assert.deepEqual(normalizeRenderPrefs("{not json"), defaults);
+assert.deepEqual(normalizeRenderPrefs(42), defaults);
+assert.deepEqual(normalizeRenderPrefs([]), defaults);
+assert.deepEqual(normalizeRenderPrefs({}), defaults);
+// a valid persisted object round-trips
+assert.deepEqual(normalizeRenderPrefs('{"surface":"metallic","ridges":"thin","light":1.4}'),
+  { surface: "metallic", ridges: "thin", light: 1.4 });
+assert.deepEqual(normalizeRenderPrefs({ surface: "studio", ridges: "off", light: 0.7 }),
+  { surface: "studio", ridges: "off", light: 0.7 });
+// light is clamped into 0.5..2.0; non-finite falls back to 1.0
+assert.equal(normalizeRenderPrefs({ light: 9 }).light, 2.0);
+assert.equal(normalizeRenderPrefs({ light: 0.1 }).light, 0.5);
+assert.equal(normalizeRenderPrefs({ light: 0.5 }).light, 0.5);
+assert.equal(normalizeRenderPrefs({ light: 2 }).light, 2.0);
+assert.equal(normalizeRenderPrefs({ light: "1.4" }).light, 1.4);
+assert.equal(normalizeRenderPrefs({ light: "wat" }).light, 1.0);
+assert.equal(normalizeRenderPrefs({ light: NaN }).light, 1.0);
+assert.equal(normalizeRenderPrefs({ light: Infinity }).light, 1.0);
+// unknown enums fall back per-field, never invent a surface/ridge mode
+assert.equal(normalizeRenderPrefs({ surface: "chrome" }).surface, "satin");
+assert.equal(normalizeRenderPrefs({ ridges: "glow" }).ridges, "on");
+assert.deepEqual(normalizeRenderPrefs({ surface: "matte", ridges: "nope", light: 1.5 }),
+  { surface: "matte", ridges: "on", light: 1.5 });
+// returned object is a fresh value (callers mutate/compare it without aliasing stored junk)
+const src = { surface: "matte", ridges: "off", light: 1.2 };
+const norm = normalizeRenderPrefs(src);
+assert.notEqual(norm, src);
+console.log("RENDER PREFS OK");
+'''
+
+
+def test_3d_render_prefs_normalize_offline(tmp_path):
+    """Executes the pure render-settings normalizer: defaults for absent/corrupt JSON, per-field
+    fallbacks for unknown enums, and the 0.5..2.0 light clamp with a non-finite fallback to 1.0."""
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("node not installed")
+    script = tmp_path / "render_prefs_under_test.mjs"
+    script.write_text(_RENDER_PREFS_SCRIPT, encoding="utf-8")
+    r = subprocess.run([node, str(script), str(ROOT / "hornlab_search" / "gui" / "static" / "view3d.js")],
+                       capture_output=True, text=True, cwd=str(tmp_path))
+    assert "RENDER PREFS OK" in r.stdout, f"node test failed:\nstdout: {r.stdout}\nstderr: {r.stderr}"
+
+
+def test_3d_render_settings_are_wired():
+    """The settings object + shared controls helper + the new persistence key exist, both 3D entry
+    points add the chip, and the defaults still describe today's look (satin, ridges on, 1.0x)."""
+    v3d = (ROOT / "hornlab_search" / "gui" / "static" / "view3d.js").read_text(encoding="utf-8")
+    # persistence: exactly one new key, read on init and written on every control change
+    assert 'const RENDER_PREF_KEY = "hl-v3d-render";' in v3d
+    assert 'localStorage.getItem(RENDER_PREF_KEY)' in v3d
+    assert 'localStorage.setItem(RENDER_PREF_KEY, JSON.stringify(p))' in v3d
+    # pure normalizer exported for the offline test; load/save are internal helpers
+    assert "export function normalizeRenderPrefs(raw)" in v3d
+    assert "function loadRenderPrefs()" in v3d and "function saveRenderPrefs(prefs)" in v3d
+    # shared material/lighting helper + the clickable overlay chip builder
+    assert "function applyRenderLook(ctx, prefs)" in v3d
+    assert "function applyRenderControls(container, onChange)" in v3d
+    assert v3d.count("applyRenderControls(container, p => applyRenderLook(") == 2   # init3d + init3dFrames
+    assert v3d.count("loadRenderPrefs()") >= 3                                       # def + both init paths
+    # the chip stays clickable unlike the pointer-events:none enclosure caption
+    assert "pointer-events:auto" in v3d
+    # immediate in-place changes: wire removed/added by the ridges mode, opacity thinned to 0.12
+    assert 'p.ridges === "off"' in v3d and "scene.remove(wire)" in v3d and "scene.add(wire)" in v3d
+    assert 'p.ridges === "thin" ? 0.12' in v3d
+    # light multiplier scales the three directional lights only (hemi stays ambient-relative)
+    assert "preset.light.key * p.light" in v3d
+    assert "preset.light.fill * p.light" in v3d
+    assert "preset.light.rim * p.light" in v3d
+    assert "lights.hemi.intensity = preset.light.hemi" in v3d
+    # defaults preserve today's look: satin material numbers and the 0.28 ridge opacity
+    assert "satin:    { colorScale: 1.0,  roughness: 0.55, metalness: 0.05, wireOpacity: 0.28" in v3d
+    assert "light: { hemi: 0.45, key: 1.15, fill: 0.35, rim: 0.85 } }" in v3d
+    # disposal contract unchanged: both wire resources are still released
+    assert "wireGeo.dispose(); wireMat.dispose();" in v3d
+    assert "mat.dispose(); wireMat.dispose();" in v3d
+
+
 # ── Toolbar run-control pill + resume affordance (owner decision, chat 2026-10-25) ───────────────
 # The Status page's Stop ALSO lives in the left nav on every view, and stopped GUI search runs get a
 # Resume affordance. The nav markup is a static file served verbatim (server.py::_static, not
@@ -1176,8 +1270,9 @@ def test_compose_hybrid_and_seed_views_are_wired():
     the step-1 row builder carries the hybrid caption call (absent key -> no caption), the seed
     panel holder renders per picked config, the POST bodies still come only from currentJob's
     build_argv field set (the pinned pairing test), the run-summary semantics strings and the
-    uncatalogued sole-pick rule stay byte-identical (biradial_keele, qtw_waveguide,
-    lecleach_asym_odd, salmon_x_signed and salmon_ripple12 all ride that rule today), and the
+    uncatalogued sole-pick rule stay byte-identical (the rule itself remains for any
+    future uncatalogued config; the five S1a expansion names left it with the 2026-10-25
+    C4 catalog batch), and the
     helpers are exported for the offline node test."""
     src = APPJS.read_text(encoding="utf-8")
     compose = src.split("View 5b: Compose", 1)[1].split("View 6: Launch", 1)[0]

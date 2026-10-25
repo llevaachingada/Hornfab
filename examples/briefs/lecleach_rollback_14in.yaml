@@ -1,0 +1,38 @@
+# Brief: Le Cleac'h rollback rows, 90x60, 1-inch driver. The lecleach family's own brief
+# (lecleach_asym_odd etc.; the Fourcade march is extent-honest ~1.05x its -6 dB mouth, so
+# it does not need the salmon rows' 1.8x envelope headroom).
+# f0 honesty: the envelope alone would allow ~1100 Hz (K-law V mouth 414/1.05 = 394 mm),
+# but at f0 1100 the derived fc (597.7, clamped to 600) bills the FULL RING 5,059 dofs -
+# over the 5,000 screen cap (measured). f0 1200 derives fc 652.8 -> 4,190 dofs (measured,
+# green at all three driver classes). The self-approach window measured at 2in:
+# fc ~650-750 passes, 762 fails - f0 1200 sits safely inside it.
+name: lecleach_rollback_14in
+description: Le Cleac'h rollback horn, 90x60 degree, 1.4-inch driver, 540x440x280 mm envelope, f0 1200 Hz
+driver:
+  exit_radius_mm: 17.78
+  exit_angle_deg: 5.0
+envelope:
+  max_mouth_w_mm: 540.0
+  max_mouth_h_mm: 440.0
+  max_depth_mm: 280.0
+symmetry: hv
+source:
+  cap: auto
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.7                    # the JMLC family's point is loading + smooth wavefronts
+  f0_hz: 1200.0                 # dof-honest floor for the full ring (see header)
+objective:
+  version: 3
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.5

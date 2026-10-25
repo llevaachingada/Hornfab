@@ -41,7 +41,13 @@ seed_params:
   g_fc_h_hz: 800.0
   g_fc_v_hz: 1100.0
   g_T: 0.8
-  g_stop_deg: 170.0
+  g_stop_deg: 150.0          # S1a driver-pass reseed (2026-10-25, same measured recipe as the
+                             # reseeded salmon_x_signed/salmon_ripple12 siblings): stop 170 was
+                             # envelope-true under the pre-f0 organic brief, but under the now
+                             # f0-1900 brief the derived fc pair (1200/843.8, the fc_h clamp)
+                             # deepens the rollback curl and the seed graded 4.2 % over the
+                             # depth envelope - stop 150 keeps the rows clear (verified by the
+                             # driver-pass probe); bounds unchanged
 bounds:
   g_fc_h_hz:         # band starts at 700 Hz (9b.4: fc 600-1200 for 1-inch)
     lo: 600.0
