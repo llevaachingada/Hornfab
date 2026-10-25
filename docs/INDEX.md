@@ -35,6 +35,13 @@ Keep this file current: a new doc gets a line here in the same commit.
 | [HANDOFF_LOCAL.md](HANDOFF_LOCAL.md), [HANDOFF.md](HANDOFF.md) | Older handoffs (CP-8, 6b test plan). Historical. |
 | [SENIOR_REVIEW_2026-10-14.md](SENIOR_REVIEW_2026-10-14.md) | Surrogate-fix review. Historical. |
 
+## Reference (generated)
+| Doc | What it is |
+|---|---|
+| [reference/PARAMETERS.md](reference/PARAMETERS.md) | **GENERATED — do not edit by hand.** The parameter reference (P9): every resolved typology's knobs with label, unit, one-line tooltip summary, physics detail, formula, physical effect, default (read from that config's own seed), search bounds + where they live (`bounds_source`), hard schema limits + provenance, code symbol + doc anchors, flags (`overloaded`, `doc_mismatch`, ...). Built by `tools/gen_param_catalog.py` from `hornlab_search/design/params/` (annotate-don't-restate: every number is read from an authority at build time). |
+| [reference/TYPOLOGIES.md](reference/TYPOLOGIES.md) | **GENERATED — do not edit by hand.** All 39 resolved configs (36 catalog entries + 3 uncatalogued): family, kind (generator/rows/native), group, symmetry, description, and the knob table per typology. |
+| `gui/static/param-catalog.v1.json` | The machine-readable wire contract the vanilla-JS GUI consumes (served by the existing static handler — no new route); byte-equality-checked by `tests/test_param_catalog.py` so it can never silently drift. |
+
 ## Research
 | Doc | What it is |
 |---|---|
