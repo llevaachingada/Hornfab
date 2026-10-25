@@ -21,6 +21,10 @@ CAMPAIGN_ID = re.compile(r"^campaign_[0-9]{8}T[0-9]{6}Z$")
 HASH = re.compile(r"^[0-9a-f]{6,40}$")
 STEP_NAME = re.compile(r"^[A-Za-z0-9_\-]{1,80}_rank\d+_[0-9a-f]{6,40}\.step$")
 BRIEF_NAME = re.compile(r"^[A-Za-z0-9_\-]{1,64}$")
+#: pycma's own verbose-log files (``cma/*`` and ``cma/restart_k/*``), served raw/download-only.
+#: Extensions are the ones pycma writes; anything executable or unknown is refused by the route.
+CMA_LOG_NAME = re.compile(r"^(?!.*\.\.)[A-Za-z0-9_][A-Za-z0-9_.\-]{0,79}\.(?:txt|dat|json2|q)$")
+CMA_RESTART_DIR = re.compile(r"^restart_[0-9]+$")
 TOP_K = 6                       # "pinned" = most of the TOP_K best designs within 2 % of a bound
 PIN_FRAC = 0.02
 
@@ -56,6 +60,11 @@ def _read_json(p: Path, default=None):
         return json.loads(p.read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return default
+
+
+def _as_dict(v: Any) -> dict:
+    """A mapping or an empty one (read-only readers must tolerate a wrong type, never crash)."""
+    return v if isinstance(v, dict) else {}
 
 
 def read_ndjson(p: Path) -> list[dict]:
@@ -359,11 +368,24 @@ def run_detail(runs: Path, run_id: str) -> dict:
     d = _resolve_run(runs, run_id)
     rows = read_ndjson(d / "search.ndjson")
     cfg = _config(d)
+    run_json = _read_json(d / "run.json") or {}
     summ = run_summary(d)
     best_hash, seed_hash = summ["best_hash"], (rows[0]["design_hash"] if rows else None)
     seed_ok = bool(rows and rows[0].get("ok"))
     best_row = next((r for r in rows if r.get("design_hash") == best_hash and r.get("ok")), None)
-    return clean({
+    # C-1/G4: STEP files stay the existing list of names (a frozen consumer contract) and the
+    # optional inventory sidecar is exposed additively per file; without one it is null, never
+    # fabricated. ``step_files_detail`` mirrors ``step_files`` 1:1 in sorted order.
+    step_dir = d / "step"
+    step_files = []
+    step_files_detail = []
+    if step_dir.is_dir():
+        for p in sorted(step_dir.glob("*.step")):
+            if STEP_NAME.match(p.name):
+                step_files.append(p.name)
+                step_files_detail.append(
+                    {"name": p.name, "inventory": _read_json(step_dir / f"{p.stem}.inventory.json")})
+    out = clean({
         "summary": summ,
         "target": cfg.get("target") or (cfg.get("brief") or {}).get("target"),
         "weights": cfg.get("weights") or (cfg.get("brief") or {}).get("weights"),
@@ -374,10 +396,120 @@ def run_detail(runs: Path, run_id: str) -> dict:
         "sens": sensitivity(rows, cfg.get("bounds") or {}),
         "best": design_curves(d, best_hash) if best_hash else None,
         "seed": design_curves(d, seed_hash) if seed_ok and seed_hash and seed_hash != best_hash else None,
-        "command": (_read_json(d / "run.json") or {}).get("command"),
-        "step_files": sorted(p.name for p in (d / "step").glob("*.step") if STEP_NAME.match(p.name))
-                      if (d / "step").is_dir() else [],
+        "command": run_json.get("command"),
+        "step_files": step_files,
+        "step_files_detail": step_files_detail,
     })
+    # C-1: WP11 provenance is written by the search only for the runs that have it. Present in
+    # run.json = pass it through verbatim; absent = the key is absent here too (no shape invention).
+    if isinstance(run_json.get("restarts"), list):
+        out["restarts"] = clean(run_json["restarts"])
+    if isinstance(run_json.get("qd"), dict):
+        out["qd"] = clean(run_json["qd"])
+    # G1 badge strip: the same solve-group fingerprint /api/compare exposes, always present for a
+    # run (backend + solved-grid identity; every other key only when non-default).
+    out["solve_group"] = _solve_group_fingerprint(d)
+    # WP11a schedule from the committed config.yaml. Same validation rules as config.py
+    # ``_validate_restarts`` (mode ipop|bipop, max int 0..64, both keys required); a malformed
+    # block is disclosed as absent, never guessed.
+    restarts_cfg = _as_dict(_as_dict(cfg.get("search")).get("restarts"))
+    if set(restarts_cfg) == {"mode", "max"}:
+        mode, mx = restarts_cfg.get("mode"), restarts_cfg.get("max")
+        if (isinstance(mode, str) and mode in ("ipop", "bipop")
+                and isinstance(mx, int) and not isinstance(mx, bool) and 0 <= mx <= 64):
+            out["search_restarts"] = {"mode": mode, "max": int(mx)}
+    cma_dir = d / "cma"
+    out["restart_dirs"] = sorted(p.relative_to(d).as_posix() for p in cma_dir.glob("restart_*")
+                                 if p.is_dir()) if cma_dir.is_dir() else []
+    return out
+
+
+def _solve_group_fingerprint(run_dir: Path) -> dict:
+    """The solve group a comparison must never silently mix (GUI plan §3.9), read from the run's
+    committed ``config.yaml`` + ``run.json``.
+
+    Identity keys are always present when derivable: ``backend`` (always) and ``freqs_hz`` (the solved
+    grid identity: mode + target band + verify points-per-octave). Every other key appears ONLY when
+    the run deviates from the default (``rear_res_factor`` 1.0, ``cuda_fused`` false,
+    ``source_motion`` normal, objective v1, ...). Nothing is parsed from solver output and no value is
+    invented: an absent config key stays absent here.
+    """
+    cfg = _config(run_dir)
+    rj = _as_dict(_read_json(run_dir / "run.json"))
+    solve = _as_dict(cfg.get("solve"))
+    mesh = _as_dict(cfg.get("mesh"))
+    target = _as_dict(cfg.get("target"))
+    grid = _as_dict(cfg.get("grid"))
+
+    g: dict[str, Any] = {"backend": rj.get("backend") or solve.get("backend")}
+    if solve.get("cuda_fused") is True:
+        g["cuda_fused"] = True
+    if solve.get("source_motion") not in (None, "normal"):
+        g["source_motion"] = solve["source_motion"]
+    alpha = solve.get("source_profile_alpha")            # WP16 ride key (absent until that lane lands)
+    if isinstance(alpha, (int, float)) and not isinstance(alpha, bool) and float(alpha) != 0.0:
+        g["source_profile_alpha"] = alpha
+    # WP14: near_correction is one group key set by ANY of the three knobs; the two numbers stay
+    # separate so two near-corrected runs with different cutoffs/orders still mix-warn.
+    nc, nc_cut, nc_ord = (solve.get("near_correction"), solve.get("near_correction_cutoff"),
+                          solve.get("near_correction_order"))
+    if nc is not None or nc_cut is not None or nc_ord is not None:
+        g["near_correction"] = bool(nc) if nc is not None else True
+        if nc_cut is not None:
+            g["near_correction_cutoff"] = nc_cut
+        if nc_ord is not None:
+            g["near_correction_order"] = nc_ord
+    if solve.get("solve_precision") is not None:
+        g["solve_precision"] = solve["solve_precision"]
+    rear = mesh.get("rear_res_factor")
+    try:
+        rear_f = None if rear is None else float(rear)
+    except (TypeError, ValueError):
+        rear_f = None
+    if rear_f is not None and rear_f != 1.0:
+        g["rear_res_factor"] = rear
+    bs = mesh.get("band_split")
+    if isinstance(bs, dict) and isinstance(bs.get("edges_hz"), list) and bs["edges_hz"]:
+        g["mesh_policy"] = "band_split_v1"                # the mesher's own provenance token (WP8)
+        g["band_edges_hz"] = bs["edges_hz"]
+    brief = _as_dict(cfg.get("brief"))
+    mounting = cfg.get("mounting") or brief.get("mounting")   # WP12 key (absent until it lands)
+    if isinstance(mounting, dict) and mounting:
+        g["mounting"] = mounting
+    obj = _as_dict(cfg.get("objective"))
+    version = obj.get("version", rj.get("objective_version"))
+    try:
+        version_i = None if version is None else int(version)
+    except (TypeError, ValueError):
+        version_i = None
+    if version_i is not None and version_i != 1:          # v1 is the unlabelled default
+        g["objective_version"] = version_i
+    mode = rj.get("mode")
+    if mode is None:                                      # older run.json / fixtures: the id names it
+        bits = run_dir.name.split("-")
+        mode = bits[1] if len(bits) >= 3 else None
+    ident: dict[str, Any] = {}
+    if mode is not None:
+        ident["mode"] = mode
+    for key in ("band_lo_hz", "band_hi_hz"):
+        if target.get(key) is not None:
+            ident[key] = target[key]
+    if grid.get("verify_points_per_octave") is not None:
+        ident["verify_points_per_octave"] = grid["verify_points_per_octave"]
+    if ident:
+        g["freqs_hz"] = ident
+    qd = rj.get("qd")
+    if isinstance(qd, dict) and qd.get("algorithm"):
+        g["qd_algorithm"] = qd["algorithm"]
+    return clean(g)
+
+
+def solve_group_fingerprints(run_a: Path, run_b: Path) -> tuple[dict, dict, list[str]]:
+    """(``group_a``, ``group_b``, ``mixed_keys``) for ``GET /api/compare`` (C-2). ``mixed_keys`` is
+    the sorted set of fingerprint keys whose values differ (a key absent on one side counts)."""
+    ga, gb = _solve_group_fingerprint(run_a), _solve_group_fingerprint(run_b)
+    mixed = sorted(k for k in set(ga) | set(gb) if ga.get(k) != gb.get(k))
+    return ga, gb, mixed
 
 
 def run_archive(runs: Path, run_id: str) -> dict:

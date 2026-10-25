@@ -14,6 +14,12 @@ Offline reader-level pins:
 
 Plus the app.js ES-module syntax gate, copied from tests/test_gui.py
 (test_static_js_parses_as_an_es_module) so a syntax error is caught offline.
+
+Also appended: the provenance-strip view layer of the GUI integration plan phases G1-G4
+(docs/GUI_INTEGRATION_PLAN_2026-10-25.md, contracts C-1/C-2) - badge builder + run extractor +
+restarts card + STEP inventory chips + qd caption + f11 caveat, executed for real via node (the
+app.js import runs under the same DOM-shim pattern the mesh-quadrants tests use for view3d.js),
+plus the view call-site wiring pinned by source checks (test_compose_view_is_wired style).
 """
 from __future__ import annotations
 
@@ -181,3 +187,266 @@ def test_compose_view_is_wired():
     assert re.search(r'h === "#/compose" && hash === "#/compose"', app)   # nav highlight
     # the wizard reuses the briefs editor (mount) and the stem-matching loader, not copies
     assert "opts.mount" in app and "function findBriefByFile" in app and "function newBriefDraft" in app
+
+
+# ── Provenance strips (GUI plan phases G1–G4; contracts C-1/C-2) ─────────────────────────
+# app.js renders the badge matrix (§7 badges, non-default only, key-path tooltips), the restart
+# schedule card (C-1 restarts/restart_dirs), the qd atlas caption (C-1 qd), the compare mixed_keys
+# banner + DI guard twin (C-2 group_a/group_b) and the STEP inventory chips (C-1 step_files_detail).
+# Branch behavior is executed for real by node (below), the same module-import pattern
+# tests/test_gui_mesh_quadrants.py uses for view3d.js::mirrorMesh; the view call sites are pinned
+# by source checks (test_compose_view_is_wired style) since the views need the browser DOM.
+
+APPJS = ROOT / "hornlab_search" / "gui" / "static" / "app.js"
+
+
+def test_provenance_views_are_wired():
+    """Every strip lives inside its committed view — no new nav item, no new route, index.html
+    untouched by these phases."""
+    src = APPJS.read_text(encoding="utf-8")
+    # G1 run detail: header badge strip fed by the reader's solve_group + f11 caveat (§3.4)
+    assert "function runProvenanceGroup(d)" in src and "function renderProvenanceBadges(group" in src
+    assert 'renderProvenanceBadges(prov.group, "", prov.tips)' in src
+    assert "typeof d.solve_group" in src and 'tips[k] = "solve_group." + k' in src
+    assert "typeof d.search_restarts" in src and '"run_detail.search_restarts.mode"' in src
+    assert "f11CaveatHtml(d)" in src and "best.scalars.f11_hz" in src
+    # G2: restart card below the KPIs, header reads search_restarts, honest empty state kept
+    assert "restartScheduleHtml(d, id)" in src
+    assert "run.json predates the restarts block" in src
+    assert "carries no valid" in src                      # fallback only for the absent case
+    # G2 atlas: qd caption read from the run payload, rendered in the header (canvas untouched)
+    assert "qdProvenanceCaption(QD)" in src
+    assert '"/api/run/" + encodeURIComponent(id)' in src
+    # G3 compare: server group objects through the same builder, mixed banner, DI guard twin
+    assert "renderProvenanceBadges(grp, prefix)" in src
+    assert 'sideBadgeRow("A", gA, "group_a.")' in src and 'sideBadgeRow("B", gB, "group_b.")' in src
+    assert "const mixedBanner = mixed.length" in src and "These runs differ in:" in src
+    assert "const dsA = dA.di_source, dsB = dB.di_source;" in src
+    assert 'dsA !== "balloon"' in src and 'dsB !== "balloon"' in src
+    assert "DI: cuts estimate — not comparable" in src
+    # G4 chips: the UNCHANGED step_files name list + step_files_detail matched by name
+    assert "function stepInvByName(detail)" in src and "function stepChipHtml(name, inv, id)" in src
+    assert "stepInvByName(detail)" in src and "renderFiles(d.step_files, d.step_files_detail)" in src
+    # the pure helpers are exported for the offline node test (view3d.js::mirrorMesh precedent)
+    assert "export { runProvenanceGroup, renderProvenanceBadges, restartScheduleHtml, stepChipHtml," in src
+    assert "stepInvByName, qdProvenanceCaption, f11CaveatHtml };" in src
+
+
+# The node script: imports app.js under an import-time DOM shim (app.js touches document/window at
+# module scope; location stays on the synchronous view so no fetch happens), then executes every
+# badge/card/chip branch. Same wrapper approach as tests/test_gui_mesh_quadrants.py.
+_PROV_SCRIPT = r'''
+import { pathToFileURL } from "node:url";
+import assert from "node:assert/strict";
+
+const fake = () => ({ className: "", id: "", style: {}, dataset: {}, innerHTML: "", textContent: "",
+  setAttribute() {}, getAttribute: () => null, replaceWith() {}, appendChild() {},
+  addEventListener() {}, removeEventListener() {}, closest: () => null,
+  classList: { toggle() {}, add() {}, remove() {} }, querySelector: () => null, querySelectorAll: () => [] });
+globalThis.document = {
+  getElementById: () => fake(), createElement: () => fake(), createElementNS: () => fake(),
+  querySelector: () => null, querySelectorAll: () => [], addEventListener() {},
+  documentElement: { hasAttribute: () => true, setAttribute() {}, getAttribute: () => null, style: {} },
+  body: { appendChild() {} },
+};
+globalThis.window = { innerWidth: 1280, addEventListener() {}, scrollTo() {} };
+globalThis.matchMedia = () => ({ matches: true, addEventListener() {} });
+globalThis.MutationObserver = class { observe() {} };
+globalThis.location = { hash: "#/glossary" };
+globalThis.requestAnimationFrame = () => 0;
+globalThis.localStorage = { getItem: () => null, setItem() {}, removeItem() {} };
+globalThis.fetch = () => Promise.reject(new Error("offline shim"));
+
+const app = await import(pathToFileURL(process.argv[2]).href);
+const { runProvenanceGroup, renderProvenanceBadges, restartScheduleHtml, stepChipHtml,
+        stepInvByName, qdProvenanceCaption, f11CaveatHtml } = app;
+assert.equal(typeof renderProvenanceBadges, "function");
+
+// badge builder: non-default only + exact key-path tooltips
+assert.equal(renderProvenanceBadges({}), "");
+assert.equal(renderProvenanceBadges(null), "");
+let h = renderProvenanceBadges({ backend: "bempp_cpu" });
+assert.ok(h.includes(">bempp_cpu</span>"), h);
+assert.ok(h.includes(`title="backend = bempp_cpu"`), h);
+h = renderProvenanceBadges({ backend: "beat_cuda" }, "group_a.");
+assert.ok(h.includes(`title="group_a.backend = beat_cuda"`), h);
+// C-2 identity baseline: backend + freqs_hz always render on compare group sides
+h = renderProvenanceBadges({ backend: "beat_cuda", freqs_hz: { mode: "screen", band_lo_hz: 300, band_hi_hz: 12000 } }, "group_b.");
+assert.match(h, /grid screen 300–12000 Hz/);
+assert.ok(h.includes("group_b.freqs_hz = ") && h.includes("&quot;mode&quot;:&quot;screen&quot;"), h);
+h = renderProvenanceBadges({ freqs_hz: { mode: "screen", band_lo_hz: 300, band_hi_hz: 12000, verify_points_per_octave: 8 } });
+assert.match(h, /8\/oct verify/);
+assert.equal(renderProvenanceBadges({ freqs_hz: {} }), "");       // partial identity: no badge
+h = renderProvenanceBadges({ cuda_fused: true });
+assert.ok(h.includes(">fused CUDA</span>") && h.includes(`title="cuda_fused = true"`), h);
+h = renderProvenanceBadges({ near_correction: true, solve_precision: "double" });
+assert.match(h, /near-corrected · double/);
+h = renderProvenanceBadges({ near_correction: true });
+assert.match(h, /near-corrected/);
+assert.ok(!h.includes("· double"));                  // precision never claimed when absent
+h = renderProvenanceBadges({ solve_precision: "double" });
+assert.match(h, /double precision/);
+h = renderProvenanceBadges({ source_profile_alpha: 0.5, source_profile: "j0_radial" });
+assert.match(h, /source plug α=0\.5 \(j0_radial\)/);
+assert.ok(h.includes(`title="source_profile_alpha = 0.5"`), h);
+assert.equal(renderProvenanceBadges({ source_profile_alpha: 0 }), "");  // α=0 is the default
+h = renderProvenanceBadges({ mesh_policy: "band_split_v1", band_edges_hz: [3000, 6000] });
+assert.match(h, /band-split 3\/6 k/);
+assert.ok(h.includes(`title="mesh_policy = band_split_v1"`), h);
+h = renderProvenanceBadges({ rear_res_factor: 2 });
+assert.match(h, /rear ×2/);
+assert.equal(renderProvenanceBadges({ rear_res_factor: 1 }), "");   // default: no badge
+h = renderProvenanceBadges({ mounting: { type: "enclosure", depth_mm: 250 } });
+assert.match(h, /enclosure d=250 mm/);
+h = renderProvenanceBadges({ objective_version: 2 });
+assert.match(h, /J v2/);
+assert.equal(renderProvenanceBadges({ objective_version: 1 }), ""); // v1 default: unlabelled
+h = renderProvenanceBadges({ qd_algorithm: "cma_me" });
+assert.match(h, /CMA-ME/);
+h = renderProvenanceBadges({ restarts_count: 3, restarts_mode: "bipop" });
+assert.match(h, /BIPOP ×3/);
+h = renderProvenanceBadges({ restarts_count: 3 });
+assert.match(h, /restarts ×3/);
+assert.ok(!h.includes("IPOP"));                      // the mode is never invented when unknown
+assert.match(renderProvenanceBadges({ source_motion: "axial" }), /source motion axial/);
+
+// run-provenance extraction: read straight from the reader's solve_group (the same fingerprint
+// /api/compare exposes) + the C-1 restarts array + the live search_restarts schedule
+let p = runProvenanceGroup({});
+assert.deepEqual(p.group, {});                       // older payload / no solve_group: nothing fabricated
+assert.deepEqual(p.tips, {});
+const RE = { index: 0, popsize: 10, sigma0: 0.25, n_new_in_restart: 59, evals_in_restart: 59, stop: "budget" };
+// identity-only solve_group (a plain beat_cuda run): exactly the two baseline keys
+const IDENTITY = { backend: "beat_cuda", freqs_hz: { mode: "screen", band_lo_hz: 300, band_hi_hz: 12000 } };
+p = runProvenanceGroup({ solve_group: { backend: IDENTITY.backend, freqs_hz: IDENTITY.freqs_hz } });
+assert.deepEqual(Object.keys(p.group), ["backend", "freqs_hz"]);
+assert.equal(p.group.backend, "beat_cuda");
+assert.deepEqual(p.group.freqs_hz, IDENTITY.freqs_hz);
+assert.equal(p.tips.backend, "solve_group.backend");
+assert.equal(p.tips.freqs_hz, "solve_group.freqs_hz");
+// the schedule: restarts array -> count; search_restarts -> mode/max (absent = no invented mode)
+p = runProvenanceGroup({ solve_group: IDENTITY, restarts: [RE], search_restarts: { mode: "ipop", max: 3 } });
+assert.equal(p.group.restarts_count, 1);
+assert.equal(p.group.restarts_mode, "ipop");
+assert.equal(p.group.restarts_max, 3);
+assert.equal(p.tips.restarts_mode, "run_detail.search_restarts.mode");
+assert.equal(p.tips.restarts_count, "run.json.restarts");
+p = runProvenanceGroup({ solve_group: IDENTITY, restarts: [RE] });
+assert.equal(p.group.restarts_count, 1);
+assert.ok(!("restarts_mode" in p.group) && !("restarts_max" in p.group));
+// qd_algorithm arrives inside solve_group now (the raw qd block stays the atlas caption's source)
+p = runProvenanceGroup({ solve_group: { backend: "beat_cuda", qd_algorithm: "cma_me" } });
+assert.equal(p.group.qd_algorithm, "cma_me");
+// every non-default fingerprint key reaches the badge group, tooltip naming solve_group.<key>:
+p = runProvenanceGroup({ solve_group: { backend: "beat_cpu", cuda_fused: true, source_motion: "axial",
+                       source_profile_alpha: 0.5, near_correction: true, solve_precision: "double",
+                       rear_res_factor: 2, mesh_policy: "band_split_v1", band_edges_hz: [3000, 6000],
+                       mounting: { type: "enclosure", depth_mm: 250 }, objective_version: 2,
+                       qd_algorithm: "cma_me" } });
+const rg2 = p.group;
+assert.equal(rg2.backend, "beat_cpu");
+assert.equal(rg2.cuda_fused, true);
+assert.equal(rg2.source_motion, "axial");
+assert.equal(rg2.source_profile_alpha, 0.5);
+assert.equal(rg2.near_correction, true);
+assert.equal(rg2.solve_precision, "double");
+assert.equal(rg2.rear_res_factor, 2);
+assert.equal(rg2.mesh_policy, "band_split_v1");
+assert.deepEqual(rg2.band_edges_hz, [3000, 6000]);
+assert.deepEqual(rg2.mounting, { type: "enclosure", depth_mm: 250 });
+assert.equal(rg2.objective_version, 2);
+assert.equal(rg2.qd_algorithm, "cma_me");
+for (const k of Object.keys(rg2)) assert.ok(p.tips[k].startsWith("solve_group."), k);
+
+// restart schedule card branches (honest empty states; nothing invented)
+assert.equal(restartScheduleHtml({}, "R"), "");
+assert.equal(restartScheduleHtml({ restart_dirs: [] }, "R"), "");
+let c = restartScheduleHtml({ id: "R", restart_dirs: ["cma/restart_0"] }, "R");
+assert.match(c, /Restart schedule/);
+assert.match(c, /run\.json predates the restarts block/);
+assert.match(c, /cma\/restart_0/);
+assert.match(c, /\/runs\/R\/cma\//);
+c = restartScheduleHtml({ id: "R", restarts: [RE] }, "R");
+assert.match(c, /restart 0/);
+assert.match(c, /popsize 10/);
+assert.match(c, /σ0 0\.25/);
+assert.match(c, /evals 59/);
+assert.match(c, /stop budget/);
+assert.match(c, /run\.json\.restarts/);              // rows named with their source path
+assert.match(c, /carries no valid/);                 // absent search_restarts: the honest fallback
+assert.ok(!c.includes("mode ipop"));                 // no invented mode/max
+c = restartScheduleHtml({ id: "R", restarts: [RE], search_restarts: { mode: "ipop", max: 2 } }, "R");
+assert.match(c, /mode ipop · max 2/);
+assert.match(c, /search_restarts/);                  // header names its read path
+assert.ok(!c.includes("carries no valid"));
+assert.match(c, /run\.json\.restarts\[0\]\.popsize/);
+
+// STEP chips: step_files stays the name list; inventory matched by name from step_files_detail
+const INV = { tool: "tools/cad/multicell.py", tool_sha: "0123456789abcdef0123456789abcdef01234567",
+              faces: [{ label: "driver", count: 1 }, { label: "wall", count: 9 }],
+              solids: 2, closed: true, grid: ["3x3"] };
+assert.equal(stepInvByName(undefined).size, 0);
+assert.equal(stepInvByName(null).size, 0);
+const mInv = stepInvByName([{ name: "horn_rank1_0001.step", inventory: INV },
+                            { name: "plain.step", inventory: null }, { junk: 1 }]);
+assert.equal(mInv.get("horn_rank1_0001.step"), INV);
+assert.equal(mInv.get("plain.step"), null);
+assert.equal(mInv.size, 2);
+const plain = stepChipHtml("horn_rank1_0001.step", null, "R");
+assert.ok(plain.includes('href="/runs/R/step/horn_rank1_0001.step"'), plain);
+assert.match(plain, /↓ rank1/);
+assert.ok(!plain.includes("driver="));               // no inventory: chip unchanged (silent absence)
+const chip = stepChipHtml("horn_rank1_0001.step", INV, "R");
+assert.match(chip, /3×3 STEP/);
+assert.match(chip, /driver=1/);
+assert.match(chip, /wall=9/);
+assert.match(chip, /tool 01234567/);                 // short sha on the face
+assert.ok(chip.includes('href="/runs/R/step/horn_rank1_0001.step"'), chip);
+assert.ok(chip.includes("horn_rank1_0001.step.inventory.json"), chip);  // tooltip names the sidecar
+
+// qd provenance caption: every known key, meanings as tooltips, honest absences
+assert.equal(qdProvenanceCaption(null), "");
+assert.equal(qdProvenanceCaption(undefined), "");
+assert.equal(qdProvenanceCaption({}), "");
+const QD = { algorithm: "cma_me", bins: [16, 16], coverage: 0.05078125,
+             descriptors: { h: "mean_bw_h_deg", v: "mean_bw_v_deg" },
+             descriptor_h_meaning: "mean of MetricSet.bw_h_deg",
+             descriptor_v_meaning: "mean of MetricSet.bw_v_deg",
+             non_cached: 60, occupied_bins: 13, ranges: { h: [0, 180], v: [0, 180] },
+             total_bins: 256, total_evals: 60 };
+const cap = qdProvenanceCaption(QD);
+assert.match(cap, /atlas provenance \(run\.json\.qd\)/);
+assert.match(cap, /cma_me/);
+assert.match(cap, /coverage 13\/256 bins/);
+assert.match(cap, /60 evaluations \(60 non-cached\)/);
+assert.ok(cap.includes("mean of MetricSet.bw_h_deg"), cap);
+
+// f11 caveat: the fixed sentence, ONLY when band_hi > f11 AND f11 is known; n_hz fallback named
+assert.equal(f11CaveatHtml({ target: { band_hi_hz: 12000 } }), "");
+assert.equal(f11CaveatHtml({ target: { band_hi_hz: 5500 }, best: { scalars: { f11_hz: 7914 } } }), "");
+let note = f11CaveatHtml({ target: { band_hi_hz: 12000 }, best: { scalars: { f11_hz: 7914 } } });
+assert.ok(note.includes("8–12 kHz compares GEOMETRIES, not drivers (above f11 the source is an idealized rigid cap)"), note);
+assert.match(note, /7\.9 kHz/);
+assert.ok(note.includes("best.scalars.f11_hz"), note);
+assert.ok(note.includes("target.band_hi_hz"), note);
+note = f11CaveatHtml({ target: { band_hi_hz: 12000 }, best: { scalars: { n_hz: 7914 } } });
+assert.ok(note.includes("best.scalars.n_hz"), note);
+assert.ok(!note.includes("f11_hz"), note);
+
+console.log("PROV OK");
+'''
+
+
+def test_provenance_helpers_behave_offline(tmp_path):
+    """Executes every badge/card/chip/caption branch of app.js's provenance layer for real:
+    badges appear only for non-default keys with key-path tooltips, absences stay silent, the
+    restart card has its honest empty states, STEP chips upgrade only with a matched sidecar
+    inventory, and the f11 caveat needs BOTH numbers (C-1/C-2 view contract)."""
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("node not installed")   # same environment gate as test_gui.py's ES-module check
+    script = tmp_path / "prov_under_test.mjs"
+    script.write_text(_PROV_SCRIPT, encoding="utf-8")
+    r = subprocess.run([node, str(script), str(APPJS)],
+                       capture_output=True, text=True, cwd=str(tmp_path))
+    assert "PROV OK" in r.stdout, f"node test failed:\nstdout: {r.stdout}\nstderr: {r.stderr}"

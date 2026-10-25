@@ -20,7 +20,7 @@ from pathlib import Path
 
 from . import data as D
 
-GPU_KINDS = {"run", "search", "campaign"}            # campaign dry-run tier is not a GPU job
+GPU_KINDS = {"run", "search", "campaign", "verify"}    # campaign dry-run tier is not a GPU job
 TIERS = {"dry-run", "screen", "compare"}
 FAMILIES = re.compile(r"^[a-z0-9_]+(,[a-z0-9_]+)*$")
 CLI_BOOT = "import sys; from hornlab_search.cli import main; sys.exit(main(sys.argv[1:]))"
@@ -136,6 +136,10 @@ class JobManager:
         if kind == "export-step":
             return ["export-step", "--run", self._run_id(a.get("run")),
                     "--top", self._int(a.get("top", 3), 1, 10, "top")], False
+        if kind == "verify":
+            # G-1: re-solve this run's top designs at verify fidelity; GPU (one-GPU lock via launch()).
+            return ["verify", "--run", self._run_id(a.get("run")),
+                    "--top", self._int(a.get("top", 5), 1, 25, "top"), *brief], True
         if kind == "report":
             return ["report", self._run_id(a.get("run"))], False
         raise JobError(f"unknown job kind: {kind!r}")

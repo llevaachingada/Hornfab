@@ -86,14 +86,18 @@ class App:
     def _compare(self, a: str, b: str) -> dict:
         from hornlab_search.cli import _first_ok_metrics, compare_metrics
         out = {}
+        dirs = {}
         ms = []
         for key, rid in (("a", a), ("b", b)):
             d = D._resolve_run(self.runs, rid)
+            dirs[key] = d
             row, m = _first_ok_metrics(d)
             if m is None:
                 return {"error": f"no solved row with metrics in {rid}"}
             ms.append(m)
             out[key] = D.design_curves(d, row["design_hash"])
+        # C-2: the solve group each side belongs to + the keys that differ (never a silent mix).
+        out["group_a"], out["group_b"], out["mixed_keys"] = D.solve_group_fingerprints(dirs["a"], dirs["b"])
         try:
             out["rows"] = D.clean(compare_metrics(*ms))
         except ValueError as exc:
@@ -208,7 +212,8 @@ def make_handler(app: App, port: int):
             self._send(200, p.read_bytes(), ctype + ("; charset=utf-8" if ctype.startswith("text") else ""))
 
         def _report(self, path: str) -> None:
-            """Only two kinds of run files are served: runs/<id>/report.html and runs/<id>/step/<name>.step."""
+            """Only three kinds of run files are served: runs/<id>/report.html,
+            runs/<id>/step/<name>.step, and runs/<id>/cma[/restart_k]/<pycma-log>."""
             parts = [unquote(x) for x in path.strip("/").split("/")]
             if len(parts) == 3 and parts[2] == "report.html" and D.RUN_ID.match(parts[1]):
                 p = app.runs / parts[1] / "report.html"
@@ -225,7 +230,37 @@ def make_handler(app: App, port: int):
                     self.end_headers()
                     self.wfile.write(body)
                     return
+            p = self._cma_log(parts)
+            if p is not None:
+                body = p.read_bytes()                       # raw bytes, never parsed, never cached
+                self.send_response(200)
+                self.send_header("Content-Type", "text/plain; charset=utf-8")
+                self.send_header("Content-Disposition", f'attachment; filename="{p.name}"')
+                self.send_header("Content-Length", str(len(body)))
+                self.send_header("Cache-Control", "no-store")
+                self.send_header("X-Content-Type-Options", "nosniff")
+                self.end_headers()
+                self.wfile.write(body)
+                return
             raise FileNotFoundError(path)
+
+        def _cma_log(self, parts: list[str]) -> Path | None:
+            """C-5: ``runs/<id>/cma/<name>`` and ``runs/<id>/cma/restart_k/<name>`` by strict
+            pycma-log name. The name regexes forbid ``/`` and ``..``; the resolved-path check keeps
+            every served file inside the run's own ``cma/`` tree (same guard style as ``_report_step``)."""
+            if not (len(parts) in (4, 5) and parts[2] == "cma" and D.RUN_ID.match(parts[1])):
+                return None
+            if len(parts) == 4:
+                name, base = parts[3], app.runs / parts[1] / "cma"
+            elif D.CMA_RESTART_DIR.match(parts[3]):
+                name, base = parts[4], app.runs / parts[1] / "cma" / parts[3]
+            else:
+                return None
+            if not D.CMA_LOG_NAME.match(name):
+                return None
+            p = (base / name).resolve()
+            cma_root = (app.runs / parts[1] / "cma").resolve()
+            return p if cma_root in p.parents and p.is_file() else None
 
     return Handler
 

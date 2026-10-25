@@ -907,6 +907,12 @@ async function viewRunArchive(id) {
   }
   const totalBins = nbH * nbV, coverage = totalBins ? cells.length / totalBins : 0;
   const evals = A.stats && A.stats.total_evals != null ? A.stats.total_evals : null;
+  // G2 (plan §3.1): the atlas header surfaces the run's run.json.qd provenance (algorithm,
+  // descriptor meanings, coverage, non-cached evals) from the C-1 run payload. An absent qd
+  // block (older CMA-ME runs) keeps the header exactly as committed — and the canvas code below
+  // is untouched by this addition.
+  let QD = null;
+  try { QD = (await api("/api/run/" + encodeURIComponent(id))).qd || null; } catch { QD = null; }
   const jmin = Math.min(...cells.map(c => c.objective)), jmax = Math.max(...cells.map(c => c.objective));
   const labH = (A.descriptors && A.descriptors.h) || "descriptor (h)";
   const labV = (A.descriptors && A.descriptors.v) || "descriptor (v)";
@@ -916,7 +922,8 @@ async function viewRunArchive(id) {
         (${fmtPct(coverage * 100)}${evals != null ? ", " + esc(evals) + " evaluations" : ""}).
         Axes: <code>${esc(labH)}</code> (horizontal) × <code>${esc(labV)}</code> (vertical), degrees.
         Hollow cells never held an evaluated design.
-        <a href="#/run/${esc(id)}">← back to the run</a></p></div>
+        <a href="#/run/${esc(id)}">← back to the run</a></p>
+      ${qdProvenanceCaption(QD)}</div>
     <div class="fig"><h3>Archive: best objective per descriptor bin</h3>
       <div class="cap">Colour: objective J (lower is better, brightest). Hover a cell for its descriptor
         centre, objective and design hash.</div>
@@ -990,6 +997,220 @@ async function viewRunArchive(id) {
   cv.onmouseleave = () => { hover.textContent = ""; };
 }
 
+// ── Provenance strips · GUI plan phases G1–G4 (contracts C-1/C-2, badge matrix §7) ──────
+// Honesty rules: a badge renders ONLY when its source key exists in the payload (identity keys
+// backend + freqs_hz are always present and show the baseline group, exactly like /api/compare;
+// every other key renders only when the run is non-default — never an empty shell, never a
+// default claim); every number is traceable through the badge's title tooltip, which names the
+// exact key path the value was read from (solve_group.* / run.json.restarts /
+// run_detail.search_restarts.*). These helpers are pure (no DOM) and exported for offline node
+// tests (tests/test_gui_brief_authoring.py), mirroring the view3d.js::mirrorMesh precedent.
+
+function _trimNum(v) {                      // 3000 -> "3", 2500 -> "2.5", 2.0 -> "2", 0.25 -> "0.25"
+  const n = Number(v);
+  if (!isFinite(n)) return String(v);
+  return Number.isInteger(n) ? String(n) : String(+n.toFixed(2));
+}
+
+function _jsonish(v) {                      // tooltip value: scalar as text, objects/arrays as JSON
+  if (v == null || typeof v !== "object") return String(v);
+  try { return JSON.stringify(v); } catch { return String(v); }
+}
+
+/** One provenance badge row (pure). `group` holds only non-default provenance keys, in the C-2
+ *  fingerprint vocabulary of data.py::_solve_group_fingerprint, so the run-detail extractor and
+ *  the compare view's server groups share this builder. `prefix`/`tips` name the source paths in
+ *  the tooltips ("group_a." for compare sides; explicit paths for run detail). */
+function renderProvenanceBadges(group, prefix = "", tips = {}) {
+  const g = (group && typeof group === "object") ? group : {};
+  const src = (tips && typeof tips === "object") ? tips : {};
+  const out = [];
+  const bad = (key, text) => out.push(
+    `<span class="pill" title="${esc(prefix + (src[key] || key) + " = " + _jsonish(g[key]))}">${esc(text)}</span>`);
+  // Order follows the plan §7 badge matrix, with the C-2 identity keys (backend, freqs_hz) at the
+  // front: the compare sides always carry both, so their badge row shows the baseline group.
+  if (g.backend) bad("backend", String(g.backend));
+  if (g.freqs_hz && typeof g.freqs_hz === "object") {
+    const idt = g.freqs_hz, parts = [];
+    if (idt.mode) parts.push(String(idt.mode));
+    if (idt.band_lo_hz != null && idt.band_hi_hz != null) parts.push(`${_trimNum(idt.band_lo_hz)}–${_trimNum(idt.band_hi_hz)} Hz`);
+    if (idt.verify_points_per_octave != null) parts.push(`${idt.verify_points_per_octave}/oct verify`);
+    if (parts.length) bad("freqs_hz", `grid ${parts.join(" ")}`);
+  }
+  if (g.cuda_fused === true) bad("cuda_fused", "fused CUDA");
+  if (g.near_correction && g.solve_precision != null) bad("near_correction", `near-corrected · ${g.solve_precision}`);
+  else if (g.near_correction) bad("near_correction", "near-corrected");
+  else if (g.solve_precision != null) bad("solve_precision", `${g.solve_precision} precision`);
+  if (g.source_profile_alpha != null && Number(g.source_profile_alpha) !== 0) {
+    bad("source_profile_alpha", `source plug α=${_trimNum(g.source_profile_alpha)}${g.source_profile ? ` (${g.source_profile})` : ""}`);
+  }
+  if (g.source_motion && g.source_motion !== "normal") bad("source_motion", `source motion ${g.source_motion}`);
+  if (g.mesh_policy) {
+    const e = Array.isArray(g.band_edges_hz) ? g.band_edges_hz : [];
+    const tail = e.length
+      ? (e.every(x => Number(x) >= 1000)
+          ? e.map(x => _trimNum(Number(x) / 1000)).join("/") + " k"
+          : e.map(x => fmtHz(Number(x))).join("/"))
+      : "";
+    bad("mesh_policy", tail ? `band-split ${tail}` : String(g.mesh_policy));
+  }
+  if (g.rear_res_factor != null && Number(g.rear_res_factor) !== 1) bad("rear_res_factor", `rear ×${_trimNum(g.rear_res_factor)}`);
+  if (g.mounting) {
+    const mnt = (typeof g.mounting === "object" && g.mounting) || { type: String(g.mounting) };
+    if (mnt.type) bad("mounting", `${mnt.type}${mnt.depth_mm != null ? ` d=${_trimNum(mnt.depth_mm)} mm` : ""}`);
+  }
+  if (g.objective_version != null && Number(g.objective_version) !== 1) bad("objective_version", `J v${_trimNum(g.objective_version)}`);
+  if (g.qd_algorithm) bad("qd_algorithm", g.qd_algorithm === "cma_me" ? "CMA-ME" : String(g.qd_algorithm));
+  if (g.restarts_count != null && Number(g.restarts_count) > 0) {
+    const mode = typeof g.restarts_mode === "string" ? g.restarts_mode.toUpperCase() : "";
+    bad("restarts_count", `${mode || "restarts"} ×${_trimNum(g.restarts_count)}`);
+  }
+  return out.join(" ");
+}
+
+/** The provenance group of one /api/run/<id> payload (pure): read straight from the reader's
+ *  `solve_group` (data.py::run_detail) — the same fingerprint /api/compare exposes as
+ *  group_a/group_b — so run detail and the compare view share one badge vocabulary and one set
+ *  of tooltip paths. The restart count rides the C-1 restarts array; restart mode/max ride the
+ *  reader's `search_restarts` (absent when config.yaml carries no valid search.restarts — then
+ *  the badge never claims a mode). Returns {group, tips}; tips[key] names the exact key path. */
+function runProvenanceGroup(d) {
+  const g = {}, tips = {};
+  const sg = (d && typeof d.solve_group === "object" && d.solve_group) || null;
+  if (sg) for (const k of Object.keys(sg)) { g[k] = sg[k]; tips[k] = "solve_group." + k; }
+  if (Array.isArray(d && d.restarts) && d.restarts.length) {
+    g.restarts_count = d.restarts.length; tips.restarts_count = "run.json.restarts";
+    const sr = (d && typeof d.search_restarts === "object" && d.search_restarts) || null;
+    if (sr && sr.mode) {
+      g.restarts_mode = sr.mode; tips.restarts_mode = "run_detail.search_restarts.mode";
+      if (sr.max != null) { g.restarts_max = sr.max; tips.restarts_max = "run_detail.search_restarts.max"; }
+    }
+  }
+  return { group: g, tips };
+}
+
+/** The restart schedule card (G2, plan §3.2): one text-pill row per entry of the C-1 `restarts`
+ *  array (as-is), the honest empty state when only older pycma logs exist, and nothing at all for
+ *  a non-restart run (absence stays honest). Pure; returns HTML. */
+function restartScheduleHtml(d, id) {
+  const runs = Array.isArray(d && d.restarts) ? d.restarts : [];
+  const dirs = Array.isArray(d && d.restart_dirs) ? d.restart_dirs.filter(x => typeof x === "string" && x) : [];
+  if (!runs.length && !dirs.length) return "";   // absence = not a restart run — render nothing
+  const runId = String(id || (d && d.summary && d.summary.id) || "");
+  const logs = dirs.length
+    ? `<p class="hint" style="margin:6px 0 0">pycma logs: ${dirs.map(x => `<code>${esc(x)}</code>`).join(", ")} — raw, never parsed. Each file downloads at <code>/runs/${esc(runId)}/cma/restart_k/&lt;file&gt;</code> (raw log route; the API lists the directories, not the file names)</p>`
+    : "";
+  if (!runs.length) {
+    // pycma logs listed but this run.json predates the restarts block: the honest empty state
+    return `<div class="fig restart-schedule-card"><h3>Restart schedule</h3>
+      <p class="muted" style="font-size:0.85rem;margin:6px 0 0">pycma logs available, run.json predates the restarts block — nothing to schedule.</p>${logs}</div>`;
+  }
+  const sr = (d && typeof d.search_restarts === "object" && d.search_restarts) || null;
+  const head = sr && sr.mode
+    ? `<div class="cap">mode ${esc(sr.mode)} · max ${esc(sr.max ?? "–")} — run_detail.search_restarts (the run's config search.restarts)</div>`
+    : `<div class="cap">restart rows read <code>run.json.restarts</code> as-is — the run's config carries no valid <code>search.restarts</code> block</div>`;
+  const rows = runs.map((r, i) => {
+    const rr = (r && typeof r === "object") ? r : {};
+    const k = rr.index != null ? rr.index : i;
+    const pillHtml = (key, txt) => txt == null ? ""
+      : `<span class="pill" title="run.json.restarts[${esc(k)}].${esc(key)} = ${esc(_jsonish(rr[key]))}">${esc(txt)}</span>`;
+    return `<div class="pill-row" style="margin:4px 0">` +
+      pillHtml("index", `restart ${k}`) +
+      pillHtml("popsize", rr.popsize != null ? `popsize ${rr.popsize}` : null) +
+      pillHtml("sigma0", rr.sigma0 != null ? `σ0 ${rr.sigma0}` : null) +
+      pillHtml("evals_in_restart", rr.evals_in_restart != null ? `evals ${rr.evals_in_restart}` : null) +
+      pillHtml("stop", rr.stop != null ? `stop ${rr.stop}` : null) +
+      `</div>`;
+  }).join("");
+  return `<div class="fig restart-schedule-card"><h3>Restart schedule</h3>${head}${rows}${logs}</div>`;
+}
+
+/** The C-1/step-detail lookup (pure): `step_files_detail` entries ({name, inventory|null} — the
+ *  parsed step/<name>.inventory.json sidecar next to the UNCHANGED step_files name list) matched
+ *  by name. Unmatched entries are ignored (no fabricated chips); an absent list means no chip
+ *  carries sidecar data. */
+function stepInvByName(detail) {
+  const m = new Map();
+  for (const e of (Array.isArray(detail) ? detail : [])) {
+    if (e && typeof e === "object" && typeof e.name === "string" && e.name) {
+      m.set(e.name, (e.inventory && typeof e.inventory === "object" && e.inventory !== null) ? e.inventory : null);
+    }
+  }
+  return m;
+}
+
+/** One STEP chip in the run-detail files row (G4's chip half). `name` comes from the unchanged
+ *  C-1 `step_files` list; `inv` is the matched `step_files_detail` inventory (null when the
+ *  sidecar is absent). With a sidecar the chip shows the face inventory + tool sha inline;
+ *  without one the chip is unchanged (silent absence: the WP14 sidecar simply is not written yet
+ *  — nothing invented). Pure; returns HTML. */
+function stepChipHtml(name, inv, id) {
+  name = typeof name === "string" ? name : String((name && name.name) || "");
+  if (!name) return "";
+  const href = `/runs/${esc(id)}/step/${encodeURIComponent(name)}`;
+  const rank = name.replace(/^.*_(rank\d+)_.*$/, "$1");
+  inv = (inv && typeof inv === "object" && inv !== null) ? inv : null;
+  if (!inv) return `<a class="pill" href="${href}" download>↓ ${esc(rank)}</a>`;
+  const grid = Array.isArray(inv.grid) && inv.grid.length
+    ? inv.grid.map(x => String(x).replace(/x/g, "×")).join(" + ") : "";
+  const face = label => {
+    const e = (Array.isArray(inv.faces) ? inv.faces : []).find(x => x && x.label === label);
+    return e && e.count != null ? String(e.count) : "–";
+  };
+  const sha = typeof inv.tool_sha === "string" && inv.tool_sha ? inv.tool_sha.slice(0, 8) : "–";
+  const title = `step/${name} · step/${name}.inventory.json · tool=${_jsonish(inv.tool)}` +
+    ` · tool_sha=${_jsonish(inv.tool_sha)} · solids=${_jsonish(inv.solids)} · closed=${_jsonish(inv.closed)}` +
+    (Array.isArray(inv.grid) ? ` · grid=${_jsonish(inv.grid)}` : "");
+  const faceTxt = Array.isArray(inv.faces) ? ` · driver=${esc(face("driver"))} wall=${esc(face("wall"))}` : "";
+  return `<a class="pill" href="${href}" download title="${esc(title)}">↓ ${esc(grid)} STEP${faceTxt} · tool ${esc(sha)} <span class="muted">(${esc(rank)})</span></a>`;
+}
+
+/** The run.json.qd provenance caption for the atlas header (G2, plan §3.1). Renders each key that
+ *  exists, descriptor meanings as code tooltips, and nothing when the block is absent/partial.
+ *  Pure; returns HTML. */
+function qdProvenanceCaption(qd) {
+  if (!qd || typeof qd !== "object") return "";
+  const parts = [];
+  if (qd.algorithm) parts.push(`algorithm <code title="run.json.qd.algorithm">${esc(qd.algorithm)}</code>`);
+  const dh = qd.descriptors && qd.descriptors.h, dv = qd.descriptors && qd.descriptors.v;
+  if (dh || dv) {
+    const one = (name, meaning, path) => name
+      ? `<code title="${esc((meaning ? meaning + " — " : "") + path)}">${esc(name)}</code>` : "–";
+    parts.push(`descriptors H ${one(dh, qd.descriptor_h_meaning, "run.json.qd.descriptors.h")}` +
+               ` · V ${one(dv, qd.descriptor_v_meaning, "run.json.qd.descriptors.v")}`);
+  }
+  if (qd.occupied_bins != null && qd.total_bins != null) {
+    parts.push(`coverage ${esc(qd.occupied_bins)}/${esc(qd.total_bins)} bins`);
+  }
+  if (qd.total_evals != null) {
+    parts.push(`${esc(qd.total_evals)} evaluations${qd.non_cached != null ? ` (${esc(qd.non_cached)} non-cached)` : ""}`);
+  }
+  if (!parts.length) return "";
+  return `<p class="hint" style="margin:4px 0 0" role="note">atlas provenance (run.json.qd): ${parts.join(" · ")}</p>`;
+}
+
+/** The f11 caveat sentence (§3.4): any band whose top frequency sits above f11 compares geometry
+ *  only there — the driver no longer behaves like a real one. Shown ONLY when BOTH numbers are
+ *  known in the run-detail payload (f11 from the best design's metrics scalars; band_hi from the
+ *  resolved target). Pure; returns HTML or "". */
+function f11CaveatHtml(d) {
+  const t = (d && d.target) || {};
+  const sc = ((d && d.best && d.best.scalars) || {});
+  const f11 = sc.f11_hz != null ? sc.f11_hz : sc.n_hz;      // n_hz = the same J1′-root formula (older scalars)
+  if (f11 == null || !isFinite(Number(f11)) ||
+      t.band_hi_hz == null || !(Number(t.band_hi_hz) > Number(f11))) return "";
+  const f11Path = sc.f11_hz != null ? "best.scalars.f11_hz" : "best.scalars.n_hz";
+  return `<p class="muted" style="font-size:0.82rem;margin:6px 0 0" role="note">` +
+    `<span class="warn-text">8–12 kHz compares GEOMETRIES, not drivers (above f11 the source is an idealized rigid cap)</span> ` +
+    `<span class="muted">(f11 = ${esc(fmtHz(f11))}, band_hi = ${esc(fmtHz(t.band_hi_hz))} — ${f11Path} vs target.band_hi_hz)</span></p>`;
+}
+
+// Exported pure helpers for offline node tests (tests/test_gui_brief_authoring.py) — the
+// view3d.js::mirrorMesh precedent; unused by the browser module graph.
+export { runProvenanceGroup, renderProvenanceBadges, restartScheduleHtml, stepChipHtml,
+         stepInvByName, qdProvenanceCaption, f11CaveatHtml };
+
+
 async function viewRunDetail(id) {
   const ROOT = currentRoot();     // this view's own container (see route())
   skel();
@@ -1011,16 +1232,27 @@ async function viewRunDetail(id) {
   const bandStr = `${fmtHz(t.band_lo_hz)} – ${fmtHz(t.band_hi_hz)}`;
   const dimsStr = sum.dims ? dimStr(sum.dims) : "–";
 
+  // G1 provenance strip (plan §7, re-read from the reader's solve_group): the identity baseline
+  // (backend + grid) always shows, plus every non-default key the run carries — read-and-show
+  // straight from run_detail, tooltip naming solve_group.<key>.
+  const prov = runProvenanceGroup(d);
+  const provBadges = renderProvenanceBadges(prov.group, "", prov.tips);
+  const provStripHtml = provBadges ? `<div class="pill-row" style="margin:8px 0 0">${provBadges}</div>` : "";
+
   ROOT.innerHTML = `
     <div class="stack" style="gap:24px">
       <div>
         <div class="eyebrow">Run · ${esc(sum.generator ? "typology generator" : "mesher family")} · ${esc(sum.family || "")} mesh · ${esc(sum.mode || "")} fidelity${sum.brief ? " · brief " + esc(sum.brief) : ""}${sum.cma_seed != null ? " · random seed " + esc(sum.cma_seed) : ""}</div>
         <h2>${esc(sum.name || id)}</h2>
         <p class="mono muted" style="font-size:0.78rem">${esc(id)}</p>
+        ${provStripHtml}
+        ${f11CaveatHtml(d)}
       </div>
 
       <!-- Designer header: key facts -->
       <div class="kpis" id="kpi-strip"></div>
+
+      ${restartScheduleHtml(d, id)}
 
       <!-- Actions -->
       <div class="btn-row">
@@ -1315,15 +1547,19 @@ async function viewRunDetail(id) {
   }
 
   // Files the user can take away: STEP downloads (after an export) and the full report.
-  function renderFiles(files) {
+  // `step_files` is the unchanged name list; the C-1 `step_files_detail` sidecar data is matched
+  // by name and each chip flows through stepChipHtml: with an inventory it gains the face/tool
+  // provenance inline, without one it stays exactly the download pill it always was.
+  function renderFiles(files, detail) {
     const box = document.getElementById("run-files");
     if (!box) return;
+    const invOf = stepInvByName(detail);
     box.innerHTML = files && files.length
       ? `<span class="muted">STEP solids (mm, full horn, throat open; add the driver flange in CAD):</span> ` +
-        files.map(f => `<a class="pill" href="/runs/${esc(id)}/step/${encodeURIComponent(f)}" download>↓ ${esc(f.replace(/^.*_(rank\d+)_.*$/, "$1"))}</a>`).join(" ")
+        files.map(f => stepChipHtml(f, invOf.get(String(typeof f === "object" ? (f && f.name) || "" : f)) || null, id)).join(" ")
       : "";
   }
-  renderFiles(d.step_files);
+  renderFiles(d.step_files, d.step_files_detail);
 
   // Run a CPU job (report / STEP export) in place: progress on the button, result on this page.
   async function runInline(btn, kind, args, busyLabel, onDone) {
@@ -1343,7 +1579,7 @@ async function viewRunDetail(id) {
     }
   }
   document.getElementById("btn-step").onclick = e => runInline(e.currentTarget, "export-step", { run: id, top: 3 }, "Exporting…",
-    async () => { const dd = await api("/api/run/" + id); renderFiles(dd.step_files); showToast("STEP files ready: download them below the buttons.", "good"); });
+    async () => { const dd = await api("/api/run/" + id); renderFiles(dd.step_files, dd.step_files_detail); showToast("STEP files ready: download them below the buttons.", "good"); });
   const rBtn = document.getElementById("btn-gen-report");
   if (rBtn) rBtn.onclick = e => runInline(e.currentTarget, "report", { run: id }, "Building report…", () => {
     document.getElementById("report-slot").innerHTML = `<a class="btn" href="/runs/${esc(id)}/report.html" target="_blank" rel="noopener">Open full report ↗</a>`;
@@ -1476,8 +1712,35 @@ async function viewCompare() {
     const F = FA.length ? FA : FB;
     const band = [700, 5500];
 
+    // G3: solve-group distinction (C-2 additive keys). group_a/group_b carry the non-default
+    // fingerprint keys (backend always included); mixed_keys lists where the sides differ — when
+    // empty, no banner renders (absence = clean). The DI guard twin (plan §3.9; the CLI's own
+    // refusal lives at cli.py:1065-1068): a side whose DI is not balloon-verified prints the
+    // estimate note instead of implying a real balloon DI. Older responses without C-2/G-2 keys
+    // simply render no group rows.
+    const gA = (cmp.group_a && typeof cmp.group_a === "object") ? cmp.group_a : null;
+    const gB = (cmp.group_b && typeof cmp.group_b === "object") ? cmp.group_b : null;
+    const mixed = Array.isArray(cmp.mixed_keys) ? cmp.mixed_keys : [];
+    const sideBadgeRow = (label, grp, prefix) => grp
+      ? `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-family:var(--f-mono);font-size:0.78rem;color:var(--muted);min-width:1.2rem">${esc(label)}</span><span class="pill-row">${renderProvenanceBadges(grp, prefix)}</span></div>`
+      : "";
+    const badgeRows = (gA || gB)
+      ? [sideBadgeRow("A", gA, "group_a."), sideBadgeRow("B", gB, "group_b.")].filter(Boolean).join("")
+      : "";
+    const mixedBanner = mixed.length
+      ? `<div class="alert warn" role="alert"><b>These runs differ in: ${mixed.map(k => `<code class="mono">${esc(k)}</code>`).join(", ")}.</b> The J values below are shown as-is, but ranking one run over the other is not comparable when the solve groups differ.</div>`
+      : "";
+    const dsA = dA.di_source, dsB = dB.di_source;
+    const diNote = (dsA === "cuts_estimate" || dsB === "cuts_estimate")
+      ? `<p class="hint" role="note" style="margin:0"><span class="warn-text">DI: cuts estimate — not comparable</span></p>`
+      : (dsA !== "balloon" || dsB !== "balloon")
+        ? `<p class="hint" role="note" style="margin:0"><span class="warn-text">DI source unknown on at least one side — not comparable</span></p>`
+        : "";
+    const provBlock = [badgeRows, mixedBanner, diNote].filter(Boolean).join("");
+
     res.innerHTML = `
       <div class="stack" style="gap:20px">
+        ${provBlock ? `<div class="stack" style="gap:8px" id="compare-provenance">${provBlock}</div>` : ""}
         <h3>Metric comparison</h3>
         <p class="muted" style="font-size:0.83rem">Per-frequency |A − B| on the shared grid.</p>
         ${metricTable}
