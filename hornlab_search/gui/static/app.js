@@ -8,6 +8,7 @@ import { loadParamCatalog, paramTipHtml, typologyTipHtml, typologyChipsHtml } fr
 import { init3d } from "./view3d.js";
 import { viewEvolution } from "./evolution.js";
 import { viewBalloon } from "./balloon.js";
+import { viewTypologySandbox } from "./sandbox.js";
 
 // ── XSS helper ─────────────────────────────────────────────────────
 function esc(s) {
@@ -64,6 +65,7 @@ const ROUTES = [
   { re: /^#\/compose$/,                 fn: () => viewCompose() },
   { re: /^#\/launch$/,                  fn: () => viewLaunch() },
   { re: /^#\/typologies$/,              fn: () => viewTypologies() },
+  { re: /^#\/typology\/([^\/?#]+)$/,    fn: m => viewTypologySandbox(ROOT, m[1]) },
   { re: /^#\/glossary$/,                fn: () => viewGlossary() },
 ];
 
@@ -109,6 +111,7 @@ function updateNav(hash) {
       (h === "#/briefs" && hash === "#/briefs") ||
       (h === "#/compose" && hash === "#/compose") ||
       (h === "#/launch" && hash === "#/launch") ||
+      (h === "#/typologies" && (hash === "#/typologies" || hash.startsWith("#/typology/"))) ||
       (h === "#/glossary" && hash === "#/glossary");
     a.classList.toggle("active", isActive);
   });
@@ -3986,6 +3989,20 @@ async function viewTypologies() {
       if (r) wallSection(sv, [{ profile: r.profile, color: css("--best"), filled: true }], { H: 120, compact: true });
     });
   });
+  // Card-level sandbox navigation: a click anywhere on the card (or Enter/Space on the focused
+  // card) opens #/typology/<name>, while every existing affordance inside — the screen-on pills,
+  // run links, the open-sandbox link, tooltip terms — still receives its own event first.
+  ROOT.querySelectorAll(".typ-card[data-open]").forEach(card => {
+    const go = () => { location.hash = card.dataset.open; };
+    card.addEventListener("click", e => {
+      if (e.target.closest("a, button, input, select, label, .term")) return;
+      go();
+    });
+    card.addEventListener("keydown", e => {
+      if (e.target !== card) return;
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); }
+    });
+  });
 }
 
 function typCard(t, briefs) {
@@ -4003,9 +4020,14 @@ function typCard(t, briefs) {
       : `<span class="pill" title="${esc(c.reason || "disabled")}" style="opacity:0.55">${esc(b.name)}</span>`;
   }).join(" ");
   const hasProf = (t.results || []).some(r => r.profile);
-  return `<article class="card typ-card">
+  // The whole card opens the typology's shape sandbox (owner ask 2). The affordance is an
+  // honest small link (works without the click handler, keeps its own href); the card itself
+  // is focusable + keyboard-activatable, and every existing link/button inside still wins.
+  return `<article class="card typ-card" data-open="#/typology/${esc(t.name)}" tabindex="0"
+      role="link" aria-label="open the ${esc(t.name)} shape sandbox">
     <div class="typ-head">
       <div><div class="typ-name">${typologyTipHtml(t)}</div>
+        <a class="typ-open" href="#/typology/${esc(t.name)}" title="open the shape sandbox for this typology">open sandbox →</a>
         <div class="muted typ-meta">${esc(t.symmetry === "axisymmetric" ? "axisymmetric" : "H/V (different planes)")} · ${t.n_knobs} shape parameters · screen ${t.budget.screen} / compare 2 × ${t.budget.compare} evals</div></div>
       ${hasProf ? `<svg class="typ-prof" data-name="${esc(t.name)}" aria-label="best design cross-section"></svg>` : `<div class="typ-prof empty muted">no solved design yet</div>`}
     </div>

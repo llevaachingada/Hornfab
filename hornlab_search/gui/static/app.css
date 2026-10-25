@@ -524,3 +524,53 @@ svg .iso-title { font-family: var(--f-body); font-size: 12px; font-weight: 600; 
 @media (max-width: 700px) {
   .balloon-controls { grid-template-columns: max-content 1fr 96px; }
 }
+
+/* ── Typologies card sandbox affordance (owner ask 2) ──────────────────────────────────────────── */
+/* The whole card opens #/typology/<name>; the honest small link is the visible affordance. No new
+   hex — the accent/border affordances reuse the house tokens exactly like tr.clickable / pills. */
+.typ-card[data-open] { cursor: pointer; transition: border-color 0.12s ease; }
+.typ-card[data-open]:hover { border-color: var(--accent); }
+.typ-card[data-open]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.typ-open { font-family: var(--f-mono); font-size: 0.66rem; letter-spacing: 0.04em; color: var(--accent);
+            text-decoration: none; margin-left: 8px; white-space: nowrap; }
+.typ-open:hover { text-decoration: underline; color: var(--accent-strong); }
+.typ-open:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ── Typology shape sandbox (#/typology/<name>) ────────────────────────────────────────────────── */
+/* the owner's 2x2: side | front on row one, 3D | shape parameters on row two; collapses below 1100px */
+.sbox-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+             gap: 14px; align-items: start; }
+.sbox-status { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; font-size: 0.84rem; }
+.sbox-status[hidden], #sbox-updating[hidden], #sbox-dark[hidden], #sbox-frontnote[hidden] { display: none; }
+.sbox-knobs-list { display: grid; gap: 0; min-width: 0; }
+.sbox-row { display: grid; grid-template-columns: minmax(0, 132px) 76px minmax(0, 1fr) 76px 96px minmax(0, max-content) 30px;
+            gap: 4px 8px; align-items: center; padding: 7px 0; border-top: 1px solid var(--rule); font-size: 0.8rem; min-width: 0; }
+.sbox-knobs-list .sbox-row:first-child { border-top: none; }
+.sbox-kname { font-size: 0.78rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: help; }
+.sbox-num { font-family: var(--f-mono); font-size: 0.78rem; background: var(--bg); color: var(--ink);
+            border: 1px solid var(--rule); border-radius: 5px; padding: 4px 6px; width: 100%;
+            text-align: right; font-variant-numeric: tabular-nums; min-width: 0; }
+.sbox-num:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
+.sbox-slider { width: 100%; accent-color: var(--accent); min-width: 0; }
+.sbox-val { font-family: var(--f-mono); font-size: 0.78rem; color: var(--label); text-align: right;
+            white-space: nowrap; font-variant-numeric: tabular-nums; }
+/* at-limit: the evolution knob mark's own wordless red ("red = pressed against a limit") */
+.sbox-val.at-limit { color: var(--bad); }
+.sbox-chips { display: flex; flex-wrap: wrap; gap: 4px; min-width: 0; justify-content: flex-end; }
+.sbox-reset { font-size: 0.78rem; padding: 3px 8px; border-radius: 4px; justify-self: end; }
+.sbox-knobs-list + .hint { margin-top: 8px; }
+.sbox-applied, .sbox-rejected { margin: 6px 0 0; padding-left: 1.3em; font-size: 0.82rem; display: grid; gap: 2px; }
+.sbox-notes { font-family: var(--f-mono); font-size: 0.74rem; color: var(--muted); display: grid; gap: 2px;
+              background: var(--bg); border: 1px solid var(--rule); border-radius: 5px; padding: 6px 10px; }
+.sbox-3dwrap { position: relative; height: 340px; border: 1px solid var(--rule); border-radius: 6px;
+               overflow: hidden; background: var(--viz-canvas, #e9edf0); }
+.sbox-3dwrap canvas { display: block; }
+@media (max-width: 1100px) {
+  .sbox-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 760px) {
+  .sbox-row { grid-template-columns: 76px minmax(0, 1fr) 76px 92px 30px; }
+  .sbox-kname, .sbox-chips { grid-column: 1 / -1; }
+  .sbox-3dwrap { height: 300px; }
+}
+@media (prefers-reduced-motion: reduce) { .typ-card[data-open] { transition: none; } }
