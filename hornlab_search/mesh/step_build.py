@@ -484,7 +484,20 @@ def build_mesh_from_cad(recipe: dict, mesh, cfg, out_dir: Path, *,
 
     ``cfg`` is the run ``Config`` (dof caps / ``dof_per_triangle``/``rear_res_factor``
     come from ``cfg.mesh``); ``design_hash`` is echoed into the provenance key.
+
+    WP12: a run whose brief carries ``mounting`` (a rear enclosure) is REFUSED here with a clean
+    ``GeometryInvalidError``: CAD + enclosure is explicitly out of this pass (the labelled-STEP
+    solid is authored by ``tools/cad/multicell.py``, which has no enclosure builder). The refusal
+    runs before any mesher import, so it is honest even where the mesher is absent.
     """
+    mounting = getattr(cfg, "mounting", None)
+    if mounting is not None:
+        raise GeometryInvalidError(
+            "CAD + enclosure is not implemented in this pass: a cad design is meshed from the "
+            "labelled STEP authored by tools/cad/multicell.py (mesh/step_build.py), and that "
+            "tool has no enclosure builder. Drop the brief's mounting block for this design or "
+            "use a formula/GRID design for an enclosure candidate.")
+
     import hornlab_mesher  # noqa: F401  (pin guard: a missing mesher fails clearly here)
     from hornlab_mesher.mesh_validation import mesh_frequency_validation
 

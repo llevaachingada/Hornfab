@@ -37,7 +37,8 @@ import numpy as np
 
 from .. import config as config_mod
 from ..dataset.record import DEFAULT_TRACE_FRACTION, build_record, should_capture_traces, to_jsonable
-from ..mesh.build import MeshConsistencyError, build_mesh
+from ..design import families
+from ..mesh.build import MeshConsistencyError, build_mesh, mounting_of
 from ..metrics.compute import compute_metrics
 from ..metrics.di import di_from_balloon, sin_theta_weights
 from ..objective import PENALTY_FAILED, PENALTY_INVALID, objective, penalty_result
@@ -653,7 +654,10 @@ def evaluate(design: Design, space, cfg, mode: str, run_dir, store, backend, *,
     mspec = config_mod.mesh_spec(mode, cfg)
     sspec = config_mod.solve_spec(mode, cfg)
     dh, mh, sh = design.hash(), mspec.hash(), sspec.hash()
-    key = f"{dh}-{mh}-{sh}"
+    # WP12: MeshSpec.hash does not know about the rear enclosure, so the normalized mounting block
+    # rides in the key itself (run-known memo + solve-cache identity). Absent -> today's key.
+    mkey = families.mounting_key(mounting_of(cfg))
+    key = f"{dh}-{mh}-{sh}" + (f"-{mkey}" if mkey else "")
 
     hit = ctx.known.get(key)
     if hit is not None:
@@ -854,6 +858,8 @@ def _compute(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx, st)
     Pre-M3 deterministic markers carry no brief_hash: they re-evaluate once, conservatively, then
     are rewritten under configs that carry a brief (so a later brief change is honoured)."""
     from ..design.generated import GENERATOR_ERROR_KEY
+    # WP12: every row/record of a mounting run echoes the normalized block, failures included.
+    st["mounting"] = mounting_of(cfg)
     marker = _failure_marker(ctx, key)
     if marker is not None and marker.exists():
         try:
@@ -949,6 +955,8 @@ def _record_provenance(ctx: EvalContext, st: dict) -> dict:
         prov["mesh_policy"] = st["mesh_policy"]      # WP8: keep band-split data out of old groups
     if st.get("cad"):
         prov["cad"] = st["cad"]                      # WP14: cad-route recipe/tool/step echo
+    if st.get("mounting"):
+        prov["mounting"] = st["mounting"]            # WP12: normalized brief mounting block
     return prov
 
 
@@ -1005,6 +1013,12 @@ def _persist(ev: Evaluation, mode: str, sspec, design_dir: Path, ctx: EvalContex
     # ---- the ndjson row, last
     row = evaluation_to_row(ev, mode, ctx.n_rows, seconds,
                             objective_version=ctx.objective_version)
+    if st.get("mounting"):
+        # WP12 provenance echo. The row's ``key`` carries the SAME mounting suffix ``evaluate``
+        # used for the run-known memo and the solve cache, so a resume reloads this row under the
+        # key the next call looks up. Absent on freestanding rows (old rows byte-identical).
+        row["mounting"] = to_jsonable(st["mounting"])
+        row["key"] = f"{row['key']}-{families.mounting_key(st['mounting'])}"
     if st.get("mesh_policy"):
         # WP8 provenance echo: absent on single-mesh rows (old rows byte-identical).
         row["mesh_policy"] = st["mesh_policy"]

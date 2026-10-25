@@ -1,0 +1,43 @@
+# Brief: 90x60 degree 1-inch horn in a rear enclosure, 520x420x260 mm envelope
+# WP12 (M6): the first brief that carries the SEARCH-side `mounting` block. The block is
+# validated by hornlab_search.config._validate_mounting_block and translated onto the
+# hornlab_mesher's own top-level `enclosure` keys (design/families.enclosure_section):
+# depth_mm -> depth_mm, margins_mm -> space_l/t/r/b_mm, edge_mm -> edge_mm,
+# plan rounded_rectangle -> plan_type 1. Only the rounded-rectangle plan has a watertight
+# closed/reduced-domain enclosure builder (plan_type 2/3 are refused by the mesher), so the
+# `plan` token is deliberately the only spelling the loader accepts.
+# Numbers mirror examples/briefs/hifi_90x60_1in.yaml; the enclosure depth sits inside the
+# envelope's max_depth_mm. Objective stays the default v1 (v2 remains opt-in).
+name: enclosure_1in
+description: 90x60 degree, 1-inch driver, 520x420x260 mm envelope, 250 mm rear enclosure
+driver:
+  exit_radius_mm: 12.7          # 1-inch throat radius
+  exit_angle_deg: 5.0           # throat wall angle at z=0 (half-angle)
+envelope:
+  max_mouth_w_mm: 520.0
+  max_mouth_h_mm: 420.0
+  max_depth_mm: 260.0           # the rear enclosure (250 mm) fits inside this
+symmetry: hv                    # coverage_h != coverage_v => hv-symmetric families only
+source:
+  cap: auto
+mounting:
+  type: enclosure               # the only mounting model this build supports
+  depth_mm: 250.0               # rear enclosure depth (mm)
+  margins_mm: 25.0              # scalar broadcast to space_l/t/r/b_mm (the mesher default)
+  edge_mm: 18.0                 # rounded fillet radius; 0 = sharp (mesher default 18)
+  plan: rounded_rectangle       # the only plan hornlab_mesher builds on reduced domains
+target:
+  coverage_h_deg: 90.0          # TOTAL included angle, -6 dB
+  coverage_v_deg: 60.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0            # limited by 8 GB RTX 4060 dof cap (TOOLCHAIN.md)
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.7
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.5

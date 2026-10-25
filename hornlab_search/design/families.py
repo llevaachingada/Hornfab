@@ -15,6 +15,8 @@ nothing in the optimizer may refuse a design on a rule of thumb (contracts secti
 from __future__ import annotations
 
 import copy
+import hashlib
+import json
 import math
 from dataclasses import dataclass
 from pathlib import Path
@@ -463,10 +465,60 @@ def validate(design: Design) -> None:
         _validate_freeform(design)
 
 
+# ------------------------------------------------------------------ enclosure (WP12)
+
+#: SEARCH-side mounting plan token -> the mesher's own ``plan_type``. Only the rounded rectangle
+#: has a watertight closed/reduced-domain enclosure builder (hornlab_mesher
+#: builders/enclosure.py); config.py refuses every other token at load time.
+MOUNTING_PLANS = {"rounded_rectangle": 1}
+
+
+def enclosure_section(mounting: dict) -> dict:
+    """Normalized ``brief.mounting`` -> the mesher's own top-level ``enclosure`` section.
+
+    ONE translator for both routes (formula route below, GRID route in mesh/grid_build.py).
+    Emits ONLY the mesher's own key names (``config_builder._enclosure_from_config``): depth_mm,
+    the four margins broadcast to ``space_l/t/r/b_mm``, edge_mm and plan_type. Deliberately NOT
+    emitted (the mesher's own defaults apply): edge_type (1, rounded fillet), plan_n (unused by
+    plan_type 1), depth_margin_mm (1 mm) and front_mesh_size_mm / back_mesh_size_mm.
+    """
+    margins = mounting["margins_mm"]
+    return {
+        "depth_mm": float(mounting["depth_mm"]),
+        "space_l_mm": float(margins["l"]),
+        "space_t_mm": float(margins["t"]),
+        "space_r_mm": float(margins["r"]),
+        "space_b_mm": float(margins["b"]),
+        "edge_mm": float(mounting["edge_mm"]),
+        "plan_type": int(MOUNTING_PLANS[mounting["plan"]]),
+    }
+
+
+def enclosure_object(mounting: dict):
+    """The mesher's ``HornEnclosure`` for a direct point-grid build (the GRID route).
+
+    Lazy import: this module is imported by offline code where the mesher may not be installed.
+    """
+    from hornlab_mesher.geometry import HornEnclosure
+    return HornEnclosure(**enclosure_section(mounting))
+
+
+def mounting_key(mounting: dict | None) -> str:
+    """Stable cache-key component for a normalized mounting block.
+
+    ``""`` when absent, so every existing (freestanding) mesh/solve/evaluate key is byte-identical.
+    """
+    if mounting is None:
+        return ""
+    blob = json.dumps(mounting, sort_keys=True, separators=(",", ":"), default=float)
+    return "mnt-" + hashlib.sha256(blob.encode()).hexdigest()[:12]
+
+
 # ------------------------------------------------------------------ mesher config
 
 
-def to_mesher_config(design: Design, mesh: MeshSpec, res_mm: dict, out_path: Path) -> dict:
+def to_mesher_config(design: Design, mesh: MeshSpec, res_mm: dict, out_path: Path, *,
+                     mounting: dict | None = None) -> dict:
     """Build the dict ``hornlab_mesher.build_from_config`` consumes.
 
     DEVIATION FROM THE TASK FILE'S SKETCH (see NOTES_FOR_SENIOR 2026-10-12 task-04): the
@@ -474,10 +526,17 @@ def to_mesher_config(design: Design, mesh: MeshSpec, res_mm: dict, out_path: Pat
     ``max_triangles`` is silently ignored (the default 18000 applies and a quarter mesh is
     then refused at 4500). Keys must live in their natural section, so this returns the
     sectioned form the mesher's own examples use. Each key's section comes from its KeySpec.
+
+    WP12: ``mounting`` (the normalized ``brief.mounting`` block) flips the top-level mode to
+    ``enclosure`` and adds the mesher's own top-level ``enclosure`` section (a SIBLING of
+    ``mesh``, not a member of it). ``None`` keeps today's dict byte-for-byte.
     """
     validate(design)
     table = FAMILY_KEYS[design.family]
     cfg: dict = {"formula": design.family, "mode": "freestanding"}
+    if mounting is not None:
+        cfg["mode"] = "enclosure"
+        cfg["enclosure"] = enclosure_section(mounting)
     sections: dict[str, dict] = {"profile": {}, "cross_section": {}, "mesh": {}, "morph": {},
                                  "gcurve": {}}
     for key, value in design.params.items():

@@ -241,6 +241,16 @@ def rear_res_factor(cfg) -> float:
     return float(getattr(getattr(cfg, "mesh", None), "rear_res_factor", 1.0))
 
 
+def mounting_of(cfg) -> dict | None:
+    """WP12: the run's normalized ``brief.mounting`` block; ``None`` = freestanding (today).
+
+    Single accessor for the mesh/evaluate routes, so a caller without the attribute (an old
+    Config-like object) is freestanding rather than an AttributeError.
+    """
+    m = getattr(cfg, "mounting", None)
+    return m if isinstance(m, dict) else None
+
+
 def res_mm_for_spec(mesh: MeshSpec, cfg) -> dict:
     """``sizing.res_mm_for`` with the WP7 rear/outer-shell coarsening applied."""
     res = sizing.res_mm_for(mesh.epw, mesh.f_max_hz)
@@ -252,10 +262,17 @@ def res_mm_for_spec(mesh: MeshSpec, cfg) -> dict:
 
 def mesh_cache_key(design: Design, mesh: MeshSpec, cfg) -> str:
     """The mesh cache key. Factor 1.0 keeps TODAY'S string exactly; a non-default factor gets a
-    suffix so it can never collide with (or invalidate) a factor-1.0 cache entry."""
+    suffix so it can never collide with (or invalidate) a factor-1.0 cache entry.
+
+    WP12: a set ``brief.mounting`` adds a stable mounting suffix to the base (MeshSpec.hash does
+    not know about the enclosure). Absent mounting -> every existing key is byte-identical.
+    """
     base = f"{design.hash()}-{mesh.hash()}"
     factor = rear_res_factor(cfg)
-    return base if factor == 1.0 else f"{base}-rear{factor:g}"
+    if factor != 1.0:
+        base = f"{base}-rear{factor:g}"
+    mkey = families.mounting_key(mounting_of(cfg))
+    return f"{base}-{mkey}" if mkey else base
 
 
 def build_mesh(design: Design, mesh: MeshSpec, cfg, out_dir: Path, *, mode: str | None = None,
@@ -283,16 +300,17 @@ def build_mesh(design: Design, mesh: MeshSpec, cfg, out_dir: Path, *, mode: str 
 
     t0 = time.perf_counter()
     out_dir = Path(out_dir)
+    mounting = mounting_of(cfg)
     families.validate(design)
     if isinstance(design.params, dict) and "grid" in design.params:
-        return _build_grid_mesh(design, mesh, cfg, out_dir, mode=mode)
+        return _build_grid_mesh(design, mesh, cfg, out_dir, mode=mode, mounting=mounting)
     if isinstance(design.params, dict) and "cad" in design.params:
         from . import step_build
         return step_build.build_mesh_from_cad(
             design.params["cad"], mesh, cfg, out_dir, mode=mode, design_hash=design.hash())
     res = res_mm_for_spec(mesh, cfg)
     out_path = out_dir / "mesh.msh"
-    mcfg = families.to_mesher_config(design, mesh, res, out_path)
+    mcfg = families.to_mesher_config(design, mesh, res, out_path, mounting=mounting)
     # Copy-pasteable at 2 a.m.: paste into a REPL and call hornlab_mesher.build_from_config.
     log.debug("mesher config for %s: %r", design.hash(), mcfg)
 
@@ -365,10 +383,19 @@ def build_mesh(design: Design, mesh: MeshSpec, cfg, out_dir: Path, *, mode: str 
         quadrants=mesh.quadrants, symmetry_plane=sizing.SYMMETRY_PLANE[mesh.quadrants],
         res_mm=dict(res), bbox_m=tuple(summary["bbox_m"]),
         seconds=time.perf_counter() - t0)
-    _meta_path(out_dir).write_text(json.dumps(
-        {"key": key, "result": _result_to_json(result), "summary": summary,
-         "mesher_config": mcfg, "rear_res_factor": rear_res_factor(cfg)},
-        indent=1, sort_keys=True), encoding="utf-8")
+    meta = {"key": key, "result": _result_to_json(result), "summary": summary,
+            "mesher_config": mcfg, "rear_res_factor": rear_res_factor(cfg)}
+    if mounting is not None:
+        # WP12 additive echo (the mesher_config precedent): the normalized search-side block, the
+        # mesher keys actually emitted, and the counts from THIS result. Absent on freestanding
+        # meshes, so every older mesh_meta.json stays byte-identical.
+        meta["mounting"] = {
+            "normalized": dict(mounting),
+            "mesher": families.enclosure_section(mounting),
+            "n_triangles": int(result.n_triangles),
+            "n_dof": result.n_dof,
+        }
+    _meta_path(out_dir).write_text(json.dumps(meta, indent=1, sort_keys=True), encoding="utf-8")
     if cache_dir is not None:
         _copy_entry(out_dir, Path(cache_dir) / key)
     log.info("mesh %s: %d triangles, %d vertices, %.2f s", key, result.n_triangles,
@@ -380,12 +407,15 @@ def build_mesh(design: Design, mesh: MeshSpec, cfg, out_dir: Path, *, mode: str 
 
 
 def _build_grid_mesh(design: Design, mesh: MeshSpec, cfg, out_dir: Path, *,
-                     mode: str | None = None) -> MeshResult:
+                     mode: str | None = None, mounting: dict | None = None) -> MeshResult:
     """Point-grid route: re-derive the grid from the Design's recipe and mesh it.
 
     ``design.params["grid"]`` carries the compact surface spec plus the flat knobs (the recipe);
     the brief supplies the driver exit and the envelope. ``grid_build.build_grid_mesh`` owns the
     mesher call and the post-mesh guards; this function only reconstructs the grid geometry.
+
+    WP12: ``mounting`` (the normalized brief block) selects the enclosure topology on the same
+    point grid: ``grid_build`` then builds NO outer shell and passes ``enclosure`` instead.
     """
     from ..design.generators import grid as grid_mod
     from ..design.generators.registry import GeneratorError
@@ -414,7 +444,7 @@ def _build_grid_mesh(design: Design, mesh: MeshSpec, cfg, out_dir: Path, *,
     return grid_build.build_grid_mesh(
         {"inner_points": inner, "meta": meta,
          "wall_thickness_mm": float(block.get("wall_thickness_mm", 3.0))},
-        mesh, out_dir / "mesh.msh", cfg, mode=mode)
+        mesh, out_dir / "mesh.msh", cfg, mode=mode, mounting=mounting)
 
 
 # ------------------------------------------------------------------ STEP
@@ -452,7 +482,7 @@ def export_step(design: Design, mesh: MeshSpec, cfg, out: Path):
             "Call build_mesh; do not re-export through the formula path.")
     res = res_mm_for_spec(mesh, cfg)
     out = Path(out)
-    mcfg = families.to_mesher_config(design, mesh, res, out)
+    mcfg = families.to_mesher_config(design, mesh, res, out, mounting=mounting_of(cfg))
     log.debug("mesher config for STEP %s: %r", design.hash(), mcfg)
     out.parent.mkdir(parents=True, exist_ok=True)
     try:

@@ -17,6 +17,13 @@ mesher resolves BARE (inner wall + throat cap only), which is not a closed BEM s
 module therefore always builds the shell via ``grid.grid_outer_points`` when the caller does not
 supply one.
 
+MODE-DEPENDENT since WP12: when the run's brief carries ``mounting`` (a rear enclosure), the
+route builds **no** outer shell at all and passes ``enclosure=HornEnclosure(...)`` instead --
+``PointGridHornGeometry`` refuses enclosure + outer_points together (geometry.py:316-320), and
+the enclosure builder supplies the closed domain. ``closed=False`` and the symmetry planes stay
+exactly as for the freestanding route (reduced-domain cut planes are the enclosure builder's
+job); only ``outer_points``/``wall_thickness_mm`` change.
+
 Every guard after the build is the SAME code ``mesh/build.py`` runs (imported, not copied), so
 the two routes cannot drift:
 
@@ -61,13 +68,18 @@ DEFAULT_WALL_THICKNESS_MM = 3.0
 _GRID_SYMMETRY_AXES = {"1": ("x", "y"), "14": ("x",)}
 
 
-def _resolve_grid(grid: dict) -> tuple[np.ndarray, np.ndarray, float, dict, bool]:
+def _resolve_grid(grid: dict, *, enclosure: dict | None = None
+                  ) -> tuple[np.ndarray, np.ndarray | None, float, dict, bool]:
     """``grid`` dict -> ``(inner, outer, wall_thickness_mm, meta, closed)``.
 
     Accepts either the pair returned by ``grid.grid_points`` packed as
     ``{"inner_points": ..., "meta": ...}`` or the same dict plus ``outer_points`` /
     ``wall_thickness_mm``. ``closed=True`` only for a full-circle grid (``meta["quarter"]``
     false AND not a half model); this pass's ``build_grid_mesh`` refuses that config.
+
+    ``enclosure`` (the normalized WP12 mounting block) selects the enclosure topology: no outer
+    shell is built (``outer`` is None) and an explicit ``outer_points`` in ``grid`` is refused,
+    mirroring the mesher's own structural guard (geometry.py:316-320).
     """
     if not isinstance(grid, dict):
         raise TypeError(f"grid must be a dict, got {type(grid).__name__}")
@@ -81,6 +93,12 @@ def _resolve_grid(grid: dict) -> tuple[np.ndarray, np.ndarray, float, dict, bool
     closed = (not bool(meta.get("quarter", True))) and not half
     t = float(grid.get("wall_thickness_mm", DEFAULT_WALL_THICKNESS_MM))
     outer = grid.get("outer_points")
+    if enclosure is not None:
+        if outer is not None:
+            raise ValueError(
+                "enclosure cannot be combined with outer_points; choose either the enclosure "
+                "topology or the freestanding wall shell")
+        return inner, None, t, meta, closed
     if outer is None:
         outer = grid_gen.grid_outer_points(inner, t, half=half)
     else:
@@ -92,7 +110,8 @@ def _resolve_grid(grid: dict) -> tuple[np.ndarray, np.ndarray, float, dict, bool
     return inner, outer, t, meta, closed
 
 
-def build_grid_mesh(grid, mesh, out_path, cfg, *, mode: str | None = None) -> MeshResult:
+def build_grid_mesh(grid, mesh, out_path, cfg, *, mode: str | None = None,
+                    mounting: dict | None = None) -> MeshResult:
     """GRID geometry + ``MeshSpec`` -> ``out_path`` (.msh, metres) and a ``MeshResult``.
 
     ``grid`` is the dict described in :func:`_resolve_grid`; ``mesh`` is the ``MeshSpec``
@@ -100,6 +119,10 @@ def build_grid_mesh(grid, mesh, out_path, cfg, *, mode: str | None = None) -> Me
     ``dof_per_triangle`` come from ``cfg.mesh``, exactly as in ``mesh/build.py``);
     ``mode`` ("screen"|"verify"|"final") selects the cap, else it is inferred from
     ``mesh.max_triangles`` like ``build.py`` does.
+
+    ``mounting`` (WP12) is the normalized ``brief.mounting`` block from the run ``Config``.
+    When set, no outer shell is built and the mesher's ``HornEnclosure`` is passed instead
+    (one translator: ``design.families.enclosure_section``/``enclosure_object``).
 
     The mesher budget is ``int(mesh.max_triangles)`` -- the same value ``families
     .to_mesher_config`` puts in ``mesh.max_triangles`` for the FREEFORM route (the mesher reads
@@ -112,7 +135,8 @@ def build_grid_mesh(grid, mesh, out_path, cfg, *, mode: str | None = None) -> Me
 
     t0 = time.perf_counter()
     out_path = Path(out_path)
-    inner, outer, t, meta, closed = _resolve_grid(grid)
+    inner, outer, t, meta, closed = _resolve_grid(grid, enclosure=mounting)
+    enclosure = None if mounting is None else families.enclosure_object(mounting)
     if closed:
         raise ValueError("build_grid_mesh needs a quarter or half grid (not a full circle)")
     half = bool(meta.get("half_model", False))
@@ -146,11 +170,12 @@ def build_grid_mesh(grid, mesh, out_path, cfg, *, mode: str | None = None) -> Me
     geometry = PointGridHornGeometry(
         inner_points=inner,
         closed=False,
-        outer_points=outer,
-        wall_thickness_mm=float(t),
+        outer_points=outer,                    # None in enclosure mode (structural guard)
+        wall_thickness_mm=float(t) if enclosure is None else 0.0,
         source_shape=1,
         source_auto_angle_deg=angle,
         symmetry_planes=_GRID_SYMMETRY_AXES[mesh.quadrants],
+        enclosure=enclosure,
     )
 
     out_path.parent.mkdir(parents=True, exist_ok=True)

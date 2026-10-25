@@ -128,11 +128,25 @@ class Config:
     generator: dict | None = None    # typology generator block (s4); family is then FREEFORM
     objective_version: int = 1       # WP1: brief/config `objective: {version: 2}` -> v2 objective
     grid: dict | None = None         # WP4: brief `grid: {verify_points_per_octave: N}` -> HF verify grid
+    mounting: dict | None = None     # WP12: brief `mounting` (normalized); absent = freestanding
 
 
 # ------------------------------------------------------------------ briefs
 
 BRIEF_SYMMETRY = ("hv", "axisymmetric")
+
+# WP12: the SEARCH-side ``mounting`` block. The only mounting model this build supports is the
+# mesher's rear enclosure; the only plan token is the rounded rectangle, because that is the ONLY
+# plan with a watertight enclosure builder on closed/reduced domains (plan_type 2/3 are refused by
+# hornlab_mesher). The normalized dict this module stores/broadcasts carries the mesher's own
+# defaults for absent optional keys (margins 25 mm, edge 18 mm), so downstream code never invents
+# a default of its own.
+MOUNTING_TYPES = ("enclosure",)
+MOUNTING_PLANS = {"rounded_rectangle": 1}
+MOUNTING_KEYS = ("type", "depth_mm", "margins_mm", "edge_mm", "plan")
+MOUNTING_MARGIN_SIDES = ("l", "t", "r", "b")
+MOUNTING_DEFAULT_MARGIN_MM = 25.0    # hornlab_mesher HornEnclosure.space_*_mm default
+MOUNTING_DEFAULT_EDGE_MM = 18.0      # hornlab_mesher HornEnclosure.edge_mm default
 
 
 def _resolve_path(p, *bases) -> Path:
@@ -154,7 +168,7 @@ def load_brief(path) -> dict:
     if not isinstance(raw, dict):
         raise ConfigError(f"{where}: top level must be a mapping")
     allowed = {"name", "description", "driver", "envelope", "symmetry", "source", "target", "weights",
-               "verify_only", "objective", "grid"}
+               "verify_only", "objective", "grid", "mounting"}
     unknown = set(raw) - allowed
     if unknown:
         raise ConfigError(f"{where}: unknown key(s) {sorted(unknown)}")
@@ -173,6 +187,8 @@ def load_brief(path) -> dict:
         _validate_objective_block(raw["objective"], where)
     if "grid" in raw and raw["grid"] is not None:
         _validate_grid_block(raw["grid"], where)
+    if "mounting" in raw and raw["mounting"] is not None:
+        _validate_mounting_block(raw["mounting"], where)
     for k in ("max_mouth_w_mm", "max_mouth_h_mm", "max_depth_mm"):
         if not isinstance(env.get(k), (int, float)) or not float(env[k]) > 0:
             raise ConfigError(f"{where}: envelope.{k} must be a positive number")
@@ -239,6 +255,89 @@ def _validate_grid_block(block, where: str) -> dict:
     if isinstance(ppo, bool) or not isinstance(ppo, (int, float)) or not ppo > 0:
         raise ConfigError(f"{where}: grid.verify_points_per_octave must be a positive number")
     return {"verify_points_per_octave": float(ppo)}
+
+
+# ------------------------------------------------------------------ WP12 mounting block
+
+
+def _mounting_mm(value, where: str, *, positive: bool) -> float:
+    """One finite number from a mounting block. ``positive`` -> strictly > 0, else >= 0."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)) \
+            or not np.isfinite(float(value)):
+        bound = "> 0" if positive else ">= 0"
+        raise ConfigError(f"{where} must be a finite number {bound} (mm), got {value!r}")
+    v = float(value)
+    if (positive and v <= 0.0) or (not positive and v < 0.0):
+        bound = "> 0" if positive else ">= 0"
+        raise ConfigError(f"{where} must be a finite number {bound} (mm), got {value!r}")
+    return v
+
+
+def _validate_mounting_block(block, where: str) -> dict:
+    """Brief ``mounting: {type: enclosure, depth_mm, margins_mm, edge_mm, plan}`` (WP12).
+
+    The block is the SEARCH-side schema; it is translated onto the mesher's own top-level
+    ``enclosure`` keys in ``design/families.to_mesher_config`` (one shared helper, no invented
+    mesher keys). Exact keys, so a YAML typo is never silent:
+
+    * ``type`` is REQUIRED and must be ``enclosure``. An absent block is freestanding (today);
+      there is deliberately no ``type: freestanding`` spelling.
+    * ``depth_mm`` is REQUIRED and > 0 (mm); <= 0 would mean "no enclosure" to the mesher, which
+      is exactly what an absent block already says.
+    * ``margins_mm`` is a positive scalar OR a mapping with any subset of ``l/t/r/b`` (each > 0);
+      omitted sides are the mesher's own 25 mm default. It is always normalized to
+      ``{"l": x, "t": y, "r": z, "b": w}`` here.
+    * ``edge_mm`` >= 0 (0 = sharp), defaulting to the mesher's 18 mm.
+    * ``plan`` is a token from ``MOUNTING_PLANS`` (only ``rounded_rectangle``): the mesher refuses
+      plan_type 2/3 on closed/reduced domains, so a search brief never silently picks one.
+
+    The returned dict is the normalized block stored on ``Config.mounting`` and echoed in run
+    provenance/config.yaml + the mesh cache key.
+    """
+    if not isinstance(block, dict):
+        raise ConfigError(f"{where}: mounting must be a mapping")
+    unknown = set(block) - set(MOUNTING_KEYS)
+    if unknown:
+        raise ConfigError(f"{where}: mounting unknown key(s) {sorted(unknown)} "
+                          f"(allowed: {list(MOUNTING_KEYS)})")
+    kind = block.get("type")
+    if kind not in MOUNTING_TYPES:
+        raise ConfigError(
+            f"{where}: mounting.type must be one of {list(MOUNTING_TYPES)} (omit the block for a "
+            f"freestanding horn), got {kind!r}")
+    if "depth_mm" not in block:
+        raise ConfigError(f"{where}: missing required key 'mounting.depth_mm'")
+    depth_mm = _mounting_mm(block["depth_mm"], f"{where}: mounting.depth_mm", positive=True)
+
+    margins_raw = block.get("margins_mm", MOUNTING_DEFAULT_MARGIN_MM)
+    if isinstance(margins_raw, dict):
+        unknown = set(margins_raw) - set(MOUNTING_MARGIN_SIDES)
+        if unknown:
+            raise ConfigError(f"{where}: mounting.margins_mm unknown side(s) {sorted(unknown)} "
+                              f"(allowed: {list(MOUNTING_MARGIN_SIDES)})")
+        margins = {
+            side: _mounting_mm(margins_raw.get(side, MOUNTING_DEFAULT_MARGIN_MM),
+                              f"{where}: mounting.margins_mm.{side}", positive=True)
+            for side in MOUNTING_MARGIN_SIDES
+        }
+    else:
+        v = _mounting_mm(margins_raw, f"{where}: mounting.margins_mm", positive=True)
+        margins = {side: v for side in MOUNTING_MARGIN_SIDES}
+
+    edge_mm = _mounting_mm(block.get("edge_mm", MOUNTING_DEFAULT_EDGE_MM),
+                           f"{where}: mounting.edge_mm", positive=False)
+    plan = block.get("plan", "rounded_rectangle")
+    if not isinstance(plan, str) or plan not in MOUNTING_PLANS:
+        raise ConfigError(
+            f"{where}: mounting.plan must be one of {sorted(MOUNTING_PLANS)} (the only enclosure "
+            f"plan hornlab_mesher builds on closed/reduced domains), got {plan!r}")
+    return {
+        "type": "enclosure",
+        "depth_mm": depth_mm,
+        "margins_mm": margins,
+        "edge_mm": edge_mm,
+        "plan": plan,
+    }
 
 
 # ------------------------------------------------------------------ WP5/WP7/WP8 blocks
@@ -567,6 +666,12 @@ def load_config(path, *, brief=None, cma_seed: int | None = None) -> Config:
     if brief_d is not None and brief_d.get("grid") is not None:
         raw["grid"] = dict(brief_d["grid"])
     grid_cfg = _validate_grid_block(raw["grid"], where) if raw.get("grid") is not None else None
+    # WP12: a brief's mounting block is re-validated here (a run directory's embedded brief goes
+    # through this path too) and normalized into raw so config_sha covers it; absent = freestanding.
+    mounting_cfg = None
+    if brief_d is not None and brief_d.get("mounting") is not None:
+        mounting_cfg = _validate_mounting_block(brief_d["mounting"], f"{where}:mounting")
+        raw["mounting"] = dict(mounting_cfg)
     if cma_seed is not None:
         raw.setdefault("search", {})
         raw["search"] = dict(raw["search"], seed=int(cma_seed))
@@ -651,6 +756,7 @@ def load_config(path, *, brief=None, cma_seed: int | None = None) -> Config:
         generator=None if gen is None else dict(gen),
         objective_version=objective_version,
         grid=grid_cfg,
+        mounting=mounting_cfg,
     )
 
 
