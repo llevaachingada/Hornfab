@@ -380,7 +380,10 @@ def _command_string(argv) -> str:
 
 def _backend(cfg):
     from hornlab_search.solve.base import get_backend
-    return get_backend(cfg.solve.backend, timeout_s=float(cfg.solve.timeout_s))
+    kw = {"timeout_s": float(cfg.solve.timeout_s)}
+    if str(cfg.solve.backend).startswith("beat_"):
+        kw["cuda_fused"] = bool(getattr(cfg.solve, "cuda_fused", False))   # WP15 (default False)
+    return get_backend(cfg.solve.backend, **kw)
 
 
 def _print_terms(ev) -> None:
@@ -526,12 +529,35 @@ def _verify_only_refusal(brief: dict | None, command: str) -> str | None:
     return None
 
 
+def _verify_only_precheck(args, command: str) -> int | None:
+    """Ordering (senior pass 2026-10-24, WP2): a verify_only brief passed as ``--brief`` is refused
+    BEFORE the config is loaded, so the shipped exit-2 contract for the 12 kHz briefs wins even
+    when the WP2 driver pins would also reject the config/brief pair. A malformed brief path is
+    not pre-checked here; load_config's own loader reports it with its full message."""
+    from hornlab_search.config import load_brief
+    brief_path = getattr(args, "brief", None)
+    if not brief_path:
+        return None
+    try:
+        b = load_brief(brief_path)
+    except Exception:
+        return None
+    why = _verify_only_refusal(b, command)
+    if why:
+        print(why)
+        return 2
+    return None
+
+
 def _cmd_run(args, argv) -> int:
     from hornlab_search.dataset.store import DatasetStore
     from hornlab_search.search import cma, rundir
     from hornlab_search.search.gpulock import GpuBusyError, gpu_lock
     from hornlab_search.solve import worker
     from hornlab_search.types import BackendUnavailableError
+    pre = _verify_only_precheck(args, "run")            # WP2 ordering: BEFORE config validation
+    if pre is not None:
+        return pre
     cfg = _load_cfg(args)
     worker.install_handlers()
     if args.dry_run:
@@ -602,6 +628,9 @@ def _search_body(args, argv, d) -> int:
     from hornlab_search.search.evaluate import read_ndjson
     from hornlab_search.solve import worker
     from hornlab_search.types import BackendUnavailableError
+    pre = _verify_only_precheck(args, "search")         # WP2 ordering: BEFORE config validation
+    if pre is not None:
+        return pre
     if args.resume:
         run_dir = Path(args.resume)
         if not run_dir.is_dir():

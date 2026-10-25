@@ -39,7 +39,7 @@ def _load_example(name):
 def test_examples_load_with_no_none_in_required_fields(name):
     cfg = _load_example(name)
     for f in dataclasses.fields(cfg):
-        if f.name in ("brief", "generator"):      # optional by design (TYPOLOGY_PLAN s3-s5)
+        if f.name in ("brief", "generator", "grid"):      # optional by design (s3-s5; WP4 grid)
             continue
         value = getattr(cfg, f.name)
         assert value is not None, f"{name}: {f.name} is None"

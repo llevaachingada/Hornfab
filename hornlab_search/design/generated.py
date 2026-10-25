@@ -26,6 +26,13 @@ from .space import Bound, _ROUND_DECIMALS
 log = logging.getLogger("hornlab_search.design.generated")
 
 GENERATOR_ERROR_KEY = "_generator_error"
+#: Relative pre-mesh envelope overshoot carried alongside an ``invalid_envelope`` error.
+#: ABSENT on every legal design (and on non-envelope generator errors): search/evaluate.py
+#: reads ``params.get(GENERATOR_OVERSHOOT_KEY)`` only to grade the penalty.
+GENERATOR_OVERSHOOT_KEY = "_generator_overshoot"
+#: Cap on the stored overshoot.  ``graded_infeasible_penalty`` saturates at 2e3 for an
+#: overshoot of 10, so larger values carry no extra ranking information.
+_MAX_STORED_OVERSHOOT = 10.0
 
 
 def brief_hash(brief: dict) -> str:
@@ -79,6 +86,24 @@ class GeneratedSpace:
         except Exception as exc:  # noqa: BLE001 - scored as invalid_geometry in evaluate
             params = {GENERATOR_ERROR_KEY: f"{type(exc).__name__}: {exc}",
                       "_knobs": {k: knobs[k] for k in sorted(knobs)}}
+        else:
+            # Pre-mesh envelope estimate. ``materialize`` checks the INNER mouth; this catches
+            # the outer shell offset the post-mesh bounding box includes, so an envelope
+            # violation is scored (invalid_envelope) without paying for a mesh. The happy path
+            # adds nothing: no overshoot key is present when the estimate is 0.
+            try:
+                overshoot = registry.envelope_overshoot_estimate(params, self.brief)
+            except Exception:  # noqa: BLE001 - an estimate must never turn a legal knob invalid
+                log.debug("pre-mesh envelope estimate failed", exc_info=True)
+                overshoot = None
+            if overshoot is not None and overshoot > 0.0:
+                value = min(max(float(overshoot), 0.0), _MAX_STORED_OVERSHOOT)
+                params = {**params,
+                          GENERATOR_ERROR_KEY: (
+                              "invalid_envelope: estimated outside the brief envelope "
+                              f"(max relative overshoot {value:.4f})"),
+                          GENERATOR_OVERSHOOT_KEY: float(value),
+                          "_knobs": {k: knobs[k] for k in sorted(knobs)}}
         d = Design("FREEFORM", params)
         # last-wins: provenance then names the knobs of the candidate actually being evaluated
         # (two knob vectors can round to the same anchors); CMA never normalizes loop candidates.

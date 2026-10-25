@@ -48,7 +48,7 @@ half models at 2× the dofs. **Twisted horns** break both mirrors: full model, 4
 | G1 | Named presets: OS (s = 0), QT waveguide, catenoidal | existing | as parents | medium | trivial | catalog entries plus docs; QT = OS meridian in H and V on a rounded-rectangle section |
 | G2 | **Meridian splice** (A up to z_s, then B, C¹ joined) | FREEFORM generator | z_s/L, parent knobs | high | low | e.g. OS throat → tractrix/JMLC mouth. The existing `blend` is a convex blend at equal t, not a splice |
 | G3 | **Throat-adapted classical** (F4 in Report 1) | FREEFORM generator | `throat_blend_mm` | high (fairness) | low | lets conical/exponential/hypex start at the driver angle |
-| G4 | **Spherical-wavefront Salmon (JMLC-type)** | FREEFORM generator | f_c, T, max_wall | high | low–medium | section 3 |
+| G4 | **Le Cléac'h (exact, Fourcade 2015)** + organic/elliptical/X family | FREEFORM (≤ 90°) / GRID (rollback) | f_c, T, stop angle, H/V cutoffs | high | low–medium | **superseded by plan WP9b** (verified construction + reference numbers) |
 | G5 | Kugelwellen (Klangfilm) | FREEFORM generator | f_c | low–medium | low | agent formula needs a primary-source check (section 7) |
 | G6 | **Curvature/angle-space meridian** θ(s) = θ_OS(s) + Σ c_k·cos(kπs/L) | FREEFORM generator | 4–8 DCT coefficients, mouth size | high | low | smooth, low-dimensional and CMA-friendly; wall *angle* is what governs diffraction (ICW uses the same idea) |
 | G7 | **Point-grid family `GRID`** (adapter) | point grid | — | very high (enabler) | medium | section 4 |
@@ -66,6 +66,8 @@ half models at 2× the dofs. **Twisted horns** break both mirrors: full model, 4
 | — | Metamaterial / labyrinth, line-array DOSC / Paraline, CBT | — | — | low here | very high | out of scope for a single-body BEM search (agreeing with Appendix A) |
 
 ## 3. Spherical-wavefront Salmon horn (JMLC-type): explicit construction
+
+> **Superseded 2026-10-24:** the published exact construction (Fourcade 2015) is now in `04_IMPLEMENTATION_PLAN.md` WP9b, validated against its reference case. Use that; the sketch below is kept for history only.
 
 Area law (Salmon 1946; JMLC applies it to wavefront areas) [Appendix A, sources there]:
 `A(x) = A0·[cosh(x/x0) + T·sinh(x/x0)]²`, with `x0 = c/(2π f_c)`, where x is the axial distance travelled by the

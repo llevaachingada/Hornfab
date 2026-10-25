@@ -109,6 +109,7 @@ def _prepare(cfg, run_dir: Path, mode: str, backend, store, cache_dir, trace_fra
             "config_path": None if config_path is None else str(config_path),
             "config": cfg.raw, "config_sha": rundir.config_sha(cfg.raw),
             "backend": cfg.solve.backend, "lib_shas": lib_shas,
+            "objective_version": int(getattr(cfg, "objective_version", 1)),
             "toolchain": rundir.toolchain_snapshot(),
             "runtime": rundir.runtime_provenance(),
             "cma_seed": cfg.search.seed, "trace_fraction": trace_fraction,

@@ -51,6 +51,7 @@ Keep this file current: a new doc gets a line here in the same commit.
 | [evidence/CP-8a.md](evidence/CP-8a.md) … [CP-8d.md](evidence/CP-8d.md), `CP-8c_*.md` | CP-8 checkpoint outputs (dataset campaign, surrogate gates). |
 | `evidence/runs/` + `manifest.sha256` | Summary layers of GPU runs (logs, not raw data). |
 | `evidence/BETA_READINESS.md` | Beta readiness pass: SHAs/upstream, data integrity, physics audit (C2 epw 6 vs 8). |
+| [evidence/OBJECTIVE_V2_RESCORE.md](evidence/OBJECTIVE_V2_RESCORE.md) | WP1 re-score: v1 vs v2 objective over 18,059 stored records; Spearman rho 0.989; both compare-tier claims survive; v1 drift 0. Per-record CSV local (regenerate with tools/rescore). |
 | [evidence/HF12K_VERIFY_2026-10-23.md](evidence/HF12K_VERIFY_2026-10-23.md) | P2 12 kHz finalist verify pass: epw check at 12 kHz, beamwidth/DI to 12 kHz, VRAM; cross-mode caveat. |
 | [evidence/CP-8d_retrain_2026-10-23.md](evidence/CP-8d_retrain_2026-10-23.md) | Surrogate retrain after the OSSE top-up: every gate vs threshold, held-out 463 < 500; model not used. |
 

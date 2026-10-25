@@ -31,6 +31,10 @@ FREQ_GRIDS: dict[str, tuple[float, float, int]] = {
 
 MODES = ("screen", "verify", "final")
 
+# WP4 (senior pass 2026-10-24): the verify grid's HF-density extension starts at 5 kHz — below
+# that the frozen 25-point verify grid is already dense enough for every measured epw decision.
+HF_VERIFY_LO_HZ = 5000.0
+
 
 def freq_grid(lo: float, hi: float, n: int) -> tuple[float, ...]:
     return tuple(round(float(f), 2) for f in np.geomspace(lo, hi, n))
@@ -62,6 +66,7 @@ class SolveSettings:
     balloon_points_verify: int
     gmres_tol: float
     timeout_s: float
+    cuda_fused: bool = False   # WP15: opt-in fused CUDA Burton-Miller assembly (beat_cuda only)
 
     def balloon_points(self, mode: str) -> int:
         if not self.balloon:
@@ -77,6 +82,7 @@ class SearchSettings:
     budget: int
     popsize: int | None
     tolfun: float
+    infeasible_penalty: str = "flat"   # WP3: 'flat' (default, today) | 'graded'
 
 
 @dataclass
@@ -93,6 +99,8 @@ class Config:
     raw: dict
     brief: dict | None = None        # design brief (docs/TYPOLOGY_PLAN.md s3), if one was applied
     generator: dict | None = None    # typology generator block (s4); family is then FREEFORM
+    objective_version: int = 1       # WP1: brief/config `objective: {version: 2}` -> v2 objective
+    grid: dict | None = None         # WP4: brief `grid: {verify_points_per_octave: N}` -> HF verify grid
 
 
 # ------------------------------------------------------------------ briefs
@@ -119,7 +127,7 @@ def load_brief(path) -> dict:
     if not isinstance(raw, dict):
         raise ConfigError(f"{where}: top level must be a mapping")
     allowed = {"name", "description", "driver", "envelope", "symmetry", "source", "target", "weights",
-               "verify_only"}
+               "verify_only", "objective", "grid"}
     unknown = set(raw) - allowed
     if unknown:
         raise ConfigError(f"{where}: unknown key(s) {sorted(unknown)}")
@@ -131,6 +139,13 @@ def load_brief(path) -> dict:
             raise ConfigError(f"{where}: driver.{k} must be a number")
     if not 0 < float(drv["exit_radius_mm"]) < 100 or not 0 <= float(drv["exit_angle_deg"]) < 45:
         raise ConfigError(f"{where}: driver exit radius must be in (0, 100) mm and angle in [0, 45) deg")
+    pol = drv.get("throat_angle_policy")
+    if pol is not None and pol not in ("pin", "free"):
+        raise ConfigError(f"{where}: driver.throat_angle_policy must be 'pin' or 'free', got {pol!r}")
+    if "objective" in raw and raw["objective"] is not None:
+        _validate_objective_block(raw["objective"], where)
+    if "grid" in raw and raw["grid"] is not None:
+        _validate_grid_block(raw["grid"], where)
     for k in ("max_mouth_w_mm", "max_mouth_h_mm", "max_depth_mm"):
         if not isinstance(env.get(k), (int, float)) or not float(env[k]) > 0:
             raise ConfigError(f"{where}: envelope.{k} must be a positive number")
@@ -166,6 +181,114 @@ def _require(section: dict, key: str, where: str):
     return section[key]
 
 
+# ------------------------------------------------------------------ WP1/WP4 blocks (senior pass)
+
+def _validate_objective_block(block, where: str) -> dict:
+    """Brief/config ``objective: {version: 2}`` selects objective v2 (WP1). Default 1. Unknown
+    keys are refused so a YAML typo is never silent."""
+    if not isinstance(block, dict):
+        raise ConfigError(f"{where}: objective must be a mapping")
+    unknown = set(block) - {"version"}
+    if unknown:
+        raise ConfigError(f"{where}: objective unknown key(s) {sorted(unknown)} (allowed: version)")
+    v = block.get("version", 1)
+    if isinstance(v, bool) or not isinstance(v, int) or v not in (1, 2):
+        raise ConfigError(f"{where}: objective.version must be 1 or 2, got {v!r}")
+    return {"version": int(v)}
+
+
+def _validate_grid_block(block, where: str) -> dict:
+    """Brief ``grid: {verify_points_per_octave: N}`` (WP4): build the verify grid as the frozen
+    grid PLUS extra log points in [5 kHz, band_hi] at that density. It forms a NEW grid group:
+    records carry it via their own solve.freqs_hz, and comparisons against runs with a different
+    grid refuse (intended separation)."""
+    if not isinstance(block, dict):
+        raise ConfigError(f"{where}: grid must be a mapping")
+    unknown = set(block) - {"verify_points_per_octave"}
+    if unknown:
+        raise ConfigError(f"{where}: grid unknown key(s) {sorted(unknown)} "
+                          f"(allowed: verify_points_per_octave)")
+    ppo = block.get("verify_points_per_octave")
+    if isinstance(ppo, bool) or not isinstance(ppo, (int, float)) or not ppo > 0:
+        raise ConfigError(f"{where}: grid.verify_points_per_octave must be a positive number")
+    return {"verify_points_per_octave": float(ppo)}
+
+
+# ------------------------------------------------------------------ WP2 driver fairness
+
+_PIN_FAMILIES = ("OSSE", "R-OSSE", "ICW")
+_DRIVER_PIN_TOL = 0.01
+
+
+def _force_pin(key: str, value: float, seed: dict, bounds: dict, where: str, unit: str,
+               nested: bool = False) -> None:
+    """WP2: force one design parameter onto the brief's driver value.
+
+    A config that already PINS the parameter (``search: false``) at a different value raises
+    ConfigError — silently rescaling a horn is worse. A searching bound is replaced by
+    lo=hi=value, search: false, and the seed param is set to the same value so the seed design
+    matches the brief's driver. For nested FREEFORM keys (``profileH.throatAngleDeg``) the bound
+    keeps its flat dotted-path form and the seed param is set inside its plane node."""
+    b = bounds.get(key)
+    if isinstance(b, dict) and not b.get("search", True):
+        lo, hi = float(b.get("lo", value)), float(b.get("hi", value))
+        if abs(lo - value) > _DRIVER_PIN_TOL or abs(hi - value) > _DRIVER_PIN_TOL:
+            raise ConfigError(
+                f"{where}: bounds.{key} is pinned at [{lo}, {hi}] {unit} but the applied brief "
+                f"pins the driver at {value} {unit}; rescale the horn explicitly or drop the pin "
+                f"(WP2 driver fairness, senior pass 2026-10-24)")
+        return
+    bounds[key] = {"lo": value, "hi": value, "search": False}
+    if nested:
+        plane, _, leaf = key.partition(".")
+        node = seed.get(plane)
+        if isinstance(node, dict):
+            node[leaf] = value
+    else:
+        seed[key] = value
+
+
+def _apply_brief_driver_pins(raw: dict, brief_d: dict | None, where: str,
+                             embedded: bool = False) -> None:
+    """WP2 (senior pass 2026-10-24, fairness): when a brief is applied to a NATIVE family config
+    (no ``generator:``), pin the horn's throat to the brief's driver, so every family competes on
+    the same objective instead of each searching its own throat. Generator typologies already do
+    this inside registry.materialize; their configs are untouched here.
+
+    - OSSE / R-OSSE / ICW: ``r0_mm`` is pinned to ``driver.exit_radius_mm`` (always; the brief
+      defines the throat size a design is allowed to use), and ``a0_deg`` is pinned to
+      ``driver.exit_angle_deg`` ONLY when the brief says ``driver.throat_angle_policy: pin``.
+    - Native FREEFORM: under ``pin``, ``profileH/V.throatAngleDeg`` are pinned to the exit angle.
+    - A brief WITHOUT the policy key behaves exactly as before on throat angles, so every
+      existing run reproduces bit-for-bit.
+    - Oracle M1 ruling: ``embedded=True`` (a run directory's own merged config.yaml, the
+      resume/verify/report path) SKIPS the pins entirely — a pre-WP2 run whose embedded brief
+      conflicts with its pinned throat must stay loadable (bit-for-bit contract on old runs);
+      fairness is enforced where the brief is applied fresh (``--brief`` or ``brief_file:``,
+      including a NEW run's subprocess, which passes the brief freshly)."""
+    if brief_d is None or embedded or raw.get("generator") is not None:
+        return
+    drv = brief_d.get("driver") or {}
+    if not isinstance(drv.get("exit_radius_mm"), (int, float)):
+        return  # a malformed driver was already refused inside load_brief
+    exit_r = float(drv["exit_radius_mm"])
+    exit_a = float(drv["exit_angle_deg"])
+    policy = drv.get("throat_angle_policy")
+    family = str(raw.get("family", ""))
+    seed = raw.setdefault("seed_params", {})
+    bounds = raw.setdefault("bounds", {})
+    if family in _PIN_FAMILIES and ("r0_mm" in seed or "r0_mm" in bounds):
+        _force_pin("r0_mm", exit_r, seed, bounds, where, "mm")
+        if policy == "pin" and ("a0_deg" in seed or "a0_deg" in bounds):
+            _force_pin("a0_deg", exit_a, seed, bounds, where, "deg")
+    if family == "FREEFORM" and policy == "pin":
+        for plane in ("profileH", "profileV"):
+            node = seed.get(plane)
+            if isinstance(node, dict) and "throatAngleDeg" in node:
+                _force_pin(f"{plane}.throatAngleDeg", exit_a, seed, bounds, where, "deg",
+                           nested=True)
+
+
 def _build(cls, section: dict, where: str, optional: tuple[str, ...] = ()):
     kwargs = {}
     for name in cls.__dataclass_fields__:
@@ -193,11 +316,16 @@ def load_config(path, *, brief=None, cma_seed: int | None = None) -> Config:
 
     brief_path = brief if brief is not None else raw.get("brief_file")
     brief_d = None
+    embedded_brief = False
     if brief is None and isinstance(raw.get("brief"), dict):
         # A run directory's config.yaml already holds the merged brief (target/weights applied and
         # the brief embedded); use it as is, so resume/verify/report reproduce the run exactly.
         brief_d = dict(raw["brief"])
         brief_path = None
+        embedded_brief = True
+    obj_cfg = None
+    if raw.get("objective") is not None:
+        obj_cfg = _validate_objective_block(raw["objective"], where)
     if brief_path is not None:
         bp = _resolve_path(brief_path, path.parent, Path(__file__).resolve().parents[1])
         if not Path(bp).exists():
@@ -210,6 +338,15 @@ def load_config(path, *, brief=None, cma_seed: int | None = None) -> Config:
         raw["target"] = dict(brief_d["target"])
         raw["weights"] = dict(brief_d["weights"])
         raw["brief"] = {k: v for k, v in brief_d.items() if k != "path"}
+    if brief_d is not None and brief_d.get("objective") is not None:
+        # A brief's objective version wins over the config's own block (the brief replaces the
+        # target/weights pair it belongs to); recorded in raw so config_sha covers it.
+        raw["objective"] = dict(brief_d["objective"])
+    elif obj_cfg is not None:
+        raw["objective"] = obj_cfg
+    if brief_d is not None and brief_d.get("grid") is not None:
+        raw["grid"] = dict(brief_d["grid"])
+    grid_cfg = _validate_grid_block(raw["grid"], where) if raw.get("grid") is not None else None
     if cma_seed is not None:
         raw.setdefault("search", {})
         raw["search"] = dict(raw["search"], seed=int(cma_seed))
@@ -222,13 +359,23 @@ def load_config(path, *, brief=None, cma_seed: int | None = None) -> Config:
         if brief_d is None:
             raise ConfigError(f"{where}: a generator config needs a brief (brief_file: or --brief)")
 
+    _apply_brief_driver_pins(raw, brief_d, where, embedded=embedded_brief)
+
     mesh = _build(MeshSettings, _require(raw, "mesh", where), f"{where}:mesh",
                   optional=("max_triangle_slack",))
-    solve = _build(SolveSettings, _require(raw, "solve", where), f"{where}:solve")
+    solve = _build(SolveSettings, _require(raw, "solve", where), f"{where}:solve",
+                   optional=("cuda_fused",))
+    if solve.cuda_fused and str(solve.backend) != "beat_cuda":
+        raise ConfigError(f"{where}: solve.cuda_fused is only implemented for backend: beat_cuda "
+                          f"(got {solve.backend!r})")
     search = _build(SearchSettings, _require(raw, "search", where), f"{where}:search",
-                    optional=("popsize",))
+                    optional=("popsize", "infeasible_penalty"))
     if "popsize" not in raw["search"]:
         search.popsize = None
+    if search.infeasible_penalty not in ("flat", "graded"):
+        raise ConfigError(f"{where}: search.infeasible_penalty must be 'flat' or 'graded', "
+                          f"got {search.infeasible_penalty!r}")
+    objective_version = int((raw.get("objective") or {}).get("version", 1))
 
     if mesh.quadrants not in QUADRANT_FACTOR:
         raise ConfigError(f"{where}: mesh.quadrants must be one of {list(QUADRANT_FACTOR)}")
@@ -253,6 +400,8 @@ def load_config(path, *, brief=None, cma_seed: int | None = None) -> Config:
         raw=raw,
         brief=brief_d,
         generator=None if gen is None else dict(gen),
+        objective_version=objective_version,
+        grid=grid_cfg,
     )
 
 
@@ -260,12 +409,25 @@ def load_config(path, *, brief=None, cma_seed: int | None = None) -> Config:
 
 def mode_freqs(mode: str, cfg: Config) -> tuple[float, ...]:
     """The mode's frozen log grid, with its top edge clipped to the target band's upper
-    edge so the mesh is never asked to resolve frequencies the objective ignores."""
+    edge so the mesh is never asked to resolve frequencies the objective ignores.
+
+    WP4 (senior pass 2026-10-24): a brief with ``grid: {verify_points_per_octave: N}`` extends the
+    VERIFY grid with extra log points in [5 kHz, band_hi] at that density. That is a NEW grid
+    group — records carry it through their own solve.freqs_hz (and the solve-spec hash), so a
+    comparison against runs on the frozen grid refuses rather than mixing grids."""
     lo, hi, n = FREQ_GRIDS[mode]
     band_hi = cfg.target_raw.get("band_hi_hz")
     if band_hi is not None and float(band_hi) < hi:
         hi = float(band_hi)
-    return freq_grid(lo, hi, n)
+    base = [round(float(f), 2) for f in freq_grid(lo, hi, n)]
+    if mode == "verify":
+        ppo = ((cfg.grid or {}).get("verify_points_per_octave"))
+        if ppo is not None and hi > HF_VERIFY_LO_HZ:
+            n_oct = float(np.log2(hi / HF_VERIFY_LO_HZ))
+            n_pts = max(1, int(round(n_oct * float(ppo))))
+            extra = [round(float(f), 2) for f in np.geomspace(HF_VERIFY_LO_HZ, hi, n_pts + 1)]
+            return tuple(sorted(set(base) | set(extra)))
+    return tuple(base)
 
 
 def mesh_spec(mode: Mode, cfg: Config) -> MeshSpec:
@@ -296,10 +458,14 @@ def solve_spec(mode: Mode, cfg: Config) -> SolveSpec:
         balloon=bool(s.balloon),
         balloon_points=s.balloon_points(mode),
     )
+    # WP15: cuda_fused rides in `extra` so the solve-spec hash (cache key, dataset provenance)
+    # changes ONLY when the opt-in is actually set; absent leaves every old hash untouched.
+    extra = {"cuda_fused": True} if bool(getattr(s, "cuda_fused", False)) else {}
     return SolveSpec(
         mode=mode,
         freqs_hz=mode_freqs(mode, cfg),
         backend=str(s.backend),
         observation=obs,
         gmres_tol=float(s.gmres_tol),
+        extra=extra,
     )

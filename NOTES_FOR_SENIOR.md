@@ -327,3 +327,42 @@ User authorized (chat, 2026-10-22: "make these changes in the cloud ... merge in
 - task 06: NEW `metrics/spinorama.py`, `metrics/beam_shape.py` (+ tests; written by a Sonnet subagent, reviewed and wired by the reviewer).
 - task 08: `search/evaluate.py` (`directivity_extras`, report-only scalars), `search/rundir.py` + `search/cma.py` (runtime provenance), `report/html.py` (one line per design), `tests/test_search_directivity_extras.py`, `tests/test_search_provenance.py`.
 Rulings requested: (1) early rejection policy (BL_LEARNINGS s2 item 4) before any implementation; (2) whether `beam_p_mean` / `spdi_*` should ever enter J (reviewer: NO until a verify-resolution balloon validates p).
+
+## 2026-10-24 (orchestrator, senior pass M4 recon / exp-1): point-grid curl acceptance — VERDICT + closure route
+
+Question (WP9b 9b.3 step 3, "first thing to test"): does the pinned mesher's point-grid builder accept a
+profile that turns back on itself? Probe `C:\Users\hunte\Hrns\AppData\Local\Temp\opencode\grid_curl_probe.py`
+(offline, CPU/gmsh only; explorer lane), exact Le Cleac'h march (jmlc_reference.py), fc 800 Hz, T 0.8, 1"
+throat (D_mm 25.4 = DIAMETER), phi0 5 deg half-angle, n_phi 25 quarter rows, dl 1 mm.
+
+- **VERDICT: YES — self-turning (non-monotone x) profiles build. No fork mesher change for acceptance.**
+  stop 200 deg: rollback 24.80 mm, OK 0.21 s, 232 verts / 396 tris; stop 240 deg: rollback 29.58 mm, OK
+  0.24 s, 243 / 417; monotone control (stop 90): OK 0.90 s, 191 / 322. Surface authoring has no monotone-z
+  assumption: `_validated_grid` checks shape/finite only (point_grid_surfaces.py:622-630), bspline patching is
+  chord-based (_occ.py:74-101, 528-580), postprocess handles non-monotonic point grids (mesher.py:509-512),
+  rollback-aware open-shell orientation in normals.py:80-134.
+- **BUT the literal WP10 call is NOT BEM-usable**: `closed=False, symmetry_planes=("x","y"), no outer_points`
+  resolves to BARE mode (inner wall + throat cap only; build_mode at geometry.py:322-330) and
+  `mesh/topology.check_surface` rejects it for control AND curl (open mouth rim off symmetry planes). This is
+  a closure-mode issue, not a curl rejection.
+- **Working closure route: FREESTANDING with explicit `outer_points`** (in-plane normal offset of the profile
+  by wall_thickness_mm, per Fourcade eqs 28-29: x_d = x + t*cos(phi+90), y_d = y + t*sin(phi+90)) — both
+  curled stops build AND pass bbox + yz+xz symmetry + topology (200 deg: 432 verts / 768 tris; 240: 526 / 952).
+  `wall_thickness_mm` alone does NOT synthesize an outer shell (point_grid_freestanding.py:283-284 raises
+  without outer_points) — WP10 must build the offset grid as the plan's step 4 says.
+- infinite_baffle closure (tag 12 mouth_aperture) refuses a rollback: "mouth ring to be the front-most z
+  station ... protrudes through the baffle plane to z=24.7959 mm" — curled horns must use freestanding.
+- Caller contract measured: `PointGridHornGeometry(inner_points=P_mm (n_phi, n_s, 3) phi-major,
+  closed=False, symmetry_planes=("x","y"), wall_thickness_mm=3.0, source_shape=1 (rounded cap),
+  source_auto_angle_deg=phi0)` + `build_mesh_with_info(geom, MeshDensity(throat_res_mm, mouth_res_mm,
+  rear_res_mm, max_triangles, allow_large_mesh), output_path=..., scale_to_metres=True)`; import
+  PointGridHornGeometry/MeshDensity from hornlab_mesher.geometry (not top-level). jmlc_reference returns
+  METRES while the grid wants MM (x1000); row k = same arc-length fraction l/L0(phi) for all phi.
+- Freestanding outer-ring quirk (non-blocking, candidate future FORKS note): `_outer_wall_axial_ring_indices`
+  (point_grid_freestanding.py:116-128) drops rings at the max-z plane = the 90-deg station for a curl, leaving
+  a ~1-station chord in the outer return wall there; it still builds and passes topology.
+- Self-approach margins measured: min true distance 19.6 mm (200 deg) / 18.5 mm (240 deg) — plan's refuse line
+  (2t + 2 mm = 8 mm at t=3) leaves generous room; quality gate "report" flagged 8 slivers (~1%) at
+  mouth_res 12 mm (min angle ~5.4 deg) — a quality review/finer mouth res is advisable for T1-T7 configs.
+- Installed mesher == fork pin b922e807 (65/65 files byte-identical). Repo bbox band is [0.02, 5.0] m
+  (mesh/build.py:37-38), not the plan's 0.1-1 m wording.

@@ -14,3 +14,7 @@ report.html
 # review page build outputs (regenerate with tools/review)
 tools/review/review_data.json
 tools/review/hornlab_review.html
+
+# WP1 re-score: the per-record CSV is a regenerated artifact (data-adjacent, 12.3 MB > the
+# evidence rule "about the data, never the data itself"); the markdown report IS committed.
+docs/evidence/objective_v2_rescore/

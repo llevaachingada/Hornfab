@@ -47,7 +47,12 @@ def test_verify_brief_uses_the_brief_band_and_writes_its_own_run(smoke_cfg, tmp_
     run_dir, _ = _source_run(smoke_cfg, tmp_path, monkeypatch)
     before = {p.name for p in (tmp_path / "runs").iterdir()}
     brief = tmp_path / "brief_12k.yaml"                          # the fake mesh is 600 mm wide
-    brief.write_text(BRIEF_12K.read_text(encoding="utf-8").replace("400.0", "1000.0").replace("300.0", "1000.0")
+    brief.write_text(BRIEF_12K.read_text(encoding="utf-8")
+                     # WP2 (senior pass 2026-10-24): the run's native OSSE config pins r0 at 17.78 mm,
+                     # so the applied brief must carry the matching driver (or verify refuses).
+                     .replace("exit_radius_mm: 12.7", "exit_radius_mm: 17.78")
+                     .replace("exit_angle_deg: 5.0", "exit_angle_deg: 15.5")
+                     .replace("400.0", "1000.0").replace("300.0", "1000.0")
                      .replace("220.0", "1000.0"),
                      encoding="utf-8")
     code, be = _verify(tmp_path, monkeypatch, run_dir, "--brief", str(brief))

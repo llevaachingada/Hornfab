@@ -95,3 +95,49 @@ def di_slope_db_per_decade(freqs_hz, di_db) -> float:
     if ok.sum() < 2 or np.ptp(f[ok]) == 0.0:
         return float("nan")
     return float(np.polyfit(np.log10(f[ok]), d[ok], 1)[0])
+
+
+# ------------------------------------------------------------------ objective v2 addition
+# Appended for objective v2 (senior pass 2026-10-24, WP1). v1 functions above are untouched.
+
+import functools  # noqa: E402  (appended section; keeps the frozen block untouched)
+
+
+@functools.lru_cache(maxsize=256)
+def _target_di_gaussian_db_cached(cov_h_deg: float, cov_v_deg: float) -> float:
+    """Numerical DI of the reference separable Gaussian beam (see the public wrapper)."""
+    n = 721
+    theta = np.radians(np.linspace(0.0, 180.0, n))
+    phi = np.radians(np.linspace(0.0, 360.0, 2 * n, endpoint=False))
+    t_grid, p_grid = np.meshgrid(theta, phi, indexing="ij")
+    x = np.sin(t_grid) * np.cos(p_grid)
+    y = np.sin(t_grid) * np.sin(p_grid)
+    z = np.cos(t_grid)
+    # Angles projected into the H and V planes, exactly as the reference di_gauss.
+    ah = np.degrees(np.arctan2(x, z))
+    av = np.degrees(np.arctan2(y, z))
+    db = -6.0206 * ((ah / (cov_h_deg / 2.0)) ** 2 + (av / (cov_v_deg / 2.0)) ** 2)
+    with np.errstate(under="ignore"):
+        p2 = 10.0 ** (db / 10.0)
+    w = np.sin(t_grid)
+    mean_p2 = float(np.sum(w * p2) / np.sum(w))
+    return float(10.0 * np.log10(1.0 / mean_p2))
+
+
+def target_di_gaussian_db(cov_h_deg, cov_v_deg) -> float:
+    """Directivity index of an ideal separable Gaussian beam at the target widths.
+
+    The beam is ``dB = -6.0206 * ((theta_h/(h/2))^2 + (theta_v/(v/2))^2)`` with
+    ``theta_h = atan2(x, z)`` and ``theta_v = atan2(y, z)``, integrated on a sin(theta)-weighted
+    full-sphere theta-phi grid (721 theta steps, 2*721 phi steps). Reference implementation:
+    ``docs/research/senior_pass_2026-10-24/evidence/objective_assumption_checks.py::di_gauss``.
+
+    Results (dB): (90, 90) -> 10.33, (90, 60) -> 11.91, (75, 45) -> 13.76. This replaces the
+    cuts-formula target, which reads about 2.5 dB low for any real beam (Report 1 F5). Cached on
+    the coverage pair rounded to 1e-6 degrees.
+    """
+    h = float(cov_h_deg)
+    v = float(cov_v_deg)
+    if not (np.isfinite(h) and np.isfinite(v) and h > 0.0 and v > 0.0):
+        raise ValueError(f"target_di_gaussian_db: coverage must be finite and positive, got {h} x {v}")
+    return float(_target_di_gaussian_db_cached(round(h, 6), round(v, 6)))

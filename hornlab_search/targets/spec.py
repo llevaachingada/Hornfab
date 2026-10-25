@@ -41,9 +41,68 @@ class Target:
             kw["z_min"] = float(d["z_min"])
         if d.get("freq_weights") is not None:
             kw["freq_weights"] = dict(d["freq_weights"])
+            kw["freq_weights"] = validate_freq_weights(kw["freq_weights"])
         t = cls(**kw)
         if not (t.band_lo_hz > 0 and t.band_hi_hz > t.band_lo_hz):
             raise ValueError("Target.from_dict: need 0 < band_lo_hz < band_hi_hz")
         if not (t.coverage_h_deg > 0 and t.coverage_v_deg > 0):
             raise ValueError("Target.from_dict: coverage angles must be positive")
         return t
+
+
+# ------------------------------------------------------------------ freq_weights validation
+# Appended for WP4 (senior pass 2026-10-24). ``freq_weights`` stays OPTIONAL; absent means no
+# weighting and every existing YAML behaves exactly as before. Only a PROVIDED value is checked,
+# so the typo that used to be silently ignored (Report 1 F6/B1) is now a clear error.
+
+import math  # noqa: E402  (appended section; keeps the frozen block untouched)
+
+
+def validate_freq_weights(value) -> dict:
+    """Validate and normalise a ``Target.freq_weights`` mapping.
+
+    Accepted schema (01_CONTRACTS section 11, WP4)::
+
+        freq_weights:
+          band_hz:
+            - [lo_hz, hi_hz, weight]
+            - ...
+
+    Every interval must be ``0 < lo < hi`` with finite endpoints, and ``weight`` must be finite
+    and strictly positive. A frequency gets the PRODUCT of every interval that contains it
+    (default 1.0). Returns a normalised ``{"band_hz": [[float, float, float], ...]}`` dict.
+
+    Raises ``ValueError`` with a message naming the offending entry. Unknown top-level keys are
+    rejected so a misspelt ``band_hz`` is not silently ignored.
+    """
+    if not isinstance(value, dict):
+        raise ValueError(
+            "Target.freq_weights: expected a mapping like {band_hz: [[lo_hz, hi_hz, weight], "
+            f"...]}}, got {type(value).__name__}")
+    unknown = sorted(set(value) - {"band_hz"})
+    if unknown:
+        raise ValueError(f"Target.freq_weights: unknown key(s) {unknown}; only 'band_hz' is allowed")
+    if "band_hz" not in value:
+        raise ValueError("Target.freq_weights: missing required key 'band_hz'")
+    bands = value["band_hz"]
+    if not isinstance(bands, (list, tuple)):
+        raise ValueError(
+            "Target.freq_weights.band_hz: expected a list of [lo_hz, hi_hz, weight] rows, got "
+            f"{type(bands).__name__}")
+    out: list[list[float]] = []
+    for i, row in enumerate(bands):
+        where = f"Target.freq_weights.band_hz[{i}]"
+        if not isinstance(row, (list, tuple)) or len(row) != 3:
+            raise ValueError(f"{where}: expected [lo_hz, hi_hz, weight], got {row!r}")
+        try:
+            lo, hi, w = float(row[0]), float(row[1]), float(row[2])
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"{where}: lo, hi and weight must be numbers, got {row!r}") from exc
+        if not (math.isfinite(lo) and math.isfinite(hi) and math.isfinite(w)):
+            raise ValueError(f"{where}: lo, hi and weight must be finite, got {row!r}")
+        if not (lo > 0.0 and hi > lo):
+            raise ValueError(f"{where}: need 0 < lo_hz < hi_hz, got lo={lo}, hi={hi}")
+        if not w > 0.0:
+            raise ValueError(f"{where}: weight must be > 0, got {w}")
+        out.append([lo, hi, w])
+    return {"band_hz": out}

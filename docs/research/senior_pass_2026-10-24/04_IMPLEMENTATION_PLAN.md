@@ -36,6 +36,7 @@ WP2 brief pins driver (fairness)      WP6 12 kHz screen briefs            WP16 n
 WP3 shape-only perturb + graded pen.  WP7 rear-shell coarsening           WP17 near-correction on CUDA
 WP4 freq_weights + HF grid density    WP8 band-split meshing              (long term: matrix-free GMRES)
 WP9 new FREEFORM generators           WP10 GRID family (point grid)
+WP9b Le Cléac'h/Kugelwellen (T1,T2)   WP9b organic/elliptical/X (T3-T7, needs WP10)
 WP11 BIPOP restarts + QD archive      WP12 enclosure mounting
                                       WP13 axisymmetric BEM backend (owner OK first)
                                       WP14 multicell prototype (CAD → STEP)
@@ -217,6 +218,208 @@ under `examples/typologies/` and a catalog entry.
 
 Tests: the existing generator test style (`tests/test_design_generators_profiles.py`): Hermite fidelity within
 0.2 mm, envelope refusal, knob → params determinism. GPU smoke: one `run` per new typology at screen.
+
+## WP9b. Le Cléac'h family, organic/elliptical horns and X-shapes (owner request 2026-10-24)
+
+Goal: the curled-lip Le Cléac'h horns (axisymmetric JMLC, elliptical JMLC, Iwata/FH-N2, Ferguson/toroidal), the
+Kugelwellen, Gerstgrasser's "Min-Phase" (Le Cléac'h × OS), and audiohorn.net-style X-shapes, as searchable typologies.
+Depends on WP10 (GRID adapter); T1 and T2 can be built and unit-tested before WP10 exists.
+
+### 9b.0 Sources actually read, and what each gives (all checked 2026-10-24)
+
+| Source | What it gives us | Status |
+|---|---|---|
+| **J. Fourcade, "Calcul du Pavillon Le Cléac'h", 14 Apr 2015** (16 pp., French; `unepassionaudiophile.fr/wp-content/uploads/2018/01/Pavillon-JMLC.pdf`) | **The exact Le Cléac'h construction (eqs 10–27)**, the JMLC 2007 spreadsheet recurrence (eqs 1–8) and its derivation, the offset-profile formula for wall thickness (28–29), and **a numerical reference case** (fig. 7 + table p.13). | primary/secondary, verifiable; **this satisfies the R9 gate** |
+| J.-M. Le Cléac'h, "Acoustical horns and waveguides", ETF 2010 lecture (128 slides, rintelen.ch) | Tractrix as a spherical-cap law A = 2πR²(1−cos α) (p.77); Kugelwellen = same idea with **twice** the tractrix radius (p.78, Rösch/Klangfilm; H. Schmidt, *Funk und Ton* 5, 1950); the JMLC method slide (p.82, figure only); Le Cléac'h vs OS isobars (pp.97–99, 122); multicell and sectoral horns (pp.111–118); **Gerstgrasser Min-Phase horn = Le Cléac'h/OS compromise** (pp.125–127). | primary (author) |
+| B. Kolbrek, "Horn Theory: An Introduction, Part 2", audioXpress 2008 | **Kugelwellen equations 18–22** (below); its wavefronts are *not* normal to the wall; it folds back; JMLC's principle described (equidistant wavefronts normal to wall + Salmon law); OS r = √(r_t² + tan²θ0·x²). | secondary, peer-reviewed magazine |
+| J.-M. Le Cléac'h, diyAudio thread 140190 p.40 (posts by "Jmmlc", 2010) | The two JMLC rules in his words (wavefront i parallel/equidistant to wavefront i−1; wavefronts orthogonal to walls); **"quasi Iwata": keeps the original Iwata's width/height-ratio evolution throat→mouth and T = 0.5**; non-axisymmetric versions were made as 3-D point clouds (spreadsheets > 100 MB); hypex T = 0.707 gives the most resistive throat impedance; **driver exit angles are quoted as DOUBLE (included) angles**; a mismatch between driver exit and horn throat angle causes ripples near the throat. | primary (author, forum) |
+| sphericalhorns.net (2019, 2020) | Kugelwellen formulas (agree with Kolbrek); a JMLC-inspired calculator (self-declared not identical to JMLC) | secondary; used only as a cross-check |
+| audiohorn.net (X-Shape pages) | The X-Shape is designed by in-house FEA for constant directivity on both axes and "true loading" (lower crossover than OS). **No geometry is published.** | marketing; geometry below is OUR hypothesis |
+
+### 9b.1 Why these horns look the way they do (physics, short)
+
+1. **Curled lips (rollback past 90°).** A JMLC/Kugelwellen wall keeps turning so it stays normal to the growing
+   wavefront. Past 90° it curls back toward the driver. The mouth is then not an edge but a smooth surface wrapping
+   around the wavefront, so the impedance step to free air is gradual. That means low mouth reflection (smooth
+   response, little "horn sound") and weak edge diffraction. Fourcade's table shows the gain: the same horn stopped at
+   90° has a 0.13 m² mouth wavefront; stopped at 360° it has 0.72 m², with the overall length unchanged.
+2. **Organic/saddle mouths (elliptical JMLC, Iwata, FH-N2).** With different coverage horizontally and vertically, the
+   wavefront grows faster sideways. Each azimuth's wall reaches 90° (and starts curling) at a different distance
+   from the throat, so the lip curls at different depths around the mouth: the mouth edge becomes a 3-D saddle.
+   Iwata additionally changes the width/height ratio along the horn, hence the twisted, flowing look.
+3. **X-shapes (audiohorn.net).** No published geometry. Our physical reading [inferred]: a near-rectangular coverage
+   pattern needs the diagonal directions to keep up with the sides. Extending the diagonals ("arms") gives the corner
+   wavefront the same rollback room as the sides and spreads the mouth diffraction over many depths instead of one
+   ring. That is a hypothesis to test with the BEM, not a known result.
+4. **Min-Phase (Gerstgrasser).** An OS waveguide (good directivity control) whose mouth begins curling much earlier
+   (ETF slide p.126). That keeps OS directivity while borrowing JMLC's low-reflection mouth.
+
+### 9b.2 New typologies (generator names, knobs, construction)
+
+All lengths in mm, angles in degrees. Every typology takes its throat from the brief: `r0 = driver.exit_radius_mm`,
+`phi0 = driver.exit_angle_deg` (a **half**-angle; JMLC's driver tables give the included angle, so divide by 2).
+
+**T1 `lecleach` (axisymmetric JMLC, exact formulation).** Port of `docs/research/senior_pass_2026-10-24/evidence/jmlc_reference.py`
+into `design/generators/profiles.py` as `lecleach_exact(r0_mm, fc_hz, T, phi0_deg, stop_deg, dl_mm=1.0, c=C_AIR)`:
+```
+R0 = r0 / sin(phi0);  S0 = 2π R0² (1 − cos phi0);  m = 4π fc / c                     (Fourcade 11, 13, 43)
+S(l) = S0 [cosh(m l/2) + T sinh(m l/2)]²                                            (42)
+start: x0 = 0, y0 = r0, φ0 = phi0; l_i = i·dl
+for i = 1, 2, ...:
+    acc  = 2π (R0 + l_i)² (1 − cos phi0)                                            (15) spherical core
+    acc += Σ_{k=1}^{i−1} 2π h_k (h_k sin φ_{k−1} + y_{k−1}) dα_{k−1},  h_k = l_i − l_{k−1}   (20) earlier rings
+    S_ii = S(l_i) − acc                                                             (22) new compensating ring
+    r_i  = dl sin φ_{i−1} + y_{i−1}                                                 (23)
+    dα_{i−1} = S_ii / (2π r_i dl)                                                   (24)
+    φ_i = φ_{i−1} + dα_{i−1};  x_i = x_{i−1} + dl cos φ_i;  y_i = y_{i−1} + dl sin φ_i   (25–27)
+stop when φ_i ≥ stop_deg
+```
+The ring sum is O(i), so the whole march is O(n²): 500 steps take milliseconds; vectorize the sum with numpy (see
+the reference file). Output: the meridian as arc-length samples (x, y, φ), which is **not** a function y(x) past 90°.
+Knobs: `fc_hz` (300–1,200 for a 1" driver), `T` (0–1; 0.5 Iwata, 0.707 hypex, 0.8 JMLC default), `stop_deg`
+(90–270; above ~270° the curl nearly closes on itself, see 9b.4). Re-enable the `lecleach` name only when the
+validation test below passes (R9 gate satisfied by Fourcade's published table).
+
+**Validation (unit test, offline).** Fourcade fig. 7: fc 400 Hz, T 0.8, throat Ø25.4 mm, exit half-angle 8°,
+dl 1 mm, c 344 m/s, stop 360°.
+
+| quantity | published | our reference implementation (2026-10-24) | test tolerance |
+|---|---|---|---|
+| L0 (arc length at stop) for stop 90/180/270/360° | 394 / 467 / 496 / 511 mm | 394 / 467 / 496 / 512 mm | ±2 mm |
+| mouth wavefront area S(L0), stop 90/180/270/360° | 0.13 / 0.38 / 0.57 / 0.72 m² | 0.131 / 0.379 / 0.579 / 0.732 m² | ±2 % |
+| overall length (max x) | 321.35 mm | 321.41 mm (dl 0.5: 321.46) | ±1 mm |
+| overall width (2·max y) | 467.30 mm | 471.31 mm | ±1 % (**open item**: 0.9 % gap, see below) |
+| "throat cone angle" | 8.55° | (definition differs; our φ dips to 4.3° in the first mm) | report only |
+
+Open item: our width is 0.9 % larger, and the program's "throat angle" definition is unknown (its source is in
+`AxialHorn.zip`, which we do not have). Likely a different first-step convention (sphericalhorns notes adding
+the first outer element one step later). Try that variant; if it closes the gap, adopt it. Otherwise ship with ±1 %.
+
+**T2 `kugelwellen` (Klangfilm spherical-wave horn; Kolbrek eqs 18–22).**
+```
+r_k = c / (π fc)                 # constant wavefront sphere radius (= 2 × tractrix radius c/(2π fc))
+h0  = r_k − √(r_k² − r0²)        # throat cap height
+m   = 4π fc / c
+for x from 0 upward (x = axial distance of the wavefront apex from the throat apex):
+    h  = h0·e^(m x)              # area 2π r_k h grows exponentially
+    y  = √(2 r_k h − h²)         # rim radius (wall)
+    xw = x − h + h0              # rim axial position (wall)
+stop at h = 2 r_k (closed sphere) or at a chosen fold-back angle
+```
+The wall reaches 90° at h = 1/m = r_k/4 (y = (√7/4)·r_k ≈ 0.661 r_k, the axial maximum of x_w). It then folds
+back, reaches 180° at h = r_k (y = r_k, the maximum radius) and closes at h = 2 r_k [verified numerically
+2026-10-24, fc 800 Hz, r0 12.7 mm]. The wavefronts are not normal to the wall (Kolbrek), so expect slightly more
+mouth reflection than JMLC; that is a reason to include it as a comparison. Requires r0 < r_k. Knobs: `fc_hz`,
+`fold_deg` (stop angle, 90–240). Tests: those three landmarks within 0.5°/0.1 mm; x_end = ln(2 r_k/h0)/m.
+
+**T3 `jmlc_elliptical` (Level-1 elliptical JMLC, per-azimuth meridians).** Build one T1 meridian per azimuth φ with
+its own cutoff:
+```
+1/fc(φ) = cos²φ / fc_h + sin²φ / fc_v      # larger fc → narrower; fc_h < fc_v for a wide-horizontal horn
+```
+(same T, same throat). Rows are equal-**l** (same wavefront index), so row j of every φ belongs to the same
+wavefront index; the mouth edge is the set of each row's last point, which sits at different (x, y) per φ: the
+saddle. Stop rule per φ: `stop_deg` (same angle all around, the natural choice), or `L0` common. Knobs: `fc_h_hz`,
+`fc_v_hz`, `T`, `stop_deg`. Level 1 is an approximation: true 3-D JMLC also keeps wavefronts parallel *across*
+azimuths, which per-azimuth 2-D marches do not enforce. Report it as "JMLC-type elliptical", not as JMLC's own.
+
+**T4 `jmlc_iwata` (quasi-Iwata / FH-N2: width/height ratio law + T = 0.5).** Area-preserving elliptical stretch of
+an axisymmetric T1 meridian, which keeps JMLC's wavefront-area law exactly in the cross-section-area sense:
+```
+AR(l) = AR_t + (AR_m − AR_t)·(l/L0)^p            # width/height ratio, throat → mouth (Iwata: AR_t ≈ 1)
+y_h(l) = y(l)·√AR(l),  y_v(l) = y(l)/√AR(l)      # π·y_h·y_v = π·y² (area preserved)
+x is shared: x_h(l) = x_v(l) = x(l)
+intermediate φ: superellipse of exponent n(l) = 2 + (n_m − 2)·(l/L0)^q   (quasi-rectangular mouth)
+```
+Knobs: `fc_hz`, `T` (default 0.5 per JMLC), `AR_m` (1.2–2.5), `p` (0.5–3), `n_m` (2–6), `stop_deg`. This is our
+reconstruction of the published *principle* (ratio evolution + T = 0.5). JMLC's own Iwata point clouds are not
+public; say so in the catalog description.
+
+**T5 `x_shape` (hypothesis, audiohorn-inspired).** T3 or T4 plus a diagonal term on each azimuth's construction
+length and stop angle:
+```
+stop(φ) = stop_deg·(1 + x_amp·cos 4φ')      with φ' = φ − 45° so the maxima sit on the diagonals
+fc(φ)  from T3, optionally × (1 − x_fc·cos 4φ')  (diagonals flare slightly faster)
+```
+`x_amp` ∈ [0, 0.4], `x_fc` ∈ [0, 0.3]. x_amp = 0 must reproduce T3/T4 exactly (test). cos 4φ is even about both
+mirror planes, so the quarter model stays valid.
+
+**T6 `min_phase` (Gerstgrasser-style OS + early curl) [inferred from ETF slides 125–127; no formula published].**
+OS meridian `r(x) = √(r0² + tan²θ·x²)` (Kolbrek eq 23; OSSE with s = 0) from the throat to a switch point `x_s`, then
+continue with a JMLC-type curl. Implementation: from x_s, run the T1 march initialized with the OS point and
+angle (y = r(x_s), φ = atan(dr/dx)) and an S0 equal to the spherical-cap area through that point (R = y/sin φ). This
+is the WP9 `splice` idea applied to a curl. Knobs: `cov_half_deg` (θ), `xs_frac`, `fc_hz`, `T`, `stop_deg`.
+
+**T7 `toroidal_rollback` ("Ferguson"-like ring mouth).** T1 with stop 180–240° plus a large wall radius at the lip
+(`wall_thickness_mm` 6–12, rounded by the shell offset). Mainly a geometry preset of T1 for the catalog; list it so
+users can find the look.
+
+**T8 (research, optional) `jmlc_3d`: true 3-D parallel-wavefront construction.** Wavefront surface W_i (triangulated)
+→ offset by dl along its normals → add a rim strip whose angular growth dα(φ) is split around the rim to keep the
+total area on S(l) and steer the rim aspect toward AR(l). Eikonal/level-set flavoured. Do it only if T3/T4 results
+justify it.
+
+### 9b.3 Geometry pipeline (GRID route)
+
+1. **Rows.** For quarter models, φ_j = 0…90° with n_phi ≥ 13 (≥ 25 when x_amp > 0). For each φ_j the generator returns
+   (x, y, φ) samples on the arc-length grid. Resample every row to the **same n_s** by normalized arc length (use
+   l/L0(φ), so row k is "the same fraction of the horn" for every φ). The point grid needs a rectangular (n_phi × n_s)
+   array.
+2. **3-D points.** For T3/T5 each row's radius is used directly at its azimuth: `P = (y·cos φ, y·sin φ, x)`. For T4:
+   `P = (y_h(l)·cos θ_s, y_v(l)·sin θ_s, x(l))`, where θ_s traces the superellipse of exponent n(l). Units: mm (the GRID
+   adapter converts as WP10 specifies).
+3. **Non-monotone x.** Past 90° x decreases along a row. The point grid stores 3-D points per row, so this is
+   representable (Magnus's R-OSSE rollback already produces such grids). **Verify** with one T1 horn at stop 200°
+   before anything else; if the builder assumes monotone z, that is a fork change (FORKS.md) in the mesher, not a
+   reason to drop rollback.
+4. **Wall thickness / outer shell.** Offset the profile along the in-plane normal by t (Fourcade eq 28–29:
+   `x_d = x + t·cos(φ + π/2)`, `y_d = y + t·sin(φ + π/2)`) and pass it as `outer_points`, or let the mesher offset.
+   Check the curl's inner gap: the minimum distance between any two non-adjacent points of a row (and its offset)
+   must be ≥ 2t + 2 mm, otherwise refuse (`GeneratorError`, a graded infeasible penalty per WP3).
+5. **Source.** JMLC's throat wavefront is a spherical cap of radius R0 = r0/sin φ0, which is exactly our
+   `source.cap: auto` (r0/sin θ_throat). Keep `auto`.
+6. **Envelope.** Use the meshed bbox as now; rollback adds width, not depth, so curled horns need wide, shallow
+   envelopes.
+
+### 9b.4 Limits and failure modes to test for
+
+- **Stop angle.** At 360° Fourcade's horn has a nearly closed spiral: thin air pockets and self-approach. Default
+  `stop_deg` ≤ 240; bounds [90, 270].
+- **Size versus cutoff.** fc 400 Hz on 1" gives ≈ 470 mm wide and 320 mm long. For the 1" briefs use fc 600–1,200 Hz
+  (smaller, and the band starts at 700 Hz anyway).
+- **dofs.** The curled lip roughly doubles the radiating surface over a 90°-stopped horn of the same width. Screen at
+  f_max 4–5.5 kHz on the current CUDA path; 8–12 kHz only after WP15 (fused CUDA) or on `beat_cpu`.
+- **Thin gaps** between the curl and the outer shell behave like thin septa (near-singular quadrature): validate one
+  design on `beat_cpu` with `near_correction=True` before trusting CUDA screens (as WP14).
+- **Throat mismatch.** If `phi0` (driver) differs from where the law wants to start, the profile ripples in the first
+  millimetres (JMLC's own remark; our reference dips from 8° to 4.3°). Report `throat_angle_mismatch_deg` (WP2).
+
+### 9b.5 Files, tests, catalog
+
+- `design/generators/profiles.py`: `lecleach_exact`, `kugelwellen`, helper `resample_by_arclength`; keep the old
+  `lecleach()` raising until T1's validation test passes, then route `lecleach` to `lecleach_exact`.
+- `design/generators/grid.py` (WP10) gains row builders `rows_axisym(meridian)`, `rows_per_azimuth(fc_of_phi, …)`,
+  `rows_ar_stretch(meridian, AR, n_exp)`, `x_shape_modulation(...)`.
+- Tests (`tests/test_design_generators_lecleach.py`, `..._kugelwellen.py`, `..._grid_organic.py`):
+  Fourcade table (above); Kugelwellen closed-form checks; T3 with fc_h = fc_v equals T1 at every φ (≤ 1e-9 mm);
+  T4 with AR_m = 1 and n_m = 2 equals T1; T5 with x_amp = 0 equals T3/T4; quarter-symmetry of every grid
+  (mirror rows match within 1e-9); the self-approach refusal; arc-length resampling keeps endpoints exactly.
+- `examples/typologies/`: `lecleach.yaml` (replace the gated stub), `kugelwellen.yaml`, `jmlc_elliptical.yaml`,
+  `jmlc_iwata.yaml`, `x_shape.yaml`, `min_phase.yaml`, `toroidal_rollback.yaml`; catalog group `organic`
+  (axisymmetric ones also usable under axi briefs). Starting bounds for 1": fc 600–1,200 Hz; T 0.3–1.0;
+  stop 120–240°; fc_v/fc_h 1.0–2.0; AR_m 1.2–2.2; x_amp 0–0.35.
+- Brief `examples/briefs/organic_rollback_1in.yaml`: 90×60, band 700–5,500 Hz, envelope about 520×420×260 mm
+  (wide and shallow), `source.cap: auto`, objective v2 once WP1 lands.
+- Evidence `docs/evidence/ORGANIC_SMOKE_<date>.md`: one screen run per typology, with screenshots from the GUI 3-D
+  view and the CPU near-correction check of one curled design.
+
+### 9b.6 How the owner runs them (after WP9b + WP10 land)
+
+```
+hornlab-search families --brief examples\briefs\organic_rollback_1in.yaml
+hornlab-search campaign --brief examples\briefs\organic_rollback_1in.yaml --families organic --tier screen
+hornlab-search gui            # Typologies page / 3-D view to see the shapes; Export STEP for renders
+```
 
 ## WP10. GRID family via the mesher's point-grid builder
 

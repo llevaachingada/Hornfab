@@ -19,6 +19,10 @@ entries:
     config: osse_baseline.yaml
     group: magnus
     symmetry: hv
+    # WP2 (senior pass 2026-10-24): this entry is tied to its own 1.4-inch driver (r0 17.78 mm,
+    # brief osse_75x45.yaml); campaigns under a 1-inch brief SKIP it with the reason printed.
+    driver_exit_mm: 17.78
+    brief_tied: osse_75x45.yaml
     description: OSSE baseline 75x45 deg, 1.4-inch driver, 10 searchable knobs (CP-8c reference)
 
   - name: rosse_baseline

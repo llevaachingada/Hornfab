@@ -14,8 +14,11 @@ Generator block::
       profile_v: same                         # 'same' (axisymmetric meridian) or a spec
       blend_h: {type: conical}                # optional second parent for H; knob h_w in [0, 1]
       blend_v: ...                            # optional, V
-      perturb: {u_max: 0.35}                  # optional monotone-increment perturbation; knobs
-                                              # h_u0..h_u{n-2} (and v_u* when V differs)
+      perturb: {u_max: 0.35, mode: legacy}    # optional monotone-increment perturbation; knobs
+                                              # h_u0..h_u{n-2} (and v_u* when V differs).
+                                              # mode 'legacy' (default) = exp(u) increments, which
+                                              # move mouth size too; 'shape' rescales the
+                                              # increments to keep the parent mouth radius
       n_anchors: 16
       max_wall_deg: 80.0
       mouth: ellipse                          # ellipse | superellipse (knob mouth_exponent) |
@@ -156,16 +159,24 @@ def materialize(gen: dict, knobs: dict, brief: dict) -> dict:
     ah = _anchors_rounded(mh, n_anchors, max_wall)
     av = ah if same else _anchors_rounded(mv, n_anchors, max_wall)
     pert = gen.get("perturb")
+    # Single place the perturbation is applied.  Absent ``mode`` (or 'legacy') is byte-for-byte
+    # the previous behaviour; 'shape' keeps the parent mouth radius (see profiles.py).
+    pert_mode = "legacy"
+    if pert:
+        pert_mode = str(pert.get("mode", "legacy"))
+        if pert_mode not in ("legacy", "shape"):
+            raise GeneratorError(f"perturb mode must be 'legacy' or 'shape', got {pert_mode!r}")
     if pert and any(abs(_knob(knobs, p, f"u{i}")) > 0 for p in ("h", "v") for i in range(len(ah) - 1)):
         # (all u == 0 leaves the parent typology's anchors and exact wall angles untouched)
         u_max = float(pert.get("u_max", 0.35))
+        perturb = P.perturb_increments_shape if pert_mode == "shape" else P.perturb_increments
         uh = [_knob(knobs, "h", f"u{i}") for i in range(len(ah) - 1)]
-        ah = [[round(float(x), _ROUND) for x in row] for row in P.perturb_increments(ah, uh, u_max)]
+        ah = [[round(float(x), _ROUND) for x in row] for row in perturb(ah, uh, u_max)]
         if same:
             av = ah
         else:
             uv = [_knob(knobs, "v", f"u{i}") for i in range(len(av) - 1)]
-            av = [[round(float(x), _ROUND) for x in row] for row in P.perturb_increments(av, uv, u_max)]
+            av = [[round(float(x), _ROUND) for x in row] for row in perturb(av, uv, u_max)]
         for rows in (ah, av):
             for row in rows:
                 row[2] = max(-max_wall, min(max_wall, row[2]))
@@ -221,3 +232,78 @@ def info(gen: dict, knobs: dict, brief: dict) -> dict:
     except Exception:  # noqa: BLE001 - report-only
         pass
     return out
+
+
+#: Tolerance search/evaluate.py::envelope_violation applies to the mouth W/H (mm).
+_ENVELOPE_MOUTH_TOLERANCE_MM = 0.5
+
+
+def _profile_radii(params: dict, key: str) -> list[float] | None:
+    """Anchor radii of ``profileH``/``profileV``; None if this is not the generated form."""
+    prof = params.get(key)
+    if not isinstance(prof, dict):
+        return None
+    pts = prof.get("points")
+    if not isinstance(pts, (list, tuple)) or not pts:
+        return None
+    radii = []
+    for row in pts:
+        try:
+            radii.append(float(row[1]))
+        except (TypeError, ValueError, IndexError):
+            return None
+    return radii
+
+
+def envelope_overshoot_estimate(params: dict, brief: dict | None) -> float | None:
+    """Relative size-envelope overshoot of a generated FREEFORM design, before meshing.
+
+    Mimics ``search/evaluate.py::envelope_violation`` on the materialized anchors so a
+    candidate that will be rejected after meshing can be scored without meshing:
+
+    * outer width  = 2 * (max ``profileH`` radius + ``wall_thickness_mm``)
+    * outer height = 2 * (max ``profileV`` radius + ``wall_thickness_mm``)
+    * depth        = anchor z span + ``wall_thickness_mm``
+
+    The shell offset is included because the post-mesh bounding box includes the free-
+    standing outer shell.  The limits are the post-mesh ones: brief ``max_mouth_w_mm``/
+    ``max_mouth_h_mm`` plus the 0.5 mm meshing tolerance and ``max_depth_mm`` plus
+    ``ENVELOPE_DEPTH_ALLOWANCE_MM`` (imported lazily from evaluate to keep the design
+    layer import-free of the search layer at module load).
+
+    Returns ``max(0, max(value/limit - 1))`` over the three dimensions: ``0.0`` when the
+    estimate is inside, a positive relative overshoot when it is outside.  ``None`` when
+    ``brief`` is None or ``params`` is not the generated-``profileH``/``profileV`` form.
+    Conservative by construction (the radial shell offset is added in full); verified
+    against every existing typology seed, which estimates 0.0.
+    """
+    if brief is None or not isinstance(params, dict):
+        return None
+    rad_h = _profile_radii(params, "profileH")
+    rad_v = _profile_radii(params, "profileV")
+    if rad_h is None or rad_v is None:
+        return None
+    env = brief.get("envelope") or {}
+    if not env:
+        return 0.0
+    try:
+        wt = float(params.get("wall_thickness_mm", 3.0))
+        lim_w = float(env.get("max_mouth_w_mm", 1e9)) + _ENVELOPE_MOUTH_TOLERANCE_MM
+        lim_h = float(env.get("max_mouth_h_mm", 1e9)) + _ENVELOPE_MOUTH_TOLERANCE_MM
+        from ...search.evaluate import ENVELOPE_DEPTH_ALLOWANCE_MM
+        lim_d = float(env.get("max_depth_mm", 1e9)) + float(ENVELOPE_DEPTH_ALLOWANCE_MM)
+    except (TypeError, ValueError):
+        return None
+    if not (math.isfinite(wt) and wt >= 0.0
+            and lim_w > 0.0 and lim_h > 0.0 and lim_d > 0.0):
+        return None
+    # profileH is the horizontal meridian (x), profileV the vertical one (y).
+    z_h = [float(row[0]) for row in params["profileH"]["points"]]
+    z_v = [float(row[0]) for row in params["profileV"]["points"]]
+    w_mm = 2.0 * (max(rad_h) + wt)
+    h_mm = 2.0 * (max(rad_v) + wt)
+    depth_mm = (max(max(z_h), max(z_v)) - min(min(z_h), min(z_v))) + wt
+    overshoot = max(w_mm / lim_w - 1.0, h_mm / lim_h - 1.0, depth_mm / lim_d - 1.0, 0.0)
+    if not math.isfinite(overshoot):
+        return None
+    return float(overshoot)

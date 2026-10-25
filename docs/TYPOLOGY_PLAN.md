@@ -172,3 +172,17 @@ expectations is checked against V4–V5 before it is believed.
 
 Order: A and B in parallel → C wiring → V3 → V4/V5/V6 (GPU) → V7 screen → compare. Every commit updates CONTINUITY
 and ISSUES. Ownership: edits to task-04/05/08 paths are user-authorised and listed in NOTES_FOR_SENIOR.
+
+---
+
+## Dated note 2026-10-24 (senior pass WP4): screens rank coarsely; re-rank finalists on the dense grid
+
+The screen tier's 12-point log grid is a coarse ranking device (docs/evidence/TYPOLOGY_SCREEN_2026-10-22.md:
+neighbouring families often separate by less than the screen grid's own resolution). A screen result is a
+shortlist, never a published ranking. Briefs that set `grid: {verify_points_per_octave: N}` (senior pass
+2026-10-24, `hornlab_search/config.py::mode_freqs`) build the verify grid as the frozen 25-point grid PLUS
+extra log points in [5 kHz, band_hi] at that density; finalists are re-ranked on that denser grid before any
+comparison is quoted. The extended grid is its own frequency-grid group — comparisons against runs on the
+frozen grid refuse rather than mixing grids. Per-frequency objective weights under objective v2
+(`Target.freq_weights`) apply only with `objective: {version: 2}` in the brief; under v1 the key is ignored
+with a one-time WARNING (it was silently ignored before).

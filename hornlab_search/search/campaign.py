@@ -124,8 +124,13 @@ def is_compatible(entry: dict, brief: dict) -> tuple[bool, str]:
 
     Returns (ok, reason). Reason is empty when ok=True.
 
-    Current check (TYPOLOGY_PLAN.md s7, R4):
-    - An axisymmetric entry is incompatible with a brief whose coverage_h != coverage_v.
+    Current checks:
+    - An axisymmetric entry is incompatible with a brief whose coverage_h != coverage_v
+      (TYPOLOGY_PLAN.md s7, R4).
+    - WP2 (senior pass 2026-10-24): an entry tied to its own driver exit (catalog key
+      ``driver_exit_mm``, e.g. osse_baseline's 1.4-inch throat) cannot compete under a brief with
+      a different driver — the campaign SKIPs it with the reason printed, instead of comparing
+      across different objectives.
     """
     entry_sym = entry.get("symmetry", "hv")
     brief_sym = brief.get("symmetry", "hv")
@@ -137,6 +142,16 @@ def is_compatible(entry: dict, brief: dict) -> tuple[bool, str]:
             f"entry symmetry 'axisymmetric' is incompatible with brief coverage_h={h} != coverage_v={v}; "
             "axisymmetric families require coverage_h == coverage_v"
         )
+    tied_exit = entry.get("driver_exit_mm")
+    if tied_exit is not None:
+        brief_exit = (brief.get("driver") or {}).get("exit_radius_mm")
+        if isinstance(brief_exit, (int, float)) and abs(float(brief_exit) - float(tied_exit)) > 0.01:
+            tied_brief = entry.get("brief_tied") or "its own brief"
+            return False, (
+                f"entry is tied to its {float(tied_exit):g} mm driver exit ({tied_brief}); the "
+                f"campaign brief '{brief.get('name', '?')}' has a {float(brief_exit):g} mm exit; "
+                "skip (WP2 driver fairness, senior pass 2026-10-24)"
+            )
     return True, ""
 
 

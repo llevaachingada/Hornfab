@@ -41,6 +41,7 @@ from ..mesh.build import MeshConsistencyError, build_mesh
 from ..metrics.compute import compute_metrics
 from ..metrics.di import di_from_balloon, sin_theta_weights
 from ..objective import PENALTY_FAILED, PENALTY_INVALID, objective, penalty_result
+from ..objective.scalar_v2 import objective_v2
 from ..solve import cache as solve_cache
 from ..solve.base import theta_deg_from_dirs
 from ..targets.spec import Target
@@ -50,12 +51,27 @@ from ..types import (Design, Evaluation, GeometryInvalidError, MeshResult, MeshT
 log = logging.getLogger("hornlab_search.search.evaluate")
 
 KIND_INVALID = "invalid_geometry"
+KIND_INVALID_ENV = "invalid_envelope"   # WP3: pre-mesh envelope estimate violated (graded penalty)
 KIND_TOO_LARGE = "mesh_too_large"
 KIND_SOLVE = "solve_failed"
 KIND_METRICS = "metrics_failed"
 KIND_EXC = "exception"
 #: Pure functions of the design: worth memoizing, and re-running them is wasted effort.
 DETERMINISTIC_KINDS = (KIND_INVALID, KIND_TOO_LARGE)
+
+_FREQ_WEIGHTS_V1_WARNED = False
+
+
+def warn_freq_weights_v1(cfg, target: Target) -> None:
+    """WP4 (senior pass 2026-10-24): ``Target.freq_weights`` under objective v1 is IGNORED — warn
+    once per process so the YAML is never honoured silently, and point at the opt-in. Never in
+    the hot path more than once."""
+    global _FREQ_WEIGHTS_V1_WARNED
+    if _FREQ_WEIGHTS_V1_WARNED or getattr(cfg, "objective_version", 1) != 1 or not target.freq_weights:
+        return
+    log.warning("Target.freq_weights is set but objective v1 ignores it (WP4): per-frequency "
+                "weights apply only under 'objective: {version: 2}' in the brief")
+    _FREQ_WEIGHTS_V1_WARNED = True
 
 TRACE_KIND = "p1_pressure_by_node+dp0_neumann_by_element"
 
@@ -114,6 +130,7 @@ class EvalContext:
     counters: Counter = field(default_factory=Counter)
     write_ndjson: bool = True
     provenance: dict = field(default_factory=dict)     # config / brief identity for dataset records (R8)
+    objective_version: int = 1                         # WP1: 2 when the brief/config opts in
 
     @property
     def solve_cache_root(self) -> Path | None:
@@ -139,6 +156,7 @@ def make_context(cfg, store=None, *, cache_dir=None, lib_shas=None,
                       lib_shas=lib_shas if lib_shas is not None else collect_lib_shas(),
                       cache_dir=None if cache_dir is None else Path(cache_dir),
                       trace_fraction=float(trace_fraction))
+    ctx.objective_version = int(getattr(cfg, "objective_version", 1))
     ctx.provenance = record_provenance(cfg)
     if store is not None:
         ctx.store_seen = {(e.get("design_hash"), e.get("mode"), bool(e.get("ok"))) for e in store.index}
@@ -279,7 +297,39 @@ def loading_extras(freqs_hz, z_real, target: Target) -> dict:
 
 #: Report-only scalars added by ``directivity_extras`` (never weighted into J).
 EXTRA_SCALAR_KEYS = ("spdi_mean_db", "spdi_range_db", "lw_minus_on_axis_mean_db",
-                     "beam_p_mean", "beam_p_residual_pct_mean", "beam_p_n_valid")
+                     "beam_p_mean", "beam_p_residual_pct_mean", "beam_p_n_valid",
+                     "throat_angle_mismatch_deg")
+
+
+def _design_throat_angles_deg(design: Design) -> list[float]:
+    """The design's throat wall angle(s) in degrees, per plane where it is defined.
+
+    OSSE/R-OSSE/ICW carry one ``a0_deg``; generated and native FREEFORM designs carry
+    ``profileH.throatAngleDeg`` / ``profileV.throatAngleDeg``. Empty list when the family exposes
+    no throat-angle key (then the mismatch is undefined, not zero)."""
+    p = design.params.get("a0_deg")
+    if isinstance(p, (int, float)) and not isinstance(p, bool):
+        return [float(p)]
+    out = []
+    for plane in ("profileH", "profileV"):
+        v = (design.params.get(plane) or {}).get("throatAngleDeg")
+        if isinstance(v, (int, float)) and not isinstance(v, bool):
+            out.append(float(v))
+    return out
+
+
+def _throat_angle_mismatch_deg(design: Design, brief: dict | None) -> float | None:
+    """WP2 report scalar: |throat angle - brief driver exit angle| in degrees, the WORST plane
+    for H/V designs. None when there is no brief or the family has no throat angle."""
+    if not brief:
+        return None
+    exit_a = (brief.get("driver") or {}).get("exit_angle_deg")
+    if not isinstance(exit_a, (int, float)):
+        return None
+    angles = _design_throat_angles_deg(design)
+    if not angles:
+        return None
+    return float(max(abs(a - float(exit_a)) for a in angles))
 
 
 def directivity_extras(resp: Response, m: MetricSet, target: Target) -> dict:
@@ -356,13 +406,15 @@ def error_kind(error: str) -> str:
     return error.split(":", 1)[0] if error else ""
 
 
-def evaluation_to_row(ev: Evaluation, mode: str, n: int, seconds: dict) -> dict:
+def evaluation_to_row(ev: Evaluation, mode: str, n: int, seconds: dict,
+                      objective_version: int = 1) -> dict:
     m = ev.mesh
     out = ev.outcome
     return to_jsonable({
         "n": n, "mode": mode, "key": f"{ev.design_hash}-{ev.mesh_hash}-{ev.solve_hash}",
         "design_hash": ev.design_hash, "mesh_hash": ev.mesh_hash, "solve_hash": ev.solve_hash,
         "family": ev.design.family, "params": ev.design.params,
+        "objective_version": int(objective_version),
         "objective": ev.objective, "terms": ev.terms, "ok": not ev.error, "error": ev.error,
         "kind": error_kind(ev.error), "cached": ev.cached, "seconds": seconds,
         "n_dof": None if m is None else m.n_dof,
@@ -476,6 +528,7 @@ def evaluate(design: Design, space, cfg, mode: str, run_dir, store, backend, *,
     # (found live: `--resume runs\<dir>` made every solve fail with "opening file ... No such file").
     run_dir = Path(run_dir).resolve()
     ctx = ctx or make_context(cfg, store)
+    warn_freq_weights_v1(cfg, ctx.target)
     t_start = time.perf_counter()
     mspec = config_mod.mesh_spec(mode, cfg)
     sspec = config_mod.solve_spec(mode, cfg)
@@ -517,7 +570,7 @@ def evaluate(design: Design, space, cfg, mode: str, run_dir, store, backend, *,
             log.debug("generator provenance failed", exc_info=True)
     if kind:
         err = f"{kind}: {st['err']}"
-        J, terms = penalty_result(PENALTY_INVALID if kind in DETERMINISTIC_KINDS else PENALTY_FAILED)
+        J, terms = penalty_result(_failure_penalty(kind, design, cfg))
     else:
         err, J, terms = "", st["J"], st["terms"]
     mesh, outcome = st["mesh"], st["outcome"]
@@ -545,12 +598,38 @@ def evaluate(design: Design, space, cfg, mode: str, run_dir, store, backend, *,
     return ev
 
 
+def _failure_penalty(kind: str, design: Design, cfg) -> float:
+    """The penalty J for an expected-failure kind. WP3 (senior pass 2026-10-24): with
+    ``search: {infeasible_penalty: graded}`` a pre-mesh envelope violation (kind invalid_envelope)
+    is graded by the generator's relative overshoot capped at 2·PENALTY_INVALID; the default
+    'flat' keeps today's flat PENALTY_INVALID. Other kinds are unchanged."""
+    from ..design.generated import GENERATOR_OVERSHOOT_KEY
+    from ..objective.terms import graded_infeasible_penalty
+
+    if kind == KIND_INVALID_ENV and getattr(cfg, "search", None) is not None and \
+            getattr(cfg.search, "infeasible_penalty", "flat") == "graded":
+        over = design.params.get(GENERATOR_OVERSHOOT_KEY)
+        if isinstance(over, (int, float)) and not isinstance(over, bool) and np.isfinite(float(over)):
+            return graded_infeasible_penalty(float(over))
+        return graded_infeasible_penalty(0.0)          # == PENALTY_INVALID
+    return PENALTY_INVALID if kind in DETERMINISTIC_KINDS else PENALTY_FAILED
+
+
 def _failure_marker(ctx: EvalContext, key: str) -> Path | None:
     """Where a DETERMINISTIC failure of this exact (design, mesh spec, solve spec) key is
     remembered across runs, so a replay with the same CMA seed does not spend budget re-failing
     it (ISSUES 2026-10-22). The key already includes the mesh spec (mode, epw, dof cap)."""
     root = ctx.solve_cache_root
     return None if root is None else Path(root) / "failures" / f"{key}.json"
+
+
+def _score(metrics, resp, ctx) -> tuple[float, dict]:
+    """The objective dispatch (WP1, senior pass 2026-10-24): version 1 keeps the exact v1 path
+    (and every old run reproduces bit-for-bit); version 2 (brief/config``objective: {version: 2}``)
+    scores with the detrended terms in ``objective/scalar_v2.py``. Same key set either way."""
+    if ctx.objective_version == 2:
+        return objective_v2(metrics, resp, True, ctx.target, ctx.weights)
+    return objective(metrics, True, ctx.target, ctx.weights)
 
 
 def _compute(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx, st) -> None:
@@ -568,7 +647,9 @@ def _compute(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx, st)
         except Exception as exc:  # noqa: BLE001 - a bad marker is ignored, the design re-runs
             log.warning("failure marker %s unreadable: %s", marker, exc)
     if GENERATOR_ERROR_KEY in design.params:            # typology knobs gave no legal horn
-        st["kind"], st["err"] = KIND_INVALID, f"generator: {design.params[GENERATOR_ERROR_KEY]}"
+        gerr = str(design.params[GENERATOR_ERROR_KEY])
+        env_kind = KIND_INVALID_ENV if gerr.startswith("invalid_envelope") else KIND_INVALID
+        st["kind"], st["err"] = env_kind, f"generator: {gerr}"
         return
     try:
         mesh = build_mesh(design, mspec, cfg, design_dir, mode=mode, cache_dir=ctx.mesh_cache_root)
@@ -614,7 +695,12 @@ def _compute(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx, st)
     except Exception as exc:  # noqa: BLE001
         st["kind"], st["err"] = KIND_METRICS, f"{type(exc).__name__}: {exc}\n{traceback.format_exc()}"
         return
-    st["J"], st["terms"] = objective(st["metrics"], True, ctx.target, ctx.weights)
+    brief = getattr(cfg, "brief", None)
+    mismatch = _throat_angle_mismatch_deg(design, brief)
+    if mismatch is not None:
+        # WP2 report-only scalar (senior pass 2026-10-24): never weighted, never fails a solve.
+        st["metrics"].scalars["throat_angle_mismatch_deg"] = mismatch
+    st["J"], st["terms"] = _score(st["metrics"], st["resp"], ctx)
     if root is not None and not st["from_disk"]:
         try:
             solve_cache.store(key, root, resp, {"ok": True, "objective": st["J"],
@@ -683,7 +769,8 @@ def _persist(ev: Evaluation, mode: str, sspec, design_dir: Path, ctx: EvalContex
                           type(exc).__name__, exc)
 
     # ---- the ndjson row, last
-    row = evaluation_to_row(ev, mode, ctx.n_rows, seconds)
+    row = evaluation_to_row(ev, mode, ctx.n_rows, seconds,
+                            objective_version=ctx.objective_version)
     if st.get("generator"):
         row["generator"] = to_jsonable(st["generator"])
     if ctx.write_ndjson:

@@ -96,3 +96,20 @@ def load_term(z_real, target: Target) -> tuple[float, int]:
     z = np.asarray(z_real, float)
     m, n = _mean(np.maximum(0.0, target.z_min - z))
     return m, n
+
+
+#: Ceiling of the graded infeasibility penalty (2 * PENALTY_INVALID). At overshoot 10 and
+#: beyond every invalid design scores the same; below it the score points back toward the
+#: feasible region, which the flat PENALTY_INVALID plateau cannot do.
+PENALTY_INVALID_GRADED_CAP = 2.0e3
+
+
+def graded_infeasible_penalty(overshoot: float) -> float:
+    """Graded penalty for a pre-mesh envelope violation.
+
+    ``PENALTY_INVALID + 100 * max(0, overshoot)``, capped at
+    ``PENALTY_INVALID_GRADED_CAP``. Always finite, >= PENALTY_INVALID, and monotone
+    non-decreasing in ``overshoot``; far above any valid J (O(10-100)).
+    """
+    return min(PENALTY_INVALID_GRADED_CAP,
+               PENALTY_INVALID + 100.0 * max(0.0, float(overshoot)))

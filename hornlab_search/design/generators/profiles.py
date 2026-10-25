@@ -431,3 +431,72 @@ def hermite_reference(anchors: list[list[float]], z_mm) -> np.ndarray:
     slopes = np.tan(np.radians(np.array([a[2] for a in anchors], dtype=float)))
     cs = CubicHermiteSpline(z_arr, r_arr, slopes)
     return cs(np.asarray(z_mm, dtype=float))
+
+
+def perturb_increments_shape(
+    anchors: list[list[float]],
+    u,
+    u_max: float,
+) -> list[list[float]]:
+    """Shape-only monotone-increment perturbation of anchor radii.
+
+    Same construction as :func:`perturb_increments` -- base increments
+    ``d_i = r_{i+1} - r_i`` are scaled by ``exp(clip(u_i, -u_max, u_max))`` and the
+    radii rebuilt from the throat -- but the perturbed increment vector is then
+    rescaled so its sum is unchanged::
+
+        new_d *= d.sum() / new_d.sum()
+
+    The mouth radius is the anchor-radius sum, so it is unchanged to floating-point
+    precision: these knobs redistribute the *shape* (where the expansion happens)
+    without changing the size.  Mouth size comes from the parent typology's own
+    knobs (e.g. ``h_rm_mm``), not from this perturbation.
+
+    ``z`` values are unchanged and the angles are re-derived exactly as in
+    :func:`perturb_increments` (monotone PCHIP; throat angle kept from anchor 0).
+    ``u_max`` clamping is identical, so every increment stays positive and in the
+    same direction class as the legacy path.
+
+    Raises
+    ------
+    ValueError
+        If ``len(u) != len(anchors) - 1``, if the base increments are not all
+        positive (same as the legacy path), or if the rescaled increment sum is not
+        a finite positive number (impossible-knob guard; the registry turns this
+        into an invalid-geometry candidate like any other bad knob).
+    """
+    u = np.asarray(u, dtype=float)
+    n = len(anchors)
+    if len(u) != n - 1:
+        raise ValueError(f"len(u)={len(u)} must equal len(anchors)−1={n - 1}")
+
+    z_arr   = np.array([a[0] for a in anchors], dtype=float)
+    r_arr   = np.array([a[1] for a in anchors], dtype=float)
+    theta_base = float(anchors[0][2])
+
+    d = np.diff(r_arr)
+    if np.any(d <= 0.0):
+        raise ValueError("base increments r_{i+1}−r_i must all be > 0")
+
+    new_d = d * np.exp(np.clip(u, -u_max, u_max))
+    total = float(np.sum(new_d))
+    if not np.isfinite(total) or total <= 0.0:
+        raise ValueError("perturbed increment sum is not finite and positive; "
+                         "cannot rescale to the parent mouth radius")
+    new_d = new_d * (float(np.sum(d)) / total)
+
+    new_r = np.empty(n)
+    new_r[0] = r_arr[0]
+    for i in range(n - 1):
+        new_r[i + 1] = new_r[i] + new_d[i]
+
+    # Re-derive angles via monotone PCHIP (identical to perturb_increments)
+    pchip = PchipInterpolator(z_arr, new_r)
+    drdzm = pchip.derivative()(z_arr)
+    new_theta = np.degrees(np.arctan(drdzm))
+    new_theta[0] = theta_base   # keep throat angle from base
+
+    return [
+        [float(z_arr[i]), float(new_r[i]), float(new_theta[i])]
+        for i in range(n)
+    ]

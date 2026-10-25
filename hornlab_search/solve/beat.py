@@ -33,6 +33,7 @@ Facts about the installed ``hornlab-beat-bem`` 0.2.0 (read from its source, not 
 from __future__ import annotations
 
 import logging
+import os
 import time
 import traceback
 from types import SimpleNamespace
@@ -146,6 +147,31 @@ def _native_diagnostics(raw) -> list | None:
     return out if any(d is not None for d in out) else None
 
 
+def _assert_cuda_fused_path(raw, spec: SolveSpec) -> None:
+    """WP15: a ``cuda_fused`` solve must PROVE it ran the fused CUDA path. The driver adds
+    ``"assembly_path" => "fused_cuda"`` to every per-frequency ``native_diagnostics`` only when
+    that path ran. No diagnostics at all, or a different path, means the solve silently used the
+    old 4-operator CUDA path (e.g. a warm host started before
+    ``HORNLAB_BEAT_FUSED_BM_CUDA=1`` was set) and is REFUSED here — that data must never be
+    presented as a fused solve. Clear the host (``hornlab-search gpu-clean``) and solve again."""
+    if not bool((spec.extra or {}).get("cuda_fused")):
+        return
+    seen = bad = 0
+    for e in (getattr(raw, "solver_log", None) or []):
+        d = e.get("native_diagnostics") if isinstance(e, dict) else None
+        if not isinstance(d, dict):
+            continue
+        seen += 1
+        if str(d.get("assembly_path", "")) != "fused_cuda":
+            bad += 1
+    if seen == 0 or bad:
+        raise ResponseSanityError(
+            "solve.cuda_fused was requested but the driver diagnostics do not prove the fused "
+            f"CUDA path ran ({seen} per-frequency diagnostic entries, {bad} without "
+            "assembly_path == 'fused_cuda'; a warm host started without "
+            "HORNLAB_BEAT_FUSED_BM_CUDA=1 must be cleared first: hornlab-search gpu-clean)")
+
+
 def _to_response(raw, spec: SolveSpec, mesh: MeshResult) -> Response:
     """Build our ``Response`` from a (stacked) beat result. RAISES ``ResponseSanityError`` on any
     array that cannot be right; it never returns a bad Response.
@@ -232,6 +258,9 @@ def _to_response(raw, spec: SolveSpec, mesh: MeshResult) -> Response:
 
     mi = raw.mesh_info
     n_dof = _p1_dof_count(raw)
+    # WP15: when a cuda_fused solve is requested, PROVE the fused path ran before building a
+    # Response (refusal above otherwise); meta carries the evidence.
+    _assert_cuda_fused_path(raw, spec)
     meta = {
         "device": getattr(getattr(raw, "config", None), "beat_backend", None),
         "is_partial": bool(getattr(raw, "is_partial", False)),
@@ -256,6 +285,8 @@ def _to_response(raw, spec: SolveSpec, mesh: MeshResult) -> Response:
                           "NOT equal-area: weight by sin(theta)" if sp is not None else None,
         "native_diagnostics": _native_diagnostics(raw),
         "n_dof_source": "solver_log[i].native_diagnostics.p1_dof_count (fallback: mesh_info.n_vertices)",
+        "cuda_fused": bool((spec.extra or {}).get("cuda_fused")),
+        "mesh_policy": (spec.extra or {}).get("mesh_policy"),
     }
     return Response(
         freqs_hz=want_f.copy(),
@@ -288,9 +319,12 @@ class BeatBackend:
     """
 
     def __init__(self, device: str, timeout_s: float | None = None, track_vram: bool = True,
-                 per_frequency_calls: bool | None = None, notes_path=None):
+                 per_frequency_calls: bool | None = None, notes_path=None,
+                 cuda_fused: bool = False):
         if device not in ("cuda", "cpu"):
             raise ValueError(f"device must be 'cuda' or 'cpu', got {device!r}")
+        if cuda_fused and device != "cuda":
+            raise ValueError(f"cuda_fused is only implemented for the cuda backend, got {device!r}")
         self.device = device
         self.name = f"beat_{device}"
         self.timeout_s = timeout_s
@@ -299,6 +333,11 @@ class BeatBackend:
         # one call 18.3 s vs per-frequency 19.2 s; 2,316 dofs, 6 freqs: 7.2 s vs 7.7 s), so one call.
         self.per_frequency_calls = (device == "cuda") if per_frequency_calls is None else bool(per_frequency_calls)
         self.notes_path = notes_path
+        # WP15: opt-in fused CUDA Burton-Miller assembly. The env MUST be set BEFORE the persistent
+        # worker host spawns (the host inherits this process's environment); explicit "0" for the
+        # default so a flag left over in the process environment can never leak into a run.
+        self.cuda_fused = bool(cuda_fused)
+        os.environ["HORNLAB_BEAT_FUSED_BM_CUDA"] = "1" if self.cuda_fused else "0"
 
     # ---- protocol
     def available(self) -> tuple[bool, str]:

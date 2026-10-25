@@ -36,8 +36,10 @@ def test_briefs_load_and_validate(tmp_path):
 
 def test_brief_and_seed_override_reach_config_and_sha():
     from hornlab_search.search import rundir
-    a = load_config(EXAMPLES / "osse_baseline.yaml")
-    b = load_config(EXAMPLES / "osse_baseline.yaml", brief=BRIEFS / "hifi_90x60_1in.yaml", cma_seed=777)
+    a = load_config(EXAMPLES / "rosse_baseline.yaml")
+    # (WP2 2026-10-24: osse_baseline is tied to its 1.4-inch driver and refused under a 1-inch
+    # brief; rosse_baseline matches the hifi brief's driver, so the pin is a no-op here.)
+    b = load_config(EXAMPLES / "rosse_baseline.yaml", brief=BRIEFS / "hifi_90x60_1in.yaml", cma_seed=777)
     assert b.search.seed == 777 and b.target_raw["coverage_v_deg"] == 60.0
     assert b.brief["name"] == "hifi_90x60_1in" and b.raw["brief"]["name"] == "hifi_90x60_1in"
     assert rundir.config_sha(a.raw) != rundir.config_sha(b.raw)
@@ -48,7 +50,7 @@ def test_saved_run_config_reloads_with_its_embedded_brief(tmp_path):
     """run_dir/config.yaml (merged raw) must reload to the same target, brief and config_sha."""
     import yaml
     from hornlab_search.search import rundir
-    for src, brief in ((EXAMPLES / "osse_baseline.yaml", BRIEFS / "axi_90x90_1in.yaml"),
+    for src, brief in ((EXAMPLES / "rosse_baseline.yaml", BRIEFS / "hifi_90x60_1in.yaml"),
                        (TYP / "conical.yaml", None)):
         cfg = load_config(src, **({} if brief is None else {"brief": brief}))
         p = tmp_path / f"{src.stem}.yaml"
