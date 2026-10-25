@@ -522,3 +522,42 @@ the designs — deliberately deferred to a later round (not acted on; the landed
 oracle's measured decisions). Anyone revisiting bounds must start from the oracle doc S1/S5 tables
 and re-measure, not widen by hand.
 
+## 2026-10-25  orchestrator (GUI param-reference / typology-sandbox pass)  CONTRACT GAP: there is no parameter reference — GUI knob tooltips have no source, and the three typology vocabularies are unjoined
+
+**Status: PROPOSAL ONLY.** Nothing was started; no code, config, bound, or frozen file was touched. Owner directive: record it, do not implement it. Filed as `docs/NEXT_DEV_PRIORITIES.md` **P9** and mirrored in `docs/ISSUES.md`.
+
+**What I was doing:** scoping three owner GUI asks that arrived together — (a) hover descriptions of every parameter on the Run page and the Typologies page, (b) a clickable per-typology sandbox page with manually draggable knobs, live H/V wall section + live 3D, parameter name beside each slider, editable min/max on both sides, and "save as this typology's default min/max", (c) one findable source of truth for typology → design → formula → parameter → min/max → design characteristic → the code that implements it.
+
+**What happened (all verified this pass):**
+
+1. **No geometry-knob description layer exists anywhere.** `gui/static/glossary.js` defines objective/metric terms only; it contains **zero** geometry-knob entries. `gui/static/app.js` carries labels/hints for the brief fields only (`coverage_h/v_deg`, `band_*`, `envelope.*`, `driver.exit_radius_mm`, `driver.exit_angle_deg`, `throat_angle_policy`). The only accurate parameter prose in the tree lives in **code docstrings** (`design/generators/profiles.py`, `grid.py`, `registry.py`) and in the research docs. So ask (a) has no existing source to render — the copy must be authored once and then owned.
+
+2. **Three typology vocabularies, no join.** 4 mesher families (`design/families.py` `FAMILY_KEYS`), 11 generator types (`design/generators/registry.py` `TYPES`), 36 catalog ids (`examples/catalog.yaml`, counted this pass). The GUI's Typologies page speaks catalog ids; the code speaks families/generator types; nothing maps between them. `docs/CODE_MAP.md` maps modules, not *typologies*, so neither a user nor an agent can get from "salmon_elliptical" to the code that builds it without reading four files.
+
+3. **Knob names are overloaded, so a per-name reference would emit WRONG tooltips.** Verified overloads: `n` (OSSE superellipse termination exponent vs biradial flare-rate exponent, claim 14 `[2,8]`); `q` (OSSE termination saturation ≈0.995 vs R-OSSE blend exponent 1.0); `a_deg` (OSSE coverage half-angle vs biradial initial-wall half-angle, which has its own default 25 in `registry.py`, vs QTW half-dispersion angle); `T`; and `stop_deg` vs `max_wall_deg` — `registry.py:37-38` already records, from the 2026-10-25 R9 audit, that `spherical_salmon` uses `{p}_max_wall_deg` and **not** `{p}_stop_deg`. Any reference keyed on knob name alone is unsafe; it must be keyed on `(catalog typology, knob)`.
+
+4. **One open doc/code mismatch, not to be resolved by a lane.** `docs/plan/12_RESEARCH_BASIS.md:158` states the superellipse cross-section `exponent` default as **2.0**; `registry.DEFAULT_KNOBS["mouth_exponent"]` is **4.0** and the shipped configs use 4.0. `families.py` only imposes the hard `[2,16]` limit. No source wins on its own.
+
+5. **The bounds question is already load-bearing elsewhere.** `examples/typologies/*.yaml` `bounds:` are what the run page's "parameter limits" bars display, W8 exists precisely because those boxes bind designs at their ceiling, and this file already records the owner's remark that some min/max values may still be over-constraining. Ask (b)'s "save as default min/max" therefore edits a surface the search depends on, not a cosmetic slider range.
+
+6. **Observed GUI defect, exact anchor:** on the search time-lapse page the `3D` checkbox renders **checked** while the canvas prints `3D off — flip the 3D toggle above.` Either the control's visual state is not the state the render path reads, or the render fails and the off-state placeholder is reused instead of an error state. Recorded as a defect (not diagnosed — the code-map lane was still running).
+
+**What I tried (analysis only, no writes):** designed the reference as an **annotation layer over the existing authorities** rather than a new table of numbers, because a hand-written master table would become a fourth stale copy and would collide with `AGENTS.md` line 29 ("Every horn number is a YAML default in `examples/` — hardcoded horn numbers are bugs"):
+- hard limits read from `families.KeySpec.lo/.hi` (which `families.py:12-13` defines as schema limits only);
+- defaults read from `registry.DEFAULT_KNOBS`;
+- bounds read from `examples/typologies/*.yaml`;
+- prose/formulas derived from the existing docstrings and dossiers, never newly invented (hard rule 3);
+- the doc (`tools/gen_param_reference.py` → `docs/reference/PARAMETERS.md`, `TYPOLOGIES.md`) **generated**, with symbol-anchored code refs;
+- a FAIL-not-warn drift test so metadata cannot silently diverge from `DEFAULT_KNOBS`, `KeySpec`, the catalog, or the code symbols.
+Proposed precedence for the sandbox sliders: hard `KeySpec` clamp (always wins) → `examples/typologies/*.yaml` bounds → a user-saved override **outside** `examples/` → session tweak.
+
+**What I need decided:**
+
+1. **Package location.** `hornlab_search/design/params/` (next to the code it annotates; one copy for GUI + docs + tests) vs under `gui/` (import-light, but the GUI would own design facts). I recommend `design/params/` with an import-light `__init__` (no mesher/numpy/search imports, never raises on an unknown typology or knob).
+2. **What "save as default min/max" is allowed to write.** Two very different things: (i) a **non-authoritative personal preference** in a user-scope file that only the sandbox respects, or (ii) an **owner-gated edit to `examples/typologies/*.yaml`**. Hard rule 3 and the "horn numbers are YAML defaults" rule point at (ii) requiring your explicit sign-off and per-config measurement under W8 — never a GUI side effect. Please rule on which, and if (ii), the approval path.
+3. **Does the sandbox render designs the search would reject?** If a user drags a knob outside the brief envelope, does the sandbox refuse, or render with a visible "outside envelope" marker? The run page already has established at-limit language (red marker = pressed against a limit); the sandbox should reuse it rather than invent a second vocabulary.
+4. **Which `exponent` default is canonical** (2.0 prose vs 4.0 shipped) — needed before that knob can carry a tooltip that states a default.
+5. **Scope confirmation.** I did not enter W8, did not touch any bound, and did not open the frozen plan. If P9 should also produce the generated reference doc in the same pass as the GUI tooltips, say so; otherwise the doc is the cheap first slice and the GUI consumes it afterwards.
+
+
+

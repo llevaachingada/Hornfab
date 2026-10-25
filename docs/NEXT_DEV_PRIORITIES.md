@@ -196,6 +196,73 @@ the seeds machinery exists), not a requirement.**
 
 - [ ] **W8 — per-typology search-box audit (owner-directed 2026-10-25 evening, from the run-page at-limit finding).** The owner's `perturbed_osse_hv` run under a 680×500×600 envelope showed the config's own `L_mm` box (90–140 mm) binding 4/6 best designs at its ceiling while the brief allowed 3× more depth — the knob boxes (config `bounds:`), not the brief envelopes, cap size ambition. Audit EVERY typology config's bounds against the realistic brief envelopes + the measured mesher caps, surface the over-constrained knobs (at-limit saturation across stored runs is the signal), and propose the widening table (owner-gated per config, never automatic). Guide reference: `docs/BRIEF_AND_SCORING_GUIDE_2026-10-25.md` §4 (the three-layer size-limit model). Related deferred note: the owner earlier suspected "some min/max parameters may be over-constraining" (S1A_DRIVER_PASS_ORACLE_FINAL header note).
 
+## P9 (recorded 2026-10-25, OWNER-DIRECTED; **PROPOSAL ONLY — nothing started, no code written, no config or bound touched**). GUI parameter reference, an interactive typology sandbox, and one findable source of truth for *typology → design → formula → parameter → min/max → design characteristic → the code that implements it*
+
+**Why it matters.** Four gaps surfaced in one sitting and they share one root cause: the parameter knowledge exists, but it is scattered across five documents and four code files with nothing joining it.
+
+1. **No descriptions exist for the typology knobs.** A user reading `g_fc_h_hz`, `g_T`, `g_stop_deg` on a run page cannot learn what they move. Verified negative findings: `hornlab_search/gui/static/glossary.js` defines objective/metric terms only and carries **no** geometry-knob entries; `gui/static/app.js` carries labels/hints for the **brief** fields only (`coverage_h/v_deg`, `band_*`, `envelope.*`, `driver.exit_radius_mm`, `driver.exit_angle_deg`, `throat_angle_policy`). Nothing covers the typology knobs on the Run page or the Typologies page.
+2. **There is no way to explore a typology's shape space by hand.** The only geometry views are read-only playback of a *finished* search (the search time-lapse page, and the run-detail shape cards whose parameter bars are status indicators, not controls). The owner wants a sandbox: drag a knob, watch the horizontal/vertical wall section and the 3D view update.
+3. **Nothing joins the three typology vocabularies**, so a user or an agent must reconstruct the join from raw sources every time (table below).
+4. **A live defect**: on the search time-lapse page the `3D` checkbox renders **checked** while the canvas prints `3D off — flip the 3D toggle above.` Either the checkbox's visual state is not the state the render path reads, or the render throws and reuses the off-state placeholder instead of an error state. Not yet confirmed in code (the code-map lane was still running when this was recorded) — grep the string above; it is the exact anchor.
+
+**What already exists — do not rebuild it.** The repo already has the two authoritative parameter layers, and they are correct:
+
+| Authority | File | Owns |
+|---|---|---|
+| `KeySpec` / `FAMILY_KEYS` | `design/families.py` | the mesher's legal keys, their **hard schema limits** `lo`/`hi`, one-line notes, refusal hints. `families.py:12-13` is explicit: these are **schema limits only**, never plausibility limits |
+| `TYPES` / `DEFAULT_KNOBS` | `design/generators/registry.py` | the generator vocabulary (11 names), the knob defaults, and every knob read by `build_meridian`/`materialize` |
+| catalog + configs | `examples/catalog.yaml`, `examples/typologies/*.yaml` | the catalog ids, seeds, and **search bounds** — `AGENTS.md` line 29: *"Every horn number is a YAML default in `examples/` — hardcoded horn numbers are bugs."* |
+| research | `docs/research/typologies/MESHER_TYPOLOGIES.md`, `docs/plan/12_RESEARCH_BASIS.md`, `docs/TYPOLOGY_PLAN.md`, per-typology dossiers | the formulas and their sources |
+
+**What is missing is the JOIN plus the human-facing text**: display label, unit, plain-language physical meaning, formula, and a symbol cross-reference to the code that reads it — and one entry point that returns all of it.
+
+**The three-vocabulary problem — why a flat table cannot work:**
+
+| Layer | Authority | Count | Example |
+|---|---|---|---|
+| mesher families | `families.FAMILY_KEYS` | 4 | `OSSE`, `R-OSSE`, `ICW`, `FREEFORM` |
+| generator types | `registry.TYPES` | 11 | `lecleach`, `biradial`, `qtw_waveguide` |
+| catalog typologies | `examples/catalog.yaml` | **36** (verified 2026-10-25) | `salmon_elliptical`, `lecleach_rollback` |
+
+The Typologies page shows catalog ids; a tooltip there must resolve `salmon_elliptical → FREEFORM → grid rows → g_fc_h_hz`. A Run-page tooltip must resolve a run back to its catalog entry. Keying on **catalog id and resolving downward** is the only arrangement that does not duplicate knob facts.
+
+**Knob names are overloaded across typologies, so a per-name lookup would emit WRONG tooltips.** Verified instances:
+
+| Knob | Meaning A | Meaning B / C |
+|---|---|---|
+| `n` | OSSE superellipse termination exponent | biradial flare-rate exponent (patent claim 14, `[2,8]`) |
+| `q` | OSSE termination saturation (≈0.995) | R-OSSE blend exponent (1.0) |
+| `a_deg` | OSSE coverage half-angle | biradial initial-wall half-angle (its own default 25) / QTW half-dispersion angle |
+| `stop_deg` vs `max_wall_deg` | — | `registry.py:37-38` already records that `spherical_salmon` uses `{p}_max_wall_deg` and **not** `{p}_stop_deg`; the R9 audit flagged it |
+| `exponent` | cross-section superellipse exponent | `12_RESEARCH_BASIS.md:158` says default **2.0**; `registry.DEFAULT_KNOBS["mouth_exponent"]` ships **4.0** — an open doc/code mismatch, not for a lane to silently resolve |
+
+**Proposed arrangement (annotate, never restate).** A new `hornlab_search/design/params/` package that *reads* the authorities above at import time and adds only the join and the prose:
+
+- `descriptors.py` — one entry per distinct knob **name** holding shared facts (label, unit, summary ≤120 chars, detail, formula, physical effect, symbol cross-ref, doc anchor), with an explicit `contexts` sub-mapping for the overloads in the table above.
+- `typologies.py` — one entry per **catalog id** (all 36, plus any config present in `examples/typologies/` but uncatalogued): family, generator type or grid kind, one-line summary, R9/source status, knob list, and per-typology overrides only where the meaning differs.
+- `bounds.py` — the precedence chain for the sandbox sliders (below).
+- `__init__.py` — `resolve(id)`, `knobs_for(id)`, `describe(id, knob)`, `bounds_for(id, knob)`, `all_typologies()`, `validate_metadata()`. Import-light (no mesher/numpy/search imports) and **never raises** on an unknown typology or knob — the GUI must degrade to a plain label, not crash.
+- `tools/gen_param_reference.py` → generates `docs/reference/PARAMETERS.md` + `docs/reference/TYPOLOGIES.md` with a "GENERATED — do not edit" header and **symbol-anchored** code references (verified to resolve before emitting), never line numbers.
+- `tests/test_param_reference.py` → the drift gate.
+
+**Bounds precedence for the sandbox sliders (lowest → highest authority):**
+1. `families.KeySpec.lo/.hi` — hard schema clamp, **always wins** as the final clamp (`families.py:12-13`).
+2. `examples/typologies/*.yaml` — the search bounds, which is also what the run page's "parameter limits" bars already display.
+3. A **user-saved override** file outside `examples/` — this is the "save as the default min/max for this typology" ask.
+4. A session/sandbox tweak — caller-supplied, never persisted.
+
+**Drift gate (this is what keeps it a source of truth instead of a fifth stale copy).** The test FAILS (never warns) when: a name in `DEFAULT_KNOBS` has no metadata; a knob read by `build_meridian`/`materialize`/`grid.py` has no metadata for the typologies that read it; a catalog id has no entry; a metadata default disagrees with `DEFAULT_KNOBS`; a metadata hard limit disagrees with `KeySpec`; a code symbol or doc anchor does not resolve; a summary is missing or over-length.
+
+**Explicitly NOT in P9 scope:** no new typology, no new search, no new solver or mesher code, no change to `docs/plan/**` (frozen), no GPU work, no automatic widening of any bound. This is a read-only view over existing authority plus a GUI surface — the R9 research-grounding rule (`AGENTS.md` §Research grounding) does not bind because nothing ships under a new published name; a sandbox must *cite* the existing dossiers rather than make new claims.
+
+**Interaction with W8 (must not be worked around).** W8 (per-typology search-box audit) exists because the owner found config `bounds:` binding 4/6 best designs at their ceiling, and `NOTES_FOR_SENIOR.md` records the owner's remark that some min/max parameters may still be **over-constraining**. The sandbox MUST display the real bounds and MUST NOT let a saved override masquerade as an authoritative default. Bounds are widened only through W8, per config, with measurement — never as a side effect of a GUI save.
+
+**Open decisions for the owner before any code (see also `NOTES_FOR_SENIOR.md`):**
+- Does the metadata package belong in `design/params/` (near the code it annotates) or under `gui/`? The former keeps one copy for GUI + docs + tests; the latter is import-light by construction and risks the GUI owning design facts.
+- Where do user-saved slider bounds persist, and are they a *personal preference* (never authoritative, never committed) or an *owner-gated config edit* to `examples/typologies/*.yaml`? Hard rule 3 and the "every horn number is a YAML default in `examples/`" rule both point at the latter only with the owner's explicit sign-off.
+- Is a sandbox geometry page allowed to render a design that the search would reject (outside the brief envelope), and if so does it carry a visible "outside envelope" marker? Precedent: the run page already distinguishes at-limit parameters with a red marker; the sandbox should reuse that language rather than invent one.
+- `exponent` 2.0 (prose) vs 4.0 (shipped): which is the documented default? A lane must not pick a winner.
+
 ## Not recommended (recorded so nobody re-proposes it without new evidence)
 - Half precision or other "quantization" of the BEM system: the solver is Float32 with a Float64 Krylov space; dense
   high-frequency BEM systems are poorly conditioned.
