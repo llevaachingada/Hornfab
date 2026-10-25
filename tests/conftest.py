@@ -51,6 +51,9 @@ requires_beat = pytest.mark.skipif(
     not _have("hornlab_beat_bem"), reason="hornlab_beat_bem not installed")
 requires_bempp = pytest.mark.skipif(
     not _have("hornlab_bempp_bem"), reason="hornlab_bempp_bem not installed")
+# WP14: tools/cad/multicell.py builds its solid with the optional `cad` extra.
+requires_build123d = pytest.mark.skipif(
+    not _have("build123d"), reason="build123d (optional [cad] extra) not installed")
 
 
 # ------------------------------------------------------------------ helpers

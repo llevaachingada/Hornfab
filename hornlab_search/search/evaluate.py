@@ -496,25 +496,57 @@ def load_known(path: Path) -> tuple[dict, int]:
 # ------------------------------------------------------------------ evaluate
 
 
+#: The small per-record ``cad`` echo (WP14). The FULL block (derived geometry, frequency
+#: report, repair/topology) stays on disk in ``<mesh_dir>/mesh_meta.json["cad"]``.
+CAD_ECHO_KEYS = ("tool", "tool_sha256", "recipe", "step_sha256", "face_inventory")
+
+
 def _grid_info(mesh_dir: Path) -> tuple[float | None, dict]:
     """(area_m2 of the solved mesh, mesh.grid block) from build_mesh's mesh_meta.json.
 
     The mesher's structured surface sampling is ``angular_segments x length_segments`` (defaults 64
-    x 32 in hornlab_mesher). ``available`` is True: the grid itself is reachable through the
-    mesher's public ``config_builder.build_point_grid`` (TOOLCHAIN C4) and is regenerated from the
-    recorded params; it is not stored per record."""
+    x 32 in hornlab_mesher). ``available`` is True for a formula-route mesh: the grid itself is
+    reachable through the mesher's public ``config_builder.build_point_grid`` (TOOLCHAIN C4) and is
+    regenerated from the recorded params; it is not stored per record.
+
+    A **cad-route** mesh (``mesh_meta.json`` carries a ``cad`` block) has NO grid recipe: its
+    ``available`` is False with null segment counts, and the honest provenance is the additive
+    ``cad`` echo in :func:`_cad_info`."""
     area = None
     seg = {"angular_segments": 64, "length_segments": 32}
+    cad = False
     try:
         meta = json.loads((Path(mesh_dir) / "mesh_meta.json").read_text(encoding="utf-8"))
         area = float(meta["summary"]["area_m2"])
-        msec = (meta.get("mesher_config") or {}).get("mesh") or {}
-        for k in seg:
-            if msec.get(k) is not None:
-                seg[k] = int(msec[k])
+        cad = isinstance(meta.get("cad"), dict)
+        if not cad:
+            msec = (meta.get("mesher_config") or {}).get("mesh") or {}
+            for k in seg:
+                if msec.get(k) is not None:
+                    seg[k] = int(msec[k])
     except Exception as exc:  # noqa: BLE001
         log.debug("no mesh_meta.json in %s: %s", mesh_dir, exc)
+    if cad:
+        return area, {"angular_segments": None, "length_segments": None, "available": False}
     return area, {**seg, "available": True}
+
+
+def _cad_info(mesh_dir: Path) -> dict | None:
+    """Additive cad-route provenance echo for dataset records/ndjson rows, or None.
+
+    Mirrors the WP8 ``mesh_policy`` precedent: only a cad-row carries it, so formula and GRID
+    rows stay byte-identical. The subset is deliberately small (recipe + tool sha + step sha +
+    face inventory); the full meta remains on disk beside the mesh.
+    """
+    try:
+        meta = json.loads((Path(mesh_dir) / "mesh_meta.json").read_text(encoding="utf-8"))
+    except Exception as exc:  # noqa: BLE001
+        log.debug("no mesh_meta.json in %s: %s", mesh_dir, exc)
+        return None
+    cad = meta.get("cad")
+    if not isinstance(cad, dict):
+        return None
+    return {k: cad.get(k) for k in CAD_ECHO_KEYS}
 
 
 def _write_json(path: Path, obj) -> None:
@@ -631,8 +663,8 @@ def evaluate(design: Design, space, cfg, mode: str, run_dir, store, backend, *,
 
     design_dir = run_dir / "designs" / dh
     st: dict = {"mesh": None, "outcome": None, "resp": None, "metrics": None, "kind": "", "err": "",
-                "from_disk": False, "area": None, "grid": None, "raw_traces": None, "J": None,
-                "terms": None}
+                "from_disk": False, "area": None, "grid": None, "cad": None, "raw_traces": None,
+                "J": None, "terms": None}
     try:
         _compute(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx, st)
     except MeshConsistencyError:
@@ -799,6 +831,7 @@ def _compute_band_split(design, cfg, mode, mspec, sspec, design_dir, backend, ct
     st["resp"] = merged
     st["mesh"] = meshes[-1]
     st["area"], st["grid"] = _grid_info(design_dir / f"band{len(bands) - 1}")
+    st["cad"] = _cad_info(design_dir / f"band{len(bands) - 1}")
     st["from_disk"] = all(from_disk)
     st["outcome"] = SolveOutcome(True, merged, solve_seconds, peak_vram,
                                  "cache hit" if st["from_disk"] else "")
@@ -852,6 +885,7 @@ def _compute(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx, st)
         return
     st["mesh"] = mesh
     st["area"], st["grid"] = _grid_info(design_dir)
+    st["cad"] = _cad_info(design_dir)
     why = envelope_violation(mesh, getattr(cfg, "brief", None))
     if why:
         # Brief-dependent, NOT a pure function of (design, mesh spec): never failure-cached.
@@ -913,6 +947,8 @@ def _record_provenance(ctx: EvalContext, st: dict) -> dict:
         prov["brief_hash"] = gen.get("brief_hash") or prov.get("brief_hash")
     if st.get("mesh_policy"):
         prov["mesh_policy"] = st["mesh_policy"]      # WP8: keep band-split data out of old groups
+    if st.get("cad"):
+        prov["cad"] = st["cad"]                      # WP14: cad-route recipe/tool/step echo
     return prov
 
 
@@ -972,6 +1008,9 @@ def _persist(ev: Evaluation, mode: str, sspec, design_dir: Path, ctx: EvalContex
     if st.get("mesh_policy"):
         # WP8 provenance echo: absent on single-mesh rows (old rows byte-identical).
         row["mesh_policy"] = st["mesh_policy"]
+    if st.get("cad"):
+        # WP14 provenance echo: absent on formula/GRID rows (old rows byte-identical).
+        row["cad"] = to_jsonable(st["cad"])
     if st.get("generator"):
         row["generator"] = to_jsonable(st["generator"])
     if ctx.write_ndjson:

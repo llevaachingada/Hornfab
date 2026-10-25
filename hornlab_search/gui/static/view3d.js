@@ -271,3 +271,204 @@ export async function init3d(container, meshData, profile, seedProfile, shadows 
     if (groundMat) groundMat.dispose();
   };
 }
+
+/**
+ * Pure per-frame preparation for the 3D time-lapse (no THREE, node-testable): mirrors each frame's
+ * mesh to the full horn with mirrorMesh, records every frame's mm bounding box (the player unions
+ * them for ONE fixed camera), and carries the honest per-frame facts (evaluation number, objective,
+ * hash, decimation disclosure, full-mesh tri count). Frames without mesh data are skipped.
+ * frames: [{n, objective, mesh_hash, quadrants, verts, tris, decimated, n_tris_full}, ...].
+ * Returns [{n, objective, mesh_hash, decimated, n_tris_full, verts, tris, bounds}, ...].
+ */
+export function prepareFrames(frames) {
+  const out = [];
+  for (const f of (Array.isArray(frames) ? frames : [])) {
+    // Shape gate: a renderable frame holds whole vertices (x,y,z triples, at least one triangle's
+    // worth) and whole index triples — anything less is unusable junk, skipped honestly.
+    if (!f || !Array.isArray(f.verts) || f.verts.length < 9 || f.verts.length % 3 !== 0 ||
+        !Array.isArray(f.tris) || f.tris.length < 3 || f.tris.length % 3 !== 0) continue;
+    const { verts, tris } = mirrorMesh(f.verts, f.tris, f.quadrants);
+    const bounds = { x0: Infinity, y0: Infinity, z0: Infinity, x1: -Infinity, y1: -Infinity, z1: -Infinity };
+    for (let i = 0; i < verts.length; i += 3) {
+      bounds.x0 = Math.min(bounds.x0, verts[i]);     bounds.x1 = Math.max(bounds.x1, verts[i]);
+      bounds.y0 = Math.min(bounds.y0, verts[i + 1]); bounds.y1 = Math.max(bounds.y1, verts[i + 1]);
+      bounds.z0 = Math.min(bounds.z0, verts[i + 2]); bounds.z1 = Math.max(bounds.z1, verts[i + 2]);
+    }
+    out.push({ n: f.n, objective: f.objective == null ? null : f.objective, mesh_hash: f.mesh_hash == null ? null : f.mesh_hash,
+               decimated: f.decimated === true, n_tris_full: f.n_tris_full == null ? null : f.n_tris_full,
+               verts, tris, bounds });
+  }
+  return out;
+}
+
+/** Union of per-frame mm bounds — the one camera fits the WHOLE time-lapse, so no frame jump ever
+ *  moves it. (internal; bounds objects from prepareFrames) */
+function unionBounds(list) {
+  const u = { x0: Infinity, y0: Infinity, z0: Infinity, x1: -Infinity, y1: -Infinity, z1: -Infinity };
+  for (const b of list) {
+    if (!b) continue;
+    u.x0 = Math.min(u.x0, b.x0); u.x1 = Math.max(u.x1, b.x1);
+    u.y0 = Math.min(u.y0, b.y0); u.y1 = Math.max(u.y1, b.y1);
+    u.z0 = Math.min(u.z0, b.z0); u.z1 = Math.max(u.z1, b.z1);
+  }
+  return u;
+}
+
+/**
+ * 3D time-lapse player (evolution's 3D mode): ONE scene, fixed camera and lights sized from the
+ * UNION of every frame's mirrored bounds, geometry hot-swapped per frame index. Each frame's
+ * BufferGeometry and wireframe ridgelines are built lazily on first show; decimated frames get an
+ * on-screen "mesh decimated to N tris" disclosure. On CDN failure the 2D wall-profile fallback
+ * renders and the promise resolves to null (callers stay honestly on 2D).
+ * opts: { shadows = true, profile, seedProfile, emptyMessage }.
+ * Returns { show(i), frames (prepared), dispose } — or null when 3D is unavailable.
+ */
+export async function init3dFrames(container, frames, opts = {}) {
+  const prepared = prepareFrames(frames);
+  container.innerHTML = "";
+  if (!prepared.length) {
+    const msg = document.createElement("div");
+    msg.className = "view3d-fallback";
+    msg.textContent = opts.emptyMessage || "No meshed improvement frames in this run — nothing to play in 3D.";
+    container.appendChild(msg);
+    return null;
+  }
+  const ok = await loadThree();
+  if (!ok) { render2DFallback(container, opts.profile || null, opts.seedProfile || null); return null; }
+
+  // One rig for the whole time-lapse: the camera, lights and shadow ground derive from the union
+  // of all frames' bounds, so swapping geometry never moves the camera.
+  const u = unionBounds(prepared.map(p => p.bounds));
+  const center = new THREE.Vector3((u.x0 + u.x1) / 2, (u.y0 + u.y1) / 2, (u.z0 + u.z1) / 2);
+  const maxDim = Math.max(u.x1 - u.x0, u.y1 - u.y0, u.z1 - u.z0);
+  if (!isFinite(maxDim) || maxDim <= 0) { render2DFallback(container, opts.profile || null, opts.seedProfile || null); return null; }
+  const shadows = opts.shadows !== false;
+
+  const cs = getComputedStyle(document.documentElement);
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(
+    cs.getPropertyValue("--viz-canvas").trim() || cs.getPropertyValue("--surface").trim() || "#ffffff");
+
+  const mat = new THREE.MeshStandardMaterial({
+    color: 0xdfe4e8, roughness: 0.55, metalness: 0.05,
+    side: THREE.DoubleSide, transparent: false,
+    polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1,
+  });
+  const wireMat = new THREE.LineBasicMaterial({ color: 0xf4f7f9, transparent: true, opacity: 0.28 });
+  const mesh = new THREE.Mesh(new THREE.BufferGeometry(), mat);          // geometry swapped per frame
+  const wire = new THREE.LineSegments(new THREE.BufferGeometry(), wireMat);
+  mesh.castShadow = mesh.receiveShadow = shadows;
+  scene.add(mesh, wire);
+
+  const hemi = new THREE.HemisphereLight(0xffffff, 0x8fa3ad, 0.45);
+  scene.add(hemi);
+  const key = new THREE.DirectionalLight(0xffffff, 1.15);
+  key.position.copy(center).addScaledVector(new THREE.Vector3(1.6, 2.2, 1.8), maxDim);
+  const fillL = new THREE.DirectionalLight(0xffffff, 0.35);
+  fillL.position.copy(center).addScaledVector(new THREE.Vector3(-1.8, 0.6, 1.2), maxDim);
+  const rim = new THREE.DirectionalLight(0xffffff, 0.85);
+  rim.position.copy(center).addScaledVector(new THREE.Vector3(-1.2, -1.0, -2.2), maxDim);
+  scene.add(key, fillL, rim);
+
+  let groundGeo = null, groundMat = null;
+  if (shadows) {
+    key.castShadow = true;
+    key.target.position.copy(center);
+    scene.add(key.target);
+    key.shadow.mapSize.set(1024, 1024);
+    key.shadow.camera.left = -0.8 * maxDim; key.shadow.camera.right = 0.8 * maxDim;
+    key.shadow.camera.top = 0.8 * maxDim;   key.shadow.camera.bottom = -0.8 * maxDim;
+    key.shadow.camera.near = 0.1;           key.shadow.camera.far = 4 * maxDim;
+    key.shadow.normalBias = 0.01 * maxDim;  key.shadow.bias = 0;
+    groundGeo = new THREE.PlaneGeometry(2.6 * maxDim, 2.6 * maxDim);
+    groundMat = new THREE.ShadowMaterial({ opacity: 0.22 });
+    const ground = new THREE.Mesh(groundGeo, groundMat);
+    ground.position.set(center.x, u.y0 * 0.001 - 0.02 * maxDim, center.z);
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    scene.add(ground);
+  }
+
+  const w = container.clientWidth || 600, h = container.clientHeight || 400;
+  const camera = new THREE.PerspectiveCamera(45, w / h, 0.001, 100);
+  camera.position.set(center.x + maxDim * 1.2, center.y + maxDim * 0.8, center.z + maxDim * 1.5);
+  camera.lookAt(center);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setSize(w, h);
+  if (shadows) { renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; }
+  container.appendChild(renderer.domElement);
+
+  // Per-frame decimation disclosure ("mesh decimated to N tris") — subtle, honest, on-screen.
+  const frameNote = document.createElement("div");
+  frameNote.style.cssText = "position:absolute;bottom:8px;left:12px;font-family:var(--f-mono);" +
+    "font-size:0.7rem;color:var(--muted);pointer-events:none;";
+  frameNote.textContent = "";
+  container.style.position = "relative";
+  container.appendChild(frameNote);
+
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.target.copy(center);
+  controls.update();
+
+  const ro = new ResizeObserver(entries => {
+    for (const e of entries) {
+      const { width, height } = e.contentRect;
+      renderer.setSize(width, height);
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+    }
+  });
+  ro.observe(container);
+
+  // Lazy per-frame geometry: BufferGeometry + normals + wireframe are built on FIRST show and
+  // cached for the rest of the playback (the mirrored arrays themselves come from prepareFrames).
+  const cache = new Map();
+  function buildGeo(i) {
+    if (cache.has(i)) return cache.get(i);
+    const p = prepared[i];
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.BufferAttribute(Float32Array.from(p.verts), 3));
+    geo.setIndex(new THREE.BufferAttribute(Uint32Array.from(p.tris), 1));
+    geo.computeVertexNormals();
+    geo.scale(0.001, 0.001, 0.001);                    // verts are mm; the stage is metres
+    const wireGeo = new THREE.WireframeGeometry(geo);
+    const built = { geo, wireGeo };
+    cache.set(i, built);
+    return built;
+  }
+
+  let cur = -1, raf;
+  function show(i) {
+    const j = Math.max(0, Math.min(prepared.length - 1, Number(i) || 0));
+    if (j === cur) return;
+    cur = j;
+    const built = buildGeo(j);
+    mesh.geometry = built.geo;
+    wire.geometry = built.wireGeo;
+    frameNote.textContent = prepared[j].decimated
+      ? `mesh decimated to ${prepared[j].tris.length / 3} tris` : "";
+  }
+  show(0);
+
+  function animate() {
+    raf = requestAnimationFrame(animate);
+    controls.update();
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  function dispose() {
+    cancelAnimationFrame(raf);
+    ro.disconnect();
+    for (const { geo, wireGeo } of cache.values()) { geo.dispose(); wireGeo.dispose(); }
+    cache.clear();
+    renderer.dispose(); mat.dispose(); wireMat.dispose();
+    hemi.dispose(); key.dispose(); fillL.dispose(); rim.dispose();
+    if (groundGeo) groundGeo.dispose();
+    if (groundMat) groundMat.dispose();
+  }
+  container._dispose3d = dispose;                       // route()'s [data-v3d] sweep kills playback
+  return { show, frames: prepared, dispose };
+}

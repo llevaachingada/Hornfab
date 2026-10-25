@@ -65,9 +65,11 @@ const ROUTES = [
 ];
 
 function route() {
-  // Dispose any 3D scene
-  const old = document.getElementById("view3d-wrap");
-  if (old?._dispose3d) old._dispose3d();
+  // Dispose any 3D scene: every init3d-tagged container carries [data-v3d] (the 3D page's
+  // #view3d-wrap, the run page's inline viewer, the evolution player). Sweeping the marker — rather
+  // than only the old #view3d-wrap id — kills every live renderer and rAF loop while its container
+  // is still attached, so no WebGL context or animation loop outlives its view.
+  document.querySelectorAll("[data-v3d]").forEach(el => { if (el._dispose3d) el._dispose3d(); });
   // Clear status timer if navigating away
   if (!location.hash.startsWith("#/status") && location.hash !== "" && location.hash !== "#/") {
     clearStatusTimer();
@@ -1331,6 +1333,17 @@ async function viewRunDetail(id) {
         <svg id="c-prof"></svg>
       </div>
 
+      <!-- Inline 3D (lazy): the best design rendered right here — the dedicated 3D page stays -->
+      <div class="fig run-3d-fig">
+        <div class="fig-head"><h3>Best design in 3D</h3>
+          <label class="evo-opt" style="color:var(--ink)"><input type="checkbox" id="inline3d-shadows"> wall shadows</label></div>
+        <div class="cap">The solved mesh of the best design, loaded in place after the page settles (no tab click needed). Drag to orbit · scroll to zoom · right-drag to pan. Full-screen version on the <a href="#/run/${esc(id)}/3d">3D view</a>.</div>
+        <div id="inline-3d" data-v3d style="position:relative;height:300px;border:1px solid var(--rule);border-radius:6px;overflow:hidden;background:var(--viz-canvas,#e9edf0)">
+          <div class="view3d-fallback">Loading 3D…</div>
+        </div>
+        <div class="hint" id="inline3d-note" role="status"></div>
+      </div>
+
       <hr class="sep">
 
       <!-- Search history -->
@@ -1460,6 +1473,47 @@ async function viewRunDetail(id) {
     ...(S.profile ? [{ profile: S.profile, color: css("--seed"), dash: true }] : []),
     ...(B.profile ? [{ profile: B.profile, color: css("--best"), filled: true }] : []),
   ], { H: 320 });
+
+  // Inline 3D for the best design (no tab click needed). Lazy by design: the page has rendered,
+  // only now does the mesh fetch start — and if the user navigated away in the meantime the build
+  // is skipped, because route() disposes [data-v3d] containers while they are still attached and
+  // a scene must never start inside a detached container (that is how renderers leak). The inline
+  // viewer is the only AUTO-loaded 3D scene for this design; the dedicated 3D page stays click-only.
+  const inline3d = document.getElementById("inline-3d");
+  const inlineNote = document.getElementById("inline3d-note");
+  if (inline3d) {
+    const inlineHash = B.hash || sum.best_hash;
+    const shBox = document.getElementById("inline3d-shadows");
+    let inlineShadows = true;
+    try { inlineShadows = localStorage.getItem("hl-v3d-shadows") !== "0"; } catch {}   // same toggle as the 3D page
+    if (shBox) shBox.checked = inlineShadows;
+    if (!inlineHash) {
+      inline3d.innerHTML = `<div class="view3d-fallback">No best design hashed yet — nothing to render in 3D.</div>`;
+    } else {
+      api("/api/mesh/" + id + "/" + inlineHash).then(meshD => {
+        if (!inline3d.isConnected) return;               // navigated away while the mesh was loading
+        const qNote = String((meshD || {}).quadrants || "") === "1" ? "quarter model mirrored to the full horn"
+          : ((meshD || {}).quadrants === "14" || (meshD || {}).quadrants === "12") ? "half model mirrored to the full horn"
+          : "full model, no mirroring";
+        if (inlineNote) inlineNote.textContent =
+          `${((meshD || {}).n_tris != null ? meshD.n_tris : "?")} triangles in the meshed domain (${qNote}).`;
+        const start = () => init3d(inline3d, meshD, B.profile, S.profile, shBox.checked).catch(() => {
+          if (inline3d.isConnected && inlineNote) inlineNote.textContent =
+            "3D could not start (three.js did not load) — the wall cross-section above carries the geometry.";
+        });
+        start();
+        if (shBox) shBox.onchange = () => {
+          try { localStorage.setItem("hl-v3d-shadows", shBox.checked ? "1" : "0"); } catch {}
+          if (inline3d._dispose3d) inline3d._dispose3d();
+          start();
+        };
+      }).catch(() => {
+        if (inline3d.isConnected) inline3d.innerHTML =
+          `<div class="view3d-fallback">Could not load the mesh for this design — the 2D wall cross-section above carries the geometry.</div>`;
+        if (inline3d.isConnected && inlineNote) inlineNote.textContent = "";
+      });
+    }
+  }
 
   // Directivity isobars (Boundary Lab style): best design H and V; the start design on request
   const mapsEl = document.getElementById("polar-maps");
@@ -1618,7 +1672,7 @@ async function viewRun3D(id) {
       <div class="fig-head">
         <label class="evo-opt" style="color:var(--ink)"><input type="checkbox" id="v3d-shadows" ${(() => { try { return localStorage.getItem("hl-v3d-shadows") === "0" ? "" : "checked"; } catch { return "checked"; } })()}> wall shadows</label>
       </div>
-      <div id="view3d-wrap"><div class="view3d-fallback">Loading 3D…</div></div>
+      <div id="view3d-wrap" data-v3d><div class="view3d-fallback">Loading 3D…</div></div>
       <p class="muted" style="font-size:0.8rem">Drag to orbit · scroll to zoom · right-drag to pan.</p>
     </div>`;
 

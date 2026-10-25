@@ -49,6 +49,17 @@ INVENTORY = {"tool": "tools/cad/multicell.py", "tool_sha": "deadbeef",
              "faces": [{"label": "driver", "count": 1}, {"label": "wall", "count": 4}],
              "solids": 1, "closed": True, "grid": ["3x3"]}
 
+# --- 3D evolution time-lapse fixtures (separate run ids from the C-1/G-1 ones) ---------------
+EVO_RID = "20261026T000000Z-screen-aaa111"
+EVO_SKIP_RID = "20261026T000001Z-screen-bbb222"
+EVO_NOMESH_RID = "20261026T000002Z-screen-ccc333"
+EVO_NOROWS_RID = "20261026T000003Z-screen-ddd444"
+EVO_Q_META_RID = "20261026T000004Z-screen-eee555"
+EVO_Q_ROW_RID = "20261026T000005Z-screen-fff666"
+EVO_Q_CFG_RID = "20261026T000006Z-screen-aaa777"
+EVO_Q_NONE_RID = "20261026T000007Z-screen-bbb888"
+H0, H1, H2 = "111111111111", "222222222222", "333333333333"
+
 
 def _cfg(mesh_extra: dict | None = None, solve_extra: dict | None = None,
          search_extra: dict | None = None) -> dict:
@@ -106,6 +117,50 @@ def _write_run(runs: Path, rid: str, *, mesh_extra: dict | None = None,
         if inventory is not None:
             (step / (Path(STEP).stem + ".inventory.json")).write_text(json.dumps(inventory))
     return run
+
+
+def _mesh_text(extra_node: bool = False) -> str:
+    """Tiny gmsh 2.2 ASCII with 3 triangles (4 nodes, or 5 with an unused extra node)."""
+    nodes = ["1 0 0 0", "2 0.1 0 0", "3 0 0.1 0", "4 0.1 0.1 0"]
+    if extra_node:
+        nodes.append("5 0 0 0.1")
+    return ("$MeshFormat\n2.2 0 8\n$EndMeshFormat\n$Nodes\n" + str(len(nodes)) + "\n"
+            + "\n".join(nodes) + "\n$EndNodes\n$Elements\n3\n"
+            "1 2 2 1 1 1 2 3\n2 2 2 1 1 2 3 4\n3 2 2 1 1 1 3 4\n$EndElements\n")
+
+
+def _evo_row(n: int, h: str, j: float | None, *, ok: bool = True,
+             quadrants: str | None = None) -> dict:
+    row = {"n": n, "design_hash": h, "ok": ok, "objective": j if ok else None,
+           "mode": "screen", "family": "FREEFORM", "error": None if ok else "invalid_geometry: x"}
+    if quadrants:
+        row["quadrants"] = quadrants
+    return row
+
+
+def _evo_run(runs: Path, rid: str, rows: list[dict], *,
+             cfg_quadrants: str | None = "1") -> Path:
+    run = runs / rid
+    run.mkdir(parents=True)
+    cfg = _cfg()
+    if cfg_quadrants is None:
+        cfg["mesh"].pop("quadrants", None)
+    else:
+        cfg["mesh"]["quadrants"] = cfg_quadrants
+    (run / "config.yaml").write_text(yaml.safe_dump(cfg))
+    (run / "search.ndjson").write_text("\n".join(json.dumps(r) for r in rows) + "\n")
+    return run
+
+
+def _evo_design(run: Path, h: str, *, mesh: bool = True, quadrants_meta: str | None = None,
+                extra_node: bool = False) -> Path:
+    dd = run / "designs" / h
+    dd.mkdir(parents=True, exist_ok=True)
+    if mesh:
+        (dd / "mesh.msh").write_text(_mesh_text(extra_node))
+    if quadrants_meta is not None:
+        (dd / "mesh_meta.json").write_text(json.dumps({"result": {"quadrants": quadrants_meta}}))
+    return dd
 
 
 @pytest.fixture()
@@ -310,6 +365,111 @@ def test_verify_is_refused_while_the_gpu_lock_is_held(repo):
     with pytest.raises(J.JobError, match="GPU busy"):
         jm.launch("verify", {"run": RUN_B, "top": 3})
     assert not jm.jobs
+
+
+# ------------------------------------------------------------------ 3D evolution frames
+
+
+def test_evolution_frames3d_uses_the_evolution_improvement_rule_and_skips_missing_meshes(repo):
+    runs = repo / "runs"
+    rows = [_evo_row(0, H0, 10.0), _evo_row(1, H1, 12.0), _evo_row(2, H2, 9.0)]
+    run = _evo_run(runs, EVO_SKIP_RID, rows)
+    _evo_design(run, H0)
+    _evo_design(run, H1)                     # meshed but NOT an improvement: never a frame
+    _evo_design(run, H2, mesh=False)         # improved, design dir lacks mesh.msh: skipped
+
+    d = D.evolution_frames3d(runs, EVO_SKIP_RID)
+    assert d["available"] is True and d["cap"] == 6000
+    [f] = d["frames"]                        # exactly the one improvement with a saved mesh
+    assert f["mesh_hash"] == H0 and f["n"] == 0 and f["objective"] == 10.0
+    assert f["quadrants"] == "1" and f["n_tris_full"] == 3 and f["decimated"] is False
+    assert "1 improved frame(s) skipped" in d["note"]
+    # the 2D player agrees on frame selection (2 improvements; one has no geometry)
+    assert D.evolution(runs, EVO_SKIP_RID)["n_improvements"] == 2
+    json.dumps(d, allow_nan=False)
+
+
+def test_evolution_frames3d_decimates_by_stride_and_honors_the_cap(repo):
+    runs = repo / "runs"
+    run = _evo_run(runs, EVO_RID, [_evo_row(0, H0, 10.0)])
+    _evo_design(run, H0)
+
+    full = D.evolution_frames3d(runs, EVO_RID)
+    f = full["frames"][0]
+    assert full["cap"] == 6000 and f["decimated"] is False
+    assert f["n_tris_full"] == 3 and len(f["tris"]) == 9 and f["n_verts"] == 4
+    assert len(f["verts"]) == 12 and all(isinstance(v, float) for v in f["verts"])
+
+    dec = D.evolution_frames3d(runs, EVO_RID, max_tris_per_frame=2)
+    g = dec["frames"][0]
+    assert dec["cap"] == 2 and g["decimated"] is True and g["n_tris_full"] == 3
+    assert len(g["tris"]) // 3 == 2          # ceil(3 / 2) = 2 stride-sampled triangles
+    assert g["verts"] == f["verts"] and g["n_verts"] == 4
+
+
+def test_evolution_frames3d_available_false_is_honest(repo):
+    runs = repo / "runs"
+    _evo_run(runs, EVO_NOMESH_RID, [_evo_row(0, H0, 10.0)])       # improved, no design dir
+    d = D.evolution_frames3d(runs, EVO_NOMESH_RID)
+    assert d["available"] is False and d["frames"] == [] and d["cap"] == 6000
+    assert "skipped: no saved mesh" in d["note"]
+
+    _evo_run(runs, EVO_NOROWS_RID, [])                            # search.ndjson exists, empty
+    d = D.evolution_frames3d(runs, EVO_NOROWS_RID)
+    assert d["available"] is False and d["frames"] == []
+    assert "no evaluations recorded yet" in d["note"]
+
+
+def test_evolution_frames3d_cache_is_created_and_invalidated_by_a_mesh_change(repo):
+    runs = repo / "runs"
+    run = _evo_run(runs, EVO_RID, [_evo_row(0, H0, 10.0)])
+    _evo_design(run, H0)
+    cache = runs / ".gui_cache" / f"evolution_{EVO_RID}_m3d.json"
+
+    first = D.evolution_frames3d(runs, EVO_RID)
+    assert cache.exists() and first["frames"][0]["n_verts"] == 4
+    key1 = json.loads(cache.read_text(encoding="utf-8"))["key"]
+    assert D.evolution_frames3d(runs, EVO_RID) == first          # unchanged: cache hit
+
+    _evo_design(run, H0, extra_node=True)                        # size + mtime_ns bump
+    second = D.evolution_frames3d(runs, EVO_RID)
+    key2 = json.loads(cache.read_text(encoding="utf-8"))["key"]
+    assert key1 != key2 and second["frames"][0]["n_verts"] == 5
+    assert second["frames"][0]["n_verts"] != first["frames"][0]["n_verts"]
+
+
+def test_evolution_frames3d_quadrants_chain_meta_then_row_then_config(repo):
+    runs = repo / "runs"
+    # mesh_meta.result.quadrants wins
+    r = _evo_run(runs, EVO_Q_META_RID, [_evo_row(0, H0, 10.0, quadrants="1")], cfg_quadrants="1234")
+    _evo_design(r, H0, quadrants_meta="14")
+    assert D.evolution_frames3d(runs, EVO_Q_META_RID)["frames"][0]["quadrants"] == "14"
+    # mesh_meta without quadrants -> the ndjson row
+    r = _evo_run(runs, EVO_Q_ROW_RID, [_evo_row(0, H0, 10.0, quadrants="12")], cfg_quadrants="1234")
+    _evo_design(r, H0)
+    assert D.evolution_frames3d(runs, EVO_Q_ROW_RID)["frames"][0]["quadrants"] == "12"
+    # neither -> config.yaml mesh.quadrants
+    r = _evo_run(runs, EVO_Q_CFG_RID, [_evo_row(0, H0, 10.0)], cfg_quadrants="14")
+    _evo_design(r, H0)
+    assert D.evolution_frames3d(runs, EVO_Q_CFG_RID)["frames"][0]["quadrants"] == "14"
+    # nothing recorded anywhere -> the mesh_surface last resort
+    r = _evo_run(runs, EVO_Q_NONE_RID, [_evo_row(0, H0, 10.0)], cfg_quadrants=None)
+    _evo_design(r, H0)
+    assert D.evolution_frames3d(runs, EVO_Q_NONE_RID)["frames"][0]["quadrants"] == "1234"
+
+
+def test_evolution_frames3d_route(server, repo):
+    runs = repo / "runs"
+    run = _evo_run(runs, EVO_RID, [_evo_row(0, H0, 10.0)])
+    _evo_design(run, H0)
+
+    code, body = _req(server + f"/api/evolution/{EVO_RID}/frames3d")
+    assert code == 200 and body["run_id"] == EVO_RID
+    assert body["available"] is True and body["cap"] == 6000 and "note" not in body
+    [f] = body["frames"]
+    assert f["mesh_hash"] == H0 and len(f["tris"]) == 9 and f["decimated"] is False
+    assert _req(server + "/api/evolution/bad-id/frames3d")[0] == 400
+    assert _req(server + "/api/evolution/20261026T000099Z-screen-abc999/frames3d")[0] == 404
 
 
 # ------------------------------------------------------------------ server fixture

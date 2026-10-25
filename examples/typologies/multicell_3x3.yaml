@@ -1,0 +1,89 @@
+# multicell_3x3: WP14 multicell prototype -- CAD-authored 3x3 air volume -> labelled STEP -> mesh
+#
+# GA (Altec "Voice of the Theatre"-era) multicell, Report 2 section 5. The geometry is NOT a
+# formula profile: family stays FREEFORM (frozen contract) but the Design params are the CAD
+# recipe {"cad": {...}} -- exactly like a GRID design carries {"grid": {...}} (W10). The CAD
+# tool `tools/cad/multicell.py` is the canonical builder; `hornlab_search/mesh/step_build.py`
+# drives it, labels -> physical tags (driver -> 2 / SD1D1001, wall -> 1 / SD1G0), meshes with
+# gmsh and writes metres.
+#
+# The numbers below are the CAD lane's PROVEN 3x3 defaults (tools/cad/multicell.py DEFAULTS,
+# printed by --help on every run); `runs/m5_wp14/multicell_3x3.step` is reference evidence for
+# the same recipe (driver=1, wall=53 faces). Every one is a YAML default, none is hardcoded.
+#
+# n_h = n_v = 3 is ODD, so a cell is centred on each axis: the axis line runs through AIR, not
+# through a septum (the classic WE/Altec cell layout). An EVEN count puts a septum on the axis.
+# septum_mm >= 1.5 is the solver's closed-surface contract (zero-thickness septa are refused);
+# throat_wall_mm is the clearance required between the round throat bore and the cell walls.
+#
+# IMPORTANT (this slice's scope): the exported solid is the AIR volume, whose surfaces the mesh
+# tags wall=1 including the flat mouth. This config is the MESH/solve fixture for WP14; mouth
+# radiation treatment is the focal solve lane's question, not a mesh-adapter knob.
+#
+# BAND: 4000 Hz per the WP14 plan (M5, `docs/research/senior_pass_2026-10-24/
+# 04_IMPLEMENTATION_PLAN.md` WP14). epw 6 at 4 kHz => h = 14.3 mm at the mouth, 7.1 mm near the
+# throat (the mesher's throat = mouth / 2 convention). The mesh keeps the driven patch valid at
+# 4 kHz within the 5000-dof screen cap; the grade's far-field warnings are recorded verbatim in
+# `<run>/mesh_meta.json["cad"]["frequency_validation"]` -- read them before trusting a solve.
+#
+# SOLVE: screen arm on beat_cuda (the search backend). The WP14 PHYSICS gate is the CPU
+# validation arm on beat_cpu with
+#     solve.backend: beat_cpu, solve.near_correction: true, solve.solve_precision: double
+# and CUDA screens of multicells are allowed only after CUDA-vs-CPU differs by < 0.2 dB
+# (plan 04:474-480). That arm is an override on the focal run, not this prototype's default.
+name: multicell_3x3
+family: FREEFORM
+seed_params:
+  cad:
+    tool: multicell
+    n_h: 3                    # horizontal cells (odd: a cell is centred on the x axis)
+    n_v: 3                    # vertical cells (odd: a cell is centred on the y axis)
+    alpha_total_deg: 60.0     # total horizontal cell-fan angle at the split
+    beta_total_deg: 40.0      # total vertical cell-fan angle at the split
+    length_mm: 300.0          # driver face -> mouth
+    z_s_mm: 60.0              # where the round throat splits into cells (septum start)
+    r_throat_mm: 12.7         # 1 inch driver exit radius
+    septum_mm: 2.0            # >= 1.5 mm (closed-surface solver contract)
+    throat_wall_mm: 3.0       # clearance between throat bore and cell walls
+    flare_hz: 200.0           # exponential throat-manifold cutoff (0 = straight)
+# No search dimensions yet: the cad recipe is a fixed prototype geometry (no generator knobs),
+# so `bounds` is intentionally empty. The focal lane builds/solves this fixture; a later lane
+# adds the multicell's searchable knobs (cells/angles/lengths) with a generator of its own.
+bounds: {}
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 700.0
+  band_hi_hz: 4000.0
+  di_target_db: null
+  di_slope_target: 0.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 6.0
+  quadrants: '1234'         # the multicell solid is a FULL model (not symmetry-reduced)
+  dof_cap_screen: 5000
+  dof_cap_verify: 7000
+  dof_cap_final: 8900
+  dof_per_triangle: 0.50    # TOOLCHAIN M1: measured ~0.500 full-domain (0.51 is the quarter)
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+search:
+  algorithm: cma
+  sigma0: 0.25
+  seed: 1234
+  budget: 200
+  popsize: null
+  tolfun: 0.001

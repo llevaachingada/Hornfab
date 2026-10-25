@@ -52,6 +52,8 @@ class App:
             return D.list_briefs(self.root)
         if head == "evolution" and len(parts) == 2:
             return D.evolution(self.runs, parts[1])
+        if head == "evolution" and len(parts) == 3 and parts[2] == "frames3d":
+            return D.evolution_frames3d(self.runs, parts[1])
         if head == "archive" and len(parts) == 2:
             return D.run_archive(self.runs, parts[1])
         if head == "typologies":

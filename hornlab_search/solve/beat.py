@@ -53,6 +53,79 @@ ANGLE_ECHO_TOL_DEG = 1e-3          # solver echoes angles in Float32
 Z_CONVENTION = "exp(-i*omega*t); z = Z_specific/(rho*c); mass-like loading has Im < 0"
 
 
+def _refuse_unsupported_solver_knobs(device: str, extra: dict | None) -> None:
+    """WP14+WP16: surface the library's own accelerator refusals EARLY, before any worker/GPU work.
+
+    ``hornlab_beat_bem.SolveConfig`` already refuses ``near_correction`` on CUDA/ROCm/Metal
+    (``NEAR_CORRECTION_REFUSALS``, config.py:62-78) and ``solve_precision='double'`` off the CPU
+    backend (config.py:544-547). Those are ``NotImplementedError``s raised only once the adapter
+    builds a config — after ``get_backend`` has already probed the device. Refuse here with the
+    library's own rationale (single-image near cache vs multi-image symmetry) so a misconfigured
+    run fails cleanly and actionably before a warm host exists. CPU near correction and double
+    precision are the WP14 CPU-validation path; the accelerator port is WP17/fork work.
+    ``source_profile_alpha`` (WP16) is refused everywhere but the fused CUDA path, with the
+    library's own rationale quoted (see ``_source_profile_kwargs`` for the forward)."""
+    from ..config import ConfigError
+
+    extra = extra or {}
+    precision = str(extra.get("solve_precision", "single"))
+    near = bool(extra.get("near_correction", False))
+    label = {"cuda": "CUDA", "rocm": "ROCm", "metal": "Metal"}.get(str(device), str(device).upper())
+    if precision == "double" and device != "cpu":
+        raise ConfigError(
+            f"solve.solve_precision='double' is only available on the BEAT CPU backend "
+            f"(hornlab_beat_bem refuses it on {label}); use backend: beat_cpu with "
+            f"solve_precision: double (WP14 CPU validation)")
+    if near and device != "cpu":
+        raise ConfigError(
+            f"near_correction is not implemented for the BEAT {label} backend: the CUDA device "
+            f"path carries a single image-near cache, so under a multi-image symmetry two of "
+            f"three mirror transforms would integrate a near-singular kernel with the plain "
+            f"regular rule and say nothing about it; refused rather than silently wrong. "
+            f"Near correction is a BEAT CPU feature (backend: beat_cpu, WP14); the accelerator "
+            f"port is WP17/fork work, so hornlab-search refuses before starting any GPU work "
+            f"instead of after the device probe.")
+    # WP16: source_profile_alpha is a fused-CUDA-only feature in hornlab_beat_bem. Surface the
+    # library's OWN refusal here (its SolveConfig raises NotImplementedError at construction,
+    # after get_backend's device probe) so a misconfigured run fails before any GPU/worker work.
+    alpha = extra.get("source_profile_alpha")
+    if alpha is not None and float(alpha) != 0.0:
+        fused = os.environ.get("HORNLAB_BEAT_FUSED_BM_CUDA", "0") == "1"
+        if device != "cuda" or not fused:
+            raise ConfigError(
+                f"WP16: profile source implemented on the fused path only (branch work in "
+                f"progress): source_profile_alpha={float(alpha)!r} needs beat_backend='cuda' and "
+                f"HORNLAB_BEAT_FUSED_BM_CUDA=1 in the environment the Julia worker inherits; "
+                f"every other path would assemble the uniform drive and report a profile it "
+                f"never applied (set solve.cuda_fused: true, which exports "
+                f"HORNLAB_BEAT_FUSED_BM_CUDA=1 before the host spawns)")
+
+
+def _near_precision_kwargs(extra: dict | None) -> dict:
+    """WP14: the SolveConfig kwargs for the four CPU-validation keys, named exactly like the
+    library's own fields. Absent keys are NOT sent, so an old spec builds today's exact config."""
+    extra = extra or {}
+    kw: dict = {}
+    if "near_correction" in extra:
+        kw["near_correction"] = bool(extra["near_correction"])
+    if "near_correction_cutoff" in extra:
+        kw["near_correction_cutoff"] = float(extra["near_correction_cutoff"])
+    if "near_correction_order" in extra:
+        kw["near_correction_order"] = int(extra["near_correction_order"])
+    if "solve_precision" in extra:
+        kw["solve_precision"] = str(extra["solve_precision"])
+    return kw
+
+
+def _source_profile_kwargs(extra: dict | None) -> dict:
+    """WP16: the SolveConfig kwarg for the J0 source-profile angle, named exactly like the
+    library's own field. Absent key -> NOT sent, so an old spec builds today's exact config."""
+    extra = extra or {}
+    if "source_profile_alpha" not in extra:
+        return {}
+    return {"source_profile_alpha": float(extra["source_profile_alpha"])}
+
+
 def check_symmetry_pairing(mesh: MeshResult) -> None:
     """Silent killer #2: the symmetry flag must be the one ``mesh/sizing.SYMMETRY_PLANE`` derives
     from ``quadrants``. A mismatch is a bug, not a bad candidate, so it RAISES (never becomes a
@@ -373,6 +446,9 @@ class BeatBackend:
     # ---- config
     def make_config(self, mesh: MeshResult, spec: SolveSpec, *, frame_origin_m=None,
                     surface_traces: bool = False):
+        # WP14: check the accelerator refusals BEFORE importing the solver / pairing checks, so a
+        # CUDA run with near_correction or double precision fails before any GPU/worker work.
+        _refuse_unsupported_solver_knobs(self.device, spec.extra)
         import hornlab_beat_bem as beat
         check_symmetry_pairing(mesh)
         obs_kw = {}
@@ -404,6 +480,12 @@ class BeatBackend:
             # are untouched.
             source_motion=str((spec.extra or {}).get("source_motion", "normal")),
             air_density=RHO_AIR,
+            # WP14: forwarded under the library's own field names, ONLY when the key is present in
+            # `extra` (absent = the SolveConfig default, i.e. today's dict byte-for-byte).
+            **_near_precision_kwargs(spec.extra),
+            # WP16: forwarded under the library's own field name, ONLY when the key is present in
+            # `extra` (absent = the SolveConfig default 0.0, i.e. today's dict byte-for-byte).
+            **_source_profile_kwargs(spec.extra),
             sound_speed=C_AIR,
             observation=observation,
             frame_override=frame,

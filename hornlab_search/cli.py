@@ -450,18 +450,25 @@ def _cmd_selftest(args) -> int:
         cfg.solve.backend = args.backend
     worker.install_handlers()
     d = _dirs(args) if hasattr(args, "runs_dir") else {"runs": REPO / "runs"}
+    entered_locked_body = False
     try:
         with gpu_lock(_command_string(["selftest"] + sys.argv[1:]), runs_root=d["runs"]):
+            entered_locked_body = True
             return _selftest_body(args, cfg, selftest)
     except GpuBusyError as exc:
         print(str(exc), file=sys.stderr)
         return 3
     finally:
-        # a self-test is a measurement: leave no Julia host holding VRAM behind it (AGENTS.md rule 6)
-        try:
-            worker.shutdown(verify=True)
-        except Exception as exc:  # noqa: BLE001
-            print(f"WARNING: could not verify the BEAT host is gone: {exc}")
+        # A self-test is a measurement: leave no Julia host holding VRAM behind it (AGENTS.md rule
+        # 6) - but ONLY when this process actually entered the locked body. A GpuBusyError refusal
+        # means the lock was never acquired and this process started no worker: calling
+        # worker.shutdown() there would force-kill BEAT hosts belonging to the live job that holds
+        # the lock (observed 2026-10-25: a lock-refused selftest killed another campaign's host).
+        if entered_locked_body:
+            try:
+                worker.shutdown(verify=True)
+            except Exception as exc:  # noqa: BLE001
+                print(f"WARNING: could not verify the BEAT host is gone: {exc}")
 
 
 def _selftest_body(args, cfg, selftest) -> int:

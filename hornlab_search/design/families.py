@@ -408,6 +408,11 @@ def validate(design: Design) -> None:
     family literal stays FREEFORM (frozen contract), but the params are a grid spec, not anchors,
     so the grid schema validates them (``generators.grid.validate_grid_params``) instead of
     ``_validate_freeform``.
+
+    WP14: the same for a ``FREEFORM`` design whose params carry ``"cad"`` -- a labelled-STEP
+    recipe for ``mesh/step_build.py`` (``tool: multicell``), validated by
+    ``step_build.validate_cad_params``. The family literal stays FREEFORM, and a cad Design
+    carries ONLY ``cad`` (exactly like a grid Design carries only ``grid``).
     """
     fam = design.family
     if fam not in FAMILY_KEYS:
@@ -427,6 +432,19 @@ def validate(design: Design) -> None:
             grid_gen.validate_grid_params(design.params["grid"])
         except grid_gen.registry.GeneratorError as exc:
             raise GeometryInvalidError(f"{fam}.grid: {exc}") from exc
+        return
+    if "cad" in design.params:
+        if fam != "FREEFORM":
+            raise GeometryInvalidError(
+                f"{fam}: a cad design must use family FREEFORM (got {fam!r})")
+        from ..mesh import step_build as cad_mod             # lazy: mesh imports this package
+        extra = sorted(k for k in design.params if k != "cad")
+        if extra:
+            raise _bad(fam, extra[0], "not a cad design key (a cad Design carries only 'cad')")
+        try:
+            cad_mod.validate_cad_params(design.params["cad"])
+        except cad_mod.CadParamsError as exc:
+            raise GeometryInvalidError(f"{fam}.cad: {exc}") from exc
         return
     hints = _REFUSED_HINTS.get(fam, {})
     for key in design.params:

@@ -15,7 +15,9 @@ dependencies = [
   "pyyaml>=6",
   "jinja2>=3.1",
   "hornlab-waveguide-mesher @ git+https://github.com/m3gnus/hornlab-waveguide-mesher.git@b922e807a5cf10cf732c4557ec0b9b495762afd7",
-  "hornlab-beat-bem @ git+https://github.com/m3gnus/hornlab-beat-bem.git@38544d214ba2e8a4977bb82170d2fb4a3f9fa8b0",
+  # WP16+17 fork stack, hosted fork (docs/FORKS.md): WP15 fused CUDA Burton-Miller + WP16 J0 source
+  # profile + WP17 fused-CUDA near correction (stage 1), all opt-in at their defaults.
+  "hornlab-beat-bem @ git+https://github.com/llevaachingada/hornlab-beat-bem.git@760a1ecf6075f5ccdbf97a69874c7f88441e36c1",
   "hornlab-plots @ git+https://github.com/m3gnus/hornlab-plots.git@9e4a6d0dd2ccb6e735dd00233dccccb50d12ed44",
 ]
 
@@ -26,6 +28,8 @@ surrogate = ["torch>=2.2"]
 # WP11b CMA-ME atlas. The PyPI distribution is `ribs` (`import ribs`); `pyribs` is an alias that
 # does not resolve, so pin the import name exactly.
 qd = ["ribs==0.12.0"]
+# WP14 optional dep: tools/cad/multicell.py builds the multicell air volume and needs OCP.
+cad = ["build123d==0.13.0"]
 
 [project.scripts]
 hornlab-search = "hornlab_search.cli:main"

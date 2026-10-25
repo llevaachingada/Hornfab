@@ -26,6 +26,11 @@
 # W 438.9 x H 293.7 x 223.1 mm outer (fits the organic 520 x 420 x 260 brief) and
 # W*fc_h / (H*fc_v) = 0.9962 (the datasheet invariant within 2 %). The min self-approach
 # is 9.17 mm >= 2t + 2 = 8 mm.
+#
+# MESHER WARNING (benign, recorded): the outer shell wants 3.866 mm on 6 of 33 rings and is
+# held at 5.197 mm - the INNER acoustic surface is unaffected (seed uses epw 6 to fit the
+# 5,000 screen dof cap). Tracked in docs/ISSUES.md M4 local-only ("salmon_saddle emits the
+# mesher outer-shell clearance warning").
 name: salmon_saddle
 family: FREEFORM
 brief_file: ../briefs/organic_rollback_1in.yaml

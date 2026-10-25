@@ -26,7 +26,12 @@ from hornlab_search.types import Design, MeshSpec, ObservationSpec, SolveSpec
 EXAMPLE_NAMES = ["osse_baseline", "throat_adapter", "icw_termination", "freeform_hv", "search_smoke"]
 
 # Config fields that the loader treats as optional (may legitimately be None).
-OPTIONAL_FIELDS = {"search.popsize", "search.restarts", "search.qd", "mesh.band_split"}
+OPTIONAL_FIELDS = {"search.popsize", "search.restarts", "search.qd", "mesh.band_split",
+                   # WP14: absent = today; these only exist when a config opts in.
+                   "solve.near_correction", "solve.near_correction_cutoff",
+                   "solve.near_correction_order", "solve.solve_precision",
+                   # WP16: J0 source-profile angle; absent = today.
+                   "solve.source_profile_alpha"}
 
 
 def _load_example(name):

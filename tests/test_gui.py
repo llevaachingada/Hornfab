@@ -284,6 +284,29 @@ def test_list_configs_reads_catalog(repo):
     assert "catalog" not in cfgs
 
 
+def test_list_configs_seed_gate_memoizes_and_invalidates(repo, monkeypatch):
+    """ISSUES M4: the disabled gate materialized every seed on every refresh (rows marches are
+    brentq loops - the saddle is ~25 rows).  Two refreshes of untouched files must march ONCE,
+    and an edited config must re-march and serve the new content."""
+    typ = repo / "examples" / "typologies"
+    typ.mkdir()
+    cfg = typ / "conical.yaml"
+    shutil.copy(ROOT / "examples" / "typologies" / "conical.yaml", cfg)
+    marches = []
+    real = D._config_seed_materializes
+    monkeypatch.setattr(D, "_config_seed_materializes", lambda p: (marches.append(p), real(p))[1])
+    cfgs = {c["name"]: c for c in D.list_configs(repo)}
+    assert cfgs["conical"]["disabled"] is False          # the shipped seed materializes
+    first = len(marches)
+    assert first >= 1
+    D.list_configs(repo)                                # unchanged state: served from the memo
+    assert len(marches) == first
+    cfg.write_text(yaml.safe_dump({"name": "conical_edited", "family": "FREEFORM"}))   # now unloadable
+    cfgs = {c["name"]: c for c in D.list_configs(repo)}
+    assert len(marches) == first + 1                    # invalidated: re-marched, and only this one
+    assert cfgs["conical_edited"]["disabled"] is True and "conical" not in cfgs
+
+
 def test_past_jobs_reload_after_restart(repo, monkeypatch):
     monkeypatch.setattr(J, "CLI_BOOT", "import sys; print('dry-run OK: done', flush=True)")
     jm = J.JobManager(repo, repo / "runs")

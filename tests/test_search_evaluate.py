@@ -2,12 +2,15 @@
 from __future__ import annotations
 
 import dataclasses
+import hashlib
+import json
 from pathlib import Path
 
 import numpy as np
 import pytest
 
-from hornlab_search.config import mode_freqs
+from conftest import EXAMPLES, requires_build123d, requires_mesher
+from hornlab_search.config import load_config, mode_freqs
 from hornlab_search.dataset.store import DatasetStore
 from hornlab_search.design.space import DesignSpace
 from hornlab_search.mesh.build import MeshUnitsError, SymmetryMismatchError
@@ -16,7 +19,8 @@ from hornlab_search.search.evaluate import (evaluate, make_context, metrics_from
                                             mouth_dims_m, read_ndjson, row_to_evaluation)
 from hornlab_search.solve.base import balloon_dirs_from_angles
 from hornlab_search.targets.spec import Target
-from hornlab_search.types import MeshResult, Response
+from hornlab_search.types import Design, MeshResult, Response
+from test_mesh_step_build import TINY
 from test_search_support import LIBS, SyntheticBackend, fast_cfg, install_fakes, synthetic_response
 
 
@@ -59,6 +63,7 @@ def test_evaluate_happy_path_writes_every_artifact(cfg, tmp_path, monkeypatch):
     (meta, arrays) = next(store.iter_records(with_arrays=True))
     assert meta["ok"] and meta["objective_version"] == 1
     assert "mesh_policy" not in (meta.get("provenance") or {})
+    assert "cad" not in row and "cad" not in (meta.get("provenance") or {})
     assert meta["mesh"]["area_m2"] == 0.1 and meta["mesh"]["grid"]["available"]
     assert meta["mesh"]["grid"]["angular_segments"] == 64 and meta["solve"]["mode"] == "screen"
     assert "spl_h_db" in arrays and meta["solve"]["freqs_hz"] == list(mode_freqs("screen", cfg))
@@ -349,3 +354,80 @@ def test_band_split_seam_check_runs_only_in_verify(monkeypatch, smoke_cfg, tmp_p
                    ctx=_ctx(cfg, None))
     resp2 = load_response(tmp_path / "screen" / "designs" / ev2.design_hash / "response.npz")
     assert "seam_check" not in resp2.meta
+
+
+# ---- WP14: a cad-route mesh has no grid recipe; the honest echo is `cad`
+
+
+def test_grid_info_is_honest_about_cad_versus_formula_meta(tmp_path):
+    """No mesher/GPU: the meta shape alone decides the grid block and the cad echo."""
+    formula = tmp_path / "formula"
+    formula.mkdir()
+    (formula / "mesh_meta.json").write_text(json.dumps({
+        "summary": {"area_m2": 0.25},
+        "mesher_config": {"mesh": {"angular_segments": 48, "length_segments": 24}}}))
+    area, grid = ev_mod._grid_info(formula)
+    assert area == 0.25
+    assert grid == {"angular_segments": 48, "length_segments": 24, "available": True}
+    assert ev_mod._cad_info(formula) is None
+
+    cad = tmp_path / "cad"
+    cad.mkdir()
+    (cad / "mesh_meta.json").write_text(json.dumps({
+        "summary": {"area_m2": 0.5},
+        "cad": {"tool": "multicell", "tool_sha256": "a" * 64, "recipe": {"n_h": 2},
+                "step_sha256": "b" * 64, "face_inventory": {"driver": 1, "wall": 9},
+                "frequency_validation": {"status": "valid"}}}))
+    area, grid = ev_mod._grid_info(cad)
+    assert area == 0.5
+    assert grid == {"angular_segments": None, "length_segments": None, "available": False}
+    assert ev_mod._cad_info(cad) == {
+        "tool": "multicell", "tool_sha256": "a" * 64, "recipe": {"n_h": 2},
+        "step_sha256": "b" * 64, "face_inventory": {"driver": 1, "wall": 9}}
+
+
+def _cad_cfg():
+    """The WP14 example config at the STEP lane's cheap 2x2 / 2 kHz fixture point."""
+    base = load_config(EXAMPLES / "typologies" / "multicell_3x3.yaml")
+    return dataclasses.replace(
+        base, mesh=dataclasses.replace(base.mesh, epw=10.0),
+        target_raw={**base.target_raw, "band_hi_hz": 2000.0})
+
+
+@requires_build123d
+@requires_mesher
+def test_cad_row_reports_no_grid_and_carries_the_small_cad_echo(tmp_path):
+    """Real CAD + real gmsh mesh (offline, CPU); the solve is the synthetic backend."""
+    cfg = _cad_cfg()
+    be = SyntheticBackend()
+    store = DatasetStore(tmp_path / "ds")
+    design = Design("FREEFORM", {"cad": dict(TINY)})
+    run = tmp_path / "run"
+    ev = evaluate(design, None, cfg, "screen", run, store, be,
+                  ctx=_ctx(cfg, store, ndjson=run / "search.ndjson"))
+    assert not ev.error, ev.error
+    (meta, _arrays) = next(store.iter_records(with_arrays=True))
+
+    grid = meta["mesh"]["grid"]
+    assert grid["available"] is False
+    assert grid["angular_segments"] is None and grid["length_segments"] is None
+    assert meta["mesh"]["area_m2"] > 0.0             # the area still comes from the same meta
+
+    cad = meta["provenance"]["cad"]
+    assert set(cad) == set(ev_mod.CAD_ECHO_KEYS)
+    assert cad["tool"] == "tools/cad/multicell.py"
+    tool = Path(__file__).resolve().parents[1] / "tools" / "cad" / "multicell.py"
+    assert cad["tool_sha256"] == hashlib.sha256(tool.read_bytes()).hexdigest()
+    assert cad["recipe"] == TINY
+    assert len(cad["step_sha256"]) == 64
+    assert cad["face_inventory"]["driver"] == 1 and cad["face_inventory"]["wall"] > 0
+
+    disk = json.loads((run / "designs" / ev.design_hash / "mesh_meta.json").read_text(encoding="utf-8"))
+    assert cad["step_sha256"] == disk["cad"]["step_sha256"]
+    assert cad["face_inventory"] == disk["cad"]["face_inventory"]
+    # SMALL: the rest of the block (derived geometry, frequency report) stays on disk
+    assert not {"derived", "solid", "frequency_validation"} & set(cad)
+
+    (row,) = read_ndjson(run / "search.ndjson")
+    assert row["cad"] == cad
+

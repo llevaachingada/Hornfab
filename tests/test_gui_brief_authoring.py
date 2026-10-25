@@ -450,3 +450,121 @@ def test_provenance_helpers_behave_offline(tmp_path):
     r = subprocess.run([node, str(script), str(APPJS)],
                        capture_output=True, text=True, cwd=str(tmp_path))
     assert "PROV OK" in r.stdout, f"node test failed:\nstdout: {r.stdout}\nstderr: {r.stderr}"
+
+
+# ── Inline 3D + 3D time-lapse (owner requests, views only) ───────────────────────────────
+# Run detail carries a lazy embedded 3D viewer for the best design (data-v3d tagged, disposed by
+# route()'s marker sweep); the evolution page gains a lazy "3D" mode playing the frames3d
+# improvement frames through view3d.js::init3dFrames. Source wiring here; the pure per-frame
+# preparation runs for real in node below.
+
+def test_inline_3d_and_disposal_are_wired():
+    """The inline viewer exists below the wall cross-section, is lazy (fetch after render, staleness
+    guard, failure note), carries the [data-v3d] marker, and route() sweeps every marked container."""
+    src = APPJS.read_text(encoding="utf-8")
+    # route() disposal: the marker sweep replaces the old single-id dispose
+    assert 'document.querySelectorAll("[data-v3d]")' in src
+    assert 'if (el._dispose3d) el._dispose3d();' in src
+    assert re.search(r'querySelectorAll\("\[data-v3d\]"\)\.forEach\(el => \{ if \(el\._dispose3d\) el\._dispose3d\(\); \}\);', src)
+    # the dedicated 3D page container is marked too (same sweep covers it)
+    assert 'id="view3d-wrap" data-v3d' in src
+    # inline viewer inside viewRunDetail: marked container + lazy loader
+    assert 'id="inline-3d" data-v3d' in src
+    assert 'api("/api/mesh/" + id + "/" + inlineHash)' in src      # fetched only after render
+    assert "if (!inline3d.isConnected) return;" in src             # navigated away -> no scene
+    assert "init3d(inline3d" in src                                # existing init3d, container-fitted
+    assert "Could not load the mesh for this design" in src        # fetch failure -> honest note
+    assert "No best design hashed yet" in src                      # no best design -> honest note
+    # shadows default on, persisted with the SAME toggle key as the 3D page
+    assert src.count('localStorage.getItem("hl-v3d-shadows")') >= 2
+    assert "inline3d-shadows" in src
+    # no second auto-loaded scene for the same design: the inline loader's start() serves both its
+    # initial build and its shadow re-init, so app.js holds exactly three init3d call sites
+    # (3D page: initial + shadow toggle; inline: start, shared by its initial build and toggle)
+    assert src.count("init3d(") == 3
+
+
+def test_evolution_3d_mode_is_wired():
+    """The evolution page gains the lazy 3D toggle: frames3d fetched ONLY on use, improvements-only
+    rule enforced both ways and disclosed, player container marked [data-v3d], honest unavailable
+    branches, and view3d.js exports the frame player."""
+    evo = (ROOT / "hornlab_search" / "gui" / "static" / "evolution.js").read_text(encoding="utf-8")
+    v3d = (ROOT / "hornlab_search" / "gui" / "static" / "view3d.js").read_text(encoding="utf-8")
+    # toggle + container + player wiring
+    assert 'id="evo-3d"' in evo and 'id="evo-3d" data-v3d' in evo
+    assert 'fetch("/api/evolution/" + encodeURIComponent(runId) + "/frames3d")' in evo
+    assert "init3dFrames(cv, frames3d" in evo and 'import { init3dFrames } from "./view3d.js";' in evo
+    # lazy: the fetch lives inside the enable path, not at view load
+    assert "async function enable3d" in evo and "Loading 3D time-lapse" in evo
+    # the single rule: one source-of-truth constant, disclosed 3+ places (toggle note, build note,
+    # re-enable note, mode-select note)
+    assert 'const RULE3D = "3D shows improvement frames only' in evo
+    assert evo.count("RULE3D") >= 4
+    assert 'mode !== "best"' in evo                     # checking 3D forces improvements-only
+    assert "'every candidate' plays in 2D" in evo       # selecting every-candidate turns 3D off
+    # honest branches: no frames / fetch failure / CDN failure all stay on 2D
+    assert "R.available === false" in evo and "the 2D time-lapse stays." in evo
+    assert "staying on the 2D panels." in evo
+    assert 'if (!root.isConnected) return;' in evo      # navigation during the lazy build bails
+    # view3d.js: exported player + disposal contract + lazy THREE (no top-level WebGL need)
+    assert "export async function init3dFrames" in v3d
+    assert "container._dispose3d = dispose" in v3d
+    assert "mesh.geometry = built.geo;" in v3d          # hot-swap, no scene rebuild
+
+
+# Node-exercisable core of the frame player (view3d.js top level stays DOM/THREE-free — the same
+# direct-import pattern as tests/test_gui_mesh_quadrants.py; the WebGL scene assembly itself needs
+# a browser, so prepareFrames is the executed part and the swap paths are source-wired above).
+_FRAMES_SCRIPT = r'''
+import { pathToFileURL } from "node:url";
+import assert from "node:assert/strict";
+const v3d = await import(pathToFileURL(process.argv[2]).href);
+const { prepareFrames, init3dFrames, mirrorMesh } = v3d;
+assert.equal(typeof prepareFrames, "function");
+assert.equal(typeof init3dFrames, "function");          // exported; scene half needs a browser
+assert.equal(typeof mirrorMesh, "function");            // the per-frame mirroring it reuses
+// improvement frames as the reader keys them: eval number n, objective, hash, quadrants, decimation
+const quarter = { n: 3, objective: 22.5, mesh_hash: "aaaa11112222", quadrants: "1",
+  verts: [0, 0, 0, 1, 0, 0, 0, 1, 0], tris: [0, 1, 2], decimated: true, n_tris_full: 400 };
+const half = { n: 7, objective: 18.4, quadrants: "14",
+  verts: [0, 0, 0, 1, 0, 0, 0, 1, 0], tris: [0, 1, 2], decimated: false, n_tris_full: 3 };
+const empty = { n: 9, objective: null, quadrants: "", verts: [], tris: [] };   // no mesh saved
+const pf = prepareFrames([quarter, half, empty, null]);
+assert.equal(pf.length, 2, "mesh-less frames are skipped, never fabricated");
+// frame 1: quarter '1' -> 4 mirrored copies (12 verts); bounds extend symmetric to -1
+assert.equal(pf[0].verts.length, 36);                   // 12 mirrored verts x 3 floats
+assert.equal(pf[0].tris.length, 12);                    // 4 copies of the one triangle
+assert.deepEqual([pf[0].bounds.x0, pf[0].bounds.x1, pf[0].bounds.y0, pf[0].bounds.y1,
+                  pf[0].bounds.z0, pf[0].bounds.z1], [-1, 1, -1, 1, 0, 0]);
+assert.equal(pf[0].n, 3);                               // eval identity carried for playback mapping
+assert.equal(pf[0].objective, 22.5);
+assert.equal(pf[0].mesh_hash, "aaaa11112222");
+assert.equal(pf[0].decimated, true);                    // disclosure flag rides the frame
+assert.equal(pf[0].n_tris_full, 400);
+// frame 2: half '14' -> 2 copies, one reflection = winding flip, exactly like mirrorMesh
+assert.equal(pf[1].verts.length, 18);                   // 6 mirrored verts x 3 floats
+assert.deepEqual([...pf[1].tris], [0, 1, 2, 3, 5, 4]);
+assert.equal(pf[1].decimated, false);
+assert.equal(pf[1].objective, 18.4);
+// union bounds across frames (the player's fixed camera) is derivable, and garbage never throws
+const union = [-Math.min(pf[0].bounds.x0, pf[1].bounds.x0), Math.max(pf[0].bounds.x1, pf[1].bounds.x1)];
+assert.deepEqual(union, [1, 1]);
+assert.deepEqual(prepareFrames(undefined), []);
+assert.deepEqual(prepareFrames({}), []);
+assert.deepEqual(prepareFrames([{ n: 1, verts: [0, 0, 0], tris: [0, 0, 0] }]).length, 0);  // degenerate
+console.log("FRAMES OK");
+'''
+
+
+def test_3d_frames_prepare_offline(tmp_path):
+    """Executes the pure per-frame core of init3dFrames: mirrorMesh per frame (quarter/half handedness
+    bounds), the honest skips (no mesh saved), the decimation disclosure flags and the eval-identity
+    carry that the playback mapping keys on."""
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("node not installed")
+    script = tmp_path / "frames_under_test.mjs"
+    script.write_text(_FRAMES_SCRIPT, encoding="utf-8")
+    r = subprocess.run([node, str(script), str(ROOT / "hornlab_search" / "gui" / "static" / "view3d.js")],
+                       capture_output=True, text=True, cwd=str(tmp_path))
+    assert "FRAMES OK" in r.stdout, f"node test failed:\nstdout: {r.stdout}\nstderr: {r.stderr}"

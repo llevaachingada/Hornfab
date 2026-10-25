@@ -194,3 +194,30 @@ def build_grid_mesh(grid, mesh, out_path, cfg, *, mode: str | None = None) -> Me
 # + json.dumps(meta, sort_keys=True))`` + ``mesh.hash()``; do not reuse ``mesh_cache_key`` as is,
 # or two different grids that happen to share a Design hash (none) would collide. The cache is
 # deliberately absent here until the pseudo-family owns that key.
+
+# ------------------------------------------------------------------ SKETCH only (2026-10-25)
+# GRID mesh-cache design, written down but NOT implemented (ISSUES M4 local-only item:
+# "GRID-route mesh-cache absence"). Comment-only: nothing above depends on this block.
+#
+# * KEY = the design RECIPE JSON, i.e. the persisted ``design.params["grid"]`` (generator kind +
+#   every knob, ``n_phi``/``n_s``/``wall_thickness_mm``, span) -- NOT a ``Design`` hash, which a
+#   GRID run does not have -- PLUS a hash of the MESH-BUILD inputs: the resolved ``MeshDensity``
+#   (throat/mouth/rear res from ``res_mm_for_spec``, aperture_res_scale, max_triangles,
+#   allow_large_mesh) and the symmetry/model inputs (``mesh.quadrants``, ``_GRID_SYMMETRY_AXES``,
+#   ``source_auto_angle_deg``, ``source_shape``, ``DEFAULT_WALL_THICKNESS_MM``). The point-grid
+#   arrays are a pure function of the recipe, so hashing the recipe avoids re-marching to hash.
+# * INVALIDATION = hash change, nothing else: same recipe + same build inputs -> reuse the .msh;
+#   any knob, sampling, density or symmetry edit -> a new key -> remesh. No TTL, no mtime.
+# * STORAGE candidate = ``runs/.mesh_cache/<key>.msh`` (GUI/cache-owned, like the existing
+#   ``runs/.gui_cache``) or a explicit ``--cache-dir`` argument threaded through the caller, so a
+#   measurement can point it at scratch. Store the ``MeshResult`` fields beside the .msh (n_triangles,
+#   dofs, res_mm, bbox, symmetry_plane) so a hit still reports the same result shape.
+# * WARNING -- the M2/M4 lesson: the EXISTING solve/mesh caches are NOT keyed by library SHA. In
+#   M2 the A/B had to re-solve on FRESH cache dirs because stale entries would otherwise have
+#   silently served responses from the old ``hornlab_beat_bem``/``hornlab_mesher`` build as if they
+#   were the A/B arm. A GRID mesh cache inherits that hazard: the .msh depends on the mesher's
+#   code as much as on the recipe. Any implementation MUST therefore either (a) fold the library
+#   SHAs (``hornlab_mesher``, and the gmsh version) into the key, or (b) leave the cache per-SHA
+#   (``runs/.mesh_cache/<lib_shas>/<key>.msh``) so a reinstall cannot mix builds -- fresh cache
+#   dirs per GPU job remain the measurement default either way.
+

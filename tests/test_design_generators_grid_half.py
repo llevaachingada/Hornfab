@@ -361,6 +361,8 @@ def test_example_configs_materialize_and_are_catalogued():
         json.dumps(space.provenance(space.seed))
         assert registry.envelope_overshoot_estimate(space.seed.params, cfg.brief) == 0.0
     assert not (TYP / "lecleach.yaml").exists()       # the stale gated stub is removed
+    assert "3.866 mm on 6 of 33 rings" in (TYP / "salmon_saddle.yaml").read_text(
+        encoding="utf-8")          # the benign mesher warning is recorded in the config header
 
 
 def test_catalog_entries_symmetry_and_brief_compatibility():

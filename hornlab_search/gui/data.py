@@ -758,6 +758,40 @@ def _config_seed_materializes(p: Path) -> bool:
         return False
 
 
+#: In-process memo for the disabled gate (ISSUES M4 local-only "GUI ``list_configs`` latency").
+#: ``_config_seed_materializes`` runs the REAL generator march, and the rows kinds are brentq
+#: loops (the saddle is ~25 rows), so re-materializing every seed on every refresh is the
+#: visible latency the issue records.  The gate's whole input is the config file PLUS the brief
+#: it names (the brief supplies the driver exit radius/angle the march starts from), so the key
+#: is both files' (path, mtime_ns, size): an edited config -- or an edited brief -- re-materializes
+#: on the next refresh, while an untouched pair is served from memory.  Deliberately process-local
+#: (no on-disk staleness to clean up; a generator code change needs a GUI restart, exactly like
+#: every other import).  Bounded by the number of config files.
+_SEED_GATE_CACHE: dict[tuple, bool] = {}
+
+
+def _file_stamp(p: Path | None) -> tuple | None:
+    if p is None:
+        return None
+    try:
+        st = p.stat()
+    except OSError:
+        return None
+    return (str(p.resolve()), st.st_mtime_ns, st.st_size)
+
+
+def _seed_gate_key(p: Path, raw: dict, root: Path) -> tuple:
+    """Memo key for one config: its own stamp + the stamp of the brief file it names."""
+    brief = raw.get("brief_file") if isinstance(raw, dict) else None
+    brief_p = None
+    if isinstance(brief, str) and brief:
+        for cand in (p.parent / brief, root / brief):      # cfg.load_config resolution order
+            if cand.exists():
+                brief_p = cand
+                break
+    return (_file_stamp(p), _file_stamp(brief_p))
+
+
 def list_configs(root: Path) -> list[dict]:
     """Every runnable config under examples/ (not briefs, not the catalog), with its catalog entry."""
     cat = {e.get("config"): e for e in catalog(root)}
@@ -773,14 +807,20 @@ def list_configs(root: Path) -> list[dict]:
         rel = p.relative_to(ex).as_posix()
         e = cat.get(rel, {})
         bounds = raw.get("bounds") or {}
+        # honest gate: the seed materializes (never a name substring; lecleach is live).
+        # Memoized on the config+brief stamps -- the march is the refresh's whole cost.
+        key = _seed_gate_key(p, raw, root)
+        disabled = _SEED_GATE_CACHE.get(key)
+        if disabled is None:
+            disabled = not _config_seed_materializes(p)
+            _SEED_GATE_CACHE[key] = disabled
         out.append(clean({
             "path": p.relative_to(root).as_posix(), "name": raw.get("name") or p.stem,
             "family": raw.get("family"), "generator": isinstance(raw.get("generator"), dict),
             "brief_file": raw.get("brief_file"), "catalog_name": e.get("name"), "group": e.get("group"),
             "symmetry": e.get("symmetry"), "description": e.get("description"),
             "n_knobs": sum(1 for b in bounds.values() if isinstance(b, dict) and b.get("search", True)),
-            # honest gate: the seed materializes (never a name substring; lecleach is live)
-            "disabled": not _config_seed_materializes(p)}))
+            "disabled": disabled}))
     return out
 
 
@@ -949,6 +989,25 @@ def typologies(root: Path, runs: Path) -> list[dict]:
 # ---------------------------------------------------------------------------- evolution (time-lapse)
 
 EVO_VERSION = 2
+M3D_VERSION = 1
+M3D_DEFAULT_CAP = 6000
+
+
+def _improvement_flags(rows: list[dict]) -> list[bool]:
+    """Best-so-far transitions over the evaluation rows -- the ONE frame-selection rule shared by
+    ``evolution()`` (2D) and ``evolution_frames3d()`` (3D), so the two players never disagree."""
+    flags: list[bool] = []
+    best = None
+    for r in rows:
+        ok = bool(r.get("ok")) and r.get("objective") is not None
+        j = float(r["objective"]) if ok else None
+        improved = False
+        if j is not None:
+            improved = best is None or j < best
+            if improved:
+                best = j
+        flags.append(improved)
+    return flags
 
 
 def _decimate(pts: list, n: int) -> list:
@@ -1031,13 +1090,14 @@ def evolution(runs: Path, run_id: str) -> dict:
     prev = ({f["hash"]: f for f in old["data"].get("frames", []) if f.get("geo")}       # reuse geometry while
             if same_version else {})                                                    # the search grows
     frames, best = [], None
+    flags = _improvement_flags(rows)
     geo_by_hash: dict[str, dict | None] = {}
-    for r in rows:
+    for i, r in enumerate(rows):
         h = r.get("design_hash")
         ok = bool(r.get("ok")) and r.get("objective") is not None
         j = float(r["objective"]) if ok else None
-        improved = ok and (best is None or j < best)
-        if improved:
+        improved = flags[i]
+        if improved and j is not None:
             best = j
         kv = _knob_values(r)
         knobs = {k: (None if k not in kv else round((kv[k] - float(b["lo"])) / ((float(b["hi"]) - float(b["lo"])) or 1), 4))
@@ -1064,6 +1124,103 @@ def evolution(runs: Path, run_id: str) -> dict:
     data = clean({"run_id": run_id, "name": cfg.get("name"), "bounds": {k: [b["lo"], b["hi"]] for k, b in bounds.items()},
                   "extent": ext, "frames": frames,
                   "n_improvements": sum(1 for f in frames if f["improved"])})
+    try:
+        cache.parent.mkdir(parents=True, exist_ok=True)
+        tmp = cache.with_suffix(".tmp")
+        tmp.write_text(json.dumps({"key": key, "data": data}), encoding="utf-8")
+        tmp.replace(cache)
+    except OSError:
+        pass
+    return data
+
+
+def evolution_frames3d(runs: Path, run_id: str, max_tris_per_frame: int = M3D_DEFAULT_CAP) -> dict:
+    """Per-improved-frame triangle geometry for the 3D time-lapse.
+
+    Frame selection is EXACTLY ``evolution()``'s rule, shared through ``_improvement_flags``: a row
+    is a frame when it is ok and sets a new best-so-far J. Only frames whose ``designs/<hash>/mesh.msh``
+    the search actually saved are returned; an improved row without a saved mesh is skipped (never
+    invented) and disclosed in ``note``. Triangle decimation is stride subsampling: k =
+    ceil(n_tris_full / cap), keep every k-th triangle, ``decimated`` true iff k > 1.
+
+    Cache: ``runs/.gui_cache/evolution_<id>_m3d.json``, keyed on ``search.ndjson`` (size, mtime) plus
+    every improved frame's ``mesh.msh`` (path, mtime_ns, size) -- a grown search or a (re)written/
+    deleted mesh invalidates. ``mesh_meta.json``/``config.yaml`` are static run artifacts and stay
+    outside the key (the same discipline as ``evolution()``'s geometry cache). The ndjson is always
+    re-read so the key can be computed; the cache saves the expensive mesh parsing. Atomic write.
+    """
+    d = _resolve_run(runs, run_id)
+    nd = d / "search.ndjson"
+    cap = max(1, int(max_tris_per_frame))
+    st = nd.stat()
+    rows = read_ndjson(nd)
+    cfg = _config(d)
+    cfg_q = _as_dict(cfg.get("mesh")).get("quadrants")
+    flags = _improvement_flags(rows)
+    improved = [(i, r) for i, (r, imp) in enumerate(zip(rows, flags)) if imp]
+
+    # Cache key: search.ndjson stamp + each improved hash's mesh stamp (None tuple when absent, so a
+    # mesh appearing later invalidates too). Row order is stable for an unchanged ndjson.
+    stamps: list[list] = []
+    for _, r in improved:
+        h = r.get("design_hash")
+        p = d / "designs" / str(h) / "mesh.msh" if HASH.match(h or "") else None
+        try:
+            ms = p.stat() if p is not None else None
+        except OSError:
+            ms = None
+        stamps.append([str(h) if h is not None else None,
+                       ms.st_mtime_ns if ms else None, ms.st_size if ms else None])
+
+    cache = runs / ".gui_cache" / f"evolution_{run_id}_m3d.json"
+    key = [M3D_VERSION, cap, st.st_size, int(st.st_mtime), stamps]
+    old = _read_json(cache) if cache.exists() else None
+    if isinstance(old, dict) and old.get("key") == key:
+        return old["data"]
+
+    frames: list[dict] = []
+    skipped: list[str] = []
+    for _, r in improved:
+        h = r.get("design_hash")
+        if not HASH.match(h or ""):
+            skipped.append(str(h))
+            continue
+        design_dir = d / "designs" / str(h)
+        nt = mesh_nodes_tris(design_dir / "mesh.msh")
+        if nt is None:
+            skipped.append(str(h))
+            continue
+        pts, tris = nt
+        meta = _as_dict(_read_json(design_dir / "mesh_meta.json"))
+        q = (_as_dict(meta.get("result")).get("quadrants") or r.get("quadrants")
+             or cfg_q or "1234")
+        n_full = int(len(tris))
+        k = max(1, math.ceil(n_full / cap)) if n_full else 1
+        sel = tris[::k] if k > 1 else tris
+        frames.append(clean({
+            "n": r.get("n"),
+            "objective": float(r["objective"]) if r.get("objective") is not None else None,
+            "mesh_hash": h,
+            "quadrants": str(q),
+            "verts": np.round(pts * 1000, 2).ravel().tolist(),
+            "tris": sel.ravel().tolist(),
+            "n_tris_full": n_full,
+            "decimated": bool(k > 1),
+            "n_verts": int(len(pts)),
+        }))
+
+    available = bool(frames)
+    if not rows:
+        note = "no evaluations recorded yet"
+    elif not improved:
+        note = "no successful evaluation to animate (no improved frame)"
+    elif not available or skipped:
+        note = f"{len(skipped)} improved frame(s) skipped: no saved mesh"
+    else:
+        note = None
+    data = clean({"run_id": run_id, "available": available, "cap": cap, "frames": frames})
+    if note:
+        data["note"] = note
     try:
         cache.parent.mkdir(parents=True, exist_ok=True)
         tmp = cache.with_suffix(".tmp")

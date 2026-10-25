@@ -271,6 +271,11 @@ def build_mesh(design: Design, mesh: MeshSpec, cfg, out_dir: Path, *, mode: str 
     (``mesh/grid_build.py``). Same guards and the SAME ``MeshTooLargeError`` class, so
     ``search/evaluate.py``'s ``mesh_too_large`` mapping applies unchanged. That route has no mesh
     cache yet (grid_build.py documents why) and writes no ``mesh_meta.json``.
+
+    WP14: a FREEFORM design whose params carry ``"cad"`` takes the labelled-STEP route
+    (``mesh/step_build.py``): the CAD tool generates the STEP from the recipe, gmsh meshes it,
+    the twin mesh is written in metres and ``mesh_meta.json`` carries the ``cad`` provenance
+    echo. Same guard classes; no formula-path call.
     """
     import hornlab_mesher as hm
     from hornlab_mesher.config_parser import ConfigError
@@ -281,6 +286,10 @@ def build_mesh(design: Design, mesh: MeshSpec, cfg, out_dir: Path, *, mode: str 
     families.validate(design)
     if isinstance(design.params, dict) and "grid" in design.params:
         return _build_grid_mesh(design, mesh, cfg, out_dir, mode=mode)
+    if isinstance(design.params, dict) and "cad" in design.params:
+        from . import step_build
+        return step_build.build_mesh_from_cad(
+            design.params["cad"], mesh, cfg, out_dir, mode=mode, design_hash=design.hash())
     res = res_mm_for_spec(mesh, cfg)
     out_path = out_dir / "mesh.msh"
     mcfg = families.to_mesher_config(design, mesh, res, out_path)
@@ -414,12 +423,33 @@ def _build_grid_mesh(design: Design, mesh: MeshSpec, cfg, out_dir: Path, *,
 def export_step(design: Design, mesh: MeshSpec, cfg, out: Path):
     """Closed B-rep solid in millimetres (driver membrane removed, symmetry-reduced designs
     expanded to all four quadrants). Returns ``(path, info)``; ``info`` is the mesher's CadInfo
-    with ``.body`` and ``.volume_mm3``."""
+    with ``.body`` and ``.volume_mm3``.
+
+    FORMULA PATH ONLY. The export below rides ``families.to_mesher_config`` -> the mesher's
+    ``write_step_from_config``, which renders the OSSE/R-OSSE/ICW/FREEFORM-anchor formulas. A
+    GRID design's geometry (point grid + explicit outer shell) and a cad design's solid are
+    authored OUTSIDE that formula path, so both are refused here with a clean
+    ``GeometryInvalidError`` instead of a ``KeyError`` from the formula dict -- and for a cad
+    design the CAD tool (``tools/cad/multicell.py``) IS the STEP exporter:
+    ``mesh/step_build.py`` writes the labelled STEP beside every mesh it builds.
+    """
     import hornlab_mesher as hm
     from hornlab_mesher.config_parser import ConfigError
     from hornlab_mesher.mesher import MesherError
 
     families.validate(design)
+    if isinstance(design.params, dict) and "grid" in design.params:
+        raise GeometryInvalidError(
+            "STEP export is not defined for a GRID design: it rides the formula mesher path "
+            "(families.to_mesher_config -> write_step_from_config), and a point-grid horn has "
+            "no formula geometry to render. Mesh it with build_mesh (mesh/grid_build.py) or "
+            "export the point grid through the generator's own CAD path.")
+    if isinstance(design.params, dict) and "cad" in design.params:
+        raise GeometryInvalidError(
+            "STEP export is not defined for a cad design: the CAD tool "
+            "(tools/cad/multicell.py) is its STEP exporter, and mesh/step_build.py already "
+            "writes the labelled STEP next to the mesh it builds (<out_dir>/cad/*.step). "
+            "Call build_mesh; do not re-export through the formula path.")
     res = res_mm_for_spec(mesh, cfg)
     out = Path(out)
     mcfg = families.to_mesher_config(design, mesh, res, out)

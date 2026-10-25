@@ -79,6 +79,19 @@ class SolveSettings:
     timeout_s: float
     cuda_fused: bool = False   # WP15: opt-in fused CUDA Burton-Miller assembly (beat_cuda only)
     source_motion: str = "normal"   # WP5: 'normal' (breathing cap, today) | 'axial' (rigid piston)
+    # WP14: CPU-validation knobs that mirror hornlab_beat_bem's own SolveConfig field names
+    # (config.py: near_correction/cutoff/order/solve_precision). None = absent = today, bit-for-bit.
+    # near_correction + solve_precision='double' are BEAT CPU features; the library refuses every
+    # accelerator (NEAR_CORRECTION_REFUSALS) and double precision off the CPU backend.
+    near_correction: bool | None = None
+    near_correction_cutoff: float | None = None
+    near_correction_order: int | None = None
+    solve_precision: str | None = None
+    # WP16: J0 source-profile angle (radians), mirroring hornlab_beat_bem's own SolveConfig field
+    # name. None = absent = today. 0.0 is an explicit no-op; the sign flips the profile phase.
+    # The library validates the rest and REFUSES every path but fused CUDA
+    # (source_profile_alpha is a fused-CUDA-only feature).
+    source_profile_alpha: float | None = None
 
     def balloon_points(self, mode: str) -> int:
         if not self.balloon:
@@ -327,6 +340,88 @@ def _validate_qd(block, where: str) -> dict | None:
     return out
 
 
+def _validate_near_correction(solve, where: str) -> None:
+    """WP14: validate ``solve.near_correction*`` / ``solve.solve_precision`` BEFORE the library
+    sees them. The bounds mirror hornlab_beat_bem's own SolveConfig (near_correction_cutoff finite
+    and > 0; near_correction_order an integer >= 4; solve_precision in {'single','double'}), so a
+    typo is refused here with a clear message instead of after a worker/host is built. ``None``
+    (key absent) leaves today's behaviour byte-for-byte untouched.
+
+    near-singular correction and double precision are BEAT features: only the CPU device path
+    implements them. A non-beat backend with a non-default value is refused loudly, exactly like
+    ``source_motion`` below."""
+    nc = solve.near_correction
+    if nc is not None and not isinstance(nc, bool):
+        raise ConfigError(f"{where}: near_correction must be a boolean, got {nc!r}")
+    cutoff = solve.near_correction_cutoff
+    if cutoff is not None:
+        try:
+            cutoff = float(cutoff)
+        except (TypeError, ValueError, OverflowError):
+            raise ConfigError(
+                f"{where}: near_correction_cutoff must be a finite number > 0, got {cutoff!r}") from None
+        if not np.isfinite(cutoff) or cutoff <= 0.0:
+            raise ConfigError(
+                f"{where}: near_correction_cutoff must be finite and greater than zero "
+                f"(hornlab_beat_bem's own SolveConfig requires it), got {cutoff!r}")
+        solve.near_correction_cutoff = cutoff
+    order = solve.near_correction_order
+    if order is not None:
+        ok = not isinstance(order, bool) and isinstance(order, (int, float)) and float(order).is_integer()
+        if not ok or int(order) < 4:
+            raise ConfigError(
+                f"{where}: near_correction_order must be an integer >= 4 "
+                f"(hornlab_beat_bem's own minimum; it validates too), got {order!r}")
+        solve.near_correction_order = int(order)
+    precision = solve.solve_precision
+    if precision is not None and precision not in ("single", "double"):
+        raise ConfigError(
+            f"{where}: solve_precision must be 'single' or 'double', got {precision!r}")
+    backend = str(solve.backend)
+    near_requested = (bool(nc) or solve.near_correction_cutoff is not None
+                      or solve.near_correction_order is not None)
+    precision_requested = precision is not None and precision != "single"
+    if (near_requested or precision_requested) and not backend.startswith("beat_"):
+        raise ConfigError(
+            f"{where}: near_correction/solve_precision are only implemented for the beat backends "
+            f"(beat_cpu/beat_cuda), got backend {backend!r} (near-singular correction and double "
+            f"precision are BEAT CPU features)")
+
+
+def _validate_source_profile_alpha(solve, where: str) -> None:
+    """WP16: validate ``solve.source_profile_alpha`` BEFORE the library sees it.
+
+    The only rule mirrored here is the library's own: the value must be a finite float. Any finite
+    value is accepted -- 0.0 is an explicit no-op, and a negative angle is meaningful (the sign
+    flips the J0 source profile's phase); no magnitude cap is invented. The library validates the
+    remainder (fused-CUDA-only refusal) and ``BeatBackend.make_config`` surfaces that refusal
+    early. ``None`` (key absent) leaves today's behaviour byte-for-byte untouched.
+
+    The knob is a BEAT feature (the fused CUDA path): a non-beat backend with a non-zero value is
+    refused loudly, in the same tone as ``near_correction``/``solve_precision`` above."""
+    alpha = solve.source_profile_alpha
+    if alpha is None:
+        return
+    if isinstance(alpha, bool):
+        raise ConfigError(f"{where}: source_profile_alpha must be a finite number, got {alpha!r}")
+    try:
+        alpha = float(alpha)
+    except (TypeError, ValueError, OverflowError):
+        raise ConfigError(
+            f"{where}: source_profile_alpha must be a finite number, got {alpha!r}") from None
+    if not np.isfinite(alpha):
+        raise ConfigError(
+            f"{where}: source_profile_alpha must be finite "
+            f"(hornlab_beat_bem's own SolveConfig requires it), got {alpha!r}")
+    solve.source_profile_alpha = alpha
+    backend = str(solve.backend)
+    if alpha != 0.0 and not backend.startswith("beat_"):
+        raise ConfigError(
+            f"{where}: source_profile_alpha is only implemented for the beat backends "
+            f"(beat_cuda, fused path), got backend {backend!r} (the profile source is a "
+            f"fused-CUDA feature)")
+
+
 def _validate_source_motion(value, backend: str, where: str) -> str:
     """WP5: ``solve.source_motion`` is 'normal' (today) or 'axial' (rigid piston). Only the beat
     adapter implements it; a non-beat backend with a non-default value is refused loudly."""
@@ -489,7 +584,9 @@ def load_config(path, *, brief=None, cma_seed: int | None = None) -> Config:
     mesh = _build(MeshSettings, _require(raw, "mesh", where), f"{where}:mesh",
                   optional=("max_triangle_slack", "rear_res_factor", "band_split"))
     solve = _build(SolveSettings, _require(raw, "solve", where), f"{where}:solve",
-                   optional=("cuda_fused", "source_motion"))
+                   optional=("cuda_fused", "source_motion", "near_correction",
+                             "near_correction_cutoff", "near_correction_order",
+                             "solve_precision", "source_profile_alpha"))
     if solve.cuda_fused and str(solve.backend) != "beat_cuda":
         raise ConfigError(f"{where}: solve.cuda_fused is only implemented for backend: beat_cuda "
                           f"(got {solve.backend!r})")
@@ -503,6 +600,8 @@ def load_config(path, *, brief=None, cma_seed: int | None = None) -> Config:
         mesh.band_split = _validate_band_split(mesh.band_split, f"{where}:mesh", band_lo, band_hi)
     solve.source_motion = _validate_source_motion(
         solve.source_motion, str(solve.backend), f"{where}:solve")
+    _validate_near_correction(solve, f"{where}:solve")
+    _validate_source_profile_alpha(solve, f"{where}:solve")
     search = _build(SearchSettings, _require(raw, "search", where), f"{where}:search",
                     optional=("popsize", "infeasible_penalty", "restarts", "qd"))
     if "popsize" not in raw["search"]:
@@ -614,6 +713,18 @@ def solve_spec(mode: Mode, cfg: Config) -> SolveSpec:
     # WP5: 'normal' is today's beat source and must NOT enter `extra` (old hashes unchanged).
     if str(getattr(s, "source_motion", "normal")) != "normal":
         extra["source_motion"] = str(s.source_motion)
+    # WP14: CPU-validation knobs. They ride in `extra` under the library's OWN field names and
+    # ONLY when non-None, so every old solve-spec hash is untouched (absent = today).
+    for _key in ("near_correction", "near_correction_cutoff", "near_correction_order",
+                 "solve_precision"):
+        _val = getattr(s, _key, None)
+        if _val is not None:
+            extra[_key] = _val
+    # WP16: J0 source-profile angle rides in `extra` under the library's OWN field name and ONLY
+    # when explicitly set, so every old solve-spec hash is untouched (absent = today).
+    _alpha = getattr(s, "source_profile_alpha", None)
+    if _alpha is not None:
+        extra["source_profile_alpha"] = float(_alpha)
     # WP8: band-split rides in `extra` too (solve hash + Response.meta provenance via beat).
     band_split = getattr(cfg.mesh, "band_split", None)
     if band_split is not None:

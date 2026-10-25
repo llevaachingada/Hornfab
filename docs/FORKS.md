@@ -38,8 +38,12 @@ Both were cloned from `github.com/m3gnus/*` on 2026-10-24 and verified byte-iden
 5. **Pin it**: change the dependency line in `pyproject.toml` to the same URL and SHA, and add a line in `TOOLCHAIN.md`
    (SHA, branch, what changed, date). `doctor` and `tests/test_mesh_pin.py` accept any git URL since 2026-10-24.
    - A `file:///C:/...` pin works **only on this machine**. Anything merged to `main` that a collaborator pulls must
-     pin a URL they can reach: push the fork branch to a GitHub fork (for example under the owner's account) and pin
-     that URL. Pushing is an owner action.
+     pin a URL they can reach. **Landed 2026-10-25:** the fork is hosted at
+     `https://github.com/llevaachingada/hornlab-beat-bem` (owner-authorized 2026-10-25, `gh auth` account
+     `llevaachingada`), public, GPL-3.0, and `pyproject.toml` pins it. Pushed topic branches:
+     `hornlab-search/fused-cuda` (WP15), `hornlab-search/wp16-source-profile` @ `f4ef05c` (WP16),
+     `hornlab-search/wp17-cuda-near` (WP15+16+17 linear; pin `760a1ec`, test-env tip `a40a204`), plus
+     `hornlab-search/base` @ `38544d2`. Future pushes are owner-delegated through the same `gh auth`.
 6. **Validate before data counts** (solver changes; from a clean GPU state, one job at a time):
    1. `hornlab-search selftest --analytic`: spread ≤ 0.5 dB (reference 0.020 dB).
    2. `hornlab-search selftest --crosscheck` vs `bempp_cpu`: < 0.2 dB (reference 0.039 dB).

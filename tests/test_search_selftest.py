@@ -1,16 +1,25 @@
 """Tests 8-11 of 08_TASK_PIPELINE (offline parts of the self-test) plus fake-backend runs of
-run_analytic/run_crosscheck so the verdict logic is exercised without a solver."""
+run_analytic/run_crosscheck so the verdict logic is exercised without a solver.
+
+Also pins the CLI's lock-ownership rule (2026-10-25 fix-16): a selftest REFUSED by the GPU lock
+must not call worker.shutdown(), because it never acquired the lock and owns no workers; the
+success path keeps the verified shutdown at the end of the measurement (AGENTS.md rule 6)."""
 from __future__ import annotations
 
+import contextlib
 from collections import Counter
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
 
+from hornlab_search import cli
 from hornlab_search.constants import C_AIR, RHO_AIR
 from hornlab_search.mesh.build import read_msh_summary
+from hornlab_search.search import gpulock
 from hornlab_search.search.selftest import (KA_VALUES, analytic_magnitude, format_analytic,
                                             icosphere, run_analytic, write_sphere_msh)
+from hornlab_search.solve import worker
 from hornlab_search.solve.base import arc_angles_deg
 from hornlab_search.types import Response, SolveOutcome
 
@@ -173,3 +182,47 @@ def test_a_velocity_driven_backend_needs_drive_velocity_and_the_raw_spread_is_al
     assert res["r_spread_raw_db"] > 20.0 and res["passed"] is True     # literal test fails, corrected passes
     assert max(abs(r["abs_vs_unit_accel_db"] - res["rows"][0]["abs_vs_unit_accel_db"])
                for r in res["rows"]) < 1e-9
+
+
+# ------------------------------------------------------------------ CLI lock ownership (fix-16)
+
+def _selftest_args(tmp_path) -> SimpleNamespace:
+    """The argparse namespace _cmd_selftest reads (analytics, no GPU; body is stubbed/faked)."""
+    return SimpleNamespace(config=None, backend=None, runs_dir=str(tmp_path),
+                           cache_dir=str(tmp_path / "cache"), dataset_dir=str(tmp_path / "dataset"),
+                           analytic=True, no_convergence=True, convergence="3", tol_db=0.5,
+                           subdivisions=3, n_freqs=5)
+
+
+def test_lock_refused_selftest_does_not_shut_down_workers(monkeypatch, tmp_path, capsys):
+    """fix-16: a GpuBusyError refusal must NOT reach worker.shutdown() -- this process never
+    acquired the lock and started no worker, so a shutdown would force-kill the live job's host."""
+    calls = []
+    monkeypatch.setattr(worker, "install_handlers", lambda *a, **k: None)
+    monkeypatch.setattr(worker, "shutdown", lambda *a, **k: calls.append((a, k)))
+
+    @contextlib.contextmanager
+    def busy_lock(command, runs_root=None):
+        raise gpulock.GpuBusyError('GPU busy: tester running "other job" (pid 4242) since now')
+        yield                                                   # pragma: no cover
+
+    monkeypatch.setattr(gpulock, "gpu_lock", busy_lock)
+    assert cli._cmd_selftest(_selftest_args(tmp_path)) == 3
+    assert calls == [], "a lock-refused selftest must not shut down (and kill) another job's workers"
+    assert "GPU busy" in capsys.readouterr().err
+
+
+def test_successful_selftest_still_verifies_shutdown(monkeypatch, tmp_path):
+    """The happy path keeps rule 6 exactly as today: one verified worker shutdown at the end."""
+    calls = []
+    monkeypatch.setattr(worker, "install_handlers", lambda *a, **k: None)
+    monkeypatch.setattr(worker, "shutdown", lambda *a, **k: calls.append(k))
+    monkeypatch.setattr(cli, "_selftest_body", lambda args, cfg, st: 0)
+
+    @contextlib.contextmanager
+    def held_lock(command, runs_root=None):
+        yield
+
+    monkeypatch.setattr(gpulock, "gpu_lock", held_lock)
+    assert cli._cmd_selftest(_selftest_args(tmp_path)) == 0
+    assert calls == [{"verify": True}]

@@ -1,7 +1,11 @@
 // evolution.js — time-lapse of a search: how the horn's shape and score evolved, evaluation by evaluation.
 // AGPL-3.0-or-later. Data: GET /api/evolution/<run> (hornlab_search/gui/data.py::evolution). Geometry is
 // what the search meshed; axes are fixed for the whole run so on-screen motion is the design changing.
+// 3D mode (owner request): GET /api/evolution/<run>/frames3d plays the IMPROVEMENT frames as hot-swapped
+// meshes (view3d.js::init3dFrames) — improvements-only by contract, so the 3D toggle and the frame-mode
+// select enforce one rule both ways: 3D ⟺ improvements only ('every candidate' stays 2D).
 import { css, niceTicks, NS, el, familyColor } from "./charts.js";
+import { init3dFrames } from "./view3d.js";
 
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const fmt = (v, d = 2) => v == null || !isFinite(v) ? "–" : Number(v).toFixed(d);
@@ -37,8 +41,20 @@ export async function viewEvolution(root, runId) {
       <label class="evo-opt">speed <select id="evo-speed" aria-label="Speed">
         <option value="1200">slow</option><option value="500" selected>normal</option><option value="150">fast</option><option value="40">very fast</option></select></label>
       <label class="evo-opt"><input type="checkbox" id="evo-loop" checked> loop</label>
+      <label class="evo-opt" title="Plays the improvement frames as hot-swapped 3D meshes (improvements only; 'every candidate' stays 2D)">
+        <input type="checkbox" id="evo-3d"> 3D</label>
+      <div class="hint" id="evo-3d-note" role="status" style="margin:0;flex-basis:100%"></div>
     </div>
     <div class="evo-status card" id="evo-status" aria-live="polite"></div>
+    <div class="evo-grid" id="evo-3d-wrap" hidden>
+      <div class="fig evo-3d-fig">
+        <h3>3D shape over the search</h3>
+        <div class="cap">Improvement frames only — 'every candidate' playback stays 2D (the rule, both ways). Camera and lighting are fixed for the whole time-lapse; decimated frames disclose their tri count on the canvas.</div>
+        <div id="evo-3d" data-v3d style="position:relative;height:340px;border:1px solid var(--rule);border-radius:6px;overflow:hidden;background:var(--viz-canvas,#e9edf0)">
+          <div class="view3d-fallback">3D off — flip the 3D toggle above.</div>
+        </div>
+      </div>
+    </div>
     <div class="evo-grid">
       <div class="fig"><h3>Side view: wall cross-section</h3>
         <div class="cap">Horizontal plane right, vertical plane mirrored left, throat at the bottom (mm).</div>
@@ -109,6 +125,13 @@ export async function viewEvolution(root, runId) {
       <span>score <b>${fmt(f.j)}</b></span><span>best so far <b>${fmt(f.best_j)}</b></span>
       ${imp} ${fail} ${f.cached ? `<span class="pill">replayed from cache</span>` : ""}
       ${f.geo ? "" : `<span class="muted">no mesh saved for this design</span>`}`;
+    // 3D mode: hot-swap the same evaluation's mesh (matched by the eval number n the reader keys
+    // frames on). An evaluation with no matching 3D frame keeps the current mesh on screen — the
+    // 2D panels above always show the truth, so the playback never silently skips.
+    if (player3d && grid3d && !grid3d.hidden) {
+      const j3 = nMap3d.get(f.n);
+      if (j3 != null) player3d.show(j3);
+    }
     pos.textContent = `${idx + 1} / ${seq.length}`;
   }
 
@@ -131,6 +154,10 @@ export async function viewEvolution(root, runId) {
   document.getElementById("evo-next").onclick = () => { stop(); show(idx + 1); };
   scrub.oninput = () => { stop(); show(+scrub.value); };
   document.getElementById("evo-mode").onchange = e => { stop(); const cur = seq[idx]; mode = e.target.value; buildSeq();
+    if (mode === "all" && box3d.checked) {                       // the 3D rule, direction 2:
+      box3d.checked = false;                                     // 'every candidate' plays in 2D
+      disable3d("'every candidate' plays in 2D — " + RULE3D);
+    }
     let j = seq.findIndex(s => s >= cur); show(j < 0 ? seq.length - 1 : j); };
   const onKey = e => {
     if (!document.getElementById("evo-scrub")) { document.removeEventListener("keydown", onKey); stop(); return; }
@@ -142,6 +169,82 @@ export async function viewEvolution(root, runId) {
   };
   document.addEventListener("keydown", onKey);
   window.addEventListener("hashchange", stop, { once: true });
+
+  // ── 3D time-lapse (lazy): 3D ⟺ improvements-only, one rule enforced in both directions ────────
+  // The frames3d reader provides improvement frames only, so 'every candidate' cannot play in 3D:
+  // checking 3D forces the frame mode to improvements (visible in the select); selecting 'every
+  // candidate' turns 3D off again. Both directions are disclosed on screen. The fetch and the
+  // renderer build happen only on first use; a navigation that lands mid-build disposes or bails
+  // via root.isConnected (route()'s [data-v3d] sweep disposes the attached player directly).
+  const box3d = document.getElementById("evo-3d");
+  const note3d = document.getElementById("evo-3d-note");
+  const grid3d = document.getElementById("evo-3d-wrap");
+  const RULE3D = "3D shows improvement frames only — 'every candidate' stays 2D.";
+  let player3d = null, frames3d = null, skipNote3d = "", nMap3d = new Map(), loading3d = false;
+
+  async function build3d() {
+    const cv = document.getElementById("evo-3d");
+    if (!cv || !frames3d) return;
+    player3d = await init3dFrames(cv, frames3d, { shadows: true, profile: lastImprovementSection(F) });
+    nMap3d = new Map(frames3d.map((fr, i) => [fr.n, i]));
+  }
+
+  async function enable3d() {
+    if (loading3d) return;
+    loading3d = true;
+    try {
+      if (mode !== "best") { mode = "best"; document.getElementById("evo-mode").value = "best"; buildSeq(); }
+      grid3d.hidden = false;
+      if (player3d) {
+        note3d.textContent = `${frames3d.length} improvement frames in 3D · ` + RULE3D;
+        show(idx); return;
+      }
+      if (!frames3d) {
+        note3d.textContent = "Loading 3D time-lapse…";
+        let R;
+        try {
+          const r = await fetch("/api/evolution/" + encodeURIComponent(runId) + "/frames3d");
+          if (!r.ok) throw new Error(r.status + " " + (await r.text()));
+          R = await r.json();
+        } catch (e) {
+          if (!root.isConnected) return;
+          box3d.checked = false; grid3d.hidden = true;
+          note3d.textContent = `3D time-lapse unavailable (${e.message}) — staying on the 2D panels.`;
+          return;
+        }
+        if (!root.isConnected) return;
+        if (!R || R.available === false || !Array.isArray(R.frames) || !R.frames.length) {
+          box3d.checked = false; grid3d.hidden = true;
+          note3d.textContent = "No 3D frames for this run (the reader found none) — the 2D time-lapse stays.";
+          return;
+        }
+        frames3d = R.frames;
+        skipNote3d = R.note || "";       // reader-disclosed skipped frames (kept across re-enables)
+      }
+      note3d.textContent = `Building 3D from ${frames3d.length} improvement frames…`;
+      await build3d();
+      if (!root.isConnected) { if (player3d && player3d.dispose) player3d.dispose(); player3d = null; return; }
+      if (!player3d) {
+        box3d.checked = false; grid3d.hidden = true;
+        note3d.textContent = "three.js is unavailable — the 2D time-lapse stays.";
+        return;
+      }
+      // surface the skip note: it explains any count gap against the 2D improvements list
+      note3d.textContent =
+        `${frames3d.length} improvement frames in 3D${skipNote3d ? " · " + esc(skipNote3d) : ""} · ` + RULE3D;
+      show(idx);                                       // sync the current frame into the player
+    } finally { loading3d = false; }
+  }
+
+  function disable3d(reason) {
+    grid3d.hidden = true;
+    if (player3d) { if (player3d.dispose) player3d.dispose(); player3d = null; }
+    const cv = document.getElementById("evo-3d");
+    if (cv) cv.innerHTML = `<div class="view3d-fallback">3D off — flip the 3D toggle above.</div>`;
+    note3d.textContent = reason || "";
+  }
+
+  if (box3d) box3d.onchange = async () => { stop(); if (box3d.checked) await enable3d(); else disable3d(); };
 
   const q = new URLSearchParams(location.hash.split("?")[1] || "");
   if (q.get("mode") === "all") { mode = "all"; document.getElementById("evo-mode").value = "all"; }
@@ -155,6 +258,17 @@ async function envelopeFor(E) {
     const env = (run.brief || {}).envelope;
     return env && env.max_mouth_w_mm ? { w: env.max_mouth_w_mm, h: env.max_mouth_h_mm } : null;
   } catch { return null; }
+}
+
+// The newest improvement frame's ordered wall section, handed to init3dFrames as the 2D fallback
+// profile: if three.js cannot load, the 3D container degrades to that cross-section instead of an
+// empty message (kind 'nodes' sections are unordered — never drawn as a fake outline).
+function lastImprovementSection(F) {
+  for (let i = F.length - 1; i >= 0; i--) {
+    const fr = F[i] || {}, sec = (fr.geo || {}).section;
+    if (fr.improved && sec && sec.kind === "section") return { h: sec.h, v: sec.v };
+  }
+  return null;
 }
 
 // ── side view ─────────────────────────────────────────────────────────────────────────────────────
