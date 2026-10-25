@@ -258,6 +258,40 @@ class JobManager:
             self.run_cli(["gpu-clean"], timeout=120)       # same cleanup the CLI uses; lock holder is now dead
         return job
 
+    def stop_external(self) -> dict:
+        """Owner 2026-10-25: kill the run that holds the GPU lock even when this GUI did not start
+        it. The lock file is this repo's own (pid + command recorded by whoever is using our GPU),
+        so the kill targets exactly that recorded pid (+ its child tree) and then a gpu-clean pass
+        -- never an arbitrary pid. Refuses when a GUI-started GPU job is running: that is the Stop
+        control's path (cancel), and the two paths must never race."""
+        running = [j for j in self.jobs.values() if j.gpu and j.status == "running"]
+        if running:
+            raise JobError("a GPU job started from this GUI is running — use its Stop control instead")
+        from hornlab_search.search.gpulock import _lock_path, _pid_alive, _read_lock
+        lk = _read_lock(_lock_path(self.runs))
+        if not (lk and lk.get("pid") and _pid_alive(int(lk["pid"]))):
+            return {"ok": False, "error": "no live GPU lock to stop"}
+        pid = int(lk["pid"])
+        if pid == os.getpid():
+            raise JobError("refusing to kill this GUI's own process")
+        cmd = lk.get("command", "?")
+        self._kill_tree(pid)
+        rc, out = self.run_cli(["gpu-clean"], timeout=120)   # the holder is dead; same cleanup cancel() uses
+        return {"ok": True, "killed": pid, "command": cmd, "gpu_clean_rc": rc, "gpu_clean_tail": out[-200:]}
+
+    def _kill_tree(self, pid: int) -> None:
+        """Kill one pid + its child tree (the GPU-lock holder and the Julia children it spawned). A
+        method of its own so tests can monkeypatch the kill and assert on the pid, never really
+        killing anything. POSIX: SIGTERM to the recorded pid (its own children are not in a known
+        process group, so the tree kill is best-effort there; the Windows path is the exact one)."""
+        if os.name == "nt":
+            subprocess.run(["taskkill", "/PID", str(pid), "/T", "/F"], capture_output=True)
+        else:
+            try:
+                os.kill(pid, signal.SIGTERM)
+            except ProcessLookupError:
+                pass
+
     def list(self) -> list[dict]:
         return [j.view(12) for j in sorted(self.jobs.values(), key=lambda j: j.id, reverse=True)]
 

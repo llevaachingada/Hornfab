@@ -797,3 +797,77 @@ def test_search_resume_argv_survives_a_gui_restart(repo):
     [row] = J.JobManager(repo, repo / "runs").list()
     assert row["kind"] == "search" and row["argv"] == argv and row["gpu"] is True
     assert row["command"] == "hornlab-search search --budget 12 --resume " + run_dir
+
+
+# ── kill-current (owner 2026-10-25): jobs.stop_external ────────────────────────────────────────
+# The externally-started run holding OUR gpu lock is killed by the pid the lock file records
+# (+ its child tree), then a gpu-clean pass; the kill is monkeypatched here so no real process
+# dies in tests. GUI-started running jobs route through cancel() instead — the refusal test
+# pins that the two paths never race.
+
+
+def test_stop_external_kills_lock_holder_and_cleans(tmp_path, monkeypatch):
+    from hornlab_search.gui import jobs as J
+    from hornlab_search.search.gpulock import _lock_path
+    root = tmp_path / "repo"
+    (root / "runs").mkdir(parents=True)
+    jm = J.JobManager(root, root / "runs")
+    import sys
+    sleeper = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(30)"])
+    try:
+        lk = _lock_path(root / "runs")
+        lk.parent.mkdir(parents=True, exist_ok=True)
+        lk.write_text(json.dumps({"pid": sleeper.pid, "user": "terminal",
+                                  "command": "hornlab-search search --config x.yaml",
+                                  "start_time": "t"}))
+        killed, cleans = [], []
+        monkeypatch.setattr(J.JobManager, "_kill_tree", lambda self, pid: killed.append(pid))
+        monkeypatch.setattr(J.JobManager, "run_cli",
+                            lambda self, argv, timeout=120: cleans.append(argv) or (0, "gpu-clean out"))
+        out = jm.stop_external()
+        assert out["ok"] is True and out["killed"] == sleeper.pid
+        assert out["command"] == "hornlab-search search --config x.yaml"
+        assert killed == [sleeper.pid] and cleans == [["gpu-clean"]]
+    finally:
+        sleeper.kill()
+
+
+def test_stop_external_refuses_while_gui_gpu_job_running(tmp_path):
+    """A GUI-started running GPU job is the Stop control's path (cancel) - the kill must never race it."""
+    from hornlab_search.gui import jobs as J
+    root = tmp_path / "repo"
+    (root / "runs").mkdir(parents=True)
+    jm = J.JobManager(root, root / "runs")
+    jm.jobs["j1"] = J.Job("j1", "search", ["search"], root / "runs" / "j.log", True)  # running GPU job
+    with pytest.raises(J.JobError, match="use its Stop control"):
+        jm.stop_external()
+
+
+def test_stop_external_no_live_lock_is_honest(tmp_path):
+    from hornlab_search.gui import jobs as J
+    from hornlab_search.search.gpulock import _lock_path
+    import sys
+    root = tmp_path / "repo"
+    (root / "runs").mkdir(parents=True)
+    jm = J.JobManager(root, root / "runs")
+    # a definitively dead pid: spawn, wait, then record its (now-exited) pid in the lock
+    p = subprocess.Popen([sys.executable, "-c", "import sys; sys.exit(0)"])
+    p.wait()
+    lk = _lock_path(root / "runs")
+    lk.parent.mkdir(parents=True, exist_ok=True)
+    lk.write_text(json.dumps({"pid": p.pid, "user": "u", "command": "x", "start_time": "t"}))
+    out = jm.stop_external()
+    assert out["ok"] is False and "no live GPU lock" in out["error"]
+
+
+def test_stop_external_refuses_its_own_pid(tmp_path):
+    from hornlab_search.gui import jobs as J
+    from hornlab_search.search.gpulock import _lock_path
+    root = tmp_path / "repo"
+    (root / "runs").mkdir(parents=True)
+    jm = J.JobManager(root, root / "runs")
+    lk = _lock_path(root / "runs")
+    lk.parent.mkdir(parents=True, exist_ok=True)
+    lk.write_text(json.dumps({"pid": os.getpid(), "user": "gui", "command": "gui", "start_time": "t"}))
+    with pytest.raises(J.JobError, match="own process"):
+        jm.stop_external()

@@ -257,7 +257,7 @@ def test_stop_run_affordance_is_wired():
     assert ">Stop run</button>" in src and '"Confirm stop"' in src
     assert "click again to confirm — the job's process tree is killed and a gpu-clean pass runs" in src
     assert "stop requested — the run dir records the stop; wait for the job to exit + a gpu-clean pass" in src
-    assert "run started outside the GUI (terminal) — the GUI only stops its own jobs" in src
+    assert "Kills the externally-started run that holds our GPU lock" in src   # external = pid-targeted kill (owner 2026-10-25)
     assert "no run folder written yet" in src              # startup-window card, no invented numbers
     # the cancel actually targets the live endpoint; no browser confirm() on the status page
     assert '"/api/job/" + aff.job.id + "/cancel"' in src
@@ -559,13 +559,16 @@ aff = stopAffordanceFor([null, { id: "x", kind: "run", gpu: false, status: "runn
 assert.equal(aff.state, "gui-cancel");
 assert.equal(aff.job.id, "job1");                       // the newest running GPU job owns the GPU
 assert.ok(aff.note.includes("2 GUI GPU jobs"), aff.note);
-// the region copy — external is a pill, never a button; idle renders nothing
+// the region copy — gui-cancel is the Stop button; external (owner 2026-10-25) is a pid-targeted
+// KILL run button: the GUI now kills exactly the pid recorded in OUR gpu lock file, never arbitrary
 assert.equal(stopRegionHtml({ state: "idle" }), "");
 assert.equal(stopRegionHtml(null), "");
 const extStop = stopRegionHtml({ state: "external", lock: { pid: 4242, command: "hornlab-search search --config c.yaml" } });
-assert.match(extStop, /run started outside the GUI \(terminal\) — the GUI only stops its own jobs/);
-assert.ok(!extStop.includes("<button"), extStop);       // never a button for a non-GUI run
-assert.ok(extStop.includes("pid 4242"), extStop);       // the lock it points at is traceable
+assert.match(extStop, /<button class="btn danger" id="btn-kill-run"/);
+assert.match(extStop, />Kill run<\/button>/);
+assert.match(extStop, /Kills the externally-started run that holds our GPU lock: pid 4242/);
+assert.ok(extStop.includes("external run · pid 4242"), extStop);   // the kill is pid-targeted, traceable
+assert.match(extStop, /id="st-kill-msg"/);
 const guiStop = stopRegionHtml({ state: "gui-cancel", job: JGUI });
 assert.match(guiStop, /<button class="btn danger" id="btn-stop-run"/);
 assert.match(guiStop, />Stop run<\/button>/);           // face label
@@ -625,13 +628,15 @@ assert.equal(toolbarPillFor([JST1, JRUN], null, [RUNV]).job.id, "j9");
 assert.equal(toolbarPillFor([JST1], { alive: true, pid: 7, command: "x" }, [RUNV]).state, "external");  // foreign lock beats resume
 assert.equal(toolbarPillFor([JST1, JCPU], null, [RUNV]).state, "resume");   // only a CPU job running: resume still holds
 // pill HTML: exact faces + ids + honest absences; a foreign run is never a button
-assert.equal(toolbarPillHtml({ state: "idle" }), "");
-assert.equal(toolbarPillHtml(null), "");
+assert.match(toolbarPillHtml({ state: "idle" }), /no run in progress/);   // ALWAYS-visible pill: idle is a visible indicator, never an empty holder
+assert.doesNotMatch(toolbarPillHtml({ state: "idle" }), /<button/);       // and idle offers no button
+assert.match(toolbarPillHtml(null), /no run in progress/);   // null-safe: same honest idle face
 const extPill = toolbarPillHtml({ state: "external", lock: { pid: 4242, command: "hornlab-search search --config c.yaml" } });
-assert.ok(!extPill.includes("<button"), extPill);
-assert.match(extPill, /external GPU run · pid 4242/);
-assert.match(extPill, /GPU lock held externally \(pid 4242\) — stop it from its own terminal/);
-assert.ok(extPill.includes("hornlab-search search --config c.yaml"), extPill);   // the lock it names
+assert.match(extPill, /<button class="btn danger" id="tb-kill-run"/);
+assert.match(extPill, />■ Kill run<\/button>/);
+assert.match(extPill, /Kills the externally-started run that holds our GPU lock: pid 4242/);
+assert.ok(extPill.includes("external run · pid 4242"), extPill);
+assert.ok(extPill.includes('id="tb-kill-msg"'), extPill);
 const stopPill = toolbarPillHtml({ state: "stop", job: JRUN });
 assert.match(stopPill, /<button class="btn danger" id="tb-stop-run"/);
 assert.match(stopPill, />■ Stop<\/button>/);
@@ -819,7 +824,8 @@ def test_toolbar_run_pill_is_wired():
     assert '"Confirm stop"' in src and '"Confirm resume"' in src
     assert "click again to confirm — process tree killed + gpu-clean" in src
     assert "stop requested — wait for the job to exit + the gpu-clean pass" in src
-    assert "external GPU run · pid" in src and "stop it from its own terminal" in src
+    assert ">■ Kill run</button>" in src and "external run · pid" in src
+    assert "Kills the externally-started run that holds our GPU lock" in src
     assert "cached evals replay free" in src and "budget is per invocation" in src
     # resume POST contract (LANDED jobs.py): --resume takes a RUN ID — sourced from the stopped
     # job's own log and validated against /api/runs summaries; the preview probe still gates the
@@ -839,3 +845,10 @@ def test_toolbar_run_pill_is_wired():
     assert pill_block.count("data-v3d") == 0
     assert 'id="tb-stop-run"' in pill_block and 'id="tb-resume-run"' in pill_block
     assert 'id="tb-stop-msg"' in pill_block and 'id="tb-resume-msg"' in pill_block
+    # the KILL run control (owner 2026-10-25): the externally-started run holding OUR gpu lock is
+    # killed by pid + child tree + gpu-clean via POST /api/stop-current — in the pill AND the cards
+    assert 'id="tb-kill-run"' in pill_block and 'id="tb-kill-msg"' in pill_block
+    assert 'id="btn-kill-run"' in src and 'id="st-kill-msg"' in src
+    assert 'post("/api/stop-current", {})' in src and '"Confirm kill"' in src
+    # note: the kill itself lives server-side (jobs.stop_external) — pinned in
+    # tests/test_gui_integration_phases.py, not in this app.js source check

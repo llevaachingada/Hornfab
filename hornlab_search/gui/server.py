@@ -132,6 +132,10 @@ class App:
                     return {"error": busy + " - gpu-clean refused (it would kill a running solve)"}
                 rc, text = self.jobs.run_cli(["gpu-clean"])
                 return {"ok": rc == 0, "text": text}
+            if head == "stop-current":
+                # Owner 2026-10-25: kill the externally-started run that holds OUR GPU lock (the
+                # lock file records its pid + command); gui-started jobs route through cancel.
+                return self.jobs.stop_external()
         except (JobError, ValueError) as exc:
             return {"error": str(exc)}
         except Exception as exc:  # noqa: BLE001 - e.g. a ConfigError from load_brief

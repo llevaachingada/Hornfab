@@ -465,12 +465,21 @@ function stopAffordanceFor(jobs, lock) {
 }
 
 /** One stop-region state as HTML (pure): gui-cancel => the danger Stop button + what it targets;
- *  external => the informational pill (never a button); idle => nothing. */
+ *  external => the danger Kill run button (owner 2026-10-25: the GUI MAY kill the externally-
+ *  started run that holds OUR gpu lock — the lock file records exactly which pid holds it, so the
+ *  kill is pid-targeted + gpu-clean, never arbitrary); idle => nothing. */
 function stopRegionHtml(aff) {
   if (!aff || aff.state === "idle") return "";
   if (aff.state === "external") {
     const l = aff.lock || {};
-    return `<div style="margin-top:8px"><span class="pill warn" title="${esc("GPU lock held by pid " + (l.pid != null ? l.pid : "?") + ": " + (l.command || ""))}">run started outside the GUI (terminal) — the GUI only stops its own jobs</span></div>`;
+    const pid = l.pid != null ? l.pid : "?";
+    return `<div style="margin-top:8px">
+      <div class="btn-row" style="flex-wrap:wrap;gap:8px;align-items:center">
+        <button class="btn danger" id="btn-kill-run" title="Kills the externally-started run that holds our GPU lock: pid ${esc(pid)} with its child tree, then a gpu-clean pass">Kill run</button>
+        <span class="mono muted" style="font-size:0.75rem">external run · pid ${esc(pid)}</span>
+      </div>
+      <div class="hint" id="st-kill-msg" role="status" style="margin:4px 0 0"></div>
+    </div>`;
   }
   const j = aff.job || {};
   const tail = String(Array.isArray(j.argv) ? j.argv.slice(1).join(" ") : "").slice(0, 90);
@@ -529,18 +538,41 @@ function wireTwoStepArm(btn, msgId, opts) {
  *  poll. */
 function wireStopButton(aff) {
   const btn = document.getElementById("btn-stop-run");
-  if (!btn || !aff || aff.state !== "gui-cancel" || !aff.job) return;
-  wireTwoStepArm(btn, "st-stop-msg", {
-    armLabel: "Confirm stop",
-    armedMsgHtml: `<span class="warn-text">click again to confirm — the job's process tree is killed and a gpu-clean pass runs</span>`,
-    fire: async (b, m) => {
-      b.disabled = true;
-      if (m) m.textContent = "stop requested — the run dir records the stop; wait for the job to exit + a gpu-clean pass";
-      const r = await post("/api/job/" + aff.job.id + "/cancel", {});
-      if (r && r.error && m) m.innerHTML = `<span class="warn-text">${esc(r.error)}</span>`;
-      else showToast("Stop requested — the job is killed and a gpu-clean pass runs after GPU jobs.", "info");
-    }
-  });
+  if (btn && aff && aff.state === "gui-cancel" && aff.job) {
+    wireTwoStepArm(btn, "st-stop-msg", {
+      armLabel: "Confirm stop",
+      armedMsgHtml: `<span class="warn-text">click again to confirm — the job's process tree is killed and a gpu-clean pass runs</span>`,
+      fire: async (b, m) => {
+        b.disabled = true;
+        if (m) m.textContent = "stop requested — the run dir records the stop; wait for the job to exit + a gpu-clean pass";
+        const r = await post("/api/job/" + aff.job.id + "/cancel", {});
+        if (r && r.error && m) m.innerHTML = `<span class="warn-text">${esc(r.error)}</span>`;
+        else showToast("Stop requested — the job is killed and a gpu-clean pass runs after GPU jobs.", "info");
+      }
+    });
+    return;
+  }
+  // External state (owner 2026-10-25): the run holding our GPU lock was NOT started by the GUI —
+  // the kill targets exactly the pid the lock file records (+ its child tree), then gpu-clean.
+  const kill = document.getElementById("btn-kill-run");
+  const lock = aff && aff.state === "external" ? aff.lock : null;
+  if (kill && lock) {
+    const pid = lock.pid != null ? lock.pid : "?";
+    wireTwoStepArm(kill, "st-kill-msg", {
+      armLabel: "Confirm kill",
+      armedMsgHtml: `<span class="warn-text">click again to confirm — kills the externally-started process holding the GPU lock (pid ${esc(pid)}) with its child tree, then a gpu-clean pass</span>`,
+      fire: async (b, m) => {
+        b.disabled = true;
+        if (m) m.textContent = "kill requested…";
+        const r = await post("/api/stop-current", {});
+        if (r && r.error) { b.disabled = false; if (m) m.innerHTML = `<span class="warn-text">${esc(r.error)}</span>`; }
+        else {
+          if (m) m.textContent = `killed pid ${r && r.killed != null ? r.killed : "?"} — gpu-clean pass ran`;
+          showToast("Run killed — a gpu-clean pass ran after it.", "info");
+        }
+      }
+    });
+  }
 }
 
 // ── Toolbar run-control pill (left nav, every view) ─────────────────────────────────────────
@@ -615,27 +647,38 @@ function toolbarPillFor(jobs, lock, runs) {
 }
 
 /** Pure HTML for one pill state (compact, nav-width, existing theme classes/vars only): stop → the
- *  danger button + what it targets; external → the muted pill naming the lock (never a button);
- *  resume → the primary button + what it resumes (an honest note instead of a button when the argv
- *  carries no --config); idle → "" (holder stays empty: honest absence, zero layout residue). */
+ *  danger button + what it targets; external → the danger KILL run button (owner 2026-10-25: the
+ *  GUI MAY kill the externally-started run that holds OUR gpu lock — the lock file records exactly
+ *  which pid holds it, so the kill is pid-targeted + gpu-clean, never arbitrary); resume → the
+ *  primary button + what it resumes (an honest note instead of a button when the argv carries no
+ *  --config); idle → a small always-visible "no run in progress" indicator (owner directive: the
+ *  pill is a VISIBLE toolbar control at all times, not honest-absence). */
 function toolbarPillHtml(pill) {
-  if (!pill || pill.state === "idle") return "";
+  const state = pill ? pill.state : "idle";
   const wrap = inner =>
     `<div class="nav-runctl" style="padding:6px 16px 4px;display:grid;gap:4px;margin-top:2px">${inner}</div>`;
   const BTN = "width:100%;padding:5px 10px;font-size:0.8rem;line-height:1.25";
   const SUB = "font-size:0.64rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap";
   const MSG = "font-size:0.66rem;line-height:1.3;white-space:normal";
-  if (pill.state === "external") {
+  if (state === "external") {
     const l = pill.lock || {};
     const pid = l.pid != null ? l.pid : "?";
-    return wrap(`<span class="pill warn" style="display:block;${SUB}" title="${esc(`GPU lock held externally (pid ${pid}) — stop it from its own terminal: ${l.command || ""}`)}">external GPU run · pid ${esc(pid)}</span>`);
+    return wrap(`<button class="btn danger" id="tb-kill-run" style="${BTN}" title="Kills the externally-started run that holds our GPU lock: pid ${esc(pid)} with its child tree, then a gpu-clean pass">■ Kill run</button>
+      <span class="mono muted" style="${SUB}">external run · pid ${esc(pid)}</span>
+      <span id="tb-kill-msg" role="status" style="${MSG}"></span>`);
+  }
+  if (state === "idle") {
+    return wrap(`<span class="pill" style="display:block;${SUB};color:var(--muted)" title="No run in progress — start one from Compose or Launch">no run in progress</span>`);
   }
   const j = pill.job || {};
-  if (pill.state === "stop") {
+  if (state === "stop") {
     return wrap(`<button class="btn danger" id="tb-stop-run" style="${BTN}" title="Stops the run: process tree killed + gpu-clean">■ Stop</button>
       <span class="mono muted" style="${SUB}">job ${esc(j.id || "?")} · ${esc(j.kind || "?")}</span>
       ${pill.note ? `<span class="warn-text" style="${MSG}">${esc(pill.note)}</span>` : ""}
       <span id="tb-stop-msg" role="status" style="${MSG}"></span>`);
+  }
+  if (state === "idle") {
+    return wrap(`<span class="pill" style="display:block;${SUB};color:var(--muted)" title="No run in progress — start one from Compose or Launch">no run in progress</span>`);
   }
   if (!pill.args) {
     return wrap(`<span class="pill warn" style="display:block;${SUB}" title="The stopped search's log names no resumable run folder (or its budget is exhausted) — a resume needs that run directory">stopped search — no resumable run folder</span>
@@ -659,20 +702,21 @@ async function resumePreview(pill) {
     return { ok: false, why: "this server build adds no --resume flag — a launch would start a FRESH search, not a resume; nothing was started" };
   return { ok: true, command: String(r.command || "") };
 }
-
 /** Wires the pill's one button, stateless per render: each re-render rebuilds content and re-arms
- *  from scratch, so an armed state never fires at a stale job. The resume arm probes the server's
- *  contract on the ARM click and blocks the confirm click (with the honest reason) when the
- *  previewed argv shows no resume flag. */
-function wireToolbarPill(pill) {
-  const stopBtn = document.getElementById("tb-stop-run");
+ *  from scratch, so an armed state never fires at a stale job. `root` scopes the queries so the
+ *  duplicated holders (links column + nav-footer circle) wire independently. The resume arm probes
+ *  the server's contract on the ARM click and blocks the confirm click (with the honest reason)
+ *  when the previewed argv shows no resume flag. */
+function wireToolbarPill(pill, root = document, idsuf = "") {
+  const stopBtn = root.querySelector(`#tb-stop-run${idsuf}`);
   if (stopBtn && pill.state === "stop" && pill.job) {
-    wireTwoStepArm(stopBtn, "tb-stop-msg", {
+    wireTwoStepArm(stopBtn, root.querySelector(`#tb-stop-msg${idsuf}`), {
       armLabel: "Confirm stop",
       armedMsgHtml: `<span class="warn-text">click again to confirm — process tree killed + gpu-clean</span>`,
       fire: async (b, m) => {
         b.disabled = true;
         if (m) m.textContent = "stop requested — wait for the job to exit + the gpu-clean pass";
+
         const r = await post("/api/job/" + pill.job.id + "/cancel", {});
         if (r && r.error) { if (m) m.innerHTML = `<span class="warn-text">${esc(r.error)}</span>`; }
         else {
@@ -684,25 +728,45 @@ function wireToolbarPill(pill) {
     });
     return;
   }
-  const rsBtn = document.getElementById("tb-resume-run");
-  if (rsBtn && pill.state === "resume") wireResumeArm(rsBtn, "tb-resume-msg", pill);
+  // External state (owner 2026-10-25): the pill's Kill run targets exactly the pid recorded in OUR
+  // gpu lock file (the externally-started run + its child tree) and then gpu-clean.
+  const killBtn = root.querySelector(`#tb-kill-run${idsuf}`);
+  if (killBtn && pill.state === "external") {
+    wireTwoStepArm(killBtn, root.querySelector(`#tb-kill-msg${idsuf}`), {
+      armLabel: "Confirm kill",
+      armedMsgHtml: `<span class="warn-text">click again to confirm — kills the externally-started process holding our GPU lock (its pid is in the tooltip) with its child tree, then a gpu-clean pass</span>`,
+      fire: async (b, m) => {
+        b.disabled = true;
+        if (m) m.textContent = "kill requested…";
+        const r = await post("/api/stop-current", {});
+        if (r && r.error) { b.disabled = false; if (m) m.innerHTML = `<span class="warn-text">${esc(r.error)}</span>`; }
+        else {
+          if (m) m.textContent = `killed pid ${r && r.killed != null ? r.killed : "?"} — gpu-clean pass ran`;
+          showToast("Run killed — a gpu-clean pass ran after it.", "info");
+          pollNavOnce();
+        }
+      }
+    });
+    return;
+  }
+  const rsBtn = root.querySelector(`#tb-resume-run${idsuf}`);
+  if (rsBtn && pill.state === "resume") wireResumeArm(rsBtn, root.querySelector(`#tb-resume-msg${idsuf}`), pill);
 }
 
-function wireResumeArm(btn, msgId, pill) {
+function wireResumeArm(btn, msg, pill) {
   let probe = null;
-  wireTwoStepArm(btn, msgId, {
+  wireTwoStepArm(btn, msg, {
     armLabel: "Confirm resume",
     armedMsgHtml: `<span class="warn-text">checking the server's resume contract…</span>`,
     onArm: m => {
       resumePreview(pill).then(res => {
         probe = res;
-        const mm = document.getElementById(msgId);
-        if (!mm || !mm.isConnected) return;
+        if (!m || !m.isConnected) return;
         if (res.ok) {
-          mm.innerHTML = `<span class="warn-text">click again to confirm — resumes from its run folder; cached evals replay free, budget is per invocation</span>
+          m.innerHTML = `<span class="warn-text">click again to confirm — resumes from its run folder; cached evals replay free, budget is per invocation</span>
             <span class="mono muted" style="font-size:0.62rem;line-height:1.3;white-space:normal;word-break:break-all">${esc(res.command)}</span>`;
         } else {
-          mm.innerHTML = `<span class="warn-text">${esc(res.why)}</span>`;
+          m.innerHTML = `<span class="warn-text">${esc(res.why)}</span>`;
         }
       });
     },
@@ -751,7 +815,7 @@ function renderNavPill() {
   if (sig === _pillSig && holder.firstElementChild) return;   // unchanged: keep the wired DOM (an armed click survives the poll)
   _pillSig = sig;
   holder.innerHTML = toolbarPillHtml(pill);
-  wireToolbarPill(pill);
+  wireToolbarPill(pill, holder);
 }
 
 async function pollNavOnce() {
