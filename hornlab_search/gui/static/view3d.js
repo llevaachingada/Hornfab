@@ -564,8 +564,16 @@ export async function init3dFrames(container, frames, opts = {}) {
   // One rig for the whole time-lapse: the camera, lights and shadow ground derive from the union
   // of all frames' bounds, so swapping geometry never moves the camera.
   const u = unionBounds(prepared.map(p => p.bounds));
-  const center = new THREE.Vector3((u.x0 + u.x1) / 2, (u.y0 + u.y1) / 2, (u.z0 + u.z1) / 2);
-  const maxDim = Math.max(u.x1 - u.x0, u.y1 - u.y0, u.z1 - u.z0);
+  // Frame vertices are MILLIMETRES and buildGeo scales the geometry by 0.001 onto the metre stage,
+  // so the rig must live in the SAME unit system: compute the centre/extent in metres here too.
+  // (Before this, the camera sat ~600 "units" from a horn that was 0.4 units wide with far=100 —
+  // everything was clipped, which is why the evolution 3D panel rendered blank. The single-mesh
+  // init3d receives metre payloads, so it needs no conversion.)
+  const CENTRE_SCALE = 0.001;
+  const center = new THREE.Vector3((u.x0 + u.x1) / 2 * CENTRE_SCALE,
+                                   (u.y0 + u.y1) / 2 * CENTRE_SCALE,
+                                   (u.z0 + u.z1) / 2 * CENTRE_SCALE);
+  const maxDim = Math.max(u.x1 - u.x0, u.y1 - u.y0, u.z1 - u.z0) * CENTRE_SCALE;
   if (!isFinite(maxDim) || maxDim <= 0) { render2DFallback(container, opts.profile || null, opts.seedProfile || null); return null; }
   const shadows = opts.shadows !== false;
 

@@ -226,6 +226,35 @@ export function familyColor(i) { return FAMILY_COLORS[i % FAMILY_COLORS.length];
 /** Wall cross-section, true aspect: H plane to the right (+r), V plane mirrored left (−r), depth z up.
  *  designs: [{profile: {h: [[z, r]...], v: [...], kind}, color, label, filled}]. Section outlines
  *  (kind 'section') are drawn as closed shapes; node clouds (kind 'nodes') as small dots. */
+/**
+ * Complete a symmetry-reduced mouth ring for display. The mesh payload is a QUARTER (quadrants
+ * "1"), a HALF, or already FULL, and the frames payload does not always say which — so decide
+ * from the points themselves: an arc living in one quadrant is mirrored into all four (order
+ * preserved, so the drawn ring never self-intersects); a ring spanning one axis is mirrored
+ * across that axis; a ring already spanning both axes is returned untouched. Pure. Used by the
+ * evolution front view and the typology sandbox.
+ */
+export function mirrorRing(pts) {
+  const p = (pts || []).filter(q => Array.isArray(q) && q.length >= 2 && isFinite(q[0]) && isFinite(q[1]));
+  if (p.length < 2) return p;
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  for (const [x, y] of p) {
+    minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+    minY = Math.min(minY, y); maxY = Math.max(maxY, y);
+  }
+  const eps = 1e-6 * Math.max(1, Math.abs(maxX), Math.abs(minX), Math.abs(maxY), Math.abs(minY));
+  const spansX = minX < -eps && maxX > eps, spansY = minY < -eps && maxY > eps;
+  if (spansX && spansY) return p;                                        // already a full ring
+  const rev = a => a.slice().reverse();
+  if (spansX) return p.concat(rev(p).map(([x, y]) => [x, -y]));          // half: mirror across x
+  if (spansY) return p.concat(rev(p).map(([x, y]) => [-x, y]));          // half: mirror across y
+  // quarter arc -> closed ring around all four quadrants, traversed CCW
+  return p
+    .concat(rev(p).map(([x, y]) => [-x, y]))
+    .concat(p.map(([x, y]) => [-x, -y]))
+    .concat(rev(p).map(([x, y]) => [x, -y]));
+}
+
 export function wallSection(svg, designs, { H = 300, compact = false, extent = null } = {}) {
   svg.innerHTML = "";
   const W = measuredWidth(svg, compact ? 150 : 460);

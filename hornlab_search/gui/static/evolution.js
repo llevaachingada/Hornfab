@@ -4,7 +4,7 @@
 // 3D mode (owner request): GET /api/evolution/<run>/frames3d plays the IMPROVEMENT frames as hot-swapped
 // meshes (view3d.js::init3dFrames) — improvements-only by contract, so the 3D toggle and the frame-mode
 // select enforce one rule both ways: 3D ⟺ improvements only ('every candidate' stays 2D).
-import { css, niceTicks, NS, el, familyColor } from "./charts.js";
+import { css, niceTicks, NS, el, familyColor, mirrorRing } from "./charts.js";
 import { init3dFrames } from "./view3d.js";
 import { loadParamCatalog, paramTitle } from "./paramtips.js";
 
@@ -341,7 +341,13 @@ function frontFrame(svg, ext, env) {
   const layer = el("g", {}, svg);
   return { svg, layer, X, Y };
 }
-function mouthPath(m, X, Y) { return m && m.length ? m.map(([x, y], i) => (i ? "L" : "M") + X(x).toFixed(1) + "," + Y(y).toFixed(1)).join("") + "Z" : ""; }
+/** Mouth ring path. The frames payload carries a QUARTER ring (quadrants "1"), so mirrorRing
+ *  completes it before drawing — without that the front view showed a single quadrant fan
+ *  anchored at the origin instead of the mouth outline. */
+function mouthPath(m, X, Y) {
+  const ring = mirrorRing(m);
+  return ring.length ? ring.map(([x, y], i) => (i ? "L" : "M") + X(x).toFixed(1) + "," + Y(y).toFixed(1)).join("") + "Z" : "";
+}
 function drawFront(Fr, f, ghosts, bestF) {
   Fr.layer.innerHTML = "";
   ghosts.slice().reverse().forEach((g, i) => el("path", { d: mouthPath(g.geo.mouth, Fr.X, Fr.Y), fill: "none",

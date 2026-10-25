@@ -25,7 +25,7 @@
 // through the existing paramtips.js helpers — names, summaries, ranges and the `detail` physics
 // sentence are never invented here, and a missing catalog degrades to the raw key site-wide.
 
-import { css, niceTicks, el, fmt, measuredWidth, wallSection } from "./charts.js";
+import { css, niceTicks, el, fmt, measuredWidth, wallSection, mirrorRing } from "./charts.js";
 import { mirrorMesh, loadThree, normalizeRenderPrefs } from "./view3d.js";
 import { loadParamCatalog, formatParamTitle, formatSearchRange, docFor } from "./paramtips.js";
 
@@ -360,9 +360,12 @@ export function sectionExtents(section, mouth) {
 export function combinedSectionLoop(section) {
   const loop = d => {
     if (!d) return null;
-    const zSort = (pts, dir) => (pts || []).filter(p => Array.isArray(p) && p.length >= 2)
-      .sort((a, b) => (a[0] - b[0]) * dir);
-    const outer = zSort(d.outer, 1), inner = zSort(d.inner, -1);
+    // PRESERVE each plane's own point order (throat -> mouth for outer, mouth -> throat for the
+    // reversed inner). Sorting by z was the defect: a rollback meridian is NOT monotone in z, so
+    // the sorted loop self-intersected and the even-odd fill broke into the striped fringe the
+    // owner saw on the vertical plane.
+    const clean = pts => (pts || []).filter(p => Array.isArray(p) && p.length >= 2 && isFinite(p[0]) && isFinite(p[1]));
+    const outer = clean(d.outer), inner = clean(d.inner).reverse();
     if (outer.length >= 2 && inner.length >= 2) return outer.concat(inner);
     if (outer.length >= 2) return outer;              // a lone wall still draws (no band)
     if (inner.length >= 2) return inner;
@@ -375,7 +378,7 @@ export function combinedSectionLoop(section) {
 
 /** The mouth ring band (outer + inner reversed, even-odd) — "" when there is no outer ring. */
 export function mouthBandPath(mouth, X, Y) {
-  const chain = pts => (pts || []).filter(p => Array.isArray(p) && p.length >= 2)
+  const chain = pts => mirrorRing(pts)
     .map(([x, y], i) => (i ? "L" : "M") + X(x).toFixed(1) + "," + Y(y).toFixed(1));
   const outer = chain((mouth || {}).outer);
   if (!outer.length) return "";
@@ -708,7 +711,7 @@ function drawFront(svg, payload, envelope, emptyMsg) {
     el("path", { d: band, fill: css("--best"), "fill-rule": "evenodd", "fill-opacity": 0.22, stroke: "none" }, svg);
     el("path", { d: band, fill: "none", stroke: css("--best"), "stroke-width": 1.6, "fill-rule": "evenodd" }, svg);
   }
-  const innerPts = ((mouth || {}).inner || []).filter(p => Array.isArray(p) && p.length >= 2);
+  const innerPts = mirrorRing((mouth || {}).inner);
   if (innerPts.length) {
     const ip = innerPts.map(([x, y], i) => (i ? "L" : "M") + X(x).toFixed(1) + "," + Y(y).toFixed(1)).join("") + "Z";
     el("path", { d: ip, fill: "none", stroke: css("--muted"), "stroke-width": 1.1 }, svg);

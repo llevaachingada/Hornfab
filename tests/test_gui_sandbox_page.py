@@ -328,6 +328,16 @@ const band = m.mouthBandPath({ outer: [[0, 0], [10, 0]], inner: [[5, 2], [8, 2]]
 assert.ok(band.startsWith("M0.0,0.0L10.0,0.0"), band);
 assert.ok(band.endsWith("Z"), band);
 assert.ok(band.indexOf("8.0,2.0L5.0,2.0") > 0, "inner ring reversed into the same path");
+// QUARTER payload rings are completed into a closed four-quadrant outline (mouth-outline fix).
+const qBand = m.mouthBandPath({ outer: [[10, 0], [0, 10]], inner: [[8, 0], [0, 8]] }, X, Y);
+assert.ok(qBand.includes("-10.0"), "quarter ring mirrored into the -x quadrant: " + qBand);
+assert.ok(qBand.includes("-8.0"), "quarter inner ring mirrored too: " + qBand);
+// ROLLBACK meridians are NOT monotone in z: the loop must keep its own point order (the striped
+// vertical-plane fringe was a z-sort self-intersection, never a data problem).
+const ROLL = { h: { inner: [[0, 10], [100, 80], [120, 60]], outer: [[0, 13], [100, 120], [120, 90]] }, v: null };
+assert.deepEqual(m.combinedSectionLoop(ROLL).h,
+  [[0, 13], [100, 120], [120, 90], [120, 60], [100, 80], [0, 10]],
+  "rollback order preserved, never z-sorted");
 
 console.log("SANDBOX OK");
 '''
