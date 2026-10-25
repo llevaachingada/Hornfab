@@ -42,7 +42,7 @@ export async function viewEvolution(root, runId) {
         <option value="1200">slow</option><option value="500" selected>normal</option><option value="150">fast</option><option value="40">very fast</option></select></label>
       <label class="evo-opt"><input type="checkbox" id="evo-loop" checked> loop</label>
       <label class="evo-opt" title="Plays the improvement frames as hot-swapped 3D meshes (improvements only; 'every candidate' stays 2D)">
-        <input type="checkbox" id="evo-3d"> 3D</label>
+        <input type="checkbox" id="evo-3d-toggle"> 3D</label>
       <div class="hint" id="evo-3d-note" role="status" style="margin:0;flex-basis:100%"></div>
     </div>
     <div class="evo-status card" id="evo-status" aria-live="polite"></div>
@@ -176,7 +176,12 @@ export async function viewEvolution(root, runId) {
   // candidate' turns 3D off again. Both directions are disclosed on screen. The fetch and the
   // renderer build happen only on first use; a navigation that lands mid-build disposes or bails
   // via root.isConnected (route()'s [data-v3d] sweep disposes the attached player directly).
-  const box3d = document.getElementById("evo-3d");
+  // The toggle and the container are DIFFERENT elements with DIFFERENT ids (#evo-3d-toggle is the
+  // checkbox, #evo-3d is the div that carries [data-v3d] and receives the canvas + _dispose3d).
+  // They start from one state: the renderer is off, so the box is unchecked (never "on" while the
+  // container still shows the off placeholder).
+  const box3d = document.getElementById("evo-3d-toggle");
+  if (box3d) box3d.checked = false;
   const note3d = document.getElementById("evo-3d-note");
   const grid3d = document.getElementById("evo-3d-wrap");
   const RULE3D = "3D shows improvement frames only — 'every candidate' stays 2D.";
@@ -238,6 +243,7 @@ export async function viewEvolution(root, runId) {
 
   function disable3d(reason) {
     grid3d.hidden = true;
+    if (box3d) box3d.checked = false;                // off means BOTH: unchecked box and placeholder
     if (player3d) { if (player3d.dispose) player3d.dispose(); player3d = null; }
     const cv = document.getElementById("evo-3d");
     if (cv) cv.innerHTML = `<div class="view3d-fallback">3D off — flip the 3D toggle above.</div>`;
