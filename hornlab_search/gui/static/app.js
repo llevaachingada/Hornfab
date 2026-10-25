@@ -196,8 +196,10 @@ async function viewHome() {
   if (cur && lock && lock.alive) {
     const budget = cur.budget || 1;
     const pct = Math.min(100, Math.round((cur.n / budget) * 100));
+    const over = !!(cur.budget && cur.n > cur.budget);
+    const budgetCls = over ? "bad" : pct >= 90 ? "warn" : "";
     const nFail = Object.values(cur.failures || {}).reduce((a, v) => a + v, 0);
-    const barCls = nFail / Math.max(cur.n, 1) > 0.3 ? "warn" : "";
+    const barCls = over ? "bad" : nFail / Math.max(cur.n, 1) > 0.3 ? "warn" : "";
     const eta = cur.eta_min != null ? `~${Math.round(cur.eta_min)} min left` : "";
     const rate = cur.rate_per_h != null ? `${cur.rate_per_h.toFixed(0)}/h` : "";
     gpuCard = `<div class="card status-card running-card">
@@ -205,7 +207,7 @@ async function viewHome() {
       <div style="margin:6px 0">
         <div class="progress-wrap"><div class="progress-bar ${barCls}" style="width:${pct}%"></div></div>
         <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:0.8rem;color:var(--muted)">
-          <span>${cur.n.toLocaleString()} / ${budget.toLocaleString()} evals (${pct}%)</span>
+          <span><b class="${budgetCls}">${cur.n.toLocaleString()} / ${budget.toLocaleString()} evals (${pct}%)${over ? " over budget" : ""}</b></span>
           <span>${eta}</span>
         </div>
       </div>
@@ -429,13 +431,15 @@ function currentRunCard(cur) {
   if (!cur) return "";
   const budget = cur.budget || 1;
   const pct = Math.min(100, Math.round((cur.n / budget) * 100));
+  const over = !!(cur.budget && cur.n > cur.budget);
+  const budgetCls = over ? "bad" : pct >= 90 ? "warn" : "";
   const eta = cur.eta_min != null ? `~${Math.round(cur.eta_min)} min left` : "";
   return `<div class="card running-card" style="margin-top:-4px">
     <div class="eyebrow" style="margin-bottom:6px">Running now</div>
     <div style="font-weight:500">${esc(cur.name || cur.id)}</div>
-    <div class="progress-wrap" style="margin:8px 0 4px"><div class="progress-bar" style="width:${pct}%"></div></div>
+    <div class="progress-wrap" style="margin:8px 0 4px"><div class="progress-bar ${over ? "bad" : ""}" style="width:${pct}%"></div></div>
     <div style="display:flex;justify-content:space-between;font-size:0.8rem;color:var(--muted)">
-      <span>${cur.n.toLocaleString()} / ${budget.toLocaleString()} (${pct}%)</span>
+      <span><b class="${budgetCls}">${cur.n.toLocaleString()} / ${budget.toLocaleString()} (${pct}%)${over ? " over budget" : ""}</b></span>
       <span>${eta}</span>
     </div>
     <div class="kpis" style="margin-top:8px">
@@ -590,16 +594,24 @@ async function viewCampaignDetail(id) {
       : "";
     const dimCell = e.dims ? dimStr(e.dims) : "–";
 
-    // Separation from next
-    let rowCls = "";
+    // Separation from next: row tint stays, plus a text badge (state not by colour alone)
+    let rowCls = "", rankNote = "";
     if (i < entries.length - 1) {
-      const sep = isSeparated(e, entries[i + 1]);
-      if (sep === true) rowCls = "row-ahead";
-      else if (sep === false) rowCls = "row-not-sep";
+      const next = entries[i + 1];
+      const sep = isSeparated(e, next);
+      if (sep === true) {
+        rowCls = "row-ahead";
+        const pctDelta = e.median_j ? ((next.median_j - e.median_j) / e.median_j) * 100 : null;
+        rankNote = (pctDelta != null && isFinite(pctDelta) && pctDelta > 0)
+          ? `+${Math.round(pctDelta)} %` : "leader";
+      } else if (sep === false) {
+        rowCls = "row-not-sep";
+        rankNote = "within noise";
+      }
     }
 
     return `<tr class="${rowCls}" ${bestLink}>
-      <td class="r mono">${i + 1}</td>
+      <td class="r mono">${i + 1}${rankNote ? ` <small class="muted">${esc(rankNote)}</small>` : ""}</td>
       <td><b>${esc(e.name)}</b></td>
       <td>${gpill}</td>
       <td class="r">${fmt(e.best_j)}</td>
@@ -997,6 +1009,8 @@ async function viewRunDetail(id) {
     </div>`;
 
   // KPI strip (designer-first order)
+  const budgetPct = sum.budget ? Math.round(((sum.n || 0) / sum.budget) * 100) : 0;
+  const overBudget = !!(sum.budget && sum.n > sum.budget);
   document.getElementById("kpi-strip").innerHTML = [
     [`${tip("bw", "Coverage target")}`, coverTarget],
     [`${tip("band", "Band")}`, bandStr],
@@ -1004,10 +1018,12 @@ async function viewRunDetail(id) {
     [`${tip("J", "Score: start")}`, fmt(sum.seed_j && sum.seed_j < 900 ? sum.seed_j : null)],
     [`${tip("J", "Score: best")}`, fmt(sum.best_j)],
     ["Change vs start", ch],
-    [`${tip("budget", "Budget used")}`, `${(sum.n || 0).toLocaleString()}${sum.budget ? " / " + sum.budget.toLocaleString() : ""}`],
+    [`${tip("budget", "Budget used")}`,
+     `${(sum.n || 0).toLocaleString()}${sum.budget ? " / " + sum.budget.toLocaleString() : ""}${overBudget ? " over budget" : ""}`,
+     overBudget ? "bad" : budgetPct >= 90 ? "warn" : ""],
     [`${tip("failures", "Failures")}`, `${nf} (${failPct}%)`],
     [`${tip("pinned", "At limit")}`, pinnedSens.length > 0 ? `<b class="bad">${pinnedSens.length}</b>` : pill("0", "good")],
-  ].map(([k, v]) => `<div class="kpi"><span>${k}</span><b>${v}</b></div>`).join("");
+  ].map(([k, v, cls]) => `<div class="kpi"><span>${k}</span><b${cls ? ` class="${cls}"` : ""}>${v}</b></div>`).join("");
 
   const F = S.freqs || B.freqs || [];
   const band = [t.band_lo_hz || 700, t.band_hi_hz || 5500];

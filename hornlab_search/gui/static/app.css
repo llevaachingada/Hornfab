@@ -292,8 +292,8 @@ legend { font-family:var(--f-mono); font-size:0.78rem; color:var(--accent);
 .tl-row:last-child { border-bottom:none; }
 .tl-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
 .tl-dot.done   { background:var(--good); }
-.tl-dot.skip   { background:var(--muted); }
-.tl-dot.failed { background:var(--bad); }
+.tl-dot.skip   { background:transparent; border:2px solid var(--muted); }
+.tl-dot.failed { background:var(--bad); border-radius:2px; }
 .tl-dot.run    { background:var(--accent); }
 .tl-name { font-family:var(--f-mono); font-size:0.78rem; flex:1; min-width:0;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
