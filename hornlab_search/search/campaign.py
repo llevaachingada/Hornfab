@@ -35,7 +35,7 @@ TIER_COMPARE = "compare"
 ALL_TIERS = (TIER_DRY_RUN, TIER_SCREEN, TIER_COMPARE)
 
 # Groups the "--families" SPEC can name
-GROUP_NAMES = ("classical", "magnus", "hybrid", "legacy")
+GROUP_NAMES = ("classical", "magnus", "hybrid", "legacy", "organic")
 
 
 # ------------------------------------------------------------------ brief loading

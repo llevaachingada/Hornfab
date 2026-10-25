@@ -402,13 +402,32 @@ def _validate_freeform(design: Design) -> None:
 
 def validate(design: Design) -> None:
     """Raise GeometryInvalidError naming the offending key. No guessing: a key not in the
-    family's table is rejected, not passed through."""
+    family's table is rejected, not passed through.
+
+    WP10: a ``FREEFORM`` design whose params carry ``"grid"`` is the point-grid adapter. The
+    family literal stays FREEFORM (frozen contract), but the params are a grid spec, not anchors,
+    so the grid schema validates them (``generators.grid.validate_grid_params``) instead of
+    ``_validate_freeform``.
+    """
     fam = design.family
     if fam not in FAMILY_KEYS:
         raise GeometryInvalidError(f"unknown family {fam!r}; legal: {list(FAMILY_KEYS)}")
     table = FAMILY_KEYS[fam]
     if not isinstance(design.params, dict):
         raise GeometryInvalidError(f"{fam}: params must be a dict")
+    if "grid" in design.params:
+        if fam != "FREEFORM":
+            raise GeometryInvalidError(
+                f"{fam}: a grid design must use family FREEFORM (got {fam!r})")
+        from .generators import grid as grid_gen            # lazy: generators import this pkg
+        extra = sorted(k for k in design.params if k != "grid")
+        if extra:
+            raise _bad(fam, extra[0], "not a grid design key (a grid Design carries only 'grid')")
+        try:
+            grid_gen.validate_grid_params(design.params["grid"])
+        except grid_gen.registry.GeneratorError as exc:
+            raise GeometryInvalidError(f"{fam}.grid: {exc}") from exc
+        return
     hints = _REFUSED_HINTS.get(fam, {})
     for key in design.params:
         if key in table:

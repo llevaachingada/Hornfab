@@ -16,10 +16,12 @@ bempp_cpu) → `metrics` (beamwidth, ripple, DI, impedance) → `objective` (sca
 | `types.py`, `constants.py` | Frozen contract types (Design, MeshResult, MetricSet, …); physical constants. |
 | `design/families.py` | Legal keys per family (OSSE, R-OSSE, ICW, FREEFORM), validation, mesher config. |
 | `design/space.py` | DesignSpace: bounds ↔ [0,1]^k for CMA-ES; dispatches generator configs. |
-| `design/generated.py` | GeneratedSpace: generator knobs → FREEFORM Design; provenance. |
-| `design/generators/profiles.py` | Classical meridians (conical, exponential, hypex, tractrix; Le Cléac'h disabled), blend, anchors, perturbation. |
-| `design/generators/registry.py` | Typology spec + knobs + brief → FREEFORM params (H/V hybrids, OSSE via Magnus's `profile_points`, envelope). |
+| `design/generated.py` | GeneratedSpace: generator knobs → FREEFORM Design; provenance; M4: dispatches `generator: {name: grid}` recipes (radius-field + rows kinds) to `grid.design_params`. |
+| `design/generators/grid.py` | GRID adapter (WP10) + WP9b rows machinery: radius-field point grid (superellipse p(s), G8 even-cosine a_k(s), G9 phi-termination) and rows kinds (salmon_axisym/salmon_elliptical/lecleach/iwata_ar/toroidal_rollback + lecleach_mod/lecleach_ar internals); quarter and HALF spans (`span: half` = quadrants '14', phi ∈ [−90°,+90°], odd n_phi ≥ 25); LIST harmonic contract (`g_stop_cos2k`/`g_stop_sin2k1`/`g_bend_sin1_mm`, lib-2 C2 basis, phi from horizontal); design_params persistence + validation dispatch + conservative envelope extents. |
+| `design/generators/profiles.py` | Classical meridians (conical, exponential, hypex, tractrix) + `splice` (C1 OSSE→tractrix), `throat_blend_mm` knob (OS far-field angle brentq solve), `spherical_salmon` (neutral-name march, area law ≤2e-14), `lecleach` → `lecleach_exact` (Fourcade 2015, R9-J verified: width 0.00 mm vs fig 7), `spherical_wave` (T=1), blend, anchors, perturbation. |
+| `design/generators/registry.py` | Typology spec + knobs + brief → FREEFORM params (H/V hybrids, OSSE via Magnus's `profile_points`, envelope; M4: splice/TYPES + throat-blend types + grid/rows envelope estimator branch). |
 | `mesh/build.py`, `sizing.py`, `topology.py`, `grid.py` | Mesh build + cache, dof caps, STEP export; pre-solve surface/symmetry checks. |
+| `mesh/grid_build.py` | M4 point-grid → mesher route: `PointGridHornGeometry` freestanding + explicit `outer_points` (never BARE), KEYWORDS-only `MeshDensity`, quadrant/symmetry from `sizing` constants ("14" → yz, factor 2), same MeshTooLargeError/topology guards as build.py; NO mesh cache yet (re-mesh per eval; wire-in note at EOF). |
 | `solve/beat.py`, `bempp.py`, `worker.py`, `cache.py`, `traces.py`, `phasor.py`, `base.py` | BEM backends, persistent Julia host (a dead host is recovered: library clients dropped, re-warmed, candidate retried once), solve cache, boundary traces, phase conventions. |
 | `metrics/` | `compute.py` (MetricSet), `polar.py`, `smoothness.py`, `di.py`, `impedance.py`; report-only `spinorama.py`, `beam_shape.py`. |
 | `objective/terms.py`, `scalar.py`, `scalar_v2.py` | The six J terms and the weighted sum. v2 (`objective: {version: 2}` in the brief, WP1 senior pass 2026-10-24): detrended ripple, detrended on-axis flatness, Gaussian-beam DI target, optional per-frequency weights — same key set, opt-in; v1 default is bit-for-bit. |
@@ -40,7 +42,8 @@ bempp_cpu) → `metrics` (beamwidth, ripple, DI, impedance) → `objective` (sca
 |---|---|
 | `examples/catalog.yaml` | Every family/typology the `campaign` command can run (name, group, symmetry). |
 | `examples/briefs/*.yaml` | Design briefs: driver, size envelope, target, weights. `*_12k.yaml`: 12 kHz VERIFY-only copies (NEXT_DEV_PRIORITIES P2; `verify --brief` writes its own `runs/<ts>-verify-<id>`). |
-| `examples/typologies/*.yaml` | Generator configs (classical + hybrids). |
+| `examples/typologies/*.yaml` | Generator configs (classical + hybrids + M4: grid_ellipse, grid_ellipse_mod, splice_osse_tractrix, throatblend_hypex, spherical_salmon, salmon_elliptical, salmon_x_shape, salmon_saddle (HALF), lecleach_f90, lecleach_rollback, lecleach_iwata_ar, lecleach_toroidal — `docs/evidence/M4_SMOKE_2026-10-25.md`; labels per lib-2 dossier). |
+| `examples/briefs/organic_rollback_1in.yaml` | M4 organic brief: 90×60, band 700–5500 Hz, wide/shallow envelope (rollback horns); the organic catalog group's brief. |
 | `examples/*.yaml` | Native-family configs (OSSE, R-OSSE, ICW, FREEFORM) and legacy smoke/adapter configs. |
 | `examples/**/*_fusedcuda.yaml` | WP15 fused-CUDA copies of `osse_axi`, `osse_baseline`, `perturbed_osse_hv`, `freeform_sculpt`: `solve.cuda_fused: true`, verify/final caps 12,000 (screen 5,000 unchanged); originals untouched (`docs/evidence/FUSED_CUDA_2026-10-24.md`). |
 | `tools/review/` | Builds the self-contained review page (`build_review_data.py`, `review_template.html`, `assemble.py`). |
@@ -48,6 +51,7 @@ bempp_cpu) → `metrics` (beamwidth, ripple, DI, impedance) → `objective` (sca
 | `tools/overnight/` | Unattended GPU queue (`queue_20261022.ps1`) and stall watchdog (`watchdog.ps1`, keeps Windows awake). |
 | `tools/measure_fused_ceiling.py` | WP15 fused-CUDA VRAM ceiling: one solve per fresh process (TOOLCHAIN M2), `nvidia-smi` polled from a daemon thread, verified `worker.shutdown`; `--mesh-only` is the CPU-only res→dof calibration. Numbers: `docs/evidence/FUSED_CUDA_2026-10-24.md`. |
 | `tools/m3_measurement_pack.py` | M3 measurement harness (WP5/WP7/WP8): reconstructs a stored run-dir design (`designs/<hash>/design.json`) and re-solves it through the normal `evaluate` path with config overrides (`--set mesh.rear_res_factor=1.5` etc.); `traces` subcommand = `solve_traced` + offline `field_from_traces` field eval at arbitrary radii; `compare` subcommand; VRAM poll thread + verified shutdown; guards: reuses a fresh cache dir, refuses run dirs with ndjson rows. Numbers: `docs/evidence/MEASUREMENT_PACK_2026-10-24.md`. |
+| `tools/evidence_bytecheck_m4.py` | M4 evidence byte-check: verifies every quoted token (J/dofs/run-dir + both compare blocks) against the decoded `runs/m4_smoke/final_*.log` logs; run from the repo root; result in `docs/evidence/M4_SMOKE_2026-10-25.md` §2. |
 | `tests/` | Offline suite; `requires_*` / `gpu` / `slow` markers in `tests/conftest.py`. |
 | `.opencode/skills/` | Agent skills (opencode project scope, auto-discovered): `hornlab-gpu-job` (per-GPU-job hygiene/capture recipe; exit-3 + tripwire semantics) + `hornlab-evidence` (evidence-doc assembly + pre-publish byte-check) + `hornlab-typology-research` (horn-design grounding: typology dossiers + R9/rename-gate discipline before typology/shape work). |
 

@@ -568,6 +568,22 @@ def catalog(root: Path) -> list[dict]:
     return [clean(e) for e in raw.get("entries", []) if isinstance(e, dict)]
 
 
+def _config_seed_materializes(p: Path) -> bool:
+    """True when the config's own seed materializes (the honest runnable gate).
+
+    The old heuristic keyed on ``"lecleach" in p.stem``; lecleach is now a verified,
+    live generator, so a name substring is simply wrong.  A config whose seed cannot be
+    materialized is the only thing the GUI should grey out.
+    """
+    try:
+        from hornlab_search.config import load_config
+        from hornlab_search.design.space import DesignSpace
+        DesignSpace.from_config(load_config(p))
+        return True
+    except Exception:  # noqa: BLE001 - an unloadable/unmaterializable seed is disabled
+        return False
+
+
 def list_configs(root: Path) -> list[dict]:
     """Every runnable config under examples/ (not briefs, not the catalog), with its catalog entry."""
     cat = {e.get("config"): e for e in catalog(root)}
@@ -589,7 +605,8 @@ def list_configs(root: Path) -> list[dict]:
             "brief_file": raw.get("brief_file"), "catalog_name": e.get("name"), "group": e.get("group"),
             "symmetry": e.get("symmetry"), "description": e.get("description"),
             "n_knobs": sum(1 for b in bounds.values() if isinstance(b, dict) and b.get("search", True)),
-            "disabled": "lecleach" in p.stem}))
+            # honest gate: the seed materializes (never a name substring; lecleach is live)
+            "disabled": not _config_seed_materializes(p)}))
     return out
 
 

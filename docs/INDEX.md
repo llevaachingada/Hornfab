@@ -37,6 +37,9 @@ Keep this file current: a new doc gets a line here in the same commit.
 |---|---|
 | [research/typologies/MESHER_TYPOLOGIES.md](research/typologies/MESHER_TYPOLOGIES.md) | What Magnus's mesher implements (OSSE, R-OSSE, ICW, FREEFORM, LOOKUP), file:line. |
 | [research/typologies/SEARCH_LAYER_GAPS.md](research/typologies/SEARCH_LAYER_GAPS.md) | Search-layer coverage vs the mesher. |
+| [research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md](research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md) | M4 grounding dossier (CITATION outcome): WP9 splice/throat_blend/spherical_salmon + WP9b per-azimuth Salmon rows + X-shape; C2 quarter/half symmetry basis; checkable properties; knob ranges; §5 carries the 2026-10-25 lecleach supersession note. |
+| [research/typologies/JMLC_LECLEACH_RESEARCH_2026-10-25.md](research/typologies/JMLC_LECLEACH_RESEARCH_2026-10-25.md) | Le Cléac'h source verification (librarian, fetched): Fourcade 2015 PDF (eqs 10–27, 42–43, fig-7 reference case); the plan's included-vs-half angle bug found (phi0 = 4.0°); R9-J gate PASSED (width 0.00 mm) — lecleach live per the owner's 2026-10-25 directive. |
+| [research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md](research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md) | JMLC-family variants research (lib-2, owner photo directive): fetched datasheets (E-JMLC-300/IWATA-300/JMLC-350); no published per-azimuth math exists — AR-stretch/torus/harmonic laws are labeled reconstructions; optimization conventions + knob surface. |
 | [research/senior_pass_2026-10-24/](research/senior_pass_2026-10-24/README.md) | Senior pass 2026-10-24: objective/assumption audit, new typologies + multi-cell, 12 kHz routes, implementation plan (WP1–WP14). |
 | [research/ATH_SUPERFORMULA_AND_GSA_2026-10-25.md](research/ATH_SUPERFORMULA_AND_GSA_2026-10-25.md) | **P6 IMPLEMENTATION PLAN v1.0** (rewritten from the research dossier, dossier content folded in): P6a superformula-family campaign (quarter-symmetry math, search box, degeneracy/curvature guards, configs, GPU + GUI) + P6b GSA-vs-CMA-ES bake-off (protocol, library audit → own ~120-line GSA, pre-registered decision rule) + parallel-lane structure with verbatim dispatch prompts. Owner-gated; runs after WP1–WP17 completes. Research basis in `plan/12_RESEARCH_BASIS.md` §11. |
 | [research/TIME_DOMAIN_RINGING.md](research/TIME_DOMAIN_RINGING.md) | Ringing / waterfalls: what we can see, stage-2 design. |
@@ -45,6 +48,7 @@ Keep this file current: a new doc gets a line here in the same commit.
 ## Evidence (measured results; `evidence/README.md` explains the rules)
 | Doc | What it is |
 |---|---|
+| [evidence/M4_SMOKE_2026-10-25.md](evidence/M4_SMOKE_2026-10-25.md) | M4 GPU smoke: 12 new-typology screens + conical reference (byte-checked verbatim logs; tools/evidence_bytecheck_m4.py); frozen-sculpt full-vs-quarter PASS (≤ 0.051° / 0.0043 dB vs the 0.1 dB/1° bar); WP10 zero-modulation compare honestly DIFFERENT (P-M4-1 proposal); final suite 1194/0/1/0 (intended tripwire only). |
 | [evidence/SOLVER_VERIFY_2026-10-22.md](evidence/SOLVER_VERIFY_2026-10-22.md) | GPU tests, analytic sphere, GPU vs CPU cross-check. |
 | [evidence/TYPOLOGY_VERIFY.md](evidence/TYPOLOGY_VERIFY.md) | Typology ladder V1–V5. |
 | [evidence/TYPOLOGY_SCREEN_2026-10-22.md](evidence/TYPOLOGY_SCREEN_2026-10-22.md) | First fair screen campaigns + reading. Raw: `evidence/campaigns/`. |

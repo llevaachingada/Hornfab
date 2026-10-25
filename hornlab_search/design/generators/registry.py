@@ -10,10 +10,17 @@ Generator block::
     generator:
       name: typology
       profile_h: {type: exponential}          # conical | exponential | hypex | tractrix |
-                                              # lecleach | spherical_wave | osse
+                                              # lecleach | spherical_wave | osse | splice |
+                                              # spherical_salmon
       profile_v: same                         # 'same' (axisymmetric meridian) or a spec
       blend_h: {type: conical}                # optional second parent for H; knob h_w in [0, 1]
       blend_v: ...                            # optional, V
+      # splice (WP9 G2): nested parents, both built from the same r0; knob {p}_zs_frac
+      # in [0.2, 0.8]. Parent knobs use {p}_first_{name} / {p}_second_{name}.
+      # profile_h: {type: splice, first: {type: osse}, second: {type: tractrix}}
+      # spherical_salmon (WP9 G4): knobs {p}_fc_hz, {p}_T, {p}_max_wall_deg.
+      # throat_blend_mm (WP9 G3): conical | exponential | hypex | tractrix only; default 0
+      # is ABSOLUTELY today's profile (the blend block is skipped).
       perturb: {u_max: 0.35, mode: legacy}    # optional monotone-increment perturbation; knobs
                                               # h_u0..h_u{n-2} (and v_u* when V differs).
                                               # mode 'legacy' (default) = exp(u) increments, which
@@ -26,7 +33,8 @@ Generator block::
 
 Knobs (mm, deg, Hz), per meridian prefix ``h_`` / ``v_`` (blend parents ``hb_`` / ``vb_``):
 ``L_mm`` (shared depth), ``{p}_rm_mm`` (conical / exponential / hypex mouth radius), ``{p}_T``
-(hypex, lecleach), ``{p}_fc_hz`` (tractrix, lecleach, spherical_wave), ``{p}_a_deg``, ``{p}_k``,
+(hypex, lecleach), ``{p}_fc_hz`` (tractrix, lecleach, spherical_wave), ``{p}_stop_deg``
+(lecleach, spherical_wave, spherical_salmon; default 88), ``{p}_a_deg``, ``{p}_k``,
 ``{p}_s``, ``{p}_n``, ``{p}_q`` (osse; the throat angle a0 is the brief's driver exit angle).
 
 Throat: every meridian starts at the brief's driver exit radius r0. Depth: fixed-size typologies
@@ -42,15 +50,21 @@ import numpy as np
 
 from . import profiles as P
 
-TYPES = ("conical", "exponential", "hypex", "tractrix", "lecleach", "spherical_wave", "osse")
+TYPES = ("conical", "exponential", "hypex", "tractrix", "lecleach", "spherical_wave", "osse",
+         "splice", "spherical_salmon")
 FIXED_SIZE = ("conical", "exponential", "hypex", "osse")
 MOUTHS = ("ellipse", "superellipse", "rounded_rectangle")
+
+#: Typologies that accept the WP9 G3 ``{p}_throat_blend_mm`` knob (the OS throat is
+#: blended in over [0, L_b]; default 0 skips the blend entirely).
+THROAT_BLEND_TYPES = ("conical", "exponential", "hypex", "tractrix")
 
 #: Knob defaults used when a config does not set a knob (mm, Hz, deg). Values sit inside the
 #: hi-fi brief's envelope and are typical of 1-inch compression-driver horns.
 DEFAULT_KNOBS = {"L_mm": 190.0, "rm_mm": 150.0, "T": 0.7, "fc_hz": 800.0, "a_deg": 45.0,
                  "k": 1.0, "s": 0.6, "n": 4.0, "q": 0.995, "w": 0.5, "mouth_exponent": 4.0,
-                 "mouth_corner_mm": 30.0, "u": 0.0}
+                 "mouth_corner_mm": 30.0, "u": 0.0, "zs_frac": 0.5, "throat_blend_mm": 0.0,
+                 "max_wall_deg": 80.0, "stop_deg": 88.0}
 
 _ROUND = 6
 
@@ -93,24 +107,74 @@ def _osse(spec: dict, knobs: dict, prefix: str, r0: float, a0: float, L: float, 
     return P.Meridian("osse", z - z[0], r, th, {"osse": prm})
 
 
+def _throat_blended(m: P.Meridian, t: str, knobs: dict, prefix: str, r0: float,
+                    a0: float) -> P.Meridian:
+    """Apply WP9 G3 when the knob is present and > 0; a zero/absent knob returns ``m``.
+
+    The early return is the bit-for-bit default-0 contract: nothing (not even a float
+    round trip) touches the meridian when the knob is 0 or absent.
+    """
+    if t not in THROAT_BLEND_TYPES:
+        return m
+    L_b = _knob(knobs, prefix, "throat_blend_mm")
+    if not L_b > 0.0:
+        return m
+    if L_b > m.length_mm + 1e-9:
+        raise GeneratorError(
+            f"throat_blend_mm={L_b:.3f} exceeds the {t} meridian length {m.length_mm:.3f} mm")
+    try:
+        return P.throat_blend(m, r0, a0, L_b)
+    except ValueError as exc:
+        raise GeneratorError(str(exc)) from exc
+
+
 def build_meridian(spec: dict, knobs: dict, prefix: str, *, r0: float, a0: float, L: float,
                    max_wall: float, phi: float) -> P.Meridian:
     t = spec.get("type")
     if t not in TYPES:
         raise GeneratorError(f"unknown typology {t!r} (known: {list(TYPES)})")
     if t == "conical":
-        return P.conical(r0, _knob(knobs, prefix, "rm_mm"), L)
-    if t == "exponential":
-        return P.exponential(r0, _knob(knobs, prefix, "rm_mm"), L)
-    if t == "hypex":
-        return P.hypex(r0, _knob(knobs, prefix, "rm_mm"), L, _knob(knobs, prefix, "T"))
-    if t == "tractrix":
-        return P.tractrix(r0, _knob(knobs, prefix, "fc_hz"), max_wall_deg=max_wall)
-    if t == "lecleach":
-        return P.lecleach(r0, _knob(knobs, prefix, "fc_hz"), _knob(knobs, prefix, "T"), max_wall_deg=max_wall)
-    if t == "spherical_wave":
-        return P.spherical_wave(r0, _knob(knobs, prefix, "fc_hz"), max_wall_deg=max_wall)
-    return _osse(spec, knobs, prefix, r0, a0, L, phi)
+        m = P.conical(r0, _knob(knobs, prefix, "rm_mm"), L)
+    elif t == "exponential":
+        m = P.exponential(r0, _knob(knobs, prefix, "rm_mm"), L)
+    elif t == "hypex":
+        m = P.hypex(r0, _knob(knobs, prefix, "rm_mm"), L, _knob(knobs, prefix, "T"))
+    elif t == "tractrix":
+        m = P.tractrix(r0, _knob(knobs, prefix, "fc_hz"), max_wall_deg=max_wall)
+    elif t == "lecleach":
+        # Verified Fourcade construction (R9-J); phi0 is the brief's driver exit
+        # HALF-angle, passed through unchanged (WP2 precedent: no second halving).
+        m = P.lecleach(r0, _knob(knobs, prefix, "fc_hz"), _knob(knobs, prefix, "T"),
+                       max_wall_deg=_knob(knobs, prefix, "stop_deg"), phi0_deg=a0)
+        return _truncate(m, L)
+    elif t == "spherical_wave":
+        m = P.spherical_wave(r0, _knob(knobs, prefix, "fc_hz"),
+                             max_wall_deg=_knob(knobs, prefix, "stop_deg"), phi0_deg=a0)
+        return _truncate(m, L)
+    elif t == "splice":
+        first, second = spec.get("first"), spec.get("second")
+        if not isinstance(first, dict) or not isinstance(second, dict):
+            raise GeneratorError("splice needs nested 'first' and 'second' generator specs")
+        m1 = build_meridian(first, knobs, f"{prefix}_first", r0=r0, a0=a0, L=L,
+                            max_wall=max_wall, phi=phi)
+        m2 = build_meridian(second, knobs, f"{prefix}_second", r0=r0, a0=a0, L=L,
+                            max_wall=max_wall, phi=phi)
+        try:
+            return P.splice(m1, m2, _knob(knobs, prefix, "zs_frac"))
+        except ValueError as exc:
+            raise GeneratorError(str(exc)) from exc
+    elif t == "spherical_salmon":
+        try:
+            m = P.spherical_salmon(r0, _knob(knobs, prefix, "fc_hz"), _knob(knobs, prefix, "T"),
+                                   a0, _knob(knobs, prefix, "max_wall_deg"), dx_mm=0.25)
+        except ValueError as exc:
+            raise GeneratorError(str(exc)) from exc
+        # The knob L_mm is required by materialize; for a length-derived typology it may only
+        # SHORTEN the intrinsic march length (tractrix precedent: the envelope check still binds).
+        return _truncate(m, L)
+    else:
+        m = _osse(spec, knobs, prefix, r0, a0, L, phi)
+    return _throat_blended(m, t, knobs, prefix, r0, a0)
 
 
 def _anchors_rounded(m: P.Meridian, n: int, max_wall: float) -> list[list[float]]:
@@ -255,6 +319,33 @@ def _profile_radii(params: dict, key: str) -> list[float] | None:
     return radii
 
 
+def _grid_overshoot_estimate(block: dict, brief: dict) -> float | None:
+    """WP10/WP3: conservative pre-mesh envelope overshoot of a GRID design (no meshing).
+
+    Same limits and tolerance as the FREEFORM branch below; the outer extents come from
+    ``generators.grid.envelope_extents`` (meridians + radius field + wall thickness). The estimate
+    is advisory: any failure returns ``None`` rather than turning a legal knob invalid.
+    """
+    env = brief.get("envelope") or {}
+    if not env:
+        return 0.0
+    try:
+        from . import grid as grid_mod          # lazy: grid.py imports this module
+        lim_w = float(env.get("max_mouth_w_mm", 1e9)) + _ENVELOPE_MOUTH_TOLERANCE_MM
+        lim_h = float(env.get("max_mouth_h_mm", 1e9)) + _ENVELOPE_MOUTH_TOLERANCE_MM
+        from ...search.evaluate import ENVELOPE_DEPTH_ALLOWANCE_MM
+        lim_d = float(env.get("max_depth_mm", 1e9)) + float(ENVELOPE_DEPTH_ALLOWANCE_MM)
+        if not (lim_w > 0.0 and lim_h > 0.0 and lim_d > 0.0):
+            return None
+        w_mm, h_mm, depth_mm = grid_mod.envelope_extents(block, block.get("knobs") or {}, brief)
+    except Exception:  # noqa: BLE001 - the estimate is advisory (WP3)
+        return None
+    overshoot = max(w_mm / lim_w - 1.0, h_mm / lim_h - 1.0, depth_mm / lim_d - 1.0, 0.0)
+    if not math.isfinite(overshoot):
+        return None
+    return float(overshoot)
+
+
 def envelope_overshoot_estimate(params: dict, brief: dict | None) -> float | None:
     """Relative size-envelope overshoot of a generated FREEFORM design, before meshing.
 
@@ -279,6 +370,8 @@ def envelope_overshoot_estimate(params: dict, brief: dict | None) -> float | Non
     """
     if brief is None or not isinstance(params, dict):
         return None
+    if isinstance(params.get("grid"), dict):
+        return _grid_overshoot_estimate(params["grid"], brief)
     rad_h = _profile_radii(params, "profileH")
     rad_v = _profile_radii(params, "profileV")
     if rad_h is None or rad_v is None:

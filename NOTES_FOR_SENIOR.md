@@ -389,3 +389,37 @@ Harness calibration note (fixer lane): the TOOLCHAIN M1 res->dof table came from
 ceiling sweep therefore calibrates mouth-res per target (6.72/5.74/5.02/4.45/4.06 mm for ~8.9k/12k/
 15.7k/20k/24k quarter dofs), verified by `--mesh-only` probes (6.655 -> 17,894 tris / 9,117 dofs).
 Harness: `tools/measure_fused_ceiling.py`.
+
+## 2026-10-25 (orchestrator, M4 pass): Le Cleac'h stays BLOCKED under R9 (owner ruling) — candidate source on record; nothing improvised
+
+What happened: the M4 work order blocks `lecleach` (T1) — "no implementation without a human-supplied verifiable
+published construction reference; the ETF PDF/threads are not usable" (owner ruling 2026-10-25). Per the pass
+order this block records the CANDIDATE SOURCE found in the senior-pass research, without acting on it:
+Fourcade 2015, "Calcul du Pavillon Le Cléac'h" (16 pp., French;
+`unepassionaudiophile.fr/wp-content/uploads/2018/01/Pavillon-JMLC.pdf`) — construction eqs 10–27, the JMLC 2007
+spreadsheet recurrence (eqs 1–8), the offset-profile formula (28–29), and a numerical reference case (fig. 7 +
+table p.13). Report 4 §9b.0 scored it "primary/secondary, verifiable; this satisfies the R9 gate", and §9b.2's
+validation table (fc 400 Hz, T 0.8, throat Ø25.4 mm, exit half-angle 8°, dl 1 mm, c 344 m/s; L0/S(L0)/width
+rows, our reference implementation's numbers quoted) is the ready-made comparison; the known open item is the
+0.9 % width gap (9b.2). What I need decided: (a) does the owner accept the Fourcade PDF as the R9 reference
+(if yes: T1 `lecleach_exact` may ship in a later pass after the ±2 mm/±2 %/±1 % validation table passes);
+(b) whether the owner then also names the 0.5-mm rename gate satisfied (Report 2 §3) vs keeping `spherical_salmon`.
+
+## 2026-10-25 (orchestrator, M4 pass): OWNER DIRECTIVE closes the R9-Le Cleac'h question — lecleach SHIPPED LIVE after R9-J PASSED
+
+Superseeds the block above (kept for the record). Later the same day the owner directed in chat — verbatim:
+"I don't really care about the authorship I just wanted to be right and I will definitely want to use it ... I
+want to integrate this" — accepting the Fourcade 2015 PDF as the verified construction and waiving the
+attribution formality, with the verification bar intact. Actions taken (all in this pass, pre-commit):
+(1) librarian lane FETCHED the Fourcade PDF and read fig. 7 with its inputs — finding the senior plan's
+§9b.2 premise bug: the 8.0 deg exit is the INCLUDED angle, so phi0 = 4.0 (the 0.9 % width "open item"
+closes at exactly 0.00 mm discrepancy; dated corrections in `docs/research/typologies/JMLC_LECLEACH_RESEARCH_2026-10-25.md`).
+(2) `lecleach_exact` (exact Fourcade eqs 10–27/42–43) implemented and routed only after the R9-J gate test
+PASSED in-lane: width 467.30 mm vs published 467.30 (0.00 mm), 2phi1 8.552 vs 8.55 deg, L0 within ±1 mm
+(512/511 at 360 deg), mouth areas ≤1.31 %, length +0.44 mm (`tests/test_design_generators_lecleach.py`).
+(3) Rollback ships via the WP10 GRID rows route (stop 120–240), FREEFORM ≤88 deg interim; `spherical_salmon`
+(own neutral march) ships as a separate distinct generator. Answers to the two questions above: (a) YES —
+Fourcade accepted (owner directive + fetched PDF); (b) BOTH ship: `lecleach` (verified exact) and
+`spherical_salmon` (different construction, neutral name). GUI/`__init__` staleness fixed; old gated-stub
+`examples/typologies/lecleach.yaml` deleted. Note: the earlier same-day "stays BLOCKED" text in the
+`WP9_WP9B_GROUNDING` dossier §5 records the pre-directive state; a dated supersession note is appended there.

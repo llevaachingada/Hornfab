@@ -1,0 +1,82 @@
+# lecleach_rollback: Le Cleac'h (JMLC) rollback, GRID rows route (axisymmetric)
+# VERIFIED EXACT CONSTRUCTION: Fourcade 2015 eqs 10-27 + 42-43, the SAME march as
+# lecleach_f90, but the GRID rows machinery represents the curled lip (stop 90-240 deg:
+# the wall turns past 90 deg and its axial abscissa becomes non-monotone).  Source and the
+# R9-J gate table: docs/research/typologies/JMLC_LECLEACH_RESEARCH_2026-10-25.md.
+#
+# ANGLE CONVENTION: the knobs and the brief's driver exit are HALF-angles. JMLC driver
+# tables quote INCLUDED angles; halve only at the operator boundary (8 deg included -> 4).
+#
+# Rows contract (WP9b/WP10): generator: {name: grid, rows: {type: lecleach}}; n_phi >= 13
+# (quarter model, both endpoint rows), n_s >= 8, wall_thickness_mm 0.5-12; knobs g_fc_hz,
+# g_T, g_stop_deg only (NO L_mm, NO profile_h, NO max_wall_deg: the march derives depth).
+# Every row is the same axisymmetric march, resampled at equal normalized arc length; the
+# outer shell is the per-row in-plane normal offset (Fourcade eqs 28-29 form) and a
+# non-adjacent gap below 2t + 2 mm is refused as graded infeasible.
+#
+# Envelope: rollback adds WIDTH, not depth. Seed stop 170 deg measures 240.1 x 240.1 x
+# 116.3 mm outer at fc 800 / T 0.8, inside the axi brief's 360 x 360 x 220 mm envelope and
+# under the 5000 screen cap (the seed IS the tuned value; bounds are untouched [120, 240]).
+# n_s 32 keeps 33 stations on the curled lip; min self-approach at the seed is 11.24 mm
+# against the 2t + 2 = 8 mm refusal limit.
+name: lecleach_rollback
+family: FREEFORM
+brief_file: ../briefs/axi_90x90_1in.yaml
+generator:
+  name: grid
+  rows:
+    type: lecleach
+  n_phi: 15          # quarter model: 15 rows, both endpoint rows included (>= 13 per 9b.3)
+  n_s: 32            # 33 equal-arc-length stations per row (l/L0 = k/n_s)
+  wall_thickness_mm: 3.0
+seed_params:
+  g_fc_hz: 800.0
+  g_T: 0.8
+  g_stop_deg: 170.0
+bounds:
+  g_fc_hz:         # band starts at 700 Hz (9b.4: fc 600-1200 for 1-inch)
+    lo: 600.0
+    hi: 1200.0
+  g_T:
+    lo: 0.3
+    hi: 1.0
+  g_stop_deg:
+    lo: 120.0
+    hi: 240.0
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 90.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 8.0
+  quadrants: '1'             # the rows machinery ships quarter models only
+  dof_cap_screen: 5000
+  dof_cap_verify: 7000
+  dof_cap_final: 8900
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+search:
+  algorithm: cma
+  sigma0: 0.25
+  seed: 1234
+  budget: 200
+  popsize: null
+  tolfun: 0.001

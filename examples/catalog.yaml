@@ -5,12 +5,15 @@
 #   legacy   - utility configs not intended for typology comparison (smoke tests, adapters)
 #   classical - generator-based classical horns: conical, exponential, hypex, tractrix, OSSE meridian (Le Cleach gated off)
 #   hybrid   - generator-based hybrids: H/V, blend, perturbed
+#   organic  - WP9b per-azimuth rollback rows (LABELED HYPOTHESIS-SHAPE EXPERIMENTS, neutral names;
+#              dossier docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md section 2.4).
+#              hv symmetry: every azimuth has its own fc(phi), so these are NOT axisymmetric.
 # The orchestrator will append classical and hybrid entries; keep this format simple.
 #
 # Fields:
 #   name:        unique identifier for --families SPEC and in leaderboard output
 #   config:      path relative to examples/  (the config must load with load_config)
-#   group:       one of magnus | legacy | classical | hybrid
+#   group:       one of magnus | legacy | classical | hybrid | organic
 #   symmetry:    hv | axisymmetric  (must match the config's mesh.quadrants and the design's symmetry)
 #   description: one-line human description
 
@@ -134,5 +137,109 @@ entries:
     symmetry: axisymmetric
     description: tractrix + monotone increment perturbation (8 knobs)
 
-  # lecleach / spherical_wave: generator DISABLED (TYPOLOGY_PLAN R9 gate: no verifiable published
-  # construction was reachable); examples/typologies/lecleach.yaml is kept but not listed.
+  # ---- WP9 (senior pass 2026-10-24; dossier docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md) ----
+  - name: splice_osse_tractrix
+    config: typologies/splice_osse_tractrix.yaml
+    group: hybrid
+    symmetry: axisymmetric   # one meridian mirrored all azimuths (profile_v: same)
+    description: C1 splice OSSE throat -> tractrix mouth, zs_frac searched in [0.2, 0.8] (1 knob)
+
+  - name: throatblend_hypex
+    config: typologies/throatblend_hypex.yaml
+    group: classical
+    symmetry: axisymmetric   # one meridian mirrored all azimuths (profile_v: same)
+    description: hypex with an OS throat blend over [0, throat_blend_mm], 0-30 mm (4 knobs)
+
+  - name: spherical_salmon
+    config: typologies/spherical_salmon.yaml
+    group: classical
+    symmetry: axisymmetric   # one meridian mirrored all azimuths (profile_v: same)
+    description: spherical-wavefront Salmon march (neutral G4 name), fc/T/stop searched (3 knobs)
+
+  # ---- WP10 (senior pass 2026-10-24 WP10; point-grid adapter) ----
+  - name: grid_ellipse
+    config: typologies/grid_ellipse.yaml
+    group: classical
+    symmetry: axisymmetric   # quarter-symmetric point grid with an axisymmetric (V=H) surface
+    description: point-grid adapter, plain ellipse section (pnorm 2, zero modulation), 2 knobs
+
+  - name: grid_ellipse_mod
+    config: typologies/grid_ellipse_mod.yaml
+    group: classical
+    symmetry: hv   # G8/G9 modulated section (a1 0.06 cos 2phi) is NOT phi-independent -> hv
+    description: point-grid adapter, G8/G9 modulated mouth (a1 0.06, a2 -0.03, 2 mm side rollback), 2 knobs
+
+  # ---- WP9b (dossier section 2.4 / plan 9b.2 T3/T5; owner ruling 2026-10-25) ----
+  # LABELED HYPOTHESIS-SHAPE EXPERIMENTS under neutral names. The per-azimuth Salmon rows are
+  # NOT an attributed published construction (R9); the verified JMLC construction ships separately
+  # as lecleach_f90 / lecleach_rollback (see the Le Cleac'h block below).
+  # symmetry: hv because H and V march with different fc (fc_h != fc_v): the quarter model is
+  # mirror-symmetric about the cardinal planes, but the surface is NOT phi-independent, so it
+  # is not 'axisymmetric' for campaign compatibility purposes.
+  - name: salmon_elliptical
+    config: typologies/salmon_elliptical.yaml
+    group: organic
+    symmetry: hv
+    description: per-azimuth spherical_salmon rows (fc_h 800 / fc_v 1100 seed), rollback stop; 4 knobs; labeled hypothesis
+
+  - name: salmon_x_shape
+    config: typologies/salmon_x_shape.yaml
+    group: organic
+    symmetry: hv
+    description: the same rows + T5 diagonal term x_amp 0.25 / x_fc 0.15 (6 knobs); labeled hypothesis
+
+  # ---- Le Cleac'h (JMLC): LIVE per the owner directive 2026-10-25 ----
+  # Verified Fourcade 2015 construction (eqs 10-27, 42-43); the R9-J gate PASSED (mouth width
+  # 467.30 mm, 0.00 mm gap) against the published fig. 7 reference case:
+  # docs/research/typologies/JMLC_LECLEACH_RESEARCH_2026-10-25.md
+  #   * lecleach_f90: FREEFORM meridian, stop <= 88 deg (z monotone); axisymmetric because
+  #     profile_v is mirrored from one meridian.
+  #   * lecleach_rollback: GRID rows route (real rollback, stop 90-240 deg). The rows are the
+  #     SAME axisymmetric march on every azimuth, so symmetry stays axisymmetric: compatible
+  #     with a 90x90 (coverage_h == coverage_v) brief; is_compatible SKIPs it under an hv
+  #     90x60 brief, which is correct because the surface has no H/V split.
+  # examples/typologies/lecleach.yaml (the old gated stub) is REMOVED: it was superseded by
+  # lecleach_f90.yaml and unlisted; the gated stub is gone rather than left inconsistent.
+  - name: lecleach_f90
+    config: typologies/lecleach_f90.yaml
+    group: classical
+    symmetry: axisymmetric   # one meridian mirrored all azimuths (profile_v: same)
+    description: Le Cleac'h (Fourcade 2015) exact meridian, stop <= 88 deg, fc/T/stop searched (3 knobs)
+
+  - name: lecleach_rollback
+    config: typologies/lecleach_rollback.yaml
+    group: organic
+    symmetry: axisymmetric   # same axisymmetric march on every azimuth (no H/V split)
+    description: Le Cleac'h exact rollback via the GRID rows route, stop 120-240 searched (3 knobs)
+
+  # ---- JMLC-family variants (lib-2, docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md) ----
+  # Every entry below is a LABELED RECONSTRUCTION/HYPOTHESIS over the VERIFIED Fourcade
+  # meridian: no published per-azimuth JMLC math, no published AR construction, no published
+  # torus-lip math exists (lib-2 C1/C2 and section 5). Neutral names only.
+  #   * salmon_saddle: the NEUTRAL Salmon rows with an explicit span: half and fixed
+  #     [inferred] a2/b1 stop fractions ([0.25] / [0.2], not searchable). The sin(phi) term
+  #     is left-right symmetric but up/down antisymmetric -> HALF model (quadrants "14");
+  #     the mouth is not phi-independent => symmetry hv. The 90x60 organic brief fits.
+  #   * lecleach_iwata_ar: the area-preserving AR stretch (H != V) over the verified
+  #     meridian; both mirror planes still hold, so it is a QUARTER model (quadrants "1")
+  #     and the catalog symmetry is hv (not axisymmetric).
+  #   * lecleach_toroidal: the tangent-continuous lip is the same on every azimuth =>
+  #     axisymmetric; compatible with the 90x90 axi brief, SKIPPED (correctly) under the
+  #     90x60 organic brief.
+  - name: salmon_saddle
+    config: typologies/salmon_saddle.yaml
+    group: organic
+    symmetry: hv
+    description: Salmon rows + explicit HALF span and a fixed C2 a2/b1 stop saddle (top != bottom), labeled hypothesis; 4 knobs
+
+  - name: lecleach_iwata_ar
+    config: typologies/lecleach_iwata_ar.yaml
+    group: organic
+    symmetry: hv
+    description: Le Cleac'h exact meridian + area-preserving AR evolution (AR_m/AR_p, T=0.5 pinned), our reconstruction; 4 knobs
+
+  - name: lecleach_toroidal
+    config: typologies/lecleach_toroidal.yaml
+    group: organic
+    symmetry: axisymmetric   # same tangent lip on every azimuth (no H/V split)
+    description: Le Cleac'h exact rollback + tangent-continuous toroidal lip (r_lip 6-35 mm), inferred; 4 knobs

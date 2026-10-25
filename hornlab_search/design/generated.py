@@ -3,8 +3,9 @@
 Same interface as ``DesignSpace`` (``family``, ``seed``, ``bounds``, ``keys``, ``normalize``,
 ``denormalize``), so CMA-ES and the pipeline are unchanged. The search vector holds generator
 knobs (alphabetical, like DesignSpace); ``denormalize`` materialises them into an ordinary FREEFORM
-``Design`` via ``generators.registry.materialize``. The design hash is the geometry, so equal shapes
-from different knobs deduplicate.
+``Design`` via the module dispatch in :func:`materialize` (``generators.registry.materialize`` for
+typologies, ``generators.grid.design_params`` for ``name: grid``). The design hash is the geometry
+(the recipe for a grid), so equal shapes from different knobs deduplicate.
 
 ``denormalize`` never raises for bad knobs: a knob vector that gives no legal horn (envelope,
 tractrix mouth smaller than the throat, ...) becomes a Design carrying ``_generator_error``, which
@@ -20,6 +21,7 @@ import logging
 import numpy as np
 
 from ..types import Design, GeometryInvalidError
+from .generators import grid as grid_gen
 from .generators import registry
 from .space import Bound, _ROUND_DECIMALS
 
@@ -40,6 +42,18 @@ def brief_hash(brief: dict) -> str:
     return hashlib.sha256(json.dumps(body, sort_keys=True, default=str).encode()).hexdigest()[:12]
 
 
+def materialize(gen: dict, knobs: dict, brief: dict) -> dict:
+    """Generator block + knobs -> Design params, dispatching on the block's ``name``.
+
+    ``name: grid`` is the WP10 point-grid adapter: its params are the compact surface spec plus the
+    knob recipe (``{"grid": {...}}``), NOT FREEFORM anchors, because the grid is evaluated at mesh
+    time by ``mesh/grid_build.py``. Every other name keeps the typology path (FREEFORM anchors).
+    """
+    if str(gen.get("name", "")) == "grid":
+        return grid_gen.design_params(gen, knobs, brief)
+    return registry.materialize(gen, knobs, brief)
+
+
 class GeneratedSpace:
     family = "FREEFORM"
 
@@ -47,7 +61,14 @@ class GeneratedSpace:
         self.gen = dict(gen)
         self.brief = dict(brief)
         self.bounds = dict(bounds)
-        knobs = {k: float(v) for k, v in (seed_knobs or {}).items()}
+        # Harmonic stop-law knobs are JSON lists of floats (grid rows); every other
+        # generator knob is a scalar. Keep both forms (a list must not be float()ed).
+        knobs = {}
+        for k, v in (seed_knobs or {}).items():
+            if isinstance(v, (list, tuple)):
+                knobs[k] = [float(x) for x in v]
+            else:
+                knobs[k] = float(v)
         for k in sorted(self.bounds):
             b = self.bounds[k]
             if b.search and k not in knobs:
@@ -55,7 +76,7 @@ class GeneratedSpace:
                 log.warning("generator seed lacks knob %s; filled with the bound midpoint", k)
         self.seed_knobs = knobs
         try:
-            params = registry.materialize(self.gen, knobs, self.brief)
+            params = materialize(self.gen, knobs, self.brief)
         except Exception as exc:  # the SEED must be legal: stop with a clear message
             raise GeometryInvalidError(f"generator seed is not a legal horn: {exc}") from exc
         self.seed = Design("FREEFORM", params)
@@ -82,7 +103,7 @@ class GeneratedSpace:
 
     def design_from_knobs(self, knobs: dict) -> Design:
         try:
-            params = registry.materialize(self.gen, knobs, self.brief)
+            params = materialize(self.gen, knobs, self.brief)
         except Exception as exc:  # noqa: BLE001 - scored as invalid_geometry in evaluate
             params = {GENERATOR_ERROR_KEY: f"{type(exc).__name__}: {exc}",
                       "_knobs": {k: knobs[k] for k in sorted(knobs)}}

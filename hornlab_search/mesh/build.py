@@ -266,6 +266,11 @@ def build_mesh(design: Design, mesh: MeshSpec, cfg, out_dir: Path, *, mode: str 
     ``cfg.mesh``). ``mode`` ("screen"|"verify"|"final") selects the cap; if omitted it is
     inferred from ``mesh.max_triangles`` (see ``sizing.dof_cap_for``). ``cache_dir`` adds a
     shared cache at ``cache_dir/<design hash>-<mesh hash>/``; hits are COPIED into ``out_dir``.
+
+    WP10: a FREEFORM design whose params carry ``"grid"`` takes the point-grid adapter route
+    (``mesh/grid_build.py``). Same guards and the SAME ``MeshTooLargeError`` class, so
+    ``search/evaluate.py``'s ``mesh_too_large`` mapping applies unchanged. That route has no mesh
+    cache yet (grid_build.py documents why) and writes no ``mesh_meta.json``.
     """
     import hornlab_mesher as hm
     from hornlab_mesher.config_parser import ConfigError
@@ -274,6 +279,8 @@ def build_mesh(design: Design, mesh: MeshSpec, cfg, out_dir: Path, *, mode: str 
     t0 = time.perf_counter()
     out_dir = Path(out_dir)
     families.validate(design)
+    if isinstance(design.params, dict) and "grid" in design.params:
+        return _build_grid_mesh(design, mesh, cfg, out_dir, mode=mode)
     res = res_mm_for_spec(mesh, cfg)
     out_path = out_dir / "mesh.msh"
     mcfg = families.to_mesher_config(design, mesh, res, out_path)
@@ -358,6 +365,47 @@ def build_mesh(design: Design, mesh: MeshSpec, cfg, out_dir: Path, *, mode: str 
     log.info("mesh %s: %d triangles, %d vertices, %.2f s", key, result.n_triangles,
              summary["n_nodes_used"], result.seconds)
     return result
+
+
+# ------------------------------------------------------------------ grid (WP10)
+
+
+def _build_grid_mesh(design: Design, mesh: MeshSpec, cfg, out_dir: Path, *,
+                     mode: str | None = None) -> MeshResult:
+    """Point-grid route: re-derive the grid from the Design's recipe and mesh it.
+
+    ``design.params["grid"]`` carries the compact surface spec plus the flat knobs (the recipe);
+    the brief supplies the driver exit and the envelope. ``grid_build.build_grid_mesh`` owns the
+    mesher call and the post-mesh guards; this function only reconstructs the grid geometry.
+    """
+    from ..design.generators import grid as grid_mod
+    from ..design.generators.registry import GeneratorError
+    from . import grid_build
+
+    block = design.params["grid"]
+    brief = getattr(cfg, "brief", None)
+    if not brief:
+        raise ValueError(
+            "a grid design needs cfg.brief (driver exit + envelope) to re-derive its geometry; "
+            "the config that produced this design was loaded without an embedded brief")
+    knobs = block.get("knobs") or {}
+    try:
+        if "rows" in block:
+            # WP9b rows kind: per-azimuth Salmon marches; depth comes from the march, so
+            # L_mm is not part of (and is not required by) the recipe.
+            spec = {k: v for k, v in block.items() if k != "knobs"}
+            inner, meta = grid_mod.rows_grid_points(spec, knobs, brief)
+        else:
+            spec = {k: block[k] for k in grid_mod.GRID_SPEC_KEYS if k in block}
+            inner, meta = grid_mod.grid_points(spec, knobs, brief)
+    except GeneratorError as exc:      # recipe + brief no longer agree = an invalid candidate
+        raise GeometryInvalidError(str(exc)) from exc
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    return grid_build.build_grid_mesh(
+        {"inner_points": inner, "meta": meta,
+         "wall_thickness_mm": float(block.get("wall_thickness_mm", 3.0))},
+        mesh, out_dir / "mesh.msh", cfg, mode=mode)
 
 
 # ------------------------------------------------------------------ STEP

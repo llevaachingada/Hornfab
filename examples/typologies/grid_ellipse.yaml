@@ -1,0 +1,77 @@
+# grid_ellipse: WP10 point-grid adapter, plain ellipse cross-section (zero modulation)
+#
+# Generator path: design/generated.py dispatches `generator.name: grid` to
+# design/generators/grid.grid_points (Report 2 section 4 radius field) and
+# mesh/grid_build.py meshes it with hornlab_mesher.PointGridHornGeometry
+# (FREESTANDING, explicit outer shell, symmetry_planes=("x","y"), quarter model).
+#
+# ZERO-MODULATION COMPARISON: pnorm 2.0 and no a_k / term_side knobs, conical H=V
+# meridians with the same seed depth/mouth as the classical FREEFORM config
+#   examples/typologies/conical.yaml   (brief ../briefs/axi_90x90_1in.yaml, L_mm 180, h_rm_mm 120)
+# so the GRID-vs-FREEFORM J comparison rides the same brief and the same horn.
+# The only intended differences are n_phi/n_s sampling and the grid's quarter-only surface;
+# any J gap above the pass bar is an adapter bug, not a shape difference.
+#
+# family stays FREEFORM (frozen contract): the Design params are {"grid": {...}}, not anchors.
+# Knobs are the flat names below; g_pnorm/g_term_side_mm/g_a* are ABSENT = GRID_DEFAULTS
+# (pnorm 2.0, term 0.0, all a_k 0.0) -- an absent zero and an explicit zero describe the same
+# geometry and therefore share a design hash.
+name: grid_ellipse
+family: FREEFORM
+brief_file: ../briefs/axi_90x90_1in.yaml
+generator:
+  name: grid
+  profile_h:
+    type: conical
+  profile_v: same
+  n_phi: 13          # quarter model, plan 9b.3 minimum (>= 13 rows, both endpoints included)
+  n_s: 32            # 33 axial stations on s = i/n_s (equal axial fractions)
+  max_wall_deg: 80.0
+  wall_thickness_mm: 3.0   # explicit outer shell (freestanding requires outer_points)
+seed_params:
+  L_mm: 180.0
+  h_rm_mm: 120.0
+bounds:
+  L_mm:
+    lo: 120.0
+    hi: 220.0
+  h_rm_mm:
+    lo: 60.0
+    hi: 175.0
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 90.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 8.0
+  quadrants: '1'             # the grid generator ships quarter models only
+  dof_cap_screen: 5000
+  dof_cap_verify: 7000
+  dof_cap_final: 8900
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+search:
+  algorithm: cma
+  sigma0: 0.25
+  seed: 1234
+  budget: 200
+  popsize: null
+  tolfun: 0.001

@@ -1,0 +1,74 @@
+# throatblend_hypex: hypex with the WP9 G3 throat blend (throat_blend_mm), axisymmetric
+# WP9 G3 in docs/research/senior_pass_2026-10-24/04_IMPLEMENTATION_PLAN.md (steps 1-2)
+# and docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md section 2.2.
+# Over [0, L_b] r = (1-w) r_OS + w r_cls with w = smoothstep(z / L_b). r_OS is the OS
+# meridian (OSSE with s = 0) starting at the driver exit angle, with its far-field angle
+# solved so its wall angle at L_b equals the hypex's wall angle there. Beyond L_b the
+# classical hypex is unchanged; the default throat_blend_mm = 0 is today's exact profile.
+# Knob range 0-30 mm: PROPOSAL only, per Report 1 F4 / the dossier section 4.
+name: throatblend_hypex
+family: FREEFORM
+brief_file: ../briefs/axi_90x90_1in.yaml
+generator:
+  name: typology
+  profile_h:
+    type: hypex
+  profile_v: same
+  n_anchors: 16
+  max_wall_deg: 80.0
+  mouth: ellipse
+seed_params:
+  L_mm: 190.0
+  h_rm_mm: 140.0
+  h_T: 0.7
+  h_throat_blend_mm: 8.0
+bounds:
+  L_mm:
+    lo: 120.0
+    hi: 220.0
+  h_rm_mm:
+    lo: 60.0
+    hi: 175.0
+  h_T:
+    lo: 0.0
+    hi: 1.0
+  h_throat_blend_mm:
+    lo: 0.0
+    hi: 30.0
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 90.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 8.0  # beta C2 2026-10-22: epw 6 vs 8 on osse_axi gave DI 0.124 dB > 0.1 dB; axi cost unchanged (docs/evidence/BETA_READINESS.md)
+  quadrants: '1'
+  dof_cap_screen: 5000
+  dof_cap_verify: 7000
+  dof_cap_final: 8900
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+search:
+  algorithm: cma
+  sigma0: 0.25
+  seed: 1234
+  budget: 200
+  popsize: null
+  tolfun: 0.001

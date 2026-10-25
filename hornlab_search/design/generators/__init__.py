@@ -7,7 +7,7 @@ Public API re-exported from profiles.py:
     exponential          - exponential area expansion
     hypex                - Salmon hypex (T=0 catenoidal .. T=1 exponential)
     tractrix             - Voigt tractrix, length derived from fc and max_wall_deg
-    lecleach             - Le Cléac'h spherical-wave horn (R9 gate; currently unavailable)
+    lecleach             - Le Cléac'h Fourcade 2015 exact construction (R9-J verified)
     spherical_wave       - lecleach(..., T=1.0)
     blend                - weighted blend of two meridians on normalised t=z/L
     select_anchors       - choose [z, r, angleDeg] anchors by equal arc-length in (z,theta) space

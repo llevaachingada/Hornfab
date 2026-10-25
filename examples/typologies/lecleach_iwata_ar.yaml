@@ -1,0 +1,98 @@
+# lecleach_iwata_ar: area-preserving AR evolution of the verified Le Cleac'h march
+# (NEUTRAL name; NO product name ships).
+#
+# LABEL: "our reconstruction of the published principle (AR evolution + T=0.5); no
+# published construction for this class exists" (lib-2 section 2.2/3). The MERIDIAN is the
+# VERIFIED Fourcade 2015 exact construction (R9-J; docs/research/typologies/
+# JMLC_LECLEACH_RESEARCH_2026-10-25.md). The AR law is OURS:
+#     AR(l) = 1 + (AR_m - 1)(l/L0)^p        (AR_t = 1 pinned, circular throat)
+#     y_h(l) = y(l) sqrt(AR(l)),  y_v(l) = y(l) / sqrt(AR(l))
+#     y_h y_v = y^2 EXACTLY                 (area preserved; tested at 1e-9)
+#     x shared                              (the march length is untouched)
+# The section at every station is the same superellipse radius-field formula the GRID
+# uses, at p_exp = 2 (ellipse): r(phi) = y_h y_v / sqrt((y_v cos phi)^2 + (y_h sin phi)^2)
+# with phi from the HORIZONTAL (+x) axis. Both cardinal mirror planes hold by
+# construction (shared x(l), an ellipse section), so span QUARTER is valid and honest;
+# H != V at AR_m > 1, so the surface is not axisymmetric.
+#
+# T is PINNED at 0.5 (the published AR-evolution principle is the one hard convention,
+# lib-2 2.2);
+# fc/stop/AR_m/AR_p are searched with honest bounds. The 1-inch brief is used because
+# the photographed variant class is a 1-inch organic horn; AR_m 2.0 is the lib-2
+# datasheet starting value (the published 2-inch 590/320 = 1.84; bounds 1.2-2.8).
+#
+# SEED NOTE (tuned, bounds untouched): wt 2.0 mm is the thinnest shell that still passes
+# the 2t + 2 self-approach guard at the seed (inner 6.01 mm vs 6.0 mm; the AR stretch
+# brings the inner surface close near the mouth). W/H = 331 x 166 mm, depth 126 mm,
+# inside the organic 520 x 420 x 260 envelope. This is our reconstruction, NOT an
+# reproduction of that product (its depth/width 0.76 is a DIFFERENT flare; lib-2 2.2).
+name: lecleach_iwata_ar
+family: FREEFORM
+brief_file: ../briefs/organic_rollback_1in.yaml
+generator:
+  name: grid
+  rows:
+    type: iwata_ar
+  n_phi: 15          # quarter model (both mirror planes hold); both endpoint rows included
+  n_s: 32            # 33 shared-l stations per row (equal-arc on the base march)
+  wall_thickness_mm: 2.0
+seed_params:
+  g_fc_hz: 800.0
+  g_T: 0.5
+  g_stop_deg: 180.0
+  g_ar_m: 2.0
+  g_ar_p: 1.0
+bounds:
+  g_fc_hz:           # T = 0.5 refuses the very low fc corner (non-positive ring bracket)
+    lo: 800.0
+    hi: 1200.0
+  g_T:               # published AR-evolution principle: pinned at 0.5, not searched
+    lo: 0.5
+    hi: 0.5
+    search: false
+  g_stop_deg:
+    lo: 120.0
+    hi: 240.0
+  g_ar_m:            # lib-2 2.2/2.6 starting range 1.8-2.8; widen a little for search
+    lo: 1.2
+    hi: 2.8
+  g_ar_p:
+    lo: 0.5
+    hi: 2.0
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 8.0
+  quadrants: '1'
+  dof_cap_screen: 5000
+  dof_cap_verify: 7000
+  dof_cap_final: 8900
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+search:
+  algorithm: cma
+  sigma0: 0.25
+  seed: 1234
+  budget: 200
+  popsize: null
+  tolfun: 0.001

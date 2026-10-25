@@ -1,0 +1,95 @@
+# salmon_x_shape: salmon_elliptical + X-shape stop modulation (NEUTRAL name; LABELED hypothesis)
+#
+# LABELED HYPOTHESIS-SHAPE EXPERIMENT - not an attributed published construction (R9 gate).
+# Grounding: docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md section 2.4 and
+# docs/research/senior_pass_2026-10-24/04_IMPLEMENTATION_PLAN.md 9b.2 T5 / 9b.3 / 9b.5.
+# audiohorn.net publishes no geometry; the modulation below is OUR hypothesis, not their horn.
+#
+# Same generator block, marches and brief as examples/typologies/salmon_elliptical.yaml. The only
+# change is the T5 modulation (x_shape_modulation in design/generators/grid.py):
+#     stop(phi) = stop_deg * (1 + x_amp * cos 4 phi'),  phi' = phi - 45 deg
+#     fc(phi)  *= (1 - x_fc * cos 4 phi')              (only when x_amp > 0)
+# so the stop maxima sit on the quarter diagonals and cos 4 phi' is even about both cardinal
+# mirror planes (the quarter model stays valid). x_amp = 0 reproduces salmon_elliptical exactly
+# (property P2), which the test suite asserts at <= 1e-9 mm.
+#
+# SEED NOTE: stop_deg 180 is the cap-area asymptote and is refused (see salmon_elliptical.yaml).
+# With x_amp 0.25 the diagonal row stops at 1.25 * stop; at this 130 deg seed the diagonal stops
+# at 162.5 deg, the curl fits the 520x420x260 mm brief (D ~ 140 mm, W/H 355/329 mm) and the 5000
+# dof screen cap (2239 dofs). Seeds tried and rejected: stop 150 -> 5511 dofs > cap; stop 140 ->
+# outer-shell self-approach 7.998 mm < 2t + 2 = 8.000 mm. The bounds are NOT changed (still the
+# plan's 120-240 deg), only the seed. (9b.3 suggests n_phi >= 25 once x_amp > 0; this pass keeps
+# the lane's 15-row probe and labels it.)
+name: salmon_x_shape
+family: FREEFORM
+brief_file: ../briefs/organic_rollback_1in.yaml
+generator:
+  name: grid
+  rows:
+    type: salmon_elliptical
+  n_phi: 15
+  n_s: 32
+  wall_thickness_mm: 3.0
+seed_params:
+  g_fc_h_hz: 800.0
+  g_fc_v_hz: 1100.0
+  g_T: 0.8
+  g_stop_deg: 130.0
+  g_x_amp: 0.25
+  g_x_fc: 0.15
+bounds:
+  g_fc_h_hz:
+    lo: 600.0
+    hi: 1200.0
+  g_fc_v_hz:
+    lo: 600.0
+    hi: 1200.0
+  g_T:
+    lo: 0.3
+    hi: 1.0
+  g_stop_deg:
+    lo: 120.0
+    hi: 240.0
+  g_x_amp:           # plan ceiling 0.4; 9b.5 starting range 0-0.35
+    lo: 0.0
+    hi: 0.35
+  g_x_fc:            # 9b.2 T5
+    lo: 0.0
+    hi: 0.3
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 8.0
+  quadrants: '1'
+  dof_cap_screen: 5000
+  dof_cap_verify: 7000
+  dof_cap_final: 8900
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+search:
+  algorithm: cma
+  sigma0: 0.25
+  seed: 1234
+  budget: 200
+  popsize: null
+  tolfun: 0.001

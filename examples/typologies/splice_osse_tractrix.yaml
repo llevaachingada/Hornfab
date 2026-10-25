@@ -1,0 +1,91 @@
+# splice_osse_tractrix: C1 meridian splice, OSSE throat -> tractrix mouth (axisymmetric)
+# WP9 G2 in docs/research/senior_pass_2026-10-24/04_IMPLEMENTATION_PLAN.md (steps 1-2)
+# and docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md section 2.1.
+# Both parents are built from the brief's driver exit radius (r0); the second parent is
+# translated in z so its radius meets the first's at z_s = zs_frac * L(parent 1).
+# If the wall-angle gap at that radius-matched joint is more than 2 deg, a C1 Hermite
+# bridge over 10 % of the second parent's length is used instead.
+# [inferred] Plan ambiguity resolution: the joint is defined by the radius match (a radius
+# step cannot be represented by one meridian); the 2 deg angle gap selects direct vs bridge.
+# Knobs in mm / Hz / deg; the brief fixes the driver exit, envelope, target and weights.
+name: splice_osse_tractrix
+family: FREEFORM
+brief_file: ../briefs/axi_90x90_1in.yaml
+generator:
+  name: typology
+  profile_h:
+    type: splice
+    first:
+      type: osse
+    second:
+      type: tractrix
+  profile_v: same
+  n_anchors: 16
+  max_wall_deg: 80.0
+  mouth: ellipse
+seed_params:
+  L_mm: 110.0            # parent-1 (OSSE) depth; the splice length is derived from the parents
+  h_first_a_deg: 25.0    # OSSE far-field angle
+  h_first_s: 0.4         # OSSE shape exponent
+  h_second_fc_hz: 750.0  # tractrix mouth radius a = c / (2 pi f_c)
+  h_zs_frac: 0.5         # splice at 50 % of the OSSE depth (matched-angle case)
+bounds:
+  # Only the splice position is searched (WP9: {p}_zs_frac in [0.2, 0.8], not widened).
+  # Every other knob is fixed to the seed values above (lo == hi, search: false).
+  L_mm:
+    lo: 110.0
+    hi: 110.0
+    search: false
+  h_first_a_deg:
+    lo: 25.0
+    hi: 25.0
+    search: false
+  h_first_s:
+    lo: 0.4
+    hi: 0.4
+    search: false
+  h_second_fc_hz:
+    lo: 750.0
+    hi: 750.0
+    search: false
+  h_zs_frac:
+    lo: 0.2
+    hi: 0.8
+    search: true
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 90.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 8.0  # beta C2 2026-10-22: epw 6 vs 8 on osse_axi gave DI 0.124 dB > 0.1 dB; axi cost unchanged (docs/evidence/BETA_READINESS.md)
+  quadrants: '1'
+  dof_cap_screen: 5000
+  dof_cap_verify: 7000
+  dof_cap_final: 8900
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+search:
+  algorithm: cma
+  sigma0: 0.25
+  seed: 1234
+  budget: 200
+  popsize: null
+  tolfun: 0.001

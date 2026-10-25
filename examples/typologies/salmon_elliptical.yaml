@@ -1,0 +1,94 @@
+# salmon_elliptical: WP9b per-azimuth spherical_salmon rows (NEUTRAL name; LABELED hypothesis)
+#
+# LABELED HYPOTHESIS-SHAPE EXPERIMENT - not an attributed published construction (R9 gate).
+# Grounding: docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md section 2.4
+# (organic/elliptical = plan 9b.2 T3 analogue) and docs/research/senior_pass_2026-10-24/
+# 04_IMPLEMENTATION_PLAN.md 9b.2 T3 / 9b.3 / 9b.5. Published-family names are intentionally not used.
+#
+# Construction: ONE spherical_salmon march per azimuth with
+#     1/fc(phi) = cos^2(phi)/fc_h + sin^2(phi)/fc_v       (9b.2 T3 verbatim)
+# same T, same throat (r0 = brief driver exit radius, theta0 = driver exit angle). Every row is
+# resampled to the same n_s by NORMALIZED ARC LENGTH l/L0(phi) (9b.3 step 1), 3-D points are
+# P = (y cos phi, y sin phi, x) in mm (x = the march's wall axial abscissa; it is NON-MONOTONE
+# past 90 deg = rollback, which the point-grid adapter represents), and the quarter model runs
+# phi in [0, 90] with both endpoint rows (row 0 on y=0, last row on x=0) so the mesher can use
+# symmetry_planes=("x","y").
+#
+# The outer shell is the per-row in-plane normal offset by wall_thickness_mm (Fourcade eqs 28-29
+# form, per-row (y, x) profile; grid_outer_points). A row whose non-adjacent parts come closer
+# than 2t + 2 mm is refused as graded infeasible (dossier 2.4 P4), and the cross-row minimum
+# distance is reported in the mesh meta only (report-only, labelled).
+#
+# family stays FREEFORM (frozen contract): the Design params are {"grid": {...}} with a "rows"
+# block, not anchors. L_mm is NOT part of this recipe and is NOT required: the march derives the
+# depth; the brief envelope still bounds it through the mesh-free estimator.
+#
+# SEED NOTE: stop_deg 180 is the cap-area asymptote of the Salmon law and is refused by the
+# march (it cannot be a seed, nor a bounds interior it can evaluate). The seed is 170 deg, the
+# largest clean rollback seed below that asymptote for these knobs; the bounds keep the plan's
+# 120-240 deg. Every number here is a YAML default (nothing is hardcoded in the generator).
+name: salmon_elliptical
+family: FREEFORM
+brief_file: ../briefs/organic_rollback_1in.yaml
+generator:
+  name: grid
+  rows:
+    type: salmon_elliptical
+  n_phi: 15          # quarter model: 15 rows, both endpoint rows included (>= 13 per 9b.3)
+  n_s: 32            # 33 equal-arc-length stations per row (l/L0 = k/n_s)
+  wall_thickness_mm: 3.0
+seed_params:
+  g_fc_h_hz: 800.0
+  g_fc_v_hz: 1100.0
+  g_T: 0.8
+  g_stop_deg: 170.0
+bounds:
+  g_fc_h_hz:         # band starts at 700 Hz (9b.4: fc 600-1200 for 1-inch)
+    lo: 600.0
+    hi: 1200.0
+  g_fc_v_hz:
+    lo: 600.0
+    hi: 1200.0
+  g_T:
+    lo: 0.3
+    hi: 1.0
+  g_stop_deg:
+    lo: 120.0
+    hi: 240.0
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 8.0
+  quadrants: '1'             # the rows machinery ships quarter models only
+  dof_cap_screen: 5000
+  dof_cap_verify: 7000
+  dof_cap_final: 8900
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+search:
+  algorithm: cma
+  sigma0: 0.25
+  seed: 1234
+  budget: 200
+  popsize: null
+  tolfun: 0.001

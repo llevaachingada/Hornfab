@@ -1,0 +1,84 @@
+# lecleach_f90: Le Cleac'h (JMLC) FREEFORM meridian, stop <= 88 deg (axisymmetric)
+# VERIFIED EXACT CONSTRUCTION: Fourcade 2015, "Calcul du Pavillon Le Cleac'h", eqs 10-27 + 42-43.
+# Source of record and the R9-J gate table: docs/research/typologies/JMLC_LECLEACH_RESEARCH_2026-10-25.md
+# (fetched PDF; fig. 7/p.13 reference case reproduced at phi0 = 4.0 deg, 0.00 mm width gap).
+# The R9-J test (tests/test_design_generators_lecleach.py) checks width 467.30 mm within 0.5 mm,
+# included throat angle 8.55 deg within 0.1 deg, L0 394/467/496/511 mm and S(L0) 0.13/0.38/0.57/0.72 m2.
+#
+# ANGLE CONVENTION: {p}_stop_deg and the driver exit are HALF-angles. The repo's
+# driver.exit_angle_deg is already a half-angle (WP2 precedent: it is passed through, never
+# halved again). JMLC driver tables quote INCLUDED angles: halve only where an operator pastes
+# one (the published 8.0 deg included exit is phi0 = 4.0 deg).
+#
+# FREEFORM only represents stop <= 88 deg (z monotone, |theta| < 90). Rollback above 88 deg
+# uses the GRID rows route: examples/typologies/lecleach_rollback.yaml.
+# n_anchors 48: Fourcade's throat transient needs more stations than 16 to hold the repo's
+# 0.2 mm anchor-fidelity bar across the searched knobs (measured 0.114 mm worst at 48).
+# max_wall_deg 89.9 is the anchor clamp only (the march overshoots an 88 deg stop by ~1 deg);
+# the searched stop is {p}_stop_deg.
+name: lecleach_f90
+family: FREEFORM
+brief_file: ../briefs/axi_90x90_1in.yaml
+generator:
+  name: typology
+  profile_h:
+    type: lecleach
+  profile_v: same
+  n_anchors: 48
+  max_wall_deg: 89.9
+  wall_thickness_mm: 1.5   # Fourcade's 1 mm throat step has high sampled curvature; the
+                           # mesher's outward-offset guard needs t*kappa < 0.4 there. 3 mm
+                           # fails at n_anchors 48 (measured); 1.5 mm passes and meshes.
+  mouth: ellipse
+seed_params:
+  L_mm: 220.0            # required by materialize; may only shorten the march length
+  h_fc_hz: 800.0
+  h_T: 0.8
+  h_stop_deg: 80.0
+bounds:
+  h_fc_hz:
+    lo: 600.0
+    hi: 1200.0
+  h_T:                       # dossier 4: T 0.3-1.0 (0.5 published-principle analogue, 0.707 hypex, 1 exponential)
+    lo: 0.3
+    hi: 1.0
+  h_stop_deg:
+    lo: 60.0
+    hi: 88.0
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 90.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 8.0  # beta C2 2026-10-22: epw 6 vs 8 on osse_axi gave DI 0.124 dB > 0.1 dB; axi cost unchanged (docs/evidence/BETA_READINESS.md)
+  quadrants: '1'
+  dof_cap_screen: 5000
+  dof_cap_verify: 7000
+  dof_cap_final: 8900
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+search:
+  algorithm: cma
+  sigma0: 0.25
+  seed: 1234
+  budget: 200
+  popsize: null
+  tolfun: 0.001

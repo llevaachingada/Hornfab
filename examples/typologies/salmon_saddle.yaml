@@ -1,0 +1,99 @@
+# salmon_saddle: photographed up/down-asymmetric saddle/spade (NEUTRAL name; LABELED hypothesis)
+#
+# LABELED RECONSTRUCTION/HYPOTHESIS - not an attributed published construction (R9).
+# Grounding: docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md
+# sections 2.1/2.5/3 (the C2 symmetry basis and the photographed saddle signature). No
+# published per-azimuth saddle law exists; this is OUR hypothesis over the Salmon rows.
+#
+# C2 SYMMETRY BASIS (lib-2 section 2.5, binding): phi is measured FROM THE HORIZONTAL (+x)
+# mouth-plane axis; a point is (r cos phi, r sin phi). Left-right mirror x -> -x is
+# phi -> pi - phi; the invariant basis is {cos 2k phi, sin(2k+1) phi}.
+#   * cos(2 phi) is doubly even -> quarter-safe, deepest rollback at the SIDES (phi = 0);
+#   * sin(phi) is left-right symmetric but up/down ANTISYMMETRIC -> HALF model only
+#     (phi -90..+90, symmetry plane yz, x >= 0, quadrants '14', 2x the quarter dofs);
+#   * a cos(phi) term breaks the left-right mirror and is REFUSED.
+# The law below: stop(phi) = stop_deg * (1 + 0.25 cos 2phi + 0.2 sin phi); +0.2 at the
+# top (phi = +90), -0.2 at the bottom (phi = -90): top deeper than bottom, sides deepest.
+#
+# span: half is EXPLICIT (not inferred from the b knob); n_phi 25 is odd and >= 25 so the
+# phi = 0 horizontal row and both +/-90 endpoint rows (on the yz plane) exist with honest
+# half-span resolution. Every number in seed_params is a YAML default; the harmonic
+# coefficients are FIXED shape knobs (not in bounds). fc/T/stop are searched as in
+# salmon_elliptical (base stop bounds 120-240; the modulated rows may leave that window,
+# which is the point of the saddle: the short bottom is ~88 deg at the seed).
+#
+# SEED NOTE (tuned, bounds untouched): stop 160 / fc_h 800 / fc_v 1200 gives
+# W 438.9 x H 293.7 x 223.1 mm outer (fits the organic 520 x 420 x 260 brief) and
+# W*fc_h / (H*fc_v) = 0.9962 (the datasheet invariant within 2 %). The min self-approach
+# is 9.17 mm >= 2t + 2 = 8 mm.
+name: salmon_saddle
+family: FREEFORM
+brief_file: ../briefs/organic_rollback_1in.yaml
+generator:
+  name: grid
+  rows:
+    type: salmon_elliptical
+  span: half          # explicit: sin(phi) is up/down antisymmetric (C2)
+  n_phi: 25           # HALF model: odd and >= 25 (plan 9b.3)
+  n_s: 32             # 33 equal-arc-length stations per row (l/L0 = k/n_s)
+  wall_thickness_mm: 3.0
+seed_params:
+  g_fc_h_hz: 800.0
+  g_fc_v_hz: 1200.0
+  g_T: 0.8
+  g_stop_deg: 160.0
+  g_stop_cos2k: [0.25]    # a2: sides (phi = 0) roll 25 % deeper
+  g_stop_sin2k1: [0.2]    # b1: top 20 % deeper, bottom 20 % shallower
+bounds:
+  g_fc_h_hz:
+    lo: 600.0
+    hi: 1200.0
+  g_fc_v_hz:
+    lo: 600.0
+    hi: 1200.0
+  g_T:
+    lo: 0.3
+    hi: 1.0
+  g_stop_deg:
+    lo: 120.0
+    hi: 240.0
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 6.0                  # the half saddle's asymmetric side roll is a large area; epw 8
+                            # exceeds the 5000 screen cap at 5.5 kHz (15.2k tris vs the
+                            # 11.3k effective half-model limit). epw 6 fits and is the
+                            # documented beta trade-off (osse_axi: epw 6 vs 8 = 0.124 dB DI).
+  quadrants: '14'           # HALF model: left-right mirror only (yz plane, x >= 0)
+  dof_cap_screen: 5000
+  dof_cap_verify: 7000
+  dof_cap_final: 8900
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+search:
+  algorithm: cma
+  sigma0: 0.25
+  seed: 1234
+  budget: 200
+  popsize: null
+  tolfun: 0.001

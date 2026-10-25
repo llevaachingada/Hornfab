@@ -1,0 +1,94 @@
+# grid_ellipse_mod: WP10 point-grid adapter, G8 + G9 modulated mouth (labeled hypothesis shape)
+#
+# Same generator block, meridians and brief as examples/typologies/grid_ellipse.yaml
+# (and therefore the same comparison reference: examples/typologies/conical.yaml). The only
+# change is the mouth modulation:
+#   g_a1_mouth: 0.06      G8 even Fourier term  a_1(s) = (1-s)*0 + s*0.06, factor (1 + a1 cos 2phi)
+#   g_a2_mouth: -0.03     G8 even Fourier term  k = 2 (2*phi), factor (1 + a2 cos 4phi)
+#   g_term_side_mm: 2.0   G9 side rollback: dz(phi) = -|knob| * cos^2(phi), weighted by
+#                         w_mouth(s) = 3s^2 - 2s^3 (smoothstep; plan names w_mouth without a form,
+#                         so this monotone C1 weight is an [inferred] choice, labelled here)
+#
+# The plan/dossier name G8/G9 but publish NO numeric ranges for a_k / term_side_mm yet (owner
+# gate on knob ranges), so these are PINNED hypothesis values (search: false), not invented
+# bounds: the search space stays L_mm and h_rm_mm, exactly like grid_ellipse.yaml. Every value
+# is a YAML default; nothing is hardcoded in the generator.
+name: grid_ellipse_mod
+family: FREEFORM
+brief_file: ../briefs/axi_90x90_1in.yaml
+generator:
+  name: grid
+  profile_h:
+    type: conical
+  profile_v: same
+  n_phi: 13
+  n_s: 32
+  max_wall_deg: 80.0
+  wall_thickness_mm: 3.0
+seed_params:
+  L_mm: 180.0
+  h_rm_mm: 120.0
+  g_pnorm: 2.0
+  g_a1_mouth: 0.06
+  g_a2_mouth: -0.03
+  g_term_side_mm: 2.0
+bounds:
+  L_mm:
+    lo: 120.0
+    hi: 220.0
+  h_rm_mm:
+    lo: 60.0
+    hi: 175.0
+  g_pnorm:
+    lo: 2.0
+    hi: 2.0
+    search: false
+  g_a1_mouth:
+    lo: 0.06
+    hi: 0.06
+    search: false
+  g_a2_mouth:
+    lo: -0.03
+    hi: -0.03
+    search: false
+  g_term_side_mm:
+    lo: 2.0
+    hi: 2.0
+    search: false
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 90.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 8.0
+  quadrants: '1'
+  dof_cap_screen: 5000
+  dof_cap_verify: 7000
+  dof_cap_final: 8900
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+search:
+  algorithm: cma
+  sigma0: 0.25
+  seed: 1234
+  budget: 200
+  popsize: null
+  tolfun: 0.001

@@ -1,0 +1,91 @@
+# lecleach_toroidal: verified Le Cleac'h rollback + a tangent-continuous toroidal lip
+# (NEUTRAL name; the plan's T7 wording, NEVER the product name).
+#
+# The MERIDIAN is the VERIFIED Fourcade 2015 exact construction (R9-J;
+# docs/research/typologies/JMLC_LECLEACH_RESEARCH_2026-10-25.md). The LIP is the lib-2
+# inferred geometric analogue (docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_
+# 2026-10-25.md sections 2.3-2.4): NO published lip math exists. It is a circular arc of
+# radius r_lip that CONTINUES the wall with the SAME tangent at the joint (C1), then
+# keeps increasing the wall angle for 180 deg, curling back as in the photos. The
+# overall width is the widest bearing of the arc, not its end station.
+#
+# lib-2 consistency (LABELED [documented-inputs, inferred]): lecleach_exact(fc 350,
+# T 0.8, r0 25.4 mm, phi0 5 deg, stop 360, c 344) is 535.9 mm wide; the r_lip = 30 mm
+# tangent arc reaches 594.1 mm overall vs the published JMLC-350 diameter 595 mm
+# (0.9 mm, inside the +/-3 mm plausibility band). phi0 = 5 deg is OUR assumption (the
+# product's actual fc/T/stop/exit are unpublished); the speed of sound is the published
+# case's own 344 m/s. This is a plausibility check, NOT a reproduction claim.
+#
+# Axisymmetric: every azimuth gets the same march + lip, so the catalog symmetry stays
+# "axisymmetric" and the 90x90 axi brief is compatible. span: quarter (implicit; the
+# toroidal type is axisymmetric by construction).
+#
+# SEED NOTE (tuned, bounds untouched): fc 600 / T 0.8 / stop 170 / r_lip 30 / wt 3 mm
+# gives W 311.5 x H 311.5 x depth 180.0 mm outer (inside 360 x 360 x 220), min
+# self-approach 11.28 mm >= 8 mm, and meshes at the 5000 screen cap. Bounds keep the
+# lib-2 6-35 mm lip range and the lecleach rows' 120-240 deg rollback window.
+name: lecleach_toroidal
+family: FREEFORM
+brief_file: ../briefs/axi_90x90_1in.yaml
+generator:
+  name: grid
+  rows:
+    type: toroidal_rollback
+  n_phi: 15          # quarter model: 15 rows, both endpoint rows included (>= 13)
+  n_s: 32            # 33 equal-arc-length stations per row (l/L0 = k/n_s)
+  wall_thickness_mm: 3.0
+seed_params:
+  g_fc_hz: 600.0
+  g_T: 0.8
+  g_stop_deg: 170.0
+  g_r_lip_mm: 30.0
+bounds:
+  g_fc_hz:
+    lo: 600.0
+    hi: 1200.0
+  g_T:
+    lo: 0.3
+    hi: 1.0
+  g_stop_deg:
+    lo: 120.0
+    hi: 240.0
+  g_r_lip_mm:        # lib-2 2.3 starting range; seed 30 = the 2" class example
+    lo: 6.0
+    hi: 35.0
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 90.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 8.0
+  quadrants: '1'
+  dof_cap_screen: 5000
+  dof_cap_verify: 7000
+  dof_cap_final: 8900
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+search:
+  algorithm: cma
+  sigma0: 0.25
+  seed: 1234
+  budget: 200
+  popsize: null
+  tolfun: 0.001

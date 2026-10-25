@@ -22,7 +22,6 @@ import pytest
 from hornlab_search.constants import C_AIR
 from hornlab_search.design.generators.profiles import (
     Meridian,
-    GeneratorUnavailable,
     blend,
     conical,
     exponential,
@@ -243,17 +242,22 @@ class TestTractrix:
 
 
 # ---------------------------------------------------------------------------
-# Le Cléac'h / spherical_wave gated
+# Le Cléac'h / spherical_wave live (verified Fourcade construction, R9-J 2026-10-25)
 # ---------------------------------------------------------------------------
 
-def test_lecleach_raises_unavailable():
-    with pytest.raises(GeneratorUnavailable):
+def test_lecleach_is_live_and_requires_the_half_angle():
+    m = lecleach(R0, 800.0, T=0.7, phi0_deg=5.0)
+    _assert_valid_meridian(m, "lecleach")
+    assert m.r_mm[0] == pytest.approx(R0)
+    # phi0_deg is the throat HALF-angle and is required (no silent default).
+    with pytest.raises(ValueError, match="phi0_deg"):
         lecleach(R0, 800.0, T=0.7)
 
 
-def test_spherical_wave_raises_unavailable():
-    with pytest.raises(GeneratorUnavailable):
-        spherical_wave(R0, 800.0)
+def test_spherical_wave_is_live_t1():
+    m = spherical_wave(R0, 800.0, phi0_deg=5.0)
+    _assert_valid_meridian(m, "spherical_wave")
+    assert m.info["T"] == 1.0
 
 
 # ---------------------------------------------------------------------------
