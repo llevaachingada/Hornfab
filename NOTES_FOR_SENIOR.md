@@ -423,3 +423,53 @@ Fourcade accepted (owner directive + fetched PDF); (b) BOTH ship: `lecleach` (ve
 `spherical_salmon` (different construction, neutral name). GUI/`__init__` staleness fixed; old gated-stub
 `examples/typologies/lecleach.yaml` deleted. Note: the earlier same-day "stays BLOCKED" text in the
 `WP9_WP9B_GROUNDING` dossier §5 records the pre-directive state; a dated supersession note is appended there.
+
+
+## 2026-10-25 (GUI-integration orchestrator) - OWNER DIRECTIVE: ALL CAD work STOPPED + DEFERRED (GUI-only round)
+
+Owner in chat: "stop that agent ... do not work on CAD shit right now -- only touch files related to
+the GUI itself." Scope note: this session is GUI-only (hornlab_search/gui/ + GUI tests + GUI docs); the
+backend M5/M6 stream belongs to the parallel orchestrator session -- its live CAD/back-end edits in
+config.py / design/families.py / mesh/build.py are NOT mine and were not touched; stopping THAT stream
+requires its own orchestrator/owner (please read this note).
+
+Deferred items (from my cancelled fixer lane, design finished, code REMOVED from the working tree to
+keep file diffs lane-pure -- nothing lost, re-implementable from this note):
+1. CAD STEP inventory mapping in run_detail -- step_files_detail[i].inventory should resolve: a
+   `<name>.inventory.json` sidecar WINS when present; else `designs/<hash>/mesh_meta.json["cad"]`.
+   The cad block's REAL key names (read from mesh/step_build.py at the M5B landing): face_inventory
+   = {"driver": 1, "wall": N} (NOT "inventory"), tool_sha256 (NOT tool_sha), tool_path, solid.solids,
+   solid.all_shells_closed. Only-present-fields -> {faces: [{label, count}], solids, closed,
+   tool_sha256, tool_path}. STEP filename -> design hash via regex `_rank\d+_([0-9a-f]{6,40})\.step$`.
+2. cad_route solve-group marker -- the cad recipe is PER DESIGN (Design.params["cad"]; config.yaml
+   carries none), so the run-level proxy is the best-objective row's mesh_meta.json["cad"] block
+   (seed row if nothing succeeded) -> solve_group.cad_route: true (only-when-non-default).
+   Consumers planned: G4 STEP chips + a "cad STEP" G1 badge (both render automatically whenever the
+   reader emits them).
+3. cma_files run_detail key (NOT CAD -- deferred only because data.py was co-edited): list every
+   pycma log the C-5 route serves (top-level cma/ + each cma/restart_k/, CMA_LOG_NAME-matched,
+   {path (run-relative), name, size}, sorted) -> restart-card DIRECT file chips in app.js. A full
+   working implementation existed and was removed with the sweep; trivial to restore.
+4. source_profile_alpha pin test only remaining -- the solve-group fingerprint ALREADY picks up
+   solve.source_profile_alpha from the M5B config (real runs badge "source plug a=..." automatically);
+   only the dedicated fixture test was pending (NOT CAD-related; queue with the next GUI pass).
+
+Everything above is GUI-side display work over committed M5B artifacts -- zero solver/mesher changes.
+Deferred at owner direction 2026-10-25; resume whenever the owner lifts the CAD hold.
+
+## 2026-10-25 (GUI-integration orchestrator) - TODO: denser balloons + denser frequency grids on
+higher-tier runs (W7 in docs/NEXT_DEV_PRIORITIES.md; research basis 12_RESEARCH_BASIS.md section 12)
+
+Owner priority 2026-10-25: raise verify/final-tier data density toward Boundary Lab-class fidelity.
+BL reference numbers (docs/research/boundary_lab_0.5/bl_inventory.md): balloon_angle_precision_deg
+default 2.5 deg clamped 0.5-15; equal-area Fibonacci point count = round(41253/angle^2) (~6,600 points
+at 2.5 deg, ~41,253 at 1 deg); freq_count 41 log-spaced 200-20,000 Hz; spherical DI =
+-10*log10(mean(10^(SPL_rel/10))) over that equal-area balloon (a plain mean ONLY because the sampling
+is equal-area). Our targets: solve.balloon_points_verify from the M3/WP5 512->1024->2592 ladder into
+1,000-6,600; verify-solve frequency count from 25 toward ~41 log-spaced (grid.verify_points_per_octave
+/ a NEW named grid group per the W3 contract rule if the solve-spec hash changes). Gates: the M3/WP5
+measured delta-DI ladder decides how much density buys accuracy; GPU cost -- balloon points bill field
+evaluation (not dofs), freq count bills linearly per solve; stays OFF the 8 GB 4060 search tiers
+(screen keeps 12 freqs / light balloon). Feeds the W6 web Balloon view: its sin(theta) unequal-area
+layout must be interpolated on the sphere, not the index grid, at any density. Full write-up:
+12_RESEARCH_BASIS.md section 12 (owner-directed appendix; BL source recon; GPL-3.0 attribution carried).
