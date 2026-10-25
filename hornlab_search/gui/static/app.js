@@ -715,7 +715,7 @@ async function viewCampaignDetail(id) {
       H: 260, xlog: true, xlim, ylim: [0, bwmax], xticks: FT, yticks: niceTicks(0, bwmax, 5),
       xlabel: "Hz", ylabel: "deg", band,
       fill: tgt ? [{ y0: tgt * 0.9, y1: tgt * 1.1, color: css("--best"), opacity: 0.10 }] : [],
-      hlines: tgt ? [{ y: tgt, color: css("--muted"), dash: true }] : [],
+      hlines: tgt ? [{ y: tgt, color: css("--label"), dash: true }] : [],
       series: entries.map((e, idx) => { const b = e.best || {}, F2 = b.freqs || freqsRef;
         const arr = bwPlane === "h" ? (b.bw_h || []) : (b.bw_v || []);
         return { pts: F2.map((f, i) => [f, arr[i] ?? null]), color: familyColor(idx), w: idx === 0 ? 2.4 : 1.6 }; }),
@@ -728,13 +728,13 @@ async function viewCampaignDetail(id) {
       chart(diSvg, {
         H: 260, xlog: true, xlim, ylim: [dlo, dhi], xticks: FT, yticks: niceTicks(dlo, dhi, 5),
         xlabel: "Hz", ylabel: "dB", band,
-        hlines: dit != null ? [{ y: dit, color: css("--muted"), dash: true }] : [],
+        hlines: dit != null ? [{ y: dit, color: css("--label"), dash: true }] : [],
         series: entries.map((e, idx) => { const b = e.best || {}, F2 = b.freqs || freqsRef;
           return { pts: F2.map((f, i) => [f, (b.di || [])[i] ?? null]), color: familyColor(idx), w: idx === 0 ? 2.4 : 1.6 }; }),
       });
     }
     legDiv.innerHTML = entries.map((e, idx) => `<span><i style="color:${familyColor(idx)};border-top-color:${familyColor(idx)}"></i>${esc(e.name)}${idx === 0 ? " (rank 1)" : ""}</span>`).join("")
-      + `<span><i style="color:var(--muted)" class="dash"></i>target</span>`;
+      + `<span><i style="color:var(--label)" class="dash"></i>target</span>`;
   }
   drawBW();
   document.getElementById("btn-bw-h").onclick = () => {
@@ -911,8 +911,8 @@ async function viewRunDetail(id) {
             <span><i style="color:var(--best)" class="dash"></i>best, vertical</span>
             <span><i style="color:var(--seed)"></i>start H</span>
             <span><i style="color:var(--seed)" class="dash"></i>start V</span>
-            <span><i style="color:var(--muted)"></i>target H</span>
-            <span><i style="color:var(--muted)" class="dash"></i>target V</span>
+            <span><i style="color:var(--label)"></i>target H</span>
+            <span><i style="color:var(--label)" class="dash"></i>target V</span>
           </div>
           <svg id="c-bw"></svg>
         </div>
@@ -921,7 +921,7 @@ async function viewRunDetail(id) {
           <div class="legend">
             <span><i style="color:var(--seed)"></i>start</span>
             <span><i style="color:var(--best)"></i>best</span>
-            <span><i style="color:var(--muted)" class="dash"></i>DI target</span>
+            <span><i style="color:var(--label)" class="dash"></i>DI target</span>
           </div>
           <svg id="c-di"></svg>
         </div>
@@ -949,7 +949,7 @@ async function viewRunDetail(id) {
       <!-- Polar maps -->
       <div class="fig">
         <div class="fig-head"><h3>${tip("polar", "Directivity (isobars)")}</h3>
-          <label class="evo-opt"><input type="checkbox" id="iso-start"> also show the starting design</label></div>
+          <label class="evo-opt" style="color:var(--ink)"><input type="checkbox" id="iso-start"> also show the starting design</label></div>
         <div class="cap">Level relative to on-axis at 2 m, in 3 dB colour bands from −30 to 0 dB, with white contour lines every 3 dB (the heavier line is −6 dB: the beamwidth edge). Frequency across, angle up. Hover for a readout. Interpolated between the ${((d.best || {}).freqs || []).length} solved frequencies.</div>
         <div class="maps iso-maps" id="polar-maps"></div>
       </div>
@@ -1014,8 +1014,8 @@ async function viewRunDetail(id) {
 
   // One convention on every chart: horizontal plane solid, vertical plane dashed; start amber, best teal.
   const series2 = (key, w) => [
-    ...(S[key + "_h"] ? [{ pts: F.map((f, i) => [f, S[key + "_h"][i] ?? null]), color: css("--seed"), w: 1.4 }] : []),
-    ...(S[key + "_v"] ? [{ pts: F.map((f, i) => [f, S[key + "_v"][i] ?? null]), color: css("--seed"), w: 1.4, dash: true }] : []),
+    ...(S[key + "_h"] ? [{ pts: F.map((f, i) => [f, S[key + "_h"][i] ?? null]), color: css("--seed"), w: 1.7 }] : []),
+    ...(S[key + "_v"] ? [{ pts: F.map((f, i) => [f, S[key + "_v"][i] ?? null]), color: css("--seed"), w: 1.7, dash: true }] : []),
     ...(B[key + "_h"] ? [{ pts: F.map((f, i) => [f, B[key + "_h"][i] ?? null]), color: css("--best"), w }] : []),
     ...(B[key + "_v"] ? [{ pts: F.map((f, i) => [f, B[key + "_v"][i] ?? null]), color: css("--best"), w, dash: true }] : []),
   ];
@@ -1026,8 +1026,8 @@ async function viewRunDetail(id) {
     const bwAll = [...(S.bw_h || []), ...(S.bw_v || []), ...(B.bw_h || []), ...(B.bw_v || []), th, tv].filter(v => v != null);
     const bmax = Math.min(200, Math.ceil(Math.max(...bwAll) * 1.08 / 10) * 10) || 180;
     const fill = [], hlines = [];
-    if (th) { fill.push({ y0: th * 0.9, y1: th * 1.1, color: css("--best"), opacity: 0.10 }); hlines.push({ y: th, color: css("--muted") }); }
-    if (tv && tv !== th) { fill.push({ y0: tv * 0.9, y1: tv * 1.1, color: css("--best"), opacity: 0.07 }); hlines.push({ y: tv, color: css("--muted"), dash: true }); }
+    if (th) { fill.push({ y0: th * 0.9, y1: th * 1.1, color: css("--best"), opacity: 0.10 }); hlines.push({ y: th, color: css("--label") }); }
+    if (tv && tv !== th) { fill.push({ y0: tv * 0.9, y1: tv * 1.1, color: css("--best"), opacity: 0.07 }); hlines.push({ y: tv, color: css("--label"), dash: true }); }
     chart(document.getElementById("c-bw"), {
       xlog: true, xlim: [F[0], F[F.length - 1]], ylim: [0, bmax], fill,
       xticks: FT, yticks: niceTicks(0, bmax, 5), xlabel: "Hz", ylabel: "deg", band, hlines,
@@ -1043,9 +1043,9 @@ async function viewRunDetail(id) {
     chart(document.getElementById("c-di"), {
       xlog: true, xlim: [F[0], F[F.length - 1]], ylim: [dlo, dhi],
       xticks: FT, yticks: niceTicks(dlo, dhi, 5), xlabel: "Hz", ylabel: "dB", band,
-      hlines: [{ y: dit, color: css("--muted"), dash: true }],
+      hlines: [{ y: dit, color: css("--label"), dash: true }],
       series: [
-        { pts: F.map((f, i) => [f, (S.di || [])[i] ?? null]), color: css("--seed"), w: 1.4 },
+        { pts: F.map((f, i) => [f, (S.di || [])[i] ?? null]), color: css("--seed"), w: 1.7 },
         { pts: F.map((f, i) => [f, (B.di || [])[i] ?? null]), color: css("--best"), w: 2.2 },
       ],
     });
@@ -1058,9 +1058,9 @@ async function viewRunDetail(id) {
     chart(document.getElementById("c-axis"), {
       xlog: true, xlim: [F[0], F[F.length - 1]], ylim: [alo, ahi],
       xticks: FT, yticks: niceTicks(alo, ahi, 5), xlabel: "Hz", ylabel: "dB", band,
-      hlines: [{ y: 0, color: css("--muted") }],
+      hlines: [{ y: 0, color: css("--label") }],
       series: [
-        { pts: F.map((f, i) => [f, (S.on_axis || [])[i] ?? null]), color: css("--seed"), w: 1.4 },
+        { pts: F.map((f, i) => [f, (S.on_axis || [])[i] ?? null]), color: css("--seed"), w: 1.7 },
         { pts: F.map((f, i) => [f, (B.on_axis || [])[i] ?? null]), color: css("--best"), w: 2.2 },
       ],
     });
@@ -1075,10 +1075,10 @@ async function viewRunDetail(id) {
     chart(document.getElementById("c-zre"), {
       xlog: true, xlim: [F[0], F[F.length - 1]], ylim: [zlo, zhi],
       xticks: FT, yticks: niceTicks(zlo, zhi, 5), xlabel: "Hz", ylabel: "×ρc", band,
-      hlines: [{ y: 1.0, color: css("--muted"), dash: true }, { y: 0.7, color: css("--warn"), dash: true }, { y: 0, color: css("--muted") }],
+      hlines: [{ y: 1.0, color: css("--label"), dash: true }, { y: 0.7, color: css("--warn"), dash: true }, { y: 0, color: css("--label") }],
       series: [
-        { pts: F.map((f, i) => [f, (S.z_re || [])[i] ?? null]), color: css("--seed"), w: 1.4 },
-        { pts: F.map((f, i) => [f, X(S)[i] ?? null]), color: css("--seed"), w: 1.2, dash: true },
+        { pts: F.map((f, i) => [f, (S.z_re || [])[i] ?? null]), color: css("--seed"), w: 1.7 },
+        { pts: F.map((f, i) => [f, X(S)[i] ?? null]), color: css("--seed"), w: 1.7, dash: true },
         { pts: F.map((f, i) => [f, (B.z_re || [])[i] ?? null]), color: css("--best"), w: 2.2 },
         { pts: F.map((f, i) => [f, X(B)[i] ?? null]), color: css("--best"), w: 1.8, dash: true },
       ],
@@ -1121,7 +1121,7 @@ async function viewRunDetail(id) {
       xticks: niceTicks(0, sum.n || Js.length, 5), yticks: niceTicks(0, ymax, 5),
       xlabel: "evaluation", ylabel: "score",
       series: [
-        { pts: Js, color: css("--muted"), dots: true, opacity: 0.3 },
+        { pts: Js, color: css("--muted"), dots: true, opacity: 0.8 },
         { pts: runBest, color: css("--best"), w: 2.2 },
       ],
       hlines: [{ y: sum.seed_j, color: css("--seed"), dash: true }],

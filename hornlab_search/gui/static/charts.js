@@ -66,14 +66,14 @@ export function chart(svg, { W = 460, H = 240, xlog = false, xlim, ylim,
   if (xlabel) { const t = el("text", { x: W - m.r, y: H - 3, "text-anchor": "end" }, svg); t.textContent = xlabel; }
   if (ylabel) { const t = el("text", { x: m.l - 6, y: 11, "text-anchor": "end" }, svg); t.textContent = ylabel; }
   for (const h of hlines)
-    el("line", { x1: m.l, x2: W - m.r, y1: Y(h.y), y2: Y(h.y), stroke: h.color, "stroke-width": 1.2, "stroke-dasharray": h.dash ? "5 4" : "none" }, svg);
+    el("line", { x1: m.l, x2: W - m.r, y1: Y(h.y), y2: Y(h.y), stroke: h.color, "stroke-width": 1.5, "stroke-dasharray": h.dash ? "5 4" : "none" }, svg);
   const clipY = v => Math.min(Math.max(v, y0), y1);
   for (const s of series) {
     const pts = s.pts.filter(p => p[1] != null && isFinite(p[1]));
     if (!pts.length) continue;
     if (s.dots) {
       for (const p of pts)
-        el("circle", { cx: X(p[0]), cy: Y(clipY(p[1])), r: s.r || 1.6, fill: s.color, opacity: s.opacity ?? 0.45 }, svg);
+        el("circle", { cx: X(p[0]), cy: Y(clipY(p[1])), r: s.r || 2.0, fill: s.color, opacity: s.opacity ?? 0.8 }, svg);
     } else {
       el("path", { d: pts.map((p, i) => (i ? "L" : "M") + X(p[0]).toFixed(1) + "," + Y(clipY(p[1])).toFixed(1)).join(""),
         fill: "none", stroke: s.color, "stroke-width": s.w || 1.8,
@@ -351,19 +351,25 @@ export function isobarMap(svg, rows, angles, freqs, { H = 300, title = "" } = {}
              "L" + (m.l + (p2[0] + 0.5) * sx).toFixed(1) + "," + (m.t + (p2[1] + 0.5) * sy).toFixed(1);
       }
     }
-    if (d) el("path", { d, fill: "none", stroke: "#fff", "stroke-opacity": L === -6 ? 0.95 : 0.55,
-                        "stroke-width": L === -6 ? 1.7 : 0.8 }, svg);
+    if (d) {
+      // dark halo first (under), white core second (over): the 0.55-opaque halo composites
+      // ≈ 3.7:1 over #FFDF00 and the white core on it ≈ 5:1 — legible on every colormap band
+      el("path", { d, fill: "none", stroke: "#10181d", "stroke-opacity": 0.55,
+                   "stroke-width": L === -6 ? 3.4 : 2.6 }, svg);
+      el("path", { d, fill: "none", stroke: "#ffffff", "stroke-opacity": L === -6 ? 0.98 : 0.8,
+                   "stroke-width": L === -6 ? 1.8 : 1.1 }, svg);
+    }
   }
   // grid and axes
   const g = el("g", {}, svg);
   for (const t of [200, 500, 1000, 2000, 5000, 10000, 20000]) {
     if (Math.log10(t) < lf0 - 1e-9 || Math.log10(t) > lf1 + 1e-9) continue;
-    el("line", { x1: X(t), x2: X(t), y1: m.t, y2: m.t + ph, stroke: "#808080", "stroke-opacity": 0.6, "stroke-width": 0.8 }, g);
+    el("line", { x1: X(t), x2: X(t), y1: m.t, y2: m.t + ph, stroke: "#808080", "stroke-opacity": 0.7, "stroke-width": 1.0 }, g);
     el("text", { x: X(t), y: m.t + ph + 14, "text-anchor": "middle" }, svg).textContent = t >= 1000 ? t / 1000 + "k" : String(t);
   }
   for (let a = -90; a <= 90; a += 30) {
     if (a < a0 || a > a1) continue;
-    el("line", { x1: m.l, x2: m.l + pw, y1: Y(a), y2: Y(a), stroke: "#808080", "stroke-opacity": a === 0 ? 0.9 : 0.6, "stroke-width": 0.8 }, g);
+    el("line", { x1: m.l, x2: m.l + pw, y1: Y(a), y2: Y(a), stroke: "#808080", "stroke-opacity": a === 0 ? 0.9 : 0.7, "stroke-width": 1.0 }, g);
     el("text", { x: m.l - 6, y: Y(a) + 3, "text-anchor": "end" }, svg).textContent = (a > 0 ? "+" : "") + a + "°";
   }
   el("rect", { x: m.l, y: m.t, width: pw, height: ph, fill: "none", stroke: css("--rule") }, svg);
