@@ -692,3 +692,108 @@ def test_solve_group_pins_a_non_default_source_profile_alpha(repo):
     assert "source_profile_alpha" not in D._solve_group_fingerprint(run)
     # a default run (key absent) omits it too
     assert "source_profile_alpha" not in D._solve_group_fingerprint(repo / "runs" / RUN_B)
+
+
+# ------------------------------------------------------------------ G-1b search resume
+
+
+def test_search_resume_argv_shape_carries_every_cli_flag(repo):
+    jm = J.JobManager(repo, repo / "runs")
+    run_dir = str((repo / "runs" / RUN_B).resolve())
+    argv, gpu = jm.build_argv("search", {
+        "config": "examples/cfg.yaml", "resume": RUN_B, "budget": 25, "max_evals": 40,
+        "mode": "verify", "allow_config_change": True,
+        "brief": "examples/briefs/axi_90x90_1in.yaml", "cma_seed": 7})
+    assert gpu is True                                     # same GPU kind, same launch lock
+    assert argv == ["search", "--config", "examples/cfg.yaml", "--budget", "25",
+                    "--max-evals", "40", "--mode", "verify", "--resume", run_dir,
+                    "--allow-config-change",
+                    "--brief", "examples/briefs/axi_90x90_1in.yaml", "--cma-seed", "7"]
+
+
+def test_search_resume_config_and_budget_are_optional(repo):
+    jm = J.JobManager(repo, repo / "runs")
+    run_dir = str((repo / "runs" / RUN_B).resolve())
+    # The CLI resumes from <run>/config.yaml when --config is absent (cli.py:646) and falls back
+    # to the run's own search.budget when --budget is absent (cli.py:695): both stay omitted.
+    argv, gpu = jm.build_argv("search", {"resume": RUN_B})
+    assert gpu is True and argv == ["search", "--resume", run_dir]
+    # explicit budget/mode pass straight through, before --resume
+    argv, _ = jm.build_argv("search", {"resume": RUN_B, "budget": "12", "mode": "screen"})
+    assert argv == ["search", "--budget", "12", "--mode", "screen", "--resume", run_dir]
+
+
+def test_search_non_resume_argv_is_unchanged_and_new_flags_are_additive(repo):
+    jm = J.JobManager(repo, repo / "runs")
+    argv, gpu = jm.build_argv("search", {"config": "examples/cfg.yaml"})
+    assert gpu is True and argv == ["search", "--config", "examples/cfg.yaml",
+                                    "--budget", "60"]   # exact pre-resume shape/default
+    argv, _ = jm.build_argv("search", {"config": "examples/cfg.yaml",
+                                       "max_evals": 100, "mode": "verify"})
+    assert argv == ["search", "--config", "examples/cfg.yaml", "--budget", "60",
+                    "--max-evals", "100", "--mode", "verify"]
+
+
+def test_search_resume_preview_reports_the_exact_command_and_gpu(server):
+    code, body = _req(server + "/api/preview", data=json.dumps(
+        {"kind": "search", "args": {"resume": RUN_B, "budget": 25, "mode": "screen"}}).encode())
+    assert code == 200 and body["gpu"] is True and body["gpu_busy"] is None
+    assert body["command"].startswith("hornlab-search search ")
+    assert "--resume" in body["command"] and RUN_B in body["command"]
+
+
+def test_search_resume_inherits_the_gpu_busy_refusal(repo):
+    from hornlab_search.search.gpulock import _lock_path
+    lk = _lock_path(repo / "runs")
+    lk.parent.mkdir(parents=True, exist_ok=True)
+    lk.write_text(json.dumps({"pid": os.getpid(), "user": "u", "command": "search x",
+                              "start_time": "t"}))
+    jm = J.JobManager(repo, repo / "runs")
+    with pytest.raises(J.JobError, match="GPU busy"):
+        jm.launch("search", {"resume": RUN_B})
+    assert not jm.jobs
+
+
+def test_search_resume_uses_the_one_gui_gpu_slot(repo):
+    jm = J.JobManager(repo, repo / "runs")
+    fake = J.Job("fake", "search", ["search", "--resume", "x"],
+                 repo / "runs" / "fake.log", True)
+    jm.jobs[fake.id] = fake                            # a GPU job from this GUI is still running
+    with pytest.raises(J.JobError, match="still running"):
+        jm.launch("search", {"resume": RUN_B})
+    assert set(jm.jobs) == {"fake"}                    # the resume never spawned
+
+
+def test_search_resume_validation_refusals(repo):
+    jm = J.JobManager(repo, repo / "runs")
+    with pytest.raises(J.JobError, match="run id"):
+        jm.build_argv("search", {"resume": True})          # the CLI needs a DIR, not a bare flag
+    with pytest.raises(J.JobError):
+        jm.build_argv("search", {"resume": "not-a-run"})
+    with pytest.raises(J.JobError, match="unknown run"):
+        jm.build_argv("search", {"resume": "20261025T000099Z-screen-abc999"})
+    with pytest.raises(J.JobError, match="repository"):
+        jm.build_argv("search", {"config": "../outside.yaml", "resume": RUN_B})
+    with pytest.raises(J.JobError, match="config/brief"):
+        jm.build_argv("search", {})
+    with pytest.raises(J.JobError, match="allow_config_change"):
+        jm.build_argv("search", {"config": "examples/cfg.yaml", "allow_config_change": True})
+    for bad in ({"resume": RUN_B, "budget": 0}, {"resume": RUN_B, "budget": 5001},
+                {"resume": RUN_B, "max_evals": 0}, {"resume": RUN_B, "max_evals": 1_000_001},
+                {"resume": RUN_B, "mode": "fast"}):
+        with pytest.raises(J.JobError):
+            jm.build_argv("search", bad)
+
+
+def test_search_resume_argv_survives_a_gui_restart(repo):
+    jm = J.JobManager(repo, repo / "runs")
+    run_dir = str((repo / "runs" / RUN_B).resolve())
+    argv = ["search", "--budget", "12", "--resume", run_dir]
+    jobs_dir = repo / "runs" / "gui_jobs"
+    jobs_dir.mkdir(parents=True, exist_ok=True)
+    (jobs_dir / "20261025T000000-abcdef.json").write_text(json.dumps(
+        {"id": "20261025T000000-abcdef", "kind": "search", "argv": argv, "gpu": True,
+         "status": "done", "returncode": 0, "started": "t", "ended": "t"}))
+    [row] = J.JobManager(repo, repo / "runs").list()
+    assert row["kind"] == "search" and row["argv"] == argv and row["gpu"] is True
+    assert row["command"] == "hornlab-search search --budget 12 --resume " + run_dir

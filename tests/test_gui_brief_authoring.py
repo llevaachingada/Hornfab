@@ -234,7 +234,38 @@ def test_provenance_views_are_wired():
     assert "pycma logs (raw, never parsed; each file serves by its exact name):" in src
     # the pure helpers are exported for the offline node test (view3d.js::mirrorMesh precedent)
     assert "export { runProvenanceGroup, renderProvenanceBadges, restartScheduleHtml, stepChipHtml," in src
-    assert "stepInvByName, qdProvenanceCaption, f11CaveatHtml };" in src
+    assert "stopAffordanceFor, stopRegionHtml, currentRunCard," in src
+    assert "toolbarPillFor, toolbarPillHtml, resumeArgsFor, resumeableSearchJob };" in src
+
+
+def test_stop_run_affordance_is_wired():
+    """Owner request "a button that stops the current run": Status page — the decision is by job
+    OWNERSHIP (JobManager only knows GUI jobs; one GPU at a time), the two-step arm runs without a
+    confirm() dialog and states the honest post-action truth; the Launch row keeps its existing
+    behavior with matching copy; the current-run card refreshes on the poll."""
+    src = APPJS.read_text(encoding="utf-8")
+    jobs_fetch_ct = src.count("/api/jobs")
+    assert src.count("[data, jobs] = await Promise.all([") >= 1 and jobs_fetch_ct >= 2
+    assert "renderStatus(data, jobs)" in src and "updateStatusInPlace(data, jobs)" in src
+    # the decision helper + the region builder are pure, wired, and node-tested via the export
+    assert "function stopAffordanceFor(jobs, lock)" in src and "function stopRegionHtml(aff)" in src
+    assert "stopAffordanceFor(jobs, lock)" in src          # called at render AND refresh
+    assert 'cc.innerHTML = currentRunCard(data.current, aff); wireStopButton(aff);' in src  # live poll
+    assert "currentRunCard(cur, aff)" in src               # card renders inside, layout unchanged
+    assert 'id="st-current-card"' in src
+    # three states, exact text (Confirm stop is the arm-state literal, not an HTML fragment)
+    assert ">Stop run</button>" in src and '"Confirm stop"' in src
+    assert "click again to confirm — the job's process tree is killed and a gpu-clean pass runs" in src
+    assert "stop requested — the run dir records the stop; wait for the job to exit + a gpu-clean pass" in src
+    assert "run started outside the GUI (terminal) — the GUI only stops its own jobs" in src
+    assert "no run folder written yet" in src              # startup-window card, no invented numbers
+    # the cancel actually targets the live endpoint; no browser confirm() on the status page
+    assert '"/api/job/" + aff.job.id + "/cancel"' in src
+    assert "wireStopButton" in src and "aria-pressed" in src
+    # Launch row: same semantics, existing behavior kept (confirm() dialog stays; copy aligned)
+    assert 'title="Stops the run: the job\'s process tree is killed and a gpu-clean pass runs after GPU jobs">Stop run</button>' in src
+    assert "Stop requested — the job is killed and a gpu-clean pass runs after GPU jobs." in src
+    assert 'confirm("Cancel this job?")' in src            # Launch behavior untouched
 
 
 def test_balloon_entry_point_already_wired():
@@ -276,8 +307,16 @@ globalThis.fetch = () => Promise.reject(new Error("offline shim"));
 
 const app = await import(pathToFileURL(process.argv[2]).href);
 const { runProvenanceGroup, renderProvenanceBadges, restartScheduleHtml, stepChipHtml,
-        stepInvByName, qdProvenanceCaption, f11CaveatHtml } = app;
+        stepInvByName, qdProvenanceCaption, f11CaveatHtml,
+        stopAffordanceFor, stopRegionHtml, currentRunCard,
+        toolbarPillFor, toolbarPillHtml, resumeArgsFor, resumeableSearchJob } = app;
+assert.equal(typeof stopAffordanceFor, "function");
+assert.equal(typeof stopRegionHtml, "function");
 assert.equal(typeof renderProvenanceBadges, "function");
+assert.equal(typeof toolbarPillFor, "function");
+assert.equal(typeof toolbarPillHtml, "function");
+assert.equal(typeof resumeArgsFor, "function");
+assert.equal(typeof resumeableSearchJob, "function");
 
 // badge builder: non-default only + exact key-path tooltips
 assert.equal(renderProvenanceBadges({}), "");
@@ -500,6 +539,116 @@ const olderLogs = restartScheduleHtml({ id: "R", restart_dirs: ["cma/restart_0"]
 assert.match(olderLogs, /run\.json predates the restarts block/);
 assert.match(olderLogs, /href="\/runs\/R\/cma\/restart_0\/outcmaes_progress\.txt"/);
 
+// stop-run affordance (Status page): the ownership rule and the exact copy of all three states
+const JGUI = { id: "job1", kind: "search", argv: ["search", "--config", "a.yaml", "--budget", "60"], gpu: true, status: "running" };
+const JGPU2 = { id: "job0", kind: "run", argv: ["run", "--config", "x.yaml"], gpu: true, status: "running" };
+const JCPU = { id: "job2", kind: "report", argv: ["report", "--run", "r"], gpu: false, status: "running" };
+const JDONE = { id: "job3", kind: "run", argv: ["run", "--config", "b.yaml"], gpu: true, status: "done" };
+let aff = stopAffordanceFor([JGUI], null);
+assert.equal(aff.state, "gui-cancel");                  // a GUI GPU job IS the current run (one GPU at a time)
+assert.equal(aff.job.id, "job1");
+assert.equal(aff.note, "");
+assert.equal(stopAffordanceFor([JCPU], null).state, "idle");      // a running CPU job is not the GPU run
+assert.equal(stopAffordanceFor([JDONE], null).state, "idle");    // done/cancelled jobs are ignored
+assert.equal(stopAffordanceFor([], null).state, "idle");
+assert.equal(stopAffordanceFor(undefined, undefined).state, "idle");  // nothing running: absence is honest
+aff = stopAffordanceFor(null, { pid: 4242, command: "hornlab-search search --config c.yaml", alive: true });
+assert.equal(aff.state, "external");                    // lock held, no GUI GPU job = a terminal run
+assert.equal(aff.lock.pid, 4242);
+aff = stopAffordanceFor([null, { id: "x", kind: "run", gpu: false, status: "running" }, JGPU2, JGUI], null);
+assert.equal(aff.state, "gui-cancel");
+assert.equal(aff.job.id, "job1");                       // the newest running GPU job owns the GPU
+assert.ok(aff.note.includes("2 GUI GPU jobs"), aff.note);
+// the region copy — external is a pill, never a button; idle renders nothing
+assert.equal(stopRegionHtml({ state: "idle" }), "");
+assert.equal(stopRegionHtml(null), "");
+const extStop = stopRegionHtml({ state: "external", lock: { pid: 4242, command: "hornlab-search search --config c.yaml" } });
+assert.match(extStop, /run started outside the GUI \(terminal\) — the GUI only stops its own jobs/);
+assert.ok(!extStop.includes("<button"), extStop);       // never a button for a non-GUI run
+assert.ok(extStop.includes("pid 4242"), extStop);       // the lock it points at is traceable
+const guiStop = stopRegionHtml({ state: "gui-cancel", job: JGUI });
+assert.match(guiStop, /<button class="btn danger" id="btn-stop-run"/);
+assert.match(guiStop, />Stop run<\/button>/);           // face label
+assert.match(guiStop, /GUI job job1 · search · --config a\.yaml --budget 60/);  // kind + argv tail
+assert.ok(guiStop.includes("Stops the run: the job's process tree is killed"), guiStop);
+// the card without a run folder yet (startup window): minimal, no invented progress numbers
+const card0 = currentRunCard(null, { state: "gui-cancel", job: JGUI });
+assert.match(card0, /Running now/);
+assert.match(card0, /GPU job search — --config a\.yaml --budget 60/);
+assert.match(card0, /no run folder written yet/);
+assert.ok(!card0.includes("progress-bar"), card0);
+assert.equal(currentRunCard(null, { state: "idle" }), "");
+assert.equal(currentRunCard(null, null), "");
+
+// toolbar run-control pill (nav, every view): the decision matrix behind toolbarPillFor
+// Resume contract (landed jobs.py): --resume takes a RUN ID (a bare true is refused), so the run id
+// is sourced from the stopped job's own log and validated against the /api/runs summaries.
+const JRUN = { id: "j9", kind: "run", argv: ["run", "--config", "r.yaml"], gpu: true, status: "running" };
+const JST1 = { id: "a1", kind: "search", argv: ["search", "--config", "examples/briefs/x.yaml", "--budget", "500"], gpu: true,
+               status: "cancelled", log_tail: ["run dir: runs/20261025T090000Z-search-abc123", "eval 99 ok"] };
+const JST2 = { id: "b2", kind: "search", argv: ["search", "--config", "y.yaml"], gpu: true, status: "failed", returncode: 1,
+               log_tail: ["run dir: runs/20261025T090000Z-search-abc123", "run dir: runs/20261024T010000Z-search-789abc"] };
+const JRS = { id: "c3", kind: "search", argv: ["search", "--config", "z.yaml"], gpu: true, status: "ended (GUI restarted)" };
+const JOKD = { id: "d4", kind: "search", argv: ["search", "--config", "o.yaml"], gpu: true, status: "done" };
+const RUNV = { id: "20261025T090000Z-search-abc123", mode: "verify", budget: 500, n: 99 };
+const RUNF = { id: "20261025T090000Z-search-abc123", mode: "screen", budget: 100, n: 100 };   // budget exhausted: finished
+const RUNNB = { id: "20261024T010000Z-search-789abc", budget: null, n: 7 };                    // no budget recorded
+assert.equal(toolbarPillFor([], null, []).state, "idle");
+assert.equal(toolbarPillFor(undefined, undefined, undefined).state, "idle");   // nothing known: renders nothing
+assert.equal(toolbarPillFor([JOKD], null, [RUNV]).state, "idle");              // finished normally: no offer
+assert.equal(toolbarPillFor([JRS], null, [RUNV]).state, "idle");               // post-restart state unknown: never offered
+assert.equal(resumeableSearchJob(JOKD), false);
+assert.equal(resumeableSearchJob(null), false);
+assert.equal(resumeableSearchJob({ kind: "run", status: "cancelled" }), false);
+assert.equal(resumeableSearchJob(JST2), true);
+let tp = toolbarPillFor([JST1], null, [RUNV]);
+assert.equal(tp.state, "resume");
+assert.equal(tp.job.id, "a1");
+assert.deepEqual(tp.args, { resume: "20261025T090000Z-search-abc123", mode: "verify" });   // mode carried: no screen rewrite
+assert.equal(toolbarPillFor([JST1], null, []).args, null);          // runs list empty: cannot validate a run id
+assert.equal(toolbarPillFor([JST1], null, undefined).args, null);   // runs not polled yet: degrade, never guess
+assert.equal(toolbarPillFor([JST1], null, [RUNF]).args, null);      // budget exhausted = finished: pill offers nothing
+tp = toolbarPillFor([JST2, JST1], null, [RUNV, RUNNB]);
+assert.equal(tp.job.id, "b2");                     // the newest stopped search wins, list-order-independent
+assert.deepEqual(tp.args, { resume: "20261025T090000Z-search-abc123", mode: "verify" });  // log names two IDs: newest-backed wins
+assert.deepEqual(resumeArgsFor(JST1, [{ id: "20261025T090000Z-search-abc123" }]), { resume: "20261025T090000Z-search-abc123" });
+assert.deepEqual(resumeArgsFor(JST2, [RUNNB]), { resume: "20261024T010000Z-search-789abc" });  // budget null: still resumable
+assert.equal(resumeArgsFor(JST1, [RUNF]), null);
+assert.equal(resumeArgsFor(null, [RUNV]), null);
+assert.equal(resumeArgsFor(JRUN, [RUNV]), null);   // resume is search-only
+assert.equal(resumeArgsFor(JRS, [RUNV]), null);    // "ended (GUI restarted)" is never resumeable
+assert.equal(resumeArgsFor({ kind: "search", log_tail: ["no run id here"] }, [RUNV]), null);
+assert.equal(resumeArgsFor(JST1, undefined), null);
+assert.equal(toolbarPillFor([JRUN], null, [RUNV]).state, "stop");      // a running GUI GPU job beats resume
+assert.equal(toolbarPillFor([JST1, JRUN], null, [RUNV]).state, "stop");
+assert.equal(toolbarPillFor([JST1, JRUN], null, [RUNV]).job.id, "j9");
+assert.equal(toolbarPillFor([JST1], { alive: true, pid: 7, command: "x" }, [RUNV]).state, "external");  // foreign lock beats resume
+assert.equal(toolbarPillFor([JST1, JCPU], null, [RUNV]).state, "resume");   // only a CPU job running: resume still holds
+// pill HTML: exact faces + ids + honest absences; a foreign run is never a button
+assert.equal(toolbarPillHtml({ state: "idle" }), "");
+assert.equal(toolbarPillHtml(null), "");
+const extPill = toolbarPillHtml({ state: "external", lock: { pid: 4242, command: "hornlab-search search --config c.yaml" } });
+assert.ok(!extPill.includes("<button"), extPill);
+assert.match(extPill, /external GPU run · pid 4242/);
+assert.match(extPill, /GPU lock held externally \(pid 4242\) — stop it from its own terminal/);
+assert.ok(extPill.includes("hornlab-search search --config c.yaml"), extPill);   // the lock it names
+const stopPill = toolbarPillHtml({ state: "stop", job: JRUN });
+assert.match(stopPill, /<button class="btn danger" id="tb-stop-run"/);
+assert.match(stopPill, />■ Stop<\/button>/);
+assert.ok(stopPill.includes("Stops the run: process tree killed + gpu-clean"), stopPill);
+assert.match(stopPill, /job j9 · run/);
+assert.ok(stopPill.includes('id="tb-stop-msg"'), stopPill);
+assert.match(toolbarPillHtml({ state: "stop", job: JRUN, note: "2 GUI GPU jobs are running" }), /2 GUI GPU jobs are running/);
+const resPill = toolbarPillHtml({ state: "resume", job: JST1, args: { resume: "20261025T090000Z-search-abc123", mode: "verify" } });
+assert.match(resPill, /<button class="btn primary" id="tb-resume-run"/);
+assert.match(resPill, />▶ Resume search<\/button>/);
+assert.match(resPill, /job a1 · resume 20261025T090000Z-search-abc123/);
+assert.ok(resPill.includes('id="tb-resume-msg"'), resPill);
+assert.match(resPill, /budget is per invocation/);
+const degPill = toolbarPillHtml({ state: "resume", job: { id: "f6", kind: "search" }, args: null });
+assert.ok(!degPill.includes("<button"), degPill);          // degraded: a note, not a broken button
+assert.match(degPill, /no resumable run folder/);
+
 console.log("PROV OK");
 '''
 
@@ -635,3 +784,58 @@ def test_3d_frames_prepare_offline(tmp_path):
     r = subprocess.run([node, str(script), str(ROOT / "hornlab_search" / "gui" / "static" / "view3d.js")],
                        capture_output=True, text=True, cwd=str(tmp_path))
     assert "FRAMES OK" in r.stdout, f"node test failed:\nstdout: {r.stdout}\nstderr: {r.stderr}"
+
+
+# ── Toolbar run-control pill + resume affordance (owner decision, chat 2026-10-25) ───────────────
+# The Status page's Stop ALSO lives in the left nav on every view, and stopped GUI search runs get a
+# Resume affordance. The nav markup is a static file served verbatim (server.py::_static, not
+# rendered per request), so app.js injects the pill holder itself and index.html stays untouched.
+
+def test_toolbar_run_pill_is_wired():
+    """app.js-only nav placement (holder injected below the nav links, after #app-nav ul), the pure
+    decision helper + pill HTML node-tested via the exports, the shared two-step arm reused by
+    status stop + toolbar stop + resume, the pill fed by the status poll AND its own 10 s poll,
+    route() re-invocation, and the resume POST contract defended by a /api/preview probe."""
+    src = APPJS.read_text(encoding="utf-8")
+    idx = (ROOT / "hornlab_search" / "gui" / "static" / "index.html").read_text(encoding="utf-8")
+    # placement: injected by app.js, index.html untouched, below the nav links (after #app-nav ul)
+    assert "nav-runctl" not in idx
+    assert 'holder.id = "nav-runctl"' in src and "ul.after(holder)" in src
+    # route() re-invokes the pill statelessly (sig-skip keeps an armed click alive)
+    route_body = src.split("function route() {", 1)[1].split("\n}\n", 1)[0]
+    assert "renderNavPill();" in route_body
+    assert "_pillSig" in src and "holder.firstElementChild" in src
+    # the shared two-step arm is reused, not duplicated: definition + status stop + toolbar stop + resume
+    assert "function wireTwoStepArm(btn, msgId, opts)" in src
+    assert src.count("wireTwoStepArm(") >= 4
+    # data: the status page's poll feeds the pill (render + refresh), plus a small dedicated poll
+    assert src.count("pillFeed(data, jobs)") >= 2
+    assert "async function pollNavOnce()" in src
+    assert "setInterval(() => { if (!document.hidden) pollNavOnce(); }, 10000)" in src
+    assert 'document.addEventListener("DOMContentLoaded", startNavRunPill, { once: true });' in src
+    # copy: grounded, one line, existing --bad/--accent classes (consistent with the Status page)
+    assert ">■ Stop</button>" in src and ">▶ Resume search</button>" in src
+    assert 'title="Stops the run: process tree killed + gpu-clean"' in src
+    assert '"Confirm stop"' in src and '"Confirm resume"' in src
+    assert "click again to confirm — process tree killed + gpu-clean" in src
+    assert "stop requested — wait for the job to exit + the gpu-clean pass" in src
+    assert "external GPU run · pid" in src and "stop it from its own terminal" in src
+    assert "cached evals replay free" in src and "budget is per invocation" in src
+    # resume POST contract (LANDED jobs.py): --resume takes a RUN ID — sourced from the stopped
+    # job's own log and validated against /api/runs summaries; the preview probe still gates the
+    # launch on the server's own --resume* flag in its previewed argv
+    assert 'post("/api/preview", { kind: "search", args: pill.args })' in src
+    assert 'post("/api/jobs", { kind: "search", args: pill.args })' in src
+    assert 't.startsWith("--resume")' in src
+    assert 'api("/api/runs")' in src                    # the run-id validation data source
+    assert "const args = { resume: r.id };" in src      # a run id, never a bare boolean
+    assert "if (r.mode) args.mode = r.mode;" in src     # screen default would rewrite run.json mode
+    assert "r.budget == null || r.n < r.budget" in src  # an exhausted run is finished: no pill offer
+    # honest degrade when no resumable run can be sourced (never a silently fresh search)
+    assert "would start a FRESH search, not a resume" in src
+    assert "no resumable run folder" in src
+    # the pill section carries no WebGL code and nothing the [data-v3d] disposal sweep touches
+    pill_block = src.split("Toolbar run-control pill (left nav", 1)[1].split("function currentRunCard", 1)[0]
+    assert pill_block.count("data-v3d") == 0
+    assert 'id="tb-stop-run"' in pill_block and 'id="tb-resume-run"' in pill_block
+    assert 'id="tb-stop-msg"' in pill_block and 'id="tb-resume-msg"' in pill_block

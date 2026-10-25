@@ -76,6 +76,10 @@ function route() {
   if (!location.hash.startsWith("#/status") && location.hash !== "" && location.hash !== "#/") {
     clearStatusTimer();
   }
+  // The nav run-control pill: #view-root is replaced but the nav never is, so re-invoking it here
+  // keeps wiring fresh on every route/theme-observer re-render; the sig-skip keeps an armed click
+  // alive when nothing changed (stateless-idempotent; never tagged [data-v3d]).
+  renderNavPill();
 
   const fresh = document.createElement("div");
   fresh.id = "view-root"; fresh.className = ROOT.className; fresh.setAttribute("role", "main");
@@ -335,19 +339,23 @@ function clearStatusTimer() {
 async function viewStatus() {
   const ROOT = currentRoot();     // this view's own container (see route())
   if (!_statusRendered) skel("Loading status…");
-  let data;
-  try { data = await api("/api/status"); }
-  catch (e) {
+  let data, jobs;
+  try {
+    [data, jobs] = await Promise.all([
+      api("/api/status"),
+      api("/api/jobs").catch(() => []),   // the stop affordance correlates the GUI's own jobs
+    ]);
+  } catch (e) {
     if (!_statusRendered) ROOT.innerHTML = errBanner("Could not load status: " + e.message);
     return;
   }
 
   if (!_statusRendered) {
     if (ROOT !== currentRoot()) return;   // the user navigated away while this loaded
-  renderStatus(data);
+  renderStatus(data, jobs);
     _statusRendered = true;
   } else {
-    updateStatusInPlace(data);
+    updateStatusInPlace(data, jobs);
   }
 
   if (!_statusTimer) {
@@ -360,13 +368,14 @@ async function viewStatus() {
   }
 }
 
-function renderStatus(data) {
+function renderStatus(data, jobs = []) {
   const lock = data.gpu_lock;
   const disk = data.disk || {};
   const ql = data.queue_log || {};
   const wl = data.watchdog_log || [];
   const steps = ql.steps || [];
   const cur = data.current;
+  const aff = stopAffordanceFor(jobs, lock);
 
   ROOT.innerHTML = `
     <div class="stack" style="gap:24px">
@@ -390,7 +399,7 @@ function renderStatus(data) {
           <div class="sub" id="st-disk-sub">${disk.total_gb != null ? disk.total_gb.toFixed(0) + " GB total · " + (100 - disk.free_gb / disk.total_gb * 100).toFixed(0) + "% used" : ""}</div>
         </div>
       </div>
-      ${cur ? currentRunCard(cur) : ""}
+      <div id="st-current-card">${currentRunCard(cur, aff)}</div>
       <div class="btn-row">
         <button id="btn-refresh">↻ Refresh</button>
         <button id="btn-gpuclean" class="danger" ${lock && lock.alive ? "disabled title='A live job holds the GPU lock'" : ""}>gpu-clean</button>
@@ -407,6 +416,8 @@ function renderStatus(data) {
     </div>`;
 
   document.getElementById("btn-refresh").onclick = () => { _statusRendered = false; viewStatus(); };
+  wireStopButton(aff);
+  pillFeed(data, jobs);   // the nav pill shares this poll's look (no extra fetch on this view)
   document.getElementById("btn-gpuclean").onclick = async () => {
     if (!confirm("Run gpu-clean? This kills stale Julia/BEAT processes.")) return;
     const r = await post("/api/gpu-clean", {});
@@ -434,8 +445,356 @@ function lockCardHtml(lock) {
   </div>`;
 }
 
-function currentRunCard(cur) {
-  if (!cur) return "";
+/** The stop-run affordance for the Status page (pure): JobManager only tracks GUI-started jobs, so
+ *  the GUI's honest correlation is by job ownership. One GPU job at a time makes "a GUI-started GPU
+ *  job is running" unambiguous — that job IS the current run, labelled with its kind + argv tail.
+ *  A lock held with NO GUI GPU job = a run started outside the GUI (terminal): never a button.
+ *  Nothing running => idle => nothing rendered (absence is honest).
+ *  Returns {state: "gui-cancel"|"external"|"idle", job?, note?, lock?}. */
+function stopAffordanceFor(jobs, lock) {
+  const list = Array.isArray(jobs) ? jobs : [];
+  const runningGpu = list.filter(j => j && j.status === "running" && j.gpu === true);
+  if (runningGpu.length) {
+    const j = runningGpu[runningGpu.length - 1];   // the newest one owns the GPU (one GPU at a time)
+    return { state: "gui-cancel", job: j,
+             note: runningGpu.length > 1 ? `${runningGpu.length} GUI GPU jobs are running — the newest one owns the GPU lock` : "" };
+  }
+  const l = (lock && typeof lock === "object") ? lock : null;
+  if (l && l.alive) return { state: "external", lock: l };
+  return { state: "idle" };
+}
+
+/** One stop-region state as HTML (pure): gui-cancel => the danger Stop button + what it targets;
+ *  external => the informational pill (never a button); idle => nothing. */
+function stopRegionHtml(aff) {
+  if (!aff || aff.state === "idle") return "";
+  if (aff.state === "external") {
+    const l = aff.lock || {};
+    return `<div style="margin-top:8px"><span class="pill warn" title="${esc("GPU lock held by pid " + (l.pid != null ? l.pid : "?") + ": " + (l.command || ""))}">run started outside the GUI (terminal) — the GUI only stops its own jobs</span></div>`;
+  }
+  const j = aff.job || {};
+  const tail = String(Array.isArray(j.argv) ? j.argv.slice(1).join(" ") : "").slice(0, 90);
+  return `<div style="margin-top:8px">
+    <div class="btn-row" style="flex-wrap:wrap;gap:8px;align-items:center">
+      <button class="btn danger" id="btn-stop-run" title="Stops the run: the job's process tree is killed and a gpu-clean pass runs after GPU jobs">Stop run</button>
+      <span class="mono muted" style="font-size:0.75rem" id="st-stop-what">GUI job ${esc(j.id || "")} · ${esc(j.kind || "")}${tail ? " · " + esc(tail) : ""}</span>
+    </div>
+    ${aff.note ? `<div class="hint" style="margin:4px 0 0">${esc(aff.note)}</div>` : ""}
+    <div class="hint" id="st-stop-msg" role="status" style="margin:4px 0 0"></div>
+  </div>`;
+}
+
+/** Shared two-step arm for dangerous one-liner buttons (no confirm() dialogs): click 1 arms — the
+ *  button reads opts.armLabel, opts.armedMsgHtml (HTML) states what the second click does, and the
+ *  arm clears itself after 5 s; click 2 restores the face label and runs opts.fire(btn, msgEl). The
+ *  message element is looked up by id at click time, so re-renders may replace it. Shared by the
+ *  Status stop button, the nav pill's stop and the nav pill's resume. */
+function wireTwoStepArm(btn, msgId, opts) {
+  if (!btn) return;
+  const face = btn.textContent;
+  let armed = false, timer = null;
+  const msg = () => (typeof msgId === "string" ? document.getElementById(msgId) : msgId);
+  const disarm = () => {
+    armed = false;
+    if (timer) { clearTimeout(timer); timer = null; }
+    if (btn.isConnected) {
+      btn.textContent = face;
+      btn.removeAttribute("aria-pressed");
+      const m = msg();
+      if (m) m.innerHTML = "";
+    }
+  };
+  btn.onclick = async () => {
+    if (!armed) {
+      armed = true;
+      btn.textContent = opts.armLabel;
+      btn.setAttribute("aria-pressed", "true");
+      const m = msg();
+      if (m) m.innerHTML = opts.armedMsgHtml || "";
+      if (opts.onArm) opts.onArm(m);
+      timer = setTimeout(disarm, 5000);
+      return;
+    }
+    if (timer) { clearTimeout(timer); timer = null; }
+    armed = false;
+    btn.textContent = face;
+    btn.removeAttribute("aria-pressed");
+    await opts.fire(btn, msg());
+  };
+}
+
+/** Two-step arm for the Status Stop button (no confirm() dialogs): the first click arms ("Confirm
+ *  stop", auto-disarms after 5 s), the second sends the cancel and shows the honest post-action
+ *  status. Called on every status render/refresh — the current state always comes from the last
+ *  poll. */
+function wireStopButton(aff) {
+  const btn = document.getElementById("btn-stop-run");
+  if (!btn || !aff || aff.state !== "gui-cancel" || !aff.job) return;
+  wireTwoStepArm(btn, "st-stop-msg", {
+    armLabel: "Confirm stop",
+    armedMsgHtml: `<span class="warn-text">click again to confirm — the job's process tree is killed and a gpu-clean pass runs</span>`,
+    fire: async (b, m) => {
+      b.disabled = true;
+      if (m) m.textContent = "stop requested — the run dir records the stop; wait for the job to exit + a gpu-clean pass";
+      const r = await post("/api/job/" + aff.job.id + "/cancel", {});
+      if (r && r.error && m) m.innerHTML = `<span class="warn-text">${esc(r.error)}</span>`;
+      else showToast("Stop requested — the job is killed and a gpu-clean pass runs after GPU jobs.", "info");
+    }
+  });
+}
+
+// ── Toolbar run-control pill (left nav, every view) ─────────────────────────────────────────
+// Owner decision: the run Stop control ALSO lives in the left nav as a compact pill on every view,
+// plus a Resume affordance for stopped GUI search runs. The nav markup is a static file served
+// verbatim (server.py::_static — not rendered per request), so app.js owns the pill end to end and
+// index.html stays untouched. Data: the Status page's existing /api/status + /api/jobs poll feeds
+// the pill, and a small dedicated poll (10 s, skipped while the tab is hidden; /api/jobs +
+// /api/status + /api/runs) covers every other route. The holder is injected once below the nav
+// links; every re-render is content-only and stateless-idempotent (route() / theme MutationObserver
+// simply redraw it), carries no 3D disposal marker (route()'s sweep ignores it), styled with the
+// existing theme vars only.
+
+/** The run-dir line pattern the search log carries (same shape renderJobs keys its "Open run" link
+ *  on; data.py RUN_ID modulo the anchors). */
+const RUN_IN_LOG = /[0-9]{8}T[0-9]{6}Z-[a-z]+-[0-9a-f]{6}/g;
+
+/** Pure: the POST /api/preview + /api/jobs args to resume a stopped search job under the LANDED
+ *  contract — the CLI's --resume takes a run directory and jobs.py refuses a bare switch, so the
+ *  run id is sourced from the job's OWN log (the run-dir lines it printed) and validated against
+ *  the /api/runs summaries: the run must exist and must not have exhausted its recorded budget
+ *  (an exhausted run is finished — budget top-ups stay a deliberate owner action, never a pill
+ *  side-effect). Omitted on purpose: --config (the CLI reuses run_dir/config.yaml, so a config
+ *  edited after the stop can never poison the replay) and --budget (a per-invocation NEW-eval cap;
+ *  omitting reuses the run's own config budget). mode rides through from the run's summary rows —
+ *  the CLI's resume default is screen and run.json["mode"] gets rewritten, so a verify/final run
+ *  would silently drop its mode without it. null when no resumable run can be sourced: the pill
+ *  degrades to an honest note instead of a button. */
+function resumeArgsFor(job, runs) {
+  if (!job || job.kind !== "search" || !Array.isArray(job.log_tail)) return null;
+  const byId = new Map((Array.isArray(runs) ? runs : []).filter(r => r && r.id).map(r => [r.id, r]));
+  const seen = new Set();
+  for (const line of job.log_tail) {
+    const m = String(line).match(RUN_IN_LOG);
+    if (m) m.forEach(id => seen.add(id));
+  }
+  const cands = [...seen].map(id => byId.get(id)).filter(Boolean)
+    .filter(r => r.budget == null || r.n < r.budget)
+    .sort((a, b) => String(a.id).localeCompare(String(b.id)));
+  const r = cands.slice(-1)[0];
+  if (!r) return null;                                   // nothing in the runs list backs the log line
+  const args = { resume: r.id };
+  if (r.mode) args.mode = r.mode;                        // never let the screen default rewrite a mode
+  return args;
+}
+
+/** Pure: is this job a stopped GUI search run a Resume affordance may target? Cancelled by the
+ *  GUI, or failed with a real exit code. "ended (GUI restarted)" is deliberately excluded: whether
+ *  that subprocess still runs is unknown to this GUI session, and resuming it could double-run a
+ *  solver. */
+function resumeableSearchJob(j) {
+  return !!j && j.kind === "search" &&
+    (j.status === "cancelled" || (j.status === "failed" && j.returncode != null && j.returncode !== 0));
+}
+
+/** Pure decision for the nav pill: the Status page's stop rule first (a GUI GPU job running →
+ *  stop; a foreign lock → external), then the newest stopped search worth resuming; otherwise idle,
+ *  which renders nothing (absence honest). Returns {state: "stop"|"external"|"resume"|"idle",
+ *  job?, args?, lock?, note?}. External beats resume: with the GPU held the launch would only be
+ *  refused, so the pill stays quiet about it. */
+function toolbarPillFor(jobs, lock, runs) {
+  const stop = stopAffordanceFor(jobs, lock);
+  if (stop.state === "gui-cancel") return { state: "stop", job: stop.job, note: stop.note };
+  if (stop.state === "external") return { state: "external", lock: stop.lock };
+  const list = Array.isArray(jobs) ? jobs : [];
+  const cands = list.filter(resumeableSearchJob);
+  if (cands.length) {
+    const job = cands.slice().sort((a, b) => String(a.id).localeCompare(String(b.id))).slice(-1)[0];
+    return { state: "resume", job, args: resumeArgsFor(job, runs) };
+  }
+  return { state: "idle" };
+}
+
+/** Pure HTML for one pill state (compact, nav-width, existing theme classes/vars only): stop → the
+ *  danger button + what it targets; external → the muted pill naming the lock (never a button);
+ *  resume → the primary button + what it resumes (an honest note instead of a button when the argv
+ *  carries no --config); idle → "" (holder stays empty: honest absence, zero layout residue). */
+function toolbarPillHtml(pill) {
+  if (!pill || pill.state === "idle") return "";
+  const wrap = inner =>
+    `<div class="nav-runctl" style="padding:6px 16px 4px;display:grid;gap:4px;margin-top:2px">${inner}</div>`;
+  const BTN = "width:100%;padding:5px 10px;font-size:0.8rem;line-height:1.25";
+  const SUB = "font-size:0.64rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap";
+  const MSG = "font-size:0.66rem;line-height:1.3;white-space:normal";
+  if (pill.state === "external") {
+    const l = pill.lock || {};
+    const pid = l.pid != null ? l.pid : "?";
+    return wrap(`<span class="pill warn" style="display:block;${SUB}" title="${esc(`GPU lock held externally (pid ${pid}) — stop it from its own terminal: ${l.command || ""}`)}">external GPU run · pid ${esc(pid)}</span>`);
+  }
+  const j = pill.job || {};
+  if (pill.state === "stop") {
+    return wrap(`<button class="btn danger" id="tb-stop-run" style="${BTN}" title="Stops the run: process tree killed + gpu-clean">■ Stop</button>
+      <span class="mono muted" style="${SUB}">job ${esc(j.id || "?")} · ${esc(j.kind || "?")}</span>
+      ${pill.note ? `<span class="warn-text" style="${MSG}">${esc(pill.note)}</span>` : ""}
+      <span id="tb-stop-msg" role="status" style="${MSG}"></span>`);
+  }
+  if (!pill.args) {
+    return wrap(`<span class="pill warn" style="display:block;${SUB}" title="The stopped search's log names no resumable run folder (or its budget is exhausted) — a resume needs that run directory">stopped search — no resumable run folder</span>
+      <span class="mono muted" style="${SUB}">job ${esc(j.id || "?")} · no resume from here</span>`);
+  }
+  return wrap(`<button class="btn primary" id="tb-resume-run" style="${BTN}" title="Relaunches the stopped search from its run folder — cached evals replay free; budget is per invocation">▶ Resume search</button>
+    <span class="mono muted" style="${SUB}">job ${esc(j.id || "?")} · resume ${esc(pill.args.resume)}</span>
+    <span id="tb-resume-msg" role="status" style="${MSG}"></span>`);
+}
+
+/** The resume contract probe: /api/preview runs jobs.build_argv with the SAME validation a launch
+ *  would (and zero side effects), so the resume can only fire when the server's OWN previewed
+ *  command really carries a --resume* flag. If the landed jobs.py names its switch differently (or
+ *  an older build ignores args.resume), the probe returns not-ok and the button degrades to an
+ *  honest note — never a silently started fresh search. */
+async function resumePreview(pill) {
+  const r = await post("/api/preview", { kind: "search", args: pill.args });
+  if (r.error) return { ok: false, why: `the server refused the resume: ${r.error}` };
+  const toks = String(r.command || "").split(" ");
+  if (!toks.some(t => t.startsWith("--resume")))
+    return { ok: false, why: "this server build adds no --resume flag — a launch would start a FRESH search, not a resume; nothing was started" };
+  return { ok: true, command: String(r.command || "") };
+}
+
+/** Wires the pill's one button, stateless per render: each re-render rebuilds content and re-arms
+ *  from scratch, so an armed state never fires at a stale job. The resume arm probes the server's
+ *  contract on the ARM click and blocks the confirm click (with the honest reason) when the
+ *  previewed argv shows no resume flag. */
+function wireToolbarPill(pill) {
+  const stopBtn = document.getElementById("tb-stop-run");
+  if (stopBtn && pill.state === "stop" && pill.job) {
+    wireTwoStepArm(stopBtn, "tb-stop-msg", {
+      armLabel: "Confirm stop",
+      armedMsgHtml: `<span class="warn-text">click again to confirm — process tree killed + gpu-clean</span>`,
+      fire: async (b, m) => {
+        b.disabled = true;
+        if (m) m.textContent = "stop requested — wait for the job to exit + the gpu-clean pass";
+        const r = await post("/api/job/" + pill.job.id + "/cancel", {});
+        if (r && r.error) { if (m) m.innerHTML = `<span class="warn-text">${esc(r.error)}</span>`; }
+        else {
+          showToast("Stop requested — the job is killed and a gpu-clean pass runs after GPU jobs.", "info");
+          if (m) m.textContent = "stop requested";
+          pollNavOnce();
+        }
+      }
+    });
+    return;
+  }
+  const rsBtn = document.getElementById("tb-resume-run");
+  if (rsBtn && pill.state === "resume") wireResumeArm(rsBtn, "tb-resume-msg", pill);
+}
+
+function wireResumeArm(btn, msgId, pill) {
+  let probe = null;
+  wireTwoStepArm(btn, msgId, {
+    armLabel: "Confirm resume",
+    armedMsgHtml: `<span class="warn-text">checking the server's resume contract…</span>`,
+    onArm: m => {
+      resumePreview(pill).then(res => {
+        probe = res;
+        const mm = document.getElementById(msgId);
+        if (!mm || !mm.isConnected) return;
+        if (res.ok) {
+          mm.innerHTML = `<span class="warn-text">click again to confirm — resumes from its run folder; cached evals replay free, budget is per invocation</span>
+            <span class="mono muted" style="font-size:0.62rem;line-height:1.3;white-space:normal;word-break:break-all">${esc(res.command)}</span>`;
+        } else {
+          mm.innerHTML = `<span class="warn-text">${esc(res.why)}</span>`;
+        }
+      });
+    },
+    fire: async (b, m) => {
+      if (!probe || !probe.ok) {
+        if (m) m.innerHTML = `<span class="warn-text">${esc(probe ? probe.why : "the server's resume check has not returned — nothing was launched")}</span>`;
+        return;
+      }
+      b.disabled = true;
+      if (m) m.textContent = "launching…";
+      const r = await post("/api/jobs", { kind: "search", args: pill.args });
+      if (r && r.error) {
+        b.disabled = false;
+        if (m) m.innerHTML = `<span class="warn-text">${esc(r.error)}</span>`;
+      } else {
+        if (m) m.textContent = `resume launched — job ${r && r.id ? r.id : "?"}`;
+        showToast("Resume launched — cached evals replay free; the budget cap applies to its new evals.", "good");
+        pollNavOnce();
+      }
+    }
+  });
+}
+
+let _pillJobs = null, _pillStatus = null, _pillRuns = null, _pillTimer = null, _pillSig = "";
+
+/** Injects the pill holder once, directly below the nav links (after #app-nav ul, before the
+ *  .nav-spacer). The nav is never re-rendered by route() (only #view-root is), but the guard makes
+ *  the injection idempotent under any future re-render path. */
+function ensureNavRunCtl() {
+  let holder = document.getElementById("nav-runctl");
+  if (holder && holder.isConnected) return holder;
+  const nav = document.getElementById("app-nav");
+  if (!nav) return null;
+  holder = document.createElement("div");
+  holder.id = "nav-runctl";
+  const ul = nav.querySelector("ul");
+  if (ul) ul.after(holder); else nav.appendChild(holder);
+  return holder;
+}
+
+function renderNavPill() {
+  const holder = ensureNavRunCtl();
+  if (!holder) return;
+  const pill = toolbarPillFor(_pillJobs, _pillStatus ? _pillStatus.gpu_lock : null, _pillRuns);
+  const sig = JSON.stringify(pill);
+  if (sig === _pillSig && holder.firstElementChild) return;   // unchanged: keep the wired DOM (an armed click survives the poll)
+  _pillSig = sig;
+  holder.innerHTML = toolbarPillHtml(pill);
+  wireToolbarPill(pill);
+}
+
+async function pollNavOnce() {
+  const [jobs, st, runs] = await Promise.all([
+    api("/api/jobs").catch(() => null),
+    api("/api/status").catch(() => null),
+    api("/api/runs").catch(() => null),   // run summaries: the resume run-id validation (mode/budget/n)
+  ]);
+  if (jobs) _pillJobs = jobs;
+  if (st) _pillStatus = st;
+  if (runs) _pillRuns = runs;
+  renderNavPill();
+}
+
+/** The Status page's own /api/status + /api/jobs poll feeds the pill too (one shared look, no
+ *  extra fetch while that view is open). */
+function pillFeed(data, jobs) {
+  if (data) _pillStatus = data;
+  if (Array.isArray(jobs)) _pillJobs = jobs;
+  renderNavPill();
+}
+
+function startNavRunPill() {
+  renderNavPill();
+  pollNavOnce();                      // immediate feed: the resume state should not wait one tick
+  if (_pillTimer) return;
+  _pillTimer = setInterval(() => { if (!document.hidden) pollNavOnce(); }, 10000);
+}
+
+function currentRunCard(cur, aff = null) {
+  if (!cur) {
+    // the current-run card with no run folder yet: a GUI GPU job is running (startup window) —
+    // honest minimal card, no invented progress numbers
+    if (!aff || aff.state !== "gui-cancel") return "";
+    const j = aff.job || {};
+    const tail = String(Array.isArray(j.argv) ? j.argv.slice(1).join(" ") : "").slice(0, 90);
+    return `<div class="card running-card" style="margin-top:-4px">
+      <div class="eyebrow" style="margin-bottom:6px">Running now</div>
+      <div style="font-weight:500">GPU job ${esc(j.kind || "")}${tail ? ` — ${esc(tail)}` : ""}</div>
+      <p class="muted" style="font-size:0.82rem;margin:6px 0 0">no run folder written yet — evaluations appear here once the search starts writing.</p>
+      ${stopRegionHtml(aff)}
+    </div>`;
+  }
   const budget = cur.budget || 1;
   const pct = Math.min(100, Math.round((cur.n / budget) * 100));
   const over = !!(cur.budget && cur.n > cur.budget);
@@ -454,6 +813,7 @@ function currentRunCard(cur) {
       <div class="kpi"><span>Score: start</span><b>${fmt(cur.seed_j && cur.seed_j < 900 ? cur.seed_j : null)}</b></div>
       <div class="kpi"><span>Rate</span><b>${cur.rate_per_h ? cur.rate_per_h.toFixed(0) + "/h" : "–"}</b></div>
     </div>
+    ${stopRegionHtml(aff)}
   </div>`;
 }
 
@@ -477,14 +837,20 @@ function queueTimelineHtml(steps) {
   </div>`;
 }
 
-function updateStatusInPlace(data) {
+function updateStatusInPlace(data, jobs = []) {
   const lock = data.gpu_lock;
   const disk = data.disk || {};
   const ql = data.queue_log || {};
   const wl = data.watchdog_log || [];
+  const aff = stopAffordanceFor(jobs, lock);
 
   const sl = document.getElementById("st-lock");
   if (sl) sl.innerHTML = lockCardHtml(lock);
+
+  // the current-run card goes live on the poll: progress numbers refresh, the card appears when a
+  // run starts, and the stop affordance always reflects the last poll's jobs/lock state
+  const cc = document.getElementById("st-current-card");
+  if (cc) { cc.innerHTML = currentRunCard(data.current, aff); wireStopButton(aff); }
 
   const sv = document.getElementById("st-vram");
   if (sv) sv.innerHTML = `${data.vram_mib != null ? data.vram_mib.toFixed(0) : "–"} <small style="font-size:1rem">MiB</small>`;
@@ -506,6 +872,7 @@ function updateStatusInPlace(data) {
 
   const gc = document.getElementById("btn-gpuclean");
   if (gc) gc.disabled = !!(lock && lock.alive);
+  pillFeed(data, jobs);   // the nav pill shares this poll's look (no extra fetch on this view)
 }
 
 // ── View 2: Campaigns list ─────────────────────────────────────────
@@ -1241,7 +1608,9 @@ function f11CaveatHtml(d) {
 // Exported pure helpers for offline node tests (tests/test_gui_brief_authoring.py) — the
 // view3d.js::mirrorMesh precedent; unused by the browser module graph.
 export { runProvenanceGroup, renderProvenanceBadges, restartScheduleHtml, stepChipHtml,
-         stepInvByName, qdProvenanceCaption, f11CaveatHtml };
+         stepInvByName, qdProvenanceCaption, f11CaveatHtml,
+         stopAffordanceFor, stopRegionHtml, currentRunCard,
+         toolbarPillFor, toolbarPillHtml, resumeArgsFor, resumeableSearchJob };
 
 
 async function viewRunDetail(id) {
@@ -3150,7 +3519,7 @@ function renderJobs(jobs) {
 
     const logLines = (j.log_tail || []).join("\n");
     const cancelBtn = j.status === "running"
-      ? `<button class="btn danger cancel-job-btn" data-job-id="${esc(j.id)}">Cancel</button>` : "";
+      ? `<button class="btn danger cancel-job-btn" data-job-id="${esc(j.id)}" title="Stops the run: the job's process tree is killed and a gpu-clean pass runs after GPU jobs">Stop run</button>` : "";
 
     // Try to extract run ID from log
     let runLink = "";
@@ -3179,6 +3548,7 @@ function renderJobs(jobs) {
       if (!confirm("Cancel this job?")) return;
       const r = await post("/api/job/" + btn.dataset.jobId + "/cancel", {});
       if (r.error) showToast(r.error, "error");
+      else showToast("Stop requested — the job is killed and a gpu-clean pass runs after GPU jobs.", "info");
       refreshJobs();
     };
   });
@@ -3213,6 +3583,10 @@ function viewGlossary() {
 // ── Init ───────────────────────────────────────────────────────────
 
 route();
+// The nav pill's dedicated 10 s poll starts once the page has loaded. Modules run before
+// DOMContentLoaded fires, so the event always lands after boot; the listener keeps the offline
+// node import of this module timer-free (its shim's addEventListener is a no-op).
+document.addEventListener("DOMContentLoaded", startNavRunPill, { once: true });
 
 // Redraw charts on theme change. route() replaces #view-root, so snapshot scroll and
 // filter/form state, re-render, then restore once the async view has settled. The one

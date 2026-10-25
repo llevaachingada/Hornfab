@@ -22,6 +22,8 @@ from . import data as D
 
 GPU_KINDS = {"run", "search", "campaign", "verify"}    # campaign dry-run tier is not a GPU job
 TIERS = {"dry-run", "screen", "compare"}
+SEARCH_MODES = ("screen", "verify", "final")           # cli.py's `search --mode` choices
+MAX_EVALS_CAP = 1_000_000                              # GUI sanity cap for --max-evals
 FAMILIES = re.compile(r"^[a-z0-9_]+(,[a-z0-9_]+)*$")
 CLI_BOOT = "import sys; from hornlab_search.cli import main; sys.exit(main(sys.argv[1:]))"
 
@@ -120,8 +122,47 @@ class JobManager:
         if kind == "run":
             return ["run", "--config", self._repo_file(a.get("config")), *brief, *seed], True
         if kind == "search":
-            budget = ["--budget", self._int(a.get("budget", 60), 1, 5000, "budget")]
-            return ["search", "--config", self._repo_file(a.get("config")), *budget, *brief, *seed], True
+            # Resume is an ADDITIVE option on the same kind, so GPU classification, the one-GPU
+            # launch lock, cancel and past-job reload stay exactly the search kind's. The CLI's
+            # ``--resume`` takes a DIRECTORY (cli.py:641-646,1322), not a bare flag: a GUI run id
+            # is resolved to runs/<id> with the same validation every other run arg uses. On a
+            # resume the config is optional in the CLI (run_dir/config.yaml is used when absent),
+            # so only an explicit config is emitted. A resume omits --budget unless given, letting
+            # the CLI use the run's own config budget; a fresh search keeps the 60 default.
+            resume = a.get("resume")
+            if resume is True:
+                raise JobError("resume needs a run id: the CLI's --resume takes a run directory, "
+                               "so a bare true cannot identify the run")
+            resume_dir = (self._run_id(resume) if resume not in (None, "", False) else None)
+            if a.get("config"):
+                cfg = self._repo_file(a["config"])
+            elif resume_dir is None:
+                raise JobError("a config/brief path is required")   # same refusal as _repo_file
+            else:
+                cfg = None
+            argv = ["search"]
+            if cfg is not None:
+                argv += ["--config", cfg]
+            budget = a.get("budget")
+            if resume_dir is None:
+                argv += ["--budget", self._int(60 if budget in (None, "") else budget,
+                                               1, 5000, "budget")]
+            elif budget not in (None, ""):
+                argv += ["--budget", self._int(budget, 1, 5000, "budget")]
+            if a.get("max_evals") not in (None, ""):
+                argv += ["--max-evals", self._int(a["max_evals"], 1, MAX_EVALS_CAP, "max_evals")]
+            mode = a.get("mode")
+            if mode not in (None, ""):
+                if mode not in SEARCH_MODES:
+                    raise JobError(f"mode must be one of {list(SEARCH_MODES)}")
+                argv += ["--mode", mode]
+            if resume_dir is not None:
+                argv += ["--resume", resume_dir]
+            if a.get("allow_config_change"):
+                if resume_dir is None:
+                    raise JobError("allow_config_change only applies to a resume")
+                argv.append("--allow-config-change")
+            return [*argv, *brief, *seed], True
         if kind == "campaign":
             f = a.get("families", "")
             fams = (",".join(str(x) for x in f) if isinstance(f, (list, tuple)) else str(f)).replace(" ", "") or "all"
