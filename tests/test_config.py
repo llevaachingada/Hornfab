@@ -26,7 +26,7 @@ from hornlab_search.types import Design, MeshSpec, ObservationSpec, SolveSpec
 EXAMPLE_NAMES = ["osse_baseline", "throat_adapter", "icw_termination", "freeform_hv", "search_smoke"]
 
 # Config fields that the loader treats as optional (may legitimately be None).
-OPTIONAL_FIELDS = {"search.popsize", "mesh.band_split"}
+OPTIONAL_FIELDS = {"search.popsize", "search.restarts", "search.qd", "mesh.band_split"}
 
 
 def _load_example(name):

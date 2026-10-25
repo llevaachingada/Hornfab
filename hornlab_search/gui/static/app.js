@@ -54,6 +54,7 @@ const ROUTES = [
   { re: /^#\/runs$/,                    fn: () => viewRunsList() },
   { re: /^#\/run\/(.+)\/3d$/,           fn: m => viewRun3D(m[1]) },
   { re: /^#\/run\/(.+)\/evolution$/,    fn: m => viewEvolution(ROOT, m[1]) },
+  { re: /^#\/run\/(.+)\/archive$/,      fn: m => viewRunArchive(m[1]) },
   { re: /^#\/run\/(.+)$/,               fn: m => viewRunDetail(m[1]) },
   { re: /^#\/compare$/,                 fn: () => viewCompare() },
   { re: /^#\/briefs$/,                  fn: () => viewBriefs() },
@@ -869,6 +870,124 @@ function renderRunsList(allRuns) {
 
 // ── View 3 detail: Run detail ──────────────────────────────────────
 
+// -- WP11b: CMA-ME quality-diversity atlas (read-only, plain canvas) -----------
+// Data: GET /api/archive/<run> (data.py::run_archive) over the pinned archive_heatmap.json:
+//   {bins: [bins_h, bins_v], ranges: {h: [lo, hi], v: [lo, hi]},
+//    cells: [{h_center, v_center, objective, design_hash}],
+//    descriptors: {h: name, v: name}}   (occupied bins only; descriptors may be absent)
+// A plain cma run has no such file: the endpoint reports available:false and this view says so.
+async function viewRunArchive(id) {
+  const ROOT = currentRoot();     // this view's own container (see route())
+  ROOT.innerHTML = `<p class="muted">Loading the quality-diversity atlas…</p>`;
+  let A;
+  try { A = await api("/api/archive/" + encodeURIComponent(id)); }
+  catch (e) { ROOT.innerHTML = errBanner(e.message); return; }
+  if (!A.available) {
+    ROOT.innerHTML = `<div class="stack" style="gap:12px">
+      <div class="eyebrow">Quality-diversity atlas</div><h2>${esc(id)}</h2>
+      <p class="muted">This run has no atlas. Only a CMA-ME search (<code>search.algorithm: cma_me</code>)
+        writes <code>archive_heatmap.json</code>; a plain cma run never does.</p>
+      <p><a href="#/run/${esc(id)}">← back to the run</a></p></div>`;
+    return;
+  }
+  const bins = A.bins || [1, 1], rng = A.ranges || {};
+  const nbH = Math.max(1, Math.trunc(bins[0]) || 1), nbV = Math.max(1, Math.trunc(bins[1]) || 1);
+  const axH = Array.isArray(rng.h) ? rng.h.map(Number) : [0, 180];
+  const axV = Array.isArray(rng.v) ? rng.v.map(Number) : [0, 180];
+  const cells = (A.cells || []).filter(c => c && isFinite(c.h_center) && isFinite(c.v_center)
+                                            && isFinite(c.objective));
+  if (!cells.length) {
+    ROOT.innerHTML = `<div class="stack" style="gap:12px">
+      <div class="eyebrow">Quality-diversity atlas</div><h2>${esc(id)}</h2>
+      <p class="muted">The archive has no occupied bins yet.</p>
+      <p><a href="#/run/${esc(id)}">← back to the run</a></p></div>`;
+    return;
+  }
+  const totalBins = nbH * nbV, coverage = totalBins ? cells.length / totalBins : 0;
+  const evals = A.stats && A.stats.total_evals != null ? A.stats.total_evals : null;
+  const jmin = Math.min(...cells.map(c => c.objective)), jmax = Math.max(...cells.map(c => c.objective));
+  const labH = (A.descriptors && A.descriptors.h) || "descriptor (h)";
+  const labV = (A.descriptors && A.descriptors.v) || "descriptor (v)";
+  ROOT.innerHTML = `<div class="stack" style="gap:16px">
+    <div><div class="eyebrow">Quality-diversity atlas · CMA-ME</div><h2>${esc(id)}</h2>
+      <p class="muted" style="margin:2px 0 0">${cells.length} of ${totalBins} bins occupied
+        (${fmtPct(coverage * 100)}${evals != null ? ", " + esc(evals) + " evaluations" : ""}).
+        Axes: <code>${esc(labH)}</code> (horizontal) × <code>${esc(labV)}</code> (vertical), degrees.
+        Hollow cells never held an evaluated design.
+        <a href="#/run/${esc(id)}">← back to the run</a></p></div>
+    <div class="fig"><h3>Archive: best objective per descriptor bin</h3>
+      <div class="cap">Colour: objective J (lower is better, brightest). Hover a cell for its descriptor
+        centre, objective and design hash.</div>
+      <canvas id="qd-canvas" width="720" height="540" style="max-width:100%"></canvas>
+      <div class="legend" style="align-items:center">
+        <span class="mono">worst J ${fmt(jmax, 3)}</span>
+        <canvas id="qd-cbar" style="width:180px;height:10px;border:1px solid var(--rule)"></canvas>
+        <span class="mono">best J ${fmt(jmin, 3)}</span>
+      </div>
+      <div id="qd-hover" class="mono muted" style="min-height:1.2em"></div></div>
+  </div>`;
+  drawCbar(document.getElementById("qd-cbar"));
+  const cv = document.getElementById("qd-canvas"), g = cv.getContext("2d");
+  const padL = 78, padB = 58, padT = 16, padR = 20;
+  const W = cv.width - padL - padR, H = cv.height - padT - padB;
+  const cw = W / nbH, ch = H / nbV;
+  // descriptor value -> bin index, clamped: a cell centre at the top edge lands in the last bin
+  const binOf = (v, ax, n) => {
+    if (!(ax[1] > ax[0])) return 0;
+    return Math.max(0, Math.min(n - 1, Math.floor((v - ax[0]) / (ax[1] - ax[0]) * n)));
+  };
+  const byBin = new Map();
+  for (const c of cells) {
+    const key = binOf(c.h_center, axH, nbH) + "," + binOf(c.v_center, axV, nbV);
+    const old = byBin.get(key);                       // one elite per bin by contract; keep the best anyway
+    if (!old || c.objective < old.objective) byBin.set(key, c);
+  }
+  g.fillStyle = css("--surface") || "#15181c"; g.fillRect(padL, padT, W, H);
+  g.strokeStyle = css("--rule") || "#333"; g.lineWidth = 1;
+  for (let i = 0; i <= nbH; i++) {
+    const x = padL + i * cw; g.beginPath(); g.moveTo(x, padT); g.lineTo(x, padT + H); g.stroke();
+  }
+  for (let j = 0; j <= nbV; j++) {
+    const y = padT + j * ch; g.beginPath(); g.moveTo(padL, y); g.lineTo(padL + W, y); g.stroke();
+  }
+  for (const [key, c] of byBin) {
+    const [i, j] = key.split(",").map(Number);
+    const t = jmax > jmin ? (c.objective - jmin) / (jmax - jmin) : 0.5;
+    const [rr, gg, bb] = cmap(1 - t);                 // t = 0 (best objective) -> bright/warm end
+    g.fillStyle = `rgb(${rr},${gg},${bb})`;
+    g.fillRect(padL + i * cw + 1, padT + H - (j + 1) * ch + 1, cw - 2, ch - 2);
+  }
+  g.fillStyle = css("--label") || "#aaa"; g.font = "11px monospace";
+  g.textAlign = "center"; g.textBaseline = "top";
+  const stepH = Math.max(1, Math.round(nbH / 6)), stepV = Math.max(1, Math.round(nbV / 5));
+  for (let i = 0; i < nbH; i += stepH) {
+    const c = axH[0] + (i + 0.5) * (axH[1] - axH[0]) / nbH;
+    g.fillText(fmtDeg(c), padL + (i + 0.5) * cw, padT + H + 6);
+  }
+  g.textAlign = "right"; g.textBaseline = "middle";
+  for (let j = 0; j < nbV; j += stepV) {
+    const c = axV[0] + (j + 0.5) * (axV[1] - axV[0]) / nbV;
+    g.fillText(fmtDeg(c), padL - 6, padT + H - (j + 0.5) * ch);
+  }
+  g.textAlign = "center"; g.textBaseline = "alphabetic";
+  g.fillText(labH, padL + W / 2, cv.height - 10);
+  g.save(); g.translate(14, padT + H / 2); g.rotate(-Math.PI / 2);
+  g.fillText(labV, 0, 0); g.restore();
+  const hover = document.getElementById("qd-hover");
+  cv.onmousemove = ev => {
+    const b = cv.getBoundingClientRect();
+    const x = (ev.clientX - b.left) * cv.width / b.width - padL;
+    const y = padT + H - (ev.clientY - b.top) * cv.height / b.height;
+    const i = Math.floor(x / cw), j = Math.floor(y / ch);
+    if (i < 0 || j < 0 || i >= nbH || j >= nbV) { hover.textContent = ""; return; }
+    const c = byBin.get(i + "," + j);
+    hover.textContent = c
+      ? `bin [${i}, ${j}] · ${labH} ${fmtDeg(c.h_center)} · ${labV} ${fmtDeg(c.v_center)} · J ${fmt(c.objective, 4)} · design ${String(c.design_hash || "").slice(0, 12)}`
+      : `bin [${i}, ${j}] · empty`;
+  };
+  cv.onmouseleave = () => { hover.textContent = ""; };
+}
+
 async function viewRunDetail(id) {
   const ROOT = currentRoot();     // this view's own container (see route())
   skel();
@@ -904,6 +1023,7 @@ async function viewRunDetail(id) {
       <!-- Actions -->
       <div class="btn-row">
         <a class="btn primary" href="#/run/${esc(id)}/evolution">▶ Evolution time-lapse</a>
+        <a class="btn" href="#/run/${esc(id)}/archive" title="Quality-diversity atlas: objective per descriptor bin (CMA-ME runs only)">QD atlas</a>
         <a class="btn" href="#/run/${esc(id)}/3d">3D view</a>
         <a class="btn" href="#/compare?a=${esc(id)}">Compare with…</a>
         <span id="report-slot">${sum.has_report

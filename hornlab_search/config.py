@@ -31,6 +31,15 @@ FREQ_GRIDS: dict[str, tuple[float, float, int]] = {
 
 MODES = ("screen", "verify", "final")
 
+# WP11b: the search algorithms this config knows how to run. The CLI entry (``search.cma.search``)
+# dispatches on this value; anything else is refused at load time with a ``search.algorithm`` prefix.
+SEARCH_ALGORITHMS = ("cma", "cma_me")
+
+# WP11b: the descriptor functions shipped for CMA-ME quality-diversity runs. Each is the MEAN of a
+# MetricSet beamwidth over the in-band frequency indices (cfg.target.band_lo_hz..band_hi_hz),
+# NaN-safe. Names are part of the ``search.qd`` schema; extend here and in search/cma_me.py together.
+QD_DESCRIPTORS = ("mean_bw_h_deg", "mean_bw_v_deg")
+
 # WP4 (senior pass 2026-10-24): the verify grid's HF-density extension starts at 5 kHz — below
 # that the frozen 25-point verify grid is already dense enough for every measured epw decision.
 HF_VERIFY_LO_HZ = 5000.0
@@ -86,6 +95,8 @@ class SearchSettings:
     popsize: int | None
     tolfun: float
     infeasible_penalty: str = "flat"   # WP3: 'flat' (default, today) | 'graded'
+    restarts: dict | None = None       # WP11a: {"mode": ipop|bipop, "max": N} (absent = today)
+    qd: dict | None = None             # WP11b: CMA-ME descriptors/bins (absent = today)
 
 
 @dataclass
@@ -254,6 +265,66 @@ def _validate_band_split(block, where: str, band_lo: float, band_hi: float) -> d
                 f"{where}: band_split edge {e:g} Hz is outside the open target band "
                 f"({band_lo:g}, {band_hi:g}) Hz")
     return {"edges_hz": vals}
+
+
+def _validate_restarts(block, where: str) -> dict | None:
+    """WP11a: ``search.restarts: {mode: ipop|bipop, max: N}`` runs CMA-ES with pycma's own
+    IPOP/BIPOP restart schedule (``max`` restarts after the initial attempt). It is a SEARCH-ONLY
+    key: it never enters the solve-spec hash, and absent/None keeps today's single-ES behaviour
+    bit-for-bit. Unknown sub-keys and missing ones are refused so a YAML typo is never silent."""
+    if block is None:
+        return None
+    if not isinstance(block, dict):
+        raise ConfigError(f"{where}: restarts must be a mapping with keys mode and max")
+    unknown = set(block) - {"mode", "max"}
+    if unknown:
+        raise ConfigError(f"{where}: unknown key(s) {sorted(unknown)} (allowed: mode, max)")
+    for key in ("mode", "max"):
+        if key not in block:
+            raise ConfigError(f"{where}: missing required key '{key}'")
+    mode = block["mode"]
+    if not isinstance(mode, str) or mode not in ("ipop", "bipop"):
+        raise ConfigError(f"{where}: mode must be 'ipop' or 'bipop', got {mode!r}")
+    mx = block["max"]
+    if isinstance(mx, bool) or not isinstance(mx, int) or not (0 <= mx <= 64):
+        raise ConfigError(f"{where}: max must be an integer in [0, 64], got {mx!r}")
+    return {"mode": mode, "max": int(mx)}
+
+
+def _validate_qd(block, where: str) -> dict | None:
+    """WP11b: ``search.qd`` selects the two CMA-ME descriptors and the archive's bin counts.
+
+    Exact sub-keys: ``descriptor_h``, ``descriptor_v`` (each a name from ``QD_DESCRIPTORS``) and
+    ``bins_h``, ``bins_v`` (integers in [2, 64]). ALL FOUR are required when the block is present;
+    there is deliberately no silent default. It is a SEARCH-ONLY key: it never enters the
+    solve-spec hash. Unknown sub-keys, unknown descriptor names and mis-typed bins are refused with
+    a ``search.qd`` prefix so a YAML typo is never silent."""
+    if block is None:
+        return None
+    if not isinstance(block, dict):
+        raise ConfigError(f"{where}: qd must be a mapping with keys "
+                          f"descriptor_h, descriptor_v, bins_h, bins_v")
+    unknown = set(block) - {"descriptor_h", "descriptor_v", "bins_h", "bins_v"}
+    if unknown:
+        raise ConfigError(f"{where}: unknown key(s) {sorted(unknown)} "
+                          f"(allowed: descriptor_h, descriptor_v, bins_h, bins_v)")
+    names = {}
+    for key in ("descriptor_h", "descriptor_v"):
+        if key not in block:
+            raise ConfigError(f"{where}: missing required key '{key}'")
+        v = block[key]
+        if not isinstance(v, str) or v not in QD_DESCRIPTORS:
+            raise ConfigError(f"{where}: {key} must be one of {list(QD_DESCRIPTORS)}, got {v!r}")
+        names[key] = v
+    out = dict(names)
+    for key in ("bins_h", "bins_v"):
+        if key not in block:
+            raise ConfigError(f"{where}: missing required key '{key}'")
+        v = block[key]
+        if isinstance(v, bool) or not isinstance(v, int) or not (2 <= v <= 64):
+            raise ConfigError(f"{where}: {key} must be an integer in [2, 64], got {v!r}")
+        out[key] = int(v)
+    return out
 
 
 def _validate_source_motion(value, backend: str, where: str) -> str:
@@ -433,12 +504,27 @@ def load_config(path, *, brief=None, cma_seed: int | None = None) -> Config:
     solve.source_motion = _validate_source_motion(
         solve.source_motion, str(solve.backend), f"{where}:solve")
     search = _build(SearchSettings, _require(raw, "search", where), f"{where}:search",
-                    optional=("popsize", "infeasible_penalty"))
+                    optional=("popsize", "infeasible_penalty", "restarts", "qd"))
     if "popsize" not in raw["search"]:
         search.popsize = None
     if search.infeasible_penalty not in ("flat", "graded"):
         raise ConfigError(f"{where}: search.infeasible_penalty must be 'flat' or 'graded', "
                           f"got {search.infeasible_penalty!r}")
+    if search.algorithm not in SEARCH_ALGORITHMS:
+        raise ConfigError(f"{where}: search.algorithm must be one of {list(SEARCH_ALGORITHMS)}, "
+                          f"got {search.algorithm!r}")
+    search.restarts = _validate_restarts(search.restarts, f"{where}:search.restarts")
+    search.qd = _validate_qd(search.qd, f"{where}:search.qd")
+    if search.algorithm == "cma_me":
+        if search.qd is None:
+            raise ConfigError(f"{where}:search.qd: search.qd is required for "
+                              f"search.algorithm: cma_me (bins_h/bins_v have no default)")
+        if search.restarts is not None:
+            raise ConfigError(f"{where}:search.restarts: search.restarts is not supported with "
+                              f"search.algorithm: cma_me")
+    elif search.qd is not None:
+        raise ConfigError(f"{where}:search.qd: search.qd is only used with "
+                          f"search.algorithm: cma_me")
     objective_version = int((raw.get("objective") or {}).get("version", 1))
 
     if mesh.quadrants not in QUADRANT_FACTOR:

@@ -23,6 +23,9 @@ dependencies = [
 crosscheck = ["hornlab-bempp-bem @ git+https://github.com/m3gnus/hornlab-bempp-bem.git@8e6910602ece9abb2e9ce0db7a637f4bedf17f53"]
 dev = ["pytest>=8", "pytest-timeout"]
 surrogate = ["torch>=2.2"]
+# WP11b CMA-ME atlas. The PyPI distribution is `ribs` (`import ribs`); `pyribs` is an alias that
+# does not resolve, so pin the import name exactly.
+qd = ["ribs==0.12.0"]
 
 [project.scripts]
 hornlab-search = "hornlab_search.cli:main"

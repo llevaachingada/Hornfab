@@ -380,6 +380,33 @@ def run_detail(runs: Path, run_id: str) -> dict:
     })
 
 
+def run_archive(runs: Path, run_id: str) -> dict:
+    """The CMA-ME quality-diversity atlas of a run (WP11b), read from the search-written
+    ``archive_heatmap.json``: ``{"bins": [bins_h, bins_v], "ranges": {"h": [lo, hi], "v": [lo, hi]},
+    "descriptors": {"h": name, "v": name},
+    "cells": [{"h_center", "v_center", "objective", "design_hash"}]}``.
+
+    Only OCCUPIED bins appear in ``cells``; a cell centre is the descriptor mean over the solve band
+    (``mean_bw_h_deg`` on the h axis, ``mean_bw_v_deg`` on the v axis) and ``objective`` is the run's
+    J (lower is better). The raw ``archive.json`` is never parsed and nothing is solved. A run without
+    an atlas (every plain cma run) gets the empty pattern, exactly like a run with no evaluations.
+    Additive keys the file may carry (legacy ``rows``/``axis`` aliases) are ignored, not echoed."""
+    d = _resolve_run(runs, run_id)
+    heat = _read_json(d / "archive_heatmap.json")
+    if (not isinstance(heat, dict) or not isinstance(heat.get("bins"), list)
+            or not isinstance(heat.get("ranges"), dict) or not isinstance(heat.get("cells"), list)):
+        return {"run_id": run_id, "available": False, "bins": None, "ranges": None, "cells": [],
+                "stats": None}
+    out = {"run_id": run_id, "available": True, "bins": heat["bins"], "ranges": heat["ranges"],
+           "cells": heat["cells"],
+           "descriptors": heat["descriptors"] if isinstance(heat.get("descriptors"), dict) else None,
+           "stats": heat.get("stats") if isinstance(heat.get("stats"), dict) else None}
+    for key in ("descriptor_h", "descriptor_v"):        # optional labels, absent from the pinned file
+        if isinstance(heat.get(key), str):
+            out[key] = heat[key]
+    return clean(out)
+
+
 def mesh_surface(runs: Path, run_id: str, h: str, max_tris: int = 60000) -> dict:
     """Triangle surface of a solved design (mm), the meshed domain only (a quarter for quadrants '1')."""
     d = _resolve_run(runs, run_id)

@@ -401,6 +401,45 @@ def test_evolution_frames_cache_and_growth(repo):
     assert len(e2["frames"]) == 10 and e2["frames"][9]["improved"] and e2["frames"][9]["best_j"] == 1.0
 
 
+def test_archive_reader_empty_pattern_without_an_atlas(server, repo):
+    """A plain cma run writes no archive_heatmap.json: the route says so instead of 404ing."""
+    a = D.run_archive(repo / "runs", RID)
+    assert a["available"] is False and a["cells"] == [] and a["bins"] is None
+    assert a["ranges"] is None and a["stats"] is None
+    code, body = _req(server + f"/api/archive/{RID}")
+    assert code == 200 and body["available"] is False and body["cells"] == []
+
+
+def test_archive_reader_serves_the_pinned_heatmap(server, repo):
+    """The pinned archive_heatmap.json contract: bins/ranges/descriptors/cells, occupied bins only."""
+    heat = {"bins": [4, 3], "ranges": {"h": [0, 180], "v": [0, 180]},
+            "descriptors": {"h": "mean_bw_h_deg", "v": "mean_bw_v_deg"},
+            "cells": [{"h_center": 67.5, "v_center": 150.0, "objective": 3.5,
+                       "design_hash": "aaaaaaaaaaaa"}]}
+    (repo / "runs" / RID / "archive_heatmap.json").write_text(json.dumps(heat), encoding="utf-8")
+    a = D.run_archive(repo / "runs", RID)
+    assert a["available"] is True and a["bins"] == [4, 3] and a["ranges"] == heat["ranges"]
+    assert a["descriptors"] == {"h": "mean_bw_h_deg", "v": "mean_bw_v_deg"}
+    assert a["cells"][0]["h_center"] == 67.5 and a["cells"][0]["objective"] == 3.5
+    assert "rows" not in a and "axis" not in a            # legacy aliases are ignored, not echoed
+    code, body = _req(server + f"/api/archive/{RID}")
+    assert code == 200 and body["available"] is True
+    assert body["descriptors"] == a["descriptors"]
+    assert body["cells"][0]["design_hash"] == "aaaaaaaaaaaa"
+
+
+def test_archive_reader_tolerates_additive_aliases_and_a_half_written_file(repo):
+    path = repo / "runs" / RID / "archive_heatmap.json"
+    path.write_text("{not json", encoding="utf-8")        # a file being written right now
+    assert D.run_archive(repo / "runs", RID)["available"] is False
+    heat = {"bins": [2, 2], "ranges": {"h": [0, 180], "v": [0, 180]}, "cells": [],
+            "rows": [{"bin": [0, 0]}], "axis": {"h": [0, 180], "v": [0, 180]}}
+    path.write_text(json.dumps(heat), encoding="utf-8")
+    a = D.run_archive(repo / "runs", RID)
+    assert a["available"] is True and a["cells"] == [] and "rows" not in a
+    assert a["descriptors"] is None                       # no label contract in this file -> honest None
+
+
 def test_step_files_listed_and_served_only_by_strict_name(server, repo):
     step = repo / "runs" / RID / "step"
     step.mkdir()

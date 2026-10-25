@@ -52,6 +52,8 @@ class App:
             return D.list_briefs(self.root)
         if head == "evolution" and len(parts) == 2:
             return D.evolution(self.runs, parts[1])
+        if head == "archive" and len(parts) == 2:
+            return D.run_archive(self.runs, parts[1])
         if head == "typologies":
             return D.typologies(self.root, self.runs)
         if head == "leaders":

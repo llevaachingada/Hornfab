@@ -1,7 +1,7 @@
 # ISSUES
 
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
-Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-10-25 (M4 pass pushed: WP9 generators + WP9b organic/X halves + lecleach R9-J live (owner chat directive) + WP10 GRID adapter; smoke evidence `docs/evidence/M4_SMOKE_2026-10-25.md`; suite 1194/0/1/0 with the single intended `test_mesh_pin` tripwire; no GitHub issue state changed).
+Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-10-25 (M5 WP11 pushed: `search.restarts` IPOP/BIPOP mirroring pycma + `search.algorithm: cma_me` QD atlas on ribs 0.12.0; offline suite 1234/0/1/0 (+40 additive) with the single intended `test_mesh_pin` tripwire; 4 sequential GPU screens prove budget exactness (fired 4-ES BIPOP run incl.; VRAM pair [measured] for the fired job, jobs 1-3 disclosed MISSING); evidence `docs/evidence/M5_WP11_2026-10-25.md`, byte-check 30/30; no GitHub issue state changed).
 
 | ID | Title | Status | Owner | Plan ref |
 |---|---|---|---|---|
@@ -19,6 +19,14 @@ Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 20
 | #13 | hardening-review: Stage A surrogate gate-integrity and real-data traps | **open — fixes MERGED to main** (FF to 6d1d5c7 on 2026-10-22 carries e0b9b61 + 11304f6 + cloud reconciliation 152a829 verbatim; oracle pre-merge sign-off; full offline suite 533 PASS at the merged tree; awaiting owner close) | phase-2 (cloud) | `docs/plan/11_PHASE2_SURROGATE.md` §4 |
 
 Local-only items (no GitHub issue): band edges capped by the measured dof cap (confirmed, user "keep lowered edges"); task 07 test-17 disk-latency flake risk (do not loosen); residual CP-7 risks (epw=6 above 2.5 kHz unmeasured; f11 unexercised; DI-vs-beamwidth not a regression test) — see `NOTES_FOR_SENIOR.md` task-09 block and CONTINUITY 06:20.
+
+Local-only, added 2026-10-25 (M5 WP11 pass; evidence `docs/evidence/M5_WP11_2026-10-25.md`; nothing flipped — all new keys opt-in, absent = bit-for-bit):
+- **VRAM per-job baseline/peak MISSING for the first three GPU screens** (ipop/bipop/cma_me): the screen lane ran the jobs correctly (durable run.json artifacts carry their proof) but never started its external VRAM sampler; only the fired-restarts screen has the [measured] pair (baseline 430 MiB / peak 2305 MiB). M4 precedent (peak-per-job disclosed MISSING) applies; re-runs cost ~4 min GPU each on FRESH cache dirs (owner's call).
+- **QD atlas browser render not exercised live**: route tests (34/0/0) + reader tests + `node --check` cover the served contract; a one-minute manual GUI check on `runs/20261025T080717Z-screen-fd13a7` (has atlas artifacts) remains owner-side.
+- **`tools/launch_gui.ps1` — untracked stray predating this pass** (present in the tree before the first WP11 lane): NOT committed, NOT deleted; owner decides commit/delete/leave.
+- **`qd` extra transitive weight**: `ribs==0.12.0` pulls numba/pandas/scikit-learn — confined to the optional `qd` extra; noted at Oracle review (exact pin justified: archive semantics are version-sensitive).
+- **BIPOP schedule divergences from pycma documented in `_RestartSchedule` docstring** (small-run maxiter cap omitted — the global eval budget governs; our `max` counts all restarts incl. small ones, pycma's counts non-small only): behavior deliberate, next reader diffing against pycma should read the docstring first.
+- Resume determinism caveat (inherited, not regressed): `solve_failed` rows are never memoised → a resume after a solver-unhealthy abort re-solves them and may legitimately diverge from the uninterrupted replay (docstring caveat per Oracle; behavior unchanged from cma.py).
 
 Local-only, added 2026-10-25 (M4 pass; evidence `docs/evidence/M4_SMOKE_2026-10-25.md`; Proposals owner-gated — nothing flipped): 
 - **P-M4-1** — matched-sampling GRID-vs-FREEFORM equality run before the strict WP10-step-5 J-equivalence claim: the zero-modulation compare (grid_ellipse 1298 dofs vs conical 1319 dofs) is between two DIFFERENT design hashes (`d0dc9b5a8999` vs `f8b94e104f80` — same yaml seed, different surface authorings); measured deltas ≤ 0.110 dB on-axis / ≤ 3.45° bw / ≤ 0.071 dB DI; construction-level equality is proven offline (closed forms ≤ 1e-9); the run-level equality needs GRID n_phi/n_s matched to the FREEFORM mesher segmentation (owner-gated).
