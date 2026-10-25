@@ -56,8 +56,10 @@ KIND_TOO_LARGE = "mesh_too_large"
 KIND_SOLVE = "solve_failed"
 KIND_METRICS = "metrics_failed"
 KIND_EXC = "exception"
-#: Pure functions of the design: worth memoizing, and re-running them is wasted effort.
-DETERMINISTIC_KINDS = (KIND_INVALID, KIND_TOO_LARGE)
+#: Pure functions of the (design, brief): worth memoizing, and re-running them is wasted effort.
+#: ``invalid_envelope`` is a function of the design params the generator built from a brief, so its
+#: marker carries the brief hash as well (replay-validity, see ``_compute``).
+DETERMINISTIC_KINDS = (KIND_INVALID, KIND_INVALID_ENV, KIND_TOO_LARGE)
 
 _FREQ_WEIGHTS_V1_WARNED = False
 
@@ -560,7 +562,9 @@ def evaluate(design: Design, space, cfg, mode: str, run_dir, store, backend, *,
             try:
                 marker.parent.mkdir(parents=True, exist_ok=True)
                 marker.write_text(json.dumps({"kind": kind, "error": str(st["err"])[:4000],
-                                              "lib_shas": ctx.lib_shas}, default=str), encoding="utf-8")
+                                              "lib_shas": ctx.lib_shas,
+                                              "brief_hash": ctx.provenance.get("brief_hash")},
+                                             default=str), encoding="utf-8")
             except Exception as exc:  # noqa: BLE001 - bookkeeping only
                 log.warning("could not write failure marker %s: %s", marker, exc)
     if hasattr(space, "provenance"):
@@ -640,8 +644,10 @@ def _compute(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx, st)
         try:
             rec = json.loads(marker.read_text(encoding="utf-8"))
             # a marker is only valid for the library versions that produced it (a mesher fix must
-            # not keep replaying an old geometry failure)
-            if rec.get("kind") in DETERMINISTIC_KINDS and rec.get("lib_shas") == ctx.lib_shas:
+            # not keep replaying an old geometry failure) AND for the brief that produced its
+            # verdict (the envelope comes from the brief: a different brief must re-evaluate)
+            if rec.get("kind") in DETERMINISTIC_KINDS and rec.get("lib_shas") == ctx.lib_shas \
+                    and rec.get("brief_hash") == ctx.provenance.get("brief_hash"):
                 st["kind"], st["err"], st["fail_cached"] = rec["kind"], str(rec.get("error", "")), True
                 return
         except Exception as exc:  # noqa: BLE001 - a bad marker is ignored, the design re-runs
@@ -761,6 +767,7 @@ def _persist(ev: Evaluation, mode: str, sspec, design_dir: Path, ctx: EvalContex
                 meta, arrays = build_record(
                     ev, ctx.target, ctx.lib_shas, solve_spec=sspec, area_m2=st["area"],
                     grid=st["grid"], traces=trace_info, trace_sample_fraction=ctx.trace_fraction,
+                    objective_version=ctx.objective_version,
                     provenance=_record_provenance(ctx, st))
                 store.append(meta, arrays)
                 ctx.store_seen.add(seen)

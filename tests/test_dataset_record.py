@@ -11,7 +11,8 @@ import pytest
 from conftest import make_fake_response
 from hornlab_search.dataset.record import (ARRAY_KEYS, DEFAULT_TRACE_FRACTION, REQUIRED_LIB_SHAS,
                                            SCHEMA_VERSION, build_record, dumps_strict,
-                                           should_capture_traces, to_jsonable, validate_record)
+                                           record_objective_version, should_capture_traces,
+                                           to_jsonable, validate_record)
 from hornlab_search.metrics.compute import compute_metrics
 from hornlab_search.types import Evaluation, MeshResult, SolveOutcome, SolveSpec, Design
 from test_dataset_factory import GRID, LIB_SHAS, TARGET, make_eval, solve_spec
@@ -259,3 +260,54 @@ def test_to_jsonable_converts_and_rejects():
     with pytest.raises(TypeError):
         to_jsonable({"z": np.array([1j])})
     assert math.isfinite(to_jsonable(1e308))
+
+
+# objective_version (M3 carry-over): explicit on every new record, absence-tolerant on reads
+def test_default_v1_write_records_objective_version_1():
+    meta, _ = _built()
+    assert meta["objective_version"] == 1
+    assert record_objective_version(meta) == 1
+    validate_record(meta)
+
+
+def test_a_v2_evaluation_writes_objective_version_2():
+    meta, _ = _built(objective_version=2)
+    assert meta["objective_version"] == 2
+    assert record_objective_version(meta) == 2
+    validate_record(meta)
+
+
+def test_a_record_missing_objective_version_still_validates_as_v1():
+    meta, _ = _built()
+    del meta["objective_version"]
+    validate_record(meta)                                    # absence is legal...
+    assert "objective_version" not in meta                   # ...and the stored data is not mutated
+    assert record_objective_version(meta) == 1
+
+
+def test_validate_rejects_an_unknown_objective_version():
+    meta, _ = _built()
+    for bad in (0, 3, "2", True):
+        with pytest.raises(ValueError, match="objective_version"):
+            validate_record(dict(meta, objective_version=bad))
+
+
+def test_v2_brief_evaluation_writes_objective_version_2_to_the_record(smoke_cfg, tmp_path, monkeypatch):
+    """End to end: the context that drives ``_score`` dispatch is the one that stamps the record."""
+    import dataclasses
+
+    from hornlab_search.dataset.store import DatasetStore
+    from hornlab_search.design.space import DesignSpace
+    from hornlab_search.search.evaluate import evaluate, make_context
+    from test_search_support import LIBS, SyntheticBackend, install_fakes
+
+    cfg = dataclasses.replace(smoke_cfg, objective_version=2)
+    be = SyntheticBackend()
+    install_fakes(monkeypatch, be)
+    store = DatasetStore(tmp_path / "ds")
+    space = DesignSpace.from_config(cfg)
+    evaluate(space.seed, space, cfg, "screen", tmp_path / "run", store, be,
+             ctx=make_context(cfg, store, lib_shas=LIBS))
+    meta, _ = next(store.iter_records(with_arrays=True))
+    assert meta["objective_version"] == 2
+    validate_record(meta)

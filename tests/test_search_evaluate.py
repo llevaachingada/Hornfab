@@ -56,7 +56,8 @@ def test_evaluate_happy_path_writes_every_artifact(cfg, tmp_path, monkeypatch):
     (row,) = read_ndjson(tmp_path / "run" / "search.ndjson")
     assert row["design_hash"] == ev.design_hash and row["objective"] == ev.objective
     (meta, arrays) = next(store.iter_records(with_arrays=True))
-    assert meta["ok"] and meta["mesh"]["area_m2"] == 0.1 and meta["mesh"]["grid"]["available"]
+    assert meta["ok"] and meta["objective_version"] == 1
+    assert meta["mesh"]["area_m2"] == 0.1 and meta["mesh"]["grid"]["available"]
     assert meta["mesh"]["grid"]["angular_segments"] == 64 and meta["solve"]["mode"] == "screen"
     assert "spl_h_db" in arrays and meta["solve"]["freqs_hz"] == list(mode_freqs("screen", cfg))
 
@@ -183,3 +184,44 @@ def test_a_relative_run_dir_still_gives_the_solver_an_absolute_mesh_path(cfg, tm
     ev = evaluate(space.seed, space, cfg, "screen", Path("rel_run"), None, be, ctx=_ctx(cfg, None))
     assert not ev.error and seen and Path(seen[0]).is_absolute()
     assert (tmp_path / "rel_run" / "search.ndjson").exists()
+
+
+# ---- invalid_envelope failure marker: replay only under the brief that produced the verdict
+
+def test_invalid_envelope_failure_marker_is_scoped_to_the_brief(tmp_path):
+    import json
+
+    from conftest import EXAMPLES
+    from hornlab_search.config import load_config
+    from hornlab_search.design.generated import GENERATOR_ERROR_KEY, GeneratedSpace, brief_hash
+
+    cfg = load_config(EXAMPLES / "typologies" / "conical.yaml")
+    space = GeneratedSpace.from_config(cfg)
+    bad = space.design_from_knobs({**space.seed_knobs, "h_rm_mm": 180.0})
+    assert bad.params[GENERATOR_ERROR_KEY].startswith("invalid_envelope:")
+    cache = tmp_path / "cache"
+
+    # 1. first evaluation writes the marker
+    ev1 = evaluate(bad, space, cfg, "screen", tmp_path / "r1", None, None,
+                   ctx=make_context(cfg, None, lib_shas=LIBS, cache_dir=cache))
+    assert ev1.error.startswith("invalid_envelope") and not ev1.cached
+
+    # 2. the same brief replays the memoized verdict
+    ev2 = evaluate(bad, space, cfg, "screen", tmp_path / "r2", None, None,
+                   ctx=make_context(cfg, None, lib_shas=LIBS, cache_dir=cache))
+    assert ev2.cached and ev2.error == ev1.error
+
+    # 3. a different brief envelope on the SAME design must NOT replay the old verdict
+    assert cfg.brief is not None
+    tight = dict(cfg.brief)
+    tight["envelope"] = dict(tight["envelope"], max_depth_mm=100.0)
+    cfg2 = dataclasses.replace(cfg, brief=tight,
+                               raw={**cfg.raw, "brief": {k: v for k, v in tight.items()
+                                                          if k != "path"}})
+    ev3 = evaluate(bad, space, cfg2, "screen", tmp_path / "r3", None, None,
+                   ctx=make_context(cfg2, None, lib_shas=LIBS, cache_dir=cache))
+    assert not ev3.cached and ev3.error.startswith("invalid_envelope")
+    marker = next((cache / "solve" / "failures").glob("*.json"))
+    rec = json.loads(marker.read_text(encoding="utf-8"))
+    assert rec["kind"] == "invalid_envelope"
+    assert rec["brief_hash"] == brief_hash(tight)      # re-evaluated and rewritten under cfg2

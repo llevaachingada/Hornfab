@@ -128,6 +128,13 @@ def _int(x) -> int | None:
     return None if x is None else int(x)
 
 
+def record_objective_version(meta: dict) -> int:
+    """The objective version a record was scored with. Records written before the field existed
+    (schema_version 1, pre-M3) are version 1: absence is not an error and the stored data is never
+    rewritten."""
+    return int(meta.get("objective_version", 1))
+
+
 # ------------------------------------------------------------------ sampling
 
 def should_capture_traces(design_hash: str, fraction: float = DEFAULT_TRACE_FRACTION) -> bool:
@@ -255,6 +262,7 @@ def build_record(ev: Evaluation, target, lib_shas: dict, *,
                  trace_sample_fraction: float = DEFAULT_TRACE_FRACTION,
                  excitation: dict | None = None,
                  created_utc: str | None = None,
+                 objective_version: int = 1,
                  provenance: dict | None = None) -> tuple[dict, dict]:
     """Returns (metadata_dict, arrays_dict).
 
@@ -277,8 +285,11 @@ def build_record(ev: Evaluation, target, lib_shas: dict, *,
       trace_sample_fraction  the configured sampling fraction, recorded on every row so a later
                    reader can tell "not sampled" from "capture failed".
       excitation   overrides DEFAULT_EXCITATION (phase 1 never needs to).
-      created_utc  ISO-8601 "YYYY-MM-DDTHH:MM:SSZ"; now if omitted.
-      provenance   optional, additive (plan R8): {"config", "brief", "brief_hash", "generator"} -
+       created_utc  ISO-8601 "YYYY-MM-DDTHH:MM:SSZ"; now if omitted.
+       objective_version  the objective dispatch version the evaluation was scored with (1 or 2),
+                    from ``ctx.objective_version``. Always written; older records lack it and read
+                    as version 1 (``record_objective_version``).
+       provenance   optional, additive (plan R8): {"config", "brief", "brief_hash", "generator"} -
                    which config / design brief scored this record and which typology generator (if
                    any) produced the design. Older records lack it; readers must treat it as optional.
                    The metric curves are target-free; only ``objective``/``terms`` depend on the brief.
@@ -329,6 +340,7 @@ def build_record(ev: Evaluation, target, lib_shas: dict, *,
         "metrics_scalars": to_jsonable(scalars, "$.metrics_scalars"),
         "objective": _num(ev.objective),
         "terms": to_jsonable(ev.terms, "$.terms"),
+        "objective_version": int(objective_version),
         "ok": ok,
         "error": error,
         "created_utc": created_utc or _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -402,6 +414,10 @@ def validate_record(meta: dict) -> None:
             raise ValueError(f"'{k}' must be a non-empty string, got {meta[k]!r}")
     if meta["family"] not in FAMILIES:
         raise ValueError(f"family {meta['family']!r} is not one of {FAMILIES}")
+    if "objective_version" in meta:                 # absence means v1 (records written before M3)
+        ov = meta["objective_version"]
+        if isinstance(ov, bool) or not isinstance(ov, int) or ov not in (1, 2):
+            raise ValueError(f"'objective_version' must be 1 or 2, got {ov!r}")
     if not isinstance(meta["ok"], bool):
         raise ValueError("'ok' must be a bool")
     if not isinstance(meta["error"], str):
