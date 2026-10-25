@@ -58,21 +58,40 @@
 </div>
 
 <script type="module">
-  // ── Theme toggle ─────────────────────────────────────────────────
+  // ── Theme boot + toggle ──────────────────────────────────────────
   (function () {
-    const stored = localStorage.getItem("hl-theme");
-    if (stored) document.documentElement.setAttribute("data-theme", stored);
+    const doc = document.documentElement;
+    const savePref = t => { try { localStorage.setItem("hl-theme", t); } catch {} };
+
+    // 1. ?theme=light|dark capture override — persists exactly like a click.
+    const fromUrl = new URLSearchParams(location.search).get("theme");
+    if (fromUrl === "light" || fromUrl === "dark") {
+      doc.setAttribute("data-theme", fromUrl);
+      savePref(fromUrl);
+    }
+
+    // 2. Stored preference.
+    let stored = null;
+    try { stored = localStorage.getItem("hl-theme"); } catch {}
+    if (stored === "light" || stored === "dark") doc.setAttribute("data-theme", stored);
+
+    // 3. OS fallback — used when nothing is pinned yet, and by the toggle so the
+    //    first click always flips away from the theme actually on screen.
+    const prefersDark = () => matchMedia("(prefers-color-scheme: dark)").matches;
     const icon = document.getElementById("theme-icon");
     function setIcon() {
-      const t = document.documentElement.getAttribute("data-theme");
+      const t = doc.getAttribute("data-theme") || (prefersDark() ? "dark" : "light");
       icon.textContent = t === "dark" ? "☀" : "◑";
     }
     setIcon();
+
+    // 4. Toggle: always writes the explicit attribute + preference.
     document.getElementById("btn-theme").addEventListener("click", () => {
-      const cur = document.documentElement.getAttribute("data-theme");
-      const next = cur === "dark" ? "light" : "dark";
-      document.documentElement.setAttribute("data-theme", next);
-      localStorage.setItem("hl-theme", next);
+      const cur = doc.getAttribute("data-theme");
+      const eff = cur || (prefersDark() ? "dark" : "light");
+      const next = eff === "dark" ? "light" : "dark";
+      doc.setAttribute("data-theme", next);
+      savePref(next);
       setIcon();
     });
   })();

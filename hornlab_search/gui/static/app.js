@@ -78,7 +78,7 @@ function route() {
   const path = hash.split("?")[0];
   for (const { re, fn } of ROUTES) {
     const m = path.match(re);
-    if (m) { fn(m); updateNav(path); return; }
+    if (m) { updateNav(path); return fn(m); }
   }
   ROOT.innerHTML = "";
   const p = document.createElement("p"); p.className = "muted";
@@ -1986,15 +1986,38 @@ function viewGlossary() {
 
 route();
 
-// Redraw charts on theme change
+// Redraw charts on theme change. route() replaces #view-root, so snapshot scroll and
+// filter/form state, re-render, then restore once the async view has settled. The one
+// requestAnimationFrame retry catches views that render in stages (wallSection cards).
+function snapshotViewState() {
+  const snap = { y: window.scrollY, fields: [] };
+  document.querySelectorAll(".filter-bar input, .form-grid input, .form-grid select, textarea")
+    .forEach(el => snap.fields.push([el, el.value]));
+  return snap;
+}
+
+function restoreViewState(snap) {
+  if (!snap) return;
+  window.scrollTo(0, snap.y);
+  snap.fields.forEach(([el, v]) => {
+    if (el.isConnected && el.value !== v) el.value = v;
+  });
+}
+
+async function routeAndRestore() {
+  const snap = snapshotViewState();
+  await route();
+  restoreViewState(snap);
+  requestAnimationFrame(() => restoreViewState(snap));
+}
+
 matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", () => {
-  const h = location.hash;
-  if (h.startsWith("#/run/") || h.startsWith("#/campaign/") || h.startsWith("#/compare")) route();
+  // A pinned preference (explicit data-theme) wins; re-rendering here is pure waste.
+  if (document.documentElement.hasAttribute("data-theme")) return;
+  routeAndRestore();
 });
-new MutationObserver(() => {
-  const h = location.hash;
-  if (h.startsWith("#/run/") || h.startsWith("#/campaign/") || h.startsWith("#/compare")) route();
-}).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+new MutationObserver(() => { routeAndRestore(); })
+  .observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
 // ── Keyboard access for clickable table rows (rows use onclick for navigation) ──────────────────
 new MutationObserver(() => {
