@@ -1524,12 +1524,42 @@ async function viewCompare() {
 
 // ── View 5: Briefs ─────────────────────────────────────────────────
 
+// Starting values for a brand-new brief. They mirror the shipped brief
+// examples/briefs/axi_90x90_1in.yaml (coverage angles, scoring weights, 1-inch driver) with a
+// wider-than-tall envelope; everything else is the schema default in config.py::load_brief.
+const NEW_BRIEF_DEFAULTS = {
+  target: { coverage_h_deg: 90, coverage_v_deg: 90, band_lo_hz: 500, band_hi_hz: 5500,
+            di_target_db: null, di_slope_target: 0, z_min: 0 },
+  weights: { cov: 1.0, rip: 1.0, di: 0.3, dislope: 0.5, flat: 0.5, load: 0.5 },
+  envelope: { max_mouth_w_mm: 500, max_mouth_h_mm: 400, max_depth_mm: 250 },
+  driver: { exit_radius_mm: 12.7, exit_angle_deg: 0, throat_angle_policy: "free" },
+  symmetry: "hv", objective_version: 1, verify_only: false,
+};
+
+function newBriefDraft() {
+  return { name: "", kind: "new", path: "", brief: {
+    name: "", description: "",
+    driver: { ...NEW_BRIEF_DEFAULTS.driver },
+    envelope: { ...NEW_BRIEF_DEFAULTS.envelope },
+    symmetry: NEW_BRIEF_DEFAULTS.symmetry,
+    source: {},
+    target: { ...NEW_BRIEF_DEFAULTS.target },
+    weights: { ...NEW_BRIEF_DEFAULTS.weights },
+    verify_only: NEW_BRIEF_DEFAULTS.verify_only,
+    objective: { version: NEW_BRIEF_DEFAULTS.objective_version },
+  } };
+}
+
 async function viewBriefs() {
   const ROOT = currentRoot();     // this view's own container (see route())
   skel();
-  let briefs;
-  try { briefs = await api("/api/briefs"); }
-  catch (e) { ROOT.innerHTML = errBanner(e.message); return; }
+  let briefs, configs = [];
+  try {
+    [briefs, configs] = await Promise.all([
+      api("/api/briefs"),
+      api("/api/configs").catch(() => []),   // the typology picker; its absence must not kill the page
+    ]);
+  } catch (e) { ROOT.innerHTML = errBanner(e.message); return; }
 
   if (!briefs.length) {
     ROOT.innerHTML = `<div class="stack" style="gap:20px">
@@ -1539,13 +1569,36 @@ async function viewBriefs() {
     return;
   }
 
+  // Typology picker options: grouped by catalog group, captioned with the family, disabled
+  // entries kept visible (marker + disabled attribute) so their existence is never hidden.
+  const GROUP_LABEL = { classical: "Classical horns", hybrid: "Hybrids", organic: "Organic horns",
+                        magnus: "Magnus mesher families", legacy: "Utility / legacy" };
+  const byGroup = {};
+  for (const c of configs) (byGroup[c.group || "Other"] = byGroup[c.group || "Other"] || []).push(c);
+  let pickOpts = `<option value="">— pick a typology's brief —</option>`;
+  for (const [grp, list] of Object.entries(byGroup)) {
+    pickOpts += `<optgroup label="${esc(GROUP_LABEL[grp] || grp)}">`;
+    for (const c of list) {
+      const desc = c.description ? ` — ${c.description.slice(0, 60)}` : "";
+      pickOpts += `<option value="${esc(c.path)}" ${c.disabled ? "disabled" : ""}>${esc(c.catalog_name || c.name)} · ${esc(c.family || "—")}${esc(desc)}${c.disabled ? " (disabled)" : ""}</option>`;
+    }
+    pickOpts += `</optgroup>`;
+  }
+
   ROOT.innerHTML = `
     <div class="stack" style="gap:24px">
       <div>
         <div class="eyebrow">Briefs &amp; families</div>
         <h2>Briefs</h2>
-        <p class="muted" style="font-size:0.85rem">Select a brief to view or edit its parameters. Save a modified copy under a new name.</p>
+        <p class="muted" style="font-size:0.85rem">Select a brief to view or edit its parameters. Save a modified copy under a new name, start a new brief from scratch, or start from a typology's brief.</p>
       </div>
+      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:10px" role="toolbar" aria-label="Brief authoring">
+        <button id="btn-new-brief" title="Open the editor with schema-safe defaults">New brief</button>
+        <label for="typo-pick" class="form-label" style="font-family:var(--f-mono);font-size:0.8rem;color:var(--muted)">Start from typology</label>
+        <select id="typo-pick" style="font:inherit;font-size:0.88rem;background:var(--bg);color:var(--ink);border:1px solid var(--rule);border-radius:5px;padding:6px 10px;min-width:260px;max-width:100%">${pickOpts}</select>
+        <span id="typo-pick-msg" class="hint" role="status"></span>
+      </div>
+      ${configs.length ? "" : `<p class="hint">Typology list unavailable — New brief still works.</p>`}
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px" id="briefs-list"></div>
       <div id="brief-detail"></div>
     </div>`;
@@ -1561,10 +1614,37 @@ async function viewBriefs() {
     listEl.appendChild(btn);
   });
 
+  document.getElementById("btn-new-brief").onclick = async () => {
+    await showBriefDetail(newBriefDraft(), briefs, { mode: "new", scroll: true });
+  };
+
+  const pickSel = document.getElementById("typo-pick");
+  const pickMsg = document.getElementById("typo-pick-msg");
+  pickSel.onchange = async e => {
+    pickMsg.textContent = "";
+    const c = configs.find(c => c.path === e.target.value);
+    if (!c) return;
+    if (!c.brief_file) {
+      pickMsg.textContent = `${c.catalog_name || c.name} has no brief_file configured — use New brief instead.`;
+      e.target.value = "";
+      return;
+    }
+    const stem = String(c.brief_file).replace(/\\/g, "/").split("/").pop().replace(/\.(yaml|yml)$/, "");
+    const br = briefs.find(x => x.name === stem) ||
+               briefs.find(x => x.path === String(c.brief_file).replace(/\\/g, "/"));
+    if (!br) {
+      pickMsg.textContent = `Brief file ${c.brief_file} was not found among the briefs on this page.`;
+      e.target.value = "";
+      return;
+    }
+    await showBriefDetail(br, briefs, { mode: "typology", origin: c, scroll: true });
+  };
+
   if (briefs.length) showBriefDetail(briefs[0], briefs);
 }
 
-async function showBriefDetail(b, allBriefs) {
+async function showBriefDetail(b, allBriefs, opts = {}) {
+  const isNew = opts.mode === "new";
   const det = document.getElementById("brief-detail");
   det.innerHTML = `<p class="muted">Loading…</p>`;
   const br = b.brief || {};
@@ -1573,19 +1653,60 @@ async function showBriefDetail(b, allBriefs) {
   const env = br.envelope || {};
   const drv = br.driver || {};
 
+  // 5500 Hz is the search ceiling on the 8 GB RTX 4060 (mesh dof cap, TOOLCHAIN.md) — a practical
+  // hardware note, NOT a schema rule: the schema accepts any band_hi above band_lo, and the
+  // verify-only *_12k briefs run at 12000. Values are saved as typed, never clamped.
   const bandHiOver = (tgt.band_hi_hz || 0) > 5500;
   const bandHiWarn = bandHiOver
-    ? `<span class="warn-text">⚠ band_hi > 5500 Hz — beyond 8 GB GPU limit; will be blocked</span>` : "";
+    ? `<span class="warn-text">⚠ band_hi above 5500 Hz — beyond the 8 GB GPU dof cap: verify-only territory (like the *_12k briefs), not search</span>` : "";
+
+  const pol = drv.throat_angle_policy;                    // "pin" | "free" | absent
+  const objVer = (br.objective || {}).version ?? 1;
+  const fwRows = ((tgt.freq_weights || {}).band_hz || []).slice();
+
+  const headTitle = isNew ? "New brief" : esc(b.name);
+  const kindLabel = isNew ? "new (unsaved)" : b.kind;
+  const provenance = (opts.mode === "typology" && opts.origin)
+    ? `<p class="hint" style="font-size:0.8rem;margin:4px 0 0" role="note">Starting point loaded: <b>${esc(opts.origin.catalog_name || opts.origin.name)}</b> names this brief as its brief_file — catalog group ${esc(opts.origin.group || "—")}, family ${esc(opts.origin.family || "—")}. The typology itself is unchanged; saving below writes your own copy.</p>`
+    : "";
+
+  const INPUT_CSS = "font:inherit;font-size:0.88rem;background:var(--bg);color:var(--ink);border:1px solid var(--rule);border-radius:5px;padding:6px 10px;max-width:100%";
 
   det.innerHTML = `
     <div class="stack" style="gap:20px">
       <hr class="sep">
       <div>
-        <h3>${esc(b.name)} <span class="pill" style="font-size:0.7rem;border-color:var(--muted);color:var(--muted)">${esc(b.kind)}</span></h3>
-        <p class="muted" style="font-size:0.85rem">${esc(br.description || "")}</p>
-        <p class="muted mono" style="font-size:0.75rem">${esc(b.path || "")}</p>
+        <h3>${headTitle} <span class="pill" style="font-size:0.7rem;border-color:var(--muted);color:var(--muted)">${esc(kindLabel)}</span></h3>
+        ${isNew ? "" : `<p class="muted" style="font-size:0.85rem">${esc(br.description || "")}</p>`}
+        ${isNew ? "" : `<p class="muted mono" style="font-size:0.75rem">${esc(b.path || "")}</p>`}
+        ${provenance}
       </div>
       <form id="brief-form" class="stack" style="gap:20px">
+
+        <fieldset>
+          <legend>Identity &amp; symmetry</legend>
+          <div class="form-grid">
+            <label for="brf-desc">Description</label>
+            <div><input id="brf-desc" type="text" value="${esc(br.description || "")}" placeholder="what this brief is for"
+              style="${INPUT_CSS};width:min(420px,100%)">
+              <div class="hint">Stored in the brief YAML (free text, may be empty)</div></div>
+            <label for="brf-sym">Symmetry</label>
+            <div><select id="brf-sym" style="${INPUT_CSS};width:220px">
+                <option value="hv" ${br.symmetry !== "axisymmetric" ? "selected" : ""}>hv — H and V may differ</option>
+                <option value="axisymmetric" ${br.symmetry === "axisymmetric" ? "selected" : ""}>axisymmetric — body of revolution</option>
+              </select>
+              <div class="hint">The server refuses axisymmetric briefs with unequal coverage: "an axisymmetric brief needs coverage_h_deg == coverage_v_deg"</div></div>
+            <label for="brf-verify-only">verify_only</label>
+            <div><input id="brf-verify-only" type="checkbox" ${br.verify_only ? "checked" : ""}>
+              <div class="hint">verify_only briefs are refused by search/run/campaign — only <code>verify --brief</code> uses them (the 12 kHz briefs work this way)</div></div>
+            <label for="brf-obj">Objective version</label>
+            <div><select id="brf-obj" style="${INPUT_CSS};width:220px">
+                <option value="1" ${objVer === 1 ? "selected" : ""}>1 — default scoring</option>
+                <option value="2" ${objVer === 2 ? "selected" : ""}>2 — opt-in updated scoring</option>
+              </select>
+              <div class="hint">Every shipped brief scores with version 1; version 2 is the opt-in update</div></div>
+          </div>
+        </fieldset>
 
         <fieldset>
           <legend>Target</legend>
@@ -1601,8 +1722,8 @@ async function showBriefDetail(b, allBriefs) {
               <div class="hint">Lowest scored frequency</div></div>
             <label for="brf-bhi">${tip("band", "Band high")} Hz</label>
             <div>
-              <input id="brf-bhi" type="number" step="100" min="500" max="5500" value="${tgt.band_hi_hz ?? 5500}">
-              <div class="hint" id="bhi-warn">${bandHiWarn || "Max 5 500 Hz on 8 GB GPU"}</div>
+              <input id="brf-bhi" type="number" step="100" value="${tgt.band_hi_hz ?? 5500}">
+              <div class="hint" id="bhi-warn">${bandHiWarn || "5500 Hz is the practical search ceiling on the 8 GB RTX 4060; higher values are saved as typed and belong to verify-only passes"}</div>
             </div>
             <label for="brf-di">${tip("di_db", "DI target")} dB</label>
             <div><input id="brf-di" type="number" step="0.1" value="${tgt.di_target_db ?? ""}" placeholder="auto from coverage">
@@ -1610,6 +1731,9 @@ async function showBriefDetail(b, allBriefs) {
             <label for="brf-dislope">${tip("dislope", "DI slope target")}</label>
             <div><input id="brf-dislope" type="number" step="0.01" value="${tgt.di_slope_target ?? 0}">
               <div class="hint">0 = constant directivity</div></div>
+            <label for="brf-zmin">${tip("load", "Loading threshold")} z_min</label>
+            <div><input id="brf-zmin" type="number" step="0.05" min="0" max="1" value="${tgt.z_min ?? 0}">
+              <div class="hint">Lowest scored frequency loading threshold — the throat-impedance floor the load term scores below (classical briefs use 0.7, default 0)</div></div>
           </div>
         </fieldset>
 
@@ -1631,6 +1755,8 @@ async function showBriefDetail(b, allBriefs) {
             <input id="brf-mh" type="number" step="1" value="${env.max_mouth_h_mm ?? 360}">
             <label for="brf-md">Max depth mm</label>
             <input id="brf-md" type="number" step="1" value="${env.max_depth_mm ?? 220}">
+            <span class="form-label" style="color:var(--muted)">Note</span>
+            <div class="hint">Width and height are independent — a wider-than-tall mouth is legal for every symmetry value</div>
           </div>
         </fieldset>
 
@@ -1643,38 +1769,81 @@ async function showBriefDetail(b, allBriefs) {
             <label for="brf-ea">Exit angle °</label>
             <div><input id="brf-ea" type="number" step="0.1" value="${drv.exit_angle_deg ?? 5.0}">
               <div class="hint">Half-angle of the exit cone</div></div>
+            <label for="brf-pol">Throat angle policy</label>
+            <div><select id="brf-pol" style="${INPUT_CSS};width:340px;max-width:100%">
+                <option value="" ${pol == null ? "selected" : ""}>— not set (each family keeps its own throat behaviour) —</option>
+                <option value="free" ${pol === "free" ? "selected" : ""}>free — throat angle stays searchable</option>
+                <option value="pin" ${pol === "pin" ? "selected" : ""}>pin — throat angle pinned to the driver exit angle</option>
+              </select>
+              <div class="hint">pin exists so every family competes on the same throat; absent key = exactly the pre-pin behaviour</div></div>
           </div>
         </fieldset>
+
+        <details id="brf-advanced" style="border:1px solid var(--rule);border-radius:6px;padding:10px 14px">
+          <summary style="cursor:pointer;font-family:var(--f-mono);font-size:0.78rem;color:var(--accent)">Advanced — frequency weights${br.grid ? " · grid carried through" : ""}</summary>
+          <div class="stack" style="gap:8px;margin-top:10px">
+            <div>
+              <div class="hint" style="margin-bottom:6px"><code>target.freq_weights</code> — one row per frequency slice: lo_hz, hi_hz, weight. A frequency gets the product of every slice containing it; empty means no weighting. Checked here (non-negative numbers, lo &lt; hi), then re-validated by the server on save.</div>
+              <div id="brf-fw-rows" class="stack" style="gap:6px"></div>
+              <button type="button" id="brf-fw-add" style="margin-top:8px">+ Add frequency-weight row</button>
+              <div id="brf-fw-msg" style="margin-top:6px"></div>
+            </div>
+            ${br.grid ? `<div class="hint">grid: verify_points_per_octave ${esc(String(br.grid.verify_points_per_octave ?? "—"))} — carried through unchanged (edit the YAML for another value)</div>` : ""}
+            <div class="hint">source: cap ${esc(String((br.source || {}).cap ?? "auto"))} — carried through unchanged</div>
+          </div>
+        </details>
 
         <div>
           <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">
             <input id="brf-save-name" type="text" placeholder="new-brief-name"
               pattern="[A-Za-z0-9_-]{1,64}" title="Letters, digits, _ and - only (max 64)"
               aria-label="save as name"
-              style="font:inherit;font-size:0.88rem;background:var(--bg);border:1px solid var(--rule);border-radius:5px;padding:6px 10px;width:180px">
+              style="${INPUT_CSS};width:180px">
             <button type="button" id="btn-save-brief" class="primary">Save as new brief</button>
           </div>
           <div class="hint">Name: letters, digits, _ and - only (max 64 characters)</div>
           <div id="brief-save-msg" style="margin-top:8px"></div>
         </div>
 
+        ${isNew ? `<p class="hint" style="margin:0" role="note">Starting values follow the shipped brief <code>examples/briefs/axi_90x90_1in.yaml</code> (coverage angles and scoring weights); the 500 × 400 × 250 mm envelope is wider than tall like your own briefs; every other field is the schema default. All of it is editable.</p>` : ""}
+
       </form>
 
+      ${isNew ? "" : `
       <div>
         <h4 style="margin-bottom:8px">Families compatible with this brief</h4>
         <button id="btn-families">Show compatible families</button>
         <pre class="families-out" id="families-out" style="display:none"></pre>
-      </div>
+      </div>`}
     </div>`;
 
-  // Band-hi warning and clamp
+  // Frequency-weight rows (target.freq_weights). Collapsed by default; values persist as typed.
+  const fwBox = document.getElementById("brf-fw-rows");
+  function addFwRow(r = ["", "", ""]) {
+    const div = document.createElement("div");
+    div.className = "fw-row";
+    div.style.cssText = "display:flex;gap:8px;align-items:center;flex-wrap:wrap";
+    div.innerHTML = `
+      <input type="number" class="fw-lo" min="0" step="1" aria-label="freq weight lo_hz" placeholder="lo_hz" style="${INPUT_CSS};width:104px" value="${r[0] ?? ""}">
+      <span class="muted" aria-hidden="true">–</span>
+      <input type="number" class="fw-hi" min="0" step="1" aria-label="freq weight hi_hz" placeholder="hi_hz" style="${INPUT_CSS};width:104px" value="${r[1] ?? ""}">
+      <span class="muted" aria-hidden="true">×</span>
+      <input type="number" class="fw-w" min="0" step="0.1" aria-label="freq weight weight" placeholder="weight" style="${INPUT_CSS};width:84px" value="${r[2] ?? ""}">
+      <button type="button" class="fw-del" aria-label="Remove this frequency-weight row" title="Remove this row">✕</button>`;
+    div.querySelector(".fw-del").onclick = () => div.remove();
+    fwBox.appendChild(div);
+  }
+  fwRows.forEach(r => addFwRow(r));
+  document.getElementById("brf-fw-add").onclick = () => addFwRow();
+
+  // Band-hi note (honest, no clamp): the value is saved exactly as typed.
   document.getElementById("brf-bhi").addEventListener("input", e => {
     const v = +e.target.value;
     const warnEl = document.getElementById("bhi-warn");
     if (v > 5500) {
-      warnEl.innerHTML = `<span class="warn-text">⚠ band_hi > 5500 Hz — beyond 8 GB GPU limit; clamped to 5500 on save</span>`;
+      warnEl.innerHTML = `<span class="warn-text">⚠ band_hi above 5500 Hz — beyond the 8 GB GPU dof cap (verify-only territory); saved as typed, no clamp</span>`;
     } else {
-      warnEl.textContent = "Max 5 500 Hz on 8 GB GPU";
+      warnEl.textContent = "5500 Hz is the practical search ceiling on the 8 GB RTX 4060; higher values are saved as typed and belong to verify-only passes";
     }
   });
 
@@ -1686,38 +1855,77 @@ async function showBriefDetail(b, allBriefs) {
     if (!/^[A-Za-z0-9_-]{1,64}$/.test(name)) {
       msg.innerHTML = `<div class="alert error">Name must be letters, digits, _ and - only (max 64).</div>`; return;
     }
-    const bhi = Math.min(5500, +document.getElementById("brf-bhi").value);
+    // Frequency-weight rows: numbers, non-negative, lo < hi — client-side only; the server
+    // (config.load_brief) re-validates for real and its error is shown verbatim below.
+    const fw = [];
+    let fwErr = "";
+    for (const row of document.querySelectorAll("#brf-fw-rows .fw-row")) {
+      const lo = row.querySelector(".fw-lo").value.trim(),
+            hi = row.querySelector(".fw-hi").value.trim(),
+            w  = row.querySelector(".fw-w").value.trim();
+      if (lo === "" && hi === "" && w === "") continue;
+      const L = +lo, H = +hi, W = +w;
+      if (lo === "" || hi === "" || w === "" || !Number.isFinite(L) || !Number.isFinite(H) || !Number.isFinite(W))
+        fwErr = "Every frequency-weight row needs numbers for lo_hz, hi_hz and weight.";
+      else if (L < 0 || H < 0 || W < 0)
+        fwErr = "Frequency-weight rows must be non-negative.";
+      else if (L >= H)
+        fwErr = "lo_hz must be below hi_hz in every frequency-weight row.";
+      else fw.push([L, H, W]);
+    }
+    const fwMsg = document.getElementById("brf-fw-msg");
+    if (fwErr) {
+      fwMsg.innerHTML = `<span class="warn-text">⚠ ${esc(fwErr)}</span>`;
+      msg.innerHTML = `<div class="alert warn">Fix the advanced frequency-weight rows before saving.</div>`;
+      document.getElementById("brf-advanced").open = true;
+      return;
+    }
+    fwMsg.textContent = "";
     const newBrief = {
-      name, description: br.description || "",
-      driver: { exit_radius_mm: +document.getElementById("brf-er").value, exit_angle_deg: +document.getElementById("brf-ea").value },
-      envelope: { max_mouth_w_mm: +document.getElementById("brf-mw").value, max_mouth_h_mm: +document.getElementById("brf-mh").value, max_depth_mm: +document.getElementById("brf-md").value },
-      symmetry: br.symmetry || "hv", source: br.source || {},
+      name,
+      description: document.getElementById("brf-desc").value.trim(),
+      driver: { exit_radius_mm: +document.getElementById("brf-er").value,
+                exit_angle_deg: +document.getElementById("brf-ea").value,
+                throat_angle_policy: document.getElementById("brf-pol").value || null },
+      envelope: { max_mouth_w_mm: +document.getElementById("brf-mw").value,
+                  max_mouth_h_mm: +document.getElementById("brf-mh").value,
+                  max_depth_mm: +document.getElementById("brf-md").value },
+      symmetry: document.getElementById("brf-sym").value,
+      source: br.source || {},
       target: {
         coverage_h_deg: +document.getElementById("brf-cov-h").value,
         coverage_v_deg: +document.getElementById("brf-cov-v").value,
         band_lo_hz: +document.getElementById("brf-blo").value,
-        band_hi_hz: bhi,
-        di_target_db: document.getElementById("brf-di").value ? +document.getElementById("brf-di").value : null,
+        band_hi_hz: +document.getElementById("brf-bhi").value,     // no clamp: the server validates for real
+        di_target_db: document.getElementById("brf-di").value === "" ? null : +document.getElementById("brf-di").value,
         di_slope_target: +document.getElementById("brf-dislope").value,
-        z_min: tgt.z_min ?? 0,
+        z_min: +document.getElementById("brf-zmin").value,
+        ...(fw.length ? { freq_weights: { band_hz: fw } } : {}),   // absent = no weighting (schema default)
       },
       weights: Object.fromEntries(TERM_ORDER.map(k => [k, +document.getElementById(`brf-w-${k}`).value])),
+      verify_only: document.getElementById("brf-verify-only").checked,
+      objective: { version: +document.getElementById("brf-obj").value },
+      ...(br.grid ? { grid: br.grid } : {}),                       // carried through, never silently dropped
     };
     const r = await post("/api/brief", { name, brief: newBrief });
     if (r.error) msg.innerHTML = `<div class="alert error">${esc(r.error)}</div>`;
     else msg.innerHTML = `<div class="alert info">Saved to ${esc(r.path || name)}</div>`;
   };
 
-  // Show families
-  document.getElementById("btn-families").onclick = async () => {
-    const pre = document.getElementById("families-out");
-    pre.style.display = "block";
-    pre.textContent = "Loading…";
-    try {
-      const r = await api("/api/families?brief=" + encodeURIComponent(b.name));
-      pre.textContent = r.text || "(no output)";
-    } catch (e) { pre.textContent = "Error: " + e.message; }
-  };
+  if (!isNew) {
+    // Show families
+    document.getElementById("btn-families").onclick = async () => {
+      const pre = document.getElementById("families-out");
+      pre.style.display = "block";
+      pre.textContent = "Loading…";
+      try {
+        const r = await api("/api/families?brief=" + encodeURIComponent(b.name));
+        pre.textContent = r.text || "(no output)";
+      } catch (e) { pre.textContent = "Error: " + e.message; }
+    };
+  }
+
+  if (opts.scroll) det.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 // ── View 6: Launch ─────────────────────────────────────────────────
@@ -1896,7 +2104,7 @@ function renderLaunch(briefs, jobs, configs, statusData, typs = []) {
   });
 
   // Family picker: grouped by kind, incompatible families disabled with the CLI's own reason
-  const GROUP_LABEL = { classical: "Classical horns", hybrid: "Hybrids", magnus: "Magnus mesher families", legacy: "Utility / legacy" };
+  const GROUP_LABEL = { classical: "Classical horns", hybrid: "Hybrids", organic: "Organic horns", magnus: "Magnus mesher families", legacy: "Utility / legacy" };
   const selected = new Set((pre.get("families") || "").split(",").filter(Boolean));
   if (pre.get("brief")) {
     const o = [...document.getElementById("lf-brief").options].find(x => x.dataset.name === pre.get("brief"));
