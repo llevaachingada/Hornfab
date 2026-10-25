@@ -82,7 +82,18 @@ Need a file you do not own? Do not edit it. Append the exact change to `NOTES_FO
   `0.001` is for its mm example mesh. `mesh/build.py` asserts bbox is 0.1–1 m.
 - **Quadrants vs symmetry flag** must derive from one source and be tested together.
 - **DI provenance**: `MetricSet.di_source` is `"balloon"` or `"cuts_estimate"`; no checkpoint passes on
-  `cuts_estimate`.
+`cuts_estimate`.
+
+## Research grounding (before typology/shape work)
+
+Work that ADDS or CHANGES a typology, generator, grid/point-grid shape law, mounting model, multicell/septa
+geometry, brief-for-a-new-typology, or an objective/directivity term that encodes a NEW acoustic priority runs
+the `hornlab-typology-research` skill (project) FIRST: outside research on the typology itself — primary
+sources in a source table, corrected claims, a validatable construction, experiential reports — before code;
+if the senior-pass research already covers it, cite it and proceed. Lane roles that cannot load skills apply
+this paragraph plus the WP9b 9b.0 standard (docs/research/senior_pass_2026-10-24/04_IMPLEMENTATION_PLAN.md).
+The R9 gate binds: nothing ships under a published name without a verifiable published reference. Routine
+config/GPU/evidence work skips it (see also hornlab-gpu-job, hornlab-evidence).
 
 ## Tests
 
