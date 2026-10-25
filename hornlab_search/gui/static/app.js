@@ -1662,7 +1662,11 @@ async function showBriefDetail(b, allBriefs, opts = {}) {
 
   const pol = drv.throat_angle_policy;                    // "pin" | "free" | absent
   const objVer = (br.objective || {}).version ?? 1;
-  const fwRows = ((tgt.freq_weights || {}).band_hz || []).slice();
+  // band_hz must be an array of rows; a hand-edited brief may carry anything (list_briefs does no
+  // validation) — a non-array is disclosed, never allowed to break the form mid-render.
+  const fwRaw = (tgt.freq_weights || {}).band_hz;
+  const fwRows = Array.isArray(fwRaw) ? fwRaw.filter(r => Array.isArray(r) && r.length >= 1).map(r => r.map(v => v == null ? "" : String(v))) : [];
+  const fwBadNote = !Array.isArray(fwRaw) ? `<div class="hint" style="margin-bottom:6px"><span class="warn-text">⚠ this brief's target.freq_weights.band_hz is not a list of rows — not editable here (fix the YAML)</span></div>` : "";
 
   const headTitle = isNew ? "New brief" : esc(b.name);
   const kindLabel = isNew ? "new (unsaved)" : b.kind;
@@ -1783,6 +1787,7 @@ async function showBriefDetail(b, allBriefs, opts = {}) {
           <summary style="cursor:pointer;font-family:var(--f-mono);font-size:0.78rem;color:var(--accent)">Advanced — frequency weights${br.grid ? " · grid carried through" : ""}</summary>
           <div class="stack" style="gap:8px;margin-top:10px">
             <div>
+              ${fwBadNote}
               <div class="hint" style="margin-bottom:6px"><code>target.freq_weights</code> — one row per frequency slice: lo_hz, hi_hz, weight. A frequency gets the product of every slice containing it; empty means no weighting. Checked here (non-negative numbers, lo &lt; hi), then re-validated by the server on save.</div>
               <div id="brf-fw-rows" class="stack" style="gap:6px"></div>
               <button type="button" id="brf-fw-add" style="margin-top:8px">+ Add frequency-weight row</button>
@@ -1805,7 +1810,7 @@ async function showBriefDetail(b, allBriefs, opts = {}) {
           <div id="brief-save-msg" style="margin-top:8px"></div>
         </div>
 
-        ${isNew ? `<p class="hint" style="margin:0" role="note">Starting values follow the shipped brief <code>examples/briefs/axi_90x90_1in.yaml</code> (coverage angles and scoring weights); the 500 × 400 × 250 mm envelope is wider than tall like your own briefs; every other field is the schema default. All of it is editable.</p>` : ""}
+        ${isNew ? `<p class="hint" style="margin:0" role="note">Starting values follow the shipped brief <code>examples/briefs/axi_90x90_1in.yaml</code> (coverage angles, scoring weights, band top 5500); the 500 × 400 × 250 mm envelope is wider than tall like your own briefs and band low 500 Hz is the compose default; every other field is the schema default. All of it is editable.</p>` : ""}
 
       </form>
 
@@ -1824,11 +1829,11 @@ async function showBriefDetail(b, allBriefs, opts = {}) {
     div.className = "fw-row";
     div.style.cssText = "display:flex;gap:8px;align-items:center;flex-wrap:wrap";
     div.innerHTML = `
-      <input type="number" class="fw-lo" min="0" step="1" aria-label="freq weight lo_hz" placeholder="lo_hz" style="${INPUT_CSS};width:104px" value="${r[0] ?? ""}">
+      <input type="number" class="fw-lo" min="0" step="1" aria-label="freq weight lo_hz" placeholder="lo_hz" style="${INPUT_CSS};width:104px" value="${esc(r[0] ?? "")}">
       <span class="muted" aria-hidden="true">–</span>
-      <input type="number" class="fw-hi" min="0" step="1" aria-label="freq weight hi_hz" placeholder="hi_hz" style="${INPUT_CSS};width:104px" value="${r[1] ?? ""}">
+      <input type="number" class="fw-hi" min="0" step="1" aria-label="freq weight hi_hz" placeholder="hi_hz" style="${INPUT_CSS};width:104px" value="${esc(r[1] ?? "")}">
       <span class="muted" aria-hidden="true">×</span>
-      <input type="number" class="fw-w" min="0" step="0.1" aria-label="freq weight weight" placeholder="weight" style="${INPUT_CSS};width:84px" value="${r[2] ?? ""}">
+      <input type="number" class="fw-w" min="0" step="0.1" aria-label="freq weight weight" placeholder="weight" style="${INPUT_CSS};width:84px" value="${esc(r[2] ?? "")}">
       <button type="button" class="fw-del" aria-label="Remove this frequency-weight row" title="Remove this row">✕</button>`;
     div.querySelector(".fw-del").onclick = () => div.remove();
     fwBox.appendChild(div);
