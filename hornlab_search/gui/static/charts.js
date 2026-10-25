@@ -344,7 +344,7 @@ function sample(rows, fi, ai) {
 const MS = { 1: ["l", "t"], 2: ["t", "r"], 3: ["l", "r"], 4: ["r", "b"], 5: ["l", "t", "r", "b"], 6: ["t", "b"], 7: ["l", "b"],
              8: ["l", "b"], 9: ["t", "b"], 10: ["t", "r", "l", "b"], 11: ["r", "b"], 12: ["l", "r"], 13: ["t", "r"], 14: ["l", "t"] };
 
-export function isobarMap(svg, rows, angles, freqs, { H = 300, title = "" } = {}) {
+export function isobarMap(svg, rows, angles, freqs, { H = 300, title = "", angleTicks = null } = {}) {
   svg.innerHTML = "";
   if (!rows || !rows.length || !angles || !angles.length || !freqs || freqs.length < 2) return;
   const W = measuredWidth(svg, 520);
@@ -402,14 +402,15 @@ export function isobarMap(svg, rows, angles, freqs, { H = 300, title = "" } = {}
                    "stroke-width": L === -6 ? 1.8 : 1.1 }, svg);
     }
   }
-  // grid and axes
+  // grid and axes (angleTicks: optional — the balloon view passes 0..180 theta ticks over a
+  // 0..180 polar-angle slice; default keeps the ±90° behaviour all other callers rely on)
   const g = el("g", {}, svg);
   for (const t of [200, 500, 1000, 2000, 5000, 10000, 20000]) {
     if (Math.log10(t) < lf0 - 1e-9 || Math.log10(t) > lf1 + 1e-9) continue;
     el("line", { x1: X(t), x2: X(t), y1: m.t, y2: m.t + ph, stroke: "#808080", "stroke-opacity": 0.7, "stroke-width": 1.0 }, g);
     el("text", { x: X(t), y: m.t + ph + 14, "text-anchor": "middle" }, svg).textContent = t >= 1000 ? t / 1000 + "k" : String(t);
   }
-  for (let a = -90; a <= 90; a += 30) {
+  for (const a of (angleTicks || [-90, -60, -30, 0, 30, 60, 90])) {
     if (a < a0 || a > a1) continue;
     el("line", { x1: m.l, x2: m.l + pw, y1: Y(a), y2: Y(a), stroke: "#808080", "stroke-opacity": a === 0 ? 0.9 : 0.7, "stroke-width": 1.0 }, g);
     el("text", { x: m.l - 6, y: Y(a) + 3, "text-anchor": "end" }, svg).textContent = (a > 0 ? "+" : "") + a + "°";

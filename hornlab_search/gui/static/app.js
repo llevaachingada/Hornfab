@@ -6,6 +6,7 @@ import { chart, heat, cmap, drawCbar, niceTicks, diFromCuts, groupColor,
 import { TERMS as GLOSSARY, TERM_ORDER, tip } from "./glossary.js";
 import { init3d } from "./view3d.js";
 import { viewEvolution } from "./evolution.js";
+import { viewBalloon } from "./balloon.js";
 
 // ── XSS helper ─────────────────────────────────────────────────────
 function esc(s) {
@@ -53,6 +54,7 @@ const ROUTES = [
   { re: /^#\/campaign\/(.+)$/,          fn: m => viewCampaignDetail(m[1]) },
   { re: /^#\/runs$/,                    fn: () => viewRunsList() },
   { re: /^#\/run\/(.+)\/3d$/,           fn: m => viewRun3D(m[1]) },
+  { re: /^#\/run\/(.+)\/balloon$/,      fn: m => viewBalloon(ROOT, m[1]) },     // W6: BL-style balloon
   { re: /^#\/run\/(.+)\/evolution$/,    fn: m => viewEvolution(ROOT, m[1]) },
   { re: /^#\/run\/(.+)\/archive$/,      fn: m => viewRunArchive(m[1]) },
   { re: /^#\/run\/(.+)$/,               fn: m => viewRunDetail(m[1]) },
@@ -1260,6 +1262,7 @@ async function viewRunDetail(id) {
       <div class="btn-row">
         <a class="btn primary" href="#/run/${esc(id)}/evolution">▶ Evolution time-lapse</a>
         <a class="btn" href="#/run/${esc(id)}/archive" title="Quality-diversity atlas: objective per descriptor bin (CMA-ME runs only)">QD atlas</a>
+        <a class="btn" href="#/run/${esc(id)}/balloon" title="W6 Balloon: the stored directivity balloon in 3D — shape + colour = SPL, white isobar rings, radar slicer, freq × angle slice">◉ Balloon 3D</a>
         <a class="btn" href="#/run/${esc(id)}/3d">3D view</a>
         <a class="btn" href="#/compare?a=${esc(id)}">Compare with…</a>
         <span id="report-slot">${sum.has_report
@@ -1668,6 +1671,7 @@ async function viewRun3D(id) {
       </div>
       <div class="btn-row">
         <a class="btn" href="#/run/${esc(id)}">← Back to run</a>
+        <a class="btn" href="#/run/${esc(id)}/balloon">◉ Balloon 3D</a>
       </div>
       <div class="fig-head">
         <label class="evo-opt" style="color:var(--ink)"><input type="checkbox" id="v3d-shadows" ${(() => { try { return localStorage.getItem("hl-v3d-shadows") === "0" ? "" : "checked"; } catch { return "checked"; } })()}> wall shadows</label>

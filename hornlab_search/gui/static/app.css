@@ -27,6 +27,7 @@
   --f-mono:      "Spline Sans Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
   --nav-w:       220px;
   --nav-top:     0px;
+  --balloon-cut: #c2417d;  /* pink accent of the balloon view's radar cut / V-axis ray (4.7:1 on white) */
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --bg:#0e1418; --surface:#151d23; --ink:#e3eaee; --muted:#93a3ad; --label:#b3bfc6; --rule:#40505b;
@@ -35,6 +36,7 @@
   --seed:#d9a466; --best:#5cc3cf;
   --band:rgba(92,195,207,0.30); --good:#6cc27a; --warn:#e0a050; --warn-soft:rgba(224,160,80,0.14);
   --bad:#ec7b7b; --bad-soft:rgba(236,123,123,0.13);
+  --balloon-cut:#ef89b8;
   color-scheme:dark; } }
 :root[data-theme="dark"] {
   --bg:#0e1418; --surface:#151d23; --ink:#e3eaee; --muted:#93a3ad; --label:#b3bfc6; --rule:#40505b;
@@ -43,6 +45,7 @@
   --seed:#d9a466; --best:#5cc3cf;
   --band:rgba(92,195,207,0.30); --good:#6cc27a; --warn:#e0a050; --warn-soft:rgba(224,160,80,0.14);
   --bad:#ec7b7b; --bad-soft:rgba(236,123,123,0.13);
+  --balloon-cut:#ef89b8;
   color-scheme:dark; }
 
 /* ── Reset ──────────────────────────────────────────────────────── */
@@ -467,8 +470,7 @@ svg.camp-sec { width: 100%; height: 130px; display: block; }
 .typ-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 470px), 1fr)) !important; }
 
 /* ── Evolution time-lapse ─────────────────────────────────────────────────────────────────────── */
-.evo-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
-.evo-controls input[type=range] { flex: 1 1 220px; min-width: 140px; accent-color: var(--accent); }
+.evo-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }.evo-controls input[type=range] { flex: 1 1 220px; min-width: 140px; accent-color: var(--accent); }
 .evo-pos { font-size: 0.8rem; color: var(--muted); min-width: 70px; }
 .evo-opt { font-size: 0.8rem; color: var(--muted); display: inline-flex; align-items: center; gap: 4px; }
 .evo-status { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; font-size: 0.88rem; padding: 10px 14px; }
@@ -496,3 +498,19 @@ svg .iso-title { font-family: var(--f-body); font-size: 12px; font-weight: 600; 
 .toast.good { border-color: var(--good); } .toast.error { border-color: var(--bad); }
 .guide summary { cursor: pointer; list-style: revert; }
 .guide-steps { margin: 10px 0 0; padding-left: 1.3em; display: grid; gap: 6px; font-size: 0.9rem; }
+
+/* ── Balloon view (W6: own implementation; display design follows Boundary Lab's GPL-3 balloon plot) ── */
+.balloon-controls { display: grid; grid-template-columns: max-content minmax(180px, 1fr) minmax(96px, 170px);
+  gap: 12px 14px; align-items: center; }
+.balloon-controls label { font-family: var(--f-mono); font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
+.balloon-controls input[type=range] { width: 100%; accent-color: var(--accent); }
+.balloon-slider-val { font-family: var(--f-mono); font-size: 0.82rem; color: var(--label);
+  text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+#balloon-wrap { width: 100%; height: 480px; background: var(--viz-canvas, #e9edf0);
+  border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; position: relative; }
+#balloon-wrap canvas { display: block; cursor: crosshair; }
+#balloon-hover { font-family: var(--f-mono); font-size: 0.78rem; color: var(--label); min-height: 1.3em; }
+.balloon-radar { width: 100%; max-width: 340px; aspect-ratio: 1 / 1; display: block; margin: 0 auto; }
+@media (max-width: 700px) {
+  .balloon-controls { grid-template-columns: max-content 1fr 96px; }
+}

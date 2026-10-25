@@ -339,7 +339,7 @@ def test_leaders_prefer_compare_tier_and_apply_the_ranking_rule(repo):
     assert l["campaign_id"] == "campaign_20261025T000000Z" and l["clearly_ahead"] is False
 
 
-@pytest.mark.parametrize("name", ["app.js", "charts.js", "glossary.js", "view3d.js", "evolution.js"])
+@pytest.mark.parametrize("name", ["app.js", "charts.js", "glossary.js", "view3d.js", "evolution.js", "balloon.js"])
 def test_static_js_parses_as_an_es_module(name, tmp_path):
     """A syntax error anywhere in app.js blanks every view ("Loading..." forever); catch it offline."""
     node = shutil.which("node")

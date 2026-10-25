@@ -48,6 +48,10 @@ class App:
             return D.campaign_detail(self.runs, parts[1])
         if head == "mesh" and len(parts) == 3:
             return D.mesh_surface(self.runs, parts[1], parts[2])
+        if head == "balloon" and len(parts) == 2:
+            return D.balloon_designs(self.runs, parts[1])
+        if head == "balloon" and len(parts) == 3:
+            return D.balloon(self.runs, parts[1], parts[2])
         if head == "briefs":
             return D.list_briefs(self.root)
         if head == "evolution" and len(parts) == 2:

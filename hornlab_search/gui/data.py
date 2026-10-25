@@ -446,7 +446,7 @@ def _solve_group_fingerprint(run_dir: Path) -> dict:
         g["cuda_fused"] = True
     if solve.get("source_motion") not in (None, "normal"):
         g["source_motion"] = solve["source_motion"]
-    alpha = solve.get("source_profile_alpha")            # WP16 ride key (absent until that lane lands)
+    alpha = solve.get("source_profile_alpha")            # WP16 ride key (committed in config.py)
     if isinstance(alpha, (int, float)) and not isinstance(alpha, bool) and float(alpha) != 0.0:
         g["source_profile_alpha"] = alpha
     # WP14: near_correction is one group key set by ANY of the three knobs; the two numbers stay
@@ -568,6 +568,93 @@ def _row_quadrants(run_dir: Path, h: str) -> str | None:
         if row.get("design_hash") == h and row.get("quadrants"):
             return str(row["quadrants"])
     return None
+
+
+# ---------------------------------------------------------------------------- balloon (W6)
+
+#: Normalised window of the balloon display (design follows Boundary Lab's
+#: JWSound/boundary-lab Balloon Plot, GPL-3.0; the implementation here is our own): 0 dB sits on
+#: the on-axis direction, and anything below this floor collapses onto it.
+BALLOON_MIN_DB = -30.0
+
+
+def _balloon_label(design_dir: Path) -> str:
+    """Short human label of one design: family, plus the wall kind the generator derived."""
+    dj = _read_json(design_dir / "design.json") or {}
+    fam = str(dj.get("family") or "?")
+    gen = _as_dict(dj.get("generator"))
+    kind = _as_dict(_as_dict(gen.get("derived")).get("h")).get("type")
+    return f"{fam} · {kind}" if kind else fam
+
+
+def balloon_designs(runs: Path, run_id: str) -> dict:
+    """Design-picker payload for the balloon view: the run's successful designs ranked by
+    objective (best first, TOP_K at most), each disclosing whether a stored-balloon
+    ``response.npz`` is actually on disk. Read-only: file-existence probes only."""
+    d = _resolve_run(runs, run_id)
+    rows = [r for r in read_ndjson(d / "search.ndjson")
+            if r.get("ok") and HASH.match(str(r.get("design_hash") or ""))]
+    rows.sort(key=lambda r: float(r["objective"]) if r.get("objective") is not None else math.inf)
+    seen, designs = set(), []
+    for r in rows:
+        h = str(r["design_hash"])
+        if h in seen:
+            continue
+        seen.add(h)
+        designs.append({"hash": h, "objective": r.get("objective"), "n": r.get("n"),
+                        "has_balloon": (d / "designs" / h / "response.npz").is_file()})
+        if len(designs) >= TOP_K:
+            break
+    return clean({"run_id": run_id, "name": _config(d).get("name"), "designs": designs})
+
+
+def balloon(runs: Path, run_id: str, h: str) -> dict:
+    """One design's stored balloon (W6) for the GUI's three.js Balloon view.
+
+    Reads only the ``response.npz`` the search already wrote. The per-direction order is
+    theta-major exactly as stored (``balloon_layout``: index = i*nP + j; theta rows 0..180
+    INCLUSIVE from +Z — both pole rows present, each holding the same direction for every phi;
+    phi columns 0..360 counterclockwise from +X toward +Y, NO stored wrap column — the viewer
+    closes the seam). Levels are relative to on-axis (the theta = 0 pole row), Float32-rounded
+    and clipped to ``[BALLOON_MIN_DB, 0]`` dB — the Balloon display's window. Nothing is solved
+    or interpolated here; bilinear interpolation on the grid is a viewer concern.
+    """
+    d = _resolve_run(runs, run_id)
+    if not HASH.match(h):
+        raise ValueError(f"not a design hash: {h!r}")
+    p = d / "designs" / h / "response.npz"
+    if not p.is_file():
+        raise FileNotFoundError(f"{run_id}/{h}/response.npz")
+    try:
+        with np.load(p, allow_pickle=False) as z:
+            freqs = np.asarray(z["freqs_hz"], float)
+            spl = np.asarray(z["spl_balloon_db"], float)
+            try:
+                meta = json.loads(str(z["meta"]))
+            except (ValueError, TypeError):
+                meta = {}
+            n_dof = int(z["n_dof"]) if "n_dof" in z.files else None
+    except (OSError, KeyError) as exc:
+        raise ValueError(f"unreadable balloon payload: {exc}") from exc
+    grid = meta.get("balloon_grid")
+    if not (isinstance(grid, list) and len(grid) == 2
+            and all(isinstance(v, int) and not isinstance(v, bool) and v > 0 for v in grid)):
+        raise ValueError(f"balloon_grid {grid!r} does not match spl_balloon_db shape {spl.shape}")
+    if spl.shape != (len(freqs), grid[0] * grid[1]):
+        raise ValueError(f"balloon_grid {grid!r} does not match spl_balloon_db shape {spl.shape}")
+    nT, nP = int(grid[0]), int(grid[1])
+    ref = spl[:, 0:nP].mean(axis=1)                      # on-axis pole row (all phi, one direction)
+    rel = np.clip(spl - ref[:, None], BALLOON_MIN_DB, 0.0).astype(np.float32)
+    return clean({
+        "run_id": run_id, "design": h, "label": _balloon_label(d / "designs" / h),
+        "freqs_hz": _rnd(freqs, 1),
+        "balloon_grid": [nT, nP],
+        "layout": str(meta.get("balloon_layout") or ""),
+        "n_dof": n_dof,
+        "distance_m": meta.get("distance_m") if isinstance(meta.get("distance_m"), (int, float)) else None,
+        "min_db": BALLOON_MIN_DB,
+        "spl": rel.tolist(),
+    })
 
 
 # ---------------------------------------------------------------------------- campaigns

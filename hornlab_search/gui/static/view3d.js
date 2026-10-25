@@ -6,17 +6,20 @@
 
 let THREE, OrbitControls;
 
-async function loadThree() {
-  if (THREE) return true;
+/** Load three.js r160 + OrbitControls (module-scope). Resolves to the THREE namespace (falsy
+ *  when the CDN import failed) so a viewer can also `const THREE = await loadThree()` and use
+ *  it in its own scope. */
+export async function loadThree() {
+  if (THREE) return THREE;
   try {
     const mod = await import("three");
     THREE = mod;
     const { OrbitControls: OC } = await import("three/addons/controls/OrbitControls.js");
     OrbitControls = OC;
-    return true;
+    return THREE;
   } catch (e) {
     console.warn("view3d: three.js failed to load:", e);
-    return false;
+    return null;
   }
 }
 
