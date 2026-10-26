@@ -384,4 +384,6 @@ def test_sandbox_css_block_present_and_reduced_motion_guarded():
     assert m, "the slider row rule is missing"
     # the row grid collapses on narrow screens instead of scrolling sideways
     assert css.count("@media (max-width: 760px)") >= 1
-    assert ".sbox-kname, .sbox-chips { grid-column: 1 / -1; }" in css
+    # 2026-10-26: every row is two lines at every width -- the name/chips line spans the row and
+    # the slider gets its own full-width line, so nothing scrolls sideways
+    assert 'grid-template-areas: "name name chips reset" "lo slider val hi";' in css

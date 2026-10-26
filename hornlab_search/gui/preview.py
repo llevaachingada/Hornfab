@@ -78,10 +78,15 @@ def tessellate(
 ) -> dict:
     """Tessellate one canonical grid into the three sandbox preview roles.
 
-    Returns ``{"roles": [...], "positions": (N, 3) float64, "indices": (M, 3) int64}``. The
-    roles are emitted in render order and every surface keeps the mesher's own
-    winding-vs-normal validation. ``outer_grid is None`` omits ``horn.outer``/``mouth_rim``
-    rather than inventing a shell.
+    Returns ``{"roles": [...], "positions": (N, 3) float64, "indices": (M, 3) int64,
+    "warnings": [...]}``. The roles are emitted in render order and every surface keeps the
+    mesher's own winding-vs-normal validation. ``outer_grid is None`` omits
+    ``horn.outer``/``mouth_rim`` rather than inventing a shell.
+
+    A sandbox shows shapes the search would refuse, so a wall that folds over itself is DRAWN,
+    not dropped: when the inner surface fails the strict winding check it is rebuilt with the
+    mesher's own ``wind_folds_individually`` repair and the folded-triangle count is reported in
+    ``warnings``; a mouth rim that fails alone is left out (also reported).
     """
     inner = np.ascontiguousarray(np.asarray(inner_grid, dtype=np.float64))
     if inner.ndim != 3 or inner.shape[2] != 3:
@@ -98,17 +103,19 @@ def tessellate(
     phi_indices = np.arange(master.shape[1], dtype=np.int64)
     selected_inner = master[np.ix_(t_indices, phi_indices)]
 
-    surfaces = [
-        _grid_surface_from_selection(
-            "horn.inner",
-            master,
-            normals,
-            t_indices,
-            phi_indices,
-            closed_phi=closed,
-            normal_sign=-1.0,
-        )
-    ]
+    warnings: list[str] = []
+    try:
+        inner_surface = _grid_surface_from_selection(
+            "horn.inner", master, normals, t_indices, phi_indices,
+            closed_phi=closed, normal_sign=-1.0)
+    except ValueError as exc:
+        inner_surface = _grid_surface_from_selection(
+            "horn.inner", master, normals, t_indices, phi_indices,
+            closed_phi=closed, normal_sign=-1.0, wind_folds_individually=True)
+        folded = int((inner_surface.metadata or {}).get("foldedTriangles") or 0)
+        warnings.append(f"the inner wall folds over itself ({folded} folded triangles drawn; "
+                        f"strict check: {exc})")
+    surfaces = [inner_surface]
     if outer_grid is not None:
         outer = np.ascontiguousarray(np.asarray(outer_grid, dtype=np.float64))
         if outer.shape != inner.shape:
@@ -128,15 +135,18 @@ def tessellate(
         # The mesher may split the shell at the throat-jog crease (a shading role); the sandbox
         # contract has exactly three roles, so every shell part rides under "horn.outer".
         surfaces.extend(outer_parts)
-        surfaces.append(
-            _smooth_mouth_rim(
-                selected_inner[:, -1, :],
-                selected_outer[:, -1, :],
-                closed_phi=closed,
-                exit_direction=_exit_direction(selected_inner),
-                include_curvature=False,
+        try:
+            surfaces.append(
+                _smooth_mouth_rim(
+                    selected_inner[:, -1, :],
+                    selected_outer[:, -1, :],
+                    closed_phi=closed,
+                    exit_direction=_exit_direction(selected_inner),
+                    include_curvature=False,
+                )
             )
-        )
+        except ValueError as exc:
+            warnings.append(f"mouth rim face left out ({exc})")
 
     positions: list[np.ndarray] = []
     triangles: list[np.ndarray] = []
@@ -154,4 +164,5 @@ def tessellate(
         "roles": roles,
         "positions": np.vstack(positions),
         "indices": np.vstack(triangles),
+        "warnings": warnings,
     }

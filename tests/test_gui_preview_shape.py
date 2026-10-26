@@ -85,15 +85,18 @@ def test_grid_kind_uses_the_configs_own_arrays():
     assert out["envelope"]["available"] is True
 
 
-def test_native_kind_reports_envelope_unavailable_honestly():
-    out = D.preview_shape(ROOT, "osse_baseline", _q(detail="2d"))
+def test_native_kind_measures_its_envelope_from_the_preview_geometry():
+    # 2026-10-26: the estimator still has no native branch, so the sandbox MEASURES the drawn
+    # shape against the brief instead of leaving the envelope blank.
+    bare = D.preview_shape(ROOT, "osse_baseline", _q(detail="2d"))      # no brief: nothing to measure against
+    assert bare["envelope"] == {"available": False, "reason": "the brief has no size envelope"}
+    out = D.preview_shape(ROOT, "osse_baseline", _q(detail="2d", brief="osse_75x45"))
     assert out["kind"] == "native"
     assert out["available"] is True
-    assert out["envelope"] == {
-        "available": False,
-        "reason": ("envelope estimator has FREEFORM-anchor and GRID branches only; "
-                   "OSSE/R-OSSE/ICW params return None"),
-    }
+    assert out["envelope"]["available"] is True
+    assert out["envelope"]["source"] == "measured from the preview geometry"
+    assert out["envelope"]["overshoot"] >= 0.0
+    assert out["dims"]["w"] > 0 and out["dims"]["h"] > 0 and out["dims"]["d"] > 0
     assert len(out["section"]["h"]["inner"]) >= 2
 
 

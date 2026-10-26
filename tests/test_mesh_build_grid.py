@@ -136,7 +136,7 @@ def test_grid_recipe_disagreeing_with_the_brief_is_invalid_geometry(tmp_path):
         build.build_mesh(design, _low_spec(cfg), cfg, tmp_path)   # ...but the brief refuses it
 
 
-def test_grid_self_approach_classifies_invalid_geometry_and_is_memoized(tmp_path):
+def test_grid_self_approach_classifies_invalid_geometry_and_is_memoized(tmp_path, monkeypatch):
     """S1b (2026-10-25 R9 audit + campaign finding): the rows route's in-build_grid_mesh
     re-checks (the self-approach guard in _resolve_grid) used to escape build_grid_mesh as a
     bare GeneratorError and land in evaluate's generic-except as kind 'exception' - flat 1000,
@@ -147,7 +147,16 @@ def test_grid_self_approach_classifies_invalid_geometry_and_is_memoized(tmp_path
     mesh/build.build_mesh_from_design_grid's recipe-step wrap stays as it is. Fixture: the
     salmon_saddle seed under a 17.4 mm-exit brief (its tuned 12.7 mm brief leaves the outer
     shell 0.002 mm above the refusal limit; the bigger driver pushes it just under)."""
+    from hornlab_search.design.generators import grid as grid_gen
     from hornlab_search.search import evaluate as E
+
+    # 2026-10-26: the guard now measures folds only (arc separation >= pi/2 * limit), so this
+    # seed's old 0.002 mm "refusal" -- a chord-vs-arc false positive on ordinary lip curvature --
+    # is gone (it measures ~12.6 mm against the 8 mm limit). The contract under test is the
+    # BOUNDARY: a real guard refusal must come back as invalid_geometry and be memoized. The
+    # gap measurement is therefore forced below the limit; the refusal still travels the real
+    # check_self_approach -> build_grid_mesh -> evaluate path.
+    monkeypatch.setattr(grid_gen, "min_self_approach_mm", lambda *a, **k: 1.0)
 
     bigger = dict(_cfg("salmon_saddle").brief)
     bigger.pop("path", None)                               # loader-added runtime key, not schema

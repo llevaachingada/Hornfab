@@ -3132,7 +3132,7 @@ async function viewCompose() {
       return `<label class="fam-row ${off ? "off" : ""}" title="${esc(why)}">
         <input type="checkbox" value="${esc(c.path)}" ${off ? "disabled" : ""} ${S.picks.has(c.path) ? "checked" : ""}>
         <span class="fam-name">${esc(c.catalog_name || c.name)}${c.disabled ? ` <span class="pill bad" style="font-size:0.66rem">disabled</span>` : ""}</span>
-        <span class="fam-meta">${esc(c.family || "—")} · ${symLabel(c)} · ${c.n_knobs} params${cap ? `<br>${esc(cap)}` : ""}</span>
+        <span class="fam-meta">${esc(c.family || "—")} · ${symLabel(c)} · ${c.n_knobs} params${morphPill(c)}${cap ? `<br>${esc(cap)}` : ""}</span>
         <span class="fam-best">${esc(stem)}</span>
       </label>`;
     };
@@ -3961,6 +3961,15 @@ const TYP_GROUP = {
   legacy: ["Utility / legacy", "Test and adapter configs, not meant for typology comparison."],
 };
 
+/** Morph status pill: "Morph searched" when the config searches Ath Morph knobs, "Morph" when it
+ *  can take Morph (enable it in the shape sandbox), nothing for rows/grid typologies. */
+function morphPill(c) {
+  if (!c || !c.morph_capable) return "";
+  return c.morph_searched
+    ? ` <span class="pill good" style="font-size:0.66rem" title="this config searches Ath Morph knobs">Morph searched</span>`
+    : ` <span class="pill" style="font-size:0.66rem" title="can take Ath Morph — turn it on in the shape sandbox (and tick search to add it to runs)">Morph</span>`;
+}
+
 async function viewTypologies() {
   const ROOT = currentRoot();     // this view's own container (see route())
   skel();
@@ -4028,7 +4037,7 @@ function typCard(t, briefs) {
     <div class="typ-head">
       <div><div class="typ-name">${typologyTipHtml(t)}</div>
         <a class="typ-open" href="#/typology/${esc(t.name)}" title="open the shape sandbox for this typology">open sandbox →</a>
-        <div class="muted typ-meta">${esc(t.symmetry === "axisymmetric" ? "axisymmetric" : "H/V (different planes)")} · ${t.n_knobs} shape parameters · screen ${t.budget.screen} / compare 2 × ${t.budget.compare} evals</div></div>
+        <div class="muted typ-meta">${esc(t.symmetry === "axisymmetric" ? "axisymmetric" : "H/V (different planes)")} · ${t.n_knobs} shape parameters · screen ${t.budget.screen} / compare 2 × ${t.budget.compare} evals${morphPill(t)}</div></div>
       ${hasProf ? `<svg class="typ-prof" data-name="${esc(t.name)}" aria-label="best design cross-section"></svg>` : `<div class="typ-prof empty muted">no solved design yet</div>`}
     </div>
     <p class="typ-desc">${esc(t.description || "")}</p>

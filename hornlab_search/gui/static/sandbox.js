@@ -82,6 +82,80 @@ export function envelopeChip(overshoot) {
   };
 }
 
+/** The slider's EXPLORE range (2026-10-26, owner: "the sandbox is for seeing what a slider
+ *  does"): the catalog's hard schema limits when it has them, otherwise the search box widened
+ *  by its own span on each side. Non-negative quantities stay non-negative; a positive box keeps
+ *  at least 20 % of its own minimum (a 0 Hz cutoff or a 0 mm length is not a horn). The range
+ *  always contains the box and the current value. */
+export function exploreRange(box, hard, value, key) {
+  const lo0 = box ? Number(box.lo) : NaN, hi0 = box ? Number(box.hi) : NaN;
+  const v = value == null ? NaN : Number(value);
+  const okBox = isFinite(lo0) && isFinite(hi0);
+  const span = okBox && hi0 > lo0 ? hi0 - lo0 : Math.max(Math.abs(isFinite(v) ? v : (okBox ? lo0 : 1)), 1);
+  const base = okBox ? { lo: lo0, hi: hi0 } : { lo: isFinite(v) ? v : 0, hi: isFinite(v) ? v : 1 };
+  let lo = base.lo - span, hi = base.hi + span;
+  if (base.lo >= 0) lo = Math.max(lo, base.lo > 0 ? base.lo * 0.2 : 0);
+  const k = String(key || "");
+  if (/stop_deg$/.test(k)) { lo = Math.max(lo, 30); hi = Math.min(hi, 350); }
+  else if (/_deg$/.test(k)) hi = Math.min(hi, 89);          // a wall/coverage angle stays below 90
+  if (k === "q" || /_q$/.test(k)) hi = Math.min(hi, 1);    // OSSE q: 1 is the limit of the law
+  const hlo = hard && hard.lo != null && isFinite(Number(hard.lo)) ? Number(hard.lo) : null;
+  const hhi = hard && hard.hi != null && isFinite(Number(hard.hi)) ? Number(hard.hi) : null;
+  if (hlo != null) lo = Math.max(lo, hlo);
+  if (hhi != null) hi = Math.min(hi, hhi);
+  if (okBox) { lo = Math.min(lo, lo0); hi = Math.max(hi, hi0); }
+  if (isFinite(v)) { lo = Math.min(lo, v); hi = Math.max(hi, v); }
+  if (!(hi > lo)) hi = lo + 1;
+  return { lo: rndNum(lo), hi: rndNum(hi) };
+}
+
+/** CSS custom properties that paint the search box as a band on the slider track. */
+export function bandStyle(box, explore) {
+  const lo = Number(explore && explore.lo), hi = Number(explore && explore.hi);
+  if (!box || !(hi > lo)) return "";
+  const pct = x => Math.max(0, Math.min(100, ((Number(x) - lo) / (hi - lo)) * 100)).toFixed(1) + "%";
+  return `--band-lo:${pct(box.lo)};--band-hi:${pct(box.hi)}`;
+}
+
+/** True when the value sits outside the search box (a run would never visit it). */
+export const outsideBox = (v, box) => !!box && isFinite(Number(v))
+  && (Number(v) < Number(box.lo) - 1e-9 || Number(v) > Number(box.hi) + 1e-9);
+
+/** The 3D caption, from the payload's own symmetry. */
+export function shapeCaption(quadrants) {
+  const q = String(quadrants || "");
+  const what = q === "1" ? "Quarter model mirrored to the full horn"
+    : (q === "12" || q === "14") ? "Half model mirrored to the full horn"
+    : q === "1234" ? "Full-ring model (no mirroring)" : "Model";
+  return `${what}. It hot-swaps while you work — the camera never resets.`;
+}
+
+/** "mouth 433 × 252 mm · depth 214 mm" from the payload's measured dims. */
+export function dimsText(dims) {
+  if (!dims || !isFinite(Number(dims.w)) || !isFinite(Number(dims.h))) return "";
+  const r = x => Math.round(Number(x));
+  return `mouth ${r(dims.w)} × ${r(dims.h)} mm` + (isFinite(Number(dims.d)) ? ` · depth ${r(dims.d)} mm` : "");
+}
+
+/** Morph knobs the sandbox offers (Ath Morph; the mesher owns the law). */
+export const MORPH_KNOBS = [
+  { key: "morph_width_mm", lo: 0, hi: 1500, step: "1", label: "target width, mm (full)" },
+  { key: "morph_height_mm", lo: 0, hi: 1500, step: "1", label: "target height, mm (full)" },
+  { key: "morph_corner_mm", lo: 0, hi: 300, step: "1", label: "corner radius, mm" },
+  { key: "morph_exponent", lo: 2, hi: 16, step: "0.1", label: "superellipse exponent (target 3)" },
+  { key: "morph_rate", lo: 0, hi: 10, step: "0.1", label: "how early the morph starts" },
+  { key: "morph_fixed", lo: 0, hi: 1, step: "0.01", label: "fixed part of the length (0..1)" },
+];
+export const MORPH_TARGETS = [["0", "off"], ["1", "rectangle"], ["2", "circle"], ["3", "superellipse"]];
+
+/** The search box a Morph knob gets when "search this" is ticked: ±25 % around the value,
+ *  inside the knob's explore range. */
+export function morphSearchBox(value, lo, hi) {
+  const v = Number(value);
+  const d = Math.max(Math.abs(v) * 0.25, (hi - lo) * 0.02);
+  return { lo: rndNum(Math.max(lo, v - d)), hi: rndNum(Math.min(hi, v + d)) };
+}
+
 /** Clamp a knob value into a (possibly user-edited) row range. */
 export function clampKnob(v, lo, hi) {
   const n = Number(v);
@@ -174,21 +248,68 @@ export function sliderRowHtml(e) {
   const chips = [];
   if (e.edited) chips.push(`<span class="pill warn" title="the editable bounds differ from the typology's published bounds — Save bounds writes them to their YAML home">edited</span>`);
   if (e.rejected) chips.push(rejectedChipHtml(e.rejected));
-  const at = atLimitEdge(e.value, b.lo, b.hi);
+  const ex = e.explore || null;                      // explore mode: the slider spans the explore range
+  const at = ex ? null : atLimitEdge(e.value, b.lo, b.hi);
+  if (ex && outsideBox(e.value, b)) chips.push(OUT_OF_BOX_CHIP);
   const title = mergedKnobTitle(doc, key) ?? String(key);
-  const step = sliderStep(b.lo, b.hi);
+  const step = sliderStep(ex ? ex.lo : b.lo, ex ? ex.hi : b.hi);
+  const sMin = ex ? ex.lo : b.lo, sMax = ex ? ex.hi : b.hi;
   return `<div class="sbox-row" data-key="${esc(key)}">`
     + `<span class="mono sbox-kname" tabindex="0" title="${esc(title)}">${esc(key)}</span>`
     + `<input class="sbox-num" type="number" step="any" data-role="lo" aria-label="${esc(key)} — editable minimum bound" value="${numAttr(b.lo)}">`
-    + `<input class="sbox-slider" type="range" data-role="slider" aria-label="${esc(key)} value" min="${numAttr(b.lo)}" max="${numAttr(b.hi)}" step="${esc(step)}" value="${numAttr(e.value)}">`
+    + `<input class="sbox-slider${ex ? " banded" : ""}" type="range" data-role="slider" aria-label="${esc(key)} value" min="${numAttr(sMin)}" max="${numAttr(sMax)}" step="${esc(step)}" value="${numAttr(e.value)}"${ex ? ` style="${bandStyle(b, ex)}"` : ""}>`
     + `<input class="sbox-num" type="number" step="any" data-role="hi" aria-label="${esc(key)} — editable maximum bound" value="${numAttr(b.hi)}">`
-    + `<span class="sbox-val num${at ? " at-limit" : ""}" data-role="val" data-at="${esc(at || "")}"`
-    + (at ? ` title="within 2% of the ${at === "lo" ? "minimum" : "maximum"} bound — pressed against the limit"` : "")
-    + `>${esc(fmtKnobValue(e.value, b.lo, b.hi))}</span>`
+    + (ex ? `<input class="sbox-num sbox-valin" type="number" step="any" data-role="val" aria-label="${esc(key)} value — type any number" value="${numAttr(Number(e.value))}">`
+      : `<span class="sbox-val num${at ? " at-limit" : ""}" data-role="val" data-at="${esc(at || "")}"`
+        + (at ? ` title="within 2% of the ${at === "lo" ? "minimum" : "maximum"} bound — pressed against the limit"` : "")
+        + `>${esc(fmtKnobValue(e.value, b.lo, b.hi))}</span>`)
     + `<span class="sbox-chips" data-role="chips">${chips.join("")}</span>`
     + `<button type="button" class="sbox-reset" data-role="reset" aria-label="${esc(key)} — restore the typology's published bounds"`
     + ` title="Restore the typology's published bounds (${esc(fmt(Number(cat.lo)))}..${esc(fmt(Number(cat.hi)))})">↺</button>`
     + `</div>`;
+}
+
+const OUT_OF_BOX_CHIP = `<span class="pill warn" data-role="oob" title="outside the search box (the band on the slider): a search run would never visit this value">outside search</span>`;
+
+/** A knob the config FIXES in search (search: false, or no bounds row): explore it here; the
+ *  run keeps the config's value. */
+export function fixedRowHtml(e) {
+  const key = String(e.key);
+  const title = mergedKnobTitle(e.doc || null, key) ?? String(key);
+  const ex = e.explore;
+  return `<div class="sbox-row sbox-fixed" data-key="${esc(key)}" data-mode="fixed">`
+    + `<span class="mono sbox-kname" tabindex="0" title="${esc(title)}">${esc(key)}</span>`
+    + `<span class="muted sbox-fixtag" title="fixed in search: a run uses the config's value (${esc(fmt(Number(e.pinned)))})">fixed</span>`
+    + `<input class="sbox-slider" type="range" data-role="slider" aria-label="${esc(key)} value" min="${numAttr(ex.lo)}" max="${numAttr(ex.hi)}" step="${esc(sliderStep(ex.lo, ex.hi))}" value="${numAttr(e.value)}"${e.locked ? " disabled" : ""}>`
+    + `<span></span>`
+    + (e.locked ? `<span class="sbox-val num" data-role="val" title="search limits on: a run holds this value">${esc(fmtKnobValue(e.value, ex.lo, ex.hi))}</span>`
+      : `<input class="sbox-num sbox-valin" type="number" step="any" data-role="val" aria-label="${esc(key)} value — type any number" value="${numAttr(Number(e.value))}">`)
+    + `<span class="sbox-chips" data-role="chips">${Number(e.value) !== Number(e.pinned) ? `<span class="pill warn" title="differs from the config's fixed value ${esc(fmt(Number(e.pinned)))}">changed</span>` : ""}</span>`
+    + `<button type="button" class="sbox-reset" data-role="unfix" aria-label="${esc(key)} — back to the config's fixed value" title="back to the config's fixed value (${esc(fmt(Number(e.pinned)))})">↺</button>`
+    + `</div>`;
+}
+
+/** One Morph row: [name | search toggle | slider | box | value | chips | (blank)]. */
+export function morphRowHtml(m, value, inSearch, limited) {
+  const box = inSearch ? morphSearchBox(value, m.lo, m.hi) : null;
+  const locked = !!limited && !box;                 // search limits on: only searched knobs move
+  const rng = limited && box ? box : m;
+  return `<div class="sbox-row sbox-morph" data-key="${esc(m.key)}" data-mode="morph">`
+    + `<span class="mono sbox-kname" tabindex="0" title="${esc(m.label)}">${esc(m.key)}</span>`
+    + `<label class="sbox-fixtag" title="add this knob to the typology's search (Save writes it to the YAML)"><input type="checkbox" data-role="msearch"${inSearch ? " checked" : ""}> search</label>`
+    + `<input class="sbox-slider${box && !limited ? " banded" : ""}" type="range" data-role="slider" aria-label="${esc(m.key)} value" min="${rng.lo}" max="${rng.hi}" step="${m.step}" value="${numAttr(Number(value))}"${box && !limited ? ` style="${bandStyle(box, m)}"` : ""}${locked ? " disabled" : ""}>`
+    + `<span class="muted sbox-box" data-role="mbox">${box ? `${esc(fmt(box.lo))}..${esc(fmt(box.hi))}` : ""}</span>`
+    + (limited ? `<span class="sbox-val num" data-role="val">${esc(fmtKnobValue(Number(value), m.lo, m.hi))}</span>`
+      : `<input class="sbox-num sbox-valin" type="number" step="any" data-role="val" aria-label="${esc(m.key)} value — type any number" value="${numAttr(Number(value))}">`)
+    + `<span class="sbox-chips" data-role="chips"></span><span></span>`
+    + `</div>`;
+}
+
+/** Show a value in a row's value cell (a plain span, or the free-mode number box). */
+export function setValText(el, text) {
+  if (!el) return;
+  if (el.tagName === "INPUT") { if (document.activeElement !== el) el.value = String(text).replace(/[^0-9eE+\-.]/g, ""); }
+  else el.textContent = text;
 }
 
 /** One bound edit, validated honestly: NaN and lo>=hi are refused — the input reverts, a warn
@@ -707,9 +828,10 @@ function drawFront(svg, payload, envelope, emptyMsg) {
     }, svg);
   }
   const band = mouthBandPath(mouth, X, Y);
+  const col = (payload && payload.__color) || css("--best");
   if (band) {
-    el("path", { d: band, fill: css("--best"), "fill-rule": "evenodd", "fill-opacity": 0.22, stroke: "none" }, svg);
-    el("path", { d: band, fill: "none", stroke: css("--best"), "stroke-width": 1.6, "fill-rule": "evenodd" }, svg);
+    el("path", { d: band, fill: col, "fill-rule": "evenodd", "fill-opacity": 0.22, stroke: "none" }, svg);
+    el("path", { d: band, fill: "none", stroke: col, "stroke-width": 1.6, "fill-rule": "evenodd" }, svg);
   }
   const innerPts = mirrorRing((mouth || {}).inner);
   if (innerPts.length) {
@@ -720,11 +842,40 @@ function drawFront(svg, payload, envelope, emptyMsg) {
   lbl.textContent = "width mm";
 }
 
+/** A catalog-shaped typology built from the config file itself (``/api/configs``), for configs
+ *  the generated parameter catalog does not list yet (e.g. a new campaign folder). Knob docs are
+ *  then absent; the sliders, bounds and preview work the same. */
+export function typologyFromConfigEntry(c) {
+  if (!c) return null;
+  const bounds = c.bounds || {}, seed = c.seed_params || {};
+  const bounds_index = {};
+  for (const [k, b] of Object.entries(bounds)) {
+    if (b && typeof b === "object") bounds_index[k] = { lo: b.lo, hi: b.hi, search: b.search !== false, file: c.path, key: `bounds.${k}` };
+  }
+  const keys = [...new Set([...Object.keys(seed), ...Object.keys(bounds)])];
+  return {
+    name: c.name, group: c.group || "", symmetry: c.symmetry || "", family: c.family,
+    kind: c.generator ? ((c.generator_block || {}).name === "grid" ? "rows" : "generator") : "native",
+    description: `${c.path} — not in the parameter catalog yet, so the knobs are read from the config file (regenerate with tools/gen_param_catalog.py --write for full tooltips).`,
+    brief_file: c.brief_file, bounds_index,
+    knobs: keys.map(k => ({ knob: k, default: seed[k] ?? (bounds[k] || {}).lo, hard: null,
+                            search: bounds[k] ? { lo: bounds[k].lo, hi: bounds[k].hi, search: bounds[k].search !== false } : null })),
+  };
+}
+
+async function typologyFromConfig(configName) {
+  try {
+    const cfgs = await fetchJson("/api/configs");
+    return typologyFromConfigEntry((cfgs || []).find(c => c.name === configName));
+  } catch { return null; }
+}
+
 export async function viewTypologySandbox(root, configName) {
   const ROOT = root;
   ROOT.innerHTML = `<p class="muted">Loading the sandbox…</p>`;
   const cat = await loadParamCatalog();               // never throws; a failed load degrades below
-  const t = cat && cat.typologies && cat.typologies[configName];
+  let t = cat && cat.typologies && cat.typologies[configName];
+  if (!t) t = await typologyFromConfig(configName);   // new configs: read the YAML itself
   if (!t) {
     ROOT.innerHTML = `<div class="stack" style="gap:14px">
       <div class="alert error" role="alert">Typology <span class="mono">${esc(configName)}</span> is not in the parameter catalog — the sandbox cannot list its knobs honestly. <a href="#/typologies">← back to typologies</a></div>
@@ -739,6 +890,37 @@ export async function viewTypologySandbox(root, configName) {
                boundsSource: bi.file ? { file: bi.file, key: bi.key } : null };
     });
   const catalogBounds = Object.fromEntries(entries.map(e => [e.key, { lo: e.lo, hi: e.hi }]));
+  // 2026-10-26: sliders explore a WIDE range; the search box is a band on the track.
+  const knobDoc = Object.fromEntries((t.knobs || []).map(k => [k.knob, k]));
+  const explore = {};
+  for (const e of entries) {
+    const k = knobDoc[e.key];
+    explore[e.key] = exploreRange({ lo: e.lo, hi: e.hi }, k && k.hard,
+      k && typeof k.default === "number" ? k.default : null, e.key);
+  }
+  // knobs the config fixes in search (no searched bounds row): explorable here, never saved
+  const SKIP_FIXED = new Set(["r0_mm", "n_phi", "n_s", "span"]);
+  const searchKeys = new Set(entries.map(e => e.key));
+  const fixedEntries = (t.knobs || []).flatMap(k => {
+    if (!k || searchKeys.has(k.knob) || SKIP_FIXED.has(k.knob)) return [];
+    const d = k.default;
+    const list = Array.isArray(d) && d.length === 1 && typeof d[0] === "number";
+    const v = list ? d[0] : d;
+    if (typeof v !== "number" || !isFinite(v)) return [];
+    return [{ key: k.knob, pinned: v, list, doc: docFor(configName, k.knob),
+              explore: exploreRange(null, k.hard, v, k.knob) }];
+  });
+  const fixedVals = Object.fromEntries(fixedEntries.map(f => [f.key, f.pinned]));
+  // Morph: offered for the knobs this config does NOT already declare (ath_core declares them)
+  const declared = new Set((t.knobs || []).map(k => k.knob));
+  const morphKnobs = MORPH_KNOBS.filter(m => !declared.has(m.key));
+  const morphOffered = !declared.has("morph_target");
+  const morph = { target: 0, shrink: 0, vals: {}, search: new Set(), capable: false };
+  // the switch: FREE sandbox (any value) vs SEARCH LIMITS (only what a run can reach); per typology
+  const LIMIT_KEY = "hl-sbox-limit:" + configName;
+  let limited = false;
+  try { limited = localStorage.getItem(LIMIT_KEY) === "1"; } catch { /* private mode: free */ }
+  const rangeOf = key => (limited ? rowBounds[key] : explore[key]);
 
   let briefs = [];
   try { briefs = await fetchJson("/api/briefs"); } catch { briefs = []; }
@@ -750,7 +932,21 @@ export async function viewTypologySandbox(root, configName) {
     : (briefs.find(b => b.name === briefFileStem(t.brief_file)) || briefs[0] || { name: "" }).name;
   let rowBounds = Object.fromEntries(entries.map(e => [e.key, (q.bnds && q.bnds[e.key]) || { lo: e.lo, hi: e.hi }]));
   const knobs = initialKnobValues(entries, q.knobs || {});
-  for (const e of entries) knobs[e.key] = clampKnob(knobs[e.key], rowBounds[e.key].lo, rowBounds[e.key].hi);
+  for (const e of entries) {
+    for (const r of [rowBounds[e.key]]) explore[e.key] = { lo: Math.min(explore[e.key].lo, r.lo), hi: Math.max(explore[e.key].hi, r.hi) };
+    const fromUrl = q.knobs && typeof q.knobs[e.key] === "number" ? q.knobs[e.key] : knobs[e.key];
+    knobs[e.key] = clampKnob(fromUrl, explore[e.key].lo, explore[e.key].hi);
+  }
+  for (const f of fixedEntries) if (q.knobs && typeof q.knobs[f.key] === "number") fixedVals[f.key] = q.knobs[f.key];
+  if (limited) {
+    for (const e of entries) knobs[e.key] = clampKnob(knobs[e.key], rowBounds[e.key].lo, rowBounds[e.key].hi);
+    for (const f of fixedEntries) fixedVals[f.key] = f.pinned;
+  }
+  if (q.knobs && morphOffered) {
+    if (typeof q.knobs.morph_target === "number") morph.target = Math.round(q.knobs.morph_target);
+    if (typeof q.knobs.morph_allow_shrinkage === "number") morph.shrink = q.knobs.morph_allow_shrinkage ? 1 : 0;
+    for (const m of morphKnobs) if (typeof q.knobs[m.key] === "number") morph.vals[m.key] = q.knobs[m.key];
+  }
   let rejected = {};                                   // key -> reason (until the next save attempt)
   let slowNow = false;                                 // authoritative once a payload lands
   let backendDark = false;                             // any preview-shape failure (404 / network)
@@ -770,6 +966,7 @@ export async function viewTypologySandbox(root, configName) {
         <select id="sbox-brief" aria-label="brief — changing it re-previews the shape">
           ${briefs.map(b => `<option value="${esc(b.name)}"${b.name === briefSel ? " selected" : ""}>${esc(b.name)}${b.kind === "user" ? " (yours)" : ""}</option>`).join("") || `<option value="">brief list unavailable</option>`}
         </select></label>
+      <span id="sbox-dims" class="num"></span>
       <span id="sbox-env"></span>
       <span id="sbox-updating" hidden><span class="pill warn" style="cursor:default">updating…</span></span>
       <span id="sbox-dark" class="muted" hidden>${esc(EMPTY_PREVIEW)} — sliders still work from the typology's published bounds</span>
@@ -793,7 +990,8 @@ export async function viewTypologySandbox(root, configName) {
           <label class="evo-opt" title="the same persisted wall-shadows toggle as every other 3D view">
             <input type="checkbox" id="sbox-shadow" checked> wall shadows</label>
         </div>
-        <div class="cap">Quarter payload mirrored to the full horn. It hot-swaps while you work — the camera never resets.</div>
+        <div class="cap" id="sbox-3dcap">${esc(shapeCaption(t.symmetry === "full" ? "1234" : ""))}</div>
+        <div class="cap warn-text" id="sbox-3dwarn" hidden></div>
         <div id="sbox-3d" data-v3d class="sbox-3dwrap"><div class="view3d-fallback">loading…</div></div>
       </div>
       <div class="card" id="sbox-slider-card">
@@ -801,14 +999,16 @@ export async function viewTypologySandbox(root, configName) {
           <h3>Shape parameters</h3>
           <span class="btn-row">
             <span id="sbox-save-hint" class="muted" style="font-size:0.76rem"></span>
+            <label class="evo-opt" title="on: sliders move only inside each search box and fixed knobs stay at the run's values (what a search can reach); off: a free sandbox — any value, type it in the value box"><input type="checkbox" id="sbox-limit"${limited ? " checked" : ""}> search limits only</label>
             <button id="sbox-save" class="primary" ${entries.length ? "" : "disabled"}>Save bounds</button>
           </span>
         </div>
-        <p class="cap muted">Drag a slider to reshape the horn. Edit the min / max boxes to widen the search box the slider can reach — the value turns red when it presses against a bound, and ↺ restores the typology's published bounds. Saving writes only the edited rows to where those bounds live.</p>
+        <p class="cap muted"><b>Free sandbox</b> (switch off): drag any slider or type any value in the value box — sliders reach well past what a search explores. <b>Search limits only</b> (switch on): sliders stay inside the search box and fixed knobs stay at the run's values. The shaded band on each track is the <b>search box</b> (the range a run explores); edit it with the min / max boxes, ↺ restores the published box, and Save writes edited boxes to the typology's YAML. Rows marked <b>fixed</b> are held constant by a run; you can still explore them here.</p>
         <div id="sbox-knobs" class="sbox-knobs-list">${entries.map(e => sliderRowHtml({
           key: e.key, doc: e.doc, catalog: catalogBounds[e.key], bounds: rowBounds[e.key],
-          value: clampKnob(knobs[e.key], rowBounds[e.key].lo, rowBounds[e.key].hi), edited: false,
-        })).join("") || `<p class="muted">This typology has no searchable shape parameters — its geometry is authored outside the knob search.</p>`}</div>
+          value: knobs[e.key], edited: false, explore: limited ? null : explore[e.key],
+        })).join("") || `<p class="muted">This typology has no searchable shape parameters — its geometry is authored outside the knob search.</p>`}${fixedEntries.map(f => fixedRowHtml({ ...f, value: fixedVals[f.key], locked: limited })).join("")}</div>
+        <div id="sbox-morph" class="sbox-morph-card" hidden></div>
         <div id="sbox-save-msg" class="hint" aria-live="polite"></div>
         <div id="sbox-save-result" style="margin-top:8px"></div>
       </div>
@@ -836,6 +1036,10 @@ export async function viewTypologySandbox(root, configName) {
   const saveMsg = document.getElementById("sbox-save-msg");
   const saveResult = document.getElementById("sbox-save-result");
   const briefEl = document.getElementById("sbox-brief");
+  const dimsEl = document.getElementById("sbox-dims");
+  const cap3d = document.getElementById("sbox-3dcap");
+  const warn3d = document.getElementById("sbox-3dwarn");
+  const morphEl = document.getElementById("sbox-morph");
 
   emptySvg(sideSvg, "loading the preview…");
   emptySvg(frontSvg, "loading the preview…");
@@ -845,9 +1049,19 @@ export async function viewTypologySandbox(root, configName) {
   let slowTimer = null, idle3d = null, inFlight3d = false, dirty3d = false;
   let urlTimer = null, armTimer = null, player3d = null;
 
-  const currentKnobsJson = () => {
+  /** What the preview gets: searched knobs, fixed knobs (lists re-wrapped), active Morph. */
+  const currentKnobsJson = (forUrl) => {
     const o = {};
-    for (const e of entries) o[e.key] = clampKnob(knobs[e.key], rowBounds[e.key].lo, rowBounds[e.key].hi);
+    for (const e of entries) o[e.key] = clampKnob(knobs[e.key], rangeOf(e.key).lo, rangeOf(e.key).hi);
+    for (const f of fixedEntries) {
+      if (fixedVals[f.key] === f.pinned) continue;               // unchanged: the config's own value
+      o[f.key] = f.list && !forUrl ? [fixedVals[f.key]] : fixedVals[f.key];
+    }
+    if (morphOffered && morph.target > 0) {
+      o.morph_target = morph.target;
+      o.morph_allow_shrinkage = morph.shrink;
+      for (const m of morphKnobs) if (typeof morph.vals[m.key] === "number") o[m.key] = morph.vals[m.key];
+    }
     return o;
   };
 
@@ -879,8 +1093,10 @@ export async function viewTypologySandbox(root, configName) {
 
   function drawPayload(payload, unavailableMsg) {
     lastPayload = payload;
+    const refused = Array.isArray(payload.rejected) && payload.rejected.length > 0;
+    payload.__color = refused ? css("--bad") : null;
     const loop = combinedSectionLoop(payload.section);
-    if (loop) wallSection(sideSvg, [{ profile: loop, color: css("--best"), filled: true }], { H: 330 });
+    if (loop) wallSection(sideSvg, [{ profile: loop, color: refused ? css("--bad") : css("--best"), filled: true }], { H: 330 });
     else emptySvg(sideSvg, unavailableMsg || EMPTY_PREVIEW);
     const env = envelopeForBrief();
     drawFront(frontSvg, payload, env, unavailableMsg);
@@ -893,7 +1109,12 @@ export async function viewTypologySandbox(root, configName) {
     }
     const envChip = envelopeChip(payload.envelope && payload.envelope.available
       ? Number(payload.envelope.overshoot) : null);
-    if (envEl) envEl.innerHTML = envChip ? envChip.html : "";
+    const refusedChip = refused
+      ? `<span class="pill bad" title="${esc(payload.rejected.join(" · "))}">a search would refuse this shape: ${esc(String(payload.rejected[0]).slice(0, 70))}</span>` : "";
+    if (envEl) envEl.innerHTML = (envChip ? envChip.html : "") + refusedChip;
+    if (dimsEl) dimsEl.textContent = dimsText(payload.dims);
+    if (cap3d && payload.quadrants) cap3d.textContent = shapeCaption(payload.quadrants);
+    if (payload.morph_capable && morphOffered && !morph.capable) { morph.capable = true; renderMorph(); }
     const notes = Array.isArray(payload.notes) ? payload.notes.filter(Boolean) : [];
     if (notesEl) notesEl.textContent = notes.length ? notes.join(" · ") : "";
   }
@@ -961,8 +1182,10 @@ export async function viewTypologySandbox(root, configName) {
           !Array.isArray(s3.tris) || !s3.tris.length) {
         show3dUnavailable((s3 && s3.reason) || "no preview geometry for this design");
       } else if (player3d) {
+        show3dWarnings(s3.warnings);
         player3d.applyMesh(s3.verts, s3.tris, payload.quadrants);
       } else {
+        show3dWarnings(s3.warnings);
         player3d = await initSandbox3d(cv3d, { verts: s3.verts, tris: s3.tris, quadrants: payload.quadrants },
           { shadows: shadowsOn() });
       }
@@ -976,6 +1199,89 @@ export async function viewTypologySandbox(root, configName) {
     }
   }
 
+  function show3dWarnings(ws) {
+    if (!warn3d) return;
+    const list = Array.isArray(ws) ? ws.filter(Boolean) : [];
+    warn3d.hidden = !list.length;
+    warn3d.textContent = list.join(" · ");
+  }
+
+  // ── Morph section (offered when the endpoint says the config can take Morph) ──────────
+  function morphDefaults() {
+    const d = (lastPayload && lastPayload.dims) || {};
+    const base = { morph_width_mm: Math.round(Number(d.w) || 300), morph_height_mm: Math.round(Number(d.h) || 300),
+                   morph_corner_mm: 30, morph_exponent: 4, morph_rate: 3, morph_fixed: 0 };
+    for (const m of morphKnobs) if (typeof morph.vals[m.key] !== "number") morph.vals[m.key] = base[m.key];
+  }
+  function renderMorph() {
+    if (!morphEl || !morph.capable || !morphKnobs.length) return;
+    morphEl.hidden = false;
+    const on = morph.target > 0;
+    if (on) morphDefaults();
+    morphEl.innerHTML = `<div class="fig-head"><h3>Morph</h3>
+        <span class="btn-row">
+          <label class="evo-opt">target <select data-role="mtarget" aria-label="Morph target shape">
+            ${MORPH_TARGETS.map(([v, n]) => `<option value="${v}"${Number(v) === morph.target ? " selected" : ""}>${n}</option>`).join("")}
+          </select></label>
+          <label class="evo-opt" title="without this, a target smaller than the horn's own mouth changes nothing (the mesher's rule)"><input type="checkbox" data-role="mshrink"${morph.shrink ? " checked" : ""}> allow shrinking</label>
+        </span></div>
+      <p class="cap muted">Ath Morph reshapes the mouth outline toward a target (rectangle / circle / superellipse) over the last part of the horn. Width and height are the FULL target mouth. Tick <b>search</b> to add a knob to this typology's search; Save writes it to the YAML with the target shape fixed for the run (a run should not flip shapes).</p>
+      ${on ? `<div class="sbox-knobs-list">${morphKnobs.map(m => morphRowHtml(m, morph.vals[m.key], morph.search.has(m.key), limited)).join("")}</div>`
+           : `<p class="muted" style="font-size:0.8rem">Pick a target shape to start.</p>`}`;
+  }
+  function morphChanged(commit) {
+    request2d(timingDecision(slowNow, commit ? "release" : "input"));
+    if (commit || !slowNow) arm3d();
+    if (commit) { writeUrl(); refreshSave(); }
+  }
+  if (morphEl) {
+    morphEl.addEventListener("change", ev => {
+      const role = ev.target.dataset.role;
+      if (role === "mtarget") { morph.target = Number(ev.target.value) || 0; renderMorph(); morphChanged(true); return; }
+      if (role === "mshrink") { morph.shrink = ev.target.checked ? 1 : 0; morphChanged(true); return; }
+      const row = ev.target.closest(".sbox-row");
+      if (!row) return;
+      if (role === "msearch") {
+        if (ev.target.checked) morph.search.add(row.dataset.key); else morph.search.delete(row.dataset.key);
+        renderMorph(); refreshSave(); return;
+      }
+      if (role === "slider") morphChanged(true);
+      if (role === "val") {
+        const v = Number(String(ev.target.value).replace(",", "."));
+        if (isFinite(v)) { morph.vals[row.dataset.key] = v; renderMorph(); morphChanged(true); }
+      }
+    });
+    morphEl.addEventListener("input", ev => {
+      if (ev.target.dataset.role !== "slider") return;
+      const row = ev.target.closest(".sbox-row");
+      const m = morphKnobs.find(x => x.key === row.dataset.key);
+      morph.vals[m.key] = Number(ev.target.value);
+      const valEl = row.querySelector('[data-role="val"]');
+      if (valEl) setValText(valEl, fmtKnobValue(morph.vals[m.key], m.lo, m.hi));
+      if (morph.search.has(m.key)) {
+        const box = morphSearchBox(morph.vals[m.key], m.lo, m.hi);
+        ev.target.setAttribute("style", bandStyle(box, m));
+        const b = row.querySelector('[data-role="mbox"]');
+        if (b) b.textContent = `${fmt(box.lo)}..${fmt(box.hi)}`;
+      }
+      morphChanged(false);
+    });
+  }
+  /** The Morph rows "search" adds: ±25 % boxes + the target shape (and shrink flag) pinned. */
+  function morphAdds() {
+    if (!(morph.target > 0) || !morph.search.size) return {};
+    const add = {
+      morph_target: { lo: morph.target, hi: morph.target, seed: morph.target, pinned: true },
+      morph_allow_shrinkage: { lo: morph.shrink, hi: morph.shrink, seed: morph.shrink, pinned: true },
+    };
+    for (const m of morphKnobs) {
+      const v = morph.vals[m.key];
+      if (morph.search.has(m.key)) add[m.key] = { ...morphSearchBox(v, m.lo, m.hi), seed: v };
+      else add[m.key] = { lo: v, hi: v, seed: v, pinned: true };
+    }
+    return add;
+  }
+
   function show3dUnavailable(reason) {
     if (!cv3d || player3d) return;                     // keep the last honest geometry on screen
     cv3d.innerHTML = `<div class="view3d-fallback">${esc(reason)}</div>`;
@@ -987,7 +1293,7 @@ export async function viewTypologySandbox(root, configName) {
   function writeUrlNow() {
     if (urlTimer) { clearTimeout(urlTimer); urlTimer = null; }
     history.replaceState(null, "", "#/typology/" + encodeURIComponent(configName)
-      + buildQueryState({ brief: briefSel, knobs: currentKnobsJson(), bnds: collectChangedBounds(catalogBounds, rowBounds) }));
+      + buildQueryState({ brief: briefSel, knobs: currentKnobsJson(true), bnds: collectChangedBounds(catalogBounds, rowBounds) }));
   }
   function writeUrl() {
     if (urlTimer) clearTimeout(urlTimer);
@@ -999,17 +1305,22 @@ export async function viewTypologySandbox(root, configName) {
   function repaintRow(key) {
     const row = rowEl(key);
     if (!row) return;
-    const b = rowBounds[key], v = clampKnob(knobs[key], b.lo, b.hi);
+    const b = rowBounds[key];
+    if (!b) return;                                    // fixed / Morph rows repaint themselves
+    explore[key] = { lo: Math.min(explore[key].lo, b.lo), hi: Math.max(explore[key].hi, b.hi) };
+    const ex = rangeOf(key);
+    const v = knobs[key] = clampKnob(knobs[key], ex.lo, ex.hi);
     const slider = row.querySelector('[data-role="slider"]');
     if (slider) {
-      slider.min = numAttr(b.lo); slider.max = numAttr(b.hi);
-      slider.step = String(sliderStep(b.lo, b.hi));
+      slider.min = numAttr(ex.lo); slider.max = numAttr(ex.hi);
+      slider.step = String(sliderStep(ex.lo, ex.hi));
       slider.value = numAttr(v);
+      if (!limited) slider.setAttribute("style", bandStyle(b, ex));
     }
     const valEl = row.querySelector('[data-role="val"]');
-    const at = atLimitEdge(v, b.lo, b.hi);
+    const at = null;
     if (valEl) {
-      valEl.textContent = fmtKnobValue(v, b.lo, b.hi);
+      setValText(valEl, fmtKnobValue(v, b.lo, b.hi));
       valEl.classList.toggle("at-limit", !!at);
       valEl.dataset.at = at || "";
       if (at) valEl.setAttribute("title", `within 2% of the ${at === "lo" ? "minimum" : "maximum"} bound — pressed against the limit`);
@@ -1019,6 +1330,7 @@ export async function viewTypologySandbox(root, configName) {
     const chips = [];
     if (edited) chips.push(`<span class="pill warn" title="the editable bounds differ from the typology's published bounds — Save bounds writes them to their YAML home">edited</span>`);
     if (rejected[key]) chips.push(rejectedChipHtml(rejected[key]));
+    if (outsideBox(v, b)) chips.push(OUT_OF_BOX_CHIP);
     const c = row.querySelector('[data-role="chips"]');
     if (c) c.innerHTML = chips.join("");
   }
@@ -1028,7 +1340,7 @@ export async function viewTypologySandbox(root, configName) {
   let armed = false;
   function refreshSave(face) {
     const changed = collectChangedBounds(catalogBounds, rowBounds);
-    const n = Object.keys(changed).length;
+    const n = Object.keys(changed).length + (Object.keys(morphAdds()).length ? morph.search.size : 0);
     if (face != null) saveBtn.textContent = face;
     saveBtn.disabled = armed ? false : (n === 0 || backendDark);
     saveBtn.title = armed ? "click again to confirm the write"
@@ -1058,11 +1370,14 @@ export async function viewTypologySandbox(root, configName) {
     armed = false;
     if (armTimer) { clearTimeout(armTimer); armTimer = null; }
     const changed = collectChangedBounds(catalogBounds, rowBounds);
+    const adds = morphAdds();
     saveBtn.textContent = "Save bounds";
-    if (!Object.keys(changed).length) { refreshSave(); return; }
+    if (!Object.keys(changed).length && !Object.keys(adds).length) { refreshSave(); return; }
     saveBtn.disabled = true;
     if (saveMsg) saveMsg.textContent = "saving…";
-    const r = await postJson("/api/save-bounds", saveBoundsPayload(configName, changed));
+    const body = saveBoundsPayload(configName, changed);
+    if (Object.keys(adds).length) body.add = adds;
+    const r = await postJson("/api/save-bounds", body);
     if (!ROOT.isConnected) return;
     saveResult.innerHTML = saveResultHtml(r);
     if (r && r.ok === true) {
@@ -1100,18 +1415,27 @@ export async function viewTypologySandbox(root, configName) {
     const key = row.dataset.key;
     const role = ev.target.dataset.role;
     const b = rowBounds[key];
+    if (role === "slider" && row.dataset.mode === "fixed") {
+      const f = fixedEntries.find(x => x.key === key);
+      fixedVals[key] = Number(ev.target.value);
+      const valEl = row.querySelector('[data-role="val"]');
+      if (valEl) setValText(valEl, fmtKnobValue(fixedVals[key], f.explore.lo, f.explore.hi));
+      const c = row.querySelector('[data-role="chips"]');
+      if (c) c.innerHTML = fixedVals[key] !== f.pinned ? `<span class="pill warn" title="differs from the config's fixed value ${esc(fmt(f.pinned))}">changed</span>` : "";
+      request2d(timingDecision(slowNow, "input"));
+      if (!slowNow) arm3d();
+      return;
+    }
     if (role === "slider") {
-      const v = clampKnob(Number(ev.target.value), b.lo, b.hi);
+      const ex = rangeOf(key);
+      const v = clampKnob(Number(ev.target.value), ex.lo, ex.hi);
       knobs[key] = v;
       const valEl = row.querySelector('[data-role="val"]');
-      const at = atLimitEdge(v, b.lo, b.hi);
-      if (valEl) {
-        valEl.textContent = fmtKnobValue(v, b.lo, b.hi);
-        valEl.classList.toggle("at-limit", !!at);
-        valEl.dataset.at = at || "";
-        if (at) valEl.setAttribute("title", `within 2% of the ${at === "lo" ? "minimum" : "maximum"} bound — pressed against the limit`);
-        else valEl.removeAttribute("title");
-      }
+      if (valEl) setValText(valEl, fmtKnobValue(v, ex.lo, ex.hi));
+      const c = row.querySelector('[data-role="chips"]');
+      const oob = c && c.querySelector('[data-role="oob"]');
+      if (outsideBox(v, b) && c && !oob) c.insertAdjacentHTML("beforeend", OUT_OF_BOX_CHIP);
+      if (!outsideBox(v, b) && oob) oob.remove();
       request2d(timingDecision(slowNow, "input"));
       if (!slowNow) arm3d();                                          // held drag: 3D follows after the idle
       return;
@@ -1126,6 +1450,23 @@ export async function viewTypologySandbox(root, configName) {
     const key = row.dataset.key;
     const role = ev.target.dataset.role;
     const b = rowBounds[key];
+    if (role === "val") {                               // free mode: any typed number
+      const v = Number(String(ev.target.value).replace(",", "."));
+      if (!isFinite(v)) { warnChip(row, "not a number — the edit was refused"); return; }
+      if (row.dataset.mode === "fixed") {
+        const f = fixedEntries.find(x => x.key === key);
+        fixedVals[key] = v;
+        f.explore = { lo: Math.min(f.explore.lo, v), hi: Math.max(f.explore.hi, v) };
+        row.outerHTML = fixedRowHtml({ ...f, value: v, locked: limited });
+      } else {
+        explore[key] = { lo: Math.min(explore[key].lo, v), hi: Math.max(explore[key].hi, v) };
+        knobs[key] = v;
+        repaintRow(key);
+      }
+      request2d(timingDecision(slowNow, "release"));
+      arm3d(); writeUrl();
+      return;
+    }
     if (role === "lo" || role === "hi") {
       const out = boundEditOutcome(role, b.lo, b.hi, ev.target.value === "" ? NaN : Number(ev.target.value));
       if (!out.ok) {
@@ -1134,7 +1475,6 @@ export async function viewTypologySandbox(root, configName) {
         return;
       }
       rowBounds[key] = { lo: out.lo, hi: out.hi };
-      knobs[key] = clampKnob(knobs[key], out.lo, out.hi);
       repaintRow(key);
     }
     request2d(timingDecision(slowNow, "release"));
@@ -1144,13 +1484,22 @@ export async function viewTypologySandbox(root, configName) {
   });
 
   knobsEl.addEventListener("click", ev => {
+    const unfix = ev.target.closest('[data-role="unfix"]');
+    if (unfix) {
+      const row = unfix.closest(".sbox-row");
+      const f = fixedEntries.find(x => x.key === row.dataset.key);
+      fixedVals[f.key] = f.pinned;
+      row.outerHTML = fixedRowHtml({ ...f, value: f.pinned });
+      request2d(timingDecision(slowNow, "release"));
+      arm3d(); writeUrl();
+      return;
+    }
     const btn = ev.target.closest('[data-role="reset"]');
     if (!btn) return;
     const row = btn.closest(".sbox-row");
     const key = row.dataset.key;
     rowBounds[key] = { ...catalogBounds[key] };
     delete rejected[key];
-    knobs[key] = clampKnob(knobs[key], rowBounds[key].lo, rowBounds[key].hi);
     const lo = row.querySelector('[data-role="lo"]'), hi = row.querySelector('[data-role="hi"]');
     if (lo) lo.value = numAttr(rowBounds[key].lo);
     if (hi) hi.value = numAttr(rowBounds[key].hi);
@@ -1159,6 +1508,25 @@ export async function viewTypologySandbox(root, configName) {
     arm3d();
     writeUrl();
     refreshSave();
+  });
+
+  // ── the free / search-limits switch ───────────────────────────────────────────────
+  const limitEl = document.getElementById("sbox-limit");
+  if (limitEl) limitEl.addEventListener("change", () => {
+    limited = limitEl.checked;
+    try { localStorage.setItem(LIMIT_KEY, limited ? "1" : "0"); } catch { /* private mode */ }
+    if (limited) {
+      for (const e of entries) knobs[e.key] = clampKnob(knobs[e.key], rowBounds[e.key].lo, rowBounds[e.key].hi);
+      for (const f of fixedEntries) fixedVals[f.key] = f.pinned;
+    }
+    knobsEl.innerHTML = entries.map(e => sliderRowHtml({
+      key: e.key, doc: e.doc, catalog: catalogBounds[e.key], bounds: rowBounds[e.key],
+      value: knobs[e.key], edited: collectChangedBounds({ [e.key]: catalogBounds[e.key] }, { [e.key]: rowBounds[e.key] })[e.key] != null,
+      explore: limited ? null : explore[e.key],
+    })).join("") + fixedEntries.map(f => fixedRowHtml({ ...f, value: fixedVals[f.key], locked: limited })).join("");
+    renderMorph();
+    request2d(timingDecision(slowNow, "release"));
+    arm3d(); writeUrl();
   });
 
   // ── brief select: changing re-previews everything ──────────────────────────────────

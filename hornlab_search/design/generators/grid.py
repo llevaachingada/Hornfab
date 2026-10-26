@@ -465,7 +465,12 @@ def _row_min_nonadjacent_gap(row: np.ndarray, limit_mm: float) -> float:
     """Min 3-D distance between points of ONE meridian row that are not neighbours ON it (mm).
 
     Two stations are "non-adjacent" when the arc length between them along the row is at least
-    ``limit_mm`` (the clearance being tested). That is the quantity the 2026-10-24 curl probe
+    ``pi/2 * limit_mm``: the arc of a U-turn whose two legs sit exactly ``limit_mm`` apart. A
+    smooth bend gentler than that U-turn therefore never reads as self-approach, while a fold
+    tighter than it does. (2026-10-26 fix: the old ``>= limit_mm`` arc rule compared a CHORD
+    against an equal ARC, and a chord is always shorter than its arc on any curved wall, so
+    ordinary lip curvature was refused at 7.998 / 8.000 mm against an 8 mm limit.) That is the
+    quantity the 2026-10-24 curl probe
     measured (``NOTES_FOR_SENIOR.md``: the profile folding back onto its own earlier part, "min
     true distance 19.6 / 18.5 mm"). An index-offset rule is NOT used: with a dense station grid
     it would call ordinary sampling "self-approach". Distances between DIFFERENT phi rows are
@@ -475,7 +480,7 @@ def _row_min_nonadjacent_gap(row: np.ndarray, limit_mm: float) -> float:
     pts = np.asarray(row, dtype=float)
     arc = np.concatenate(([0.0], np.cumsum(np.linalg.norm(np.diff(pts, axis=0), axis=1))))
     separation = np.abs(arc[:, None] - arc[None, :])
-    far = separation >= float(limit_mm)
+    far = separation >= float(limit_mm) * (math.pi / 2.0)
     if not np.any(far):
         return math.inf
     delta = pts[:, None, :] - pts[None, :, :]
@@ -626,7 +631,7 @@ def check_self_approach(inner: np.ndarray, outer: np.ndarray, wall_thickness_mm:
 
 def grid_outer_points(inner: np.ndarray, wall_thickness_mm: float, *,
                       half: bool = False, half_xz: bool = False,
-                      full: bool = False) -> np.ndarray:
+                      full: bool = False, check: bool = True) -> np.ndarray:
     """Explicit outer shell: in-plane normal offset of each row's ``(rho, z)`` profile.
 
     Fourcade 2015 eqs 28-29 form applied in the row's own meridian half-plane
@@ -675,7 +680,8 @@ def grid_outer_points(inner: np.ndarray, wall_thickness_mm: float, *,
         outer[0, :, 1] = 0.0
         outer[-1, :, 0] = 0.0
 
-    check_self_approach(grid, outer, t)
+    if check:                      # the sandbox draws a refused shape: it checks separately
+        check_self_approach(grid, outer, t)
     return outer
 
 # ------------------------------------------------------------------ WP9b rows machinery

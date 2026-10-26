@@ -1163,6 +1163,9 @@ def list_configs(root: Path) -> list[dict]:
             "brief_file": raw.get("brief_file"), "catalog_name": e.get("name"), "group": e.get("group"),
             "symmetry": e.get("symmetry"), "description": e.get("description"),
             "n_knobs": sum(1 for b in bounds.values() if isinstance(b, dict) and b.get("search", True)),
+            "morph_capable": morph_capable(raw),
+            "morph_searched": any(str(k).startswith("morph_") and isinstance(b, dict)
+                                  and b.get("search", True) for k, b in bounds.items()),
             "disabled": disabled})
         # Additive, honest passthrough for the Compose wizard's hybrid views: the config's REAL
         # generator block (splice/blend/grid shapes exactly as yaml.safe_load yields) and the seed
@@ -1173,6 +1176,8 @@ def list_configs(root: Path) -> list[dict]:
         seed = raw.get("seed_params")
         if isinstance(seed, dict) and seed:
             entry["seed_params"] = clean(seed)
+        if bounds:              # the sandbox's fallback when the param catalog has no entry yet
+            entry["bounds"] = clean(bounds)
         out.append(entry)
     return out
 
@@ -1332,6 +1337,8 @@ def typologies(root: Path, runs: Path) -> list[dict]:
             "name": e.get("name"), "group": e.get("group"), "symmetry": e.get("symmetry"),
             "description": e.get("description"), "config": cfg.get("path"), "n_knobs": k,
             "disabled": bool(cfg.get("disabled")),
+            "morph_capable": bool(cfg.get("morph_capable")),
+            "morph_searched": bool(cfg.get("morph_searched")),
             "budget": {"screen": budget_for_tier("screen", k), "compare": budget_for_tier("compare", k)},
             "compat": compat, "results": results.get(e.get("name"), [])}))
     order = {"classical": 0, "hybrid": 1, "magnus": 2, "legacy": 3}
@@ -1643,9 +1650,42 @@ def _build_viewport(mcfg: dict) -> dict:
     return build_viewport_geometry_from_config(mcfg, point_lists=False)
 
 
+#: Native families whose mesher branch takes the Ath Morph section.
+MORPH_FAMILIES = ("OSSE", "R-OSSE", "ICW", "FREEFORM")
+
+
+def morph_capable(raw: dict) -> bool:
+    """Can this config take native Morph? Native OSSE / R-OSSE / ICW / FREEFORM (not a CAD
+    recipe), or a generated typology with an elliptical mouth (the generator refuses Morph on a
+    superellipse / rounded-rectangle mouth: two outline mechanisms). Rows/grid typologies make
+    their mouth from the per-azimuth law, so Morph does not apply to them."""
+    gen = raw.get("generator")
+    if isinstance(gen, dict):
+        return gen.get("name") not in ("grid",) and gen.get("mouth", "ellipse") == "ellipse"
+    seed = raw.get("seed_params") or {}
+    return str(raw.get("family", "")) in MORPH_FAMILIES and "cad" not in seed
+
+
+def _preview_extra_keys(cfg) -> set[str]:
+    """Knobs the sandbox may set although the config neither seeds nor bounds them: every
+    numeric key the native family accepts (Morph, wall, ...), and the generator's opt-in Morph
+    knobs. Rows/grid blocks take only their own keys (their mouth IS the per-azimuth law)."""
+    from hornlab_search.design import families
+    from hornlab_search.design.generators import registry
+    gen = cfg.generator if isinstance(cfg.generator, dict) else None
+    if gen is None:
+        if "cad" in cfg.seed_params:
+            return set()
+        keys = families.FAMILY_KEYS.get(str(cfg.family), {})
+        return {k for k, spec in keys.items() if spec.kind in (int, float)}
+    if gen.get("name") == "grid":
+        return set()
+    return {k for k in registry.DEFAULT_KNOBS if k.startswith("morph_")}
+
+
 def _preview_knobs(cfg, overrides: dict) -> tuple[dict, list[str]]:
     """Merge requested knobs per key: valid names win, unknown names are named and ignored."""
-    allowed = set(cfg.bounds_raw) | set(cfg.seed_params)
+    allowed = set(cfg.bounds_raw) | set(cfg.seed_params) | _preview_extra_keys(cfg)
     effective = copy.deepcopy(cfg.seed_params)
     notes: list[str] = []
     for key, value in overrides.items():
@@ -1739,7 +1779,8 @@ def _rows_overshoot_from_arrays(inner, meta: dict, wall_mm: float, brief: dict |
 def _preview_response(*, config: str, brief: str | None, kind: str, quadrants: str,
                       available: bool, knobs: dict, section: dict, mouth: dict,
                       envelope: dict, shape3d: dict, slow: bool, timings: dict,
-                      notes: list[str]) -> dict:
+                      notes: list[str], rejected: list[str] | None = None,
+                      dims: dict | None = None, morph_capable: bool = False) -> dict:
     return clean({
         "version": 1,
         "config": config,
@@ -1756,7 +1797,44 @@ def _preview_response(*, config: str, brief: str | None, kind: str, quadrants: s
         "slow": bool(slow),
         "timings_ms": {k: round(float(v), 3) for k, v in timings.items()},
         "notes": notes,
+        # Why a search would refuse this shape (envelope / self-approach). The geometry is
+        # still drawn: the sandbox is for seeing what a knob does, not only what is legal.
+        "rejected": list(rejected or []),
+        # The full horn's measured size (outer shell when present), mm.
+        "dims": dims,
+        "morph_capable": bool(morph_capable),
     })
+
+
+def _preview_dims(inner, outer) -> dict | None:
+    """Full-horn width / height / depth (mm) from the preview grid, mirror-aware: a quarter or
+    half model is symmetric about the planes it omits, so a one-sided extent counts twice."""
+    pts = np.asarray(outer if outer is not None else inner, dtype=float).reshape(-1, 3)
+    if pts.size == 0 or not np.all(np.isfinite(pts)):
+        return None
+
+    def span(v):
+        lo, hi = float(v.min()), float(v.max())
+        # one-sided (a mirror model) unless the far side reaches 2 % of the near side
+        return hi - lo if -lo > 0.02 * max(hi, 1.0) else 2.0 * max(hi, -lo)
+
+    return {"w": round(span(pts[:, 0]), 1), "h": round(span(pts[:, 1]), 1),
+            "d": round(float(pts[:, 2].max() - pts[:, 2].min()), 1)}
+
+
+def _measured_envelope(dims: dict | None, brief: dict | None) -> dict:
+    """Overshoot of the measured size against the brief's envelope (native families, which
+    have no estimator branch)."""
+    env = (brief or {}).get("envelope") or {}
+    if not dims:
+        return {"available": False, "reason": "no preview geometry to measure"}
+    ratios = [dims[k] / float(env[e]) for k, e in (("w", "max_mouth_w_mm"), ("h", "max_mouth_h_mm"),
+                                                   ("d", "max_depth_mm"))
+              if env.get(e) and float(env[e]) > 0]
+    if not ratios:
+        return {"available": False, "reason": "the brief has no size envelope"}
+    return {"available": True, "overshoot": round(max(0.0, max(ratios) - 1.0), 6),
+            "source": "measured from the preview geometry"}
 
 
 def preview_shape(root: Path, config_name: str, q: dict) -> dict:
@@ -1794,7 +1872,19 @@ def preview_shape(root: Path, config_name: str, q: dict) -> dict:
         brief_name_raw = brief_q[0] if isinstance(brief_q, (list, tuple)) else brief_q
         brief_p = _preview_brief_path(root, str(brief_name_raw))
 
-    cfg = load_config(cfg_path, brief=brief_p)
+    try:
+        cfg = load_config(cfg_path, brief=brief_p)
+    except ConfigError as exc:
+        # e.g. a config that pins its throat radius under a brief with another driver size:
+        # say so on the page instead of a server error that blanks the sandbox.
+        reason = f"this config cannot load under this brief: {exc}"
+        return _preview_response(
+            config=config_name, brief=brief_p.stem if brief_p else None, kind="native",
+            quadrants="1", available=False, knobs={},
+            section={"h": {"inner": [], "outer": []}, "v": {"inner": [], "outer": []}},
+            mouth={"inner": [], "outer": []}, envelope={"available": False, "reason": reason},
+            shape3d={"available": False, "reason": reason}, slow=False,
+            timings={"total": (time.perf_counter() - started) * 1000.0}, notes=[reason])
     brief_name = (cfg.brief or {}).get("name")
     quadrants = str(cfg.mesh.quadrants)
 
@@ -1840,6 +1930,7 @@ def preview_shape(root: Path, config_name: str, q: dict) -> dict:
     envelope: dict
     section: dict
     mouth: dict
+    rejected: list[str] = []
     inner = outer = angles = None
     t_coords = phi_coords = None
     closed_phi = False
@@ -1855,7 +1946,11 @@ def preview_shape(root: Path, config_name: str, q: dict) -> dict:
             closed_phi = ((not bool(meta.get("quarter", True))) and not half
                           and not half_xz)
             outer = grid_gen.grid_outer_points(inner, wall_mm, half=half,
-                                               half_xz=half_xz, full=closed_phi)
+                                               half_xz=half_xz, full=closed_phi, check=False)
+            try:
+                grid_gen.check_self_approach(inner, outer, wall_mm)
+            except registry.GeneratorError as exc:
+                rejected.append(str(exc))
             angles = _rows_angles(meta, int(inner.shape[0]))
             t_params = (time.perf_counter() - started) * 1000.0
             if is_rows:
@@ -1869,10 +1964,9 @@ def preview_shape(root: Path, config_name: str, q: dict) -> dict:
                             if overshoot is None
                             else {"available": True, "overshoot": round(float(overshoot), 6)})
             if envelope.get("available") and float(envelope["overshoot"]) > 0.0:
-                return unavailable(
+                rejected.append(
                     "invalid_envelope: estimated outside the brief envelope "
-                    f"(max relative overshoot {float(envelope['overshoot']):.4f})",
-                    envelope=envelope)
+                    f"(max relative overshoot {float(envelope['overshoot']):.4f})")
         else:
             # (3) GENERATOR vs (4) NATIVE: materialize the mesher config, then the viewport.
             if gen:
@@ -1907,10 +2001,9 @@ def preview_shape(root: Path, config_name: str, q: dict) -> dict:
                 envelope = {"available": False, "reason": PREVIEW_NOTES_ENVELOPE_NATIVE}
             t_params = (time.perf_counter() - started) * 1000.0
             if envelope.get("available") and float(envelope["overshoot"]) > 0.0:
-                return unavailable(
+                rejected.append(
                     "invalid_envelope: estimated outside the brief envelope "
-                    f"(max relative overshoot {float(envelope['overshoot']):.4f})",
-                    envelope=envelope)
+                    f"(max relative overshoot {float(envelope['overshoot']):.4f})")
             viewport = _build_viewport(mcfg_coarse)
             grid_data = viewport["grid"]
             inner = np.asarray(grid_data["inner_grid"], dtype=float)
@@ -1929,6 +2022,9 @@ def preview_shape(root: Path, config_name: str, q: dict) -> dict:
 
     if angles is None:
         angles = _rows_angles({}, int(np.asarray(inner).shape[0]))
+    dims = _preview_dims(inner, outer)
+    if kind == "native":
+        envelope = _measured_envelope(dims, cfg.brief)
 
     t0 = time.perf_counter()
     section, mouth = _sections(inner, outer, angles)
@@ -1951,6 +2047,7 @@ def preview_shape(root: Path, config_name: str, q: dict) -> dict:
                 t_shape = (time.perf_counter() - t0) * 1000.0
                 shape3d = {
                     "available": True,
+                    "warnings": list(soup.get("warnings") or []),
                     "roles": list(soup["roles"]),
                     "verts": np.round(np.asarray(soup["positions"], dtype=float), 3).ravel().tolist(),
                     "tris": np.asarray(soup["indices"], dtype=np.int64).ravel().tolist(),
@@ -1963,7 +2060,8 @@ def preview_shape(root: Path, config_name: str, q: dict) -> dict:
     return _preview_response(
         config=config_name, brief=brief_name, kind=kind, quadrants=quadrants,
         available=True, knobs=effective, section=section, mouth=mouth,
-        envelope=envelope, shape3d=shape3d, slow=slow, timings=timings, notes=notes)
+        envelope=envelope, shape3d=shape3d, slow=slow, timings=timings, notes=notes,
+        rejected=rejected, dims=dims, morph_capable=morph_capable(cfg.raw))
 
 
 # ---------------------------------------------------------------------------- bounds writer
@@ -1971,6 +2069,33 @@ def preview_shape(root: Path, config_name: str, q: dict) -> dict:
 
 def _fmt_bound(v: float) -> str:
     return repr(float(v))
+
+
+def _append_block_lines(text: str, block: str, new_lines: list[str]) -> str:
+    """Append ``new_lines`` as entries at the END of the top-level ``block:`` mapping, at its own
+    indentation (comment-preserving; nothing else moves). A missing block is created at the end."""
+    nl = "\r\n" if "\r\n" in text else "\n"
+    lines = text.splitlines(keepends=True)
+    start = next((i for i, ln in enumerate(lines)
+                  if re.match(rf"^{re.escape(block)}\s*:\s*(#.*)?(\r?\n)?$", ln)), None)
+    if start is None:
+        body = "".join(f"  {ln}{nl}" for ln in new_lines)
+        sep = "" if text.endswith(("\n", "\r\n")) or not text else nl
+        return text + sep + f"{block}:{nl}" + body
+    indent, last = 2, start
+    for j in range(start + 1, len(lines)):
+        st = lines[j].strip()
+        if not st or st.startswith("#"):
+            continue
+        if not lines[j][:1].isspace():
+            break
+        if last == start:
+            indent = len(lines[j]) - len(lines[j].lstrip())
+        last = j
+    if not lines[last].endswith(("\n", "\r\n")):
+        lines[last] += nl
+    ins = [" " * indent + ln + nl for ln in new_lines]
+    return "".join(lines[:last + 1] + ins + lines[last + 1:])
 
 
 def _patch_bounds_lines(text: str, updates: dict) -> tuple[str, set[str]]:
@@ -2075,8 +2200,11 @@ def save_bounds(root: Path, body: dict) -> dict:
     updates = body.get("bounds")
     if not isinstance(name, str) or not name:
         raise ValueError("body needs a non-empty 'config' name")
-    if not isinstance(updates, dict) or not updates:
-        raise ValueError("body needs a non-empty 'bounds' object")
+    adds = body.get("add") or {}
+    if updates is None:
+        updates = {}
+    if not isinstance(updates, dict) or not isinstance(adds, dict) or not (updates or adds):
+        raise ValueError("body needs a non-empty 'bounds' or 'add' object")
     entry = _preview_config(root, name)
     rel = entry["path"]
     path = (root / rel).resolve()
@@ -2144,10 +2272,70 @@ def save_bounds(root: Path, body: dict) -> dict:
                         "from": {"lo": old.get("lo"), "hi": old.get("hi")},
                         "to": {"lo": lo, "hi": hi}})
 
+    added_bounds: list[str] = []
+    added_seeds: list[str] = []
+    if adds:
+        from hornlab_search.config import ConfigError, load_config
+        try:
+            legal = _preview_extra_keys(load_config(path))
+        except ConfigError as exc:
+            legal = set()
+            notes.append(f"config does not load on its own: {exc}")
+        seeds = doc.get("seed_params") if isinstance(doc.get("seed_params"), dict) else {}
+        for raw_key, raw_value in adds.items():
+            key = str(raw_key)
+            if key in known:
+                rejected.append({"key": key, "reason": "already_a_bound_row (edit it instead)"})
+                continue
+            if key not in legal:
+                rejected.append({"key": key, "reason": "not_a_legal_key_for_this_typology"})
+                continue
+            v = raw_value if isinstance(raw_value, dict) else {}
+            try:
+                lo, hi = float(v.get("lo")), float(v.get("hi"))
+                seed = float(v.get("seed", (lo + hi) / 2.0))
+            except (TypeError, ValueError):
+                rejected.append({"key": key, "reason": "not_a_finite_number"})
+                continue
+            if not all(math.isfinite(x) for x in (lo, hi, seed)) or lo > hi or not lo <= seed <= hi:
+                rejected.append({"key": key, "reason": "need finite lo <= seed <= hi"})
+                continue
+            is_int = key in ("morph_target", "morph_allow_shrinkage")
+            fmt_v = (lambda x: str(int(round(x)))) if is_int else (lambda x: repr(round(x, 6)))
+            pinned = bool(v.get("pinned")) or lo == hi
+            added_bounds.append(f"{key}: {{lo: {fmt_v(lo)}, hi: {fmt_v(hi)}"
+                                + (", search: false}" if pinned else "}"))
+            if key not in seeds:
+                added_seeds.append(f"{key}: {fmt_v(seed)}")
+            applied.append({"key": key, "from": None,
+                            "to": {"lo": lo, "hi": hi, "seed": seed, "pinned": pinned}})
+
     if rejected:
         return {"ok": False, "rejected": rejected, "applied": [], "notes": notes}
 
     new_text, patched = _patch_bounds_lines(text, accepted)
+    if added_bounds:
+        new_text = _append_block_lines(new_text, "bounds", added_bounds)
+    if added_seeds:
+        new_text = _append_block_lines(new_text, "seed_params", added_seeds)
+    if adds:
+        # the whole config must still load (family keys, generator rules, the brief) before a
+        # single byte is written
+        from hornlab_search.config import ConfigError, load_config
+        probe = path.with_name("." + path.stem + ".probe.yaml")
+        try:
+            probe.write_text(new_text, encoding="utf-8")
+            load_config(probe)
+        except ConfigError as exc:
+            return {"ok": False, "applied": [],
+                    "rejected": [{"key": k, "reason": f"config would not load: {exc}"}
+                                 for k in adds],
+                    "notes": notes}
+        finally:
+            if probe.exists():
+                probe.unlink()
+        notes.append("added rows: regenerate the parameter catalog "
+                     "(tools/gen_param_catalog.py --write) so every page lists them")
     missing = sorted(set(accepted) - patched)
     if missing:
         return {"ok": False, "applied": [],
