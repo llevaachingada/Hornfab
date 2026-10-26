@@ -377,3 +377,5 @@ Added 2026-10-26 (campaign Phase 0, implementation lane code-2):
 - [ ] Campaign config lane: b1t__lecleach_iwata_ar.yaml spells a retired product name (neutral-naming test fails) - fix before the smoke night.
 - [x] Sandbox 2026-10-26: free/search-limits switch, explore ranges, fixed-knob sliders, Morph card + save-as-search-rows, refused shapes drawn, measured size/envelope, 3D fold tolerance; self-approach chord-vs-arc false refusal fixed.
 - [ ] Param catalog generator scans examples/typologies/*.yaml only - campaign subfolder configs get no tooltips until it recurses (sandbox falls back to the config file).
+- [x] Ath crease class: OS-SE guiding curve exposed in the sandbox (OSSE); mesher config refusals shown, not 500.
+- [ ] Open: native-OSSE TwinRay/CORE typology that searches gcurve_* + Morph (the crease class); per-azimuth a(p) expression knobs.

@@ -2,6 +2,14 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-26 (night) - WHY NO ATH-STYLE CREASES, AND THE FIX: the OS-SE guiding curve in the sandbox
+
+- **Owner question:** none of our typologies (incl. the TwinRay / CORE reconstructions) ever showed the puckered, lofted ridges of at-horns.eu's CORE / TwinRay / Opus; Morph was expected to make them and does not.
+- **Diagnosis:** the creases come from a coverage angle that changes with DIRECTION around the axis. Ath gets it from the OS-SE **guiding curve** (superellipse / superformula, CORE's `sf()` script) and per-azimuth `a(p)` expressions; Morph only pulls the mouth outline to a rectangle. Our `ath_core` uses one coverage angle (the constant-azimuth reduction), `ath_twinray_380` is a FREEFORM generator with only H/V profiles, and NO config ever set a guiding curve although the search layer already carries `gcurve_*` (OSSE only) and the mesher supports it. Measured: CORE's mouth radius is 198 mm at every angle; with a pinched superformula curve (m1=m2=4, n1=0.5, n2=n3=1) it swings 407 -> 212 mm with azimuth, and with CORE's rectangle Morph the walls fold into throat-to-corner creases (seen in the sandbox 3D).
+- **Sandbox:** a Guiding-curve card on every OSSE typology (off / superellipse / superformula; width, height/width, position along the length, rotation, se_n, sf a/b/m1/m2/n1/n2/n3; presets pinched 4-lobe / diamond / soft square / rectangle; per-knob 'search' ticks saved as search rows like Morph). The mesher requires a circular cross-section with a guiding curve, so the card holds exponent 2 / aspect 1 while it is on. A TwinRay-like OSSE (L 192, a 35, a0 5, pinched curve, rectangle Morph 380x303) previews at 383 x 306 x 188 mm vs the published 380 x 303 x 192.
+- **Bug fixed:** a mesher config refusal (e.g. guiding curve + non-circular section) escaped the preview as a server error; it is now shown as the page's reason.
+- **Next (owner):** a native-OSSE TwinRay / CORE typology that searches the guiding curve (+ Morph), replacing the H/V-only reconstructions for the crease class; optionally `a(p)` expression knobs. Suite 1663/1664 (remaining: campaign-config naming).
+
 ## 2026-10-26 (evening, later) - SANDBOX IS A REAL SANDBOX + MORPH EVERYWHERE + SELF-APPROACH FALSE-REFUSAL FIX
 
 - **Owner asks:** "the sandbox idea was just to see what the sliders are doing" (it was boxed to the search bounds); "enable Morph for all the typologies that can take it, everywhere in the GUI"; "a switch on the sandbox page for each typology" between free and limited.

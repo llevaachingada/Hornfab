@@ -1164,6 +1164,7 @@ def list_configs(root: Path) -> list[dict]:
             "symmetry": e.get("symmetry"), "description": e.get("description"),
             "n_knobs": sum(1 for b in bounds.values() if isinstance(b, dict) and b.get("search", True)),
             "morph_capable": morph_capable(raw),
+            "gcurve_capable": gcurve_capable(raw),
             "morph_searched": any(str(k).startswith("morph_") and isinstance(b, dict)
                                   and b.get("search", True) for k, b in bounds.items()),
             "disabled": disabled})
@@ -1666,6 +1667,21 @@ def morph_capable(raw: dict) -> bool:
     return str(raw.get("family", "")) in MORPH_FAMILIES and "cad" not in seed
 
 
+try:  # the mesher's config refusal type (absent mesher -> nothing to catch)
+    from hornlab_mesher.config_parser import ConfigError as _MesherConfigError
+except Exception:  # noqa: BLE001
+    class _MesherConfigError(Exception):
+        pass
+
+
+def gcurve_capable(raw: dict) -> bool:
+    """Ath's OS-SE guiding curve (superellipse / superformula mouth law that sets a different
+    coverage angle in every direction -- the source of Ath's creased CORE / TwinRay walls) is an
+    OSSE-only mesher feature."""
+    return (not isinstance(raw.get("generator"), dict) and str(raw.get("family", "")) == "OSSE"
+            and "cad" not in (raw.get("seed_params") or {}))
+
+
 def _preview_extra_keys(cfg) -> set[str]:
     """Knobs the sandbox may set although the config neither seeds nor bounds them: every
     numeric key the native family accepts (Morph, wall, ...), and the generator's opt-in Morph
@@ -1780,7 +1796,8 @@ def _preview_response(*, config: str, brief: str | None, kind: str, quadrants: s
                       available: bool, knobs: dict, section: dict, mouth: dict,
                       envelope: dict, shape3d: dict, slow: bool, timings: dict,
                       notes: list[str], rejected: list[str] | None = None,
-                      dims: dict | None = None, morph_capable: bool = False) -> dict:
+                      dims: dict | None = None, morph_capable: bool = False,
+                      gcurve_capable: bool = False) -> dict:
     return clean({
         "version": 1,
         "config": config,
@@ -1803,6 +1820,7 @@ def _preview_response(*, config: str, brief: str | None, kind: str, quadrants: s
         # The full horn's measured size (outer shell when present), mm.
         "dims": dims,
         "morph_capable": bool(morph_capable),
+        "gcurve_capable": bool(gcurve_capable),
     })
 
 
@@ -2016,7 +2034,9 @@ def preview_shape(root: Path, config_name: str, q: dict) -> dict:
             phi_coords = (np.asarray(phi_grid, dtype=float).T if phi_grid is not None
                           else np.broadcast_to(np.asarray(angles, dtype=float),
                                                inner.shape[1::-1]))
-    except (registry.GeneratorError, GeometryInvalidError, ConfigError) as exc:
+    except (registry.GeneratorError, GeometryInvalidError, ConfigError, _MesherConfigError) as exc:
+        # the mesher's own config refusals (e.g. a guiding curve on a non-circular cross-section)
+        # are explained on the page like ours, never a server error that blanks the sandbox
         t_params = t_params or (time.perf_counter() - started) * 1000.0
         return unavailable(str(exc))
 
@@ -2061,7 +2081,8 @@ def preview_shape(root: Path, config_name: str, q: dict) -> dict:
         config=config_name, brief=brief_name, kind=kind, quadrants=quadrants,
         available=True, knobs=effective, section=section, mouth=mouth,
         envelope=envelope, shape3d=shape3d, slow=slow, timings=timings, notes=notes,
-        rejected=rejected, dims=dims, morph_capable=morph_capable(cfg.raw))
+        rejected=rejected, dims=dims, morph_capable=morph_capable(cfg.raw),
+        gcurve_capable=gcurve_capable(cfg.raw))
 
 
 # ---------------------------------------------------------------------------- bounds writer

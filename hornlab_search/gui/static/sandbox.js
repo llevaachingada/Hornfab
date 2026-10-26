@@ -148,6 +148,39 @@ export const MORPH_KNOBS = [
 ];
 export const MORPH_TARGETS = [["0", "off"], ["1", "rectangle"], ["2", "circle"], ["3", "superellipse"]];
 
+/** Ath's OS-SE GUIDING CURVE (OSSE only): a closed curve at a fraction of the length whose shape
+ *  sets the coverage angle in EVERY direction. A superformula curve with pinched or pointed lobes
+ *  makes the wall flare differently per azimuth, which folds it into the creases seen on Ath's
+ *  CORE / TwinRay horns (add a rectangle Morph for the square mouth). `types` = the curve types a
+ *  knob applies to. */
+export const GCURVE_SPEC = {
+  id: "gcurve", title: "Guiding curve (Ath OS-SE)", targetKey: "gcurve_type",
+  targets: [["0", "off"], ["1", "superellipse"], ["2", "superformula"]],
+  knobs: [
+    { key: "gcurve_width_mm", lo: 50, hi: 1500, step: "1", label: "curve width, mm (full)", types: [1, 2] },
+    { key: "gcurve_aspect_ratio", lo: 0.2, hi: 3, step: "0.01", label: "height / width", types: [1, 2] },
+    { key: "gcurve_dist", lo: 0.05, hi: 1, step: "0.01", label: "where along the length the curve sits (0..1)", types: [1, 2] },
+    { key: "gcurve_rot_deg", lo: -90, hi: 90, step: "1", label: "rotation, deg", types: [1, 2] },
+    { key: "gcurve_se_n", lo: 1, hi: 20, step: "0.1", label: "superellipse exponent (2 = ellipse, high = rectangle)", types: [1] },
+    { key: "gcurve_sf_a", lo: 0.2, hi: 3, step: "0.01", label: "superformula a", types: [2] },
+    { key: "gcurve_sf_b", lo: 0.2, hi: 3, step: "0.01", label: "superformula b", types: [2] },
+    { key: "gcurve_sf_m1", lo: 0, hi: 12, step: "1", label: "lobes (m1)", types: [2] },
+    { key: "gcurve_sf_m2", lo: 0, hi: 12, step: "1", label: "lobes (m2)", types: [2] },
+    { key: "gcurve_sf_n1", lo: 0.1, hi: 20, step: "0.1", label: "n1: small = pinched / star, large = round", types: [2] },
+    { key: "gcurve_sf_n2", lo: 0.1, hi: 20, step: "0.1", label: "n2: cos-term sharpness", types: [2] },
+    { key: "gcurve_sf_n3", lo: 0.1, hi: 20, step: "0.1", label: "n3: sin-term sharpness", types: [2] },
+  ],
+  presets: [
+    { name: "pinched 4-lobe", type: 2, vals: { gcurve_sf_m1: 4, gcurve_sf_m2: 4, gcurve_sf_n1: 0.5, gcurve_sf_n2: 1, gcurve_sf_n3: 1, gcurve_sf_a: 1, gcurve_sf_b: 1 } },
+    { name: "diamond", type: 2, vals: { gcurve_sf_m1: 4, gcurve_sf_m2: 4, gcurve_sf_n1: 1, gcurve_sf_n2: 1, gcurve_sf_n3: 1, gcurve_sf_a: 1, gcurve_sf_b: 1 } },
+    { name: "soft square", type: 2, vals: { gcurve_sf_m1: 4, gcurve_sf_m2: 4, gcurve_sf_n1: 4, gcurve_sf_n2: 4, gcurve_sf_n3: 4, gcurve_sf_a: 1, gcurve_sf_b: 1 } },
+    { name: "rectangle", type: 1, vals: { gcurve_se_n: 8 } },
+  ],
+};
+
+/** The knobs of a guiding-curve type (pure). */
+export const gcurveKnobsFor = type => GCURVE_SPEC.knobs.filter(k => k.types.includes(Number(type)));
+
 /** The search box a Morph knob gets when "search this" is ticked: ±25 % around the value,
  *  inside the knob's explore range. */
 export function morphSearchBox(value, lo, hi) {
@@ -916,6 +949,8 @@ export async function viewTypologySandbox(root, configName) {
   const morphKnobs = MORPH_KNOBS.filter(m => !declared.has(m.key));
   const morphOffered = !declared.has("morph_target");
   const morph = { target: 0, shrink: 0, vals: {}, search: new Set(), capable: false };
+  const gcOffered = !declared.has("gcurve_type");
+  const gc = { type: 0, vals: {}, search: new Set(), capable: false };
   // the switch: FREE sandbox (any value) vs SEARCH LIMITS (only what a run can reach); per typology
   const LIMIT_KEY = "hl-sbox-limit:" + configName;
   let limited = false;
@@ -941,6 +976,10 @@ export async function viewTypologySandbox(root, configName) {
   if (limited) {
     for (const e of entries) knobs[e.key] = clampKnob(knobs[e.key], rowBounds[e.key].lo, rowBounds[e.key].hi);
     for (const f of fixedEntries) fixedVals[f.key] = f.pinned;
+  }
+  if (q.knobs && gcOffered) {
+    if (typeof q.knobs.gcurve_type === "number") gc.type = Math.round(q.knobs.gcurve_type);
+    for (const k of GCURVE_SPEC.knobs) if (typeof q.knobs[k.key] === "number") gc.vals[k.key] = q.knobs[k.key];
   }
   if (q.knobs && morphOffered) {
     if (typeof q.knobs.morph_target === "number") morph.target = Math.round(q.knobs.morph_target);
@@ -1009,6 +1048,7 @@ export async function viewTypologySandbox(root, configName) {
           value: knobs[e.key], edited: false, explore: limited ? null : explore[e.key],
         })).join("") || `<p class="muted">This typology has no searchable shape parameters — its geometry is authored outside the knob search.</p>`}${fixedEntries.map(f => fixedRowHtml({ ...f, value: fixedVals[f.key], locked: limited })).join("")}</div>
         <div id="sbox-morph" class="sbox-morph-card" hidden></div>
+        <div id="sbox-gcurve" class="sbox-morph-card" hidden></div>
         <div id="sbox-save-msg" class="hint" aria-live="polite"></div>
         <div id="sbox-save-result" style="margin-top:8px"></div>
       </div>
@@ -1056,6 +1096,13 @@ export async function viewTypologySandbox(root, configName) {
     for (const f of fixedEntries) {
       if (fixedVals[f.key] === f.pinned) continue;               // unchanged: the config's own value
       o[f.key] = f.list && !forUrl ? [fixedVals[f.key]] : fixedVals[f.key];
+    }
+    if (gcOffered && gc.type > 0) {
+      // the mesher solves the coverage angle against the guiding curve, so the cross-section
+      // must stay circular (exponent 2, aspect 1); the curve's own aspect ratio shapes the outline
+      o.exponent = 2; o.aspect_ratio = 1;
+      o.gcurve_type = gc.type;
+      for (const k of gcurveKnobsFor(gc.type)) if (typeof gc.vals[k.key] === "number") o[k.key] = gc.vals[k.key];
     }
     if (morphOffered && morph.target > 0) {
       o.morph_target = morph.target;
@@ -1115,6 +1162,7 @@ export async function viewTypologySandbox(root, configName) {
     if (dimsEl) dimsEl.textContent = dimsText(payload.dims);
     if (cap3d && payload.quadrants) cap3d.textContent = shapeCaption(payload.quadrants);
     if (payload.morph_capable && morphOffered && !morph.capable) { morph.capable = true; renderMorph(); }
+    if (payload.gcurve_capable && gcOffered && !gc.capable) { gc.capable = true; renderGc(); }
     const notes = Array.isArray(payload.notes) ? payload.notes.filter(Boolean) : [];
     if (notesEl) notesEl.textContent = notes.length ? notes.join(" · ") : "";
   }
@@ -1267,6 +1315,81 @@ export async function viewTypologySandbox(root, configName) {
       morphChanged(false);
     });
   }
+  // ── Guiding-curve card (OSSE): same row/search mechanics as Morph ─────────────────────
+  const gcEl = document.getElementById("sbox-gcurve");
+  function gcDefaults() {
+    const d = (lastPayload && lastPayload.dims) || {};
+    const w = Math.round(Number(d.w) || 400), h = Math.round(Number(d.h) || 400);
+    const base = { gcurve_width_mm: w, gcurve_aspect_ratio: rndNum(h / w), gcurve_dist: 0.6, gcurve_rot_deg: 0,
+                   gcurve_se_n: 4, gcurve_sf_a: 1, gcurve_sf_b: 1, gcurve_sf_m1: 4, gcurve_sf_m2: 4,
+                   gcurve_sf_n1: 0.5, gcurve_sf_n2: 1, gcurve_sf_n3: 1 };
+    for (const k of GCURVE_SPEC.knobs) if (typeof gc.vals[k.key] !== "number") gc.vals[k.key] = base[k.key];
+  }
+  function renderGc() {
+    if (!gcEl || !gc.capable) return;
+    gcEl.hidden = false;
+    const on = gc.type > 0;
+    if (on) gcDefaults();
+    const ks = gcurveKnobsFor(gc.type);
+    gcEl.innerHTML = `<div class="fig-head"><h3>${esc(GCURVE_SPEC.title)}</h3>
+        <span class="btn-row">
+          <label class="evo-opt">curve <select data-role="gctype" aria-label="guiding curve type">
+            ${GCURVE_SPEC.targets.map(([v, n]) => `<option value="${v}"${Number(v) === gc.type ? " selected" : ""}>${n}</option>`).join("")}
+          </select></label>
+        </span></div>
+      <p class="cap muted">A closed curve part-way along the horn whose shape sets the coverage angle in <b>every</b> direction, not just horizontal and vertical. While it is on, the cross-section is held circular (exponent 2, aspect 1 — the mesher's rule; use the curve's own height / width). Pinched or pointed superformula lobes make the wall flare differently per direction, which folds it into the creases on Ath's CORE / TwinRay horns — add a <b>rectangle Morph</b> for the square mouth. Presets: ${GCURVE_SPEC.presets.map((pr, i) => `<button type="button" class="sbox-reset" data-role="gcpreset" data-i="${i}">${esc(pr.name)}</button>`).join(" ")}</p>
+      ${on ? `<div class="sbox-knobs-list">${ks.map(k => morphRowHtml(k, gc.vals[k.key], gc.search.has(k.key), limited)).join("")}</div>`
+           : `<p class="muted" style="font-size:0.8rem">Pick a curve type or a preset to start.</p>`}`;
+  }
+  function gcChanged(commit) {
+    request2d(timingDecision(slowNow, commit ? "release" : "input"));
+    if (commit || !slowNow) arm3d();
+    if (commit) { writeUrl(); refreshSave(); }
+  }
+  if (gcEl) {
+    gcEl.addEventListener("click", ev => {
+      const b = ev.target.closest('[data-role="gcpreset"]');
+      if (!b) return;
+      const pr = GCURVE_SPEC.presets[Number(b.dataset.i)];
+      gc.type = pr.type;
+      gcDefaults();
+      Object.assign(gc.vals, pr.vals);
+      renderGc(); gcChanged(true);
+    });
+    gcEl.addEventListener("change", ev => {
+      const role = ev.target.dataset.role;
+      if (role === "gctype") { gc.type = Number(ev.target.value) || 0; renderGc(); gcChanged(true); return; }
+      const row = ev.target.closest(".sbox-row");
+      if (!row) return;
+      if (role === "msearch") {
+        if (ev.target.checked) gc.search.add(row.dataset.key); else gc.search.delete(row.dataset.key);
+        renderGc(); refreshSave(); return;
+      }
+      if (role === "slider") gcChanged(true);
+      if (role === "val") {
+        const v = Number(String(ev.target.value).replace(",", "."));
+        if (isFinite(v)) { gc.vals[row.dataset.key] = v; renderGc(); gcChanged(true); }
+      }
+    });
+    gcEl.addEventListener("input", ev => {
+      if (ev.target.dataset.role !== "slider") return;
+      const row = ev.target.closest(".sbox-row");
+      const k = GCURVE_SPEC.knobs.find(x => x.key === row.dataset.key);
+      gc.vals[k.key] = Number(ev.target.value);
+      setValText(row.querySelector('[data-role="val"]'), fmtKnobValue(gc.vals[k.key], k.lo, k.hi));
+      gcChanged(false);
+    });
+  }
+  function gcAdds() {
+    if (!(gc.type > 0) || !gc.search.size) return {};
+    const add = { gcurve_type: { lo: gc.type, hi: gc.type, seed: gc.type, pinned: true } };
+    for (const k of gcurveKnobsFor(gc.type)) {
+      const v = gc.vals[k.key];
+      add[k.key] = gc.search.has(k.key) ? { ...morphSearchBox(v, k.lo, k.hi), seed: v } : { lo: v, hi: v, seed: v, pinned: true };
+    }
+    return add;
+  }
+
   /** The Morph rows "search" adds: ±25 % boxes + the target shape (and shrink flag) pinned. */
   function morphAdds() {
     if (!(morph.target > 0) || !morph.search.size) return {};
@@ -1340,7 +1463,8 @@ export async function viewTypologySandbox(root, configName) {
   let armed = false;
   function refreshSave(face) {
     const changed = collectChangedBounds(catalogBounds, rowBounds);
-    const n = Object.keys(changed).length + (Object.keys(morphAdds()).length ? morph.search.size : 0);
+    const n = Object.keys(changed).length + (Object.keys(morphAdds()).length ? morph.search.size : 0)
+      + (Object.keys(gcAdds()).length ? gc.search.size : 0);
     if (face != null) saveBtn.textContent = face;
     saveBtn.disabled = armed ? false : (n === 0 || backendDark);
     saveBtn.title = armed ? "click again to confirm the write"
@@ -1370,7 +1494,7 @@ export async function viewTypologySandbox(root, configName) {
     armed = false;
     if (armTimer) { clearTimeout(armTimer); armTimer = null; }
     const changed = collectChangedBounds(catalogBounds, rowBounds);
-    const adds = morphAdds();
+    const adds = { ...morphAdds(), ...gcAdds() };
     saveBtn.textContent = "Save bounds";
     if (!Object.keys(changed).length && !Object.keys(adds).length) { refreshSave(); return; }
     saveBtn.disabled = true;
@@ -1525,6 +1649,7 @@ export async function viewTypologySandbox(root, configName) {
       explore: limited ? null : explore[e.key],
     })).join("") + fixedEntries.map(f => fixedRowHtml({ ...f, value: fixedVals[f.key], locked: limited })).join("");
     renderMorph();
+    renderGc();
     request2d(timingDecision(slowNow, "release"));
     arm3d(); writeUrl();
   });

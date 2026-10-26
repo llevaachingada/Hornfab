@@ -221,3 +221,36 @@ def test_sandbox_explore_helpers_offline(tmp_path):
     sandbox = ROOT / "hornlab_search" / "gui" / "static" / "sandbox.js"
     r = subprocess.run([node, str(script), str(sandbox)], capture_output=True, text=True)
     assert "EXPLORE OK" in r.stdout, f"stdout: {r.stdout}\nstderr: {r.stderr}"
+
+
+# ------------------------------------------------------------------ guiding curve (Ath OS-SE creases)
+
+def test_guiding_curve_is_offered_on_osse_only():
+    assert D.gcurve_capable({"family": "OSSE"})
+    assert not D.gcurve_capable({"family": "R-OSSE"})
+    assert not D.gcurve_capable({"family": "FREEFORM", "generator": {"name": "typology"}})
+    out = D.preview_shape(ROOT, "ath_core", _q("ath_core_2in"))
+    assert out["gcurve_capable"] is True
+
+
+def test_superformula_guiding_curve_makes_the_coverage_vary_with_direction():
+    plain = D.preview_shape(ROOT, "ath_core", _q("ath_core_2in", morph_target=0))
+    lobed = D.preview_shape(ROOT, "ath_core", _q(
+        "ath_core_2in", morph_target=0, gcurve_type=2, gcurve_width_mm=400, gcurve_aspect_ratio=0.7,
+        gcurve_dist=0.6, gcurve_sf_a=1, gcurve_sf_b=1, gcurve_sf_m1=4, gcurve_sf_m2=4,
+        gcurve_sf_n1=0.5, gcurve_sf_n2=1, gcurve_sf_n3=1))
+
+    def spread(o):
+        m = np.array(o["mouth"]["inner"])
+        r = np.hypot(m[:, 0], m[:, 1])
+        return float(r.max() / r.min())
+    assert spread(plain) < 1.02                      # CORE alone: one coverage angle, round mouth
+    assert spread(lobed) > 1.5                       # pinched lobes: the radius swings with azimuth
+
+
+def test_mesher_config_refusal_is_explained_not_a_server_error():
+    out = D.preview_shape(ROOT, "osse_baseline", _q(
+        "osse_75x45", gcurve_type=1, gcurve_width_mm=380, gcurve_aspect_ratio=0.8, gcurve_dist=0.6,
+        gcurve_se_n=4, exponent=4))
+    assert out["available"] is False
+    assert "guiding curve cannot be combined with a non-circular cross_section" in out["notes"][0]
