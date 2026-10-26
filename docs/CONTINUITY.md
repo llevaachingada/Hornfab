@@ -2,6 +2,15 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-26 (campaign Phase 0) - objective v3 amendment: optional per-plane `target.f0_v_hz` LANDED (impl-code2; absent = bit-identical)
+
+- **What it does:** `target.f0_v_hz` (appended after `f0_hz`; `Target` stays positional) makes the coverage term the SUM of two separately masked means: the horizontal squared error over `f >= f0_hz` and the vertical squared error over `f >= f0_v_hz`, with `freq_weights` restricted to each mask. `dislope` keeps the H/f0 mask; `n_in_band` reports the H-mask count. Validation: `0 < f0_v_hz <= band_hi_hz` and, when `f0_hz` is set, `f0_v_hz >= f0_hz`; every refusal names `target.f0_v_hz`.
+- **Absent = bit-identical:** the pre-amendment expression is kept verbatim inside the `f0_v_hz is None` branch. Goldens captured before the edit are unchanged on the landed tree: `lecleach_asym_odd` `config_sha d153b1dd96d1`, seed hash `103316ebbfeb`, screen solve-spec hash `cfdb0910d126`, J `9.526627218934914` (`n_in_band 10`). Dataset records emit `f0_v_hz` only when set; the config feasibility record does the same, so absent-key record bytes are unchanged.
+- **Contract:** `docs/plan/01_CONTRACTS.md` is FROZEN and was not edited. Dated amendment recorded here: **"objective v3 amendment 2026-10-26: optional per-plane f0_v_hz, owner-directed"**; the same text is appended to `NOTES_FOR_SENIOR.md`.
+- **Where it needed no change:** the in-run memo key (`search/evaluate.py:660-667`) and the GUI compare fingerprint (`gui/data.py:619-621`) do not carry `f0_hz` either (they key design/mesh/solve and band edges), so there is no `f0_v_hz` key to add; `report/html.py` rebuilds `Target` from `cfg.target_raw` and needs no field handling.
+- **Tests:** new `tests/test_objective_v3_f0v.py` (9/9): absent path `==` a verbatim copy of the pre-change function on both plain and freq-weighted cases; a vertical error below `f0_v` leaves J exactly unchanged while a horizontal error between `f0` and `f0_v` counts (and a vertical error at/above `f0_v` counts); validation refusals; `load_brief` + config feasibility emission.
+- **Verification:** standard offline gate green - `compileall` clean, `tools/gen_param_catalog.py --check` OK, `node --check` x8 OK, offline suite **1639 passed / 0 failed / 0 errors / 0 skipped** (`runs/step2b/suite.xml`; 1630 baseline + 9 new). No GPU/Julia work.
+
 ## 2026-10-26 (campaign Phase 0) - ICW nested driver pin LANDED (impl-code1; `icw_seed.r0_mm`)
 
 - **Bug:** the WP2 driver pin only looked for ROOT `r0_mm`. Every ICW config keeps its throat at `seed_params.icw_seed.r0_mm` (bounds carries the flat dotted key `icw_seed.r0_mm`), so the pin silently missed ICW entirely and a campaign brief could pair an 18 mm driver with a 12.7 mm horn.

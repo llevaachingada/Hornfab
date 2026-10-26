@@ -169,6 +169,10 @@ def _target_dict(target) -> dict:
         d = dict(target)
     else:
         raise TypeError(f"target must be a dataclass or dict, got {type(target).__name__}")
+    # 2026-10-26 objective v3 amendment: f0_v_hz is OPTIONAL and emitted only when set, so a
+    # record written without it stays byte-identical to the pre-amendment record.
+    if d.get("f0_v_hz", "absent") is None:
+        d.pop("f0_v_hz", None)
     return to_jsonable(d, "$.target")
 
 

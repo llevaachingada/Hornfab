@@ -1080,6 +1080,10 @@ def _brief_preflight_and_derive(raw: dict, brief_d: dict | None, where: str) -> 
         "feasible_w": bool(env_w > 0.0 and req_w <= env_w + 1e-9),
         "feasible_v": bool(env_h > 0.0 and req_h <= env_h + 1e-9),
     }
+    # 2026-10-26 objective v3 amendment: only emitted when the brief opts in, so a brief
+    # without f0_v_hz keeps its pre-amendment feasibility-record bytes.
+    if t.get("f0_v_hz") is not None:
+        feas["f0_v_hz"] = float(t["f0_v_hz"])
     for mode in ("screen", "verify"):
         lo, hi, n = FREQ_GRIDS[mode]
         hi_eff = min(hi, band_hi)

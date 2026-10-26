@@ -17,6 +17,11 @@ class Target:
     f0_hz: float | None = None     # 2026-10-25 owner amendment: the K-law pattern-control
                                    # design frequency (d = KEELE_K/(f0*coverage)); absent =
                                    # band_lo and every existing YAML behaves as before.
+    f0_v_hz: float | None = None   # 2026-10-26 objective v3 amendment (owner-directed):
+                                   # optional PER-PLANE vertical scoring frequency. When set,
+                                   # cov scores the horizontal error only at f >= f0_hz and the
+                                   # vertical error only at f >= f0_v_hz (f0_v_hz >= f0_hz).
+                                   # Absent = the pre-amendment path, bit-identical.
 
     def f0_effective_hz(self) -> float:
         """The K-law design frequency in force (an explicit f0 wins over band_lo)."""
@@ -51,6 +56,8 @@ class Target:
             kw["freq_weights"] = validate_freq_weights(kw["freq_weights"])
         if d.get("f0_hz") is not None:
             kw["f0_hz"] = float(d["f0_hz"])
+        if d.get("f0_v_hz") is not None:
+            kw["f0_v_hz"] = float(d["f0_v_hz"])
         t = cls(**kw)
         if not (t.band_lo_hz > 0 and t.band_hi_hz > t.band_lo_hz):
             raise ValueError("Target.from_dict: need 0 < band_lo_hz < band_hi_hz")
@@ -60,6 +67,15 @@ class Target:
             raise ValueError(
                 f"Target.from_dict: f0_hz must be in (0, band_hi_hz], got {t.f0_hz!r} "
                 f"(band_hi {t.band_hi_hz:g})")
+        if t.f0_v_hz is not None:
+            if not (t.f0_v_hz > 0 and t.f0_v_hz <= t.band_hi_hz):
+                raise ValueError(
+                    f"Target.from_dict: target.f0_v_hz must be in (0, band_hi_hz], got "
+                    f"{t.f0_v_hz!r} (band_hi {t.band_hi_hz:g})")
+            if t.f0_hz is not None and t.f0_v_hz < t.f0_hz:
+                raise ValueError(
+                    f"Target.from_dict: target.f0_v_hz must be >= target.f0_hz, got "
+                    f"f0_v_hz={t.f0_v_hz!r} < f0_hz={t.f0_hz!r}")
         return t
 
 

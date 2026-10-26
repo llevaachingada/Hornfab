@@ -561,3 +561,7 @@ Proposed precedence for the sandbox sliders: hard `KeySpec` clamp (always wins) 
 
 
 
+
+
+## 2026-10-26 objective v3 amendment (Phase 0 item 2B, impl-code2)
+objective v3 amendment 2026-10-26: optional per-plane f0_v_hz, owner-directed. `target.f0_v_hz` (appended after `f0_hz`; Target stays positional) masks the vertical coverage error to f >= f0_v_hz while the horizontal error keeps f >= f0_hz; cov is the sum of the two masked means (freq_weights restricted per mask). `dislope` keeps the H/f0 mask. Absent = the pre-amendment expression verbatim, bit-identical (config_sha / seed hash / solve-spec hash / J pinned). Validation refuses f0_v_hz < f0_hz or > band_hi_hz with a message naming target.f0_v_hz. `docs/plan/01_CONTRACTS.md` is frozen and was not edited.

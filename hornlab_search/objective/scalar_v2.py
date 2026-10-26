@@ -283,7 +283,14 @@ def objective_v3(metrics, resp, ok, target, weights):
     reduced the other terms instead. Everything else (rip/di/flat/load, the penalties and
     the same key set) follows v2 exactly; v1/v2 runs are untouched (non-retroactive).
     The masked frequency count is reported once per run by the brief's feasibility
-    record (config.py), not per row, so the frozen terms-key contract is untouched."""
+    record (config.py), not per row, so the frozen terms-key contract is untouched.
+
+    2026-10-26 amendment (owner-directed, Phase 0 item 2B): an optional per-plane scoring
+    frequency ``target.f0_v_hz``. When it is set, the coverage term is the SUM of two
+    separately masked means - the horizontal error over ``f >= f0`` and the vertical error
+    over ``f >= f0_v_hz`` - with the same ``freq_weights`` vector restricted to each mask.
+    The H mask is still the one ``dislope`` uses, and ``n_in_band`` reports its count.
+    ``f0_v_hz is None`` executes the pre-amendment expression unchanged, bit-for-bit."""
     try:
         return _objective_v3(metrics, resp, ok, target, weights)
     except Exception:  # noqa: BLE001 - the contract says never raises
@@ -319,14 +326,35 @@ def _objective_v3(metrics, resp, ok, target, weights):
 
     # cov: per-frequency squared error over the SCORE band (v3: below-f0 masked),
     # frequency-weighted when the brief carries freq_weights (WP4's vector, generalized).
-    e_f = ((np.asarray(metrics.bw_h_deg, float)[score] - target.coverage_h_deg) ** 2
-           + (np.asarray(metrics.bw_v_deg, float)[score] - target.coverage_v_deg) ** 2) / 100.0
-    if target.freq_weights is not None and n_score >= 1:
-        cov, _ = _weighted_mean(e_f, freq_weight_vector(f, target)[score])
-    elif n_score >= 1:
-        cov, _ = _plain_mean(e_f)
+    # 2026-10-26 amendment: when target.f0_v_hz is set, the H and V errors are scored over
+    # their OWN masks (V below f0_v is not scored); absent = the pre-amendment path.
+    if target.f0_v_hz is None:
+        e_f = ((np.asarray(metrics.bw_h_deg, float)[score] - target.coverage_h_deg) ** 2
+               + (np.asarray(metrics.bw_v_deg, float)[score] - target.coverage_v_deg) ** 2) / 100.0
+        if target.freq_weights is not None and n_score >= 1:
+            cov, _ = _weighted_mean(e_f, freq_weight_vector(f, target)[score])
+        elif n_score >= 1:
+            cov, _ = _plain_mean(e_f)
+        else:
+            cov = NAN_TERM_FILL
     else:
-        cov = NAN_TERM_FILL
+        f0_v = float(target.f0_v_hz)
+        score_v = band & (f >= f0_v)
+        n_score_v = int(score_v.sum())
+        if n_score_v == 0:
+            log.warning("no solved frequency at or above f0_v_hz = %g Hz; the vertical "
+                        "coverage term is unscorable this run", f0_v)
+            return penalty_result(PENALTY_FAILED, n_in_band=n_band)
+        e_h = ((np.asarray(metrics.bw_h_deg, float)[score] - target.coverage_h_deg) ** 2) / 100.0
+        e_v = ((np.asarray(metrics.bw_v_deg, float)[score_v] - target.coverage_v_deg) ** 2) / 100.0
+        if target.freq_weights is not None:
+            wv = freq_weight_vector(f, target)
+            cov_h, _ = _weighted_mean(e_h, wv[score])
+            cov_v, _ = _weighted_mean(e_v, wv[score_v])
+        else:
+            cov_h, _ = _plain_mean(e_h)
+            cov_v, _ = _plain_mean(e_v)
+        cov = cov_h + cov_v
 
     # dislope: the slope fit over the SCORE band only (the unattainable band stops pulling it).
     dsl, _ = T.dislope_term(s(f), s(metrics.di_db), target)
