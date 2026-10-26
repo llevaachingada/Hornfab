@@ -23,13 +23,13 @@ seed_params:
   g_stop_deg: 170.0
 bounds:
   g_fc_hz:
-    lo: 268.0
-    hi: 320.0
+    lo: 187.6
+    hi: 536.0
   g_T:
-    lo: 0.98
+    lo: 0.3
     hi: 1.0
   g_stop_deg:
-    lo: 160.0
+    lo: 90.0
     hi: 200.0
 target:
   coverage_h_deg: 90.0

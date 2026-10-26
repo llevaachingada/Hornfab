@@ -41,23 +41,23 @@ bounds:
     lo: 1.0
     hi: 3.0
   L_mm:
-    lo: 320.0
-    hi: 380.0
+    lo: 140.0
+    hi: 650.0
   a_deg:
-    lo: 42.0
-    hi: 48.0
+    lo: 10.0
+    hi: 80.0
   n:
-    lo: 6.0
-    hi: 7.5
+    lo: 1.0
+    hi: 10.0
   s:
-    lo: 0.6
-    hi: 0.83
+    lo: 0.0
+    hi: 1.5
   q:
-    lo: 0.99
+    lo: 0.9
     hi: 1.0
   k:
-    lo: 0.9
-    hi: 1.2
+    lo: 0.3
+    hi: 5.0
   exponent:
     lo: 2.0
     hi: 2.0
@@ -77,23 +77,23 @@ bounds:
     hi: 1
     search: false
   morph_width_mm:
-    lo: 680.0
-    hi: 730.0
+    lo: 423.6
+    hi: 811.9
   morph_height_mm:
-    lo: 680.0
-    hi: 730.0
+    lo: 423.6
+    hi: 811.9
   morph_corner_mm:
-    lo: 10.0
-    hi: 30.0
+    lo: 0.0
+    hi: 80.0
   morph_exponent:
     lo: 2.0
-    hi: 8.0
+    hi: 10.0
   morph_rate:
-    lo: 2.0
-    hi: 4.0
+    lo: 0.5
+    hi: 8.0
   morph_fixed:
     lo: 0.0
-    hi: 0.1
+    hi: 0.6
   morph_allow_shrinkage:
     lo: 1
     hi: 1
@@ -137,4 +137,5 @@ search:
   budget: 180
   popsize: null
   tolfun: 0.001
+  infeasible_penalty: graded
 description: Cell b3a__ath_core_14in - ADAPTATION of the published ATH CORE 2-inch recipe to 1.4 in.

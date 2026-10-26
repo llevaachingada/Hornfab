@@ -27,26 +27,26 @@ seed_params:
   v_n: 4.0
 bounds:
   L_mm:
-    lo: 185.0
-    hi: 205.0
+    lo: 78.0
+    hi: 600.0
   h_a_deg:
-    lo: 36.0
-    hi: 44.0
+    lo: 10.0
+    hi: 80.0
   v_a_deg:
-    lo: 22.0
-    hi: 32.0
+    lo: 10.0
+    hi: 80.0
   h_rm_mm:
-    lo: 225.0
-    hi: 245.0
+    lo: 141.12
+    hi: 270.48
   v_rm_mm:
-    lo: 213.0
-    hi: 227.0
+    lo: 132.6
+    hi: 254.15
   h_n:
-    lo: 2.0
-    hi: 8.0
+    lo: 1.0
+    hi: 10.0
   v_n:
-    lo: 2.0
-    hi: 8.0
+    lo: 1.0
+    hi: 10.0
 target:
   coverage_h_deg: 90.0
   coverage_v_deg: 60.0
@@ -86,4 +86,5 @@ search:
   budget: 100
   popsize: null
   tolfun: 0.001
+  infeasible_penalty: graded
 description: Cell b3bw__biradial_keele - Keele biradial generator, brief b3bw_pa_90x60_600_load_wide.

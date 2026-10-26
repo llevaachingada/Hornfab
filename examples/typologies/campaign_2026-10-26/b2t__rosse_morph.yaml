@@ -36,60 +36,60 @@ bounds:
     hi: 18.0
     search: false
   a_deg:
-    lo: 18.0
-    hi: 22.0
+    lo: 10.0
+    hi: 80.0
   a0_deg:
     lo: 1.0
     hi: 4.0
   R_mm:
-    lo: 220.0
-    hi: 245.0
+    lo: 139.8
+    hi: 267.95
   tmax:
-    lo: 0.9
+    lo: 0.6
     hi: 1.0
   k:
-    lo: 0.8
-    hi: 1.2
-  q:
-    lo: 0.8
-    hi: 1.2
-  m:
-    lo: 0.7
-    hi: 1.0
-  r:
     lo: 0.3
-    hi: 0.5
+    hi: 5.0
+  q:
+    lo: 0.5
+    hi: 2.0
+  m:
+    lo: 0.2
+    hi: 1.5
+  r:
+    lo: 0.05
+    hi: 1.0
   b:
-    lo: 0.15
-    hi: 0.25
+    lo: 0.0
+    hi: 0.6
   exponent:
     lo: 2.0
-    hi: 8.0
+    hi: 10.0
   aspect_ratio:
-    lo: 0.64
-    hi: 0.7
+    lo: 0.4
+    hi: 1.2
   morph_target:
     lo: 1
     hi: 1
     search: false
   morph_width_mm:
-    lo: 340.0
-    hi: 365.0
+    lo: 211.8
+    hi: 405.95
   morph_height_mm:
-    lo: 510.0
-    hi: 545.0
+    lo: 317.4
+    hi: 608.35
   morph_corner_mm:
-    lo: 25.0
-    hi: 60.0
+    lo: 0.0
+    hi: 80.0
   morph_exponent:
     lo: 2.0
-    hi: 8.0
+    hi: 10.0
   morph_rate:
-    lo: 2.0
-    hi: 4.0
+    lo: 0.5
+    hi: 8.0
   morph_fixed:
     lo: 0.0
-    hi: 0.1
+    hi: 0.6
   morph_allow_shrinkage:
     lo: 0
     hi: 0
@@ -133,5 +133,6 @@ search:
   budget: 204
   popsize: null
   tolfun: 0.001
+  infeasible_penalty: graded
 description: Cell b2t__rosse_morph - R-OSSE + pinned native morph, brief b2t_pa_60x40_1200_tall.
 brief_file: ../../briefs/campaign_2026-10-26/b2t_pa_60x40_1200_tall.yaml

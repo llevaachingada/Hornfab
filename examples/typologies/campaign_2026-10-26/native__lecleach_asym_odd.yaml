@@ -29,13 +29,13 @@ seed_params:
   g_eps_start: 0.2
 bounds:
   g_fc_hz:
-    lo: 740.0
-    hi: 900.0
+    lo: 560.0
+    hi: 1600.0
   g_T:
-    lo: 0.6
+    lo: 0.3
     hi: 1.0
   g_stop_deg:
-    lo: 150.0
+    lo: 90.0
     hi: 200.0
   g_eps_m:
     lo: 0.0

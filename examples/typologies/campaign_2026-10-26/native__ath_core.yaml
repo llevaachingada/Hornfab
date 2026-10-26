@@ -40,23 +40,23 @@ bounds:
     hi: 1.2
     search: false
   L_mm:
-    lo: 230.0
-    hi: 300.0
+    lo: 104.0
+    hi: 520.0
   a_deg:
-    lo: 22.0
-    hi: 27.0
+    lo: 10.0
+    hi: 80.0
   n:
-    lo: 6.0
-    hi: 7.5
+    lo: 1.0
+    hi: 10.0
   s:
-    lo: 0.6
-    hi: 0.83
+    lo: 0.0
+    hi: 1.5
   q:
-    lo: 0.99
+    lo: 0.9
     hi: 1.0
   k:
-    lo: 0.9
-    hi: 1.2
+    lo: 0.3
+    hi: 5.0
   exponent:
     lo: 2.0
     hi: 2.0
@@ -76,23 +76,23 @@ bounds:
     hi: 1
     search: false
   morph_width_mm:
-    lo: 380.0
-    hi: 430.0
+    lo: 238.2
+    hi: 456.55
   morph_height_mm:
-    lo: 380.0
-    hi: 430.0
+    lo: 238.2
+    hi: 456.55
   morph_corner_mm:
-    lo: 10.0
-    hi: 30.0
+    lo: 0.0
+    hi: 80.0
   morph_exponent:
     lo: 2.0
-    hi: 8.0
+    hi: 10.0
   morph_rate:
-    lo: 2.0
-    hi: 4.0
+    lo: 0.5
+    hi: 8.0
   morph_fixed:
     lo: 0.0
-    hi: 0.1
+    hi: 0.6
   morph_allow_shrinkage:
     lo: 1
     hi: 1
@@ -136,4 +136,5 @@ search:
   budget: 168
   popsize: null
   tolfun: 0.001
+  infeasible_penalty: graded
 description: Cell native__ath_core - native ATH CORE-style control, brief native_ath_core_2in.

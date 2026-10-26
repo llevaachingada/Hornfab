@@ -25,32 +25,32 @@ bounds:
     hi: 18.0
     search: false
   a_deg:
-    lo: 16.0
-    hi: 24.0
+    lo: 10.0
+    hi: 80.0
   a0_deg:
     lo: 1.0
     hi: 4.0
   L_mm:
-    lo: 110.0
-    hi: 190.0
+    lo: 71.2
+    hi: 300.0
   n:
-    lo: 2.0
-    hi: 8.0
+    lo: 1.0
+    hi: 10.0
   s:
     lo: 0.0
-    hi: 1.0
+    hi: 1.5
   q:
     lo: 0.9
     hi: 1.0
   k:
     lo: 0.3
-    hi: 2.5
+    hi: 5.0
   exponent:
     lo: 2.0
-    hi: 8.0
+    hi: 10.0
   aspect_ratio:
-    lo: 1.05
-    hi: 1.35
+    lo: 0.4
+    hi: 2.5
 target:
   coverage_h_deg: 75.0
   coverage_v_deg: 45.0
@@ -89,5 +89,6 @@ search:
   budget: 108
   popsize: null
   tolfun: 0.001
+  infeasible_penalty: graded
 description: Cell b2w__osse_baseline - native OSSE baseline, brief b2w_pa_60x40_1200_wide.
 brief_file: ../../briefs/campaign_2026-10-26/b2w_pa_60x40_1200_wide.yaml

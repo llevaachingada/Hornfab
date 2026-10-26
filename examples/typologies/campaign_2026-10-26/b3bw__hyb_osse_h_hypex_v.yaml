@@ -30,17 +30,17 @@ seed_params:
   v_T: 0.7
 bounds:
   L_mm:
-    lo: 180.0
-    hi: 208.0
+    lo: 81.2
+    hi: 600.0
   h_a_deg:
-    lo: 40.0
-    hi: 48.0
+    lo: 10.0
+    hi: 80.0
   h_s:
     lo: 0.0
-    hi: 0.6
+    hi: 1.5
   v_rm_mm:
-    lo: 213.0
-    hi: 222.0
+    lo: 132.6
+    hi: 254.15
   v_T:
     lo: 0.0
     hi: 1.0
@@ -82,4 +82,5 @@ search:
   budget: 100
   popsize: null
   tolfun: 0.001
+  infeasible_penalty: graded
 description: Cell b3bw__hyb_osse_h_hypex_v - H OSSE / V hypex hybrid, brief b3bw_..._wide.

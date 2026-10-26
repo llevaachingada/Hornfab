@@ -25,17 +25,17 @@ seed_params:
   g_ar_p: 1.0
 bounds:
   g_fc_hz:
-    lo: 430.0
-    hi: 520.0
+    lo: 323.4
+    hi: 924.0
   g_T:
-    lo: 0.75
-    hi: 0.9
+    lo: 0.3
+    hi: 1.0
   g_stop_deg:
-    lo: 150.0
+    lo: 90.0
     hi: 220.0
   g_ar_m:
-    lo: 0.63
-    hi: 0.72
+    lo: 0.4
+    hi: 1.2
   g_ar_p:
     lo: 0.7
     hi: 1.4

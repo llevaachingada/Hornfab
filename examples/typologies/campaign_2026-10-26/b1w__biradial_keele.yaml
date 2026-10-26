@@ -32,26 +32,26 @@ seed_params:
   v_n: 4.0
 bounds:
   L_mm:
-    lo: 185.0
-    hi: 195.0
+    lo: 78.0
+    hi: 400.0
   h_a_deg:
-    lo: 36.0
-    hi: 40.5
+    lo: 10.0
+    hi: 80.0
   v_a_deg:
-    lo: 22.0
-    hi: 32.0
+    lo: 10.0
+    hi: 80.0
   h_rm_mm:
-    lo: 182.0
-    hi: 190.0
+    lo: 110.76
+    hi: 212.29
   v_rm_mm:
-    lo: 142.0
-    hi: 147.5
+    lo: 87.9
+    hi: 168.475
   h_n:
-    lo: 2.0
-    hi: 8.0
+    lo: 1.0
+    hi: 10.0
   v_n:
-    lo: 2.0
-    hi: 8.0
+    lo: 1.0
+    hi: 10.0
 target:
   coverage_h_deg: 90.0
   coverage_v_deg: 60.0
@@ -91,4 +91,5 @@ search:
   budget: 100
   popsize: null
   tolfun: 0.001
+  infeasible_penalty: graded
 description: Cell b1w__biradial_keele - Keele biradial generator, brief b1w_hifi_90x60_850_wide.

@@ -25,23 +25,23 @@ seed_params:
   g_x_fc: 0.15
 bounds:
   g_fc_h_hz:
-    lo: 880.0
-    hi: 1050.0
+    lo: 648.2
+    hi: 1852.0
   g_fc_v_hz:
-    lo: 600.0
-    hi: 720.0
+    lo: 443.1
+    hi: 1266.0
   g_T:
-    lo: 0.7
+    lo: 0.3
     hi: 1.0
   g_stop_deg:
-    lo: 125.0
+    lo: 90.0
     hi: 158.0
   g_x_amp:
-    lo: -0.18
-    hi: 0.18
+    lo: -0.4
+    hi: 0.4
   g_x_fc:
-    lo: 0.05
-    hi: 0.18
+    lo: 0.0
+    hi: 0.3
 target:
   coverage_h_deg: 90.0
   coverage_v_deg: 60.0

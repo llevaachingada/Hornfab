@@ -36,41 +36,41 @@ seed_params:
   mouth_exponent: 4.0
 bounds:
   L_mm:
-    lo: 185.0
-    hi: 200.0
+    lo: 76.8
+    hi: 320.0
   h_a_deg:
-    lo: 33.0
-    hi: 37.0
+    lo: 10.0
+    hi: 80.0
   v_a_deg:
-    lo: 24.0
-    hi: 28.0
+    lo: 10.0
+    hi: 80.0
   h_s:
-    lo: 0.55
-    hi: 0.65
+    lo: 0.0
+    hi: 1.5
   v_s:
-    lo: 0.55
-    hi: 0.65
+    lo: 0.0
+    hi: 1.5
   h_n:
-    lo: 5.5
-    hi: 6.5
+    lo: 1.0
+    hi: 10.0
   v_n:
-    lo: 5.5
-    hi: 6.5
+    lo: 1.0
+    hi: 10.0
   h_q:
-    lo: 0.99
+    lo: 0.9
     hi: 1.0
   v_q:
-    lo: 0.99
+    lo: 0.9
     hi: 1.0
   h_k:
-    lo: 0.9
-    hi: 1.1
+    lo: 0.3
+    hi: 5.0
   v_k:
-    lo: 0.9
-    hi: 1.1
+    lo: 0.3
+    hi: 5.0
   mouth_exponent:
-    lo: 3.0
-    hi: 6.0
+    lo: 2.0
+    hi: 12.0
 target:
   coverage_h_deg: 90.0
   coverage_v_deg: 60.0
@@ -110,4 +110,5 @@ search:
   budget: 144
   popsize: null
   tolfun: 0.001
+  infeasible_penalty: graded
 description: Cell native__ath_twinray_380 - native ATH TwinRay 380 control, brief

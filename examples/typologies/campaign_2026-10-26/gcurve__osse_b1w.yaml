@@ -1,0 +1,113 @@
+# Cell gcurve__osse_b1w - native OSSE with the OS-SE GUIDING CURVE on the b1w seed,
+# brief b1w_hifi_90x60_850_wide.
+# SOURCE: the ATH CORE / TwinRay construction (at-horns.eu; OS-SE Waveguide, M. Batik section 5):
+#   a superellipse mouth curve makes the coverage angle change with direction around the axis.
+#   type 1 = superellipse; the mesher requires a circular cross-section while a guiding curve
+#   is on, so exponent is pinned 2.0 and aspect_ratio 1.0.
+# RESEED: gcurve_type 1 (pinned), rot 0 (pinned), dist 0.5, se_n 4, aspect 0.7, width 335.0
+#   (b1w's measured mouth width); the underlying OSSE geometry is b1w's seed exactly
+#   (r0 18, a 30, L 140, n 4, s 0.7, q 0.995, k 1) with the rect Morph pinned to the
+#   335.0 x 291.3 mm seed mouth (shrinkage off). The curve only changes the outline;
+#   rate/corner/fixed are searched.
+# CHANGED vs b1w__osse_baseline: guiding curve switched ON; aspect_ratio 1.15 -> 1.0 (the
+#   mesher's guiding-curve requirement - the curve, not the cross-section, makes the wide
+#   mouth); exponent 4 -> 2; Morph switched on; L/a_deg/gcurve_* searched.
+# BOXES: campaign knob table intersected with families.KeySpec hard limits. L 0.4*140 = 56
+#   to the brief's 400 mm depth; gcurve width 0.3-1.1 x 335 = 100.5-368.5 mm; dist 0.2-0.9,
+#   se_n 2-8, aspect 0.4-1.6; morph rate 0.5-8, corner 0-80 mm, fixed 0-0.6.
+name: gcurve__osse_b1w
+family: OSSE
+seed_params:
+  r0_mm: 18.0
+  a_deg: 30.0
+  a0_deg: 2.5
+  L_mm: 140.0
+  n: 4.0
+  s: 0.7
+  q: 0.995
+  k: 1.0
+  exponent: 2.0
+  aspect_ratio: 1.0
+  gcurve_type: 1
+  gcurve_dist: 0.5
+  gcurve_rot_deg: 0.0
+  gcurve_se_n: 4.0
+  gcurve_aspect_ratio: 0.7
+  gcurve_width_mm: 335.0
+  morph_target: 1
+  morph_width_mm: 335.0
+  morph_height_mm: 291.3
+  morph_corner_mm: 16.5
+  morph_exponent: 4.0
+  morph_rate: 3.0
+  morph_fixed: 0.0
+  morph_allow_shrinkage: 0
+bounds:
+  r0_mm: {lo: 18.0, hi: 18.0, search: false}
+  a_deg: {lo: 10.0, hi: 80.0}
+  a0_deg: {lo: 2.5, hi: 2.5, search: false}
+  L_mm: {lo: 56.0, hi: 400.0}
+  n: {lo: 4.0, hi: 4.0, search: false}
+  s: {lo: 0.7, hi: 0.7, search: false}
+  q: {lo: 0.995, hi: 0.995, search: false}
+  k: {lo: 1.0, hi: 1.0, search: false}
+  exponent: {lo: 2.0, hi: 2.0, search: false}
+  aspect_ratio: {lo: 1.0, hi: 1.0, search: false}
+  gcurve_type: {lo: 1, hi: 1, search: false}
+  gcurve_dist: {lo: 0.2, hi: 0.9}
+  gcurve_rot_deg: {lo: 0.0, hi: 0.0, search: false}
+  gcurve_se_n: {lo: 2.0, hi: 8.0}
+  gcurve_aspect_ratio: {lo: 0.4, hi: 1.6}
+  gcurve_width_mm: {lo: 100.5, hi: 368.5}
+  morph_target: {lo: 1, hi: 1, search: false}
+  morph_width_mm: {lo: 335.0, hi: 335.0, search: false}
+  morph_height_mm: {lo: 291.3, hi: 291.3, search: false}
+  morph_corner_mm: {lo: 0.0, hi: 80.0}
+  morph_exponent: {lo: 4.0, hi: 4.0, search: false}
+  morph_rate: {lo: 0.5, hi: 8.0}
+  morph_fixed: {lo: 0.0, hi: 0.6}
+  morph_allow_shrinkage: {lo: 0, hi: 0, search: false}
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 300.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.0
+  f0_hz: 850.0
+  f0_v_hz: 1411.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 12000
+  dof_cap_verify: 12000
+  dof_cap_final: 12000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.15
+  seed: 1234
+  budget: 30
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+description: Native OSSE with an OS-SE superellipse guiding curve on the b1w seed, 90x60 target, 380x300x400 mm wide envelope, band 300-8000 Hz
+brief_file: ../../briefs/campaign_2026-10-26/b1w_hifi_90x60_850_wide.yaml
