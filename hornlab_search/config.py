@@ -684,6 +684,12 @@ def load_config(path, *, brief=None, cma_seed: int | None = None) -> Config:
             raise ConfigError(f"{where}: a generator config must have family: FREEFORM")
         if brief_d is None:
             raise ConfigError(f"{where}: a generator config needs a brief (brief_file: or --brief)")
+        # Opt-out from the f0 seed derivation (campaign 2026-10-26). ABSENT stays "derive",
+        # which is exactly today's behaviour and leaves config_sha byte-identical.
+        policy = gen.get("seed_policy", "derive")
+        if policy not in ("derive", "explicit"):
+            raise ConfigError(
+                f"{where}: generator.seed_policy must be 'derive' or 'explicit', got {policy!r}")
 
     _apply_brief_driver_pins(raw, brief_d, where, embedded=embedded_brief)
     if not embedded_brief:
@@ -756,7 +762,8 @@ def load_config(path, *, brief=None, cma_seed: int | None = None) -> Config:
         search=search,
         raw=raw,
         brief=brief_d,
-        generator=None if gen is None else dict(gen),
+        generator=None if gen is None else {
+            k: v for k, v in gen.items() if k != "seed_policy"},
         objective_version=objective_version,
         grid=grid_cfg,
         mounting=mounting_cfg,
@@ -885,9 +892,16 @@ def _derive_generator_geometry(raw: dict, target: dict, feas: dict) -> list:
     "clamped_to_bound" - widening stays owner-gated and is never automatic).
     Formula and native-family configs get an honest no-rule note; the feasibility
     record itself is family-independent.
+
+    ``generator.seed_policy: explicit`` skips the derivation entirely (the campaign uses
+    hand-measured seeds): seed_params and bounds are left untouched and one note records
+    the opt-out. Absent (or ``derive``) is the behaviour above, byte-for-byte.
     """
     notes: list = []
     gen = raw.get("generator")
+    if isinstance(gen, dict) and str(gen.get("seed_policy", "derive")) == "explicit":
+        notes.append({"knob": "-", "note": "seed_policy explicit: derivation skipped"})
+        return notes
     seed = raw.setdefault("seed_params", {})
     bounds = raw.setdefault("bounds", {})
     env_w = float(feas["envelope_mouth_w_mm"])

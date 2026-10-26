@@ -2,6 +2,13 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-26 (campaign Phase 0) - `generator.seed_policy` opt-out LANDED (impl-code1; absent = byte-identical)
+
+- **Why:** `_derive_generator_geometry` overwrites generator seeds from `target.f0_hz` on every campaign brief. Its rows constants are wrong for Salmon (1.88e5 vs measured 3.23e5 at stop 150) and its JMLC rule (geometric-mean mouth then fc-floor clamp) collapses Le Cleac'h seeds to ~313 mm round horns. The campaign needs hand-measured seeds without disabling the honest K-law feasibility record.
+- **Contract:** new optional `generator.seed_policy`, value `derive` (default; absent behaves exactly as today) or `explicit`. With `explicit`, `_derive_generator_geometry` returns before touching `seed_params` or `bounds`, keeps the feasibility block, and appends `{"knob": "-", "note": "seed_policy explicit: derivation skipped"}`. Anything else is a `ConfigError` naming `generator.seed_policy`. The directive stays in `raw` (so `config_sha` covers it) but is filtered out of `Config.generator` and defensively stripped in `registry.materialize`, so it can never reach a mesher config.
+- **Byte-identity:** `tests/test_config_seed_policy.py` pins the pre-change goldens for `salmon_elliptical` and `lecleach_rollback` under `examples/briefs/organic_rollback_14in.yaml` (seed_params, derivation notes, `config_sha` `9b5cc34de453` / `f2e29be7c418`); explicit keeps every YAML seed/bound and refuses bad values; a materializer spy proves the key is never passed through.
+- **Verification:** focused 10/10, adjacent config/derivation/design 90/90; standard gate green - compileall, catalog `--check`, `node --check` x8, offline suite **1626/0/0/0** (`runs/step2a/suite.xml`; 1607 baseline + 10 new + 9 from a concurrently-added untracked lane file, never staged). No GPU/Julia work.
+
 ## 2026-10-25 (late) - ATH FRAMEWORK PASS: native Morph on every family, `ath_core` + `ath_twinray_380`
 
 - **Morph surface:** `morph_*` (including `morph_exponent`, target 3) is legal for OSSE, R-OSSE, ICW and FREEFORM. The old FREEFORM `morph_target` refusal is gone; the mesher already supported it. Generated typologies opt in through the same knobs; an absent `morph_target` emits no morph keys and is byte-identical. The generator requires `mouth: ellipse` when native morph is active.

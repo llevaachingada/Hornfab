@@ -357,3 +357,7 @@ Added 2026-10-25 (ATH framework pass, local-only):
 - [ ] Open: exact CORE a(phi) law (needs a rows/generator extension); FREEFORM rectangle morph on an elliptical H/V base trips the mesher non-convex guard (measured); Mesh.Roundover / Ath Rollback / enclosure fidelity; an owner-approved morph campaign.
 - [x] Senior review 2026-10-26: morph_target 0..3 guard (R-3) + test; ATH lane committed; suite 1607/0/0/0.
 - [ ] Open (campaign 2026-10-26): Phase 0 code fixes (seed_policy explicit, target.f0_v_hz, ICW nested r0 pin, rows span half_xz), campaign briefs/configs, night runner, smoke night - handed off to another agent.
+
+Added 2026-10-26 (campaign Phase 0, implementation lane code-1):
+- [x] `generator.seed_policy: explicit`: skips the f0 seed/bounds derivation while keeping the K-law feasibility block; `derive`/absent is byte-identical (config_sha + derived seeds pinned). Validation refuses any other value as `generator.seed_policy`. Directive stripped before materialize/mesher. Tests `tests/test_config_seed_policy.py` (10/10); gate 1626/0/0/0 (`runs/step2a/suite.xml`).
+- [ ] Open (this lane next): ICW nested `icw_seed.r0_mm` WP2 driver pin (Step 2C). Other Phase 0 items (target.f0_v_hz, rows span half_xz, campaign configs, night runner) remain with their owning lanes.

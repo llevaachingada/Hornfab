@@ -236,6 +236,8 @@ def _anchors_rounded(m: P.Meridian, n: int, max_wall: float) -> list[list[float]
 
 def materialize(gen: dict, knobs: dict, brief: dict) -> dict:
     """(generator block, knobs, brief) -> FREEFORM params. Raises GeneratorError."""
+    # ``seed_policy`` is a config-load directive, not geometry; never let it into a recipe.
+    gen = {k: v for k, v in gen.items() if k != "seed_policy"}
     r0 = float(brief["driver"]["exit_radius_mm"])
     a0 = float(brief["driver"]["exit_angle_deg"])
     env = brief["envelope"]
