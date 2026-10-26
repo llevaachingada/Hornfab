@@ -2,16 +2,21 @@
 #
 # PURPOSE: campaign NATIVE control (docs/SOLVE_CAMPAIGN_PLAN_2026-10-26.md s3/s4). This is the
 #   shipped examples/briefs/ath_twinray_380_14in.yaml with the campaign analysis band
-#   (300-8000 Hz). It keeps objective.version 2 and carries NO f0_hz (published-dimension
-#   reconstruction, not a K-law mouth).
-# K-LAW ARITHMETIC: NOT APPLICABLE - the TwinRay 380 is a published 380 x 303 mm device
-#   (36-10-380 class), not a K-law target. The 700x600x320 envelope is intentionally larger
-#   than the datasheet seed so the search box is not clipped.
+#   (300-8000 Hz). objective.version 3 with per-plane f0: the published 380 x 303 mm mouth holds
+#   the 90 deg horizontal target from 25,400,000 / (380 * 90) = 743 Hz and the 60 deg vertical
+#   target from 25,400,000 / (303 * 60) = 1,397 Hz, so each plane is judged only where the
+#   published mouth can hold it.
+#   2026-10-26 senior review: scored for what this horn type is for; J not comparable with
+#   earlier results on this brief.
+# K-LAW ARITHMETIC: the f0 values above are K-law arithmetic applied to the PUBLISHED mouth
+#   dimensions; the device itself is a published 380 x 303 mm reconstruction (36-10-380 class),
+#   not a K-law design. The 700x600x320 envelope is intentionally larger than the datasheet seed
+#   so the search box is not clipped.
 # DRIVER CLASS: 1.4-inch member (35.56 mm exit, r0 = 17.78 mm), published 10 deg total throat
 #   angle -> 5 deg half-angle (throat_angle_policy: pin).
 # f11 DISCLOSURE: 1.4in f11 5,653 Hz: 5.7-8 kHz compares geometry, not the driver.
 name: native_twinray_380_14in
-description: Native ATH TwinRay 380 1.4-inch control, 90x60 target, 700x600x320 mm envelope, band 300-8000 Hz, objective v2
+description: Native ATH TwinRay 380 1.4-inch control, 90x60 target, 700x600x320 mm envelope, band 300-8000 Hz, objective v3 (f0 743 Hz, f0_v 1397 Hz)
 driver:
   exit_radius_mm: 17.78
   exit_angle_deg: 5.0
@@ -31,6 +36,8 @@ target:
   di_target_db: null
   di_slope_target: 0.0
   z_min: 0.0
+  f0_hz: 743.0
+  f0_v_hz: 1397.0
 weights:
   cov: 1.0
   rip: 1.0
@@ -41,4 +48,4 @@ weights:
 grid:
   verify_points_per_octave: 6
 objective:
-  version: 2
+  version: 3
