@@ -1,0 +1,48 @@
+# Brief: 90 x 90 deg, f0 650 Hz, 1.4-inch driver, mouth inside the 500 mm cap.
+# 2026-10-26 (owner): f0 raised from 565 to 650 Hz - a rounder design point that also buys VRAM
+# headroom, since the mouth shrinks with the higher break frequency.
+#
+# K-LAW SIZING:
+#   d = 25,400,000 / (f0 * coverage_deg) = 25,400,000/(650*90) = 434.2 mm
+#   That is comfortably inside the 500 mm cap (envelope carries 506 = 500 + 2 x 3 mm shell).
+#   For reference: 500 mm would only allow f0 564.4 Hz at 90 deg; 650 Hz wants 434 mm.
+#
+# MEASURED VRAM (stress ladder 2026-10-26, pure OSSE, epw 6, quarter, one 8 kHz solve):
+#   403 mm -> 7,644 tris -> 3,340 MB peak;  474 mm -> 10,402 tris -> 5,797 MB.
+#   A 434 mm mouth therefore lands near ~8,200 tris / ~4,000 MB at an 8 kHz top: comfortable,
+#   ~4 GB of headroom. It fits the 5,000-dof screen cap at 5.5-6 kHz and runs as a verify-tier
+#   search at 8 kHz.
+#
+# f11 = 100,250/17.78 = 5,638 Hz: above that the real driver is not a uniform cap, so the
+# 5.6-8 kHz region compares geometry, not driver behaviour.
+
+name: cap500_90x90_650hz_1p4in
+description: 90x90 waveguide, f0 650 Hz (434 mm mouth, inside the 500 mm cap), 1.4-inch, 506x506x450 envelope, band 500-8000 Hz
+driver:
+  exit_radius_mm: 17.78
+  exit_angle_deg: 15.5
+envelope:
+  max_mouth_w_mm: 506.0        # 500 mm cap: 500 + 2 x 3 mm shell
+  max_mouth_h_mm: 506.0
+  max_depth_mm: 450.0
+symmetry: axisymmetric
+source:
+  cap: auto
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 90.0
+  band_lo_hz: 500.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.0
+  f0_hz: 650.0                 # 25,400,000/(650*90) = 434.2 mm
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.2                 # a wide horn narrows above f0; keep the slope demand mild
+  flat: 0.5
+  load: 0.0
+objective:
+  version: 3

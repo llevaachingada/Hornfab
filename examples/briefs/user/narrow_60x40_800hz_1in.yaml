@@ -1,0 +1,54 @@
+# Brief: NARROW 60 x 40 deg, f0 800 Hz, 1-inch driver, no mouth cap.
+# 2026-10-26 (owner): "the 60 by 40 down to 800 hertz" - the low-frequency reach is wanted, so the
+# 500 mm cap is deliberately NOT applied here.
+#
+# K-LAW SIZING (why this is a big horn):
+#   V (binding): 25,400,000/(800*40) = 793.8 mm
+#   H:           25,400,000/(800*60) = 529.2 mm
+#   A 40 deg pattern at 800 Hz simply needs a ~794 mm mouth. Under the 500 mm cap the same pattern
+#   could only start at 1270 Hz (that is the separate cap500_60x40_1270hz_1in brief).
+#
+# MEASURED VRAM REALITY (stress ladder 2026-10-26, pure OSSE, epw 6, quarter, one 8 kHz solve):
+#   474 mm -> 10,402 tris -> 5,797 MB;  500 mm -> 11,516 tris -> 7,212 MB;
+#   550 mm -> 13,866 tris -> 7,397 MB;  635 mm -> 18,236 tris -> 7,501 MB (card saturated).
+#   A 794 mm mouth at an 8 kHz top extrapolates to roughly 28-29k tris, i.e. well past the 8,188 MB
+#   card: expect a CUDA OOM (the failure is a refused allocation, not hardware damage).
+#   The owner has accepted this: run it and let it fail if it fails. If a run is wanted to actually
+#   complete, drop band_hi to ~4 kHz (about 7,300 tris / ~3 GB) or use a larger-VRAM card.
+#
+# MOUTH-ANGLE CONSTRAINT (config side): a 40 deg V pattern needs a mouth WALL half-angle near
+# 20 deg, so a FREEFORM run of this brief needs mouthAngleDeg bounds around 12..35, not the
+# shipped 35..70 (which cannot make a 40 deg pattern at all).
+#
+# f11 = 100,250/12.7 = 7,894 Hz -> 7.9-8 kHz is above the driver's first cross mode.
+
+name: narrow_60x40_800hz_1in
+description: Narrow waveguide 60x40 H/V, f0 800 Hz, 1-inch, 540x810x420 mm envelope, band 500-8000 Hz (794 mm mouth; exceeds the 8 GB card at 8 kHz - accepted)
+driver:
+  exit_radius_mm: 12.7
+  exit_angle_deg: 5.0
+envelope:
+  max_mouth_w_mm: 540.0        # 529.2 + shell + margin
+  max_mouth_h_mm: 810.0        # 793.8 + shell + margin
+  max_depth_mm: 420.0
+symmetry: hv
+source:
+  cap: auto
+target:
+  coverage_h_deg: 60.0
+  coverage_v_deg: 40.0
+  band_lo_hz: 500.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.0
+  f0_hz: 800.0                 # 25,400,000/(800*40) = 793.8 mm on V
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+objective:
+  version: 3
