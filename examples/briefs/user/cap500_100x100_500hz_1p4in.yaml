@@ -1,0 +1,49 @@
+# Brief: WIDE, 100 x 100 deg, f0 500 Hz, 1.4-inch driver, mouth capped at 500 mm.
+# Created 2026-10-26 at the owner's direction: cap the mouth at 500 mm and take whatever
+# dispersion that geometry can support.
+#
+# THE CAP DRIVES THE COVERAGE (inverse K-law):
+#   coverage = K / (f0 * d),  K = 25,400,000 mm*deg*Hz
+#   at d = 500 mm and f0 = 500 Hz  ->  101.6 deg is the WIDEST this mouth can hold.
+#   100 x 100 is chosen just inside that limit (100 deg -> 508 mm at 500 Hz).
+#
+# DOF CLASS AT 8 kHz: a 500 mm mouth is ~9,900 quarter dofs (3000*(500/400)^2*(8000/5500)^2).
+#   That is above the 5,000 screen cap and under the 12,000 fused-CUDA cap, so this brief is a
+#   VERIFY-TIER / fused search at an 8 kHz top; at a 5.5 kHz top the same mouth is 4,688 dofs
+#   and fits the screen cap. The 8 kHz run should therefore carry solve.cuda_fused: true.
+#
+# f11 = 100,250/17.78 = 5,638 Hz: the 5.6-8 kHz region compares geometry, not driver behaviour.
+# A 100 deg pattern at 8 kHz from a 500 mm mouth is not physically defensible either - a 500 mm
+# mouth is 14.6 wavelengths at 8 kHz; the top of the band measures what the flare does, not a
+# constant 100 deg. Recorded so no run is read as a CD claim at the top octave.
+
+name: cap500_100x100_500hz_1p4in
+description: Wide 100x100 waveguide, f0 500 Hz, 1.4-inch, 500 mm mouth cap (540x540x450 envelope), band 500-8000 Hz, verify-tier at 8 kHz
+driver:
+  exit_radius_mm: 17.78
+  exit_angle_deg: 15.5
+envelope:
+  max_mouth_w_mm: 506.0        # TRUE 500 mm cap: 500 + 2 x 3 mm shell
+  max_mouth_h_mm: 506.0
+  max_depth_mm: 450.0
+symmetry: axisymmetric         # equal coverage in both planes
+source:
+  cap: auto
+target:
+  coverage_h_deg: 101.6        # 25,400,000/(500*101.6) = 500.0 mm exactly
+  coverage_v_deg: 101.6
+  band_lo_hz: 500.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.0
+  f0_hz: 500.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.2
+  flat: 0.5
+  load: 0.0
+objective:
+  version: 3

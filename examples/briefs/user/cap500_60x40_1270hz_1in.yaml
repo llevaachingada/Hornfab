@@ -1,0 +1,43 @@
+# Brief: NARROW, 60 x 40 deg, f0 1270 Hz, 1-inch driver, mouth capped at 500 mm.
+# Created 2026-10-26: the narrowest pattern a 500 mm mouth can hold. K-law inverse:
+#   V (binding): 25,400,000/(1270*40) = 500.0 mm    H: /(1270*60) = 333.3 mm
+#   The earlier 60x40 @880 Hz brief needed 722 mm on V and was 10 kHz/8 kHz infeasible;
+#   this keeps the 40 deg pattern by accepting f0 = 1270 Hz instead of 880.
+#
+# MOUTH-ANGLE CONSTRAINT (config side): a 40 deg V pattern needs a mouth WALL half-angle near
+# 20 deg, so a FREEFORM run of this brief needs mouthAngleDeg bounds around 15..35, not the
+# shipped 35..70 (which cannot make a 40 deg pattern at all).
+#
+# DOF CLASS AT 8 kHz: max mouth 500 mm -> ~9,900 quarter dofs (verify tier, fused-CUDA cap);
+#   4,688 dofs at 5.5 kHz (screen-ok). f11 (1-inch) 7,894 Hz -> 7.9-8 kHz compares geometry only.
+
+name: cap500_60x40_1270hz_1in
+description: Narrow 60x40 waveguide, f0 1270 Hz, 1-inch, 500 mm mouth cap (360x520x380 envelope), band 500-8000 Hz, verify-tier at 8 kHz
+driver:
+  exit_radius_mm: 12.7
+  exit_angle_deg: 5.0
+envelope:
+  max_mouth_w_mm: 360.0        # 333 + shell
+  max_mouth_h_mm: 520.0        # 500 + shell
+  max_depth_mm: 380.0
+symmetry: hv
+source:
+  cap: auto
+target:
+  coverage_h_deg: 60.0
+  coverage_v_deg: 40.0
+  band_lo_hz: 500.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.0
+  f0_hz: 1270.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+objective:
+  version: 3

@@ -1,0 +1,50 @@
+# Brief: WIDE dispersion 90 x 60 H/V, f0 500 Hz, 1.4-inch driver, analysis band 500-10000 Hz.
+# Rewritten 2026-10-26 (band top 8k -> 10k per owner) with the dof reality stated outright.
+#
+# K-LAW SIZING:  d = 25,400,000 / (f0 * coverage_total_deg)
+#   H: /(500*90) = 564.4 mm        V: /(500*60) = 846.7 mm        (V binds)
+#
+# *** DOF CLASS AT 10 kHz: NOT SOLVABLE ON THE 8 GB CARD ***
+#   Quarter dofs ~ 3000*(d/400)^2*(f/5500)^2. At d = 847 mm and 10 kHz that is ~44,000 dofs.
+#   The largest mouth that meshes at 10 kHz is 284 mm (5,000-dof screen cap) or 379 mm (8,900
+#   measured hard ceiling). This brief needs 847 mm on V, so at 10 kHz the solver will refuse
+#   nearly every candidate (mesh_too_large). What the search will do instead is SHRINK the mouth,
+#   which throws away the 500 Hz pattern control that defines this brief.
+#   A 500 Hz horn that CAN be analyzed to 10 kHz must be far wider: >= 180 deg gives d = 282 mm
+#   (180 deg -> 25,400,000/(500*180) = 282 mm), i.e. a hemispherical, very shallow device.
+#   Treat this file as the design target for a 500 Hz wide horn + a verify-tier aspiration, NOT a
+#   10 kHz screen search, until the mouth shrinks or the band top drops.
+#
+# f11 = 100,250/17.78 = 5,638 Hz: above that the real driver is not a uniform cap, so 5.6-10 kHz
+# compares geometry only. Disclosed.
+
+name: wide_90x60_500hz_1p4in
+description: Wide waveguide 90x60 H/V, f0 500 Hz, 1.4-inch, 620x900x450 mm envelope, analysis band 500-10000 Hz (10 kHz infeasible on 8 GB)
+driver:
+  exit_radius_mm: 17.78
+  exit_angle_deg: 15.5
+envelope:
+  max_mouth_w_mm: 620.0
+  max_mouth_h_mm: 900.0
+  max_depth_mm: 450.0
+symmetry: hv
+source:
+  cap: auto
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 500.0
+  band_hi_hz: 10000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.0
+  f0_hz: 500.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+objective:
+  version: 3

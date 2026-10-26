@@ -1,0 +1,39 @@
+# Brief: MID, 90 x 60 deg, f0 850 Hz, 1.4-inch driver, mouth capped at 500 mm.
+# Created 2026-10-26: the 90x60 horn that a 500 mm mouth can hold. K-law inverse:
+#   V (binding): 25,400,000/(850*60) = 498.0 mm   H: /(850*90) = 332.0 mm
+#   A 90x60 pattern at a 500 mm mouth requires f0 >= 847 Hz - hence 850 Hz, not 500.
+#
+# DOF CLASS AT 8 kHz: max mouth 498 mm -> ~9,800 quarter dofs (verify tier, fused-CUDA cap);
+#   4,650 dofs at a 5.5 kHz top (screen-ok). Use solve.cuda_fused: true for an 8 kHz run.
+# f11 (1.4-inch) 5,638 Hz -> 5.6-8 kHz compares geometry only.
+
+name: cap500_90x60_850hz_1p4in
+description: Mid 90x60 waveguide, f0 850 Hz, 1.4-inch, 500 mm mouth cap (360x520x400 envelope), band 500-8000 Hz, verify-tier at 8 kHz
+driver:
+  exit_radius_mm: 17.78
+  exit_angle_deg: 15.5
+envelope:
+  max_mouth_w_mm: 360.0        # 332 + shell
+  max_mouth_h_mm: 520.0        # 498 + shell
+  max_depth_mm: 400.0
+symmetry: hv
+source:
+  cap: auto
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 500.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.0
+  f0_hz: 850.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+objective:
+  version: 3
