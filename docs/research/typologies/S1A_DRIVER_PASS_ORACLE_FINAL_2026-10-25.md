@@ -10,6 +10,10 @@ selection/scoring guide text for readers. **Owner note (2026-10-25, on record):*
 suspects some min/max parameters may be OVER-CONSTRAINING the designs — to be re-examined in a
 later round (do not act on it in this pass; the bounds below are the landed decision).
 
+**Correction note (2026-10-26, campaign Phase 0 item 2E):** the biradial `widened_to_closure`
+widening is K-law-driven (reached 396.9/352.8 mm, past closure). The record below stays verbatim;
+this dated note is the only addition (see `docs/CONTINUITY.md` 2026-10-26).
+
 ---
 
 # S1a TYPOLOGY-COMPLETION REPAIR — FINAL DESIGN (decision-maker pass, 2026-10-25)
