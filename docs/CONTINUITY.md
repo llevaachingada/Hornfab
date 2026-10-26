@@ -2,6 +2,10 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-26 (night, later) - SANDBOX LAYOUT: 3D stays on screen while you drag
+
+- Owner: "adjust sliders and still see the 3D view", "3D larger", "more sliding space, less text on either side". The 3D figure is sticky (desktop: the larger left column, height max(340 px, 100vh - 150 px); narrow: pinned on top at max(240 px, 45vh)); sliders sit in their own column; side/front views below the 3D. One line per knob (name | long slider | value | reset), ~25 px instead of ~60; the min/max search-box inputs hide behind an 'edit search boxes' toggle (remembered); help paragraphs fold into 'how ... works' toggles; guiding-curve presets on their own line. Static-only change (refresh the page).
+
 ## 2026-10-26 (night) - WHY NO ATH-STYLE CREASES, AND THE FIX: the OS-SE guiding curve in the sandbox
 
 - **Owner question:** none of our typologies (incl. the TwinRay / CORE reconstructions) ever showed the puckered, lofted ridges of at-horns.eu's CORE / TwinRay / Opus; Morph was expected to make them and does not.

@@ -545,17 +545,21 @@ svg .iso-title { font-family: var(--f-body); font-size: 12px; font-weight: 600; 
 .sbox-knobs-list { display: grid; gap: 0; min-width: 0; }
 /* two lines per knob so the slider gets the full width: [name ... chips | reset] over
    [min | slider | value | max]; every row kind keeps the same 7-child order */
-.sbox-row { display: grid; grid-template-columns: 76px minmax(0, 1fr) 96px 76px;
-            grid-template-areas: "name name chips reset" "lo slider val hi";
-            gap: 4px 8px; align-items: center; padding: 7px 0; border-top: 1px solid var(--rule); font-size: 0.8rem; min-width: 0; }
+/* one line per knob: [name | long slider | value | reset]; the min/max search-box inputs and any
+   tags/chips sit on a second line only when present ("edit search boxes" shows the inputs) */
+.sbox-row { display: grid; grid-template-columns: minmax(64px, 118px) minmax(0, 1fr) 64px 22px;
+            grid-template-areas: "name slider val reset" "lo chips chips hi";
+            gap: 0 6px; align-items: center; padding: 1px 0; border-top: 1px solid var(--rule); font-size: 0.76rem; min-width: 0; }
 .sbox-row > :nth-child(1) { grid-area: name; }   .sbox-row > :nth-child(2) { grid-area: lo; }
 .sbox-row > :nth-child(3) { grid-area: slider; } .sbox-row > :nth-child(4) { grid-area: hi; }
 .sbox-row > :nth-child(5) { grid-area: val; }    .sbox-row > :nth-child(6) { grid-area: chips; }
 .sbox-row > :nth-child(7) { grid-area: reset; justify-self: end; }
+.sbox-knobs-list:not(.edit-boxes) [data-role="lo"], .sbox-knobs-list:not(.edit-boxes) [data-role="hi"] { display: none; }
+.sbox-chips:empty, .sbox-row > span:empty { display: none; }
 .sbox-knobs-list .sbox-row:first-child { border-top: none; }
 .sbox-kname { font-size: 0.78rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: help; }
-.sbox-num { font-family: var(--f-mono); font-size: 0.78rem; background: var(--bg); color: var(--ink);
-            border: 1px solid var(--rule); border-radius: 5px; padding: 4px 6px; width: 100%;
+.sbox-num { font-family: var(--f-mono); font-size: 0.74rem; background: var(--bg); color: var(--ink);
+            border: 1px solid var(--rule); border-radius: 4px; padding: 1px 4px; width: 100%;
             text-align: right; font-variant-numeric: tabular-nums; min-width: 0; }
 .sbox-num:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
 .sbox-slider { width: 100%; accent-color: var(--accent); min-width: 0; }
@@ -578,14 +582,29 @@ svg .iso-title { font-family: var(--f-body); font-size: 12px; font-weight: 600; 
 .sbox-fixtag { font-size: 0.74rem; text-align: center; white-space: nowrap; }
 .sbox-box { font-family: var(--f-mono); font-size: 0.72rem; text-align: center; white-space: nowrap; }
 .sbox-fixed .sbox-kname, .sbox-morph .sbox-kname { color: var(--muted); }
-.sbox-morph-card { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--rule); }
+.sbox-morph-card { margin-top: 8px; padding-top: 6px; border-top: 1px solid var(--rule); }
+.sbox-knobs-card { padding: 10px 12px; }
+.sbox-knobs-card .fig-head h3, .sbox-morph-card .fig-head h3 { margin: 0; font-size: 0.95rem; }
+.sbox-help { margin: 2px 0 4px; font-size: 0.78rem; }
+.sbox-help summary { cursor: pointer; color: var(--muted); font-size: 0.74rem; }
+.sbox-help p { margin: 4px 0 0; }
+.sbox-presets { font-size: 0.74rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin: 2px 0 4px; }
+/* keep the 3D view on screen while the sliders scroll: sliders in one column, the views pinned
+   in the other (desktop); on a narrow window the 3D view sticks to the top above the sliders */
+.sbox-grid { grid-template-columns: minmax(0, 1.35fr) minmax(340px, 1fr);
+             grid-template-areas: "view knobs" "side knobs" "front knobs"; align-items: start; }
+.sbox-3d-fig { grid-area: view; position: sticky; top: 8px; z-index: 3; }
+.sbox-3d-fig .sbox-3dwrap { height: max(340px, calc(100vh - 150px)); }
+.sbox-knobs-card { grid-area: knobs; }
+.sbox-side-fig { grid-area: side; }
+.sbox-front-fig { grid-area: front; }
 .sbox-morph-card[hidden], #sbox-3dwarn[hidden] { display: none; }
 .sbox-val { font-family: var(--f-mono); font-size: 0.78rem; color: var(--label); text-align: right;
             white-space: nowrap; font-variant-numeric: tabular-nums; }
 /* at-limit: the evolution knob mark's own wordless red ("red = pressed against a limit") */
 .sbox-val.at-limit { color: var(--bad); }
 .sbox-chips { display: flex; flex-wrap: wrap; gap: 4px; min-width: 0; justify-content: flex-end; }
-.sbox-reset { font-size: 0.78rem; padding: 3px 8px; border-radius: 4px; justify-self: end; }
+.sbox-reset { font-size: 0.72rem; padding: 0 6px; line-height: 1.5; border-radius: 4px; justify-self: end; }
 .sbox-knobs-list + .hint { margin-top: 8px; }
 .sbox-applied, .sbox-rejected { margin: 6px 0 0; padding-left: 1.3em; font-size: 0.82rem; display: grid; gap: 2px; }
 .sbox-notes { font-family: var(--f-mono); font-size: 0.74rem; color: var(--muted); display: grid; gap: 2px;
@@ -594,7 +613,10 @@ svg .iso-title { font-family: var(--f-body); font-size: 12px; font-weight: 600; 
                overflow: hidden; background: var(--viz-canvas, #e9edf0); }
 .sbox-3dwrap canvas { display: block; }
 @media (max-width: 1100px) {
-  .sbox-grid { grid-template-columns: minmax(0, 1fr); }
+  .sbox-grid { grid-template-columns: minmax(0, 1fr); grid-template-areas: "view" "knobs" "side" "front"; }
+  .sbox-3d-fig { top: 0; padding: 6px 8px; box-shadow: 0 6px 12px -8px rgba(0, 0, 0, 0.6); }
+  .sbox-3d-fig .cap { display: none; }
+  .sbox-3d-fig .sbox-3dwrap { height: max(240px, 45vh); }
 }
 @media (max-width: 760px) {
   .sbox-row { grid-template-columns: 64px minmax(0, 1fr) 80px 64px; }

@@ -384,6 +384,7 @@ def test_sandbox_css_block_present_and_reduced_motion_guarded():
     assert m, "the slider row rule is missing"
     # the row grid collapses on narrow screens instead of scrolling sideways
     assert css.count("@media (max-width: 760px)") >= 1
-    # 2026-10-26: every row is two lines at every width -- the name/chips line spans the row and
-    # the slider gets its own full-width line, so nothing scrolls sideways
-    assert 'grid-template-areas: "name name chips reset" "lo slider val hi";' in css
+    # 2026-10-26: one compact line per knob (name | long slider | value | reset); the search-box
+    # inputs and chips drop to a second line only when shown, so nothing scrolls sideways
+    assert 'grid-template-areas: "name slider val reset" "lo chips chips hi";' in css
+    assert ".sbox-3d-fig { grid-area: view; position: sticky;" in css     # 3D stays on screen

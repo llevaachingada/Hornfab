@@ -1012,18 +1012,18 @@ export async function viewTypologySandbox(root, configName) {
       <span id="sbox-notes" class="muted" style="font-size:0.74rem"></span>
     </div>
     <div class="sbox-grid">
-      <div class="fig">
+      <div class="fig sbox-side-fig">
         <h3>Side view: wall cross-section</h3>
         <div class="cap">Horizontal plane right, vertical plane mirrored left, throat at the bottom (mm). Filled band = wall thickness.</div>
         <svg id="sbox-side"></svg>
       </div>
-      <div class="fig">
+      <div class="fig sbox-front-fig">
         <h3>Front view: mouth outline</h3>
         <div class="cap">Mouth ring (mm); dashed: the brief's size envelope.</div>
         <div id="sbox-frontnote" class="cap muted" hidden></div>
         <svg id="sbox-front"></svg>
       </div>
-      <div class="fig">
+      <div class="fig sbox-3d-fig">
         <div class="fig-head">
           <h3>3D shape</h3>
           <label class="evo-opt" title="the same persisted wall-shadows toggle as every other 3D view">
@@ -1033,16 +1033,17 @@ export async function viewTypologySandbox(root, configName) {
         <div class="cap warn-text" id="sbox-3dwarn" hidden></div>
         <div id="sbox-3d" data-v3d class="sbox-3dwrap"><div class="view3d-fallback">loading…</div></div>
       </div>
-      <div class="card" id="sbox-slider-card">
+      <div class="card sbox-knobs-card" id="sbox-slider-card">
         <div class="fig-head">
           <h3>Shape parameters</h3>
           <span class="btn-row">
             <span id="sbox-save-hint" class="muted" style="font-size:0.76rem"></span>
+            <label class="evo-opt" title="show the min / max boxes that set each knob's search box (the band on the slider)"><input type="checkbox" id="sbox-editbox"> edit search boxes</label>
             <label class="evo-opt" title="on: sliders move only inside each search box and fixed knobs stay at the run's values (what a search can reach); off: a free sandbox — any value, type it in the value box"><input type="checkbox" id="sbox-limit"${limited ? " checked" : ""}> search limits only</label>
             <button id="sbox-save" class="primary" ${entries.length ? "" : "disabled"}>Save bounds</button>
           </span>
         </div>
-        <p class="cap muted"><b>Free sandbox</b> (switch off): drag any slider or type any value in the value box — sliders reach well past what a search explores. <b>Search limits only</b> (switch on): sliders stay inside the search box and fixed knobs stay at the run's values. The shaded band on each track is the <b>search box</b> (the range a run explores); edit it with the min / max boxes, ↺ restores the published box, and Save writes edited boxes to the typology's YAML. Rows marked <b>fixed</b> are held constant by a run; you can still explore them here.</p>
+        <details class="sbox-help"><summary>how the sliders work</summary><p class="cap muted"><b>Free sandbox</b> (switch off): drag any slider or type any value in the value box — sliders reach well past what a search explores. <b>Search limits only</b> (switch on): sliders stay inside the search box and fixed knobs stay at the run's values. The shaded band on each track is the <b>search box</b> (the range a run explores); edit it with the min / max boxes, ↺ restores the published box, and Save writes edited boxes to the typology's YAML. Rows marked <b>fixed</b> are held constant by a run; you can still explore them here.</p></details>
         <div id="sbox-knobs" class="sbox-knobs-list">${entries.map(e => sliderRowHtml({
           key: e.key, doc: e.doc, catalog: catalogBounds[e.key], bounds: rowBounds[e.key],
           value: knobs[e.key], edited: false, explore: limited ? null : explore[e.key],
@@ -1273,7 +1274,7 @@ export async function viewTypologySandbox(root, configName) {
           </select></label>
           <label class="evo-opt" title="without this, a target smaller than the horn's own mouth changes nothing (the mesher's rule)"><input type="checkbox" data-role="mshrink"${morph.shrink ? " checked" : ""}> allow shrinking</label>
         </span></div>
-      <p class="cap muted">Ath Morph reshapes the mouth outline toward a target (rectangle / circle / superellipse) over the last part of the horn. Width and height are the FULL target mouth. Tick <b>search</b> to add a knob to this typology's search; Save writes it to the YAML with the target shape fixed for the run (a run should not flip shapes).</p>
+      <details class="sbox-help"><summary>what Morph does</summary><p class="cap muted">Ath Morph reshapes the mouth outline toward a target (rectangle / circle / superellipse) over the last part of the horn. Width and height are the FULL target mouth. Tick <b>search</b> to add a knob to this typology's search; Save writes it to the YAML with the target shape fixed for the run (a run should not flip shapes).</p></details>
       ${on ? `<div class="sbox-knobs-list">${morphKnobs.map(m => morphRowHtml(m, morph.vals[m.key], morph.search.has(m.key), limited)).join("")}</div>`
            : `<p class="muted" style="font-size:0.8rem">Pick a target shape to start.</p>`}`;
   }
@@ -1337,7 +1338,8 @@ export async function viewTypologySandbox(root, configName) {
             ${GCURVE_SPEC.targets.map(([v, n]) => `<option value="${v}"${Number(v) === gc.type ? " selected" : ""}>${n}</option>`).join("")}
           </select></label>
         </span></div>
-      <p class="cap muted">A closed curve part-way along the horn whose shape sets the coverage angle in <b>every</b> direction, not just horizontal and vertical. While it is on, the cross-section is held circular (exponent 2, aspect 1 — the mesher's rule; use the curve's own height / width). Pinched or pointed superformula lobes make the wall flare differently per direction, which folds it into the creases on Ath's CORE / TwinRay horns — add a <b>rectangle Morph</b> for the square mouth. Presets: ${GCURVE_SPEC.presets.map((pr, i) => `<button type="button" class="sbox-reset" data-role="gcpreset" data-i="${i}">${esc(pr.name)}</button>`).join(" ")}</p>
+      <details class="sbox-help"><summary>what the guiding curve does</summary><p class="cap muted">A closed curve part-way along the horn whose shape sets the coverage angle in <b>every</b> direction, not just horizontal and vertical. While it is on, the cross-section is held circular (exponent 2, aspect 1 — the mesher's rule; use the curve's own height / width). Pinched or pointed superformula lobes make the wall flare differently per direction, which folds it into the creases on Ath's CORE / TwinRay horns — add a <b>rectangle Morph</b> for the square mouth.</p></details>
+      <div class="sbox-presets">presets ${GCURVE_SPEC.presets.map((pr, i) => `<button type="button" class="sbox-reset" data-role="gcpreset" data-i="${i}">${esc(pr.name)}</button>`).join(" ")}</div>
       ${on ? `<div class="sbox-knobs-list">${ks.map(k => morphRowHtml(k, gc.vals[k.key], gc.search.has(k.key), limited)).join("")}</div>`
            : `<p class="muted" style="font-size:0.8rem">Pick a curve type or a preset to start.</p>`}`;
   }
@@ -1635,6 +1637,15 @@ export async function viewTypologySandbox(root, configName) {
   });
 
   // ── the free / search-limits switch ───────────────────────────────────────────────
+  const editBoxEl = document.getElementById("sbox-editbox");
+  if (editBoxEl) {
+    try { editBoxEl.checked = localStorage.getItem("hl-sbox-editbox") === "1"; } catch { /* default off */ }
+    knobsEl.classList.toggle("edit-boxes", editBoxEl.checked);
+    editBoxEl.addEventListener("change", () => {
+      knobsEl.classList.toggle("edit-boxes", editBoxEl.checked);
+      try { localStorage.setItem("hl-sbox-editbox", editBoxEl.checked ? "1" : "0"); } catch { /* private */ }
+    });
+  }
   const limitEl = document.getElementById("sbox-limit");
   if (limitEl) limitEl.addEventListener("change", () => {
     limited = limitEl.checked;
