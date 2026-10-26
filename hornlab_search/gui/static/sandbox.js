@@ -178,6 +178,37 @@ export const GCURVE_SPEC = {
   ],
 };
 
+/** Ath CORE's PER-DIRECTION law (OSSE): the wall angle and the mouth termination written as
+ *  functions of the azimuth p, exactly as at-horns.eu/core.html does it:
+ *    a(p) = a_deg + amp_sf * SF(p) + amp_cos * |cos p|^pow,  n(p) = n + amp_n cos^2 p,
+ *    s(p) = s + amp_s cos^2 p.  Diagonals that open wider than H/V fold the walls into creases. */
+export const AZLAW_SPEC = {
+  title: "Per-direction law (Ath CORE)",
+  knobs: [
+    { key: "az_a_sf_amp", lo: -60, hi: 60, step: "0.5", label: "superformula amplitude on the wall angle, deg" },
+    { key: "az_sf_m", lo: 4, hi: 12, step: "4", label: "lobes m (multiples of 4)" },
+    { key: "az_sf_n1", lo: 0.5, hi: 40, step: "0.1", label: "n1: overall sharpness (large = flatter)" },
+    { key: "az_sf_n2", lo: 0.5, hi: 40, step: "0.1", label: "n2: sharpness toward horizontal" },
+    { key: "az_sf_n3", lo: 0.5, hi: 40, step: "0.1", label: "n3: sharpness toward vertical" },
+    { key: "az_sf_a", lo: 0.2, hi: 3, step: "0.01", label: "a: horizontal scale" },
+    { key: "az_sf_b", lo: 0.2, hi: 3, step: "0.01", label: "b: vertical scale (< 1 narrows V)" },
+    { key: "az_a_cos_amp", lo: -40, hi: 40, step: "0.5", label: "|cos p|^pow amplitude, deg (trims near horizontal)" },
+    { key: "az_a_cos_pow", lo: 1, hi: 20, step: "0.5", label: "power of that term (higher = narrower sector)" },
+    { key: "az_n_cos2_amp", lo: -5, hi: 5, step: "0.05", label: "termination n: extra in horizontal (cos² p)" },
+    { key: "az_s_cos2_amp", lo: -0.5, hi: 0.5, step: "0.01", label: "termination s: extra in horizontal (cos² p)" },
+  ],
+  core: { az_a_sf_amp: 35, az_sf_m: 4, az_sf_n1: 12, az_sf_n2: 15, az_sf_n3: 16, az_sf_a: 1,
+          az_sf_b: 0.618, az_a_cos_amp: -15, az_a_cos_pow: 10, az_n_cos2_amp: 1.5, az_s_cos2_amp: 0.23 },
+  coreRows: { a_deg: 5, n: 6, s: 0.6 },
+};
+
+/** "crease this horn": CORE's law shape, with a_deg moved so the horizontal angle stays put
+ *  (at p = 0 the superformula is 1/a^... = 1 and |cos p| = 1, so a(0) = a_deg + amp_sf + amp_cos). */
+export function creasePreset(currentA) {
+  const v = { ...AZLAW_SPEC.core, az_a_sf_amp: 30, az_a_cos_amp: -10, az_n_cos2_amp: 0, az_s_cos2_amp: 0 };
+  return { vals: v, a_deg: rndNum(Number(currentA) - v.az_a_sf_amp - v.az_a_cos_amp) };
+}
+
 /** The knobs of a guiding-curve type (pure). */
 export const gcurveKnobsFor = type => GCURVE_SPEC.knobs.filter(k => k.types.includes(Number(type)));
 
@@ -951,6 +982,8 @@ export async function viewTypologySandbox(root, configName) {
   const morph = { target: 0, shrink: 0, vals: {}, search: new Set(), capable: false };
   const gcOffered = !declared.has("gcurve_type");
   const gc = { type: 0, vals: {}, search: new Set(), capable: false };
+  const azOffered = !declared.has("az_a_sf_amp");
+  const az = { on: false, vals: {}, search: new Set(), capable: false };
   // the switch: FREE sandbox (any value) vs SEARCH LIMITS (only what a run can reach); per typology
   const LIMIT_KEY = "hl-sbox-limit:" + configName;
   let limited = false;
@@ -976,6 +1009,9 @@ export async function viewTypologySandbox(root, configName) {
   if (limited) {
     for (const e of entries) knobs[e.key] = clampKnob(knobs[e.key], rowBounds[e.key].lo, rowBounds[e.key].hi);
     for (const f of fixedEntries) fixedVals[f.key] = f.pinned;
+  }
+  if (q.knobs && azOffered) {
+    for (const k of AZLAW_SPEC.knobs) if (typeof q.knobs[k.key] === "number") { az.vals[k.key] = q.knobs[k.key]; az.on = true; }
   }
   if (q.knobs && gcOffered) {
     if (typeof q.knobs.gcurve_type === "number") gc.type = Math.round(q.knobs.gcurve_type);
@@ -1050,6 +1086,7 @@ export async function viewTypologySandbox(root, configName) {
         })).join("") || `<p class="muted">This typology has no searchable shape parameters — its geometry is authored outside the knob search.</p>`}${fixedEntries.map(f => fixedRowHtml({ ...f, value: fixedVals[f.key], locked: limited })).join("")}</div>
         <div id="sbox-morph" class="sbox-morph-card" hidden></div>
         <div id="sbox-gcurve" class="sbox-morph-card" hidden></div>
+        <div id="sbox-azlaw" class="sbox-morph-card" hidden></div>
         <div id="sbox-save-msg" class="hint" aria-live="polite"></div>
         <div id="sbox-save-result" style="margin-top:8px"></div>
       </div>
@@ -1097,6 +1134,9 @@ export async function viewTypologySandbox(root, configName) {
     for (const f of fixedEntries) {
       if (fixedVals[f.key] === f.pinned) continue;               // unchanged: the config's own value
       o[f.key] = f.list && !forUrl ? [fixedVals[f.key]] : fixedVals[f.key];
+    }
+    if (azOffered && az.on) {
+      for (const k of AZLAW_SPEC.knobs) if (typeof az.vals[k.key] === "number") o[k.key] = az.vals[k.key];
     }
     if (gcOffered && gc.type > 0) {
       // the mesher solves the coverage angle against the guiding curve, so the cross-section
@@ -1164,6 +1204,7 @@ export async function viewTypologySandbox(root, configName) {
     if (cap3d && payload.quadrants) cap3d.textContent = shapeCaption(payload.quadrants);
     if (payload.morph_capable && morphOffered && !morph.capable) { morph.capable = true; renderMorph(); }
     if (payload.gcurve_capable && gcOffered && !gc.capable) { gc.capable = true; renderGc(); }
+    if (payload.gcurve_capable && azOffered && !az.capable) { az.capable = true; renderAz(); }
     const notes = Array.isArray(payload.notes) ? payload.notes.filter(Boolean) : [];
     if (notesEl) notesEl.textContent = notes.length ? notes.join(" · ") : "";
   }
@@ -1382,6 +1423,79 @@ export async function viewTypologySandbox(root, configName) {
       gcChanged(false);
     });
   }
+  // ── Per-direction law card (OSSE; Ath CORE's own construction) ─────────────────────────
+  const azEl = document.getElementById("sbox-azlaw");
+  function setRowKnob(key, v) {                       // a preset may move a_deg / n / s rows
+    if (key in knobs) { knobs[key] = v; explore[key] = { lo: Math.min(explore[key].lo, v), hi: Math.max(explore[key].hi, v) }; repaintRow(key); }
+    else if (key in fixedVals) { fixedVals[key] = v; const f = fixedEntries.find(x => x.key === key); const row = rowEl(key); if (f && row) row.outerHTML = fixedRowHtml({ ...f, value: v, locked: limited }); }
+  }
+  function renderAz() {
+    if (!azEl || !az.capable) return;
+    azEl.hidden = false;
+    azEl.innerHTML = `<div class="fig-head"><h3>${esc(AZLAW_SPEC.title)}</h3>
+        <span class="btn-row"><label class="evo-opt">law <select data-role="azon" aria-label="per-direction law on or off">
+          <option value="0"${az.on ? "" : " selected"}>off</option><option value="1"${az.on ? " selected" : ""}>on</option></select></label></span></div>
+      <details class="sbox-help"><summary>what the per-direction law does</summary><p class="cap muted">Ath CORE writes the wall angle and the mouth termination as functions of the direction around the horn: <span class="mono">a(p) = a_deg + amp·SF(p) + amp·|cos p|^pow</span>, <span class="mono">n(p) = n + amp·cos²p</span>, <span class="mono">s(p) = s + amp·cos²p</span>. While it is on, <b>a_deg is the base</b> the terms add to. Diagonals that open wider than horizontal / vertical fold the walls into Ath's creases; a rectangle Morph squares the mouth. Tick <b>search</b> to add a knob to this typology's runs.</p></details>
+      <div class="sbox-presets">presets <button type="button" class="sbox-reset" data-role="azpreset" data-p="core">Ath CORE (published)</button> <button type="button" class="sbox-reset" data-role="azpreset" data-p="crease">crease this horn</button></div>
+      ${az.on ? `<div class="sbox-knobs-list">${AZLAW_SPEC.knobs.map(k => morphRowHtml(k, az.vals[k.key], az.search.has(k.key), limited)).join("")}</div>` : ""}`;
+  }
+  function applyAzPreset(which) {
+    if (which === "core") {
+      Object.assign(az.vals, AZLAW_SPEC.core);
+      for (const [k, v] of Object.entries(AZLAW_SPEC.coreRows)) setRowKnob(k, v);
+    } else {
+      const pr = creasePreset(knobs.a_deg ?? fixedVals.a_deg ?? 30);
+      Object.assign(az.vals, pr.vals);
+      setRowKnob("a_deg", pr.a_deg);
+    }
+    az.on = true;
+    renderAz(); gcChanged(true);
+  }
+  if (azEl) {
+    azEl.addEventListener("click", ev => {
+      const b = ev.target.closest('[data-role="azpreset"]');
+      if (b) applyAzPreset(b.dataset.p);
+    });
+    azEl.addEventListener("change", ev => {
+      const role = ev.target.dataset.role;
+      if (role === "azon") {
+        az.on = ev.target.value === "1";
+        if (az.on && typeof az.vals.az_a_sf_amp !== "number") { applyAzPreset("crease"); return; }
+        renderAz(); gcChanged(true); return;
+      }
+      const row = ev.target.closest(".sbox-row");
+      if (!row) return;
+      if (role === "msearch") {
+        if (ev.target.checked) az.search.add(row.dataset.key); else az.search.delete(row.dataset.key);
+        renderAz(); refreshSave(); return;
+      }
+      if (role === "slider") gcChanged(true);
+      if (role === "val") {
+        const v = Number(String(ev.target.value).replace(",", "."));
+        if (isFinite(v)) { az.vals[row.dataset.key] = v; renderAz(); gcChanged(true); }
+      }
+    });
+    azEl.addEventListener("input", ev => {
+      if (ev.target.dataset.role !== "slider") return;
+      const row = ev.target.closest(".sbox-row");
+      const k = AZLAW_SPEC.knobs.find(x => x.key === row.dataset.key);
+      az.vals[k.key] = Number(ev.target.value);
+      setValText(row.querySelector('[data-role="val"]'), fmtKnobValue(az.vals[k.key], k.lo, k.hi));
+      gcChanged(false);
+    });
+  }
+  function azAdds() {
+    if (!az.on || !az.search.size) return {};
+    const add = {};
+    for (const k of AZLAW_SPEC.knobs) {
+      const v = az.vals[k.key];
+      if (typeof v !== "number") continue;
+      add[k.key] = az.search.has(k.key) && k.key !== "az_sf_m"
+        ? { ...morphSearchBox(v, k.lo, k.hi), seed: v } : { lo: v, hi: v, seed: v, pinned: true };
+    }
+    return add;
+  }
+
   function gcAdds() {
     if (!(gc.type > 0) || !gc.search.size) return {};
     const add = { gcurve_type: { lo: gc.type, hi: gc.type, seed: gc.type, pinned: true } };
@@ -1466,7 +1580,8 @@ export async function viewTypologySandbox(root, configName) {
   function refreshSave(face) {
     const changed = collectChangedBounds(catalogBounds, rowBounds);
     const n = Object.keys(changed).length + (Object.keys(morphAdds()).length ? morph.search.size : 0)
-      + (Object.keys(gcAdds()).length ? gc.search.size : 0);
+      + (Object.keys(gcAdds()).length ? gc.search.size : 0)
+      + (Object.keys(azAdds()).length ? az.search.size : 0);
     if (face != null) saveBtn.textContent = face;
     saveBtn.disabled = armed ? false : (n === 0 || backendDark);
     saveBtn.title = armed ? "click again to confirm the write"
@@ -1496,7 +1611,7 @@ export async function viewTypologySandbox(root, configName) {
     armed = false;
     if (armTimer) { clearTimeout(armTimer); armTimer = null; }
     const changed = collectChangedBounds(catalogBounds, rowBounds);
-    const adds = { ...morphAdds(), ...gcAdds() };
+    const adds = { ...morphAdds(), ...gcAdds(), ...azAdds() };
     saveBtn.textContent = "Save bounds";
     if (!Object.keys(changed).length && !Object.keys(adds).length) { refreshSave(); return; }
     saveBtn.disabled = true;
@@ -1661,6 +1776,7 @@ export async function viewTypologySandbox(root, configName) {
     })).join("") + fixedEntries.map(f => fixedRowHtml({ ...f, value: fixedVals[f.key], locked: limited })).join("");
     renderMorph();
     renderGc();
+    renderAz();
     request2d(timingDecision(slowNow, "release"));
     arm3d(); writeUrl();
   });

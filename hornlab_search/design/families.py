@@ -96,8 +96,83 @@ _GCURVE = {
     "gcurve_sf_n3": _f(section="gcurve"),
 }
 
+# Per-azimuth ("per-direction") OSSE laws, the Ath CORE construction (at-horns.eu/core.html):
+#   a(p) = a_deg + az_a_sf_amp * SF(p) + az_a_cos_amp * |cos p|^az_a_cos_pow
+#   n(p) = n + az_n_cos2_amp * cos^2 p          s(p) = s + az_s_cos2_amp * cos^2 p
+# with the Gielis superformula SF(p) = (|cos(m p/4)/a|^n2 + |sin(m p/4)/b|^n3)^(-1/n1).
+# CORE itself is a_deg 5, sf amp 35 (m 4, n1 12, n2 15, n3 16, a 1, b 0.618), cos amp -15 pow 10,
+# n 6 + 1.5 cos^2, s 0.6 + 0.23 cos^2 -> a = 25.0 / 33.8 / 23.4 deg at p = 0 / 45 / 90 deg: the
+# wider diagonals fold the walls into the creases. These keys never reach the mesher as keys:
+# to_mesher_config turns them into the mesher's own p-expressions for a, n and s. All absent or
+# zero = the plain numeric a/n/s (byte-identical). m is a multiple of 4 so every law keeps the
+# quarter-model mirror symmetry.
+_AZLAW = {
+    "az_a_sf_amp": _f(-60.0, 60.0, "superformula term amplitude on the wall angle a, deg", section="azlaw"),
+    "az_sf_m": _f(4.0, 12.0, "superformula lobes m (a multiple of 4)", section="azlaw"),
+    "az_sf_n1": _f(0.1, 40.0, "superformula n1 (overall sharpness)", section="azlaw"),
+    "az_sf_n2": _f(0.1, 40.0, "superformula n2 (cosine-term exponent)", section="azlaw"),
+    "az_sf_n3": _f(0.1, 40.0, "superformula n3 (sine-term exponent)", section="azlaw"),
+    "az_sf_a": _f(0.05, 5.0, "superformula a (cosine-term scale)", section="azlaw"),
+    "az_sf_b": _f(0.05, 5.0, "superformula b (sine-term scale)", section="azlaw"),
+    "az_a_cos_amp": _f(-60.0, 60.0, "|cos p|^pow term amplitude on a, deg", section="azlaw"),
+    "az_a_cos_pow": _f(0.5, 40.0, "|cos p| exponent of that term", section="azlaw"),
+    "az_n_cos2_amp": _f(-10.0, 10.0, "cos^2 p term on the termination n", section="azlaw"),
+    "az_s_cos2_amp": _f(-1.0, 1.0, "cos^2 p term on the termination s", section="azlaw"),
+}
+AZLAW_DEFAULTS = {"az_sf_m": 4.0, "az_sf_n1": 2.0, "az_sf_n2": 2.0, "az_sf_n3": 2.0,
+                  "az_sf_a": 1.0, "az_sf_b": 1.0, "az_a_cos_pow": 2.0}
+
+
+def _num(v: float) -> str:
+    return repr(float(v))
+
+
+def azlaw_expressions(params: dict) -> dict:
+    """The mesher p-expressions for a / n / s from the az_* knobs (radians, Python syntax the
+    mesher's expression evaluator accepts). Returns {} when every az amplitude is 0/absent."""
+    g = {**AZLAW_DEFAULTS, **{k: v for k, v in params.items() if k in _AZLAW}}
+    amp_sf = float(g.get("az_a_sf_amp", 0.0))
+    amp_cos = float(g.get("az_a_cos_amp", 0.0))
+    amp_n = float(g.get("az_n_cos2_amp", 0.0))
+    amp_s = float(g.get("az_s_cos2_amp", 0.0))
+    out: dict = {}
+    if amp_sf or amp_cos:
+        terms = [_num(params.get("a_deg", 60.0))]
+        if amp_sf:
+            m4 = _num(float(g["az_sf_m"]) / 4.0)
+            sf = (f"(abs(cos({m4}*p)/{_num(g['az_sf_a'])})**{_num(g['az_sf_n2'])} + "
+                  f"abs(sin({m4}*p)/{_num(g['az_sf_b'])})**{_num(g['az_sf_n3'])})"
+                  f"**({_num(-1.0 / float(g['az_sf_n1']))})")
+            terms.append(f"{_num(amp_sf)}*{sf}")
+        if amp_cos:
+            terms.append(f"{_num(amp_cos)}*abs(cos(p))**{_num(g['az_a_cos_pow'])}")
+        out["a_deg"] = " + ".join(terms)
+    if amp_n:
+        out["n"] = f"{_num(params.get('n', 4.0))} + {_num(amp_n)}*cos(p)**2"
+    if amp_s:
+        out["s"] = f"{_num(params.get('s', 0.0))} + {_num(amp_s)}*cos(p)**2"
+    return out
+
+
+def azlaw_values(params: dict, p_rad: float) -> dict:
+    """a / n / s at one azimuth (for validation and docs), plain floats."""
+    from math import cos, sin
+    g = {**AZLAW_DEFAULTS, **{k: v for k, v in params.items() if k in _AZLAW}}
+    a = float(params.get("a_deg", 60.0))
+    if float(g.get("az_a_sf_amp", 0.0)):
+        m4 = float(g["az_sf_m"]) / 4.0
+        base = (abs(cos(m4 * p_rad) / g["az_sf_a"]) ** g["az_sf_n2"]
+                + abs(sin(m4 * p_rad) / g["az_sf_b"]) ** g["az_sf_n3"])
+        a += float(g["az_a_sf_amp"]) * base ** (-1.0 / float(g["az_sf_n1"]))
+    if float(g.get("az_a_cos_amp", 0.0)):
+        a += float(g["az_a_cos_amp"]) * abs(cos(p_rad)) ** float(g["az_a_cos_pow"])
+    n = float(params.get("n", 4.0)) + float(g.get("az_n_cos2_amp", 0.0)) * cos(p_rad) ** 2
+    s = float(params.get("s", 0.0)) + float(g.get("az_s_cos2_amp", 0.0)) * cos(p_rad) ** 2
+    return {"a_deg": a, "n": n, "s": s}
+
+
 _OSSE = {
-    **_THROAT, **_CROSS, **_COMMON, **_MORPH, **_GCURVE,
+    **_THROAT, **_CROSS, **_COMMON, **_MORPH, **_GCURVE, **_AZLAW,
     "L_mm": _f(note="axial length, mm (OSSE only)"),
     "n": _f(note="termination n (> 0 while s != 0)"),
     "s": _f(note="termination s"),
@@ -301,6 +376,18 @@ def _check_value(family: str, key: str, spec: KeySpec, v) -> None:
 def _validate_osse_like(design: Design) -> None:
     p = design.params
     fam = design.family
+    if any(k in p for k in _AZLAW):
+        m = float(p.get("az_sf_m", AZLAW_DEFAULTS["az_sf_m"]))
+        if abs(m / 4.0 - round(m / 4.0)) > 1e-9:
+            raise _bad(fam, "az_sf_m", f"must be a multiple of 4 (quarter-model symmetry), got {m!r}")
+        import math as _m
+        for deg in range(0, 91, 3):                     # the whole law, sampled per 3 degrees
+            v = azlaw_values(p, _m.radians(deg))
+            if not (0.5 <= v["a_deg"] <= 89.5) or not _m.isfinite(v["a_deg"]):
+                raise _bad(fam, "az_a_sf_amp", f"the per-direction wall angle a({deg} deg) = "
+                                               f"{v['a_deg']:.2f} leaves (0.5, 89.5) deg")
+            if v["s"] != 0 and v["n"] <= 0:
+                raise _bad(fam, "az_n_cos2_amp", f"n({deg} deg) = {v['n']:.3f} must stay > 0")
     if fam == "OSSE":
         s = p.get("s", 0.0)
         if s != 0:
@@ -540,13 +627,19 @@ def to_mesher_config(design: Design, mesh: MeshSpec, res_mm: dict, out_path: Pat
         cfg["enclosure"] = enclosure_section(mounting)
     sections: dict[str, dict] = {"profile": {}, "cross_section": {}, "mesh": {}, "morph": {},
                                  "gcurve": {}}
+    exprs = azlaw_expressions(design.params) if design.family == "OSSE" else {}
     for key, value in design.params.items():
         sec = table[key].section
-        value = copy.deepcopy(value)
+        if sec == "azlaw":                  # folded into the a / n / s expressions below
+            continue
+        value = copy.deepcopy(exprs.get(key, value))
         if sec == "top":
             cfg[key] = value
         else:
             sections.setdefault(sec, {})[key] = value
+    for key, expr in exprs.items():
+        if key not in design.params:        # the mesher's own default is then the base value
+            sections["profile"][key] = expr
     sections["mesh"].update({
         "quadrants": mesh.quadrants,
         "throat_res_mm": res_mm["throat"],

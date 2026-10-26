@@ -116,6 +116,19 @@ enclosure.
 Seed mesh (screen, CPU, epw 8): 6,174 triangles / 3,232 dofs; bbox mouth 0.1986 m
 radius; `s1/s2` stretch the axial span to ~0.353 m.
 
+## 5b. Per-direction law (the exact CORE construction)
+
+Added 2026-10-26 (owner: "why can't we get Ath's creased walls"). The published CORE script (https://at-horns.eu/core.html, fetched 2026-10-26) does not use a guiding curve; it writes the wall angle and the termination as expressions of the azimuth p:
+
+```
+a = 5 + 35*sf(4,12,15,16,1,0.618,p) - 15*cos(p)^10
+n = 6.0 + 1.5*cos(p)^2
+s = 0.6 + 0.23*cos(p)^2
+Morph.TargetShape = 1, FixedPart 0, Rate 3, CornerRadius 16.5
+```
+
+Native OSSE now carries `az_*` knobs (`design/families.py::azlaw_expressions`) that build exactly these expressions for the mesher (sf written out: SF(p) = (|cos(m p/4)/a|^n2 + |sin(m p/4)/b|^n3)^(-1/n1)). Measured: a = 25.0 / 33.8 / 23.4 deg at p = 0 / 45 / 90 deg (H/V match section 5's published 25.0 / 23.4), n 7.5 / 6.0, s 0.83 / 0.60. The diagonals open ~9 deg wider than H and V; with the rectangle Morph that pushes the corners out (mouth radius 273 mm at 44 deg vs 198 mm on the axes) and folds the walls into the creases. m is restricted to multiples of 4 (quarter symmetry); a(p) is validated over the quarter to stay in (0.5, 89.5) deg.
+
 ## 6. TwinRay reconstruction
 
 Published 36-10-380: 36 mm throat, 10° total throat angle, 380×303 mm mouth, 192 mm
