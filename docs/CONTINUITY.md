@@ -2,6 +2,14 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-26 (evening) - GUI DISCOVERY: anything a search writes shows up (owner: "I don't want AI wiring every campaign")
+
+- **Configs + briefs at any depth:** `gui/data.py::list_configs` scans every `examples/**.yaml` (except `briefs/` and `catalog.yaml`); `list_briefs` scans `examples/briefs/**` with kind `shipped` / `user` / the subfolder name. The sandbox's config index stamp now covers every config folder. Campaign folders (`typologies/campaign_*`, `briefs/campaign_*`) need no wiring.
+- **No run cap:** `list_runs` returned the newest 300 only (233 on disk today); now all, with `run_summary` memoized on the ndjson stamp.
+- **Auto campaigns:** runs that no `campaign.json` claims are grouped per (brief, mode) into `auto_<brief>__<mode>` leaderboards (listed after real campaigns, never superseded; `campaign_detail` builds them from the run folders). On today's tree: 13 groups that had no leaderboard before (e.g. user briefs 7040use, 75x35).
+- **Night runner on the Status page:** `tools/run_campaign_night.py` also appends `=== <time> START/END <job>` lines to `runs/overnight/queue_<night>.log` (the format `queue_steps` already parses).
+- **Tests:** `tests/test_gui_discovery.py` (5). Full offline suite 1648/1649: the one failure is the uncommitted campaign config `typologies/campaign_2026-10-26/b1t__lecleach_iwata_ar.yaml` spelling a retired product name (neutral-naming test) - the campaign-config lane's to fix, not this change. Restart the GUI to pick this up.
+
 ## 2026-10-26 (campaign Phase 0) - doc fixes: S1A `widened_to_closure` correction + `n_in_band` meaning (impl-code2, Step 2E)
 
 - **S1A verbatim record:** added a dated correction note at the TOP of `docs/research/typologies/S1A_DRIVER_PASS_ORACLE_FINAL_2026-10-25.md` (the body is unchanged): **"the biradial `widened_to_closure` widening is K-law-driven (reached 396.9/352.8 mm, past closure)"**. The old "widening only ever reaches the closure line" line inside the record is superseded by this note, not rewritten.

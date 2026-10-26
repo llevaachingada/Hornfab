@@ -177,6 +177,28 @@ def _ts(s: str | None):
 
 
 def run_summary(run_dir: Path) -> dict:
+    """Memoized on the run's search.ndjson stamp: list_runs and the auto campaigns both summarize
+    every run on each refresh, and a finished run's summary never changes."""
+    try:
+        st = (run_dir / "search.ndjson").stat()
+        stamp = (st.st_mtime_ns, st.st_size)
+    except OSError:
+        stamp = None
+    key = str(run_dir.resolve())
+    hit = _RUN_SUMMARY_CACHE.get(key)
+    if stamp is not None and hit is not None and hit[0] == stamp:
+        return hit[1]
+    out = _run_summary(run_dir)
+    if stamp is not None:
+        _RUN_SUMMARY_CACHE[key] = (stamp, out)
+    return out
+
+
+#: ``resolved run dir -> ((ndjson mtime_ns, size), run_summary dict)``.
+_RUN_SUMMARY_CACHE: dict[str, tuple] = {}
+
+
+def _run_summary(run_dir: Path) -> dict:
     rows = read_ndjson(run_dir / "search.ndjson")
     cfg = _config(run_dir)
     ok = [r for r in rows if r.get("ok")]
@@ -205,8 +227,10 @@ def run_summary(run_dir: Path) -> dict:
     })
 
 
-def list_runs(runs: Path, limit: int = 300) -> list[dict]:
-    return [run_summary(d) for d in _run_dirs(runs)[:limit]]
+def list_runs(runs: Path, limit: int | None = None) -> list[dict]:
+    """Every run under ``runs`` (no cap: anything a search wrote must show up)."""
+    dirs = _run_dirs(runs)
+    return [run_summary(d) for d in (dirs if limit is None else dirs[:limit])]
 
 
 def _resolve_run(runs: Path, run_id: str) -> Path:
@@ -813,6 +837,8 @@ def superseded(runs: Path, cid: str) -> bool:
     itself committed evidence. The committed set is the reviewed record (campaigns before the
     2026-10-22 fixes scored native configs on their own targets without the size envelope; see
     docs/evidence/TYPOLOGY_SCREEN_2026-10-22.md); anything newer was run with the current code."""
+    if AUTO_ID.match(cid):
+        return False
     ev = _evidence_campaigns(runs)
     return bool(ev) and cid not in ev and cid < max(ev)
 
@@ -830,10 +856,92 @@ def list_campaigns(runs: Path) -> list[dict]:
                           "superseded": superseded(runs, p.name),
                           "seeds": c.get("seeds"), "n_entries": len(c.get("entries", [])),
                           "families": [e.get("name") for e in c.get("entries", [])]}))
+    # Runs that no campaign.json claims (the night runner, a hand-launched or GUI-launched search)
+    # still get a per-brief leaderboard: grouped by brief and mode, listed AFTER the real
+    # campaigns so a real campaign of the same tier keeps precedence in leaders().
+    for cid, members in sorted(_auto_groups(runs).items()):
+        names = sorted({s.get("name") or d.name for d, s in members})
+        out.append(clean({"id": cid, "tier": members[0][1].get("mode") or "screen",
+                          "brief": members[0][1].get("brief"), "superseded": False, "seeds": None,
+                          "n_entries": len(names), "families": names, "auto": True,
+                          "n_runs": len(members)}))
     return out
 
 
+#: Auto campaign ids: ``auto_<brief name>__<mode>`` (brief names are BRIEF_NAME-safe).
+AUTO_ID = re.compile(r"^auto_([A-Za-z0-9_.\-]+)__(screen|verify|final)$")
+
+
+def _campaign_run_ids(runs: Path) -> set[str]:
+    """Run ids already listed by some campaign.json (those runs belong to that campaign)."""
+    out: set[str] = set()
+    for p in (runs.iterdir() if runs.is_dir() else ()):
+        if p.is_dir() and CAMPAIGN_ID.match(p.name):
+            for e in (_read_json(p / "campaign.json") or {}).get("entries", []):
+                for j in e.get("jobs") or []:
+                    if j.get("run_dir"):
+                        out.add(Path(j["run_dir"]).name)
+    return out
+
+
+def _auto_groups(runs: Path) -> dict[str, list[tuple[Path, dict]]]:
+    """Every run not claimed by a campaign.json, grouped by (brief, mode). Runs without a brief
+    (scored on the config's own target) stay in the run list only."""
+    claimed = _campaign_run_ids(runs)
+    groups: dict[str, list[tuple[Path, dict]]] = {}
+    for d in _run_dirs(runs):
+        if d.name in claimed:
+            continue
+        s = run_summary(d)
+        brief, mode = s.get("brief"), s.get("mode") or "screen"
+        if not brief or not s.get("n"):
+            continue
+        cid = f"auto_{brief}__{mode}"
+        if AUTO_ID.match(cid):
+            groups.setdefault(cid, []).append((d, s))
+    return groups
+
+
+def _auto_campaign_detail(runs: Path, cid: str) -> dict:
+    members = _auto_groups(runs).get(cid)
+    if not members:
+        raise FileNotFoundError(cid)
+    by_name: dict[str, list[tuple[Path, dict]]] = {}
+    for d, s in members:
+        by_name.setdefault(s.get("name") or d.name, []).append((d, s))
+    entries = []
+    for name, rs in by_name.items():
+        js = [s["best_j"] for _, s in rs if s.get("best_j") is not None]
+        best_d, best_s = min(((d, s) for d, s in rs if s.get("best_j") is not None),
+                             key=lambda t: t[1]["best_j"], default=(None, None))
+        best = design_curves(best_d, best_s["best_hash"]) if best_s and best_s.get("best_hash") else None
+        entries.append({
+            "name": name, "group": None, "symmetry": None, "skipped": False, "skip_reason": None,
+            "family": rs[0][1].get("family"),
+            "best_j": min(js) if js else None,
+            "median_j": float(np.median(js)) if js else None,
+            "spread": (max(js) - min(js)) if len(js) > 1 else None,
+            "evals": sum(s.get("n") or 0 for _, s in rs),
+            "failures": dict(sum((Counter(s.get("failures") or {}) for _, s in rs), Counter())),
+            "pinned": [],
+            "jobs": [{"seed": s.get("cma_seed") if s.get("cma_seed") is not None else d.name[-6:],
+                      "best_j": s.get("best_j"), "run_id": d.name,
+                      "returncode": None, "wall_min": None} for d, s in rs],
+            "best": best, "dims": best_s.get("dims") if best_s else None,
+            "best_run_id": best_d.name if best_d is not None else None,
+        })
+    entries.sort(key=lambda e: (e["best_j"] is None, e["median_j"] if e["median_j"] is not None else 0))
+    brief = members[0][1].get("brief")
+    brief_raw = next((b["brief"] for b in list_briefs(runs.parent) if b["name"] == brief), {})
+    return clean({"id": cid, "tier": members[0][1].get("mode") or "screen", "brief": brief,
+                  "seeds": None, "superseded": False, "auto": True,
+                  "target": (brief_raw or {}).get("target"), "entries": entries,
+                  "leaderboard_md": None})
+
+
 def campaign_detail(runs: Path, cid: str) -> dict:
+    if AUTO_ID.match(cid):
+        return _auto_campaign_detail(runs, cid)
     if not CAMPAIGN_ID.match(cid):
         raise ValueError(f"not a campaign id: {cid!r}")
     c = _read_json(runs / cid / "campaign.json")
@@ -886,16 +994,21 @@ def brief_dirs(root: Path) -> tuple[Path, Path]:
 
 
 def list_briefs(root: Path) -> list[dict]:
-    shipped, user = brief_dirs(root)
+    """Every brief under examples/briefs/ at any depth: kind ``shipped`` (top level), ``user``
+    (briefs/user/) or the subfolder path (e.g. a campaign folder)."""
+    shipped, _user = brief_dirs(root)
     out = []
-    for kind, d in (("shipped", shipped), ("user", user)):
-        for p in sorted(d.glob("*.yaml")) if d.is_dir() else []:
-            try:
-                raw = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
-            except yaml.YAMLError as exc:
-                raw = {"_error": str(exc)}
-            out.append(clean({"name": p.stem, "kind": kind,
-                              "path": p.relative_to(root).as_posix(), "brief": raw}))
+    files = sorted(p for p in shipped.rglob("*.yaml") if not p.name.startswith(".")) \
+        if shipped.is_dir() else []
+    for p in files:
+        parent = p.parent.relative_to(shipped).as_posix()
+        kind = "shipped" if parent == "." else ("user" if parent == "user" else parent)
+        try:
+            raw = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+        except yaml.YAMLError as exc:
+            raw = {"_error": str(exc)}
+        out.append(clean({"name": p.stem, "kind": kind,
+                          "path": p.relative_to(root).as_posix(), "brief": raw}))
     return out
 
 
@@ -1026,8 +1139,9 @@ def list_configs(root: Path) -> list[dict]:
     cat = {e.get("config"): e for e in catalog(root)}
     ex = root / "examples"
     out = []
-    for p in sorted(list(ex.glob("*.yaml")) + list((ex / "typologies").glob("*.yaml"))):
-        if p.name == "catalog.yaml":
+    for p in sorted(ex.rglob("*.yaml")):
+        if (p.name == "catalog.yaml" or p.name.startswith(".")
+                or p.relative_to(ex).parts[0] == "briefs"):
             continue
         try:
             raw = yaml.safe_load(p.read_text(encoding="utf-8-sig")) or {}
@@ -1169,7 +1283,7 @@ def typologies(root: Path, runs: Path) -> list[dict]:
     (``campaign.budget_for_tier``), and its best result in the latest campaign of the strongest tier per
     brief, with the best design's size and wall cross-section."""
     from hornlab_search.search.campaign import budget_for_tier, is_compatible
-    briefs = [b for b in list_briefs(root) if b["kind"] == "shipped" or b["kind"] == "user"]
+    briefs = list_briefs(root)
     cfgs = {c["catalog_name"]: c for c in list_configs(root) if c.get("catalog_name")}
     # per family: its result in the newest campaign of each scored tier per brief THAT CONTAINS IT
     # (a later campaign that re-ran only some families must not hide the others' last result)
@@ -1496,10 +1610,10 @@ def _preview_config(root: Path, name: str) -> dict:
     """
     key = str(root.resolve())
     try:
-        signature = (
-            (root / "examples").stat().st_mtime_ns,
-            (root / "examples" / "typologies").stat().st_mtime_ns,
-        )
+        ex = root / "examples"
+        signature = tuple(
+            d.stat().st_mtime_ns for d in [ex, *sorted(q for q in ex.rglob("*") if q.is_dir())]
+            if d.relative_to(ex).parts[:1] != ("briefs",))
     except OSError:
         signature = None
     cached = _PREVIEW_CONFIG_CACHE.get(key)

@@ -233,6 +233,13 @@ def load_night(path: Path | str, *, repo_root: Path | str | None = None,
     return NightPlan(night=night, jobs=tuple(jobs), path=path)
 
 
+def write_queue_line(log: Path, text: str) -> None:
+    """Append one ``=== <local ISO time> <text>`` line (the overnight queue-log format)."""
+    log.parent.mkdir(parents=True, exist_ok=True)
+    with open(log, "a", encoding="utf-8") as handle:
+        handle.write(f"=== {datetime.now().strftime('%Y-%m-%dT%H:%M:%S')} {text}\n")
+
+
 def night_dir_for(plan: NightPlan, *, runs_root: Path | str | None = None,
                   repo_root: Path | str | None = None) -> Path:
     root = Path(runs_root) if runs_root is not None else _repo_path(repo_root) / "runs"
@@ -678,9 +685,14 @@ def run_night(plan: NightPlan, *, dry_run: bool = False, only: str | None = None
         runner = NightRunner(repo_root=root, runs_root=runs_root)
 
     summary_path = night_dir / "summary.jsonl"
+    # The GUI Status page reads runs/overnight/queue_*.log (gui/data.py _STEP / queue_steps), the
+    # same lines tools/overnight/queue_*.ps1 write, so the night shows up there without extra wiring.
+    queue_log = night_dir.parent.parent / "overnight" / f"queue_{plan.night}.log"
     results: list[JobResult] = []
     for job in jobs:
+        write_queue_line(queue_log, f"START {job.id} : {' '.join(job.argv)}")
         result = _run_one(plan, job, night_dir=night_dir, runner=runner, repo_root=root)
+        write_queue_line(queue_log, f"END {job.id} exit {result.exit_code}")
         results.append(result)
         with open(summary_path, "a", encoding="utf-8") as handle:
             handle.write(json.dumps(result.to_dict(), ensure_ascii=False) + "\n")
@@ -688,6 +700,7 @@ def run_night(plan: NightPlan, *, dry_run: bool = False, only: str | None = None
         print(f"[{result.id}] exit={result.exit_code} evals={result.evals_ndjson} "
               f"best_J={_fmt(result.best_J)} note={result.note}")
     write_summary_md(night_dir / "SUMMARY.md", plan, results)
+    write_queue_line(queue_log, "QUEUE DONE")
     return results
 
 
