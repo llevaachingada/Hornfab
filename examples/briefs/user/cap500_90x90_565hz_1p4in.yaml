@@ -1,0 +1,50 @@
+# Brief: 90 x 90 deg, mouth capped at 500 mm -> f0 565 Hz, 1.4-inch driver.
+# 2026-10-26: replaced the 100 x 100 cap-500 brief (owner: "100 by 100 is too wide - make it 90 by 90").
+#
+# THE MATH THAT SETS f0 (inverse K-law, and why this is NOT a 500 Hz horn):
+#   d = 25,400,000 / (f0 * coverage_deg)
+#   at d = 500 mm and coverage 90 deg  ->  f0 = 25,400,000/(500*90) = 564.4 Hz MINIMUM.
+#   So a 90x90 pattern inside a 500 mm mouth starts at ~565 Hz. At 500 Hz the same mouth can only
+#   hold 101.6 deg (that was the rejected 100x100 brief). f0 = 565 gives d = 499.5 mm.
+#
+# DOF / VRAM CLASS AT 8 kHz - MEASURED, not estimated (stress ladder 2026-10-26):
+#   500 mm mouth at 8 kHz = 11,516 tris, ~5,870 quarter dofs, 7,212 MB peak of 8,188 MB.
+#   That leaves under 1 GB of headroom with the GUI running, so it is NOT a comfortable search
+#   size. Practical home: a 5,500-6,000 Hz screen (about 3.2 GB) with an 8 kHz verify pass on the
+#   finalists, and solve.cuda_fused: true if the fused 12,000 caps are wanted.
+#   At 10 kHz a 500 mm mouth measured 7,442 MB + an OOM line in the driver - not viable.
+#
+# f11 = 100,250/17.78 = 5,638 Hz: from 5.6 kHz up the real driver is not a uniform cap, so
+# 5.6-8 kHz compares geometry only. A 500 mm mouth is 14.6 wavelengths at 8 kHz, so the top of
+# the band measures what the flare does, not a constant 90 deg.
+
+name: cap500_90x90_565hz_1p4in
+description: 90x90 waveguide, mouth capped at 500 mm (f0 565 Hz - the highest f0 a 500 mm mouth allows at 90 deg), 1.4-inch, 506x506x450 envelope, band 500-8000 Hz
+driver:
+  exit_radius_mm: 17.78
+  exit_angle_deg: 15.5
+envelope:
+  max_mouth_w_mm: 506.0        # TRUE 500 mm cap: 500 + 2 x 3 mm shell
+  max_mouth_h_mm: 506.0
+  max_depth_mm: 450.0
+symmetry: axisymmetric         # equal coverage in both planes
+source:
+  cap: auto
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 90.0
+  band_lo_hz: 500.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.0
+  f0_hz: 565.0                 # 25,400,000/(565*90) = 499.5 mm - inside the cap
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.2                 # a wide horn narrows above f0; keep the slope demand mild
+  flat: 0.5
+  load: 0.0
+objective:
+  version: 3
