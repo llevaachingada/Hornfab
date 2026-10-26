@@ -2,6 +2,13 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-26 (campaign Phase 0) - ICW nested driver pin LANDED (impl-code1; `icw_seed.r0_mm`)
+
+- **Bug:** the WP2 driver pin only looked for ROOT `r0_mm`. Every ICW config keeps its throat at `seed_params.icw_seed.r0_mm` (bounds carries the flat dotted key `icw_seed.r0_mm`), so the pin silently missed ICW entirely and a campaign brief could pair an 18 mm driver with a 12.7 mm horn.
+- **Fix:** `_apply_brief_driver_pins` now pins `icw_seed.r0_mm` for `family: ICW` whenever the nested seed key or the dotted bound exists, using the SAME `_force_pin` semantics and error shape as the root path: a mismatching pinned bound is refused (`ConfigError` naming `bounds.icw_seed.r0_mm`), an unpinned one becomes `lo=hi=driver`, `search: false`, and the nested seed is forced. The embedded-brief resume grandfather is untouched.
+- **Tests:** new `tests/test_config_icw_driver_pin.py` (4/4) - a copy with a searchable nested bound under an 18 mm brief gets seed 18 + bound 18 (and the `DesignSpace` seed reads 18); the shipped 12.7 pin under an 18 mm brief is refused; the shipped config under a matching 12.7 brief is unchanged; an embedded 18 mm brief still loads the old run grandfather.
+- **Verification:** focused 75/75; standard gate green - compileall, catalog `--check`, `node --check` x8, offline suite **1630/0/0/0** (`runs/step2c/suite.xml`). No GPU/Julia work.
+
 ## 2026-10-26 (campaign Phase 0) - `generator.seed_policy` opt-out LANDED (impl-code1; absent = byte-identical)
 
 - **Why:** `_derive_generator_geometry` overwrites generator seeds from `target.f0_hz` on every campaign brief. Its rows constants are wrong for Salmon (1.88e5 vs measured 3.23e5 at stop 150) and its JMLC rule (geometric-mean mouth then fc-floor clamp) collapses Le Cleac'h seeds to ~313 mm round horns. The campaign needs hand-measured seeds without disabling the honest K-law feasibility record.

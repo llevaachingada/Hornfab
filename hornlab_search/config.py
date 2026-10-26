@@ -578,6 +578,8 @@ def _apply_brief_driver_pins(raw: dict, brief_d: dict | None, where: str,
     - OSSE / R-OSSE / ICW: ``r0_mm`` is pinned to ``driver.exit_radius_mm`` (always; the brief
       defines the throat size a design is allowed to use), and ``a0_deg`` is pinned to
       ``driver.exit_angle_deg`` ONLY when the brief says ``driver.throat_angle_policy: pin``.
+      ICW keeps its throat in the nested ``icw_seed`` block (``icw_seed.r0_mm`` in seed_params,
+      the flat dotted key in bounds), so that path is pinned by the same rule too.
     - Native FREEFORM: under ``pin``, ``profileH/V.throatAngleDeg`` are pinned to the exit angle.
     - A brief WITHOUT the policy key behaves exactly as before on throat angles, so every
       existing run reproduces bit-for-bit.
@@ -601,6 +603,13 @@ def _apply_brief_driver_pins(raw: dict, brief_d: dict | None, where: str,
         _force_pin("r0_mm", exit_r, seed, bounds, where, "mm")
         if policy == "pin" and ("a0_deg" in seed or "a0_deg" in bounds):
             _force_pin("a0_deg", exit_a, seed, bounds, where, "deg")
+    if family == "ICW":
+        # Campaign 2026-10-26 Phase 0: ICW's throat is nested (seed icw_seed.r0_mm; bounds
+        # carries the flat dotted key), so the root-only check above silently missed it.
+        icw_seed = seed.get("icw_seed")
+        if ((isinstance(icw_seed, dict) and "r0_mm" in icw_seed)
+                or "icw_seed.r0_mm" in bounds):
+            _force_pin("icw_seed.r0_mm", exit_r, seed, bounds, where, "mm", nested=True)
     if family == "FREEFORM" and policy == "pin":
         for plane in ("profileH", "profileV"):
             node = seed.get(plane)
