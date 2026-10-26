@@ -106,14 +106,18 @@ GRID_BLOCK_KEYS = (*GRID_SPEC_KEYS, "knobs")
 #
 # Row span (WP9b C2): ``span: quarter`` (default; phi 0..90, quadrants "1", both cardinal
 # mirror planes) or ``span: half`` (phi -90..+90 inclusive, mirror plane yz, x >= 0,
-# quadrants "14", 2x the quarter dofs), or ``span: full`` (phi 0..360 EXCLUSIVE of the
+# quadrants "14", 2x the quarter dofs), or ``span: half_xz`` (phi 0..180 inclusive, mirror
+# plane xz, y >= 0, quadrants "12", 2x the quarter dofs; 2026-10-26 Phase 0 item 2D), or
+# ``span: full`` (phi 0..360 EXCLUSIVE of the
 # seam row, n_phi >= 25, quadrants "1234", NO mirror planes: a closed full-ring point
 # grid - the mesher's PointGridHornGeometry default mode (closed=True, symmetry planes
 # unused); 4x the quarter dofs).  The phi origin is pinned at the HORIZONTAL (+x)
 # axis in every span.  The LIST contract selects half EXPLICITLY with ``span: half``; the
 # scalar ``lecleach_mod`` b-term/bend PRESENCE also forces half (its landed rule); the
-# odd-cosine asymmetry (lecleach_asym with eps_m != 0) FORCES a FULL model (it breaks the
-# left-right mirror, so only the seam-free full ring represents it honestly).
+# odd-cosine asymmetry (lecleach_asym with eps_m != 0) FORCES a FULL model by default, but
+# is legal on ``span: half_xz`` because cos(phi) is EVEN under the up/down mirror
+# phi -> -phi (the left-right asymmetry is intact; only a vertical mirror is used).
+#
 # Owner ruling 2026-10-25: the Salmon rows are LABELED HYPOTHESIS-SHAPE EXPERIMENTS under
 # neutral names; nothing there is an attributed published construction (R9).  The
 # ``lecleach`` rows ARE the attributed Fourcade 2015 construction (R9-J gate passed).
@@ -128,20 +132,21 @@ GRID_BLOCK_KEYS = (*GRID_SPEC_KEYS, "knobs")
 #     axial bend delta-x(phi) = bend*sin(phi) likewise, so those rules require the HALF
 #     model (phi -90..+90, mirror plane yz, x >= 0, quadrants "14");
 #   * a cos(phi) (odd cosine) term is NOT invariant under phi -> pi - phi: it breaks the
-#     left-right mirror and is REFUSED.
+#     left-right mirror, but it IS even under phi -> -phi, so it is representable on the
+#     UPPER half (phi 0..180, mirror plane xz, y >= 0, quadrants "12", span: half_xz).
 # The PHI ORIGIN IS PINNED here and in every rows meta's ``sign_conventions``: phi = 0 is
 # the horizontal (+x) axis.  (If phi were measured from vertical the roles swap.)
 ROWS_TYPES = ("salmon_elliptical", "salmon_axisym", "lecleach", "iwata_ar",
               "toroidal_rollback", "lecleach_mod", "lecleach_ar", "lecleach_asym")
 #: The persisted spec fields of a rows Design (``design.params["grid"]``).  ``span`` is
-#: accepted everywhere but PERSISTED ONLY FOR A HALF MODEL (kept out of the keys so the
-#: quarter recipe -- and its design hash -- stays byte-identical to before this pass).
+#: accepted everywhere but PERSISTED ONLY FOR A NON-QUARTER model (kept out of the keys so
+#: the quarter recipe -- and its design hash -- stays byte-identical to before this pass).
 ROWS_SPEC_KEYS = ("rows", "n_phi", "n_s", "wall_thickness_mm")
 ROWS_BLOCK_KEYS = (*ROWS_SPEC_KEYS, "knobs")
 ROWS_ALLOWED_SPEC_KEYS = (*ROWS_SPEC_KEYS, "span")
 ROWS_ALLOWED_BLOCK_KEYS = (*ROWS_BLOCK_KEYS, "span")
-#: The three legal row spans (phi from the HORIZONTAL axis in all of them).
-ROWS_SPANS = ("quarter", "half", "full")
+#: The four legal row spans (phi from the HORIZONTAL axis in all of them).
+ROWS_SPANS = ("quarter", "half", "half_xz", "full")
 #: Honest minimum row count for a half model when modulation is on (plan 9b.3).
 MIN_PHI_HALF = 25
 #: Honest minimum row count for a full ring (the mesher's AngularSegments scale; a
@@ -620,7 +625,8 @@ def check_self_approach(inner: np.ndarray, outer: np.ndarray, wall_thickness_mm:
 
 
 def grid_outer_points(inner: np.ndarray, wall_thickness_mm: float, *,
-                      half: bool = False, full: bool = False) -> np.ndarray:
+                      half: bool = False, half_xz: bool = False,
+                      full: bool = False) -> np.ndarray:
     """Explicit outer shell: in-plane normal offset of each row's ``(rho, z)`` profile.
 
     Fourcade 2015 eqs 28-29 form applied in the row's own meridian half-plane
@@ -628,7 +634,8 @@ def grid_outer_points(inner: np.ndarray, wall_thickness_mm: float, *,
     normal is the tangent ``(drho, dz)`` rotated by -90 deg, ``n = (dz, -drho) / |(drho, dz)|``,
     which is continuous through a rollback (it is just the tangent rotated with the profile).
     ``phi`` is unchanged, so the symmetry-plane rows stay on their plane: quarter row 0 on
-    ``y = 0`` and last on ``x = 0``; half BOTH endpoint rows on ``x = 0`` (``half=True``).
+    ``y = 0`` and last on ``x = 0``; half BOTH endpoint rows on ``x = 0`` (``half=True``);
+    half_xz BOTH endpoint rows on ``y = 0`` (``half_xz=True``).
 
     Raises ``GeneratorError`` when a min non-adjacent gap (inner or outer, mm) is below
     ``2 * wall_thickness_mm + 2 mm`` (dossier 2.4 P4).
@@ -661,6 +668,9 @@ def grid_outer_points(inner: np.ndarray, wall_thickness_mm: float, *,
     elif half:
         outer[0, :, 0] = 0.0
         outer[-1, :, 0] = 0.0
+    elif half_xz:
+        outer[0, :, 1] = 0.0       # phi = 0 -> y = 0 (xz plane)
+        outer[-1, :, 1] = 0.0      # phi = 180 -> y = 0
     else:
         outer[0, :, 1] = 0.0
         outer[-1, :, 0] = 0.0
@@ -672,7 +682,7 @@ def grid_outer_points(inner: np.ndarray, wall_thickness_mm: float, *,
 
 
 def _rows_declared_span(spec: dict) -> str | None:
-    """The EXPLICIT ``span`` field (``quarter``/``half``/``full``), or ``None`` when absent."""
+    """The EXPLICIT ``span`` field (``quarter``/``half``/``half_xz``/``full``), or None."""
     span = spec.get("span")
     if span is None:
         return None
@@ -689,10 +699,13 @@ def _rows_lecleach_asym_knobs(knob_map: dict, prefix: str = "g") -> dict:
         r(phi, s) *= 1 + eps_m * w(s) * cos(phi)
     with ``w`` the smoothstep window opening at the arc fraction ``eps_start``
     (0 stays a legal value: it produces the SYMMETRIC verified rows exactly; only
-    ``eps_m != 0`` forces the full model).  The list harmonic stop/bend contract rides
-    along (on a full model ANY phi basis is representable, so the quarter/half basis
-    restrictions do not bind).  The throat stays EXACT (w(0) = 0 at the window start:
-    every row still shares the driver's exit radius/angle).
+    ``eps_m != 0`` forces a non-quarter model).  The asymmetry is even under the up/down
+    mirror ``phi -> -phi``, so ``eps_m != 0`` is representable on the seam-free FULL ring
+    OR on the UPPER-HALF model (``span: half_xz``, phi 0..180, mirror plane xz); a plain
+    ``span: half`` (x >= 0) is not a symmetry half for it.  The list harmonic stop/bend
+    contract rides along (on a full model ANY phi basis is representable, so the
+    quarter/half basis restrictions do not bind).  The throat stays EXACT (w(0) = 0 at
+    the window start: every row still shares the driver's exit radius/angle).
     """
     allowed = {f"{prefix}_fc_hz", f"{prefix}_T", f"{prefix}_stop_deg",
                f"{prefix}_r_lip_mm", f"{prefix}_eps_m", f"{prefix}_eps_start",
@@ -748,10 +761,12 @@ def _rows_eps_window(s_frac: np.ndarray, start: float) -> np.ndarray:
 def _rows_span_phis(n_phi: int, span: str) -> np.ndarray:
     """Azimuths for a rows kind: ``quarter`` -> [0, 90]; ``half`` -> [-90, +90];
 
-    ``full`` -> ``[0, 360)`` (n_phi rows, endpoint EXCLUDED - the seam row at 360 deg
-    would duplicate row 0's phi = 0).  The phi ORIGIN is pinned to the horizontal (+x)
-    axis in every span; the span only decides how much of the circle is present.  A half
-    model needs an ODD n_phi >= MIN_PHI_HALF; a full model needs n_phi >= MIN_PHI_FULL.
+    ``half_xz`` -> [0, 180]; ``full`` -> ``[0, 360)`` (n_phi rows, endpoint EXCLUDED - the
+    seam row at 360 deg would duplicate row 0's phi = 0).  The phi ORIGIN is pinned to the
+    horizontal (+x) axis in every span; the span only decides how much of the circle is
+    present.  A half or half_xz model needs an ODD n_phi >= MIN_PHI_HALF (the half span so
+    phi = 0 and both +/-90 deg rows exist; half_xz so the phi = 0 and 180 deg endpoint rows
+    and the phi = 90 deg vertical row exist); a full model needs n_phi >= MIN_PHI_FULL.
     """
     if span == "half":
         if n_phi < MIN_PHI_HALF:
@@ -763,6 +778,17 @@ def _rows_span_phis(n_phi: int, span: str) -> np.ndarray:
                 "half-model rows need an ODD n_phi (the phi = 0 horizontal row and both "
                 f"+/-90 deg endpoint rows must exist); got n_phi={n_phi}")
         return np.linspace(-0.5 * math.pi, 0.5 * math.pi, n_phi)
+    if span == "half_xz":
+        if n_phi < MIN_PHI_HALF:
+            raise registry.GeneratorError(
+                f"half_xz-model rows need n_phi >= {MIN_PHI_HALF} (honest half-span "
+                f"resolution); got n_phi={n_phi}")
+        if n_phi % 2 == 0:
+            raise registry.GeneratorError(
+                "half_xz-model rows need an ODD n_phi (the phi = 0 and 180 deg endpoint "
+                f"rows on the xz mirror plane, plus the phi = 90 deg vertical row); got "
+                f"n_phi={n_phi}")
+        return np.linspace(0.0, math.pi, n_phi)
     if span == "full":
         if n_phi < MIN_PHI_FULL:
             raise registry.GeneratorError(
@@ -778,16 +804,19 @@ def _rows_span_requested(kind: str, spec: dict, knob_map: dict, prefix: str = "g
     Forcing rules (each refuses a contradictory explicit declaration loudly instead of
     silently mis-meshing):
     * ``lecleach_mod`` with a b-term / bend knob PRESENT forces ``half``;
-    * ``lecleach_asym`` with ``eps_m != 0`` forces ``full`` (the odd cosine breaks the
-      left-right mirror; only the seam-free full ring represents it).
+    * ``lecleach_asym`` keeps the left-right asymmetry on a ``half_xz`` (upper-half) or
+      ``full`` ring; a plain ``half`` (x >= 0) is refused because it is not a symmetry
+      half for the odd cosine.  With eps_m == 0 the same spans plus ``quarter`` are legal.
+    * ``span: half_xz`` is implemented for ``lecleach_asym`` only in this pass; another
+      rows kind that declares it is refused loudly rather than silently mis-meshed.
     """
     declared = _rows_declared_span(spec)
     if kind == "lecleach_mod" and _rows_mod_half(knob_map, prefix):
-        if declared == "quarter":
+        if declared in ("quarter", "half_xz"):
             raise registry.GeneratorError(
                 "grid rows: a b-term / axial-bend knob is present, which forces the HALF "
                 "model (phi -90..+90, symmetry plane yz, quadrants '14'); remove "
-                "span: quarter or set span: half")
+                "span: quarter / span: half_xz or set span: half")
         return "half"
     if kind == "lecleach_asym":
         eps = float(knob_map.get(f"{prefix}_eps_m", 0.0))
@@ -795,10 +824,19 @@ def _rows_span_requested(kind: str, spec: dict, knob_map: dict, prefix: str = "g
             if declared in ("quarter", "half"):
                 raise registry.GeneratorError(
                     "grid rows: the odd-cosine asymmetry (eps_m != 0) breaks the "
-                    "left-right mirror and forces the FULL ring (phi 0..360, quadrants "
-                    "'1234'); remove span or set span: full")
-            return "full"
+                    "left-right mirror; it needs the seam-free FULL ring (phi 0..360, "
+                    "quadrants '1234') or the UPPER-HALF model (span: half_xz, phi "
+                    "0..180, quadrants '12'); remove span or set span: full / span: half_xz")
+            return "full" if declared is None else declared
+        if declared == "half":
+            raise registry.GeneratorError(
+                "grid rows: lecleach_asym does not use the x >= 0 half model; use span: "
+                "half_xz (upper half, quadrants '12'), span: quarter or span: full")
         return declared or "quarter"
+    if declared == "half_xz":
+        raise registry.GeneratorError(
+            f"grid rows: span: half_xz is implemented for lecleach_asym rows only; "
+            f"{kind} must use quarter/half/full")
     if declared is None:
         return "half" if (kind == "lecleach_mod" and False) else "quarter"
     return declared
@@ -1395,8 +1433,10 @@ def _build_rows_grid(profiles_xy: list[tuple[np.ndarray, np.ndarray]], phis: np.
     Row span (TASK B1 / lib-2 C2): the phis decide the model.  A quarter spans
     ``[0, 90]`` (row 0 on the H plane ``y = 0``, last row on ``x = 0``; quadrants "1").
     A half spans ``[-90, +90]`` with both endpoint rows on ``x = 0`` (symmetry plane
-    ``yz``; quadrants "14"); phi = 0 is the horizontal axis in EVERY span (the phi
-    origin is pinned, never inferred from the span).  A FULL ring spans ``[0, 360)``
+    ``yz``; quadrants "14").  A half_xz spans ``[0, 180]`` with both endpoint rows on
+    ``y = 0`` (symmetry plane ``xz``; quadrants "12"; the phi = 90 deg vertical row is
+    pinned to ``x = 0``).  ``phi = 0`` is the horizontal axis in EVERY span (the phi
+    origin is pinned, never inferred).  A FULL ring spans ``[0, 360)``
     (endpoint excluded; no mirror planes; quadrants "1234"; the mesher's native
     closed/full-ring mode).
     """
@@ -1407,6 +1447,8 @@ def _build_rows_grid(profiles_xy: list[tuple[np.ndarray, np.ndarray]], phis: np.
     phis = np.asarray(phis, dtype=float).reshape(-1)
     half = bool(phis[0] < -1e-9)
     full = (not half) and bool(float(phis[-1]) > math.pi + 1e-9)
+    half_xz = (not half) and (not full) and bool(
+        abs(float(phis[-1]) - math.pi) <= 1e-9)
     if half:
         if n_phi % 2 == 0:
             raise registry.GeneratorError(
@@ -1416,6 +1458,14 @@ def _build_rows_grid(profiles_xy: list[tuple[np.ndarray, np.ndarray]], phis: np.
                 or abs(float(phis[-1]) - 0.5 * math.pi) > 1e-9:
             raise registry.GeneratorError(
                 "half-model phi must span -90 .. +90 deg inclusive")
+    elif half_xz:
+        if n_phi % 2 == 0:
+            raise registry.GeneratorError(
+                "half_xz-model rows need an ODD n_phi so the phi = 0 / 180 deg endpoint "
+                f"rows and the phi = 90 deg vertical row exist; got n_phi={n_phi}")
+        if abs(float(phis[0])) > 1e-9 or abs(float(phis[-1]) - math.pi) > 1e-9:
+            raise registry.GeneratorError(
+                "half_xz-model phi must span 0 .. 180 deg inclusive")
     elif n_phi < 2:
         raise registry.GeneratorError("quarter rows need n_phi >= 2")
     grid = np.empty((n_phi, n_s + 1, 3), dtype=float)
@@ -1453,6 +1503,11 @@ def _build_rows_grid(profiles_xy: list[tuple[np.ndarray, np.ndarray]], phis: np.
     elif half:
         grid[0, :, 0] = 0.0        # phi = -90 -> x = 0 (yz plane)
         grid[-1, :, 0] = 0.0       # phi = +90 -> x = 0
+    elif half_xz:
+        grid[0, :, 1] = 0.0        # phi = 0 -> y = 0 (xz plane)
+        grid[-1, :, 1] = 0.0       # phi = 180 -> y = 0
+        i_v = int(np.argmin(np.abs(phis - 0.5 * math.pi)))
+        grid[i_v, :, 0] = 0.0      # phi = 90 -> x = 0 (V plane)
     else:
         grid[0, :, 1] = 0.0        # phi = 0 -> y = 0 (H plane)
         grid[-1, :, 0] = 0.0       # phi = 90 -> x = 0 (V plane)
@@ -1461,16 +1516,20 @@ def _build_rows_grid(profiles_xy: list[tuple[np.ndarray, np.ndarray]], phis: np.
     meta = dict(meta)
     meta.update({
         "n_phi": int(n_phi),
-        "n_phi_quarter": int((n_phi + 1) // 2) if half else int(n_phi),
+        "n_phi_quarter": int((n_phi + 1) // 2) if (half or half_xz) else int(n_phi),
         "n_s": int(n_s),
-        "phi_span_deg": 360.0 if full else (180.0 if half else 90.0),
+        "phi_span_deg": 360.0 if full else (180.0 if (half or half_xz) else 90.0),
         "phi_origin_deg": 0.0,
-        "quarter": not (half or full),
+        "quarter": not (half or half_xz or full),
         "half_model": half,
-        "row_span": "full" if full else ("half" if half else "quarter"),
-        "span": "full" if full else ("half" if half else "quarter"),
-        "symmetry_plane": None if full else ("yz" if half else "yz+xz"),
-        "quadrants": "1234" if full else ("14" if half else "1"),
+        "row_span": ("full" if full else ("half" if half else
+                                          ("half_xz" if half_xz else "quarter"))),
+        "span": ("full" if full else ("half" if half else
+                                      ("half_xz" if half_xz else "quarter"))),
+        "symmetry_plane": (None if full else
+                           ("yz" if half else ("xz" if half_xz else "yz+xz"))),
+        "quadrants": ("1234" if full else
+                      ("14" if half else ("12" if half_xz else "1"))),
         "rows": list(rows_meta),
         "min_self_approach_mm": float(
             _sheet_min_nonadjacent_gap(grid, _self_approach_limit(meta))),
@@ -1734,7 +1793,8 @@ def _rows_marches(spec: dict, knobs: dict, brief: dict, prefix: str = "g") -> li
     half = span == "half"
     full = span == "full"
     phis = _rows_span_phis(n_phi, span)
-    span_rad = {"quarter": 0.5 * math.pi, "half": math.pi, "full": 2.0 * math.pi}[span]
+    span_rad = {"quarter": 0.5 * math.pi, "half": math.pi, "half_xz": math.pi,
+                "full": 2.0 * math.pi}[span]
     if full and kind in ("iwata_ar", "toroidal_rollback", "lecleach_ar", "lecleach_mod"):
         raise registry.GeneratorError(
             f"{kind} is axisymmetric by construction (or b-term-half-forced): span: full "
@@ -2025,6 +2085,7 @@ def rows_per_azimuth(base_spec_with_rows: dict, knobs: dict, brief: dict,
     phis = np.asarray([m["phi"] for m in marches], dtype=float)
     span = _rows_span_requested(kind, base_spec_with_rows, knob_map, prefix)
     half = span == "half"
+    half_xz = span == "half_xz"
     full = span == "full"
     resample_flags = [bool(m.get("resample", True)) for m in marches]
     if len(set(resample_flags)) != 1:
@@ -2047,6 +2108,10 @@ def rows_per_azimuth(base_spec_with_rows: dict, knobs: dict, brief: dict,
         phi_note = ("measured from the HORIZONTAL +x axis; HALF model phi = -90 .. +90 "
                     "deg inclusive (phi = 0 row is horizontal, both +/-90 rows lie on "
                     "x = 0 / the yz symmetry plane)")
+    elif half_xz:
+        phi_note = ("measured from the HORIZONTAL +x axis; HALF_XZ model phi = 0 .. 180 "
+                    "deg inclusive (phi = 0 and 180 rows lie on y = 0 / the xz symmetry "
+                    "plane, phi = 90 is the vertical row)")
     else:
         phi_note = ("measured from the HORIZONTAL +x axis; QUARTER model phi = 0 .. 90 "
                     "deg inclusive (row 0 = H plane y = 0, last row = V plane x = 0)")
@@ -2232,9 +2297,14 @@ def rows_per_azimuth(base_spec_with_rows: dict, knobs: dict, brief: dict,
             "row_stop_actual_deg": [float(m["march"]["stop_deg"]) for m in marches],
             "sign_conventions": sign_conventions,
         }
-        if asym["eps_m"] != 0.0:
+        if asym["eps_m"] != 0.0 and full:
             meta["full_ring_reason"] = ("the odd cos(phi) term breaks the left-right "
-                                        "mirror; only the full ring represents it (C2)")
+                                        "mirror; the seam-free full ring represents it (C2)")
+        if asym["eps_m"] != 0.0 and half_xz:
+            meta["half_xz_reason"] = ("the odd cos(phi) term is EVEN under the up/down "
+                                      "mirror phi -> -phi, so the upper half (phi 0..180, "
+                                      "mirror plane xz, quadrants '12') represents it while "
+                                      "keeping the left-right asymmetry")
         if task_harm["active"]:
             meta.update({
                 "reconstruction_label": ROWS_MOD_RECONSTRUCTION_LABEL,
@@ -2334,7 +2404,8 @@ def _rows_envelope_extents(spec: dict, knobs: dict, brief: dict,
     kind = _rows_check_spec(spec)
     knob_map = _knob_map(knobs)
     span = _rows_span_requested(kind, spec, knob_map, prefix)
-    bend = abs(float(rows_task_harmonics(knob_map, prefix, half=(span != "quarter"))
+    bend = abs(float(rows_task_harmonics(knob_map, prefix,
+                                         half=(span in ("half", "full")))
                      ["bend_sin1_mm"]))
     marches = _rows_marches(spec, knobs, brief, prefix)
     width = height = 0.0

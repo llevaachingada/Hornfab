@@ -1553,6 +1553,8 @@ def _rows_angles(meta: dict, n_phi: int) -> np.ndarray:
                ("half" if meta.get("half_model") else "quarter"))
     if span == "half":
         return np.linspace(-0.5 * math.pi, 0.5 * math.pi, n_phi)
+    if span == "half_xz":
+        return np.linspace(0.0, math.pi, n_phi)
     if span == "full":
         return np.linspace(0.0, 2.0 * math.pi, n_phi, endpoint=False)
     return np.linspace(0.0, 0.5 * math.pi, n_phi)
@@ -1735,8 +1737,11 @@ def preview_shape(root: Path, config_name: str, q: dict) -> dict:
             wall_mm = float(gspec.get("wall_thickness_mm", 3.0))
             inner, meta = grid_gen.grid_points(gspec, effective, cfg.brief)
             half = bool(meta.get("half_model", False))
-            closed_phi = (not bool(meta.get("quarter", True))) and not half
-            outer = grid_gen.grid_outer_points(inner, wall_mm, half=half, full=closed_phi)
+            half_xz = str(meta.get("row_span") or meta.get("span") or "") == "half_xz"
+            closed_phi = ((not bool(meta.get("quarter", True))) and not half
+                          and not half_xz)
+            outer = grid_gen.grid_outer_points(inner, wall_mm, half=half,
+                                               half_xz=half_xz, full=closed_phi)
             angles = _rows_angles(meta, int(inner.shape[0]))
             t_params = (time.perf_counter() - started) * 1000.0
             if is_rows:

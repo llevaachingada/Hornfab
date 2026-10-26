@@ -5430,6 +5430,7 @@
             "choices": [
               "quarter",
               "half",
+              "half_xz",
               "full"
             ],
             "hi": null,
@@ -5981,6 +5982,7 @@
             "choices": [
               "quarter",
               "half",
+              "half_xz",
               "full"
             ],
             "hi": null,
@@ -8888,6 +8890,7 @@
             "choices": [
               "quarter",
               "half",
+              "half_xz",
               "full"
             ],
             "hi": null,
@@ -9785,6 +9788,7 @@
             "choices": [
               "quarter",
               "half",
+              "half_xz",
               "full"
             ],
             "hi": null,
@@ -10162,6 +10166,7 @@
             "choices": [
               "quarter",
               "half",
+              "half_xz",
               "full"
             ],
             "hi": null,
@@ -10600,6 +10605,7 @@
             "choices": [
               "quarter",
               "half",
+              "half_xz",
               "full"
             ],
             "hi": null,
@@ -16801,6 +16807,7 @@
             "choices": [
               "quarter",
               "half",
+              "half_xz",
               "full"
             ],
             "hi": null,
@@ -17438,6 +17445,7 @@
             "choices": [
               "quarter",
               "half",
+              "half_xz",
               "full"
             ],
             "hi": null,
@@ -17962,6 +17970,7 @@
             "choices": [
               "quarter",
               "half",
+              "half_xz",
               "full"
             ],
             "hi": null,
@@ -18516,6 +18525,7 @@
             "choices": [
               "quarter",
               "half",
+              "half_xz",
               "full"
             ],
             "hi": null,
@@ -19070,6 +19080,7 @@
             "choices": [
               "quarter",
               "half",
+              "half_xz",
               "full"
             ],
             "hi": null,

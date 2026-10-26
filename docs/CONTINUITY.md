@@ -2,6 +2,15 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-26 (campaign Phase 0) - rows `span: half_xz` LANDED (impl-code2; lecleach_asym upper-half `'12'` model, 2x dof saving)
+
+- **What it does:** a fourth rows span, `half_xz` = phi 0..180 inclusive (ODD n_phi >= 25), the upper half across the xz mirror plane (y >= 0), quadrants `'12'`. `lecleach_asym` now accepts it: its `cos(phi)` asymmetry is even under the up/down mirror phi -> -phi, so the left-right asymmetry is intact and only a vertical mirror is used. Plain `span: half` (x >= 0) stays refused for `lecleach_asym`; `half_xz` is refused for the other rows kinds in this pass. The phi = 0/180 endpoint rows are pinned to y = 0 and the phi = 90 row to x = 0.
+- **Mesh machinery:** `_GRID_SYMMETRY_AXES['12'] = ('y',)` (the mesher's y=0/xz axis), now DERIVED from `sizing.SYMMETRY_PLANE` instead of a second hand-maintained quadrant table; `build_grid_mesh` expects quadrants `'12'` for a `half_xz` span and builds the outer shell with `grid_outer_points(..., half_xz=True)`. `sizing.py` needed no change (`'12' -> xz`, QUADRANT_FACTOR 2 already present). The GUI preview's outer-shell call was updated to pass the same flag.
+- **Measured (CPU, real `hornlab_mesher`):** the shipped `lecleach_asym_odd` seed's half_xz grid mirrors the full ring to **1.7e-13 mm** (direct upper half 1.4e-14 mm); meshing at a 2 kHz top gives **1,485 tris (half) vs 3,036 (full 48-row mirror-equivalent ring)**, ratio 2.04, symmetry plane xz, all 93 open edges on the plane, 0 non-manifold. `lecleach_asym_odd.yaml` is deliberately NOT switched to half_xz yet: the GPU equivalence A/B (<=0.05 dB / <=1 deg) is Phase B item 5.
+- **Artifacts:** a knob source changed (`ROWS_SPANS` feeds the span choice), so `tools/gen_param_catalog.py --write` regenerated `gui/static/param-catalog.v1.json`; `--check` is green and the `docs/reference` bytes were unchanged.
+- **Tests:** new `tests/test_design_generators_grid_halfxz.py` (5/5): point mirror vs the full ring, outer-shell endpoints, symmetry-table derivation from sizing, validation/kind scope, and the mesher-gated triangle count + xz plane.
+- **Verification:** standard offline gate green - `compileall` clean, `tools/gen_param_catalog.py --check` OK, `node --check` x8 OK, offline suite **1644 passed / 0 failed / 0 errors / 0 skipped** (`runs/step2d/suite.xml`; 1639 + 5 new). No GPU/Julia work.
+
 ## 2026-10-26 (campaign Phase 0) - overnight campaign runner LANDED (impl-code2; the RUNNER lane's written files, committed)
 
 - **What landed:** the other lane's written-but-uncommitted `tools/run_campaign_night.py` (730 lines) and `tests/test_tools_night_runner.py` (9 tests), staged by explicit path only.
