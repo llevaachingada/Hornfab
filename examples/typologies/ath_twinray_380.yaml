@@ -1,0 +1,99 @@
+# ath_twinray_380: TwinRay 380 Suite reconstruction (1.4-inch member).
+#
+# PRIMARY SOURCE (published dimensions, not a published script):
+#   https://at-horns.eu/twinray.html#twinray36-380
+#   36-10-380: 36 mm throat, 10 deg total throat angle, 380 x 303 mm mouth,
+#   192 mm depth, low-frequency point 580 Hz.
+#
+# HONEST LABEL: published-dimension reconstruction. The Ath definition script is not
+# public. The seed reproduces the published mouth with our OSSE law (h_a 34.7,
+# v_a 25.9, s 0.60, n 6.0 at L 192). Enclosure/mounting, the planar rim frame and any
+# rollback are not modelled.
+#
+# MORPH ROUTE: the mouth is the generator's searchable cross-section morph
+# (mouth: superellipse, mouth_exponent searched), not Ath's native Morph.Rate. The
+# native FREEFORM morph is exposed for generated typologies, but on this elliptical
+# base a rectangle target trips the mesher's non-convex outline guard (measured), so
+# the superellipse station is the honest working route here. Native morph is exercised
+# by ath_core (OSSE) and remains available through morph_target on the generator.
+name: ath_twinray_380
+family: FREEFORM
+brief_file: ../briefs/ath_twinray_380_14in.yaml
+
+generator:
+  name: typology
+  profile_h:
+    type: osse
+  profile_v:
+    type: osse
+  n_anchors: 16
+  max_wall_deg: 80.0
+  mouth: superellipse     # searchable cross-section outline (see MORPH ROUTE above)
+  wall_thickness_mm: 5.0
+
+seed_params:
+  L_mm: 192.0
+  h_a_deg: 34.7           # reproduces the published 380 mm width
+  v_a_deg: 25.9           # reproduces the published 303 mm height
+  h_s: 0.60
+  v_s: 0.60
+  h_n: 6.0
+  v_n: 6.0
+  h_q: 0.996
+  v_q: 0.996
+  h_k: 1.0
+  v_k: 1.0
+  mouth_exponent: 4.0      # rounded-rectangle-like superellipse (inferred)
+
+bounds:
+  L_mm: {lo: 160.0, hi: 240.0}
+  h_a_deg: {lo: 22.0, hi: 46.0}
+  v_a_deg: {lo: 16.0, hi: 40.0}
+  h_s: {lo: 0.25, hi: 0.95}
+  v_s: {lo: 0.25, hi: 0.95}
+  h_n: {lo: 3.5, hi: 9.0}
+  v_n: {lo: 3.5, hi: 9.0}
+  h_q: {lo: 0.96, hi: 1.0}
+  v_q: {lo: 0.96, hi: 1.0}
+  h_k: {lo: 0.6, hi: 1.6}
+  v_k: {lo: 0.6, hi: 1.6}
+  mouth_exponent: {lo: 2.0, hi: 12.0}
+
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 500.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 8.0
+  quadrants: '1'
+  dof_cap_screen: 5000
+  dof_cap_verify: 7000
+  dof_cap_final: 8900
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+search:
+  algorithm: cma
+  sigma0: 0.25
+  seed: 1234
+  budget: 200
+  popsize: null
+  tolfun: 0.001

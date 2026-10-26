@@ -39,9 +39,11 @@
 
 **Mesher mapping:** All pass directly as the mesher's own keys; `to_mesher_config` routes by `KeySpec.section` into `profile`, `cross_section`, `mesh`, `morph`, `gcurve` sub-dicts. (families.py:432-466)
 
-**Exposed in examples:** `osse_baseline.yaml` searches `a_deg, a0_deg, L_mm, n, s, q, k, exponent, aspect_ratio` (9 active dims). `throat_adapter.yaml` searches `throat_ext_length_mm, throat_ext_angle_deg, slot_length_mm, a0_deg, k` (5 dims). The MORPH and GCURVE keys are in the table but **no example config exercises them** — they are dead table entries from the search perspective.
+**Exposed in examples:** `osse_baseline.yaml` searches `a_deg, a0_deg, L_mm, n, s, q, k, exponent, aspect_ratio` (9 active dims). `throat_adapter.yaml` searches `throat_ext_length_mm, throat_ext_angle_deg, slot_length_mm, a0_deg, k` (5 dims). The GCURVE keys are in the table but **no example config exercises them**; the MORPH keys are now used by `ath_core` (native OSSE) and available to generated typologies (2026-10-25).
 
 **Not exposed:** `rot_deg`, `h`, `s1`, `s2`, `slot_length_mm` (only `throat_adapter`), all 13 `_MORPH` and `_GCURVE` keys. `04_TASK_DESIGN_MESH.md` fork table (p.12) explicitly identifies MORPH and GCURVE (superformula) as "trivial, already there" table rows. Adding `gcurve_sf_a` etc. to a YAML config is the entire code change needed.
+
+**2026-10-25 correction (later pass):** the morph half of this paragraph is superseded. `_MORPH` (including `morph_exponent`/target 3) is now legal on OSSE, R-OSSE, ICW and FREEFORM, and generated typologies can opt in through the generator's morph knobs. `ath_core` exercises native morph. `_GCURVE` remains exposed but unused; see `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md`.
 
 ---
 

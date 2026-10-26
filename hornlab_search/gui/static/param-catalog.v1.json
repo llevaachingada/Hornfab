@@ -6,6 +6,2126 @@
     "native"
   ],
   "typologies": {
+    "ath_core": {
+      "bounds_index": {
+        "L_mm": {
+          "file": "examples/typologies/ath_core.yaml",
+          "hi": 320.0,
+          "key": "bounds.L_mm",
+          "lo": 210.0,
+          "log": false,
+          "search": true
+        },
+        "a0_deg": {
+          "file": "examples/typologies/ath_core.yaml",
+          "hi": 1.2,
+          "key": "bounds.a0_deg",
+          "lo": 1.2,
+          "log": false,
+          "search": false
+        },
+        "a_deg": {
+          "file": "examples/typologies/ath_core.yaml",
+          "hi": 32.0,
+          "key": "bounds.a_deg",
+          "lo": 16.0,
+          "log": false,
+          "search": true
+        },
+        "aspect_ratio": {
+          "file": "examples/typologies/ath_core.yaml",
+          "hi": 1.0,
+          "key": "bounds.aspect_ratio",
+          "lo": 1.0,
+          "log": false,
+          "search": false
+        },
+        "exponent": {
+          "file": "examples/typologies/ath_core.yaml",
+          "hi": 2.0,
+          "key": "bounds.exponent",
+          "lo": 2.0,
+          "log": false,
+          "search": false
+        },
+        "k": {
+          "file": "examples/typologies/ath_core.yaml",
+          "hi": 1.6,
+          "key": "bounds.k",
+          "lo": 0.6,
+          "log": false,
+          "search": true
+        },
+        "morph_allow_shrinkage": {
+          "file": "examples/typologies/ath_core.yaml",
+          "hi": 1,
+          "key": "bounds.morph_allow_shrinkage",
+          "lo": 1,
+          "log": false,
+          "search": false
+        },
+        "morph_corner_mm": {
+          "file": "examples/typologies/ath_core.yaml",
+          "hi": 40.0,
+          "key": "bounds.morph_corner_mm",
+          "lo": 4.0,
+          "log": false,
+          "search": true
+        },
+        "morph_exponent": {
+          "file": "examples/typologies/ath_core.yaml",
+          "hi": 8.0,
+          "key": "bounds.morph_exponent",
+          "lo": 2.0,
+          "log": false,
+          "search": true
+        },
+        "morph_fixed": {
+          "file": "examples/typologies/ath_core.yaml",
+          "hi": 0.5,
+          "key": "bounds.morph_fixed",
+          "lo": 0.0,
+          "log": false,
+          "search": true
+        },
+        "morph_height_mm": {
+          "file": "examples/typologies/ath_core.yaml",
+          "hi": 500.0,
+          "key": "bounds.morph_height_mm",
+          "lo": 300.0,
+          "log": false,
+          "search": true
+        },
+        "morph_rate": {
+          "file": "examples/typologies/ath_core.yaml",
+          "hi": 6.0,
+          "key": "bounds.morph_rate",
+          "lo": 1.0,
+          "log": false,
+          "search": true
+        },
+        "morph_target": {
+          "file": "examples/typologies/ath_core.yaml",
+          "hi": 3,
+          "key": "bounds.morph_target",
+          "lo": 1,
+          "log": false,
+          "search": true
+        },
+        "morph_width_mm": {
+          "file": "examples/typologies/ath_core.yaml",
+          "hi": 500.0,
+          "key": "bounds.morph_width_mm",
+          "lo": 300.0,
+          "log": false,
+          "search": true
+        },
+        "n": {
+          "file": "examples/typologies/ath_core.yaml",
+          "hi": 9.0,
+          "key": "bounds.n",
+          "lo": 3.5,
+          "log": false,
+          "search": true
+        },
+        "q": {
+          "file": "examples/typologies/ath_core.yaml",
+          "hi": 1.0,
+          "key": "bounds.q",
+          "lo": 0.96,
+          "log": false,
+          "search": true
+        },
+        "r0_mm": {
+          "file": "examples/typologies/ath_core.yaml",
+          "hi": 25.4,
+          "key": "bounds.r0_mm",
+          "lo": 25.4,
+          "log": false,
+          "search": false
+        },
+        "s": {
+          "file": "examples/typologies/ath_core.yaml",
+          "hi": 0.95,
+          "key": "bounds.s",
+          "lo": 0.25,
+          "log": false,
+          "search": true
+        },
+        "s1": {
+          "file": "examples/typologies/ath_core.yaml",
+          "hi": 2.0,
+          "key": "bounds.s1",
+          "lo": 0.0,
+          "log": false,
+          "search": true
+        },
+        "s2": {
+          "file": "examples/typologies/ath_core.yaml",
+          "hi": 0.06,
+          "key": "bounds.s2",
+          "lo": 0.0,
+          "log": false,
+          "search": true
+        }
+      },
+      "brief_file": "examples/briefs/ath_core_2in.yaml",
+      "brief_tied": null,
+      "config_path": "examples/typologies/ath_core.yaml",
+      "description": "generalized ATH CORE 2-inch OS-SE + native mouth morph; target/exponent/width/height/corner/rate/fixed searched",
+      "documented": true,
+      "driver_exit_mm": null,
+      "empty_reason": null,
+      "family": "OSSE",
+      "group": "classical",
+      "kind": "native",
+      "knob_names": [
+        "L_mm",
+        "a0_deg",
+        "a_deg",
+        "aspect_ratio",
+        "exponent",
+        "k",
+        "morph_allow_shrinkage",
+        "morph_corner_mm",
+        "morph_exponent",
+        "morph_fixed",
+        "morph_height_mm",
+        "morph_rate",
+        "morph_target",
+        "morph_width_mm",
+        "n",
+        "q",
+        "r0_mm",
+        "s",
+        "s1",
+        "s2"
+      ],
+      "knobs": [
+        {
+          "base_knob": "L_mm",
+          "bounds_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "bounds.L_mm"
+          },
+          "code_ref": "hornlab_mesher.profile_formulas.calculate_osse",
+          "context": "native:osse",
+          "contexts": [
+            "native",
+            "native:icw",
+            "native:osse"
+          ],
+          "default": 260.0,
+          "default_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "seed_params.L_mm"
+          },
+          "detail": "The mesher requires it positive. In the total-length mode the section is carved differently, so the same value can mean a different total span.",
+          "doc_ref": [
+            "docs/research/typologies/MESHER_TYPOLOGIES.md",
+            "### 1b. OSSE parameters"
+          ],
+          "documented": true,
+          "flags": [
+            "overloaded"
+          ],
+          "formula": "z_main in [0, L]",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": "float",
+            "lo": null,
+            "note": null,
+            "section": "profile",
+            "source": {
+              "file": "hornlab_search/design/families.py",
+              "key": "FAMILY_KEYS.OSSE.L_mm"
+            }
+          },
+          "knob": "L_mm",
+          "label": "OSSE main-section length",
+          "physical": "Sets the depth of the flared OSSE body.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": {
+            "hi": 320.0,
+            "lo": 210.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Length of the main OSSE section; extension and slot may add to the total.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "a0_deg",
+          "bounds_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "bounds.a0_deg"
+          },
+          "code_ref": "hornlab_mesher.profile_formulas.calculate_osse",
+          "context": "native",
+          "contexts": [],
+          "default": 1.2,
+          "default_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "seed_params.a0_deg"
+          },
+          "detail": "OSSE carries it in the 2 k r0 z tan(a0) term of the base radius, and R-OSSE carries the same term in its throat-radius curve. ICW uses it as the initial tangent angle theta0 of the curvature integral. It should match the driver exit angle when the wall is meant to continue the driver.",
+          "doc_ref": [
+            "docs/research/typologies/MESHER_TYPOLOGIES.md",
+            "### 1b. OSSE parameters"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "OSSE/R-OSSE: c2 = 2 k r0 tan(a0); ICW: theta(0) = theta0",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": "float",
+            "lo": null,
+            "note": null,
+            "section": "profile",
+            "source": {
+              "file": "hornlab_search/design/families.py",
+              "key": "FAMILY_KEYS.OSSE.a0_deg"
+            }
+          },
+          "knob": "a0_deg",
+          "label": "Throat half-angle",
+          "physical": "Sets the initial expansion slope at the driver exit.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": {
+            "hi": 1.2,
+            "lo": 1.2,
+            "log": false,
+            "search": false
+          },
+          "summary": "Wall half-angle at the throat, passed to the OSSE, R-OSSE and ICW meridian.",
+          "unit": "deg"
+        },
+        {
+          "base_knob": "a_deg",
+          "bounds_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "bounds.a_deg"
+          },
+          "code_ref": "hornlab_mesher.profile_formulas.calculate_osse",
+          "context": "native",
+          "contexts": [
+            "native"
+          ],
+          "default": 24.2,
+          "default_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "seed_params.a_deg"
+          },
+          "detail": "The mesher measures the angle as a half-angle from the axis. The target block in a config measures the total included angle, which is the value the objective scores. Read the block before comparing the two.",
+          "doc_ref": [
+            "docs/research/typologies/MESHER_TYPOLOGIES.md",
+            "### 1b. OSSE parameters"
+          ],
+          "documented": true,
+          "flags": [
+            "overloaded"
+          ],
+          "formula": "OSSE: base(z) carries tan(a); R-OSSE: c3 = tan(a)^2",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": "float",
+            "lo": null,
+            "note": null,
+            "section": "profile",
+            "source": {
+              "file": "hornlab_search/design/families.py",
+              "key": "FAMILY_KEYS.OSSE.a_deg"
+            }
+          },
+          "knob": "a_deg",
+          "label": "Native coverage half-angle",
+          "physical": "Sets how wide the wall opens relative to the axis.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": {
+            "hi": 32.0,
+            "lo": 16.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "OSSE/R-OSSE coverage half-angle in the mesher's own convention.",
+          "unit": "deg"
+        },
+        {
+          "base_knob": "aspect_ratio",
+          "bounds_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "bounds.aspect_ratio"
+          },
+          "code_ref": "hornlab_search.design.families.FAMILY_KEYS",
+          "context": "native",
+          "contexts": [],
+          "default": 1.0,
+          "default_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "seed_params.aspect_ratio"
+          },
+          "detail": "The mesher scales the horizontal and vertical half-widths of the outline by this ratio. A value of one gives a circular section; larger values widen it. It does not change either meridian and is not a coverage angle.",
+          "doc_ref": [
+            "docs/research/typologies/MESHER_TYPOLOGIES.md",
+            "## 7. Geometric / cross-section model (all formulas)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "b = a * aspect_ratio in the ellipse/superellipse station",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": "float",
+            "lo": null,
+            "note": null,
+            "section": "cross_section",
+            "source": {
+              "file": "hornlab_search/design/families.py",
+              "key": "FAMILY_KEYS.OSSE.aspect_ratio"
+            }
+          },
+          "knob": "aspect_ratio",
+          "label": "Cross-section aspect ratio",
+          "physical": "Widens or narrows the cross-section without changing the wall profiles.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": {
+            "hi": 1.0,
+            "lo": 1.0,
+            "log": false,
+            "search": false
+          },
+          "summary": "Width-to-height scaling of the cross-section relative to the meridian radius.",
+          "unit": null
+        },
+        {
+          "base_knob": "exponent",
+          "bounds_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "bounds.exponent"
+          },
+          "code_ref": "hornlab_search.design.families.FAMILY_KEYS",
+          "context": "native",
+          "contexts": [
+            "native"
+          ],
+          "default": 2.0,
+          "default_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "seed_params.exponent"
+          },
+          "detail": "The research basis states a default of 2.0 (a plain ellipse); the shipped generator default for the same idea is 4.0 (registry.DEFAULT_KNOBS). This entry records both claims and does not choose between them. It is not the generator's mouth_exponent key, although the two describe the same idea.",
+          "doc_ref": [
+            "docs/plan/12_RESEARCH_BASIS.md",
+            "## 4. The geometry we would have written already exists"
+          ],
+          "documented": true,
+          "flags": [
+            "doc_mismatch",
+            "overloaded"
+          ],
+          "formula": "( |cos(phi)/a|^e + |sin(phi)/b|^e )^(-1/e)",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": "float",
+            "lo": null,
+            "note": null,
+            "section": "cross_section",
+            "source": {
+              "file": "hornlab_search/design/families.py",
+              "key": "FAMILY_KEYS.OSSE.exponent"
+            }
+          },
+          "knob": "exponent",
+          "label": "Native cross-section exponent",
+          "physical": "Squares off or rounds the cross-section outline.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": {
+            "hi": 2.0,
+            "lo": 2.0,
+            "log": false,
+            "search": false
+          },
+          "summary": "Superellipse exponent of the outline; the documented default is disputed.",
+          "unit": null
+        },
+        {
+          "base_knob": "k",
+          "bounds_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "bounds.k"
+          },
+          "code_ref": "hornlab_mesher.profile_formulas.calculate_osse",
+          "context": "native",
+          "contexts": [],
+          "default": 1.0,
+          "default_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "seed_params.k"
+          },
+          "detail": "The base radius carries (k r0) and r0(1-k) terms plus the tangent-driven z term, so k reshapes the wall between the throat and the far-field angle. R-OSSE reuses it in its throat-radius curve. It is dimensionless and is not a termination control.",
+          "doc_ref": [
+            "docs/research/typologies/MESHER_TYPOLOGIES.md",
+            "### 1b. OSSE parameters"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "base(z) = sqrt((k r0)^2 + 2 k r0 z tan(a0) + z^2 tan(a)^2) + r0(1-k)",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": "float",
+            "lo": null,
+            "note": null,
+            "section": "profile",
+            "source": {
+              "file": "hornlab_search/design/families.py",
+              "key": "FAMILY_KEYS.OSSE.k"
+            }
+          },
+          "knob": "k",
+          "label": "OS-SE shape factor",
+          "physical": "Reshapes the wall between the throat and the far-field angle.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": {
+            "hi": 1.6,
+            "lo": 0.6,
+            "log": false,
+            "search": true
+          },
+          "summary": "Blends the OS-SE base radius between its radius term and its tangent term.",
+          "unit": null
+        },
+        {
+          "base_knob": "morph_allow_shrinkage",
+          "bounds_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "bounds.morph_allow_shrinkage"
+          },
+          "code_ref": "hornlab_mesher.profile_morph._resolve_morph_half_dimensions",
+          "context": "native",
+          "contexts": [],
+          "default": 1,
+          "default_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "seed_params.morph_allow_shrinkage"
+          },
+          "detail": "Without the flag the mesher refuses a target that would shrink the outline. With it the morph may pull the section inward. Ath calls the same control Morph.AllowShrinkage.",
+          "doc_ref": [
+            "docs/research/typologies/MESHER_TYPOLOGIES.md",
+            "### 6a. Cross-section morphing (ALL formula families)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": "int",
+            "lo": null,
+            "note": null,
+            "section": "morph",
+            "source": {
+              "file": "hornlab_search/design/families.py",
+              "key": "FAMILY_KEYS.OSSE.morph_allow_shrinkage"
+            }
+          },
+          "knob": "morph_allow_shrinkage",
+          "label": "Allow morph shrinkage",
+          "physical": "Allows or refuses a mouth outline that narrows toward the target.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": {
+            "hi": 1,
+            "lo": 1,
+            "log": false,
+            "search": false
+          },
+          "summary": "0/1 flag that lets a morph target be smaller than the current mouth extent.",
+          "unit": null
+        },
+        {
+          "base_knob": "morph_corner_mm",
+          "bounds_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "bounds.morph_corner_mm"
+          },
+          "code_ref": "hornlab_mesher.profile_morph._resolve_morph_half_dimensions",
+          "context": "native",
+          "contexts": [],
+          "default": 16.5,
+          "default_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "seed_params.morph_corner_mm"
+          },
+          "detail": "The radius is clamped against the target half-dimensions at run time. It is used only for a rounded-rectangle target. Ath calls the same control Morph.CornerRadius.",
+          "doc_ref": [
+            "docs/research/typologies/MESHER_TYPOLOGIES.md",
+            "### 6a. Cross-section morphing (ALL formula families)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": "float",
+            "lo": null,
+            "note": null,
+            "section": "morph",
+            "source": {
+              "file": "hornlab_search/design/families.py",
+              "key": "FAMILY_KEYS.OSSE.morph_corner_mm"
+            }
+          },
+          "knob": "morph_corner_mm",
+          "label": "Morph corner radius",
+          "physical": "Rounds the corners of a rectangular morphed mouth.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": {
+            "hi": 40.0,
+            "lo": 4.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Corner radius of a rounded-rectangle morph target.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "morph_exponent",
+          "bounds_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "bounds.morph_exponent"
+          },
+          "code_ref": "hornlab_mesher.profile_morph._morph_target_radius_at_angle",
+          "context": "native",
+          "contexts": [],
+          "default": 4.0,
+          "default_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "seed_params.morph_exponent"
+          },
+          "detail": "The mesher reads this only when morph_target is 3, then clamps it into the superellipse range before building the target outline. Ath's guide documents only targets 0-2; target 3 is a mesher extension.",
+          "doc_ref": [
+            "docs/research/typologies/MESHER_TYPOLOGIES.md",
+            "### 6a. Cross-section morphing (ALL formula families)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": 16.0,
+            "kind": "float",
+            "lo": 2.0,
+            "note": null,
+            "section": "morph",
+            "source": {
+              "file": "hornlab_search/design/families.py",
+              "key": "FAMILY_KEYS.OSSE.morph_exponent"
+            }
+          },
+          "knob": "morph_exponent",
+          "label": "Morph superellipse exponent",
+          "physical": "Squares off or rounds a superellipse morphed mouth.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": {
+            "hi": 8.0,
+            "lo": 2.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Superellipse exponent of a morph target 3 outline.",
+          "unit": null
+        },
+        {
+          "base_knob": "morph_fixed",
+          "bounds_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "bounds.morph_fixed"
+          },
+          "code_ref": "hornlab_mesher.profile_morph._morph_factor",
+          "context": "native",
+          "contexts": [],
+          "default": 0.0,
+          "default_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "seed_params.morph_fixed"
+          },
+          "detail": "The fixed part holds the base section before the morph factor becomes nonzero. The remaining axial fraction is remapped before the rate power is applied. Ath calls the same control Morph.FixedPart.",
+          "doc_ref": [
+            "docs/research/typologies/MESHER_TYPOLOGIES.md",
+            "### 6a. Cross-section morphing (ALL formula families)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "factor = 0 for t <= morph_fixed",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": "float",
+            "lo": null,
+            "note": null,
+            "section": "morph",
+            "source": {
+              "file": "hornlab_search/design/families.py",
+              "key": "FAMILY_KEYS.OSSE.morph_fixed"
+            }
+          },
+          "knob": "morph_fixed",
+          "label": "Morph fixed part",
+          "physical": "Delays the start of the outline change along the horn.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": {
+            "hi": 0.5,
+            "lo": 0.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Axial fraction where the morph begins; zero starts at the throat.",
+          "unit": null
+        },
+        {
+          "base_knob": "morph_height_mm",
+          "bounds_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "bounds.morph_height_mm"
+          },
+          "code_ref": "hornlab_mesher.profile_morph._morph_factor",
+          "context": "native",
+          "contexts": [],
+          "default": 397.0,
+          "default_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "seed_params.morph_height_mm"
+          },
+          "detail": "A zero height lets the mesher infer the target height from the mouth extent. The value is a full height, not a half-height. Ath calls the same control Morph.TargetHeight.",
+          "doc_ref": [
+            "docs/research/typologies/MESHER_TYPOLOGIES.md",
+            "### 6a. Cross-section morphing (ALL formula families)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": "float",
+            "lo": null,
+            "note": null,
+            "section": "morph",
+            "source": {
+              "file": "hornlab_search/design/families.py",
+              "key": "FAMILY_KEYS.OSSE.morph_height_mm"
+            }
+          },
+          "knob": "morph_height_mm",
+          "label": "Morph target height",
+          "physical": "Sets how tall the morphed mouth outline becomes.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": {
+            "hi": 500.0,
+            "lo": 300.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Full target height of a rectangular or superellipse morph at the mouth.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "morph_rate",
+          "bounds_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "bounds.morph_rate"
+          },
+          "code_ref": "hornlab_mesher.profile_morph._morph_factor",
+          "context": "native",
+          "contexts": [],
+          "default": 3.0,
+          "default_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "seed_params.morph_rate"
+          },
+          "detail": "The factor is the remapped axial fraction raised to this power, so larger values delay the morph until nearer the mouth. It only matters when a morph target is active. Ath calls the same control Morph.Rate.",
+          "doc_ref": [
+            "docs/research/typologies/MESHER_TYPOLOGIES.md",
+            "### 6a. Cross-section morphing (ALL formula families)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "factor = clamp((t - morph_fixed)/(1 - morph_fixed), 0, 1)^morph_rate",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": "float",
+            "lo": 0.0,
+            "note": null,
+            "section": "morph",
+            "source": {
+              "file": "hornlab_search/design/families.py",
+              "key": "FAMILY_KEYS.OSSE.morph_rate"
+            }
+          },
+          "knob": "morph_rate",
+          "label": "Morph rate",
+          "physical": "Moves how quickly the outline changes along the horn.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": {
+            "hi": 6.0,
+            "lo": 1.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Power-law rate of the morph blend from the fixed part to the mouth.",
+          "unit": null
+        },
+        {
+          "base_knob": "morph_target",
+          "bounds_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "bounds.morph_target"
+          },
+          "code_ref": "hornlab_mesher.profile_morph._morph_target_shape",
+          "context": "native",
+          "contexts": [],
+          "default": 1,
+          "default_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "seed_params.morph_target"
+          },
+          "detail": "families.py names the off, rectangle, circle and superellipse codes; the superellipse target reads morph_exponent. The morph factor begins at morph_fixed and follows the rate power toward the mouth. Ath's own vocabulary calls this control Morph.TargetShape.",
+          "doc_ref": [
+            "docs/research/typologies/MESHER_TYPOLOGIES.md",
+            "### 6a. Cross-section morphing (ALL formula families)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "r(t, phi) = r_base(t, phi) + factor * (r_target(phi) - r_mouth_base(phi))",
+          "hard": {
+            "choices": null,
+            "hi": 3,
+            "kind": "int",
+            "lo": 0,
+            "note": null,
+            "section": "morph",
+            "source": {
+              "file": "hornlab_search/design/families.py",
+              "key": "FAMILY_KEYS.OSSE.morph_target"
+            }
+          },
+          "knob": "morph_target",
+          "label": "Morph target shape",
+          "physical": "Blends the round section into a target outline toward the mouth.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": {
+            "hi": 3,
+            "lo": 1,
+            "log": false,
+            "search": true
+          },
+          "summary": "Cross-section shape the mouth morphs toward: off, rectangle, circle or superellipse.",
+          "unit": null
+        },
+        {
+          "base_knob": "morph_width_mm",
+          "bounds_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "bounds.morph_width_mm"
+          },
+          "code_ref": "hornlab_mesher.profile_morph._morph_factor",
+          "context": "native",
+          "contexts": [],
+          "default": 397.0,
+          "default_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "seed_params.morph_width_mm"
+          },
+          "detail": "A zero width lets the mesher infer the target width from the mouth extent. The value is a full width, not a half-width. Ath calls the same control Morph.TargetWidth.",
+          "doc_ref": [
+            "docs/research/typologies/MESHER_TYPOLOGIES.md",
+            "### 6a. Cross-section morphing (ALL formula families)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": "float",
+            "lo": null,
+            "note": null,
+            "section": "morph",
+            "source": {
+              "file": "hornlab_search/design/families.py",
+              "key": "FAMILY_KEYS.OSSE.morph_width_mm"
+            }
+          },
+          "knob": "morph_width_mm",
+          "label": "Morph target width",
+          "physical": "Sets how wide the morphed mouth outline becomes.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": {
+            "hi": 500.0,
+            "lo": 300.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Full target width of a rectangular or superellipse morph at the mouth.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "n",
+          "bounds_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "bounds.n"
+          },
+          "code_ref": "hornlab_mesher.profile_formulas.calculate_osse",
+          "context": "native",
+          "contexts": [
+            "native"
+          ],
+          "default": 6.75,
+          "default_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "seed_params.n"
+          },
+          "detail": "It is read only while the termination amplitude is nonzero. The biradial generator meaning of n is not asserted in this context.",
+          "doc_ref": [
+            "docs/research/typologies/MESHER_TYPOLOGIES.md",
+            "### 1b. OSSE parameters"
+          ],
+          "documented": true,
+          "flags": [
+            "overloaded"
+          ],
+          "formula": "term = (s L/q)(1 - (1 - z_norm^n)^(1/n))",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": "float",
+            "lo": null,
+            "note": null,
+            "section": "profile",
+            "source": {
+              "file": "hornlab_search/design/families.py",
+              "key": "FAMILY_KEYS.OSSE.n"
+            }
+          },
+          "knob": "n",
+          "label": "OSSE termination exponent",
+          "physical": "Sharpens or softens the OSSE mouth roll.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": {
+            "hi": 9.0,
+            "lo": 3.5,
+            "log": false,
+            "search": true
+          },
+          "summary": "Superellipse exponent of the OSSE termination term.",
+          "unit": null
+        },
+        {
+          "base_knob": "q",
+          "bounds_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "bounds.q"
+          },
+          "code_ref": "hornlab_mesher.profile_formulas.calculate_osse",
+          "context": "native:osse",
+          "contexts": [
+            "native",
+            "native:osse",
+            "native:rosse"
+          ],
+          "default": 0.996,
+          "default_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "seed_params.q"
+          },
+          "detail": "It sets how quickly the termination term saturates with axial station. The mesher requires it positive whenever the termination amplitude s is nonzero.",
+          "doc_ref": [
+            "docs/research/typologies/MESHER_TYPOLOGIES.md",
+            "### 1b. OSSE parameters"
+          ],
+          "documented": true,
+          "flags": [
+            "overloaded"
+          ],
+          "formula": "z_norm = q z/L; term = (s L/q)(1 - (1 - z_norm^n)^(1/n))",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": "float",
+            "lo": null,
+            "note": null,
+            "section": "profile",
+            "source": {
+              "file": "hornlab_search/design/families.py",
+              "key": "FAMILY_KEYS.OSSE.q"
+            }
+          },
+          "knob": "q",
+          "label": "OSSE termination saturation",
+          "physical": "Changes how abruptly the terminated outline reaches its corner.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": {
+            "hi": 1.0,
+            "lo": 0.96,
+            "log": false,
+            "search": true
+          },
+          "summary": "Superellipse saturation of the OSSE termination; positive while s is nonzero.",
+          "unit": null
+        },
+        {
+          "base_knob": "r0_mm",
+          "bounds_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "bounds.r0_mm"
+          },
+          "code_ref": "hornlab_mesher.profile_formulas.calculate_osse",
+          "context": "native",
+          "contexts": [],
+          "default": 25.4,
+          "default_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "seed_params.r0_mm"
+          },
+          "detail": "OSSE and R-OSSE use it as the base radius of the wall law, ICW uses it as the throat integration constant, and a FREEFORM meridian starts at its own first anchor radius. It is shared by the H and V planes unless a per-azimuth expression is used. The mesher rejects a non-positive value.",
+          "doc_ref": [
+            "docs/research/typologies/MESHER_TYPOLOGIES.md",
+            "### 1b. OSSE parameters"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "OSSE: base(z) starts at k r0 + r0(1-k); ICW: r(s) = r0 + S integral sin(theta)",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": "float",
+            "lo": null,
+            "note": null,
+            "section": "profile",
+            "source": {
+              "file": "hornlab_search/design/families.py",
+              "key": "FAMILY_KEYS.OSSE.r0_mm"
+            }
+          },
+          "knob": "r0_mm",
+          "label": "Throat radius",
+          "physical": "Sets the throat area and the driver exit the wall must match.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": {
+            "hi": 25.4,
+            "lo": 25.4,
+            "log": false,
+            "search": false
+          },
+          "summary": "Throat radius every native family starts its meridian from.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "s",
+          "bounds_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "bounds.s"
+          },
+          "code_ref": "hornlab_mesher.profile_formulas.calculate_osse",
+          "context": "native",
+          "contexts": [],
+          "default": 0.715,
+          "default_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "seed_params.s"
+          },
+          "detail": "A nonzero amplitude turns on the superellipse termination and makes n and q active. A zero value leaves the plain OS wall. R-OSSE has no s; its rollback comes from the blended curves and tmax, not from this key.",
+          "doc_ref": [
+            "docs/research/typologies/MESHER_TYPOLOGIES.md",
+            "### 1b. OSSE parameters"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "term is added to base only while s != 0",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": "float",
+            "lo": null,
+            "note": null,
+            "section": "profile",
+            "source": {
+              "file": "hornlab_search/design/families.py",
+              "key": "FAMILY_KEYS.OSSE.s"
+            }
+          },
+          "knob": "s",
+          "label": "Termination amplitude",
+          "physical": "Rolls the OSSE mouth toward a superellipse outline.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": {
+            "hi": 0.95,
+            "lo": 0.25,
+            "log": false,
+            "search": true
+          },
+          "summary": "OSSE superellipse termination amplitude; zero leaves the plain OS wall.",
+          "unit": null
+        },
+        {
+          "base_knob": "s1",
+          "bounds_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "bounds.s1"
+          },
+          "code_ref": "hornlab_mesher.throat_stretch.stretch_coefficients",
+          "context": "native",
+          "contexts": [],
+          "default": 1.14,
+          "default_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "seed_params.s1"
+          },
+          "detail": "The mesher maps the main-section axial coordinate through x + s1 * degrees(atan(s2 x)), so s1 multiplies an angle and is not dimensionless. It is active only with a nonzero s2. The coefficients must be plain finite numbers, and various rotation/slot combinations are refused.",
+          "doc_ref": [
+            "docs/research/typologies/MESHER_TYPOLOGIES.md",
+            "### 6f. Throat stretch (OSSE, R-OSSE)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "x_stretched = x + s1 * degrees(atan(s2 * x))",
+          "hard": {
+            "choices": null,
+            "hi": 10.0,
+            "kind": "float",
+            "lo": 0.0,
+            "note": null,
+            "section": "profile",
+            "source": {
+              "file": "hornlab_search/design/families.py",
+              "key": "FAMILY_KEYS.OSSE.s1"
+            }
+          },
+          "knob": "s1",
+          "label": "Throat stretch coefficient 1",
+          "physical": "Redistributes axial stations toward or away from the throat.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": {
+            "hi": 2.0,
+            "lo": 0.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Strength of the OSSE/R-OSSE nonlinear throat-stretch mapping.",
+          "unit": "mm/deg"
+        },
+        {
+          "base_knob": "s2",
+          "bounds_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "bounds.s2"
+          },
+          "code_ref": "hornlab_mesher.throat_stretch.stretch_coefficients",
+          "context": "native",
+          "contexts": [],
+          "default": 0.025,
+          "default_source": {
+            "file": "examples/typologies/ath_core.yaml",
+            "key": "seed_params.s2"
+          },
+          "detail": "s2 sets how quickly the arctangent saturates with axial distance, so its unit is inverse length. It is active only together with a nonzero s1. The mesher refuses a slot combined with throat stretch and refuses per-azimuth forms of either coefficient.",
+          "doc_ref": [
+            "docs/research/typologies/MESHER_TYPOLOGIES.md",
+            "### 6f. Throat stretch (OSSE, R-OSSE)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "x_stretched = x + s1 * degrees(atan(s2 * x))",
+          "hard": {
+            "choices": null,
+            "hi": 10.0,
+            "kind": "float",
+            "lo": 0.0,
+            "note": null,
+            "section": "profile",
+            "source": {
+              "file": "hornlab_search/design/families.py",
+              "key": "FAMILY_KEYS.OSSE.s2"
+            }
+          },
+          "knob": "s2",
+          "label": "Throat stretch coefficient 2",
+          "physical": "Moves where the stretched region becomes nearly linear again.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": {
+            "hi": 0.06,
+            "lo": 0.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Inverse-length scale inside the throat-stretch arctangent.",
+          "unit": "1/mm"
+        }
+      ],
+      "name": "ath_core",
+      "non_native_keys": [],
+      "source_status": "catalog",
+      "symmetry": "hv"
+    },
+    "ath_twinray_380": {
+      "bounds_index": {
+        "L_mm": {
+          "file": "examples/typologies/ath_twinray_380.yaml",
+          "hi": 240.0,
+          "key": "bounds.L_mm",
+          "lo": 160.0,
+          "log": false,
+          "search": true
+        },
+        "h_a_deg": {
+          "file": "examples/typologies/ath_twinray_380.yaml",
+          "hi": 46.0,
+          "key": "bounds.h_a_deg",
+          "lo": 22.0,
+          "log": false,
+          "search": true
+        },
+        "h_k": {
+          "file": "examples/typologies/ath_twinray_380.yaml",
+          "hi": 1.6,
+          "key": "bounds.h_k",
+          "lo": 0.6,
+          "log": false,
+          "search": true
+        },
+        "h_n": {
+          "file": "examples/typologies/ath_twinray_380.yaml",
+          "hi": 9.0,
+          "key": "bounds.h_n",
+          "lo": 3.5,
+          "log": false,
+          "search": true
+        },
+        "h_q": {
+          "file": "examples/typologies/ath_twinray_380.yaml",
+          "hi": 1.0,
+          "key": "bounds.h_q",
+          "lo": 0.96,
+          "log": false,
+          "search": true
+        },
+        "h_s": {
+          "file": "examples/typologies/ath_twinray_380.yaml",
+          "hi": 0.95,
+          "key": "bounds.h_s",
+          "lo": 0.25,
+          "log": false,
+          "search": true
+        },
+        "mouth_exponent": {
+          "file": "examples/typologies/ath_twinray_380.yaml",
+          "hi": 12.0,
+          "key": "bounds.mouth_exponent",
+          "lo": 2.0,
+          "log": false,
+          "search": true
+        },
+        "v_a_deg": {
+          "file": "examples/typologies/ath_twinray_380.yaml",
+          "hi": 40.0,
+          "key": "bounds.v_a_deg",
+          "lo": 16.0,
+          "log": false,
+          "search": true
+        },
+        "v_k": {
+          "file": "examples/typologies/ath_twinray_380.yaml",
+          "hi": 1.6,
+          "key": "bounds.v_k",
+          "lo": 0.6,
+          "log": false,
+          "search": true
+        },
+        "v_n": {
+          "file": "examples/typologies/ath_twinray_380.yaml",
+          "hi": 9.0,
+          "key": "bounds.v_n",
+          "lo": 3.5,
+          "log": false,
+          "search": true
+        },
+        "v_q": {
+          "file": "examples/typologies/ath_twinray_380.yaml",
+          "hi": 1.0,
+          "key": "bounds.v_q",
+          "lo": 0.96,
+          "log": false,
+          "search": true
+        },
+        "v_s": {
+          "file": "examples/typologies/ath_twinray_380.yaml",
+          "hi": 0.95,
+          "key": "bounds.v_s",
+          "lo": 0.25,
+          "log": false,
+          "search": true
+        }
+      },
+      "brief_file": "examples/briefs/ath_twinray_380_14in.yaml",
+      "brief_tied": null,
+      "config_path": "examples/typologies/ath_twinray_380.yaml",
+      "description": "TwinRay 380 1.4-inch published-dimension reconstruction + searchable superellipse mouth; full shape/outline search",
+      "documented": true,
+      "driver_exit_mm": null,
+      "empty_reason": null,
+      "family": "FREEFORM",
+      "group": "classical",
+      "kind": "generator",
+      "knob_names": [
+        "L_mm",
+        "h_a_deg",
+        "h_k",
+        "h_n",
+        "h_q",
+        "h_s",
+        "max_wall_deg",
+        "mouth",
+        "mouth_exponent",
+        "n_anchors",
+        "v_a_deg",
+        "v_k",
+        "v_n",
+        "v_q",
+        "v_s",
+        "wall_thickness_mm"
+      ],
+      "knobs": [
+        {
+          "base_knob": "L_mm",
+          "bounds_source": {
+            "file": "examples/typologies/ath_twinray_380.yaml",
+            "key": "bounds.L_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.registry.materialize",
+          "context": "generator",
+          "contexts": [],
+          "default": 192.0,
+          "default_source": {
+            "file": "examples/typologies/ath_twinray_380.yaml",
+            "key": "seed_params.L_mm"
+          },
+          "detail": "The generator builds both meridians to one z span, so L_mm is shared rather than a per-plane length. It is the fixed-length dimension for conical, exponential, hypex and OSSE; length-derived types may only be shortened to it. The brief envelope still bounds the final depth.",
+          "doc_ref": [
+            "docs/research/typologies/MESHER_TYPOLOGIES.md",
+            "## 4. FREEFORM"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "z = s L, with s the normalised axial fraction",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": "float",
+            "lo": null,
+            "note": "mesher schema limit for the same-named family key; the generator law may validate the knob separately",
+            "section": "profile",
+            "source": {
+              "file": "hornlab_search/design/families.py",
+              "key": "FAMILY_KEYS.ICW.L_mm"
+            }
+          },
+          "knob": "L_mm",
+          "label": "Depth",
+          "physical": "Moves the mouth plane in or out along the horn axis.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": {
+            "hi": 240.0,
+            "lo": 160.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Axial depth shared by both meridians, throat to mouth.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "a_deg",
+          "bounds_source": {
+            "file": "examples/typologies/ath_twinray_380.yaml",
+            "key": "bounds.h_a_deg"
+          },
+          "code_ref": "hornlab_search.design.generators.registry.build_meridian",
+          "context": "generator",
+          "contexts": [
+            "generator",
+            "generator:biradial",
+            "generator:qtw"
+          ],
+          "default": 34.7,
+          "default_source": {
+            "file": "examples/typologies/ath_twinray_380.yaml",
+            "key": "seed_params.h_a_deg"
+          },
+          "detail": "The OSSE wall starts at the brief's driver exit angle and approaches this coverage half-angle. It is a half-angle in the mesher's convention.",
+          "doc_ref": [
+            "docs/research/typologies/MESHER_TYPOLOGIES.md",
+            "### 1b. OSSE parameters"
+          ],
+          "documented": true,
+          "flags": [
+            "overloaded"
+          ],
+          "formula": "OSSE: a is the far-field wall half-angle",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": "float",
+            "lo": null,
+            "note": "mesher schema limit for the same-named family key; the generator law may validate the knob separately",
+            "section": "profile",
+            "source": {
+              "file": "hornlab_search/design/families.py",
+              "key": "FAMILY_KEYS.OSSE.a_deg"
+            }
+          },
+          "knob": "h_a_deg",
+          "label": "H-plane OSSE coverage half-angle",
+          "physical": "Widens or narrows the OSSE mouth for a fixed depth.",
+          "plane": "H",
+          "prefix": "h",
+          "role": null,
+          "search": {
+            "hi": 46.0,
+            "lo": 22.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Far-field wall half-angle of the OSSE meridian; the throat angle is the driver exit.",
+          "unit": "deg"
+        },
+        {
+          "base_knob": "k",
+          "bounds_source": {
+            "file": "examples/typologies/ath_twinray_380.yaml",
+            "key": "bounds.h_k"
+          },
+          "code_ref": "hornlab_search.design.generators.registry._osse",
+          "context": "generator",
+          "contexts": [],
+          "default": 1.0,
+          "default_source": {
+            "file": "examples/typologies/ath_twinray_380.yaml",
+            "key": "seed_params.h_k"
+          },
+          "detail": "The OS-SE wall law carries a shape factor k alongside the coverage and termination knobs. It is dimensionless and is passed straight to the mesher's own OSSE formula rather than reimplemented here.",
+          "doc_ref": [
+            "docs/research/typologies/MESHER_TYPOLOGIES.md",
+            "### 1b. OSSE parameters"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "OS-SE wall law (hornlab_mesher.profile_formulas.profile_points)",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": "float",
+            "lo": null,
+            "note": "mesher schema limit for the same-named family key; the generator law may validate the knob separately",
+            "section": "profile",
+            "source": {
+              "file": "hornlab_search/design/families.py",
+              "key": "FAMILY_KEYS.OSSE.k"
+            }
+          },
+          "knob": "h_k",
+          "label": "H-plane OSSE k",
+          "physical": "Reshapes the OS wall between the throat and the far-field angle.",
+          "plane": "H",
+          "prefix": "h",
+          "role": null,
+          "search": {
+            "hi": 1.6,
+            "lo": 0.6,
+            "log": false,
+            "search": true
+          },
+          "summary": "OS-SE shape factor; the standard OS profile is the reference value.",
+          "unit": null
+        },
+        {
+          "base_knob": "n",
+          "bounds_source": {
+            "file": "examples/typologies/ath_twinray_380.yaml",
+            "key": "bounds.h_n"
+          },
+          "code_ref": "hornlab_search.design.generators.registry._osse",
+          "context": "generator",
+          "contexts": [
+            "generator",
+            "generator:biradial"
+          ],
+          "default": 6.0,
+          "default_source": {
+            "file": "examples/typologies/ath_twinray_380.yaml",
+            "key": "seed_params.h_n"
+          },
+          "detail": "It controls how sharply the OSSE wall transitions into the terminated cross-section. The mesher accepts it as a plain finite number and requires it positive while s is nonzero.",
+          "doc_ref": [
+            "docs/research/typologies/MESHER_TYPOLOGIES.md",
+            "### 1b. OSSE parameters"
+          ],
+          "documented": true,
+          "flags": [
+            "overloaded"
+          ],
+          "formula": "OSSE termination exponent; bi-radial: r(z) = r0 + tan(a) z + c z^n",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": "float",
+            "lo": null,
+            "note": "mesher schema limit for the same-named family key; the generator law may validate the knob separately",
+            "section": "profile",
+            "source": {
+              "file": "hornlab_search/design/families.py",
+              "key": "FAMILY_KEYS.OSSE.n"
+            }
+          },
+          "knob": "h_n",
+          "label": "H-plane OSSE termination exponent",
+          "physical": "Sharpens or softens the mouth roll of an OSSE termination.",
+          "plane": "H",
+          "prefix": "h",
+          "role": null,
+          "search": {
+            "hi": 9.0,
+            "lo": 3.5,
+            "log": false,
+            "search": true
+          },
+          "summary": "Superellipse termination exponent of the OSSE meridian, active while s is nonzero.",
+          "unit": null
+        },
+        {
+          "base_knob": "q",
+          "bounds_source": {
+            "file": "examples/typologies/ath_twinray_380.yaml",
+            "key": "bounds.h_q"
+          },
+          "code_ref": "hornlab_search.design.generators.registry._osse",
+          "context": "generator",
+          "contexts": [
+            "generator",
+            "rosse"
+          ],
+          "default": 0.996,
+          "default_source": {
+            "file": "examples/typologies/ath_twinray_380.yaml",
+            "key": "seed_params.h_q"
+          },
+          "detail": "The mesher requires q positive whenever s is nonzero. It works with n to place the terminated cross-section between the OS wall and its corner.",
+          "doc_ref": [
+            "docs/research/typologies/MESHER_TYPOLOGIES.md",
+            "### 1b. OSSE parameters"
+          ],
+          "documented": true,
+          "flags": [
+            "deferred",
+            "overloaded"
+          ],
+          "formula": "OSSE superellipse termination (pkg/profile_formulas.py)",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": "float",
+            "lo": null,
+            "note": "mesher schema limit for the same-named family key; the generator law may validate the knob separately",
+            "section": "profile",
+            "source": {
+              "file": "hornlab_search/design/families.py",
+              "key": "FAMILY_KEYS.OSSE.q"
+            }
+          },
+          "knob": "h_q",
+          "label": "H-plane OSSE termination saturation",
+          "physical": "Changes how quickly the terminated outline reaches its corner.",
+          "plane": "H",
+          "prefix": "h",
+          "role": null,
+          "search": {
+            "hi": 1.0,
+            "lo": 0.96,
+            "log": false,
+            "search": true
+          },
+          "summary": "Saturation of the OSSE superellipse termination; positive while s is nonzero.",
+          "unit": null
+        },
+        {
+          "base_knob": "s",
+          "bounds_source": {
+            "file": "examples/typologies/ath_twinray_380.yaml",
+            "key": "bounds.h_s"
+          },
+          "code_ref": "hornlab_search.design.generators.registry._osse",
+          "context": "generator",
+          "contexts": [],
+          "default": 0.6,
+          "default_source": {
+            "file": "examples/typologies/ath_twinray_380.yaml",
+            "key": "seed_params.h_s"
+          },
+          "detail": "A nonzero s turns on the OSSE superellipse termination and makes n and q active. The mesher requires a positive n and q while s is nonzero. A zero value leaves the plain OS wall.",
+          "doc_ref": [
+            "docs/research/typologies/MESHER_TYPOLOGIES.md",
+            "### 1b. OSSE parameters"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "OSSE superellipse termination (pkg/profile_formulas.py)",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": "float",
+            "lo": null,
+            "note": "mesher schema limit for the same-named family key; the generator law may validate the knob separately",
+            "section": "profile",
+            "source": {
+              "file": "hornlab_search/design/families.py",
+              "key": "FAMILY_KEYS.OSSE.s"
+            }
+          },
+          "knob": "h_s",
+          "label": "H-plane termination amplitude",
+          "physical": "Rolls the mouth toward a superellipse outline instead of a plain OS wall.",
+          "plane": "H",
+          "prefix": "h",
+          "role": null,
+          "search": {
+            "hi": 0.95,
+            "lo": 0.25,
+            "log": false,
+            "search": true
+          },
+          "summary": "OSSE superellipse termination amplitude; zero disables the termination.",
+          "unit": null
+        },
+        {
+          "base_knob": "max_wall_deg",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.registry.materialize",
+          "context": "generator",
+          "contexts": [
+            "generator",
+            "generator:spherical_salmon"
+          ],
+          "default": 80.0,
+          "default_source": {
+            "file": "examples/typologies/ath_twinray_380.yaml",
+            "key": "generator.max_wall_deg"
+          },
+          "detail": "The materializer clamps anchor angles into this cap after selecting and perturbing them. The same block key also supplies the default stop for a spherical-salmon march.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.3 `spherical_salmon` (G4)"
+          ],
+          "documented": true,
+          "flags": [
+            "overloaded"
+          ],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "not a mesher family key; there is no hard schema clamp for this name",
+            "section": null,
+            "source": null
+          },
+          "knob": "max_wall_deg",
+          "label": "Generator wall-angle cap",
+          "physical": "Caps how vertical the wall may become.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Upper bound applied to every selected anchor's wall angle.",
+          "unit": "deg"
+        },
+        {
+          "base_knob": "mouth",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.registry.materialize",
+          "context": "generator",
+          "contexts": [],
+          "default": "superellipse",
+          "default_source": {
+            "file": "examples/typologies/ath_twinray_380.yaml",
+            "key": "generator.mouth"
+          },
+          "detail": "The generator emits two cross-section stations: a circular throat and the selected mouth shape. Superellipse and rounded-rectangle mouths read the mouth exponent and corner-radius knobs respectively.",
+          "doc_ref": [
+            "docs/research/typologies/MESHER_TYPOLOGIES.md",
+            "### 4d. Cross-section stations (crossSections)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "not a mesher family key; there is no hard schema clamp for this name",
+            "section": null,
+            "source": null
+          },
+          "knob": "mouth",
+          "label": "Mouth cross-section",
+          "physical": "Changes the mouth outline without changing the meridians.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Mouth cross-section family: ellipse, superellipse or rounded rectangle.",
+          "unit": null
+        },
+        {
+          "base_knob": "mouth_exponent",
+          "bounds_source": {
+            "file": "examples/typologies/ath_twinray_380.yaml",
+            "key": "bounds.mouth_exponent"
+          },
+          "code_ref": "hornlab_search.design.generators.registry.materialize",
+          "context": "generator",
+          "contexts": [],
+          "default": 4.0,
+          "default_source": {
+            "file": "examples/typologies/ath_twinray_380.yaml",
+            "key": "seed_params.mouth_exponent"
+          },
+          "detail": "Used only when the mouth is a superellipse. The generator clamps the value into the mesher's legal superellipse range before it emits the station. It is not the cross-section exponent of the native FREEFORM family.",
+          "doc_ref": [
+            "docs/research/typologies/MESHER_TYPOLOGIES.md",
+            "### 4d. Cross-section stations (crossSections)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "not a mesher family key; there is no hard schema clamp for this name",
+            "section": null,
+            "source": null
+          },
+          "knob": "mouth_exponent",
+          "label": "Mouth superellipse exponent",
+          "physical": "Squares off or rounds the mouth outline.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": {
+            "hi": 12.0,
+            "lo": 2.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Superellipse exponent of a superellipse mouth cross-section.",
+          "unit": null
+        },
+        {
+          "base_knob": "n_anchors",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.profiles.select_anchors",
+          "context": "generator",
+          "contexts": [],
+          "default": 16,
+          "default_source": {
+            "file": "examples/typologies/ath_twinray_380.yaml",
+            "key": "generator.n_anchors"
+          },
+          "detail": "The generator reduces the dense march to this many anchors before the mesher sees it. Both endpoints are always kept and interior anchors are placed by equal arc length in the normalised z/angle plane, so curved regions get more anchors.",
+          "doc_ref": [
+            "docs/research/typologies/MESHER_TYPOLOGIES.md",
+            "### 4b. Profile representation"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "not a mesher family key; there is no hard schema clamp for this name",
+            "section": null,
+            "source": null
+          },
+          "knob": "n_anchors",
+          "label": "Anchor count",
+          "physical": "Raises mesh fidelity at the cost of more control points.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Number of [z, r, wall-angle] anchors selected per meridian.",
+          "unit": null
+        },
+        {
+          "base_knob": "a_deg",
+          "bounds_source": {
+            "file": "examples/typologies/ath_twinray_380.yaml",
+            "key": "bounds.v_a_deg"
+          },
+          "code_ref": "hornlab_search.design.generators.registry.build_meridian",
+          "context": "generator",
+          "contexts": [
+            "generator",
+            "generator:biradial",
+            "generator:qtw"
+          ],
+          "default": 25.9,
+          "default_source": {
+            "file": "examples/typologies/ath_twinray_380.yaml",
+            "key": "seed_params.v_a_deg"
+          },
+          "detail": "The OSSE wall starts at the brief's driver exit angle and approaches this coverage half-angle. It is a half-angle in the mesher's convention.",
+          "doc_ref": [
+            "docs/research/typologies/MESHER_TYPOLOGIES.md",
+            "### 1b. OSSE parameters"
+          ],
+          "documented": true,
+          "flags": [
+            "overloaded"
+          ],
+          "formula": "OSSE: a is the far-field wall half-angle",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": "float",
+            "lo": null,
+            "note": "mesher schema limit for the same-named family key; the generator law may validate the knob separately",
+            "section": "profile",
+            "source": {
+              "file": "hornlab_search/design/families.py",
+              "key": "FAMILY_KEYS.OSSE.a_deg"
+            }
+          },
+          "knob": "v_a_deg",
+          "label": "V-plane OSSE coverage half-angle",
+          "physical": "Widens or narrows the OSSE mouth for a fixed depth.",
+          "plane": "V",
+          "prefix": "v",
+          "role": null,
+          "search": {
+            "hi": 40.0,
+            "lo": 16.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Far-field wall half-angle of the OSSE meridian; the throat angle is the driver exit.",
+          "unit": "deg"
+        },
+        {
+          "base_knob": "k",
+          "bounds_source": {
+            "file": "examples/typologies/ath_twinray_380.yaml",
+            "key": "bounds.v_k"
+          },
+          "code_ref": "hornlab_search.design.generators.registry._osse",
+          "context": "generator",
+          "contexts": [],
+          "default": 1.0,
+          "default_source": {
+            "file": "examples/typologies/ath_twinray_380.yaml",
+            "key": "seed_params.v_k"
+          },
+          "detail": "The OS-SE wall law carries a shape factor k alongside the coverage and termination knobs. It is dimensionless and is passed straight to the mesher's own OSSE formula rather than reimplemented here.",
+          "doc_ref": [
+            "docs/research/typologies/MESHER_TYPOLOGIES.md",
+            "### 1b. OSSE parameters"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "OS-SE wall law (hornlab_mesher.profile_formulas.profile_points)",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": "float",
+            "lo": null,
+            "note": "mesher schema limit for the same-named family key; the generator law may validate the knob separately",
+            "section": "profile",
+            "source": {
+              "file": "hornlab_search/design/families.py",
+              "key": "FAMILY_KEYS.OSSE.k"
+            }
+          },
+          "knob": "v_k",
+          "label": "V-plane OSSE k",
+          "physical": "Reshapes the OS wall between the throat and the far-field angle.",
+          "plane": "V",
+          "prefix": "v",
+          "role": null,
+          "search": {
+            "hi": 1.6,
+            "lo": 0.6,
+            "log": false,
+            "search": true
+          },
+          "summary": "OS-SE shape factor; the standard OS profile is the reference value.",
+          "unit": null
+        },
+        {
+          "base_knob": "n",
+          "bounds_source": {
+            "file": "examples/typologies/ath_twinray_380.yaml",
+            "key": "bounds.v_n"
+          },
+          "code_ref": "hornlab_search.design.generators.registry._osse",
+          "context": "generator",
+          "contexts": [
+            "generator",
+            "generator:biradial"
+          ],
+          "default": 6.0,
+          "default_source": {
+            "file": "examples/typologies/ath_twinray_380.yaml",
+            "key": "seed_params.v_n"
+          },
+          "detail": "It controls how sharply the OSSE wall transitions into the terminated cross-section. The mesher accepts it as a plain finite number and requires it positive while s is nonzero.",
+          "doc_ref": [
+            "docs/research/typologies/MESHER_TYPOLOGIES.md",
+            "### 1b. OSSE parameters"
+          ],
+          "documented": true,
+          "flags": [
+            "overloaded"
+          ],
+          "formula": "OSSE termination exponent; bi-radial: r(z) = r0 + tan(a) z + c z^n",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": "float",
+            "lo": null,
+            "note": "mesher schema limit for the same-named family key; the generator law may validate the knob separately",
+            "section": "profile",
+            "source": {
+              "file": "hornlab_search/design/families.py",
+              "key": "FAMILY_KEYS.OSSE.n"
+            }
+          },
+          "knob": "v_n",
+          "label": "V-plane OSSE termination exponent",
+          "physical": "Sharpens or softens the mouth roll of an OSSE termination.",
+          "plane": "V",
+          "prefix": "v",
+          "role": null,
+          "search": {
+            "hi": 9.0,
+            "lo": 3.5,
+            "log": false,
+            "search": true
+          },
+          "summary": "Superellipse termination exponent of the OSSE meridian, active while s is nonzero.",
+          "unit": null
+        },
+        {
+          "base_knob": "q",
+          "bounds_source": {
+            "file": "examples/typologies/ath_twinray_380.yaml",
+            "key": "bounds.v_q"
+          },
+          "code_ref": "hornlab_search.design.generators.registry._osse",
+          "context": "generator",
+          "contexts": [
+            "generator",
+            "rosse"
+          ],
+          "default": 0.996,
+          "default_source": {
+            "file": "examples/typologies/ath_twinray_380.yaml",
+            "key": "seed_params.v_q"
+          },
+          "detail": "The mesher requires q positive whenever s is nonzero. It works with n to place the terminated cross-section between the OS wall and its corner.",
+          "doc_ref": [
+            "docs/research/typologies/MESHER_TYPOLOGIES.md",
+            "### 1b. OSSE parameters"
+          ],
+          "documented": true,
+          "flags": [
+            "deferred",
+            "overloaded"
+          ],
+          "formula": "OSSE superellipse termination (pkg/profile_formulas.py)",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": "float",
+            "lo": null,
+            "note": "mesher schema limit for the same-named family key; the generator law may validate the knob separately",
+            "section": "profile",
+            "source": {
+              "file": "hornlab_search/design/families.py",
+              "key": "FAMILY_KEYS.OSSE.q"
+            }
+          },
+          "knob": "v_q",
+          "label": "V-plane OSSE termination saturation",
+          "physical": "Changes how quickly the terminated outline reaches its corner.",
+          "plane": "V",
+          "prefix": "v",
+          "role": null,
+          "search": {
+            "hi": 1.0,
+            "lo": 0.96,
+            "log": false,
+            "search": true
+          },
+          "summary": "Saturation of the OSSE superellipse termination; positive while s is nonzero.",
+          "unit": null
+        },
+        {
+          "base_knob": "s",
+          "bounds_source": {
+            "file": "examples/typologies/ath_twinray_380.yaml",
+            "key": "bounds.v_s"
+          },
+          "code_ref": "hornlab_search.design.generators.registry._osse",
+          "context": "generator",
+          "contexts": [],
+          "default": 0.6,
+          "default_source": {
+            "file": "examples/typologies/ath_twinray_380.yaml",
+            "key": "seed_params.v_s"
+          },
+          "detail": "A nonzero s turns on the OSSE superellipse termination and makes n and q active. The mesher requires a positive n and q while s is nonzero. A zero value leaves the plain OS wall.",
+          "doc_ref": [
+            "docs/research/typologies/MESHER_TYPOLOGIES.md",
+            "### 1b. OSSE parameters"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "OSSE superellipse termination (pkg/profile_formulas.py)",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": "float",
+            "lo": null,
+            "note": "mesher schema limit for the same-named family key; the generator law may validate the knob separately",
+            "section": "profile",
+            "source": {
+              "file": "hornlab_search/design/families.py",
+              "key": "FAMILY_KEYS.OSSE.s"
+            }
+          },
+          "knob": "v_s",
+          "label": "V-plane termination amplitude",
+          "physical": "Rolls the mouth toward a superellipse outline instead of a plain OS wall.",
+          "plane": "V",
+          "prefix": "v",
+          "role": null,
+          "search": {
+            "hi": 0.95,
+            "lo": 0.25,
+            "log": false,
+            "search": true
+          },
+          "summary": "OSSE superellipse termination amplitude; zero disables the termination.",
+          "unit": null
+        },
+        {
+          "base_knob": "wall_thickness_mm",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.registry.materialize",
+          "context": "generator",
+          "contexts": [],
+          "default": 5.0,
+          "default_source": {
+            "file": "examples/typologies/ath_twinray_380.yaml",
+            "key": "generator.wall_thickness_mm"
+          },
+          "detail": "The generated horn is a printed shell, so the mesher builds an outer surface offset from the wall. The generator validates a practical range because a highly curved throat or mouth cannot take the mesher's default shell. It is a mechanical thickness, not an acoustic dimension.",
+          "doc_ref": [
+            "docs/research/typologies/MESHER_TYPOLOGIES.md",
+            "## 7. Geometric / cross-section model (all formulas)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": "float",
+            "lo": 0.0,
+            "note": "mesher schema limit for the same-named family key; the generator law may validate the knob separately",
+            "section": "mesh",
+            "source": {
+              "file": "hornlab_search/design/families.py",
+              "key": "FAMILY_KEYS.FREEFORM.wall_thickness_mm"
+            }
+          },
+          "knob": "wall_thickness_mm",
+          "label": "Shell thickness",
+          "physical": "Changes the printed wall thickness, not the acoustic inner surface.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Freestanding outer-shell thickness the mesher offsets from the wall.",
+          "unit": "mm"
+        }
+      ],
+      "name": "ath_twinray_380",
+      "non_native_keys": [],
+      "source_status": "catalog",
+      "symmetry": "hv"
+    },
     "biradial_keele": {
       "bounds_index": {
         "L_mm": {
@@ -9975,7 +12095,7 @@
       "bounds_index": {
         "L_mm": {
           "file": "examples/typologies/perturbed_osse_hv.yaml",
-          "hi": 140.0,
+          "hi": 200.0,
           "key": "bounds.L_mm",
           "lo": 90.0,
           "log": false,
@@ -10195,7 +12315,7 @@
           "prefix": "",
           "role": null,
           "search": {
-            "hi": 140.0,
+            "hi": 200.0,
             "lo": 90.0,
             "log": false,
             "search": true

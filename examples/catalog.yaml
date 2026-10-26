@@ -288,3 +288,19 @@ entries:
     group: organic
     symmetry: hv
     description: salmon rows + even-lobe mouth ripple (12 lobes, half model) - the pleats experiment (7 knobs); labeled experiment
+
+  # ---- ATH-derived framework entries (2026-10-25, owner-directed) ----
+  # ath_core is the published CORE recipe reduced to constant azimuth and wired to the
+  # native Ath Morph law; ath_twinray_380 is a published-dimension reconstruction with the
+  # same native morph. Both labels are carried verbatim in the config headers.
+  - name: ath_core
+    config: typologies/ath_core.yaml
+    group: classical
+    symmetry: hv              # square morph breaks axisymmetry; H and V targets match
+    description: generalized ATH CORE 2-inch OS-SE + native mouth morph; target/exponent/width/height/corner/rate/fixed searched
+
+  - name: ath_twinray_380
+    config: typologies/ath_twinray_380.yaml
+    group: classical
+    symmetry: hv
+    description: TwinRay 380 1.4-inch published-dimension reconstruction + searchable superellipse mouth; full shape/outline search

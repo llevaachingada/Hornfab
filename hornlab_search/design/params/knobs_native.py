@@ -372,8 +372,8 @@ NATIVE_KNOBS: dict[str, KnobDoc] = {
         label="Morph target shape",
         unit=None,
         summary="Cross-section shape the mouth morphs toward: off, rectangle, circle or superellipse.",
-        detail=("families.py names the off, rectangle and circle codes; the mesher reference "
-                "also documents a superellipse target. The morph factor begins at "
+        detail=("families.py names the off, rectangle, circle and superellipse codes; the "
+                "superellipse target reads morph_exponent. The morph factor begins at "
                 "morph_fixed and follows the rate power toward the mouth. Ath's own "
                 "vocabulary calls this control Morph.TargetShape."),
         formula="r(t, phi) = r_base(t, phi) + factor * (r_target(phi) - r_mouth_base(phi))",
@@ -418,6 +418,19 @@ NATIVE_KNOBS: dict[str, KnobDoc] = {
         formula=None,
         physical="Rounds the corners of a rectangular morphed mouth.",
         code_ref=_PM + "_resolve_morph_half_dimensions",
+        doc_ref=(_MESHER, "### 6a. Cross-section morphing (ALL formula families)"),
+    ),
+    "morph_exponent": _make(
+        "morph_exponent",
+        label="Morph superellipse exponent",
+        unit=None,
+        summary="Superellipse exponent of a morph target 3 outline.",
+        detail=("The mesher reads this only when morph_target is 3, then clamps it into "
+                "the superellipse range before building the target outline. Ath's guide "
+                "documents only targets 0-2; target 3 is a mesher extension."),
+        formula=None,
+        physical="Squares off or rounds a superellipse morphed mouth.",
+        code_ref=_PM + "_morph_target_radius_at_angle",
         doc_ref=(_MESHER, "### 6a. Cross-section morphing (ALL formula families)"),
     ),
     "morph_rate": _make(

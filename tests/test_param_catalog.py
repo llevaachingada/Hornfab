@@ -404,7 +404,7 @@ def test_every_family_key_has_a_native_doc_or_is_an_explicit_non_knob():
 def test_every_native_config_seed_and_bound_key_resolves():
     catalog = build_catalog(ROOT)
     natives = _native_typologies(catalog)
-    assert len(natives) == 9, f"expected the 9 native configs, got {sorted(natives)}"
+    assert len(natives) == 10, f"expected the 10 native configs, got {sorted(natives)}"
     for name, typ in natives.items():
         data = yaml.safe_load((ROOT / typ["config_path"]).read_text(encoding="utf-8"))
         keys = set(data.get("seed_params") or {}) | set(data.get("bounds") or {})

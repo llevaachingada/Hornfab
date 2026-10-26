@@ -1,0 +1,39 @@
+# Brief: ATH TwinRay 380 Suite, 1.4-inch member (36-10-380 class).
+#
+# Published datasheet values (at-horns.eu/twinray.html#twinray36-380):
+#   36 mm throat, 10 deg total throat angle, 380 x 303 mm mouth, 192 mm depth,
+#   low-frequency point 580 Hz. The typology is a published-dimension reconstruction
+#   (the Ath script is not published), not an exact product replica.
+#
+# Envelope is deliberately larger than the datasheet so the search box is not clipped.
+# The 1.4-inch f11 is about 5.6 kHz, so band_hi 5500 stays below it.
+name: ath_twinray_380_14in
+description: TwinRay 380 Suite 1.4-inch reconstruction, 90x60 target, 700x600x320 mm envelope
+driver:
+  exit_radius_mm: 17.78         # 1.4-inch (35.56 mm exit)
+  exit_angle_deg: 5.0           # half of the published 10 deg total throat angle
+  throat_angle_policy: pin
+envelope:
+  max_mouth_w_mm: 700.0
+  max_mouth_h_mm: 600.0
+  max_depth_mm: 320.0
+symmetry: hv
+source:
+  cap: auto
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 500.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+objective:
+  version: 2

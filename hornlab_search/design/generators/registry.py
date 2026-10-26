@@ -39,6 +39,16 @@ NOT a ``{p}_stop_deg`` knob; the knob-name mismatch was recorded by the 2026-10-
 ``{p}_a_deg``, ``{p}_k``, ``{p}_s``, ``{p}_n``, ``{p}_q`` (osse; the throat angle a0 is the
 brief's driver exit angle).
 
+Native Ath-style morph is an opt-in knob surface on ANY generated type: ``morph_target``
+(0 off; 1 rectangle, 2 circle, 3 superellipse), ``morph_width_mm`` / ``morph_height_mm``
+(full target dimensions; 0 = raw mouth extent), ``morph_corner_mm``, ``morph_exponent``,
+``morph_rate``, ``morph_fixed``, ``morph_allow_shrinkage``. A zero/absent
+``morph_target`` emits no morph keys and leaves the generated params byte-identical.
+Because FREEFORM refuses a morphed non-elliptical cross-section, the generator requires
+``mouth: ellipse`` whenever native morph is active; choose the target shape instead of a
+cross-section station. The searched values live in ``seed_params``/``bounds`` like any
+other knob, so the optimiser can trade mouth shape against directivity.
+
 Additional types (2026-10-25 owner-approved expansion):
 ``biradial`` (US4308932A, Keele/JBL 1980; dossier
 docs/research/typologies/BIRADIAL_IWATA_300_RESEARCH_2026-10-25.md): per-plane power-series
@@ -78,7 +88,10 @@ THROAT_BLEND_TYPES = ("conical", "exponential", "hypex", "tractrix")
 DEFAULT_KNOBS = {"L_mm": 190.0, "rm_mm": 150.0, "T": 0.7, "fc_hz": 800.0, "a_deg": 45.0,
                  "k": 1.0, "s": 0.6, "n": 4.0, "q": 0.995, "w": 0.5, "mouth_exponent": 4.0,
                  "mouth_corner_mm": 30.0, "u": 0.0, "zs_frac": 0.5, "throat_blend_mm": 0.0,
-                 "max_wall_deg": 80.0, "stop_deg": 88.0, "R_arc_mm": 45.0}
+                 "max_wall_deg": 80.0, "stop_deg": 88.0, "R_arc_mm": 45.0,
+                 "morph_target": 0, "morph_width_mm": 0.0, "morph_height_mm": 0.0,
+                 "morph_corner_mm": 35.0, "morph_exponent": 2.0, "morph_rate": 3.0,
+                 "morph_fixed": 0.0, "morph_allow_shrinkage": 0}
 
 _ROUND = 6
 
@@ -289,6 +302,17 @@ def materialize(gen: dict, knobs: dict, brief: dict) -> dict:
     mouth = gen.get("mouth", "ellipse")
     if mouth not in MOUTHS:
         raise GeneratorError(f"mouth must be one of {list(MOUTHS)}, got {mouth!r}")
+
+    # Native Ath-style morph is opt-in through the knobs. Absent (0) leaves the generated
+    # design byte-identical to the pre-morph generator: no morph key reaches the mesher.
+    morph_target = int(round(_knob(knobs, "", "morph_target")))
+    if morph_target not in (0, 1, 2, 3):
+        raise GeneratorError(f"morph_target must be 0, 1, 2 or 3, got {morph_target}")
+    if morph_target and mouth != "ellipse":
+        raise GeneratorError(
+            "native morph needs mouth: ellipse (choose the morph target shape instead of a "
+            "cross-section station; FREEFORM refuses a morphed superellipse/rounded-rectangle "
+            "cross-section)")
     if mouth == "ellipse":
         stations = [{"t": 0.0, "shape": "circle"}, {"t": 1.0, "shape": "ellipse"}]
     elif mouth == "superellipse":
@@ -310,8 +334,23 @@ def materialize(gen: dict, knobs: dict, brief: dict) -> dict:
     wt = float(gen.get("wall_thickness_mm", 3.0))
     if not 0.5 <= wt <= 12.0:
         raise GeneratorError(f"wall_thickness_mm must be in [0.5, 12], got {wt}")
-    return {"profileH": prof(ah), "profileV": prof(av), "crossSections": stations,
-            "wall_thickness_mm": round(wt, _ROUND)}
+    out = {"profileH": prof(ah), "profileV": prof(av), "crossSections": stations,
+           "wall_thickness_mm": round(wt, _ROUND)}
+    if morph_target:
+        # The numeric morph knobs are search dimensions; the target code is discrete
+        # (a config may pin it or let the optimiser sample it). The mesher owns the law
+        # (OS-SE paper section 5).
+        out.update({
+            "morph_target": morph_target,
+            "morph_width_mm": round(_knob(knobs, "", "morph_width_mm"), _ROUND),
+            "morph_height_mm": round(_knob(knobs, "", "morph_height_mm"), _ROUND),
+            "morph_corner_mm": round(_knob(knobs, "", "morph_corner_mm"), _ROUND),
+            "morph_exponent": round(_knob(knobs, "", "morph_exponent"), _ROUND),
+            "morph_rate": round(_knob(knobs, "", "morph_rate"), _ROUND),
+            "morph_fixed": round(_knob(knobs, "", "morph_fixed"), _ROUND),
+            "morph_allow_shrinkage": int(round(_knob(knobs, "", "morph_allow_shrinkage"))),
+        })
+    return out
 
 
 def info(gen: dict, knobs: dict, brief: dict) -> dict:

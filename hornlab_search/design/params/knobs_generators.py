@@ -125,6 +125,7 @@ _JMLC = "docs/research/typologies/JMLC_LECLEACH_RESEARCH_2026-10-25.md"
 
 _R = "hornlab_search.design.generators.registry."
 _P = "hornlab_search.design.generators.profiles."
+_PM = "hornlab_mesher.profile_morph."
 
 GENERATOR_KNOBS: dict[str, KnobDoc] = {
     # ---------------------------------------------------------------- shared depth / size
@@ -523,6 +524,112 @@ GENERATOR_KNOBS: dict[str, KnobDoc] = {
         physical="Rounds the corners of a rectangular mouth.",
         code_ref=_R + "materialize",
         doc_ref=(_MESHER, "### 4d. Cross-section stations (crossSections)"),
+    ),
+    "morph_target": _make(
+        "morph_target",
+        label="Morph target shape",
+        unit=None,
+        summary="Native mouth morph target: off, rectangle, circle or superellipse.",
+        detail=("An opt-in native Ath-style morph. Zero leaves the generated design "
+                "byte-identical and emits no morph keys. Values 1-3 blend the raw outline "
+                "toward the target through the mesher's own law; a generator mouth must "
+                "stay elliptical so the two outline mechanisms cannot fight."),
+        formula="r(t, phi) = r_base(t, phi) + factor * (r_target(phi) - r_mouth_base(phi))",
+        physical="Blends the generated cross-section into a target mouth outline.",
+        code_ref=_R + "materialize",
+        doc_ref=(_MESHER, "### 6a. Cross-section morphing (ALL formula families)"),
+    ),
+    "morph_width_mm": _make(
+        "morph_width_mm",
+        label="Morph target width",
+        unit="mm",
+        summary="Full target width of a morphed mouth; zero keeps the raw mouth extent.",
+        detail=("This is a full width, not a half-width. A zero value asks the mesher to "
+                "use the raw mouth extent (Ath's implicit circumscribed target). It is "
+                "independent of the raw meridian radii and is a search dimension when "
+                "the config gives it a bound."),
+        formula=None,
+        physical="Sets the wide dimension of the target outline.",
+        code_ref=_PM + "_resolve_morph_half_dimensions",
+        doc_ref=(_MESHER, "### 6a. Cross-section morphing (ALL formula families)"),
+    ),
+    "morph_height_mm": _make(
+        "morph_height_mm",
+        label="Morph target height",
+        unit="mm",
+        summary="Full target height of a morphed mouth; zero keeps the raw mouth extent.",
+        detail=("This is a full height, not a half-height. A zero value asks the mesher to "
+                "use the raw mouth extent. It is independent of the raw meridian radii and "
+                "is a search dimension when the config gives it a bound."),
+        formula=None,
+        physical="Sets the tall dimension of the target outline.",
+        code_ref=_PM + "_resolve_morph_half_dimensions",
+        doc_ref=(_MESHER, "### 6a. Cross-section morphing (ALL formula families)"),
+    ),
+    "morph_corner_mm": _make(
+        "morph_corner_mm",
+        label="Morph corner radius",
+        unit="mm",
+        summary="Corner radius of a rounded-rectangle morph target.",
+        detail=("Used only by morph target 1. The mesher clamps the radius against the "
+                "target half-dimensions at run time, so an over-large value cannot fold "
+                "the outline. It is independent of the generator's cross-section corner."),
+        formula=None,
+        physical="Rounds the corners of the morphed mouth.",
+        code_ref=_PM + "_resolve_morph_half_dimensions",
+        doc_ref=(_MESHER, "### 6a. Cross-section morphing (ALL formula families)"),
+    ),
+    "morph_exponent": _make(
+        "morph_exponent",
+        label="Morph superellipse exponent",
+        unit=None,
+        summary="Superellipse exponent of morph target 3.",
+        detail=("The mesher reads this only for morph target 3. It is clamped into the "
+                "superellipse range before the target outline is built. Ath's guide only "
+                "documents targets 0-2; target 3 is a mesher extension."),
+        formula=None,
+        physical="Squares off or rounds a superellipse morph target.",
+        code_ref=_PM + "_morph_target_radius_at_angle",
+        doc_ref=(_MESHER, "### 6a. Cross-section morphing (ALL formula families)"),
+    ),
+    "morph_rate": _make(
+        "morph_rate",
+        label="Morph rate",
+        unit=None,
+        summary="Power-law rate of the morph blend from the fixed part to the mouth.",
+        detail=("The factor is the remapped axial fraction raised to this power, so larger "
+                "values delay the outline change until nearer the mouth. Ath documents a "
+                "minimum of 1; the mesher also accepts [0, 1) as an abrupt variant."),
+        formula="factor = clamp((t - morph_fixed)/(1 - morph_fixed), 0, 1)^morph_rate",
+        physical="Moves how quickly the outline changes along the horn.",
+        code_ref=_PM + "_morph_factor",
+        doc_ref=(_MESHER, "### 6a. Cross-section morphing (ALL formula families)"),
+    ),
+    "morph_fixed": _make(
+        "morph_fixed",
+        label="Morph fixed part",
+        unit=None,
+        summary="Axial fraction where the morph begins; zero starts at the throat.",
+        detail=("The original profile is preserved up to this fraction and the remaining "
+                "axial span is remapped before the rate power is applied. It is a fraction "
+                "of horn length, not a distance in millimetres."),
+        formula="factor = 0 for t <= morph_fixed",
+        physical="Delays the start of the outline change along the horn.",
+        code_ref=_PM + "_morph_factor",
+        doc_ref=(_MESHER, "### 6a. Cross-section morphing (ALL formula families)"),
+    ),
+    "morph_allow_shrinkage": _make(
+        "morph_allow_shrinkage",
+        label="Allow morph shrinkage",
+        unit=None,
+        summary="0/1 flag that lets a morph target be smaller than the raw mouth extent.",
+        detail=("Without the flag the mesher enlarges the target so the horn never narrows. "
+                "With it the morph may pull the section inward. It is a discrete flag, not "
+                "a continuous search dimension."),
+        formula=None,
+        physical="Allows or refuses a target outline smaller than the raw mouth.",
+        code_ref=_PM + "_resolve_morph_half_dimensions",
+        doc_ref=(_MESHER, "### 6a. Cross-section morphing (ALL formula families)"),
     ),
     "wall_thickness_mm": _make(
         "wall_thickness_mm",

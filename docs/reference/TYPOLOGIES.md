@@ -5,6 +5,74 @@
 Catalog version: 1  
 Domains covered: `generators`, `rows`, `native`
 
+## `ath_core`
+
+- **Family:** OSSE
+- **Kind:** native
+- **Group:** classical
+- **Symmetry:** hv
+- **Description:** generalized ATH CORE 2-inch OS-SE + native mouth morph; target/exponent/width/height/corner/rate/fixed searched
+- **Source status:** catalog
+- **Config:** `examples/typologies/ath_core.yaml`
+- **Brief:** `examples/briefs/ath_core_2in.yaml`
+- **Documented:** true
+- **Knobs:** 20
+
+| Knob | Label | Unit | Default | Search | Hard lo | Hard hi | Summary |
+|---|---|---|---|---|---|---|---|
+| `L_mm` | OSSE main-section length | mm | 260.0 | 210.0 .. 320.0 | — | — | Length of the main OSSE section; extension and slot may add to the total. |
+| `a0_deg` | Throat half-angle | deg | 1.2 | 1.2 .. 1.2 | — | — | Wall half-angle at the throat, passed to the OSSE, R-OSSE and ICW meridian. |
+| `a_deg` | Native coverage half-angle | deg | 24.2 | 16.0 .. 32.0 | — | — | OSSE/R-OSSE coverage half-angle in the mesher's own convention. |
+| `aspect_ratio` | Cross-section aspect ratio | — | 1.0 | 1.0 .. 1.0 | — | — | Width-to-height scaling of the cross-section relative to the meridian radius. |
+| `exponent` | Native cross-section exponent | — | 2.0 | 2.0 .. 2.0 | — | — | Superellipse exponent of the outline; the documented default is disputed. |
+| `k` | OS-SE shape factor | — | 1.0 | 0.6 .. 1.6 | — | — | Blends the OS-SE base radius between its radius term and its tangent term. |
+| `morph_allow_shrinkage` | Allow morph shrinkage | — | 1 | 1 .. 1 | — | — | 0/1 flag that lets a morph target be smaller than the current mouth extent. |
+| `morph_corner_mm` | Morph corner radius | mm | 16.5 | 4.0 .. 40.0 | — | — | Corner radius of a rounded-rectangle morph target. |
+| `morph_exponent` | Morph superellipse exponent | — | 4.0 | 2.0 .. 8.0 | 2.0 | 16.0 | Superellipse exponent of a morph target 3 outline. |
+| `morph_fixed` | Morph fixed part | — | 0.0 | 0.0 .. 0.5 | — | — | Axial fraction where the morph begins; zero starts at the throat. |
+| `morph_height_mm` | Morph target height | mm | 397.0 | 300.0 .. 500.0 | — | — | Full target height of a rectangular or superellipse morph at the mouth. |
+| `morph_rate` | Morph rate | — | 3.0 | 1.0 .. 6.0 | 0.0 | — | Power-law rate of the morph blend from the fixed part to the mouth. |
+| `morph_target` | Morph target shape | — | 1 | 1 .. 3 | 0 | 3 | Cross-section shape the mouth morphs toward: off, rectangle, circle or superellipse. |
+| `morph_width_mm` | Morph target width | mm | 397.0 | 300.0 .. 500.0 | — | — | Full target width of a rectangular or superellipse morph at the mouth. |
+| `n` | OSSE termination exponent | — | 6.75 | 3.5 .. 9.0 | — | — | Superellipse exponent of the OSSE termination term. |
+| `q` | OSSE termination saturation | — | 0.996 | 0.96 .. 1.0 | — | — | Superellipse saturation of the OSSE termination; positive while s is nonzero. |
+| `r0_mm` | Throat radius | mm | 25.4 | 25.4 .. 25.4 | — | — | Throat radius every native family starts its meridian from. |
+| `s` | Termination amplitude | — | 0.715 | 0.25 .. 0.95 | — | — | OSSE superellipse termination amplitude; zero leaves the plain OS wall. |
+| `s1` | Throat stretch coefficient 1 | mm/deg | 1.14 | 0.0 .. 2.0 | 0.0 | 10.0 | Strength of the OSSE/R-OSSE nonlinear throat-stretch mapping. |
+| `s2` | Throat stretch coefficient 2 | 1/mm | 0.025 | 0.0 .. 0.06 | 0.0 | 10.0 | Inverse-length scale inside the throat-stretch arctangent. |
+
+## `ath_twinray_380`
+
+- **Family:** FREEFORM
+- **Kind:** generator
+- **Group:** classical
+- **Symmetry:** hv
+- **Description:** TwinRay 380 1.4-inch published-dimension reconstruction + searchable superellipse mouth; full shape/outline search
+- **Source status:** catalog
+- **Config:** `examples/typologies/ath_twinray_380.yaml`
+- **Brief:** `examples/briefs/ath_twinray_380_14in.yaml`
+- **Documented:** true
+- **Knobs:** 16
+
+| Knob | Label | Unit | Default | Search | Hard lo | Hard hi | Summary |
+|---|---|---|---|---|---|---|---|
+| `L_mm` | Depth | mm | 192.0 | 160.0 .. 240.0 | — | — | Axial depth shared by both meridians, throat to mouth. |
+| `h_a_deg` | H-plane OSSE coverage half-angle | deg | 34.7 | 22.0 .. 46.0 | — | — | Far-field wall half-angle of the OSSE meridian; the throat angle is the driver exit. |
+| `h_k` | H-plane OSSE k | — | 1.0 | 0.6 .. 1.6 | — | — | OS-SE shape factor; the standard OS profile is the reference value. |
+| `h_n` | H-plane OSSE termination exponent | — | 6.0 | 3.5 .. 9.0 | — | — | Superellipse termination exponent of the OSSE meridian, active while s is nonzero. |
+| `h_q` | H-plane OSSE termination saturation | — | 0.996 | 0.96 .. 1.0 | — | — | Saturation of the OSSE superellipse termination; positive while s is nonzero. |
+| `h_s` | H-plane termination amplitude | — | 0.6 | 0.25 .. 0.95 | — | — | OSSE superellipse termination amplitude; zero disables the termination. |
+| `max_wall_deg` | Generator wall-angle cap | deg | 80.0 | — | — | — | Upper bound applied to every selected anchor's wall angle. |
+| `mouth` | Mouth cross-section | — | superellipse | — | — | — | Mouth cross-section family: ellipse, superellipse or rounded rectangle. |
+| `mouth_exponent` | Mouth superellipse exponent | — | 4.0 | 2.0 .. 12.0 | — | — | Superellipse exponent of a superellipse mouth cross-section. |
+| `n_anchors` | Anchor count | — | 16 | — | — | — | Number of [z, r, wall-angle] anchors selected per meridian. |
+| `v_a_deg` | V-plane OSSE coverage half-angle | deg | 25.9 | 16.0 .. 40.0 | — | — | Far-field wall half-angle of the OSSE meridian; the throat angle is the driver exit. |
+| `v_k` | V-plane OSSE k | — | 1.0 | 0.6 .. 1.6 | — | — | OS-SE shape factor; the standard OS profile is the reference value. |
+| `v_n` | V-plane OSSE termination exponent | — | 6.0 | 3.5 .. 9.0 | — | — | Superellipse termination exponent of the OSSE meridian, active while s is nonzero. |
+| `v_q` | V-plane OSSE termination saturation | — | 0.996 | 0.96 .. 1.0 | — | — | Saturation of the OSSE superellipse termination; positive while s is nonzero. |
+| `v_s` | V-plane termination amplitude | — | 0.6 | 0.25 .. 0.95 | — | — | OSSE superellipse termination amplitude; zero disables the termination. |
+| `wall_thickness_mm` | Shell thickness | mm | 5.0 | — | 0.0 | — | Freestanding outer-shell thickness the mesher offsets from the wall. |
+
 ## `biradial_keele`
 
 - **Family:** FREEFORM
@@ -565,7 +633,7 @@ No knob prose applies to this typology in the current domains (generators, rows,
 
 | Knob | Label | Unit | Default | Search | Hard lo | Hard hi | Summary |
 |---|---|---|---|---|---|---|---|
-| `L_mm` | Depth | mm | 120.0 | 90.0 .. 140.0 | — | — | Axial depth shared by both meridians, throat to mouth. |
+| `L_mm` | Depth | mm | 120.0 | 90.0 .. 200.0 | — | — | Axial depth shared by both meridians, throat to mouth. |
 | `h_a_deg` | H-plane OSSE coverage half-angle | deg | 45.0 | 35.0 .. 50.0 | — | — | Far-field wall half-angle of the OSSE meridian; the throat angle is the driver exit. |
 | `h_u0` | H-plane perturbation strength | — | 0.0 | -0.25 .. 0.25 | — | — | Per-anchor log-increment perturbation applied to the anchor radii. |
 | `h_u1` | H-plane perturbation strength | — | 0.0 | -0.25 .. 0.25 | — | — | Per-anchor log-increment perturbation applied to the anchor radii. |

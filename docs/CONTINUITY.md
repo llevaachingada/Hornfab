@@ -2,6 +2,16 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-25 (late) - ATH FRAMEWORK PASS: native Morph on every family, `ath_core` + `ath_twinray_380`
+
+- **Morph surface:** `morph_*` (including `morph_exponent`, target 3) is legal for OSSE, R-OSSE, ICW and FREEFORM. The old FREEFORM `morph_target` refusal is gone; the mesher already supported it. Generated typologies opt in through the same knobs; an absent `morph_target` emits no morph keys and is byte-identical. The generator requires `mouth: ellipse` when native morph is active.
+- **`ath_core`:** native OSSE generalization of the published 2-inch CORE recipe (constant-azimuth reduction; a 24.2 / n 6.75 / s 0.715 / q .996 / L 260 / s1 1.14 / s2 .025). Native Ath Morph is searched: target shape (1-3), exponent, width, height, corner, rate and fixed part. Brief `ath_core_2in` (50x50, 650x650x520, no K-law f0).
+- **`ath_twinray_380`:** published-dimension reconstruction of the 1.4-inch 380 Suite (380x303x192, 90x60 target, 700x600x320 envelope). Measured: the mesher's FREEFORM rectangle-morph guard rejects a rounded-rect target on this elliptical H/V base (non-convex at t≈0.75 for every corner tried); target 2/3-exp-2 mesh but are not the product. The config therefore uses the generator's searchable superellipse cross-section (`mouth_exponent`), with the native morph route documented as available for compatible bases.
+- **Search counts:** `ath_core` 15, `ath_twinray_380` 12; wide boxes anchored on the published value near the middle, envelope is the outer constraint.
+- **Evidence:** `docs/evidence/ATH_TYPOLOGIES_2026-10-25.md`. Dry-runs: CORE 6,174 tri / 3,232 dof / mouth 397 mm; TwinRay 3,796 tri / 1,987 dof / mouth 380x303 mm. First GPU seeds: CORE J 42.448 / 3,232 dof / 15.3 s; TwinRay J 38.357 / 1,987 dof / 8.3 s (scratch dirs, one job at a time, GPU cleaned). Offline suite **1606/0/0/0** (`runs/ath_morph_suite_final3.xml`); param catalog `--check` green.
+- **Docs:** dossier `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md`; INDEX/CODE_MAP updated. NOT modelled: exact CORE `a(φ)` law, `Mesh.Roundover`, rear/enclosure, TwinRay rim frame/rollback.
+- **Senior review + commit (2026-10-26):** code reviewed hunk-by-hunk; one fix (R-3): `morph_target` now has a hard 0..3 schema limit on every morph family, so an out-of-range code is refused by the search layer instead of the mesher (test `test_morph_target_out_of_range_is_refused_by_the_search_layer`); param artifacts regenerated (`--check` OK); ISSUES control-character typos fixed. Offline suite **1607/0/0/0** (`runs/ath_commit/suite.xml`). Committed by explicit paths only; `NOTES_FOR_SENIOR.md` (auto OOM notes) and `perturbed_osse_hv.yaml` (owner GUI edit) left uncommitted. Campaign plan v2 + senior readiness review (section 12) committed alongside: `docs/SOLVE_CAMPAIGN_PLAN_2026-10-26.md`.
+
 ## 2026-10-26 - MEASURED GPU CEILING AT 8 kHz AND 10 kHz (owner-requested stress ladder; real VRAM numbers replace the earlier estimates)
 
 - **Owner ask:** "what about 8,000 hertz - can we do that? why don't you run a test and see if it crashes my card", then "if we can actually fit it at 10,000 it's not going to crash the car". Also: cap the mouth at 500 mm and use whatever dispersion that supports.

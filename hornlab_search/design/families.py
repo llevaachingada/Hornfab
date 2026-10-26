@@ -70,11 +70,12 @@ _COMMON = {
     "wall_thickness_mm": _f(0.0, None, "freestanding shell thickness, mm", section="mesh"),
 }
 _MORPH = {
-    "morph_target": _i(note="0 none, 1 rectangle, 2 circle", section="morph"),
-    "morph_width_mm": _f(note="full target width, mm", section="morph"),
-    "morph_height_mm": _f(note="full target height, mm", section="morph"),
+    "morph_target": _i(0, 3, "0 none, 1 rectangle, 2 circle, 3 superellipse", section="morph"),
+    "morph_width_mm": _f(note="full target width, mm; 0 = implicit mouth extent", section="morph"),
+    "morph_height_mm": _f(note="full target height, mm; 0 = implicit mouth extent", section="morph"),
     "morph_corner_mm": _f(note="target corner radius, mm", section="morph"),
-    "morph_rate": _f(0.0, None, "morph rate, >= 0", section="morph"),
+    "morph_exponent": _f(2.0, 16.0, "superellipse exponent for morph target 3", section="morph"),
+    "morph_rate": _f(0.0, None, "morph rate, >= 0 (Ath documents >= 1)", section="morph"),
     "morph_fixed": _f(note="fixed part, 0..1", section="morph"),
     "morph_allow_shrinkage": _i(note="0/1", section="morph"),
 }
@@ -105,7 +106,7 @@ _OSSE = {
 }
 
 _ROSSE = {
-    **_THROAT, **_CROSS, **_COMMON,
+    **_THROAT, **_CROSS, **_COMMON, **_MORPH,
     "R_mm": _f(note="mouth radius, mm (R-OSSE only)"),
     "tmax": _f(note="truncation parameter, > 0"),
     "m": _f(note="R-OSSE m"),
@@ -114,7 +115,7 @@ _ROSSE = {
 }
 
 _ICW = {
-    **_COMMON,
+    **_COMMON, **_MORPH,
     "termination": KeySpec(str, note="categorical; cannot take a lo/hi bound", section="profile",
                            choices=("flat_baffle", "rollback")),
     "r0_mm": _f(note="throat radius, mm"),
@@ -137,7 +138,7 @@ _ICW = {
 }
 
 _FREEFORM = {
-    **_COMMON,
+    **_COMMON, **_MORPH,
     "profileH": KeySpec(dict, note="{points, throatAngleDeg, mouthAngleDeg}, horizontal meridian"),
     "profileV": KeySpec(dict, note="{points, throatAngleDeg, mouthAngleDeg}, vertical meridian"),
     "crossSections": KeySpec(list, note="2..32 stations {t, shape, [exponent|cornerRadiusMm]}"),
@@ -181,7 +182,7 @@ for _k in ("sampling_mode", "z_map_points", "zmap"):
 _REFUSED_HINTS["FREEFORM"] = {
     k: f"FREEFORM refuses '{k}': crossSections / the two meridians own the outline"
     for k in ("exponent", "aspect_ratio", "rot_deg", "h", "s1", "s2", "throat_ext_length_mm",
-              "throat_ext_angle_deg", "slot_length_mm", "morph_target", "gcurve_type")
+              "throat_ext_angle_deg", "slot_length_mm", "gcurve_type")
 }
 
 # FREEFORM bare-key aliases. The shipped examples/freeform_hv.yaml bounds a bare ``exponent``;

@@ -1,0 +1,41 @@
+# Brief: ATH CORE-style 2-inch waveguide, generalized 50 x 50 degree target.
+#
+# The published CORE recipe is a near-axisymmetric OS-SE with an azimuthal wall-angle
+# law (at-horns.eu/core.html, CC-BY-4.0). The typology that consumes this brief keeps
+# the recipe in YAML and reduces the azimuth law to its H/V midpoint; it is a framework
+# entry, not an exact replica. The 2-inch driver class uses a 25.4 mm exit, close to
+# the published 25.0 mm script value.
+#
+# The envelope is intentionally larger than the seed so the search box is not silently
+# clipped. CORE does not follow the Keele K-law, so this brief deliberately carries no
+# f0_hz: objective v3 then behaves as v2 instead of flagging an inapplicable K-law.
+name: ath_core_2in
+description: ATH CORE-style 2-inch waveguide, generalized 50x50 target, 650x650x520 mm envelope
+driver:
+  exit_radius_mm: 25.4          # 2-inch class; published CORE script uses 25.0
+  exit_angle_deg: 1.2           # published Throat.Angle
+  throat_angle_policy: pin
+envelope:
+  max_mouth_w_mm: 650.0
+  max_mouth_h_mm: 650.0
+  max_depth_mm: 520.0
+symmetry: hv                     # square morph breaks axisymmetry; H and V targets match
+source:
+  cap: auto
+target:
+  coverage_h_deg: 50.0
+  coverage_v_deg: 50.0
+  band_lo_hz: 500.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+objective:
+  version: 2
