@@ -1,0 +1,81 @@
+# Cell b1t__lecleach_iwata_ar - JMLC/iwata area-preserving AR rows, brief b1t_..._rows.
+# SOURCE: LANE_A_LECLEACH.md s3.6 (B1 row: fc 462 [430,520], T 0.8 [0.75,0.90], stop 180
+#   [150,220], AR 0.667 [0.63,0.72], p 1.0 [0.7,1.4]; measured 331x495x223, 2,612 dofs @8k).
+# CHANGED vs shipped lecleach_iwata_ar: brief -> rows variant (dislope 0); generator
+#   seed_policy explicit (no silent f0 f0 derivation); T UNPINNED from 0.5 (T 0.5 refuses
+#   fc < ~480 at r0 18) and AR bounds widened DOWN to 0.63 (the tall K-law mouth needs
+#   W/H 0.667; the shipped 1.2 floor is a wide-horn box); fc bounds down to 430; mesh epw 6,
+#   caps 12000; solve cuda_fused true; CMA sigma0 0.15 seed 1234.
+name: b1t__lecleach_iwata_ar
+family: FREEFORM
+brief_file: ../../briefs/campaign_2026-10-26/b1t_hifi_90x60_850_tall_rows.yaml
+generator:
+  name: grid
+  rows:
+    type: iwata_ar
+  n_phi: 15
+  n_s: 32
+  wall_thickness_mm: 2.0
+  seed_policy: explicit
+seed_params:
+  g_fc_hz: 462.0
+  g_T: 0.8
+  g_stop_deg: 180.0
+  g_ar_m: 0.667
+  g_ar_p: 1.0
+bounds:
+  g_fc_hz:
+    lo: 430.0
+    hi: 520.0
+  g_T:
+    lo: 0.75
+    hi: 0.9
+  g_stop_deg:
+    lo: 150.0
+    hi: 220.0
+  g_ar_m:
+    lo: 0.63
+    hi: 0.72
+  g_ar_p:
+    lo: 0.7
+    hi: 1.4
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 12000
+  dof_cap_verify: 12000
+  dof_cap_final: 12000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.15
+  seed: 1234
+  budget: 100
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+description: Cell b1t__lecleach_iwata_ar - JMLC/iwata area-preserving AR rows, brief b1t_..._rows.

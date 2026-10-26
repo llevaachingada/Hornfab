@@ -1,0 +1,87 @@
+# Cell b2w__hyb_osse_h_hypex_v - H OSSE / V hypex hybrid, brief b2w_pa_60x40_1200_wide.
+# SOURCE: LANE_D_REFERENCE_OBJECTIVE.md s1.2/1.3 (hypex V mouth = 2*v_rm exactly; H OSSE
+#   mouth grows with L and h_a; h_a lo must drop to 30 to take coverage_h/2 = 30).
+# WIDE RESCALE (recorded): LANE_D's B2 portrait recipe (v_rm 397, L 340) is rescaled to the
+#   300 mm wide envelope: v_rm 146.5 (outer 299 mm); H mouth 353 -> L ~ 220 at h_a 30.
+# CHANGED vs shipped: brief -> b2w; generator seed_policy explicit; v_rm bounds 142-151
+#   (the shipped 50-140 hi cannot hold the wide 300 mm V mouth); L 190-250; h_a lo 30;
+#   mesh epw 6, caps 12000; solve cuda_fused true; CMA sigma0 0.15 seed 1234.
+# LHS-AUDIT NARROW (physical): v_rm hi 151 -> 147.5 (outer V mouth > 300 mm above 147);
+#   L hi 250 -> 215 and h_a hi 35 -> 32 (the H mouth grows ~20 mm/deg and crosses the
+#   380 mm envelope above h_a 32 at L > 215). Seed becomes L 215 / h_a 30 (the original
+#   L 220 seed was just over the narrowed box; its mouth was 342 mm wide, the reseed is
+#   ~332 mm, still inside the wide envelope).
+name: b2w__hyb_osse_h_hypex_v
+family: FREEFORM
+brief_file: ../../briefs/campaign_2026-10-26/b2w_pa_60x40_1200_wide.yaml
+generator:
+  name: typology
+  profile_h:
+    type: osse
+  profile_v:
+    type: hypex
+  n_anchors: 16
+  max_wall_deg: 80.0
+  mouth: ellipse
+  seed_policy: explicit
+seed_params:
+  L_mm: 215.0
+  h_a_deg: 30.0
+  h_s: 0.3
+  v_rm_mm: 146.5
+  v_T: 0.7
+bounds:
+  L_mm:
+    lo: 190.0
+    hi: 215.0
+  h_a_deg:
+    lo: 30.0
+    hi: 32.0
+  h_s:
+    lo: 0.0
+    hi: 0.6
+  v_rm_mm:
+    lo: 142.0
+    hi: 147.5
+  v_T:
+    lo: 0.0
+    hi: 1.0
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 90.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 12000
+  dof_cap_verify: 12000
+  dof_cap_final: 12000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.15
+  seed: 1234
+  budget: 100
+  popsize: null
+  tolfun: 0.001
+description: Cell b2w__hyb_osse_h_hypex_v - H OSSE / V hypex hybrid, brief b2w_pa_60x40_1200_wide.

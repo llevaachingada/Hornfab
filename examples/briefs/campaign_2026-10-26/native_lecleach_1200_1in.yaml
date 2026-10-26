@@ -1,0 +1,45 @@
+# Brief native_lecleach_1200_1in - native Le Cleac'h control cell (90 x 90, f0 1200 Hz, 1-inch).
+#
+# PURPOSE: campaign NATIVE control (docs/SOLVE_CAMPAIGN_PLAN_2026-10-26.md s3/s4). This is the
+#   shipped examples/briefs/user/lecleach_90x90_1200hz_1in.yaml with the campaign analysis band
+#   (300-8000 Hz) and weights.dislope 0. It is a LOADING-family control, not a CD brief.
+# K-LAW ARITHMETIC (mouth = 25,400,000 / (f0 * coverage_deg)):
+#   25,400,000 / (1200 * 90) = 235.2 mm round mouth (inside the 400 mm envelope).
+# DRIVER CLASS: 1-inch compression driver, r0 = 12.7 mm, exit half-angle 4.0 deg (JMLC
+#   convention: the tables quote included angles; 8 deg included -> 4 deg half).
+# SYMMETRY NOTE: the family is axisymmetric in practice; this brief declares `hv` to match the
+#   campaign template, and the config runs the rows march as a quarter model (quadrants '1').
+# f11 DISCLOSURE: 1in f11 7,914 Hz: only the top 8 kHz grid point is above it, and above f11
+#   the uniform-piston source is a geometry comparison, not driver behaviour.
+name: native_lecleach_1200_1in
+description: Native Le Cleac'h control 90x90, f0 1200 Hz, 1-inch, 400x400x260 envelope, band 300-8000 Hz
+driver:
+  exit_radius_mm: 12.7
+  exit_angle_deg: 4.0
+envelope:
+  max_mouth_w_mm: 400.0
+  max_mouth_h_mm: 400.0
+  max_depth_mm: 260.0
+symmetry: hv
+source:
+  cap: auto
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 90.0
+  band_lo_hz: 300.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.0
+  f0_hz: 1200.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.0
+  flat: 0.5
+  load: 0.0
+grid:
+  verify_points_per_octave: 6
+objective:
+  version: 3

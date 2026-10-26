@@ -1,0 +1,44 @@
+# Brief native_twinray_380_14in - native ATH TwinRay 380 control (90 x 60, band 300-8000 Hz).
+#
+# PURPOSE: campaign NATIVE control (docs/SOLVE_CAMPAIGN_PLAN_2026-10-26.md s3/s4). This is the
+#   shipped examples/briefs/ath_twinray_380_14in.yaml with the campaign analysis band
+#   (300-8000 Hz). It keeps objective.version 2 and carries NO f0_hz (published-dimension
+#   reconstruction, not a K-law mouth).
+# K-LAW ARITHMETIC: NOT APPLICABLE - the TwinRay 380 is a published 380 x 303 mm device
+#   (36-10-380 class), not a K-law target. The 700x600x320 envelope is intentionally larger
+#   than the datasheet seed so the search box is not clipped.
+# DRIVER CLASS: 1.4-inch member (35.56 mm exit, r0 = 17.78 mm), published 10 deg total throat
+#   angle -> 5 deg half-angle (throat_angle_policy: pin).
+# f11 DISCLOSURE: 1.4in f11 5,653 Hz: 5.7-8 kHz compares geometry, not the driver.
+name: native_twinray_380_14in
+description: Native ATH TwinRay 380 1.4-inch control, 90x60 target, 700x600x320 mm envelope, band 300-8000 Hz, objective v2
+driver:
+  exit_radius_mm: 17.78
+  exit_angle_deg: 5.0
+  throat_angle_policy: pin
+envelope:
+  max_mouth_w_mm: 700.0
+  max_mouth_h_mm: 600.0
+  max_depth_mm: 320.0
+symmetry: hv
+source:
+  cap: auto
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 300.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+grid:
+  verify_points_per_octave: 6
+objective:
+  version: 2

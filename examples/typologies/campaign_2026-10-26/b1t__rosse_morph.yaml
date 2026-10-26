@@ -1,0 +1,137 @@
+# Cell b1t__rosse_morph - R-OSSE + pinned native morph, brief b1t_hifi_90x60_850_tall.
+# SOURCE: LANE_C_ATH_MORPH.md s2.7 (primary recommendation; R-4 gate PASSES 17/17).
+# CHANGED vs shipped rosse_baseline: brief -> b1t campaign; r0 re-pinned 12.7 -> 18.0 mm
+#   (1.4-inch driver); seed R 249 / a 30 / aspect 0.667 from LANE_C s2.7 (B1 column);
+#   morph_target pinned 1 (rectangular product cell), morph_size 332 x 498 = the brief mouth,
+#   morph_fixed 0-0.1, morph_allow_shrinkage 0; wall_thickness_mm 5 EXPLICIT (the shipped
+#   absent key silently becomes the mesher's 6 mm and caused shell self-intersection);
+#   mesh epw 6, caps 12000; solve cuda_fused true; CMA sigma0 0.15 seed 1234.
+name: b1t__rosse_morph
+family: R-OSSE
+seed_params:
+  r0_mm: 18.0
+  a_deg: 30.0
+  a0_deg: 2.5
+  R_mm: 249.0
+  tmax: 1.0
+  k: 1.0
+  q: 1.0
+  m: 0.85
+  r: 0.4
+  b: 0.2
+  exponent: 4.0
+  aspect_ratio: 0.667
+  morph_target: 1
+  morph_width_mm: 332.0
+  morph_height_mm: 498.0
+  morph_corner_mm: 35.0
+  morph_exponent: 4.0
+  morph_rate: 3.0
+  morph_fixed: 0.0
+  morph_allow_shrinkage: 0
+  wall_thickness_mm: 5.0
+bounds:
+  r0_mm:
+    lo: 18.0
+    hi: 18.0
+    search: false
+  a_deg:
+    lo: 28.0
+    hi: 32.0
+  a0_deg:
+    lo: 1.0
+    hi: 4.0
+  R_mm:
+    lo: 235.0
+    hi: 260.0
+  tmax:
+    lo: 0.9
+    hi: 1.0
+  k:
+    lo: 0.8
+    hi: 1.2
+  q:
+    lo: 0.8
+    hi: 1.2
+  m:
+    lo: 0.7
+    hi: 1.0
+  r:
+    lo: 0.3
+    hi: 0.5
+  b:
+    lo: 0.15
+    hi: 0.25
+  exponent:
+    lo: 2.0
+    hi: 8.0
+  aspect_ratio:
+    lo: 0.64
+    hi: 0.7
+  morph_target:
+    lo: 1
+    hi: 1
+    search: false
+  morph_width_mm:
+    lo: 320.0
+    hi: 345.0
+  morph_height_mm:
+    lo: 480.0
+    hi: 510.0
+  morph_corner_mm:
+    lo: 25.0
+    hi: 60.0
+  morph_exponent:
+    lo: 2.0
+    hi: 8.0
+  morph_rate:
+    lo: 2.0
+    hi: 4.0
+  morph_fixed:
+    lo: 0.0
+    hi: 0.1
+  morph_allow_shrinkage:
+    lo: 0
+    hi: 0
+    search: false
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 12000
+  dof_cap_verify: 12000
+  dof_cap_final: 12000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.15
+  seed: 1234
+  budget: 204
+  popsize: null
+  tolfun: 0.001
+description: Cell b1t__rosse_morph - R-OSSE + pinned native morph, brief b1t_hifi_90x60_850_tall.
+brief_file: ../../briefs/campaign_2026-10-26/b1t_hifi_90x60_850_tall.yaml

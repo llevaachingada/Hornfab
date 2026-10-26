@@ -1,0 +1,46 @@
+# Brief b1t_rows - hi-fi 90 x 60 deg, f0 850 Hz, 1.4-inch driver, TALL, ROWS variant.
+#
+# PURPOSE: campaign cell family b1t for the non-CD rows families (Le Cleac'h / Salmon).
+#   Identical geometry/envelope/driver to b1t_hifi_90x60_850_tall, with weights.dislope 0.
+# ROWS/OBJECTIVE NOTE: a non-CD profile cannot hold a flat DI slope, so scoring dislope is a
+#   trap; dislope is zeroed for every Le Cleac'h/Salmon cell (LANE_A s3.6, LANE_B s7).
+#   A rows cell and a morph cell on the "same" brief are NOT ranked together: the objective
+#   weights differ.
+# K-LAW ARITHMETIC (mouth = 25,400,000 / (f0 * coverage_deg)):
+#   H axis: 25,400,000 / (850 * 90) = 332.0 mm
+#   V axis: 25,400,000 / (850 * 60) = 498.0 mm
+#   Envelope 360 x 520 x 400 mm.
+# DRIVER CLASS: 1.4-inch compression driver, r0 = 18.0 mm, exit half-angle 2.5 deg.
+# f11 DISCLOSURE: 1.4in f11 5,653 Hz: 5.7-8 kHz compares geometry, not the driver.
+name: b1t_hifi_90x60_850_tall_rows
+description: Hi-fi 90x60, f0 850 Hz, 1.4-inch, portrait K-law mouth, 360x520x400 envelope, ROWS objective (dislope 0)
+driver:
+  exit_radius_mm: 18.0
+  exit_angle_deg: 2.5
+envelope:
+  max_mouth_w_mm: 360.0
+  max_mouth_h_mm: 520.0
+  max_depth_mm: 400.0
+symmetry: hv
+source:
+  cap: auto
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 300.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.0
+  f0_hz: 850.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.0
+  flat: 0.5
+  load: 0.0
+grid:
+  verify_points_per_octave: 6
+objective:
+  version: 3

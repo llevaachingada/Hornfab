@@ -1,0 +1,44 @@
+# Brief native_ath_core_2in - native ATH CORE-style 2-inch control (50 x 50, band 300-8000 Hz).
+#
+# PURPOSE: campaign NATIVE control (docs/SOLVE_CAMPAIGN_PLAN_2026-10-26.md s3/s4). This is the
+#   shipped examples/briefs/ath_core_2in.yaml with the campaign analysis band (300-8000 Hz).
+#   It keeps objective.version 2 and carries NO f0_hz: CORE does not follow the Keele K-law,
+#   so v3's f0 mask would be inapplicable and is deliberately not used.
+# K-LAW ARITHMETIC: NOT APPLICABLE - the published CORE recipe is a nominal 50x50 OS-SE, not a
+#   K-law mouth. The brief's 650 mm envelope is intentionally larger than the ~397 mm seed.
+# DRIVER CLASS: 2-inch compression driver, r0 = 25.4 mm, published CORE throat angle 1.2 deg
+#   (throat_angle_policy: pin).
+# f11 DISCLOSURE: 2in f11 3,957 Hz: above 3.96 kHz the uniform-piston source is a geometry
+#   comparison, not a 2-inch driver's real exit behaviour.
+name: native_ath_core_2in
+description: Native ATH CORE-style 2-inch control, 50x50 target, 650x650x520 mm envelope, band 300-8000 Hz, objective v2
+driver:
+  exit_radius_mm: 25.4
+  exit_angle_deg: 1.2
+  throat_angle_policy: pin
+envelope:
+  max_mouth_w_mm: 650.0
+  max_mouth_h_mm: 650.0
+  max_depth_mm: 520.0
+symmetry: hv
+source:
+  cap: auto
+target:
+  coverage_h_deg: 50.0
+  coverage_v_deg: 50.0
+  band_lo_hz: 300.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+grid:
+  verify_points_per_octave: 6
+objective:
+  version: 2

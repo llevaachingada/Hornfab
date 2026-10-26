@@ -1,0 +1,92 @@
+# Cell b1w__osse_baseline - native OSSE baseline, brief b1w_hifi_90x60_850_wide.
+# SOURCE: LANE_D_REFERENCE_OBJECTIVE.md s1.2/1.3 (OSSE B1 counterfactual a30/L169 at the
+#   wide aspect; aspect 1.0-2.0 is legal for the wide branch).
+# CHANGED vs shipped osse_baseline: brief -> b1w wide branch; r0 17.78 -> 18.0 (1.4-inch);
+#   a0 2.5 deg, a_deg 30 (coverage_v/2), aspect 1.15 (W/H for the 380x300 envelope);
+#   L seed 140 (the 169 seed measured 402x350 mm, over the wide envelope) and bounds 120-200; the wide envelope needs a shallower mouth than the tall
+#   K-law case; mesh epw 6, caps 12000; solve cuda_fused true; CMA sigma0 0.15 seed 1234.
+name: b1w__osse_baseline
+family: OSSE
+seed_params:
+  r0_mm: 18.0
+  a_deg: 30.0
+  a0_deg: 2.5
+  L_mm: 140.0
+  n: 4.0
+  s: 0.7
+  q: 0.995
+  k: 1.0
+  exponent: 4.0
+  aspect_ratio: 1.15
+bounds:
+  r0_mm:
+    lo: 18.0
+    hi: 18.0
+    search: false
+  a_deg:
+    lo: 26.0
+    hi: 34.0
+  a0_deg:
+    lo: 1.0
+    hi: 4.0
+  L_mm:
+    lo: 140.0
+    hi: 220.0
+  n:
+    lo: 2.0
+    hi: 8.0
+  s:
+    lo: 0.0
+    hi: 1.0
+  q:
+    lo: 0.9
+    hi: 1.0
+  k:
+    lo: 0.3
+    hi: 2.5
+  exponent:
+    lo: 2.0
+    hi: 8.0
+  aspect_ratio:
+    lo: 1.0
+    hi: 1.3
+target:
+  coverage_h_deg: 75.0
+  coverage_v_deg: 45.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 12000
+  dof_cap_verify: 12000
+  dof_cap_final: 12000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.15
+  seed: 1234
+  budget: 108
+  popsize: null
+  tolfun: 0.001
+description: Cell b1w__osse_baseline - native OSSE baseline, brief b1w_hifi_90x60_850_wide.
+brief_file: ../../briefs/campaign_2026-10-26/b1w_hifi_90x60_850_wide.yaml

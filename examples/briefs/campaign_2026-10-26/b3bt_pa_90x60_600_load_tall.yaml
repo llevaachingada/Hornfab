@@ -1,0 +1,45 @@
+# Brief b3bt - PA 90 x 60 deg, f0 600 Hz, 1.4-inch 300 Hz-class driver, TALL, loading-scored.
+#
+# PURPOSE: primary low-reach campaign brief b3bt (docs/SOLVE_CAMPAIGN_PLAN_2026-10-26.md s3 B3b).
+#   Strict K-law both axes (portrait mouth) plus a loading term so the 600 Hz reach is scored.
+# K-LAW ARITHMETIC (mouth = 25,400,000 / (f0 * coverage_deg)):
+#   H axis: 25,400,000 / (600 * 90) = 470.4 mm
+#   V axis: 25,400,000 / (600 * 60) = 705.6 mm
+#   Envelope 500 x 740 x 600 mm holds the K-law mouth plus the freestanding shell.
+# DRIVER CLASS: 1.4-inch 300 Hz-class compression driver (BMS 4594ND class), r0 = 18.0 mm,
+#   exit half-angle 2.0 deg.
+# LOADING: weights.load 0.5 with z_min 0.7 (the repo's own LOAD_THRESHOLD), evidenced at the
+#   verify tier (screen never solves below 500 Hz; see plan s0).
+# f11 DISCLOSURE: 1.4in f11 5,653 Hz: 5.7-8 kHz compares geometry, not the driver.
+name: b3bt_pa_90x60_600_load_tall
+description: PA 90x60 f0 600 Hz loading, 1.4-inch 300 Hz class, portrait K-law mouth (470x706), 500x740x600 envelope, band 300-8000 Hz
+driver:
+  exit_radius_mm: 18.0
+  exit_angle_deg: 2.0
+envelope:
+  max_mouth_w_mm: 500.0
+  max_mouth_h_mm: 740.0
+  max_depth_mm: 600.0
+symmetry: hv
+source:
+  cap: auto
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 300.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.7
+  f0_hz: 600.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.5
+grid:
+  verify_points_per_octave: 6
+objective:
+  version: 3

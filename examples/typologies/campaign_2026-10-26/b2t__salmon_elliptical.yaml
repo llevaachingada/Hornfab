@@ -1,0 +1,77 @@
+# Cell b2t__salmon_elliptical - plain Salmon elliptical rows, brief b2t_..._rows.
+# SOURCE: LANE_B_SALMON.md s2 (rows mouth*fc = 3.23e5 at stop 150) re-derived for b2t's
+#   353x529 mouth: fc_h 915, fc_v 610, T 0.8, stop 150 (rim 353x529, depth ~165 inside the
+#   300 mm envelope; cf. the measured B1 348x508x157 at fc 926/633).
+# CHANGED vs shipped salmon_elliptical: brief -> rows variant (dislope 0); seed_policy
+#   explicit; seed re-derived to the b2t rim-honest pair; bounds per LANE_B style
+#   (fc_h [860,970], fc_v [575,650], stop [140,160], T [0.75,0.95]); mesh epw 6 (was 8),
+#   caps 12000; solve cuda_fused true; CMA sigma0 0.15 seed 1234.
+name: b2t__salmon_elliptical
+family: FREEFORM
+brief_file: ../../briefs/campaign_2026-10-26/b2t_pa_60x40_1200_tall_rows.yaml
+generator:
+  name: grid
+  rows:
+    type: salmon_elliptical
+  n_phi: 15
+  n_s: 32
+  wall_thickness_mm: 3.0
+  seed_policy: explicit
+seed_params:
+  g_fc_h_hz: 915.0
+  g_fc_v_hz: 610.0
+  g_T: 0.8
+  g_stop_deg: 150.0
+bounds:
+  g_fc_h_hz:
+    lo: 860.0
+    hi: 970.0
+  g_fc_v_hz:
+    lo: 575.0
+    hi: 650.0
+  g_T:
+    lo: 0.75
+    hi: 0.95
+  g_stop_deg:
+    lo: 140.0
+    hi: 160.0
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 12000
+  dof_cap_verify: 12000
+  dof_cap_final: 12000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.15
+  seed: 1234
+  budget: 100
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+description: Cell b2t__salmon_elliptical - plain Salmon elliptical rows, brief b2t_..._rows.

@@ -1,0 +1,71 @@
+# Cell native__lecleach_rollback - native Le Cleac'h control, brief native_lecleach_1200_1in.
+# SOURCE: LANE_A_LECLEACH.md s3.6 (native 1200/90x90/1-inch row: fc 800 [740,900],
+#   T 0.8 [0.6,1.0], stop 170 [150,200]; measured 235x235x116, 931 dofs).
+# CHANGED vs shipped lecleach_rollback: brief -> native_lecleach campaign control;
+#   seed_policy explicit; seed fc 800 / T 0.8 / stop 170; bounds per LANE_A; mesh epw 6
+#   (was 8), caps 12000; solve cuda_fused true; CMA sigma0 0.15 seed 1234.
+name: native__lecleach_rollback
+family: FREEFORM
+brief_file: ../../briefs/campaign_2026-10-26/native_lecleach_1200_1in.yaml
+generator:
+  name: grid
+  rows:
+    type: lecleach
+  n_phi: 15
+  n_s: 32
+  wall_thickness_mm: 3.0
+  seed_policy: explicit
+seed_params:
+  g_fc_hz: 800.0
+  g_T: 0.8
+  g_stop_deg: 170.0
+bounds:
+  g_fc_hz:
+    lo: 740.0
+    hi: 900.0
+  g_T:
+    lo: 0.6
+    hi: 1.0
+  g_stop_deg:
+    lo: 150.0
+    hi: 200.0
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 90.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 12000
+  dof_cap_verify: 12000
+  dof_cap_final: 12000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.15
+  seed: 1234
+  budget: 100
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+description: Cell native__lecleach_rollback - native Le Cleac'h control, brief native_lecleach_1200_1in.

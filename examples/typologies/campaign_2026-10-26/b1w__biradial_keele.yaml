@@ -1,0 +1,94 @@
+# Cell b1w__biradial_keele - Keele biradial generator, brief b1w_hifi_90x60_850_wide.
+# SOURCE: LANE_D_REFERENCE_OBJECTIVE.md s1.2 (B1 is a hard seed refusal on the 360 mm tall
+#   envelope; the wide 380 mm envelope covers the 368.6 mm closure) and s1.3.
+# WIDE RESCALE (recorded): LANE_D's biradial B1 portrait seed uses v_rm 249 (H 498); this
+#   WIDE cell rescales the V-plane mouth knob to the 300 mm wide envelope: v_rm 146.5
+#   (outer 2*(146.5+3) = 299 mm). H-plane h_rm 184.6 is the r0 18 + tan(40.5)*195 closure
+#   line (mouth W 369.2, inside 380). h_a is capped at 40.5 so the closure line stays
+#   inside h_rm; generator seed_policy explicit; mesh epw 6, caps 12000; solve cuda_fused
+#   true; CMA sigma0 0.15 seed 1234.
+# LHS-AUDIT NARROW (physical): v_rm hi 151 -> 147.5 because the outer V mouth 2*(v_rm+3)
+#   exceeds the 300 mm envelope above 147; the seed (146.5) is unchanged.
+name: b1w__biradial_keele
+family: FREEFORM
+brief_file: ../../briefs/campaign_2026-10-26/b1w_hifi_90x60_850_wide.yaml
+generator:
+  name: typology
+  profile_h:
+    type: biradial
+  profile_v:
+    type: biradial
+  n_anchors: 16
+  max_wall_deg: 80.0
+  mouth: ellipse
+  seed_policy: explicit
+seed_params:
+  L_mm: 195.0
+  h_a_deg: 40.5
+  v_a_deg: 27.0
+  h_rm_mm: 184.6
+  v_rm_mm: 146.5
+  h_n: 5.5
+  v_n: 4.0
+bounds:
+  L_mm:
+    lo: 185.0
+    hi: 195.0
+  h_a_deg:
+    lo: 36.0
+    hi: 40.5
+  v_a_deg:
+    lo: 22.0
+    hi: 32.0
+  h_rm_mm:
+    lo: 182.0
+    hi: 190.0
+  v_rm_mm:
+    lo: 142.0
+    hi: 147.5
+  h_n:
+    lo: 2.0
+    hi: 8.0
+  v_n:
+    lo: 2.0
+    hi: 8.0
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 12000
+  dof_cap_verify: 12000
+  dof_cap_final: 12000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.15
+  seed: 1234
+  budget: 100
+  popsize: null
+  tolfun: 0.001
+description: Cell b1w__biradial_keele - Keele biradial generator, brief b1w_hifi_90x60_850_wide.

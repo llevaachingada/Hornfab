@@ -1,0 +1,113 @@
+# Cell native__ath_twinray_380 - native ATH TwinRay 380 control, brief
+# native_twinray_380_14in.
+# SOURCE: LANE_C_ATH_MORPH.md s2.2 (L 185-200, h_a 33-37, v_a 24-28, s 0.55-0.65,
+#   n 5.5-6.5, q 0.99-1.0, k 0.9-1.1, mouth_exponent 3-6). The published-dimension seed is
+#   kept; the search box is narrowed around it so the search cannot walk off the published
+#   mouth (L hi 240 would cap the mouth at ~494x399 anyway).
+# CHANGED vs shipped ath_twinray_380: brief -> campaign control (band 300-8000, v2);
+#   bounds per LANE_C; mesh epw 6 (was 8), caps 12000; solve cuda_fused true;
+#   CMA sigma0 0.15 seed 1234.
+name: native__ath_twinray_380
+family: FREEFORM
+brief_file: ../../briefs/campaign_2026-10-26/native_twinray_380_14in.yaml
+generator:
+  name: typology
+  profile_h:
+    type: osse
+  profile_v:
+    type: osse
+  n_anchors: 16
+  max_wall_deg: 80.0
+  mouth: superellipse
+  wall_thickness_mm: 5.0
+  seed_policy: explicit
+seed_params:
+  L_mm: 192.0
+  h_a_deg: 34.7
+  v_a_deg: 25.9
+  h_s: 0.6
+  v_s: 0.6
+  h_n: 6.0
+  v_n: 6.0
+  h_q: 0.996
+  v_q: 0.996
+  h_k: 1.0
+  v_k: 1.0
+  mouth_exponent: 4.0
+bounds:
+  L_mm:
+    lo: 185.0
+    hi: 200.0
+  h_a_deg:
+    lo: 33.0
+    hi: 37.0
+  v_a_deg:
+    lo: 24.0
+    hi: 28.0
+  h_s:
+    lo: 0.55
+    hi: 0.65
+  v_s:
+    lo: 0.55
+    hi: 0.65
+  h_n:
+    lo: 5.5
+    hi: 6.5
+  v_n:
+    lo: 5.5
+    hi: 6.5
+  h_q:
+    lo: 0.99
+    hi: 1.0
+  v_q:
+    lo: 0.99
+    hi: 1.0
+  h_k:
+    lo: 0.9
+    hi: 1.1
+  v_k:
+    lo: 0.9
+    hi: 1.1
+  mouth_exponent:
+    lo: 3.0
+    hi: 6.0
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 500.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 12000
+  dof_cap_verify: 12000
+  dof_cap_final: 12000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.15
+  seed: 1234
+  budget: 144
+  popsize: null
+  tolfun: 0.001
+description: Cell native__ath_twinray_380 - native ATH TwinRay 380 control, brief

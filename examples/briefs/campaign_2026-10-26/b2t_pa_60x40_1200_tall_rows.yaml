@@ -1,0 +1,45 @@
+# Brief b2t_rows - PA 60 x 40 deg, f0 1200 Hz, 1.4-inch driver, TALL, ROWS variant.
+#
+# PURPOSE: campaign cell family b2t for the non-CD rows families (Le Cleac'h / Salmon).
+#   Identical geometry/envelope/driver to b2t_pa_60x40_1200_tall, with weights.dislope 0.
+# ROWS/OBJECTIVE NOTE: a non-CD profile cannot hold a flat DI slope, so dislope is zeroed for
+#   every Le Cleac'h/Salmon cell (LANE_A s3.6, LANE_B s7). A rows cell and a morph cell on the
+#   "same" brief are NOT ranked together: the objective weights differ.
+# K-LAW ARITHMETIC (mouth = 25,400,000 / (f0 * coverage_deg)):
+#   H axis: 25,400,000 / (1200 * 60) = 352.8 mm
+#   V axis: 25,400,000 / (1200 * 40) = 529.2 mm
+#   Envelope 380 x 560 x 300 mm.
+# DRIVER CLASS: 1.4-inch compression driver, r0 = 18.0 mm, exit half-angle 2.5 deg.
+# f11 DISCLOSURE: 1.4in f11 5,653 Hz: 5.7-8 kHz compares geometry, not the driver.
+name: b2t_pa_60x40_1200_tall_rows
+description: PA 60x40, f0 1200 Hz, 1.4-inch, portrait K-law mouth, 380x560x300 envelope, ROWS objective (dislope 0)
+driver:
+  exit_radius_mm: 18.0
+  exit_angle_deg: 2.5
+envelope:
+  max_mouth_w_mm: 380.0
+  max_mouth_h_mm: 560.0
+  max_depth_mm: 300.0
+symmetry: hv
+source:
+  cap: auto
+target:
+  coverage_h_deg: 60.0
+  coverage_v_deg: 40.0
+  band_lo_hz: 300.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.0
+  f0_hz: 1200.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.0
+  flat: 0.5
+  load: 0.0
+grid:
+  verify_points_per_octave: 6
+objective:
+  version: 3

@@ -1,0 +1,73 @@
+# Cell b3a__lecleach_rollback - Le Cleac'h rollback rows, brief b3a_..._rows.
+# SOURCE: LANE_A_LECLEACH.md s3.6 (B3a row: fc 268 [268,320], T 1.0 [0.98,1.0], stop 170
+#   [160,200]; measured 694x694x472, 7,241 dofs; 90 deg holds to ~407 Hz, 1.7 % short of
+#   the 706 mm K-law mouth).
+# CHANGED vs shipped lecleach_rollback: brief -> rows variant (dislope 0); seed_policy
+#   explicit; fc bounds down to 268 (the shipped 600 floor made a 313 mm round horn);
+#   T bounds up to 1.0; mesh epw 6 (was 8), caps 12000; solve cuda_fused true;
+#   CMA sigma0 0.15 seed 1234.
+name: b3a__lecleach_rollback
+family: FREEFORM
+brief_file: ../../briefs/campaign_2026-10-26/b3a_pa_90x90_400_square_rows.yaml
+generator:
+  name: grid
+  rows:
+    type: lecleach
+  n_phi: 15
+  n_s: 32
+  wall_thickness_mm: 3.0
+  seed_policy: explicit
+seed_params:
+  g_fc_hz: 268.0
+  g_T: 1.0
+  g_stop_deg: 170.0
+bounds:
+  g_fc_hz:
+    lo: 268.0
+    hi: 320.0
+  g_T:
+    lo: 0.98
+    hi: 1.0
+  g_stop_deg:
+    lo: 160.0
+    hi: 200.0
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 90.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 12000
+  dof_cap_verify: 12000
+  dof_cap_final: 12000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.15
+  seed: 1234
+  budget: 100
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+description: Cell b3a__lecleach_rollback - Le Cleac'h rollback rows, brief b3a_..._rows.

@@ -1,0 +1,46 @@
+# Brief b2w - PA 60 x 40 deg, f0 1200 Hz, 1.4-inch driver, WIDE (commercial convention).
+#
+# PURPOSE: wide-envelope branch of b2t (docs/SOLVE_CAMPAIGN_PLAN_2026-10-26.md s3 D-11 option b).
+#   The H axis keeps the strict K-law mouth; the V axis is allowed to narrow to the envelope.
+# K-LAW ARITHMETIC (mouth = 25,400,000 / (f0 * coverage_deg)):
+#   H axis: 25,400,000 / (1200 * 60) = 352.8 mm
+#   V-K-law would be 25,400,000 / (1200 * 40) = 529.2 mm, which needs a 560 mm tall envelope.
+#   This branch instead sets target.f0_v_hz = 25,400,000 / (40 * 300) = 2117 Hz: the 300 mm
+#   envelope height holds 40 deg from 2117 Hz. Objective v3 masks the V-plane coverage error
+#   below f0_v_hz; the H plane is still scored from f0 1200 Hz.
+# DRIVER CLASS: 1.4-inch compression driver (35-36 mm exit class), r0 = 18.0 mm,
+#   exit half-angle 2.5 deg.
+# f11 DISCLOSURE: 1.4in f11 5,653 Hz: 5.7-8 kHz compares geometry, not the driver.
+name: b2w_pa_60x40_1200_wide
+description: PA 60x40, f0 1200 Hz (V from 2117 Hz), 1.4-inch, wide 380x300x300 envelope, band 300-8000 Hz
+driver:
+  exit_radius_mm: 18.0
+  exit_angle_deg: 2.5
+envelope:
+  max_mouth_w_mm: 380.0
+  max_mouth_h_mm: 300.0
+  max_depth_mm: 300.0
+symmetry: hv
+source:
+  cap: auto
+target:
+  coverage_h_deg: 60.0
+  coverage_v_deg: 40.0
+  band_lo_hz: 300.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.0
+  f0_hz: 1200.0
+  f0_v_hz: 2117.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+grid:
+  verify_points_per_octave: 6
+objective:
+  version: 3

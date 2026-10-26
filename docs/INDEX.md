@@ -64,6 +64,16 @@ Keep this file current: a new doc gets a line here in the same commit.
 | [research/TIME_DOMAIN_RINGING.md](research/TIME_DOMAIN_RINGING.md) | Ringing / waterfalls: what we can see, stage-2 design. |
 | [BOUNDARY_LAB_0.5_RESEARCH.md](BOUNDARY_LAB_0.5_RESEARCH.md), [research/boundary_lab_0.5/](research/boundary_lab_0.5/) | Boundary Lab 0.5.0 findings and inventories. |
 
+### Campaign 2026-10-26 lane evidence (five audit lanes + orchestrator findings)
+| Doc | What it is |
+|---|---|
+| [research/campaign_2026-10-26/LANE_A_LECLEACH.md](research/campaign_2026-10-26/LANE_A_LECLEACH.md) | LANE A: Le Cleac'h/JMLC audit — the f0-derivation over-constraint (all briefs clamp to 600 Hz), commercial wide-vs-K-law portrait conflict, per-brief measured seeds/bounds, JMLC fc-is-a-loading-corner and dislope-0 verdict, half_xz geometry proof. |
+| [research/campaign_2026-10-26/LANE_B_SALMON.md](research/campaign_2026-10-26/LANE_B_SALMON.md) | LANE B: Salmon/X-shape rows audit — the rows mouth×fc = 3.23e5 invariant (vs the shared 1.88e5), stop-240 duplicate/180 asymptote, x_amp/x_fc bounds, ripple-lobe integer trap, rim-honest per-brief reseeds and LHS refusal rates. |
+| [research/campaign_2026-10-26/LANE_C_ATH_MORPH.md](research/campaign_2026-10-26/LANE_C_ATH_MORPH.md) | LANE C: ATH/Morph/FREEFORM audit — R-OSSE + pinned native morph mesh-proven 17/17 for all four briefs, the missing wall_thickness 6 mm default as the real self-intersection cause, morph_target as a categorical gene, per-brief seeds/bounds and compatibility. |
+| [research/campaign_2026-10-26/LANE_D_REFERENCE_OBJECTIVE.md](research/campaign_2026-10-26/LANE_D_REFERENCE_OBJECTIVE.md) | LANE D: reference/hybrid typologies + objective mechanics — aspect_ratio is whole-horn W/H, native seeds get no f0 derivation, biradial is the only K-law-exact generator, screen/verify grids and v3 masking, load/f11/cov_band_hz analysis. |
+| [research/campaign_2026-10-26/LANE_E_WEB_DRIVERS_BRIEFS.md](research/campaign_2026-10-26/LANE_E_WEB_DRIVERS_BRIEFS.md) | LANE E: outside web research — driver classes/exit angles/f11, real 60x40 PA horn sizes, K-law vs vendor cutoff ratings, 300–400 Hz loading drivers, and the typology-fit recommendations with URLs. |
+| [research/campaign_2026-10-26/ORCH_FINDINGS.md](research/campaign_2026-10-26/ORCH_FINDINGS.md) | Orchestrator verification F1–F9: native no-derivation, driver-pin refusals (incl. the ICW nested-key miss), band_lo inertness, v3 masking, dof/VRAM fit, budget re-check, and the brief cross-check. |
+
 ## Evidence (measured results; `evidence/README.md` explains the rules)
 | Doc | What it is |
 |---|---|
@@ -72,6 +82,7 @@ Keep this file current: a new doc gets a line here in the same commit.
 | [evidence/M5_WP11_2026-10-25.md](evidence/M5_WP11_2026-10-25.md) | M5 WP11: restarts (IPOP/BIPOP mirroring pycma) + CMA-ME QD atlas (ribs 0.12.0; `archive.json`/`archive_heatmap.json` contract + read-only GUI atlas view); offline suite 1234/0/1/0 (intended tripwire; +40 additive) + 4 GPU screens proving budget exactness (fired run: 4 ES instances, BIPOP schedule visible, VRAM 430→2305 MiB [measured]); byte-check tools/evidence_bytecheck_m5.py 30/30. |
 | [evidence/M4_SMOKE_2026-10-25.md](evidence/M4_SMOKE_2026-10-25.md) | M4 GPU smoke: 12 new-typology screens + conical reference (byte-checked verbatim logs; tools/evidence_bytecheck_m4.py); frozen-sculpt full-vs-quarter PASS (≤ 0.051° / 0.0043 dB vs the 0.1 dB/1° bar); WP10 zero-modulation compare honestly DIFFERENT (P-M4-1 proposal); final suite 1194/0/1/0 (intended tripwire only). |
 | [evidence/ATH_TYPOLOGIES_2026-10-25.md](evidence/ATH_TYPOLOGIES_2026-10-25.md) | ATH framework pass: `ath_core`/`ath_twinray_380` dry-run mesh numbers, first GPU seed solves (J, dofs, times), 1604-test offline suite, and the morph-route limits (FREEFORM rectangle guard measured). |
+| [evidence/CAMPAIGN_DRYRUN_2026-10-26.md](evidence/CAMPAIGN_DRYRUN_2026-10-26.md) | Campaign 2026-10-26 CPU validation: all 23 cells dry-run green (dofs 921–9,871, envelope 0, K-law within 10 % on tall/square and inside-envelope on wide), the 16/32-point LHS mesh audit with per-cell invalid %, the narrowing record, and the 12/29/36 grid check. No GPU. |
 | [evidence/SOLVER_VERIFY_2026-10-22.md](evidence/SOLVER_VERIFY_2026-10-22.md) | GPU tests, analytic sphere, GPU vs CPU cross-check. |
 | [evidence/TYPOLOGY_VERIFY.md](evidence/TYPOLOGY_VERIFY.md) | Typology ladder V1–V5. |
 | [evidence/TYPOLOGY_SCREEN_2026-10-22.md](evidence/TYPOLOGY_SCREEN_2026-10-22.md) | First fair screen campaigns + reading. Raw: `evidence/campaigns/`. |

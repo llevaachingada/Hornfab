@@ -1,0 +1,89 @@
+# Cell b3bw__biradial_keele - Keele biradial generator, brief b3bw_pa_90x60_600_load_wide.
+# SOURCE: LANE_D_REFERENCE_OBJECTIVE.md s1.2/1.3 (B3b exact seed h_rm 235.2, v_rm 352.8).
+# WIDE RESCALE (recorded): the portrait V mouth knob is rescaled to the 450 mm wide
+#   envelope: v_rm 221 (outer 2*(221+3) = 448 mm); h_rm stays 235.2 (W 470.4, outer 476
+#   inside 500). L 195, h_a 40.5, v_a 27; generator seed_policy explicit; mesh epw 6,
+#   caps 12000; solve cuda_fused true; CMA sigma0 0.15 seed 1234.
+name: b3bw__biradial_keele
+family: FREEFORM
+brief_file: ../../briefs/campaign_2026-10-26/b3bw_pa_90x60_600_load_wide.yaml
+generator:
+  name: typology
+  profile_h:
+    type: biradial
+  profile_v:
+    type: biradial
+  n_anchors: 16
+  max_wall_deg: 80.0
+  mouth: ellipse
+  seed_policy: explicit
+seed_params:
+  L_mm: 195.0
+  h_a_deg: 40.5
+  v_a_deg: 27.0
+  h_rm_mm: 235.2
+  v_rm_mm: 221.0
+  h_n: 5.5
+  v_n: 4.0
+bounds:
+  L_mm:
+    lo: 185.0
+    hi: 205.0
+  h_a_deg:
+    lo: 36.0
+    hi: 44.0
+  v_a_deg:
+    lo: 22.0
+    hi: 32.0
+  h_rm_mm:
+    lo: 225.0
+    hi: 245.0
+  v_rm_mm:
+    lo: 213.0
+    hi: 227.0
+  h_n:
+    lo: 2.0
+    hi: 8.0
+  v_n:
+    lo: 2.0
+    hi: 8.0
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 12000
+  dof_cap_verify: 12000
+  dof_cap_final: 12000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.15
+  seed: 1234
+  budget: 100
+  popsize: null
+  tolfun: 0.001
+description: Cell b3bw__biradial_keele - Keele biradial generator, brief b3bw_pa_90x60_600_load_wide.
