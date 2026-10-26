@@ -2,6 +2,12 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-26 (campaign Phase 0) - overnight campaign runner LANDED (impl-code2; the RUNNER lane's written files, committed)
+
+- **What landed:** the other lane's written-but-uncommitted `tools/run_campaign_night.py` (730 lines) and `tests/test_tools_night_runner.py` (9 tests), staged by explicit path only.
+- **Protocol:** reads a runtime night YAML (`runs/nights/<night>.yaml`, not committed) and runs jobs STRICTLY SEQUENTIALLY (one GPU): pre-hygiene kills only `julia.exe` (PIDs logged first), runs `hornlab-search gpu-clean`, waits for `runs/.gpu.lock` to disappear, records the `nvidia-smi` VRAM baseline; each job is a subprocess with a per-job timeout (search 3 h / command 2 h) teed to `runs/nights/<night>/<id>.log`; post-hygiene runs `gpu-clean` again and records peak/after VRAM. The evaluation count is read from the run's `search.ndjson` (never from `--budget`), the best J is parsed from the search tool's final summary line, one JSON line per job goes to `summary.jsonl`, and a short `SUMMARY.md` table is written. A failed or timed-out job is recorded and skipped - never retried. Import-light (stdlib + PyYAML) with pure parsing/accounting helpers.
+- **Verification:** the tool imports by path (module registered in `sys.modules`, `REPO_ROOT` correct); focused `tests/test_tools_night_runner.py` **9/9**; standard offline gate green - `compileall` clean, `tools/gen_param_catalog.py --check` OK, `node --check` x8 OK, offline suite **1639 passed / 0 failed / 0 errors / 0 skipped** (`runs/step2-runner/suite.xml`). The 9 runner tests were already part of the recorded 1630 baseline as an untracked file (see the seed_policy entry), so committing them does not raise the count. No GPU/Julia work.
+
 ## 2026-10-26 (campaign Phase 0) - objective v3 amendment: optional per-plane `target.f0_v_hz` LANDED (impl-code2; absent = bit-identical)
 
 - **What it does:** `target.f0_v_hz` (appended after `f0_hz`; `Target` stays positional) makes the coverage term the SUM of two separately masked means: the horizontal squared error over `f >= f0_hz` and the vertical squared error over `f >= f0_v_hz`, with `freq_weights` restricted to each mask. `dislope` keeps the H/f0 mask; `n_in_band` reports the H-mask count. Validation: `0 < f0_v_hz <= band_hi_hz` and, when `f0_hz` is set, `f0_v_hz >= f0_hz`; every refusal names `target.f0_v_hz`.
