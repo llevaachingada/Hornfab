@@ -38,7 +38,7 @@ seed_params:
 bounds:
   L_mm:
     lo: 90.0
-    hi: 140.0
+    hi: 200.0
   h_a_deg:
     lo: 35.0
     hi: 50.0

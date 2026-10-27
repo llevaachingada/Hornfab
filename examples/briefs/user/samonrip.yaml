@@ -1,0 +1,31 @@
+name: samonrip
+description: Organic rollback horn, 90x60 degree, 1-inch driver, 520x420x260 mm envelope
+driver:
+  exit_radius_mm: 17.2
+  exit_angle_deg: 5
+  throat_angle_policy: null
+envelope:
+  max_mouth_w_mm: 500
+  max_mouth_h_mm: 390
+  max_depth_mm: 300
+symmetry: hv
+source:
+  cap: auto
+target:
+  coverage_h_deg: 75
+  coverage_v_deg: 30
+  band_lo_hz: 500
+  band_hi_hz: 12000
+  di_target_db: null
+  di_slope_target: 0
+  z_min: 0.7
+weights:
+  cov: 1
+  rip: 1
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.5
+verify_only: false
+objective:
+  version: 3

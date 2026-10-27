@@ -167,6 +167,24 @@ def test_gpu_job_refused_while_lock_held(repo):
     assert not jm.jobs
 
 
+def test_queued_resume_is_listed_with_status_and_position(repo, monkeypatch):
+    """A resume queued behind the GPU is visible (status + 1-based queue_position) without spawning."""
+    jm = J.JobManager(repo, repo / "runs")
+    jm.QUEUE_POLL_S = 3600
+    monkeypatch.setattr(jm, "gpu_busy", lambda: "GPU busy: other (pid 1)")
+    monkeypatch.setattr(J.subprocess, "Popen",
+                        lambda *a, **k: pytest.fail("a queued resume must not spawn"))
+    job = jm.launch("search", {"config": "examples/cfg.yaml", "resume": RID})
+    assert job.status == "queued" and job.proc is None and not job.log.exists()
+    [row] = jm.list()
+    assert row["id"] == job.id and row["status"] == "queued" and row["queue_position"] == 1
+    assert jm.view(job.id)["queue_position"] == 1
+    with pytest.raises(KeyError):
+        jm.view("missing")
+    jm.cancel(job.id)
+    assert jm.view(job.id)["status"] == "cancelled" and jm.view(job.id)["queue_position"] == 0
+
+
 def test_launch_log_and_cancel(repo, monkeypatch):
     monkeypatch.setattr(J, "CLI_BOOT", "import sys, time; print('hello', sys.argv[1:], flush=True); time.sleep(60)")
     jm = J.JobManager(repo, repo / "runs")

@@ -9,6 +9,7 @@ Keep this file current: a new doc gets a line here in the same commit.
 | [CONTINUITY.md](CONTINUITY.md) | Status block + dated log, newest first. The source of truth for "where are we". |
 | [ISSUES.md](ISSUES.md) | Open issues and the TO-DO list (next-round priorities at the top). |
 | [FORKS.md](FORKS.md) | How we change Magnus's solver/mesher: pinned forks in `..\forks`, install by SHA, validation ladder (owner decision 2026-10-24). |
+| [IMPLEMENTATION_PLAN_2026-10-27.md](IMPLEMENTATION_PLAN_2026-10-27.md) | After the smoke night: fix v3 record rejection, reseed gcurve cell, objective v4 normalisation (owner tolerances), diagonal balloons, then seeds/compare/polish on v4; fluted-wall (Solana) idea. NEXT_DEV_PRIORITIES P10. |
 | [NEXT_DEV_PRIORITIES.md](NEXT_DEV_PRIORITIES.md) | Post-beta priorities: P1 fused CUDA assembly (DONE, M2), P2 12 kHz pass (DONE), P3 Metal backend, P4 grid-density ideas, P5 build-decision easy wins, P6 superformula campaign + GSA-vs-CMA-ES bake-off (proposals, owner-gated). |
 | [HANDOFF_BETA.md](HANDOFF_BETA.md) | Current agent handoff: beta-readiness pass, items A–G, stop conditions. |
 | [HANDOFF_COLLABORATOR_2026-10-23.md](HANDOFF_COLLABORATOR_2026-10-23.md) | For the collaborator pulling `main` on 2026-10-23: setup, what runs on the GPU box, files the owner edits tonight, rules, open questions. |
@@ -63,6 +64,10 @@ Keep this file current: a new doc gets a line here in the same commit.
 | [research/ATH_SUPERFORMULA_AND_GSA_2026-10-25.md](research/ATH_SUPERFORMULA_AND_GSA_2026-10-25.md) | **P6 IMPLEMENTATION PLAN v1.0** (rewritten from the research dossier, dossier content folded in): P6a superformula-family campaign (quarter-symmetry math, search box, degeneracy/curvature guards, configs, GPU + GUI) + P6b GSA-vs-CMA-ES bake-off (protocol, library audit → own ~120-line GSA, pre-registered decision rule) + parallel-lane structure with verbatim dispatch prompts. Owner-gated; runs after WP1–WP17 completes. Research basis in `plan/12_RESEARCH_BASIS.md` §11. |
 | [research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md](research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md) | ATH CORE / TwinRay framework pass: the Ath Morph law and guide vocabulary, the measured FREEFORM rectangle-morph guard, `ath_core` (native OSSE + searched Morph) and `ath_twinray_380` (published-dimension superellipse reconstruction), wide search-box policy, seed mesh numbers, and the honest not-modelled list. |
 | [research/TIME_DOMAIN_RINGING.md](research/TIME_DOMAIN_RINGING.md) | Ringing / waterfalls: what we can see, stage-2 design. |
+| [research/V4_SCORING_REVIEW_2026-10-27.md](research/V4_SCORING_REVIEW_2026-10-27.md) | Objective-v4 scoring review (Opus, offline, no GPU): what else J should contain before v4 — normalisation changes the winner (Spearman ~0.93 global but top-5 and argmin shift; loading briefs collapse to 0.1), DI-std and presence-band/asymmetric-cov additions, diagonal-term reference choice, the four tolerance-research hypotheses tested on stored records, and the parameter-box audit (appendix). Companion: OBJECTIVE_V4_TOLERANCES, V4_TOLERANCE_RESEARCH. |
+| [research/V4_TOLERANCE_RESEARCH_2026-10-27.md](research/V4_TOLERANCE_RESEARCH_2026-10-27.md) | Outside + in-repo sources on v4 tolerances per horn class (orchestrator): Princeton DI-std/polar-xcorr, Toole/Olive, asymmetric -6 dB specs, K-law pattern flip; proposed class blocks and the presence-band note (owner §4b). Its numbers are [E] proposals — tested in V4_SCORING_REVIEW. |
+| [evidence/OBJECTIVE_V4_TOLERANCES.md](evidence/OBJECTIVE_V4_TOLERANCES.md) | v4 tolerance options for the owner: term units file:line, Option A (physical, recommended) vs Option B (data-median), weighted-share tables recomputed on stored v3 records, the penalty-ordering check (Option B fails on the loading brief), and per-class blocks. |
+| [../examples/briefs/campaign_2026-10-26/](../examples/briefs/campaign_2026-10-26/) | Includes three objective-v4 class briefs (`b1w_..._v4` waveguide, `b3bw_..._v4` loading, `b3a_..._v4` low-reach PA) carrying Option A tolerances; see CODE_MAP `objective/scalar_v4.py`. |
 | [BOUNDARY_LAB_0.5_RESEARCH.md](BOUNDARY_LAB_0.5_RESEARCH.md), [research/boundary_lab_0.5/](research/boundary_lab_0.5/) | Boundary Lab 0.5.0 findings and inventories. |
 
 ### Campaign 2026-10-26 lane evidence (five audit lanes + orchestrator findings)
@@ -103,3 +108,5 @@ Keep this file current: a new doc gets a line here in the same commit.
 ## Elsewhere in the repo
 `../README.md` (install, commands, known limits) · `../TOOLCHAIN.md` (pinned SHAs, measured machine numbers) ·
 `../CONTRIBUTING.md` · `../NOTES_FOR_SENIOR.md` (append-only rulings and questions) · `../examples/catalog.yaml`.
+
+- `docs/data/campaign_v4_2026-10-27/` - analysis tables (cells_summary.csv, evals.csv, best_designs.json, README) from the v4 screen nights, for the collaborator.

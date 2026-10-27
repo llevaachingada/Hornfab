@@ -44,6 +44,7 @@ from ..metrics.compute import compute_metrics
 from ..metrics.di import di_from_balloon, sin_theta_weights
 from ..objective import PENALTY_FAILED, PENALTY_INVALID, objective, penalty_result
 from ..objective.scalar_v2 import objective_v2, objective_v3
+from ..objective.scalar_v4 import V4Params, objective_v4
 from ..objective.versions import SUPPORTED_OBJECTIVE_VERSIONS
 from ..solve import cache as solve_cache
 from ..solve.base import stack_responses, theta_deg_from_dirs
@@ -139,6 +140,7 @@ class EvalContext:
     write_ndjson: bool = True
     provenance: dict = field(default_factory=dict)     # config / brief identity for dataset records (R8)
     objective_version: int = 1                         # WP1: 2 when the brief/config opts in
+    objective_params: object | None = None             # v4: the validated ``V4Params`` (tolerances...)
 
     @property
     def solve_cache_root(self) -> Path | None:
@@ -165,6 +167,8 @@ def make_context(cfg, store=None, *, cache_dir=None, lib_shas=None,
                       cache_dir=None if cache_dir is None else Path(cache_dir),
                       trace_fraction=float(trace_fraction))
     ctx.objective_version = int(getattr(cfg, "objective_version", 1))
+    block = getattr(cfg, "objective_params", None)
+    ctx.objective_params = None if block is None else V4Params.from_block(block)
     ctx.provenance = record_provenance(cfg)
     if store is not None:
         ctx.store_seen = {(e.get("design_hash"), e.get("mode"), bool(e.get("ok"))) for e in store.index}
@@ -755,10 +759,18 @@ def _failure_marker(ctx: EvalContext, key: str) -> Path | None:
 #: ``objective.versions.SUPPORTED_OBJECTIVE_VERSIONS`` - the dataset record validator uses the
 #: same tuple, so a version cannot be scored without also being recordable (or recorded without
 #: being scorable). Checked once, at import, so drift fails loudly.
+def _score_v4(metrics, resp, target, weights, params):
+    if params is None:
+        raise ValueError("objective_version 4 needs the brief's objective block (tolerances); the "
+                         "evaluation context carries none")
+    return objective_v4(metrics, resp, True, target, weights, params)
+
+
 _OBJECTIVE_SCORERS = {
-    1: lambda metrics, resp, target, weights: objective(metrics, True, target, weights),
-    2: lambda metrics, resp, target, weights: objective_v2(metrics, resp, True, target, weights),
-    3: lambda metrics, resp, target, weights: objective_v3(metrics, resp, True, target, weights),
+    1: lambda metrics, resp, target, weights, params: objective(metrics, True, target, weights),
+    2: lambda metrics, resp, target, weights, params: objective_v2(metrics, resp, True, target, weights),
+    3: lambda metrics, resp, target, weights, params: objective_v3(metrics, resp, True, target, weights),
+    4: _score_v4,
 }
 if tuple(sorted(_OBJECTIVE_SCORERS)) != SUPPORTED_OBJECTIVE_VERSIONS:
     raise RuntimeError(
@@ -771,7 +783,8 @@ def _score(metrics, resp, ctx) -> tuple[float, dict]:
     (and every old run reproduces bit-for-bit); version 2 (brief/config``objective: {version: 2}``)
     scores with the detrended terms in ``objective/scalar_v2.py``. Version 3 (2026-10-25,
     owner-approved): freq-weighted cov + the below-f0 (K-law design frequency) mask on
-    cov/dislope - see ``objective_v3`` in scalar_v2.py.
+    cov/dislope - see ``objective_v3`` in scalar_v2.py. Version 4 (2026-10-27): tolerance-normalised
+    terms plus asymmetric coverage, DI std and the diagonal term - ``objective/scalar_v4.py``.
 
     The allowed versions are the single source of truth in ``objective/versions.py``, shared with
     the dataset record validator. An unsupported version fails loudly instead of silently scoring
@@ -780,7 +793,7 @@ def _score(metrics, resp, ctx) -> tuple[float, dict]:
     if scorer is None:
         raise ValueError(f"objective_version {ctx.objective_version!r} is not one of "
                          f"{SUPPORTED_OBJECTIVE_VERSIONS}")
-    return scorer(metrics, resp, ctx.target, ctx.weights)
+    return scorer(metrics, resp, ctx.target, ctx.weights, getattr(ctx, "objective_params", None))
 
 
 def _compute_band_split(design, cfg, mode, mspec, sspec, design_dir, backend, ctx, st) -> None:

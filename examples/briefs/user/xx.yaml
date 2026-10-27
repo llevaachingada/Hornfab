@@ -1,0 +1,32 @@
+name: xx
+description: Large 2-inch rollback 90x40, 640x460x340 envelope, f0 1000 Hz (baseline
+  Phase D)
+driver:
+  exit_radius_mm: 25.4
+  exit_angle_deg: 4
+  throat_angle_policy: null
+envelope:
+  max_mouth_w_mm: 640
+  max_mouth_h_mm: 460
+  max_depth_mm: 400
+symmetry: hv
+source:
+  cap: auto
+target:
+  coverage_h_deg: 90
+  coverage_v_deg: 40
+  band_lo_hz: 500
+  band_hi_hz: 8000
+  di_target_db: null
+  di_slope_target: 0
+  z_min: 0.7
+weights:
+  cov: 1
+  rip: 1
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.5
+verify_only: false
+objective:
+  version: 3

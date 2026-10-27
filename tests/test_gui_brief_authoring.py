@@ -309,7 +309,8 @@ const app = await import(pathToFileURL(process.argv[2]).href);
 const { runProvenanceGroup, renderProvenanceBadges, restartScheduleHtml, stepChipHtml,
         stepInvByName, qdProvenanceCaption, f11CaveatHtml,
         stopAffordanceFor, stopRegionHtml, currentRunCard,
-        toolbarPillFor, toolbarPillHtml, resumeArgsFor, resumeableSearchJob } = app;
+        toolbarPillFor, toolbarPillHtml, resumeArgsFor, resumeableSearchJob,
+        continueRunAvailable, continueRunArgs } = app;
 assert.equal(typeof stopAffordanceFor, "function");
 assert.equal(typeof stopRegionHtml, "function");
 assert.equal(typeof renderProvenanceBadges, "function");
@@ -653,6 +654,58 @@ assert.match(resPill, /budget is per invocation/);
 const degPill = toolbarPillHtml({ state: "resume", job: { id: "f6", kind: "search" }, args: null });
 assert.ok(!degPill.includes("<button"), degPill);          // degraded: a note, not a broken button
 assert.match(degPill, /no resumable run folder/);
+
+// Continue-run helpers (run-detail "Continue this run"): availability requires a search command;
+// the args builder adds N NEW evals on the stored config — no --config, no --max-evals, mode only
+// when the run declares one, and the input run is never mutated.
+assert.equal(typeof continueRunAvailable, "function");
+assert.equal(typeof continueRunArgs, "function");
+assert.equal(continueRunAvailable({ command: "hornlab-search search --config x --budget 40" }), true);
+assert.equal(continueRunAvailable({ command: "  hornlab-search search --config x --budget 40" }), true);
+assert.equal(continueRunAvailable({ command: "hornlab-search search --config x --budget 40\t\n" }), true);
+assert.equal(continueRunAvailable({ command: "hornlab-search run --config x" }), false);
+assert.equal(continueRunAvailable({}), false);
+assert.equal(continueRunAvailable(null), false);
+assert.equal(continueRunAvailable(undefined), false);
+assert.equal(continueRunAvailable({ command: 5 }), false);
+
+const CRID = "20261025T090000Z-search-abc123";
+// strings and numbers both accepted; the numeric string is trimmed, the result is {args, n}
+assert.deepEqual(continueRunArgs({ id: CRID, mode: "verify" }, "25"),
+                 { args: { resume: CRID, budget: 25, mode: "verify" }, n: 25 });
+assert.deepEqual(continueRunArgs({ id: CRID }, 25), { args: { resume: CRID, budget: 25 }, n: 25 });
+assert.deepEqual(continueRunArgs({ id: CRID }, " 12 "), { args: { resume: CRID, budget: 12 }, n: 12 });
+// boundaries are inclusive
+assert.deepEqual(continueRunArgs({ id: CRID }, 1), { args: { resume: CRID, budget: 1 }, n: 1 });
+assert.deepEqual(continueRunArgs({ id: CRID }, 5000), { args: { resume: CRID, budget: 5000 }, n: 5000 });
+// a falsy mode is omitted, never defaulted in
+for (const r of [{ id: CRID, mode: "" }, { id: CRID, mode: null }, { id: CRID, mode: undefined },
+                 { id: CRID }]) {
+  const ok = continueRunArgs(r, "5");
+  assert.deepEqual(ok, { args: { resume: CRID, budget: 5 }, n: 5 });
+  assert.ok(!("mode" in ok.args));
+}
+// rejections: {error} only — never a half-built args payload
+for (const badN of [0, 5001, 12.5, "12.5", "abc", "", null, true, false, undefined]) {
+  const bad = continueRunArgs({ id: CRID }, badN);
+  assert.ok(typeof bad.error === "string" && bad.error.length > 0, String(badN));
+  assert.ok(!("args" in bad), String(badN));
+}
+for (const badRun of [null, undefined, {}, { id: "" }, { id: "   " }, { id: 5 }]) {
+  const bad = continueRunArgs(badRun, "5");
+  assert.ok(typeof bad.error === "string" && bad.error.length > 0);
+  assert.ok(!("args" in bad));
+}
+// contract: exactly resume/budget (+mode); never config/max_evals, and extra run keys are not
+// forwarded. The input run object is never mutated.
+const extraRun = { id: CRID, mode: "screen", config: "examples/poison.yaml", max_evals: 999 };
+const extraBefore = JSON.stringify(extraRun);
+const extra = continueRunArgs(extraRun, "8");
+assert.deepEqual(extra, { args: { resume: CRID, budget: 8, mode: "screen" }, n: 8 });
+assert.deepEqual(Object.keys(extra.args).sort(), ["budget", "mode", "resume"]);
+assert.ok(!("config" in extra.args) && !("max_evals" in extra.args));
+assert.equal(JSON.stringify(extraRun), extraBefore);
+assert.deepEqual(Object.keys(continueRunArgs({ id: CRID }, "8").args).sort(), ["budget", "resume"]);
 
 console.log("PROV OK");
 '''
@@ -1098,6 +1151,122 @@ def test_toolbar_run_pill_is_wired():
     assert 'post("/api/stop-current", {})' in src and '"Confirm kill"' in src
     # note: the kill itself lives server-side (jobs.stop_external) — pinned in
     # tests/test_gui_integration_phases.py, not in this app.js source check
+
+
+# ── Run-detail "Continue this run" card (search top-up) ──────────────────────────────────────────
+# The card renders only for a search run, POSTs {kind:"search", args:{resume,budget[,mode]}}, and the
+# wiring re-renders the detail page after the job is done. The pure helpers are node-tested above via
+# the PROV script; here the generated HTML ids/attributes and the launch contract are source-pinned.
+
+def test_continue_run_control_is_wired():
+    """The card builder exists and is rendered in the run-detail template, its five ids and the
+    numeric bounded/labelled input are present, the launch POST carries exactly the helper's args,
+    the helper builds only resume/budget(+mode), and the wiring polls the job and re-renders the
+    detail page on done (no --config/max-evals, no blocking dialogs)."""
+    src = APPJS.read_text(encoding="utf-8")
+    # the card builder exists and is rendered in the run-detail template
+    assert "function continueRunCardHtml(d, sum) {" in src
+    assert "${continueRunCardHtml(d, sum)}" in src
+    assert 'if (!continueRunAvailable(d)) return "";' in src      # only a search run gets a card
+    # the five stable ids + a numeric, labelled, bounded input and a live status region
+    for i in ("continue-run-card", "continue-run-n", "continue-run-help",
+              "continue-run-btn", "continue-run-status"):
+        assert f'id="{i}"' in src, i
+    assert '<label for="continue-run-n">Additional evaluations</label>' in src
+    assert ('id="continue-run-n" type="number" min="1" max="5000" step="1" '
+            'inputmode="numeric"') in src
+    assert 'id="continue-run-status" role="status"' in src
+    # launch POST: the exact shape the CLI/JobManager expects (kind search + the helper's args)
+    assert 'post("/api/jobs", { kind: "search", args: checked.args })' in src
+    # helper contract: N new evals only; no config, no max-evals, mode only when declared
+    helper = src.split("function continueRunArgs(run, rawN) {", 1)[1].split("\n}\n", 1)[0]
+    assert "const args = { resume: id, budget: n };" in helper
+    assert "if (run.mode) args.mode = run.mode;" in helper
+    assert "--config" not in helper
+    assert "max_evals" not in helper and "max-evals" not in helper
+    # the wiring block: polls the job, re-renders the detail page on done, no blocking dialogs
+    cont = src.split('const contBtn = document.getElementById("continue-run-btn");', 1)[1]
+    cont = cont.split("// ── View 3 / 7: 3D view", 1)[0]
+    assert 'api("/api/job/" + r.id)' in cont
+    assert "setTimeout(res, 2000)" in cont
+    assert "await viewRunDetail(id);" in cont
+    assert "--config" not in cont
+    assert "max_evals" not in cont and "max-evals" not in cont
+    assert "confirm(" not in cont and "alert(" not in cont
+
+
+def test_continue_run_queue_states_are_wired():
+    """A resume job queues when the GPU is busy: the launch response and the poll surface the
+    queued state honestly (never as "running"), a queued-only cancel button posts /cancel and stops
+    the poll without its message being overwritten, and renderJobs marks queued rows with the warn
+    colour plus a Cancel queued action (the Stop run button stays running-only)."""
+    src = APPJS.read_text(encoding="utf-8")
+    css = (ROOT / "hornlab_search" / "gui" / "static" / "app.css").read_text(encoding="utf-8")
+
+    cont = src.split('const contBtn = document.getElementById("continue-run-btn");', 1)[1]
+    cont = cont.split("// ── View 3 / 7: 3D view", 1)[0]
+
+    # launch response: queued shows the FIFO position + that it starts itself; running keeps
+    # the existing "Started job" copy
+    assert 'if (r.status === "queued")' in cont
+    assert "Queued behind the current run (position ${r.position})" in cont
+    assert "starts automatically when the GPU is free." in cont
+    assert 'say(`Started job ${r.id}' in cont
+
+    # poll: queued is handled BEFORE running, uses queue_position, and offers the cancel affordance
+    assert cont.index('if (j.status === "queued")') < cont.index('if (j.status === "running")')
+    assert "Waiting in queue (position ${j.queue_position})" in cont
+    assert "showCancel(true);" in cont
+    # running hides the cancel affordance and says running, never "waiting"
+    assert "showCancel(false);" in cont
+    assert "contCancel.hidden = !on;" in cont
+
+    # card markup: the queued-only cancel button is hidden by default with an honest title
+    assert 'id="continue-run-cancel" hidden' in src
+    assert 'title="Removes this request from the queue — nothing has started yet"' in src
+    assert ">Cancel queued request</button>" in src
+    # clicking it posts a QUEUED-ONLY cancel for the active job, reports success, and stops the
+    # poll locally
+    assert 'post("/api/job/" + activeJobId + "/cancel", { only_queued: true })' in cont
+    assert "Queued request cancelled." in cont
+    assert "let stopped = false;" in cont
+    assert "stopped = true;" in cont
+    assert "if (stopped) return;" in cont
+    # the job may have auto-started between the poll and the click: the error path must hide the
+    # queued-only affordance and keep polling (never kill, never re-enable the input)
+    cancel = cont.split("if (contCancel) contCancel.onclick = async () => {", 1)[1]
+    err = cancel.split("if (r.error) {", 1)[1].split("return;", 1)[0]
+    assert 'say("Could not cancel: " + r.error, "error-text");' in err
+    assert "queued = false;" in err
+    assert "showCancel(false);" in err
+    assert "setBusy(false);" not in err      # the input/Continue stay disabled for the running job
+    assert "stopped = true;" not in err      # the next poll must surface "Running…"
+
+    # no blocking dialogs added, and the launch args still carry no --config / max-evals
+    assert "confirm(" not in cont and "alert(" not in cont
+    assert "--config" not in cont
+    assert "max_evals" not in cont and "max-evals" not in cont
+
+    # status page: queued has its own status class (existing --warn colour) and a queued-only
+    # Cancel queued that reuses the .cancel-job-btn / data-job-id mechanism
+    assert re.search(r"\.job-row \.job-status-queued\s*\{\s*color:var\(--warn\);\s*\}", css)
+    jobs = src.split("function renderJobs(jobs) {", 1)[1].split("// ── View G: Glossary", 1)[0]
+    assert 'j.status === "queued"' in jobs
+    assert " · queued (position ${qpos})" in jobs
+    assert '>Cancel queued</button>' in jobs
+    assert 'data-queued="1"' in jobs
+    assert 'title="Removes this request from the queue — nothing has started yet"' in jobs
+    # Stop run stays running-only, and the shared handler posts cancel for both with no new dialog;
+    # a queued row sends the same queued-only guard so a race cannot kill an auto-started job
+    assert ">Stop run</button>" in jobs
+    assert 'post("/api/job/" + btn.dataset.jobId + "/cancel",' in jobs
+    assert "wasQueued ? { only_queued: true } : {}" in jobs
+    assert "wasQueued" in jobs
+    assert 'if (!wasQueued && !confirm("Cancel this job?")) return;' in jobs
+    assert 'showToast("Queued request cancelled — nothing had started.", "info")' in jobs
+
+    # no design/CSS additions for this hardening: the card still relies on the hidden attribute
+    assert "continue-run-cancel" not in css
 
 
 # ── Compose hybrid disclosure + seed preview (owner ask, 2026-10-25) ─────────────────────────

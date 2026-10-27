@@ -623,6 +623,36 @@ function resumeArgsFor(job, runs) {
   return args;
 }
 
+/** Pure: may the run-detail "Continue this run" control be shown? Only a run whose stored command
+ *  was a search: the CLI then loads <run>/config.yaml on --resume, so the same configuration is
+ *  reused. A missing/null command (or any other command) renders no card at all. */
+function continueRunAvailable(d) {
+  return !!(d && typeof d.command === "string" && d.command.trim().startsWith("hornlab-search search"));
+}
+
+/** Pure: the POST /api/jobs args for adding N NEW evaluations to an opened search run. Mirrors
+ *  resumeArgsFor's contract: no --config (the CLI reuses the run's stored config.yaml), no
+ *  --max-evals (it counts replays too; --budget is the NEW-evaluation cap), and mode only when the
+ *  run declares one (otherwise the CLI's screen default would rewrite the run's mode). Returns
+ *  {args, n} on valid input, {error} on blank id / non-integer / out-of-range nonsense. */
+function continueRunArgs(run, rawN) {
+  const id = run && typeof run.id === "string" ? run.id.trim() : "";
+  if (!id) return { error: "this run has no id to resume" };
+  let n;
+  if (typeof rawN === "number") {
+    n = rawN;
+  } else if (typeof rawN === "string" && /^[0-9]+$/.test(rawN.trim())) {
+    n = Number(rawN.trim());
+  } else {
+    return { error: "enter a whole number of evaluations between 1 and 5000" };
+  }
+  if (!Number.isInteger(n) || n < 1 || n > 5000)
+    return { error: "enter a whole number of evaluations between 1 and 5000" };
+  const args = { resume: id, budget: n };
+  if (run.mode) args.mode = run.mode;                    // never let the screen default rewrite a mode
+  return { args, n };
+}
+
 /** Pure: is this job a stopped GUI search run a Resume affordance may target? Cancelled by the
  *  GUI, or failed with a real exit code. "ended (GUI restarted)" is deliberately excluded: whether
  *  that subprocess still runs is unknown to this GUI session, and resuming it could double-run a
@@ -1763,6 +1793,42 @@ export { runProvenanceGroup, renderProvenanceBadges, restartScheduleHtml, stepCh
 
 export { f0KpiHtml, mountingRankWarnHtml, seedDerivationHtml, objectiveVersionOptionsHtml };
 
+export { continueRunAvailable, continueRunArgs };
+
+
+/** Compact run-detail card: top up an opened search run with N NEW evaluations while reusing the
+ *  run's stored configuration. Rendered only when continueRunAvailable(d); validation, the POST and
+ *  the job poll live in viewRunDetail's wiring below. Pure; returns HTML ("" when not available). */
+function continueRunCardHtml(d, sum) {
+  if (!continueRunAvailable(d)) return "";
+  const total = sum && sum.n != null ? Number(sum.n).toLocaleString() : "–";
+  const reason = d && d.stop_reason != null ? String(d.stop_reason) : "";
+  const doubtful = !!reason && reason !== "budget" && reason !== "interrupted";
+  const warn = doubtful
+    ? `<p class="muted" role="note" style="font-size:0.78rem;margin:6px 0 0">This run stopped on ` +
+      `<span class="mono">${esc(reason)}</span> — a top-up may add no new work.</p>`
+    : "";
+  return `<div class="card" id="continue-run-card" style="margin-top:-8px">
+    <div class="eyebrow">Run control</div>
+    <h3 style="margin:4px 0 0">Continue this run</h3>
+    <p class="muted" style="font-size:0.85rem;margin:6px 0 0">${esc(total)} evaluations so far.
+      Continuing uses this run's saved configuration.</p>
+    <div class="btn-row continue-run-row">
+      <label for="continue-run-n">Additional evaluations</label>
+      <input id="continue-run-n" type="number" min="1" max="5000" step="1" inputmode="numeric"
+             placeholder="50" aria-describedby="continue-run-help">
+      <button class="primary" id="continue-run-btn">Continue run</button>
+      <button class="btn" id="continue-run-cancel" hidden
+              title="Removes this request from the queue — nothing has started yet">Cancel queued request</button>
+    </div>
+    <p class="muted" id="continue-run-help" style="font-size:0.78rem;margin:6px 0 0">
+      Adds N new evaluations — one candidate solve each, the search's iteration unit.
+      Candidates already solved replay free; the run keeps its saved configuration.</p>
+    ${warn}
+    <span class="muted" id="continue-run-status" role="status" style="display:block;font-size:0.8rem;margin:4px 0 0"></span>
+  </div>`;
+}
+
 
 async function viewRunDetail(id) {
   const ROOT = currentRoot();     // this view's own container (see route())
@@ -1822,6 +1888,7 @@ async function viewRunDetail(id) {
           : `<button id="btn-gen-report" title="Builds the detailed HTML report (about 30 s)">Make full report</button>`}</span>
         <button id="btn-step" title="Writes closed STEP solids (mm) of the 3 best designs for CAD or 3D printing">Export STEP for CAD (top 3)</button>
       </div>
+      ${continueRunCardHtml(d, sum)}
       <div id="run-files" class="run-files"></div>
 
       <!-- Acoustic performance charts (designer order) -->
@@ -2204,6 +2271,125 @@ async function viewRunDetail(id) {
     document.getElementById("report-slot").innerHTML = `<a class="btn" href="/runs/${esc(id)}/report.html" target="_blank" rel="noopener">Open full report ↗</a>`;
     showToast("Report ready.", "good");
   });
+
+  // Continue an opened search run: N NEW evaluations on the same stored configuration. The pure
+  // helper owns validation/args; this block only touches the DOM and polls the job. A job that
+  // queues behind the GPU's current run stays cancellable until it actually starts.
+  const contBtn = document.getElementById("continue-run-btn");
+  if (contBtn) {
+    const contInput = document.getElementById("continue-run-n");
+    const contStatus = document.getElementById("continue-run-status");
+    const contCancel = document.getElementById("continue-run-cancel");
+    const say = (msg, cls = "muted") => {
+      if (!contStatus) return;
+      contStatus.textContent = msg;
+      contStatus.className = cls;
+    };
+    const setBusy = busy => {
+      contBtn.disabled = busy;
+      if (contInput) contInput.disabled = busy;
+    };
+    const showCancel = on => {
+      if (contCancel) contCancel.hidden = !on;
+    };
+    let activeJobId = null;
+    let queued = false;
+    let stopped = false;         // set by Cancel queued request: the poll loop must not overwrite its message
+    const startContinue = async () => {
+      if (contBtn.disabled) return;
+      const checked = continueRunArgs({ id, mode: d.mode || sum.mode }, contInput ? contInput.value : "");
+      if (checked.error) {
+        say(checked.error, "error-text");
+        if (contInput) { contInput.setAttribute("aria-invalid", "true"); contInput.focus(); }
+        return;
+      }
+      if (contInput) contInput.removeAttribute("aria-invalid");
+      stopped = false;
+      queued = false;
+      activeJobId = null;
+      showCancel(false);
+      setBusy(true);
+      say("Starting…");
+      let r;
+      try { r = await post("/api/jobs", { kind: "search", args: checked.args }); }
+      catch (e) { setBusy(false); say("Could not start: " + e.message, "error-text"); return; }
+      if (r.error) { setBusy(false); say("Could not start: " + r.error, "error-text"); return; }
+      activeJobId = r.id;
+      if (r.status === "queued") {
+        queued = true;
+        showCancel(true);
+        say(`Queued behind the current run (position ${r.position}) — starts automatically when the GPU is free.`);
+      } else {
+        say(`Started job ${r.id} — ${checked.n} more evaluation${checked.n === 1 ? "" : "s"}.`);
+      }
+      while (ROOT === currentRoot() && !stopped) {
+        await new Promise(res => setTimeout(res, 2000));
+        if (ROOT !== currentRoot() || stopped) return;
+        let j;
+        try { j = await api("/api/job/" + r.id); }
+        catch {
+          if (stopped) return;
+          say(queued
+            ? "Still waiting in queue — starts automatically when the GPU is free."
+            : `Running ${r.id}…`);
+          continue;
+        }
+        if (stopped) return;         // a cancel landed while this poll was in flight
+        if (j.status === "queued") {
+          queued = true;
+          showCancel(true);
+          say(`Waiting in queue (position ${j.queue_position}) — starts automatically when the GPU is free.`);
+          continue;
+        }
+        if (j.status === "running") {
+          queued = false;
+          showCancel(false);
+          say(`Running ${r.id}…`);
+          continue;
+        }
+        if (j.status === "done") {
+          showCancel(false);
+          say("Done — reloading this run.");
+          await viewRunDetail(id);
+          return;
+        }
+        setBusy(false);
+        showCancel(false);
+        queued = false;
+        const tail = Array.isArray(j.log_tail) && j.log_tail.length ? j.log_tail[j.log_tail.length - 1] : "";
+        say(`Job ${r.id} ${j.status}${tail ? " — " + tail : ""}.`, "error-text");
+        return;
+      }
+    };
+    contBtn.onclick = startContinue;
+    if (contInput) contInput.addEventListener("keydown", e => {
+      if (e.key === "Enter") { e.preventDefault(); startContinue(); }
+    });
+    if (contCancel) contCancel.onclick = async () => {
+      if (!activeJobId || !queued) return;
+      contCancel.disabled = true;
+      let r;
+      try { r = await post("/api/job/" + activeJobId + "/cancel", { only_queued: true }); }
+      catch (e) { contCancel.disabled = false; say("Could not cancel: " + e.message, "error-text"); return; }
+      if (r.error) {
+        // The job auto-started between the poll and this click. Never kill it here: keep the poll
+        // running (the next tick shows "Running…"), hide the queued-only affordance, and leave the
+        // Continue input disabled.
+        contCancel.disabled = false;
+        say("Could not cancel: " + r.error, "error-text");
+        queued = false;
+        showCancel(false);
+        return;
+      }
+      stopped = true;              // the queued request never started; leave its message in place
+      queued = false;
+      activeJobId = null;
+      showCancel(false);
+      contCancel.disabled = false;
+      setBusy(false);
+      say("Queued request cancelled.");
+    };
+  }
 }
 
 // ── View 3 / 7: 3D view ────────────────────────────────────────────
@@ -3823,13 +4009,19 @@ function renderJobs(jobs) {
 
   el2.innerHTML = jobs.slice().reverse().map(j => {
     const sc = `job-status-${j.status || "done"}`;
+    const qpos = Number(j.queue_position) > 0 ? Number(j.queue_position) : null;
     const dur = j.started && j.ended
       ? " · " + ((new Date(j.ended) - new Date(j.started)) / 60000).toFixed(1) + "m"
-      : j.status === "running" ? " · running…" : "";
+      : j.status === "running" ? " · running…"
+      : j.status === "queued" ? (qpos ? ` · queued (position ${qpos})` : " · queued")
+      : "";
 
     const logLines = (j.log_tail || []).join("\n");
     const cancelBtn = j.status === "running"
-      ? `<button class="btn danger cancel-job-btn" data-job-id="${esc(j.id)}" title="Stops the run: the job's process tree is killed and a gpu-clean pass runs after GPU jobs">Stop run</button>` : "";
+      ? `<button class="btn danger cancel-job-btn" data-job-id="${esc(j.id)}" title="Stops the run: the job's process tree is killed and a gpu-clean pass runs after GPU jobs">Stop run</button>`
+      : j.status === "queued"
+        ? `<button class="btn danger cancel-job-btn" data-job-id="${esc(j.id)}" data-queued="1" title="Removes this request from the queue — nothing has started yet">Cancel queued</button>`
+        : "";
 
     // Try to extract run ID from log
     let runLink = "";
@@ -3855,9 +4047,12 @@ function renderJobs(jobs) {
   // Attach cancel event via delegation (avoids XSS risk from inline onclick)
   el2.querySelectorAll(".cancel-job-btn").forEach(btn => {
     btn.onclick = async () => {
-      if (!confirm("Cancel this job?")) return;
-      const r = await post("/api/job/" + btn.dataset.jobId + "/cancel", {});
+      const wasQueued = btn.dataset.queued === "1";
+      if (!wasQueued && !confirm("Cancel this job?")) return;
+      const r = await post("/api/job/" + btn.dataset.jobId + "/cancel",
+                           wasQueued ? { only_queued: true } : {});
       if (r.error) showToast(r.error, "error");
+      else if (wasQueued) showToast("Queued request cancelled — nothing had started.", "info");
       else showToast("Stop requested — the job is killed and a gpu-clean pass runs after GPU jobs.", "info");
       refreshJobs();
     };

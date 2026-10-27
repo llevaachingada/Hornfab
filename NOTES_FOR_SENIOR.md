@@ -631,3 +631,6 @@ What I need decided:
 
 ## 2026-10-26 senior pass learnings
 See docs/research/LEARNINGS_2026-10-26.md (Ath crease mechanism, over-constrained boxes, per-type scoring, driver realism, fused ceiling). Build on it rather than re-deriving.
+
+## 2026-10-27 objective v4 implementation (orchestrator)
+Files outside the usual ownership touched by the owner-directed v4 pass: `hornlab_search/metrics/diagonal.py` (new; 45/135 deg beamwidths from the balloon, pure numpy/scipy), `hornlab_search/config.py` (`_validate_objective_block` accepts v4, `Config.objective_params`, penalty-ordering refusal at load), `hornlab_search/search/evaluate.py` (dispatch table gains 4; scorers take the validated `V4Params`), `hornlab_search/objective/versions.py`. `tests/test_dataset_record.py` and `tests/test_config.py` each had one assertion updated because their subject changed (4 is now a supported version; `objective_params` is optional like `grid`); no tolerance loosened. v1-v3 behaviour and config hashes are unchanged.

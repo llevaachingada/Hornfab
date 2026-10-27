@@ -181,6 +181,14 @@ button[aria-pressed="true"] { border-color:var(--accent); background:var(--accen
 button[disabled],.btn[disabled] { opacity:0.45; cursor:not-allowed; pointer-events:none; }
 .btn-row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
 
+/* Run detail: continue an opened run (N new evaluations, stored config reused) */
+.continue-run-row { margin-top:10px; }
+.continue-run-row label { font-family:var(--f-mono); font-size:0.72rem; letter-spacing:0.06em;
+  text-transform:uppercase; color:var(--label); }
+.continue-run-row input { font:inherit; font-size:0.88rem; background:var(--bg); color:var(--ink);
+  border:1px solid var(--rule); border-radius:5px; padding:6px 10px; width:9em; max-width:100%; }
+.continue-run-row input:focus { outline:2px solid var(--accent); border-color:var(--accent); }
+
 /* ── KPI strip ──────────────────────────────────────────────────── */
 .kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
   gap:1px; background:var(--rule); border:1px solid var(--rule); border-radius:6px; overflow:hidden; }
@@ -338,6 +346,7 @@ legend { font-family:var(--f-mono); font-size:0.78rem; color:var(--accent);
 .job-row .job-head { display:flex; justify-content:space-between; align-items:start; gap:8px; flex-wrap:wrap; }
 .job-row .job-title { font-weight:500; font-size:0.9rem; }
 .job-row .job-status-running { color:var(--accent); }
+.job-row .job-status-queued  { color:var(--warn); }
 .job-row .job-status-done    { color:var(--good); }
 .job-row .job-status-failed  { color:var(--bad); }
 .job-row .job-status-cancelled { color:var(--muted); }

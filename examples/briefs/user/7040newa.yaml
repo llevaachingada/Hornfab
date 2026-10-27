@@ -1,0 +1,31 @@
+name: 7040newa
+description: ''
+driver:
+  exit_radius_mm: 17
+  exit_angle_deg: 7
+  throat_angle_policy: null
+envelope:
+  max_mouth_w_mm: 680
+  max_mouth_h_mm: 400
+  max_depth_mm: 500
+symmetry: hv
+source:
+  cap: auto
+target:
+  coverage_h_deg: 50
+  coverage_v_deg: 50
+  band_lo_hz: 600
+  band_hi_hz: 5500
+  di_target_db: null
+  di_slope_target: 0
+  z_min: 0.7
+weights:
+  cov: 1
+  rip: 1
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.5
+verify_only: false
+objective:
+  version: 3

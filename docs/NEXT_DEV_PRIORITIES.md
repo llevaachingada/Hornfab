@@ -263,6 +263,28 @@ The Typologies page shows catalog ids; a tooltip there must resolve `salmon_elli
 - Is a sandbox geometry page allowed to render a design that the search would reject (outside the brief envelope), and if so does it carry a visible "outside envelope" marker? Precedent: the run page already distinguishes at-limit parameters with a red marker; the sandbox should reuse that language rather than invent one.
 - `exponent` 2.0 (prose) vs 4.0 (shipped): which is the documented default? A lane must not pick a winner.
 
+## P10 (added 2026-10-27, owner-directed). After the campaign smoke night: data-integrity fixes, objective v4, then the search sequence
+
+**Full plan: `docs/IMPLEMENTATION_PLAN_2026-10-27.md`.** In order: (1) `dataset/record.py` accepts the scorer's
+objective versions (v3 records were silently not written); (2) reseed `gcurve__osse_b1w` (`gcurve_dist` 1.0);
+(3) objective v4 with per-term tolerances from the brief (owner picks the tolerances; T0 re-run on 27 cells);
+(4) T3 diagonal balloons on same-brief crease/control pairs; then (5) second seeds, (6) compare tier, (7) polish,
+all scored v4. Section 9 records the fluted/lobed-wall idea from JW Sound's Solana (harmonic FREEFORM station,
+fork change), gated on v4 results.
+
+## P11 (added 2026-10-27, owner-directed, TABLED). Share campaign data with the collaborator, then merge to main
+
+- **Hugging Face sync.** Data (~22 GB: `runs/` 11.4, `cache/` 7.9, `dataset/` 2.4) is git-ignored and too big for GitHub.
+  `tools/hf_sync.py` (`pack` / `upload` / `pull`) is written but never run for real. Needs the owner to run
+  `hf auth login` (write token) and to pick the repo (suggested `chingadalleva/hornlab-search-data`, private by default).
+  Start with groups `text,solve,dataset` (~7.2 GB); `meshes` (~10 GB) is optional. Pack only after the GPU night has
+  finished writing. The solve cache is what lets a no-CUDA collaborator re-score offline.
+- **Merge to main.** Open question: which branches ("everything" = `unified-typologies` only, or also `beta-fixes`, which
+  says "merge after overnight queue"; exclude `dev/fused-cuda-pin`). Work tree has uncommitted v4 changes; the repo rule
+  says CONTINUITY.md and ISSUES.md must be updated in the same commit as any push.
+- **Also pending from the v4 nights:** re-run `crease__osse_b1w` (resume job failed at startup), check why
+  `b1w__biradial_keele` stops at ~10 evals, update CONTINUITY.md for the 100-per-cell and resume nights.
+
 ## Not recommended (recorded so nobody re-proposes it without new evidence)
 - Half precision or other "quantization" of the BEM system: the solver is Float32 with a Float64 Krylov space; dense
   high-frequency BEM systems are poorly conditioned.

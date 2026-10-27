@@ -163,8 +163,15 @@ def _search_argv(job_id: str, spec: dict, cli_exe: Path) -> tuple[str, ...]:
     mode = str(spec.get("mode") or "screen")
     if mode not in _MODES:
         raise ValueError(f"job {job_id!r}: mode must be one of {_MODES}, got {mode!r}")
-    argv = [str(cli_exe), "search", "--config", str(config), "--budget", str(budget),
-            "--mode", mode]
+    resume = spec.get("resume")
+    if resume:
+        # Continue an earlier run: the CLI reads the run's own config.yaml (no sha mismatch), replays
+        # the finished candidates from search.ndjson/the solve cache, and spends ``budget`` on NEW solves.
+        argv = [str(cli_exe), "search", "--resume", str(resume), "--budget", str(budget),
+                "--mode", mode]
+    else:
+        argv = [str(cli_exe), "search", "--config", str(config), "--budget", str(budget),
+                "--mode", mode]
     brief = spec.get("brief")
     if brief:
         argv.extend(["--brief", str(brief)])

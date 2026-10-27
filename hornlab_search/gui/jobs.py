@@ -14,6 +14,7 @@ import signal
 import subprocess
 import sys
 import threading
+import time
 import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -61,11 +62,14 @@ def _quote(a: str) -> str:
 
 
 class JobManager:
+    QUEUE_POLL_S = 5.0                     # lazy pump thread: how often a queued resume re-checks the GPU
+
     def __init__(self, root: Path, runs: Path):
         self.root, self.runs = root.resolve(), runs.resolve()
         self.dir = self.runs / "gui_jobs"
         self.jobs: dict[str, Job] = {}
         self._lock = threading.Lock()
+        self._pump_thread: threading.Thread | None = None
         self._load_past()
 
     def _load_past(self, keep: int = 30) -> None:
@@ -82,6 +86,8 @@ class JobManager:
             status = m.get("status")
             if status in (None, "running"):              # the GUI stopped before the job did
                 status = "ended (GUI restarted)"
+            elif status == "queued":                     # never started; this session must not start it
+                status = "cancelled (GUI restarted before start)"
             job = Job(jid, m.get("kind", "?"), list(m.get("argv") or []), log, bool(m.get("gpu")),
                       started=m.get("started") or "", ended=m.get("ended"), status=status,
                       returncode=m.get("returncode"))
@@ -195,39 +201,144 @@ class JobManager:
                     f'(pid {lk["pid"]}) since {lk.get("start_time", "?")}')
         return None
 
+    @staticmethod
+    def _is_resume_search(kind: str, args: dict) -> bool:
+        """Only a search resume may wait in the GPU queue; every fresh launch keeps the hard refusal."""
+        resume = (args or {}).get("resume")
+        return kind == "search" and resume not in (None, "", False, True)
+
     def launch(self, kind: str, args: dict) -> Job:
         argv, gpu = self.build_argv(kind, args)
         with self._lock:
             if gpu:
-                if any(j.gpu and j.status == "running" for j in self.jobs.values()):
-                    raise JobError("a GPU job started from this GUI is still running")
-                busy = self.gpu_busy()
+                # Strict FIFO: a continuation already waiting has first claim on the GPU even when
+                # the lock looks free (the pump may simply not have ticked yet), so a fresh launch
+                # must never jump it and a later resume joins the queue behind it.
+                if any(j.status == "queued" for j in self.jobs.values()):
+                    if not self._is_resume_search(kind, args):
+                        raise JobError("a queued continuation is waiting — it starts when the GPU is free")
+                    job = self._new_job(kind, argv, gpu, status="queued")
+                    self.jobs[job.id] = job
+                    self._save_meta(job)                   # started = enqueue time; no log yet
+                    self._ensure_pump_locked()
+                    return job
+                busy = ("a GPU job started from this GUI is still running"
+                        if any(j.gpu and j.status == "running" for j in self.jobs.values())
+                        else self.gpu_busy())
                 if busy:
-                    raise JobError(busy)
+                    if not self._is_resume_search(kind, args):
+                        raise JobError(busy)
+                    job = self._new_job(kind, argv, gpu, status="queued")
+                    self.jobs[job.id] = job
+                    self._save_meta(job)                   # started = enqueue time; no log yet
+                    self._ensure_pump_locked()
+                    return job
+            job = self._new_job(kind, argv, gpu)
+            self.jobs[job.id] = job
+            self._start_locked(job)
+            return job
+
+    def _new_job(self, kind: str, argv: list[str], gpu: bool, status: str = "running") -> Job:
+        self.dir.mkdir(parents=True, exist_ok=True)
+        jid = _dt.datetime.now().strftime("%Y%m%dT%H%M%S") + "-" + uuid.uuid4().hex[:6]
+        return Job(jid, kind, argv, self.dir / f"{jid}.log", gpu, status=status, proc=None)
+
+    def _start_locked(self, job: Job) -> None:
+        """Spawn one job (the caller holds ``_lock``). A Popen failure is recorded, never raised: the
+        pump path must survive it and move on to the next queued job."""
+        fh = None
+        try:
             self.dir.mkdir(parents=True, exist_ok=True)
-            jid = _dt.datetime.now().strftime("%Y%m%dT%H%M%S") + "-" + uuid.uuid4().hex[:6]
-            log = self.dir / f"{jid}.log"
-            fh = log.open("w", encoding="utf-8")
+            fh = job.log.open("w", encoding="utf-8")
             kw = {"cwd": str(self.root), "stdout": fh, "stderr": subprocess.STDOUT, "stdin": subprocess.DEVNULL,
                   "env": {**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUNBUFFERED": "1"}}
             if os.name == "nt":
                 kw["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
             else:
                 kw["start_new_session"] = True
-            proc = subprocess.Popen([sys.executable, "-c", CLI_BOOT, *argv], **kw)
-            job = Job(jid, kind, argv, log, gpu, proc=proc)
-            self.jobs[jid] = job
+            proc = subprocess.Popen([sys.executable, "-c", CLI_BOOT, *job.argv], **kw)
+        except (OSError, subprocess.SubprocessError):
+            if fh is not None:
+                try:
+                    fh.close()
+                except OSError:
+                    pass
+            job.status, job.ended = "failed", _now()
             self._save_meta(job)
+            return
+        job.status, job.started, job.proc = "running", _now(), proc
+        self._save_meta(job)
         threading.Thread(target=self._wait, args=(job, fh), daemon=True).start()
-        return job
 
     def _wait(self, job: Job, fh) -> None:
         rc = job.proc.wait()
-        fh.close()
-        job.returncode, job.ended = rc, _now()
-        if job.status == "running":
-            job.status = "done" if rc == 0 else "failed"
-        self._save_meta(job)
+        try:
+            fh.close()
+        except OSError:
+            pass
+        with self._lock:
+            job.returncode, job.ended = rc, _now()
+            if job.status == "running":
+                job.status = "done" if rc == 0 else "failed"
+            self._save_meta(job)
+            self._pump_locked()                            # the GPU is free: start the next queued job now
+
+    # ------------------------------------------------------------------ queue
+
+    def pump(self) -> Job | None:
+        """Deterministic trigger for the same check the lazy thread runs (tests call this)."""
+        with self._lock:
+            return self._pump_locked()
+
+    def _pump_locked(self) -> Job | None:
+        if any(j.gpu and j.status == "running" for j in self.jobs.values()):
+            return None
+        if self.gpu_busy():
+            return None
+        job = next((j for j in self.jobs.values() if j.status == "queued"), None)   # dict = insertion order
+        if job is None:
+            return None
+        self._start_locked(job)
+        return job
+
+    def _ensure_pump_locked(self) -> None:
+        if self._pump_thread is None or not self._pump_thread.is_alive():
+            self._pump_thread = threading.Thread(target=self._pump_loop, daemon=True)
+            self._pump_thread.start()
+
+    def _pump_loop(self) -> None:
+        while True:
+            time.sleep(self.QUEUE_POLL_S)
+            with self._lock:
+                if not any(j.status == "queued" for j in self.jobs.values()):
+                    self._pump_thread = None
+                    return
+                try:
+                    self._pump_locked()
+                except Exception:  # noqa: BLE001 - never let the pump thread die while work is queued
+                    pass
+
+    def queue_position(self, job: Job) -> int:
+        with self._lock:
+            return self._position_locked(job)
+
+    def _position_locked(self, job: Job) -> int:
+        if job.status != "queued":
+            return 0
+        n = 0
+        for j in self.jobs.values():
+            if j.status == "queued":
+                n += 1
+                if j is job:
+                    return n
+        return 0
+
+    def view(self, jid: str, tail: int = 40) -> dict:
+        with self._lock:
+            job = self.jobs.get(jid)
+            if job is None:
+                raise KeyError(jid)
+            return {**job.view(tail), "queue_position": self._position_locked(job)}
 
     def _save_meta(self, job: Job) -> None:
         try:
@@ -236,27 +347,36 @@ class JobManager:
         except OSError:
             pass
 
-    def cancel(self, jid: str) -> Job:
-        job = self.jobs.get(jid)
-        if job is None:
-            raise JobError(f"unknown job {jid!r}")
-        if job.status != "running" or job.proc is None:
+    def cancel(self, jid: str, only_queued: bool = False) -> Job:
+        with self._lock:
+            job = self.jobs.get(jid)
+            if job is None:
+                raise JobError(f"unknown job {jid!r}")
+            if only_queued and job.status != "queued":
+                # The UI's queued card/list is poll-driven: the job may have auto-started between
+                # the poll and the click. A queued-only cancel must never kill a running job.
+                raise JobError("this request already started — use its Stop control")
+            if job.status == "queued":
+                job.status, job.ended = "cancelled", _now()
+                self._save_meta(job)
+                return job                                  # it never started: no kill, no gpu-clean
+            if job.status != "running" or job.proc is None:
+                return job
+            job.status = "cancelled"
+            if os.name == "nt":
+                subprocess.run(["taskkill", "/PID", str(job.proc.pid), "/T", "/F"], capture_output=True)
+            else:
+                try:
+                    os.killpg(job.proc.pid, signal.SIGTERM)
+                except ProcessLookupError:
+                    pass
+            if job.gpu:
+                try:
+                    job.proc.wait(timeout=30)
+                except subprocess.TimeoutExpired:
+                    pass
+                self.run_cli(["gpu-clean"], timeout=120)   # same cleanup the CLI uses; lock holder is now dead
             return job
-        job.status = "cancelled"
-        if os.name == "nt":
-            subprocess.run(["taskkill", "/PID", str(job.proc.pid), "/T", "/F"], capture_output=True)
-        else:
-            try:
-                os.killpg(job.proc.pid, signal.SIGTERM)
-            except ProcessLookupError:
-                pass
-        if job.gpu:
-            try:
-                job.proc.wait(timeout=30)
-            except subprocess.TimeoutExpired:
-                pass
-            self.run_cli(["gpu-clean"], timeout=120)       # same cleanup the CLI uses; lock holder is now dead
-        return job
 
     def stop_external(self) -> dict:
         """Owner 2026-10-25: kill the run that holds the GPU lock even when this GUI did not start
@@ -293,7 +413,9 @@ class JobManager:
                 pass
 
     def list(self) -> list[dict]:
-        return [j.view(12) for j in sorted(self.jobs.values(), key=lambda j: j.id, reverse=True)]
+        with self._lock:
+            return [{**j.view(12), "queue_position": self._position_locked(j)}
+                    for j in sorted(self.jobs.values(), key=lambda j: j.id, reverse=True)]
 
     def run_cli(self, argv: list[str], timeout: int = 120) -> tuple[int, str]:
         """A short, synchronous CLI call (families, gpu-clean); returns (exit code, combined output)."""

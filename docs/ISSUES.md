@@ -418,3 +418,6 @@ Added 2026-10-26 (campaign Phase 0, implementation lane code-2):
 - [ ] Open: native-OSSE TwinRay/CORE typology that searches gcurve_* + Morph (the crease class); per-azimuth a(p) expression knobs.
 - [x] README rewrite with GUI screenshots; main fast-forwarded (2026-10-26).
 - [x] 2026-10-26 learnings recorded (docs/research/LEARNINGS_2026-10-26.md).
+
+
+Local-only, added 2026-10-27 (no GitHub issue state changed): objective v4 implemented + two v4 GPU nights (first + resume); open: re-run crease__osse_b1w (resume startup failure), biradial_keele cells refuse ~90 % of candidates, HF data sync tabled (P11), merge of unified-typologies to main.

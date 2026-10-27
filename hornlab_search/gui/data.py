@@ -540,6 +540,16 @@ def run_detail(runs: Path, run_id: str) -> dict:
         "step_files": step_files,
         "step_files_detail": step_files_detail,
     })
+    # Continue-run control: the last invocation's stop reason tells the run detail whether a budget
+    # top-up is likely to do work (budget/interrupted) or the optimizer stopped on its own terms.
+    # Same convention as below: present in run.json = pass it through, absent stays absent.
+    if run_json.get("stop_reason") is not None:
+        out["stop_reason"] = run_json["stop_reason"]
+    # run.json["mode"] is the LAST invocation's fidelity (cma._prepare rewrites it on every resume),
+    # while summary.mode (rows[0]) keeps the run's original mode. The continue control must carry the
+    # current mode, or the CLI's "screen" default silently rewrites a verify/final run.
+    if run_json.get("mode") is not None:
+        out["mode"] = run_json["mode"]
     # C-1: WP11 provenance is written by the search only for the runs that have it. Present in
     # run.json = pass it through verbatim; absent = the key is absent here too (no shape invention).
     if isinstance(run_json.get("restarts"), list):

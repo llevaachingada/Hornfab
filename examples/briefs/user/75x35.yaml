@@ -1,0 +1,30 @@
+name: 75x35
+description: Eighty by 40
+driver:
+  exit_radius_mm: 17.4
+  exit_angle_deg: 8
+  throat_angle_policy: free
+envelope:
+  max_mouth_w_mm: 500
+  max_mouth_h_mm: 400
+  max_depth_mm: 300
+symmetry: hv
+source: {}
+target:
+  coverage_h_deg: 75
+  coverage_v_deg: 35
+  band_lo_hz: 300
+  band_hi_hz: 12000
+  di_target_db: null
+  di_slope_target: 0
+  z_min: 0
+weights:
+  cov: 1
+  rip: 1
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.5
+verify_only: false
+objective:
+  version: 2

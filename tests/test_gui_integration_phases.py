@@ -18,6 +18,7 @@ import shutil
 import socket
 import subprocess
 import threading
+import time
 import urllib.error
 import urllib.request
 from http.server import ThreadingHTTPServer
@@ -36,6 +37,7 @@ RUN_A = "20261025T000000Z-screen-aaa111"       # restarts/qd/restart dirs/STEP s
 RUN_B = "20261025T000001Z-screen-bbb222"       # plain run (no WP11 keys, no sidecar)
 RUN_C = "20261025T000002Z-screen-ccc333"       # identical to B except mesh.rear_res_factor
 RUN_D = "20261025T000003Z-screen-ddd444"       # identical to B (empty mixed_keys)
+STOP_RID = "20261025T000004Z-screen-eee555"    # run.json carries a stop_reason
 
 HASH = "aaaaaaaaaaaa"
 STEP = "fake_rank1_aaaaaaaaaaaa.step"
@@ -269,6 +271,22 @@ def test_run_detail_never_fabricates_a_malformed_search_restarts_block(repo):
     cfg["search"]["restarts"] = {"mode": "ipop"}           # missing `max`: invalid -> absent
     (run / "config.yaml").write_text(yaml.safe_dump(cfg))
     assert "search_restarts" not in D.run_detail(repo / "runs", RUN_B)
+
+
+def test_run_detail_passes_stop_reason_through(repo):
+    """A run.json stop_reason is passed through verbatim for the continue-run card's honest note.
+    run.json["mode"] (LAST invocation) is preferred over summary.mode (rows[0], original mode), so a
+    verify/final resume is never silently continued at the CLI's screen default."""
+    _write_run(repo / "runs", STOP_RID, run_json_extra={"stop_reason": "budget", "mode": "verify"})
+    d = D.run_detail(repo / "runs", STOP_RID)
+    assert d["stop_reason"] == "budget" and d["mode"] == "verify"
+    assert d["summary"]["mode"] == "screen"          # rows[0] keeps the original mode
+
+
+def test_run_detail_omits_absent_stop_reason(repo):
+    """No stop_reason in run.json -> the key is absent here too (no shape invention)."""
+    d = D.run_detail(repo / "runs", RUN_B)
+    assert "stop_reason" not in d
 
 
 def test_run_detail_route_serves_the_additive_keys(server):
@@ -723,6 +741,18 @@ def test_search_resume_config_and_budget_are_optional(repo):
     assert argv == ["search", "--budget", "12", "--mode", "screen", "--resume", run_dir]
 
 
+def test_continue_run_argv_is_n_new_evaluations(repo):
+    """The exact argv the run-detail Continue card sends: N NEW evals on the stored config.
+    No --config (the CLI reuses <run>/config.yaml) and no --max-evals (it counts replays too)."""
+    jm = J.JobManager(repo, repo / "runs")
+    run_dir = str((repo / "runs" / RUN_B).resolve())
+    argv, gpu = jm.build_argv("search", {"resume": RUN_B, "budget": 25, "mode": "verify"})
+    assert gpu is True
+    assert argv == ["search", "--budget", "25", "--mode", "verify", "--resume", run_dir]
+    assert "--config" not in argv
+    assert "--max-evals" not in argv
+
+
 def test_search_non_resume_argv_is_unchanged_and_new_flags_are_additive(repo):
     jm = J.JobManager(repo, repo / "runs")
     argv, gpu = jm.build_argv("search", {"config": "examples/cfg.yaml"})
@@ -742,26 +772,244 @@ def test_search_resume_preview_reports_the_exact_command_and_gpu(server):
     assert "--resume" in body["command"] and RUN_B in body["command"]
 
 
-def test_search_resume_inherits_the_gpu_busy_refusal(repo):
+def test_continue_run_preview_is_budget_only(server):
+    """The Continue card's previewed command carries the new-eval budget and mode only: no
+    --config (reused from the run) and no --max-evals."""
+    code, body = _req(server + "/api/preview", data=json.dumps(
+        {"kind": "search", "args": {"resume": RUN_B, "budget": 25, "mode": "verify"}}).encode())
+    assert code == 200 and body["gpu"] is True
+    assert "--budget 25" in body["command"]
+    assert "--mode verify" in body["command"]
+    assert "--config" not in body["command"]
+    assert "--max-evals" not in body["command"]
+
+
+def test_search_resume_queues_under_an_external_gpu_lock(repo, monkeypatch):
     from hornlab_search.search.gpulock import _lock_path
     lk = _lock_path(repo / "runs")
     lk.parent.mkdir(parents=True, exist_ok=True)
     lk.write_text(json.dumps({"pid": os.getpid(), "user": "u", "command": "search x",
                               "start_time": "t"}))
     jm = J.JobManager(repo, repo / "runs")
+    jm.QUEUE_POLL_S = 3600                       # the lazy pump must not fire during this test
+
+    def _no_spawn(*a, **k):
+        pytest.fail("a queued resume must not spawn before the GPU frees")
+
+    monkeypatch.setattr(J.subprocess, "Popen", _no_spawn)
+    # A FRESH launch under the same lock keeps the hard refusal (test_gui.py pins this too).
     with pytest.raises(J.JobError, match="GPU busy"):
-        jm.launch("search", {"resume": RUN_B})
-    assert not jm.jobs
+        jm.launch("search", {"config": "examples/cfg.yaml", "budget": 5})
+    job = jm.launch("search", {"resume": RUN_B})
+    assert job.status == "queued" and job.proc is None
+    assert not job.log.exists()
+    assert jm.queue_position(job) == 1
+    jm.cancel(job.id)                            # leave no queued job for the lazy thread
+    assert job.status == "cancelled"
+    assert not [j for j in jm.jobs.values() if j.status == "queued"]
 
 
-def test_search_resume_uses_the_one_gui_gpu_slot(repo):
+def test_search_resume_uses_the_one_gui_gpu_slot(repo, monkeypatch):
     jm = J.JobManager(repo, repo / "runs")
+    jm.QUEUE_POLL_S = 3600
+
+    def _no_spawn(*a, **k):
+        pytest.fail("a queued resume must not spawn while the GUI GPU job is running")
+
+    monkeypatch.setattr(J.subprocess, "Popen", _no_spawn)
     fake = J.Job("fake", "search", ["search", "--resume", "x"],
                  repo / "runs" / "fake.log", True)
     jm.jobs[fake.id] = fake                            # a GPU job from this GUI is still running
-    with pytest.raises(J.JobError, match="still running"):
-        jm.launch("search", {"resume": RUN_B})
-    assert set(jm.jobs) == {"fake"}                    # the resume never spawned
+    job = jm.launch("search", {"resume": RUN_B})
+    assert fake.status == "running" and job.status == "queued"
+    assert job.proc is None and not job.log.exists()
+    assert jm.queue_position(job) == 1 and job.started
+    jm.cancel(job.id)                                  # no queued job left behind
+    assert job.status == "cancelled"
+
+
+class _FakeProc:
+    """A Popen stand-in: wait() blocks until release() so the job stays 'running' under test control."""
+    _next_pid = 4000
+
+    def __init__(self, *a, **k):
+        type(self)._next_pid += 1
+        self.pid = type(self)._next_pid
+        self.returncode = None
+        self.release = threading.Event()
+
+    def wait(self, timeout=None):
+        self.release.wait(timeout)
+        return 0
+
+    def poll(self):
+        return self.returncode
+
+
+def _fake_spawn(procs):
+    def spawn(*a, **k):
+        proc = _FakeProc(*a, **k)
+        procs.append(proc)
+        return proc
+    return spawn
+
+
+def _wait_until(pred, timeout=5.0):
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        if pred():
+            return True
+        time.sleep(0.01)
+    return False
+
+
+def test_queued_resume_starts_when_an_external_gpu_lock_clears(repo, monkeypatch):
+    procs = []
+    monkeypatch.setattr(J.subprocess, "Popen", _fake_spawn(procs))
+    jm = J.JobManager(repo, repo / "runs")
+    jm.QUEUE_POLL_S = 3600
+    jm.gpu_busy = lambda: "GPU busy: other (pid 1)"
+    job = jm.launch("search", {"resume": RUN_B})
+    assert job.status == "queued" and job.proc is None and procs == []
+    assert jm.queue_position(job) == 1
+    jm.gpu_busy = lambda: None
+    assert jm.pump() is job
+    assert job.status == "running" and job.proc is procs[0]
+    assert job.log.exists() and jm.queue_position(job) == 0
+    procs[0].release.set()
+    assert _wait_until(lambda: job.status == "done")
+
+
+def test_queued_resumes_start_one_at_a_time_in_fifo_order(repo, monkeypatch):
+    procs = []
+    monkeypatch.setattr(J.subprocess, "Popen", _fake_spawn(procs))
+    jm = J.JobManager(repo, repo / "runs")
+    jm.QUEUE_POLL_S = 3600
+    jm.gpu_busy = lambda: None
+    busy = J.Job("busy", "search", ["search"], repo / "runs" / "busy.log", True)
+    jm.jobs[busy.id] = busy
+    j1 = jm.launch("search", {"resume": RUN_B})
+    j2 = jm.launch("search", {"resume": RUN_C})
+    assert (j1.status, j2.status) == ("queued", "queued") and procs == []
+    assert (jm.queue_position(j1), jm.queue_position(j2)) == (1, 2)
+    busy.status = "done"
+    jm.pump()
+    assert j1.status == "running" and j1.proc is procs[0] and j2.status == "queued"
+    assert (jm.queue_position(j1), jm.queue_position(j2)) == (0, 1)
+    procs[0].release.set()                       # j1 finishes -> its _wait thread pumps j2
+    assert _wait_until(lambda: j2.status == "running")
+    assert j2.proc is procs[1] and procs[0] is not procs[1]
+    assert jm.queue_position(j2) == 0
+    procs[1].release.set()
+    assert _wait_until(lambda: j2.status == "done")
+
+
+def test_pump_starts_a_queued_resume_when_the_gui_job_finishes(repo, monkeypatch):
+    procs = []
+    monkeypatch.setattr(J.subprocess, "Popen", _fake_spawn(procs))
+    jm = J.JobManager(repo, repo / "runs")
+    jm.QUEUE_POLL_S = 3600
+    jm.gpu_busy = lambda: None
+    running = J.Job("gui-run", "run", ["run"], repo / "runs" / "run.log", True)
+    jm.jobs[running.id] = running
+    job = jm.launch("search", {"resume": RUN_B})
+    assert job.status == "queued" and procs == []
+    running.status = "done"                      # the GUI-started GPU job ended
+    assert jm.pump() is job
+    assert job.status == "running" and job.proc is procs[0]
+    procs[0].release.set()
+    assert _wait_until(lambda: job.status == "done")
+
+
+def test_cancel_a_queued_resume_never_spawns_it(repo, monkeypatch):
+    procs = []
+    monkeypatch.setattr(J.subprocess, "Popen", _fake_spawn(procs))
+    jm = J.JobManager(repo, repo / "runs")
+    jm.QUEUE_POLL_S = 3600
+    jm.gpu_busy = lambda: None
+    monkeypatch.setattr(jm, "run_cli",
+                        lambda *a, **k: pytest.fail("a queued cancel must not run gpu-clean"))
+    busy = J.Job("busy", "search", ["search"], repo / "runs" / "busy.log", True)
+    jm.jobs[busy.id] = busy
+    job = jm.launch("search", {"resume": RUN_B})
+    assert job.status == "queued" and job.proc is None
+    out = jm.cancel(job.id)
+    assert out is job and job.status == "cancelled" and job.ended and job.proc is None
+    assert jm.queue_position(job) == 0
+    busy.status = "done"
+    assert jm.pump() is None and procs == []
+
+
+def test_cancel_only_queued_never_kills_a_started_job(repo, monkeypatch):
+    """A queued-only cancel is a race guard: it refuses (and touches nothing) once the job started,
+    while a genuinely queued job still cancels without spawning."""
+    procs = []
+    monkeypatch.setattr(J.subprocess, "Popen", _fake_spawn(procs))
+    jm = J.JobManager(repo, repo / "runs")
+    jm.QUEUE_POLL_S = 3600
+    jm.gpu_busy = lambda: None
+    monkeypatch.setattr(jm, "run_cli",
+                        lambda *a, **k: pytest.fail("a refused cancel must not run gpu-clean"))
+    running = jm.launch("search", {"resume": RUN_B})
+    assert running.status == "running" and running.proc is procs[0]
+    with pytest.raises(J.JobError, match="already started"):
+        jm.cancel(running.id, only_queued=True)
+    assert running.status == "running" and procs[0].poll() is None
+    procs[0].release.set()
+    assert _wait_until(lambda: running.status == "done")
+
+    jm.gpu_busy = lambda: "GPU busy: other (pid 1)"
+    queued = jm.launch("search", {"resume": RUN_C})
+    assert queued.status == "queued" and queued.proc is None
+    out = jm.cancel(queued.id, only_queued=True)
+    assert out is queued and queued.status == "cancelled" and queued.proc is None
+    assert len(procs) == 1                        # the queued cancel spawned nothing
+
+
+def test_a_free_looking_gpu_cannot_let_a_fresh_launch_jump_the_queue(repo, monkeypatch):
+    """Strict FIFO: while a continuation is waiting, a resume joins the back of the queue even when
+    the GPU lock looks free (the pump has not ticked), and a fresh launch is refused."""
+    procs = []
+    monkeypatch.setattr(J.subprocess, "Popen", _fake_spawn(procs))
+    jm = J.JobManager(repo, repo / "runs")
+    jm.QUEUE_POLL_S = 3600
+    jm.gpu_busy = lambda: "GPU busy: other (pid 1)"
+    a = jm.launch("search", {"resume": RUN_B})
+    assert a.status == "queued" and procs == []
+    jm.gpu_busy = lambda: None                 # the lock cleared but the pump has not ticked yet
+    b = jm.launch("search", {"resume": RUN_C})
+    assert b.status == "queued" and b.proc is None and procs == []
+    assert (jm.queue_position(a), jm.queue_position(b)) == (1, 2)
+    with pytest.raises(J.JobError, match="queued continuation"):
+        jm.launch("search", {"config": "examples/cfg.yaml", "budget": 5})
+    assert procs == []                         # nothing was spawned by the refused launch
+    assert jm.pump() is a
+    assert a.status == "running" and a.proc is procs[0] and b.status == "queued"
+    assert len(procs) == 1                     # pump started A only
+    jm.cancel(b.id)
+    procs[0].release.set()
+    assert _wait_until(lambda: a.status == "done")
+
+
+def test_a_persisted_queued_job_loads_cancelled_and_never_starts(repo, monkeypatch):
+    run_dir = str((repo / "runs" / RUN_B).resolve())
+    jobs_dir = repo / "runs" / "gui_jobs"
+    jobs_dir.mkdir(parents=True)
+    jid = "20261025T000000-abcdef"
+    (jobs_dir / f"{jid}.json").write_text(json.dumps(
+        {"id": jid, "kind": "search", "argv": ["search", "--resume", run_dir], "gpu": True,
+         "status": "queued", "started": "t", "ended": None}))
+
+    def _no_spawn(*a, **k):
+        pytest.fail("a queued job from the previous session must not start")
+
+    monkeypatch.setattr(J.subprocess, "Popen", _no_spawn)
+    jm = J.JobManager(repo, repo / "runs")
+    job = jm.jobs[jid]
+    assert job.status == "cancelled (GUI restarted before start)"
+    assert job.proc is None and not job.log.exists()
+    assert jm.queue_position(job) == 0
+    assert jm.pump() is None
 
 
 def test_search_resume_validation_refusals(repo):
@@ -797,6 +1045,78 @@ def test_search_resume_argv_survives_a_gui_restart(repo):
     [row] = J.JobManager(repo, repo / "runs").list()
     assert row["kind"] == "search" and row["argv"] == argv and row["gpu"] is True
     assert row["command"] == "hornlab-search search --budget 12 --resume " + run_dir
+
+
+# ── queued-resume HTTP contract (keeps the App handle so the queue can be forced busy) ─────────
+
+
+@pytest.fixture()
+def server_app(repo):
+    s = socket.socket()
+    s.bind(("127.0.0.1", 0))
+    port = s.getsockname()[1]
+    s.close()
+    app = App(repo)
+    httpd = ThreadingHTTPServer(("127.0.0.1", port), make_handler(app, port))
+    threading.Thread(target=httpd.serve_forever, daemon=True).start()
+    try:
+        yield f"http://127.0.0.1:{port}", app
+    finally:
+        httpd.shutdown()
+        httpd.server_close()
+
+
+def test_http_queue_contract_post_list_get_cancel(server_app, monkeypatch):
+    base, app = server_app
+    procs = []
+    monkeypatch.setattr(J.subprocess, "Popen", _fake_spawn(procs))
+    app.jobs.QUEUE_POLL_S = 3600
+    app.jobs.gpu_busy = lambda: "GPU busy: other (pid 1)"
+    code, body = _req(base + "/api/jobs", data=json.dumps(
+        {"kind": "search", "args": {"resume": RUN_B}}).encode())
+    assert code == 200 and body["status"] == "queued" and body["position"] == 1
+    jid = body["id"]
+    code, rows = _req(base + "/api/jobs")
+    [row] = [r for r in rows if r["id"] == jid]
+    assert row["status"] == "queued" and row["queue_position"] == 1
+    code, detail = _req(base + f"/api/job/{jid}")
+    assert code == 200 and detail["status"] == "queued" and detail["queue_position"] == 1
+    code, cancelled = _req(base + f"/api/job/{jid}/cancel", data=json.dumps({}).encode())
+    assert code == 200 and cancelled["status"] == "cancelled"
+    assert procs == []                                 # it never spawned
+    code, detail = _req(base + f"/api/job/{jid}")
+    assert code == 200 and detail["queue_position"] == 0
+    assert _req(base + "/api/job/does-not-exist")[0] == 404
+
+
+def test_http_cancel_only_queued_refuses_an_already_started_job(server_app, monkeypatch):
+    """The card/list race guard over HTTP: a queued-only cancel still works while queued, but once
+    the job auto-started it returns an error and kills nothing."""
+    base, app = server_app
+    procs = []
+    monkeypatch.setattr(J.subprocess, "Popen", _fake_spawn(procs))
+    app.jobs.QUEUE_POLL_S = 3600
+    app.jobs.gpu_busy = lambda: "GPU busy: other (pid 1)"
+    code, body = _req(base + "/api/jobs", data=json.dumps(
+        {"kind": "search", "args": {"resume": RUN_B}}).encode())
+    assert code == 200 and body["status"] == "queued" and body["position"] == 1
+    code, cancelled = _req(base + f"/api/job/{body['id']}/cancel",
+                           data=json.dumps({"only_queued": True}).encode())
+    assert code == 200 and cancelled["status"] == "cancelled"
+    assert procs == []                                 # the queued cancel spawned nothing
+
+    app.jobs.gpu_busy = lambda: None                   # the job now starts before the click lands
+    running = app.jobs.launch("search", {"resume": RUN_C})
+    assert running.status == "running" and running.proc is procs[0]
+    monkeypatch.setattr(app.jobs, "run_cli",
+                        lambda *a, **k: pytest.fail("a refused cancel must not run gpu-clean"))
+    code, refused = _req(base + f"/api/job/{running.id}/cancel",
+                        data=json.dumps({"only_queued": True}).encode())
+    assert code == 200 and "already started" in refused["error"]
+    assert running.status == "running" and procs[0].poll() is None
+    assert len(procs) == 1                             # no second spawn, no kill
+    procs[0].release.set()
+    assert _wait_until(lambda: running.status == "done")
 
 
 # ── kill-current (owner 2026-10-25): jobs.stop_external ────────────────────────────────────────

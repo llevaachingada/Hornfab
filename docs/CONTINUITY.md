@@ -2,6 +2,98 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-27 (midday) - v4 NIGHTS DONE/RUNNING; RESUME NIGHT; DATA TABLES FOR THE COLLABORATOR; MERGE TO MAIN
+
+- **First v4 night (100 evals/cell, 27 cells, ~5.1 h): finished, 27/27 exit 0.** Budgets were revised from the earlier 9.5 h
+  plan to 100 per cell (60 for two slow cells, 30 for `b3a__ath_core_14in`). Best J lowest: `native__ath_core` 1.60,
+  `crease__core_law` 1.70, `b3a__biradial_keele` 1.98. `b1w__biradial_keele` / `b3bw__biradial_keele` ran only 10 evals
+  (90 % refused): their scores rest on one or two valid designs.
+- **Resume night** `runs/nights/v4_resume_2026-10-27.yaml` (27 jobs, 100 MORE non-cached solves each, same run dirs via
+  `hornlab-search search --resume`). `tools/run_campaign_night.py` gained a `resume:` job field. Confirmed: budget counts only
+  new solves (control 112 -> 212 rows, gcurve 101 -> 201). Gains: gcurve 5.22 -> 3.86, b1w osse_baseline 7.01 -> 5.47,
+  control 5.91 -> 5.32; crease__core_law and rollback/asym_odd flat (near floor). **`crease__osse_b1w` failed at startup
+  (Julia host exit 3221225786, runner logged exit 0) and still needs a re-run** after the night ends.
+- **Data for the collaborator (no CUDA needed):** `tools/export_campaign_tables.py` -> `docs/data/campaign_v4_2026-10-27/`
+  (`cells_summary.csv`, `evals.csv` ~4.5 MB with J, normalised terms, scalar metrics, per-eval design parameters;
+  `best_designs.json`; README with column meanings). Re-run it after the resume night for the final numbers. The solve cache
+  (~22 GB incl. runs) is NOT in git; the Hugging Face route (`tools/hf_sync.py`, needs the owner's `hf auth login`) is
+  tabled as P11 in `docs/NEXT_DEV_PRIORITIES.md`.
+- **Images:** scratch only (`scratch/v4_gallery/`, pyvista in `scratch/vizenv`); not committed.
+## 2026-10-27 (overnight) - v4 T0 GATE PASSED; OVERNIGHT v4 SCREEN CAMPAIGN RUNNING
+
+- **v4 twins of the whole campaign:** `tools/make_v4_campaign.py` writes `examples/briefs/campaign_2026-10-26_v4/`
+  (14 briefs) and `examples/typologies/campaign_2026-10-26_v4/` (27 configs); `--check` reports drift. Only `name` and
+  `brief_file` differ from the v3 cells. Classes: A waveguide (b1*, b2*, ath core, twinray), B loading (b3b*, native
+  lecleach; diag 0.15 and no presence weighting on the native lecleach), C low-reach PA (b3a*: one-sided below f0).
+- **T0 gate (27 cells, budget 1, screen): 27/27 valid, 0 failed.** Most jobs took ~20 s because the solve cache is keyed
+  on geometry + solver settings, not the objective: seeds were re-scored under v4 from the smoke night's stored
+  responses (so the v4 scorer, including the diagonal term from the real stored balloons, ran on 27 real designs;
+  only one row needed a fresh solve). Night folder `runs/nights/v4_t0_2026-10-27/`.
+- **Dominance check (the point of v4):** median top-term share of seed J is **53 %** (v3: four of eight scored cells at
+  82-92 % one term); 4 of 27 cells exceed 60 %, max 75 % (`cov`). `load` is 7-12 % on the loading briefs (v3: 2 %).
+  Cov is still the largest term on most cells, as it should be for a coverage brief.
+- **Diagonal check (offline, stored best designs, 512-pt balloons):** the crease seed's 45/135 beam is 4-12 deg
+  NARROWER than the H/V mean across 1.7-4.8 kHz, the control's is 5-10 deg WIDER above 3.7 kHz, `crease__core_law` is
+  narrower around 1.4-2.3 kHz. So the crease does not widen the diagonal here; the `diag` term (round reference,
+  narrow side 2x) will penalise the crease seed in the presence band. One seed per cell; a verify-resolution
+  (1024-pt) run on finalists would firm it up. Script: `scratch/v4_impl/diag_check.py`.
+- **Overnight run:** `runs/nights/v4_overnight_2026-10-27.yaml`, 27 jobs, 1,770 evaluations, ~9.5 h estimated
+  (budgets from measured s/eval: 100 fast / 60 medium / 40 slow / 30 for `b3a__ath_core_14in`; heavy B3a cells LAST).
+  Launched detached 00:59 EDT with the observer (`tools/observe_run.py`, 13 h cap). Outputs:
+  `runs/nights/v4_overnight_2026-10-27/{SUMMARY.md,summary.jsonl,observe.ndjson}`; logs
+  `runs/nights/v4_overnight_runner_stdout.log`. A first launch from the tool shell was stopped within seconds (a
+  foreground-style timeout could have killed a 9 h run); its orphan job/Julia worker were killed and the stale
+  `.gpu.lock` removed; one empty stub run dir `runs/20261027T045803Z-screen-5845fa` is left from it.
+- **Not run:** ladder rungs, verify/final tiers, second seeds, the low-frequency report-only grid, epw 5-vs-6.
+
+## 2026-10-27 (late) - OBJECTIVE v4 IMPLEMENTED (owner decisions: Option A, round diagonal, DI std alongside dislope, presence band via freq_weights)
+
+- **What shipped (uncommitted, no GPU):** `objective/scalar_v4.py`, `metrics/diagonal.py`, dispatch + version 4,
+  config parsing of the `objective:` block (`tolerances` required, no defaults; `cov_narrow_ratio`,
+  `cov_below_f0: mask|one_sided`, `diag_reference: round`). Stored `terms` are the NORMALISED values (raw =
+  term x tolerance), so `w * terms[k]` sums to `total` and the GUI/report need no change. New weights `distd`,
+  `diag` default 0, so a v4 brief with only tolerances is "v3, normalised".
+- **Penalty ordering enforced at load:** config refuses a brief whose all-unmeasurable valid J exceeds half the
+  refusal penalty (the Option B failure mode). The three new briefs score 61 / 94 / 111.
+- **Briefs (new files, v3 briefs untouched):** `examples/briefs/campaign_2026-10-26/b1w_hifi_90x60_850_wide_v4.yaml`
+  (class A: narrow side 2x, presence band x2), `b3bw_pa_90x60_600_load_wide_v4.yaml` (class B: symmetric, loose
+  dislope, load live), `b3a_pa_90x90_400_square_v4.yaml` (class C: one-sided below f0, narrow 2x, presence x2).
+  Class numbers are proposals [E]; Option A numbers are the review's.
+- **Tests:** `tests/test_objective_v4.py` (24 cases: validation, neutral v4 == v3, tolerance scaling, asymmetry,
+  one-sided, DI std, diagonal on a synthetic round beam, penalty ordering, config + dispatch end to end).
+  Offline suite exit 0, no failures. Two assertions updated because their subject changed (see NOTES_FOR_SENIOR).
+- **Diagonal term cost:** ~50-130 ms per evaluation (interpolates the stored balloon), negligible vs 7+ s solves.
+  Rank effect still unverified: `crease__osse_b1w` has no stored balloon record; the queued T3 diagonal check
+  (plan item 4) is the GPU step that settles it.
+- **Not done, owner-gated:** the box-widening table (review appendix A), the low-frequency report-only grid
+  extension (verify 200 Hz / final 125 Hz), the epw 5-vs-6 test, and re-running the 27 T0 cells under v4.
+
+## 2026-10-27 (v4 scoring review, investigation only - NO code/config/GPU) - NORMALISATION CHANGES THE WINNER
+
+- **Docs:** `docs/research/V4_SCORING_REVIEW_2026-10-27.md` (findings), `docs/evidence/OBJECTIVE_V4_TOLERANCES.md`
+  (two tolerance options for the owner), both indexed; the orchestrator's `V4_TOLERANCE_RESEARCH_2026-10-27.md`
+  indexed too. Read-only analysis scripts in `scratch/v4_review/`. No v1-v3 code/brief/config touched, no GPU.
+- **Offline recompute verified exact:** rebuilding Response/MetricSet/Target from stored arrays reproduces the
+  stored objective to max |err| 2.8e-14 over all 50 ok v3 records. Only 54 v3 records exist (50 ok: lecleach 43,
+  crease 5, gcurve 2) - the smoke night's were lost - but the search.ndjson trajectories survived (100+ cells,
+  term-level) and carry the rank-correlation work.
+- **Finding 1 (load-bearing):** v4 normalisation is not cosmetic. Global Spearman(v3, v4-physical) ~0.93, but the
+  argmin design changes in ~40% of cells, top-5 overlap is routinely 0-3/5, and loading briefs collapse
+  (`native__lecleach_rollback` Spearman 0.10 n=74, -0.01 on the 43 records, top-5 0/5). The tolerance choice is
+  real and must be made per class, not defaulted.
+- **Findings 2-5:** six-term normalisation is necessary but not sufficient - add DI-std (independent of dislope,
+  ρ -0.37..+0.90) and a presence-band (2.5-5.5 kHz = 3/12 screen points) asymmetric-narrow cov penalty; the
+  balloon already drives 9-77% of J via DI but never reads diagonal SHAPE; data-median tolerances break penalty
+  ordering (worst valid J 1572 > 1000 on lecleach) while physical tolerances hold (79-117); the 33% refusal rate
+  is `invalid_geometry` (89/124, a geometry-law limit), NOT a box-width problem.
+- **Hypotheses tested (tolerance-research note):** asymmetric cov (survives, class-gated), one-sided cov below f0
+  (survives for low-reach PA), DI-std vs dislope (survives, not redundant), presence band (survives, 3/12 points,
+  reshuffles loading cells). Class-specific tolerance blocks supported.
+- **Owner decisions:** the tolerance set (Option A physical recommended); diagonal reference (round recommended);
+  DI-std replace-or-supplement dislope; asymmetric-cov ratio+classes; presence-band grid vs freq_weights; the
+  box-widening table (appendix, owner-gated). **Could NOT verify:** the diagonal term's rank effect - the one
+  asymmetric-diagonal cell (`crease__osse_b1w`) has no stored balloon; needs the queued T3 balloons (GPU).
+
 ## 2026-10-27 (gcurve follow-up) - THE GUIDING CURVE NOW SITS AT THE MOUTH (`dist 1.0`), T0 VALID
 
 - **Supersedes the width-130 workaround below.** That seed was valid (367 x 292, J 6.289) but it

@@ -83,10 +83,10 @@ class App:
         if head == "jobs":
             return self.jobs.list()
         if head == "job" and len(parts) == 2:
-            j = self.jobs.jobs.get(parts[1])
-            if j is None:
-                raise FileNotFoundError(parts[1])
-            return j.view(200)
+            try:
+                return self.jobs.view(parts[1], 200)
+            except KeyError:
+                raise FileNotFoundError(parts[1]) from None
         if head == "compare":
             return self._compare((q.get("a") or [""])[0], (q.get("b") or [""])[0])
         raise FileNotFoundError(path)
@@ -130,9 +130,11 @@ class App:
                 return {"command": "hornlab-search " + " ".join(_quote(x) for x in argv), "gpu": gpu,
                         "gpu_busy": self.jobs.gpu_busy() if gpu else None}
             if head == "jobs":
-                return {"id": self.jobs.launch(str(body.get("kind", "")), body.get("args") or {}).id}
+                job = self.jobs.launch(str(body.get("kind", "")), body.get("args") or {})
+                return {"id": job.id, "status": job.status,
+                        "position": self.jobs.queue_position(job)}
             if head == "job" and len(parts) == 3 and parts[2] == "cancel":
-                return self.jobs.cancel(parts[1]).view(40)
+                return self.jobs.cancel(parts[1], only_queued=bool((body or {}).get("only_queued"))).view(40)
             if head == "gpu-clean":
                 busy = self.jobs.gpu_busy()
                 if busy:
