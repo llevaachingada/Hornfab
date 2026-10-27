@@ -562,6 +562,72 @@ Proposed precedence for the sandbox sliders: hard `KeySpec` clamp (always wins) 
 
 
 
+## 2026-10-26  task-05  runtime cuda_oom: beat_cuda CUDA out of memory
+What happened: RuntimeError('Out of GPU memory trying to allocate 660.150 MiB\nEffective GPU memory usage: 100.00% (7.996 GiB/7.996 GiB)\nMemory pool usage: 15.965 GiB (15.969 GiB reserved)\n') on C:\Users\hunte\AppData\Local\Temp\opencode\pass40\rungs\mesh_635\mesh.msh (n_triangles=18236, n_dof=None, quadrants=1)
+What it means: the dof cap in TOOLCHAIN.md / the YAML is wrong for this GPU state (or a stale Julia host held VRAM; run solve.worker.clear_stale_hosts and re-test from a clean state before changing the cap, AGENTS.md hygiene rule 7).
+(Appended automatically by hornlab_search.solve.base.note_failure_for_senior.)
+
+## 2026-10-26  task-05  runtime cuda_oom: beat_cuda CUDA out of memory
+What happened: RuntimeError('Out of GPU memory trying to allocate 631.512 MiB\nEffective GPU memory usage: 100.00% (7.996 GiB/7.996 GiB)\nMemory pool usage: 15.889 GiB (15.906 GiB reserved)\n') on C:\Users\hunte\AppData\Local\Temp\opencode\pass40\rungs\10k\mesh_500\mesh.msh (n_triangles=17832, n_dof=None, quadrants=1)
+What it means: the dof cap in TOOLCHAIN.md / the YAML is wrong for this GPU state (or a stale Julia host held VRAM; run solve.worker.clear_stale_hosts and re-test from a clean state before changing the cap, AGENTS.md hygiene rule 7).
+(Appended automatically by hornlab_search.solve.base.note_failure_for_senior.)
 
 ## 2026-10-26 objective v3 amendment (Phase 0 item 2B, impl-code2)
 objective v3 amendment 2026-10-26: optional per-plane f0_v_hz, owner-directed. `target.f0_v_hz` (appended after `f0_hz`; Target stays positional) masks the vertical coverage error to f >= f0_v_hz while the horizontal error keeps f >= f0_hz; cov is the sum of the two masked means (freq_weights restricted per mask). `dislope` keeps the H/f0 mask. Absent = the pre-amendment expression verbatim, bit-identical (config_sha / seed hash / solve-spec hash / J pinned). Validation refuses f0_v_hz < f0_hz or > band_hi_hz with a message naming target.f0_v_hz. `docs/plan/01_CONTRACTS.md` is frozen and was not edited.
+
+## 2026-10-26  campaign-bounds audit (orchestrator)  campaign search boxes are narrow by construction; owner flags wider over-constraint
+What I was doing: reviewing the 23 campaign cells authored by the BRIEFS lane against the handoff's own
+PASS gate ("mouth within 10 % of the brief's K-law mouth"), to answer the owner's question of whether
+the boxes leave the solver enough room.
+
+What happened (measured by reading all 23 configs in examples/typologies/campaign_2026-10-26/):
+
+| cell | searched dims | pinned | narrowest searched windows (relative width) |
+|---|---:|---:|---|
+| b1w__biradial_keele | 7 | 0 | v_rm 4 %, h_rm 4 %, L 5 %, h_a 11 % |
+| b2w__hyb_osse_h_hypex_v | 5 | 0 | v_rm 4 %, h_a 14 %, L 16 % |
+| b3a__lecleach_rollback | 3 | 0 | g_T 2 %, g_fc 16 %, g_stop 20 % |
+| native__lecleach_rollback | 3 | 0 | g_fc 18 %, g_stop 25 %, g_T 40 % |
+| b1t__rosse_morph | 17 | 3 | morph_width 7 %, morph_height 6 %, aspect 9 %, R 10 % |
+| b1t__lecleach_iwata_ar | 5 | 0 | g_ar_m 12 %, g_T 17 %, g_fc 17 % |
+| b3a__ath_core_14in | 15 | 5 | q 1 %, morph_w/h 7 %, a 12 % |
+
+Across all 23 cells: 3-17 searched dimensions, 0-6 pinned, and many narrowest windows sit at 2-12 %
+relative width. Cause: the 10 % K-law PASS criterion forces the mouth knobs to ~+/-10 %, because
+mouth ~ K/fc (rows) and mouth ~ f(R) (R-OSSE). The narrow bounds are a consequence of the acceptance
+gate, not of the lane improvising. Structural constraints (cannot widen without breaking the brief):
+driver pin r0 18.0; the envelope; the 10 % gate; morph_target pinned (categorical gene, measured
+15.8 % flip rate). Discretionary constraints worth flagging: morph_width/height at 5-7 % means the
+Morph A/B can barely morph, so it may UNDERSTATE Morph's value; 3-dim JMLC cells with g_T at 2 %
+effectively fix T; biradial/hypex rm at 4-5 % means those cells tune angles/depth only.
+Why narrowing was defensible: the audit lanes measured heavy invalidity outside these windows
+(salmon_x_signed 24-41 % envelope refusals even inside recommended boxes; biradial closure guard;
+saddle 22.7 s/candidate). Wider boxes mostly buy invalid candidates.
+What decides it: the Step-5 LHS invalid-% per cell (in production at time of writing). ~0-10 % invalid
+means widening is affordable; 25-40 % means the window is justified.
+Consequence for interpretation: results read as "best each family achieves inside a buildable envelope
+near the K-law mouth", not "what the family can do". Cross-family J spreads will be small and
+comparable to seed noise, which makes the >=3-seed / pooled-variance rule load-bearing before any
+"family A beats B" claim.
+
+Owner's broader observation (recorded as stated): through their own testing, a lot of the CURRENT
+minimum/maximum parameter values in the shipped configs are already somewhat over-constrained and
+have prevented the solver from finding more. This campaign inherits that tendency, and its narrow
+boxes make it visible.
+
+What I tried: nothing changed. The BRIEFS lane was still running; by owner instruction no changes were
+sent to it and no file of its was edited.
+
+What I need decided:
+1. After the smoke night: an explicit over-constraint audit of the shipped KeySpec/bounds (which lo/hi
+   are physical vs arbitrary), using per-cell LHS invalid-% as the widening evidence; widening stays
+   owner-gated per the plan's rule ("never widen a box to make results look good").
+2. Whether to add a small EXPLORATION set (wide boxes, no 10 % PASS gate, excluded from the per-brief
+   comparison leaderboards) instead of loosening the 23 comparison cells.
+3. Whether the 10 % K-law gate should itself become a per-cell knob (10 % for comparison cells,
+   ~25 % for exploration cells), so the PASS criterion and the bounds cannot drift apart again.
+
+(Uncommitted at time of writing; append-only block, stage with the next docs commit that touches this file.)
+
+## 2026-10-26 senior pass learnings
+See docs/research/LEARNINGS_2026-10-26.md (Ath crease mechanism, over-constrained boxes, per-type scoring, driver realism, fused ceiling). Build on it rather than re-deriving.

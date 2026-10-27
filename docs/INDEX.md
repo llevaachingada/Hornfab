@@ -30,6 +30,7 @@ Keep this file current: a new doc gets a line here in the same commit.
 | [BRIEF_AND_SCORING_GUIDE_2026-10-25.md](BRIEF_AND_SCORING_GUIDE_2026-10-25.md) | The owner's briefs + scoring answer (S1a driver pass, Oracle-decided): the shipped brief family `{hifi_90x60, organic_rollback, lecleach_rollback} × {1in, 14in, 2in}` with every f0's physics (K-law + the salmon 1.8× rollback-extent correction + the lecleach dof floor), the which-brief-for-which-typology selection table, custom-brief guidance (verified 12.7–25.4 mm exits; 12k bands measured over the caps; f11 per throat), and the plain-language scoring guide (term meanings, v1/v2/v3, the dislope hostility, what NOT to tune first, per-family recommended weights). |
 | [BOUNDARY_LAB_INTEGRATION_PLAN.md](BOUNDARY_LAB_INTEGRATION_PLAN.md) | Proposed Boundary Lab export / cross-check (not started). |
 | [BL_LEARNINGS_IMPLEMENTATION.md](BL_LEARNINGS_IMPLEMENTATION.md) | Boundary Lab learnings implemented (mesh checks, phasor, provenance, SPDI). |
+| [research/LEARNINGS_2026-10-26.md](research/LEARNINGS_2026-10-26.md) | Durable learnings from the 2026-10-26 pass: Ath crease mechanism, over-constrained boxes, per-type scoring, driver realism, fused ceiling. Read before campaign or typology work. |
 | [HIGH_FREQUENCY_OPTIONS.md](HIGH_FREQUENCY_OPTIONS.md) | Reaching 12 kHz on 8 GB: options and evidence. |
 | [CLOUD_GPU_REPORT.md](CLOUD_GPU_REPORT.md) | Cloud GPU rental research. |
 | [HANDOFF_LOCAL.md](HANDOFF_LOCAL.md), [HANDOFF.md](HANDOFF.md) | Older handoffs (CP-8, 6b test plan). Historical. |

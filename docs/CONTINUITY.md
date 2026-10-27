@@ -2,6 +2,10 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-26 (late) - LEARNINGS RECORDED
+
+- docs/research/LEARNINGS_2026-10-26.md: 13 durable findings (Ath creases = per-direction law; guiding-curve rules; plausible crease shapes; FREEFORM Morph target; self-approach fix; boxes vs CMA; per-type scoring; J blind spots; driver realism; drivers per brief; fused ceiling; GUI). Indexed in docs/INDEX.md; pointer appended to NOTES_FOR_SENIOR.md.
+
 ## 2026-10-27 (smoke night, report) - CAMPAIGN SMOKE: 41 jobs, the crease class works, four scoring findings
 
 - **Run:** `runs\nights\smoke_2026-10-27.yaml` (27 T0 + 9 mini-T1 + 5 ladder), 376 evaluations,

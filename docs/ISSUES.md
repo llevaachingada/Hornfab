@@ -417,3 +417,4 @@ Added 2026-10-26 (campaign Phase 0, implementation lane code-2):
 - [x] Ath crease class: OS-SE guiding curve exposed in the sandbox (OSSE); mesher config refusals shown, not 500.
 - [ ] Open: native-OSSE TwinRay/CORE typology that searches gcurve_* + Morph (the crease class); per-azimuth a(p) expression knobs.
 - [x] README rewrite with GUI screenshots; main fast-forwarded (2026-10-26).
+- [x] 2026-10-26 learnings recorded (docs/research/LEARNINGS_2026-10-26.md).
