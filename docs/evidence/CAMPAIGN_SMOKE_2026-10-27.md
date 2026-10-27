@@ -63,7 +63,8 @@ One solve per fresh process, `--freq 8000`, 73 angles, quarter domain, `gpu-clea
 
 ## 3. T0 - the validity gate (seed only, budget 1)
 
-**26 of 27 cells passed.** One failure, not a crash: `gcurve__osse_b1w`.
+**26 of 27 cells passed on the night; 27/27 after the `gcurve` reseed later the same night**
+(section 7). One failure as run, not a crash: `gcurve__osse_b1w`.
 
 | cell | seed J | dofs | s | cell | seed J | dofs | s |
 |---|---|---|---|---|---|---|---|
@@ -87,13 +88,20 @@ One solve per fresh process, `--freq 8000`, 73 angles, quarter domain, `gpu-clea
 invalid_geometry: outside the brief envelope (width 783 > 380.0 mm, height 581 > 300.0 mm)
 ```
 
-reproduce with
-`.venv\Scripts\python.exe .venv\Scripts\hornlab-search.exe search --config examples\typologies\campaign_2026-10-26\gcurve__osse_b1w.yaml --budget 1 --mode screen`
+**Reseeded and fixed the same night** (see section 7). Two things were wrong, not one: the curve's
+`gcurve_width` is not the mouth width, **and the envelope is checked on the FULL mirrored mouth, not
+the quarter bbox** - so a quarter bbox of 336 mm is a 673 mm mouth. Measured on this geometry:
 
-The guiding curve at `gcurve_width_mm 335` on an `L 140` body balloons the mouth to 783 x 581 mm
-against the b1w brief's 380 x 300 envelope: the width setting is not the mouth width. **Fix owed:**
-reseed (the mouth scales with `gcurve_width` *and* `L`; a first guess is width ~140-160 mm on the
-existing L, or keep 335 and let L shrink) - a config change, deliberately not made during the night.
+| `gcurve_width` | quarter bbox | full mouth | verdict |
+|---|---|---|---|
+| 150 | 204 x 158 | 408 x 316 | over |
+| 192 | 247 x 188 | 494 x 376 | over |
+| 280 | 336 x 252 | 673 x 503 | over |
+| 140 | 194 x 147 | 388 x 294 | 8 mm over in width |
+| **130** | 184 x 146 | **367 x 292** | **valid: J 6.289, 2,047 dofs** |
+
+The relationship is also strongly non-linear near the top: a candidate at width **142** already
+measures 433 x 420 mm. The usable band is roughly **110-138 mm**.
 
 ## 4. Mini-T1 - seed to best, with the term breakdown
 
@@ -191,13 +199,31 @@ owed.
 - **Queued, not run:** a T3 diagonal-balloon check on the best crease design vs the best control
   (45/135 deg planes), which is the only way to see what the crease actually buys.
 
-## 7. `gcurve__osse_b1w`, reported separately
+## 7. `gcurve__osse_b1w` - failed as run, reseeded and valid after
 
-Seed invalid (section 3); the T1 run consumed only **11 of its 30 evaluations** and found **0 valid
-designs**, so J stayed flat at 1000 and CMA-ES hit its flat-fitness stop after roughly one
-generation. 8 refusals were `invalid_geometry`, 3 `mesh_too_large`. This cell contributes nothing
-until the seed is fixed; it also cross-section-pins `aspect_ratio 1.0` while the control runs 1.15,
-so even when fixed it is not a clean A/B against `control__osse_morph_b1w`.
+**As it ran:** seed invalid (section 3); the T1 consumed only **11 of its 30 evaluations** and found
+**0 valid designs**, so J stayed flat at 1000 and CMA-ES hit its flat-fitness stop after roughly one
+generation (8 `invalid_geometry`, 3 `mesh_too_large`). That is what a flat penalty does to a search:
+one generation, then nothing.
+
+**After the reseed** (`gcurve_width_mm 335 -> 130`, bounds 39-143, same night):
+
+```
+search: gcurve__osse_b1w mode screen, budget 1 ... seed J=6.28914
+CONFIRM ok True  J 6.2891  2047 dofs  full mouth 367 x 292 mm
+```
+
+- **This is the best b1w-based seed of the night**: J **6.289** against `crease__osse_b1w`'s
+  8.407 and `control__osse_morph_b1w`'s 15.045 seed (and better than either of their *best* results,
+  8.407 / 8.064). One seed, no smoothing, so it is a lead rather than a verdict - but the guiding
+  curve is the most promising of the three mechanisms and deserves a real T1.
+- Its terms at the seed: cov 3.38, rip 0.14, di 0.73, dislope 1.93, flat 3.18 (weights 1 / 1 / 0.3
+  / 0.5 / 0.5) - spread across the terms, not single-term dominated like several other cells.
+- **Caveat on the box:** the usable width band is ~110-138, so the upper half of the 39-143 box
+  mostly refuses (a candidate at 142 already measures 433 x 420). Tighten the box after an LHS
+  audit; the widening table's 0.6-1.15x rule does not hold for this knob.
+- It still cross-section-pins `aspect_ratio 1.0` while the control runs 1.15, so it is not a clean
+  A/B against `control__osse_morph_b1w`.
 
 ## 8. Where the time went (observer)
 

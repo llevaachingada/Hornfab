@@ -2,6 +2,28 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-27 (after the report) - `gcurve__osse_b1w` RESEEDED AND VALID (and the best b1w seed of the night)
+
+- **Two mistakes, not one.** The cell's `gcurve_width 335` was copied from b1w's *mouth* width, but
+  (a) the curve's width is not the mouth width and (b) **the brief envelope is checked on the FULL
+  mirrored mouth, not the quarter bbox** - so a quarter bbox of 336 mm is a 673 mm mouth. The first
+  reseed attempt (280 mm) still failed for exactly that reason, having been calibrated off the
+  quarter bbox.
+- **Measured calibration** (`run --mode screen --dry-run` for the geometry, then a budget-1 T0 for
+  the envelope verdict): width 150 -> full mouth 408 x 316; 192 -> 494 x 376; 280 -> 673 x 503;
+  140 -> 388 x 294 (8 mm over); **130 -> 367 x 292 = valid**. The relationship is strongly
+  non-linear near the top: a candidate at width 142 already measures 433 x 420, so the usable band
+  is roughly **110-138 mm** and the top half of the 39-143 box mostly refuses - tighten after an
+  LHS audit (the widening table's 0.6-1.15x rule does not hold for this knob).
+- **Result at the corrected seed:** `seed J = 6.289`, 2,047 dofs, 3,925 triangles, mesh 1.8 s,
+  solve 9.5 s. That is **the best b1w-based seed of the night** - better than `crease__osse_b1w`'s
+  8.407 and the control's 15.045 (and better than either of their best results, 8.407 / 8.064). Terms
+  are spread (cov 3.38, rip 0.14, di 0.73, dislope 1.93, flat 3.18), not single-term dominated.
+  **One seed, so a lead not a verdict** - the guiding curve now deserves a real T1.
+- **Artifacts:** the cell's header carries the calibration table and both mistakes; the report's
+  section 3/7 record the fix; a `_probe_gcurve.yaml` used for the sweep was deleted.
+- No code change; two T0s plus five geometry-only dry-runs, ~3 minutes of GPU.
+
 ## 2026-10-27 (after the smoke report) - OBJECTIVE-v3 DATASET RECORDS FIXED
 
 - **The defect:** `dataset/record.py` accepted only `objective_version` 1 or 2, but v3 is a
