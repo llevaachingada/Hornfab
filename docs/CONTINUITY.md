@@ -2,6 +2,48 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-27 (smoke night, report) - CAMPAIGN SMOKE: 41 jobs, the crease class works, four scoring findings
+
+- **Run:** `runs\nights\smoke_2026-10-27.yaml` (27 T0 + 9 mini-T1 + 5 ladder), 376 evaluations,
+  **252 valid / 124 refused (33 %)** - `invalid_geometry` 89, `invalid_envelope` 26,
+  `mesh_too_large` 9. **157.8 valid evaluations per hour.** Report:
+  `docs/evidence/CAMPAIGN_SMOKE_2026-10-27.md`.
+- **T0 gate: 26/27 pass.** `gcurve__osse_b1w` is **invalid**: `outside the brief envelope (width
+  783 > 380.0 mm, height 581 > 300.0 mm)` - the guiding curve's width setting is not the mouth
+  width, and at `gcurve_width 335` on an L 140 body the mouth doubles. Its T1 spent 11 of 30
+  evaluations and found 0 valid designs (flat J = 1000 -> CMA flat-fitness stop). Reseed owed.
+- **The crease class works.** `crease__core_law` at budget 60: **J 19.022 -> 2.784 (-85 %)**, 39/61
+  valid, and it **kept the diagonal crease**: a(0/45/90) = 25.0/33.8/23.4 -> 18.0/34.7/31.5 deg,
+  crease strength +9.56 -> **+9.97 deg**, while moving 13 of its 17 searched knobs (`a_deg` 5 -> 15.1,
+  `az_sf_n1` 12 -> 21.9, `az_sf_n2` 15 -> 10.3, `morph_corner` 16.5 -> 5.9). The A/B at equal budget
+  60 is `crease__osse_b1w` 8.407 -> 8.407 (**no gain**, the seed is a local optimum) vs
+  `control__osse_morph_b1w` 15.045 -> 8.064 (-46 %) - indicative only, one seed each, and J cannot
+  see the diagonals. A T3 diagonal-balloon check is queued.
+- **Scoring findings (four, all actionable):** (1) **four of the eight scored cells are single-term
+  dominated** (`cov` 82-92 % of J on `b1t__rosse_morph`, `b2t__lecleach_iwata_ar`,
+  `b3bt__salmon_x_signed`, `control`; the crease seed was 80 % `dislope`); (2) **the Le Cleac'h
+  loading experiment did not work** - `load 0.5` contributes 0.11 of 5.60 J (**2 %**) because the raw
+  load term is 0.02-0.22 against flat ~5, so the weights do not mean influence; **normalise the
+  terms** before any further weight work; (3) `f_load_hz` reads 500 Hz on the Le Cleac'h seed, which
+  is the grid floor, not a measurement; (4) the screen grid starts at 500 Hz, so the 300 Hz band
+  floor is a verify-only promise.
+- **Ladder (8 kHz, fused):** 5,106 dofs 2.55 s/freq at 21 % VRAM / 8,919 6.62 s at 41 % / 12,183
+  11.0 s at 73 % / 13,999 13.78 s at **88 %** / 16,960 96 % **unusable**. The 90 % rule binds just
+  above 14k: a 706 mm B3a (~10k dofs) is fine at 8 kHz, a 90x60 at 400 Hz (~17k) is not.
+  **Cost model corrected:** inside one frequency **assembly is 73-96 % of the cost** and the solve is
+  0.07-0.94 s; a campaign eval at ~11,967 dofs logs 9.5 s/frequency, matching the standalone 12,183
+  number, so **the assembly is paid per frequency**. The frequency count, not the dof count, is the
+  throughput knob.
+- **Observer (`tools/observe_run.py`, new):** 176 samples at 5 s. GPU median utilisation **100 %**,
+  mean 61 %, **idle ~43 % of wall clock** in CPU phases (mesh 18 %, between-evals 14 %, refusals
+  10 %). The card is saturated while solving, so a CPU/GPU pipeline is the accuracy-neutral
+  speed-up; 2-way concurrency only for cells <= ~6k dofs (two 8.9k solves would need 6.6 GB of 8.2).
+- **Owed:** gcurve reseed; term normalisation; the `dataset/record.py` v3 rejection (no dataset
+  records from any v3 run tonight); full offline suite; LHS audit of the widened boxes +
+  `tools/expand_walls.py`; per-frequency timing instrumentation + the concurrency A/B; sandbox law
+  card browser check; catalog generator recursion into campaign folders; `osse_baseline` 803 x 643
+  vs its 750 x 600 envelope; parked `make_shape_variants.py`.
+
 ## 2026-10-26 (night, during the smoke run) - READ-ONLY RUN OBSERVER (`tools/observe_run.py`)
 
 - **Why:** the first pass at "can we run twice as fast" had to infer the GPU/CPU phase split from

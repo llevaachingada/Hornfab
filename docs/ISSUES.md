@@ -26,6 +26,16 @@ Local-only, added 2026-10-26 (**campaign Phase 0 Steps 2C/3/4/5 LANDED — CPU o
 - **Non-blocking residuals recorded in the evidence doc:** LHS invalid rates of 31–37.5 % on four cells (below the >40 % narrowing trigger) are envelope/geometry refusals, not crashes; one `b3bt__rosse_morph` LHS corner is above 12,000 dofs and is graded infeasible; the biradial/hypex generator rows print a pre-existing H/V throat-tangent warning while meshing validly.
 
 
+Local-only, added 2026-10-27 (**campaign smoke night LANDED - report only, no code/config change; no GitHub issue state changed**):
+- **Report:** `docs/evidence/CAMPAIGN_SMOKE_2026-10-27.md` - 41 jobs, 376 evaluations, 252 valid / 124 refused (33 %), 157.8 valid evals/hour, T0 26/27, crease A/B at equal budget 60, WALLS, the 8 kHz fused ladder, and the observer phase split.
+- **Crease class confirmed on GPU:** `crease__core_law` J 19.022 -> 2.784 (-85 %) keeping the crease (a(45) - mean(a0,a90) = +9.97 deg); `crease__osse_b1w` no gain; control -46 %. One seed each - no typology-vs-typology claim yet.
+- **DEFECTS / OWED (new):**
+  - `gcurve__osse_b1w` seed is **outside its brief envelope** (783 x 581 vs 380 x 300 mm) -> invalid, its T1 found 0 valid designs. Reseed owed (the curve width is not the mouth width).
+  - **The objective terms are not normalised**, so weights do not mean influence: `load 0.5` is 2 % of J on `native__lecleach_rollback` while flat is 45 %. Four of eight scored cells are single-term >70 %. Normalise before any weight tuning.
+  - `f_load_hz` = 500 Hz on that seed is the **grid floor**, not a measurement (screen grid starts at 500 Hz).
+  - Per-frequency assembly dominates (73-96 % of one frequency's cost), so **frequency count is the throughput knob**; the 8 kHz ceiling binds just above 14k dofs (13,999 = 88 % VRAM, 16,960 = 96 % unusable).
+- **Open gates unchanged:** BEM verify seed for the portrait morph/rows cells; T3 diagonal-balloon check for crease vs control (queued); full offline suite; LHS audit of the widened boxes; `tools/expand_walls.py`; sandbox law card browser check; catalog generator recursion into campaign folders; `osse_baseline` 803 x 643 vs its own 750 x 600 envelope; parked `make_shape_variants.py`.
+
 Local-only, added 2026-10-26 (**read-only run observer added - `tools/observe_run.py`; no GitHub issue state changed**):
 - Samples GPU util / VRAM / power / clocks, CPU per process, the running job and the newest run's eval rows to `runs/nights/<night>/observe.ndjson`, then writes `observe_summary.md` (phase shares, utilisation histogram). Read-only: no solver launch, no writes into run dirs.
 - **First measured facts (smoke night):** GPU is at 100 % during solves but idle through the CPU phases; the card was using 695 MiB at a 4.8k-dof cell while `python.exe` (128 %) and `julia.exe` (144 %) ran the mesh/metrics side at 22.6 % total CPU. Feeds the "2x faster" analysis: pipeline ceiling, concurrency headroom, VRAM per cell size.
