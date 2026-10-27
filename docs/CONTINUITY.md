@@ -2,6 +2,27 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-26 (night, during the smoke run) - READ-ONLY RUN OBSERVER (`tools/observe_run.py`)
+
+- **Why:** the first pass at "can we run twice as fast" had to infer the GPU/CPU phase split from
+  ndjson timestamps. This records it directly, once per 5 s, for any night: GPU utilisation, VRAM
+  used/total, power, temperature, SM clock vs max, total CPU % and the per-process CPU of
+  `python.exe` / `julia.exe` / `hornlab-search.exe`, the running job (newest job log), and the
+  newest run's eval count, last row's mesh/solve seconds, dof count and error kind. One JSON line
+  per sample to `runs/nights/<night>/observe.ndjson`; on exit it writes
+  `observe_summary.md` (phase shares, utilisation histogram, VRAM/power stats).
+- **Read-only by construction:** `nvidia-smi` queries, `psutil` counters, and reads of
+  `summary.jsonl` / the newest job log / the newest `search.ndjson`. It never launches a solver and
+  never writes into a run directory.
+- **First samples (smoke_2026-10-27, `t1__b3bt__salmon_x_signed`):** GPU 100 % util at 695 MiB VRAM
+  of 8,188, 77 W, 70 degC, SM clock 2,550 of a 3,105 MHz max, total CPU 22.6 % while `python.exe`
+  is 128 % and `julia.exe` 144 % - the mesh/metrics side uses ~2.7 cores while most cores idle.
+  That is the pipelining headroom the speed-up analysis was looking for.
+- **How to use it later:** phase shares give the CPU/GPU pipeline ceiling (`1 / gpu_solve_share`);
+  the utilisation histogram gives the concurrency headroom; `evals` deltas vs dofs give a
+  throughput model; the VRAM column gives the two-way-parallel budget per cell size.
+- Docs + one tool; no code path the campaign uses was touched.
+
 ## 2026-10-26 (night) - README rewrite + GUI screenshots; main fast-forwarded
 
 - Owner: friendlier README with screenshots, no personal names. New intro/pitch, docs/images/*.jpg (sandbox crease, 8-lobe mouth, live status, runs, run charts); technical sections kept below. main fast-forwarded to unified-typologies.

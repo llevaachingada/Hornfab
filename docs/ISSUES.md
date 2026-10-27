@@ -26,6 +26,10 @@ Local-only, added 2026-10-26 (**campaign Phase 0 Steps 2C/3/4/5 LANDED — CPU o
 - **Non-blocking residuals recorded in the evidence doc:** LHS invalid rates of 31–37.5 % on four cells (below the >40 % narrowing trigger) are envelope/geometry refusals, not crashes; one `b3bt__rosse_morph` LHS corner is above 12,000 dofs and is graded infeasible; the biradial/hypex generator rows print a pre-existing H/V throat-tangent warning while meshing validly.
 
 
+Local-only, added 2026-10-26 (**read-only run observer added - `tools/observe_run.py`; no GitHub issue state changed**):
+- Samples GPU util / VRAM / power / clocks, CPU per process, the running job and the newest run's eval rows to `runs/nights/<night>/observe.ndjson`, then writes `observe_summary.md` (phase shares, utilisation histogram). Read-only: no solver launch, no writes into run dirs.
+- **First measured facts (smoke night):** GPU is at 100 % during solves but idle through the CPU phases; the card was using 695 MiB at a 4.8k-dof cell while `python.exe` (128 %) and `julia.exe` (144 %) ran the mesh/metrics side at 22.6 % total CPU. Feeds the "2x faster" analysis: pipeline ceiling, concurrency headroom, VRAM per cell size.
+
 Local-only, added 2026-10-26 (**senior scoring review of the native campaign briefs - text only; no GitHub issue state changed**):
 - **Changed:** `native_ath_core_2in` and `native_twinray_380_14in` -> objective v3 with K-law f0 (1280 Hz; 743 / 1397 Hz per plane, computed from the published mouth dimensions); `native_lecleach_1200_1in` -> scored on loading (cov 0.3, load 0.5, z_min 0.7; dislope 0). **J on those three brief names is not comparable with earlier results.**
 - **Deliberately unchanged:** all B1/B2/B3 briefs (already v3 + f0, wide ones with f0_v), the `*_rows` briefs (dislope 0), the B3b briefs (load 0.5 / z_min 0.7).
