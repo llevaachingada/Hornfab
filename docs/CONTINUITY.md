@@ -2,6 +2,29 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-27 (gcurve follow-up) - THE GUIDING CURVE NOW SITS AT THE MOUTH (`dist 1.0`), T0 VALID
+
+- **Supersedes the width-130 workaround below.** That seed was valid (367 x 292, J 6.289) but it
+  changed the intended mouth scale to pull the envelope back. The real defect was the curve
+  **station**: at `gcurve_dist 0.5` the 335 mm outline sat halfway down the horn and the flare kept
+  growing to the mouth (783 x 581 mm). At **`gcurve_dist 1.0` the outline is the mouth**, so width
+  335 is the mouth width again. Box change: `gcurve_dist` hi 0.9 -> 1.0; the width box returns to
+  the campaign 0.3-1.1x335 = 100.5-368.5 mm (39-143 was the workaround's box). `families.KeySpec`
+  has no lo/hi clamp on `gcurve_dist`, and the mesher's own formula accepts `0 < dist <= 1.0` as a
+  fraction of L, so 1.0 is allowed. The cell header now explains the station fix and both attempts.
+- **Measured geometry:** dry-run bbox 0.1676 x 0.1457 m after the quarter mirror -> full mouth
+  **335.2 x 291.5 mm**, depth 146 mm, inside the 380 x 300 brief envelope.
+- **T0, budget 1, screen:** `seed J = 9.85253`, **1,855 dofs**, 3,543 triangles, 1 new / 0 cached,
+  7.1 s/candidate, objective v3. The v3 dataset record landed (`dataset/shard-0030.jsonl`).
+- **Trade-off, stated plainly:** the dist-1.0 seed (9.853) is structurally correct and beats the
+  control seed 15.045, but it is **worse** than the width-130 workaround (6.289) and the crease seed
+  (8.407). One seed each; J sees only H and V, and this cell still pins `aspect_ratio 1.0` while the
+  control runs 1.15, so it is not a clean A/B. The guiding curve still needs a real T1/diagonal
+  check before any ranking claim.
+- **Verification:** `.venv\Scripts\python.exe .venv\Scripts\hornlab-search.exe search --config
+  examples\typologies\campaign_2026-10-26\gcurve__osse_b1w.yaml --budget 1 --mode screen` (one
+  geometry dry-run + one T0, ~6 s of GPU). No code change.
+
 ## 2026-10-27 (dataset v3 follow-up) - OBJECTIVE VERSIONS NOW HAVE ONE SOURCE OF TRUTH
 
 - **Follow-up to the entry below.** The first fix widened the validator with a literal `(1, 2, 3)`;

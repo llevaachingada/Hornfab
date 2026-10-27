@@ -4,17 +4,21 @@
 #   a superellipse mouth curve makes the coverage angle change with direction around the axis.
 #   type 1 = superellipse; the mesher requires a circular cross-section while a guiding curve
 #   is on, so exponent is pinned 2.0 and aspect_ratio 1.0.
-# RESEED 2026-10-27 (smoke night, second attempt): gcurve_type 1 (pinned), rot 0 (pinned),
-#   dist 0.5, se_n 4, aspect 0.7, **width 130.0**. The original width 335 (b1w's mouth width) was
-#   wrong twice over: the curve's width is NOT the mouth width, and the brief envelope is checked
-#   on the FULL mirrored mouth, not the quarter bbox. Measured on this geometry:
-#     width 150 -> quarter 204 x 158 -> full 408 x 316 mm   (over the 380 x 300 envelope)
-#     width 192 -> 247 x 188 -> 494 x 376                   (over)
-#     width 280 -> 336 x 252 -> 673 x 503                   (over)
-#     width 140 -> 194 x 147 -> 388 x 294                   (8 mm over in width)
-#     width 130 -> 184 x 146 -> 367 x 292                   VALID: J 6.289, 2,047 dofs
-#   The curve's width therefore runs ~2.8x the quarter mouth dimension here; 130 mm reproduces the
-#   b1w seed's mouth scale (367 x 292 vs 335 x 291) and the pinned Morph target sits on top.
+# RESEED 2026-10-27 (smoke night, final): gcurve_type 1 (pinned), rot 0 (pinned), **dist 1.0**,
+#   se_n 4, aspect 0.7, **width 335.0** (b1w's measured mouth width).
+#   WHY DIST 1.0: the mesher solves the OSSE coverage angle so the wall meets the guiding curve at
+#   `gcurve_dist x L` from the throat. At the original dist 0.5 the 335 mm outline sat halfway down
+#   the horn while the flare kept growing to the mouth, and the full mirrored mouth measured
+#   783 x 581 mm - a seed that could not even be meshed inside the 380 x 300 brief envelope. At
+#   dist 1.0 the outline IS the mouth, so width 335 is again the mouth width: the measured full
+#   envelope is 335 x 291 mm (bbox_m 0.1676 x 0.1457 after the quarter mirror, depth 146 mm).
+#   The brief envelope is checked on the FULL mirrored mouth, not the quarter bbox, which is why
+#   the old failure read 783 mm wide. `families.KeySpec` has no lo/hi clamp on `gcurve_dist`, and
+#   the mesher's own formula accepts 0 < dist <= 1.0 as a fraction of L (above 1.0 it would be an
+#   absolute z in metres), so 1.0 is the allowed upper end - hence the box upper bound.
+#   Morph cannot pull the outline back (morph_allow_shrinkage is off), so the seed itself must be
+#   inside the envelope; the old smaller-width workaround (dist 0.5, width 130) was rejected in
+#   favour of fixing the station, because it changed the intended mouth scale.
 #   The underlying OSSE geometry is b1w's seed exactly (r0 18, a 30, L 140, n 4, s 0.7, q 0.995,
 #   k 1) with the rect Morph pinned to the 335.0 x 291.3 mm seed mouth (shrinkage off). The curve
 #   only changes the outline; rate/corner/fixed are searched.
@@ -22,7 +26,7 @@
 #   mesher's guiding-curve requirement - the curve, not the cross-section, makes the wide
 #   mouth); exponent 4 -> 2; Morph switched on; L/a_deg/gcurve_* searched.
 # BOXES: campaign knob table intersected with families.KeySpec hard limits. L 0.4*140 = 56
-#   to the brief's 400 mm depth; gcurve width 0.3-1.1 x 130 = 39-143 mm; dist 0.2-0.9,
+#   to the brief's 400 mm depth; gcurve width 0.3-1.1 x 335 = 100.5-368.5 mm; dist 0.2-1.0,
 #   se_n 2-8, aspect 0.4-1.6; morph rate 0.5-8, corner 0-80 mm, fixed 0-0.6.
 name: gcurve__osse_b1w
 family: OSSE
@@ -38,11 +42,11 @@ seed_params:
   exponent: 2.0
   aspect_ratio: 1.0
   gcurve_type: 1
-  gcurve_dist: 0.5
+  gcurve_dist: 1.0
   gcurve_rot_deg: 0.0
   gcurve_se_n: 4.0
   gcurve_aspect_ratio: 0.7
-  gcurve_width_mm: 130.0
+  gcurve_width_mm: 335.0
   morph_target: 1
   morph_width_mm: 335.0
   morph_height_mm: 291.3
@@ -63,11 +67,11 @@ bounds:
   exponent: {lo: 2.0, hi: 2.0, search: false}
   aspect_ratio: {lo: 1.0, hi: 1.0, search: false}
   gcurve_type: {lo: 1, hi: 1, search: false}
-  gcurve_dist: {lo: 0.2, hi: 0.9}
+  gcurve_dist: {lo: 0.2, hi: 1.0}
   gcurve_rot_deg: {lo: 0.0, hi: 0.0, search: false}
   gcurve_se_n: {lo: 2.0, hi: 8.0}
   gcurve_aspect_ratio: {lo: 0.4, hi: 1.6}
-  gcurve_width_mm: {lo: 39.0, hi: 143.0}
+  gcurve_width_mm: {lo: 100.5, hi: 368.5}
   morph_target: {lo: 1, hi: 1, search: false}
   morph_width_mm: {lo: 335.0, hi: 335.0, search: false}
   morph_height_mm: {lo: 291.3, hi: 291.3, search: false}

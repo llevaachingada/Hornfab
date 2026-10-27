@@ -88,20 +88,26 @@ One solve per fresh process, `--freq 8000`, 73 angles, quarter domain, `gpu-clea
 invalid_geometry: outside the brief envelope (width 783 > 380.0 mm, height 581 > 300.0 mm)
 ```
 
-**Reseeded and fixed the same night** (see section 7). Two things were wrong, not one: the curve's
-`gcurve_width` is not the mouth width, **and the envelope is checked on the FULL mirrored mouth, not
-the quarter bbox** - so a quarter bbox of 336 mm is a 673 mm mouth. Measured on this geometry:
+**Reseeded and fixed the same night** (see section 7). The root cause was the curve STATION, not
+just the width: at `gcurve_dist 0.5` the 335 mm outline sat halfway down the horn while the flare
+kept growing to the mouth, so the full mirrored mouth measured 783 x 581 mm. The final seed puts the
+outline at the mouth (`gcurve_dist: 1.0`, width 335), which caps the mouth at the pinned Morph
+target: **335.2 x 291.5 mm** (depth 146 mm), **J 9.85253, 1,855 dofs, 3,543 triangles** (v3 T0).
 
-| `gcurve_width` | quarter bbox | full mouth | verdict |
+A smaller-width workaround (dist 0.5, width 130) also measured valid (367 x 292, J 6.289) but was
+rejected because it changed the intended mouth scale; its calibration table is kept as history:
+
+| `gcurve_width` @ dist 0.5 | quarter bbox | full mouth | verdict |
 |---|---|---|---|
 | 150 | 204 x 158 | 408 x 316 | over |
 | 192 | 247 x 188 | 494 x 376 | over |
 | 280 | 336 x 252 | 673 x 503 | over |
 | 140 | 194 x 147 | 388 x 294 | 8 mm over in width |
-| **130** | 184 x 146 | **367 x 292** | **valid: J 6.289, 2,047 dofs** |
+| 130 | 184 x 146 | 367 x 292 | valid: J 6.289, 2,047 dofs |
 
-The relationship is also strongly non-linear near the top: a candidate at width **142** already
-measures 433 x 420 mm. The usable band is roughly **110-138 mm**.
+The width response at dist 0.5 is strongly non-linear near the top (a candidate at 142 already
+measures 433 x 420 mm), which is why that workaround was fragile. At dist 1.0 the envelope is set
+by the curve at the mouth, not by the width alone.
 
 ## 4. Mini-T1 - seed to best, with the term breakdown
 
@@ -199,31 +205,33 @@ owed.
 - **Queued, not run:** a T3 diagonal-balloon check on the best crease design vs the best control
   (45/135 deg planes), which is the only way to see what the crease actually buys.
 
-## 7. `gcurve__osse_b1w` - failed as run, reseeded and valid after
+## 7. `gcurve__osse_b1w` - failed as run, fixed by moving the curve to the mouth
 
 **As it ran:** seed invalid (section 3); the T1 consumed only **11 of its 30 evaluations** and found
 **0 valid designs**, so J stayed flat at 1000 and CMA-ES hit its flat-fitness stop after roughly one
 generation (8 `invalid_geometry`, 3 `mesh_too_large`). That is what a flat penalty does to a search:
 one generation, then nothing.
 
-**After the reseed** (`gcurve_width_mm 335 -> 130`, bounds 39-143, same night):
+**The fix** (`gcurve_dist 0.5 -> 1.0`, width back to 335, box hi 0.9 -> 1.0): the mesher solves the
+coverage angle so the wall meets the curve at `gcurve_dist x L`; at 1.0 that station is the mouth,
+so 335 mm is the mouth width and the full mirrored mouth is bounded by the pinned Morph target.
+Measured 335.2 x 291.5 mm (depth 146 mm). A budget-1 v3 T0:
 
 ```
-search: gcurve__osse_b1w mode screen, budget 1 ... seed J=6.28914
-CONFIRM ok True  J 6.2891  2047 dofs  full mouth 367 x 292 mm
+search: gcurve__osse_b1w mode screen, budget 1 new evaluations, 24 bounded keys, output runs/20261027T030310Z-screen-f45d04
+  evaluations 1 (1 new, 0 cached), failures {}, GPU 5.7 s, 7.1 s/candidate, 510/h
+  seed J=9.85253  best J=9.85253 (did NOT improve on the seed); stop: budget
 ```
 
-- **This is the best b1w-based seed of the night**: J **6.289** against `crease__osse_b1w`'s
-  8.407 and `control__osse_morph_b1w`'s 15.045 seed (and better than either of their *best* results,
-  8.407 / 8.064). One seed, no smoothing, so it is a lead rather than a verdict - but the guiding
-  curve is the most promising of the three mechanisms and deserves a real T1.
-- Its terms at the seed: cov 3.38, rip 0.14, di 0.73, dislope 1.93, flat 3.18 (weights 1 / 1 / 0.3
-  / 0.5 / 0.5) - spread across the terms, not single-term dominated like several other cells.
-- **Caveat on the box:** the usable width band is ~110-138, so the upper half of the 39-143 box
-  mostly refuses (a candidate at 142 already measures 433 x 420). Tighten the box after an LHS
-  audit; the widening table's 0.6-1.15x rule does not hold for this knob.
-- It still cross-section-pins `aspect_ratio 1.0` while the control runs 1.15, so it is not a clean
-  A/B against `control__osse_morph_b1w`.
+- **T0 result:** J **9.85253**, **1,855 dofs**, 3,543 triangles, objective v3. The dataset record
+  landed (`dataset/shard-0030.jsonl`), so the same run also confirms the v3 record fix.
+- **Trade-off:** the dist-0.5 / width-130 workaround measured J **6.289** (2,047 dofs, 367 x 292)
+  and was the best b1w-based seed of the night, but it got there by changing the mouth scale. The
+  dist-1.0 seed is the structurally correct one, beats the control seed 15.045, and is still worse
+  than `crease__osse_b1w` 8.407 and the width-130 workaround. **One seed each - no ranking claim.**
+- **Caveats:** it still cross-section-pins `aspect_ratio 1.0` while the control runs 1.15, so it is
+  not a clean A/B; J sees only the H/V planes, so the diagonal effect of the guiding curve is
+  invisible until the queued T3 balloon check.
 
 ## 8. Where the time went (observer)
 
@@ -263,12 +271,13 @@ the ladder rung monopolised the last 26 minutes at 100 % GPU and drags every who
 
 ## 10. Owed work
 
-1. **`gcurve__osse_b1w` reseed** (section 3), then re-T0.
+1. **DONE 2026-10-27:** `gcurve__osse_b1w` reseed - `gcurve_dist 1.0`, width 335, T0 J 9.853,
+   1,855 dofs, 335.2 x 291.5 mm (section 7).
 2. **Normalise the objective terms** before any weight tuning; the Le Cleac'h loading experiment
    shows weights do not currently mean influence (section 4).
-3. **Dataset records are not written for v3 runs** - `dataset/record.py:421-424` accepts v1/v2 only;
-   logged by all 27 T0 jobs. One-line widen + a regression test. This blocks surrogate training,
-   which is what would make NSGA-II affordable.
+3. **DONE 2026-10-27:** dataset records for v3 runs - the allowed versions now come from
+   `objective/versions.py`, shared with the scorer dispatch; a live v3 T0 wrote a record. The smoke
+   night's lost records are not reconstructable from this folder (section 10 note in CONTINUITY).
 4. **Full offline suite** (deferred tonight by the owner).
 5. **LHS audit of the widened boxes** (the T0/T1 refusal rates: 33 % overall) and
    `tools/expand_walls.py` (auto-widen an edge the best designs press against).
