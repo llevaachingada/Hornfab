@@ -67,7 +67,11 @@ def main(argv=None) -> int:
             for k in ("freqs_hz", "bw_h_deg", "bw_v_deg", "di_db", "ripple_h_db", "ripple_v_db", "on_axis_db"):
                 if k in m:
                     row[k] = json.dumps([round(x, 3) if isinstance(x, float) else x for x in m[k]])
-            for k, v in (r.get("params") or {}).items():
+            params = dict(r.get("params") or {})
+            grid = params.pop("grid", None)
+            if isinstance(grid, dict):                      # FREEFORM point-grid families keep their genes here
+                params.update(grid.get("knobs") or {})
+            for k, v in params.items():
                 row[f"p_{k}"] = v
                 pkeys.add(f"p_{k}")
             all_rows.append(row)

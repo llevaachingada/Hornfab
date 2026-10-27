@@ -285,6 +285,26 @@ fork change), gated on v4 results.
 - **Also pending from the v4 nights:** re-run `crease__osse_b1w` (resume job failed at startup), check why
   `b1w__biradial_keele` stops at ~10 evals, update CONTINUITY.md for the 100-per-cell and resume nights.
 
+## P12 (added 2026-10-27, owner-directed, TOP PRIORITY BEFORE MORE SOLVE NIGHTS). Do the simulations behave like a built-and-measured horn? Loading, the ideal source, and scoring honesty
+
+**Owner's concern (verbatim intent):** "I don't want to be running these simulations if it isn't going to behave like it would if we built one and tested it." Investigate first; do not queue large campaigns on a scoring/model basis that has not been checked against reality.
+
+**What was found 2026-10-27 (evidence: stored `z_throat` of the v4 best designs, `hornlab_search/objective/terms.py::load_term`, briefs under `examples/briefs/campaign_2026-10-26_v4/`):**
+1. **Loading is weighted on only 4 briefs** (`b3bt_*`, `b3bw_*`, `native_lecleach_1200_1in`; weight 0.5, `z_min` 0.7). Every other brief, **including the b3a 90x90 PA cells and their best horn `b3a__rosse_morph` (J 1.31)**, has `load` weight 0.
+2. **The J 1.31 winner is essentially unloaded:** Re z_throat = 0.04 / 0.12 / 0.37 / 0.82 at 500 / 827 / 1370 / 2268 Hz, yet its H and V polars look excellent down to 500 Hz. `native__lecleach_rollback`: 0.03 at 500 Hz. `b3bt__rosse_morph` (loading brief) 0.08-0.14 at 500-643 Hz.
+3. **The model drives an ideal source** (unit normal acceleration on tag 2; `spl_reference` in `solve/beat.py` meta), with NO driver (no T/S model, diaphragm, phase plug, rear cavity) and polars normalised to on-axis. So pattern SHAPE is credible, but level, efficiency, excursion/distortion and cutoff peaks of a real compression driver on a poorly loaded horn are NOT represented, and a horn that is nearly silent at 500 Hz can still look perfect in the polar plots.
+4. **`load_term` is `mean_f(max(0, z_min - Re z))` over the whole scored band**, so sub-cutoff deficits are diluted by many well-loaded points; the screen grid starts at 500 Hz, below which big-PA loading is never solved (verify tier goes to 300 Hz).
+5. Related scoring-honesty observations (same day): cov is `err^2/100` with tolerances 2.0 (A) / 4.5 (B, C), i.e. about 14 / 21 deg RMS per "1 unit", so J is generous; cov is MASKED below f0 for class A (twinray V is 120 deg at 500 Hz and still scores 3.0); loading, flatness and presence-band weights are mild.
+
+**Research report (2026-10-27, outside sources):** `docs/research/SIM_VS_REAL_HORN_2026-10-27.md`; summary in `docs/plan/12_RESEARCH_BASIS.md` section 17. Ranked actions from it: P12a re-score (free) > lumped compression-driver model over the BEM throat impedance (cheap, no new solves) > validate against ONE published measured horn > load ON for PA/low-reach (max or sub-f0 aggregation; weights 0.3-0.5 CD, 0.8-1.0 PA, 1.0 low-reach) > report-only 200-300 Hz solve > print and measure two finalists. Also: keep `distd`, down-weight `dislope` on constant-directivity briefs; add polar cross-correlation as a report metric.
+
+**To do (in order; owner approval needed before changing scoring or queuing new campaigns):**
+- [ ] **P12a - quantify the gap.** Re-score the existing cached responses (no new solves) with loading ON (weight 0.5-1.0, `z_min` high, scored from f0 upward) on the PA/low-reach briefs and show the rank change (expect `b3a__rosse_morph` to drop). Also a stricter-cov variant (tolerances 2->1, 4.5->2; one-sided below f0 for every class; presence band 2x->3x).
+- [ ] **P12b - real-world validation.** Pick a measured reference horn (published CD horn or a collaborator's measured prints, e.g. a known 90x60 with polars and impedance/FR) and check our solver + objective reproduce its measured polars, DI and throat loading; document the error. Quantify the ideal-source assumption: add a simple driver model (compression-driver diaphragm + rear cavity + phase plug equivalent circuit, or the BEM throat impedance into a Thiele-Small-style driver) so on-axis level / FR and excursion can be predicted, and add an `absolute level` or `efficiency` term (not just on-axis-normalised patterns).
+- [ ] **P12c - fix the model/scoring gaps found:** loading on for all low-reach and PA briefs; verify-tier (300 Hz) loading check for finalists; consider a report-only low-frequency solve (200 Hz) so cutoff behaviour is visible; throat cross-mode (f11) already noted in the fused-CUDA evidence.
+- [ ] **P12d - build-and-measure loop.** Print 1-2 finalists (see the print-service notes in the 2026-10-27 chat: PLA/PETG prototypes, 4 pieces, 4-6 perimeters, gyroid, resin-backed) and measure polars/impedance to calibrate the objective before the next big campaign. A first print of a "scoring-honest" winner vs a "J-winner" would show whether J predicts real behaviour.
+- **Gate:** no new multi-hour solve nights beyond the already queued ripple/ridge night until P12a (and ideally P12b) results are reviewed; the queued night is cheap, comparison-oriented geometry exploration, but its J values inherit these caveats.
+
 ## Not recommended (recorded so nobody re-proposes it without new evidence)
 - Half precision or other "quantization" of the BEM system: the solver is Float32 with a Float64 Krylov space; dense
   high-frequency BEM systems are poorly conditioned.

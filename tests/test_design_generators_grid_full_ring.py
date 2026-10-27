@@ -110,7 +110,7 @@ def test_ripple_validator_evict_s_and_ranges():
                              "g_ripple_lobes": 11.0})
     with pytest.raises(registry.GeneratorError, match="ripple_amp_mm"):
         G._rows_shape_knobs({"g_fc_h_hz": 800.0, "g_fc_v_hz": 1100.0,
-                             "g_ripple_lobes": 12.0, "g_ripple_amp_mm": 9.0})
+                             "g_ripple_lobes": 12.0, "g_ripple_amp_mm": 60.0})   # cap raised 6 -> 50 mm 2026-10-27 (Solana-depth flutes); 60 is still refused
     with pytest.raises(registry.GeneratorError, match="ripple_amp_mm > 0 needs"):
         G._rows_shape_knobs({"g_fc_h_hz": 800.0, "g_fc_v_hz": 1100.0,
                              "g_ripple_amp_mm": 3.0})

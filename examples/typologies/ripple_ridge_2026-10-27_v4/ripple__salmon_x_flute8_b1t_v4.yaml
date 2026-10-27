@@ -1,0 +1,101 @@
+# GENERATED 2026-10-27 (rev 2, owner: flutes must run into the throat and be deeper, like JW Sound Solana).
+# Salmon rows + an 8-lobe radius flute r *= 1 + (amp/row_max) w(s) cos(8 phi); w opens at ripple_start (seed 0.1,
+# i.e. 10% along the wall). Depth cap raised 6 -> 50 mm in design/generators/grid.py for this. 8 lobes pinned
+# (integer gene). Solana source + limits: docs/IMPLEMENTATION_PLAN_2026-10-27.md s9 (no twist, no non-round throat).
+# Same brief/caps/solver as b1t__salmon_x_signed_v4 (direct comparison).
+# BRIEF: the _diag_v4 copy (diag weight 1.0, otherwise identical to the comparison cell's brief).
+# rev 3 (owner): longer, deeper throat and a smaller roll-over: T 0.8 -> 0.4 (measured depth 158 -> ~180 mm),
+# stop 150 -> 110 deg (box 90-140); flutes from the throat (start 0.02, box 0-0.4) and deeper (amp 32 mm); X humps softened (x_amp -0.15 -> -0.07, box +/-0.2).
+name: ripple__salmon_x_flute8_b1t_v4
+family: FREEFORM
+brief_file: ../../briefs/campaign_2026-10-26_v4/b1t_hifi_90x60_850_tall_rows_diag_v4.yaml
+generator:
+  name: grid
+  rows:
+    type: salmon_elliptical
+  n_phi: 25
+  n_s: 32
+  wall_thickness_mm: 3.0
+  seed_policy: explicit
+  span: half
+seed_params:
+  g_fc_h_hz: 926.0
+  g_fc_v_hz: 633.0
+  g_T: 0.4
+  g_stop_deg: 110.0
+  g_x_amp: -0.07
+  g_x_fc: 0.15
+  g_ripple_lobes: 8
+  g_ripple_amp_mm: 32.0
+  g_ripple_start: 0.02
+bounds:
+  g_fc_h_hz:
+    lo: 648.2
+    hi: 1852.0
+  g_fc_v_hz:
+    lo: 443.1
+    hi: 1266.0
+  g_T:
+    lo: 0.3
+    hi: 1.0
+  g_stop_deg:
+    lo: 90.0
+    hi: 140.0
+  g_x_amp:
+    lo: -0.2
+    hi: 0.2
+  g_x_fc:
+    lo: 0.0
+    hi: 0.3
+  g_ripple_lobes:
+    lo: 8
+    hi: 8
+    search: false
+  g_ripple_amp_mm:
+    lo: 8.0
+    hi: 45.0
+  g_ripple_start:
+    lo: 0.0
+    hi: 0.4
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 6.0
+  quadrants: '14'
+  dof_cap_screen: 12000
+  dof_cap_verify: 12000
+  dof_cap_final: 12000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.15
+  seed: 1234
+  budget: 100
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+description: 'Solana-style fluted wall: 8 flutes from near the throat to the mouth, depth 8-45 mm and window start 0.02-0.5
+  SEARCHED, plus the signed X pucker; b1t tall rows brief.'

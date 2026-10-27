@@ -2,6 +2,31 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-27 (evening) - RESUME NIGHT DONE; RIPPLE/RIDGE NIGHT RUNNING; SIM-VS-REAL RESEARCH (P12); PUSHED TO MAIN
+
+- **Resume night finished (27/27 exit 0, +~100 solves per cell).** Biggest gains (best J before -> after): `b3a__rosse_morph` 3.17 -> **1.31**
+  (lowest J anywhere), twinray 4.44 -> 3.00, `b2w__osse_baseline` 5.49 -> 3.78, gcurve 5.22 -> 3.86, `b1w__osse_baseline` 7.01 -> 5.47,
+  `native__ath_core` 1.91 -> 1.60, `b3bt__rosse_morph` 4.42 -> 3.75, `b3a__ath_core_14in` 5.76 -> 2.05 (132 rows). Flat (near floor):
+  `crease__core_law` 1.70, rollback/asym_odd. Scoring cross-check: J == sum(w x term) + penalty for all 3,676 first-night valid rows.
+  `crease__osse_b1w` (startup failure) and `b2t__rosse_morph` (its Julia host was killed by a test run - **never run pytest solver tests during a
+  night**) are re-run in the next night.
+- **Ripple/ridge night LAUNCHED 17:23 EDT** (`runs/nights/v4_ripple_ridge_2026-10-27.yaml`, 10 jobs, owner "go ahead"): 2 re-runs, then flute
+  cells (`examples/typologies/ripple_ridge_2026-10-27_v4/`): Salmon rows + 8 deep flutes (Solana-style, from near the throat, depth 8-45 mm;
+  `ROWS_MAX_RIPPLE_AMP_MM` 6 -> 50 in `design/generators/grid.py`, test updated), X-pucker + flutes, ATH CORE law with 8 lobes
+  (`ridge__ath_core_law8`, scored on the `_diag_v4` briefs: diag weight 1.0), and 5 s125 variants (6/8/10 flutes, X 6/8). Throat longer/deeper
+  (T 0.4), roll-over 110-125 deg. These use the b1t brief (850 Hz, 360x520 mm), so they are NOT sized for 500-600 Hz loading; a b3bt-brief twin set was
+  proposed, not built.
+- **P12 - do the sims behave like a built horn? (owner concern, top priority, gate on further big nights).** Findings: loading weighted only on
+  b3bt/b3bw/native_lecleach; the J 1.31 winner has Re z_throat 0.04-0.12 below 830 Hz; ideal source, no driver model; cov err^2/100 with tolerances
+  2/4.5 is generous and masked below f0 for class A. Outside research pass: `docs/research/SIM_VS_REAL_HORN_2026-10-27.md` and a new section 17 in
+  `docs/plan/12_RESEARCH_BASIS.md`. Conclusion: ideal-source BEM is a sound RELATIVE tool for pattern shape above cutoff, not for level/loading/
+  distortion. Ranked actions: (1) free P12a re-score of cached responses with load ON + stricter cov, (2) lumped compression-driver model over the BEM
+  throat impedance, (3) validate against one published measured horn, (4) load on for PA/low-reach, (5) report-only 200-300 Hz solve, (6) print and
+  measure a J-winner and a loading-aware winner. Nothing in scoring has changed yet.
+- **Other additions today:** `tools/export_campaign_tables.py` + `docs/data/campaign_v4_2026-10-27/` (collaborator tables, refreshed),
+  `docs/HANDOFF_COLLABORATOR_2026-10-27.md`, `_diag_v4` brief copies, `tools/hf_sync.py` (tabled P11). Renders and story images are scratch only
+  (`scratch/v4_gallery`, `scratch/seed_gallery`, `scratch/story`; pyvista in `scratch/vizenv`).
+
 ## 2026-10-27 (midday) - v4 NIGHTS DONE/RUNNING; RESUME NIGHT; DATA TABLES FOR THE COLLABORATOR; MERGE TO MAIN
 
 - **First v4 night (100 evals/cell, 27 cells, ~5.1 h): finished, 27/27 exit 0.** Budgets were revised from the earlier 9.5 h

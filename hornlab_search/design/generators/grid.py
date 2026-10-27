@@ -173,7 +173,7 @@ ROWS_MAX_EPS = 0.3
 #: The even-lobe mouth ripple (owner's "pleats" feature; MOUTH_RIPPLE_SERRATION dossier):
 #: lobes N even in [6, 24], amp in mm, window start as an arc fraction.
 ROWS_RIPPLE_LOBES_RANGE = (6.0, 24.0)
-ROWS_MAX_RIPPLE_AMP_MM = 6.0
+ROWS_MAX_RIPPLE_AMP_MM = 50.0   # 2026-10-27 owner: Solana-depth flutes (30-50 mm, IMPLEMENTATION_PLAN s9); was 6
 #: Honest ripple resolution bar: >= 4 phi samples per lobe period
 #: (samples_per_period = (2 pi / N) / d_phi over the row's own span).
 ROWS_RIPPLE_SAMPLES_PER_LOBE = 4.0

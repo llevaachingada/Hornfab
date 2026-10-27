@@ -1001,3 +1001,28 @@ Flygare & Pantaleev, quad-ridge flared horn, IEEE TAP 2020: doi:10.1109/TAP.2019
 Joseph Crowe catalogue/products + sitemaps: https://josephcrowe.com (full per-page list in the biradial dossier)
 JBL Pro directivity technology: https://jblpro.com/en/innovation-directivity
 Full per-claim source tables: the three §13 dossiers in docs/research/typologies/ carry every URL/status label; this section records the load-bearing subset only.
+
+## 17. Simulation fidelity: does an ideal-source BEM behave like a built horn? (added 2026-10-27, owner-directed; P12)
+
+Full report: `docs/research/SIM_VS_REAL_HORN_2026-10-27.md` (source table there; this section is the summary for the senior pass).
+
+- **[published + measured]** Far-field pattern (polars, DI, beamwidth) above the horn's cutoff is predicted well by BEM with a velocity/piston source
+  (Kolbrek BEM pages, Panzer & Macey BERIM, diyAudio Ath/ABEC print-and-measure threads; our own CP-7: 0.039 dB two-solver, epw6 vs 18 <= 0.29 deg bw /
+  0.028 dB DI). **Level, efficiency, low-frequency loading, cutoff peaks and distortion are NOT predicted**, and on-axis normalisation hides the error.
+  Also missing: the real throat/driver exit wavefront (our f11 cross-mode ~5.7 kHz on 1.4 in), baffle diffraction, wall vibration, print-wall effects;
+  epw 6 is the ~10 % modal-error class.
+- **Other tools:** Hornresp (1-D + measured T/S), Akabak (LEM driver + BEM; output power ~ Re Z_throat), ABEC/Ath (ideal source for pattern, driver
+  coupling for level), Boundary Lab (monolithic FEM-BEM-LEM with dry Mmd; post-hoc Mms coupling double-counts radiation mass). An ideal source for
+  pattern plus a separate loading/level stage is normal practice; our gap is that the second stage is mostly switched off (loading weight 0 on most briefs).
+- **Loading criteria:** mouth circumference >~ one wavelength at cutoff; Keele d = K/(theta * f_theta), K ~ 2.54e4 m*deg*Hz; designers want Re(z) >~ 0.5-0.7
+  in band. Our `load_term = mean_f max(0, z_min - Re z)`: shape fine, but the band-mean dilutes a deep sub-cutoff deficit; recommend max or a sub-f0
+  integral, weights 0.3-0.5 (CD waveguide), 0.8-1.0 (PA to 400-600 Hz), 1.0 (low-reach).
+- **Scoring honesty:** `cov` err^2/100 with tolerances 2/4.5 is ~14/21 deg RMS per unit (generous); the mask below f0 should be one-sided; keep `distd`
+  (std of DI, one of the two best CD metrics per Sridhar/Tylka/Choueiri, AES 140, 2016) and down-weight `dislope` on CD briefs; consider polar
+  cross-correlation as a report metric.
+- **Validation plan:** compare against a published measured horn (Ath-generated + builder measurements, JBL 2380-class, Geddes OS): beamwidth +-5 deg
+  (+-3 in the presence band), DI +-1 dB, f_theta within ~1/6 octave, Re(z) transition within ~1/3 octave [inferred thresholds]. Add a lumped
+  compression-driver circuit over the stored BEM throat impedance (cheap). Build and measure two printed finalists (the J-winner and a loading-aware winner)
+  on a turntable with a large roundover baffle.
+- **Not verified by the research pass:** the gedlee.com directivity PDF (TLS error), the Panzer/Macey IOA PDF (404), the exact 2nd-harmonic figures of the
+  ICA2019 distortion paper.

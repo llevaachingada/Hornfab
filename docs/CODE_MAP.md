@@ -72,3 +72,5 @@ bempp_cpu) → `metrics` (beamwidth, ripple, DI, impedance) → `objective` (sca
 `hornlab_plots` — Magnus's (GitHub `m3gnus`) packages, installed in `.venv`.
 
 - `tools/export_campaign_tables.py` - exports compact per-cell/per-eval CSV tables (no meshes) to `docs/data/campaign_v4_2026-10-27/`; `tools/hf_sync.py` - packs runs/cache into tar shards for a Hugging Face dataset repo (tabled, P11).
+
+- `examples/typologies/ripple_ridge_2026-10-27_v4/` - fluted-wall cells (Salmon rows + 6/8/10 flutes, X + flutes) and ATH CORE law-8; `examples/briefs/campaign_2026-10-26_v4/*_diag_v4.yaml` - diag-weight-1.0 brief copies.
