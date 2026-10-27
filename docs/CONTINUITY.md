@@ -2,6 +2,15 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-26 (night, during the smoke run) - README REFRESHED TO THE CURRENT TREE
+
+- **Status block** (was 2026-10-22): 41 typologies in `examples/catalog.yaml`; **Le Cléac'h is enabled** (the README still said "disabled until a verifiable published construction is available" - it was re-enabled 2026-10-25 with its dossier); the per-direction `az_*` law and the OS-SE guiding curve as searchable mechanisms; objective-v3 K-law f0 (plus f0_v on wide horns); the overnight runner.
+- **Known limits corrected:** "nothing above 5.5 kHz is scored on an 8 GB GPU" is superseded by the measured ladder - coverage graded to 8 kHz at 12,000-dof caps, 8 kHz safe to a ~474 mm mouth, 10 kHz to ~353 mm, ≥550 mm at 8 kHz memory-saturated. Added the real blind spot: **the objective reads only the H and V planes**, so diagonal (45°/135°) behaviour - what a creased wall changes - is not scored.
+- **Dataset caveat recorded where users will see it:** objective-v3 runs write `search.ndjson` + `best.json` but **not** dataset records (`dataset/record.py` accepts v1/v2 only). Found tonight in all 27 T0 jobs; fix owed (see ISSUES).
+- **Name:** "Collin's HornLab packages" -> "the HornLab mesher and BEM solvers" (owner request: no personal name in the README).
+- **Commands/docs:** the `gui` row now names the typology sandbox and generated tooltips; a sentence covers `tools/run_campaign_night.py`; the docs list gains the generated `docs/reference/{PARAMETERS,TYPOLOGIES}.md` pair and `docs/evidence/`.
+- Docs only - no code or config change, and the running night is unaffected.
+
 ## 2026-10-26 (night, pre-smoke) - SENIOR SCORING REVIEW: each native control scored for its own job
 
 - **Why:** the native campaign controls were all on objective v2 (no f0 mask) except Le Cleac'h. For `crease__core_law` and the two ATH natives that means the score was dominated by low-frequency coverage error no shape can fix, so the search would chase that instead of the crease parameters. A Le Cleac'h was being scored as if it were a constant-directivity horn, i.e. penalised for narrowing by design.
