@@ -2,6 +2,24 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-27 (after the smoke report) - OBJECTIVE-v3 DATASET RECORDS FIXED
+
+- **The defect:** `dataset/record.py` accepted only `objective_version` 1 or 2, but v3 is a
+  dispatched objective (`search/evaluate.py` routes to it since the 2026-10-26 amendment). Every
+  objective-v3 evaluation therefore wrote **no dataset record** - the `ValueError` is caught and only
+  logged, so it was invisible until the smoke night logged it in all 27 T0 jobs. `search.ndjson`,
+  `best.json` and reports were unaffected; the phase-2 surrogate data was.
+- **The fix:** the validator now accepts `(1, 2, 3)`, with a comment naming when v3 shipped. The
+  docstring follows.
+- **Tests:** `tests/test_dataset_record.py` - the stale reject-list dropped `3` (it now rejects
+  `0, 4, "2", True`), a meta-level `v3` validation case was added, and an **end-to-end** case runs a
+  real `evaluate(..., objective_version=3)` through the store and asserts the record lands with
+  `objective_version 3`. That end-to-end case is the one that would have caught this. **45 passed /
+  0 failed / 0 skipped**.
+- Not a loosened test: the assertion's subject changed because the objective gained a v3. The
+  rejects for `0`, `4`, `"2"` and `True` are intact.
+- No GPU work.
+
 ## 2026-10-26 (late) - LEARNINGS RECORDED
 
 - docs/research/LEARNINGS_2026-10-26.md: 13 durable findings (Ath creases = per-direction law; guiding-curve rules; plausible crease shapes; FREEFORM Morph target; self-approach fix; boxes vs CMA; per-type scoring; J blind spots; driver realism; drivers per brief; fused ceiling; GUI). Indexed in docs/INDEX.md; pointer appended to NOTES_FOR_SENIOR.md.

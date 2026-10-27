@@ -285,9 +285,18 @@ def test_a_record_missing_objective_version_still_validates_as_v1():
     assert record_objective_version(meta) == 1
 
 
+def test_a_v3_evaluation_writes_objective_version_3():
+    """v3 (2026-10-26: per-plane f0_v + the K-law f0 mask) is a dispatched objective since
+    ``search/evaluate.py`` routes to it; its records must validate, not be rejected."""
+    meta, _ = _built(objective_version=3)
+    assert meta["objective_version"] == 3
+    assert record_objective_version(meta) == 3
+    validate_record(meta)
+
+
 def test_validate_rejects_an_unknown_objective_version():
     meta, _ = _built()
-    for bad in (0, 3, "2", True):
+    for bad in (0, 4, "2", True):
         with pytest.raises(ValueError, match="objective_version"):
             validate_record(dict(meta, objective_version=bad))
 
@@ -310,4 +319,27 @@ def test_v2_brief_evaluation_writes_objective_version_2_to_the_record(smoke_cfg,
              ctx=make_context(cfg, store, lib_shas=LIBS))
     meta, _ = next(store.iter_records(with_arrays=True))
     assert meta["objective_version"] == 2
+    validate_record(meta)
+
+
+def test_v3_evaluation_actually_writes_a_dataset_record(smoke_cfg, tmp_path, monkeypatch):
+    """End to end regression: before 2026-10-27 the record writer refused v3, so every objective-v3
+    evaluation silently wrote NO dataset record (the exception is caught and logged). Proves the
+    record now lands, with the version stamped."""
+    import dataclasses
+
+    from hornlab_search.dataset.store import DatasetStore
+    from hornlab_search.design.space import DesignSpace
+    from hornlab_search.search.evaluate import evaluate, make_context
+    from test_search_support import LIBS, SyntheticBackend, install_fakes
+
+    cfg = dataclasses.replace(smoke_cfg, objective_version=3)
+    be = SyntheticBackend()
+    install_fakes(monkeypatch, be)
+    store = DatasetStore(tmp_path / "ds")
+    space = DesignSpace.from_config(cfg)
+    evaluate(space.seed, space, cfg, "screen", tmp_path / "run", store, be,
+             ctx=make_context(cfg, store, lib_shas=LIBS))
+    meta, _ = next(store.iter_records(with_arrays=True))
+    assert meta["objective_version"] == 3
     validate_record(meta)

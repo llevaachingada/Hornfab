@@ -290,9 +290,9 @@ def build_record(ev: Evaluation, target, lib_shas: dict, *,
                    reader can tell "not sampled" from "capture failed".
       excitation   overrides DEFAULT_EXCITATION (phase 1 never needs to).
        created_utc  ISO-8601 "YYYY-MM-DDTHH:MM:SSZ"; now if omitted.
-       objective_version  the objective dispatch version the evaluation was scored with (1 or 2),
-                    from ``ctx.objective_version``. Always written; older records lack it and read
-                    as version 1 (``record_objective_version``).
+       objective_version  the objective dispatch version the evaluation was scored with
+                    (1, 2 or 3), from ``ctx.objective_version``. Always written; older records
+                    lack it and read as version 1 (``record_objective_version``).
        provenance   optional, additive (plan R8): {"config", "brief", "brief_hash", "generator"} -
                    which config / design brief scored this record and which typology generator (if
                    any) produced the design. Older records lack it; readers must treat it as optional.
@@ -420,8 +420,10 @@ def validate_record(meta: dict) -> None:
         raise ValueError(f"family {meta['family']!r} is not one of {FAMILIES}")
     if "objective_version" in meta:                 # absence means v1 (records written before M3)
         ov = meta["objective_version"]
-        if isinstance(ov, bool) or not isinstance(ov, int) or ov not in (1, 2):
-            raise ValueError(f"'objective_version' must be 1 or 2, got {ov!r}")
+        # v3 shipped 2026-10-26 (per-plane f0_v + the K-law f0 mask); it is a dispatched objective
+        # (search/evaluate.py), so its records must validate. The v1/v2 pins predate it.
+        if isinstance(ov, bool) or not isinstance(ov, int) or ov not in (1, 2, 3):
+            raise ValueError(f"'objective_version' must be 1, 2 or 3, got {ov!r}")
     if not isinstance(meta["ok"], bool):
         raise ValueError("'ok' must be a bool")
     if not isinstance(meta["error"], str):
