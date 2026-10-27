@@ -35,6 +35,7 @@ Local-only, added 2026-10-27 (**campaign smoke night LANDED - report only, no co
   - `f_load_hz` = 500 Hz on that seed is the **grid floor**, not a measurement (screen grid starts at 500 Hz).
   - Per-frequency assembly dominates (73-96 % of one frequency's cost), so **frequency count is the throughput knob**; the 8 kHz ceiling binds just above 14k dofs (13,999 = 88 % VRAM, 16,960 = 96 % unusable).
 - **Open gates unchanged:** BEM verify seed for the portrait morph/rows cells; T3 diagonal-balloon check for crease vs control (queued); full offline suite; LHS audit of the widened boxes; `tools/expand_walls.py`; sandbox law card browser check; catalog generator recursion into campaign folders; `osse_baseline` 803 x 643 vs its own 750 x 600 envelope; parked `make_shape_variants.py`.
+- **Throughput (observer, to be re-measured):** over a ~6-minute search window the GPU solved only ~33 % of the time (`between_evals` 39 %, `refusal_or_mesh` 24 %), median utilisation 24 % at 931 MiB / 19 W, while the ladder rungs were GPU-bound at 100 %. The window is too short to schedule pipeline work from; relaunch `tools/observe_run.py` with the next full search night.
 
 Local-only, added 2026-10-26 (**read-only run observer added - `tools/observe_run.py`; no GitHub issue state changed**):
 - Samples GPU util / VRAM / power / clocks, CPU per process, the running job and the newest run's eval rows to `runs/nights/<night>/observe.ndjson`, then writes `observe_summary.md` (phase shares, utilisation histogram). Read-only: no solver launch, no writes into run dirs.

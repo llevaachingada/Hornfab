@@ -34,10 +34,12 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
   0.07-0.94 s; a campaign eval at ~11,967 dofs logs 9.5 s/frequency, matching the standalone 12,183
   number, so **the assembly is paid per frequency**. The frequency count, not the dof count, is the
   throughput knob.
-- **Observer (`tools/observe_run.py`, new):** 176 samples at 5 s. GPU median utilisation **100 %**,
-  mean 61 %, **idle ~43 % of wall clock** in CPU phases (mesh 18 %, between-evals 14 %, refusals
-  10 %). The card is saturated while solving, so a CPU/GPU pipeline is the accuracy-neutral
-  speed-up; 2-way concurrency only for cells <= ~6k dofs (two 8.9k solves would need 6.6 GB of 8.2).
+- **Observer (`tools/observe_run.py`, new):** 384 samples at 5 s, **read the two phases
+  separately**. Ladder rungs: 92 % `gpu_solve`, median util 100 % (GPU-bound). **Search jobs** (75
+  samples, ~6 min): `gpu_solve` 33 %, `between_evals` 39 %, `refusal_or_mesh` 24 %, `cpu_idle` 4 %,
+  **median GPU utilisation 24 %**, VRAM 931 MiB, 19 W - the card is idle-waiting, not working. The
+  search window is short (one 31-eval cell) so the pipeline opening is promising but **must be
+  re-measured over a full search window** before scheduling the work.
 - **Owed:** gcurve reseed; term normalisation; the `dataset/record.py` v3 rejection (no dataset
   records from any v3 run tonight); full offline suite; LHS audit of the widened boxes +
   `tools/expand_walls.py`; per-frequency timing instrumentation + the concurrency A/B; sandbox law

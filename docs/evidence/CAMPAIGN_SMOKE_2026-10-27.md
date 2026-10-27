@@ -26,8 +26,7 @@ floor). Coverage is graded to 8 kHz, past the 1.4-inch driver's ~5.6 kHz cross-m
 
 ## 1. Night totals
 
-- **41 jobs** (27 T0 + 9 mini-T1 + 5 ladder rungs); 40 recorded in `summary.jsonl` at the time of
-  writing, the 17k ladder rung still in flight.
+- **41 jobs** (27 T0 + 9 mini-T1 + 5 ladder rungs), **all 41 recorded** in `summary.jsonl`.
 - **376 evaluations, 252 valid, 124 refused**: `invalid_geometry` 89, `invalid_envelope` 26,
   `mesh_too_large` 9 → **33 % refused overall**. The Phase-0 LHS audit measured 0-37.5 % before the
   boxes were widened, so **the physical-range widening did not increase the refusal rate** - the
@@ -46,12 +45,13 @@ One solve per fresh process, `--freq 8000`, 73 angles, quarter domain, `gpu-clea
 | `phaseB_dof8k9` | 8,919 | 17,500 | 4.06 | 0.267 | 6.62 | 2,433 | 3,324 | 41 % |
 | `phaseB_dof12k` | 12,183 | 23,973 | 6.69 | 0.636 | 11.00 | 5,183 | 5,972 | 73 % |
 | `phaseB_dof14k` | 13,999 | 27,578 | 8.54 | 0.937 | 13.78 | 6,028 | 7,199 | **88 %** |
-| `phaseB_dof17k` | 16,960 | 33,460 | - | - | - | - | 7,898 live | **96 % - UNUSABLE** |
+| `phaseB_dof17k` | 16,960 | 33,460 | - | - | - | - | **7,908** | **97 % - TIMEOUT (1,800 s, exit 124)** |
 
 - **The 90 % rule now has a measured edge: it binds just above 14k dofs.** 12,183 dofs is the last
-  comfortable point (73 %); 13,999 is at 88 % (works, no headroom for the GUI); 16,960 sat at 96 %
-  with the GPU at 100 % and 27 W - the oversubscription signature - for as long as it was observed
-  (it was still in flight at the 30-minute timeout when this report was written).
+  comfortable point (73 %); 13,999 is at 88 % (works, no headroom for the GUI); **16,960 peaked at
+  7,908 MiB (97 %) and was killed at exactly the 1,800 s timeout with no RESULT line** - the GPU sat
+  at 100 % utilisation drawing only 26-27 W, the oversubscription-into-host-memory signature
+  documented in `FUSED_CUDA_2026-10-24.md`. `gpu-clean` recovered the card to 294 MiB afterwards.
 - **Consequence for briefs at 8 kHz:** a 706 mm B3a horn (~10k dofs) is fine; a 90 x 60 at 400 Hz
   (~17k dofs) is **not available** - it must move to a lower top frequency or accept the
   oversubscription/host-memory path documented in `FUSED_CUDA_2026-10-24.md`.
@@ -201,22 +201,27 @@ so even when fixed it is not a clean A/B against `control__osse_morph_b1w`.
 
 ## 8. Where the time went (observer)
 
-`tools/observe_run.py` sampled every 5 s for the whole night (176 samples):
+`tools/observe_run.py` sampled every 5 s (384 samples). **The two phases must be read separately** -
+the ladder rung monopolised the last 26 minutes at 100 % GPU and drags every whole-night average:
 
-| phase | share of samples |
-|---|---|
-| `gpu_solve` (GPU >= 60 %) | **57 %** |
-| `between_evals` (meshing / metrics / handoff) | 18 % |
-| `cpu_idle` | 14 % |
-| `refusal_or_mesh` (rejected candidates) | 10 % |
+| window | samples | `gpu_solve` | `between_evals` | `refusal_or_mesh` | `cpu_idle` | GPU util median / mean |
+|---|---|---|---|---|---|---|
+| **search jobs (T0 + T1)** | 75 (~6 min) | **33 %** | **39 %** | **24 %** | 4 % | **24 % / 40 %** |
+| ladder rungs | 309 (~26 min) | 92 % | 1 % | 0 % | 7 % | 100 % / 92 % |
 
-GPU utilisation: median **100 %**, mean 61 %. So the card is saturated while solving and idle
-roughly **43 %** of wall clock - a CPU/GPU pipeline (mesh candidate *i+1* and score *i-1* while the
-GPU solves *i*) is the one change that could plausibly reach ~1.5x with no accuracy cost. Combined
-with the per-frequency assembly finding (section 2), the ranked levers are: pipeline, then fewer
-frequencies per candidate on the screen tier (same 500-8,000 Hz band, full grid on finalists), then
-a relaxed GMRES tolerance, then 2-way concurrency (only for cells <= ~6k dofs: two 8.9k solves would
-need 6.6 GB of 8.2).
+- **The ladder is GPU-bound and saturated** (100 % util, 27 W median while the 17k rung thrashed in
+  host memory).
+- **The search is not.** In the observed search window the card spent only about a third of the
+  time solving, ~39 % between evaluations (mesh/metrics/handoff) and ~24 % on refused candidates;
+  median utilisation was 24 %. That is what a CPU/GPU pipeline would recover, and it is a bigger
+  opening than the earlier rough estimate suggested.
+- **Caveat, stated plainly:** that window is only ~6 minutes and covers the tail of one 31-eval cell
+  (`t1__native__lecleach_rollback`) whose refusal rate may not be typical. The observer started at
+  01:19 UTC, after most of the T1 batch. **This measurement should be repeated over a full search
+  window before any pipeline work is scheduled** - it is cheap (the same tool, launched with the
+  night) and it is the difference between a 1.5x and a 3x claim.
+- VRAM during search: median **931 MiB** (the 7,748 MiB median in `observe_summary.md` is the rung).
+  Power during search: 19 W median. Both confirm the card is idle-waiting, not working.
 
 ## 9. Known limits of this run
 
