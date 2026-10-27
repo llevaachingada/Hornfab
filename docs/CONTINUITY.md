@@ -2,6 +2,10 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-26 (night) - README rewrite + GUI screenshots; main fast-forwarded
+
+- Owner: friendlier README with screenshots, no personal names. New intro/pitch, docs/images/*.jpg (sandbox crease, 8-lobe mouth, live status, runs, run charts); technical sections kept below. main fast-forwarded to unified-typologies.
+
 ## 2026-10-26 (night, during the smoke run) - README REFRESHED TO THE CURRENT TREE
 
 - **Status block** (was 2026-10-22): 41 typologies in `examples/catalog.yaml`; **Le Cléac'h is enabled** (the README still said "disabled until a verifiable published construction is available" - it was re-enabled 2026-10-25 with its dossier); the per-direction `az_*` law and the OS-SE guiding curve as searchable mechanisms; objective-v3 K-law f0 (plus f0_v on wide horns); the overnight runner.

@@ -1,22 +1,49 @@
 # hornlab-search
 
-Objective-driven horn-loudspeaker geometry search. State a target — coverage angle, band, ripple,
-throat size, a room — and `hornlab-search` generates candidate geometry, solves each candidate with
-GPU boundary-element acoustics, scores it, and iterates (CMA-ES).
+**Describe the horn you want. Let the computer find it.**
 
-It is a **search layer** over the HornLab mesher and BEM solvers, not a solver:
+hornlab-search designs horn loudspeakers by goal instead of by guesswork. You say what you need,
+for example *"90° × 60° coverage from 850 Hz up, a 1.4-inch driver, and it has to fit in
+360 × 300 mm"*, and it builds candidate horns, simulates each one with real boundary-element
+acoustics on your GPU, scores how close it gets, and evolves better shapes overnight.
 
-| Package | Job |
+![Ath CORE-style creased walls in the shape sandbox](docs/images/sandbox_core_crease.jpg)
+
+## Why it's fun
+
+- **Every serious horn family in one place:** OSSE and R-OSSE waveguides, Le Cléac'h, Salmon
+  rollback and X-shape horns, biradial, tractrix and exponential classics, hybrids, freeform shapes,
+  and Ath-style CORE / TwinRay designs.
+- **The creased, sculpted look, on purpose.** The folded walls of Ath's CORE horns come from a
+  coverage angle that changes with direction. Here that's a set of searchable knobs, so the
+  optimizer can explore folds, lobes and Morph-squared mouths, not just smooth trumpets.
+- **A real shape sandbox.** Pick any typology, drag a slider, and watch the side view, mouth outline
+  and 3D horn update live. Switch to "search limits only" to see exactly what a run can reach.
+- **Honest physics.** Every candidate gets a full 3D acoustic solve: beamwidth, directivity, on-axis
+  response and throat loading. The solver is checked against an exact analytic case and a second,
+  independent solver.
+- **Runs overnight, shows up in the morning.** Queue a night of searches; every run lands in the
+  GUI with leaderboards, curves, an evolution time-lapse and STEP export for CAD or 3D printing.
+
+![Fluted 8-lobe mouth, straight on](docs/images/sandbox_8lobe_mouth.jpg)
+
+## What it looks like
+
+| Live overnight run | Every run, ranked |
 |---|---|
-| `hornlab_mesher` | geometry + gmsh meshing (OSSE, R-OSSE, ICW, FREEFORM) |
-| `hornlab_beat_bem` | GPU BEM (CUDA) |
-| `hornlab_bempp_bem` | CPU BEM — the independent cross-check |
-| `hornlab_plots` | report figures |
+| ![Status page during an overnight run](docs/images/status_live_run.jpg) | ![Runs list](docs/images/runs_list.jpg) |
 
-We never write a solver, mesher, gmsh writer, Green's function, or plotting library from scratch, and
-never hand-edit the installed copies. When the solver or mesher itself needs a change (for example, to fit
-higher-frequency solves on the GPU), we make it in a pinned fork: see `docs/FORKS.md`.
-License: **AGPL-3.0-or-later**.
+![A run's beamwidth, directivity, response and throat-impedance curves](docs/images/run_charts.jpg)
+
+## How it works, briefly
+
+1. **A brief** fixes the driver, the size you can build, the target coverage and the frequency band.
+2. **A typology** is a horn family with knobs (angles, lengths, flare laws, mouth shape).
+3. **The search** (CMA-ES) tries designs, meshes each one, solves it on the GPU and scores it.
+4. **The GUI** shows the results as they come in.
+
+It is a search layer over the HornLab packages (geometry/meshing and the GPU and CPU boundary-element
+solvers); it never re-implements a solver or mesher. License: **AGPL-3.0-or-later**.
 
 ## Install
 
