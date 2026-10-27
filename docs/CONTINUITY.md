@@ -2,6 +2,30 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-27 (dataset v3 follow-up) - OBJECTIVE VERSIONS NOW HAVE ONE SOURCE OF TRUTH
+
+- **Follow-up to the entry below.** The first fix widened the validator with a literal `(1, 2, 3)`;
+  that would need editing again for v4 (term normalisation), which is exactly the drift the task
+  called out. The allowed set now lives in
+  `hornlab_search/objective/versions.py::SUPPORTED_OBJECTIVE_VERSIONS`.
+  `search/evaluate.py::_score` dispatches through a table whose keys are checked against that tuple
+  at import (RuntimeError on drift), and `dataset/record.py::validate_record` rejects anything
+  outside it.
+- **Adding v4** is now one edit to the tuple plus its scorer in the same commit; the import check
+  refuses a half-landed version. The bool rejection and "missing field means v1" are unchanged.
+- **Tests:** a v3 record writes/validates/reads back; `99` (plus `0`, `4`, `"2"`, `True`) still
+  reject; a new test pins the dispatch-table/tuple equality. Offline suite:
+  `pytest -m "not slow and not gpu and not crosscheck"` -> **1689 passed, 20 deselected, 1 warning**
+  (317.66 s, exit 0).
+- **Live confirmation:** a budget-1 v3 T0 wrote `dataset/shard-0030.jsonl` with
+  `objective_version: 3, ok: true` and did not log `dataset record ... NOT written`.
+- **Reconstruction of the smoke night's lost records: NO from the night folder.** It holds only the
+  41 job logs and `summary.jsonl` (job-level `best_J`, `evals_ndjson`, `run_dir`) - no
+  per-evaluation rows. Full `search.ndjson` rows and `metrics.json`/`response.npz` do survive in the
+  referenced `runs/<timestamp>-screen-*` dirs, so a bespoke backfill is possible from those, but it
+  would need a replay tool (not written) and is not a read of
+  `runs/nights/smoke_2026-10-27/`.
+
 ## 2026-10-27 (after the report) - `gcurve__osse_b1w` RESEEDED AND VALID (and the best b1w seed of the night)
 
 - **Two mistakes, not one.** The cell's `gcurve_width 335` was copied from b1w's *mouth* width, but

@@ -14,6 +14,8 @@ from hornlab_search.dataset.record import (ARRAY_KEYS, DEFAULT_TRACE_FRACTION, R
                                            record_objective_version, should_capture_traces,
                                            to_jsonable, validate_record)
 from hornlab_search.metrics.compute import compute_metrics
+from hornlab_search.objective.versions import (SUPPORTED_OBJECTIVE_VERSIONS,
+                                               is_supported_objective_version)
 from hornlab_search.types import Evaluation, MeshResult, SolveOutcome, SolveSpec, Design
 from test_dataset_factory import GRID, LIB_SHAS, TARGET, make_eval, solve_spec
 
@@ -292,13 +294,29 @@ def test_a_v3_evaluation_writes_objective_version_3():
     assert meta["objective_version"] == 3
     assert record_objective_version(meta) == 3
     validate_record(meta)
+    assert is_supported_objective_version(3)
 
 
 def test_validate_rejects_an_unknown_objective_version():
     meta, _ = _built()
-    for bad in (0, 4, "2", True):
+    for bad in (0, 4, 99, "2", True):
         with pytest.raises(ValueError, match="objective_version"):
             validate_record(dict(meta, objective_version=bad))
+    for bad in (0, 4, 99, "2", True):
+        assert not is_supported_objective_version(bad)
+
+
+def test_objective_versions_are_one_source_of_truth_with_the_scorer():
+    """The record validator and ``search/evaluate.py`` dispatch must read the same tuple. If a
+    future v4 adds a scorer without updating the tuple (or vice versa), evaluate's import-time
+    check raises instead of half-landing."""
+    from hornlab_search.search.evaluate import _OBJECTIVE_SCORERS
+
+    assert tuple(sorted(_OBJECTIVE_SCORERS)) == SUPPORTED_OBJECTIVE_VERSIONS
+    for version in SUPPORTED_OBJECTIVE_VERSIONS:
+        meta, _ = _built(objective_version=version)
+        validate_record(meta)
+        assert record_objective_version(meta) == version
 
 
 def test_v2_brief_evaluation_writes_objective_version_2_to_the_record(smoke_cfg, tmp_path, monkeypatch):

@@ -44,6 +44,7 @@ from ..metrics.compute import compute_metrics
 from ..metrics.di import di_from_balloon, sin_theta_weights
 from ..objective import PENALTY_FAILED, PENALTY_INVALID, objective, penalty_result
 from ..objective.scalar_v2 import objective_v2, objective_v3
+from ..objective.versions import SUPPORTED_OBJECTIVE_VERSIONS
 from ..solve import cache as solve_cache
 from ..solve.base import stack_responses, theta_deg_from_dirs
 from ..targets.spec import Target
@@ -750,17 +751,36 @@ def _failure_marker(ctx: EvalContext, key: str) -> Path | None:
     return None if root is None else Path(root) / "failures" / f"{key}.json"
 
 
+#: The objective dispatch table. Its keys MUST equal
+#: ``objective.versions.SUPPORTED_OBJECTIVE_VERSIONS`` - the dataset record validator uses the
+#: same tuple, so a version cannot be scored without also being recordable (or recorded without
+#: being scorable). Checked once, at import, so drift fails loudly.
+_OBJECTIVE_SCORERS = {
+    1: lambda metrics, resp, target, weights: objective(metrics, True, target, weights),
+    2: lambda metrics, resp, target, weights: objective_v2(metrics, resp, True, target, weights),
+    3: lambda metrics, resp, target, weights: objective_v3(metrics, resp, True, target, weights),
+}
+if tuple(sorted(_OBJECTIVE_SCORERS)) != SUPPORTED_OBJECTIVE_VERSIONS:
+    raise RuntimeError(
+        "objective dispatch table and objective.versions.SUPPORTED_OBJECTIVE_VERSIONS "
+        f"disagree: {tuple(sorted(_OBJECTIVE_SCORERS))} vs {SUPPORTED_OBJECTIVE_VERSIONS}")
+
+
 def _score(metrics, resp, ctx) -> tuple[float, dict]:
     """The objective dispatch (WP1, senior pass 2026-10-24): version 1 keeps the exact v1 path
     (and every old run reproduces bit-for-bit); version 2 (brief/config``objective: {version: 2}``)
-    scores with the detrended terms in ``objective/scalar_v2.py``. Same key set either way.
-    Version 3 (2026-10-25, owner-approved): freq-weighted cov + the below-f0 (K-law design
-    frequency) mask on cov/dislope - see ``objective_v3`` in scalar_v2.py."""
-    if ctx.objective_version == 2:
-        return objective_v2(metrics, resp, True, ctx.target, ctx.weights)
-    if ctx.objective_version == 3:
-        return objective_v3(metrics, resp, True, ctx.target, ctx.weights)
-    return objective(metrics, True, ctx.target, ctx.weights)
+    scores with the detrended terms in ``objective/scalar_v2.py``. Version 3 (2026-10-25,
+    owner-approved): freq-weighted cov + the below-f0 (K-law design frequency) mask on
+    cov/dislope - see ``objective_v3`` in scalar_v2.py.
+
+    The allowed versions are the single source of truth in ``objective/versions.py``, shared with
+    the dataset record validator. An unsupported version fails loudly instead of silently scoring
+    v1, so a future v4 cannot half-land."""
+    scorer = _OBJECTIVE_SCORERS.get(int(ctx.objective_version))
+    if scorer is None:
+        raise ValueError(f"objective_version {ctx.objective_version!r} is not one of "
+                         f"{SUPPORTED_OBJECTIVE_VERSIONS}")
+    return scorer(metrics, resp, ctx.target, ctx.weights)
 
 
 def _compute_band_split(design, cfg, mode, mspec, sspec, design_dir, backend, ctx, st) -> None:
