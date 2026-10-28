@@ -2,6 +2,19 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-28 (11:36 EDT) - PUSHED: 9 COMMITS TO origin/unified-typologies (shape work + night queue)
+
+- **Pushed:** `d27ac6f`..`78fbd19` (9 commits, fast-forward, 0 behind upstream). Contents: chanterelle cells; round-throat A/B configs;
+  night runner takes over a dead GPU-lock holder (test added); `osse_rollback` hybrid rows kind (constant-directivity OS throat, flute
+  ripple, curled lip, superformula morph, four-petal angle law `a_fold` / `a_union` / `union_blend_deg`); Salmon `fc_fold` / `fc_union`;
+  quatrefoil, hybrid, petal_os and deep-60x40 brief configs; render sheets in `docs/renders/2026-10-28/`.
+- **Not pushed / left alone:** `hornlab_search/gui/static/sandbox.js` and `view3d.js` have modifications made by someone else; they were
+  deliberately kept out of every commit.
+- **Live state at push time:** day queue controller v3 waiting on the hybrid night (`v4_day_H_hybrids_2026-10-28`, 3 of 4 done, best so
+  far `hy__os_ruffle` 3.83). Next night `v4_day_H2_hybrids_2026-10-28` (15 jobs; refined petal/lobe horns first). 17:30 start cutoff.
+- **Test status:** grid, rows, osse_rollback and catalog suites pass (CPU only); the full offline suite was NOT re-run after today's
+  grid changes because a GPU night is live (rule: no pytest solver tests during a night).
+
 ## 2026-10-28 (11:45 EDT) - REFINED PETAL/LOBE HORNS ON THE CD THROAT; FIRST HYBRID RESULT 3.83
 
 - **First result of the CD-throat hybrid idea:** `hybrid__os_ruffle` best J **3.83** on the b3a 90x90 brief (40 solves) vs 10.73 for the

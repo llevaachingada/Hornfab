@@ -20,6 +20,13 @@ Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 20
 
 Local-only items (no GitHub issue): band edges capped by the measured dof cap (confirmed, user "keep lowered edges"); task 07 test-17 disk-latency flake risk (do not loosen); residual CP-7 risks (epw=6 above 2.5 kHz unmeasured; f11 unexercised; DI-vs-beamwidth not a regression test) — see `NOTES_FOR_SENIOR.md` task-09 block and CONTINUITY 06:20.
 
+Local-only, pushed 2026-10-28 11:36 EDT (**shape work + night queue, no GitHub issue state changed**; 9 commits to origin/unified-typologies):
+- **OPEN, first result:** constant-directivity hybrid `hybrid__os_ruffle` J 3.83 (b3a 90x90, 40 solves) vs best Salmon chanterelle 10.73. Refined
+  petal/lobe horns (`examples/typologies/petal_os_2026-10-28_v4/`) queued in night `v4_day_H2_hybrids_2026-10-28`; not yet solved.
+- **OPEN:** the full offline suite has not been re-run since the osse_rollback / fc_fold / fc_union changes; run it when no GPU night is live.
+- **OPEN (owner):** round-throat A/B cells (`examples/typologies/round_throat_2026-10-28_v4/`) queued; the non-round effect is still unmeasured.
+- **LEFT ALONE:** `hornlab_search/gui/static/sandbox.js` and `view3d.js` carry uncommitted changes not made in this session.
+
 Local-only, added 2026-10-27 late evening (**P12 senior pass, zero GPU - no GitHub issue state changed; to-dos are P0 in `docs/NEXT_DEV_PRIORITIES.md`**):
 - **OPEN, owner inputs:** driver list per brief + use case (tube-amp hi-fi / PA); gate levels (hi-fi sensitivity floor at 1 W / 1 m,
   PA max-SPL target); scoring decisions (output-at-f0 term, stricter hi-fi pattern, 10 m, half weight above f11); woofer block per brief.
