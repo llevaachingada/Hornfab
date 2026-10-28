@@ -1,0 +1,111 @@
+# GENERATED 2026-10-28 (owner: fewer lobes - an X (4) and a 6 - morphed with the superformula; and one that is
+# not axisymmetric, ~70 x 40). rows type osse_rollback with the superformula mouth morph
+# r *= 1 + sf_amt w(s) (sf(phi)/mean - 1), sf = (|cos(m phi/4)|^n2 + |sin(m phi/4)/ab|^n2)^(-1/n1) (Gielis),
+# window opening at sf_start so the 36 mm coupling plane stays round. LABELED HYPOTHESIS-SHAPE EXPERIMENT.
+# Variant: NON-axisymmetric: OS wall 36/22 deg half-angles (~72 x 44), superformula m 4 stretched tall (ab 2.6) toward the K-law mouth, 8 gentle flutes, curled lip; scored on the 60x40 tall brief.
+name: hybrid__ns_72x44_v4
+family: FREEFORM
+brief_file: ../../briefs/campaign_2026-10-26_v4/b2t_pa_60x40_1200_tall_v4.yaml
+generator:
+  name: grid
+  rows:
+    type: osse_rollback
+  n_phi: 25
+  n_s: 40
+  wall_thickness_mm: 3.0
+  seed_policy: explicit
+  span: quarter
+seed_params:
+  g_a_h_deg: 36.0
+  g_a_v_deg: 22.0
+  g_k: 1.0
+  g_L_mm: 250.0
+  g_r_lip_mm: 40.0
+  g_wrap_deg: 100.0
+  g_sf_m: 4
+  g_sf_n1: 2.0
+  g_sf_n2: 2.0
+  g_sf_ab: 2.6
+  g_sf_amt: 1.1
+  g_sf_start: 0.25
+  g_ripple_lobes: 8
+  g_ripple_amp_mm: 8.0
+  g_ripple_start: 0.35
+bounds:
+  g_a_h_deg:
+    lo: 30.0
+    hi: 40.0
+  g_a_v_deg:
+    lo: 18.0
+    hi: 26.0
+  g_k:
+    lo: 0.8
+    hi: 2.0
+  g_L_mm:
+    lo: 220.0
+    hi: 255.0
+  g_r_lip_mm:
+    lo: 25.0
+    hi: 45.0
+  g_wrap_deg:
+    lo: 80.0
+    hi: 130.0
+  g_sf_m:
+    lo: 4
+    hi: 4
+    search: false
+  g_sf_n1:
+    lo: 2.0
+    hi: 2.0
+    search: false
+  g_sf_n2:
+    lo: 2.0
+    hi: 2.0
+    search: false
+  g_sf_ab:
+    lo: 2.0
+    hi: 3.0
+  g_sf_amt:
+    lo: 0.8
+    hi: 1.3
+  g_sf_start:
+    lo: 0.15
+    hi: 0.4
+  g_ripple_lobes:
+    lo: 8
+    hi: 8
+    search: false
+  g_ripple_amp_mm:
+    lo: 4.0
+    hi: 12.0
+  g_ripple_start:
+    lo: 0.25
+    hi: 0.5
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 12000
+  dof_cap_verify: 12000
+  dof_cap_final: 12000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.2
+  seed: 1234
+  budget: 40
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+description: 'Hybrid ns_72x44: NON-axisymmetric: OS wall 36/22 deg half-angles (~72
+  x 44), superformula m 4 stretched tall (ab 2.6) toward the K-law mouth, 8 gentle
+  flutes, curled lip; scored on the 60x40 tall brief.'

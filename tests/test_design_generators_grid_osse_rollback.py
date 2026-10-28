@@ -79,3 +79,32 @@ def test_grid_points_and_persisted_block_validate():
     params = grid.design_params(SPEC, SEED, BRIEF)
     grid.validate_grid_params(params["grid"])
     assert math.isfinite(meta["mouth_w_mm"]) and meta["mouth_w_mm"] > 2 * 18.0
+
+
+SF_X = {"g_ripple_lobes": 0, "g_ripple_amp_mm": 0.0, "g_ripple_start": 0.0,
+        "g_sf_m": 4, "g_sf_n1": 1.2, "g_sf_n2": 8.0, "g_sf_amt": 0.75, "g_sf_start": 0.3}
+
+
+def test_superformula_x_points_on_the_diagonals_and_starts_round():
+    ms = marches(SF_X)
+    phi = np.array([m["phi"] for m in ms])
+    i0, i45 = int(np.argmin(np.abs(phi))), int(np.argmin(np.abs(phi - math.pi / 4)))
+    assert ms[i45]["y"].max() > 1.5 * ms[i0]["y"].max()          # the X arm reaches far past the axis
+    assert all(m["y"][0] == pytest.approx(18.0, abs=1e-6) for m in ms)  # coupling plane stays round
+    np.testing.assert_allclose(ms[i0]["y"][:60], ms[i45]["y"][:60], rtol=1e-9)  # no morph before sf_start
+
+
+def test_superformula_stretch_makes_a_tall_mouth():
+    k = {**SF_X, "g_sf_n1": 2.0, "g_sf_n2": 2.0, "g_sf_ab": 2.5, "g_sf_amt": 1.0}
+    _pts, meta = grid.rows_grid_points(SPEC, {**SEED, **k}, BRIEF)
+    assert meta["mouth_h_mm"] > 1.4 * meta["mouth_w_mm"]
+
+
+@pytest.mark.parametrize("bad, msg", [
+    ({"g_sf_m": 5}, "EVEN"),
+    ({"g_sf_m": 6, "g_sf_ab": 2.0}, "multiple of 4"),
+    ({"g_sf_m": 0, "g_sf_amt": 0.5}, "needs sf_m"),
+])
+def test_superformula_refusals(bad, msg):
+    with pytest.raises(registry.GeneratorError, match=msg):
+        marches({**SF_X, **bad})

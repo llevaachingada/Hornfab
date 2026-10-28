@@ -1718,7 +1718,14 @@ def _rows_iwata_ar_knobs(knobs: dict, prefix: str = "g") -> dict:
 #: flutes, wrap(phi) = wrap_deg (1 + wrap_cos_amp cos(N phi)), for a ruffled curled margin.
 ROWS_OSSE_ROLL_KNOB_DEFAULTS = {"a_h_deg": 45.0, "a_v_deg": 45.0, "k": 1.0, "L_mm": 120.0,
                                 "s": 0.0, "n": 4.0, "q": 0.996, "r_lip_mm": 30.0,
-                                "wrap_deg": 120.0, "wrap_cos_amp": 0.0}
+                                "wrap_deg": 120.0, "wrap_cos_amp": 0.0,
+                                "sf_m": 0.0, "sf_n1": 2.0, "sf_n2": 2.0, "sf_ab": 1.0,
+                                "sf_amt": 0.0, "sf_start": 0.0}
+#: Superformula mouth morph (owner 2026-10-28): r *= 1 + sf_amt * w(s) * (sf(phi) / mean(sf) - 1) with
+#: sf(phi) = (|cos(m phi/4)|^n2 + |sin(m phi/4) / ab|^n2)^(-1/n1) (Gielis; n2 = n3, a = 1). Any EVEN m keeps
+#: both mirror planes when ab = 1; ab != 1 (a stretched mouth) needs m a multiple of 4.
+ROWS_OSSE_ROLL_SF_M_RANGE = (2, 16)
+ROWS_OSSE_ROLL_MAX_SF_AMT = 1.5
 ROWS_OSSE_ROLL_A_RANGE = (5.0, 85.0)
 ROWS_OSSE_ROLL_MAX_WRAP_DEG = 200.0
 ROWS_OSSE_ROLL_MAX_WRAP_COS_AMP = 0.9
@@ -1765,6 +1772,26 @@ def _rows_osse_rollback_knobs(knobs: dict, prefix: str = "g") -> dict:
         raise registry.GeneratorError(
             "osse_rollback rows: wrap_cos_amp must be in "
             f"[0, {ROWS_OSSE_ROLL_MAX_WRAP_COS_AMP:g}], got {out['wrap_cos_amp']}")
+    m = out["sf_m"]
+    if m != 0.0:
+        lo_m, hi_m = ROWS_OSSE_ROLL_SF_M_RANGE
+        if m != int(m) or int(m) % 2 or not lo_m <= m <= hi_m:
+            raise registry.GeneratorError(
+                f"osse_rollback rows: sf_m must be an EVEN integer in [{lo_m}, {hi_m}] (or 0 = off), "
+                f"got {m}")
+        if out["sf_n1"] <= 0.0 or out["sf_n2"] <= 0.0 or out["sf_ab"] <= 0.0:
+            raise registry.GeneratorError(
+                "osse_rollback rows: sf_n1, sf_n2 and sf_ab must be > 0")
+        if out["sf_ab"] != 1.0 and int(m) % 4:
+            raise registry.GeneratorError(
+                "osse_rollback rows: sf_ab != 1 keeps the mirror planes only when sf_m is a "
+                f"multiple of 4, got sf_m {int(m)}")
+        if not 0.0 <= out["sf_amt"] <= ROWS_OSSE_ROLL_MAX_SF_AMT or not 0.0 <= out["sf_start"] < 1.0:
+            raise registry.GeneratorError(
+                f"osse_rollback rows: sf_amt must be in [0, {ROWS_OSSE_ROLL_MAX_SF_AMT:g}] and "
+                f"sf_start in [0, 1), got {out['sf_amt']} / {out['sf_start']}")
+    elif out["sf_amt"] != 0.0:
+        raise registry.GeneratorError("osse_rollback rows: sf_amt > 0 needs sf_m set")
     out.update(_rows_ripple_knobs(knobs, prefix))
     if out["wrap_cos_amp"] > 0.0 and not out["ripple_lobes"]:
         raise registry.GeneratorError(
@@ -1777,6 +1804,16 @@ def _rows_osse_rollback_marches(ok: dict, phis, r0: float, a0: float) -> list[di
     from hornlab_mesher.profile_formulas import profile_points
     out = []
     lobes = int(ok["ripple_lobes"])
+    sf_m = int(ok["sf_m"])
+
+    def superformula(ph):
+        q = np.asarray(ph, dtype=float) * sf_m / 4.0
+        s_term = (np.abs(np.cos(q)) ** ok["sf_n2"]
+                  + np.abs(np.sin(q) / ok["sf_ab"]) ** ok["sf_n2"])
+        return s_term ** (-1.0 / ok["sf_n1"])
+
+    sf_mean = (float(np.mean(superformula(np.linspace(0.0, 2.0 * math.pi, 4096, endpoint=False))))
+               if sf_m else 1.0)
     for phi in phis:
         c2, s2 = math.cos(float(phi)) ** 2, math.sin(float(phi)) ** 2
         a_phi = ok["a_h_deg"] * c2 + ok["a_v_deg"] * s2
@@ -1792,6 +1829,13 @@ def _rows_osse_rollback_marches(ok: dict, phis, r0: float, a0: float) -> list[di
             raise registry.GeneratorError(
                 f"osse_rollback: the OSSE wall is not a single-valued r(z) at phi "
                 f"{np.degrees(phi):.1f} deg for these knobs")
+        if sf_m and ok["sf_amt"] > 0.0:
+            l_arc = _arc_length(xs, ys)
+            w_sf = _rows_eps_window(l_arc / float(l_arc[-1]), ok["sf_start"])
+            ys = ys * (1.0 + ok["sf_amt"] * w_sf * (float(superformula(float(phi))) / sf_mean - 1.0))
+            if not np.all(ys > 0.0):
+                raise registry.GeneratorError(
+                    "osse_rollback: the superformula morph pinches the wall to zero radius")
         if lobes:
             l_arc = _arc_length(xs, ys)
             w = _rows_eps_window(l_arc / float(l_arc[-1]), ok["ripple_start"])
