@@ -2,6 +2,20 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-28 (afternoon) - REUSABLE CLAUDE SKILLS + THE TOOLS BEHIND THEM (zero GPU)
+
+- **Why:** the last two days spent many turns re-deriving the same recipes (detached launch, keep-awake, live-night rules, mesh checks,
+  render layouts). Each is now one tool plus one short skill, so the next session runs it instead of rebuilding it.
+- **Tools:** `tools/shape_check.py` (CPU mesh-only check: dofs/cap, mouth W x H, depth, envelope, round coupling; safe during a night),
+  `tools/render/render_views.py` + `tools/render/compose.py` (views; `stack` = the owner's card), `tools/night_queue/queue.ps1` +
+  `launch_detached.ps1` (multi-night queue, keep-awake, cutoff, wait-on-runner), `tools/night_status.py` (status + best per brief).
+- **Skills** in `.claude/skills/` (Claude Code loads only this folder): `hornlab-night-queue`, `hornlab-shape-check`, `hornlab-render`, plus
+  copies of the three `.opencode` skills (edit the originals, re-copy).
+- **Verified:** shape_check on trumpet / clover / rosse_morph_round; render + compose on ruffled (run dir) and clover (mesh); night_status on
+  today's nights. **Not live-tested:** `queue.ps1` / `launch_detached.ps1` (parse-checked only - starting a runner would kill the live
+  H2 night's Julia host); the running day queue is still the earlier hand-written controller.
+- **Live state:** H2 night 7 of 15 done; best so far `po__x4_mild` 3.62 (b3a); `po__ns_60x40_deep_soft` 21.6 (deep 60x40 brief).
+
 ## 2026-10-28 (11:36 EDT) - PUSHED: 9 COMMITS TO origin/unified-typologies (shape work + night queue)
 
 - **Pushed:** `d27ac6f`..`78fbd19` (9 commits, fast-forward, 0 behind upstream). Contents: chanterelle cells; round-throat A/B configs;
