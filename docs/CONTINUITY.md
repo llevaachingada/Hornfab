@@ -22,6 +22,19 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
   during a live GPU night).
 - **Also carried up in this push:** `e0ea198` (skills + tools, committed by the afternoon session, previously unpushed on `main`).
 
+## 2026-10-28 (17:45 EDT) - DAY QUEUE STATUS; TOP-2-PER-TYPOLOGY SHEETS
+
+- **Queue:** H2 hybrids 15/15 done (15:24); C round-throat 6/6 done (16:44); D verify running (10 of 12 at 17:45); E extend will not
+  start (17:30 cutoff). Controller and runner unchanged.
+- **Round-throat A/B (b3a / b3bt):** locking the R-OSSE throat round did NOT cost score - b3a 1.034 (new best on that brief; was 1.307
+  non-round), b3bt 3.22 (was 3.75). `rt__b1t` / `rt__b2t` rosse_morph returned J 1000 on all 13 evals (infeasible - not yet diagnosed).
+- **Verify (higher fidelity, balloon DI):** screen J holds within ~0.1-0.3 for R-OSSE b3a (1.31 -> 1.41), ATH 14in (2.05 -> 2.33),
+  biradial (1.96 -> 2.25); it slips ~0.9-2 for ATH core 2in (1.60 -> 2.54), core_law (1.70 -> 2.60), ridge law8 (2.81 -> 3.87),
+  salmon_x_signed b3bt (4.02 -> 6.04), lecleach_iwata b3bt (5.45 -> 7.56). Screen under-reads the narrow/ridged shapes.
+- **H2 results (b3a):** hy__sf_x4 3.31, po__x4_mild 3.62, hy__sf_star6 3.74, po__star6_mild 4.48, rosette12 4.64; quatrefoil Salmon
+  9.3-11.2; ns_72x44 11.9 and the deep 60x40 pair 20-22 (poor). Best hybrid still hy__osse_flare_curl 1.113.
+- **Renders:** `docs/renders/2026-10-28/top2_per_typology/` (11 typologies).
+
 ## 2026-10-28 (afternoon) - REUSABLE CLAUDE SKILLS + THE TOOLS BEHIND THEM (zero GPU)
 
 - **Why:** the last two days spent many turns re-deriving the same recipes (detached launch, keep-awake, live-night rules, mesh checks,

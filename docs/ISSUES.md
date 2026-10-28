@@ -20,6 +20,10 @@ Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 20
 
 Local-only items (no GitHub issue): band edges capped by the measured dof cap (confirmed, user "keep lowered edges"); task 07 test-17 disk-latency flake risk (do not loosen); residual CP-7 risks (epw=6 above 2.5 kHz unmeasured; f11 unexercised; DI-vs-beamwidth not a regression test) — see `NOTES_FOR_SENIOR.md` task-09 block and CONTINUITY 06:20.
 
+Local-only, added 2026-10-28 17:45 EDT (**no GitHub issue state changed**):
+- **OPEN:** round-throat `rt__b1t__rosse_morph` and `rt__b2t__rosse_morph` scored J 1000 on every eval (infeasible); diagnose before re-queueing.
+- **OPEN:** verify slips 0.9-2 J for ATH 2in core / ridge and Salmon / Le Cleac'h tall shapes vs screen; screen ranking of those is optimistic.
+
 Local-only, added 2026-10-28 afternoon (**skills + tools, no GitHub issue state changed**):
 - **OPEN:** `tools/night_queue/queue.ps1` and `launch_detached.ps1` are parse-checked only; first live use should be the next queue launched
   when no night is running (watch the log and the controller's parent process).
