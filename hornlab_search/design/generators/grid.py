@@ -1739,7 +1739,13 @@ ROWS_OSSE_ROLL_KNOB_DEFAULTS = {"a_h_deg": 45.0, "a_v_deg": 45.0, "k": 1.0, "L_m
                                 "s": 0.0, "n": 4.0, "q": 0.996, "r_lip_mm": 30.0,
                                 "wrap_deg": 120.0, "wrap_cos_amp": 0.0,
                                 "sf_m": 0.0, "sf_n1": 2.0, "sf_n2": 2.0, "sf_ab": 1.0,
-                                "sf_amt": 0.0, "sf_start": 0.0}
+                                "sf_amt": 0.0, "sf_start": 0.0,
+                                "a_fold": 2.0, "a_union": 0.0, "union_blend_deg": 0.0}
+#: Angle-law options (owner 2026-10-28, four-petal shapes on the CD throat): a(phi) = a_h cos^2(ang) + a_v sin^2(ang)
+#: with ang = phi (a_fold 2), 2 phi (a_fold 4: a_h on both axes, a_v on the diagonals) or, with a_union 1, the
+#: union with the 90 deg copy: ang = 45 deg + |psi - 45 deg| (axes take a_v, the diagonal joins the mid law). A
+#: union_blend_deg > 0 replaces |x| by a smooth |x| so the diagonal join is a rounded hump, not a crease.
+ROWS_OSSE_ROLL_MAX_BLEND_DEG = 30.0
 #: Superformula mouth morph (owner 2026-10-28): r *= 1 + sf_amt * w(s) * (sf(phi) / mean(sf) - 1) with
 #: sf(phi) = (|cos(m phi/4)|^n2 + |sin(m phi/4) / ab|^n2)^(-1/n1) (Gielis; n2 = n3, a = 1). Any EVEN m keeps
 #: both mirror planes when ab = 1; ab != 1 (a stretched mouth) needs m a multiple of 4.
@@ -1811,6 +1817,15 @@ def _rows_osse_rollback_knobs(knobs: dict, prefix: str = "g") -> dict:
                 f"sf_start in [0, 1), got {out['sf_amt']} / {out['sf_start']}")
     elif out["sf_amt"] != 0.0:
         raise registry.GeneratorError("osse_rollback rows: sf_amt > 0 needs sf_m set")
+    if out["a_fold"] not in (2.0, 4.0) or out["a_union"] not in (0.0, 1.0):
+        raise registry.GeneratorError(
+            f"osse_rollback rows: a_fold must be 2 or 4 and a_union 0 or 1, got {out['a_fold']} / {out['a_union']}")
+    if out["a_union"] and out["a_fold"] != 2.0:
+        raise registry.GeneratorError("osse_rollback rows: a_union and a_fold 4 are alternatives; use one")
+    if not 0.0 <= out["union_blend_deg"] <= ROWS_OSSE_ROLL_MAX_BLEND_DEG:
+        raise registry.GeneratorError(
+            f"osse_rollback rows: union_blend_deg must be in [0, {ROWS_OSSE_ROLL_MAX_BLEND_DEG:g}], "
+            f"got {out['union_blend_deg']}")
     out.update(_rows_ripple_knobs(knobs, prefix))
     if out["wrap_cos_amp"] > 0.0 and not out["ripple_lobes"]:
         raise registry.GeneratorError(
@@ -1834,7 +1849,17 @@ def _rows_osse_rollback_marches(ok: dict, phis, r0: float, a0: float) -> list[di
     sf_mean = (float(np.mean(superformula(np.linspace(0.0, 2.0 * math.pi, 4096, endpoint=False))))
                if sf_m else 1.0)
     for phi in phis:
-        c2, s2 = math.cos(float(phi)) ** 2, math.sin(float(phi)) ** 2
+        ang = float(phi) * (ok["a_fold"] / 2.0)
+        if ok["a_union"]:
+            psi = abs(math.atan2(math.sin(float(phi)), math.cos(float(phi))))
+            psi = min(psi, math.pi - psi)                      # fold into [0, 90 deg]
+            x = psi - 0.25 * math.pi
+            k = math.radians(ok["union_blend_deg"])
+            if k > 0.0:                                        # smooth |x|, exact at the axes
+                ang = 0.25 * math.pi + math.sqrt(x * x + k * k) * (0.25 * math.pi) / math.hypot(0.25 * math.pi, k)
+            else:
+                ang = 0.25 * math.pi + abs(x)
+        c2, s2 = math.cos(ang) ** 2, math.sin(ang) ** 2
         a_phi = ok["a_h_deg"] * c2 + ok["a_v_deg"] * s2
         prm = {"type": "OSSE", "r0": r0, "a0": a0, "L": ok["L_mm"], "a": a_phi, "k": ok["k"],
                "s": ok["s"], "n": ok["n"], "q": ok["q"]}

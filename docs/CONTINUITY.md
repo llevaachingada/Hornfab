@@ -2,6 +2,21 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-28 (11:45 EDT) - REFINED PETAL/LOBE HORNS ON THE CD THROAT; FIRST HYBRID RESULT 3.83
+
+- **First result of the CD-throat hybrid idea:** `hybrid__os_ruffle` best J **3.83** on the b3a 90x90 brief (40 solves) vs 10.73 for the
+  best Salmon chanterelle (ruffled) on the same brief.
+- `osse_rollback` gained the four-petal options on its angle law: `a_fold` 4 (a_h on both axes, a_v on the diagonals), `a_union` 1
+  (union with the 90 deg copy) and `union_blend_deg` (a smooth |x| so the diagonal join is a rounded hump, not a crease). 3 new tests
+  (osse_rollback tests now 19).
+- **Refined set** (owner: "acoustically more sense") `examples/typologies/petal_os_2026-10-28_v4/`: clover, union_soft, union_soft_flute,
+  x4_mild, star6_mild, rosette12 (the six-star joined with its 30 deg copy as a soft 12-lobe edge), ns_60x40_deep_soft. Common rules: CD
+  throat instead of the Salmon march, K-law-ish mouths (577-705 mm on the 740 envelope), moderate petal contrast (walls 35-45 deg), soft
+  joins, shallow late flutes or none, curled lip. 4.0-6.9k dofs, all round at the exit.
+- H2 night rewritten before it started: the 7 refined horns first (30 each), then sf/60x40 (40), then the Salmon quatrefoils (40). With
+  the 17:30 cutoff the verify night will likely not start today.
+- Render sheets saved in `docs/renders/2026-10-28/` (indexed).
+
 ## 2026-10-28 (11:30 EDT) - SUPERFORMULA + 60x40 HYBRIDS, FOUR-PETAL "ROTATE-AND-JOIN" SALMON; QUEUE v3
 
 - `osse_rollback` gained a superformula mouth morph (Gielis, n2 = n3; fades in from `sf_start`, coupling plane stays round). Configs in

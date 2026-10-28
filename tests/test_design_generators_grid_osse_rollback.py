@@ -108,3 +108,30 @@ def test_superformula_stretch_makes_a_tall_mouth():
 def test_superformula_refusals(bad, msg):
     with pytest.raises(registry.GeneratorError, match=msg):
         marches({**SF_X, **bad})
+
+
+def _row_a(extra):
+    ms = marches({"g_ripple_lobes": 0, "g_ripple_amp_mm": 0.0, "g_ripple_start": 0.0, **extra})
+    return np.array([m["a_deg"] for m in ms])
+
+
+def test_a_fold4_puts_a_h_on_both_axes_and_a_v_on_the_diagonal():
+    a = _row_a({"g_a_h_deg": 45.0, "g_a_v_deg": 35.0, "g_a_fold": 4})
+    assert a[0] == pytest.approx(45.0) and a[-1] == pytest.approx(45.0) and a[len(a) // 2] == pytest.approx(35.0)
+
+
+def test_a_union_is_mirror_symmetric_and_the_soft_blend_rounds_the_join():
+    hard = _row_a({"g_a_h_deg": 28.0, "g_a_v_deg": 45.0, "g_a_union": 1})
+    soft = _row_a({"g_a_h_deg": 28.0, "g_a_v_deg": 45.0, "g_a_union": 1, "g_union_blend_deg": 12.0})
+    np.testing.assert_allclose(hard, hard[::-1], atol=1e-9)
+    assert hard[0] == pytest.approx(45.0) and soft[0] == pytest.approx(45.0)      # axes carry the petal law
+    mid = len(hard) // 2
+    assert hard[mid] == pytest.approx(36.5) and soft[mid] > hard[mid]           # crease vs rounded hump
+    assert np.max(np.abs(np.diff(soft, 2))) < np.max(np.abs(np.diff(hard, 2)))  # smoother across the join
+
+
+@pytest.mark.parametrize("bad, msg", [({"g_a_fold": 3}, "a_fold"), ({"g_a_union": 1, "g_a_fold": 4}, "alternatives"),
+                                      ({"g_a_union": 1, "g_union_blend_deg": 45.0}, "union_blend_deg")])
+def test_angle_law_refusals(bad, msg):
+    with pytest.raises(registry.GeneratorError, match=msg):
+        marches(bad)

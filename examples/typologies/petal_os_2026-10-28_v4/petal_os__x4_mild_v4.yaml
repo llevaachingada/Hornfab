@@ -1,0 +1,93 @@
+# GENERATED 2026-10-28 (owner: make acoustically more sensible versions of the four-petal / superformula shapes).
+# Common changes vs the first versions: OS/OSSE constant-directivity throat instead of the Salmon march (which beams),
+# mouths near the K-law size for 90 deg (577-705 mm on the 740 envelope), moderate petal contrast (walls 35-45 deg),
+# soft-blended joins instead of creases, flutes shallow and opening late (or none), curled lip r 45 / 110 deg.
+# rows type osse_rollback (a_fold / a_union / union_blend_deg / superformula). LABELED HYPOTHESIS-SHAPE EXPERIMENT.
+# Variant: a gentler X (superformula m 4, n1 2, n2 6, amount 0.4 from 35 % of the wall).
+name: petal_os__x4_mild_v4
+family: FREEFORM
+brief_file: ../../briefs/campaign_2026-10-26_v4/b3a_pa_90x90_400_square_v4.yaml
+generator:
+  name: grid
+  rows:
+    type: osse_rollback
+  n_phi: 25
+  n_s: 40
+  wall_thickness_mm: 3.0
+  seed_policy: explicit
+  span: quarter
+seed_params:
+  g_k: 1.0
+  g_r_lip_mm: 45.0
+  g_wrap_deg: 110.0
+  g_a_h_deg: 45.0
+  g_a_v_deg: 45.0
+  g_L_mm: 265.0
+  g_sf_m: 4
+  g_sf_n1: 2.0
+  g_sf_n2: 6.0
+  g_sf_amt: 0.4
+  g_sf_start: 0.35
+bounds:
+  g_k:
+    lo: 0.8
+    hi: 2.0
+  g_r_lip_mm:
+    lo: 30.0
+    hi: 60.0
+  g_wrap_deg:
+    lo: 90.0
+    hi: 140.0
+  g_a_h_deg:
+    lo: 42.0
+    hi: 48.0
+  g_a_v_deg:
+    lo: 42.0
+    hi: 48.0
+  g_L_mm:
+    lo: 240.0
+    hi: 280.0
+  g_sf_m:
+    lo: 4
+    hi: 4
+    search: false
+  g_sf_n1:
+    lo: 1.5
+    hi: 3.0
+  g_sf_n2:
+    lo: 6.0
+    hi: 6.0
+    search: false
+  g_sf_amt:
+    lo: 0.25
+    hi: 0.55
+  g_sf_start:
+    lo: 0.25
+    hi: 0.5
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 12000
+  dof_cap_verify: 12000
+  dof_cap_final: 12000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.2
+  seed: 1234
+  budget: 30
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+description: 'Petal/lobe horn on a CD throat, x4_mild: a gentler X (superformula m
+  4, n1 2, n2 6, amount 0.4 from 35 % of the wall).'
