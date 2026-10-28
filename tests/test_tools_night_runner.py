@@ -305,3 +305,16 @@ def test_parse_run_dir_variants_and_best_j():
     assert night.parse_best_j("seed J=3.0  best J=1.25 (improved)") == 1.25
     assert night.parse_best_j("best J=9.0\nbest J=2.5\n") == 2.5
     assert night.parse_best_j("no summary") is None
+
+
+def test_stale_lock_helpers(tmp_path):
+    # 2026-10-28: a job killed on timeout leaves runs/.gpu.lock; the runner takes it over when the
+    # recorded holder is gone instead of waiting out lock_wait_s and failing the next job.
+    import os
+    lock = tmp_path / ".gpu.lock"
+    lock.write_text(json.dumps({"pid": 999999, "command": "x"}), encoding="utf-8")
+    assert night._lock_holder_pid(lock) == 999999
+    assert night._pid_alive(999999) is False
+    assert night._pid_alive(os.getpid()) is True
+    lock.write_text("not json", encoding="utf-8")
+    assert night._lock_holder_pid(lock) is None

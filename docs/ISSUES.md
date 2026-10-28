@@ -28,8 +28,9 @@ Local-only, added 2026-10-27 late evening (**P12 senior pass, zero GPU - no GitH
   OSSE/R-OSSE copies, then a pre-mesh refusal via `mesh/throat_check.py` (after the night).
 - **IN PROGRESS:** ripple/ridge night stopped after 6/10 jobs (runner killed from outside ~20:08 EDT, job 7 at 87/100); re-run
   night `v4_ripple_rerun_2026-10-27` launched 21:27 EDT, detached via WMI (resume job 7 + the three flute jobs that never started).
-- **Small gap:** `hornlab-search gpu-clean` does not remove a dead holder's `runs/.gpu.lock`, and the night runner waits for the file to
-  disappear - a stale lock blocks the next night until removed by hand.
+- **FIXED 2026-10-28:** the night runner now takes over a dead holder's `runs/.gpu.lock` (`gpu-clean` still does not).
+- **OPEN (owner challenge):** how much a non-round driver coupling matters is unmeasured; round-throat A/B cells run 2026-10-28;
+  a one-design A/B with a round source + built-in transition section is owed (new geometry option).
 - **FINDING:** the b3a 90x90 / 400 Hz brief has no acceptable horn yet (leading cells 11-13 dB short of loading; 1.4" OS-type throats
   cannot load there) - needs loading-capable families or a 2" exit, not a re-rank.
 - **OWED:** calibration night (band-split screen, 10 m vs 2 m, epw 6 vs 9 presence band, verify-grid rank check); new screen grid

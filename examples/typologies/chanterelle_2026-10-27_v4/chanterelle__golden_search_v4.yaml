@@ -1,0 +1,77 @@
+# GENERATED 2026-10-27 (owner art direction: "chanterelle" shapes - round funnel, curled-back wavy lip, ridges
+# ("false gills") running from the lip down to the throat). LABELED EXPERIMENT: Salmon rows + the even-lobe radius
+# ripple (same construction as examples/typologies/ripple_ridge_2026-10-27_v4/), new knob values only; not a
+# published typology (no published name used). Round seed (fc_h = fc_v); coupling plane round at the 36 mm exit
+# (checked with hornlab_search/mesh/throat_check.py). Brief: b3a 90x90 PA (740 x 740 x 650 envelope) - the envelope
+# the shapes were drawn in; its f0 400 Hz is below what a 1.4" exit can load, so read loading with the loudness readout.
+# Renders: scratch/chanterelle/ (local).
+# SEARCH cell (2026-10-28): boxes keep the look - round within ~11 %, lip 145-175 deg, 6 flutes 18-32 mm, start 0-0.06; fc floor 530 keeps it under the dof cap.
+name: chanterelle__golden_search_v4
+family: FREEFORM
+brief_file: ../../briefs/campaign_2026-10-26_v4/b3a_pa_90x90_400_square_v4.yaml
+generator:
+  name: grid
+  rows:
+    type: salmon_elliptical
+  n_phi: 25
+  n_s: 32
+  wall_thickness_mm: 3.0
+  seed_policy: explicit
+  span: half
+seed_params:
+  g_fc_h_hz: 560.0
+  g_fc_v_hz: 560.0
+  g_T: 0.55
+  g_stop_deg: 160.0
+  g_ripple_lobes: 6
+  g_ripple_amp_mm: 26.0
+  g_ripple_start: 0.0
+bounds:
+  g_fc_h_hz:
+    lo: 530.0
+    hi: 640.0
+  g_fc_v_hz:
+    lo: 530.0
+    hi: 640.0
+  g_T:
+    lo: 0.45
+    hi: 0.7
+  g_stop_deg:
+    lo: 145.0
+    hi: 175.0
+  g_ripple_lobes:
+    lo: 6
+    hi: 6
+    search: false
+  g_ripple_amp_mm:
+    lo: 18.0
+    hi: 32.0
+  g_ripple_start:
+    lo: 0.0
+    hi: 0.06
+mesh:
+  epw: 6.0
+  quadrants: '14'
+  dof_cap_screen: 12000
+  dof_cap_verify: 12000
+  dof_cap_final: 12000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.2
+  seed: 1234
+  budget: 40
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+description: 'Short search around the golden chanterelle, boxed to keep the look.'

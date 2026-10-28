@@ -2,6 +2,26 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-28 (09:12 EDT) - OVERNIGHT STALLED BY SLEEP; DAY QUEUE TO ~7 PM LAUNCHED (owner); THROAT RULE SOFTENED
+
+- **Overnight:** Windows went to sleep at 22:21 (Kernel-Power 42) and woke 09:00. Ripple re-run: job 7 resumed and finished (100,
+  best 11.19), `salmon_flute10_s125` 9.82, `salmon_x_flute6_s125` stalled at 66/100 by the sleep and was killed on its timeout at wake;
+  `salmon_x_flute8_s125` then waited on the dead job's lock (removed by hand) and is solving. The chanterelle waiter gave up (6 h
+  wall-clock deadline crossed during sleep) - nothing started.
+- **Runner fix:** `tools/run_campaign_night.py` now takes over a GPU lock whose holder is gone (a timed-out job left one behind and the
+  next job would have waited out lock_wait_s and failed); test added (`tests/test_tools_night_runner.py`, 11 pass).
+- **Day queue** (`runs/nights/day_queue_2026-10-28.ps1`, WMI-detached, keeps Windows awake via SetThreadExecutionState, log
+  `runs/nights/day_queue_2026-10-28.log`; no night starts after 17:30): after the ripple re-run -> A finish `salmon_x_flute6_s125`
+  (+34) -> chanterelles (3 seeds + 40-solve searches around ruffled, golden, trumpet) -> C round-coupling A/B of six OSSE/R-OSSE
+  winners (`examples/typologies/round_throat_2026-10-28_v4/`: aspect_ratio locked 1, R-OSSE exponent locked 2 because exponent alone
+  made the coupling plane a rounded square; seeded from each winner; budget 80) -> D verify grid on the top 5 of 12 leading cells
+  (screen-vs-verify rank check) -> E +100 on `ridge__ath_core_law8` and `b3bt__salmon_x_signed`.
+- **Throat rule softened (owner challenge, 2026-10-28):** ATH-style settings can give non-round throats (our mesher follows ATH's
+  rules and applies aspect/exponent down to the throat); the research's "ATH always couples round" rested on summaries. Certain: the
+  8 flagged winners were simulated with a source shaped like their throat, not a round driver exit. Unmeasured: how much a non-round
+  coupling matters. Round coupling = the default for prints; the round-throat cells run as an A/B, not a replacement. Owed: a
+  one-design A/B with a round source + a built-in transition section (needs a new geometry option).
+
 ## 2026-10-27 (22:00 EDT) - CHANTERELLE CELLS QUEUED BEHIND THE RIPPLE RE-RUN (owner "yes, queue them")
 
 - **Owner art direction:** horns that look like chanterelle mushrooms (round funnel, curled-back wavy lip, "false gill" ridges

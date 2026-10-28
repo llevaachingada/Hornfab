@@ -1,0 +1,140 @@
+# GENERATED 2026-10-28 from examples/typologies/campaign_2026-10-26_v4/b3a__rosse_morph_v4.yaml (owner throat rule 2026-10-27:
+# no separate adapter; the driver coupling plane must be round at the exit size). OSSE/R-OSSE aspect_ratio stretches
+# the coupling plane, so it is LOCKED at 1.0 here; the mouth shape comes from the morph. Seed = the v4 winner
+# (589360bea375, J 1.307, run 20261027T104422Z-screen-a060fb) with aspect_ratio set to 1 and every
+# other searched value clipped into its box. Same brief, bounds, mesh and solver settings otherwise.
+# 2026-10-28 mesh check: with aspect 1 the R-OSSE coupling plane was still a rounded square (the cross-section
+# superellipse exponent shapes the throat too), so exponent is LOCKED at 2.0 as well (winner had 4.2214).
+name: b3a__rosse_morph_round_v4
+family: R-OSSE
+seed_params:
+  r0_mm: 18.0
+  a_deg: 34.1047
+  a0_deg: 1.0042
+  R_mm: 291.0655
+  tmax: 0.8628
+  k: 0.9243
+  q: 1.1341
+  m: 0.8217
+  r: 0.2125
+  b: 0.3066
+  exponent: 2.0
+  aspect_ratio: 1.0
+  morph_target: 1
+  morph_width_mm: 651.7727
+  morph_height_mm: 680.33
+  morph_corner_mm: 29.5051
+  morph_exponent: 4.4237
+  morph_rate: 3.0184
+  morph_fixed: 0.0069
+  morph_allow_shrinkage: 0
+  wall_thickness_mm: 5.0
+bounds:
+  r0_mm:
+    lo: 18.0
+    hi: 18.0
+    search: false
+  a_deg:
+    lo: 10.0
+    hi: 80.0
+  a0_deg:
+    lo: 1.0
+    hi: 4.0
+  R_mm:
+    lo: 211.8
+    hi: 405.95
+  tmax:
+    lo: 0.6
+    hi: 1.0
+  k:
+    lo: 0.3
+    hi: 5.0
+  q:
+    lo: 0.5
+    hi: 2.0
+  m:
+    lo: 0.2
+    hi: 1.5
+  r:
+    lo: 0.05
+    hi: 1.0
+  b:
+    lo: 0.0
+    hi: 0.6
+  exponent:
+    lo: 2.0
+    hi: 2.0
+    search: false
+  aspect_ratio:
+    lo: 1.0
+    hi: 1.0
+    search: false
+  morph_target:
+    lo: 1
+    hi: 1
+    search: false
+  morph_width_mm:
+    lo: 423.6
+    hi: 811.9
+  morph_height_mm:
+    lo: 423.6
+    hi: 811.9
+  morph_corner_mm:
+    lo: 0.0
+    hi: 80.0
+  morph_exponent:
+    lo: 2.0
+    hi: 10.0
+  morph_rate:
+    lo: 0.5
+    hi: 8.0
+  morph_fixed:
+    lo: 0.0
+    hi: 0.6
+  morph_allow_shrinkage:
+    lo: 0
+    hi: 0
+    search: false
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 12000
+  dof_cap_verify: 12000
+  dof_cap_final: 12000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.15
+  seed: 1234
+  budget: 80
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+description: b3a__rosse_morph with aspect_ratio locked at 1 (round driver coupling
+  plane, owner rule 2026-10-27); seeded from its v4 winner.
+brief_file: ../../briefs/campaign_2026-10-26_v4/b3a_pa_90x90_400_square_v4.yaml

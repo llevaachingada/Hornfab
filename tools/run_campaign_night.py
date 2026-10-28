@@ -447,6 +447,16 @@ class NightRunner:
         lock = self.runs_root / ".gpu.lock"
         deadline = time.monotonic() + self.lock_wait_s
         while lock.exists() and time.monotonic() < deadline:
+            # A job killed on timeout leaves its lock behind (2026-10-28: the next job then
+            # waited out lock_wait_s and failed). Take over a lock whose holder is gone.
+            holder = _lock_holder_pid(lock)
+            if holder is not None and not _pid_alive(holder):
+                try:
+                    lock.unlink()
+                    _append(log_path, f"removed stale GPU lock (holder pid {holder} is gone)\n")
+                except OSError:
+                    pass
+                continue
             time.sleep(0.5)
         if lock.exists():
             raise RuntimeError(
@@ -712,6 +722,47 @@ def run_night(plan: NightPlan, *, dry_run: bool = False, only: str | None = None
 
 
 # ------------------------------------------------------------------ CLI
+
+
+def _lock_holder_pid(lock: Path) -> int | None:
+    """PID recorded in a ``runs/.gpu.lock`` file, or None when unreadable."""
+    try:
+        pid = json.loads(lock.read_text(encoding="utf-8")).get("pid")
+        return int(pid) if pid is not None else None
+    except (OSError, ValueError, TypeError):
+        return None
+
+
+def _pid_alive(pid: int) -> bool:
+    """Same probe as ``hornlab_search.search.gpulock._pid_alive`` (kept local: this module is
+    import-light). Windows: OpenProcess + GetExitCodeProcess, never ``os.kill(pid, 0)``."""
+    if pid <= 0:
+        return False
+    if os.name == "nt":
+        import ctypes
+        from ctypes import wintypes
+        k32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        k32.OpenProcess.restype = wintypes.HANDLE
+        k32.OpenProcess.argtypes = (wintypes.DWORD, wintypes.BOOL, wintypes.DWORD)
+        k32.GetExitCodeProcess.argtypes = (wintypes.HANDLE, ctypes.POINTER(wintypes.DWORD))
+        k32.CloseHandle.argtypes = (wintypes.HANDLE,)
+        h = k32.OpenProcess(0x1000, False, pid)
+        if not h:
+            return ctypes.get_last_error() == 5
+        try:
+            code = wintypes.DWORD()
+            if not k32.GetExitCodeProcess(h, ctypes.byref(code)):
+                return True
+            return code.value == 259
+        finally:
+            k32.CloseHandle(h)
+    try:
+        os.kill(pid, 0)
+        return True
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
 
 
 def _parse_args(argv: list[str] | None) -> argparse.Namespace:
