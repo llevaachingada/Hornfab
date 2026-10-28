@@ -2,6 +2,21 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-28 (10:50 EDT) - NEW HYBRID ROW KIND `osse_rollback` (CD throat + flutes + curled lip); QUEUE RE-ORDERED
+
+- **Why (owner):** the Salmon chanterelles beam (ruffled ~120 deg below 1.5 kHz -> ~55 deg at 8 kHz; across 670 stored Salmon designs even
+  the most even goes ~111 -> 70 -> 43 deg): the roll-back march is a loading profile. Owner asked for a hybrid with a constant-
+  directivity throat from another horn, paired with the rollback + fluted rim, flutes into the throat but not to the driver.
+- **Built:** rows type `osse_rollback` in `design/generators/grid.py` - per-azimuth OS/OSSE wall from Magnus's `profile_points`
+  (a(phi) = a_h cos^2 + a_v sin^2), the existing even-lobe flute ripple opening at `ripple_start`, and the existing tangent-continuous
+  curled lip with optional `wrap_cos_amp` (wrap follows the flutes = ruffled margin). Additive only: existing grid generator / mesh /
+  config tests pass; 9 new tests (`tests/test_design_generators_grid_osse_rollback.py`); param catalog + variants tests pass.
+  LABELED HYPOTHESIS-SHAPE EXPERIMENT (no published name).
+- **Configs** `examples/typologies/chanterelle_hybrid_2026-10-28_v4/` (b3a 90x90 brief, quarter model): os_curl, os_ruffle,
+  os_deepflute, osse_flare_curl. Mesh-only: 5,018-5,884 dofs, mouths 598-697 mm, depth 213-246 mm, all couple round at 36 mm.
+- **Queue v2** (`runs/nights/day_queue_2026-10-28_v2.ps1`, WMI, keep-awake, same log, no night after 17:30): old controller stopped
+  (its running chanterelle runner kept going), new one waits for it, then hybrids (4 x 40) -> round-throat A/B -> verify -> extend.
+
 ## 2026-10-28 (09:12 EDT) - OVERNIGHT STALLED BY SLEEP; DAY QUEUE TO ~7 PM LAUNCHED (owner); THROAT RULE SOFTENED
 
 - **Overnight:** Windows went to sleep at 22:21 (Kernel-Power 42) and woke 09:00. Ripple re-run: job 7 resumed and finished (100,

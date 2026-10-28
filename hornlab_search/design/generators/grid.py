@@ -137,7 +137,8 @@ GRID_BLOCK_KEYS = (*GRID_SPEC_KEYS, "knobs")
 # The PHI ORIGIN IS PINNED here and in every rows meta's ``sign_conventions``: phi = 0 is
 # the horizontal (+x) axis.  (If phi were measured from vertical the roles swap.)
 ROWS_TYPES = ("salmon_elliptical", "salmon_axisym", "lecleach", "iwata_ar",
-              "toroidal_rollback", "lecleach_mod", "lecleach_ar", "lecleach_asym")
+              "toroidal_rollback", "lecleach_mod", "lecleach_ar", "lecleach_asym",
+              "osse_rollback")
 #: The persisted spec fields of a rows Design (``design.params["grid"]``).  ``span`` is
 #: accepted everywhere but PERSISTED ONLY FOR A NON-QUARTER model (kept out of the keys so
 #: the quarter recipe -- and its design hash -- stays byte-identical to before this pass).
@@ -1711,6 +1712,103 @@ def _rows_iwata_ar_knobs(knobs: dict, prefix: str = "g") -> dict:
     return out
 
 
+#: osse_rollback (owner-directed hybrid, 2026-10-28): a constant-directivity OS/OSSE throat wall per
+#: azimuth, the even-lobe flute ripple, and the tangent-continuous curled lip. Coverage half-angle
+#: per azimuth a(phi) = a_h cos^2 phi + a_v sin^2 phi (mirror-safe); the lip wrap may follow the
+#: flutes, wrap(phi) = wrap_deg (1 + wrap_cos_amp cos(N phi)), for a ruffled curled margin.
+ROWS_OSSE_ROLL_KNOB_DEFAULTS = {"a_h_deg": 45.0, "a_v_deg": 45.0, "k": 1.0, "L_mm": 120.0,
+                                "s": 0.0, "n": 4.0, "q": 0.996, "r_lip_mm": 30.0,
+                                "wrap_deg": 120.0, "wrap_cos_amp": 0.0}
+ROWS_OSSE_ROLL_A_RANGE = (5.0, 85.0)
+ROWS_OSSE_ROLL_MAX_WRAP_DEG = 200.0
+ROWS_OSSE_ROLL_MAX_WRAP_COS_AMP = 0.9
+ROWS_OSSE_ROLL_SAMPLES = 400
+OSSE_ROLL_LABEL = (
+    "LABELED HYPOTHESIS-SHAPE EXPERIMENT (owner-directed hybrid 2026-10-28): per-azimuth OS/OSSE "
+    "wall from Magnus's profile_points formula (the constant-directivity throat), the even-lobe "
+    "flute ripple, and the [inferred] tangent-continuous curled lip. Not a published "
+    "construction; no published name is used.")
+
+
+def _rows_osse_rollback_knobs(knobs: dict, prefix: str = "g") -> dict:
+    """Validated ``rows: {type: osse_rollback}`` knobs (OS wall + flutes + curled lip)."""
+    names = tuple(ROWS_OSSE_ROLL_KNOB_DEFAULTS)
+    allowed = ({f"{prefix}_{n}" for n in names}
+               | {f"{prefix}_ripple_lobes", f"{prefix}_ripple_amp_mm", f"{prefix}_ripple_start"})
+    foreign = sorted(str(k) for k in knobs
+                     if str(k).startswith(f"{prefix}_") and k not in allowed)
+    if foreign:
+        raise registry.GeneratorError(
+            f"osse_rollback rows accept {sorted(allowed)}; got foreign knob(s) {foreign}")
+    out = {n: float(knobs.get(f"{prefix}_{n}", d)) for n, d in ROWS_OSSE_ROLL_KNOB_DEFAULTS.items()}
+    for n, v in out.items():
+        if not math.isfinite(v):
+            raise registry.GeneratorError(f"osse_rollback rows: {n} must be finite, got {v!r}")
+    lo, hi = ROWS_OSSE_ROLL_A_RANGE
+    for n in ("a_h_deg", "a_v_deg"):
+        if not lo <= out[n] <= hi:
+            raise registry.GeneratorError(
+                f"osse_rollback rows: {n} must be in [{lo:g}, {hi:g}] deg, got {out[n]}")
+    if out["k"] <= 0.0 or out["n"] <= 0.0 or out["s"] < 0.0 or not 0.0 < out["q"] <= 1.0:
+        raise registry.GeneratorError(
+            "osse_rollback rows: need k > 0, n > 0, s >= 0 and 0 < q <= 1, got "
+            f"k={out['k']} n={out['n']} s={out['s']} q={out['q']}")
+    if not 10.0 <= out["L_mm"] <= 1000.0:
+        raise registry.GeneratorError(
+            f"osse_rollback rows: L_mm must be in [10, 1000], got {out['L_mm']}")
+    out["r_lip_mm"] = _rows_lip_mm(knobs, prefix)
+    if not 0.0 <= out["wrap_deg"] <= ROWS_OSSE_ROLL_MAX_WRAP_DEG:
+        raise registry.GeneratorError(
+            f"osse_rollback rows: wrap_deg must be in [0, {ROWS_OSSE_ROLL_MAX_WRAP_DEG:g}], "
+            f"got {out['wrap_deg']}")
+    if not 0.0 <= out["wrap_cos_amp"] <= ROWS_OSSE_ROLL_MAX_WRAP_COS_AMP:
+        raise registry.GeneratorError(
+            "osse_rollback rows: wrap_cos_amp must be in "
+            f"[0, {ROWS_OSSE_ROLL_MAX_WRAP_COS_AMP:g}], got {out['wrap_cos_amp']}")
+    out.update(_rows_ripple_knobs(knobs, prefix))
+    if out["wrap_cos_amp"] > 0.0 and not out["ripple_lobes"]:
+        raise registry.GeneratorError(
+            "osse_rollback rows: wrap_cos_amp follows the flute count; set ripple_lobes")
+    return out
+
+
+def _rows_osse_rollback_marches(ok: dict, phis, r0: float, a0: float) -> list[dict]:
+    """One OS/OSSE wall per azimuth, flutes in the ripple window, then the curled lip."""
+    from hornlab_mesher.profile_formulas import profile_points
+    out = []
+    lobes = int(ok["ripple_lobes"])
+    for phi in phis:
+        c2, s2 = math.cos(float(phi)) ** 2, math.sin(float(phi)) ** 2
+        a_phi = ok["a_h_deg"] * c2 + ok["a_v_deg"] * s2
+        prm = {"type": "OSSE", "r0": r0, "a0": a0, "L": ok["L_mm"], "a": a_phi, "k": ok["k"],
+               "s": ok["s"], "n": ok["n"], "q": ok["q"]}
+        try:
+            pts = np.asarray(profile_points(prm, ROWS_OSSE_ROLL_SAMPLES, float(phi)), dtype=float)
+        except Exception as exc:  # noqa: BLE001 - an illegal knob combination is a refusal
+            raise registry.GeneratorError(f"osse_rollback: OSSE wall failed: {exc}") from exc
+        xs, ys = pts[:, 0] - pts[0, 0], pts[:, 1]
+        if (not np.all(np.isfinite(pts)) or not np.all(np.diff(xs) > 0.0)
+                or not np.all(ys > 0.0)):
+            raise registry.GeneratorError(
+                f"osse_rollback: the OSSE wall is not a single-valued r(z) at phi "
+                f"{np.degrees(phi):.1f} deg for these knobs")
+        if lobes:
+            l_arc = _arc_length(xs, ys)
+            w = _rows_eps_window(l_arc / float(l_arc[-1]), ok["ripple_start"])
+            ys = ys * (1.0 + (ok["ripple_amp_mm"] / max(float(np.max(ys)), 1e-9))
+                       * w * np.cos(lobes * float(phi)))
+        end_deg = math.degrees(math.atan2(float(ys[-1] - ys[-2]), float(xs[-1] - xs[-2])))
+        wrap = ok["wrap_deg"] * ((1.0 + ok["wrap_cos_amp"] * math.cos(lobes * float(phi)))
+                                 if lobes else 1.0)
+        xs, ys, lip = append_tangent_lip(xs, ys, ok["r_lip_mm"], end_deg, wrap_deg=wrap)
+        stop = end_deg + (wrap if ok["r_lip_mm"] > 0.0 else 0.0)
+        out.append({"phi": float(phi), "phi_deg": float(np.degrees(phi)), "a_deg": float(a_phi),
+                    "stop_deg": float(stop), "x": xs, "y": ys,
+                    "march": {"stop_deg": float(stop), "wall_end_deg": float(end_deg)},
+                    "lip": lip})
+    return out
+
+
 def _rows_toroidal_knobs(knobs: dict, prefix: str = "g") -> dict:
     """Validated ``rows: {type: toroidal_rollback}`` knobs (T1 + tangent lip, inferred)."""
     allowed = {f"{prefix}_fc_hz", f"{prefix}_T", f"{prefix}_stop_deg", f"{prefix}_r_lip_mm",
@@ -1808,6 +1906,11 @@ def _rows_marches(spec: dict, knobs: dict, brief: dict, prefix: str = "g") -> li
     # Harmonic basis: a FULL model has no mirror to violate, so the half-only terms
     # (odd sines / bend) are representable there; the validation takes half=True for full.
     harm_half = half or full
+    if kind == "osse_rollback":
+        ok = _rows_osse_rollback_knobs(knob_map, prefix)
+        if ok["ripple_lobes"]:
+            _rows_ripple_resolution_guard(ok["ripple_lobes"], span_rad, n_phi)
+        return _rows_osse_rollback_marches(ok, phis, r0, a0)
     if kind == "lecleach":
         lk = _rows_lecleach_knobs(knob_map, prefix)
         harm = rows_task_harmonics(knob_map, prefix, half=harm_half)
@@ -2276,6 +2379,25 @@ def rows_per_azimuth(base_spec_with_rows: dict, knobs: dict, brief: dict,
             "row_stop_actual_deg": [float(m["march"]["stop_deg"]) for m in marches],
             "sign_conventions": sign_conventions,
         }
+    elif kind == "osse_rollback":
+        ok = _rows_osse_rollback_knobs(knob_map, prefix)
+        meta = {
+            "family": "grid",
+            "rows_type": kind,
+            "construction_label": OSSE_ROLL_LABEL,
+            "source_auto_angle_deg": a0,
+            "wall_thickness_mm": wt,
+            **{k: float(v) for k, v in ok.items() if k != "ripple_lobes"},
+            "ripple_lobes": int(ok["ripple_lobes"]),
+            "lip_model": ("[inferred] tangent-continuous circular lip arc (C1 at the joint) "
+                          "curling back; wrap(phi) = wrap_deg (1 + wrap_cos_amp cos(N phi))"),
+            "row_a_deg": [float(m["a_deg"]) for m in marches],
+            "row_wall_end_deg": [float(m["march"]["wall_end_deg"]) for m in marches],
+            "row_stop_deg": [float(m["march"]["stop_deg"]) for m in marches],
+            "sign_conventions": sign_conventions,
+        }
+        if ok["ripple_lobes"]:
+            meta["ripple_label"] = ROWS_RIPPLE_LABEL
     elif kind == "lecleach_asym":
         assert asym is not None
         march0 = marches[0]["march"]
@@ -2543,6 +2665,8 @@ def validate_grid_params(block: dict) -> None:
             _rows_lecleach_mod_knobs(knob_map)
         elif kind == "lecleach_ar":
             _rows_lecleach_ar_knobs(knob_map)
+        elif kind == "osse_rollback":
+            _rows_osse_rollback_knobs(knob_map)
         else:
             _rows_shape_knobs(knob_map)
             rows_task_harmonics(knob_map, half=(half or span == "full"))

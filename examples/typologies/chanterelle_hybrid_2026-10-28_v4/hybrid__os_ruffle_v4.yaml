@@ -1,0 +1,88 @@
+# GENERATED 2026-10-28 (owner: a new hybrid - constant-directivity throat from another horn, paired with the
+# rollback and fluted rim; flutes run into the throat but not to the driver). rows type osse_rollback
+# (hornlab_search/design/generators/grid.py): per-azimuth OS/OSSE wall (Magnus's profile_points, the Geddes OS
+# throat), the even-lobe flute ripple opening at ripple_start, and the tangent-continuous curled lip.
+# LABELED HYPOTHESIS-SHAPE EXPERIMENT; no published name. Coupling plane round at the 36 mm exit (ripple window
+# closed at the throat). Brief b3a 90x90 PA. Variant: H1 plus a curl wrap that follows the flutes (ruffled curled margin).
+name: hybrid__os_ruffle_v4
+family: FREEFORM
+brief_file: ../../briefs/campaign_2026-10-26_v4/b3a_pa_90x90_400_square_v4.yaml
+generator:
+  name: grid
+  rows:
+    type: osse_rollback
+  n_phi: 25
+  n_s: 40
+  wall_thickness_mm: 3.0
+  seed_policy: explicit
+  span: quarter
+seed_params:
+  g_a_h_deg: 45.0
+  g_a_v_deg: 45.0
+  g_k: 1.0
+  g_L_mm: 230.0
+  g_r_lip_mm: 40.0
+  g_wrap_deg: 115.0
+  g_wrap_cos_amp: 0.35
+  g_ripple_lobes: 10
+  g_ripple_amp_mm: 12.0
+  g_ripple_start: 0.3
+bounds:
+  g_a_h_deg:
+    lo: 40.0
+    hi: 50.0
+  g_a_v_deg:
+    lo: 40.0
+    hi: 50.0
+  g_k:
+    lo: 0.8
+    hi: 2.0
+  g_L_mm:
+    lo: 190.0
+    hi: 260.0
+  g_r_lip_mm:
+    lo: 25.0
+    hi: 60.0
+  g_wrap_deg:
+    lo: 90.0
+    hi: 140.0
+  g_wrap_cos_amp:
+    lo: 0.2
+    hi: 0.5
+  g_ripple_lobes:
+    lo: 10
+    hi: 10
+    search: false
+  g_ripple_amp_mm:
+    lo: 8.0
+    hi: 18.0
+  g_ripple_start:
+    lo: 0.2
+    hi: 0.45
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 12000
+  dof_cap_verify: 12000
+  dof_cap_final: 12000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.2
+  seed: 1234
+  budget: 40
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+description: 'Hybrid os_ruffle: constant-directivity OS throat + flutes + curled lip
+  (H1 plus a curl wrap that follows the flutes (ruffled curled margin)).'
