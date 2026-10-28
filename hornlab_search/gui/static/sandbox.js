@@ -590,6 +590,124 @@ const SURF_PRESETS = {                    // mirror of view3d.js::RENDER_PRESETS
   studio:   { colorScale: 1.0,  roughness: 0.45, metalness: 0.05, wireOpacity: 0.28, light: { hemi: 0.55, key: 1.55, fill: 0.70, rim: 1.15 } },
 };
 
+// Ridge overlay geometry — exact mirror of view3d.js::RIDGE_* and buildRidgeGeometry (same key,
+// same rule: only dihedral creases, capped, shared edges once). Keep the two in sync by hand.
+const RIDGE_SEG_CAP = 1600;
+const RIDGE_TIE_OVERFLOW = 1.5;
+const RIDGE_BOUNDARY_FRACTION = 0.35;
+const RIDGE_OPACITY_GAIN = 2.0;
+const ridgeCache = new WeakMap();
+
+/**
+ * Build the ridge line geometry for one mesh, cached on that geometry object.
+ * Mirrors view3d.js::buildRidgeGeometry: weld coincident vertices, compare the two faces sharing
+ * an edge, emit only real dihedral creases once, cap the total by the mesh's own sorted angles,
+ * and drop unmatched (boundary) edges when they dominate (stride-decimated soup, not a rim).
+ * `THREE` is passed in because the sandbox loads it lazily inside initSandbox3d.
+ */
+function buildRidgeGeometry(THREE, geo) {
+  const cached = ridgeCache.get(geo);
+  if (cached) return cached;
+
+  const pos = geo.getAttribute("position");
+  const index = geo.getIndex();
+  if (!pos || !index) {
+    const empty = new THREE.BufferGeometry();
+    ridgeCache.set(geo, empty);
+    return empty;
+  }
+  const P = pos.array, I = index.array;
+  const nTri = Math.floor(I.length / 3);
+  const Q = 1e5;                                   // 0.01 mm in metres — the payload's own rounding
+  const keyToUid = new Map();
+  const vx = [], vy = [], vz = [];
+  const weld = new Int32Array(pos.count);
+  for (let i = 0; i < pos.count; i++) {
+    const x = P[i * 3], y = P[i * 3 + 1], z = P[i * 3 + 2];
+    const key = `${Math.round(x * Q)},${Math.round(y * Q)},${Math.round(z * Q)}`;
+    let uid = keyToUid.get(key);
+    if (uid === undefined) {
+      uid = vx.length;
+      keyToUid.set(key, uid);
+      vx.push(x); vy.push(y); vz.push(z);
+    }
+    weld[i] = uid;
+  }
+  const U = Math.max(1, vx.length);
+
+  // Face normals; |dot| accepts either winding so a mixed-winding mesh cannot explode the set.
+  const nx = new Float32Array(nTri), ny = new Float32Array(nTri), nz = new Float32Array(nTri);
+  const edgeFace = new Map();                      // min*U+max -> first face index, or -1 once paired
+  const edgeA = [], edgeB = [], angle = [];
+  for (let t = 0; t < nTri; t++) {
+    const a = weld[I[t * 3]], b = weld[I[t * 3 + 1]], c = weld[I[t * 3 + 2]];
+    if (a === b || b === c || c === a) continue;   // degenerate after welding
+    const ax = vx[a], ay = vy[a], az = vz[a];
+    const ux = vx[b] - ax, uy = vy[b] - ay, uz = vz[b] - az;
+    const wx = vx[c] - ax, wy = vy[c] - ay, wz = vz[c] - az;
+    let fx = uy * wz - uz * wy, fy = uz * wx - ux * wz, fz = ux * wy - uy * wx;
+    const len = Math.sqrt(fx * fx + fy * fy + fz * fz);
+    if (!(len > 0)) continue;
+    fx /= len; fy /= len; fz /= len;
+    nx[t] = fx; ny[t] = fy; nz[t] = fz;
+    const corners = [a, b, c];
+    for (let j = 0; j < 3; j++) {
+      const p = corners[j], q = corners[(j + 1) % 3];
+      const key = p < q ? p * U + q : q * U + p;
+      const hit = edgeFace.get(key);
+      if (hit === undefined) {
+        edgeFace.set(key, t);
+      } else if (hit >= 0) {
+        const dot = nx[hit] * fx + ny[hit] * fy + nz[hit] * fz;
+        angle.push(Math.acos(Math.min(1, Math.abs(dot))) * 180 / Math.PI);
+        edgeA.push(p); edgeB.push(q);
+        edgeFace.set(key, -1);                     // a third face on a non-manifold edge is ignored
+      }
+    }
+  }
+
+  // Unmatched edges: a rim on a connected shell, decimation holes on a triangle soup.
+  const boundary = [];
+  for (const [key, face] of edgeFace) {
+    if (face >= 0) boundary.push(Math.floor(key / U), key % U);
+  }
+  const totalEdges = edgeFace.size || 1;
+  const keepBoundary = (boundary.length / 2) / totalEdges <= RIDGE_BOUNDARY_FRACTION;
+  const boundarySegs = keepBoundary ? boundary.length / 2 : 0;
+  const budget = Math.max(0, RIDGE_SEG_CAP - boundarySegs);
+
+  // Sharpest first; expand the cut to the whole tie-group unless that would blow the budget.
+  const order = new Array(angle.length);
+  for (let i = 0; i < order.length; i++) order[i] = i;
+  order.sort((i, j) => angle[j] - angle[i]);
+  let keep = Math.min(budget, order.length);
+  if (keep > 0 && keep < order.length) {
+    const cut = angle[order[keep - 1]];
+    let above = 0;
+    while (above < order.length && angle[order[above]] > cut) above++;
+    let ties = 0;
+    while (above + ties < order.length && angle[order[above + ties]] === cut) ties++;
+    keep = above + ties > budget * RIDGE_TIE_OVERFLOW ? above : above + ties;
+  }
+
+  const out = new Float32Array((keep + boundarySegs) * 6);
+  let o = 0;
+  const put = (a, b) => {
+    out[o++] = vx[a]; out[o++] = vy[a]; out[o++] = vz[a];
+    out[o++] = vx[b]; out[o++] = vy[b]; out[o++] = vz[b];
+  };
+  for (let i = 0; i < keep; i++) { const e = order[i]; put(edgeA[e], edgeB[e]); }
+  if (keepBoundary) for (let i = 0; i < boundary.length; i += 2) put(boundary[i], boundary[i + 1]);
+
+  const ridge = new THREE.BufferGeometry();
+  ridge.setAttribute("position", new THREE.BufferAttribute(out, 3));
+  ridge.userData.ridgeSegments = keep + boundarySegs;
+  ridge.userData.ridgeThresholdDeg = keep ? +angle[order[keep - 1]].toFixed(2) : null;
+  ridge.userData.ridgeBoundaryKept = keepBoundary;
+  ridgeCache.set(geo, ridge);
+  return ridge;
+}
+
 function loadPrefs3d() {
   try { return normalizeRenderPrefs(localStorage.getItem(RENDER_KEY)); }
   catch { return normalizeRenderPrefs(null); }
@@ -673,7 +791,10 @@ export async function initSandbox3d(container, first, opts = {}) {
     side: THREE.DoubleSide, transparent: false,
     polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1,
   });
-  const wireMat = new THREE.LineBasicMaterial({ color: WIRE_COLOR, transparent: true, opacity: 0.28 });
+  const wireMat = new THREE.LineBasicMaterial({
+    color: WIRE_COLOR, transparent: true, opacity: 0.28,
+    depthWrite: false,   // overlay only; never occlude the shaded surface or its own creases
+  });
   const mesh = new THREE.Mesh(new THREE.BufferGeometry(), mat);
   const wire = new THREE.LineSegments(new THREE.BufferGeometry(), wireMat);
   scene.add(mesh, wire);
@@ -696,7 +817,8 @@ export async function initSandbox3d(container, first, opts = {}) {
     mat.color.setHex(HORN_BODY).multiplyScalar(preset.colorScale);
     mat.roughness = preset.roughness;
     mat.metalness = preset.metalness;
-    wireMat.opacity = p.ridges === "thin" ? 0.12 : preset.wireOpacity;
+    const ridgeOpacity = p.ridges === "thin" ? 0.12 : preset.wireOpacity;
+    wireMat.opacity = ridgeOpacity * RIDGE_OPACITY_GAIN;
     if (p.ridges === "off") scene.remove(wire);
     else scene.add(wire);
     lights.key.intensity = preset.light.key * p.light;
@@ -765,8 +887,8 @@ export async function initSandbox3d(container, first, opts = {}) {
     geo.boundingBox.getSize(size);
     const maxDim = Math.max(size.x, size.y, size.z);
     if (!isFinite(maxDim) || maxDim <= 0) { geo.dispose(); return; }
-    const wireGeo = new THREE.WireframeGeometry(geo);
-    if (curGeo) curGeo.dispose();
+    const wireGeo = buildRidgeGeometry(THREE, geo);
+    if (curGeo) { ridgeCache.delete(curGeo); curGeo.dispose(); }
     if (curWireGeo) curWireGeo.dispose();
     curGeo = geo;
     curWireGeo = wireGeo;
@@ -806,7 +928,7 @@ export async function initSandbox3d(container, first, opts = {}) {
     ro.disconnect();
     controls.dispose();
     renderer.dispose();
-    if (curGeo) curGeo.dispose();
+    if (curGeo) { ridgeCache.delete(curGeo); curGeo.dispose(); }
     if (curWireGeo) curWireGeo.dispose();
     mat.dispose();
     wireMat.dispose();

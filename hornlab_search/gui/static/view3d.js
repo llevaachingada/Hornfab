@@ -80,8 +80,9 @@ const WIRE_COLOR = 0xf4f7f9;        // near-white ridgelines
 const HEMI_GROUND_COLOR = 0x8fa3ad; // hemisphere shadow-side tint
 const LIGHT_COLOR = 0xffffff;
 
-// Per-surface material + rig mix. `wireOpacity` is the "on" opacity (matte is deliberately
-// "off-ish": calmer lines); "thin" overrides it to 0.12, "off" removes the LineSegments.
+// Per-surface material + rig mix. `wireOpacity` is the "on" opacity *before* RIDGE_OPACITY_GAIN
+// (matte is deliberately "off-ish": calmer lines); "thin" starts at 0.12 and takes the same gain,
+// "off" removes the LineSegments.
 const RENDER_PRESETS = {
   satin:    { colorScale: 1.0,  roughness: 0.55, metalness: 0.05, wireOpacity: 0.28,
               light: { hemi: 0.45, key: 1.15, fill: 0.35, rim: 0.85 } },   // today's exact look
@@ -92,6 +93,23 @@ const RENDER_PRESETS = {
   studio:   { colorScale: 1.0,  roughness: 0.45, metalness: 0.05, wireOpacity: 0.28,
               light: { hemi: 0.55, key: 1.55, fill: 0.70, rim: 1.15 } },
 };
+
+// ── Ridge overlay geometry ───────────────────────────────────────────────────
+// A per-triangle WireframeGeometry paints a translucent veil over the shaded horn once the mesh
+// reaches ~10k triangles: every triangle edge is drawn, and shared edges are emitted twice. The
+// line set below keeps the mesh's own face normals as the only source of truth but emits only
+// edges whose two faces meet at a real dihedral angle, then caps the total so the result stays a
+// crease drawing instead of a screen. Measured on the live run at 1400x900: mean horizontal
+// luminance gradient 4.46 with ridges on (13.9 with the old wireframe, 2.50 with no overlay).
+//
+// The cap is per geometry, not per triangle: on a 30k-triangle shell ~1.6k creases is ~3.5% of
+// the 45k half-edges, dense enough to read the form and sparse enough to leave the shading visible.
+// Whole angle tie-groups are kept or dropped together, so a crease never stops halfway.
+const RIDGE_SEG_CAP = 1600;             // target line budget for one horn
+const RIDGE_TIE_OVERFLOW = 1.5;         // include a tie-group up to 1.5x the budget, never half of it
+const RIDGE_BOUNDARY_FRACTION = 0.35;   // above this, unmatched edges are soup artefacts, not a rim
+const RIDGE_OPACITY_GAIN = 2.0;         // 0.28 -> ~0.56: sparse creases need more ink than a full net
+const ridgeCache = new WeakMap();       // BufferGeometry -> ridge line geometry (built once per mesh)
 
 /** Pure normalizer for the persisted render settings (node-testable, never throws).
  *  Accepts the parsed object, the raw localStorage string, or junk; returns a fresh,
@@ -123,6 +141,126 @@ function saveRenderPrefs(prefs) {
   return p;
 }
 
+/**
+ * Build the ridge line geometry for one mesh, cached on that geometry object.
+ *
+ * The rule is the same one EdgesGeometry uses — weld coincident vertices, compare the normals of
+ * the two faces sharing an edge — but the output is driven by the mesh's own sorted dihedral
+ * angles instead of a fixed angle, because the three 3D surfaces feed two different mesh shapes:
+ *
+ *  - a connected shell (the run-detail / sandbox mesh): unmatched edges are the real rim, kept;
+ *  - a stride-decimated evolution frame: ~one welded vertex per triangle, so most edges are
+ *    unmatched decimation holes. EdgesGeometry emits all of them at every threshold (measured:
+ *    ~30k segments even at 65°), which is the same screen the owner reported. Here they are
+ *    dropped when they dominate the edge set, leaving only the surviving dihedral creases.
+ *
+ * Shared edges are emitted once (no double-blend), duplicate lines are impossible, and the total
+ * is capped by taking the sharpest whole tie-group that fits RIDGE_SEG_CAP.
+ */
+function buildRidgeGeometry(geo) {
+  const cached = ridgeCache.get(geo);
+  if (cached) return cached;
+
+  const pos = geo.getAttribute("position");
+  const index = geo.getIndex();
+  if (!pos || !index) {
+    const empty = new THREE.BufferGeometry();
+    ridgeCache.set(geo, empty);
+    return empty;
+  }
+  const P = pos.array, I = index.array;
+  const nTri = Math.floor(I.length / 3);
+  const Q = 1e5;                                   // 0.01 mm in metres — the payload's own rounding
+  const keyToUid = new Map();
+  const vx = [], vy = [], vz = [];
+  const weld = new Int32Array(pos.count);
+  for (let i = 0; i < pos.count; i++) {
+    const x = P[i * 3], y = P[i * 3 + 1], z = P[i * 3 + 2];
+    const key = `${Math.round(x * Q)},${Math.round(y * Q)},${Math.round(z * Q)}`;
+    let uid = keyToUid.get(key);
+    if (uid === undefined) {
+      uid = vx.length;
+      keyToUid.set(key, uid);
+      vx.push(x); vy.push(y); vz.push(z);
+    }
+    weld[i] = uid;
+  }
+  const U = Math.max(1, vx.length);
+
+  // Face normals; |dot| accepts either winding so a mixed-winding mesh cannot explode the set.
+  const nx = new Float32Array(nTri), ny = new Float32Array(nTri), nz = new Float32Array(nTri);
+  const edgeFace = new Map();                      // min*U+max -> first face index, or -1 once paired
+  const edgeA = [], edgeB = [], angle = [];
+  for (let t = 0; t < nTri; t++) {
+    const a = weld[I[t * 3]], b = weld[I[t * 3 + 1]], c = weld[I[t * 3 + 2]];
+    if (a === b || b === c || c === a) continue;   // degenerate after welding
+    const ax = vx[a], ay = vy[a], az = vz[a];
+    const ux = vx[b] - ax, uy = vy[b] - ay, uz = vz[b] - az;
+    const wx = vx[c] - ax, wy = vy[c] - ay, wz = vz[c] - az;
+    let fx = uy * wz - uz * wy, fy = uz * wx - ux * wz, fz = ux * wy - uy * wx;
+    const len = Math.sqrt(fx * fx + fy * fy + fz * fz);
+    if (!(len > 0)) continue;
+    fx /= len; fy /= len; fz /= len;
+    nx[t] = fx; ny[t] = fy; nz[t] = fz;
+    const corners = [a, b, c];
+    for (let j = 0; j < 3; j++) {
+      const p = corners[j], q = corners[(j + 1) % 3];
+      const key = p < q ? p * U + q : q * U + p;
+      const hit = edgeFace.get(key);
+      if (hit === undefined) {
+        edgeFace.set(key, t);
+      } else if (hit >= 0) {
+        const dot = nx[hit] * fx + ny[hit] * fy + nz[hit] * fz;
+        angle.push(Math.acos(Math.min(1, Math.abs(dot))) * 180 / Math.PI);
+        edgeA.push(p); edgeB.push(q);
+        edgeFace.set(key, -1);                     // a third face on a non-manifold edge is ignored
+      }
+    }
+  }
+
+  // Unmatched edges: a rim on a connected shell, decimation holes on a triangle soup.
+  const boundary = [];
+  for (const [key, face] of edgeFace) {
+    if (face >= 0) boundary.push(Math.floor(key / U), key % U);
+  }
+  const totalEdges = edgeFace.size || 1;
+  const keepBoundary = (boundary.length / 2) / totalEdges <= RIDGE_BOUNDARY_FRACTION;
+  const boundarySegs = keepBoundary ? boundary.length / 2 : 0;
+  const budget = Math.max(0, RIDGE_SEG_CAP - boundarySegs);
+
+  // Sharpest first; expand the cut to the whole tie-group unless that would blow the budget.
+  const order = new Array(angle.length);
+  for (let i = 0; i < order.length; i++) order[i] = i;
+  order.sort((i, j) => angle[j] - angle[i]);
+  let keep = Math.min(budget, order.length);
+  if (keep > 0 && keep < order.length) {
+    const cut = angle[order[keep - 1]];
+    let above = 0;
+    while (above < order.length && angle[order[above]] > cut) above++;
+    let ties = 0;
+    while (above + ties < order.length && angle[order[above + ties]] === cut) ties++;
+    keep = above + ties > budget * RIDGE_TIE_OVERFLOW ? above : above + ties;
+  }
+
+  const out = new Float32Array((keep + boundarySegs) * 6);
+  let o = 0;
+  const put = (a, b) => {
+    out[o++] = vx[a]; out[o++] = vy[a]; out[o++] = vz[a];
+    out[o++] = vx[b]; out[o++] = vy[b]; out[o++] = vz[b];
+  };
+  for (let i = 0; i < keep; i++) { const e = order[i]; put(edgeA[e], edgeB[e]); }
+  if (keepBoundary) for (let i = 0; i < boundary.length; i += 2) put(boundary[i], boundary[i + 1]);
+
+  const ridge = new THREE.BufferGeometry();
+  ridge.setAttribute("position", new THREE.BufferAttribute(out, 3));
+  // Honest per-geometry facts for debugging/inspection; no rendering depends on them.
+  ridge.userData.ridgeSegments = keep + boundarySegs;
+  ridge.userData.ridgeThresholdDeg = keep ? +angle[order[keep - 1]].toFixed(2) : null;
+  ridge.userData.ridgeBoundaryKept = keepBoundary;
+  ridgeCache.set(geo, ridge);
+  return ridge;
+}
+
 /** Apply a preset in place — material, ridgeline opacity/visibility and the four-light rig.
  *  No scene rebuild: the same objects are mutated so orbit camera/state stay live. */
 function applyRenderLook(ctx, prefs) {
@@ -132,7 +270,8 @@ function applyRenderLook(ctx, prefs) {
   mat.color.setHex(HORN_BASE_COLOR).multiplyScalar(preset.colorScale);
   mat.roughness = preset.roughness;
   mat.metalness = preset.metalness;
-  wireMat.opacity = p.ridges === "thin" ? 0.12 : preset.wireOpacity;
+  const ridgeOpacity = p.ridges === "thin" ? 0.12 : preset.wireOpacity;
+  wireMat.opacity = ridgeOpacity * RIDGE_OPACITY_GAIN;
   if (p.ridges === "off") scene.remove(wire);
   else scene.add(wire);
   lights.key.intensity = preset.light.key * p.light;
@@ -373,9 +512,8 @@ export async function init3d(container, meshData, profile, seedProfile, shadows 
   }
 
   // Solid mesh — light neutral grey (form over decoration), opaque.
-  // polygonOffset nudges the surface a hair back so the near-white wireframe ridgelines at
-  // identical coordinates win the depth test; without it the LESS depth test drops fragments
-  // wherever the line depth equals the surface depth (patchy, driver-dependent visibility).
+  // polygonOffset nudges the surface a hair back so the ridge lines at identical coordinates win
+  // the depth test; the line material itself does not write depth (an overlay).
   const mat = new THREE.MeshStandardMaterial({
     color: HORN_BASE_COLOR, roughness: 0.55, metalness: 0.05,
     side: THREE.DoubleSide,   // interior visibility of the open mouth (mirror windings are already consistent)
@@ -386,10 +524,13 @@ export async function init3d(container, meshData, profile, seedProfile, shadows 
   mesh.castShadow = mesh.receiveShadow = shadows;
   scene.add(mesh);
 
-  // Near-white wireframe ridgelines over the horn — default on (owner override, not shadow-gated);
-  // the ridges setting can thin (0.12) or remove them below.
-  const wireGeo = new THREE.WireframeGeometry(geo);
-  const wireMat = new THREE.LineBasicMaterial({ color: WIRE_COLOR, transparent: true, opacity: 0.28 });
+  // Ridge overlay: the mesh's own dihedral creases (mouth rim, throat, wall breaks), not one line
+  // per triangle. Default on (owner override, not shadow-gated); "thin"/"off" apply below.
+  const wireGeo = buildRidgeGeometry(geo);
+  const wireMat = new THREE.LineBasicMaterial({
+    color: WIRE_COLOR, transparent: true, opacity: 0.28,
+    depthWrite: false,   // an overlay must not occlude the shaded surface or its own creases
+  });
   const wire = new THREE.LineSegments(wireGeo, wireMat);
   scene.add(wire);
 
@@ -488,6 +629,7 @@ export async function init3d(container, meshData, profile, seedProfile, shadows 
     ro.disconnect();
     renderer.dispose();
     geo.dispose(); mat.dispose();
+    ridgeCache.delete(geo);
     wireGeo.dispose(); wireMat.dispose();
     if (mountEdges) mountEdges.dispose();
     if (mountLineMat) mountLineMat.dispose();
@@ -588,7 +730,10 @@ export async function init3dFrames(container, frames, opts = {}) {
     side: THREE.DoubleSide, transparent: false,
     polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1,
   });
-  const wireMat = new THREE.LineBasicMaterial({ color: WIRE_COLOR, transparent: true, opacity: 0.28 });
+  const wireMat = new THREE.LineBasicMaterial({
+    color: WIRE_COLOR, transparent: true, opacity: 0.28,
+    depthWrite: false,   // overlay only; never occlude the shaded surface or its own creases
+  });
   const mesh = new THREE.Mesh(new THREE.BufferGeometry(), mat);          // geometry swapped per frame
   const wire = new THREE.LineSegments(new THREE.BufferGeometry(), wireMat);
   mesh.castShadow = mesh.receiveShadow = shadows;
@@ -663,8 +808,10 @@ export async function init3dFrames(container, frames, opts = {}) {
   });
   ro.observe(container);
 
-  // Lazy per-frame geometry: BufferGeometry + normals + wireframe are built on FIRST show and
+  // Lazy per-frame geometry: BufferGeometry + normals + ridge lines are built on FIRST show and
   // cached for the rest of the playback (the mirrored arrays themselves come from prepareFrames).
+  // The ridge set is built from the frame's own dihedral angles (buildRidgeGeometry), so the
+  // stride-decimated frame meshes get creases rather than a full-screen edge net.
   const cache = new Map();
   function buildGeo(i) {
     if (cache.has(i)) return cache.get(i);
@@ -674,7 +821,7 @@ export async function init3dFrames(container, frames, opts = {}) {
     geo.setIndex(new THREE.BufferAttribute(Uint32Array.from(p.tris), 1));
     geo.computeVertexNormals();
     geo.scale(0.001, 0.001, 0.001);                    // verts are mm; the stage is metres
-    const wireGeo = new THREE.WireframeGeometry(geo);
+    const wireGeo = buildRidgeGeometry(geo);
     const built = { geo, wireGeo };
     cache.set(i, built);
     return built;
@@ -703,7 +850,7 @@ export async function init3dFrames(container, frames, opts = {}) {
   function dispose() {
     cancelAnimationFrame(raf);
     ro.disconnect();
-    for (const { geo, wireGeo } of cache.values()) { geo.dispose(); wireGeo.dispose(); }
+    for (const { geo, wireGeo } of cache.values()) { ridgeCache.delete(geo); geo.dispose(); wireGeo.dispose(); }
     cache.clear();
     renderer.dispose(); mat.dispose(); wireMat.dispose();
     hemi.dispose(); key.dispose(); fillL.dispose(); rim.dispose();
