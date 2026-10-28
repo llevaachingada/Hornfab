@@ -2,6 +2,26 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-28 (15:05 EDT) - PUSHED: SOLVED-STYLE RENDER SHEETS + THE DAY'S WINNER (J 1.11)
+
+- **Renders (4 PNG, `docs/renders/2026-10-28/`):** `typologies_solved_2026-10-28.png` (best design of each typology solved today, one row each),
+  `hybrids_solved_2026-10-28.png` (the 6 CD-throat hybrids, best first), `petal_os_solved_2026-10-28.png` (6 refined petal/lobe horns),
+  `osse_flare_curl_card.png` (design card: two views + full-width H/V dispersion). Folder README and the INDEX line updated with them.
+  Made with `tools/render/render_views.py` + `tools/render/compose.py` (the `hornlab-render` skill), from each run's solved `best.json`.
+- **Day-queue results (b3a 90x90 / 400 Hz, screen, quarter):** `hy__osse_flare_curl` **J 1.113** (best on this brief so far; prior 1.307
+  `b3a__rosse_morph` 10-27) > `hy__sf_x4` 3.31 > `petal__x4_mild` 3.62 > `hy__sf_star6` 3.74 > `hy__os_ruffle` 3.83 > `po__star6_mild` 4.48 >
+  `hy__os_curl` 4.59 > `po__rosette12` 4.64 > `po__union_soft` 5.18 > `po__union_soft_flute` 5.53 > `po__clover` 5.71 > Salmon chanterelle
+  10.73-13.12 > `qf__union` 11.17 > `hy__ns_72x44` 11.89 > `hy__ns_60x40_deep` 20.46 > `po__ns_60x40_deep_soft` 21.58.
+- **Signal:** non-square mouths (60x40, 72x44) are 3 of the 4 worst results of the day on the 90x90 brief; the four-petal Salmon
+  quatrefoils land in the chanterelle band (9-12), not the hybrid band. The CD-throat `osse_rollback` lane is the only one reaching 1.x.
+- **Caveat (owner):** the winner is pattern-clean but weakly loaded - output gap at f0 11.5 dB, loaded (Re z >= 0.5) from 1.76 kHz - and
+  `objective.load` has weight 0 in the brief, so J cannot see loading. Decide before verify: accept EQ, or re-score the day's top designs
+  with a load-weighted brief.
+- **Live state at push time:** H2 queue on `qf__fold_xout` (after `qf__union` 11.17); 17:30 cutoff; screen-only, no design verified yet;
+  the full offline suite still has not been re-run since the `osse_rollback` / `fc_fold` / `fc_union` changes (no pytest solver tests
+  during a live GPU night).
+- **Also carried up in this push:** `e0ea198` (skills + tools, committed by the afternoon session, previously unpushed on `main`).
+
 ## 2026-10-28 (afternoon) - REUSABLE CLAUDE SKILLS + THE TOOLS BEHIND THEM (zero GPU)
 
 - **Why:** the last two days spent many turns re-deriving the same recipes (detached launch, keep-awake, live-night rules, mesh checks,

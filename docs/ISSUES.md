@@ -24,6 +24,15 @@ Local-only, added 2026-10-28 afternoon (**skills + tools, no GitHub issue state 
 - **OPEN:** `tools/night_queue/queue.ps1` and `launch_detached.ps1` are parse-checked only; first live use should be the next queue launched
   when no night is running (watch the log and the controller's parent process).
 
+Local-only, pushed 2026-10-28 15:05 EDT (**render sheets for the day's solved styles, no GitHub issue state changed**):
+- **OPEN (owner decision):** the new b3a leader `hy__osse_flare_curl` J 1.113 wins on pattern but is weakly loaded (output gap at f0
+  11.5 dB, loaded from 1.76 kHz) and `objective.load` is weighted 0 in that brief, so J cannot see loading. Decide: accept EQ, or add a
+  load-weighted re-score of the day's top designs before the verify night.
+- **OPEN:** screen-only. None of the 2026-10-28 winners has been through `verify`; the D_verify night has not started.
+- **FINDING:** non-square mouths (60x40, 72x44) score 11.9-21.6 J on the 90x90 brief (3 of the 4 worst results of the day) - drop that lane
+  unless the brief changes. Four-petal Salmon quatrefoils land in the chanterelle band (9-12), not the hybrid band.
+- **OPEN:** full offline suite not re-run since the `osse_rollback` / `fc_fold` / `fc_union` changes (blocked by the live GPU night).
+
 Local-only, pushed 2026-10-28 11:36 EDT (**shape work + night queue, no GitHub issue state changed**; 9 commits to origin/unified-typologies):
 - **OPEN, first result:** constant-directivity hybrid `hybrid__os_ruffle` J 3.83 (b3a 90x90, 40 solves) vs best Salmon chanterelle 10.73. Refined
   petal/lobe horns (`examples/typologies/petal_os_2026-10-28_v4/`) queued in night `v4_day_H2_hybrids_2026-10-28`; not yet solved.
