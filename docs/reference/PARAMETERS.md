@@ -4895,7 +4895,7 @@ Domains covered: `generators`, `rows`, `native`
 - **Context:** `rows`
 - **Default:** 3.0 (source: `examples/typologies/salmon_ripple12.yaml` `seed_params.g_ripple_amp_mm`)
 - **Search bounds:** 0.5 .. 6.0 (search=true, log=false; source: `examples/typologies/salmon_ripple12.yaml` `bounds.g_ripple_amp_mm`)
-- **Hard limits:** lo=—, hi=6.0, kind=—, section=— (`hornlab_search/design/generators/grid.py` `ROWS_MAX_RIPPLE_AMP_MM`)
+- **Hard limits:** lo=—, hi=50.0, kind=—, section=— (`hornlab_search/design/generators/grid.py` `ROWS_MAX_RIPPLE_AMP_MM`)
 - **Code:** `hornlab_search.design.generators.grid._rows_ripple_knobs`
 - **Doc:** `docs/research/typologies/MOUTH_RIPPLE_SERRATION_RESEARCH_2026-10-25.md` § ## 6. Knob/scoring scheme for the campaign (proposal, ours)
 - **Flags:** —

@@ -820,7 +820,7 @@ No knob prose applies to this typology in the current domains (generators, rows,
 | `g_T` | Rows family factor (rows) | — | 0.8 | 0.3 .. 1.0 | — | — | Salmon family T on the Salmon rows; Fourcade area-law T on the Le Cleac'h rows. |
 | `g_fc_h_hz` | Horizontal cutoff frequency (rows) | Hz | 800.0 | 600.0 .. 1200.0 | — | — | Horizontal-plane Salmon cutoff in the per-azimuth cutoff blend. |
 | `g_fc_v_hz` | Vertical cutoff frequency (rows) | Hz | 1100.0 | 600.0 .. 1200.0 | — | — | Vertical-plane Salmon cutoff in the per-azimuth cutoff blend. |
-| `g_ripple_amp_mm` | Pleats amplitude (rows) | mm | 3.0 | 0.5 .. 6.0 | — | 6.0 | Peak radius deviation of the even-lobe mouth ripple, in millimetres. |
+| `g_ripple_amp_mm` | Pleats amplitude (rows) | mm | 3.0 | 0.5 .. 6.0 | — | 50.0 | Peak radius deviation of the even-lobe mouth ripple, in millimetres. |
 | `g_ripple_lobes` | Pleats lobe count (rows) | — | 12 | 6.0 .. 24.0 | 6.0 | 24.0 | Even lobe count of the mouth ripple; even cosines keep the left-right mirror. |
 | `g_ripple_start` | Pleats window start (rows) | — | 0.8 | 0.7 .. 0.95 | — | — | Arc fraction where the ripple's opening window starts. |
 | `g_stop_deg` | Rows march stop (rows) | deg | 150.0 | 120.0 .. 240.0 | — | — | Wall-angle stop of the per-azimuth rows march; the legal window depends on the kind. |

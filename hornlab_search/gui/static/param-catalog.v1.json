@@ -17142,7 +17142,7 @@
           "formula": "delta_r = amp w(s) cos(N phi)",
           "hard": {
             "choices": null,
-            "hi": 6.0,
+            "hi": 50.0,
             "kind": null,
             "lo": null,
             "note": "named grid.py cap",
