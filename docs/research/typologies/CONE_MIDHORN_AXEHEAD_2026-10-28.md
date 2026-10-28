@@ -118,6 +118,69 @@ limited by cone breakup; vertical lobing between stacked boxes.
 constant-height H-flare 90 deg x ~40 deg, mouth ~ 700 x 300 mm, band 250-3000 Hz. [inferred from the patents'
 proportions and the K-law; no published F1 dimensions were found]
 
+## 5b. Corrections table: an owner-pasted description checked against the patents (2026-10-28 19:10)
+
+The owner pasted an outside AI's description ("three-zone area function"). Checked against the US6650760 claims
+(re-fetched in full) and the US6557664 description:
+
+| Pasted claim | Verdict | What the patents say |
+|---|---|---|
+| The "Axhead" is a central solid of revolution, circular | **Wrong device** | The circular four-part member is US6650760 (1999, the 75-750 Hz loaded low-mid). The axe-head is US6557664 (1992) and is explicitly **not** circularly symmetric (knife-edge in one plane, flat in the other). Two topologies, two typologies. |
+| Region 1 = "the nose inside the cone", hemispherical/ogive | **Inverted** | The part inside the cone is portion 1, whose area *increases* toward the front (it follows the cone). The **hemispherical end is portion 4, at the front, projecting into the horn**. |
+| Channel: area increases (inside cone) -> decreases -> throat -> flare | **Correct** | Region 1 increases, region 2 decreases, throat increases at a first rate, horn at a second, greater rate. |
+| "Horn rate greater than the first rate in Region 1" | **Wrong reference** | The "first rate" is the **throat's** slow expansion; the horn expands faster than the throat. The throat is a short slowly expanding ring, not a single minimum point. |
+| Throat = minimum annular area | Partly | The minimum is at the end of region 2 / start of the throat; the member is constant-section through the throat (portion 3) while the channel grows slowly. |
+| Independent H and V conical flare angles (examples 50x25 etc.) | **Not in the source** | US6650760's housing is rectangular with **parallel top and bottom (constant height)** and varying width: a horizontal-only flare. The example angles are not published. |
+| "Fancy angles are dispersion control, not phase-plug maths" | Half right | For the 1992 axe-head the plug **itself** shapes dispersion: two plane profiles give "lower acoustic impedance in one plane than the other". |
+| Plug "blocks the centre where HF would cross-cancel" | Imprecise | It does sit in front of the centre (inside the voice-coil diameter, gap > xmax), but the centre's output is not discarded; it leaves through the gap. The gain is a small chamber and one ring-shaped exit. |
+| Equal-path equation with "extra path added by the nose", Delta(r) | **Not published; mechanism inverted** | Neither patent states an equal-path equation (US6650760: none found). A solid body cannot add path to the centre; equalisation comes from a thin gap that follows the cone and from where the ring exit sits. The formulation we will use is in 5c. |
+| Forum quotes ("ring radiator", "eats compression chamber volume", "part of horn expansion") | Consistent | Matches the diyAudio excerpts read (section 1). "More a part of the horn than a phase plug" was not read by us (thread 403). |
+| The channel is folded | Missing from the paste | US6650760: folded at the region 2 / throat transition, for size. |
+
+## 5c. Parametric definition for hornlab-search (two typologies, labelled hypothesis shapes)
+
+Axial coordinate z from the cone's voice-coil plane toward the mouth. All profiles are smooth (C1) splines
+between named stations. Names stay neutral (R9 rename gate): `cone_plughorn_bullet` and `cone_plughorn_axe`.
+
+**Common: the cone.** Cone radius Rc, depth dc (cone surface z_cone(r) linear from the coil radius r_vc to Rc),
+dust-cap radius r_dc, xmax. Driver face (BEM tag 2): v1 a flat annulus at the cone mouth plane; v2 the conical
+surface.
+
+**`cone_plughorn_bullet` (US6650760 topology, circular member, rectangular housing):**
+- Member radius r_c(z) through stations: S0 rear tip (inside the cone, at gap g >= 1.5 xmax from the cone
+  surface) -> S1 max radius r_cmax (portion 1, area increasing, rear surface parallel to the cone at gap g) ->
+  S2 throat start (portion 2, radius decreasing) -> S3 throat end (portion 3, constant radius r_ct) -> S4
+  hemispherical nose of radius r_ct (portion 4).
+- Housing: rectangular, constant height Hh, width w(z); region 2 contracts so that channel area A(z) =
+  Hh*w(z) - pi*r_c(z)^2 falls to A_t at S2.
+- Hard constraints (the patent's signs): dA/dz > 0 in region 1; dA/dz < 0 in region 2; throat expansion rate m1
+  > 0 small; horn rate m2 > m1. Compression ratio Sd/A_t is a knob (box 1.5-5).
+- Horn: width flare law beyond S3 (conical / exponential / OS, half-angle theta_h); height constant (patent) or
+  an optional small vertical flare as a labelled extension. Optional fold: not modelled in v1 (BEM of the
+  straight version first).
+
+**`cone_plughorn_axe` (US6557664 topology, non-circular member):**
+- The member is lofted through superellipse cross-sections whose half-width b_h(z) and half-height b_v(z) follow
+  two separate plane profiles:
+  - vertical plane: tapers out along the cone (gap g) to a transition z_tv, then tapers in progressively to a
+    knife edge at the nose z_n;
+  - horizontal plane: tapers out to z_th, runs almost straight (taper <= a few degrees), then closes abruptly
+    over a short length L_ab near z_n.
+- The channel wall gets a divergence break ("abruptly increases") whose position z_b(phi) varies with azimuth;
+  parametrise z_b(phi) = z_b0 + dz_b * cos(2 phi).
+- Corner fillets between member and channel (patent: fillets the corner portions).
+- Horn beyond the nose: OS or conical walls with separate H/V angles; the axe-head sets which plane is wide.
+
+**Path coherence objective (replaces the pasted Delta(r) equation).** For each radiating point on the cone at
+radius r, the travel time to the ring exit is t(r) = (gap path from r along the cone/member gap to the ring
+radius r_ring + straight distance from the ring to the throat plane) / c. Geometric guard: spread
+max_r t - min_r t < 1 / (4 f_top). The real check is BEM: group-delay spread across angles at the top of the
+band (WP-M3 term, owner approval).
+
+**Seeds (inferred, to be re-derived by WP-M0):** 12" cone Rc 0.13 m, dc 0.045 m, r_vc 0.05 m, xmax 6 mm ->
+g 9 mm; Sd/A_t 3; bullet: Hh 0.20 m, theta_h 45 deg, horn length 0.45 m; axe: z_n ~ Rc ahead of the cone
+plane, knife-edge vertical, flat horizontal, horn 90 x 40 deg.
+
 ## 6. Open gaps
 
 - No F1 production drawings or dimensions are published; the patents give shapes and relations, not numbers.
