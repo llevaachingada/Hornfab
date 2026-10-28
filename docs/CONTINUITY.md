@@ -22,6 +22,15 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
   during a live GPU night).
 - **Also carried up in this push:** `e0ea198` (skills + tools, committed by the afternoon session, previously unpushed on `main`).
 
+## 2026-10-28 (18:10 EDT) - COMPRESSION DRIVER LIBRARY (research, zero GPU)
+
+- Owner wants horn loading to ~600 Hz (can't afford more DCX464). Sonnet research agent wrote
+  `docs/research/COMPRESSION_DRIVER_LIBRARY_2026-10-28.md`: 17 drivers in three price brackets, by exit and use.
+- Low-crossover candidates: Beyma CP800/Ti (2", 500 Hz rated), BMS 4592-MID (2", 300 Hz), RCF ND850-2.0, Eminence PSD3006 (fs 511 Hz).
+- **Gap:** no driver has Sd + Mmd published in the data found, so the absolute driver model (`driver/compression.py`) cannot run on any
+  of them yet; driver files were not added to `examples/drivers/`. Needs the full datasheet PDFs or owner measurements.
+- Pending owner decisions: loading term in the score; 90x60 vs 90x90 for the 600 Hz low-crossover brief; which driver.
+
 ## 2026-10-28 (17:45 EDT) - DAY QUEUE STATUS; TOP-2-PER-TYPOLOGY SHEETS
 
 - **Queue:** H2 hybrids 15/15 done (15:24); C round-throat 6/6 done (16:44); D verify running (10 of 12 at 17:45); E extend will not
