@@ -2,6 +2,22 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-27 (22:00 EDT) - CHANTERELLE CELLS QUEUED BEHIND THE RIPPLE RE-RUN (owner "yes, queue them")
+
+- **Owner art direction:** horns that look like chanterelle mushrooms (round funnel, curled-back wavy lip, "false gill" ridges
+  down to the throat). Renders (scratch, local): 3 stored Salmon-flute designs picked by look (scores 15-18, not winners) and 3 NEW
+  shapes. New configs `examples/typologies/chanterelle_2026-10-27_v4/`: `golden` (6 flutes 26 mm, lip 160 deg), `ruffled`
+  (10 flutes 14 mm, lip 145 deg), `trumpet` (8 flutes 20 mm, lip 200 deg; scaled 520 -> 570 Hz because the first mesh was
+  12,346 dofs > the 12,000 cap) as seed-only cells, plus `ruffled_search` (40 solves, boxed to keep the look: round within
+  ~11 %, lip 135-165 deg, 10 flutes 10-20 mm). LABELED EXPERIMENT on the existing Salmon rows + ripple construction (no new
+  typology, no published name). Brief b3a 90x90 PA (the envelope they were drawn in; its 400 Hz f0 is below what a 1.4" exit
+  can load - read loading with the loudness readout). Mesh-only checks: 10,672 / 6,573 / 10,316 dofs; all couple round to 36 mm.
+- **Queue:** `runs/nights/v4_chanterelle_2026-10-27.yaml` starts via a detached waiter (`runs/nights/v4_chanterelle_waiter.ps1`,
+  launched by WMI, log `runs/nights/v4_chanterelle_waiter.log`) only after the ripple re-run runner (pid 32496, matched by command
+  line) exits; it clears the GPU lock only if its holder is dead and gives up after 6 h. Estimated ~30-40 min of solves.
+- **Safety note:** do not use `hornlab-search run --dry-run` while a night runs - `_cmd_run` calls `worker.install_handlers()`
+  before the dry-run branch; mesh-only checks here called `mesh.build.build_mesh` directly.
+
 ## 2026-10-27 (21:27 EDT) - RIPPLE RE-RUN NIGHT LAUNCHED (owner "re-run them"), DETACHED VIA WMI
 
 - `runs/nights/v4_ripple_rerun_2026-10-27.yaml`: job 7 RESUMED in its run dir for the last 13 new solves (budget 13), then

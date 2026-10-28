@@ -1,0 +1,77 @@
+# GENERATED 2026-10-27 (owner art direction: "chanterelle" shapes - round funnel, curled-back wavy lip, ridges
+# ("false gills") running from the lip down to the throat). LABELED EXPERIMENT: Salmon rows + the even-lobe radius
+# ripple (same construction as examples/typologies/ripple_ridge_2026-10-27_v4/), new knob values only; not a
+# published typology (no published name used). Round seed (fc_h = fc_v); coupling plane round at the 36 mm exit
+# (checked with hornlab_search/mesh/throat_check.py). Brief: b3a 90x90 PA (740 x 740 x 650 envelope) - the envelope
+# the shapes were drawn in; its f0 400 Hz is below what a 1.4" exit can load, so read loading with the loudness readout.
+# Renders: scratch/chanterelle/ (local). Trumpet scaled 520 -> 570 Hz (~9 % smaller) after its first mesh
+# was 12,346 dofs > the 12,000 screen cap.
+name: chanterelle__trumpet_v4
+family: FREEFORM
+brief_file: ../../briefs/campaign_2026-10-26_v4/b3a_pa_90x90_400_square_v4.yaml
+generator:
+  name: grid
+  rows:
+    type: salmon_elliptical
+  n_phi: 25
+  n_s: 32
+  wall_thickness_mm: 3.0
+  seed_policy: explicit
+  span: half
+seed_params:
+  g_fc_h_hz: 570.0
+  g_fc_v_hz: 570.0
+  g_T: 0.5
+  g_stop_deg: 200.0
+  g_ripple_lobes: 8
+  g_ripple_amp_mm: 20.0
+  g_ripple_start: 0.05
+bounds:
+  g_fc_h_hz:
+    lo: 541.5
+    hi: 598.5
+  g_fc_v_hz:
+    lo: 541.5
+    hi: 598.5
+  g_T:
+    lo: 0.45
+    hi: 0.55
+  g_stop_deg:
+    lo: 195.0
+    hi: 205.0
+  g_ripple_lobes:
+    lo: 8
+    hi: 8
+    search: false
+  g_ripple_amp_mm:
+    lo: 18.0
+    hi: 22.0
+  g_ripple_start:
+    lo: 0.0
+    hi: 0.1
+mesh:
+  epw: 6.0
+  quadrants: '14'
+  dof_cap_screen: 12000
+  dof_cap_verify: 12000
+  dof_cap_final: 12000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.15
+  seed: 1234
+  budget: 1
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+description: 'Chanterelle trumpet seed (round, lip 200 deg, 8 flutes 20 mm from the throat); seed-only solve.'
