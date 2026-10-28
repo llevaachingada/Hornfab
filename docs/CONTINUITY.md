@@ -22,6 +22,15 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
   during a live GPU night).
 - **Also carried up in this push:** `e0ea198` (skills + tools, committed by the afternoon session, previously unpushed on `main`).
 
+## 2026-10-28 (19:10 EDT) - CONE MID HORN / AXE-HEAD RESEARCH + PLAN (zero GPU)
+
+- Owner: model large cones in a mid horn with a central plug (Funktion-One "axe heads"). Dossier
+  `docs/research/typologies/CONE_MIDHORN_AXEHEAD_2026-10-28.md`: the three Andrews patents (US6557664 axe-head 1992,
+  US6650760 F1 loaded low-mid 75-750 Hz 1999, US4836327 Turbosound coax 1986), practitioner rules, and a plan:
+  WP-M0 1-D calculator (Hornresp-style), M1 cone driver files, M2 build123d CAD generator via the existing STEP route,
+  M3 brief + coherence term (owner approval), M4 first GPU (owner go), M5 print + measure.
+- The coax HF-through-the-plug variant stays out (multi-entry class, owner-deferred 2026-10-24) unless reopened.
+
 ## 2026-10-28 (18:10 EDT) - COMPRESSION DRIVER LIBRARY (research, zero GPU)
 
 - Owner wants horn loading to ~600 Hz (can't afford more DCX464). Sonnet research agent wrote
