@@ -275,3 +275,45 @@ def test_example_configs_load_as_grid_rows_spaces():
         assert space.seed.params["grid"]["rows"]["type"] == "salmon_elliptical"
         families.validate(space.seed)
         assert registry.envelope_overshoot_estimate(space.seed.params, cfg.brief) == 0.0
+
+
+# ---- 2026-10-28 owner "copy, rotate 90 deg, join": fc_fold 4 and fc_union 1 on salmon rows ----
+
+_QF_BRIEF = {"driver": {"exit_radius_mm": 18.0, "exit_angle_deg": 2.0}}
+_QF_SPEC = {"rows": {"type": "salmon_elliptical"}, "n_phi": 25, "n_s": 32, "wall_thickness_mm": 3.0,
+            "span": "quarter"}
+_QF = {"g_fc_h_hz": 1298.3, "g_fc_v_hz": 451.16, "g_T": 0.78, "g_stop_deg": 113.4,
+       "g_x_amp": 0.0, "g_x_fc": 0.0}   # X term off so the stored fc is the pure law
+
+
+def _qf_fc(extra):
+    from hornlab_search.design.generators import grid as g
+    ms = g._rows_marches(_QF_SPEC, {**_QF, **extra}, _QF_BRIEF)
+    return np.array([m["phi"] for m in ms]), np.array([m["fc_hz"] for m in ms])
+
+
+def test_fc_fold_default_is_todays_law_and_fold4_puts_fc_h_on_both_axes():
+    phi, fc2 = _qf_fc({})
+    _, fc2b = _qf_fc({"g_fc_fold": 2})
+    np.testing.assert_allclose(fc2, fc2b)
+    assert fc2[0] == pytest.approx(1298.3) and fc2[-1] == pytest.approx(451.16)
+    _, fc4 = _qf_fc({"g_fc_fold": 4})
+    assert fc4[0] == pytest.approx(1298.3) and fc4[-1] == pytest.approx(1298.3)
+    assert fc4[len(phi) // 2] == pytest.approx(451.16)          # the diagonal
+
+
+def test_fc_union_mirrors_about_45_deg_and_keeps_the_petal_on_both_axes():
+    phi, fcu = _qf_fc({"g_fc_union": 1})
+    _, fc2 = _qf_fc({})
+    np.testing.assert_allclose(fcu, fcu[::-1])                    # row(phi) == row(90 - phi)
+    assert fcu[0] == pytest.approx(451.16) and fcu[-1] == pytest.approx(451.16)
+    mid = len(phi) // 2
+    np.testing.assert_allclose(fcu[mid:], fc2[mid:])              # the upper half IS the original
+
+
+@pytest.mark.parametrize("bad, msg", [({"g_fc_fold": 3}, "fc_fold"), ({"g_fc_union": 2}, "fc_union"),
+                                      ({"g_fc_union": 1, "g_fc_fold": 4}, "alternatives")])
+def test_fc_fold_union_refusals(bad, msg):
+    from hornlab_search.design.generators import registry as reg
+    with pytest.raises(reg.GeneratorError, match=msg):
+        _qf_fc(bad)

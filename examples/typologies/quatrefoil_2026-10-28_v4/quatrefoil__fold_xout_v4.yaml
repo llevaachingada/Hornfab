@@ -1,0 +1,89 @@
+# GENERATED 2026-10-28 (owner: take the ripple X-flute8 horn, copy it, rotate 90 deg and join it to itself -
+# vertical petals become horizontal petals too, joined on the X humps). Seeded from the winner of
+# ripple__salmon_x_flute8_b1t (runs/20261027T220716Z-screen-decadf, J 9.41). Salmon rows + two new fc-law options in
+# design/generators/grid.py: fc_fold 4 (the law in 2 phi) and fc_union 1 (union with the 90 deg copy). Four-fold
+# symmetric, so a quarter model (quadrants '1'). LABELED HYPOTHESIS-SHAPE EXPERIMENT; no published name.
+# Variant: fc_fold 4 with the X term flipped (+0.10): petals on the axes joined by raised humps on the diagonals. Brief b3a 90x90 (square envelope; a four-fold shape gives matching H and V).
+name: quatrefoil__fold_xout_v4
+family: FREEFORM
+brief_file: ../../briefs/campaign_2026-10-26_v4/b3a_pa_90x90_400_square_v4.yaml
+generator:
+  name: grid
+  rows:
+    type: salmon_elliptical
+  n_phi: 25
+  n_s: 32
+  wall_thickness_mm: 3.0
+  seed_policy: explicit
+  span: quarter
+seed_params:
+  g_T: 0.7819
+  g_stop_deg: 113.43
+  g_x_fc: 0.2799
+  g_ripple_lobes: 8
+  g_ripple_amp_mm: 17.08
+  g_ripple_start: 0.1075
+  g_fc_h_hz: 451.16
+  g_fc_v_hz: 1298.3
+  g_fc_fold: 4
+  g_x_amp: 0.1037
+bounds:
+  g_T:
+    lo: 0.6
+    hi: 0.95
+  g_stop_deg:
+    lo: 100.0
+    hi: 130.0
+  g_x_fc:
+    lo: 0.15
+    hi: 0.3
+  g_ripple_lobes:
+    lo: 8
+    hi: 8
+    search: false
+  g_ripple_amp_mm:
+    lo: 10.0
+    hi: 24.0
+  g_ripple_start:
+    lo: 0.05
+    hi: 0.25
+  g_fc_h_hz:
+    lo: 383.49
+    hi: 518.83
+  g_fc_v_hz:
+    lo: 1103.55
+    hi: 1493.04
+  g_fc_fold:
+    lo: 4
+    hi: 4
+    search: false
+  g_x_amp:
+    lo: 0.06222
+    hi: 0.14518
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 12000
+  dof_cap_verify: 12000
+  dof_cap_final: 12000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.2
+  seed: 1234
+  budget: 40
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+description: 'Quatrefoil fold_xout: fc_fold 4 with the X term flipped (+0.10): petals
+  on the axes joined by raised humps on the diagonals.'

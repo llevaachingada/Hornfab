@@ -2,6 +2,20 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-28 (11:30 EDT) - SUPERFORMULA + 60x40 HYBRIDS, FOUR-PETAL "ROTATE-AND-JOIN" SALMON; QUEUE v3
+
+- `osse_rollback` gained a superformula mouth morph (Gielis, n2 = n3; fades in from `sf_start`, coupling plane stays round). Configs in
+  `examples/typologies/chanterelle_hybrid_2026-10-28_v4/`: `sf_x4` (4-lobe X, 688 mm, 6,751 dofs), `sf_star6`, `ns_72x44` (OS walls
+  36/22 deg, tall K-law mouth 363 x 509, 300 mm) and `ns_60x40_deep` (OS k 5 uses the depth: 368 x 529 mouth, 420 mm) on a new brief copy
+  `b2t_pa_60x40_1200_tall_deep_v4.yaml` (only max_depth 300 -> 600; owner dropped the depth cap).
+- Salmon rows gained `fc_fold` (4 = the two-fold fc law in 2 phi: four petals on the axes) and `fc_union` (1 = the union of the shape and its
+  90 deg copy: each azimuth takes the law at max(psi, 90 - psi), so the diagonal joins are the original 45 deg rows - an X of creases).
+  Defaults keep every existing design's geometry and hash. Configs `examples/typologies/quatrefoil_2026-10-28_v4/` seeded from the
+  ripple X-flute8 winner: fold_xin (clover), fold_xout (petals + humped joins), union, union_noflute; 2.2-4.5k dofs, round at 36 mm.
+- Tests: osse_rollback 12 (superformula added), salmon fold/union 3 new; grid + catalog suites pass.
+- Queue v3 (`runs/nights/day_queue_2026-10-28_v3.ps1`): after the running hybrid night -> H2 (sf/60x40 x4 + quatrefoil x4, 40 each) ->
+  round-throat A/B -> verify -> extend; no night after 17:30.
+
 ## 2026-10-28 (10:50 EDT) - NEW HYBRID ROW KIND `osse_rollback` (CD throat + flutes + curled lip); QUEUE RE-ORDERED
 
 - **Why (owner):** the Salmon chanterelles beam (ruffled ~120 deg below 1.5 kHz -> ~55 deg at 8 kHz; across 670 stored Salmon designs even

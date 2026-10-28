@@ -159,7 +159,7 @@ MIN_PHI_FULL = 25
 ROWS_DEFAULTS: dict[str, float] = {"x_amp": 0.0, "x_fc": 0.0, "bend_sin1_mm": 0.0,
                                    "eps_m": 0.0, "eps_start": 0.0,
                                    "ripple_lobes": 0.0, "ripple_amp_mm": 0.0,
-                                   "ripple_start": 0.0}
+                                   "ripple_start": 0.0, "fc_fold": 2.0, "fc_union": 0.0}
 #: Hard caps from dossier section 2.4 / plan 9b.2 T5 (search bounds are YAML defaults).
 #: 2026-10-25 (owner-approved signed-X v2): x_amp is SIGNED - negative amp opens the mouth
 #: along the CARDINAL axes (the "corners-in" reading); positive keeps today's diagonal-out
@@ -200,7 +200,16 @@ ROWS_RIPPLE_LABEL = (
 ROWS_KNOB_DEFAULTS = {"fc_h_hz": 800.0, "fc_v_hz": 1100.0, "T": 0.8, "stop_deg": 170.0,
                       "x_amp": 0.0, "x_fc": 0.0,
                       "eps_m": 0.0, "eps_start": 0.0,
-                      "ripple_lobes": 0.0, "ripple_amp_mm": 0.0, "ripple_start": 0.0}
+                      "ripple_lobes": 0.0, "ripple_amp_mm": 0.0, "ripple_start": 0.0,
+                      "fc_fold": 2.0, "fc_union": 0.0}
+#: Salmon fc law fold (owner 2026-10-28, "copy, rotate 90 deg, join"): 2 = today's two-fold law
+#: 1/fc = cos^2 phi / fc_h + sin^2 phi / fc_v; 4 = the same law in 2 phi, so the AXES (H and V) get
+#: fc_h and the DIAGONALS get fc_v - four petals on the axes meeting on the diagonals.
+ROWS_FC_FOLDS = (2.0, 4.0)
+#: fc_union 1 (owner 2026-10-28, literal "copy, rotate 90 deg, join"): the UNION of the shape and its 90 deg
+#: copy - each azimuth takes the fc law at psi_eff = max(psi, 90 deg - psi) (psi folded into the first
+#: quadrant), so the axes carry the petal row and the diagonal joins carry the original 45 deg row (its
+#: X humps); the join is a crease along the diagonal (C0 in phi by construction).
 #: A salmon saddle stop law is a labeled reconstruction; keep every modulated row inside the
 #: plan's Salmon stop window so the march stays a rollback, not a near-closed spiral.
 ROWS_SALMON_MOD_STOP_RANGE = (120.0, 240.0)
@@ -903,7 +912,7 @@ def _rows_shape_knobs(knobs: dict, prefix: str = "g") -> dict:
                f"{prefix}_r_lip_mm", f"{prefix}_stop_cos2k",
                f"{prefix}_stop_sin2k1", f"{prefix}_bend_sin1_mm",
                f"{prefix}_ripple_lobes", f"{prefix}_ripple_amp_mm",
-               f"{prefix}_ripple_start"}
+               f"{prefix}_ripple_start", f"{prefix}_fc_fold", f"{prefix}_fc_union"}
     foreign = sorted(str(k) for k in knobs
                      if str(k).startswith(f"{prefix}_") and k not in allowed)
     if foreign:
@@ -940,9 +949,19 @@ def _rows_shape_knobs(knobs: dict, prefix: str = "g") -> dict:
     if not 0.0 <= x_fc <= ROWS_MAX_X_FC:
         raise registry.GeneratorError(
             f"x_fc must be in [0, {ROWS_MAX_X_FC}], got {x_fc}")
+    fold = _rows_knob(knobs, prefix, "fc_fold")
+    if fold not in ROWS_FC_FOLDS:
+        raise registry.GeneratorError(
+            f"fc_fold must be one of {list(ROWS_FC_FOLDS)} (2 = two petals, 4 = four petals on the "
+            f"axes joined on the diagonals), got {fold!r}")
+    union = _rows_knob(knobs, prefix, "fc_union")
+    if union not in (0.0, 1.0):
+        raise registry.GeneratorError(f"fc_union must be 0 or 1, got {union!r}")
+    if union and fold != 2.0:
+        raise registry.GeneratorError("fc_union and fc_fold 4 are alternatives; use one")
     ripple = _rows_ripple_knobs(knobs, prefix)
     return {"fc_h_hz": fc_h, "fc_v_hz": fc_v, "T": T, "stop_deg": stop,
-            "x_amp": x_amp, "x_fc": x_fc, **ripple}
+            "x_amp": x_amp, "x_fc": x_fc, "fc_fold": fold, "fc_union": union, **ripple}
 
 
 def _rows_ripple_knobs(knobs: dict, prefix: str = "g") -> dict:
@@ -2156,7 +2175,12 @@ def _rows_marches(spec: dict, knobs: dict, brief: dict, prefix: str = "g") -> li
         if kind == "salmon_axisym":
             fc = pk["fc_h_hz"]
         else:
-            c, s = math.cos(float(phi)), math.sin(float(phi))
+            ang = float(phi) * (pk["fc_fold"] / 2.0)       # fold 4: the same law in 2 phi
+            if pk["fc_union"]:                               # union with the 90 deg copy
+                psi = abs(math.atan2(math.sin(float(phi)), math.cos(float(phi))))
+                psi = min(psi, math.pi - psi)
+                ang = max(psi, 0.5 * math.pi - psi)
+            c, s = math.cos(ang), math.sin(ang)
             fc = 1.0 / (c * c / pk["fc_h_hz"] + s * s / pk["fc_v_hz"])
         fc *= float(fc_scale)
         try:
@@ -2497,6 +2521,8 @@ def rows_per_azimuth(base_spec_with_rows: dict, knobs: dict, brief: dict,
             "stop_deg": float(pk["stop_deg"]),
             "x_amp": float(pk["x_amp"]),
             "x_fc": float(pk["x_fc"]),
+            "fc_fold": float(pk["fc_fold"]),
+            "fc_union": float(pk["fc_union"]),
             "ripple_lobes": int(pk["ripple_lobes"]),
             "ripple_amp_mm": float(pk["ripple_amp_mm"]),
             "ripple_start": float(pk["ripple_start"]),
