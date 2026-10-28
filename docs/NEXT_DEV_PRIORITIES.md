@@ -4,6 +4,53 @@ Written 2026-10-22 22:35 EDT by the local orchestrator, at the user's request. *
 after the beta session.** Items are in priority order. Background: `docs/HIGH_FREQUENCY_OPTIONS.md` (2026-10-13),
 `docs/CLOUD_GPU_REPORT.md`, `TOOLCHAIN.md` M2/M3.
 
+## P0 (added 2026-10-27 late evening, owner-directed: TOP OF THE LIST). P12 follow-through - make a high-ranked horn a horn that measures well when printed
+
+Source: `docs/research/SENIOR_PASS_SCORING_SEARCH_REALITY_2026-10-27.md` (the plan, numbers, owner decisions s7),
+`docs/DRIVER_MODEL.md`, `docs/research/THROAT_COUPLING_2026-10-27.md`. Built this evening (report-only, zero GPU):
+horn loudness readout, compression-driver model, round-throat check, `tools/loudness_report.py`. Rules that still
+bind: no pytest solver tests / GPU / Julia while a night runs; scoring and brief changes need the owner's approval;
+do not edit configs a running night uses.
+
+**Owner inputs needed first (block the items marked [owner]):**
+- [ ] [owner] **Driver list per brief** and use case (tube-amp hi-fi / PA / both); fill `examples/drivers/<maker>_<model>.yaml`
+  from datasheets (URL in `source`, dry moving mass Mmd, published sensitivity + condition) - template `examples/drivers/_template.yaml`.
+- [ ] [owner] **Gate levels:** sensitivity floor at 1 W / 1 m for tube-amp hi-fi briefs; maximum-SPL target for PA briefs.
+- [ ] [owner] **Scoring decisions** (senior pass s2): output-at-f0 term in dB (worst case from 0.95 f0, 3 dB = one unit,
+  weight 1.0 PA / 0.5 hi-fi); stricter pattern scoring for hi-fi only for now (cov tolerance 2 -> 1, presence band 3x,
+  one-sided below f0); score at 10 m; half weight above the driver's f11.
+- [ ] [owner] **Woofer system block** per brief: woofer size, crossover, mouth-over-woofer overlap allowed (s1.5, s2.3).
+- [x] **Decided 2026-10-27: no separate throat adapter; only the driver coupling plane must be round at the exit size;**
+  morph / ridges / non-round shapes are allowed right after it (confirmed by the outside research).
+
+**Do next (in order):**
+1. [ ] **Throat rule in the configs (next night's copies only):** lock `aspect_ratio = 1` in every OSSE / R-OSSE cell
+   (it stretches the coupling plane: 24x36, 26x36, 41x36, 50x36 mm measured on 36 mm briefs) and shape the mouth with the
+   morph. After the night: pre-mesh refusal of a non-round or wrong-size coupling plane (`search/evaluate.py`, using
+   `mesh/throat_check.py`). Optional fork change: an aspect ramp from 1 at the throat. Then measure how fast the horn
+   may leave round with a small `morph_fixed` sweep (research gives no number; 20-30 % of length is a guess to test).
+2. [ ] **Calibration night** (~3-4 h, first GPU job after the ripple/ridge night), on 6 stored finalists: band-split
+   screen vs single mesh (accept: Re z +-0.03, beamwidth +-2 deg, DI +-0.2 dB); 10 m vs 2 m; epw 6 vs 9 in 2.5-5.5 kHz;
+   verify grid on the top 5 per brief - does the screen ranking survive?
+3. [ ] **New screen grid** (after 2 passes): band split at 2 kHz; low band adds 0.7 f0 .. f0 (~6 points/octave);
+   ~7 points in 2.5-5.5 kHz instead of 3 (a coarse grid missed the narrowest beam there by up to 12 deg); estimated
+   ~0.9x today's time per design. Settle grid, distance and mesh BEFORE big nights - they are the only things that
+   invalidate the solve cache.
+4. [ ] **Search changes:** budget counts valid solves only (refusals are 23 % of every budget today); reduced knobs +
+   two stages (1-4 knobs carry ~80 % of J; lock table s3.2); successive halving per brief; on the 400-600 Hz PA briefs
+   move budget to loading-capable families (Le Cleac'h, ATH core law, hypex hybrids, salmon-X) - 1.4" OS-type throats
+   cannot load there (cone rule, s1.1); seeds from physics + the re-ranked stored designs; lq-CMA-ES A/B on 1-2 cells.
+5. [ ] **Gates, not weights, for "does it work"** (s6): round coupling plane, woofer spacing, output at f0, and per
+   use case sensitivity (hi-fi) or max SPL (PA) on at least one listed driver. Pattern stays the score.
+6. [ ] **Organic galleries:** CMA-ME with shape axes (mouth non-roundness, ridge/flute amplitude, azimuthal lobing,
+   depth) so each organic family returns the best design per "look", all passing the gates.
+7. [ ] **Plumbing after the night:** `hornlab-search report --driver <yaml>` (needs `cli.py`); run
+   `tests/test_report_html.py` and the full offline suite; optional loudness columns in `tools/export_campaign_tables.py`.
+8. [ ] **Reality:** validate the driver model against each driver's published sensitivity; run one published measured
+   horn through the pipeline (P12b; accept beamwidth +-5 deg, +-3 deg in the presence band, DI +-1 dB); print a small
+   hi-fi horn first, then today's PA winner and the loading-aware winner for one brief; measure free-standing, rotating
+   about the throat plane, mic at 2 m (senior pass s5), plus the driver's electrical impedance on the horn.
+
 ## P1 (top priority). Fused / direct CUDA Burton-Miller assembly in the exterior driver
 
 **Why it matters.** The 8 GB RTX 4060 runs out of memory between 8.9k (works, 74 s per frequency under memory
@@ -297,6 +344,11 @@ fork change), gated on v4 results.
 5. Related scoring-honesty observations (same day): cov is `err^2/100` with tolerances 2.0 (A) / 4.5 (B, C), i.e. about 14 / 21 deg RMS per "1 unit", so J is generous; cov is MASKED below f0 for class A (twinray V is 120 deg at 500 Hz and still scores 3.0); loading, flatness and presence-band weights are mild.
 
 **Research report (2026-10-27, outside sources):** `docs/research/SIM_VS_REAL_HORN_2026-10-27.md`; summary in `docs/plan/12_RESEARCH_BASIS.md` section 17. Ranked actions from it: P12a re-score (free) > lumped compression-driver model over the BEM throat impedance (cheap, no new solves) > validate against ONE published measured horn > load ON for PA/low-reach (max or sub-f0 aggregation; weights 0.3-0.5 CD, 0.8-1.0 PA, 1.0 low-reach) > report-only 200-300 Hz solve > print and measure two finalists. Also: keep `distd`, down-weight `dislope` on constant-directivity briefs; add polar cross-correlation as a report metric.
+
+**Senior pass (2026-10-27 evening, zero GPU):** `docs/research/SENIOR_PASS_SCORING_SEARCH_REALITY_2026-10-27.md` - P12a
+offline re-score done there (loading in dB + stricter pattern), knob importance per cell, woofer spacing / DI match at the
+crossover (new: no brief knows about the woofer), 2 m vs 10 m, reduced-knob two-stage search, a calibration night, the
+print-and-measure protocol, and six owner decisions.
 
 **To do (in order; owner approval needed before changing scoring or queuing new campaigns):**
 - [ ] **P12a - quantify the gap.** Re-score the existing cached responses (no new solves) with loading ON (weight 0.5-1.0, `z_min` high, scored from f0 upward) on the PA/low-reach briefs and show the rank change (expect `b3a__rosse_morph` to drop). Also a stricter-cov variant (tolerances 2->1, 4.5->2; one-sided below f0 for every class; presence band 2x->3x).

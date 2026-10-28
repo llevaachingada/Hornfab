@@ -1151,7 +1151,7 @@ def list_configs(root: Path) -> list[dict]:
     out = []
     for p in sorted(ex.rglob("*.yaml")):
         if (p.name == "catalog.yaml" or p.name.startswith(".")
-                or p.relative_to(ex).parts[0] == "briefs"):
+                or p.relative_to(ex).parts[0] in ("briefs", "drivers")):
             continue
         try:
             raw = yaml.safe_load(p.read_text(encoding="utf-8-sig")) or {}

@@ -20,6 +20,21 @@ Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 20
 
 Local-only items (no GitHub issue): band edges capped by the measured dof cap (confirmed, user "keep lowered edges"); task 07 test-17 disk-latency flake risk (do not loosen); residual CP-7 risks (epw=6 above 2.5 kHz unmeasured; f11 unexercised; DI-vs-beamwidth not a regression test) — see `NOTES_FOR_SENIOR.md` task-09 block and CONTINUITY 06:20.
 
+Local-only, added 2026-10-27 late evening (**P12 senior pass, zero GPU - no GitHub issue state changed; to-dos are P0 in `docs/NEXT_DEV_PRIORITIES.md`**):
+- **OPEN, owner inputs:** driver list per brief + use case (tube-amp hi-fi / PA); gate levels (hi-fi sensitivity floor at 1 W / 1 m,
+  PA max-SPL target); scoring decisions (output-at-f0 term, stricter hi-fi pattern, 10 m, half weight above f11); woofer block per brief.
+- **DEFECT (new):** OSSE / R-OSSE `aspect_ratio` stretches the driver coupling plane (24x36 ... 50x36 mm on 36 mm briefs; 8 of 30
+  winners). Owner rule decided: round coupling plane at the exit size, no adapter. Fix: lock `aspect_ratio = 1` in the next night's
+  OSSE/R-OSSE copies, then a pre-mesh refusal via `mesh/throat_check.py` (after the night).
+- **OPEN:** ripple/ridge night stopped after 6/10 jobs (runner killed from outside at 19:51 EDT, no error logged); jobs
+  `salmon_flute8_s125`, `salmon_flute10_s125`, `salmon_x_flute6_s125`, `salmon_x_flute8_s125` not run - re-run on the owner's go.
+- **FINDING:** the b3a 90x90 / 400 Hz brief has no acceptable horn yet (leading cells 11-13 dB short of loading; 1.4" OS-type throats
+  cannot load there) - needs loading-capable families or a 2" exit, not a re-rank.
+- **OWED:** calibration night (band-split screen, 10 m vs 2 m, epw 6 vs 9 presence band, verify-grid rank check); new screen grid
+  (low band to 0.7 f0, ~7 presence-band points); budget = valid solves; reduced knobs / two stages / successive halving; CMA-ME shape
+  axes; `report --driver` in `cli.py`.
+- **Small bug (pre-existing):** `tools/gen_param_catalog.py --check` prints its `committed=` / `fresh=` labels swapped (line 108).
+
 Local-only, added 2026-10-26 (**campaign Phase 0 Steps 2C/3/4/5 LANDED — CPU only, no GPU/Julia; no GitHub issue state changed**):
 - **What is now in the tree**: six lane reports (`docs/research/campaign_2026-10-26/`), 14 briefs (`examples/briefs/campaign_2026-10-26/`), 23 configs (`examples/typologies/campaign_2026-10-26/`), and `docs/evidence/CAMPAIGN_DRYRUN_2026-10-26.md`. All 23 cells dry-run green; dofs 921–9,871; envelope 0; mouth within 10 % of K-law on tall/square and inside-envelope on wide; LHS invalid 0–37.5 %; grids 12/29/36; no cell dropped.
 - **Open items for the campaign owner/gates (unchanged, now with measured seeds):** (1) the one BEM verify seed per portrait morph/rows class before a long campaign (geometry is proven, coverage is not); (2) `beat_bem` rejects the xz native symmetry plane, so `native__lecleach_asym_odd` keeps `span: full` / quadrants `'1234'` and the `half_xz` 2× saving stays unused on GPU (ISSUES entry in the Phase-0 code commit); (3) Phase B items 1–4 still own the fused s/candidate and the >15,984-dof go/no-go; (4) the D-11 option (a)/(b) choice is now encoded per cell (tall cells strict K-law, wide cells commercial convention) but remains the owner's ruling if the campaign is re-frozen; (5) `cov_band_hz` (D-3) is not implemented and is not needed by these cells (f11 is disclosed per brief instead).

@@ -1,0 +1,42 @@
+# Compression-driver file for the lumped driver model (hornlab_search/driver/compression.py,
+# docs/DRIVER_MODEL.md). Copy to examples/drivers/<maker>_<model>.yaml and fill from the datasheet.
+# Every number comes from the manufacturer's datasheet (put the URL in `source`); never guess one.
+# Units are the datasheet's usual ones. Leave a key out (or null) when the datasheet does not give it.
+#
+# Used by: tools/loudness_report.py --driver examples/drivers/<file>.yaml   (no GPU, stored solves)
+
+name: Maker Model                   # shown in the tables
+source: https://...                  # datasheet URL (required in practice: the R9 rule for numbers)
+use: hifi_tube | pa | both           # free text: what the brief family wants this driver for
+notes: ""
+
+# --- geometry (match the horn throat before printing) --------------------------------------------
+exit_diameter_mm: null               # "throat diameter" / "exit": 25.4 (1"), 35.5-36 (1.4"), 50.8 (2")
+
+# --- electrical ----------------------------------------------------------------------------------
+nominal_impedance_ohm: null          # 8 or 16; sets the voltage for the 1 W figures
+re_ohm: null                         # REQUIRED. DC resistance "Re"
+le_mh: null                          # voice-coil inductance "Le" (optional; small for compression drivers)
+
+# --- mechanical / motor --------------------------------------------------------------------------
+sd_cm2: null                         # REQUIRED. diaphragm (effective) area "Sd"
+mmd_g: null                          # moving mass WITHOUT air load: "Mmd" / "moving mass" / "diaphragm mass".
+mms_g: null                          #   use mms_g only if the sheet says "Mms" (may include air load; flagged)
+bl_tm: null                          # force factor "BL" (or give qes and it is derived)
+fs_hz: null                          # resonance "Fs" as published (includes the driver's own rear chamber)
+qms: null                            # mechanical Q "Qms" (or give qts + qes, or rms_kg_s)
+qes: null                            # electrical Q "Qes"
+qts: null                            # total Q "Qts"
+cms_mm_per_n: null                   # only if published instead of fs (then rear_chamber_cm3 is used too)
+rms_kg_s: null                       # mechanical resistance, only if published instead of qms
+rear_chamber_cm3: null               # only used together with cms_mm_per_n
+front_chamber_cm3: null              # compression chamber volume, rarely published; omit if unknown
+
+# --- limits (for maximum SPL) --------------------------------------------------------------------
+power_aes_w: null                    # rated power (AES / continuous program: say which in notes)
+xmax_mm: null                        # peak excursion limit, if published
+min_crossover_hz: null               # recommended minimum crossover (12 or 24 dB/oct: note which)
+
+# --- the manufacturer's own sensitivity, to check the model against ------------------------------
+published_sensitivity_db: null       # e.g. 1 W / 1 m on a plane-wave tube or on their reference horn
+published_sensitivity_condition: ""  # copy the condition text exactly (PWT, horn model, band)

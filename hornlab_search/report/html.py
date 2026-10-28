@@ -30,6 +30,7 @@ from ..config import Config, load_config
 from ..constants import BESSEL_J1P_11, C_AIR, KEELE_K
 from ..design import families
 from ..design.space import Bound
+from ..metrics.loudness import Z_HALF, Z_LOADED, horn_loudness
 from ..objective import WEIGHTED_KEYS, weighted_terms
 from ..search.evaluate import error_kind, mouth_dims_m, read_ndjson
 from ..solve import cache as solve_cache
@@ -260,7 +261,7 @@ def noise_floor(run: dict) -> dict:
 def _design_figures(run_dir: Path, row: dict, target: Target, family: str, bounds: dict) -> dict:
     """PNG figures and SVG charts for one design. Never raises: a missing response gives a note."""
     import hornlab_plots as hp
-    out = {"pngs": [], "svgs": [], "note": ""}
+    out = {"pngs": [], "svgs": [], "note": "", "loud": ""}
     r = None
     try:
         r = solve_cache.load_response(run_dir / "designs" / row["design_hash"] / "response.npz")
@@ -315,6 +316,23 @@ def _design_figures(run_dir: Path, row: dict, target: Target, family: str, bound
                 out["pngs"].append(("Directivity index (hornlab_plots)",
                                     _uri(hp.directivity_index_b64(r.freqs_hz, _nan(m["di_db"]), dpi=PNG_DPI))))
             if r.z_throat is not None:
+                # P12 (2026-10-27): report-only horn loudness, docs/DRIVER_MODEL.md; never in J.
+                ld = horn_loudness(r, f0_hz=target.f0_effective_hz())
+                lv = np.asarray(ld["onaxis_db_per_mps"], dtype=float)
+                lv_max = float(np.max(lv[np.isfinite(lv)])) if np.isfinite(lv).any() else float("nan")
+                out["svgs"].append(("Throat loading: output vs a fully loaded throat for the same throat "
+                                    "motion (10 log10 Re z, dB; horn only, before any driver)", _svg_lines(
+                    [{"x": ld["freqs_hz"], "y": ld["loading_db"], "label": "10 log10 Re z", "color": PALETTE[3],
+                      "points": True}],
+                    xlabel="frequency (Hz)", ylabel="dB", xlog=True, vlines=vl, band=band,
+                    hlines=[(10 * math.log10(Z_LOADED), "Re z 0.7", PALETTE[0]),
+                            (10 * math.log10(Z_HALF), "Re z 0.5", PALETTE[1])], title="throat loading")))
+                out["loud"] = (f"loudness (report-only, horn only): output gap at f0 "
+                               f"{_fmt(ld['output_gap_at_f0_db'], 1)} dB &middot; loaded (Re z >= 0.5) from "
+                               f"{_fmt(ld['f_loaded_hz'], 0)} Hz &middot; on-axis level per 1 m/s throat velocity "
+                               f"at 1 m: {_fmt(lv_max, 1)} dB max &middot; "
+                               f"driven source area {_fmt(ld['throat_area_m2'] * 1e6, 0)} mm2 "
+                               f"(throat shape vs driver exit: tools/loudness_report.py)")
                 z = np.asarray(r.z_throat)
                 out["pngs"].append(("Throat impedance, normalized by rho*c",
                                     _uri(hp.impedance_b64(r.freqs_hz, z.real, z.imag, dpi=PNG_DPI,
@@ -400,6 +418,7 @@ The floor is set by the two-solver disagreement, not by mesh refinement. Caveat:
 {% for p in d.params %}<tr><td>{{ p.key }}</td><td>{{ p.value }}</td><td>{{ p.lo }}</td><td>{{ p.hi }}</td><td>{{ p.frac }}</td></tr>{% endfor %}</table>
 <p class="muted">f_break (H, V) = {{ d.f_break }} Hz &middot; f11 = {{ d.f11 }} Hz &middot; mouth ~ {{ d.mouth }} m &middot; {{ d.n_dof }} dofs</p>
 <p class="muted">report-only (not in J): SPDI band mean {{ d.spdi }} dB, range {{ d.spdi_range }} dB &middot; listening window re on-axis {{ d.lw }} dB &middot; forward beam shape p = {{ d.beam_p }} (2 round, ~4 rounded square; qualitative at screen balloon resolution)</p>
+{% if d.loud %}<p class="muted">{{ d.loud }}</p>{% endif %}
 {% if d.note %}<p class="muted">{{ d.note }}</p>{% endif %}
 {% for title, svg in d.svgs %}<h4>{{ title }}</h4>{{ svg }}{% endfor %}
 <div class="grid">{% for title, uri in d.pngs %}<figure style="margin:0"><img alt="{{ title }}" src="{{ uri }}"><figcaption class="muted">{{ title }}</figcaption></figure>{% endfor %}</div>
@@ -648,7 +667,7 @@ def _designs(show, run_dir, target, weights, bounds, family, figures) -> list[di
              "f11": _fmt(sc.get("f11_hz"), 4),
              "spdi": _fmt(sc.get("spdi_mean_db"), 3), "spdi_range": _fmt(sc.get("spdi_range_db"), 3),
              "lw": _fmt(sc.get("lw_minus_on_axis_mean_db"), 3), "beam_p": _fmt(sc.get("beam_p_mean"), 3),
-             "mouth": "n/a", "pngs": [], "svgs": [], "note": ""}
+             "mouth": "n/a", "pngs": [], "svgs": [], "note": "", "loud": ""}
         if row.get("bbox_m"):
             mw, mh = mouth_dims_m(MeshResult("", 0, None, row.get("quadrants") or "",
                                              row.get("symmetry_plane"), {}, tuple(row["bbox_m"]), 0.0))
@@ -656,6 +675,7 @@ def _designs(show, run_dir, target, weights, bounds, family, figures) -> list[di
         if figures and row.get("ok"):
             f = _design_figures(run_dir, row, target, family, bounds)
             d["pngs"], d["svgs"], d["note"] = f["pngs"], [(t, Markup(s)) for t, s in f["svgs"]], f["note"]
+            d["loud"] = Markup(f.get("loud", ""))
         out.append(d)
     return out
 

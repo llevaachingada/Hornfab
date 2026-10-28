@@ -2,6 +2,43 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-27 (late evening) - SENIOR PASS P12 (ZERO GPU): SCORING/SEARCH/REALITY PLAN, LOUDNESS + DRIVER MODEL, THROAT RULE; RIPPLE NIGHT STOPPED AT 6/10
+
+- **Ripple/ridge night STOPPED after 6 of 10 jobs** (all 6 exit 0: crease re-run 4.57, b2t R-OSSE re-run 5.58, salmon_flute8 9.85,
+  salmon_x_flute8 9.41, `ridge__ath_core_law8` **2.81**, salmon_flute6_s125 10.08). Job 7 (`salmon_flute8_s125`) started 19:51:17 EDT and its
+  log ends right after the argv line; the runner wrote no exit line and neither the runner nor the job process exists any more; no
+  Julia host left; `runs/.gpu.lock` is stale (pid 35548 dead - `gpulock.py` takes stale locks over by itself). A failed job would
+  have been logged and the runner would have moved on, so the runner was killed from outside (most likely the session/window that
+  launched it closed); not a code fault. **Not run: `salmon_flute8_s125`, `salmon_flute10_s125`, `salmon_x_flute6_s125`,
+  `salmon_x_flute8_s125`** - re-run them (fresh run dirs; job 7 left no rows) when the owner says so.
+- **This entry** touched no search-path module, brief, config or GPU (`cli.py` untouched). **Next steps are now P0 at the top of
+  `docs/NEXT_DEV_PRIORITIES.md`.**
+- **Plan doc:** `docs/research/SENIOR_PASS_SCORING_SEARCH_REALITY_2026-10-27.md` (from ~5,100 stored rows, 4,094 stored responses).
+  Key numbers: PA winners are 8-14 dB short of a loaded throat at 500-830 Hz; the b3a 90x90/400 Hz winner (J 1.31) loads
+  (Re z >= 0.5) only from ~1.6 kHz, and its three leading cells contain **no** design within 3 dB of loading - a cone rule
+  (x0 = r0/tan a) reproduces the BEM Re z within ~0.02, so 1.4" OS-type throats cannot load there; P12a offline re-score
+  (exact reproduction, max |err| 0.0) changes the cell winner in 10-13 of 27 cells, mostly to near neighbours; 1-4 knobs
+  carry ~80 % of J in 9-17-knob cells; refusals are 23 % of every budget; the presence band has 3 screen points and a coarse
+  grid missed the narrowest beam there by up to 12 deg on 15 stored pairs; the 2 m arc is centred on the throat (near-field
+  for big mouths); woofer spacing puts the first vertical null inside coverage for crease core law, ath core, native
+  Le Cleac'h and the fluted cells; horn DI exceeds a woofer's at the crossover by 2-6 dB. Six owner decisions + gates (s7).
+- **Built (report-only):** `hornlab_search/metrics/loudness.py` (output gap at f0, loaded-from frequency, on-axis level per
+  1 m/s), `hornlab_search/driver/compression.py` (lumped compression driver over the BEM throat impedance: SPL at 2.83 V and
+  1 W, excursion, efficiency, impedance, max SPL), `hornlab_search/mesh/throat_check.py`, `tools/loudness_report.py`,
+  `examples/drivers/_template.yaml` (no real driver yet - owner to supply), loudness chart + line in the per-run HTML report,
+  GUI config list skips `examples/drivers/`. Stored-data check: throat power = balloon power within 0.0-0.4 dB, 500 Hz-8 kHz,
+  four horns. Tests: `tests/test_driver_compression.py`, `tests/test_metrics_loudness.py`, `tests/test_mesh_throat_check.py`
+  (24 pass, offline). After the night stopped, the full offline suite (CI selection) ran: **1,736 passed**, one pre-existing
+  failure deselected - `test_param_catalog::test_committed_json_is_byte_identical_to_a_fresh_build`: fa9a5a6 raised
+  `ROWS_MAX_RIPPLE_AMP_MM` 6 -> 50 without regenerating the param catalog, so the GUI showed a 6 mm ripple cap; regenerated
+  in the follow-up commit (`tools/gen_param_catalog.py --write`). Docs:
+  `docs/DRIVER_MODEL.md`; INDEX and CODE_MAP updated.
+- **Throat finding + owner rule:** OSSE / R-OSSE `aspect_ratio` stretches the coupling plane (24x36, 26x36, 41x36, 50x36 mm on
+  36 mm briefs; 8 of 30 winners). Owner rule: no separate adapter; only the coupling plane must be round at the driver exit;
+  morph/ridges allowed right after. Outside research (`docs/research/THROAT_COUPLING_2026-10-27.md`, Sonnet subagent, reviewed:
+  one cross-mode figure corrected) confirms the round coupling plane; the transition rate has no published number.
+- **Scratch (local only):** `scratch/p12_senior_pass/` (scripts + `p12a_rows.csv`).
+
 ## 2026-10-27 (evening) - RESUME NIGHT DONE; RIPPLE/RIDGE NIGHT RUNNING; SIM-VS-REAL RESEARCH (P12); PUSHED TO MAIN
 
 - **Resume night finished (27/27 exit 0, +~100 solves per cell).** Biggest gains (best J before -> after): `b3a__rosse_morph` 3.17 -> **1.31**
