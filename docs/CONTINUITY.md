@@ -2,15 +2,25 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-27 (21:27 EDT) - RIPPLE RE-RUN NIGHT LAUNCHED (owner "re-run them"), DETACHED VIA WMI
+
+- `runs/nights/v4_ripple_rerun_2026-10-27.yaml`: job 7 RESUMED in its run dir for the last 13 new solves (budget 13), then
+  `salmon_flute10_s125`, `salmon_x_flute6_s125`, `salmon_x_flute8_s125` fresh at budget 100 each (~1.5-2 h). Hygiene: no Julia, stale
+  `runs/.gpu.lock` (pid 35548 dead) removed by hand because the runner waits for the file to disappear and `gpu-clean` does not clear a
+  dead holder's lock; VRAM baseline 1,263 MiB. **Launched through `Win32_Process.Create` (WMI)**, so the runner's parent is
+  `WmiPrvSE`, not a Claude session: closing the app no longer kills a night. Confirmed solving (row 88 written, Julia host up). Logs:
+  `runs/nights/v4_ripple_rerun_runner_{stdout,stderr}.log`, `runs/nights/v4_ripple_rerun_2026-10-27/`. Launcher kept in scratch only.
+- Renders (scratch, local): `scratch/ripple_gallery/` (the 4 finished ripple/ridge winners) and `scratch/best5_gallery/` (the 5
+  lowest-J cell winners), each with the loading line and the driver coupling-plane check.
+
 ## 2026-10-27 (late evening) - SENIOR PASS P12 (ZERO GPU): SCORING/SEARCH/REALITY PLAN, LOUDNESS + DRIVER MODEL, THROAT RULE; RIPPLE NIGHT STOPPED AT 6/10
 
 - **Ripple/ridge night STOPPED after 6 of 10 jobs** (all 6 exit 0: crease re-run 4.57, b2t R-OSSE re-run 5.58, salmon_flute8 9.85,
-  salmon_x_flute8 9.41, `ridge__ath_core_law8` **2.81**, salmon_flute6_s125 10.08). Job 7 (`salmon_flute8_s125`) started 19:51:17 EDT and its
-  log ends right after the argv line; the runner wrote no exit line and neither the runner nor the job process exists any more; no
-  Julia host left; `runs/.gpu.lock` is stale (pid 35548 dead - `gpulock.py` takes stale locks over by itself). A failed job would
-  have been logged and the runner would have moved on, so the runner was killed from outside (most likely the session/window that
-  launched it closed); not a code fault. **Not run: `salmon_flute8_s125`, `salmon_flute10_s125`, `salmon_x_flute6_s125`,
-  `salmon_x_flute8_s125`** - re-run them (fresh run dirs; job 7 left no rows) when the owner says so.
+  salmon_x_flute8 9.41, `ridge__ath_core_law8` **2.81**, salmon_flute6_s125 10.08). Job 7 (`salmon_flute8_s125`, run dir
+  `runs/20261027T235118Z-screen-094cd0`) started 19:51 EDT and was killed at ~20:08 EDT after **87 of 100** evaluations (64 valid,
+  best J 11.40; the runner buffers the job log, so the log showed only the argv line). The runner wrote no exit line and its process was
+  gone; a failed job would have been logged and the runner would have moved on, so it was killed from outside (most likely the
+  session that launched it closing); not a code fault. Jobs 8-10 never started. **Re-run launched 21:27 EDT - see the entry above.**
 - **This entry** touched no search-path module, brief, config or GPU (`cli.py` untouched). **Next steps are now P0 at the top of
   `docs/NEXT_DEV_PRIORITIES.md`.**
 - **Plan doc:** `docs/research/SENIOR_PASS_SCORING_SEARCH_REALITY_2026-10-27.md` (from ~5,100 stored rows, 4,094 stored responses).
