@@ -150,7 +150,7 @@ mesh:
   dof_per_triangle: 0.51
 solve:
   backend: beat_cuda
-  distance_m: 2.0
+  distance_m: 10.0
   angle_count: 73
   balloon: true
   balloon_points_screen: 512
