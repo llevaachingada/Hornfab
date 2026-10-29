@@ -2,6 +2,26 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-29 (18:45 EDT) - MINI MULTIPLE-ENTRY HORN: RESEARCH PASS, DRAFT PUSHED (zero GPU, no code)
+
+- **Owner request:** internal + external research toward a mini multiple-entry horn (Synergy/Unity class, smaller than
+  JW Sound's Solana): one compression driver + 2 x 6.5-inch or 4 x 4-inch mids on ports, very small box, strong EDM bass.
+  Research and plan seeds only; nothing wired. MEH was owner-deferred 2026-10-24 (G17); reopened for research only.
+- **Dossier (draft):** `docs/research/typologies/MINI_MEH_RESEARCH_2026-10-29.md` + folder `mini_meh_2026-10-29/`
+  (`calc/` = CPU research scripts and outputs, not imported anywhere). Sections 7-8 (external findings, corrections)
+  wait on the Sonnet web lane (Danley primaries, JW Sound Solana, current Boundary Lab, small DIY MEHs, driver T/S).
+- **Findings so far [measured / verified]:** mids cannot do EDM bass (4 x 4-inch ~93 dB, 2 x 6.5-inch ~97-101 dB at 50 Hz,
+  1 m half space; 115 dB needs ~840 cm^3 Vd) -> 2-way mini top + sub, or compact 3-way with woofers; a 300 mm mouth holds
+  90 deg only to ~940 Hz; 1-D MEH sketch: the CD notch sits ~1.15-1.4 x the port corner and deepens as entries move toward
+  the throat (-18 dB at 20 mm, -2 dB at 70 mm), best sum near the quarter-wave limit; per-source solve + impedance
+  matrix + lumped drivers equals the direct solve to 6e-16 (the plan's core decomposition).
+- **Solver/mesher inventory (fork source read 2026-10-29):** the Julia engine already solves several channels on one
+  factorization and returns per-channel pressures; the Python package refuses more than one tag (`config.py:462`);
+  no mutual impedance matrix yet. The mesher has MEH tag names 8-12 but no MEH builder (corrects the frozen plan's
+  "geometry path is already there").
+- **Owner questions:** separate sub or bass in the box; a size number; use case and coverage; 4 x 4-inch vs 2 x 6.5-inch;
+  DSP per channel; which new J terms (dossier s13).
+
 ## 2026-10-28 (15:05 EDT) - PUSHED: SOLVED-STYLE RENDER SHEETS + THE DAY'S WINNER (J 1.11)
 
 - **Renders (4 PNG, `docs/renders/2026-10-28/`):** `typologies_solved_2026-10-28.png` (best design of each typology solved today, one row each),
