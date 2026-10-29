@@ -22,6 +22,20 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
   during a live GPU night).
 - **Also carried up in this push:** `e0ea198` (skills + tools, committed by the afternoon session, previously unpushed on `main`).
 
+## 2026-10-28 (21:00 EDT) - CONE PLUGHORN: HORN-THEORY MORPH KNOBS, GUI, HANDOFF (zero GPU)
+
+- `tools/cad/plughorn.py` gained a morph layer: 14 `m_*` knobs (compression ratio, axe-head base, wall angles, mouth corner,
+  roll-out, axe head relative to the horn, plate margin, bowl-from-cone) that derive the raw CAD dimensions; seeds reproduce
+  the Evo 7SH / Evo 2SH CAD within 0.3-0.5 mm; a 12-inch variant regrows the throat at the same compression ratio.
+  `derived()` adds first-order theory diagnostics. Rationale table: CONE_MIDHORN_AXEHEAD_2026-10-28.md section 5e.
+- 3 morph configs (`cone_plughorn__morph_*`), source_motion axial; 27-29 of 40 random knob vectors legal; mesh 5.8k-10.7k dofs.
+- Evo 2SH corrected to Funktion-One's spec: 8-inch mid, 50 x 25 (brief vertical 25).
+- GUI sandbox previews plughorn configs (all tool keys are knobs; out-of-envelope shapes are drawn and flagged).
+- Handoff for the driver work: `docs/research/HANDOFF_CONE_DRIVER_MODEL_2026-10-28.md` (F1 publishes no T/S; targets 112 dB/1 W
+  Evo 7SH 10-inch, 111 dB/1 W Evo 2SH 8-inch).
+- Tried and removed: an axe-head "cone fill" knob (OCC booleans left the chamber as a detached shell); handed to the driver work.
+- Tests: plughorn + step_build + catalog 68 pass (CPU). Not solved on the GPU.
+
 ## 2026-10-28 (20:10 EDT) - CONE MID HORN + AXE HEAD TYPOLOGY FROM FUNKTION-ONE CAD (zero GPU)
 
 - Owner supplied Funktion-One's 3D models (Evo 7SH narrow 40x20, Evo 2SH wide 50) as DWG. LibreDWG could not decode the

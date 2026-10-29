@@ -7,3 +7,4 @@ converted with the ODA File Converter, read with `tools/cad/sat_dump.py`). Rende
 - `cone_plughorn_sheet.png` - both horns: front, 3/4, section.
 - `*_vs_f1_cad.png` - our edges (red) over Funktion-One's CAD edges (black) in three views: the horn interior and
   axe head coincide; the outside is deliberately simplified (convex shell + driver bowl).
+- `morph_knobs.png` - what the morph knobs do (seed = Evo 7SH CAD; wider walls; compression 7; short blade; big roll-out; 12-inch cone).

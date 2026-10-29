@@ -111,9 +111,119 @@ class PlughornParams:
     plug_base_back_mm: float = 2.0     # the base sits this far behind the throat plane (in the chamber)
     plug_gap_mm: float = 2.0           # min clearance plug <-> walls / cone (the CAD has 2.4 mm at the throat diagonals)
     scale: float = 1.0
+    # ---- MORPH knobs (horn-theory levers; 0 = off, the raw dimensions above are used as they are). When on,
+    # each one DERIVES raw dimensions, in this order, so the shape stays consistent while a search moves it.
+    # Values that reproduce the Evo 7SH CAD are in the docstring of ``resolve_morph``.
+    m_compression_ratio: float = 0.0   # Sd / (throat octagon - axe-head base) area: sizes the throat for the cone
+    m_plug_base_frac: float = 0.0      # axe-head base x / throat x (base keeps its shape); sets the throat ring width
+    m_wall_angle_h_deg: float = 0.0    # side-wall half-angle (throat edge -> wall end): horizontal pattern
+    m_wall_angle_v_deg: float = 0.0    # top-wall half-angle: vertical pattern
+    m_mouth_corner_frac: float = 0.0   # mouth corner chamfer as a fraction of the wall-end size
+    m_roll_h_mm: float = 0.0           # side roll-out radial size (wall end -> front opening)
+    m_roll_v_mm: float = 0.0           # top/bottom roll-out radial size
+    m_plug_width_frac: float = 0.0     # axe-head tips / front-opening half-width
+    m_plug_nose_frac: float = 0.0      # nose depth / length
+    m_plug_tip_frac: float = 0.0       # tip depth / length (blade sweep = tip - nose)
+    m_plug_ridge_frac: float = 0.0     # ridge-end depth / length (vertical wedge length)
+    m_plug_height_frac: float = 0.0    # axe-head half-height / throat half-height
+    m_plug_flat_frac: float = 0.0      # flat top half-length / tip half-width
+    m_plate_margin_mm: float = 0.0     # front plate border around the opening (shell follows)
+    m_bowl_auto: float = 0.0           # 1 = size the driver bowl from the cone (rear-chamber proportions of the CAD)
 
     def s(self, name: str) -> float:
         return getattr(self, name) * self.scale
+
+    def morph_active(self) -> bool:
+        return any(getattr(self, f.name) for f in fields(self) if f.name.startswith("m_"))
+
+    def resolve_morph(self) -> "PlughornParams":
+        """Apply the m_* knobs: return a copy whose RAW dimensions are derived from them (m_* kept).
+
+        Physics of each lever (cone mid horn with an axe-head phase plug):
+        * m_compression_ratio + m_plug_base_frac -> throat size. The ring between the throat octagon and the
+          axe-head base is the horn's real throat (Sd / ring = compression ratio). Higher CR = more loading and
+          efficiency in the lower mids, a lower front-chamber cut-off and more air-load distortion. The
+          octagon/base SHAPES stay those of the current raw values; only their size moves.
+        * m_wall_angle_h/v -> wall-end positions: straight (conical) walls from the throat edges; the -6 dB
+          coverage of a CD wall section is close to twice the wall angle (Evo 7SH 23 / 10.9 deg for 40 x 20,
+          Evo 2SH 31.6 / 13.6 deg for 50 x 25). With ``length`` they set the mouth size, i.e. the lowest
+          frequency the pattern is held (K-law, see ``derived``).
+        * m_mouth_corner_frac -> the twisted corner panels' size (both CADs: ~0.07).
+        * m_roll_h/v -> the roll-out (mouth termination): larger = less edge diffraction, wider opening.
+        * m_plug_* -> the axe head relative to the horn it sits in (both CADs: width 0.72 of the opening,
+          ridge end at ~0.6 of the length): the blade splits the throat into two wide slots (wide H, controlled V).
+        * m_plate_margin / m_bowl_auto -> the outside follows the horn / the cone.
+        Evo 7SH-equivalent settings: CR 5.0, base 0.833, walls 23.0 / 10.9, corner 0.067, roll 27.6 / 29.5,
+        plug width 0.726, nose 0.032, tip 0.167, ridge 0.579, height 0.744, flat 0.429, margin 23.2.
+        """
+        if not self.morph_active():
+            return self
+        sc = self.scale
+        g = {f.name: getattr(self, f.name) * (sc if f.name.endswith("_mm") and not f.name.startswith(("cone_",
+             "post_", "front_gap", "plug_gap", "plug_base_back", "wall_mm")) else 1.0) for f in fields(self)}
+        L = g["length_mm"]
+        # --- throat: scale the octagon (and the base with it) to hit the compression ratio
+        tsx, tsh, tty, tth = g["throat_side_x_mm"], g["throat_side_half_mm"], g["throat_top_y_mm"], g["throat_top_half_mm"]
+        bx, bsy, btx, by = g["plug_base_x_mm"], g["plug_base_side_y_mm"], g["plug_base_top_x_mm"], g["plug_base_y_mm"]
+        if self.m_plug_base_frac:              # base x = frac * throat x; the base keeps its own shape
+            k_b = self.m_plug_base_frac * tsx / bx
+            bx, bsy, btx, by = bx * k_b, bsy * k_b, btx * k_b, by * k_b
+        if self.m_compression_ratio:
+            sd = math.pi * (self.cone_r_mm ** 2 - self.post_r_mm ** 2)
+            octa = _poly_area(np.array([(x, y) for x, y, _ in self._octagon((tsx, tsh, 0), (tth, tty, 0))]))
+            base = _poly_area(_hull2d([(sx * bx, sy * bsy) for sx in (1, -1) for sy in (1, -1)]
+                                      + [(sx * btx, sy * by) for sx in (1, -1) for sy in (1, -1)]))
+            k = math.sqrt(sd / self.m_compression_ratio / max(octa - base, 1e-9))
+            tsx, tsh, tty, tth, bx, bsy, btx, by = (v * k for v in (tsx, tsh, tty, tth, bx, bsy, btx, by))
+        # --- walls, mouth corner, roll-out
+        msd, mtd = g["mouth_side_d_mm"], g["mouth_top_d_mm"]
+        msx, mty = g["mouth_side_x_mm"], g["mouth_top_y_mm"]
+        if self.m_wall_angle_h_deg:
+            msx = tsx + math.tan(math.radians(self.m_wall_angle_h_deg)) * (L - msd)
+        if self.m_wall_angle_v_deg:
+            mty = tty + math.tan(math.radians(self.m_wall_angle_v_deg)) * (L - mtd)
+        c = self.m_mouth_corner_frac or (1.0 - g["mouth_side_half_mm"] / g["mouth_top_y_mm"])
+        msh, mth = (1.0 - c) * mty, (1.0 - c) * msx
+        rh = self.m_roll_h_mm * sc if self.m_roll_h_mm else g["front_side_x_mm"] - g["mouth_side_x_mm"]
+        rv = self.m_roll_v_mm * sc if self.m_roll_v_mm else g["front_top_y_mm"] - g["mouth_top_y_mm"]
+        msd = msd * (rh / max(g["front_side_x_mm"] - g["mouth_side_x_mm"], 1e-9))
+        mtd = mtd * (rv / max(g["front_top_y_mm"] - g["mouth_top_y_mm"], 1e-9))
+        if self.m_wall_angle_h_deg:                       # depth of the wall end moved with the roll-out
+            msx = tsx + math.tan(math.radians(self.m_wall_angle_h_deg)) * (L - msd)
+            mth = (1.0 - c) * msx
+        if self.m_wall_angle_v_deg:
+            mty = tty + math.tan(math.radians(self.m_wall_angle_v_deg)) * (L - mtd)
+            msh = (1.0 - c) * mty
+        fsx, fty = msx + rh, mty + rv
+        # --- axe head relative to the horn
+        tip_x = self.m_plug_width_frac * fsx if self.m_plug_width_frac else g["plug_tip_x_mm"]
+        nose_d = self.m_plug_nose_frac * L if self.m_plug_nose_frac else g["plug_nose_d_mm"]
+        tip_d = self.m_plug_tip_frac * L if self.m_plug_tip_frac else g["plug_tip_d_mm"]
+        top_d = self.m_plug_ridge_frac * L if self.m_plug_ridge_frac else g["plug_top_d_mm"]
+        top_y = self.m_plug_height_frac * tty if self.m_plug_height_frac else g["plug_top_y_mm"]
+        cy = top_y * (g["plug_corner_y_mm"] / g["plug_top_y_mm"])
+        cx = self.m_plug_flat_frac * tip_x if self.m_plug_flat_frac else g["plug_corner_x_mm"]
+        # --- outside
+        pw, ph, sw, sh = g["plate_w_mm"], g["plate_h_mm"], g["shell_w_mm"], g["shell_h_mm"]
+        if self.m_plate_margin_mm:
+            m = self.m_plate_margin_mm * sc
+            pw, ph, sw, sh = 2 * fsx + 2 * m, 2 * fty + 2 * m, 2 * fsx + m, 2 * fty + m
+        bowl = {}
+        if self.m_bowl_auto:
+            r1 = 1.24 * self.cone_r_mm
+            bd_ = 1.7 * self.cone_r_mm
+            bowl = {"bowl_r1_mm": r1, "bowl_r2_mm": 0.88 * r1, "bowl_len_mm": 0.76 * bd_,
+                    "bowl_back_r_mm": 0.5 * r1, "bowl_back_d_mm": bd_}
+            bowl = {k: v / sc for k, v in bowl.items()}
+        raw = {"throat_side_x_mm": tsx, "throat_side_half_mm": tsh, "throat_top_y_mm": tty, "throat_top_half_mm": tth,
+               "plug_base_x_mm": bx, "plug_base_side_y_mm": bsy, "plug_base_top_x_mm": btx, "plug_base_y_mm": by,
+               "mouth_side_x_mm": msx, "mouth_side_half_mm": msh, "mouth_side_d_mm": msd, "mouth_top_y_mm": mty,
+               "mouth_top_half_mm": mth, "mouth_top_d_mm": mtd, "front_side_x_mm": fsx, "front_top_y_mm": fty,
+               "plug_tip_x_mm": tip_x, "plug_nose_d_mm": nose_d, "plug_tip_d_mm": tip_d, "plug_top_d_mm": top_d,
+               "plug_top_y_mm": top_y, "plug_corner_y_mm": cy, "plug_corner_x_mm": cx,
+               "plate_w_mm": pw, "plate_h_mm": ph, "shell_w_mm": sw, "shell_h_mm": sh}
+        raw = {k: v / sc for k, v in raw.items()}
+        return replace(self, **raw, **bowl)
 
     @property
     def L(self) -> float:
@@ -220,6 +330,10 @@ class PlughornParams:
     # ------------------------------------------------------------------ checks
     def validate(self) -> None:
         for f in fields(self):
+            if f.name.startswith("m_"):
+                if getattr(self, f.name) < 0.0:
+                    raise ValueError(f"{f.name} must be >= 0 (0 = off)")
+                continue
             if f.name not in ("roll_steps", "plug_base_side_y_mm") and not getattr(self, f.name) > 0.0:
                 raise ValueError(f"{f.name} must be > 0, got {getattr(self, f.name)}")
         if not 1 <= int(self.roll_steps) <= 8:
@@ -285,6 +399,8 @@ class PlughornParams:
             if not sec:
                 continue
             horn = self.horn_section(z)
+            if horn is None or len(horn) < 3:               # the axe head reaches past the horn
+                return {"min_mm": float("-inf"), "at_z_mm": z, "against": "outside of the horn"}
             for q in sec:
                 d = _dist_inside(horn, q)
                 if z < 0.0:
@@ -314,7 +430,10 @@ class PlughornParams:
             z = L * i / 160
             sec = _edge_cuts(cloud, edges, z)
             a_p = _poly_area(_hull2d(sec)) if len(sec) >= 3 else 0.0
-            areas.append((z, _poly_area(self.horn_section(z)) - a_p))
+            hs = self.horn_section(z)
+            if hs is None or len(hs) < 3:                   # a degenerate cut (e.g. exactly at the front face)
+                continue
+            areas.append((z, _poly_area(hs) - a_p))
         zmin, amin = min(areas, key=lambda t: t[1])
         hp = self.horn_points()
         return {
@@ -322,7 +441,7 @@ class PlughornParams:
             "throat_area_cm2": round(_poly_area(np.array([(x, y) for x, y, _ in self.throat_octagon()])) / 100, 1),
             "min_channel_area_cm2": round(amin / 100, 1),
             "min_channel_depth_mm": round(L - zmin, 1),
-            "compression_ratio": round(sd / amin, 2),
+            "compression_ratio": round(sd / amin, 2) if amin > 0 else float("inf"),
             "side_wall_angle_deg": round(math.degrees(math.atan2(hp["Ms"][0] - hp["R"][0], hp["Ms"][2])), 1),
             "top_wall_angle_deg": round(math.degrees(math.atan2(hp["Mt"][1] - hp["Q"][1], hp["Mt"][2])), 1),
             "front_opening_mm": [round(2 * self.s("front_side_x_mm"), 1), round(2 * self.s("front_top_y_mm"), 1)],
@@ -332,6 +451,38 @@ class PlughornParams:
             "depth_total_mm": round(L + self.s("bowl_back_d_mm"), 1),
             "rear_chamber_gross_l": round(self.rear_chamber_l(), 2),
             "plug_clearance_mm": round(float(self.clearance()["min_mm"]), 2),
+            **self.theory(amin),
+        }
+
+    def theory(self, ring_area_mm2: float) -> dict[str, Any]:
+        """Horn-theory diagnostics (estimates, for steering a search; the BEM is the judge).
+
+        * K-law pattern control: a wall pair holds its angle down to f ~ 25.4e6 / (mouth mm * angle deg)
+          (Keele; the repo's K-law), with the nominal angle = 2 x the wall angle.
+        * mouth cut-off: the mouth stops loading the throat below ~ c / perimeter.
+        * front-chamber cut-off: the air between cone and throat (V1) in parallel with the ring's
+          radiation resistance: f ~ c * S_ring / (2 pi V1) [first-order; Keele's form, verify].
+        * path spread: cone rim vs cone centre distance to the throat ring; the quarter-wave frequency
+          c / (4 * spread) is where they start to cancel (the axe head's job is to keep this high).
+        """
+        c = 343.0e3                                          # mm/s
+        fsx, fty = self.s("front_side_x_mm"), self.s("front_top_y_mm")
+        hp = self.horn_points()
+        ah = math.degrees(math.atan2(hp["Ms"][0] - hp["R"][0], hp["Ms"][2]))
+        av = math.degrees(math.atan2(hp["Mt"][1] - hp["Q"][1], hp["Mt"][2]))
+        g, cd, cr, pr = self.front_gap_mm, self.cone_depth_mm, self.cone_r_mm, self.post_r_mm
+        v1 = math.pi * cr * cr * g + math.pi * cd * (cr * cr + cr * pr + pr * pr) / 3 - math.pi * pr * pr * cd
+        r_ring = 0.5 * (self.s("throat_side_x_mm") + self.s("plug_base_x_mm"))
+        rim = math.hypot(cr - r_ring, g)
+        centre = math.hypot(r_ring - pr, g + cd)
+        spread = abs(centre - rim)
+        return {
+            "k_law_pattern_h_hz": round(25.4e6 / (2 * fsx * 2 * ah), 0),
+            "k_law_pattern_v_hz": round(25.4e6 / (2 * fty * 2 * av), 0),
+            "mouth_cutoff_hz": round(c / (4 * (fsx + fty)), 0),
+            "front_chamber_fc_hz": round(c * ring_area_mm2 / (2 * math.pi * v1), 0),
+            "path_spread_mm": round(spread, 1),
+            "path_quarter_wave_hz": round(c / (4 * spread), 0) if spread > 0 else None,
         }
 
 
@@ -408,7 +559,10 @@ def _dist_inside(poly, q) -> float:
     for i in range(len(poly)):
         (x0, y0), (x1, y1) = poly[i], poly[(i + 1) % len(poly)]
         dx, dy = x1 - x0, y1 - y0
-        best = min(best, ((q[0] - x0) * (-dy) + (q[1] - y0) * dx) / math.hypot(dx, dy))
+        ln = math.hypot(dx, dy)
+        if ln < 1e-9:                                   # repeated vertex: no edge
+            continue
+        best = min(best, ((q[0] - x0) * (-dy) + (q[1] - y0) * dx) / ln)
     return best
 
 
@@ -423,6 +577,7 @@ def params_from_recipe(recipe: dict) -> PlughornParams:
     if unknown:
         raise ValueError(f"unknown plughorn key(s) {unknown}")
     p = replace(DEFAULTS, **{k: (int(round(float(v))) if k in INT_KEYS else float(v)) for k, v in values.items()})
+    p = p.resolve_morph()
     p.validate()
     return p
 
@@ -561,7 +716,7 @@ def main(argv=None) -> int:
     for f in fields(PlughornParams):
         ap.add_argument("--" + f.name.replace("_", "-"), type=type(f.default), default=f.default)
     a = ap.parse_args(argv)
-    p = PlughornParams(**{f.name: getattr(a, f.name) for f in fields(PlughornParams)})
+    p = PlughornParams(**{f.name: getattr(a, f.name) for f in fields(PlughornParams)}).resolve_morph()
     res = export(Path(a.out), p)
     if a.stl:
         _multicell()._cad()["bd"].export_stl(res["part"], a.stl)

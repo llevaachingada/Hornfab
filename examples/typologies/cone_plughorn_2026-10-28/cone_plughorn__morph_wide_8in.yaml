@@ -1,0 +1,134 @@
+# cone_plughorn__morph_wide_8in - LABELED HYPOTHESIS-SHAPE EXPERIMENT (cone mid horn + axe head, horn-theory morph knobs).
+# Evo 2SH topology (8-inch) driven by the morph knobs (seeded to reproduce the CAD).
+# Morph knobs (tools/cad/plughorn.py PlughornParams.resolve_morph): compression ratio + axe-head base -> throat;
+# wall angles -> coverage; mouth corner + roll-out -> termination; axe head relative to the horn. generator.fixed
+# carries the source horn's raw shapes (throat/base/roll proportions) the morph scales.
+# Seed vs source CAD: max raw difference 0.5 mm. Derived: CR 6.48, walls 31.6/13.6 deg, K-law pattern H 930 Hz / V 3409 Hz, mouth cut-off 243 Hz, clearance 2.67 mm.
+# solve.source_motion axial: the cone moves as a rigid piston (see docs/research/HANDOFF_CONE_DRIVER_MODEL_2026-10-28.md).
+name: cone_plughorn__morph_wide_8in
+family: FREEFORM
+brief_file: ../../briefs/cone_midhorn_2026-10-28/cone_mid_wide_50.yaml
+generator:
+  name: plughorn
+  seed_policy: explicit
+  fixed:
+    cone_r_mm: 84.0
+    cone_depth_mm: 34.0
+    post_r_mm: 17.0
+    throat_side_x_mm: 73.0
+    throat_side_half_mm: 15.0
+    throat_top_y_mm: 73.0
+    throat_top_half_mm: 1.8
+    mouth_side_x_mm: 204.3
+    mouth_side_half_mm: 113.7
+    mouth_side_d_mm: 9.3
+    mouth_top_y_mm: 123.8
+    mouth_top_half_mm: 187.3
+    mouth_top_d_mm: 13.2
+    front_side_x_mm: 215.9
+    front_top_y_mm: 137.0
+    plate_w_mm: 466.0
+    plate_h_mm: 320.0
+    plate_t_mm: 18.0
+    shell_w_mm: 456.0
+    shell_h_mm: 300.0
+    bowl_r1_mm: 105.0
+    bowl_r2_mm: 105.0
+    bowl_len_mm: 88.0
+    bowl_back_r_mm: 52.7
+    bowl_back_d_mm: 136.0
+    plug_nose_d_mm: 16.5
+    plug_tip_x_mm: 154.8
+    plug_tip_d_mm: 52.1
+    plug_top_y_mm: 49.7
+    plug_top_d_mm: 134.7
+    plug_corner_x_mm: 59.0
+    plug_corner_y_mm: 50.6
+    plug_base_x_mm: 60.0
+    plug_base_side_y_mm: 10.9
+    plug_base_top_x_mm: 18.8
+    plug_base_y_mm: 55.0
+    m_plate_margin_mm: 17.1
+seed_params:
+  m_compression_ratio: 6.09
+  m_plug_base_frac: 0.8219
+  m_wall_angle_h_deg: 31.6
+  m_wall_angle_v_deg: 13.6
+  m_mouth_corner_frac: 0.0816
+  m_roll_h_mm: 11.6
+  m_roll_v_mm: 13.2
+  m_plug_width_frac: 0.717
+  m_plug_nose_frac: 0.074
+  m_plug_tip_frac: 0.2336
+  m_plug_ridge_frac: 0.604
+  m_plug_height_frac: 0.6808
+  m_plug_flat_frac: 0.3811
+  length_mm: 223.0
+bounds:
+  m_compression_ratio:
+    lo: 5.4
+    hi: 9.5
+  m_plug_base_frac:
+    lo: 0.72
+    hi: 0.83
+  m_mouth_corner_frac:
+    lo: 0.04
+    hi: 0.14
+  m_plug_width_frac:
+    lo: 0.62
+    hi: 0.8
+  m_plug_nose_frac:
+    lo: 0.02
+    hi: 0.12
+  m_plug_tip_frac:
+    lo: 0.12
+    hi: 0.32
+  m_plug_ridge_frac:
+    lo: 0.45
+    hi: 0.7
+  m_plug_height_frac:
+    lo: 0.6
+    hi: 0.85
+  m_plug_flat_frac:
+    lo: 0.3
+    hi: 0.5
+  m_wall_angle_h_deg:
+    lo: 24.0
+    hi: 36.0
+  m_wall_angle_v_deg:
+    lo: 10.0
+    hi: 17.0
+  m_roll_h_mm:
+    lo: 8.0
+    hi: 30.0
+  m_roll_v_mm:
+    lo: 8.0
+    hi: 30.0
+  length_mm:
+    lo: 190.0
+    hi: 260.0
+mesh:
+  epw: 6.0
+  quadrants: '1234'
+  dof_cap_screen: 12000
+  dof_cap_verify: 12000
+  dof_cap_final: 12000
+  dof_per_triangle: 0.5
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+  source_motion: axial
+search:
+  algorithm: cma
+  sigma0: 0.2
+  seed: 1234
+  budget: 80
+  popsize: null
+  tolfun: 0.001

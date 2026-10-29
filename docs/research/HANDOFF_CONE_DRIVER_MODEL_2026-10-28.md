@@ -74,6 +74,12 @@ the driver itself must be MEASURED or substituted by a published pro mid driver.
    only published values in `examples/drivers/` (never invent a number; R9 rule); prefer ones with Mmd/Mms, Bl, Sd,
    Le given.
 
+7. **Cone fill (front-chamber volume)**: the patents say the axe head's rear fills the cone ("eats the compression
+   chamber"); the CAD carries no driver, so `plughorn.py` has no fill and `theory()` over-estimates the front air volume
+   (front-chamber cut-off ~420 Hz on the Evo 7SH, too low for a 4 kHz mid). A revolved fill following the cone at a gap was
+   tried on 2026-10-28 and REMOVED: union left the chamber as a detached shell, subtracting it from the air core broke the
+   body. Rebuild it as part of the driver work (e.g. loft the fill and the axe-head base as ONE solid before the union).
+
 ## 5. Rules for the next agent
 
 - Zero GPU while a night runs (CLAUDE.md GPU hygiene); mesh checks with `tools/shape_check.py` are CPU-safe.

@@ -87,3 +87,36 @@ def test_quadrants_must_be_full(tmp_path):
     cfg = load_config(EVO2)
     with pytest.raises(GeometryInvalidError, match="FULL"):
         build.build_mesh(DesignSpace.from_config(cfg).seed, replace(COARSE, quadrants="1"), cfg, tmp_path)
+
+
+MORPH = FOLDER / "cone_plughorn__morph_narrow_10in.yaml"
+
+
+def _morph_params(tool, **changes):
+    import yaml
+    cfg = yaml.safe_load(MORPH.read_text(encoding="utf-8"))
+    values = {**cfg["generator"]["fixed"], **cfg["seed_params"], **changes}
+    return replace(tool.DEFAULTS, **values).resolve_morph()
+
+
+def test_morph_seed_reproduces_the_cad(tool):
+    p, raw = _morph_params(tool), tool.DEFAULTS
+    for k in ("throat_side_x_mm", "mouth_side_x_mm", "mouth_top_y_mm", "front_side_x_mm", "plug_tip_x_mm",
+              "plug_top_d_mm", "plug_base_x_mm"):
+        assert getattr(p, k) == pytest.approx(getattr(raw, k), abs=1.0), k
+
+
+def test_morph_knobs_move_what_they_say(tool):
+    p = _morph_params(tool, m_wall_angle_h_deg=28.0, m_wall_angle_v_deg=14.0)
+    d = p.derived()
+    assert d["side_wall_angle_deg"] == pytest.approx(28.0, abs=0.1)
+    assert d["top_wall_angle_deg"] == pytest.approx(14.0, abs=0.1)
+    seed = _morph_params(tool).derived()
+    assert d["k_law_pattern_h_hz"] < seed["k_law_pattern_h_hz"]          # bigger mouth holds the pattern lower
+    hi = _morph_params(tool, m_compression_ratio=7.0, m_plug_base_frac=0.80)
+    assert hi.throat_side_x_mm < _morph_params(tool).throat_side_x_mm      # more compression = smaller throat
+    big = _morph_params(tool, cone_r_mm=125.0, cone_depth_mm=52.0, post_r_mm=25.0, m_bowl_auto=1.0)
+    assert big.derived()["compression_ratio"] == pytest.approx(seed["compression_ratio"], rel=0.03)
+    assert big.throat_side_x_mm > _morph_params(tool).throat_side_x_mm     # the throat regrows for a bigger cone
+    with pytest.raises(ValueError, match="clearance"):                       # a throat gap that closes is refused
+        _morph_params(tool, m_compression_ratio=8.0).validate()

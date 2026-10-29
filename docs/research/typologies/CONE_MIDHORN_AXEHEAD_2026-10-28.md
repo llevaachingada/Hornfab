@@ -203,6 +203,37 @@ diagonals: the compression ring (5.0:1 and 7.5:1 against a 10-inch / 9-inch cone
 driver: the cone size is an assumption. Section 5c's crease-point / ruled-top reading came from the Evo 7 EH drawing
 and is superseded for the SH horns.
 
+## 5e. The optimisation parameter set (morph knobs, 2026-10-28 21:00)
+
+The raw CAD dimensions (~45 numbers, strongly coupled) are kept as the source of truth; a morph layer
+(`PlughornParams.resolve_morph`, keys `m_*`, 0 = off) derives them from 14 horn-theory levers so a search moves the
+design consistently. Normalising both Funktion-One CADs showed the same design rules at both sizes (axe-head tips
+0.726 / 0.717 of the opening; ridge end 0.58 / 0.60 of the length; mouth corner 0.067 / 0.082; base 0.83 / 0.82 of
+the throat), which is why these are ratios and not millimetres.
+
+| Knob | Physics it controls | Evo 7SH | Evo 2SH | Search box |
+|---|---|---|---|---|
+| `m_compression_ratio` | Sd / throat-ring area: loading + efficiency in the lower mids vs air-load distortion and front-chamber roll-off; sizes the throat for the cone (driver-size portable) | 5.02 | 6.48 | 4.1-8 (8-inch 5.4-9.5): lower = throat bigger than the cone |
+| `m_plug_base_frac` | axe-head base / throat: the ring width (the 2.4 mm diagonal gap) | 0.833 | 0.822 | 0.72-0.83: above ~0.835 the gap closes |
+| `m_wall_angle_h_deg` / `_v_deg` | straight-wall CD section: coverage ~ 2 x wall angle near the mouth; with `length_mm` sets the mouth and the K-law pattern-control frequency | 23.0 / 10.9 | 31.6 / 13.6 | 18-28 / 8-14 (wide 24-36 / 10-17) |
+| `length_mm` | horn length: mouth size at fixed angles, mouth loading cut-off (~ c / perimeter) | 400 | 223 | +-15 % |
+| `m_mouth_corner_frac` | twisted corner panels: diagonal pattern / corner diffraction | 0.067 | 0.082 | 0.04-0.14 |
+| `m_roll_h_mm` / `_v_mm` | mouth roll-out: edge diffraction, effective mouth size | 27.6 / 29.5 | 11.6 / 13.2 | 15-45 (wide 8-30) |
+| `m_plug_width_frac` | blade span / opening: how the axe head splits the wavefront horizontally | 0.726 | 0.717 | 0.62-0.80 |
+| `m_plug_nose_frac`, `m_plug_tip_frac` | nose and tip depth / length: blade sweep, where the two slots rejoin | 0.032, 0.167 | 0.074, 0.234 | 0.02-0.12, 0.12-0.32 |
+| `m_plug_ridge_frac` | vertical wedge length: the vertical slot expansion | 0.579 | 0.604 | 0.45-0.70 |
+| `m_plug_height_frac`, `m_plug_flat_frac` | axe-head height / throat, flat top / tip: slot heights, blockage | 0.744, 0.429 | 0.681, 0.381 | 0.60-0.85, 0.30-0.50 |
+| `m_plate_margin_mm`, `m_bowl_auto` | outside follows the horn; bowl sized from the cone (rear chamber) | fixed | fixed | not searched |
+
+Diagnostics in `derived()` steer a search before any solve [first-order estimates]: K-law pattern-control frequency
+H/V, mouth cut-off (Evo 7SH 182 Hz vs F1's 220 Hz band start; Evo 2SH 243 vs 280 Hz), front-chamber cut-off
+(over-estimates V1: the real axe head fills the cone - the cone-fill knob was tried and removed for boolean
+robustness, see the handoff), path spread cone rim vs centre and its quarter-wave frequency, compression ratio,
+clearance. Random sampling inside the boxes: 27-29 / 40 legal (the rest are real conflicts: blade hits a wall,
+outgrows the envelope), so CMA-ES sees a mostly-feasible box. Configs: `cone_plughorn__morph_narrow_10in`,
+`__morph_wide_8in`, `__morph_narrow_12in` (`solve.source_motion: axial`). What each knob does:
+`docs/renders/2026-10-28/cone_plughorn/morph_knobs.png`.
+
 ## 6. Open gaps
 
 - No F1 production drawings or dimensions are published; the patents give shapes and relations, not numbers.

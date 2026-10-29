@@ -2113,7 +2113,7 @@ def _plughorn_preview(cfg, effective, notes, detail, config_name, brief_name, qu
     from hornlab_search.mesh import step_build
     t0 = time.perf_counter()
     try:
-        cad = plughorn_params(cfg.generator, effective, cfg.brief)["cad"]
+        cad = plughorn_params(cfg.generator, effective, None)["cad"]     # envelope is reported, not refused
         tool = step_build.load_cad_tool(tool=step_build.PLUGHORN_TOOL)
         p = tool.params_from_recipe(cad)
     except (ValueError, RuntimeError) as exc:
