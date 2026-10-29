@@ -592,12 +592,16 @@ def audit_row(
     }
 
 
-def collect(runs_root: Path) -> tuple[list[dict], dict[str, int]]:
-    """Walk the dated runs and audit every selected stored row."""
+def collect(runs_root: Path, run_glob: str = "2026102[78]T*") -> tuple[list[dict], dict[str, int]]:
+    """Walk the dated runs matching ``run_glob`` and audit every selected stored row.
+
+    The default keeps the 2026-10-27/28 A1 evidence set; the D rerun passes
+    ``--run-glob '20261029T*'`` so the new v5 runs are audited without mixing groups.
+    """
     counters: Counter = Counter()
     shape_cache: dict = {}
     rows: list[dict] = []
-    run_dirs = sorted(p for p in runs_root.glob("2026102[78]T*") if p.is_dir())
+    run_dirs = sorted(p for p in runs_root.glob(run_glob) if p.is_dir())
     counters["run_dirs"] = len(run_dirs)
     for run_dir in run_dirs:
         meta = read_run_meta(run_dir)
@@ -841,13 +845,16 @@ def main(argv: list[str] | None = None) -> int:
                         help="runs directory (default: <repo>/runs)")
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT_DIR,
                         help="output directory (default: docs/data/gate_audit_2026-10-29)")
+    parser.add_argument("--run-glob", default="2026102[78]T*",
+                        help="run-directory glob under --runs (default: 2026102[78]T*); "
+                             "use '20261029T*' for the hardened D runs")
     args = parser.parse_args(argv)
 
     if not args.runs.is_dir():
         print(f"error: --runs {args.runs} is not a directory", file=sys.stderr)
         return 2
 
-    rows, counters = collect(args.runs)
+    rows, counters = collect(args.runs, args.run_glob)
     rows = sort_rows(rows)
     args.out.mkdir(parents=True, exist_ok=True)
     csv_path = args.out / "gate_audit.csv"
