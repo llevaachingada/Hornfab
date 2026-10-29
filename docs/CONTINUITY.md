@@ -2,6 +2,23 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-29 (early) - OWNER-DELEGATED DECISIONS: HARDENED SOLVE PLAN (execution started)
+
+Owner delegated the open decisions in the 2026-10-28 chat. These are recorded as **owner decisions**; where they conflict with the 2026-10-29 "next solve strategy" handoff, these win.
+
+- **D1 loading metric.** Report LFP20 (Re z = 0.20, interpolated in log f), LFP50 and LFP70. Crossover rule `f_x >= 1.6 * LFP20` (hi-fi stretch 1.4x, never below 1.25x), and Re z >= 0.5 held from f_x upward.
+- **D2 pattern metric.** H within +/-20 % of target from f_x to band_hi; V within -40 %/+25 % from `max(1.5*f_x, f0_v)`; DI rise <= 5 dB from f_x to 8 kHz; beamwidth at 8 kHz >= 0.75x target in both planes; diagonals on the same narrow-side rule.
+- **D3 briefs.** b3bt/b3bw keep f_x 600 (LFP20 <= 375); b1t/b1w 850 (LFP20 <= 530); **b3a retargets to f_x 480** under new `b3a_pa_90x90_480_square_v5` (gate LFP20 <= 300), with the 400 Hz brief kept as a variant; retire the `rows` brief variants (DI-slope weight 0 selected the beamer).
+- **D4 throat.** Coupling plane round at the driver exit diameter (+/-0.5 mm), hard pre-solve refusal. A long slow throat section (80-220 mm, 3-10 deg total; Opus V-ERS style) is part of the horn profile and is allowed. No separate adapter.
+- **D5 seeds.** Primary `osse_ext_throat` (OS-SE + extended throat; neutral name, not "Opus"). Controls: native TwinRay 380 (published) and ATH Gen2-style R-OSSE. **Never seed** salmon_x, Le Cleac'h, chanterelle, or `af67489288c4` as constant-directivity candidates.
+- **B2 grid opt-in (amended 2026-10-29).** `grid.screen_extra_hz: [250, 315, 400, 2573, 3311, 4260]`, merged into the frozen 12-point screen grid -> **18 points** (250, 315, 400, 500, 643, 828, 1065, 1370, 1763, 2269, 2573, 2919, 3311, 3756, 4260, 4832, 6218, 8000 Hz). The 250/315/400 points feed the LFP/loading gate, not J (250 is below band_lo 300); 2573/3311/4260 are the geometric midpoints of 2269-2919, 2919-3756 and 3756-4832, giving ~1/6-octave spacing across 2.3-4.8 kHz. New grid group automatically; verify unchanged; apply to every D brief including the room briefs. Cost ~1.5x today's screen.
+- **C0 approved.** When `throat_ext_length_mm > 0`, derive `r0_mm = exit_r + L*tan(theta)` per design at materialize time (L and theta are searched); tie `a0_deg` to theta; zero-length stays bit-for-bit.
+- **C1-C5 v5 approved.** C1 LFP20/LFP50 loading penalty + Re z >= 0.5 from f_x; C2 `flat_cv` (on-axis + 20 log10 omega) over [f_x, 3 kHz] plus the existing flat above; C3 `cov_narrow_ratio 2.0` on every CD brief including b3bt, restore DI-slope weight, 8 kHz beamwidth floor, retire rows; C4 pre-solve round-throat refusal; C5 upper/lower vertical -6 dB targets for room-asym. **v4 stays byte-identical.** New tolerances live in the brief; absent = refuse to load.
+- **A1 canonical gate constants.** `F_X = f0`, `LFP_RE_Z 0.20`, `LFP_CROSSOVER_RATIO 1.6`, `LOADED_RE_Z 0.50`, `H_TOL 0.20`, `V_LO/HI 0.60/1.25`, `DI_RISE_MAX_DB 5.0`, `BW8K_FLOOR 0.75`, `THROAT_TOL_MM 0.5`, `ROUND_TOL 0.03`. Unresolved fails.
+- **Stop point.** After the D searches, top-10 verify and the A1 rerun. No 12/16 kHz pass, no print. Report the A1 table (empty sets included), B1 result, top 3 per cell, every zero-pass cell with its binding gate, and GPU hours/refusal rate.
+
+**B1 calibration result (2026-10-29T01:36Z, verify).** Published TwinRay 380 seed `fd2d5cc073ac` solved at verify in run `20261029T013620Z-verify-3f4992`: **LFP20 566.6 Hz**, LFP50 1004 Hz, LFP70 1269 Hz. Acceptance 580 +/- 1/6 octave = [518, 651] Hz -> **PASS**. The screen CMA best is 728 Hz; the published seed, not the CMA best, is the calibration point.
+
 ## 2026-10-28 (15:05 EDT) - PUSHED: SOLVED-STYLE RENDER SHEETS + THE DAY'S WINNER (J 1.11)
 
 - **Renders (4 PNG, `docs/renders/2026-10-28/`):** `typologies_solved_2026-10-28.png` (best design of each typology solved today, one row each),
