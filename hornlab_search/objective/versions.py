@@ -10,7 +10,9 @@ from __future__ import annotations
 #: 1 = the original objective; 2 = detrended terms (2026-10-24); 3 = per-plane ``f0_v``
 #: plus the K-law ``f0`` mask (2026-10-26). 4 = tolerance-normalised terms plus asymmetric
 #: coverage, DI standard deviation and the diagonal term (2026-10-27, ``objective/scalar_v4.py``).
-SUPPORTED_OBJECTIVE_VERSIONS: tuple[int, ...] = (1, 2, 3, 4)
+#: 5 = v4 plus the combined loading-frequency penalty, constant-velocity flatness, the 8 kHz
+#: one-sided floor and signed V coverage (2026-10-29, ``objective/scalar_v5.py``).
+SUPPORTED_OBJECTIVE_VERSIONS: tuple[int, ...] = (1, 2, 3, 4, 5)
 
 
 def is_supported_objective_version(value: object) -> bool:

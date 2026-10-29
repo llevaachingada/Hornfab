@@ -228,20 +228,29 @@ def _require(section: dict, key: str, where: str):
 # ------------------------------------------------------------------ WP1/WP4 blocks (senior pass)
 
 def _validate_objective_block(block, where: str) -> dict:
-    """Brief/config ``objective: {version: 2|3|4}`` (WP1; v3 = the 2026-10-25 owner-approved
+    """Brief/config ``objective: {version: 2|3|4|5}`` (WP1; v3 = the 2026-10-25 owner-approved
     K-law-masked coverage scoring - see objective/scalar_v2.py objective_v3; v4 = the 2026-10-27
     tolerance-normalised objective, whose block also carries ``tolerances`` and the optional
-    ``cov_narrow_ratio`` / ``cov_below_f0`` / ``diag_reference`` - see objective/scalar_v4.py).
+    ``cov_narrow_ratio`` / ``cov_below_f0`` / ``diag_reference`` - see objective/scalar_v4.py;
+    v5 = the 2026-10-29 loading/flat_cv/8 kHz-floor/signed-V objective, whose block adds the
+    ``loaded_re_z`` / ``lfp_re_z`` / ``lfp_crossover_ratio`` / ``bw8k_floor`` scoring constants -
+    see objective/scalar_v5.py).
     Default 1. Unknown keys are refused so a YAML typo is never silent."""
     if not isinstance(block, dict):
         raise ConfigError(f"{where}: objective must be a mapping")
     v = block.get("version", 1)
-    if isinstance(v, bool) or not isinstance(v, int) or v not in (1, 2, 3, 4):
-        raise ConfigError(f"{where}: objective.version must be 1, 2, 3 or 4, got {v!r}")
+    if isinstance(v, bool) or not isinstance(v, int) or v not in (1, 2, 3, 4, 5):
+        raise ConfigError(f"{where}: objective.version must be 1, 2, 3, 4 or 5, got {v!r}")
     if v == 4:
         from .objective.scalar_v4 import V4Params
         try:
             return V4Params.from_block(block).to_block()
+        except ValueError as e:
+            raise ConfigError(f"{where}: {e}") from None
+    if v == 5:
+        from .objective.scalar_v5 import V5Params
+        try:
+            return V5Params.from_block(block).to_block()
         except ValueError as e:
             raise ConfigError(f"{where}: {e}") from None
     unknown = set(block) - {"version"}
@@ -836,6 +845,17 @@ def load_config(path, *, brief=None, cma_seed: int | None = None) -> Config:
         if worst > 0.5 * PENALTY_INVALID:
             raise ConfigError(
                 f"{where}: objective v4 tolerances/weights let an all-unmeasurable valid design score "
+                f"J = {worst:.0f}, above half the refusal penalty ({PENALTY_INVALID:g}); raise the "
+                f"tolerances or lower the weights so refused designs always rank below valid ones")
+    elif objective_version == 5:
+        # Same penalty-ordering invariant as v4 (plan 3d.2 / 3f), on the v5 term set.
+        from .objective.scalar_v5 import V5Params, worst_valid_j
+        from .objective.terms import PENALTY_INVALID
+        objective_params = _validate_objective_block(raw["objective"], where)
+        worst = worst_valid_j(V5Params.from_block(objective_params), raw.get("weights"))
+        if worst > 0.5 * PENALTY_INVALID:
+            raise ConfigError(
+                f"{where}: objective v5 tolerances/weights let an all-unmeasurable valid design score "
                 f"J = {worst:.0f}, above half the refusal penalty ({PENALTY_INVALID:g}); raise the "
                 f"tolerances or lower the weights so refused designs always rank below valid ones")
 

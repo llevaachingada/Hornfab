@@ -22,6 +22,10 @@ class Target:
                                    # cov scores the horizontal error only at f >= f0_hz and the
                                    # vertical error only at f >= f0_v_hz (f0_v_hz >= f0_hz).
                                    # Absent = the pre-amendment path, bit-identical.
+    coverage_v_up_deg: float | None = None    # 2026-10-29 objective v5 (C5): signed V half-angle
+    coverage_v_down_deg: float | None = None  # above / below the axis. BOTH-OR-NEITHER, and
+                                              # |up| + |down| must equal coverage_v_deg. Absent =
+                                              # v5 scores one total vertical width (v4's rule).
 
     def f0_effective_hz(self) -> float:
         """The K-law design frequency in force (an explicit f0 wins over band_lo)."""
@@ -58,6 +62,9 @@ class Target:
             kw["f0_hz"] = float(d["f0_hz"])
         if d.get("f0_v_hz") is not None:
             kw["f0_v_hz"] = float(d["f0_v_hz"])
+        for k in ("coverage_v_up_deg", "coverage_v_down_deg"):
+            if d.get(k) is not None:
+                kw[k] = float(d[k])
         t = cls(**kw)
         if not (t.band_lo_hz > 0 and t.band_hi_hz > t.band_lo_hz):
             raise ValueError("Target.from_dict: need 0 < band_lo_hz < band_hi_hz")
@@ -76,7 +83,34 @@ class Target:
                 raise ValueError(
                     f"Target.from_dict: target.f0_v_hz must be >= target.f0_hz, got "
                     f"f0_v_hz={t.f0_v_hz!r} < f0_hz={t.f0_hz!r}")
+        _validate_v_asymmetry(t)
         return t
+
+
+def _validate_v_asymmetry(t: "Target") -> None:
+    """C5 (objective v5): the signed V half-angles, when present, must be a consistent pair.
+
+    Both-or-neither (one half alone is ambiguous), finite, ``up > 0``, ``down < 0``, and
+    ``|up| + |down|`` equal to ``coverage_v_deg`` within 1e-6 so the signed pair describes the
+    SAME total coverage every other metric and gate uses."""
+    up, down = t.coverage_v_up_deg, t.coverage_v_down_deg
+    if up is None and down is None:
+        return
+    if up is None or down is None:
+        raise ValueError("Target.from_dict: coverage_v_up_deg and coverage_v_down_deg must be "
+                         "given together (both or neither)")
+    if not (math.isfinite(up) and math.isfinite(down)):
+        raise ValueError(f"Target.from_dict: coverage_v_up_deg/coverage_v_down_deg must be finite, "
+                         f"got up={up!r}, down={down!r}")
+    if not up > 0.0:
+        raise ValueError(f"Target.from_dict: coverage_v_up_deg must be > 0, got {up!r}")
+    if not down < 0.0:
+        raise ValueError(f"Target.from_dict: coverage_v_down_deg must be < 0, got {down!r}")
+    total = up - down
+    if abs(total - t.coverage_v_deg) > 1e-6:
+        raise ValueError(
+            f"Target.from_dict: |coverage_v_up_deg| + |coverage_v_down_deg| = {total:g} must equal "
+            f"coverage_v_deg = {t.coverage_v_deg:g} (tolerance 1e-6)")
 
 
 # ------------------------------------------------------------------ freq_weights validation
