@@ -66,8 +66,13 @@ def check(path: str, brief: str | None, mode: str, save_dir: Path | None, geomet
         mesh = build.build_mesh(design, ms, cfg, work, mode=mode)
         summ = build.read_msh_summary(Path(mesh.path))
         bb = mesh.bbox_m
-        shape = throat_shape(mesh.path)
-        fit, why = fits_exit(shape, exit_d)
+        cad = design.params.get("cad") if isinstance(design.params, dict) else None
+        if isinstance(cad, dict) and cad.get("tool") == "plughorn":
+            # A cone mid horn: the driver face IS the cone, there is no compression-driver exit to match.
+            fit, why = True, f"cone r {float(cad['cone_r_mm']):.0f} mm (no exit to match)"
+        else:
+            shape = throat_shape(mesh.path)
+            fit, why = fits_exit(shape, exit_d)
         out.update(dofs=int(summ["n_nodes_used"]), cap=int(cfg.mesh.dof_cap(mode)), quadrants=mesh.quadrants,
                    mouth_w=2000.0 * bb[3], mouth_h=2000.0 * bb[4], depth=1000.0 * (bb[5] - bb[2]),
                    throat=why if fit is not None else "unknown", throat_ok=bool(fit))

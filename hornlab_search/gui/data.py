@@ -1706,6 +1706,9 @@ def _preview_extra_keys(cfg) -> set[str]:
         return {k for k, spec in keys.items() if spec.kind in (int, float)}
     if gen.get("name") == "grid":
         return set()
+    if gen.get("name") == "plughorn":                 # every key of the CAD tool is a knob
+        from hornlab_search.mesh import step_build
+        return set(step_build.load_cad_tool(tool=step_build.PLUGHORN_TOOL).KEYS)
     return {k for k in registry.DEFAULT_KNOBS if k.startswith("morph_")}
 
 
@@ -1948,6 +1951,11 @@ def preview_shape(root: Path, config_name: str, q: dict) -> dict:
             shape3d={"available": False, "reason": reason},
             slow=slow, timings=timings, notes=notes + [reason])
 
+    # (1b) cone mid horn + axe head (tools/cad/plughorn.py): the CAD tool's own sections and solid.
+    if gen and gen.get("name") == "plughorn":
+        return _plughorn_preview(cfg, effective, notes, detail, config_name, brief_name, quadrants,
+                                 started, unavailable)
+
     # (1) CAD recipe: no on-demand preview in the mesher; stop BEFORE to_mesher_config.
     if "cad" in cfg.seed_params:
         return unavailable(PREVIEW_NOTES_CAD,
@@ -2093,6 +2101,69 @@ def preview_shape(root: Path, config_name: str, q: dict) -> dict:
         envelope=envelope, shape3d=shape3d, slow=slow, timings=timings, notes=notes,
         rejected=rejected, dims=dims, morph_capable=morph_capable(cfg.raw),
         gcurve_capable=gcurve_capable(cfg.raw))
+
+
+def _plughorn_preview(cfg, effective, notes, detail, config_name, brief_name, quadrants, started,
+                      unavailable) -> dict:
+    """Sandbox preview of a ``plughorn`` design: H/V wall sections and the front opening from the
+    tool's own section geometry; 3D = the tessellated CAD solid (horn + axe head + bowl), mm.
+
+    The 3D tessellation builds the full OCC solid (~1-3 s), so the payload is marked ``slow``."""
+    from hornlab_search.design.generated import plughorn_params
+    from hornlab_search.mesh import step_build
+    t0 = time.perf_counter()
+    try:
+        cad = plughorn_params(cfg.generator, effective, cfg.brief)["cad"]
+        tool = step_build.load_cad_tool(tool=step_build.PLUGHORN_TOOL)
+        p = tool.params_from_recipe(cad)
+    except (ValueError, RuntimeError) as exc:
+        return unavailable(str(exc))
+    t_params = (time.perf_counter() - t0) * 1000.0
+    L = p.L
+    h_in, v_in = [], []
+    for i in range(41):
+        z = L * i / 40
+        sec = p.horn_section(z)
+        if sec is None or len(sec) < 3:
+            continue
+        sec = np.asarray(sec, dtype=float)
+        h_in.append([round(float(z), 3), round(float(np.abs(sec[:, 0]).max()), 3)])
+        v_in.append([round(float(z), 3), round(float(np.abs(sec[:, 1]).max()), 3)])
+    section = {"h": {"inner": h_in, "outer": []}, "v": {"inner": v_in, "outer": []}}
+    mouth = {"inner": [[round(x, 3), round(y, 3)] for x, y, _z in p.front_octagon()], "outer": []}
+    d = p.derived()
+    rejected = []
+    env = (cfg.brief or {}).get("envelope") or {}
+    for key, val in (("max_mouth_w_mm", d["outer_w_mm"]), ("max_mouth_h_mm", d["outer_h_mm"]),
+                     ("max_depth_mm", d["depth_total_mm"])):
+        if key in env and val > float(env[key]) + 0.5:
+            rejected.append(f"invalid_envelope: outer {key[4:-3]} {val:.0f} mm > {env[key]} mm")
+    envelope = {"available": True, "overshoot": 0.0 if not rejected else 1.0}
+    notes = list(notes) + [f"{k}: {v}" for k, v in d.items() if k in (
+        "compression_ratio", "min_channel_area_cm2", "side_wall_angle_deg", "top_wall_angle_deg",
+        "plug_clearance_mm", "rear_chamber_gross_l")]
+    t_section = (time.perf_counter() - t0) * 1000.0 - t_params
+    t_shape = 0.0
+    if detail == "3d":
+        t1 = time.perf_counter()
+        try:
+            part = tool.build_body(p)
+            verts, tris = part.tessellate(1.0, 0.3)
+            shape3d = {"available": True, "warnings": [], "roles": ["horn.inner"],
+                       "verts": np.round(np.array([[v.X, v.Y, v.Z] for v in verts]), 3).ravel().tolist(),
+                       "tris": np.asarray(tris, dtype=np.int64).ravel().tolist()}
+        except Exception as exc:  # noqa: BLE001 - a CAD failure is explained, never a server error
+            shape3d = {"available": False, "reason": f"CAD build failed: {exc}"}
+        t_shape = (time.perf_counter() - t1) * 1000.0
+    else:
+        shape3d = {"available": False, "reason": "detail=2d"}
+    dims = {"w": d["outer_w_mm"], "h": d["outer_h_mm"], "d": d["depth_total_mm"]}
+    timings = {"params": t_params, "section": t_section, "shape3d": t_shape,
+               "total": (time.perf_counter() - started) * 1000.0}
+    return _preview_response(
+        config=config_name, brief=brief_name, kind="plughorn", quadrants=quadrants, available=True,
+        knobs=effective, section=section, mouth=mouth, envelope=envelope, shape3d=shape3d, slow=True,
+        timings=timings, notes=notes, rejected=rejected, dims=dims)
 
 
 # ---------------------------------------------------------------------------- bounds writer

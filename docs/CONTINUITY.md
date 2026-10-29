@@ -22,6 +22,24 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
   during a live GPU night).
 - **Also carried up in this push:** `e0ea198` (skills + tools, committed by the afternoon session, previously unpushed on `main`).
 
+## 2026-10-28 (20:10 EDT) - CONE MID HORN + AXE HEAD TYPOLOGY FROM FUNKTION-ONE CAD (zero GPU)
+
+- Owner supplied Funktion-One's 3D models (Evo 7SH narrow 40x20, Evo 2SH wide 50) as DWG. LibreDWG could not decode the
+  3D solid (AC1027 data-storage SAB); the ODA File Converter (signed, extracted locally to `third_party/oda`, gitignored)
+  rewrote them as DXF R2000 and `tools/cad/sat_dump.py` read every vertex/edge/face. CAD files stay local
+  (`reference/`, gitignored, Funktion-One copyright).
+- Both horns share one topology: throat octagon in front of the cone, flat top/side walls, ruled corner panels, rolled
+  mouth, a planar convex axe head whose base sits in the throat (2.4-2.7 mm gap at the throat diagonals = the compression
+  ring, Sd/min channel 5.0 Evo 7SH, 7.5 Evo 2SH). `tools/cad/plughorn.py` builds it with the CAD numbers as defaults
+  (overlays coincide: `docs/renders/2026-10-28/cone_plughorn/`). Outside simplified per owner: plate + convex shell +
+  moulded driver bowl (gross 6.1 / 2.8 L).
+- Wired: `step_build` CAD-tool registry, `generator: {name: plughorn}`, GUI sandbox preview (sections + 3D CAD solid,
+  slow ~5-7 s), shape_check. Configs `examples/typologies/cone_plughorn_2026-10-28/` (2), briefs
+  `examples/briefs/cone_midhorn_2026-10-28/` (2). Mesh: 9,421 / 5,976 dofs (cap 12k), one driver face each.
+- Tests: `tests/test_mesh_plughorn.py` + `test_mesh_step_build.py` 29 pass (CPU). Not solved on the GPU yet.
+- Open: cone size not in the CAD (10-inch r 105 assumed on 7SH; r 90 on 2SH to fit its bowl); 2.4 mm throat gap is a
+  BEM thin-gap risk; Evo 2SH vertical coverage target 30 is a placeholder; parameter set still = raw CAD dimensions.
+
 ## 2026-10-28 (19:10 EDT) - CONE MID HORN / AXE-HEAD RESEARCH + PLAN (zero GPU)
 
 - Owner: model large cones in a mid horn with a central plug (Funktion-One "axe heads"). Dossier

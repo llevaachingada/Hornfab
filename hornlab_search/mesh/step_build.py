@@ -113,6 +113,16 @@ POSTPROCESS_TOLERANCE_MM = 1.0e-3
 
 STEP_FILENAME = "multicell.step"
 
+#: 2026-10-28: the cone mid horn with an axe-head plug (``tools/cad/plughorn.py``). Its recipe keys are
+#: the tool's own ``KEYS`` (every one required, like multicell's); the tool validates ranges and the
+#: plug clearance itself. Registry: tool name -> (tool file, STEP file name).
+PLUGHORN_TOOL = "plughorn"
+PLUGHORN_TOOL_RELPATH = "tools/cad/plughorn.py"
+CAD_TOOLS = {
+    CAD_TOOL: (CAD_TOOL_RELPATH, STEP_FILENAME),
+    PLUGHORN_TOOL: (PLUGHORN_TOOL_RELPATH, "plughorn.step"),
+}
+
 
 class CadParamsError(ValueError):
     """A ``cad`` recipe block the adapter refuses (shape/type/range)."""
@@ -139,6 +149,9 @@ def validate_cad_params(block) -> None:
     """
     if not isinstance(block, dict):
         raise CadParamsError(f"cad params must be a mapping, got {type(block).__name__}")
+    if block.get("tool") == PLUGHORN_TOOL:
+        _validate_plughorn(block)
+        return
     unknown = sorted(set(block) - set(CAD_KEYS))
     if unknown:
         raise CadParamsError(f"cad: unknown key(s) {unknown} (legal: {list(CAD_KEYS)})")
@@ -184,11 +197,26 @@ def validate_cad_params(block) -> None:
             f"got {block['flare_hz']!r}")
 
 
+def _validate_plughorn(block: dict) -> None:
+    """Exact keys + finite numbers; the tool's own ``validate`` owns ranges and clearance."""
+    keys = tuple(load_cad_tool(tool=PLUGHORN_TOOL).KEYS)
+    unknown = sorted(set(block) - set(keys) - {"tool"})
+    if unknown:
+        raise CadParamsError(f"cad: unknown plughorn key(s) {unknown} (legal: {list(keys)})")
+    missing = [k for k in keys if k not in block]
+    if missing:
+        raise CadParamsError(
+            f"cad: missing required plughorn key(s) {missing}; the recipe carries every key")
+    bad = [k for k in keys if not _isnum(block[k])]
+    if bad:
+        raise CadParamsError(f"cad: plughorn key(s) {bad} must be finite numbers")
+
+
 # ------------------------------------------------------------------ the CAD tool
 
 
 @functools.lru_cache(maxsize=4)
-def load_cad_tool(path: Path | None = None):
+def load_cad_tool(path: Path | None = None, tool: str = CAD_TOOL):
     """Load ``tools/cad/multicell.py`` by file path (it is not library code).
 
     The tool stays the canonical builder; nothing here re-implements its geometry.
@@ -196,13 +224,13 @@ def load_cad_tool(path: Path | None = None):
     imported lazily inside the tool), so re-executing it per candidate would be
     wasted work, not stale state.
     """
-    tool_path = Path(path) if path is not None else _REPO_ROOT / CAD_TOOL_RELPATH
+    tool_path = Path(path) if path is not None else _REPO_ROOT / CAD_TOOLS[tool][0]
     tool_path = tool_path.resolve()
     if not tool_path.is_file():
         raise FileNotFoundError(
             f"the CAD tool {tool_path} is missing; the cad route builds its STEP with "
             f"{CAD_TOOL_RELPATH} (repo root {_REPO_ROOT}) and refuses to guess a builder")
-    name = "hornlab_search_cad_multicell"
+    name = f"hornlab_search_cad_{tool_path.stem}"
     spec = importlib.util.spec_from_file_location(name, tool_path)
     if spec is None or spec.loader is None:                 # pragma: no cover - defensive
         raise ImportError(f"could not load the CAD tool from {tool_path}")
@@ -213,7 +241,9 @@ def load_cad_tool(path: Path | None = None):
 
 
 def _tool_params(tool, recipe: dict):
-    """``cad`` block -> the tool's own ``MulticellParams`` (mm / deg)."""
+    """``cad`` block -> the tool's own params dataclass (mm / deg)."""
+    if hasattr(tool, "params_from_recipe"):
+        return tool.params_from_recipe(recipe)
     values = {k: v for k, v in recipe.items() if k != "tool"}
     values["n_h"] = int(values["n_h"])
     values["n_v"] = int(values["n_v"])
@@ -230,7 +260,7 @@ def build_cad_step(recipe: dict, out_step: Path) -> dict:
     labels do not round-trip, so a returned path always satisfies the contract.
     """
     validate_cad_params(recipe)
-    tool = load_cad_tool()
+    tool = load_cad_tool(tool=str(recipe.get("tool", CAD_TOOL)))
     out_step = Path(out_step)
     out_step.parent.mkdir(parents=True, exist_ok=True)
     params = _tool_params(tool, recipe)
@@ -505,13 +535,15 @@ def build_mesh_from_cad(recipe: dict, mesh, cfg, out_dir: Path, *,
     validate_cad_params(recipe)
     if not isinstance(mesh.quadrants, str) or mesh.quadrants != "1234":
         raise GeometryInvalidError(
-            "cad: the multicell STEP is a FULL solid (mirror-symmetric but not reduced), "
+            "cad: the CAD STEP is a FULL solid (mirror-symmetric but not reduced), "
             f"so mesh.quadrants must be '1234'; got {mesh.quadrants!r}. A reduced solve of a "
             "full model would double-count the domain.")
 
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    step_path = out_dir / "cad" / STEP_FILENAME
+    tool_name = str(recipe.get("tool", CAD_TOOL))
+    tool_relpath, step_name = CAD_TOOLS[tool_name]
+    step_path = out_dir / "cad" / step_name
     built = build_cad_step(recipe, step_path)
     step_sha = _sha256(step_path)
     inventory = dict(built["inventory"])
@@ -519,7 +551,7 @@ def build_mesh_from_cad(recipe: dict, mesh, cfg, out_dir: Path, *,
     res = res_mm_for_spec(mesh, cfg)
     res = {"throat": float(res["throat"]), "mouth": float(res["mouth"]),
            "rear": float(res["rear"])}
-    raw_path = out_dir / "cad" / "multicell_raw_mm.msh"
+    raw_path = out_dir / "cad" / f"{tool_name}_raw_mm.msh"
     try:
         mapped = _import_and_mark(step_path, raw_path, res)
         repaired, repair, topo_report, source_specs = postprocess_cad_raw(raw_path, res)
@@ -578,7 +610,7 @@ def build_mesh_from_cad(recipe: dict, mesh, cfg, out_dir: Path, *,
             },
             "summary": summary,
             "cad": {
-                "tool": CAD_TOOL_RELPATH,
+                "tool": tool_relpath,
                 "tool_path": built["tool_path"],
                 "tool_sha256": _sha256(Path(built["tool_path"])),
                 "recipe": dict(recipe),

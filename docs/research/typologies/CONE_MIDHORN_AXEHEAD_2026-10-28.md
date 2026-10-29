@@ -181,6 +181,28 @@ band (WP-M3 term, owner approval).
 g 9 mm; Sd/A_t 3; bullet: Hh 0.20 m, theta_h 45 deg, horn length 0.45 m; axe: z_n ~ Rc ahead of the cone
 plane, knife-edge vertical, flat horizontal, horn 90 x 40 deg.
 
+## 5d. From Funktion-One's CAD (2026-10-28 20:00, supersedes 5c's image-based reading)
+
+The owner supplied the Evo 7SH and Evo 2SH 3D models. Read values (mm, depth behind the front face):
+
+| | Evo 7SH (40 x 20) | Evo 2SH (50) |
+|---|---|---|
+| throat (driver plane) depth | 400 | 223 |
+| throat octagon | (+-90, +-22.5), (+-15.6, +-90) | (+-73, +-15), (+-1.8, +-73) |
+| wall end side / top | x 252.2 @ 18.3 / y 162.3 @ 24.3 | x 204.3 @ 9.3 / y 123.8 @ 13.2 |
+| front opening | 559.6 x 383.6 | 431.8 x 274.0 |
+| axe head nose / tips | 12.7 / +-203.2 @ 66.8 | 16.5 / +-154.8 @ 52.1 |
+| ridge end / corner | +-67 @ 231.4 / (+-87.1, +-68.3) @ 258.8 | +-49.7 @ 134.7 / (+-59, +-50.6) @ 150.5 |
+| axe-head base (throat plane) | (+-75, 0), (+-28.6, +-75) | (+-60, +-10.9), (+-18.8, +-55) |
+| bowl | r 130 -> 114.7 @ +145, back r 65 @ +190 | r 105 to +88, back r 52.7 @ +136 |
+
+Walls: one flat top plane and one flat side plane from the throat octagon to the wall end; corner panels are ruled
+(twisted) quads; the roll-out is a circular (cone-surface) roundover. The axe head's four front faces are planar (corner
+within 0.01 mm of the nose/tip/ridge plane). The axe-head base sits on the throat plate leaving ~2.4 mm at the throat
+diagonals: the compression ring (5.0:1 and 7.5:1 against a 10-inch / 9-inch cone). The simplified 3D models carry no
+driver: the cone size is an assumption. Section 5c's crease-point / ruled-top reading came from the Evo 7 EH drawing
+and is superseded for the SH horns.
+
 ## 6. Open gaps
 
 - No F1 production drawings or dimensions are published; the patents give shapes and relations, not numbers.

@@ -51,7 +51,41 @@ def materialize(gen: dict, knobs: dict, brief: dict) -> dict:
     """
     if str(gen.get("name", "")) == "grid":
         return grid_gen.design_params(gen, knobs, brief)
+    if str(gen.get("name", "")) == "plughorn":
+        return plughorn_params(gen, knobs, brief)
     return registry.materialize(gen, knobs, brief)
+
+
+def plughorn_params(gen: dict, knobs: dict, brief: dict) -> dict:
+    """``name: plughorn`` -> ``{"cad": recipe}`` for ``tools/cad/plughorn.py`` (2026-10-28).
+
+    Recipe = the tool's documented DEFAULTS, overridden by ``generator.fixed`` and then by the knobs
+    (knob names ARE the tool's keys, e.g. ``h_angle2_deg``). Every key is written, so the recipe is
+    explicit and the design hash is the geometry. The tool's own validation (ranges, plug clearance)
+    runs here, and the outer size is checked against the brief envelope, so an illegal knob vector
+    becomes ``invalid_geometry`` / ``invalid_envelope`` before any mesh.
+    """
+    from dataclasses import asdict
+
+    from ..mesh import step_build                   # lazy: mesh imports the design package
+    tool = step_build.load_cad_tool(tool=step_build.PLUGHORN_TOOL)
+    recipe = dict(asdict(tool.DEFAULTS))
+    fixed = dict(gen.get("fixed") or {})
+    for src in (fixed, knobs):
+        unknown = sorted(set(src) - set(recipe))
+        if unknown:
+            raise ValueError(f"plughorn: unknown key(s) {unknown}")
+        recipe.update({k: float(v) for k, v in src.items()})
+    for k in tool.INT_KEYS:
+        recipe[k] = int(round(recipe[k]))
+    params = tool.params_from_recipe(recipe)          # raises ValueError on a bad shape
+    d = params.derived()
+    env = (brief or {}).get("envelope") or {}
+    for key, val in (("max_mouth_w_mm", d["outer_w_mm"]), ("max_mouth_h_mm", d["outer_h_mm"]),
+                     ("max_depth_mm", d["depth_total_mm"])):
+        if key in env and val > float(env[key]) + 0.5:
+            raise ValueError(f"plughorn: outer {key[4:-3]} {val:.0f} mm exceeds the brief's {env[key]} mm")
+    return {"cad": {"tool": step_build.PLUGHORN_TOOL, **recipe}}
 
 
 class GeneratedSpace:

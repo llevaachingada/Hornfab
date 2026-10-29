@@ -1,0 +1,78 @@
+# cone_plughorn__evo7sh_narrow - LABELED HYPOTHESIS-SHAPE EXPERIMENT (cone mid horn + axe head, Funktion-One Evo SH style).
+# Evo 7SH mid horn, every default read from Funktion-One's 3D model (DWG, owner 2026-10-28): 10-inch cone, throat 400 mm deep, 560 x 384 opening, axe head nose 12.7 mm behind the face, tips +-203 mm.
+# Derived: opening [559.6, 383.6], side wall 23.0 deg, top wall 10.9 deg, Sd/min channel 5.02, plug clearance 2.45 mm, bowl 6.14 L gross.
+# Geometry + every key: tools/cad/plughorn.py. generator.fixed = keys pinned (not searched); seed_params /
+# bounds = the searchable knobs (+-12 % around the CAD). Full model: mesh.quadrants '1234'.
+name: cone_plughorn__evo7sh_narrow
+family: FREEFORM
+brief_file: ../../briefs/cone_midhorn_2026-10-28/cone_mid_narrow_40x20.yaml
+generator:
+  name: plughorn
+  seed_policy: explicit
+  fixed: {}
+seed_params:
+  length_mm: 400.0
+  mouth_side_x_mm: 252.2
+  mouth_top_y_mm: 162.3
+  front_side_x_mm: 279.8
+  front_top_y_mm: 191.8
+  throat_side_x_mm: 90.0
+  throat_top_y_mm: 90.0
+  plug_tip_x_mm: 203.2
+  plug_nose_d_mm: 12.7
+  plug_top_d_mm: 231.4
+bounds:
+  length_mm:
+    lo: 352.0
+    hi: 448.0
+  mouth_side_x_mm:
+    lo: 221.9
+    hi: 282.5
+  mouth_top_y_mm:
+    lo: 142.8
+    hi: 181.8
+  front_side_x_mm:
+    lo: 246.2
+    hi: 313.4
+  front_top_y_mm:
+    lo: 168.8
+    hi: 214.8
+  throat_side_x_mm:
+    lo: 79.2
+    hi: 100.8
+  throat_top_y_mm:
+    lo: 79.2
+    hi: 100.8
+  plug_tip_x_mm:
+    lo: 178.8
+    hi: 227.6
+  plug_nose_d_mm:
+    lo: 11.2
+    hi: 14.2
+  plug_top_d_mm:
+    lo: 203.6
+    hi: 259.2
+mesh:
+  epw: 6.0
+  quadrants: '1234'
+  dof_cap_screen: 12000
+  dof_cap_verify: 12000
+  dof_cap_final: 12000
+  dof_per_triangle: 0.5
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.2
+  seed: 1234
+  budget: 60
+  popsize: null
+  tolfun: 0.001

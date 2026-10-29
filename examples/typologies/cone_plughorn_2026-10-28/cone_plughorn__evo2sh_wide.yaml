@@ -1,0 +1,105 @@
+# cone_plughorn__evo2sh_wide - LABELED HYPOTHESIS-SHAPE EXPERIMENT (cone mid horn + axe head, Funktion-One Evo SH style).
+# Evo 2SH mid horn (the wider 50 deg pattern), every number read from Funktion-One's 3D model (DWG, owner 2026-10-28): throat 223 mm deep, 432 x 274 opening, axe head tips +-155 mm; cone 90 mm radius to fit the 105 mm bowl (driver size not in the CAD).
+# Derived: opening [431.8, 274.0], side wall 31.6 deg, top wall 13.6 deg, Sd/min channel 7.45, plug clearance 2.67 mm, bowl 2.84 L gross.
+# Geometry + every key: tools/cad/plughorn.py. generator.fixed = keys pinned (not searched); seed_params /
+# bounds = the searchable knobs (+-12 % around the CAD). Full model: mesh.quadrants '1234'.
+name: cone_plughorn__evo2sh_wide
+family: FREEFORM
+brief_file: ../../briefs/cone_midhorn_2026-10-28/cone_mid_wide_50.yaml
+generator:
+  name: plughorn
+  seed_policy: explicit
+  fixed:
+    cone_r_mm: 90.0
+    cone_depth_mm: 38.0
+    post_r_mm: 18.0
+    throat_side_half_mm: 15.0
+    throat_top_half_mm: 1.8
+    mouth_side_half_mm: 113.7
+    mouth_side_d_mm: 9.3
+    mouth_top_half_mm: 187.3
+    mouth_top_d_mm: 13.2
+    plate_w_mm: 466.0
+    plate_h_mm: 320.0
+    plate_t_mm: 18.0
+    shell_w_mm: 456.0
+    shell_h_mm: 300.0
+    bowl_r1_mm: 105.0
+    bowl_r2_mm: 105.0
+    bowl_len_mm: 88.0
+    bowl_back_r_mm: 52.7
+    bowl_back_d_mm: 136.0
+    plug_tip_d_mm: 52.1
+    plug_top_y_mm: 49.7
+    plug_corner_x_mm: 59.0
+    plug_corner_y_mm: 50.6
+    plug_base_x_mm: 60.0
+    plug_base_side_y_mm: 10.9
+    plug_base_top_x_mm: 18.8
+    plug_base_y_mm: 55.0
+seed_params:
+  length_mm: 223.0
+  throat_side_x_mm: 73.0
+  throat_top_y_mm: 73.0
+  mouth_side_x_mm: 204.3
+  mouth_top_y_mm: 123.8
+  front_side_x_mm: 215.9
+  front_top_y_mm: 137.0
+  plug_nose_d_mm: 16.5
+  plug_tip_x_mm: 154.8
+  plug_top_d_mm: 134.7
+bounds:
+  length_mm:
+    lo: 196.2
+    hi: 249.8
+  mouth_side_x_mm:
+    lo: 179.8
+    hi: 228.8
+  mouth_top_y_mm:
+    lo: 108.9
+    hi: 138.7
+  front_side_x_mm:
+    lo: 190.0
+    hi: 241.8
+  front_top_y_mm:
+    lo: 120.6
+    hi: 153.4
+  throat_side_x_mm:
+    lo: 64.2
+    hi: 81.8
+  throat_top_y_mm:
+    lo: 64.2
+    hi: 81.8
+  plug_tip_x_mm:
+    lo: 136.2
+    hi: 173.4
+  plug_nose_d_mm:
+    lo: 14.5
+    hi: 18.5
+  plug_top_d_mm:
+    lo: 118.5
+    hi: 150.9
+mesh:
+  epw: 6.0
+  quadrants: '1234'
+  dof_cap_screen: 12000
+  dof_cap_verify: 12000
+  dof_cap_final: 12000
+  dof_per_triangle: 0.5
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.2
+  seed: 1234
+  budget: 60
+  popsize: null
+  tolfun: 0.001
