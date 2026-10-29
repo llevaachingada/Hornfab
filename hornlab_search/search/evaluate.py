@@ -235,6 +235,54 @@ def throat_radius_m(design: Design) -> float | None:
     return None
 
 
+def _brief_exit_radius_mm(cfg) -> float | None:
+    """The applied brief's driver exit radius, or None when this run has no brief/driver."""
+    brief = getattr(cfg, "brief", None)
+    drv = brief.get("driver") if isinstance(brief, dict) else None
+    r = drv.get("exit_radius_mm") if isinstance(drv, dict) else None
+    if isinstance(r, (int, float)) and not isinstance(r, bool) \
+            and np.isfinite(float(r)) and float(r) > 0.0:
+        return float(r)
+    return None
+
+
+def _derive_throat_coupling(design: Design, cfg) -> Design:
+    """C0 (2026-10-28): put the DRIVEN coupling plane at the brief's driver exit.
+
+    The mesher's OSSE/R-OSSE throat extension anchors ``r0_mm`` at the MAIN throat and tapers
+    back to the driven end at ``r0 - L*tan(theta)`` (half-angle from the axis). With a positive
+    ``throat_ext_length_mm`` the driver-end radius must therefore be the brief's exit radius, so
+    ``r0_mm = exit_r + L*tan(theta)`` and ``a0_deg = theta`` (continuous wall slope). Both L and
+    theta are SEARCHED, so this is derived per design here, never baked into the config at load.
+
+    Returns a NEW ``Design`` (a shallow copy of the params; the CMA candidate object is never
+    mutated). Zero/absent extension — or no brief driver — returns the design unchanged, so every
+    pre-C0 design hash and mesh key is byte-identical. Derivation happens before the hash is
+    computed, so the mesh cache key, design dir, dataset record and every metric see the same
+    derived geometry that is meshed.
+    """
+    if design.family not in ("OSSE", "R-OSSE") or not isinstance(design.params, dict):
+        return design
+    length = design.params.get("throat_ext_length_mm")
+    if isinstance(length, bool) or not isinstance(length, (int, float)) \
+            or not np.isfinite(float(length)) or float(length) <= 0.0:
+        return design
+    theta = design.params.get("throat_ext_angle_deg", 0.0)
+    if isinstance(theta, bool) or not isinstance(theta, (int, float)) \
+            or not np.isfinite(float(theta)):
+        return design
+    exit_r = _brief_exit_radius_mm(cfg)
+    if exit_r is None:
+        return design
+    r0 = exit_r + float(length) * float(np.tan(np.radians(float(theta))))
+    if not r0 > 0.0:                    # leave it to the mesher's own refusal (reported, cached)
+        return design
+    params = dict(design.params)        # shallow copy: the candidate's own params stay untouched
+    params["r0_mm"] = r0
+    params["a0_deg"] = float(theta)
+    return Design(design.family, params)
+
+
 def metrics_from_response(resp: Response, target: Target, *, mesh: MeshResult | None = None,
                           design: Design | None = None) -> MetricSet:
     """``compute_metrics`` with the balloon DI done correctly.
@@ -657,6 +705,9 @@ def evaluate(design: Design, space, cfg, mode: str, run_dir, store, backend, *,
     ctx = ctx or make_context(cfg, store)
     warn_freq_weights_v1(cfg, ctx.target)
     t_start = time.perf_counter()
+    # C0: the driven coupling plane of an extended-throat design is the brief's driver exit. The
+    # derivation depends on the SEARCHED L/theta, so it is per design (never a config constant).
+    design = _derive_throat_coupling(design, cfg)
     mspec = config_mod.mesh_spec(mode, cfg)
     sspec = config_mod.solve_spec(mode, cfg)
     dh, mh, sh = design.hash(), mspec.hash(), sspec.hash()

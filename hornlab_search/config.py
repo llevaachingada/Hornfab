@@ -577,6 +577,27 @@ def _force_pin(key: str, value: float, seed: dict, bounds: dict, where: str, uni
         seed[key] = value
 
 
+def _positive_number(v) -> bool:
+    """True for a finite number > 0 (bools excluded)."""
+    return isinstance(v, (int, float)) and not isinstance(v, bool) \
+        and np.isfinite(float(v)) and float(v) > 0.0
+
+
+def _declares_positive_throat_extension(seed: dict, bounds: dict) -> bool:
+    """Does this native OSSE/R-OSSE config search/seed a POSITIVE throat extension?
+
+    The mesher's extension tapers the MAIN throat ``r0`` back to the driven plane at
+    ``r0 - L*tan(theta)``. When L can be > 0 the coupling plane belongs at the driver exit, so
+    ``r0`` must be derived per design (``search/evaluate.py:_derive_throat_coupling``) and must
+    NOT be pinned to the brief's exit radius here. A zero/absent extension keeps today's pin
+    (bit-for-bit).
+    """
+    if _positive_number(seed.get("throat_ext_length_mm")):
+        return True
+    b = bounds.get("throat_ext_length_mm")
+    return isinstance(b, dict) and _positive_number(b.get("hi"))
+
+
 def _apply_brief_driver_pins(raw: dict, brief_d: dict | None, where: str,
                              embedded: bool = False) -> None:
     """WP2 (senior pass 2026-10-24, fairness): when a brief is applied to a NATIVE family config
@@ -596,7 +617,13 @@ def _apply_brief_driver_pins(raw: dict, brief_d: dict | None, where: str,
       resume/verify/report path) SKIPS the pins entirely — a pre-WP2 run whose embedded brief
       conflicts with its pinned throat must stay loadable (bit-for-bit contract on old runs);
       fairness is enforced where the brief is applied fresh (``--brief`` or ``brief_file:``,
-      including a NEW run's subprocess, which passes the brief freshly)."""
+      including a NEW run's subprocess, which passes the brief freshly).
+    - 2026-10-28 (C0, extended-throat coupling plane): when a NATIVE OSSE/R-OSSE config declares
+      ``throat_ext_length_mm`` with a positive seed or a positive ``hi`` bound, the driven plane is
+      the extension's driver end (r0 - L*tan(theta)), so neither ``r0_mm`` nor ``a0_deg`` is pinned
+      to the brief: ``search/evaluate.py`` derives r0 = exit_r + L*tan(theta) and a0 = theta per
+      design (L and theta are searched). Zero-length/absent extension = today's pins, bit-for-bit.
+    """
     if brief_d is None or embedded or raw.get("generator") is not None:
         return
     drv = brief_d.get("driver") or {}
@@ -608,7 +635,9 @@ def _apply_brief_driver_pins(raw: dict, brief_d: dict | None, where: str,
     family = str(raw.get("family", ""))
     seed = raw.setdefault("seed_params", {})
     bounds = raw.setdefault("bounds", {})
-    if family in _PIN_FAMILIES and ("r0_mm" in seed or "r0_mm" in bounds):
+    extended = family in ("OSSE", "R-OSSE") \
+        and _declares_positive_throat_extension(seed, bounds)
+    if family in _PIN_FAMILIES and ("r0_mm" in seed or "r0_mm" in bounds) and not extended:
         _force_pin("r0_mm", exit_r, seed, bounds, where, "mm")
         if policy == "pin" and ("a0_deg" in seed or "a0_deg" in bounds):
             _force_pin("a0_deg", exit_a, seed, bounds, where, "deg")
