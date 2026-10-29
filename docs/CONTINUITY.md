@@ -2,6 +2,25 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-29 (20:15 EDT) - MINI MEH RESEARCH: WEB LANE FOLDED IN, CLAIMS SPOT-CHECKED (zero GPU, no code)
+
+- **Web lane (Sonnet) returned:** raw survey kept verbatim as `docs/research/typologies/mini_meh_2026-10-29/appendix_A_web_survey_raw.md`
+  (sources, 8 targets, design-rules digest, product-size and driver tables, conflicts). Dossier s0-s13 rewritten around it.
+- **Orchestrator spot-checks (all match):** JW DH350 MEH page, Solana page, US 8,284,976 claims 1/4/5/6 + notch/port passages,
+  Boundary Lab releases (v0.5.0 still latest) and its `Multi_region_SAWMOD` example, MEH Studio repo. US 6,411,718 claim text
+  not re-readable here (503/403); kept at the lane's label.
+- **Key external facts:** JW DH350 MEH = the owner's size class (2 x 6.5-inch + 1-inch CD + 2 PR, 470 x 260 x 200 mm, ~15 L net,
+  60 Hz-16 kHz +-2 dB, 106 dB, taps lambda/4 at the 1.0-1.2 kHz XO); Solana 4 x 6.5-inch + 1-inch, 109/120 dB, 90 x 90 to 700 Hz,
+  no dimensions; no Danley box in this size class (SH75 62 L, SM-60F 113 L); Boundary Lab solves several voltage-driven drivers +
+  FEM chambers + port interfaces in one coupled system (Mmd only, no passive radiators); no AES/JASA paper on MEH found.
+- **New 1-D result [measured]:** the mid's own reflection notch depends only on the horn; in a cone it sits 1.4-1.8x above
+  c/4d, but a 35 mm compression-driver duct pulls it to ~1.6-1.9 kHz for close entries (the practitioners' ~1.5 kHz ceiling):
+  the CD's internal depth must be modelled (`calc/notch_vs_path.md`).
+- **Corrections (dossier s8; owner-file items appended to `NOTES_FOR_SENIOR.md`):** frozen plan's "MEH geometry path exists"
+  (tag names only); `DRIVER_MODEL.md` "Boundary Lab issue #78" is timini/horn-simulation issue #78 (rule unchanged); BL
+  "symmetry Off" applies to plugin assemblies, coupled projects run with symmetry xy; draft's "6.5-inch needs a 1.4-inch CD".
+- **Still open:** owner decisions in dossier s13 (bass route, size number, use/coverage, mid complement, DSP, J terms).
+
 ## 2026-10-29 (18:45 EDT) - MINI MULTIPLE-ENTRY HORN: RESEARCH PASS, DRAFT PUSHED (zero GPU, no code)
 
 - **Owner request:** internal + external research toward a mini multiple-entry horn (Synergy/Unity class, smaller than

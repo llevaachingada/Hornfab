@@ -120,6 +120,7 @@ class Horn:
     cov_v: float
     depth: float      # apex-to-mouth axial length, m
     s_throat: float = 5.07e-4   # 1-inch exit
+    cd_passage: float = 0.0     # m, CD internal duct (exit bore to diaphragm) behind the throat; 0 = rigid throat
 
     @property
     def omega(self):
@@ -180,6 +181,13 @@ def solve(horn: Horn, entries: list[Entry], f, u_cd, e_entries):
         x1 = nodes[idx - 1][0]
         T = seg_T(x1, x2, f, om)
         a, b = T @ a, T @ b
+    if horn.cd_passage > 0:
+        # cylindrical CD exit duct of the throat area between the throat plane and the diaphragm
+        k = 2 * np.pi * f / C
+        zc = Z0 / horn.s_throat
+        kl = k * horn.cd_passage
+        Tc = np.array([[np.cos(kl), 1j * zc * np.sin(kl)], [1j * np.sin(kl) / zc, np.cos(kl)]])
+        a, b = Tc @ a, Tc @ b
     u_n = (u_cd - b[1]) / a[1]
     p_entries = {i: (st[0] * u_n + st[1])[0] for (kind, i), st in states.items()}
     p_throat = a[0] * u_n + b[0]
