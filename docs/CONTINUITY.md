@@ -22,6 +22,12 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
   during a live GPU night).
 - **Also carried up in this push:** `e0ea198` (skills + tools, committed by the afternoon session, previously unpushed on `main`).
 
+## 2026-10-28 (20:50 EDT) - PUSHED: 8 COMMITS TO origin/main
+
+- `cb09147`..this commit: top-2-per-typology renders + day-queue status; compression-driver library; cone mid horn research,
+  corrections and the CAD-based `cone_plughorn` typology (tool, GUI preview, configs, tests, morph knobs); driver handoff.
+- Not pushed by design: `third_party/`, `reference/` (gitignored). Nothing GPU ran for this work.
+
 ## 2026-10-28 (21:00 EDT) - CONE PLUGHORN: HORN-THEORY MORPH KNOBS, GUI, HANDOFF (zero GPU)
 
 - `tools/cad/plughorn.py` gained a morph layer: 14 `m_*` knobs (compression ratio, axe-head base, wall angles, mouth corner,

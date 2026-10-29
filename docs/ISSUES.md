@@ -20,6 +20,14 @@ Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 20
 
 Local-only items (no GitHub issue): band edges capped by the measured dof cap (confirmed, user "keep lowered edges"); task 07 test-17 disk-latency flake risk (do not loosen); residual CP-7 risks (epw=6 above 2.5 kHz unmeasured; f11 unexercised; DI-vs-beamwidth not a regression test) — see `NOTES_FOR_SENIOR.md` task-09 block and CONTINUITY 06:20.
 
+Local-only, pushed 2026-10-28 20:50 EDT (**cone mid horn typology + research; no GitHub issue state changed**; 8 commits to origin/main):
+- **OPEN:** `cone_plughorn` never solved on the GPU; first screen should use `source_motion: axial` and a CPU cross-check of the
+  2.4 mm axe-head/throat gap (thin-gap risk).
+- **OPEN (handoff):** paper-cone driver T/S unknown (Funktion-One publishes none); axe-head cone fill not modelled (front-chamber
+  cut-off estimate too low); see `docs/research/HANDOFF_CONE_DRIVER_MODEL_2026-10-28.md`.
+- **OPEN:** compression-driver library lacks Sd/Mmd for every driver (absolute sensitivity model cannot run on them yet).
+- **LOCAL ONLY:** `third_party/` (LibreDWG, ODA File Converter) and `reference/` (Funktion-One CAD) are gitignored by design.
+
 Local-only, added 2026-10-28 17:45 EDT (**no GitHub issue state changed**):
 - **OPEN:** round-throat `rt__b1t__rosse_morph` and `rt__b2t__rosse_morph` scored J 1000 on every eval (infeasible); diagnose before re-queueing.
 - **OPEN:** verify slips 0.9-2 J for ATH 2in core / ridge and Salmon / Le Cleac'h tall shapes vs screen; screen ranking of those is optimistic.
