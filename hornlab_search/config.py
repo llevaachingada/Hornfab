@@ -250,21 +250,60 @@ def _validate_objective_block(block, where: str) -> dict:
     return {"version": int(v)}
 
 
+GRID_KEYS = ("verify_points_per_octave", "screen_extra_hz")
+
+
+def _positive_grid_number(block: dict, key: str, where: str) -> float:
+    v = block.get(key)
+    if isinstance(v, bool) or not isinstance(v, (int, float)) or not np.isfinite(float(v)) \
+            or not float(v) > 0:
+        raise ConfigError(f"{where}: grid.{key} must be a positive number")
+    return float(v)
+
+
+def _screen_extra_points(value, where: str) -> list[float]:
+    """``grid.screen_extra_hz``: a non-empty list of positive finite numbers (bools refused)."""
+    if not isinstance(value, (list, tuple)) or isinstance(value, (str, bytes)):
+        raise ConfigError(f"{where}: grid.screen_extra_hz must be a non-empty list of positive "
+                          f"finite numbers, got {value!r}")
+    if not value:
+        raise ConfigError(f"{where}: grid.screen_extra_hz must not be empty")
+    points = []
+    for i, x in enumerate(value):
+        if isinstance(x, bool) or not isinstance(x, (int, float)) \
+                or not np.isfinite(float(x)) or not float(x) > 0:
+            raise ConfigError(f"{where}: grid.screen_extra_hz[{i}] must be a positive finite "
+                              f"number, got {x!r}")
+        points.append(float(x))
+    return points
+
+
 def _validate_grid_block(block, where: str) -> dict:
-    """Brief ``grid: {verify_points_per_octave: N}`` (WP4): build the verify grid as the frozen
-    grid PLUS extra log points in [5 kHz, band_hi] at that density. It forms a NEW grid group:
-    records carry it via their own solve.freqs_hz, and comparisons against runs with a different
-    grid refuse (intended separation)."""
+    """Brief ``grid:`` block (exact keys; a YAML typo is never silent).
+
+    - ``verify_points_per_octave`` (WP4): build the verify grid as the frozen grid PLUS extra log
+      points in [5 kHz, band_hi] at that density. That is a NEW grid group: records carry it via
+      their own solve.freqs_hz, and comparisons against runs with a different grid refuse.
+    - ``screen_extra_hz`` (2026-10-28, opt-in): an explicit list of extra SCREEN frequencies,
+      merged into the frozen 12-point grid after the band_hi clip (``mode_freqs``). The approved
+      points are 250, 315, 400 (LFP/loading gate, below band_lo and intentionally not clipped) and
+      2573, 3311, 4260 (mid-band). Absent = the old 12-point screen grid, byte-for-byte.
+    """
     if not isinstance(block, dict):
         raise ConfigError(f"{where}: grid must be a mapping")
-    unknown = set(block) - {"verify_points_per_octave"}
+    unknown = set(block) - set(GRID_KEYS)
     if unknown:
         raise ConfigError(f"{where}: grid unknown key(s) {sorted(unknown)} "
-                          f"(allowed: verify_points_per_octave)")
-    ppo = block.get("verify_points_per_octave")
-    if isinstance(ppo, bool) or not isinstance(ppo, (int, float)) or not ppo > 0:
-        raise ConfigError(f"{where}: grid.verify_points_per_octave must be a positive number")
-    return {"verify_points_per_octave": float(ppo)}
+                          f"(allowed: {', '.join(GRID_KEYS)})")
+    if not block:
+        raise ConfigError(f"{where}: grid must set at least one of {list(GRID_KEYS)}")
+    out: dict = {}
+    if "verify_points_per_octave" in block:
+        out["verify_points_per_octave"] = _positive_grid_number(block, "verify_points_per_octave",
+                                                                where)
+    if "screen_extra_hz" in block:
+        out["screen_extra_hz"] = _screen_extra_points(block["screen_extra_hz"], where)
+    return out
 
 
 # ------------------------------------------------------------------ WP12 mounting block
@@ -833,6 +872,18 @@ def load_config(path, *, brief=None, cma_seed: int | None = None) -> Config:
 
 # ------------------------------------------------------------------ specs
 
+def _merge_screen_extra(base: list[float], extra, hi: float) -> tuple[float, ...]:
+    """Frozen screen grid PLUS the brief's explicit ``screen_extra_hz`` points.
+
+    The top clip to ``band_hi`` has already been applied to ``base`` (``hi``); extra points above
+    it are dropped. The bottom is never clipped: 250 Hz is deliberately below ``band_lo`` (the
+    LFP/loading gate solves it, J does not score it). Sorted, rounded to 2 decimals; the tuple is
+    the solve spec's ``freqs_hz``, so the solve hash changes automatically.
+    """
+    pts = {round(float(f), 2) for f in extra if float(f) <= float(hi)}
+    return tuple(sorted(set(base) | pts))
+
+
 def mode_freqs(mode: str, cfg: Config) -> tuple[float, ...]:
     """The mode's frozen log grid, with its top edge clipped to the target band's upper
     edge so the mesh is never asked to resolve frequencies the objective ignores.
@@ -840,14 +891,23 @@ def mode_freqs(mode: str, cfg: Config) -> tuple[float, ...]:
     WP4 (senior pass 2026-10-24): a brief with ``grid: {verify_points_per_octave: N}`` extends the
     VERIFY grid with extra log points in [5 kHz, band_hi] at that density. That is a NEW grid
     group — records carry it through their own solve.freqs_hz (and the solve-spec hash), so a
-    comparison against runs on the frozen grid refuses rather than mixing grids."""
+    comparison against runs on the frozen grid refuses rather than mixing grids.
+
+    2026-10-28 (B2): ``grid: {screen_extra_hz: [...]}`` merges explicit extra points into the
+    SCREEN grid (see ``_merge_screen_extra``); the bottom edge is never clipped. Absent keys leave
+    the screen grid byte-identical, and the verify/final grids are never touched by them."""
     lo, hi, n = FREQ_GRIDS[mode]
     band_hi = cfg.target_raw.get("band_hi_hz")
     if band_hi is not None and float(band_hi) < hi:
         hi = float(band_hi)
     base = [round(float(f), 2) for f in freq_grid(lo, hi, n)]
+    grid_cfg = cfg.grid or {}
+    if mode == "screen":
+        extra = grid_cfg.get("screen_extra_hz")
+        if extra:
+            return _merge_screen_extra(base, extra, hi)
     if mode == "verify":
-        ppo = ((cfg.grid or {}).get("verify_points_per_octave"))
+        ppo = (grid_cfg.get("verify_points_per_octave"))
         if ppo is not None and hi > HF_VERIFY_LO_HZ:
             n_oct = float(np.log2(hi / HF_VERIFY_LO_HZ))
             n_pts = max(1, int(round(n_oct * float(ppo))))
