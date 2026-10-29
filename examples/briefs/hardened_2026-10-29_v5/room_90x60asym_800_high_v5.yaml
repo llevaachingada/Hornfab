@@ -1,0 +1,93 @@
+# OBJECTIVE v5 COPY (2026-10-29, hardened plan): the v4 brief with the 2026-10-29 v5 objective.
+# v4 stays untouched. THE ONLY CHANGES vs v4: name/description, target.coverage_v_up_deg 15.0 /
+# coverage_v_down_deg -45.0 (sum = coverage_v_deg 60), objective.version 5, flat_cv tolerance 1.5,
+# the nine weighted terms (flat_cv added), weights distd 0.5 / flat_cv 0.5, cov_narrow_ratio 2.0,
+# the v5 loading/pattern constants (loaded_re_z 0.5, lfp_re_z 0.2, lfp_crossover_ratio 1.6,
+# bw8k_floor 0.75) and grid.screen_extra_hz. Driver, envelope, loading weight and class are v4's.
+#
+# Brief room_90x60asym_800_high - hi-fi ROOM COVERAGE horn, 90 deg H x 60 deg V ASYMMETRIC
+# (narrow UP, wide DOWN), crossover 800 Hz, 1.4-inch, high mount (ceiling-hung ~8.5 ft).
+#
+# OWNER USE CASE: same room as room_90x60_800_shelf_v5 (20 x 14 x 10 ft, front corners, toed in).
+# WHY ASYMMETRIC: from 8.5 ft the seats span ~11 deg (far corner) to ~44 deg (nearest seat) BELOW
+#   the horn. The textbook high-mount answer is a vertical pattern skewed down: about +15 deg up
+#   and -45 deg down (60 deg total, centred ~15 deg below the horn axis). Top edge near level keeps
+#   the 10 ft ceiling (1.5 ft above the horn) out of the beam; the wide lower half reaches the
+#   near seats. Physical tilt of a symmetric horn gets part of this; the asymmetry also puts more
+#   level toward the far seats (upper half) and less toward the near seats (lower half).
+#
+# STATUS (v5, 2026-10-29):
+#   * SCORING: objective v5 carries the asymmetric-V term (C5): the upper/lower -6 dB angles are
+#     scored separately against coverage_v_up_deg / coverage_v_down_deg, so J now ranks the
+#     asymmetry, not only the total V width. The gate audit's upper/lower edge check still decides.
+#   * GEOMETRY (unchanged from v4): representable only by the rows generator's up/down-antisymmetric
+#     terms (sin(phi) / sin(3 phi) LIST stop terms and the axial bend_sin1_mm; see
+#     hornlab_search/design/generators/grid.py), which REQUIRE span: half (mirror plane yz,
+#     quadrants "14", 2x the quarter dofs). The typology config sets the span, not this brief.
+#   * symmetry: hv below is the loader's label (allowed: hv | axisymmetric); it does not fix the
+#     mesh span.
+# GATES (hardened plan D1/D2): loading as the shelf brief (LFP20 <= 500 Hz, Re z >= 0.5 from
+#   800 Hz). Pattern: H +-20 % from 800 Hz to 8 kHz; V upper -6 dB edge +10..+20 deg, lower edge
+#   -35..-55 deg from 1.5 f_x up; DI rise <= 5 dB; no beam narrower than 0.75 x target at 8 kHz.
+# K-LAW (mouth = 25,400,000 / (f0 * coverage_deg)): H 353 mm at 800 Hz; V 529 mm at 800 Hz.
+#   High-mount envelope 520 W x 440 H x 420 D -> f0_v_hz = 25,400,000 / (60 * 440) = 962 Hz.
+# DRIVER CLASS: 1.4-inch compression driver (36 mm exit), r0 = 18.0 mm, exit half-angle 2.5 deg.
+# f11 DISCLOSURE: 1.4in f11 5,653 Hz: 5.7-8 kHz compares geometry, not the driver.
+name: room_90x60asym_800_high_v5
+description: (objective v5) Room-coverage 90 H x 60 V asymmetric (+15/-45 target), crossover 800 Hz (V from 962 Hz), 1.4-inch, high-mount 520x440x420 envelope, band 300-8000 Hz, v5 signed-V + LFP + flat_cv
+driver:
+  exit_radius_mm: 18.0
+  exit_angle_deg: 2.5
+envelope:
+  max_mouth_w_mm: 520.0
+  max_mouth_h_mm: 440.0
+  max_depth_mm: 420.0
+symmetry: hv
+source:
+  cap: auto
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  coverage_v_up_deg: 15.0
+  coverage_v_down_deg: -45.0
+  band_lo_hz: 300.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.5
+  f0_hz: 800.0
+  f0_v_hz: 962.0
+  freq_weights:
+    band_hz:
+      - [2500.0, 5500.0, 2.0]
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.5
+  distd: 0.5
+  diag: 0.5
+  flat_cv: 0.5
+grid:
+  verify_points_per_octave: 6
+  screen_extra_hz: [250, 315, 400, 2573, 3311, 4260]
+objective:
+  version: 5
+  tolerances:
+    cov: 2.0
+    rip: 1.0
+    di: 0.4
+    dislope: 9.0
+    flat: 1.5
+    load: 0.3
+    distd: 2.0
+    diag: 2.0
+    flat_cv: 1.5
+  cov_narrow_ratio: 2.0
+  cov_below_f0: mask
+  loaded_re_z: 0.5
+  lfp_re_z: 0.2
+  lfp_crossover_ratio: 1.6
+  bw8k_floor: 0.75

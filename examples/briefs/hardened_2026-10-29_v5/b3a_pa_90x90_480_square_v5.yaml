@@ -1,0 +1,78 @@
+# OBJECTIVE v5 COPY (2026-10-29, hardened plan): the 400 Hz v4 b3a brief is untouched; this is the
+# NEW 480 Hz low-reach cell. THE ONLY CHANGES vs the v4 b3a brief: name/description, target.f0_hz
+# 480 (K-law mouth 588 x 588), objective.version 5, flat_cv tolerance 1.5, the nine weighted terms,
+# weights load 1.0 / distd 0.5 / flat_cv 0.5, cov_narrow_ratio 2.0, the v5 loading/pattern constants
+# and grid.screen_extra_hz. Driver, envelope, class C and cov_below_f0 are v4's.
+# CLASS C (low-reach PA that falls off): below f0 a WIDE pattern is physics and free, a NARROW one is
+# still scored (one_sided); narrow side 2x everywhere; presence band weighted x2.
+# Tolerances: v4 class A/B/C numbers unchanged from docs/evidence/OBJECTIVE_V4_TOLERANCES.md plus
+# flat_cv 1.5 (objective v5, constant-velocity on-axis flatness below 3 kHz).
+# Brief b3a - PA 90 x 90 deg, f0 480 Hz, 1.4-inch 300 Hz-class driver, SQUARE.
+#
+# PURPOSE: low-reach campaign brief b3a (docs/SOLVE_CAMPAIGN_PLAN_2026-10-26.md s3 B3a) at 480 Hz.
+#   Strict K-law on both (equal) axes; the 480 Hz cell pushes the K-law mouth below the 740 mm
+#   square envelope so the loading reach is scored without a 400 Hz square.
+# K-LAW ARITHMETIC (mouth = 25,400,000 / (f0 * coverage_deg)):
+#   H axis: 25,400,000 / (480 * 90) = 588.0 mm
+#   V axis: 25,400,000 / (480 * 90) = 588.0 mm
+#   Envelope 740 x 740 x 650 mm holds the K-law mouth plus the freestanding shell.
+# DRIVER CLASS: 1.4-inch 300 Hz-class compression driver (BMS 4594ND class), r0 = 18.0 mm,
+#   exit half-angle 2.0 deg.
+# LOADING (v5): load weight 1.0; z_min stays 0.0 (the v4 plan's loading term belongs to B3b, but
+#   v5 still scores LFP20 / loaded plateau / flat_cv through the weights).
+# f11 DISCLOSURE: 1.4in f11 5,653 Hz: 5.7-8 kHz compares geometry, not the driver.
+name: b3a_pa_90x90_480_square_v5
+description: (objective v5) PA 90x90, f0 480 Hz, 1.4-inch 300 Hz class, K-law square mouth (588x588), 740x740x650 envelope, band 300-8000 Hz, v5 LFP loading + flat_cv
+driver:
+  exit_radius_mm: 18.0
+  exit_angle_deg: 2.0
+envelope:
+  max_mouth_w_mm: 740.0
+  max_mouth_h_mm: 740.0
+  max_depth_mm: 650.0
+symmetry: hv
+source:
+  cap: auto
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 90.0
+  band_lo_hz: 300.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.0
+  f0_hz: 480.0
+  freq_weights:
+    band_hz:
+      - [2500.0, 5500.0, 2.0]
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 1.0
+  distd: 0.5
+  diag: 0.5
+  flat_cv: 0.5
+grid:
+  verify_points_per_octave: 6
+  screen_extra_hz: [250, 315, 400, 2573, 3311, 4260]
+objective:
+  version: 5
+  tolerances:
+    cov: 4.5
+    rip: 2.0
+    di: 0.4
+    dislope: 36.0
+    flat: 1.5
+    load: 0.3
+    distd: 3.0
+    diag: 4.5
+    flat_cv: 1.5
+  cov_narrow_ratio: 2.0
+  cov_below_f0: one_sided
+  loaded_re_z: 0.5
+  lfp_re_z: 0.2
+  lfp_crossover_ratio: 1.6
+  bw8k_floor: 0.75

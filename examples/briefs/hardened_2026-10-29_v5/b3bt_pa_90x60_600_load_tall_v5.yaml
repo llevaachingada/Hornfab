@@ -1,0 +1,75 @@
+# OBJECTIVE v5 COPY (2026-10-29, hardened plan): the v4 brief with the 2026-10-29 v5 objective.
+# v4 stays untouched. THE ONLY CHANGES vs v4: objective.version 5, flat_cv tolerance 1.5, the nine
+# weighted terms (flat_cv added), weights load 1.0 / distd 0.5 / flat_cv 0.5, cov_narrow_ratio 2.0,
+# the v5 loading/pattern constants (loaded_re_z 0.5, lfp_re_z 0.2, lfp_crossover_ratio 1.6,
+# bw8k_floor 0.75) and grid.screen_extra_hz. Target, driver, envelope and class facts are v4's.
+# CLASS B (loading / rollback): symmetric coverage (narrowing can be the design), looser DI-slope
+# tolerance (DI rises naturally), load term as the v4 brief had it. DI std and the diagonal are live.
+# Tolerances: v4 class A/B/C numbers unchanged from docs/evidence/OBJECTIVE_V4_TOLERANCES.md plus
+# flat_cv 1.5 (objective v5, constant-velocity on-axis flatness below 3 kHz).
+# Brief b3bt - PA 90 x 60 deg, f0 600 Hz, 1.4-inch 300 Hz-class driver, TALL, loading-scored.
+#
+# PURPOSE: primary low-reach campaign brief b3bt (docs/SOLVE_CAMPAIGN_PLAN_2026-10-26.md s3 B3b).
+#   Strict K-law both axes (portrait mouth) plus a loading term so the 600 Hz reach is scored.
+# K-LAW ARITHMETIC (mouth = 25,400,000 / (f0 * coverage_deg)):
+#   H axis: 25,400,000 / (600 * 90) = 470.4 mm
+#   V axis: 25,400,000 / (600 * 60) = 705.6 mm
+#   Envelope 500 x 740 x 600 mm holds the K-law mouth plus the freestanding shell.
+# DRIVER CLASS: 1.4-inch 300 Hz-class compression driver (BMS 4594ND class), r0 = 18.0 mm,
+#   exit half-angle 2.0 deg.
+# LOADING (v5): weights.load 1.0 with z_min 0.7 (the repo's own LOAD_THRESHOLD). v5 scores the
+#   LFP20 crossover (Re z 0.2, <= 500 Hz) and the loaded plateau (Re z 0.5) as well as flat_cv;
+#   the 18-point screen grid includes 250/315/400 Hz so the low-loading behaviour is actually solved.
+# f11 DISCLOSURE: 1.4in f11 5,653 Hz: 5.7-8 kHz compares geometry, not the driver.
+name: b3bt_pa_90x60_600_load_tall_v5
+description: (objective v5) PA 90x60 f0 600 Hz loading, 1.4-inch 300 Hz class, portrait K-law mouth (470x706), 500x740x600 envelope, band 300-8000 Hz, v5 LFP loading + flat_cv
+driver:
+  exit_radius_mm: 18.0
+  exit_angle_deg: 2.0
+envelope:
+  max_mouth_w_mm: 500.0
+  max_mouth_h_mm: 740.0
+  max_depth_mm: 600.0
+symmetry: hv
+source:
+  cap: auto
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 300.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.7
+  f0_hz: 600.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 1.0
+  distd: 0.5
+  diag: 0.5
+  flat_cv: 0.5
+grid:
+  verify_points_per_octave: 6
+  screen_extra_hz: [250, 315, 400, 2573, 3311, 4260]
+objective:
+  version: 5
+  tolerances:
+    cov: 4.5
+    rip: 2.0
+    di: 0.4
+    dislope: 36.0
+    flat: 1.5
+    load: 0.3
+    distd: 3.0
+    diag: 4.5
+    flat_cv: 1.5
+  cov_narrow_ratio: 2.0
+  cov_below_f0: mask
+  loaded_re_z: 0.5
+  lfp_re_z: 0.2
+  lfp_crossover_ratio: 1.6
+  bw8k_floor: 0.75

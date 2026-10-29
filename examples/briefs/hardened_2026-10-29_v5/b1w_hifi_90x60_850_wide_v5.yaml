@@ -1,0 +1,80 @@
+# OBJECTIVE v5 COPY (2026-10-29, hardened plan): the v4 brief with the 2026-10-29 v5 objective.
+# v4 stays untouched. THE ONLY CHANGES vs v4: name/description, objective.version 5, flat_cv
+# tolerance 1.5, the nine weighted terms (flat_cv added), weights load 0.5 / distd 0.5 / flat_cv 0.5,
+# cov_narrow_ratio 2.0, the v5 loading/pattern constants (loaded_re_z 0.5, lfp_re_z 0.2,
+# lfp_crossover_ratio 1.6, bw8k_floor 0.75) and grid.screen_extra_hz. Target, driver, envelope and
+# class facts are v4's.
+# CLASS A (constant-directivity waveguide): narrow side counts 2x the wide side; DI std and the
+# diagonal term are live; the 2.5-5.5 kHz presence band is weighted x2 (owner field experience).
+# Tolerances: v4 class A numbers unchanged from docs/evidence/OBJECTIVE_V4_TOLERANCES.md plus
+# flat_cv 1.5 (objective v5, constant-velocity on-axis flatness below 3 kHz).
+# Brief b1w - hi-fi 90 x 60 deg, f0 850 Hz, 1.4-inch driver, WIDE (commercial convention).
+#
+# PURPOSE: wide-envelope branch of b1t (docs/SOLVE_CAMPAIGN_PLAN_2026-10-26.md s3 D-11 option b).
+#   The H axis keeps the strict K-law mouth; the V axis is allowed to narrow to the 380x300
+#   envelope, i.e. V coverage is honest only above the frequency the envelope can hold.
+# K-LAW ARITHMETIC (mouth = 25,400,000 / (f0 * coverage_deg)):
+#   H axis: 25,400,000 / (850 * 90)  = 332.0 mm
+#   V-K-law would be 25,400,000 / (850 * 60) = 498.0 mm, which needs a 520 mm tall envelope.
+#   This branch instead sets target.f0_v_hz = 25,400,000 / (60 * 300) = 1411 Hz: the 300 mm
+#   envelope height holds 60 deg from 1411 Hz. Objective v3+ masks the V-plane coverage error
+#   below f0_v_hz; the H plane is still scored from f0 850 Hz.
+# DRIVER CLASS: 1.4-inch compression driver (35-36 mm exit class), r0 = 18.0 mm,
+#   exit half-angle 2.5 deg.
+# f11 DISCLOSURE: 1.4in f11 5,653 Hz: 5.7-8 kHz compares geometry, not the driver.
+name: b1w_hifi_90x60_850_wide_v5
+description: (objective v5) Hi-fi 90x60, f0 850 Hz (V from 1411 Hz), 1.4-inch, wide 380x300x400 envelope, band 300-8000 Hz, v5 LFP loading + flat_cv
+driver:
+  exit_radius_mm: 18.0
+  exit_angle_deg: 2.5
+envelope:
+  max_mouth_w_mm: 380.0
+  max_mouth_h_mm: 300.0
+  max_depth_mm: 400.0
+symmetry: hv
+source:
+  cap: auto
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 300.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.0
+  f0_hz: 850.0
+  f0_v_hz: 1411.0
+  freq_weights:
+    band_hz:
+      - [2500.0, 5500.0, 2.0]
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.5
+  distd: 0.5
+  diag: 0.5
+  flat_cv: 0.5
+grid:
+  verify_points_per_octave: 6
+  screen_extra_hz: [250, 315, 400, 2573, 3311, 4260]
+objective:
+  version: 5
+  tolerances:
+    cov: 2.0
+    rip: 1.0
+    di: 0.4
+    dislope: 9.0
+    flat: 1.5
+    load: 0.3
+    distd: 2.0
+    diag: 2.0
+    flat_cv: 1.5
+  cov_narrow_ratio: 2.0
+  cov_below_f0: mask
+  loaded_re_z: 0.5
+  lfp_re_z: 0.2
+  lfp_crossover_ratio: 1.6
+  bw8k_floor: 0.75
