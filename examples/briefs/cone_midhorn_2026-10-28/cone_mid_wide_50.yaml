@@ -1,8 +1,8 @@
 # Cone mid-horn brief (2026-10-28). driver.exit_radius_mm is informational only (the schema needs one
 # < 100 mm); tools/cad/plughorn.py owns the cone. Envelope = the CAD part + 10 % room to tweak.
 name: cone_mid_wide_50
-description: 'Evo 2SH-class cone mid horn: 50 deg horizontal (owner 2026-10-28); vertical
-  30 is a placeholder until confirmed; band 250-3000 Hz'
+description: 'Evo 2SH-class cone mid horn (8-inch): 50 x 25 nominal (Funktion-One
+  spec sheet); band 250-3000 Hz (F1 crosses the mid at ~4 kHz; capped by the dof budget)'
 driver:
   exit_radius_mm: 76.0
   exit_angle_deg: 0.0
@@ -15,7 +15,7 @@ source:
   cap: auto
 target:
   coverage_h_deg: 50.0
-  coverage_v_deg: 30.0
+  coverage_v_deg: 25.0
   band_lo_hz: 250.0
   band_hi_hz: 3000.0
   di_target_db: null

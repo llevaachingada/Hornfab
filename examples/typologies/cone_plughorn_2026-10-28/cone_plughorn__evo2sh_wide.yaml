@@ -1,6 +1,6 @@
 # cone_plughorn__evo2sh_wide - LABELED HYPOTHESIS-SHAPE EXPERIMENT (cone mid horn + axe head, Funktion-One Evo SH style).
-# Evo 2SH mid horn (the wider 50 deg pattern), every number read from Funktion-One's 3D model (DWG, owner 2026-10-28): throat 223 mm deep, 432 x 274 opening, axe head tips +-155 mm; cone 90 mm radius to fit the 105 mm bowl (driver size not in the CAD).
-# Derived: opening [431.8, 274.0], side wall 31.6 deg, top wall 13.6 deg, Sd/min channel 7.45, plug clearance 2.67 mm, bowl 2.84 L gross.
+# Evo 2SH mid horn (the wider 50 deg pattern), every number read from Funktion-One's 3D model (DWG, owner 2026-10-28): throat 223 mm deep, 432 x 274 opening, axe head tips +-155 mm; 8-inch cone (r 84, F1 spec) in the 105 mm bowl.
+# Derived: opening [431.8, 274.0], side wall 31.6 deg, top wall 13.6 deg, Sd/min channel 6.48, plug clearance 2.67 mm, bowl 2.95 L gross.
 # Geometry + every key: tools/cad/plughorn.py. generator.fixed = keys pinned (not searched); seed_params /
 # bounds = the searchable knobs (+-12 % around the CAD). Full model: mesh.quadrants '1234'.
 name: cone_plughorn__evo2sh_wide
@@ -10,9 +10,9 @@ generator:
   name: plughorn
   seed_policy: explicit
   fixed:
-    cone_r_mm: 90.0
-    cone_depth_mm: 38.0
-    post_r_mm: 18.0
+    cone_r_mm: 84.0
+    cone_depth_mm: 34.0
+    post_r_mm: 17.0
     throat_side_half_mm: 15.0
     throat_top_half_mm: 1.8
     mouth_side_half_mm: 113.7
