@@ -551,3 +551,23 @@ host is not shut down by its CLI (GPU hygiene rules 1, 2, 6). PRs are not modell
 6. **New J terms (s10.4):** which ones to add, and their weights.
 7. **Commercial intent:** only if you might sell. Google Patents lists the Synergy patent (US 8,284,976) as active to
    about 2029; Unity (US 6,411,718) has expired. This is not legal advice and is irrelevant for DIY.
+
+## 14. Owner decisions 2026-10-30 and the hand-off
+
+Answers to s13: separate bass box (30-120 Hz flat, MEH top from ~120 Hz); the top fits a 16 in (406 mm) square
+face, studio-monitor depth (380 mm assumed), corner-hung; home hi-fi / DJ practice / DJ booth, critical listening
+first, level "keeps up with a powered 12 in + horn PA"; DSP and FIR on every channel; not for sale.
+
+The orchestrator then fixed the design and wrote the implementation hand-off in `docs/meh/` (contracts + ten work
+packages for cheaper agents). New research artefacts behind those decisions:
+- `calc/meh_layout.py` -> `calc/layout_out.md`:
+  - layout feasibility in the 16 in box: horn ~150 mm long, mouth 330 x 191 at 90x60;
+  - the naive knob box is 12-29 % feasible, the reparameterised box with deterministic repair 56-93 %;
+  - T2 top/bottom 77 % vs sides 41 %;
+  - the 6.5 in front chamber sets the port corner at ~650-950 Hz, so T2 pairs with a 1.4 in CD;
+  - seeds T2-A, T2-B, T1.
+- `calc/meh_bassbox_sizing.py` -> `calc/bassbox_sizing.md`: 15 in / 18 in long-throw options for 30-120 Hz.
+
+Typologies after the decision: **T2 `meh2_6x2`** (1.4 in CD + 2 x 6.5 in, top/bottom walls, 90x60, XO 650-1100 Hz,
+HP 120 Hz) primary; **T1 `meh2_4x4`** (1 in CD + 4 x 4 in, XO 1-1.5 kHz, HP 160 Hz) secondary; T2b and T3 dropped
+(bass box is separate); T4 (fluted) stays later.

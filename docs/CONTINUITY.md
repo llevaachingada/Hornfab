@@ -2,6 +2,25 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-30 - MEH UN-DEFERRED BY OWNER; DESIGN FIXED; IMPLEMENTATION HAND-OFF IN `docs/meh/` (zero GPU, no package code)
+
+- **Owner decisions:** MEH top + separate bass box (30-120 Hz flat); top fits a 16 in square face (406 mm), corner-hung,
+  studio-monitor depth (380 mm assumed); home hi-fi / DJ practice / booth, critical listening, level of a powered 12 in
+  PA; DSP + FIR on every channel; not for sale. Owner gave the orchestrator architecture, labels, typologies, solves and
+  scoring, with the rest handed to cheaper sub-agents.
+- **Design fixed:** T2 `meh2_6x2` primary (1.4 in CD + 2 x 6.5 in on top/bottom walls, 90x60, XO 650-1100 Hz, HP 120 Hz);
+  T1 `meh2_4x4` secondary (1 in CD + 4 x 4 in, XO 1-1.5 kHz, HP 160 Hz). L1 solve = flush port patches as driven tags
+  (2 CD, 10 mids), one BEM solve gives per-channel transfers + impedance matrix, drivers/xo/delay/fill/rear volume
+  optimised per geometry by an inner optimiser. Objective v5 = v4 pattern terms on the summed system + `lw_resid`,
+  `notch`, `xo_lob`, `headroom`; `flat` off (FIR).
+- **New research [measured]:** `calc/meh_layout.py` layout feasibility in the 16 in box (horn ~150 mm, mouth 330 x 191;
+  reparameterised knob box 56-93 % feasible vs 12-29 % naive; seeds T2-A/T2-B/T1); `calc/meh_bassbox_sizing.py`
+  (15 in / 18 in long-throw for 30-120 Hz).
+- **Hand-off:** `docs/meh/README.md` (waves, models, dispatch prompt, merge order) + `00_MEH_CONTRACTS.md` + M1-M10 task
+  files. Wave 1 (parallel, cloud): M1 drivers, M2 solver fork, M3 adapter, M4 network, M5 CAD, M6 objective, M10 bass box;
+  wave 2: M7 pipeline; wave 3 (owner GPU box): M8 validation + screen, M9 Boundary Lab.
+- `CLAUDE.md` gained one ownership pointer to contracts C13; `NEXT_DEV_PRIORITIES.md` P13.
+
 ## 2026-10-29 (20:15 EDT) - MINI MEH RESEARCH: WEB LANE FOLDED IN, CLAIMS SPOT-CHECKED (zero GPU, no code)
 
 - **Web lane (Sonnet) returned:** raw survey kept verbatim as `docs/research/typologies/mini_meh_2026-10-29/appendix_A_web_survey_raw.md`

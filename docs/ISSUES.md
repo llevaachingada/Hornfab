@@ -20,6 +20,14 @@ Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 20
 
 Local-only items (no GitHub issue): band edges capped by the measured dof cap (confirmed, user "keep lowered edges"); task 07 test-17 disk-latency flake risk (do not loosen); residual CP-7 risks (epw=6 above 2.5 kHz unmeasured; f11 unexercised; DI-vs-beamwidth not a regression test) — see `NOTES_FOR_SENIOR.md` task-09 block and CONTINUITY 06:20.
 
+Local-only, pushed 2026-10-30 (**MEH implementation hand-off; no GitHub issue state changed**):
+- **OPEN (wave 1, dispatch-ready):** M1 driver files, M2 solver fork multi-tag + impedance matrix, M3 solve adapter,
+  M4 network + inner optimiser, M5 CAD tool + multi-label STEP, M6 objective v5 + brief block, M10 bass box
+  (`docs/meh/README.md`).
+- **OPEN (wave 2/3):** M7 pipeline + configs; M8 GPU validation, pin bump, first screen (owner's box); M9 Boundary Lab.
+- **OPEN (owner):** confirm the 380 mm box depth assumption.
+- **CLOSED:** dossier s13 questions answered by the owner 2026-10-30 (dossier s14).
+
 Local-only, pushed 2026-10-29 20:15 EDT (**mini MEH research pass complete for this round; no GitHub issue state changed**):
 - **OPEN (owner decisions):** mini MEH targets - bass route (top + sub / one-box PR-vent ~106 dB / 3-way), size number, use and
   coverage, 4 x 4-inch vs 2 x 6.5-inch, DSP per channel, new J terms, commercial intent (Synergy patent)
