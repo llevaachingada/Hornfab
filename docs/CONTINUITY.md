@@ -2,6 +2,11 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-30 (late) - MEH CHIEF-IMPLEMENTER HAND-OFF
+
+- `docs/meh/CHIEF_IMPLEMENTER_HANDOFF.md`: pull steps for `C:\Users\hunte\Hrns\hornlab-search`, wave order with gates,
+  a six-link readiness proof that the MEH is optimisable end to end, and the follow-on optimisation studies.
+
 ## 2026-10-30 - MEH UN-DEFERRED BY OWNER; DESIGN FIXED; IMPLEMENTATION HAND-OFF IN `docs/meh/` (zero GPU, no package code)
 
 - **Owner decisions:** MEH top + separate bass box (30-120 Hz flat); top fits a 16 in square face (406 mm), corner-hung,
