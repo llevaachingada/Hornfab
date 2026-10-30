@@ -2,8 +2,8 @@
 
 Key is ``f"{design_hash}-{mesh_hash}-{solve_hash}"`` (01_CONTRACTS section 14). A hit
 requires ``status.json`` with ``"ok": true`` AND a loadable ``response.npz``; anything else
-(missing, corrupt, ``ok: false``) is a miss, never an error. Files are copied, never symlinked
-(symlinks on Windows need elevation and fail in confusing ways).
+(missing, corrupt, ``ok: false``) is a miss, never an error. Files are copied or hardlinked,
+never symlinked (symlinks on Windows need elevation and fail in confusing ways).
 
 ``response.npz`` keys are exactly the ``Response`` field names. A ``None`` array field is an
 ABSENT key. ``backend`` is a 0-d string array, ``n_dof`` a 0-d int array (absent when None) and
@@ -65,8 +65,20 @@ def save_response(path: Path, resp: Response) -> None:
     if resp.n_dof is not None:
         arrays["n_dof"] = np.array(int(resp.n_dof), dtype=np.int64)
     arrays["meta"] = np.array(json.dumps(jsonable(resp.meta), sort_keys=True))
-    with open(path, "wb") as fh:          # a file object: np.savez must not append ".npz"
-        np.savez(fh, **arrays)
+    path = Path(path)
+    # Atomic: ``path`` may be a hardlink to a cache entry, so never write through it. Write a
+    # temp file in the same directory, then replace the directory entry.
+    tmp = path.with_name(f".{path.name}.{uuid.uuid4().hex[:8]}.tmp")
+    try:
+        with open(tmp, "wb") as fh:      # a file object: np.savez must not append ".npz"
+            np.savez(fh, **arrays)
+        os.replace(tmp, path)
+    except BaseException:
+        try:
+            tmp.unlink(missing_ok=True)
+        except OSError:
+            pass
+        raise
 
 
 def load_response(path: Path) -> Response:
@@ -132,12 +144,44 @@ def store(k: str, root: Path, resp: Response | None, status: dict) -> None:
     os.replace(tmp, d / STATUS_FILE)
 
 
+def _install(src: Path, dst: Path, *, link: bool) -> None:
+    """Install ``src`` at ``dst`` through a temp name in ``dst``'s directory + ``os.replace``.
+
+    A pre-existing ``dst`` (possibly itself a hardlink to the shared cache) is replaced
+    atomically and never written through. ``link=True`` hardlinks when the filesystem allows
+    it and falls back to a plain copy (different volume, no hardlink support, permissions).
+    """
+    tmp = dst.with_name(f".{dst.name}.{uuid.uuid4().hex[:8]}.tmp")
+    try:
+        if link:
+            try:
+                os.link(src, tmp)
+            except OSError:
+                shutil.copy2(src, tmp)
+        else:
+            shutil.copy2(src, tmp)
+        os.replace(tmp, dst)
+    except BaseException:
+        try:
+            tmp.unlink(missing_ok=True)
+        except OSError:
+            pass
+        raise
+
+
 def copy_entry(k: str, src_root: Path, dst_dir: Path) -> Path:
-    """Copy a cache entry's files into ``dst_dir`` (a run's designs/<hash>/). Copy, not link."""
+    """Copy or hardlink a cache entry's files into ``dst_dir`` (a run's designs/<hash>/).
+
+    ``response.npz`` is hardlinked (copy fallback), so a run's file shares the cache inode;
+    every writer into the run dir must therefore be atomic. ``status.json`` is always a plain
+    copy: ``search/evaluate.py`` rewrites the run's own status and a shared inode would corrupt
+    the cache entry. Never symlink (01_CONTRACTS section 14).
+    """
     src = entry_dir(k, src_root)
     dst_dir = Path(dst_dir)
     dst_dir.mkdir(parents=True, exist_ok=True)
-    for name in (RESPONSE_FILE, STATUS_FILE):
-        if (src / name).exists():
-            shutil.copy2(src / name, dst_dir / name)
+    if (src / RESPONSE_FILE).exists():
+        _install(src / RESPONSE_FILE, dst_dir / RESPONSE_FILE, link=True)
+    if (src / STATUS_FILE).exists():
+        _install(src / STATUS_FILE, dst_dir / STATUS_FILE, link=False)
     return dst_dir

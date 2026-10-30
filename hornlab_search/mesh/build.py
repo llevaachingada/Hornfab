@@ -20,8 +20,10 @@ from __future__ import annotations
 import copy
 import json
 import logging
+import os
 import shutil
 import time
+import uuid
 from pathlib import Path
 
 import numpy as np
@@ -200,13 +202,44 @@ def _load_cached(d: Path, key: str) -> dict | None:
     return meta if meta.get("key") == key else None
 
 
+def _install(src: Path, dst: Path, *, link: bool) -> None:
+    """Install ``src`` at ``dst`` through a temp name in ``dst``'s directory + ``os.replace``.
+
+    A pre-existing ``dst`` (possibly itself a hardlink to the shared cache) is replaced
+    atomically and never written through. ``link=True`` hardlinks when the filesystem allows
+    it and falls back to a plain copy (different volume, no hardlink support, permissions).
+    """
+    tmp = dst.with_name(f".{dst.name}.{uuid.uuid4().hex[:8]}.tmp")
+    try:
+        if link:
+            try:
+                os.link(src, tmp)
+            except OSError:
+                shutil.copyfile(src, tmp)
+        else:
+            shutil.copyfile(src, tmp)
+        os.replace(tmp, dst)
+    except BaseException:
+        try:
+            tmp.unlink(missing_ok=True)
+        except OSError:
+            pass
+        raise
+
+
 def _copy_entry(src: Path, dst: Path) -> None:
-    """Copy, never symlink: symlinks on Windows need elevation (01_CONTRACTS section 14)."""
+    """Copy or hardlink, never symlink: symlinks on Windows need elevation
+    (01_CONTRACTS section 14).
+
+    ``mesh.msh`` is hardlinked (copy fallback), so a run's mesh shares the cache inode; every
+    writer into a run dir must therefore install through a temp name + ``os.replace``.
+    ``mesh_meta.json`` is a plain copy (provenance, never shared).
+    """
     dst.mkdir(parents=True, exist_ok=True)
     if src.resolve() == dst.resolve():
         return
-    shutil.copyfile(src / "mesh.msh", dst / "mesh.msh")
-    shutil.copyfile(_meta_path(src), _meta_path(dst))
+    _install(src / "mesh.msh", dst / "mesh.msh", link=True)
+    _install(_meta_path(src), _meta_path(dst), link=False)
 
 
 # ------------------------------------------------------------------ guards
@@ -344,6 +377,8 @@ def build_mesh(design: Design, mesh: MeshSpec, cfg, out_dir: Path, *, mode: str 
                 f"epw={mesh.epw:g}, quadrants={mesh.quadrants!r}; no mesh was generated")
 
     out_dir.mkdir(parents=True, exist_ok=True)
+    # The mesher writes ``out_path`` directly, so it must not be a hardlink to a cache entry.
+    out_path.unlink(missing_ok=True)
     try:
         built = hm.build_from_config(mcfg, out_path)
     except TriangleBudgetExceeded as exc:

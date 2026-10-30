@@ -2,6 +2,28 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-30 (04:55Z) - PHASE 1 CODE: LINK-FIRST CACHE COPIES + ATOMIC RUN-DIR WRITERS
+
+**Landed (not yet applied to data).** `solve/cache.py` and `mesh/build.py` now install cache files
+with `os.link` (plain-copy fallback) through a temp name + `os.replace`: `response.npz` and
+`mesh.msh` become hardlinks to the cache, while `status.json` and `mesh_meta.json` stay plain
+copies because `search/evaluate.py` rewrites a run's own status. `save_response` and
+`evaluate._write_json` are atomic, and the three mesh routes (formula `build_mesh`, `grid_build`,
+`step_build`) unlink `out_path` immediately before the mesher writes, so a rebuild can never
+truncate a shared cache inode. No cache key, `store()`, tolerance or mesher config changed.
+
+**Evidence.** `tests/test_solve_cache.py tests/test_mesh_build.py tests/test_tools_data_dedupe.py`
+-> 48 passed. The hardlink permission comes from the owner decision recorded in the entry below;
+`docs/plan/01_CONTRACTS.md` is frozen and untouched, so the amended wording lives in CONTINUITY
+and ISSUES only.
+
+**New tools.** `tools/data/dedupe_runs.py` (dry-run default, sha256-gated, temp+replace, manifest)
+and `tools/data/doctor.py` (read-only integrity report, exit 1 on an ERROR finding). Doctor on the
+real store: 23,884 records / 48 shards, 768 duplicate `(design, solve)` groups (+1,022 rows),
+traces 1,067 on disk / 1,043 referenced / 24 orphans (44.7 MiB) / 0 missing, unreferenced cache
+3 mesh (664 KiB) + 1 solve (994 KiB), run heavy files 27,541 mesh (8.1 GiB) + 26,381 response
+(6.7 GiB) all unlinked — the pre-apply baseline.
+
 ## 2026-10-30 - DATA CONSOLIDATION ADOPTED: OWNER OK FOR HARDLINKS, NO OFF-MACHINE BACKUP
 
 **Decision (owner, 2026-10-30).** Execute `docs/DATA_CONSOLIDATION_PLAN_2026-10-29.md` phase by

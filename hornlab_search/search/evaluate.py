@@ -27,6 +27,7 @@ import os
 import subprocess
 import time
 import traceback
+import uuid
 from collections import Counter
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -631,7 +632,23 @@ def _cad_info(mesh_dir: Path) -> dict | None:
 
 
 def _write_json(path: Path, obj) -> None:
-    path.write_text(json.dumps(to_jsonable(obj), indent=1, sort_keys=True), encoding="utf-8")
+    """Atomic JSON write: temp file in the same directory, then ``os.replace``.
+
+    ``path`` may be a hardlink to a shared cache entry (design dirs are link-backed), so the
+    bytes must never be written through it.
+    """
+    path = Path(path)
+    text = json.dumps(to_jsonable(obj), indent=1, sort_keys=True)
+    tmp = path.with_name(f".{path.name}.{uuid.uuid4().hex[:8]}.tmp")
+    try:
+        tmp.write_text(text, encoding="utf-8")
+        os.replace(tmp, path)
+    except BaseException:
+        try:
+            tmp.unlink(missing_ok=True)
+        except OSError:
+            pass
+        raise
 
 
 # ------------------------------------------------------------------ WP8 band split

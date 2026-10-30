@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import dataclasses
+import os
 import subprocess
 import sys
 
@@ -146,8 +147,27 @@ def test_npz_keys_are_exactly_the_response_field_names(tmp_path):
         assert set(z.files) <= names and "p_h" not in z.files
 
 
-def test_copy_entry_copies_files_not_links(tmp_path):
-    cache.store("k", tmp_path / "c", _full_response(), {"ok": True})
+def test_copy_entry_hardlinks_response_but_copies_status(tmp_path):
+    cache.store("k", tmp_path / "c", _full_response(), {"ok": True, "seconds": 1.0})
     dst = cache.copy_entry("k", tmp_path / "c", tmp_path / "run" / "designs" / "h")
+    cache_resp = tmp_path / "c" / "k" / cache.RESPONSE_FILE
+    cache_status = tmp_path / "c" / "k" / cache.STATUS_FILE
+    assert os.path.samefile(dst / cache.RESPONSE_FILE, cache_resp)
+    assert os.stat(dst / cache.RESPONSE_FILE).st_nlink >= 2
+    assert not os.path.samefile(dst / cache.STATUS_FILE, cache_status)
     for name in (cache.RESPONSE_FILE, cache.STATUS_FILE):
         assert (dst / name).exists() and not (dst / name).is_symlink()
+        assert (dst / name).read_bytes() == (tmp_path / "c" / "k" / name).read_bytes()
+
+
+def test_save_response_over_a_hardlinked_design_never_touches_the_cache(tmp_path):
+    cache.store("k", tmp_path / "c", _full_response(), {"ok": True})
+    dst = cache.copy_entry("k", tmp_path / "c", tmp_path / "run" / "designs" / "h")
+    cache_npz = tmp_path / "c" / "k" / cache.RESPONSE_FILE
+    before = cache_npz.read_bytes()
+    other = make_fake_response()
+    other.spl_h_db = other.spl_h_db + 12.0
+    cache.save_response(dst / cache.RESPONSE_FILE, other)
+    assert cache_npz.read_bytes() == before
+    assert (dst / cache.RESPONSE_FILE).read_bytes() != before
+    assert not os.path.samefile(dst / cache.RESPONSE_FILE, cache_npz)

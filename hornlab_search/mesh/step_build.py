@@ -576,6 +576,8 @@ def build_mesh_from_cad(recipe: dict, mesh, cfg, out_dir: Path, *,
                 "; ".join(freq.get("warnings") or ["status invalid"]))
 
         out_path = out_dir / "mesh.msh"
+        # write_mesh_metres writes ``out_path`` directly; never write through a hardlink.
+        out_path.unlink(missing_ok=True)
         write_mesh_metres(out_path, points_mm, triangles, tags)
 
         summary, xyz, xyz_tri = read_msh_summary(out_path, return_arrays=True)

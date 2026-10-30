@@ -28,8 +28,12 @@ Local-only, added 2026-10-30 (**data consolidation executing; no GitHub issue st
   (`os.replace` over a temp file), never an in-place truncate of a possibly linked inode.
 - **Phase 0 done:** the 51 previously-uncommitted files on `feat/hardened-plan-2026-10-29` are
   committed (`chore(repo)`); no data deleted, moved or linked.
-- **in progress:** Phase 1 (atomic writers + hardlink dedupe tool), then compression, verified
-  deletions, doctor/keepers, docs rotation.
+- **in progress:** Phase 1 landed in code (link-first `copy_entry`/`_copy_entry`, atomic
+  `save_response`/`_write_json`, unlink-before-mesh-write on all three mesh routes; 48 focused
+  tests pass). `tools/data/dedupe_runs.py` (dry-run default) and `tools/data/doctor.py` are in
+  place; the doctor baseline is 27,541 unlinked run meshes (8.1 GiB) and 26,381 unlinked run
+  responses (6.7 GiB). Dedupe apply, compression, verified deletions, keepers and docs rotation
+  are still to run.
 
 Local-only, added 2026-10-29 12:20Z (**b3a retargeted to 80x80/600 + driver-exit f11 + gate-aware search; no GitHub issue state changed**):
 - **Loading-window source (owner decision 2026-10-29):** the Re z >= 0.50 hold's upper bound now
