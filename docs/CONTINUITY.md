@@ -30,6 +30,19 @@ frames now undecimated, 11,816-16,636 tris x4 mirror = 47k-67k rendered triangle
 `pytest tests/test_gui.py tests/test_gui_mesh_quadrants.py tests/test_gui_integration_phases.py
 tests/test_gui_brief_authoring.py` = 131 passed; `compileall hornlab_search/gui` clean.
 
+## 2026-10-30 (16:04Z) - ATLAS NIGHT RESULT: 34 + 43 CELLS, 17 + 8 SELF-REFERENCED PASSES; DAY QUEUE LAUNCHED
+
+**Night result.** Hybrid `runs/20261030T064105Z-screen-1206a5` timed out at 4.5 h with 981 rows (776 ok):
+34 occupied 10-deg cells, **17 self-referenced all-gate passes** (49x40 ... 90x61), 16 brief-gate (A1) passes
+(all earlier hybrid runs together: 3). ATH CORE `runs/20261030T111108Z-screen-377bbe`: 501 rows, 43 cells (13
+before), 8 self-referenced passes, 12 A1 passes. The 09:45 cutoff dropped CORE-law and the audit; the A1 audit
+(`scratch/gate_audit_atlas_2026-10-30/`, 1,243 rows, 28 pass_all) and the readout were then run by hand (CPU).
+
+**Day queue (owner 12:02 "run whatever we should for the next 6 hours"; controller pid 22016, cutoff 16:15, log
+`runs/nights/queue_2026-10-30_day.log`).** (1) verify the 25 elites via elite-only run dirs
+`runs/elites_20261030_{hypex,ath_core}`; (2) resume the hybrid atlas +400; (3) CORE-law atlas 300, then A1 audits,
+readout and STEP export of the elites. Handoff: `docs/HANDOFF_NEXT_RUNS_2026-10-30.md`.
+
 ## 2026-10-30 (06:36Z) - COVERAGE ATLAS NIGHT LAUNCHED: FIRST REAL CMA-ME (QUALITY-DIVERSITY) RUNS
 
 **Why (owner: "take the wheel").** Offline re-gate of the 6,322 audited rows (`docs/data/gate_audit_2026-10-29*`):
