@@ -11,6 +11,9 @@ Closed rows #1-#11 (all closed before 2026-10-30) now live in [docs/history/ISSU
 
 Local-only items (no GitHub issue): band edges capped by the measured dof cap (confirmed, user "keep lowered edges"); task 07 test-17 disk-latency flake risk (do not loosen); residual CP-7 risks (epw=6 above 2.5 kHz unmeasured; f11 unexercised; DI-vs-beamwidth not a regression test) — see `NOTES_FOR_SENIOR.md` task-09 block and CONTINUITY 06:20.
 
+Local-only, added 2026-10-30 (**3D evolution transparency bug fixed; no GitHub issue state changed**):
+- **FIXED (owner report): randomly transparent triangles in the evolution 3D time-lapse.** `data.evolution_frames3d` stride-sampled (`tris[::k]`) above the frame cap, so above-cap frames lost ~half their faces as scattered holes. Replaced by hole-free vertex-clustering decimation (`_cluster_decimate`), also used by `mesh_surface` in place of `tris[:max_tris]` truncation; symmetry-plane vertices snap to zero so the mirror seam stays closed. `M3D_DEFAULT_CAP` 6000 -> 30000 and `M3D_VERSION` -> 2 invalidate the stale stride caches. Real run `20261029T155433Z-screen-5b871c` now renders all 6 frames undecimated. 131 GUI/reader tests pass. Detail: CONTINUITY 16:00Z.
+
 Local-only, added 2026-10-30 (**data consolidation executing; no GitHub issue state changed**):
 - **Owner decisions (2026-10-30):** hardlinks are allowed in the run/cache copy path (amends
   `docs/plan/01_CONTRACTS.md` section 14 to "copy or hardlink, never symlink"); the off-machine

@@ -4,6 +4,60 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 
 Older entries (before 2026-10-23): [docs/history/CONTINUITY_2026-10-12_2026-10-22.md](history/CONTINUITY_2026-10-12_2026-10-22.md).
 
+## 2026-10-30 (16:00Z) - FIX: 3D EVOLUTION MESHES NO LONGER PUNCH RANDOM TRIANGLE HOLES
+
+**What the owner saw.** On the evolution 3D time-lapse ("improvement frames only", run
+`20261029T155433Z-screen-5b871c`) the horn looked like a mix of solid and fully transparent triangles,
+with the shape dissolving into speckle at the silhouette.
+
+**Root cause.** `data.evolution_frames3d` decimated above the per-frame cap by stride subsampling
+(`tris[::k]`, `k = ceil(n_tris_full / cap)`). On a connected sheet that keeps every k-th triangle and
+deletes the rest, so a k=2 frame lost ~half its faces as scattered single-triangle holes. The old cache
+for that run held exactly that: 11.8k-16.6k-tri frames cut to ~5-6k.
+
+**Fix (`hornlab_search/gui/data.py`).** New `_cluster_decimate` / `_cluster_once`: vertex-clustering
+decimation (floor-snap vertices onto a grid, weld each occupied cell to its members' centroid, drop
+degenerate and duplicate faces, compact unused vertices, bisect the grid size until the tri count sits
+just under the cap). It coarsens the sheet but never punches per-triangle holes. Symmetry-plane vertices
+(`'1'` -> x=0,y=0; `'14'` -> x=0; `'12'` -> y=0) are snapped to exactly zero so the mirrored seam has no
+slit. The same path replaces `mesh_surface`'s `tris[:max_tris]` prefix truncation (additive
+`decimated:true` key only when it fires). `M3D_DEFAULT_CAP` 6000 -> 30000 and `M3D_VERSION` 1 -> 2 (the
+version is in the cache key, so every stale stride-decimated cache is invalidated). Real run: all 6
+frames now undecimated, 11,816-16,636 tris x4 mirror = 47k-67k rendered triangles per frame.
+
+**Verified.** `tests/test_gui_integration_phases.py` decimation test rewritten to the hole-free contract
+(12x12 grid, 242 tris, cap 100): tri count <= cap, zero degenerate faces, symmetry vertices exactly 0.
+`pytest tests/test_gui.py tests/test_gui_mesh_quadrants.py tests/test_gui_integration_phases.py
+tests/test_gui_brief_authoring.py` = 131 passed; `compileall hornlab_search/gui` clean.
+
+## 2026-10-30 (06:36Z) - COVERAGE ATLAS NIGHT LAUNCHED: FIRST REAL CMA-ME (QUALITY-DIVERSITY) RUNS
+
+**Why (owner: "take the wheel").** Offline re-gate of the 6,322 audited rows (`docs/data/gate_audit_2026-10-29*`):
+45 pass all gates against the brief's nominal coverage, 118 at H +/-25 %, and **150 when each horn is judged
+against its own median in-band beamwidth** (54 ath_core, 41 core_law, 27 hyb_osse_h_hypex_v, 20
+osse_ext_throat). The failures are mostly good constant-directivity horns at a different angle than the brief
+asked for (e.g. 57x45 from the 60x40 brief, 65x63 from the 90x60 brief). The near-miss H failures are mid-band
+narrowing (65 of 82 one-sample fails, mostly 1.8-2.9 kHz) and 8 kHz beaming (21). So the night maps natural
+coverage instead of chasing one target: CMA-ME keeps the best design per 10-deg (mean bw H, mean bw V) cell.
+
+**Relaunched 06:41Z (owner: "don't care about 300 mm envelopes").** The first launch (pid 34792, run
+`20261030T063601Z-screen-333d6d`, 44 rows) refused 25 of 44 candidates on the b2w brief's 380x300x300 envelope;
+it was stopped, and the hybrid now uses the brief copy `examples/briefs/atlas_2026-10-30/b2w_pa_60x40_1200_big_v4.yaml`
+(only name/description/envelope changed: 650x650x520, the ath_core brief's envelope; refusal check only, the seed
+was a cache hit). Hybrid budget 1200 -> 1000. Live controller **pid 30360**, run `20261030T064105Z-screen-1206a5`:
+first 11 rows 8 ok / 3 refused (mouths 782-855 mm wide), 8-16 s per solve at ~2k dofs.
+
+**Queued (detached, controller pid 30360, parent WmiPrvSE; log `runs/nights/queue_2026-10-30.log`; cutoff 09:45).**
+Configs `examples/typologies/atlas_2026-10-30/` = copies of the campaign v4 cells with only `name` and
+`search:` changed (`algorithm: cma_me`, `qd` mean_bw_h/v x 18 bins over 0-180 deg, sigma0 0.25, seed 1030);
+`qd` is search-only, so the cells' cached solves are reused. Shape check: all three ok (dofs 1985 / 3777 / 5179
+of 12000, envelope fits, round coupling). Nights in order: `atlas1_hypex` (1000 evals, H-OSSE/V-hypex hybrid,
+b2w 60x40/1200, 650 mm envelope copy), `atlas2_ath_core` (500, native ATH CORE 2"), `atlas3_core_law` (300, per-direction CORE law),
+`atlas4_audit` (A1 gate audit over `20261030T*-screen-*`, CPU). No code, solver or brief change.
+
+**Next (morning).** Read the archives (filled cells, best per cell), re-gate each elite against its own coverage,
+verify the best elite per occupied cell, render a coverage contact sheet, pick print candidates.
+
 ## 2026-10-30 (06:35Z) - DATA CONSOLIDATION COMPLETE: ~32.6 GB OF REPO DATA -> ~12.5 GB, +17.3 GB FREE
 
 **Phases 2-5.** NTFS compression (`compact /c /s:<dir>`, transparent, reversible with `compact /u`):

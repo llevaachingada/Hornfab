@@ -722,9 +722,13 @@ def mesh_surface(runs: Path, run_id: str, h: str, max_tris: int = 60000) -> dict
     meta = _read_json(d / "designs" / h / "mesh_meta.json") or {}
     q = (meta.get("result") or {}).get("quadrants") or _row_quadrants(d, h) \
         or (_config(d).get("mesh") or {}).get("quadrants")
+    snap_axes = {"1": (0, 1), "14": (0,), "12": (1,)}.get(str(q), ())
+    out_pts, out_tris, decimated = _cluster_decimate(pts, tris, max_tris, snap_axes)
     out = {"quadrants": str(q or "1234"), "n_tris": int(len(tris)),
-           "verts": np.round(pts * 1000, 2).ravel().tolist(),
-           "tris": tris[:max_tris].ravel().tolist()}
+           "verts": np.round(out_pts * 1000, 2).ravel().tolist(),
+           "tris": out_tris.ravel().tolist()}
+    if decimated:
+        out["decimated"] = True
     # WP12: ``mesh_meta.json["mounting"]`` (the mesher + normalized blocks) is served additively so
     # the 3D view can draw the solved mesh's own outline. Absent on every non-enclosure run — the
     # key then stays absent, never fabricated.
@@ -1459,8 +1463,8 @@ def typologies(root: Path, runs: Path, snap: _Snapshot | None = None) -> list[di
 # ---------------------------------------------------------------------------- evolution (time-lapse)
 
 EVO_VERSION = 2
-M3D_VERSION = 1
-M3D_DEFAULT_CAP = 6000
+M3D_VERSION = 2
+M3D_DEFAULT_CAP = 30000
 
 
 def _improvement_flags(rows: list[dict]) -> list[bool]:
@@ -1485,6 +1489,84 @@ def _decimate(pts: list, n: int) -> list:
         return pts
     step = (len(pts) - 1) / (n - 1)
     return [pts[round(i * step)] for i in range(n)]
+
+
+def _cluster_once(pts: np.ndarray, tris: np.ndarray, cell: float,
+                  snap_axes: tuple[int, ...]):
+    """One vertex-clustering pass at grid size ``cell`` (metres): every occupied grid cell becomes
+    one vertex at its members' centroid, indices are rebuilt, degenerate and duplicate triangles are
+    dropped, and unused cells are compacted away. ``snap_axes`` holds the symmetry-plane axes of a
+    quarter/half mesh; a cell that contains a vertex lying on such a plane keeps that coordinate at
+    exactly zero, so the mirror seam stays gap-free."""
+    keys = np.floor(pts / cell).astype(np.int64)
+    _, inv = np.unique(keys, axis=0, return_inverse=True)
+    inv = inv.ravel()
+    ncell = int(inv.max()) + 1 if inv.size else 0
+    sums = np.zeros((ncell, 3), dtype=float)
+    np.add.at(sums, inv, pts)
+    counts = np.bincount(inv, minlength=ncell).astype(float)
+    reps = sums / counts[:, None]
+    for ax in snap_axes:
+        on = np.abs(pts[:, ax]) <= 1e-12
+        if np.any(on):
+            hit = np.zeros(ncell, dtype=bool)
+            hit[inv[on]] = True
+            reps[hit, ax] = 0.0
+
+    t = inv[tris]
+    keep = (t[:, 0] != t[:, 1]) & (t[:, 1] != t[:, 2]) & (t[:, 0] != t[:, 2])
+    t = t[keep]
+    if not t.size:
+        return reps[:0], np.zeros((0, 3), dtype=np.int64)
+    # Dedupe by sorted corner set: a collapsed quad would otherwise render as two coincident,
+    # oppositely wound faces (z-fighting reads as flickering holes).
+    _, first = np.unique(np.sort(t, axis=1), axis=0, return_index=True)
+    t = t[np.sort(first)]
+    used = np.unique(t)
+    remap = -np.ones(len(reps), dtype=np.int64)
+    remap[used] = np.arange(len(used))
+    return reps[used], remap[t]
+
+
+def _cluster_decimate(pts: np.ndarray, tris: np.ndarray, cap: int,
+                      snap_axes: tuple[int, ...] = ()):
+    """Hole-free triangle decimation toward ``cap`` triangles.
+
+    Stride subsampling (``tris[::k]``) keeps every k-th triangle of a connected sheet, so half or
+    more of the surface is punched out as scattered single-triangle holes — exactly the "randomly
+    transparent triangles" the owner saw. Vertex clustering instead welds neighbouring vertices,
+    which coarsens the sheet but keeps it continuous. The grid size is bisected on the surface's
+    own area so the result lands just under ``cap`` (and never zero unless the budget is absurd).
+    Returns ``(pts, tris, decimated)``; untouched when ``len(tris) <= cap``."""
+    n_full = int(len(tris))
+    if n_full <= cap:
+        return pts, tris, False
+    a, b, c = pts[tris[:, 0]], pts[tris[:, 1]], pts[tris[:, 2]]
+    area = float(np.linalg.norm(np.cross(b - a, c - a), axis=1).sum()) * 0.5
+    diagonal = float(np.linalg.norm(pts.max(axis=0) - pts.min(axis=0)))
+    if not np.isfinite(area) or area <= 0 or diagonal <= 0:
+        return pts, tris, False
+    # A sheet occupies ~area/cell^2 cells; seed loosely around the count the budget implies.
+    seed = math.sqrt(area / max(1.0, cap / 2.0))
+    lo = max(seed * 1e-3, diagonal * 1e-6)   # fine grid: ~everything survives
+    hi = max(seed * 3.0, diagonal)           # coarse grid: ~nothing survives
+    best = None
+    smallest = None
+    for _ in range(20):
+        cell = math.sqrt(lo * hi)
+        rp, rt = _cluster_once(pts, tris, cell, snap_axes)
+        if len(rt) > cap:
+            lo = cell
+            if smallest is None or len(rt) < len(smallest[1]):
+                smallest = (rp, rt)
+        else:
+            if len(rt) and (best is None or len(rt) > len(best[1])):
+                best = (rp, rt)
+            hi = cell
+        if hi / lo < 1.02:
+            break
+    rp, rt = best if best is not None else (smallest if smallest is not None else (pts, tris))
+    return rp, rt, True
 
 
 def _hull(points: list[tuple[float, float]]) -> list[tuple[float, float]]:
@@ -1610,8 +1692,8 @@ def evolution_frames3d(runs: Path, run_id: str, max_tris_per_frame: int = M3D_DE
     Frame selection is EXACTLY ``evolution()``'s rule, shared through ``_improvement_flags``: a row
     is a frame when it is ok and sets a new best-so-far J. Only frames whose ``designs/<hash>/mesh.msh``
     the search actually saved are returned; an improved row without a saved mesh is skipped (never
-    invented) and disclosed in ``note``. Triangle decimation is stride subsampling: k =
-    ceil(n_tris_full / cap), keep every k-th triangle, ``decimated`` true iff k > 1.
+    invented) and disclosed in ``note``. A frame above ``cap`` triangles is decimated hole-free by
+    vertex clustering (``_cluster_decimate``); ``decimated`` is true exactly when that happened.
 
     Cache: ``runs/.gui_cache/evolution_<id>_m3d.json``, keyed on ``search.ndjson`` (size, mtime) plus
     every improved frame's ``mesh.msh`` (path, mtime_ns, size) -- a grown search or a (re)written/
@@ -1665,17 +1747,17 @@ def evolution_frames3d(runs: Path, run_id: str, max_tris_per_frame: int = M3D_DE
         q = (_as_dict(meta.get("result")).get("quadrants") or r.get("quadrants")
              or cfg_q or "1234")
         n_full = int(len(tris))
-        k = max(1, math.ceil(n_full / cap)) if n_full else 1
-        sel = tris[::k] if k > 1 else tris
+        snap_axes = {"1": (0, 1), "14": (0,), "12": (1,)}.get(str(q), ())
+        out_pts, out_tris, decimated = _cluster_decimate(pts, tris, cap, snap_axes)
         frames.append(clean({
             "n": r.get("n"),
             "objective": float(r["objective"]) if r.get("objective") is not None else None,
             "mesh_hash": h,
             "quadrants": str(q),
-            "verts": np.round(pts * 1000, 2).ravel().tolist(),
-            "tris": sel.ravel().tolist(),
+            "verts": np.round(out_pts * 1000, 2).ravel().tolist(),
+            "tris": out_tris.ravel().tolist(),
             "n_tris_full": n_full,
-            "decimated": bool(k > 1),
+            "decimated": bool(decimated),
             "n_verts": int(len(pts)),
         }))
 
