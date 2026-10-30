@@ -6,6 +6,7 @@ are the gate definitions in the tool docstring, not the tool's own implementatio
 from __future__ import annotations
 
 import importlib.util
+import json
 import math
 import sys
 
@@ -193,6 +194,120 @@ def test_loading_gate_unresolved_without_fx_samples():
     assert not res.gate.passed and res.gate.unresolved
 
 
+def test_loading_gate_rez_hold_stops_at_f11():
+    # Loaded >= 0.50 from F_X through f11 = 5584 Hz; 0.29 at 8 kHz is above f11 and not scored.
+    f = [300, 600, 1200, 2400, 4000, 5584, 8000]
+    z = [0.60, 0.62, 0.65, 0.70, 0.68, 0.55, 0.29]
+    res = ga.gate_loading(f, z, f_x=600, f11_hz=5584, band_hi=8000)
+    assert res.gate.passed and not res.gate.unresolved
+    assert res.f11_hz == pytest.approx(5584.0)
+    assert res.loaded_hi_hz == pytest.approx(5584.0)
+    assert res.rez_min_from_fx == pytest.approx(0.55)
+
+
+def test_loading_gate_still_fails_rez_below_half_inside_the_window():
+    f = [300, 600, 1000, 2000, 4000, 5584, 8000]
+    z = [0.25, 0.60, 0.55, 0.40, 0.70, 0.55, 0.29]
+    res = ga.gate_loading(f, z, f_x=600, f11_hz=5584, band_hi=8000)
+    assert not res.gate.passed and not res.gate.unresolved
+    assert "Re z" in res.gate.reason
+    assert res.rez_min_from_fx == pytest.approx(0.40)
+
+
+def test_loading_gate_without_f11_falls_back_to_band_hi():
+    f = [300, 600, 1200, 2400, 4000, 5584, 8000]
+    z = [0.60, 0.62, 0.65, 0.70, 0.68, 0.55, 0.29]
+    for f11 in (None, float("nan"), 0.0):
+        res = ga.gate_loading(f, z, f_x=600, f11_hz=f11, band_hi=8000)
+        assert not res.gate.passed and not res.gate.unresolved
+        assert res.f11_hz is None
+        assert res.loaded_hi_hz == pytest.approx(8000.0)
+        assert res.rez_min_from_fx == pytest.approx(0.29)
+
+
+def test_loading_gate_lfp20_crossover_is_unchanged_by_the_f11_window():
+    f = [300, 500, 600, 1200, 2400, 8000]
+    z = [0.05, 0.10, 0.60, 0.65, 0.70, 0.70]
+    res = ga.gate_loading(f, z, f_x=600, f11_hz=5584, band_hi=8000)
+    assert not res.gate.passed and not res.gate.unresolved
+    assert "LFP20" in res.gate.reason
+    assert res.rez_min_from_fx == pytest.approx(0.60)
+
+
+# ------------------------------------------------------------------ f11 source precedence
+
+
+def _meta(**overrides):
+    meta = {
+        "run": "r", "brief": "b", "cell": "c", "family": "OSSE",
+        "f_x": 600.0, "f0_v": 600.0, "band_hi": 8000.0,
+        "coverage_h": 80.0, "coverage_v": 80.0,
+        "exit_diameter_mm": 36.0, "loaded_hi_hz": None, "driver_f11_hz": None,
+    }
+    meta.update(overrides)
+    return meta
+
+
+def test_f11_prefers_explicit_then_driver_then_stored_design():
+    explicit = ga.resolve_f11_hz(_meta(loaded_hi_hz=5653.0, driver_f11_hz=5583.5), 3809.0)
+    driver = ga.resolve_f11_hz(_meta(driver_f11_hz=5583.5), 3809.0)
+    stored = ga.resolve_f11_hz(_meta(), 3809.0)
+    absent = ga.resolve_f11_hz(_meta(), None)
+    assert explicit == pytest.approx(5653.0)
+    assert driver == pytest.approx(5583.5)
+    assert stored == pytest.approx(3809.0)
+    assert absent is None
+
+
+def _write_run_json(tmp_path, target_extra=None, driver=None):
+    run = tmp_path / "20261029T000000Z-screen-abc123"
+    run.mkdir()
+    target = {
+        "coverage_h_deg": 80.0, "coverage_v_deg": 80.0,
+        "band_lo_hz": 300.0, "band_hi_hz": 8000.0, "f0_hz": 600.0,
+    }
+    if target_extra:
+        target.update(target_extra)
+    brief = {"name": "b3a_pa_80x80_600_square_v5", "target": target,
+             "driver": {"exit_radius_mm": 18.0, "exit_angle_deg": 2.0} if driver is None else driver}
+    (run / "run.json").write_text(json.dumps({"config": {"brief": brief}}), encoding="utf-8")
+    return run
+
+
+def test_read_run_meta_computes_the_driver_exit_f11(tmp_path):
+    meta = ga.read_run_meta(_write_run_json(tmp_path))
+    assert meta is not None
+    assert meta["exit_diameter_mm"] == pytest.approx(36.0)
+    assert meta["driver_f11_hz"] == pytest.approx(1.8412 * 343.0 / (2.0 * math.pi * 0.018))
+    assert meta["loaded_hi_hz"] is None
+    assert ga.resolve_f11_hz(meta, 3809.0) == pytest.approx(meta["driver_f11_hz"])
+
+
+def test_read_run_meta_prefers_an_explicit_loaded_hi_hz(tmp_path):
+    meta = ga.read_run_meta(_write_run_json(tmp_path, {"loaded_hi_hz": 5653.0}))
+    assert meta is not None and meta["loaded_hi_hz"] == pytest.approx(5653.0)
+    assert ga.resolve_f11_hz(meta, 3809.0) == pytest.approx(5653.0)
+
+
+def test_read_run_meta_without_a_driver_keeps_the_stored_design_f11(tmp_path):
+    meta = ga.read_run_meta(_write_run_json(tmp_path, driver={"exit_angle_deg": 2.0}))
+    assert meta is not None and meta["driver_f11_hz"] is None
+    assert ga.resolve_f11_hz(meta, 3809.0) == pytest.approx(3809.0)
+
+
+def test_827_hz_rez_dip_fails_loading_regardless_of_the_upper_bound():
+    # Re z 0.291 at 827.75 Hz is inside [600, 5653], [600, 5583.5] and [600, 3809].
+    f = [300, 600, 827.75, 1200, 2400, 4000, 5584, 8000]
+    z = [0.60, 0.62, 0.291, 0.65, 0.70, 0.68, 0.55, 0.29]
+    for f11 in (5653.0, 5583.5, 3809.0, None):
+        res = ga.gate_loading(f, z, f_x=600, f11_hz=f11, band_hi=8000)
+        assert not res.gate.passed and not res.gate.unresolved
+        # Without an f11 the 8 kHz 0.29 sample joins the window; either way it is below 0.50.
+        expected = 0.291 if f11 is not None else 0.29
+        assert res.rez_min_from_fx == pytest.approx(expected)
+        assert "Re z" in res.gate.reason
+
+
 # ------------------------------------------------------------------ throat gate
 
 
@@ -222,7 +337,7 @@ def test_throat_gate_passes_a_round_exit_and_unresolves_a_missing_mesh():
 # ------------------------------------------------------------------ stored-row parsing
 
 
-def _raw_row(design_hash="abc123", objective_version=None, **overrides):
+def _raw_row(design_hash="abc123", objective_version=None, scalars=None, **overrides):
     row = {
         "ok": True,
         "design_hash": design_hash,
@@ -237,6 +352,7 @@ def _raw_row(design_hash="abc123", objective_version=None, **overrides):
             "bw_v_deg": [90, 90, 90, 90, 90],
             "di_db": [9.0, 10.0, 11.0, 11.0, 10.0],
             "z_throat_real": [0.01, 0.2, 0.5, 0.8, 1.0],
+            "scalars": {} if scalars is None else dict(scalars),
         },
     }
     if objective_version is not None:
@@ -267,6 +383,13 @@ def test_parse_drops_failed_or_metricless_rows():
     assert ga.parse_stored_row(_raw_row(ok=False), "screen") is None
     assert ga.parse_stored_row(_raw_row(metrics=None), "screen") is None
     assert ga.parse_stored_row(_raw_row(metrics={"freqs_hz": []}), "screen") is None
+
+
+def test_parse_stored_row_reads_the_f11_scalar_and_tolerates_its_absence():
+    assert ga.parse_stored_row(_raw_row(scalars={"f11_hz": 5584.0}), "screen")["f11_hz"] \
+        == pytest.approx(5584.0)
+    assert ga.parse_stored_row(_raw_row(scalars={"f11_hz": None}), "screen")["f11_hz"] is None
+    assert ga.parse_stored_row(_raw_row(), "screen")["f11_hz"] is None
 
 
 def test_verify_rows_replace_screen_rows_for_the_same_design_only():

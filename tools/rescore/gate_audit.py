@@ -11,11 +11,24 @@ without a verify row keeps its screen row. Rows are never deduped across runs, s
 every audited stored row.
 
 Gate definitions (canonical, 2026-10-29): H constant-directivity, V constant-directivity, DI rise,
-8 kHz beamwidth floor, throat loading (LFP20 x 1.6 <= F_X and Re z >= 0.50 above the crossover) and
-round throat at the driver exit. A gate that cannot be evaluated is UNRESOLVED and fails.
+8 kHz beamwidth floor, throat loading (LFP20 x 1.6 <= F_X and Re z >= 0.50 over the loaded window)
+and round throat at the driver exit. A gate that cannot be evaluated is UNRESOLVED and fails.
 
 Per-run values (not module constants because they come from the brief):
 ``F_X = brief.target.f0_hz`` and ``BAND_HI = min(8000.0, brief.target.band_hi_hz)``.
+
+Loading window (owner decision 2026-10-29): the Re z >= 0.50 hold runs over the solved frequencies in
+``[F_X, min(BAND_HI, f11_hz)]``. The upper bound is resolved with an explicit precedence:
+
+1. ``brief.target.loaded_hi_hz`` when present (owner-retargeted cells set it directly);
+2. otherwise the **driver-exit** first cross-mode computed from ``brief.driver.exit_radius_mm`` as
+   ``f11 = BESSEL_J1P_11 * C_AIR / (2*pi*a)`` (the real driver coupling plane);
+3. otherwise the design's own stored ``metrics.scalars.f11_hz`` (the extended MAIN throat, which is
+   not the driver exit);
+4. otherwise ``BAND_HI`` (the old behaviour).
+
+Above f11 the uniform-velocity source is an idealised rigid cap, so a Re z dip there is not a
+driver-loading failure. LFP20 and the other gates are unchanged.
 
 Usage (from the repo root)::
 
@@ -40,6 +53,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from hornlab_search.constants import BESSEL_J1P_11, C_AIR  # noqa: E402
 from hornlab_search.mesh.throat_check import fits_exit, throat_shape  # noqa: E402
 
 # ---------------------------------------------------------------- canonical constants
@@ -84,7 +98,7 @@ CSV_FIELDS = (
     "h", "v", "di", "bw8k", "load", "throat", "pass_all",
     "unresolved", "unresolved_reasons", "flags", "gate_notes",
     "lfp20_hz", "lfp50_hz", "lfp70_hz", "lfp20_note",
-    "rez_at_fx", "rez_min_from_fx", "di_rise_db",
+    "f11_hz", "loaded_hi_hz", "rez_at_fx", "rez_min_from_fx", "di_rise_db",
     "bwh_at_8k", "bwv_at_8k", "bw8k_at_hz",
     "throat_w_mm", "throat_h_mm", "throat_round", "throat_reason",
     "n_dof", "seconds_total",
@@ -166,6 +180,8 @@ class LoadResult:
     lfp50_hz: float | None = None
     lfp70_hz: float | None = None
     lfp20_note: str = ""
+    f11_hz: float | None = None
+    loaded_hi_hz: float | None = None
     rez_at_fx: float | None = None
     rez_min_from_fx: float | None = None
 
@@ -283,19 +299,39 @@ def gate_bw8k(
     return Bw8kResult(GateResult(not bad, False, reason), ftop, vh, vv, top_below)
 
 
-def gate_loading(freqs, z_real, f_x: float) -> LoadResult:
-    """Loading: LFP20 * 1.6 <= F_X, plus Re z >= 0.50 for every solved f >= F_X."""
+def gate_loading(
+    freqs, z_real, f_x: float,
+    f11_hz: float | None = None, band_hi: float | None = None,
+) -> LoadResult:
+    """Loading: LFP20 * 1.6 <= F_X, plus Re z >= 0.50 over ``[F_X, min(BAND_HI, f11)]``.
+
+    The Re z hold stops at the design's first throat cross-mode ``f11_hz`` when it is known: above
+    f11 the uniform-velocity source is an idealised rigid cap, so a dip there is not a driver-loading
+    failure. With no ``f11_hz`` the window ends at ``BAND_HI`` (the pre-2026-10-29 behaviour).
+    """
     f = np.asarray(freqs, dtype=float)
     z = None if z_real is None else np.asarray(z_real, dtype=float)
+    hi = float("inf") if band_hi is None else float(band_hi)
+    f11 = None
+    if f11_hz is not None:
+        try:
+            f11_candidate = float(f11_hz)
+        except (TypeError, ValueError):
+            f11_candidate = float("nan")
+        if math.isfinite(f11_candidate) and f11_candidate > 0.0:
+            f11 = f11_candidate
+            hi = min(hi, f11)
+    loaded_hi = hi if math.isfinite(hi) else None
     if z is None or z.size != f.size or f.size == 0:
-        return LoadResult(GateResult(False, True, "no usable z_throat_real"))
+        return LoadResult(GateResult(False, True, "no usable z_throat_real"),
+                          f11_hz=f11, loaded_hi_hz=loaded_hi)
     lfp20, note20 = crossing_freq(f, z, LFP_RE_Z)
     lfp50, _ = crossing_freq(f, z, 0.50)
     lfp70, _ = crossing_freq(f, z, 0.70)
     rez_at_fx = interp_log_f(f, z, f_x)
-    above = f >= f_x
-    if above.any() and np.isfinite(z[above]).all():
-        rez_min = float(z[above].min())
+    loaded = (f >= f_x) & (f <= hi)
+    if loaded.any() and np.isfinite(z[loaded]).all():
+        rez_min = float(z[loaded].min())
     else:
         rez_min = float("nan")
 
@@ -309,14 +345,21 @@ def gate_loading(freqs, z_real, f_x: float) -> LoadResult:
             f"LFP20 {lfp20:.1f} Hz x {LFP_CROSSOVER_RATIO:g} = "
             f"{lfp20 * LFP_CROSSOVER_RATIO:.1f} Hz > F_X {f_x:g} Hz"
         )
-    if not above.any():
+    if hi < f_x:
         unresolved = True
-        problems.append(f"no solved frequency >= F_X={f_x:g} Hz")
-    elif not np.isfinite(z[above]).all():
+        problems.append(
+            f"loaded window ends at {hi:g} Hz, below F_X={f_x:g} Hz"
+        )
+    elif not loaded.any():
         unresolved = True
-        problems.append(f"non-finite Re z at a solved frequency >= F_X={f_x:g} Hz")
+        problems.append(f"no solved frequency in [{f_x:g}, {hi:g}] Hz")
+    elif not np.isfinite(z[loaded]).all():
+        unresolved = True
+        problems.append(f"non-finite Re z in [{f_x:g}, {hi:g}] Hz")
     elif rez_min < LOADED_RE_Z:
-        problems.append(f"Re z {rez_min:.3f} < {LOADED_RE_Z:g} at a solved f >= F_X")
+        problems.append(
+            f"Re z {rez_min:.3f} < {LOADED_RE_Z:g} in [{f_x:g}, {hi:g}] Hz"
+        )
 
     return LoadResult(
         GateResult(not problems, unresolved, "; ".join(problems), lfp20),
@@ -324,6 +367,8 @@ def gate_loading(freqs, z_real, f_x: float) -> LoadResult:
         lfp50_hz=lfp50,
         lfp70_hz=lfp70,
         lfp20_note=note20,
+        f11_hz=f11,
+        loaded_hi_hz=loaded_hi,
         rez_at_fx=rez_at_fx,
         rez_min_from_fx=rez_min,
     )
@@ -387,6 +432,10 @@ def parse_stored_row(row: Any, tier: str) -> dict | None:
     if j_raw is None:
         j_raw = row.get("J")
 
+    scalars = metrics.get("scalars")
+    f11_raw = scalars.get("f11_hz") if isinstance(scalars, dict) else None
+    f11 = float(f11_raw) if isinstance(f11_raw, (int, float)) else None
+
     return {
         "tier": tier,
         "design": row.get("design_hash") or row.get("design") or "",
@@ -398,6 +447,7 @@ def parse_stored_row(row: Any, tier: str) -> dict | None:
         "bw_v": bw_v,
         "di_db": di_db,
         "z_real": z,
+        "f11_hz": f11,
         "n_dof": row.get("n_dof"),
         "seconds_total": float(seconds_total) if isinstance(seconds_total, (int, float)) else None,
     }
@@ -457,8 +507,18 @@ def read_run_meta(run_dir: Path) -> dict | None:
         HARD_BAND_HI_HZ,
         float(band_hi_raw) if isinstance(band_hi_raw, (int, float)) else HARD_BAND_HI_HZ,
     )
+    loaded_hi_raw = target.get("loaded_hi_hz")
+    loaded_hi = (float(loaded_hi_raw)
+                 if isinstance(loaded_hi_raw, (int, float))
+                 and not isinstance(loaded_hi_raw, bool)
+                 and math.isfinite(float(loaded_hi_raw)) and float(loaded_hi_raw) > 0.0
+                 else None)
     exit_radius = driver.get("exit_radius_mm")
     exit_diameter = 2.0 * float(exit_radius) if isinstance(exit_radius, (int, float)) else None
+    driver_f11 = (float(BESSEL_J1P_11 * C_AIR / (2.0 * math.pi * (float(exit_radius) / 1000.0)))
+                  if isinstance(exit_radius, (int, float)) and not isinstance(exit_radius, bool)
+                  and math.isfinite(float(exit_radius)) and float(exit_radius) > 0.0
+                  else None)
     name = brief.get("name") or config.get("name") or run.get("config_name") or run_dir.name
     return {
         "run": run_dir.name,
@@ -471,7 +531,20 @@ def read_run_meta(run_dir: Path) -> dict | None:
         "coverage_h": coverage_h,
         "coverage_v": coverage_v,
         "exit_diameter_mm": exit_diameter,
+        "loaded_hi_hz": loaded_hi,
+        "driver_f11_hz": driver_f11,
     }
+
+
+def resolve_f11_hz(meta: dict, stored_f11: float | None) -> float | None:
+    """The loading hold's upper bound: explicit target, then driver exit, then stored design f11."""
+    explicit = meta.get("loaded_hi_hz")
+    if explicit is not None:
+        return explicit
+    driver = meta.get("driver_f11_hz")
+    if driver is not None:
+        return driver
+    return stored_f11
 
 
 # ---------------------------------------------------------------- mesh and audit row
@@ -510,7 +583,8 @@ def audit_row(
     v = gate_v(freqs, stored["bw_v"], coverage_v, f_x, meta["f0_v"], band_hi)
     di = gate_di_rise(freqs, stored["di_db"], f_x, band_hi)
     bw8k = gate_bw8k(freqs, stored["bw_h"], stored["bw_v"], coverage_h, coverage_v, band_hi)
-    load = gate_loading(freqs, stored["z_real"], f_x)
+    load = gate_loading(freqs, stored["z_real"], f_x,
+                        f11_hz=resolve_f11_hz(meta, stored.get("f11_hz")), band_hi=band_hi)
 
     mesh_path, mesh_source = find_mesh(run_dir, stored["design"], stored["mesh_hash"])
     counters[f"mesh_source_{mesh_source}"] += 1
@@ -573,6 +647,8 @@ def audit_row(
         "lfp50_hz": load.lfp50_hz,
         "lfp70_hz": load.lfp70_hz,
         "lfp20_note": load.lfp20_note,
+        "f11_hz": load.f11_hz,
+        "loaded_hi_hz": load.loaded_hi_hz,
         "rez_at_fx": load.rez_at_fx,
         "rez_min_from_fx": load.rez_min_from_fx,
         "di_rise_db": di.value if di.value is not None else float("nan"),
@@ -731,7 +807,15 @@ def write_readme(path: Path, rows: list[dict], counters: dict[str, int],
                  "`top_below_band_hi` is flagged.")
     lines.append(f"- **Loading**: LFP20 (Re z crossing {LFP_RE_Z:g} from below, log-f "
                  f"interpolated) must satisfy `LFP20 * {LFP_CROSSOVER_RATIO:g} <= F_X`; Re z must "
-                 f"stay >= {LOADED_RE_Z:g} at every solved f >= `F_X`. A grid whose first sample "
+                 f"stay >= {LOADED_RE_Z:g} over the solved frequencies in "
+                 "`[F_X, min(BAND_HI, f11_hz)]`. The upper bound `f11_hz` is resolved in this "
+                 "order: (1) an explicit `target.loaded_hi_hz`; (2) the DRIVER-EXIT cross-mode "
+                 "computed from `driver.exit_radius_mm` as `1.8412*c/(2*pi*a)`; (3) the design's "
+                 "stored `metrics.scalars.f11_hz` (the extended MAIN throat, not the driver "
+                 "exit); (4) `BAND_HI` (the previous behaviour). Above f11 the uniform-velocity "
+                 "source is an idealised rigid cap, so a Re z dip there is not a driver-loading "
+                 "failure. The CSV carries `f11_hz`, which is the resolved bound (explicit, driver "
+                 "or stored) and `loaded_hi_hz = min(BAND_HI, f11_hz)`. A grid whose first sample "
                  "is already above the threshold is resolved-low at the grid start.")
     lines.append(f"- **Throat**: `throat_check.throat_shape` + `fits_exit` on the solved mesh; "
                  f"width/height within {THROAT_TOL_MM:g} mm of the driver exit diameter and "

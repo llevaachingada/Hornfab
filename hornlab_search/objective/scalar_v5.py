@@ -16,12 +16,20 @@ What v5 adds over v4 (each is driven by the objective block or the target, never
   of Re z through ``lfp_re_z`` (default 0.20), interpolated between the bracketing solved samples;
   ``LFP50`` is the crossing through 0.50. ``lfp_pen = max(0, log2(LFP20 * lfp_crossover_ratio /
   F_X))`` with ``F_X = target.f0_effective_hz()``: the design is penalised when it only loads well
-  above the band it is meant to control. ``rez_pen = max(0, loaded_re_z - min Re z at f >= F_X)``
-  (default ``loaded_re_z`` 0.50) is the old shortfall, now measured only where the pattern matters.
-  ``LFP20`` at the lowest solved sample is an UPPER BOUND (the crossing is at or below the grid
-  start), as the owner asked. A crossing above the highest solved frequency, no z, or no solved
-  sample at/above F_X is UNMEASURABLE -> ``NAN_TERM_FILL`` (never NaN/inf). ``lfp20_hz``,
-  ``lfp50_hz`` and ``rez_min_from_fx`` ride along as diagnostic keys (in ``V5_ALL_KEYS``, never
+  above the band it is meant to control. ``rez_pen = max(0, loaded_re_z - min Re z over the loaded
+  window)`` (default ``loaded_re_z`` 0.50) is the old shortfall, now measured only where the pattern
+  matters. The loaded window is ``[F_X, min(band_hi, f11_hz)]``. The upper bound ``f11_hz`` is
+  resolved in this order (owner decision 2026-10-29): (1) an explicit ``target.loaded_hi_hz``; (2)
+  the DRIVER-EXIT cross-mode computed from ``target.driver_exit_radius_mm`` (surfaced by the config
+  from the brief's ``driver.exit_radius_mm``) as ``BESSEL_J1P_11 * C_AIR / (2*pi*a)``; (3) the
+  design's own first throat cross-mode from ``metrics.scalars['f11_hz']`` (the extended MAIN throat,
+  which is not the driver exit); (4) none, so the window ends at ``band_hi``. Above f11 the
+  uniform-velocity source is an idealised rigid cap, so a Re z dip there is not a driver-loading
+  failure. ``LFP20`` itself is still measured over the whole solved grid. ``LFP20`` at the lowest
+  solved sample is an UPPER BOUND (the crossing is at or below the grid start), as the owner asked.
+  A crossing above the highest solved frequency, no z, or no solved sample in the loaded window is
+  UNMEASURABLE -> ``NAN_TERM_FILL`` (never NaN/inf). ``lfp20_hz``, ``lfp50_hz``, ``rez_min_from_fx``,
+  ``f11_hz`` and ``loaded_hi_hz`` ride along as diagnostic keys (in ``V5_ALL_KEYS``, never
   weighted).
 * C2 ``flat_cv`` - constant-VELOCITY on-axis flatness over ``F_X <= f <= 3000 Hz``. Unit
   acceleration level ``on_axis_db`` becomes the unit-velocity level ``on_axis_db + 20*log10(f)``;
@@ -52,6 +60,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from ..constants import BESSEL_J1P_11, C_AIR
 from ..metrics.polar import beamwidth_edges_deg
 from ..targets.spec import Target
 from .scalar import penalty_result
@@ -70,7 +79,7 @@ __all__ = ["objective_v5", "V5Params", "V5_WEIGHTED_KEYS", "V5_ALL_KEYS", "V5_DE
 V5_EXTRA_WEIGHTED_KEYS = ("flat_cv",)
 V5_WEIGHTED_KEYS = V4_WEIGHTED_KEYS + V5_EXTRA_WEIGHTED_KEYS
 #: C1 diagnostics: extra, NEVER weighted, but part of the stored key set.
-V5_DIAGNOSTIC_KEYS = ("lfp20_hz", "lfp50_hz", "rez_min_from_fx")
+V5_DIAGNOSTIC_KEYS = ("lfp20_hz", "lfp50_hz", "rez_min_from_fx", "f11_hz", "loaded_hi_hz")
 V5_ALL_KEYS = V4_ALL_KEYS + V5_EXTRA_WEIGHTED_KEYS + V5_DIAGNOSTIC_KEYS
 #: v4's defaults plus a silent (zero-weight) flat_cv; load stays 0.0 unless the brief asks.
 V5_DEFAULT_WEIGHTS = {**V4_DEFAULT_WEIGHTS, "flat_cv": 0.0}
@@ -230,6 +239,53 @@ def _first_crossing_hz(f: np.ndarray, z: np.ndarray, thr: float) -> float | None
     return float(2.0 ** lg)
 
 
+def _f11_hz(metrics) -> float | None:
+    """The design's first throat cross-mode from ``metrics.scalars['f11_hz']``; ``None`` if absent."""
+    scalars = getattr(metrics, "scalars", None)
+    if not isinstance(scalars, dict):
+        return None
+    raw = scalars.get("f11_hz")
+    if raw is None:
+        return None
+    try:
+        value = float(raw)
+    except (TypeError, ValueError):
+        return None
+    return value if math.isfinite(value) and value > 0.0 else None
+
+
+def _driver_exit_f11_hz(radius_mm) -> float | None:
+    """Driver-exit first cross-mode ``BESSEL_J1P_11 * C_AIR / (2*pi*a)`` from a radius in mm."""
+    try:
+        radius = float(radius_mm)
+    except (TypeError, ValueError):
+        return None
+    if not (math.isfinite(radius) and radius > 0.0):
+        return None
+    return float(BESSEL_J1P_11 * C_AIR / (2.0 * math.pi * (radius / 1000.0)))
+
+
+def _resolve_f11_hz(target: Target, metrics) -> float | None:
+    """Resolve the loading hold's upper bound with the owner's 2026-10-29 precedence.
+
+    Explicit ``target.loaded_hi_hz`` wins; then the DRIVER-EXIT f11 from
+    ``target.driver_exit_radius_mm``; then the design's stored main-throat ``scalars.f11_hz``;
+    ``None`` means the window ends at ``band_hi``. Only finite positive values are used.
+    """
+    explicit = getattr(target, "loaded_hi_hz", None)
+    if explicit is not None:
+        try:
+            value = float(explicit)
+        except (TypeError, ValueError):
+            value = float("nan")
+        if math.isfinite(value) and value > 0.0:
+            return value
+    driver = _driver_exit_f11_hz(getattr(target, "driver_exit_radius_mm", None))
+    if driver is not None:
+        return driver
+    return _f11_hz(metrics)
+
+
 def _load_v5(metrics, target: Target, params: V5Params) -> tuple[float, dict]:
     """(raw combined loading penalty, diagnostics). Unmeasurable -> ``NAN_TERM_FILL``."""
     diag = {k: NAN_TERM_FILL for k in V5_DIAGNOSTIC_KEYS}
@@ -239,11 +295,20 @@ def _load_v5(metrics, target: Target, params: V5Params) -> tuple[float, dict]:
         return NAN_TERM_FILL, diag
     z = np.asarray(z, dtype=float)
     fx = float(target.f0_effective_hz())
-    # rez_pen needs a measured Re z AT/ABOVE F_X; without one the whole term is unmeasurable.
-    above = np.isfinite(z) & (f >= fx)
-    if not above.any():
+    # Re z is judged only over [F_X, min(band_hi, f11)]: above f11 the uniform-velocity source is an
+    # idealised rigid cap, so a dip there is not a driver-loading failure (owner 2026-10-29). The
+    # bound prefers an explicit loaded_hi_hz, then the driver-exit f11, then the stored design f11.
+    loaded_hi = float(target.band_hi_hz)
+    f11 = _resolve_f11_hz(target, metrics)
+    if f11 is not None:
+        loaded_hi = min(loaded_hi, f11)
+        diag["f11_hz"] = f11
+    diag["loaded_hi_hz"] = loaded_hi
+    # rez_pen needs a measured Re z IN the loaded window; without one the whole term is unmeasurable.
+    loaded = np.isfinite(z) & (f >= fx) & (f <= loaded_hi)
+    if not loaded.any():
         return NAN_TERM_FILL, diag
-    rez_min = float(np.min(z[above]))
+    rez_min = float(np.min(z[loaded]))
     diag["rez_min_from_fx"] = rez_min
     lfp20 = _first_crossing_hz(f, z, params.lfp_re_z)
     lfp50 = _first_crossing_hz(f, z, 0.50)

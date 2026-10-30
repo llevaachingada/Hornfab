@@ -174,6 +174,11 @@ def _target_dict(target) -> dict:
     # record written without it stays byte-identical to the pre-amendment record.
     if d.get("f0_v_hz", "absent") is None:
         d.pop("f0_v_hz", None)
+    # 2026-10-29 loading-window amendment: these are OPTIONAL and emitted only when set, so a
+    # record written without them stays byte-identical to the pre-amendment record.
+    for key in ("loaded_hi_hz", "driver_exit_radius_mm"):
+        if d.get(key, "absent") is None:
+            d.pop(key, None)
     return to_jsonable(d, "$.target")
 
 

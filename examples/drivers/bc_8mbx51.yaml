@@ -1,0 +1,41 @@
+# STAND-IN driver for the cone_plughorn mid (8-inch slot, Evo 2SH topology).
+# Not a Funktion-One driver. Every number below is printed on the manufacturer's product page
+# (source URL); nothing is derived or guessed.
+#
+# The page prints Mms only (moving mass INCLUDING the driver's own air load), so the model flags this
+# file `(Mms! air-load split missing)`: the front air load is supplied by the BEM horn load. Relative
+# comparisons and order-of-magnitude checks only, not a prediction of the built box.
+#
+# The sealed rear bowl is a property of the HORN, not of the driver: no rear_box_l here. Pass the
+# measured net bowl volume with `tools/loudness_report.py --rear-box-l <L>`.
+
+kind: cone
+name: B&C 8MBX51 (stand-in, Mms only)
+source: https://www.bcspeakers.com/en/products/lf-driver/8/8/8mbx51
+use: pa
+notes: >-
+  Stand-in for the Evo 2SH 8-inch mid. B&C publishes this model as a product page only (no PDF
+  datasheet). Cone: "Waterproof Impregnated Cone" (weatherproof impregnated paper), curvilinear.
+  No frequency range and no recommended crossover are published on the page.
+
+exit_diameter_mm: null
+
+nominal_impedance_ohm: 8
+re_ohm: 4.9
+le_mh: 0.4                   # printed as Le, with no measurement frequency
+
+sd_cm2: 220
+mms_g: 20                    # printed as Mms (includes air load); Mmd NOT published -> flagged
+bl_tm: 11.4
+fs_hz: 60
+qms: 5.6
+qes: 0.31
+qts: 0.29
+
+power_aes_w: 200             # printed "Nominal Power Handling"; continuous program 400 W
+xmax_mm: 6.0                 # printed Xmax; Xvar 8
+
+published_sensitivity_db: 96.5
+published_sensitivity_condition: >-
+  "Applied RMS Voltage is set to 2.83 V for 8 ohms Nominal Impedance" (manufacturer tooltip) -
+  i.e. 1 W into 8 ohm nominal.

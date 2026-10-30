@@ -1,0 +1,38 @@
+# STAND-IN driver for the cone_plughorn mid (10-inch slot, Evo 7SH topology).
+# Not a Funktion-One driver. Every number is printed on the Faital Pro datasheet (source URL).
+#
+# This sheet prints BOTH Mms (28.2 g) and Mmd (20.0 g), so the model can use the DRY mass the way the
+# solver needs it: `mmd_g` below, no Mms flag. That is why this is the preferred 10-inch stand-in.
+#
+# The sealed rear bowl is a property of the HORN, not of the driver: no rear_box_l here. Pass the
+# measured net bowl volume with `tools/loudness_report.py --rear-box-l <L>`.
+
+kind: cone
+name: Faital Pro 10PR300 (stand-in, Mmd published)
+source: https://faitalpro.com/en/products/LF_Loudspeakers/product_details/datasheet.php?id=101040110
+use: pa
+notes: >-
+  Stand-in for the Evo 7SH 10-inch mid. Cone material is NOT stated on the datasheet (only the surround
+  is: triple roll, treated polycotton). The sheet prints "Bl 14.1 N/A" - 14.1 is used; the "N/A" is a
+  layout artefact and is not interpreted. Xmax is printed with the sheet's own formula; Xdamage 14 mm.
+
+exit_diameter_mm: null
+
+nominal_impedance_ohm: 8
+re_ohm: 5.4
+le_mh: 0.6                   # printed as Le, with no measurement frequency
+
+sd_cm2: 348
+mmd_g: 20.0                  # printed as Mmd (dry moving mass) - preferred
+mms_g: 28.2                  # printed as Mms; recorded for the record, NOT used when mmd_g is present
+bl_tm: 14.1
+fs_hz: 60
+qms: 5.8
+qes: 0.29
+qts: 0.28
+
+power_aes_w: 300             # AES 2-1984 Rev. 2003, 2 h; maximum 600 W (3 dB above nominal)
+xmax_mm: 4.92
+
+published_sensitivity_db: 98.0
+published_sensitivity_condition: "1W/1m"

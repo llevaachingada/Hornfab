@@ -1,0 +1,86 @@
+# OBJECTIVE v5 COPY (2026-10-29, hardened plan): the 400 Hz v4 b3a, the 480 Hz 90x90, the 600 Hz
+# 72x72 and the 600 Hz 75x60 v5 briefs are untouched; this is the OWNER-RETARGETED 600 Hz 80x80 b3a
+# cell and the FIRST gate-aware search cell.
+# WHY 80x80 (owner 2026-10-29): the b3a 588 x 588 mm seed's natural top octave reads H 89.65 at
+# 1.07 kHz and V 89.65, so against an 80x80 target H = 89.65/80 = 1.121 and V = 89.65/80 = 1.121 at
+# 1.07 kHz (both inside the +/-20 % H window and the [0.60, 1.25] V window). At 8 kHz the seed reads
+# H 69.3 and V 69.3 -> 69.3/80 = 0.866 (passes both). The 72x72 retarget FAILED H at 1.07 kHz
+# (89.65/72 = 1.245 > 1.20); 75x60 passed H but failed V (90/60 = 1.50); 60x30 is worse. 80x80 is
+# the cell whose natural family pattern clears both axes.
+# K-LAW ARITHMETIC (mouth = 25,400,000 / (f0 * coverage_deg)):
+#   H axis: 25,400,000 / (600 * 80) = 529.17 mm
+#   V axis: 25,400,000 / (600 * 80) = 529.17 mm -> K-law mouth is 529 x 529
+#   The SEED STAYS 588 x 588 (larger than its own K-law mouth): the 588 square is the measured
+#   natural top-octave pattern reported above, so the search starts from the actual family geometry
+#   and moves the mouth/coverage by the 6 searched knobs. Envelope 740 x 740 x 650 holds it.
+# DRIVER CLASS: 1.4-inch 300 Hz-class compression driver (BMS 4594ND class), r0 = 18.0 mm,
+#   exit half-angle 2.0 deg.
+# f11 SOURCE (owner 2026-10-29): the loading hold's upper bound is the DRIVER EXIT 18 mm f11
+#   = 5,653 Hz, set EXPLICITLY here as target.loaded_hi_hz. The stored scalars.f11_hz 3,809 Hz is
+#   the 26.385 mm MAIN-throat cross-mode of the extended seed, not the driver exit; it must not
+#   shorten the loaded window. The gate/objective precedence is explicit loaded_hi_hz > driver-exit
+#   f11 > stored design f11 > band_hi.
+# LOADING DIP (the search target): the seed still has a real loading dip - Re z 0.291 at 827.75 Hz.
+#   That dip is INSIDE any loaded window (600 Hz .. 3.8-5.7 kHz), so it is a genuine driver-loading
+#   failure, not an above-f11 artifact. The 100-eval gate-aware search must remove it.
+# CLASS C (low-reach PA that falls off): below f0 a WIDE pattern is physics and free, a NARROW one is
+#   still scored (one_sided); narrow side 2x everywhere; presence band weighted x2.
+# Tolerances: v4 class C numbers plus flat_cv 1.5 (objective v5).
+name: b3a_pa_80x80_600_square_v5
+description: (objective v5) PA 80x80, f0 600 Hz, 1.4-inch 300 Hz class, K-law mouth 529x529 but the 588x588 seed retained, 740x740x650 envelope, band 300-8000 Hz, v5 LFP loading with the Re z hold to the explicit driver-exit loaded_hi_hz 5653 + flat_cv
+driver:
+  exit_radius_mm: 18.0
+  exit_angle_deg: 2.0
+envelope:
+  max_mouth_w_mm: 740.0
+  max_mouth_h_mm: 740.0
+  max_depth_mm: 650.0
+symmetry: hv
+source:
+  cap: auto
+target:
+  coverage_h_deg: 80.0
+  coverage_v_deg: 80.0
+  band_lo_hz: 300.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.0
+  f0_hz: 600.0
+  # Driver-exit (18 mm) f11: the loading hold runs [F_X, 5653] Hz; the stored 3809 Hz design
+  # main-throat f11 must NOT shorten it. 827.75 Hz is inside this window and still fails.
+  loaded_hi_hz: 5653.0
+  freq_weights:
+    band_hz:
+      - [2500.0, 5500.0, 2.0]
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 1.0
+  distd: 0.5
+  diag: 0.5
+  flat_cv: 0.5
+grid:
+  verify_points_per_octave: 6
+  screen_extra_hz: [250, 315, 400, 2573, 3311, 4260]
+objective:
+  version: 5
+  tolerances:
+    cov: 4.5
+    rip: 2.0
+    di: 0.4
+    dislope: 36.0
+    flat: 1.5
+    load: 0.3
+    distd: 3.0
+    diag: 4.5
+    flat_cv: 1.5
+  cov_narrow_ratio: 2.0
+  cov_below_f0: one_sided
+  loaded_re_z: 0.5
+  lfp_re_z: 0.2
+  lfp_crossover_ratio: 1.6
+  bw8k_floor: 0.75

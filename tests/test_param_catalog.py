@@ -226,6 +226,27 @@ def test_catalog_version_and_domains_are_exposed():
     assert tuple(domains_covered()) == DOMAINS
 
 
+def test_subfolder_typologies_are_catalogued_or_they_vanish():
+    """A config under ``examples/typologies/<subdir>/`` is invisible to ``build_catalog`` unless
+    ``examples/catalog.yaml`` names it (``_config_sources`` globs only the top level), and a missing
+    entry means no group, no description, no knob list and no entry in the GUI's param catalog.
+    The cone_plughorn family (Funktion-One CAD topology) is pinned here so it cannot silently
+    disappear again; add a new line for any future subfolder typology."""
+    catalog = build_catalog(ROOT)
+    typos = catalog["typologies"]
+    expected = {"cone_plughorn_7sh", "cone_plughorn_2sh", "cone_plughorn_morph_10in",
+                "cone_plughorn_morph_8in", "cone_plughorn_morph_12in"}
+    assert expected <= set(typos)
+    for name in sorted(expected):
+        e = typos[name]
+        assert e["group"] == "cone", f"{name}: group must be 'cone', got {e['group']!r}"
+        assert e["source_status"] == "catalog", f"{name}: not listed in examples/catalog.yaml"
+        assert e["symmetry"] == "full", f"{name}: quadrants are '1234'"
+        assert e["config_path"].startswith("examples/typologies/")
+        assert (ROOT / e["config_path"]).exists()
+        assert e["knobs"], f"{name}: a catalogued typology must expose its knobs"
+
+
 # ------------------------------------------------------------------ overloads
 
 

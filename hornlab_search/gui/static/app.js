@@ -186,21 +186,82 @@ function dimStr(dims) {
 
 // ── View HOME ──────────────────────────────────────────────────────
 
+// /api/leaders takes ~18 s on the real data set; it must never hold up the first paint. Every
+// Home render takes a new epoch and a late leaderboard response only paints if its epoch is
+// still current (a newer render, or a different ROOT after navigation, supersedes it).
+let _homeEpoch = 0;
+
+/** "Best horn per brief" block for the Home dashboard. Extracted so the slow /api/leaders
+ *  response can repaint just this region (#home-leaders) after the rest of Home has painted. */
+function homeLeadersHtml(leaders, pending = false) {
+  if (pending) {
+    return `<div class="card">
+      <div class="eyebrow">Best horn per brief</div>
+      <p class="muted">Loading leaderboard…</p>
+    </div>`;
+  }
+  if (!leaders || !leaders.length) {
+    return `<div class="card"><div class="eyebrow">Best horn per brief</div><p class="muted">No scored campaigns yet. Run a screen campaign from Launch.</p></div>`;
+  }
+  const rows = leaders.map(l => {
+    const verdict = l.tier === "compare"
+      ? (l.clearly_ahead ? pill("clearly ahead", "good") : pill("not separated", "warn"))
+      : pill("screen only", "warn");
+    const link = l.best_run_id ? `href="#/run/${esc(l.best_run_id)}"` : "";
+    return `<a class="best-brief-row" ${link}>
+      <div>
+        <div class="bbr-name">${esc(l.brief)}</div>
+        <div class="bbr-meta">${esc(l.family)} · ${esc(l.dims ? dimStr(l.dims) : "–")} · ${verdict}</div>
+        <div class="bbr-meta muted">${esc(l.tier)} campaign, ${esc(l.n_families)} families${l.runner_up ? `; next: ${esc(l.runner_up)} (+${fmt(l.gap)})` : ""}</div>
+      </div>
+      <div class="bbr-score" title="median score over repeats (lower is better)">${fmt(l.median_j)}</div>
+    </a>`;
+  }).join("");
+  return `<div class="card">
+    <div class="eyebrow" style="margin-bottom:10px">Best horn per brief</div>
+    <p class="muted" style="margin:0 0 8px;font-size:0.82rem">Median score of the leading family in the latest campaign for each brief (lower is better). Size is the outer mouth width × height × depth of its best design.</p>
+    <div class="best-brief-grid">${rows}</div>
+  </div>`;
+}
+
+/** Paint the slow leaderboard into an already-rendered Home. Dropped when a newer Home render
+ *  has started (epoch) or the user navigated away (ROOT identity changed). */
+async function patchHomeLeaders(ROOT, myEpoch) {
+  let leaders = null, error = null;
+  try {
+    leaders = await api("/api/leaders");
+  } catch (e) {
+    error = e;
+  }
+  if (myEpoch !== _homeEpoch || ROOT !== currentRoot()) return;
+  const box = ROOT.querySelector("#home-leaders");
+  if (!box) return;
+  if (error) {
+    box.innerHTML = `<div class="card">
+      <div class="eyebrow">Best horn per brief</div>
+      <p class="muted">Leaderboard unavailable — ${esc(error.message || String(error))}</p>
+    </div>`;
+    return;
+  }
+  box.innerHTML = homeLeadersHtml(Array.isArray(leaders) ? leaders : []);
+}
+
 async function viewHome() {
   const ROOT = currentRoot();     // this view's own container (see route())
+  const myEpoch = ++_homeEpoch;  // this render supersedes any pending leaderboard paint
   skel("Loading dashboard…");
-  let statusData, campaigns, runs, leaders;
+  let statusData, campaigns, runs;
   try {
-    [statusData, campaigns, runs, leaders] = await Promise.all([
+    [statusData, campaigns, runs] = await Promise.all([
       api("/api/status"),
       api("/api/campaigns").catch(() => []),
       api("/api/runs").catch(() => []),
-      api("/api/leaders").catch(() => []),
     ]);
   } catch (e) {
     ROOT.innerHTML = errBanner("Could not load home: " + e.message);
     return;
   }
+  if (myEpoch !== _homeEpoch || ROOT !== currentRoot()) return;
 
   const cur = statusData.current;
   const lock = statusData.gpu_lock;
@@ -271,31 +332,9 @@ async function viewHome() {
   }
 
   // Best horn per brief: from /api/leaders (latest campaign of the strongest tier per brief, ranked by
-  // median score; never from raw runs, which include superseded and out-of-envelope designs)
-  let bestBriefHtml = "";
-  if (leaders.length) {
-    const rows = leaders.map(l => {
-      const verdict = l.tier === "compare"
-        ? (l.clearly_ahead ? pill("clearly ahead", "good") : pill("not separated", "warn"))
-        : pill("screen only", "warn");
-      const link = l.best_run_id ? `href="#/run/${esc(l.best_run_id)}"` : "";
-      return `<a class="best-brief-row" ${link}>
-        <div>
-          <div class="bbr-name">${esc(l.brief)}</div>
-          <div class="bbr-meta">${esc(l.family)} · ${esc(l.dims ? dimStr(l.dims) : "–")} · ${verdict}</div>
-          <div class="bbr-meta muted">${esc(l.tier)} campaign, ${esc(l.n_families)} families${l.runner_up ? `; next: ${esc(l.runner_up)} (+${fmt(l.gap)})` : ""}</div>
-        </div>
-        <div class="bbr-score" title="median score over repeats (lower is better)">${fmt(l.median_j)}</div>
-      </a>`;
-    }).join("");
-    bestBriefHtml = `<div class="card">
-      <div class="eyebrow" style="margin-bottom:10px">Best horn per brief</div>
-      <p class="muted" style="margin:0 0 8px;font-size:0.82rem">Median score of the leading family in the latest campaign for each brief (lower is better). Size is the outer mouth width × height × depth of its best design.</p>
-      <div class="best-brief-grid">${rows}</div>
-    </div>`;
-  } else {
-    bestBriefHtml = `<div class="card"><div class="eyebrow">Best horn per brief</div><p class="muted">No scored campaigns yet. Run a screen campaign from Launch.</p></div>`;
-  }
+  // median score; never from raw runs, which include superseded and out-of-envelope designs).
+  // leaders arrive after first paint: #home-leaders is patched in place by patchHomeLeaders().
+  const bestBriefHtml = homeLeadersHtml([], true);
 
   const guideHtml = `<details class="card guide" ${(() => { try { return localStorage.getItem("hl-guide-seen") ? "" : "open"; } catch { return "open"; } })()} id="guide">
     <summary><b>How to use this</b> <span class="muted">— four steps from a target to a printable horn</span></summary>
@@ -321,13 +360,16 @@ async function viewHome() {
     </div>
     ${guideHtml}
     ${gpuCard}
-    ${bestBriefHtml}
+    <div id="home-leaders">${bestBriefHtml}</div>
     ${timelineHtml}
     ${quickLinks}
   </div>`;
   document.getElementById("guide")?.addEventListener("toggle", e => {
     try { if (!e.target.open) localStorage.setItem("hl-guide-seen", "1"); else localStorage.removeItem("hl-guide-seen"); } catch {}
   });
+
+  // The first paint is done; the slow leaderboard (/api/leaders) fills in later, in place.
+  patchHomeLeaders(ROOT, myEpoch);
 }
 
 // ── View 1: Status ─────────────────────────────────────────────────

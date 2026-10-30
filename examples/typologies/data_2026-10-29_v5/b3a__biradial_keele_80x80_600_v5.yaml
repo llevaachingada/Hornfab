@@ -1,0 +1,103 @@
+# OBJECTIVE v5 COPY (2026-10-29, data campaign): identical generator, seed and bounds to the v4 cell
+# b3a__biradial_keele_v4; only the brief (objective v5, 80x80/600), the mesh/solve/search block
+# (the v5 OSSE standard) and the name differ.
+# Cell b3a__biradial_keele_80x80_600 - Keele biradial generator, brief b3a_pa_80x80_600_square_v5.
+# SOURCE: LANE_D_REFERENCE_OBJECTIVE.md s1.2/1.3 (B3a exact seed: h_rm 352.8, v_rm 352.8;
+#   measured 706x706, ~6,103 dofs at epw 6). v_a is the shipped 34 deg clamp: the rm
+#   knobs, not v_a, size the mouth.
+# GEOMETRY UNCHANGED vs v4: seed_policy explicit, L 195, h_a 40.5, K-law-sized rm bounds
+#   340-365. Seeds are NOT rescaled for the 80x80 cell.
+# Mesh epw 6, quadrant "1", caps 12000; solve beat_cuda 73 angles at 10 m; CMA sigma0 0.15
+# seed 1234 budget 100, graded.
+name: b3a__biradial_keele_80x80_600_v5
+family: FREEFORM
+brief_file: ../../briefs/hardened_2026-10-29_v5/b3a_pa_80x80_600_square_v5.yaml
+generator:
+  name: typology
+  profile_h:
+    type: biradial
+  profile_v:
+    type: biradial
+  n_anchors: 16
+  max_wall_deg: 80.0
+  mouth: ellipse
+  seed_policy: explicit
+seed_params:
+  L_mm: 195.0
+  h_a_deg: 40.5
+  v_a_deg: 34.0
+  h_rm_mm: 352.8
+  v_rm_mm: 352.8
+  h_n: 5.5
+  v_n: 4.0
+bounds:
+  L_mm:
+    lo: 78.0
+    hi: 650.0
+  h_a_deg:
+    lo: 10.0
+    hi: 80.0
+  v_a_deg:
+    lo: 10.0
+    hi: 80.0
+  h_rm_mm:
+    lo: 211.68
+    hi: 405.72
+  v_rm_mm:
+    lo: 211.68
+    hi: 405.72
+  h_n:
+    lo: 1.0
+    hi: 10.0
+  v_n:
+    lo: 1.0
+    hi: 10.0
+target:
+  coverage_h_deg: 80.0
+  coverage_v_deg: 80.0
+  band_lo_hz: 300.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.0
+  f0_hz: 600.0
+  loaded_hi_hz: 5653.0
+  freq_weights:
+    band_hz:
+      - [2500.0, 5500.0, 2.0]
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 1.0
+  distd: 0.5
+  diag: 0.5
+  flat_cv: 0.5
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 12000
+  dof_cap_verify: 12000
+  dof_cap_final: 12000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.15
+  seed: 1234
+  budget: 100
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+description: Cell b3a__biradial_keele_80x80_600 - Keele biradial generator, brief b3a_pa_80x80_600_square_v5.

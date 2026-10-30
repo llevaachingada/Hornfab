@@ -20,6 +20,141 @@ Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 20
 
 Local-only items (no GitHub issue): band edges capped by the measured dof cap (confirmed, user "keep lowered edges"); task 07 test-17 disk-latency flake risk (do not loosen); residual CP-7 risks (epw=6 above 2.5 kHz unmeasured; f11 unexercised; DI-vs-beamwidth not a regression test) — see `NOTES_FOR_SENIOR.md` task-09 block and CONTINUITY 06:20.
 
+Local-only, added 2026-10-30 (**data consolidation executing; no GitHub issue state changed**):
+- **Owner decisions (2026-10-30):** hardlinks are allowed in the run/cache copy path (amends
+  `docs/plan/01_CONTRACTS.md` section 14 to "copy or hardlink, never symlink"); the off-machine
+  backup gate in `docs/DATA_CONSOLIDATION_PLAN_2026-10-29.md` Phase 0 is waived by the owner.
+  Correctness therefore rests on every writer into `runs/<run>/designs/<hash>/` being atomic
+  (`os.replace` over a temp file), never an in-place truncate of a possibly linked inode.
+- **Phase 0 done:** the 51 previously-uncommitted files on `feat/hardened-plan-2026-10-29` are
+  committed (`chore(repo)`); no data deleted, moved or linked.
+- **in progress:** Phase 1 (atomic writers + hardlink dedupe tool), then compression, verified
+  deletions, doctor/keepers, docs rotation.
+
+Local-only, added 2026-10-29 12:20Z (**b3a retargeted to 80x80/600 + driver-exit f11 + gate-aware search; no GitHub issue state changed**):
+- **Loading-window source (owner decision 2026-10-29):** the Re z >= 0.50 hold's upper bound now
+  resolves `target.loaded_hi_hz` (explicit) > **driver-exit f11** from `driver.exit_radius_mm`
+  (`1.8412*c/(2*pi*a)`) > stored `metrics.scalars.f11_hz` (the extended MAIN throat) > `BAND_HI`.
+  The hold runs over `[F_X, min(BAND_HI, loaded_hi_hz)]`; LFP20/LFP50 and the other gates unchanged.
+  Landed in `tools/rescore/gate_audit.py` and `hornlab_search/objective/scalar_v5.py`; the target
+  fields live in `targets/spec.py` (config surfaces the brief's driver radius on the typed target
+  only, so `config_sha` is unchanged). 65 focused gate/objective tests pass.
+- **80x80/600 cell:** new brief
+  `examples/briefs/hardened_2026-10-29_v5/b3a_pa_80x80_600_square_v5.yaml` (`loaded_hi_hz: 5653.0`)
+  and config `examples/typologies/hardened_2026-10-29_v5/b3a__osse_ext_throat_80x80_600_v5.yaml`
+  (budget 100, distance 10, seed 588x588). 80x80 natural pattern: H 89.65/80 = 1.121 and
+  V 1.121 at 1.07 kHz, H/V 0.866 at 8 kHz.
+- **Seed A1 (cache hit, run `20261029T121930Z-screen-10b954`): 0 pass-all, J = 3.24955.** H/V/DI/
+  BW8K/Throat pass; **Loading FAIL** (`Re z 0.291` at 827.75 Hz inside [600, 5653]).
+- **Correction retained:** the 72x72 target failed H at 1.07 kHz (89.65/72 = 1.245); the 0.291 Re z
+  dip is a genuine ~828 Hz loading failure, not an above-f11 artifact.
+- **COMPLETE (2026-10-29 13:42Z):** gate-aware 100-eval search
+  `runs/20261029T122018Z-screen-9766f0` (100 new + 10 cached); best J **2.9053** (seed 3.2495);
+  A1 **0/110 pass-all**; H 68, V 108, DI 109, BW8K 96, Throat 110, **Loading 0**. LFP20 110/110
+  (min 282.3 Hz); best loading Re z **0.3767** (best-J 0.2763; seed 0.291 at 827.75) vs the 0.5
+  floor. The 827 Hz dip is structural in the b3a ext-throat family. A1:
+  `scratch/gate_audit_b3a80x80_search/`. No code/solver/fork change; no commit.
+- **Next (owner choice):** change family/throat; native ATH core 2" is the only prior all-gate pass
+  set (42 designs). Do not run another b3a 80x80/seed/target.
+- **OPEN (feature, owner-gated):** a single typology with a searchable throat-style switch is
+  feasible for generated (FREEFORM) typologies via an integer `throat_style` index +
+  `throat_length_mm` (generator layer; no mesher/cache/search change). Native OSSE/ATH-core needs a
+  mesher/fork change. No implementation started.
+
+Local-only, added 2026-10-29 12:00Z (**b3a retargeted to 72x72/600 + f11 loading hold; no GitHub issue state changed**):
+- **Loading definition (owner decision 2026-10-29):** the Re z >= 0.50 hold now runs over the solved
+  frequencies in `[F_X, min(BAND_HI, f11_hz)]`, where `f11_hz` is the design's own first throat
+  cross-mode from the stored `metrics.scalars.f11_hz`; absent/null falls back to `BAND_HI` (old
+  behaviour). LFP20/LFP50 and the other gates are unchanged. Landed in `tools/rescore/gate_audit.py`
+  and `hornlab_search/objective/scalar_v5.py` (`_load_v5`; `f11_hz`/`loaded_hi_hz` are unweighted
+  diagnostics, no new weighted key). 56 focused tests pass.
+- **72x72/600 cell:** new brief
+  `examples/briefs/hardened_2026-10-29_v5/b3a_pa_72x72_600_square_v5.yaml` and config
+  `examples/typologies/hardened_2026-10-29_v5/b3a__osse_ext_throat_72x72_600_v5.yaml` (budget 100,
+  seed 588x588). The 75x60 files stay (75x60 passed H, failed V 90/60 = 1.50; 60x30 fails V 90/30).
+- **Seed A1 (cache hit, run `20261029T115645Z-screen-567db8`): 0 pass-all, J = 3.43861.** H FAIL
+  (1 of 14, worst at 1.07 kHz 89.65 vs 72, +24.5 %); V/DI/BW8K/Throat pass; **Loading FAIL** (Re z
+  0.291 at 827.75 Hz inside [600, 3809.38]).
+- **Premise correction:** the seed's stored f11 is **3,809 Hz** (design r0 = 26.385 mm extended
+  throat), not 5,584 Hz (that is the 18 mm driver exit). The 0.291 Re z dip is at ~828 Hz, not 8 kHz
+  (8 kHz Re z = 0.981), so the f11 hold does not rescue this seed. Recorded, not re-scored away.
+- **Next:** a 100-eval GATE-AWARE search on the 72x72/600 cell (H pre-filter over [f_x, f11] or
+  [f_x, 8k], loading pre-filter, feasible box), not another J-polishing pass. Do not run it without
+  owner queuing.
+
+Local-only, added 2026-10-29 04:05Z (**cone source model plan; no GitHub issue state changed**):
+- **OPEN (plan, owner-gated):** `cone_plughorn` directivity above ~1 kHz is unearned - the cone face is a rigid
+  axial piston, but a 10-inch paper cone stops being pistonic around 0.7-1.5 kHz. Plan:
+  `docs/CONE_SOURCE_MODEL_PLAN_2026-10-29.md`, priorities **P0b**, WPs C0-C7.
+- **OPEN (cheap, no risk):** C0 - stop calling `Sd_eff(f)` a directivity model (it scales level only) and print
+  the piston-valid band on every cone report.
+- **OPEN (blocker for C3):** `solve/bempp.py` drives tag 2 uniformly, so no profile can be cross-checked on the
+  CPU yet; and beat enforces ONE `source_tag` (`velocity_sources` singleton) with `source_profile_alpha`
+  fused-CUDA-only.
+- **OPEN (hardware):** the settling measurement is an in-situ scanning LDV (fallback: 3-5 ring accelerometers);
+  no published 10-inch-cone-horn vs compression-horn polar comparison below cutoff was found.
+- **Do not:** rank cone_plughorn designs on 1-4 kHz pattern/DI until C2+C3 pass.
+
+Local-only, added 2026-10-29 03:35Z (**typology links resolve by catalog name; no GitHub issue state changed**):
+- **CLOSED:** `#/typology/cone_plughorn_7sh` still showed no geometry. The typology page links carry the
+  CATALOG name, while `_preview_config` matched only the config's own `name:` (catalog
+  `cone_plughorn_7sh` vs config `cone_plughorn__evo7sh_narrow`), so the endpoint returned 404.
+  `_preview_config` now falls back to `catalog_name` (exact name wins); the same resolver serves
+  `save_bounds`, so sandbox bound edits work from the same link. Verified over HTTP for all five catalog
+  names (4002-4452 verts each; 5-7 s warm). Test `test_typology_link_resolves_by_catalog_name`.
+
+Local-only, added 2026-10-29 03:10Z (**cone_plughorn 3D sandbox preview working; no GitHub issue state changed**):
+- **CLOSED:** "preview endpoint unavailable" on the plughorn typologies. The GUI process on `:8765` was
+  from 2026-10-27, before `_plughorn_preview` existed, so it answered `available=false, reason="generator
+  needs profile_h"`. Restarted; all five configs now return sections + 3D (5-6 s warm, 46.8 s first call).
+- **CLOSED:** `cone_plughorn__morph_wide_8in` returned no 3D. One planar boolean-remnant face (634 mm^2)
+  has no triangulation and `build123d`'s whole-solid `tessellate` turns that into an empty payload.
+  Added `_tessellate_part` (per-face fallback + `shape3d.warnings`), display-only; the solid/STEP/mesh
+  are unchanged and gmsh meshes it (3,182 tris). Verified: 3720 v / 3294 t with the warning shown.
+- **OPEN (cosmetic):** the 8-inch morph view is missing that one face; the durable fix is in the CAD
+  boolean, not the preview. Also open: the ~45 plughorn knobs are catalog placeholders with raw key names.
+- **Note:** the sandbox sliders were verified through the API (`length_mm 400->430` moves the sections,
+  `plug_tip_x_mm 190` rebuilds the solid). No GPU solve involved - the 3D preview is CAD tessellation.
+
+Local-only, added 2026-10-29 02:50Z (**cone_plughorn exposed in the GUI catalog; no GitHub issue state changed**):
+- **CLOSED (this pass):** the Funktion-One cone mid horn was invisible in the GUI. Cause: the five configs
+  sit in `examples/typologies/cone_plughorn_2026-10-28/` and `_config_sources` globs only the top level, so
+  without an `examples/catalog.yaml` entry they never reached `build_catalog` (no catalog name, group,
+  description, or knob list; absent from `param-catalog.v1.json` and both reference docs). Five entries +
+  new group `cone` added, artifacts regenerated (41 -> 46 typologies), guard test added.
+- **OPEN:** the plughorn knobs are catalog placeholders (`documented: false`, raw key labels) - a ~45-key
+  prose pass in `knobs_generators.py` is still needed for the tooltips to say what each CAD key does.
+- **OPEN (not from this pass):** `tests/test_gui_sandbox_page.py::test_3d_hot_swap_never_scenes_per_frame`
+  asserts a literal `sandbox.js` line that no longer exists (the file now disposes via a `ridgeCache.delete`
+  block). Stale test on the committed tree.
+
+Local-only, added 2026-10-29 02:20Z (**cone driver model + bowl + cone fill; no GitHub issue state changed**):
+- **CLOSED (this pass):** axe-head cone fill not modelled. The fill is now one lofted solid with the base;
+  Evo 7SH front chamber 0.848 L gross -> 0.201 L net, front-chamber cut-off 419 -> 1792 Hz.
+- **CLOSED (this pass):** the driver model had no cone path. `kind: cone`, `rear_box_l`, `rear_box_q`,
+  LR-2 semi-inductance, `air_load_g`, `f_breakup_hz` [inferred]; compression path bit-identical.
+- **OPEN (blocker):** thin-gap CPU cross-check cannot run at the correct cone drive -
+  `source_motion: axial` is refused on `bempp_cpu` (beat backends only); `beat_cpu` needs
+  `python -m hornlab_beat_bem.provision --backend cpu` and a free machine. bempp at ~9k dofs did not
+  finish one frequency in ~20 min during a live night. Mesh is cached at `scratch/thin_gap/epw6/`.
+- **OPEN (hardware):** the real paper-cone driver's T/S, Mmd split, net bowl volume and break-up are
+  still unmeasured; protocol in `docs/research/MEASUREMENT_CONE_DRIVER_2026-10-28.md`. Four published
+  stand-in files exist (`examples/drivers/bc_10mbx64`, `faital_10pr300`, `bc_8mbx51`, `faital_8pr155`).
+- **OPEN:** `cone_plughorn` still never solved (GPU night was live).
+
+Local-only, added 2026-10-29 02:35Z (**CPU second-lane hardening pass; proposal only, no GitHub issue state changed**):
+- **OPEN (senior sign-off):** CPU second solve lane beside the GPU lane - plan/alternatives/risks in
+  `docs/research/CPU_SECOND_LANE_HARDENING_2026-10-28.md`; 8 decisions in §12; expected ~1.5-1.7x screen throughput, not 2x.
+- **OPEN (blocker before any CPU work):** CPU engine unprovisioned on this install (`backend_ready("cpu") == False`;
+  installed fingerprint `4ef2da0d...` != recorded `a19e67a0...`). Re-run
+  `python -m hornlab_beat_bem.provision --backend cpu` with the GPU idle; add a `doctor` check.
+- **OPEN (code):** `--backend beat_cpu` on a `cuda_fused: true` config raises in `BeatBackend.__init__`
+  (`solve/beat.py:395-401`) because the override runs after validation (`cli.py:371-373`); drop `cuda_fused` for non-CUDA
+  backends or re-validate after the override.
+- **OPEN (ops):** campaign after-job hygiene (`search/campaign.py:411-419`) and `gpu-clean`/the night runner
+  (`search/hygiene.py:117-144`, `tools/run_campaign_night.py:~431`) kill every project Julia by keyword; a live CPU lane needs a
+  `.cpu.lane.lock` marker or those paths must be lane-aware.
+
 Local-only, pushed 2026-10-28 20:50 EDT (**cone mid horn typology + research; no GitHub issue state changed**; 8 commits to origin/main):
 - **OPEN:** `cone_plughorn` never solved on the GPU; first screen should use `source_motion: axial` and a CPU cross-check of the
   2.4 mm axe-head/throat gap (thin-gap risk).
@@ -475,3 +610,13 @@ Local-only, added 2026-10-27 (no GitHub issue state changed): objective v4 imple
 Local-only, added 2026-10-27 (evening; no GitHub issue state changed): resume night done; ripple/ridge night running (10 jobs); P12 sim-vs-real investigation opened (loading weight 0 on most briefs, ideal source, generous cov) with the SIM_VS_REAL research report; pushed to main.
 
 Local-only, added 2026-10-29 (owner-delegated hardened solve plan; no GitHub issue state changed): A1 canonical gate-audit tool/output under tools/rescore/gate_audit.py + docs/data/gate_audit_2026-10-29/; B1 published TwinRay 380 seed verify PASS (LFP20 566.6 Hz, acceptance 518-651); C0 extended-throat r0/a0 derivation; B2 explicit grid.screen_extra_hz [250,315,400,2573,3311,4260] -> 18-point screen grid; C1-C5 objective v5 (loading/LFP, flat_cv, CD pattern, round-throat refusal, asymmetric V); D searches b3bt-600, b3a-480, b1w-850, room-shelf-800. Stop after top-10 verify + A1 rerun; no 12/16 kHz pass and no print. Detailed owner decisions: docs/CONTINUITY.md 2026-10-29 entry.
+
+Local-only, added 2026-10-29 (fast-BEM research; no code/GPU; no GitHub issue state changed):
+- [ ] **OPEN: quadrature order A/B (highest value).** Order 4 = 36 point-pairs/element-pair, order 2 = 9 (4x fewer; `forks/hornlab-beat-bem/docs/beat-engine-CUDA.md:53`; `forks/hornlab-beat-bem/hornlab_beat_bem/config.py:32,405`). The fork's wavelength selector (`kh` cutoffs q1_max=0 / q2_max=2.0) exists but is CPU-only and discarded on CUDA (`julia/BeatEngineDriver.jl:186-187,1766-1773`). Validate order 2 at 500 Hz / 2 kHz / 8 kHz; expose `solve.quadrature_order` through `SolveSpec.extra` (hashed); port the selector only if 8 kHz fails while low/mid pass. Report: `docs/research/MATRIX_FREE_GPU_GMRES_FMM_2026-10-29.md` section 5.
+- [ ] **OPEN: GMRES-on-CUDA A/B (second).** No CUDA GMRES exists; the fused CUDA solve is a direct `lu!` (`julia/src/BeatEngineCudaBurtonMiller.jl:642-648`). Reuse `BeatEngineDenseSolve.jl` GMRES with a CUDA matvec; keep FP64 Krylov; no silent default. Expected 1.0-1.4x speed plus ~1.0-1.8 GB peak-VRAM saving [inferred] - the memory win is the point.
+- [ ] **OPEN: bempp FMM/OSRC CPU probe (third, off the GPU lane).** bempp-cl 0.4.2 ships an ExaFMM hook but `exafmm` is not installed in `.venv`; our adapter also refuses Burton-Miller + native symmetry (`NOTES_FOR_SENIOR.md:150`), so a probe runs full meshes. Use it to calibrate FMM constants at kD ~ 100, not as a production path.
+- [ ] **OPEN: PVFMM/FMM3D only if the quadrature path fails and a 14k+ workflow is actually required.** PVFMM is GPU but the Burton-Miller layer is months; FMM3D `hfmm3d` is CPU (Apache-2.0). Stop rules in the report section 9.
+- [ ] **OPEN: owner sign-off needed for any fork change** (pinned SHA + validation ladder per `docs/FORKS.md`); no new solver written (hard rule 2).
+- [ ] **OPEN: do NOT default GMRES.** The cost-model router (`BeatEngineDenseSolve.jl:317-355`) exists because a threshold is wrong across machines and backends.
+- [ ] **OPEN: any new flag must ride `SolveSpec.extra` and change the solve hash** (`hornlab_search/types.py:96-101`); absent = byte-identical to today. Also fix the double-misnomer: `gmres_tol` is hashed/recorded but never applied on Beat (`solve/beat.py:24-25`), and `CAMPAIGN_SMOKE`'s "iterative solve" is a dense LU.
+- Report path: `docs/research/MATRIX_FREE_GPU_GMRES_FMM_2026-10-29.md`; priorities `NEXT_DEV_PRIORITIES.md` P13; research basis `plan/12_RESEARCH_BASIS.md` section 18.

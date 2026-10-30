@@ -1,0 +1,79 @@
+# OBJECTIVE v5 COPY (2026-10-29, data campaign): the v4 native ATH CORE 2-inch control brief with the
+# v5 loading/scoring block. The v4 brief is untouched.
+# CLASS A (constant-directivity waveguide): narrow side counts 2x the wide side; DI std and the
+# diagonal term are live; the 2.5-5.5 kHz presence band is weighted x2 (owner field experience).
+# Tolerances: docs/evidence/OBJECTIVE_V4_TOLERANCES.md (class A = Option A) plus the v5 flat_cv 1.5
+# (objective/scalar_v5.py). Raw term = stored term x tolerance.
+# cov_below_f0 is OMITTED on purpose: a class A brief scores the whole band (v4 style, loader
+# default "mask"), so nothing is scored one-sided below f0.
+# Brief native_ath_core_2in_v5 - native ATH CORE-style 2-inch control (50 x 50, band 300-8000 Hz).
+#
+# PURPOSE: data-campaign NATIVE control. This is the v4 native_ath_core_2in brief re-stamped for
+#   objective v5. objective.version 5 with target.f0_hz 1280: CORE is not a Keele K-law mouth, but
+#   its measured 397 mm mouth does hold the 50 deg target from 25,400,000 / (397 * 50) = 1,280 Hz,
+#   so that is the honest pattern-control frequency for a constant-directivity score.
+# K-LAW ARITHMETIC: NOT APPLICABLE as a design law - the published CORE recipe is a nominal 50x50
+#   OS-SE, not a K-law mouth. The brief's 650 mm envelope is intentionally larger than the ~397 mm
+#   seed; the f0 above only masks coverage below what the 397 mm mouth can hold.
+# DRIVER CLASS: 2-inch compression driver, r0 = 25.4 mm, published CORE throat angle 1.2 deg
+#   (throat_angle_policy: pin).
+# f11 DISCLOSURE: 2in driver-exit f11 = 3,957 Hz, set EXPLICITLY as target.loaded_hi_hz. Above
+#   3.96 kHz the uniform-piston source is a geometry comparison, not a 2-inch driver's real exit
+#   behaviour; the loading hold must not be extended past it.
+name: native_ath_core_2in_v5
+description: (objective v5) Native ATH CORE-style 2-inch control, 50x50 target, 650x650x520 mm envelope, band 300-8000 Hz, f0 1280 Hz, v5 LFP loading to the explicit driver-exit loaded_hi_hz 3957 + flat_cv
+driver:
+  exit_radius_mm: 25.4
+  exit_angle_deg: 1.2
+  throat_angle_policy: pin
+envelope:
+  max_mouth_w_mm: 650.0
+  max_mouth_h_mm: 650.0
+  max_depth_mm: 520.0
+symmetry: hv
+source:
+  cap: auto
+target:
+  coverage_h_deg: 50.0
+  coverage_v_deg: 50.0
+  band_lo_hz: 300.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.0
+  f0_hz: 1280.0
+  # Driver-exit (25.4 mm) f11: the loading hold runs to 3957 Hz.
+  loaded_hi_hz: 3957.0
+  freq_weights:
+    band_hz:
+      - [2500.0, 5500.0, 2.0]
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 1.0
+  distd: 0.5
+  diag: 0.5
+  flat_cv: 0.5
+grid:
+  verify_points_per_octave: 6
+  screen_extra_hz: [250, 315, 400, 2573, 3311, 4260]
+objective:
+  version: 5
+  tolerances:
+    cov: 2.0
+    rip: 1.0
+    di: 0.4
+    dislope: 9.0
+    flat: 1.5
+    load: 0.3
+    distd: 2.0
+    diag: 2.0
+    flat_cv: 1.5
+  cov_narrow_ratio: 2.0
+  loaded_re_z: 0.5
+  lfp_re_z: 0.2
+  lfp_crossover_ratio: 1.6
+  bw8k_floor: 0.75

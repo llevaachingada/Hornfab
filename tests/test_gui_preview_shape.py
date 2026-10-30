@@ -100,6 +100,40 @@ def test_native_kind_measures_its_envelope_from_the_preview_geometry():
     assert len(out["section"]["h"]["inner"]) >= 2
 
 
+def test_plughorn_3d_survives_one_untriangulable_face():
+    """A valid, gmsh-meshable solid can still defeat build123d's whole-shape tessellate.
+
+    ``cone_plughorn__morph_wide_8in`` has one planar boolean-remnant face (634 mm^2) that comes
+    back without a triangulation; ``Shape.tessellate`` raises ``'NoneType' has no 'NbNodes'`` and
+    the whole 3D payload used to blank. The preview falls back to per-face tessellation and says
+    what it could not draw. The Evo 7SH (no such face) must stay warning-free.
+    """
+    out = D.preview_shape(ROOT, "cone_plughorn__morph_wide_8in", _q(detail="3d"))
+    assert out["available"] is True and out["kind"] == "plughorn"
+    s3 = out["shape3d"]
+    assert s3["available"] is True and len(s3["tris"]) > 0 and len(s3["verts"]) > 0
+    assert s3["warnings"] and "could not be triangulated" in s3["warnings"][0]
+
+    ok = D.preview_shape(ROOT, "cone_plughorn__evo7sh_narrow", _q(detail="3d"))
+    assert ok["shape3d"]["available"] is True and ok["shape3d"]["warnings"] == []
+
+
+def test_typology_link_resolves_by_catalog_name():
+    """`#/typology/<catalog name>` must reach the config it names.
+
+    /api/typologies hands the front end the CATALOG name; the preview endpoint used to resolve
+    only the config's own `name:`. They differ for every catalogued config whose YAML `name:`
+    carries a different identifier - all five cone_plughorn entries - so the typology page
+    answered 404 ("preview endpoint unavailable"). Exact config name still wins.
+    """
+    out = D.preview_shape(ROOT, "cone_plughorn_7sh", _q(detail="3d"))
+    assert out["available"] is True and out["kind"] == "plughorn"
+    assert out["section"]["h"]["inner"] and out["shape3d"]["available"] is True
+    assert out["config"] == "cone_plughorn_7sh"
+    with pytest.raises(FileNotFoundError):
+        D.preview_shape(ROOT, "no_such_typology", _q(detail="2d"))
+
+
 def test_cad_kind_is_hard_unavailable_with_the_mesher_gap_reason():
     out = D.preview_shape(ROOT, "multicell_3x3", _q(detail="3d"))
     assert out["available"] is False

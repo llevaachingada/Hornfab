@@ -3,9 +3,10 @@ one-sided floor, C5 signed V coverage, plus the v4/v5 dispatch contract.
 
 Offline, CPU only, synthetic MetricSets/Responses. The contracts pinned here:
 
-* C1 ``load`` is ``max(0, log2(LFP20 * ratio / F_X)) + max(0, loaded_re_z - min Re z at f >= F_X)``;
-  LFP at the grid start is an upper bound, a crossing above the grid end (or no z / no sample at
-  F_X) is ``NAN_TERM_FILL``, and v4's load is untouched;
+* C1 ``load`` is ``max(0, log2(LFP20 * ratio / F_X)) + max(0, loaded_re_z - min Re z over
+  [F_X, min(band_hi, f11)])``; the Re z hold stops at the design's ``f11_hz`` (``NAN_TERM_FILL``
+  when the window has no sample); LFP at the grid start is an upper bound, a crossing above the grid
+  end (or no z) is ``NAN_TERM_FILL``, and v4's load is untouched;
 * C2 ``flat_cv`` is the population std of a unit-velocity level against a log2-f line over
   F_X..3000 Hz, normalised by its tolerance and 0.0 at zero weight;
 * C3 the 8 kHz floor only charges NARROW patterns, at ``min(8000, band_hi)``, and ``cov``'s narrow
@@ -61,7 +62,8 @@ def _target(**kw) -> Target:
     return Target.from_dict({**_T, **kw})
 
 
-def _metrics(freqs, t: Target, *, bw_h=None, bw_v=None, di=None, z=None, on_axis=None) -> MetricSet:
+def _metrics(freqs, t: Target, *, bw_h=None, bw_v=None, di=None, z=None, on_axis=None,
+             scalars=None) -> MetricSet:
     f = np.asarray(freqs, dtype=float)
     ref = target_di_gaussian_db(t.coverage_h_deg, t.coverage_v_deg)
     return MetricSet(
@@ -71,7 +73,8 @@ def _metrics(freqs, t: Target, *, bw_h=None, bw_v=None, di=None, z=None, on_axis
         di_db=np.full(f.size, ref) if di is None else np.asarray(di, float),
         di_source="balloon", ripple_h_db=np.zeros(f.size), ripple_v_db=np.zeros(f.size),
         on_axis_db=np.zeros(f.size) if on_axis is None else np.asarray(on_axis, float),
-        z_throat_real=None if z is None else np.asarray(z, float), scalars={})
+        z_throat_real=None if z is None else np.asarray(z, float),
+        scalars={} if scalars is None else dict(scalars))
 
 
 # ------------------------------------------------------------------ schema + params
@@ -80,7 +83,8 @@ def test_v5_key_set_is_v4_plus_flat_cv_and_the_diagnostics():
     assert 5 in SUPPORTED_OBJECTIVE_VERSIONS
     assert V5_WEIGHTED_KEYS == V4_WEIGHTED_KEYS + ("flat_cv",)
     assert set(V5_ALL_KEYS) == set(V4_ALL_KEYS) | {"flat_cv"} | set(V5_DIAGNOSTIC_KEYS)
-    assert V5_DIAGNOSTIC_KEYS == ("lfp20_hz", "lfp50_hz", "rez_min_from_fx")
+    assert V5_DIAGNOSTIC_KEYS == ("lfp20_hz", "lfp50_hz", "rez_min_from_fx", "f11_hz",
+                                  "loaded_hi_hz")
     assert V5_DEFAULT_WEIGHTS == {**W, "distd": 0.0, "diag": 0.0, "flat_cv": 0.0}
 
 
@@ -140,6 +144,54 @@ def test_lfp_above_the_grid_end_is_the_unmeasurable_fill():
     assert terms["load"] == pytest.approx(NAN_TERM_FILL)
 
 
+def test_rez_hold_stops_at_f11_so_an_eight_k_dip_does_not_fail_loading():
+    # Loaded >= 0.50 from F_X through f11 = 5584 Hz; the 0.29 dip at 8 kHz is above f11 and free.
+    t = _target(f0_hz=600.0, band_hi_hz=8000.0)
+    f = np.array([300.0, 600.0, 1200.0, 2400.0, 4000.0, 5584.0, 8000.0])
+    z = [0.60, 0.62, 0.65, 0.70, 0.68, 0.55, 0.29]
+    m = _metrics(f, t, z=z, scalars={"f11_hz": 5584.0})
+    _, terms = objective_v5(m, None, True, t, {"load": 1.0}, _params())
+    assert terms["load"] == pytest.approx(0.0)
+    assert terms["rez_min_from_fx"] == pytest.approx(0.55)
+    assert terms["f11_hz"] == pytest.approx(5584.0)
+    assert terms["loaded_hi_hz"] == pytest.approx(5584.0)
+
+
+def test_rez_below_half_inside_the_loaded_window_still_fails():
+    t = _target(f0_hz=600.0, band_hi_hz=8000.0)
+    f = np.array([300.0, 600.0, 1000.0, 2000.0, 4000.0, 5584.0, 8000.0])
+    z = [0.25, 0.60, 0.55, 0.40, 0.70, 0.55, 0.29]
+    m = _metrics(f, t, z=z, scalars={"f11_hz": 5584.0})
+    _, terms = objective_v5(m, None, True, t, {"load": 1.0}, _params())
+    assert terms["rez_min_from_fx"] == pytest.approx(0.40)
+    assert terms["load"] == pytest.approx(0.50 - 0.40)
+
+
+def test_absent_or_null_f11_falls_back_to_band_hi():
+    t = _target(f0_hz=600.0, band_hi_hz=8000.0)
+    f = np.array([300.0, 600.0, 1200.0, 2400.0, 4000.0, 5584.0, 8000.0])
+    z = [0.60, 0.62, 0.65, 0.70, 0.68, 0.55, 0.29]
+    for scalars in ({}, {"f11_hz": None}):
+        _, terms = objective_v5(_metrics(f, t, z=z, scalars=scalars), None, True, t,
+                                {"load": 1.0}, _params())
+        # The whole [F_X, BAND_HI] window applies again: the 8 kHz 0.29 dip is scored.
+        assert terms["rez_min_from_fx"] == pytest.approx(0.29)
+        assert terms["load"] == pytest.approx(0.50 - 0.29)
+        assert terms["loaded_hi_hz"] == pytest.approx(8000.0)
+        assert terms["f11_hz"] == pytest.approx(NAN_TERM_FILL)
+
+
+def test_lfp20_penalty_is_unchanged_by_the_loaded_window():
+    t = _target(f0_hz=600.0, band_hi_hz=8000.0)
+    f = np.array([300.0, 500.0, 600.0, 1200.0, 2400.0, 8000.0])
+    z = [0.05, 0.10, 0.60, 0.65, 0.70, 0.70]
+    m = _metrics(f, t, z=z, scalars={"f11_hz": 5584.0})
+    _, terms = objective_v5(m, None, True, t, {"load": 1.0}, _params())
+    cross = 500.0 * (600.0 / 500.0) ** 0.2          # LFP20 between 500 (0.10) and 600 (0.60)
+    assert terms["load"] == pytest.approx(math.log2(cross * 1.6 / 600.0))
+    assert terms["rez_min_from_fx"] == pytest.approx(0.60)
+
+
 def test_no_z_or_no_sample_at_fx_is_the_unmeasurable_fill():
     from hornlab_search.objective.scalar_v5 import _load_v5
 
@@ -154,6 +206,59 @@ def test_no_z_or_no_sample_at_fx_is_the_unmeasurable_fill():
     raw, diag = _load_v5(_metrics(f[:2], t, z=[0.9, 0.9]), t, _params())
     assert raw == pytest.approx(NAN_TERM_FILL)
     assert diag["rez_min_from_fx"] == pytest.approx(NAN_TERM_FILL)
+
+
+def test_explicit_loaded_hi_hz_wins_over_driver_and_stored_f11():
+    # 80x80 owner brief: target loaded_hi_hz 5653 beats the driver-exit 5583.5 and stored 3809.
+    t = _target(f0_hz=600.0, band_hi_hz=8000.0, loaded_hi_hz=5653.0,
+                driver_exit_radius_mm=18.0)
+    f = np.array([300.0, 600.0, 1200.0, 2400.0, 4000.0, 5584.0, 8000.0])
+    z = [0.60, 0.62, 0.65, 0.70, 0.68, 0.55, 0.29]
+    m = _metrics(f, t, z=z, scalars={"f11_hz": 3809.0})
+    _, terms = objective_v5(m, None, True, t, {"load": 1.0}, _params())
+    assert terms["f11_hz"] == pytest.approx(5653.0)
+    assert terms["loaded_hi_hz"] == pytest.approx(5653.0)
+
+
+def test_driver_exit_f11_is_preferred_over_the_stored_design_f11():
+    # No explicit target bound: the 18 mm driver exit gives 1.8412*343/(2*pi*0.018) = 5583.5 Hz.
+    t = _target(f0_hz=600.0, band_hi_hz=8000.0, driver_exit_radius_mm=18.0)
+    f = np.array([300.0, 600.0, 1200.0, 2400.0, 4000.0, 5584.0, 8000.0])
+    z = [0.60, 0.62, 0.65, 0.70, 0.68, 0.55, 0.29]
+    m = _metrics(f, t, z=z, scalars={"f11_hz": 3809.0})   # extended main throat: ignored
+    _, terms = objective_v5(m, None, True, t, {"load": 1.0}, _params())
+    driver = 1.8412 * 343.0 / (2.0 * math.pi * 0.018)
+    assert terms["f11_hz"] == pytest.approx(driver)
+    assert terms["loaded_hi_hz"] == pytest.approx(driver)
+    assert terms["rez_min_from_fx"] == pytest.approx(0.62)   # min in [600, 5583.5]; the 8 kHz dip is above f11
+
+
+def test_design_f11_is_the_fallback_when_neither_explicit_nor_driver_is_known():
+    t = _target(f0_hz=600.0, band_hi_hz=8000.0)
+    f = np.array([300.0, 600.0, 1200.0, 2400.0, 4000.0, 5584.0, 8000.0])
+    z = [0.60, 0.62, 0.65, 0.70, 0.68, 0.55, 0.29]
+    m = _metrics(f, t, z=z, scalars={"f11_hz": 3809.0})
+    _, terms = objective_v5(m, None, True, t, {"load": 1.0}, _params())
+    assert terms["f11_hz"] == pytest.approx(3809.0)
+    assert terms["loaded_hi_hz"] == pytest.approx(3809.0)
+    assert terms["rez_min_from_fx"] == pytest.approx(0.62)
+
+
+def test_the_827_hz_dip_fails_loading_under_every_upper_bound():
+    # The owner's seed has Re z 0.291 at 827.75 Hz, inside every candidate loaded window.
+    f = np.array([300.0, 600.0, 827.75, 1200.0, 2400.0, 4000.0, 5584.0, 8000.0])
+    z = [0.60, 0.62, 0.291, 0.65, 0.70, 0.68, 0.55, 0.29]
+    cases = (
+        {"loaded_hi_hz": 5653.0},               # explicit driver f11
+        {"driver_exit_radius_mm": 18.0},        # derived driver-exit f11
+        {},                                     # stored design f11 / band_hi
+    )
+    for extra in cases:
+        t = _target(f0_hz=600.0, band_hi_hz=8000.0, **extra)
+        m = _metrics(f, t, z=z, scalars={"f11_hz": 3809.0})
+        _, terms = objective_v5(m, None, True, t, {"load": 1.0}, _params())
+        assert terms["rez_min_from_fx"] == pytest.approx(0.291)
+        assert terms["load"] > 0.0
 
 
 def test_v4_load_is_untouched():

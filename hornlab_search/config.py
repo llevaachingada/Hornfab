@@ -869,12 +869,24 @@ def load_config(path, *, brief=None, cma_seed: int | None = None) -> Config:
         if "lo" not in b or "hi" not in b:
             raise ConfigError(f"{where}: bounds.{k} needs lo and hi")
 
+    # 2026-10-29 owner retarget: surface the applied brief's driver exit radius on the TYPED target
+    # only (not on ``raw``), so the objective can derive the DRIVER-EXIT f11 when the brief has no
+    # explicit target.loaded_hi_hz. Keeping ``raw`` untouched preserves config_sha for every
+    # existing brief-based run; gate_audit reads the same value from run.json's brief.driver.
+    target_raw = dict(_require(raw, "target", where))
+    applied_brief = raw.get("brief") if isinstance(raw.get("brief"), dict) else None
+    brief_driver = brief_d.get("driver") if isinstance(brief_d, dict) else None
+    applied_drv = ((applied_brief or {}).get("driver") or brief_driver or {})
+    exit_r = applied_drv.get("exit_radius_mm") if isinstance(applied_drv, dict) else None
+    if isinstance(exit_r, (int, float)) and not isinstance(exit_r, bool) and float(exit_r) > 0.0:
+        target_raw.setdefault("driver_exit_radius_mm", float(exit_r))
+
     return Config(
         name=str(_require(raw, "name", where)),
         family=str(_require(raw, "family", where)),
         seed_params=dict(_require(raw, "seed_params", where)),
         bounds_raw=dict(bounds),
-        target_raw=dict(_require(raw, "target", where)),
+        target_raw=target_raw,
         weights=dict(_require(raw, "weights", where)),
         mesh=mesh,
         solve=solve,

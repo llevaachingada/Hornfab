@@ -2,6 +2,325 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-30 - DATA CONSOLIDATION ADOPTED: OWNER OK FOR HARDLINKS, NO OFF-MACHINE BACKUP
+
+**Decision (owner, 2026-10-30).** Execute `docs/DATA_CONSOLIDATION_PLAN_2026-10-29.md` phase by
+phase. The owner allowed hardlinks in the run/cache copy path (amends `01_CONTRACTS.md` section 14
+from "copy, never symlink" to "copy or hardlink, never symlink") and waived the off-machine backup:
+the data is not precious enough to duplicate. Phase 0's restore gate is therefore replaced by a
+hardlink-integrity check after Phase 1 (cache bytes unchanged, `st_nlink == 2` on linked pairs).
+
+**This commit.** The 51 files that were uncommitted on `feat/hardened-plan-2026-10-29`: the 80x80
+gate-aware search work and its evidence, the parameter/typology reference updates, the GUI
+progressive/perf tests, and the cone-source-model and data-consolidation plans. No data was deleted,
+moved or linked by this commit. Measured on 2026-10-30 before any change: `runs/` 15.55 GB,
+`cache/` 10.81 GB, `dataset/` 3.53 GB, backups 0.82 GB, `scratch/` 0.82 GB (~32 GB total).
+Focused suite on the changed modules: 147 passed (`test_driver_compression`, `test_objective_v5`,
+`test_param_catalog`, `test_tools_gate_audit`, `test_gui_preview_shape`, `test_gui_home_progressive`,
+`test_gui_perf_snapshot`).
+
+**Next.** Phase 1: unlink-before-mesh-write, atomic `save_response`, link-first `_copy_entry` /
+`copy_entry` with copy fallback, then `tools/data/dedupe_runs.py` (dry-run default) and a real run.
+
+## 2026-10-29 (13:42Z) - 80x80 GATE-AWARE SEARCH COMPLETE: 0/110 PASS-ALL; LOADING 0/110; 827 HZ DIP STRUCTURAL
+
+**Result.** Run `runs/20261029T122018Z-screen-9766f0`: 100 new + 10 cached, best J **2.9053**
+(seed 3.2495). Post-search A1 `scratch/gate_audit_b3a80x80_search/`: **110 rows, 0 pass-all**.
+Per gate: **H 68**, **V 108**, **DI 109**, **BW8K 96**, **Throat 110**, **Loading 0**. LFP20 passes
+110/110 (min 282.3 Hz); the loading failure is the Re z dip: best-J 0.2763, best loading row 0.3767,
+seed 0.291 at 827.75 Hz, floor 0.5. The 827 Hz dip is inside [600, 5653] and is structural in the
+b3a extended-throat family. The 80x80 retarget fixed H/V (D-era H 0/96); loading is the sole
+universal blocker. Do not run another b3a 80x80/seed/target.
+
+**Next (owner choice).** Change family or throat; native ATH core 2" is the only prior all-gate pass
+set (42 designs). The 80x80 search and A1 are complete; no code/solver/fork change; nothing committed.
+Evidence: `docs/evidence/HARDENED_D_2026-10-29.md` section 13.
+
+**Throat-style knob research (owner question, no edits).** One typology with a searchable
+`throat_style` is feasible for **generated (FREEFORM)** typologies: an integer index knob
+(0 off / 1 straight / 2 exponential) plus `throat_length_mm`, built in
+`design/generators/profiles.py` + `registry.py`; no mesher/cache/search change because hashes are
+the materialised geometry. Native OSSE/ATH-core (`ath_core`, `osse_ext_throat`) exposes only the
+mesher's linear `throatExtLength/Angle` tube; straight-vs-exponential there needs a mesher/fork
+change under `docs/FORKS.md`. The literal `throat_style: [straight, exponential]` bound is rejected
+today (float-only bounds); use an integer index. Not implemented; owner choice pending.
+
+## 2026-10-29 (12:20Z) - OWNER RETARGET 2: b3a -> 80x80/600, DRIVER-EXIT f11 5653, GATE-AWARE 100-EVAL SEARCH LAUNCHED
+
+**Owner decision (2026-10-29).** Retarget the b3a cell to **80 x 80 deg at 600 Hz** and source the
+loading hold's `f11` from the **18 mm driver exit (5,653 Hz)**, not the design's main throat (the
+stored `scalars.f11_hz` 3,809 Hz is the 26.385 mm extended-throat cross-mode). Then run the
+**gate-aware 100-eval search** on this cell. Reasoning: the b3a 588 x 588 seed's natural pattern is
+H 89.65 at 1.07 kHz and 69.3 at 8 kHz; against 80x80 that is 1.121 and 0.866 (both pass), and V
+89.65/80 = 1.121 (pass). The 72x72 retarget FAILED H at 1.07 kHz (89.65/72 = 1.245 > 1.20); 75x60
+passed H but failed V (90/60 = 1.50); 60x30 is worse. The seed still has a real loading dip:
+**Re z 0.291 at 827.75 Hz**, inside any loaded window, which the search must remove.
+
+**Implemented (gate/objective/target/brief/config/tests; no solver/Julia/fork change; no commit).**
+- `tools/rescore/gate_audit.py` + `hornlab_search/objective/scalar_v5.py`: the loading hold's upper
+  bound now resolves **explicit `target.loaded_hi_hz` > driver-exit f11 (from
+  `driver.exit_radius_mm`, `1.8412*c/(2*pi*a)`) > stored `metrics.scalars.f11_hz` (main throat) >
+  `BAND_HI`**. The Re z hold is `[F_X, min(BAND_HI, loaded_hi_hz)]`; LFP20/LFP50 unchanged.
+  `loaded_hi_hz`/`f11_hz` remain UNWEIGHTED diagnostics; the CSV/README document the precedence.
+  `hornlab_search/targets/spec.py` carries `loaded_hi_hz` / `driver_exit_radius_mm`; `config.py`
+  surfaces the brief's driver radius on the TYPED target only (never `raw`, so `config_sha` is
+  unchanged for every existing brief run); `dataset/record.py` omits the absent keys.
+- New brief `examples/briefs/hardened_2026-10-29_v5/b3a_pa_80x80_600_square_v5.yaml` (80x80, f0 600,
+  K-law 529x529, 588x588 seed retained, 740x740x650, band 300-8000, 18-point grid, v5 class C,
+  `loaded_hi_hz: 5653.0`) and config
+  `examples/typologies/hardened_2026-10-29_v5/b3a__osse_ext_throat_80x80_600_v5.yaml` (budget 100,
+  distance 10, seed 588x588, six searched knobs, everything else identical to the b3a v5 cell).
+- Focused tests: `tests/test_tools_gate_audit.py` + `tests/test_objective_v5.py` **65 passed**
+  (56 previous + 9 new f11-source cases); `tests/test_targets.py`/`test_config.py`/
+  `test_objective_v3_f0v.py` **84 passed** (config_sha goldens unchanged). compileall clean.
+
+**Seed A1 (cache hit: 0 new / 1 cached, GPU 0.0 s; run `20261029T121930Z-screen-10b954`).**
+`J = 3.24955`, **pass_all = FALSE**. Per gate: **H pass**, **V pass**, **DI pass**, **BW8K pass**
+(bw_h 69.30 / bw_v 69.52 at 8 kHz), **Loading FAIL** (`Re z 0.291 < 0.5` in [600, 5653] Hz; LFP20
+329.9 Hz passes the 375 Hz bar), **Throat pass** (36.0 x 36.0 mm, round 0.994). CSV:
+`scratch/gate_audit_b3a80x80/gate_audit.csv`; README beside it.
+
+**Search launched (detached, one GPU job).** `runs/nights/b3a80x80_search.ps1` via
+`launch_detached.ps1`; **wrapper pid 36992**; log `runs/nights/b3a80x80_search.log`; run
+`runs/20261029T122018Z-screen-9766f0`. Same v5 objective (load 1.0), 80x80 brief, 588 seed,
+18-point grid, distance 10, budget 100. **Post-search A1 controller pid 16056** waits for the search
+pid, then runs `gate_audit --run-glob "20261029T122018Z-screen-*" --out scratch/gate_audit_b3a80x80_search`
+and writes `runs/nights/b3a80x80_search_a1.log`. No second search was started.
+
+## 2026-10-29 (12:00Z) - OWNER RETARGET: b3a -> 72x72/600 + Re z HOLD TO f11 (seed A1: 0 pass-all)
+
+**Owner decision (2026-10-29).** Retarget the b3a cell to **72 x 72 deg at 600 Hz** and hold the loading
+gate's `Re z >= 0.50` from `f_x` to the design's **first throat cross-mode f11**, not to 8 kHz. The
+reasoning given: the b3a 588 x 588 mm seed is the K-law mouth for 72x72 at 600
+(`25.4e6 / (600*72) = 588`); at 72x72 its natural top octave reads H 64/72 = 0.89 and V 90/72 = 1.25
+(both pass); LFP20 330 clears the 375 Hz bar; the only old-gate failure was said to be "Re z 0.29 at
+8 kHz", which is above the 1.4-inch f11 (5,653 Hz by hand) and is not a driver-loading failure.
+75x60 passed H but failed V (90/60 = 1.50); 60x30 fails V (90/30 = 3.0). The 75x60 files stay.
+
+**Implemented (gate/objective/tests/brief/config only; no solver/Julia/fork change; no commit).**
+- `tools/rescore/gate_audit.py`: the Re z hold now runs over the solved frequencies in
+  `[F_X, min(BAND_HI, f11_hz)]`; `f11_hz` is read per row from the stored `metrics.scalars.f11_hz`,
+  and absent/null falls back to `BAND_HI` (old behaviour). LFP20 and every other gate unchanged. The
+  row/CSV carry `f11_hz` and `loaded_hi_hz`; the README documents the window.
+- `hornlab_search/objective/scalar_v5.py`: `_load_v5` applies the same window to `rez_min_from_fx`;
+  LFP20/LFP50 penalties unchanged; `f11_hz`/`loaded_hi_hz` added as UNWEIGHTED diagnostics (no new
+  weighted key). Module docstring documents the definition.
+- New brief `examples/briefs/hardened_2026-10-29_v5/b3a_pa_72x72_600_square_v5.yaml` (72x72, f0 600,
+  588x588 K-law, class C tolerances, v5) and config
+  `examples/typologies/hardened_2026-10-29_v5/b3a__osse_ext_throat_72x72_600_v5.yaml` (budget 100).
+- Focused tests: `tests/test_tools_gate_audit.py` + `tests/test_objective_v5.py` **56 passed**.
+
+**Seed check (cache hit: 0 new / 1 cached, GPU 0.0 s; run `20261029T115645Z-screen-567db8`).**
+`J = 3.43861`, `pass_all = FALSE`. A1 per gate: **H FAIL** (1 of 14 samples outside +/-20 %, worst
+deviation 0.245), **V pass**, **DI pass**, **BW8K pass**, **Loading FAIL** (`Re z 0.291 < 0.5` in
+[600, 3809.38] Hz), **Throat pass**. CSV: `scratch/gate_audit_b3a72x72/gate_audit.csv`.
+
+**Correction to the retarget premise (measured).** The seed's stored `scalars.f11_hz` is **3,809 Hz**,
+not 5,584 Hz: `compute_metrics` takes f11 from the design `r0_mm` (26.385 mm, the extended throat),
+not the 18 mm driver exit (18 mm -> 5,582 Hz). The `Re z 0.291` dip is at **827.75 Hz**, well inside
+[600, 3809]; Re z at 8 kHz is 0.981. So the f11 window does **not** rescue this seed - it is a genuine
+~828 Hz loading dip, not an above-f11 artifact. The H failure is likewise **at 1.07 kHz**
+(bw_h 89.65 vs 72, +24.5 %), not at 8 kHz (69.30 vs 72 passes). The retarget's scoring/gate change is
+correct and landed; the specific seed does not pass the gates. No 100-eval search was run.
+
+## 2026-10-29 (late) - FAST-BEM RESEARCH: QUADRATURE FIRST, GMRES SECOND, FMM AT 14K+ (zero GPU)
+
+Owner-directed research pass. **Docs only: no code, config, example, test or D-night file touched; no GPU or
+solver job run; nothing committed.** New report:
+`docs/research/MATRIX_FREE_GPU_GMRES_FMM_2026-10-29.md` (also `NEXT_DEV_PRIORITIES` P13 and
+`plan/12_RESEARCH_BASIS.md` section 18).
+
+- **Verdict.** At 5-6k dofs the dense fused CUDA path is assembly-bound (73-96 % of per-frequency wall,
+  `CAMPAIGN_SMOKE_2026-10-27.md:57`) and already one-matrix + device LU. Matrix-free/FMM is **not** the 2x at
+  our current size. The cheapest credible 2x is quadrature order 4 -> 2. FMM is a feasibility play at 14k+ and
+  the only path at 20k+. **No 10x is supported at 5-10k.**
+- **The quadrature finding.** Order 4 = 6-point triangle rule = **36 point-pairs per element pair**; order 2 =
+  3 points = **9 point-pairs** (`forks/hornlab-beat-bem/docs/beat-engine-CUDA.md:53`; `config.py:32,405`) -
+  4x fewer kernel evaluations. The fork already has a wavelength-driven 1/2/4 selector with `kh` cutoffs
+  (`q1_max=0`, `q2_max=2.0`; `BeatEngineDriver.jl:207-229`) but it is **CPU-only and discarded on CUDA**
+  (`:186-187`, `:1766-1773`). At epw 6, `kh ~ 1.05` -> order 2.
+- **CUDA has no GMRES.** The fused CUDA solve is `lu!` (`BeatEngineCudaBurtonMiller.jl:642-648`); the fork's
+  GMRES (35-136 iterations, worst 549; FP64 Krylov because FP32 loses orthogonality 584-1000 vs 35-42) is
+  CPU/Metal only (`BeatEngineDenseSolve.jl:14-55,363-372,72-73`). Expected gain on CUDA **1.0-1.4x**, plus a
+  ~1.0-1.8 GB peak-VRAM saving from deleting the LU workspace [inferred] - a feasibility lever, not a 2x.
+- **FMM** is 2-5x only at 14-20k, and even there the constants at kD ~ 100-235 are unverified. Exafmm-t is
+  CPU/low-frequency/dormant; PVFMM is the GPU candidate but the BM layer is months; FMM3D `hfmm3d` is the best
+  CPU algorithm fit; H-matrix/ACA ranks blow up at kD ~ 100. bempp-cl FMM is CPU Exafmm, not a GPU production
+  path (`exafmm` is not even installed in `.venv`).
+- **Axisymmetric/multimodal** is the only 10-100x (round horns, m=0, ~400 unknowns, ms/freq), does **not**
+  apply to the 90x60/90x90 morph briefs, and stays WP13 owner-deferred.
+- **Also recorded (gotchas found):** `CAMPAIGN_SMOKE`'s "iterative solve 0.07-0.94 s" is a dense LU on CUDA;
+  `_cuda_use_matrix_free_burton_miller_rhs` is RHS-only (`BeatEngineCore.jl:1509,1528`); `gmres_tol` is hashed
+  and recorded but never applied on Beat (`solve/beat.py:24-25`); an axisymmetric brief is not an axisymmetric
+  BEM.
+- **Next steps (owner sign-off for any fork change):** Phase 0 phase timing on 3 stored meshes x 3 freqs ->
+  Phase 1 quadrature A/B (expose `solve.quadrature_order`, SPL <=0.05 dB at 500 Hz/2 kHz, <=0.10 dB at 8 kHz,
+  bw <=0.3 deg, DI <=0.05 dB, >=1.5x at 5k or >=1.3x at 14k) -> Phase 2 GMRES on CUDA -> Phase 3 bempp
+  FMM/OSRC CPU probe -> Phase 4 PVFMM/FMM3D only if justified.
+
+## 2026-10-29 (04:05Z) - PLAN WRITTEN: CONE SOURCE MODEL (the rigid piston is the assumption)
+
+Owner asked for a senior-level plan to fix the cone source after the research pass showed the directivity claim
+is unearned above ~1 kHz. **Plan only, nothing implemented.** New doc
+`docs/CONE_SOURCE_MODEL_PLAN_2026-10-29.md`; indexed, and elevated in `NEXT_DEV_PRIORITIES.md` as **P0b**
+(it blocks every cone_plughorn directivity claim).
+
+- **The finding.** The cone face (tag 2) is driven as a rigid axial piston at all frequencies. A 10-inch paper
+  cone is pistonic only to its first break-up, ~0.7–1.5 kHz [consensus; must be measured]; the band is
+  220 Hz–4 kHz. Since `p(θ) ∝ ∫ v(r)J₀(k r sinθ) r dr`, sign changes in `v(r)` must produce lobes/nulls a
+  uniform piston cannot. So 1–4 kHz pattern/DI is geometry-only today. The BEM geometry is fine; the boundary
+  condition on the cone is the assumption.
+- **Code audit recorded in the plan** (all verified this pass): beat `SolveConfig.source_tag` asserts exactly
+  ONE source tag (`((tag, _),) = velocity_sources.items()`); `source_profile_alpha` is a per-face J0 factor,
+  **fused-CUDA only**, refused in both Python and Julia; `julia/BeatEngineDriver.jl::source_profile_factors`
+  (~841) is the seam to generalise; `sweep.py` computes the entry impedance from the **mean** pressure over the
+  source tag (must become velocity-weighted); `solve/bempp.py` drives uniformly
+  (`velocity_sources={SOURCE_TAG: 1.0}`) so the CPU cross-check cannot see a profile yet; STEP labels are
+  pinned to `{driver, wall}` with exactly one driver face (`multicell.LABELS`, `read_face_inventory`), so
+  ring tags are a schema + mesher + `_is_driver_face` change.
+- **Recommended route.** C0 honesty now (retire `Sd_eff` as a directivity model, print the piston-valid band);
+  C1 `SourceProfile` data model + validation; C2 beat CPU factors + the generalised Julia builder; C3 bempp so
+  the profile is cross-checked; C4 `A_eq` + velocity-weighted `Z_rad` in `resp.meta`, `drive()` consumes them;
+  C5 provenance/reporting; C6 measured LDV/accelerometer profile; C7 multi-tag rings only with evidence.
+  Uniform profile must be byte-identical to today.
+- **Two-way coupling is the trap** the plan calls out: the circuit must see the radiation impedance of the
+  actual velocity distribution (`Z_rad = Σ conj(v)pA / Σ|v|²A`), not the uniform mean, or level/impedance/
+  excursion are inconsistent with the polars near break-up.
+- **Research record** (sources + labels) is in the plan: Frankort 1975; Kagawa 1980; Hu 2017; Smith 1953
+  (front chamber); Dodd 2008/09, Bernland 2019, Berggren 2020 (phase-plug wavefront); Morse & Ingard, Pierce,
+  Williams (waveguide mode filtering, Rayleigh/Hankel); Keele 1975/77, Kolbrek 2008 (cutoff); Beranek/Olson;
+  Hornresp/AkAbak/ABEC/COMSOL practice. **No published `Sd_eff(f)` law exists**; no measured cone-horn vs
+  compression-horn polar comparison below cutoff was found.
+- **Owner decisions listed:** approve C0; approve C1–C2; pick the driver; LDV access (or accept the 3–5
+  accelerometer fallback); C7 now or later. No GPU, no solver, no code touched.
+
+## 2026-10-29 (03:35Z) - TYPOLOGY LINK RESOLVED BY CATALOG NAME (the real "still not rendering")
+
+Owner opened `#/typology/cone_plughorn_7sh` and still got no geometry.
+
+- **Cause.** The typology page links carry the CATALOG name (`/api/typologies` serves
+  `examples/catalog.yaml` names), but `gui/data.py::_preview_config` matched only the config's own
+  `name:`. Those differ for every renamed config - all five cone_plughorn entries
+  (catalog `cone_plughorn_7sh` vs config `cone_plughorn__evo7sh_narrow`) - so the sandbox's
+  `/api/preview-shape/cone_plughorn_7sh` answered **404** and the page said "preview endpoint
+  unavailable". Earlier entries in this file were about the config NAME (`...__evo7sh_narrow`),
+  which is why they passed while the real link did not.
+- **Fix.** `_preview_config` now falls back to `catalog_name` after the exact config name
+  (exact name wins; unknown still 404s). It is the single resolver for the preview AND for
+  `save_bounds`, so edited bounds from the sandbox work through the same link.
+- **Verified over HTTP with the CATALOG names** (`/api/preview-shape/<catalog>?detail=3d`):
+  `cone_plughorn_7sh` 4002 v / 3672 t (36.9 s first call, 5-7 s warm), `cone_plughorn_2sh`
+  4452/3888, `morph_10in` 4002/3672, `morph_12in` 4002/3672, `morph_8in` 3720/3294 + the known
+  one-face warning. All `available: true`.
+- **Test:** `test_typology_link_resolves_by_catalog_name` (plus the tessellation test);
+  `test_gui_preview_shape.py` 14 pass. GUI server restarted once more to pick the resolver up.
+
+## 2026-10-29 (03:10Z) - CONE PLUGHORN SANDBOX PREVIEW: STALE SERVER + ONE TESSELATION EDGE CASE
+
+Follow-up to the exposure fix below. Owner: "preview endpoint unavailable ... can't see it in 3D".
+
+- **Cause 1 (the actual "unavailable"): a stale server process.** The GUI on `:8765` had been running
+  since **2026-10-27 21:06**, i.e. before `gui/data.py::_plughorn_preview` existed, so the plughorn
+  configs fell through to the generic generator branch and returned
+  `available=false, reason="generator needs profile_h"` (HTTP 200, empty sections). Restarted; no code
+  change needed for this half.
+- **Cause 2: one config could not tessellate.** `build123d` `Shape.tessellate` walks every face and
+  assumes each returns a triangulation, so ONE face without one blanks the whole payload with
+  `AttributeError: 'NoneType' object has no attribute 'NbNodes'`.
+  `cone_plughorn__morph_wide_8in` has exactly one such face (index 27, planar, 634 mm^2, fails at every
+  deflection/sag tolerance tried) while the same solid meshes fine in gmsh (3,182 triangles, tags
+  `1:3065, 2:117`). Added `_tessellate_part` (per-face fallback + skipped-face count) in
+  `gui/data.py`; the payload now carries `shape3d.warnings`. Display-only: the solid, the STEP, the
+  mesh and every solve path are untouched.
+- **Measured after the restart** (`/api/preview-shape/...?detail=3d`, all five configs):
+  `evo7sh` 46.8 s cold / then 5-6 s warm, 4002 v / 3672 t; `evo2sh` 4452/3888; `morph_10in` 4002/3672;
+  `morph_12in` 4002/3672; `morph_8in` **3720/3294 with 1-face warning**. All `available: true`.
+- **Sandbox sliders verified through the API**: `length_mm 400 -> 430` moves the last section to
+  z=430 and echoes the knob; `plug_tip_x_mm 190` rebuilds (4014 verts). No rejections.
+- **Tests:** `test_gui_preview_shape.py` 13 pass, incl. the new
+  `test_plughorn_3d_survives_one_untriangulable_face`. `test_param_catalog.py` 38 pass.
+- **Open, cosmetic:** the ~45 CAD knobs are catalog placeholders (raw key labels, no prose). The 8-inch
+  morph view misses the one un-triangulable face (internal boolean remnant); fixing the CAD is the
+  durable answer, deferred because it is display-only.
+
+## 2026-10-29 (02:50Z) - CONE PLUGHORN WAS INVISIBLE IN THE GUI: CAUSE + FIX
+
+Owner: "I do not see this Funktion-One style horn exposed anywhere in the GUI."
+
+- **Cause.** The five configs live in `examples/typologies/cone_plughorn_2026-10-28/` (a subfolder),
+  and `design/params/catalog.py::_config_sources` globs only `examples/typologies/*.yaml`. A subfolder
+  config is therefore invisible to `build_catalog` unless `examples/catalog.yaml` names it - and no
+  entry existed. Symptoms: `catalog_name: None`, `group: None`, no description in the GUI config
+  table, and no entry at all in `param-catalog.v1.json` (no typology page, nothing for the sandbox
+  knob panel). `docs/reference/TYPOLOGIES.md` / `PARAMETERS.md` lacked it too.
+- **Fix.** Five catalog entries added (`cone_plughorn_7sh`, `_2sh`, `_morph_10in`, `_morph_8in`,
+  `_morph_12in`), new group **`cone`**, symmetry `full` (quadrants '1234'), and the three generated
+  artifacts rebuilt with `tools/gen_param_catalog.py --write`: param catalog 41 -> **46 typologies**,
+  JSON 887,613 bytes. The live GUI (`:8765`) now returns all five with `group: cone`,
+  `n_knobs` 10 (raw CAD) / 14 (morph), `disabled: false`.
+- **Guard test** (`tests/test_param_catalog.py::test_subfolder_typologies_are_catalogued_or_they_vanish`)
+  so a subfolder typology cannot silently disappear again.
+- **Known rough edge:** the plughorn knobs are placeholders (`documented: false`, label = raw key,
+  e.g. `front_side_x_mm`). The catalog never fabricates prose - a ~45-key prose pass is the follow-up.
+- **Pre-existing failure, not from this change:** `tests/test_gui_sandbox_page.py::
+  test_3d_hot_swap_never_scenes_per_frame` asserts the literal `if (curGeo) curGeo.dispose();` but
+  `sandbox.js:891` now reads `if (curGeo) { ridgeCache.delete(curGeo); curGeo.dispose(); }`
+  (committed tree, untouched here). 62 others in that run pass.
+
+## 2026-10-29 (02:35Z) - CPU SECOND-LANE HARDENING PASS (proposal only; zero GPU, zero code)
+
+Owner asked for a self-study hardening/research pass on the first CPU-lane proposal before any work starts. Read-only: solver/worker/lock/cache/dataset/mesh/campaign paths, installed `hornlab_beat_bem` host/registry/provision internals, `TOOLCHAIN.md` M2-M4, the stored smoke-night evidence, and one re-parse of `runs/nights/v4_overnight_2026-10-27/observe.ndjson`. Two read-only probes: CPU-engine readiness and the two provision-state JSONs. No GPU/Julia/solve/mesher/pytest, no code edit, no push. New doc: `docs/research/CPU_SECOND_LANE_HARDENING_2026-10-28.md`.
+
+- **Verdict stands, with better mechanics.** A second CPU-only `search` lane beside the GPU lane is feasible; expected **~1.5-1.7x** screen throughput [estimate] (~1.4-1.55x at 5k dofs; ~1.2-1.4x at 8.9k), not 2x, because `beat_cpu` is 1.8x slower/frequency at 2.4k and 2.3x at 5.1k. It also adds CPU-only capability (>14k quarter dofs; `near_correction`; `double`). No single-solve speed-up.
+- **Topology changed:** target **shared `runs/`, separate `cache_cpu/` + `dataset_cpu/`** (Option B), not separate runs folders (A). Run ids are UUID-unique (`search/rundir.py:28-32`) and the GPU lock is per runs root, so one folder is safe; only the mesh cache (`mesh/build.py:204-208`, non-atomic) and the dataset (`dataset/store.py:24-35`, single-writer) must stay separate. A remains the fallback; the full in-run mesh/solve pipeline (C) stays a later project (higher ceiling, 3-5x engineering).
+- **Lane identity is cleaner than first proposed:** the library always passes `--dir <registry>` to a worker host (`.venv/.../hornlab_beat_bem/worker_client.py:425-437`); a dedicated `HORNLAB_BEAT_WORKER_DIR` for the CPU lane makes lane-scoped host cleanup a string match, with "unknown host => never kill".
+- **New concrete blocker (H2):** `--backend beat_cpu` on a `cuda_fused: true` campaign cell fails at `BeatBackend.__init__` (`solve/beat.py:395-401`) because the CLI override runs after config validation (`cli.py:371-373`). Fix: drop `cuda_fused` for non-CUDA backends (`cuda_fused` is a CUDA-only opt-in; the CPU engine's default assembly is already the fused BM path) or re-validate after the override.
+- **CPU engine is unprovisioned right now (measured read-only):** `backend_ready("cpu") == False`; installed fingerprint `4ef2da0d...` != recorded `a19e67a0...`. Re-provision before the first lane; add a `doctor` check (it recurs after every pinned-solver change).
+- **Other hardening:** campaign cannot select a backend and its after-job hygiene kills all project Julia (`search/campaign.py:411-439`); `gpu-clean`/the night runner kill by keyword (`search/hygiene.py:117-144`, `tools/run_campaign_night.py:~431`) -> lane marker required; `beat_cpu` makes one multi-frequency call (no mid-call cancel); a thread knob must reach BOTH `warm_up` and `SolveConfig` or a second host appears; `SolveSpec.backend` is already in the hash, so the cache is backend-safe.
+- **For the senior:** 8 sign-off questions in doc section 12 (topology B vs A; the "one GPU solve + one CPU lane" rule amendment; registry-dir lane identity; `solve.julia_threads` outside the hash; lane marker; H2 fix; separate dataset root; Phase-2 measurement gates). No work started pending that.
+
+## 2026-10-29 (02:20Z) - CONE DRIVER MODEL + BOWL + CONE FILL (CPU only, zero GPU)
+
+Owner handoff `docs/research/HANDOFF_CONE_DRIVER_MODEL_2026-10-28.md` executed. No GPU, no solve
+(a night was live); nothing pushed from this session.
+
+- **Driver model extended, compression path untouched** (`hornlab_search/driver/compression.py`):
+  `kind: compression | cone`, `rear_box_l` (sealed bowl, NET litres), `rear_box_q` [inferred]
+  series box loss at fs, LR-2 semi-inductance (`l2_mh` + `r2_ohm`, both-or-neither), `air_load_g`
+  (splits a published `mms_g` so the flag clears), `f_breakup_hz` + `breakup_exponent` [inferred]
+  effective-area law, opt-in diagnostic `rear_air_mass_g` (default 0). `kind: cone` refuses
+  `front_chamber_cm3 > 0` (the front chamber is in the mesh). **No box air mass by default**: the
+  lumped sealed-box load is compliance-only; `rho*Vb/Sd^2` is not the physical load and would raise fs.
+  Old-vs-new bit-identical on 3 compression drivers x 3 loads, every legacy output incl. `z_in_ohm`.
+- **Sealed bowl is a HORN property, not a driver property** -> `tools/loudness_report.py
+  --rear-box-l <L>` overrides it for cone drivers (refused for compression drivers). Cone tags in the
+  table: `(cone, bowl 6.14 L)`, `(Mms! air-load split missing)`, `(breakup [inferred] >N Hz)`.
+- **Stand-in drivers added (published values only, URL in `source`)**: `bc_10mbx64` (Mms only ->
+  flagged), `faital_10pr300` (**Mmd printed** 20.0 g), `bc_8mbx51` (Mms only -> flagged),
+  `faital_8pr155` (**Mmd printed** 20.9 g). Measured: **no maker publishes a semi-inductance fit**
+  (B&C/18 Sound/Faital print a single Le with no frequency), so the LR-2 values must come from our own
+  impedance fit. Smoke run on a stored horn (44.5 x 35.6 throat, not the 7SH): 103.5 dB @ 1 W /
+  6.14 L for the 10MBX64 vs 102.6 for the 10PR300 - order of magnitude only until the real driver exists.
+- **Cone fill landed** (`tools/cad/plughorn.py`): the axe head's rear now fills the cone as ONE ruled
+  loft (post circle -> cone-rim circle -> base footprint), anchored through the post, axial
+  `plug_gap_mm` clearance to the cone. Evo 7SH: front chamber **0.848 L gross -> 0.201 L net**
+  (ratio 0.237), front-chamber cut-off **419 -> 1792 Hz** (the old estimate was the reason the
+  chamber looked too big for a 4 kHz mid); `cone_fill: 0` reproduces the old numbers. Solid still
+  ONE valid closed solid, **129 faces, ONE driver face**; 13 plughorn + 22 step_build tests pass.
+- **Measurement protocol written**: `docs/research/MEASUREMENT_CONE_DRIVER_2026-10-28.md` (added-mass
+  Mmd split, LR-2 fit + residual, rice-displacement net bowl volume, Qb from Fc/Qtc, printed-horn
+  impedance/SPL/polars/excursion/break-up, acceptance tolerances, traps).
+- **Thin-gap cross-check: NOT done, and now has a named blocker.** The 7SH mesh builds fine at epw 6
+  (`scratch/thin_gap/epw6/mesh.msh`, 1.3 MB), but a single bempp_cpu frequency did not finish inside
+  ~20 min while the night was running, so it was abandoned rather than left competing for CPU. Worse:
+  `source_motion: axial` is **refused on every non-beat backend**
+  (`ConfigError: ... only implemented for the beat backends (beat_cuda/beat_cpu), got 'bempp_cpu'`),
+  so a CPU cross-check at the correct cone drive needs `beat_cpu` provisioned first. The bempp route
+  can still test mesh convergence at the (wrong) `normal` drive.
+- **Tests run:** `test_driver_compression` + `test_metrics_loudness` + `test_mesh_throat_check`
+  31 pass; `test_mesh_plughorn` 13 pass; `test_mesh_step_build` 22 pass. Full offline suite NOT run
+  (live night). Still open: the real driver's T/S (hardware), the first `cone_plughorn` solve.
+
 ## 2026-10-29 (early) - OWNER-DELEGATED DECISIONS: HARDENED SOLVE PLAN (execution started)
 
 Owner delegated the open decisions in the 2026-10-28 chat. These are recorded as **owner decisions**; where they conflict with the 2026-10-29 "next solve strategy" handoff, these win.

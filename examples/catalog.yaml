@@ -8,8 +8,7 @@
 #               (2026-10-25 correction: Le Cleac'h is LIVE per the owner directive - the R9-J
 #               gate passed at 0.00 mm; the old "gated off" note here was stale)
 #   hybrid   - generator-based hybrids: H/V, blend, perturbed, splice (C1-corrected)
-#   organic  - WP9b per-azimuth rollback rows (LABELED HYPOTHESIS-SHAPE EXPERIMENTS, neutral names;
-#              dossier docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md section 2.4)
+#   organic  - WP9b per-azimuth rollback rows (LABELED HYPOTHESIS-SHAPE EXPERIMENTS, neutral names;#              dossier docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md section 2.4)
 #              + the 2026-10-25 owner-approved additions: signed-X v2, the even-lobe mouth
 #              ripple (the "pleats"), and the asymmetric Le Cleac'h (odd-cosine, full ring).
 #              hv symmetry: every azimuth has its own fc(phi), so these are NOT axisymmetric.
@@ -18,7 +17,7 @@
 # Fields:
 #   name:        unique identifier for --families SPEC and in leaderboard output
 #   config:      path relative to examples/  (the config must load with load_config)
-#   group:       one of magnus | legacy | classical | hybrid | organic
+#   group:       one of magnus | legacy | classical | hybrid | organic | cone
 #   symmetry:    hv | axisymmetric | full   (must match the config's mesh.quadrants and the
 #              design's symmetry; "full" = the 2026-10-25 seam-free full-ring rows models,
 #              quadrants '1234', e.g. the odd-cosine lecleach_asym)
@@ -304,3 +303,39 @@ entries:
     group: classical
     symmetry: hv
     description: TwinRay 380 1.4-inch published-dimension reconstruction + searchable superellipse mouth; full shape/outline search
+
+  # ---- cone-driven mid horns with a central plug ("axe head") (2026-10-29) ----
+  # Built by tools/cad/plughorn.py from Funktion-One's own Evo 7SH / Evo 2SH 3D models
+  # (reference/funktion-one/, local only). The driver cone is the single BEM source face (tag 2),
+  # so these solve with solve.source_motion: axial. Research + limits:
+  # docs/research/typologies/CONE_MIDHORN_AXEHEAD_2026-10-28.md and
+  # docs/research/HANDOFF_CONE_DRIVER_MODEL_2026-10-28.md. All five carry mesh.quadrants '1234'.
+  - name: cone_plughorn_7sh
+    config: typologies/cone_plughorn_2026-10-28/cone_plughorn__evo7sh_narrow.yaml
+    group: cone
+    symmetry: full            # quadrants 1234: the axe-head base is not a symmetry-plane cut
+    description: Funktion-One Evo 7SH topology (40x20 deg, 10-inch cone, axe head), 400 mm, from their CAD; raw dimensions, cone fill on
+
+  - name: cone_plughorn_2sh
+    config: typologies/cone_plughorn_2026-10-28/cone_plughorn__evo2sh_wide.yaml
+    group: cone
+    symmetry: full
+    description: Funktion-One Evo 2SH topology (50x25 deg, 8-inch cone, axe head), 223 mm, from their CAD; raw dimensions, cone fill on
+
+  - name: cone_plughorn_morph_10in
+    config: typologies/cone_plughorn_2026-10-28/cone_plughorn__morph_narrow_10in.yaml
+    group: cone
+    symmetry: full
+    description: Evo-7SH topology with the 14 horn-theory morph knobs on (CR, wall angles, axe-head ratios, bowl), 10-inch cone
+
+  - name: cone_plughorn_morph_8in
+    config: typologies/cone_plughorn_2026-10-28/cone_plughorn__morph_wide_8in.yaml
+    group: cone
+    symmetry: full
+    description: Evo-2SH topology with the 14 morph knobs on, 8-inch cone, wide 50x25 variant
+
+  - name: cone_plughorn_morph_12in
+    config: typologies/cone_plughorn_2026-10-28/cone_plughorn__morph_narrow_12in.yaml
+    group: cone
+    symmetry: full
+    description: Evo-7SH topology with the 14 morph knobs on, 12-inch cone (the cone size is an assumption until measured)

@@ -1819,6 +1819,921 @@ Domains covered: `generators`, `rows`, `native`
 - **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 4b. Profile representation
 - **Flags:** —
 
+## Group: cone
+
+### cone_plughorn_2sh — FREEFORM / generator
+
+- **Group:** cone
+- **Symmetry:** full
+- **Config:** `examples/typologies/cone_plughorn_2026-10-28/cone_plughorn__evo2sh_wide.yaml`
+- **Brief:** `examples/briefs/cone_midhorn_2026-10-28/cone_mid_wide_50.yaml`
+- **Source status:** catalog
+- **Description:** Funktion-One Evo 2SH topology (50x25 deg, 8-inch cone, axe head), 223 mm, from their CAD; raw dimensions, cone fill on
+
+#### `front_side_x_mm` — front_side_x_mm
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `front_top_y_mm` — front_top_y_mm
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `length_mm` — length_mm
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `mouth_side_x_mm` — mouth_side_x_mm
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `mouth_top_y_mm` — mouth_top_y_mm
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `plug_nose_d_mm` — plug_nose_d_mm
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `plug_tip_x_mm` — plug_tip_x_mm
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `plug_top_d_mm` — plug_top_d_mm
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `throat_side_x_mm` — throat_side_x_mm
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `throat_top_y_mm` — throat_top_y_mm
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+### cone_plughorn_7sh — FREEFORM / generator
+
+- **Group:** cone
+- **Symmetry:** full
+- **Config:** `examples/typologies/cone_plughorn_2026-10-28/cone_plughorn__evo7sh_narrow.yaml`
+- **Brief:** `examples/briefs/cone_midhorn_2026-10-28/cone_mid_narrow_40x20.yaml`
+- **Source status:** catalog
+- **Description:** Funktion-One Evo 7SH topology (40x20 deg, 10-inch cone, axe head), 400 mm, from their CAD; raw dimensions, cone fill on
+
+#### `front_side_x_mm` — front_side_x_mm
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `front_top_y_mm` — front_top_y_mm
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `length_mm` — length_mm
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `mouth_side_x_mm` — mouth_side_x_mm
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `mouth_top_y_mm` — mouth_top_y_mm
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `plug_nose_d_mm` — plug_nose_d_mm
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `plug_tip_x_mm` — plug_tip_x_mm
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `plug_top_d_mm` — plug_top_d_mm
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `throat_side_x_mm` — throat_side_x_mm
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `throat_top_y_mm` — throat_top_y_mm
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+### cone_plughorn_morph_10in — FREEFORM / generator
+
+- **Group:** cone
+- **Symmetry:** full
+- **Config:** `examples/typologies/cone_plughorn_2026-10-28/cone_plughorn__morph_narrow_10in.yaml`
+- **Brief:** `examples/briefs/cone_midhorn_2026-10-28/cone_mid_narrow_40x20.yaml`
+- **Source status:** catalog
+- **Description:** Evo-7SH topology with the 14 horn-theory morph knobs on (CR, wall angles, axe-head ratios, bowl), 10-inch cone
+
+#### `length_mm` — length_mm
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_compression_ratio` — m_compression_ratio
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_mouth_corner_frac` — m_mouth_corner_frac
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_plug_base_frac` — m_plug_base_frac
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_plug_flat_frac` — m_plug_flat_frac
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_plug_height_frac` — m_plug_height_frac
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_plug_nose_frac` — m_plug_nose_frac
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_plug_ridge_frac` — m_plug_ridge_frac
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_plug_tip_frac` — m_plug_tip_frac
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_plug_width_frac` — m_plug_width_frac
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_roll_h_mm` — m_roll_h_mm
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_roll_v_mm` — m_roll_v_mm
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_wall_angle_h_deg` — m_wall_angle_h_deg
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_wall_angle_v_deg` — m_wall_angle_v_deg
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+### cone_plughorn_morph_12in — FREEFORM / generator
+
+- **Group:** cone
+- **Symmetry:** full
+- **Config:** `examples/typologies/cone_plughorn_2026-10-28/cone_plughorn__morph_narrow_12in.yaml`
+- **Brief:** `examples/briefs/cone_midhorn_2026-10-28/cone_mid_narrow_40x20.yaml`
+- **Source status:** catalog
+- **Description:** Evo-7SH topology with the 14 morph knobs on, 12-inch cone (the cone size is an assumption until measured)
+
+#### `length_mm` — length_mm
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_compression_ratio` — m_compression_ratio
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_mouth_corner_frac` — m_mouth_corner_frac
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_plug_base_frac` — m_plug_base_frac
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_plug_flat_frac` — m_plug_flat_frac
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_plug_height_frac` — m_plug_height_frac
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_plug_nose_frac` — m_plug_nose_frac
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_plug_ridge_frac` — m_plug_ridge_frac
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_plug_tip_frac` — m_plug_tip_frac
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_plug_width_frac` — m_plug_width_frac
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_roll_h_mm` — m_roll_h_mm
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_roll_v_mm` — m_roll_v_mm
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_wall_angle_h_deg` — m_wall_angle_h_deg
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_wall_angle_v_deg` — m_wall_angle_v_deg
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+### cone_plughorn_morph_8in — FREEFORM / generator
+
+- **Group:** cone
+- **Symmetry:** full
+- **Config:** `examples/typologies/cone_plughorn_2026-10-28/cone_plughorn__morph_wide_8in.yaml`
+- **Brief:** `examples/briefs/cone_midhorn_2026-10-28/cone_mid_wide_50.yaml`
+- **Source status:** catalog
+- **Description:** Evo-2SH topology with the 14 morph knobs on, 8-inch cone, wide 50x25 variant
+
+#### `length_mm` — length_mm
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_compression_ratio` — m_compression_ratio
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_mouth_corner_frac` — m_mouth_corner_frac
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_plug_base_frac` — m_plug_base_frac
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_plug_flat_frac` — m_plug_flat_frac
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_plug_height_frac` — m_plug_height_frac
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_plug_nose_frac` — m_plug_nose_frac
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_plug_ridge_frac` — m_plug_ridge_frac
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_plug_tip_frac` — m_plug_tip_frac
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_plug_width_frac` — m_plug_width_frac
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_roll_h_mm` — m_roll_h_mm
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_roll_v_mm` — m_roll_v_mm
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_wall_angle_h_deg` — m_wall_angle_h_deg
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `m_wall_angle_v_deg` — m_wall_angle_v_deg
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
 ## Group: hybrid
 
 ### blend_conical_exponential — FREEFORM / generator

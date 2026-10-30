@@ -26,6 +26,14 @@ class Target:
     coverage_v_down_deg: float | None = None  # above / below the axis. BOTH-OR-NEITHER, and
                                               # |up| + |down| must equal coverage_v_deg. Absent =
                                               # v5 scores one total vertical width (v4's rule).
+    loaded_hi_hz: float | None = None         # 2026-10-29 owner retarget: explicit upper bound for the
+                                              # v5 / gate_audit Re z loading hold. WINS over every
+                                              # derived f11 source. Absent = derive (see below).
+    driver_exit_radius_mm: float | None = None  # The brief's driver exit radius, surfaced on the
+                                              # target so the objective can compute the DRIVER-EXIT
+                                              # f11 = BESSEL_J1P_11 * C_AIR / (2 pi a) when no
+                                              # explicit loaded_hi_hz is given. Absent = fall back to
+                                              # the stored design f11 (main throat) or band_hi.
 
     def f0_effective_hz(self) -> float:
         """The K-law design frequency in force (an explicit f0 wins over band_lo)."""
@@ -62,7 +70,8 @@ class Target:
             kw["f0_hz"] = float(d["f0_hz"])
         if d.get("f0_v_hz") is not None:
             kw["f0_v_hz"] = float(d["f0_v_hz"])
-        for k in ("coverage_v_up_deg", "coverage_v_down_deg"):
+        for k in ("coverage_v_up_deg", "coverage_v_down_deg", "loaded_hi_hz",
+                  "driver_exit_radius_mm"):
             if d.get(k) is not None:
                 kw[k] = float(d[k])
         t = cls(**kw)
@@ -84,6 +93,11 @@ class Target:
                     f"Target.from_dict: target.f0_v_hz must be >= target.f0_hz, got "
                     f"f0_v_hz={t.f0_v_hz!r} < f0_hz={t.f0_hz!r}")
         _validate_v_asymmetry(t)
+        for k in ("loaded_hi_hz", "driver_exit_radius_mm"):
+            v = getattr(t, k)
+            if v is not None and not (math.isfinite(v) and v > 0.0):
+                raise ValueError(f"Target.from_dict: target.{k} must be a finite number > 0, "
+                                 f"got {v!r}")
         return t
 
 

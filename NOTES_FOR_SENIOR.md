@@ -645,3 +645,15 @@ Owner: "I don't want to be running these simulations if it isn't going to behave
 
 ### 2026-10-27 (evening) P12 research result (append)
 Outside research is in `docs/research/SIM_VS_REAL_HORN_2026-10-27.md` and `docs/plan/12_RESEARCH_BASIS.md` section 17: ideal-source BEM is a sound relative tool for pattern shape above cutoff, not for level/loading/distortion. Ranked actions are in `docs/NEXT_DEV_PRIORITIES.md` P12. Decision requested from the senior pass: approve P12a (free re-score with loading ON + stricter cov), the lumped-driver-over-BEM-throat-impedance add, and which published measured horn to validate against. The ripple/ridge night was launched 2026-10-27 17:23 on the existing v4 scoring at the owner's direction.
+
+## 2026-10-29  orchestration  CPU second solve lane: hardening pass, sign-off requested
+What I was doing: hardening/research review of the proposal to run a second `search` on `beat_cpu` beside the GPU lane, before any code or GPU work (owner instruction: no heavy testing).
+What happened (read-only): the physics seam is fine (`evaluate()` pure; `SolveSpec.backend` already in the cache hash; CPU/GPU hosts are distinct by Julia project), but the job-hygiene layer is machine-wide. Concrete findings:
+1. lane identity is cleanest by the worker host's `--dir` registry directory, not by parsing the key JSON;
+2. `--backend beat_cpu` on a `cuda_fused: true` config fails in `BeatBackend.__init__` because the CLI override runs after config validation;
+3. `beat_cpu` is unprovisioned right now (fingerprint drift), and this recurs after a pinned-solver change;
+4. campaign after-job hygiene plus `gpu-clean`/the night runner kill every project Julia, so a live CPU lane needs a marker;
+5. `beat_cpu` makes one multi-frequency call, so there is no mid-call cancel;
+6. a `julia_threads` knob must reach both `warm_up` and `SolveConfig` or a second host appears silently.
+What I tried: nothing changed; no GPU, no solve, no mesher, no pytest, no provisioning, no push. Findings written to `docs/research/CPU_SECOND_LANE_HARDENING_2026-10-28.md` and recorded in INDEX/CONTINUITY/NEXT_DEV_PRIORITIES/ISSUES.
+What I need decided: the 8 questions in the doc section 12 - target topology (recommended: shared `runs/`, separate cache/dataset; separate runs folders as fallback); whether "one GPU solve at a time" may be amended to permit one CUDA solve + one CPU lane; registry-dir lane identity + "unknown host => never kill"; `solve.julia_threads` kept out of the solve hash; the `.cpu.lane.lock` marker; the H2 `cuda_fused` fix; a separate dataset root for Phases 1-2; and the Phase-2 measurement gates (dual-lane smoke + per-lane evals/hour; checkpoint/benchmark runs stay exclusive).

@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import mimetypes
 import threading
 import traceback
@@ -24,6 +25,8 @@ from .jobs import JobError, JobManager
 STATIC = Path(__file__).with_name("static")
 MAX_BODY = 64 * 1024
 DEFAULT_PORT = 8765
+
+_LOG = logging.getLogger(__name__)
 
 
 class App:
@@ -284,11 +287,32 @@ def make_handler(app: App, port: int):
     return Handler
 
 
+def warm_in_background(app: App, delay_s: float = 1.0) -> threading.Timer:
+    """Warm the run index off-thread so the owner's first Home load is not a 4 s wait.
+
+    ``D.list_runs`` parses every run's ``search.ndjson`` and memoizes each summary in
+    ``_RUN_SUMMARY_CACHE``; doing it once in the background turns that cost into a no-op for
+    the first ``/api/runs`` request. ``list_configs`` is deliberately NOT warmed: it
+    materializes every geometry and costs tens of seconds of CPU.
+    """
+    def _warm() -> None:
+        try:
+            D.list_runs(app.runs)
+        except Exception:  # noqa: BLE001 - a warm-up must never crash the process
+            _LOG.debug("run-index warm-up failed", exc_info=True)
+
+    t = threading.Timer(delay_s, _warm)
+    t.daemon = True
+    t.start()
+    return t
+
+
 def serve(root: Path, port: int = DEFAULT_PORT, open_browser: bool = True, runs: Path | None = None) -> int:
     app = App(root, runs)
     httpd = ThreadingHTTPServer(("127.0.0.1", port), make_handler(app, port))
     url = f"http://127.0.0.1:{port}/"
     print(f"hornlab-search gui: {url}  (Ctrl-C to stop; local only)")
+    warm_in_background(app)
     if open_browser:
         threading.Timer(0.8, lambda: webbrowser.open(url)).start()
     try:

@@ -4,6 +4,42 @@ Written 2026-10-22 22:35 EDT by the local orchestrator, at the user's request. *
 after the beta session.** Items are in priority order. Background: `docs/HIGH_FREQUENCY_OPTIONS.md` (2026-10-13),
 `docs/CLOUD_GPU_REPORT.md`, `TOOLCHAIN.md` M2/M3.
 
+## P0a (added 2026-10-29, owner-directed). b3a 80x80/600 gate-aware search — A1 decision next
+
+Owner retargeted the b3a PA cell to **80 x 80 deg at 600 Hz** (the 588 x 588 seed reads H/V 89.65 at
+1.07 kHz -> 1.121 against 80, and 69.3 at 8 kHz -> 0.866; the 72x72 target fails H at 1.07 kHz,
+89.65/72 = 1.245). The loading hold's f11 now comes from the **18 mm driver exit (5,653 Hz, explicit
+`target.loaded_hi_hz`)** rather than the stored 3,809 Hz main-throat cross-mode. Seed A1: H/V/DI/BW8K/
+Throat pass, Loading FAIL (Re z 0.291 at 827.75 Hz). The gate-aware 100-eval search is **running**
+(`runs/20261029T122018Z-screen-9766f0`; log `runs/nights/b3a80x80_search.log`), with a detached A1
+controller. **Next:** read `runs/nights/b3a80x80_search_a1.log` + `scratch/gate_audit_b3a80x80_search/`
+and decide on the first gate-passing candidate; do not start a second GPU job while it runs.
+
+## P0b (added 2026-10-29, owner-directed: BLOCKS every cone_plughorn directivity claim). Cone source model — the rigid piston is the assumption
+
+Plan: [`CONE_SOURCE_MODEL_PLAN_2026-10-29.md`](CONE_SOURCE_MODEL_PLAN_2026-10-29.md). Measured state: the
+`cone_plughorn` typology drives the cone face as a **rigid axial piston** at every frequency, but a 10-inch
+paper cone is pistonic only to roughly **0.7–1.5 kHz**; the band runs to 4 kHz. Above break-up a real cone has
+sign changes in `v(r)`, which must produce lobes and nulls that a uniform piston cannot produce (Hankel
+transform; Frankort 1975, Kagawa 1980, Hu 2017). The BEM geometry is not the weak link — the velocity boundary
+condition on the cone is. Nothing about the horn, mesh, mouth or circuit changes; only the source.
+
+**Do now, zero risk (WP C0):** stop describing `f_breakup_hz`/`Sd_eff(f)` as a directivity model — it scales
+level only — and print the piston-valid band on every cone report. No number changes.
+
+**Then (C1–C5, solver-adjacent, owner-gated):** a `solve.source_profile` radial table of per-face complex
+factors on tag 2 (reusing the existing `source_profile_factors` seam, which today is fused-CUDA-only and
+J0-shaped), enabled on beat CPU **and** bempp so the profile can be cross-checked; solve metadata carries
+`A_eq` and the velocity-weighted `Z_rad`; `drive()` consumes those instead of `Sd_eff`. Uniform profile must be
+byte-identical to today.
+
+**Then (C6, hardware):** measured `v(r,f)` from an in-situ scanning LDV (fallback: 3–5 ring accelerometers),
+replayed through the same mesh. Acceptance: measured polars within ±2 dB, 1–4 kHz, in coverage.
+
+**Do not:** rank cone_plughorn designs on 1–4 kHz pattern or DI until C2+C3 pass, and never fit an
+`Sd_eff`-style scalar to measured polars and call it a model. Gate rule unchanged: no GPU solve while a night
+runs; C0/C1/C2/C3 are CPU-only.
+
 ## P0 (added 2026-10-27 late evening, owner-directed: TOP OF THE LIST). P12 follow-through - make a high-ranked horn a horn that measures well when printed
 
 Source: `docs/research/SENIOR_PASS_SCORING_SEARCH_REALITY_2026-10-27.md` (the plan, numbers, owner decisions s7),
@@ -50,6 +86,23 @@ do not edit configs a running night uses.
    horn through the pipeline (P12b; accept beamwidth +-5 deg, +-3 deg in the presence band, DI +-1 dB); print a small
    hi-fi horn first, then today's PA winner and the loading-aware winner for one brief; measure free-standing, rotating
    about the throat plane, mic at 2 m (senior pass s5), plus the driver's electrical impedance on the horn.
+
+## P0b (added 2026-10-29, PROPOSAL ONLY - nothing started, senior sign-off required). CPU second solve lane: use the idle CPU while the GPU searches
+
+Evidence (zero new GPU): a screen search is GPU-busy only 33% of the wall clock and the card is idle 43% of a night
+(`docs/evidence/CAMPAIGN_SMOKE_2026-10-27.md` §8); whole-machine CPU was 17-19% busy (re-parse of the stored observer log).
+Full plan + alternatives + risk register: `docs/research/CPU_SECOND_LANE_HARDENING_2026-10-28.md`.
+
+- **What:** run a second, fully separate `search` on `beat_cpu` while the GPU lane searches other cells/seeds. Never mix
+  backends in one run's J series; never two GPU solves.
+- **Plain expected gain [estimate]:** ~1.5-1.7x more evaluations per night at screen sizes (~1.4-1.55x at 5k, ~1.2-1.4x at
+  8.9k), plus CPU-only capability (>14k quarter dofs, `near_correction`, `double`). Not 2x; not a faster single solve.
+- **Recommended shape:** shared `runs/`, separate `cache_cpu/` + `dataset_cpu/`; CPU engine on a dedicated
+  `HORNLAB_BEAT_WORKER_DIR`; CPU lane skips the GPU lock; ~8-10 Julia threads; lane-scoped host cleanup ("unknown -> never
+  kill"). Separate runs folders are the fallback.
+- **Before any code:** re-provision `beat_cpu` (currently unprovisioned: fingerprint drift), fix the
+  `cuda_fused` + `--backend beat_cpu` refusal, make campaign/`gpu-clean` lane-aware, and get the 8 decisions in doc §12.
+- **Not the same as** the bigger mesh/solve pipeline (higher ceiling, 3-5x the work); measure this first.
 
 ## P1 (top priority). Fused / direct CUDA Burton-Miller assembly in the exterior driver
 
@@ -367,3 +420,43 @@ print-and-measure protocol, and six owner decisions.
 ## Fallback
 Cloud RTX 4090 (24 GB, about $0.34–0.69/h) or L40S (48 GB, about $0.79/h): `docs/CLOUD_GPU_REPORT.md` CP-9a pod proof
 first (Linux CUDA never run with this solver).
+
+## P13 (added 2026-10-29, owner-directed research). Fast BEM: quadrature first, GMRES second, FMM at 14k+
+
+**Report: `docs/research/MATRIX_FREE_GPU_GMRES_FMM_2026-10-29.md`** (this section is the summary). Research only; no code/GPU run, nothing committed.
+
+**Verdict.** At 5-6k dofs the dense fused CUDA path is assembly-bound (73-96 % of per-frequency wall, `docs/evidence/CAMPAIGN_SMOKE_2026-10-27.md:57`) and already one-matrix + device LU. Matrix-free/FMM is **not** the 2x at our size. The cheapest credible 2x is quadrature order 4 -> 2. FMM is a feasibility play at 14k+ and the only path at 20k+. No 10x is supported at 5-10k.
+
+Why the quadrature lever is real: order 4 is a 6-point triangle rule = **36 point-pairs per element pair**; order 2 is 3 points = **9 point-pairs** (4x fewer kernel evaluations; `forks/hornlab-beat-bem/docs/beat-engine-CUDA.md:53`; `forks/hornlab-beat-bem/hornlab_beat_bem/config.py:32,405`). The fork already ships a wavelength-driven 1/2/4 selector with `kh` cutoffs (`q1_max=0`, `q2_max=2.0`; `julia/BeatEngineDriver.jl:207-229`) but it is **CPU-only and dead on CUDA** (`:186-187`, `:1766-1773`). At epw 6 `kh ~ 1.05`, so it would pick order 2 at every size we solve.
+
+**Phased plan (in order, each phase gates the next).**
+
+- [ ] **Phase 0 - phase timing (1 day, no solver change).** Three stored meshes (5,106 / 12,183 / 13,999 dofs) x three frequencies (500 Hz / 2 kHz / 8 kHz); log assembly, singular correction, solve, field. This is the baseline for every later A/B.
+- [ ] **Phase 1 - quadrature A/B (highest value; 0.5-4 days).** Expose `solve.quadrature_order` (1/2/4) via `SolveSpec.extra` (hashed; absent = byte-identical). Run order 4 vs order 2 at 500 Hz / 2 kHz / 8 kHz. If 8 kHz fails while low/mid pass, port the fork's wavelength selector to CUDA (per-order regular/identity/field caches, `beat-engine-CUDA.md:145`). **Acceptance:** SPL <= 0.05 dB at 500 Hz and 2 kHz, <= 0.10 dB at 8 kHz; beamwidth <= 0.3 deg; DI <= 0.05 dB; >= 1.5x at ~5k dofs or >= 1.3x at ~14k.
+- [ ] **Phase 2 - GMRES on CUDA (3-6 days).** Reuse `BeatEngineDenseSolve.jl`'s GMRES with a CUDA matvec; **FP64 Krylov only** (FP32 loses orthogonality: 584-1000 iterations vs a true 35-42, `:363-372`); no silent default; report method/iterations/fallback/residual. **Acceptance:** median <= 100 iterations, p95 <= 200, zero fallbacks, wall <= 0.9x the same-path LU, fields <= 0.01 dB. Expected 1.0-1.4x speed; the ~1.0-1.8 GB peak-VRAM saving [inferred] is the real deliverable.
+- [ ] **Phase 3 - bempp FMM + OSRC CPU probe (1-2 weeks, off the GPU lane).** Install `exafmm` (bempp-cl 0.4.2 ships the hook; the module is not in `.venv`), run a full-mesh BM problem at our kD, measure iterations and wall vs dense bempp. Note our adapter refuses Burton-Miller + native symmetry (`NOTES_FOR_SENIOR.md:150`), so the probe is full-mesh.
+- [ ] **Phase 4 - PVFMM or FMM3D, only if Phase 3 justifies it (project, not task).** GPU PVFMM (the Burton-Miller layer is months) or CPU FMM3D `hfmm3d` (Apache-2.0). Acceptance for a prototype: >= 2x at 14k, < 6 GB peak, SPL <= 0.05 dB, beamwidth <= 0.3 deg, no fallback.
+
+**Stop rules (any one ends that phase).** Assembly drops below 50 % of per-frequency wall (Phase 1's premise is gone - re-rank); quadrature fails the 8 kHz bar and the selector port reaches < 1.2x; GMRES exceeds 300 iterations median or > 20 % fallback; the FMM prototype is slower than fused at 14k or off by > 0.1 dB; any proposal needs epw < 6 (hard no).
+
+**Gates/hygiene.** Any fork change is owner-sign-off + pinned SHA + the `docs/FORKS.md` validation ladder. Do not write a new solver (hard rule 2). Do not default GMRES. Do not use FP32 Krylov. Do not use H-matrix/ACA at kD ~ 100. Do not adopt bempp + Exafmm as the GPU path. Do not make FMM the first 2x. Do not promise 10x at 5-10k.
+
+**Also fixed by this pass (documentation honesty, no code):** `CAMPAIGN_SMOKE`'s "iterative solve 0.07-0.94 s" is a dense `lu!` on the fused CUDA path (`julia/src/BeatEngineCudaBurtonMiller.jl:642-648`); `_cuda_use_matrix_free_burton_miller_rhs` is RHS-only (`julia/src/BeatEngineCore.jl:1509,1528`); `gmres_tol` is hashed and recorded but never applied on Beat (`hornlab_search/solve/beat.py:24-25`); an axisymmetric **brief** is not an axisymmetric **BEM** (`docs/GUI_INTEGRATION_PLAN_2026-10-25.md:81`; WP13 owner-deferred).
+
+## P13a (added 2026-10-29, owner-directed scoring/gate change). f11 loading hold + the 72x72/600 b3a cell
+
+**Landed (gate/objective/tests/brief/config only; no solver change; no commit).** The loading gate's
+`Re z >= 0.50` hold now runs over `[F_X, min(BAND_HI, f11_hz)]` in both `tools/rescore/gate_audit.py`
+and `hornlab_search/objective/scalar_v5.py` (`_load_v5`), with `f11_hz` from the stored
+`metrics.scalars.f11_hz` and a `BAND_HI` fallback. `f11_hz`/`loaded_hi_hz` are unweighted diagnostics.
+The b3a cell is retargeted to **72x72 at 600 Hz** (new brief + config, budget 100, 588x588 seed); the
+75x60 files stay. 56 focused tests pass.
+
+**Seed result (cache hit): 0 pass-all, J = 3.43861.** H FAIL, V/DI/BW8K/Throat pass, Loading FAIL.
+The seed's stored f11 is **3,809 Hz** (extended-throat r0 26.385 mm), not 5,584 Hz, and the 0.291
+Re z dip is at **827.75 Hz** - a real low-mid loading dip, not an above-f11 artifact. The retarget's
+gate change is correct, but this seed does not pass.
+
+**Next: the first 100-eval search should be GATE-AWARE, not another J-polishing pass:** H hard
+pre-filter (from f_x to f11 or 8 kHz), loading LFP20/Re z pre-filter, envelope feasibility, 4-6 knobs,
+two stages. Do not queue it without owner approval; it is a GPU night.

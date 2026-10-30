@@ -1,0 +1,85 @@
+# OBJECTIVE v5 COPY (2026-10-29, hardened plan): the 400 Hz v4 b3a, the 480 Hz 90x90 and the 600 Hz
+# 75x60 v5 briefs are untouched; this is the OWNER-RETARGETED 600 Hz 72x72 b3a cell.
+# WHY 72x72: the b3a 588 x 588 mm seed is exactly the K-law mouth for 72 x 72 at 600 Hz
+# (25,400,000 / (600 * 72) = 587.96 mm), so the family's natural top-octave pattern reads
+# H 64/72 = 0.89 (inside +/-20 %) and V 90/72 = 1.25 (on the V upper edge) instead of beaming against
+# 90x90. The LFP20 330 Hz loading also clears the 600 Hz target (330 < F_X/1.6 = 375, i.e.
+# 330 * 1.6 = 528 <= 600). The only old-gate failure was Re z 0.29 at 8 kHz, which is ABOVE the
+# 1.4-inch f11 (5,584 Hz stored / 5,653 Hz by hand) and is therefore not a driver-loading failure.
+# f11 LOADING HOLD (owner 2026-10-29): the loading gate's Re z >= 0.50 hold runs from f_x to
+# min(band_hi, f11) - the design's own first throat cross-mode - not to 8 kHz. Above f11 the
+# uniform-velocity source is an idealised rigid cap, so a Re z dip there is not scored as a loading
+# failure. When f11 is absent the window falls back to band_hi (the old behaviour).
+# CLASS C (low-reach PA that falls off): below f0 a WIDE pattern is physics and free, a NARROW one is
+# still scored (one_sided); narrow side 2x everywhere; presence band weighted x2.
+# Tolerances: v4 class C numbers plus flat_cv 1.5 (objective v5).
+# Brief b3a - PA 72 x 72 deg, f0 600 Hz, 1.4-inch 300 Hz-class driver, SQUARE 740 x 740.
+#
+# PURPOSE: the same low-reach PA family, retargeted to the pattern the extended-throat seed naturally
+# holds at 600 Hz. The 90x90/480 and 75x60/600 cells stay in the tree; 75x60 passed H but failed V
+# (90/60 = 1.50), and 60x30 fails V (90/30 = 3.00). 72x72 is the retarget that keeps both axes
+# inside their gates on the natural family.
+# K-LAW ARITHMETIC (mouth = 25,400,000 / (f0 * coverage_deg)):
+#   H axis: 25,400,000 / (600 * 72) = 587.96 mm
+#   V axis: 25,400,000 / (600 * 72) = 587.96 mm -> the seed's 588 x 588 square mouth IS the K-law
+#   Envelope 740 x 740 x 650 mm holds the K-law mouth plus the freestanding shell.
+# DRIVER CLASS: 1.4-inch 300 Hz-class compression driver (BMS 4594ND class), r0 = 18.0 mm,
+#   exit half-angle 2.0 deg.
+# LOADING (v5): load weight 1.0; the v5 LFP20 / Re z window / flat_cv terms are scored.
+# f11 DISCLOSURE: 1.4in f11 5,653 Hz (5,584 Hz on this seed's stored scalars): above f11 the score
+#   compares geometry, not the real driver exit.
+name: b3a_pa_72x72_600_square_v5
+description: (objective v5) PA 72x72, f0 600 Hz, 1.4-inch 300 Hz class, K-law square mouth (588x588), 740x740x650 envelope, band 300-8000 Hz, v5 LFP loading with the Re z hold to f11 + flat_cv
+driver:
+  exit_radius_mm: 18.0
+  exit_angle_deg: 2.0
+envelope:
+  max_mouth_w_mm: 740.0
+  max_mouth_h_mm: 740.0
+  max_depth_mm: 650.0
+symmetry: hv
+source:
+  cap: auto
+target:
+  coverage_h_deg: 72.0
+  coverage_v_deg: 72.0
+  band_lo_hz: 300.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.0
+  f0_hz: 600.0
+  freq_weights:
+    band_hz:
+      - [2500.0, 5500.0, 2.0]
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 1.0
+  distd: 0.5
+  diag: 0.5
+  flat_cv: 0.5
+grid:
+  verify_points_per_octave: 6
+  screen_extra_hz: [250, 315, 400, 2573, 3311, 4260]
+objective:
+  version: 5
+  tolerances:
+    cov: 4.5
+    rip: 2.0
+    di: 0.4
+    dislope: 36.0
+    flat: 1.5
+    load: 0.3
+    distd: 3.0
+    diag: 4.5
+    flat_cv: 1.5
+  cov_narrow_ratio: 2.0
+  cov_below_f0: one_sided
+  loaded_re_z: 0.5
+  lfp_re_z: 0.2
+  lfp_crossover_ratio: 1.6
+  bw8k_floor: 0.75
