@@ -427,6 +427,51 @@ But the pass also sharpens the risk. Every verified 3D acoustic result is at an 
 
 ---
 
+## 11. JW Sound "Solana" fluted waveguides: what transfers to a single-entry horn
+
+Added 2026-10-26; recorded as an **owner amendment 2026-10-30** (append-only research addition, no
+earlier plan text edited). Source: jw_sound Instagram posts of 2024-09-03 ("rapid prototyping of waveguides via genetic
+algorithms") and 2024-11-07 (Solana update): renders and one horizontal polar map, screenshots supplied by the user.
+Solana is a multi-entry horn (woofer ports between the flutes), which is deferred for hornlab; only the wall
+geometry is considered here, not the ports.
+
+**What the images show.** About 8 radial flutes (ridges between ports) running from a non-round throat to a
+twisted, square-ish mouth with petal corners; the flute pattern has a pinwheel twist (not mirror-symmetric). The
+shape came from a GA search. The horizontal polar map holds roughly ±45–60° from about 700 Hz to 10 kHz, with a
+disturbance near 1.8–2 kHz (likely the port / crossover region) and ragged off-axis lobing above 5 kHz.
+
+**[verified] Already expressible here** (`docs/research/typologies/MESHER_TYPOLOGIES.md`):
+- N-lobed cross-sections: OSSE guiding curve with the Gielis superformula (`gcurveSF` m1, m2, n1–n3), section 6g.
+- Round-to-square transition: morph targets 1 and 3, and FREEFORM `crossSections` stations, sections 4d and 6a.
+- Non-planar mouth: every OSSE parameter, `L` included, accepts an expression in azimuth `p`, section 6b.
+- Search over a parametrized shape: CMA-ES over typologies; `perturbed_osse_hv` leads the hifi brief
+  (`docs/evidence/TYPOLOGY_COMPARE_2026-10-23.md`).
+
+**[verified] Not expressible here**, from the mesher fork source:
+1. **Lobe amplitude that rises mid-horn and fades at the mouth.** OSSE / R-OSSE build one meridian per azimuth, so
+   a lobe made by `a(p)` or the guiding curve only deepens toward the mouth. Parameter expressions take `p` only
+   (`profile_common.py` `_ParamExpressionValidator` admits the name `p` and constants, no `z` or `t`). Morph only
+   blends toward the mouth from `morphFixed`. FREEFORM stations can vary along the horn but have no lobed shape
+   (ellipse, superellipse, rounded rectangle only). So "sculpt the wavefront mid-horn, keep the mouth edge clean"
+   cannot be built.
+2. **Twist** (lobe angle drifting with depth). Needs `z`/`t` in expressions or a per-station φ offset, and breaks
+   the H/V mirror symmetry that quarter-model meshing relies on (only `cos(2m·p)` terms survive): a full model,
+   about 4x the BEM cost.
+3. **Superformula never exercised.** `SEARCH_LAYER_GAPS.md` section 1.5: the `_GCURVE` keys are in `families.py`
+   but no typology YAML uses them and no compare run includes them.
+4. **Non-round throat.** FREEFORM's first station must be circle / ellipse; OSSE starts at `r0`. Mostly a port
+   artefact on Solana; low priority.
+
+**Physics expectation.** Flutes 30–50 mm deep are a significant fraction of a wavelength only above roughly
+3–5 kHz, which is where Solana's map is ragged and where our objective tends to lose. Solana's 500 Hz–2 kHz
+control comes from mouth size and the woofer-port loading, neither of which transfers while multi-entry is
+deferred. This connects to section 4's stated opening (per-azimuth control of the flare): a harmonic station is a
+low-order azimuthal Fourier series whose coefficients vary along the horn.
+
+Next steps are in `docs/NEXT_DEV_PRIORITIES.md` P4.
+
+---
+
 ## Sources
 
 hornlab-waveguide-mesher: https://github.com/m3gnus/hornlab-waveguide-mesher

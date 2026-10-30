@@ -3,6 +3,13 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-10-22 (local GPU box, solver re-verification + typology plan; no GitHub issue state changed).
 
+Local-only, added 2026-10-30 (**owner amendment + branch wind-down; no GitHub issue state changed**):
+- `docs/plan/12_RESEARCH_BASIS.md` section 11 (Solana fluted waveguides) is an owner-amended,
+  append-only research addition; `docs/NEXT_DEV_PRIORITIES.md` P4 carries its next steps.
+- Owner allowed hardlinks in the run/cache copy path (`01_CONTRACTS.md` section 14 becomes "copy or
+  hardlink, never symlink") and waived the off-machine backup gate for
+  `docs/DATA_CONSOLIDATION_PLAN_2026-10-29.md`. `hornlab-beta-wt/` is removed once this branch is pushed.
+
 | ID | Title | Status | Owner | Plan ref |
 |---|---|---|---|---|
 | #1 | [04] Design space and mesh | closed, CP-2 green | 04 | `docs/plan/04_TASK_DESIGN_MESH.md` |

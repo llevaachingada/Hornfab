@@ -64,6 +64,27 @@ backend option, macOS process hygiene (`search/hygiene.py` POSIX branch), then o
 and the same 3-design A/B against the 4060 (< 0.2 dB) before mixing data. Metal has no near-correction (same as CUDA
 under symmetry).
 
+## P4. Fluted / lobed walls (from JW Sound Solana; added 2026-10-26)
+
+Background and gap analysis: `docs/plan/12_RESEARCH_BASIS.md` section 11. Single-entry only; no ports. Do in order,
+each step gated on the previous one showing a real J gain (compare tier: medians differ by more than both spreads).
+
+- **P4a. `osse_gcurve_sf` typology, config only.** OSSE + superformula guiding curve with m restricted to multiples
+  of 4 (quarter symmetry; try m = 4 and 8). Search n1–n3, `gcurveDist`, `gcurveWidth` on `hifi_90x60_1in`,
+  2-seed compare tier against `perturbed_osse_hv`. Tests "lobes that grow toward the mouth" with no code. Also
+  add the example YAML that `SEARCH_LAYER_GAPS.md` section 1.5 says is missing.
+- **P4b. `harmonic` FREEFORM cross-section station, fork change** in `forks/hornlab-waveguide-mesher`
+  (`docs/FORKS.md`). Station radius `r(φ) = r_ellipse(φ) · (1 + Σ c_m cos(4m·φ))`, blended by the existing
+  smootherstep; end stations stay ellipse / rounded rectangle so lobing rises mid-horn and fades at the mouth.
+  About 30 lines in `freeform.py` (`_station_radius` plus validation, guard `r > 0`). Typology =
+  `perturbed_osse_hv` + a few `c_m` at 2–3 interior stations. Expect the 30 % invalid-geometry rate to rise; reuse
+  the monotone-increment idea from `perturb_increments` for the `c_m` bounds.
+- **P4c. Twist, only if P4a or P4b wins.** Needs `z`/`t` in the expression evaluator or a per-station φ offset,
+  and non-quarter (full-model) meshing, about 4x BEM cost per design.
+
+Evaluate gains above 3–5 kHz specifically; pair with P2 (12 kHz finalist pass), since that is the band where
+flutes act.
+
 ## Not recommended (recorded so nobody re-proposes it without new evidence)
 - Half precision or other "quantization" of the BEM system: the solver is Float32 with a Float64 Krylov space; dense
   high-frequency BEM systems are poorly conditioned.

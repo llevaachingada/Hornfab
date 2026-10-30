@@ -2,6 +2,18 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-30 - OWNER AMENDMENT: SOLANA SECTION 11 + P4 COMMITTED; BETA WORKTREE TO BE REMOVED
+
+**What.** `docs/plan/12_RESEARCH_BASIS.md` section 11 (JW Sound "Solana" fluted waveguides) and
+`docs/NEXT_DEV_PRIORITIES.md` P4 are committed here as an owner amendment: section 11 is an
+append-only research addition and no earlier plan text was edited. This commit also pushes the two
+already-committed compare-tier commits (`4b733c6`, `a3ca3b9`) that were 2 ahead of `origin/beta-fixes`.
+
+**Why now.** Owner decisions 2026-10-30 for `docs/DATA_CONSOLIDATION_PLAN_2026-10-29.md`: hardlinks
+are allowed in the run/cache copy path (amends `01_CONTRACTS.md` section 14 to "copy or hardlink,
+never symlink") and the off-machine backup gate is waived. `hornlab-beta-wt/` is removed in Phase 3
+once this branch is pushed and its working tree is clean.
+
 ## Status
 - **Wave:** 0, 1, 2 and 3 complete; Phase 2 Stage A code landed (synthetic-tested only) (tasks 04-08 done; CP-7a-f all PASS). This is the end of the plan's Wave ladder.
 - **Last checkpoints:** CP-7 (senior physics gate) GREEN - noise floor 0.039 dB. CP-8a PASS, CP-8b PASS; CP-8c CLOSED (PARTIAL on the literal four-families criterion; verify OK) - 3556 records / 8 shards / 587.2 MB, families OSSE 2034 + ICW 800 + FREEFORM 722 (R-OSSE: no example config), duplicate designs 14; campaign wall ~14.9 h; verify OK 0 bad / 0 bad arrays. Issue #13 hardening MERGED TO MAIN (2026-10-22: FF to 6d1d5c7 includes e0b9b61 + 11304f6 + cloud 152a829).
