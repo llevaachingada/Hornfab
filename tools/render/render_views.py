@@ -9,10 +9,10 @@ Quarter/half meshes are mirrored to the full horn.
 Views: ``a`` front 3/4, ``b`` behind 3/4 (the underside / outer shell), ``c`` straight-on front, ``s`` side,
 ``u`` from below. Colors: ``gray`` (report style) or ``apricot`` (organic shapes).
 
-Setup once (CPU wheels, ~200 MB):  py -3.12 -m venv scratch\\vizenv && scratch\\vizenv\\Scripts\\pip install pyvista meshio
+Setup once (CPU wheels, ~200 MB):  py -3 -m venv "%LOCALAPPDATA%/hornlab/vizenv" && "%LOCALAPPDATA%/hornlab/vizenv/Scripts/pip" install pyvista meshio
 Usage (repo root)::
 
-    scratch\\vizenv\\Scripts\\python.exe tools/render/render_views.py --out scratch/r --views a,b,s runs/<run> clover=scratch/m/clover/mesh.msh
+    "%LOCALAPPDATA%/hornlab/vizenv/Scripts/python.exe" tools/render/render_views.py --out scratch/r --views a,b,s runs/<run> clover=scratch/m/clover/mesh.msh
 
 Writes ``<out>/<label>_<view>.png`` and ``<out>/targets.json`` (label -> mesh, run dir, design hash) for compose.py.
 It uses the GPU's OpenGL for a few seconds; harmless next to a running solve (a few hundred MB of VRAM at most).

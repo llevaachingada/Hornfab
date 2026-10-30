@@ -2,7 +2,7 @@
 
 Viz env (pyvista + meshio)::
 
-    scratch\\vizenv\\Scripts\\python.exe tools/render/render_lines.py mesh.msh edges.npz out_prefix
+    "%LOCALAPPDATA%/hornlab/vizenv/Scripts/python.exe" tools/render/render_lines.py mesh.msh edges.npz out_prefix
 
 Writes ``<out>_front.png`` (orthographic, like a drawing's front view), ``<out>_iso.png`` and
 ``<out>_section.png`` (the x = 0 half, showing the axe head's side profile).

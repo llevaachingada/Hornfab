@@ -71,7 +71,10 @@ is a different, empty repo: ignore it.
 Accept: SHA table in a new `docs/evidence/BETA_READINESS.md`; upstream diff summary in ISSUES; guard test green.
 
 ### B. Data integrity (no GPU)
-1. Back up `dataset\` to `dataset_backup_<YYYYMMDD>\` (gitignored, precious).
+1. `dataset\` is the **only** copy. The `dataset_backup_20261013\` and `dataset_backup_20261022\`
+   snapshots were deleted on 2026-10-30 after both were re-verified as strict subsets (0 missing
+   `(design_hash, solve_hash)` ids), and the owner waived an off-machine backup. Treat data loss as
+   final; run `hornlab-search dataset verify` before any migration.
 2. `hornlab-search dataset verify` → OK; `dataset stats` pasted.
 3. Known gap: plan R8 says records carry the brief hash; today generator/brief provenance is only in `search.ndjson`
    rows and `design.json`, not in dataset records, and the store now mixes objectives scored under different briefs.
@@ -79,7 +82,7 @@ Accept: SHA table in a new `docs/evidence/BETA_READINESS.md`; upstream diff summ
    `search/evaluate.py::_persist`) with a test; or make `surrogate train` refuse mixed-brief data. Metric curves are
    target-free and remain valid.
 4. `surrogate train/propose/round` on a generator config must fail with a clear message, not a traceback.
-Accept: verify OK, backup exists, R8 closed or fenced with a test, surrogate refusal tested.
+Accept: verify OK, R8 closed or fenced with a test, surrogate refusal tested.
 
 ### C. Physics audit: no fallacies (one GPU check)
 Record each conclusion in `BETA_READINESS.md` with file:line or a measured number; limitations go to the quickstart's

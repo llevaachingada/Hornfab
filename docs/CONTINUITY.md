@@ -2,6 +2,29 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-30 (05:55Z) - PHASE 1 APPLIED: HARD-LINK DEDUPE FREED 13.30 GiB (49,968 FILES)
+
+**Result.** `tools/data/dedupe_runs.py --apply` replaced 49,968 run heavy files with hardlinks to
+their sha256-verified cache entry: 23,839 of 27,541 run `mesh.msh` and 26,129 of 26,381 run
+`response.npz`. Free space 75.63 -> 88.94 GB (13.30 GiB, exactly the dry-run estimate). 0 errors,
+0 copy-fallbacks. Unmatched 3,954: 3,806 `no candidate` (GRID/STEP-route designs have no mesh
+cache by design), 143 `sha mismatch` (kept as real copies), 5 `no metadata`.
+
+**Gate (all passed).** GUI data layer on the Oct 13 `ca15be` and Oct 29 `9766f0` runs:
+`run_detail`, `design_curves`, `mesh_surface` (24,480 / 35,376 tris), `balloon_designs` (6/6 with
+stored balloons), `balloon`, `evolution_frames3d` (38 / 12 frames). `cli report` 2.7 MB per run,
+`tools/loudness_report.py` rows per run. 30 random links are `samefile` with their cache file,
+`st_nlink` 2-6. Doctor after: mesh 23,839 linked / 3,702 not (1.6 GB), response 26,129 / 252 not
+(49 MB).
+
+**Also in this commit.** `dataset_backup_20261013/`, `dataset_backup_20261022/` (both re-verified
+as strict subsets, 0 missing ids) and the root `report.html` deleted: 851.8 MB freed and
+`HANDOFF_BETA` step B1 now states `dataset/` is the only copy. `scratch/vizenv` (460 MB) moved out
+of the repo to `%LOCALAPPDATA%/hornlab/vizenv` (pyvista 0.49.1 / meshio 5.3.5 import OK) with
+`tools/render/*` and CODE_MAP updated.
+
+**Manifests:** `scratch/2026-10-30_consolidation/{dedupe_dryrun_full,dedupe_apply_full,doctor_post_dedupe}.json`.
+
 ## 2026-10-30 (04:55Z) - PHASE 1 CODE: LINK-FIRST CACHE COPIES + ATOMIC RUN-DIR WRITERS
 
 **Landed (not yet applied to data).** `solve/cache.py` and `mesh/build.py` now install cache files
