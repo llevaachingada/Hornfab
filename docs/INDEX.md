@@ -8,11 +8,14 @@ Keep this file current: a new doc gets a line here in the same commit.
 |---|---|
 | [CONTINUITY.md](CONTINUITY.md) | Status block + dated log, newest first. The source of truth for "where are we". |
 | [ISSUES.md](ISSUES.md) | Open issues and the TO-DO list (next-round priorities at the top). |
+| [history/CONTINUITY_2026-10-12_2026-10-22.md](history/CONTINUITY_2026-10-12_2026-10-22.md) | Diary archive: CONTINUITY entries 2026-10-12 to 2026-10-22, rotated verbatim (newest first) on 2026-10-30. |
+| [history/ISSUES_closed.md](history/ISSUES_closed.md) | Closed GitHub issue rows #1–#11, rotated verbatim from ISSUES.md on 2026-10-30. |
+| [history/NOTES_FOR_SENIOR_resolved.md](history/NOTES_FOR_SENIOR_resolved.md) | Resolved NOTES_FOR_SENIOR blocks, rotated verbatim on 2026-10-30. |
 | [FORKS.md](FORKS.md) | How we change Magnus's solver/mesher: pinned forks in `..\forks`, install by SHA, validation ladder (owner decision 2026-10-24). |
 | [IMPLEMENTATION_PLAN_2026-10-27.md](IMPLEMENTATION_PLAN_2026-10-27.md) | After the smoke night: fix v3 record rejection, reseed gcurve cell, objective v4 normalisation (owner tolerances), diagonal balloons, then seeds/compare/polish on v4; fluted-wall (Solana) idea. NEXT_DEV_PRIORITIES P10. |
 | [NEXT_DEV_PRIORITIES.md](NEXT_DEV_PRIORITIES.md) | Post-beta priorities: P1 fused CUDA assembly (DONE, M2), P2 12 kHz pass (DONE), P3 Metal backend, P4 grid-density ideas, P5 build-decision easy wins, P6 superformula campaign + GSA-vs-CMA-ES bake-off (proposals, owner-gated). |
 | [HANDOFF_BETA.md](HANDOFF_BETA.md) | Current agent handoff: beta-readiness pass, items A–G, stop conditions. |
-| [HANDOFF_COLLABORATOR_2026-10-23.md](HANDOFF_COLLABORATOR_2026-10-23.md) | For the collaborator pulling `main` on 2026-10-23: setup, what runs on the GPU box, files the owner edits tonight, rules, open questions. |
+| [archive/HANDOFF_COLLABORATOR_2026-10-23.md](archive/HANDOFF_COLLABORATOR_2026-10-23.md) | **Archived 2026-10-30**, superseded by [HANDOFF_COLLABORATOR_2026-10-27.md](HANDOFF_COLLABORATOR_2026-10-27.md). For the collaborator pulling `main` on 2026-10-23: setup, what runs on the GPU box, files the owner edits tonight, rules, open questions. |
 | [HANDOFF_BRIEF_DESIGN_2026-10-24.md](HANDOFF_BRIEF_DESIGN_2026-10-24.md) | NEXT PASS (after M3): study list + owner interview protocol + real-driver grounding → 2–4 real briefs + baseline settings; GPU = only the owner-approved POC (budget 20). |
 | [BETA_QUICKSTART.md](BETA_QUICKSTART.md) | First loop for beta testers: brief → campaign → report → STEP. |
 | [BETA_SESSION_PLAN.md](BETA_SESSION_PLAN.md) | Beta session agenda, GPU etiquette, known limits, what not to try. |
@@ -35,8 +38,9 @@ Keep this file current: a new doc gets a line here in the same commit.
 | [research/LEARNINGS_2026-10-26.md](research/LEARNINGS_2026-10-26.md) | Durable learnings from the 2026-10-26 pass: Ath crease mechanism, over-constrained boxes, per-type scoring, driver realism, fused ceiling. Read before campaign or typology work. |
 | [HIGH_FREQUENCY_OPTIONS.md](HIGH_FREQUENCY_OPTIONS.md) | Reaching 12 kHz on 8 GB: options and evidence. |
 | [CLOUD_GPU_REPORT.md](CLOUD_GPU_REPORT.md) | Cloud GPU rental research. |
-| [DATA_CONSOLIDATION_PLAN_2026-10-29.md](DATA_CONSOLIDATION_PLAN_2026-10-29.md) | **Plan, not executed.** Measured inventory of runs/cache/dataset/scratch/docs (~32 GB, no off-machine copy); `runs/designs/*` heavy files are byte copies of `cache/`. Phases: backup gate, hardlink dedupe (~13–15 GB), NTFS compression, verified deletions, doctor/keepers tools, docs rotation; owner decisions. |
-| [HANDOFF_LOCAL.md](HANDOFF_LOCAL.md), [HANDOFF.md](HANDOFF.md) | Older handoffs (CP-8, 6b test plan). Historical. |
+| [DATA_CONSOLIDATION_RESULT_2026-10-30.md](DATA_CONSOLIDATION_RESULT_2026-10-30.md) | **Executed 2026-10-30.** What the plan actually did: 49,968 run files hardlinked (13.30 GiB), NTFS compression on cache/runs/dataset, verified deletions, `doctor.py`/`keepers.py`, docs rotation. ~32.6 GB -> ~12.5 GB; +17.3 GB free. Includes the gates, manifests, and the 143 SPL-differing responses that were deliberately not linked. |
+| [DATA_CONSOLIDATION_PLAN_2026-10-29.md](DATA_CONSOLIDATION_PLAN_2026-10-29.md) | **Executed 2026-10-30 — see the result doc.** Measured inventory of runs/cache/dataset/scratch/docs (~32 GB, no off-machine copy); `runs/designs/*` heavy files are byte copies of `cache/`. Sections 1-5 are the original phases (backup gate, hardlink dedupe, compression, verified deletions, doctor/keepers, docs rotation); section 6 is a 2026-10-30 second pass on configs, tools and repo hygiene, with the agent claims that did not survive checking. |
+| [archive/HANDOFF_LOCAL.md](archive/HANDOFF_LOCAL.md), [archive/HANDOFF.md](archive/HANDOFF.md) | **Archived 2026-10-30**, superseded by [HANDOFF_BETA.md](HANDOFF_BETA.md). Older handoffs (CP-8, 6b test plan). Historical. |
 | [SENIOR_REVIEW_2026-10-14.md](SENIOR_REVIEW_2026-10-14.md) | Surrogate-fix review. Historical. |
 
 ## Reference (generated)

@@ -176,3 +176,151 @@ the inventory's grep is approximate), `docs/plan/**` (frozen), galleries, or gat
    append-only and per-push rules?
 4. Confirm the "no quality culling" position: keep low-score and failed designs, and get the
    curated list from `keepers.py`.
+
+## 6. Second pass (2026-10-30): configs, briefs, typologies, tools, repo hygiene
+
+Recommendations only. Nothing in this pass deletes or edits code. I checked every item below
+myself (a measurement, diff or grep on 2026-10-30); claims from the audit agents that didn't
+survive checking are listed in 6.5.
+
+### 6.1 Configs and briefs: the main source of versioning sprawl
+
+1. **There's no config inheritance, so every objective generation copies every config.**
+   `hornlab_search/config.py` has no `extends:` or base mechanism. Measured:
+   - The 27 `examples/typologies/campaign_2026-10-26_v4/*` files differ from their v3 twins
+     **only in `name` and `brief_file`**.
+   - The 14 v3/v4 brief pairs differ only in the `objective` block (`tolerances`,
+     `weights.diag`/`distd`, `version`, `cov_narrow_ratio`) and, in 10 of them,
+     `target.freq_weights`.
+   - Share of keys identical across every file in a generation dir:
+     `hardened_2026-10-29_v5` typologies **79%**, `quatrefoil` 63%, `hardened` briefs 59%,
+     `chanterelle` 56%, `round_throat` 53%, the rest 30–51%.
+
+   **Fix (one code change, then most copying stops):**
+   - add `extends: <path>`, deep-merged, to typology configs and briefs;
+   - add an objective profile that briefs reference (e.g. `examples/objectives/v4.yaml`,
+     `v5.yaml`), since all v4 briefs share the same objective block;
+   - optionally add a `--brief` override flag on `search`, so a new objective generation means
+     new briefs only, not copied typology configs.
+
+   **Constraint:** resolve `extends` *before* `config_sha` is computed. The `test_config.py`
+   goldens must not move, or every existing run's identity changes.
+2. **Archive the superseded generation after that:** `examples/{briefs,typologies}/campaign_2026-10-26/`
+   (14 briefs and 27 typology configs) move to `examples/_archive/`. It is still referenced by
+   `tools/make_v4_campaign.py`, `tools/run_campaign_night.py` and
+   `tests/test_tools_night_runner.py`, so repoint those first. Every run keeps its own
+   `config.yaml` snapshot, so reproducibility is unaffected.
+3. **Backend and debug variants are dressed up as typologies.**
+   - Four `*_fusedcuda` configs (`osse_baseline`, `osse_axi`, `freeform_sculpt`,
+     `perturbed_osse_hv`) differ from their base only in `solve.cuda_fused: true` and the dof
+     caps (8,900/7,000 become 12,000). `perturbed_osse_hv` also changes one mouth bound
+     (200 to 140).
+   - `freeform_sculpt_symcheck_full` and `_quarter` differ only in quadrants and dof caps.
+   - `search_smoke` and `throat_adapter` are utility configs.
+
+   All of these appear in the generated typology catalog (`docs/reference/TYPOLOGIES.md`,
+   `gui/static/param-catalog.v1.json`), so the GUI and docs show backend profiles as horn
+   types. Meanwhile 120 configs set `cuda_fused: true` explicitly while the code default is
+   `False`.
+
+   **Fix:** a `profiles/fused_cuda.yaml` overlay pulled in through `extends`. Don't flip the
+   code default: absent and `False` hash the same today, so flipping it would change
+   `solve_hash` for every config that leaves it out and lose those cache hits. Then drop the
+   variants from the typology catalog (catalog group `legacy` already exists for utilities).
+4. **`examples/catalog.yaml` is a campaign family list, not an index.** It has 43 entries, no
+   briefs, and none of the generation dirs. That's fine, but say so in its header so nobody
+   "completes" it.
+
+### 6.2 Typologies
+
+5. **Three typology lists drift independently:**
+   - `hornlab_search/design/params` generates `TYPOLOGIES.md`, `PARAMETERS.md` and the GUI
+     `param-catalog.v1.json` via `tools/gen_param_catalog.py`;
+   - `design/generators/registry.py` holds `TYPES`;
+   - `examples/catalog.yaml`.
+
+   Add one offline test that asserts they agree, modulo the variants in item 3 once those are
+   removed.
+6. **cone_plughorn names don't match.** The catalog says `cone_plughorn_2sh`, `_7sh`,
+   `_morph_8in`, `_morph_10in` and `_morph_12in`. The configs in
+   `examples/typologies/cone_plughorn_2026-10-28/` are named `cone_plughorn__evo2sh_wide`,
+   `__evo7sh_narrow`, `__morph_wide_8in`, `__morph_narrow_10in` and `__morph_narrow_12in`.
+   Pick one scheme.
+7. **`grid_ellipse_mod` is `grid_ellipse` with four pinned mouth knobs** (`g_a1_mouth`,
+   `g_a2_mouth`, `g_pnorm` and `g_term_side_mm`, all with `search: false`). It's a seed variant,
+   not a typology. Owner call: keep it as a seed or config of `grid_ellipse`, or keep it
+   separate on purpose.
+8. **The dataset can't say which typology or run produced a record.** That's the blocker for any
+   typology-level culling, merging or keepers list.
+   - FREEFORM records (13,859, the largest family) store raw `profileH`, `profileV`,
+     `crossSections` and `grid`. The typology exists only in the run's config `name`
+     (e.g. `b3a__osse_ext_throat_80x80_600_v5`).
+   - Dataset rows carry no `run_id`.
+
+   **Fix:** additive optional record fields `run_id`, `config_name` and `typology`.
+   `dataset/record.py` already omits absent keys, so schema v1 readers are unaffected. Backfill
+   the existing 23,884 records as a *derived view* by joining `runs/*/search.ndjson`
+   (design_hash, then run) and `runs/*/config.yaml` (name). Feed that view to
+   `tools/data/keepers.py` (Phase 4).
+9. Both perturb modes (`perturb_increments` and `perturb_increments_shape`) are used by
+   `registry.py`. They're not duplicates, so no action.
+
+### 6.3 Tools and code (candidates only)
+
+10. **Merge the five `tools/evidence_bytecheck_{m4,m5,m5b,m6,typology_smoke}.py` scripts** into
+    one `evidence_bytecheck.py --milestone ...`. They share the same `load()` helper and exit
+    pattern. Prove it by running old and new against every existing evidence doc and diffing
+    the output.
+11. **Two past-campaign generators become unnecessary once 6.1 lands:**
+    `tools/make_v4_campaign.py` (hard-coded v3 to v4) and `tools/widen_campaign_boxes.py`.
+    Archive them then. `tools/overnight/` is the 2026-10-22 one-off, superseded by
+    `tools/night_queue/`, which is what the `hornlab-night-queue` skill uses. Archive it.
+12. **Functions with no references anywhere** (repo-wide word grep over `hornlab_search/`,
+    `tools/` and `tests/`; also `.js`, `.ps1` and CODE_MAP):
+    - `search/campaign.py:70 all_catalog_names`
+    - `design/custom.py:17 build_custom`
+    - `driver/compression.py:386 driver_fields`
+    - `search/rundir.py:35 latest_run`
+    - `design/families.py:281 legal_roots`
+
+    Only tests use `solve/cache.py:114 lookup_status` and `solve/phasor.py:47
+    boundary_lab_to_ours`. Confirm there's no `getattr` or CLI dispatch before removing any of
+    them. Not part of this pass.
+13. **Keep all objective versions** (v1, v2, v3 inside `scalar_v2.py`, v4, v5): cited evidence
+    is reproduced with them. A cosmetic option is to move `objective_v3` into `scalar_v3.py`
+    for findability.
+14. **Tests:** `cfg` fixtures in `test_mesh_grid_build.py`, `test_mesh_step_build.py` and
+    `test_report_html.py` shadow the session `cfg` in `conftest.py`. Check whether they differ.
+    Low priority. The `test_*_support.py`, `test_*_helpers.py` and `test_dataset_factory.py`
+    files are shared helpers imported by 84 test files, so keep them.
+
+### 6.4 Repo hygiene
+
+15. **`AGENTS.md` and `CLAUDE.md` share 40 identical non-blank lines** (silent killers,
+    research grounding, GPU hygiene, push rule), so two files are maintained by hand.
+    `CLAUDE.md`'s wave plan and ownership table also describe Waves 0–3, which closed at CP-8.
+    Make `AGENTS.md` canonical and reduce `CLAUDE.md` to `@AGENTS.md` plus the Claude-only
+    lines. These files are orchestrator-owned, so it's an owner call.
+16. **`.opencode/skills/` mirrors 3 of the 6 `.claude/skills/`.** The 3 copies are identical
+    today; `hornlab-night-queue`, `hornlab-render` and `hornlab-shape-check` are missing. Add
+    a mirror script or a test that fails on drift.
+17. **Merged branches:** `claude/wave-3-implementation-review-2dk4qe`, `unified-typologies` and
+    `origin/ccr-455d2184-yj5zk4` are fully merged into `main`, so delete them.
+    `dev/fused-cuda-pin` is one commit pinning `fa99ee5`, which `main`'s `760a1ec` pin
+    supersedes; delete it after confirming. Deleting remote branches is outward-facing, so ask
+    first.
+18. **About 41 MB of evidence data sits in git:** `docs/evidence/runs` (220 files), `docs/data`
+    and `docs/renders`. That's most of the 58 MB repo. Don't rewrite history. Going forward,
+    evidence should cite runs by path plus sha256 manifest and rely on the off-machine backup,
+    not commit copies.
+
+### 6.5 Agent claims that didn't survive checking
+
+- **"`catalog.yaml` has a YAML parse error":** false. It loads cleanly (43 entries).
+- **"`hornlab_search/driver/` is empty":** false. It holds `compression.py`.
+- **"The four zero-test test files are junk":** false. They're shared helpers.
+- **"`docs/data/gate_audit_2026-10-29-d` supersedes `gate_audit_2026-10-29`":** false. They're
+  separate audits (A1 and the D campaign) and both are cited.
+- **"`param-catalog.v1.json` is untracked":** false. It's tracked and generated.
+- **"29.1M dataset records":** false. There are 23,884.
+- **"299 cited runs":** unreliable, because the short hex suffixes give false grep matches.
