@@ -20,6 +20,34 @@ Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 20
 
 Local-only items (no GitHub issue): band edges capped by the measured dof cap (confirmed, user "keep lowered edges"); task 07 test-17 disk-latency flake risk (do not loosen); residual CP-7 risks (epw=6 above 2.5 kHz unmeasured; f11 unexercised; DI-vs-beamwidth not a regression test) — see `NOTES_FOR_SENIOR.md` task-09 block and CONTINUITY 06:20.
 
+Local-only, pushed 2026-10-30 late (**chief-implementer hand-off; no GitHub issue state changed**):
+- **OPEN:** owner/lead agent to pull branch `ccr-4978c80b-tvvcgv` locally and run `docs/meh/CHIEF_IMPLEMENTER_HANDOFF.md`.
+
+Local-only, pushed 2026-10-30 (**MEH implementation hand-off; no GitHub issue state changed**):
+- **OPEN (wave 1, dispatch-ready):** M1 driver files, M2 solver fork multi-tag + impedance matrix, M3 solve adapter,
+  M4 network + inner optimiser, M5 CAD tool + multi-label STEP, M6 objective v5 + brief block, M10 bass box
+  (`docs/meh/README.md`).
+- **OPEN (wave 2/3):** M7 pipeline + configs; M8 GPU validation, pin bump, first screen (owner's box); M9 Boundary Lab.
+- **OPEN (owner):** confirm the 380 mm box depth assumption.
+- **CLOSED:** dossier s13 questions answered by the owner 2026-10-30 (dossier s14).
+
+Local-only, pushed 2026-10-29 20:15 EDT (**mini MEH research pass complete for this round; no GitHub issue state changed**):
+- **OPEN (owner decisions):** mini MEH targets - bass route (top + sub / one-box PR-vent ~106 dB / 3-way), size number, use and
+  coverage, 4 x 4-inch vs 2 x 6.5-inch, DSP per channel, new J terms, commercial intent (Synergy patent)
+  (`docs/research/typologies/MINI_MEH_RESEARCH_2026-10-29.md` s13).
+- **OPEN (senior, `NOTES_FOR_SENIOR.md` 2026-10-29):** attribution fix in `docs/DRIVER_MODEL.md:42` (issue #78 is
+  timini/horn-simulation); frozen-plan MEH tag note; BL symmetry note.
+- **CLOSED (research):** web-lane findings folded into the dossier s7-s8 with orchestrator spot-checks.
+- **FINDING:** compression-driver internal depth sets the mid ceiling in a mini MEH (1-D); any MEH model must include it.
+
+Local-only, pushed 2026-10-29 18:45 EDT (**mini MEH research pass, draft; no GitHub issue state changed**):
+- **OPEN (owner decisions):** mini multiple-entry horn targets - separate sub vs bass in the box, size number, use case /
+  coverage, 4 x 4-inch vs 2 x 6.5-inch mids, DSP per channel, new J terms
+  (`docs/research/typologies/MINI_MEH_RESEARCH_2026-10-29.md` s13).
+- **CLOSED 2026-10-29 20:15:** web-lane findings folded into the dossier s7-s8.
+- **FINDING / correction:** the mesher has MEH tag names 8-12 only, no builder; MEH geometry needs the CAD -> STEP route
+  (multi-label) or a new builder. Python `SolveConfig` refuses more than one source tag although the engine supports it.
+
 Local-only, pushed 2026-10-28 20:50 EDT (**cone mid horn typology + research; no GitHub issue state changed**; 8 commits to origin/main):
 - **OPEN:** `cone_plughorn` never solved on the GPU; first screen should use `source_motion: axial` and a CPU cross-check of the
   2.4 mm axe-head/throat gap (thin-gap risk).

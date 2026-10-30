@@ -2,6 +2,69 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-30 (late) - MEH CHIEF-IMPLEMENTER HAND-OFF
+
+- `docs/meh/CHIEF_IMPLEMENTER_HANDOFF.md`: pull steps for `C:\Users\hunte\Hrns\hornlab-search`, wave order with gates,
+  a six-link readiness proof that the MEH is optimisable end to end, and the follow-on optimisation studies.
+
+## 2026-10-30 - MEH UN-DEFERRED BY OWNER; DESIGN FIXED; IMPLEMENTATION HAND-OFF IN `docs/meh/` (zero GPU, no package code)
+
+- **Owner decisions:** MEH top + separate bass box (30-120 Hz flat); top fits a 16 in square face (406 mm), corner-hung,
+  studio-monitor depth (380 mm assumed); home hi-fi / DJ practice / booth, critical listening, level of a powered 12 in
+  PA; DSP + FIR on every channel; not for sale. Owner gave the orchestrator architecture, labels, typologies, solves and
+  scoring, with the rest handed to cheaper sub-agents.
+- **Design fixed:** T2 `meh2_6x2` primary (1.4 in CD + 2 x 6.5 in on top/bottom walls, 90x60, XO 650-1100 Hz, HP 120 Hz);
+  T1 `meh2_4x4` secondary (1 in CD + 4 x 4 in, XO 1-1.5 kHz, HP 160 Hz). L1 solve = flush port patches as driven tags
+  (2 CD, 10 mids), one BEM solve gives per-channel transfers + impedance matrix, drivers/xo/delay/fill/rear volume
+  optimised per geometry by an inner optimiser. Objective v5 = v4 pattern terms on the summed system + `lw_resid`,
+  `notch`, `xo_lob`, `headroom`; `flat` off (FIR).
+- **New research [measured]:** `calc/meh_layout.py` layout feasibility in the 16 in box (horn ~150 mm, mouth 330 x 191;
+  reparameterised knob box 56-93 % feasible vs 12-29 % naive; seeds T2-A/T2-B/T1); `calc/meh_bassbox_sizing.py`
+  (15 in / 18 in long-throw for 30-120 Hz).
+- **Hand-off:** `docs/meh/README.md` (waves, models, dispatch prompt, merge order) + `00_MEH_CONTRACTS.md` + M1-M10 task
+  files. Wave 1 (parallel, cloud): M1 drivers, M2 solver fork, M3 adapter, M4 network, M5 CAD, M6 objective, M10 bass box;
+  wave 2: M7 pipeline; wave 3 (owner GPU box): M8 validation + screen, M9 Boundary Lab.
+- `CLAUDE.md` gained one ownership pointer to contracts C13; `NEXT_DEV_PRIORITIES.md` P13.
+
+## 2026-10-29 (20:15 EDT) - MINI MEH RESEARCH: WEB LANE FOLDED IN, CLAIMS SPOT-CHECKED (zero GPU, no code)
+
+- **Web lane (Sonnet) returned:** raw survey kept verbatim as `docs/research/typologies/mini_meh_2026-10-29/appendix_A_web_survey_raw.md`
+  (sources, 8 targets, design-rules digest, product-size and driver tables, conflicts). Dossier s0-s13 rewritten around it.
+- **Orchestrator spot-checks (all match):** JW DH350 MEH page, Solana page, US 8,284,976 claims 1/4/5/6 + notch/port passages,
+  Boundary Lab releases (v0.5.0 still latest) and its `Multi_region_SAWMOD` example, MEH Studio repo. US 6,411,718 claim text
+  not re-readable here (503/403); kept at the lane's label.
+- **Key external facts:** JW DH350 MEH = the owner's size class (2 x 6.5-inch + 1-inch CD + 2 PR, 470 x 260 x 200 mm, ~15 L net,
+  60 Hz-16 kHz +-2 dB, 106 dB, taps lambda/4 at the 1.0-1.2 kHz XO); Solana 4 x 6.5-inch + 1-inch, 109/120 dB, 90 x 90 to 700 Hz,
+  no dimensions; no Danley box in this size class (SH75 62 L, SM-60F 113 L); Boundary Lab solves several voltage-driven drivers +
+  FEM chambers + port interfaces in one coupled system (Mmd only, no passive radiators); no AES/JASA paper on MEH found.
+- **New 1-D result [measured]:** the mid's own reflection notch depends only on the horn; in a cone it sits 1.4-1.8x above
+  c/4d, but a 35 mm compression-driver duct pulls it to ~1.6-1.9 kHz for close entries (the practitioners' ~1.5 kHz ceiling):
+  the CD's internal depth must be modelled (`calc/notch_vs_path.md`).
+- **Corrections (dossier s8; owner-file items appended to `NOTES_FOR_SENIOR.md`):** frozen plan's "MEH geometry path exists"
+  (tag names only); `DRIVER_MODEL.md` "Boundary Lab issue #78" is timini/horn-simulation issue #78 (rule unchanged); BL
+  "symmetry Off" applies to plugin assemblies, coupled projects run with symmetry xy; draft's "6.5-inch needs a 1.4-inch CD".
+- **Still open:** owner decisions in dossier s13 (bass route, size number, use/coverage, mid complement, DSP, J terms).
+
+## 2026-10-29 (18:45 EDT) - MINI MULTIPLE-ENTRY HORN: RESEARCH PASS, DRAFT PUSHED (zero GPU, no code)
+
+- **Owner request:** internal + external research toward a mini multiple-entry horn (Synergy/Unity class, smaller than
+  JW Sound's Solana): one compression driver + 2 x 6.5-inch or 4 x 4-inch mids on ports, very small box, strong EDM bass.
+  Research and plan seeds only; nothing wired. MEH was owner-deferred 2026-10-24 (G17); reopened for research only.
+- **Dossier (draft):** `docs/research/typologies/MINI_MEH_RESEARCH_2026-10-29.md` + folder `mini_meh_2026-10-29/`
+  (`calc/` = CPU research scripts and outputs, not imported anywhere). Sections 7-8 (external findings, corrections)
+  wait on the Sonnet web lane (Danley primaries, JW Sound Solana, current Boundary Lab, small DIY MEHs, driver T/S).
+- **Findings so far [measured / verified]:** mids cannot do EDM bass (4 x 4-inch ~93 dB, 2 x 6.5-inch ~97-101 dB at 50 Hz,
+  1 m half space; 115 dB needs ~840 cm^3 Vd) -> 2-way mini top + sub, or compact 3-way with woofers; a 300 mm mouth holds
+  90 deg only to ~940 Hz; 1-D MEH sketch: the CD notch sits ~1.15-1.4 x the port corner and deepens as entries move toward
+  the throat (-18 dB at 20 mm, -2 dB at 70 mm), best sum near the quarter-wave limit; per-source solve + impedance
+  matrix + lumped drivers equals the direct solve to 6e-16 (the plan's core decomposition).
+- **Solver/mesher inventory (fork source read 2026-10-29):** the Julia engine already solves several channels on one
+  factorization and returns per-channel pressures; the Python package refuses more than one tag (`config.py:462`);
+  no mutual impedance matrix yet. The mesher has MEH tag names 8-12 but no MEH builder (corrects the frozen plan's
+  "geometry path is already there").
+- **Owner questions:** separate sub or bass in the box; a size number; use case and coverage; 4 x 4-inch vs 2 x 6.5-inch;
+  DSP per channel; which new J terms (dossier s13).
+
 ## 2026-10-28 (15:05 EDT) - PUSHED: SOLVED-STYLE RENDER SHEETS + THE DAY'S WINNER (J 1.11)
 
 - **Renders (4 PNG, `docs/renders/2026-10-28/`):** `typologies_solved_2026-10-28.png` (best design of each typology solved today, one row each),
