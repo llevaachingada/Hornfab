@@ -235,6 +235,45 @@ def shape_active(joint_doc: dict) -> set[str]:
     return searchable_keys(joint_doc) & SHAPE_KEYS
 
 
+def permanently_pinned_keys(doc: dict) -> set[str]:
+    """Keys present in ``bounds`` with ``search: false`` (never jointly searchable)."""
+    out: set[str] = set()
+    for k, v in _as_dict(doc.get("bounds")).items():
+        if isinstance(v, dict) and v.get("search") is False:
+            out.add(k)
+    return out
+
+
+def stage_knob_schedule(joint_doc: dict) -> dict[str, Any]:
+    """Active vs fixed (pinned) jointly-searchable keys per stage — for plan.json / COMPARE.md.
+
+    ``fixed`` = jointly searchable on the joint arm but pinned for that stage
+    (``search: false``, lo=hi). Permanently pinned keys are listed separately; they never
+    enter the active set.
+    """
+    joint = searchable_keys(joint_doc)
+    macro = macro_active(joint_doc)
+    shape = shape_active(joint_doc)
+    return {
+        "joint_searchable": sorted(joint),
+        "permanently_pinned": sorted(permanently_pinned_keys(joint_doc)),
+        "stage_A_macro": {
+            "active": sorted(macro),
+            "fixed": sorted(joint - macro),
+        },
+        "stage_B_shape": {
+            "active": sorted(shape),
+            "fixed": sorted(joint - shape),
+        },
+        "stage_C_polish": {
+            "active": sorted(joint),
+            "fixed": [],
+            "note": ("all jointly searchable keys reopened in ±polish_frac boxes around "
+                     "Stage B's best; permanently_pinned stay pinned"),
+        },
+    }
+
+
 def load_yaml(path: Path) -> dict:
     return yaml.safe_load(path.read_text(encoding="utf-8"))
 
@@ -430,12 +469,54 @@ def _parse_run_dir(log_path: Path) -> str | None:
     return None
 
 
-def write_compare(out_dir: Path, staged: list[dict], joint: dict | None) -> Path:
+def _fmt_keys(keys: object) -> str:
+    if not keys:
+        return "_(none)_"
+    if isinstance(keys, (list, tuple, set)):
+        return ", ".join(f"`{k}`" for k in keys)
+    return str(keys)
+
+
+def write_compare(
+    out_dir: Path,
+    staged: list[dict],
+    joint: dict | None,
+    *,
+    knob_schedule: dict | None = None,
+) -> Path:
     lines = [
         "# Staged vs joint A/B",
         "",
         f"Written: {datetime.now(timezone.utc).isoformat(timespec='seconds')}",
         "",
+    ]
+    if knob_schedule:
+        lines += [
+            "## Knob schedule",
+            "",
+            f"- Joint searchable: {_fmt_keys(knob_schedule.get('joint_searchable'))}",
+            f"- Permanently pinned (never searched): "
+            f"{_fmt_keys(knob_schedule.get('permanently_pinned'))}",
+            "",
+            "| Stage | Active (searched) | Fixed / pinned this stage |",
+            "|---|---|---|",
+        ]
+        for label, key in (
+            ("A macro", "stage_A_macro"),
+            ("B shape", "stage_B_shape"),
+            ("C polish", "stage_C_polish"),
+        ):
+            block = knob_schedule.get(key) or {}
+            lines.append(
+                f"| {label} | {_fmt_keys(block.get('active'))} | "
+                f"{_fmt_keys(block.get('fixed'))} |"
+            )
+        note = (knob_schedule.get("stage_C_polish") or {}).get("note")
+        if note:
+            lines += ["", f"_Stage C: {note}_"]
+        lines.append("")
+
+    lines += [
         "## Staged arms",
         "",
         "| Stage | best J | evals | valid | crease a0/a45/a90 | strength | seconds |",
@@ -686,14 +767,16 @@ def main(argv: list[str] | None = None) -> int:
     path_joint = cfg_dir / "joint__crease_core_law.yaml"
     dump_yaml(path_joint, joint_doc)
 
+    knobs = stage_knob_schedule(joint_doc)
     plan = {
         "out": str(out_dir),
         "budget_total": total,
         "budgets": {"A": ba, "B": bb, "C": bc, "joint": total},
         "backend": backend,
         "backend_choice": args.backend,
-        "macro_active": sorted(macro_active(joint_doc)),
-        "shape_active": sorted(shape_active(joint_doc)),
+        "macro_active": knobs["stage_A_macro"]["active"],
+        "shape_active": knobs["stage_B_shape"]["active"],
+        "knob_schedule": knobs,
         "polish_frac": args.polish_frac,
         "polish_sigma0": args.polish_sigma0,
         "dry_run": bool(args.dry_run),
@@ -713,7 +796,7 @@ def main(argv: list[str] | None = None) -> int:
             joint_doc, dict(_as_dict(stage_b_doc.get("seed_params"))),
             budget=bc, frac=args.polish_frac, sigma0=args.polish_sigma0)
         dump_yaml(cfg_dir / "stageC_polish__crease_core_law.yaml", stage_c_doc)
-        write_compare(out_dir, [], None)
+        write_compare(out_dir, [], None, knob_schedule=knobs)
         return 0
 
     python = args.python or find_python()
@@ -731,7 +814,7 @@ def main(argv: list[str] | None = None) -> int:
         else:
             if not meta_a.get("best_params"):
                 print("Stage A produced no best.json; stopping staged chain", file=sys.stderr)
-                write_compare(out_dir, staged_metas, None)
+                write_compare(out_dir, staged_metas, None, knob_schedule=knobs)
                 return meta_a.get("exit_code") or 1
             best_a_params = meta_a["best_params"]
 
@@ -747,7 +830,7 @@ def main(argv: list[str] | None = None) -> int:
         else:
             if not meta_b.get("best_params"):
                 print("Stage B produced no best.json; stopping staged chain", file=sys.stderr)
-                write_compare(out_dir, staged_metas, None)
+                write_compare(out_dir, staged_metas, None, knob_schedule=knobs)
                 return meta_b.get("exit_code") or 1
             best_b_params = meta_b["best_params"]
 
@@ -765,7 +848,7 @@ def main(argv: list[str] | None = None) -> int:
         joint_meta = run_search(python, path_joint, out_dir, dry_run=args.dry_run, backend=backend)
         joint_meta["name"] = "joint"
 
-    compare = write_compare(out_dir, staged_metas, joint_meta)
+    compare = write_compare(out_dir, staged_metas, joint_meta, knob_schedule=knobs)
     summary = {"plan": plan, "staged": staged_metas, "joint": joint_meta,
                "compare": str(compare)}
     (out_dir / "summary.json").write_text(json.dumps(summary, indent=2, default=str) + "\n",

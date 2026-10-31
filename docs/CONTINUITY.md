@@ -2,6 +2,12 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-31 (evening) - Staged A/B knob schedule disclosure
+
+- `tools/run_staged_search.py` writes **active vs fixed/pinned** knobs per stage into
+  `plan.json` (`knob_schedule`) and a **Knob schedule** section at the top of `COMPARE.md`.
+  Stage B `fixed` is where macros show as pinned to A's best. Offline tests updated.
+
 ## 2026-10-31 (evening) - Mac .venv + Metal smoke + GUI auto-backend
 
 - Project `.venv` (Python 3.12.4) with `pip install -e ".[dev,crosscheck]"` — mesher, beat,

@@ -174,6 +174,18 @@ def test_synthetic_cli_writes_json(tmp_path):
     assert (out / "COMPARE_SYNTHETIC.md").is_file()
 
 
+def test_stage_knob_schedule_lists_fixed():
+    j = yaml.safe_load(JOINT.read_text(encoding="utf-8"))
+    sched = T.stage_knob_schedule(j)
+    assert set(sched["stage_A_macro"]["active"]).issubset(T.MACRO_KEYS)
+    assert set(sched["stage_B_shape"]["active"]).issubset(T.SHAPE_KEYS)
+    joint = set(sched["joint_searchable"])
+    assert set(sched["stage_A_macro"]["fixed"]) == joint - set(sched["stage_A_macro"]["active"])
+    assert set(sched["stage_B_shape"]["fixed"]) == joint - set(sched["stage_B_shape"]["active"])
+    assert sched["stage_C_polish"]["fixed"] == []
+    assert "r0_mm" in sched["permanently_pinned"] or "morph_target" in sched["permanently_pinned"]
+
+
 def test_dry_run_writes_derived_configs_and_compare(tmp_path):
     out = tmp_path / "staged_ab"
     rc = T.main([
@@ -193,6 +205,15 @@ def test_dry_run_writes_derived_configs_and_compare(tmp_path):
     assert (out / "configs" / "joint__crease_core_law.yaml").is_file()
     plan = json.loads((out / "plan.json").read_text(encoding="utf-8"))
     assert plan["budgets"] == {"A": 20, "B": 20, "C": 20, "joint": 60}
+    sched = plan["knob_schedule"]
+    assert "L_mm" in sched["stage_A_macro"]["active"]
+    assert "az_a_sf_amp" in sched["stage_A_macro"]["fixed"]
+    assert "L_mm" in sched["stage_B_shape"]["fixed"]
+    assert "az_a_sf_amp" in sched["stage_B_shape"]["active"]
+    compare = (out / "COMPARE.md").read_text(encoding="utf-8")
+    assert "## Knob schedule" in compare
+    assert "Fixed / pinned this stage" in compare
+    assert "`L_mm`" in compare
     # Stage C must be narrowed vs the joint full box on a searched macro key.
     c = yaml.safe_load((out / "configs" / "stageC_polish__crease_core_law.yaml").read_text())
     j = yaml.safe_load((out / "configs" / "joint__crease_core_law.yaml").read_text())

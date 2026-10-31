@@ -29,6 +29,9 @@ Local-only, added 2026-10-31 (**staged search A/B protocol + chaining harness; n
 - **Still higher leverage than staging:** objective term normalisation (smoke night); diagonal
   balloon scoring for crease knobs.
 
+Local-only, added 2026-10-31 evening (**staged knob schedule in COMPARE/plan; no GitHub issue state changed**):
+- **Landed:** `plan.json` / `COMPARE.md` list active vs fixed knobs per staged arm.
+
 Local-only, added 2026-10-31 evening (**Mac .venv + Metal; no GitHub issue state changed**):
 - **Landed:** project `.venv` + `[dev,crosscheck]`; Metal ready; dry-runs + budget-5 Metal
   smokes (tractrix / freeform_hv / conical); GUI auto `--backend beat_metal` when CUDA absent.

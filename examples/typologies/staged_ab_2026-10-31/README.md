@@ -70,3 +70,5 @@ python tools/run_staged_search.py --synthetic --out runs/staged_ab_check
 ```
 
 Report: `runs/staged_ab_*/COMPARE.md` (and `COMPARE_SYNTHETIC.md` for the toy landscape).
+`COMPARE.md` and `plan.json` both list **active vs fixed/pinned** knobs per stage
+(`knob_schedule`).
