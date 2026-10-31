@@ -546,6 +546,9 @@ def run_detail(runs: Path, run_id: str) -> dict:
         out["restarts"] = clean(run_json["restarts"])
     if isinstance(run_json.get("qd"), dict):
         out["qd"] = clean(run_json["qd"])
+    # CMA covariance snapshot (search/cma.py::covariance_summary) — additive; absent on old runs.
+    if isinstance(run_json.get("cma_covariance"), dict):
+        out["cma_covariance"] = clean(run_json["cma_covariance"])
     # G1 badge strip: the same solve-group fingerprint /api/compare exposes, always present for a
     # run (backend + solved-grid identity; every other key only when non-default).
     out["solve_group"] = _solve_group_fingerprint(d)

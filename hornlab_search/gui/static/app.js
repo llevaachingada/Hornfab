@@ -1921,6 +1921,14 @@ async function viewRunDetail(id) {
         <div class="tbl-wrap"><table id="sens-table"></table></div>
       </div>
 
+      <!-- CMA covariance (search distribution; absent on older runs) -->
+      <div class="fig" id="cma-cov-block" style="display:none">
+        <h3>${tip("cma_cov", "CMA covariance")}</h3>
+        <div class="cap" id="cma-cov-cap">Unit-box search scales from the final ES. Large ${tip("cma_std", "σ√Cᵢᵢ")} ⇒ still exploring that knob; eigenvectors are coupled J-directions, not acoustic Sobol indices.</div>
+        <div class="tbl-wrap"><table id="cma-cov-table"></table></div>
+        <div id="cma-eig-wrap" class="stack" style="gap:8px;margin-top:10px"></div>
+      </div>
+
       <!-- Failures -->
       <div class="stack" style="gap:6px">
         <h3>${tip("failures", "Failures")}</h3>
@@ -2157,6 +2165,47 @@ async function viewRunDetail(id) {
     sensT.innerHTML = s + "</tbody>";
   } else {
     sensT.innerHTML = "<tr><td class='muted'>No sensitivity data.</td></tr>";
+  }
+
+  // CMA covariance (final ES; from run.json cma_covariance)
+  const cov = d.cma_covariance;
+  const covBlock = document.getElementById("cma-cov-block");
+  if (covBlock && cov && Array.isArray(cov.coordinates) && cov.coordinates.length) {
+    covBlock.style.display = "";
+    const cond = cov.condition_number != null ? Number(cov.condition_number).toFixed(1) : "–";
+    const cap = document.getElementById("cma-cov-cap");
+    if (cap) {
+      cap.innerHTML = `σ=${esc(cov.sigma != null ? Number(cov.sigma).toFixed(3) : "–")} · cond(C)=${esc(cond)} · `
+        + `large ${tip("cma_std", "σ√Cᵢᵢ")} ⇒ still exploring that knob; `
+        + `eigenvectors are coupled J-directions, not acoustic Sobol indices.`;
+    }
+    const maxStd = Math.max(...cov.coordinates.map(r => Number(r.std_unit) || 0), 1e-12);
+    let ct = `<thead><tr>
+      <th>Parameter</th><th class="r">${tip("cma_Cii", "Cᵢᵢ")}</th>
+      <th class="r">${tip("cma_std", "σ√Cᵢᵢ")}</th><th class="r">Share</th><th></th></tr></thead><tbody>`;
+    for (const r of cov.coordinates) {
+      const std = Number(r.std_unit) || 0;
+      const share = r.share != null ? Number(r.share) : 0;
+      const w = Math.max(0, Math.min(100, (std / maxStd) * 100));
+      ct += `<tr><td class="mono">${paramTipHtml(sum.name, r.key, r.key)}</td>
+        <td class="r">${fmt(r.C_ii, 4)}</td><td class="r">${fmt(std, 4)}</td>
+        <td class="r">${(100 * share).toFixed(0)}%</td>
+        <td><svg width="90" height="10" viewBox="0 0 90 10" aria-hidden="true">
+          <rect x="0" y="2" width="${w * 0.9}" height="6" rx="1" fill="${css("--best")}"/></svg></td></tr>`;
+    }
+    const covT = document.getElementById("cma-cov-table");
+    if (covT) covT.innerHTML = ct + "</tbody>";
+    const eigWrap = document.getElementById("cma-eig-wrap");
+    if (eigWrap && Array.isArray(cov.eigenpairs) && cov.eigenpairs.length) {
+      eigWrap.innerHTML = cov.eigenpairs.map(ep => {
+        const loads = (ep.top_loadings || []).slice(0, 5)
+          .map(L => `<code>${esc(L.key)}</code>&nbsp;${Number(L.loading).toFixed(2)}`)
+          .join(" · ");
+        const frac = ep.fraction != null ? `${(100 * Number(ep.fraction)).toFixed(0)}%` : "–";
+        return `<div class="cap"><b>Eigen ${esc(ep.rank)}</b> · λ=${esc(fmt(ep.eigenvalue, 4))} · `
+          + `${esc(frac)} of trace · top loadings: ${loads || "–"}</div>`;
+      }).join("");
+    }
   }
 
   // P9 (catalog hover docs): the seed-derivation call site is pinned as seedDerivationHtml(d.feasibility)

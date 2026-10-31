@@ -29,6 +29,10 @@ Local-only, added 2026-10-31 (**staged search A/B protocol + chaining harness; n
 - **Still higher leverage than staging:** objective term normalisation (smoke night); diagonal
   balloon scoring for crease knobs.
 
+Local-only, added 2026-10-31 evening (**CMA covariance dump; no GitHub issue state changed**):
+- **Landed:** `cma_covariance` on `run.json` + run-detail GUI table (σ√Cᵢᵢ shares + eigen loadings).
+  Complements Spearman sensitivity; not a Sobol acoustic decomposition.
+
 Local-only, added 2026-10-31 evening (**staged knob schedule in COMPARE/plan; no GitHub issue state changed**):
 - **Landed:** `plan.json` / `COMPARE.md` list active vs fixed knobs per staged arm.
 

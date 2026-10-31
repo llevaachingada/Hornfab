@@ -2,6 +2,13 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-31 (evening) - CMA covariance dump + GUI table
+
+- End of each CMA search writes `run.json` `cma_covariance` (+ `cma/covariance.json`):
+  per-knob `C_ii` / `σ√C_ii` shares and top eigenpair loadings (unit-box search distribution).
+  Restart arms carry a compact `covariance` block. GUI run detail shows the table when present.
+  Offline: `tests/test_cma_covariance.py`.
+
 ## 2026-10-31 (evening) - Staged A/B knob schedule disclosure
 
 - `tools/run_staged_search.py` writes **active vs fixed/pinned** knobs per stage into
