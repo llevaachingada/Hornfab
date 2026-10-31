@@ -6,6 +6,7 @@
     hornlab-search search   --config <yaml> [--budget N] [--mode screen] [--resume DIR]
     hornlab-search verify   --run <dir> [--top 5]
     hornlab-search report   <run_dir> [--out report.html] [--top 5]
+    hornlab-search pin-plan --run <dir|id> [--write-config PATH]
     hornlab-search dataset  stats|verify|export
     hornlab-search compare  <run_a> <run_b>       (report metric differences, e.g. full vs quarter)
 
@@ -883,6 +884,69 @@ def _cmd_report(args) -> int:
     return 0
 
 
+def _resolve_run_dir(raw: str, runs_root: Path) -> Path | None:
+    """Accept an absolute/relative run directory or a bare run id under ``runs_root``."""
+    p = Path(raw)
+    if p.is_dir() and (p / "run.json").is_file():
+        return p.resolve()
+    cand = runs_root / raw
+    if cand.is_dir() and (cand / "run.json").is_file():
+        return cand.resolve()
+    return None
+
+
+def _cmd_pin_plan(args) -> int:
+    """Recommend CMA knobs to pin from a finished run's ``cma_covariance`` (+ Spearman)."""
+    import yaml
+
+    from hornlab_search.gui.data import sensitivity
+    from hornlab_search.search.evaluate import read_ndjson
+    from hornlab_search.search.pin_from_cma import (
+        apply_pins_to_config, format_pin_plan_md, recommend_pins,
+    )
+    from hornlab_search.search.rundir import read_json, write_json_atomic
+
+    d = _dirs(args)
+    run_dir = _resolve_run_dir(args.run, d["runs"])
+    if run_dir is None:
+        print(f"pin-plan FAILED: run not found: {args.run!r}")
+        return 1
+    run_json = read_json(run_dir / "run.json", {}) or {}
+    cov = run_json.get("cma_covariance")
+    if not isinstance(cov, dict):
+        print(f"pin-plan FAILED: {run_dir}/run.json has no cma_covariance "
+              "(re-run search after the covariance dump landed)")
+        return 1
+    best = read_json(run_dir / "best.json", {}) or {}
+    best_params = best.get("params") if isinstance(best.get("params"), dict) else {}
+    cfg_path = run_dir / "config.yaml"
+    cfg = {}
+    if cfg_path.is_file():
+        cfg = yaml.safe_load(cfg_path.read_text(encoding="utf-8")) or {}
+    bounds = cfg.get("bounds") if isinstance(cfg.get("bounds"), dict) else {}
+    rows = read_ndjson(run_dir / "search.ndjson") if (run_dir / "search.ndjson").is_file() else []
+    sens = sensitivity(rows, bounds) if rows and bounds else []
+    plan = recommend_pins(cov, best_params=best_params, sens=sens, bounds=bounds)
+    plan["run_dir"] = str(run_dir)
+    plan["run_id"] = run_dir.name
+    write_json_atomic(run_dir / "pin_plan.json", plan)
+    md = format_pin_plan_md(plan, run_id=run_dir.name)
+    (run_dir / "PIN_PLAN.md").write_text(md, encoding="utf-8")
+    n_pin = len(plan.get("pin") or [])
+    print(f"pin-plan OK: {n_pin} pin / {len(plan.get('keep') or [])} keep → "
+          f"{run_dir / 'pin_plan.json'} and {run_dir / 'PIN_PLAN.md'}")
+    if args.write_config:
+        out_cfg = Path(args.write_config)
+        if not cfg:
+            print("pin-plan FAILED: no config.yaml in the run; cannot --write-config")
+            return 1
+        patched = apply_pins_to_config(cfg, plan)
+        out_cfg.parent.mkdir(parents=True, exist_ok=True)
+        out_cfg.write_text(yaml.safe_dump(patched, sort_keys=False), encoding="utf-8")
+        print(f"pin-plan wrote config: {out_cfg}")
+    return 0
+
+
 # ---------------------------------------------------------------------- dataset
 
 
@@ -1387,6 +1451,12 @@ def build_parser() -> argparse.ArgumentParser:
     rp.add_argument("run_dir")
     rp.add_argument("--out")
     rp.add_argument("--top", type=int, default=5)
+    pp = sub.add_parser("pin-plan", parents=[common],
+                        help="recommend knobs to pin from a run's CMA covariance (+ Spearman)")
+    pp.add_argument("--run", required=True, metavar="DIR|ID",
+                    help="run directory or id under --runs-dir")
+    pp.add_argument("--write-config", metavar="PATH",
+                    help="optional: write a patched YAML with recommended pins applied")
     ds = sub.add_parser("dataset", parents=[common])
     ds.add_argument("action", choices=("stats", "verify", "export"))
     ds.add_argument("--out", default="train.npz")
@@ -1479,6 +1549,8 @@ def main(argv: list[str] | None = None) -> int:
             return _cmd_verify(args, argv)
         if args.cmd == "report":
             return _cmd_report(args)
+        if args.cmd == "pin-plan":
+            return _cmd_pin_plan(args)
         if args.cmd == "dataset":
             return _cmd_dataset(args)
         if args.cmd == "surrogate":

@@ -1927,6 +1927,11 @@ async function viewRunDetail(id) {
         <div class="cap" id="cma-cov-cap">Unit-box search scales from the final ES. Large ${tip("cma_std", "σ√Cᵢᵢ")} ⇒ still exploring that knob; eigenvectors are coupled J-directions, not acoustic Sobol indices.</div>
         <div class="tbl-wrap"><table id="cma-cov-table"></table></div>
         <div id="cma-eig-wrap" class="stack" style="gap:8px;margin-top:10px"></div>
+        <div id="pin-plan-wrap" style="display:none;margin-top:14px">
+          <h3 style="margin:0 0 6px">${tip("pin_plan", "Pin plan")}</h3>
+          <div class="cap">Recommendations from CMA scales + Spearman guard. Does not change the config — run <code>hornlab-search pin-plan --run ${esc(sum.id || id)}</code> to write <code>PIN_PLAN.md</code> / a patched YAML.</div>
+          <div class="tbl-wrap"><table id="pin-plan-table"></table></div>
+        </div>
       </div>
 
       <!-- Failures -->
@@ -2205,6 +2210,26 @@ async function viewRunDetail(id) {
         return `<div class="cap"><b>Eigen ${esc(ep.rank)}</b> · λ=${esc(fmt(ep.eigenvalue, 4))} · `
           + `${esc(frac)} of trace · top loadings: ${loads || "–"}</div>`;
       }).join("");
+    }
+    const pinPlan = d.pin_plan;
+    const pinWrap = document.getElementById("pin-plan-wrap");
+    const pinT = document.getElementById("pin-plan-table");
+    if (pinWrap && pinT && pinPlan && Array.isArray(pinPlan.decisions) && pinPlan.decisions.length) {
+      pinWrap.style.display = "";
+      let pt = `<thead><tr><th>Key</th><th>Action</th><th class="r">Value</th>
+        <th class="r">share</th><th class="r">σ√Cᵢᵢ</th><th class="r">ρ</th><th>Reasons</th></tr></thead><tbody>`;
+      for (const row of pinPlan.decisions) {
+        const act = row.action === "pin"
+          ? `<span class="pill warn">pin</span>`
+          : `<span class="pill">keep</span>`;
+        const rho = row.rho != null ? Number(row.rho).toFixed(2) : "–";
+        pt += `<tr><td class="mono">${paramTipHtml(sum.name, row.key, row.key)}</td>
+          <td>${act}</td><td class="r">${row.value != null ? fmt(row.value, 4) : "–"}</td>
+          <td class="r">${fmt(row.share, 4)}</td><td class="r">${fmt(row.std_unit, 4)}</td>
+          <td class="r">${rho}</td>
+          <td class="muted" style="font-size:0.8rem">${esc((row.reasons || []).join("; "))}</td></tr>`;
+      }
+      pinT.innerHTML = pt + "</tbody>";
     }
   }
 

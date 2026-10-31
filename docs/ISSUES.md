@@ -29,6 +29,10 @@ Local-only, added 2026-10-31 (**staged search A/B protocol + chaining harness; n
 - **Still higher leverage than staging:** objective term normalisation (smoke night); diagonal
   balloon scoring for crease knobs.
 
+Local-only, added 2026-10-31 evening (**CMA pin-plan; no GitHub issue state changed**):
+- **Landed:** `pin_from_cma` + `hornlab-search pin-plan` + run-detail Pin plan table
+  (recommend-only; optional `--write-config`).
+
 Local-only, added 2026-10-31 evening (**CMA covariance dump; no GitHub issue state changed**):
 - **Landed:** `cma_covariance` on `run.json` + run-detail GUI table (σ√Cᵢᵢ shares + eigen loadings).
   Complements Spearman sensitivity; not a Sobol acoustic decomposition.

@@ -56,6 +56,8 @@ export const TERMS = {
               long: "Variance CMA assigns to that knob's unit-box axis. Larger ⇒ the search distribution is still broad on that coordinate." },
   cma_std:  { label: "σ√Cᵢᵢ", unit: "unit box", short: "Sampling scale along one knob",
               long: "Effective standard deviation of new samples along that axis (step-size σ times √Cᵢᵢ). Compare across knobs: large means still exploring; small means locally collapsed — a candidate to pin in a later stage." },
+  pin_plan: { label: "Pin plan", unit: "", short: "Which knobs to freeze from CMA + Spearman",
+              long: "Recommendation only: pin when σ√Cᵢᵢ share and std are both small, unless |Spearman ρ| is high (still drives J). Values come from best.json. Write artifacts with hornlab-search pin-plan --run <id>; optional --write-config emits a patched YAML." },
   restarts: { label: "CMA restarts", unit: "", short: "IPOP / BIPOP after a natural stop",
               long: "When CMA-ES stops early (flat fitness / tolfun) before the budget is spent, restarts start a fresh ES on leftover evals. Off = single CMA (config default for most YAMLs). IPOP doubles population each restart. BIPOP mixes small-σ local restarts with large-pop ones. Prefer on longer budgets (compare / 150+); short screens often burn the rest in one restart." },
   restarts_max: { label: "Max restarts", unit: "", short: "How many fresh ES instances after the first",

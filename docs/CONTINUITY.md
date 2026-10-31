@@ -2,6 +2,13 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-31 (evening) - CMA-driven knob pin recommendations
+
+- `search/pin_from_cma.py`: pin when `σ√C_ii` share and std are small, unless Spearman
+  `|ρ|` vetoes; values from `best.json`. CLI `hornlab-search pin-plan --run <id>` writes
+  `pin_plan.json` + `PIN_PLAN.md` (+ optional `--write-config`). Run detail shows the table
+  under CMA covariance. Offline: `tests/test_pin_from_cma.py`.
+
 ## 2026-10-31 (evening) - CMA covariance dump + GUI table
 
 - End of each CMA search writes `run.json` `cma_covariance` (+ `cma/covariance.json`):
