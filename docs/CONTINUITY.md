@@ -2,6 +2,61 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-10-31 (evening) - Mac .venv + Metal smoke + GUI auto-backend
+
+- Project `.venv` (Python 3.12.4) with `pip install -e ".[dev,crosscheck]"` — mesher, beat,
+  plots, bempp all import; Metal `ready` via Julia. Doctor: 9 PASS / 2 FAIL (expected: no
+  nvidia-smi / beat_cuda).
+- Dry-run OK: freeform_hv, conical, tractrix. Short `--backend beat_metal --budget 5` searches
+  OK: tractrix 137→111, freeform_hv 33.3→30.8, conical 154.7→35.0.
+- GUI `jobs.py`: when CUDA is unavailable, search/run auto-append `--backend beat_metal` (else
+  `beat_cpu` if that is ready). Launch on this Mac no longer dies on YAML `beat_cuda`.
+- GUI restarted on `.venv/bin/python`. Mac↔4060 A/B still owed before mixing Metal into CUDA
+  leaderboards.
+
+## 2026-10-31 (evening) - Hansen budget heuristic for Launch/Compose
+
+- **`search/budget_heuristic.py`:** suggested evals = `max(150, 100·N)` from Hansen's
+  hard-problem floor (~100·N … 300·N² in c-cmaes; we keep the linear end for GPU BEM).
+  IPOP/BIPOP add `(1+max)×screen` leftover room (BIPOP +25 %). Cap 5000 (GUI allow-list).
+- **`GET /api/budget-hint`:** `n_knobs=` or `config=` + optional `restarts_mode`/`restarts_max`.
+- Launch auto-fills when config/restarts change (until the user edits); Compose offers
+  "Use suggested". Glossary updated. Offline: `tests/test_budget_heuristic.py` + GUI API test.
+
+## 2026-10-31 (evening) - Launch/Compose IPOP/BIPOP controls
+
+- CLI: `search --restarts-mode {ipop,bipop,off}` + `--restarts-max N` (overrides config;
+  updates `cfg.raw` so the run snapshot matches). GUI Launch + Compose search forms expose the
+  same via allow-listed `jobs.py` args. Glossary tips added. Offline: argv allow-list + CLI apply
+  helper + search smoke with `--restarts-mode ipop`.
+
+## 2026-10-31 (later) - beat_metal + Mac path for staged A/B
+
+- **P3 slice:** `beat_metal` added to `BACKEND_NAMES` / `BeatBackend` / CLI `--backend` /
+  `source_motion` allow-list. No nvidia-smi VRAM poll on Metal; `cuda_fused` stays CUDA-only
+  (Metal's fused assembly is the library default).
+- **Staged harness:** `--backend auto|beat_cuda|beat_metal|beat_cpu|bempp_cpu` — on Darwin
+  `auto` → `beat_metal` and clears `cuda_fused` on emitted configs. README has Mac install +
+  run steps. Offline tests cover the rewrite.
+- Still owed: project `.venv` + `pip install -e ".[dev,crosscheck]"` on this Mac, then
+  `doctor` + the staged A/B; Mac↔4060 A/B before mixing Metal into CUDA leaderboards.
+
+## 2026-10-31 - STAGED SEARCH A/B PROTOCOL + CHAINING HARNESS
+
+- **Why:** refine CMA on high-dim typologies (macro → shape → joint polish vs one joint run).
+- **Configs:** `examples/typologies/staged_ab_2026-10-31/` — joint budget 60 vs stages 20+20+20 on
+  `crease__core_law` (same seed lineage / brief as the smoke cell).
+- **Harness:** `tools/run_staged_search.py` — seeds Stage B from A's `best.json`, builds Stage C
+  with ±12 % boxes and `sigma0=0.06`, writes `COMPARE.md`. Offline tests:
+  `tests/test_tools_staged_search.py` (10 passed).
+- **Synthetic coupled A/B (no GPU):** staged final J **0.100** vs joint **0.302** (seed 1.262,
+  coupling 0.7, budget 60) → **staged+polish wins**. Evidence:
+  `docs/evidence/STAGED_SEARCH_AB_2026-10-31.md`.
+- **Acoustic GPU A/B:** blocked on this Mac (no CUDA / no project venv / `cma` missing). GPU-box
+  command recorded in the evidence doc. Do **not** promote into `hornlab_search/search/` until
+  that run lands. Parallel priority unchanged: objective term normalisation.
+- Docs: INDEX, CODE_MAP, ISSUES updated this entry.
+
 ## 2026-10-26 (late) - LEARNINGS RECORDED
 
 - docs/research/LEARNINGS_2026-10-26.md: 13 durable findings (Ath creases = per-direction law; guiding-curve rules; plausible crease shapes; FREEFORM Morph target; self-approach fix; boxes vs CMA; per-type scoring; J blind spots; driver realism; drivers per brief; fused ceiling; GUI). Indexed in docs/INDEX.md; pointer appended to NOTES_FOR_SENIOR.md.

@@ -23,9 +23,29 @@ from . import data as D
 GPU_KINDS = {"run", "search", "campaign", "verify"}    # campaign dry-run tier is not a GPU job
 TIERS = {"dry-run", "screen", "compare"}
 SEARCH_MODES = ("screen", "verify", "final")           # cli.py's `search --mode` choices
+RESTART_MODES = ("ipop", "bipop", "off")               # cli.py's `search --restarts-mode`
+BACKENDS = ("beat_cuda", "beat_metal", "beat_cpu", "bempp_cpu")  # cli.py `--backend`
+RESTARTS_MAX_CAP = 64                                  # mirrors config._validate_restarts
 MAX_EVALS_CAP = 1_000_000                              # GUI sanity cap for --max-evals
 FAMILIES = re.compile(r"^[a-z0-9_]+(,[a-z0-9_]+)*$")
 CLI_BOOT = "import sys; from hornlab_search.cli import main; sys.exit(main(sys.argv[1:]))"
+
+
+def auto_backend() -> str | None:
+    """When CUDA is unavailable, return a workable `--backend` so Mac Launch does not die on
+    YAML defaults of ``beat_cuda``. ``None`` = leave the config alone (CUDA box)."""
+    try:
+        from hornlab_beat_bem import beat_backend_statuses
+        st = beat_backend_statuses() or {}
+    except Exception:
+        return None
+    if (st.get("cuda") or {}).get("available"):
+        return None
+    if (st.get("metal") or {}).get("available"):
+        return "beat_metal"
+    if (st.get("cpu") or {}).get("available"):
+        return "beat_cpu"
+    return None
 
 
 class JobError(ValueError):
@@ -102,6 +122,17 @@ class JobManager:
             raise JobError(f"unknown run: {rid!r}")
         return str(self.runs / rid)
 
+    def _backend_argv(self, a: dict) -> list[str]:
+        """Explicit ``backend`` arg, else ``auto_backend()`` on non-CUDA hosts."""
+        b = a.get("backend")
+        if b in (None, ""):
+            b = auto_backend()
+        if b in (None, ""):
+            return []
+        if b not in BACKENDS:
+            raise JobError(f"backend must be one of {list(BACKENDS)}")
+        return ["--backend", str(b)]
+
     @staticmethod
     def _int(v, lo: int, hi: int, name: str) -> str:
         try:
@@ -120,7 +151,9 @@ class JobManager:
         if kind == "dry-run":
             return ["run", "--config", self._repo_file(a.get("config")), "--dry-run", *brief], False
         if kind == "run":
-            return ["run", "--config", self._repo_file(a.get("config")), *brief, *seed], True
+            argv = ["run", "--config", self._repo_file(a.get("config")), *brief, *seed]
+            argv += self._backend_argv(a)
+            return argv, True
         if kind == "search":
             # Resume is an ADDITIVE option on the same kind, so GPU classification, the one-GPU
             # launch lock, cancel and past-job reload stay exactly the search kind's. The CLI's
@@ -162,7 +195,25 @@ class JobManager:
                 if resume_dir is None:
                     raise JobError("allow_config_change only applies to a resume")
                 argv.append("--allow-config-change")
-            return [*argv, *brief, *seed], True
+            # WP11a restarts override (Launch / Compose). Absent = leave the config YAML alone.
+            rmode = a.get("restarts_mode")
+            rmax = a.get("restarts_max")
+            if rmode not in (None, ""):
+                if rmode not in RESTART_MODES:
+                    raise JobError(f"restarts_mode must be one of {list(RESTART_MODES)}")
+                argv += ["--restarts-mode", str(rmode)]
+                if rmode == "off" and rmax not in (None, ""):
+                    raise JobError("restarts_max is meaningless when restarts_mode is off")
+                if rmode in ("ipop", "bipop"):
+                    # Default 2 when the UI leaves max blank — mirrors the CLI default.
+                    argv += ["--restarts-max",
+                             self._int(2 if rmax in (None, "") else rmax,
+                                       0, RESTARTS_MAX_CAP, "restarts_max")]
+            elif rmax not in (None, ""):
+                raise JobError("restarts_max requires restarts_mode (ipop|bipop|off)")
+            argv = [*argv, *brief, *seed]
+            argv += self._backend_argv(a)
+            return argv, True
         if kind == "campaign":
             f = a.get("families", "")
             fams = (",".join(str(x) for x in f) if isinstance(f, (list, tuple)) else str(f)).replace(" ", "") or "all"

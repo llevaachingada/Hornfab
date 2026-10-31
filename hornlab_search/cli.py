@@ -378,11 +378,47 @@ def _command_string(argv) -> str:
     return "hornlab-search " + " ".join(argv)
 
 
+def _apply_restarts_cli(cfg, mode, max_n) -> None:
+    """Apply ``--restarts-mode`` / ``--restarts-max`` onto a loaded Config (mutates in place).
+
+    Absent both flags: leave ``cfg.search.restarts`` alone (config YAML wins).
+    ``mode='off'``: clear restarts (single CMA-ES), ignoring max.
+    ``mode`` in {ipop,bipop}: set ``{mode, max}``; max defaults to the config's existing max,
+    else 2. Updates ``cfg.raw['search']`` so the run snapshot / config_sha match what ran.
+    Refuses when ``search.algorithm`` is ``cma_me`` (same rule as config validation).
+    """
+    from hornlab_search.config import ConfigError, _validate_restarts
+
+    if mode is None and max_n is None:
+        return
+    if str(getattr(cfg.search, "algorithm", "cma")) == "cma_me":
+        raise ConfigError("search.restarts is not supported with search.algorithm: cma_me "
+                          "(CLI --restarts-* refused)")
+    raw_search = cfg.raw.setdefault("search", {})
+    if not isinstance(raw_search, dict):
+        raise ConfigError("config search block must be a mapping to apply --restarts-*")
+    if mode in ("off", "none"):
+        if max_n is not None:
+            raise ConfigError("--restarts-max is meaningless with --restarts-mode off")
+        cfg.search.restarts = None
+        raw_search.pop("restarts", None)
+        return
+    if mode is None:
+        raise ConfigError("--restarts-max requires --restarts-mode ipop|bipop|off")
+    existing = getattr(cfg.search, "restarts", None) or {}
+    if max_n is None:
+        max_n = int(existing["max"]) if isinstance(existing, dict) and "max" in existing else 2
+    block = _validate_restarts({"mode": mode, "max": int(max_n)}, "cli:--restarts")
+    cfg.search.restarts = block
+    raw_search["restarts"] = dict(block)
+
+
 def _backend(cfg):
     from hornlab_search.solve.base import get_backend
     kw = {"timeout_s": float(cfg.solve.timeout_s)}
-    if str(cfg.solve.backend).startswith("beat_"):
-        kw["cuda_fused"] = bool(getattr(cfg.solve, "cuda_fused", False))   # WP15 (default False)
+    # WP15 cuda_fused is CUDA-only; never pass it for metal/cpu (BeatBackend refuses otherwise).
+    if str(cfg.solve.backend) == "beat_cuda":
+        kw["cuda_fused"] = bool(getattr(cfg.solve, "cuda_fused", False))
     return get_backend(cfg.solve.backend, **kw)
 
 
@@ -664,6 +700,12 @@ def _search_body(args, argv, d) -> int:
         if not args.resume:
             run_dir.rmdir()                      # created above, still empty
         print(why)
+        return 2
+    try:
+        _apply_restarts_cli(cfg, getattr(args, "restarts_mode", None),
+                            getattr(args, "restarts_max", None))
+    except Exception as exc:  # ConfigError / ValueError — refuse before any GPU work
+        print(f"search FAILED: {exc}")
         return 2
     if args.backend:
         cfg.solve.backend = args.backend
@@ -1287,7 +1329,7 @@ def build_parser() -> argparse.ArgumentParser:
     common.add_argument("--runs-dir", help="default <repo>/runs")
     common.add_argument("--cache-dir", help="default <repo>/cache")
     common.add_argument("--dataset-dir", help="default <repo>/dataset")
-    common.add_argument("--backend", choices=("beat_cuda", "beat_cpu", "bempp_cpu"),
+    common.add_argument("--backend", choices=("beat_cuda", "beat_metal", "beat_cpu", "bempp_cpu"),
                         help="override solve.backend in the config")
     common.add_argument("--trace-fraction", type=float, default=0.05,
                         help="fraction of designs that also record boundary traces (default 0.05)")
@@ -1327,6 +1369,13 @@ def build_parser() -> argparse.ArgumentParser:
                    help="brief YAML; overrides config target/weights and is folded into config_sha")
     q.add_argument("--cma-seed", type=int, metavar="INT",
                    help="override search.seed in the config")
+    q.add_argument("--restarts-mode", choices=("ipop", "bipop", "off"),
+                   help="override search.restarts.mode (off = single CMA-ES; "
+                        "absent = leave the config's search.restarts alone)")
+    q.add_argument("--restarts-max", type=int, metavar="N",
+                   help="override search.restarts.max (0..64); required with "
+                        "--restarts-mode ipop|bipop unless the config already has max "
+                        "(default 2 when the config has no restarts block)")
     v = sub.add_parser("verify", parents=[common], help="re-solve a run's top designs at verify fidelity")
     v.add_argument("--run", required=True)
     v.add_argument("--top", type=int, default=5)

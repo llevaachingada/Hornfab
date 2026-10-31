@@ -631,3 +631,17 @@ What I need decided:
 
 ## 2026-10-26 senior pass learnings
 See docs/research/LEARNINGS_2026-10-26.md (Ath crease mechanism, over-constrained boxes, per-type scoring, driver realism, fused ceiling). Build on it rather than re-deriving.
+
+## 2026-10-31 staged search A/B (collaborator Mac)
+
+What happened: implemented the staged-search recommendation as an equal-budget protocol
+(macro 20 → shape 20 → polish 20 vs joint 60) on crease__core_law, with
+`tools/run_staged_search.py` chaining stages from `best.json`. Offline suite green.
+Synthetic coupled landscape: staged+polish wins (J 0.100 vs 0.302). Acoustic GPU A/B could
+not run here (no CUDA / no project venv). Decision recorded in
+`docs/evidence/STAGED_SEARCH_AB_2026-10-31.md`: keep the tools/ harness; do not promote into
+`hornlab_search/search/` until the CUDA-box run; term normalisation remains higher leverage.
+
+What I need decided: nothing blocking — GPU-box owner should run
+`tools/run_staged_search.py --out runs/staged_ab_2026-10-31 --both` when free and paste
+COMPARE.md into the evidence doc.

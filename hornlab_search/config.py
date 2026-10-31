@@ -530,7 +530,7 @@ def _validate_source_motion(value, backend: str, where: str) -> str:
     if value != "normal" and not str(backend).startswith("beat_"):
         raise ConfigError(
             f"{where}: source_motion={value!r} is only implemented for the beat backends "
-            f"(beat_cuda/beat_cpu), got backend {backend!r}")
+            f"(beat_cuda/beat_metal/beat_cpu), got backend {backend!r}")
     return value
 
 

@@ -105,7 +105,11 @@ def _prepare(cfg, run_dir: Path, mode: str, backend, store, cache_dir, trace_fra
     metrics_compute.reset_warning_state()
     if backend is None:
         from ..solve.base import get_backend
-        backend = get_backend(cfg.solve.backend, timeout_s=float(cfg.solve.timeout_s))
+        kw: dict = {"timeout_s": float(cfg.solve.timeout_s)}
+        # WP15 cuda_fused is CUDA-only (Metal/CPU must not receive the flag).
+        if str(cfg.solve.backend) == "beat_cuda":
+            kw["cuda_fused"] = bool(getattr(cfg.solve, "cuda_fused", False))
+        backend = get_backend(cfg.solve.backend, **kw)
     worker.warm(backend)                       # once, before the seed; idempotent
     lib_shas = lib_shas or collect_lib_shas()
     ctx = make_context(cfg, store, cache_dir=cache_dir, lib_shas=lib_shas,

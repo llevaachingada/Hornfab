@@ -18,6 +18,39 @@ Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 20
 | #11 | [Q] Collin: OK with the hornlab-search name? | closed (keep until objection) | user | `docs/plan/README.md` |
 | #13 | hardening-review: Stage A surrogate gate-integrity and real-data traps | **open — fixes MERGED to main** (FF to 6d1d5c7 on 2026-10-22 carries e0b9b61 + 11304f6 + cloud reconciliation 152a829 verbatim; oracle pre-merge sign-off; full offline suite 533 PASS at the merged tree; awaiting owner close) | phase-2 (cloud) | `docs/plan/11_PHASE2_SURROGATE.md` §4 |
 
+Local-only, added 2026-10-31 (**staged search A/B protocol + chaining harness; no GitHub issue state changed**):
+- **Landed:** `examples/typologies/staged_ab_2026-10-31/` (joint 60 vs A/B/C 20+20+20 on crease__core_law),
+  `tools/run_staged_search.py`, `tests/test_tools_staged_search.py`, evidence
+  `docs/evidence/STAGED_SEARCH_AB_2026-10-31.md`.
+- **Synthetic coupled A/B:** staged+polish wins (J 0.100 vs joint 0.302) — keep the tools/ harness;
+  do **not** change the default `search` path until the GPU acoustic A/B runs on the CUDA box.
+- **Owed (GPU box):** `python tools/run_staged_search.py --out runs/staged_ab_2026-10-31 --both`
+  (one job at a time); paste COMPARE.md numbers into the evidence doc.
+- **Still higher leverage than staging:** objective term normalisation (smoke night); diagonal
+  balloon scoring for crease knobs.
+
+Local-only, added 2026-10-31 evening (**Mac .venv + Metal; no GitHub issue state changed**):
+- **Landed:** project `.venv` + `[dev,crosscheck]`; Metal ready; dry-runs + budget-5 Metal
+  smokes (tractrix / freeform_hv / conical); GUI auto `--backend beat_metal` when CUDA absent.
+- **Still owed:** Mac↔4060 A/B (<0.2 dB) before mixing Metal into CUDA datasets; doctor still
+  FAILs the CUDA checks on Mac (expected).
+
+Local-only, added 2026-10-31 evening (**Hansen budget heuristic; no GitHub issue state changed**):
+- **Landed:** `search/budget_heuristic.py` + `GET /api/budget-hint`; Launch/Compose suggest
+  `max(150, 100·N)` (Hansen) with IPOP/BIPOP restart inflation; GUI cap 5000.
+
+Local-only, added 2026-10-31 evening (**Launch IPOP/BIPOP controls; no GitHub issue state changed**):
+- **Landed:** Launch + Compose search forms — CMA restarts mode (config default / off / IPOP / BIPOP)
+  + max; CLI `--restarts-mode` / `--restarts-max`; `jobs.py` allow-list. Run detail still shows
+  the schedule read-only after the fact.
+
+Local-only, added 2026-10-31 later (**beat_metal + Mac staged path; no GitHub issue state changed**):
+- **Landed:** `beat_metal` in `BACKEND_NAMES` / `BeatBackend` / CLI; staged harness `--backend auto`
+  → Metal on Darwin (clears `cuda_fused`). See staged README + evidence doc Mac section.
+- **Owed on this Mac:** create `.venv` with Python 3.12/3.13, `pip install -e ".[dev,crosscheck]"`,
+  `doctor`, then the staged A/B; Mac↔4060 A/B (<0.2 dB) before mixing Metal into CUDA datasets
+  (P3 remainder).
+
 Local-only items (no GitHub issue): band edges capped by the measured dof cap (confirmed, user "keep lowered edges"); task 07 test-17 disk-latency flake risk (do not loosen); residual CP-7 risks (epw=6 above 2.5 kHz unmeasured; f11 unexercised; DI-vs-beamwidth not a regression test) — see `NOTES_FOR_SENIOR.md` task-09 block and CONTINUITY 06:20.
 
 Local-only, added 2026-10-26 (**campaign Phase 0 Steps 2C/3/4/5 LANDED — CPU only, no GPU/Julia; no GitHub issue state changed**):
