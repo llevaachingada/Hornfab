@@ -2,6 +2,16 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-11-01 (09:40 EDT) - CI FIX ON THE PR: OPTIONAL SOLVER DEP GATED IN THE NEW TEST
+
+- PR #18's first CI run failed at **collection**, not in a test: `tests/test_solve_worker_restart.py` imported
+  `hornlab_beat_bem` at module scope, and CI does not install that package (main's 546926d deliberately gated
+  optional-dependency tests). The import is now `pytest.importorskip(...)`, matching the repo's existing pattern, so
+  the file skips cleanly where the solver is absent and still runs on the owner's box.
+- Nothing else in the failure list was ours: the run stopped at that one collection error (3 skips, 21 deselected).
+  The merge itself is already on `meh/integration` (`08f04bf`) and the focused gate over every touched area passed
+  (config, solve/adapter, GUI sandbox, param catalog, all MEH/objective/bassbox tests: exit 0).
+
 ## 2026-11-01 (09:05 EDT) - MERGED origin/main INTO meh/integration: LF NORMALIZED, LOGS UNIONED
 
 - `origin/main` had moved (46 files: the staged-search A/B work, Metal device support in `solve/beat.py`, a

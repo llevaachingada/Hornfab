@@ -121,6 +121,8 @@ Local-only, not pushed 2026-10-31 (**MEH wave 1 merging into `meh/integration`; 
   8,296-8,485 dofs, over any cap that keeps VRAM safe. `cuda_fused` refuses multi-channel by design. Resolving the band
   needs a >= 12 GB card. Stopped by owner direction.
 - **DONE (docs accuracy):** the M8 evidence doc and its INDEX line now state the full result set (links 1/2/5/6 PASS, link 4 FAIL, link 3 PARTIAL, screens verified, blocks); no number changed.
+- **CI FIXED (PR #18):** `tests/test_solve_worker_restart.py` now gates `hornlab_beat_bem` with
+  `pytest.importorskip`, so CI (which does not install the solver) skips it instead of failing at collection.
 - **MERGED main (2026-11-01):** `origin/main` merged into `meh/integration`; 16 MEH-touched files normalized to
   LF (main is LF), logs unioned so no entry from either side was dropped, and main's Metal/backend-override work
   coexists with the MEH config changes. PR conflicts resolved.
