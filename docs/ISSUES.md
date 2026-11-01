@@ -126,6 +126,8 @@ Local-only, not pushed 2026-10-31 (**MEH wave 1 merging into `meh/integration`; 
 - **MERGED main (2026-11-01):** `origin/main` merged into `meh/integration`; 16 MEH-touched files normalized to
   LF (main is LF), logs unioned so no entry from either side was dropped, and main's Metal/backend-override work
   coexists with the MEH config changes. PR conflicts resolved.
+- **PACKAGED (handoff, PR #18):** `docs/meh/MEH_QUICKSTART.md`, `tools/meh/run_screen.ps1`, and
+  `docs/evidence/meh_2026-11-01/` (both verified winners + README). No production code changed.
 - **PR OPENED (wrap-up):** `meh/integration` -> `main`, carrying the full MEH implementation, the owner-approved
   pin bump, both verified screens, the six-line readiness proof, and the hardware audit/hand-off. Final offline
   suite green at the tip (exit 0). Open items inside the PR body: 8 GB band ceiling, M9 blocked, step 3 blocked,

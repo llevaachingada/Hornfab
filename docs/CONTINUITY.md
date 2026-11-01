@@ -2,6 +2,24 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-11-01 (10:20 EDT) - PACKAGED FOR HANDOFF: QUICKSTART, SCREEN LAUNCHER, BOTH VERIFIED WINNERS
+
+- **`docs/meh/MEH_QUICKSTART.md`**: install (pinned stack, `doctor`), the CI gate, a no-GPU `run --dry-run`, the
+  screen + verify commands, what is already done, and the six traps that cost this pass time (8 GB band ceiling,
+  non-comparable frequency grids, stale solver hosts producing misleading errors, LF-only repo, `fill` not carried in
+  the record, quarter-only CAD).
+- **`tools/meh/run_screen.ps1`**: one-brief launcher - clears stray solver hosts, runs the CMA screen, finds the run
+  directory, re-solves the top N at verify fidelity, and writes `runs/nights/meh_<tag>_*.log` plus a summary line.
+  Parameterised by tag/config/budget/mode; replaces the session-local `scratch/meh/*.ps1` helpers, which are
+  gitignored.
+- **`docs/evidence/meh_2026-11-01/`**: the two verified winners as JSON (geometry knobs, objective terms, the
+  inner-network solution, the CAD layout, channel tags, library SHAs) plus a README that states the numbers and the
+  caveats. Extracted from the dataset records, not retyped: T2 `ed11d2cd3acc` (screen 9.530 / verify 11.894, HF1440 +
+  6NDL38, XO 651.8 Hz LR4, +0.312 ms, 4.21 L rear) and T1 `704051ae928c` (13.228 / 14.512, HF108 + 4NDF34,
+  XO 1000.2 Hz LR4, +1.430 ms inverted, 0.81 L rear).
+- Purpose: the next session (owner's friend or an agent) can reproduce and extend the MEH work without rebuilding the
+  launchers, re-running the screens, or hunting for the winners.
+
 ## 2026-11-01 (09:40 EDT) - CI FIX ON THE PR: OPTIONAL SOLVER DEP GATED IN THE NEW TEST
 
 - PR #18's first CI run failed at **collection**, not in a test: `tests/test_solve_worker_restart.py` imported
