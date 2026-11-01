@@ -2,6 +2,18 @@
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 
+## 2026-11-01 (09:05 EDT) - MERGED origin/main INTO meh/integration: LF NORMALIZED, LOGS UNIONED
+
+- `origin/main` had moved (46 files: the staged-search A/B work, Metal device support in `solve/beat.py`, a
+  `load_config(backend=...)` override, and the same ridgeCache test fix we made independently).
+- **Line endings:** main is LF; this branch had CRLF in 16 MEH-touched files, which turned every shared file into a
+  whole-file conflict and would have broken the byte-identical param-catalog test on Linux CI. All 16 are now LF
+  (a9720d2), so the merge is semantic rather than 100 whole-file rewrites.
+- **Conflicts resolved:** `CONTINUITY` and `NOTES_FOR_SENIOR` are unions (nothing dropped: 11 main entries and one main
+  block added); `tests/test_gui_sandbox_page.py` keeps this branch's version (identical assertion); `config.py` and
+  `beat.py` auto-merged cleanly once the EOLs matched, so main's Metal support and this branch's freq_grid/recycling
+  changes coexist.
+
 ## 2026-11-01 - HARDWARE DECISION STUDY: RENTAL FIRST; FULL-WALL MESH IS MUCH LARGER
 
 - Owner clarified this is a theoretical rent-versus-buy decision; no rental machines configured. Rental spend $0, no new BEM solves/screens. `docs/evidence/HARDWARE_2026-11-01.md` records the study, current published rates and explicitly conditional costs.
@@ -10,27 +22,6 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 - Historical NPZ/NDJSON extraction corrects the handoff's seed/winner attribution: T2 winner is N=5,872/E=11,456 with baseline/peak 513/7,575 MiB; T1 winner N=6,249/E=12,205 with baseline/peak 330/7,840 MiB. Across 69 successful historical screen candidates, assembly is the largest reported engine stage (~2 s/frequency, versus ~0.2 s solve). No 12 kHz throughput inference follows.
 - Flat device-use peaks do not prove constant workspace; CUDA 719 does not uniquely establish OOM. Current `vram_41f.csv` differs from the earlier trace described in M8 and has no verified idle baseline. These refine the older capacity diagnosis; the recorded failures and prior screen winners remain unchanged.
 - Shared-host multi-GPU work is not a one-line change: evaluator/persistence side effects, global lock, all-host cleanup and worker registry identity need isolation. Two separate single-GPU machines, one brief each, are a simpler future deployment test. All cross-card, unified-memory, lane-scaling and overnight measurements remain open. `doctor`: 11/11 checks passed; evidence excerpts checked against decoded bytes. No production code/pins/tolerances changed.
-
-## 2026-10-31 (20:28Z) - 3D EVOLUTION TRANSPARENCY: FIX RE-LANDED ON meh/integration + LIVE SERVER RESTARTED
-
-- **Owner report (run `20261031T202159Z-screen-ba7648`, 2 improvement frames):** the 3D time-lapse still
-  showed shredded / see-through triangles, caption "mesh decimated to 5781 tris".
-- **Root cause was not a new renderer bug.** The hole-free decimation fix (`64ccb20`, authored on
-  `feat/hardened-plan-2026-10-29`) had never reached the branch the GUI runs from: this worktree is on
-  `meh/integration` (merge-base `a6bb725`), whose `gui/data.py` still had `M3D_VERSION=1`,
-  `M3D_DEFAULT_CAP=6000` and the stride sampler `tris[::k]`. The live GUI (PID 7176 on 127.0.0.1:8765)
-  had imported that old module, and `runs/.gui_cache/evolution_20261031T202159Z-screen-ba7648_m3d.json`
-  was still `key=[1,6000]` -> 11,562-tri frames cut to 5,781/5,902 (k=2), i.e. half the surface deleted
-  as scattered single-triangle holes.
-- **Fix re-landed here:** cherry-picked the two code files from `64ccb20`
-  (`hornlab_search/gui/data.py` `_cluster_decimate`/`_cluster_once`, `tests/test_gui_integration_phases.py`
-  hole-free contract). `M3D_VERSION` 2 / `M3D_DEFAULT_CAP` 30000; stale cache regenerated for the run and
-  now reads back **11,562 / 11,804 tris, `decimated:false`** (no decimation, complete surface).
-  131 GUI/reader tests pass.
-- **Live server:** the old `:8765` process is being restarted so it loads this module; the new process
-  re-reads the regenerated cache (version 2 key) instead of the stride one.
-- **Process lesson:** a code fix is not live until the long-running GUI process restarts, and a branch
-  switch silently reverts the working tree. Check `D.M3D_VERSION`/cache key, not just the branch log.
 
 ## 2026-11-01 (08:20 EDT) - WRAP-UP: FULL OFFLINE SUITE GREEN AT THE TIP; PR TO `main` OPENED
 
@@ -225,6 +216,59 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
   120-12,000 Hz, so the objective scored `n_in_band 10` and never saw 120-500 Hz or 10-12 kHz; (2) `verify`'s own
   line says the verify mesh equals the screen mesh - only the frequency count and balloon size change, so it is a
   re-score, not a finer mesh.
+
+## 2026-11-01 (later) - CI unblock part 2: optional-dep gates + OS-independent assertions
+
+- Remaining pre-existing red: ~24 tests assumed optional deps that CI does not install
+  (`hornlab_mesher`, `hornlab_beat_bem`, `ribs`) and 3 tests only passed on Windows. Now gated with
+  the existing `requires_mesher` / `requires_beat` markers (per-test `pytest.importorskip("ribs")`
+  for the three QD tests, since no `requires_ribs` marker exists).
+- OS fixes, no assertion loosened: `test_cma_files_lists_every_served_pycma_log` writes fixture
+  bytes and expects `len(bytes)` (Windows text mode was CRLF-inflating `version.txt` to 5 bytes);
+  `test_parse_run_dir_variants_and_best_j` builds `tmp_path` paths instead of `C:/work/...`; the
+  sandbox hot-swap pin now matches the shipped `if (curGeo) { ridgeCache.delete(curGeo);
+  curGeo.dispose(); }`.
+- Local: the 11 affected modules run 248 passed; with the three deps simulated absent, 165 passed /
+  41 skipped / 0 failed. No product code changed.
+
+## 2026-11-01 (later) - CI unblock: the preview-shape suite skips when the optional mesher is absent
+
+- main's GitHub Actions run had been red since 2026-10-29 with a **collection error**, not a test
+  failure: `tests/test_gui_preview_shape.py` imports `gui.preview`, which raises RuntimeError when
+  `hornlab_mesher.preview` is not importable, and CI installs the package with `--no-deps` (the
+  mesher pin is deliberately not installed there). One module-level guard now skips only when the
+  mesher is absent; a **present** mesher whose pinned preview API changed still fails loudly.
+- No product code changed; locally (mesher installed) the file still runs its 12 tests.
+
+## 2026-11-01 - MERGED: PR #17 (Metal, budget hint, staged A/B, CMA covariance + pin plan) + the hardware-neutrality rule
+
+- **Merged:** jamescollinharky's PR #17 (`36c6712`, 4 commits, 32 files, +3135/-40) squashed onto `main`: `beat_metal` backend + Mac path, Hansen `max(150, 100*N)` budget hint (`GET /api/budget-hint`), staged MACRO->SHAPE A/B harness (`tools/run_staged_search.py`), end-of-run `cma_covariance` (`run.json` + `cma/covariance.json` + GUI table), CMA-driven `pin-plan` (CLI + run-detail table), `--restarts-mode` / `--restarts-max` (CLI + Launch/Compose).
+- **Docs:** all three conflicts were append-only logs. `CODE_MAP.md` was curated (took the PR's `solve/*` row; kept main's newer `metrics/`, `driver/compression`, `mesh/throat_check` rows that the PR copy would have erased); `CONTINUITY.md` ordered newest-first; `NOTES_FOR_SENIOR.md` unioned chronologically.
+- **Two merge defects found by the merged test suite, fixed before landing:** (1) `auto_backend()` probed `hornlab_beat_bem` (spawning `nvidia-smi`) inside `build_argv`, so merely enqueueing a queued resume did hardware I/O and 11 GUI tests failed that pass on main; it is now platform-only - Apple Silicon -> `beat_metal`, otherwise `None`, never a silent CPU swap. (2) `--backend` was applied *after* config validation, so `cuda_fused: true` stayed in `raw` / `SolveSpec.extra` and a Metal override died at the first solve while `run.json.backend` disagreed with the snapshot; `load_config(..., backend=...)` now applies the override before validation and drops `cuda_fused` for non-CUDA backends, so `config_sha`, the snapshot and `run.json.backend` agree.
+- **Owner rule (2026-11-01): results must be hardware-neutral.** The endpoint is the same data regardless of the host's solver backend (CUDA / Metal / CPU / Julia). Enforced from now on: no silent backend swapping (backend is explicit, hashed into `SolveSpec`, recorded in `run.json.backend` and dataset provenance); pooling across backends only after a measured parity check; `beat_metal` stays a lab backend until Mac<->4060 <=0.2 dB is measured.
+- **Verification:** full offline suite green apart from the same 2 pre-existing environment failures as pristine `main` (`test_mesh_pin` pinned-dist mismatch; `tests/test_gui_sandbox_page.py::test_3d_hot_swap_never_scenes_per_frame`). Optimizer A/B (`osse_baseline`, budget 4, seed 1234): identical `design_hash` sequence (`8443a5763be5`, `c54661892c59`, `16905720dfc2`, `8f7d77bd7bfd`) and identical best params; J differs by <=3.0e-06 while the seed candidate - bit-identical input by construction - alone differs by 2.1e-06, i.e. solver noise, not an optimizer change. `run.json` gains only `cma_covariance` (+ `cma/covariance.json`).
+- **Owed:** GPU-box `python tools/run_staged_search.py --out runs/staged_ab_2026-10-31 --both`, then paste COMPARE.md into `docs/evidence/STAGED_SEARCH_AB_2026-10-31.md`; Mac<->4060 Metal parity before Metal rows enter any campaign/compare.
+
+## 2026-10-31 (20:28Z) - 3D EVOLUTION TRANSPARENCY: FIX RE-LANDED ON meh/integration + LIVE SERVER RESTARTED
+
+- **Owner report (run `20261031T202159Z-screen-ba7648`, 2 improvement frames):** the 3D time-lapse still
+  showed shredded / see-through triangles, caption "mesh decimated to 5781 tris".
+- **Root cause was not a new renderer bug.** The hole-free decimation fix (`64ccb20`, authored on
+  `feat/hardened-plan-2026-10-29`) had never reached the branch the GUI runs from: this worktree is on
+  `meh/integration` (merge-base `a6bb725`), whose `gui/data.py` still had `M3D_VERSION=1`,
+  `M3D_DEFAULT_CAP=6000` and the stride sampler `tris[::k]`. The live GUI (PID 7176 on 127.0.0.1:8765)
+  had imported that old module, and `runs/.gui_cache/evolution_20261031T202159Z-screen-ba7648_m3d.json`
+  was still `key=[1,6000]` -> 11,562-tri frames cut to 5,781/5,902 (k=2), i.e. half the surface deleted
+  as scattered single-triangle holes.
+- **Fix re-landed here:** cherry-picked the two code files from `64ccb20`
+  (`hornlab_search/gui/data.py` `_cluster_decimate`/`_cluster_once`, `tests/test_gui_integration_phases.py`
+  hole-free contract). `M3D_VERSION` 2 / `M3D_DEFAULT_CAP` 30000; stale cache regenerated for the run and
+  now reads back **11,562 / 11,804 tris, `decimated:false`** (no decimation, complete surface).
+  131 GUI/reader tests pass.
+- **Live server:** the old `:8765` process is being restarted so it loads this module; the new process
+  re-reads the regenerated cache (version 2 key) instead of the stride one.
+- **Process lesson:** a code fix is not live until the long-running GUI process restarts, and a branch
+  switch silently reverts the working tree. Check `D.M3D_VERSION`/cache key, not just the branch log.
 
 ## 2026-10-31 (20:45 EDT) - MEH SCREEN LAUNCHED (T2 then T1, 40 evals each, then verify top 2)
 
@@ -442,6 +486,81 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 - **Known gaps (carried to ISSUES):** seed renders not produced (`pyvista` absent from the venv, no installs
   permitted); `cd_duct_mm = 0` refused (no disc face without a bore); unknown cone (cutout, depth) pairs refused
   until M1 lands.
+
+## 2026-10-31 (evening) - CMA-driven knob pin recommendations
+
+- `search/pin_from_cma.py`: pin when `σ√C_ii` share and std are small, unless Spearman
+  `|ρ|` vetoes; values from `best.json`. CLI `hornlab-search pin-plan --run <id>` writes
+  `pin_plan.json` + `PIN_PLAN.md` (+ optional `--write-config`). Run detail shows the table
+  under CMA covariance. Offline: `tests/test_pin_from_cma.py`.
+
+## 2026-10-31 (evening) - CMA covariance dump + GUI table
+
+- End of each CMA search writes `run.json` `cma_covariance` (+ `cma/covariance.json`):
+  per-knob `C_ii` / `σ√C_ii` shares and top eigenpair loadings (unit-box search distribution).
+  Restart arms carry a compact `covariance` block. GUI run detail shows the table when present.
+  Offline: `tests/test_cma_covariance.py`.
+
+## 2026-10-31 (evening) - Staged A/B knob schedule disclosure
+
+- `tools/run_staged_search.py` writes **active vs fixed/pinned** knobs per stage into
+  `plan.json` (`knob_schedule`) and a **Knob schedule** section at the top of `COMPARE.md`.
+  Stage B `fixed` is where macros show as pinned to A's best. Offline tests updated.
+
+## 2026-10-31 (evening) - Mac .venv + Metal smoke + GUI auto-backend
+
+- Project `.venv` (Python 3.12.4) with `pip install -e ".[dev,crosscheck]"` — mesher, beat,
+  plots, bempp all import; Metal `ready` via Julia. Doctor: 9 PASS / 2 FAIL (expected: no
+  nvidia-smi / beat_cuda).
+- Dry-run OK: freeform_hv, conical, tractrix. Short `--backend beat_metal --budget 5` searches
+  OK: tractrix 137→111, freeform_hv 33.3→30.8, conical 154.7→35.0.
+- GUI `jobs.py`: when CUDA is unavailable, search/run auto-append `--backend beat_metal` (else
+  `beat_cpu` if that is ready). Launch on this Mac no longer dies on YAML `beat_cuda`.
+- GUI restarted on `.venv/bin/python`. Mac↔4060 A/B still owed before mixing Metal into CUDA
+  leaderboards.
+
+## 2026-10-31 (evening) - Hansen budget heuristic for Launch/Compose
+
+- **`search/budget_heuristic.py`:** suggested evals = `max(150, 100·N)` from Hansen's
+  hard-problem floor (~100·N … 300·N² in c-cmaes; we keep the linear end for GPU BEM).
+  IPOP/BIPOP add `(1+max)×screen` leftover room (BIPOP +25 %). Cap 5000 (GUI allow-list).
+- **`GET /api/budget-hint`:** `n_knobs=` or `config=` + optional `restarts_mode`/`restarts_max`.
+- Launch auto-fills when config/restarts change (until the user edits); Compose offers
+  "Use suggested". Glossary updated. Offline: `tests/test_budget_heuristic.py` + GUI API test.
+
+## 2026-10-31 (evening) - Launch/Compose IPOP/BIPOP controls
+
+- CLI: `search --restarts-mode {ipop,bipop,off}` + `--restarts-max N` (overrides config;
+  updates `cfg.raw` so the run snapshot matches). GUI Launch + Compose search forms expose the
+  same via allow-listed `jobs.py` args. Glossary tips added. Offline: argv allow-list + CLI apply
+  helper + search smoke with `--restarts-mode ipop`.
+
+## 2026-10-31 (later) - beat_metal + Mac path for staged A/B
+
+- **P3 slice:** `beat_metal` added to `BACKEND_NAMES` / `BeatBackend` / CLI `--backend` /
+  `source_motion` allow-list. No nvidia-smi VRAM poll on Metal; `cuda_fused` stays CUDA-only
+  (Metal's fused assembly is the library default).
+- **Staged harness:** `--backend auto|beat_cuda|beat_metal|beat_cpu|bempp_cpu` — on Darwin
+  `auto` → `beat_metal` and clears `cuda_fused` on emitted configs. README has Mac install +
+  run steps. Offline tests cover the rewrite.
+- Still owed: project `.venv` + `pip install -e ".[dev,crosscheck]"` on this Mac, then
+  `doctor` + the staged A/B; Mac↔4060 A/B before mixing Metal into CUDA leaderboards.
+
+## 2026-10-31 - STAGED SEARCH A/B PROTOCOL + CHAINING HARNESS
+
+- **Why:** refine CMA on high-dim typologies (macro → shape → joint polish vs one joint run).
+- **Configs:** `examples/typologies/staged_ab_2026-10-31/` — joint budget 60 vs stages 20+20+20 on
+  `crease__core_law` (same seed lineage / brief as the smoke cell).
+- **Harness:** `tools/run_staged_search.py` — seeds Stage B from A's `best.json`, builds Stage C
+  with ±12 % boxes and `sigma0=0.06`, writes `COMPARE.md`. Offline tests:
+  `tests/test_tools_staged_search.py` (10 passed).
+- **Synthetic coupled A/B (no GPU):** staged final J **0.100** vs joint **0.302** (seed 1.262,
+  coupling 0.7, budget 60) → **staged+polish wins**. Evidence:
+  `docs/evidence/STAGED_SEARCH_AB_2026-10-31.md`.
+- **Acoustic GPU A/B:** blocked on this Mac (no CUDA / no project venv / `cma` missing). GPU-box
+  command recorded in the evidence doc. Do **not** promote into `hornlab_search/search/` until
+  that run lands. Parallel priority unchanged: objective term normalisation.
+- Docs: INDEX, CODE_MAP, ISSUES updated this entry.
 
 ## 2026-10-30 (18:10 EDT) - MEH INTEGRATION BRANCH PULLED; BASELINE GREEN AFTER TWO PRE-EXISTING REDS
 
@@ -975,10 +1094,6 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
   rejects for `0`, `4`, `"2"` and `True` are intact.
 - No GPU work.
 
-## 2026-10-26 (late) - LEARNINGS RECORDED
-
-- docs/research/LEARNINGS_2026-10-26.md: 13 durable findings (Ath creases = per-direction law; guiding-curve rules; plausible crease shapes; FREEFORM Morph target; self-approach fix; boxes vs CMA; per-type scoring; J blind spots; driver realism; drivers per brief; fused ceiling; GUI). Indexed in docs/INDEX.md; pointer appended to NOTES_FOR_SENIOR.md.
-
 ## 2026-10-27 (smoke night, report) - CAMPAIGN SMOKE: 41 jobs, the crease class works, four scoring findings
 
 - **Run:** `runs\nights\smoke_2026-10-27.yaml` (27 T0 + 9 mini-T1 + 5 ladder), 376 evaluations,
@@ -1022,6 +1137,10 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
   `tools/expand_walls.py`; per-frequency timing instrumentation + the concurrency A/B; sandbox law
   card browser check; catalog generator recursion into campaign folders; `osse_baseline` 803 x 643
   vs its 750 x 600 envelope; parked `make_shape_variants.py`.
+
+## 2026-10-26 (late) - LEARNINGS RECORDED
+
+- docs/research/LEARNINGS_2026-10-26.md: 13 durable findings (Ath creases = per-direction law; guiding-curve rules; plausible crease shapes; FREEFORM Morph target; self-approach fix; boxes vs CMA; per-type scoring; J blind spots; driver realism; drivers per brief; fused ceiling; GUI). Indexed in docs/INDEX.md; pointer appended to NOTES_FOR_SENIOR.md.
 
 ## 2026-10-26 (night, during the smoke run) - READ-ONLY RUN OBSERVER (`tools/observe_run.py`)
 
@@ -1184,16 +1303,6 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 - **Byte-identity:** `tests/test_config_seed_policy.py` pins the pre-change goldens for `salmon_elliptical` and `lecleach_rollback` under `examples/briefs/organic_rollback_14in.yaml` (seed_params, derivation notes, `config_sha` `9b5cc34de453` / `f2e29be7c418`); explicit keeps every YAML seed/bound and refuses bad values; a materializer spy proves the key is never passed through.
 - **Verification:** focused 10/10, adjacent config/derivation/design 90/90; standard gate green - compileall, catalog `--check`, `node --check` x8, offline suite **1626/0/0/0** (`runs/step2a/suite.xml`; 1607 baseline + 10 new + 9 from a concurrently-added untracked lane file, never staged). No GPU/Julia work.
 
-## 2026-10-25 (late) - ATH FRAMEWORK PASS: native Morph on every family, `ath_core` + `ath_twinray_380`
-
-- **Morph surface:** `morph_*` (including `morph_exponent`, target 3) is legal for OSSE, R-OSSE, ICW and FREEFORM. The old FREEFORM `morph_target` refusal is gone; the mesher already supported it. Generated typologies opt in through the same knobs; an absent `morph_target` emits no morph keys and is byte-identical. The generator requires `mouth: ellipse` when native morph is active.
-- **`ath_core`:** native OSSE generalization of the published 2-inch CORE recipe (constant-azimuth reduction; a 24.2 / n 6.75 / s 0.715 / q .996 / L 260 / s1 1.14 / s2 .025). Native Ath Morph is searched: target shape (1-3), exponent, width, height, corner, rate and fixed part. Brief `ath_core_2in` (50x50, 650x650x520, no K-law f0).
-- **`ath_twinray_380`:** published-dimension reconstruction of the 1.4-inch 380 Suite (380x303x192, 90x60 target, 700x600x320 envelope). Measured: the mesher's FREEFORM rectangle-morph guard rejects a rounded-rect target on this elliptical H/V base (non-convex at t≈0.75 for every corner tried); target 2/3-exp-2 mesh but are not the product. The config therefore uses the generator's searchable superellipse cross-section (`mouth_exponent`), with the native morph route documented as available for compatible bases.
-- **Search counts:** `ath_core` 15, `ath_twinray_380` 12; wide boxes anchored on the published value near the middle, envelope is the outer constraint.
-- **Evidence:** `docs/evidence/ATH_TYPOLOGIES_2026-10-25.md`. Dry-runs: CORE 6,174 tri / 3,232 dof / mouth 397 mm; TwinRay 3,796 tri / 1,987 dof / mouth 380x303 mm. First GPU seeds: CORE J 42.448 / 3,232 dof / 15.3 s; TwinRay J 38.357 / 1,987 dof / 8.3 s (scratch dirs, one job at a time, GPU cleaned). Offline suite **1606/0/0/0** (`runs/ath_morph_suite_final3.xml`); param catalog `--check` green.
-- **Docs:** dossier `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md`; INDEX/CODE_MAP updated. NOT modelled: exact CORE `a(φ)` law, `Mesh.Roundover`, rear/enclosure, TwinRay rim frame/rollback.
-- **Senior review + commit (2026-10-26):** code reviewed hunk-by-hunk; one fix (R-3): `morph_target` now has a hard 0..3 schema limit on every morph family, so an out-of-range code is refused by the search layer instead of the mesher (test `test_morph_target_out_of_range_is_refused_by_the_search_layer`); param artifacts regenerated (`--check` OK); ISSUES control-character typos fixed. Offline suite **1607/0/0/0** (`runs/ath_commit/suite.xml`). Committed by explicit paths only; `NOTES_FOR_SENIOR.md` (auto OOM notes) and `perturbed_osse_hv.yaml` (owner GUI edit) left uncommitted. Campaign plan v2 + senior readiness review (section 12) committed alongside: `docs/SOLVE_CAMPAIGN_PLAN_2026-10-26.md`.
-
 ## 2026-10-26 - MEASURED GPU CEILING AT 8 kHz AND 10 kHz (owner-requested stress ladder; real VRAM numbers replace the earlier estimates)
 
 - **Owner ask:** "what about 8,000 hertz - can we do that? why don't you run a test and see if it crashes my card", then "if we can actually fit it at 10,000 it's not going to crash the car". Also: cap the mouth at 500 mm and use whatever dispersion that supports.
@@ -1217,6 +1326,16 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 - **Practical home:** the 434-500 mm briefs run best at a 5,500-6,000 Hz screen (~3.2-4 GB) with an 8 kHz verify on finalists; 10 kHz is only reachable at <=353 mm (measured).
 - **Correction on record:** my earlier "a 500 Hz horn analysable to 10 kHz must be >=150-180 deg wide" line was arithmetic from forcing the mesh budget, not acoustics; a 500 mm mouth is 14.6 wavelengths at 8 kHz and cannot hold a 100 deg pattern there, let alone 180. The measured ladder supersedes that reasoning - the constraint is VRAM, and the honest fix is band-limiting what `cov` scores, not widening the horn into an impossible shape.
 - **Follow-ups this unlocks:** (1) set `solve.cuda_fused: true` + `dof_cap_verify: 12000` for the 500 mm briefs since fused CUDA is the shipped path to the 12,000 caps; (2) add `target.cov_band_hz` so coverage is scored over the band the horn can actually hold while ripple/flat/DI score to 8-10 kHz; (3) the cap-500 briefs' dispersion table (f0 vs max coverage at 500 mm): 500 Hz -> 101.6 deg, 700 -> 72.6, 850 -> 59.8, 1000 -> 50.8, 1270 -> 40.0, 1450 -> 35.0.
+
+## 2026-10-25 (late) - ATH FRAMEWORK PASS: native Morph on every family, `ath_core` + `ath_twinray_380`
+
+- **Morph surface:** `morph_*` (including `morph_exponent`, target 3) is legal for OSSE, R-OSSE, ICW and FREEFORM. The old FREEFORM `morph_target` refusal is gone; the mesher already supported it. Generated typologies opt in through the same knobs; an absent `morph_target` emits no morph keys and is byte-identical. The generator requires `mouth: ellipse` when native morph is active.
+- **`ath_core`:** native OSSE generalization of the published 2-inch CORE recipe (constant-azimuth reduction; a 24.2 / n 6.75 / s 0.715 / q .996 / L 260 / s1 1.14 / s2 .025). Native Ath Morph is searched: target shape (1-3), exponent, width, height, corner, rate and fixed part. Brief `ath_core_2in` (50x50, 650x650x520, no K-law f0).
+- **`ath_twinray_380`:** published-dimension reconstruction of the 1.4-inch 380 Suite (380x303x192, 90x60 target, 700x600x320 envelope). Measured: the mesher's FREEFORM rectangle-morph guard rejects a rounded-rect target on this elliptical H/V base (non-convex at t≈0.75 for every corner tried); target 2/3-exp-2 mesh but are not the product. The config therefore uses the generator's searchable superellipse cross-section (`mouth_exponent`), with the native morph route documented as available for compatible bases.
+- **Search counts:** `ath_core` 15, `ath_twinray_380` 12; wide boxes anchored on the published value near the middle, envelope is the outer constraint.
+- **Evidence:** `docs/evidence/ATH_TYPOLOGIES_2026-10-25.md`. Dry-runs: CORE 6,174 tri / 3,232 dof / mouth 397 mm; TwinRay 3,796 tri / 1,987 dof / mouth 380x303 mm. First GPU seeds: CORE J 42.448 / 3,232 dof / 15.3 s; TwinRay J 38.357 / 1,987 dof / 8.3 s (scratch dirs, one job at a time, GPU cleaned). Offline suite **1606/0/0/0** (`runs/ath_morph_suite_final3.xml`); param catalog `--check` green.
+- **Docs:** dossier `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md`; INDEX/CODE_MAP updated. NOT modelled: exact CORE `a(φ)` law, `Mesh.Roundover`, rear/enclosure, TwinRay rim frame/rollback.
+- **Senior review + commit (2026-10-26):** code reviewed hunk-by-hunk; one fix (R-3): `morph_target` now has a hard 0..3 schema limit on every morph family, so an out-of-range code is refused by the search layer instead of the mesher (test `test_morph_target_out_of_range_is_refused_by_the_search_layer`); param artifacts regenerated (`--check` OK); ISSUES control-character typos fixed. Offline suite **1607/0/0/0** (`runs/ath_commit/suite.xml`). Committed by explicit paths only; `NOTES_FOR_SENIOR.md` (auto OOM notes) and `perturbed_osse_hv.yaml` (owner GUI edit) left uncommitted. Campaign plan v2 + senior readiness review (section 12) committed alongside: `docs/SOLVE_CAMPAIGN_PLAN_2026-10-26.md`.
 
 ## 2026-10-25 (late) - OWNER SCREENSHOT PASS: mouth ring mirrored, evolution 3D un-clipped, rollback section order preserved (three real bugs, each root-caused before editing)
 
@@ -1540,13 +1659,6 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 - **OWNER FLAG (slim-preset gating):** `.opencode/oh-my-opencode-slim.json` gives the ORCHESTRATOR `skills: ["*"]` but fixer/explorer/librarian/designer/council roles `[]` — lane sessions never see these skills when they run as non-orchestrator roles. Options: add `hornlab-gpu-job` (and `hornlab-evidence`) to those roles' arrays (one-line config change each) or keep embedding the ceremony in dispatch prompts. Owner config decision; mirrored in ISSUES.
 - **NEXT_DEV_PRIORITIES updated (owner request, ~00:30):** new **P5 section** — the build-decision easy wins NOT in the WP plan: W1 screen-vs-verify rank-consistency audit (offline, zero GPU; the rescore pattern), W2 the dense finalist resonance net (= P4a, now SCHEDULED as the brief-design pass's POC build-gate), W3 denser screen grid as a NEW NAMED grid group (frozen-contract; owner-gated), W4 `compare --bar` judge mode (~20 lines, removes the eyeball step hit 3× in M2), W5 perceptual `freq_weights` emphasis + M3/WP5 calibration defaults in the owner baseline doc (config-only). The same commit carries the OWNER's P4 note verbatim (its first commit) — the "dangling P4 reference" advisory in ISSUES is RESOLVED. **W6 (added late, then corrected by recon):** a BL-class balloon VIEW in the GUI; the owner directed "study BL's newest balloon-display source on GitHub and follow it" — recon done: BL's balloon is a **dB-to-radius BLOB** (radius = max(spl−floor, 0); shape AND color encode level), PyVista/VTK smooth-shading + turbo, white tubed isobar rings, protractor, a radar slicer (barycentric meridian interpolation) and an isobar freq×angle slice; ours will be an OWN web implementation (three.js r160, vanilla JS, GPL attribution) — designer lane dispatched (gui/** scope only, no conflict with the in-flight M3 lane).
 
-## Status
-- **Phase:** senior-pass implementation (owner directive 2026-10-24; WP1–WP17, no Synergy/MEH). **M1 DONE and pushed** (WP1–WP4 offline parts + WP15 repo-side plumbing; Oracle GO). **M2 DONE: WP15 fused CUDA validated on the GPU** — ladder, fused GPU test, measured ceiling, 12 kHz verify; Oracle GO recorded in the M2 entry. **M3 DONE** (carry-overs + WP5/WP7/WP8 calibration, zero new searches; Oracle GO-with-fixes ALL applied). **M4 DONE (2026-10-25): WP9 generators (splice/throat_blend/spherical_salmon) + WP9b GRID rows (organic/elliptical/X-shape as labeled hypotheses + HALF models) + `lecleach` SHIPPED after R9-J PASSED (owner chat directive, Fourcade verified, 0.00 mm width) + WP10 GRID adapter** — 12 typology smokes green on the GPU, full-vs-quarter PASS, suites 1194/0/1/0 (intended tripwire only), Oracle GO-with-fixes (doc-only) applied. **M5 WP11 DONE (2026-10-25): restarts (IPOP/BIPOP mirroring pycma) + CMA-ME QD atlas (ribs 0.12.0 — offline-first, +40 tests, 4 GPU screens proving budget exactness incl. a fired 4-ES BIPOP run; Oracle GO-with-fixes applied; evidence `docs/evidence/M5_WP11_2026-10-25.md`, byte-check 30/30). M5B DONE (2026-10-25): WP14 multicell CATEGORY (CAD→STEP route: `tools/cad/multicell.py` + `mesh/step_build.py` + the `cad` recipe/echo/example + `solve.near_correction*`/`solve_precision`/`source_profile_alpha` keys) + WP16/17 fork branches LANDED AND GPU-VALIDATED (Julia 46/46 testsets incl. all four CUDA testsets; selftests 0.020/0.0390 dB; 3-arm A/B worst 4.94e-06 dB) + FORK HOSTED (github.com/llevaachingada/hornlab-beat-bem) + PIN MOVED THERE (`760a1ec`) — the test_mesh_pin tripwire RESOLVED, suite 1325/0/0/0; M4 debts finished; multicell PHYSICS DEFERRED (owner — mouth-topology defect diagnosed, evidence preserved); CLI selftest lock-kill fix; evidence `docs/evidence/M5B_WP14_WP16_WP17_2026-10-25.md`, byte-check 33/33. M6/WP12 DONE (2026-10-25): enclosure mounting plumbed (brief.mounting → the mesher's OWN keys, −mnt- cache keys, all echoes) AND MEASURED on two finalists — dofs +199.4 % / +106.5 %, both under the unchanged caps, enclosure J improves (a different objective landscape — never rank across mountings), reference parity 2.91e-06 dB; **WP13 OWNER-DEFERRED** ("don't know how necessary that is"); suite 1372/0/0/0; evidence `docs/evidence/M6_WP12_2026-10-25.md`, byte-check 21/21.** Waves 0–3 + CP-7 complete; CP-8a/b PASS, CP-8c CLOSED, CP-8d still FAILED (surrogate retrain pending more OSSE data — unchanged).
-- **Done 2026-10-24:** M1: objective v2 (opt-in, offline re-score over 18,059 records: Spearman ρ(v1,v2) = 0.989, both compare-tier claims SURVIVE, v1 drift 0 — `docs/evidence/OBJECTIVE_V2_RESCORE.md`); WP2 driver pins with the embedded-brief grandfather; WP3 shape-only perturb + graded infeasibility; WP4 `freq_weights` + HF verify grid. WP15 repo side: `solve.cuda_fused` flag, env gating, diagnostics proof + refusal (fork branch `hornlab-search/fused-cuda` @ `fa99ee5` in `..\forks\hornlab-beat-bem`; Julia tests green). **M2 (late evening):** fork installed by SHA; ladder analytic **0.020 dB** / crosscheck **0.0390 dB** (both = base references); 3-arm A/B vs stored base-pin runs ≤ 2.9e-6 dB / 2.1e-05 deg (bars 0.039 dB / 1°); fused GPU test green ([measured] on-axis 0.0000 dB, bw 0.01-deg print precision, z_throat 3.35e-07; stale-host refusal); flag-off bit-determinism finding rebarred to a measured 1e-4 dB floor (base-pin reproduction logged); ceiling measured: fused **fits 15,984 / fails 20,237, SAFE = 12,000** (old path same mesh: 7,389 vs 2,217 MiB, 59.6 vs 9.1 s/freq); four `*_fusedcuda` configs (caps 5000/12000/12000); 12 kHz verify on the flag (4,438 dofs, 2.1 s/freq, 25× fused proven). Evidence `docs/evidence/FUSED_CUDA_2026-10-24.md`; pin on `dev/fused-cuda-pin` ONLY (never main; GitHub hosting = owner action). **M3 (2026-10-25):** carry-overs @ `1dda493` + `solve.source_motion` / `mesh.rear_res_factor` / `mesh.band_split` (+ `stack_responses`, verify-only seam, `mesh_policy: band_split_v1` provenance) + the 17-job measurement pack on the stored WP5 finalists (`tools/m3_measurement_pack.py`); evidence `docs/evidence/MEASUREMENT_PACK_2026-10-24.md`; details in the M3 entry above.
-- **Next (next agent):** The implementation plan's NON-OWNER-GATED work is COMPLETE as of M6/WP12: the machine carries the brief-agnostic shape surface (classical + splice/throat-blend/salmon + GRID + organic rows + rollback lecleach/iwata_ar/toroidal + saddle halves) + restarts schedules + the QD-atlas contract + the CAD→STEP multicell category + the enclosure-mounting route (measured: dofs +199 %/+107 %, both under the unchanged caps) + the WP16 source plug + WP17 fused-CUDA near correction (stage 1) on the hosted fork's pinned stack (`760a1ec`; installed == pinned — the mesh-pin tripwire is green). **Everything remaining needs the owner: [a] the brief-design consultation (deferred) — 2–4 real briefs turn the machinery from "calibrated" into "aimed"; [b] resume-or-park the deferred WP14 multicell PHYSICS (the fixture's mouth-topology defect + the full resume recipe live in `docs/ISSUES.md`'s deferred-WP14 block; WP17 stage 1 is ready for it); [c] P6a superformula campaign + P6b GSA-vs-CMA-ES bake-off (owner-gated); [d] the small parked proposals (W7 balloon density, the M3/5 calibration proposals); [e] WP17 stage 2 (fused + per-image symmetry near caches) only when symmetric-drive multicells need the GPU. WP13 axisymmetric backend = OWNER-DEFERRED ("don't know how necessary that is" 2026-10-25).** Nothing else runs without the owner.
-- **Open owner decisions:** v2 objective as brief DEFAULT (today opt-in); bound proposals (`docs/evidence/TYPOLOGY_COMPARE_2026-10-23.md`); mesher bump (post-beta); surrogate OSSE top-up; GUI contrast owner click-path check remains; **P6a/P6b + W7 + the brief-design consultation + resume-or-park the deferred WP14 multicell physics (all owner-gated — see Next). RESOLVED 2026-10-25: fork hosting + pin (hosted fork; `760a1ec` pinned; installed == pinned — tripwire green); WP13 = OWNER-DEFERRED.**
-- **Blockers:** none (owner gate on the pin hosting only).
-
 ## 2026-10-24 (local, ~23:59 EDT) - NEXT TWO PASSES HANDED OFF: M3 reshaped (zero searches, owner directive) + brief-design consultation committed
 
 - **Owner ruling (late 2026-10-24): the shipped demo briefs are NOT their design intent — never spend GPU searching demo sheets.** M3 RESHAPED accordingly, handoff text issued VERBATIM IN CHAT (the owner holds it): two carry-over fixes (dataset-record `objective_version` field; `invalid_envelope` memoization = brief_hash into the failure marker's replay-validity, Oracle-ruled one-liner) + WP5 measurement pack (2/10/50 m via ONE surface_traces solve per finalist + offline math; balloon 1024/2592; source_motion axial — PROPOSALS ONLY, owner gates every flip) + WP7 rear-shell check (1.5/2.0 vs the stored 1.0 baseline on osse_axi best; READ-FIRST the mesher's MeshDensity rear surfaces) + WP8 band-split check (2 designs vs STORED single-mesh responses; seam checks; `mesh_policy: band_split_v1`) — ~15–20 GPU solves on STORED designs, zero new searches. WP6 demo-sheet searches CUT: the 12 kHz capability is banked (M2's fused verify); screen economics: 12 kHz screens just fit the 5,000 cap (~45 s/candidate), 14 kHz blows it and ~2× per candidate above f11 with no realism gain (band stays 700–12,000; a screen-cap raise for band_hi > 12,000 is OWNER-GATED).
@@ -1643,14 +1755,6 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 - `tests/test_report_html.py` zero-success test: setup now expects the resumable stop (3 failure rows instead of 10); its assertions are unchanged plus one on the row count.
 - Offline suite: **808 passed, 18 deselected, exit 0**.
 
-## 2026-10-22 (local, ~22:45 EDT) — docs index and code map
-
-- New `docs/INDEX.md` (every doc, one line each) and `docs/CODE_MAP.md` (every module, config folder, external dependency); pointers added to `CLAUDE.md` (Start here, step 0), `AGENTS.md` and a new `.claude/CLAUDE.md`. Rule: a new doc or module gets a line in the index/map in the same commit.
-
-## 2026-10-22 (local, ~22:35 EDT) — NEXT DEVELOPMENT ROUND PRIORITIES recorded (docs only)
-
-- New `docs/NEXT_DEV_PRIORITIES.md` (user decision): **P1 fused / direct CUDA Burton-Miller assembly** in the exterior driver (fused path is CPU/Metal only at `hornlab_beat_bem/julia/BeatEngineDriver.jl` ~l.1215; the CUDA single-matrix assembler at `julia/src/BeatEngineCudaBurtonMiller.jl:350` is only exercised by `runtests.jl`); engine work in Magnus's package (his OK or a pinned fork), expected 8 GB ceiling ~9k -> ~20k quarter dofs [inferred], validation ladder listed. **Not enabled for the 2026-10-22/23 overnight queue** (one solver for the compare tier and the surrogate top-up). P2 12 kHz finalist verify pass on the 4060; P3 `beat_metal` backend for the collaborator's MacBook. ISSUES TO-DO and HANDOFF_BETA point to it.
-
 ## 2026-10-23 (local, ~11:30 EDT) - GUI beta hardening: Boundary Lab-style isobars, every control exercised, navigation race fixed
 
 - **Directivity isobars** now follow Boundary Lab's renderer (read from `JWSound/boundary-lab` `src/blab/plotting.py` / `ui/plots.py`, ideas only): frequency on a log x-axis, angle on y, level re on-axis in 10 DISCRETE 3 dB colour bands from -30 to 0 dB (its default clip and palette), white contour lines every 3 dB (marching squares; -6 dB heavier), labelled dB colour bar, hover crosshair reading frequency / angle / dB. Best design H + V; starting design on a toggle. Checked against the beamwidth curves (H -6 dB edge ~+-45 deg at the 90 deg target).
@@ -1699,6 +1803,14 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 - Alongside the queue (no GPU): D3 Ctrl-C test on the CPU backend with a separate runs dir; F rehearsal CPU steps; surrogate retrain + CP-8d gates on a dataset snapshot after OSSE seed 4102 ends (~09:40), torch forced to CPU. Only the F screen step needs the GPU (after ~16:15).
 - Local web GUI planned and in progress: `docs/GUI_PLAN.md`.
 - OWNER 03:26: do NOT republish the review page until the owner says so (version 4 stays). After the beta, start from `docs/NEXT_DEV_PRIORITIES.md`.
+
+## 2026-10-22 (local, ~22:45 EDT) — docs index and code map
+
+- New `docs/INDEX.md` (every doc, one line each) and `docs/CODE_MAP.md` (every module, config folder, external dependency); pointers added to `CLAUDE.md` (Start here, step 0), `AGENTS.md` and a new `.claude/CLAUDE.md`. Rule: a new doc or module gets a line in the index/map in the same commit.
+
+## 2026-10-22 (local, ~22:35 EDT) — NEXT DEVELOPMENT ROUND PRIORITIES recorded (docs only)
+
+- New `docs/NEXT_DEV_PRIORITIES.md` (user decision): **P1 fused / direct CUDA Burton-Miller assembly** in the exterior driver (fused path is CPU/Metal only at `hornlab_beat_bem/julia/BeatEngineDriver.jl` ~l.1215; the CUDA single-matrix assembler at `julia/src/BeatEngineCudaBurtonMiller.jl:350` is only exercised by `runtests.jl`); engine work in Magnus's package (his OK or a pinned fork), expected 8 GB ceiling ~9k -> ~20k quarter dofs [inferred], validation ladder listed. **Not enabled for the 2026-10-22/23 overnight queue** (one solver for the compare tier and the surrogate top-up). P2 12 kHz finalist verify pass on the 4060; P3 `beat_metal` backend for the collaborator's MacBook. ISSUES TO-DO and HANDOFF_BETA point to it.
 
 ## 2026-10-22 (local, ~22:17 EDT) - beta pass in progress; OVERNIGHT GPU QUEUE RUNNING (UNCOMMITTED WORK)
 
@@ -1835,6 +1947,16 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 - `throat_radius_m` handles FREEFORM (f11 was never computed for it). Mesher wall-port feature request and the HornLab-author naming question recorded in NOTES.
 - Offline suite (cloud, mesher installed, torch CPU): **514 passed, 1 skipped, 18 deselected, exit 0**. No gate threshold, plan file or `freeform_hv.yaml` changed.
 
+## 2026-10-14 (cloud, ~02:05 UTC) — NOTICE: surrogate fixes waiting on `ccr-455d2184-yj5zk4`; merge AFTER CP-8c, BEFORE CP-8d (senior reviewer: Claude)
+
+> **LOCAL AGENT: do not run CP-8d (`surrogate train` / `propose`) on this branch's current code.** Issue #13 fixes F1-F6 are on `ccr-455d2184-yj5zk4` (draft PR #14 into this branch), with offline suite 455 passed / 30 skipped. They touch only `surrogate/**`, `_cmd_surrogate`, surrogate tests and `HANDOFF_LOCAL.md`, so the running CP-8c search is unaffected. **Do not pull mid-run.** When CP-8c is closed and julia is cleared:
+> 1. `git fetch origin ccr-455d2184-yj5zk4` then `git merge origin/ccr-455d2184-yj5zk4` (conflicts expected in `docs/CONTINUITY.md` / `docs/ISSUES.md` only: keep every entry, newest first).
+> 2. Run `pytest -m "not slow and not gpu and not crosscheck"` (expect ~485 with the mesher), paste it, push.
+> 3. Then CP-8d. Note: `propose` now refuses a gate-failing bundle, so with ~225 held-out CP-8d stops after `train` ("indicative only"), as HANDOFF already says.
+> Review: `docs/SENIOR_REVIEW_2026-10-14.md` (on the fix branch). This entry is docs-only.
+>
+> **LOCAL AGENT RECONCILIATION (2026-10-13, ~20:30 local): the SAME issue-#13 fixes were independently implemented on THIS branch (commit 567ec8b, next entry) before this notice arrived** — the hardening lane was user-authorized, ran offline/CPU-only, and was discovered colliding with this notice only during the push rebase. Commit 567ec8b covers EIGHT items (this notice lists six: F1-F6) and the full offline suite WITH the mesher passed 488/0-deselected-other on this branch. **Do NOT merge `ccr-455d2184-yj5zk4` on top** — that would double-apply overlapping changes in `surrogate/**`. Cloud owner: diff 567ec8b against PR #14 and adopt ONE set (drop the other). CP-8d proceeds on this branch's fixed code either way. Note one deliberate difference: `propose` here refuses by default but has `--allow-unvalidated`, so the runbook's "indicative only" CP-8d (held-out 225 < 500) can still propose and solve round 1 — which HANDOFF intends — while the notice's wording suggests CP-8d stops after `train`.
+
 ## 2026-10-13 (local GPU box, ~23:10) — store/CLI pipeline fixes + CP-8d glue implemented; full offline suite 498 PASS (fixer lane, CPU-only; fix queued by the senior review)
 
 - Implemented all five queued items (offline/CPU-only while run 3 flew): (1) `dataset stats` now reports **`missing families`** (R-OSSE will be listed, by design) + **`duplicate designs`** count; (2) `verify_store` checks Y-metric array **shapes** vs the record's own `solve.freqs_hz` and reports `bad_arrays` separately — exactly what `to_training_arrays` would otherwise silently drop; `dataset verify` exits 1 on either `bad` or `bad_arrays`; (3) **resume guard**: `search --resume` compares `run.json["config_sha"]` to the current config and REFUSES on mismatch (naming both SHAs) unless `--allow-config-change` is passed — the mid-campaign weight/bound edits recorded as follow-ups can no longer silently mix old-J and new-J rows; (4) `surrogate train` headline split: `GATES FAILED: <names>` vs `GATES REFUSED (indicative only): all <N> measured gates pass; held-out <X> < 500 formal floor`; (5) **new `surrogate round` subcommand** (`hornlab_search/surrogate/round.py` + CLI): loads proposals.json, solves each through the normal `evaluate` path into a FRESH run dir with its own ndjson, computes `round_report`, and writes atomic `ismo_round1.json` with report + per-proposal rows + `random_true_J` provenance + exploit/explore-medians + exploit parameter spread + store counts before/after + bundle gate status + config_sha — the CP-8d honesty artifact the reviews demanded.
@@ -1849,16 +1971,6 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
 - **CP-8d misreading guards adopted verbatim** (14-item list in ISSUES): refusal-vs-failure headline with `n_heldout` vs the 500 floor; solved-only medians AND exploit/explore reported separately; `random_true_J` provenance (CMA gen-0 samples, penalty-row convention); proposals' parameter spread (the 30 exploits are near-clones of one NSGA basin); frozen `pred_J` + bundle/config_sha/store count recorded; results persisted as `ismo_round1.json` + `docs/evidence/CP-8d.md`.
 - **Next implementation lane dispatched (store/CLI small fixes, CPU-only):** `n_duplicate_designs` + `missing_families` in `stats()`/`stats_report`, Y-array shape check in `verify_store` (report `bad_arrays` separately), `config_sha` comparison on `--resume` (unmissable warning → refuse unless overridden), the refusal-vs-failure headline split in `surrogate train`, and the CP-8d round helper writing `ismo_round1.json`. These cross task-ownership lines (dataset/**, search/**, cli.py) — implemented under the user's explicit authorization, flagged for cloud review exactly like the #13 lane.
 - Checked clean at scale (no action): append cost, shard roll, in-memory index, trace sampling (4.1 % vs 5 % set), torn-line recovery, ndjson durability, digest arithmetic (2434 = 1500+1+130 smoke+3 older OSSE + 800 ICW; `skipped_grid_mismatch` 133 = the 4500 Hz-grid records; held-out 225.2 = 15 % × 1501).
-
-## 2026-10-14 (cloud, ~02:05 UTC) — NOTICE: surrogate fixes waiting on `ccr-455d2184-yj5zk4`; merge AFTER CP-8c, BEFORE CP-8d (senior reviewer: Claude)
-
-> **LOCAL AGENT: do not run CP-8d (`surrogate train` / `propose`) on this branch's current code.** Issue #13 fixes F1-F6 are on `ccr-455d2184-yj5zk4` (draft PR #14 into this branch), with offline suite 455 passed / 30 skipped. They touch only `surrogate/**`, `_cmd_surrogate`, surrogate tests and `HANDOFF_LOCAL.md`, so the running CP-8c search is unaffected. **Do not pull mid-run.** When CP-8c is closed and julia is cleared:
-> 1. `git fetch origin ccr-455d2184-yj5zk4` then `git merge origin/ccr-455d2184-yj5zk4` (conflicts expected in `docs/CONTINUITY.md` / `docs/ISSUES.md` only: keep every entry, newest first).
-> 2. Run `pytest -m "not slow and not gpu and not crosscheck"` (expect ~485 with the mesher), paste it, push.
-> 3. Then CP-8d. Note: `propose` now refuses a gate-failing bundle, so with ~225 held-out CP-8d stops after `train` ("indicative only"), as HANDOFF already says.
-> Review: `docs/SENIOR_REVIEW_2026-10-14.md` (on the fix branch). This entry is docs-only.
->
-> **LOCAL AGENT RECONCILIATION (2026-10-13, ~20:30 local): the SAME issue-#13 fixes were independently implemented on THIS branch (commit 567ec8b, next entry) before this notice arrived** — the hardening lane was user-authorized, ran offline/CPU-only, and was discovered colliding with this notice only during the push rebase. Commit 567ec8b covers EIGHT items (this notice lists six: F1-F6) and the full offline suite WITH the mesher passed 488/0-deselected-other on this branch. **Do NOT merge `ccr-455d2184-yj5zk4` on top** — that would double-apply overlapping changes in `surrogate/**`. Cloud owner: diff 567ec8b against PR #14 and adopt ONE set (drop the other). CP-8d proceeds on this branch's fixed code either way. Note one deliberate difference: `propose` here refuses by default but has `--allow-unvalidated`, so the runbook's "indicative only" CP-8d (held-out 225 < 500) can still propose and solve round 1 — which HANDOFF intends — while the notice's wording suggests CP-8d stops after `train`.
 
 ## 2026-10-13 (local GPU box, ~23:30) — CP-8c run 3/4 COMPLETE (freeform_hv): CMA converged at 722/800 (`tolfun`), best J 30.54 (-8.3 %); dataset now three families + new stats lines live (local agent)
 
@@ -2165,3 +2277,10 @@ PASS  round-trip        reserved for task 04
 **Open CP-0 items:** M2 (VRAM vs dofs + dof ceiling), M3 (s/person-candidate), M4 (cuda vs cpu), M5 (after-detach). All blocked on exclusive GPU access.
 
 **Next action:** dispatch the Wave 1 issues in parallel using the prompt template in `docs/plan/00_ORCHESTRATOR.md` — **only after** CP-0 is completed on a clean GPU and the repo is pushed.
+## Status
+- **Phase:** senior-pass implementation (owner directive 2026-10-24; WP1–WP17, no Synergy/MEH). **M1 DONE and pushed** (WP1–WP4 offline parts + WP15 repo-side plumbing; Oracle GO). **M2 DONE: WP15 fused CUDA validated on the GPU** — ladder, fused GPU test, measured ceiling, 12 kHz verify; Oracle GO recorded in the M2 entry. **M3 DONE** (carry-overs + WP5/WP7/WP8 calibration, zero new searches; Oracle GO-with-fixes ALL applied). **M4 DONE (2026-10-25): WP9 generators (splice/throat_blend/spherical_salmon) + WP9b GRID rows (organic/elliptical/X-shape as labeled hypotheses + HALF models) + `lecleach` SHIPPED after R9-J PASSED (owner chat directive, Fourcade verified, 0.00 mm width) + WP10 GRID adapter** — 12 typology smokes green on the GPU, full-vs-quarter PASS, suites 1194/0/1/0 (intended tripwire only), Oracle GO-with-fixes (doc-only) applied. **M5 WP11 DONE (2026-10-25): restarts (IPOP/BIPOP mirroring pycma) + CMA-ME QD atlas (ribs 0.12.0 — offline-first, +40 tests, 4 GPU screens proving budget exactness incl. a fired 4-ES BIPOP run; Oracle GO-with-fixes applied; evidence `docs/evidence/M5_WP11_2026-10-25.md`, byte-check 30/30). M5B DONE (2026-10-25): WP14 multicell CATEGORY (CAD→STEP route: `tools/cad/multicell.py` + `mesh/step_build.py` + the `cad` recipe/echo/example + `solve.near_correction*`/`solve_precision`/`source_profile_alpha` keys) + WP16/17 fork branches LANDED AND GPU-VALIDATED (Julia 46/46 testsets incl. all four CUDA testsets; selftests 0.020/0.0390 dB; 3-arm A/B worst 4.94e-06 dB) + FORK HOSTED (github.com/llevaachingada/hornlab-beat-bem) + PIN MOVED THERE (`760a1ec`) — the test_mesh_pin tripwire RESOLVED, suite 1325/0/0/0; M4 debts finished; multicell PHYSICS DEFERRED (owner — mouth-topology defect diagnosed, evidence preserved); CLI selftest lock-kill fix; evidence `docs/evidence/M5B_WP14_WP16_WP17_2026-10-25.md`, byte-check 33/33. M6/WP12 DONE (2026-10-25): enclosure mounting plumbed (brief.mounting → the mesher's OWN keys, −mnt- cache keys, all echoes) AND MEASURED on two finalists — dofs +199.4 % / +106.5 %, both under the unchanged caps, enclosure J improves (a different objective landscape — never rank across mountings), reference parity 2.91e-06 dB; **WP13 OWNER-DEFERRED** ("don't know how necessary that is"); suite 1372/0/0/0; evidence `docs/evidence/M6_WP12_2026-10-25.md`, byte-check 21/21.** Waves 0–3 + CP-7 complete; CP-8a/b PASS, CP-8c CLOSED, CP-8d still FAILED (surrogate retrain pending more OSSE data — unchanged).
+- **Done 2026-10-24:** M1: objective v2 (opt-in, offline re-score over 18,059 records: Spearman ρ(v1,v2) = 0.989, both compare-tier claims SURVIVE, v1 drift 0 — `docs/evidence/OBJECTIVE_V2_RESCORE.md`); WP2 driver pins with the embedded-brief grandfather; WP3 shape-only perturb + graded infeasibility; WP4 `freq_weights` + HF verify grid. WP15 repo side: `solve.cuda_fused` flag, env gating, diagnostics proof + refusal (fork branch `hornlab-search/fused-cuda` @ `fa99ee5` in `..\forks\hornlab-beat-bem`; Julia tests green). **M2 (late evening):** fork installed by SHA; ladder analytic **0.020 dB** / crosscheck **0.0390 dB** (both = base references); 3-arm A/B vs stored base-pin runs ≤ 2.9e-6 dB / 2.1e-05 deg (bars 0.039 dB / 1°); fused GPU test green ([measured] on-axis 0.0000 dB, bw 0.01-deg print precision, z_throat 3.35e-07; stale-host refusal); flag-off bit-determinism finding rebarred to a measured 1e-4 dB floor (base-pin reproduction logged); ceiling measured: fused **fits 15,984 / fails 20,237, SAFE = 12,000** (old path same mesh: 7,389 vs 2,217 MiB, 59.6 vs 9.1 s/freq); four `*_fusedcuda` configs (caps 5000/12000/12000); 12 kHz verify on the flag (4,438 dofs, 2.1 s/freq, 25× fused proven). Evidence `docs/evidence/FUSED_CUDA_2026-10-24.md`; pin on `dev/fused-cuda-pin` ONLY (never main; GitHub hosting = owner action). **M3 (2026-10-25):** carry-overs @ `1dda493` + `solve.source_motion` / `mesh.rear_res_factor` / `mesh.band_split` (+ `stack_responses`, verify-only seam, `mesh_policy: band_split_v1` provenance) + the 17-job measurement pack on the stored WP5 finalists (`tools/m3_measurement_pack.py`); evidence `docs/evidence/MEASUREMENT_PACK_2026-10-24.md`; details in the M3 entry above.
+- **Next (next agent):** The implementation plan's NON-OWNER-GATED work is COMPLETE as of M6/WP12: the machine carries the brief-agnostic shape surface (classical + splice/throat-blend/salmon + GRID + organic rows + rollback lecleach/iwata_ar/toroidal + saddle halves) + restarts schedules + the QD-atlas contract + the CAD→STEP multicell category + the enclosure-mounting route (measured: dofs +199 %/+107 %, both under the unchanged caps) + the WP16 source plug + WP17 fused-CUDA near correction (stage 1) on the hosted fork's pinned stack (`760a1ec`; installed == pinned — the mesh-pin tripwire is green). **Everything remaining needs the owner: [a] the brief-design consultation (deferred) — 2–4 real briefs turn the machinery from "calibrated" into "aimed"; [b] resume-or-park the deferred WP14 multicell PHYSICS (the fixture's mouth-topology defect + the full resume recipe live in `docs/ISSUES.md`'s deferred-WP14 block; WP17 stage 1 is ready for it); [c] P6a superformula campaign + P6b GSA-vs-CMA-ES bake-off (owner-gated); [d] the small parked proposals (W7 balloon density, the M3/5 calibration proposals); [e] WP17 stage 2 (fused + per-image symmetry near caches) only when symmetric-drive multicells need the GPU. WP13 axisymmetric backend = OWNER-DEFERRED ("don't know how necessary that is" 2026-10-25).** Nothing else runs without the owner.
+- **Open owner decisions:** v2 objective as brief DEFAULT (today opt-in); bound proposals (`docs/evidence/TYPOLOGY_COMPARE_2026-10-23.md`); mesher bump (post-beta); surrogate OSSE top-up; GUI contrast owner click-path check remains; **P6a/P6b + W7 + the brief-design consultation + resume-or-park the deferred WP14 multicell physics (all owner-gated — see Next). RESOLVED 2026-10-25: fork hosting + pin (hosted fork; `760a1ec` pinned; installed == pinned — tripwire green); WP13 = OWNER-DEFERRED.**
+- **Blockers:** none (owner gate on the pin hosting only).
+
