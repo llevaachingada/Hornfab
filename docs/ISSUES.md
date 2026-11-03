@@ -126,6 +126,21 @@ Local-only, not pushed 2026-10-31 (**MEH wave 1 merging into `meh/integration`; 
 - **MERGED main (2026-11-01):** `origin/main` merged into `meh/integration`; 16 MEH-touched files normalized to
   LF (main is LF), logs unioned so no entry from either side was dropped, and main's Metal/backend-override work
   coexists with the MEH config changes. PR conflicts resolved.
+- **DONE (GUI visibility, 2026-11-03):** the MEH searchable typologies are registered in `examples/catalog.yaml`
+  under a new `meh` group, with the three derived artifacts regenerated. The three CAD-only seeds are
+  intentionally not catalogued (the native domain requires knobs; multicell_3x3 is its only CAD exception), and
+  the catalog comment records that choice.
+- **MEASURED (full range + threads, 2026-11-03):** CUDA completes the 41-point 120-12k band at 38.5 s/frequency
+  (1,577 s, 7,924 MiB) while CPU is ~18.2 s/frequency; on the real 12-point screen grid CUDA is 4.0x faster
+  (25.7 vs 103.0 s). Julia threads 1/8/24 make CUDA slower (0.88/0.96x) - it is GPU-bound. Concurrent CUDA
+  solves are ruled out on 8 GB by the 7.9 GB single-solve peak.
+- **MEASURED (40-design sweep, 2026-11-03):** neither backend wins outright. CPU beats CUDA below 1k dofs and
+  above ~7k dofs (8.5k: 18.9 vs 53.6 s); CUDA is 1.5-4x faster at 1-7k. Physics parity 3.6e-05 dB. Practical
+  rule: CUDA screens for 1-7k dofs, CPU above ~7k. Script `tools/bench/cuda_cpu_40designs.py`.
+- **MEASURED (2026-11-03 benchmark):** CPU is 6.4x faster than the 8 GB card at the production 8,044-dof MEH
+  mesh (5.86 vs 37.2 s/frequency, SPL parity 5.0e-4 dB) and solves the 25,171-dof 16 kHz mesh in 100.7 s,
+  which needs ~47 GiB of CUDA storage. **Revisit the GPU-first hardware conclusion for screening** (CPU may be
+  the cheaper engine for this dof regime); the 16 kHz wall-resolution caveat (~10.3 kHz walls) still stands.
 - **PACKAGED (handoff, PR #18):** `docs/meh/MEH_QUICKSTART.md`, `tools/meh/run_screen.ps1`, and
   `docs/evidence/meh_2026-11-01/` (both verified winners + README). No production code changed.
 
