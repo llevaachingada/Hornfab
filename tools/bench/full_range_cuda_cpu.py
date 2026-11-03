@@ -19,7 +19,6 @@ import argparse
 import json
 import statistics
 import subprocess
-import threading
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -29,6 +28,7 @@ import numpy as np
 import hornlab_beat_bem as beat
 from hornlab_beat_bem import ObservationConfig, SolveConfig
 from hornlab_beat_bem.sweep import solve_frequencies
+from _bench_common import GpuMemPeak, kill_hosts  # tree-kill hosts; sees WDDM shared-memory spill
 
 ROOT = Path(__file__).resolve().parents[2]
 CONFIG = ROOT / "examples" / "typologies" / "meh_2026-10-30" / "meh_t2a_search.yaml"
@@ -55,29 +55,6 @@ def vram_mib() -> int | None:
         return int("".join(c for c in out.stdout if c.isdigit()))
     except ValueError:
         return None
-
-
-class Peak:
-    def __init__(self, period=2.0):
-        self.peak, self._stop, self._period = (vram_mib() or 0), threading.Event(), period
-
-    def __enter__(self):
-        def loop():
-            while not self._stop.is_set():
-                v = vram_mib()
-                if v is not None:
-                    self.peak = max(self.peak, v)
-                self._stop.wait(self._period)
-        threading.Thread(target=loop, daemon=True).start()
-        return self
-
-    def __exit__(self, *a):
-        self._stop.set()
-
-
-def kill_hosts() -> None:
-    subprocess.run(["taskkill", "/F", "/IM", "julia.exe"], capture_output=True)
-    time.sleep(2)
 
 
 def build_production_mesh() -> tuple[Path, dict]:
@@ -113,11 +90,12 @@ def one(mesh: Path, freq: float, backend: str) -> dict:
                                                     planes=["horizontal", "vertical"]))
     t0 = time.perf_counter()
     try:
-        with Peak() as peak:
+        with GpuMemPeak() as peak:
             res = solve_frequencies(str(mesh), [freq], cfg)
         return {"ok": True, "seconds": round(time.perf_counter() - t0, 3),
                 "spl0": float(np.asarray(res.spl_db).reshape(-1)[0]),
-                "peak_vram_mib": peak.peak if backend == "cuda" else None}
+                "peak_vram_mib": peak.peak if backend == "cuda" else None,
+                **(peak.record() if backend == "cuda" else {})}
     except Exception as exc:  # noqa: BLE001 - a failure at a frequency is the finding
         return {"ok": False, "seconds": round(time.perf_counter() - t0, 3),
                 "error": f"{type(exc).__name__}: {str(exc)[:240]}",

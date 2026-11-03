@@ -18,6 +18,13 @@ Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 20
 | #11 | [Q] Collin: OK with the hornlab-search name? | closed (keep until objection) | user | `docs/plan/README.md` |
 | #13 | hardening-review: Stage A surrogate gate-integrity and real-data traps | **open — fixes MERGED to main** (FF to 6d1d5c7 on 2026-10-22 carries e0b9b61 + 11304f6 + cloud reconciliation 152a829 verbatim; oracle pre-merge sign-off; full offline suite 533 PASS at the merged tree; awaiting owner close) | phase-2 (cloud) | `docs/plan/11_PHASE2_SURROGATE.md` §4 |
 
+Local-only, added 2026-11-03 (**CPU-vs-CUDA audit; no GitHub issue state changed**):
+- **PR #19 (`meh/integration`, open):** its conclusion "CPU is the faster engine for the MEH" is withdrawn - the
+  CUDA arm spilled into shared system memory (`docs/evidence/BENCH_AUDIT_2026-11-03.md`). Body/doc correction
+  pending owner approval to edit the PR.
+- **Pin `0850ef3`** (multi-channel fused CUDA) is local until fork branch `hornlab-search/meh-fused-cuda` is pushed.
+- **Owner:** set CUDA Sysmem Fallback Policy to Prefer No Sysmem Fallback for `julia.exe`.
+
 Local-only, added 2026-11-01 (**PR #17 merged to main + the hardware-neutrality rule; no GitHub issue state changed**):
 - **Merged (squash):** Metal backend + Mac path, Hansen budget hint, staged A/B harness, CMA
   covariance dump, CMA pin plan, restart controls (jamescollinharky's PR #17). Two merge defects
