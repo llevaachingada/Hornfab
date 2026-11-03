@@ -1,5 +1,81 @@
 # CONTINUITY
 
+
+## 2026-11-03 (01:31Z) - BENCHMARK: CPU BEATS CUDA AT THE MEH MESH SIZE; 16 kHz RUNS ON CPU
+
+- New `tools/bench/cpu_vs_cuda_meh.py` (15-minute budget, timestamped log + JSON). Measured on the owner's box,
+  pin unchanged, 372 s total: `docs/evidence/BENCH_CPU_VS_CUDA_2026-11-03.md`, raw log in
+  `runs/bench_cpu_cuda_20261103T013105Z/`.
+- **A. CPU does multi-tag solves** (2-tag tetra, 1 kHz, 2.34 s). The MEH path is not CUDA-only.
+- **B. Production T2 mesh (8,044 dofs, 2 tags), warm protocol (warm-up call, then the same 2-frequency call twice):**
+  CUDA **37.2 s/frequency** (repeats 71.6 / 74.5 s for two frequencies, peak VRAM 7,853 MiB) vs CPU
+  **5.86 s/frequency** (repeats 11.6 / 11.7 s). **CPU is 6.4x faster**; max |dSPL| 5.03e-04 dB. This is the same
+  documented CUDA cliff: fast at ~6k dofs (the 12-frequency screen measured 3.6 s/frequency at 5,872 dofs), then
+  collapse by ~8k.
+- **C. 16 kHz on CPU.** The earlier 16 kHz failures were the application's dof cap (8,900), not the mesh or the
+  card. With the cap raised for the diagnostic build: 49,757 triangles / **25,171 dofs**, built in 5.0 s, CPU
+  solves 1 kHz in **100.7 s**. CUDA static storage for that mesh is **46.9 GiB** (audit formula 24.N.E + 32.N^2),
+  so the 8 GB card cannot hold it. Wall caveat stands: at epw 5.4 the driven patches resolve to ~21.8 kHz but the
+  rigid walls only to ~10.3 kHz.
+- **Implication:** for the MEH's dof regime the CPU backend is the faster engine and needs no VRAM. The
+  rent-a-GPU-first conclusion in the hardware audit should be revisited for screens specifically; a CPU screen may
+  already be the cheap path, with the GPU reserved for what it actually wins.
+
+
+## 2026-11-03 (02:00Z) - 40-DESIGN CUDA-vs-CPU SWEEP: NO SINGLE WINNER, CROSSOVER AT BOTH ENDS
+
+- New `tools/bench/cuda_cpu_40designs.py`: **40 stored designs, no CAD/re-meshing** (30 single-source stratified
+  across the dof range + 10 multi-entry with tag 10), one identical 1 kHz solve each per backend, hosts cleared
+  between arms. Ran 358.6 s. Evidence: `docs/evidence/BENCH_40_DESIGNS_2026-11-03.md`, rows in
+  `runs/bench_40designs_20261103T015652Z/`.
+- **Result [measured]:** CUDA cold first call 26.5 s vs CPU 2.5 s; warm means 3.54 vs 4.18 s; sums over 40 designs
+  164.4 s vs 165.5 s; median CPU/CUDA **2.23x**; CPU won **6/40**; SPL parity max **3.6e-05 dB**; CUDA peak VRAM
+  7,841 MiB.
+- **The crossover is a shape, not a point.** CPU faster below 1k dofs (0.17-0.22 s vs 0.35-0.72 s) and at
+  8,472/8,530 dofs (18.1/18.9 s vs **41.6/53.6 s**); CUDA faster by 1.5-4x from 1k to ~7k dofs. The CUDA cliff is
+  located sharply between 6,929 dofs (5.81 s) and 8,472 dofs (41.63 s) - 7x for +22 % dofs - while CPU scales
+  smoothly.
+- **Implication for screens:** stay on CUDA at 1-7k dofs, move to CPU above ~7k. Physics is backend-independent to
+  3.6e-05 dB, so the choice is purely throughput. Caveat: one frequency, one design per dof value, and CPU cost is
+  mesh-dependent.
+
+
+## 2026-11-03 (03:05Z) - FULL-RANGE + THREAD BENCHMARKS: 4x CUDA ON THE SCREEN GRID, NO THREAD GAIN
+
+- **A. Contracted band (41 points, 8,044 dofs, 2 tags)** [measured, `tools/bench/full_range_cuda_cpu.py`]: CUDA
+  completed **41/41** at **38.46 s/frequency, 1,577 s total, 7,924 MiB peak** - it does not crash, it is just slow;
+  CPU reached 16 frequencies at 18.18 s/frequency and was stopped by the operator (cost, not failure). Parity over
+  120-675 Hz: max |dSPL| 2.96e-04 dB, median CPU/CUDA 0.47.
+- **B. The grid we actually screen (12 points, 5,872-dof winner mesh, 2 tags)** [measured]: CUDA **25.7 s** for the
+  whole sweep (2.05-2.52 s/frequency, 7,796 MiB peak) vs CPU **103.0 s** with the app's one-call-per-grid policy
+  (8.59 s/frequency effective) - **CUDA ~4.0x faster**; parity 4.19e-05 dB. The per-frequency-call CPU arm (111.7 s)
+  is not the app's policy and is recorded only as a control.
+- **C. Julia threads do not help CUDA** [measured, `tools/bench/cuda_threads.py`]: 1 / 8 / 24 threads on the 8,044-dof
+  mesh gave warm 42.92 / 48.98 / 44.88 s - speedups 1.00 / **0.88** / **0.96**, i.e. threads make it slightly slower.
+  SPL bit-identical. The CUDA path is GPU-bound; `julia_threads` is not a lever. Concurrent solves are also impossible
+  on this card (one solve already peaks at 7,924 of 8,188 MiB).
+- Tool fix recorded: mesh paths handed to the solver must be absolute (the Julia worker opens them from its own cwd);
+  the harness now resolves them.
+- Evidence: `docs/evidence/BENCH_FULLRANGE_THREADS_2026-11-03.md`.
+
+
+## 2026-11-03 (03:40Z) - MEH SEARCHABLE TYPOLOGIES REGISTERED IN THE CATALOG (GUI VISIBILITY)
+
+- `examples/catalog.yaml` gains a new **`meh`** group with the two SEARCHABLE rows:
+  `meh_t2a_search` (T2-A, HF1440 + 2 x 6NDL38) and `meh_t1_search` (T1, HF108 + 4 x 4NDF34). The GUI's Typologies
+  page reads this file, so the MEH family is now browsable instead of hidden in a folder.
+- **The three CAD-authored seeds are deliberately NOT catalogued** (`meh_t2a`, `meh_t2b`, `meh_t1`). The catalog's
+  `native` domain requires native knobs, and `multicell_3x3` is its single documented CAD-only exception; adding three
+  more CAD-only entries broke `test_every_native_config_seed_and_bound_key_resolves` (expected 10 native configs, got
+  13) and `test_all_native_typologies_are_documented_and_non_empty_except_multicell`. Rather than relax those
+  invariants for cosmetic listing, the seeds stay documented in `examples/typologies/meh_2026-10-30/` and
+  `docs/meh/MEH_QUICKSTART.md`, and the catalog comment records why.
+- Regenerated the three derived artifacts as the byte-tests require
+  (`tools/gen_param_catalog.py --write`): `gui/static/param-catalog.v1.json`, `docs/reference/PARAMETERS.md`,
+  `docs/reference/TYPOLOGIES.md`.
+- Focused gate green: `tests/test_param_catalog.py`, `tests/test_design_meh_generator.py`,
+  `tests/test_design_generators_lecleach.py`, `tests/test_design_generators_grid_half.py`.
+
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
 ## 2026-11-02 - P11 TURNED ON: PUBLIC HF DATASET REPO PUBLISHED FOR THE COLLABORATOR
 

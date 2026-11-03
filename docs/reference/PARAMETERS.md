@@ -4214,6 +4214,194 @@ Domains covered: `generators`, `rows`, `native`
 - **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 2b. R-OSSE parameters
 - **Flags:** —
 
+## Group: meh
+
+### meh_t1_search — FREEFORM / generator
+
+- **Group:** meh
+- **Symmetry:** hv
+- **Config:** `examples/typologies/meh_2026-10-30/meh_t1_search.yaml`
+- **Brief:** `examples/briefs/meh_2026-10-30/meh_home_90x60_t1.yaml`
+- **Source status:** catalog
+- **Description:** MEH T1 SEARCHABLE - same generator and grid, T1 seed (slide 14 mm after the CAD repair)
+
+#### `across_frac` — across_frac
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `cov_h_deg` — cov_h_deg
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `cov_v_deg` — cov_v_deg
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `port_along_mm` — port_along_mm
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `slide_mm` — slide_mm
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `z_frac` — z_frac
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+### meh_t2a_search — FREEFORM / generator
+
+- **Group:** meh
+- **Symmetry:** hv
+- **Config:** `examples/typologies/meh_2026-10-30/meh_t2a_search.yaml`
+- **Brief:** `examples/briefs/meh_2026-10-30/meh_home_90x60_t2.yaml`
+- **Source status:** catalog
+- **Description:** MEH T2-A SEARCHABLE - generator meh, six layout knobs, 120 Hz-12 kHz 1/6-octave grid, screen cap 8200 dofs
+
+#### `across_frac` — across_frac
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `cov_h_deg` — cov_h_deg
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `cov_v_deg` — cov_v_deg
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `port_along_mm` — port_along_mm
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `slide_mm` — slide_mm
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
+#### `z_frac` — z_frac
+
+- **Summary:** No documentation authored for this knob name yet.
+- **Detail:** This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.
+- **Formula:** not stated
+- **Physical effect:** Not documented in this layer.
+- **Context:** `generators`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `—`
+- **Doc:** —
+- **Flags:** deferred
+
 ## Group: organic
 
 ### lecleach_asym_odd — FREEFORM / rows

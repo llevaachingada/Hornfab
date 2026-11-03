@@ -531,6 +531,50 @@ Domains covered: `generators`, `rows`, `native`
 | `span` | Row span | — | — | — | — | — | How much of the azimuth circle the rows model covers. |
 | `wall_thickness_mm` | Shell thickness | mm | 3.0 | — | — | — | Outer-shell thickness of a freestanding rows model. |
 
+## `meh_t1_search`
+
+- **Family:** FREEFORM
+- **Kind:** generator
+- **Group:** meh
+- **Symmetry:** hv
+- **Description:** MEH T1 SEARCHABLE - same generator and grid, T1 seed (slide 14 mm after the CAD repair)
+- **Source status:** catalog
+- **Config:** `examples/typologies/meh_2026-10-30/meh_t1_search.yaml`
+- **Brief:** `examples/briefs/meh_2026-10-30/meh_home_90x60_t1.yaml`
+- **Documented:** true
+- **Knobs:** 6
+
+| Knob | Label | Unit | Default | Search | Hard lo | Hard hi | Summary |
+|---|---|---|---|---|---|---|---|
+| `across_frac` | across_frac | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `cov_h_deg` | cov_h_deg | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `cov_v_deg` | cov_v_deg | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `port_along_mm` | port_along_mm | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `slide_mm` | slide_mm | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `z_frac` | z_frac | — | — | — | — | — | No documentation authored for this knob name yet. |
+
+## `meh_t2a_search`
+
+- **Family:** FREEFORM
+- **Kind:** generator
+- **Group:** meh
+- **Symmetry:** hv
+- **Description:** MEH T2-A SEARCHABLE - generator meh, six layout knobs, 120 Hz-12 kHz 1/6-octave grid, screen cap 8200 dofs
+- **Source status:** catalog
+- **Config:** `examples/typologies/meh_2026-10-30/meh_t2a_search.yaml`
+- **Brief:** `examples/briefs/meh_2026-10-30/meh_home_90x60_t2.yaml`
+- **Documented:** true
+- **Knobs:** 6
+
+| Knob | Label | Unit | Default | Search | Hard lo | Hard hi | Summary |
+|---|---|---|---|---|---|---|---|
+| `across_frac` | across_frac | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `cov_h_deg` | cov_h_deg | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `cov_v_deg` | cov_v_deg | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `port_along_mm` | port_along_mm | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `slide_mm` | slide_mm | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `z_frac` | z_frac | — | — | — | — | — | No documentation authored for this knob name yet. |
+
 ## `multicell_3x3`
 
 - **Family:** FREEFORM
