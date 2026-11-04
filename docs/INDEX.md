@@ -8,6 +8,8 @@ Keep this file current: a new doc gets a line here in the same commit.
 |---|---|
 | [CONTINUITY.md](CONTINUITY.md) | Status block + dated log, newest first. The source of truth for "where are we". |
 | [ISSUES.md](ISSUES.md) | Open issues and the TO-DO list (next-round priorities at the top). |
+| [throughput/RUNBOOK.md](throughput/RUNBOOK.md) | **Throughput packet (2026-11-04), owner checklist:** pull, offline tests, then GPU steps in order (hygiene, baseline matrix, WP2 prefetch on/off, WP4 curvature study, WP5 batching, WP3 CPU+GPU pilot), what each output file means, pass/fail gates. Everything opt-in. |
+| [throughput/WP1_FUSED_IDENTITY_CACHE_PATCH.md](throughput/WP1_FUSED_IDENTITY_CACHE_PATCH.md) | WP1 solver-fork proposal (skip the unused GPU identity cache on fused CUDA): Julia guard, verification checklist, A/B commands, rollback. **Unverified against source lines**; not applied. |
 | [FORKS.md](FORKS.md) | How we change Magnus's solver/mesher: pinned forks in `..\forks`, install by SHA, validation ladder (owner decision 2026-10-24). |
 | [IMPLEMENTATION_PLAN_2026-10-27.md](IMPLEMENTATION_PLAN_2026-10-27.md) | After the smoke night: fix v3 record rejection, reseed gcurve cell, objective v4 normalisation (owner tolerances), diagonal balloons, then seeds/compare/polish on v4; fluted-wall (Solana) idea. NEXT_DEV_PRIORITIES P10. |
 | [NEXT_DEV_PRIORITIES.md](NEXT_DEV_PRIORITIES.md) | Post-beta priorities: P1 fused CUDA assembly (DONE, M2), P2 12 kHz pass (DONE), P3 Metal backend, P4 grid-density ideas, P5 build-decision easy wins, P6 superformula campaign + GSA-vs-CMA-ES bake-off (proposals, owner-gated). |

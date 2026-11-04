@@ -1,6 +1,39 @@
 # CONTINUITY
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
+## 2026-11-04 - THROUGHPUT PACKET: OPT-IN PROFILING, PREFETCH, BATCH KNOB, CURVATURE MESHING, BENCH TOOLS (branch `ccr-80a29f93-dxnmdm`)
+
+- **Status:** all new behaviour is OPT-IN; defaults, numbers, frequencies, cache keys / hashes of default configs and
+  record formats are unchanged. Nothing GPU-side was run (the build container has no GPU, no Julia, no solver fork, no
+  mesher). Offline suite: new tests pass; the 5 `test_report_html` / `test_search_cli` report failures in that container
+  are the missing `hornlab_plots` package (they failed identically before any change). Owner runs the GPU steps:
+  `docs/throughput/RUNBOOK.md`.
+- **WP0:** `hornlab_search/profiling.py` stage timer (`HORNLAB_STAGE_TIMING=1` -> `designs/<hash>/stage_timing.ndjson`,
+  wired in `search/evaluate.py` around mesh / solve / metrics / MEH inner optimize / score / cache store / persist; records
+  the solver's backend, `assembly_paths`, VRAM from the response). `tools/bench/throughput_matrix.py` (production
+  `solve_spec` + `get_backend`, 12/25/36/41 sets, batch arms, cold + warm reps, nvidia-smi poller thread, CSV/JSON, env
+  info, parity). Legacy bench scripts: `taskkill /IM julia.exe` replaced by `tools/bench/_hosts.py` (kills only host
+  trees the script started; pre-existing hosts are reported, not killed) and an opt-in `HORNLAB_BENCH_FUSED` /
+  `HORNLAB_BENCH_SYMMETRY` for the SolveConfig they build directly (default = their old behaviour).
+- **WP2:** `search.pipeline_prefetch` (config, default 0) / `HORNLAB_PIPELINE_PREFETCH` (env wins). A one-thread builder
+  pre-meshes candidates i+1..i+depth while i solves (`search/pipeline.py`, `mesh/prefetch.py`); `mesh/build.build_mesh`
+  takes a parked mesh first (keyed by mesh cache key + output dir + mode). Coordinator remains the only writer of
+  ndjson / cache / dataset, evaluates in ask order, `tell` order unchanged; seed first, budget, cache hits, failures,
+  interrupts unchanged (offline tests with fake delays prove identical rows/order and real overlap). CMA and CMA-ME wired
+  (CMA-ME test needs `ribs`, skipped here). **Unverified on the real machine:** whether the real gmsh mesher accepts
+  running off the main thread; if not the prefetcher disables itself with one warning and the run continues serially.
+- **WP5:** `BeatBackend(freq_batch_size=N)` / `HORNLAB_FREQ_BATCH_SIZE` chunks the same ordered frequency list into
+  calls of at most N (default None = today's per-frequency CUDA grouping). `throughput_matrix --batch-sizes default,1,2,4,12`.
+- **WP4:** `mesh.curvature_npts` (default 0): `MeshSpec.curvature_npts` enters `MeshSpec.hash()` only when non-zero;
+  `mesh/step_build.sizing_options` sets `Mesh.MeshSizeFromCurvature`, clamped `MeshSizeMax` = wavelength ceiling,
+  `MeshSizeMin` = source size; CAD route only. `tools/bench/mesh_policy_study.py` (N/E, edge stats, build seconds, optional `--solve`).
+- **WP3:** `tools/bench/cpu_gpu_concurrent.py`: separate lane processes, own `HORNLAB_BEAT_WORKER_DIR`, no `worker.*`
+  global kills, own-tree cleanup, start barrier, serial-vs-concurrent parity, aggregate candidates/h. Bench only; real
+  behaviour unmeasured.
+- **WP1:** `docs/throughput/WP1_FUSED_IDENTITY_CACHE_PATCH.md` (Julia proposal, checklist, A/B, rollback), UNVERIFIED
+  against source lines, not applied.
+- **Owner runbook:** `docs/throughput/RUNBOOK.md`. Cross-owner files touched are listed in `NOTES_FOR_SENIOR.md`.
+
 ## 2026-11-02 - P11 TURNED ON: PUBLIC HF DATASET REPO PUBLISHED FOR THE COLLABORATOR
 
 - **Owner directive:** set up Hugging Face storage so the GitHub collaborator can pull "the solves we've done".

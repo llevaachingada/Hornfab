@@ -587,6 +587,22 @@ def _to_response(raw, spec: SolveSpec, mesh: MeshResult) -> Response:
 # ------------------------------------------------------------------ the backend
 
 
+def frequency_groups(freqs, per_frequency_calls: bool, batch_size: int | None) -> list[list[float]]:
+    """How the frequency list is split into ``solve_frequencies`` calls (pure, offline).
+
+    ``batch_size`` None keeps today's behaviour: one call per frequency when
+    ``per_frequency_calls`` else one call with all of them. A batch size N chunks the list in
+    order into groups of at most N; the concatenation of the groups is always exactly ``freqs``.
+    """
+    freqs = [float(f) for f in freqs]
+    if batch_size is None:
+        return [[f] for f in freqs] if per_frequency_calls else [freqs]
+    n = int(batch_size)
+    if n < 1:
+        raise ValueError(f"batch_size must be >= 1, got {batch_size!r}")
+    return [freqs[i:i + n] for i in range(0, len(freqs), n)]
+
+
 class BeatBackend:
     """``hornlab_beat_bem`` on ``device`` ('cuda', 'metal', or 'cpu'). Satisfies ``solve.base.Backend``.
 
@@ -598,7 +614,7 @@ class BeatBackend:
 
     def __init__(self, device: str, timeout_s: float | None = None, track_vram: bool = True,
                  per_frequency_calls: bool | None = None, notes_path=None,
-                 cuda_fused: bool = False):
+                 cuda_fused: bool = False, freq_batch_size: int | None = None):
         if device not in ("cuda", "metal", "cpu"):
             raise ValueError(f"device must be 'cuda', 'metal', or 'cpu', got {device!r}")
         if cuda_fused and device != "cuda":
@@ -615,6 +631,17 @@ class BeatBackend:
         self.per_frequency_calls = (
             device in ("cuda", "metal") if per_frequency_calls is None else bool(per_frequency_calls))
         self.notes_path = notes_path
+        # WP5 (throughput packet): opt-in frequency batch size for the A/B study. None (default)
+        # = today's grouping exactly (per_frequency_calls decides: 1 per call on CUDA/Metal, all
+        # in one call on CPU). N >= 1 sends the SAME frequency list, in the SAME order, as
+        # consecutive solve_frequencies calls of at most N frequencies each; no frequency is ever
+        # dropped. The env HORNLAB_FREQ_BATCH_SIZE is the same knob without a code change.
+        if freq_batch_size is None:
+            _env = os.environ.get("HORNLAB_FREQ_BATCH_SIZE", "").strip()
+            freq_batch_size = int(_env) if _env else None
+        if freq_batch_size is not None and int(freq_batch_size) < 1:
+            raise ValueError(f"freq_batch_size must be >= 1 or None, got {freq_batch_size!r}")
+        self.freq_batch_size = None if freq_batch_size is None else int(freq_batch_size)
         # WP15: opt-in fused CUDA Burton-Miller assembly. The env MUST be set BEFORE the persistent
         # worker host spawns (the host inherits this process's environment); explicit "0" for the
         # default so a flag left over in the process environment can never leak into a run.
@@ -734,7 +761,7 @@ class BeatBackend:
         log.debug("beat SolveConfig: %r", cfg)
         log.debug("beat frequencies_hz: %r  mesh: %s", freqs, mesh.path)
         deadline = None if self.timeout_s is None else time.perf_counter() + float(self.timeout_s)
-        groups = [[f] for f in freqs] if self.per_frequency_calls else [freqs]
+        groups = frequency_groups(freqs, self.per_frequency_calls, self.freq_batch_size)
         # MEH (2026-10-31): a long sweep grows the persistent host's VRAM pool until a CUDA
         # launch failure on the 8 GB card (measured: 41 frequencies peaked 7,908/8,188 MiB and
         # died with code 719 after completing the sweep). ``worker_restart_every`` recycles the
@@ -801,6 +828,8 @@ class BeatBackend:
             resp.meta["vram_peak_mib"] = mon.peak_mib
         resp.meta["solve_seconds"] = seconds
         resp.meta["per_frequency_calls"] = self.per_frequency_calls
+        if self.freq_batch_size is not None:       # WP5: present only when the knob is used
+            resp.meta["freq_batch_size"] = self.freq_batch_size
         worker.note_solve_seconds(self.name, seconds)
         traces = None
         if surface_traces:

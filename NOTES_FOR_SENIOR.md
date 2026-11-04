@@ -675,3 +675,17 @@ What I need decided: nothing blocking — GPU-box owner should run
 `tools/run_staged_search.py --out runs/staged_ab_2026-10-31 --both` when free and paste
 COMPARE.md into the evidence doc.
 
+## 2026-11-04 throughput packet (branch ccr-80a29f93-dxnmdm): cross-owner files touched
+What happened: opt-in throughput work (profiling, mesh prefetch, frequency-batch knob, curvature meshing, bench
+tools). Files outside their usual owner, all additive and default-off: `hornlab_search/search/evaluate.py` (08;
+stage-timer hooks, `prefetch_depth`, `prefetch_candidate`), `search/cma.py` + `search/cma_me.py` (08; pipeline
+hooks, `run.json.pipeline_prefetch` only when enabled), new `search/pipeline.py` (08), `mesh/build.py` +
+`mesh/step_build.py` + new `mesh/prefetch.py` (04; one handoff lookup, `sizing_options`), `types.py` (03;
+`MeshSpec.curvature_npts`, hash input unchanged when 0), `config.py` (03; `search.pipeline_prefetch`,
+`mesh.curvature_npts`, both validated, default 0), `solve/beat.py` (05; `freq_batch_size`, `frequency_groups`),
+new `profiling.py`, `tools/bench/*` (legacy scripts: guarded host kill + opt-in fused/symmetry flags).
+What I need decided: (1) WP2 relies on the real mesher tolerating a non-main thread; confirm on the GPU box
+(RUNBOOK step B) before anyone turns it on for a campaign. (2) Whether `pipeline_prefetch` / `curvature_npts` /
+`HORNLAB_FREQ_BATCH_SIZE` should get GUI/brief plumbing after they pass their gates. (3) WP1 needs a fork branch
+(`docs/throughput/WP1_FUSED_IDENTITY_CACHE_PATCH.md`); its source lines are unverified.
+

@@ -18,6 +18,14 @@ Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 20
 | #11 | [Q] Collin: OK with the hornlab-search name? | closed (keep until objection) | user | `docs/plan/README.md` |
 | #13 | hardening-review: Stage A surrogate gate-integrity and real-data traps | **open — fixes MERGED to main** (FF to 6d1d5c7 on 2026-10-22 carries e0b9b61 + 11304f6 + cloud reconciliation 152a829 verbatim; oracle pre-merge sign-off; full offline suite 533 PASS at the merged tree; awaiting owner close) | phase-2 (cloud) | `docs/plan/11_PHASE2_SURROGATE.md` §4 |
 
+Local-only, added 2026-11-04 (**throughput packet on branch `ccr-80a29f93-dxnmdm`; no GitHub issue state changed**):
+- **Open (owner GPU runs, `docs/throughput/RUNBOOK.md`):** baseline throughput matrix (WP0); WP2 prefetch on/off gate
+  (real-mesher main-thread behaviour unverified); WP5 batch-size A/B (1/2/4/12, then 41 if safe); WP4 curvature study +
+  converged-reference check; WP3 CPU+GPU concurrent pilot.
+- **Open (solver fork, not started):** WP1 skip of the unused GPU identity cache on fused CUDA
+  (`docs/throughput/WP1_FUSED_IDENTITY_CACHE_PATCH.md`, unverified against source lines).
+- **Not started:** WP6 multi-source fused CUDA / shared LU; WP7 report-only metric deferral (profile first).
+
 Local-only, added 2026-11-01 (**PR #17 merged to main + the hardware-neutrality rule; no GitHub issue state changed**):
 - **Merged (squash):** Metal backend + Mac path, Hansen budget hint, staged A/B harness, CMA
   covariance dump, CMA pin plan, restart controls (jamescollinharky's PR #17). Two merge defects
