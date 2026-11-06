@@ -1,6 +1,47 @@
 # CONTINUITY
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
+## 2026-11-06 - BOUNDARY LAB A/B CHECK: HANDOFF EXPORT, HORNFAB REFERENCE SOLVE, BL IMPORT, COMPARE + REPORT (branch `ccr-80a29f93-dxnmdm`)
+
+- **Status:** new, default-off, additive: `hornlab-search ab-bl export | solve | import | compare | demo --fake`
+  (`hornlab_search/compare/`, owner guide `docs/ab/BOUNDARY_LAB_AB.md`). No solver, hash, cache key, record format or default
+  changed. Offline only: the build container has no GPU, no Julia, no mesher, no Boundary Lab. **Nothing was run against a real
+  Boundary Lab or a real solve.** Owner runs the GPU/friend steps (guide section 3, agent block section 6).
+- **What it does:** `export` writes a self-contained handoff folder for one design (run best / rank / hash / config seed): the exact
+  Hornfab mesh mirrored to a FULL mesh in metres (`SD1G0` tag 1 rigid, `SD1D1001` tag 2 driven) plus the reduced mesh, a ready
+  `.blab.json` (schema 10, symmetry off) and a symmetric alternative (BL `xy`, derived from `sizing.SYMMETRY_PLANE` only), a
+  headless request overlay with the exact frequency list (default 1/12 octave from 100 Hz, top capped at what the mesh resolves),
+  `handoff.json` (mesh sha256, driven area, observation set-up, conventions) and `FOR_YOUR_FRIEND.md`. `solve` runs the high-res
+  reference (existing `solve_spec` + backend; only the frequency list, angle count and balloon size replaced) on the full handoff
+  mesh or, with `--symmetric`, on the reduced mesh; GPU lock, VRAM baseline, hosts cleared before and verified gone after.
+  `import` reads Boundary Lab GUI text exports, the balloon folder, a headless run folder and generic CSV. `compare` aligns grids
+  (copies only), derives on-axis / off-axis family / H and V maps / -6 dB beamwidth / DI (balloon) / balloon difference / phase /
+  impedance, per-band max / RMS / median, PASS / WARN / FAIL against tolerances (starting points, not standards; override with
+  JSON), a convention checker (6.02 dB, 3.01 dB, 12.04 dB, 60 dB, +-20 dB/decade drive-basis slope, time convention, polarity,
+  delay, radius, mirrored angles, H/V swap, frequency-axis scale), and writes `report.html` (charts embedded; matplotlib PNG
+  when installed, otherwise built-in SVG / PNG), `summary.json`, `verdict.txt`.
+- **Boundary Lab formats: verified vs inferred** (static read of `JWSound/boundary-lab` `15f9a89`, 2026-11-02; details in the
+  guide section 1). Verified in source: schema-10 project keys, preference names, frequency grid formula, polar arc geometry,
+  Fibonacci balloon count rule, polar / on-axis / balloon export formats, headless run layout and quantity ids, phasor
+  `exp(+i w t)`. **Found:** polar exports are normalized to the on-axis sample, balloon and polar exports are clipped to the SPL
+  Min/Max preference, and **Normalized Channel Correction (default ON) flattens each channel on axis before export** (the project
+  switches it off; the friend must confirm). BL `pyproject` now pins BEAT Engine 0.7.0 (our 2026-10-21 notes said 0.6.0).
+  Inferred, unrun: that the GUI opens the generated project untouched, an impedance dock text export, RMS vs peak (3.01 dB).
+- **Physics note that shapes the plan:** Hornfab drives unit ACCELERATION, BL 1 m/s VELOCITY: `+20 log10(2 pi f)` dB and a
+  conjugate, done once in `compare/hornfab_side.py` and cross-checked against `solve/phasor.py` in tests. **The 8 GB card cannot
+  solve a 20 kHz mesh** (`TOOLCHAIN.md` ceilings ~5.5k full / ~8.9k quarter dofs), so "full band" means "up to what the mesh
+  resolves"; the export prints that limit and `solve --dry-run` the cost.
+- **Tests:** `tests/test_compare_ab_{model,import,analysis,conventions,report,export,cli}.py` (synthetic data for both sides in the
+  real file formats, injected-fault detection, handoff structure, reference solve and `solve` command with a fake backend).
+  Full offline suite in the build container: **5 failed, 1977 passed, 245 skipped** (`python -m pytest -q`); the 5 failures are the
+  known `test_report_html` / `test_search_cli` ones that need the missing `hornlab_plots` package (identical before this change);
+  the 7 new files add 67 passing tests plus 1 skip (the matplotlib chart test is skipped when matplotlib is absent; it passes when
+  matplotlib is on the path).
+- **Cross-owner files touched** (also in `NOTES_FOR_SENIOR.md`): `hornlab_search/cli.py` (08; one `ab-bl` subparser + dispatch),
+  new package `hornlab_search/compare/` (unassigned, orchestrator to assign), `docs/INDEX.md`, `docs/CODE_MAP.md`.
+- **Owner next:** guide section 3 (`demo --fake`, `export`, `solve --dry-run`, `solve --symmetric`, send `bl_handoff`, drop results,
+  `compare`). The friend's decisions are listed in the guide section 4.
+
 ## 2026-11-04 - THROUGHPUT PACKET: OPT-IN PROFILING, PREFETCH, BATCH KNOB, CURVATURE MESHING, BENCH TOOLS (branch `ccr-80a29f93-dxnmdm`)
 
 - **Status:** all new behaviour is OPT-IN; defaults, numbers, frequencies, cache keys / hashes of default configs and

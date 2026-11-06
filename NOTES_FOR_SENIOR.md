@@ -689,3 +689,13 @@ What I need decided: (1) WP2 relies on the real mesher tolerating a non-main thr
 `HORNLAB_FREQ_BATCH_SIZE` should get GUI/brief plumbing after they pass their gates. (3) WP1 needs a fork branch
 (`docs/throughput/WP1_FUSED_IDENTITY_CACHE_PATCH.md`); its source lines are unverified.
 
+## 2026-11-06  ab-bl  Boundary Lab A/B check: cross-owner edits and open questions
+What I did: new package `hornlab_search/compare/` (A/B check of one design against Boundary Lab: handoff export, high-res reference
+solve, BL import, compare, report, `demo --fake`), tests `tests/test_compare_ab_*.py`, owner guide `docs/ab/BOUNDARY_LAB_AB.md`.
+Files outside my usual paths, additive and default-off: `hornlab_search/cli.py` (08/03; one `ab-bl` subparser built by
+`compare/cli.py::add_arguments` + one dispatch branch; no existing command changed), `docs/INDEX.md`, `docs/CODE_MAP.md`.
+What I need decided: (1) who owns `hornlab_search/compare/**` and `tests/test_compare_ab_*.py` (orchestrator table). (2) The default
+tolerances (`compare/analysis.py::Tolerances`) are starting points; confirm or replace after the first real agreement run.
+(3) Boundary Lab's `pyproject` at `15f9a89` pins BEAT Engine 0.7.0 while `docs/BOUNDARY_LAB_0.5_RESEARCH.md` recorded 0.6.0: the
+friend's actual BL/BEAT versions must be written into the first evidence document. (4) Nothing here was run against a real BL or
+a GPU; the generated `.blab.json` opening untouched in the BL GUI is inferred, not verified.
