@@ -1,4 +1,8 @@
-"""Does multi-threaded Julia help the CUDA BEM path? (owner question, 2026-11-03)
+"""LEGACY BENCH (see docs/throughput/RUNBOOK.md): runs the historical NON-production path unless
+HORNLAB_BENCH_FUSED=1 / HORNLAB_BENCH_SYMMETRY=yz+xz are set; use tools/bench/throughput_matrix.py for
+fused-production numbers. Julia hosts are no longer killed by image name (tools/bench/_hosts.py).
+
+Does multi-threaded Julia help the CUDA BEM path? (owner question, 2026-11-03)
 
 One fixed mesh in the slow CUDA regime (8,044 quarter dofs), two frequencies, and
 `SolveConfig.julia_threads` = 1, 8, 24. The solver host is cleared between settings so each
@@ -41,9 +45,9 @@ def log(msg: str) -> None:
     LOG.write_text("\n".join(LINES) + "\n", encoding="utf-8", newline="\n")
 
 
-def kill_hosts() -> None:
-    subprocess.run(["taskkill", "/F", "/IM", "julia.exe"], capture_output=True)
-    time.sleep(2)
+# WP0: the old `taskkill /F /IM julia.exe` killed every Julia process on the machine. This kills only
+# BEAT host trees this script started (tools/bench/_hosts.py); pre-existing hosts are reported, not killed.
+from _hosts import bench_solve_kwargs, kill_hosts  # noqa: E402,F401  (sibling module; scripts run as `python tools\\bench\\x.py`)
 
 
 def main() -> int:
@@ -56,7 +60,7 @@ def main() -> int:
     for n in THREADS:
         kill_hosts()
         log(f"--- julia_threads={n}: fresh host ---")
-        cfg = SolveConfig(velocity_sources={2: 1.0, 10: 1.0}, impedance_matrix=True,
+        cfg = SolveConfig(**bench_solve_kwargs(), velocity_sources={2: 1.0, 10: 1.0}, impedance_matrix=True,
                           beat_backend="cuda", julia_threads=int(n), observation=obs)
         for f in FREQS:
             t0 = time.perf_counter()

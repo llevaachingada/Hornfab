@@ -1,4 +1,8 @@
-"""40 existing designs, one identical solve each, CUDA vs CPU, per-design logging.
+"""LEGACY BENCH (see docs/throughput/RUNBOOK.md): runs the historical NON-production path unless
+HORNLAB_BENCH_FUSED=1 / HORNLAB_BENCH_SYMMETRY=yz+xz are set; use tools/bench/throughput_matrix.py for
+fused-production numbers. Julia hosts are no longer killed by image name (tools/bench/_hosts.py).
+
+40 existing designs, one identical solve each, CUDA vs CPU, per-design logging.
 
 Design set: 40 STORED designs (no CAD, no re-meshing), chosen deterministically:
   - 30 single-source designs stratified across the dof range (tags {1,2} -> drive tag 2)
@@ -74,9 +78,9 @@ class Peak:
         self._stop.set()
 
 
-def kill_hosts() -> None:
-    subprocess.run(["taskkill", "/F", "/IM", "julia.exe"], capture_output=True)
-    time.sleep(2)
+# WP0: the old `taskkill /F /IM julia.exe` killed every Julia process on the machine. This kills only
+# BEAT host trees this script started (tools/bench/_hosts.py); pre-existing hosts are reported, not killed.
+from _hosts import bench_solve_kwargs, kill_hosts  # noqa: E402,F401  (sibling module; scripts run as `python tools\\bench\\x.py`)
 
 
 def candidate_designs(limit: int) -> list[dict]:
@@ -119,7 +123,7 @@ def observation() -> ObservationConfig:
 
 def run_one(design: dict, backend: str) -> dict:
     tags = [2, 10] if 10 in design["tags"] else [2]
-    cfg = SolveConfig(velocity_sources={t: 1.0 for t in tags}, impedance_matrix=True,
+    cfg = SolveConfig(**bench_solve_kwargs(), velocity_sources={t: 1.0 for t in tags}, impedance_matrix=True,
                       beat_backend=backend, observation=observation())
     t0 = time.perf_counter()
     try:

@@ -1,4 +1,8 @@
-"""One brief + one mesh, the FULL contracted frequency grid, CUDA vs CPU, per-frequency timing.
+"""LEGACY BENCH (see docs/throughput/RUNBOOK.md): runs the historical NON-production path unless
+HORNLAB_BENCH_FUSED=1 / HORNLAB_BENCH_SYMMETRY=yz+xz are set; use tools/bench/throughput_matrix.py for
+fused-production numbers. Julia hosts are no longer killed by image name (tools/bench/_hosts.py).
+
+One brief + one mesh, the FULL contracted frequency grid, CUDA vs CPU, per-frequency timing.
 
 Fixed design: the T2 search config (`examples/typologies/meh_2026-10-30/meh_t2a_search.yaml`) -> its
 brief (`meh_home_90x60_t2`) and its seed mesh at the production screen settings. Frequencies come from
@@ -75,9 +79,9 @@ class Peak:
         self._stop.set()
 
 
-def kill_hosts() -> None:
-    subprocess.run(["taskkill", "/F", "/IM", "julia.exe"], capture_output=True)
-    time.sleep(2)
+# WP0: the old `taskkill /F /IM julia.exe` killed every Julia process on the machine. This kills only
+# BEAT host trees this script started (tools/bench/_hosts.py); pre-existing hosts are reported, not killed.
+from _hosts import bench_solve_kwargs, kill_hosts  # noqa: E402,F401  (sibling module; scripts run as `python tools\\bench\\x.py`)
 
 
 def build_production_mesh() -> tuple[Path, dict]:
@@ -107,7 +111,7 @@ def frequencies(config_path=CONFIG) -> list[float]:
 
 
 def one(mesh: Path, freq: float, backend: str) -> dict:
-    cfg = SolveConfig(velocity_sources={2: 1.0, 10: 1.0}, impedance_matrix=True,
+    cfg = SolveConfig(**bench_solve_kwargs(), velocity_sources={2: 1.0, 10: 1.0}, impedance_matrix=True,
                       beat_backend=backend,
                       observation=ObservationConfig(distance_m=2.0, angle_count=37,
                                                     planes=["horizontal", "vertical"]))

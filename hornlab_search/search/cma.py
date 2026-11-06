@@ -40,6 +40,7 @@ from ..solve import worker
 from ..targets.spec import Target
 from ..types import Evaluation
 from . import rundir
+from .pipeline import CandidatePipeline
 from .evaluate import (collect_lib_shas, error_kind, evaluate, make_context, read_ndjson)
 
 log = logging.getLogger("hornlab_search.search.cma")
@@ -337,6 +338,8 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
         state["best_no"] = next((r.get("n") for r in rows0 if r.get("design_hash") == b0.design_hash), None)
         rundir.write_best(run_dir, b0, mode, state["best_no"])
 
+    pipe = CandidatePipeline(cfg, mode, run_dir, ctx)      # inert unless pipeline_prefetch > 0
+
     def run_one(design) -> Evaluation:
         t0 = time.perf_counter()
         ev = evaluate(design, space, cfg, mode, run_dir, store, backend, ctx=ctx)
@@ -375,6 +378,8 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
         if best is not None:
             upd["best"] = {"design_hash": best.design_hash, "objective": best.objective,
                            "eval_no": state["best_no"]}
+        if pipe.enabled:                       # absent key => run.json schema stays today's
+            upd["pipeline_prefetch"] = pipe.stats()
         if restarts is not None:               # absent key => run.json schema stays exactly today's
             upd["restarts"] = restarts_log
         if cov is not None:                    # additive; older readers ignore the key
@@ -414,10 +419,21 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
                     return "cma: " + ", ".join(sorted(stop))
                 X = es_instance.ask()
                 F = []
-                for x in X:
-                    if exhausted():
-                        break
-                    F.append(run_one(space.denormalize(np.asarray(x))).objective)
+                if pipe.enabled:
+                    # WP2 (opt-in): same order, same run_one, same F; only mesh building of the
+                    # NEXT candidates moves onto a background worker while this one solves.
+                    designs = [space.denormalize(np.asarray(x)) for x in X]
+                    pipe.begin_generation(designs)
+                    for i, d in enumerate(designs):
+                        if exhausted():
+                            break
+                        pipe.before(i)
+                        F.append(run_one(d).objective)
+                else:
+                    for x in X:
+                        if exhausted():
+                            break
+                        F.append(run_one(space.denormalize(np.asarray(x))).objective)
                 if len(F) < len(X):           # budget ran out mid-generation: do not tell
                     return "budget"
                 es_instance.tell(X, F)
@@ -504,6 +520,7 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
         finish("aborted")
         raise
     finally:
+        pipe.close()
         _detach(backend)
     return state["best"]
 

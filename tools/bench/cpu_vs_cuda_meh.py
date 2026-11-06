@@ -1,4 +1,8 @@
-"""CUDA vs CPU for the MEH (multi-entry) solve, and CPU high-resolution feasibility.
+"""LEGACY BENCH (see docs/throughput/RUNBOOK.md): runs the historical NON-production path unless
+HORNLAB_BENCH_FUSED=1 / HORNLAB_BENCH_SYMMETRY=yz+xz are set; use tools/bench/throughput_matrix.py for
+fused-production numbers. Julia hosts are no longer killed by image name (tools/bench/_hosts.py).
+
+CUDA vs CPU for the MEH (multi-entry) solve, and CPU high-resolution feasibility.
 
 What this does NOT repeat (already measured, see TOOLCHAIN.md s"M4 cuda vs cpu" and
 docs/evidence/MEH_M8_2026-10-31.md): single-source cuda-vs-cpu timings, the bempp cross-check,
@@ -83,10 +87,9 @@ class VramPeak:
         self._stop.set()
 
 
-def kill_hosts() -> None:
-    """Clear BEAT hosts between arms; only julia carries our solves on this box."""
-    subprocess.run(["taskkill", "/F", "/IM", "julia.exe"], capture_output=True)
-    time.sleep(2)
+# WP0: the old `taskkill /F /IM julia.exe` killed every Julia process on the machine. This kills only
+# BEAT host trees this script started (tools/bench/_hosts.py); pre-existing hosts are reported, not killed.
+from _hosts import bench_solve_kwargs, kill_hosts  # noqa: E402,F401  (sibling module; scripts run as `python tools\\bench\\x.py`)
 
 
 def write_tetra(path: Path) -> Path:
@@ -113,7 +116,7 @@ def observation() -> ObservationConfig:
 
 
 def solve(mesh: Path, freqs, *, backend: str, tags, balloon=True):
-    cfg = SolveConfig(
+    cfg = SolveConfig(**bench_solve_kwargs(),
         velocity_sources={t: 1.0 for t in tags},
         impedance_matrix=True,
         beat_backend=backend,

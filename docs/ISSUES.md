@@ -18,6 +18,20 @@ Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 20
 | #11 | [Q] Collin: OK with the hornlab-search name? | closed (keep until objection) | user | `docs/plan/README.md` |
 | #13 | hardening-review: Stage A surrogate gate-integrity and real-data traps | **open — fixes MERGED to main** (FF to 6d1d5c7 on 2026-10-22 carries e0b9b61 + 11304f6 + cloud reconciliation 152a829 verbatim; oracle pre-merge sign-off; full offline suite 533 PASS at the merged tree; awaiting owner close) | phase-2 (cloud) | `docs/plan/11_PHASE2_SURROGATE.md` §4 |
 
+Local-only, added 2026-11-06 (**Boundary Lab A/B check on branch `ccr-80a29f93-dxnmdm`; no GitHub issue state changed**):
+- **Open (owner + friend, `docs/ab/BOUNDARY_LAB_AB.md`):** first real A/B of one design: `ab-bl demo --fake`, `export`, `solve --dry-run`, `solve --symmetric` on the GPU, friend runs Boundary Lab, `compare`. Plan ref `docs/BOUNDARY_LAB_INTEGRATION_PLAN.md` BL-1 / BL-2 (this is a file-interchange route; no BL code is imported).
+- **Open (needs the friend's first run):** the generated `.blab.json` opens in the BL GUI untouched; whether the Acoustic Impedance dock exports text; RMS vs peak pressure (3.01 dB); BL version actually used (source now pins BEAT Engine 0.7.0).
+- **Open (ruling):** ownership of the new `hornlab_search/compare/` package and its tests (`tests/test_compare_ab_*.py`); tolerances are starting points pending the first measured agreement.
+- **Constraint recorded:** the 8 GB RTX 4060 cannot solve a 20 kHz mesh (`TOOLCHAIN.md` ceilings), so full-band A/B means up to the highest frequency the exported mesh resolves; larger needs the CPU backend or a bigger GPU.
+
+Local-only, added 2026-11-04 (**throughput packet on branch `ccr-80a29f93-dxnmdm`; no GitHub issue state changed**):
+- **Open (owner GPU runs, `docs/throughput/RUNBOOK.md`):** baseline throughput matrix (WP0); WP2 prefetch on/off gate
+  (real-mesher main-thread behaviour unverified); WP5 batch-size A/B (1/2/4/12, then 41 if safe); WP4 curvature study +
+  converged-reference check; WP3 CPU+GPU concurrent pilot.
+- **Open (solver fork, not started):** WP1 skip of the unused GPU identity cache on fused CUDA
+  (`docs/throughput/WP1_FUSED_IDENTITY_CACHE_PATCH.md`, unverified against source lines).
+- **Not started:** WP6 multi-source fused CUDA / shared LU; WP7 report-only metric deferral (profile first).
+
 Local-only, added 2026-11-01 (**PR #17 merged to main + the hardware-neutrality rule; no GitHub issue state changed**):
 - **Merged (squash):** Metal backend + Mac path, Hansen budget hint, staged A/B harness, CMA
   covariance dump, CMA pin plan, restart controls (jamescollinharky's PR #17). Two merge defects

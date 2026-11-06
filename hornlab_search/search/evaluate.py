@@ -37,6 +37,7 @@ from pathlib import Path
 import numpy as np
 
 from .. import config as config_mod
+from .. import profiling
 from ..dataset.record import DEFAULT_TRACE_FRACTION, build_record, should_capture_traces, to_jsonable
 from ..design import families
 from ..design.generators.registry import GeneratorError
@@ -748,9 +749,11 @@ def evaluate(design: Design, space, cfg, mode: str, run_dir, store, backend, *,
     st: dict = {"mesh": None, "outcome": None, "resp": None, "metrics": None, "kind": "", "err": "",
                 "from_disk": False, "area": None, "grid": None, "cad": None, "raw_traces": None,
                 "J": None, "terms": None}
+    tm = profiling.begin(design_dir, dh, key)    # WP0: None unless HORNLAB_STAGE_TIMING=1
     try:
         _compute(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx, st)
     except MeshConsistencyError:
+        profiling.end(tm)
         raise                                   # units / symmetry bug: stop the run (section 15)
     except Exception as exc:  # noqa: BLE001 - the contract: any unexpected exception is a penalty row
         st["kind"], st["err"] = KIND_EXC, f"{type(exc).__name__}: {exc}\n{traceback.format_exc()}"
@@ -788,9 +791,13 @@ def evaluate(design: Design, space, cfg, mode: str, run_dir, store, backend, *,
                "solve": 0.0 if (outcome is None or st["from_disk"]) else float(outcome.seconds),
                "total": time.perf_counter() - t_start}
     try:
-        _persist(ev, mode, sspec, design_dir, ctx, store, st, seconds)
+        with profiling.stage("persist"):
+            _persist(ev, mode, sspec, design_dir, ctx, store, st, seconds)
     except Exception:  # noqa: BLE001 - bookkeeping must not kill a search
         log.error("persisting evaluation %s failed:\n%s", dh, traceback.format_exc()[:2000])
+    profiling.record("candidate_total", seconds["total"], cached=bool(ev.cached),
+                     kind=kind or None)
+    profiling.end(tm)
 
     ctx.counters["cache_hits_disk" if ev.cached else "evaluated"] += 1
     if kind:
@@ -801,6 +808,60 @@ def evaluate(design: Design, space, cfg, mode: str, run_dir, store, backend, *,
              seconds["mesh"], seconds["solve"], None if mesh is None else mesh.n_dof, ev.cached,
              f" FAILED[{kind}]" if kind else "")
     return ev
+
+
+PREFETCH_ENV = "HORNLAB_PIPELINE_PREFETCH"
+
+
+def prefetch_depth(cfg) -> int:
+    """WP2: how many candidates ahead to pre-build meshes. ``HORNLAB_PIPELINE_PREFETCH`` (env)
+    wins over ``search.pipeline_prefetch`` (config); both default to 0 = today's serial loop."""
+    raw = os.environ.get(PREFETCH_ENV)
+    if raw is not None and str(raw).strip() != "":
+        try:
+            return max(0, int(raw))
+        except ValueError:
+            log.warning("%s=%r is not an integer; ignored", PREFETCH_ENV, raw)
+    return max(0, int(getattr(getattr(cfg, "search", None), "pipeline_prefetch", 0) or 0))
+
+
+def prefetch_candidate(design: Design, cfg, mode: str, run_dir, ctx: EvalContext) -> bool:
+    """WP2 worker body: build ``design``'s mesh ahead of ``evaluate`` and park it for pickup.
+
+    Safe off-thread: it reads ``ctx`` but never writes it, and writes only the candidate's own
+    ``designs/<hash>/`` mesh files. Returns True when a mesh was parked. Candidates that need no
+    mesh or several (run-known, failure-marked, generator error, band-split) return False and the
+    evaluator does its normal work. Any exception propagates to the prefetcher, which swallows it.
+    """
+    from ..mesh import prefetch as mesh_prefetch
+    from ..mesh.build import prebuilt_key
+    from ..design.generated import GENERATOR_ERROR_KEY
+    run_dir = Path(run_dir).resolve()
+    mspec = config_mod.mesh_spec(mode, cfg)
+    sspec = config_mod.solve_spec(mode, cfg)
+    meh = meh_block_of(cfg)
+    if meh is not None:
+        sspec = _with_meh_source_tags(sspec, meh)
+    elif band_split_of(cfg) is not None:
+        return False                              # several meshes per candidate: not prefetched
+    dh, mh, sh = design.hash(), mspec.hash(), sspec.hash()
+    mkey = families.mounting_key(mounting_of(cfg))
+    key = f"{dh}-{mh}-{sh}" + (f"-{mkey}" if mkey else "")
+    if key in ctx.known or GENERATOR_ERROR_KEY in design.params:
+        return False
+    marker = _failure_marker(ctx, key)
+    if marker is not None and marker.exists():
+        return False
+    design_dir = run_dir / "designs" / dh
+    tm = profiling.begin(design_dir, dh, key)
+    try:
+        with profiling.stage("mesh_prefetch"):
+            mesh = build_mesh(design, mspec, cfg, design_dir, mode=mode,
+                              cache_dir=ctx.mesh_cache_root)
+    finally:
+        profiling.end(tm)
+    mesh_prefetch.put(prebuilt_key(design, mspec, cfg, design_dir, mode), mesh)
+    return True
 
 
 def _failure_penalty(kind: str, design: Design, cfg) -> float:
@@ -1098,7 +1159,9 @@ def _compute_meh(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx,
     brief = getattr(cfg, "brief", None)
 
     try:
-        mesh = build_mesh(design, mspec, cfg, design_dir, mode=mode, cache_dir=ctx.mesh_cache_root)
+        with profiling.stage("mesh_build"):
+            mesh = build_mesh(design, mspec, cfg, design_dir, mode=mode,
+                              cache_dir=ctx.mesh_cache_root)
     except GeometryInvalidError as exc:
         st["kind"], st["err"] = KIND_INVALID, str(exc)
         return
@@ -1125,8 +1188,11 @@ def _compute_meh(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx,
             st["from_disk"] = True
             st["outcome"] = SolveOutcome(True, resp, 0.0, None, "cache hit")
     if resp is None:
-        outcome = backend.solve(mesh, sspec)
+        with profiling.stage("solve"):
+            outcome = backend.solve(mesh, sspec)
         st["outcome"] = outcome
+        if outcome.ok and outcome.response is not None:
+            profiling.record("solver_path", 0.0, **profiling.solver_path_meta(outcome.response))
         if not outcome.ok or outcome.response is None:
             st["kind"], st["err"] = KIND_SOLVE, outcome.message or "solve failed"
             log.error("MEH solve failed for %s: %s", design.hash(), st["err"][:2000])
@@ -1155,8 +1221,10 @@ def _compute_meh(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx,
     layout, derived = _meh_layout(design, cad)
     params = getattr(ctx, "objective_params", None)
     score = inner_score if params is None else functools.partial(inner_score, params=params)
-    solution = optimise_network(resp, layout, brief, drivers, score=score)
-    system = system_response(resp, solution)
+    with profiling.stage("meh_inner_optimize"):
+        solution = optimise_network(resp, layout, brief, drivers, score=score)
+    with profiling.stage("meh_system_response"):
+        system = system_response(resp, solution)
 
     # The synthesised balloon is on the BEM theta-phi sphere grid. Carry that fact into the
     # metrics so metrics_from_response applies its sin(theta) quadrature (C4/C11) instead of
@@ -1166,7 +1234,8 @@ def _compute_meh(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx,
         system.meta["balloon_grid"] = grid_meta
 
     try:
-        st["metrics"] = metrics_from_response(system, ctx.target, mesh=mesh, design=design)
+        with profiling.stage("metrics"):
+            st["metrics"] = metrics_from_response(system, ctx.target, mesh=mesh, design=design)
     except Exception as exc:  # noqa: BLE001
         st["kind"], st["err"] = KIND_METRICS, f"{type(exc).__name__}: {exc}\n{traceback.format_exc()}"
         return
@@ -1175,7 +1244,8 @@ def _compute_meh(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx,
         st["metrics"].scalars["throat_angle_mismatch_deg"] = mismatch
 
     meh_ctx = _meh_ctx(system, solution, block, ctx.target)
-    st["J"], st["terms"] = _score(st["metrics"], system, ctx, meh_ctx=meh_ctx)
+    with profiling.stage("score"):
+        st["J"], st["terms"] = _score(st["metrics"], system, ctx, meh_ctx=meh_ctx)
     st["network_solution"] = solution.to_dict()
     st["meh_layout"] = {"derived": derived, "recipe": dict((cad or {}).get("recipe") or {})}
 
@@ -1183,8 +1253,9 @@ def _compute_meh(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx,
         # The cache holds the BEM response (not the synthesised one): re-scoring with a new
         # brief re-runs the CPU inner loop on it without another solve.
         try:
-            solve_cache.store(key, root, resp, {"ok": True, "objective": st["J"],
-                                                "n_dof": resp.n_dof, "mode": mode})
+            with profiling.stage("cache_store"):
+                solve_cache.store(key, root, resp, {"ok": True, "objective": st["J"],
+                                                    "n_dof": resp.n_dof, "mode": mode})
         except Exception as exc:  # noqa: BLE001
             log.warning("MEH solve cache write failed for %s: %s", key, exc)
 
@@ -1224,7 +1295,9 @@ def _compute(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx, st)
         _compute_band_split(design, cfg, mode, mspec, sspec, design_dir, backend, ctx, st)
         return
     try:
-        mesh = build_mesh(design, mspec, cfg, design_dir, mode=mode, cache_dir=ctx.mesh_cache_root)
+        with profiling.stage("mesh_build"):
+            mesh = build_mesh(design, mspec, cfg, design_dir, mode=mode,
+                              cache_dir=ctx.mesh_cache_root)
     except GeometryInvalidError as exc:
         st["kind"], st["err"] = KIND_INVALID, str(exc)
         return
@@ -1256,12 +1329,15 @@ def _compute(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx, st)
             st["outcome"] = SolveOutcome(True, resp, 0.0, None, "cache hit")
     if resp is None:
         want_traces = (store_wants_traces(ctx, design) and hasattr(backend, "solve_traced"))
-        if want_traces:
-            outcome, raw = backend.solve_traced(mesh, sspec)
-            st["raw_traces"] = raw
-        else:
-            outcome = backend.solve(mesh, sspec)
+        with profiling.stage("solve", traced=bool(want_traces)):
+            if want_traces:
+                outcome, raw = backend.solve_traced(mesh, sspec)
+                st["raw_traces"] = raw
+            else:
+                outcome = backend.solve(mesh, sspec)
         st["outcome"] = outcome
+        if outcome.ok and outcome.response is not None:
+            profiling.record("solver_path", 0.0, **profiling.solver_path_meta(outcome.response))
         if not outcome.ok or outcome.response is None:
             st["kind"], st["err"] = KIND_SOLVE, outcome.message or "solve failed"
             log.error("solve failed for %s: %s", design.hash(), st["err"][:2000])
@@ -1271,7 +1347,8 @@ def _compute(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx, st)
     if resp.n_dof is not None:
         mesh.n_dof = int(resp.n_dof)
     try:
-        st["metrics"] = metrics_from_response(resp, ctx.target, mesh=mesh, design=design)
+        with profiling.stage("metrics"):
+            st["metrics"] = metrics_from_response(resp, ctx.target, mesh=mesh, design=design)
     except Exception as exc:  # noqa: BLE001
         st["kind"], st["err"] = KIND_METRICS, f"{type(exc).__name__}: {exc}\n{traceback.format_exc()}"
         return
@@ -1280,11 +1357,13 @@ def _compute(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx, st)
     if mismatch is not None:
         # WP2 report-only scalar (senior pass 2026-10-24): never weighted, never fails a solve.
         st["metrics"].scalars["throat_angle_mismatch_deg"] = mismatch
-    st["J"], st["terms"] = _score(st["metrics"], st["resp"], ctx)
+    with profiling.stage("score"):
+        st["J"], st["terms"] = _score(st["metrics"], st["resp"], ctx)
     if root is not None and not st["from_disk"]:
         try:
-            solve_cache.store(key, root, resp, {"ok": True, "objective": st["J"],
-                                                "n_dof": resp.n_dof, "mode": mode})
+            with profiling.stage("cache_store"):
+                solve_cache.store(key, root, resp, {"ok": True, "objective": st["J"],
+                                                    "n_dof": resp.n_dof, "mode": mode})
         except Exception as exc:  # noqa: BLE001 - a cache write failure is not a failed candidate
             log.warning("solve cache write failed for %s: %s", key, exc)
 

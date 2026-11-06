@@ -8,6 +8,7 @@ the typed DesignSpace and Target from `bounds_raw` and `target_raw`.
 from __future__ import annotations
 
 import logging
+import math
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -62,6 +63,8 @@ class MeshSettings:
     max_triangle_slack: float = 1.15
     rear_res_factor: float = 1.0       # WP7: scale ONLY the outer shell/rear-cap resolution
     band_split: dict | None = None     # WP8: {"edges_hz": [...]} -> one mesh per band (absent = today)
+    curvature_npts: float = 0.0        # WP4 (throughput): Gmsh Mesh.MeshSizeFromCurvature for the CAD
+                                       # route; 0 = off = today's meshes and hashes exactly
 
     def dof_cap(self, mode: str) -> int:
         return int(getattr(self, f"dof_cap_{mode}"))
@@ -110,6 +113,7 @@ class SearchSettings:
     infeasible_penalty: str = "flat"   # WP3: 'flat' (default, today) | 'graded'
     restarts: dict | None = None       # WP11a: {"mode": ipop|bipop, "max": N} (absent = today)
     qd: dict | None = None             # WP11b: CMA-ME descriptors/bins (absent = today)
+    pipeline_prefetch: int = 0         # WP2: build this many candidates' meshes ahead (0 = serial, today)
 
 
 @dataclass
@@ -965,7 +969,7 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
         raw = _brief_preflight_and_derive(raw, brief_d, where)
 
     mesh = _build(MeshSettings, _require(raw, "mesh", where), f"{where}:mesh",
-                  optional=("max_triangle_slack", "rear_res_factor", "band_split"))
+                  optional=("max_triangle_slack", "rear_res_factor", "band_split", "curvature_npts"))
     solve_section = dict(_require(raw, "solve", where))
     if solve_section.get("freq_grid") is not None:
         _validate_freq_grid(solve_section["freq_grid"], f"{where}:solve")
@@ -986,6 +990,14 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
         raise ConfigError(f"{where}: solve.cuda_fused is only implemented for backend: beat_cuda "
                           f"(got {solve.backend!r})")
     mesh.rear_res_factor = _validate_rear_res_factor(mesh.rear_res_factor, f"{where}:mesh")
+    try:
+        mesh.curvature_npts = float(mesh.curvature_npts)
+        _cn_ok = math.isfinite(mesh.curvature_npts) and 0.0 <= mesh.curvature_npts <= 100.0
+    except (TypeError, ValueError):
+        _cn_ok = False
+    if not _cn_ok:
+        raise ConfigError(f"{where}:mesh: curvature_npts must be a number in [0, 100] "
+                          f"(0 = off, 8-20 typical), got {mesh.curvature_npts!r}")
     if mesh.band_split is not None:                    # absent = today, no target keys touched
         try:
             band_lo = float(raw["target"]["band_lo_hz"])
@@ -998,7 +1010,7 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
     _validate_near_correction(solve, f"{where}:solve")
     _validate_source_profile_alpha(solve, f"{where}:solve")
     search = _build(SearchSettings, _require(raw, "search", where), f"{where}:search",
-                    optional=("popsize", "infeasible_penalty", "restarts", "qd"))
+                    optional=("popsize", "infeasible_penalty", "restarts", "qd", "pipeline_prefetch"))
     if "popsize" not in raw["search"]:
         search.popsize = None
     if search.infeasible_penalty not in ("flat", "graded"):
@@ -1007,6 +1019,13 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
     if search.algorithm not in SEARCH_ALGORITHMS:
         raise ConfigError(f"{where}: search.algorithm must be one of {list(SEARCH_ALGORITHMS)}, "
                           f"got {search.algorithm!r}")
+    try:
+        search.pipeline_prefetch = int(search.pipeline_prefetch)
+    except (TypeError, ValueError):
+        raise ConfigError(f"{where}:search: pipeline_prefetch must be an integer >= 0") from None
+    if search.pipeline_prefetch < 0:
+        raise ConfigError(f"{where}:search: pipeline_prefetch must be >= 0 (got "
+                          f"{search.pipeline_prefetch})")
     search.restarts = _validate_restarts(search.restarts, f"{where}:search.restarts")
     search.qd = _validate_qd(search.qd, f"{where}:search.qd")
     if search.algorithm == "cma_me":
@@ -1145,6 +1164,7 @@ def mesh_spec(mode: Mode, cfg: Config) -> MeshSpec:
         quadrants=cfg.mesh.quadrants,
         max_triangles=max_tri,
         allow_large_mesh=False,
+        curvature_npts=float(getattr(cfg.mesh, "curvature_npts", 0.0) or 0.0),
     )
 
 
