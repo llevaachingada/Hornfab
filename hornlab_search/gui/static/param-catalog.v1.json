@@ -10675,6 +10675,566 @@
       "source_status": "catalog",
       "symmetry": "axisymmetric"
     },
+    "meh_t1_search": {
+      "bounds_index": {
+        "across_frac": {
+          "file": "examples/typologies/meh_2026-10-30/meh_t1_search.yaml",
+          "hi": 0.9,
+          "key": "bounds.across_frac",
+          "lo": 0.35,
+          "log": false,
+          "search": true
+        },
+        "cov_h_deg": {
+          "file": "examples/typologies/meh_2026-10-30/meh_t1_search.yaml",
+          "hi": 95,
+          "key": "bounds.cov_h_deg",
+          "lo": 75,
+          "log": false,
+          "search": true
+        },
+        "cov_v_deg": {
+          "file": "examples/typologies/meh_2026-10-30/meh_t1_search.yaml",
+          "hi": 80,
+          "key": "bounds.cov_v_deg",
+          "lo": 50,
+          "log": false,
+          "search": true
+        },
+        "port_along_mm": {
+          "file": "examples/typologies/meh_2026-10-30/meh_t1_search.yaml",
+          "hi": 35,
+          "key": "bounds.port_along_mm",
+          "lo": 12,
+          "log": false,
+          "search": true
+        },
+        "slide_mm": {
+          "file": "examples/typologies/meh_2026-10-30/meh_t1_search.yaml",
+          "hi": 40,
+          "key": "bounds.slide_mm",
+          "lo": -10,
+          "log": false,
+          "search": true
+        },
+        "z_frac": {
+          "file": "examples/typologies/meh_2026-10-30/meh_t1_search.yaml",
+          "hi": 0.6,
+          "key": "bounds.z_frac",
+          "lo": 0.0,
+          "log": false,
+          "search": true
+        }
+      },
+      "brief_file": "examples/briefs/meh_2026-10-30/meh_home_90x60_t1.yaml",
+      "brief_tied": null,
+      "config_path": "examples/typologies/meh_2026-10-30/meh_t1_search.yaml",
+      "description": "MEH T1 SEARCHABLE - same generator and grid, T1 seed (slide 14 mm after the CAD repair)",
+      "documented": true,
+      "driver_exit_mm": null,
+      "empty_reason": null,
+      "family": "FREEFORM",
+      "group": "meh",
+      "kind": "generator",
+      "knob_names": [
+        "across_frac",
+        "cov_h_deg",
+        "cov_v_deg",
+        "port_along_mm",
+        "slide_mm",
+        "z_frac"
+      ],
+      "knobs": [
+        {
+          "base_knob": "across_frac",
+          "bounds_source": null,
+          "code_ref": null,
+          "context": "generators",
+          "contexts": [],
+          "default": null,
+          "default_source": null,
+          "detail": "This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.",
+          "doc_ref": null,
+          "documented": false,
+          "flags": [
+            "deferred"
+          ],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "not a mesher family key; there is no hard schema clamp for this name",
+            "section": null,
+            "source": null
+          },
+          "knob": "across_frac",
+          "label": "across_frac",
+          "physical": "Not documented in this layer.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "No documentation authored for this knob name yet.",
+          "unit": null
+        },
+        {
+          "base_knob": "cov_h_deg",
+          "bounds_source": null,
+          "code_ref": null,
+          "context": "generators",
+          "contexts": [],
+          "default": null,
+          "default_source": null,
+          "detail": "This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.",
+          "doc_ref": null,
+          "documented": false,
+          "flags": [
+            "deferred"
+          ],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "not a mesher family key; there is no hard schema clamp for this name",
+            "section": null,
+            "source": null
+          },
+          "knob": "cov_h_deg",
+          "label": "cov_h_deg",
+          "physical": "Not documented in this layer.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "No documentation authored for this knob name yet.",
+          "unit": null
+        },
+        {
+          "base_knob": "cov_v_deg",
+          "bounds_source": null,
+          "code_ref": null,
+          "context": "generators",
+          "contexts": [],
+          "default": null,
+          "default_source": null,
+          "detail": "This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.",
+          "doc_ref": null,
+          "documented": false,
+          "flags": [
+            "deferred"
+          ],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "not a mesher family key; there is no hard schema clamp for this name",
+            "section": null,
+            "source": null
+          },
+          "knob": "cov_v_deg",
+          "label": "cov_v_deg",
+          "physical": "Not documented in this layer.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "No documentation authored for this knob name yet.",
+          "unit": null
+        },
+        {
+          "base_knob": "port_along_mm",
+          "bounds_source": null,
+          "code_ref": null,
+          "context": "generators",
+          "contexts": [],
+          "default": null,
+          "default_source": null,
+          "detail": "This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.",
+          "doc_ref": null,
+          "documented": false,
+          "flags": [
+            "deferred"
+          ],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "not a mesher family key; there is no hard schema clamp for this name",
+            "section": null,
+            "source": null
+          },
+          "knob": "port_along_mm",
+          "label": "port_along_mm",
+          "physical": "Not documented in this layer.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "No documentation authored for this knob name yet.",
+          "unit": null
+        },
+        {
+          "base_knob": "slide_mm",
+          "bounds_source": null,
+          "code_ref": null,
+          "context": "generators",
+          "contexts": [],
+          "default": null,
+          "default_source": null,
+          "detail": "This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.",
+          "doc_ref": null,
+          "documented": false,
+          "flags": [
+            "deferred"
+          ],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "not a mesher family key; there is no hard schema clamp for this name",
+            "section": null,
+            "source": null
+          },
+          "knob": "slide_mm",
+          "label": "slide_mm",
+          "physical": "Not documented in this layer.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "No documentation authored for this knob name yet.",
+          "unit": null
+        },
+        {
+          "base_knob": "z_frac",
+          "bounds_source": null,
+          "code_ref": null,
+          "context": "generators",
+          "contexts": [],
+          "default": null,
+          "default_source": null,
+          "detail": "This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.",
+          "doc_ref": null,
+          "documented": false,
+          "flags": [
+            "deferred"
+          ],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "not a mesher family key; there is no hard schema clamp for this name",
+            "section": null,
+            "source": null
+          },
+          "knob": "z_frac",
+          "label": "z_frac",
+          "physical": "Not documented in this layer.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "No documentation authored for this knob name yet.",
+          "unit": null
+        }
+      ],
+      "name": "meh_t1_search",
+      "non_native_keys": [],
+      "source_status": "catalog",
+      "symmetry": "hv"
+    },
+    "meh_t2a_search": {
+      "bounds_index": {
+        "across_frac": {
+          "file": "examples/typologies/meh_2026-10-30/meh_t2a_search.yaml",
+          "hi": 0.9,
+          "key": "bounds.across_frac",
+          "lo": 0.35,
+          "log": false,
+          "search": true
+        },
+        "cov_h_deg": {
+          "file": "examples/typologies/meh_2026-10-30/meh_t2a_search.yaml",
+          "hi": 95,
+          "key": "bounds.cov_h_deg",
+          "lo": 75,
+          "log": false,
+          "search": true
+        },
+        "cov_v_deg": {
+          "file": "examples/typologies/meh_2026-10-30/meh_t2a_search.yaml",
+          "hi": 80,
+          "key": "bounds.cov_v_deg",
+          "lo": 50,
+          "log": false,
+          "search": true
+        },
+        "port_along_mm": {
+          "file": "examples/typologies/meh_2026-10-30/meh_t2a_search.yaml",
+          "hi": 35,
+          "key": "bounds.port_along_mm",
+          "lo": 12,
+          "log": false,
+          "search": true
+        },
+        "slide_mm": {
+          "file": "examples/typologies/meh_2026-10-30/meh_t2a_search.yaml",
+          "hi": 40,
+          "key": "bounds.slide_mm",
+          "lo": -10,
+          "log": false,
+          "search": true
+        },
+        "z_frac": {
+          "file": "examples/typologies/meh_2026-10-30/meh_t2a_search.yaml",
+          "hi": 0.7,
+          "key": "bounds.z_frac",
+          "lo": 0.0,
+          "log": false,
+          "search": true
+        }
+      },
+      "brief_file": "examples/briefs/meh_2026-10-30/meh_home_90x60_t2.yaml",
+      "brief_tied": null,
+      "config_path": "examples/typologies/meh_2026-10-30/meh_t2a_search.yaml",
+      "description": "MEH T2-A SEARCHABLE - generator meh, six layout knobs, 120 Hz-12 kHz 1/6-octave grid, screen cap 8200 dofs",
+      "documented": true,
+      "driver_exit_mm": null,
+      "empty_reason": null,
+      "family": "FREEFORM",
+      "group": "meh",
+      "kind": "generator",
+      "knob_names": [
+        "across_frac",
+        "cov_h_deg",
+        "cov_v_deg",
+        "port_along_mm",
+        "slide_mm",
+        "z_frac"
+      ],
+      "knobs": [
+        {
+          "base_knob": "across_frac",
+          "bounds_source": null,
+          "code_ref": null,
+          "context": "generators",
+          "contexts": [],
+          "default": null,
+          "default_source": null,
+          "detail": "This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.",
+          "doc_ref": null,
+          "documented": false,
+          "flags": [
+            "deferred"
+          ],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "not a mesher family key; there is no hard schema clamp for this name",
+            "section": null,
+            "source": null
+          },
+          "knob": "across_frac",
+          "label": "across_frac",
+          "physical": "Not documented in this layer.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "No documentation authored for this knob name yet.",
+          "unit": null
+        },
+        {
+          "base_knob": "cov_h_deg",
+          "bounds_source": null,
+          "code_ref": null,
+          "context": "generators",
+          "contexts": [],
+          "default": null,
+          "default_source": null,
+          "detail": "This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.",
+          "doc_ref": null,
+          "documented": false,
+          "flags": [
+            "deferred"
+          ],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "not a mesher family key; there is no hard schema clamp for this name",
+            "section": null,
+            "source": null
+          },
+          "knob": "cov_h_deg",
+          "label": "cov_h_deg",
+          "physical": "Not documented in this layer.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "No documentation authored for this knob name yet.",
+          "unit": null
+        },
+        {
+          "base_knob": "cov_v_deg",
+          "bounds_source": null,
+          "code_ref": null,
+          "context": "generators",
+          "contexts": [],
+          "default": null,
+          "default_source": null,
+          "detail": "This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.",
+          "doc_ref": null,
+          "documented": false,
+          "flags": [
+            "deferred"
+          ],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "not a mesher family key; there is no hard schema clamp for this name",
+            "section": null,
+            "source": null
+          },
+          "knob": "cov_v_deg",
+          "label": "cov_v_deg",
+          "physical": "Not documented in this layer.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "No documentation authored for this knob name yet.",
+          "unit": null
+        },
+        {
+          "base_knob": "port_along_mm",
+          "bounds_source": null,
+          "code_ref": null,
+          "context": "generators",
+          "contexts": [],
+          "default": null,
+          "default_source": null,
+          "detail": "This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.",
+          "doc_ref": null,
+          "documented": false,
+          "flags": [
+            "deferred"
+          ],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "not a mesher family key; there is no hard schema clamp for this name",
+            "section": null,
+            "source": null
+          },
+          "knob": "port_along_mm",
+          "label": "port_along_mm",
+          "physical": "Not documented in this layer.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "No documentation authored for this knob name yet.",
+          "unit": null
+        },
+        {
+          "base_knob": "slide_mm",
+          "bounds_source": null,
+          "code_ref": null,
+          "context": "generators",
+          "contexts": [],
+          "default": null,
+          "default_source": null,
+          "detail": "This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.",
+          "doc_ref": null,
+          "documented": false,
+          "flags": [
+            "deferred"
+          ],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "not a mesher family key; there is no hard schema clamp for this name",
+            "section": null,
+            "source": null
+          },
+          "knob": "slide_mm",
+          "label": "slide_mm",
+          "physical": "Not documented in this layer.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "No documentation authored for this knob name yet.",
+          "unit": null
+        },
+        {
+          "base_knob": "z_frac",
+          "bounds_source": null,
+          "code_ref": null,
+          "context": "generators",
+          "contexts": [],
+          "default": null,
+          "default_source": null,
+          "detail": "This name was found in a config but has no authored entry in the current parameter layer. It is reported rather than guessed.",
+          "doc_ref": null,
+          "documented": false,
+          "flags": [
+            "deferred"
+          ],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "not a mesher family key; there is no hard schema clamp for this name",
+            "section": null,
+            "source": null
+          },
+          "knob": "z_frac",
+          "label": "z_frac",
+          "physical": "Not documented in this layer.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "No documentation authored for this knob name yet.",
+          "unit": null
+        }
+      ],
+      "name": "meh_t2a_search",
+      "non_native_keys": [],
+      "source_status": "catalog",
+      "symmetry": "hv"
+    },
     "multicell_3x3": {
       "bounds_index": {},
       "brief_file": null,
