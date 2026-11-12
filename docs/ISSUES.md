@@ -9,6 +9,12 @@ Local-only, added 2026-11-12 (**day plan group G: objective v8 PROPOSAL; no GitH
   v4/v6/v7 = 0.683/0.792/0.668, top-20 overlap 13/11/12 of 20 on 400 stored rows. Owner sign-off
   required; an A/B night (>=5 seeds per class) must precede any brief switch. 39 targeted tests green.
 
+Local-only, added 2026-11-12 (**test-suite efficiency review; proposal only, no GitHub issue state changed**):
+- `docs/research/TEST_SUITE_EFFICIENCY_2026-11-12.md`: measured suite/churn (2706 tests/588 s local;
+  122 CI runs + 824 run-minutes today; 24 tests = 51% of suite time) and proposals R1-R8 (single CI
+  trigger + main, pip cache, docs-only fast lane, `slow`-marking heavy integration tests, CI-as-gate,
+  required checks, optional xdist, GPU smoke-vs-full ladder). Owner decides; nothing applied.
+
 Local-only, added 2026-11-12 (**day plan group E merge, PR #36; no GitHub issue state changed**):
 - E.1 `#/analysis` page + `/api/analysis` routes (renders Group A outputs read-only; new
   `gui --analysis-dir` flag); E.2 home lanes panel via `GET /api/lanes` (local duplicate of D.1,
