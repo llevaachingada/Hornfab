@@ -760,17 +760,25 @@ assert.equal(typeof f0KpiHtml, "function");
 assert.equal(typeof mountingRankWarnHtml, "function");
 assert.equal(typeof seedDerivationHtml, "function");
 
-// 1. objective select: exactly three options, value 3 present, honest v3 description
+// 1. objective select: exactly seven options with the objective package's own names
 const opts1 = objectiveVersionOptionsHtml(1);
-assert.equal((opts1.match(/<option /g) || []).length, 3);
-for (const v of ["1", "2", "3"]) assert.ok(opts1.includes(`value="${v}"`), v);
-assert.ok(opts1.includes("scoring floor f0"), opts1);
-assert.ok(opts1.includes("cov + dislope score only f ≥ f0"), opts1);
+assert.equal((opts1.match(/<option /g) || []).length, 7);
+for (const v of ["1", "2", "3", "4", "5", "6", "7"]) assert.ok(opts1.includes(`value="${v}"`), v);
+// The option builder HTML-escapes its labels; the apostrophe in Le Cléac'h is &#39; in the source
+// and decodes to the exact requested label in the browser.
+const VERSION_LABELS = [
+  "v1 legacy", "v2 detrended", "v3 below-f0 mask", "v4 tolerance-normalised",
+  "v5 MEH system", "v6 loading_smooth (Le Cléac&#39;h)", "v7 loading + CD gates (hi-fi/PA)",
+];
+for (const label of VERSION_LABELS) assert.ok(opts1.includes(label), label);
 assert.match(opts1, /value="1" selected/);            // an existing v1 brief still selects 1
 assert.ok(!/value="3" selected/.test(opts1));
 const opts3 = objectiveVersionOptionsHtml(3);
 assert.match(opts3, /value="3" selected/);            // a v3 brief selects 3
 assert.ok(!/value="1" selected/.test(opts3));
+const opts7 = objectiveVersionOptionsHtml(7);
+assert.match(opts7, /value="7" selected/);
+assert.ok(!/value="6" selected/.test(opts7));
 
 // 2. scoring-floor KPI: nothing without f0; the fmtHz floor + the honest title with f0
 assert.equal(f0KpiHtml({}), "");
@@ -840,8 +848,9 @@ console.log("S1A OK");
 
 
 def test_s1a_helpers_behave_offline(tmp_path):
-    """Executes the objective-v3 surfaces' pure builders for real: the three-option objective select
-    (value 3 + honest floor-f0 description), the f0 KPI (nothing without f0, fmtHz floor with it),
+    """Executes the objective-v3 surfaces' pure builders for real: the seven-option objective select
+    (v1-v7 with exact package labels, the default still v1), the f0 KPI (nothing without f0, fmtHz
+    floor with it),
     the mounting rank warn (only on mixed_keys mounting), and the seed-derivation card (nothing
     without feasibility.derivation, knob/derived/applied/clamp rows, below-f0 counts, honest
     dashes/notes for the entries with no target)."""
@@ -864,7 +873,8 @@ def test_s1a_views_are_wired():
     # task 1: ONE editor select in app.js (the wizard mounts showBriefDetail, it does not copy it)
     assert src.count('id="brf-obj"') == 1
     assert "objectiveVersionOptionsHtml(objVer)" in src
-    assert "3 additionally masks everything below the brief's scoring floor f0 (target.f0_hz)" in src
+    assert "v3 masks everything below the brief's scoring floor f0 (target.f0_hz)" in src
+    assert "v7 loading + CD gates (hi-fi/PA)" in src
     assert 'objective: { version: +document.getElementById("brf-obj").value },' in src   # save path unchanged
     # task 1: the new-brief draft default stays v1
     assert 'symmetry: "hv", objective_version: 1, verify_only: false,' in src
