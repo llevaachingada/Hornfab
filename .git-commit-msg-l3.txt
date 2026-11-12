@@ -1,0 +1,28 @@
+feat(solve): lane-aware BEAT host cleanup keyed on the worker registry dir (two-lane night)
+
+Decisions 2/3/5 of the 2026-11-12 two-lane night, one classifier for every
+cleanup path:
+
+- solve/worker: lane identity derives from the registry dir shape
+  .../<lane>/workers that HORNLAB_BEAT_WORKER_DIR carries; a host is
+  attributed to a lane by the --dir registry on its own command line.
+  clear_stale_hosts/recover_after_failure/shutdown take lane= (default:
+  our env), kill ONLY same-lane host trees, log every unknown-lane host
+  as "unknown host, left alone" and never kill it, and skip hosts of a
+  lane whose lock (runs/.gpu.lock or runs/.cpu.lane.lock) is held by a
+  live OTHER process - the holder of OUR lane's lock is this lane's
+  authority, so our own cleanup always runs. Without a lane the
+  historical clear-all behaviour is preserved. Tree walk is per-target
+  (multi-lane tables), not one shared tree.
+- search/hygiene.clear_julia: same lane rule for the keyword-filtered
+  Julia list; force= preserves the kill-through-live-lock escape for the
+  caller's lane only.
+- start_beat_worker forwards julia_threads to warm_up so the persistent
+  host is keyed on the same thread count as SolveConfig (H9: a mismatch
+  silently spawns a second host); absent = the library's "auto" exactly
+  as before.
+- tests: classifier on fake process tables (lane filtering/unknown
+  host/other-lane live lock/own-lane live lock/shutdown/recover), and
+  the hygiene lane rule incl. the gpu-clean-as-subprocess reentrancy.
+
+Co-Authored-By: glm-5.3-flash <noreply@ollama-cloud>
