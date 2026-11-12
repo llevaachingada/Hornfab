@@ -3,6 +3,13 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-10-25 (M6/WP12 pushed: enclosure mounting plumbed end-to-end (`brief.mounting` → the mesher's OWN keys; `-mnt-` cache keys; mesh_meta/ndjson/record echoes; absent = byte-for-bit) and MEASURED on two finalists — dofs +199.4 %/+106.5 %, both under the UNCHANGED caps, enclosure J improves (a different objective landscape — never rank across mountings), reference parity 2.91e-06 dB; **WP13 axisymmetric backend OWNER-DEFERRED** ("don't know how necessary that is"); suite **1372/0/0/0**; focused 71/0/0; evidence `docs/evidence/M6_WP12_2026-10-25.md`, byte-check 21/21; no GitHub issue state changed).
 
+Local-only, added 2026-11-12 (**day plan group B merge, PR #40; no GitHub issue state changed**):
+- B.1-B.9 landed opt-in (warm start, links, narrow/widen subcommand, valid-only budget, round-throat
+  gate flag, infeasible resample, lq surrogate, CMA-MAE option, PARAMETERS.md sections). Defaults
+  unchanged (78ed1f4 goldens green). 97 targeted tests green. `cma_me` + `resample` is a ConfigError
+  (ribs 0.12 `Scheduler.tell` cannot drop refused solutions) — documented. Open follow-up:
+  fold the hand-written search-key section into `tools/gen_param_catalog.py`.
+
 Local-only, added 2026-11-12 (**day plan group C merge, PR #37; no GitHub issue state changed**):
 - C.1/C.2 calibration planner + verdicts landed; C.3 N1 throughput evidence + C.4 screen-fidelity
   proposal written (recommendations are proposals only; owner flips defaults after the calibration
