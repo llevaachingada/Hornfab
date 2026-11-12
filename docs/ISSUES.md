@@ -3,6 +3,13 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-10-25 (M6/WP12 pushed: enclosure mounting plumbed end-to-end (`brief.mounting` → the mesher's OWN keys; `-mnt-` cache keys; mesh_meta/ndjson/record echoes; absent = byte-for-bit) and MEASURED on two finalists — dofs +199.4 %/+106.5 %, both under the UNCHANGED caps, enclosure J improves (a different objective landscape — never rank across mountings), reference parity 2.91e-06 dB; **WP13 axisymmetric backend OWNER-DEFERRED** ("don't know how necessary that is"); suite **1372/0/0/0**; focused 71/0/0; evidence `docs/evidence/M6_WP12_2026-10-25.md`, byte-check 21/21; no GitHub issue state changed).
 
+Local-only, added 2026-11-12 (**fix: verify outputs per backend, PR #44; no GitHub issue state changed**):
+- `verify --backend X` wrote every backend into `<run>/verify/`, overwriting the other lane's
+  `response.npz`/`metrics.json` and mixing the rows. New `--verify-dir PATH`; a `--backend` mismatch now
+  gets its own run dir with `verify_of.backend`; an explicit dir refuses mixed-backend rows. Defaults
+  unchanged. Tonight's c2b/g1c responses recovered from the per-lane caches for A.7 (PASS, 5/5 within
+  0.2 dB); no re-solve. Queue-branch GUI `_cpu_activity` must learn the new dirs when it merges.
+
 Local-only, added 2026-11-12 (**GUI verify/high-res view plan; plan only, no GitHub issue state changed**):
 - `docs/GUI_VERIFY_VIEW_PLAN_2026-11-12.md`: verify sub-view inside run detail (`#/run/<id>/verify` + Verification
   card), verify runs as fidelity-badged rows linked to their parent, per-design high-res panel (Hz scrubber ->

@@ -1,6 +1,26 @@
 # CONTINUITY
 
 
+## 2026-11-12 (20:40Z) - FIX: VERIFY OUTPUTS ARE PER BACKEND (PR #44)
+
+- `verify --backend X` used to write every backend into `<run>/verify/`; a CPU verify overwrote the GPU
+  verify's `designs/<hash>/response.npz` / `metrics.json` and mixed the ndjson, making A.7 lane parity
+  unmeasurable (the D.3 handoff caution). Defaults were unchanged, but the override path had no backend
+  dimension.
+- Fix: `verify --verify-dir PATH`; a `--backend` override that differs from the run's recorded
+  `run.json.backend` gets its own run dir (mirroring `--brief`) with `verify_of.backend`; an explicit dir
+  refuses rows from another backend. Same-backend verify still writes `<run>/verify/` exactly as before.
+- Tests: `tests/test_cli_verify_designs.py` 9/0/0/0 (4 new); all `tests/test_cli_*.py` 26/0/0/0; local
+  full suite 2814 passed / 1 failed / 2 skipped on the pre-merge head. The failure is
+  `tests/test_mesh_build.py::test_too_large_is_refused_before_any_mesh_is_written`, a load-sensitive
+  100 ms timing assertion (208.9 ms under two concurrent suites; passes in isolation; CI green) -- not a
+  code regression and not weakened.
+- Tonight's already-running `c2b`/`g1c` loaded the old code; their per-backend responses were recovered
+  read-only from `cache_cpu/solve/<key>` + `cache/solve/<key>` and A.7 on the reconstructed pair is
+  **PASS** (5/5 designs within 0.2 dB; max 0.0356 dB, |dJ| <= 3.4e-5). No re-solve.
+- Note for `day/2026-11-12-queue`: its local GUI `_cpu_activity` reads `<run>/verify/search.ndjson`; when
+  that branch merges it must also read `--verify-dir` / a `*-verify` run's `run.json.verify_of`.
+
 ## 2026-11-12 (20:20Z) - GUI VERIFY / HIGH-RES VIEW PLAN (DESIGN PASS, PLAN ONLY)
 
 - Wrote `docs/GUI_VERIFY_VIEW_PLAN_2026-11-12.md` (design pass: designer lane + Boundary Lab research lane,
