@@ -309,6 +309,21 @@ def _brief_exit_radius_mm(cfg) -> float | None:
     return None
 
 
+def _round_throat_gate_active(cfg, ctx) -> bool:
+    """C4 round-throat refusal active for THIS evaluation? (B.5, day 2026-11-12.)
+
+    Objective v7 keeps the gate always on. Every other single-entry version opts in only through
+    the brief's ``gates: {round_throat: true}`` (validated by config.load_brief); absent key =
+    today's behaviour (gate off, except v7)."""
+    if int(getattr(ctx, "objective_version", 1)) == 7:
+        return True
+    brief = getattr(cfg, "brief", None)
+    if not isinstance(brief, dict):
+        return False
+    gates = brief.get("gates")
+    return isinstance(gates, dict) and gates.get("round_throat") is True
+
+
 def _refuse_if_throat_misfits(mesh: MeshResult, cfg) -> None:
     """C4 (objective v7, was "v5" on the hardened branch, 2026-10-29): refuse a throat that is not the driver's round exit.
 
@@ -1181,7 +1196,7 @@ def _compute_band_split(design, cfg, mode, mspec, sspec, design_dir, backend, ct
             # Brief-dependent, NOT a pure function of (design, mesh spec): never failure-cached.
             st["kind"], st["err"], st["no_marker"] = KIND_INVALID, why, True
             return
-        if int(getattr(ctx, "objective_version", 1)) == 7:   # hardened C4 gate; v5 = MEH, v6 = loading_smooth keep their own rules
+        if _round_throat_gate_active(cfg, ctx):   # v7 always on; other versions opt in via brief gates (B.5)
             try:
                 _refuse_if_throat_misfits(bmesh, cfg)
             except GeometryInvalidError as exc:
@@ -1540,7 +1555,7 @@ def _compute(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx, st)
     # C4 (objective v7, was "v5" on the hardened branch): the driven throat must be the brief driver's round exit. The refusal is
     # a DETERMINISTIC invalid candidate (mapped exactly like build_mesh's geometry refusal), and
     # it happens before the solve-cache lookup so a stored response can never bypass it.
-    if int(getattr(ctx, "objective_version", 1)) == 7:   # hardened C4 gate; v5 = MEH, v6 = loading_smooth keep their own rules
+    if _round_throat_gate_active(cfg, ctx):   # v7 always on; other versions opt in via brief gates (B.5)
         try:
             _refuse_if_throat_misfits(mesh, cfg)
         except GeometryInvalidError as exc:

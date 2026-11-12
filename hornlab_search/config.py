@@ -223,12 +223,14 @@ def load_brief(path) -> dict:
     if not isinstance(raw, dict):
         raise ConfigError(f"{where}: top level must be a mapping")
     allowed = {"name", "description", "driver", "envelope", "symmetry", "source", "target", "weights",
-               "verify_only", "objective", "grid", "mounting", "meh"}
+               "verify_only", "objective", "grid", "mounting", "meh", "gates"}
     unknown = set(raw) - allowed
     if unknown:
         raise ConfigError(f"{where}: unknown key(s) {sorted(unknown)}")
     for k in ("name", "driver", "envelope", "symmetry", "target", "weights"):
         _require(raw, k, where)
+    if "gates" in raw and raw["gates"] is not None:
+        _validate_gates_block(raw["gates"], f"{where}:gates")
     drv, env = raw["driver"], raw["envelope"]
     for k in ("exit_radius_mm", "exit_angle_deg"):
         if not isinstance(drv.get(k), (int, float)):
@@ -276,6 +278,26 @@ def load_brief(path) -> dict:
 
 class ConfigError(ValueError):
     """A YAML config is missing a required key or has an illegal value."""
+
+
+#: B.5 (day 2026-11-12): brief ``gates:`` block. ``round_throat`` (default false) opts every
+#: objective version into the C4 round-throat refusal that v7 always applies; v7 itself never
+#: needs the key. Extendable later with more gate names; unknown names are refused.
+GATE_KEYS = ("round_throat",)
+
+
+def _validate_gates_block(block, where: str) -> dict:
+    """Brief ``gates: {round_throat: true}`` (B.5): exact keys, strict booleans."""
+    if not isinstance(block, dict):
+        raise ConfigError(f"{where}: gates must be a mapping")
+    unknown = set(block) - set(GATE_KEYS)
+    if unknown:
+        raise ConfigError(f"{where}: gates unknown key(s) {sorted(unknown)} "
+                          f"(allowed: {list(GATE_KEYS)})")
+    if "round_throat" in block and not isinstance(block["round_throat"], bool):
+        raise ConfigError(f"{where}: gates.round_throat must be true or false, "
+                          f"got {block['round_throat']!r}")
+    return block
 
 
 def _require(section: dict, key: str, where: str):
@@ -1110,6 +1132,10 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
     if brief_d is not None and brief_d.get("mounting") is not None:
         mounting_cfg = _validate_mounting_block(brief_d["mounting"], f"{where}:mounting")
         raw["mounting"] = dict(mounting_cfg)
+    # B.5: an embedded run-directory brief's gates go through the same validator here (a resume
+    # cannot smuggle an unvalidated gate); a fresh brief was already validated by load_brief.
+    if brief_d is not None and brief_d.get("gates") is not None and embedded_brief:
+        _validate_gates_block(brief_d["gates"], f"{where}:gates")
     # C10: the MEH block lives in the brief.  A fresh brief was already validated by load_brief;
     # an embedded run-directory brief goes through the same validator here (so a resume cannot
     # smuggle an unvalidated block), and the normalized form is stored in raw for config_sha.
