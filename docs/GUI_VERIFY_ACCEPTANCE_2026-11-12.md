@@ -62,6 +62,17 @@ found and **fixed before push** (all re-captured and re-verified live on 8799, `
    honesty bug; footer now counts null/invalid rows over the full resumed history:
    **"139 evals ok, 62 failed (30.8%) · 72 above axis range."** ▲ strip moved to the bottom per caption.
 
+A second audit round found the scroll treatments still unreachable in practice: Edge/Windows overlay
+scrollbars reserve no bar, so a clipped table *looks* cut with no affordance. Fixed by a reusable
+`wireScrollHints()` (charts.js): the wrapper detects real overflow (`scrollWidth > clientWidth`),
+shows a "scroll for all columns →" hint + right-edge shadow until scrolled to the end; applied to the
+verify design table, compare table, and gate-audit card (gate columns are never silently hidden at
+narrow widths — the caption says all audited columns are present and to scroll sideways). Verified
+headlessly on Edge at 900 px: wrapper is the clipping ancestor, `scrollWidth` 1382 vs 624 client,
+last columns (`Actions`, `8 kHz BW`, `dof`) reachable by scroll. This round also fixed a real routing
+bug: `route()` stripped the query string, so verify sort/design state and `#/run/<id>/verify/compare?a=…&b=…`
+never reached the compare table — verify routes now own their query string.
+
 Known cosmetic, recorded in `docs/ISSUES.md`, not fixed here: light-theme 3D-balloon annotations and
 circular-polar grid are faint (contrast-plan territory); scatter labels crowd when several designs
 share a J value (cluster around 4.6–5.0 on ed1da9); DI and On-axis render one card each with H+V
