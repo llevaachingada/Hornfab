@@ -35,6 +35,40 @@
 
 
 ## 2026-11-12 - INTEGRATION: COLLIN'S PR #22, #19, #23, THE CUDA FIX AND THE HARDENED PLAN MERGED; OBJECTIVE v5 COLLISION FIXED
+## 2026-11-12 — LANE L5: DATA INTEROP WITH THE COLLABORATOR (TWO-WAY)
+
+- **What:** L5 makes the dataset self-describing and two-way. All eight DECIDED tasks complete (L5.1-L5.6, L5.8;
+  L5.7 is a post-merge upload step for the owner).
+- **L5.1 `hornlab_search/dataset/manifest.py`:** `python -m hornlab_search.dataset.manifest` writes
+  `<dataset_root>/MANIFEST.json`: `manifest_version`, `schema_version`, `lab` label (default `hunter-4060`),
+  row counts broken down by `objective_version`, `family`, `backend`, `mode`, typology, and the full
+  `objective_version × family × backend × mode` grid; per-shard sha256+row count; `created_utc` min/max;
+  objective versions legend (1-7 from `objective/versions.py`); the 2026-11-12 "5→7 relabel" note. Deterministic
+  (sorted keys, sorted lists). `tools/hf_sync.py pack` calls it first so every packed snapshot carries a manifest.
+- **L5.2 `tools/export_config.py`:** `--run <dir> --top N` writes `<hash>.mesher.json` (exact dict
+  `families.to_mesher_config` returns) + `<hash>.meta.json` (family, params, J, objective_version, terms, brief,
+  lib_sha, run_id, config_name). Generator/CAD families listed in `skipped.json` with reason.
+- **L5.3 `tools/hf_sync.py`:** `pack` runs manifest first; `push --lab <name>` uploads under `labs/<name>/`;
+  `pull --lab <name> --into dataset_ext/<name>`. `HF_HUB_DISABLE_XET=1` for uploads. No real network calls in
+  tests (subprocess faked).
+- **L5.4 `tools/data/ingest_foreign.py`:** validates pulled rows with `validate_record`, tags `lab`, never writes
+  into `dataset/`. Parity report: same `design_hash + mesh_hash + solve spec`, SPL diff from `.npz` arrays. CP-7b
+  rule: comparable only after >= 3 shared designs agree within 0.2 dB.
+- **L5.5 `tools/export_campaign_tables.py`:** grouped and labelled by `objective_version` and `backend`; never
+  ranked across groups. README.md describes the rule.
+- **L5.6 `docs/COLLABORATOR_PULL_RUNBOOK_2026-11-02.md`:** new section "What changed 2026-11-12" covers the v5→v7
+  relabel, MANIFEST.json, and the labs/ two-way flow with owner actions.
+- **L5.8 `tools/data/keepers.py`:** `--backfill --apply --backup <dir>` joins `runs/*/search.ndjson` +
+  `runs/*/config.yaml` → `run_id`/`config_name`/`typology` for old records. Dry run by default. Atomic
+  os.replace with backup. Tests on a synthetic two-run tree.
+- **Tests [measured]:** 35 L5-specific tests + 120 L5+dataset tests pass.
+- **Owner actions:** grant Collin HF write access to `chingadalleva/hornlab-search-data` (or agree on his repo);
+  ask Collin to `push --lab collin-4090` his Solana/SAWMOD runs; Collin owes Metal-vs-4060 parity check
+  (≤ 0.2 dB) before Metal rows join (PR #17). Then run L5.7: `tools/hf_sync.py pack --groups text,dataset` +
+  `upload` from the main checkout between GPU jobs.
+- **Branch:** `lane/L5-data-interop` → PR to `main`.
+
+## 2026-11-12 - INTEGRATION: COLLIN'S PR #22, #19, #23, THE CUDA FIX AND THE HARDENED PLAN MERGED; OBJECTIVE v5 COLLISION FIXED COLLIN'S PR #22, #19, #23, THE CUDA FIX AND THE HARDENED PLAN MERGED; OBJECTIVE v5 COLLISION FIXED
 
 - **Owner directive:** merge the collaborator's work and everything outstanding into one tested main, pause new MEH
   work, then scoring truth, speed and the GUI. Plan: `docs/SENIOR_PLAN_2026-11-12.md` (P14).

@@ -173,7 +173,83 @@ contains `response.npz` (266,816 B) + `status.json` (92 B).
 
 ---
 
-## 8. Provenance
+## 8. What changed 2026-11-12
+
+Three things changed on 2026-11-12; the data format is **backward-compatible** (all section 4
+checks still pass on the original 2026-11-02 snapshot).
+
+### 8a. Objective v5 → v7 relabel
+
+The hardened objective (loading penalty, constant-velocity flatness, 8 kHz one-sided floor, signed
+V coverage) was written as `version: 5` on `feat/hardened-plan-2026-10-29`. On 2026-11-12 this
+was renumbered to **v7** to avoid collision with MEH (also v5). Effect:
+
+- 1,371 dataset rows in `shard-045.jsonl`–`shard-047.jsonl` now carry `"objective_version": 7`.
+- 26 run dirs under `runs/` with dates 2026-10-29 have their `search.ndjson` rows updated.
+- Backup (unchanged originals) is at `runs/_backup_renumber_v5_v7/`.
+- 9 brief files under `examples/briefs/hardened_2026-10-29_v5/` now say `version: 7`.
+- **If you have a local copy from 2026-11-02:** rows you read as `objective_version: 5` from the
+  hardened-plan run dirs (dated 2026-10-29) are v7. Re-run
+  `python tools/data/renumber_objective_v5_to_v7.py --dry-run` to see which of your rows need
+  the same fix.
+
+Objective version mapping (current, all labs):
+
+| Version | Name | Since |
+|---|---|---|
+| 1 | original objective | 2026-10-xx |
+| 2 | detrended terms | 2026-10-24 |
+| 3 | per-plane f0_v plus the K-law f0 mask | 2026-10-26 |
+| 4 | tolerance-normalised terms, asymmetric coverage, DI std, diagonal | 2026-10-27 |
+| 5 | MEH system objective (synthesised response, lw_resid, notch, xo_lob, headroom) | 2026-10-30 |
+| 6 | loading_smooth — Le Cléac'h / rollback class (load_near, z_smooth, cov_pat, di_rise) | 2026-11-05 |
+| 7 | v4 + loading/freq penalty, CV flatness, 8 kHz floor, signed V coverage (was labelled v5) | 2026-10-29 / relabelled 2026-11-12 |
+
+**Never compare J across objective versions; they re-weight the terms.**
+
+### 8b. Dataset MANIFEST.json
+
+Every packed snapshot now ships a `dataset/MANIFEST.json`: a read-only census with
+`schema_version`, row counts broken down by `objective_version × family × backend × mode`,
+distinct lib SHAs, `created_utc` min/max, and a per-shard sha256+row count. Regenerate at any
+time with:
+
+```bash
+python -m hornlab_search.dataset.manifest --dataset-root dataset
+```
+
+The manifest is included automatically whenever you pack or push with `tools/hf_sync.py`.
+
+### 8c. Labs prefix (two-way data)
+
+The HF dataset repo (`chingadalleva/hornlab-search-data`) now supports a **per-lab prefix**:
+each lab pushes its own data under `labs/<name>/` and pulls another lab's data into
+`dataset_ext/<name>/`. Local `dataset/` is never overwritten by a pull.
+
+**How Collin pushes his runs:**
+
+```bash
+# Collin, from his checkout:
+python tools/hf_sync.py push --lab collin-4090 --out /tmp/hf_stage
+```
+
+**How hunter pulls Collin's data:**
+
+```bash
+python tools/hf_sync.py pull --lab collin-4090 --into dataset_ext/collin-4090
+python tools/data/ingest_foreign.py --lab collin-4090   # validate + parity report
+```
+
+Foreign rows are **never merged** into `dataset/`; they live in `dataset_ext/<lab>/` until the
+CP-7b parity gate clears (≥ 3 shared designs agree within 0.2 dB max SPL).
+
+**Owner action needed:** grant Collin write access to `chingadalleva/hornlab-search-data`, or
+agree on him using his own HF repo (then both sides pass `--repo <his-repo>` when pushing and
+pulling).
+
+---
+
+## 9. Provenance
 
 - Packed with `tools/hf_sync.py pack --groups text,solve,dataset` (no GPU night writing at the time: julia
   host idle, VRAM 706 MiB of 8188, newest `runs/` write 9 min before the pack).

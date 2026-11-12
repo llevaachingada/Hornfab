@@ -7,6 +7,10 @@ Local-only, added 2026-11-12 (**lane L1 CPU second lane; no GitHub issue state c
 - **PR `lane/L1-cpu-lane` → `main` (open draft):** CPU second solve lane wired end-to-end (L1.1-L1.6, L1.8);
   `solve.julia_threads`, lane-scoped host cleanup, `lane_env()`, two-lane night runner, `lane`+`backend` rows,
   `examples/profiles/`, AGENTS.md / CLAUDE.md "Two lanes" paragraph. L1.7 (GUI objective versions) is out of scope.
+Local-only, added 2026-11-12 (**lane L5: data-interop; no GitHub issue state changed**):
+- **WP-F / L5 DONE:** dataset MANIFEST.json, two-way HF labs sync, design mesher-config export, foreign ingestion
+  (CP-7b parity gate), campaign tables grouped by objective_version+backend. Runbook updated. Owner actions: grant
+  Collin HF write access; run L5.7 pack+upload between GPU jobs.
 
 Local-only, added 2026-11-12 (**integration; GitHub: PRs #19, #22, #23 close as merged with the integration PR; #13 to close**):
 - Objective numbering: 5 = MEH, 6 = loading_smooth (Collin), **7 = the hardened objective** (was "5" on

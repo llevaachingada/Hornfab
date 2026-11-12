@@ -706,3 +706,30 @@ What happened (read-only): the physics seam is fine (`evaluate()` pure; `SolveSp
 6. a `julia_threads` knob must reach both `warm_up` and `SolveConfig` or a second host appears silently.
 What I tried: nothing changed; no GPU, no solve, no mesher, no pytest, no provisioning, no push. Findings written to `docs/research/CPU_SECOND_LANE_HARDENING_2026-10-28.md` and recorded in INDEX/CONTINUITY/NEXT_DEV_PRIORITIES/ISSUES.
 What I need decided: the 8 questions in the doc section 12 - target topology (recommended: shared `runs/`, separate cache/dataset; separate runs folders as fallback); whether "one GPU solve at a time" may be amended to permit one CUDA solve + one CPU lane; registry-dir lane identity + "unknown host => never kill"; `solve.julia_threads` kept out of the solve hash; the `.cpu.lane.lock` marker; the H2 `cuda_fused` fix; a separate dataset root for Phases 1-2; and the Phase-2 measurement gates (dual-lane smoke + per-lane evals/hour; checkpoint/benchmark runs stay exclusive).
+
+## 2026-11-12  lane L3  scoring truth: v6-vs-v7 re-score of the live dataset, driver readiness audit
+What I did (CPU only; no GPU, no solve, no selftest; `dataset/` read-only): new
+`tools/rescore/rescore_v6_v7.py` (offline re-score of stored metric arrays via
+`gate_audit.parse_stored_row`, v6 = `native_lecleach_1200_1in_v6`, v7 = the class-matched hardened
+briefs), new `tools/rescore/driver_check.py` (report-only driver-file readiness), evidence
+`docs/evidence/RESCORE_V6_V7_2026-11-12.md`, research
+`docs/research/LOADING_OBJECTIVES_RECONCILED_2026-11.md`, tests `tests/test_tools_rescore_v6_v7.py`.
+Scored 22,928 stored rows: class A tau 0.322 (top-20 overlap 2/20), B tau 0.280 (0/20), C tau 0.084
+(5/20); top-20-union tau is negative in every class.
+What I found (each needs an owner call, nothing blocking):
+1. **Only one v6 brief exists** (class-B Le Cleac'h), so the class-A/C v6 columns score those
+   populations with the Le Cleac'h scorer. Do we write v6 A/C briefs, or declare v6 class-B-only?
+2. **Shape gates collapse on the loading/low-reach populations**: unique-design H passes are
+   2/3,563 (B) and 6/1,596 (C) over their own targets (A: 2,436/17,182). Not a scoring bug - it is
+   what the stored targets ask for - but it means "pass_all" is essentially empty outside class A.
+3. **Predicted-vs-published driver sensitivity cannot be checked from the dataset**: `drive()` needs
+   `meta['physical_tag_areas_m2']`; stored single-channel rows have none, and the only rows with
+   `tag_areas_m2` are two-channel MEH network solves where single-piston `drive()` does not apply.
+   Follow-up (P0 item 8): run it in a verify run dir where `run.json` + `designs/*/mesh.msh` supply
+   the real tag areas. Driver readiness itself: 19 files, 14 with dry `mmd_g`, 19 with a source URL
+   and a published sensitivity, 0 unloadable; 3 MEH compression files carry no Mmd by design (C7
+   volume-velocity source), 2 P12 cones are Mms-only (bc_10mbx64, bc_8mbx51).
+4. **`dataset/` is live**: it appended rows during the night (shard-0054), so the re-score is a
+   snapshot; re-running the tool includes newer rows (method unchanged). The sweep's own counters
+   reconcile against the reconciliation table in the evidence doc.
+

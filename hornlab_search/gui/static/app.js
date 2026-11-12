@@ -1326,6 +1326,7 @@ function renderRunsList(allRuns) {
         <div class="eyebrow">All runs</div>
         <h2>Runs</h2>
         <p class="muted" style="font-size:0.85rem">${allRuns.length} total · newest first</p>
+        <div id="runs-version-banner"></div>
       </div>
       <div class="filter-bar">
         <input id="run-filter" type="search" placeholder="Filter by name / family / brief…" aria-label="filter runs">
@@ -1370,9 +1371,12 @@ function renderRunsList(allRuns) {
              (r.family || "").toLowerCase().includes(q) ||
              (r.brief || "").toLowerCase().includes(q))
     );
-    if (sort === "best_j") filtered.sort((a, b) => (a.best_j ?? 999) - (b.best_j ?? 999));
-    else if (sort === "name") filtered.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-    else filtered.sort((a, b) => (b.started || "").localeCompare(a.started || ""));
+    // Version guard: a mixed-version table is grouped by objective definition, then sorted INSIDE
+    // each group, so a v4 J never outranks a v7 J on the same axis without the banner saying so.
+    filtered = sortRunsForTable(filtered, sort);
+
+    const banner = document.getElementById("runs-version-banner");
+    if (banner) banner.innerHTML = objectiveVersionBannerHtml(filtered);
 
     const tbody = document.getElementById("runs-tbody");
     if (!filtered.length) {
@@ -1391,7 +1395,7 @@ function renderRunsList(allRuns) {
         <td><b>${esc(r.name)}</b><br><span class="mono muted" style="font-size:0.72rem">${esc(r.id)}</span></td>
         <td>${esc(r.family || "–")}</td>
         <td>${esc(r.brief || "–")}</td>
-        <td class="r num">${r.seed_j != null && r.seed_j < 900 ? fmt(r.seed_j) : "–"} → <b>${fmt(r.best_j)}</b></td>
+        <td class="r num"><span class="mono muted" style="font-size:0.68rem">${esc(jVersionLabel(r))}</span><br>${r.seed_j != null && r.seed_j < 900 ? fmt(r.seed_j) : "–"} → <b>${fmt(r.best_j)}</b></td>
         <td class="r ${chCls}">${ch}</td>
         <td style="font-size:0.82rem">${r.dims ? esc(dimStr(r.dims)) : "–"}</td>
         <td class="r">${r.n.toLocaleString()}</td>
@@ -1880,15 +1884,93 @@ function seedDerivationHtml(feas, objective) {
       ${klaw}<div class="cap">${cap}</div>${counts}${table}</div>`;
 }
 
-/** The brief editor's objective-version options (v3 = the below-f0 scoring floor). Pure; returns
- *  the three <option> tags, selected per the brief's own objective.version. */
+/** The brief editor's objective-version options (v1-v7, the versions the objective package
+ *  actually implements). Pure; returns the seven <option> tags, selected per the brief's own
+ *  objective.version. The default for a NEW brief is unchanged (NEW_BRIEF_DEFAULTS below). */
 function objectiveVersionOptionsHtml(sel) {
   return [
-    [1, "1 — default scoring"],
-    [2, "2 — opt-in updated scoring"],
-    [3, "3 — scoring floor f0 (cov + dislope score only f ≥ f0)"],
+    [1, "v1 legacy"],
+    [2, "v2 detrended"],
+    [3, "v3 below-f0 mask"],
+    [4, "v4 tolerance-normalised"],
+    [5, "v5 MEH system"],
+    [6, "v6 loading_smooth (Le Cléac'h)"],
+    [7, "v7 loading + CD gates (hi-fi/PA)"],
   ].map(([v, label]) => `<option value="${v}" ${sel === v ? "selected" : ""}>${esc(label)}</option>`)
     .join("\n                ");
+}
+
+// ── Objective-version guard ────────────────────────────────────────
+// A J score is only comparable inside one objective definition. Run summaries and the umap /
+// compare payloads carry objective_version (gui/data.py::run_objective_version, v1 when absent).
+// These pure helpers keep the label, the mixed-set banner and the grouped order identical
+// everywhere J is ranked or compared (runs list, compare view, Design cloud, run detail).
+
+const J_VERSION_BANNER = "J from different objective versions is not comparable";
+
+/** The version as a positive integer; an absent/odd value is v1, never a guess. */
+function objectiveVersionOf(x) {
+  const v = (x && typeof x === "object") ? x.objective_version : x;
+  const n = Number(v);
+  return Number.isFinite(n) && n > 0 ? n : 1;
+}
+
+/** "J vN" — the label every J column/legend wears. */
+function jVersionLabel(x) {
+  return `J v${_trimNum(objectiveVersionOf(x))}`;
+}
+
+/** Every distinct objective version in the set, newest definition first. */
+function objectiveVersions(runs) {
+  return [...new Set((runs || []).map(objectiveVersionOf))].sort((a, b) => b - a);
+}
+
+/** Banner when the displayed set mixes objective versions; "" when it does not. */
+function objectiveVersionBannerHtml(runs) {
+  return objectiveVersions(runs).length > 1
+    ? `<div class="alert warn" role="alert">${J_VERSION_BANNER}</div>`
+    : "";
+}
+
+/** Runs-table order. When the set mixes versions, group by objective version (newest definition
+ *  first) and apply the chosen key INSIDE each group; a single-version set is untouched. */
+function sortRunsForTable(runs, sort) {
+  const arr = [...(runs || [])];
+  const byKey = (a, b) => {
+    if (sort === "best_j") return (a.best_j ?? Infinity) - (b.best_j ?? Infinity);
+    if (sort === "name") return String(a.name || "").localeCompare(String(b.name || ""));
+    return String(b.started || "").localeCompare(String(a.started || ""));
+  };
+  if (objectiveVersions(arr).length <= 1) return arr.sort(byKey);
+  return arr.sort((a, b) => objectiveVersionOf(b) - objectiveVersionOf(a) || byKey(a, b));
+}
+
+/** Per-design gate pass/fail chips for the gates present in the run's audit CSV. Pure; "" when
+ *  the run carries no gate audit, so the view renders NO column rather than inventing one. */
+function gateAuditHtml(audit) {
+  if (!audit || audit.available !== true) return "";
+  const gates = Array.isArray(audit.gates) ? audit.gates : [];
+  const entries = Object.entries(audit.designs || {});
+  if (!gates.length || !entries.length) return "";
+  const labels = audit.labels || {};
+  const chip = v => v === true ? `<span class="pill good">pass</span>`
+    : v === false ? `<span class="pill bad">fail</span>`
+    : `<span class="muted">–</span>`;
+  entries.sort((a, b) => ((a[1].J ?? Infinity) - (b[1].J ?? Infinity)) || a[0].localeCompare(b[0]));
+  const head = gates.map(g => `<th class="r">${esc(labels[g] || g)}</th>`).join("");
+  const rows = entries.map(([hash, e]) => {
+    const g = e.gates || {};
+    const cells = gates.map(k => `<td class="r">${chip(g[k])}</td>`).join("");
+    return `<tr><td class="mono">${esc(hash)}</td><td class="r">${fmt(e.J, 3)}</td><td>${esc(e.tier || "–")}</td>${cells}</tr>`;
+  }).join("");
+  return `<div class="fig" id="gate-audit-card">
+        <h3>Gate audit</h3>
+        <div class="cap">Per-design pass/fail from <span class="mono">${esc(audit.source || "")}</span>. Only the gates present in that audit are shown.</div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Design</th><th class="r">J</th><th>Tier</th>${head}</tr></thead>
+          <tbody>${rows}</tbody>
+        </table></div>
+      </div>`;
 }
 
 // Exported pure helpers for offline node tests (tests/test_gui_brief_authoring.py) — the
@@ -1899,7 +1981,9 @@ export { runProvenanceGroup, renderProvenanceBadges, restartScheduleHtml, stepCh
          toolbarPillFor, toolbarPillHtml, resumeArgsFor, resumeableSearchJob };
 
 
-export { f0KpiHtml, mountingRankWarnHtml, seedDerivationHtml, objectiveVersionOptionsHtml };
+export { f0KpiHtml, mountingRankWarnHtml, seedDerivationHtml, objectiveVersionOptionsHtml,
+         objectiveVersionOf, jVersionLabel, objectiveVersions, objectiveVersionBannerHtml,
+         sortRunsForTable, gateAuditHtml, J_VERSION_BANNER };
 
 export { continueRunAvailable, continueRunArgs };
 
@@ -1979,6 +2063,8 @@ async function viewRunDetail(id) {
 
       <!-- Designer header: key facts -->
       <div class="kpis" id="kpi-strip"></div>
+
+      ${gateAuditHtml(d.gate_audit)}
 
       ${restartScheduleHtml(d, id)}
 
@@ -2126,8 +2212,8 @@ async function viewRunDetail(id) {
     [`${tip("bw", "Coverage target")}`, coverTarget],
     [`${tip("band", "Band")}`, bandStr],
     [`${tip("dims", "Horn size")} <small style="font-family:var(--f-mono);font-size:0.6rem;color:var(--muted)">W×H×D outer</small>`, dimsStr],
-    [`${tip("J", "Score: start")}`, fmt(sum.seed_j && sum.seed_j < 900 ? sum.seed_j : null)],
-    [`${tip("J", "Score: best")}`, fmt(sum.best_j)],
+    [`${tip("J", "Score: start")} <small style="font-family:var(--f-mono);font-size:0.6rem;color:var(--muted)">${esc(jVersionLabel(d))}</small>`, fmt(sum.seed_j && sum.seed_j < 900 ? sum.seed_j : null)],
+    [`${tip("J", "Score: best")} <small style="font-family:var(--f-mono);font-size:0.6rem;color:var(--muted)">${esc(jVersionLabel(d))}</small>`, fmt(sum.best_j)],
     ["Change vs start", ch],
     [`${tip("budget", "Budget used")}`,
      `${(sum.n || 0).toLocaleString()}${sum.budget ? " / " + sum.budget.toLocaleString() : ""}${overBudget ? " over budget" : ""}`,
@@ -2647,7 +2733,7 @@ async function viewCompare() {
   const preB = qbMatch ? qbMatch[1] : "";
 
   const opts = allRuns.map(r =>
-    `<option value="${esc(r.id)}">${esc(r.name)} — ${esc(r.id.slice(0, 20))}… (Score=${fmt(r.best_j)})</option>`
+    `<option value="${esc(r.id)}">${esc(r.name)} — ${esc(r.id.slice(0, 20))}… (${esc(jVersionLabel(r))}=${fmt(r.best_j)})</option>`
   ).join("");
 
   ROOT.innerHTML = `
@@ -2738,7 +2824,19 @@ async function viewCompare() {
       : (dsA !== "balloon" || dsB !== "balloon")
         ? `<p class="hint" role="note" style="margin:0"><span class="warn-text">DI source unknown on at least one side — not comparable</span></p>`
         : "";
-    const provBlock = [badgeRows, mixedBanner, mountingRankWarnHtml(mixed), diNote].filter(Boolean).join("");
+    // Version guard: each side names its objective definition; a cross-version pair gets the
+    // explicit banner (the J values stay visible, their ranking does not travel across versions).
+    const vA = cmp.objective_version_a, vB = cmp.objective_version_b;
+    const versionsMixed = (typeof cmp.versions_mixed === "boolean")
+      ? cmp.versions_mixed : objectiveVersionOf(vA) !== objectiveVersionOf(vB);
+    const versionPills = `<div class="pill-row">
+      <span class="pill">A · ${esc(jVersionLabel(vA))}</span>
+      <span class="pill">B · ${esc(jVersionLabel(vB))}</span>
+    </div>`;
+    const versionBanner = versionsMixed
+      ? `<div class="alert warn" role="alert">${J_VERSION_BANNER}</div>` : "";
+    const provBlock = [versionBanner, versionPills].filter(Boolean).join("")
+      + [badgeRows, mixedBanner, mountingRankWarnHtml(mixed), diNote].filter(Boolean).join("");
 
     res.innerHTML = `
       <div class="stack" style="gap:20px">
@@ -2990,7 +3088,7 @@ async function showBriefDetail(b, allBriefs, opts = {}) {
             <div><select id="brf-obj" style="${INPUT_CSS};width:220px">
                 ${objectiveVersionOptionsHtml(objVer)}
               </select>
-              <div class="hint">Version 1 ships everywhere; 2 is the opt-in update; 3 additionally masks everything below the brief's scoring floor f0 (target.f0_hz)</div></div>
+              <div class="hint">J is only comparable inside one version. v1 legacy; v2 detrended; v3 masks everything below the brief's scoring floor f0 (target.f0_hz); v4 tolerance-normalised; v5 MEH system; v6 loading_smooth (Le Cléac'h); v7 loading + CD gates (hi-fi/PA). The default for a new brief stays v1.</div></div>
           </div>
         </fieldset>
 
