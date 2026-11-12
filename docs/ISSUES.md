@@ -3,6 +3,11 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-10-25 (M6/WP12 pushed: enclosure mounting plumbed end-to-end (`brief.mounting` → the mesher's OWN keys; `-mnt-` cache keys; mesh_meta/ndjson/record echoes; absent = byte-for-bit) and MEASURED on two finalists — dofs +199.4 %/+106.5 %, both under the UNCHANGED caps, enclosure J improves (a different objective landscape — never rank across mountings), reference parity 2.91e-06 dB; **WP13 axisymmetric backend OWNER-DEFERRED** ("don't know how necessary that is"); suite **1372/0/0/0**; focused 71/0/0; evidence `docs/evidence/M6_WP12_2026-10-25.md`, byte-check 21/21; no GitHub issue state changed).
 
+Local-only, added 2026-11-12 (**refusals / CMA trajectory handoff, PR #49; no GitHub issue state changed**):
+- `docs/research/REFUSALS_AND_OPTIMIZER_HANDOFF_2026-11-12.md`: plain-CMA resample vs CMA-ME/
+  CMA-MAE, exact code/tests, measured refusal counts, dataset failure metadata (4,634/28,573 main;
+  16/237 dataset_cpu; D.3 no ok filter), over-constraint guardrails. No code/queue/default changes.
+
 Local-only, added 2026-11-12 (**partial day evidence committed, PR #48; no GitHub issue state changed**):
 - `docs/evidence/DAY_2026-11-12_ANALYSIS_PARTIAL.md` (A.8 partial + 10 charts; A.7 PASS, 24-run
   fidelity census, 25-seed variance, D.3 dry-run) and `docs/evidence/NIGHT_2026-11-12_PARTIAL.md`
