@@ -126,7 +126,14 @@ def write_run(rows: list[dict], tmp_path: Path, name: str = "run", *,
     (d / "config.yaml").write_text(yaml.safe_dump(cfg), encoding="utf-8")
     run_json = {"run_id": name, "config_name": cfg.get("name"), "family": family,
                 "mode": rows[0]["mode"] if rows else "screen",
-                "cma_seed": seed, "config": cfg, "status": "finished"}
+                "cma_seed": seed, "config": cfg, "status": "finished",
+                # real runs record library pins; a stable default keeps synthetic
+                # compatibility checks meaningful (override in tests as needed)
+                "lib_shas": {"hornlab_search": "test-sha",
+                             "hornlab_beat_bem": "test-sha",
+                             "hornlab_mesher": "test-sha",
+                             "hornlab_plots": "test-sha",
+                             "hornlab_bempp_bem": "test-sha"}}
     run_json.update(extra_run_json or {})
     (d / "run.json").write_text(json.dumps(run_json, indent=1, allow_nan=False),
                                 encoding="utf-8")
