@@ -264,6 +264,26 @@ def _arrays_for(ev: Evaluation) -> dict:
     return out
 
 
+def typology_name(generator: dict | None, family: str | None) -> str:
+    """Typology label: ``<spec.name>:<profile_h.type>[/<profile_v.type>]`` for generated
+    designs (the ``generator`` block on search.ndjson rows / record provenance), else the native
+    family name. ``""`` when neither is known."""
+    if isinstance(generator, dict):
+        spec = generator.get("spec") if isinstance(generator.get("spec"), dict) else {}
+        name = spec.get("name") or generator.get("name")
+        if name:
+            label = str(name)
+            ph, pv = spec.get("profile_h"), spec.get("profile_v")
+            th = ph.get("type") if isinstance(ph, dict) else None
+            tv = pv.get("type") if isinstance(pv, dict) else None
+            if th:
+                label += f":{th}"
+                if tv and tv != th:
+                    label += f"/{tv}"
+            return label
+    return str(family) if family else ""
+
+
 def build_record(ev: Evaluation, target, lib_shas: dict, *,
                  solve_spec: SolveSpec | None = None,
                  area_m2: float | None = None,
@@ -273,7 +293,10 @@ def build_record(ev: Evaluation, target, lib_shas: dict, *,
                  excitation: dict | None = None,
                  created_utc: str | None = None,
                  objective_version: int = 1,
-                 provenance: dict | None = None) -> tuple[dict, dict]:
+                 provenance: dict | None = None,
+                 run_id: str | None = None,
+                 config_name: str | None = None,
+                 typology: str | None = None) -> tuple[dict, dict]:
     """Returns (metadata_dict, arrays_dict).
 
     metadata is JSON-serializable with NO numpy types anywhere and no NaN/Inf (those become null).
@@ -304,6 +327,9 @@ def build_record(ev: Evaluation, target, lib_shas: dict, *,
                    which config / design brief scored this record and which typology generator (if
                    any) produced the design. Older records lack it; readers must treat it as optional.
                    The metric curves are target-free; only ``objective``/``terms`` depend on the brief.
+       run_id / config_name / typology  optional, additive (swarm lane H): top-level strings
+                   written only when given (absent, never null, otherwise). ``typology`` is
+                   ``typology_name(generator, family)``. Schema v1 readers ignore them.
     """
     out = ev.outcome
     resp = None if out is None else out.response
@@ -359,6 +385,9 @@ def build_record(ev: Evaluation, target, lib_shas: dict, *,
     }
     if provenance:
         meta["provenance"] = to_jsonable(provenance, "$.provenance")
+    for key, value in (("run_id", run_id), ("config_name", config_name), ("typology", typology)):
+        if value:
+            meta[key] = str(value)
     arrays = _arrays_for(ev) if ok else {}
     return meta, arrays
 
