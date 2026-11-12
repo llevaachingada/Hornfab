@@ -1,5 +1,28 @@
 # CONTINUITY
 
+
+## 2026-11-13 (~00:2xZ) - GUI WORK MERGED INTO LOCAL MAIN; OWNER'S 8765 GUI RESTARTED ON IT; PUSHED (feat/gui-integration fully landed)
+
+- The owner's own consolidation branch (`consolidation/local-main-2026-11-12`, `2ab94cf`) had already
+  merged `feat/gui-integration` (up to the visual-audit fixes) + `day/2026-11-12-queue` (GUI-1/GUI-2
+  session-aware status) + `lane/L4-hygiene` + `origin/main` into `main`; this session validated that
+  union (duplicated-merge attempt aborted) and switched the main checkout to `main`.
+- Validation on `main` before restart: full `-k gui` suite exit 0 (426 tests; includes the visual-audit
+  fixes, WP7 verify jobs, session-aware status, day-queue union in app.js/data.py/CONTINUITY) and
+  `test_cli_solve_lock.py` green. Day-queue union resolutions were committed on
+  `feat/gui-integration` (`1078cd2`) as the lane-merge record; `main` carries the equivalent via
+  `2ab94cf`.
+- **Owner's desktop shortcut verified and serving the latest GUI:** the shortcut chains to
+  `tools/launch_gui.ps1` (kill old `hornlab-search gui` processes → start fresh on 8765) — unchanged
+  and correct; the staleness was only local `main` not holding the GUI work. The 8765 server was
+  restarted via the same script and live-verified: `/api/verify/…ed1da9` returns
+  `brief=b1w_hifi_90x60_850_wide_v4 band=300–8000` (features that did not exist this morning).
+  Review server on 8799 (worktree) was used for the acceptance walk and for the browser session the
+  owner opened mid-merge; it can be stopped without affecting the queue.
+- Pushed `main` to origin (42 commits incl. WP0–WP10, finishing pass, visual-audit fixes, day-queue
+  lane, L4, docs consolidation). Owner decisions today: brief-leader window 14 → 31 days; direct
+  main push instead of a PR (the consolidation already merged the lanes locally).
+
 ## 2026-11-12 (19:06Z) - GUI: LIVE, SESSION-AWARE STATUS FOR THE TWO-LANE NIGHT (fix(gui): A+B+C LANDED, CLOSED GUI-1 + GUI-2)
 
 Context: the two-lane day queue (launched 14:35Z per the 14:30Z entry) was killed by the machine's
