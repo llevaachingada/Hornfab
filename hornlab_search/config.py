@@ -237,19 +237,22 @@ def _require(section: dict, key: str, where: str):
 # ------------------------------------------------------------------ WP1/WP4 blocks (senior pass)
 
 def _validate_objective_block(block, where: str) -> dict:
-    """Brief/config ``objective: {version: 2|3|4|5|6}`` (WP1; v3 = the 2026-10-25 owner-approved
+    """Brief/config ``objective: {version: 2|3|4|5|6|7}`` (WP1; v3 = the 2026-10-25 owner-approved
     K-law-masked coverage scoring - see objective/scalar_v2.py objective_v3; v4 = the 2026-10-27
     tolerance-normalised objective, whose block also carries ``tolerances`` and the optional
     ``cov_narrow_ratio`` / ``cov_below_f0`` / ``diag_reference`` - see objective/scalar_v4.py;
     v5 = the MEH system objective, whose block is v4's shape with the C11 defaults when
     ``tolerances`` is omitted - see objective/scalar_meh.py;
-    v6 = loading_smooth for Le Cléac'h / rollback - see objective/scalar_v6.py). Default 1.
+    v6 = loading_smooth for Le Cléac'h / rollback - see objective/scalar_v6.py;
+    v7 = the 2026-10-29 loading/flat_cv/8 kHz-floor/signed-V objective ("v5" on the hardened branch),
+    whose block adds ``loaded_re_z`` / ``lfp_re_z`` / ``lfp_crossover_ratio`` / ``bw8k_floor`` -
+    see objective/scalar_v7.py). Default 1.
     Unknown keys are refused so a YAML typo is never silent."""
     if not isinstance(block, dict):
         raise ConfigError(f"{where}: objective must be a mapping")
     v = block.get("version", 1)
-    if isinstance(v, bool) or not isinstance(v, int) or v not in (1, 2, 3, 4, 5, 6):
-        raise ConfigError(f"{where}: objective.version must be 1, 2, 3, 4, 5 or 6, got {v!r}")
+    if isinstance(v, bool) or not isinstance(v, int) or v not in (1, 2, 3, 4, 5, 6, 7):
+        raise ConfigError(f"{where}: objective.version must be 1, 2, 3, 4, 5, 6 or 7, got {v!r}")
     if v == 4:
         from .objective.scalar_v4 import V4Params
         try:
@@ -268,27 +271,72 @@ def _validate_objective_block(block, where: str) -> dict:
             return V6Params.from_block(block).to_block()
         except ValueError as e:
             raise ConfigError(f"{where}: {e}") from None
+    if v == 7:
+        from .objective.scalar_v7 import V7Params
+        try:
+            return V7Params.from_block(block).to_block()
+        except ValueError as e:
+            raise ConfigError(f"{where}: {e}") from None
     unknown = set(block) - {"version"}
     if unknown:
         raise ConfigError(f"{where}: objective unknown key(s) {sorted(unknown)} (allowed: version)")
     return {"version": int(v)}
 
 
+GRID_KEYS = ("verify_points_per_octave", "screen_extra_hz")
+
+
+def _positive_grid_number(block: dict, key: str, where: str) -> float:
+    v = block.get(key)
+    if isinstance(v, bool) or not isinstance(v, (int, float)) or not np.isfinite(float(v)) \
+            or not float(v) > 0:
+        raise ConfigError(f"{where}: grid.{key} must be a positive number")
+    return float(v)
+
+
+def _screen_extra_points(value, where: str) -> list[float]:
+    """``grid.screen_extra_hz``: a non-empty list of positive finite numbers (bools refused)."""
+    if not isinstance(value, (list, tuple)) or isinstance(value, (str, bytes)):
+        raise ConfigError(f"{where}: grid.screen_extra_hz must be a non-empty list of positive "
+                          f"finite numbers, got {value!r}")
+    if not value:
+        raise ConfigError(f"{where}: grid.screen_extra_hz must not be empty")
+    points = []
+    for i, x in enumerate(value):
+        if isinstance(x, bool) or not isinstance(x, (int, float)) \
+                or not np.isfinite(float(x)) or not float(x) > 0:
+            raise ConfigError(f"{where}: grid.screen_extra_hz[{i}] must be a positive finite "
+                              f"number, got {x!r}")
+        points.append(float(x))
+    return points
+
+
 def _validate_grid_block(block, where: str) -> dict:
-    """Brief ``grid: {verify_points_per_octave: N}`` (WP4): build the verify grid as the frozen
-    grid PLUS extra log points in [5 kHz, band_hi] at that density. It forms a NEW grid group:
-    records carry it via their own solve.freqs_hz, and comparisons against runs with a different
-    grid refuse (intended separation)."""
+    """Brief ``grid:`` block (exact keys; a YAML typo is never silent).
+
+    - ``verify_points_per_octave`` (WP4): build the verify grid as the frozen grid PLUS extra log
+      points in [5 kHz, band_hi] at that density. That is a NEW grid group: records carry it via
+      their own solve.freqs_hz, and comparisons against runs with a different grid refuse.
+    - ``screen_extra_hz`` (2026-10-28, opt-in): an explicit list of extra SCREEN frequencies,
+      merged into the frozen 12-point grid after the band_hi clip (``mode_freqs``). The approved
+      points are 250, 315, 400 (LFP/loading gate, below band_lo and intentionally not clipped) and
+      2573, 3311, 4260 (mid-band). Absent = the old 12-point screen grid, byte-for-byte.
+    """
     if not isinstance(block, dict):
         raise ConfigError(f"{where}: grid must be a mapping")
-    unknown = set(block) - {"verify_points_per_octave"}
+    unknown = set(block) - set(GRID_KEYS)
     if unknown:
         raise ConfigError(f"{where}: grid unknown key(s) {sorted(unknown)} "
-                          f"(allowed: verify_points_per_octave)")
-    ppo = block.get("verify_points_per_octave")
-    if isinstance(ppo, bool) or not isinstance(ppo, (int, float)) or not ppo > 0:
-        raise ConfigError(f"{where}: grid.verify_points_per_octave must be a positive number")
-    return {"verify_points_per_octave": float(ppo)}
+                          f"(allowed: {', '.join(GRID_KEYS)})")
+    if not block:
+        raise ConfigError(f"{where}: grid must set at least one of {list(GRID_KEYS)}")
+    out: dict = {}
+    if "verify_points_per_octave" in block:
+        out["verify_points_per_octave"] = _positive_grid_number(block, "verify_points_per_octave",
+                                                                where)
+    if "screen_extra_hz" in block:
+        out["screen_extra_hz"] = _screen_extra_points(block["screen_extra_hz"], where)
+    return out
 
 
 # ------------------------------------------------------------------ WP12 mounting block
@@ -817,6 +865,27 @@ def _force_pin(key: str, value: float, seed: dict, bounds: dict, where: str, uni
         seed[key] = value
 
 
+def _positive_number(v) -> bool:
+    """True for a finite number > 0 (bools excluded)."""
+    return isinstance(v, (int, float)) and not isinstance(v, bool) \
+        and np.isfinite(float(v)) and float(v) > 0.0
+
+
+def _declares_positive_throat_extension(seed: dict, bounds: dict) -> bool:
+    """Does this native OSSE/R-OSSE config search/seed a POSITIVE throat extension?
+
+    The mesher's extension tapers the MAIN throat ``r0`` back to the driven plane at
+    ``r0 - L*tan(theta)``. When L can be > 0 the coupling plane belongs at the driver exit, so
+    ``r0`` must be derived per design (``search/evaluate.py:_derive_throat_coupling``) and must
+    NOT be pinned to the brief's exit radius here. A zero/absent extension keeps today's pin
+    (bit-for-bit).
+    """
+    if _positive_number(seed.get("throat_ext_length_mm")):
+        return True
+    b = bounds.get("throat_ext_length_mm")
+    return isinstance(b, dict) and _positive_number(b.get("hi"))
+
+
 def _apply_brief_driver_pins(raw: dict, brief_d: dict | None, where: str,
                              embedded: bool = False) -> None:
     """WP2 (senior pass 2026-10-24, fairness): when a brief is applied to a NATIVE family config
@@ -836,7 +905,13 @@ def _apply_brief_driver_pins(raw: dict, brief_d: dict | None, where: str,
       resume/verify/report path) SKIPS the pins entirely — a pre-WP2 run whose embedded brief
       conflicts with its pinned throat must stay loadable (bit-for-bit contract on old runs);
       fairness is enforced where the brief is applied fresh (``--brief`` or ``brief_file:``,
-      including a NEW run's subprocess, which passes the brief freshly)."""
+      including a NEW run's subprocess, which passes the brief freshly).
+    - 2026-10-28 (C0, extended-throat coupling plane): when a NATIVE OSSE/R-OSSE config declares
+      ``throat_ext_length_mm`` with a positive seed or a positive ``hi`` bound, the driven plane is
+      the extension's driver end (r0 - L*tan(theta)), so neither ``r0_mm`` nor ``a0_deg`` is pinned
+      to the brief: ``search/evaluate.py`` derives r0 = exit_r + L*tan(theta) and a0 = theta per
+      design (L and theta are searched). Zero-length/absent extension = today's pins, bit-for-bit.
+    """
     if brief_d is None or embedded or raw.get("generator") is not None:
         return
     drv = brief_d.get("driver") or {}
@@ -848,7 +923,9 @@ def _apply_brief_driver_pins(raw: dict, brief_d: dict | None, where: str,
     family = str(raw.get("family", ""))
     seed = raw.setdefault("seed_params", {})
     bounds = raw.setdefault("bounds", {})
-    if family in _PIN_FAMILIES and ("r0_mm" in seed or "r0_mm" in bounds):
+    extended = family in ("OSSE", "R-OSSE") \
+        and _declares_positive_throat_extension(seed, bounds)
+    if family in _PIN_FAMILIES and ("r0_mm" in seed or "r0_mm" in bounds) and not extended:
         _force_pin("r0_mm", exit_r, seed, bounds, where, "mm")
         if policy == "pin" and ("a0_deg" in seed or "a0_deg" in bounds):
             _force_pin("a0_deg", exit_a, seed, bounds, where, "deg")
@@ -1080,6 +1157,17 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
                 f"{where}: objective v6 tolerances/weights let an all-unmeasurable valid design score "
                 f"J = {worst:.0f}, above half the refusal penalty ({PENALTY_INVALID:g}); raise the "
                 f"tolerances or lower the weights so refused designs always rank below valid ones")
+    elif objective_version == 7:
+        # Same penalty-ordering invariant as v4 (plan 3d.2 / 3f), on the v7 term set.
+        from .objective.scalar_v7 import V7Params, worst_valid_j
+        from .objective.terms import PENALTY_INVALID
+        objective_params = _validate_objective_block(raw["objective"], where)
+        worst = worst_valid_j(V7Params.from_block(objective_params), raw.get("weights"))
+        if worst > 0.5 * PENALTY_INVALID:
+            raise ConfigError(
+                f"{where}: objective v7 tolerances/weights let an all-unmeasurable valid design score "
+                f"J = {worst:.0f}, above half the refusal penalty ({PENALTY_INVALID:g}); raise the "
+                f"tolerances or lower the weights so refused designs always rank below valid ones")
 
     if mesh.quadrants not in QUADRANT_FACTOR:
         raise ConfigError(f"{where}: mesh.quadrants must be one of {list(QUADRANT_FACTOR)}")
@@ -1091,12 +1179,24 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
         if "lo" not in b or "hi" not in b:
             raise ConfigError(f"{where}: bounds.{k} needs lo and hi")
 
+    # 2026-10-29 owner retarget: surface the applied brief's driver exit radius on the TYPED target
+    # only (not on ``raw``), so the objective can derive the DRIVER-EXIT f11 when the brief has no
+    # explicit target.loaded_hi_hz. Keeping ``raw`` untouched preserves config_sha for every
+    # existing brief-based run; gate_audit reads the same value from run.json's brief.driver.
+    target_raw = dict(_require(raw, "target", where))
+    applied_brief = raw.get("brief") if isinstance(raw.get("brief"), dict) else None
+    brief_driver = brief_d.get("driver") if isinstance(brief_d, dict) else None
+    applied_drv = ((applied_brief or {}).get("driver") or brief_driver or {})
+    exit_r = applied_drv.get("exit_radius_mm") if isinstance(applied_drv, dict) else None
+    if isinstance(exit_r, (int, float)) and not isinstance(exit_r, bool) and float(exit_r) > 0.0:
+        target_raw.setdefault("driver_exit_radius_mm", float(exit_r))
+
     return Config(
         name=str(_require(raw, "name", where)),
         family=str(_require(raw, "family", where)),
         seed_params=dict(_require(raw, "seed_params", where)),
         bounds_raw=dict(bounds),
-        target_raw=dict(_require(raw, "target", where)),
+        target_raw=target_raw,
         weights=dict(_require(raw, "weights", where)),
         mesh=mesh,
         solve=solve,
@@ -1135,6 +1235,18 @@ def _validate_freq_grid(block, where: str) -> tuple[float, float, float]:
     return lo, hi, ppo
 
 
+def _merge_screen_extra(base: list[float], extra, hi: float) -> tuple[float, ...]:
+    """Frozen screen grid PLUS the brief's explicit ``screen_extra_hz`` points.
+
+    The top clip to ``band_hi`` has already been applied to ``base`` (``hi``); extra points above
+    it are dropped. The bottom is never clipped: 250 Hz is deliberately below ``band_lo`` (the
+    LFP/loading gate solves it, J does not score it). Sorted, rounded to 2 decimals; the tuple is
+    the solve spec's ``freqs_hz``, so the solve hash changes automatically.
+    """
+    pts = {round(float(f), 2) for f in extra if float(f) <= float(hi)}
+    return tuple(sorted(set(base) | pts))
+
+
 def mode_freqs(mode: str, cfg: Config) -> tuple[float, ...]:
     """The mode's frozen log grid, with its top edge clipped to the target band's upper
     edge so the mesh is never asked to resolve frequencies the objective ignores.
@@ -1142,7 +1254,11 @@ def mode_freqs(mode: str, cfg: Config) -> tuple[float, ...]:
     WP4 (senior pass 2026-10-24): a brief with ``grid: {verify_points_per_octave: N}`` extends the
     VERIFY grid with extra log points in [5 kHz, band_hi] at that density. That is a NEW grid
     group — records carry it through their own solve.freqs_hz (and the solve-spec hash), so a
-    comparison against runs on the frozen grid refuses rather than mixing grids."""
+    comparison against runs on the frozen grid refuses rather than mixing grids.
+
+    2026-10-28 (B2): ``grid: {screen_extra_hz: [...]}`` merges explicit extra points into the
+    SCREEN grid (see ``_merge_screen_extra``); the bottom edge is never clipped. Absent keys leave
+    the screen grid byte-identical, and the verify/final grids are never touched by them."""
     lo, hi, n = FREQ_GRIDS[mode]
     band_hi = cfg.target_raw.get("band_hi_hz")
     if band_hi is not None and float(band_hi) < hi:
@@ -1156,8 +1272,13 @@ def mode_freqs(mode: str, cfg: Config) -> tuple[float, ...]:
             n_pts = max(2, int(round(float(np.log2(hi_eff / o_lo)) * ppo)) + 1)
             return tuple(round(float(f), 2) for f in np.geomspace(o_lo, hi_eff, n_pts))
     base = [round(float(f), 2) for f in freq_grid(lo, hi, n)]
+    grid_cfg = cfg.grid or {}
+    if mode == "screen":
+        extra = grid_cfg.get("screen_extra_hz")
+        if extra:
+            return _merge_screen_extra(base, extra, hi)
     if mode == "verify":
-        ppo = ((cfg.grid or {}).get("verify_points_per_octave"))
+        ppo = (grid_cfg.get("verify_points_per_octave"))
         if ppo is not None and hi > HF_VERIFY_LO_HZ:
             n_oct = float(np.log2(hi / HF_VERIFY_LO_HZ))
             n_pts = max(1, int(round(n_oct * float(ppo))))

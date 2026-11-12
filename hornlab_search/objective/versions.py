@@ -14,7 +14,10 @@ from __future__ import annotations
 #: notch, xo_lob and headroom (2026-10-30, ``objective/scalar_meh.py``).
 #: 6 = loading_smooth (Le Cléac'h / rollback class): load_near, z_smooth, cov_pat, di_rise
 #: (2026-11-05, ``objective/scalar_v6.py``).
-SUPPORTED_OBJECTIVE_VERSIONS: tuple[int, ...] = (1, 2, 3, 4, 5, 6)
+#: 7 = v4 plus the combined loading-frequency penalty, constant-velocity flatness, the 8 kHz
+#: one-sided floor and signed V coverage (2026-10-29, ``objective/scalar_v7.py``; written as "5" on
+#: feat/hardened-plan-2026-10-29, renumbered 2026-11-12 - see tools/data/renumber_objective_v5_to_v7.py).
+SUPPORTED_OBJECTIVE_VERSIONS: tuple[int, ...] = (1, 2, 3, 4, 5, 6, 7)
 
 
 def is_supported_objective_version(value: object) -> bool:

@@ -28,6 +28,7 @@ import os
 import subprocess
 import time
 import traceback
+import uuid
 from collections import Counter
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -42,6 +43,7 @@ from ..dataset.record import DEFAULT_TRACE_FRACTION, build_record, should_captur
 from ..design import families
 from ..design.generators.registry import GeneratorError
 from ..mesh.build import MeshConsistencyError, build_mesh, mounting_of
+from ..mesh.throat_check import fits_exit, throat_shape
 from ..metrics.compute import compute_metrics
 from ..metrics.di import di_from_balloon, sin_theta_weights
 from ..objective import PENALTY_FAILED, PENALTY_INVALID, objective, penalty_result
@@ -49,6 +51,7 @@ from ..objective.scalar_meh import MehParams, objective_meh
 from ..objective.scalar_v2 import objective_v2, objective_v3
 from ..objective.scalar_v4 import V4Params, objective_v4
 from ..objective.scalar_v6 import V6Params, objective_v6
+from ..objective.scalar_v7 import V7Params, objective_v7
 from ..objective.versions import SUPPORTED_OBJECTIVE_VERSIONS
 from ..solve import cache as solve_cache
 from ..solve.base import stack_responses, theta_deg_from_dirs
@@ -224,6 +227,8 @@ def make_context(cfg, store=None, *, cache_dir=None, lib_shas=None,
         ctx.objective_params = MehParams.from_block(block)
     elif ctx.objective_version == 6:
         ctx.objective_params = V6Params.from_block(block)
+    elif ctx.objective_version == 7:
+        ctx.objective_params = V7Params.from_block(block)
     else:
         ctx.objective_params = V4Params.from_block(block)
     ctx.provenance = record_provenance(cfg)
@@ -290,6 +295,73 @@ def throat_radius_m(design: Design) -> float | None:
         r = min(radii)
         return r / 1000.0 if r > 0 else None
     return None
+
+
+def _brief_exit_radius_mm(cfg) -> float | None:
+    """The applied brief's driver exit radius, or None when this run has no brief/driver."""
+    brief = getattr(cfg, "brief", None)
+    drv = brief.get("driver") if isinstance(brief, dict) else None
+    r = drv.get("exit_radius_mm") if isinstance(drv, dict) else None
+    if isinstance(r, (int, float)) and not isinstance(r, bool) \
+            and np.isfinite(float(r)) and float(r) > 0.0:
+        return float(r)
+    return None
+
+
+def _refuse_if_throat_misfits(mesh: MeshResult, cfg) -> None:
+    """C4 (objective v7, was "v5" on the hardened branch, 2026-10-29): refuse a throat that is not the driver's round exit.
+
+    Runs after the mesh exists and BEFORE any solver call: reads the mesh's source-tagged driven
+    surface with ``mesh.throat_check`` and compares it with ``2 * driver.exit_radius_mm`` from the
+    applied brief. Raises ``GeometryInvalidError`` with the exact mismatch when the check says the
+    throat does not fit; ``fits is None`` (unjudgeable, e.g. an unreadable mesh) is let through.
+    A run without a brief driver is never checked, so mesh-free runs are untouched.
+    """
+    exit_r = _brief_exit_radius_mm(cfg)
+    if exit_r is None:
+        return
+    fits, why = fits_exit(throat_shape(mesh.path), 2.0 * exit_r)
+    if fits is False:
+        raise GeometryInvalidError(
+            f"throat does not fit the brief driver exit: {why} (the driven coupling plane must be "
+            f"round at 2 x exit_radius_mm = {2.0 * exit_r:.1f} mm)")
+
+
+def _derive_throat_coupling(design: Design, cfg) -> Design:
+    """C0 (2026-10-28): put the DRIVEN coupling plane at the brief's driver exit.
+
+    The mesher's OSSE/R-OSSE throat extension anchors ``r0_mm`` at the MAIN throat and tapers
+    back to the driven end at ``r0 - L*tan(theta)`` (half-angle from the axis). With a positive
+    ``throat_ext_length_mm`` the driver-end radius must therefore be the brief's exit radius, so
+    ``r0_mm = exit_r + L*tan(theta)`` and ``a0_deg = theta`` (continuous wall slope). Both L and
+    theta are SEARCHED, so this is derived per design here, never baked into the config at load.
+
+    Returns a NEW ``Design`` (a shallow copy of the params; the CMA candidate object is never
+    mutated). Zero/absent extension — or no brief driver — returns the design unchanged, so every
+    pre-C0 design hash and mesh key is byte-identical. Derivation happens before the hash is
+    computed, so the mesh cache key, design dir, dataset record and every metric see the same
+    derived geometry that is meshed.
+    """
+    if design.family not in ("OSSE", "R-OSSE") or not isinstance(design.params, dict):
+        return design
+    length = design.params.get("throat_ext_length_mm")
+    if isinstance(length, bool) or not isinstance(length, (int, float)) \
+            or not np.isfinite(float(length)) or float(length) <= 0.0:
+        return design
+    theta = design.params.get("throat_ext_angle_deg", 0.0)
+    if isinstance(theta, bool) or not isinstance(theta, (int, float)) \
+            or not np.isfinite(float(theta)):
+        return design
+    exit_r = _brief_exit_radius_mm(cfg)
+    if exit_r is None:
+        return design
+    r0 = exit_r + float(length) * float(np.tan(np.radians(float(theta))))
+    if not r0 > 0.0:                    # leave it to the mesher's own refusal (reported, cached)
+        return design
+    params = dict(design.params)        # shallow copy: the candidate's own params stay untouched
+    params["r0_mm"] = r0
+    params["a0_deg"] = float(theta)
+    return Design(design.family, params)
 
 
 def metrics_from_response(resp: Response, target: Target, *, mesh: MeshResult | None = None,
@@ -640,7 +712,23 @@ def _mid_ports_meta(mesh_dir: Path) -> dict | None:
 
 
 def _write_json(path: Path, obj) -> None:
-    path.write_text(json.dumps(to_jsonable(obj), indent=1, sort_keys=True), encoding="utf-8")
+    """Atomic JSON write: temp file in the same directory, then ``os.replace``.
+
+    ``path`` may be a hardlink to a shared cache entry (design dirs are link-backed), so the
+    bytes must never be written through it.
+    """
+    path = Path(path)
+    text = json.dumps(to_jsonable(obj), indent=1, sort_keys=True)
+    tmp = path.with_name(f".{path.name}.{uuid.uuid4().hex[:8]}.tmp")
+    try:
+        tmp.write_text(text, encoding="utf-8")
+        os.replace(tmp, path)
+    except BaseException:
+        try:
+            tmp.unlink(missing_ok=True)
+        except OSError:
+            pass
+        raise
 
 
 # ------------------------------------------------------------------ WP8 band split
@@ -740,6 +828,9 @@ def evaluate(design: Design, space, cfg, mode: str, run_dir, store, backend, *,
     ctx = ctx or make_context(cfg, store)
     warn_freq_weights_v1(cfg, ctx.target)
     t_start = time.perf_counter()
+    # C0: the driven coupling plane of an extended-throat design is the brief's driver exit. The
+    # derivation depends on the SEARCHED L/theta, so it is per design (never a config constant).
+    design = _derive_throat_coupling(design, cfg)
     mspec = config_mod.mesh_spec(mode, cfg)
     sspec = config_mod.solve_spec(mode, cfg)
     meh = meh_block_of(cfg)
@@ -936,6 +1027,15 @@ def _score_v6(metrics, resp, target, weights, params):
     return objective_v6(metrics, resp, True, target, weights, params)
 
 
+def _score_v7(metrics, resp, target, weights, params):
+    if params is None:
+        raise ValueError("objective_version 7 needs the brief's objective block (tolerances); the "
+                         "evaluation context carries none")
+    if not isinstance(params, V7Params):
+        params = V7Params.from_block(params)
+    return objective_v7(metrics, resp, True, target, weights, params)
+
+
 _OBJECTIVE_SCORERS = {
     1: lambda metrics, resp, target, weights, params: objective(metrics, True, target, weights),
     2: lambda metrics, resp, target, weights, params: objective_v2(metrics, resp, True, target, weights),
@@ -943,6 +1043,7 @@ _OBJECTIVE_SCORERS = {
     4: _score_v4,
     5: _score_v5,
     6: _score_v6,
+    7: _score_v7,
 }
 if tuple(sorted(_OBJECTIVE_SCORERS)) != SUPPORTED_OBJECTIVE_VERSIONS:
     raise RuntimeError(
@@ -985,6 +1086,9 @@ def _score(metrics, resp, ctx, meh_ctx=None) -> tuple[float, dict]:
     cov/dislope - see ``objective_v3`` in scalar_v2.py. Version 4 (2026-10-27): tolerance-normalised
     terms plus asymmetric coverage, DI std and the diagonal term - ``objective/scalar_v4.py``.
     Version 6 (2026-11-05): loading_smooth for Le Cléac'h / rollback - ``objective/scalar_v6.py``.
+    Version 7 (2026-10-29, renumbered from the hardened branch's "5"): v4 plus the combined
+    loading-frequency penalty (C1), constant-velocity flatness (C2), the 8 kHz one-sided floor (C3)
+    and signed V coverage (C5) - ``objective/scalar_v7.py``.
 
     The allowed versions are the single source of truth in ``objective/versions.py``, shared with
     the dataset record validator. An unsupported version fails loudly instead of silently scoring
@@ -1048,6 +1152,12 @@ def _compute_band_split(design, cfg, mode, mspec, sspec, design_dir, backend, ct
             # Brief-dependent, NOT a pure function of (design, mesh spec): never failure-cached.
             st["kind"], st["err"], st["no_marker"] = KIND_INVALID, why, True
             return
+        if int(getattr(ctx, "objective_version", 1)) == 7:   # hardened C4 gate; v5 = MEH, v6 = loading_smooth keep their own rules
+            try:
+                _refuse_if_throat_misfits(bmesh, cfg)
+            except GeometryInvalidError as exc:
+                st["kind"], st["err"] = KIND_INVALID, str(exc)
+                return
         mesh_specs.append(bmspec)
         meshes.append(bmesh)
 
@@ -1397,6 +1507,16 @@ def _compute(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx, st)
         # Brief-dependent, NOT a pure function of (design, mesh spec): never failure-cached.
         st["kind"], st["err"], st["no_marker"] = KIND_INVALID, why, True
         return
+
+    # C4 (objective v7, was "v5" on the hardened branch): the driven throat must be the brief driver's round exit. The refusal is
+    # a DETERMINISTIC invalid candidate (mapped exactly like build_mesh's geometry refusal), and
+    # it happens before the solve-cache lookup so a stored response can never bypass it.
+    if int(getattr(ctx, "objective_version", 1)) == 7:   # hardened C4 gate; v5 = MEH, v6 = loading_smooth keep their own rules
+        try:
+            _refuse_if_throat_misfits(mesh, cfg)
+        except GeometryInvalidError as exc:
+            st["kind"], st["err"] = KIND_INVALID, str(exc)
+            return
 
     resp = None
     root = ctx.solve_cache_root

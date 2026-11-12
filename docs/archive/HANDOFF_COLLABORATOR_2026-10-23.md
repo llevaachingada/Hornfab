@@ -1,3 +1,5 @@
+> **Archived 2026-10-30.** Superseded by [HANDOFF_COLLABORATOR_2026-10-27.md](../HANDOFF_COLLABORATOR_2026-10-27.md) and [HANDOFF_BETA.md](../HANDOFF_BETA.md).
+
 # Handoff for the collaborator pulling `main` tonight (2026-10-23, ~15:15 EDT)
 
 Written by the owner's orchestrator session. `main` is clean and pushed at the commit that adds this file; the

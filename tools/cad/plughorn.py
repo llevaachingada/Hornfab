@@ -26,6 +26,13 @@ The model (all lengths mm; ``d`` = depth behind the front face; mirror-symmetric
   that keeps each front face planar (derived); base octagon (``plug_base_x``/``plug_base_side_y``, ``plug_base_top_x``/``plug_base_y``)
   just behind the throat plane, carried on a post (radius ``post_r``) from the cone centre (US6557664: the
   member is mounted inside the voice-coil diameter), so horn + plug are ONE solid.
+* **Cone fill** (``cone_fill`` 1 = on, the F1 arrangement: the axe head's rear "eats the compression chamber"):
+  ONE loft from a circle at the post (r = 0.9 * ``post_r``, so it overlaps the post) through a circle at
+  ``cone_r - plug_gap`` to the axe-head base footprint, at the base depth ``-plug_base_back``. Its conical
+  underside follows the cone at an AXIAL ``plug_gap`` clearance (2 mm Evo 7SH), so the driver cone stays one
+  intact face; the throat ring between the octagon and the base footprint stays open air. The fill is unioned
+  with body + post + plug, so the whole model is ONE connected solid. ``front_chamber_l`` uses this net volume.
+  ``cone_fill = 0`` restores the old open cone chamber.
 * **Outside** (simplified, owner 2026-10-28): front plate ``plate_w x plate_h x plate_t``, a convex shell from
   the plate's back (``shell_w x shell_h``) to the driver ring, and the moulded driver bowl (``bowl_*``), whose
   gross air volume is reported for the lumped driver model.
@@ -69,6 +76,7 @@ class PlughornParams:
     cone_depth_mm: float = 45.0
     post_r_mm: float = 22.0
     front_gap_mm: float = 8.0          # throat plane -> cone rim (the compression chamber depth)
+    cone_fill: float = 1.0             # 1 = the axe head's rear fills the cone chamber (F1 arrangement); 0 = off
     # horn (Evo 7SH CAD)
     length_mm: float = 400.0           # front face -> throat plane
     throat_side_x_mm: float = 90.0
@@ -334,10 +342,12 @@ class PlughornParams:
                 if getattr(self, f.name) < 0.0:
                     raise ValueError(f"{f.name} must be >= 0 (0 = off)")
                 continue
-            if f.name not in ("roll_steps", "plug_base_side_y_mm") and not getattr(self, f.name) > 0.0:
+            if f.name not in ("roll_steps", "plug_base_side_y_mm", "cone_fill") and not getattr(self, f.name) > 0.0:
                 raise ValueError(f"{f.name} must be > 0, got {getattr(self, f.name)}")
         if not 1 <= int(self.roll_steps) <= 8:
             raise ValueError("roll_steps must be in [1, 8]")
+        if self.cone_fill < 0.0:
+            raise ValueError("cone_fill must be >= 0 (0 = off)")
         g = self.s
         if not (g("throat_top_half_mm") < g("throat_side_x_mm") and g("throat_side_half_mm") < g("throat_top_y_mm")):
             raise ValueError("throat octagon: top half-length < side x and side half-height < top y")
@@ -367,6 +377,20 @@ class PlughornParams:
             raise ValueError("axe head: the nose must be the forward-most point and all points inside the horn")
         if not (g("plug_base_y_mm") > self.post_r_mm + 2 and g("plug_base_x_mm") > self.post_r_mm + 2):
             raise ValueError("the axe-head base must enclose the post (+2 mm)")
+        if self.cone_fill > 0.0:
+            poly = self.base_footprint()
+            base_area = _poly_area(poly)
+            oct_area = _poly_area(np.array([(x, y) for x, y, _ in self.throat_octagon()]))
+            if base_area >= oct_area:
+                raise ValueError(
+                    f"cone fill: the axe-head base footprint ({base_area:.0f} mm2) would close the "
+                    f"throat ring (octagon {oct_area:.0f} mm2); enlarge the throat or shrink the base")
+            if max(math.hypot(x, y) for x, y in poly) >= self.cone_r_mm - self.plug_gap_mm:
+                raise ValueError(
+                    "cone fill: the axe-head base footprint reaches the cone chamber wall, so the fill "
+                    "would touch the cone/chamber (need footprint radius < cone_r - plug_gap)")
+            if self.cone_r_mm - self.plug_gap_mm <= self.post_r_mm:
+                raise ValueError("cone fill: cone_r - plug_gap must be > post_r")
         clear = self.clearance()
         if clear["min_mm"] < self.plug_gap_mm:
             raise ValueError(
@@ -387,6 +411,73 @@ class PlughornParams:
     def cone_z(self, r: float) -> float:
         t = (r - self.post_r_mm) / (self.cone_r_mm - self.post_r_mm)
         return -self.front_gap_mm - self.cone_depth_mm * (1.0 - min(max(t, 0.0), 1.0))
+
+    # ------------------------------------------------------------------ cone fill
+    def base_footprint(self):
+        """Convex polygon (CCW, x/y mm) of the axe-head base: the cone fill's top face."""
+        bx, bsy = self.s("plug_base_x_mm"), self.s("plug_base_side_y_mm")
+        btx, by = self.s("plug_base_top_x_mm"), self.s("plug_base_y_mm")
+        pts = [(sx * bx, sy * bsy) for sx in (1, -1) for sy in (1, -1)]
+        pts += [(sx * btx, sy * by) for sx in (1, -1) for sy in (1, -1)]
+        return _hull2d(pts)
+
+    def _fill_sections(self):
+        """The cone fill's loft sections (r, z) and top polygon, in the fill's own terms.
+
+        ``ri`` is 0.9 * post_r so the fill overlaps the post (the anchor); ``R = cone_r - plug_gap``
+        leaves a radial passage at the chamber wall, and every section is offset AXIALLY from the cone
+        by ``plug_gap`` (the minimum normal gap is plug_gap * cos(cone slope) = 1.76 mm on the 7SH).
+        """
+        cr, pr = self.cone_r_mm, self.post_r_mm
+        gap, z_top = self.plug_gap_mm, -self.plug_base_back_mm
+        ri, R = 0.9 * pr, cr - gap
+        return {"ri": ri, "R": R, "z_ri": self.cone_z(ri) + gap, "z_R": self.cone_z(R) + gap,
+                "z_top": z_top, "poly": self.base_footprint()}
+
+    def _fill_volumes(self) -> tuple[float, float]:
+        """(fill volume, part of it inside the post) in mm^3, from the loft's own sections.
+
+        The fill is a frustum from ``ri`` to ``R`` followed by a ruled transition from the circle
+        ``R`` to the base footprint.  The transition is modelled as a frustum to the EQUAL-AREA radius
+        ``sqrt(base area / pi)``; the real OCC loft agrees with this to < 0.2 % (measured 0.1 % on the
+        7SH, 0.02 % on the 2SH).  The part below ``post_r`` is solid post, not air, so it is removed
+        before it is subtracted from the chamber.
+        """
+        f = self._fill_sections()
+        ri, R, z_ri, z_R, z_top, poly = f["ri"], f["R"], f["z_ri"], f["z_R"], f["z_top"], f["poly"]
+        r_eq = math.sqrt(_poly_area(poly) / math.pi)
+        v_fill = math.pi * (z_R - z_ri) * (R * R + R * ri + ri * ri) / 3 \
+            + math.pi * (z_top - z_R) * (R * R + R * r_eq + r_eq * r_eq) / 3
+        h, slope = z_top - z_ri, (z_R - z_ri) / (R - ri)
+        v_post = h * math.pi * ri * ri                      # flat bottom cap, r < ri (inside the post)
+        v_post += 2 * math.pi * ((h * self.post_r_mm ** 2 / 2 - slope * (self.post_r_mm ** 3 / 3
+                                 - ri * self.post_r_mm ** 2 / 2)) - (h * ri * ri / 2 - slope
+                                 * (ri ** 3 / 3 - ri * ri * ri / 2)))
+        return v_fill, v_post
+
+    def front_chamber_gross_l(self) -> float:
+        """Gross air in the cone cavity (cone surface -> throat plane, post radius -> cone rim), no fill.
+
+        V = pi*g*(cr^2 - pr^2) + pi*cd*(cr^2 + cr*pr - 2*pr^2)/3  [mm^3].
+        (The old ``theory`` v1 used pi*cr^2*g instead of pi*g*(cr^2 - pr^2), i.e. it also counted the
+        plug cylinder over r < post_r: +1.4 % on the 7SH.  ``theory`` keeps that value when the fill is off.)
+        """
+        cr, pr, g, cd = self.cone_r_mm, self.post_r_mm, self.front_gap_mm, self.cone_depth_mm
+        return (math.pi * g * (cr * cr - pr * pr)
+                + math.pi * cd * (cr * cr + cr * pr - 2 * pr * pr) / 3) / 1e6
+
+    def front_chamber_l(self) -> float:
+        """NET air (litres) between the cone and the throat plane after the fill.
+
+        With the fill on: ``gross - (fill volume above the post)``.  That is the axial gap over the
+        cone plus the open region above the fill's sloped side and around the throat ring.  With
+        ``cone_fill = 0`` it is the gross cone-cavity air, so the old cut-off is reproduced.
+        """
+        gross = self.front_chamber_gross_l()
+        if self.cone_fill <= 0.0:
+            return gross
+        v_fill, v_post = self._fill_volumes()
+        return max(gross * 1e6 - (v_fill - v_post), 0.0) / 1e6
 
     def clearance(self, n: int = 200) -> dict[str, Any]:
         cloud = self.plug_cloud()
@@ -450,6 +541,8 @@ class PlughornParams:
             "outer_h_mm": round(self.s("plate_h_mm"), 1),
             "depth_total_mm": round(L + self.s("bowl_back_d_mm"), 1),
             "rear_chamber_gross_l": round(self.rear_chamber_l(), 2),
+            "front_chamber_l": round(self.front_chamber_l(), 3),
+            "front_chamber_gross_l": round(self.front_chamber_gross_l(), 3),
             "plug_clearance_mm": round(float(self.clearance()["min_mm"]), 2),
             **self.theory(amin),
         }
@@ -461,7 +554,9 @@ class PlughornParams:
           (Keele; the repo's K-law), with the nominal angle = 2 x the wall angle.
         * mouth cut-off: the mouth stops loading the throat below ~ c / perimeter.
         * front-chamber cut-off: the air between cone and throat (V1) in parallel with the ring's
-          radiation resistance: f ~ c * S_ring / (2 pi V1) [first-order; Keele's form, verify].
+          radiation resistance: f ~ c * S_ring / (2 pi V1) [first-order; Keele's form, verify]. V1 is
+          the NET volume after the cone fill (``front_chamber_l``) when ``cone_fill`` is on; with the fill
+          off it is the old gross cone-cavity value, reproduced exactly.
         * path spread: cone rim vs cone centre distance to the throat ring; the quarter-wave frequency
           c / (4 * spread) is where they start to cancel (the axe head's job is to keep this high).
         """
@@ -472,6 +567,8 @@ class PlughornParams:
         av = math.degrees(math.atan2(hp["Mt"][1] - hp["Q"][1], hp["Mt"][2]))
         g, cd, cr, pr = self.front_gap_mm, self.cone_depth_mm, self.cone_r_mm, self.post_r_mm
         v1 = math.pi * cr * cr * g + math.pi * cd * (cr * cr + cr * pr + pr * pr) / 3 - math.pi * pr * pr * cd
+        if self.cone_fill > 0.0:                            # the axe head's rear eats the compression chamber
+            v1 = self.front_chamber_l() * 1e6
         r_ring = 0.5 * (self.s("throat_side_x_mm") + self.s("plug_base_x_mm"))
         rim = math.hypot(cr - r_ring, g)
         centre = math.hypot(r_ring - pr, g + cd)
@@ -619,8 +716,24 @@ def _convex_solid(bd, cloud):
     return bd.Solid(bd.Shell(faces))
 
 
+def _cone_fill_solid(bd, p: PlughornParams):
+    """The cone fill as ONE ruled loft: post circle -> cone-rim circle -> axe-head base footprint.
+
+    It overlaps the post at r = 0.9 * post_r (the anchor) and its top face is the axe-head base
+    footprint at z = -plug_base_back (coplanar with the plug's base), so the later union makes one
+    connected solid.  Every bottom edge sits ``plug_gap`` (axially) above the cone.
+    """
+    f = p._fill_sections()
+    sec = [
+        bd.Face(bd.Wire.make_circle(f["ri"], bd.Plane.XY.offset(f["z_ri"]))),
+        bd.Face(bd.Wire.make_circle(f["R"], bd.Plane.XY.offset(f["z_R"]))),
+        _poly_face(bd, [(x, y, f["z_top"]) for x, y in f["poly"]]),
+    ]
+    return bd.loft(sec, ruled=True)
+
+
 def build_body(p: PlughornParams = DEFAULTS):
-    """Horn + front plate + shell + driver bowl + post + axe head as ONE closed solid (mm)."""
+    """Horn + front plate + shell + driver bowl + post + axe head (+ cone fill) as ONE closed solid (mm)."""
     p.validate()
     bd = _multicell()._cad()["bd"]
     L, over = p.L, 30.0
@@ -655,6 +768,8 @@ def build_body(p: PlughornParams = DEFAULTS):
     zb = -p.plug_base_back_mm
     post = bd.Pos(0, 0, 0.5 * (-g - cd - 2.0 + zb + 2.0)) * bd.Cylinder(p.post_r_mm, (zb + 2.0) - (-g - cd - 2.0))
     plug = _convex_solid(bd, p.plug_cloud())
+    if p.cone_fill > 0.0:
+        return body + post + plug + _cone_fill_solid(bd, p)
     return body + post + plug
 
 

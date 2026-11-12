@@ -1,0 +1,38 @@
+# STAND-IN driver for the cone_plughorn mid (8-inch slot, Evo 2SH topology).
+# Not a Funktion-One driver. Every number is printed on the Faital Pro datasheet (source URL).
+#
+# This sheet prints BOTH Mms (24.5 g) and Mmd (20.9 g), so the model uses the DRY mass the way the
+# solver needs it: `mmd_g` below, no Mms flag. Preferred 8-inch stand-in.
+#
+# The sealed rear bowl is a property of the HORN, not of the driver: no rear_box_l here. Pass the
+# measured net bowl volume with `tools/loudness_report.py --rear-box-l <L>`.
+
+kind: cone
+name: Faital Pro 8PR155 (stand-in, Mmd published)
+source: https://faitalpro.com/en/products/LF_Loudspeakers/product_details/datasheet.php?id=101030145
+use: pa
+notes: >-
+  Stand-in for the Evo 2SH 8-inch mid. Cone material is NOT published (the sheet names only the
+  surround: triple roll, treated polycotton). Xmax is the sheet's own figure; Xdamage 10.65 mm.
+  Frequency range 80-6300 Hz is printed; no recommended crossover is published.
+
+exit_diameter_mm: null
+
+nominal_impedance_ohm: 8
+re_ohm: 5.3
+le_mh: 0.41                  # printed as Le, with no measurement frequency
+
+sd_cm2: 217
+mmd_g: 20.9                  # printed as Mmd (dry moving mass) - preferred
+mms_g: 24.5                  # printed as Mms; recorded for the record, NOT used when mmd_g is present
+bl_tm: 13.4
+fs_hz: 85
+qms: 8.8
+qes: 0.39
+qts: 0.37
+
+power_aes_w: 200             # AES; maximum 400 W (3 dB above nominal)
+xmax_mm: 3.57
+
+published_sensitivity_db: 97.0
+published_sensitivity_condition: "1W/1m"

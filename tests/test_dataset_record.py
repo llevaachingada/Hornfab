@@ -299,11 +299,11 @@ def test_a_v3_evaluation_writes_objective_version_3():
 
 def test_validate_rejects_an_unknown_objective_version():
     meta, _ = _built()
-    # 6 is loading_smooth (2026-11-05), so the first UNKNOWN version is now 7.
-    for bad in (0, 7, 99, "2", True):
+    # 6 is loading_smooth (2026-11-05), 7 the renumbered hardened objective, so the first UNKNOWN version is 8.
+    for bad in (0, 8, 99, "2", True):
         with pytest.raises(ValueError, match="objective_version"):
             validate_record(dict(meta, objective_version=bad))
-    for bad in (0, 7, 99, "2", True):
+    for bad in (0, 8, 99, "2", True):
         assert not is_supported_objective_version(bad)
 
 

@@ -119,3 +119,54 @@ def beamwidth_deg(angles_deg, spl_db, drop_db: float = 6.0) -> tuple[float, int]
         else:
             lo = float(a[0])
     return hi - lo, int(crossings.size)
+
+
+def beamwidth_edges_deg(angles_deg, spl_db, drop_db: float = 6.0) -> tuple[float, float]:
+    """The signed (lower_deg, upper_deg) -drop_db crossings of a cut (2026-10-29, objective v5 C5).
+
+    ``beamwidth_deg`` returns one total width; some briefs specify the two halves separately
+    (an asymmetric vertical coverage). This returns the SAME outermost crossing on each side of
+    the on-axis sample, so ``upper - lower`` is ``beamwidth_deg``'s width for a two-sided pattern.
+
+    Frozen rules, matching ``beamwidth_deg`` (01_CONTRACTS.md section 10):
+      - Reference is the ON-AXIS sample, not the maximum; no exact 0-degree sample -> ValueError.
+      - Threshold is the same exact half-pressure level (-6.0206 dB) for ``drop_db=6``.
+      - Crossings are interpolated LINEARLY IN dB versus angle between the bracketing samples.
+      - No crossing on a side -> the angle grid's edge on that side, so a one-sided pattern still
+        reports a usable, finite edge.
+      - An all-non-finite pattern carries no information: both edges are the grid edges.
+
+    ``lower`` is the outermost negative-side crossing (the grid start when there is none) and
+    ``upper`` the outermost positive-side crossing (the grid end when there is none).
+    """
+    a = np.asarray(angles_deg, dtype=float)
+    s = np.asarray(spl_db, dtype=float)
+    if a.ndim != 1 or s.shape != a.shape:
+        raise ValueError(
+            f"beamwidth_edges_deg: angles {a.shape} and spl {s.shape} must be equal 1-D shapes")
+    if a.size < 2:
+        raise ValueError("beamwidth_edges_deg: need at least two samples")
+    if np.any(np.diff(a) <= 0):
+        raise ValueError("beamwidth_edges_deg: angles must be strictly ascending")
+    i0 = int(np.argmin(np.abs(a)))
+    if abs(a[i0]) > _ANGLE_TOL:
+        raise ValueError("beamwidth_edges_deg: no exact 0-degree sample in the angle array")
+    lo_edge, hi_edge = float(a[0]), float(a[-1])
+    if not np.isfinite(s[i0]):
+        return lo_edge, hi_edge
+
+    thr = _threshold_db(drop_db)
+    n = normalized_db(s, s[i0])
+    inside = n >= thr
+    flips = np.nonzero(inside[:-1] != inside[1:])[0]
+    if flips.size == 0:
+        return lo_edge, hi_edge
+
+    # One side of every flip is >= thr and the other < thr, so n[j+1] != n[j].
+    t = (thr - n[flips]) / (n[flips + 1] - n[flips])
+    crossings = a[flips] + t * (a[flips + 1] - a[flips])
+    lower = crossings[crossings <= 0.0]
+    upper = crossings[crossings >= 0.0]
+    lo = float(lower.min()) if lower.size else lo_edge
+    hi = float(upper.max()) if upper.size else hi_edge
+    return lo, hi

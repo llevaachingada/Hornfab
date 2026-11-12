@@ -1,0 +1,78 @@
+# Brief room_90x60_800_shelf - hi-fi ROOM COVERAGE horn, 90 x 60 deg, crossover 800 Hz, 1.4-inch, SYMMETRIC.
+#
+# OWNER USE CASE (2026-10-28): living room ~20 ft x 14 ft x 10 ft ceiling (6.1 x 4.3 x 3.05 m). Two
+#   horns high in the front corners of the 20 ft wall (bookshelf ~5 ft or ceiling-hung ~8.5 ft),
+#   toed in toward the opposite rear corners. Goal: even level and the same tonal balance across
+#   the whole room, not a sweet spot. Imaging is secondary.
+# WHY 90 x 60:
+#   H 90: a corner sees exactly a 90 deg quadrant; the adjacent walls sit at the -6 dB edges, so the
+#     near-horn wall reflections stay weak. Wider (120) sprays the near walls at full level.
+#   V 60: hung at 8.5 ft, seated ears (3.6 ft) span ~11 deg (far corner, ~24 ft) to ~44 deg down
+#     (nearest seat, ~5 ft). Aimed ~25 deg down, a 50-60 deg V window covers every seat.
+#     On a shelf at ~5 ft the span is ~3-16 deg down; 60 deg is ample.
+#   Level: aim at the far side (far seats on-axis, near seats off-axis) to offset inverse square.
+# CROSSOVER 800 Hz: DI matched to a 12" woofer near 1 kHz or a 15" near 800 Hz (both ~90 deg there).
+#   Calibration (docs: hardened handoff 2026-10-28): 18 Sound XT1464 (380x304x257) is rated cutoff
+#   500 Hz with crossover >= 800 Hz; ATH TwinRay 36-10-380 (380x303x192) LFP20 580 Hz.
+# GATES (hardened plan D1/D2, applied by tools/rescore/gate_audit.py, not by J):
+#   loading: LFP20 (Re z = 0.2) <= 500 Hz (= f_x / 1.6) AND Re z >= 0.5 held from 800 Hz up.
+#   pattern: H within +-20 % from 800 Hz to 8 kHz; V -40 %/+25 % from max(1.5 f_x, f0_v);
+#            DI rise <= 5 dB from 800 Hz to 8 kHz; bw at 8 kHz >= 0.75 x target in both planes.
+#   throat:  coupling plane round, 36 mm (hornlab_search/mesh/throat_check.py).
+# K-LAW ARITHMETIC (mouth = 25,400,000 / (f0 * coverage_deg)):
+#   H: 25,400,000 / (800 * 90) = 353 mm  (envelope 400 W holds it)
+#   V: 25,400,000 / (800 * 60) = 529 mm  (shelf envelope 320 H does not) -> f0_v_hz =
+#      25,400,000 / (60 * 320) = 1323 Hz; V coverage is scored only above 1323 Hz.
+#   XT1464 implies commercial practice ~18-23e6 mm.deg.Hz, so 25.4e6 is conservative.
+# DRIVER CLASS: 1.4-inch compression driver (36 mm exit), r0 = 18.0 mm, exit half-angle 2.5 deg.
+# f11 DISCLOSURE: 1.4in f11 5,653 Hz: 5.7-8 kHz compares geometry, not the driver.
+# Class A tolerances (docs/evidence/OBJECTIVE_V4_TOLERANCES.md). load is weighted (0.5, z_min 0.5)
+#   so the search is pushed toward loading; the gate, not J, decides pass/fail.
+name: room_90x60_800_shelf_v4
+description: (objective v4) Room-coverage hi-fi 90x60, crossover 800 Hz (V from 1323 Hz), 1.4-inch, shelf 400x320x300 envelope, band 300-8000 Hz, loading weighted
+driver:
+  exit_radius_mm: 18.0
+  exit_angle_deg: 2.5
+envelope:
+  max_mouth_w_mm: 400.0
+  max_mouth_h_mm: 320.0
+  max_depth_mm: 300.0
+symmetry: hv
+source:
+  cap: auto
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 300.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.5
+  f0_hz: 800.0
+  f0_v_hz: 1323.0
+  freq_weights:
+    band_hz:
+      - [2500.0, 5500.0, 2.0]
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.5
+  distd: 0.5
+  diag: 0.5
+grid:
+  verify_points_per_octave: 6
+objective:
+  version: 4
+  tolerances:
+    cov: 2.0
+    rip: 1.0
+    di: 0.4
+    dislope: 9.0
+    flat: 1.5
+    load: 0.3
+    distd: 2.0
+    diag: 2.0
+  cov_narrow_ratio: 2.0

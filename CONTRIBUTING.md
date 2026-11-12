@@ -15,6 +15,12 @@ Read `CLAUDE.md` first, then `docs/CONTINUITY.md`. The plan in `docs/plan/` is t
 - **Every push updates `docs/CONTINUITY.md` and `docs/ISSUES.md` in the same commit.** No exceptions.
 - CI runs offline tests only (tests needing a real solver/GPU are marked and deselected). Solver
   checkpoints are run on the real machine and pasted.
+- **New loose artifacts** (pytest XML, probes, campaign manifests, one-off logs) go to
+  `scratch/<YYYY-MM-DD>_<topic>/`, never into `runs/` or the repo root.
+- **Config generations**: a `_vN` generation supersedes `_vN-1`. Once tests stop referencing an old
+  `examples/{briefs,typologies}/<gen>/`, move it to `examples/_archive/` — runs keep their own
+  `config.yaml` snapshot, so reproducibility survives. Do not copy an unchanged config into a new
+  generation just to keep the directories parallel.
 
 ## The 8 hard rules (verbatim from `docs/plan/00_ORCHESTRATOR.md`)
 

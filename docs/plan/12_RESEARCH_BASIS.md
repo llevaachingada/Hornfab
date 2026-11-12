@@ -1026,3 +1026,31 @@ Full report: `docs/research/SIM_VS_REAL_HORN_2026-10-27.md` (source table there;
   on a turntable with a large roundover baffle.
 - **Not verified by the research pass:** the gedlee.com directivity PDF (TLS error), the Panzer/Macey IOA PDF (404), the exact 2nd-harmonic figures of the
   ICA2019 distortion paper.
+
+## 18. Fast BEM acceleration (matrix-free / GMRES / FMM) - 2026-10-29
+
+Full report: `docs/research/MATRIX_FREE_GPU_GMRES_FMM_2026-10-29.md` (owner-authorized append to this frozen plan; no earlier text edited). Research only - no code/GPU run. Priorities: `NEXT_DEV_PRIORITIES.md` P13.
+
+**Verdict.** At 5-6k dofs the dense fused CUDA path is assembly-bound and already near-optimal; matrix-free/FMM is not the 2x at our size. The cheapest credible 2x is quadrature order 4 -> 2 (wavelength-driven). FMM is a feasibility play at 14k+ and the only path at 20k+. A 10x is not supported at 5-10k.
+
+**Evidence table (measured / reported).**
+
+| Claim | Evidence | Label |
+|---|---|---|
+| Assembly is 73-96 % of one frequency; the "iterative solve" is 0.07-0.94 s | `docs/evidence/CAMPAIGN_SMOKE_2026-10-27.md:57-59` | measured |
+| 5,106 dofs 2.55 s/freq; 8,919 6.62; 12,183 11.0; 13,999 13.78; 15,984 437 s assembly; 20,237 host death | `docs/CONTINUITY.md:696-697`; `docs/evidence/FUSED_CUDA_2026-10-24.md:309-313,344` | measured |
+| 8 GB card; ~12k dofs is the safe cap | `TOOLCHAIN.md:9,94,121`; `docs/ISSUES.md:457` | measured |
+| CUDA default = four dense operators + device `\` per drive | `forks/hornlab-beat-bem/hornlab_beat_bem/julia/src/BeatEngineCore.jl:1527,1536`; `julia/BeatEngineDriver.jl:723-763` | measured (source) |
+| `cuda_fused` = one N x N system + device `lu!` | `julia/src/BeatEngineCudaBurtonMiller.jl:642-648`; `julia/BeatEngineDriver.jl:1912-1921` | measured (source) |
+| No CUDA GMRES; GMRES is CPU/Metal, diagonal preconditioning, FP64 Krylov | `julia/src/BeatEngineDenseSolve.jl:14-55,72-73,363-372` | measured (source) |
+| bempp_cpu defaults to GMRES over dense weak forms | `hornlab_search/solve/bempp.py:108,168`; installed `hornlab_bempp_bem/config.py:211`, `symmetry.py:949` | measured (source) |
+| No FMM/H-matrix/ACA in Beat or our bempp adapter; bempp-cl ships an ExaFMM hook but `exafmm` is not installed | grep of `hornlab_search/solve/*.py` and the fork `.jl`; `.venv/Lib/site-packages/bempp_cl/api/fmm/exafmm.py` | measured |
+| Axisymmetric BEM is planned (`backend: axibem`), WP13 owner-deferred | `docs/GUI_INTEGRATION_PLAN_2026-10-25.md:81`; `docs/ISSUES.md:4` | measured (docs) |
+
+**The quadrature finding (the recommended lever).** Order 4 uses a 6-point triangle rule, i.e. **36 point-pairs per element pair**; order 2 uses 3 points, i.e. **9 point-pairs** - 4x fewer kernel evaluations (`forks/hornlab-beat-bem/docs/beat-engine-CUDA.md:53`). Allowed orders are `(1, 2, 4)`, default 4 (`forks/hornlab-beat-bem/hornlab_beat_bem/config.py:32,405`); the search adapter does not forward the key today (`hornlab_search/solve/beat.py:470-493`). The fork already carries a wavelength-driven 1/2/4 selector with `kh` cutoffs `q1_max = 0`, `q2_max = 2.0` (`julia/BeatEngineDriver.jl:207-229`), but it refuses non-CPU backends (`:186-187`) and the selected rule is discarded off CPU (`:1766-1773`). At epw 6, `kh = 2*pi/6 = 1.05`, so it would select order 2 at every size we solve. Port cost is a rule/cache port, not research; the CUDA cache is keyed on `mesh + rule`, so per-order caches are required (`beat-engine-CUDA.md:145`).
+
+**GMRES and FMM verdicts.** GMRES vs dense LU crosses at 2k-5k dofs on CPU at one drive (`BeatEngineDenseSolve.jl:14-18,123`); a GPU crossing at ~5k-10k is inferred, not measured. On the fused CUDA path the solve is at most 0.94 s of 2.55 s at 5,106 dofs, so even an infinitely fast solver caps the win at 1.58x [derived]; the honest GMRES expectation is 1.0-1.4x, with a ~1.0-1.8 GB peak-VRAM saving from deleting the factorization workspace [inferred] as the real value. FMM crosses dense at ~10k-20k dofs at kD ~ 100 [reported S5 + inferred], and is memory-driven at 20k+ (dense operator alone is 3.3 GB at 20,237 dofs); published 2-5x applies in the 14-20k band, 10x is unsupported. H-matrix/ACA is the wrong tool at kD ~ 100 (rank growth); S7's 5.5x is GPU H-matrix assembly, not our solve.
+
+**Sources (as supplied for this pass; full URLs/DOIs in the report).** S1 bempp-cl (MIT; FMM/OSRC; Exafmm; CPU FMM); S3 Exafmm-t (BSD-3; CPU OpenMP; low-frequency; dormant 2021); S5 Gumerov & Duraiswami 2009 JASA, https://doi.org/10.1121/1.3021297 (broadband FMM-BEM kD 0.0001-500); S6 Gumerov & Duraiswami 2017 JASA, https://doi.org/10.1121/1.4987467 (GPU/CPU FMM-BEM); S7 Vater, Betcke, Dilba 2017 arXiv, https://arxiv.org/abs/1711.01897 (GPU H-matrix assembly 5.5x); S11 Sushnikova et al. 2023 SIAM MMS, https://doi.org/10.1137/22m1514040 (FMM-LU; not highly oscillatory); S13 Antoine & Darbas 2007 M2AN, https://doi.org/10.1051/m2an:2007009 (OSRC); S14 Fierro-Piccardo & Jerez-Hanckes 2020 JCP, https://doi.org/10.1016/j.jcp.2020.109355 (Calderon); S17 Chen, Schafer, Desbrun 2025 ACM TOG, https://doi.org/10.1145/3731196 (sparse inverse-LU; author claim); S20 Dong, Shen, Gao 2020 JASA, https://doi.org/10.1121/10.0001037 (multimodal horn optimization); S22 Dong, Doc, Felix 2024 JASA, https://doi.org/10.1121/10.0025389 (axisymmetric horn/enclosure); S26 Hipperson, Hargreaves, Cox 2026 arXiv, https://doi.org/10.48550/arxiv.2604.21431 (JAX-BEM); S28 PVFMM, https://doi.org/10.4208/cicp.020215.150515sw (GPU FMM; high-k GPU maturity unverified); S29 FMM3D, https://github.com/flatironinstitute/FMM3D (Apache-2.0; hfmm3d; CPU); S30 NiHu, https://github.com/Q-Minh/nihu (GPL-3; BM+FMM reference; CPU; 2023); S31 H2Lib, https://github.com/H2Lib/H2Lib (LGPL-3; H2; CPU; high-k ranks).
+
+**Not verified.** No independent 5-20k Burton-Miller GPU benchmark; FMM constants at kD ~ 100-235 unverified; bempp-cl FMM defaults are low-frequency-oriented; the GMRES study is CPU/Metal; several papers read at abstract level; no solver run in this research.

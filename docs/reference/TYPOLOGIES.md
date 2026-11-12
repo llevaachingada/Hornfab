@@ -145,6 +145,148 @@ Domains covered: `generators`, `rows`, `native`
 | `mouth` | Mouth cross-section | — | ellipse | — | — | — | Mouth cross-section family: ellipse, superellipse or rounded rectangle. |
 | `n_anchors` | Anchor count | — | 16 | — | — | — | Number of [z, r, wall-angle] anchors selected per meridian. |
 
+## `cone_plughorn_2sh`
+
+- **Family:** FREEFORM
+- **Kind:** generator
+- **Group:** cone
+- **Symmetry:** full
+- **Description:** Funktion-One Evo 2SH topology (50x25 deg, 8-inch cone, axe head), 223 mm, from their CAD; raw dimensions, cone fill on
+- **Source status:** catalog
+- **Config:** `examples/typologies/cone_plughorn_2026-10-28/cone_plughorn__evo2sh_wide.yaml`
+- **Brief:** `examples/briefs/cone_midhorn_2026-10-28/cone_mid_wide_50.yaml`
+- **Documented:** true
+- **Knobs:** 10
+
+| Knob | Label | Unit | Default | Search | Hard lo | Hard hi | Summary |
+|---|---|---|---|---|---|---|---|
+| `front_side_x_mm` | front_side_x_mm | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `front_top_y_mm` | front_top_y_mm | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `length_mm` | length_mm | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `mouth_side_x_mm` | mouth_side_x_mm | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `mouth_top_y_mm` | mouth_top_y_mm | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `plug_nose_d_mm` | plug_nose_d_mm | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `plug_tip_x_mm` | plug_tip_x_mm | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `plug_top_d_mm` | plug_top_d_mm | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `throat_side_x_mm` | throat_side_x_mm | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `throat_top_y_mm` | throat_top_y_mm | — | — | — | — | — | No documentation authored for this knob name yet. |
+
+## `cone_plughorn_7sh`
+
+- **Family:** FREEFORM
+- **Kind:** generator
+- **Group:** cone
+- **Symmetry:** full
+- **Description:** Funktion-One Evo 7SH topology (40x20 deg, 10-inch cone, axe head), 400 mm, from their CAD; raw dimensions, cone fill on
+- **Source status:** catalog
+- **Config:** `examples/typologies/cone_plughorn_2026-10-28/cone_plughorn__evo7sh_narrow.yaml`
+- **Brief:** `examples/briefs/cone_midhorn_2026-10-28/cone_mid_narrow_40x20.yaml`
+- **Documented:** true
+- **Knobs:** 10
+
+| Knob | Label | Unit | Default | Search | Hard lo | Hard hi | Summary |
+|---|---|---|---|---|---|---|---|
+| `front_side_x_mm` | front_side_x_mm | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `front_top_y_mm` | front_top_y_mm | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `length_mm` | length_mm | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `mouth_side_x_mm` | mouth_side_x_mm | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `mouth_top_y_mm` | mouth_top_y_mm | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `plug_nose_d_mm` | plug_nose_d_mm | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `plug_tip_x_mm` | plug_tip_x_mm | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `plug_top_d_mm` | plug_top_d_mm | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `throat_side_x_mm` | throat_side_x_mm | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `throat_top_y_mm` | throat_top_y_mm | — | — | — | — | — | No documentation authored for this knob name yet. |
+
+## `cone_plughorn_morph_10in`
+
+- **Family:** FREEFORM
+- **Kind:** generator
+- **Group:** cone
+- **Symmetry:** full
+- **Description:** Evo-7SH topology with the 14 horn-theory morph knobs on (CR, wall angles, axe-head ratios, bowl), 10-inch cone
+- **Source status:** catalog
+- **Config:** `examples/typologies/cone_plughorn_2026-10-28/cone_plughorn__morph_narrow_10in.yaml`
+- **Brief:** `examples/briefs/cone_midhorn_2026-10-28/cone_mid_narrow_40x20.yaml`
+- **Documented:** true
+- **Knobs:** 14
+
+| Knob | Label | Unit | Default | Search | Hard lo | Hard hi | Summary |
+|---|---|---|---|---|---|---|---|
+| `length_mm` | length_mm | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_compression_ratio` | m_compression_ratio | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_mouth_corner_frac` | m_mouth_corner_frac | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_plug_base_frac` | m_plug_base_frac | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_plug_flat_frac` | m_plug_flat_frac | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_plug_height_frac` | m_plug_height_frac | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_plug_nose_frac` | m_plug_nose_frac | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_plug_ridge_frac` | m_plug_ridge_frac | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_plug_tip_frac` | m_plug_tip_frac | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_plug_width_frac` | m_plug_width_frac | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_roll_h_mm` | m_roll_h_mm | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_roll_v_mm` | m_roll_v_mm | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_wall_angle_h_deg` | m_wall_angle_h_deg | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_wall_angle_v_deg` | m_wall_angle_v_deg | — | — | — | — | — | No documentation authored for this knob name yet. |
+
+## `cone_plughorn_morph_12in`
+
+- **Family:** FREEFORM
+- **Kind:** generator
+- **Group:** cone
+- **Symmetry:** full
+- **Description:** Evo-7SH topology with the 14 morph knobs on, 12-inch cone (the cone size is an assumption until measured)
+- **Source status:** catalog
+- **Config:** `examples/typologies/cone_plughorn_2026-10-28/cone_plughorn__morph_narrow_12in.yaml`
+- **Brief:** `examples/briefs/cone_midhorn_2026-10-28/cone_mid_narrow_40x20.yaml`
+- **Documented:** true
+- **Knobs:** 14
+
+| Knob | Label | Unit | Default | Search | Hard lo | Hard hi | Summary |
+|---|---|---|---|---|---|---|---|
+| `length_mm` | length_mm | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_compression_ratio` | m_compression_ratio | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_mouth_corner_frac` | m_mouth_corner_frac | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_plug_base_frac` | m_plug_base_frac | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_plug_flat_frac` | m_plug_flat_frac | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_plug_height_frac` | m_plug_height_frac | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_plug_nose_frac` | m_plug_nose_frac | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_plug_ridge_frac` | m_plug_ridge_frac | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_plug_tip_frac` | m_plug_tip_frac | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_plug_width_frac` | m_plug_width_frac | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_roll_h_mm` | m_roll_h_mm | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_roll_v_mm` | m_roll_v_mm | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_wall_angle_h_deg` | m_wall_angle_h_deg | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_wall_angle_v_deg` | m_wall_angle_v_deg | — | — | — | — | — | No documentation authored for this knob name yet. |
+
+## `cone_plughorn_morph_8in`
+
+- **Family:** FREEFORM
+- **Kind:** generator
+- **Group:** cone
+- **Symmetry:** full
+- **Description:** Evo-2SH topology with the 14 morph knobs on, 8-inch cone, wide 50x25 variant
+- **Source status:** catalog
+- **Config:** `examples/typologies/cone_plughorn_2026-10-28/cone_plughorn__morph_wide_8in.yaml`
+- **Brief:** `examples/briefs/cone_midhorn_2026-10-28/cone_mid_wide_50.yaml`
+- **Documented:** true
+- **Knobs:** 14
+
+| Knob | Label | Unit | Default | Search | Hard lo | Hard hi | Summary |
+|---|---|---|---|---|---|---|---|
+| `length_mm` | length_mm | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_compression_ratio` | m_compression_ratio | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_mouth_corner_frac` | m_mouth_corner_frac | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_plug_base_frac` | m_plug_base_frac | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_plug_flat_frac` | m_plug_flat_frac | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_plug_height_frac` | m_plug_height_frac | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_plug_nose_frac` | m_plug_nose_frac | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_plug_ridge_frac` | m_plug_ridge_frac | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_plug_tip_frac` | m_plug_tip_frac | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_plug_width_frac` | m_plug_width_frac | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_roll_h_mm` | m_roll_h_mm | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_roll_v_mm` | m_roll_v_mm | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_wall_angle_h_deg` | m_wall_angle_h_deg | — | — | — | — | — | No documentation authored for this knob name yet. |
+| `m_wall_angle_v_deg` | m_wall_angle_v_deg | — | — | — | — | — | No documentation authored for this knob name yet. |
+
 ## `conical`
 
 - **Family:** FREEFORM
