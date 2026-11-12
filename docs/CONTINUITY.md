@@ -1,6 +1,17 @@
 # CONTINUITY
 
 
+## 2026-11-12 (22:15Z) - REFUSALS / CMA TRAJECTORY HANDOFF (PR #49)
+
+- Added `docs/research/REFUSALS_AND_OPTIMIZER_HANDOFF_2026-11-12.md`: plain-CMA `resample` +
+  `budget_counts: valid` + `max_attempts` as the simple "refusals never told" path vs CMA-ME
+  (resample is a ConfigError; failed designs are told with seed measures; CMA-MAE is the archive-level
+  mitigation), exact code paths/tests, measured refusal counts (core_law 567 ok / 434 refused; archive
+  17 cells / 0 penalty), the dataset failure-metadata caveat (main 4,634/28,573 failed; `dataset_cpu`
+  16/237; D.3 merge has no ok filter), over-constraint guardrails, and an offline verification plan.
+- No code, queue, or default changes. The external council handoff now points to it. The GPU night
+  queue is still running.
+
 ## 2026-11-12 (22:05Z) - PARTIAL DAY EVIDENCE COMMITTED (PR #48)
 
 - Committed the PARTIAL day evidence while the GPU continuation queue (`g2`–`g9`) runs:
