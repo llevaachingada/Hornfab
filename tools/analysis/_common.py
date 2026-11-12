@@ -267,6 +267,8 @@ def spearman(x, y) -> float | None:
     xv, yv = xv[good], yv[good]
     if xv.size < 3:
         return None
+    if np.ptp(xv) == 0 or np.ptp(yv) == 0:
+        return None  # a constant input has no defined rank correlation
     try:
         import scipy.stats as sps  # type: ignore
 
