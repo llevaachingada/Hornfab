@@ -4426,7 +4426,7 @@ let _launchPollTimer = null;
 
 async function viewLaunch() {
   const ROOT = currentRoot();     // this view's own container (see route())
-  skel();
+  skel("Checking which saved configs can mesh… the first visit after starting the GUI can take about a minute; later visits are instant.");
   let briefs = [], jobs = [], configs = [], statusData = null;
   try {
     [briefs, jobs, configs, statusData] = await Promise.all([
@@ -4436,9 +4436,29 @@ async function viewLaunch() {
       api("/api/status").catch(() => null),
     ]);
   } catch (e) { ROOT.innerHTML = errBanner(e.message); return; }
-  const typs = await api("/api/typologies").catch(() => []);
   if (ROOT !== currentRoot()) return;   // the user navigated away while this loaded
-  renderLaunch(briefs, jobs, configs, statusData, typs);
+  // Render the form now; the typology list (slow on a cold server) fills in when it arrives.
+  // If the user already started filling the form, never re-render under them: offer a link instead.
+  renderLaunch(briefs, jobs, configs, statusData, []);
+  const note = document.createElement("div");
+  note.className = "hint"; note.id = "launch-typs-loading"; note.setAttribute("role", "status");
+  note.textContent = "Loading the horn-family list for campaigns… (the rest of this page is ready)";
+  ROOT.prepend(note);
+  let touched = false;
+  const touch = () => { touched = true; };
+  ROOT.addEventListener("input", touch, { once: true });
+  ROOT.addEventListener("change", touch, { once: true });
+  const typs = await api("/api/typologies").catch(() => null);
+  if (ROOT !== currentRoot()) return;
+  const n = document.getElementById("launch-typs-loading");
+  if (!typs) { if (n) n.textContent = "Horn-family list unavailable; reload the page to retry."; return; }
+  if (!touched) { renderLaunch(briefs, jobs, configs, statusData, typs); return; }
+  if (n) {
+    n.innerHTML = `Horn-family list ready. <a href="#" id="launch-typs-apply">Show it</a> (resets this form).`;
+    document.getElementById("launch-typs-apply").onclick = (ev) => {
+      ev.preventDefault(); renderLaunch(briefs, jobs, configs, statusData, typs);
+    };
+  }
 }
 
 function renderLaunch(briefs, jobs, configs, statusData, typs = []) {

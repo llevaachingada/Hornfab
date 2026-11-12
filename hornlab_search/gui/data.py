@@ -40,6 +40,14 @@ PIN_FRAC = 0.02
 
 # ---------------------------------------------------------------------------- helpers
 
+_SAFE_LOADER = getattr(yaml, "CSafeLoader", yaml.SafeLoader)
+
+
+def _yaml_load(text: str) -> Any:
+    """``yaml.safe_load`` with the libyaml C loader when available (same safe tag set, ~10x faster
+    on the hundreds of configs the read-only views parse)."""
+    return yaml.load(text, Loader=_SAFE_LOADER)  # noqa: S506 - SafeLoader family only
+
 
 def clean(x: Any) -> Any:
     """Recursively make a value JSON-safe: numpy -> python, NaN/Inf -> None."""
@@ -143,7 +151,7 @@ def _run_dirs(runs: Path) -> list[Path]:
 
 def _config(run_dir: Path) -> dict:
     try:
-        return yaml.safe_load((run_dir / "config.yaml").read_text(encoding="utf-8")) or {}
+        return _yaml_load((run_dir / "config.yaml").read_text(encoding="utf-8")) or {}
     except (OSError, yaml.YAMLError):
         return {}
 
@@ -306,7 +314,31 @@ def _plane_chains(pts: np.ndarray, tris: np.ndarray, ax: int, tol: float = 1e-6)
     return chains
 
 
+#: wall profiles keyed by mesh path -> ((mtime, size), profile). Parsing a .msh costs ~75 ms and the
+#: campaign/typology views ask for the same few hundred designs on every call.
+_PROFILE_CACHE: dict[str, tuple] = {}
+_PROFILE_CACHE_MAX = 2048
+
+
 def _profile_from_mesh(msh: Path) -> dict:
+    try:
+        st = msh.stat()
+        stamp = (st.st_mtime, st.st_size)
+    except OSError:
+        stamp = None
+    key = str(msh)
+    hit = _PROFILE_CACHE.get(key)
+    if stamp is not None and hit and hit[0] == stamp:
+        return copy.deepcopy(hit[1])
+    prof = _profile_from_mesh_uncached(msh)
+    if stamp is not None:
+        if len(_PROFILE_CACHE) >= _PROFILE_CACHE_MAX:
+            _PROFILE_CACHE.pop(next(iter(_PROFILE_CACHE)))
+        _PROFILE_CACHE[key] = (stamp, copy.deepcopy(prof))
+    return prof
+
+
+def _profile_from_mesh_uncached(msh: Path) -> dict:
     """Wall cross-section in the H (x-z) and V (y-z) planes, in mm as [z, r] points.
     kind 'section': ordered outline from the plane's boundary edges (quarter meshes);
     kind 'nodes': unordered plane nodes (full meshes, where the planes are not mesh boundaries)."""
@@ -1267,7 +1299,7 @@ def list_briefs(root: Path, cached: list[dict] | None = None) -> list[dict]:
         parent = p.parent.relative_to(shipped).as_posix()
         kind = "shipped" if parent == "." else ("user" if parent == "user" else parent)
         try:
-            raw = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+            raw = _yaml_load(p.read_text(encoding="utf-8")) or {}
         except yaml.YAMLError as exc:
             raw = {"_error": str(exc)}
         out.append(clean({"name": p.stem, "kind": kind,
@@ -1341,7 +1373,7 @@ def status(root: Path, runs: Path) -> dict:
 
 def catalog(root: Path) -> list[dict]:
     try:
-        raw = yaml.safe_load((root / "examples" / "catalog.yaml").read_text(encoding="utf-8-sig")) or {}
+        raw = _yaml_load((root / "examples" / "catalog.yaml").read_text(encoding="utf-8-sig")) or {}
     except (OSError, yaml.YAMLError):
         return []
     return [clean(e) for e in raw.get("entries", []) if isinstance(e, dict)]
@@ -1407,7 +1439,7 @@ def list_configs(root: Path) -> list[dict]:
                 or p.relative_to(ex).parts[0] in ("briefs", "drivers")):
             continue
         try:
-            raw = yaml.safe_load(p.read_text(encoding="utf-8-sig")) or {}
+            raw = _yaml_load(p.read_text(encoding="utf-8-sig")) or {}
         except yaml.YAMLError:
             continue
         rel = p.relative_to(ex).as_posix()
@@ -3392,6 +3424,33 @@ def analysis_report(analysis_dir: Path, name: str) -> dict:
 # ---------------------------------------------------------------------------- elites catalog (E.3)
 
 
+#: elites payload keyed by runs dir -> ((CSV paths+mtimes, runs-dir mtime), payload). A new or
+#: changed audit CSV, or a run added/removed, invalidates it.
+_ELITES_CACHE: dict[str, tuple] = {}
+
+
+def _elite_run_info(run_dir: Path | None) -> tuple:
+    """One run's facts for the elites cards, read once per catalog build (not once per CSV row):
+    (has_run, objective version, {design_hash: lowest-objective atlas cell}, atlas descriptors)."""
+    has_run = bool(run_dir and (run_dir / "search.ndjson").is_file())
+    if not has_run:
+        return False, None, {}, {}
+    version = run_objective_version(run_dir)
+    best: dict[str, dict] = {}
+    descs: dict = {}
+    heat = _read_json(run_dir / "archive_heatmap.json")
+    if isinstance(heat, dict) and isinstance(heat.get("cells"), list):
+        descs = heat.get("descriptors") if isinstance(heat.get("descriptors"), dict) else {}
+        key = lambda c: c.get("objective") if isinstance(c.get("objective"), (int, float)) else float("inf")
+        for c in heat["cells"]:
+            if not isinstance(c, dict):
+                continue
+            h = c.get("design_hash")
+            if h is not None and (h not in best or key(c) < key(best[h])):
+                best[h] = c
+    return True, version, best, descs
+
+
 def elites_catalog(runs: Path, root: Path) -> dict:
     """The elites catalog: every design row recorded in a committed gate-audit CSV.
 
@@ -3408,8 +3467,13 @@ def elites_catalog(runs: Path, root: Path) -> dict:
     if not sources:
         return {"available": False, "sources": [], "cards": [],
                 "note": "no gate-audit CSV under docs/data/gate_audit_*/ or scratch/gate_audit_*/"}
+    stamp = (tuple((str(p), _mt(p)) for p in sources), _mt(runs))
+    hit = _ELITES_CACHE.get(str(runs))
+    if hit and hit[0] == stamp:
+        return hit[1]
     cards: list[dict] = []
     seen: set[tuple[str, str]] = set()
+    run_info: dict[str, tuple] = {}            # run_id -> (has_run, version, {hash: best cell}, descriptors)
     n_pass = 0
     for csv_path in sources:
         try:
@@ -3443,20 +3507,15 @@ def elites_catalog(runs: Path, root: Path) -> dict:
             tier = (r.get("tier") or "").strip() or None
             pass_all = _csv_bool(r.get("pass_all"))
             run_dir = runs / run_id if run_id and RUN_ID.match(run_id) else None
-            has_run = bool(run_dir and (run_dir / "search.ndjson").is_file())
-            version = run_objective_version(run_dir) if has_run else None
+            info = run_info.get(run_id)
+            if info is None:
+                info = run_info[run_id] = _elite_run_info(run_dir)
+            has_run, version, heat_cells, descs = info
             cell = None
-            if has_run:
-                heat = _read_json(run_dir / "archive_heatmap.json")
-                if isinstance(heat, dict) and isinstance(heat.get("cells"), list):
-                    descs = heat.get("descriptors") if isinstance(heat.get("descriptors"), dict) else {}
-                    hits = [c for c in heat["cells"]
-                            if isinstance(c, dict) and c.get("design_hash") == h]
-                    if hits:
-                        c = min(hits, key=lambda c: c.get("objective")
-                                if isinstance(c.get("objective"), (int, float)) else float("inf"))
-                        cell = {"descriptors": {"h": descs.get("h"), "v": descs.get("v")},
-                                "h_center": c.get("h_center"), "v_center": c.get("v_center")}
+            hit = heat_cells.get(h) if has_run else None
+            if hit is not None:
+                cell = {"descriptors": {"h": descs.get("h"), "v": descs.get("v")},
+                        "h_center": hit.get("h_center"), "v_center": hit.get("v_center")}
             cards.append(clean({
                 "run": run_id or None, "hash": h, "J": j, "tier": tier,
                 "gates": gate_vals, "pass_all": pass_all, "source": source,
@@ -3471,6 +3530,8 @@ def elites_catalog(runs: Path, root: Path) -> dict:
     gate_keys: set[str] = set()
     for c in cards:
         gate_keys |= set(c["gates"])
-    return {"available": True, "sources": sorted({c["source"] for c in cards}),
-            "labels": {k: GATE_AUDIT_LABELS.get(k, k) for k in sorted(gate_keys)},
-            "cards": cards, "n_pass": n_pass}
+    out = {"available": True, "sources": sorted({c["source"] for c in cards}),
+           "labels": {k: GATE_AUDIT_LABELS.get(k, k) for k in sorted(gate_keys)},
+           "cards": cards, "n_pass": n_pass}
+    _ELITES_CACHE[str(runs)] = (stamp, out)
+    return out
