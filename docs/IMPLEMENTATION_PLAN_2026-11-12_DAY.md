@@ -206,3 +206,65 @@ Start after A.0 is on A's branch (read the schema from that branch: `git show da
 ## 4. Out of scope today
 MEH work; objective v8; pin bumps / fork changes (WP1 identity-cache patch waits for the calibration night); flipping
 any default; HF upload (do it after the merge of D.3, between nights); anything needing the owner.
+
+---
+
+## 5. Senior math/architecture amendments (2026-11-12, from data on 415 runs / 28,790 solves)
+
+Measured findings (scripts: `C:\Users\hunte\Hrns\study_2026-11-12\senior\a1.py..a3.py`, read-only):
+1. **Refusals 16%** of solves (invalid_geometry 10.8%, mesh_too_large 3.0%, envelope 2.0%); 9.8% of CMA
+   generations are >=50% flat penalty (J=1000) -> ranking ties, wasted budget.
+2. **Weights do not mean influence.** v4 median share of J: cov 0.42, diag 0.16, di 0.11, flat 0.11, rip 0.01,
+   load 0.00 (rip has weight 1.0 like cov). v6: di_rise 0.47, load_near 0.00. Cause: tolerances not calibrated,
+   and terms mix SQUARED errors (cov, dislope, diag) with LINEAR ones (rip, flat) so relative influence changes
+   with distance from the target.
+3. **Screen is optimistic and cannot rank its own finalists:** verify J worse than screen in 95% of 104 pairs
+   (typically +25-50%); within-run Spearman of the top 5 is often 0.1-0.3. Winner's curse from a coarse grid.
+4. **Seed variance is large:** best@150 evals spread 26% (rosse, 2 seeds; freeform_sculpt, 26 seeds), 59% (v6,
+   2 seeds). Single-seed typology comparisons are not trustworthy.
+5. **Budgets end too early:** 54/130 runs still improved >1% in their last 20%; median run reaches within 5% of
+   its final best at 55% of budget.
+6. **Bound walls:** 7% of searched knobs sit within 2% of a bound overall, but `morph_fixed` in 32/51 runs,
+   `tmax` 11/22. The CMA-ME emitter (ribs `bounds=`) resamples out-of-bounds samples (log: "resampled at least
+   100 times"), distorting the search exactly there.
+7. CMA-ME tells refused designs with the SEED's measures (they land in the seed cell). Plain CMA uses pycma
+   `bounds=[0,1]` (BoundTransform) plus clipping in `denormalize` (fine).
+
+Tools verified installed: pycma 4.5.0 has `cma.fmin_lq_surr2` (lq-CMA-ES surrogate), `fmin_con2`, options
+`is_feasible`, `ask_and_eval`, `inject`; ribs 0.12.0 `GridArchive(learning_rate, threshold_min)` = CMA-MAE support,
+rankers incl. `ImprovementRanker`. scikit-learn 1.9, scipy 1.18 present; SALib/optuna/botorch NOT installed (adding
+deps needs owner OK and no live queue).
+
+**Amendments to the groups (DECIDED; all opt-in, defaults unchanged):**
+- **A (analysis) add:** A.9 `term_balance.py` (share of J per term per brief + raw-unit distributions of top-decile
+  designs, the data the tolerance recalibration needs); A.10 `fidelity.py` (screen-vs-verify bias and within-run
+  rank agreement, per brief); A.2 must report bootstrap 95% CIs of median best-so-far and an ECDF of
+  evals-to-target (COCO style), and require >=5 seeds before printing an "A beats B" verdict (3-4 seeds =
+  "indicative"). A.3: Spearman on optimizer samples is biased; add a global surrogate (sklearn
+  RandomForest/GradientBoosting on ALL valid rows of a family) with permutation importance; Sobol on the surrogate
+  only if SALib is approved.
+- **B add:**
+  - B.6 `search.infeasible: resample` - use pycma `ask_and_eval`/an `is_feasible` predicate that runs the cheap
+    pre-solve geometry/envelope checks and resamples (cap 10x) instead of telling J=1000; refusals logged, never
+    told. For CMA-ME: refused designs are NOT told into the archive (filter before `scheduler.tell`).
+  - B.7 `search.surrogate: lq` - pycma `fmin_lq_surr2`-style lq-CMA-ES surrogate (expected 2-5x fewer solves on
+    smooth 5-20 D problems); warm-started from B.1's prior rows. Opt-in, benchmark against plain CMA with >=5 seeds.
+  - B.8 CMA-ME -> **CMA-MAE** option: `GridArchive(learning_rate=0.01..0.1, threshold_min=<J cap as maximised
+    objective>)`, emitter `ranker="imp"`, and NO `bounds=` in the emitter (clip in `denormalize`, like plain CMA).
+  - B.9 Restarts: recommend `search.restarts: {mode: bipop}` for budgets >= 300 (already implemented, WP11a);
+    budget defaults stay but A.1 reports "still improving" so the owner can extend.
+  - B.3 `narrow` must also WIDEN when the wall is physical-safe (flag) and must flag knobs at a wall in >50% of runs
+    (morph_fixed, tmax) for pinning instead.
+- **C add:** C.4 screen-fidelity fix proposal: the screen grid is the cause of finding 3; generate configs for
+  the P0 "new screen grid" (band split at 2 kHz, ~7 points in 2.5-5.5 kHz) and measure Spearman(screen, verify) on
+  stored finalists in the calibration night. Until then: verify the top **15-20** (not 5) per run and rank
+  finalists by verify J only.
+- **New group G (objective v8 proposal, offline only, owner approves before use):** `objective/scalar_v8.py`:
+  every term in LINEAR units (RMS deg for cov/diag, RMS dB, dB/oct for dislope), divided by a tolerance
+  recalibrated per brief class from A.9 (tolerance = median raw value of the top decile, so each weighted term
+  contributes ~equally near the optimum); gates (round throat, loading, f11) as hard refusals, not weights.
+  Deliver: the scorer + tests + an offline re-score of the dataset (Kendall tau of top-20 vs v4/v7 per class) and
+  a one-page owner brief. Never switch briefs to v8 without owner sign-off.
+- **Research the orchestrator may do before coding (allowed, cite sources in PR):** pycma docs on
+  `fmin_lq_surr2`/`is_feasible`; ribs CMA-MAE tutorial; COCO/IOHprofiler ECDF practice; WS-CMA-ES (warm start)
+  for B.1. Keep it short; do not add dependencies.
