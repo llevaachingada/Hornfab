@@ -17,6 +17,11 @@ Local-only, added 2026-11-12 (**GUI verify view front end WP3+WP6 implemented; n
   per-design panel, compare-two, checklist. `balloon.js` tier param added. CSS block appended.
   37 new tests green; full -k gui suite 362/0.
 
+Local-only, added 2026-11-12 (**refusals / CMA trajectory handoff, PR #49; no GitHub issue state changed**):
+- `docs/research/REFUSALS_AND_OPTIMIZER_HANDOFF_2026-11-12.md`: plain-CMA resample vs CMA-ME/
+  CMA-MAE, exact code/tests, measured refusal counts, dataset failure metadata (4,634/28,573 main;
+  16/237 dataset_cpu; D.3 no ok filter), over-constraint guardrails. No code/queue/default changes.
+
 Local-only, added 2026-11-12 (**partial day evidence committed, PR #48; no GitHub issue state changed**):
 - `docs/evidence/DAY_2026-11-12_ANALYSIS_PARTIAL.md` (A.8 partial + 10 charts; A.7 PASS, 24-run
   fidelity census, 25-seed variance, D.3 dry-run) and `docs/evidence/NIGHT_2026-11-12_PARTIAL.md`

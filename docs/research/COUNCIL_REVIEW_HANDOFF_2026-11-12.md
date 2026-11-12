@@ -12,6 +12,9 @@
 
 **The plan under review**
 - `C:\Users\hunte\Hrns\oc-wt\DOCS\docs\research\DATA_GA_RESEARCH_PLAN_2026-11-12.md` — the raw research plan. It already has a "Known corrections at save time" section; verify the rest.
+- **Refusal/optimizer specifics for the data/search review:** `docs/research/REFUSALS_AND_OPTIMIZER_HANDOFF_2026-11-12.md`
+  (plain-CMA resample vs CMA-ME, exact code paths/tests, dataset failure-metadata caveat, over-constraint
+  guardrails).
 
 **Authoritative plans/context**
 - `C:\Users\hunte\Hrns\oc-wt\plan\docs\IMPLEMENTATION_PLAN_2026-11-12_DAY.md` — the day plan (groups A–F, §5 amendments, group G).
