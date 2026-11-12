@@ -1,6 +1,25 @@
 # CONTINUITY
 
 
+## 2026-11-12 (19:45Z) - DAY GROUP G: OBJECTIVE V8 PROPOSAL (OFFLINE ONLY, OWNER-GATED)
+
+- Day-plan group G (PR #43, branch `day/G-objective-v8`): `hornlab_search/objective/scalar_v8.py`
+  PROPOSAL scorer — every weighted term in its own **linear** unit (RMS deg for cov/diag, RMS dB for
+  rip/di/flat/distd, dB/decade for dislope) divided by per-class tolerances calibrated from the stored
+  dataset (median raw value of the top decile, A.9 method); loading/f11/round-throat become **hard
+  refusals**, not weights. **NOT registered**: `objective/versions.py` still dispatches 1-7, no brief
+  uses v8, no default changed. Owner sign-off required before any use (day-plan section 5).
+- `tools/analysis/v8_rescore.py`: offline re-score (read-only dataset shards via
+  `gate_audit.parse_stored_row`) of v4/v6/v7 vs v8 with calibrated tolerances + hard-refusal gates;
+  per-class Kendall tau + top-20 overlap; JSON+MD to `--out`.
+- [measured] Re-score on 400 stored valid rows (dataset snapshot): tau v8 vs v4 0.683 / v6 0.792 /
+  v7 0.668; top-20 overlap 13/20, 11/20, 12/20; 0 v8 hard-refusal rows in the scored set.
+  Interpretation: v8 is a re-weighting of the same physics, not a new landscape — different top-20
+  shortlists, so an A/B night (>=5 seeds per class) must precede any brief switch.
+- `docs/research/OBJECTIVE_V8_PROPOSAL_2026-11-12.md`: one-page owner brief (recipe, calibrated
+  tolerances with provenance, re-score table, risks, explicit sign-off gate).
+- Verified: 39 targeted tests green (39/0/0/0); no GPU/solver; dataset read-only.
+
 ## 2026-11-12 (19:25Z) - TEST-SUITE EFFICIENCY REVIEW (SENIOR PASS, PROPOSAL ONLY)
 
 - Wrote `docs/research/TEST_SUITE_EFFICIENCY_2026-11-12.md` (senior research pass, owner-gated):
