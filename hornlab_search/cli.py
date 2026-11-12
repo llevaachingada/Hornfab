@@ -836,6 +836,7 @@ def _verify_body(args, argv, d) -> int:
     from hornlab_search.config import load_config
     from hornlab_search.dataset.store import DatasetStore
     from hornlab_search.design.space import DesignSpace
+    from hornlab_search.search import rundir
     from hornlab_search.search.evaluate import evaluate, make_context, read_ndjson
     from hornlab_search.solve import worker
     from hornlab_search.types import BackendUnavailableError, Design
@@ -849,6 +850,13 @@ def _verify_body(args, argv, d) -> int:
     brief = getattr(args, "brief", None)
     cfg = load_config(run_dir / "config.yaml", brief=Path(brief) if brief else None,
                       backend=getattr(args, "backend", None))
+    # A different backend is a different solver and therefore a different response: it must not
+    # write into the source run's verify/ dir (a CPU verify must never overwrite a GPU response).
+    # The run's own backend is recorded in run.json; a missing one is treated as a mismatch.
+    stored_backend = (rundir.read_json(run_dir / "run.json", {}) or {}).get("backend")
+    explicit_dir = getattr(args, "verify_dir", None)
+    backend_mismatch = bool(getattr(args, "backend", None) is not None
+                            and (not stored_backend or cfg.solve.backend != stored_backend))
     d = _dirs(args)
     seen, top = set(), []
     for r in sorted((r for r in rows if r.get("ok")), key=lambda r: r["objective"]):
@@ -882,27 +890,46 @@ def _verify_body(args, argv, d) -> int:
         print(f"verify FAILED: {exc}")
         return 1
     store = DatasetStore(d["dataset"])
-    worker.warm(backend)
-    if brief:
-        # Another brief = another frequency grid / target: its own run directory (listed by the
-        # GUI like any run), never mixed into the source run's verify/ rows.
-        from hornlab_search.search import rundir
-        from hornlab_search.search.evaluate import collect_lib_shas
+    if explicit_dir is not None:
+        vdir = Path(explicit_dir)
+        vdir.mkdir(parents=True, exist_ok=True)
+        if (vdir / "search.ndjson").exists():
+            others = sorted({str(r.get("backend")) for r in read_ndjson(vdir / "search.ndjson")
+                             if r.get("backend") and str(r.get("backend")) != cfg.solve.backend})
+            if others:
+                print(f"verify REFUSED: --verify-dir {vdir} already holds rows from backend(s) "
+                      f"{', '.join(others)}; this run is {cfg.solve.backend}. Choose a fresh "
+                      f"directory per backend.")
+                return 2
+    elif brief or backend_mismatch:
         vdir = rundir.new_run_dir(d["runs"], "verify")
+    else:
+        vdir = run_dir / "verify"
+        vdir.mkdir(exist_ok=True)
+    new_run_meta = explicit_dir is None and bool(brief or backend_mismatch)
+    if new_run_meta:
+        # Another brief or another backend = a different J / response: its own run directory
+        # (listed by the GUI like any run), never mixed into the source run's verify/ rows.
+        from hornlab_search.search.evaluate import collect_lib_shas
         rundir.write_config_snapshot(vdir, cfg)
         rundir.write_json_atomic(vdir / "run.json", {
             "run_id": vdir.name, "config_name": cfg.name, "family": cfg.family, "mode": "verify",
             "config": cfg.raw, "config_sha": rundir.config_sha(cfg.raw), "backend": cfg.solve.backend,
             "lib_shas": collect_lib_shas(), "toolchain": rundir.toolchain_snapshot(),
             "runtime": rundir.runtime_provenance(), "command": _command_string(argv),
-            "verify_of": {"run": str(run_dir.resolve()), "top": len(top), "brief": str(brief)},
+            "verify_of": {"run": str(run_dir.resolve()), "top": len(top),
+                          "brief": str(brief) if brief else None, "backend": cfg.solve.backend},
             "status": "running", "started_utc": rundir.utc_now(), "dataset_dir": str(store.root)})
-    else:
-        vdir = run_dir / "verify"
-        vdir.mkdir(exist_ok=True)
+    worker.warm(backend)
     ctx = make_context(cfg, store, cache_dir=d["cache"], trace_fraction=args.trace_fraction,
                        ndjson=vdir / "search.ndjson")
     space = DesignSpace.from_config(cfg)
+    if explicit_dir is not None:
+        print(f"verify: writing to explicit --verify-dir {vdir}")
+    elif backend_mismatch and not brief:
+        print(f"verify: backend {cfg.solve.backend} differs from the run's recorded backend "
+              f"{stored_backend or 'unknown'}; writing to its own run dir {vdir} "
+              f"(the source verify/ dir is never mixed across backends)")
     if brief:
         print(f"verify: re-solving the top {len(top)} designs of {run_dir.name} under brief {brief} "
               f"(band {cfg.target_raw.get('band_lo_hz')}-{cfg.target_raw.get('band_hi_hz')} Hz); "
@@ -922,7 +949,7 @@ def _verify_body(args, argv, d) -> int:
         print(f"  {r['design_hash']}  {r['objective']:10.5f}  "
               f"{('FAILED: ' + ev.error.splitlines()[0][:60]) if ev.error else format(ev.objective, '10.5f')}"
               f"  {ev.metrics.di_source if ev.metrics else 'n/a'}")
-    if brief:
+    if new_run_meta:
         if best is not None:
             rundir.write_best(vdir, best, "verify", best_no)
         rundir.update_run_json(vdir, status="finished", finished_utc=rundir.utc_now(),
@@ -1550,6 +1577,9 @@ def build_parser() -> argparse.ArgumentParser:
     vsel.add_argument("--designs-file", metavar="CSV", help="CSV with a 'design' column of hashes")
     v.add_argument("--brief", metavar="PATH",
                    help="brief YAML; overrides config target/weights")
+    v.add_argument("--verify-dir", metavar="PATH",
+                   help="write verify outputs here instead of <run>/verify; keep one directory per "
+                        "backend (a --backend override without this flag gets its own run dir)")
     v.add_argument("--cma-seed", type=int, metavar="INT",
                    help="override search.seed (informational; verify does not run CMA)")
     rp = sub.add_parser("report", parents=[common], help="HTML report of a run directory")

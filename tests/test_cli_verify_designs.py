@@ -85,3 +85,59 @@ def test_top_default_still_five_and_flags_exclusive(src, tmp_path, monkeypatch):
     assert code == 2
     code, _ = _verify(tmp_path, monkeypatch, run_dir, "--designs", h[0], "--designs-file", "x.csv")
     assert code == 2
+
+
+# -- backend-aware output dirs (fix/verify-backend-dir, 2026-11-12) ---------------------------
+# A CPU verify must never write into the source run's verify/ dir that a GPU verify owns: the
+# response.npz/metrics.json would be overwritten and lane parity would become unmeasurable.
+
+def _run_json(run_dir):
+    from hornlab_search.search.rundir import read_json
+    return read_json(run_dir / "run.json", {}) or {}
+
+
+def test_backend_override_writes_its_own_run_dir(src, tmp_path, monkeypatch):
+    run_dir, h = src
+    assert _run_json(run_dir).get("backend") == "beat_cuda"
+    code, be = _verify(tmp_path, monkeypatch, run_dir, "--backend", "beat_cpu", "--top", "2")
+    assert code == 0 and be.calls == 2
+    assert not (run_dir / "verify" / "search.ndjson").exists()
+    dirs = [p for p in (tmp_path / "runs").glob("*-verify-*") if p.is_dir()]
+    assert len(dirs) == 1
+    meta = _run_json(dirs[0])
+    assert meta["backend"] == "beat_cpu" and meta["mode"] == "verify"
+    assert meta["verify_of"]["backend"] == "beat_cpu"
+    assert meta["verify_of"]["run"].replace("\\", "/").rsplit("/", 1)[-1] == run_dir.name
+    assert len(read_ndjson(dirs[0] / "search.ndjson")) == 2
+
+
+def test_verify_dir_flag_writes_exactly_there(src, tmp_path, monkeypatch):
+    run_dir, h = src
+    out = tmp_path / "cpu_verify"
+    code, be = _verify(tmp_path, monkeypatch, run_dir, "--backend", "beat_cpu",
+                       "--verify-dir", str(out), "--top", "2")
+    assert code == 0 and be.calls == 2
+    assert len(read_ndjson(out / "search.ndjson")) == 2
+    assert not (run_dir / "verify" / "search.ndjson").exists()
+    assert not list((tmp_path / "runs").glob("*-verify-*"))
+
+
+def test_explicit_verify_dir_refuses_a_mixed_backend(src, tmp_path, monkeypatch, capsys):
+    run_dir, h = src
+    out = tmp_path / "mixed"
+    out.mkdir()
+    (out / "search.ndjson").write_text(
+        '{"ok": true, "design_hash": "deadbeef0000", "backend": "beat_cuda"}\n', encoding="utf-8")
+    code, be = _verify(tmp_path, monkeypatch, run_dir, "--backend", "beat_cpu",
+                       "--verify-dir", str(out))
+    assert code == 2 and be.calls == 0
+    assert "already holds rows from backend" in capsys.readouterr().out
+
+
+def test_same_backend_override_keeps_the_source_verify_dir(src, tmp_path, monkeypatch):
+    run_dir, h = src
+    stored = _run_json(run_dir)["backend"]
+    code, be = _verify(tmp_path, monkeypatch, run_dir, "--backend", stored, "--top", "2")
+    assert code == 0 and be.calls == 2
+    assert len(read_ndjson(run_dir / "verify" / "search.ndjson")) == 2
+    assert not list((tmp_path / "runs").glob("*-verify-*"))
