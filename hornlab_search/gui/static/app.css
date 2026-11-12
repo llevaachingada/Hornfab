@@ -398,6 +398,13 @@ pre.families-out { font-family:var(--f-mono); font-size:0.82rem; background:var(
 .skeleton-line { height:0.9em; background:var(--rule); border-radius:3px; }
 .skeleton-block { background:var(--rule); border-radius:6px; }
 
+/* ── Live-run indicator (runs table, 2026-11-12) ─────────────────────────────────────────────── */
+@keyframes live-pulse {
+  0%,100% { opacity:1; }
+  50% { opacity:0.35; }
+}
+.live-dot { color:var(--good); animation:live-pulse 1.2s ease-in-out infinite; }
+
 /* ── GPU busy overlay ───────────────────────────────────────────── */
 .gpu-busy-note {
   background:var(--warn-soft); border:1px solid var(--warn); color:var(--warn);

@@ -19,6 +19,29 @@ Local-only, added 2026-11-12 (**integration; GitHub: PRs #19, #22, #23 close as 
   reconciliation (WP-B1); two-way data interop with Collin (WP-F / handoff L5). `swarm/B` + `swarm/C` merged in #24.
 
 Local-only, added 2026-11-12 (day queue): staged-search brief path fix; narrowed ath_core cell; two-lane day queue live.
+Local-only, added 2026-11-12 (GUI diagnosis, read-only pass; owner chose "diagnose only" — no code changed; no GitHub issue state changed):
+
+| ID | Title | Status | Owner | Plan ref |
+|---|---|---|---|---|
+| GUI-1 | Recent runs/queue progress not shown on Home/Status/Runs | CLOSED 2026-11-12 (all root causes fixed; see below) | owner-decided | gui/data.py, gui/static/app.js |
+| GUI-2 | "J from different objective versions is not comparable" banner reads as an error | CLOSED 2026-11-12 (info note + version filter) | owner-decided | app.js guard helpers |
+
+**GUI-1 root causes (all verified live, branch `day/2026-11-12-queue` HEAD d638231):**
+1. `status()` picks `runs/overnight/queue_*.log` by LEXICOGRAPHIC name, not mtime (`data.py:1328-1333`): of 28 logs it selects `queue_v5_continue_2026-10-29.log`, so tonight's `gpu_day_2026-11-12_cont` / `cpu_day_2026-11-12_cont` steps never show. Fix: newest-by-mtime (+ per-lane list, additive).
+2. CPU lane never "current": `status()` reads only the GPU lock (`data.py:1309-1313`); `runs/.cpu.lane.lock` (`gpulock.py:44,99,271`) is never read. Fix: add CPU lane lock/current row.
+3. Verify outputs live in `<run>/verify/search.ndjson` (`cli.py:894-898`) which `list_runs`/`run_detail` never scan (`data.py:140,512`) — c1b/g1c-style jobs are structurally invisible (also hides `runs/elites_20261030_hypex`). Fix: additive `verify` block per run detail.
+4. Runs/detail views fetch once, no refresh timer (`app.js:1308,2025`); only Status/pill/Launch poll. Fix: refresh button/timer.
+5. Resumed runs: table sorted by original `started` (a resumed run sits ~26th of 425, "13d ago"); `current_run` scans only `[:30]` dirs (`data.py:1466-1470`); `run_progress` compares total rows to the SESSION budget (resumed run prints "892/117 (762%) over budget", `data.py:1452-1463`). Fixes: activity sort / drop slice / session-budget handling.
+
+**Not the cause (checked):** no run-list cache or snapshot (`runs/.gui_cache` holds only evolution/umap artefacts keyed by `(size,mtime)`); no date/runcount/night filters; browser cache is `no-store`; live growth 885→892 observed across reads. Empty reboot leftover `runs/20261112T114355Z-screen-7ee43f` (n=0) lists with default v1.
+
+**GUI-2:** informational guard banner (`J_VERSION_BANNER`, `app.js:1909-1933`, commit 0751895 2026-11-12 03:41) meeting a genuinely mixed corpus: v1×228, v2×7, v3×54, v4×100, v5×7, v6×2, v7×27. Table IS correctly grouped per version and rows labelled `J vN`. Not errors: no mixed rows inside a run, no None versions (absent=v1 by contract), no best-across-runs mixing. If desired later: reword as `role="note"` with per-version counts (do NOT re-label old runs; `tests/test_gui_views_l2.py:199` pins the string — update with it).
+
+**GUI-2 CLOSED 2026-11-12:** banner reworded to `role="note"` / `.alert.info` — "J is only comparable within one objective version — the table is grouped by version" with per-version count chips (`objectiveVersionCounts`, exported); NEW version dropdown filter on Runs (All versions / J vN with counts). `tests/test_gui_views_l2.py` node guard updated (new string + counts + `verifyBlockHtml` ΔJ pin). Do NOT re-label old runs.
+
+**GUI-1 FULLY CLOSED 2026-11-12 (second pass, owner-approved A+B+C):** on top of the partial fixes above — (i) Runs page: default sort **Recently active** (by `last`), `active` flag in `run_summary` (fresh on every call incl. cache hits), pulsing ● LIVE cell, resumed badge `sess N`, `has_verify` marker; (ii) Run detail: **Verify re-solves** block from `<run>/verify/search.ndjson` with ΔJ=CPU−GPU pairing (verified live on 377bbe: |ΔJ| ≤ 7e-05); (iii) Runs version filter; (iv) CPU-lane generality: night-queued CPU `search` jobs resolve their run dir from the job log's `output <dir>` line and get session/rate/ETA; `current_run` now skips runs whose last row is lane-tagged `cpu` (lane attribution can't be swallowed by a concurrent CPU run); (v) Watchdog pane removed (stale by ~3 weeks); (vi) queue tabs: the newest 5 queue logs are switchable on Status (selection persists across polls); (vii) `_run_summary` sessions on `run.json "resumes"`. Deferred remainder (gates display WP-D2, elites catalog D4, balloon W6, compose classes P8d, P9 sandbox, leaderboard latency, Kill-run typed-confirm — owner deferred): NOTES_FOR_SENIOR.md 2026-11-12 entry (updated at 14:05).
+
+**Safety note while night queues run:** GUI restart is safe; app.js fixes need only a browser reload; data.py fixes need one GUI restart. Never use the GUI's `gpu-clean` / "Kill run" / stop-current during a live night — they `taskkill /T` the GPU-lock pid (jobs.py:399-449, server.py:185-194).
 
 | ID | Title | Status | Owner | Plan ref |
 |---|---|---|---|---|

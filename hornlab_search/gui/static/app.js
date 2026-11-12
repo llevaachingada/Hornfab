@@ -195,6 +195,73 @@ function timeSince(iso) {
   return `${Math.floor(s / 86400)}d ago`;
 }
 
+function fmtDur(ms) {
+  if (!isFinite(ms) || ms < 0) return "–";
+  if (ms < 60000) return `${Math.round(ms / 1000)}s`;
+  if (ms < 3600000) return `${(ms / 60000).toFixed(1)}m`;
+  if (ms < 86400000) return `${(ms / 3600000).toFixed(1)}h`;
+  return `${(ms / 86400000).toFixed(1)}d`;
+}
+
+/** Session-aware accounting for a live run: a resumed run's budget belongs to the CURRENT
+ *  invocation (run.json 'resumes'), while `n` stays the lifetime row count. Falls back to the
+ *  lifetime-vs-budget rendering when the server predates the `session` block. */
+function sessionAccounting(cur) {
+  const ses = (cur && cur.session) || { n: cur && cur.n, budget: cur && cur.budget, resumed: false, n_resumes: 0 };
+  ses.n = ses.n || 0;
+  return ses;
+}
+
+/** The queue the GUI should show: the server now ranks queue logs by mtime (`queues`), with the
+ *  compat `queue_log` key already pointing at the newest — prefer `queues[0]`, fall back clean. */
+function newestQueue(data) {
+  return (data && data.queues && data.queues[0]) || (data && data.queue_log) || {};
+}
+
+/** Both lanes' queues: the newest-by-mtime log first; a segmented selector switches the timeline
+ *  across the newest few (the server ships 5) so any past night stays one click away. */
+let _statusQueueSel = 0;
+function queuesBlockHtml(data, withTail = false, sel = 0) {
+  const list = (data.queues && data.queues.length)
+    ? data.queues.slice(0, 5)
+    : [data.queue_log].filter(Boolean);
+  if (!list.length) return "";
+  const idx = Math.min(Math.max(0, sel), list.length - 1);
+  const q = list[idx];
+  const tabs = list.length > 1
+    ? `<div class="btn-row" style="margin-bottom:8px;flex-wrap:wrap;gap:6px">${list.map((qq, i) =>
+        `<button class="btn queue-tab ${i === idx ? "primary" : ""}" data-i="${i}" style="font-size:0.72rem;padding:3px 8px">${esc(String(qq.name || "").replace(/^queue_/, "").replace(/\.log$/, ""))}</button>`).join("")}</div>`
+    : "";
+  const card = `<div class="card" style="min-width:0">
+      <div class="eyebrow" style="margin-bottom:10px">Queue — ${esc(q.name || "")}</div>
+      <div class="timeline">${queueTimelineHtml(q.steps || [])}</div>
+      ${withTail && (q.tail || []).length ? `<div class="log-tail" id="queue-tail" aria-label="queue log">${esc(q.tail.join("\n"))}</div>` : ""}
+    </div>`;
+  return `${tabs}${card}`;
+}
+
+/** Wire the queue-tab buttons inside `container` (re-entrant: each re-render rewires). The Status
+ *  page remembers its selection across polls via _statusQueueSel. */
+function wireQueueTabs(container, data) {
+  if (!container) return;
+  container.querySelectorAll(".queue-tab").forEach(b => b.onclick = () => {
+    const i = Number(b.dataset.i);
+    if (container.id === "st-queues") _statusQueueSel = i;
+    container.innerHTML = queuesBlockHtml(data, container.id === "st-queues", i);
+    wireQueueTabs(container, data);
+  });
+}
+
+/** Live solver hosts, labelled per lane ("GPU x · CPU y · z stale"); pre-lane servers show the
+ *  raw julia process count. */
+function hostsLabel(data) {
+  const h = data && data.hosts;
+  if (!h) return String((data && data.julia_procs) ?? "–");
+  const parts = [`GPU ${h.gpu ?? 0}`, `CPU ${h.cpu ?? 0}`];
+  if (h.stale) parts.push(`${h.stale} stale`);
+  return parts.join(" · ");
+}
+
 function failurePills(obj) {
   return Object.entries(obj || {})
     .filter(([, v]) => v > 0)
@@ -288,33 +355,38 @@ async function viewHome() {
 
   const cur = statusData.current;
   const lock = statusData.gpu_lock;
-  const steps = (statusData.queue_log || {}).steps || [];
 
-  // GPU / running card
+  // GPU / running card — session-aware: a resumed run's budget covers THIS invocation only
   let gpuCard;
   if (cur && lock && lock.alive) {
-    const budget = cur.budget || 1;
-    const pct = Math.min(100, Math.round((cur.n / budget) * 100));
-    const over = !!(cur.budget && cur.n > cur.budget);
+    const ses = sessionAccounting(cur);
+    const budget = ses.budget || 0;
+    const pct = budget ? Math.min(100, Math.round((ses.n / budget) * 100)) : 100;
+    const over = !!(budget && ses.n > budget);
     const budgetCls = over ? "bad" : pct >= 90 ? "warn" : "";
-    const nFail = Object.values(cur.failures || {}).reduce((a, v) => a + v, 0);
-    const barCls = over ? "bad" : nFail / Math.max(cur.n, 1) > 0.3 ? "warn" : "";
+    const failS = cur.failures_session != null ? cur.failures_session
+      : Object.values(cur.failures || {}).reduce((a, v) => a + v, 0);
+    const barCls = over ? "bad" : failS / Math.max(ses.n, 1) > 0.3 ? "warn" : "";
     const eta = cur.eta_min != null ? `~${Math.round(cur.eta_min)} min left` : "";
     const rate = cur.rate_per_h != null ? `${cur.rate_per_h.toFixed(0)}/h` : "";
+    const sesHtml = budget
+      ? `<b class="${budgetCls}">${ses.n} / ${budget} this session (${pct}%)${over ? " over budget" : ""}</b>`
+      : `${cur.n.toLocaleString()} rows`;
+    const sesSub = ses.resumed ? `resumed ×${ses.n_resumes} · ${cur.n.toLocaleString()} rows lifetime` : "";
     gpuCard = `<div class="card status-card running-card">
       <div class="label">▶ Running: ${esc(cur.name || cur.id)}</div>
       <div style="margin:6px 0">
         <div class="progress-wrap"><div class="progress-bar ${barCls}" style="width:${pct}%"></div></div>
         <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:0.8rem;color:var(--muted)">
-          <span><b class="${budgetCls}">${cur.n.toLocaleString()} / ${budget.toLocaleString()} evals (${pct}%)${over ? " over budget" : ""}</b></span>
+          <span>${sesHtml}${sesSub ? ` · ${esc(sesSub)}` : ""}</span>
           <span>${eta}</span>
         </div>
       </div>
       <div class="kpis" style="margin-top:4px">
         <div class="kpi"><span>Best score</span><b>${fmt(cur.best_j)}</b></div>
         <div class="kpi"><span>Started score</span><b>${fmt(cur.seed_j && cur.seed_j < 900 ? cur.seed_j : null)}</b></div>
-        <div class="kpi"><span>Rate</span><b>${rate || "–"}</b></div>
-        <div class="kpi"><span>Failures</span><b>${esc(Object.values(cur.failures || {}).reduce((a, v) => a + v, 0))}</b></div>
+        <div class="kpi"><span>Rate (session)</span><b>${rate || "–"}</b></div>
+        <div class="kpi"><span>Failures${cur.failures_session != null ? " (session)" : ""}</span><b title="${esc(Object.values(cur.failures || {}).reduce((a, v) => a + v, 0))} lifetime">${failS}</b></div>
       </div>
       <div class="btn-row" style="margin-top:8px">
         <a class="btn primary" href="#/run/${esc(cur.id)}">Open run →</a>
@@ -332,27 +404,21 @@ async function viewHome() {
     </div>`;
   }
 
-  // Queue timeline
-  let timelineHtml = "";
-  if (steps.length) {
-    timelineHtml = `<div class="card" style="min-width:0">
-      <div class="eyebrow" style="margin-bottom:10px">Overnight queue — ${esc((statusData.queue_log || {}).name || "")}</div>
-      <div class="timeline">
-        ${steps.slice(-20).map(s => {
-          const dot = s.skipped ? "skip" : s.exit == null ? "run" : s.exit === 0 ? "done" : "failed";
-          const dur = (s.started && s.ended)
-            ? (() => { const ms = new Date(s.ended) - new Date(s.started); return ms > 60000 ? (ms/60000).toFixed(1)+"m" : (ms/1000).toFixed(0)+"s"; })()
-            : s.skipped ? "skipped" : s.started ? "running" : "";
-          const exitNote = s.exit != null && s.exit !== 0 ? `<span class="tl-exit-bad">exit ${s.exit}</span>` : "";
-          return `<div class="tl-row">
-            <div class="tl-dot ${dot}" title="${dot}"></div>
-            <span class="tl-name">${esc(s.name)}</span>
-            <span class="tl-time">${esc(dur)} ${exitNote}</span>
-          </div>`;
-        }).join("")}
-      </div>
-    </div>`;
-  }
+  // CPU second lane card (2026-11-12): its lock, tonight's queue job, and live verify output
+  const cpuLock = statusData.cpu_lock;
+  const cpuJob = statusData.cpu_job || {};
+  const cpuCur = statusData.cpu_current;
+  const cpuCard = (cpuLock && cpuLock.alive)
+    ? `<div class="card status-card">
+        <div class="label">CPU lane</div>
+        <div class="value">busy</div>
+        <div class="sub" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60ch">${esc(cpuJob.name || "working")}${cpuJob.started ? ` · started ${esc(timeSince(cpuJob.started))}` : ""}</div>
+        <div class="sub">${cpuCur ? `${cpuCur.n}${cpuJob.target ? " / " + cpuJob.target : ""} verified · latest ${esc(timeSince(cpuCur.last))}` : "no verify output yet"}</div>
+      </div>`
+    : `<div class="card status-card">
+        <div class="label">CPU lane</div>
+        <div class="value">idle</div>
+      </div>`;
 
   // Best horn per brief: from /api/leaders (latest campaign of the strongest tier per brief, ranked by
   // median score; never from raw runs, which include superseded and out-of-envelope designs).
@@ -383,8 +449,9 @@ async function viewHome() {
     </div>
     ${guideHtml}
     ${gpuCard}
+    ${cpuCard}
     <div id="home-leaders">${bestBriefHtml}</div>
-    ${timelineHtml}
+    ${queuesBlockHtml(statusData)}
     ${quickLinks}
   </div>`;
   document.getElementById("guide")?.addEventListener("toggle", e => {
@@ -440,9 +507,6 @@ async function viewStatus() {
 function renderStatus(data, jobs = []) {
   const lock = data.gpu_lock;
   const disk = data.disk || {};
-  const ql = data.queue_log || {};
-  const wl = data.watchdog_log || [];
-  const steps = ql.steps || [];
   const cur = data.current;
   const aff = stopAffordanceFor(jobs, lock);
 
@@ -454,13 +518,14 @@ function renderStatus(data, jobs = []) {
       </div>
       <div class="status-grid" id="st-cards">
         <div id="st-lock">${lockCardHtml(lock)}</div>
+        <div id="st-cpu">${cpuLaneCardHtml(data)}</div>
         <div class="status-card">
           <div class="label">${tip("dims", "VRAM used")}</div>
           <div class="value num" id="st-vram">${data.vram_mib != null ? data.vram_mib.toFixed(0) : "–"} <small style="font-size:1rem">MiB</small></div>
         </div>
         <div class="status-card">
           <div class="label">${tip("julia", "Solver hosts")}</div>
-          <div class="value num" id="st-julia">${data.julia_procs ?? "–"}</div>
+          <div class="value num" id="st-julia" style="font-size:1.15rem" title="Live BEAT worker hosts per lane, plus stale registry entries">${esc(hostsLabel(data))}</div>
         </div>
         <div class="status-card">
           <div class="label">Disk free</div>
@@ -473,19 +538,12 @@ function renderStatus(data, jobs = []) {
         <button id="btn-refresh">↻ Refresh</button>
         <button id="btn-gpuclean" class="danger" ${lock && lock.alive ? "disabled title='A live job holds the GPU lock'" : ""}>gpu-clean</button>
       </div>
-      <div class="stack" style="gap:8px">
-        <div class="eyebrow">Queue log — ${esc(ql.name || "")}</div>
-        ${steps.length ? queueTimelineHtml(steps) : ""}
-        <div class="log-tail" id="queue-tail" aria-label="queue log">${esc((ql.tail || []).join("\n"))}</div>
-      </div>
-      <div class="stack" style="gap:8px">
-        <div class="eyebrow">Watchdog log</div>
-        <div class="log-tail" id="watchdog-tail" aria-label="watchdog log">${esc(wl.join("\n"))}</div>
-      </div>
+      <div class="stack" style="gap:8px" id="st-queues">${queuesBlockHtml(data, true, _statusQueueSel)}</div>
     </div>`;
 
   document.getElementById("btn-refresh").onclick = () => { _statusRendered = false; viewStatus(); };
   wireStopButton(aff);
+  wireQueueTabs(document.getElementById("st-queues"), data);
   pillFeed(data, jobs);   // the nav pill shares this poll's look (no extra fetch on this view)
   document.getElementById("btn-gpuclean").onclick = async () => {
     if (!confirm("Run gpu-clean? This kills stale Julia/BEAT processes.")) return;
@@ -958,26 +1016,44 @@ function currentRunCard(cur, aff = null) {
       ${stopRegionHtml(aff)}
     </div>`;
   }
-  const budget = cur.budget || 1;
-  const pct = Math.min(100, Math.round((cur.n / budget) * 100));
-  const over = !!(cur.budget && cur.n > cur.budget);
+  const ses = sessionAccounting(cur);
+  const budget = ses.budget || 0;
+  const pct = budget ? Math.min(100, Math.round((ses.n / budget) * 100)) : 100;
+  const over = !!(budget && ses.n > budget);
   const budgetCls = over ? "bad" : pct >= 90 ? "warn" : "";
   const eta = cur.eta_min != null ? `~${Math.round(cur.eta_min)} min left` : "";
+  const sesHtml = budget
+    ? `<b class="${budgetCls}">${ses.n} / ${budget} this session (${pct}%)${over ? " over budget" : ""}</b>`
+    : `${cur.n.toLocaleString()} rows`;
+  const sesSub = ses.resumed ? `resumed ×${ses.n_resumes} · ${cur.n.toLocaleString()} rows lifetime` : "";
   return `<div class="card running-card" style="margin-top:-4px">
     <div class="eyebrow" style="margin-bottom:6px">Running now</div>
     <div style="font-weight:500">${esc(cur.name || cur.id)}</div>
     <div class="progress-wrap" style="margin:8px 0 4px"><div class="progress-bar ${over ? "bad" : ""}" style="width:${pct}%"></div></div>
     <div style="display:flex;justify-content:space-between;font-size:0.8rem;color:var(--muted)">
-      <span><b class="${budgetCls}">${cur.n.toLocaleString()} / ${budget.toLocaleString()} (${pct}%)${over ? " over budget" : ""}</b></span>
+      <span>${sesHtml}${sesSub ? ` · ${esc(sesSub)}` : ""}</span>
       <span>${eta}</span>
     </div>
     <div class="kpis" style="margin-top:8px">
       <div class="kpi"><span>Score: best</span><b>${fmt(cur.best_j)}</b></div>
       <div class="kpi"><span>Score: start</span><b>${fmt(cur.seed_j && cur.seed_j < 900 ? cur.seed_j : null)}</b></div>
-      <div class="kpi"><span>Rate</span><b>${cur.rate_per_h ? cur.rate_per_h.toFixed(0) + "/h" : "–"}</b></div>
+      <div class="kpi"><span>Rate (session)</span><b>${cur.rate_per_h ? cur.rate_per_h.toFixed(0) + "/h" : "–"}</b></div>
     </div>
     ${stopRegionHtml(aff)}
   </div>`;
+}
+
+function cpuLaneCardHtml(data) {
+  const l = data.cpu_lock;
+  if (l && l.alive) {
+    const job = data.cpu_job || {};
+    const cu = data.cpu_current;
+    return `<div class="label">CPU lane</div>
+      <div class="value">busy</div>
+      <div class="sub" title="${esc(l.command || "")}" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:30ch">${esc(job.name || (cu ? cu.run_id : "working"))}</div>
+      <div class="sub">${cu ? `${cu.n}${job.target ? " / " + job.target : ""} verified · last ${esc(timeSince(cu.last))}` : "no verify output yet"} · PID ${esc(l.pid)}</div>`;
+  }
+  return `<div class="label">CPU lane</div><div class="value good-text">Free</div>`;
 }
 
 function queueTimelineHtml(steps) {
@@ -987,9 +1063,9 @@ function queueTimelineHtml(steps) {
       const dot = s.skipped ? "skip" : s.exit == null ? "run" : s.exit === 0 ? "done" : "failed";
       let dur = "";
       if (s.started && s.ended) {
-        const ms = new Date(s.ended) - new Date(s.started);
-        dur = ms > 60000 ? (ms / 60000).toFixed(1) + "m" : (ms / 1000).toFixed(0) + "s";
-      } else if (s.skipped) { dur = "skipped"; } else if (s.started) { dur = "running"; }
+        dur = fmtDur(new Date(s.ended) - new Date(s.started));
+      } else if (s.skipped) { dur = "skipped"; }
+      else if (s.started) { dur = fmtDur(Date.now() - new Date(s.started)) + " running"; }
       const exitNote = s.exit != null && s.exit !== 0 ? ` <span class="tl-exit-bad">exit ${s.exit}</span>` : "";
       return `<div class="tl-row">
         <div class="tl-dot ${dot}" title="${dot}"></div>
@@ -1003,12 +1079,13 @@ function queueTimelineHtml(steps) {
 function updateStatusInPlace(data, jobs = []) {
   const lock = data.gpu_lock;
   const disk = data.disk || {};
-  const ql = data.queue_log || {};
-  const wl = data.watchdog_log || [];
   const aff = stopAffordanceFor(jobs, lock);
 
   const sl = document.getElementById("st-lock");
   if (sl) sl.innerHTML = lockCardHtml(lock);
+
+  const sc = document.getElementById("st-cpu");
+  if (sc) sc.innerHTML = cpuLaneCardHtml(data);
 
   // the current-run card goes live on the poll: progress numbers refresh, the card appears when a
   // run starts, and the stop affordance always reflects the last poll's jobs/lock state
@@ -1019,7 +1096,7 @@ function updateStatusInPlace(data, jobs = []) {
   if (sv) sv.innerHTML = `${data.vram_mib != null ? data.vram_mib.toFixed(0) : "–"} <small style="font-size:1rem">MiB</small>`;
 
   const sj = document.getElementById("st-julia");
-  if (sj) sj.textContent = data.julia_procs ?? "–";
+  if (sj) { sj.textContent = hostsLabel(data); sj.title = "Live BEAT worker hosts per lane, plus stale registry entries"; }
 
   const sd = document.getElementById("st-disk-val");
   if (sd) sd.innerHTML = `${disk.free_gb != null ? disk.free_gb.toFixed(1) : "–"} <small style="font-size:1rem">GB</small>`;
@@ -1027,11 +1104,8 @@ function updateStatusInPlace(data, jobs = []) {
   const ss = document.getElementById("st-disk-sub");
   if (ss) ss.textContent = disk.total_gb != null ? `${disk.total_gb.toFixed(0)} GB total · ${(100 - disk.free_gb / disk.total_gb * 100).toFixed(0)}% used` : "";
 
-  const qt = document.getElementById("queue-tail");
-  if (qt) qt.textContent = (ql.tail || []).join("\n");
-
-  const wt = document.getElementById("watchdog-tail");
-  if (wt) wt.textContent = wl.join("\n");
+  const qs = document.getElementById("st-queues");
+  if (qs) { qs.innerHTML = queuesBlockHtml(data, true, _statusQueueSel); wireQueueTabs(qs, data); }
 
   const gc = document.getElementById("btn-gpuclean");
   if (gc) gc.disabled = !!(lock && lock.alive);
@@ -1325,7 +1399,7 @@ function renderRunsList(allRuns) {
       <div>
         <div class="eyebrow">All runs</div>
         <h2>Runs</h2>
-        <p class="muted" style="font-size:0.85rem">${allRuns.length} total · newest first</p>
+        <p class="muted" style="font-size:0.85rem">${allRuns.length} total</p>
         <div id="runs-version-banner"></div>
       </div>
       <div class="filter-bar">
@@ -1338,7 +1412,12 @@ function renderRunsList(allRuns) {
           <option value="">All families</option>
           ${families.map(f => `<option value="${esc(f)}">${esc(f)}</option>`).join("")}
         </select>
+        <select id="run-filter-version" aria-label="filter by objective version">
+          <option value="">All versions</option>
+          ${objectiveVersions(allRuns).map(v => `<option value="${v}">J v${v} (${allRuns.filter(r => objectiveVersionOf(r) === v).length})</option>`).join("")}
+        </select>
         <select id="run-sort" class="sort-sel" aria-label="sort runs">
+          <option value="active" selected>Recently active</option>
           <option value="date">Newest first</option>
           <option value="best_j">${tip("J", "Score")} (best first)</option>
           <option value="name">Name</option>
@@ -1347,7 +1426,7 @@ function renderRunsList(allRuns) {
       <div class="tbl-wrap">
         <table id="runs-table">
           <thead><tr>
-            <th>Date</th><th>Name</th><th>Family</th><th>Brief</th>
+            <th>Started</th><th>Name</th><th>Family</th><th>Brief</th>
             <th class="r">${tip("J", "Score start → best")}</th>
             <th class="r">Change</th>
             <th>${tip("dims", "Horn size W×H×D")}</th>
@@ -1363,16 +1442,18 @@ function renderRunsList(allRuns) {
     const q = document.getElementById("run-filter").value.toLowerCase();
     const bf = document.getElementById("run-filter-brief").value;
     const ff = document.getElementById("run-filter-family").value;
+    const vf = document.getElementById("run-filter-version").value;
     const sort = document.getElementById("run-sort").value;
     let filtered = allRuns.filter(r =>
       (!bf || r.brief === bf) &&
       (!ff || r.family === ff) &&
+      (!vf || objectiveVersionOf(r) === Number(vf)) &&
       (!q || (r.name || "").toLowerCase().includes(q) ||
              (r.family || "").toLowerCase().includes(q) ||
              (r.brief || "").toLowerCase().includes(q))
     );
     // Version guard: a mixed-version table is grouped by objective definition, then sorted INSIDE
-    // each group, so a v4 J never outranks a v7 J on the same axis without the banner saying so.
+    // each group, so a v4 J never outranks a v7 J on the same axis without the note saying so.
     filtered = sortRunsForTable(filtered, sort);
 
     const banner = document.getElementById("runs-version-banner");
@@ -1389,16 +1470,16 @@ function renderRunsList(allRuns) {
       const ch = betterPct(r.seed_j, r.best_j);
       const chCls = ch.endsWith("better") ? "good-text" : "";
       const failPct = r.n > 0 ? ((nf / r.n) * 100).toFixed(0) + "%" : "–";
-      const isRunning = !r.last || (Date.now() - new Date(r.last).getTime()) < 120000;
-      return `<tr class="clickable" onclick="location.hash='#/run/${esc(r.id)}'" ${isRunning ? 'style="background:var(--accent-soft)"' : ""}>
-        <td class="muted mono" style="font-size:0.76rem;white-space:nowrap">${timeSince(r.started)}</td>
+      const live = r.active === true || (!r.last || (Date.now() - new Date(r.last).getTime()) < 120000);
+      return `<tr class="clickable" onclick="location.hash='#/run/${esc(r.id)}'" ${live ? 'style="background:var(--accent-soft)"' : ""}>
+        <td class="muted mono" style="font-size:0.76rem;white-space:nowrap">${live ? `<span class="live-dot" title="rows written in the last 2 min">●</span> ` : "⏸ "}${timeSince(r.last || r.started)}<br><span style="font-size:0.7rem">started ${timeSince(r.started)}</span></td>
         <td><b>${esc(r.name)}</b><br><span class="mono muted" style="font-size:0.72rem">${esc(r.id)}</span></td>
         <td>${esc(r.family || "–")}</td>
         <td>${esc(r.brief || "–")}</td>
         <td class="r num"><span class="mono muted" style="font-size:0.68rem">${esc(jVersionLabel(r))}</span><br>${r.seed_j != null && r.seed_j < 900 ? fmt(r.seed_j) : "–"} → <b>${fmt(r.best_j)}</b></td>
         <td class="r ${chCls}">${ch}</td>
         <td style="font-size:0.82rem">${r.dims ? esc(dimStr(r.dims)) : "–"}</td>
-        <td class="r">${r.n.toLocaleString()}</td>
+        <td class="r">${r.n.toLocaleString()}${r.resumed && r.session_n != null ? `<br><span class="mono muted" style="font-size:0.66rem" title="rows in the current session (resumed ×${r.n_resumes})">sess ${r.session_n.toLocaleString()}</span>` : ""}${r.has_verify ? `<br><span class="mono muted" style="font-size:0.66rem">verify ✔</span>` : ""}</td>
         <td class="r">${nf > 0 ? `<span class="warn-text">${esc(failPct)}</span>` : failPct}</td>
       </tr>`;
     }).join("");
@@ -1408,6 +1489,7 @@ function renderRunsList(allRuns) {
   document.getElementById("run-filter").addEventListener("input", render);
   document.getElementById("run-filter-brief").addEventListener("change", render);
   document.getElementById("run-filter-family").addEventListener("change", render);
+  document.getElementById("run-filter-version").addEventListener("change", render);
   document.getElementById("run-sort").addEventListener("change", render);
 }
 
@@ -1906,8 +1988,6 @@ function objectiveVersionOptionsHtml(sel) {
 // These pure helpers keep the label, the mixed-set banner and the grouped order identical
 // everywhere J is ranked or compared (runs list, compare view, Design cloud, run detail).
 
-const J_VERSION_BANNER = "J from different objective versions is not comparable";
-
 /** The version as a positive integer; an absent/odd value is v1, never a guess. */
 function objectiveVersionOf(x) {
   const v = (x && typeof x === "object") ? x.objective_version : x;
@@ -1925,24 +2005,79 @@ function objectiveVersions(runs) {
   return [...new Set((runs || []).map(objectiveVersionOf))].sort((a, b) => b - a);
 }
 
-/** Banner when the displayed set mixes objective versions; "" when it does not. */
+const J_VERSION_BANNER = "J is only comparable within one objective version — the table is grouped by version";
+
+/** Version → row count over the displayed set, newest definition first. */
+function objectiveVersionCounts(runs) {
+  const counts = new Map();
+  for (const r of runs || []) {
+    const v = objectiveVersionOf(r);
+    counts.set(v, (counts.get(v) || 0) + 1);
+  }
+  return [...counts.entries()].sort((a, b) => b[0] - a[0]);
+}
+
+/** Banner when the displayed set mixes objective versions; "" when it does not. Informational
+ *  (role=note, .alert.info): the table IS grouped by version and every J is labelled — the old
+ *  amber-alert copy read as an error on a corpus that has always spanned v1-v7. */
 function objectiveVersionBannerHtml(runs) {
-  return objectiveVersions(runs).length > 1
-    ? `<div class="alert warn" role="alert">${J_VERSION_BANNER}</div>`
-    : "";
+  const counts = objectiveVersionCounts(runs);
+  if (counts.length <= 1) return "";
+  const span = counts.length === 2
+    ? `v${counts[0][0]} and v${counts[1][0]}`
+    : `v${counts[counts.length - 1][0]}…v${counts[0][0]}`;
+  const chips = counts.map(([v, n]) => `<span class="pill" style="margin:2px 6px 0 0">J v${v} ×${n}</span>`).join("");
+  return `<div class="alert info" role="note">${esc(J_VERSION_BANNER)}
+    <span class="muted">this table spans ${esc(span)}:</span><div style="margin-top:4px">${chips}</div></div>`;
 }
 
 /** Runs-table order. When the set mixes versions, group by objective version (newest definition
- *  first) and apply the chosen key INSIDE each group; a single-version set is untouched. */
+ *  first) and apply the chosen key INSIDE each group; a single-version set is untouched.
+ *  `active` = most recently WRITTEN first (a resumed run keeps its old started-date but is the
+ *  only lane actually appending; today's default). */
 function sortRunsForTable(runs, sort) {
   const arr = [...(runs || [])];
   const byKey = (a, b) => {
     if (sort === "best_j") return (a.best_j ?? Infinity) - (b.best_j ?? Infinity);
     if (sort === "name") return String(a.name || "").localeCompare(String(b.name || ""));
-    return String(b.started || "").localeCompare(String(a.started || ""));
+    if (sort === "date") return String(b.started || "").localeCompare(String(a.started || ""));
+    return String(b.last || b.started || "").localeCompare(String(a.last || a.started || ""));
   };
   if (objectiveVersions(arr).length <= 1) return arr.sort(byKey);
   return arr.sort((a, b) => objectiveVersionOf(b) - objectiveVersionOf(a) || byKey(a, b));
+}
+
+/** The run's verify re-solves (``verify --run X`` → ``X/verify/``). Rows pair by design hash:
+ *  when both backends solved the same design the table shows ΔJ = CPU − GPU, the direct two-lane
+ *  parity evidence (2026-11-12 cross-check jobs). Pure; "" when the run has no verify output. */
+function verifyBlockHtml(ver) {
+  if (!ver || !ver.rows || !ver.rows.length) return "";
+  const byHash = new Map();
+  for (const r of ver.rows) {
+    const k = String(r.design_hash || "?");
+    if (!byHash.has(k)) byHash.set(k, []);
+    byHash.get(k).push(r);
+  }
+  const rowsHtml = [...byHash.entries()].map(([hash, rs]) => {
+    const gpu = rs.find(r => !r.backend || r.backend === "beat_cuda" || r.backend === "beat_metal");
+    const cpu = rs.find(r => r.backend && r.backend.includes("cpu"));
+    let dj = `<td class="r muted">–</td>`;
+    if (gpu && cpu && gpu.objective != null && cpu.objective != null) {
+      const d = cpu.objective - gpu.objective;
+      dj = `<td class="r mono" style="font-size:0.76rem">${d >= 0 ? "+" : ""}${d.toFixed(6)}</td>`;
+    }
+    const cells = rs.map(r =>
+      `<div style="font-size:0.74rem"><span class="mono muted">${esc(r.backend || "beat_cuda")}</span> · J ${fmt(r.objective, 4)} · ${esc(timeSince(r.created_utc))}${r.ok === false ? ' · <span class="warn-text">failed</span>' : ""}</div>`).join("");
+    return `<tr><td class="mono" style="font-size:0.76rem">${esc(hash)}</td><td>${cells}</td>${dj}</tr>`;
+  }).join("");
+  return `<div class="fig" id="verify-block">
+      <h3>Verify re-solves</h3>
+      <div class="cap">${ver.n} row(s) from <span class="mono">verify/</span> — higher-fidelity re-solves of this run's designs. ΔJ = CPU − GPU where both backends solved the same design (J, not dB).</div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Design</th><th>Solves</th><th class="r">ΔJ (CPU−GPU)</th></tr></thead>
+        <tbody>${rowsHtml}</tbody>
+      </table></div>
+    </div>`;
 }
 
 /** Per-design gate pass/fail chips for the gates present in the run's audit CSV. Pure; "" when
@@ -1983,7 +2118,8 @@ export { runProvenanceGroup, renderProvenanceBadges, restartScheduleHtml, stepCh
 
 export { f0KpiHtml, mountingRankWarnHtml, seedDerivationHtml, objectiveVersionOptionsHtml,
          objectiveVersionOf, jVersionLabel, objectiveVersions, objectiveVersionBannerHtml,
-         sortRunsForTable, gateAuditHtml, J_VERSION_BANNER };
+         objectiveVersionCounts, verifyBlockHtml, sortRunsForTable, gateAuditHtml,
+         J_VERSION_BANNER };
 
 export { continueRunAvailable, continueRunArgs };
 
@@ -2063,6 +2199,8 @@ async function viewRunDetail(id) {
 
       <!-- Designer header: key facts -->
       <div class="kpis" id="kpi-strip"></div>
+
+      ${verifyBlockHtml(d.verify)}
 
       ${gateAuditHtml(d.gate_audit)}
 

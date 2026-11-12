@@ -1,6 +1,47 @@
 # CONTINUITY
 
 
+## 2026-11-12 (19:06Z) - GUI: LIVE, SESSION-AWARE STATUS FOR THE TWO-LANE NIGHT (fix(gui): A+B+C LANDED, CLOSED GUI-1 + GUI-2)
+
+Context: the two-lane day queue (launched 14:35Z per the 14:30Z entry) was killed by the machine's
+Windows-Update restart at 17:41Z; resumed at 18:13Z via `runs/nights/*_2026-11-12_cont.yaml` + the
+repo's own detached `tools/night_queue/queue.ps1` chain. At entry time the GPU lane is on
+g1b (`--resume runs/20261030T170642Z-screen-fbab4f --budget 117`, session ~75/117, ~100/h, best J
+2.12827) with g2-g9 queued behind g1c; the CPU lane finished c1b (exit 0) and is on c2b
+(core_law top-10 verify, job-relative 1/10 visible in the GUI). Nothing solver-side changed today.
+
+GUI fixes (all data-flow only, from artifacts the CLI already wrote; no solver/queue code touched;
+one GUI restart after each gui edit — `serve()` teardown is socket-only, proven safe twice while
+both lanes solved):
+
+- **Interrupted-queue resume state (first pass, ~18:30Z):** queue log pick by MTIME not name
+  (lexicographic showed `queue_v5_continue_2026-10-29` all day); session-aware progress on
+  `run.json "resumes"` boundaries (the interrupted g1 showed "894/117 (100%) over budget" in red —
+  now "74 / 117 this session · resumed ×3 · 904 rows lifetime", session rate/ETA/failures; the old
+  last-40-row rate window spanned the 12-day crash gap and reported 20/h vs 100/h actual);
+  `current_run` scans ALL dirs (the `[:30]` cap would blank Home/Status as the queue created ~5 new
+  run dirs); CPU lane lock/night/job/verify-activity + per-lane host counts (`GPU 1 · CPU 1 · 0 stale`).
+- **Second pass (owner-approved A+B+C, ~19:00Z):** Runs page default sort **Recently active** +
+  pulsing ● LIVE cell + `sess N` badge + `has_verify` marker (session fields from
+  `run.json "resumes"`, `active` recomputed on every call incl. cache hits); Run detail
+  **"Verify re-solves"** block from `<run>/verify/search.ndjson` with ΔJ = CPU−GPU pairing —
+  verified live on `20261030T111108Z-screen-377bbe`: |ΔJ| ≤ 7e-05 J on the g0/c1 cross-check
+  designs (strongest backend-parity evidence recorded); Runs version filter dropdown;
+  `J_VERSION_BANNER` reworded to a neutral `role="note"` note with per-version count chips
+  (**CLOSES GUI-2**; the amber alert read as an error on a corpus that always spanned v1-v7);
+  CPU-lane `search` jobs get live session/rate/ETA via the night job log's `output <dir>` line;
+  `current_run` skips runs whose last ndjson row is lane-tagged `cpu` (a busy CPU lane can never
+  hijack the GPU lock card); watchdog pane removed (content was Oct-23); queue tabs over the newest
+  5 queue logs with selection persisting across polls.
+- **Tests [measured]:** `node --check` app.js + compileall + `L2 GUARD OK` (node guard in
+  `tests/test_gui_views_l2.py` — new pins: banner string/chips/counts, active-sort, ΔJ block) +
+  96 offline GUI tests pass. Affected: `gui/data.py`, `gui/static/app.js`, `app.css`,
+  `tests/test_gui_views_l2.py`; docs: `ISSUES.md` (GUI-1/GUI-2 CLOSED with evidence),
+  `NOTES_FOR_SENIOR.md` (2026-11-12 entries, deferred list: Kill-confirm — untouched per owner,
+  WP-D2 gates display, D4 elites catalog, W6 balloon, P8d, P9 sandbox, leaderboard latency).
+- Deferred feature lanes (still open, by owner choice): see NOTES_FOR_SENIOR 2026-11-12.
+- Continuation queues/artifacts live under `runs/nights/*_cont*` (gitignored run space).
+
 ## 2026-11-12 (14:30Z) - DAY QUEUE: GPU + CPU LANES LAUNCHED FROM THE COMPUTE STUDY
 
 - Study: `C:/Users/hunte/Hrns/study_2026-11-12/COMPUTE_STUDY.md` (414 runs inventoried, sensitivity, bound walls). Its queue

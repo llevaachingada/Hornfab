@@ -187,7 +187,8 @@ globalThis.fetch = () => Promise.reject(new Error("offline shim"));
 
 const app = await import(pathToFileURL(process.argv[2]).href);
 const { objectiveVersionOf, jVersionLabel, objectiveVersions, objectiveVersionBannerHtml,
-        sortRunsForTable, gateAuditHtml, J_VERSION_BANNER } = app;
+        objectiveVersionCounts, verifyBlockHtml, sortRunsForTable, gateAuditHtml,
+        J_VERSION_BANNER } = app;
 
 assert.equal(objectiveVersionOf(null), 1);
 assert.equal(objectiveVersionOf(undefined), 1);
@@ -199,10 +200,16 @@ assert.equal(jVersionLabel({}), "J v1");
 assert.deepEqual(objectiveVersions([{ objective_version: 4 }, { objective_version: 7 },
                                     { objective_version: 4 }]), [7, 4]);
 assert.equal(objectiveVersionBannerHtml([{ objective_version: 7 }]), "");
-const banner = objectiveVersionBannerHtml([{ objective_version: 7 }, { objective_version: 4 }]);
-assert.ok(banner.includes("alert warn"), banner);
-assert.equal(J_VERSION_BANNER, "J from different objective versions is not comparable");
+const banner = objectiveVersionBannerHtml([{ objective_version: 7 }, { objective_version: 4 },
+                                           { objective_version: 7 }]);
+assert.ok(banner.includes("alert info"), banner);
+assert.ok(banner.includes("role=\"note\""), banner);
+assert.equal(J_VERSION_BANNER, "J is only comparable within one objective version — the table is grouped by version");
 assert.ok(banner.includes(J_VERSION_BANNER), banner);
+assert.deepEqual(objectiveVersionCounts([{ objective_version: 7 }, { objective_version: 4 },
+                                         { objective_version: 7 }]), [[7, 2], [4, 1]]);
+assert.ok(banner.includes("J v7 ×2") && banner.includes("J v4 ×1"), banner);
+assert.ok(objectiveVersionBannerHtml([{ objective_version: 4 }, { objective_version: 4 }]) === "");
 
 const runs = [
   { name: "v4-a", best_j: 5, started: "2026-01-01", objective_version: 4 },
@@ -211,6 +218,14 @@ const runs = [
 ];
 assert.deepEqual(sortRunsForTable(runs, "best_j").map(r => r.name), ["v7-c", "v7-b", "v4-a"]);
 assert.deepEqual(sortRunsForTable(runs.slice(1), "best_j").map(r => r.name), ["v7-c", "v7-b"]);
+// 'active' sorts by last-written (resumed runs keep their old started-date but are the live lane)
+const act = [
+  { name: "old-live", started: "2026-01-01", last: "2026-01-09", objective_version: 4 },
+  { name: "mid", started: "2026-01-05", last: "2026-01-06", objective_version: 4 },
+  { name: "new-idle", started: "2026-01-07", last: "2026-01-07", objective_version: 4 },
+];
+assert.deepEqual(sortRunsForTable(act, "active").map(r => r.name), ["old-live", "new-idle", "mid"]);
+assert.deepEqual(sortRunsForTable(act, "date").map(r => r.name), ["new-idle", "mid", "old-live"]);
 
 assert.equal(gateAuditHtml(null), "");
 assert.equal(gateAuditHtml({ available: false }), "");
@@ -228,6 +243,15 @@ assert.ok(gate.includes("round throat") && gate.includes("loading"), gate);
 assert.ok(gate.includes("pass") && gate.includes("fail"), gate);
 assert.ok(gate.includes("docs/data/gate_audit_x/gate_audit.csv"), gate);
 assert.ok(!gate.includes("CD H"), "gates absent from the audit must not be invented");
+
+assert.equal(verifyBlockHtml(null), "");
+assert.equal(verifyBlockHtml({ n: 0, rows: [] }), "");
+const ver = verifyBlockHtml({ n: 2, rows: [
+  { design_hash: "aaa", objective: 2.09867, backend: null, created_utc: "2026-01-01T00:00:00Z", ok: true },
+  { design_hash: "aaa", objective: 2.09865, backend: "beat_cpu", created_utc: "2026-01-01T00:05:00Z", ok: true },
+]});
+assert.ok(ver.includes("Verify re-solves") && ver.includes("ΔJ (CPU−GPU)"), ver);
+assert.ok(ver.includes("-0.000020"), ver);
 
 console.log("L2 GUARD OK");
 '''
