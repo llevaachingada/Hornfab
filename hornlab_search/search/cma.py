@@ -57,6 +57,14 @@ EVALS_PER_PROJECTION = (1000, 10000)
 # they say the machine hiccupped, not that the design was refused.
 REFUSAL_KINDS = DETERMINISTIC_KINDS
 DEFAULT_ATTEMPTS_FACTOR = 4       # search.max_attempts default (valid mode only): 4 x budget
+RESAMPLE_CAP = 10                 # B.6: a refused candidate is resampled at most this many times
+
+
+def _refusal(ev: Evaluation) -> bool:
+    """True when ``ev`` is a DETERMINISTIC refusal (invalid geometry / envelope / too large):
+    the B.6 resample-and-replace class. Cached replays of a refusal resample too (they are
+    free), so a resume never re-tells a penalty for a design the box refuses anyway."""
+    return error_kind(ev.error) in DETERMINISTIC_KINDS
 
 
 def budget_policy(cfg, budget=None) -> dict:
@@ -430,7 +438,8 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
     wall: list[float] = []
     restarts_log: list[dict] = []              # filled only when search.restarts is configured
     state = {"best": None, "best_no": None, "seed_ev": None, "n_new": 0, "stop": "",
-             "solve_fail_streak": 0, "attempts": 0, "n_valid": 0, "n_refused_free": 0}
+             "solve_fail_streak": 0, "attempts": 0, "n_valid": 0, "n_refused_free": 0,
+             "n_resampled": 0}
 
     # On a resume the best so far is already on disk in search.ndjson: start from it, so a short
     # (or zero-budget) resume can never overwrite best.json with something worse.
@@ -530,12 +539,14 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
 
             Returns the stop reason. A generation cut by the budget is NOT ``tell``-ed (a resume
             replays it from the cache and finishes it), exactly as in the single-ES path."""
+            resample = str(cfg.search.infeasible_penalty) == "resample"     # B.6 (opt-in)
             gen = 0
             while not exhausted():
                 stop = es_instance.stop()
                 if stop:
                     return "cma: " + ", ".join(sorted(stop))
                 X = es_instance.ask()
+                X = [np.asarray(x, dtype=float).reshape(-1) for x in X]
                 F = []
                 if pipe.enabled:
                     # WP2 (opt-in): same order, same run_one, same F; only mesh building of the
@@ -546,15 +557,40 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
                         if exhausted():
                             break
                         pipe.before(i)
-                        F.append(run_one(d).objective)
+                        ev = run_one(d)
+                        # B.6: with search.infeasible_penalty: resample a refused candidate is
+                        # REPLACED by a new sample from the same distribution (cap RESAMPLE_CAP
+                        # tries) and never told; with today's penalties it is told as before.
+                        for _ in range(RESAMPLE_CAP):
+                            if not resample or not _refusal(ev) or exhausted():
+                                break
+                            x_new = np.asarray(es_instance.ask(1)[0], dtype=float).reshape(-1)
+                            X[i] = x_new
+                            state["n_resampled"] += 1
+                            ev = run_one(space.denormalize(x_new))
+                        F.append(ev.objective)
                 else:
-                    for x in X:
+                    for i, x in enumerate(X):
                         if exhausted():
                             break
-                        F.append(run_one(space.denormalize(np.asarray(x))).objective)
+                        ev = run_one(space.denormalize(np.asarray(x)))
+                        # B.6: same resample-and-replace as the prefetch path above (plain pycma
+                        # ask(number=1) resampling, as done by BoundTransform in cma's own
+                        # ask_and_eval); a refusal is LOADED into the ndjson but NEVER told.
+                        for _ in range(RESAMPLE_CAP):
+                            if not resample or not _refusal(ev) or exhausted():
+                                break
+                            x_new = np.asarray(es_instance.ask(1)[0], dtype=float).reshape(-1)
+                            X[i] = x_new
+                            state["n_resampled"] += 1
+                            ev = run_one(space.denormalize(x_new))
+                        F.append(ev.objective)
                 if len(F) < len(X):           # budget ran out mid-generation: do not tell
                     return "budget"
                 es_instance.tell(X, F)
+                if resample and state.get("n_resampled"):
+                    log.info("B.6 resample: %d refusal(s) replaced by new samples so far",
+                             state["n_resampled"])
                 try:
                     es_instance.logger.add()
                 except Exception:  # noqa: BLE001 - cma's own logging is optional

@@ -115,7 +115,7 @@ class SearchSettings:
     budget: int
     popsize: int | None
     tolfun: float
-    infeasible_penalty: str = "flat"   # WP3: 'flat' (default, today) | 'graded'
+    infeasible_penalty: str = "flat"   # WP3: 'flat' (default, today) | 'graded' | 'resample' (B.6)
     restarts: dict | None = None       # WP11a: {"mode": ipop|bipop, "max": N} (absent = today)
     qd: dict | None = None             # WP11b: CMA-ME descriptors/bins (absent = today)
     pipeline_prefetch: int = 0         # WP2: build this many candidates' meshes ahead (0 = serial, today)
@@ -1320,9 +1320,17 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
         search.popsize = None
     if "budget_counts" not in raw["search"]:
         search.budget_counts = "new"
-    if search.infeasible_penalty not in ("flat", "graded"):
-        raise ConfigError(f"{where}: search.infeasible_penalty must be 'flat' or 'graded', "
-                          f"got {search.infeasible_penalty!r}")
+    if search.infeasible_penalty not in ("flat", "graded", "resample"):
+        raise ConfigError(f"{where}: search.infeasible_penalty must be 'flat', 'graded' or "
+                          f"'resample', got {search.infeasible_penalty!r}")
+    if search.infeasible_penalty == "resample" and search.algorithm == "cma_me":
+        # B.6: ribs 0.12 scheduler.tell slices one results slice per emitter by its own
+        # _num_emitted (.venv .../ribs/schedulers/_scheduler.py:401-411), so a CMA-ME batch
+        # cannot drop its refused solutions: resampling is a plain-CMA behaviour. Tell the
+        # config owner loudly instead of silently degrading the atlas run.
+        raise ConfigError(f"{where}: search.infeasible_penalty: resample is not supported with "
+                          f"search.algorithm: cma_me (ribs scheduler.tell needs one result per "
+                          f"asked solution; refusals there keep today's seed-cell fallback)")
     search.budget_counts = _validate_budget_counts(search.budget_counts, f"{where}:search")
     search.max_attempts = _validate_max_attempts(search.max_attempts, f"{where}:search")
     if "links" not in raw["search"]:
