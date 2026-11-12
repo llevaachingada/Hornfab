@@ -154,13 +154,30 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
                  warm_record["mean_objective"], sigma0_eff)
     solution_dim = int(len(x0))
 
-    archive = GridArchive(solution_dim=solution_dim, dims=list(bins),
-                          ranges=[DESCRIPTOR_RANGE_DEG, DESCRIPTOR_RANGE_DEG],
-                          seed=int(cfg.search.seed))
+    # B.8 (opt-in): search.qd.maes turns the CMA-ME archive into a CMA-MAE soft archive
+    # (Fontaine & Nikolaidis 2023): learning_rate in [0.01, 0.1] and threshold_min = the NEGATIVE
+    # J threshold (the archive MAXIMISES -J = -(-1000) = 1000 for refusal-penalty rows), the
+    # emitter ranks with "imp" and carries NO bounds (candidates are clipped in
+    # DesignSpace.denormalize exactly like the plain CMA path). Absent maes = today's archive.
+    maes = qd.get("maes") if isinstance(qd, dict) else None
+    ranker = "2imp"
+    if maes:
+        ranker = "imp"
+        log.info("CMA-MAE: archive learning_rate %.4g, threshold_min %.6g (J threshold %.6g)",
+                 maes["learning_rate"], -maes["j_threshold"], maes["j_threshold"])
+        archive = GridArchive(solution_dim=solution_dim, dims=list(bins),
+                              ranges=[DESCRIPTOR_RANGE_DEG, DESCRIPTOR_RANGE_DEG],
+                              learning_rate=float(maes["learning_rate"]),
+                              threshold_min=-float(maes["j_threshold"]),
+                              seed=int(cfg.search.seed))
+    else:
+        archive = GridArchive(solution_dim=solution_dim, dims=list(bins),
+                              ranges=[DESCRIPTOR_RANGE_DEG, DESCRIPTOR_RANGE_DEG],
+                              seed=int(cfg.search.seed))
     emitter = EvolutionStrategyEmitter(
         archive, x0=np.asarray(x0, dtype=float), sigma0=sigma0_eff,
-        ranker="2imp", es="cma_es", selection_rule="mu",
-        bounds=[(0.0, 1.0)] * solution_dim,
+        ranker=ranker, es="cma_es", selection_rule="mu",
+        bounds=None if maes else [(0.0, 1.0)] * solution_dim,
         batch_size=int(cfg.search.popsize) if cfg.search.popsize else None,
         seed=int(cfg.search.seed))
     scheduler = Scheduler(archive, [emitter])
@@ -305,8 +322,10 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
                      "coverage": payload["stats"]["coverage"],
                      "total_evals": payload["stats"]["total_evals"],
                      "non_cached": payload["stats"]["non_cached"],
-                     "descriptor_h_meaning": _describe_descriptor(names[0]),
-                     "descriptor_v_meaning": _describe_descriptor(names[1])}
+                 "descriptor_h_meaning": _describe_descriptor(names[0]),
+                 "descriptor_v_meaning": _describe_descriptor(names[1])}
+        if maes:
+            upd["qd"]["maes"] = dict(maes)      # B.8: record the CMA-MAE archive parameters
         if pipe.enabled:
             upd["pipeline_prefetch"] = pipe.stats()
         # B.4: present only for budget_counts: valid (or an explicit max_attempts), so a default

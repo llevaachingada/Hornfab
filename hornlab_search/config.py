@@ -786,13 +786,20 @@ def _validate_qd(block, where: str) -> dict | None:
     ``bins_h``, ``bins_v`` (integers in [2, 64]). ALL FOUR are required when the block is present;
     there is deliberately no silent default. It is a SEARCH-ONLY key: it never enters the
     solve-spec hash. Unknown sub-keys, unknown descriptor names and mis-typed bins are refused with
-    a ``search.qd`` prefix so a YAML typo is never silent."""
+    a ``search.qd`` prefix so a YAML typo is never silent.
+
+    B.8 (day 2026-11-12): the optional sub-block ``maes: {learning_rate, j_threshold}`` opts the
+    CMA-ME run into CMA-MAE (Fontaine & Nikolaidis 2023): GridArchive(learning_rate in
+    [0.01, 0.1], threshold_min = -j_threshold as the MAXIMISED objective), emitter ranker
+    "imp" and no emitter bounds (candidates are clipped in DesignSpace.denormalize, like plain
+    CMA). Absent ``maes`` = today's CMA-ME (learning_rate 1.0, threshold_min -inf, ranker
+    "2imp", emitter bounds resampling)."""
     if block is None:
         return None
     if not isinstance(block, dict):
         raise ConfigError(f"{where}: qd must be a mapping with keys "
                           f"descriptor_h, descriptor_v, bins_h, bins_v")
-    unknown = set(block) - {"descriptor_h", "descriptor_v", "bins_h", "bins_v"}
+    unknown = set(block) - {"descriptor_h", "descriptor_v", "bins_h", "bins_v", "maes"}
     if unknown:
         raise ConfigError(f"{where}: unknown key(s) {sorted(unknown)} "
                           f"(allowed: descriptor_h, descriptor_v, bins_h, bins_v)")
@@ -812,6 +819,26 @@ def _validate_qd(block, where: str) -> dict | None:
         if isinstance(v, bool) or not isinstance(v, int) or not (2 <= v <= 64):
             raise ConfigError(f"{where}: {key} must be an integer in [2, 64], got {v!r}")
         out[key] = int(v)
+    if "maes" in block and block["maes"] is not None:
+        m = block["maes"]
+        if not isinstance(m, dict):
+            raise ConfigError(f"{where}.maes: must be a mapping with keys "
+                              f"learning_rate, j_threshold")
+        unknown = set(m) - {"learning_rate", "j_threshold"}
+        if unknown:
+            raise ConfigError(f"{where}.maes: unknown key(s) {sorted(unknown)} "
+                              f"(allowed: learning_rate, j_threshold)")
+        lr = m.get("learning_rate")
+        if isinstance(lr, bool) or not isinstance(lr, (int, float)) \
+                or not (0.01 <= float(lr) <= 0.1):
+            raise ConfigError(f"{where}.maes.learning_rate must be a number in [0.01, 0.1], "
+                              f"got {lr!r}")
+        jt = m.get("j_threshold")
+        if isinstance(jt, bool) or not isinstance(jt, (int, float)) \
+                or not float(jt) > 0:
+            raise ConfigError(f"{where}.maes.j_threshold must be a positive number (the refusal "
+                              f"penalty J cap; archive threshold_min = -j_threshold), got {jt!r}")
+        out["maes"] = {"learning_rate": float(lr), "j_threshold": float(jt)}
     return out
 
 
