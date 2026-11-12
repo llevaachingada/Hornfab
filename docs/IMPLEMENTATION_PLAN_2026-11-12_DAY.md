@@ -268,3 +268,57 @@ deps needs owner OK and no live queue).
 - **Research the orchestrator may do before coding (allowed, cite sources in PR):** pycma docs on
   `fmin_lq_surr2`/`is_feasible`; ribs CMA-MAE tutorial; COCO/IOHprofiler ECDF practice; WS-CMA-ES (warm start)
   for B.1. Keep it short; do not add dependencies.
+
+---
+
+## 6. Group R - research continuation (one research agent, web + repo, no code changes)
+
+**Goal:** turn section 5's findings into a sourced, math-grounded design dossier for the next round of search and
+analysis work. Output `docs/research/SEARCH_MATH_DOSSIER_2026-11.md` (+ INDEX line), every claim with a primary
+source (paper, library docs, release notes) and, where it applies, a check against THIS repo's data or code
+(file:line, run dir). Read-only on `runs/`, `dataset/`; small analysis scripts go under
+`C:\Users\hunte\Hrns\study_2026-11-12\research\` only. Runs in parallel with groups A-G; it informs B.6-B.9 and G
+but does not block them.
+
+**Ground truth to start from (do not re-derive):** section 5 numbers; scripts `study_2026-11-12\senior\a1-a3.py`;
+`hornlab_search/search/cma.py` (pycma 4.5.0, unit box, `bounds=[0,1]`, clip in `DesignSpace.denormalize`,
+refusals told as 1000 / graded envelope penalty), `search/cma_me.py` (ribs 0.12.0, one emitter, `ranker="2imp"`,
+`threshold_min=-inf`, `learning_rate=1.0`, emitter `bounds=`), `objective/scalar_v4.py` + `objective/terms.py`
+(J = sum w_k * term_k / tol_k; cov/diag/dislope squared, rip/flat linear; NAN_TERM_FILL 30; PENALTY 1000),
+`objective/scalar_v6.py`, `objective/scalar_v7.py`, PR #27 evidence (v6 vs v7 top-20 tau < 0).
+
+**Questions (answer each with: what the literature says, the math, how it maps to our setup, a concrete config
+or code sketch, expected gain, risk, and how to test it with our data):**
+1. **Constraint handling in CMA-ES** for cheap-to-check infeasibility (16% refusals): resample vs repair vs
+   penalty vs pycma `fmin_con2` / augmented Lagrangian; bias of truncated sampling; what to do when the optimum
+   sits on a bound (morph_fixed). Recommend one, with pycma options.
+2. **Surrogate-assisted CMA-ES:** lq-CMA-ES (Hansen 2019) in pycma 4.5 (`fmin_lq_surr2`, `fitness_models`);
+   expected evaluations saved at 5-20 D; behaviour with refusals and a 28k-row prior archive; alternatives (GP-EI
+   BO, TuRBO, RF/GBM surrogates). Which fits a 10-60 s deterministic black box best.
+3. **Warm starts and transfer:** WS-CMA-ES (Nomura 2021), pycma `inject`, initial covariance from previous runs'
+   CMA dumps; how to warm-start from a different brief safely.
+4. **Restarts and budget allocation:** IPOP vs BIPOP vs one long run, given our seed spread (26-59%) and "still
+   improving at end" (42% of runs); successive halving / Hyperband across seeds or cells.
+5. **Quality-diversity:** CMA-ME vs CMA-MAE (Fontaine & Nikolaidis 2023), archive learning rate choice, number
+   of emitters, handling infeasible solutions and bounds in ribs 0.12; QD-score/coverage metrics and how to
+   compare atlas runs.
+6. **Objective design (scoring math):** weighted sums of normalised terms; squared vs linear (RMS) error units and
+   why mixing them makes weights distance-dependent; tolerance calibration from data (top-decile medians);
+   Chebyshev / achievement scalarizing; lexicographic gates; when MO (NSGA-II, MO-CMA-ES) is worth it. Use our
+   measured shares (cov 0.42, rip 0.01, load 0.00) to show the effect numerically and propose v8 settings.
+7. **Multi-fidelity:** our screen is optimistic (95% of verify pairs worse) and ranks its own top 5 poorly;
+   literature on winner's-curse / optimization bias under low fidelity, rank-correlation checks, frequency-grid
+   density vs aliasing of narrow beams, MF-BO / successive halving with screen->verify, how many finalists to
+   verify (top-k sizing).
+8. **Algorithm comparison statistics:** COCO / IOHprofiler practice (ECDF of runtime-to-target, ERT), number of
+   independent runs needed for our measured variance (power calculation), bootstrap CIs, Mann-Whitney; the
+   26-seed freeform_sculpt group as a worked example.
+9. **Sensitivity and linked parameters:** bias of Spearman on optimizer samples; given-data Sobol (SALib delta,
+   RBD-FAST), surrogate-based Sobol/SHAP, active subspaces, CMA covariance eigen-analysis; how to turn a finding
+   into a `links:` entry (B.2) or a pin.
+10. **Anything else that would get better horns in fewer solves** for this specific setup (e.g. dof-adaptive
+    fidelity, early stopping of bad candidates during the frequency sweep, batch/parallel CMA with two lanes).
+
+**Deliverable format:** one section per question, a ranked table "change -> expected gain -> cost -> how to
+verify on our data", and a short owner summary in plain language at the top. Propose new dependencies (SALib,
+optuna, botorch) only with a justification; do not install them. Cite at most one short quote per source.
