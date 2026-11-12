@@ -1,6 +1,30 @@
 # CONTINUITY
 
 
+## 2026-11-12 (20:20Z) - GUI VERIFY / HIGH-RES VIEW PLAN (DESIGN PASS, PLAN ONLY)
+
+- Wrote `docs/GUI_VERIFY_VIEW_PLAN_2026-11-12.md` (design pass: designer lane + Boundary Lab research lane,
+  reconciled). Plan only; no GUI code changed.
+- Decision: **primary = a Verify sub-view inside run detail** (`#/run/<id>/verify`, entered from a persistent
+  Verification card), **verify runs as first-class rows / second-class pages** (fidelity badge + parent link,
+  redirect to the parent Verify view), optional "Verified only" filter; no new top-level nav item.
+- Surfaces: (A) Verify view with KPIs (screen bias, worse-on-verify, screen-#1->verify rank, top-5 overlap,
+  rank agreement), a screen-vs-verify scatter, and a verify-J-ranked table with delta + gates + density;
+  (B) per-design high-res panel with one Hz-labelled frequency scrubber driving 3D balloon (dB-radius blob,
+  white 6 dB isobars, guides), H/V polar cuts with a screen ghost, isobar map, and on-axis/DI/ripple/beamwidth
+  curves with a screen ghost; (C) compare-two-verified with per-frequency deltas.
+- Grounding corrected during the pass: GUI `run_detail`/leaderboards are screen-centric today (verify precedence
+  exists only in gate audit/campaign grouping) -> the view builds the screen<->verify pairing explicitly (same
+  rule as `tools/analysis/fidelity.py`); verify has two layouts (inline `<run>/verify/` without run.json; separate
+  `auto_*__verify` runs with `verify_of`); default shortlist is top 5; frequency counts vary per brief.
+- Boundary Lab v0.5.0 research folded in: borrow isobars->balloon->curves grouping, Hz frequency slider with k/N,
+  explicit A/B state (never hidden gestures), quality/density honesty, print at full stored resolution; reject
+  floating windows, turbo-only encoding, implying BL-class density.
+- Slices 1-6 scoped (data/API foundation; entry points/identity; table/summary; per-design panel; compare-two;
+  optional verify-selected), each with headless tests; risks listed (inline vs separate, absolute `verify_of`
+  paths, cross-grid comparability, gate-audit keying, response overwrite, export ranking gap).
+- Bookkeeping: ISSUES + INDEX updated in the same commit.
+
 ## 2026-11-12 (19:45Z) - DAY GROUP G: OBJECTIVE V8 PROPOSAL (OFFLINE ONLY, OWNER-GATED)
 
 - Day-plan group G (PR #43, branch `day/G-objective-v8`): `hornlab_search/objective/scalar_v8.py`
