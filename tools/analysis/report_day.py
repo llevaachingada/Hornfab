@@ -1,4 +1,4 @@
-"""A.8 report_day.py — run every Group A analysis from one YAML spec into one REPORT.md.
+﻿"""A.8 report_day.py — run every Group A analysis from one YAML spec into one REPORT.md.
 
 Usage:  PY tools\\analysis\\report_day.py --spec <yaml> --out <dir>
 
@@ -60,31 +60,36 @@ def run_sections(spec: dict, out_dir: Path) -> list[dict]:
                                      md=lambda p, _m=mod: _m._md({"runs": [p]}),
                                      charts=lambda p, _m=mod: (
                                          {"convergence_1.png": _m._chart(p)}
-                                         if p.get("curve") else None)))
+                                         if p.get("curve") else None),
+                                     tool="convergence"))
     for entry in spec.get("seed_groups") or []:
         mod = _load_tool("seed_variance")
         # one seed-group per spec id
         groups = {str(entry["id"]): [Path(_resolve(runs_root, p)) for p in entry["seeds"]]}
         sections.append(_run_section(out_dir, entry,
                                      "seed_variance_" + str(entry["id"]),
-                                     lambda e, _m=mod, _g=groups: _m.analyse_groups(_g)))
+                                     lambda e, _m=mod, _g=groups: _m.analyse_groups(_g),
+                                     tool="seed_variance"))
     for entry in spec.get("sensitivity") or []:
         mod = _load_tool("sensitivity")
         sections.append(_run_section(out_dir, entry, "sensitivity_" + str(entry["id"]),
                                      lambda e, _m=mod: _m.analyse_run(Path(_resolve(runs_root, e["run"]))),
-                                     md=lambda p, _m=mod: _m._md(p)))
+                                     md=lambda p, _m=mod: _m._md(p),
+                                     tool="sensitivity"))
     for entry in spec.get("links") or []:
         mod = _load_tool("links")
         sections.append(_run_section(out_dir, entry, "links_" + str(entry["id"]),
                                      lambda e, _m=mod: _m.analyse_run(Path(_resolve(runs_root, e["run"]))),
                                      md=lambda p, _m=mod: _m._md(p),
-                                     charts=lambda p, _m=mod: _m.charts(p)))
+                                     charts=lambda p, _m=mod: _m.charts(p),
+                                     tool="links"))
     for entry in spec.get("walls") or []:
         mod = _load_tool("walls")
         sections.append(_run_section(out_dir, entry, "walls_" + str(entry["id"]),
                                      lambda e, _m=mod: _m.analyse_run(Path(_resolve(runs_root, e["run"]))),
                                      md=lambda p, _m=mod: _m._md(p),
-                                     charts=lambda p, _m=mod: _m.charts(p)))
+                                     charts=lambda p, _m=mod: _m.charts(p),
+                                     tool="walls"))
     for entry in spec.get("ab_compare") or []:
         mod = _load_tool("ab_compare")
         sections.append(_run_section(
@@ -93,7 +98,8 @@ def run_sections(spec: dict, out_dir: Path) -> list[dict]:
                                          [Path(_resolve(runs_root, p)) for p in e["b"]],
                                          e.get("label_a"), e.get("label_b")),
             md=lambda p, _m=mod: _m._md(p),
-            charts=lambda p, _m=mod: _m.charts(p)))
+            charts=lambda p, _m=mod: _m.charts(p),
+            tool="ab_compare"))
     for entry in spec.get("lane_parity") or []:
         mod = _load_tool("lane_parity")
         sections.append(_run_section(
@@ -101,31 +107,37 @@ def run_sections(spec: dict, out_dir: Path) -> list[dict]:
             lambda e, _m=mod: _m.analyse(Path(_resolve(runs_root, e["gpu"])),
                                          Path(_resolve(runs_root, e["cpu"]))),
             md=lambda p, _m=mod: _m._md(p),
-            charts=lambda p, _m=mod: _m.charts(p)))
+            charts=lambda p, _m=mod: _m.charts(p),
+            tool="lane_parity"))
     for entry in spec.get("term_balance") or []:
         mod = _load_tool("term_balance")
         sections.append(_run_section(
             out_dir, entry, "term_balance_" + str(entry["id"]),
             lambda e, _m=mod: _m.analyse_run(Path(_resolve(runs_root, e["run"]))),
             md=lambda p, _m=mod: _m._md(p),
-            charts=lambda p, _m=mod: _m.charts(p)))
+            charts=lambda p, _m=mod: _m.charts(p),
+            tool="term_balance"))
     for entry in spec.get("fidelity") or []:
         mod = _load_tool("fidelity")
         sections.append(_run_section(
             out_dir, entry, "fidelity_" + str(entry["id"]),
             lambda e, _m=mod: _m.analyse_run(Path(_resolve(runs_root, e["run"]))),
             md=lambda p, _m=mod: _m._md(p),
-            charts=lambda p, _m=mod: _m.charts(p)))
+            charts=lambda p, _m=mod: _m.charts(p),
+            tool="fidelity"))
     return sections
 
 
 def _run_section(out_dir: Path, entry: dict, name: str,
-                 compute, md=None, charts=None) -> dict:
+                 compute, md=None, charts=None, tool=None) -> dict:
     """Run one spec section; catch everything and record status (never abort the report).
 
-    ``fail()`` helpers raise SystemExit (not Exception) — caught too, since e.g.
-    seed_variance refuses mixed-provenance groups that way."""
-    sec: dict = {"id": str(entry.get("id", name)), "tool": name.split("_")[0], "status": "",
+    ``fail()`` helpers raise SystemExit (not Exception) - caught too, since e.g.
+    seed_variance refuses mixed-provenance groups that way. ``tool`` is the section's
+    real tool name (e.g. "seed_variance") - splitting ``name`` on "_" is wrong for
+    multi-word tools."""
+    tool = tool or (name.split("_", 1)[0] if "_" in name else name)
+    sec: dict = {"id": str(entry.get("id", name)), "tool": tool, "status": "",
                  "detail": "", "error": None}
     sub = Path(out_dir) / name
     try:
@@ -133,10 +145,10 @@ def _run_section(out_dir: Path, entry: dict, name: str,
         from _common import write_report
 
         table = md(payload) if md else _default_md(payload)
-        written = write_report(sub, name.split("_")[0], payload, table,
+        written = write_report(sub, tool, payload, table,
                                (charts(payload) if charts else None) or None)  # type: ignore[arg-type]
         sec.update(status="ok", detail=str(sub),
-                   outputs={Path(k).name: v for k, v in written.items()})
+                   outputs={Path(v).name: v for v in written.values()})
     except (Exception, SystemExit) as exc:  # noqa: BLE001 - a bad run dir must not kill the whole report
         sec.update(status="error", error=f"{type(exc).__name__}: {exc}",
                    detail="\n".join(traceback.format_exc().splitlines()[-3:]))
@@ -195,7 +207,15 @@ def main(argv=None) -> int:
                "n_ok": sum(1 for s in sections if s["status"] == "ok"),
                "n_error": sum(1 for s in sections if s["status"] == "error"),
                "sections": sections}
-    write_report(Path(args.out), TOOL, payload, make_report_md(sections, args.spec))
+    md = make_report_md(sections, args.spec)
+    written = write_report(Path(args.out), TOOL, payload, md)
+    # schema names the human report REPORT.md; report_day.md stays for the family naming
+    report_md = Path(args.out) / "REPORT.md"
+    try:
+        report_md.write_text(md, encoding="utf-8")
+        written["REPORT.md"] = str(report_md)
+    except OSError as exc:
+        print(f"warning: REPORT.md write failed ({exc})", file=__import__("sys").stderr)
     print(f"report_day OK: {payload['n_ok']} ok / {payload['n_error']} errored section(s)"
           f" -> {args.out}")
     return 0

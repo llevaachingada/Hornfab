@@ -120,6 +120,8 @@ def analyse_run(run_dir: Path) -> dict:
 
 
 def _md(payload: dict) -> str:
+    if "runs" in payload:  # multi-run wrapper: render one section per run
+        return "\n\n".join(_md(r) for r in payload["runs"])
     v = payload["objective_version"]
     lines = ["# Term balance", "",
              f"Brief `{payload['brief']}` (objective v{v if v is not None else '?'}, "
@@ -140,6 +142,24 @@ def _md(payload: dict) -> str:
     return "\n".join(lines)
 
 
+def charts(payload: dict) -> dict:
+    """Chart factory for main() and report_day.py: median share of J per term."""
+    def fn(plt):
+        shares = payload.get("shares") or {}
+        if not shares:
+            return None
+        fig, ax = plt.subplots(figsize=(7, 4))
+        keys = list(shares)
+        ax.bar(keys, [shares[k]["median"] for k in keys])
+        ax.set_ylabel("median share of J")
+        v = payload.get("objective_version")
+        ax.set_title(f"term balance — {payload['brief']} (v{v if v is not None else '?'})")
+        ax.tick_params(axis="x", rotation=30)
+        fig.tight_layout()
+        return fig
+    return {"term_balance.png": fn}
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=( __doc__ or "").splitlines()[0])
     ap.add_argument("--run", action="append", required=True, help="run dir (repeatable)")
@@ -157,23 +177,8 @@ def main(argv=None) -> int:
         payload = {"brief": payloads[0]["brief"],
                    "objective_version": payloads[0]["objective_version"],
                    "runs": payloads}
-    brief = payload["brief"]
-    version = payload["objective_version"]
 
-    def fn(plt):
-        shares = payloads[0]["shares"]
-        if not shares:
-            return None
-        fig, ax = plt.subplots(figsize=(7, 4))
-        keys = list(shares)
-        ax.bar(keys, [shares[k]["median"] for k in keys])
-        ax.set_ylabel("median share of J")
-        ax.set_title(f"term balance — {brief} (v{version})")
-        ax.tick_params(axis="x", rotation=30)
-        fig.tight_layout()
-        return fig
-
-    write_report(Path(args.out), TOOL, payload, _md(payloads[0]), {"term_balance.png": fn})
+    write_report(Path(args.out), TOOL, payload, _md(payload), charts(payload))
     print(f"term_balance OK: {len(payloads)} run(s) -> {args.out}")
     return 0
 
