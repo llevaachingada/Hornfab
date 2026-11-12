@@ -1,5 +1,11 @@
 # Code map
 
+Data-analysis and optimization roadmap (planning, not shipped modules): [reviewed S0-S11 plan](research/COUNCIL_REVIEW_AND_IMPL_PLAN_2026-11-12.md), [locked Bayesian Design Study/GUI orchestrator spec](research/BAYESIAN_STUDY_ORCHESTRATOR_SPEC_2026-11-12.md) and [complete implementation prompts, starting at B0](research/DATA_GA_IMPLEMENTATION_PROMPTS_2026-11-12.md). The documents distinguish existing code from proposed catalog/effects/seed/discovery tools and additive `studies/`/`bo/` modules.
+
+Latest governing scope: [horn-specific hardening after two Terra reviews](research/HORN_OPTIMIZATION_HARDENING_2026-11-12.md). Preserve physical/metric/score identities and prove offline rescoring; explain parameter/geometry/acoustics through existing GUI. BoTorch stays in full implementation scope: pure adapter work can parallelize after contracts, then integrate persistent study/propose/serial run/verify feedback. Production defaults/adoption remain separate evidence gates.
+
+The same hardening document §8 and prompt blocks F0/F1 specify outcome isolation (planning only): deterministic refusal versus resource limit versus measured acoustic gate versus infrastructure error, opt-in strict CMA/same-candidate recovery, both QD archives and safe emitter/scheduler handling. Existing capped `resample` still has penalty fallback; no runtime code/default was changed by this review.
+
 Where things live. Docs: [`INDEX.md`](INDEX.md). Ownership per path: [`../CLAUDE.md`](../CLAUDE.md) "File ownership".
 Keep current: a new module or config folder gets a line here in the same commit.
 

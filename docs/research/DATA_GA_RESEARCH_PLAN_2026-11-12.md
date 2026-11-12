@@ -1,5 +1,7 @@
 # Data analysis, GA improvement, and dataset-exploitation research plan (2026-11-12)
 
+**Review completed:** recommendations and execution order are superseded by [the source-audited review and implementation plan](COUNCIL_REVIEW_AND_IMPL_PLAN_2026-11-12.md), with [complete slice prompts](DATA_GA_IMPLEMENTATION_PROMPTS_2026-11-12.md). The raw research below is preserved as historical input; later statements about v8 placeholders, 26 equal-budget seeds and statistical/optimization guarantees must not be used as current instructions.
+
 **Status:** RAW research plan — pending senior hardening/review. Saved verbatim from the research pass so it is durable.
 **Author:** research pass (oracle), 2026-11-12. **Saved by:** orchestrator.
 **Scope:** inventory of today's data-analysis/GA work across the worktrees; dataset exploitation (warm starts, links, walls/narrow, sensitivity/term balance, seed variance, fidelity, v8); seed/parameter discovery; visualization; a ranked CPU-only work queue; merge dependencies; owner decisions.
