@@ -31,9 +31,17 @@ import json
 import os
 import time
 from pathlib import Path
+from typing import Callable
 
 # Env-var set by the lock holder so child processes can skip acquisition.
 _LOCK_OWNER_ENV = "HORNLAB_GPU_LOCK_OWNER"
+#: The CPU lane's own marker/lock, held by the nightly controller (2026-11-12 two-lane night).
+#: Same mechanism, separate file: a live CPU lock means the CPU lane's Julia hosts must be left
+#: alone by the GPU lane's gpu-clean/night hygiene, and vice versa.
+_CPU_LANE_LOCK_OWNER_ENV = "HORNLAB_CPU_LANE_LOCK_OWNER"
+
+#: Lane name -> its lock file name under ``runs/``. Two independent lanes, two independent locks.
+LANE_LOCK_FILES = {"gpu": ".gpu.lock", "cpu": ".cpu.lane.lock"}
 
 REPO = Path(__file__).resolve().parents[2]
 _DEFAULT_RUNS = REPO / "runs"
@@ -88,6 +96,48 @@ def _lock_path(runs_root: Path | None = None) -> Path:
     return root / ".gpu.lock"
 
 
+def lane_lock_path(lane: str, runs_root: Path | None = None) -> Path:
+    """The lock file for ``lane`` (``gpu`` -> ``runs/.gpu.lock``, ``cpu`` -> ``runs/.cpu.lane.lock``).
+
+    The CPU lane's marker is deliberately a *separate file* with the same semantics as the GPU
+    lock, so the two lanes never contend for one marker and a live one can be recognised by the
+    other lane's hygiene code. Unknown lane names are refused loudly (no silent default).
+    """
+    name = LANE_LOCK_FILES.get(str(lane).lower())
+    if name is None:
+        raise ValueError(f"unknown lane {lane!r} (known: {sorted(LANE_LOCK_FILES)})")
+    root = Path(runs_root) if runs_root is not None else _DEFAULT_RUNS
+    root.mkdir(parents=True, exist_ok=True)
+    return root / name
+
+
+def live_locked_lanes(runs_root: Path | None = None, *,
+                      alive: "Callable[[int], bool] | None" = None) -> set[str]:
+    """Lane names whose lock is held by a LIVE process other than us.
+
+    Used by host-cleanup code to satisfy the two-lane rule: never touch a host of a lane whose
+    lock is live. A dead holder (the 2026-10-28 timeout case) is not protected; a lock we hold
+    ourselves is not protected either (so our own cleanup can still run).
+    """
+    root = Path(runs_root) if runs_root is not None else _DEFAULT_RUNS
+    probe = alive or _pid_alive
+    out: set[str] = set()
+    for lane, name in LANE_LOCK_FILES.items():
+        data = _read_lock(root / name)
+        if not data:
+            continue
+        raw_pid = data.get("pid")
+        if raw_pid is None:
+            continue
+        try:
+            pid = int(raw_pid)
+        except (TypeError, ValueError):
+            continue
+        if pid > 0 and pid != os.getpid() and probe(pid):
+            out.add(lane)
+    return out
+
+
 def _read_lock(path: Path) -> dict | None:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
@@ -132,24 +182,16 @@ def _acquire(path: Path, command: str) -> bool:
 
 
 @contextlib.contextmanager
-def gpu_lock(command: str, runs_root: Path | None = None):
-    """Context manager that acquires the GPU lock for the duration of *command*.
-
-    Raises :class:`GpuBusyError` if the lock is held by a live process.
-    Takes over a stale lock whose PID is gone.
-    Child processes whose ``HORNLAB_GPU_LOCK_OWNER`` env-var names the current
-    lock PID proceed without acquiring (reentrancy for campaign subprocesses).
-    Removes the lock on exit even on KeyboardInterrupt, but only when it still
-    owns the lock.
-    """
-    path = _lock_path(runs_root)
+def _locked(command: str, path: Path, owner_env: str):
+    """The shared lock mechanism: exclusive file create, stale takeover, reentrancy via
+    ``owner_env``, and removal on exit only when the lock is still ours."""
     my_pid = os.getpid()
 
     # ---- reentrancy: a child whose env names the current lock's PID skips acquisition
-    owner_env = os.environ.get(_LOCK_OWNER_ENV, "").strip()
-    if owner_env:
+    env_raw = os.environ.get(owner_env, "").strip()
+    if env_raw:
         try:
-            env_pid = int(owner_env)
+            env_pid = int(env_raw)
         except ValueError:
             env_pid = None
         if env_pid is not None:
@@ -173,7 +215,7 @@ def gpu_lock(command: str, runs_root: Path | None = None):
             time.sleep(0.05)
             continue
         holder_pid = lock_data.get("pid")
-        if holder_pid is None or not _pid_alive(holder_pid):
+        if holder_pid is None or not _pid_alive(int(holder_pid)):
             # Stale lock - try to remove and re-acquire
             try:
                 path.unlink()
@@ -190,16 +232,16 @@ def gpu_lock(command: str, runs_root: Path | None = None):
         )
 
     # ---- set env var for children
-    old_env = os.environ.get(_LOCK_OWNER_ENV)
-    os.environ[_LOCK_OWNER_ENV] = str(my_pid)
+    old_env = os.environ.get(owner_env)
+    os.environ[owner_env] = str(my_pid)
     try:
         yield
     finally:
         # Restore env
         if old_env is None:
-            os.environ.pop(_LOCK_OWNER_ENV, None)
+            os.environ.pop(owner_env, None)
         else:
-            os.environ[_LOCK_OWNER_ENV] = old_env
+            os.environ[owner_env] = old_env
         # Remove lock only if we still own it
         if acquired:
             lock_data = _read_lock(path)
@@ -208,3 +250,30 @@ def gpu_lock(command: str, runs_root: Path | None = None):
                     path.unlink()
                 except OSError:
                     pass
+
+
+@contextlib.contextmanager
+def gpu_lock(command: str, runs_root: Path | None = None):
+    """Context manager that acquires the GPU lock for the duration of *command*.
+
+    Raises :class:`GpuBusyError` if the lock is held by a live process.
+    Takes over a stale lock whose PID is gone.
+    Child processes whose ``HORNLAB_GPU_LOCK_OWNER`` env-var names the current
+    lock PID proceed without acquiring (reentrancy for campaign subprocesses).
+    Removes the lock on exit even on KeyboardInterrupt, but only when it still
+    owns the lock.
+    """
+    with _locked(command, _lock_path(runs_root), _LOCK_OWNER_ENV):
+        yield
+
+
+@contextlib.contextmanager
+def cpu_lane_lock(command: str, runs_root: Path | None = None):
+    """Context manager for the CPU lane's own marker (``runs/.cpu.lane.lock``).
+
+    Same mechanism as :func:`gpu_lock`, separate file: the CPU lane holds this while its nightly
+    controller runs, so GPU-side hygiene can see that the lane is live and must not touch its
+    hosts. Reentrancy uses ``HORNLAB_CPU_LANE_LOCK_OWNER``; a stale holder is taken over.
+    """
+    with _locked(command, lane_lock_path("cpu", runs_root), _CPU_LANE_LOCK_OWNER_ENV):
+        yield

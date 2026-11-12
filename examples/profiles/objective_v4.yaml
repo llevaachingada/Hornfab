@@ -1,0 +1,10 @@
+# objective_v4: the objective keys identical across every brief in
+# examples/briefs/campaign_2026-10-26_v4/ (17 briefs). The per-brief keys (tolerances.cov/diag/
+# dislope/distd/rip, cov_narrow_ratio, cov_below_f0) differ between briefs and stay in each brief.
+# Partial file: only meaningful as a brief `extends:` base.
+objective:
+  version: 4
+  tolerances:
+    di: 0.4
+    flat: 1.5
+    load: 0.3

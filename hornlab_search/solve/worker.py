@@ -26,18 +26,30 @@ import atexit
 import json
 import logging
 import os
+import re
 import signal
 import subprocess
 import sys
 import threading
 import time
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Callable
 
 log = logging.getLogger("hornlab_search.solve.worker")
 
 HOST_MARKER = "hornlab_beat_bem.worker_host"
 LAUNCHER_MARKER = "hornlab_beat_bem"          # julialauncher.exe cmdline carries the package dir
+
+#: The BEAT worker registry directory the host was spawned with. Its ``<lane>/workers`` suffix is
+#: how a host is attributed to one of the two nightly lanes (2026-11-12 two-lane night).
+WORKER_DIR_ENV = "HORNLAB_BEAT_WORKER_DIR"
+
+#: Registry dir shape ``.../<lane>/workers``; the parent name is the lane.
+_WORKERS_DIRNAME = "workers"
+
+#: ``--dir <registry>`` / ``--dir=<registry>`` on a ``worker_host`` command line.
+_HOST_DIR_RE = re.compile(r'--dir(?:=|\s+)(?:"([^"]+)"|(\S+))')
 
 #: A single idle warm host plus the desktop uses ~1.5-2.5 GB. Above this with a host present,
 #: the host (or a crashed predecessor) is holding more than a healthy warm worker should.
@@ -49,6 +61,14 @@ _HOSTS_AT_SOLVE: dict[str, list[tuple[int, ...]]] = {}
 _COLD_START_S: dict[str, float] = {}
 _HANDLERS_INSTALLED = False
 _PREV_SIGINT = None
+
+#: Default for a ``lane=`` keyword: derive it from ``HORNLAB_BEAT_WORKER_DIR`` (and fall back to
+#: the old no-lane behaviour when the process is outside a lane). Distinct from an explicit None.
+_AUTO_LANE = object()
+
+
+def _repo_runs_root() -> Path:
+    return Path(__file__).resolve().parents[2] / "runs"
 
 
 class WorkerReleaseError(RuntimeError):
@@ -64,6 +84,80 @@ class ProcInfo:
     ppid: int
     name: str
     cmdline: str
+
+
+# ------------------------------------------------------------------ lane identity
+
+
+def worker_dir_from_env() -> str | None:
+    """The registry dir this process was launched with (``HORNLAB_BEAT_WORKER_DIR``), or None.
+
+    Read directly from the environment: ``hornlab_beat_bem.worker_registry.worker_dir()`` creates
+    the directory as a side effect, so it must never be called from classification code.
+    """
+    raw = os.environ.get(WORKER_DIR_ENV, "").strip()
+    return raw or None
+
+
+def derive_lane(registry_dir: str | os.PathLike | None) -> str | None:
+    """Lane name from a registry dir of the shape ``.../<lane>/workers``; None when unknown.
+
+    A host whose registry dir does not end in ``workers`` (or is absent) is UNKNOWN and must be
+    left alone: killing it could take another lane's warm host. This is decision 3 of the
+    2026-11-12 two-lane night, expressed as one pure function so every cleanup path shares it.
+    """
+    if not registry_dir:
+        return None
+    parts = _path_parts(registry_dir)
+    if len(parts) < 2 or parts[-1].lower() != _WORKERS_DIRNAME:
+        return None
+    lane = parts[-2].strip().lower()
+    return lane or None
+
+
+def _path_parts(p) -> list[str]:
+    """Path components split on BOTH separators: a host's ``--dir`` is a Windows path even when
+    this code (or CI) runs on POSIX, where ``Path`` would not split backslashes."""
+    try:
+        text = os.fspath(p) if not isinstance(p, str) else p
+    except TypeError:
+        return []
+    return [x for x in re.split(r"[\\/]+", str(text)) if x]
+
+
+def lane_from_env() -> str | None:
+    """This process's lane from ``HORNLAB_BEAT_WORKER_DIR``, or None when not in a lane."""
+    return derive_lane(worker_dir_from_env())
+
+
+def host_registry_dir(cmdline: str) -> str | None:
+    """The ``--dir`` argument on a BEAT host command line, or None when it carries none."""
+    match = _HOST_DIR_RE.search(cmdline or "")
+    if not match:
+        return None
+    return match.group(1) or match.group(2)
+
+
+def host_lane(cmdline: str) -> str | None:
+    """Lane a host belongs to, from the ``--dir`` on its command line; None = unknown."""
+    return derive_lane(host_registry_dir(cmdline))
+
+
+def live_locked_lanes(runs_root: Path | str | None = None) -> set[str]:
+    """Lane names whose lock is held by a LIVE process other than us (lazy import: search ->
+    solve has no import dependency at module load)."""
+    from ..search.gpulock import live_locked_lanes as _live
+    return _live(Path(runs_root) if runs_root is not None else None)
+
+
+def _runs_root_for(registry_dir: str | None) -> Path | None:
+    """``runs/`` from an env registry dir ``runs/lanes/<lane>/workers``; None when unknown."""
+    if not registry_dir:
+        return None
+    parts = _path_parts(registry_dir)
+    if len(parts) >= 2 and parts[-1].lower() == _WORKERS_DIRNAME:
+        return Path(*parts[:-3]) if len(parts) >= 3 else None
+    return None
 
 
 def list_processes() -> list[ProcInfo]:
@@ -263,6 +357,8 @@ def clear_stale_hosts(*, lister: Callable[[], list[ProcInfo]] | None = None,
                       killer: Callable[[int], bool] = kill_tree,
                       vram_probe: Callable[[], float | None] = vram_used_mib,
                       vram_high_mib: float = VRAM_HIGH_MIB, force: bool = False,
+                      lane: str | None | object = _AUTO_LANE,
+                      runs_root: Path | str | None = None,
                       timeout_s: float = 20.0, sleep: Callable[[float], None] = time.sleep) -> list[int]:
     """Kill BEAT hosts that look stale, BEFORE a warm-up. Returns the root pids killed.
 
@@ -271,33 +367,69 @@ def clear_stale_hosts(*, lister: Callable[[], list[ProcInfo]] | None = None,
     ``vram_high_mib``. Exactly one host on an idle-looking GPU is kept: adopting it is the
     warm-start saving. Never uses image-name kills; only trees rooted at a ``worker_host``
     command line. Raises ``WorkerReleaseError`` if a host survives the kill.
+
+    Two-lane rule (2026-11-12): ``lane`` defaults to the lane named by ``HORNLAB_BEAT_WORKER_DIR``
+    (``.../<lane>/workers``). With a lane, only hosts whose ``--dir`` names that SAME lane are
+    candidates; a host whose lane cannot be determined is logged as ``unknown host, left alone``
+    and kept, and so is a host of ANOTHER lane whose lock is live. Our own lane's live lock does
+    not block us: the lock holder is this lane's authority (the night controller), which is
+    exactly the process asking for pre/post hygiene. With no lane at all the historical
+    clear-all behaviour is preserved (there is no lane identity to protect).
     """
     lister = lister or list_processes
     procs = lister()
     roots = beat_host_roots(procs)
     if not roots:
         return []
+    resolved_lane = lane_from_env() if lane is _AUTO_LANE else (lane or None)
+    root_dir = (Path(runs_root) if runs_root is not None
+                else _runs_root_for(worker_dir_from_env()) or _repo_runs_root())
+    protected = live_locked_lanes(root_dir)
+    if resolved_lane is not None:
+        # A live lock protects a lane from OTHER lanes; the holder is this lane's own authority.
+        protected.discard(str(resolved_lane).lower())
+    targets = []
+    for r in roots:
+        rlane = host_lane(r.cmdline)
+        if rlane is not None and rlane in protected:
+            log.warning("lane %s lock is live: leaving its BEAT host pid %d alone", rlane, r.pid)
+            continue
+        if resolved_lane is None:
+            targets.append(r)
+            continue
+        if rlane is None:
+            log.info("unknown host, left alone: pid %d (lane %s)", r.pid, resolved_lane)
+            continue
+        if rlane != str(resolved_lane).lower():
+            log.debug("pid %d belongs to lane %s (mine %s): left alone", r.pid, rlane, resolved_lane)
+            continue
+        targets.append(r)
+    if not targets:
+        return []
     used = None if force else vram_probe()
     reasons = []
     if force:
         reasons.append("forced")
-    if len(roots) > 1:
-        reasons.append(f"{len(roots)} hosts")
+    if len(targets) > 1:
+        reasons.append(f"{len(targets)} hosts")
     if used is not None and used > vram_high_mib:
         reasons.append(f"VRAM {used:.0f} MiB > {vram_high_mib:.0f}")
     if not reasons:
-        log.info("one BEAT host (pid %d) and VRAM %s: keeping it for adoption", roots[0].pid,
+        log.info("one BEAT host (pid %d) and VRAM %s: keeping it for adoption", targets[0].pid,
                  "unknown" if used is None else f"{used:.0f} MiB")
         return []
-    all_pids = host_tree_pids(procs)
-    log.warning("clearing stale BEAT hosts %s (%s)", [r.pid for r in roots], ", ".join(reasons))
-    for r in roots:
+    all_pids: set[int] = set()
+    for r in targets:
+        all_pids.add(r.pid)
+        all_pids.update(d.pid for d in _descendants(procs, r.pid))
+    log.warning("clearing stale BEAT hosts %s (%s)", [r.pid for r in targets], ", ".join(reasons))
+    for r in targets:
         killer(r.pid)
     left = _wait_until_gone(all_pids, lister, timeout_s, sleep)
     if left:
         raise WorkerReleaseError(f"BEAT host process(es) survived kill: {sorted(left)}")
     _WARM.clear()
-    return [r.pid for r in roots]
+    return [r.pid for r in targets]
 
 
 # ------------------------------------------------------------------ public lifecycle
@@ -307,10 +439,16 @@ def _is_beat(name: str) -> bool:
     return str(name).startswith("beat")
 
 
-def start_beat_worker(device: str) -> None:
-    """Boot the persistent host and JIT-exercise the kernels on a 4-triangle mesh."""
+def start_beat_worker(device: str, julia_threads: int | None = None) -> None:
+    """Boot the persistent host and JIT-exercise the kernels on a 4-triangle mesh.
+
+    ``julia_threads`` (CPU second lane, 2026-11-12): forwarded to ``warm_up`` so the host is
+    keyed on the SAME thread count as ``SolveConfig.julia_threads``; a mismatch would make the
+    library spawn a second host (H9). Absent = the library's "auto", byte-identical to before.
+    """
     import hornlab_beat_bem as beat
-    beat.warm_up(beat_backend=device, mode="tiny")
+    kw = {} if julia_threads is None else {"julia_threads": int(julia_threads)}
+    beat.warm_up(beat_backend=device, mode="tiny", **kw)
 
 
 def warm(backend) -> None:
@@ -388,7 +526,8 @@ def detach() -> None:
 def shutdown(*, verify: bool = True, timeout_s: float = 20.0,
              lister: Callable[[], list[ProcInfo]] | None = None,
              killer: Callable[[int], bool] = kill_tree,
-             sleep: Callable[[float], None] = time.sleep, stop_fn: Callable[[], None] | None = None) -> list[int]:
+             sleep: Callable[[float], None] = time.sleep, stop_fn: Callable[[], None] | None = None,
+             lane: str | None | object = _AUTO_LANE) -> list[int]:
     """Stop the BEAT host and VERIFY it is gone. Only call at process exit or at the end of a
     measurement/checkpoint run.
 
@@ -399,12 +538,35 @@ def shutdown(*, verify: bool = True, timeout_s: float = 20.0,
 
     Returns the root pids that had to be force-killed (empty when the library stopped them).
     ``verify=False`` skips steps 2-3 (just the library call).
+
+    Two-lane rule: steps 2-3 only consider hosts of ``lane`` (defaulting to the lane named by
+    ``HORNLAB_BEAT_WORKER_DIR``). Ending the CPU lane must never force-kill the GPU lane's warm
+    host, and a host whose lane cannot be determined is left alone. With no lane the historical
+    all-hosts behaviour is preserved.
     """
     lister = lister or list_processes
     before = lister() if verify else []
-    mine = host_tree_pids(before)
-    trees = {r.pid: ({r.pid} | {d.pid for d in _descendants(before, r.pid)})
-             for r in beat_host_roots(before)}
+    resolved_lane = lane_from_env() if lane is _AUTO_LANE else (lane or None)
+    roots = beat_host_roots(before)
+    if resolved_lane is not None:
+        kept = []
+        for r in roots:
+            rlane = host_lane(r.cmdline)
+            if rlane is None:
+                log.info("unknown host, left alone: pid %d (lane %s)", r.pid, resolved_lane)
+                continue
+            if rlane != str(resolved_lane).lower():
+                log.debug("pid %d belongs to lane %s (mine %s): left alone",
+                          r.pid, rlane, resolved_lane)
+                continue
+            kept.append(r)
+        roots = kept
+    mine: set[int] = set()
+    trees: dict[int, set[int]] = {}
+    for r in roots:
+        tree = {r.pid} | {d.pid for d in _descendants(before, r.pid)}
+        trees[r.pid] = tree
+        mine.update(tree)
     try:
         if stop_fn is not None:
             stop_fn()
@@ -433,10 +595,15 @@ def shutdown(*, verify: bool = True, timeout_s: float = 20.0,
 
 
 def recover_after_failure(name: str, *, lister=None, killer: Callable[[int], bool] = kill_tree,
-                          drop_clients: Callable[[], None] | None = None) -> None:
+                          drop_clients: Callable[[], None] | None = None,
+                          lane: str | None | object = _AUTO_LANE,
+                          runs_root: Path | str | None = None) -> None:
     """After a CUDA OOM or a worker crash the host is poisoned (stuck pool, half-dead process).
     Drop warm state, drop the library's cached worker clients, and kill project BEAT hosts so the
     next ``warm`` / solve starts clean.
+
+    ``lane`` is forwarded to :func:`clear_stale_hosts`, so a lane process only ever recycles its
+    OWN hosts: the other lane's warm host (and any host whose lane is unknown) is left alone.
 
     Dropping the clients matters: ``hornlab_beat_bem.worker.get_worker`` caches one
     ``HostedBeatWorker`` per key, and that object keeps its socket after a send fails. Killing the
@@ -446,7 +613,8 @@ def recover_after_failure(name: str, *, lister=None, killer: Callable[[int], boo
     mark_cold(name)
     (drop_clients or detach)()
     try:
-        clear_stale_hosts(force=True, lister=lister, killer=killer)
+        clear_stale_hosts(force=True, lister=lister, killer=killer, lane=lane,
+                          runs_root=runs_root)
     except Exception as exc:
         log.warning("recover_after_failure: %s", exc)
 

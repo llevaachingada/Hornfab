@@ -95,6 +95,11 @@ class SolveSettings:
     # The library validates the rest and REFUSES every path but fused CUDA
     # (source_profile_alpha is a fused-CUDA-only feature).
     source_profile_alpha: float | None = None
+    # CPU second lane (2026-11-12): Julia/BLAS thread count for this run's BEAT host. It changes
+    # ONLY how the host is scheduled, never the physics, so it is deliberately NOT part of the
+    # solve-spec hash (two configs differing only here share a solve hash and a warm host).
+    # None = absent = the library's own "auto". Validated as a positive integer.
+    julia_threads: int | None = None
 
     def balloon_points(self, mode: str) -> int:
         if not self.balloon:
@@ -164,11 +169,53 @@ def _resolve_path(p, *bases) -> Path:
     return p
 
 
+def _deep_merge(base: dict, child: dict) -> dict:
+    """Child wins; nested mappings merge recursively; lists and scalars are replaced whole."""
+    out = dict(base)
+    for k, v in child.items():
+        if isinstance(v, dict) and isinstance(out.get(k), dict):
+            out[k] = _deep_merge(out[k], v)
+        else:
+            out[k] = v
+    return out
+
+
+def _load_yaml_extends(path, _chain: tuple = ()):
+    """Read a YAML file and resolve its ``extends:`` (a path or list of paths, relative to the
+    file that names them) recursively. Bases merge in list order (later wins), then the file's
+    own keys win over all bases. The ``extends`` key never survives, so a config written with
+    ``extends:`` and its flat copy give the same ``raw`` and therefore the same config_sha and
+    solve hash. Raises ConfigError on a cycle or a missing base, naming the chain."""
+    path = Path(path)
+    key = path.resolve()
+    chain = _chain + (key,)
+    show = " -> ".join(str(c) for c in chain)
+    if key in _chain:
+        raise ConfigError(f"extends cycle: {show}")
+    if _chain and not path.is_file():
+        raise ConfigError(f"extends: file not found: {path} (chain: {show})")
+    raw = yaml.safe_load(path.read_text(encoding="utf-8"))
+    if not isinstance(raw, dict):
+        if _chain:
+            raise ConfigError(f"extends: {path} top level must be a mapping (chain: {show})")
+        return raw
+    if "extends" not in raw:
+        return raw
+    ext = raw.pop("extends")
+    ext = [] if ext is None else [ext] if isinstance(ext, str) else ext
+    if not isinstance(ext, list) or not all(isinstance(e, str) for e in ext):
+        raise ConfigError(f"{path.name}: extends must be a path or a list of paths")
+    merged: dict = {}
+    for e in ext:
+        merged = _deep_merge(merged, _load_yaml_extends(path.parent / e, chain))
+    return _deep_merge(merged, raw)
+
+
 def load_brief(path) -> dict:
     """A design brief: driver exit, size envelope, symmetry class, source cap, target and weights
     (docs/TYPOLOGY_PLAN.md s3). It makes J comparable across typologies. Raises ConfigError."""
     path = Path(path)
-    raw = yaml.safe_load(path.read_text(encoding="utf-8"))
+    raw = _load_yaml_extends(path)
     where = f"brief {path.name}"
     if not isinstance(raw, dict):
         raise ConfigError(f"{where}: top level must be a mapping")
@@ -819,6 +866,18 @@ def _validate_source_profile_alpha(solve, where: str) -> None:
             f"fused-CUDA feature)")
 
 
+def _validate_julia_threads(value, where: str) -> int:
+    """CPU second lane: ``solve.julia_threads`` is a positive integer (host scheduling only).
+
+    It must be a real integer, not ``True``/``3.0``/``"12"``; a typo must be refused here rather
+    than silently becoming a different host. ``None`` (key absent) keeps the library's "auto".
+    """
+    if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+        raise ConfigError(
+            f"{where}: julia_threads must be a positive integer, got {value!r}")
+    return int(value)
+
+
 def _validate_source_motion(value, backend: str, where: str) -> str:
     """WP5: ``solve.source_motion`` is 'normal' (today) or 'axial' (rigid piston). Only the beat
     adapter implements it; a non-beat backend with a non-default value is refused loudly."""
@@ -970,7 +1029,7 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
     dropped from ``raw`` when the effective backend is not ``beat_cuda`` (it must not survive an
     override and then trip ``solve.beat._assert_cuda_fused_path`` at the first solve)."""
     path = Path(path)
-    raw = yaml.safe_load(path.read_text(encoding="utf-8"))
+    raw = _load_yaml_extends(path)
     if not isinstance(raw, dict):
         raise ConfigError(f"{path}: top level must be a mapping")
     where = path.name
@@ -1069,7 +1128,9 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
     solve = _build(SolveSettings, solve_section, f"{where}:solve",
                    optional=("cuda_fused", "source_motion", "near_correction",
                              "near_correction_cutoff", "near_correction_order",
-                             "solve_precision", "source_profile_alpha"))
+                             "solve_precision", "source_profile_alpha", "julia_threads"))
+    if solve.julia_threads is not None:
+        solve.julia_threads = _validate_julia_threads(solve.julia_threads, f"{where}:solve")
     if solve.cuda_fused and str(solve.backend) != "beat_cuda":
         raise ConfigError(f"{where}: solve.cuda_fused is only implemented for backend: beat_cuda "
                           f"(got {solve.backend!r})")
