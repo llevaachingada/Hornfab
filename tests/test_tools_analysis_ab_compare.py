@@ -30,33 +30,42 @@ def test_equal_budget_and_final_golden(tmp_path):
     b = _write_side(tmp_path, "b", [[20.0, 15.0, 10.0, 8.0]])
     p = ab.analyse(a, b, "narrow", "control")
     assert p["label_a"] == "narrow" and p["label_b"] == "control"
-    assert p["sides"]["a"] == {"runs": [str(d) for d in a], "n_runs": 2, "n_new_valid_max": 4}
+    assert p["sides"]["a"]["runs"] == [str(d) for d in a]
+    assert p["sides"]["a"]["n_runs"] == 2 and p["sides"]["a"]["n_new_valid_max"] == 4
     assert p["sides"]["b"]["n_runs"] == 1 and p["sides"]["b"]["n_new_valid_max"] == 4
-    assert p["equal_budget"] == [{"n": 1, "best_a": 11.0, "best_b": 20.0},
-                                 {"n": 2, "best_a": 8.5, "best_b": 15.0},
-                                 {"n": 3, "best_a": 5.5, "best_b": 10.0},
-                                 {"n": 4, "best_a": 3.5, "best_b": 8.0}]
-    assert p["final"] == {"median_a": 3.5, "median_b": 8.0, "spread_a": pytest.approx(1.0),
-                          "spread_b": pytest.approx(0.0)}
+    assert [(e["n"], e["best_a"], e["best_b"]) for e in p["equal_budget"]] == [
+        (1, 11.0, 20.0), (2, 8.5, 15.0), (3, 5.5, 10.0), (4, 3.5, 8.0)]
+    assert p["final"]["median_a"] == 3.5 and p["final"]["median_b"] == 8.0
+    assert p["final"]["spread_a"] == pytest.approx(1.0)
+    assert p["final"]["spread_b"] == pytest.approx(0.0)
     v = p["verdict"]
-    assert v["n_runs_per_side"] == 1 and v["verdict"] == "no-verdict"
-    assert "below the 3-run" in v["note"]
+    # no --pair was declared: descriptive only, never a paired win declaration
+    assert v["decision"] == "descriptive_only" and v["verdict"] == "no-verdict"
+    assert p["legacy_median_rule"]["rule_holds"] is True
+    assert p["legacy_median_rule"]["verdict"] == "no-verdict"  # < 3 runs/side
 
 
-def test_five_runs_each_prints_verdict(tmp_path):
+def _pairs(a, b):
+    return [(f"p{i}", da, db) for i, (da, db) in enumerate(zip(a, b))]
+
+
+def test_five_declared_pairs_prints_paired_verdict(tmp_path):
     a = _write_side(tmp_path, "a", [[10.0, 9.0, 8.0, 7.0]] * 5)   # final 7, spread 0
     b = _write_side(tmp_path, "b", [[20.0, 19.0, 18.0, 17.0]] * 5)  # final 17, spread 0
-    p = ab.analyse(a, b, "narrow", "control")
+    p = ab.analyse(a, b, "narrow", "control", pairs=_pairs(a, b),
+                   budget=4, practical_delta=1.0)
     v = p["verdict"]
     assert v["n_runs_per_side"] == 5 and v["rule_holds"] is True
-    assert v["verdict"] == "a-beats-b"  # a's median 7 < b's 17
+    assert v["verdict"] == "a-beats-b" and v["decision"] == "a_better"
 
 
-def test_three_four_runs_is_indicative(tmp_path):
+def test_three_declared_pairs_is_indicative(tmp_path):
     a = _write_side(tmp_path, "a", [[10.0, 9.0, 8.0, 7.0]] * 4)
     b = _write_side(tmp_path, "b", [[20.0, 19.0, 18.0, 17.0]] * 3)
-    v = ab.analyse(a, b)["verdict"]
+    p = ab.analyse(a, b, pairs=_pairs(a, b), budget=4, practical_delta=1.0)
+    v = p["verdict"]
     assert v["n_runs_per_side"] == 3 and v["verdict"] == "indicative"
+    assert v["decision"] == "pilot_only"
 
 
 def test_downsampled_equal_budget_has_no_duplicate_last_point(tmp_path):
@@ -93,12 +102,16 @@ def test_cli_report_and_chart(tmp_path):
     a = _write_side(tmp_path, "a", [[10.0, 9.0, 8.0, 7.0]] * 5)
     b = _write_side(tmp_path, "b", [[20.0, 19.0, 18.0, 17.0]] * 5)
     argv = ["--a", ",".join(str(d) for d in a), "--b", ",".join(str(d) for d in b),
-            "--label-a", "narrow", "--label-b", "control"]
+            "--label-a", "narrow", "--label-b", "control",
+            "--budget", "4", "--practical-delta", "1.0"]
+    for i, (da, db) in enumerate(zip(a, b)):
+        argv += ["--pair", f"p{i}={da}|{db}"]
     out = tmp_path / "out"
     proc = run_cli("ab_compare", argv, tmp_path)
     assert proc.returncode == 0, proc.stderr
     doc = run_json_payload(out, "ab_compare")
     assert doc["tool"] == "ab_compare" and doc["verdict"]["verdict"] == "a-beats-b"
+    assert doc["paired"]["pairing_declared"] is True
     md = (out / "ab_compare.md").read_text(encoding="utf-8")
     assert "**narrow**" in md and "a-beats-b" in md
     assert (out / "ab_compare.png").exists()

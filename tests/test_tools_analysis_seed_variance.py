@@ -80,43 +80,66 @@ def test_seed_distances_norm_golden(tmp_path):
     assert all(v is None or v >= 0 for v in dist.values())
 
 
-def test_verdict_alpha_beats_beta_with_five_seeds(tmp_path):
+def _pairs(a_dirs, b_dirs):
+    return [(f"p{i}", a, b) for i, (a, b) in enumerate(zip(a_dirs, b_dirs))]
+
+
+def test_paired_alpha_beats_beta_with_five_pairs(tmp_path):
+    a_dirs = [write_run(rows, tmp_path, f"a{i}", seed=1030 + i)
+              for i, rows in enumerate(_group_rows(ALPHA_BESTS))]
+    b_dirs = [write_run(rows, tmp_path, f"b{i}", seed=2030 + i)
+              for i, rows in enumerate(_group_rows(BETA_BESTS))]
+    payload = sv.analyse_groups({"alpha": a_dirs, "beta": b_dirs},
+                                pairs=_pairs(a_dirs, b_dirs), budget=N_EVALS,
+                                practical_delta=1.0)
+    s = payload["prospective"]["summaries"]["summary"]
+    assert s["n_pairs"] == 5 and s["decision"] == "a_better"
+    assert s["ci95_bootstrap_mean"][1] < -1.0
+    v = payload["verdicts"][0]
+    assert v["n_seeds"] == 5 and v["rule_holds"] is True
+    assert v["verdict"] == "a-beats-b" and v["decision"] == "a_better"
+
+
+def test_paired_four_pairs_is_only_indicative(tmp_path):
+    a_dirs = [write_run(rows, tmp_path, f"a{i}", seed=1030 + i)
+              for i, rows in enumerate(_group_rows(ALPHA_BESTS[:4]))]
+    b_dirs = [write_run(rows, tmp_path, f"b{i}", seed=2030 + i)
+              for i, rows in enumerate(_group_rows(BETA_BESTS[:4]))]
+    payload = sv.analyse_groups({"alpha": a_dirs, "beta": b_dirs},
+                                pairs=_pairs(a_dirs, b_dirs), budget=N_EVALS,
+                                practical_delta=1.0)
+    s = payload["prospective"]["summaries"]["summary"]
+    assert s["n_pairs"] == 4 and s["decision"] == "pilot_only"
+    v = payload["verdicts"][0]
+    assert v["n_seeds"] == 4 and v["verdict"] == "indicative"
+
+
+def test_paired_mixed_signs_is_inconclusive(tmp_path):
+    # diffs (A - B) = [-5, +5, -5.5, +4.5, -5.5]: mean ~ -1.3, CI spans zero
+    a_bests = [9.0, 20.0, 9.0, 20.0, 9.0]
+    b_dirs = [write_run(rows, tmp_path, f"b{i}", seed=2030 + i)
+              for i, rows in enumerate(_group_rows(BETA_BESTS))]
+    a_dirs = [write_run(rows, tmp_path, f"a{i}", seed=1030 + i)
+              for i, rows in enumerate(_group_rows(a_bests))]
+    payload = sv.analyse_groups({"alpha": a_dirs, "beta": b_dirs},
+                                pairs=_pairs(a_dirs, b_dirs), budget=N_EVALS,
+                                practical_delta=1.0)
+    s = payload["prospective"]["summaries"]["summary"]
+    assert s["decision"] == "inconclusive"
+    assert s["ci95_bootstrap_mean"][0] < 0 < s["ci95_bootstrap_mean"][1]
+    assert payload["verdicts"][0]["verdict"] == "no-verdict"
+
+
+def test_no_predeclared_pair_declares_descriptive_only(tmp_path):
     a_dirs = [write_run(rows, tmp_path, f"a{i}", seed=1030 + i)
               for i, rows in enumerate(_group_rows(ALPHA_BESTS))]
     b_dirs = [write_run(rows, tmp_path, f"b{i}", seed=2030 + i)
               for i, rows in enumerate(_group_rows(BETA_BESTS))]
     payload = sv.analyse_groups({"alpha": a_dirs, "beta": b_dirs})
-    assert len(payload["verdicts"]) == 1
-    v = payload["verdicts"][0]
-    assert v["a"] == "alpha" and v["b"] == "beta"
-    assert v["median_a"] == 11.5 and v["median_b"] == 14.5
-    assert v["spread_a"] == 2.5 and v["spread_b"] == 1.5
-    assert v["n_seeds"] == 5 and v["rule_holds"] is True
-    assert v["verdict"] == "a-beats-b"
-
-
-def test_verdict_with_fewer_than_five_seeds_is_indicative(tmp_path):
-    a_dirs = [write_run(rows, tmp_path, f"a{i}", seed=1030 + i)
-              for i, rows in enumerate(_group_rows(ALPHA_BESTS[:4]))]
-    b_dirs = [write_run(rows, tmp_path, f"b{i}", seed=2030 + i)
-              for i, rows in enumerate(_group_rows(BETA_BESTS[:4]))]
-    payload = sv.analyse_groups({"alpha": a_dirs, "beta": b_dirs})
-    v = payload["verdicts"][0]
-    assert v["n_seeds"] == 4 and v["rule_holds"] is True and v["verdict"] == "indicative"
-
-
-def test_verdict_below_the_rule_is_no_verdict(tmp_path):
-    # alpha median 9.0 with spread 6.0 vs beta median 14.5 spread 1.5:
-    # diff 5.5 is NOT more than alpha's spread -> no verdict despite the better median
-    a_bests = [9.0, 15.0, 9.0, 15.0, 9.0]
-    b_dirs = [write_run(rows, tmp_path, f"b{i}", seed=2030 + i)
-              for i, rows in enumerate(_group_rows(BETA_BESTS))]
-    a_dirs = [write_run(rows, tmp_path, f"a{i}", seed=1030 + i)
-              for i, rows in enumerate(_group_rows(a_bests))]
-    payload = sv.analyse_groups({"alpha": a_dirs, "beta": b_dirs})
-    v = payload["verdicts"][0]
-    assert v["median_a"] == 9.0 and v["spread_a"] == 6.0
-    assert v["rule_holds"] is False and v["verdict"] == "no-verdict"
+    assert payload["prospective"]["pairing_declared"] is False
+    assert payload["verdicts"] == []
+    # legacy median/spread labels remain descriptive only
+    assert "descriptive_historical" in payload
 
 
 def test_group_mixing_objective_version_raises(tmp_path):
@@ -127,16 +150,24 @@ def test_group_mixing_objective_version_raises(tmp_path):
         sv.analyse_group("bad", [d1, d2])
 
 
-def test_verdict_across_different_families_is_exit_2(tmp_path):
+def test_paired_across_different_families_raises(tmp_path):
     icw_cfg = {**BASE_CONFIG, "family": "ICW"}
     a_dirs = [write_run(rows, tmp_path, f"a{i}", seed=1030 + i)
               for i, rows in enumerate(_group_rows(ALPHA_BESTS))]
     b_dirs = [write_run(_rows_for(b, i, family="ICW"), tmp_path, f"b{i}", seed=2030 + i,
                         config=icw_cfg, family="ICW")
               for i, b in enumerate(BETA_BESTS)]
-    with pytest.raises(SystemExit) as exc:
-        sv.analyse_groups({"alpha": a_dirs, "beta": b_dirs})
-    assert exc.value.code == 2  # hard error per schema.md, never a warning
+    with pytest.raises(ValueError, match="different task/scoring"):
+        sv.analyse_groups({"alpha": a_dirs, "beta": b_dirs},
+                          pairs=_pairs(a_dirs, b_dirs))
+    # the CLI maps that to exit code 2 (hard error per schema.md, never a warning)
+    argv = ["--group", "alpha=" + ",".join(str(d) for d in a_dirs),
+            "--group", "beta=" + ",".join(str(d) for d in b_dirs)]
+    for name, da, db in _pairs(a_dirs, b_dirs):
+        argv += ["--pair", f"{name}={da}|{db}"]
+    proc = run_cli("seed_variance", argv, tmp_path, out="out_cross")
+    assert proc.returncode == 2
+    assert "different task/scoring" in proc.stderr
 
 
 def test_cli_ok_and_exit_2_paths(tmp_path):
