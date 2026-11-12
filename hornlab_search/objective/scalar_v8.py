@@ -120,13 +120,25 @@ _GATE_LFP_CROSSOVER_RATIO = 1.6
 #: Measured per-class tolerances: ``tol_k = median(raw unit value of term k over the top decile
 #: of the class's stored valid dataset rows)`` ranked under the class-matched v4 brief, top
 #: decile = max(3, ceil(n/10)) rows (the A.9 ``term_balance`` convention). Measured 2026-11-12
-#: by ``tools/analysis/v8_rescore.py`` (run logged in the owner brief and the PR body; see
-#: ``scratch/objective_v8_2026-11-12/`` counters). Values are in the units of the table above.
-#: PLACEHOLDER-PROVENANCE: replaced by the real calibration numbers before commit.
+#: by ``tools/analysis/v8_rescore.py`` over the full committed dataset: **23,833 rows scored**
+#: (class A 18,145; B 4,063; C 1,625). The numbers are summarised in
+#: ``docs/research/OBJECTIVE_V8_PROPOSAL_2026-11-12.md`` section 4; the reproducible source is
+#: the run JSON (``scratch/objective_v8_full_2026-11-12/v8_rescore.json``; command in the brief).
+#: Values are in the units of the table above. They are descriptive calibration defaults for the
+#: proposal, not an independently validated tolerance set.
 V8_MEASURED_TOLERANCES: dict[str, dict[str, float]] = {
-    "A": {k: 1.0 for k in V8_WEIGHTED_KEYS},
-    "B": {k: 1.0 for k in V8_WEIGHTED_KEYS},
-    "C": {k: 1.0 for k in V8_WEIGHTED_KEYS},
+    "A": {"cov": 8.757688573042602, "rip": 0.42191807648960944, "di": 1.443739415254483,
+          "dislope": 0.17439423463107215, "flat": 0.9284635221960371,
+          "distd": 0.5647747600028713, "diag": 8.745682431974728,
+          "flat_cv": 0.7642950396262194},
+    "B": {"cov": 22.719221938279105, "rip": 0.5222073382675729, "di": 1.9399359904891833,
+          "dislope": 1.69525764553831, "flat": 2.0988250353739883,
+          "distd": 1.5949341457011132, "diag": 20.85593945083782,
+          "flat_cv": 1.3608018938550763},
+    "C": {"cov": 14.381957593015777, "rip": 0.3519286403834949, "di": 1.209070488584681,
+          "dislope": 0.43361149512384534, "flat": 2.116955744540814,
+          "distd": 0.7718229842948265, "diag": 15.445944458446165,
+          "flat_cv": 1.1235766836224141},
 }
 
 _GATES = ("round_throat", "loading", "f11")
