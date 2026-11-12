@@ -11,6 +11,11 @@
   stdlib+numpy/scipy/matplotlib+optional-sklearn so they work under either. No product code changed.
 - Follow-up rule for future lanes: never put an absolute machine path in a test; derive the
   interpreter from `sys.executable`.
+- Second CI-only failure (same runs): three `test_tools_analysis_sensitivity.py` tests asserted
+  `surrogate.available is True`, but sklearn is OPTIONAL by contract (day plan + schema: try/except,
+  Spearman fallback) and CI has no sklearn — the tool correctly degrades with
+  `{'available': False, 'note': 'sklearn not installed; Spearman only'}`. The tests now branch on the
+  availability contract (deep assertions keep running wherever sklearn exists); no tool code changed.
 
 ## 2026-11-12 (17:10Z) - DAY GROUP A: EVOLUTIONARY-ANALYSIS TOOLKIT COMPLETE
 
