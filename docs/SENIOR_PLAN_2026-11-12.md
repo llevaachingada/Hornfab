@@ -96,6 +96,14 @@ D (GUI) in parallel lanes. One GPU job at a time; GPU work only from the night w
 - B6 **Measured reference.** P12b: one published measured horn through the pipeline (accept beamwidth +-5 deg,
   DI +-1 dB). Without it, no score is calibrated to reality.
 
+### WP-F Data interop with the collaborator (audit 2026-11-12)
+Every Collin commit is in `main` (PR #17's 72 functions/classes/constants all present after its squash;
+PR #22 merged here). The DATA path is one-way: Collin's RunPod runs (Solana 4090 screen, CMA-300/1000) never
+reached this box, the dataset has no MANIFEST (`docs/plan/07_TASK_DATASET.md`), and designs cannot be exported in
+the mesher's own config (`docs/plan/12_RESEARCH_BASIS.md` line 332). Fix tonight, handoff lane L5: MANIFEST,
+`export_config.py`, two-way HF (`labs/<name>/`), foreign-data ingest into `dataset_ext/<lab>/` with a 0.2 dB
+parity gate, version/backend-grouped tables, HF re-pack with the v7 relabel. Owner: grant Collin HF write access.
+
 ### WP-C Solve speed (measure, then flip defaults)
 - C1 **Measure PR #23's opt-ins** on the 4060 with `tools/bench/throughput_matrix.py`: stage timer on; fused
   CUDA on/off; mesh prefetch on/off; `freq_batch_size`; 3 reference designs (1k / 4k / 8k dofs). Every CUDA
@@ -125,12 +133,19 @@ D (GUI) in parallel lanes. One GPU job at a time; GPU work only from the night w
 No new MEH work packages. Keep the merged code green (CI) and Collin's `mid_ports` path working. Open MEH
 readiness items (link 3 partial, link 4 fail, `docs/evidence/MEH_M8_2026-10-31.md`) are parked, not dropped.
 
-## 3. GPU night (8-24 h unattended) - from a dedicated worktree
+## 3. GPU night and the CPU second lane (8-24 h unattended)
 
-Run from `C:\Users\hunte\Hrns\night-wt` (a worktree of `main` after A1), so coding in the main checkout cannot
-change what later queue jobs import (the editable install resolves `hornlab_search` from the working directory).
-Shared risk: the installed pins; nobody changes `.venv` while a night runs. Use the `hornlab-night-queue` and
-`hornlab-gpu-job` skills.
+**Executable handoff: `docs/OPENCODE_HANDOFF_2026-11-12.md`** (OpenCode orchestrator + parallel workers).
+
+- The night runs from the **main checkout**: the CLI keeps `runs/`, `cache/`, `dataset/` there, so a worktree
+  night would lose every cache hit. Coding workers use their own worktrees under `C:\Users\hunte\Hrns\oc-wt\`
+  (pytest in a worktree imports that worktree's code). Nobody touches the main checkout or `.venv` during a night.
+- **DECIDED 2026-11-12: integrate the CPU second lane now** (`docs/research/CPU_SECOND_LANE_HARDENING_2026-10-28.md`;
+  its section 12 is answered in the handoff, lane L1): Option B (shared `runs/`, CPU lane on `cache_cpu` /
+  `dataset_cpu`), lane identity by BEAT worker dir, unknown hosts never killed, `solve.julia_threads` (12 for the
+  CPU lane) outside the solve hash, `.cpu.lane.lock`, the night runner's `taskkill /IM julia.exe` removed. No
+  separate pre-test: the night's per-lane logs are the measurement; hourly check-ins with GPU<->CPU failover.
+- N2 (calibration) moves to the next night: it needs the n1 throughput defaults first.
 
 | # | Job | Why | Est. |
 |---|---|---|---|

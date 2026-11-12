@@ -7,7 +7,7 @@ Local-only, added 2026-11-12 (**integration; GitHub: PRs #19, #22, #23 close as 
 - Objective numbering: 5 = MEH, 6 = loading_smooth (Collin), **7 = the hardened objective** (was "5" on
   `feat/hardened-plan-2026-10-29`; data relabelled, see CONTINUITY 2026-11-12). Plan: `docs/SENIOR_PLAN_2026-11-12.md`.
 - Open: HF dataset re-pack after the relabel (WP-E4); GUI objective versions 4-7 (WP-D1); loading objectives
-  reconciliation (WP-B1); `swarm/B` + `swarm/C` follow-up merge (WP-A2).
+  reconciliation (WP-B1); two-way data interop with Collin (WP-F / handoff L5). `swarm/B` + `swarm/C` merged in #24.
 
 | ID | Title | Status | Owner | Plan ref |
 |---|---|---|---|---|

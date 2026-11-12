@@ -17,6 +17,12 @@
 - **Pins installed in `.venv`:** mesher `55da4f4` (Collin's fork), beat-bem `0850ef3`.
 - **Tests [measured]:** offline suite 2,474 collected, 2,472 passed; the 2 failures were stale version-tuple asserts,
   fixed and rerun green (`runs/integ_2026-11-12/offline2.{log,xml}`); new `tests/test_tools_renumber_objective.py`.
+- **Also merged:** `swarm/B` (`verify --designs/--designs-file`) and `swarm/C` (atlas v2 configs). Offline suite at the tip
+  **2,481 / 2,481 passed** (`runs/integ_2026-11-12/offline3.xml`).
+- **Collaborator audit:** every Collin commit is in (PR #17's 72 symbols present after its squash; PR #22 merged). The
+  data path is one-way (his RunPod runs never came back; no dataset MANIFEST; no mesher-config export): handoff lane L5.
+- **Night handoff for an OpenCode orchestrator:** `docs/OPENCODE_HANDOFF_2026-11-12.md` - GPU night, CPU second lane
+  integrated now (decisions encoded), lanes L1-L5, hourly check-ins with GPU<->CPU failover.
 - **Found for the plan:** the GUI brief editor offers objective versions 1-3 only; three loading definitions (v4, v6,
   v7) need reconciling; CONTINUITY is no longer newest-first after the merges.
 
