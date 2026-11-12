@@ -188,25 +188,38 @@ def _ts(s: str | None):
 
 def run_summary(run_dir: Path) -> dict:
     """Memoized on the run's search.ndjson stamp: list_runs and the auto campaigns both summarize
-    every run on each refresh, and a finished run's summary never changes."""
+    every run on each refresh, and a finished run's summary never changes. ``active`` is computed
+    AFTER the cache lookup on every call: a live run's stamp changes with every row, but an
+    inactive run's stamp never does, so only the cache-miss path would ever refresh it."""
+    # The stamp carries BOTH files' identities: a resume rewrites run.json (new command/budget/
+    # resumes) at session start and at finish, and at finish the ndjson goes quiet — without the
+    # run.json stamp a finished resumed run could keep a pre-finish memo all night.
     try:
         st = (run_dir / "search.ndjson").stat()
-        stamp: tuple = (st.st_mtime_ns, st.st_size)
-        # WP1: include verify/search.ndjson in cache stamp so a new inline verify
-        # source invalidates the cached summary.
-        vp = run_dir / "verify" / "search.ndjson"
-        if vp.is_file():
-            vst = vp.stat()
-            stamp = stamp + (vst.st_mtime_ns, vst.st_size)
+        nd = (st.st_mtime_ns, st.st_size)
+        nd_mtime = st.st_mtime
     except OSError:
-        stamp = None
+        nd, nd_mtime = None, None
+    try:
+        rj = (run_dir / "run.json").stat()
+        rj = (rj.st_mtime_ns, rj.st_size)
+    except OSError:
+        rj = None
+    try:
+        vst = (run_dir / "verify" / "search.ndjson").stat()
+        verify_stamp = (vst.st_mtime_ns, vst.st_size)
+    except OSError:
+        verify_stamp = None
+    stamp = (nd, rj, verify_stamp) if (nd is not None or rj is not None or verify_stamp is not None) else None
     key = str(run_dir.resolve())
     hit = _RUN_SUMMARY_CACHE.get(key)
     if stamp is not None and hit is not None and hit[0] == stamp:
+        hit[1]["active"] = bool(nd_mtime is not None and (time.time() - nd_mtime) < 120.0)
         return hit[1]
     out = _run_summary(run_dir)
+    out["active"] = bool(nd_mtime is not None and (time.time() - nd_mtime) < 120.0)
     if stamp is not None:
-        _RUN_SUMMARY_CACHE[key] = (stamp, out)
+        _RUN_SUMMARY_CACHE[key] = (stamp, dict(out))
     return out
 
 
@@ -235,6 +248,13 @@ def _run_summary(run_dir: Path) -> dict:
                     break
             except (ValueError, TypeError):
                 pass
+    resumes = _resumes(run_dir)
+    b = _ts(resumes[-1]) if resumes else None
+    if b is not None:
+        srows = [r for r in rows if (_t := _ts(r.get("created_utc"))) and _t >= b]
+    else:
+        srows = rows
+    ok_s = [r for r in srows if r.get("ok")]
     return clean({
         "id": run_dir.name,
         "name": cfg.get("name"),
@@ -258,6 +278,13 @@ def _run_summary(run_dir: Path) -> dict:
         "cma_seed": _command_flags(run_dir).get("cma_seed"),
         "has_inline_verify": has_inline_verify,
         "verify_of_run_id": verify_of_run_id,
+        # session accounting (2026-11-12): a resumed run's budget belongs to its CURRENT
+        # invocation; session_n counts only the rows written since (see run_progress).
+        "resumed": bool(resumes),
+        "n_resumes": len(resumes),
+        "session_n": len(srows),
+        "session_best_j": min((r["objective"] for r in ok_s), default=None),
+        "has_verify": (run_dir / "verify" / "search.ndjson").exists(),
     })
 
 
@@ -689,6 +716,38 @@ def _cma_files(run_dir: Path) -> list[dict]:
     return sorted(out, key=lambda f: f["path"])
 
 
+def _verify_summary(run_dir: Path) -> dict | None:
+    """The run's verify re-solves (``verify --run X`` writes ``X/verify/search.ndjson``). Rows
+    carry backend/lane when the two-lane runner produced them, so the view can pair a design's
+    CPU and GPU solves. Absent dir = None (the detail key stays absent)."""
+    vpath = run_dir / "verify" / "search.ndjson"
+    if not vpath.exists():
+        return None
+    rows = read_ndjson(vpath)
+    return clean({"n": len(rows), "rows": [
+        {"design_hash": r.get("design_hash"), "objective": r.get("objective"),
+         "backend": r.get("backend"), "lane": r.get("lane"),
+         "created_utc": r.get("created_utc"), "ok": r.get("ok")} for r in rows]})
+
+
+def _last_row_lane(ndjson: Path) -> str | None:
+    """The ``lane`` tag of a search.ndjson's LAST row (``None`` on pre-two-lane rows, malformed
+    tails, or unreadable files) — how current_run tells which lane owns a run dir."""
+    try:
+        with open(ndjson, "rb") as fh:
+            fh.seek(0, os.SEEK_END)
+            size = fh.tell()
+            fh.seek(max(0, size - 8192))
+            tail = fh.read().decode("utf-8", "replace").strip()
+        if not tail:
+            return None
+        row = json.loads(tail.splitlines()[-1])
+        lane = row.get("lane")
+        return str(lane).lower() if lane else None
+    except Exception:  # noqa: BLE001 - attribution must never break the run scan
+        return None
+
+
 def run_detail(runs: Path, run_id: str, root: Path | None = None) -> dict:
     d = _resolve_run(runs, run_id)
     repo_root = Path(root) if root is not None else runs.parent
@@ -728,6 +787,12 @@ def run_detail(runs: Path, run_id: str, root: Path | None = None) -> dict:
         "step_files_detail": step_files_detail,
         "objective_version": run_objective_version(d),
     })
+    # Verify re-solves (2026-11-12): ``verify --run X`` writes ``X/verify/search.ndjson``; rows may
+    # pair the same design across backends (the two-lane CPU/GPU cross-checks). Absent dir =
+    # absent key, never fabricated.
+    ver = _verify_summary(d)
+    if ver is not None:
+        out["verify"] = ver
     # Gate audit: a committed CSV (docs/data/gate_audit_*/ or scratch/gate_audit_*/) carries the
     # per-design pass/fail truth. Absent audit = the key stays absent, so the view renders no column.
     gate_audit = run_gate_audit(repo_root, run_id)
@@ -1513,14 +1578,167 @@ def save_user_brief(root: Path, name: str, brief: dict) -> Path:
 # ---------------------------------------------------------------------------- machine state
 
 
-def status(root: Path, runs: Path) -> dict:
-    import shutil
-    from hornlab_search.search import hygiene
-    from hornlab_search.search.gpulock import _lock_path, _pid_alive, _read_lock
-    lock = _read_lock(_lock_path(runs))
+def _lock_payload(lock_path: Path) -> dict | None:
+    from hornlab_search.search.gpulock import _pid_alive, _read_lock
+    lock = _read_lock(lock_path)
     if lock:
         lock = dict(lock)
         lock["alive"] = bool(lock.get("pid") and _pid_alive(int(lock["pid"])))
+    return lock
+
+
+def _queue_payload(log: Path) -> dict:
+    """One overnight queue log as the GUI shows it: its START/END/SKIP steps + the raw tail."""
+    try:
+        mtime = log.stat().st_mtime
+    except OSError:
+        mtime = 0.0
+    payload = {"name": log.name, "mtime": mtime, "steps": queue_steps(log),
+               "tail": tail_text(log, 30)}
+    open_step = _open_step(payload["steps"])
+    if open_step:
+        payload["open_step"] = clean(open_step)
+    return payload
+
+
+def _open_step(steps: list[dict]) -> dict | None:
+    """The most recent step that STARTed but has no END yet — the job running right now."""
+    for st in reversed(steps):
+        if st.get("started") and not st.get("ended") and not st.get("skipped"):
+            return st
+    return None
+
+
+def _verify_target(argv: str | None) -> int | None:
+    """The design count a queued verify job will re-solve (from its own START argv)."""
+    if not argv:
+        return None
+    m = re.search(r"--top (\d+)", argv)
+    if m:
+        return int(m.group(1))
+    m = re.search(r"--designs ([A-Za-z0-9,]+)", argv)
+    if m:
+        return len([x for x in m.group(1).split(",") if x])
+    return None
+
+
+def _lane_hosts(runs: Path, lane: str) -> dict:
+    """Live vs stale BEAT host registry entries for one lane (runs/lanes/<lane>/workers/*)."""
+    from hornlab_search.search.gpulock import _pid_alive
+    d = runs / "lanes" / lane / "workers"
+    live = stale = 0
+    if d.is_dir():
+        for f in d.glob("*.json"):
+            if f.name.endswith(".key.json"):
+                continue
+            j = _read_json(f) or {}
+            pid = j.get("pid")
+            if isinstance(pid, int) and pid > 0 and _pid_alive(pid):
+                live += 1
+            else:
+                stale += 1
+    return {"live": live, "stale": stale}
+
+
+def _cpu_activity(runs: Path, since_local=None, run_id: str | None = None,
+                  max_age_s: float = 1800, command: str | None = None) -> dict | None:
+    """The CPU lane's visible verify work. With ``run_id`` (parsed from the queued job's own
+    ``--run``), count THAT run's ``verify/search.ndjson`` rows since the job started — even 0 rows
+    while the first design is still solving (the file may not exist yet). Without it, fall back to
+    the mtime-newest verify output (within ``max_age_s``). Verify jobs write into a subdir of the
+    run they verify, so plain run enumeration never sees them (2026-11-12: both tonight's CPU
+    verifies were invisible on every page)."""
+    import time
+    if run_id:
+        run_dir = runs / run_id
+        cmd = command or ""
+        explicit = re.search(r'--verify-dir(?:=|\s+)(?:"([^"]+)"|\'([^\']+)\'|(\S+))', cmd)
+        if explicit:
+            out = Path(next(v for v in explicit.groups() if v is not None))
+            if not out.is_absolute():
+                out = runs.parent / out
+            f = out / "search.ndjson"
+        else:
+            backend = re.search(r'--backend(?:=|\s+)(\S+)', cmd)
+            stored = (_read_json(run_dir / "run.json") or {}).get("backend")
+            linked = bool(re.search(r'--brief(?:=|\s+)', cmd) or
+                          (backend and backend.group(1).strip('"\'') != stored))
+            if linked:
+                from hornlab_search.gui.data_verify import _match_parent
+                candidates = []
+                for candidate in _run_dirs(runs):
+                    meta = _as_dict(_read_json(candidate / "run.json"))
+                    parent = _as_dict(meta.get("verify_of")).get("run")
+                    if meta.get("mode") == "verify" and isinstance(parent, str) and _match_parent(parent, run_id, runs):
+                        started = _ts(meta.get("started_utc"))
+                        if since_local is None or (started and started >= since_local):
+                            candidates.append(candidate)
+                if not candidates:
+                    return clean({"run_id": run_id, "mode": "verify", "n": 0, "last": None})
+                f = max(candidates, key=_mt) / "search.ndjson"
+            else:
+                f = run_dir / "verify" / "search.ndjson"
+    else:
+        best_f, best_t = None, 0.0
+        for p in runs.glob("*/verify/search.ndjson"):
+            try:
+                t = p.stat().st_mtime
+            except OSError:
+                continue
+            if t > best_t:
+                best_f, best_t = p, t
+        if best_f is None or time.time() - best_t > max_age_s:
+            return None
+        f = best_f
+    rows = read_ndjson(f) if f.exists() else []
+    if since_local is not None:
+        rows = [r for r in rows if (_t := _ts(r.get("created_utc"))) and _t.astimezone() >= since_local]
+    return clean({"run_id": run_id or f.parent.parent.name, "mode": "verify", "n": len(rows),
+                  "last": rows[-1].get("created_utc") if rows else None})
+
+
+def _parse_wall_ts(s: str | None):
+    """A timestamp in either of this repo's two on-disk shapes: UTC ``...Z`` (ndjson) or local
+    ``YYYY-MM-DDTHH:MM:SS`` (the night runner's queue-log lines). None if unparseable."""
+    t = _ts(s)
+    if t is not None:
+        return t
+    try:
+        import datetime as dt
+        return dt.datetime.fromisoformat(s or "").astimezone()
+    except (TypeError, ValueError):
+        return None
+
+
+def _cpu_search_run_dir(runs: Path, night: str | None, job_id: str | None,
+                        resume_arg: str | None) -> Path | None:
+    """A CPU-lane SEARCH job's run dir: ``--resume`` names it directly; a fresh search prints
+    ``output <dir>`` into the night's job log the moment it begins writing."""
+    if resume_arg:
+        p = Path(resume_arg)
+        if not p.is_absolute():
+            p = runs.parent / p
+        return p if p.is_dir() else None
+    if not night or not job_id:
+        return None
+    joblog = runs / "nights" / night / f"{job_id}.log"
+    if not joblog.exists():
+        return None
+    for ln in reversed(tail_text(joblog, 80)):
+        m = re.search(r"output (\S+)", ln)
+        if m:
+            p = Path(m.group(1))
+            if not p.is_absolute():
+                p = runs.parent / p
+            return p if p.is_dir() else None
+    return None
+
+
+def status(root: Path, runs: Path) -> dict:
+    import shutil
+    from hornlab_search.search import hygiene
+    from hornlab_search.search.gpulock import _lock_path, lane_lock_path
+    lock = _lock_payload(_lock_path(runs))
     try:
         procs = hygiene.list_project_julia()
     except Exception:  # noqa: BLE001 - status must never fail on a probe
@@ -1535,14 +1753,65 @@ def status(root: Path, runs: Path) -> dict:
         disk = {"free_gb": round(u.free / 1e9, 1), "total_gb": round(u.total / 1e9, 1)}
     except OSError:
         pass
+
+    # Queue logs by RECENCY, not name: sorted-by-name picked 'v5_continue_2026-10-29' over every
+    # current night because 'v' > 'g'/'c' (the Oct-29 steps shown as "the" queue all day).
     ov = runs / "overnight"
-    queue_logs = sorted(ov.glob("queue_*.log"), key=lambda p: (_mt(p), p.name)) if ov.is_dir() else []  # newest by mtime: names sort by prefix, not date
+    qlogs = sorted((p for p in ov.glob("queue_*.log")),
+                   key=lambda p: (_mt(p), p.name), reverse=True) if ov.is_dir() else []
+    queues = [_queue_payload(p) for p in qlogs[:5]]
+
+    # CPU second lane (2026-11-12): its lock, tonight's queue step, and live output. The lane
+    # lock's command names the night ('night <name>'), which resolves the runner's own queue log
+    # runs/overnight/queue_<night>.log — that log's open START line IS the running CPU job.
+    # Verify jobs: rows at/after the job's start in <run>/verify/search.ndjson. Search jobs:
+    # --resume names the run dir directly, a fresh search prints 'output <dir>' into the night's
+    # job log the moment it starts (both feed run_progress, so session/rate/ETA carry over).
+    cpu_lock = _lock_payload(lane_lock_path("cpu", runs))
+    cpu_night, cpu_job = None, None
+    if cpu_lock and cpu_lock.get("alive"):
+        m = re.search(r"night (\S+)", str(cpu_lock.get("command") or ""))
+        cpu_night = m.group(1) if m else None
+        if cpu_night:
+            qlog = ov / f"queue_{cpu_night}.log"
+            if qlog.exists():
+                step = _open_step(queue_steps(qlog))
+                if step:
+                    cmd = step.get("command") or ""
+                    is_search = re.search(r" search --", cmd) is not None
+                    m2 = re.search(r"--run (?:\"?runs[\\/])?([A-Za-z0-9_.\-\\/]+)", cmd)
+                    run_id = m2.group(1).strip("\"\\/") if m2 else None
+                    mbud = re.search(r"--budget (\d+)", cmd)
+                    cpu_job = clean({"name": step.get("name"), "started": step.get("started"),
+                                     "kind": "search" if is_search else "verify",
+                                     "target": int(mbud.group(1)) if is_search and mbud else _verify_target(cmd),
+                                     "run_id": run_id})
+    cpu_since = _parse_wall_ts((cpu_job or {}).get("started")) if cpu_job else None
+    cpu_run = (cpu_job or {}).get("run_id")
+    cpu_current = None
+    if cpu_lock and cpu_lock.get("alive"):
+        if (cpu_job or {}).get("kind") == "search":
+            rp = _cpu_search_run_dir(runs, cpu_night, (cpu_job or {}).get("name"), cpu_run)
+            if rp is not None:
+                p = run_progress(rp)
+                cpu_current = clean({"run_id": rp.name, "mode": "screen", "n": p.get("n"),
+                                     "last": p.get("last"), "session": p.get("session"),
+                                     "rate_per_h": p.get("rate_per_h"), "eta_min": p.get("eta_min")})
+        elif cpu_job or cpu_run:
+            cpu_current = _cpu_activity(runs, since_local=cpu_since, run_id=cpu_run, command=cmd)
+
+    gpu_hosts = _lane_hosts(runs, "gpu")
+    cpu_hosts = _lane_hosts(runs, "cpu")
     return clean({
         "gpu_lock": lock, "vram_mib": vram, "julia_procs": len(procs), "disk": disk,
-        "queue_log": {"name": queue_logs[-1].name, "tail": tail_text(queue_logs[-1], 30),
-                      "steps": queue_steps(queue_logs[-1])} if queue_logs else None,
+        "hosts": {"gpu": gpu_hosts["live"], "cpu": cpu_hosts["live"],
+                  "stale": gpu_hosts["stale"] + cpu_hosts["stale"]},
+        "cpu_lock": cpu_lock, "cpu_night": cpu_night, "cpu_job": cpu_job,
+        "cpu_current": cpu_current,
+        "queues": queues,
+        # compat key, now newest-by-mtime (was sorted-by-name)
+        "queue_log": queues[0] if queues else None,
         "current": run_progress(cur) if (lock and lock.get("alive") and (cur := current_run(runs))) else None,
-        "watchdog_log": tail_text(ov / "watchdog.log", 10) if ov.is_dir() else [],
     })
 
 
@@ -1756,32 +2025,74 @@ def list_configs(root: Path) -> list[dict]:
 # ---------------------------------------------------------------------------- live progress
 
 
+def _resumes(run_dir: Path) -> list:
+    """Every invocation's start UTC (run.json ``resumes``), oldest first. Empty when the run was
+    never interrupted-and-resumed."""
+    rj = _read_json(run_dir / "run.json") or {}
+    r = rj.get("resumes")
+    return r if isinstance(r, list) else []
+
+
+def _span_rate(rows_or_ts, key="created_utc") -> float | None:
+    """Rows per hour across the span first→last timestamp of the given rows."""
+    t = [_ts(r.get(key)) for r in rows_or_ts]
+    t = [x for x in t if x]
+    if len(t) >= 2 and (t[-1] - t[0]).total_seconds() > 0:
+        return (len(t) - 1) / (t[-1] - t[0]).total_seconds() * 3600
+    return None
+
+
 def run_progress(run_dir: Path) -> dict:
-    """Evaluations done vs budget, best so far, rate and ETA from the run's own timestamps."""
+    """Evaluations done vs budget, best so far, rate and ETA from the run's own timestamps.
+
+    Session-aware (2026-11-12): a resumed run's ``--budget`` (the run.json command regex) buys
+    evals for the CURRENT invocation only, while ``n`` counts the run's lifetime rows. The session
+    is the rows at/after the last ``run.json 'resumes'`` timestamp; a never-resumed run is its own
+    session, which reproduces today's numbers exactly (rate over the whole row span, budget vs n).
+    The old rate — last-40 rows — poisoned a resumed run's window with the pre-crash gap and
+    reported e.g. 19/h while the session really ran at 76/h."""
     s = run_summary(run_dir)
     rows = read_ndjson(run_dir / "search.ndjson")
-    t = [_ts(r.get("created_utc")) for r in rows[-40:]]
-    t = [x for x in t if x]
-    rate = None
-    if len(t) >= 2 and (t[-1] - t[0]).total_seconds() > 0:
-        rate = (len(t) - 1) / (t[-1] - t[0]).total_seconds() * 3600
-    left = (s["budget"] - s["n"]) if s.get("budget") else None
+    resumes = _resumes(run_dir)
+    b = _ts(resumes[-1]) if resumes else None
+    if b is None:
+        srows = rows
+    else:
+        srows = [r for r in rows if (_t := _ts(r.get("created_utc"))) and _t >= b]
+    rate = _span_rate(srows) if len(srows) >= 2 else None
+    budget = s.get("budget")
+    n_s = len(srows)
+    ok_s = [r for r in srows if r.get("ok")]
+    left = (budget - n_s) if budget else None
     return clean({**s, "rate_per_h": rate,
-                  "eta_min": (left / rate * 60) if (rate and left is not None and left > 0) else None})
+                  "eta_min": (left / rate * 60) if (rate and left is not None and left > 0) else None,
+                  "session": clean({"n": n_s, "budget": budget, "resumed": bool(resumes),
+                                    "n_resumes": len(resumes),
+                                    "started": resumes[-1] if resumes else s.get("started")}),
+                  "failures_session": sum(1 for r in srows if not r.get("ok")),
+                  "session_best_j": min((r["objective"] for r in ok_s), default=None)})
 
 
 def current_run(runs: Path, max_age_s: float = 1800) -> Path | None:
-    """The run folder written most recently (within max_age_s), i.e. the search in progress."""
-    import time
+    """The GPU lane's run folder: the ``search.ndjson`` written most recently (within ``max_age_s``)
+    whose last row is NOT tagged to the CPU lane — with two live lanes, the newest-written dir can
+    be the CPU lane's, and the GPU lock card must not swallow it.
+
+    No ``[:30]`` slice: the newest-named 30 dirs are the ones a night queue is busy CREATING, so
+    capping the scan hides the resumed (older-named) run it is actually appending to once ~5 new
+    run dirs exist."""
     best, best_t = None, 0.0
-    for d in _run_dirs(runs)[:30]:
+    for d in _run_dirs(runs):
         f = d / "search.ndjson"
         try:
             m = f.stat().st_mtime
         except OSError:
             continue
-        if m > best_t:
-            best, best_t = d, m
+        if m <= best_t:
+            continue
+        if _last_row_lane(f) == "cpu":
+            continue
+        best, best_t = d, m
     return best if best and time.time() - best_t < max_age_s else None
 
 

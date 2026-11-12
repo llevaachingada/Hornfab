@@ -1,5 +1,16 @@
 # AGENTS.md — hornlab-search
 
+## Owner amendment: one consolidated checkout (2026-11-12)
+
+The owner requested all local HornLab work be consolidated into local `main` at
+`C:/Users/hunte/Hrns/hornlab-search`. This overrides the earlier per-task worktree/branch workflow
+for ongoing local work. Work in that canonical checkout; do not create new worktrees or private
+working copies unless the owner explicitly asks. Parallel agents may read the shared tree and
+edit disjoint assigned files. Only the parent integrator performs git mutations; coordinate
+shared files and preserve other agents' changes. Historical worktree paths in old evidence are
+provenance, not current execution paths. Consolidation backups preserve original branches/files.
+
+
 Base-level instructions for every agent working in this repo, whether dispatched by OpenCode,
 Claude Code, or a human. This file orients you. The numbered plan in `docs/plan/` commands you.
 
