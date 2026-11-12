@@ -59,6 +59,7 @@ def test_maes_bad_blocks_are_refused(tmp_path, smoke_cfg_path, qd, match):
 
 
 def test_cma_mae_run_records_maes_in_run_json(tmp_path, smoke_cfg, monkeypatch):
+    pytest.importorskip("ribs", reason="ribs not installed")
     smoke = two_knob_cfg(smoke_cfg, qd=qd_block(maes=dict(MAES)))
     rd = tmp_path / "maes_run"
     monkeypatch.setattr(qd_mod, "evaluate", knob_eval(smoke))
@@ -71,6 +72,7 @@ def test_cma_mae_run_records_maes_in_run_json(tmp_path, smoke_cfg, monkeypatch):
 
 
 def test_default_cma_me_run_json_has_no_maes(tmp_path, smoke_cfg, monkeypatch):
+    pytest.importorskip("ribs", reason="ribs not installed")
     smoke = two_knob_cfg(smoke_cfg, qd=qd_block())
     rd = tmp_path / "plain_run"
     monkeypatch.setattr(qd_mod, "evaluate", knob_eval(smoke))
@@ -83,6 +85,7 @@ def test_cma_mae_archive_reaches_cells_beyond_the_plain_archive(tmp_path, smoke_
     """With the soft archive the SAME budget fills AT LEAST as many cells as the plain CMA-ME:
     refused... (here the 2-knob fake never refuses; the assertion pins that maes keeps the
     machinery running and the archive non-empty)."""
+    pytest.importorskip("ribs", reason="ribs not installed")
     smoke = two_knob_cfg(smoke_cfg, qd=qd_block(maes=dict(MAES)))
     rd = tmp_path / "maes2"
     monkeypatch.setattr(qd_mod, "evaluate", knob_eval(smoke))
