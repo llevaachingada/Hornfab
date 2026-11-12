@@ -188,6 +188,17 @@ Configured in `.opencode/oh-my-opencode-slim.json` (preset `fm-cloud`):
   `kimi-k3` — all on ollama-cloud, run in parallel
 
 Even with 6 background agents, the same rule binds: **one GPU solve at a time.**
+
+**Skills (OpenCode reads `.claude/skills/` and `.opencode/skills/`; this file, not CLAUDE.md, is what
+OpenCode loads):** `hornlab-gpu-job` (any GPU/solve job), `hornlab-night-queue` (unattended nights),
+`hornlab-evidence` (evidence docs), `hornlab-shape-check` (new configs, before GPU), `hornlab-render`
+(images), `hornlab-typology-research` (new typology/objective work). The orchestrator has all skills; fixer and
+designer are granted the hornlab skills in `.opencode/oh-my-opencode-slim.json` so delegated lanes can load them.
+
+**Current state (2026-11-12):** read `docs/SENIOR_PLAN_2026-11-12.md` and, for tonight, execute
+`docs/OPENCODE_HANDOFF_2026-11-12.md`. New MEH work is paused by the owner. Objective versions: 4 =
+tolerance-normalised, 5 = MEH, 6 = loading_smooth (Le Cléac'h), 7 = hardened CD objective (written "5" on the
+old hardened branch; data relabelled). Never rank J across versions.
 ## GPU / Julia hygiene (measured 2026-10-12; applies to every agent)
 
 `hornlab_beat_bem` runs solves in a **persistent Julia host** (`HORNLAB_BEAT_PERSISTENT_HOST=1`, idle
@@ -200,9 +211,12 @@ the real ceiling.
 Rules:
 1. **Before any GPU measurement, benchmark, or checkpoint run**, list and clear stale hosts, and confirm
    VRAM is near idle (the desktop alone uses ~0.3-0.5 GB):
-   `Get-Process julia` then `taskkill /F /IM julia.exe`, then `nvidia-smi --query-gpu=memory.used --format=csv`.
-   Only Julia processes this project started may be killed. On a shared machine, check the
-   command line first.
+   `hornlab-search gpu-clean` (or `solve.worker.clear_stale_hosts(force=True)` in a script), then
+   `nvidia-smi --query-gpu=memory.used --format=csv`. **Never `taskkill /IM julia.exe`** (by image name): the
+   host is a `python -m hornlab_beat_bem.worker_host` tree that respawns julia, so an image-name kill leaves the
+   warm host alive, and it kills every other Julia on the machine, including a CPU solve lane
+   (`docs/OPENCODE_HANDOFF_2026-11-12.md` L1). Desktop apps rendering on the NVIDIA GPU can hold 1-2 GB; record
+   that baseline.
 2. **One measurement per fresh process, with Julia cleared between jobs.** Never compare VRAM or
    timings across solves of different meshes inside one warm worker (the pool keeps growing).
 3. **Record the baseline** (`memory.used` before the solve) next to every peak-VRAM number.
@@ -213,6 +227,11 @@ Rules:
    really exits (check the process list) and test it. `detach_workers()` leaving a host warm is
    intended inside a search; it is not acceptable at the end of a measurement or checkpoint.
 7. A solver crash or OOM is only a finding once it reproduces from a clean state (rule 1).
+8. **On Windows, `nvidia-smi` cannot see a spill.** Past VRAM the driver can page allocations into shared
+   system RAM and the solve runs 5-10x slower instead of failing. A CUDA timing is only valid with the host
+   tree's `\GPU Process Memory(*)\Shared Usage` recorded and near zero (`tools/bench/_bench_common.GpuMemPeak`).
+   The owner sets NVIDIA Control Panel -> `julia.exe` -> CUDA Sysmem Fallback Policy -> Prefer No Sysmem
+   Fallback, so an over-size solve fails fast instead.
 
 **Two lanes (2026-11-12).** "One GPU solve at a time" means one CUDA solve, and one CPU-backend search
 may run beside it. Lane identity is the BEAT worker registry directory: each lane sets its own

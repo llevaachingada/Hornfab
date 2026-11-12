@@ -45,7 +45,8 @@ operational recipe, not the rules. Fork installs follow `docs/FORKS.md`; machine
 
 ## 3. Post-job
 
-- a. `hornlab-search gpu-clean`, then VERIFY: no julia remains, VRAM back to idle.
+- a. `hornlab-search gpu-clean`, then VERIFY: no julia remains, VRAM back to idle. (With a CPU lane live, the
+  CPU lane's host - its command line carries `runs\lanes\cpu\workers` - legitimately remains; leave it.)
 - b. If the job died: clear hosts, read the log tail (OOM/CRASH lines) — rule 7's clean-state reproduce comes
   first. A REFUSAL message naming gpu-clean (e.g. a flagged solve against a warm host predating its env) is a
   stale-host instruction, not a finding: clean and re-run once.

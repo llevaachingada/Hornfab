@@ -35,8 +35,10 @@ Background (read once, do not re-derive): `docs/SENIOR_PLAN_2026-11-12.md` (the 
 
 ## 1. Setup (orchestrator, serial, ~15 min)
 
-1.1 Confirm the integration PR has merged: `gh pr view 24 --json state` must say `MERGED`. If it is still open,
-    STOP and wait (the senior is landing it); do not merge it yourself.
+1.1 Land the integration PR #24 (owner-approved; the repo has GitHub auto-merge disabled, so this is manual):
+    `gh pr view 24 --json state,statusCheckRollup`. If `MERGED`, continue. If `OPEN` and every check is
+    `SUCCESS`, run `gh pr merge 24 --merge` (merge commit, NEVER squash: squashing would orphan Collin's commits
+    and PRs #19/#22/#23). If a check FAILED, STOP and report; do not fix it yourself.
 1.2 In the main checkout: `git fetch origin`, `git checkout main`, `git reset --hard origin/main` only if
     `git status --short` is empty (if not empty, STOP and report). Then
     `PY -c "import hornlab_search, importlib.metadata as m; print(m.distribution('hornlab-beat-bem').read_text('direct_url.json'))"`
@@ -109,7 +111,8 @@ DECIDED details:
 with per-lane logging, so tonight's run IS the measurement. No separate pre-test.
 
 **Owns:** `hornlab_search/solve/worker.py`, `hornlab_search/search/hygiene.py`, `hornlab_search/search/gpulock.py`,
-`hornlab_search/config.py` (only the `solve.julia_threads` knob), `tools/run_campaign_night.py`,
+`hornlab_search/config.py` (the `solve.julia_threads` knob and L1.8 `extends:`), `examples/profiles/` (create),
+`tests/test_config_extends.py` (create), `tools/run_campaign_night.py`,
 `tools/night_queue/queue.ps1`, `tests/test_solve_worker*.py`, `tests/test_search_hygiene*.py`,
 `tests/test_night_runner*.py` (create), `tests/test_config_julia_threads.py` (create), `CLAUDE.md` GPU rules
 section ONLY (one paragraph, see L1.6).
@@ -151,6 +154,14 @@ section ONLY (one paragraph, see L1.6).
   (additive) so the morning report can compute evaluations/hour per lane. If `HORNLAB_STAGE_TIMING=1` (PR #23)
   is cheap, set it in both lanes' `env:`.
 - L1.6 CLAUDE.md GPU rules: one paragraph "Two lanes" stating decisions 2, 3, 5.
+- L1.8 **Finish swarm lane F** (`extends:` for configs/briefs; rescued uncommitted work is commits `4ff42ce`
+  (`config.py`) and `17e0520` (`examples/profiles/`) on branch `swarm/F-2026-10-31`, pushed).
+  `git cherry-pick 4ff42ce 17e0520` into L1's branch; then RENAME `examples/profiles/objective_v5.yaml` to
+  `objective_v7.yaml` and set `version: 7` in it (that profile is the hardened objective); then meet `docs/SWARM_PLAN_2026-10-30.md` section F exactly: `extends:` resolved before
+  `config_sha`/solve hash; existing goldens unchanged; tests = flat-vs-extends identical `Config` and
+  `config_sha` for 3 real cells, cycle detection, missing-file error naming the chain; add
+  `examples/profiles/fused_cuda.yaml` and `examples/profiles/objective_v4.yaml`/`objective_v7.yaml` (NOT v5:
+  v5 is MEH now). Do not migrate existing configs.
 - L1.7 PR `lane/L1-cpu-lane` -> main, offline suite green in the worktree. **The orchestrator merges L1 into
   main only between two GPU night jobs** (watch `night_status.py`; merge right after a job ends), then pulls
   main into the main checkout with `git pull --ff-only` (the night controller re-reads code per job).
@@ -262,6 +273,16 @@ the gpu-clean path there): L5's entry points are `python -m hornlab_search.datas
   (the CP-7b rule); until then GUI/tools show them as a separate group.
 - L5.5 `tools/export_campaign_tables.py`: group and label every table by `objective_version` and `backend`;
   never rank across them (same rule as L2.2).
+- L5.8 **Finish swarm lane H: record provenance** (rescued uncommitted work = commit `68a16da` on branch
+  `swarm/H-2026-10-31`, pushed; touches `dataset/record.py` + the `_persist` call in `search/evaluate.py`).
+  `git cherry-pick 68a16da` into L5's branch (L5 therefore also owns `hornlab_search/dataset/record.py`,
+  the `_persist` function in `search/evaluate.py`, `tools/data/keepers.py`, `tests/test_dataset_record*.py`),
+  then meet `docs/SWARM_PLAN_2026-10-30.md` section H: optional record fields `run_id`, `config_name`,
+  `typology` (omitted when absent); `tools/data/keepers.py` backfills them for old rows by joining
+  `runs/*/search.ndjson` with `runs/*/config.yaml` `name` (write the backfill as a dry-run-by-default command
+  with backup, like `tools/data/renumber_objective_v5_to_v7.py`; run `--apply` only between GPU jobs);
+  tests = round trip with and without the fields, backfill on a synthetic two-run tree. MANIFEST (L5.1) then
+  also counts rows by `typology`.
 - L5.6 Runbook: add "what changed 2026-11-12" (v5 -> v7 relabel, MANIFEST, labs/ prefix, how Collin pushes his
   runs) to `docs/COLLABORATOR_PULL_RUNBOOK_2026-11-02.md`.
 - L5.7 **Tonight, after L5 merges** (CPU/network only, no GPU): re-pack and upload the dataset with the

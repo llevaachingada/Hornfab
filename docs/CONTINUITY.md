@@ -90,6 +90,11 @@
   data path is one-way (his RunPod runs never came back; no dataset MANIFEST; no mesher-config export): handoff lane L5.
 - **Night handoff for an OpenCode orchestrator:** `docs/OPENCODE_HANDOFF_2026-11-12.md` - GPU night, CPU second lane
   integrated now (decisions encoded), lanes L1-L5, hourly check-ins with GPU<->CPU failover.
+- **OpenCode readiness (2026-11-12):** OpenCode reads `AGENTS.md` (never CLAUDE.md) and skills from `.claude/skills/`. AGENTS.md
+  still said `taskkill /F /IM julia.exe` (would have killed the CPU lane): now matches CLAUDE.md rules 1 and 8, plus the
+  skills list and current state. Duplicate `.opencode/skills/` copies removed (single source `.claude/skills/`). The
+  local, untracked `.opencode/oh-my-opencode-slim.json` grants fixer/designer the hornlab skills (they had `[]`, which
+  blocks skill loading). gpu-job and night-queue skills note the two-lane exception after L1.
 - **Found for the plan:** the GUI brief editor offers objective versions 1-3 only; three loading definitions (v4, v6,
   v7) need reconciling; CONTINUITY is no longer newest-first after the merges.
 
