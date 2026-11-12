@@ -16,12 +16,17 @@ Recorded by task 02 on 2026-10-12. **Status: PARTIAL — M2/M3/M4 and M5-after-d
 - System Python also present: `C:\Users\hunte\AppData\Local\Programs\Python\Python312\python.exe` (used internally by the beat worker host)
 
 ## Pinned dependencies (40-char SHAs)
-- hornlab-waveguide-mesher: `b922e807a5cf10cf732c4557ec0b9b495762afd7`
-- hornlab-beat-bem:           `1efdc6f934e16f288880b6d68e8dce8480b7a421`
+- hornlab-waveguide-mesher: `55da4f46d662d8dcd7a9f94a609eeea4009fcd62` (fork `jamescollinharky/hornlab-waveguide-mesher` branch `hornlab-search/osse-midports`; base `b922e807`; opt-in `mid_ports` L1 flush tag-10 patches on native OSSE(+SF) walls; absent = byte-identical. 2026-11-03)
+- hornlab-beat-bem:           `0850ef39b29d7c51f8fbb082184d3784d2ff8bef`
 - hornlab-plots:              `9e4a6d0dd2ccb6e735dd00233dccccb50d12ed44`
 - hornlab-bempp-bem:          `8e6910602ece9abb2e9ce0db7a637f4bedf17f53` (installed OK, with bempp-cl 0.4.2 and numba 0.68.0)
 
 Pin history:
+- 2026-11-03: beat-bem pin → `0850ef3` (branch `hornlab-search/meh-fused-cuda`, on 1efdc6f): the fused CUDA path
+  (`solve.cuda_fused`) now accepts multi-channel (MEH) solves - LHS once, RHS-only assembly per extra channel, one
+  LU. Single-channel path unchanged. Validated: Julia MEH testset CUDA 16/16 (adds fused-vs-four-operator per
+  channel), CPU 7/7; on the 8,044-dof T2 mesh fused 2.66 s/freq / 2.1 GB vs four-operator 38.8 s / ~14 GB spilled,
+  channel SPL within 4.2e-4 dB of CPU. `docs/evidence/BENCH_AUDIT_2026-11-03.md`.
 - 2026-10-31: beat-bem pin → `1efdc6f` (branch `hornlab-search/meh-multisource`, cut from 760a1ec): opt-in multi-tag
   `velocity_sources` (1..8, unit amplitude), opt-in `impedance_matrix`, `channel_*` result fields, `tag_areas_m2`;
   one tag with no matrix is byte-identical (golden payload). Validated in M8: fork Python suite 329 pass; Julia

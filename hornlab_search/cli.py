@@ -4,7 +4,7 @@
     hornlab-search selftest --analytic [--tol-db 0.5] [--subdivisions 3] | --crosscheck
     hornlab-search run      --config <yaml> [--mode screen|verify|final] [--dry-run]
     hornlab-search search   --config <yaml> [--budget N] [--mode screen] [--resume DIR]
-    hornlab-search verify   --run <dir> [--top 5]
+    hornlab-search verify   --run <dir> [--top 5 | --designs h1,h2 | --designs-file f.csv]
     hornlab-search report   <run_dir> [--out report.html] [--top 5]
     hornlab-search pin-plan --run <dir|id> [--write-config PATH]
     hornlab-search dataset  stats|verify|export
@@ -782,6 +782,28 @@ def _cmd_verify(args, argv) -> int:
         return 3
 
 
+def _verify_wanted_hashes(args) -> list[str] | None:
+    """Hashes from ``--designs h1,h2`` or ``--designs-file <csv with a 'design' column>`` (order kept,
+    duplicates dropped); None when neither was given (``--top`` mode)."""
+    raw: list[str]
+    if getattr(args, "designs", None):
+        raw = args.designs.split(",")
+    elif getattr(args, "designs_file", None):
+        import csv
+        with open(args.designs_file, newline="", encoding="utf-8-sig") as fh:
+            reader = csv.DictReader(fh)
+            if "design" not in (reader.fieldnames or []):
+                raise ValueError(f"{args.designs_file} has no 'design' column")
+            raw = [row["design"] or "" for row in reader]
+    else:
+        return None
+    out: list[str] = []
+    for h in (x.strip() for x in raw):
+        if h and h not in out:
+            out.append(h)
+    return out
+
+
 def _verify_body(args, argv, d) -> int:
     from hornlab_search.config import load_config
     from hornlab_search.dataset.store import DatasetStore
@@ -805,7 +827,23 @@ def _verify_body(args, argv, d) -> int:
         if r["design_hash"] not in seen:
             seen.add(r["design_hash"])
             top.append(r)
-    top = top[: args.top]
+    # --designs / --designs-file (lane B, 2026-10-31): re-solve exactly the named hashes, in the order
+    # given; per hash the lowest-J ok row (= first in J order, same dedup as --top) is re-solved.
+    try:
+        wanted = _verify_wanted_hashes(args)
+    except (OSError, ValueError) as exc:
+        print(f"verify FAILED: {exc}")
+        return 2
+    if wanted is None:
+        top = top[: args.top if args.top is not None else 5]
+    else:
+        by_hash = {r["design_hash"]: r for r in top}
+        missing = [h for h in wanted if h not in by_hash]
+        if missing:
+            print(f"verify FAILED: {len(missing)} design hash(es) have no ok row in "
+                  f"{run_dir / 'search.ndjson'}: {', '.join(missing)}")
+            return 2
+        top = [by_hash[h] for h in wanted]
     if not top:
         print("verify FAILED: no successful evaluation to verify")
         return 1
@@ -1440,7 +1478,10 @@ def build_parser() -> argparse.ArgumentParser:
                         "(default 2 when the config has no restarts block)")
     v = sub.add_parser("verify", parents=[common], help="re-solve a run's top designs at verify fidelity")
     v.add_argument("--run", required=True)
-    v.add_argument("--top", type=int, default=5)
+    vsel = v.add_mutually_exclusive_group()
+    vsel.add_argument("--top", type=int, default=None, help="re-solve the N best designs (default 5)")
+    vsel.add_argument("--designs", metavar="H1,H2,...", help="re-solve exactly these design hashes")
+    vsel.add_argument("--designs-file", metavar="CSV", help="CSV with a 'design' column of hashes")
     v.add_argument("--brief", metavar="PATH",
                    help="brief YAML; overrides config target/weights")
     v.add_argument("--cma-seed", type=int, metavar="INT",
@@ -1515,6 +1556,10 @@ def build_parser() -> argparse.ArgumentParser:
                         help="kill stale Julia/BEAT processes and report VRAM usage")
     gc.add_argument("--force", action="store_true",
                     help="DANGEROUS: skip the GPU-lock check and kill Julia even if a search is running")
+    ab = sub.add_parser("ab-bl", parents=[common], help="A/B check of a Hornfab design against Boundary Lab "
+                        "(export | solve | import | compare | demo --fake); see docs/ab/BOUNDARY_LAB_AB.md")
+    from hornlab_search.compare.cli import add_arguments as _ab_arguments
+    _ab_arguments(ab)
     gui = sub.add_parser("gui", parents=[common], help="local web GUI (127.0.0.1) over runs, briefs and jobs")
     gui.add_argument("--port", type=int, default=8765)
     gui.add_argument("--no-browser", action="store_true", help="do not open a browser tab")
@@ -1583,6 +1628,9 @@ def main(argv: list[str] | None = None) -> int:
             return _cmd_campaign(args)
         if args.cmd == "gpu-clean":
             return _cmd_gpu_clean(args)
+        if args.cmd == "ab-bl":
+            from hornlab_search.compare.cli import run as _ab_run
+            return _ab_run(args, argv)
         if args.cmd == "gui":
             from hornlab_search.gui.server import serve
             return serve(REPO, args.port, not args.no_browser,

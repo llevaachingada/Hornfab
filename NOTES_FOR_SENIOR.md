@@ -64,11 +64,7 @@ What happened: runs after the first crashed with "Warm BEAT Engine solver exited
 What I tried: killed all julia.exe between jobs and re-ran (results in TOOLCHAIN.md).
 What I need decided: (1) task 05 must make `solve/worker.py` release hosts reliably and test it by process list; contract 01 section 9 assumes shutdown works. (2) The "GPU / Julia hygiene" rules are now in AGENTS.md and CLAUDE.md. (3) Consider a `doctor` check that warns when more than one julia host is alive or VRAM baseline is above 1 GB.
 
-## 2026-10-12  task-06  RESOLVED HERE, please confirm: "-6 dB" is implemented as HALF PRESSURE (-6.0206 dB), not -6.0000 dB
-What I was doing: beamwidth_deg against contract tests 1 and 2 (cardioid reads 180.0, dipole reads 120.0, both to 0.05 deg).
-What happened: the orchestrator addendum suggested an epsilon of 1e-3 dB around a strict -6.0 dB threshold. That cannot work: (1+cos t)/2 is 20*log10(0.5) = -6.0206 dB at +-90 deg, which is 0.0206 dB below -6.0, i.e. 20x outside a 1e-3 dB epsilon. A strict -6.0 reads the cardioid 179.73 and the dipole 119.83 (both fail the 0.05 tolerance).
-What I did: polar._threshold_db maps the conventional labels to their exact amplitude ratios: drop_db=6.0 -> 20*log10(0.5) (half pressure), drop_db=3.0 -> 10*log10(0.5) (half power); any other value is taken literally. No tolerance was loosened, the result is continuous in the pattern (no snapping), and every contract case is exact on any grid. A near-threshold epsilon of ~0.025 dB with snapping was the alternative; I rejected it because it is discontinuous and grid dependent (the piston cases at a 2.5 deg grid would see up to 0.12 deg snap error).
-What I need decided: confirm 01_CONTRACTS section 10 "-6 dB" means p = 0.5 (it must, for its own cardioid/dipole numbers). Every later beamwidth in the project inherits this.
+> Rotated 2026-10-30 to [docs/history/NOTES_FOR_SENIOR_resolved.md](history/NOTES_FOR_SENIOR_resolved.md) - entry "## 2026-10-12  task-06  RESOLVED HERE, please confirm: "-6 dB" is implemented as HALF PRESSURE (-6.0206 dB), not -6.0000 dB".
 
 ## 2026-10-12  task-06  CONTRACT GAP: di_from_cuts formula contradicts tests 14 and 15
 What I was doing: contract tests 14 (target_di_db(360, 180) == 0.0) and 15 (di_from_cuts(180, 180) on an omni pattern agrees with the balloon DI, 0 dB, to 0.3).
@@ -675,3 +671,38 @@ What I need decided: nothing blocking — GPU-box owner should run
 `tools/run_staged_search.py --out runs/staged_ab_2026-10-31 --both` when free and paste
 COMPARE.md into the evidence doc.
 
+## 2026-11-04 throughput packet (branch ccr-80a29f93-dxnmdm): cross-owner files touched
+What happened: opt-in throughput work (profiling, mesh prefetch, frequency-batch knob, curvature meshing, bench
+tools). Files outside their usual owner, all additive and default-off: `hornlab_search/search/evaluate.py` (08;
+stage-timer hooks, `prefetch_depth`, `prefetch_candidate`), `search/cma.py` + `search/cma_me.py` (08; pipeline
+hooks, `run.json.pipeline_prefetch` only when enabled), new `search/pipeline.py` (08), `mesh/build.py` +
+`mesh/step_build.py` + new `mesh/prefetch.py` (04; one handoff lookup, `sizing_options`), `types.py` (03;
+`MeshSpec.curvature_npts`, hash input unchanged when 0), `config.py` (03; `search.pipeline_prefetch`,
+`mesh.curvature_npts`, both validated, default 0), `solve/beat.py` (05; `freq_batch_size`, `frequency_groups`),
+new `profiling.py`, `tools/bench/*` (legacy scripts: guarded host kill + opt-in fused/symmetry flags).
+What I need decided: (1) WP2 relies on the real mesher tolerating a non-main thread; confirm on the GPU box
+(RUNBOOK step B) before anyone turns it on for a campaign. (2) Whether `pipeline_prefetch` / `curvature_npts` /
+`HORNLAB_FREQ_BATCH_SIZE` should get GUI/brief plumbing after they pass their gates. (3) WP1 needs a fork branch
+(`docs/throughput/WP1_FUSED_IDENTITY_CACHE_PATCH.md`); its source lines are unverified.
+
+## 2026-11-06  ab-bl  Boundary Lab A/B check: cross-owner edits and open questions
+What I did: new package `hornlab_search/compare/` (A/B check of one design against Boundary Lab: handoff export, high-res reference
+solve, BL import, compare, report, `demo --fake`), tests `tests/test_compare_ab_*.py`, owner guide `docs/ab/BOUNDARY_LAB_AB.md`.
+Files outside my usual paths, additive and default-off: `hornlab_search/cli.py` (08/03; one `ab-bl` subparser built by
+`compare/cli.py::add_arguments` + one dispatch branch; no existing command changed), `docs/INDEX.md`, `docs/CODE_MAP.md`.
+What I need decided: (1) who owns `hornlab_search/compare/**` and `tests/test_compare_ab_*.py` (orchestrator table). (2) The default
+tolerances (`compare/analysis.py::Tolerances`) are starting points; confirm or replace after the first real agreement run.
+(3) Boundary Lab's `pyproject` at `15f9a89` pins BEAT Engine 0.7.0 while `docs/BOUNDARY_LAB_0.5_RESEARCH.md` recorded 0.6.0: the
+friend's actual BL/BEAT versions must be written into the first evidence document. (4) Nothing here was run against a real BL or
+a GPU; the generated `.blab.json` opening untouched in the BL GUI is inferred, not verified.
+## 2026-10-29  orchestration  CPU second solve lane: hardening pass, sign-off requested
+What I was doing: hardening/research review of the proposal to run a second `search` on `beat_cpu` beside the GPU lane, before any code or GPU work (owner instruction: no heavy testing).
+What happened (read-only): the physics seam is fine (`evaluate()` pure; `SolveSpec.backend` already in the cache hash; CPU/GPU hosts are distinct by Julia project), but the job-hygiene layer is machine-wide. Concrete findings:
+1. lane identity is cleanest by the worker host's `--dir` registry directory, not by parsing the key JSON;
+2. `--backend beat_cpu` on a `cuda_fused: true` config fails in `BeatBackend.__init__` because the CLI override runs after config validation;
+3. `beat_cpu` is unprovisioned right now (fingerprint drift), and this recurs after a pinned-solver change;
+4. campaign after-job hygiene plus `gpu-clean`/the night runner kill every project Julia, so a live CPU lane needs a marker;
+5. `beat_cpu` makes one multi-frequency call, so there is no mid-call cancel;
+6. a `julia_threads` knob must reach both `warm_up` and `SolveConfig` or a second host appears silently.
+What I tried: nothing changed; no GPU, no solve, no mesher, no pytest, no provisioning, no push. Findings written to `docs/research/CPU_SECOND_LANE_HARDENING_2026-10-28.md` and recorded in INDEX/CONTINUITY/NEXT_DEV_PRIORITIES/ISSUES.
+What I need decided: the 8 questions in the doc section 12 - target topology (recommended: shared `runs/`, separate cache/dataset; separate runs folders as fallback); whether "one GPU solve at a time" may be amended to permit one CUDA solve + one CPU lane; registry-dir lane identity + "unknown host => never kill"; `solve.julia_threads` kept out of the solve hash; the `.cpu.lane.lock` marker; the H2 `cuda_fused` fix; a separate dataset root for Phases 1-2; and the Phase-2 measurement gates (dual-lane smoke + per-lane evals/hour; checkpoint/benchmark runs stay exclusive).

@@ -44,6 +44,7 @@ from . import rundir
 from .cma import (MAX_CONSECUTIVE_SOLVE_FAILURES, SolverUnhealthyError, _detach, _prepare,
                   summarize, summarize_rows)
 from .evaluate import error_kind, evaluate, read_ndjson
+from .pipeline import CandidatePipeline
 
 log = logging.getLogger("hornlab_search.search.cma_me")
 
@@ -162,6 +163,8 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
         state["best_no"] = next((r.get("n") for r in rows0
                                  if r.get("design_hash") == b0.design_hash), None)
         rundir.write_best(run_dir, b0, mode, state["best_no"])
+
+    pipe = CandidatePipeline(cfg, mode, run_dir, ctx)      # inert unless pipeline_prefetch > 0
 
     def run_one(design) -> Evaluation:
         t0 = time.perf_counter()
@@ -284,6 +287,8 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
                      "non_cached": payload["stats"]["non_cached"],
                      "descriptor_h_meaning": _describe_descriptor(names[0]),
                      "descriptor_v_meaning": _describe_descriptor(names[1])}
+        if pipe.enabled:
+            upd["pipeline_prefetch"] = pipe.stats()
         rundir.update_run_json(run_dir, **upd)
         log.info("CMA-ME %s: %d evaluations (%d new, %d cached), archive %d/%d cells "
                  "(%.1f%% coverage), best J=%.4f, %d failures %s",
@@ -343,12 +348,24 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
                 break
             batch_evs = []
             cut = False
-            for x in X:
-                if exhausted():
-                    cut = True
-                    break
-                x = clip01(x)
-                batch_evs.append(run_one(space.denormalize(x)))
+            if pipe.enabled:
+                # WP2 (opt-in): identical order/run_one/tell; only the NEXT candidates' meshes are
+                # built on a background worker while this one solves.
+                designs = [space.denormalize(clip01(x)) for x in X]
+                pipe.begin_generation(designs)
+                for i, d in enumerate(designs):
+                    if exhausted():
+                        cut = True
+                        break
+                    pipe.before(i)
+                    batch_evs.append(run_one(d))
+            else:
+                for x in X:
+                    if exhausted():
+                        cut = True
+                        break
+                    x = clip01(x)
+                    batch_evs.append(run_one(space.denormalize(x)))
             if cut:                               # budget ran out mid-generation: do not tell
                 state["stop"] = "budget"
                 break
@@ -370,5 +387,6 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
         finish("aborted")
         raise
     finally:
+        pipe.close()
         _detach(backend)
     return state["best"]

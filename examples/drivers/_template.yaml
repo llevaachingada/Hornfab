@@ -1,10 +1,15 @@
-# Compression-driver file for the lumped driver model (hornlab_search/driver/compression.py,
+# Driver file for the lumped driver model (hornlab_search/driver/compression.py,
 # docs/DRIVER_MODEL.md). Copy to examples/drivers/<maker>_<model>.yaml and fill from the datasheet.
 # Every number comes from the manufacturer's datasheet (put the URL in `source`); never guess one.
 # Units are the datasheet's usual ones. Leave a key out (or null) when the datasheet does not give it.
 #
+# Two kinds: `compression` (default: a compression driver behind a phase plug) and `cone` (a paper-cone
+# driver in a sealed rear bowl, e.g. the cone_plughorn mid). A cone file MUST have front_chamber_cm3
+# at 0: that front volume is already in the BEM mesh, so the circuit adds no second front compliance.
+#
 # Used by: tools/loudness_report.py --driver examples/drivers/<file>.yaml   (no GPU, stored solves)
 
+kind: compression | cone             # how the driver is loaded: compression (default) or cone
 name: Maker Model                   # shown in the tables
 source: https://...                  # datasheet URL (required in practice: the R9 rule for numbers)
 use: hifi_tube | pa | both           # free text: what the brief family wants this driver for
@@ -16,12 +21,17 @@ exit_diameter_mm: null               # "throat diameter" / "exit": 25.4 (1"), 35
 # --- electrical ----------------------------------------------------------------------------------
 nominal_impedance_ohm: null          # 8 or 16; sets the voltage for the 1 W figures
 re_ohm: null                         # REQUIRED. DC resistance "Re"
-le_mh: null                          # voice-coil inductance "Le" (optional; small for compression drivers)
+le_mh: null                          # voice-coil inductance "Le" (plain model)
+l2_mh: null                          # semi-inductance LR-2 (Leach/Wright) with r2_ohm: BOTH or neither.
+r2_ohm: null                         #   FORM is standard; VALUES come from the impedance fit. `drive()`
+                                     #   reports inductance_model: plain | lr2. Both are in series with Re.
 
 # --- mechanical / motor --------------------------------------------------------------------------
-sd_cm2: null                         # REQUIRED. diaphragm (effective) area "Sd"
+sd_cm2: null                         # REQUIRED. diaphragm (effective) area "Sd" (cone face, projected)
 mmd_g: null                          # moving mass WITHOUT air load: "Mmd" / "moving mass" / "diaphragm mass".
 mms_g: null                          #   use mms_g only if the sheet says "Mms" (may include air load; flagged)
+air_load_g: null                     #   only WITH mms_g: published front free-air load, so m = mms_g - air_load_g
+                                     #   and the (Mms!) flag is cleared. Must be smaller than mms_g.
 bl_tm: null                          # force factor "BL" (or give qes and it is derived)
 fs_hz: null                          # resonance "Fs" as published (includes the driver's own rear chamber)
 qms: null                            # mechanical Q "Qms" (or give qts + qes, or rms_kg_s)
@@ -29,8 +39,22 @@ qes: null                            # electrical Q "Qes"
 qts: null                            # total Q "Qts"
 cms_mm_per_n: null                   # only if published instead of fs (then rear_chamber_cm3 is used too)
 rms_kg_s: null                       # mechanical resistance, only if published instead of qms
-rear_chamber_cm3: null               # only used together with cms_mm_per_n
-front_chamber_cm3: null              # compression chamber volume, rarely published; omit if unknown
+rear_chamber_cm3: null               # compression-driver rear chamber; only used with cms_mm_per_n
+front_chamber_cm3: null              # compression chamber volume, rarely published; omit if unknown.
+                                     #   MUST be 0 (or omitted) for kind: cone - it is in the BEM mesh.
+
+# --- sealed rear bowl (kind: cone; also usable for a compression driver) ---------------------------
+rear_box_l: null                     # NET air volume of the sealed bowl in LITRES (motor volume already
+                                     # subtracted, as the measurement/rear_chamber_l() supplies it). The
+                                     # lumped load is compliance-only: Cab = Vb/(rho c^2), no air mass.
+rear_box_q: null                     # optional box-loss Q (leak/stuffing). Series resistance at fs:
+                                     # Rr = 1/(2 pi fs Qb Cab). [inferred] engineering model, off by default.
+rear_air_mass_g: null                # DIAGNOSTIC upper bound only, default off (0): a folded-column mass
+                                     # rho Vb/Sd^2 in series with Cab. Not the physical sealed-box load.
+
+# --- cone break-up (paper cone; [inferred] until a laser/accelerometer profile exists) -------------
+f_breakup_hz: null                   # optional. Sd_eff(f) = Sd / (1 + (f/f_b)^n); off when omitted.
+breakup_exponent: null               # n above, > 0; defaults to 2.0 when omitted.
 
 # --- limits (for maximum SPL) --------------------------------------------------------------------
 power_aes_w: null                    # rated power (AES / continuous program: say which in notes)

@@ -45,12 +45,15 @@ bounds: {}
 mesh:
   epw: 4.2
   quadrants: '1'           # the meh STEP is a QUARTER open shell (C2)
-  dof_cap_screen: 9000
-  dof_cap_verify: 9000
-  dof_cap_final: 9000
+  dof_cap_screen: 12000   # measured fused safe value (FUSED_CUDA_2026-10-24 s6)
+  dof_cap_verify: 12000   # measured fused safe value (FUSED_CUDA_2026-10-24 s6)
+  dof_cap_final: 12000   # measured fused safe value (FUSED_CUDA_2026-10-24 s6)
   dof_per_triangle: 0.51   # TOOLCHAIN M1: measured ~0.51 quarter
 solve:
   backend: beat_cuda
+  # fused CUDA handles multi-channel since the meh-fused-cuda pin: ~2.1 GB and ~3 s/freq at 8k dofs, where
+  # the four-operator path spills past 8 GB into system RAM (docs/evidence/BENCH_AUDIT_2026-11-03.md)
+  cuda_fused: true
   distance_m: 2.0
   angle_count: 73
   balloon: true

@@ -40,7 +40,59 @@ stored 2 m to 1 m.
 
 **Use the dry moving mass (Mmd).** An `Mms` that already contains air load double-counts the radiation
 mass (Boundary Lab issue #78: 10-20 % low-frequency error); a driver file with only `mms_g` is flagged
-`(Mms!)` in the tables.
+`(Mms!)` in the tables. When the sheet publishes `Mms` *and* the front free-air load, give both: with
+`air_load_g` set, `m = mms_g - air_load_g`, the Mms flag is cleared, and the model mass is the dry Mmd.
+
+## Cone driver in a sealed rear bowl (2026-10-28)
+
+`kind` defaults to `"compression"`, so every earlier driver file gives the same numbers; `kind: "cone"`
+adds the paper-cone path used by the cone_plughorn mid driver (research:
+`docs/research/HANDOFF_CONE_DRIVER_MODEL_2026-10-28.md` s4). Nothing here is a new solver, a search term
+or a config key - it is the report-only lumped circuit.
+
+| Key | Unit | Meaning |
+|---|---|---|
+| `kind` | `"compression"` / `"cone"` | driver kind; default `"compression"`, anything else is an error |
+| `rear_box_l` | litres | sealed rear bowl's **net** air volume (driver motor volume already subtracted). `Cab = Vb/(rho c^2)`, a series compliance referred to the diaphragm by `Sd^2` |
+| `rear_box_q` | - | optional box-loss Q: series acoustic resistance at the driver's fs, `Rr = 1/(2 pi fs Qb Cab)`; [inferred] leak/stuffing model, off by default; must be > 0 |
+| `l2_mh` + `r2_ohm` | mH, ohm | semi-inductance LR-2 alternative to a plain `le_mh`: `Z_L = jw Le + (jw L2 R2)/(R2 + jw L2)`; both or neither (an error names the missing one). `drive()` reports `inductance_model` = `"plain"` / `"lr2"` |
+| `air_load_g` | g | front free-air load split out of a published `mms_g`; `m = mms_g - air_load_g`, no Mms flag; must be < `mms_g`; only with `mms_g` |
+| `rear_air_mass_g` | g | **diagnostic upper bound, default off (0)**: a folded-column mass `rho Vb/Sd^2` in series with `Cab`. This is not the physical sealed-box load (the lumped box is compliance-only; the mass would wrongly raise fs) |
+| `f_breakup_hz`, `breakup_exponent` (default 2.0) | Hz, - | [inferred] break-up placeholder: `Sd_eff(f) = Sd / (1 + (f/f_b)^n)`. Applies to the acoustic load (`Sd_eff^2 (Zf + Zr)`) **and** to the radiated volume velocity (`Ud = Sd_eff v`), so the circuit stays lossless. Off when `f_breakup_hz` is omitted |
+
+For `kind: "cone"` the front chamber (`front_chamber_cm3`) must be 0: the cone chamber and throat ring are
+already in the BEM mesh, so the circuit must not add a second front compliance (V1 = 0). The model uses
+the cone face's area projected on the axis as `Sd`; `z_throat` from the BEM is already averaged over the
+driven face.
+
+**Why the LR-2 block?** A 10-inch paper cone's voice-coil impedance is not a plain `Le` above ~1 kHz. The
+LR-2 form is standard (Leach/Wright); the values come from the impedance measurement's fit, never from a
+guess. **Why the break-up law?** A rigid-piston model is only defensible to ~1-1.5 kHz on a paper cone;
+`f_breakup_hz` is a labelled [inferred] placeholder until a laser/accelerometer profile exists - it is an
+assumption, not a datasheet value.
+
+**What this section does NOT cover: directivity.** The circuit only produces level, impedance and excursion.
+The pattern comes from the BEM solve, whose source is the cone face driven as a **rigid axial piston** at every
+frequency. That is defensible to the first cone break-up (roughly 0.7-1.5 kHz on a 10-inch paper cone) and not
+to 4 kHz: above break-up the real surface velocity changes sign across the cone, which must produce lobes and
+nulls a uniform piston cannot. `Sd_eff(f)` scales radiated area; it cannot change a polar. So every
+cone-band pattern/DI number above ~1 kHz is geometry-only until the source model lands - plan and owner
+decisions: `docs/CONE_SOURCE_MODEL_PLAN_2026-10-29.md` (NEXT_DEV_PRIORITIES P0b).
+
+**Cone output labels:** `tools/loudness_report.py` marks such a driver `(cone, bowl 6.10 L)`, keeps the
+`(Mms!)` flag but says the air-load split is missing, notes the break-up assumption when set, and adds an
+`sd_eff_m2` CSV column (the effective area it used). Checks: `kind` alone leaves the compression-path
+arrays identical (`np.array_equal`, `z_in` included); a sealed bowl raises the system resonance and lowers
+the excursion peak; box-loss plus compliance conserve energy to machine precision; LR-2 tends to 0 (w -> 0)
+and to `R2` at high frequency and matches a plain `le_mh` for very large `R2`; `mms_g + air_load_g` equals
+the equivalent `mmd_g`; every bad combination in the table above raises `ValueError`.
+
+**The bowl belongs to the horn, not to the driver.** Two horns need two different bowls, so
+`tools/loudness_report.py --rear-box-l <L>` overrides `rear_box_l` for every `kind: cone` driver
+(it is refused with a warning for compression drivers), and the four stand-in driver files in
+`examples/drivers/` deliberately carry no bowl volume. Pass the **net** volume (motor subtracted):
+the Evo 7SH CAD's gross 6.14 L and the Evo 2SH's 2.79 L are gross and need the measured motor
+volume taken off, per `docs/research/MEASUREMENT_CONE_DRIVER_2026-10-28.md` s2.
 
 ## How far to trust it
 

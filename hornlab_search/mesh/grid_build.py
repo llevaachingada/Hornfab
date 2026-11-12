@@ -194,6 +194,8 @@ def build_grid_mesh(grid, mesh, out_path, cfg, *, mode: str | None = None,
     )
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    # The mesher writes ``out_path`` directly; never let it write through a hardlink.
+    out_path.unlink(missing_ok=True)
     try:
         _path, info = build_mesh_with_info(geometry, density, output_path=out_path,
                                            scale_to_metres=True)

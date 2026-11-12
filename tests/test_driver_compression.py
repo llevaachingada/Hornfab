@@ -157,3 +157,156 @@ def test_refuses_a_response_without_impedance_or_area():
         drive(d, Response(**{**r.__dict__, "z_throat": None}))
     with pytest.raises(ValueError, match="area"):
         drive(d, Response(**{**r.__dict__, "meta": {"distance_m": 2.0}}))
+
+# --- cone driver in a sealed rear bowl (2026-10-28, handoff section 4) -----------------------------
+
+CONE = {"name": "synthetic cone", "kind": "cone", "re_ohm": 6.5, "sd_cm2": 350.0, "mmd_g": 18.0,
+        "fs_hz": 55.0, "qms": 4.0, "bl_tm": 12.0}
+
+
+def test_new_keys_do_not_change_the_compression_path():
+    """The same compression driver with and without ``kind: compression`` gives identical numbers."""
+    base = {**BASE, "le_mh": 0.08, "fs_hz": None, "cms_mm_per_n": 0.04,
+            "rear_chamber_cm3": 40.0, "front_chamber_cm3": 2.0}
+    f = np.geomspace(200, 8000, 31)
+    resp = fake_response(f, 0.7 - 0.3j, 0.01)
+    a = drive(CompressionDriver.from_dict(base), resp, volts_rms=2.83)
+    b = drive(CompressionDriver.from_dict({**base, "kind": "compression"}), resp, volts_rms=2.83)
+    assert set(a) == set(b)
+    for key, value in a.items():
+        if isinstance(value, np.ndarray):
+            assert np.array_equal(value, b[key]), key
+        else:
+            assert value == b[key], key
+    assert a["kind"] == "compression" and a["inductance_model"] == "plain" and not a["breakup_applied"]
+    assert a["rear_box_m3"] is None
+
+
+def test_rear_box_and_box_q_conserve_energy():
+    """A sealed compliance AND a box-loss resistance in the rear branch keep the circuit lossless."""
+    d = CompressionDriver.from_dict({**CONE, "rear_box_l": 6.1, "rear_box_q": 7.0})
+    assert d.rear_box_m3 == pytest.approx(6.1e-3)
+    f = np.geomspace(20, 500, 40)
+    resp = fake_response(f, 0.9 - 0.2j, 0.01)
+    out = drive(d, resp, volts_rms=2.83)
+    i = 2.83 / out["z_in_ohm"]
+    w = 2 * np.pi * f
+    v = out["excursion_mm_peak"] * 1e-3 * w / math.sqrt(2.0)
+    # rear_box_q is a series acoustic resistance at fs; its loss is the extra term in the balance
+    cab = 6.1e-3 / (RHO_AIR * C_AIR ** 2)
+    rr = 1.0 / (2 * math.pi * d.fs_hz * 7.0 * cab)
+    ud = out["sd_eff_m2"] * v
+    p_in = np.real(2.83 * np.conj(i))
+    losses = np.abs(i) ** 2 * d.re_ohm + d.rms_kg_s * v ** 2 + rr * np.abs(ud) ** 2
+    np.testing.assert_allclose(p_in - losses, out["acoustic_power_w"], rtol=1e-9, atol=1e-15)
+
+
+def test_sealed_rear_box_raises_resonance_and_lowers_excursion_peak():
+    f = np.geomspace(20, 600, 600)
+    # a light acoustic load, so the mechanical system resonance is the visible excursion peak
+    resp = fake_response(f, 1e-3 + 0j, 0.01)
+    free = drive(CompressionDriver.from_dict({**CONE, "bl_tm": 3.0}), resp, volts_rms=1.0)
+    boxed = drive(CompressionDriver.from_dict({**CONE, "bl_tm": 3.0, "rear_box_l": 6.1}), resp,
+                  volts_rms=1.0)
+
+    def peak(o):
+        k = int(np.argmax(o["excursion_mm_peak"]))
+        return f[k], o["excursion_mm_peak"][k]
+
+    f_free, x_free = peak(free)
+    f_box, x_box = peak(boxed)
+    assert f_box > f_free            # the bowl's compliance stiffens the suspension
+    assert x_box < x_free            # and the excursion peak is smaller
+
+
+def test_lr2_semi_inductance_limits_and_plain_equivalence():
+    low = {**BASE, "bl_tm": 1e-3}
+    plain = CompressionDriver.from_dict({**low, "le_mh": 0.0})
+    lr2 = CompressionDriver.from_dict({**low, "le_mh": 0.0, "l2_mh": 0.5, "r2_ohm": 3.0})
+    resp_lo = fake_response([1e-4, 1e-3], 1.0, 0.01)
+    np.testing.assert_allclose(drive(lr2, resp_lo)["z_in_ohm"], drive(plain, resp_lo)["z_in_ohm"],
+                               rtol=1e-6, atol=1e-9)          # w -> 0: the LR-2 block vanishes
+    resp_hi = fake_response([20000.0], 0.9 - 0.2j, 0.01)
+    z_hi = drive(lr2, resp_hi)["z_in_ohm"][0]
+    assert np.real(z_hi) == pytest.approx(6.0 + 3.0, abs=0.01)  # high f: the block -> R2
+    assert drive(lr2, resp_hi)["inductance_model"] == "lr2"
+
+    # a very large r2_ohm makes the LR-2 block a plain inductance of l2_mh
+    big = CompressionDriver.from_dict({**BASE, "le_mh": 0.0, "l2_mh": 0.5, "r2_ohm": 1e15})
+    flat = CompressionDriver.from_dict({**BASE, "le_mh": 0.5})
+    resp = fake_response(np.geomspace(300, 8000, 25), 0.9 - 0.2j, 0.01)
+    np.testing.assert_allclose(drive(big, resp)["z_in_ohm"], drive(flat, resp)["z_in_ohm"], rtol=1e-6)
+
+    # energy: the LR-2 block is a real resistance R2*(wL2)^2/(R2^2+(wL2)^2) at every frequency
+    d = CompressionDriver.from_dict({**BASE, "le_mh": 0.05, "l2_mh": 0.5, "r2_ohm": 3.0})
+    f = np.geomspace(300, 6000, 25)
+    out = drive(d, fake_response(f, 0.9 - 0.2j, 0.01), volts_rms=2.83)
+    i = 2.83 / out["z_in_ohm"]
+    w = 2 * np.pi * f
+    v = out["excursion_mm_peak"] * 1e-3 * w / math.sqrt(2.0)
+    wl2 = w * d.l2_h
+    r_block = d.r2_ohm * wl2 ** 2 / (d.r2_ohm ** 2 + wl2 ** 2)
+    p_in = np.real(2.83 * np.conj(i))
+    losses = np.abs(i) ** 2 * (d.re_ohm + r_block) + d.rms_kg_s * v ** 2
+    np.testing.assert_allclose(p_in - losses, out["acoustic_power_w"], rtol=1e-9, atol=1e-15)
+
+
+def test_air_load_g_splits_a_published_mms_like_mmd():
+    with_air = CompressionDriver.from_dict({"name": "a", "re_ohm": 6.0, "sd_cm2": 350.0, "mms_g": 20.0,
+                                            "air_load_g": 2.0, "fs_hz": 55.0, "qms": 4.0, "bl_tm": 12.0})
+    dry = CompressionDriver.from_dict({"name": "a", "re_ohm": 6.0, "sd_cm2": 350.0, "mmd_g": 18.0,
+                                       "fs_hz": 55.0, "qms": 4.0, "bl_tm": 12.0})
+    assert with_air.m_kg == dry.m_kg
+    assert with_air.mass_may_include_air_load is False
+    assert dry.mass_may_include_air_load is False
+    resp = fake_response([55.0, 500.0], 0.9 - 0.2j, 0.01)
+    for key, value in drive(with_air, resp).items():
+        other = drive(dry, resp)[key]
+        if isinstance(value, np.ndarray):
+            assert np.array_equal(value, other), key
+        else:
+            assert value == other, key
+
+
+def test_cone_refuses_a_front_chamber_bad_kinds_and_half_an_lr2():
+    with pytest.raises(ValueError, match="front_chamber_cm3"):
+        CompressionDriver.from_dict({**CONE, "front_chamber_cm3": 1.0})
+    with pytest.raises(ValueError, match="kind"):
+        CompressionDriver.from_dict({**BASE, "kind": "banana"})
+    with pytest.raises(ValueError, match="r2_ohm"):
+        CompressionDriver.from_dict({**BASE, "l2_mh": 0.5})
+    with pytest.raises(ValueError, match="l2_mh"):
+        CompressionDriver.from_dict({**BASE, "r2_ohm": 3.0})
+    with pytest.raises(ValueError, match="air_load_g"):
+        CompressionDriver.from_dict({**BASE, "air_load_g": 1.0})
+
+
+def test_breakup_area_law_lowers_the_level_and_keeps_energy():
+    f = np.array([10.0, 8000.0])
+    resp = fake_response(f, 0.9 - 0.2j, 0.01)
+    d0 = CompressionDriver.from_dict(CONE)
+    db = CompressionDriver.from_dict({**CONE, "f_breakup_hz": 1200.0})
+    o0, ob = drive(d0, resp, volts_rms=2.83), drive(db, resp, volts_rms=2.83)
+    assert not o0["breakup_applied"] and ob["breakup_applied"]
+    assert ob["spl_onaxis_db"][0] == pytest.approx(o0["spl_onaxis_db"][0], abs=0.01)  # f << f_b
+    assert ob["spl_onaxis_db"][1] < o0["spl_onaxis_db"][1] - 6.0                     # well above f_b
+    sd = d0.sd_m2
+    np.testing.assert_allclose(ob["sd_eff_m2"], sd / (1.0 + (f / 1200.0) ** 2.0), rtol=1e-12)
+    np.testing.assert_array_equal(o0["sd_eff_m2"], np.full(f.shape, sd))
+    # the area law scales the load and Ud together, so the circuit stays lossless
+    i = 2.83 / ob["z_in_ohm"]
+    w = 2 * np.pi * f
+    v = ob["excursion_mm_peak"] * 1e-3 * w / math.sqrt(2.0)
+    p_in = np.real(2.83 * np.conj(i))
+    losses = np.abs(i) ** 2 * db.re_ohm + db.rms_kg_s * v ** 2
+    np.testing.assert_allclose(p_in - losses, ob["acoustic_power_w"], rtol=1e-9, atol=1e-15)
+    # kind alone changes nothing: no f_breakup_hz -> the compression-path arithmetic
+    d_comp = CompressionDriver.from_dict({k: v for k, v in CONE.items() if k != "kind"})
+    for key, value in drive(d_comp, resp).items():
+        if key == "kind":
+            continue
+        other = o0[key]
+        if isinstance(value, np.ndarray):
+            assert np.array_equal(value, other), key
+        else:
+            assert value == other, key

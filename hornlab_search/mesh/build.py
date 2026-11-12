@@ -20,13 +20,16 @@ from __future__ import annotations
 import copy
 import json
 import logging
+import os
 import shutil
 import time
+import uuid
 from pathlib import Path
 
 import numpy as np
 
 from ..types import (Design, GeometryInvalidError, MeshResult, MeshSpec, MeshTooLargeError)
+from . import prefetch as _prefetch
 from . import sizing, topology
 from ..design import families
 
@@ -38,6 +41,7 @@ BBOX_MIN_M = 0.02
 BBOX_MAX_M = 5.0
 
 SOURCE_TAG = 2          # SD1D1001, hornlab_mesher.tags.PhysicalGroup.PRIMARY_SOURCE
+MID_PORT_TAG = 10       # mid_port_exit_left (OSSE mid_ports / MEH entry_mid)
 
 # Pre-mesh estimate: a coarse geometry resolve (cheap, no gmsh) gives the wall areas.
 _COARSE_RES_MM = 20.0
@@ -200,13 +204,44 @@ def _load_cached(d: Path, key: str) -> dict | None:
     return meta if meta.get("key") == key else None
 
 
+def _install(src: Path, dst: Path, *, link: bool) -> None:
+    """Install ``src`` at ``dst`` through a temp name in ``dst``'s directory + ``os.replace``.
+
+    A pre-existing ``dst`` (possibly itself a hardlink to the shared cache) is replaced
+    atomically and never written through. ``link=True`` hardlinks when the filesystem allows
+    it and falls back to a plain copy (different volume, no hardlink support, permissions).
+    """
+    tmp = dst.with_name(f".{dst.name}.{uuid.uuid4().hex[:8]}.tmp")
+    try:
+        if link:
+            try:
+                os.link(src, tmp)
+            except OSError:
+                shutil.copyfile(src, tmp)
+        else:
+            shutil.copyfile(src, tmp)
+        os.replace(tmp, dst)
+    except BaseException:
+        try:
+            tmp.unlink(missing_ok=True)
+        except OSError:
+            pass
+        raise
+
+
 def _copy_entry(src: Path, dst: Path) -> None:
-    """Copy, never symlink: symlinks on Windows need elevation (01_CONTRACTS section 14)."""
+    """Copy or hardlink, never symlink: symlinks on Windows need elevation
+    (01_CONTRACTS section 14).
+
+    ``mesh.msh`` is hardlinked (copy fallback), so a run's mesh shares the cache inode; every
+    writer into a run dir must therefore install through a temp name + ``os.replace``.
+    ``mesh_meta.json`` is a plain copy (provenance, never shared).
+    """
     dst.mkdir(parents=True, exist_ok=True)
     if src.resolve() == dst.resolve():
         return
-    shutil.copyfile(src / "mesh.msh", dst / "mesh.msh")
-    shutil.copyfile(_meta_path(src), _meta_path(dst))
+    _install(src / "mesh.msh", dst / "mesh.msh", link=True)
+    _install(_meta_path(src), _meta_path(dst), link=False)
 
 
 # ------------------------------------------------------------------ guards
@@ -275,6 +310,12 @@ def mesh_cache_key(design: Design, mesh: MeshSpec, cfg) -> str:
     return f"{base}-{mkey}" if mkey else base
 
 
+def prebuilt_key(design: Design, mesh: MeshSpec, cfg, out_dir, mode: str | None) -> tuple:
+    """Identity of a prefetched mesh (WP2): the mesh cache key plus the exact output directory and
+    mode, so a handoff can only ever land on the candidate/dir/mode it was built for."""
+    return (mesh_cache_key(design, mesh, cfg), str(Path(out_dir).resolve()), mode)
+
+
 def build_mesh(design: Design, mesh: MeshSpec, cfg, out_dir: Path, *, mode: str | None = None,
                cache_dir: Path | None = None) -> MeshResult:
     """Design + MeshSpec -> ``out_dir/mesh.msh`` (metres) + ``out_dir/mesh_meta.json``.
@@ -294,6 +335,12 @@ def build_mesh(design: Design, mesh: MeshSpec, cfg, out_dir: Path, *, mode: str 
     the twin mesh is written in metres and ``mesh_meta.json`` carries the ``cad`` provenance
     echo. Same guard classes; no formula-path call.
     """
+    # WP2 (opt-in prefetch): a mesh a background worker already built for exactly this candidate
+    # is handed back. The memo is empty unless `pipeline_prefetch` is on, so by default this is a
+    # dict miss and the code below runs exactly as before.
+    _pre = _prefetch.take(prebuilt_key(design, mesh, cfg, out_dir, mode))
+    if _pre is not None:
+        return _pre
     import hornlab_mesher as hm
     from hornlab_mesher.config_parser import ConfigError
     from hornlab_mesher.mesher import MesherError, TriangleBudgetExceeded
@@ -344,6 +391,8 @@ def build_mesh(design: Design, mesh: MeshSpec, cfg, out_dir: Path, *, mode: str 
                 f"epw={mesh.epw:g}, quadrants={mesh.quadrants!r}; no mesh was generated")
 
     out_dir.mkdir(parents=True, exist_ok=True)
+    # The mesher writes ``out_path`` directly, so it must not be a hardlink to a cache entry.
+    out_path.unlink(missing_ok=True)
     try:
         built = hm.build_from_config(mcfg, out_path)
     except TriangleBudgetExceeded as exc:
@@ -371,6 +420,11 @@ def build_mesh(design: Design, mesh: MeshSpec, cfg, out_dir: Path, *, mode: str 
             raise GeometryInvalidError(
                 f"mesh has no elements on physical tag {SOURCE_TAG} (SD1D1001, the source); "
                 f"tags present: {summary['tags']}")
+        if isinstance(design.params, dict) and design.params.get("mid_ports"):
+            if summary["tags"].get(MID_PORT_TAG, 0) <= 0:
+                raise GeometryInvalidError(
+                    f"mid_ports requested but mesh has no elements on tag {MID_PORT_TAG} "
+                    f"(mid_port_exit_left); tags present: {summary['tags']}")
         _check_dofs(summary["n_triangles"], summary["n_nodes_used"], mesh, cfg, mode)
         # Closed/manifold surface, no unwelded seams, reduced mesh inside its symmetry domain.
         topology.check_surface(xyz, tri, want)
@@ -394,6 +448,13 @@ def build_mesh(design: Design, mesh: MeshSpec, cfg, out_dir: Path, *, mode: str 
             "mesher": families.enclosure_section(mounting),
             "n_triangles": int(result.n_triangles),
             "n_dof": result.n_dof,
+        }
+    mid_ports_meta = (getattr(built, "metadata", None) or {}).get("midPorts")
+    if mid_ports_meta is not None:
+        # Echo mesher midPorts report + tag-10 triangle count into mesh_meta.json.
+        meta["mid_ports"] = {
+            **dict(mid_ports_meta),
+            "tag10_triangles": int(summary["tags"].get(MID_PORT_TAG, 0)),
         }
     _meta_path(out_dir).write_text(json.dumps(meta, indent=1, sort_keys=True), encoding="utf-8")
     if cache_dir is not None:

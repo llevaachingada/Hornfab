@@ -8,6 +8,7 @@ import copy
 import dataclasses
 import hashlib
 import json
+import os
 import time
 
 import numpy as np
@@ -279,17 +280,57 @@ def test_cache_hit_does_not_invoke_the_mesher(osse_cfg, osse_seed, tmp_path, mon
         build.build_mesh(osse_seed, spec(3500.0), big(osse_cfg), tmp_path)
 
 
-def test_shared_cache_copies_not_links(osse_cfg, osse_seed, tmp_path, monkeypatch):
+def test_shared_cache_hardlinks_mesh_but_copies_meta(osse_cfg, osse_seed, tmp_path, monkeypatch):
     import hornlab_mesher as hm
     cache = tmp_path / "cache"
     first = build.build_mesh(osse_seed, spec(3000.0), big(osse_cfg), tmp_path / "run1", cache_dir=cache)
     monkeypatch.setattr(hm, "build_from_config",
                         lambda *a, **k: (_ for _ in ()).throw(AssertionError("mesher invoked")))
     second = build.build_mesh(osse_seed, spec(3000.0), big(osse_cfg), tmp_path / "run2", cache_dir=cache)
+    p1 = tmp_path / "run1" / "mesh.msh"
     p2 = tmp_path / "run2" / "mesh.msh"
     assert p2.is_file() and not p2.is_symlink()
     assert second.path == str(p2) and second.n_triangles == first.n_triangles
-    assert p2.read_bytes() == (tmp_path / "run1" / "mesh.msh").read_bytes()
+    assert os.path.samefile(p2, p1)
+    assert os.stat(p2).st_nlink >= 2
+    assert p2.read_bytes() == p1.read_bytes()
+    m1 = tmp_path / "run1" / "mesh_meta.json"
+    m2 = tmp_path / "run2" / "mesh_meta.json"
+    assert not os.path.samefile(m2, m1)
+    assert m2.read_bytes() == m1.read_bytes()
+
+
+def test_copy_entry_replaces_an_existing_link_without_writing_through(tmp_path):
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "mesh.msh").write_bytes(b"new mesh bytes")
+    (src / "mesh_meta.json").write_text('{"key": "k"}', encoding="utf-8")
+    third = tmp_path / "third.msh"
+    third.write_bytes(b"third-party bytes")
+    dst = tmp_path / "dst"
+    dst.mkdir()
+    os.link(third, dst / "mesh.msh")
+    build._copy_entry(src, dst)
+    assert third.read_bytes() == b"third-party bytes"
+    assert (dst / "mesh.msh").read_bytes() == b"new mesh bytes"
+    assert os.path.samefile(dst / "mesh.msh", src / "mesh.msh")
+    assert (dst / "mesh_meta.json").read_bytes() == (src / "mesh_meta.json").read_bytes()
+
+
+def test_rebuild_into_the_same_design_dir_never_writes_through_the_cache(osse_cfg, osse_seed,
+                                                                        tmp_path):
+    cache = tmp_path / "cache"
+    out = tmp_path / "run"
+    first = build.build_mesh(osse_seed, spec(3000.0), big(osse_cfg), out, cache_dir=cache)
+    key1 = build.mesh_cache_key(osse_seed, spec(3000.0), big(osse_cfg))
+    cache_msh = cache / key1 / "mesh.msh"
+    before = cache_msh.read_bytes()
+    assert os.path.samefile(out / "mesh.msh", cache_msh)
+    second = build.build_mesh(osse_seed, spec(3500.0), big(osse_cfg), out, cache_dir=cache)
+    assert second.n_triangles != first.n_triangles
+    assert cache_msh.read_bytes() == before
+    assert not os.path.samefile(out / "mesh.msh", cache_msh)
+    assert (out / "mesh.msh").read_bytes() != before
 
 
 def test_cache_hit_still_honours_the_dof_cap(osse_cfg, osse_seed, tmp_path):

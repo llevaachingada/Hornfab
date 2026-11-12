@@ -1,4 +1,8 @@
-"""40 existing designs, one identical solve each, CUDA vs CPU, per-design logging.
+"""LEGACY BENCH (see docs/throughput/RUNBOOK.md): runs the historical NON-production path unless
+HORNLAB_BENCH_FUSED=1 / HORNLAB_BENCH_SYMMETRY=yz+xz are set; use tools/bench/throughput_matrix.py for
+fused-production numbers. Julia hosts are no longer killed by image name (tools/bench/_hosts.py).
+
+40 existing designs, one identical solve each, CUDA vs CPU, per-design logging.
 
 Design set: 40 STORED designs (no CAD, no re-meshing), chosen deterministically:
   - 30 single-source designs stratified across the dof range (tags {1,2} -> drive tag 2)
@@ -17,7 +21,6 @@ import glob
 import json
 import random
 import subprocess
-import threading
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -27,6 +30,8 @@ import numpy as np
 import hornlab_beat_bem as beat
 from hornlab_beat_bem import ObservationConfig, SolveConfig
 from hornlab_beat_bem.sweep import solve_frequencies
+from _bench_common import GpuMemPeak, kill_hosts  # tree-kill hosts; sees WDDM shared-memory spill
+from _hosts import bench_solve_kwargs  # noqa: E402  (PR #23 opt-in production flags)
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "runs" / f"bench_40designs_{datetime.now(timezone.utc):%Y%m%dT%H%M%SZ}"
@@ -53,30 +58,6 @@ def vram_mib() -> int | None:
         return int("".join(c for c in out.stdout if c.isdigit()))
     except ValueError:
         return None
-
-
-class Peak:
-    def __init__(self, period=2.0):
-        self.peak, self._stop, self._period = (vram_mib() or 0), threading.Event(), period
-
-    def __enter__(self):
-        def loop():
-            while not self._stop.is_set():
-                v = vram_mib()
-                if v is not None:
-                    self.peak = max(self.peak, v)
-                self._stop.wait(self._period)
-        self._t = threading.Thread(target=loop, daemon=True)
-        self._t.start()
-        return self
-
-    def __exit__(self, *a):
-        self._stop.set()
-
-
-def kill_hosts() -> None:
-    subprocess.run(["taskkill", "/F", "/IM", "julia.exe"], capture_output=True)
-    time.sleep(2)
 
 
 def candidate_designs(limit: int) -> list[dict]:
@@ -119,16 +100,17 @@ def observation() -> ObservationConfig:
 
 def run_one(design: dict, backend: str) -> dict:
     tags = [2, 10] if 10 in design["tags"] else [2]
-    cfg = SolveConfig(velocity_sources={t: 1.0 for t in tags}, impedance_matrix=True,
+    cfg = SolveConfig(**bench_solve_kwargs(), velocity_sources={t: 1.0 for t in tags}, impedance_matrix=True,
                       beat_backend=backend, observation=observation())
     t0 = time.perf_counter()
     try:
-        with Peak() as peak:
+        with GpuMemPeak() as peak:
             res = solve_frequencies(design["mesh"], [FREQ], cfg)
         dt = time.perf_counter() - t0
         spl0 = float(np.asarray(res.spl_db).reshape(-1)[0])
         return {"ok": True, "seconds": round(dt, 3), "spl0": spl0,
                 "peak_vram_mib": peak.peak if backend == "cuda" else None,
+                **(peak.record() if backend == "cuda" else {}),
                 "channel_tags": list(res.channel_tags)}
     except Exception as exc:  # noqa: BLE001
         return {"ok": False, "seconds": round(time.perf_counter() - t0, 3),

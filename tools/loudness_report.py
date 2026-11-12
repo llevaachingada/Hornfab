@@ -10,6 +10,9 @@ file here (examples/drivers/*.yaml) at zero solve cost. Two tables:
   sensitivity band), level, excursion and efficiency at f0, maximum SPL at f0 (rated power or xmax),
   and the throat/exit mismatch to check before printing.
 
+The sealed rear bowl of a ``kind: cone`` driver belongs to the HORN, not to the driver file, so
+``--rear-box-l <litres>`` overrides it for every cone driver (the NET volume: motor subtracted).
+
 Model and caveats: hornlab_search/metrics/loudness.py, hornlab_search/driver/compression.py,
 docs/DRIVER_MODEL.md.
 
@@ -27,6 +30,7 @@ import csv
 import json
 import math
 import sys
+from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
@@ -107,12 +111,27 @@ def main(argv=None) -> int:
     ap.add_argument("--cells-csv", help="a campaign cells_summary.csv (run_dir relative to runs/)")
     ap.add_argument("--top", type=int, default=1, help="designs per run, best J first (default 1)")
     ap.add_argument("--driver", action="append", default=[], help="driver YAML (repeatable)")
+    ap.add_argument("--rear-box-l", type=float,
+                    help="sealed rear volume in litres for kind: cone drivers (NET, motor subtracted); "
+                         "the bowl belongs to the horn, so this overrides the driver file")
     ap.add_argument("--volts", type=float, default=2.83, help="drive voltage rms (default 2.83)")
     ap.add_argument("--csv", help="write the per-frequency long table here")
     ap.add_argument("--md", help="write the markdown tables here (also printed)")
     args = ap.parse_args(argv)
 
     drivers = [CompressionDriver.from_yaml(p) for p in args.driver]
+    if args.rear_box_l is not None:
+        if args.rear_box_l <= 0.0:
+            ap.error("--rear-box-l must be > 0 L")
+        overridden = []
+        for d in drivers:
+            if d.kind == "cone":
+                overridden.append(replace(d, rear_box_m3=args.rear_box_l * 1e-3))
+            else:
+                print(f"--rear-box-l ignored for {d.name}: only kind: cone has a sealed rear bowl",
+                      file=sys.stderr)
+                overridden.append(d)
+        drivers = overridden
     horn_lines = ["| horn | design | J | f0 Hz | throat W x H mm (brief exit; round?) | output gap at f0 dB | loaded from Hz | "
                   "on-axis dB/(m/s) @1 m: f0 / 1 kHz / 2 kHz / 4 kHz |", "|---|---|---|---|---|---|---|---|"]
     drv_lines = ["| horn | design | driver | sens band Hz | sens 2.83 V dB | sens 1 W dB | SPL @f0 dB | "
@@ -159,8 +178,16 @@ def main(argv=None) -> int:
                 lim = mx["limit"][i0] or "-"
                 ok_d, why_d = fits_exit(shape, d.exit_diameter_mm)
                 fits = "?" if ok_d is None else ("yes" if ok_d else f"NO: {why_d}")
+                tag = d.name
+                if d.kind == "cone":
+                    tag += (f" (cone, bowl {d.rear_box_m3 * 1e3:.2f} L)" if d.rear_box_m3
+                            else " (cone, no bowl)")
+                if d.mass_may_include_air_load:
+                    tag += " (Mms! air-load split missing)"
+                if out["breakup_applied"]:
+                    tag += f" (breakup [inferred] >{d.f_breakup_hz:.0f} Hz)"
                 drv_lines.append(
-                    f"| {label} | {r['design_hash']} | {d.name}{' (Mms!)' if d.mass_may_include_air_load else ''} | "
+                    f"| {label} | {r['design_hash']} | {tag} | "
                     f"{lo:.0f}-{hi:.0f} | {_fmt(band_mean_db(f, out['spl_onaxis_db'], lo, hi))} | "
                     f"{_fmt(band_mean_db(f, w1['spl_onaxis_db'], lo, hi))} | "
                     f"{_fmt(_interp_db(f, out['spl_onaxis_db'], at))} | "
@@ -174,6 +201,7 @@ def main(argv=None) -> int:
                                       "excursion_mm_peak": out["excursion_mm_peak"][i],
                                       "z_in_mag_ohm": abs(out["z_in_ohm"][i]),
                                       "efficiency_pct": out["efficiency_pct"][i],
+                                      "sd_eff_m2": out["sd_eff_m2"][i],
                                       "max_spl_db": mx["max_spl_db"][i], "max_spl_limit": mx["limit"][i]})
     text = "## Horn only (same driver: compare by difference)\n\n" + "\n".join(horn_lines) + "\n"
     if drivers:

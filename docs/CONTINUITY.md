@@ -1,6 +1,204 @@
 # CONTINUITY
 
+
+## 2026-11-12 - INTEGRATION: COLLIN'S PR #22, #19, #23, THE CUDA FIX AND THE HARDENED PLAN MERGED; OBJECTIVE v5 COLLISION FIXED
+
+- **Owner directive:** merge the collaborator's work and everything outstanding into one tested main, pause new MEH
+  work, then scoring truth, speed and the GUI. Plan: `docs/SENIOR_PLAN_2026-11-12.md` (P14).
+- **Merged into `integ/2026-11-12`** (merge commits, authorship kept): PR #19, `fix/cuda-fused-meh-bench-audit`
+  (beat-bem `0850ef3`, fork branch pushed), **PR #22 (Collin: Solana/SAWMOD, `mid_ports`, objective v6, Design
+  cloud; mesher pin `jamescollinharky/hornlab-waveguide-mesher@55da4f4`)**, PR #23 (throughput packet, BL A/B),
+  `feat/hardened-plan-2026-10-29` (13 commits that were never PR'd).
+- **Collision found and fixed:** main's v5 = MEH; the hardened branch's loading/flat_cv/8 kHz/signed-V objective was
+  also "5". It is now **v7** (`objective/scalar_v7.py`); its round-throat refusal applies to v7 only (was `>= 5`).
+  Nine hardened briefs say `version: 7`. `tools/data/renumber_objective_v5_to_v7.py --apply` relabelled **1,371
+  dataset rows** (shards 45-47) and **26 run dirs** (2026-10-29); MEH's 126 v5 rows untouched; backup
+  `runs/_backup_renumber_v5_v7/`. The public HF dataset still carries the old labels (plan WP-E4).
+- **Pins installed in `.venv`:** mesher `55da4f4` (Collin's fork), beat-bem `0850ef3`.
+- **Tests [measured]:** offline suite 2,474 collected, 2,472 passed; the 2 failures were stale version-tuple asserts,
+  fixed and rerun green (`runs/integ_2026-11-12/offline2.{log,xml}`); new `tests/test_tools_renumber_objective.py`.
+- **Also merged:** `swarm/B` (`verify --designs/--designs-file`) and `swarm/C` (atlas v2 configs). Offline suite at the tip
+  **2,481 / 2,481 passed** (`runs/integ_2026-11-12/offline3.xml`).
+- **Collaborator audit:** every Collin commit is in (PR #17's 72 symbols present after its squash; PR #22 merged). The
+  data path is one-way (his RunPod runs never came back; no dataset MANIFEST; no mesher-config export): handoff lane L5.
+- **Night handoff for an OpenCode orchestrator:** `docs/OPENCODE_HANDOFF_2026-11-12.md` - GPU night, CPU second lane
+  integrated now (decisions encoded), lanes L1-L5, hourly check-ins with GPU<->CPU failover.
+- **Found for the plan:** the GUI brief editor offers objective versions 1-3 only; three loading definitions (v4, v6,
+  v7) need reconciling; CONTINUITY is no longer newest-first after the merges.
+
+## 2026-11-03 (01:31Z) - BENCHMARK: CPU BEATS CUDA AT THE MEH MESH SIZE; 16 kHz RUNS ON CPU
+
+- New `tools/bench/cpu_vs_cuda_meh.py` (15-minute budget, timestamped log + JSON). Measured on the owner's box,
+  pin unchanged, 372 s total: `docs/evidence/BENCH_CPU_VS_CUDA_2026-11-03.md`, raw log in
+  `runs/bench_cpu_cuda_20261103T013105Z/`.
+- **A. CPU does multi-tag solves** (2-tag tetra, 1 kHz, 2.34 s). The MEH path is not CUDA-only.
+- **B. Production T2 mesh (8,044 dofs, 2 tags), warm protocol (warm-up call, then the same 2-frequency call twice):**
+  CUDA **37.2 s/frequency** (repeats 71.6 / 74.5 s for two frequencies, peak VRAM 7,853 MiB) vs CPU
+  **5.86 s/frequency** (repeats 11.6 / 11.7 s). **CPU is 6.4x faster**; max |dSPL| 5.03e-04 dB. This is the same
+  documented CUDA cliff: fast at ~6k dofs (the 12-frequency screen measured 3.6 s/frequency at 5,872 dofs), then
+  collapse by ~8k.
+- **C. 16 kHz on CPU.** The earlier 16 kHz failures were the application's dof cap (8,900), not the mesh or the
+  card. With the cap raised for the diagnostic build: 49,757 triangles / **25,171 dofs**, built in 5.0 s, CPU
+  solves 1 kHz in **100.7 s**. CUDA static storage for that mesh is **46.9 GiB** (audit formula 24.N.E + 32.N^2),
+  so the 8 GB card cannot hold it. Wall caveat stands: at epw 5.4 the driven patches resolve to ~21.8 kHz but the
+  rigid walls only to ~10.3 kHz.
+- **Implication:** for the MEH's dof regime the CPU backend is the faster engine and needs no VRAM. The
+  rent-a-GPU-first conclusion in the hardware audit should be revisited for screens specifically; a CPU screen may
+  already be the cheap path, with the GPU reserved for what it actually wins.
+
+
+## 2026-11-03 (02:00Z) - 40-DESIGN CUDA-vs-CPU SWEEP: NO SINGLE WINNER, CROSSOVER AT BOTH ENDS
+
+- New `tools/bench/cuda_cpu_40designs.py`: **40 stored designs, no CAD/re-meshing** (30 single-source stratified
+  across the dof range + 10 multi-entry with tag 10), one identical 1 kHz solve each per backend, hosts cleared
+  between arms. Ran 358.6 s. Evidence: `docs/evidence/BENCH_40_DESIGNS_2026-11-03.md`, rows in
+  `runs/bench_40designs_20261103T015652Z/`.
+- **Result [measured]:** CUDA cold first call 26.5 s vs CPU 2.5 s; warm means 3.54 vs 4.18 s; sums over 40 designs
+  164.4 s vs 165.5 s; median CPU/CUDA **2.23x**; CPU won **6/40**; SPL parity max **3.6e-05 dB**; CUDA peak VRAM
+  7,841 MiB.
+- **The crossover is a shape, not a point.** CPU faster below 1k dofs (0.17-0.22 s vs 0.35-0.72 s) and at
+  8,472/8,530 dofs (18.1/18.9 s vs **41.6/53.6 s**); CUDA faster by 1.5-4x from 1k to ~7k dofs. The CUDA cliff is
+  located sharply between 6,929 dofs (5.81 s) and 8,472 dofs (41.63 s) - 7x for +22 % dofs - while CPU scales
+  smoothly.
+- **Implication for screens:** stay on CUDA at 1-7k dofs, move to CPU above ~7k. Physics is backend-independent to
+  3.6e-05 dB, so the choice is purely throughput. Caveat: one frequency, one design per dof value, and CPU cost is
+  mesh-dependent.
+
+
+## 2026-11-03 (03:05Z) - FULL-RANGE + THREAD BENCHMARKS: 4x CUDA ON THE SCREEN GRID, NO THREAD GAIN
+
+- **A. Contracted band (41 points, 8,044 dofs, 2 tags)** [measured, `tools/bench/full_range_cuda_cpu.py`]: CUDA
+  completed **41/41** at **38.46 s/frequency, 1,577 s total, 7,924 MiB peak** - it does not crash, it is just slow;
+  CPU reached 16 frequencies at 18.18 s/frequency and was stopped by the operator (cost, not failure). Parity over
+  120-675 Hz: max |dSPL| 2.96e-04 dB, median CPU/CUDA 0.47.
+- **B. The grid we actually screen (12 points, 5,872-dof winner mesh, 2 tags)** [measured]: CUDA **25.7 s** for the
+  whole sweep (2.05-2.52 s/frequency, 7,796 MiB peak) vs CPU **103.0 s** with the app's one-call-per-grid policy
+  (8.59 s/frequency effective) - **CUDA ~4.0x faster**; parity 4.19e-05 dB. The per-frequency-call CPU arm (111.7 s)
+  is not the app's policy and is recorded only as a control.
+- **C. Julia threads do not help CUDA** [measured, `tools/bench/cuda_threads.py`]: 1 / 8 / 24 threads on the 8,044-dof
+  mesh gave warm 42.92 / 48.98 / 44.88 s - speedups 1.00 / **0.88** / **0.96**, i.e. threads make it slightly slower.
+  SPL bit-identical. The CUDA path is GPU-bound; `julia_threads` is not a lever. Concurrent solves are also impossible
+  on this card (one solve already peaks at 7,924 of 8,188 MiB).
+- Tool fix recorded: mesh paths handed to the solver must be absolute (the Julia worker opens them from its own cwd);
+  the harness now resolves them.
+- Evidence: `docs/evidence/BENCH_FULLRANGE_THREADS_2026-11-03.md`.
+
+
+## 2026-11-03 (03:40Z) - MEH SEARCHABLE TYPOLOGIES REGISTERED IN THE CATALOG (GUI VISIBILITY)
+
+- `examples/catalog.yaml` gains a new **`meh`** group with the two SEARCHABLE rows:
+  `meh_t2a_search` (T2-A, HF1440 + 2 x 6NDL38) and `meh_t1_search` (T1, HF108 + 4 x 4NDF34). The GUI's Typologies
+  page reads this file, so the MEH family is now browsable instead of hidden in a folder.
+- **The three CAD-authored seeds are deliberately NOT catalogued** (`meh_t2a`, `meh_t2b`, `meh_t1`). The catalog's
+  `native` domain requires native knobs, and `multicell_3x3` is its single documented CAD-only exception; adding three
+  more CAD-only entries broke `test_every_native_config_seed_and_bound_key_resolves` (expected 10 native configs, got
+  13) and `test_all_native_typologies_are_documented_and_non_empty_except_multicell`. Rather than relax those
+  invariants for cosmetic listing, the seeds stay documented in `examples/typologies/meh_2026-10-30/` and
+  `docs/meh/MEH_QUICKSTART.md`, and the catalog comment records why.
+- Regenerated the three derived artifacts as the byte-tests require
+  (`tools/gen_param_catalog.py --write`): `gui/static/param-catalog.v1.json`, `docs/reference/PARAMETERS.md`,
+  `docs/reference/TYPOLOGIES.md`.
+- Focused gate green: `tests/test_param_catalog.py`, `tests/test_design_meh_generator.py`,
+  `tests/test_design_generators_lecleach.py`, `tests/test_design_generators_grid_half.py`.
+
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
+## 2026-11-03 - CPU-VS-CUDA AUDIT: "CPU 6.4x FASTER" WAS A VRAM SPILL; MULTI-CHANNEL FUSED CUDA FOR THE MEH
+
+- **Finding [measured]:** PR #19's CUDA arm was the four-operator path (fused refused >1 channel), which at 8,044
+  dofs needs ~14 GB and pages ~6.9 GB into WDDM shared system memory (per-process `Shared Usage` counter) -
+  38.8-43.8 s/freq. `nvidia-smi` cannot see that. The "fresh host" resets were `taskkill /IM julia.exe`, a no-op
+  for the worker_host tree. The 40-design bench had CUDA faster on 34/40 (median 2.2x). Full write-up and the
+  withdrawn PR #19 conclusion: `docs/evidence/BENCH_AUDIT_2026-11-03.md`.
+- **Fork:** beat-bem `hornlab-search/meh-fused-cuda` @ `0850ef3` (on 1efdc6f): fused CUDA accepts multi-channel -
+  LHS once, `assemble_burton_miller_rhs_cuda` per extra channel, one LU. Opt-in flag unchanged; single channel
+  untouched; VENDORING.md entry. Julia MEH testset CUDA **16/16** (new fused-vs-four-operator per-channel check),
+  CPU 7/7. **Pin bumped to `0850ef3`** (pyproject, TOOLCHAIN) - the fork branch must be pushed before this lands.
+- **Measured on the T2 mesh:** fused 2-channel **2.66 s/freq, 2.1 GB, 80 MiB shared**; CPU 5.5-6.0 (15.4 right
+  after a spill); four-operator 38.8. Channel SPL fused-vs-CPU 4.2e-4 dB max, impedance matrix 3.4e-6 rel.
+- **Configs:** all five `examples/typologies/meh_2026-10-30/*.yaml` set `solve.cuda_fused: true` and dof caps
+  12,000 (the measured fused safe value). Config hashes change for MEH runs (intended: new solve path).
+- **Tooling:** `tools/bench/_bench_common.py` (tree-kill host reset, `GpuMemPeak` with shared-memory spill
+  flag); the four bench scripts use it; `cpu_vs_cuda_meh.py --cuda-fused`. CLAUDE.md GPU rule 1 no longer says
+  `taskkill /IM julia.exe`; new rule 8 (spill is invisible to nvidia-smi; Prefer No Sysmem Fallback).
+- `tests/test_end_to_end_meh.py::test_real_meh_end_to_end_gpu` now passes `cuda_fused` from the config, like
+  cli/cma (it hand-built the backend and the fused-path proof correctly refused). Real-GPU run green.
+- **Verification [measured]:** full local suite (GPU-marked tests included) **1,850 passed, 0 failed**, exit 0.
+- **Owner actions (system settings, not done by an agent):** NVIDIA Control Panel `julia.exe` -> CUDA Sysmem
+  Fallback Policy -> Prefer No Sysmem Fallback; move Chrome/Claude/Terminal/rbassist to the iGPU for solve sessions.
+## 2026-11-06 - BOUNDARY LAB A/B CHECK: HANDOFF EXPORT, HORNFAB REFERENCE SOLVE, BL IMPORT, COMPARE + REPORT (branch `ccr-80a29f93-dxnmdm`)
+
+- **Status:** new, default-off, additive: `hornlab-search ab-bl export | solve | import | compare | demo --fake`
+  (`hornlab_search/compare/`, owner guide `docs/ab/BOUNDARY_LAB_AB.md`). No solver, hash, cache key, record format or default
+  changed. Offline only: the build container has no GPU, no Julia, no mesher, no Boundary Lab. **Nothing was run against a real
+  Boundary Lab or a real solve.** Owner runs the GPU/friend steps (guide section 3, agent block section 6).
+- **What it does:** `export` writes a self-contained handoff folder for one design (run best / rank / hash / config seed): the exact
+  Hornfab mesh mirrored to a FULL mesh in metres (`SD1G0` tag 1 rigid, `SD1D1001` tag 2 driven) plus the reduced mesh, a ready
+  `.blab.json` (schema 10, symmetry off) and a symmetric alternative (BL `xy`, derived from `sizing.SYMMETRY_PLANE` only), a
+  headless request overlay with the exact frequency list (default 1/12 octave from 100 Hz, top capped at what the mesh resolves),
+  `handoff.json` (mesh sha256, driven area, observation set-up, conventions) and `FOR_YOUR_FRIEND.md`. `solve` runs the high-res
+  reference (existing `solve_spec` + backend; only the frequency list, angle count and balloon size replaced) on the full handoff
+  mesh or, with `--symmetric`, on the reduced mesh; GPU lock, VRAM baseline, hosts cleared before and verified gone after.
+  `import` reads Boundary Lab GUI text exports, the balloon folder, a headless run folder and generic CSV. `compare` aligns grids
+  (copies only), derives on-axis / off-axis family / H and V maps / -6 dB beamwidth / DI (balloon) / balloon difference / phase /
+  impedance, per-band max / RMS / median, PASS / WARN / FAIL against tolerances (starting points, not standards; override with
+  JSON), a convention checker (6.02 dB, 3.01 dB, 12.04 dB, 60 dB, +-20 dB/decade drive-basis slope, time convention, polarity,
+  delay, radius, mirrored angles, H/V swap, frequency-axis scale), and writes `report.html` (charts embedded; matplotlib PNG
+  when installed, otherwise built-in SVG / PNG), `summary.json`, `verdict.txt`.
+- **Boundary Lab formats: verified vs inferred** (static read of `JWSound/boundary-lab` `15f9a89`, 2026-11-02; details in the
+  guide section 1). Verified in source: schema-10 project keys, preference names, frequency grid formula, polar arc geometry,
+  Fibonacci balloon count rule, polar / on-axis / balloon export formats, headless run layout and quantity ids, phasor
+  `exp(+i w t)`. **Found:** polar exports are normalized to the on-axis sample, balloon and polar exports are clipped to the SPL
+  Min/Max preference, and **Normalized Channel Correction (default ON) flattens each channel on axis before export** (the project
+  switches it off; the friend must confirm). BL `pyproject` now pins BEAT Engine 0.7.0 (our 2026-10-21 notes said 0.6.0).
+  Inferred, unrun: that the GUI opens the generated project untouched, an impedance dock text export, RMS vs peak (3.01 dB).
+- **Physics note that shapes the plan:** Hornfab drives unit ACCELERATION, BL 1 m/s VELOCITY: `+20 log10(2 pi f)` dB and a
+  conjugate, done once in `compare/hornfab_side.py` and cross-checked against `solve/phasor.py` in tests. **The 8 GB card cannot
+  solve a 20 kHz mesh** (`TOOLCHAIN.md` ceilings ~5.5k full / ~8.9k quarter dofs), so "full band" means "up to what the mesh
+  resolves"; the export prints that limit and `solve --dry-run` the cost.
+- **Tests:** `tests/test_compare_ab_{model,import,analysis,conventions,report,export,cli}.py` (synthetic data for both sides in the
+  real file formats, injected-fault detection, handoff structure, reference solve and `solve` command with a fake backend).
+  Full offline suite in the build container: **5 failed, 1977 passed, 245 skipped** (`python -m pytest -q`); the 5 failures are the
+  known `test_report_html` / `test_search_cli` ones that need the missing `hornlab_plots` package (identical before this change);
+  the 7 new files add 67 passing tests plus 1 skip (the matplotlib chart test is skipped when matplotlib is absent; it passes when
+  matplotlib is on the path).
+- **Cross-owner files touched** (also in `NOTES_FOR_SENIOR.md`): `hornlab_search/cli.py` (08; one `ab-bl` subparser + dispatch),
+  new package `hornlab_search/compare/` (unassigned, orchestrator to assign), `docs/INDEX.md`, `docs/CODE_MAP.md`.
+- **Owner next:** guide section 3 (`demo --fake`, `export`, `solve --dry-run`, `solve --symmetric`, send `bl_handoff`, drop results,
+  `compare`). The friend's decisions are listed in the guide section 4.
+
+## 2026-11-04 - THROUGHPUT PACKET: OPT-IN PROFILING, PREFETCH, BATCH KNOB, CURVATURE MESHING, BENCH TOOLS (branch `ccr-80a29f93-dxnmdm`)
+
+- **Status:** all new behaviour is OPT-IN; defaults, numbers, frequencies, cache keys / hashes of default configs and
+  record formats are unchanged. Nothing GPU-side was run (the build container has no GPU, no Julia, no solver fork, no
+  mesher). Offline suite: new tests pass; the 5 `test_report_html` / `test_search_cli` report failures in that container
+  are the missing `hornlab_plots` package (they failed identically before any change). Owner runs the GPU steps:
+  `docs/throughput/RUNBOOK.md`.
+- **WP0:** `hornlab_search/profiling.py` stage timer (`HORNLAB_STAGE_TIMING=1` -> `designs/<hash>/stage_timing.ndjson`,
+  wired in `search/evaluate.py` around mesh / solve / metrics / MEH inner optimize / score / cache store / persist; records
+  the solver's backend, `assembly_paths`, VRAM from the response). `tools/bench/throughput_matrix.py` (production
+  `solve_spec` + `get_backend`, 12/25/36/41 sets, batch arms, cold + warm reps, nvidia-smi poller thread, CSV/JSON, env
+  info, parity). Legacy bench scripts: `taskkill /IM julia.exe` replaced by `tools/bench/_hosts.py` (kills only host
+  trees the script started; pre-existing hosts are reported, not killed) and an opt-in `HORNLAB_BENCH_FUSED` /
+  `HORNLAB_BENCH_SYMMETRY` for the SolveConfig they build directly (default = their old behaviour).
+- **WP2:** `search.pipeline_prefetch` (config, default 0) / `HORNLAB_PIPELINE_PREFETCH` (env wins). A one-thread builder
+  pre-meshes candidates i+1..i+depth while i solves (`search/pipeline.py`, `mesh/prefetch.py`); `mesh/build.build_mesh`
+  takes a parked mesh first (keyed by mesh cache key + output dir + mode). Coordinator remains the only writer of
+  ndjson / cache / dataset, evaluates in ask order, `tell` order unchanged; seed first, budget, cache hits, failures,
+  interrupts unchanged (offline tests with fake delays prove identical rows/order and real overlap). CMA and CMA-ME wired
+  (CMA-ME test needs `ribs`, skipped here). **Unverified on the real machine:** whether the real gmsh mesher accepts
+  running off the main thread; if not the prefetcher disables itself with one warning and the run continues serially.
+- **WP5:** `BeatBackend(freq_batch_size=N)` / `HORNLAB_FREQ_BATCH_SIZE` chunks the same ordered frequency list into
+  calls of at most N (default None = today's per-frequency CUDA grouping). `throughput_matrix --batch-sizes default,1,2,4,12`.
+- **WP4:** `mesh.curvature_npts` (default 0): `MeshSpec.curvature_npts` enters `MeshSpec.hash()` only when non-zero;
+  `mesh/step_build.sizing_options` sets `Mesh.MeshSizeFromCurvature`, clamped `MeshSizeMax` = wavelength ceiling,
+  `MeshSizeMin` = source size; CAD route only. `tools/bench/mesh_policy_study.py` (N/E, edge stats, build seconds, optional `--solve`).
+- **WP3:** `tools/bench/cpu_gpu_concurrent.py`: separate lane processes, own `HORNLAB_BEAT_WORKER_DIR`, no `worker.*`
+  global kills, own-tree cleanup, start barrier, serial-vs-concurrent parity, aggregate candidates/h. Bench only; real
+  behaviour unmeasured.
+- **WP1:** `docs/throughput/WP1_FUSED_IDENTITY_CACHE_PATCH.md` (Julia proposal, checklist, A/B, rollback), UNVERIFIED
+  against source lines, not applied.
+- **Owner runbook:** `docs/throughput/RUNBOOK.md`. Cross-owner files touched are listed in `NOTES_FOR_SENIOR.md`.
+
 ## 2026-11-02 - P11 TURNED ON: PUBLIC HF DATASET REPO PUBLISHED FOR THE COLLABORATOR
 
 - **Owner directive:** set up Hugging Face storage so the GitHub collaborator can pull "the solves we've done".
@@ -42,6 +240,192 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
   (PS 5.1 re-encoded UTF-8 as ANSI, mangling em dashes and quotes) and were restored from git and re-edited with
   a UTF-8-safe editor before the commit; the committed diff contains no replacement characters.
 
+
+## 2026-11-05 - CI fix: native param catalog for mid_ports + Solana/SAWMOD natives
+
+- PR #22 CI failed `tests/test_param_catalog.py` (4): `OSSE.mid_ports` missing from
+  `NATIVE_KNOBS`; hard-coded "10 natives" broke after Solana/SAWMOD YAMLs; CAD-only
+  `sawmod_meh_lr2` / `solana_meh*` empty-knob gate; stale `param-catalog.v1.json`.
+- **Fix:** document `mid_ports` (not_a_knob); core-native floor + CAD-only set in the
+  test; regenerate catalog / PARAMETERS / TYPOLOGIES.
+
+## 2026-11-05 - Objective v6 (loading_smooth) for Le Cléac'h / rollback
+
+- **Why:** CD-shaped v4 remapping (`dislope:0`, `load:0.5`) kept the wrong math — band-mean
+  `load` was ~2 % of J; coverage still punished natural narrowing. JMLC fc is a loading corner;
+  pattern control starts ~1.5–1.8×fc; DI rises smoothly (ETF 2010 / LANE_A).
+- **Landed:** `objective.version: 6` — `load_near`, `z_smooth`, `cov_pat`, `di_rise`, plus
+  `flat`/`rip`/`distd`/`diag`. Module `hornlab_search/objective/scalar_v6.py`; dispatch in
+  `versions.py` / `evaluate.py` / `config.py`. Design `g_fc_hz` stamped into metrics for
+  `f_pattern`. Dossier `docs/research/typologies/LECLEACH_OBJECTIVE_V6_2026-11-05.md`.
+- **Briefs:** `examples/briefs/campaign_2026-10-26_v6/native_lecleach_1200_1in_v6.yaml`,
+  `examples/briefs/lecleach_rollback_1in_v6.yaml` (v4 briefs untouched; J not comparable).
+- **Tests:** `tests/test_objective_v6.py` — 14 offline pins green (constant-Z load_near≈0,
+  sinusoidal z_smooth↑, DI+5 dB/dec → di_rise≈0, cov errors below f_pattern ignored).
+- **Re-score [measured]:** campaign `docs/data/campaign_v4_2026-10-27/evals.csv` lecleach cells
+  (no `z_throat` in export → `load_near`/`z_smooth` take NAN fill). On available pattern terms,
+  seed shares are live — e.g. `native__lecleach_rollback` n=209: di_rise raw≈9.1 (slope ~8 vs
+  target +5), cov_pat raw≈7.0; `b1t__lecleach_iwata_ar` n=198: di_rise 36 % / cov_pat 6 % of
+  pattern-term J. Full load-dominance check needs records with throat impedance.
+
+## 2026-11-03 - PR: feat/solana-sawmod-wg-bench → main
+
+- Opening PR for Solana/SAWMOD bench path, mid_ports mesher pin, RunPod cloud tooling,
+  UMAP evidence HTML, and GUI **Design cloud** (`/api/umap`, `#/run/<id>/umap`).
+- Keele CMA-100 synced locally (`20261104T021231Z-screen-4347f5`, best J=13.17); sample
+  PCA on 34 OK designs (not shipped as a code change).
+
+## 2026-11-03 - Design cloud (UMAP/PCA) in the local GUI
+
+- **Landed:** `GET /api/umap/<run>?method=auto|umap|pca` (`data.run_umap_cloud`), run page
+  button **Design cloud** → `#/run/<id>/umap` (`static/umap.js`). PCA always (numpy); UMAP when
+  `umap-learn` is installed. Color by param unit quartiles or total J; click for full param table.
+  Cached in `runs/.gui_cache/`. Offline `tests/test_gui_umap.py`.
+
+## 2026-11-03 - UMAP HTML: full param table + safer embed
+
+- **Fix:** `UMAP_SOLANA_OSSE_MEH_SF_CMA1000.html` now embeds data as `window.UMAP_DATA`,
+  populates all 18 searchable knobs in the dropdown, and shows a side panel with every
+  physical + unit value on point click (not just the active color channel).
+
+## 2026-11-03 - Interactive UMAP of solana_osse_meh_sf CMA-1000 (GitHub-viewable)
+
+- **Artifact:** `docs/evidence/UMAP_SOLANA_OSSE_MEH_SF_CMA1000.html` (+ `.md`) — standalone
+  D3 page of OK designs from run `20261103T053926Z-screen-8b32a1`, color by parameter
+  unit quartiles or total-J bands; click for values. Open via htmlpreview link in the
+  evidence md (GitHub file view is source-only).
+- **Method note:** UMAP on unit-box searchable knobs (not per-term loss); subsample of OK evals.
+
+## 2026-11-03 - Ath OSSE+SF mid_ports mesher fork + solana_osse_meh_sf
+
+- **Mesher fork:** `jamescollinharky/hornlab-waveguide-mesher` branch
+  `hornlab-search/osse-midports` @ `55da4f46d662d8dcd7a9f94a609eeea4009fcd62`
+  (base `b922e807`). Opt-in top-level `mid_ports` re-tags inner-wall triangles to
+  tag 10 (flush L1 exits); absent = byte-identical. Pinned in `pyproject.toml` +
+  `TOOLCHAIN.md`; `docs/FORKS.md` updated. Mac checkout:
+  `~/Desktop/projects/forks/hornlab-waveguide-mesher`.
+- **Search wiring:** `families.to_mesher_config` emits `mid_ports` for OSSE when
+  present; `mesh/build.py` requires tag 10 and echoes `midPorts` into
+  `mesh_meta.json`. Offline tests `tests/test_design_mid_ports.py` +
+  `tests/test_mesh_mid_ports.py`; `test_mesh_pin` / doctor pinned-shas green.
+- **Config:** `examples/typologies/solana_osse_meh_sf.yaml` — Ath SF seed (same as
+  `solana_osse_sf_search`) + `mid_ports` tblr + brief `solana_meh_1in_90x90`.
+  Shape-check [measured] Mac+4090: ~2900 dofs / 14000, mouth 450×450, depth 152,
+  round coupling. Flat CAD MEH (`solana_meh*`) remains the fallback; Ath+SF+MEH
+  is now the Solana MEH-context estimate path.
+- **MEH evaluate:** OSSE mid_ports path supplies port area via
+  `mesh_meta.json["mid_ports"]` (`_meh_layout`); CAD `derived` still preferred when present.
+- **4090 [measured]:** screen `20261103T052310Z-screen-ce9d4f` seed **J=39.604** (2921 dofs,
+  solve 38.5 s). CMA `20261103T052647Z-screen-cd22a5` live on pod `kt44oly5cdlaps` — early
+  best **J≈22.3** (was 39.6); Mac GUI pull-loop syncs that run into local `runs/`.
+
+## 2026-11-02 (evening) - Solana/SAWMOD bench + RunPod cloud path landed on branch
+
+- **Branch:** `feat/solana-sawmod-wg-bench` rebased onto `origin/main` @ `0fb7d98` (PR #21
+  hardware decision). WIP stashed → FF → restored; INDEX/ISSUES conflict merge kept main +
+  Solana/SAWMOD/cloud rows.
+- **Cloud GPU path:** `tools/cloud/` (`runpod_ctl.py`, `bootstrap_linux.sh`, `run_job.sh`,
+  `runpod_env.example`) + `docs/CLOUD_GPU_RUNBOOK.md`. Secrets stay local (`.env.local`
+  gitignored). POSIX BEAT orphan cleanup: bare `julia … solver.jl --worker` hosts now
+  match in `solve/worker.py` (not only Windows `julialauncher*`); test in
+  `tests/test_solve_worker.py`.
+- **RunPod [measured]:** RTX 4090 pod bootstrapped; CP-9a selftest deltas **0.020 / 0.039 dB**;
+  Solana CD screen J≈41.9 on CUDA; `examples/osse_baseline_4090.yaml` (fused BM, band/dof
+  raises for 24 GB) queued for ~200-eval CMA. One GPU at a time; hosts cleared via
+  `run_job.sh`.
+- **Solana:** phase-1 Ath WG (`solana_osse` + brief) + evidence; phase-2 MEH CAD seed
+  `solana_meh` / `solana_meh_search` + brief `solana_meh_1in_90x90` from DIY Guide Rev 2.0
+  (DH450 + 4×6NDL38, face 450 mm vs DIY 410 disclosed). Mouth probes under
+  `examples/typologies/_solana_mouth_probes/` (athscript / morph_fixed_0 / gcurve_off —
+  SF mouth ~450 vs morph-only ~356).
+- **SAWMOD:** control WG + knuckle + `walls: lr` MEH probe; CAD/`step_build` accept `lr`.
+- **Still owed:** stop/finish live OSSE search as needed; Solana CD mouth-matched
+  (`gcurve_off`) screen+verify on 4090; Ath midports MEH path; SAWMOD Ath knuckle+ports /
+  LF / BL refine.
+
+## 2026-11-02 - P11 TURNED ON: PUBLIC HF DATASET REPO PUBLISHED FOR THE COLLABORATOR
+
+- **Owner directive:** set up Hugging Face storage so the GitHub collaborator can pull "the solves we've done".
+  Owner chose **public** (collaborator needs no HF account/token) and the **core groups** `text,solve,dataset`.
+- **Live:** <https://huggingface.co/datasets/chingadalleva/hornlab-search-data> — public dataset repo, created
+  with `hf repos create ... --repo-type dataset --public`, 7 tar shards + `.gitattributes`, **11.56 GB /
+  10.76 GiB** (11,556,730,880 B), **197,581 source files**, packed 2026-11-02 ~20:53 local from this worktree
+  at `task/hardware-decision-2026-11-01`. Remote sizes verified byte-identical to the local tars
+  (`text-000` 731,473,920 B; `solve-000..002` 2.03 GB each, `solve-003` 8,550,400 B; `dataset-000` 2.04 GB,
+  `dataset-001` 1.95 GB). Seven per-shard commits (`bfbe708`, `75cf749`, `50aa0b1`, `fbcc6e4`, `42611f3`,
+  `d51b17d`, `701f568`).
+- **Safety gate before packing [measured]:** julia host PID 17056 idle (CPU 954.859 -> unchanged over 8 min),
+  VRAM 706 MiB of 8188, newest `runs/` write 20:44 vs pack start 20:53, so no GPU night was writing.
+- **Collaborator path verified end to end:** anonymous `curl -r 0-2047` on `solve-003.tar` returns **206** with
+  2048 bytes (no auth), and `hf download ... --repo-type dataset --include "solve-003.tar" --local-dir .hf_stage`
+  + in-place untar reproduced `cache/solve/<key>/{response.npz,status.json}` (32 cache dirs). Instructions live in
+  `docs/HANDOFF_COLLABORATOR_2026-10-27.md` section 4; P11 marked done.
+- **`tools/hf_sync.py` corrected** against huggingface_hub docs checked 2026-11-02: `upload` now runs
+  `hf upload <repo> <dir> . --repo-type dataset` (`hf upload-large-folder` is deprecated and absent from the
+  2.4.0 CLI reference; `hf_transfer`/`HF_HUB_ENABLE_HF_TRANSFER` are gone in hub v1), `pull` filters
+  `--include "*.tar"`. Local CLI/hub is 1.17.0 with `hf_xet` 1.5.0.
+- **Measured network finding [owner machine]:** the **Xet upload path stalls here** — two `hf upload` runs held
+  0.1-1.2 MB/s with zero commits after 25+ min while the same link measured 8.3 MB/s upstream
+  (`speed.cloudflare.com/__up`, 20 MB) and 9.7 MB/s down from `huggingface.co`; `HF_HUB_DISABLE_XET=1` then
+  pushed 2.04 GB in 3.4 min. Uploads from this box must set `HF_HUB_DISABLE_XET=1`. Downloads were unaffected.
+- **Not uploaded:** `cache/mesh/**` + `runs/**/*.msh` (16.81 GB) — pack with `--groups meshes` if the collaborator
+  needs stored meshes rather than rebuilding them with the CPU mesher. Anything written after 20:53 local needs
+  a re-pack.
+- **Collaborator runbook added:** `docs/COLLABORATOR_PULL_RUNBOOK_2026-11-02.md` — agent-executable
+  (clone → `hf download` → verify sha256 per shard → extract in place → verify counts 124,681 / 48,817 /
+  24,083 → load one `response.npz`), plus the offline re-score entry points, a troubleshooting table and the
+  rules for an agent working in the checkout (never commit the data, never touch `.venv`, no GPU solves, push
+  rule). Linked from `docs/INDEX.md`, `docs/HANDOFF_COLLABORATOR_2026-10-27.md` section 4 and P11.
+- **Shipped as PR #20 into `main`** (`task/p11-hf-sync`, cherry-picked off `origin/main` so the PR carries
+  only this work, not the 47 unrelated commits on `task/hardware-decision-2026-11-01`). Files: `tools/hf_sync.py`,
+  the new runbook, `docs/HANDOFF_COLLABORATOR_2026-10-27.md`, `docs/NEXT_DEV_PRIORITIES.md`, `docs/INDEX.md`,
+  this entry and the `docs/ISSUES.md` note. No solves, configs, pins, tolerances or tests touched.
+- **Process note:** two docs were briefly damaged by a PowerShell `Get-Content -Raw | Set-Content` round-trip
+  (PS 5.1 re-encoded UTF-8 as ANSI, mangling em dashes and quotes) and were restored from git and re-edited with
+  a UTF-8-safe editor before the commit; the committed diff contains no replacement characters.
+
+
+## 2026-11-02 - Cloud GPU runner (RunPod-first tooling)
+
+- Added `tools/cloud/`: `runpod_ctl.py` (GraphQL create/status/ssh/stop/terminate),
+  `bootstrap_linux.sh`, `run_job.sh` (force-clear BEAT hosts → CLI with explicit
+  `--backend beat_cuda` → `shutdown(verify=True)` → `runs/cloud_job_*.json`),
+  `runpod_env.example`. Secrets stay out of git (`.env.local` gitignored).
+- Runbook: `docs/CLOUD_GPU_RUNBOOK.md` (CP-9a gates, Solana screen first, ~$50 pilot
+  suggestion). Research still in `CLOUD_GPU_REPORT.md`.
+- POSIX worker hygiene: `beat_host_roots` now finds orphaned bare `julia … solver.jl
+  --worker` hosts (Linux/macOS), not only Windows `julialauncher*`. Test added in
+  `tests/test_solve_worker.py`. Offline worker tests green.
+- Superseded same evening: first paid 4090 pod ran CP-9a + Solana screen (see evening
+  entry above).
+
+## 2026-11-01 (late afternoon) - Solana 2.0 WG reconstruction (phase 1) + SAWMOD phase-2 probes
+
+- **Solana:** DIY Guide Rev 2.0 + `Advanced/athscript.cfg` snapshotted under
+  `docs/research/typologies/solana_2026-11-01/` (Drive guide `1-JxZ-…`, files
+  `151N2rq4…`). Dossier `SOLANA_WAVEGUIDE_2026-11-01.md`. Config `solana_osse` +
+  brief `solana_control_1in_90x90` (verbatim Ath pins: L=140, SF m=8, morph 353×353).
+- Dry-run **4284 dofs**; mouth with SF **~450 mm** vs Ath morph 353 / STL outer ~376
+  (morph-only ~356 — mesher/Ath delta disclosed). Screen Metal:
+  `runs/20261101T211314Z-screen-72f3bd` — **J=41.9**, 27.9 s, `di_source=balloon`.
+  Evidence `docs/evidence/SOLANA_WG_2026-11-01.md`. Phase 2+: mid ports / MEH / mouth delta.
+- **SAWMOD phase-2 probes (same session):** knuckle CD-only
+  `sawmod_knuckle_osse` (SF digitized) Metal `20261101T210541Z-screen-3c1938` J=241 /
+  2948 dofs; flat-wall MEH `sawmod_meh_lr2` (`walls: lr`, cone 103/66, hp_hz 250) dry-run
+  3950 dofs + multi-source Metal `20261101T210635Z-screen-ab4075` J=21.5 (v5; `n_nan=12`,
+  `load=100`, z_throat null — provisional). beat-bem bumped to pin `1efdc6f` for MEH path.
+  CAD `tools/cad/meh.py` + `step_build` accept `walls: lr`. LF/BL still later.
+
+## 2026-11-01 (afternoon) - SAWMOD control-waveguide benchmark (phase 1)
+
+- Whitepaper snapshot + dossier: `docs/research/typologies/sawmod_2026-11-01/`,
+  `SAWMOD_CONTROL_WAVEGUIDE_2026-11-01.md`. Config `sawmod_control_osse` + brief
+  `sawmod_control_1in_100x70` (pinned OS-SE L=115, morph rate 4, no knuckles).
+- Mesh: L=115 mm, mouth after morph **280×196** mm (`morph_allow_shrinkage: 1` required;
+  raw OSSE ~395 mm). Screen Metal solve OK: **1464 dofs**, J=345.2, 5.4 s —
+  `runs/20261101T205918Z-screen-e7b5a2`. Evidence
+  `docs/evidence/SAWMOD_CONTROL_WG_2026-11-01.md` (freestanding vs paper baffle caveat).
+- Phase 2+ still owed: knuckles, mid ports, LF slot, BL SAWMOD refine.
 
 ## 2026-11-01 (10:20 EDT) - PACKAGED FOR HANDOFF: QUICKSTART, SCREEN LAUNCHER, BOTH VERIFIED WINNERS
 
@@ -1264,6 +1648,485 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
   "geometry path is already there").
 - **Owner questions:** separate sub or bass in the box; a size number; use case and coverage; 4 x 4-inch vs 2 x 6.5-inch;
   DSP per channel; which new J terms (dossier s13).
+
+Older entries (before 2026-10-23): [docs/history/CONTINUITY_2026-10-12_2026-10-22.md](history/CONTINUITY_2026-10-12_2026-10-22.md).
+
+## 2026-10-30 (16:00Z) - FIX: 3D EVOLUTION MESHES NO LONGER PUNCH RANDOM TRIANGLE HOLES
+
+**What the owner saw.** On the evolution 3D time-lapse ("improvement frames only", run
+`20261029T155433Z-screen-5b871c`) the horn looked like a mix of solid and fully transparent triangles,
+with the shape dissolving into speckle at the silhouette.
+
+**Root cause.** `data.evolution_frames3d` decimated above the per-frame cap by stride subsampling
+(`tris[::k]`, `k = ceil(n_tris_full / cap)`). On a connected sheet that keeps every k-th triangle and
+deletes the rest, so a k=2 frame lost ~half its faces as scattered single-triangle holes. The old cache
+for that run held exactly that: 11.8k-16.6k-tri frames cut to ~5-6k.
+
+**Fix (`hornlab_search/gui/data.py`).** New `_cluster_decimate` / `_cluster_once`: vertex-clustering
+decimation (floor-snap vertices onto a grid, weld each occupied cell to its members' centroid, drop
+degenerate and duplicate faces, compact unused vertices, bisect the grid size until the tri count sits
+just under the cap). It coarsens the sheet but never punches per-triangle holes. Symmetry-plane vertices
+(`'1'` -> x=0,y=0; `'14'` -> x=0; `'12'` -> y=0) are snapped to exactly zero so the mirrored seam has no
+slit. The same path replaces `mesh_surface`'s `tris[:max_tris]` prefix truncation (additive
+`decimated:true` key only when it fires). `M3D_DEFAULT_CAP` 6000 -> 30000 and `M3D_VERSION` 1 -> 2 (the
+version is in the cache key, so every stale stride-decimated cache is invalidated). Real run: all 6
+frames now undecimated, 11,816-16,636 tris x4 mirror = 47k-67k rendered triangles per frame.
+
+**Verified.** `tests/test_gui_integration_phases.py` decimation test rewritten to the hole-free contract
+(12x12 grid, 242 tris, cap 100): tri count <= cap, zero degenerate faces, symmetry vertices exactly 0.
+`pytest tests/test_gui.py tests/test_gui_mesh_quadrants.py tests/test_gui_integration_phases.py
+tests/test_gui_brief_authoring.py` = 131 passed; `compileall hornlab_search/gui` clean.
+
+## 2026-10-30 (16:04Z) - ATLAS NIGHT RESULT: 34 + 43 CELLS, 17 + 8 SELF-REFERENCED PASSES; DAY QUEUE LAUNCHED
+
+**Night result.** Hybrid `runs/20261030T064105Z-screen-1206a5` timed out at 4.5 h with 981 rows (776 ok):
+34 occupied 10-deg cells, **17 self-referenced all-gate passes** (49x40 ... 90x61), 16 brief-gate (A1) passes
+(all earlier hybrid runs together: 3). ATH CORE `runs/20261030T111108Z-screen-377bbe`: 501 rows, 43 cells (13
+before), 8 self-referenced passes, 12 A1 passes. The 09:45 cutoff dropped CORE-law and the audit; the A1 audit
+(`scratch/gate_audit_atlas_2026-10-30/`, 1,243 rows, 28 pass_all) and the readout were then run by hand (CPU).
+
+**Day queue (owner 12:02 "run whatever we should for the next 6 hours"; controller pid 22016, cutoff 16:15, log
+`runs/nights/queue_2026-10-30_day.log`).** (1) verify the 25 elites via elite-only run dirs
+`runs/elites_20261030_{hypex,ath_core}`; (2) resume the hybrid atlas +400; (3) CORE-law atlas 300, then A1 audits,
+readout and STEP export of the elites. Handoff: `docs/HANDOFF_NEXT_RUNS_2026-10-30.md`.
+
+## 2026-10-30 (06:36Z) - COVERAGE ATLAS NIGHT LAUNCHED: FIRST REAL CMA-ME (QUALITY-DIVERSITY) RUNS
+
+**Why (owner: "take the wheel").** Offline re-gate of the 6,322 audited rows (`docs/data/gate_audit_2026-10-29*`):
+45 pass all gates against the brief's nominal coverage, 118 at H +/-25 %, and **150 when each horn is judged
+against its own median in-band beamwidth** (54 ath_core, 41 core_law, 27 hyb_osse_h_hypex_v, 20
+osse_ext_throat). The failures are mostly good constant-directivity horns at a different angle than the brief
+asked for (e.g. 57x45 from the 60x40 brief, 65x63 from the 90x60 brief). The near-miss H failures are mid-band
+narrowing (65 of 82 one-sample fails, mostly 1.8-2.9 kHz) and 8 kHz beaming (21). So the night maps natural
+coverage instead of chasing one target: CMA-ME keeps the best design per 10-deg (mean bw H, mean bw V) cell.
+
+**Relaunched 06:41Z (owner: "don't care about 300 mm envelopes").** The first launch (pid 34792, run
+`20261030T063601Z-screen-333d6d`, 44 rows) refused 25 of 44 candidates on the b2w brief's 380x300x300 envelope;
+it was stopped, and the hybrid now uses the brief copy `examples/briefs/atlas_2026-10-30/b2w_pa_60x40_1200_big_v4.yaml`
+(only name/description/envelope changed: 650x650x520, the ath_core brief's envelope; refusal check only, the seed
+was a cache hit). Hybrid budget 1200 -> 1000. Live controller **pid 30360**, run `20261030T064105Z-screen-1206a5`:
+first 11 rows 8 ok / 3 refused (mouths 782-855 mm wide), 8-16 s per solve at ~2k dofs.
+
+**Queued (detached, controller pid 30360, parent WmiPrvSE; log `runs/nights/queue_2026-10-30.log`; cutoff 09:45).**
+Configs `examples/typologies/atlas_2026-10-30/` = copies of the campaign v4 cells with only `name` and
+`search:` changed (`algorithm: cma_me`, `qd` mean_bw_h/v x 18 bins over 0-180 deg, sigma0 0.25, seed 1030);
+`qd` is search-only, so the cells' cached solves are reused. Shape check: all three ok (dofs 1985 / 3777 / 5179
+of 12000, envelope fits, round coupling). Nights in order: `atlas1_hypex` (1000 evals, H-OSSE/V-hypex hybrid,
+b2w 60x40/1200, 650 mm envelope copy), `atlas2_ath_core` (500, native ATH CORE 2"), `atlas3_core_law` (300, per-direction CORE law),
+`atlas4_audit` (A1 gate audit over `20261030T*-screen-*`, CPU). No code, solver or brief change.
+
+**Next (morning).** Read the archives (filled cells, best per cell), re-gate each elite against its own coverage,
+verify the best elite per occupied cell, render a coverage contact sheet, pick print candidates.
+
+## 2026-10-30 (06:35Z) - DATA CONSOLIDATION COMPLETE: ~32.6 GB OF REPO DATA -> ~12.5 GB, +17.3 GB FREE
+
+**Phases 2-5.** NTFS compression (`compact /c /s:<dir>`, transparent, reversible with `compact /u`):
+cache -3.12 GB (1.5x), runs -0.47 GB, dataset traces -0.91 GB (1.9x), dataset records -0.32 GB
+(1.2x). Deletions, each after re-verification: both `dataset_backup_*` (strict subsets, 0 missing
+ids), the root `report.html`, 9 uncited `scratch/` dirs plus 9 probe meshes, 24 orphan traces (no
+record references them), the outside-repo strays (`AppData/`, `gui_fixture/`, two pytest logs, an
+`.opencode` backup), and the `hornlab-beta-wt` worktree. `scratch/vizenv` moved to
+`%LOCALAPPDATA%/hornlab/vizenv` — still on disk, outside the repo. Drive free space 76.44 -> 93.70 GB.
+
+**Tools.** `tools/data/doctor.py` (read-only integrity report, exit 1 on ERROR) and
+`tools/data/keepers.py` (`dataset/views/keepers.csv`: 22,862 unique `(design, solve)` rows, 1,022
+duplicate rows collapsed, best-per-target and best-per-family flags). `gates` is `unavailable` by
+design — dataset records carry scalars only, and no verdict was invented to fill the column.
+
+**Docs (owner-authorized rotation).** CONTINUITY keeps 2026-10-23 onward; 44 older entries moved
+verbatim to `docs/history/CONTINUITY_2026-10-12_2026-10-22.md` and the reassembly sha256 equals the
+original body exactly. Closed ISSUES rows moved to `docs/history/ISSUES_closed.md`, one resolved
+NOTES_FOR_SENIOR block rotated, three superseded HANDOFF files archived with a "superseded by"
+banner, `SOLVE_CAMPAIGN_PLAN_2026-10-26.orig.md` deleted (git keeps it), INDEX has 0 dead links of
+104 checked. CONTRIBUTING now carries the scratch-artifact and config-generation rules.
+
+**Finding.** 143 run responses stay unlinked because their sha256 differs from the cache entry: in a
+sample the complex pressures match to 1.2e-4 while `spl_h_db` differs by up to 4.7 dB — the same
+solve re-saved under a different SPL convention by an older/re-scoring path, not corruption.
+
+**Result doc:** `docs/DATA_CONSOLIDATION_RESULT_2026-10-30.md` (what ran, gates, manifests, what was
+kept on purpose).
+
+## 2026-10-30 (05:55Z) - PHASE 1 APPLIED: HARD-LINK DEDUPE FREED 13.30 GiB (49,968 FILES)
+
+**Result.** `tools/data/dedupe_runs.py --apply` replaced 49,968 run heavy files with hardlinks to
+their sha256-verified cache entry: 23,839 of 27,541 run `mesh.msh` and 26,129 of 26,381 run
+`response.npz`. Free space 75.63 -> 88.94 GB (13.30 GiB, exactly the dry-run estimate). 0 errors,
+0 copy-fallbacks. Unmatched 3,954: 3,806 `no candidate` (GRID/STEP-route designs have no mesh
+cache by design), 143 `sha mismatch` (kept as real copies), 5 `no metadata`.
+
+**Gate (all passed).** GUI data layer on the Oct 13 `ca15be` and Oct 29 `9766f0` runs:
+`run_detail`, `design_curves`, `mesh_surface` (24,480 / 35,376 tris), `balloon_designs` (6/6 with
+stored balloons), `balloon`, `evolution_frames3d` (38 / 12 frames). `cli report` 2.7 MB per run,
+`tools/loudness_report.py` rows per run. 30 random links are `samefile` with their cache file,
+`st_nlink` 2-6. Doctor after: mesh 23,839 linked / 3,702 not (1.6 GB), response 26,129 / 252 not
+(49 MB).
+
+**Also in this commit.** `dataset_backup_20261013/`, `dataset_backup_20261022/` (both re-verified
+as strict subsets, 0 missing ids) and the root `report.html` deleted: 851.8 MB freed and
+`HANDOFF_BETA` step B1 now states `dataset/` is the only copy. `scratch/vizenv` (460 MB) moved out
+of the repo to `%LOCALAPPDATA%/hornlab/vizenv` (pyvista 0.49.1 / meshio 5.3.5 import OK) with
+`tools/render/*` and CODE_MAP updated.
+
+**Manifests:** `scratch/2026-10-30_consolidation/{dedupe_dryrun_full,dedupe_apply_full,doctor_post_dedupe}.json`.
+
+## 2026-10-30 (04:55Z) - PHASE 1 CODE: LINK-FIRST CACHE COPIES + ATOMIC RUN-DIR WRITERS
+
+**Landed (not yet applied to data).** `solve/cache.py` and `mesh/build.py` now install cache files
+with `os.link` (plain-copy fallback) through a temp name + `os.replace`: `response.npz` and
+`mesh.msh` become hardlinks to the cache, while `status.json` and `mesh_meta.json` stay plain
+copies because `search/evaluate.py` rewrites a run's own status. `save_response` and
+`evaluate._write_json` are atomic, and the three mesh routes (formula `build_mesh`, `grid_build`,
+`step_build`) unlink `out_path` immediately before the mesher writes, so a rebuild can never
+truncate a shared cache inode. No cache key, `store()`, tolerance or mesher config changed.
+
+**Evidence.** `tests/test_solve_cache.py tests/test_mesh_build.py tests/test_tools_data_dedupe.py`
+-> 48 passed. The hardlink permission comes from the owner decision recorded in the entry below;
+`docs/plan/01_CONTRACTS.md` is frozen and untouched, so the amended wording lives in CONTINUITY
+and ISSUES only.
+
+**New tools.** `tools/data/dedupe_runs.py` (dry-run default, sha256-gated, temp+replace, manifest)
+and `tools/data/doctor.py` (read-only integrity report, exit 1 on an ERROR finding). Doctor on the
+real store: 23,884 records / 48 shards, 768 duplicate `(design, solve)` groups (+1,022 rows),
+traces 1,067 on disk / 1,043 referenced / 24 orphans (44.7 MiB) / 0 missing, unreferenced cache
+3 mesh (664 KiB) + 1 solve (994 KiB), run heavy files 27,541 mesh (8.1 GiB) + 26,381 response
+(6.7 GiB) all unlinked — the pre-apply baseline.
+
+## 2026-10-30 - DATA CONSOLIDATION ADOPTED: OWNER OK FOR HARDLINKS, NO OFF-MACHINE BACKUP
+
+**Decision (owner, 2026-10-30).** Execute `docs/DATA_CONSOLIDATION_PLAN_2026-10-29.md` phase by
+phase. The owner allowed hardlinks in the run/cache copy path (amends `01_CONTRACTS.md` section 14
+from "copy, never symlink" to "copy or hardlink, never symlink") and waived the off-machine backup:
+the data is not precious enough to duplicate. Phase 0's restore gate is therefore replaced by a
+hardlink-integrity check after Phase 1 (cache bytes unchanged, `st_nlink == 2` on linked pairs).
+
+**This commit.** The 51 files that were uncommitted on `feat/hardened-plan-2026-10-29`: the 80x80
+gate-aware search work and its evidence, the parameter/typology reference updates, the GUI
+progressive/perf tests, and the cone-source-model and data-consolidation plans. No data was deleted,
+moved or linked by this commit. Measured on 2026-10-30 before any change: `runs/` 15.55 GB,
+`cache/` 10.81 GB, `dataset/` 3.53 GB, backups 0.82 GB, `scratch/` 0.82 GB (~32 GB total).
+Focused suite on the changed modules: 147 passed (`test_driver_compression`, `test_objective_v5`,
+`test_param_catalog`, `test_tools_gate_audit`, `test_gui_preview_shape`, `test_gui_home_progressive`,
+`test_gui_perf_snapshot`).
+
+**Next.** Phase 1: unlink-before-mesh-write, atomic `save_response`, link-first `_copy_entry` /
+`copy_entry` with copy fallback, then `tools/data/dedupe_runs.py` (dry-run default) and a real run.
+
+## 2026-10-29 (13:42Z) - 80x80 GATE-AWARE SEARCH COMPLETE: 0/110 PASS-ALL; LOADING 0/110; 827 HZ DIP STRUCTURAL
+
+**Result.** Run `runs/20261029T122018Z-screen-9766f0`: 100 new + 10 cached, best J **2.9053**
+(seed 3.2495). Post-search A1 `scratch/gate_audit_b3a80x80_search/`: **110 rows, 0 pass-all**.
+Per gate: **H 68**, **V 108**, **DI 109**, **BW8K 96**, **Throat 110**, **Loading 0**. LFP20 passes
+110/110 (min 282.3 Hz); the loading failure is the Re z dip: best-J 0.2763, best loading row 0.3767,
+seed 0.291 at 827.75 Hz, floor 0.5. The 827 Hz dip is inside [600, 5653] and is structural in the
+b3a extended-throat family. The 80x80 retarget fixed H/V (D-era H 0/96); loading is the sole
+universal blocker. Do not run another b3a 80x80/seed/target.
+
+**Next (owner choice).** Change family or throat; native ATH core 2" is the only prior all-gate pass
+set (42 designs). The 80x80 search and A1 are complete; no code/solver/fork change; nothing committed.
+Evidence: `docs/evidence/HARDENED_D_2026-10-29.md` section 13.
+
+**Throat-style knob research (owner question, no edits).** One typology with a searchable
+`throat_style` is feasible for **generated (FREEFORM)** typologies: an integer index knob
+(0 off / 1 straight / 2 exponential) plus `throat_length_mm`, built in
+`design/generators/profiles.py` + `registry.py`; no mesher/cache/search change because hashes are
+the materialised geometry. Native OSSE/ATH-core (`ath_core`, `osse_ext_throat`) exposes only the
+mesher's linear `throatExtLength/Angle` tube; straight-vs-exponential there needs a mesher/fork
+change under `docs/FORKS.md`. The literal `throat_style: [straight, exponential]` bound is rejected
+today (float-only bounds); use an integer index. Not implemented; owner choice pending.
+
+## 2026-10-29 (12:20Z) - OWNER RETARGET 2: b3a -> 80x80/600, DRIVER-EXIT f11 5653, GATE-AWARE 100-EVAL SEARCH LAUNCHED
+
+**Owner decision (2026-10-29).** Retarget the b3a cell to **80 x 80 deg at 600 Hz** and source the
+loading hold's `f11` from the **18 mm driver exit (5,653 Hz)**, not the design's main throat (the
+stored `scalars.f11_hz` 3,809 Hz is the 26.385 mm extended-throat cross-mode). Then run the
+**gate-aware 100-eval search** on this cell. Reasoning: the b3a 588 x 588 seed's natural pattern is
+H 89.65 at 1.07 kHz and 69.3 at 8 kHz; against 80x80 that is 1.121 and 0.866 (both pass), and V
+89.65/80 = 1.121 (pass). The 72x72 retarget FAILED H at 1.07 kHz (89.65/72 = 1.245 > 1.20); 75x60
+passed H but failed V (90/60 = 1.50); 60x30 is worse. The seed still has a real loading dip:
+**Re z 0.291 at 827.75 Hz**, inside any loaded window, which the search must remove.
+
+**Implemented (gate/objective/target/brief/config/tests; no solver/Julia/fork change; no commit).**
+- `tools/rescore/gate_audit.py` + `hornlab_search/objective/scalar_v5.py`: the loading hold's upper
+  bound now resolves **explicit `target.loaded_hi_hz` > driver-exit f11 (from
+  `driver.exit_radius_mm`, `1.8412*c/(2*pi*a)`) > stored `metrics.scalars.f11_hz` (main throat) >
+  `BAND_HI`**. The Re z hold is `[F_X, min(BAND_HI, loaded_hi_hz)]`; LFP20/LFP50 unchanged.
+  `loaded_hi_hz`/`f11_hz` remain UNWEIGHTED diagnostics; the CSV/README document the precedence.
+  `hornlab_search/targets/spec.py` carries `loaded_hi_hz` / `driver_exit_radius_mm`; `config.py`
+  surfaces the brief's driver radius on the TYPED target only (never `raw`, so `config_sha` is
+  unchanged for every existing brief run); `dataset/record.py` omits the absent keys.
+- New brief `examples/briefs/hardened_2026-10-29_v5/b3a_pa_80x80_600_square_v5.yaml` (80x80, f0 600,
+  K-law 529x529, 588x588 seed retained, 740x740x650, band 300-8000, 18-point grid, v5 class C,
+  `loaded_hi_hz: 5653.0`) and config
+  `examples/typologies/hardened_2026-10-29_v5/b3a__osse_ext_throat_80x80_600_v5.yaml` (budget 100,
+  distance 10, seed 588x588, six searched knobs, everything else identical to the b3a v5 cell).
+- Focused tests: `tests/test_tools_gate_audit.py` + `tests/test_objective_v5.py` **65 passed**
+  (56 previous + 9 new f11-source cases); `tests/test_targets.py`/`test_config.py`/
+  `test_objective_v3_f0v.py` **84 passed** (config_sha goldens unchanged). compileall clean.
+
+**Seed A1 (cache hit: 0 new / 1 cached, GPU 0.0 s; run `20261029T121930Z-screen-10b954`).**
+`J = 3.24955`, **pass_all = FALSE**. Per gate: **H pass**, **V pass**, **DI pass**, **BW8K pass**
+(bw_h 69.30 / bw_v 69.52 at 8 kHz), **Loading FAIL** (`Re z 0.291 < 0.5` in [600, 5653] Hz; LFP20
+329.9 Hz passes the 375 Hz bar), **Throat pass** (36.0 x 36.0 mm, round 0.994). CSV:
+`scratch/gate_audit_b3a80x80/gate_audit.csv`; README beside it.
+
+**Search launched (detached, one GPU job).** `runs/nights/b3a80x80_search.ps1` via
+`launch_detached.ps1`; **wrapper pid 36992**; log `runs/nights/b3a80x80_search.log`; run
+`runs/20261029T122018Z-screen-9766f0`. Same v5 objective (load 1.0), 80x80 brief, 588 seed,
+18-point grid, distance 10, budget 100. **Post-search A1 controller pid 16056** waits for the search
+pid, then runs `gate_audit --run-glob "20261029T122018Z-screen-*" --out scratch/gate_audit_b3a80x80_search`
+and writes `runs/nights/b3a80x80_search_a1.log`. No second search was started.
+
+## 2026-10-29 (12:00Z) - OWNER RETARGET: b3a -> 72x72/600 + Re z HOLD TO f11 (seed A1: 0 pass-all)
+
+**Owner decision (2026-10-29).** Retarget the b3a cell to **72 x 72 deg at 600 Hz** and hold the loading
+gate's `Re z >= 0.50` from `f_x` to the design's **first throat cross-mode f11**, not to 8 kHz. The
+reasoning given: the b3a 588 x 588 mm seed is the K-law mouth for 72x72 at 600
+(`25.4e6 / (600*72) = 588`); at 72x72 its natural top octave reads H 64/72 = 0.89 and V 90/72 = 1.25
+(both pass); LFP20 330 clears the 375 Hz bar; the only old-gate failure was said to be "Re z 0.29 at
+8 kHz", which is above the 1.4-inch f11 (5,653 Hz by hand) and is not a driver-loading failure.
+75x60 passed H but failed V (90/60 = 1.50); 60x30 fails V (90/30 = 3.0). The 75x60 files stay.
+
+**Implemented (gate/objective/tests/brief/config only; no solver/Julia/fork change; no commit).**
+- `tools/rescore/gate_audit.py`: the Re z hold now runs over the solved frequencies in
+  `[F_X, min(BAND_HI, f11_hz)]`; `f11_hz` is read per row from the stored `metrics.scalars.f11_hz`,
+  and absent/null falls back to `BAND_HI` (old behaviour). LFP20 and every other gate unchanged. The
+  row/CSV carry `f11_hz` and `loaded_hi_hz`; the README documents the window.
+- `hornlab_search/objective/scalar_v5.py`: `_load_v5` applies the same window to `rez_min_from_fx`;
+  LFP20/LFP50 penalties unchanged; `f11_hz`/`loaded_hi_hz` added as UNWEIGHTED diagnostics (no new
+  weighted key). Module docstring documents the definition.
+- New brief `examples/briefs/hardened_2026-10-29_v5/b3a_pa_72x72_600_square_v5.yaml` (72x72, f0 600,
+  588x588 K-law, class C tolerances, v5) and config
+  `examples/typologies/hardened_2026-10-29_v5/b3a__osse_ext_throat_72x72_600_v5.yaml` (budget 100).
+- Focused tests: `tests/test_tools_gate_audit.py` + `tests/test_objective_v5.py` **56 passed**.
+
+**Seed check (cache hit: 0 new / 1 cached, GPU 0.0 s; run `20261029T115645Z-screen-567db8`).**
+`J = 3.43861`, `pass_all = FALSE`. A1 per gate: **H FAIL** (1 of 14 samples outside +/-20 %, worst
+deviation 0.245), **V pass**, **DI pass**, **BW8K pass**, **Loading FAIL** (`Re z 0.291 < 0.5` in
+[600, 3809.38] Hz), **Throat pass**. CSV: `scratch/gate_audit_b3a72x72/gate_audit.csv`.
+
+**Correction to the retarget premise (measured).** The seed's stored `scalars.f11_hz` is **3,809 Hz**,
+not 5,584 Hz: `compute_metrics` takes f11 from the design `r0_mm` (26.385 mm, the extended throat),
+not the 18 mm driver exit (18 mm -> 5,582 Hz). The `Re z 0.291` dip is at **827.75 Hz**, well inside
+[600, 3809]; Re z at 8 kHz is 0.981. So the f11 window does **not** rescue this seed - it is a genuine
+~828 Hz loading dip, not an above-f11 artifact. The H failure is likewise **at 1.07 kHz**
+(bw_h 89.65 vs 72, +24.5 %), not at 8 kHz (69.30 vs 72 passes). The retarget's scoring/gate change is
+correct and landed; the specific seed does not pass the gates. No 100-eval search was run.
+
+## 2026-10-29 (late) - FAST-BEM RESEARCH: QUADRATURE FIRST, GMRES SECOND, FMM AT 14K+ (zero GPU)
+
+Owner-directed research pass. **Docs only: no code, config, example, test or D-night file touched; no GPU or
+solver job run; nothing committed.** New report:
+`docs/research/MATRIX_FREE_GPU_GMRES_FMM_2026-10-29.md` (also `NEXT_DEV_PRIORITIES` P13 and
+`plan/12_RESEARCH_BASIS.md` section 18).
+
+- **Verdict.** At 5-6k dofs the dense fused CUDA path is assembly-bound (73-96 % of per-frequency wall,
+  `CAMPAIGN_SMOKE_2026-10-27.md:57`) and already one-matrix + device LU. Matrix-free/FMM is **not** the 2x at
+  our current size. The cheapest credible 2x is quadrature order 4 -> 2. FMM is a feasibility play at 14k+ and
+  the only path at 20k+. **No 10x is supported at 5-10k.**
+- **The quadrature finding.** Order 4 = 6-point triangle rule = **36 point-pairs per element pair**; order 2 =
+  3 points = **9 point-pairs** (`forks/hornlab-beat-bem/docs/beat-engine-CUDA.md:53`; `config.py:32,405`) -
+  4x fewer kernel evaluations. The fork already has a wavelength-driven 1/2/4 selector with `kh` cutoffs
+  (`q1_max=0`, `q2_max=2.0`; `BeatEngineDriver.jl:207-229`) but it is **CPU-only and discarded on CUDA**
+  (`:186-187`, `:1766-1773`). At epw 6, `kh ~ 1.05` -> order 2.
+- **CUDA has no GMRES.** The fused CUDA solve is `lu!` (`BeatEngineCudaBurtonMiller.jl:642-648`); the fork's
+  GMRES (35-136 iterations, worst 549; FP64 Krylov because FP32 loses orthogonality 584-1000 vs 35-42) is
+  CPU/Metal only (`BeatEngineDenseSolve.jl:14-55,363-372,72-73`). Expected gain on CUDA **1.0-1.4x**, plus a
+  ~1.0-1.8 GB peak-VRAM saving from deleting the LU workspace [inferred] - a feasibility lever, not a 2x.
+- **FMM** is 2-5x only at 14-20k, and even there the constants at kD ~ 100-235 are unverified. Exafmm-t is
+  CPU/low-frequency/dormant; PVFMM is the GPU candidate but the BM layer is months; FMM3D `hfmm3d` is the best
+  CPU algorithm fit; H-matrix/ACA ranks blow up at kD ~ 100. bempp-cl FMM is CPU Exafmm, not a GPU production
+  path (`exafmm` is not even installed in `.venv`).
+- **Axisymmetric/multimodal** is the only 10-100x (round horns, m=0, ~400 unknowns, ms/freq), does **not**
+  apply to the 90x60/90x90 morph briefs, and stays WP13 owner-deferred.
+- **Also recorded (gotchas found):** `CAMPAIGN_SMOKE`'s "iterative solve 0.07-0.94 s" is a dense LU on CUDA;
+  `_cuda_use_matrix_free_burton_miller_rhs` is RHS-only (`BeatEngineCore.jl:1509,1528`); `gmres_tol` is hashed
+  and recorded but never applied on Beat (`solve/beat.py:24-25`); an axisymmetric brief is not an axisymmetric
+  BEM.
+- **Next steps (owner sign-off for any fork change):** Phase 0 phase timing on 3 stored meshes x 3 freqs ->
+  Phase 1 quadrature A/B (expose `solve.quadrature_order`, SPL <=0.05 dB at 500 Hz/2 kHz, <=0.10 dB at 8 kHz,
+  bw <=0.3 deg, DI <=0.05 dB, >=1.5x at 5k or >=1.3x at 14k) -> Phase 2 GMRES on CUDA -> Phase 3 bempp
+  FMM/OSRC CPU probe -> Phase 4 PVFMM/FMM3D only if justified.
+
+## 2026-10-29 (04:05Z) - PLAN WRITTEN: CONE SOURCE MODEL (the rigid piston is the assumption)
+
+Owner asked for a senior-level plan to fix the cone source after the research pass showed the directivity claim
+is unearned above ~1 kHz. **Plan only, nothing implemented.** New doc
+`docs/CONE_SOURCE_MODEL_PLAN_2026-10-29.md`; indexed, and elevated in `NEXT_DEV_PRIORITIES.md` as **P0b**
+(it blocks every cone_plughorn directivity claim).
+
+- **The finding.** The cone face (tag 2) is driven as a rigid axial piston at all frequencies. A 10-inch paper
+  cone is pistonic only to its first break-up, ~0.7–1.5 kHz [consensus; must be measured]; the band is
+  220 Hz–4 kHz. Since `p(θ) ∝ ∫ v(r)J₀(k r sinθ) r dr`, sign changes in `v(r)` must produce lobes/nulls a
+  uniform piston cannot. So 1–4 kHz pattern/DI is geometry-only today. The BEM geometry is fine; the boundary
+  condition on the cone is the assumption.
+- **Code audit recorded in the plan** (all verified this pass): beat `SolveConfig.source_tag` asserts exactly
+  ONE source tag (`((tag, _),) = velocity_sources.items()`); `source_profile_alpha` is a per-face J0 factor,
+  **fused-CUDA only**, refused in both Python and Julia; `julia/BeatEngineDriver.jl::source_profile_factors`
+  (~841) is the seam to generalise; `sweep.py` computes the entry impedance from the **mean** pressure over the
+  source tag (must become velocity-weighted); `solve/bempp.py` drives uniformly
+  (`velocity_sources={SOURCE_TAG: 1.0}`) so the CPU cross-check cannot see a profile yet; STEP labels are
+  pinned to `{driver, wall}` with exactly one driver face (`multicell.LABELS`, `read_face_inventory`), so
+  ring tags are a schema + mesher + `_is_driver_face` change.
+- **Recommended route.** C0 honesty now (retire `Sd_eff` as a directivity model, print the piston-valid band);
+  C1 `SourceProfile` data model + validation; C2 beat CPU factors + the generalised Julia builder; C3 bempp so
+  the profile is cross-checked; C4 `A_eq` + velocity-weighted `Z_rad` in `resp.meta`, `drive()` consumes them;
+  C5 provenance/reporting; C6 measured LDV/accelerometer profile; C7 multi-tag rings only with evidence.
+  Uniform profile must be byte-identical to today.
+- **Two-way coupling is the trap** the plan calls out: the circuit must see the radiation impedance of the
+  actual velocity distribution (`Z_rad = Σ conj(v)pA / Σ|v|²A`), not the uniform mean, or level/impedance/
+  excursion are inconsistent with the polars near break-up.
+- **Research record** (sources + labels) is in the plan: Frankort 1975; Kagawa 1980; Hu 2017; Smith 1953
+  (front chamber); Dodd 2008/09, Bernland 2019, Berggren 2020 (phase-plug wavefront); Morse & Ingard, Pierce,
+  Williams (waveguide mode filtering, Rayleigh/Hankel); Keele 1975/77, Kolbrek 2008 (cutoff); Beranek/Olson;
+  Hornresp/AkAbak/ABEC/COMSOL practice. **No published `Sd_eff(f)` law exists**; no measured cone-horn vs
+  compression-horn polar comparison below cutoff was found.
+- **Owner decisions listed:** approve C0; approve C1–C2; pick the driver; LDV access (or accept the 3–5
+  accelerometer fallback); C7 now or later. No GPU, no solver, no code touched.
+
+## 2026-10-29 (03:35Z) - TYPOLOGY LINK RESOLVED BY CATALOG NAME (the real "still not rendering")
+
+Owner opened `#/typology/cone_plughorn_7sh` and still got no geometry.
+
+- **Cause.** The typology page links carry the CATALOG name (`/api/typologies` serves
+  `examples/catalog.yaml` names), but `gui/data.py::_preview_config` matched only the config's own
+  `name:`. Those differ for every renamed config - all five cone_plughorn entries
+  (catalog `cone_plughorn_7sh` vs config `cone_plughorn__evo7sh_narrow`) - so the sandbox's
+  `/api/preview-shape/cone_plughorn_7sh` answered **404** and the page said "preview endpoint
+  unavailable". Earlier entries in this file were about the config NAME (`...__evo7sh_narrow`),
+  which is why they passed while the real link did not.
+- **Fix.** `_preview_config` now falls back to `catalog_name` after the exact config name
+  (exact name wins; unknown still 404s). It is the single resolver for the preview AND for
+  `save_bounds`, so edited bounds from the sandbox work through the same link.
+- **Verified over HTTP with the CATALOG names** (`/api/preview-shape/<catalog>?detail=3d`):
+  `cone_plughorn_7sh` 4002 v / 3672 t (36.9 s first call, 5-7 s warm), `cone_plughorn_2sh`
+  4452/3888, `morph_10in` 4002/3672, `morph_12in` 4002/3672, `morph_8in` 3720/3294 + the known
+  one-face warning. All `available: true`.
+- **Test:** `test_typology_link_resolves_by_catalog_name` (plus the tessellation test);
+  `test_gui_preview_shape.py` 14 pass. GUI server restarted once more to pick the resolver up.
+
+## 2026-10-29 (03:10Z) - CONE PLUGHORN SANDBOX PREVIEW: STALE SERVER + ONE TESSELATION EDGE CASE
+
+Follow-up to the exposure fix below. Owner: "preview endpoint unavailable ... can't see it in 3D".
+
+- **Cause 1 (the actual "unavailable"): a stale server process.** The GUI on `:8765` had been running
+  since **2026-10-27 21:06**, i.e. before `gui/data.py::_plughorn_preview` existed, so the plughorn
+  configs fell through to the generic generator branch and returned
+  `available=false, reason="generator needs profile_h"` (HTTP 200, empty sections). Restarted; no code
+  change needed for this half.
+- **Cause 2: one config could not tessellate.** `build123d` `Shape.tessellate` walks every face and
+  assumes each returns a triangulation, so ONE face without one blanks the whole payload with
+  `AttributeError: 'NoneType' object has no attribute 'NbNodes'`.
+  `cone_plughorn__morph_wide_8in` has exactly one such face (index 27, planar, 634 mm^2, fails at every
+  deflection/sag tolerance tried) while the same solid meshes fine in gmsh (3,182 triangles, tags
+  `1:3065, 2:117`). Added `_tessellate_part` (per-face fallback + skipped-face count) in
+  `gui/data.py`; the payload now carries `shape3d.warnings`. Display-only: the solid, the STEP, the
+  mesh and every solve path are untouched.
+- **Measured after the restart** (`/api/preview-shape/...?detail=3d`, all five configs):
+  `evo7sh` 46.8 s cold / then 5-6 s warm, 4002 v / 3672 t; `evo2sh` 4452/3888; `morph_10in` 4002/3672;
+  `morph_12in` 4002/3672; `morph_8in` **3720/3294 with 1-face warning**. All `available: true`.
+- **Sandbox sliders verified through the API**: `length_mm 400 -> 430` moves the last section to
+  z=430 and echoes the knob; `plug_tip_x_mm 190` rebuilds (4014 verts). No rejections.
+- **Tests:** `test_gui_preview_shape.py` 13 pass, incl. the new
+  `test_plughorn_3d_survives_one_untriangulable_face`. `test_param_catalog.py` 38 pass.
+- **Open, cosmetic:** the ~45 CAD knobs are catalog placeholders (raw key labels, no prose). The 8-inch
+  morph view misses the one un-triangulable face (internal boolean remnant); fixing the CAD is the
+  durable answer, deferred because it is display-only.
+
+## 2026-10-29 (02:50Z) - CONE PLUGHORN WAS INVISIBLE IN THE GUI: CAUSE + FIX
+
+Owner: "I do not see this Funktion-One style horn exposed anywhere in the GUI."
+
+- **Cause.** The five configs live in `examples/typologies/cone_plughorn_2026-10-28/` (a subfolder),
+  and `design/params/catalog.py::_config_sources` globs only `examples/typologies/*.yaml`. A subfolder
+  config is therefore invisible to `build_catalog` unless `examples/catalog.yaml` names it - and no
+  entry existed. Symptoms: `catalog_name: None`, `group: None`, no description in the GUI config
+  table, and no entry at all in `param-catalog.v1.json` (no typology page, nothing for the sandbox
+  knob panel). `docs/reference/TYPOLOGIES.md` / `PARAMETERS.md` lacked it too.
+- **Fix.** Five catalog entries added (`cone_plughorn_7sh`, `_2sh`, `_morph_10in`, `_morph_8in`,
+  `_morph_12in`), new group **`cone`**, symmetry `full` (quadrants '1234'), and the three generated
+  artifacts rebuilt with `tools/gen_param_catalog.py --write`: param catalog 41 -> **46 typologies**,
+  JSON 887,613 bytes. The live GUI (`:8765`) now returns all five with `group: cone`,
+  `n_knobs` 10 (raw CAD) / 14 (morph), `disabled: false`.
+- **Guard test** (`tests/test_param_catalog.py::test_subfolder_typologies_are_catalogued_or_they_vanish`)
+  so a subfolder typology cannot silently disappear again.
+- **Known rough edge:** the plughorn knobs are placeholders (`documented: false`, label = raw key,
+  e.g. `front_side_x_mm`). The catalog never fabricates prose - a ~45-key prose pass is the follow-up.
+- **Pre-existing failure, not from this change:** `tests/test_gui_sandbox_page.py::
+  test_3d_hot_swap_never_scenes_per_frame` asserts the literal `if (curGeo) curGeo.dispose();` but
+  `sandbox.js:891` now reads `if (curGeo) { ridgeCache.delete(curGeo); curGeo.dispose(); }`
+  (committed tree, untouched here). 62 others in that run pass.
+
+## 2026-10-29 (02:35Z) - CPU SECOND-LANE HARDENING PASS (proposal only; zero GPU, zero code)
+
+Owner asked for a self-study hardening/research pass on the first CPU-lane proposal before any work starts. Read-only: solver/worker/lock/cache/dataset/mesh/campaign paths, installed `hornlab_beat_bem` host/registry/provision internals, `TOOLCHAIN.md` M2-M4, the stored smoke-night evidence, and one re-parse of `runs/nights/v4_overnight_2026-10-27/observe.ndjson`. Two read-only probes: CPU-engine readiness and the two provision-state JSONs. No GPU/Julia/solve/mesher/pytest, no code edit, no push. New doc: `docs/research/CPU_SECOND_LANE_HARDENING_2026-10-28.md`.
+
+- **Verdict stands, with better mechanics.** A second CPU-only `search` lane beside the GPU lane is feasible; expected **~1.5-1.7x** screen throughput [estimate] (~1.4-1.55x at 5k dofs; ~1.2-1.4x at 8.9k), not 2x, because `beat_cpu` is 1.8x slower/frequency at 2.4k and 2.3x at 5.1k. It also adds CPU-only capability (>14k quarter dofs; `near_correction`; `double`). No single-solve speed-up.
+- **Topology changed:** target **shared `runs/`, separate `cache_cpu/` + `dataset_cpu/`** (Option B), not separate runs folders (A). Run ids are UUID-unique (`search/rundir.py:28-32`) and the GPU lock is per runs root, so one folder is safe; only the mesh cache (`mesh/build.py:204-208`, non-atomic) and the dataset (`dataset/store.py:24-35`, single-writer) must stay separate. A remains the fallback; the full in-run mesh/solve pipeline (C) stays a later project (higher ceiling, 3-5x engineering).
+- **Lane identity is cleaner than first proposed:** the library always passes `--dir <registry>` to a worker host (`.venv/.../hornlab_beat_bem/worker_client.py:425-437`); a dedicated `HORNLAB_BEAT_WORKER_DIR` for the CPU lane makes lane-scoped host cleanup a string match, with "unknown host => never kill".
+- **New concrete blocker (H2):** `--backend beat_cpu` on a `cuda_fused: true` campaign cell fails at `BeatBackend.__init__` (`solve/beat.py:395-401`) because the CLI override runs after config validation (`cli.py:371-373`). Fix: drop `cuda_fused` for non-CUDA backends (`cuda_fused` is a CUDA-only opt-in; the CPU engine's default assembly is already the fused BM path) or re-validate after the override.
+- **CPU engine is unprovisioned right now (measured read-only):** `backend_ready("cpu") == False`; installed fingerprint `4ef2da0d...` != recorded `a19e67a0...`. Re-provision before the first lane; add a `doctor` check (it recurs after every pinned-solver change).
+- **Other hardening:** campaign cannot select a backend and its after-job hygiene kills all project Julia (`search/campaign.py:411-439`); `gpu-clean`/the night runner kill by keyword (`search/hygiene.py:117-144`, `tools/run_campaign_night.py:~431`) -> lane marker required; `beat_cpu` makes one multi-frequency call (no mid-call cancel); a thread knob must reach BOTH `warm_up` and `SolveConfig` or a second host appears; `SolveSpec.backend` is already in the hash, so the cache is backend-safe.
+- **For the senior:** 8 sign-off questions in doc section 12 (topology B vs A; the "one GPU solve + one CPU lane" rule amendment; registry-dir lane identity; `solve.julia_threads` outside the hash; lane marker; H2 fix; separate dataset root; Phase-2 measurement gates). No work started pending that.
+
+## 2026-10-29 (02:20Z) - CONE DRIVER MODEL + BOWL + CONE FILL (CPU only, zero GPU)
+
+Owner handoff `docs/research/HANDOFF_CONE_DRIVER_MODEL_2026-10-28.md` executed. No GPU, no solve
+(a night was live); nothing pushed from this session.
+
+- **Driver model extended, compression path untouched** (`hornlab_search/driver/compression.py`):
+  `kind: compression | cone`, `rear_box_l` (sealed bowl, NET litres), `rear_box_q` [inferred]
+  series box loss at fs, LR-2 semi-inductance (`l2_mh` + `r2_ohm`, both-or-neither), `air_load_g`
+  (splits a published `mms_g` so the flag clears), `f_breakup_hz` + `breakup_exponent` [inferred]
+  effective-area law, opt-in diagnostic `rear_air_mass_g` (default 0). `kind: cone` refuses
+  `front_chamber_cm3 > 0` (the front chamber is in the mesh). **No box air mass by default**: the
+  lumped sealed-box load is compliance-only; `rho*Vb/Sd^2` is not the physical load and would raise fs.
+  Old-vs-new bit-identical on 3 compression drivers x 3 loads, every legacy output incl. `z_in_ohm`.
+- **Sealed bowl is a HORN property, not a driver property** -> `tools/loudness_report.py
+  --rear-box-l <L>` overrides it for cone drivers (refused for compression drivers). Cone tags in the
+  table: `(cone, bowl 6.14 L)`, `(Mms! air-load split missing)`, `(breakup [inferred] >N Hz)`.
+- **Stand-in drivers added (published values only, URL in `source`)**: `bc_10mbx64` (Mms only ->
+  flagged), `faital_10pr300` (**Mmd printed** 20.0 g), `bc_8mbx51` (Mms only -> flagged),
+  `faital_8pr155` (**Mmd printed** 20.9 g). Measured: **no maker publishes a semi-inductance fit**
+  (B&C/18 Sound/Faital print a single Le with no frequency), so the LR-2 values must come from our own
+  impedance fit. Smoke run on a stored horn (44.5 x 35.6 throat, not the 7SH): 103.5 dB @ 1 W /
+  6.14 L for the 10MBX64 vs 102.6 for the 10PR300 - order of magnitude only until the real driver exists.
+- **Cone fill landed** (`tools/cad/plughorn.py`): the axe head's rear now fills the cone as ONE ruled
+  loft (post circle -> cone-rim circle -> base footprint), anchored through the post, axial
+  `plug_gap_mm` clearance to the cone. Evo 7SH: front chamber **0.848 L gross -> 0.201 L net**
+  (ratio 0.237), front-chamber cut-off **419 -> 1792 Hz** (the old estimate was the reason the
+  chamber looked too big for a 4 kHz mid); `cone_fill: 0` reproduces the old numbers. Solid still
+  ONE valid closed solid, **129 faces, ONE driver face**; 13 plughorn + 22 step_build tests pass.
+- **Measurement protocol written**: `docs/research/MEASUREMENT_CONE_DRIVER_2026-10-28.md` (added-mass
+  Mmd split, LR-2 fit + residual, rice-displacement net bowl volume, Qb from Fc/Qtc, printed-horn
+  impedance/SPL/polars/excursion/break-up, acceptance tolerances, traps).
+- **Thin-gap cross-check: NOT done, and now has a named blocker.** The 7SH mesh builds fine at epw 6
+  (`scratch/thin_gap/epw6/mesh.msh`, 1.3 MB), but a single bempp_cpu frequency did not finish inside
+  ~20 min while the night was running, so it was abandoned rather than left competing for CPU. Worse:
+  `source_motion: axial` is **refused on every non-beat backend**
+  (`ConfigError: ... only implemented for the beat backends (beat_cuda/beat_cpu), got 'bempp_cpu'`),
+  so a CPU cross-check at the correct cone drive needs `beat_cpu` provisioned first. The bempp route
+  can still test mesh convergence at the (wrong) `normal` drive.
+- **Tests run:** `test_driver_compression` + `test_metrics_loudness` + `test_mesh_throat_check`
+  31 pass; `test_mesh_plughorn` 13 pass; `test_mesh_step_build` 22 pass. Full offline suite NOT run
+  (live night). Still open: the real driver's T/S (hardware), the first `cone_plughorn` solve.
+
+## 2026-10-29 (early) - OWNER-DELEGATED DECISIONS: HARDENED SOLVE PLAN (execution started)
+
+Owner delegated the open decisions in the 2026-10-28 chat. These are recorded as **owner decisions**; where they conflict with the 2026-10-29 "next solve strategy" handoff, these win.
+
+- **D1 loading metric.** Report LFP20 (Re z = 0.20, interpolated in log f), LFP50 and LFP70. Crossover rule `f_x >= 1.6 * LFP20` (hi-fi stretch 1.4x, never below 1.25x), and Re z >= 0.5 held from f_x upward.
+- **D2 pattern metric.** H within +/-20 % of target from f_x to band_hi; V within -40 %/+25 % from `max(1.5*f_x, f0_v)`; DI rise <= 5 dB from f_x to 8 kHz; beamwidth at 8 kHz >= 0.75x target in both planes; diagonals on the same narrow-side rule.
+- **D3 briefs.** b3bt/b3bw keep f_x 600 (LFP20 <= 375); b1t/b1w 850 (LFP20 <= 530); **b3a retargets to f_x 480** under new `b3a_pa_90x90_480_square_v5` (gate LFP20 <= 300), with the 400 Hz brief kept as a variant; retire the `rows` brief variants (DI-slope weight 0 selected the beamer).
+- **D4 throat.** Coupling plane round at the driver exit diameter (+/-0.5 mm), hard pre-solve refusal. A long slow throat section (80-220 mm, 3-10 deg total; Opus V-ERS style) is part of the horn profile and is allowed. No separate adapter.
+- **D5 seeds.** Primary `osse_ext_throat` (OS-SE + extended throat; neutral name, not "Opus"). Controls: native TwinRay 380 (published) and ATH Gen2-style R-OSSE. **Never seed** salmon_x, Le Cleac'h, chanterelle, or `af67489288c4` as constant-directivity candidates.
+- **B2 grid opt-in (amended 2026-10-29).** `grid.screen_extra_hz: [250, 315, 400, 2573, 3311, 4260]`, merged into the frozen 12-point screen grid -> **18 points** (250, 315, 400, 500, 643, 828, 1065, 1370, 1763, 2269, 2573, 2919, 3311, 3756, 4260, 4832, 6218, 8000 Hz). The 250/315/400 points feed the LFP/loading gate, not J (250 is below band_lo 300); 2573/3311/4260 are the geometric midpoints of 2269-2919, 2919-3756 and 3756-4832, giving ~1/6-octave spacing across 2.3-4.8 kHz. New grid group automatically; verify unchanged; apply to every D brief including the room briefs. Cost ~1.5x today's screen.
+- **C0 approved.** When `throat_ext_length_mm > 0`, derive `r0_mm = exit_r + L*tan(theta)` per design at materialize time (L and theta are searched); tie `a0_deg` to theta; zero-length stays bit-for-bit.
+- **C1-C5 v5 approved.** C1 LFP20/LFP50 loading penalty + Re z >= 0.5 from f_x; C2 `flat_cv` (on-axis + 20 log10 omega) over [f_x, 3 kHz] plus the existing flat above; C3 `cov_narrow_ratio 2.0` on every CD brief including b3bt, restore DI-slope weight, 8 kHz beamwidth floor, retire rows; C4 pre-solve round-throat refusal; C5 upper/lower vertical -6 dB targets for room-asym. **v4 stays byte-identical.** New tolerances live in the brief; absent = refuse to load.
+- **A1 canonical gate constants.** `F_X = f0`, `LFP_RE_Z 0.20`, `LFP_CROSSOVER_RATIO 1.6`, `LOADED_RE_Z 0.50`, `H_TOL 0.20`, `V_LO/HI 0.60/1.25`, `DI_RISE_MAX_DB 5.0`, `BW8K_FLOOR 0.75`, `THROAT_TOL_MM 0.5`, `ROUND_TOL 0.03`. Unresolved fails.
+- **Stop point.** After the D searches, top-10 verify and the A1 rerun. No 12/16 kHz pass, no print. Report the A1 table (empty sets included), B1 result, top 3 per cell, every zero-pass cell with its binding gate, and GPU hours/refusal rate.
+
+**B1 calibration result (2026-10-29T01:36Z, verify).** Published TwinRay 380 seed `fd2d5cc073ac` solved at verify in run `20261029T013620Z-verify-3f4992`: **LFP20 566.6 Hz**, LFP50 1004 Hz, LFP70 1269 Hz. Acceptance 580 +/- 1/6 octave = [518, 651] Hz -> **PASS**. The screen CMA best is 728 Hz; the published seed, not the CMA best, is the calibration point.
 
 ## 2026-10-28 (15:05 EDT) - PUSHED: SOLVED-STYLE RENDER SHEETS + THE DAY'S WINNER (J 1.11)
 

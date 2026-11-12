@@ -28,6 +28,7 @@ import os
 import subprocess
 import time
 import traceback
+import uuid
 from collections import Counter
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -37,16 +38,20 @@ from pathlib import Path
 import numpy as np
 
 from .. import config as config_mod
+from .. import profiling
 from ..dataset.record import DEFAULT_TRACE_FRACTION, build_record, should_capture_traces, to_jsonable
 from ..design import families
 from ..design.generators.registry import GeneratorError
 from ..mesh.build import MeshConsistencyError, build_mesh, mounting_of
+from ..mesh.throat_check import fits_exit, throat_shape
 from ..metrics.compute import compute_metrics
 from ..metrics.di import di_from_balloon, sin_theta_weights
 from ..objective import PENALTY_FAILED, PENALTY_INVALID, objective, penalty_result
 from ..objective.scalar_meh import MehParams, objective_meh
 from ..objective.scalar_v2 import objective_v2, objective_v3
 from ..objective.scalar_v4 import V4Params, objective_v4
+from ..objective.scalar_v6 import V6Params, objective_v6
+from ..objective.scalar_v7 import V7Params, objective_v7
 from ..objective.versions import SUPPORTED_OBJECTIVE_VERSIONS
 from ..solve import cache as solve_cache
 from ..solve.base import stack_responses, theta_deg_from_dirs
@@ -220,6 +225,10 @@ def make_context(cfg, store=None, *, cache_dir=None, lib_shas=None,
         # M6 bridge (M7 owns the MEH context): the v5 block carries the four C11 tolerances that
         # V4Params does not know, so it is validated with its own params class.
         ctx.objective_params = MehParams.from_block(block)
+    elif ctx.objective_version == 6:
+        ctx.objective_params = V6Params.from_block(block)
+    elif ctx.objective_version == 7:
+        ctx.objective_params = V7Params.from_block(block)
     else:
         ctx.objective_params = V4Params.from_block(block)
     ctx.provenance = record_provenance(cfg)
@@ -286,6 +295,73 @@ def throat_radius_m(design: Design) -> float | None:
         r = min(radii)
         return r / 1000.0 if r > 0 else None
     return None
+
+
+def _brief_exit_radius_mm(cfg) -> float | None:
+    """The applied brief's driver exit radius, or None when this run has no brief/driver."""
+    brief = getattr(cfg, "brief", None)
+    drv = brief.get("driver") if isinstance(brief, dict) else None
+    r = drv.get("exit_radius_mm") if isinstance(drv, dict) else None
+    if isinstance(r, (int, float)) and not isinstance(r, bool) \
+            and np.isfinite(float(r)) and float(r) > 0.0:
+        return float(r)
+    return None
+
+
+def _refuse_if_throat_misfits(mesh: MeshResult, cfg) -> None:
+    """C4 (objective v7, was "v5" on the hardened branch, 2026-10-29): refuse a throat that is not the driver's round exit.
+
+    Runs after the mesh exists and BEFORE any solver call: reads the mesh's source-tagged driven
+    surface with ``mesh.throat_check`` and compares it with ``2 * driver.exit_radius_mm`` from the
+    applied brief. Raises ``GeometryInvalidError`` with the exact mismatch when the check says the
+    throat does not fit; ``fits is None`` (unjudgeable, e.g. an unreadable mesh) is let through.
+    A run without a brief driver is never checked, so mesh-free runs are untouched.
+    """
+    exit_r = _brief_exit_radius_mm(cfg)
+    if exit_r is None:
+        return
+    fits, why = fits_exit(throat_shape(mesh.path), 2.0 * exit_r)
+    if fits is False:
+        raise GeometryInvalidError(
+            f"throat does not fit the brief driver exit: {why} (the driven coupling plane must be "
+            f"round at 2 x exit_radius_mm = {2.0 * exit_r:.1f} mm)")
+
+
+def _derive_throat_coupling(design: Design, cfg) -> Design:
+    """C0 (2026-10-28): put the DRIVEN coupling plane at the brief's driver exit.
+
+    The mesher's OSSE/R-OSSE throat extension anchors ``r0_mm`` at the MAIN throat and tapers
+    back to the driven end at ``r0 - L*tan(theta)`` (half-angle from the axis). With a positive
+    ``throat_ext_length_mm`` the driver-end radius must therefore be the brief's exit radius, so
+    ``r0_mm = exit_r + L*tan(theta)`` and ``a0_deg = theta`` (continuous wall slope). Both L and
+    theta are SEARCHED, so this is derived per design here, never baked into the config at load.
+
+    Returns a NEW ``Design`` (a shallow copy of the params; the CMA candidate object is never
+    mutated). Zero/absent extension — or no brief driver — returns the design unchanged, so every
+    pre-C0 design hash and mesh key is byte-identical. Derivation happens before the hash is
+    computed, so the mesh cache key, design dir, dataset record and every metric see the same
+    derived geometry that is meshed.
+    """
+    if design.family not in ("OSSE", "R-OSSE") or not isinstance(design.params, dict):
+        return design
+    length = design.params.get("throat_ext_length_mm")
+    if isinstance(length, bool) or not isinstance(length, (int, float)) \
+            or not np.isfinite(float(length)) or float(length) <= 0.0:
+        return design
+    theta = design.params.get("throat_ext_angle_deg", 0.0)
+    if isinstance(theta, bool) or not isinstance(theta, (int, float)) \
+            or not np.isfinite(float(theta)):
+        return design
+    exit_r = _brief_exit_radius_mm(cfg)
+    if exit_r is None:
+        return design
+    r0 = exit_r + float(length) * float(np.tan(np.radians(float(theta))))
+    if not r0 > 0.0:                    # leave it to the mesher's own refusal (reported, cached)
+        return design
+    params = dict(design.params)        # shallow copy: the candidate's own params stay untouched
+    params["r0_mm"] = r0
+    params["a0_deg"] = float(theta)
+    return Design(design.family, params)
 
 
 def metrics_from_response(resp: Response, target: Target, *, mesh: MeshResult | None = None,
@@ -624,8 +700,35 @@ def _cad_meta(mesh_dir: Path) -> dict | None:
     return cad if isinstance(cad, dict) else None
 
 
+def _mid_ports_meta(mesh_dir: Path) -> dict | None:
+    """``mesh_meta.json["mid_ports"]`` from the OSSE mesher-fork path, or None."""
+    try:
+        meta = json.loads((Path(mesh_dir) / "mesh_meta.json").read_text(encoding="utf-8"))
+    except Exception as exc:  # noqa: BLE001
+        log.debug("no mesh_meta.json in %s: %s", mesh_dir, exc)
+        return None
+    block = meta.get("mid_ports")
+    return block if isinstance(block, dict) else None
+
+
 def _write_json(path: Path, obj) -> None:
-    path.write_text(json.dumps(to_jsonable(obj), indent=1, sort_keys=True), encoding="utf-8")
+    """Atomic JSON write: temp file in the same directory, then ``os.replace``.
+
+    ``path`` may be a hardlink to a shared cache entry (design dirs are link-backed), so the
+    bytes must never be written through it.
+    """
+    path = Path(path)
+    text = json.dumps(to_jsonable(obj), indent=1, sort_keys=True)
+    tmp = path.with_name(f".{path.name}.{uuid.uuid4().hex[:8]}.tmp")
+    try:
+        tmp.write_text(text, encoding="utf-8")
+        os.replace(tmp, path)
+    except BaseException:
+        try:
+            tmp.unlink(missing_ok=True)
+        except OSError:
+            pass
+        raise
 
 
 # ------------------------------------------------------------------ WP8 band split
@@ -725,6 +828,9 @@ def evaluate(design: Design, space, cfg, mode: str, run_dir, store, backend, *,
     ctx = ctx or make_context(cfg, store)
     warn_freq_weights_v1(cfg, ctx.target)
     t_start = time.perf_counter()
+    # C0: the driven coupling plane of an extended-throat design is the brief's driver exit. The
+    # derivation depends on the SEARCHED L/theta, so it is per design (never a config constant).
+    design = _derive_throat_coupling(design, cfg)
     mspec = config_mod.mesh_spec(mode, cfg)
     sspec = config_mod.solve_spec(mode, cfg)
     meh = meh_block_of(cfg)
@@ -748,9 +854,11 @@ def evaluate(design: Design, space, cfg, mode: str, run_dir, store, backend, *,
     st: dict = {"mesh": None, "outcome": None, "resp": None, "metrics": None, "kind": "", "err": "",
                 "from_disk": False, "area": None, "grid": None, "cad": None, "raw_traces": None,
                 "J": None, "terms": None}
+    tm = profiling.begin(design_dir, dh, key)    # WP0: None unless HORNLAB_STAGE_TIMING=1
     try:
         _compute(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx, st)
     except MeshConsistencyError:
+        profiling.end(tm)
         raise                                   # units / symmetry bug: stop the run (section 15)
     except Exception as exc:  # noqa: BLE001 - the contract: any unexpected exception is a penalty row
         st["kind"], st["err"] = KIND_EXC, f"{type(exc).__name__}: {exc}\n{traceback.format_exc()}"
@@ -788,9 +896,13 @@ def evaluate(design: Design, space, cfg, mode: str, run_dir, store, backend, *,
                "solve": 0.0 if (outcome is None or st["from_disk"]) else float(outcome.seconds),
                "total": time.perf_counter() - t_start}
     try:
-        _persist(ev, mode, sspec, design_dir, ctx, store, st, seconds)
+        with profiling.stage("persist"):
+            _persist(ev, mode, sspec, design_dir, ctx, store, st, seconds)
     except Exception:  # noqa: BLE001 - bookkeeping must not kill a search
         log.error("persisting evaluation %s failed:\n%s", dh, traceback.format_exc()[:2000])
+    profiling.record("candidate_total", seconds["total"], cached=bool(ev.cached),
+                     kind=kind or None)
+    profiling.end(tm)
 
     ctx.counters["cache_hits_disk" if ev.cached else "evaluated"] += 1
     if kind:
@@ -801,6 +913,60 @@ def evaluate(design: Design, space, cfg, mode: str, run_dir, store, backend, *,
              seconds["mesh"], seconds["solve"], None if mesh is None else mesh.n_dof, ev.cached,
              f" FAILED[{kind}]" if kind else "")
     return ev
+
+
+PREFETCH_ENV = "HORNLAB_PIPELINE_PREFETCH"
+
+
+def prefetch_depth(cfg) -> int:
+    """WP2: how many candidates ahead to pre-build meshes. ``HORNLAB_PIPELINE_PREFETCH`` (env)
+    wins over ``search.pipeline_prefetch`` (config); both default to 0 = today's serial loop."""
+    raw = os.environ.get(PREFETCH_ENV)
+    if raw is not None and str(raw).strip() != "":
+        try:
+            return max(0, int(raw))
+        except ValueError:
+            log.warning("%s=%r is not an integer; ignored", PREFETCH_ENV, raw)
+    return max(0, int(getattr(getattr(cfg, "search", None), "pipeline_prefetch", 0) or 0))
+
+
+def prefetch_candidate(design: Design, cfg, mode: str, run_dir, ctx: EvalContext) -> bool:
+    """WP2 worker body: build ``design``'s mesh ahead of ``evaluate`` and park it for pickup.
+
+    Safe off-thread: it reads ``ctx`` but never writes it, and writes only the candidate's own
+    ``designs/<hash>/`` mesh files. Returns True when a mesh was parked. Candidates that need no
+    mesh or several (run-known, failure-marked, generator error, band-split) return False and the
+    evaluator does its normal work. Any exception propagates to the prefetcher, which swallows it.
+    """
+    from ..mesh import prefetch as mesh_prefetch
+    from ..mesh.build import prebuilt_key
+    from ..design.generated import GENERATOR_ERROR_KEY
+    run_dir = Path(run_dir).resolve()
+    mspec = config_mod.mesh_spec(mode, cfg)
+    sspec = config_mod.solve_spec(mode, cfg)
+    meh = meh_block_of(cfg)
+    if meh is not None:
+        sspec = _with_meh_source_tags(sspec, meh)
+    elif band_split_of(cfg) is not None:
+        return False                              # several meshes per candidate: not prefetched
+    dh, mh, sh = design.hash(), mspec.hash(), sspec.hash()
+    mkey = families.mounting_key(mounting_of(cfg))
+    key = f"{dh}-{mh}-{sh}" + (f"-{mkey}" if mkey else "")
+    if key in ctx.known or GENERATOR_ERROR_KEY in design.params:
+        return False
+    marker = _failure_marker(ctx, key)
+    if marker is not None and marker.exists():
+        return False
+    design_dir = run_dir / "designs" / dh
+    tm = profiling.begin(design_dir, dh, key)
+    try:
+        with profiling.stage("mesh_prefetch"):
+            mesh = build_mesh(design, mspec, cfg, design_dir, mode=mode,
+                              cache_dir=ctx.mesh_cache_root)
+    finally:
+        profiling.end(tm)
+    mesh_prefetch.put(prebuilt_key(design, mspec, cfg, design_dir, mode), mesh)
+    return True
 
 
 def _failure_penalty(kind: str, design: Design, cfg) -> float:
@@ -852,17 +1018,64 @@ def _score_v5(metrics, resp, target, weights, params, meh_ctx=None):
     return objective_meh(metrics, resp, True, target, weights, params, meh_ctx)
 
 
+def _score_v6(metrics, resp, target, weights, params):
+    if params is None:
+        raise ValueError("objective_version 6 needs the brief's objective block (tolerances); the "
+                         "evaluation context carries none")
+    if not isinstance(params, V6Params):
+        params = V6Params.from_block(params)
+    return objective_v6(metrics, resp, True, target, weights, params)
+
+
+def _score_v7(metrics, resp, target, weights, params):
+    if params is None:
+        raise ValueError("objective_version 7 needs the brief's objective block (tolerances); the "
+                         "evaluation context carries none")
+    if not isinstance(params, V7Params):
+        params = V7Params.from_block(params)
+    return objective_v7(metrics, resp, True, target, weights, params)
+
+
 _OBJECTIVE_SCORERS = {
     1: lambda metrics, resp, target, weights, params: objective(metrics, True, target, weights),
     2: lambda metrics, resp, target, weights, params: objective_v2(metrics, resp, True, target, weights),
     3: lambda metrics, resp, target, weights, params: objective_v3(metrics, resp, True, target, weights),
     4: _score_v4,
     5: _score_v5,
+    6: _score_v6,
+    7: _score_v7,
 }
 if tuple(sorted(_OBJECTIVE_SCORERS)) != SUPPORTED_OBJECTIVE_VERSIONS:
     raise RuntimeError(
         "objective dispatch table and objective.versions.SUPPORTED_OBJECTIVE_VERSIONS "
         f"disagree: {tuple(sorted(_OBJECTIVE_SCORERS))} vs {SUPPORTED_OBJECTIVE_VERSIONS}")
+
+
+def _stamp_design_fc_hz(metrics: MetricSet, design: Design | None) -> None:
+    """Copy the design's area-law cutoff into ``metrics.scalars['fc_hz']`` for objective v6.
+
+    Looks at common knob names used by Le Cléac'h / rows generators. Absent = leave scalars alone
+    so ``resolve_fc_hz`` falls back to the brief's ``f0_hz``.
+    """
+    if metrics is None or design is None:
+        return
+    params = getattr(design, "params", None) or {}
+    for key in ("g_fc_hz", "fc_hz", "h_fc_hz"):
+        v = params.get(key)
+        if isinstance(v, (int, float)) and not isinstance(v, bool) and float(v) > 0.0:
+            metrics.scalars["fc_hz"] = float(v)
+            return
+        # Nested plane blocks (FREEFORM typology knobs).
+        if isinstance(v, dict):
+            continue
+    for plane in ("profileH", "profileV", "h", "v"):
+        block = params.get(plane)
+        if isinstance(block, dict):
+            for key in ("fc_hz", "g_fc_hz"):
+                v = block.get(key)
+                if isinstance(v, (int, float)) and not isinstance(v, bool) and float(v) > 0.0:
+                    metrics.scalars["fc_hz"] = float(v)
+                    return
 
 
 def _score(metrics, resp, ctx, meh_ctx=None) -> tuple[float, dict]:
@@ -872,10 +1085,14 @@ def _score(metrics, resp, ctx, meh_ctx=None) -> tuple[float, dict]:
     owner-approved): freq-weighted cov + the below-f0 (K-law design frequency) mask on
     cov/dislope - see ``objective_v3`` in scalar_v2.py. Version 4 (2026-10-27): tolerance-normalised
     terms plus asymmetric coverage, DI std and the diagonal term - ``objective/scalar_v4.py``.
+    Version 6 (2026-11-05): loading_smooth for Le Cléac'h / rollback - ``objective/scalar_v6.py``.
+    Version 7 (2026-10-29, renumbered from the hardened branch's "5"): v4 plus the combined
+    loading-frequency penalty (C1), constant-velocity flatness (C2), the 8 kHz one-sided floor (C3)
+    and signed V coverage (C5) - ``objective/scalar_v7.py``.
 
     The allowed versions are the single source of truth in ``objective/versions.py``, shared with
     the dataset record validator. An unsupported version fails loudly instead of silently scoring
-    v1, so a future v4 cannot half-land."""
+    v1, so a future version cannot half-land."""
     scorer = _OBJECTIVE_SCORERS.get(int(ctx.objective_version))
     if scorer is None:
         raise ValueError(f"objective_version {ctx.objective_version!r} is not one of "
@@ -935,6 +1152,12 @@ def _compute_band_split(design, cfg, mode, mspec, sspec, design_dir, backend, ct
             # Brief-dependent, NOT a pure function of (design, mesh spec): never failure-cached.
             st["kind"], st["err"], st["no_marker"] = KIND_INVALID, why, True
             return
+        if int(getattr(ctx, "objective_version", 1)) == 7:   # hardened C4 gate; v5 = MEH, v6 = loading_smooth keep their own rules
+            try:
+                _refuse_if_throat_misfits(bmesh, cfg)
+            except GeometryInvalidError as exc:
+                st["kind"], st["err"] = KIND_INVALID, str(exc)
+                return
         mesh_specs.append(bmspec)
         meshes.append(bmesh)
 
@@ -990,6 +1213,7 @@ def _compute_band_split(design, cfg, mode, mspec, sspec, design_dir, backend, ct
     mismatch = _throat_angle_mismatch_deg(design, getattr(cfg, "brief", None))
     if mismatch is not None:
         st["metrics"].scalars["throat_angle_mismatch_deg"] = mismatch
+    _stamp_design_fc_hz(st["metrics"], design)
     st["J"], st["terms"] = _score(st["metrics"], st["resp"], ctx)
 
 
@@ -1050,8 +1274,13 @@ def _meh_ctx(system, solution, block: dict, target: Target) -> dict:
     }
 
 
-def _meh_layout(design: Design, cad: dict | None) -> tuple[dict, dict]:
-    """(``layout_derived`` for M4 inner, full derived dict) from the CAD mesh provenance.
+def _meh_layout(design: Design, cad: dict | None,
+                mid_ports: dict | None = None) -> tuple[dict, dict]:
+    """(``layout_derived`` for M4 inner, full derived dict) from mesh provenance.
+
+    Prefer the MEH CAD ``derived()`` block when present. Else accept OSSE
+    ``mid_ports`` (mesher fork): one full port rectangle = across_mm × port_along_mm
+    (same as CAD ``port_across * port_along``).
 
     The inner optimiser needs the printed port area and the L1 recipe. We deliberately do NOT
     hand it the tool's ``v_front_cm3``: the front-chamber volume must stay the fill-dependent
@@ -1066,10 +1295,29 @@ def _meh_layout(design: Design, cad: dict | None) -> tuple[dict, dict]:
         ports = derived.get("ports") or []
         if ports and isinstance(ports[0], dict):
             port_area = ports[0].get("area_mm2")
+    if port_area is None and mid_ports:
+        across = mid_ports.get("across_mm")
+        along = mid_ports.get("port_along_mm")
+        if across is not None and along is not None:
+            port_area = float(across) * float(along)
+        else:
+            port_area = mid_ports.get("expected_area_mm2")
+        # Synthetic recipe for the inner optimiser: mid_ports knobs + shell thickness as neck.
+        if not recipe:
+            recipe = dict((design.params or {}).get("mid_ports") or {})
+            wt = (design.params or {}).get("wall_thickness_mm")
+            if wt is not None:
+                recipe.setdefault("wall_t_mm", float(wt))
+            derived = {
+                "port_area_mm2": float(port_area) if port_area is not None else None,
+                "source": "osse_mid_ports",
+                "mid_ports": dict(mid_ports),
+            }
     if port_area is None:
         raise ValueError(
-            "MEH mesh provenance carries no port area; the meh CAD tool's derived() block "
-            "is required (task M5 echoes it into mesh_meta.json)[\"cad\"][\"derived\"]")
+            "MEH mesh provenance carries no port area; need either the meh CAD "
+            "derived() block in mesh_meta.json[\"cad\"][\"derived\"] or OSSE "
+            "mid_ports areas in mesh_meta.json[\"mid_ports\"]")
     neck_mm = recipe.get("wall_t_mm")
     layout = {
         "derived": {
@@ -1098,7 +1346,9 @@ def _compute_meh(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx,
     brief = getattr(cfg, "brief", None)
 
     try:
-        mesh = build_mesh(design, mspec, cfg, design_dir, mode=mode, cache_dir=ctx.mesh_cache_root)
+        with profiling.stage("mesh_build"):
+            mesh = build_mesh(design, mspec, cfg, design_dir, mode=mode,
+                              cache_dir=ctx.mesh_cache_root)
     except GeometryInvalidError as exc:
         st["kind"], st["err"] = KIND_INVALID, str(exc)
         return
@@ -1111,6 +1361,7 @@ def _compute_meh(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx,
     st["mesh"] = mesh
     st["area"], st["grid"] = _grid_info(design_dir)
     cad = _cad_meta(design_dir)
+    mid_ports = _mid_ports_meta(design_dir)
     st["cad"] = ({k: cad.get(k) for k in CAD_ECHO_KEYS} if cad else _cad_info(design_dir))
     why = envelope_violation(mesh, brief)
     if why:
@@ -1125,8 +1376,11 @@ def _compute_meh(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx,
             st["from_disk"] = True
             st["outcome"] = SolveOutcome(True, resp, 0.0, None, "cache hit")
     if resp is None:
-        outcome = backend.solve(mesh, sspec)
+        with profiling.stage("solve"):
+            outcome = backend.solve(mesh, sspec)
         st["outcome"] = outcome
+        if outcome.ok and outcome.response is not None:
+            profiling.record("solver_path", 0.0, **profiling.solver_path_meta(outcome.response))
         if not outcome.ok or outcome.response is None:
             st["kind"], st["err"] = KIND_SOLVE, outcome.message or "solve failed"
             log.error("MEH solve failed for %s: %s", design.hash(), st["err"][:2000])
@@ -1152,11 +1406,13 @@ def _compute_meh(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx,
     except (KeyError, TypeError) as exc:
         raise ValueError(f"meh.groups is malformed: {exc!r}") from None
 
-    layout, derived = _meh_layout(design, cad)
+    layout, derived = _meh_layout(design, cad, mid_ports=mid_ports)
     params = getattr(ctx, "objective_params", None)
     score = inner_score if params is None else functools.partial(inner_score, params=params)
-    solution = optimise_network(resp, layout, brief, drivers, score=score)
-    system = system_response(resp, solution)
+    with profiling.stage("meh_inner_optimize"):
+        solution = optimise_network(resp, layout, brief, drivers, score=score)
+    with profiling.stage("meh_system_response"):
+        system = system_response(resp, solution)
 
     # The synthesised balloon is on the BEM theta-phi sphere grid. Carry that fact into the
     # metrics so metrics_from_response applies its sin(theta) quadrature (C4/C11) instead of
@@ -1166,7 +1422,8 @@ def _compute_meh(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx,
         system.meta["balloon_grid"] = grid_meta
 
     try:
-        st["metrics"] = metrics_from_response(system, ctx.target, mesh=mesh, design=design)
+        with profiling.stage("metrics"):
+            st["metrics"] = metrics_from_response(system, ctx.target, mesh=mesh, design=design)
     except Exception as exc:  # noqa: BLE001
         st["kind"], st["err"] = KIND_METRICS, f"{type(exc).__name__}: {exc}\n{traceback.format_exc()}"
         return
@@ -1175,7 +1432,8 @@ def _compute_meh(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx,
         st["metrics"].scalars["throat_angle_mismatch_deg"] = mismatch
 
     meh_ctx = _meh_ctx(system, solution, block, ctx.target)
-    st["J"], st["terms"] = _score(st["metrics"], system, ctx, meh_ctx=meh_ctx)
+    with profiling.stage("score"):
+        st["J"], st["terms"] = _score(st["metrics"], system, ctx, meh_ctx=meh_ctx)
     st["network_solution"] = solution.to_dict()
     st["meh_layout"] = {"derived": derived, "recipe": dict((cad or {}).get("recipe") or {})}
 
@@ -1183,8 +1441,9 @@ def _compute_meh(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx,
         # The cache holds the BEM response (not the synthesised one): re-scoring with a new
         # brief re-runs the CPU inner loop on it without another solve.
         try:
-            solve_cache.store(key, root, resp, {"ok": True, "objective": st["J"],
-                                                "n_dof": resp.n_dof, "mode": mode})
+            with profiling.stage("cache_store"):
+                solve_cache.store(key, root, resp, {"ok": True, "objective": st["J"],
+                                                    "n_dof": resp.n_dof, "mode": mode})
         except Exception as exc:  # noqa: BLE001
             log.warning("MEH solve cache write failed for %s: %s", key, exc)
 
@@ -1224,7 +1483,9 @@ def _compute(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx, st)
         _compute_band_split(design, cfg, mode, mspec, sspec, design_dir, backend, ctx, st)
         return
     try:
-        mesh = build_mesh(design, mspec, cfg, design_dir, mode=mode, cache_dir=ctx.mesh_cache_root)
+        with profiling.stage("mesh_build"):
+            mesh = build_mesh(design, mspec, cfg, design_dir, mode=mode,
+                              cache_dir=ctx.mesh_cache_root)
     except GeometryInvalidError as exc:
         st["kind"], st["err"] = KIND_INVALID, str(exc)
         return
@@ -1247,6 +1508,16 @@ def _compute(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx, st)
         st["kind"], st["err"], st["no_marker"] = KIND_INVALID, why, True
         return
 
+    # C4 (objective v7, was "v5" on the hardened branch): the driven throat must be the brief driver's round exit. The refusal is
+    # a DETERMINISTIC invalid candidate (mapped exactly like build_mesh's geometry refusal), and
+    # it happens before the solve-cache lookup so a stored response can never bypass it.
+    if int(getattr(ctx, "objective_version", 1)) == 7:   # hardened C4 gate; v5 = MEH, v6 = loading_smooth keep their own rules
+        try:
+            _refuse_if_throat_misfits(mesh, cfg)
+        except GeometryInvalidError as exc:
+            st["kind"], st["err"] = KIND_INVALID, str(exc)
+            return
+
     resp = None
     root = ctx.solve_cache_root
     if root is not None:
@@ -1256,12 +1527,15 @@ def _compute(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx, st)
             st["outcome"] = SolveOutcome(True, resp, 0.0, None, "cache hit")
     if resp is None:
         want_traces = (store_wants_traces(ctx, design) and hasattr(backend, "solve_traced"))
-        if want_traces:
-            outcome, raw = backend.solve_traced(mesh, sspec)
-            st["raw_traces"] = raw
-        else:
-            outcome = backend.solve(mesh, sspec)
+        with profiling.stage("solve", traced=bool(want_traces)):
+            if want_traces:
+                outcome, raw = backend.solve_traced(mesh, sspec)
+                st["raw_traces"] = raw
+            else:
+                outcome = backend.solve(mesh, sspec)
         st["outcome"] = outcome
+        if outcome.ok and outcome.response is not None:
+            profiling.record("solver_path", 0.0, **profiling.solver_path_meta(outcome.response))
         if not outcome.ok or outcome.response is None:
             st["kind"], st["err"] = KIND_SOLVE, outcome.message or "solve failed"
             log.error("solve failed for %s: %s", design.hash(), st["err"][:2000])
@@ -1271,7 +1545,8 @@ def _compute(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx, st)
     if resp.n_dof is not None:
         mesh.n_dof = int(resp.n_dof)
     try:
-        st["metrics"] = metrics_from_response(resp, ctx.target, mesh=mesh, design=design)
+        with profiling.stage("metrics"):
+            st["metrics"] = metrics_from_response(resp, ctx.target, mesh=mesh, design=design)
     except Exception as exc:  # noqa: BLE001
         st["kind"], st["err"] = KIND_METRICS, f"{type(exc).__name__}: {exc}\n{traceback.format_exc()}"
         return
@@ -1280,11 +1555,14 @@ def _compute(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx, st)
     if mismatch is not None:
         # WP2 report-only scalar (senior pass 2026-10-24): never weighted, never fails a solve.
         st["metrics"].scalars["throat_angle_mismatch_deg"] = mismatch
-    st["J"], st["terms"] = _score(st["metrics"], st["resp"], ctx)
+    _stamp_design_fc_hz(st["metrics"], design)
+    with profiling.stage("score"):
+        st["J"], st["terms"] = _score(st["metrics"], st["resp"], ctx)
     if root is not None and not st["from_disk"]:
         try:
-            solve_cache.store(key, root, resp, {"ok": True, "objective": st["J"],
-                                                "n_dof": resp.n_dof, "mode": mode})
+            with profiling.stage("cache_store"):
+                solve_cache.store(key, root, resp, {"ok": True, "objective": st["J"],
+                                                    "n_dof": resp.n_dof, "mode": mode})
         except Exception as exc:  # noqa: BLE001 - a cache write failure is not a failed candidate
             log.warning("solve cache write failed for %s: %s", key, exc)
 

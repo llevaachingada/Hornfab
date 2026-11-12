@@ -5,6 +5,7 @@ Real CAD + real gmsh, offline, CPU only. The defaults are the Evo 7SH numbers re
 """
 from __future__ import annotations
 
+import json
 from dataclasses import asdict, replace
 
 import pytest
@@ -48,6 +49,58 @@ def test_refusals(tool):
         tool.params_from_recipe({"tool": "plughorn", "nope": 1.0})
 
 
+def _params_from_config(tool, path):
+    """The seed recipe from a mounted example -> the CAD tool's resolved params."""
+    recipe = DesignSpace.from_config(load_config(path)).seed.params["cad"]
+    return tool.params_from_recipe(recipe)
+
+
+@pytest.mark.parametrize("path", [EVO7, EVO2])
+def test_cone_fill_exports_one_connected_solid(tool, path, tmp_path):
+    """The fill is anchored: body + post + plug + fill is ONE valid, closed solid with one driver face."""
+    p = _params_from_config(tool, path)
+    assert p.cone_fill > 0.0                                   # on by default
+    res = tool.export(tmp_path / f"{path.stem}.step", p)
+    solid = res["solid"]
+    assert solid["solids"] == 1
+    assert solid["all_shells_closed"] is True
+    assert solid["driver_faces"] == 1
+    assert solid["valid"] is True
+
+
+def test_front_chamber_volume_and_cutoff(tool):
+    """The fill eats most of the front chamber; the old gross value is reproduced with cone_fill = 0."""
+    p = tool.DEFAULTS
+    gross = p.front_chamber_gross_l()
+    net = p.front_chamber_l()
+    assert net > 0.0
+    assert net < gross
+    ratio = net / gross
+    assert ratio < 0.5
+    # measured on the Evo 7SH defaults: net 0.201 L vs gross 0.848 L -> ratio 0.237
+    assert ratio == pytest.approx(0.237, abs=0.01)
+    assert p.clearance()["min_mm"] >= p.plug_gap_mm - 1e-6     # the fill does not touch the cone
+
+    off = replace(p, cone_fill=0.0)
+    assert off.front_chamber_l() == pytest.approx(gross)
+    assert off.derived()["front_chamber_fc_hz"] == pytest.approx(419.0, abs=1.0)  # the old pin
+    assert p.derived()["front_chamber_fc_hz"] > 2.0 * off.derived()["front_chamber_fc_hz"]
+
+    d = p.derived()
+    assert d["front_chamber_l"] == pytest.approx(net, abs=1e-3)
+    assert d["front_chamber_gross_l"] == pytest.approx(gross, abs=1e-3)
+
+
+def test_cone_fill_validate_refusals(tool):
+    with pytest.raises(ValueError, match="cone fill"):         # base footprint closes the throat ring
+        replace(tool.DEFAULTS, plug_base_x_mm=100.0, plug_base_top_x_mm=38.0,
+                plug_base_y_mm=100.0).validate()
+    with pytest.raises(ValueError, match="plug_gap_mm"):       # a zero gap would touch the cone
+        replace(tool.DEFAULTS, plug_gap_mm=0.0).validate()
+    with pytest.raises(ValueError, match="cone_fill"):
+        replace(tool.DEFAULTS, cone_fill=-1.0).validate()
+
+
 def test_step_build_validates_keys(tool):
     recipe = {"tool": "plughorn", **asdict(tool.DEFAULTS)}
     step_build.validate_cad_params(recipe)
@@ -81,6 +134,13 @@ def test_mesh_build_one_driver_face(path, tmp_path):
     summ = build.read_msh_summary(res.path)
     assert summ["tags"].get(2, 0) > 0 and summ["tags"].get(1, 0) > 0
     assert (tmp_path / "cad" / "plughorn.step").exists()
+    # the cone fill must leave exactly one driver surface and one closed solid: the chamber stays one
+    # connected air volume (the fill is part of the solid, not a detached shell).
+    meta = json.loads((tmp_path / "mesh_meta.json").read_text(encoding="utf-8"))
+    assert meta["cad"]["face_inventory"]["driver"] == 1
+    assert meta["cad"]["driver_surfaces"] == 1
+    assert meta["cad"]["solid"]["solids"] == 1
+    assert meta["cad"]["solid"]["all_shells_closed"] is True
 
 
 def test_quadrants_must_be_full(tmp_path):

@@ -1,0 +1,80 @@
+# Brief room_90x60asym_800_high - hi-fi ROOM COVERAGE horn, 90 deg H x 60 deg V ASYMMETRIC
+# (narrow UP, wide DOWN), crossover 800 Hz, 1.4-inch, high mount (ceiling-hung ~8.5 ft).
+#
+# OWNER USE CASE: same room as room_90x60_800_shelf_v4 (20 x 14 x 10 ft, front corners, toed in).
+# WHY ASYMMETRIC: from 8.5 ft the seats span ~11 deg (far corner) to ~44 deg (nearest seat) BELOW
+#   the horn. The textbook high-mount answer is a vertical pattern skewed down: about +15 deg up
+#   and -45 deg down (60 deg total, centred ~15 deg below the horn axis). Top edge near level keeps
+#   the 10 ft ceiling (1.5 ft above the horn) out of the beam; the wide lower half reaches the
+#   near seats. Physical tilt of a symmetric horn gets part of this; the asymmetry also puts more
+#   level toward the far seats (upper half) and less toward the near seats (lower half).
+#
+# STATUS - READ BEFORE RUNNING (2026-10-28):
+#   * GEOMETRY: representable today only by the rows generator's up/down-antisymmetric terms
+#     (sin(phi) / sin(3 phi) LIST stop terms and the axial bend_sin1_mm; see
+#     hornlab_search/design/generators/grid.py:107-140), which REQUIRE span: half (mirror plane
+#     yz, quadrants "14", 2x the quarter dofs). The typology config sets the span, not this brief.
+#     Whether an OS-like (constant-directivity) row type accepts those terms is UNCHECKED; if none
+#     does, adding a sin(phi) term to the OSSE per-direction law is a code item (handoff C5).
+#   * SCORING: J measures V beamwidth as the -6 dB width about the 0 deg axis. It cannot yet score
+#     "+15 / -45". Until the asymmetric-V metric lands (handoff C5: upper and lower -6 dB angles
+#     scored separately against target_v_up_deg / target_v_down_deg), this brief ranks only the
+#     total V width and is NOT a valid rank of the asymmetry. Use the gate audit's upper/lower
+#     -6 dB angles, read from the stored balloon, as the decision.
+#   * symmetry: hv below is the loader's label (allowed: hv | axisymmetric); it does not fix the
+#     mesh span. Check search/campaign.py:141-152 if a campaign refuses the half-span pairing.
+# GATES (hardened plan D1/D2): loading as the shelf brief (LFP20 <= 500 Hz, Re z >= 0.5 from
+#   800 Hz). Pattern: H +-20 % from 800 Hz to 8 kHz; V upper -6 dB edge +10..+20 deg, lower edge
+#   -35..-55 deg from 1.5 f_x up; DI rise <= 5 dB; no beam narrower than 0.75 x target at 8 kHz.
+# K-LAW (mouth = 25,400,000 / (f0 * coverage_deg)): H 353 mm at 800 Hz; V 529 mm at 800 Hz.
+#   High-mount envelope 520 W x 440 H x 420 D -> f0_v_hz = 25,400,000 / (60 * 440) = 962 Hz.
+# DRIVER CLASS: 1.4-inch compression driver (36 mm exit), r0 = 18.0 mm, exit half-angle 2.5 deg.
+# f11 DISCLOSURE: 1.4in f11 5,653 Hz: 5.7-8 kHz compares geometry, not the driver.
+name: room_90x60asym_800_high_v4
+description: (objective v4) Room-coverage 90 H x 60 V asymmetric (+15/-45 target, see header), crossover 800 Hz (V from 962 Hz), 1.4-inch, high-mount 520x440x420 envelope, band 300-8000 Hz; asymmetric-V metric NOT yet in J
+driver:
+  exit_radius_mm: 18.0
+  exit_angle_deg: 2.5
+envelope:
+  max_mouth_w_mm: 520.0
+  max_mouth_h_mm: 440.0
+  max_depth_mm: 420.0
+symmetry: hv
+source:
+  cap: auto
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 300.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.5
+  f0_hz: 800.0
+  f0_v_hz: 962.0
+  freq_weights:
+    band_hz:
+      - [2500.0, 5500.0, 2.0]
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.5
+  distd: 0.5
+  diag: 0.5
+grid:
+  verify_points_per_octave: 6
+objective:
+  version: 4
+  tolerances:
+    cov: 2.0
+    rip: 1.0
+    di: 0.4
+    dislope: 9.0
+    flat: 1.5
+    load: 0.3
+    distd: 2.0
+    diag: 2.0
+  cov_narrow_ratio: 2.0

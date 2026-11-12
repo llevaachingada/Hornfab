@@ -1,4 +1,8 @@
-"""CUDA vs CPU for the MEH (multi-entry) solve, and CPU high-resolution feasibility.
+"""LEGACY BENCH (see docs/throughput/RUNBOOK.md): runs the historical NON-production path unless
+HORNLAB_BENCH_FUSED=1 / HORNLAB_BENCH_SYMMETRY=yz+xz are set; use tools/bench/throughput_matrix.py for
+fused-production numbers. Julia hosts are no longer killed by image name (tools/bench/_hosts.py).
+
+CUDA vs CPU for the MEH (multi-entry) solve, and CPU high-resolution feasibility.
 
 What this does NOT repeat (already measured, see TOOLCHAIN.md s"M4 cuda vs cpu" and
 docs/evidence/MEH_M8_2026-10-31.md): single-source cuda-vs-cpu timings, the bempp cross-check,
@@ -18,10 +22,7 @@ from __future__ import annotations
 
 import argparse
 import json
-import shutil
-import subprocess
-import tempfile
-import threading
+import os
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -31,6 +32,8 @@ import numpy as np
 import hornlab_beat_bem as beat
 from hornlab_beat_bem import ObservationConfig, SolveConfig
 from hornlab_beat_bem.sweep import solve_frequencies
+from _bench_common import GpuMemPeak, kill_hosts  # tree-kill hosts; sees WDDM shared-memory spill
+from _hosts import bench_solve_kwargs  # noqa: E402  (PR #23 opt-in production flags)
 
 ROOT = Path(__file__).resolve().parents[2]
 LOG_DIR = ROOT / "runs" / f"bench_cpu_cuda_{datetime.now(timezone.utc):%Y%m%dT%H%M%SZ}"
@@ -51,42 +54,6 @@ def log(msg: str) -> None:
 
 def remaining() -> float:
     return BUDGET_S - (time.monotonic() - T0)
-
-
-def vram_used_mib() -> int | None:
-    out = subprocess.run(["nvidia-smi", "--query-gpu=memory.used", "--format=csv,noheader"],
-                         capture_output=True, text=True)
-    try:
-        return int("".join(ch for ch in out.stdout if ch.isdigit()))
-    except ValueError:
-        return None
-
-
-class VramPeak:
-    """Poll from a separate thread (CLAUDE.md rule 5)."""
-
-    def __init__(self, period=2.0):
-        self.period, self.peak, self._stop = period, vram_used_mib(), threading.Event()
-
-    def __enter__(self):
-        def loop():
-            while not self._stop.is_set():
-                v = vram_used_mib()
-                if v is not None:
-                    self.peak = max(self.peak, v)
-                self._stop.wait(self.period)
-        self._t = threading.Thread(target=loop, daemon=True)
-        self._t.start()
-        return self
-
-    def __exit__(self, *exc):
-        self._stop.set()
-
-
-def kill_hosts() -> None:
-    """Clear BEAT hosts between arms; only julia carries our solves on this box."""
-    subprocess.run(["taskkill", "/F", "/IM", "julia.exe"], capture_output=True)
-    time.sleep(2)
 
 
 def write_tetra(path: Path) -> Path:
@@ -113,15 +80,18 @@ def observation() -> ObservationConfig:
 
 
 def solve(mesh: Path, freqs, *, backend: str, tags, balloon=True):
-    cfg = SolveConfig(
+    cfg = SolveConfig(**bench_solve_kwargs(),
         velocity_sources={t: 1.0 for t in tags},
         impedance_matrix=True,
         beat_backend=backend,
         observation=observation(),
     )
     t0 = time.perf_counter()
-    with VramPeak() as peak:
+    with GpuMemPeak() as peak:
         result = solve_frequencies(str(mesh), list(freqs), cfg)
+    if peak.spilled:
+        log(f"WARNING: {backend} arm spilled {peak.shared_peak_mib} MiB into WDDM shared system memory - "
+            "this timing measures PCIe paging, not the GPU")
     return result, time.perf_counter() - t0, peak.peak
 
 
@@ -159,8 +129,12 @@ def main() -> int:
     global BUDGET_S
     ap = argparse.ArgumentParser()
     ap.add_argument("--budget", type=float, default=900.0, help="hard wall-clock budget, seconds")
+    ap.add_argument("--cuda-fused", action="store_true",
+                    help="CUDA arms use the fused Burton-Miller path (multi-channel since beat-bem 94d251c)")
     args = ap.parse_args()
     BUDGET_S = float(args.budget)
+    # read by the Julia host at spawn; every arm starts from kill_hosts(), so it always applies
+    os.environ["HORNLAB_BEAT_FUSED_BM_CUDA"] = "1" if args.cuda_fused else "0"
 
     statuses = beat.beat_backend_statuses()
     log(f"log: {LOG}")

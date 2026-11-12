@@ -228,6 +228,27 @@ def test_catalog_version_and_domains_are_exposed():
     assert tuple(domains_covered()) == DOMAINS
 
 
+def test_subfolder_typologies_are_catalogued_or_they_vanish():
+    """A config under ``examples/typologies/<subdir>/`` is invisible to ``build_catalog`` unless
+    ``examples/catalog.yaml`` names it (``_config_sources`` globs only the top level), and a missing
+    entry means no group, no description, no knob list and no entry in the GUI's param catalog.
+    The cone_plughorn family (Funktion-One CAD topology) is pinned here so it cannot silently
+    disappear again; add a new line for any future subfolder typology."""
+    catalog = build_catalog(ROOT)
+    typos = catalog["typologies"]
+    expected = {"cone_plughorn_7sh", "cone_plughorn_2sh", "cone_plughorn_morph_10in",
+                "cone_plughorn_morph_8in", "cone_plughorn_morph_12in"}
+    assert expected <= set(typos)
+    for name in sorted(expected):
+        e = typos[name]
+        assert e["group"] == "cone", f"{name}: group must be 'cone', got {e['group']!r}"
+        assert e["source_status"] == "catalog", f"{name}: not listed in examples/catalog.yaml"
+        assert e["symmetry"] == "full", f"{name}: quadrants are '1234'"
+        assert e["config_path"].startswith("examples/typologies/")
+        assert (ROOT / e["config_path"]).exists()
+        assert e["knobs"], f"{name}: a catalogued typology must expose its knobs"
+
+
 # ------------------------------------------------------------------ overloads
 
 
@@ -403,10 +424,25 @@ def test_every_family_key_has_a_native_doc_or_is_an_explicit_non_knob():
         set(t) for t in families.FAMILY_KEYS.values())))
 
 
+#: Original native set (pre-Solana/SAWMOD). New OSSE/CAD natives may be added; the count
+#: assertion below is a floor plus the live set, not a frozen "exactly 10".
+_CORE_NATIVE = frozenset({
+    "ath_core", "freeform_hv", "freeform_sculpt", "icw_rollback", "icw_termination",
+    "multicell_3x3", "osse_baseline", "rosse_baseline", "search_smoke", "throat_adapter",
+})
+#: CAD-recipe configs: seed has only ``cad:``, so no families.FAMILY_KEYS knobs emit.
+_CAD_ONLY_NATIVE = frozenset({
+    "multicell_3x3", "sawmod_meh_lr2", "solana_meh", "solana_meh_wg",
+})
+
+
 def test_every_native_config_seed_and_bound_key_resolves():
     catalog = build_catalog(ROOT)
     natives = _native_typologies(catalog)
-    assert len(natives) == 10, f"expected the 10 native configs, got {sorted(natives)}"
+    assert _CORE_NATIVE <= set(natives), (
+        f"missing core native configs: {sorted(_CORE_NATIVE - set(natives))}")
+    assert len(natives) >= len(_CORE_NATIVE), (
+        f"expected at least the {len(_CORE_NATIVE)} core natives, got {sorted(natives)}")
     for name, typ in natives.items():
         data = yaml.safe_load((ROOT / typ["config_path"]).read_text(encoding="utf-8"))
         keys = set(data.get("seed_params") or {}) | set(data.get("bounds") or {})
@@ -504,9 +540,10 @@ def test_all_native_typologies_are_documented_and_non_empty_except_multicell():
     natives = _native_typologies(catalog)
     for name, typ in natives.items():
         assert typ["documented"] is True, f"{name}: native domain is claimed"
-        if name == "multicell_3x3":
-            assert typ["knobs"] == [], "CAD-only config has no native family keys"
-            assert typ["non_native_keys"] == ["cad"]
+        if name in _CAD_ONLY_NATIVE:
+            assert typ["knobs"] == [], f"{name}: CAD-only config has no native family keys"
+            assert typ["non_native_keys"] == ["cad"], (
+                f"{name}: expected non_native_keys ['cad'], got {typ['non_native_keys']!r}")
             assert typ["empty_reason"] and "cad" in typ["empty_reason"]
         else:
             assert typ["knobs"], f"{name}: no native knobs emitted"

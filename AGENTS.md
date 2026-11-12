@@ -176,7 +176,8 @@ PRs into `main` only, with complete unedited checkpoint output pasted in the bod
 
 Configured in `.opencode/oh-my-opencode-slim.json` (preset `fm-cloud`):
 
-- **Orchestrator + designer**: `ollama-cloud/glm-5.3-flash`
+- **Orchestrator**: `deepseek/deepseek-flash` (DeepSeek V4.1 Flash, DeepSeek API)
+- **designer**: `ollama-cloud/glm-5.3-flash`
 - **fixer / explorer / librarian / council**: `deepseek/deepseek-flash` (DeepSeek V4.1 Flash —
   the live DeepSeek API's flash tier; the older `deepseek-v4-flash` ID appears in public model
   registries but is no longer served by the live DeepSeek or ollama-cloud APIs), falling back to
