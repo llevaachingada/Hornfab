@@ -3,6 +3,11 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-10-25 (M6/WP12 pushed: enclosure mounting plumbed end-to-end (`brief.mounting` → the mesher's OWN keys; `-mnt-` cache keys; mesh_meta/ndjson/record echoes; absent = byte-for-bit) and MEASURED on two finalists — dofs +199.4 %/+106.5 %, both under the UNCHANGED caps, enclosure J improves (a different objective landscape — never rank across mountings), reference parity 2.91e-06 dB; **WP13 axisymmetric backend OWNER-DEFERRED** ("don't know how necessary that is"); suite **1372/0/0/0**; focused 71/0/0; evidence `docs/evidence/M6_WP12_2026-10-25.md`, byte-check 21/21; no GitHub issue state changed).
 
+Local-only, added 2026-11-12 (**fix: Group-A test CLI helper ran with a hard-coded interpreter path; no GitHub issue state changed**):
+- PR #38 merged with CI red (repo does not enforce status checks): `run_cli` in
+  `tests/test_tools_analysis_common.py` hardcoded the box's venv path; CI (Linux) failed ~25 tests with
+  `FileNotFoundError`. Fixed with `sys.executable` in PR (this one); no product code touched.
+
 Local-only, added 2026-11-12 (**day plan group D merge, PR #35; no GitHub issue state changed**):
 - D.1-D.4 landed: two-lane `night_status.py` (locks, running jobs, row ages, stale-lane ALERT), night-runner
   robustness (GPU-busy -> blocked + one retry, lane/backend/status/attempts rows, --dry-run argv path
