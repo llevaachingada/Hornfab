@@ -10,6 +10,7 @@ import { viewEvolution } from "./evolution.js";
 import { viewBalloon } from "./balloon.js";
 import { viewTypologySandbox } from "./sandbox.js";
 import { viewUmap } from "./umap.js";
+import { viewVerify } from "./verify.js";
 
 // ── XSS helper ─────────────────────────────────────────────────────
 function esc(s) {
@@ -77,6 +78,8 @@ const ROUTES = [
   { re: /^#\/campaigns$/,               fn: () => viewCampaignsList() },
   { re: /^#\/campaign\/(.+)$/,          fn: m => viewCampaignDetail(m[1]) },
   { re: /^#\/runs$/,                    fn: () => viewRunsList() },
+  { re: /^#\/run\/([^\/?#]+)\/verify\/compare(?:\?(.*))?$/, fn: m => viewVerify(ROOT, m[1], "compare", m[2] || "") },
+  { re: /^#\/run\/([^\/?#]+)\/verify(?:\?(.*))?$/,         fn: m => viewVerify(ROOT, m[1], "table",   m[2] || "") },
   { re: /^#\/run\/(.+)\/3d$/,           fn: m => viewRun3D(m[1]) },
   { re: /^#\/run\/(.+)\/balloon$/,      fn: m => viewBalloon(ROOT, m[1]) },     // W6: BL-style balloon
   { re: /^#\/run\/(.+)\/evolution$/,    fn: m => viewEvolution(ROOT, m[1]) },

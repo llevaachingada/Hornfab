@@ -183,7 +183,13 @@ def run_summary(run_dir: Path) -> dict:
     every run on each refresh, and a finished run's summary never changes."""
     try:
         st = (run_dir / "search.ndjson").stat()
-        stamp = (st.st_mtime_ns, st.st_size)
+        stamp: tuple = (st.st_mtime_ns, st.st_size)
+        # WP1: include verify/search.ndjson in cache stamp so a new inline verify
+        # source invalidates the cached summary.
+        vp = run_dir / "verify" / "search.ndjson"
+        if vp.is_file():
+            vst = vp.stat()
+            stamp = stamp + (vst.st_mtime_ns, vst.st_size)
     except OSError:
         stamp = None
     key = str(run_dir.resolve())
@@ -203,9 +209,24 @@ _RUN_SUMMARY_CACHE: dict[str, tuple] = {}
 def _run_summary(run_dir: Path) -> dict:
     rows = read_ndjson(run_dir / "search.ndjson")
     cfg = _config(run_dir)
+    rj_sum = _as_dict(_read_json(run_dir / "run.json"))
     ok = [r for r in rows if r.get("ok")]
     best = min(ok, key=lambda r: r["objective"]) if ok else None
     brief = cfg.get("brief") if isinstance(cfg.get("brief"), dict) else None
+    # WP1: verify attachment fields — additive, absent on plain screen runs.
+    has_inline_verify = (run_dir / "verify" / "search.ndjson").is_file()
+    verify_of_run_id: str | None = None
+    if rj_sum.get("mode") == "verify" and "verify_of" in rj_sum:
+        from pathlib import PureWindowsPath as _PWin, PurePosixPath as _PPosix
+        vo_run = _as_dict(rj_sum.get("verify_of")).get("run") or ""
+        for _cls in (_PWin, _PPosix):
+            try:
+                name = _cls(vo_run).name
+                if name:
+                    verify_of_run_id = name
+                    break
+            except (ValueError, TypeError):
+                pass
     return clean({
         "id": run_dir.name,
         "name": cfg.get("name"),
@@ -227,6 +248,8 @@ def _run_summary(run_dir: Path) -> dict:
         "dims": horn_dims(best),
         "budget": _command_flags(run_dir).get("max_evals") or _command_flags(run_dir).get("budget"),
         "cma_seed": _command_flags(run_dir).get("cma_seed"),
+        "has_inline_verify": has_inline_verify,
+        "verify_of_run_id": verify_of_run_id,
     })
 
 
@@ -329,11 +352,24 @@ def _profile_from_mesh(msh: Path) -> dict:
     return prof
 
 
-def design_curves(run_dir: Path, h: str) -> dict | None:
-    """Per-frequency metrics, normalised polar maps and the wall profile of one solved design."""
+def design_curves(run_dir: Path, h: str, tier: str = "screen") -> dict | None:
+    """Per-frequency metrics, normalised polar maps and the wall profile of one solved design.
+
+    ``tier`` selects the design directory:
+    * ``"screen"`` (default): ``run_dir / "designs" / h``
+    * ``"verify"``: ``run_dir / "verify" / "designs" / h`` (inline verify layout)
+
+    For linked/standalone verify runs the caller passes the verify run's own ``run_dir``; in that
+    case use the default tier (the linked run's ``designs/`` dir is screen-layout relative to it).
+    """
+    if tier not in ("screen", "verify"):
+        raise ValueError(f"unknown tier {tier!r}; must be 'screen' or 'verify'")
     if not HASH.match(h):
         raise ValueError(f"not a design hash: {h!r}")
-    d = run_dir / "designs" / h
+    if tier == "verify":
+        d = run_dir / "verify" / "designs" / h
+    else:
+        d = run_dir / "designs" / h
     m = _read_json(d / "metrics.json")
     if m is None:
         return None
@@ -550,6 +586,11 @@ def run_detail(runs: Path, run_id: str, root: Path | None = None) -> dict:
     gate_audit = run_gate_audit(repo_root, run_id)
     if gate_audit.get("available"):
         out["gate_audit"] = clean(gate_audit)
+    # WP1: verify attachment summary — always present so the detail view can offer "Open verify report".
+    out["verification"] = clean({
+        "has_inline_verify": (d / "verify" / "search.ndjson").is_file(),
+        "verify_of": run_json.get("verify_of") if isinstance(run_json.get("verify_of"), dict) else None,
+    })
     # Continue-run control: the last invocation's stop reason tells the run detail whether a budget
     # top-up is likely to do work (budget/interrupted) or the optimizer stopped on its own terms.
     # Same convention as below: present in run.json = pass it through, absent stays absent.
@@ -869,17 +910,27 @@ def run_archive(runs: Path, run_id: str) -> dict:
     return clean(out)
 
 
-def mesh_surface(runs: Path, run_id: str, h: str, max_tris: int = 60000) -> dict:
+def mesh_surface(runs: Path, run_id: str, h: str, tier: str = "screen",
+                 max_tris: int = 60000) -> dict:
     """Triangle surface of a solved design (mm), the meshed domain only (a quarter for quadrants '1',
-    an x/y half for '14'/'12')."""
+    an x/y half for '14'/'12').
+
+    ``tier`` selects the design directory (see ``design_curves`` for the convention).
+    """
+    if tier not in ("screen", "verify"):
+        raise ValueError(f"unknown tier {tier!r}; must be 'screen' or 'verify'")
     d = _resolve_run(runs, run_id)
     if not HASH.match(h):
         raise ValueError(f"not a design hash: {h!r}")
-    nt = mesh_nodes_tris(d / "designs" / h / "mesh.msh")
+    if tier == "verify":
+        design_dir = d / "verify" / "designs" / h
+    else:
+        design_dir = d / "designs" / h
+    nt = mesh_nodes_tris(design_dir / "mesh.msh")
     if nt is None:
         raise FileNotFoundError(f"{run_id}/{h}/mesh.msh")
     pts, tris = nt
-    meta = _read_json(d / "designs" / h / "mesh_meta.json") or {}
+    meta = _read_json(design_dir / "mesh_meta.json") or {}
     q = (meta.get("result") or {}).get("quadrants") or _row_quadrants(d, h) \
         or (_config(d).get("mesh") or {}).get("quadrants")
     snap_axes = {"1": (0, 1), "14": (0,), "12": (1,)}.get(str(q), ())
@@ -949,7 +1000,7 @@ def balloon_designs(runs: Path, run_id: str) -> dict:
     return clean({"run_id": run_id, "name": _config(d).get("name"), "designs": designs})
 
 
-def balloon(runs: Path, run_id: str, h: str) -> dict:
+def balloon(runs: Path, run_id: str, h: str, tier: str = "screen") -> dict:
     """One design's stored balloon (W6) for the GUI's three.js Balloon view.
 
     Reads only the ``response.npz`` the search already wrote. The per-direction order is
@@ -959,11 +1010,18 @@ def balloon(runs: Path, run_id: str, h: str) -> dict:
     closes the seam). Levels are relative to on-axis (the theta = 0 pole row), Float32-rounded
     and clipped to ``[BALLOON_MIN_DB, 0]`` dB — the Balloon display's window. Nothing is solved
     or interpolated here; bilinear interpolation on the grid is a viewer concern.
+
+    ``tier`` selects the design directory (see ``design_curves`` for the convention).
     """
+    if tier not in ("screen", "verify"):
+        raise ValueError(f"unknown tier {tier!r}; must be 'screen' or 'verify'")
     d = _resolve_run(runs, run_id)
     if not HASH.match(h):
         raise ValueError(f"not a design hash: {h!r}")
-    p = d / "designs" / h / "response.npz"
+    if tier == "verify":
+        p = d / "verify" / "designs" / h / "response.npz"
+    else:
+        p = d / "designs" / h / "response.npz"
     if not p.is_file():
         raise FileNotFoundError(f"{run_id}/{h}/response.npz")
     try:
