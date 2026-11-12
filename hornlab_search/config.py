@@ -160,11 +160,53 @@ def _resolve_path(p, *bases) -> Path:
     return p
 
 
+def _deep_merge(base: dict, child: dict) -> dict:
+    """Child wins; nested mappings merge recursively; lists and scalars are replaced whole."""
+    out = dict(base)
+    for k, v in child.items():
+        if isinstance(v, dict) and isinstance(out.get(k), dict):
+            out[k] = _deep_merge(out[k], v)
+        else:
+            out[k] = v
+    return out
+
+
+def _load_yaml_extends(path, _chain: tuple = ()):
+    """Read a YAML file and resolve its ``extends:`` (a path or list of paths, relative to the
+    file that names them) recursively. Bases merge in list order (later wins), then the file's
+    own keys win over all bases. The ``extends`` key never survives, so a config written with
+    ``extends:`` and its flat copy give the same ``raw`` and therefore the same config_sha and
+    solve hash. Raises ConfigError on a cycle or a missing base, naming the chain."""
+    path = Path(path)
+    key = path.resolve()
+    chain = _chain + (key,)
+    show = " -> ".join(str(c) for c in chain)
+    if key in _chain:
+        raise ConfigError(f"extends cycle: {show}")
+    if _chain and not path.is_file():
+        raise ConfigError(f"extends: file not found: {path} (chain: {show})")
+    raw = yaml.safe_load(path.read_text(encoding="utf-8"))
+    if not isinstance(raw, dict):
+        if _chain:
+            raise ConfigError(f"extends: {path} top level must be a mapping (chain: {show})")
+        return raw
+    if "extends" not in raw:
+        return raw
+    ext = raw.pop("extends")
+    ext = [] if ext is None else [ext] if isinstance(ext, str) else ext
+    if not isinstance(ext, list) or not all(isinstance(e, str) for e in ext):
+        raise ConfigError(f"{path.name}: extends must be a path or a list of paths")
+    merged: dict = {}
+    for e in ext:
+        merged = _deep_merge(merged, _load_yaml_extends(path.parent / e, chain))
+    return _deep_merge(merged, raw)
+
+
 def load_brief(path) -> dict:
     """A design brief: driver exit, size envelope, symmetry class, source cap, target and weights
     (docs/TYPOLOGY_PLAN.md s3). It makes J comparable across typologies. Raises ConfigError."""
     path = Path(path)
-    raw = yaml.safe_load(path.read_text(encoding="utf-8"))
+    raw = _load_yaml_extends(path)
     where = f"brief {path.name}"
     if not isinstance(raw, dict):
         raise ConfigError(f"{where}: top level must be a mapping")
@@ -724,7 +766,7 @@ def load_config(path, *, brief=None, cma_seed: int | None = None) -> Config:
     ``cma_seed`` overrides ``search.seed``. A ``generator:`` block makes this a typology config
     (family must be FREEFORM; ``seed_params``/``bounds`` then hold generator knobs)."""
     path = Path(path)
-    raw = yaml.safe_load(path.read_text(encoding="utf-8"))
+    raw = _load_yaml_extends(path)
     if not isinstance(raw, dict):
         raise ConfigError(f"{path}: top level must be a mapping")
     where = path.name
