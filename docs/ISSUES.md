@@ -3,6 +3,21 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-10-25 (M6/WP12 pushed: enclosure mounting plumbed end-to-end (`brief.mounting` → the mesher's OWN keys; `-mnt-` cache keys; mesh_meta/ndjson/record echoes; absent = byte-for-bit) and MEASURED on two finalists — dofs +199.4 %/+106.5 %, both under the UNCHANGED caps, enclosure J improves (a different objective landscape — never rank across mountings), reference parity 2.91e-06 dB; **WP13 axisymmetric backend OWNER-DEFERRED** ("don't know how necessary that is"); suite **1372/0/0/0**; focused 71/0/0; evidence `docs/evidence/M6_WP12_2026-10-25.md`, byte-check 21/21; no GitHub issue state changed).
 
+Local-only, added 2026-11-12 (**day plan group D merge, PR #35; no GitHub issue state changed**):
+- D.1-D.4 landed: two-lane `night_status.py` (locks, running jobs, row ages, stale-lane ALERT), night-runner
+  robustness (GPU-busy -> blocked + one retry, lane/backend/status/attempts rows, --dry-run argv path
+  validation, explicit stale-lock takeover), parity-gated `tools/data/merge_lane_dataset.py` (dry-run default,
+  provenance.lane=cpu, atomic + idempotent), per-lane `tools/night_report.py`. 66 targeted tests; full suite
+  green on the branch. D.3 gate tolerance documented (top-level `pass`; fail closed on unrecognised).
+
+Local-only, added 2026-11-12 (**day plan group F merge, PR #33; issue #13 state changed on GitHub**):
+- **F.4 DONE:** GitHub issue #13 CLOSED by the orchestrator 2026-11-12 (comment cites fixes merged
+  2026-10-22: FF to 6d1d5c7 = e0b9b61 + 11304f6 + 152a829; suite 533 PASS). Mirrored in the row below.
+- P15 added to NEXT_DEV_PRIORITIES (day plan, PR #32); P14 lanes L1-L5 marked DONE (#29/#26/#27/#28; #25 open, merges last);
+  owner decisions recorded (v6/v7 loading split per PR #27 tau evidence, round-throat default, sysmem, Collin HF write, printing).
+- SENIOR_PLAN_2026-11-12.md gained a per-WP status column (done / in this plan / open).
+- CONTINUITY reorder delivered as `docs/history/continuity_reorder_2026-11-12.patch` (apply LAST, after all today's merges).
+
 Local-only, added 2026-11-12 (**lane L1 CPU second lane; no GitHub issue state changed**):
 - **PR `lane/L1-cpu-lane` → `main` (open draft):** CPU second solve lane wired end-to-end (L1.1-L1.6, L1.8);
   `solve.julia_threads`, lane-scoped host cleanup, `lane_env()`, two-lane night runner, `lane`+`backend` rows,
@@ -22,7 +37,7 @@ Local-only, added 2026-11-12 (day queue): staged-search brief path fix; narrowed
 
 | ID | Title | Status | Owner | Plan ref |
 |---|---|---|---|---|
-| #13 | hardening-review: Stage A surrogate gate-integrity and real-data traps | **open — fixes MERGED to main** (FF to 6d1d5c7 on 2026-10-22 carries e0b9b61 + 11304f6 + cloud reconciliation 152a829 verbatim; oracle pre-merge sign-off; full offline suite 533 PASS at the merged tree; awaiting owner close) | phase-2 (cloud) | `docs/plan/11_PHASE2_SURROGATE.md` §4 |
+| #13 | hardening-review: Stage A surrogate gate-integrity and real-data traps | **closed 2026-11-12** (fixes had MERGED to main 2026-10-22: FF to 6d1d5c7 carries e0b9b61 + 11304f6 + cloud reconciliation 152a829 verbatim; oracle pre-merge sign-off; full offline suite 533 PASS at the merged tree; closed per day-plan F.4) | phase-2 (cloud) | `docs/plan/11_PHASE2_SURROGATE.md` §4 |
 
 Local-only, added 2026-11-03 (**CPU-vs-CUDA audit; no GitHub issue state changed**):
 - **PR #19 (`meh/integration`, open):** its conclusion "CPU is the faster engine for the MEH" is withdrawn - the
@@ -916,7 +931,7 @@ Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 20
 | #9 | [Q] Collin: can build_point_grid be public API? | closed (use privately, keep pin + guard test) | user | `docs/plan/02_TASK_ENV.md` C4 |
 | #10 | [Q] Collin: confirm BEAT driver excitation on tag 2 | closed (confirmed tag 2 / unit-acceleration) | user | `docs/plan/02_TASK_ENV.md` C5 |
 | #11 | [Q] Collin: OK with the hornlab-search name? | closed (keep until objection) | user | `docs/plan/README.md` |
-| #13 | hardening-review: Stage A surrogate gate-integrity and real-data traps | **open — fixes MERGED to main** (FF to 6d1d5c7 on 2026-10-22 carries e0b9b61 + 11304f6 + cloud reconciliation 152a829 verbatim; oracle pre-merge sign-off; full offline suite 533 PASS at the merged tree; awaiting owner close) | phase-2 (cloud) | `docs/plan/11_PHASE2_SURROGATE.md` §4 |
+| #13 | hardening-review: Stage A surrogate gate-integrity and real-data traps | **closed 2026-11-12** (fixes had MERGED to main 2026-10-22: FF to 6d1d5c7 carries e0b9b61 + 11304f6 + cloud reconciliation 152a829 verbatim; oracle pre-merge sign-off; full offline suite 533 PASS at the merged tree; closed per day-plan F.4) | phase-2 (cloud) | `docs/plan/11_PHASE2_SURROGATE.md` §4 |
 
 Local-only, added 2026-11-06 (**Boundary Lab A/B check on branch `ccr-80a29f93-dxnmdm`; no GitHub issue state changed**):
 - **Open (owner + friend, `docs/ab/BOUNDARY_LAB_AB.md`):** first real A/B of one design: `ab-bl demo --fake`, `export`, `solve --dry-run`, `solve --symmetric` on the GPU, friend runs Boundary Lab, `compare`. Plan ref `docs/BOUNDARY_LAB_INTEGRATION_PLAN.md` BL-1 / BL-2 (this is a file-interchange route; no BL code is imported).
