@@ -9,6 +9,8 @@ Local-only, added 2026-11-12 (**day plan group B merge, PR #40; no GitHub issue 
   unchanged (78ed1f4 goldens green). 97 targeted tests green. `cma_me` + `resample` is a ConfigError
   (ribs 0.12 `Scheduler.tell` cannot drop refused solutions) — documented. Open follow-up:
   fold the hand-written search-key section into `tools/gen_param_catalog.py`.
+  CI also required adding the new opt-in keys to `tests/test_config.py::OPTIONAL_FIELDS`
+  (they are None by design when absent) — no product code changed.
 
 Local-only, added 2026-11-12 (**day plan group C merge, PR #37; no GitHub issue state changed**):
 - C.1/C.2 calibration planner + verdicts landed; C.3 N1 throughput evidence + C.4 screen-fidelity

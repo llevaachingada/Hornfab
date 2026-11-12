@@ -25,6 +25,9 @@
 - Verified: 97 targeted day-B tests green (97/0/0/0 junitxml); CI green on the branch.
 - NOTES_FOR_SENIOR.md appended: PARAMETERS.md is generator-owned for design knobs; the day-B
   search-key section should be folded into `tools/gen_param_catalog.py` (outside group B ownership).
+- CI fix in the merge window: the pre-existing `test_config.py` no-None guard flagged the new
+  opt-in keys (`search.max_attempts`/`links`/`warm_start`/`surrogate` are None by design when
+  absent) — added them to `OPTIONAL_FIELDS` per the established convention; no product code changed.
 
 ## 2026-11-12 (17:40Z) - DAY GROUP C: CALIBRATION HARNESS + N1 THROUGHPUT EVIDENCE
 
