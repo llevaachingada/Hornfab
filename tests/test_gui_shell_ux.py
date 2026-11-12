@@ -76,6 +76,17 @@ const L = [{ brief: "new", last_activity: "2026-11-10T00:00:00Z" }, { brief: "ol
 let f = homeLeadersFilter(L, false, now);
 assert.deepEqual(f.shown.map(x => x.brief), ["new", "none"]); assert.equal(f.hidden, 1);
 f = homeLeadersFilter(L, true, now); assert.equal(f.shown.length, 3);
+// verification card states
+const { verificationCardHtml } = app;
+assert.equal(verificationCardHtml(null, "r"), "");
+assert.ok(verificationCardHtml({ kind: "none", summary: {} }, "R1").includes('verify --run &quot;runs/R1&quot; --top 5'));
+assert.ok(verificationCardHtml({ kind: "redirect", redirect_to: null }, "R2").includes("not in this runs folder"));
+assert.ok(verificationCardHtml({ kind: "redirect", redirect_to: "P" }, "R2").includes("#/run/P/verify"));
+assert.ok(verificationCardHtml({ kind: "standalone", summary: { best_verify_j: 3 } }, "R3").includes("Single-design verification"));
+const ok = verificationCardHtml({ kind: "pairs", comparable: true, summary: { n_verified: 5, best_verify_j: 4.62, best_verify_hash: "608eef092639", screen1_verify_rank: 2, bias_median_pct: 19.1 } }, "R4");
+assert.ok(ok.includes("5 designs verified") && ok.includes("screen #1 is verify #2") && ok.includes("19.1% optimistic") && ok.includes("#/run/R4/verify"), ok);
+const nc = verificationCardHtml({ kind: "pairs", comparable: false, comparable_reason: "different bands", summary: { n_verified: 3 } }, "R5");
+assert.ok(nc.includes("no ranking across them"), nc);
 console.log("WP5 OK");
 '''
 

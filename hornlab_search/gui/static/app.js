@@ -261,6 +261,41 @@ function homeLeadersHtml(leaders, pending = false) {
   </div>`;
 }
 
+/** Pure: the run page's Verification card from a /api/verify report (plan §3.1). States:
+ *  redirect (a linked verify run) · standalone · pairs with verified rows · none yet. The copyable
+ *  command uses the exact run id; nothing here is invented — missing numbers render "–". */
+function verificationCardHtml(rep, runId) {
+  const cmd = `hornlab-search verify --run "runs/${runId}" --top 5`;
+  const open = `<a class="btn primary" href="#/run/${esc(runId)}/verify">Open verify view →</a>`;
+  if (!rep) return "";
+  if (rep.kind === "redirect") {
+    const parent = rep.redirect_to
+      ? `<a class="btn primary" href="#/run/${esc(rep.redirect_to)}/verify">Open the parent's verify view →</a> <a class="btn" href="#/run/${esc(rep.redirect_to)}">Parent run →</a>`
+      : `<span class="muted">Its parent run is not in this runs folder (moved or deleted).</span>`;
+    return `<div class="alert info card" role="note"><b>This is a verification run.</b> It re-solved designs from another run at higher resolution; its rows are not a search, so search-history panels below do not apply.<div class="btn-row" style="margin-top:8px;gap:8px">${parent}</div></div>`;
+  }
+  if (rep.kind === "standalone") {
+    const s = rep.summary || {};
+    return `<div class="card"><div class="eyebrow">Verification</div>
+      <p style="margin:4px 0 8px"><b>Single-design verification.</b> One design solved at verify resolution (verify J ${fmt(s.best_verify_j)}); there is no screen run to compare it against.</p>${open}</div>`;
+  }
+  const s = rep.summary || {};
+  const n = s.n_verified || 0;
+  if (rep.kind === "none" || !n) {
+    return `<div class="card"><div class="eyebrow">Next step</div>
+      <p style="margin:4px 0 8px"><b>Not verified yet.</b> Screen scores are a fast first pass and are usually optimistic. Verify the best designs at higher resolution before choosing one to print:</p>
+      <div class="log-tail mono" style="max-height:none;user-select:all">${esc(cmd)}</div></div>`;
+  }
+  const rank = s.screen1_verify_rank != null ? `screen #1 is verify #${s.screen1_verify_rank}` : "";
+  const bias = s.bias_median_pct != null ? `screen scores were ${fmt(Math.abs(s.bias_median_pct), 1)}% ${s.bias_median_pct >= 0 ? "optimistic" : "pessimistic"} (median)` : "";
+  const facts = [`${n} design${n === 1 ? "" : "s"} verified`, s.n_failed ? `${s.n_failed} failed` : "",
+    `best verify J ${fmt(s.best_verify_j)}${s.best_verify_hash ? ` (${esc(String(s.best_verify_hash).slice(0, 12))})` : ""}`, rank, bias]
+    .filter(Boolean).join(" · ");
+  const warn = rep.comparable === false ? `<p class="warn-text" style="margin:6px 0 0">Screen and verify were scored differently (${esc(rep.comparable_reason || "different settings")}), so no ranking across them.</p>` : "";
+  return `<div class="card"><div class="eyebrow">Verification · next step</div>
+    <p style="margin:4px 0 8px">${facts}. Pick a design to print from the verified ones, not from the screen score.</p>${warn}${open}</div>`;
+}
+
 const HOME_RECENT_DAYS = 14;   // the real tree has every brief active within 30 days, so 30 hid nothing
 let _homeShowAllBriefs = false;
 
@@ -2521,7 +2556,7 @@ export { runProvenanceGroup, renderProvenanceBadges, restartScheduleHtml, stepCh
 export { f0KpiHtml, mountingRankWarnHtml, seedDerivationHtml, objectiveVersionOptionsHtml,
          objectiveVersionOf, jVersionLabel, objectiveVersions, objectiveVersionBannerHtml,
          sortRunsForTable, gateAuditHtml, J_VERSION_BANNER, gateAuditSplit, budgetKpi,
-         runIsLive, runModeMatches, runModeBadgesHtml, runParentLineHtml, laneChipsHtml, compareOptionsHtml, homeLeadersFilter, homeLeadersHtml };
+         runIsLive, runModeMatches, runModeBadgesHtml, runParentLineHtml, laneChipsHtml, compareOptionsHtml, homeLeadersFilter, homeLeadersHtml, verificationCardHtml };
 
 export { lanesPanelHtml, verdictChipHtml, eliteGateChips };
 
@@ -2603,6 +2638,9 @@ async function viewRunDetail(id) {
 
       <!-- Designer header: key facts -->
       <div class="kpis" id="kpi-strip"></div>
+
+      <!-- Verification card + next step (GUI plan WP4): filled from /api/verify/<id> after paint -->
+      <div id="verify-card"></div>
 
       ${restartScheduleHtml(d, id)}
 
@@ -2762,6 +2800,12 @@ async function viewRunDetail(id) {
   ].map(([k, v, cls]) => `<div class="kpi"><span>${k}</span><b${cls ? ` class="${cls}"` : ""}>${v}</b></div>`);
   kpis.splice(2, 0, f0KpiHtml(t));          // right after Band; "" when the brief carries no f0
   document.getElementById("kpi-strip").innerHTML = kpis.filter(Boolean).join("");
+  {
+    const card = document.getElementById("verify-card"), here = currentRoot();
+    if (card) api(`/api/verify/${encodeURIComponent(id)}`)
+      .then(rep => { if (here === currentRoot() && card.isConnected) card.innerHTML = verificationCardHtml(rep, id); })
+      .catch(() => {});   // an older server without /api/verify: the card stays absent
+  }
 
   const F = S.freqs || B.freqs || [];
   const band = [t.band_lo_hz || 700, t.band_hi_hz || 5500];
