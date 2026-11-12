@@ -108,14 +108,21 @@ def derive_lane(registry_dir: str | os.PathLike | None) -> str | None:
     """
     if not registry_dir:
         return None
-    try:
-        path = Path(str(registry_dir))
-    except (TypeError, ValueError):
+    parts = _path_parts(registry_dir)
+    if len(parts) < 2 or parts[-1].lower() != _WORKERS_DIRNAME:
         return None
-    if path.name.lower() != _WORKERS_DIRNAME:
-        return None
-    lane = path.parent.name.strip().lower()
+    lane = parts[-2].strip().lower()
     return lane or None
+
+
+def _path_parts(p) -> list[str]:
+    """Path components split on BOTH separators: a host's ``--dir`` is a Windows path even when
+    this code (or CI) runs on POSIX, where ``Path`` would not split backslashes."""
+    try:
+        text = os.fspath(p) if not isinstance(p, str) else p
+    except TypeError:
+        return []
+    return [x for x in re.split(r"[\\/]+", str(text)) if x]
 
 
 def lane_from_env() -> str | None:
@@ -147,10 +154,7 @@ def _runs_root_for(registry_dir: str | None) -> Path | None:
     """``runs/`` from an env registry dir ``runs/lanes/<lane>/workers``; None when unknown."""
     if not registry_dir:
         return None
-    try:
-        parts = Path(str(registry_dir)).parts
-    except (TypeError, ValueError):
-        return None
+    parts = _path_parts(registry_dir)
     if len(parts) >= 2 and parts[-1].lower() == _WORKERS_DIRNAME:
         return Path(*parts[:-3]) if len(parts) >= 3 else None
     return None
