@@ -1,6 +1,18 @@
 # CONTINUITY
 
 
+## 2026-11-12 (21:35Z) - RESEARCH PLAN + EXTERNAL REVIEW HANDOFF SAVED (PR #46)
+
+- Saved `docs/research/DATA_GA_RESEARCH_PLAN_2026-11-12.md` (research-only: inventory of today's
+  A-G/R/fix groups and all worktrees; dataset exploitation; seed/parameter discovery; visualization;
+  ranked CPU-only work queue; merge map; owner decisions) and
+  `docs/research/COUNCIL_REVIEW_HANDOFF_2026-11-12.md` (self-contained brief for an independent
+  council review + senior implementation plan).
+- No code, queue, or default changes. The plan is explicitly raw/pending external review; the
+  handoff records the verified state (main 15644ca, PR #47 G follow-up merged, PR #25 last, live
+  checkout 79edc8d not on main) and the freeform_sculpt census correction (25 equal-budget seeds
+  5101-5125, median 18.589, spread 4.780; the 26th is a 777-row seed-1234 base).
+
 ## 2026-11-12 (21:15Z) - G FOLLOW-UP: MEASURED V8 TOLERANCES + FULL RE-SCORE (PR #47)
 
 - The merged G proposal shipped `V8_MEASURED_TOLERANCES` as all 1.0 placeholders and brief §4 as
