@@ -56,9 +56,13 @@ class MeshSpec:
     quadrants: str             # "1234" | "12" | "14" | "1"
     max_triangles: int
     allow_large_mesh: bool = False
+    curvature_npts: float = 0.0   # WP4 (throughput): 0 = off = today; non-zero changes the hash
 
     def hash(self) -> str:
-        return _hash(_canon(asdict(self)))
+        d = asdict(self)
+        if not d.get("curvature_npts"):
+            d.pop("curvature_npts", None)    # default: the hash input is byte-identical to before
+        return _hash(_canon(d))
 
 
 @dataclass

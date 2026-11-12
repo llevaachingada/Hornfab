@@ -347,7 +347,30 @@ def _sha256(path: Path) -> str:
 # ------------------------------------------------------------------ gmsh session
 
 
-def _import_and_mark(step_path: Path, raw_path: Path, res_mm: dict, tool_name: str = CAD_TOOL) -> dict:
+def sizing_options(res_mm: dict, curvature_npts: float = 0.0) -> dict:
+    """The Gmsh global size options of the CAD mesh, as ``{option name: value}`` (pure, no gmsh).
+
+    Default (``curvature_npts`` 0) is EXACTLY today's mesh: curvature sizing off, and no min/max
+    clamp (so the sizes come from the Distance/Threshold field alone).
+
+    WP4 opt-in (``curvature_npts`` > 0, Gmsh's "elements per 2*pi of curvature"; 8-20 typical):
+    curvature sizing is switched on and Gmsh takes the MINIMUM of it and the source-region field
+    (that is how Gmsh combines its size sources), clamped to
+      * ``Mesh.MeshSizeMax`` = the acoustic wavelength ceiling ``h_coarse`` (res_mm['mouth'] =
+        c / (epw * f_max)), so curvature can only REFINE below the acoustic size, never coarsen;
+      * ``Mesh.MeshSizeMin`` = ``h_fine`` (res_mm['throat']), so tight fillets cannot explode the
+        element count below the source-face resolution.
+    """
+    npts = float(curvature_npts or 0.0)
+    opts = {"Mesh.MeshSizeFromCurvature": npts}
+    if npts > 0.0:
+        opts["Mesh.MeshSizeMax"] = float(res_mm["mouth"])
+        opts["Mesh.MeshSizeMin"] = float(res_mm["throat"])
+    return opts
+
+
+def _import_and_mark(step_path: Path, raw_path: Path, res_mm: dict, tool_name: str = CAD_TOOL,
+                     curvature_npts: float = 0.0) -> dict:
     """OCC-import the STEP, map labels to surfaces, tag them, mesh to ``raw_path`` (mm).
 
     Runs inside the mesher's own ``_GMSH_LOCK`` and opens/finalizes its own gmsh
@@ -454,7 +477,8 @@ def _import_and_mark(step_path: Path, raw_path: Path, res_mm: dict, tool_name: s
             field.setAsBackgroundMesh(background)
             gmsh.option.setNumber("Mesh.MeshSizeExtendFromBoundary", 0)
             gmsh.option.setNumber("Mesh.MeshSizeFromPoints", 0)
-            gmsh.option.setNumber("Mesh.MeshSizeFromCurvature", 0)
+            for _opt, _val in sizing_options(res_mm, curvature_npts).items():
+                gmsh.option.setNumber(_opt, _val)      # WP4: default = curvature 0, as before
             # MeshAdapt: measured most uniform on these OCC lofts/septa (max edge
             # 1.38x target) where Frontal-Delaunay left 4x outliers at pinch corners.
             gmsh.option.setNumber("Mesh.Algorithm", 1)
@@ -672,7 +696,8 @@ def build_mesh_from_cad(recipe: dict, mesh, cfg, out_dir: Path, *,
            "rear": float(res["rear"])}
     raw_path = out_dir / "cad" / f"{tool_name}_raw_mm.msh"
     try:
-        mapped = _import_and_mark(step_path, raw_path, res, tool_name)
+        mapped = _import_and_mark(step_path, raw_path, res, tool_name,
+                                  float(getattr(mesh, "curvature_npts", 0.0) or 0.0))
         repaired, repair, topo_report, source_specs = postprocess_cad_raw(raw_path, res, tool_name)
         points_mm, triangles, tags = _triangle_arrays(repaired)
 
@@ -744,6 +769,10 @@ def build_mesh_from_cad(recipe: dict, mesh, cfg, out_dir: Path, *,
             "repair": repair,
             "topology": topo_report,
         }
+        if float(getattr(mesh, "curvature_npts", 0.0) or 0.0) > 0.0:
+            # WP4 provenance label: present ONLY for the opt-in curvature policy.
+            cad_meta["mesh_sizing"] = {"policy": "curvature", **sizing_options(
+                res, float(mesh.curvature_npts))}
         if meh:
             # The C4 tag contract echoed on the mesh record: full-domain-equivalent area and the
             # reduced-mesh area-weighted centroid per physical tag (metres).

@@ -27,6 +27,7 @@ from pathlib import Path
 import numpy as np
 
 from ..types import (Design, GeometryInvalidError, MeshResult, MeshSpec, MeshTooLargeError)
+from . import prefetch as _prefetch
 from . import sizing, topology
 from ..design import families
 
@@ -276,6 +277,12 @@ def mesh_cache_key(design: Design, mesh: MeshSpec, cfg) -> str:
     return f"{base}-{mkey}" if mkey else base
 
 
+def prebuilt_key(design: Design, mesh: MeshSpec, cfg, out_dir, mode: str | None) -> tuple:
+    """Identity of a prefetched mesh (WP2): the mesh cache key plus the exact output directory and
+    mode, so a handoff can only ever land on the candidate/dir/mode it was built for."""
+    return (mesh_cache_key(design, mesh, cfg), str(Path(out_dir).resolve()), mode)
+
+
 def build_mesh(design: Design, mesh: MeshSpec, cfg, out_dir: Path, *, mode: str | None = None,
                cache_dir: Path | None = None) -> MeshResult:
     """Design + MeshSpec -> ``out_dir/mesh.msh`` (metres) + ``out_dir/mesh_meta.json``.
@@ -295,6 +302,12 @@ def build_mesh(design: Design, mesh: MeshSpec, cfg, out_dir: Path, *, mode: str 
     the twin mesh is written in metres and ``mesh_meta.json`` carries the ``cad`` provenance
     echo. Same guard classes; no formula-path call.
     """
+    # WP2 (opt-in prefetch): a mesh a background worker already built for exactly this candidate
+    # is handed back. The memo is empty unless `pipeline_prefetch` is on, so by default this is a
+    # dict miss and the code below runs exactly as before.
+    _pre = _prefetch.take(prebuilt_key(design, mesh, cfg, out_dir, mode))
+    if _pre is not None:
+        return _pre
     import hornlab_mesher as hm
     from hornlab_mesher.config_parser import ConfigError
     from hornlab_mesher.mesher import MesherError, TriangleBudgetExceeded

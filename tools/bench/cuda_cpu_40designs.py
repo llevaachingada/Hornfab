@@ -1,4 +1,8 @@
-"""40 existing designs, one identical solve each, CUDA vs CPU, per-design logging.
+"""LEGACY BENCH (see docs/throughput/RUNBOOK.md): runs the historical NON-production path unless
+HORNLAB_BENCH_FUSED=1 / HORNLAB_BENCH_SYMMETRY=yz+xz are set; use tools/bench/throughput_matrix.py for
+fused-production numbers. Julia hosts are no longer killed by image name (tools/bench/_hosts.py).
+
+40 existing designs, one identical solve each, CUDA vs CPU, per-design logging.
 
 Design set: 40 STORED designs (no CAD, no re-meshing), chosen deterministically:
   - 30 single-source designs stratified across the dof range (tags {1,2} -> drive tag 2)
@@ -27,6 +31,7 @@ import hornlab_beat_bem as beat
 from hornlab_beat_bem import ObservationConfig, SolveConfig
 from hornlab_beat_bem.sweep import solve_frequencies
 from _bench_common import GpuMemPeak, kill_hosts  # tree-kill hosts; sees WDDM shared-memory spill
+from _hosts import bench_solve_kwargs  # noqa: E402  (PR #23 opt-in production flags)
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "runs" / f"bench_40designs_{datetime.now(timezone.utc):%Y%m%dT%H%M%SZ}"
@@ -95,7 +100,7 @@ def observation() -> ObservationConfig:
 
 def run_one(design: dict, backend: str) -> dict:
     tags = [2, 10] if 10 in design["tags"] else [2]
-    cfg = SolveConfig(velocity_sources={t: 1.0 for t in tags}, impedance_matrix=True,
+    cfg = SolveConfig(**bench_solve_kwargs(), velocity_sources={t: 1.0 for t in tags}, impedance_matrix=True,
                       beat_backend=backend, observation=observation())
     t0 = time.perf_counter()
     try:

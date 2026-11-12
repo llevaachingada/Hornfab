@@ -1,4 +1,8 @@
-"""CUDA vs CPU for the MEH (multi-entry) solve, and CPU high-resolution feasibility.
+"""LEGACY BENCH (see docs/throughput/RUNBOOK.md): runs the historical NON-production path unless
+HORNLAB_BENCH_FUSED=1 / HORNLAB_BENCH_SYMMETRY=yz+xz are set; use tools/bench/throughput_matrix.py for
+fused-production numbers. Julia hosts are no longer killed by image name (tools/bench/_hosts.py).
+
+CUDA vs CPU for the MEH (multi-entry) solve, and CPU high-resolution feasibility.
 
 What this does NOT repeat (already measured, see TOOLCHAIN.md s"M4 cuda vs cpu" and
 docs/evidence/MEH_M8_2026-10-31.md): single-source cuda-vs-cpu timings, the bempp cross-check,
@@ -29,6 +33,7 @@ import hornlab_beat_bem as beat
 from hornlab_beat_bem import ObservationConfig, SolveConfig
 from hornlab_beat_bem.sweep import solve_frequencies
 from _bench_common import GpuMemPeak, kill_hosts  # tree-kill hosts; sees WDDM shared-memory spill
+from _hosts import bench_solve_kwargs  # noqa: E402  (PR #23 opt-in production flags)
 
 ROOT = Path(__file__).resolve().parents[2]
 LOG_DIR = ROOT / "runs" / f"bench_cpu_cuda_{datetime.now(timezone.utc):%Y%m%dT%H%M%SZ}"
@@ -75,7 +80,7 @@ def observation() -> ObservationConfig:
 
 
 def solve(mesh: Path, freqs, *, backend: str, tags, balloon=True):
-    cfg = SolveConfig(
+    cfg = SolveConfig(**bench_solve_kwargs(),
         velocity_sources={t: 1.0 for t in tags},
         impedance_matrix=True,
         beat_backend=backend,

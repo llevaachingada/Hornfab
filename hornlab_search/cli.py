@@ -1515,6 +1515,10 @@ def build_parser() -> argparse.ArgumentParser:
                         help="kill stale Julia/BEAT processes and report VRAM usage")
     gc.add_argument("--force", action="store_true",
                     help="DANGEROUS: skip the GPU-lock check and kill Julia even if a search is running")
+    ab = sub.add_parser("ab-bl", parents=[common], help="A/B check of a Hornfab design against Boundary Lab "
+                        "(export | solve | import | compare | demo --fake); see docs/ab/BOUNDARY_LAB_AB.md")
+    from hornlab_search.compare.cli import add_arguments as _ab_arguments
+    _ab_arguments(ab)
     gui = sub.add_parser("gui", parents=[common], help="local web GUI (127.0.0.1) over runs, briefs and jobs")
     gui.add_argument("--port", type=int, default=8765)
     gui.add_argument("--no-browser", action="store_true", help="do not open a browser tab")
@@ -1583,6 +1587,9 @@ def main(argv: list[str] | None = None) -> int:
             return _cmd_campaign(args)
         if args.cmd == "gpu-clean":
             return _cmd_gpu_clean(args)
+        if args.cmd == "ab-bl":
+            from hornlab_search.compare.cli import run as _ab_run
+            return _ab_run(args, argv)
         if args.cmd == "gui":
             from hornlab_search.gui.server import serve
             return serve(REPO, args.port, not args.no_browser,

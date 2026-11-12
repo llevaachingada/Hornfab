@@ -1,4 +1,8 @@
-"""One brief + one mesh, the FULL contracted frequency grid, CUDA vs CPU, per-frequency timing.
+"""LEGACY BENCH (see docs/throughput/RUNBOOK.md): runs the historical NON-production path unless
+HORNLAB_BENCH_FUSED=1 / HORNLAB_BENCH_SYMMETRY=yz+xz are set; use tools/bench/throughput_matrix.py for
+fused-production numbers. Julia hosts are no longer killed by image name (tools/bench/_hosts.py).
+
+One brief + one mesh, the FULL contracted frequency grid, CUDA vs CPU, per-frequency timing.
 
 Fixed design: the T2 search config (`examples/typologies/meh_2026-10-30/meh_t2a_search.yaml`) -> its
 brief (`meh_home_90x60_t2`) and its seed mesh at the production screen settings. Frequencies come from
@@ -29,6 +33,7 @@ import hornlab_beat_bem as beat
 from hornlab_beat_bem import ObservationConfig, SolveConfig
 from hornlab_beat_bem.sweep import solve_frequencies
 from _bench_common import GpuMemPeak, kill_hosts  # tree-kill hosts; sees WDDM shared-memory spill
+from _hosts import bench_solve_kwargs  # noqa: E402  (PR #23 opt-in production flags)
 
 ROOT = Path(__file__).resolve().parents[2]
 CONFIG = ROOT / "examples" / "typologies" / "meh_2026-10-30" / "meh_t2a_search.yaml"
@@ -84,7 +89,7 @@ def frequencies(config_path=CONFIG) -> list[float]:
 
 
 def one(mesh: Path, freq: float, backend: str) -> dict:
-    cfg = SolveConfig(velocity_sources={2: 1.0, 10: 1.0}, impedance_matrix=True,
+    cfg = SolveConfig(**bench_solve_kwargs(), velocity_sources={2: 1.0, 10: 1.0}, impedance_matrix=True,
                       beat_backend=backend,
                       observation=ObservationConfig(distance_m=2.0, angle_count=37,
                                                     planes=["horizontal", "vertical"]))
