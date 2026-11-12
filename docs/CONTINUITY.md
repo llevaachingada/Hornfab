@@ -1,6 +1,23 @@
 # CONTINUITY
 
 
+## 2026-11-12 (16:25Z) - DAY GROUP D: NIGHT/DATA OPS HARDENING
+
+- Day-plan group D (PR #35, branch `day/D-night-ops`): D.1 two-lane `night_status.py` (per-lane lock
+  holders alive/stale, the running job per lane from the queue logs, its run-dir row count and
+  newest-row age, ALERT when a lane is quiet > 30 min while its job runs); D.2 runner robustness
+  (GPU-busy job -> `status: blocked` + exactly one retry after 120 s, `lane`/`backend`/`status`/
+  `attempts` on every summary row incl. command jobs, `--dry-run` validates EVERY argv path,
+  explicit stale-lock takeover log); D.3 `tools/data/merge_lane_dataset.py` (parity-gated on the A.7
+  report, dry-run by default, `provenance.lane: "cpu"` tags, backup + atomic writes, idempotent);
+  D.4 `tools/night_report.py` (per-lane morning report, [measured]/[inferred]).
+- Verified: 66 targeted offline tests green (junitxml 66/0/0/0); full offline suite green on the
+  branch (2 stored-data skips) at f98f024; live read-only smokes of the two-lane status and the
+  night report against the 2026-11-12 day runs (GPU lock holder shown correctly; CPU lock freed).
+- D.3 parity-schema tolerance (documented in PR #35): gate = top-level `pass` bool per the A.7
+  schema on `day/A-analysis`; `verdict`/`status`/`result` "pass"/"passed" accepted; unrecognised
+  gate = refuse (fail closed).
+
 ## 2026-11-12 (16:00Z) - DAY GROUP R: SEARCH-MATH RESEARCH DOSSIER
 
 - Day-plan group R (research continuation, PR #34, branch `day/R-research-dossier`): wrote
