@@ -2,7 +2,7 @@
 
 **Purpose:** hand this file to an independent senior review board (council) so it can harden the saved research plan and produce a senior-reviewed implementation plan for the major high-value items. The orchestrator is skipping its own council pass; this handoff is self-contained.
 
-**Status of the repo at handoff:** `origin/main` = **1837f02**; the saved plan is on branch `docs/data-ga-plan-2026-11-12-v2` (PR **#46**). No queue or code changes are part of this handoff.
+**Status of the repo at handoff:** `origin/main` = **15644ca** (PR #47 merged: the measured v8 tolerances + brief §4; PR #46, this plan/handoff, is open). PR #25 is open and must merge last. No queue or code changes are part of this handoff.
 
 ---
 
@@ -65,14 +65,15 @@ Classify each: ancestor of `origin/main` (merged), unmerged, WIP, stale, or unsa
 
 ## 3. Verified state to check, not trust blindly
 
-- `origin/main` = **1837f02**; PR #46 (this plan) open; PR #25 (`lane/L4-hygiene`, head e7ce42c) open and must merge **last**; PR #32 (plan doc) is not ours.
-- Day groups A–G/R and fix #44 are ancestors of main. The live checkout is on `day/2026-11-12-queue` at **79edc8d**, which is **not** on main; `d638231` **is** on main. The live tree lacks `tools/analysis/**` and the B features — run analyses from a main-synced worktree (`AN` at 1837f02).
+- `origin/main` = **15644ca**; PR #46 (this plan/handoff) open; PR #25 (`lane/L4-hygiene`, head e7ce42c) open and must merge **last**; PR #32 (plan doc) is not ours.
+- Day groups A–G/R and fix #44 are ancestors of main. The live checkout is on `day/2026-11-12-queue` at **79edc8d**, which is **not** on main; `d638231` **is** on main. The live tree lacks `tools/analysis/**` and the B features — run analyses from a main-synced worktree (`AN` is at 1837f02; `G2` is at 1837f02 + the merged G follow-up; use a fresh worktree from 15644ca for new work).
 - F.1 continuity reorder: `docs/history/continuity_reorder_2026-11-12.patch` is on main but **not applied**; `docs/history/CONTINUITY_2026-10-22_2026-10-31.md` is absent.
-- G: `docs/research/OBJECTIVE_V8_PROPOSAL_2026-11-12.md` §4 is still `<!-- V8_RESULTS -->`; `V8_MEASURED_TOLERANCES` in `scalar_v8.py` is all **1.0 placeholders**. The full re-score finished: `rows_seen=23833`, `scored=23833`; class A 18,145 rows/0 refusals, τ v4 **0.5004** (top20 4/20), v7 0.4394 (3/20), v6 0.0138 (0/20); class B 4,063 rows/**3,545 refusals (87%)**/518 rankable, τ v4 0.7687 (0/20), v7 0.6719 (0/20), v6 0.2174 (7/20); class C 1,625 rows/0 refusals, τ v4 **0.8150** (13/20), v7 0.8104 (0/20), v6 0.0086 (0/20). Per-class tolerances are in the JSON.
+- G: **the follow-up landed in PR #47 (15644ca)** — `V8_MEASURED_TOLERANCES` now has the full-dataset per-class values, brief §4 has the counters/tolerance/tau tables and the class-B caveat, and a regression test pins them. v8 remains unregistered. The full re-score: `rows_seen=23833`, `scored=23833`; class A 18,145 rows/0 refusals, τ v4 **0.5004** (top20 4/20), v7 0.4394 (3/20), v6 0.0138 (0/20); class B 4,063 rows/**3,545 refusals (87%)**/518 rankable, τ v4 0.7687 (0/20), v7 0.6719 (0/20), v6 0.2174 (7/20); class C 1,625 rows/0 refusals, τ v4 **0.8150** (13/20), v7 0.8104 (0/20), v6 0.0086 (0/20). Per-class tolerances are in the JSON.
 - A.7 lane parity: **PASS** 5/5 designs ≤0.2 dB (max 0.0356 dB), reconstructed from `cache_cpu`/`cache` after the pre-#44 shared-verify collision.
 - A.8 partial: 13/13 sections ok; fidelity g1 median screen bias **29.2%**, Spearman 0.66 all / **0.50 top-5**; v6 2-seed spread **0.704** (not a verdict); links candidate R² **0.427** (do not ship); g6 walls `g_fc_hz` 87% lo / `g_stop_deg` 87% hi.
 - CPU lane idle since 15:15; `c2b` exited 1 after **2 BEAT worker `ConnectionResetError`** failures (the night report's `blocked` label is the CPU lane's expected GPU-busy hygiene line, not a GPU issue). GPU continuation queue is still running `g2_core_law_seed1031`; `g3`–`g9` remain per `runs/nights/gpu_day_2026-11-12_cont.yaml`.
 - Full suites on the G/fix branches: 2849/1/2 and 2814/1/2; the one failure is a load-sensitive 100 ms assert in `tests/test_mesh_build.py` that passes in isolation; CI green on the merged fix head.
+- **Freeform_sculpt seed census (now verified):** the equal-budget group is **25 seeds 5101–5125** (151 rows each), not 26; the 26th run (`20261023T201245Z-screen-32f5b5`, seed 1234) is a 777-row base at a different budget. The clean 25-seed A.2 result: median best J **18.589**, spread **4.780** (25.7% of median), bootstrap 95% CI [18.413, 19.186]; the 26-seed mixed-budget group gives spread 6.213 and is not a seed-variance estimate. Outputs: `oc-wt/AN/scratch/seedvar_freeform25eq/` and `...26b/`. The reviewer should use the 25-seed group.
 
 ## 4. The review task
 
