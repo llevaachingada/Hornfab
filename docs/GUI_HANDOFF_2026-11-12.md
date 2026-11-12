@@ -29,24 +29,24 @@ Base: `docs/gui-verify-view-plan` (worktree `oc-wt/T`, = origin, commit a886538)
 | Worktree | Branch | State |
 |---|---|---|
 | `oc-wt/gui-int` | `feat/gui-integration` | **Integration branch.** Contains: WP0+WP1 (`feat/gui-verify-wp0-wp1`), WP2+WP4 slice (`feat/gui-perf-wp2`), plan v2 doc, WP5/WP4/WP2b (`feat/gui-shell`), WP3+WP6 (`feat/gui-verify-ui`, merged in f0d80b6). Full `-k gui` suite green after the last merge. |
-| `oc-wt/gui-b` | `feat/gui-charts-history` | **WP9 + WP10, a Sonnet agent was still working when this was written.** Not merged. |
+| `oc-wt/gui-b` | `feat/gui-charts-history` | WP9 + WP10, merged into gui-int (see Step 1). |
 | `oc-wt/gui-wp01`, `gui-wp2`, `gui-a`, `gui-c` | merged branches | Can be removed after the final merge (`git worktree remove`). |
 | `oc-wt/T` | `docs/gui-verify-view-plan` | Has uncommitted plan edits identical to the copy committed in gui-int. Discard them there (`git -C oc-wt/T checkout -- docs`) once gui-int is pushed. |
 
-## Step 1 — finish and merge WP9 + WP10 (branch `feat/gui-charts-history`)
+## Step 1 — WP9 + WP10: DONE and merged (16:05 EST)
 
-1. `git -C oc-wt/gui-b log --oneline -5` and `git -C oc-wt/gui-b status`. If the agent left uncommitted work,
-   review the diff and commit it (or finish it) there. Its scope: plan §5 WP9 (C1–C15) and WP10 (H1–H10).
-2. In `oc-wt/gui-int`: `git merge feat/gui-charts-history`. Expected conflicts:
-   - `app.css` (each branch appended a block at the end): keep all blocks.
-   - `app.js` `viewRunDetail`: gui-b rewrote the acoustic-chart block and the "How the search went" block; gui-int
-     moved `${gateAuditHtml(...)}` to just above `<!-- Search history -->` and added
-     `<div id="verify-card">` under `#kpi-strip` plus a fetch after the KPI strip render. Keep BOTH sides.
-   - `docs/CONTINUITY.md` / `docs/ISSUES.md` (agents may have edited): keep both entries, newest first.
-   - `data.py`: gui-b adds `cma_dynamics` + one `run_detail` key; gui-int changed `elites_catalog`, `typologies`
-     helpers, `list_runs`, `leaders`, `status` (queue log mtime), `list_configs` (disk cache). Should auto-merge.
-3. Run the full GUI suite (must be green) and `node --check` on app.js, charts.js, verify.js, balloon.js, evolution.js.
-4. If WP9/WP10 is incomplete, finish the missing C#/H# items per the plan (they are written as step lists).
+`feat/gui-charts-history` (commit 18ab502) is merged into `feat/gui-integration`. Conflicts in
+`docs/CONTINUITY.md` and `app.css` were resolved by keeping both sides, so **check that CONTINUITY's top entries
+read in the right order** (newest first) and tidy them. The full `-k gui` suite is green after the merge, and
+`node --check` is clean on app.js, charts.js, verify.js, balloon.js and evolution.js. The run page for `…ed1da9`
+renders with no console errors.
+
+**Verify first:** on that run page I could not find an h3 for the new **Off-axis responses (C13)** or the
+**Search dynamics card (H5)**, although the agent reports both as done. Find them (they may be titled differently
+or render only when data is present: `run_detail.cma_dynamics.available`), and fix them if they do not render.
+Then walk plan Appendix B items 10–16 visually (fixed axes, dotted reference lines with labels, markers at the
+solved frequencies, hatch below f0, convergence IQR band + failure strip + resume line, QD link hidden on runs
+without an atlas).
 
 ## Step 2 — fix the known defects found in live review (all small)
 
@@ -61,7 +61,7 @@ Base: `docs/gui-verify-view-plan` (worktree `oc-wt/T`, = origin, commit a886538)
    608eef is 2203 = same mesh, so it may be legitimate; confirm by comparing all 5 screen rows' `n_dof`).
 5. **Search-history panels on verify runs** (WP4 item 5 — not done): for `mode:"verify"` runs hide Change vs start,
    Budget used, Evolution/Design cloud/QD links, Continue run, Convergence, Score breakdown, CMA panels, Pin plan.
-   Do this AFTER merging gui-b because gui-b owns those blocks. The run-page Verification card already says
+   gui-b is merged, so this can be done now. The run-page Verification card already says
    "search-history panels below do not apply".
 6. **WP7 not started**: "Verify selected" (plan §5 WP7). First check whether `hornlab-search verify` already has
    `--designs`; if not, add it in `cli.py` with a test, then `jobs.py` validation, then a disabled-while-GPU-busy
