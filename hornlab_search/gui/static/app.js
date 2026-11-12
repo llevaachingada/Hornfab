@@ -234,15 +234,19 @@ function homeLeadersHtml(leaders, pending = false) {
   if (!leaders || !leaders.length) {
     return `<div class="card"><div class="eyebrow">Best horn per brief</div><p class="muted">No scored campaigns yet. Run a screen campaign from Launch.</p></div>`;
   }
-  const rows = leaders.map(l => {
+  const { shown, hidden } = homeLeadersFilter(leaders, _homeShowAllBriefs);
+  const rows = shown.map(l => {
+    // Two separate facts, two pills: how the family ranking was decided (campaign tier), and
+    // whether the leading design has been re-solved at verify resolution.
     const verdict = l.tier === "compare"
       ? (l.clearly_ahead ? pill("clearly ahead", "good") : pill("not separated", "warn"))
-      : pill("screen only", "warn");
+      : pill("single screen pass", "warn");
+    const ver = l.verified ? pill("verified designs", "good") : pill("not verified yet", "warn");
     const link = l.best_run_id ? `href="#/run/${esc(l.best_run_id)}"` : "";
     return `<a class="best-brief-row" ${link}>
       <div>
         <div class="bbr-name">${esc(l.brief)}</div>
-        <div class="bbr-meta">${esc(l.family)} · ${esc(l.dims ? dimStr(l.dims) : "–")} · ${verdict}</div>
+        <div class="bbr-meta">${esc(l.family)} · ${esc(l.dims ? dimStr(l.dims) : "–")} · ${verdict} ${ver}</div>
         <div class="bbr-meta muted">${esc(l.tier)} campaign, ${esc(l.n_families)} families${l.runner_up ? `; next: ${esc(l.runner_up)} (+${fmt(l.gap)})` : ""}</div>
       </div>
       <div class="bbr-score" title="median score over repeats (lower is better)">${fmt(l.median_j)}</div>
@@ -252,7 +256,25 @@ function homeLeadersHtml(leaders, pending = false) {
     <div class="eyebrow" style="margin-bottom:10px">Best horn per brief</div>
     <p class="muted" style="margin:0 0 8px;font-size:0.82rem">Median score of the leading family in the latest campaign for each brief (lower is better). Size is the outer mouth width × height × depth of its best design.</p>
     <div class="best-brief-grid">${rows}</div>
+    ${hidden ? `<p class="muted" style="margin:8px 0 0;font-size:0.82rem">${hidden} older brief${hidden === 1 ? "" : "s"} hidden (no activity in ${HOME_RECENT_DAYS} days). <a href="#" id="home-show-all-briefs">Show all briefs</a></p>`
+      : _homeShowAllBriefs ? `<p class="muted" style="margin:8px 0 0;font-size:0.82rem"><a href="#" id="home-show-recent-briefs">Show recent briefs only</a></p>` : ""}
   </div>`;
+}
+
+const HOME_RECENT_DAYS = 14;   // the real tree has every brief active within 30 days, so 30 hid nothing
+let _homeShowAllBriefs = false;
+
+/** Pure: split leaderboard rows into those shown (activity within HOME_RECENT_DAYS, or all when
+ *  showAll) and a hidden count. Rows without a timestamp stay visible (never hide on missing data). */
+function homeLeadersFilter(leaders, showAll, now = Date.now()) {
+  const list = Array.isArray(leaders) ? leaders : [];
+  if (showAll) return { shown: list, hidden: 0 };
+  const cutoff = now - HOME_RECENT_DAYS * 86400000;
+  const shown = list.filter(l => {
+    const t = l.last_activity ? new Date(l.last_activity).getTime() : NaN;
+    return !isFinite(t) || t >= cutoff;
+  });
+  return { shown, hidden: list.length - shown.length };
 }
 
 /** Paint the slow leaderboard into an already-rendered Home. Dropped when a newer Home render
@@ -274,7 +296,17 @@ async function patchHomeLeaders(ROOT, myEpoch) {
     </div>`;
     return;
   }
-  box.innerHTML = homeLeadersHtml(Array.isArray(leaders) ? leaders : []);
+  const list = Array.isArray(leaders) ? leaders : [];
+  const paint = () => {
+    box.innerHTML = homeLeadersHtml(list);
+    const toggle = (id, v) => {
+      const a = box.querySelector(id);
+      if (a) a.onclick = (ev) => { ev.preventDefault(); _homeShowAllBriefs = v; paint(); };
+    };
+    toggle("#home-show-all-briefs", true);
+    toggle("#home-show-recent-briefs", false);
+  };
+  paint();
 }
 
 async function viewHome() {
@@ -571,7 +603,7 @@ function stopRegionHtml(aff) {
     const pid = l.pid != null ? l.pid : "?";
     return `<div style="margin-top:8px">
       <div class="btn-row" style="flex-wrap:wrap;gap:8px;align-items:center">
-        <button class="btn danger" id="btn-kill-run" title="Kills the externally-started run that holds our GPU lock: pid ${esc(pid)} with its child tree, then a gpu-clean pass">Kill run</button>
+        <button class="btn danger" id="btn-kill-run" title="Kills the externally-started run that holds our GPU lock: pid ${esc(pid)} with its child tree, then a gpu-clean pass">Kill GPU run</button>
         <span class="mono muted" style="font-size:0.75rem">external run · pid ${esc(pid)}</span>
       </div>
       <div class="hint" id="st-kill-msg" role="status" style="margin:4px 0 0"></div>
@@ -789,8 +821,8 @@ function toolbarPillHtml(pill) {
   if (state === "external") {
     const l = pill.lock || {};
     const pid = l.pid != null ? l.pid : "?";
-    return wrap(`<button class="btn danger" id="tb-kill-run" style="${BTN}" title="Kills the externally-started run that holds our GPU lock: pid ${esc(pid)} with its child tree, then a gpu-clean pass">■ Kill run</button>
-      <span class="mono muted" style="${SUB}">external run · pid ${esc(pid)}</span>
+    return wrap(`<button class="btn danger" id="tb-kill-run" style="${BTN}" title="Kills the externally-started run that holds our GPU lock: pid ${esc(pid)} with its child tree, then a gpu-clean pass">■ Kill GPU run</button>
+      <span class="mono muted" style="${SUB}">GPU lane · external run · pid ${esc(pid)}</span>
       <span id="tb-kill-msg" role="status" style="${MSG}"></span>`);
   }
   if (state === "idle") {
@@ -916,7 +948,7 @@ function wireResumeArm(btn, msg, pill) {
   });
 }
 
-let _pillJobs = null, _pillStatus = null, _pillRuns = null, _pillTimer = null, _pillSig = "";
+let _pillJobs = null, _pillStatus = null, _pillRuns = null, _pillTimer = null, _pillSig = "", _pillLanes = null;
 
 /** Injects the pill holder once, directly below the nav links (after #app-nav ul, before the
  *  .nav-spacer). The nav is never re-rendered by route() (only #view-root is), but the guard makes
@@ -937,19 +969,40 @@ function renderNavPill() {
   const holder = ensureNavRunCtl();
   if (!holder) return;
   const pill = toolbarPillFor(_pillJobs, _pillStatus ? _pillStatus.gpu_lock : null, _pillRuns);
-  const sig = JSON.stringify(pill);
+  const sig = JSON.stringify(pill) + laneChipsHtml(_pillLanes);
   if (sig === _pillSig && holder.firstElementChild) return;   // unchanged: keep the wired DOM (an armed click survives the poll)
   _pillSig = sig;
-  holder.innerHTML = toolbarPillHtml(pill);
+  holder.innerHTML = toolbarPillHtml(pill) + laneChipsHtml(_pillLanes);
   wireToolbarPill(pill, holder);
 }
 
+/** Pure: one compact line per solve lane (GPU, CPU) for the sidebar, from /api/lanes, so the
+ *  sidebar always says what BOTH lanes are doing (the pill above only covers the GPU lock).
+ *  Absent payload (older server) renders nothing. */
+function laneChipsHtml(lanes) {
+  const list = lanes && Array.isArray(lanes.lanes) ? lanes.lanes : [];
+  if (!list.length) return "";
+  const SUB = "font-size:0.64rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block";
+  const rows = list.map(l => {
+    const name = String(l.lane || "?").toUpperCase();
+    const busy = !!(l.lock && l.lock.alive);
+    const what = l.job && l.job.name ? l.job.name
+      : busy ? "running" : (l.last_job && l.last_job.id ? `idle · last ${l.last_job.id}` : "idle");
+    const rows = l.run && l.run.n != null ? ` · ${Number(l.run.n).toLocaleString()} evals` : "";
+    const cls = l.alert ? "warn-text" : busy ? "" : "muted";
+    return `<span class="mono ${cls}" style="${SUB}" title="${esc(name)} lane: ${esc(what)}${esc(rows)}">${busy ? "●" : "○"} ${esc(name)} · ${esc(what)}${esc(rows)}</span>`;
+  }).join("");
+  return `<div class="nav-lanes" role="status" aria-label="Solve lanes" style="padding:0 16px 6px;display:grid;gap:2px">${rows}</div>`;
+}
+
 async function pollNavOnce() {
-  const [jobs, st, runs] = await Promise.all([
+  const [jobs, st, runs, lanes] = await Promise.all([
     api("/api/jobs").catch(() => null),
     api("/api/status").catch(() => null),
     api("/api/runs").catch(() => null),   // run summaries: the resume run-id validation (mode/budget/n)
+    api("/api/lanes").catch(() => null),  // both solve lanes for the sidebar lane lines
   ]);
+  if (lanes) _pillLanes = lanes;
   if (jobs) _pillJobs = jobs;
   if (st) _pillStatus = st;
   if (runs) _pillRuns = runs;
@@ -1352,7 +1405,7 @@ function renderRunsList(allRuns) {
       <div>
         <div class="eyebrow">All runs</div>
         <h2>Runs</h2>
-        <p class="muted" style="font-size:0.85rem">${allRuns.length} total · newest first</p>
+        <p class="muted" style="font-size:0.85rem">Every search and verification. ${allRuns.length} total. Screen runs are fast first-pass searches; verify runs re-solve the best designs at higher resolution.</p>
         <div id="runs-version-banner"></div>
       </div>
       <div class="filter-bar">
@@ -1365,8 +1418,15 @@ function renderRunsList(allRuns) {
           <option value="">All families</option>
           ${families.map(f => `<option value="${esc(f)}">${esc(f)}</option>`).join("")}
         </select>
+        <select id="run-filter-mode" aria-label="filter by run mode">
+          <option value="">Screen + verify</option>
+          <option value="screen">Screen runs</option>
+          <option value="verify">Verify runs</option>
+          <option value="has_verify">Runs with verified designs</option>
+        </select>
         <select id="run-sort" class="sort-sel" aria-label="sort runs">
-          <option value="date">Newest first</option>
+          <option value="activity">Last activity</option>
+          <option value="date">Newest run started</option>
           <option value="best_j">${tip("J", "Score")} (best first)</option>
           <option value="name">Name</option>
         </select>
@@ -1377,9 +1437,7 @@ function renderRunsList(allRuns) {
             <th>Date</th><th>Name</th><th>Family</th><th>Brief</th>
             <th class="r">${tip("J", "Score start → best")}</th>
             <th class="r">Change</th>
-            <th>${tip("dims", "Horn size W×H×D")}</th>
             <th class="r">Evals</th>
-            <th class="r">${tip("failures", "Fail %")}</th>
           </tr></thead>
           <tbody id="runs-tbody"></tbody>
         </table>
@@ -1391,7 +1449,9 @@ function renderRunsList(allRuns) {
     const bf = document.getElementById("run-filter-brief").value;
     const ff = document.getElementById("run-filter-family").value;
     const sort = document.getElementById("run-sort").value;
+    const mf = document.getElementById("run-filter-mode").value;
     let filtered = allRuns.filter(r =>
+      runModeMatches(r, mf) &&
       (!bf || r.brief === bf) &&
       (!ff || r.family === ff) &&
       (!q || (r.name || "").toLowerCase().includes(q) ||
@@ -1401,13 +1461,15 @@ function renderRunsList(allRuns) {
     // Version guard: a mixed-version table is grouped by objective definition, then sorted INSIDE
     // each group, so a v4 J never outranks a v7 J on the same axis without the banner saying so.
     filtered = sortRunsForTable(filtered, sort);
+    // Live runs (a row written in the last 2 min) are pinned on top whatever the sort.
+    filtered = [...filtered.filter(runIsLive), ...filtered.filter(r => !runIsLive(r))];
 
     const banner = document.getElementById("runs-version-banner");
     if (banner) banner.innerHTML = objectiveVersionBannerHtml(filtered);
 
     const tbody = document.getElementById("runs-tbody");
     if (!filtered.length) {
-      tbody.innerHTML = `<tr><td colspan="9" class="muted" style="text-align:center;padding:24px">No matching runs. <a href="#/launch">Launch a search →</a></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" class="muted" style="text-align:center;padding:24px">No matching runs. <a href="#/launch">Launch a search →</a></td></tr>`;
       return;
     }
 
@@ -1416,17 +1478,16 @@ function renderRunsList(allRuns) {
       const ch = betterPct(r.seed_j, r.best_j);
       const chCls = ch.endsWith("better") ? "good-text" : "";
       const failPct = r.n > 0 ? ((nf / r.n) * 100).toFixed(0) + "%" : "–";
-      const isRunning = !r.last || (Date.now() - new Date(r.last).getTime()) < 120000;
+      const isRunning = runIsLive(r);
       return `<tr class="clickable" onclick="location.hash='#/run/${esc(r.id)}'" ${isRunning ? 'style="background:var(--accent-soft)"' : ""}>
         <td class="muted mono" style="font-size:0.76rem;white-space:nowrap">${timeSince(r.started)}</td>
-        <td><b>${esc(r.name)}</b><br><span class="mono muted" style="font-size:0.72rem">${esc(r.id)}</span></td>
+        <td><b>${esc(r.name)}</b> ${runModeBadgesHtml(r, isRunning)}<br><span class="mono muted" style="font-size:0.72rem">${esc(r.id)}</span>${runParentLineHtml(r)}
+          <br><span class="muted" style="font-size:0.72rem">${r.dims ? esc(dimStr(r.dims)) : "size –"} · ${nf > 0 ? `<span class="warn-text">${esc(failPct)} failed</span>` : "no failures"}</span></td>
         <td>${esc(r.family || "–")}</td>
         <td>${esc(r.brief || "–")}</td>
         <td class="r num"><span class="mono muted" style="font-size:0.68rem">${esc(jVersionLabel(r))}</span><br>${r.seed_j != null && r.seed_j < 900 ? fmt(r.seed_j) : "–"} → <b>${fmt(r.best_j)}</b></td>
         <td class="r ${chCls}">${ch}</td>
-        <td style="font-size:0.82rem">${r.dims ? esc(dimStr(r.dims)) : "–"}</td>
         <td class="r">${r.n.toLocaleString()}</td>
-        <td class="r">${nf > 0 ? `<span class="warn-text">${esc(failPct)}</span>` : failPct}</td>
       </tr>`;
     }).join("");
   }
@@ -1436,6 +1497,54 @@ function renderRunsList(allRuns) {
   document.getElementById("run-filter-brief").addEventListener("change", render);
   document.getElementById("run-filter-family").addEventListener("change", render);
   document.getElementById("run-sort").addEventListener("change", render);
+  document.getElementById("run-filter-mode").addEventListener("change", render);
+}
+
+/** Pure: <option>s for the Compare pickers, filtered by free text (name/family/brief/id) and
+ *  optionally restricted to one brief; `keep` (a selected run id) is always included. */
+function compareOptionsHtml(runs, q, brief, keep = "") {
+  const needle = String(q || "").trim().toLowerCase();
+  return (runs || []).filter(r => r.id === keep || (
+      (!brief || r.brief === brief) &&
+      (!needle || [r.name, r.family, r.brief, r.id].some(v => String(v || "").toLowerCase().includes(needle)))))
+    .map(r => `<option value="${esc(r.id)}">${esc(r.name)} · ${esc(r.brief || "no brief")} · ${esc(jVersionLabel(r))} best ${fmt(r.best_j)}${r.mode === "verify" ? " · verify" : ""} — ${esc(r.id)}</option>`)
+    .join("");
+}
+
+/** A run is live when its newest row is under 2 minutes old (a run with no rows is NOT live). */
+function runIsLive(r) {
+  if (!r || !r.last) return false;
+  const t = new Date(r.last).getTime();
+  return isFinite(t) && (Date.now() - t) < 120000;
+}
+
+/** Mode filter: "" all, "screen", "verify", "has_verify" (inline verify folder or a linked verify run). */
+function runModeMatches(r, mode) {
+  if (!mode) return true;
+  const isVerify = r.mode === "verify";
+  if (mode === "verify") return isVerify;
+  if (mode === "screen") return !isVerify;
+  if (mode === "has_verify") return !!r.has_inline_verify || !!r.has_verify_runs;
+  return true;
+}
+
+/** Pills after a run's name: running · verify · verified designs (pure). */
+function runModeBadgesHtml(r, live) {
+  const out = [];
+  if (live) out.push(pill("running", "good"));
+  if (r.mode === "verify") out.push(pill("verify", "warn"));
+  else if (r.has_inline_verify || r.has_verify_runs) out.push(pill("verified designs", "good"));
+  return out.join(" ");
+}
+
+/** "↳ verification of <parent>" for a verify run (pure). A verify run without a parent in this
+ *  runs folder is either a single-design verification (search --mode verify) or one whose parent
+ *  was moved/deleted; the summary cannot tell those apart, so the line says exactly that. */
+function runParentLineHtml(r) {
+  if (r.mode !== "verify") return "";
+  if (r.verify_of_run_id)
+    return `<br><span style="font-size:0.72rem">↳ verification of <a href="#/run/${esc(r.verify_of_run_id)}" onclick="event.stopPropagation()" class="mono">${esc(r.verify_of_run_id)}</a></span>`;
+  return `<br><span class="muted" style="font-size:0.72rem">↳ single-design verification · no parent run in this folder</span>`;
 }
 
 // ── View 3 detail: Run detail ──────────────────────────────────────
@@ -1966,6 +2075,9 @@ function sortRunsForTable(runs, sort) {
   const byKey = (a, b) => {
     if (sort === "best_j") return (a.best_j ?? Infinity) - (b.best_j ?? Infinity);
     if (sort === "name") return String(a.name || "").localeCompare(String(b.name || ""));
+    // "activity" (default): newest written row first — a resumed run that is live today sorts on
+    // top even though its run id (and `started`) are weeks old.
+    if (sort === "activity") return String(b.last || b.started || "").localeCompare(String(a.last || a.started || ""));
     return String(b.started || "").localeCompare(String(a.started || ""));
   };
   if (objectiveVersions(arr).length <= 1) return arr.sort(byKey);
@@ -2290,7 +2402,9 @@ async function viewAnalysis(setId) {
       (server default <span class="mono">runs/analysis/</span>; override with
       <span class="mono">hornlab-search gui --analysis-dir</span>). The Group A tools
       (<span class="mono">tools/analysis/</span>) write <span class="mono">REPORT.md</span> + JSON + PNG
-      there; this page only renders what they wrote — it never runs an analysis.</p></div>`;
+      there; this page only renders what they wrote — it never runs an analysis.</p>
+      <p class="muted" style="margin:8px 0 4px">To make a report set, run this in a terminal at the repository root (the day spec lists which runs and tools):</p>
+      <div class="log-tail mono" style="max-height:none;user-select:all">.venv\\Scripts\\python.exe tools\\analysis\\report_day.py --spec tools\\analysis\\specs\\day_2026-11-12.yaml --out runs\\analysis\\day_2026-11-12</div></div>`;
     ROOT.innerHTML = `<div class="stack" style="gap:22px">
       <div><div class="eyebrow">Reports</div><h2>Analysis</h2></div>
       ${rows
@@ -2406,7 +2520,8 @@ export { runProvenanceGroup, renderProvenanceBadges, restartScheduleHtml, stepCh
 
 export { f0KpiHtml, mountingRankWarnHtml, seedDerivationHtml, objectiveVersionOptionsHtml,
          objectiveVersionOf, jVersionLabel, objectiveVersions, objectiveVersionBannerHtml,
-         sortRunsForTable, gateAuditHtml, J_VERSION_BANNER, gateAuditSplit, budgetKpi };
+         sortRunsForTable, gateAuditHtml, J_VERSION_BANNER, gateAuditSplit, budgetKpi,
+         runIsLive, runModeMatches, runModeBadgesHtml, runParentLineHtml, laneChipsHtml, compareOptionsHtml, homeLeadersFilter, homeLeadersHtml };
 
 export { lanesPanelHtml, verdictChipHtml, eliteGateChips };
 
@@ -3156,15 +3271,18 @@ async function viewCompare() {
   const preA = qaMatch ? qaMatch[1] : "";
   const preB = qbMatch ? qbMatch[1] : "";
 
-  const opts = allRuns.map(r =>
-    `<option value="${esc(r.id)}">${esc(r.name)} — ${esc(r.id.slice(0, 20))}… (${esc(jVersionLabel(r))}=${fmt(r.best_j)})</option>`
-  ).join("");
+  const opts = compareOptionsHtml(allRuns, "", "");
 
   ROOT.innerHTML = `
     <div class="stack" style="gap:24px">
       <div>
         <div class="eyebrow">Compare two runs</div>
         <h2>Compare</h2>
+        <p class="muted" style="font-size:0.85rem;max-width:70ch">Puts two runs' best designs side by side. Scores can only be ranked against each other when both runs use the same brief and objective version; otherwise the curves are still shown, without a verdict.</p>
+      </div>
+      <div class="filter-bar">
+        <input id="cmp-filter" type="search" placeholder="Type to narrow both lists: name, family, brief, run id…" aria-label="filter the run lists">
+        <label style="display:flex;gap:6px;align-items:center;font-size:0.85rem"><input type="checkbox" id="cmp-same-brief" checked> Run B: same brief as Run A</label>
       </div>
       <div class="compare-pickers">
         <div class="form-group">
@@ -3186,6 +3304,20 @@ async function viewCompare() {
 
   if (preA) document.getElementById("cmp-a").value = preA;
   if (preB) document.getElementById("cmp-b").value = preB;
+  // Narrowing keeps the current selections (an option list without the selected run re-adds it).
+  const refill = () => {
+    const q = document.getElementById("cmp-filter").value;
+    const selA = document.getElementById("cmp-a"), selB = document.getElementById("cmp-b");
+    const a = selA.value, b = selB.value;
+    const runA = allRuns.find(r => r.id === a);
+    const briefB = document.getElementById("cmp-same-brief").checked && runA ? (runA.brief || "") : "";
+    selA.innerHTML = `<option value="">— select —</option>` + compareOptionsHtml(allRuns, q, "", a);
+    selB.innerHTML = `<option value="">— select —</option>` + compareOptionsHtml(allRuns, q, briefB, b);
+    selA.value = a; selB.value = b;
+  };
+  document.getElementById("cmp-filter").addEventListener("input", refill);
+  document.getElementById("cmp-same-brief").addEventListener("change", refill);
+  document.getElementById("cmp-a").addEventListener("change", refill);
 
   async function doCompare() {
     const a = document.getElementById("cmp-a").value;
@@ -3929,6 +4061,7 @@ async function viewCompose() {
       <div>
         <div class="eyebrow">Compose</div>
         <h2>Compose a run</h2>
+        <p style="font-size:0.9rem;margin:0 0 4px"><b>Recommended way to start work.</b> Build a run step by step. Experienced users with a saved config can use <a href="#/launch">Launch</a> instead.</p>
         <p class="muted" style="font-size:0.85rem">Shape first (which typologies), then the brief (the objective they are scored against), then the run. Every choice shows its exact command before anything executes — nothing is launched from here without a preview.</p>
       </div>
 
@@ -4529,6 +4662,7 @@ function renderLaunch(briefs, jobs, configs, statusData, typs = []) {
       <div>
         <div class="eyebrow">Launch jobs</div>
         <h2>Launch</h2>
+        <p class="muted" style="font-size:0.85rem;margin:0 0 6px">Quick launch from a saved config or brief, for experienced users. New to this? <a href="#/compose">Compose a run</a> walks through it step by step.</p>
         <div id="launch-busy">${busyNote}</div>
       </div>
       <div class="card stack" style="gap:16px">

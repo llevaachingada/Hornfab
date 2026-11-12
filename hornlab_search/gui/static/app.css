@@ -632,3 +632,9 @@ svg .iso-title { font-family: var(--f-body); font-size: 12px; font-weight: 600; 
   .sbox-3dwrap { height: 300px; }
 }
 @media (prefers-reduced-motion: reduce) { .typ-card[data-open] { transition: none; } }
+
+/* shell (GUI plan WP5): grouped sidebar navigation */
+#app-nav ul li.nav-group-label { padding:8px 16px 2px; font-family:var(--f-mono); font-size:0.62rem;
+  letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); }
+#app-nav ul li.nav-group-label:first-child { padding-top:4px; }
+@media (max-width:700px) { #app-nav ul li.nav-group-label { display:none; } }

@@ -264,7 +264,13 @@ def _run_summary(run_dir: Path) -> dict:
 def list_runs(runs: Path, limit: int | None = None) -> list[dict]:
     """Every run under ``runs`` (no cap: anything a search wrote must show up)."""
     dirs = _run_dirs(runs)
-    return [run_summary(d) for d in (dirs if limit is None else dirs[:limit])]
+    out = [run_summary(d) for d in (dirs if limit is None else dirs[:limit])]
+    # Additive (GUI plan WP4): mark parents that have a linked verify run, so the Runs list can
+    # badge "verified designs" without the client cross-referencing. Copies: run_summary is cached.
+    parents = {s.get("verify_of_run_id") for s in out if s.get("verify_of_run_id")}
+    if parents:
+        out = [dict(s, has_verify_runs=True) if s.get("id") in parents else s for s in out]
+    return out
 
 
 def _resolve_run(runs: Path, run_id: str) -> Path:
@@ -1416,7 +1422,7 @@ def status(root: Path, runs: Path) -> dict:
     except OSError:
         pass
     ov = runs / "overnight"
-    queue_logs = sorted(ov.glob("queue_*.log")) if ov.is_dir() else []
+    queue_logs = sorted(ov.glob("queue_*.log"), key=lambda p: (_mt(p), p.name)) if ov.is_dir() else []  # newest by mtime: names sort by prefix, not date
     return clean({
         "gpu_lock": lock, "vram_mib": vram, "julia_procs": len(procs), "disk": disk,
         "queue_log": {"name": queue_logs[-1].name, "tail": tail_text(queue_logs[-1], 30),
@@ -1599,6 +1605,15 @@ def queue_steps(log: Path) -> list[dict]:
 TIER_RANK = {"compare": 2, "screen": 1}
 
 
+def _leader_run_facts(summary: dict | None) -> dict:
+    """Additive leaderboard fields from the leading run's summary: whether any of its designs were
+    verified (inline verify folder or a linked verify run), and its last activity (newest row)."""
+    if not summary:
+        return {"verified": False, "last_activity": None}
+    return {"verified": bool(summary.get("has_inline_verify") or summary.get("has_verify_runs")),
+            "last_activity": summary.get("last")}
+
+
 def leaders(runs: Path, snap: _Snapshot | None = None) -> list[dict]:
     """Per brief, the leading family of the latest campaign of the strongest tier (compare beats
     screen; dry-run has no scores). 'clearly_ahead' applies the ranking rule: the leader's median beats
@@ -1609,6 +1624,8 @@ def leaders(runs: Path, snap: _Snapshot | None = None) -> list[dict]:
     never built.  Both are per-call, so a campaign dir created between two calls is seen by the
     second one."""
     snap = snap if snap is not None else _snapshot(runs)
+    # Verification + recency per run (GUI plan WP5): one list_runs pass (summaries are cached).
+    by_id = {s.get("id"): s for s in list_runs(runs)}
     chosen: dict[str, dict] = {}
     for c in list_campaigns(runs, snap):                 # newest first
         tier, brief = c.get("tier"), c.get("brief")
@@ -1635,7 +1652,8 @@ def leaders(runs: Path, snap: _Snapshot | None = None) -> list[dict]:
                           "family": lead["name"], "group": lead.get("group"), "median_j": lead["median_j"],
                           "best_j": lead.get("best_j"), "spread": lead.get("spread"), "dims": lead.get("dims"),
                           "best_run_id": lead.get("best_run_id"), "runner_up": nxt["name"] if nxt else None,
-                          "gap": gap, "clearly_ahead": clearly, "n_families": len(scored)}))
+                          "gap": gap, "clearly_ahead": clearly, "n_families": len(scored),
+                          **_leader_run_facts(by_id.get(lead.get("best_run_id")))}))
     return out
 
 
