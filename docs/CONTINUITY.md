@@ -1,6 +1,25 @@
 # CONTINUITY
 
 
+## 2026-11-12 (19:25Z) - TEST-SUITE EFFICIENCY REVIEW (SENIOR PASS, PROPOSAL ONLY)
+
+- Wrote `docs/research/TEST_SUITE_EFFICIENCY_2026-11-12.md` (senior research pass, owner-gated):
+  measured the testing burden and proposed low-risk reductions **without removing any coverage**.
+- [measured] Local offline suite 2706 tests / 588.3 s (~10 min); CI test step 352.8 s (~5.9 min,
+  ~8 min end-to-end); today 122 CI runs (85 push + 37 PR) = 824 run-minutes; 24 tests >=5 s carry
+  51% of suite time (unmarked export/STEP/GUI-preview/bassbox/report/campaign integration tests).
+- Root causes ranked: dual `push`+`pull_request` triggers (2 runs/commit), no pip cache, docs-only
+  commits re-running the full suite (push rule + merge-time docs commits), orchestrator full-suite
+  per branch duplicating CI, unmarked heavy integration tests, and branch protection off (a red
+  merge cost two fix PRs today).
+- Proposals R1-R8: single trigger (+main), pip cache, docs-only fast CI lane (keeps
+  gen_param_catalog --check + param-catalog tests), `slow`-mark the measured heavy tests with a
+  nightly lane, CI-as-merge-gate protocol, required checks, optional xdist, and the GPU
+  smoke-vs-full-checkpoint ladder (GPU tests are NOT the CI cost; only 4 marked tests, all skipped
+  in CI). Expected: ~5-6x less CI time, ~2-3x less local waiting at equal coverage. **No change
+  was applied** — owner decides; the doc carries exact diffs.
+- ISSUES/INDEX/NOTES_FOR_SENIOR updated in the same commit per the push rule.
+
 ## 2026-11-12 (18:15Z) - DAY GROUP E: GUI ANALYSIS PAGE, LANES PANEL, ELITES CATALOG
 
 - Day-plan group E (PR #36, branch `day/E-gui`): E.1 `#/analysis` read-only page renders the Group A
