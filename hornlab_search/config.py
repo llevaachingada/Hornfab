@@ -119,6 +119,9 @@ class SearchSettings:
     restarts: dict | None = None       # WP11a: {"mode": ipop|bipop, "max": N} (absent = today)
     qd: dict | None = None             # WP11b: CMA-ME descriptors/bins (absent = today)
     pipeline_prefetch: int = 0         # WP2: build this many candidates' meshes ahead (0 = serial, today)
+    budget_counts: str = "new"         # B.4 (day 2026-11-12): 'new' (default, today) | 'valid'
+    max_attempts: int | None = None    # B.4: hard ceiling on NEW attempts; unset 'valid' mode
+                                       # defaults to 4 x budget so an all-refusing box still stops
 
 
 @dataclass
@@ -784,6 +787,32 @@ def _validate_qd(block, where: str) -> dict | None:
     return out
 
 
+def _validate_budget_counts(value, where: str) -> str:
+    """B.4 (day 2026-11-12): ``search.budget_counts`` selects what consumes the budget.
+
+    ``new`` (default) is today's semantics: every NON-CACHED evaluation consumes one budget
+    unit, refusals included. ``valid`` makes the budget count only VALID evaluations: the
+    deterministic refusals (invalid_geometry / invalid_envelope / mesh_too_large) do not
+    consume budget, and a hard ceiling ``search.max_attempts`` (default 4 x budget) stops an
+    all-refusing box. Exact tokens; anything else is a typo and is refused."""
+    if not isinstance(value, str) or value not in ("new", "valid"):
+        raise ConfigError(f"{where}: budget_counts must be 'new' or 'valid', got {value!r}")
+    return value
+
+
+def _validate_max_attempts(value, where: str) -> int | None:
+    """B.4 (day 2026-11-12): ``search.max_attempts`` is a positive integer ceiling on NEW
+    (non-cached) attempts of one search invocation. Its main use is with
+    ``search.budget_counts: valid`` (default there: 4 x budget, applied by the search loop);
+    unset (None) with the default budget_counts leaves today's behaviour untouched. Bool /
+    float / <= 0 are refused so a YAML typo is never silent."""
+    if value is None:
+        return None
+    if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+        raise ConfigError(f"{where}: max_attempts must be a positive integer, got {value!r}")
+    return int(value)
+
+
 def _validate_near_correction(solve, where: str) -> None:
     """WP14: validate ``solve.near_correction*`` / ``solve.solve_precision`` BEFORE the library
     sees them. The bounds mirror hornlab_beat_bem's own SolveConfig (near_correction_cutoff finite
@@ -1155,12 +1184,17 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
     _validate_near_correction(solve, f"{where}:solve")
     _validate_source_profile_alpha(solve, f"{where}:solve")
     search = _build(SearchSettings, _require(raw, "search", where), f"{where}:search",
-                    optional=("popsize", "infeasible_penalty", "restarts", "qd", "pipeline_prefetch"))
+                    optional=("popsize", "infeasible_penalty", "restarts", "qd", "pipeline_prefetch",
+                              "budget_counts", "max_attempts"))
     if "popsize" not in raw["search"]:
         search.popsize = None
+    if "budget_counts" not in raw["search"]:
+        search.budget_counts = "new"
     if search.infeasible_penalty not in ("flat", "graded"):
         raise ConfigError(f"{where}: search.infeasible_penalty must be 'flat' or 'graded', "
                           f"got {search.infeasible_penalty!r}")
+    search.budget_counts = _validate_budget_counts(search.budget_counts, f"{where}:search")
+    search.max_attempts = _validate_max_attempts(search.max_attempts, f"{where}:search")
     if search.algorithm not in SEARCH_ALGORITHMS:
         raise ConfigError(f"{where}: search.algorithm must be one of {list(SEARCH_ALGORITHMS)}, "
                           f"got {search.algorithm!r}")

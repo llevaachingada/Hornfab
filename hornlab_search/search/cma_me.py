@@ -42,6 +42,7 @@ from ..mesh.build import MeshConsistencyError
 from ..types import Evaluation
 from . import rundir
 from .cma import (MAX_CONSECUTIVE_SOLVE_FAILURES, SolverUnhealthyError, _detach, _prepare,
+                  budget_count, budget_counts_block, budget_exhausted, budget_policy,
                   summarize, summarize_rows)
 from .evaluate import error_kind, evaluate, read_ndjson
 from .pipeline import CandidatePipeline
@@ -129,7 +130,8 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
     run_dir = Path(resume if resume is not None else run_dir)
     run_dir, backend, ctx = _prepare(cfg, run_dir, mode, backend, store, cache_dir, trace_fraction,
                                      command, config_path, lib_shas)
-    max_new = int(budget if budget is not None else cfg.search.budget)
+    policy = budget_policy(cfg, budget)         # B.4: shared budget accounting with cma.search
+    max_new = policy["budget"]
     space = DesignSpace.from_config(cfg)
     x0 = space.normalize(space.seed)
     solution_dim = int(len(x0))
@@ -148,7 +150,7 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
     evals: list[Evaluation] = []
     wall: list[float] = []
     state = {"best": None, "best_no": None, "seed_ev": None, "n_new": 0, "stop": "",
-             "solve_fail_streak": 0}
+             "solve_fail_streak": 0, "attempts": 0, "n_valid": 0, "n_refused_free": 0}
     hash_by_solution: dict[tuple, str] = {}
     seed_measures: np.ndarray | None = None
     rows0 = read_ndjson(run_dir / "search.ndjson")
@@ -171,8 +173,8 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
         ev = evaluate(design, space, cfg, mode, run_dir, store, backend, ctx=ctx)
         dt = time.perf_counter() - t0
         evals.append(ev)
+        budget_count(state, ev)                 # B.4: same counters as the single-ES path
         if not ev.cached:
-            state["n_new"] += 1
             wall.append(dt)
         b = state["best"]
         if b is None or ev.objective < b.objective or (b.error and not ev.error):
@@ -289,14 +291,24 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
                      "descriptor_v_meaning": _describe_descriptor(names[1])}
         if pipe.enabled:
             upd["pipeline_prefetch"] = pipe.stats()
+        # B.4: present only for budget_counts: valid (or an explicit max_attempts), so a default
+        # cma_me run.json keeps today's schema byte-for-byte.
+        bc = budget_counts_block(state, policy)
+        if bc is not None:
+            upd["budget_counts"] = bc
         rundir.update_run_json(run_dir, **upd)
+        suffix = ""
+        if bc is not None:
+            cap_txt = "none" if bc["attempts_cap"] is None else str(bc["attempts_cap"])
+            suffix = (f", valid {bc['valid']} (budget counts), refusals free {bc['refused_free']}"
+                      f", attempts {bc['attempts']}/{cap_txt}")
         log.info("CMA-ME %s: %d evaluations (%d new, %d cached), archive %d/%d cells "
-                 "(%.1f%% coverage), best J=%.4f, %d failures %s",
+                 "(%.1f%% coverage), best J=%.4f, %d failures %s%s",
                  status, stats["evaluations"], stats["non_cached"], stats["cache_hits"],
                  payload["stats"]["occupied_bins"], payload["stats"]["total_bins"],
                  100.0 * payload["stats"]["coverage"],
                  float("nan") if best is None else best.objective,
-                 stats["failures"], stats["failures_by_reason"])
+                 stats["failures"], stats["failures_by_reason"], suffix)
 
     def clip01(x) -> np.ndarray:
         return np.clip(np.asarray(x, dtype=float).reshape(-1), 0.0, 1.0)
@@ -332,7 +344,7 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
         cap = int(max_evals) if max_evals else None
 
         def exhausted() -> bool:
-            return state["n_new"] >= max_new or (cap is not None and len(evals) >= cap)
+            return budget_exhausted(state, policy, cap, len(evals))
 
         def maybe_refresh() -> None:
             nonlocal written_at

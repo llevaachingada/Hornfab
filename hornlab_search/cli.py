@@ -781,6 +781,11 @@ def _search_body(args, argv, d) -> int:
           f"{g(st.get('mean_seconds_per_candidate'))} s/candidate, "
           f"{g(st.get('candidates_per_hour'), '.0f')}/h, projected 1,000 = {g(ph.get('1000'))} h, "
           f"10,000 = {g(ph.get('10000'))} h")
+    bc = run.get("budget_counts") or None         # B.4: present only for valid-only / capped budgets
+    if bc:
+        print(f"  budget counts: {bc.get('mode')}, {bc.get('valid')} valid of "
+              f"{bc.get('budget')} budget, {bc.get('refused_free')} refusals free, "
+              f"attempts {bc.get('attempts')}/{bc.get('attempts_cap')}")
     if seed is not None and best is not None:
         verdict = ("improved on the seed" if best.objective < seed - 1e-12 else "did NOT improve on the seed")
         print(f"  seed J={seed:.6g}  best J={best.objective:.6g} ({verdict}); stop: {run.get('stop_reason')}")

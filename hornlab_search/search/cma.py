@@ -41,11 +41,81 @@ from ..targets.spec import Target
 from ..types import Evaluation
 from . import rundir
 from .pipeline import CandidatePipeline
-from .evaluate import (collect_lib_shas, error_kind, evaluate, make_context, read_ndjson)
+from .evaluate import (DETERMINISTIC_KINDS, collect_lib_shas, error_kind, evaluate, make_context,
+                       read_ndjson)
 
 log = logging.getLogger("hornlab_search.search.cma")
 
 EVALS_PER_PROJECTION = (1000, 10000)
+
+# B.4 (day 2026-11-12): with ``search.budget_counts: valid`` the budget counts only VALID
+# evaluations; the deterministic refusals are exactly these kinds (the same set evaluate
+# memoizes as replayable failures). Solved-but-metrics/solve failures still consume budget:
+# they say the machine hiccupped, not that the design was refused.
+REFUSAL_KINDS = DETERMINISTIC_KINDS
+DEFAULT_ATTEMPTS_FACTOR = 4       # search.max_attempts default (valid mode only): 4 x budget
+
+
+def budget_policy(cfg, budget=None) -> dict:
+    """(mode, budget, attempts_cap) for this search invocation (shared by cma and cma_me).
+
+    ``mode`` 'new' is today's semantics and 'valid' is B.4's opt-in; ``attempts_cap`` is the
+    hard ceiling on NEW attempts. Absent ``search.max_attempts``, the valid mode defaults to
+    ``DEFAULT_ATTEMPTS_FACTOR * budget`` so an all-refusing box still stops; the 'new' mode
+    keeps a None cap (today's behaviour) unless the key is set explicitly.
+    """
+    mode = str(getattr(cfg.search, "budget_counts", "new") or "new")
+    max_new = int(budget if budget is not None else cfg.search.budget)
+    cap = getattr(cfg.search, "max_attempts", None)
+    if cap is None and mode == "valid":
+        cap = DEFAULT_ATTEMPTS_FACTOR * max_new
+    attempts_cap = None if cap is None else int(cap)
+    return {"mode": mode, "budget": max_new, "attempts_cap": attempts_cap}
+
+
+def budget_count(state: dict, ev: Evaluation) -> None:
+    """Accumulate the budget counters of ONE evaluation (call for every evaluation, cached or
+    not: a cache hit consumes no budget and writes no counter today, unchanged)."""
+    if ev.cached:
+        return
+    kind = error_kind(ev.error)
+    state.setdefault("attempts", 0)
+    state.setdefault("n_valid", 0)
+    state.setdefault("n_refused_free", 0)
+    state["n_new"] += 1
+    state["attempts"] += 1
+    if not ev.error:
+        state["n_valid"] += 1
+    elif kind in REFUSAL_KINDS:
+        state["n_refused_free"] += 1
+
+
+def budget_exhausted(state: dict, policy: dict, max_evals_cap, total_evals: int) -> bool:
+    """Is this search invocation's budget spent? ``max_evals_cap`` is the ALL-evaluations cap
+    (campaign fairness), checked against ``total_evals`` exactly as before."""
+    used = state["n_valid"] if policy["mode"] == "valid" else state["n_new"]
+    if used >= policy["budget"]:
+        return True
+    attempts_cap = policy["attempts_cap"]
+    if attempts_cap is not None and state.get("attempts", 0) >= attempts_cap:
+        return True
+    if max_evals_cap and total_evals >= max_evals_cap:
+        return True
+    return False
+
+
+def budget_counts_block(state: dict, policy: dict) -> dict | None:
+    """run.json ``budget_counts`` block; None (key absent) when counting nothing special, so
+    an unconfigured run.json keeps exactly today's schema."""
+    if policy["mode"] == "new" and policy["attempts_cap"] is None:
+        return None
+    return {
+        "mode": policy["mode"], "budget": policy["budget"],
+        "attempts_cap": None if policy["attempts_cap"] is None else int(policy["attempts_cap"]),
+        "attempts": int(state.get("attempts", 0)),
+        "valid": int(state.get("n_valid", 0)),
+        "refused_free": int(state.get("n_refused_free", 0)),
+    }
 
 
 def covariance_summary(
@@ -307,7 +377,8 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
     run_dir = Path(resume if resume is not None else run_dir)
     run_dir, backend, ctx = _prepare(cfg, run_dir, mode, backend, store, cache_dir, trace_fraction,
                                      command, config_path, lib_shas)
-    max_new = int(budget if budget is not None else cfg.search.budget)
+    policy = budget_policy(cfg, budget)
+    max_new = policy["budget"]
     space = DesignSpace.from_config(cfg)
     x0 = space.normalize(space.seed)
     restarts = getattr(cfg.search, "restarts", None)
@@ -318,6 +389,16 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
              "verb_filenameprefix": str(prefix) + os.sep, "verb_disp": 0, "verbose": -1}
         if popsize:
             o["popsize"] = int(popsize)
+        if policy["mode"] == "valid":
+            # B.4: a refusal is told as the flat 1000 penalty, so pycma's fitness-range stops
+            # (tolfun / tolfunhist / tolflatfitness, cma 4.5.0 evolution_strategy.py:4227-4229
+            # and :4306-4317) fire on a streak of refusals, not on convergence. With the
+            # valid-only budget the budget policy (n_valid / attempts cap) is the termination
+            # authority instead; geometric criteria (tolx, tolupsigma, ...) stay active. Only
+            # for the opt-in 'valid' mode: the default 'new' ES options are unchanged.
+            o["tolfun"] = 0.0
+            o["tolfunhist"] = 0.0
+            o["tolflatfitness"] = 1e12
         return o
 
     popsize0 = int(cfg.search.popsize) if cfg.search.popsize else None
@@ -330,7 +411,7 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
     wall: list[float] = []
     restarts_log: list[dict] = []              # filled only when search.restarts is configured
     state = {"best": None, "best_no": None, "seed_ev": None, "n_new": 0, "stop": "",
-             "solve_fail_streak": 0}
+             "solve_fail_streak": 0, "attempts": 0, "n_valid": 0, "n_refused_free": 0}
 
     # On a resume the best so far is already on disk in search.ndjson: start from it, so a short
     # (or zero-budget) resume can never overwrite best.json with something worse.
@@ -349,8 +430,8 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
         ev = evaluate(design, space, cfg, mode, run_dir, store, backend, ctx=ctx)
         dt = time.perf_counter() - t0
         evals.append(ev)
+        budget_count(state, ev)
         if not ev.cached:
-            state["n_new"] += 1
             wall.append(dt)
         b = state["best"]
         if b is None or ev.objective < b.objective or (b.error and not ev.error):
@@ -374,6 +455,9 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
         stats = summarize_rows(read_ndjson(run_dir / "search.ndjson")) if (run_dir / "search.ndjson").exists() else last
         seed_ev = state["seed_ev"]
         best = state["best"]
+        # B.4: the valid-only budget reports both counts; absent (default 'new') the run.json
+        # schema and the summary line stay exactly today's.
+        bc = budget_counts_block(state, policy)
         upd = {"status": status, "finished_utc": rundir.utc_now(), "stop_reason": state["stop"],
                "stats": stats, "last_invocation": last, "budget": max_new}
         if seed_ev is not None:
@@ -392,13 +476,20 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
                 rundir.write_json_atomic(run_dir / "cma" / "covariance.json", cov)
             except Exception:  # noqa: BLE001 - optional sidecar; run.json is the contract
                 log.debug("could not write cma/covariance.json", exc_info=True)
+        if bc is not None:
+            upd["budget_counts"] = bc
         rundir.update_run_json(run_dir, **upd)
+        suffix = ""
+        if bc is not None:
+            cap_txt = "none" if bc["attempts_cap"] is None else str(bc["attempts_cap"])
+            suffix = (f", valid {bc['valid']} (budget counts), refusals free {bc['refused_free']}"
+                      f", attempts {bc['attempts']}/{cap_txt}")
         log.info("search %s: %d evaluations (%d new, %d cached), %d failures %s, GPU %.1f s, "
-                 "%.1f s/candidate, %.0f candidates/h, 1k evals = %.1f h, 10k = %.1f h",
+                 "%.1f s/candidate, %.0f candidates/h, 1k evals = %.1f h, 10k = %.1f h%s",
                  status, stats["evaluations"], stats["non_cached"], stats["cache_hits"],
                  stats["failures"], stats["failures_by_reason"], stats["total_gpu_seconds"],
                  stats["mean_seconds_per_candidate"], stats["candidates_per_hour"],
-                 stats["projected_hours"]["1000"], stats["projected_hours"]["10000"])
+                 stats["projected_hours"]["1000"], stats["projected_hours"]["10000"], suffix)
 
     try:
         # 1. the seed first: every later number is meaningless without the baseline it must beat
@@ -409,7 +500,7 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
         cap = int(max_evals) if max_evals else None
 
         def exhausted() -> bool:
-            return state["n_new"] >= max_new or (cap is not None and len(evals) >= cap)
+            return budget_exhausted(state, policy, cap, len(evals))
 
         def sweep(es_instance, restart_index: int | None = None) -> str:
             """Generations of ONE ES instance until its own stop criteria or the budget run out.
