@@ -1,6 +1,62 @@
 # CONTINUITY
 
 
+## 2026-11-12 (16:25Z) - DAY GROUP D: NIGHT/DATA OPS HARDENING
+
+- Day-plan group D (PR #35, branch `day/D-night-ops`): D.1 two-lane `night_status.py` (per-lane lock
+  holders alive/stale, the running job per lane from the queue logs, its run-dir row count and
+  newest-row age, ALERT when a lane is quiet > 30 min while its job runs); D.2 runner robustness
+  (GPU-busy job -> `status: blocked` + exactly one retry after 120 s, `lane`/`backend`/`status`/
+  `attempts` on every summary row incl. command jobs, `--dry-run` validates EVERY argv path,
+  explicit stale-lock takeover log); D.3 `tools/data/merge_lane_dataset.py` (parity-gated on the A.7
+  report, dry-run by default, `provenance.lane: "cpu"` tags, backup + atomic writes, idempotent);
+  D.4 `tools/night_report.py` (per-lane morning report, [measured]/[inferred]).
+- Verified: 66 targeted offline tests green (junitxml 66/0/0/0); full offline suite green on the
+  branch (2 stored-data skips) at f98f024; live read-only smokes of the two-lane status and the
+  night report against the 2026-11-12 day runs (GPU lock holder shown correctly; CPU lock freed).
+- D.3 parity-schema tolerance (documented in PR #35): gate = top-level `pass` bool per the A.7
+  schema on `day/A-analysis`; `verdict`/`status`/`result` "pass"/"passed" accepted; unrecognised
+  gate = refuse (fail closed).
+
+## 2026-11-12 (16:00Z) - DAY GROUP R: SEARCH-MATH RESEARCH DOSSIER
+
+- Day-plan group R (research continuation, PR #34, branch `day/R-research-dossier`): wrote
+  `docs/research/SEARCH_MATH_DOSSIER_2026-11.md` (docs-only, single repo file). Ten sections, owner
+  summary, ranked change table. Sources: verified primary-source pack (Hansen GECCO'19 lq-CMA-ES + pycma
+  `fitness_models` internals; Nomura et al. AAAI'21 arXiv:2012.06932 WS-CMA-ES — plan's "Shibata"
+  attribution corrected; Fontaine & Nikolaidis GECCO'23 arXiv:2205.10752 CMA-MAE + pyribs v0.12.1 tutorial;
+  IOHprofiler/COCO ECDF refs; SALib given-data methods) + repo file:line spot-checks at tip 2ecbc69 +
+  installed pycma 4.5.0 / ribs 0.12.0 venv source (read-only). 16 claims tagged [TO-VERIFY] with exact
+  reference-to-check; no fabricated refs.
+- [measured] scripts (offline, READ-ONLY over `runs/`, in `C:\Users\hunte\study_2026-11-12\research\`,
+  never in the repo): refusal shares over 415 runs / 34,475 ndjson rows = 13.8% total (invalid_geometry
+  9.1%, mesh_too_large 2.6%, invalid_envelope 1.7%) — consistent with, slightly below, the senior 16%
+  (scope differs, both retained); §8 power table: detecting delta=10% of the spread needs n=106 (group,
+  spread 26%) or 546 (v6 spread 59%) — past n=2-10 A/Bs were underpowered.
+- Key recommendations feeding B.6-B.8 and G: feasibility resampling before telling J=1000 (16% refusals),
+  lq-CMA-ES only after an offline LQModel tau>=0.85 replay test, same-brief warm starts (mean/sigma/shrunk
+  C0 + pycma inject), config-only BIPOP for budgets >=300, CMA-MAE on ribs 0.12 (learning_rate 0.01-0.1,
+  improvement ranker, NO emitter bounds — two confirmed mismatch mechanisms: emitter-bounds resampling
+  distortion and refused rows borrowing the seed's cell), objective v8 = linear RMS error units +
+  tolerances calibrated from top-decile medians + gates as refusals.
+- INDEX.md line added (research section). No code, no GPU, no solver runs; CI green required before merge.
+
+## 2026-11-12 (15:55Z) - DAY GROUP F: DOCS AND ISSUE HYGIENE (F.4 ISSUE #13 CLOSED)
+
+- Day-plan group F (docs lane, PR #33, branch `day/F-docs-hygiene`): `docs/NEXT_DEV_PRIORITIES.md` adds P15
+  (the 2026-11-12 day hardening plan, PR #32) and marks P14 lanes L1-L5 DONE with PR numbers
+  (#29/#26/#27/#28; #25 still open, merges last today); open owner decisions recorded (loading split v6/v7
+  confirmed by PR #27 tau evidence; round-throat default; sysmem setting; HF write access for Collin; printing).
+  `docs/SENIOR_PLAN_2026-11-12.md` got a per-WP status column (done / in this plan / open), conservative.
+- CONTINUITY order fix produced as `docs/history/continuity_reorder_2026-11-12.patch` (plan F.1 DECIDED):
+  reorders entries newest-first and moves the 202 entries dated 2026-10-12..2026-10-31 to
+  `docs/history/CONTINUITY_2026-10-22_2026-10-31.md`. Patch verified (`git apply --check` + real apply)
+  against pristine origin/main content 2ecbc69. The ORCHESTRATOR applies it LAST today, after all merges
+  (CONTINUITY is edited by every merge today).
+- F.4 executed by the orchestrator at merge time: GitHub issue #13 closed (comment cites the fixes merged
+  2026-10-22: FF to 6d1d5c7 = e0b9b61 + 11304f6 + 152a829; suite 533 PASS); mirrored in `docs/ISSUES.md`.
+- Docs-only lane; no pytest applicability; CI green on PR #33.
+
 ## 2026-11-12 (14:30Z) - DAY QUEUE: GPU + CPU LANES LAUNCHED FROM THE COMPUTE STUDY
 
 - Study: `C:/Users/hunte/Hrns/study_2026-11-12/COMPUTE_STUDY.md` (414 runs inventoried, sensitivity, bound walls). Its queue
