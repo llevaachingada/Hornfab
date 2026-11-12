@@ -18,6 +18,8 @@ Local-only, added 2026-11-12 (**integration; GitHub: PRs #19, #22, #23 close as 
 - Open: HF dataset re-pack after the relabel (WP-E4); GUI objective versions 4-7 (WP-D1); loading objectives
   reconciliation (WP-B1); two-way data interop with Collin (WP-F / handoff L5). `swarm/B` + `swarm/C` merged in #24.
 
+Local-only, added 2026-11-12 (day queue): staged-search brief path fix; narrowed ath_core cell; two-lane day queue live.
+
 | ID | Title | Status | Owner | Plan ref |
 |---|---|---|---|---|
 | #13 | hardening-review: Stage A surrogate gate-integrity and real-data traps | **open — fixes MERGED to main** (FF to 6d1d5c7 on 2026-10-22 carries e0b9b61 + 11304f6 + cloud reconciliation 152a829 verbatim; oracle pre-merge sign-off; full offline suite 533 PASS at the merged tree; awaiting owner close) | phase-2 (cloud) | `docs/plan/11_PHASE2_SURROGATE.md` §4 |
