@@ -514,6 +514,25 @@ def directivity_extras(resp: Response, m: MetricSet, target: Target) -> dict:
 # ------------------------------------------------------------------ rows (search.ndjson)
 
 
+def current_lane() -> str | None:
+    """This process's lane from ``HORNLAB_BEAT_WORKER_DIR`` (``.../<lane>/workers``), or None.
+
+    Lane identity is the BEAT worker registry directory (2026-11-12 two-lane night); the nightly
+    runner sets it per lane. None outside a lane, so the row's ``lane`` field is omitted.
+    """
+    raw = os.environ.get("HORNLAB_BEAT_WORKER_DIR", "").strip()
+    if not raw:
+        return None
+    try:
+        path = Path(raw)
+    except (TypeError, ValueError):
+        return None
+    if path.name.lower() != "workers":
+        return None
+    lane = path.parent.name.strip().lower()
+    return lane or None
+
+
 def _arr(x):
     return None if x is None else np.asarray(x, dtype=float).tolist()
 
@@ -548,10 +567,11 @@ def error_kind(error: str) -> str:
 
 
 def evaluation_to_row(ev: Evaluation, mode: str, n: int, seconds: dict,
-                      objective_version: int = 1) -> dict:
+                      objective_version: int = 1, *, lane: str | None = None,
+                      backend: str | None = None) -> dict:
     m = ev.mesh
     out = ev.outcome
-    return to_jsonable({
+    row = to_jsonable({
         "n": n, "mode": mode, "key": f"{ev.design_hash}-{ev.mesh_hash}-{ev.solve_hash}",
         "design_hash": ev.design_hash, "mesh_hash": ev.mesh_hash, "solve_hash": ev.solve_hash,
         "family": ev.design.family, "params": ev.design.params,
@@ -568,6 +588,14 @@ def evaluation_to_row(ev: Evaluation, mode: str, n: int, seconds: dict,
         "metrics": metrics_to_json(ev.metrics),
         "created_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
     })
+    # Two-lane night (2026-11-12): additive provenance so a morning report can compute
+    # evaluations/hour per lane and per backend. OMITTED when unknown, so every row written
+    # outside a lane stays byte-identical to the pre-two-lane schema.
+    if lane:
+        row["lane"] = str(lane)
+    if backend:
+        row["backend"] = str(backend)
+    return row
 
 
 def row_to_evaluation(row: dict) -> Evaluation:
@@ -1643,7 +1671,9 @@ def _persist(ev: Evaluation, mode: str, sspec, design_dir: Path, ctx: EvalContex
 
     # ---- the ndjson row, last
     row = evaluation_to_row(ev, mode, ctx.n_rows, seconds,
-                            objective_version=ctx.objective_version)
+                            objective_version=ctx.objective_version,
+                            lane=current_lane(),
+                            backend=getattr(sspec, "backend", None))
     if st.get("mounting"):
         # WP12 provenance echo. The row's ``key`` carries the SAME mounting suffix ``evaluate``
         # used for the run-known memo and the solve cache, so a resume reloads this row under the

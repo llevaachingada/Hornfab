@@ -181,6 +181,10 @@ def _prepare(cfg, run_dir: Path, mode: str, backend, store, cache_dir, trace_fra
         # WP15 cuda_fused is CUDA-only (Metal/CPU must not receive the flag).
         if str(cfg.solve.backend) == "beat_cuda":
             kw["cuda_fused"] = bool(getattr(cfg.solve, "cuda_fused", False))
+        # CPU second lane (2026-11-12): same thread count for warm_up and SolveConfig (H9).
+        _threads = getattr(cfg.solve, "julia_threads", None)
+        if _threads is not None:
+            kw["julia_threads"] = int(_threads)
         backend = get_backend(cfg.solve.backend, **kw)
     worker.warm(backend)                       # once, before the seed; idempotent
     lib_shas = lib_shas or collect_lib_shas()

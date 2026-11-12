@@ -420,6 +420,11 @@ def _backend(cfg):
     # WP15 cuda_fused is CUDA-only; never pass it for metal/cpu (BeatBackend refuses otherwise).
     if str(cfg.solve.backend) == "beat_cuda":
         kw["cuda_fused"] = bool(getattr(cfg.solve, "cuda_fused", False))
+    # CPU second lane (2026-11-12): the run's host uses solve.julia_threads. Absent -> the
+    # library's own "auto" and the pre-two-lane config exactly.
+    _threads = getattr(cfg.solve, "julia_threads", None)
+    if _threads is not None:
+        kw["julia_threads"] = int(_threads)
     return get_backend(cfg.solve.backend, **kw)
 
 

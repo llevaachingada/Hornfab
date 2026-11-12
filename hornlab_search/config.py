@@ -95,6 +95,11 @@ class SolveSettings:
     # The library validates the rest and REFUSES every path but fused CUDA
     # (source_profile_alpha is a fused-CUDA-only feature).
     source_profile_alpha: float | None = None
+    # CPU second lane (2026-11-12): Julia/BLAS thread count for this run's BEAT host. It changes
+    # ONLY how the host is scheduled, never the physics, so it is deliberately NOT part of the
+    # solve-spec hash (two configs differing only here share a solve hash and a warm host).
+    # None = absent = the library's own "auto". Validated as a positive integer.
+    julia_threads: int | None = None
 
     def balloon_points(self, mode: str) -> int:
         if not self.balloon:
@@ -861,6 +866,18 @@ def _validate_source_profile_alpha(solve, where: str) -> None:
             f"fused-CUDA feature)")
 
 
+def _validate_julia_threads(value, where: str) -> int:
+    """CPU second lane: ``solve.julia_threads`` is a positive integer (host scheduling only).
+
+    It must be a real integer, not ``True``/``3.0``/``"12"``; a typo must be refused here rather
+    than silently becoming a different host. ``None`` (key absent) keeps the library's "auto".
+    """
+    if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+        raise ConfigError(
+            f"{where}: julia_threads must be a positive integer, got {value!r}")
+    return int(value)
+
+
 def _validate_source_motion(value, backend: str, where: str) -> str:
     """WP5: ``solve.source_motion`` is 'normal' (today) or 'axial' (rigid piston). Only the beat
     adapter implements it; a non-beat backend with a non-default value is refused loudly."""
@@ -1111,7 +1128,9 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
     solve = _build(SolveSettings, solve_section, f"{where}:solve",
                    optional=("cuda_fused", "source_motion", "near_correction",
                              "near_correction_cutoff", "near_correction_order",
-                             "solve_precision", "source_profile_alpha"))
+                             "solve_precision", "source_profile_alpha", "julia_threads"))
+    if solve.julia_threads is not None:
+        solve.julia_threads = _validate_julia_threads(solve.julia_threads, f"{where}:solve")
     if solve.cuda_fused and str(solve.backend) != "beat_cuda":
         raise ConfigError(f"{where}: solve.cuda_fused is only implemented for backend: beat_cuda "
                           f"(got {solve.backend!r})")

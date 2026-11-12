@@ -129,3 +129,41 @@ def test_the_v5_profile_is_gone_and_v7_holds_version_seven():
     assert data["objective"]["version"] == 7
     assert (profiles / "fused_cuda.yaml").is_file()
     assert (profiles / "objective_v4.yaml").is_file()
+
+
+def test_fused_cuda_profile_has_mesh_dof_caps_not_solve():
+    """fused_cuda.yaml must put dof_cap_verify/final under mesh:, not solve:, so that a config
+    extending it passes ``_build(SolveSettings, ...)``'s unknown-key check."""
+    data = yaml.safe_load((REPO / "examples" / "profiles" / "fused_cuda.yaml")
+                          .read_text(encoding="utf-8"))
+    assert "dof_cap_verify" not in data.get("solve", {}), (
+        "fused_cuda.yaml must put dof_cap_verify under mesh:, not solve:")
+    assert "dof_cap_final" not in data.get("solve", {}), (
+        "fused_cuda.yaml must put dof_cap_final under mesh:, not solve:")
+    mesh = data.get("mesh", {})
+    assert mesh.get("dof_cap_verify") == 12000
+    assert mesh.get("dof_cap_final") == 12000
+    assert data.get("solve", {}).get("cuda_fused") is True
+
+
+def test_fused_cuda_profile_merges_into_a_real_cell(tmp_path):
+    """A config that extends fused_cuda.yaml should load successfully (the dof_cap keys must be
+    in the mesh block so ``_build`` doesn't reject them)."""
+    # Use the first real cell as the base (it's a cuda config); strip cuda_fused to avoid a
+    # ConfigError for a non-cuda backend if the cell's backend is beat_cpu.
+    rel = CELLS[0]
+    raw = _absolutize_brief(_raw(rel), rel)
+    # Ensure the base config uses beat_cuda so cuda_fused is accepted
+    raw.setdefault("solve", {})
+    raw["solve"]["backend"] = "beat_cuda"
+    raw["solve"].pop("cuda_fused", None)  # will come from profile
+    base_path = tmp_path / "base.yaml"
+    base_path.write_text(yaml.safe_dump(raw, sort_keys=False), encoding="utf-8")
+    child = {"extends": ["base.yaml",
+                         str((REPO / "examples" / "profiles" / "fused_cuda.yaml").resolve())]}
+    child_path = tmp_path / "child.yaml"
+    child_path.write_text(yaml.safe_dump(child, sort_keys=False), encoding="utf-8")
+    cfg = load_config(child_path)
+    assert cfg.solve.cuda_fused is True
+    assert cfg.mesh.dof_cap_verify == 12000
+    assert cfg.mesh.dof_cap_final == 12000

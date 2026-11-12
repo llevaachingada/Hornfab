@@ -1,6 +1,39 @@
 # CONTINUITY
 
 
+## 2026-11-12 (L1) - LANE L1: CPU SECOND SOLVE LANE WIRED END-TO-END
+
+- **Scope:** lane L1 of the two-lane night architecture, branch `lane/L1-cpu-lane`. All eight L1
+  tasks (L1.1-L1.6, L1.8) are complete; L1.7 (GUI, out-of-scope for this branch) stays open.
+- **L1.1 — lane-scoped host cleanup (`solve/worker.py`):** `clear_stale_hosts` / `recover_after_failure`
+  carry a `lane` argument; `host_lane(cmdline)` and `derive_lane()` classify hosts by their `--dir`
+  BEAT worker registry arg; unknown-lane hosts logged as "unknown host, left alone" and never killed.
+  Three commits prior to this session (03097f7, 9f2c990, d651845).
+- **L1.2 — hygiene + gpu-clean lane-aware:** `hygiene.py::clear_julia()` has a `lane` argument;
+  `cli.py::_cmd_gpu_clean` accepts `--lane` and routes to `lane_lock_path()`. (Also in prior commits.)
+- **L1.3 — night runner two-lane:** `run_campaign_night.py` updated: no image-name kill anywhere; top-level
+  `lane:` key in night YAMLs; `lane_env()` / `build_job_env()` pure helpers set `HORNLAB_BEAT_WORKER_DIR`
+  per lane (CPU lane also sets JULIA/BLAS thread caps); per-job `backend:`, `cache_dir:`, `dataset_dir:`,
+  `env:` keys plumbed to the CLI; CPU lane holds `runs/.cpu.lane.lock` for the whole night, skips GPU lock
+  + nvidia-smi; COMMAND-kind jobs that wrap `hornlab-search search` have their `run_dir`/`evals`/`best_J`
+  parsed from log output (same patterns as SEARCH-kind jobs).
+- **L1.4 — `solve.julia_threads` excluded from solve hash:** `config.py` adds `julia_threads: int | None`
+  to `SolveSettings`, validates as positive integer, includes in `optional` to skip the hash; `cma.py` and
+  `beat.py` / `worker.py` plumb the value to the BEAT host so warm_up and SolveConfig carry the same count.
+- **L1.5 — lane + backend fields on `search.ndjson` rows:** `evaluate.py` adds `current_lane()` (reads
+  `HORNLAB_BEAT_WORKER_DIR`); `evaluation_to_row()` takes optional `lane` / `backend` and writes them
+  additively (omitted outside a lane: pre-two-lane rows stay byte-identical).
+- **L1.6 — CLAUDE.md + AGENTS.md "Two lanes" paragraph:** both files carry the paragraph describing lane
+  identity, the BEAT worker registry dir convention, and the CPU lane lock.
+- **L1.8 — profile files:** `examples/profiles/objective_v4.yaml`, `objective_v7.yaml`, and `fused_cuda.yaml`
+  ship as `extends:` overlay bases. Bug fixed: fused_cuda.yaml had `dof_cap_verify`/`dof_cap_final` under
+  `solve:` (causes ConfigError); moved to `mesh:` where `MeshSettings` owns them.
+- **Tests [measured]:** offline suite **2537 passed, 2 skipped** (exit 0; targeted L1 tests
+  42/42 passed; 2558 collected, 21 deselected by `-m "not gpu and not slow"`).
+- **New test files:** `tests/test_config_extends.py`, `tests/test_config_julia_threads.py`,
+  `tests/test_night_runner_lanes.py`.
+
+
 ## 2026-11-12 - INTEGRATION: COLLIN'S PR #22, #19, #23, THE CUDA FIX AND THE HARDENED PLAN MERGED; OBJECTIVE v5 COLLISION FIXED
 
 - **Owner directive:** merge the collaborator's work and everything outstanding into one tested main, pause new MEH
