@@ -132,10 +132,11 @@ def write_run(rows: list[dict], tmp_path: Path, name: str = "run", *,
     return d
 
 
-def run_cli(tool: str, args: list[str], tmp_path: Path):
-    """Run a tool's CLI in a subprocess (the documented usage), return CompletedProcess."""
+def run_cli(tool: str, args: list[str], tmp_path: Path, out: str = "out"):
+    """Run a tool's CLI in a subprocess (the documented usage), return CompletedProcess.
+    The output folder is ``tmp_path / out``."""
     return subprocess.run(
-        [str(PY), str(ANALYSIS / f"{tool}.py"), *args, "--out", str(tmp_path / "out")],
+        [str(PY), str(ANALYSIS / f"{tool}.py"), *args, "--out", str(tmp_path / out)],
         capture_output=True, text=True, cwd=str(REPO), timeout=300)
 
 
