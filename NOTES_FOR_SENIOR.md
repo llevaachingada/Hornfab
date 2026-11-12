@@ -733,3 +733,13 @@ What I found (each needs an owner call, nothing blocking):
    snapshot; re-running the tool includes newer rows (method unchanged). The sweep's own counters
    reconcile against the reconciliation table in the evidence doc.
 
+
+## 2026-11-12  task-05  runtime cuda_oom: beat_cuda CUDA out of memory
+What happened: RuntimeError('Out of GPU memory trying to allocate 188.794 MiB\nEffective GPU memory usage: 100.00% (7.996 GiB/7.996 GiB)\nMemory pool usage: 7.090 GiB (7.281 GiB reserved)\n') on C:\Users\hunte\Hrns\hornlab-search\runs\elites_20261030_core_law\designs\0ae06187dc7d\mesh.msh (n_triangles=13637, n_dof=7035, quadrants=1)
+What it means: the dof cap in TOOLCHAIN.md / the YAML is wrong for this GPU state (or a stale Julia host held VRAM; run solve.worker.clear_stale_hosts and re-test from a clean state before changing the cap, AGENTS.md hygiene rule 7).
+(Appended automatically by hornlab_search.solve.base.note_failure_for_senior.)
+
+## 2026-11-12  task-05  runtime cuda_oom: beat_cuda CUDA out of memory
+What happened: RuntimeError('Out of GPU memory trying to allocate 188.794 MiB\nEffective GPU memory usage: 100.00% (7.996 GiB/7.996 GiB)\nMemory pool usage: 7.090 GiB (7.281 GiB reserved)\n') on C:\Users\hunte\Hrns\hornlab-search\runs\elites_20261030_core_law\designs\0ae06187dc7d\mesh.msh (n_triangles=13637, n_dof=7035, quadrants=1)
+What it means: the dof cap in TOOLCHAIN.md / the YAML is wrong for this GPU state (or a stale Julia host held VRAM; run solve.worker.clear_stale_hosts and re-test from a clean state before changing the cap, AGENTS.md hygiene rule 7).
+(Appended automatically by hornlab_search.solve.base.note_failure_for_senior.)

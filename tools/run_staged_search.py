@@ -275,7 +275,14 @@ def stage_knob_schedule(joint_doc: dict) -> dict[str, Any]:
 
 
 def load_yaml(path: Path) -> dict:
-    return yaml.safe_load(path.read_text(encoding="utf-8"))
+    """Load a config; a relative ``brief_file`` is made absolute against the file it was read from,
+    because the stage configs are re-written into ``<out>/configs/`` where the relative path no longer
+    resolves (2026-11-12 night: "Stage A produced no best.json")."""
+    doc = yaml.safe_load(path.read_text(encoding="utf-8"))
+    bf = doc.get("brief_file") if isinstance(doc, dict) else None
+    if isinstance(bf, str) and bf and not Path(bf).is_absolute():
+        doc["brief_file"] = str((Path(path).parent / bf).resolve())
+    return doc
 
 
 def dump_yaml(path: Path, doc: dict) -> None:
