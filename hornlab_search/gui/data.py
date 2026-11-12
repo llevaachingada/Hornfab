@@ -545,6 +545,113 @@ def _step_inventory(step_dir: Path, p: Path) -> Any:
     return None if cad is None else _cad_inventory(cad)
 
 
+def cma_dynamics(run_dir: Path) -> dict:
+    """Parse pycma diagnostic files from ``<run>/cma/`` into a JSON-safe structure.
+
+    Returns ``{"available": False}`` when ``cma/fit.dat`` is absent.
+
+    Output when available::
+
+        {
+          "available": True,
+          "gens": [
+            {"iter": int, "evals": int, "sigma": float, "axis_ratio": float,
+             "best": float|null, "p25": float|null, "median": float|null, "iqr": float|null},
+            ...
+          ],
+          "stddev": [[float, ...], ...],  // per-gen per-param σ (len = n_params)
+          "axis_lengths": [[float, ...], ...],  // sorted principal-axis lengths
+          "param_names": [str, ...]  // from parameters.json2 or config.yaml, len = n_params
+        }
+
+    ``fit.dat`` column order (from the ``%`` header):
+    iter(0) evals(1) sigma(2) axis_ratio(3) bestever(4) best(5) median(6) worst(7) iqr(8) p25(9)
+    Values ``≥ 1000`` are penalty sentinels and are nulled out (the failed-eval marker).
+    """
+    cma_dir = run_dir / "cma"
+    fit_path = cma_dir / "fit.dat"
+    if not fit_path.is_file():
+        return {"available": False}
+
+    _PENALTY = 999.0  # nulled when val >= this (1000.0 is the pycma penalty)
+
+    def _parse_dat(path: Path) -> list[list[float | None]]:
+        """Return data rows from a pycma .dat file; % header lines are skipped."""
+        rows: list[list[float | None]] = []
+        try:
+            with path.open(encoding="utf-8", errors="replace") as fh:
+                for line in fh:
+                    line = line.strip()
+                    if not line or line.startswith("%"):
+                        continue
+                    parts = line.split()
+                    row: list[float | None] = []
+                    for p in parts:
+                        try:
+                            v = float(p)
+                            row.append(None if v >= _PENALTY else v)
+                        except ValueError:
+                            row.append(None)
+                    if row:
+                        rows.append(row)
+        except OSError:
+            pass
+        return rows
+
+    fit_rows = _parse_dat(fit_path)
+    gens = []
+    for r in fit_rows:
+        if len(r) < 7:
+            continue
+        def _get(i: int) -> float | None:
+            return r[i] if i < len(r) else None
+        # column 3 = axis_ratio direct from fit.dat (already a ratio, never a penalty)
+        axis_ratio_raw = r[3] if len(r) > 3 else None
+        gens.append({
+            "iter": int(r[0]) if r[0] is not None else None,
+            "evals": int(r[1]) if r[1] is not None else None,
+            "sigma": r[2],
+            "axis_ratio": axis_ratio_raw,  # not a J value, no penalty null needed
+            "best": _get(5),
+            "p25": _get(9),
+            "median": _get(6),
+            "iqr": _get(8),
+        })
+
+    # stddev.dat: cols 0=iter 1=evals 2=sigma 3=void 4=void 5..N=per-param σ
+    stddev_rows = _parse_dat(cma_dir / "stddev.dat") if (cma_dir / "stddev.dat").is_file() else []
+    stddev = [[v for v in r[5:] if v is not None] for r in stddev_rows]
+
+    # axlen.dat: cols 0=iter 1=evals 2=sigma 3=max 4=min 5..N=all principal axes
+    axlen_rows = _parse_dat(cma_dir / "axlen.dat") if (cma_dir / "axlen.dat").is_file() else []
+    axis_lengths = [[v for v in r[5:] if v is not None] for r in axlen_rows]
+
+    # Parameter names: try parameters.json2 first, then config.yaml bounds keys
+    param_names: list[str] = []
+    params_path = cma_dir / "parameters.json2"
+    if params_path.is_file():
+        try:
+            import json as _json
+            with params_path.open(encoding="utf-8") as fh:
+                p_data = _json.load(fh)
+            if isinstance(p_data, dict) and "variable_names" in p_data:
+                param_names = [str(n) for n in p_data["variable_names"]]
+        except Exception:  # noqa: BLE001
+            pass
+    if not param_names:
+        cfg = _config(run_dir)
+        param_names = [k for k, v in (cfg.get("bounds") or {}).items()
+                       if isinstance(v, dict) and v.get("search", True)]
+
+    return clean({
+        "available": True,
+        "gens": gens,
+        "stddev": stddev,
+        "axis_lengths": axis_lengths,
+        "param_names": param_names,
+    })
+
+
 def _cma_files(run_dir: Path) -> list[dict]:
     """Every pycma log the C-5 route serves: ``cma/`` plus each ``cma/restart_k/`` directory.
 
@@ -682,6 +789,11 @@ def run_detail(runs: Path, run_id: str, root: Path | None = None) -> dict:
     # C-5 companion: the exact pycma log files the raw route can serve, for direct restart-card
     # file chips. Sorted run-relative paths; [] when the run has no cma/ tree.
     out["cma_files"] = _cma_files(d)
+    # WP10: CMA-ES dynamics from cma/fit.dat, stddev.dat, axlen.dat.  Additive: absent when
+    # cma/ is missing (available:false is still included so the GUI knows it was attempted).
+    out["cma_dynamics"] = cma_dynamics(d)
+    # H7: atlas link visibility — show the QD atlas btn only when the file actually exists.
+    out["has_atlas"] = (d / "archive_heatmap.json").is_file()
     # S1a: the K-law feasibility preflight rides in the committed config.yaml (the merged cfg.raw
     # ``search/rundir.py::write_config_snapshot`` dumps). Pure passthrough — a truthy dict is
     # forwarded verbatim; an absent block stays absent (no shape invention).

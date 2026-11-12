@@ -1,7 +1,7 @@
 # ISSUES
 
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
-Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-10-25 (M6/WP12 pushed: enclosure mounting plumbed end-to-end (`brief.mounting` → the mesher's OWN keys; `-mnt-` cache keys; mesh_meta/ndjson/record echoes; absent = byte-for-bit) and MEASURED on two finalists — dofs +199.4 %/+106.5 %, both under the UNCHANGED caps, enclosure J improves (a different objective landscape — never rank across mountings), reference parity 2.91e-06 dB; **WP13 axisymmetric backend OWNER-DEFERRED** ("don't know how necessary that is"); suite **1372/0/0/0**; focused 71/0/0; evidence `docs/evidence/M6_WP12_2026-10-25.md`, byte-check 21/21; no GitHub issue state changed).
+Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-12 (WP9/WP10 chart standards + search history merged; no open issues changed; 349 GUI tests pass).
 
 Local-only, added 2026-11-12 (**GUI verify view front end WP3+WP6 implemented; no GitHub issue state changed**):
 - `verify.js` WP3+WP6 front end: pure-helper exports for the verify table, KPI strip, polar plot,
@@ -968,7 +968,7 @@ Local-only, added 2026-11-02 (no GitHub issue state changed): **P11 HF data sync
 # ISSUES
 
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
-Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-10-25 (M6/WP12 pushed: enclosure mounting plumbed end-to-end (`brief.mounting` → the mesher's OWN keys; `-mnt-` cache keys; mesh_meta/ndjson/record echoes; absent = byte-for-bit) and MEASURED on two finalists — dofs +199.4 %/+106.5 %, both under the UNCHANGED caps, enclosure J improves (a different objective landscape — never rank across mountings), reference parity 2.91e-06 dB; **WP13 axisymmetric backend OWNER-DEFERRED** ("don't know how necessary that is"); suite **1372/0/0/0**; focused 71/0/0; evidence `docs/evidence/M6_WP12_2026-10-25.md`, byte-check 21/21; no GitHub issue state changed).
+Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-12 (WP9/WP10 chart standards + search history merged; no open issues changed; 349 GUI tests pass).
 
 | ID | Title | Status | Owner | Plan ref |
 |---|---|---|---|---|

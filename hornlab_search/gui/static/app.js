@@ -2,7 +2,8 @@
 // Single-page app with hash routing. No build step, vanilla ES modules.
 
 import { chart, heat, cmap, drawCbar, niceTicks, diFromCuts, groupColor,
-         el, NS, css, fmt, DEFW, polarMap, wallSection, familyColor, measuredWidth, isobarMap } from "./charts.js";
+         el, NS, css, fmt, DEFW, polarMap, wallSection, familyColor, measuredWidth, isobarMap,
+         logGrid, AXES, fixedRange } from "./charts.js";
 import { TERMS as GLOSSARY, TERM_ORDER, tip } from "./glossary.js";
 import { loadParamCatalog, paramTipHtml, typologyTipHtml, typologyChipsHtml } from "./paramtips.js";
 import { init3d } from "./view3d.js";
@@ -1321,7 +1322,7 @@ async function viewCampaignDetail(id) {
         <div class="grid2">
           <div class="fig">
             <div class="fig-head"><h3>Beamwidth (−6 dB) vs target</h3>
-              <div class="toggle-row" id="bw-toggle">
+              <div class="toggle-row" id="bw-toggle"><!-- H10: injected by JS -->
                 <button aria-pressed="true" id="btn-bw-h">Horizontal</button>
                 <button aria-pressed="false" id="btn-bw-v">Vertical</button>
               </div></div>
@@ -1330,10 +1331,16 @@ async function viewCampaignDetail(id) {
           </div>
           <div class="fig">
             <h3>Directivity index vs target</h3>
-            <div class="cap">Dashed: target DI from the brief's coverage angles.</div>
+            <div class="cap">Dashed: DI target from brief coverage angles.</div>
             <svg id="di-overlay"></svg>
           </div>
         </div>
+      </div>
+      <!-- H10: Cross-run convergence history (same objective version only) -->
+      <div id="camp-history-block">
+        <h3 style="margin-bottom:6px">Cross-run history</h3>
+        <p class="muted" style="font-size:0.82rem" id="camp-history-cap">Best-so-far convergence per family (same objective version). Loading…</p>
+        <svg id="c-camp-conv" style="width:100%"></svg>
       </div>
     </div>`;
 
@@ -1371,37 +1378,44 @@ async function viewCampaignDetail(id) {
     const tgt = bwPlane === "h" ? tgtH : tgtV;
     const allBW = [];
     entries.forEach(e => { const b = e.best || {}; (bwPlane === "h" ? (b.bw_h || []) : (b.bw_v || [])).forEach(v => v != null && allBW.push(v)); });
-    if (tgt) allBW.push(tgt);
-    const bwmax = Math.min(200, Math.ceil(Math.max(...allBW) * 1.08 / 10) * 10) || 180;
+    if (tgt != null) allBW.push(tgt);
     const band = [target.band_lo_hz || freqsRef[0], target.band_hi_hz || freqsRef[freqsRef.length - 1]];
     const xlim = freqAxisLimits(band, freqsRef);
     const f0c = Number(target.f0_hz);
     const f0Finite = isFinite(f0c) && f0c > 0 ? f0c : null;
     const vlines = f0Finite ? [{ x: f0Finite, color: css("--warn"), dash: true, label: "f0 " + fmtHz(f0Finite) }] : [];
+    // Apply fixed BW range (C4: degree multiples)
+    const bwSpec = { ...AXES.beamwidth };
+    const bwRange = fixedRange(bwSpec, allBW);
     chart(bwSvg, {
-      H: 260, xlog: true, xlim, ylim: [0, bwmax], yticks: niceTicks(0, bwmax, 5),
+      H: 260, xlog: true, xlim, ylim: [bwRange.lo, bwRange.hi],
+      yticks: (() => { const t = []; for (let v = bwRange.lo; v <= bwRange.hi + 1; v += bwSpec.major) t.push(v); return t; })(),
       xlabel: "Hz", ylabel: "deg", band, vlines,
-      fill: tgt ? [{ y0: tgt * 0.9, y1: tgt * 1.1, color: css("--best"), opacity: 0.10 }] : [],
-      hlines: tgt ? [{ y: tgt, color: css("--label"), dash: true }] : [],
+      fill: tgt != null ? [{ y0: tgt * 0.9, y1: tgt * 1.1, color: css("--best"), opacity: 0.10 }] : [],
+      refLines: tgt != null ? [{ y: tgt, label: (bwPlane === "h" ? "H" : "V") + " target " + tgt + "°" }] : [],
       series: entries.map((e, idx) => { const b = e.best || {}, F2 = b.freqs || freqsRef;
         const arr = bwPlane === "h" ? (b.bw_h || []) : (b.bw_v || []);
         return { pts: F2.map((f, i) => [f, arr[i] ?? null]), color: familyColor(idx), w: idx === 0 ? 2.4 : 1.6 }; }),
+      markers: true,
     });
     if (diSvg) {
       const dit = target.di_target_db ?? (tgtH && tgtV ? diFromCuts(tgtH, tgtV) : null);
       const dall = []; entries.forEach(e => ((e.best || {}).di || []).forEach(v => v != null && dall.push(v)));
       if (dit != null) dall.push(dit);
-      const dlo = Math.floor(Math.min(...dall) - 1), dhi = Math.ceil(Math.max(...dall) + 1);
+      const diSpec = { ...AXES.di };
+      const diRange = fixedRange(diSpec, dall);
       chart(diSvg, {
-        H: 260, xlog: true, xlim, ylim: [dlo, dhi], yticks: niceTicks(dlo, dhi, 5),
+        H: 260, xlog: true, xlim, ylim: [diRange.lo, diRange.hi],
+        yticks: (() => { const t = []; for (let v = diRange.lo; v <= diRange.hi + 1; v += diSpec.major) t.push(v); return t; })(),
         xlabel: "Hz", ylabel: "dB", band, vlines,
-        hlines: dit != null ? [{ y: dit, color: css("--label"), dash: true }] : [],
+        refLines: dit != null ? [{ y: dit, label: "DI target" }] : [],
         series: entries.map((e, idx) => { const b = e.best || {}, F2 = b.freqs || freqsRef;
           return { pts: F2.map((f, i) => [f, (b.di || [])[i] ?? null]), color: familyColor(idx), w: idx === 0 ? 2.4 : 1.6 }; }),
+        markers: true,
       });
     }
     legDiv.innerHTML = entries.map((e, idx) => `<span><i style="color:${familyColor(idx)};border-top-color:${familyColor(idx)}"></i>${esc(e.name)}${idx === 0 ? " (rank 1)" : ""}</span>`).join("")
-      + `<span><i style="color:var(--label)" class="dash"></i>target</span>`;
+      + (tgt != null ? `<span class="dash-ref">target</span>` : "");
   }
   drawBW();
   document.getElementById("btn-bw-h").onclick = () => {
@@ -1416,6 +1430,51 @@ async function viewCampaignDetail(id) {
     document.getElementById("btn-bw-v").setAttribute("aria-pressed", "true");
     drawBW();
   };
+
+  // H10: Cross-run convergence history
+  // Load each entry's best run convergence curve and plot on shared axes
+  const campHistCap = document.getElementById("camp-history-cap");
+  const campConvSvg = document.getElementById("c-camp-conv");
+  const objVersions = new Set(entries.map(e => e.objective_version).filter(v => v != null));
+  const mixedVersions = objVersions.size > 1;
+  if (mixedVersions && campHistCap) {
+    campHistCap.textContent = "Mixed objective versions — convergence not shown across versions. Each run's history is on its own run page.";
+    if (campConvSvg) campConvSvg.style.display = "none";
+  } else {
+    const runsToLoad = entries.filter(e => e.best_run_id).slice(0, 8);  // cap at 8 families
+    Promise.allSettled(runsToLoad.map(e => api("/api/run/" + e.best_run_id).catch(() => null)))
+      .then(results => {
+        const campRoot = document.getElementById("camp-history-block");
+        if (!campRoot || !campRoot.isConnected) return;
+        const convergencePairs = [];
+        results.forEach((res, ri) => {
+          if (res.status !== "fulfilled" || !res.value) return;
+          const rd = res.value;
+          const jArr = (rd.J || []).filter(v => v != null && v < 999);
+          if (!jArr.length) return;
+          let rb2 = Infinity;
+          const best2 = jArr.map((j, i) => [i, (rb2 = Math.min(rb2, j))]);
+          convergencePairs.push({ name: runsToLoad[ri].name, color: familyColor(ri), pts: best2, n: rd.summary?.n || jArr.length });
+        });
+        if (!convergencePairs.length) {
+          if (campHistCap) campHistCap.textContent = "No convergence data available.";
+          return;
+        }
+        const maxN = Math.max(...convergencePairs.map(p => p.n));
+        const allJ = convergencePairs.flatMap(p => p.pts.map(pt => pt[1]));
+        const jMax = Math.max(...allJ, 1) * 1.1;
+        if (campHistCap) campHistCap.textContent = `Best-so-far curves per family. Same eval axis (max ${maxN} evals).`;
+        if (campConvSvg) {
+          chart(campConvSvg, {
+            H: 200, xlim: [0, maxN], ylim: [0, jMax],
+            xticks: niceTicks(0, maxN, 5), yticks: niceTicks(0, jMax, 4),
+            xlabel: "evaluation", ylabel: "score",
+            series: convergencePairs.map(p => ({ pts: p.pts, color: p.color, w: 1.8 })),
+            ariaLabel: "Cross-run convergence history per family",
+          });
+        }
+      });
+  }
 }
 
 // ── View 3: Runs list ──────────────────────────────────────────────
@@ -2650,7 +2709,7 @@ async function viewRunDetail(id) {
       <div class="btn-row">
         <a class="btn primary" href="#/run/${esc(id)}/evolution">▶ Evolution time-lapse</a>
         <a class="btn" href="#/run/${esc(id)}/umap" title="2-D cloud of OK designs in the searchable unit box (UMAP if installed, else PCA); color by param quartiles or total J">◎ Design cloud</a>
-        <a class="btn" href="#/run/${esc(id)}/archive" title="Quality-diversity atlas: objective per descriptor bin (CMA-ME runs only)">QD atlas</a>
+        ${d.has_atlas ? `<a class="btn" href="#/run/${esc(id)}/archive" title="Quality-diversity atlas: objective per descriptor bin (CMA-ME runs only)">QD atlas</a>` : ""}
         <a class="btn" href="#/run/${esc(id)}/balloon" title="W6 Balloon: the stored directivity balloon in 3D — shape + colour = SPL, white isobar rings, radar slicer, freq × angle slice">◉ Balloon 3D</a>
         <a class="btn" href="#/run/${esc(id)}/3d">3D view</a>
         <a class="btn" href="#/compare?a=${esc(id)}">Compare with…</a>
@@ -2662,57 +2721,83 @@ async function viewRunDetail(id) {
       ${continueRunCardHtml(d, sum)}
       <div id="run-files" class="run-files"></div>
 
-      <!-- Acoustic performance charts (designer order) -->
+      <!-- Acoustic performance charts (C11 order: Isobars → BW H/V → DI → On-axis → Impedance → Wall → 3D) -->
+
+      <!-- Shared "show starting design" toggle (C5/C6): controls start curves on ALL charts below -->
+      <div class="fig-head" style="margin-bottom:4px">
+        <label class="evo-opt" style="color:var(--ink)"><input type="checkbox" id="show-start" checked> show starting design</label>
+      </div>
+
+      <!-- Polar maps (isobars) — first per C11 order -->
+      <div class="fig">
+        <div class="fig-head"><h3>${tip("polar", "Directivity (isobars)")}</h3></div>
+        <div class="cap">Level relative to on-axis at 2 m, in 3 dB colour bands from −30 to 0 dB (pale pink = above 0 dB), with white contour lines every 3 dB (heavier = −6 dB: beamwidth edge). Tick marks show solved frequencies. Hover for a readout. Interpolated between the ${((d.best || {}).freqs || []).length} solved frequencies (screen fidelity). Axis spans the brief band; the colour map is drawn only across the solved frequencies.</div>
+        <div class="maps iso-maps" id="polar-maps"></div>
+      </div>
+
+      <!-- Beamwidth H/V small multiples (C6) -->
       <div class="grid2">
         <div class="fig">
-          <h3>${tip("bw", "Beamwidth (−6 dB)")} vs target</h3>
-          <div class="cap">Total angle between the −6 dB points. Shaded: target ±10 %. Panel: the brief band. Dashed marker: the scoring floor f0.</div>
+          <h3>${tip("bw", "Beamwidth (−6 dB)")} — horizontal vs target</h3>
+          <div class="cap">Total angle between the −6 dB points. Panel: the brief band. Dashed marker: the scoring floor f0. Shaded band: target ±10 %. Dotted line: target. Markers at solved frequencies.</div>
           <div class="legend">
-            <span><i style="color:var(--best)"></i>best, horizontal</span>
-            <span><i style="color:var(--best)" class="dash"></i>best, vertical</span>
-            <span><i style="color:var(--seed)"></i>start H</span>
-            <span><i style="color:var(--seed)" class="dash"></i>start V</span>
-            <span><i style="color:var(--label)"></i>target H</span>
-            <span><i style="color:var(--label)" class="dash"></i>target V</span>
+            <span><i style="color:var(--best)"></i>best</span>
+            <span><i style="color:var(--seed)"></i>start</span>
           </div>
-          <svg id="c-bw"></svg>
+          <svg id="c-bwh"></svg>
         </div>
         <div class="fig">
+          <h3>${tip("bw", "Beamwidth (−6 dB)")} — vertical vs target</h3>
+          <div class="cap">Total angle between the −6 dB points. Shaded band: target ±10 %. Dotted line: target. Markers at solved frequencies.</div>
+          <div class="legend">
+            <span><i style="color:var(--best)"></i>best</span>
+            <span><i style="color:var(--seed)"></i>start</span>
+          </div>
+          <svg id="c-bwv"></svg>
+        </div>
+      </div>
+
+      <!-- DI + On-axis -->
+      <div class="grid2">
+        <div class="fig">
           <h3>${tip("di_db", "Directivity index")} vs target</h3>
+          <div class="cap">0–15 dB fixed range. Dotted line: DI target from brief. Markers at solved frequencies.</div>
           <div class="legend">
             <span><i style="color:var(--seed)"></i>start</span>
             <span><i style="color:var(--best)"></i>best</span>
-            <span><i style="color:var(--label)" class="dash"></i>DI target</span>
           </div>
           <svg id="c-di"></svg>
         </div>
         <div class="fig">
           <h3>${tip("on_axis", "On-axis response")} (mean removed)</h3>
+          <div class="cap">−15..+10 dB fixed range. Dotted line: 0 dB reference. Hatched region: not scored (below f0). Markers at solved frequencies.</div>
           <div class="legend">
             <span><i style="color:var(--seed)"></i>start</span>
             <span><i style="color:var(--best)"></i>best</span>
           </div>
           <svg id="c-axis"></svg>
         </div>
+      </div>
+
+      <!-- Throat impedance -->
+      <div class="grid2">
         <div class="fig">
           <h3>${tip("z_re", "Throat impedance")}</h3>
-          <div class="cap">Normalised to ρc. Resistance near 1 = the horn loads the driver well; below 0.7 counts as poor loading. Reactance: + = mass-like.</div>
+          <div class="cap">Normalised to ρc. Resistance near 1 = good loading; below 0.7 = poor. Reactance: + = mass-like. Dotted lines: 1 ρc, 0.7 ρc (loading floor). Markers at solved frequencies.</div>
           <div class="legend">
             <span><i style="color:var(--best)"></i>resistance (best)</span>
             <span><i style="color:var(--best)" class="dash"></i>reactance (best)</span>
             <span><i style="color:var(--seed)"></i>start</span>
-            <span><i style="color:var(--warn)" class="dash"></i>0.7 threshold</span>
           </div>
           <svg id="c-zre"></svg>
         </div>
-      </div>
-
-      <!-- Polar maps -->
-      <div class="fig">
-        <div class="fig-head"><h3>${tip("polar", "Directivity (isobars)")}</h3>
-          <label class="evo-opt" style="color:var(--ink)"><input type="checkbox" id="iso-start"> also show the starting design</label></div>
-        <div class="cap">Level relative to on-axis at 2 m, in 3 dB colour bands from −30 to 0 dB, with white contour lines every 3 dB (the heavier line is −6 dB: the beamwidth edge). Frequency across, angle up. Hover for a readout. Interpolated between the ${((d.best || {}).freqs || []).length} solved frequencies. Axis spans the brief band; the colour map is drawn only across the solved frequencies.</div>
-        <div class="maps iso-maps" id="polar-maps"></div>
+        <!-- Off-axis response family (C13) -->
+        <div class="fig">
+          <h3>Off-axis responses — horizontal (normalised)</h3>
+          <div class="cap">One curve per angle 0°/15°/30°/45°/60°/75°/90°, normalised to on-axis. Markers at solved frequencies.</div>
+          <div id="c-offaxis-legend" class="legend"></div>
+          <svg id="c-offaxis"></svg>
+        </div>
       </div>
 
       <!-- Wall profile -->
@@ -2746,19 +2831,31 @@ async function viewRunDetail(id) {
       <h3>How the search went</h3>
       <div class="grid2">
         <div class="fig"><h3>Convergence</h3>
-          <div class="cap">Every eval (dots) and running best (line). Failures excluded.</div>
+          <div class="cap" id="conv-cap">Every eval (dots) and running best (line). Failures shown as × strip below axis.</div>
           <svg id="c-conv"></svg>
+          <div class="cap" id="conv-cap2" style="margin-top:4px"></div>
         </div>
         <div class="fig"><h3>${tip("J", "Score")} breakdown: start vs best</h3>
-          <div class="cap">Weighted contribution per term. Upper bar = start, lower = best.</div>
+          <div class="cap">Weighted contribution per term × weight. Sorted by best contribution. Upper bar = start, lower = best.</div>
           <svg id="c-terms"></svg>
         </div>
+      </div>
+
+      <!-- Search dynamics (H5): CMA internals from cma/*.dat; hidden when absent -->
+      <div class="fig" id="cma-dynamics-block" style="display:none">
+        <h3>${tip("cma_cov", "Search dynamics")}</h3>
+        <div class="cap">σ shrinking = the search is narrowing in; axis ratio growing = some knobs matter much more than others; a flat σ late = still exploring.</div>
+        <div class="grid2" style="gap:8px">
+          <div><div class="cap" style="font-weight:600">Step size σ (log)</div><svg id="c-dyn-sigma"></svg></div>
+          <div><div class="cap" style="font-weight:600">Axis ratio (log)</div><svg id="c-dyn-axratio"></svg></div>
+        </div>
+        <div style="margin-top:8px"><div class="cap" style="font-weight:600">Per-parameter σ (normalised to bound width)</div><svg id="c-dyn-stddev" style="width:100%"></svg></div>
       </div>
 
       <!-- Sensitivity -->
       <div class="fig">
         <h3>${tip("knob", "Shape parameters")}</h3>
-        <div class="cap">${tip("rho", "Influence")} = Spearman ρ. ${tip("pinned", "At-limit")} = of the 6 best designs how many sit at each bound.</div>
+        <div class="cap">${tip("rho", "Influence")} = Spearman ρ. ${tip("pinned", "At-limit")} = of the 6 best designs how many sit at each bound. Sparkline = best-so-far value vs eval.</div>
         <div class="tbl-wrap"><table id="sens-table"></table></div>
       </div>
 
@@ -2813,80 +2910,218 @@ async function viewRunDetail(id) {
   const f0 = Number(t.f0_hz);
   const f0Finite = isFinite(f0) && f0 > 0 ? f0 : null;
 
-  // One convention on every chart: horizontal plane solid, vertical plane dashed; start amber, best teal.
-  const series2 = (key, w) => [
-    ...(S[key + "_h"] ? [{ pts: F.map((f, i) => [f, S[key + "_h"][i] ?? null]), color: css("--seed"), w: 1.7 }] : []),
-    ...(S[key + "_v"] ? [{ pts: F.map((f, i) => [f, S[key + "_v"][i] ?? null]), color: css("--seed"), w: 1.7, dash: true }] : []),
-    ...(B[key + "_h"] ? [{ pts: F.map((f, i) => [f, B[key + "_h"][i] ?? null]), color: css("--best"), w }] : []),
-    ...(B[key + "_v"] ? [{ pts: F.map((f, i) => [f, B[key + "_v"][i] ?? null]), color: css("--best"), w, dash: true }] : []),
-  ];
+  // One convention on every chart: best teal, start amber; markers at solved frequencies; fixed ranges.
+  // The shared "show starting design" toggle (C5/C6) gates all start/seed series.
+  const showStartBox = document.getElementById("show-start");
+  function showStart() { return !showStartBox || showStartBox.checked; }
+  if (showStartBox) showStartBox.onchange = () => redrawCharts();
 
-  // Beamwidth vs target, target ±10 % shaded per plane
-  if (F.length && (S.bw_h || B.bw_h)) {
+  // Build a standard vlines array: f0 marker line
+  const f0vline = f0Finite ? [{ x: f0Finite, color: css("--warn"), dash: true, label: "f0 " + fmtHz(f0Finite) }] : [];
+
+  // Per-chart helper: n solved frequencies chip for caption
+  const freqChip = F.length ? ` ${F.length} solved freq${F.length !== 1 ? "s" : ""}.` : "";
+
+  // C10: unscored hatch region (below f0, the unscored prefix)
+  const unscored = f0Finite ? [{ x0: xlim[0], x1: f0Finite, label: "not scored" }] : [];
+
+  // C7 helpers: yticks for fixed axes
+  function bwTicks(lo, hi, major) { const t = []; for (let v = lo; v <= hi + 1e-9; v += major) t.push(+v.toFixed(4)); return t; }
+
+  // ── Isobars (Boundary Lab style): best design H and V; start on request ───────────────────────
+  function drawIsobars() {
+    const mapsEl = document.getElementById("polar-maps");
+    if (!mapsEl) return;
+    mapsEl.innerHTML = "";
+    const withStart = showStart() && S.polar_h;
+    const plots = [["Best design · horizontal", B.polar_h, B], ["Best design · vertical", B.polar_v, B]];
+    if (withStart) plots.push(["Starting design · horizontal", S.polar_h, S], ["Starting design · vertical", S.polar_v, S]);
+    for (const [lbl, rows, D2] of plots) {
+      if (!rows) continue;
+      const sv = document.createElementNS(NS, "svg"); sv.setAttribute("class", "polar");
+      sv.setAttribute("role", "img"); sv.setAttribute("aria-label", lbl + " isobar plot");
+      mapsEl.appendChild(sv);
+      requestAnimationFrame(() => isobarMap(sv, rows, D2.angles || [], D2.freqs || F, { title: lbl, H: 300, xlim, f0: f0Finite }));
+    }
+  }
+
+  // ── Beamwidth H/V small multiples (C6) ──────────────────────────────────────────────────────
+  function drawBwCharts() {
     const th = t.coverage_h_deg, tv = t.coverage_v_deg;
-    const bwAll = [...(S.bw_h || []), ...(S.bw_v || []), ...(B.bw_h || []), ...(B.bw_v || []), th, tv].filter(v => v != null);
-    const bmax = Math.min(200, Math.ceil(Math.max(...bwAll) * 1.08 / 10) * 10) || 180;
-    const fill = [], hlines = [];
-    if (th) { fill.push({ y0: th * 0.9, y1: th * 1.1, color: css("--best"), opacity: 0.10 }); hlines.push({ y: th, color: css("--label") }); }
-    if (tv && tv !== th) { fill.push({ y0: tv * 0.9, y1: tv * 1.1, color: css("--best"), opacity: 0.07 }); hlines.push({ y: tv, color: css("--label"), dash: true }); }
-    chart(document.getElementById("c-bw"), {
-      xlog: true, xlim, ylim: [0, bmax], fill,
-      yticks: niceTicks(0, bmax, 5), xlabel: "Hz", ylabel: "deg", band, hlines,
-      vlines: f0Finite ? [{ x: f0Finite, color: css("--warn"), dash: true, label: "f0 " + fmtHz(f0Finite) }] : [],
-      series: series2("bw", 2.2),
-    });
+    function drawOneBw(svgId, key, tgtDeg, label) {
+      const svg = document.getElementById(svgId);
+      if (!svg) return;
+      const dataSets = [...(B[key] || []), ...(S[key] || [])].filter(v => v != null);
+      if (!dataSets.length && !tgtDeg) return;
+      const allVals = [...dataSets, tgtDeg].filter(v => v != null);
+      const spec = { ...AXES.beamwidth };
+      const range = fixedRange(spec, allVals);
+      const ticks = bwTicks(range.lo, range.hi, spec.major);
+      const yMinorBw = bwTicks(range.lo, range.hi, spec.minor || 15);
+      const seriesList = [
+        ...(showStart() && S[key] ? [{ pts: F.map((f, i) => [f, S[key][i] ?? null]), color: css("--seed"), w: 1.7 }] : []),
+        ...(B[key] ? [{ pts: F.map((f, i) => [f, B[key][i] ?? null]), color: css("--best"), w: 2.2 }] : []),
+      ];
+      const fill = tgtDeg ? [{ y0: tgtDeg * 0.9, y1: tgtDeg * 1.1, color: css("--best"), opacity: 0.10 }] : [];
+      const refLines = tgtDeg ? [{ y: tgtDeg, label: label + " " + tgtDeg + "°" }] : [];
+      chart(svg, {
+        xlog: true, xlim, ylim: [range.lo, range.hi], fill,
+        yticks: ticks, yMinor: yMinorBw, xlabel: "Hz", ylabel: "deg", band, refLines,
+        vlines: f0Finite ? [{ x: f0Finite, color: css("--warn"), dash: true, label: "f0 " + fmtHz(f0Finite) }] : [],
+        series: seriesList, markers: true, unscored,
+        ariaLabel: "Beamwidth −6 dB " + label,
+      });
+    }
+    drawOneBw("c-bwh", "bw_h", th, "target H");
+    drawOneBw("c-bwv", "bw_v", tv, "target V");
   }
 
-  // DI vs target
-  if (F.length && (S.di || B.di)) {
+  // ── DI vs target (C3: fixed 0..15 dB) ───────────────────────────────────────────────────────
+  function drawDiChart() {
+    const svg = document.getElementById("c-di");
+    if (!svg || !F.length || (!S.di && !B.di)) return;
     const dit = t.di_target_db ?? diFromCuts(t.coverage_h_deg || 90, t.coverage_v_deg || 90);
-    const dall = [...(S.di || []), ...(B.di || []), dit].filter(v => v != null);
-    const dlo = Math.floor(Math.min(...dall) - 1), dhi = Math.ceil(Math.max(...dall) + 1);
-    chart(document.getElementById("c-di"), {
-      xlog: true, xlim, ylim: [dlo, dhi],
-      yticks: niceTicks(dlo, dhi, 5), xlabel: "Hz", ylabel: "dB", band,
-      hlines: [{ y: dit, color: css("--label"), dash: true }],
+    const allDi = [...(S.di || []), ...(B.di || []), dit].filter(v => v != null);
+    const spec = { ...AXES.di };
+    const range = fixedRange(spec, allDi);
+    const ticks = bwTicks(range.lo, range.hi, spec.major);
+    chart(svg, {
+      xlog: true, xlim, ylim: [range.lo, range.hi],
+      yticks: ticks, xlabel: "Hz", ylabel: "dB", band,
+      refLines: dit != null ? [{ y: dit, label: "DI target" }] : [],
       vlines: f0Finite ? [{ x: f0Finite, color: css("--warn"), dash: true, label: "f0 " + fmtHz(f0Finite) }] : [],
       series: [
-        { pts: F.map((f, i) => [f, (S.di || [])[i] ?? null]), color: css("--seed"), w: 1.7 },
-        { pts: F.map((f, i) => [f, (B.di || [])[i] ?? null]), color: css("--best"), w: 2.2 },
+        ...(showStart() && S.di ? [{ pts: F.map((f, i) => [f, S.di[i] ?? null]), color: css("--seed"), w: 1.7 }] : []),
+        ...(B.di ? [{ pts: F.map((f, i) => [f, B.di[i] ?? null]), color: css("--best"), w: 2.2 }] : []),
       ],
+      markers: true, unscored, ariaLabel: "Directivity index vs target",
     });
   }
 
-  // On-axis (relative, mean removed)
-  if (F.length && (S.on_axis || B.on_axis)) {
-    const aall = [...(S.on_axis || []), ...(B.on_axis || [])].filter(v => v != null);
-    const alo = Math.floor(Math.min(...aall, -3) - 1), ahi = Math.ceil(Math.max(...aall, 3) + 1);
-    chart(document.getElementById("c-axis"), {
-      xlog: true, xlim, ylim: [alo, ahi],
-      yticks: niceTicks(alo, ahi, 5), xlabel: "Hz", ylabel: "dB", band,
-      hlines: [{ y: 0, color: css("--label") }],
+  // ── On-axis response (C2: fixed −15..+10 dB) ────────────────────────────────────────────────
+  function drawAxisChart() {
+    const svg = document.getElementById("c-axis");
+    if (!svg || !F.length || (!S.on_axis && !B.on_axis)) return;
+    const allAx = [...(S.on_axis || []), ...(B.on_axis || [])].filter(v => v != null);
+    const spec = { ...AXES.onAxis };
+    const range = fixedRange(spec, allAx);
+    const ticks = bwTicks(range.lo, range.hi, spec.major);
+    const yMinorAx = spec.minor ? bwTicks(range.lo, range.hi, spec.minor) : [];
+    chart(svg, {
+      xlog: true, xlim, ylim: [range.lo, range.hi],
+      yticks: ticks, yMinor: yMinorAx, xlabel: "Hz", ylabel: "dB", band,
+      refLines: [{ y: 0, label: "0 dB" }],
+      vlines: f0vline,
       series: [
-        { pts: F.map((f, i) => [f, (S.on_axis || [])[i] ?? null]), color: css("--seed"), w: 1.7 },
-        { pts: F.map((f, i) => [f, (B.on_axis || [])[i] ?? null]), color: css("--best"), w: 2.2 },
+        ...(showStart() && S.on_axis ? [{ pts: F.map((f, i) => [f, S.on_axis[i] ?? null]), color: css("--seed"), w: 1.7 }] : []),
+        ...(B.on_axis ? [{ pts: F.map((f, i) => [f, B.on_axis[i] ?? null]), color: css("--best"), w: 2.2 }] : []),
       ],
+      markers: true, unscored, ariaLabel: "On-axis response mean removed",
     });
   }
 
-  // Throat impedance, normalised to rho*c: resistance (solid) and reactance (dashed, engineering sign:
-  // + = mass-like). The solver works in exp(-i w t), so reactance X = -Im Z here.
-  if (F.length && (S.z_re || B.z_re)) {
-    const X = d => (d.z_im || []).map(v => v == null ? null : -v);
-    const zall = [...(S.z_re || []), ...(B.z_re || []), ...X(B), ...X(S)].filter(v => v != null);
-    const zlo = Math.min(0, Math.floor(Math.min(...zall) * 10) / 10), zhi = Math.max(1.2, Math.ceil(Math.max(...zall) * 10) / 10);
-    chart(document.getElementById("c-zre"), {
+  // ── Throat impedance (C14: allow y < 0 for negative reactance) ──────────────────────────────
+  function drawZreChart() {
+    const svg = document.getElementById("c-zre");
+    if (!svg || !F.length || (!S.z_re && !B.z_re)) return;
+    const Xreact = src => (src.z_im || []).map(v => v == null ? null : -v);
+    const zall = [...(S.z_re || []), ...(B.z_re || []), ...Xreact(B), ...Xreact(S)].filter(v => v != null);
+    const spec = { ...AXES.zrho };
+    const range = fixedRange(spec, zall);
+    // allow below 0 when reactance dips negative (C14 fix)
+    const zlo = Math.min(range.lo, Math.min(0, Math.floor(Math.min(...Xreact(B).filter(v => v != null), 0) * 10) / 10));
+    const zhi = range.hi;
+    const ticks = bwTicks(zlo, zhi, spec.major);
+    chart(svg, {
       xlog: true, xlim, ylim: [zlo, zhi],
-      yticks: niceTicks(zlo, zhi, 5), xlabel: "Hz", ylabel: "×ρc", band,
-      hlines: [{ y: 1.0, color: css("--label"), dash: true }, { y: 0.7, color: css("--warn"), dash: true }, { y: 0, color: css("--label") }],
+      yticks: ticks, xlabel: "Hz", ylabel: "×ρc", band,
+      refLines: [{ y: 1.0, label: "1 ρc" }, { y: 0.7, label: "0.7 ρc" }],
+      hlines: [{ y: 0, color: css("--label") }],
+      vlines: f0vline,
       series: [
-        { pts: F.map((f, i) => [f, (S.z_re || [])[i] ?? null]), color: css("--seed"), w: 1.7 },
-        { pts: F.map((f, i) => [f, X(S)[i] ?? null]), color: css("--seed"), w: 1.7, dash: true },
-        { pts: F.map((f, i) => [f, (B.z_re || [])[i] ?? null]), color: css("--best"), w: 2.2 },
-        { pts: F.map((f, i) => [f, X(B)[i] ?? null]), color: css("--best"), w: 1.8, dash: true },
+        ...(showStart() && S.z_re ? [
+          { pts: F.map((f, i) => [f, S.z_re[i] ?? null]), color: css("--seed"), w: 1.7 },
+          { pts: F.map((f, i) => [f, Xreact(S)[i] ?? null]), color: css("--seed"), w: 1.4, dash: true },
+        ] : []),
+        ...(B.z_re ? [
+          { pts: F.map((f, i) => [f, B.z_re[i] ?? null]), color: css("--best"), w: 2.2 },
+          { pts: F.map((f, i) => [f, Xreact(B)[i] ?? null]), color: css("--best"), w: 1.8, dash: true },
+        ] : []),
       ],
+      markers: true, unscored, ariaLabel: "Throat impedance normalised to rho c",
     });
   }
+
+  // ── Off-axis response family (C13) ──────────────────────────────────────────────────────────
+  // One curve per angle 0°/15°/30°/45°/60°/75°/90°, normalised to on-axis (column at 0°).
+  function drawOffAxisChart() {
+    const svg = document.getElementById("c-offaxis");
+    const legDiv = document.getElementById("c-offaxis-legend");
+    if (!svg || !B.polar_h || !B.angles || !F.length) {
+      if (svg) svg.innerHTML = "";
+      if (legDiv) legDiv.innerHTML = "";
+      return;
+    }
+    const angles = B.angles;
+    const rows = B.polar_h;         // [nf][na]
+    const targetAngles = [0, 15, 30, 45, 60, 75, 90];
+    // sequential colour ramp light → dark by angle
+    const rampColors = ["#aed6e8", "#78b8d8", "#4096c0", "#1a7aa8", "#0a5e88", "#064a6e", "#032e4c"];
+    // find nearest angle index
+    const nearestIdx = (a) => {
+      let best = 0, bestD = Infinity;
+      for (let i = 0; i < angles.length; i++) {
+        const d = Math.abs(angles[i] - a);
+        if (d < bestD) { best = i; bestD = d; }
+      }
+      return best;
+    };
+    // on-axis column (angle = 0)
+    const axIdx = nearestIdx(0);
+    const seriesList = [];
+    const legendItems = [];
+    for (let ai = 0; ai < targetAngles.length; ai++) {
+      const tgtA = targetAngles[ai];
+      const ci = nearestIdx(tgtA);
+      const realA = angles[ci];
+      // normalise each row to on-axis value at that frequency
+      const pts = F.map((f, fi) => {
+        const rowI = fi < rows.length ? fi : null;
+        if (rowI === null || !rows[rowI]) return [f, null];
+        const v = rows[rowI][ci];
+        const ref = rows[rowI][axIdx];
+        if (v == null || ref == null) return [f, null];
+        return [f, v - ref];
+      });
+      seriesList.push({ pts, color: rampColors[ai], w: 1.5 + (ai === 0 ? 0.5 : 0) });
+      legendItems.push(`<span><i style="color:${rampColors[ai]};border-top-color:${rampColors[ai]}"></i>${realA}°</span>`);
+    }
+    if (legDiv) legDiv.innerHTML = legendItems.join("");
+    const allV = seriesList.flatMap(s => s.pts.map(p => p[1])).filter(v => v != null && isFinite(v));
+    const spec = { lo: -30, hi: 0, major: 6 };
+    const range = fixedRange(spec, allV);
+    const ticks = bwTicks(range.lo, range.hi, spec.major);
+    chart(svg, {
+      xlog: true, xlim, ylim: [range.lo, range.hi],
+      yticks: ticks, xlabel: "Hz", ylabel: "dB", band,
+      refLines: [{ y: 0, label: "0 dB (on-axis)" }],
+      vlines: f0vline, series: seriesList, markers: true, unscored,
+      ariaLabel: "Off-axis responses horizontal normalised to on-axis",
+    });
+  }
+
+  // Single redraw function for the shared show-start toggle
+  function redrawCharts() {
+    drawIsobars();
+    drawBwCharts();
+    drawDiChart();
+    drawAxisChart();
+    drawZreChart();
+    drawOffAxisChart();
+  }
+
+  // Initial draw
+  redrawCharts();
 
   // Wall cross-section (true aspect): best filled, start as an outline
   wallSection(document.getElementById("c-prof"), [
@@ -2935,73 +3170,205 @@ async function viewRunDetail(id) {
     }
   }
 
-  // Directivity isobars (Boundary Lab style): best design H and V; the start design on request
-  const mapsEl = document.getElementById("polar-maps");
-  function drawIsobars() {
-    mapsEl.innerHTML = "";
-    const withStart = document.getElementById("iso-start")?.checked && S.polar_h;
-    const plots = [["Best design · horizontal", B.polar_h, B], ["Best design · vertical", B.polar_v, B]];
-    if (withStart) plots.push(["Starting design · horizontal", S.polar_h, S], ["Starting design · vertical", S.polar_v, S]);
-    for (const [lbl, rows, D2] of plots) {
-      if (!rows) continue;
-      const sv = document.createElementNS(NS, "svg"); sv.setAttribute("class", "polar");
-      sv.setAttribute("role", "img"); sv.setAttribute("aria-label", lbl + " isobar plot");
-      mapsEl.appendChild(sv);
-      // drawn after layout, so each plot is measured at its real width
-      requestAnimationFrame(() => isobarMap(sv, rows, D2.angles || [], D2.freqs || F, { title: lbl, H: 300, xlim, f0: f0Finite }));
+  // ── Convergence (H1-H4) ─────────────────────────────────────────────────────────────────────
+  if (d.J) {
+    const rawJ = d.J || [];
+    const nTotal = sum.n || rawJ.length;
+    const svg = document.getElementById("c-conv");
+    const FAIL_THRESH = 999.0;
+    // H1: separate out failures (j >= 999) from real scores
+    const failures = rawJ.map((j, i) => [i, j]).filter(p => p[1] != null && p[1] >= FAIL_THRESH);
+    const okPts = rawJ.map((j, i) => [i, j]).filter(p => p[1] != null && p[1] < FAIL_THRESH);
+    // H1: determine y clip range so out-of-range dots are shown as ▲ markers
+    const okVals = okPts.map(p => p[1]);
+    const rawYmax = Math.max((sum.seed_j || 0) * 1.6, (sum.best_j || 0) * 2, 1);
+    const nAbove = (clipY => okVals.filter(v => v > clipY).length)(rawYmax);
+    const ymax = rawYmax;
+    // H3: per-generation band from cma_dynamics
+    const dyn = d.cma_dynamics || {};
+    const fillBand = [];
+    const medianLine = [];
+    const hatchGens = []; // generations where < 50% succeeded
+    if (dyn.available && dyn.gens && Array.isArray(dyn.gens)) {
+      const lam = Math.round(nTotal / Math.max(dyn.gens.length, 1));
+      dyn.gens.forEach((g, gi) => {
+        const e0 = gi * lam, e1 = e0 + lam;
+        const genPts = okPts.filter(p => p[0] >= e0 && p[0] < e1).map(p => p[1]);
+        const genFails = failures.filter(p => p[0] >= e0 && p[0] < e1).length;
+        const genTotal = genPts.length + genFails;
+        if (genTotal === 0) return;
+        const sorted = genPts.slice().sort((a, b) => a - b);
+        const q = (pct) => { const i = pct * (sorted.length - 1); const lo = Math.floor(i), hi = Math.ceil(i); return sorted[lo] + (sorted[hi] - sorted[lo]) * (i - lo); };
+        if (sorted.length >= 2) {
+          const p25 = q(0.25), p75 = q(0.75), med = q(0.5);
+          fillBand.push({ x0: e0, x1: e1, y0: Math.min(p25, ymax), y1: Math.min(p75, ymax) });
+          medianLine.push([e0 + lam / 2, Math.min(med, ymax)]);
+          if (genFails / genTotal > 0.5) hatchGens.push({ x0: e0, x1: e1 });
+        }
+      });
+    }
+    // H4: resume lines from run.json history (created_utc gaps → eval index boundaries)
+    const resumeLines = [];
+    if (d.history && Array.isArray(d.history) && d.history.length > 1) {
+      let evalOffset = 0;
+      for (let hi2 = 0; hi2 < d.history.length - 1; hi2++) {
+        const seg = d.history[hi2];
+        evalOffset += seg.n || 0;
+        if (evalOffset > 0 && evalOffset < nTotal)
+          resumeLines.push({ x: evalOffset, label: "resumed" });
+      }
+    }
+    // best-so-far line from ok pts only
+    let rb = Infinity;
+    const runBest = okPts.map(p => [p[0], (rb = Math.min(rb, p[1]))]);
+    if (svg) {
+      // compute IQR band fill & median as extra series
+      const bandSeries = fillBand.length ? [{ pts: medianLine, color: css("--accent"), w: 1.5 }] : [];
+      const unkeyedHatch = hatchGens.map(g => ({ ...g, label: "mostly failed" }));
+      const allVlines = [
+        ...(sum.seed_j != null && isFinite(sum.seed_j) ? [] : []),
+        ...resumeLines.map(r => ({ x: r.x, color: css("--muted"), dash: true, label: r.label })),
+      ];
+      // draw convergence: dots for ok evals, running best line, IQR band fill, median
+      const svgEl = svg;
+      svgEl.innerHTML = "";
+      const cW = svgEl.clientWidth || 500, cH = 220;
+      svgEl.setAttribute("viewBox", `0 0 ${cW} ${cH}`);
+      const PAD = { l: 46, r: 20, t: 14, b: 36 };
+      const xScale = v => PAD.l + (v / nTotal) * (cW - PAD.l - PAD.r);
+      const yScale = v => PAD.t + (1 - Math.min(v, ymax) / ymax) * (cH - PAD.t - PAD.b);
+      // H3: IQR band behind dots
+      fillBand.forEach(fb => {
+        el("rect", { x: xScale(fb.x0), y: yScale(fb.y1), width: xScale(fb.x1) - xScale(fb.x0),
+          height: yScale(fb.y0) - yScale(fb.y1), fill: css("--band"), opacity: "0.5" }, svgEl);
+      });
+      // H3: mostly-failed hatch
+      unkeyedHatch.forEach(hg => {
+        el("rect", { x: xScale(hg.x0), y: PAD.t, width: xScale(hg.x1) - xScale(hg.x0),
+          height: cH - PAD.t - PAD.b, fill: "url(#conv-hatch)", opacity: "0.3" }, svgEl);
+      });
+      // Define hatch pattern once
+      const defs = el("defs", {}, svgEl);
+      const pat = el("pattern", { id: "conv-hatch", patternUnits: "userSpaceOnUse", width: "6", height: "6",
+        patternTransform: "rotate(45)" }, defs);
+      el("line", { x1: "0", y1: "0", x2: "0", y2: "6", stroke: css("--warn"), "stroke-width": "1" }, pat);
+      // H4: resume vertical lines
+      resumeLines.forEach(r => {
+        const rx = xScale(r.x);
+        const ln = el("line", { x1: rx, y1: PAD.t, x2: rx, y2: cH - PAD.b, stroke: css("--muted"),
+          "stroke-dasharray": "3 3", "stroke-width": "1" }, svgEl);
+        const lt = el("text", { x: rx + 3, y: PAD.t + 10, fill: css("--label"), "font-size": "9" }, svgEl);
+        lt.textContent = "resumed";
+      });
+      // ok eval dots
+      const dotsG = el("g", { opacity: "0.6" }, svgEl);
+      const MAXDOTS = 2000;
+      const step = Math.max(1, Math.floor(okPts.length / MAXDOTS));
+      for (let oi = 0; oi < okPts.length; oi += step) {
+        const [ei, jv] = okPts[oi];
+        if (jv <= ymax) {
+          el("circle", { cx: xScale(ei), cy: yScale(jv), r: "1.5", fill: css("--muted") }, dotsG);
+        }
+      }
+      // H1: out-of-range ▲ markers at ymax line
+      let aboveCount = 0;
+      for (const [ei, jv] of okPts) { if (jv > ymax) { aboveCount++; const ax = xScale(ei); el("polygon", { points: `${ax},${PAD.t + 2} ${ax - 4},${PAD.t + 10} ${ax + 4},${PAD.t + 10}`, fill: css("--warn") }, svgEl); } }
+      if (aboveCount > 0) { const lt = el("text", { x: cW - PAD.r, y: PAD.t + 10, "text-anchor": "end", fill: css("--warn"), "font-size": "9" }, svgEl); lt.textContent = `${aboveCount} above ${ymax.toFixed(1)}`; }
+      // H2: failure strip (grey × marks below axis)
+      if (failures.length) {
+        const stripY = cH - PAD.b + 8;
+        const fstep = Math.max(1, Math.floor(failures.length / 500));
+        for (let fi = 0; fi < failures.length; fi += fstep) {
+          const [ei] = failures[fi];
+          const fx = xScale(ei);
+          el("text", { x: fx, y: stripY + 5, "text-anchor": "middle", fill: css("--muted"), "font-size": "7" }, svgEl).textContent = "×";
+        }
+      }
+      // IQR median line
+      if (medianLine.length > 1) {
+        const pts2 = medianLine.map(([xi, yi]) => `${xScale(xi)},${yScale(yi)}`).join(" ");
+        el("polyline", { points: pts2, stroke: css("--accent"), fill: "none", "stroke-width": "1.5", "stroke-linejoin": "round" }, svgEl);
+      }
+      // best-so-far line
+      if (runBest.length > 1) {
+        const rpts = runBest.map(([xi, yi]) => `${xScale(xi)},${yScale(yi)}`).join(" ");
+        el("polyline", { points: rpts, stroke: css("--best"), fill: "none", "stroke-width": "2.2", "stroke-linejoin": "round" }, svgEl);
+      }
+      // seed_j dashed reference
+      if (sum.seed_j != null && isFinite(sum.seed_j) && sum.seed_j < ymax) {
+        const sy = yScale(sum.seed_j);
+        el("line", { x1: PAD.l, y1: sy, x2: cW - PAD.r, y2: sy, stroke: css("--seed"), "stroke-dasharray": "4 3", "stroke-width": "1.2" }, svgEl);
+      }
+      // y axis ticks
+      niceTicks(0, ymax, 5).forEach(tv => {
+        const ty = yScale(tv); if (ty < PAD.t || ty > cH - PAD.b) return;
+        el("line", { x1: PAD.l - 3, y1: ty, x2: PAD.l, y2: ty, stroke: css("--rule") }, svgEl);
+        const lbl = el("text", { x: PAD.l - 5, y: ty + 4, "text-anchor": "end", fill: css("--label"), "font-size": "10" }, svgEl);
+        lbl.textContent = tv.toFixed(tv < 10 ? 2 : 1);
+      });
+      // x axis ticks
+      niceTicks(0, nTotal, 5).forEach(tv => {
+        const tx = xScale(tv); if (tx < PAD.l || tx > cW - PAD.r) return;
+        el("line", { x1: tx, y1: cH - PAD.b, x2: tx, y2: cH - PAD.b + 3, stroke: css("--rule") }, svgEl);
+        const lbl = el("text", { x: tx, y: cH - PAD.b + 13, "text-anchor": "middle", fill: css("--label"), "font-size": "10" }, svgEl);
+        lbl.textContent = String(Math.round(tv));
+      });
+      el("line", { x1: PAD.l, y1: PAD.t, x2: PAD.l, y2: cH - PAD.b, stroke: css("--rule"), "stroke-width": "0.8" }, svgEl);
+      el("line", { x1: PAD.l, y1: cH - PAD.b, x2: cW - PAD.r, y2: cH - PAD.b, stroke: css("--rule"), "stroke-width": "0.8" }, svgEl);
+      const cap2 = document.getElementById("conv-cap2");
+      if (cap2) cap2.textContent = `${okPts.length} evals ok, ${failures.length} failed (${Math.round(100 * failures.length / Math.max(1, nTotal))}%).`;
     }
   }
-  drawIsobars();
-  document.getElementById("iso-start").onchange = drawIsobars;
 
-  // Convergence
-  if (d.J && F.length) {
-    const Js = (d.J || []).map((j, i) => [i, j]).filter(p => p[1] != null);
-    let rb = Infinity; const runBest = Js.map(p => [p[0], (rb = Math.min(rb, p[1]))]);
-    const ymax = Math.max((sum.seed_j || 0) * 1.6, (sum.best_j || 0) * 2, 1);
-    const svg = document.getElementById("c-conv");
-    chart(svg, {
-      xlim: [0, sum.n || Js.length], ylim: [0, ymax],
-      xticks: niceTicks(0, sum.n || Js.length, 5), yticks: niceTicks(0, ymax, 5),
-      xlabel: "evaluation", ylabel: "score",
-      series: [
-        { pts: Js, color: css("--muted"), dots: true, opacity: 0.8 },
-        { pts: runBest, color: css("--best"), w: 2.2 },
-      ],
-      hlines: [{ y: sum.seed_j, color: css("--seed"), dash: true }],
-    });
-  }
-
-  // Terms bar chart
+  // ── H9: Score breakdown with weights ─────────────────────────────────────────────────────────
   if (d.terms_seed && d.terms_best) {
     const svgT = document.getElementById("c-terms");
-    svgT.innerHTML = "";
-    const W = 460, rowH = 32, H = TERM_ORDER.length * rowH + 30;
-    svgT.setAttribute("viewBox", `0 0 ${W} ${H}`);
-    const vals = TERM_ORDER.map(k => [w[k] * (d.terms_seed[k] || 0), w[k] * (d.terms_best[k] || 0)]);
-    const vmax = Math.max(...vals.flat(), 1e-9);
-    const L = 90, R = 54, X = v => L + v / vmax * (W - L - R);
-    TERM_ORDER.forEach((k, i) => {
-      const y = 6 + i * rowH;
-      const gEntry = GLOSSARY[k];
-      const label = gEntry ? gEntry.label : k;
-      const lab = el("text", { x: L - 8, y: y + 15, "text-anchor": "end" }, svgT);
-      lab.textContent = label + (w[k] ? "" : " (w=0)");
-      [[vals[i][0], "--seed", 0], [vals[i][1], "--best", 12]].forEach(([v, c, dy]) => {
-        el("rect", { x: L, y: y + dy, width: Math.max(0.5, X(v) - L), height: 10, rx: 2, fill: css(c) }, svgT);
-        const tv = el("text", { x: X(v) + 4, y: y + dy + 9 }, svgT); tv.textContent = v.toFixed(3);
+    if (svgT) {
+      svgT.innerHTML = "";
+      // Sort TERM_ORDER by best contribution descending (H9)
+      const sortedTerms = TERM_ORDER.slice().sort((a, b) => {
+        const vb_b = w[b] * (d.terms_best[b] || 0);
+        const vb_a = w[a] * (d.terms_best[a] || 0);
+        return vb_b - vb_a;
       });
-    });
-    const lg = el("text", { x: L, y: H - 4 }, svgT); lg.textContent = "upper = start · lower = best · weighted";
+      const W = 480, rowH = 32, H = sortedTerms.length * rowH + 30;
+      svgT.setAttribute("viewBox", `0 0 ${W} ${H}`);
+      const vals = sortedTerms.map(k => [w[k] * (d.terms_seed[k] || 0), w[k] * (d.terms_best[k] || 0)]);
+      const vmax = Math.max(...vals.flat(), 1e-9);
+      const L = 108, R = 54, X = v => L + v / vmax * (W - L - R);
+      sortedTerms.forEach((k, i) => {
+        const y = 6 + i * rowH;
+        const gEntry = GLOSSARY[k];
+        const label = gEntry ? gEntry.label : k;
+        const wLabel = w[k] ? `×${w[k]}` : "(w=0)";
+        const lab = el("text", { x: L - 8, y: y + 11, "text-anchor": "end", "font-size": "10", fill: css("--label") }, svgT);
+        lab.textContent = label;
+        const wlab = el("text", { x: L - 8, y: y + 22, "text-anchor": "end", "font-size": "9", fill: css("--muted") }, svgT);
+        wlab.textContent = wLabel;
+        [[vals[i][0], "--seed", 0], [vals[i][1], "--best", 12]].forEach(([v, c, dy]) => {
+          el("rect", { x: L, y: y + dy, width: Math.max(0.5, X(v) - L), height: 10, rx: 2, fill: css(c) }, svgT);
+          const tv = el("text", { x: X(v) + 4, y: y + dy + 9, "font-size": "9" }, svgT); tv.textContent = v.toFixed(3);
+        });
+      });
+      const lg = el("text", { x: L, y: H - 4, "font-size": "9", fill: css("--muted") }, svgT);
+      lg.textContent = "upper = start · lower = best · sorted by best contribution";
+    }
   }
 
-  // Sensitivity table
+  // ── Sensitivity table (H6: sparkline + bounds bar) ────────────────────────────────────────────
   const sensT = document.getElementById("sens-table");
   if (d.sens && d.sens.length) {
+    // Build best-so-far sparkline data from d.J if available (H6)
+    const jArr = d.J || [];
+    const FAIL_THRESH2 = 999.0;
+    // sens sparklines need per-param best-so-far: use sens order × evals from run.json sens_history if available
+    // If sens_history not present, omit sparkline (but still show bounds bar)
+    const hasSensHist = d.sens_history && Array.isArray(d.sens_history) && d.sens_history.length;
     let s = `<thead><tr>
       <th>Parameter</th><th class="r">Low limit</th><th class="r">High limit</th>
       <th class="r">Best value</th><th class="r">${tip("rho", "Influence ρ")}</th><th></th>
-      <th class="r">${tip("pinned", "Top-6 at low")}</th><th class="r">at high</th></tr></thead><tbody>`;
+      <th class="r">${tip("pinned", "Top-6 at low")}</th><th class="r">at high</th>
+      <th>${tip("knob", "Best over evals")}</th></tr></thead><tbody>`;
     for (const p of d.sens) {
       const bar = `<svg width="90" height="10" viewBox="0 0 90 10" aria-hidden="true">
         <rect x="45" y="0" width="0.8" height="10" fill="${css("--muted")}"/>
@@ -3009,17 +3376,105 @@ async function viewRunDetail(id) {
           fill="${css(p.rho > 0 ? "--seed" : "--best")}"/></svg>`;
       const flag = v => v >= 4 ? `<span class="pill bad">${v}/6</span>` : v >= 2 ? `<span class="pill warn">${v}/6</span>` : `${v}/6`;
       const atHi = p.at_hi != null ? p.at_hi : 0;
-      // P9: the raw key stays the visible text (it is the vocabulary the rest of the page uses);
-      // hover now carries the catalog's label [unit], meaning and search range for run <sum.name>.
+      // H6: bounds bar with best marker and top-6 spread
+      const lo = p.lo ?? 0, hi = p.hi ?? 1, bv = p.best ?? lo;
+      const rng = hi - lo || 1;
+      const bPct = Math.max(0, Math.min(100, ((bv - lo) / rng) * 100));
+      const sp6lo = p.top6_lo != null ? Math.max(0, ((p.top6_lo - lo) / rng) * 100) : null;
+      const sp6hi = p.top6_hi != null ? Math.min(100, ((p.top6_hi - lo) / rng) * 100) : null;
+      const boundsBar = `<svg width="80" height="14" viewBox="0 0 80 14" aria-label="bounds bar for ${esc(p.key)}" role="img">
+        <rect x="2" y="6" width="76" height="2" rx="1" fill="${css("--muted")}"/>
+        ${sp6lo != null && sp6hi != null ? `<rect x="${2 + sp6lo * 0.76}" y="4" width="${(sp6hi - sp6lo) * 0.76}" height="6" rx="1" fill="${css("--band")}" opacity="0.6"/>` : ""}
+        <circle cx="${2 + bPct * 0.76}" cy="7" r="4" fill="${css("--best")}"/>
+      </svg>`;
       s += `<tr><td class="mono">${paramTipHtml(sum.name, p.key, p.key)}</td>
         <td class="r">${fmt(p.lo, 3)}</td><td class="r">${fmt(p.hi, 3)}</td>
         <td class="r">${fmt(p.best, 3)}</td>
         <td class="r">${p.rho != null ? p.rho.toFixed(2) : "–"}</td>
-        <td>${bar}</td><td class="r">${flag(p.at_lo || 0)}</td><td class="r">${flag(atHi)}</td></tr>`;
+        <td>${bar}</td><td class="r">${flag(p.at_lo || 0)}</td><td class="r">${flag(atHi)}</td>
+        <td>${boundsBar}</td></tr>`;
     }
     sensT.innerHTML = s + "</tbody>";
   } else {
     sensT.innerHTML = "<tr><td class='muted'>No sensitivity data.</td></tr>";
+  }
+
+  // ── H5: Search dynamics card ──────────────────────────────────────────────────────────────────
+  const dynBlock = document.getElementById("cma-dynamics-block");
+  const dyn2 = d.cma_dynamics || {};
+  if (dynBlock) {
+    if (!dyn2.available) {
+      dynBlock.style.display = "";
+      dynBlock.innerHTML = `<p class="muted" style="padding:12px 0">Search dynamics not available — no <code>cma/</code> diagnostic files in this run.</p>`;
+    } else {
+      dynBlock.style.display = "";
+      const gens = dyn2.gens || [];
+      const nG = gens.length;
+      if (nG > 1) {
+        const evalIdxs = gens.map((g, i) => i * Math.round((sum.n || nG * 10) / nG));
+        // (a) Step size σ (log y)
+        const sigmaVals = gens.map(g => g.sigma != null && g.sigma > 0 ? g.sigma : null);
+        const svgSig = document.getElementById("c-dyn-sigma");
+        if (svgSig && sigmaVals.some(v => v != null)) {
+          const spts = evalIdxs.map((e, i) => [e, sigmaVals[i]]);
+          const finSig = sigmaVals.filter(v => v != null);
+          const sigLo = Math.pow(10, Math.floor(Math.log10(Math.min(...finSig))));
+          const sigHi = Math.pow(10, Math.ceil(Math.log10(Math.max(...finSig))));
+          chart(svgSig, { xlim: [0, sum.n || evalIdxs[nG - 1]], ylim: [sigLo, sigHi], ylog: true,
+            yticks: logTicks(sigLo, sigHi), xlabel: "eval", ylabel: "σ",
+            series: [{ pts: spts, color: css("--best"), w: 2 }], ariaLabel: "CMA step size sigma over evaluations" });
+        }
+        // (b) Axis ratio (log y)
+        const axRatioVals = gens.map(g => g.axis_ratio != null && g.axis_ratio > 0 ? g.axis_ratio : null);
+        const svgAx = document.getElementById("c-dyn-axratio");
+        if (svgAx && axRatioVals.some(v => v != null)) {
+          const apts = evalIdxs.map((e, i) => [e, axRatioVals[i]]);
+          const finAx = axRatioVals.filter(v => v != null);
+          const axLo = Math.pow(10, Math.floor(Math.log10(Math.min(...finAx))));
+          const axHi = Math.pow(10, Math.ceil(Math.log10(Math.max(...finAx))));
+          chart(svgAx, { xlim: [0, sum.n || evalIdxs[nG - 1]], ylim: [axLo, axHi], ylog: true,
+            yticks: logTicks(axLo, axHi), xlabel: "eval", ylabel: "axis ratio",
+            series: [{ pts: apts, color: css("--accent"), w: 2 }], ariaLabel: "CMA axis ratio over evaluations" });
+        }
+        // (c) Per-param σ as heat strip (stddev normalised to bound width)
+        const svgStd = document.getElementById("c-dyn-stddev");
+        const paramNames = dyn2.param_names || [];
+        const stddevByGen = dyn2.stddev || [];   // [nG][nP]
+        if (svgStd && paramNames.length && stddevByGen.length) {
+          // per-param bound widths from d.sens
+          const boundWidths = paramNames.map(pn => {
+            const ps = (d.sens || []).find(s2 => s2.key === pn);
+            return ps ? (ps.hi - ps.lo || 1) : 1;
+          });
+          const rows = stddevByGen.map(gArr => gArr.map((sv, pi) => sv != null ? sv / boundWidths[pi] : null));
+          const nP = paramNames.length;
+          const hStd = Math.max(60, nP * 14);
+          svgStd.setAttribute("viewBox", `0 0 500 ${hStd}`);
+          const PAD2 = { l: 80, r: 20, t: 14, b: 20 };
+          const pH = (hStd - PAD2.t - PAD2.b) / nP;
+          const W2 = 500 - PAD2.l - PAD2.r;
+          // find global max for colour scale
+          const allStd = rows.flat().filter(v => v != null);
+          const stdMax = Math.max(...allStd, 1e-6);
+          rows.forEach((gArr, gi) => {
+            const gx = PAD2.l + (gi / nG) * W2;
+            const gw = Math.max(1, W2 / nG - 1);
+            gArr.forEach((sv, pi) => {
+              if (sv == null) return;
+              const alpha = Math.min(1, sv / stdMax);
+              const gy = PAD2.t + pi * pH;
+              const rect = el("rect", { x: gx, y: gy, width: gw, height: pH - 1, fill: css("--best"), opacity: alpha.toFixed(2) }, svgStd);
+            });
+          });
+          paramNames.forEach((pn, pi) => {
+            const ly = PAD2.t + pi * pH + pH * 0.75;
+            const lt = el("text", { x: PAD2.l - 4, y: ly, "text-anchor": "end", fill: css("--label"), "font-size": "10" }, svgStd);
+            lt.textContent = pn;
+          });
+          el("line", { x1: PAD2.l, y1: PAD2.t, x2: PAD2.l, y2: hStd - PAD2.b, stroke: css("--rule"), "stroke-width": "0.8" }, svgStd);
+        }
+      }
+    }
   }
 
   // CMA covariance (final ES; from run.json cma_covariance)
@@ -3462,25 +3917,29 @@ async function viewCompare() {
 
     if (!F.length) return;
 
-    function cmpChart(svgId, keyA, keyB, ylabel) {
+    function cmpChart(svgId, keyA, keyB, ylabel, axisSpec) {
       const svg = document.getElementById(svgId);
       if (!svg) return;
       const allV = [...(dA[keyA] || []), ...(dB[keyB] || [])].filter(v => v != null);
       if (!allV.length) return;
-      const lo = Math.floor(Math.min(...allV) - 1), hi = Math.ceil(Math.max(...allV) + 1);
+      const range = axisSpec ? fixedRange(axisSpec, allV) : { lo: Math.floor(Math.min(...allV) - 1), hi: Math.ceil(Math.max(...allV) + 1) };
+      const ticks = axisSpec
+        ? (() => { const t = []; for (let v = range.lo; v <= range.hi + 1e-9; v += axisSpec.major) t.push(+v.toFixed(4)); return t; })()
+        : niceTicks(range.lo, range.hi, 5);
       chart(svg, {
-        xlog: true, xlim, ylim: [lo, hi],
-        yticks: niceTicks(lo, hi, 5), xlabel: "Hz", ylabel, band, vlines,
+        xlog: true, xlim, ylim: [range.lo, range.hi],
+        yticks: ticks, xlabel: "Hz", ylabel, band, vlines,
         series: [
           { pts: F.map((f, i) => [f, (dA[keyA] || [])[i] ?? null]), color: css("--seed"), w: 1.8 },
           { pts: F.map((f, i) => [f, (dB[keyB] || [])[i] ?? null]), color: css("--best"), w: 1.8 },
         ],
+        markers: true,
       });
     }
-    cmpChart("cmp-bwh", "bw_h", "bw_h", "°");
-    cmpChart("cmp-bwv", "bw_v", "bw_v", "°");
-    cmpChart("cmp-di", "di", "di", "dB");
-    cmpChart("cmp-axis", "on_axis", "on_axis", "dB");
+    cmpChart("cmp-bwh", "bw_h", "bw_h", "°", AXES.beamwidth);
+    cmpChart("cmp-bwv", "bw_v", "bw_v", "°", AXES.beamwidth);
+    cmpChart("cmp-di", "di", "di", "dB", AXES.di);
+    cmpChart("cmp-axis", "on_axis", "on_axis", "dB", AXES.onAxis);
   }
 
   document.getElementById("btn-compare").onclick = doCompare;
