@@ -1,6 +1,26 @@
 # CONTINUITY
 
 
+## 2026-11-12 (17:40Z) - DAY GROUP C: CALIBRATION HARNESS + N1 THROUGHPUT EVIDENCE
+
+- Day-plan group C (PR #37, branch `day/C-calibration`): C.1 `tools/calibration/plan_calibration.py`
+  (top-N finalists -> 3-6 line `extends:` overlays under `examples/calibration/<date>/` -> runnable
+  night YAML in the runner format; default `--top 20`; PROPOSAL-ONLY new-screen-grid overlay,
+  not wired into jobs) + C.2 `tools/calibration/compare_calibration.py` (per-aspect max |delta| vs
+  Re z +-0.03 / BW +-2 deg / DI +-0.2 dB, Spearman screen-vs-verify, verify-J-only finalist ranking,
+  `compare.json` + `COMPARE.md`).
+- C.3 `docs/evidence/THROUGHPUT_N1_2026-11-12.md` from the N1 night (read-only `runs/nights/
+  gpu_2026-11-12/summary.jsonl` + twelve `n1_*.log`): fused ON wins at every size (4k warm b12
+  8.49 vs 12.05 s; 8k fused-off never completes a warm rep), `freq_batch_size` 12 never hurt
+  (4.7x/2.1x/1.9x vs b1 at 1k/4k/8k), prefetch neutral on warm time and harmful near the ceiling
+  (8k fused-off+prefetch OOM: 188.794 MiB alloc failure at 100.00% (7.996/7.996 GiB), peak 7731 MiB).
+  DECIDED recommendation delivered as a proposal only (fused ON; prefetch OFF at >=8k dofs;
+  freq_batch_size 12 via `HORNLAB_FREQ_BATCH_SIZE` until a config key exists). No default flipped.
+- C.4 (same doc): screen-fidelity proposal (new screen grid: band split 2 kHz, ~7 points in
+  2.5-5.5 kHz; measure Spearman(screen, verify) in the calibration night; until then verify top 15-20
+  and rank finalists by verify J only).
+- Verified: 13 targeted tests green (13/0/0/0); CI green on the branch incl. the Group-A test files.
+
 ## 2026-11-12 (17:35Z) - FIX: GROUP-A TEST CLI HELPER USES THE RUNNING INTERPRETER (CI GREEN RESTORED)
 
 - `tests/test_tools_analysis_common.py::run_cli` hardcoded this box's
