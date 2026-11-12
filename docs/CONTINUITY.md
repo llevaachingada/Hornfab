@@ -1,6 +1,73 @@
 # CONTINUITY
 
 
+## 2026-11-12 (17:40Z) - DAY GROUP C: CALIBRATION HARNESS + N1 THROUGHPUT EVIDENCE
+
+- Day-plan group C (PR #37, branch `day/C-calibration`): C.1 `tools/calibration/plan_calibration.py`
+  (top-N finalists -> 3-6 line `extends:` overlays under `examples/calibration/<date>/` -> runnable
+  night YAML in the runner format; default `--top 20`; PROPOSAL-ONLY new-screen-grid overlay,
+  not wired into jobs) + C.2 `tools/calibration/compare_calibration.py` (per-aspect max |delta| vs
+  Re z +-0.03 / BW +-2 deg / DI +-0.2 dB, Spearman screen-vs-verify, verify-J-only finalist ranking,
+  `compare.json` + `COMPARE.md`).
+- C.3 `docs/evidence/THROUGHPUT_N1_2026-11-12.md` from the N1 night (read-only `runs/nights/
+  gpu_2026-11-12/summary.jsonl` + twelve `n1_*.log`): fused ON wins at every size (4k warm b12
+  8.49 vs 12.05 s; 8k fused-off never completes a warm rep), `freq_batch_size` 12 never hurt
+  (4.7x/2.1x/1.9x vs b1 at 1k/4k/8k), prefetch neutral on warm time and harmful near the ceiling
+  (8k fused-off+prefetch OOM: 188.794 MiB alloc failure at 100.00% (7.996/7.996 GiB), peak 7731 MiB).
+  DECIDED recommendation delivered as a proposal only (fused ON; prefetch OFF at >=8k dofs;
+  freq_batch_size 12 via `HORNLAB_FREQ_BATCH_SIZE` until a config key exists). No default flipped.
+- C.4 (same doc): screen-fidelity proposal (new screen grid: band split 2 kHz, ~7 points in
+  2.5-5.5 kHz; measure Spearman(screen, verify) in the calibration night; until then verify top 15-20
+  and rank finalists by verify J only).
+- Verified: 13 targeted tests green (13/0/0/0); CI green on the branch incl. the Group-A test files.
+
+## 2026-11-12 (17:35Z) - FIX: GROUP-A TEST CLI HELPER USES THE RUNNING INTERPRETER (CI GREEN RESTORED)
+
+- `tests/test_tools_analysis_common.py::run_cli` hardcoded this box's
+  `C:\Users\hunte\Hrns\hornlab-search\.venv\Scripts\python.exe` as the subprocess interpreter; CI
+  (Linux, no such path) got `FileNotFoundError` in ~25 Group-A CLI-invocation tests, so PR #38's merge
+  went in with CI red (status checks are not enforced on this repo). Fix: `PY = Path(sys.executable)`
+  — locally that is the venv python (pytest runs under it), in CI the job's python; tools are pure
+  stdlib+numpy/scipy/matplotlib+optional-sklearn so they work under either. No product code changed.
+- Follow-up rule for future lanes: never put an absolute machine path in a test; derive the
+  interpreter from `sys.executable`.
+- Second CI-only failure (same runs): three `test_tools_analysis_sensitivity.py` tests asserted
+  `surrogate.available is True`, but sklearn is OPTIONAL by contract (day plan + schema: try/except,
+  Spearman fallback) and CI has no sklearn — the tool correctly degrades with
+  `{'available': False, 'note': 'sklearn not installed; Spearman only'}`. The tests now branch on the
+  availability contract (deep assertions keep running wherever sklearn exists); no tool code changed.
+
+## 2026-11-12 (17:10Z) - DAY GROUP A: EVOLUTIONARY-ANALYSIS TOOLKIT COMPLETE
+
+- Day-plan group A (PR #38, branch `day/A-analysis`): A.0-A.10 complete under `tools/analysis/` —
+  `_common`, `convergence` (A.1), `seed_variance` (A.2 incl. bootstrap CIs + ECDF + >=5-seed verdict rule),
+  `sensitivity` (A.3 incl. sklearn surrogate permutation importance; Sobol skipped, SALib not installed),
+  `links` (A.4), `walls` (A.5), `ab_compare` (A.6), `lane_parity` (A.7 CP-7b 0.2 dB gate),
+  `term_balance` (A.9 per-term share of J + raw-unit top decile — the v8 tolerance-recalibration inputs),
+  `fidelity` (A.10 screen-vs-verify bias + top-5 rank agreement), `report_day` (A.8) +
+  `specs/day_2026-11-12.yaml` (today's lanes with <FILL_*> placeholders the orchestrator fills from
+  `runs/nights/{gpu,cpu}_day_2026-11-12/summary.jsonl`). Tools read run dirs read-only and write only `--out`.
+- Verified: 75 targeted Group-A tests green (75/0/0/0 junitxml); full offline suite green on the branch
+  (2 stored-data skips); schema.md is the output contract and stayed stable.
+- GUI group E codes against this schema (PR #36 landed already).
+
+## 2026-11-12 (16:25Z) - DAY GROUP D: NIGHT/DATA OPS HARDENING
+
+- Day-plan group D (PR #35, branch `day/D-night-ops`): D.1 two-lane `night_status.py` (per-lane lock
+  holders alive/stale, the running job per lane from the queue logs, its run-dir row count and
+  newest-row age, ALERT when a lane is quiet > 30 min while its job runs); D.2 runner robustness
+  (GPU-busy job -> `status: blocked` + exactly one retry after 120 s, `lane`/`backend`/`status`/
+  `attempts` on every summary row incl. command jobs, `--dry-run` validates EVERY argv path,
+  explicit stale-lock takeover log); D.3 `tools/data/merge_lane_dataset.py` (parity-gated on the A.7
+  report, dry-run by default, `provenance.lane: "cpu"` tags, backup + atomic writes, idempotent);
+  D.4 `tools/night_report.py` (per-lane morning report, [measured]/[inferred]).
+- Verified: 66 targeted offline tests green (junitxml 66/0/0/0); full offline suite green on the
+  branch (2 stored-data skips) at f98f024; live read-only smokes of the two-lane status and the
+  night report against the 2026-11-12 day runs (GPU lock holder shown correctly; CPU lock freed).
+- D.3 parity-schema tolerance (documented in PR #35): gate = top-level `pass` bool per the A.7
+  schema on `day/A-analysis`; `verdict`/`status`/`result` "pass"/"passed" accepted; unrecognised
+  gate = refuse (fail closed).
+
 ## 2026-11-12 (16:00Z) - DAY GROUP R: SEARCH-MATH RESEARCH DOSSIER
 
 - Day-plan group R (research continuation, PR #34, branch `day/R-research-dossier`): wrote

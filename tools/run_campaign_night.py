@@ -23,7 +23,14 @@ Every job runs STRICTLY SEQUENTIALLY within its lane:
    the log, the evaluation count read from that run's ``search.ndjson`` (never from ``--budget``),
    and the best J parsed from the search tool's final summary line (``None`` when absent);
 4. append one JSON line per job to ``runs/nights/<night>/summary.jsonl``;
-5. a failed or timed-out job is recorded and the runner moves on. It never retries.
+5. a failed or timed-out job is recorded and the runner moves on. A job whose log contains
+   ``GPU busy`` (the GPU-lock holder error) is recorded as ``status: blocked`` — never ``ok`` — and
+   retried exactly once after ``GPU_BUSY_RETRY_WAIT_S`` (2026-11-12: the 09:35 GPU-busy cascade
+   retried nothing and the next job failed the same way). The retry appends a second summary row
+   (``attempts: 2``), and the queue log keeps ONE START/END pair per job with a ``RETRY`` line
+   between the attempts.
+6. ``--dry-run`` additionally validates every path-valued argv flag (``--config``/``--brief`` as
+   files, ``--resume``/``--run`` as run directories) and fails listing ALL missing paths.
 
 Two lanes (2026-11-12): a night file may set top-level ``lane: gpu|cpu`` (default ``gpu``). A
 ``cpu`` night skips the GPU lock and nvidia-smi VRAM accounting, holds ``runs/.cpu.lane.lock`` for
@@ -58,6 +65,16 @@ SEARCH_TIMEOUT_S = 3 * 60 * 60
 COMMAND_TIMEOUT_S = 2 * 60 * 60
 LOCK_WAIT_S = 300.0
 VRAM_POLL_S = 2.0
+#: The text in a job log that marks this lane's lock as held by a live holder elsewhere
+#: (``GPU busy: <user> running "<cmd>" (pid <pid>) since <ts>`` from search/gpulock.py).
+GPU_BUSY_MARKER = "GPU busy"
+#: One retry, this long after a blocked job (2026-11-12: no retry at all left the lane empty).
+GPU_BUSY_RETRY_WAIT_S = 120.0
+#: Job statuses recorded in summary.jsonl (``status`` field).
+STATUS_OK = "ok"
+STATUS_BLOCKED = "blocked"
+STATUS_FAILED = "failed"
+STATUS_TIMEOUT = "timeout"
 
 #: Lanes this runner understands. ``gpu`` is the historical single-lane behaviour.
 LANES = ("gpu", "cpu")
@@ -126,9 +143,15 @@ class JobResult:
     vram_baseline_mb: float | None
     vram_after_mb: float | None
     note: str
+    # Additive fields (2026-11-12 group D): lane/backend on every row; a blocked job is never ok.
+    lane: str = "gpu"
+    backend: str | None = None
+    status: str = STATUS_FAILED
+    attempts: int = 1
 
     def to_dict(self) -> dict:
-        """The exact one-line ``summary.jsonl`` schema (key order is intentional)."""
+        """The exact one-line ``summary.jsonl`` schema (existing key order is intentional; new
+        keys are additive and appended)."""
         return {
             "id": self.id,
             "start": self.start,
@@ -141,6 +164,10 @@ class JobResult:
             "vram_baseline_mb": self.vram_baseline_mb,
             "vram_after_mb": self.vram_after_mb,
             "note": self.note,
+            "lane": self.lane,
+            "backend": self.backend,
+            "status": self.status,
+            "attempts": self.attempts,
         }
 
 
@@ -204,6 +231,100 @@ def build_job_env(job: Job, night_lane: str, runs_root: Path | str,
     env.update(lane_env(night_lane, runs_root))
     env.update({str(k): str(v) for k, v in (job.env or {}).items()})
     return env
+
+
+def backend_of(job: Job) -> str | None:
+    """The job's backend: its ``backend:`` key, else ``--backend <v>`` parsed from argv.
+
+    COMMAND-kind jobs that wrap ``hornlab-search search/verify`` (the 2026-11-12 day queue) carry
+    the backend only in their argv; the summary row for such a job records it like a search job.
+    """
+    if job.backend:
+        return job.backend
+    argv = [str(token) for token in job.argv]
+    for index, token in enumerate(argv):
+        if token == "--backend" and index + 1 < len(argv):
+            return argv[index + 1] or None
+        if token.startswith("--backend="):
+            return token.split("=", 1)[1] or None
+    return None
+
+
+def classify_status(exit_code: int, timed_out: bool, log_text: str | None) -> str:
+    """The job's recorded ``status`` (D.2a). A GPU busy job is never ``ok``.
+
+    ``blocked`` requires the ``GPU busy`` marker in the job's OWN output AND a non-zero exit:
+    the runner's own hygiene chatter (``gpu-clean reported GPU busy`` on rc 3) also contains the
+    marker, but hygiene output never fails the job that followed it, and a job that succeeded
+    through the marker must not be retried.
+    """
+    text = log_text or ""
+    if timed_out:
+        return STATUS_TIMEOUT
+    if GPU_BUSY_MARKER in text and exit_code != 0:
+        return STATUS_BLOCKED
+    if exit_code == 0:
+        return STATUS_OK
+    return STATUS_FAILED
+
+
+#: Argv flags whose value is a path ``--dry-run`` must validate (D.2d). ``--config``/``--brief``
+#: name files, ``--resume``/``--run`` name run dirs; both forms ``--flag value`` and
+#: ``--flag=value`` are understood.
+_PATH_FLAGS: dict[str, str] = {
+    "--config": "config file",
+    "--brief": "brief file",
+    "--resume": "resume run dir",
+    "--run": "run dir",
+}
+
+
+def _missing_paths_for_argv(argv: tuple[str, ...] | list[str], repo_root: Path) -> list[tuple[str, str]]:
+    """``(flag, printed value)`` for every path-valued argv flag whose target does not exist."""
+    out: list[tuple[str, str]] = []
+    tokens = [str(token) for token in argv]
+    index = 0
+    while index < len(tokens):
+        token = tokens[index]
+        flag: str | None = None
+        value: str | None = None
+        if token in _PATH_FLAGS:
+            if index + 1 < len(tokens):
+                flag, value = token, tokens[index + 1]
+                index += 2
+            else:
+                index += 1
+        else:
+            for name in _PATH_FLAGS:
+                prefix = f"{name}="
+                if token.startswith(prefix):
+                    flag, value = name, token[len(prefix):]
+                    break
+            index += 1
+        if flag is None or value is None or not value.strip():
+            continue
+        try:
+            path = Path(value)
+            if not path.is_absolute():
+                path = Path(repo_root) / path
+            exists = path.exists()
+        except OSError:  # pragma: no cover - unusable path text counts as missing
+            exists = False
+        if not exists:
+            out.append((flag, value))
+    return out
+
+
+def missing_arg_paths(plan: NightPlan, jobs: list[Job] | tuple[Job, ...],
+                      repo_root: Path | str | None = None) -> dict[str, list[tuple[str, str]]]:
+    """Per job id, every path-valued argv flag whose target does not exist (D.2d)."""
+    root = _repo_path(repo_root)
+    out: dict[str, list[tuple[str, str]]] = {}
+    for job in jobs:
+        missing = _missing_paths_for_argv(job.argv, root)
+        if missing:
+            out[job.id] = missing
+    return out
 
 
 def _search_argv(job_id: str, spec: dict, cli_exe: Path) -> tuple[str, ...]:
@@ -541,7 +662,10 @@ class NightRunner:
             if holder is not None and not _pid_alive(holder):
                 try:
                     lock.unlink()
-                    _append(log_path, f"removed stale GPU lock (holder pid {holder} is gone)\n")
+                    # D.2b: the takeover is an explicit event in the job log, never silent.
+                    _append(log_path,
+                            f"STALE LOCK TAKEN OVER: removed {lock.name} (the {self.lane} lane's "
+                            f"lock) whose recorded holder pid {holder} is gone\n")
                 except OSError:
                     pass
                 continue
@@ -688,7 +812,8 @@ class NightRunner:
 # ------------------------------------------------------------------ night core
 
 
-def _run_one(plan: NightPlan, job: Job, *, night_dir: Path, runner, repo_root: Path) -> JobResult:
+def _run_one(plan: NightPlan, job: Job, *, night_dir: Path, runner, repo_root: Path,
+             attempts: int = 1) -> JobResult:
     log_path = night_dir / f"{job.id}.log"
     started = time.monotonic()
     start = _utc_now()
@@ -727,6 +852,7 @@ def _run_one(plan: NightPlan, job: Job, *, night_dir: Path, runner, repo_root: P
     run_dir: Path | None = None
     evals = 0
     best_j: float | None = None
+    status = classify_status(exit_code, timed_out, log_text)
 
     if timed_out:
         exit_code = 124
@@ -769,6 +895,10 @@ def _run_one(plan: NightPlan, job: Job, *, night_dir: Path, runner, repo_root: P
         vram_baseline_mb=baseline,
         vram_after_mb=after,
         note="; ".join(part for part in note_parts if part),
+        lane=plan.lane,
+        backend=backend_of(job),
+        status=status,
+        attempts=int(attempts),
     )
 
 
@@ -789,12 +919,19 @@ def night_lane_lock(plan: NightPlan, runs_root: Path | str | None = None):
 def run_night(plan: NightPlan, *, dry_run: bool = False, only: str | None = None,
               repo_root: Path | str | None = None,
               runs_root: Path | str | None = None,
-              runner=None) -> list[JobResult]:
+              runner=None,
+              retry_wait_s: float | None = None) -> list[JobResult]:
     """Run (or, with ``dry_run``, print) the night's jobs in order.
 
     ``runner`` is the injection seam for tests: an object with
     ``pre_hygiene(job, log_path)``, ``run(job, log_path) -> (exit_code, timed_out)`` and
-    ``post_hygiene(job, log_path)``. Dry-run creates no files and launches nothing.
+    ``post_hygiene(job, log_path)``. Dry-run creates no files and launches nothing, and (D.2d)
+    fails naming EVERY path-valued argv flag whose target does not exist.
+
+    A job recorded ``status: blocked`` (its log contains ``GPU busy`` and it exited non-zero,
+    D.2a) is retried exactly ONCE after ``GPU_BUSY_RETRY_WAIT_S`` (``retry_wait_s`` overrides it
+    for tests); the retry appends a second ``summary.jsonl`` row with ``attempts: 2`` while the
+    queue log keeps ONE START/END pair per job with a ``RETRY`` line between the attempts.
     """
     root = _repo_path(repo_root)
     jobs = list(plan.jobs)
@@ -809,7 +946,20 @@ def run_night(plan: NightPlan, *, dry_run: bool = False, only: str | None = None
         for index, job in enumerate(jobs, 1):
             print(f"  {index}. {job.id} [{job.kind}] timeout={job.timeout_s:g}s")
             print(f"     argv: {' '.join(job.argv)}")
+        missing = missing_arg_paths(plan, jobs, repo_root=root)
+        if missing:
+            lines: list[str] = []
+            for job_id, entries in missing.items():
+                for flag, value in entries:
+                    lines.append(f"job {job_id}: {flag} {value!r} does not exist")
+            for line in lines:
+                print(f"  MISSING {line}")
+            raise ValueError(f"--dry-run: {len(lines)} path(s) missing; " + "; ".join(lines))
         return []
+
+    wait = float(GPU_BUSY_RETRY_WAIT_S if retry_wait_s is None else retry_wait_s)
+    if wait < 0:
+        raise ValueError("retry_wait_s must be >= 0")
 
     night_dir = night_dir_for(plan, runs_root=runs_root, repo_root=root)
     night_dir.mkdir(parents=True, exist_ok=True)
@@ -824,14 +974,30 @@ def run_night(plan: NightPlan, *, dry_run: bool = False, only: str | None = None
     with night_lane_lock(plan, runs_root=runs_root):
         for job in jobs:
             write_queue_line(queue_log, f"START {job.id} : {' '.join(job.argv)}")
-            result = _run_one(plan, job, night_dir=night_dir, runner=runner, repo_root=root)
-            write_queue_line(queue_log, f"END {job.id} exit {result.exit_code}")
-            results.append(result)
-            with open(summary_path, "a", encoding="utf-8") as handle:
-                handle.write(json.dumps(result.to_dict(), ensure_ascii=False) + "\n")
-                handle.flush()
-            print(f"[{result.id}] exit={result.exit_code} evals={result.evals_ndjson} "
-                  f"best_J={_fmt(result.best_J)} note={result.note}")
+            attempts = 0
+            while True:
+                attempts += 1
+                if attempts > 2:
+                    break                       # retried exactly once, never twice
+                result = _run_one(plan, job, night_dir=night_dir, runner=runner,
+                                  repo_root=root, attempts=attempts)
+                with open(summary_path, "a", encoding="utf-8") as handle:
+                    handle.write(json.dumps(result.to_dict(), ensure_ascii=False) + "\n")
+                    handle.flush()
+                if result.status == STATUS_BLOCKED and attempts < 2:
+                    write_queue_line(
+                        queue_log,
+                        f"RETRY {job.id} blocked (GPU busy); retrying once in {wait:g}s")
+                    if wait > 0:
+                        time.sleep(wait)
+                    write_queue_line(queue_log, f"RETRY {job.id} now (attempt 2)")
+                    continue
+                write_queue_line(queue_log, f"END {job.id} exit {result.exit_code}")
+                results.append(result)
+                print(f"[{result.id}] exit={result.exit_code} evals={result.evals_ndjson} "
+                      f"best_J={_fmt(result.best_J)} status={result.status} "
+                      f"note={result.note}")
+                break
     write_summary_md(night_dir / "SUMMARY.md", plan, results)
     write_queue_line(queue_log, "QUEUE DONE")
     return results

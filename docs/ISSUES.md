@@ -3,6 +3,26 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-10-25 (M6/WP12 pushed: enclosure mounting plumbed end-to-end (`brief.mounting` → the mesher's OWN keys; `-mnt-` cache keys; mesh_meta/ndjson/record echoes; absent = byte-for-bit) and MEASURED on two finalists — dofs +199.4 %/+106.5 %, both under the UNCHANGED caps, enclosure J improves (a different objective landscape — never rank across mountings), reference parity 2.91e-06 dB; **WP13 axisymmetric backend OWNER-DEFERRED** ("don't know how necessary that is"); suite **1372/0/0/0**; focused 71/0/0; evidence `docs/evidence/M6_WP12_2026-10-25.md`, byte-check 21/21; no GitHub issue state changed).
 
+Local-only, added 2026-11-12 (**day plan group C merge, PR #37; no GitHub issue state changed**):
+- C.1/C.2 calibration planner + verdicts landed; C.3 N1 throughput evidence + C.4 screen-fidelity
+  proposal written (recommendations are proposals only; owner flips defaults after the calibration
+  night). 13 targeted tests green.
+
+Local-only, added 2026-11-12 (**fix: Group-A test CLI helper ran with a hard-coded interpreter path; no GitHub issue state changed**):
+- PR #38 merged with CI red (repo does not enforce status checks): `run_cli` in
+  `tests/test_tools_analysis_common.py` hardcoded the box's venv path; CI (Linux) failed ~25 tests with
+  `FileNotFoundError`. Fixed with `sys.executable` in PR (this one); no product code touched.
+- Second cause found by the fix PR's CI: three sensitivity tests asserted surrogate availability
+  (sklearn optional by contract; absent on CI) — tests now assert the availability/degradation
+  contract instead. No product code touched.
+
+Local-only, added 2026-11-12 (**day plan group D merge, PR #35; no GitHub issue state changed**):
+- D.1-D.4 landed: two-lane `night_status.py` (locks, running jobs, row ages, stale-lane ALERT), night-runner
+  robustness (GPU-busy -> blocked + one retry, lane/backend/status/attempts rows, --dry-run argv path
+  validation, explicit stale-lock takeover), parity-gated `tools/data/merge_lane_dataset.py` (dry-run default,
+  provenance.lane=cpu, atomic + idempotent), per-lane `tools/night_report.py`. 66 targeted tests; full suite
+  green on the branch. D.3 gate tolerance documented (top-level `pass`; fail closed on unrecognised).
+
 Local-only, added 2026-11-12 (**day plan group F merge, PR #33; issue #13 state changed on GitHub**):
 - **F.4 DONE:** GitHub issue #13 CLOSED by the orchestrator 2026-11-12 (comment cites fixes merged
   2026-10-22: FF to 6d1d5c7 = e0b9b61 + 11304f6 + 152a829; suite 533 PASS). Mirrored in the row below.
