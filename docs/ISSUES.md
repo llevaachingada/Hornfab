@@ -3,6 +3,12 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-10-25 (M6/WP12 pushed: enclosure mounting plumbed end-to-end (`brief.mounting` → the mesher's OWN keys; `-mnt-` cache keys; mesh_meta/ndjson/record echoes; absent = byte-for-bit) and MEASURED on two finalists — dofs +199.4 %/+106.5 %, both under the UNCHANGED caps, enclosure J improves (a different objective landscape — never rank across mountings), reference parity 2.91e-06 dB; **WP13 axisymmetric backend OWNER-DEFERRED** ("don't know how necessary that is"); suite **1372/0/0/0**; focused 71/0/0; evidence `docs/evidence/M6_WP12_2026-10-25.md`, byte-check 21/21; no GitHub issue state changed).
 
+Local-only, added 2026-11-12 (**day plan group E merge, PR #36; no GitHub issue state changed**):
+- E.1 `#/analysis` page + `/api/analysis` routes (renders Group A outputs read-only; new
+  `gui --analysis-dir` flag); E.2 home lanes panel via `GET /api/lanes` (local duplicate of D.1,
+  never imports tools/); E.3 `#/elites` gate-audit catalog (J vN, gate chips, coverage cell, run link).
+  Targeted + full offline suite green on the branch.
+
 Local-only, added 2026-11-12 (**day plan group B merge, PR #40; no GitHub issue state changed**):
 - B.1-B.9 landed opt-in (warm start, links, narrow/widen subcommand, valid-only budget, round-throat
   gate flag, infeasible resample, lq surrogate, CMA-MAE option, PARAMETERS.md sections). Defaults

@@ -1,6 +1,25 @@
 # CONTINUITY
 
 
+## 2026-11-12 (18:15Z) - DAY GROUP E: GUI ANALYSIS PAGE, LANES PANEL, ELITES CATALOG
+
+- Day-plan group E (PR #36, branch `day/E-gui`): E.1 `#/analysis` read-only page renders the Group A
+  analysis outputs under a configurable folder (default `runs/analysis/`, new
+  `hornlab-search gui --analysis-dir` flag; `/api/analysis` + `/api/analysis/<set>` pass each
+  `<tool>.json` through verbatim: convergence curves, seed-variance table + A-beats-B/indicative
+  verdict chips, sensitivity bars + top-decile shift + surrogate importance, link candidates, walls,
+  REPORT.md text; missing sections render "not present"; never runs an analysis). It codes against
+  `tools/analysis/schema.md` (A.0) and ignores unknown fields.
+- E.2 home lanes panel backed by new `GET /api/lanes` (`gui/data.py::lane_status`, a local duplicate
+  of the D.1 read logic — never imports `tools/`): per-lane lock holders (alive/stale), the running
+  job from the newest queue log, run-dir row count + newest-row age, last completed job, and an
+  ALERT flag when a lane is quiet > 30 min while its job runs; missing files degrade to idle.
+- E.3 `#/elites` catalog renders designs from a committed gate-audit CSV (J vN, tier, L2-style gate
+  chips — only columns the CSV carries, a fail never becomes a pass — coverage cell, run link);
+  absent audit = empty catalog.
+- Verified: targeted GUI helper test green; full offline suite green on the main-synced branch
+  (2 stored-data skips); CI green on the branch.
+
 ## 2026-11-12 (17:55Z) - DAY GROUP B: SEARCH FEATURES (ALL OPT-IN)
 
 - Day-plan group B (PR #40, branch `day/B-search-features`): B.1 `search.warm_start` (new
