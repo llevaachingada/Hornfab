@@ -1,6 +1,16 @@
 # CONTINUITY
 
 
+## 2026-11-12 (22:05Z) - PARTIAL DAY EVIDENCE COMMITTED (PR #48)
+
+- Committed the PARTIAL day evidence while the GPU continuation queue (`g2`–`g9`) runs:
+  `docs/evidence/DAY_2026-11-12_ANALYSIS_PARTIAL.md` (A.8 partial, 13 sections + 10 charts;
+  appendices: A.7 PASS 5/5 <=0.2 dB, 24-run fidelity census, 25-seed variance median 18.589 /
+  spread 4.780, D.3 dry-run PASS 237 rows) and `docs/evidence/NIGHT_2026-11-12_PARTIAL.md`
+  (5 nights; `gpu_day_2026-11-12_cont` has g1b/g1c only; c2b BEAT worker-reset note). The partial
+  `tools/analysis/specs/day_2026-11-12.yaml` fill is committed too.
+- No code, queue, or default changes. Final report/A.6/PR #25/F.1/D.3 wait for `g2`–`g9` (or owner).
+
 ## 2026-11-12 (21:35Z) - RESEARCH PLAN + EXTERNAL REVIEW HANDOFF SAVED (PR #46)
 
 - Saved `docs/research/DATA_GA_RESEARCH_PLAN_2026-11-12.md` (research-only: inventory of today's
