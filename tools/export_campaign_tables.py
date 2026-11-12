@@ -2,12 +2,19 @@
 
 Reads the run directories named in night ``summary.jsonl`` files and writes, under ``--out``:
 
-* ``cells_summary.csv``  one row per cell: family, seed J, best J, refusal rate, evals;
+* ``cells_summary.csv``  one row per cell: objective_version, backend, family, seed J, best J,
+                         refusal rate, evals;
 * ``evals.csv``          one row per evaluation: J, the eight normalised terms, per-eval scalar metrics,
                          flattened design parameters (``p_<name>``), plus the per-frequency beamwidth/DI
                          series as JSON columns -- enough to re-score or fit surrogates without CUDA;
-* ``best_designs.json``  the best design's parameters and terms per cell;
+* ``best_designs.json``  the best design's parameters and terms per cell, grouped by
+                         ``v<objective_version>/<backend>``;
 * ``README.md``          column definitions and caveats.
+
+GROUPING RULE (2026-11-12): every table is labelled with its ``objective_version`` and ``backend``
+and grouped by that pair; J values are NEVER ranked or compared across groups (an objective version
+change reweights the terms, a backend change changes the solve). Ranking within a cell stays within
+a cell.
 
 Usage::
 
@@ -27,8 +34,23 @@ def _rows(path: Path) -> list[dict]:
     return [json.loads(l) for l in path.read_text(encoding="utf-8").splitlines() if l.strip()]
 
 
+def backend_of(row: dict) -> str:
+    """The backend a row was solved on (solve block first, then a flat key, else unknown)."""
+    solve = row.get("solve")
+    backend = (solve or {}).get("backend") if isinstance(solve, dict) else None
+    backend = backend or row.get("backend")
+    return str(backend) if backend else "unknown"
+
+
+def group_of(row: dict) -> str:
+    """The comparison group of a row: ``v<objective_version>/<backend>``. Rows from different
+    groups are never ranked together (the objective terms and the solver both change)."""
+    return f"v{row.get('objective_version') or 1}/{backend_of(row)}"
+
+
 def main(argv=None) -> int:
-    ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    ap = argparse.ArgumentParser(description="Export grouped, objective_version/backend-labelled "
+                                             "campaign tables (no ranking across groups).")
     ap.add_argument("--night", type=Path, required=True, help="night folder containing summary.jsonl")
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args(argv)
@@ -46,21 +68,32 @@ def main(argv=None) -> int:
         ok = [r for r in nd if r.get("ok")]
         best = min(ok, key=lambda r: r["objective"]) if ok else None
         seed = nd[0]
+        anchor = best or seed
+        group = f"v{anchor.get('objective_version') or 1}/{backend_of(anchor)}"
         summary.append({
-            "cell": cell, "family": (best or seed).get("family"), "evals": len(nd), "refused": len(nd) - len(ok),
+            "cell": cell, "group": group,
+            "objective_version": anchor.get("objective_version") or 1,
+            "backend": backend_of(anchor),
+            "family": anchor.get("family"), "evals": len(nd),
+            "refused": len(nd) - len(ok),
             "refused_pct": round(100 * (len(nd) - len(ok)) / max(len(nd), 1), 1),
             "seed_J": round(seed["objective"], 4) if seed.get("ok") else None,
             "best_J": round(best["objective"], 4) if best else None,
             "best_eval_no": nd.index(best) + 1 if best else None, "run_dir": rd.name,
         })
         if best:
-            best_out[cell] = {"design_hash": best["design_hash"], "objective": best["objective"],
-                              "params": best["params"], "terms": best["terms"]}
+            best_out.setdefault(group, {})[cell] = {
+                "design_hash": best["design_hash"], "objective": best["objective"],
+                "params": best["params"], "terms": best["terms"],
+            }
         for i, r in enumerate(nd):
             m = r.get("metrics") or {}
             row = {"cell": cell, "eval": i + 1, "ok": bool(r.get("ok")), "cached": r.get("cached"),
+                   "group": group,
+                   "objective_version": r.get("objective_version") or 1,
+                   "backend": backend_of(r),
                    "family": r.get("family"), "design_hash": r.get("design_hash"),
-                   "J": r.get("objective"), "objective_version": r.get("objective_version"),
+                   "J": r.get("objective"),
                    "error": (r.get("error") or "")[:120], "n_dof": r.get("n_dof"), "seconds": r.get("seconds")}
             for t in TERMS:
                 row[f"term_{t}"] = (r.get("terms") or {}).get(t)
@@ -76,37 +109,59 @@ def main(argv=None) -> int:
                 pkeys.add(f"p_{k}")
             all_rows.append(row)
 
-    base = ["cell", "eval", "ok", "cached", "family", "design_hash", "J", "objective_version", "error", "n_dof",
+    # Never rank across groups: every table is sorted by group (then cell), so two cells with a
+    # different objective_version or backend are never adjacent competitors in the file ordering.
+    order = {g: (int(g.lstrip("v").split("/", 1)[0]) if g.lstrip("v").split("/", 1)[0].isdigit()
+                 else 0, g) for g in {row["group"] for row in all_rows} | {s["group"] for s in summary}}
+    all_rows.sort(key=lambda row: (order[row["group"]], row["cell"], row["eval"]))
+    summary.sort(key=lambda s: (order[s["group"]], s["cell"]))
+
+    base = ["cell", "eval", "group", "objective_version", "backend", "ok", "cached", "family",
+            "design_hash", "J", "error", "n_dof",
             "seconds"] + [f"term_{t}" for t in TERMS] + ["freqs_hz", "bw_h_deg", "bw_v_deg", "di_db",
                                                          "ripple_h_db", "ripple_v_db", "on_axis_db"]
     cols = base + sorted(pkeys)
     with open(args.out / "evals.csv", "w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=cols, extrasaction="ignore"); w.writeheader(); w.writerows(all_rows)
-    with open(args.out / "cells_summary.csv", "w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=list(summary[0].keys())); w.writeheader(); w.writerows(summary)
-    (args.out / "best_designs.json").write_text(json.dumps(best_out, indent=1), encoding="utf-8")
+        w = csv.DictWriter(f, fieldnames=cols, extrasaction="ignore"); w.writeheader()
+        w.writerows(all_rows)
+    if summary:
+        with open(args.out / "cells_summary.csv", "w", newline="", encoding="utf-8") as f:
+            w = csv.DictWriter(f, fieldnames=list(summary[0].keys())); w.writeheader()
+            w.writerows(summary)
+    (args.out / "best_designs.json").write_text(json.dumps(best_out, sort_keys=True, indent=1),
+                                                encoding="utf-8")
     (args.out / "README.md").write_text(README, encoding="utf-8")
-    print(f"{len(summary)} cells, {len(all_rows)} evaluations -> {args.out}")
+    print(f"{len(summary)} cells, {len(all_rows)} evaluations "
+          f"in {len({s['group'] for s in summary})} group(s) -> {args.out}")
     return 0
 
 
-README = """# Campaign tables (objective v4)
+README = """# Campaign tables
 
 Exported by `tools/export_campaign_tables.py` from the screen-tier runs. No meshes, no raw responses.
 
-* `cells_summary.csv` - one row per typology cell. `refused` = candidates the search refused (invalid geometry/envelope);
-  `best_eval_no` is the 1-based row in `evals.csv` for that cell.
-* `evals.csv` - one row per evaluation. `J` is the v4 objective; `term_*` are the **tolerance-normalised** terms
-  (raw = term x tolerance, tolerances in `docs/evidence/OBJECTIVE_V4_TOLERANCES.md`; `J = sum(weight x term) + penalty`,
-  weights in each cell's brief under `examples/briefs/campaign_2026-10-26_v4/`). `p_*` are the design parameters
-  (blank when not used by that family). `freqs_hz`, `bw_h_deg`, `bw_v_deg`, `di_db`, `ripple_*`, `on_axis_db` are JSON
-  arrays on the 12-point screen grid (500-10k Hz). Refused rows have blank J/terms.
-* `best_designs.json` - best parameters and terms per cell.
+* `cells_summary.csv` - one row per typology cell, labelled with its comparison group
+  (`group` = `v<objective_version>/<backend>`). `refused` = candidates the search refused
+  (invalid geometry/envelope); `best_eval_no` is the 1-based row in `evals.csv` for that cell.
+* `evals.csv` - one row per evaluation, with `group`, `objective_version` and `backend` on every row.
+  `J` is the objective of that row's objective version; `term_*` are the **tolerance-normalised**
+  terms (raw = term x tolerance, tolerances in `docs/evidence/OBJECTIVE_V4_TOLERANCES.md`;
+  `J = sum(weight x term) + penalty`, weights in each cell's brief under `examples/briefs/`).
+  `p_*` are the design parameters (blank when not used by that family). `freqs_hz`, `bw_h_deg`,
+  `bw_v_deg`, `di_db`, `ripple_*`, `on_axis_db` are JSON arrays on the 12-point screen grid
+  (500-10k Hz). Refused rows have blank J/terms.
+* `best_designs.json` - best parameters and terms per cell, keyed by their comparison group
+  (`v<objective_version>/<backend>`).
 
-Caveats: J is comparable only WITHIN a cell (each brief weights the terms differently). The screen grid has 12 frequency
-points, so dispersion between them is interpolated. Cached rows (`cached=True`) re-use an earlier solve of the same geometry.
-Each cell's search is CMA-ES with one fixed seed; a "resume" extends the same run, so later rows are later CMA generations.
-The solve cache itself (needed to re-score under a different objective without CUDA) is NOT included here.
+**Never rank across groups.** Campaign tables are grouped by objective_version and backend; an
+objective version change reweights the terms and a backend change changes the solve, so J values
+are comparable only WITHIN a group (and within a cell, where briefs differ). Rows are ordered by
+group then cell, never by J across groups.
+
+Caveats: the screen grid has 12 frequency points, so dispersion between them is interpolated. Cached
+rows (`cached=True`) re-use an earlier solve of the same geometry. Each cell's search is CMA-ES with
+one fixed seed; a "resume" extends the same run, so later rows are later CMA generations. The solve
+cache itself (needed to re-score under a different objective without CUDA) is NOT included here.
 """
 
 if __name__ == "__main__":

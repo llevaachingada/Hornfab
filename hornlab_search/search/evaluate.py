@@ -39,7 +39,8 @@ import numpy as np
 
 from .. import config as config_mod
 from .. import profiling
-from ..dataset.record import DEFAULT_TRACE_FRACTION, build_record, should_capture_traces, to_jsonable
+from ..dataset.record import (DEFAULT_TRACE_FRACTION, build_record, should_capture_traces, to_jsonable,
+                              typology_name)
 from ..design import families
 from ..design.generators.registry import GeneratorError
 from ..mesh.build import MeshConsistencyError, build_mesh, mounting_of
@@ -1634,7 +1635,10 @@ def _persist(ev: Evaluation, mode: str, sspec, design_dir: Path, ctx: EvalContex
                     grid=st["grid"], traces=trace_info, trace_sample_fraction=ctx.trace_fraction,
                     objective_version=ctx.objective_version,
                     provenance=_record_provenance(ctx, st),
-                    network_solution=st.get("network_solution"))
+                    network_solution=st.get("network_solution"),
+                    run_id=design_dir.parent.parent.name,
+                    config_name=ctx.provenance.get("config"),
+                    typology=typology_name(st.get("generator"), ev.design.family))
                 store.append(meta, arrays)
                 ctx.store_seen.add(seen)
             except Exception as exc:  # noqa: BLE001 - ValueError from validate_record, or I/O

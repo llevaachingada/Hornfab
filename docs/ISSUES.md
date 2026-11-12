@@ -3,6 +3,11 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-10-25 (M6/WP12 pushed: enclosure mounting plumbed end-to-end (`brief.mounting` → the mesher's OWN keys; `-mnt-` cache keys; mesh_meta/ndjson/record echoes; absent = byte-for-bit) and MEASURED on two finalists — dofs +199.4 %/+106.5 %, both under the UNCHANGED caps, enclosure J improves (a different objective landscape — never rank across mountings), reference parity 2.91e-06 dB; **WP13 axisymmetric backend OWNER-DEFERRED** ("don't know how necessary that is"); suite **1372/0/0/0**; focused 71/0/0; evidence `docs/evidence/M6_WP12_2026-10-25.md`, byte-check 21/21; no GitHub issue state changed).
 
+Local-only, added 2026-11-12 (**lane L5: data-interop; no GitHub issue state changed**):
+- **WP-F / L5 DONE:** dataset MANIFEST.json, two-way HF labs sync, design mesher-config export, foreign ingestion
+  (CP-7b parity gate), campaign tables grouped by objective_version+backend. Runbook updated. Owner actions: grant
+  Collin HF write access; run L5.7 pack+upload between GPU jobs.
+
 Local-only, added 2026-11-12 (**integration; GitHub: PRs #19, #22, #23 close as merged with the integration PR; #13 to close**):
 - Objective numbering: 5 = MEH, 6 = loading_smooth (Collin), **7 = the hardened objective** (was "5" on
   `feat/hardened-plan-2026-10-29`; data relabelled, see CONTINUITY 2026-11-12). Plan: `docs/SENIOR_PLAN_2026-11-12.md`.
