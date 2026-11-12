@@ -1,6 +1,36 @@
 # CONTINUITY
 
 
+## 2026-11-12 (17:55Z) - DAY GROUP B: SEARCH FEATURES (ALL OPT-IN)
+
+- Day-plan group B (PR #40, branch `day/B-search-features`): B.1 `search.warm_start` (new
+  `search/warmstart.py`: mean/sigma0 from prior runs' best valid design + top-k spread; same
+  family/knobs, box clip+count; version/brief mismatch ConfigError unless `allow_cross_brief`;
+  never changes the solve hash); B.2 `search.links` (new `search/links.py`: linked knobs leave the
+  CMA dimension, computed from the parent pre-mesh, clipped; one level; cycles/unknown ConfigError);
+  B.3 `hornlab-search narrow --run <dir> [--widen]` (wall analysis in `search/pin_from_cma.py`;
+  changes ONLY bounds/seed/name + header; >50%-walled knobs reported as PIN CANDIDATE);
+  B.4 `search.budget_counts: valid` + `search.max_attempts` (refusals free, hard attempts cap,
+  both counts in run.json + summary; pycma fitness-range stops suppressed only in valid mode);
+  B.5 brief `gates: {round_throat: true}` opts any single-entry objective version into the C4
+  refusal (v7 stays always-on); B.6 `search.infeasible_penalty: resample` (refusal replaced by a
+  fresh ask, cap 10/slot, never told; cma_me + resample is a ConfigError — ribs Scheduler.tell
+  cannot drop solutions); B.7 `search.surrogate: lq` (pycma SurrogatePopulation / fmin_lq_surr2
+  style, seeded from prior rows on resume); B.8 `search.qd.maes` (CMA-MAE soft archive,
+  learning_rate 0.01-0.1, threshold_min=-j_threshold, ranker `imp`, no emitter bounds);
+  B.9 PARAMETERS.md hand-maintained section per new key.
+- Defaults unchanged: the 78ed1f4 goldens (default config_sha + first 5 CMA asks for
+  `examples/osse_baseline.yaml` seed 1234) stayed green after every feature; plain configs produce
+  bit-identical run.json schemas.
+- Verified: 97 targeted day-B tests green (97/0/0/0 junitxml); CI green on the branch.
+- NOTES_FOR_SENIOR.md appended: PARAMETERS.md is generator-owned for design knobs; the day-B
+  search-key section should be folded into `tools/gen_param_catalog.py` (outside group B ownership).
+- CI fix in the merge window: the pre-existing `test_config.py` no-None guard flagged the new
+  opt-in keys (`search.max_attempts`/`links`/`warm_start`/`surrogate` are None by design when
+  absent) — added them to `OPTIONAL_FIELDS` per the established convention; no product code changed.
+- CI fix 2: the three B.8 CMA-MAE runtime tests now `pytest.importorskip("ribs")` exactly like the
+  CMA-ME suite (CI does not install ribs; optional-dep tests skip there and run on this box).
+
 ## 2026-11-12 (17:40Z) - DAY GROUP C: CALIBRATION HARNESS + N1 THROUGHPUT EVIDENCE
 
 - Day-plan group C (PR #37, branch `day/C-calibration`): C.1 `tools/calibration/plan_calibration.py`

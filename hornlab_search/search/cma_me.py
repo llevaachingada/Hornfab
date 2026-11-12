@@ -35,13 +35,16 @@ from pathlib import Path
 
 import numpy as np
 
-from ..config import QD_DESCRIPTORS
+from ..config import ConfigError, QD_DESCRIPTORS
 from ..dataset.record import DEFAULT_TRACE_FRACTION
 from ..design.space import DesignSpace
 from ..mesh.build import MeshConsistencyError
 from ..types import Evaluation
 from . import rundir
+from . import links as links_mod
+from . import warmstart
 from .cma import (MAX_CONSECUTIVE_SOLVE_FAILURES, SolverUnhealthyError, _detach, _prepare,
+                  budget_count, budget_counts_block, budget_exhausted, budget_policy,
                   summarize, summarize_rows)
 from .evaluate import error_kind, evaluate, read_ndjson
 from .pipeline import CandidatePipeline
@@ -129,18 +132,52 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
     run_dir = Path(resume if resume is not None else run_dir)
     run_dir, backend, ctx = _prepare(cfg, run_dir, mode, backend, store, cache_dir, trace_fraction,
                                      command, config_path, lib_shas)
-    max_new = int(budget if budget is not None else cfg.search.budget)
+    policy = budget_policy(cfg, budget)         # B.4: shared budget accounting with cma.search
+    max_new = policy["budget"]
     space = DesignSpace.from_config(cfg)
+    space, linked = links_mod.reduce_space(space, cfg)   # B.2: absent search.links = same space
+    if linked:
+        log.info("search.links: %d linked knob(s) removed from the CMA-ME dimension: %s",
+                 len(linked), sorted(linked))
     x0 = space.normalize(space.seed)
+    sigma0_eff = float(cfg.search.sigma0)      # B.1: sigma0_eff = warm-start sigma when configured
+    warm_record = None
+    try:
+        warm_design, warm_record = warmstart.mean_and_sigma(cfg, space)   # (None, None) = absent
+    except warmstart.WarmStartError as exc:
+        raise ConfigError(str(exc)) from None   # a bad source is a CONFIG problem: refuse, don't solve
+    if warm_design is not None:
+        x0 = space.normalize(warm_design)
+        sigma0_eff = float(warm_record["sigma0"])
+        log.info("warm start (CMA-ME): mean = best valid design %s from %s (J=%.6g), sigma0 %.6g",
+                 warm_record["mean_design_hash"], warm_record["from_runs"],
+                 warm_record["mean_objective"], sigma0_eff)
     solution_dim = int(len(x0))
 
-    archive = GridArchive(solution_dim=solution_dim, dims=list(bins),
-                          ranges=[DESCRIPTOR_RANGE_DEG, DESCRIPTOR_RANGE_DEG],
-                          seed=int(cfg.search.seed))
+    # B.8 (opt-in): search.qd.maes turns the CMA-ME archive into a CMA-MAE soft archive
+    # (Fontaine & Nikolaidis 2023): learning_rate in [0.01, 0.1] and threshold_min = the NEGATIVE
+    # J threshold (the archive MAXIMISES -J = -(-1000) = 1000 for refusal-penalty rows), the
+    # emitter ranks with "imp" and carries NO bounds (candidates are clipped in
+    # DesignSpace.denormalize exactly like the plain CMA path). Absent maes = today's archive.
+    maes = qd.get("maes") if isinstance(qd, dict) else None
+    ranker = "2imp"
+    if maes:
+        ranker = "imp"
+        log.info("CMA-MAE: archive learning_rate %.4g, threshold_min %.6g (J threshold %.6g)",
+                 maes["learning_rate"], -maes["j_threshold"], maes["j_threshold"])
+        archive = GridArchive(solution_dim=solution_dim, dims=list(bins),
+                              ranges=[DESCRIPTOR_RANGE_DEG, DESCRIPTOR_RANGE_DEG],
+                              learning_rate=float(maes["learning_rate"]),
+                              threshold_min=-float(maes["j_threshold"]),
+                              seed=int(cfg.search.seed))
+    else:
+        archive = GridArchive(solution_dim=solution_dim, dims=list(bins),
+                              ranges=[DESCRIPTOR_RANGE_DEG, DESCRIPTOR_RANGE_DEG],
+                              seed=int(cfg.search.seed))
     emitter = EvolutionStrategyEmitter(
-        archive, x0=np.asarray(x0, dtype=float), sigma0=float(cfg.search.sigma0),
-        ranker="2imp", es="cma_es", selection_rule="mu",
-        bounds=[(0.0, 1.0)] * solution_dim,
+        archive, x0=np.asarray(x0, dtype=float), sigma0=sigma0_eff,
+        ranker=ranker, es="cma_es", selection_rule="mu",
+        bounds=None if maes else [(0.0, 1.0)] * solution_dim,
         batch_size=int(cfg.search.popsize) if cfg.search.popsize else None,
         seed=int(cfg.search.seed))
     scheduler = Scheduler(archive, [emitter])
@@ -148,7 +185,7 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
     evals: list[Evaluation] = []
     wall: list[float] = []
     state = {"best": None, "best_no": None, "seed_ev": None, "n_new": 0, "stop": "",
-             "solve_fail_streak": 0}
+             "solve_fail_streak": 0, "attempts": 0, "n_valid": 0, "n_refused_free": 0}
     hash_by_solution: dict[tuple, str] = {}
     seed_measures: np.ndarray | None = None
     rows0 = read_ndjson(run_dir / "search.ndjson")
@@ -171,8 +208,8 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
         ev = evaluate(design, space, cfg, mode, run_dir, store, backend, ctx=ctx)
         dt = time.perf_counter() - t0
         evals.append(ev)
+        budget_count(state, ev)                 # B.4: same counters as the single-ES path
         if not ev.cached:
-            state["n_new"] += 1
             wall.append(dt)
         b = state["best"]
         if b is None or ev.objective < b.objective or (b.error and not ev.error):
@@ -285,18 +322,34 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
                      "coverage": payload["stats"]["coverage"],
                      "total_evals": payload["stats"]["total_evals"],
                      "non_cached": payload["stats"]["non_cached"],
-                     "descriptor_h_meaning": _describe_descriptor(names[0]),
-                     "descriptor_v_meaning": _describe_descriptor(names[1])}
+                 "descriptor_h_meaning": _describe_descriptor(names[0]),
+                 "descriptor_v_meaning": _describe_descriptor(names[1])}
+        if maes:
+            upd["qd"]["maes"] = dict(maes)      # B.8: record the CMA-MAE archive parameters
         if pipe.enabled:
             upd["pipeline_prefetch"] = pipe.stats()
+        # B.4: present only for budget_counts: valid (or an explicit max_attempts), so a default
+        # cma_me run.json keeps today's schema byte-for-byte.
+        bc = budget_counts_block(state, policy)
+        if bc is not None:
+            upd["budget_counts"] = bc
+        if linked:
+            upd["links"] = linked               # B.2: run.json records the resolved links
+        if warm_record is not None:
+            upd["warm_start"] = warm_record     # B.1: the warm-start sources + sigma record
         rundir.update_run_json(run_dir, **upd)
+        suffix = ""
+        if bc is not None:
+            cap_txt = "none" if bc["attempts_cap"] is None else str(bc["attempts_cap"])
+            suffix = (f", valid {bc['valid']} (budget counts), refusals free {bc['refused_free']}"
+                      f", attempts {bc['attempts']}/{cap_txt}")
         log.info("CMA-ME %s: %d evaluations (%d new, %d cached), archive %d/%d cells "
-                 "(%.1f%% coverage), best J=%.4f, %d failures %s",
+                 "(%.1f%% coverage), best J=%.4f, %d failures %s%s",
                  status, stats["evaluations"], stats["non_cached"], stats["cache_hits"],
                  payload["stats"]["occupied_bins"], payload["stats"]["total_bins"],
                  100.0 * payload["stats"]["coverage"],
                  float("nan") if best is None else best.objective,
-                 stats["failures"], stats["failures_by_reason"])
+                 stats["failures"], stats["failures_by_reason"], suffix)
 
     def clip01(x) -> np.ndarray:
         return np.clip(np.asarray(x, dtype=float).reshape(-1), 0.0, 1.0)
@@ -332,7 +385,7 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
         cap = int(max_evals) if max_evals else None
 
         def exhausted() -> bool:
-            return state["n_new"] >= max_new or (cap is not None and len(evals) >= cap)
+            return budget_exhausted(state, policy, cap, len(evals))
 
         def maybe_refresh() -> None:
             nonlocal written_at

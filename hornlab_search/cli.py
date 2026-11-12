@@ -7,6 +7,7 @@
     hornlab-search verify   --run <dir> [--top 5 | --designs h1,h2 | --designs-file f.csv]
     hornlab-search report   <run_dir> [--out report.html] [--top 5]
     hornlab-search pin-plan --run <dir|id> [--write-config PATH]
+    hornlab-search narrow   --run <dir|id> [--wall-frac 0.03] [--out PATH] [--widen]
     hornlab-search dataset  stats|verify|export
     hornlab-search compare  <run_a> <run_b>       (report metric differences, e.g. full vs quarter)
 
@@ -781,6 +782,11 @@ def _search_body(args, argv, d) -> int:
           f"{g(st.get('mean_seconds_per_candidate'))} s/candidate, "
           f"{g(st.get('candidates_per_hour'), '.0f')}/h, projected 1,000 = {g(ph.get('1000'))} h, "
           f"10,000 = {g(ph.get('10000'))} h")
+    bc = run.get("budget_counts") or None         # B.4: present only for valid-only / capped budgets
+    if bc:
+        print(f"  budget counts: {bc.get('mode')}, {bc.get('valid')} valid of "
+              f"{bc.get('budget')} budget, {bc.get('refused_free')} refusals free, "
+              f"attempts {bc.get('attempts')}/{bc.get('attempts_cap')}")
     if seed is not None and best is not None:
         verdict = ("improved on the seed" if best.objective < seed - 1e-12 else "did NOT improve on the seed")
         print(f"  seed J={seed:.6g}  best J={best.objective:.6g} ({verdict}); stop: {run.get('stop_reason')}")
@@ -1002,6 +1008,44 @@ def _cmd_pin_plan(args) -> int:
         out_cfg.parent.mkdir(parents=True, exist_ok=True)
         out_cfg.write_text(yaml.safe_dump(patched, sort_keys=False), encoding="utf-8")
         print(f"pin-plan wrote config: {out_cfg}")
+    return 0
+
+
+def _cmd_narrow(args) -> int:
+    """B.3: write a config copied from the run's config.yaml where ONLY the bounds (from the
+    run's own wall analysis), search.seed (+1) and name change, with a header comment listing
+    every change and why. --widen additionally widens the walled knobs (owner opt-in)."""
+    from hornlab_search.search.pin_from_cma import write_narrow_config
+    from hornlab_search.search.rundir import read_json
+
+    d = _dirs(args)
+    run_dir = _resolve_run_dir(args.run, d["runs"])
+    if run_dir is None:
+        print(f"narrow FAILED: run not found: {args.run!r}")
+        return 1
+    rj = read_json(run_dir / "run.json", {}) or {}
+    family = str(rj.get("family") or "OSSE")
+    base = (read_json(run_dir / "run.json", {}) or {}).get("config_name") or run_dir.name
+    if args.out:
+        out_path = Path(args.out)
+    else:
+        suffix = "widen" if args.widen else "narrow"
+        out_path = Path(f"{base}_{suffix}.yaml")
+    try:
+        rep = write_narrow_config(run_dir, out_path=out_path, family=family,
+                                  wall_frac=args.wall_frac, wall_mass=args.wall_mass,
+                                  pad_frac=args.pad_frac, widen=args.widen)
+    except (FileNotFoundError, ValueError) as exc:
+        print(f"narrow FAILED: {exc}")
+        return 1
+    a = rep["analysis"]
+    for c in rep["changes"]:
+        print(f"  {c['key']}: {' '.join(c['changes'])}")
+    if rep["pin_candidates"]:
+        print(f"  pin candidates (walled in >50% of valid rows): {', '.join(rep['pin_candidates'])}")
+    print(f"narrow OK: {a['n_valid']} valid, top decile n={a['top_decile_n']}, "
+          f"{len(rep['changes'])} bound change(s), seed {rep['seed']['old']}->{rep['seed']['new']} "
+          f"-> {rep['out']}")
     return 0
 
 
@@ -1518,6 +1562,21 @@ def build_parser() -> argparse.ArgumentParser:
                     help="run directory or id under --runs-dir")
     pp.add_argument("--write-config", metavar="PATH",
                     help="optional: write a patched YAML with recommended pins applied")
+    nw = sub.add_parser("narrow", parents=[common],
+                        help="write a narrowed (optionally widened) copy of a run's config from "
+                             "its own bound-wall analysis (B.3)")
+    nw.add_argument("--run", required=True, metavar="DIR|ID",
+                    help="run directory or id under --runs-dir")
+    nw.add_argument("--wall-frac", type=float, default=0.03,
+                    help="a design counts 'at a bound' within this fraction of the box width "
+                         "(default 0.03)")
+    nw.add_argument("--wall-mass", type=float, default=0.5,
+                    help="top-decile fraction at a bound that blocks narrowing (default 0.5)")
+    nw.add_argument("--pad-frac", type=float, default=0.1,
+                    help="narrow margin beyond the top-decile span, in box widths (default 0.1)")
+    nw.add_argument("--widen", action="store_true",
+                    help="also WIDEN the knobs walled at a bound (owner-gated opt-in)")
+    nw.add_argument("--out", metavar="PATH", help="output YAML (default <CWD>/<name>_narrow.yaml)")
     ds = sub.add_parser("dataset", parents=[common])
     ds.add_argument("action", choices=("stats", "verify", "export"))
     ds.add_argument("--out", default="train.npz")
@@ -1639,6 +1698,8 @@ def main(argv: list[str] | None = None) -> int:
             return _cmd_report(args)
         if args.cmd == "pin-plan":
             return _cmd_pin_plan(args)
+        if args.cmd == "narrow":
+            return _cmd_narrow(args)
         if args.cmd == "dataset":
             return _cmd_dataset(args)
         if args.cmd == "surrogate":

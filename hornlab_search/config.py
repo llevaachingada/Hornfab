@@ -115,10 +115,19 @@ class SearchSettings:
     budget: int
     popsize: int | None
     tolfun: float
-    infeasible_penalty: str = "flat"   # WP3: 'flat' (default, today) | 'graded'
+    infeasible_penalty: str = "flat"   # WP3: 'flat' (default, today) | 'graded' | 'resample' (B.6)
     restarts: dict | None = None       # WP11a: {"mode": ipop|bipop, "max": N} (absent = today)
     qd: dict | None = None             # WP11b: CMA-ME descriptors/bins (absent = today)
     pipeline_prefetch: int = 0         # WP2: build this many candidates' meshes ahead (0 = serial, today)
+    budget_counts: str = "new"         # B.4 (day 2026-11-12): 'new' (default, today) | 'valid'
+    max_attempts: int | None = None    # B.4: hard ceiling on NEW attempts; unset 'valid' mode
+                                       # defaults to 4 x budget so an all-refusing box still stops
+    links: dict | None = None          # B.2: {<knob>: {from, scale, offset, min, max}} (B.5 gate
+                                       # aside, knobs are removed from the CMA dimension); absent
+                                       # = today's dimensions
+    warm_start: dict | None = None     # B.1: {from_runs, top_k, sigma_from_spread,
+                                       # allow_cross_brief}; absent = today's mean/sigma0
+    surrogate: str | None = None       # B.7: 'lq' (pycma lq-CMA-ES surrogate); absent = plain CMA
 
 
 @dataclass
@@ -220,12 +229,14 @@ def load_brief(path) -> dict:
     if not isinstance(raw, dict):
         raise ConfigError(f"{where}: top level must be a mapping")
     allowed = {"name", "description", "driver", "envelope", "symmetry", "source", "target", "weights",
-               "verify_only", "objective", "grid", "mounting", "meh"}
+               "verify_only", "objective", "grid", "mounting", "meh", "gates"}
     unknown = set(raw) - allowed
     if unknown:
         raise ConfigError(f"{where}: unknown key(s) {sorted(unknown)}")
     for k in ("name", "driver", "envelope", "symmetry", "target", "weights"):
         _require(raw, k, where)
+    if "gates" in raw and raw["gates"] is not None:
+        _validate_gates_block(raw["gates"], f"{where}:gates")
     drv, env = raw["driver"], raw["envelope"]
     for k in ("exit_radius_mm", "exit_angle_deg"):
         if not isinstance(drv.get(k), (int, float)):
@@ -273,6 +284,26 @@ def load_brief(path) -> dict:
 
 class ConfigError(ValueError):
     """A YAML config is missing a required key or has an illegal value."""
+
+
+#: B.5 (day 2026-11-12): brief ``gates:`` block. ``round_throat`` (default false) opts every
+#: objective version into the C4 round-throat refusal that v7 always applies; v7 itself never
+#: needs the key. Extendable later with more gate names; unknown names are refused.
+GATE_KEYS = ("round_throat",)
+
+
+def _validate_gates_block(block, where: str) -> dict:
+    """Brief ``gates: {round_throat: true}`` (B.5): exact keys, strict booleans."""
+    if not isinstance(block, dict):
+        raise ConfigError(f"{where}: gates must be a mapping")
+    unknown = set(block) - set(GATE_KEYS)
+    if unknown:
+        raise ConfigError(f"{where}: gates unknown key(s) {sorted(unknown)} "
+                          f"(allowed: {list(GATE_KEYS)})")
+    if "round_throat" in block and not isinstance(block["round_throat"], bool):
+        raise ConfigError(f"{where}: gates.round_throat must be true or false, "
+                          f"got {block['round_throat']!r}")
+    return block
 
 
 def _require(section: dict, key: str, where: str):
@@ -755,13 +786,20 @@ def _validate_qd(block, where: str) -> dict | None:
     ``bins_h``, ``bins_v`` (integers in [2, 64]). ALL FOUR are required when the block is present;
     there is deliberately no silent default. It is a SEARCH-ONLY key: it never enters the
     solve-spec hash. Unknown sub-keys, unknown descriptor names and mis-typed bins are refused with
-    a ``search.qd`` prefix so a YAML typo is never silent."""
+    a ``search.qd`` prefix so a YAML typo is never silent.
+
+    B.8 (day 2026-11-12): the optional sub-block ``maes: {learning_rate, j_threshold}`` opts the
+    CMA-ME run into CMA-MAE (Fontaine & Nikolaidis 2023): GridArchive(learning_rate in
+    [0.01, 0.1], threshold_min = -j_threshold as the MAXIMISED objective), emitter ranker
+    "imp" and no emitter bounds (candidates are clipped in DesignSpace.denormalize, like plain
+    CMA). Absent ``maes`` = today's CMA-ME (learning_rate 1.0, threshold_min -inf, ranker
+    "2imp", emitter bounds resampling)."""
     if block is None:
         return None
     if not isinstance(block, dict):
         raise ConfigError(f"{where}: qd must be a mapping with keys "
                           f"descriptor_h, descriptor_v, bins_h, bins_v")
-    unknown = set(block) - {"descriptor_h", "descriptor_v", "bins_h", "bins_v"}
+    unknown = set(block) - {"descriptor_h", "descriptor_v", "bins_h", "bins_v", "maes"}
     if unknown:
         raise ConfigError(f"{where}: unknown key(s) {sorted(unknown)} "
                           f"(allowed: descriptor_h, descriptor_v, bins_h, bins_v)")
@@ -781,7 +819,163 @@ def _validate_qd(block, where: str) -> dict | None:
         if isinstance(v, bool) or not isinstance(v, int) or not (2 <= v <= 64):
             raise ConfigError(f"{where}: {key} must be an integer in [2, 64], got {v!r}")
         out[key] = int(v)
+    if "maes" in block and block["maes"] is not None:
+        m = block["maes"]
+        if not isinstance(m, dict):
+            raise ConfigError(f"{where}.maes: must be a mapping with keys "
+                              f"learning_rate, j_threshold")
+        unknown = set(m) - {"learning_rate", "j_threshold"}
+        if unknown:
+            raise ConfigError(f"{where}.maes: unknown key(s) {sorted(unknown)} "
+                              f"(allowed: learning_rate, j_threshold)")
+        lr = m.get("learning_rate")
+        if isinstance(lr, bool) or not isinstance(lr, (int, float)) \
+                or not (0.01 <= float(lr) <= 0.1):
+            raise ConfigError(f"{where}.maes.learning_rate must be a number in [0.01, 0.1], "
+                              f"got {lr!r}")
+        jt = m.get("j_threshold")
+        if isinstance(jt, bool) or not isinstance(jt, (int, float)) \
+                or not float(jt) > 0:
+            raise ConfigError(f"{where}.maes.j_threshold must be a positive number (the refusal "
+                              f"penalty J cap; archive threshold_min = -j_threshold), got {jt!r}")
+        out["maes"] = {"learning_rate": float(lr), "j_threshold": float(jt)}
     return out
+
+
+def _validate_budget_counts(value, where: str) -> str:
+    """B.4 (day 2026-11-12): ``search.budget_counts`` selects what consumes the budget.
+
+    ``new`` (default) is today's semantics: every NON-CACHED evaluation consumes one budget
+    unit, refusals included. ``valid`` makes the budget count only VALID evaluations: the
+    deterministic refusals (invalid_geometry / invalid_envelope / mesh_too_large) do not
+    consume budget, and a hard ceiling ``search.max_attempts`` (default 4 x budget) stops an
+    all-refusing box. Exact tokens; anything else is a typo and is refused."""
+    if not isinstance(value, str) or value not in ("new", "valid"):
+        raise ConfigError(f"{where}: budget_counts must be 'new' or 'valid', got {value!r}")
+    return value
+
+
+def _validate_max_attempts(value, where: str) -> int | None:
+    """B.4 (day 2026-11-12): ``search.max_attempts`` is a positive integer ceiling on NEW
+    (non-cached) attempts of one search invocation. Its main use is with
+    ``search.budget_counts: valid`` (default there: 4 x budget, applied by the search loop);
+    unset (None) with the default budget_counts leaves today's behaviour untouched. Bool /
+    float / <= 0 are refused so a YAML typo is never silent."""
+    if value is None:
+        return None
+    if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+        raise ConfigError(f"{where}: max_attempts must be a positive integer, got {value!r}")
+    return int(value)
+
+
+def _validate_search_links(value, where: str, bounds_raw: dict) -> dict | None:
+    """B.2 (day 2026-11-12): ``search.links: {<knob>: {from, scale, offset, min, max}}``.
+
+    The linked knob is removed from the CMA dimension and computed from its parent before
+    meshing (search.links.apply_links), then clipped to ``[min, max]`` — defaults: the knob's
+    own bound lo/hi. ``scale`` (default 1.0) and ``offset`` (default 0.0) are finite numbers.
+    Exact allowed keys per entry so a YAML typo is never silent; unknown knobs and unknown
+    parents are a ConfigError; ONE LEVEL ONLY (a parent that is itself linked is refused, which
+    also excludes every cycle). Returns the RESOLVED block (scale/offset/min/max filled in)."""
+    if value is None:
+        return None
+    if not isinstance(value, dict) or not value:
+        raise ConfigError(f"{where}: must be a mapping of knob -> specs")
+    allowed = {"from", "scale", "offset", "min", "max"}
+
+    def _num(spec, key, dflt, knob):
+        v = spec.get(key, dflt)
+        if isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v):
+            raise ConfigError(f"{where}.{knob}.{key} must be a finite number, got {v!r}")
+        return float(v)
+
+    resolved: dict[str, dict] = {}
+    for knob, spec in value.items():
+        if not isinstance(knob, str) or not isinstance(spec, dict):
+            raise ConfigError(f"{where}: {knob!r}: specs must be a mapping with a string knob name")
+        unknown = set(spec) - allowed
+        if unknown:
+            raise ConfigError(f"{where}.{knob}: unknown key(s) {sorted(unknown)} "
+                              f"(allowed: {sorted(allowed)})")
+        if not isinstance(spec.get("from"), str):
+            raise ConfigError(f"{where}.{knob}.from must be a knob name (string), "
+                              f"got {spec.get('from')!r}")
+        if knob not in bounds_raw:
+            raise ConfigError(f"{where}.{knob}: knob is not a searched bound (bounds: "
+                              f"{sorted(bounds_raw)})")
+        parent = spec["from"]
+        if parent not in bounds_raw:
+            raise ConfigError(f"{where}.{knob}.from: knob {parent!r} is not a searched bound "
+                              f"(bounds: {sorted(bounds_raw)})")
+        if parent in value:
+            raise ConfigError(f"{where}.{knob}.from: one level only — the parent {parent!r} is "
+                              f"itself a linked knob (chains and cycles are refused)")
+        scale = _num(spec, "scale", 1.0, knob)
+        offset = _num(spec, "offset", 0.0, knob)
+        try:
+            lo = float(bounds_raw[knob]["lo"])
+            hi = float(bounds_raw[knob]["hi"])
+        except (KeyError, TypeError, ValueError):
+            raise ConfigError(f"{where}.{knob}: the knob's bounds are not a lo/hi pair "
+                              f"({bounds_raw[knob]!r})") from None
+        mn = _num(spec, "min", lo, knob)
+        mx = _num(spec, "max", hi, knob)
+        if not (lo <= mn <= mx <= hi):
+            raise ConfigError(f"{where}.{knob}: min/max [{mn}, {mx}] must lie inside the "
+                              f"knob's bounds [{lo}, {hi}]")
+        resolved[knob] = {"from": parent, "scale": scale, "offset": offset, "min": mn, "max": mx}
+    return resolved
+
+
+def _validate_warm_start(value, where: str, cfg_path: Path) -> dict | None:
+    """B.1 (day 2026-11-12): ``search.warm_start: {from_runs, top_k, sigma_from_spread,
+    allow_cross_brief}``. ``from_runs`` (required, non-empty) lists run DIRECTORIES whose
+    search.ndjson/run.json provide the warm-start mean; relative paths are resolved against the
+    config's directory (then the repo root), like ``brief_file``. ``top_k`` (default 10), a
+    positive integer; ``sigma_from_spread`` (default true) and ``allow_cross_brief``
+    (default false) are strict booleans; unknown keys are refused. The resolved paths are stored
+    back so run.json records them."""
+    if value is None:
+        return None
+    if not isinstance(value, dict):
+        raise ConfigError(f"{where}: must be a mapping of options")
+    allowed = {"from_runs", "top_k", "sigma_from_spread", "allow_cross_brief"}
+    unknown = set(value) - allowed
+    if unknown:
+        raise ConfigError(f"{where}: unknown key(s) {sorted(unknown)} (allowed: {sorted(allowed)})")
+    runs = value.get("from_runs")
+    if not isinstance(runs, list) or not runs or \
+            not all(isinstance(r, str) and r for r in runs):
+        raise ConfigError(f"{where}.from_runs must be a non-empty list of run-directory paths")
+    base = Path(__file__).resolve().parents[1]
+    try:
+        resolved = [str(Path(_resolve_path(r, cfg_path.parent, base))) for r in runs]
+    except (TypeError, ValueError):
+        raise ConfigError(f"{where}.from_runs: unresolvable path(s) {runs!r}") from None
+    top_k = value.get("top_k", 10)
+    if isinstance(top_k, bool) or not isinstance(top_k, int) or top_k < 1:
+        raise ConfigError(f"{where}.top_k must be a positive integer, got {top_k!r}")
+    for b in ("sigma_from_spread", "allow_cross_brief"):
+        if b in value and not isinstance(value[b], bool):
+            raise ConfigError(f"{where}.{b} must be true or false, got {value[b]!r}")
+    missing = [r for r in resolved if not Path(r).is_dir()]
+    if missing:
+        raise ConfigError(f"{where}.from_runs: run directory does not exist: {missing[0]}")
+    out = dict(value)
+    out["from_runs"] = resolved
+    out["top_k"] = int(top_k)
+    return out
+
+
+def _validate_surrogate(value, where: str) -> str | None:
+    """B.7 (day 2026-11-12): ``search.surrogate: lq`` opts the plain-CMA algorithm into pycma's
+    lq-CMA-ES surrogate (SurrogatePopulation / fmin_lq_surr2). Exact token; cma_me and the
+    restarts/prefetch paths are refused at the call site."""
+    if value is None:
+        return None
+    if value != "lq":
+        raise ConfigError(f"{where}: surrogate must be 'lq' or omitted, got {value!r}")
+    return str(value)
 
 
 def _validate_near_correction(solve, where: str) -> None:
@@ -1081,6 +1275,10 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
     if brief_d is not None and brief_d.get("mounting") is not None:
         mounting_cfg = _validate_mounting_block(brief_d["mounting"], f"{where}:mounting")
         raw["mounting"] = dict(mounting_cfg)
+    # B.5: an embedded run-directory brief's gates go through the same validator here (a resume
+    # cannot smuggle an unvalidated gate); a fresh brief was already validated by load_brief.
+    if brief_d is not None and brief_d.get("gates") is not None and embedded_brief:
+        _validate_gates_block(brief_d["gates"], f"{where}:gates")
     # C10: the MEH block lives in the brief.  A fresh brief was already validated by load_brief;
     # an embedded run-directory brief goes through the same validator here (so a resume cannot
     # smuggle an unvalidated block), and the normalized form is stored in raw for config_sha.
@@ -1155,12 +1353,53 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
     _validate_near_correction(solve, f"{where}:solve")
     _validate_source_profile_alpha(solve, f"{where}:solve")
     search = _build(SearchSettings, _require(raw, "search", where), f"{where}:search",
-                    optional=("popsize", "infeasible_penalty", "restarts", "qd", "pipeline_prefetch"))
+                    optional=("popsize", "infeasible_penalty", "restarts", "qd", "pipeline_prefetch",
+                              "budget_counts", "max_attempts", "links", "warm_start",
+                              "surrogate"))
     if "popsize" not in raw["search"]:
         search.popsize = None
-    if search.infeasible_penalty not in ("flat", "graded"):
-        raise ConfigError(f"{where}: search.infeasible_penalty must be 'flat' or 'graded', "
-                          f"got {search.infeasible_penalty!r}")
+    if "budget_counts" not in raw["search"]:
+        search.budget_counts = "new"
+    if search.infeasible_penalty not in ("flat", "graded", "resample"):
+        raise ConfigError(f"{where}: search.infeasible_penalty must be 'flat', 'graded' or "
+                          f"'resample', got {search.infeasible_penalty!r}")
+    if search.infeasible_penalty == "resample" and search.algorithm == "cma_me":
+        # B.6: ribs 0.12 scheduler.tell slices one results slice per emitter by its own
+        # _num_emitted (.venv .../ribs/schedulers/_scheduler.py:401-411), so a CMA-ME batch
+        # cannot drop its refused solutions: resampling is a plain-CMA behaviour. Tell the
+        # config owner loudly instead of silently degrading the atlas run.
+        raise ConfigError(f"{where}: search.infeasible_penalty: resample is not supported with "
+                          f"search.algorithm: cma_me (ribs scheduler.tell needs one result per "
+                          f"asked solution; refusals there keep today's seed-cell fallback)")
+    search.budget_counts = _validate_budget_counts(search.budget_counts, f"{where}:search")
+    search.max_attempts = _validate_max_attempts(search.max_attempts, f"{where}:search")
+    if "links" not in raw["search"]:
+        search.links = None
+    elif raw.get("generator") is not None:
+        raise ConfigError(f"{where}:search.links: linked knobs are not supported with a "
+                          f"generator block")
+    else:
+        search.links = _validate_search_links(search.links, f"{where}:search.links",
+                                              raw.get("bounds") or {})
+    if "warm_start" not in raw["search"]:
+        search.warm_start = None
+    else:
+        search.warm_start = _validate_warm_start(search.warm_start, f"{where}:search.warm_start",
+                                                 path)
+    if "surrogate" not in raw["search"]:
+        search.surrogate = None
+    else:
+        search.surrogate = _validate_surrogate(search.surrogate, f"{where}:search.surrogate")
+        if search.algorithm == "cma_me":
+            raise ConfigError(f"{where}:search.surrogate: the lq surrogate is only implemented "
+                              f"for search.algorithm: cma (got cma_me; the atlas keeps today's "
+                              f"emitters)")
+        if search.restarts is not None:
+            raise ConfigError(f"{where}:search.surrogate: the lq surrogate is not supported with "
+                              f"search.restarts (B.7)")
+        if search.pipeline_prefetch and search.pipeline_prefetch > 0:
+            raise ConfigError(f"{where}:search.surrogate: the lq surrogate is not supported with "
+                              f"search.pipeline_prefetch (B.7)")
     if search.algorithm not in SEARCH_ALGORITHMS:
         raise ConfigError(f"{where}: search.algorithm must be one of {list(SEARCH_ALGORITHMS)}, "
                           f"got {search.algorithm!r}")

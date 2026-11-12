@@ -33,7 +33,10 @@ OPTIONAL_FIELDS = {"search.popsize", "search.restarts", "search.qd", "mesh.band_
                    # WP16: J0 source-profile angle; absent = today.
                    "solve.source_profile_alpha",
                    # CPU lane 2026-11-12: Julia/BLAS thread count; absent = the library's "auto".
-                   "solve.julia_threads"}
+                   "solve.julia_threads",
+                   # Day 2026-11-12 group B: all opt-in; absent = today's behaviour.
+                   # (max_attempts unset in 'valid' mode means 4 x budget at runtime.)
+                   "search.max_attempts", "search.links", "search.warm_start", "search.surrogate"}
 
 
 def _load_example(name):
