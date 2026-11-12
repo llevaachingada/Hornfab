@@ -72,6 +72,8 @@ export const TERMS = {
               long: "Only one GPU job runs at a time. Any other GPU command is refused with 'GPU busy' until the holder finishes." },
   julia:    { label: "Solver hosts", unit: "", short: "Background solver processes",
               long: "The GPU solver runs in Julia worker processes. 1–2 while a job runs is normal; any left after all jobs end hold GPU memory: use gpu-clean." },
+  audit_tier: { label: "Audit tier", unit: "", short: "Fidelity the audit used",
+              long: "The fidelity of the solve the gate audit scored this row from: 'screen' is the fast, coarse search solve; 'verify' is the slower, finer re-solve of a shortlist. Verify is the one to trust before printing." },
   band:     { label: "Scored band", unit: "Hz", short: "Frequencies that count",
               long: "Only frequencies inside the band enter the score. On an 8 GB GPU nothing above 5.5 kHz is solved." },
 };

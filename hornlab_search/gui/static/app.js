@@ -1985,19 +1985,46 @@ function gateAuditHtml(audit) {
     : `<span class="muted">–</span>`;
   entries.sort((a, b) => ((a[1].J ?? Infinity) - (b[1].J ?? Infinity)) || a[0].localeCompare(b[0]));
   const head = gates.map(g => `<th class="r">${esc(labels[g] || g)}</th>`).join("");
-  const rows = entries.map(([hash, e]) => {
+  const rowHtml = ([hash, e]) => {
     const g = e.gates || {};
     const cells = gates.map(k => `<td class="r">${chip(g[k])}</td>`).join("");
     return `<tr><td class="mono">${esc(hash)}</td><td class="r">${fmt(e.J, 3)}</td><td>${esc(e.tier || "–")}</td>${cells}</tr>`;
-  }).join("");
+  };
+  // Lead with the GATE_AUDIT_LEAD best-J rows plus every verify-tier row; the rest fold into
+  // "Show all" so the response charts below are not pushed thousands of pixels down.
+  const { lead, rest } = gateAuditSplit(entries);
+  const table = (rs) => `<div class="tbl-wrap"><table>
+          <thead><tr><th>Design</th><th class="r">J</th><th>${tip("audit_tier", "Audit tier")}</th>${head}</tr></thead>
+          <tbody>${rs.map(rowHtml).join("")}</tbody>
+        </table></div>`;
   return `<div class="fig" id="gate-audit-card">
         <h3>Gate audit</h3>
-        <div class="cap">Per-design pass/fail from <span class="mono">${esc(audit.source || "")}</span>. Only the gates present in that audit are shown.</div>
-        <div class="tbl-wrap"><table>
-          <thead><tr><th>Design</th><th class="r">J</th><th>Tier</th>${head}</tr></thead>
-          <tbody>${rows}</tbody>
-        </table></div>
+        <div class="cap">Per-design pass/fail from <span class="mono">${esc(audit.source || "")}</span>. Only the gates present in that audit are shown. Audit tier is the fidelity the audit scored that row at.</div>
+        ${table(lead)}
+        ${rest.length ? `<details class="gate-audit-more"><summary>Show all ${entries.length} audited designs (${rest.length} more)</summary>${table(rest)}</details>` : ""}
       </div>`;
+}
+
+/** Budget KPI text. A resumed run's `--budget` is the size of THAT resume, not the run's total,
+ *  so "996 / 117 over budget" is wrong: say "996 evals total · this resume +117" instead. */
+function budgetKpi(n, budget, command) {
+  const N = Number(n) || 0, B = Number(budget) || 0;
+  const resumed = /--resume(\s|=|$)/.test(String(command || ""));
+  if (B && resumed && N > B) return { text: `${N.toLocaleString()} evals total · this resume +${B.toLocaleString()}`, cls: "" };
+  const over = !!(B && N > B);
+  const pct = B ? Math.round((N / B) * 100) : 0;
+  return { text: `${N.toLocaleString()}${B ? " / " + B.toLocaleString() : ""}${over ? " over budget" : ""}`,
+           cls: over ? "bad" : pct >= 90 ? "warn" : "" };
+}
+
+const GATE_AUDIT_LEAD = 10;
+
+/** Split sorted gate-audit entries into the always-visible lead (best GATE_AUDIT_LEAD by J, plus
+ *  every verify-tier row) and the folded remainder. Order inside each part is preserved. */
+function gateAuditSplit(entries) {
+  const lead = [], rest = [];
+  entries.forEach((en, i) => ((i < GATE_AUDIT_LEAD || (en[1] && en[1].tier === "verify")) ? lead : rest).push(en));
+  return { lead, rest };
 }
 
 // ── E.2: lanes panel (Home card) ───────────────────────────────────
@@ -2379,7 +2406,7 @@ export { runProvenanceGroup, renderProvenanceBadges, restartScheduleHtml, stepCh
 
 export { f0KpiHtml, mountingRankWarnHtml, seedDerivationHtml, objectiveVersionOptionsHtml,
          objectiveVersionOf, jVersionLabel, objectiveVersions, objectiveVersionBannerHtml,
-         sortRunsForTable, gateAuditHtml, J_VERSION_BANNER };
+         sortRunsForTable, gateAuditHtml, J_VERSION_BANNER, gateAuditSplit, budgetKpi };
 
 export { lanesPanelHtml, verdictChipHtml, eliteGateChips };
 
@@ -2461,8 +2488,6 @@ async function viewRunDetail(id) {
 
       <!-- Designer header: key facts -->
       <div class="kpis" id="kpi-strip"></div>
-
-      ${gateAuditHtml(d.gate_audit)}
 
       ${restartScheduleHtml(d, id)}
 
@@ -2561,6 +2586,9 @@ async function viewRunDetail(id) {
 
       <hr class="sep">
 
+      <!-- Gate audit: below the response charts (it can list hundreds of designs; see gateAuditSplit) -->
+      ${gateAuditHtml(d.gate_audit)}
+
       <!-- Search history -->
       <h3>How the search went</h3>
       <div class="grid2">
@@ -2604,18 +2632,16 @@ async function viewRunDetail(id) {
     </div>`;
 
   // KPI strip (designer-first order)
-  const budgetPct = sum.budget ? Math.round(((sum.n || 0) / sum.budget) * 100) : 0;
-  const overBudget = !!(sum.budget && sum.n > sum.budget);
+  // Name the fidelity on every score: a screen "best" is not a verified best (GUI plan G12/F6).
+  const tierWord = (sum.mode || d.mode) === "verify" ? "verify" : "screen";
   const kpis = [
     [`${tip("bw", "Coverage target")}`, coverTarget],
     [`${tip("band", "Band")}`, bandStr],
     [`${tip("dims", "Horn size")} <small style="font-family:var(--f-mono);font-size:0.6rem;color:var(--muted)">W×H×D outer</small>`, dimsStr],
-    [`${tip("J", "Score: start")} <small style="font-family:var(--f-mono);font-size:0.6rem;color:var(--muted)">${esc(jVersionLabel(d))}</small>`, fmt(sum.seed_j && sum.seed_j < 900 ? sum.seed_j : null)],
-    [`${tip("J", "Score: best")} <small style="font-family:var(--f-mono);font-size:0.6rem;color:var(--muted)">${esc(jVersionLabel(d))}</small>`, fmt(sum.best_j)],
+    [`${tip("J", `Start ${tierWord} score`)} <small style="font-family:var(--f-mono);font-size:0.6rem;color:var(--muted)">${esc(jVersionLabel(d))}</small>`, fmt(sum.seed_j && sum.seed_j < 900 ? sum.seed_j : null)],
+    [`${tip("J", `Best ${tierWord} score`)} <small style="font-family:var(--f-mono);font-size:0.6rem;color:var(--muted)">${esc(jVersionLabel(d))}</small>`, fmt(sum.best_j)],
     ["Change vs start", ch],
-    [`${tip("budget", "Budget used")}`,
-     `${(sum.n || 0).toLocaleString()}${sum.budget ? " / " + sum.budget.toLocaleString() : ""}${overBudget ? " over budget" : ""}`,
-     overBudget ? "bad" : budgetPct >= 90 ? "warn" : ""],
+    [`${tip("budget", "Budget used")}`, budgetKpi(sum.n, sum.budget, d.command).text, budgetKpi(sum.n, sum.budget, d.command).cls],
     [`${tip("failures", "Failures")}`, `${nf} (${failPct}%)`],
     [`${tip("pinned", "At limit")}`, pinnedSens.length > 0 ? `<b class="bad">${pinnedSens.length}</b>` : pill("0", "good")],
   ].map(([k, v, cls]) => `<div class="kpi"><span>${k}</span><b${cls ? ` class="${cls}"` : ""}>${v}</b></div>`);
@@ -4429,7 +4455,7 @@ let _launchPollTimer = null;
 
 async function viewLaunch() {
   const ROOT = currentRoot();     // this view's own container (see route())
-  skel();
+  skel("Checking which saved configs can mesh… the first visit after starting the GUI can take about a minute; later visits are instant.");
   let briefs = [], jobs = [], configs = [], statusData = null;
   try {
     [briefs, jobs, configs, statusData] = await Promise.all([
@@ -4439,9 +4465,29 @@ async function viewLaunch() {
       api("/api/status").catch(() => null),
     ]);
   } catch (e) { ROOT.innerHTML = errBanner(e.message); return; }
-  const typs = await api("/api/typologies").catch(() => []);
   if (ROOT !== currentRoot()) return;   // the user navigated away while this loaded
-  renderLaunch(briefs, jobs, configs, statusData, typs);
+  // Render the form now; the typology list (slow on a cold server) fills in when it arrives.
+  // If the user already started filling the form, never re-render under them: offer a link instead.
+  renderLaunch(briefs, jobs, configs, statusData, []);
+  const note = document.createElement("div");
+  note.className = "hint"; note.id = "launch-typs-loading"; note.setAttribute("role", "status");
+  note.textContent = "Loading the horn-family list for campaigns… (the rest of this page is ready)";
+  ROOT.prepend(note);
+  let touched = false;
+  const touch = () => { touched = true; };
+  ROOT.addEventListener("input", touch, { once: true });
+  ROOT.addEventListener("change", touch, { once: true });
+  const typs = await api("/api/typologies").catch(() => null);
+  if (ROOT !== currentRoot()) return;
+  const n = document.getElementById("launch-typs-loading");
+  if (!typs) { if (n) n.textContent = "Horn-family list unavailable; reload the page to retry."; return; }
+  if (!touched) { renderLaunch(briefs, jobs, configs, statusData, typs); return; }
+  if (n) {
+    n.innerHTML = `Horn-family list ready. <a href="#" id="launch-typs-apply">Show it</a> (resets this form).`;
+    document.getElementById("launch-typs-apply").onclick = (ev) => {
+      ev.preventDefault(); renderLaunch(briefs, jobs, configs, statusData, typs);
+    };
+  }
 }
 
 function renderLaunch(briefs, jobs, configs, statusData, typs = []) {
