@@ -32,20 +32,102 @@ from pathlib import Path
 import cma as cma_lib
 import numpy as np
 
+from ..config import ConfigError
 from ..dataset.record import DEFAULT_TRACE_FRACTION
 from ..design.space import DesignSpace
 from ..mesh.build import MeshConsistencyError
 from ..metrics import compute as metrics_compute
+from ..objective import PENALTY_FAILED
 from ..solve import worker
 from ..targets.spec import Target
 from ..types import Evaluation
 from . import rundir
+from . import links as links_mod
+from . import warmstart
 from .pipeline import CandidatePipeline
-from .evaluate import (collect_lib_shas, error_kind, evaluate, make_context, read_ndjson)
+from .evaluate import (DETERMINISTIC_KINDS, collect_lib_shas, error_kind, evaluate, make_context,
+                       read_ndjson)
 
 log = logging.getLogger("hornlab_search.search.cma")
 
 EVALS_PER_PROJECTION = (1000, 10000)
+
+# B.4 (day 2026-11-12): with ``search.budget_counts: valid`` the budget counts only VALID
+# evaluations; the deterministic refusals are exactly these kinds (the same set evaluate
+# memoizes as replayable failures). Solved-but-metrics/solve failures still consume budget:
+# they say the machine hiccupped, not that the design was refused.
+REFUSAL_KINDS = DETERMINISTIC_KINDS
+DEFAULT_ATTEMPTS_FACTOR = 4       # search.max_attempts default (valid mode only): 4 x budget
+RESAMPLE_CAP = 10                 # B.6: a refused candidate is resampled at most this many times
+
+
+def _refusal(ev: Evaluation) -> bool:
+    """True when ``ev`` is a DETERMINISTIC refusal (invalid geometry / envelope / too large):
+    the B.6 resample-and-replace class. Cached replays of a refusal resample too (they are
+    free), so a resume never re-tells a penalty for a design the box refuses anyway."""
+    return error_kind(ev.error) in DETERMINISTIC_KINDS
+
+
+def budget_policy(cfg, budget=None) -> dict:
+    """(mode, budget, attempts_cap) for this search invocation (shared by cma and cma_me).
+
+    ``mode`` 'new' is today's semantics and 'valid' is B.4's opt-in; ``attempts_cap`` is the
+    hard ceiling on NEW attempts. Absent ``search.max_attempts``, the valid mode defaults to
+    ``DEFAULT_ATTEMPTS_FACTOR * budget`` so an all-refusing box still stops; the 'new' mode
+    keeps a None cap (today's behaviour) unless the key is set explicitly.
+    """
+    mode = str(getattr(cfg.search, "budget_counts", "new") or "new")
+    max_new = int(budget if budget is not None else cfg.search.budget)
+    cap = getattr(cfg.search, "max_attempts", None)
+    if cap is None and mode == "valid":
+        cap = DEFAULT_ATTEMPTS_FACTOR * max_new
+    attempts_cap = None if cap is None else int(cap)
+    return {"mode": mode, "budget": max_new, "attempts_cap": attempts_cap}
+
+
+def budget_count(state: dict, ev: Evaluation) -> None:
+    """Accumulate the budget counters of ONE evaluation (call for every evaluation, cached or
+    not: a cache hit consumes no budget and writes no counter today, unchanged)."""
+    if ev.cached:
+        return
+    kind = error_kind(ev.error)
+    state.setdefault("attempts", 0)
+    state.setdefault("n_valid", 0)
+    state.setdefault("n_refused_free", 0)
+    state["n_new"] += 1
+    state["attempts"] += 1
+    if not ev.error:
+        state["n_valid"] += 1
+    elif kind in REFUSAL_KINDS:
+        state["n_refused_free"] += 1
+
+
+def budget_exhausted(state: dict, policy: dict, max_evals_cap, total_evals: int) -> bool:
+    """Is this search invocation's budget spent? ``max_evals_cap`` is the ALL-evaluations cap
+    (campaign fairness), checked against ``total_evals`` exactly as before."""
+    used = state["n_valid"] if policy["mode"] == "valid" else state["n_new"]
+    if used >= policy["budget"]:
+        return True
+    attempts_cap = policy["attempts_cap"]
+    if attempts_cap is not None and state.get("attempts", 0) >= attempts_cap:
+        return True
+    if max_evals_cap and total_evals >= max_evals_cap:
+        return True
+    return False
+
+
+def budget_counts_block(state: dict, policy: dict) -> dict | None:
+    """run.json ``budget_counts`` block; None (key absent) when counting nothing special, so
+    an unconfigured run.json keeps exactly today's schema."""
+    if policy["mode"] == "new" and policy["attempts_cap"] is None:
+        return None
+    return {
+        "mode": policy["mode"], "budget": policy["budget"],
+        "attempts_cap": None if policy["attempts_cap"] is None else int(policy["attempts_cap"]),
+        "attempts": int(state.get("attempts", 0)),
+        "valid": int(state.get("n_valid", 0)),
+        "refused_free": int(state.get("n_refused_free", 0)),
+    }
 
 
 def covariance_summary(
@@ -307,9 +389,26 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
     run_dir = Path(resume if resume is not None else run_dir)
     run_dir, backend, ctx = _prepare(cfg, run_dir, mode, backend, store, cache_dir, trace_fraction,
                                      command, config_path, lib_shas)
-    max_new = int(budget if budget is not None else cfg.search.budget)
+    policy = budget_policy(cfg, budget)
+    max_new = policy["budget"]
     space = DesignSpace.from_config(cfg)
+    space, linked = links_mod.reduce_space(space, cfg)   # B.2: absent search.links = same space
+    if linked:
+        log.info("search.links: %d linked knob(s) removed from the CMA dimension: %s",
+                 len(linked), sorted(linked))
     x0 = space.normalize(space.seed)
+    sigma0_eff = float(cfg.search.sigma0)      # B.1: sigma0_eff = warm-start sigma when configured
+    warm_record = None
+    try:
+        warm_design, warm_record = warmstart.mean_and_sigma(cfg, space)   # (None, None) = absent
+    except warmstart.WarmStartError as exc:
+        raise ConfigError(str(exc)) from None   # a bad source is a CONFIG problem: refuse, don't solve
+    if warm_design is not None:
+        x0 = space.normalize(warm_design)
+        sigma0_eff = float(warm_record["sigma0"])
+        log.info("warm start: mean = best valid design %s from %s (J=%.6g), sigma0 %.6g",
+                 warm_record["mean_design_hash"], warm_record["from_runs"],
+                 warm_record["mean_objective"], sigma0_eff)
     restarts = getattr(cfg.search, "restarts", None)
     (run_dir / "cma").mkdir(exist_ok=True)
 
@@ -318,19 +417,36 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
              "verb_filenameprefix": str(prefix) + os.sep, "verb_disp": 0, "verbose": -1}
         if popsize:
             o["popsize"] = int(popsize)
+        if policy["mode"] == "valid":
+            # B.4: a refusal is told as the flat 1000 penalty, so pycma's fitness-range stops
+            # (tolfun / tolfunhist / tolflatfitness, cma 4.5.0 evolution_strategy.py:4227-4229
+            # and :4306-4317) fire on a streak of refusals, not on convergence. With the
+            # valid-only budget the budget policy (n_valid / attempts cap) is the termination
+            # authority instead; geometric criteria (tolx, tolupsigma, ...) stay active. Only
+            # for the opt-in 'valid' mode: the default 'new' ES options are unchanged.
+            o["tolfun"] = 0.0
+            o["tolfunhist"] = 0.0
+            o["tolflatfitness"] = 1e12
+        if str(getattr(cfg.search, "surrogate", "") or "") == "lq":
+            # B.7: pycma's recommended option for the model reinjection (fitness_models.py
+            # doctest, SurrogatePopulation usage); only when the surrogate is opted in.
+            o["CMA_injections_threshold_keep_len"] = 1
         return o
 
     popsize0 = int(cfg.search.popsize) if cfg.search.popsize else None
+    surrogate_mode = str(getattr(cfg.search, "surrogate", "") or "")   # B.7: '' = plain CMA
+    surrogate_block = None
     es = None
     if restarts is None:                       # today's single-ES path, bit-for-bit
-        es = cma_lib.CMAEvolutionStrategy(list(map(float, x0)), float(cfg.search.sigma0),
+        es = cma_lib.CMAEvolutionStrategy(list(map(float, x0)), sigma0_eff,
                                           es_options(run_dir / "cma", cfg.search.seed, popsize0))
 
     evals: list[Evaluation] = []
     wall: list[float] = []
     restarts_log: list[dict] = []              # filled only when search.restarts is configured
     state = {"best": None, "best_no": None, "seed_ev": None, "n_new": 0, "stop": "",
-             "solve_fail_streak": 0}
+             "solve_fail_streak": 0, "attempts": 0, "n_valid": 0, "n_refused_free": 0,
+             "n_resampled": 0}
 
     # On a resume the best so far is already on disk in search.ndjson: start from it, so a short
     # (or zero-budget) resume can never overwrite best.json with something worse.
@@ -349,8 +465,8 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
         ev = evaluate(design, space, cfg, mode, run_dir, store, backend, ctx=ctx)
         dt = time.perf_counter() - t0
         evals.append(ev)
+        budget_count(state, ev)
         if not ev.cached:
-            state["n_new"] += 1
             wall.append(dt)
         b = state["best"]
         if b is None or ev.objective < b.objective or (b.error and not ev.error):
@@ -374,6 +490,9 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
         stats = summarize_rows(read_ndjson(run_dir / "search.ndjson")) if (run_dir / "search.ndjson").exists() else last
         seed_ev = state["seed_ev"]
         best = state["best"]
+        # B.4: the valid-only budget reports both counts; absent (default 'new') the run.json
+        # schema and the summary line stay exactly today's.
+        bc = budget_counts_block(state, policy)
         upd = {"status": status, "finished_utc": rundir.utc_now(), "stop_reason": state["stop"],
                "stats": stats, "last_invocation": last, "budget": max_new}
         if seed_ev is not None:
@@ -392,13 +511,26 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
                 rundir.write_json_atomic(run_dir / "cma" / "covariance.json", cov)
             except Exception:  # noqa: BLE001 - optional sidecar; run.json is the contract
                 log.debug("could not write cma/covariance.json", exc_info=True)
+        if bc is not None:
+            upd["budget_counts"] = bc
+        if linked:
+            upd["links"] = linked               # B.2: run.json records the resolved links
+        if warm_record is not None:
+            upd["warm_start"] = warm_record     # B.1: the warm-start sources + sigma record
+        if surrogate_block is not None:
+            upd["surrogate"] = surrogate_block  # B.7: mode + model count (absent = today's schema)
         rundir.update_run_json(run_dir, **upd)
+        suffix = ""
+        if bc is not None:
+            cap_txt = "none" if bc["attempts_cap"] is None else str(bc["attempts_cap"])
+            suffix = (f", valid {bc['valid']} (budget counts), refusals free {bc['refused_free']}"
+                      f", attempts {bc['attempts']}/{cap_txt}")
         log.info("search %s: %d evaluations (%d new, %d cached), %d failures %s, GPU %.1f s, "
-                 "%.1f s/candidate, %.0f candidates/h, 1k evals = %.1f h, 10k = %.1f h",
+                 "%.1f s/candidate, %.0f candidates/h, 1k evals = %.1f h, 10k = %.1f h%s",
                  status, stats["evaluations"], stats["non_cached"], stats["cache_hits"],
                  stats["failures"], stats["failures_by_reason"], stats["total_gpu_seconds"],
                  stats["mean_seconds_per_candidate"], stats["candidates_per_hour"],
-                 stats["projected_hours"]["1000"], stats["projected_hours"]["10000"])
+                 stats["projected_hours"]["1000"], stats["projected_hours"]["10000"], suffix)
 
     try:
         # 1. the seed first: every later number is meaningless without the baseline it must beat
@@ -409,19 +541,21 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
         cap = int(max_evals) if max_evals else None
 
         def exhausted() -> bool:
-            return state["n_new"] >= max_new or (cap is not None and len(evals) >= cap)
+            return budget_exhausted(state, policy, cap, len(evals))
 
         def sweep(es_instance, restart_index: int | None = None) -> str:
             """Generations of ONE ES instance until its own stop criteria or the budget run out.
 
             Returns the stop reason. A generation cut by the budget is NOT ``tell``-ed (a resume
             replays it from the cache and finishes it), exactly as in the single-ES path."""
+            resample = str(cfg.search.infeasible_penalty) == "resample"     # B.6 (opt-in)
             gen = 0
             while not exhausted():
                 stop = es_instance.stop()
                 if stop:
                     return "cma: " + ", ".join(sorted(stop))
                 X = es_instance.ask()
+                X = [np.asarray(x, dtype=float).reshape(-1) for x in X]
                 F = []
                 if pipe.enabled:
                     # WP2 (opt-in): same order, same run_one, same F; only mesh building of the
@@ -432,15 +566,40 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
                         if exhausted():
                             break
                         pipe.before(i)
-                        F.append(run_one(d).objective)
+                        ev = run_one(d)
+                        # B.6: with search.infeasible_penalty: resample a refused candidate is
+                        # REPLACED by a new sample from the same distribution (cap RESAMPLE_CAP
+                        # tries) and never told; with today's penalties it is told as before.
+                        for _ in range(RESAMPLE_CAP):
+                            if not resample or not _refusal(ev) or exhausted():
+                                break
+                            x_new = np.asarray(es_instance.ask(1)[0], dtype=float).reshape(-1)
+                            X[i] = x_new
+                            state["n_resampled"] += 1
+                            ev = run_one(space.denormalize(x_new))
+                        F.append(ev.objective)
                 else:
-                    for x in X:
+                    for i, x in enumerate(X):
                         if exhausted():
                             break
-                        F.append(run_one(space.denormalize(np.asarray(x))).objective)
+                        ev = run_one(space.denormalize(np.asarray(x)))
+                        # B.6: same resample-and-replace as the prefetch path above (plain pycma
+                        # ask(number=1) resampling, as done by BoundTransform in cma's own
+                        # ask_and_eval); a refusal is LOADED into the ndjson but NEVER told.
+                        for _ in range(RESAMPLE_CAP):
+                            if not resample or not _refusal(ev) or exhausted():
+                                break
+                            x_new = np.asarray(es_instance.ask(1)[0], dtype=float).reshape(-1)
+                            X[i] = x_new
+                            state["n_resampled"] += 1
+                            ev = run_one(space.denormalize(x_new))
+                        F.append(ev.objective)
                 if len(F) < len(X):           # budget ran out mid-generation: do not tell
                     return "budget"
                 es_instance.tell(X, F)
+                if resample and state.get("n_resampled"):
+                    log.info("B.6 resample: %d refusal(s) replaced by new samples so far",
+                             state["n_resampled"])
                 try:
                     es_instance.logger.add()
                 except Exception:  # noqa: BLE001 - cma's own logging is optional
@@ -454,7 +613,72 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
 
         keys = space.keys()
         last_cov: dict | None = None
-        if restarts is None:
+        if surrogate_mode == "lq":
+            # B.7 (opt-in): lq-CMA-ES via pycma's SurrogatePopulation (fitness_models.py), the
+            # same ask/tell/inject loop as cma 4.5.0's fmin_lq_surr2 (evolution_strategy.py:
+            # 4482-4500). The surrogate predicts most of a population's fitness from a linear/
+            # quadratic regression over the TRUE evaluations, so the budget buys far more
+            # generations. A generation cut by the budget is NOT told (resume contract).
+            from cma import fitness_models as _fm
+
+            class _BudgetOut(Exception):
+                pass
+
+            def _eval_one(x) -> float:
+                if exhausted():
+                    raise _BudgetOut()
+                return run_one(space.denormalize(np.asarray(x, dtype=float))).objective
+
+            surrogate = _fm.SurrogatePopulation(_eval_one)
+            seeded = 0
+            for e in list(ctx.known.values()):          # warm the model from prior rows (B.1)
+                obj = getattr(e, "objective", None)
+                des = getattr(e, "design", None)
+                if obj is None or obj >= PENALTY_FAILED or des is None:
+                    continue
+                try:
+                    surrogate.model.add_data_row(space.normalize(des), float(obj))
+                    seeded += 1
+                except Exception:  # noqa: BLE001 - seeding is best effort
+                    log.debug("surrogate model seeding failed for %s", getattr(e, "design_hash", None),
+                              exc_info=True)
+            if seeded:
+                log.info("surrogate lq: model seeded with %d prior evaluation(s) of this run",
+                         seeded)
+            if surrogate_mode == "lq":
+                surrogate_block = {"mode": "lq", "model_seeded": seeded}
+            while not exhausted():
+                if es.stop():
+                    state["stop"] = "cma: " + ", ".join(sorted(es.stop()))
+                    break
+                X = [np.asarray(x, dtype=float).reshape(-1) for x in es.ask()]
+                try:
+                    F = surrogate(X)
+                except _BudgetOut:                       # budget ran out mid-generation: not told
+                    state["stop"] = "budget"
+                    break
+                es.tell(X, list(F))
+                es.countevals = int(surrogate.evaluations)   # TRUE evaluations only
+                if surrogate_block is not None:
+                    surrogate_block["true_evaluations"] = int(surrogate.evaluations)
+                    surrogate_block["model_size"] = int(getattr(surrogate.model, "count", 0) or 0)
+                try:
+                    if surrogate.model is not None:
+                        es.inject([surrogate.model.xopt])
+                except Exception:  # noqa: BLE001 - injection is optional per fmin_lq_surr2
+                    log.debug("surrogate inject failed", exc_info=True)
+                try:
+                    es.logger.add()
+                except Exception:  # noqa: BLE001 - cma's own logging is optional
+                    pass
+                if state["best"] is not None:
+                    log.info("lq generation: best overall %.4f (%d new evaluations, model %d)",
+                             state["best"].objective, state["n_new"],
+                             int(getattr(surrogate.model, "count", 0) or 0))
+            if not state["stop"]:
+                state["stop"] = "budget"
+            last_cov = None
+        elif restarts is None:
             state["stop"] = sweep(es)
             try:
                 last_cov = covariance_summary(es, keys, include_C=True)
@@ -475,7 +699,7 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
                     poptype, sigma_factor, pop_k = sched.plan(k)
                 seed_k = int(cfg.search.seed) + k            # pycma: opts['seed'] += 1 per restart
                 es_k = cma_lib.CMAEvolutionStrategy(
-                    list(map(float, x0)), float(sigma_factor * float(cfg.search.sigma0)),
+                    list(map(float, x0)), float(sigma_factor * sigma0_eff),
                     es_options(run_dir / "cma" / f"restart_{k}", seed_k, pop_k))
                 if k == 0:
                     # pycma's popsize0: whatever the initial run got, i.e. cma's own default when
@@ -491,7 +715,7 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
                          "n_new_in_restart": state["n_new"] - n_new_before,
                          "evals_in_restart": evals_in_restart,
                          "popsize": pop_k,
-                         "sigma0": float(sigma_factor * float(cfg.search.sigma0))}
+                         "sigma0": float(sigma_factor * sigma0_eff)}
                 try:
                     cov_k = covariance_summary(es_k, keys, include_C=False)
                     entry["covariance"] = {

@@ -1,6 +1,86 @@
 # CONTINUITY
 
 
+## 2026-11-12 (17:55Z) - DAY GROUP B: SEARCH FEATURES (ALL OPT-IN)
+
+- Day-plan group B (PR #40, branch `day/B-search-features`): B.1 `search.warm_start` (new
+  `search/warmstart.py`: mean/sigma0 from prior runs' best valid design + top-k spread; same
+  family/knobs, box clip+count; version/brief mismatch ConfigError unless `allow_cross_brief`;
+  never changes the solve hash); B.2 `search.links` (new `search/links.py`: linked knobs leave the
+  CMA dimension, computed from the parent pre-mesh, clipped; one level; cycles/unknown ConfigError);
+  B.3 `hornlab-search narrow --run <dir> [--widen]` (wall analysis in `search/pin_from_cma.py`;
+  changes ONLY bounds/seed/name + header; >50%-walled knobs reported as PIN CANDIDATE);
+  B.4 `search.budget_counts: valid` + `search.max_attempts` (refusals free, hard attempts cap,
+  both counts in run.json + summary; pycma fitness-range stops suppressed only in valid mode);
+  B.5 brief `gates: {round_throat: true}` opts any single-entry objective version into the C4
+  refusal (v7 stays always-on); B.6 `search.infeasible_penalty: resample` (refusal replaced by a
+  fresh ask, cap 10/slot, never told; cma_me + resample is a ConfigError — ribs Scheduler.tell
+  cannot drop solutions); B.7 `search.surrogate: lq` (pycma SurrogatePopulation / fmin_lq_surr2
+  style, seeded from prior rows on resume); B.8 `search.qd.maes` (CMA-MAE soft archive,
+  learning_rate 0.01-0.1, threshold_min=-j_threshold, ranker `imp`, no emitter bounds);
+  B.9 PARAMETERS.md hand-maintained section per new key.
+- Defaults unchanged: the 78ed1f4 goldens (default config_sha + first 5 CMA asks for
+  `examples/osse_baseline.yaml` seed 1234) stayed green after every feature; plain configs produce
+  bit-identical run.json schemas.
+- Verified: 97 targeted day-B tests green (97/0/0/0 junitxml); CI green on the branch.
+- NOTES_FOR_SENIOR.md appended: PARAMETERS.md is generator-owned for design knobs; the day-B
+  search-key section should be folded into `tools/gen_param_catalog.py` (outside group B ownership).
+- CI fix in the merge window: the pre-existing `test_config.py` no-None guard flagged the new
+  opt-in keys (`search.max_attempts`/`links`/`warm_start`/`surrogate` are None by design when
+  absent) — added them to `OPTIONAL_FIELDS` per the established convention; no product code changed.
+- CI fix 2: the three B.8 CMA-MAE runtime tests now `pytest.importorskip("ribs")` exactly like the
+  CMA-ME suite (CI does not install ribs; optional-dep tests skip there and run on this box).
+
+## 2026-11-12 (17:40Z) - DAY GROUP C: CALIBRATION HARNESS + N1 THROUGHPUT EVIDENCE
+
+- Day-plan group C (PR #37, branch `day/C-calibration`): C.1 `tools/calibration/plan_calibration.py`
+  (top-N finalists -> 3-6 line `extends:` overlays under `examples/calibration/<date>/` -> runnable
+  night YAML in the runner format; default `--top 20`; PROPOSAL-ONLY new-screen-grid overlay,
+  not wired into jobs) + C.2 `tools/calibration/compare_calibration.py` (per-aspect max |delta| vs
+  Re z +-0.03 / BW +-2 deg / DI +-0.2 dB, Spearman screen-vs-verify, verify-J-only finalist ranking,
+  `compare.json` + `COMPARE.md`).
+- C.3 `docs/evidence/THROUGHPUT_N1_2026-11-12.md` from the N1 night (read-only `runs/nights/
+  gpu_2026-11-12/summary.jsonl` + twelve `n1_*.log`): fused ON wins at every size (4k warm b12
+  8.49 vs 12.05 s; 8k fused-off never completes a warm rep), `freq_batch_size` 12 never hurt
+  (4.7x/2.1x/1.9x vs b1 at 1k/4k/8k), prefetch neutral on warm time and harmful near the ceiling
+  (8k fused-off+prefetch OOM: 188.794 MiB alloc failure at 100.00% (7.996/7.996 GiB), peak 7731 MiB).
+  DECIDED recommendation delivered as a proposal only (fused ON; prefetch OFF at >=8k dofs;
+  freq_batch_size 12 via `HORNLAB_FREQ_BATCH_SIZE` until a config key exists). No default flipped.
+- C.4 (same doc): screen-fidelity proposal (new screen grid: band split 2 kHz, ~7 points in
+  2.5-5.5 kHz; measure Spearman(screen, verify) in the calibration night; until then verify top 15-20
+  and rank finalists by verify J only).
+- Verified: 13 targeted tests green (13/0/0/0); CI green on the branch incl. the Group-A test files.
+
+## 2026-11-12 (17:35Z) - FIX: GROUP-A TEST CLI HELPER USES THE RUNNING INTERPRETER (CI GREEN RESTORED)
+
+- `tests/test_tools_analysis_common.py::run_cli` hardcoded this box's
+  `C:\Users\hunte\Hrns\hornlab-search\.venv\Scripts\python.exe` as the subprocess interpreter; CI
+  (Linux, no such path) got `FileNotFoundError` in ~25 Group-A CLI-invocation tests, so PR #38's merge
+  went in with CI red (status checks are not enforced on this repo). Fix: `PY = Path(sys.executable)`
+  — locally that is the venv python (pytest runs under it), in CI the job's python; tools are pure
+  stdlib+numpy/scipy/matplotlib+optional-sklearn so they work under either. No product code changed.
+- Follow-up rule for future lanes: never put an absolute machine path in a test; derive the
+  interpreter from `sys.executable`.
+- Second CI-only failure (same runs): three `test_tools_analysis_sensitivity.py` tests asserted
+  `surrogate.available is True`, but sklearn is OPTIONAL by contract (day plan + schema: try/except,
+  Spearman fallback) and CI has no sklearn — the tool correctly degrades with
+  `{'available': False, 'note': 'sklearn not installed; Spearman only'}`. The tests now branch on the
+  availability contract (deep assertions keep running wherever sklearn exists); no tool code changed.
+
+## 2026-11-12 (17:10Z) - DAY GROUP A: EVOLUTIONARY-ANALYSIS TOOLKIT COMPLETE
+
+- Day-plan group A (PR #38, branch `day/A-analysis`): A.0-A.10 complete under `tools/analysis/` —
+  `_common`, `convergence` (A.1), `seed_variance` (A.2 incl. bootstrap CIs + ECDF + >=5-seed verdict rule),
+  `sensitivity` (A.3 incl. sklearn surrogate permutation importance; Sobol skipped, SALib not installed),
+  `links` (A.4), `walls` (A.5), `ab_compare` (A.6), `lane_parity` (A.7 CP-7b 0.2 dB gate),
+  `term_balance` (A.9 per-term share of J + raw-unit top decile — the v8 tolerance-recalibration inputs),
+  `fidelity` (A.10 screen-vs-verify bias + top-5 rank agreement), `report_day` (A.8) +
+  `specs/day_2026-11-12.yaml` (today's lanes with <FILL_*> placeholders the orchestrator fills from
+  `runs/nights/{gpu,cpu}_day_2026-11-12/summary.jsonl`). Tools read run dirs read-only and write only `--out`.
+- Verified: 75 targeted Group-A tests green (75/0/0/0 junitxml); full offline suite green on the branch
+  (2 stored-data skips); schema.md is the output contract and stayed stable.
+- GUI group E codes against this schema (PR #36 landed already).
+
 ## 2026-11-12 (16:25Z) - DAY GROUP D: NIGHT/DATA OPS HARDENING
 
 - Day-plan group D (PR #35, branch `day/D-night-ops`): D.1 two-lane `night_status.py` (per-lane lock
