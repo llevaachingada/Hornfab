@@ -83,6 +83,9 @@ const ROUTES = [
   { re: /^#\/run\/(.+)\/umap$/,         fn: m => viewUmap(ROOT, m[1]) },
   { re: /^#\/run\/(.+)\/archive$/,      fn: m => viewRunArchive(m[1]) },
   { re: /^#\/run\/(.+)$/,               fn: m => viewRunDetail(m[1]) },
+  { re: /^#\/analysis$/,                fn: () => viewAnalysis() },
+  { re: /^#\/analysis\/([^\/?#]+)$/,    fn: m => viewAnalysis(m[1]) },
+  { re: /^#\/elites$/,                  fn: () => viewElites() },
   { re: /^#\/compare$/,                 fn: () => viewCompare() },
   { re: /^#\/briefs$/,                  fn: () => viewBriefs() },
   { re: /^#\/compose$/,                 fn: () => viewCompose() },
@@ -130,6 +133,8 @@ function updateNav(hash) {
       (h === "#/status" && hash === "#/status") ||
       (h === "#/campaigns" && (hash === "#/campaigns" || hash.startsWith("#/campaign/"))) ||
       (h === "#/runs" && (hash === "#/runs" || (hash.startsWith("#/run/") && !hash.endsWith("/3d")))) ||
+      (h === "#/analysis" && (hash === "#/analysis" || hash.startsWith("#/analysis/"))) ||
+      (h === "#/elites" && hash === "#/elites") ||
       (h === "#/compare" && hash === "#/compare") ||
       (h === "#/briefs" && hash === "#/briefs") ||
       (h === "#/compose" && hash === "#/compose") ||
@@ -383,6 +388,7 @@ async function viewHome() {
     </div>
     ${guideHtml}
     ${gpuCard}
+    <div id="home-lanes"></div>
     <div id="home-leaders">${bestBriefHtml}</div>
     ${timelineHtml}
     ${quickLinks}
@@ -393,6 +399,24 @@ async function viewHome() {
 
   // The first paint is done; the slow leaderboard (/api/leaders) fills in later, in place.
   patchHomeLeaders(ROOT, myEpoch);
+  // E.2 lanes panel: cheap, but it is patched in AFTER the first paint (same pattern as the
+  // leaderboard) so the first-paint Promise.all stays at exactly status + campaigns + runs.
+  patchHomeLanes(ROOT, myEpoch);
+}
+
+/** Paint the E.2 solve-lane panel into an already-rendered Home; dropped when a newer Home
+ *  render has started (epoch) or the user navigated away (ROOT identity changed). Dropped
+ *  silently when /api/lanes 404s (an older server) — the panel is optional. */
+async function patchHomeLanes(ROOT, myEpoch) {
+  let lanes;
+  try {
+    lanes = await api("/api/lanes");
+  } catch {
+    return;
+  }
+  if (myEpoch !== _homeEpoch || ROOT !== currentRoot()) return;
+  const box = ROOT.querySelector("#home-lanes");
+  if (box) box.innerHTML = lanesPanelHtml(lanes);
 }
 
 // ── View 1: Status ─────────────────────────────────────────────────
@@ -1973,6 +1997,375 @@ function gateAuditHtml(audit) {
       </div>`;
 }
 
+// ── E.2: lanes panel (Home card) ───────────────────────────────────
+// Pure renderers over /api/lanes (gui/data.py::lane_status); absent lane files render as
+// idle/–, never invented. Missing payload (older server) renders nothing.
+
+function ageLabel(min) {
+  if (min == null || !isFinite(min)) return "–";
+  if (min < 1) return "<1 min";
+  if (min < 60) return Math.round(min) + " min";
+  return (min / 60).toFixed(1) + " h";
+}
+
+function laneRowHtml(l) {
+  const job = l.job
+    ? `running: ${esc(l.job.name || "?")}${l.job.started ? ` · since ${esc(l.job.started)}` : ""}`
+    : (l.last_job
+       ? `idle · last: ${esc(l.last_job.id || "?")} exit ${esc(l.last_job.exit_code ?? "–")}`
+       : "idle");
+  const run = l.run
+    ? `${esc(l.run.n_rows)} rows · best ${fmt(l.run.best_j)} · newest ${ageLabel(l.run.newest_row_age_min)} ago`
+    : (l.note ? `<span class="muted">${esc(l.note)}</span>` : "–");
+  const runLink = l.run && l.run.id
+    ? `<a href="#/run/${esc(l.run.id)}" style="font-size:0.8rem">run →</a>` : "";
+  const lockPill = !l.lock ? pill("free", "good")
+    : (l.lock.alive ? pill("lock live", "warn") : pill("lock stale", "bad"));
+  return `<tr>
+    <td><b>${esc((l.lane || "?").toUpperCase())}</b></td>
+    <td>${lockPill}</td>
+    <td>${job}</td>
+    <td class="r">${run} ${runLink}</td>
+    <td>${l.alert ? `<span class="pill bad">ALERT</span> <span class="muted">${esc(l.alert.reason || "")}</span>`
+                   : pill("ok", "good")}</td>
+  </tr>`;
+}
+
+function lanesPanelHtml(lanes) {
+  if (!lanes || !Array.isArray(lanes.lanes) || !lanes.lanes.length) return "";
+  const head = lanes.alert
+    ? `<div class="alert error" role="alert">Lane alert on ${esc((lanes.alert_lanes || []).join(", ") || "a lane")} — newest row is stale while its job is running.</div>` : "";
+  return `<div class="card" id="lanes-panel">
+    <div class="eyebrow" style="margin-bottom:10px">Solve lanes — GPU + CPU queue status</div>
+    ${head}
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Lane</th><th>Lock</th><th>Job</th><th class="r">Run (rows · best J · newest row)</th><th>Health</th></tr></thead>
+      <tbody>${lanes.lanes.map(laneRowHtml).join("")}</tbody>
+    </table></div>
+  </div>`;
+}
+
+/** Verdict chip for the seed-variance "A beats B" rule (schema 2026-11-12): a-beats-b / b-beats-a
+ *  / indicative (rule holds but < 5 seeds) / no-verdict. Pure. */
+function verdictChipHtml(verdict) {
+  if (verdict === "a-beats-b") return `<span class="pill good">A beats B</span>`;
+  if (verdict === "b-beats-a") return `<span class="pill good">B beats A</span>`;
+  if (verdict === "indicative") return `<span class="pill warn">indicative (&lt; 5 seeds)</span>`;
+  if (verdict == null) return `<span class="muted">–</span>`;
+  return `<span class="muted">${esc(verdict)}</span>`;
+}
+
+// ── E.1: analysis page (#/analysis) ────────────────────────────────
+// Read-only renderers over stored Group A outputs (convergence / seed variance / sensitivity
+// / links / walls at schema revision 2026-11-12). Unknown fields ride along and are ignored;
+// a missing section renders as absent — the page never runs an analysis itself.
+
+function _runBaseName(p) {
+  return String(p || "").split(/[\\/]/).pop() || "run";
+}
+
+function analysisConvergenceChart(svg, cv) {
+  const runs = (cv && cv.runs) || [];
+  const rows = runs.map(r => (Array.isArray(r.curve) ? r.curve.filter(
+    p => p && p.n != null && p.best != null && isFinite(p.n) && isFinite(p.best)) : []));
+  const ys = rows.flat().map(p => p.best);
+  if (!ys.length) return;
+  const maxN = Math.max(1, ...(rows.map(a => (a.length ? a[a.length - 1].n : 0))));
+  const ymin = Math.min(...ys), ymax = Math.max(...ys);
+  const pad = Math.max((ymax - ymin) * 0.05, 1e-9);
+  chart(svg, {
+    xlim: [0, maxN], ylim: [ymin - pad, ymax + pad],
+    xticks: niceTicks(0, maxN, 6), yticks: niceTicks(ymin - pad, ymax + pad, 5),
+    xlabel: "new valid evaluations", ylabel: "best J (lower is better)",
+    series: rows.map((a, i) => ({ pts: a.map(p => [p.n, p.best]), color: familyColor(i), w: 1.8 })),
+  });
+}
+
+function analysisConvergenceHtml(cv) {
+  if (!cv || !Array.isArray(cv.runs) || !cv.runs.length) return "";
+  const legend = cv.runs.map((r, i) => {
+    const extra = [
+      `best ${fmt(r.final_best)}`, `${r.n_new_valid ?? r.n_valid ?? 0} new valid evals`,
+      r.evals_to_5pct != null ? `5% target at ${r.evals_to_5pct}` : null,
+      r.evals_to_1pct != null ? `1% at ${r.evals_to_1pct}` : null,
+    ].filter(Boolean).join(" · ");
+    const still = r.last20_improvement ? ` · <span class="pill warn">still improving</span>` : "";
+    return `<span class="pill"><span style="display:inline-block;width:0.7em;height:0.7em;border-radius:2px;background:${familyColor(i)};margin-right:4px;vertical-align:-1px"></span>${esc(_runBaseName(r.run_dir))} · ${esc(extra)}${still}</span>`;
+  }).join(" ");
+  return `<div class="card">
+    <div class="eyebrow" style="margin-bottom:6px">Convergence — best-so-far J vs new valid evaluations (one colour per seed/run)</div>
+    <svg id="c-an-conv" style="width:100%" role="img" aria-label="best-so-far convergence, one curve per run"></svg>
+    <div class="cap" style="margin-top:6px">${legend}</div>
+  </div>`;
+}
+
+function analysisSeedVarianceHtml(sv) {
+  if (!sv) return "";
+  let html = "";
+  const groups = (sv.groups && typeof sv.groups === "object") ? sv.groups : {};
+  const names = Object.keys(groups);
+  if (names.length) {
+    const rows = names.map(n => {
+      const g = groups[n] || {};
+      const ci = Array.isArray(g.ci95_median_best)
+        ? `${fmt(g.ci95_median_best[0])}…${fmt(g.ci95_median_best[1])}` : "–";
+      const seeds = (Array.isArray(g.seeds) ? g.seeds : []).map(
+        s => esc(`${fmt(s.best_j)}${s.run_dir ? " (" + _runBaseName(s.run_dir) + ")" : ""}`)).join("<br>");
+      return `<tr><td class="mono">${esc(n)}</td>
+        <td class="r">${esc(g.n_seeds ?? "–")}</td>
+        <td class="r">${fmt(g.median_best)}</td><td class="r">${fmt(g.spread_best)}</td>
+        <td class="r">${ci}</td><td class="r mono">${seeds || "–"}</td></tr>`;
+    }).join("");
+    html += `<div class="card"><h3>Seed variance</h3>
+      <div class="cap">Per seed group: n, median/spread of best J, bootstrap 95% CI of the median, and per-seed best J.</div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Group</th><th class="r">Seeds</th><th class="r">Median best J</th><th class="r">Spread</th><th class="r">95% CI</th><th class="r">Per-seed best J</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div></div>`;
+  }
+  const verdicts = Array.isArray(sv.verdicts) ? sv.verdicts : [];
+  if (verdicts.length) {
+    const rows = verdicts.map(v => `<tr>
+      <td class="mono">${esc(v.a || "–")} vs ${esc(v.b || "–")}</td>
+      <td class="r">${fmt(v.median_a)} vs ${fmt(v.median_b)}</td>
+      <td class="r">${fmt(v.spread_a)} / ${fmt(v.spread_b)}</td>
+      <td class="r">${esc(v.n_seeds ?? "–")}</td>
+      <td>${verdictChipHtml(v.verdict)}${v.rule_holds === false ? ` <span class="muted">(rule does not hold)</span>` : ""}</td>
+    </tr>`).join("");
+    html += `<div class="card"><h3>Seed-variance verdicts</h3>
+      <div class="cap">${esc(sv.seed_rule || "A beats B only when the medians differ by more than both spreads")}</div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Pair</th><th class="r">Median J</th><th class="r">Spread a / b</th><th class="r">n seeds</th><th>Verdict</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div></div>`;
+  }
+  return html;
+}
+
+function analysisSensitivityHtml(s) {
+  if (!s || !Array.isArray(s.spearman) || !s.spearman.length) return "";
+  const maxAbs = Math.max(1e-9, ...(s.spearman.map(p => Math.abs(p.rho_abs ?? p.rho ?? 0))));
+  const rows = s.spearman.map(p => {
+    const rho = (p.rho ?? p.rho_abs);
+    const w = maxAbs > 0 ? (Math.abs(rho ?? 0) / maxAbs) * 90 : 0;
+    const bar = `<svg width="90" height="10" viewBox="0 0 90 10" aria-hidden="true">
+      <rect x="45" y="2" width="${w.toFixed(1)}" height="6" rx="1" fill="${rho >= 0 ? css("--seed") : css("--best")}"/></svg>`;
+    return `<tr><td class="mono">${esc(p.key)}</td><td class="r">${rho != null ? Number(rho).toFixed(2) : "–"}</td><td class="r">${esc(p.n ?? "–")}</td><td>${bar}</td></tr>`;
+  }).join("");
+  let html = `<div class="card"><h3>Sensitivity — per-knob Spearman ρ vs J (valid rows)</h3>
+    <div class="cap">ρ in [−1, 1]; Spearman on optimizer samples is biased — read it beside the surrogate importance below.</div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Knob</th><th class="r">ρ</th><th class="r">n</th><th>|ρ|</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>`;
+  const shift = Array.isArray(s.top_decile_shift) ? s.top_decile_shift : [];
+  if (shift.length) {
+    html += `<h3 style="margin-top:10px">Top-decile vs all shift</h3><div class="tbl-wrap"><table>
+      <thead><tr><th>Knob</th><th class="r">Mean all</th><th class="r">Mean top decile</th><th class="r">Shift (norm)</th></tr></thead>
+      <tbody>${shift.map(p => `<tr><td class="mono">${esc(p.key)}</td><td class="r">${fmt(p.mean_all)}</td><td class="r">${fmt(p.mean_top)}</td><td class="r">${p.shift_norm != null ? Number(p.shift_norm).toFixed(3) : "–"}</td></tr>`).join("")}</tbody>
+    </table></div>`;
+  }
+  const sur = (s.surrogate && s.surrogate.available && Array.isArray(s.surrogate.importance))
+    ? s.surrogate : null;
+  if (sur) {
+    html += `<h3 style="margin-top:10px">Surrogate permutation importance (${esc(sur.model || "?")}, R² ${esc(sur.r2)})</h3>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Knob</th><th class="r">Importance (mean ΔJ)</th><th class="r">± std</th></tr></thead>
+      <tbody>${sur.importance.map(i => `<tr><td class="mono">${esc(i.key)}</td><td class="r">${fmt(i.permutation_importance, 3)}</td><td class="r">${fmt(i.std, 3)}</td></tr>`).join("")}</tbody>
+    </table></div>`;
+  }
+  return html + `</div>`;
+}
+
+function analysisLinksHtml(lnk) {
+  if (!lnk) return "";
+  let html = "";
+  const pairs = Array.isArray(lnk.pairs) ? lnk.pairs : [];
+  const proposed = Array.isArray(lnk.proposed_links) ? lnk.proposed_links : [];
+  if (pairs.length || proposed.length) html += `<div class="card">`;
+  if (pairs.length) {
+    const rows = pairs.map(p => {
+      const f = (p.fit && typeof p.fit === "object") ? p.fit : {};
+      return `<tr><td class="mono">${esc(p.a)} · ${esc(p.b)}</td><td class="r">${p.rho != null ? Number(p.rho).toFixed(2) : "–"}</td>
+        <td class="r mono">${f.scale != null ? esc(Number(f.scale).toPrecision(4)) : "–"}</td>
+        <td class="r mono">${f.offset != null ? esc(Number(f.offset).toPrecision(4)) : "–"}</td>
+        <td class="r">${f.r2 != null ? Number(f.r2).toFixed(2) : "–"}</td></tr>`;
+    }).join("");
+    html += `<h3>Link candidates (top-decile knob pairs)</h3>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Pair (a · b)</th><th class="r">ρ</th><th class="r">scale</th><th class="r">offset</th><th class="r">R²</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>`;
+  }
+  if (proposed.length) {
+    html += `<h3 style="margin-top:10px">Proposed links for config \`links:\`</h3>
+      <p style="margin:4px 0">${proposed.map(p =>
+        `<span class="pill mono">${esc(p.knob_b)} = ${esc(Number(p.scale).toPrecision(4))}·${esc(p.knob_a)} + ${esc(Number(p.offset).toPrecision(4))} <span class="muted">(R² ${esc(Number(p.r2).toFixed(2))})</span></span>`).join(" ")}</p>`;
+  }
+  const dirs = Array.isArray(lnk.cma_directions) ? lnk.cma_directions : [];
+  if (dirs.length) {
+    html += `<h3 style="margin-top:10px">CMA dominant directions</h3><p style="margin:4px 0">${dirs.map(d =>
+      `<span class="pill">#${esc(d.rank)} λ=${esc(d.eigenvalue)} (${esc(d.fraction)} of norm) · ${esc((d.keys || []).join(", "))}</span>`).join(" ")}</p>`;
+  }
+  if (html) html += `</div>`;
+  return html;
+}
+
+function analysisWallsHtml(w) {
+  if (!w) return "";
+  const walls = Array.isArray(w.walls) ? w.walls : [];
+  const prop = Array.isArray(w.proposal) ? w.proposal : [];
+  if (!walls.length && !prop.length) return "";
+  let html = `<div class="card">`;
+  if (walls.length) {
+    const rows = walls.map(x => `<tr><td class="mono">${esc(x.key)}</td>
+      <td class="r">${fmt(x.lo)}</td><td class="r">${fmt(x.hi)}</td>
+      <td class="r">${x.frac_lo != null ? (Number(x.frac_lo) * 100).toFixed(0) + "%" : "–"}</td>
+      <td class="r">${x.frac_hi != null ? (Number(x.frac_hi) * 100).toFixed(0) + "%" : "–"}</td>
+      <td>${x.wall_lo ? pill("wall low", "warn") : ""} ${x.wall_hi ? pill("wall high", "warn") : ""}${!x.wall_lo && !x.wall_hi ? `<span class="muted">–</span>` : ""}</td></tr>`).join("");
+    html += `<h3>Bound walls (top-decile rows within 3% of a bound)</h3>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Knob</th><th class="r">Low</th><th class="r">High</th><th class="r">% at low</th><th class="r">% at high</th><th>Wall</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>`;
+  }
+  if (prop.length) {
+    html += `<h3 style="margin-top:10px">Proposals (candidates for \`narrow\` / box widening — never applied here)</h3>
+      <ul class="guide-steps" style="margin:4px 0">${prop.map(p =>
+        `<li><b>${esc(p.key)}</b> → ${esc(p.action)}: new bounds ${esc(p.new_lo)} … ${esc(p.new_hi)} — ${esc(p.reason || "")}</li>`).join("")}</ul>`;
+  }
+  return html + `</div>`;
+}
+
+async function viewAnalysis(setId) {
+  const ROOT = currentRoot();
+  skel("Loading analysis…");
+  let data;
+  try {
+    data = await api("/api/analysis" + (setId ? "/" + encodeURIComponent(setId) : ""));
+  } catch (e) {
+    ROOT.innerHTML = errBanner("Could not load analysis: " + e.message);
+    return;
+  }
+  if (ROOT !== currentRoot()) return;
+  if (!setId) {
+    // ── index over stored report sets ──
+    const rows = (Array.isArray(data) ? data : []).map(s => `<tr class="clickable" onclick="location.hash='#/analysis/${encodeURIComponent(s.id)}'">
+      <td class="mono">${esc(s.id === "." ? "(analysis folder itself)" : s.id)}</td>
+      <td>${(s.tools || []).map(t => `<span class="pill">${esc(t)}</span>`).join(" ") || `<span class="muted">no tool headers parsed</span>`}</td>
+      <td class="r">${esc(s.files.length)} files${s.has_report_md ? ` · <span class="pill">REPORT.md</span>` : ""}</td>
+      <td class="r">${esc(s.generated_utc || "–")}</td>
+    </tr>`).join("");
+    const empty = `<div class="card"><p class="muted">No analysis outputs under the configured folder yet
+      (server default <span class="mono">runs/analysis/</span>; override with
+      <span class="mono">hornlab-search gui --analysis-dir</span>). The Group A tools
+      (<span class="mono">tools/analysis/</span>) write <span class="mono">REPORT.md</span> + JSON + PNG
+      there; this page only renders what they wrote — it never runs an analysis.</p></div>`;
+    ROOT.innerHTML = `<div class="stack" style="gap:22px">
+      <div><div class="eyebrow">Reports</div><h2>Analysis</h2></div>
+      ${rows
+        ? `<div class="card"><div class="eyebrow" style="margin-bottom:8px">Report sets</div>
+           <div class="tbl-wrap"><table><thead><tr><th>Set</th><th>Tools</th><th class="r">Files</th><th class="r">Generated</th></tr></thead>
+           <tbody>${rows}</tbody></table></div></div>`
+        : empty}
+    </div>`;
+    return;
+  }
+  const d = data || {};
+  const banner = objectiveVersionBannerHtml(((d.convergence || {}).runs) || []);
+  const sections = [
+    analysisConvergenceHtml(d.convergence), analysisSeedVarianceHtml(d.seed_variance),
+    analysisSensitivityHtml(d.sensitivity), analysisLinksHtml(d.links),
+    analysisWallsHtml(d.walls),
+  ].join("");
+  const extras = (d.extra_tools || []).length
+    ? `<div class="card"><div class="eyebrow">Other tool outputs</div>
+       <p class="muted">${d.extra_tools.map(t => `<span class="pill mono">${esc(t)}</span>`).join(" ")} — no dedicated renderer; read them in <span class="mono">REPORT.md</span> and the raw JSON. Their contents are never guessed here.</p></div>`
+    : "";
+  const report = d.report_md != null
+    ? `<details class="card guide"><summary><b>REPORT.md</b>${d.report_md_truncated ? " (truncated)" : ""}</summary>
+       <pre style="white-space:pre-wrap">${esc(d.report_md)}</pre></details>`
+    : "";
+  const missing = ["convergence", "seed_variance", "sensitivity", "links", "walls"]
+    .filter(t => !(d.tools || []).includes(t));
+  ROOT.innerHTML = `<div class="stack" style="gap:22px">
+    <p><a href="#/analysis">← Analysis outputs</a></p>
+    <div>
+      <div class="eyebrow">Analysis report</div>
+      <h2>${esc(d.id === "." ? "(analysis folder itself)" : d.id)}</h2>
+      <p class="muted">${esc(d.base || "")}${d.generated_utc ? " · generated " + esc(d.generated_utc) : ""}</p>
+      ${missing.length ? `<p class="muted" style="font-size:0.8rem">Not present in this set: ${missing.map(t => `<span class="pill">${esc(t)}</span>`).join(" ")}</p>` : ""}
+    </div>
+    ${banner}
+    ${sections}
+    ${extras}
+    ${report}
+  </div>`;
+  const svg = document.getElementById("c-an-conv");
+  if (svg) requestAnimationFrame(() => analysisConvergenceChart(svg, d.convergence));
+}
+
+// ── E.3: elites catalog (#/elites) ─────────────────────────────────
+
+function eliteGateChips(c, labels) {
+  const entries = Object.entries(c.gates || {});
+  if (!entries.length) return "";
+  return entries.map(([k, v]) => v === true
+    ? `<span class="pill good">${esc(labels[k] || k)}</span>`
+    : `<span class="pill bad">${esc(labels[k] || k)} fail</span>`).join(" ");
+}
+
+function renderElitesHtml(data) {
+  if (!data || data.available !== true) {
+    return `<div class="card"><p class="muted">${esc((data && data.note)
+      || "No gate-audit CSV found under docs/data/gate_audit_*/ or scratch/gate_audit_*/.")}
+      This page lists the designs a committed gate audit recorded — an absent audit is an empty
+      catalog, never invented data.</p></div>`;
+  }
+  const labels = data.labels || {};
+  const cards = (data.cards || []).map(c => {
+    const jv = c.run_linked
+      ? ` <small class="muted mono" style="font-size:0.68rem">${esc(jVersionLabel(c))}</small>` : "";
+    const cellObj = c.coverage_cell && typeof c.coverage_cell === "object" ? c.coverage_cell : null;
+    const cell = cellObj
+      ? `Coverage cell: ${esc((cellObj.descriptors || {}).h || "h")} ${fmt(cellObj.h_center, 0)}° × ${esc((cellObj.descriptors || {}).v || "v")} ${fmt(cellObj.v_center, 0)}°`
+      : null;
+    const runLink = c.run_linked && c.run
+      ? `<a class="btn" href="#/run/${esc(c.run)}">Open run →</a>` : "";
+    return `<article class="card">
+      <div class="eyebrow">${esc(c.tier || "audit")} · ${esc(c.run || "?")}</div>
+      <div class="mono" style="font-size:1.05rem">${esc(c.hash)}</div>
+      <div style="margin:4px 0"><b>${fmt(c.J, 3)}</b>${jv}
+        ${c.pass_all === true ? pill("all gates pass", "good")
+          : c.pass_all === false ? pill("not all gates pass", "warn") : ""}</div>
+      <div style="margin:4px 0">${eliteGateChips(c, labels)}</div>
+      ${cell ? `<div class="muted" style="margin:4px 0">${esc(cell)}</div>` : ""}
+      <div class="muted" style="font-size:0.75rem">Source: ${esc(c.source || "")}</div>
+      <div class="btn-row" style="margin-top:8px">${runLink}</div>
+    </article>`;
+  }).join("");
+  const srcs = (data.sources || []).map(s => `<span class="mono muted" style="font-size:0.75rem">${esc(s)}</span>`).join(", ");
+  return `<div>
+      <div class="eyebrow">Catalog</div><h2>Elites</h2>
+      <p class="muted">${esc(data.n_pass ?? 0)} of ${esc((data.cards || []).length)} audit rows passed all gates · ${srcs}</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px">${cards}</div>`;
+}
+
+async function viewElites() {
+  const ROOT = currentRoot();
+  skel("Loading elites…");
+  let data;
+  try {
+    data = await api("/api/elites");
+  } catch (e) {
+    ROOT.innerHTML = errBanner("Could not load elites: " + e.message);
+    return;
+  }
+  if (ROOT !== currentRoot()) return;
+  ROOT.innerHTML = `<div class="stack" style="gap:22px">${renderElitesHtml(data)}</div>`;
+}
+
 // Exported pure helpers for offline node tests (tests/test_gui_brief_authoring.py) — the
 // view3d.js::mirrorMesh precedent; unused by the browser module graph.
 export { runProvenanceGroup, renderProvenanceBadges, restartScheduleHtml, stepChipHtml,
@@ -1984,6 +2377,8 @@ export { runProvenanceGroup, renderProvenanceBadges, restartScheduleHtml, stepCh
 export { f0KpiHtml, mountingRankWarnHtml, seedDerivationHtml, objectiveVersionOptionsHtml,
          objectiveVersionOf, jVersionLabel, objectiveVersions, objectiveVersionBannerHtml,
          sortRunsForTable, gateAuditHtml, J_VERSION_BANNER };
+
+export { lanesPanelHtml, verdictChipHtml, eliteGateChips };
 
 export { continueRunAvailable, continueRunArgs };
 

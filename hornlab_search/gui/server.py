@@ -30,19 +30,29 @@ _LOG = logging.getLogger(__name__)
 
 
 class App:
-    def __init__(self, root: Path, runs: Path | None = None):
+    def __init__(self, root: Path, runs: Path | None = None, analysis_dir: Path | None = None):
         self.root = root.resolve()
         self.runs = (runs or self.root / "runs").resolve()
+        self.analysis_dir = (Path(analysis_dir) if analysis_dir is not None
+                             else self.runs / "analysis").resolve()
         self.jobs = JobManager(self.root, self.runs)
 
     # GET routes return (status, json-able) ; raise FileNotFoundError / ValueError for 404 / 400
     def get(self, path: str, q: dict) -> object:
-        parts = [unquote(p) for p in path.strip("/").split("/")][1:]      # drop "api"
+        parts = [unquote(p) for p in path.strip("/").split("/")[1:]]      # drop "api"
         head = parts[0] if parts else ""
         if head == "status":
             return D.status(self.root, self.runs)
+        if head == "lanes":
+            return D.lane_status(self.runs)
         if head == "runs":
             return D.list_runs(self.runs)
+        if head == "analysis" and len(parts) == 1:
+            return D.analysis_sets(self.analysis_dir)
+        if head == "analysis" and len(parts) == 2:
+            return D.analysis_report(self.analysis_dir, parts[1])
+        if head == "elites":
+            return D.elites_catalog(self.runs, self.root)
         if head == "run" and len(parts) == 2:
             return D.run_detail(self.runs, parts[1], root=self.root)
         if head == "campaigns":
@@ -351,8 +361,9 @@ def warm_in_background(app: App, delay_s: float = 1.0) -> threading.Timer:
     return t
 
 
-def serve(root: Path, port: int = DEFAULT_PORT, open_browser: bool = True, runs: Path | None = None) -> int:
-    app = App(root, runs)
+def serve(root: Path, port: int = DEFAULT_PORT, open_browser: bool = True, runs: Path | None = None,
+          analysis_dir: Path | None = None) -> int:
+    app = App(root, runs, analysis_dir)
     httpd = ThreadingHTTPServer(("127.0.0.1", port), make_handler(app, port))
     url = f"http://127.0.0.1:{port}/"
     print(f"hornlab-search gui: {url}  (Ctrl-C to stop; local only)")
@@ -373,5 +384,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--port", type=int, default=DEFAULT_PORT)
     ap.add_argument("--no-browser", action="store_true")
     ap.add_argument("--root", default=str(Path(__file__).resolve().parents[2]), help="repository root")
+    ap.add_argument("--analysis-dir", default=None,
+                    help="folder the analysis reports render from (default: runs/analysis)")
     a = ap.parse_args(argv)
-    return serve(Path(a.root), a.port, not a.no_browser)
+    return serve(Path(a.root), a.port, not a.no_browser,
+                 analysis_dir=Path(a.analysis_dir) if a.analysis_dir else None)

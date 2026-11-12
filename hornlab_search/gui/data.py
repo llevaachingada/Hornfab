@@ -3075,3 +3075,402 @@ def save_bounds(root: Path, body: dict) -> dict:
         if tmp.exists():
             tmp.unlink()
     return {"ok": True, "file": rel, "applied": applied, "notes": notes}
+
+
+# ---------------------------------------------------------------------------- lanes (E.2, day-plan D.1)
+#
+# A small SELF-CONTAINED duplicate of the night-status read (day-plan D.1 describes it in
+# tools/night_status.py, Group D): the GUI deliberately does NOT import tools/ code. Reads
+# only what the night runner and the lane scripts already wrote:
+#   - queue logs ``queue_*.log`` under ``runs/overnight/`` (the runner's === START/END lines)
+#     and ``runs/nights/`` (the per-lane wrappers), lane-matched by filename;
+#   - per-lane night dirs ``runs/nights/<lane>*`` with ``summary.jsonl`` (completed jobs);
+#   - the lane lock files ``runs/.gpu.lock`` / ``runs/.cpu.lane.lock`` (same mechanism as
+#     ``search/gpulock.py``, read-only).
+# Every piece is optional: an empty ``runs/`` yields idle lanes, never a crash (the live lane
+# box exists only on the owner's machine).
+
+LANE_ALERT_MIN = 30.0                # minutes without a fresh row while the job is running
+LANE_IDS = ("gpu", "cpu")
+
+#: ``--resume <p>`` / ``--run-dir <p>`` / ``--out <p>`` in a queue-log START command.
+_RUN_DIR_FLAG = re.compile(r"--(?:resume|run-dir|out)[\s=]+(\"[^\"]+\"|\S+)")
+
+
+def _mt(p: Path) -> float:
+    try:
+        return p.stat().st_mtime
+    except OSError:
+        return 0.0
+
+
+def _lane_lock(runs: Path, lane: str) -> dict | None:
+    """The lane's lock-file holder (``runs/.gpu.lock`` / ``runs/.cpu.lane.lock``), alive or stale.
+    Read-only: the file's JSON passes through, ``alive`` is the pid probe, absent file is None."""
+    from hornlab_search.search.gpulock import LANE_LOCK_FILES, _pid_alive, _read_lock
+    lock = _read_lock(runs / LANE_LOCK_FILES[lane])
+    if not isinstance(lock, dict):
+        return None
+    lock = dict(lock)
+    try:
+        pid = int(lock.get("pid"))
+    except (TypeError, ValueError):
+        pid = None
+    lock["alive"] = bool(pid is not None and pid > 0 and _pid_alive(pid))
+    return clean(lock)
+
+
+def _lane_queue_log(runs: Path, lane: str) -> Path | None:
+    """The newest START/END-formatted queue log naming this lane (``runs/overnight`` first,
+    then ``runs/nights``). Logs without a parseable step line are skipped."""
+    for base in (runs / "overnight", runs / "nights"):
+        best = None
+        try:
+            cands = [p for p in base.glob(f"queue_*{lane}*.log") if p.is_file()]
+        except OSError:
+            continue
+        for log in sorted(cands, key=lambda p: (_mt(p), p.name), reverse=True):
+            if queue_steps(log):
+                best = log
+                break
+        if best is not None:
+            return best
+    return None
+
+
+def _lane_running_step(steps: list[dict]) -> dict | None:
+    """The last queue step that STARTed and never ENDed (the lane's running job), or None."""
+    for st in reversed(steps):
+        if st.get("started") and not st.get("ended") and not st.get("skipped"):
+            return st
+    return None
+
+
+def _run_dir_from_command(runs: Path, command: str | None) -> Path | None:
+    """The run folder a queue-log COMMAND targets (``--resume``/``--run-dir``/``--out``).
+    Relative paths resolve against the repo root (``runs``' parent), as the runner invokes
+    them. A fresh ``--config`` search has no resolved dir before its first row: None."""
+    m = _RUN_DIR_FLAG.search(command or "")
+    if not m:
+        return None
+    tok = m.group(1).strip('"')
+    p = Path(tok)
+    if not p.is_absolute():
+        p = runs.parent / tok
+    return p
+
+
+def _newest_row_age_min(nd: Path, rows: list[dict]) -> float | None:
+    """Minutes since the run's newest evaluation row (its ``created_utc``), else the ndjson's
+    own mtime, else None when the file is gone."""
+    for r in reversed(rows):
+        t = _ts(r.get("created_utc"))
+        if t is not None:
+            return max(0.0, (time.time() - t.timestamp()) / 60.0)
+    try:
+        return max(0.0, (time.time() - nd.stat().st_mtime) / 60.0)
+    except OSError:
+        return None
+
+
+def _lane_run_info(runs: Path, rd: Path | None) -> dict | None:
+    """Row count / newest-row age / best J of the running job's run dir (read-only)."""
+    if rd is None:
+        return None
+    nd = rd / "search.ndjson"
+    rows = read_ndjson(nd)
+    if not rows and not nd.is_file():
+        return None
+    ok = [r for r in rows if r.get("ok")]
+    best = min(ok, key=lambda r: r["objective"]) if ok else None
+    rid = rd.name if RUN_ID.match(rd.name) else (rd.parent.name if RUN_ID.match(rd.parent.name) else None)
+    return clean({
+        "id": rid, "path": str(rd), "n_rows": len(rows), "n_ok": len(ok),
+        "best_j": best["objective"] if best else None,
+        "newest_row_age_min": _newest_row_age_min(nd, rows),
+        "last_row_utc": rows[-1].get("created_utc") if rows else None,
+    })
+
+
+def _lane_last_completed(runs: Path, lane: str) -> dict | None:
+    """The last recorded job of the lane's newest ``runs/nights/<lane>*`` night dir (context for
+    an idle lane; the queue-log running step drives alerts, never this)."""
+    nights = runs / "nights"
+    if not nights.is_dir():
+        return None
+    try:
+        cands = [p for p in nights.iterdir()
+                 if p.is_dir() and p.name.lower().startswith(lane)
+                 and (p / "summary.jsonl").is_file()]
+    except OSError:
+        return None
+    if not cands:
+        return None
+    night = max(cands, key=lambda p: _mt(p / "summary.jsonl"))
+    rows = read_ndjson(night / "summary.jsonl")
+    if not rows:
+        return None
+    job = rows[-1]
+    rd = str(job.get("run_dir") or "") or None
+    rid = Path(rd).name if rd and RUN_ID.match(Path(rd).name) else \
+        (Path(rd).parent.name if rd and RUN_ID.match(Path(rd).parent.name) else None)
+    return clean({"id": job.get("id"), "night": night.name, "start": job.get("start"),
+                  "end": job.get("end"), "exit_code": job.get("exit_code"),
+                  "evals_ndjson": job.get("evals_ndjson"), "best_J": job.get("best_J"),
+                  "run_id": rid})
+
+
+def lane_status(runs: Path) -> dict:
+    """Both solve lanes (GPU + CPU) in the D.1 shape for ``GET /api/lanes``.
+
+    Per lane: the lock holder (alive or stale), the newest queue log, the RUNNING job (the last
+    queue step STARTed without END), that job's run dir row count and newest-row age, the last
+    completed job of the lane's newest night dir, and the ALERT flag: the lane's newest row is
+    older than :data:`LANE_ALERT_MIN` minutes (or absent) while its job is running. Missing
+    files degrade to idle/None; nothing here is solved or written.
+    """
+    lanes, alert_lanes = [], []
+    for lane in LANE_IDS:
+        lock = _lane_lock(runs, lane)
+        steps: list[dict] = []
+        qlog = _lane_queue_log(runs, lane)
+        if qlog is not None:
+            steps = queue_steps(qlog)
+        running = _lane_running_step(steps)
+        rd = _run_dir_from_command(runs, (running or {}).get("command"))
+        run = _lane_run_info(runs, rd)
+        last = _lane_last_completed(runs, lane)
+        alert = None
+        if running is not None:
+            age = (run or {}).get("newest_row_age_min")
+            no_rows = run is not None and not run.get("n_rows")
+            started_min = None
+            if running.get("started"):
+                t = _ts(running["started"] + "Z" if not str(running["started"]).endswith("Z")
+                        else running["started"])
+                if t is not None:
+                    started_min = max(0.0, (time.time() - t.timestamp()) / 60.0)
+            if no_rows and started_min is not None and started_min > LANE_ALERT_MIN:
+                alert = {"job": running.get("name"), "age_min": 0,
+                         "reason": f"no evaluable row yet and job {running.get('name')!r} running "
+                                   f"for {round(started_min, 1)} min"}
+            elif age is not None and age > LANE_ALERT_MIN:
+                alert = {"job": running.get("name"),
+                         "age_min": round(age, 1),
+                         "reason": f"newest row {round(age, 1)} min old while job "
+                                   f"{running.get('name')!r} is running"}
+        entry = clean({
+            "lane": lane,
+            "lock": lock,
+            "queue_log": {"name": qlog.name, "steps": steps[-12:]} if qlog else None,
+            "job": {"name": running.get("name"), "started": running.get("started"),
+                    "command": running.get("command"),
+                    "run_dir": str(rd) if rd is not None else None} if running else None,
+            "run": run,
+            "alert": alert,
+            "last_job": last,
+            "note": "run dir not resolved (fresh --config job has no stored rows yet)"
+                    if running is not None and rd is None else None,
+        })
+        if alert:
+            alert_lanes.append(lane)
+        lanes.append(entry)
+    return {"lanes": lanes, "alert": bool(alert_lanes), "alert_lanes": alert_lanes}
+
+
+# ---------------------------------------------------------------------------- analysis outputs (E.1)
+#
+# Read-only rendering of the Group A analysis tool outputs (tools/analysis/schema.md,
+# 2026-11-12). The GUI never runs an analysis and never imports tools/ code: it lists the
+# folder the tools wrote (default ``runs/analysis/``, configurable via the server's
+# ``--analysis-dir`` flag / the ``App(analysis_dir=...)`` constructor) and passes each
+# ``<tool>.json`` through verbatim. Unknown fields ride along (the client ignores them);
+# missing fields render as "not present".
+
+#: The tool JSONs Group A writes (schema revision 2026-11-12). Files with other stems are
+#: disclosed as ``extra_tools`` but never parsed.
+ANALYSIS_TOOL_JSONS = ("convergence", "seed_variance", "sensitivity", "links", "walls",
+                       "ab_compare", "lane_parity", "term_balance", "fidelity", "report_day")
+#: REPORT.md is passed through as text (rendered in the page), capped for the API body.
+ANALYSIS_REPORT_MD_MAX = 200_000
+#: One report-set folder name under the analysis root ("." = the root itself).
+ANALYSIS_SET_ID = re.compile(r"^[A-Za-z0-9_.\-]{1,80}$")
+
+
+def analysis_sets(analysis_dir: Path) -> list[dict]:
+    """The report sets found under ``analysis_dir``: the folder itself (id ``.``) plus every
+    immediate subdirectory that holds ``*.json`` or ``REPORT.md`` output. A set carries the
+    tool JSONs it holds (parsed only for their ``tool``/``generated_utc`` header — the reports
+    themselves are served verbatim by :func:`analysis_report`). Nothing found = empty list."""
+    def _one(sid: str, base: Path) -> None:
+        files: list[str] = []
+        try:
+            files = sorted(p.name for p in base.iterdir()
+                           if p.is_file() and (p.suffix == ".json" or p.name == "REPORT.md"))
+        except OSError:
+            files = []
+        if not files:
+            return
+        tools, generated = [], None
+        for tool in ANALYSIS_TOOL_JSONS:
+            d = _read_json(base / f"{tool}.json")
+            if isinstance(d, dict) and d.get("tool"):
+                tools.append(tool)
+                g = d.get("generated_utc")
+                if isinstance(g, str) and (generated is None or g > generated):
+                    generated = g
+        out.append(clean({"id": sid, "files": files, "tools": tools,
+                          "generated_utc": generated, "has_report_md": "REPORT.md" in files}))
+
+    out: list[dict] = []
+    if not analysis_dir.is_dir():
+        return out
+    _one(".", analysis_dir)
+    try:
+        dirs = sorted((p for p in analysis_dir.iterdir() if p.is_dir()), key=lambda p: p.name)
+    except OSError:
+        dirs = []
+    for p in dirs:
+        _one(p.name, p)
+    return out
+
+
+def analysis_report(analysis_dir: Path, name: str) -> dict:
+    """One report set: every ``<tool>.json`` verbatim (missing/invalid JSON = absent — never
+    invented), ``REPORT.md`` as capped text, and the names of unknown-tool JSONs under
+    ``extra_tools`` (passed through as names only; Group A may add fields/tools at any time).
+    The set id ``.`` is the analysis root itself."""
+    if name == ".":
+        base = analysis_dir
+    else:
+        if not ANALYSIS_SET_ID.match(name):
+            raise ValueError(f"not an analysis report id: {name!r}")
+        base = analysis_dir / name
+    if not base.is_dir():
+        raise FileNotFoundError(name)
+    try:
+        root_res = analysis_dir.resolve()
+        base_res = base.resolve()
+    except OSError:
+        root_res, base_res = analysis_dir, base
+    if base_res != root_res and root_res not in base_res.parents:
+        raise FileNotFoundError(name)          # symlinked/..-style escapes stay refused
+    out: dict = {"id": name, "base": (analysis_dir / name).as_posix()}
+    payloads: dict[str, dict] = {}
+    for tool in ANALYSIS_TOOL_JSONS:
+        d = _read_json(base / f"{tool}.json")
+        if isinstance(d, dict) and d:
+            payloads[tool] = d
+    out["tools"] = list(payloads)
+    try:
+        json_stems = {p.stem for p in base.glob("*.json")}
+    except OSError:
+        json_stems = set()
+    out["extra_tools"] = sorted(json_stems - set(payloads) - set(ANALYSIS_TOOL_JSONS))
+    generated = None
+    for d in payloads.values():
+        g = d.get("generated_utc")
+        if isinstance(g, str) and (generated is None or g > generated):
+            generated = g
+    if generated is not None:
+        out["generated_utc"] = generated
+    out.update(clean(payloads))
+    try:
+        report_md = (base / "REPORT.md").read_text(encoding="utf-8")
+    except OSError:
+        report_md = None
+    if report_md is not None:
+        truncated = len(report_md) > ANALYSIS_REPORT_MD_MAX
+        if truncated:
+            report_md = report_md[:ANALYSIS_REPORT_MD_MAX] \
+                + f"\n\n… (truncated at {ANALYSIS_REPORT_MD_MAX} chars)"
+        out["report_md"] = report_md
+        out["report_md_truncated"] = truncated
+    return out
+
+
+# ---------------------------------------------------------------------------- elites catalog (E.3)
+
+
+def elites_catalog(runs: Path, root: Path) -> dict:
+    """The elites catalog: every design row recorded in a committed gate-audit CSV.
+
+    Sources are the same CSVs the run-detail gate audit reads
+    (``docs/data/gate_audit_*/`` and ``scratch/gate_audit_*``, newest directory first); a
+    design seen in an earlier audit keeps its newest entry. Every recorded row gets a card —
+    with the gate chips ONLY for columns the CSV actually carries (a failed row shows fail
+    chips, never an invented pass), its J + tier, the run link when that run still exists, and
+    the design's quality-diversity coverage cell (``archive_heatmap.json``) when the run has
+    an atlas. Absent audit = ``{"available": False}`` and an empty catalog — nothing is
+    invented. Read-only.
+    """
+    sources = list(_gate_audit_paths(root))
+    if not sources:
+        return {"available": False, "sources": [], "cards": [],
+                "note": "no gate-audit CSV under docs/data/gate_audit_*/ or scratch/gate_audit_*/"}
+    cards: list[dict] = []
+    seen: set[tuple[str, str]] = set()
+    n_pass = 0
+    for csv_path in sources:
+        try:
+            with csv_path.open(newline="", encoding="utf-8") as fh:
+                rows = list(csv.DictReader(fh))
+        except OSError:
+            continue
+        if not rows:
+            continue
+        header = set(rows[0].keys())
+        gates = [k for k in GATE_AUDIT_COLUMNS if k in header]
+        try:
+            source = csv_path.relative_to(root).as_posix()
+        except ValueError:
+            source = str(csv_path)
+        for r in rows:
+            h = (r.get("design") or "").strip()
+            run_id = (r.get("run") or "").strip()
+            if not h:
+                continue
+            key = (run_id, h)
+            if key in seen:
+                continue
+            seen.add(key)
+            gate_vals = {k: v for k in gates if (v := _csv_bool(r.get(k))) is not None}
+            j_raw = r.get("J")
+            try:
+                j = float(j_raw) if j_raw not in (None, "") else None
+            except (TypeError, ValueError):
+                j = None
+            tier = (r.get("tier") or "").strip() or None
+            pass_all = _csv_bool(r.get("pass_all"))
+            run_dir = runs / run_id if run_id and RUN_ID.match(run_id) else None
+            has_run = bool(run_dir and (run_dir / "search.ndjson").is_file())
+            version = run_objective_version(run_dir) if has_run else None
+            cell = None
+            if has_run:
+                heat = _read_json(run_dir / "archive_heatmap.json")
+                if isinstance(heat, dict) and isinstance(heat.get("cells"), list):
+                    descs = heat.get("descriptors") if isinstance(heat.get("descriptors"), dict) else {}
+                    hits = [c for c in heat["cells"]
+                            if isinstance(c, dict) and c.get("design_hash") == h]
+                    if hits:
+                        c = min(hits, key=lambda c: c.get("objective")
+                                if isinstance(c.get("objective"), (int, float)) else float("inf"))
+                        cell = {"descriptors": {"h": descs.get("h"), "v": descs.get("v")},
+                                "h_center": c.get("h_center"), "v_center": c.get("v_center")}
+            cards.append(clean({
+                "run": run_id or None, "hash": h, "J": j, "tier": tier,
+                "gates": gate_vals, "pass_all": pass_all, "source": source,
+                "run_linked": has_run, "objective_version": version if has_run else None,
+                "coverage_cell": cell,
+                "has_mesh": bool(run_dir and (run_dir / "designs" / h / "mesh.msh").is_file()),
+            }))
+            if pass_all is True:
+                n_pass += 1
+    cards.sort(key=lambda c: (c["pass_all"] is not True,
+                              c["J"] if c["J"] is not None else float("inf")))
+    gate_keys: set[str] = set()
+    for c in cards:
+        gate_keys |= set(c["gates"])
+    return {"available": True, "sources": sorted({c["source"] for c in cards}),
+            "labels": {k: GATE_AUDIT_LABELS.get(k, k) for k in sorted(gate_keys)},
+            "cards": cards, "n_pass": n_pass}
