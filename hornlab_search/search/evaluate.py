@@ -37,6 +37,7 @@ from pathlib import Path
 
 import numpy as np
 
+from .links import apply_links
 from .. import config as config_mod
 from .. import profiling
 from ..dataset.record import (DEFAULT_TRACE_FRACTION, build_record, should_capture_traces, to_jsonable,
@@ -874,6 +875,8 @@ def evaluate(design: Design, space, cfg, mode: str, run_dir, store, backend, *,
     t_start = time.perf_counter()
     # C0: the driven coupling plane of an extended-throat design is the brief's driver exit. The
     # derivation depends on the SEARCHED L/theta, so it is per design (never a config constant).
+    # B.2: linked knobs are computed from their parents BEFORE the derivation reads any param.
+    design = apply_links(design, space, cfg)
     design = _derive_throat_coupling(design, cfg)
     mspec = config_mod.mesh_spec(mode, cfg)
     sspec = config_mod.solve_spec(mode, cfg)

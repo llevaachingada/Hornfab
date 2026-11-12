@@ -122,6 +122,9 @@ class SearchSettings:
     budget_counts: str = "new"         # B.4 (day 2026-11-12): 'new' (default, today) | 'valid'
     max_attempts: int | None = None    # B.4: hard ceiling on NEW attempts; unset 'valid' mode
                                        # defaults to 4 x budget so an all-refusing box still stops
+    links: dict | None = None          # B.2: {<knob>: {from, scale, offset, min, max}} (B.5 gate
+                                       # aside, knobs are removed from the CMA dimension); absent
+                                       # = today's dimensions
 
 
 @dataclass
@@ -835,6 +838,65 @@ def _validate_max_attempts(value, where: str) -> int | None:
     return int(value)
 
 
+def _validate_search_links(value, where: str, bounds_raw: dict) -> dict | None:
+    """B.2 (day 2026-11-12): ``search.links: {<knob>: {from, scale, offset, min, max}}``.
+
+    The linked knob is removed from the CMA dimension and computed from its parent before
+    meshing (search.links.apply_links), then clipped to ``[min, max]`` — defaults: the knob's
+    own bound lo/hi. ``scale`` (default 1.0) and ``offset`` (default 0.0) are finite numbers.
+    Exact allowed keys per entry so a YAML typo is never silent; unknown knobs and unknown
+    parents are a ConfigError; ONE LEVEL ONLY (a parent that is itself linked is refused, which
+    also excludes every cycle). Returns the RESOLVED block (scale/offset/min/max filled in)."""
+    if value is None:
+        return None
+    if not isinstance(value, dict) or not value:
+        raise ConfigError(f"{where}: must be a mapping of knob -> specs")
+    allowed = {"from", "scale", "offset", "min", "max"}
+
+    def _num(spec, key, dflt, knob):
+        v = spec.get(key, dflt)
+        if isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v):
+            raise ConfigError(f"{where}.{knob}.{key} must be a finite number, got {v!r}")
+        return float(v)
+
+    resolved: dict[str, dict] = {}
+    for knob, spec in value.items():
+        if not isinstance(knob, str) or not isinstance(spec, dict):
+            raise ConfigError(f"{where}: {knob!r}: specs must be a mapping with a string knob name")
+        unknown = set(spec) - allowed
+        if unknown:
+            raise ConfigError(f"{where}.{knob}: unknown key(s) {sorted(unknown)} "
+                              f"(allowed: {sorted(allowed)})")
+        if not isinstance(spec.get("from"), str):
+            raise ConfigError(f"{where}.{knob}.from must be a knob name (string), "
+                              f"got {spec.get('from')!r}")
+        if knob not in bounds_raw:
+            raise ConfigError(f"{where}.{knob}: knob is not a searched bound (bounds: "
+                              f"{sorted(bounds_raw)})")
+        parent = spec["from"]
+        if parent not in bounds_raw:
+            raise ConfigError(f"{where}.{knob}.from: knob {parent!r} is not a searched bound "
+                              f"(bounds: {sorted(bounds_raw)})")
+        if parent in value:
+            raise ConfigError(f"{where}.{knob}.from: one level only — the parent {parent!r} is "
+                              f"itself a linked knob (chains and cycles are refused)")
+        scale = _num(spec, "scale", 1.0, knob)
+        offset = _num(spec, "offset", 0.0, knob)
+        try:
+            lo = float(bounds_raw[knob]["lo"])
+            hi = float(bounds_raw[knob]["hi"])
+        except (KeyError, TypeError, ValueError):
+            raise ConfigError(f"{where}.{knob}: the knob's bounds are not a lo/hi pair "
+                              f"({bounds_raw[knob]!r})") from None
+        mn = _num(spec, "min", lo, knob)
+        mx = _num(spec, "max", hi, knob)
+        if not (lo <= mn <= mx <= hi):
+            raise ConfigError(f"{where}.{knob}: min/max [{mn}, {mx}] must lie inside the "
+                              f"knob's bounds [{lo}, {hi}]")
+        resolved[knob] = {"from": parent, "scale": scale, "offset": offset, "min": mn, "max": mx}
+    return resolved
+
+
 def _validate_near_correction(solve, where: str) -> None:
     """WP14: validate ``solve.near_correction*`` / ``solve.solve_precision`` BEFORE the library
     sees them. The bounds mirror hornlab_beat_bem's own SolveConfig (near_correction_cutoff finite
@@ -1211,7 +1273,7 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
     _validate_source_profile_alpha(solve, f"{where}:solve")
     search = _build(SearchSettings, _require(raw, "search", where), f"{where}:search",
                     optional=("popsize", "infeasible_penalty", "restarts", "qd", "pipeline_prefetch",
-                              "budget_counts", "max_attempts"))
+                              "budget_counts", "max_attempts", "links"))
     if "popsize" not in raw["search"]:
         search.popsize = None
     if "budget_counts" not in raw["search"]:
@@ -1221,6 +1283,14 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
                           f"got {search.infeasible_penalty!r}")
     search.budget_counts = _validate_budget_counts(search.budget_counts, f"{where}:search")
     search.max_attempts = _validate_max_attempts(search.max_attempts, f"{where}:search")
+    if "links" not in raw["search"]:
+        search.links = None
+    elif raw.get("generator") is not None:
+        raise ConfigError(f"{where}:search.links: linked knobs are not supported with a "
+                          f"generator block")
+    else:
+        search.links = _validate_search_links(search.links, f"{where}:search.links",
+                                              raw.get("bounds") or {})
     if search.algorithm not in SEARCH_ALGORITHMS:
         raise ConfigError(f"{where}: search.algorithm must be one of {list(SEARCH_ALGORITHMS)}, "
                           f"got {search.algorithm!r}")

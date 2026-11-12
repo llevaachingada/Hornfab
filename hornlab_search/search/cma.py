@@ -40,6 +40,7 @@ from ..solve import worker
 from ..targets.spec import Target
 from ..types import Evaluation
 from . import rundir
+from . import links as links_mod
 from .pipeline import CandidatePipeline
 from .evaluate import (DETERMINISTIC_KINDS, collect_lib_shas, error_kind, evaluate, make_context,
                        read_ndjson)
@@ -380,6 +381,10 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
     policy = budget_policy(cfg, budget)
     max_new = policy["budget"]
     space = DesignSpace.from_config(cfg)
+    space, linked = links_mod.reduce_space(space, cfg)   # B.2: absent search.links = same space
+    if linked:
+        log.info("search.links: %d linked knob(s) removed from the CMA dimension: %s",
+                 len(linked), sorted(linked))
     x0 = space.normalize(space.seed)
     restarts = getattr(cfg.search, "restarts", None)
     (run_dir / "cma").mkdir(exist_ok=True)
@@ -478,6 +483,8 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
                 log.debug("could not write cma/covariance.json", exc_info=True)
         if bc is not None:
             upd["budget_counts"] = bc
+        if linked:
+            upd["links"] = linked               # B.2: run.json records the resolved links
         rundir.update_run_json(run_dir, **upd)
         suffix = ""
         if bc is not None:

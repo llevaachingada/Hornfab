@@ -41,6 +41,7 @@ from ..design.space import DesignSpace
 from ..mesh.build import MeshConsistencyError
 from ..types import Evaluation
 from . import rundir
+from . import links as links_mod
 from .cma import (MAX_CONSECUTIVE_SOLVE_FAILURES, SolverUnhealthyError, _detach, _prepare,
                   budget_count, budget_counts_block, budget_exhausted, budget_policy,
                   summarize, summarize_rows)
@@ -133,6 +134,10 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
     policy = budget_policy(cfg, budget)         # B.4: shared budget accounting with cma.search
     max_new = policy["budget"]
     space = DesignSpace.from_config(cfg)
+    space, linked = links_mod.reduce_space(space, cfg)   # B.2: absent search.links = same space
+    if linked:
+        log.info("search.links: %d linked knob(s) removed from the CMA-ME dimension: %s",
+                 len(linked), sorted(linked))
     x0 = space.normalize(space.seed)
     solution_dim = int(len(x0))
 
@@ -296,6 +301,8 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
         bc = budget_counts_block(state, policy)
         if bc is not None:
             upd["budget_counts"] = bc
+        if linked:
+            upd["links"] = linked               # B.2: run.json records the resolved links
         rundir.update_run_json(run_dir, **upd)
         suffix = ""
         if bc is not None:
