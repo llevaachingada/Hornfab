@@ -4,81 +4,69 @@
 #        --out runs\analysis\day_2026-11-12
 #
 # Run paths are RELATIVE to `runs_root` and read-only; every output goes to --out.
-# The <FILL_*> placeholders are filled by the orchestrator from
-#   runs\nights\gpu_day_2026-11-12\summary.jsonl  and  runs\nights\cpu_day_2026-11-12\summary.jsonl
-# when tonight's jobs end (one search.ndjson run dir per job id).
+# PARTIAL fill (2026-11-12): the GPU continuation queue (g2-g7, g8/g9 resumes) is still running;
+# the completed / in-progress run dirs below are filled now. The final fill adds g2-g7 and the
+# g5 staged A/B when the GPU queue finishes.
 #
 # Job ids (night queue): g0/c1 lane parity; g1+g2 core_law seeds 1030/1031;
 # g3 narrow vs g4 control; g5 staged A/B (runs\staged_ab_2026-11-12);
 # g6+g7+c2 v6 seeds 1234/1235/1236; g8, g9 atlas resumes.
+#
+# A.7 is reported separately from the reconstructed per-backend pair (cache_cpu/cache ->
+# scratch/lane_parity_2026-11-12); the source run's verify/ dir is mixed by the pre-fix
+# collision, so it is not a valid A.7 input.
 
 runs_root: runs
 
-lane_parity:
-  - id: g0-c1                    # CP-7b 0.2 dB gate: GPU job g0 vs CPU mirror c1
-    gpu: "<FILL_g0_gpu_run_dir>"     # runs/nights/gpu_day_2026-11-12/summary.jsonl
-    cpu: "<FILL_c1_cpu_run_dir>"     # runs/nights/cpu_day_2026-11-12/summary.jsonl
+lane_parity: []
 
 convergence:
-  - id: g1                       # core_law seed 1030
-    run: "<FILL_g1_run_dir>"
-  - id: g2                       # core_law seed 1031
-    run: "<FILL_g2_run_dir>"
-  - id: g6                       # v6 seed 1234
-    run: "<FILL_g6_run_dir>"
-  - id: g7                       # v6 seed 1235
-    run: "<FILL_g7_run_dir>"
-  - id: c2                       # v6 seed 1236 (control)
-    run: "<FILL_c2_run_dir>"
-  - id: g8                       # atlas resume
-    run: "<FILL_g8_run_dir>"
-  - id: g9                       # atlas resume
-    run: "<FILL_g9_run_dir>"
+  - id: g1                       # core_law seed 1030 resume (g1b completed +117 evals)
+    run: "20261030T170642Z-screen-fbab4f"
+  # - id: g2                     # core_law seed 1031 (GPU queue pending)
+  #   run: "<FILL_g2_run_dir>"
+  # - id: g6                     # v6 seed 1234 (GPU queue will resume this run)
+  #   run: "<FILL_g6_run_dir>"
+  - id: c2                       # v6 seed 1236 (control, CPU lane)
+    run: "20261112T144510Z-screen-00cf9c"
+  # - id: g7                     # v6 seed 1235 (GPU queue pending)
+  #   run: "<FILL_g7_run_dir>"
+  - id: g8                       # atlas ext-throat resume base (GPU queue will extend it)
+    run: "20261112T110126Z-screen-c414b1"
+  - id: g9                       # ath_core atlas resume base (GPU queue will extend it)
+    run: "20261030T111108Z-screen-377bbe"
 
 seed_groups:
-  - id: core_law_v4_seeds        # g1+g2: same brief, seeds 1030/1031 (2 seeds -> indicative at most)
-    seeds: ["<FILL_g1_run_dir>", "<FILL_g2_run_dir>"]
-  - id: v6_seeds                 # g6+g7+c2: v6 seeds 1234/1235/1236 (3 seeds -> indicative at most)
-    seeds: ["<FILL_g6_run_dir>", "<FILL_g7_run_dir>", "<FILL_c2_run_dir>"]
-  - id: atlas_resumes            # g8+g9: resumed atlas runs
-    seeds: ["<FILL_g8_run_dir>", "<FILL_g9_run_dir>"]
+  # - id: core_law_v4_seeds      # g1+g2: same brief, seeds 1030/1031 (g2 pending)
+  #   seeds: ["<FILL_g1_run_dir>", "<FILL_g2_run_dir>"]
+  - id: v6_seeds                 # g6+c2 now; g7 adds the third v6 seed when it finishes
+    seeds: ["20261112T113047Z-screen-24053e", "20261112T144510Z-screen-00cf9c"]
+  # atlas resumes mix briefs/families -> A.2 refuses; not a seed group.
 
 sensitivity:
   - id: g1                       # v4 core_law (surrogate importance needs sklearn; optional)
-    run: "<FILL_g1_run_dir>"
-  - id: g6                       # v6
-    run: "<FILL_g6_run_dir>"
+    run: "20261030T170642Z-screen-fbab4f"
+  - id: g6                       # v6 (interrupted base; the GPU queue extends it)
+    run: "20261112T113047Z-screen-24053e"
 
 links:
   - id: g1                       # feeds Group B's `links:` config
-    run: "<FILL_g1_run_dir>"
+    run: "20261030T170642Z-screen-fbab4f"
 
 walls:
   - id: g1                       # bound walls -> narrow/widen proposals for Group B
-    run: "<FILL_g1_run_dir>"
+    run: "20261030T170642Z-screen-fbab4f"
   - id: g6
-    run: "<FILL_g6_run_dir>"
+    run: "20261112T113047Z-screen-24053e"
 
-ab_compare:
-  - id: g3-g4                    # narrow (g3) vs control (g4), equal budget
-    a: ["<FILL_g3_run_dir>"]
-    b: ["<FILL_g4_run_dir>"]
-    label_a: narrow
-    label_b: control
-  - id: g5                       # staged A/B written by tonight's staged dir
-    a: ["staged_ab_2026-11-12/<FILL_g5_stage_a_subdir>"]   # adjust to the layout the
-    b: ["staged_ab_2026-11-12/<FILL_g5_stage_b_subdir>"]   # staged queue actually writes
-    label_a: staged
-    label_b: joint
+ab_compare: []                   # g3/g4 and g5 staged A/B are pending in the GPU queue
 
 term_balance:                    # A.9: recalibration inputs (tolerance = top-decile median raw)
   - id: g1                       # v4 core_law
-    run: "<FILL_g1_run_dir>"
+    run: "20261030T170642Z-screen-fbab4f"
   - id: g6                       # v6
-    run: "<FILL_g6_run_dir>"
+    run: "20261112T113047Z-screen-24053e"
 
 fidelity:                        # A.10: screen-vs-verify bias per brief
-  - id: g1                       # screen run whose finals got a verify pass
-    run: "<FILL_g1_run_dir_with_verify>"
-  - id: g6
-    run: "<FILL_g6_run_dir_with_verify>"
+  - id: g1                       # screen run whose finals got a verify pass (g1c/c2b rows)
+    run: "20261030T170642Z-screen-fbab4f"
