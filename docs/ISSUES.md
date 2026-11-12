@@ -7,6 +7,9 @@ Local-only, added 2026-11-12 (**fix: Group-A test CLI helper ran with a hard-cod
 - PR #38 merged with CI red (repo does not enforce status checks): `run_cli` in
   `tests/test_tools_analysis_common.py` hardcoded the box's venv path; CI (Linux) failed ~25 tests with
   `FileNotFoundError`. Fixed with `sys.executable` in PR (this one); no product code touched.
+- Second cause found by the fix PR's CI: three sensitivity tests asserted surrogate availability
+  (sklearn optional by contract; absent on CI) — tests now assert the availability/degradation
+  contract instead. No product code touched.
 
 Local-only, added 2026-11-12 (**day plan group D merge, PR #35; no GitHub issue state changed**):
 - D.1-D.4 landed: two-lane `night_status.py` (locks, running jobs, row ages, stale-lane ALERT), night-runner
