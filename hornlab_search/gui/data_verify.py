@@ -641,6 +641,27 @@ def verify_report(runs: Path, run_id: str, root: Path) -> dict:
                 if ga.get("available"):
                     gate_audit = ga
                     break
+    # Not comparable (plan §5 WP1.3): no cross-tier ranking or worse-counts either, only raw verify J.
+    if not comparable and not is_standalone:
+        for k in ("n_worse", "n_pairs", "bias_median_pct", "spearman_all", "spearman_top5",
+                  "top5_overlap", "screen1_verify_rank"):
+            if k in summary:
+                summary[k] = None
+        for row in rows:
+            row["screen_rank"] = None
+            row["delta_j"] = row["delta_pct"] = None
+
+    # Per-row gates: merge designs from this run's audit and every linked source's audit
+    # (an audit may key verify rows under either id). Unknown hash stays None ("not audited").
+    gate_designs: dict = {}
+    for rid in [run_id] + [s["run_id"] for s in verify_sources_list if s.get("kind") == "linked"]:
+        ga = gate_audit if rid == run_id else run_gate_audit(root, rid)
+        if ga.get("available"):
+            for h, entry in (ga.get("designs") or {}).items():
+                gate_designs.setdefault(h, entry)
+    for row in rows:
+        entry = gate_designs.get(row.get("hash"))
+        row["gates"] = dict(entry.get("gates") or {}) if entry else None
     # Slim the gate_audit for the report (no per-design data; that's in rows)
     if gate_audit.get("available"):
         slim_gate = {

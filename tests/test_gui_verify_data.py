@@ -442,3 +442,28 @@ class TestDataPyAdditive:
         assert curves is not None
         # Verify tier has 29 freqs
         assert len(curves["freqs"]) == 29
+
+
+# ── orchestrator review fixes (2026-11-12) ────────────────────────────────────────────────────
+
+def test_report_rows_carry_gates_from_audit(tmp_path):
+    from tests.gui_verify_fixtures import make_runs
+    from hornlab_search.gui import data_verify as V
+    ids = make_runs(tmp_path)
+    rep = V.verify_report(tmp_path / "runs", ids["R_SCREEN"], root=tmp_path)
+    if not rep.get("gate_audit", {}).get("available"):
+        import pytest
+        pytest.skip("fixture audit not keyed to R_SCREEN")
+    assert any(r.get("gates") for r in rep["rows"]), "audited verify rows must carry gate dicts"
+
+
+def test_not_comparable_nulls_cross_tier_stats(tmp_path):
+    from tests.gui_verify_fixtures import make_runs
+    from hornlab_search.gui import data_verify as V
+    ids = make_runs(tmp_path)
+    rep = V.verify_report(tmp_path / "runs", ids["R_XBAND"], root=tmp_path)
+    assert rep["comparable"] is False
+    s = rep["summary"]
+    assert s.get("n_worse") is None and s.get("screen1_verify_rank") is None
+    assert all(r.get("screen_rank") is None and r.get("delta_pct") is None for r in rep["rows"])
+    assert any(r.get("verify_j") is not None for r in rep["rows"])
