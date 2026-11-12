@@ -1470,6 +1470,98 @@ def _config_seed_materializes(p: Path) -> bool:
 #: every other import).  Bounded by the number of config files.
 _SEED_GATE_CACHE: dict[tuple, bool] = {}
 
+# WP2b (GUI plan 2026-11-12): the march costs ~40 s cold for ~200 configs, paid on every GUI start.
+# The memo is ALSO persisted to a per-user cache file OUTSIDE the repo/runs tree. To keep the
+# "a generator code change needs a restart" guarantee, every entry carries a code fingerprint
+# (the design/ + mesh/ sources' paths, mtimes and sizes, plus the installed mesher version): any
+# code change makes every disk entry miss. HORNLAB_GUI_NO_DISK_CACHE=1 turns persistence off.
+_SEED_DISK: dict | None = None
+_SEED_DISK_DIRTY = False
+
+
+def _seed_cache_file() -> Path | None:
+    if os.environ.get("HORNLAB_GUI_NO_DISK_CACHE"):
+        return None
+    # Never touch the user's real cache file from the test suite unless a test opts in.
+    if os.environ.get("PYTEST_CURRENT_TEST") and not os.environ.get("HORNLAB_GUI_DISK_CACHE_IN_TESTS"):
+        return None
+    base = os.environ.get("LOCALAPPDATA") or os.path.join(os.path.expanduser("~"), ".cache")
+    return Path(base) / "hornlab-search" / "gui_seed_gate_cache.json"
+
+
+_CODE_STAMP: str | None = None
+
+
+def _code_stamp() -> str:
+    global _CODE_STAMP
+    if _CODE_STAMP is None:
+        import hashlib
+        pkg = Path(__file__).resolve().parents[1]
+        h = hashlib.sha256()
+        for sub in ("design", "mesh", "config.py"):
+            target = pkg / sub
+            files = sorted(target.rglob("*.py")) if target.is_dir() else [target]
+            for f in files:
+                try:
+                    st = f.stat()
+                except OSError:
+                    continue
+                h.update(f"{f.relative_to(pkg).as_posix()}|{st.st_mtime_ns}|{st.st_size}\n".encode())
+        try:
+            from importlib.metadata import version
+            h.update(("mesher=" + version("hornlab-waveguide-mesher")).encode())
+        except Exception:  # noqa: BLE001 - missing metadata just narrows the fingerprint
+            pass
+        _CODE_STAMP = h.hexdigest()[:16]
+    return _CODE_STAMP
+
+
+def _seed_disk_key(key: tuple) -> str:
+    return json.dumps([_code_stamp(), key])
+
+
+def _seed_disk_get(key: tuple) -> bool | None:
+    global _SEED_DISK
+    if _SEED_DISK is None:
+        _SEED_DISK = {}
+        f = _seed_cache_file()
+        if f is not None:
+            try:
+                data = json.loads(f.read_text(encoding="utf-8"))
+                if isinstance(data, dict):
+                    _SEED_DISK = {k: v for k, v in data.items() if isinstance(v, bool)}
+            except (OSError, ValueError):
+                pass
+    return _SEED_DISK.get(_seed_disk_key(key))
+
+
+def _seed_disk_put(key: tuple, disabled: bool) -> None:
+    global _SEED_DISK_DIRTY
+    if _SEED_DISK is None:
+        _seed_disk_get(key)
+    _SEED_DISK[_seed_disk_key(key)] = disabled
+    _SEED_DISK_DIRTY = True
+
+
+def _seed_disk_flush() -> None:
+    """Write the persisted memo once per list_configs call (atomic replace; failures are ignored —
+    the cache is an optimisation, never a source of truth). Entries for other code stamps are
+    dropped so the file cannot grow without bound."""
+    global _SEED_DISK_DIRTY
+    f = _seed_cache_file()
+    if not _SEED_DISK_DIRTY or f is None or _SEED_DISK is None:
+        return
+    stamp = json.dumps(_code_stamp())
+    keep = {k: v for k, v in _SEED_DISK.items() if k.startswith("[" + stamp + ",")}
+    try:
+        f.parent.mkdir(parents=True, exist_ok=True)
+        tmp = f.with_suffix(".tmp")
+        tmp.write_text(json.dumps(keep), encoding="utf-8")
+        os.replace(tmp, f)
+        _SEED_DISK_DIRTY = False
+    except OSError:
+        pass
+
 
 def _file_stamp(p: Path | None) -> tuple | None:
     if p is None:
@@ -1514,7 +1606,11 @@ def list_configs(root: Path) -> list[dict]:
         key = _seed_gate_key(p, raw, root)
         disabled = _SEED_GATE_CACHE.get(key)
         if disabled is None:
-            disabled = not _config_seed_materializes(p)
+            disabled = _seed_disk_get(key) if key[0] is not None else None
+            if disabled is None:
+                disabled = not _config_seed_materializes(p)
+                if key[0] is not None:
+                    _seed_disk_put(key, disabled)
             _SEED_GATE_CACHE[key] = disabled
         entry = clean({
             "path": p.relative_to(root).as_posix(), "name": raw.get("name") or p.stem,
@@ -1539,6 +1635,7 @@ def list_configs(root: Path) -> list[dict]:
         if bounds:              # the sandbox's fallback when the param catalog has no entry yet
             entry["bounds"] = clean(bounds)
         out.append(entry)
+    _seed_disk_flush()
     return out
 
 
