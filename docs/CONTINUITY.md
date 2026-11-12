@@ -1,6 +1,18 @@
 # CONTINUITY
 
 
+## 2026-11-12 (14:30Z) - DAY QUEUE: GPU + CPU LANES LAUNCHED FROM THE COMPUTE STUDY
+
+- Study: `C:/Users/hunte/Hrns/study_2026-11-12/COMPUTE_STUDY.md` (414 runs inventoried, sensitivity, bound walls). Its queue
+  was corrected before launch: its "calibration" job called an evidence byte-checker (dropped), seed replicates had no
+  `--cma-seed` (fixed), the narrowed config changed six unannounced knobs (rebuilt: only the three bound walls + seed).
+- Fixes: `tools/run_staged_search.py` resolves a relative `brief_file` against its source (the 11-12 night's n7 "Stage A
+  produced no best.json"); new `examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4_narrow.yaml`.
+- CPU backend provisioned (`python -m hornlab_beat_bem.provision --backend cpu`, probe solved). Queues
+  `runs/nights/gpu_day_2026-11-12.yaml` (10 jobs: CPU/GPU cross-check pair, core_law resume + seed 1031, narrow vs control
+  seed 1235, staged A/B, v6 resume + seed 1235, ext-throat and ath_core atlas resumes) and `runs/nights/cpu_day_2026-11-12.yaml`
+  (cross-check, v6 seed 1236, hypex elites verify on CPU).
+
 ## 2026-11-12 (L1) - LANE L1: CPU SECOND SOLVE LANE WIRED END-TO-END
 
 - **Scope:** lane L1 of the two-lane night architecture, branch `lane/L1-cpu-lane`. All eight L1
