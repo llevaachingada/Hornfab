@@ -11,6 +11,40 @@ branch is done on `integ/2026-11-12` (objective v5 collision fixed: hardened obj
 then three lanes - scoring/driver/data truth (WP-B), solve speed (WP-C), GUI (WP-D) - and the GPU night (section 3).
 **New MEH work is paused** (owner, 2026-11-12); the merged MEH code stays green.
 
+**Lane status (updated 2026-11-12 evening): all five lanes LANDED.** Integration PR #24 merged earlier the same
+day; the lanes executed the plan on top of it:
+- L1 CPU second solve lane - **DONE, PR #29 merged** (`solve.julia_threads`, two-lane night runner, row provenance, profiles).
+- L2 GUI versions/gates/views - **DONE, PR #26 merged** (objective v1-v7 selector, J version guard, gate-audit chips).
+- L3 scoring truth: offline v6-vs-v7 re-score + loading-objectives reconciliation - **DONE, PR #27 merged**.
+- L4 hygiene (`.gitattributes` + EOL renormalise, docs completions) - **PR #25 still OPEN, merges LAST today**
+  (it touches every file, so it is merged after all day-plan lanes; see `docs/IMPLEMENTATION_PLAN_2026-11-12_DAY.md` merge order).
+- L5 two-way data interop with the collaborator - **DONE, PR #28 merged** (dataset MANIFEST, `export_config.py`,
+  `labs/` two-way HF, foreign-data ingest with the CP-7b parity gate).
+- Also merged 2026-11-12: PR #30 (AGENTS.md GPU rules for OpenCode; handoff F/H assignments) and PR #31
+  (staged-search brief path fix + narrowed ath_core cell for the day queue).
+
+**Owner decisions still open (as of 2026-11-12):**
+- Loading objective: the v6 (Le Cléac'h class) / v7 (CD briefs) split is now **confirmed by PR #27's evidence**
+  (v6-vs-v7 top-20 shortlists disagree, Kendall tau < 0 in every brief class); the recommendation written there
+  is keep the split, no v8. Owner sign-off to leave the split standing is still pending.
+- Round-throat gate default for new briefs (WP-B3 / day-plan B.5): on or off by default - owner to set.
+- NVIDIA Control Panel sysmem fallback setting for `julia.exe` (WP-C5): machine setting, owner only.
+- HF write access for Collin on `chingadalleva/hornlab-search-data` (or an agreed lab repo): blocks the L5.7
+  two-way flow (`tools/hf_sync.py push --lab collin-4090`).
+- Printing 1-2 candidates (P12d / 10-30 handoff section 4.3): a measured print outranks any further night.
+
+## P15 (added 2026-11-12, orchestrator). The 2026-11-12 day hardening plan (lanes running today)
+
+**Plan: `docs/IMPLEMENTATION_PLAN_2026-11-12_DAY.md` (lands via PR #32).** Groups A-F run in parallel from
+`origin/main` while the two-lane day queue produces replicate, narrowed-vs-control, staged-vs-joint and v6 evidence:
+Group A - evolutionary-analysis toolkit (turns today's runs into answers); B - search features (data warm start,
+linked knobs, `narrow`, valid-only budget, round-throat gate flag); C - calibration harness + n1 throughput
+defaults evidence; D - night/data ops hardening (two-lane `night_status.py`, runner robustness, lane-dataset
+merge, night report); E - GUI (analysis page, lanes panel, elites catalog); F - docs and issue hygiene (this
+lane: P15 recorded here, P14 lane closure above, WP status column in the senior plan, and the CONTINUITY
+re-order patch for the orchestrator). Merge order: F -> D -> A -> C -> B -> E; PR #25 (L4 EOL renormalise)
+merges last after both queues finish, then main is pulled into the main checkout.
+
 ## P0a (added 2026-10-29, owner-directed). b3a 80x80/600 gate-aware search — A1 decision next
 
 Owner retargeted the b3a PA cell to **80 x 80 deg at 600 Hz** (the 588 x 588 seed reads H/V 89.65 at
