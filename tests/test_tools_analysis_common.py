@@ -31,8 +31,9 @@ TESTS = Path(__file__).resolve().parent
 if str(ANALYSIS) not in sys.path:
     sys.path.insert(0, str(ANALYSIS))
 
-#: the venv interpreter the tools are always run with (never bare python)
-PY = Path(r"C:\Users\hunte\Hrns\hornlab-search\.venv\Scripts\python.exe")
+#: the interpreter the tests run under (locally the venv's python via PY; in CI the
+#: job's python — never a hard-coded machine path, so the tests also run on Linux CI)
+PY = Path(sys.executable)
 
 
 def load_tool(name: str) -> Any:

@@ -1,6 +1,17 @@
 # CONTINUITY
 
 
+## 2026-11-12 (17:35Z) - FIX: GROUP-A TEST CLI HELPER USES THE RUNNING INTERPRETER (CI GREEN RESTORED)
+
+- `tests/test_tools_analysis_common.py::run_cli` hardcoded this box's
+  `C:\Users\hunte\Hrns\hornlab-search\.venv\Scripts\python.exe` as the subprocess interpreter; CI
+  (Linux, no such path) got `FileNotFoundError` in ~25 Group-A CLI-invocation tests, so PR #38's merge
+  went in with CI red (status checks are not enforced on this repo). Fix: `PY = Path(sys.executable)`
+  — locally that is the venv python (pytest runs under it), in CI the job's python; tools are pure
+  stdlib+numpy/scipy/matplotlib+optional-sklearn so they work under either. No product code changed.
+- Follow-up rule for future lanes: never put an absolute machine path in a test; derive the
+  interpreter from `sys.executable`.
+
 ## 2026-11-12 (17:10Z) - DAY GROUP A: EVOLUTIONARY-ANALYSIS TOOLKIT COMPLETE
 
 - Day-plan group A (PR #38, branch `day/A-analysis`): A.0-A.10 complete under `tools/analysis/` —
