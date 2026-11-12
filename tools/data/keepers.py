@@ -63,15 +63,23 @@ import csv
 import hashlib
 import json
 import math
+import os
 import re
+import shutil
 import sys
 from pathlib import Path
 
 # Runnable as a plain script (tools/data/<this file>): locate the repo root from the file
 # location, not the current working directory, as the other tools do.
 REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 _SHARD_RE = re.compile(r"^shard-(\d+)\.jsonl$")
+
+#: Swarm lane H: optional record provenance fields. Backfilled only when absent; existing values
+#: always win, and a missing join value never writes a null/empty string.
+BACKFILL_FIELDS = ("run_id", "config_name", "typology")
 
 FIELDS = (
     "design_hash",
@@ -318,6 +326,209 @@ def run(*, dataset: Path, out: Path) -> dict:
     }
 
 
+# ------------------------------------------------------------------ lane H backfill
+#
+# Old records (schema v1, written before 2026-11-12) lack the optional top-level run_id /
+# config_name / typology fields. Join them back from the run tree that produced them:
+#
+#   runs/<run_id>/search.ndjson   row (design_hash, solve_hash) -> generator block / family
+#   runs/<run_id>/config.yaml     name: -> config_name
+#
+# Dry run by default. ``--apply`` copies every shard it will change into ``--backup`` before
+# writing through a temp file + ``os.replace`` (hardlinked copies are never edited in place).
+# Existing fields are never overwritten; a join miss leaves the record untouched.
+
+def _read_json(path: Path) -> dict:
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def _run_config_name(run_dir: Path) -> str | None:
+    """``config.yaml`` ``name`` first (the contract the lane spec names), then run.json."""
+    config_yaml = run_dir / "config.yaml"
+    if config_yaml.is_file():
+        try:
+            import yaml
+            data = yaml.safe_load(config_yaml.read_text(encoding="utf-8")) or {}
+        except Exception:  # noqa: BLE001 - a bad run snapshot must not stop the backfill
+            data = {}
+        if isinstance(data, dict) and data.get("name"):
+            return str(data["name"])
+    run_json = _read_json(run_dir / "run.json")
+    if run_json.get("config_name"):
+        return str(run_json["config_name"])
+    config = run_json.get("config")
+    if isinstance(config, dict) and config.get("name"):
+        return str(config["name"])
+    return None
+
+
+def _row_typology(row: dict) -> str:
+    from hornlab_search.dataset.record import typology_name
+    return typology_name(row.get("generator"), row.get("family"))
+
+
+def run_index(runs_root: Path) -> tuple[dict[tuple[str, str], dict], int]:
+    """Map ``(design_hash, solve_hash)`` to the provenance values of the first run that saw it.
+
+    Returns ``(index, duplicate_hits)``. Runs are read in sorted directory order, so the result
+    is deterministic; a later duplicate is counted, not allowed to overwrite the first.
+    """
+    index: dict[tuple[str, str], dict] = {}
+    duplicates = 0
+    try:
+        run_dirs = sorted(p for p in runs_root.iterdir() if p.is_dir())
+    except OSError:
+        return index, duplicates
+    for run_dir in run_dirs:
+        ndjson = run_dir / "search.ndjson"
+        if not ndjson.is_file():
+            continue
+        config_name = _run_config_name(run_dir)
+        run_id = run_dir.name
+        try:
+            lines = ndjson.read_text(encoding="utf-8", errors="replace").splitlines()
+        except OSError:
+            continue
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                row = json.loads(line)
+            except ValueError:
+                continue
+            if not isinstance(row, dict):
+                continue
+            design_hash, solve_hash = row.get("design_hash"), row.get("solve_hash")
+            if not design_hash or not solve_hash:
+                continue
+            key = (str(design_hash), str(solve_hash))
+            if key in index:
+                duplicates += 1
+                continue
+            index[key] = {
+                "run_id": run_id,
+                "config_name": config_name,
+                "typology": _row_typology(row),
+            }
+    return index, duplicates
+
+
+def _backfill_record(record: dict, entry: dict) -> dict[str, str]:
+    """Add only absent, non-empty fields. Returns the fields actually written."""
+    added: dict[str, str] = {}
+    for field in BACKFILL_FIELDS:
+        if field in record:
+            continue
+        value = entry.get(field)
+        if value:
+            record[field] = str(value)
+            added[field] = str(value)
+    return added
+
+
+def plan_backfill(dataset_root: Path, runs_root: Path) -> tuple[dict[Path, tuple[str, int, int]], dict]:
+    """Build the rewrite plan without touching disk.
+
+    Returns ``({shard: (new_text, changed_rows, added_fields)}, stats)``.
+    """
+    index, duplicates = run_index(runs_root)
+    plan: dict[Path, tuple[str, int, int]] = {}
+    shards = 0
+    rows_seen = 0
+    rows_changed = 0
+    fields_added = 0
+    rows_joined = 0
+    try:
+        shard_files = sorted(
+            p for p in dataset_root.glob("shard-*.jsonl")
+            if p.is_file() and _SHARD_RE.match(p.name)
+        )
+    except OSError:
+        shard_files = []
+    for shard in shard_files:
+        shards += 1
+        try:
+            text = shard.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        lines = text.splitlines(keepends=True)
+        out_lines: list[str] = []
+        changed_rows = 0
+        added_fields = 0
+        for line in lines:
+            raw = line.rstrip("\r\n")
+            eol = line[len(raw):]
+            if not raw.strip():
+                out_lines.append(line)
+                continue
+            try:
+                record = json.loads(raw)
+            except ValueError:
+                out_lines.append(line)
+                continue
+            rows_seen += 1
+            if not isinstance(record, dict):
+                out_lines.append(line)
+                continue
+            key = (str(record.get("design_hash") or ""), str(record.get("solve_hash") or ""))
+            entry = index.get(key)
+            if entry is None:
+                out_lines.append(line)
+                continue
+            rows_joined += 1
+            added = _backfill_record(record, entry)
+            if not added:
+                out_lines.append(line)
+                continue
+            out_lines.append(json.dumps(record, ensure_ascii=False, separators=(",", ":")) + eol)
+            changed_rows += 1
+            added_fields += len(added)
+        if changed_rows:
+            plan[shard] = ("".join(out_lines), changed_rows, added_fields)
+            rows_changed += changed_rows
+            fields_added += added_fields
+    stats = {
+        "runs_indexed": len(index),
+        "duplicate_run_hits": duplicates,
+        "shards_read": shards,
+        "rows_seen": rows_seen,
+        "rows_joined": rows_joined,
+        "rows_changed": rows_changed,
+        "fields_added": fields_added,
+    }
+    return plan, stats
+
+
+def _write_shard(path: Path, text: str, backup_root: Path, dataset_root: Path) -> None:
+    try:
+        rel = path.resolve().relative_to(dataset_root.resolve())
+    except ValueError:
+        rel = Path(path.name)
+    dest = backup_root / rel
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    if not dest.exists():
+        shutil.copy2(path, dest)
+    tmp = path.with_name(path.name + ".lane_h.tmp")
+    tmp.write_text(text, encoding="utf-8", newline="")
+    os.replace(tmp, path)
+
+
+def _backfill_lines(stats: dict, plan: dict[Path, tuple[str, int, int]]) -> list[str]:
+    return [
+        "keepers backfill: optional run_id / config_name / typology (dry run by default)",
+        f"  run rows indexed : {stats['runs_indexed']} "
+        f"(duplicate (design, solve) hits skipped: {stats['duplicate_run_hits']})",
+        f"  dataset rows     : {stats['rows_seen']} (joined {stats['rows_joined']})",
+        f"  rows to change   : {stats['rows_changed']} in {len(plan)} shard(s)",
+        f"  fields to add    : {stats['fields_added']}",
+    ]
+
+
 def _summary_lines(doc: dict) -> list[str]:
     return [
         "keepers: curated derived view of dataset records (dataset is read-only)",
@@ -351,6 +562,16 @@ def build_parser() -> argparse.ArgumentParser:
                         help="CSV output path (default: dataset/views/keepers.csv)")
     parser.add_argument("--json", default=None,
                         help="write the summary as JSON to this path (default: none)")
+    parser.add_argument("--backfill", action="store_true",
+                        help="lane H: backfill run_id/config_name/typology from runs/*/search.ndjson "
+                             "+ config.yaml (dry run unless --apply)")
+    parser.add_argument("--runs", default="runs",
+                        help="run tree to join when --backfill (default: runs)")
+    parser.add_argument("--apply", action="store_true",
+                        help="with --backfill, write the changes (default: dry run)")
+    parser.add_argument("--backup", default=None,
+                        help="with --backfill --apply, backup root "
+                             "(default: <dataset>/_backup_backfill_run_fields)")
     parser.add_argument("--quiet", action="store_true",
                         help="do not print the human summary")
     return parser
@@ -358,6 +579,23 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    if args.backfill:
+        dataset = _resolve(args.dataset)
+        runs = _resolve(args.runs)
+        plan, stats = plan_backfill(dataset, runs)
+        if not args.quiet:
+            for line in _backfill_lines(stats, plan):
+                print(line)
+            for shard, (_text, rows, fields) in plan.items():
+                print(f"  {shard}: {rows} row(s), {fields} field(s)")
+        if not args.apply:
+            print("dry run: nothing written (pass --apply)")
+            return 0
+        backup = _resolve(args.backup) if args.backup else dataset / "_backup_backfill_run_fields"
+        for shard, (text, _rows, _fields) in plan.items():
+            _write_shard(shard, text, backup, dataset)
+        print(f"applied; originals in {backup}")
+        return 0
     doc = run(dataset=_resolve(args.dataset), out=_resolve(args.out))
     if args.json:
         _write_summary(_resolve(args.json), doc)
