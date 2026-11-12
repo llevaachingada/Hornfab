@@ -35,13 +35,14 @@ from pathlib import Path
 
 import numpy as np
 
-from ..config import QD_DESCRIPTORS
+from ..config import ConfigError, QD_DESCRIPTORS
 from ..dataset.record import DEFAULT_TRACE_FRACTION
 from ..design.space import DesignSpace
 from ..mesh.build import MeshConsistencyError
 from ..types import Evaluation
 from . import rundir
 from . import links as links_mod
+from . import warmstart
 from .cma import (MAX_CONSECUTIVE_SOLVE_FAILURES, SolverUnhealthyError, _detach, _prepare,
                   budget_count, budget_counts_block, budget_exhausted, budget_policy,
                   summarize, summarize_rows)
@@ -139,13 +140,25 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
         log.info("search.links: %d linked knob(s) removed from the CMA-ME dimension: %s",
                  len(linked), sorted(linked))
     x0 = space.normalize(space.seed)
+    sigma0_eff = float(cfg.search.sigma0)      # B.1: sigma0_eff = warm-start sigma when configured
+    warm_record = None
+    try:
+        warm_design, warm_record = warmstart.mean_and_sigma(cfg, space)   # (None, None) = absent
+    except warmstart.WarmStartError as exc:
+        raise ConfigError(str(exc)) from None   # a bad source is a CONFIG problem: refuse, don't solve
+    if warm_design is not None:
+        x0 = space.normalize(warm_design)
+        sigma0_eff = float(warm_record["sigma0"])
+        log.info("warm start (CMA-ME): mean = best valid design %s from %s (J=%.6g), sigma0 %.6g",
+                 warm_record["mean_design_hash"], warm_record["from_runs"],
+                 warm_record["mean_objective"], sigma0_eff)
     solution_dim = int(len(x0))
 
     archive = GridArchive(solution_dim=solution_dim, dims=list(bins),
                           ranges=[DESCRIPTOR_RANGE_DEG, DESCRIPTOR_RANGE_DEG],
                           seed=int(cfg.search.seed))
     emitter = EvolutionStrategyEmitter(
-        archive, x0=np.asarray(x0, dtype=float), sigma0=float(cfg.search.sigma0),
+        archive, x0=np.asarray(x0, dtype=float), sigma0=sigma0_eff,
         ranker="2imp", es="cma_es", selection_rule="mu",
         bounds=[(0.0, 1.0)] * solution_dim,
         batch_size=int(cfg.search.popsize) if cfg.search.popsize else None,
@@ -303,6 +316,8 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
             upd["budget_counts"] = bc
         if linked:
             upd["links"] = linked               # B.2: run.json records the resolved links
+        if warm_record is not None:
+            upd["warm_start"] = warm_record     # B.1: the warm-start sources + sigma record
         rundir.update_run_json(run_dir, **upd)
         suffix = ""
         if bc is not None:

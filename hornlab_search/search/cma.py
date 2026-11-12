@@ -32,6 +32,7 @@ from pathlib import Path
 import cma as cma_lib
 import numpy as np
 
+from ..config import ConfigError
 from ..dataset.record import DEFAULT_TRACE_FRACTION
 from ..design.space import DesignSpace
 from ..mesh.build import MeshConsistencyError
@@ -41,6 +42,7 @@ from ..targets.spec import Target
 from ..types import Evaluation
 from . import rundir
 from . import links as links_mod
+from . import warmstart
 from .pipeline import CandidatePipeline
 from .evaluate import (DETERMINISTIC_KINDS, collect_lib_shas, error_kind, evaluate, make_context,
                        read_ndjson)
@@ -386,6 +388,18 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
         log.info("search.links: %d linked knob(s) removed from the CMA dimension: %s",
                  len(linked), sorted(linked))
     x0 = space.normalize(space.seed)
+    sigma0_eff = float(cfg.search.sigma0)      # B.1: sigma0_eff = warm-start sigma when configured
+    warm_record = None
+    try:
+        warm_design, warm_record = warmstart.mean_and_sigma(cfg, space)   # (None, None) = absent
+    except warmstart.WarmStartError as exc:
+        raise ConfigError(str(exc)) from None   # a bad source is a CONFIG problem: refuse, don't solve
+    if warm_design is not None:
+        x0 = space.normalize(warm_design)
+        sigma0_eff = float(warm_record["sigma0"])
+        log.info("warm start: mean = best valid design %s from %s (J=%.6g), sigma0 %.6g",
+                 warm_record["mean_design_hash"], warm_record["from_runs"],
+                 warm_record["mean_objective"], sigma0_eff)
     restarts = getattr(cfg.search, "restarts", None)
     (run_dir / "cma").mkdir(exist_ok=True)
 
@@ -409,7 +423,7 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
     popsize0 = int(cfg.search.popsize) if cfg.search.popsize else None
     es = None
     if restarts is None:                       # today's single-ES path, bit-for-bit
-        es = cma_lib.CMAEvolutionStrategy(list(map(float, x0)), float(cfg.search.sigma0),
+        es = cma_lib.CMAEvolutionStrategy(list(map(float, x0)), sigma0_eff,
                                           es_options(run_dir / "cma", cfg.search.seed, popsize0))
 
     evals: list[Evaluation] = []
@@ -485,6 +499,8 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
             upd["budget_counts"] = bc
         if linked:
             upd["links"] = linked               # B.2: run.json records the resolved links
+        if warm_record is not None:
+            upd["warm_start"] = warm_record     # B.1: the warm-start sources + sigma record
         rundir.update_run_json(run_dir, **upd)
         suffix = ""
         if bc is not None:
@@ -573,7 +589,7 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
                     poptype, sigma_factor, pop_k = sched.plan(k)
                 seed_k = int(cfg.search.seed) + k            # pycma: opts['seed'] += 1 per restart
                 es_k = cma_lib.CMAEvolutionStrategy(
-                    list(map(float, x0)), float(sigma_factor * float(cfg.search.sigma0)),
+                    list(map(float, x0)), float(sigma_factor * sigma0_eff),
                     es_options(run_dir / "cma" / f"restart_{k}", seed_k, pop_k))
                 if k == 0:
                     # pycma's popsize0: whatever the initial run got, i.e. cma's own default when
@@ -589,7 +605,7 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
                          "n_new_in_restart": state["n_new"] - n_new_before,
                          "evals_in_restart": evals_in_restart,
                          "popsize": pop_k,
-                         "sigma0": float(sigma_factor * float(cfg.search.sigma0))}
+                         "sigma0": float(sigma_factor * sigma0_eff)}
                 try:
                     cov_k = covariance_summary(es_k, keys, include_C=False)
                     entry["covariance"] = {

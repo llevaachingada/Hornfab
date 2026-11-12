@@ -125,6 +125,8 @@ class SearchSettings:
     links: dict | None = None          # B.2: {<knob>: {from, scale, offset, min, max}} (B.5 gate
                                        # aside, knobs are removed from the CMA dimension); absent
                                        # = today's dimensions
+    warm_start: dict | None = None     # B.1: {from_runs, top_k, sigma_from_spread,
+                                       # allow_cross_brief}; absent = today's mean/sigma0
 
 
 @dataclass
@@ -897,6 +899,46 @@ def _validate_search_links(value, where: str, bounds_raw: dict) -> dict | None:
     return resolved
 
 
+def _validate_warm_start(value, where: str, cfg_path: Path) -> dict | None:
+    """B.1 (day 2026-11-12): ``search.warm_start: {from_runs, top_k, sigma_from_spread,
+    allow_cross_brief}``. ``from_runs`` (required, non-empty) lists run DIRECTORIES whose
+    search.ndjson/run.json provide the warm-start mean; relative paths are resolved against the
+    config's directory (then the repo root), like ``brief_file``. ``top_k`` (default 10), a
+    positive integer; ``sigma_from_spread`` (default true) and ``allow_cross_brief``
+    (default false) are strict booleans; unknown keys are refused. The resolved paths are stored
+    back so run.json records them."""
+    if value is None:
+        return None
+    if not isinstance(value, dict):
+        raise ConfigError(f"{where}: must be a mapping of options")
+    allowed = {"from_runs", "top_k", "sigma_from_spread", "allow_cross_brief"}
+    unknown = set(value) - allowed
+    if unknown:
+        raise ConfigError(f"{where}: unknown key(s) {sorted(unknown)} (allowed: {sorted(allowed)})")
+    runs = value.get("from_runs")
+    if not isinstance(runs, list) or not runs or \
+            not all(isinstance(r, str) and r for r in runs):
+        raise ConfigError(f"{where}.from_runs must be a non-empty list of run-directory paths")
+    base = Path(__file__).resolve().parents[1]
+    try:
+        resolved = [str(Path(_resolve_path(r, cfg_path.parent, base))) for r in runs]
+    except (TypeError, ValueError):
+        raise ConfigError(f"{where}.from_runs: unresolvable path(s) {runs!r}") from None
+    top_k = value.get("top_k", 10)
+    if isinstance(top_k, bool) or not isinstance(top_k, int) or top_k < 1:
+        raise ConfigError(f"{where}.top_k must be a positive integer, got {top_k!r}")
+    for b in ("sigma_from_spread", "allow_cross_brief"):
+        if b in value and not isinstance(value[b], bool):
+            raise ConfigError(f"{where}.{b} must be true or false, got {value[b]!r}")
+    missing = [r for r in resolved if not Path(r).is_dir()]
+    if missing:
+        raise ConfigError(f"{where}.from_runs: run directory does not exist: {missing[0]}")
+    out = dict(value)
+    out["from_runs"] = resolved
+    out["top_k"] = int(top_k)
+    return out
+
+
 def _validate_near_correction(solve, where: str) -> None:
     """WP14: validate ``solve.near_correction*`` / ``solve.solve_precision`` BEFORE the library
     sees them. The bounds mirror hornlab_beat_bem's own SolveConfig (near_correction_cutoff finite
@@ -1273,7 +1315,7 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
     _validate_source_profile_alpha(solve, f"{where}:solve")
     search = _build(SearchSettings, _require(raw, "search", where), f"{where}:search",
                     optional=("popsize", "infeasible_penalty", "restarts", "qd", "pipeline_prefetch",
-                              "budget_counts", "max_attempts", "links"))
+                              "budget_counts", "max_attempts", "links", "warm_start"))
     if "popsize" not in raw["search"]:
         search.popsize = None
     if "budget_counts" not in raw["search"]:
@@ -1291,6 +1333,11 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
     else:
         search.links = _validate_search_links(search.links, f"{where}:search.links",
                                               raw.get("bounds") or {})
+    if "warm_start" not in raw["search"]:
+        search.warm_start = None
+    else:
+        search.warm_start = _validate_warm_start(search.warm_start, f"{where}:search.warm_start",
+                                                 path)
     if search.algorithm not in SEARCH_ALGORITHMS:
         raise ConfigError(f"{where}: search.algorithm must be one of {list(SEARCH_ALGORITHMS)}, "
                           f"got {search.algorithm!r}")
