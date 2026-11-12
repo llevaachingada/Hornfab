@@ -439,6 +439,22 @@ def _print_terms(ev) -> None:
 # ---------------------------------------------------------------------- gpu-clean
 
 
+_CPU_BACKENDS = ("beat_cpu", "bempp_cpu")
+
+
+def _solve_lock(command: str, args, runs_root):
+    """The lock a solving command takes. A CPU-backend command (``--backend beat_cpu|bempp_cpu``, or
+    any command inside the CPU lane) never takes the GPU lock: the two-lane rule (CLAUDE.md, 2026-11-12)
+    allows one CUDA solve plus one CPU search, and the CPU lane's night runner holds
+    ``runs/.cpu.lane.lock`` for the whole night. Everything else takes the GPU lock as before."""
+    import contextlib
+    from hornlab_search.search.gpulock import gpu_lock
+    from hornlab_search.solve.worker import lane_from_env
+    if getattr(args, "backend", None) in _CPU_BACKENDS or lane_from_env() == "cpu":
+        return contextlib.nullcontext()
+    return gpu_lock(command, runs_root=runs_root)
+
+
 def _cmd_gpu_clean(args) -> int:
     from hornlab_search.search import hygiene
     from hornlab_search.search.gpulock import GpuBusyError, _lock_path, _pid_alive, _read_lock
@@ -465,7 +481,8 @@ def _cmd_gpu_clean(args) -> int:
                 return 3
 
     procs = hygiene.list_project_julia()
-    killed = hygiene.clear_julia(procs)
+    lane = getattr(args, "lane", None)
+    killed = hygiene.clear_julia(procs, lane=lane) if lane else hygiene.clear_julia(procs)
     if killed:
         print(f"gpu-clean: killed {len(killed)} process(es): {killed}")
     else:
@@ -616,7 +633,7 @@ def _cmd_run(args, argv) -> int:
         return 2
     d = _dirs(args)
     try:
-        with gpu_lock(_command_string(argv), runs_root=d["runs"]):
+        with _solve_lock(_command_string(argv), args, d["runs"]):
             return _run_body(args, argv, cfg)
     except GpuBusyError as exc:
         print(str(exc), file=sys.stderr)
@@ -662,7 +679,7 @@ def _cmd_search(args, argv) -> int:
     from hornlab_search.types import BackendUnavailableError
     d = _dirs(args)
     try:
-        with gpu_lock(_command_string(argv), runs_root=d["runs"]):
+        with _solve_lock(_command_string(argv), args, d["runs"]):
             return _search_body(args, argv, d)
     except GpuBusyError as exc:
         print(str(exc), file=sys.stderr)
@@ -780,7 +797,7 @@ def _cmd_verify(args, argv) -> int:
     from hornlab_search.search.gpulock import GpuBusyError, gpu_lock
     d = _dirs(args)
     try:
-        with gpu_lock(_command_string(argv), runs_root=d["runs"]):
+        with _solve_lock(_command_string(argv), args, d["runs"]):
             return _verify_body(args, argv, d)
     except GpuBusyError as exc:
         print(str(exc), file=sys.stderr)
@@ -1561,6 +1578,9 @@ def build_parser() -> argparse.ArgumentParser:
                         help="kill stale Julia/BEAT processes and report VRAM usage")
     gc.add_argument("--force", action="store_true",
                     help="DANGEROUS: skip the GPU-lock check and kill Julia even if a search is running")
+    gc.add_argument("--lane", choices=["gpu", "cpu"], default=None,
+                    help="two-lane nights: only kill hosts of this lane (default: the lane named by "
+                         "HORNLAB_BEAT_WORKER_DIR); hosts of unknown lane are never killed")
     ab = sub.add_parser("ab-bl", parents=[common], help="A/B check of a Hornfab design against Boundary Lab "
                         "(export | solve | import | compare | demo --fake); see docs/ab/BOUNDARY_LAB_AB.md")
     from hornlab_search.compare.cli import add_arguments as _ab_arguments
