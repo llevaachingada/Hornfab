@@ -24,6 +24,47 @@ Local-only, added 2026-11-03 (**CPU-vs-CUDA audit; no GitHub issue state changed
   pending owner approval to edit the PR.
 - **Pin `0850ef3`** (multi-channel fused CUDA): fork branch `hornlab-search/meh-fused-cuda` is pushed (verified 2026-11-12).
 - **Owner:** set CUDA Sysmem Fallback Policy to Prefer No Sysmem Fallback for `julia.exe`.
+Local-only, updated 2026-11-05 (**CI param-catalog fix on PR #22; no GitHub issue state changed**):
+- Fixed `test_param_catalog` failures: `mid_ports` NATIVE_KNOBS, native-count/CAD-only gates, regenerated param catalog.
+
+Local-only, updated 2026-11-05 (**objective v6 loading_smooth; no GitHub issue state changed**):
+- **Landed:** `objective.version: 6` (`load_near`, `z_smooth`, `cov_pat`, `di_rise`) for Le Cléac'h / rollback; dossier + briefs + offline tests. Open: re-score full records that carry `z_throat` so load_near/z_smooth dominance can be confirmed; calibrate `di_slope_target` (seed slopes ~8 dB/dec vs default +5).
+
+Local-only, updated 2026-11-03 (**PR to main; no GitHub issue state changed**):
+- Opening PR `feat/solana-sawmod-wg-bench` → `main` (Solana/SAWMOD, mid_ports, cloud tooling, UMAP evidence + GUI Design cloud).
+
+Local-only, updated 2026-11-03 (**GUI design-cloud view; no GitHub issue state changed**):
+- **Landed:** run explorer **Design cloud** (`/api/umap`, `#/run/<id>/umap`) — PCA always, UMAP if umap-learn installed.
+
+Local-only, updated 2026-11-03 (**UMAP HTML param panel fix; no GitHub issue state changed**):
+- **Fix:** UMAP evidence HTML embeds `window.UMAP_DATA`, 18-knob dropdown, full param table on click.
+
+Local-only, updated 2026-11-03 (**UMAP evidence HTML for CMA-1000; no GitHub issue state changed**):
+- **Landed:** `docs/evidence/UMAP_SOLANA_OSSE_MEH_SF_CMA1000.{html,md}` — interactive param/J-colored UMAP of run `20261103T053926Z-screen-8b32a1` (htmlpreview link in the md).
+
+Local-only, updated 2026-11-03 (**Ath OSSE+SF mid_ports fork + solana_osse_meh_sf; no GitHub issue state changed**):
+- **Mesher fork landed:** `hornlab-search/osse-midports` @ `55da4f4` (tag-10 L1 flush on native OSSE); pin in pyproject/TOOLCHAIN.
+- **Solana MEH-context path:** `solana_osse_meh_sf`; 4090 screen **J=39.604**; CMA live best **J≈22.3** (`20261103T052647Z-screen-cd22a5`). Flat CAD MEH = fallback. CMA-1000 `20261103T053926Z-screen-8b32a1` still LIVE (~gen 70+, best **7.75**).
+- **Solana owed:** finish/pull CMA-1000; mouth-matched CD (`gcurve_off`) verify; enclosure/LF.
+- **SAWMOD owed:** Ath knuckle+ports (not flat MEH), LF 10″, BL refine.
+
+Local-only, updated 2026-11-02 evening (**Solana/SAWMOD + RunPod path on `feat/solana-sawmod-wg-bench`; no GitHub issue state changed**):
+- **Cloud landed:** `tools/cloud/*`, `docs/CLOUD_GPU_RUNBOOK.md`, POSIX orphan-julia cleanup; **4090 CP-9a 0.020/0.039 dB**; Solana CUDA screen; `osse_baseline_4090` CMA in flight / owed finish+pull.
+- **Solana landed:** Ath WG + evidence; MEH CAD `solana_meh` / `solana_meh_search` + brief; mouth probes `_solana_mouth_probes/`.
+- **Solana owed:** mouth-matched CD (`gcurve_off`) 4090 screen+verify; Ath midports; enclosure/LF.
+- **SAWMOD landed:** control WG + knuckle + `walls: lr` MEH probe; CAD/`step_build` accept `lr`.
+- **SAWMOD owed:** Ath knuckle+ports (not flat MEH), LF 10″, BL refine.
+
+Local-only, added 2026-11-01 late afternoon (**Solana 2.0 phase 1 + SAWMOD phase-2 probes; no GitHub issue state changed**):
+- **Solana landed:** DIY Guide + `athscript.cfg` snapshot, dossier, `solana_osse` / `solana_control_1in_90x90`, Metal screen 4284 dofs J=41.9
+- **Solana caveats:** freestanding; `a_deg` inferred 45; SF mouth ~450 vs Ath morph 353 / STL ~376.
+- **Solana owed:** mid ports + 4×6NDL38 MEH, enclosure/LF, mouth-delta diagnosis. (MEH CAD seed landed evening 2026-11-02; Ath midports still owed.)
+- **SAWMOD phase-2 probes landed:** knuckle Metal J=241 (`3c1938`); MEH lr2 multi-source path exercised.
+- **SAWMOD still owed:** Ath knuckle+ports (not flat MEH), LF 10″, BL refine; SAWMOD MEH follow-ups.
+
+Local-only, added 2026-11-01 afternoon (**SAWMOD control WG bench phase 1; no GitHub issue state changed**):
+- **Landed:** whitepaper PDF snapshot, dossier, pinned `sawmod_control_osse` + brief.
+- **Still owed:** Ath knuckle+ports, LF 10″ slot, Boundary Lab `Multi_region_SAWMOD` refine.
 
 Local-only, added 2026-11-01 (**PR #17 merged to main + the hardware-neutrality rule; no GitHub issue state changed**):
 - **Merged (squash):** Metal backend + Mac path, Hansen budget hint, staged A/B harness, CMA

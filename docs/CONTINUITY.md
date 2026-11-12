@@ -143,6 +143,192 @@ Newest entry first. Every push updates this file and `docs/ISSUES.md` in the sam
   a UTF-8-safe editor before the commit; the committed diff contains no replacement characters.
 
 
+## 2026-11-05 - CI fix: native param catalog for mid_ports + Solana/SAWMOD natives
+
+- PR #22 CI failed `tests/test_param_catalog.py` (4): `OSSE.mid_ports` missing from
+  `NATIVE_KNOBS`; hard-coded "10 natives" broke after Solana/SAWMOD YAMLs; CAD-only
+  `sawmod_meh_lr2` / `solana_meh*` empty-knob gate; stale `param-catalog.v1.json`.
+- **Fix:** document `mid_ports` (not_a_knob); core-native floor + CAD-only set in the
+  test; regenerate catalog / PARAMETERS / TYPOLOGIES.
+
+## 2026-11-05 - Objective v6 (loading_smooth) for Le Cléac'h / rollback
+
+- **Why:** CD-shaped v4 remapping (`dislope:0`, `load:0.5`) kept the wrong math — band-mean
+  `load` was ~2 % of J; coverage still punished natural narrowing. JMLC fc is a loading corner;
+  pattern control starts ~1.5–1.8×fc; DI rises smoothly (ETF 2010 / LANE_A).
+- **Landed:** `objective.version: 6` — `load_near`, `z_smooth`, `cov_pat`, `di_rise`, plus
+  `flat`/`rip`/`distd`/`diag`. Module `hornlab_search/objective/scalar_v6.py`; dispatch in
+  `versions.py` / `evaluate.py` / `config.py`. Design `g_fc_hz` stamped into metrics for
+  `f_pattern`. Dossier `docs/research/typologies/LECLEACH_OBJECTIVE_V6_2026-11-05.md`.
+- **Briefs:** `examples/briefs/campaign_2026-10-26_v6/native_lecleach_1200_1in_v6.yaml`,
+  `examples/briefs/lecleach_rollback_1in_v6.yaml` (v4 briefs untouched; J not comparable).
+- **Tests:** `tests/test_objective_v6.py` — 14 offline pins green (constant-Z load_near≈0,
+  sinusoidal z_smooth↑, DI+5 dB/dec → di_rise≈0, cov errors below f_pattern ignored).
+- **Re-score [measured]:** campaign `docs/data/campaign_v4_2026-10-27/evals.csv` lecleach cells
+  (no `z_throat` in export → `load_near`/`z_smooth` take NAN fill). On available pattern terms,
+  seed shares are live — e.g. `native__lecleach_rollback` n=209: di_rise raw≈9.1 (slope ~8 vs
+  target +5), cov_pat raw≈7.0; `b1t__lecleach_iwata_ar` n=198: di_rise 36 % / cov_pat 6 % of
+  pattern-term J. Full load-dominance check needs records with throat impedance.
+
+## 2026-11-03 - PR: feat/solana-sawmod-wg-bench → main
+
+- Opening PR for Solana/SAWMOD bench path, mid_ports mesher pin, RunPod cloud tooling,
+  UMAP evidence HTML, and GUI **Design cloud** (`/api/umap`, `#/run/<id>/umap`).
+- Keele CMA-100 synced locally (`20261104T021231Z-screen-4347f5`, best J=13.17); sample
+  PCA on 34 OK designs (not shipped as a code change).
+
+## 2026-11-03 - Design cloud (UMAP/PCA) in the local GUI
+
+- **Landed:** `GET /api/umap/<run>?method=auto|umap|pca` (`data.run_umap_cloud`), run page
+  button **Design cloud** → `#/run/<id>/umap` (`static/umap.js`). PCA always (numpy); UMAP when
+  `umap-learn` is installed. Color by param unit quartiles or total J; click for full param table.
+  Cached in `runs/.gui_cache/`. Offline `tests/test_gui_umap.py`.
+
+## 2026-11-03 - UMAP HTML: full param table + safer embed
+
+- **Fix:** `UMAP_SOLANA_OSSE_MEH_SF_CMA1000.html` now embeds data as `window.UMAP_DATA`,
+  populates all 18 searchable knobs in the dropdown, and shows a side panel with every
+  physical + unit value on point click (not just the active color channel).
+
+## 2026-11-03 - Interactive UMAP of solana_osse_meh_sf CMA-1000 (GitHub-viewable)
+
+- **Artifact:** `docs/evidence/UMAP_SOLANA_OSSE_MEH_SF_CMA1000.html` (+ `.md`) — standalone
+  D3 page of OK designs from run `20261103T053926Z-screen-8b32a1`, color by parameter
+  unit quartiles or total-J bands; click for values. Open via htmlpreview link in the
+  evidence md (GitHub file view is source-only).
+- **Method note:** UMAP on unit-box searchable knobs (not per-term loss); subsample of OK evals.
+
+## 2026-11-03 - Ath OSSE+SF mid_ports mesher fork + solana_osse_meh_sf
+
+- **Mesher fork:** `jamescollinharky/hornlab-waveguide-mesher` branch
+  `hornlab-search/osse-midports` @ `55da4f46d662d8dcd7a9f94a609eeea4009fcd62`
+  (base `b922e807`). Opt-in top-level `mid_ports` re-tags inner-wall triangles to
+  tag 10 (flush L1 exits); absent = byte-identical. Pinned in `pyproject.toml` +
+  `TOOLCHAIN.md`; `docs/FORKS.md` updated. Mac checkout:
+  `~/Desktop/projects/forks/hornlab-waveguide-mesher`.
+- **Search wiring:** `families.to_mesher_config` emits `mid_ports` for OSSE when
+  present; `mesh/build.py` requires tag 10 and echoes `midPorts` into
+  `mesh_meta.json`. Offline tests `tests/test_design_mid_ports.py` +
+  `tests/test_mesh_mid_ports.py`; `test_mesh_pin` / doctor pinned-shas green.
+- **Config:** `examples/typologies/solana_osse_meh_sf.yaml` — Ath SF seed (same as
+  `solana_osse_sf_search`) + `mid_ports` tblr + brief `solana_meh_1in_90x90`.
+  Shape-check [measured] Mac+4090: ~2900 dofs / 14000, mouth 450×450, depth 152,
+  round coupling. Flat CAD MEH (`solana_meh*`) remains the fallback; Ath+SF+MEH
+  is now the Solana MEH-context estimate path.
+- **MEH evaluate:** OSSE mid_ports path supplies port area via
+  `mesh_meta.json["mid_ports"]` (`_meh_layout`); CAD `derived` still preferred when present.
+- **4090 [measured]:** screen `20261103T052310Z-screen-ce9d4f` seed **J=39.604** (2921 dofs,
+  solve 38.5 s). CMA `20261103T052647Z-screen-cd22a5` live on pod `kt44oly5cdlaps` — early
+  best **J≈22.3** (was 39.6); Mac GUI pull-loop syncs that run into local `runs/`.
+
+## 2026-11-02 (evening) - Solana/SAWMOD bench + RunPod cloud path landed on branch
+
+- **Branch:** `feat/solana-sawmod-wg-bench` rebased onto `origin/main` @ `0fb7d98` (PR #21
+  hardware decision). WIP stashed → FF → restored; INDEX/ISSUES conflict merge kept main +
+  Solana/SAWMOD/cloud rows.
+- **Cloud GPU path:** `tools/cloud/` (`runpod_ctl.py`, `bootstrap_linux.sh`, `run_job.sh`,
+  `runpod_env.example`) + `docs/CLOUD_GPU_RUNBOOK.md`. Secrets stay local (`.env.local`
+  gitignored). POSIX BEAT orphan cleanup: bare `julia … solver.jl --worker` hosts now
+  match in `solve/worker.py` (not only Windows `julialauncher*`); test in
+  `tests/test_solve_worker.py`.
+- **RunPod [measured]:** RTX 4090 pod bootstrapped; CP-9a selftest deltas **0.020 / 0.039 dB**;
+  Solana CD screen J≈41.9 on CUDA; `examples/osse_baseline_4090.yaml` (fused BM, band/dof
+  raises for 24 GB) queued for ~200-eval CMA. One GPU at a time; hosts cleared via
+  `run_job.sh`.
+- **Solana:** phase-1 Ath WG (`solana_osse` + brief) + evidence; phase-2 MEH CAD seed
+  `solana_meh` / `solana_meh_search` + brief `solana_meh_1in_90x90` from DIY Guide Rev 2.0
+  (DH450 + 4×6NDL38, face 450 mm vs DIY 410 disclosed). Mouth probes under
+  `examples/typologies/_solana_mouth_probes/` (athscript / morph_fixed_0 / gcurve_off —
+  SF mouth ~450 vs morph-only ~356).
+- **SAWMOD:** control WG + knuckle + `walls: lr` MEH probe; CAD/`step_build` accept `lr`.
+- **Still owed:** stop/finish live OSSE search as needed; Solana CD mouth-matched
+  (`gcurve_off`) screen+verify on 4090; Ath midports MEH path; SAWMOD Ath knuckle+ports /
+  LF / BL refine.
+
+## 2026-11-02 - P11 TURNED ON: PUBLIC HF DATASET REPO PUBLISHED FOR THE COLLABORATOR
+
+- **Owner directive:** set up Hugging Face storage so the GitHub collaborator can pull "the solves we've done".
+  Owner chose **public** (collaborator needs no HF account/token) and the **core groups** `text,solve,dataset`.
+- **Live:** <https://huggingface.co/datasets/chingadalleva/hornlab-search-data> — public dataset repo, created
+  with `hf repos create ... --repo-type dataset --public`, 7 tar shards + `.gitattributes`, **11.56 GB /
+  10.76 GiB** (11,556,730,880 B), **197,581 source files**, packed 2026-11-02 ~20:53 local from this worktree
+  at `task/hardware-decision-2026-11-01`. Remote sizes verified byte-identical to the local tars
+  (`text-000` 731,473,920 B; `solve-000..002` 2.03 GB each, `solve-003` 8,550,400 B; `dataset-000` 2.04 GB,
+  `dataset-001` 1.95 GB). Seven per-shard commits (`bfbe708`, `75cf749`, `50aa0b1`, `fbcc6e4`, `42611f3`,
+  `d51b17d`, `701f568`).
+- **Safety gate before packing [measured]:** julia host PID 17056 idle (CPU 954.859 -> unchanged over 8 min),
+  VRAM 706 MiB of 8188, newest `runs/` write 20:44 vs pack start 20:53, so no GPU night was writing.
+- **Collaborator path verified end to end:** anonymous `curl -r 0-2047` on `solve-003.tar` returns **206** with
+  2048 bytes (no auth), and `hf download ... --repo-type dataset --include "solve-003.tar" --local-dir .hf_stage`
+  + in-place untar reproduced `cache/solve/<key>/{response.npz,status.json}` (32 cache dirs). Instructions live in
+  `docs/HANDOFF_COLLABORATOR_2026-10-27.md` section 4; P11 marked done.
+- **`tools/hf_sync.py` corrected** against huggingface_hub docs checked 2026-11-02: `upload` now runs
+  `hf upload <repo> <dir> . --repo-type dataset` (`hf upload-large-folder` is deprecated and absent from the
+  2.4.0 CLI reference; `hf_transfer`/`HF_HUB_ENABLE_HF_TRANSFER` are gone in hub v1), `pull` filters
+  `--include "*.tar"`. Local CLI/hub is 1.17.0 with `hf_xet` 1.5.0.
+- **Measured network finding [owner machine]:** the **Xet upload path stalls here** — two `hf upload` runs held
+  0.1-1.2 MB/s with zero commits after 25+ min while the same link measured 8.3 MB/s upstream
+  (`speed.cloudflare.com/__up`, 20 MB) and 9.7 MB/s down from `huggingface.co`; `HF_HUB_DISABLE_XET=1` then
+  pushed 2.04 GB in 3.4 min. Uploads from this box must set `HF_HUB_DISABLE_XET=1`. Downloads were unaffected.
+- **Not uploaded:** `cache/mesh/**` + `runs/**/*.msh` (16.81 GB) — pack with `--groups meshes` if the collaborator
+  needs stored meshes rather than rebuilding them with the CPU mesher. Anything written after 20:53 local needs
+  a re-pack.
+- **Collaborator runbook added:** `docs/COLLABORATOR_PULL_RUNBOOK_2026-11-02.md` — agent-executable
+  (clone → `hf download` → verify sha256 per shard → extract in place → verify counts 124,681 / 48,817 /
+  24,083 → load one `response.npz`), plus the offline re-score entry points, a troubleshooting table and the
+  rules for an agent working in the checkout (never commit the data, never touch `.venv`, no GPU solves, push
+  rule). Linked from `docs/INDEX.md`, `docs/HANDOFF_COLLABORATOR_2026-10-27.md` section 4 and P11.
+- **Shipped as PR #20 into `main`** (`task/p11-hf-sync`, cherry-picked off `origin/main` so the PR carries
+  only this work, not the 47 unrelated commits on `task/hardware-decision-2026-11-01`). Files: `tools/hf_sync.py`,
+  the new runbook, `docs/HANDOFF_COLLABORATOR_2026-10-27.md`, `docs/NEXT_DEV_PRIORITIES.md`, `docs/INDEX.md`,
+  this entry and the `docs/ISSUES.md` note. No solves, configs, pins, tolerances or tests touched.
+- **Process note:** two docs were briefly damaged by a PowerShell `Get-Content -Raw | Set-Content` round-trip
+  (PS 5.1 re-encoded UTF-8 as ANSI, mangling em dashes and quotes) and were restored from git and re-edited with
+  a UTF-8-safe editor before the commit; the committed diff contains no replacement characters.
+
+
+## 2026-11-02 - Cloud GPU runner (RunPod-first tooling)
+
+- Added `tools/cloud/`: `runpod_ctl.py` (GraphQL create/status/ssh/stop/terminate),
+  `bootstrap_linux.sh`, `run_job.sh` (force-clear BEAT hosts → CLI with explicit
+  `--backend beat_cuda` → `shutdown(verify=True)` → `runs/cloud_job_*.json`),
+  `runpod_env.example`. Secrets stay out of git (`.env.local` gitignored).
+- Runbook: `docs/CLOUD_GPU_RUNBOOK.md` (CP-9a gates, Solana screen first, ~$50 pilot
+  suggestion). Research still in `CLOUD_GPU_REPORT.md`.
+- POSIX worker hygiene: `beat_host_roots` now finds orphaned bare `julia … solver.jl
+  --worker` hosts (Linux/macOS), not only Windows `julialauncher*`. Test added in
+  `tests/test_solve_worker.py`. Offline worker tests green.
+- Superseded same evening: first paid 4090 pod ran CP-9a + Solana screen (see evening
+  entry above).
+
+## 2026-11-01 (late afternoon) - Solana 2.0 WG reconstruction (phase 1) + SAWMOD phase-2 probes
+
+- **Solana:** DIY Guide Rev 2.0 + `Advanced/athscript.cfg` snapshotted under
+  `docs/research/typologies/solana_2026-11-01/` (Drive guide `1-JxZ-…`, files
+  `151N2rq4…`). Dossier `SOLANA_WAVEGUIDE_2026-11-01.md`. Config `solana_osse` +
+  brief `solana_control_1in_90x90` (verbatim Ath pins: L=140, SF m=8, morph 353×353).
+- Dry-run **4284 dofs**; mouth with SF **~450 mm** vs Ath morph 353 / STL outer ~376
+  (morph-only ~356 — mesher/Ath delta disclosed). Screen Metal:
+  `runs/20261101T211314Z-screen-72f3bd` — **J=41.9**, 27.9 s, `di_source=balloon`.
+  Evidence `docs/evidence/SOLANA_WG_2026-11-01.md`. Phase 2+: mid ports / MEH / mouth delta.
+- **SAWMOD phase-2 probes (same session):** knuckle CD-only
+  `sawmod_knuckle_osse` (SF digitized) Metal `20261101T210541Z-screen-3c1938` J=241 /
+  2948 dofs; flat-wall MEH `sawmod_meh_lr2` (`walls: lr`, cone 103/66, hp_hz 250) dry-run
+  3950 dofs + multi-source Metal `20261101T210635Z-screen-ab4075` J=21.5 (v5; `n_nan=12`,
+  `load=100`, z_throat null — provisional). beat-bem bumped to pin `1efdc6f` for MEH path.
+  CAD `tools/cad/meh.py` + `step_build` accept `walls: lr`. LF/BL still later.
+
+## 2026-11-01 (afternoon) - SAWMOD control-waveguide benchmark (phase 1)
+
+- Whitepaper snapshot + dossier: `docs/research/typologies/sawmod_2026-11-01/`,
+  `SAWMOD_CONTROL_WAVEGUIDE_2026-11-01.md`. Config `sawmod_control_osse` + brief
+  `sawmod_control_1in_100x70` (pinned OS-SE L=115, morph rate 4, no knuckles).
+- Mesh: L=115 mm, mouth after morph **280×196** mm (`morph_allow_shrinkage: 1` required;
+  raw OSSE ~395 mm). Screen Metal solve OK: **1464 dofs**, J=345.2, 5.4 s —
+  `runs/20261101T205918Z-screen-e7b5a2`. Evidence
+  `docs/evidence/SAWMOD_CONTROL_WG_2026-11-01.md` (freestanding vs paper baffle caveat).
+- Phase 2+ still owed: knuckles, mid ports, LF slot, BL SAWMOD refine.
+
 ## 2026-11-01 (10:20 EDT) - PACKAGED FOR HANDOFF: QUICKSTART, SCREEN LAUNCHER, BOTH VERIFIED WINNERS
 
 - **`docs/meh/MEH_QUICKSTART.md`**: install (pinned stack, `doctor`), the CI gate, a no-GPU `run --dry-run`, the
