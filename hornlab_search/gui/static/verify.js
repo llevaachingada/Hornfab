@@ -6,7 +6,7 @@
 // WP3 (table/KPIs/scatter) + WP6 (panel/compare)
 // Develop against tests/fixtures/gui/verify_report_example.json.
 
-import { chart, isobarMap, logTicks, css, fmt, el, NS, niceTicks, angleTicks } from "./charts.js";
+import { chart, isobarMap, logTicks, css, fmt, el, NS, niceTicks, angleTicks, wireScrollHints } from "./charts.js";
 import { initBalloon3d } from "./balloon.js";
 
 // ── XSS helper (local copy, same as app.js) ────────────────────────────────
@@ -299,8 +299,15 @@ export function checklistHtml(row, brief, density) {
  */
 export function polarPlot(svg, rowsH, rowsV, angles, fIndex, opts) {
   if (!svg) return;
-  const W      = opts && opts.W ? opts.W : 220;
-  const H      = opts && opts.H ? opts.H : 220;
+  // Fit the plot to its card: use the live container width (the SVG is width:100%) and keep the
+  // viewBox square, so the ±60/±90 labels and the on-axis annotation stay inside the card.
+  let containerW = 0;
+  try {
+    containerW = svg.clientWidth ||
+      (svg.parentElement && svg.parentElement.clientWidth) || 0;
+  } catch { containerW = 0; }
+  const W      = Math.max(180, Math.round((opts && opts.W) || containerW || 320));
+  const H      = Math.max(180, Math.round((opts && opts.H) || W));
   const floor  = (opts && opts.minDb != null) ? opts.minDb : -30;
   const ghostH = (opts && opts.ghostH) || null;
   const ghostV = (opts && opts.ghostV) || null;
@@ -315,12 +322,16 @@ export function polarPlot(svg, rowsH, rowsV, angles, fIndex, opts) {
 
   const maxAbs = Math.max(...angles.map(a => Math.abs(a)));
   const isHalf = maxAbs <= 90.5;
-  const pad    = 28;
+  const pad    = Math.max(30, Math.round(W * 0.055));
 
-  // Centre and radius
-  const R  = isHalf ? Math.min(W - 2 * pad, H - pad - 10) : Math.min(W - 2 * pad, H - 2 * pad) / 2;
+  // Centre and radius. For a half polar the horizontal extent (not just the vertical) sets the
+  // radius: cx ± (R + label offset) must stay inside the square viewBox.
+  const R  = Math.max(10, isHalf
+    ? Math.min(W / 2 - pad, H - pad - 10)
+    : Math.min(W, H) / 2 - pad);
   const cx = W / 2;
   const cy = isHalf ? pad + R : H / 2;
+  const labelR = R + 7;   // angle labels just outside the outer ring, inside the viewBox
 
   // Polar → SVG coords (0° = top, positive clockwise)
   const toXY = (angleDeg, r) => {
@@ -379,14 +390,14 @@ export function polarPlot(svg, rowsH, rowsV, angles, fIndex, opts) {
       x1: sx.toFixed(1), y1: sy.toFixed(1), x2: ex.toFixed(1), y2: ey.toFixed(1),
       stroke: ringCol, "stroke-width": "0.7", opacity: "0.4"
     }, svg);
-    if (a % 30 === 0) {
-      const [lx, ly] = toXY(a, R + 11);
+    if (a % 30 === 0 && a !== 0) {   // 0° is labelled by the single on-axis annotation below
+      const [lx, ly] = toXY(a, labelR);
       const anchor = a < -5 ? "end" : a > 5 ? "start" : "middle";
       const tx = el("text", {
         x: lx.toFixed(1), y: ly.toFixed(1),
         "text-anchor": anchor, "font-size": "9", fill: tickCol
       }, svg);
-      tx.textContent = a === 0 ? "0°" : (a > 0 ? "+" : "") + a + "°";
+      tx.textContent = (a > 0 ? "+" : "") + a + "°";
     }
   }
 
@@ -416,13 +427,14 @@ export function polarPlot(svg, rowsH, rowsV, angles, fIndex, opts) {
   if (rowsH && rowsH[fIndex]) drawPolar(rowsH[fIndex], hCol, null, "0.9");
   if (rowsV && rowsV[fIndex]) drawPolar(rowsV[fIndex], vCol, "5 3", "0.9");
 
-  // 0° label at top
-  const [lx0, ly0] = toXY(0, R + 14);
+  // Single 0° / on-axis annotation at the top. (The old code drew "0°" from the spoke loop and a
+  // separate "on-axis" text at almost the same coordinate, so the two collided.)
+  const [lx0, ly0] = toXY(0, labelR);
   const tLabel = el("text", {
     x: lx0.toFixed(1), y: ly0.toFixed(1),
     "text-anchor": "middle", "font-size": "9", fill: tickCol
   }, svg);
-  tLabel.textContent = "on-axis";
+  tLabel.textContent = "0° · on-axis";
 }
 
 // ── Verify table HTML helpers ──────────────────────────────────────────────
@@ -646,7 +658,6 @@ function _redraw2d(panelEl) {
       polarPlot(polSvg,
         P.polar_h, P.polar_v, angles, fi,
         {
-          W: 220, H: 220,
           ghostH: ghostRows && ghostRows.h,
           ghostV: ghostRows && ghostRows.v,
           ghostFIndex: ghostFI,
@@ -1087,14 +1098,19 @@ async function _runCompare(ROOT, runId, hashA, hashB, report) {
         <svg id="vfy-cmp-di" role="img" aria-label="DI comparison"></svg>
       </div>
     </div>
-    <div class="tbl-wrap"><table class="compact" id="vfy-cmp-tbl">
-      <thead><tr><th>Hash</th><th>screen J</th><th>verify J</th><th>gates</th><th>dof</th></tr></thead>
-      <tbody>
-        <tr><td class="mono">${esc(_hashShort(hashA))}</td><td class="r">${rA && rA.screen_j != null ? fmt(rA.screen_j) : "–"}</td><td class="r">${rA && rA.verify_j != null ? fmt(rA.verify_j) : "–"}</td><td>${_gateChips(rA && rA.gates, report.gate_audit && report.gate_audit.labels)}</td><td class="r">${rA && rA.n_dof != null ? rA.n_dof.toLocaleString() : "–"}</td></tr>
-        <tr><td class="mono">${esc(_hashShort(hashB))}</td><td class="r">${rB && rB.screen_j != null ? fmt(rB.screen_j) : "–"}</td><td class="r">${rB && rB.verify_j != null ? fmt(rB.verify_j) : "–"}</td><td>${_gateChips(rB && rB.gates, report.gate_audit && report.gate_audit.labels)}</td><td class="r">${rB && rB.n_dof != null ? rB.n_dof.toLocaleString() : "–"}</td></tr>
-      </tbody>
-    </table></div>
+    <div class="tbl-scroll">
+      <div class="tbl-scroll-hint" aria-hidden="true">scroll for all columns →</div>
+      <div class="tbl-wrap"><table class="compact" id="vfy-cmp-tbl">
+        <thead><tr><th>Hash</th><th>screen J</th><th>verify J</th><th>gates</th><th>dof</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">${esc(_hashShort(hashA))}</td><td class="r">${rA && rA.screen_j != null ? fmt(rA.screen_j) : "–"}</td><td class="r">${rA && rA.verify_j != null ? fmt(rA.verify_j) : "–"}</td><td>${_gateChips(rA && rA.gates, report.gate_audit && report.gate_audit.labels)}</td><td class="r">${rA && rA.n_dof != null ? rA.n_dof.toLocaleString() : "–"}</td></tr>
+          <tr><td class="mono">${esc(_hashShort(hashB))}</td><td class="r">${rB && rB.screen_j != null ? fmt(rB.screen_j) : "–"}</td><td class="r">${rB && rB.verify_j != null ? fmt(rB.verify_j) : "–"}</td><td>${_gateChips(rB && rB.gates, report.gate_audit && report.gate_audit.labels)}</td><td class="r">${rB && rB.n_dof != null ? rB.n_dof.toLocaleString() : "–"}</td></tr>
+        </tbody>
+      </table></div>
+    </div>
   </div>`;
+
+  wireScrollHints(resultEl);
 
   const drawCmpCharts = (fi) => {
     const fLo = freqs[0], fHi = freqs[freqs.length - 1];
@@ -1310,26 +1326,29 @@ export async function viewVerify(root, runId, mode, query) {
       ${rows.length ? `<a class="btn" href="#/run/${esc(runId)}/verify/compare">Compare two…</a>` : ""}
     </div>
 
-    <div id="vfy-table-wrap" class="tbl-wrap" role="region" aria-label="Verified designs table">
-      <table id="vfy-table" class="compact" role="grid">
-        <thead>
-          <tr>
-            <th scope="col">Design</th>
-            <th scope="col" aria-sort="${sortKey === "screen_j" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}">Screen J</th>
-            <th scope="col" aria-sort="${sortKey === "verify_j" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}">Verify J</th>
-            <th scope="col" aria-sort="${sortKey === "delta_j"  ? (sortDir === "asc" ? "ascending" : "descending") : "none"}">Δ (v−s)</th>
-            <th scope="col" aria-sort="${sortKey === "screen_rank" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}">Screen rank</th>
-            <th scope="col" aria-sort="${sortKey === "verify_rank" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}">Verify rank</th>
-            ${hasGates ? `<th scope="col">Gates</th>` : ""}
-            <th scope="col">dof / tris</th>
-            <th scope="col">lane</th>
-            <th scope="col">Actions</th>
-          </tr>
-        </thead>
-        <tbody id="vfy-tbody"></tbody>
-      </table>
-      <p class="cap" style="margin:6px 0 0">Ranked by verify J (ascending). Screen J is context only — coarser grid. Δ is a fidelity diagnostic: positive = verify sees higher cost (worse) than screen predicted.</p>
+    <div class="tbl-scroll" id="vfy-table-scroll">
+      <div class="tbl-scroll-hint" aria-hidden="true">scroll for all columns →</div>
+      <div id="vfy-table-wrap" class="tbl-wrap" role="region" aria-label="Verified designs table">
+        <table id="vfy-table" class="compact" role="grid">
+          <thead>
+            <tr>
+              <th scope="col">Design</th>
+              <th scope="col" aria-sort="${sortKey === "screen_j" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}">Screen J</th>
+              <th scope="col" aria-sort="${sortKey === "verify_j" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}">Verify J</th>
+              <th scope="col" aria-sort="${sortKey === "delta_j"  ? (sortDir === "asc" ? "ascending" : "descending") : "none"}">Δ (v−s)</th>
+              <th scope="col" aria-sort="${sortKey === "screen_rank" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}">Screen rank</th>
+              <th scope="col" aria-sort="${sortKey === "verify_rank" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}">Verify rank</th>
+              ${hasGates ? `<th scope="col">Gates</th>` : ""}
+              <th scope="col">dof / tris</th>
+              <th scope="col">lane</th>
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="vfy-tbody"></tbody>
+        </table>
+      </div>
     </div>
+    <p class="cap" style="margin:6px 0 0">Ranked by verify J (ascending). Screen J is context only — coarser grid. Δ is a fidelity diagnostic: positive = verify sees higher cost (worse) than screen predicted.</p>
 
     <div id="vfy-selected"></div>
 
@@ -1338,6 +1357,8 @@ export async function viewVerify(root, runId, mode, query) {
     </div>
     <div id="vfy-announce" class="sr-only" aria-live="polite" aria-atomic="true"></div>
   </div>`;
+
+  wireScrollHints(root);
 
   // ── Render scatter ──
   const scatterSvg = root.querySelector("#vfy-scatter");
@@ -1374,6 +1395,7 @@ export async function viewVerify(root, runId, mode, query) {
     tbody.querySelectorAll(".vfy-open-btn").forEach(btn => {
       btn.addEventListener("click", e => { e.stopPropagation(); });
     });
+    wireScrollHints(root);   // filtering changes the table width → re-check the affordance
   };
   rebuildTable();
 

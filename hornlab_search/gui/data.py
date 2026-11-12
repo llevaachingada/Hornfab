@@ -618,13 +618,15 @@ def cma_dynamics(run_dir: Path) -> dict:
             "iqr": _get(8),
         })
 
-    # stddev.dat: cols 0=iter 1=evals 2=sigma 3=void 4=void 5..N=per-param σ
+    # stddev.dat: cols 0=iter 1=evals 2=sigma 3=void 4=void 5..N=per-param σ.
+    # Keep the columns positionally aligned with ``param_names``: dropping a null/penalty column
+    # would shift every later parameter and make the GUI draw a value in the wrong row.
     stddev_rows = _parse_dat(cma_dir / "stddev.dat") if (cma_dir / "stddev.dat").is_file() else []
-    stddev = [[v for v in r[5:] if v is not None] for r in stddev_rows]
+    stddev = [r[5:] for r in stddev_rows]
 
     # axlen.dat: cols 0=iter 1=evals 2=sigma 3=max 4=min 5..N=all principal axes
     axlen_rows = _parse_dat(cma_dir / "axlen.dat") if (cma_dir / "axlen.dat").is_file() else []
-    axis_lengths = [[v for v in r[5:] if v is not None] for r in axlen_rows]
+    axis_lengths = [r[5:] for r in axlen_rows]
 
     # Parameter names: try parameters.json2 first, then config.yaml bounds keys
     param_names: list[str] = []
