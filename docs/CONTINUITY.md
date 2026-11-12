@@ -28,6 +28,8 @@
 - CI fix in the merge window: the pre-existing `test_config.py` no-None guard flagged the new
   opt-in keys (`search.max_attempts`/`links`/`warm_start`/`surrogate` are None by design when
   absent) — added them to `OPTIONAL_FIELDS` per the established convention; no product code changed.
+- CI fix 2: the three B.8 CMA-MAE runtime tests now `pytest.importorskip("ribs")` exactly like the
+  CMA-ME suite (CI does not install ribs; optional-dep tests skip there and run on this box).
 
 ## 2026-11-12 (17:40Z) - DAY GROUP C: CALIBRATION HARNESS + N1 THROUGHPUT EVIDENCE
 
