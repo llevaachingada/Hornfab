@@ -24,6 +24,22 @@
   tolerances calibrated from top-decile medians + gates as refusals.
 - INDEX.md line added (research section). No code, no GPU, no solver runs; CI green required before merge.
 
+## 2026-11-12 (15:55Z) - DAY GROUP F: DOCS AND ISSUE HYGIENE (F.4 ISSUE #13 CLOSED)
+
+- Day-plan group F (docs lane, PR #33, branch `day/F-docs-hygiene`): `docs/NEXT_DEV_PRIORITIES.md` adds P15
+  (the 2026-11-12 day hardening plan, PR #32) and marks P14 lanes L1-L5 DONE with PR numbers
+  (#29/#26/#27/#28; #25 still open, merges last today); open owner decisions recorded (loading split v6/v7
+  confirmed by PR #27 tau evidence; round-throat default; sysmem setting; HF write access for Collin; printing).
+  `docs/SENIOR_PLAN_2026-11-12.md` got a per-WP status column (done / in this plan / open), conservative.
+- CONTINUITY order fix produced as `docs/history/continuity_reorder_2026-11-12.patch` (plan F.1 DECIDED):
+  reorders entries newest-first and moves the 202 entries dated 2026-10-12..2026-10-31 to
+  `docs/history/CONTINUITY_2026-10-22_2026-10-31.md`. Patch verified (`git apply --check` + real apply)
+  against pristine origin/main content 2ecbc69. The ORCHESTRATOR applies it LAST today, after all merges
+  (CONTINUITY is edited by every merge today).
+- F.4 executed by the orchestrator at merge time: GitHub issue #13 closed (comment cites the fixes merged
+  2026-10-22: FF to 6d1d5c7 = e0b9b61 + 11304f6 + 152a829; suite 533 PASS); mirrored in `docs/ISSUES.md`.
+- Docs-only lane; no pytest applicability; CI green on PR #33.
+
 ## 2026-11-12 (14:30Z) - DAY QUEUE: GPU + CPU LANES LAUNCHED FROM THE COMPUTE STUDY
 
 - Study: `C:/Users/hunte/Hrns/study_2026-11-12/COMPUTE_STUDY.md` (414 runs inventoried, sensitivity, bound walls). Its queue
