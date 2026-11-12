@@ -277,6 +277,65 @@ console.log("CHECKLIST FAILED DESIGN OK");
     assert "CHECKLIST FAILED DESIGN OK" in r.stdout
 
 
+# ── WP7: verify-selected helpers ──────────────────────────────────────────────
+
+@pytest.mark.usefixtures("_node")
+def test_gpu_busy_from_status():
+    r = _run_node_script(r"""
+const { gpuBusyFromStatus } = await import(pathToFileURL("VERIFY_JS_PATH").href);
+
+assert.deepEqual(gpuBusyFromStatus(null), { busy: false, reason: "" });
+assert.deepEqual(gpuBusyFromStatus({}), { busy: false, reason: "" });
+assert.equal(gpuBusyFromStatus({ gpu_lock: { alive: false } }).busy, false);
+const busy = gpuBusyFromStatus({ gpu_lock: { alive: true, user: "owner", command: "search" } });
+assert.equal(busy.busy, true);
+assert.ok(busy.reason.includes("GPU busy"), busy.reason);
+assert.ok(busy.reason.includes("owner"), busy.reason);
+console.log("GPU BUSY OK");
+""", VERIFY_JS)
+    assert r.returncode == 0, f"stdout: {r.stdout}\nstderr: {r.stderr}"
+    assert "GPU BUSY OK" in r.stdout
+
+
+@pytest.mark.usefixtures("_node")
+def test_verify_select_list_html_verified_rows_only():
+    r = _run_node_script(r"""
+const { verifySelectListHtml } = await import(pathToFileURL("VERIFY_JS_PATH").href);
+
+const html = verifySelectListHtml([
+  { hash: "608eef092639", ok: true, verify_j: 4.62 },
+  { hash: "f271b7227e4e", ok: false, error: "mesh" },
+  { hash: null, ok: true },
+]);
+assert.ok(html.includes("608eef09"), html);
+assert.ok(!html.includes("f271b722"), "failed row must not be selectable");
+assert.ok(html.includes("vfy-select-chk"), html);
+assert.ok(html.includes("verify J 4.62"), html);
+assert.ok(verifySelectListHtml([]).includes("No verified designs"), html);
+console.log("VERIFY SELECT LIST OK");
+""", VERIFY_JS)
+    assert r.returncode == 0, f"stdout: {r.stdout}\nstderr: {r.stderr}"
+    assert "VERIFY SELECT LIST OK" in r.stdout
+
+
+@pytest.mark.usefixtures("_node")
+def test_verify_selected_payload_uses_designs_not_top():
+    r = _run_node_script(r"""
+const { verifySelectedPayload } = await import(pathToFileURL("VERIFY_JS_PATH").href);
+
+assert.equal(verifySelectedPayload("run-a", []), null);
+assert.equal(verifySelectedPayload("run-a", null), null);
+const body = verifySelectedPayload("run-a", ["608eef092639", "f271b7227e4e"]);
+assert.equal(body.kind, "verify");
+assert.equal(body.args.run, "run-a");
+assert.equal(body.args.designs, "608eef092639,f271b7227e4e");
+assert.ok(!("top" in body.args), "top and designs are mutually exclusive");
+console.log("VERIFY SELECT PAYLOAD OK");
+""", VERIFY_JS)
+    assert r.returncode == 0, f"stdout: {r.stdout}\nstderr: {r.stderr}"
+    assert "VERIFY SELECT PAYLOAD OK" in r.stdout
+
+
 # ── Compare query parse (via parseVerifyQuery) ────────────────────────────────
 
 @pytest.mark.usefixtures("_node")

@@ -6,7 +6,7 @@
 // WP3 (table/KPIs/scatter) + WP6 (panel/compare)
 // Develop against tests/fixtures/gui/verify_report_example.json.
 
-import { chart, isobarMap, logTicks, css, fmt, el, NS, niceTicks } from "./charts.js";
+import { chart, isobarMap, logTicks, css, fmt, el, NS, niceTicks, angleTicks } from "./charts.js";
 import { initBalloon3d } from "./balloon.js";
 
 // ── XSS helper (local copy, same as app.js) ────────────────────────────────
@@ -34,6 +34,15 @@ async function api(path) {
   const r = await fetch(path);
   if (!r.ok) throw new Error(r.status + " " + (await r.text().catch(() => "")));
   return r.json();
+}
+
+async function post(path, body) {
+  const r = await fetch(path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  return r.json().catch(() => ({ error: "invalid response" }));
 }
 
 const fmtHz = v => v == null || !isFinite(v) ? "–"
@@ -424,7 +433,7 @@ function _gateChips(gates, labels) {
   if (!gates) return '<span class="muted" style="font-size:0.8rem">not audited</span>';
   return Object.entries(gates).map(([k, v]) => {
     const lbl = (labels && labels[k]) || k;
-    return `<span class="pill ${v ? "good" : "bad"}" style="font-size:0.72rem" title="${esc(k)}">${esc(lbl)}</span>`;
+    return `<span class="pill ${v ? "good" : "bad"}" style="font-size:0.72rem" title="${esc(k)} ${v ? "pass" : "fail"}">${esc(lbl)} ${v ? "✓" : "✗"}</span>`;
   }).join(" ");
 }
 
@@ -600,7 +609,7 @@ function _redraw2d(panelEl) {
         W: 220, H: 160,
         xlim: [Math.min(...angles), Math.max(...angles)],
         ylim: [-30, 0],
-        xticks: niceTicks(Math.min(...angles), Math.max(...angles), 5),
+        xticks: angleTicks(Math.min(...angles), Math.max(...angles)),
         yticks: [-30, -24, -18, -12, -6, 0],
         xlabel: "deg", ylabel: "dB rel",
         series,
@@ -620,7 +629,7 @@ function _redraw2d(panelEl) {
         W: 220, H: 160,
         xlim: [Math.min(...angles), Math.max(...angles)],
         ylim: [-30, 0],
-        xticks: niceTicks(Math.min(...angles), Math.max(...angles), 5),
+        xticks: angleTicks(Math.min(...angles), Math.max(...angles)),
         yticks: [-30, -24, -18, -12, -6, 0],
         xlabel: "deg", ylabel: "dB rel",
         series,
@@ -1241,11 +1250,17 @@ export async function viewVerify(root, runId, mode, query) {
   // ── Render page ──
   const isStandalone = report.kind === "standalone";
   const bandText = report.band_hz ? `${fmtHz(report.band_hz[0])}–${fmtHz(report.band_hz[1])}` : "–";
+  const headerName = report.name || report.brief || runId;
+  const briefText = report.brief || "–";
 
   root.innerHTML = `<div class="stack" style="max-width:1100px;gap:18px">
     <p class="muted">← <a href="#/run/${esc(runId)}">${esc(runId)}</a></p>
     <div class="eyebrow">VERIFY · J v${esc(String(objV || "?"))} · ${esc(bandText)}</div>
-    <h2>Verification of ${esc(report.name || runId)}</h2>
+    <h2>Verification of ${esc(headerName)}</h2>
+    <p class="muted" style="font-size:0.85rem">
+      Brief <b>${esc(briefText)}</b> · band <span class="mono">${esc(bandText)}</span> ·
+      run <span class="mono">${esc(runId)}</span>
+    </p>
     ${isStandalone ? standaloneHeaderHtml() : ""}
     <p class="muted" style="font-size:0.85rem">The verify tier uses more frequencies and a finer balloon grid than the screen tier. J scores from different tiers are not directly comparable — they measure the same design at different fidelity.</p>
     ${fidelityPillsHtml(report)}
@@ -1316,6 +1331,8 @@ export async function viewVerify(root, runId, mode, query) {
       <p class="cap" style="margin:6px 0 0">Ranked by verify J (ascending). Screen J is context only — coarser grid. Δ is a fidelity diagnostic: positive = verify sees higher cost (worse) than screen predicted.</p>
     </div>
 
+    <div id="vfy-selected"></div>
+
     <div id="vfy-panel" class="card" aria-live="polite" role="region" aria-label="Selected design detail">
       <p class="muted" style="padding:16px">Select a row above to open the design detail panel.</p>
     </div>
@@ -1360,6 +1377,10 @@ export async function viewVerify(root, runId, mode, query) {
   };
   rebuildTable();
 
+  // ── WP7: verify selected designs (below the table, above the detail panel) ──
+  const selEl = root.querySelector("#vfy-selected");
+  if (selEl && rows.length) renderVerifySelected(selEl, runId, rows);
+
   // Wire toolbar controls
   const sortSel  = root.querySelector("#vfy-sort-sel");
   const dirSel   = root.querySelector("#vfy-dir-sel");
@@ -1393,4 +1414,126 @@ export async function viewVerify(root, runId, mode, query) {
     const panelEl = root.querySelector("#vfy-panel");
     if (panelEl) _loadPanel(panelEl, runId, selectedHash);
   }
+}
+
+// ── WP7: Verify selected designs ───────────────────────────────────────────
+// The server's POST /api/jobs {kind:"verify"} accepts either `top` or explicit
+// `designs` hashes (jobs.py validates them like cli.py's --designs). This block
+// lists the verified rows, posts the selected hashes, and mirrors app.js's
+// GPU-busy state (/api/status.gpu_lock.alive) so a GPU job cannot be launched
+// behind a running solve.
+
+/** GPU busy state from /api/status (same shape app.js's launch page uses). */
+export function gpuBusyFromStatus(status) {
+  const lk = status && status.gpu_lock;
+  if (lk && lk.alive) {
+    const who = [lk.user, lk.command].filter(Boolean).join(" running ");
+    return { busy: true, reason: who ? `GPU busy: ${who}` : "GPU busy" };
+  }
+  return { busy: false, reason: "" };
+}
+
+/** Checkbox list of the verified designs (ok rows only) for re-verification. */
+export function verifySelectListHtml(rows) {
+  const okRows = (rows || []).filter(r => r && r.ok && r.hash);
+  if (!okRows.length) return `<p class="muted">No verified designs to re-run.</p>`;
+  return `<div class="stack" style="gap:6px;max-height:220px;overflow:auto">` +
+    okRows.map(r => {
+      const h = String(r.hash);
+      const j = r.verify_j != null && isFinite(r.verify_j)
+        ? ` <span class="muted">verify J ${esc(fmt(r.verify_j))}</span>` : "";
+      return `<label class="filter-label" style="font-size:0.82rem">` +
+        `<input type="checkbox" class="vfy-select-chk" value="${esc(h)}">` +
+        `<span class="mono">${esc(_hashShort(h))}</span>${j}</label>`;
+    }).join("") + `</div>`;
+}
+
+/** POST body for the verify job. `top` and `designs` are mutually exclusive. */
+export function verifySelectedPayload(runId, hashes) {
+  const list = (hashes || []).filter(Boolean);
+  if (!list.length) return null;
+  return { kind: "verify", args: { run: runId, designs: list.join(",") } };
+}
+
+/** Render the selection card and wire the "Verify selected" button. */
+export async function renderVerifySelected(el, runId, rows) {
+  if (!el || el.isConnected === false) return;
+
+  el.innerHTML = `<div class="card vfy-selected-card stack" style="gap:10px">
+    <div class="filter-bar" role="group" aria-label="Verify selected designs">
+      <span class="filter-label">Verify selected</span>
+      <span class="muted" style="font-size:0.82rem">Re-solve chosen designs at verify fidelity (GPU).</span>
+      <button class="btn" id="vfy-sel-all" type="button">Select all</button>
+      <button class="btn primary" id="vfy-sel-run" type="button">Verify selected</button>
+    </div>
+    <div id="vfy-sel-hint" class="hint" role="status"></div>
+    ${verifySelectListHtml(rows)}
+  </div>`;
+
+  const btn   = el.querySelector("#vfy-sel-run");
+  const hint  = el.querySelector("#vfy-sel-hint");
+  const allBt = el.querySelector("#vfy-sel-all");
+  let busy = false;
+
+  const checks = () => Array.from(el.querySelectorAll(".vfy-select-chk"));
+  const selected = () => checks().filter(c => c.checked).map(c => c.value);
+
+  const setHint = (text, cls = "hint") => {
+    if (!hint) return;
+    hint.textContent = text;
+    hint.className = cls;
+  };
+
+  const refreshBusy = async () => {
+    try {
+      const st = await api("/api/status");
+      const b = gpuBusyFromStatus(st);
+      busy = b.busy;
+      if (btn) {
+        btn.disabled = busy;
+        btn.title = busy
+          ? `${b.reason} — Verify jobs need the GPU; try again when it is free.`
+          : "";
+        if (busy) btn.setAttribute("aria-disabled", "true");
+        else btn.removeAttribute("aria-disabled");
+      }
+      setHint(busy ? `${b.reason} — Verify selected is disabled until the GPU is free.` : "");
+    } catch (_) {
+      // Status unavailable: leave the button enabled; the server re-checks on launch.
+    }
+  };
+  refreshBusy();
+  // Re-check while the page is open; stop the timer once the view is detached.
+  const timer = setInterval(() => {
+    if (el.isConnected === false) { clearInterval(timer); return; }
+    refreshBusy();
+  }, 10000);
+
+  if (allBt) allBt.addEventListener("click", () => {
+    const boxes = checks();
+    const allOn = boxes.length > 0 && boxes.every(b => b.checked);
+    boxes.forEach(b => { b.checked = !allOn; });
+  });
+
+  if (btn) btn.addEventListener("click", async () => {
+    const hashes = selected();
+    if (!hashes.length) { setHint("Select at least one design hash first."); return; }
+    const payload = verifySelectedPayload(runId, hashes);
+    if (!payload) return;
+
+    btn.disabled = true;
+    const label = btn.textContent;
+    btn.textContent = "Starting…";
+    try {
+      const r = await post("/api/jobs", payload);
+      if (r && r.error) throw new Error(r.error);
+      setHint(`Verify job started: ${r && r.id ? r.id : "queued"}. The verify table updates when it finishes.`,
+              "hint good-text");
+    } catch (e) {
+      setHint("Could not start verify job: " + e.message, "hint error-text");
+    } finally {
+      btn.textContent = label;
+      refreshBusy();
+    }
+  });
 }

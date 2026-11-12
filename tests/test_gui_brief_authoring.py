@@ -1176,7 +1176,7 @@ def test_continue_run_control_is_wired():
     src = APPJS.read_text(encoding="utf-8")
     # the card builder exists and is rendered in the run-detail template
     assert "function continueRunCardHtml(d, sum) {" in src
-    assert "${continueRunCardHtml(d, sum)}" in src
+    assert '${isVerify ? "" : continueRunCardHtml(d, sum)}' in src   # verify runs hide the card
     assert 'if (!continueRunAvailable(d)) return "";' in src      # only a search run gets a card
     # the five stable ids + a numeric, labelled, bounded input and a live status region
     for i in ("continue-run-card", "continue-run-n", "continue-run-help",

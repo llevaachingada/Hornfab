@@ -1,7 +1,15 @@
 # ISSUES
 
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
-Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-12 (WP9/WP10 chart standards + search history merged; no open issues changed; 349 GUI tests pass).
+Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-12 (**GUI finishing pass: WP9/WP10 merged into feat/gui-integration, Step 2 fixes, WP7 verify-selected, live acceptance all-pass; no GitHub issue state changed; -k gui suite green, 49/49 live browser checks pass**).
+
+Local-only, added 2026-11-12 (**GUI finishing pass; no GitHub issue state changed**):
+- WP9+WP10 merged into `feat/gui-integration`; merge regression fixed (app.js used `logTicks` without importing it — run detail threw `logTicks is not defined`).
+- `data_verify.py` root-cause fix: `config.yaml` was read via `_read_json` (YAML ≠ JSON), nulling the verify report's name/band; `brief` added to the payload. `verify.js` header/chips/30°-ticks fixes; verify-mode run pages hide search-history panels (WP4 item 5).
+- WP7: `gui/jobs.py` verify job accepts `designs`/`designs_file` CLI-mirrored (+24 tests); verify view "Verify selected" posts them, disabled while the GPU lock is alive (verified live).
+- Owner decision (2026-11-12): Home "Best horn per brief" window 14 → 31 days.
+- Live acceptance `docs/GUI_VERIFY_ACCEPTANCE_2026-11-12.md`: Appendix B 1–16 pass; screenshots `docs/images/gui-acceptance-2026-11-12/`.
+- Known cosmetic (NOT a GitHub issue): browser-default `/favicon.ico` 404 — one console error per session; index.html declares no favicon.
 
 Local-only, added 2026-11-12 (**GUI verify view front end WP3+WP6 implemented; no GitHub issue state changed**):
 - `verify.js` WP3+WP6 front end: pure-helper exports for the verify table, KPI strip, polar plot,

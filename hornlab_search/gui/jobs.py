@@ -126,6 +126,40 @@ class JobManager:
             raise JobError(f"unknown run: {rid!r}")
         return str(self.runs / rid)
 
+    @staticmethod
+    def _design_hashes(raw) -> list[str]:
+        """Mirror cli.py ``_verify_wanted_hashes`` for a GUI-supplied ``designs`` argument: split a
+        comma-separated string (or take a list), keep the caller's order, drop empty fields and
+        duplicates, and reject anything that is not the loader's own 6-40 lowercase hex hash.
+        Shape only -- the CLI checks that each hash has an ok row in the run."""
+        if isinstance(raw, str):
+            items = raw.split(",")
+        elif isinstance(raw, (list, tuple)):
+            items = list(raw)
+        else:
+            raise JobError("designs must be a comma-separated string or a list of design hashes")
+        out: list[str] = []
+        for item in items:
+            if not isinstance(item, str):
+                raise JobError("designs: every entry must be a design hash string")
+            h = item.strip()
+            if not h:                       # cli.py drops empty comma fields
+                continue
+            if not D.HASH.match(h):
+                raise JobError(f"designs: not a design hash: {item!r} (6-40 lowercase hex)")
+            if h not in out:
+                out.append(h)               # order kept, duplicates dropped
+        if not out:
+            raise JobError("designs: at least one design hash is required")
+        return out
+
+    @staticmethod
+    def _designs_file(raw) -> str:
+        """A CSV path for ``--designs-file``; its 'design' column and existence are the CLI's job."""
+        if not isinstance(raw, str) or not raw.strip():
+            raise JobError("designs_file must be a path to a CSV file")
+        return raw.strip()
+
     def _backend_argv(self, a: dict) -> list[str]:
         """Explicit ``backend`` arg, else the platform-derived Metal default (Apple Silicon only)."""
         b = a.get("backend")
@@ -234,7 +268,25 @@ class JobManager:
                     "--top", self._int(a.get("top", 3), 1, 10, "top")], False
         if kind == "verify":
             # G-1: re-solve this run's top designs at verify fidelity; GPU (one-GPU lock via launch()).
-            return ["verify", "--run", self._run_id(a.get("run")),
+            # WP7: ``designs`` (hashes, string or list) / ``designs_file`` (CSV) select designs
+            # explicitly, exactly like cli.py's mutually exclusive --top/--designs/--designs-file.
+            # The CLI's argparse refuses any combination, so the GUI refuses it too rather than
+            # inventing a precedence; omitting ``top`` keeps the CLI's own 5-design default.
+            run_dir = self._run_id(a.get("run"))
+            has_designs = "designs" in a and a.get("designs") not in (None, "")
+            has_file = "designs_file" in a and a.get("designs_file") not in (None, "")
+            has_top = a.get("top") not in (None, "")
+            if has_designs and has_file:
+                raise JobError("verify: give either designs or designs_file, not both")
+            if (has_designs or has_file) and has_top:
+                raise JobError("verify: top cannot be combined with designs/designs_file")
+            if has_designs:
+                return ["verify", "--run", run_dir,
+                        "--designs", ",".join(self._design_hashes(a.get("designs"))), *brief], True
+            if has_file:
+                return ["verify", "--run", run_dir,
+                        "--designs-file", self._designs_file(a.get("designs_file")), *brief], True
+            return ["verify", "--run", run_dir,
                     "--top", self._int(a.get("top", 5), 1, 25, "top"), *brief], True
         if kind == "report":
             return ["report", self._run_id(a.get("run"))], False

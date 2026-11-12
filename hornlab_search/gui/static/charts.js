@@ -1,6 +1,6 @@
 // charts.js — hornlab-search GUI
 // AGPL-3.0-or-later.  Adapted from tools/review/review_template.html (same author).
-// Exports: el, chart, heat, cmap, niceTicks, diFromCuts, logGrid, AXES, fixedRange, polarPlot
+// Exports: el, chart, heat, cmap, niceTicks, angleTicks, diFromCuts, logGrid, AXES, fixedRange, polarPlot
 
 export const NS = "http://www.w3.org/2000/svg";
 
@@ -26,6 +26,20 @@ export function niceTicks(lo, hi, n = 5) {
   const out = [];
   for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-9; v += step) out.push(+v.toFixed(6));
   return out;
+}
+
+/**
+ * Angle ticks on a 30° grid (C4): the 30° multiples inside [lo, hi].
+ * Cut charts used niceTicks, which produced ±50/0/50 for a ±90° cut; audio readers expect
+ * −90, −60, −30, 0, 30, 60, 90. Falls back to the endpoint when the span holds no multiple.
+ */
+export function angleTicks(lo, hi, step = 30) {
+  lo = Number(lo); hi = Number(hi);
+  if (!isFinite(lo) || !isFinite(hi)) return [];
+  if (hi < lo) { const t = lo; lo = hi; hi = t; }
+  const out = [];
+  for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-9; v += step) out.push(v === 0 ? 0 : v);
+  return out.length ? out : [lo, hi];
 }
 
 /**

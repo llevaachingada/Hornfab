@@ -1,6 +1,43 @@
 # CONTINUITY
 
 
+## 2026-11-12 (23:5xZ) - GUI FINISHING PASS: WP9/WP10 MERGE + STEP 2 FIXES + WP7 + LIVE ACCEPTANCE (feat/gui-integration)
+
+- Merged `feat/gui-charts-history` (WP9 chart standards C1-C15 + WP10 search history H1-H10) into
+  `feat/gui-integration` (`9a45d5e`); kept both sides in `app.js`/`app.css`/docs as the handoff
+  required. Full `-k gui` suite green (exit 0) and `node --check` clean after the merge.
+- Step 2 defect fixes (all verified live on port 8799 vs the real runs tree, read-only):
+  - `verify.js` table gate pills carry ✓/✗ (pass/fail in tooltip), not colour-only.
+  - Verify header shows `report.name` + brief + band. **Root cause fixed in `data_verify.py`:
+    `config.yaml` was read with `_read_json` (YAML ≠ JSON → `{}`), so name/band were null.** `brief`
+    added to the `verify_report` payload from the run config.
+  - Cut charts use 30° ticks (`angleTicks` in `charts.js`; −90/−60/−30/0/30/60/90), not ±50.
+  - `fidelity.screen.dof_range` == verify range on `…ed1da9` investigated and **legitimate**:
+    `n_dof` is a mesh property (all 5 screen rows 2006–2380); screen DOF is read from the screen
+    `response.npz`, verify DOF from the verify design dir — same mesh, same dof.
+  - Verify-mode run pages omit every search-history panel (WP4 item 5) via a single `runIsVerify`
+    branch in `viewRunDetail`; Verification card and gate audit stay.
+  - WP7 "Verify selected": `cli.py` already had `--designs/--designs-file`; `gui/jobs.py` `kind==verify`
+    now accepts `designs` (comma string or list, CLI-mirrored shape validation, mutual exclusivity
+    with `top`) and `designs_file` (+24 new tests, `tests/test_gui_jobs_verify_designs.py`); the Verify
+    view gained `renderVerifySelected` (hash checklist, select-all, POST `{kind:"verify",args:{run,designs}}`).
+    GPU-busy disabling verified against the live GPU lock (button disabled + title/hint while the real
+    search runs).
+- **Owner decision applied:** Home "Best horn per brief" window 14 → 31 days (`HOME_RECENT_DAYS`,
+  boundary tests for 30/32 days in `test_gui_shell_ux.py`).
+- **Merge regression caught during acceptance:** the WP10 search-dynamics block in `app.js` used
+  `logTicks` without importing it (`logTicks is not defined` on run detail); import added.
+- Live acceptance: `docs/GUI_VERIFY_ACCEPTANCE_2026-11-12.md` — Appendix B items 1–16 pass with
+  measured evidence (Home 1.2 s; runs-verify filter 16 rows / 7 parent links / 9 standalone;
+  ed1da9 verification card numbers; elites warm 2.51 s; launch 2.03 s; compare filter; both themes,
+  900/1400 px; screenshots in `docs/images/gui-acceptance-2026-11-12/`).
+- Tests: `tests/test_gui_chart_standards.py` (angleTicks), `tests/test_gui_verify_data.py`
+  (name/band/brief regression), `tests/test_gui_verify_panel.py` (WP7 helpers), 
+  `tests/test_gui_jobs_verify_designs.py` (24), `tests/test_gui_shell_ux.py` + `tests/test_gui_brief_authoring.py`
+  (verify-run panel hiding + 31-day window). Full `-k gui` suite green (exit 0) after all changes;
+  `node --check` clean on app.js/verify.js/charts.js/balloon.js/evolution.js.
+- Known cosmetic: default `/favicon.ico` 404 (no favicon declared) — one console error per session.
+
 ## 2026-11-12 (22:10Z) - GUI VERIFY VIEW FRONT END (WP3 + WP6, feat/gui-verify-ui)
 
 - Implemented WP3 (verify table view) and WP6 (per-design panel) in `hornlab_search/gui/static/verify.js`.

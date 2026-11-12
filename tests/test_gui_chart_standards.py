@@ -52,7 +52,14 @@ globalThis.document = {{ getElementById: () => null, createElementNS: () => ({{
   setAttribute() {{}}, appendChild() {{}}, children: [], innerHTML: ""
 }}) }};
 
-const {{ logGrid, logTicks, AXES, fixedRange, polarPlot }} = await import("{charts_url}");
+const {{ logGrid, logTicks, AXES, fixedRange, angleTicks, polarPlot }} = await import("{charts_url}");
+
+// C4: angle ticks are 30-degree multiples, not niceTicks' ±50/0/50
+assert.deepEqual(angleTicks(-90, 90), [-90, -60, -30, 0, 30, 60, 90]);
+assert.deepEqual(angleTicks(-100, 100), [-90, -60, -30, 0, 30, 60, 90]);
+assert.deepEqual(angleTicks(-45, 45), [-30, 0, 30]);
+assert.deepEqual(angleTicks(15, 100), [30, 60, 90]);
+assert.deepEqual(angleTicks(0, 10), [0]);
 
 // C1: minor ticks between 100-10000
 const {{ major, minor }} = logGrid(100, 10000);

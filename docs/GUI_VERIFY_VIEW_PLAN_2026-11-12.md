@@ -1,6 +1,15 @@
 # GUI verify view + whole-GUI UX hardening — implementation plan (2026-11-12, v2)
 
-**Status:** PLAN (not implemented). v2 supersedes the v1 design pass of the same date. v2 was hardened against a
+**Status (2026-11-12, updated after implementation):** WP0–WP10 are implemented on `feat/gui-integration`
+(WP0/WP1 verify backend; WP2/WP2b speed; WP3/WP6 verify UI; WP4 run page + verify-mode panel hiding; WP5 shell;
+WP7 "Verify selected" with `--designs` job args; WP9 + WP10 chart standards + search history, merged from
+`feat/gui-charts-history`). Step 2 finishing fixes landed (verify header name/band/brief with a `data_verify.py`
+YAML-read root-cause fix, gate-chip ✓/✗ marks, 30° cut ticks, verify-run search-history hiding, WP7 backend+UI,
+Home window 14 → 31 days per owner decision). Live acceptance: **Appendix B 1–16 pass on port 8799 vs the real
+runs tree** — see `docs/GUI_VERIFY_ACCEPTANCE_2026-11-12.md`. Not pushed yet; owner decides push/PR split.
+
+Original status line (kept for the record): PLAN (not implemented) as of v2's writing. v2 supersedes the v1
+design pass of the same date. v2 was hardened against a
 **live inspection** of the GUI (built-in browser on `hornlab-search gui` against the real `runs/` tree, 425 runs,
 24 inline verify folders, 16 verify runs, GPU + CPU lanes running), and widened by owner request to the
 highest-value UI/UX and data-display fixes across the whole GUI, aimed at a **non-technical user**.

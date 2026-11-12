@@ -3,7 +3,7 @@
 
 import { chart, heat, cmap, drawCbar, niceTicks, diFromCuts, groupColor,
          el, NS, css, fmt, DEFW, polarMap, wallSection, familyColor, measuredWidth, isobarMap,
-         logGrid, AXES, fixedRange } from "./charts.js";
+          logGrid, logTicks, AXES, fixedRange } from "./charts.js";
 import { TERMS as GLOSSARY, TERM_ORDER, tip } from "./glossary.js";
 import { loadParamCatalog, paramTipHtml, typologyTipHtml, typologyChipsHtml } from "./paramtips.js";
 import { init3d } from "./view3d.js";
@@ -297,7 +297,7 @@ function verificationCardHtml(rep, runId) {
     <p style="margin:4px 0 8px">${facts}. Pick a design to print from the verified ones, not from the screen score.</p>${warn}${open}</div>`;
 }
 
-const HOME_RECENT_DAYS = 14;   // the real tree has every brief active within 30 days, so 30 hid nothing
+const HOME_RECENT_DAYS = 31;   // owner decision 2026-11-12: 31 days (was 14); every brief on the real tree is active within 30 days, so this hides nothing there
 let _homeShowAllBriefs = false;
 
 /** Pure: split leaderboard rows into those shown (activity within HOME_RECENT_DAYS, or all when
@@ -788,6 +788,13 @@ function resumeArgsFor(job, runs) {
  *  reused. A missing/null command (or any other command) renders no card at all. */
 function continueRunAvailable(d) {
   return !!(d && typeof d.command === "string" && d.command.trim().startsWith("hornlab-search search"));
+}
+
+/** Pure: is this run-detail payload a verification run? A verify run re-solves designs from a
+ *  search run, so its page carries no search history (plan WP4 item 5). `d.summary.mode` is the
+ *  live shape; `d.mode` is the fallback for older payloads. */
+function runIsVerify(sum, d) {
+  return (((sum && sum.mode) || (d && d.mode)) === "verify");
 }
 
 /** Pure: the POST /api/jobs args for adding N NEW evaluations to an opened search run. Mirrors
@@ -2619,7 +2626,7 @@ export { f0KpiHtml, mountingRankWarnHtml, seedDerivationHtml, objectiveVersionOp
 
 export { lanesPanelHtml, verdictChipHtml, eliteGateChips };
 
-export { continueRunAvailable, continueRunArgs };
+export { continueRunAvailable, continueRunArgs, runIsVerify };
 
 
 /** Compact run-detail card: top up an opened search run with N NEW evaluations while reusing the
@@ -2665,6 +2672,8 @@ async function viewRunDetail(id) {
   await loadParamCatalog();       // P9: catalog-grounded geometry-knob hover docs; failure degrades to raw keys
 
   const sum = d.summary || d;
+  // Verify runs re-solve designs from a screen run: search history does not apply (WP4 item 5).
+  const isVerify = runIsVerify(sum, d);
   const t = d.target || {};
   const S = d.seed || {};
   const B = d.best || {};
@@ -2707,9 +2716,9 @@ async function viewRunDetail(id) {
 
       <!-- Actions -->
       <div class="btn-row">
-        <a class="btn primary" href="#/run/${esc(id)}/evolution">▶ Evolution time-lapse</a>
+        ${isVerify ? "" : `<a class="btn primary" href="#/run/${esc(id)}/evolution">▶ Evolution time-lapse</a>
         <a class="btn" href="#/run/${esc(id)}/umap" title="2-D cloud of OK designs in the searchable unit box (UMAP if installed, else PCA); color by param quartiles or total J">◎ Design cloud</a>
-        ${d.has_atlas ? `<a class="btn" href="#/run/${esc(id)}/archive" title="Quality-diversity atlas: objective per descriptor bin (CMA-ME runs only)">QD atlas</a>` : ""}
+        ${d.has_atlas ? `<a class="btn" href="#/run/${esc(id)}/archive" title="Quality-diversity atlas: objective per descriptor bin (CMA-ME runs only)">QD atlas</a>` : ""}`}
         <a class="btn" href="#/run/${esc(id)}/balloon" title="W6 Balloon: the stored directivity balloon in 3D — shape + colour = SPL, white isobar rings, radar slicer, freq × angle slice">◉ Balloon 3D</a>
         <a class="btn" href="#/run/${esc(id)}/3d">3D view</a>
         <a class="btn" href="#/compare?a=${esc(id)}">Compare with…</a>
@@ -2718,7 +2727,7 @@ async function viewRunDetail(id) {
           : `<button id="btn-gen-report" title="Builds the detailed HTML report (about 30 s)">Make full report</button>`}</span>
         <button id="btn-step" title="Writes closed STEP solids (mm) of the 3 best designs for CAD or 3D printing">Export STEP for CAD (top 3)</button>
       </div>
-      ${continueRunCardHtml(d, sum)}
+      ${isVerify ? "" : continueRunCardHtml(d, sum)}
       <div id="run-files" class="run-files"></div>
 
       <!-- Acoustic performance charts (C11 order: Isobars → BW H/V → DI → On-axis → Impedance → Wall → 3D) -->
@@ -2827,7 +2836,7 @@ async function viewRunDetail(id) {
       <!-- Gate audit: below the response charts (it can list hundreds of designs; see gateAuditSplit) -->
       ${gateAuditHtml(d.gate_audit)}
 
-      <!-- Search history -->
+      ${isVerify ? "" : `<!-- Search history -->
       <h3>How the search went</h3>
       <div class="grid2">
         <div class="fig"><h3>Convergence</h3>
@@ -2850,7 +2859,7 @@ async function viewRunDetail(id) {
           <div><div class="cap" style="font-weight:600">Axis ratio (log)</div><svg id="c-dyn-axratio"></svg></div>
         </div>
         <div style="margin-top:8px"><div class="cap" style="font-weight:600">Per-parameter σ (normalised to bound width)</div><svg id="c-dyn-stddev" style="width:100%"></svg></div>
-      </div>
+      </div>`}
 
       <!-- Sensitivity -->
       <div class="fig">
@@ -2859,7 +2868,7 @@ async function viewRunDetail(id) {
         <div class="tbl-wrap"><table id="sens-table"></table></div>
       </div>
 
-      <!-- CMA covariance (search distribution; absent on older runs) -->
+      ${isVerify ? "" : `<!-- CMA covariance (search distribution; absent on older runs) -->
       <div class="fig" id="cma-cov-block" style="display:none">
         <h3>${tip("cma_cov", "CMA covariance")}</h3>
         <div class="cap" id="cma-cov-cap">Unit-box search scales from the final ES. Large ${tip("cma_std", "σ√Cᵢᵢ")} ⇒ still exploring that knob; eigenvectors are coupled J-directions, not acoustic Sobol indices.</div>
@@ -2870,7 +2879,7 @@ async function viewRunDetail(id) {
           <div class="cap">Recommendations from CMA scales + Spearman guard. Does not change the config — run <code>hornlab-search pin-plan --run ${esc(sum.id || id)}</code> to write <code>PIN_PLAN.md</code> / a patched YAML.</div>
           <div class="tbl-wrap"><table id="pin-plan-table"></table></div>
         </div>
-      </div>
+      </div>`}
 
       <!-- Failures -->
       <div class="stack" style="gap:6px">
@@ -2890,8 +2899,10 @@ async function viewRunDetail(id) {
     [`${tip("dims", "Horn size")} <small style="font-family:var(--f-mono);font-size:0.6rem;color:var(--muted)">W×H×D outer</small>`, dimsStr],
     [`${tip("J", `Start ${tierWord} score`)} <small style="font-family:var(--f-mono);font-size:0.6rem;color:var(--muted)">${esc(jVersionLabel(d))}</small>`, fmt(sum.seed_j && sum.seed_j < 900 ? sum.seed_j : null)],
     [`${tip("J", `Best ${tierWord} score`)} <small style="font-family:var(--f-mono);font-size:0.6rem;color:var(--muted)">${esc(jVersionLabel(d))}</small>`, fmt(sum.best_j)],
-    ["Change vs start", ch],
-    [`${tip("budget", "Budget used")}`, budgetKpi(sum.n, sum.budget, d.command).text, budgetKpi(sum.n, sum.budget, d.command).cls],
+    ...(isVerify ? [] : [
+      ["Change vs start", ch],
+      [`${tip("budget", "Budget used")}`, budgetKpi(sum.n, sum.budget, d.command).text, budgetKpi(sum.n, sum.budget, d.command).cls],
+    ]),
     [`${tip("failures", "Failures")}`, `${nf} (${failPct}%)`],
     [`${tip("pinned", "At limit")}`, pinnedSens.length > 0 ? `<b class="bad">${pinnedSens.length}</b>` : pill("0", "good")],
   ].map(([k, v, cls]) => `<div class="kpi"><span>${k}</span><b${cls ? ` class="${cls}"` : ""}>${v}</b></div>`);

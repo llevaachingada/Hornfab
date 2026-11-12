@@ -21,6 +21,7 @@ from .data import (
     HASH,
     RUN_ID,
     _as_dict,
+    _config,
     _read_json,
     _run_dirs,
     _spearman,
@@ -406,9 +407,11 @@ def verify_report(runs: Path, run_id: str, root: Path) -> dict:
             parent_id = None
 
         # For a redirect, build a minimal report pointing to parent
+        redirect_cfg = _config(run_dir)
         return clean({
             "run_id": run_id,
-            "name": _as_dict(_read_json(run_dir / "config.yaml")).get("name"),
+            "name": redirect_cfg.get("name"),
+            "brief": _as_dict(redirect_cfg.get("brief")).get("name"),
             "kind": "redirect",
             "redirect_to": parent_id,
             "parent_missing": parent_missing,
@@ -548,7 +551,9 @@ def verify_report(runs: Path, run_id: str, root: Path) -> dict:
                 best_screen[h] = r
 
     # ── Comparability ─────────────────────────────────────────────────────────
-    screen_cfg = _as_dict(_read_json(run_dir / "config.yaml")) or {}
+    # config.yaml is YAML, not JSON: ``_read_json`` silently returned {} here, which made the
+    # report's name and band null (the header fell back to the run id and "–").
+    screen_cfg = _as_dict(_config(run_dir))
     # Try to load verify config from inline verify (there may not be one)
     verify_cfg: dict | None = None
     if not is_standalone:
@@ -675,6 +680,7 @@ def verify_report(runs: Path, run_id: str, root: Path) -> dict:
     return clean({
         "run_id": run_id,
         "name": screen_cfg.get("name"),
+        "brief": _as_dict(screen_cfg.get("brief")).get("name"),
         "kind": kind,
         "redirect_to": None,
         "parent_missing": False,

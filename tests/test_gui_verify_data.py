@@ -56,6 +56,22 @@ class TestLayoutA:
         report = DV.verify_report(tmp_path / "runs", R_SCREEN, root=tmp_path)
         assert report["kind"] == "pairs"
 
+    def test_report_name_band_and_brief_come_from_yaml_config(self, tmp_path):
+        """config.yaml is YAML; reading it as JSON left name/band/brief null (header fell back
+        to the run id and "–")."""
+        import yaml
+        from tests.gui_verify_fixtures import make_runs, R_SCREEN
+        make_runs(tmp_path)
+        cfg_path = tmp_path / "runs" / R_SCREEN / "config.yaml"
+        cfg = yaml.safe_load(cfg_path.read_text(encoding="utf-8"))
+        cfg["brief"] = {"name": "b1w_hifi_90x60"}
+        cfg_path.write_text(yaml.safe_dump(cfg), encoding="utf-8")
+
+        report = DV.verify_report(tmp_path / "runs", R_SCREEN, root=tmp_path)
+        assert report["name"] == "fixture_screen"
+        assert report["band_hz"] == [300, 8000]
+        assert report["brief"] == "b1w_hifi_90x60"
+
     def test_report_top_level_keys(self, tmp_path):
         from tests.gui_verify_fixtures import make_runs, R_SCREEN
         make_runs(tmp_path)
