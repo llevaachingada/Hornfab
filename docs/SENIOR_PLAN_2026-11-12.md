@@ -54,6 +54,23 @@ WP-B1 decides whether 6 and 7 should become one objective.
 Order: A (done here) -> E (hygiene, small) -> B (scoring truth, needs research) and C (speed, needs GPU) and
 D (GUI) in parallel lanes. One GPU job at a time; GPU work only from the night worktree (section 3).
 
+**Status column (added 2026-11-12 evening, docs-hygiene lane group F; verified against merged PRs and
+`docs/CONTINUITY.md` - "done" is used only where verifiable. Lanes L1-L5 of the executable handoff ran the
+work packages: L1=PR #29, L2=PR #26, L3=PR #27, L4=PR #25, L5=PR #28; the 2026-11-12 day plan
+`docs/IMPLEMENTATION_PLAN_2026-11-12_DAY.md` carries the remainder via PR #32):**
+
+| WP | Status | Where it landed / what is still open |
+|---|---|---|
+| WP-A Integration | **done** | A1: PR #24 merged 2026-11-12. A2: swarm/B (`verify --designs`) + swarm/C (atlas v2 configs) merged with it; suite at the tip 2,481 collected / 2,481 passed (CONTINUITY integration entry). **Open:** A3 (close `beta-fixes`) not verified as done. |
+| WP-E Hygiene | **partly done / in this plan** | E5 line endings + E6 notes move: **PR #25, still OPEN, merges LAST today.** E2 CONTINUITY re-order: patch `docs/history/continuity_reorder_2026-11-12.patch` produced by group F.1, applied LAST by the orchestrator; ISSUES resync + issue #13 closure (F.4) = orchestrator actions. E3 priorities marking: lane F (P15 + P14 lane closure in `docs/NEXT_DEV_PRIORITIES.md`); L4's `[DONE]`/`[PAUSED]` prefixes ride PR #25. **Open:** E1 (delete merged local branches/worktrees), E4 (HF re-pack + upload after the v7 relabel - MANIFEST/pack groundwork landed in PR #28, the upload is a pending step). |
+| WP-B Scoring, drivers, data truth | **B2 done; B3 in this plan; B1, B4-B6 open** | B1: the v6/v7 split is now **confirmed by PR #27's evidence** (v6-vs-v7 top-20 shortlists disagree, Kendall tau < 0 in every brief class; recommendation written there: keep the split, no v8) - owner sign-off still open. B2: **done, PR #27** (`docs/evidence/RESCORE_V6_V7_2026-11-12.md`). B3 round-throat brief flag: **in this plan** (day-plan group B.5). B4-B6: **open** (PR #27's driver check is report-only). |
+| WP-F Data interop | **build done (PR #28); owner actions open** | MANIFEST, `export_config.py`, two-way `labs/` HF, foreign-data ingest with the 0.2 dB parity gate, version/backend-grouped tables: **merged in PR #28.** **Open:** HF write access for Collin (or an agreed lab repo); the L5.7 re-pack + upload. |
+| WP-C Solve speed | **in this plan / open** | C1: n1 throughput matrix runs in the GPU night; the evidence + recommendation = day-plan group C.3 (**in this plan**). C2 defaults flip: **open** - evidence only today, the owner flips after the calibration night. C3 fused identity-cache fork patch: **open** (waits for the calibration night). C4 valid-only budget: **in this plan** (day-plan group B.4). C5 sysmem setting: **open** (machine setting, owner only). |
+| WP-D GUI | **D1-D2 done (PR #26); D3-D4 in this plan; D5 open** | D1 version selector + D2 gate chips landed in **PR #26** (merged). D3 (three new views verified on real data with screenshot evidence) and D4 elites catalog: **in this plan** (day-plan group E). D5 owner click-path check: **open.** |
+| MEH | **open - paused** | No new MEH work packages (owner, 2026-11-12); merged code stays green; parked readiness items kept, not dropped. |
+| 3. GPU night + CPU lane | **in progress** | Day queue launched 2026-11-12 14:30Z on both lanes (CONTINUITY); the CPU second lane landed (PR #29). N2 calibration moves to the next night (**open** - needs the n1 defaults first). |
+| 4. Owner decisions | **open** | Loading split sign-off (evidence in PR #27), round-throat gate default, sysmem setting, HF write access for Collin, gate levels / woofer block per brief, printing 1-2 candidates. |
+
 ### WP-A Integration [this session]
 - A1 Push `integ/2026-11-12`, open the PR, merge into `main` with a merge commit (PRs #19, #22, #23 close as
   merged). **Done when** `main` = this branch and CI is green.
