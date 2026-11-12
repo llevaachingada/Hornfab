@@ -111,7 +111,7 @@ Full plan + alternatives + risk register: `docs/research/CPU_SECOND_LANE_HARDENI
   `cuda_fused` + `--backend beat_cpu` refusal, make campaign/`gpu-clean` lane-aware, and get the 8 decisions in doc §12.
 - **Not the same as** the bigger mesh/solve pipeline (higher ceiling, 3-5x the work); measure this first.
 
-## P1 (top priority). Fused / direct CUDA Burton-Miller assembly in the exterior driver
+## [DONE] P1 (top priority). Fused / direct CUDA Burton-Miller assembly in the exterior driver
 
 **Why it matters.** The 8 GB RTX 4060 runs out of memory between 8.9k (works, 74 s per frequency under memory
 pressure) and 15.7k (OOM) quarter-domain dofs (`TOOLCHAIN.md` M2). That ceiling, not the card, is what holds screening
@@ -158,7 +158,7 @@ singular cache, orbit row weights) and is tested against the 4-operator path on 
 sculpt searches) stays on the current verified CUDA path, so the compare tier and the surrogate data come from one
 solver. Do not enable P1 mid-campaign.
 
-## P2. High-frequency finalist pass at 12 kHz on the 4060 (no solver change)
+## [DONE] P2. High-frequency finalist pass at 12 kHz on the 4060 (no solver change)
 
 Typology horns are small: measured 700–1,400 quarter dofs at 5.5 kHz, so about 3.3k–6.8k at 12 kHz (dofs scale with
 f²), inside the 8.9k ceiling. Add 12 kHz briefs and a `verify` pass for the top designs only (about 1–5 min per
@@ -167,7 +167,7 @@ epw-8 screen feeds it). Physics caveat for every report: above the throat's firs
 1-inch exit) a real compression driver is not a uniform cap, so 8–12 kHz results compare geometries, not drivers.
 A 12 kHz brief is a separate frequency grid: its records form their own group (already kept apart by the grid check).
 
-## P3. Apple Silicon (Metal) backend for the collaborator's MacBook
+## [DONE] P3. Apple Silicon (Metal) backend for the collaborator's MacBook
 
 `hornlab_beat_bem` supports `metal` (`config.py` `BEAT_BACKENDS`), with the fused path ON, and unified memory holds
 dense systems far beyond 8 GB. Our layer only exposes `beat_cuda`, `beat_cpu`, `bempp_cpu`: add a `beat_metal`
@@ -370,7 +370,7 @@ The Typologies page shows catalog ids; a tooltip there must resolve `salmon_elli
 - Is a sandbox geometry page allowed to render a design that the search would reject (outside the brief envelope), and if so does it carry a visible "outside envelope" marker? Precedent: the run page already distinguishes at-limit parameters with a red marker; the sandbox should reuse that language rather than invent one.
 - `exponent` 2.0 (prose) vs 4.0 (shipped): which is the documented default? A lane must not pick a winner.
 
-## P10 (added 2026-10-27, owner-directed). After the campaign smoke night: data-integrity fixes, objective v4, then the search sequence
+## [DONE: items 1-3] P10 (added 2026-10-27, owner-directed). After the campaign smoke night: data-integrity fixes, objective v4, then the search sequence
 
 **Full plan: `docs/IMPLEMENTATION_PLAN_2026-10-27.md`.** In order: (1) `dataset/record.py` accepts the scorer's
 objective versions (v3 records were silently not written); (2) reseed `gcurve__osse_b1w` (`gcurve_dist` 1.0);
@@ -379,7 +379,10 @@ objective versions (v3 records were silently not written); (2) reseed `gcurve__o
 all scored v4. Section 9 records the fluted/lobed-wall idea from JW Sound's Solana (harmonic FREEFORM station,
 fork change), gated on v4 results.
 
-## P11 (added 2026-10-27, owner-directed). Share campaign data with the collaborator, then merge to main
+**Status 2026-11-12:** items 1-3 (record.py accepts the scorer's objective versions, `gcurve__osse_b1w`
+reseeded with `gcurve_dist` 1.0, objective v4) are DONE; items 4-7 and section 9's fluted-wall idea remain open.
+
+## [DONE] P11 (added 2026-10-27, owner-directed). Share campaign data with the collaborator, then merge to main
 
 - **Hugging Face sync: DONE 2026-11-02 (owner-directed turn-on).** Public dataset repo
   <https://huggingface.co/datasets/chingadalleva/hornlab-search-data> — 7 tar shards / 11.56 GB (10.76 GiB)
@@ -443,7 +446,7 @@ print-and-measure protocol, and six owner decisions.
 Cloud RTX 4090 (24 GB, about $0.34–0.69/h) or L40S (48 GB, about $0.79/h): `docs/CLOUD_GPU_REPORT.md` CP-9a pod proof
 first (Linux CUDA never run with this solver).
 
-## P13 (added 2026-10-30, owner-directed). Mini multiple-entry horn: implement through the `docs/meh/` hand-off
+## [PAUSED] P13 (added 2026-10-30, owner-directed). Mini multiple-entry horn: implement through the `docs/meh/` hand-off
 
 Owner un-deferred MEH (deferred 2026-10-24, G17) and set the targets: MEH top in a 16 in square face for home hi-fi /
 DJ practice / booth, separate bass box 30-120 Hz, DSP + FIR on every channel. The orchestrator fixed the architecture,
@@ -451,6 +454,9 @@ typologies (T2 `meh2_6x2` primary, T1 `meh2_4x4`), solve strategy (per-channel B
 and scoring (objective v5). Ten work packages for cheaper agents: `docs/meh/README.md` (waves, models, dispatch prompt),
 `docs/meh/00_MEH_CONTRACTS.md`. Research basis: `docs/research/typologies/MINI_MEH_RESEARCH_2026-10-29.md`.
 GPU work is M8 only, on the owner's box, after the fork change (M2) and the pipeline (M7).
+
+**Status 2026-11-12:** implemented; follow-ups paused by owner 2026-11-12.
+
 ## P13 (added 2026-10-29, owner-directed research). Fast BEM: quadrature first, GMRES second, FMM at 14k+
 
 **Report: `docs/research/MATRIX_FREE_GPU_GMRES_FMM_2026-10-29.md`** (this section is the summary). Research only; no code/GPU run, nothing committed.
