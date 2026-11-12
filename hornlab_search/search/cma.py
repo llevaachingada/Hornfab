@@ -37,6 +37,7 @@ from ..dataset.record import DEFAULT_TRACE_FRACTION
 from ..design.space import DesignSpace
 from ..mesh.build import MeshConsistencyError
 from ..metrics import compute as metrics_compute
+from ..objective import PENALTY_FAILED
 from ..solve import worker
 from ..targets.spec import Target
 from ..types import Evaluation
@@ -426,9 +427,15 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
             o["tolfun"] = 0.0
             o["tolfunhist"] = 0.0
             o["tolflatfitness"] = 1e12
+        if str(getattr(cfg.search, "surrogate", "") or "") == "lq":
+            # B.7: pycma's recommended option for the model reinjection (fitness_models.py
+            # doctest, SurrogatePopulation usage); only when the surrogate is opted in.
+            o["CMA_injections_threshold_keep_len"] = 1
         return o
 
     popsize0 = int(cfg.search.popsize) if cfg.search.popsize else None
+    surrogate_mode = str(getattr(cfg.search, "surrogate", "") or "")   # B.7: '' = plain CMA
+    surrogate_block = None
     es = None
     if restarts is None:                       # today's single-ES path, bit-for-bit
         es = cma_lib.CMAEvolutionStrategy(list(map(float, x0)), sigma0_eff,
@@ -510,6 +517,8 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
             upd["links"] = linked               # B.2: run.json records the resolved links
         if warm_record is not None:
             upd["warm_start"] = warm_record     # B.1: the warm-start sources + sigma record
+        if surrogate_block is not None:
+            upd["surrogate"] = surrogate_block  # B.7: mode + model count (absent = today's schema)
         rundir.update_run_json(run_dir, **upd)
         suffix = ""
         if bc is not None:
@@ -604,7 +613,72 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
 
         keys = space.keys()
         last_cov: dict | None = None
-        if restarts is None:
+        if surrogate_mode == "lq":
+            # B.7 (opt-in): lq-CMA-ES via pycma's SurrogatePopulation (fitness_models.py), the
+            # same ask/tell/inject loop as cma 4.5.0's fmin_lq_surr2 (evolution_strategy.py:
+            # 4482-4500). The surrogate predicts most of a population's fitness from a linear/
+            # quadratic regression over the TRUE evaluations, so the budget buys far more
+            # generations. A generation cut by the budget is NOT told (resume contract).
+            from cma import fitness_models as _fm
+
+            class _BudgetOut(Exception):
+                pass
+
+            def _eval_one(x) -> float:
+                if exhausted():
+                    raise _BudgetOut()
+                return run_one(space.denormalize(np.asarray(x, dtype=float))).objective
+
+            surrogate = _fm.SurrogatePopulation(_eval_one)
+            seeded = 0
+            for e in list(ctx.known.values()):          # warm the model from prior rows (B.1)
+                obj = getattr(e, "objective", None)
+                des = getattr(e, "design", None)
+                if obj is None or obj >= PENALTY_FAILED or des is None:
+                    continue
+                try:
+                    surrogate.model.add_data_row(space.normalize(des), float(obj))
+                    seeded += 1
+                except Exception:  # noqa: BLE001 - seeding is best effort
+                    log.debug("surrogate model seeding failed for %s", getattr(e, "design_hash", None),
+                              exc_info=True)
+            if seeded:
+                log.info("surrogate lq: model seeded with %d prior evaluation(s) of this run",
+                         seeded)
+            if surrogate_mode == "lq":
+                surrogate_block = {"mode": "lq", "model_seeded": seeded}
+            while not exhausted():
+                if es.stop():
+                    state["stop"] = "cma: " + ", ".join(sorted(es.stop()))
+                    break
+                X = [np.asarray(x, dtype=float).reshape(-1) for x in es.ask()]
+                try:
+                    F = surrogate(X)
+                except _BudgetOut:                       # budget ran out mid-generation: not told
+                    state["stop"] = "budget"
+                    break
+                es.tell(X, list(F))
+                es.countevals = int(surrogate.evaluations)   # TRUE evaluations only
+                if surrogate_block is not None:
+                    surrogate_block["true_evaluations"] = int(surrogate.evaluations)
+                    surrogate_block["model_size"] = int(getattr(surrogate.model, "count", 0) or 0)
+                try:
+                    if surrogate.model is not None:
+                        es.inject([surrogate.model.xopt])
+                except Exception:  # noqa: BLE001 - injection is optional per fmin_lq_surr2
+                    log.debug("surrogate inject failed", exc_info=True)
+                try:
+                    es.logger.add()
+                except Exception:  # noqa: BLE001 - cma's own logging is optional
+                    pass
+                if state["best"] is not None:
+                    log.info("lq generation: best overall %.4f (%d new evaluations, model %d)",
+                             state["best"].objective, state["n_new"],
+                             int(getattr(surrogate.model, "count", 0) or 0))
+            if not state["stop"]:
+                state["stop"] = "budget"
+            last_cov = None
+        elif restarts is None:
             state["stop"] = sweep(es)
             try:
                 last_cov = covariance_summary(es, keys, include_C=True)

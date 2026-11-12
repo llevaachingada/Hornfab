@@ -127,6 +127,7 @@ class SearchSettings:
                                        # = today's dimensions
     warm_start: dict | None = None     # B.1: {from_runs, top_k, sigma_from_spread,
                                        # allow_cross_brief}; absent = today's mean/sigma0
+    surrogate: str | None = None       # B.7: 'lq' (pycma lq-CMA-ES surrogate); absent = plain CMA
 
 
 @dataclass
@@ -939,6 +940,17 @@ def _validate_warm_start(value, where: str, cfg_path: Path) -> dict | None:
     return out
 
 
+def _validate_surrogate(value, where: str) -> str | None:
+    """B.7 (day 2026-11-12): ``search.surrogate: lq`` opts the plain-CMA algorithm into pycma's
+    lq-CMA-ES surrogate (SurrogatePopulation / fmin_lq_surr2). Exact token; cma_me and the
+    restarts/prefetch paths are refused at the call site."""
+    if value is None:
+        return None
+    if value != "lq":
+        raise ConfigError(f"{where}: surrogate must be 'lq' or omitted, got {value!r}")
+    return str(value)
+
+
 def _validate_near_correction(solve, where: str) -> None:
     """WP14: validate ``solve.near_correction*`` / ``solve.solve_precision`` BEFORE the library
     sees them. The bounds mirror hornlab_beat_bem's own SolveConfig (near_correction_cutoff finite
@@ -1315,7 +1327,8 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
     _validate_source_profile_alpha(solve, f"{where}:solve")
     search = _build(SearchSettings, _require(raw, "search", where), f"{where}:search",
                     optional=("popsize", "infeasible_penalty", "restarts", "qd", "pipeline_prefetch",
-                              "budget_counts", "max_attempts", "links", "warm_start"))
+                              "budget_counts", "max_attempts", "links", "warm_start",
+                              "surrogate"))
     if "popsize" not in raw["search"]:
         search.popsize = None
     if "budget_counts" not in raw["search"]:
@@ -1346,6 +1359,20 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
     else:
         search.warm_start = _validate_warm_start(search.warm_start, f"{where}:search.warm_start",
                                                  path)
+    if "surrogate" not in raw["search"]:
+        search.surrogate = None
+    else:
+        search.surrogate = _validate_surrogate(search.surrogate, f"{where}:search.surrogate")
+        if search.algorithm == "cma_me":
+            raise ConfigError(f"{where}:search.surrogate: the lq surrogate is only implemented "
+                              f"for search.algorithm: cma (got cma_me; the atlas keeps today's "
+                              f"emitters)")
+        if search.restarts is not None:
+            raise ConfigError(f"{where}:search.surrogate: the lq surrogate is not supported with "
+                              f"search.restarts (B.7)")
+        if search.pipeline_prefetch and search.pipeline_prefetch > 0:
+            raise ConfigError(f"{where}:search.surrogate: the lq surrogate is not supported with "
+                              f"search.pipeline_prefetch (B.7)")
     if search.algorithm not in SEARCH_ALGORITHMS:
         raise ConfigError(f"{where}: search.algorithm must be one of {list(SEARCH_ALGORITHMS)}, "
                           f"got {search.algorithm!r}")
