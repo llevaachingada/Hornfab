@@ -3,6 +3,12 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-10-25 (M6/WP12 pushed: enclosure mounting plumbed end-to-end (`brief.mounting` → the mesher's OWN keys; `-mnt-` cache keys; mesh_meta/ndjson/record echoes; absent = byte-for-bit) and MEASURED on two finalists — dofs +199.4 %/+106.5 %, both under the UNCHANGED caps, enclosure J improves (a different objective landscape — never rank across mountings), reference parity 2.91e-06 dB; **WP13 axisymmetric backend OWNER-DEFERRED** ("don't know how necessary that is"); suite **1372/0/0/0**; focused 71/0/0; evidence `docs/evidence/M6_WP12_2026-10-25.md`, byte-check 21/21; no GitHub issue state changed).
 
+Local-only, added 2026-11-12 (**day plan group G: objective v8 PROPOSAL; no GitHub issue state changed**):
+- `hornlab_search/objective/scalar_v8.py` + `tools/analysis/v8_rescore.py` + owner brief landed as an
+  OFFLINE PROPOSAL (not registered; no brief uses v8; no default changed). Re-score: tau v8 vs
+  v4/v6/v7 = 0.683/0.792/0.668, top-20 overlap 13/11/12 of 20 on 400 stored rows. Owner sign-off
+  required; an A/B night (>=5 seeds per class) must precede any brief switch. 39 targeted tests green.
+
 Local-only, added 2026-11-12 (**day plan group E merge, PR #36; no GitHub issue state changed**):
 - E.1 `#/analysis` page + `/api/analysis` routes (renders Group A outputs read-only; new
   `gui --analysis-dir` flag); E.2 home lanes panel via `GET /api/lanes` (local duplicate of D.1,
