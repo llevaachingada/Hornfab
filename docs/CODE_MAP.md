@@ -115,3 +115,4 @@ bempp_cpu) → `metrics` (beamwidth, ripple, DI, impedance) → `objective` (sca
 | `tools/bench/mesh_policy_study.py` | WP4: baseline vs `curvature_npts` meshes (N/E, edge stats, build seconds; optional `--solve`). |
 | `tools/bench/compare_search_runs.py` | Compare two run dirs' `search.ndjson` (same designs/order/objectives) + candidates/hour. |
 | `docs/throughput/` | `RUNBOOK.md` (owner steps + gates), `WP1_FUSED_IDENTITY_CACHE_PATCH.md` (fork proposal). |
+| `tools/data/renumber_objective_v5_to_v7.py` | 2026-11-12 one-off relabel of the hardened branch's objective "5" to v7 in dataset shards and run dirs (dry run by default, backup, os.replace). |

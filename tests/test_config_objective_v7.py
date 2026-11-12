@@ -98,8 +98,8 @@ def test_v4_block_and_dispatch_are_untouched():
     assert _validate_objective_block({"version": 3}, "b.yaml") == {"version": 3}
     with pytest.raises(ConfigError, match="unknown"):
         _validate_objective_block({"version": 3, "tolerances": V4_ONES}, "b.yaml")
-    with pytest.raises(ConfigError, match="1, 2, 3, 4 or 5"):
-        _validate_objective_block({"version": 6}, "b.yaml")
+    with pytest.raises(ConfigError, match="1, 2, 3, 4, 5, 6 or 7"):
+        _validate_objective_block({"version": 8}, "b.yaml")
     from hornlab_search.search.evaluate import _OBJECTIVE_SCORERS, _score_v4
 
     assert _OBJECTIVE_SCORERS[4] is _score_v4          # the v4 scorer object did not move

@@ -242,4 +242,4 @@ def test_search_dispatch_registers_v5_and_scores_finitely(tmp_path):
 
 
 def test_versions_tuple_is_additive():
-    assert SUPPORTED_OBJECTIVE_VERSIONS == (1, 2, 3, 4, 5, 6)
+    assert SUPPORTED_OBJECTIVE_VERSIONS[:6] == (1, 2, 3, 4, 5, 6)   # additive: 7 (renumbered hardened) may follow

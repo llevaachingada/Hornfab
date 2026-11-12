@@ -3,6 +3,12 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-10-25 (M6/WP12 pushed: enclosure mounting plumbed end-to-end (`brief.mounting` → the mesher's OWN keys; `-mnt-` cache keys; mesh_meta/ndjson/record echoes; absent = byte-for-bit) and MEASURED on two finalists — dofs +199.4 %/+106.5 %, both under the UNCHANGED caps, enclosure J improves (a different objective landscape — never rank across mountings), reference parity 2.91e-06 dB; **WP13 axisymmetric backend OWNER-DEFERRED** ("don't know how necessary that is"); suite **1372/0/0/0**; focused 71/0/0; evidence `docs/evidence/M6_WP12_2026-10-25.md`, byte-check 21/21; no GitHub issue state changed).
 
+Local-only, added 2026-11-12 (**integration; GitHub: PRs #19, #22, #23 close as merged with the integration PR; #13 to close**):
+- Objective numbering: 5 = MEH, 6 = loading_smooth (Collin), **7 = the hardened objective** (was "5" on
+  `feat/hardened-plan-2026-10-29`; data relabelled, see CONTINUITY 2026-11-12). Plan: `docs/SENIOR_PLAN_2026-11-12.md`.
+- Open: HF dataset re-pack after the relabel (WP-E4); GUI objective versions 4-7 (WP-D1); loading objectives
+  reconciliation (WP-B1); `swarm/B` + `swarm/C` follow-up merge (WP-A2).
+
 | ID | Title | Status | Owner | Plan ref |
 |---|---|---|---|---|
 | #13 | hardening-review: Stage A surrogate gate-integrity and real-data traps | **open — fixes MERGED to main** (FF to 6d1d5c7 on 2026-10-22 carries e0b9b61 + 11304f6 + cloud reconciliation 152a829 verbatim; oracle pre-merge sign-off; full offline suite 533 PASS at the merged tree; awaiting owner close) | phase-2 (cloud) | `docs/plan/11_PHASE2_SURROGATE.md` §4 |

@@ -4,6 +4,13 @@ Written 2026-10-22 22:35 EDT by the local orchestrator, at the user's request. *
 after the beta session.** Items are in priority order. Background: `docs/HIGH_FREQUENCY_OPTIONS.md` (2026-10-13),
 `docs/CLOUD_GPU_REPORT.md`, `TOOLCHAIN.md` M2/M3.
 
+## P14 (added 2026-11-12, owner-directed: TOP OF THE LIST). One main, one truth, then speed and the GUI
+
+**Plan: `docs/SENIOR_PLAN_2026-11-12.md`.** Integration of Collin's PR #22, #19, #23, the CUDA fix and the hardened
+branch is done on `integ/2026-11-12` (objective v5 collision fixed: hardened objective = v7). Next: hygiene (WP-E),
+then three lanes - scoring/driver/data truth (WP-B), solve speed (WP-C), GUI (WP-D) - and the GPU night (section 3).
+**New MEH work is paused** (owner, 2026-11-12); the merged MEH code stays green.
+
 ## P0a (added 2026-10-29, owner-directed). b3a 80x80/600 gate-aware search — A1 decision next
 
 Owner retargeted the b3a PA cell to **80 x 80 deg at 600 Hz** (the 588 x 588 seed reads H/V 89.65 at

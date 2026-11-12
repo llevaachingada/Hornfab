@@ -1,6 +1,25 @@
 # CONTINUITY
 
 
+## 2026-11-12 - INTEGRATION: COLLIN'S PR #22, #19, #23, THE CUDA FIX AND THE HARDENED PLAN MERGED; OBJECTIVE v5 COLLISION FIXED
+
+- **Owner directive:** merge the collaborator's work and everything outstanding into one tested main, pause new MEH
+  work, then scoring truth, speed and the GUI. Plan: `docs/SENIOR_PLAN_2026-11-12.md` (P14).
+- **Merged into `integ/2026-11-12`** (merge commits, authorship kept): PR #19, `fix/cuda-fused-meh-bench-audit`
+  (beat-bem `0850ef3`, fork branch pushed), **PR #22 (Collin: Solana/SAWMOD, `mid_ports`, objective v6, Design
+  cloud; mesher pin `jamescollinharky/hornlab-waveguide-mesher@55da4f4`)**, PR #23 (throughput packet, BL A/B),
+  `feat/hardened-plan-2026-10-29` (13 commits that were never PR'd).
+- **Collision found and fixed:** main's v5 = MEH; the hardened branch's loading/flat_cv/8 kHz/signed-V objective was
+  also "5". It is now **v7** (`objective/scalar_v7.py`); its round-throat refusal applies to v7 only (was `>= 5`).
+  Nine hardened briefs say `version: 7`. `tools/data/renumber_objective_v5_to_v7.py --apply` relabelled **1,371
+  dataset rows** (shards 45-47) and **26 run dirs** (2026-10-29); MEH's 126 v5 rows untouched; backup
+  `runs/_backup_renumber_v5_v7/`. The public HF dataset still carries the old labels (plan WP-E4).
+- **Pins installed in `.venv`:** mesher `55da4f4` (Collin's fork), beat-bem `0850ef3`.
+- **Tests [measured]:** offline suite 2,474 collected, 2,472 passed; the 2 failures were stale version-tuple asserts,
+  fixed and rerun green (`runs/integ_2026-11-12/offline2.{log,xml}`); new `tests/test_tools_renumber_objective.py`.
+- **Found for the plan:** the GUI brief editor offers objective versions 1-3 only; three loading definitions (v4, v6,
+  v7) need reconciling; CONTINUITY is no longer newest-first after the merges.
+
 ## 2026-11-03 (01:31Z) - BENCHMARK: CPU BEATS CUDA AT THE MEH MESH SIZE; 16 kHz RUNS ON CPU
 
 - New `tools/bench/cpu_vs_cuda_meh.py` (15-minute budget, timestamped log + JSON). Measured on the owner's box,
