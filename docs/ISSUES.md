@@ -1,7 +1,21 @@
 # ISSUES
 
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
-Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-10-25 (M6/WP12 pushed: enclosure mounting plumbed end-to-end (`brief.mounting` → the mesher's OWN keys; `-mnt-` cache keys; mesh_meta/ndjson/record echoes; absent = byte-for-bit) and MEASURED on two finalists — dofs +199.4 %/+106.5 %, both under the UNCHANGED caps, enclosure J improves (a different objective landscape — never rank across mountings), reference parity 2.91e-06 dB; **WP13 axisymmetric backend OWNER-DEFERRED** ("don't know how necessary that is"); suite **1372/0/0/0**; focused 71/0/0; evidence `docs/evidence/M6_WP12_2026-10-25.md`, byte-check 21/21; no GitHub issue state changed).
+Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-12 (**GUI finishing pass: WP9/WP10 merged into feat/gui-integration, Step 2 fixes, WP7 verify-selected, live acceptance all-pass; no GitHub issue state changed; -k gui suite green, 49/49 live browser checks pass**).
+
+Local-only, added 2026-11-12 (**GUI finishing pass; no GitHub issue state changed**):
+- WP9+WP10 merged into `feat/gui-integration`; merge regression fixed (app.js used `logTicks` without importing it — run detail threw `logTicks is not defined`).
+- `data_verify.py` root-cause fix: `config.yaml` was read via `_read_json` (YAML ≠ JSON), nulling the verify report's name/band; `brief` added to the payload. `verify.js` header/chips/30°-ticks fixes; verify-mode run pages hide search-history panels (WP4 item 5).
+- WP7: `gui/jobs.py` verify job accepts `designs`/`designs_file` CLI-mirrored (+24 tests); verify view "Verify selected" posts them, disabled while the GPU lock is alive (verified live).
+- Owner decision (2026-11-12): Home "Best horn per brief" window 14 → 31 days.
+- Live acceptance `docs/GUI_VERIFY_ACCEPTANCE_2026-11-12.md`: Appendix B 1–16 pass; screenshots `docs/images/gui-acceptance-2026-11-12/`.
+- Known cosmetic (NOT a GitHub issue): browser-default `/favicon.ico` 404 — one console error per session; index.html declares no favicon.
+- Known cosmetic (NOT a GitHub issue, visual audit 2026-11-12): light theme — 3D-balloon annotations/wireframe and the circular-polar outer grid are faint grey-on-white (candidates for `docs/GUI_CONTRAST_PLAN.md`); verify scatter labels crowd when several designs share a J value (cluster on ed1da9); DI and On-axis render one card each with H+V series (Beamwidth has separate H/V cards — C6 small multiples cover BW only). Run-detail per-parameter σ, circular polar overflow, verify/gate-audit table clipping, and the dishonest "0 failed" convergence footer were all fixed before this push (see `docs/GUI_VERIFY_ACCEPTANCE_2026-11-12.md`).
+
+Local-only, added 2026-11-12 (**GUI verify view front end WP3+WP6 implemented; no GitHub issue state changed**):
+- `verify.js` WP3+WP6 front end: pure-helper exports for the verify table, KPI strip, polar plot,
+  per-design panel, compare-two, checklist. `balloon.js` tier param added. CSS block appended.
+  37 new tests green; full -k gui suite 362/0.
 
 Local-only, added 2026-11-12 (**partial day evidence committed, PR #48; no GitHub issue state changed**):
 - `docs/evidence/DAY_2026-11-12_ANALYSIS_PARTIAL.md` (A.8 partial + 10 charts; A.7 PASS, 24-run
@@ -988,7 +1002,7 @@ Local-only, added 2026-11-02 (no GitHub issue state changed): **P11 HF data sync
 # ISSUES
 
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
-Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-10-25 (M6/WP12 pushed: enclosure mounting plumbed end-to-end (`brief.mounting` → the mesher's OWN keys; `-mnt-` cache keys; mesh_meta/ndjson/record echoes; absent = byte-for-bit) and MEASURED on two finalists — dofs +199.4 %/+106.5 %, both under the UNCHANGED caps, enclosure J improves (a different objective landscape — never rank across mountings), reference parity 2.91e-06 dB; **WP13 axisymmetric backend OWNER-DEFERRED** ("don't know how necessary that is"); suite **1372/0/0/0**; focused 71/0/0; evidence `docs/evidence/M6_WP12_2026-10-25.md`, byte-check 21/21; no GitHub issue state changed).
+Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-12 (WP9/WP10 chart standards + search history merged; no open issues changed; 349 GUI tests pass).
 
 | ID | Title | Status | Owner | Plan ref |
 |---|---|---|---|---|

@@ -1,6 +1,6 @@
 // charts.js — hornlab-search GUI
 // AGPL-3.0-or-later.  Adapted from tools/review/review_template.html (same author).
-// Exports: el, chart, heat, cmap, niceTicks, diFromCuts
+// Exports: el, chart, heat, cmap, niceTicks, angleTicks, diFromCuts, logGrid, AXES, fixedRange, polarPlot
 
 export const NS = "http://www.w3.org/2000/svg";
 
@@ -18,6 +18,41 @@ export function el(tag, attrs = {}, parent) {
   return e;
 }
 
+/**
+ * Wire a visible scroll affordance onto `.tbl-scroll` blocks. The inner `.tbl-wrap` is the
+ * clipping ancestor; when its content is wider than its scrollport we mark the outer box
+ * `is-scrollable` (which reveals the "scroll for all columns" hint and the right-edge shadow)
+ * and `at-end` once the user has reached the last column. Safe to call repeatedly.
+ */
+export function wireScrollHints(root) {
+  if (!root || typeof root.querySelectorAll !== "function") return;
+  const boxes = [];
+  if (typeof root.matches === "function" && root.matches(".tbl-scroll")) boxes.push(root);
+  root.querySelectorAll(".tbl-scroll").forEach(b => boxes.push(b));
+  boxes.forEach(box => {
+    const wrap = box.querySelector(".tbl-wrap");
+    if (!wrap) return;
+    const update = () => {
+      const overflow = wrap.scrollWidth > wrap.clientWidth + 1;
+      box.classList.toggle("is-scrollable", overflow);
+      box.classList.toggle("at-end",
+        overflow && wrap.scrollLeft + wrap.clientWidth >= wrap.scrollWidth - 2);
+    };
+    update();
+    if (!wrap.dataset.scrollHintWired) {
+      wrap.dataset.scrollHintWired = "1";
+      wrap.addEventListener("scroll", update, { passive: true });
+      if (typeof ResizeObserver !== "undefined") {
+        try {
+          const ro = new ResizeObserver(update);
+          ro.observe(wrap);
+          box._scrollHintRO = ro;   // keep a handle; the table outlives transient redraws
+        } catch (_) { /* older engines: the initial + scroll updates still work */ }
+      }
+    }
+  });
+}
+
 /** Compute ideal tick positions */
 export function niceTicks(lo, hi, n = 5) {
   const step0 = (hi - lo) / n;
@@ -26,6 +61,20 @@ export function niceTicks(lo, hi, n = 5) {
   const out = [];
   for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-9; v += step) out.push(+v.toFixed(6));
   return out;
+}
+
+/**
+ * Angle ticks on a 30° grid (C4): the 30° multiples inside [lo, hi].
+ * Cut charts used niceTicks, which produced ±50/0/50 for a ±90° cut; audio readers expect
+ * −90, −60, −30, 0, 30, 60, 90. Falls back to the endpoint when the span holds no multiple.
+ */
+export function angleTicks(lo, hi, step = 30) {
+  lo = Number(lo); hi = Number(hi);
+  if (!isFinite(lo) || !isFinite(hi)) return [];
+  if (hi < lo) { const t = lo; lo = hi; hi = t; }
+  const out = [];
+  for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-9; v += step) out.push(v === 0 ? 0 : v);
+  return out.length ? out : [lo, hi];
 }
 
 /**
@@ -53,11 +102,67 @@ export function logTicks(lo, hi) {
 }
 
 /**
+ * Log-frequency minor grid: returns {major, minor} where major = logTicks(lo, hi)
+ * (1-2-5 × decade + endpoints), minor = all integer-multiple gridlines not in major
+ * (3,4,6,7,8,9 × 10^d).  Used to give the semi-log-paper look that every audio tool uses.
+ * C1 fix: unlabelled minor gridlines at every integer × decade.
+ */
+export function logGrid(lo, hi) {
+  const major = logTicks(lo, hi);
+  const minor = [];
+  lo = Number(lo); hi = Number(hi);
+  if (!isFinite(lo) || !isFinite(hi) || lo <= 0 || hi <= 0) return { major, minor };
+  const lo10 = Math.floor(Math.log10(lo)), hi10 = Math.ceil(Math.log10(hi));
+  for (let d = lo10; d <= hi10; d++) {
+    for (let m = 2; m <= 9; m++) {
+      if (m === 2 || m === 5) continue;    // 2 and 5 are already major (via logTicks)
+      const v = m * Math.pow(10, d);
+      if (v > lo && v < hi) minor.push(+v.toFixed(6));
+    }
+  }
+  return { major, minor: minor.sort((a, b) => a - b) };
+}
+
+/**
+ * Fixed-axis specifications for the standard acoustic-analysis charts (C2–C4).
+ * Each spec has { lo, hi, major } and optionally { minor }.
+ * Pass to fixedRange() with the data to get an expanded-only range.
+ */
+export const AXES = {
+  onAxis:   { lo: -15, hi: 10,  major: 5,    minor: 1  },   // dB, on-axis response
+  di:       { lo:   0, hi: 15,  major: 3             },   // dB, directivity index
+  beamwidth:{ lo:   0, hi: 180, major: 30,   minor: 15 },   // degrees
+  zrho:     { lo:   0, hi: 1.5, major: 0.25           },   // × ρc
+};
+
+/**
+ * Expand a fixed-axis spec outward ONLY to contain all finite data values.
+ * Expansion is in whole major steps so tick positions stay clean.
+ * Returns { lo, hi } (numbers).  spec must have { lo, hi, major }.
+ */
+export function fixedRange(spec, data) {
+  const finite = (data || []).filter(v => v != null && isFinite(v));
+  if (!finite.length) return { lo: spec.lo, hi: spec.hi };
+  const dMin = Math.min(...finite), dMax = Math.max(...finite);
+  let { lo, hi, major } = spec;
+  while (lo > dMin) lo -= major;
+  while (hi < dMax) hi += major;
+  return { lo, hi };
+}
+
+/**
  * Generic 2-D SVG chart.
  * series: [{pts:[[x,y],...], color, dash, dots, r, w, opacity}]
  * hlines: [{y, color, dash}]
  * vlines: [{x, color, dash, label}]  — full-height marker lines with a top label
  * band: [x0, x1] — filled background strip
+ * NEW options (all optional; defaults preserve existing behaviour):
+ *   yMinor:    array of y values for unlabelled minor gridlines
+ *   refLines:  [{y|x, label, dash?}] — C5 neutral reference lines (dotted "1 3", --label,
+ *              with right-edge text label); y= horizontal, x= vertical
+ *   markers:   true — draw r=2 circles at every finite data point (C7)
+ *   unscored:  [{x0, x1, label}] — grey-hatch regions outside the scored band (C10)
+ *   ariaLabel: string — aria-label for the SVG element
  */
 /** Pixel width an SVG will be drawn at (so text and strokes render 1:1, never scaled up). */
 export function measuredWidth(svg, fallback) {
@@ -65,34 +170,79 @@ export function measuredWidth(svg, fallback) {
   return w >= 120 ? w : fallback;
 }
 
-export function chart(svg, { W = 460, H = 240, xlog = false, xlim, ylim,
-    xticks, yticks, xlabel, ylabel, band, hlines = [], vlines = [], series, fill }) {
+export function chart(svg, { W = 460, H = 240, xlog = false, ylog = false, xlim, ylim,
+    xticks, yticks, xlabel, ylabel, band, hlines = [], vlines = [], series, fill,
+    yMinor, refLines = [], markers = false, unscored = [], ariaLabel }) {
   svg.innerHTML = "";
   W = measuredWidth(svg, W);
   const m = { l: 44, r: 12, t: ylabel ? 20 : 10, b: 32 };   // unit label sits above the plot, clear of the top tick
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
   svg.setAttribute("width", W); svg.setAttribute("height", H);
+  if (ariaLabel) { svg.setAttribute("role", "img"); svg.setAttribute("aria-label", ariaLabel); }
   svg.dataset.chart = "1";                      // re-drawn on resize (app.js)
   const tx = xlog ? v => Math.log10(v) : v => v;
-  const [x0, x1] = xlim.map(tx), [y0, y1] = ylim;
+  const ty = ylog ? v => (v != null && v > 0 ? Math.log10(v) : null) : v => v;
+  const [x0, x1] = xlim.map(tx);
+  const [y0raw, y1raw] = ylim;
+  const y0 = ty(y0raw) ?? 0, y1 = ty(y1raw) ?? 1;
   const X = v => m.l + (tx(v) - x0) / (x1 - x0) * (W - m.l - m.r);
-  const Y = v => H - m.b - (v - y0) / (y1 - y0) * (H - m.t - m.b);
+  const Y = v => { const tv = ty(v); return tv == null ? null : H - m.b - (tv - y0) / (y1 - y0) * (H - m.t - m.b); };
   if (xlog && !xticks) xticks = logTicks(xlim[0], xlim[1]);   // span-derived; explicit callers win
+  if (ylog && !yticks) yticks = logTicks(ylim[0], ylim[1]);
   // Clip every plot mark (band, fills, series, marker lines) so nothing draws past the domain
   // into the margins — the old band-rect bleed is gone.
   const clipId = "hl-clip-" + (++_clipSeq);
   const defs = el("defs", {}, svg);
   el("rect", { x: m.l, y: m.t, width: Math.max(0, W - m.l - m.r), height: Math.max(0, H - m.t - m.b) },
      el("clipPath", { id: clipId }, defs));
+  // C10: unscored-region hatch pattern
+  if (unscored && unscored.length) {
+    const hatchId = "hl-hatch-" + _clipSeq;
+    const pat = el("pattern", { id: hatchId, x: 0, y: 0, width: 6, height: 6,
+      patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)" }, defs);
+    el("line", { x1: 0, y1: 0, x2: 0, y2: 6, stroke: css("--muted"), "stroke-width": 2, "stroke-opacity": 0.35 }, pat);
+    for (const u of unscored) {
+      const x0u = Math.max(m.l, X(u.x0)), x1u = Math.min(W - m.r, X(u.x1));
+      if (x1u > x0u) {
+        el("rect", { x: x0u, y: m.t, width: x1u - x0u, height: H - m.t - m.b,
+          fill: `url(#${hatchId})`, "pointer-events": "none" }, svg);
+        if (u.label) {
+          const lx = (x0u + x1u) / 2;
+          const tt = el("text", { x: lx, y: m.t + 11, "text-anchor": "middle",
+            style: `fill:${css("--muted")};font-size:9px` }, svg);
+          tt.textContent = u.label;
+        }
+      }
+    }
+  }
   const plot = el("g", { "clip-path": `url(#${clipId})` }, svg);
-  if (fill) for (const f of fill)
-    el("rect", { x: m.l, width: W - m.l - m.r, y: Y(Math.min(f.y1, ylim[1])), height: Math.max(0, Y(Math.max(f.y0, ylim[0])) - Y(Math.min(f.y1, ylim[1]))), fill: f.color, opacity: f.opacity ?? 0.12 }, plot);
+  if (fill) for (const f of fill) {
+    const fy0 = Y(Math.max(f.y0, y0raw)), fy1 = Y(Math.min(f.y1, y1raw));
+    if (fy0 == null || fy1 == null) continue;
+    el("rect", { x: m.l, width: W - m.l - m.r, y: Math.min(fy0, fy1), height: Math.max(0, Math.abs(fy0 - fy1)), fill: f.color, opacity: f.opacity ?? 0.12 }, plot);
+  }
   if (band) el("rect", { x: X(band[0]), y: m.t, width: Math.max(0, X(band[1]) - X(band[0])), height: H - m.t - m.b, fill: css("--band") }, plot);
   const g = el("g", { class: "grid" }, svg);
+  // C1: minor y gridlines (lighter, unlabelled)
+  for (const t of (yMinor || [])) {
+    if (t > y0raw && t < y1raw) {
+      const yt = Y(t); if (yt == null) continue;
+      el("line", { x1: m.l, x2: W - m.r, y1: yt, y2: yt, "stroke-opacity": 0.45 }, g);
+    }
+  }
   for (const t of (yticks || [])) {
-    el("line", { x1: m.l, x2: W - m.r, y1: Y(t), y2: Y(t) }, g);
-    const tt = el("text", { x: m.l - 6, y: Y(t) + 3, "text-anchor": "end" }, svg);
-    tt.textContent = t;
+    const yt = Y(t); if (yt == null) continue;
+    el("line", { x1: m.l, x2: W - m.r, y1: yt, y2: yt }, g);
+    const tt = el("text", { x: m.l - 6, y: yt + 3, "text-anchor": "end" }, svg);
+    tt.textContent = ylog ? (t >= 1 ? t : t.toExponential(0)) : t;
+  }
+  // C1: minor x gridlines for log axis (lighter, unlabelled)
+  if (xlog) {
+    const { minor: xMinor } = logGrid(xlim[0], xlim[1]);
+    for (const t of xMinor) {
+      if (t > xlim[0] && t < xlim[1])
+        el("line", { x1: X(t), x2: X(t), y1: m.t, y2: H - m.b, "stroke-opacity": 0.3 }, g);
+    }
   }
   for (const t of (xticks || [])) {
     el("line", { x1: X(t), x2: X(t), y1: m.t, y2: H - m.b }, g);
@@ -101,8 +251,35 @@ export function chart(svg, { W = 460, H = 240, xlog = false, xlim, ylim,
   }
   if (xlabel) { const t = el("text", { x: W - m.r, y: H - 3, "text-anchor": "end" }, svg); t.textContent = xlabel; }
   if (ylabel) { const t = el("text", { x: m.l - 6, y: 11, "text-anchor": "end" }, svg); t.textContent = ylabel; }
-  for (const h of hlines)
-    el("line", { x1: m.l, x2: W - m.r, y1: Y(h.y), y2: Y(h.y), stroke: h.color, "stroke-width": 1.5, "stroke-dasharray": h.dash ? "5 4" : "none" }, svg);
+  for (const h of hlines) {
+    const hy = Y(h.y); if (hy == null) continue;
+    el("line", { x1: m.l, x2: W - m.r, y1: hy, y2: hy, stroke: h.color, "stroke-width": 1.5, "stroke-dasharray": h.dash ? "5 4" : "none" }, svg);
+  }
+  // C5: reference lines — dotted "1 3", --label colour, with right-edge text label
+  const pw = W - m.l - m.r;
+  for (const rl of refLines) {
+    if (rl.y != null && isFinite(rl.y)) {
+      const rly = Y(rl.y); if (rly == null) continue;
+      el("line", { x1: m.l, x2: W - m.r, y1: rly, y2: rly,
+        stroke: css("--label"), "stroke-width": 1, "stroke-dasharray": "1 3" }, svg);
+      if (rl.label) {
+        const tt = el("text", { x: W - m.r - 2, y: rly - 2, "text-anchor": "end",
+          style: `fill:${css("--label")};font-size:9px` }, svg);
+        tt.textContent = rl.label;
+      }
+    } else if (rl.x != null && isFinite(rl.x)) {
+      const lx = X(rl.x);
+      el("line", { x1: lx, x2: lx, y1: m.t, y2: H - m.b,
+        stroke: css("--label"), "stroke-width": 1, "stroke-dasharray": "1 3" }, svg);
+      if (rl.label) {
+        const anchor = (lx - m.l) < 0.12 * pw ? "start" : (lx > W - m.r - 0.12 * pw) ? "end" : "middle";
+        const dx = anchor === "start" ? 4 : anchor === "end" ? -4 : 0;
+        const tt = el("text", { x: lx + dx, y: m.t + 9, "text-anchor": anchor,
+          style: `fill:${css("--label")};font-size:9px` }, svg);
+        tt.textContent = rl.label;
+      }
+    }
+  }
   const vlineColor = v => v.color || css("--label");
   for (const v of vlines) {
     if (!isFinite(v.x)) continue;
@@ -110,21 +287,31 @@ export function chart(svg, { W = 460, H = 240, xlog = false, xlim, ylim,
     el("line", { x1: lx, x2: lx, y1: m.t, y2: H - m.b, stroke: vlineColor(v),
                  "stroke-width": 1.5, "stroke-dasharray": v.dash ? "5 4" : "none" }, plot);
   }
-  const clipY = v => Math.min(Math.max(v, y0), y1);
+  // clipY clamps in data space (before log transform); y0raw/y1raw are the original ylim values
+  const clipY = v => Math.min(Math.max(v, y0raw), y1raw);
   for (const s of series) {
-    const pts = s.pts.filter(p => p[1] != null && isFinite(p[1]));
+    const pts = s.pts.filter(p => p[1] != null && isFinite(p[1]) && (!ylog || p[1] > 0));
     if (!pts.length) continue;
     if (s.dots) {
-      for (const p of pts)
-        el("circle", { cx: X(p[0]), cy: Y(clipY(p[1])), r: s.r || 2.0, fill: s.color, opacity: s.opacity ?? 0.8 }, plot);
+      for (const p of pts) {
+        const cy = Y(clipY(p[1])); if (cy == null) continue;
+        el("circle", { cx: X(p[0]), cy, r: s.r || 2.0, fill: s.color, opacity: s.opacity ?? 0.8 }, plot);
+      }
     } else {
-      el("path", { d: pts.map((p, i) => (i ? "L" : "M") + X(p[0]).toFixed(1) + "," + Y(clipY(p[1])).toFixed(1)).join(""),
+      const ppath = pts.map((p, i) => { const cy = Y(clipY(p[1])); return cy == null ? null : (i ? "L" : "M") + X(p[0]).toFixed(1) + "," + cy.toFixed(1); }).filter(Boolean);
+      if (ppath.length) el("path", { d: ppath.join(""),
         fill: "none", stroke: s.color, "stroke-width": s.w || 1.8,
         "stroke-dasharray": s.dash ? "5 4" : "none", "stroke-linejoin": "round" }, plot);
+      // C7: markers at each solved frequency (r=2 circles above the line)
+      if (markers) {
+        for (const p of pts) {
+          const cy = Y(clipY(p[1])); if (cy == null) continue;
+          el("circle", { cx: X(p[0]), cy, r: 2, fill: s.color, opacity: 0.75 }, plot);
+        }
+      }
     }
   }
   // marker labels sit at the top of the plot; switch anchor near an edge so they never clip
-  const pw = W - m.l - m.r;
   for (const v of vlines) {
     if (!isFinite(v.x) || !v.label) continue;
     const lx = X(v.x);
@@ -462,6 +649,8 @@ export function isobarMap(svg, rows, angles, freqs, { H = 300, title = "", angle
   // Only the solved data domain carries colour; band margins stay transparent and carry a NaN
   // sentinel so marching squares skips them (never extrapolate the edge colours into the margins).
   const tol = 1e-9 * Math.max(1, Math.abs(lf0), Math.abs(lf1));
+  // C8: over-range colour for values > 0 dB (pale pink), so off-axis lobes louder than on-axis are visible
+  const OVER_RANGE_COLOR = "#FFB0C8";
   for (let py = 0; py < chh; py++) {
     const ai = aIndex(a1 - (py + 0.5) / chh * (a1 - a0));
     for (let px = 0; px < cw; px++) {
@@ -469,7 +658,8 @@ export function isobarMap(svg, rows, angles, freqs, { H = 300, title = "", angle
       if (lg < lf0 - tol || lg > lf1 + tol) { vals[py * cw + px] = NaN; continue; }
       const v = sample(rows, fIndex(lg), ai);
       vals[py * cw + px] = v;
-      const c = hexRgb(bandColor(v)), o = (py * cw + px) * 4;
+      const c = v > 0 ? hexRgb(OVER_RANGE_COLOR) : hexRgb(bandColor(v));
+      const o = (py * cw + px) * 4;
       img.data[o] = c[0]; img.data[o + 1] = c[1]; img.data[o + 2] = c[2]; img.data[o + 3] = 255;
     }
   }
@@ -510,6 +700,11 @@ export function isobarMap(svg, rows, angles, freqs, { H = 300, title = "", angle
   // grid and axes (angleTicks: optional — the balloon view passes 0..180 theta ticks over a
   // 0..180 polar-angle slice; default keeps the ±90° behaviour all other callers rely on)
   const g = el("g", {}, svg);
+  // C1: minor log gridlines (lighter) at 3,4,6,7,8,9 × decade
+  const { minor: xMinorIso } = logGrid(dLo, dHi);
+  for (const t of xMinorIso) {
+    el("line", { x1: X(t), x2: X(t), y1: m.t, y2: m.t + ph, stroke: "#808080", "stroke-opacity": 0.3, "stroke-width": 0.8 }, g);
+  }
   for (const t of logTicks(dLo, dHi)) {
     el("line", { x1: X(t), x2: X(t), y1: m.t, y2: m.t + ph, stroke: "#808080", "stroke-opacity": 0.7, "stroke-width": 1.0 }, g);
     el("text", { x: X(t), y: m.t + ph + 14, "text-anchor": "middle" }, svg).textContent = t >= 1000 ? t / 1000 + "k" : t;
@@ -535,8 +730,12 @@ export function isobarMap(svg, rows, angles, freqs, { H = 300, title = "", angle
   }
   el("text", { x: m.l + pw / 2, y: H - 4, "text-anchor": "middle" }, svg).textContent = "Frequency (Hz)";
   if (title) el("text", { x: m.l, y: 14, class: "iso-title" }, svg).textContent = title;
-  // colour bar: the same discrete bands, 3 dB ticks
+  // colour bar: the same discrete bands, 3 dB ticks, plus C8 over-range swatch at top
   const bx = m.l + pw + 12, bw = 12, bandH = ph / ISOBAR_COLORS.length;
+  // C8: over-range swatch above 0 dB
+  const overH = Math.max(8, Math.round(bandH * 0.6));
+  el("rect", { x: bx, y: m.t - overH - 2, width: bw, height: overH, rx: 2, fill: OVER_RANGE_COLOR }, svg);
+  el("text", { x: bx + bw + 5, y: m.t - 2 - overH / 2 + 3, style: "font-size:9px" }, svg).textContent = ">0";
   ISOBAR_COLORS.forEach((c, i) => el("rect", { x: bx, y: m.t + ph - (i + 1) * bandH, width: bw, height: bandH + 0.5, fill: c }, svg));
   for (let L = ISOBAR_MIN; L <= ISOBAR_MAX; L += ISOBAR_STEP) {
     const y = m.t + ph - (L - ISOBAR_MIN) / (ISOBAR_MAX - ISOBAR_MIN) * ph;
@@ -544,6 +743,13 @@ export function isobarMap(svg, rows, angles, freqs, { H = 300, title = "", angle
     el("text", { x: bx + bw + 5, y: y + 3 }, svg).textContent = String(L);
   }
   el("text", { x: bx, y: m.t - 3 }, svg).textContent = "dB";
+  // C9: solved-frequency tick marks below the x axis
+  const tickY = m.t + ph;
+  for (const f of freqs) {
+    if (f <= dLo || f >= dHi) continue;
+    const lx = X(f);
+    el("line", { x1: lx, x2: lx, y1: tickY, y2: tickY + 4, stroke: css("--muted"), "stroke-width": 1 }, svg);
+  }
   // hover crosshair with a frequency / angle / level readout (Boundary Lab has the same)
   const cross = el("g", { style: "pointer-events:none;display:none" }, svg);
   const vl = el("line", { stroke: "#fff", "stroke-width": 1, "stroke-dasharray": "3 2" }, cross);
@@ -570,4 +776,67 @@ export function isobarMap(svg, rows, angles, freqs, { H = 300, title = "", angle
   };
   hit.addEventListener("mousemove", move);
   hit.addEventListener("mouseleave", () => { cross.style.display = "none"; });
+}
+
+/** ── Circular polar plot (C12) ─────────────────────────────────────────────────────────────────
+ * Classic polar diagram for a single frequency slice: half or full circle, rings every 6 dB,
+ * spokes every 15° labelled every 30°.  For WP6 to place inside the per-design panel.
+ *
+ * @param svg      SVG element to draw into.
+ * @param rowsH    H-plane polar data: array [na_h] of dB values (relative to on-axis).
+ * @param rowsV    V-plane polar data: array [na_v] of dB values; null = omit.
+ * @param anglesH  Angles for H rows (degrees, symmetric about 0).
+ * @param anglesV  Angles for V rows (degrees).
+ * @param opts     { H=240, dBmin=-30, ghost_h=null, ghost_v=null }
+ *                 ghost_* are prior-design arrays for a dashed screen ghost.
+ */
+export function polarPlot(svg, rowsH, rowsV, anglesH, anglesV, { H = 240, dBmin = -30, ghost_h = null, ghost_v = null } = {}) {
+  svg.innerHTML = "";
+  if (!rowsH || !rowsH.length) return;
+  const W = measuredWidth(svg, H);
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.setAttribute("width", W); svg.setAttribute("height", H);
+  svg.dataset.chart = "1";
+
+  const cx = W / 2, cy = H / 2, R = Math.min(W, H) / 2 - 20;
+  // rings every 6 dB from dBmin to 0
+  const nRings = Math.ceil(-dBmin / 6);
+  for (let i = 0; i <= nRings; i++) {
+    const r = R * (i / nRings);
+    el("circle", { cx, cy, r, fill: "none", stroke: css("--rule"), "stroke-width": i === nRings ? 1.2 : 0.7 }, svg);
+    if (i > 0) {
+      const lab = el("text", { x: cx + 2, y: cy - r - 2, "font-size": "8", style: "fill:var(--muted)" }, svg);
+      lab.textContent = String((i - nRings) * 6) + "dB";
+    }
+  }
+  // spokes every 15°, labelled every 30°
+  for (let a = 0; a < 360; a += 15) {
+    const rad = (a - 90) * Math.PI / 180;
+    el("line", { x1: cx, y1: cy, x2: cx + R * Math.cos(rad), y2: cy + R * Math.sin(rad),
+                 stroke: css("--rule"), "stroke-width": a % 30 === 0 ? 0.8 : 0.4, "stroke-dasharray": "2 2" }, svg);
+    if (a % 30 === 0) {
+      const tx2 = cx + (R + 10) * Math.cos(rad), ty2 = cy + (R + 10) * Math.sin(rad);
+      const lab = el("text", { x: tx2, y: ty2 + 3, "font-size": "8", "text-anchor": "middle", style: "fill:var(--muted)" }, svg);
+      lab.textContent = String(a) + "°";
+    }
+  }
+  // plot one polar curve: data[i] is dB at angles[i]
+  function drawPolar(data, angles, color, dash) {
+    if (!data || !data.length) return;
+    const pts = angles.map((a, i) => {
+      const v = data[i];
+      if (v == null || !isFinite(v)) return null;
+      const r = R * Math.max(0, (Math.max(dBmin, v) - dBmin) / (-dBmin));
+      const rad = (a - 90) * Math.PI / 180;
+      return [cx + r * Math.cos(rad), cy + r * Math.sin(rad)];
+    }).filter(Boolean);
+    if (pts.length < 2) return;
+    el("path", { d: pts.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + "," + p[1].toFixed(1)).join("") + "Z",
+      fill: "none", stroke: color, "stroke-width": 1.6, "stroke-dasharray": dash || "none", "stroke-linejoin": "round" }, svg);
+  }
+
+  if (ghost_h) drawPolar(ghost_h, anglesH, css("--seed"), "4 3");
+  if (ghost_v && anglesV) drawPolar(ghost_v, anglesV, css("--seed"), "4 3");
+  drawPolar(rowsH, anglesH, css("--best"), "none");
+  if (rowsV && anglesV) drawPolar(rowsV, anglesV, css("--best"), "5 3");
 }

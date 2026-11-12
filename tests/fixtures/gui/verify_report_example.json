@@ -1,0 +1,203 @@
+{
+  "run_id": "20261027T051600Z-screen-ed1da9",
+  "name": "gcurve__osse_b1w_v4",
+  "kind": "pairs",
+  "redirect_to": null,
+  "parent_missing": false,
+  "objective_version": 4,
+  "band_hz": [300, 8000],
+  "sources": [
+    {
+      "kind": "inline",
+      "path": "runs/20261027T051600Z-screen-ed1da9/verify/search.ndjson",
+      "run_id": "20261027T051600Z-screen-ed1da9",
+      "n_rows": 5,
+      "newest_row_utc": "2026-10-28T21:44:33Z",
+      "status": "finished"
+    }
+  ],
+  "state": "finished",
+  "comparable": true,
+  "comparable_reason": null,
+  "latest_only": false,
+  "fidelity": {
+    "verify": {
+      "n_freqs": [29],
+      "balloon_grid": [[23, 45]],
+      "n_points": [1035],
+      "dof_range": [2203, 6912]
+    },
+    "screen": {
+      "n_freqs": [12],
+      "balloon_grid": [[16, 32]],
+      "n_points": [512],
+      "dof_range": [1980, 5004]
+    }
+  },
+  "summary": {
+    "n_verified": 5,
+    "n_failed": 0,
+    "n_pairs": 5,
+    "n_worse": 5,
+    "bias_median_pct": 18.2,
+    "spearman_all": 0.3,
+    "spearman_top5": 0.3,
+    "top5_overlap": 3,
+    "best_verify_hash": "608eef092639",
+    "best_verify_j": 4.622,
+    "screen1_hash": "ad63b6311c33",
+    "screen1_verify_rank": 2
+  },
+  "gate_audit": {
+    "available": true,
+    "source": "docs/data/gate_audit_2026-10-29/gate_audit.csv",
+    "labels": {
+      "round_throat": "Round throat",
+      "loading": "Loading"
+    }
+  },
+  "rows": [
+    {
+      "hash": "608eef092639",
+      "family": "OSSE",
+      "screen_j": 4.4,
+      "verify_j": 4.622,
+      "delta_j": 0.222,
+      "delta_pct": 5.05,
+      "screen_rank": 3,
+      "verify_rank": 1,
+      "ok": true,
+      "error": null,
+      "n": 0,
+      "created_utc": "2026-10-28T21:44:33Z",
+      "lane": null,
+      "backend": null,
+      "n_dof": 2203,
+      "n_triangles": 4229,
+      "density": {
+        "n_freqs": 29,
+        "balloon_grid": [23, 45],
+        "n_points": 1035
+      },
+      "gates": {
+        "round_throat": true,
+        "loading": false
+      },
+      "source_kind": "inline",
+      "source_run_id": "20261027T051600Z-screen-ed1da9",
+      "has_balloon": true,
+      "has_mesh": true
+    },
+    {
+      "hash": "ad63b6311c33",
+      "family": "OSSE",
+      "screen_j": 4.1,
+      "verify_j": 4.75,
+      "delta_j": 0.65,
+      "delta_pct": 15.85,
+      "screen_rank": 1,
+      "verify_rank": 2,
+      "ok": true,
+      "error": null,
+      "n": 1,
+      "created_utc": "2026-10-28T21:40:00Z",
+      "lane": null,
+      "backend": null,
+      "n_dof": 2890,
+      "n_triangles": 5100,
+      "density": {
+        "n_freqs": 29,
+        "balloon_grid": [23, 45],
+        "n_points": 1035
+      },
+      "gates": {
+        "round_throat": true,
+        "loading": true
+      },
+      "source_kind": "inline",
+      "source_run_id": "20261027T051600Z-screen-ed1da9",
+      "has_balloon": true,
+      "has_mesh": false
+    },
+    {
+      "hash": "1234567890ab",
+      "family": "OSSE",
+      "screen_j": 4.3,
+      "verify_j": 4.90,
+      "delta_j": 0.6,
+      "delta_pct": 13.95,
+      "screen_rank": 2,
+      "verify_rank": 3,
+      "ok": true,
+      "error": null,
+      "n": 2,
+      "created_utc": "2026-10-28T21:41:00Z",
+      "lane": null,
+      "backend": null,
+      "n_dof": 3100,
+      "n_triangles": 5500,
+      "density": {
+        "n_freqs": 29,
+        "balloon_grid": [23, 45],
+        "n_points": 1035
+      },
+      "gates": null,
+      "source_kind": "inline",
+      "source_run_id": "20261027T051600Z-screen-ed1da9",
+      "has_balloon": false,
+      "has_mesh": false
+    },
+    {
+      "hash": "abcdef123456",
+      "family": "OSSE",
+      "screen_j": 4.6,
+      "verify_j": 5.10,
+      "delta_j": 0.5,
+      "delta_pct": 10.87,
+      "screen_rank": 4,
+      "verify_rank": 4,
+      "ok": true,
+      "error": null,
+      "n": 3,
+      "created_utc": "2026-10-28T21:42:00Z",
+      "lane": null,
+      "backend": null,
+      "n_dof": 2500,
+      "n_triangles": 4600,
+      "density": {
+        "n_freqs": 29,
+        "balloon_grid": [23, 45],
+        "n_points": 1035
+      },
+      "gates": null,
+      "source_kind": "inline",
+      "source_run_id": "20261027T051600Z-screen-ed1da9",
+      "has_balloon": true,
+      "has_mesh": true
+    },
+    {
+      "hash": "fedcba654321",
+      "family": "OSSE",
+      "screen_j": 4.8,
+      "verify_j": 6912.0,
+      "delta_j": null,
+      "delta_pct": null,
+      "screen_rank": 5,
+      "verify_rank": 5,
+      "ok": false,
+      "error": "mesh_too_large",
+      "n": 4,
+      "created_utc": "2026-10-28T21:43:00Z",
+      "lane": null,
+      "backend": null,
+      "n_dof": null,
+      "n_triangles": null,
+      "density": null,
+      "gates": null,
+      "source_kind": "inline",
+      "source_run_id": "20261027T051600Z-screen-ed1da9",
+      "has_balloon": false,
+      "has_mesh": false
+    }
+  ]
+}

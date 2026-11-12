@@ -632,3 +632,169 @@ svg .iso-title { font-family: var(--f-body); font-size: 12px; font-weight: 600; 
   .sbox-3dwrap { height: 300px; }
 }
 @media (prefers-reduced-motion: reduce) { .typ-card[data-open] { transition: none; } }
+
+/* shell (GUI plan WP5): grouped sidebar navigation */
+#app-nav ul li.nav-group-label { padding:8px 16px 2px; font-family:var(--f-mono); font-size:0.62rem;
+  letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); }
+#app-nav ul li.nav-group-label:first-child { padding-top:4px; }
+@media (max-width:700px) { #app-nav ul li.nav-group-label { display:none; } }
+/* ── verify view ─────────────────────────────────────────────────────────────── */
+/* WP3 (table, KPIs, scatter) + WP6 (panel, compare) */
+
+/* KPI strip */
+.vfy-kpi-strip { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.vfy-kpi { display: flex; flex-direction: column; gap: 2px; }
+.vfy-kpi-val { font-family: var(--f-mono); font-size: 1.1rem; font-weight: 600;
+               color: var(--ink); line-height: 1.1; }
+.vfy-kpi-label { font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
+
+/* Fidelity pills */
+.vfy-fidelity-pills { gap: 6px; }
+.verify-fidelity-pill { background: color-mix(in srgb, var(--good) 15%, var(--surface));
+                        border: 1px solid color-mix(in srgb, var(--good) 30%, transparent); }
+.screen-fidelity-pill { background: color-mix(in srgb, var(--seed) 12%, var(--surface));
+                        border: 1px solid color-mix(in srgb, var(--seed) 25%, transparent); }
+.vfy-standalone-pill { background: color-mix(in srgb, var(--warn) 15%, var(--surface));
+                       border: 1px solid color-mix(in srgb, var(--warn) 30%, transparent); }
+.verify-tier-pill { background: color-mix(in srgb, var(--good) 15%, var(--surface));
+                    border: 1px solid color-mix(in srgb, var(--good) 30%, transparent);
+                    font-size: 0.72rem; }
+
+/* Table */
+.vfy-row { cursor: pointer; }
+.vfy-row:hover { background: var(--accent-soft, color-mix(in srgb, var(--accent) 8%, var(--surface))); }
+.vfy-row[aria-selected="true"] { background: color-mix(in srgb, var(--best) 12%, var(--surface)); }
+.vfy-row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.vfy-hash { font-family: var(--f-mono); font-size: 0.82rem; }
+.vfy-open-btn { font-size: 0.72rem; padding: 1px 7px; }
+.vfy-gates { max-width: 160px; }
+
+/* Delta text colours */
+.bad-text  { color: var(--bad); }
+.good-text { color: var(--good); }
+
+/* Toolbar */
+.vfy-copyable { background: var(--bg); border: 1px solid var(--rule); border-radius: 4px;
+               padding: 6px 10px; font-size: 0.82rem; white-space: pre-wrap; word-break: break-all;
+               user-select: all; }
+
+/* Empty state */
+.vfy-empty { max-width: 600px; }
+
+/* Panel */
+.vfy-panel { gap: 14px; }
+.vfy-panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.vfy-panel-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.vfy-freq-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 14px; }
+.vfy-freq-slider { flex: 1 1 160px; min-width: 80px; accent-color: var(--accent); }
+.vfy-ghost-label { display: flex; align-items: center; gap: 5px; font-size: 0.84rem; cursor: pointer; }
+.vfy-charts-row { align-items: start; }
+
+/* Gates card */
+.vfy-gates-card { padding: 10px 14px; }
+.vfy-gates-row { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* Density card */
+.vfy-density-card { padding: 10px 14px; font-size: 0.84rem; }
+
+/* Ready to print checklist */
+.vfy-checklist { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 8px; }
+.vfy-checklist-item { display: flex; gap: 10px; align-items: flex-start; font-size: 0.88rem; }
+.vfy-check-icon { font-size: 1rem; min-width: 1.1em; text-align: center; line-height: 1.4; }
+.vfy-checklist-item.pass .vfy-check-icon { color: var(--good); }
+.vfy-checklist-item.fail .vfy-check-icon { color: var(--bad); }
+.vfy-checklist-item.unknown .vfy-check-icon { color: var(--warn); }
+.vfy-checklist-item.na .vfy-check-icon { color: var(--muted); }
+
+/* Compare selector */
+.vfy-compare-sel { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 10px 14px; }
+
+/* Screen-reader only */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden;
+           clip: rect(0 0 0 0); white-space: nowrap; }
+
+@media (max-width: 760px) {
+  .vfy-kpi-strip { gap: 6px 12px; }
+  .vfy-kpi-val { font-size: 0.95rem; }
+  .vfy-charts-row { grid-template-columns: 1fr !important; }
+}
+/* charts — WP9/WP10 additions */
+/* Off-axis family legend */
+#c-offaxis-legend { display: flex; flex-wrap: wrap; gap: 6px; font-size: 0.78rem; margin-top: 4px; }
+#c-offaxis-legend span { display: inline-flex; align-items: center; gap: 4px; }
+#c-offaxis-legend i { display: inline-block; width: 18px; height: 0; border-top: 2px solid currentColor; }
+/* Campaign cross-run history block */
+#camp-history-block { margin-top: 8px; }
+#c-camp-conv { width: 100%; }
+/* CMA dynamics block */
+#cma-dynamics-block .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+#cma-dynamics-block .grid2 > div { min-width: 0; }
+#cma-dynamics-block svg { width: 100%; }
+/* Convergence: out-of-range ▲ markers and failure × strip */
+#c-conv { width: 100%; }
+/* Search dynamics heat strip */
+#c-dyn-stddev { width: 100%; }
+/* Bounds bar in sens table (H6) */
+.sens-bounds-bar { display: inline-block; }
+/* dash-ref legend item */
+.dash-ref { display: inline-flex; align-items: center; gap: 4px; font-size: 0.78rem; }
+.dash-ref::before { content: ""; display: inline-block; width: 18px; height: 0; border-top: 1px dashed var(--label); }
+
+/* ── 2026-11-12 visual-audit fixes: wide tables scroll instead of clipping/overlapping ── */
+/* The runs list has always worked because its wrapper owns the scroll and no cell caps its own
+   width. Apply the same pattern everywhere and make the scrollbar visible, not an overlay. */
+.tbl-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--muted) 60%, transparent) transparent;
+}
+.tbl-wrap::-webkit-scrollbar { height: 10px; }
+.tbl-wrap::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--muted) 60%, transparent);
+  border-radius: 6px;
+}
+.tbl-wrap::-webkit-scrollbar-track { background: transparent; }
+
+/* Verify design table: give every column a real minimum so pills cannot print over numbers. */
+#vfy-table-wrap { overflow-x: auto; }
+#vfy-table { min-width: 1240px; }
+#vfy-table th,
+#vfy-table td { white-space: nowrap; }
+#vfy-table td.vfy-hash { min-width: 84px; }
+#vfy-table td.vfy-gates {
+  min-width: 220px;
+  max-width: none;          /* the old max-width:160px made pills overflow into the next cell */
+  white-space: nowrap;
+}
+#vfy-table td.vfy-actions { min-width: 110px; white-space: nowrap; }
+#vfy-table td:last-child,
+#vfy-table th:last-child { padding-right: 14px; }
+
+/* Run-detail gate audit: same treatment (DI RISE / 8KHZ BW headers were cut at ~900px). */
+#gate-audit-card .tbl-wrap { overflow-x: auto; }
+#gate-audit-card table { min-width: 760px; }
+#gate-audit-card th,
+#gate-audit-card td { white-space: nowrap; }
+
+/* Explicit scroll affordance. Native scrollbars can be overlay-only (invisible until dragged) and,
+   on a long table, the horizontal bar sits far below the first screen. The outer .tbl-scroll names
+   the behaviour and marks the clipped edge; wireScrollHints() only adds .is-scrollable when the
+   inner .tbl-wrap really has scrollWidth > clientWidth. */
+.tbl-scroll { position: relative; min-width: 0; max-width: 100%; }
+.tbl-scroll-hint {
+  display: none;
+  margin: 0 0 4px;
+  text-align: right;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+}
+.tbl-scroll.is-scrollable .tbl-scroll-hint { display: block; }
+.tbl-scroll.is-scrollable.at-end .tbl-scroll-hint { visibility: hidden; }
+.tbl-scroll.is-scrollable:not(.at-end) > .tbl-wrap {
+  box-shadow: inset -14px 0 14px -14px color-mix(in srgb, var(--ink) 45%, transparent);
+}
+

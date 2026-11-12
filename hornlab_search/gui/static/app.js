@@ -2,7 +2,8 @@
 // Single-page app with hash routing. No build step, vanilla ES modules.
 
 import { chart, heat, cmap, drawCbar, niceTicks, diFromCuts, groupColor,
-         el, NS, css, fmt, DEFW, polarMap, wallSection, familyColor, measuredWidth, isobarMap } from "./charts.js";
+         el, NS, css, fmt, DEFW, polarMap, wallSection, familyColor, measuredWidth, isobarMap,
+          logGrid, logTicks, AXES, fixedRange, wireScrollHints } from "./charts.js";
 import { TERMS as GLOSSARY, TERM_ORDER, tip } from "./glossary.js";
 import { loadParamCatalog, paramTipHtml, typologyTipHtml, typologyChipsHtml } from "./paramtips.js";
 import { init3d } from "./view3d.js";
@@ -10,6 +11,7 @@ import { viewEvolution } from "./evolution.js";
 import { viewBalloon } from "./balloon.js";
 import { viewTypologySandbox } from "./sandbox.js";
 import { viewUmap } from "./umap.js";
+import { viewVerify } from "./verify.js";
 
 // ── XSS helper ─────────────────────────────────────────────────────
 function esc(s) {
@@ -50,6 +52,63 @@ export function freqAxisLimits(band, freqs) {
   return hi > lo ? [lo, hi] : [lo, lo * 1.05];      // never a zero-width log axis
 }
 
+/**
+ * Convergence bucket counts over the FULL run history. ``data.py`` writes ``J[i] = null`` for a
+ * failed row (it writes ``999`` only on older payloads), so a null is a failure here too — otherwise
+ * the footer silently reports "0 failed" while the KPI strip counts the real failures. Pure.
+ *
+ * Returns ``{ok, failed}`` where each is an array of ``[evalIndex, value|null]`` pairs.
+ */
+export function convergenceCounts(rawJ, failThresh = 999) {
+  const ok = [], failed = [];
+  (Array.isArray(rawJ) ? rawJ : []).forEach((j, i) => {
+    if (j == null) { failed.push([i, null]); return; }
+    const v = Number(j);
+    if (!isFinite(v) || v >= failThresh) failed.push([i, isFinite(v) ? v : null]);
+    else ok.push([i, v]);
+  });
+  return { ok, failed };
+}
+
+/**
+ * Per-parameter CMA σ normalised to the parameter's bound width. Returns one row per parameter
+ * name, in names order, with ``final`` (last finite generation), ``lo``/``hi`` (range across
+ * generations) and ``n`` (finite generations). A parameter with no finite σ keeps ``final: null``
+ * so the view can show it as "no data" instead of silently drawing nothing. Pure.
+ */
+export function stddevBars(stddevByGen, paramNames, sens) {
+  const names = Array.isArray(paramNames) ? paramNames : [];
+  const gens = Array.isArray(stddevByGen) ? stddevByGen : [];
+  const byKey = new Map((Array.isArray(sens) ? sens : []).map(s => [s && s.key, s]));
+  const boundWidth = pn => {
+    const ps = byKey.get(pn);
+    const bw = ps ? Math.abs(Number(ps.hi) - Number(ps.lo)) : 0;
+    return isFinite(bw) && bw > 0 ? bw : 1;
+  };
+  const normalised = gens.map(g => names.map((pn, pi) => {
+    const raw = Array.isArray(g) ? g[pi] : null;
+    const v = Number(raw);
+    return raw != null && isFinite(v) ? v / boundWidth(pn) : null;
+  }));
+  return names.map((pn, pi) => {
+    const vals = normalised.map(r => r[pi]).filter(v => v != null);
+    return {
+      key: pn,
+      final: vals.length ? vals[vals.length - 1] : null,
+      lo: vals.length ? Math.min(...vals) : null,
+      hi: vals.length ? Math.max(...vals) : null,
+      n: vals.length,
+    };
+  });
+}
+
+/** Truncate an SVG label to fit ``maxPx`` at the given per-character estimate, ellipsis included. */
+export function fitSvgLabel(text, maxPx, charPx = 6) {
+  const s = String(text == null ? "" : text);
+  const maxChars = Math.max(1, Math.floor(Math.max(0, maxPx) / charPx));
+  return s.length <= maxChars ? s : s.slice(0, Math.max(1, maxChars - 1)) + "…";
+}
+
 // ── API helpers ────────────────────────────────────────────────────
 
 async function api(path) {
@@ -77,6 +136,8 @@ const ROUTES = [
   { re: /^#\/campaigns$/,               fn: () => viewCampaignsList() },
   { re: /^#\/campaign\/(.+)$/,          fn: m => viewCampaignDetail(m[1]) },
   { re: /^#\/runs$/,                    fn: () => viewRunsList() },
+  { re: /^#\/run\/([^\/?#]+)\/verify\/compare(?:\?(.*))?$/, fn: m => viewVerify(ROOT, m[1], "compare", m[2] || ""), query: true },
+  { re: /^#\/run\/([^\/?#]+)\/verify(?:\?(.*))?$/,         fn: m => viewVerify(ROOT, m[1], "table",   m[2] || ""), query: true },
   { re: /^#\/run\/(.+)\/3d$/,           fn: m => viewRun3D(m[1]) },
   { re: /^#\/run\/(.+)\/balloon$/,      fn: m => viewBalloon(ROOT, m[1]) },     // W6: BL-style balloon
   { re: /^#\/run\/(.+)\/evolution$/,    fn: m => viewEvolution(ROOT, m[1]) },
@@ -115,8 +176,10 @@ function route() {
   ROOT.replaceWith(fresh); ROOT = fresh;
   const hash = location.hash || "#/home";
   const path = hash.split("?")[0];
-  for (const { re, fn } of ROUTES) {
-    const m = path.match(re);
+  for (const { re, fn, query } of ROUTES) {
+    // Verify routes own their query string (design/sort/compare selection); every other route
+    // matches the bare path so a stray ?param cannot leak into a captured run id.
+    const m = (query ? hash : path).match(re);
     if (m) { updateNav(path); return fn(m); }
   }
   ROOT.innerHTML = "";
@@ -231,15 +294,19 @@ function homeLeadersHtml(leaders, pending = false) {
   if (!leaders || !leaders.length) {
     return `<div class="card"><div class="eyebrow">Best horn per brief</div><p class="muted">No scored campaigns yet. Run a screen campaign from Launch.</p></div>`;
   }
-  const rows = leaders.map(l => {
+  const { shown, hidden } = homeLeadersFilter(leaders, _homeShowAllBriefs);
+  const rows = shown.map(l => {
+    // Two separate facts, two pills: how the family ranking was decided (campaign tier), and
+    // whether the leading design has been re-solved at verify resolution.
     const verdict = l.tier === "compare"
       ? (l.clearly_ahead ? pill("clearly ahead", "good") : pill("not separated", "warn"))
-      : pill("screen only", "warn");
+      : pill("single screen pass", "warn");
+    const ver = l.verified ? pill("verified designs", "good") : pill("not verified yet", "warn");
     const link = l.best_run_id ? `href="#/run/${esc(l.best_run_id)}"` : "";
     return `<a class="best-brief-row" ${link}>
       <div>
         <div class="bbr-name">${esc(l.brief)}</div>
-        <div class="bbr-meta">${esc(l.family)} · ${esc(l.dims ? dimStr(l.dims) : "–")} · ${verdict}</div>
+        <div class="bbr-meta">${esc(l.family)} · ${esc(l.dims ? dimStr(l.dims) : "–")} · ${verdict} ${ver}</div>
         <div class="bbr-meta muted">${esc(l.tier)} campaign, ${esc(l.n_families)} families${l.runner_up ? `; next: ${esc(l.runner_up)} (+${fmt(l.gap)})` : ""}</div>
       </div>
       <div class="bbr-score" title="median score over repeats (lower is better)">${fmt(l.median_j)}</div>
@@ -249,7 +316,60 @@ function homeLeadersHtml(leaders, pending = false) {
     <div class="eyebrow" style="margin-bottom:10px">Best horn per brief</div>
     <p class="muted" style="margin:0 0 8px;font-size:0.82rem">Median score of the leading family in the latest campaign for each brief (lower is better). Size is the outer mouth width × height × depth of its best design.</p>
     <div class="best-brief-grid">${rows}</div>
+    ${hidden ? `<p class="muted" style="margin:8px 0 0;font-size:0.82rem">${hidden} older brief${hidden === 1 ? "" : "s"} hidden (no activity in ${HOME_RECENT_DAYS} days). <a href="#" id="home-show-all-briefs">Show all briefs</a></p>`
+      : _homeShowAllBriefs ? `<p class="muted" style="margin:8px 0 0;font-size:0.82rem"><a href="#" id="home-show-recent-briefs">Show recent briefs only</a></p>` : ""}
   </div>`;
+}
+
+/** Pure: the run page's Verification card from a /api/verify report (plan §3.1). States:
+ *  redirect (a linked verify run) · standalone · pairs with verified rows · none yet. The copyable
+ *  command uses the exact run id; nothing here is invented — missing numbers render "–". */
+function verificationCardHtml(rep, runId) {
+  const cmd = `hornlab-search verify --run "runs/${runId}" --top 5`;
+  const open = `<a class="btn primary" href="#/run/${esc(runId)}/verify">Open verify view →</a>`;
+  if (!rep) return "";
+  if (rep.kind === "redirect") {
+    const parent = rep.redirect_to
+      ? `<a class="btn primary" href="#/run/${esc(rep.redirect_to)}/verify">Open the parent's verify view →</a> <a class="btn" href="#/run/${esc(rep.redirect_to)}">Parent run →</a>`
+      : `<span class="muted">Its parent run is not in this runs folder (moved or deleted).</span>`;
+    return `<div class="alert info card" role="note"><b>This is a verification run.</b> It re-solved designs from another run at higher resolution; its rows are not a search, so search-history panels below do not apply.<div class="btn-row" style="margin-top:8px;gap:8px">${parent}</div></div>`;
+  }
+  if (rep.kind === "standalone") {
+    const s = rep.summary || {};
+    return `<div class="card"><div class="eyebrow">Verification</div>
+      <p style="margin:4px 0 8px"><b>Single-design verification.</b> One design solved at verify resolution (verify J ${fmt(s.best_verify_j)}); there is no screen run to compare it against.</p>${open}</div>`;
+  }
+  const s = rep.summary || {};
+  const n = s.n_verified || 0;
+  if (rep.kind === "none" || !n) {
+    return `<div class="card"><div class="eyebrow">Next step</div>
+      <p style="margin:4px 0 8px"><b>Not verified yet.</b> Screen scores are a fast first pass and are usually optimistic. Verify the best designs at higher resolution before choosing one to print:</p>
+      <div class="log-tail mono" style="max-height:none;user-select:all">${esc(cmd)}</div></div>`;
+  }
+  const rank = s.screen1_verify_rank != null ? `screen #1 is verify #${s.screen1_verify_rank}` : "";
+  const bias = s.bias_median_pct != null ? `screen scores were ${fmt(Math.abs(s.bias_median_pct), 1)}% ${s.bias_median_pct >= 0 ? "optimistic" : "pessimistic"} (median)` : "";
+  const facts = [`${n} design${n === 1 ? "" : "s"} verified`, s.n_failed ? `${s.n_failed} failed` : "",
+    `best verify J ${fmt(s.best_verify_j)}${s.best_verify_hash ? ` (${esc(String(s.best_verify_hash).slice(0, 12))})` : ""}`, rank, bias]
+    .filter(Boolean).join(" · ");
+  const warn = rep.comparable === false ? `<p class="warn-text" style="margin:6px 0 0">Screen and verify were scored differently (${esc(rep.comparable_reason || "different settings")}), so no ranking across them.</p>` : "";
+  return `<div class="card"><div class="eyebrow">Verification · next step</div>
+    <p style="margin:4px 0 8px">${facts}. Pick a design to print from the verified ones, not from the screen score.</p>${warn}${open}</div>`;
+}
+
+const HOME_RECENT_DAYS = 31;   // owner decision 2026-11-12: 31 days (was 14); every brief on the real tree is active within 30 days, so this hides nothing there
+let _homeShowAllBriefs = false;
+
+/** Pure: split leaderboard rows into those shown (activity within HOME_RECENT_DAYS, or all when
+ *  showAll) and a hidden count. Rows without a timestamp stay visible (never hide on missing data). */
+function homeLeadersFilter(leaders, showAll, now = Date.now()) {
+  const list = Array.isArray(leaders) ? leaders : [];
+  if (showAll) return { shown: list, hidden: 0 };
+  const cutoff = now - HOME_RECENT_DAYS * 86400000;
+  const shown = list.filter(l => {
+    const t = l.last_activity ? new Date(l.last_activity).getTime() : NaN;
+    return !isFinite(t) || t >= cutoff;
+  });
+  return { shown, hidden: list.length - shown.length };
 }
 
 /** Paint the slow leaderboard into an already-rendered Home. Dropped when a newer Home render
@@ -271,7 +391,17 @@ async function patchHomeLeaders(ROOT, myEpoch) {
     </div>`;
     return;
   }
-  box.innerHTML = homeLeadersHtml(Array.isArray(leaders) ? leaders : []);
+  const list = Array.isArray(leaders) ? leaders : [];
+  const paint = () => {
+    box.innerHTML = homeLeadersHtml(list);
+    const toggle = (id, v) => {
+      const a = box.querySelector(id);
+      if (a) a.onclick = (ev) => { ev.preventDefault(); _homeShowAllBriefs = v; paint(); };
+    };
+    toggle("#home-show-all-briefs", true);
+    toggle("#home-show-recent-briefs", false);
+  };
+  paint();
 }
 
 async function viewHome() {
@@ -568,7 +698,7 @@ function stopRegionHtml(aff) {
     const pid = l.pid != null ? l.pid : "?";
     return `<div style="margin-top:8px">
       <div class="btn-row" style="flex-wrap:wrap;gap:8px;align-items:center">
-        <button class="btn danger" id="btn-kill-run" title="Kills the externally-started run that holds our GPU lock: pid ${esc(pid)} with its child tree, then a gpu-clean pass">Kill run</button>
+        <button class="btn danger" id="btn-kill-run" title="Kills the externally-started run that holds our GPU lock: pid ${esc(pid)} with its child tree, then a gpu-clean pass">Kill GPU run</button>
         <span class="mono muted" style="font-size:0.75rem">external run · pid ${esc(pid)}</span>
       </div>
       <div class="hint" id="st-kill-msg" role="status" style="margin:4px 0 0"></div>
@@ -719,6 +849,13 @@ function continueRunAvailable(d) {
   return !!(d && typeof d.command === "string" && d.command.trim().startsWith("hornlab-search search"));
 }
 
+/** Pure: is this run-detail payload a verification run? A verify run re-solves designs from a
+ *  search run, so its page carries no search history (plan WP4 item 5). `d.summary.mode` is the
+ *  live shape; `d.mode` is the fallback for older payloads. */
+function runIsVerify(sum, d) {
+  return (((sum && sum.mode) || (d && d.mode)) === "verify");
+}
+
 /** Pure: the POST /api/jobs args for adding N NEW evaluations to an opened search run. Mirrors
  *  resumeArgsFor's contract: no --config (the CLI reuses the run's stored config.yaml), no
  *  --max-evals (it counts replays too; --budget is the NEW-evaluation cap), and mode only when the
@@ -786,8 +923,8 @@ function toolbarPillHtml(pill) {
   if (state === "external") {
     const l = pill.lock || {};
     const pid = l.pid != null ? l.pid : "?";
-    return wrap(`<button class="btn danger" id="tb-kill-run" style="${BTN}" title="Kills the externally-started run that holds our GPU lock: pid ${esc(pid)} with its child tree, then a gpu-clean pass">■ Kill run</button>
-      <span class="mono muted" style="${SUB}">external run · pid ${esc(pid)}</span>
+    return wrap(`<button class="btn danger" id="tb-kill-run" style="${BTN}" title="Kills the externally-started run that holds our GPU lock: pid ${esc(pid)} with its child tree, then a gpu-clean pass">■ Kill GPU run</button>
+      <span class="mono muted" style="${SUB}">GPU lane · external run · pid ${esc(pid)}</span>
       <span id="tb-kill-msg" role="status" style="${MSG}"></span>`);
   }
   if (state === "idle") {
@@ -913,7 +1050,7 @@ function wireResumeArm(btn, msg, pill) {
   });
 }
 
-let _pillJobs = null, _pillStatus = null, _pillRuns = null, _pillTimer = null, _pillSig = "";
+let _pillJobs = null, _pillStatus = null, _pillRuns = null, _pillTimer = null, _pillSig = "", _pillLanes = null;
 
 /** Injects the pill holder once, directly below the nav links (after #app-nav ul, before the
  *  .nav-spacer). The nav is never re-rendered by route() (only #view-root is), but the guard makes
@@ -934,19 +1071,40 @@ function renderNavPill() {
   const holder = ensureNavRunCtl();
   if (!holder) return;
   const pill = toolbarPillFor(_pillJobs, _pillStatus ? _pillStatus.gpu_lock : null, _pillRuns);
-  const sig = JSON.stringify(pill);
+  const sig = JSON.stringify(pill) + laneChipsHtml(_pillLanes);
   if (sig === _pillSig && holder.firstElementChild) return;   // unchanged: keep the wired DOM (an armed click survives the poll)
   _pillSig = sig;
-  holder.innerHTML = toolbarPillHtml(pill);
+  holder.innerHTML = toolbarPillHtml(pill) + laneChipsHtml(_pillLanes);
   wireToolbarPill(pill, holder);
 }
 
+/** Pure: one compact line per solve lane (GPU, CPU) for the sidebar, from /api/lanes, so the
+ *  sidebar always says what BOTH lanes are doing (the pill above only covers the GPU lock).
+ *  Absent payload (older server) renders nothing. */
+function laneChipsHtml(lanes) {
+  const list = lanes && Array.isArray(lanes.lanes) ? lanes.lanes : [];
+  if (!list.length) return "";
+  const SUB = "font-size:0.64rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block";
+  const rows = list.map(l => {
+    const name = String(l.lane || "?").toUpperCase();
+    const busy = !!(l.lock && l.lock.alive);
+    const what = l.job && l.job.name ? l.job.name
+      : busy ? "running" : (l.last_job && l.last_job.id ? `idle · last ${l.last_job.id}` : "idle");
+    const rows = l.run && l.run.n != null ? ` · ${Number(l.run.n).toLocaleString()} evals` : "";
+    const cls = l.alert ? "warn-text" : busy ? "" : "muted";
+    return `<span class="mono ${cls}" style="${SUB}" title="${esc(name)} lane: ${esc(what)}${esc(rows)}">${busy ? "●" : "○"} ${esc(name)} · ${esc(what)}${esc(rows)}</span>`;
+  }).join("");
+  return `<div class="nav-lanes" role="status" aria-label="Solve lanes" style="padding:0 16px 6px;display:grid;gap:2px">${rows}</div>`;
+}
+
 async function pollNavOnce() {
-  const [jobs, st, runs] = await Promise.all([
+  const [jobs, st, runs, lanes] = await Promise.all([
     api("/api/jobs").catch(() => null),
     api("/api/status").catch(() => null),
     api("/api/runs").catch(() => null),   // run summaries: the resume run-id validation (mode/budget/n)
+    api("/api/lanes").catch(() => null),  // both solve lanes for the sidebar lane lines
   ]);
+  if (lanes) _pillLanes = lanes;
   if (jobs) _pillJobs = jobs;
   if (st) _pillStatus = st;
   if (runs) _pillRuns = runs;
@@ -1230,7 +1388,7 @@ async function viewCampaignDetail(id) {
         <div class="grid2">
           <div class="fig">
             <div class="fig-head"><h3>Beamwidth (−6 dB) vs target</h3>
-              <div class="toggle-row" id="bw-toggle">
+              <div class="toggle-row" id="bw-toggle"><!-- H10: injected by JS -->
                 <button aria-pressed="true" id="btn-bw-h">Horizontal</button>
                 <button aria-pressed="false" id="btn-bw-v">Vertical</button>
               </div></div>
@@ -1239,10 +1397,16 @@ async function viewCampaignDetail(id) {
           </div>
           <div class="fig">
             <h3>Directivity index vs target</h3>
-            <div class="cap">Dashed: target DI from the brief's coverage angles.</div>
+            <div class="cap">Dashed: DI target from brief coverage angles.</div>
             <svg id="di-overlay"></svg>
           </div>
         </div>
+      </div>
+      <!-- H10: Cross-run convergence history (same objective version only) -->
+      <div id="camp-history-block">
+        <h3 style="margin-bottom:6px">Cross-run history</h3>
+        <p class="muted" style="font-size:0.82rem" id="camp-history-cap">Best-so-far convergence per family (same objective version). Loading…</p>
+        <svg id="c-camp-conv" style="width:100%"></svg>
       </div>
     </div>`;
 
@@ -1280,37 +1444,44 @@ async function viewCampaignDetail(id) {
     const tgt = bwPlane === "h" ? tgtH : tgtV;
     const allBW = [];
     entries.forEach(e => { const b = e.best || {}; (bwPlane === "h" ? (b.bw_h || []) : (b.bw_v || [])).forEach(v => v != null && allBW.push(v)); });
-    if (tgt) allBW.push(tgt);
-    const bwmax = Math.min(200, Math.ceil(Math.max(...allBW) * 1.08 / 10) * 10) || 180;
+    if (tgt != null) allBW.push(tgt);
     const band = [target.band_lo_hz || freqsRef[0], target.band_hi_hz || freqsRef[freqsRef.length - 1]];
     const xlim = freqAxisLimits(band, freqsRef);
     const f0c = Number(target.f0_hz);
     const f0Finite = isFinite(f0c) && f0c > 0 ? f0c : null;
     const vlines = f0Finite ? [{ x: f0Finite, color: css("--warn"), dash: true, label: "f0 " + fmtHz(f0Finite) }] : [];
+    // Apply fixed BW range (C4: degree multiples)
+    const bwSpec = { ...AXES.beamwidth };
+    const bwRange = fixedRange(bwSpec, allBW);
     chart(bwSvg, {
-      H: 260, xlog: true, xlim, ylim: [0, bwmax], yticks: niceTicks(0, bwmax, 5),
+      H: 260, xlog: true, xlim, ylim: [bwRange.lo, bwRange.hi],
+      yticks: (() => { const t = []; for (let v = bwRange.lo; v <= bwRange.hi + 1; v += bwSpec.major) t.push(v); return t; })(),
       xlabel: "Hz", ylabel: "deg", band, vlines,
-      fill: tgt ? [{ y0: tgt * 0.9, y1: tgt * 1.1, color: css("--best"), opacity: 0.10 }] : [],
-      hlines: tgt ? [{ y: tgt, color: css("--label"), dash: true }] : [],
+      fill: tgt != null ? [{ y0: tgt * 0.9, y1: tgt * 1.1, color: css("--best"), opacity: 0.10 }] : [],
+      refLines: tgt != null ? [{ y: tgt, label: (bwPlane === "h" ? "H" : "V") + " target " + tgt + "°" }] : [],
       series: entries.map((e, idx) => { const b = e.best || {}, F2 = b.freqs || freqsRef;
         const arr = bwPlane === "h" ? (b.bw_h || []) : (b.bw_v || []);
         return { pts: F2.map((f, i) => [f, arr[i] ?? null]), color: familyColor(idx), w: idx === 0 ? 2.4 : 1.6 }; }),
+      markers: true,
     });
     if (diSvg) {
       const dit = target.di_target_db ?? (tgtH && tgtV ? diFromCuts(tgtH, tgtV) : null);
       const dall = []; entries.forEach(e => ((e.best || {}).di || []).forEach(v => v != null && dall.push(v)));
       if (dit != null) dall.push(dit);
-      const dlo = Math.floor(Math.min(...dall) - 1), dhi = Math.ceil(Math.max(...dall) + 1);
+      const diSpec = { ...AXES.di };
+      const diRange = fixedRange(diSpec, dall);
       chart(diSvg, {
-        H: 260, xlog: true, xlim, ylim: [dlo, dhi], yticks: niceTicks(dlo, dhi, 5),
+        H: 260, xlog: true, xlim, ylim: [diRange.lo, diRange.hi],
+        yticks: (() => { const t = []; for (let v = diRange.lo; v <= diRange.hi + 1; v += diSpec.major) t.push(v); return t; })(),
         xlabel: "Hz", ylabel: "dB", band, vlines,
-        hlines: dit != null ? [{ y: dit, color: css("--label"), dash: true }] : [],
+        refLines: dit != null ? [{ y: dit, label: "DI target" }] : [],
         series: entries.map((e, idx) => { const b = e.best || {}, F2 = b.freqs || freqsRef;
           return { pts: F2.map((f, i) => [f, (b.di || [])[i] ?? null]), color: familyColor(idx), w: idx === 0 ? 2.4 : 1.6 }; }),
+        markers: true,
       });
     }
     legDiv.innerHTML = entries.map((e, idx) => `<span><i style="color:${familyColor(idx)};border-top-color:${familyColor(idx)}"></i>${esc(e.name)}${idx === 0 ? " (rank 1)" : ""}</span>`).join("")
-      + `<span><i style="color:var(--label)" class="dash"></i>target</span>`;
+      + (tgt != null ? `<span class="dash-ref">target</span>` : "");
   }
   drawBW();
   document.getElementById("btn-bw-h").onclick = () => {
@@ -1325,6 +1496,51 @@ async function viewCampaignDetail(id) {
     document.getElementById("btn-bw-v").setAttribute("aria-pressed", "true");
     drawBW();
   };
+
+  // H10: Cross-run convergence history
+  // Load each entry's best run convergence curve and plot on shared axes
+  const campHistCap = document.getElementById("camp-history-cap");
+  const campConvSvg = document.getElementById("c-camp-conv");
+  const objVersions = new Set(entries.map(e => e.objective_version).filter(v => v != null));
+  const mixedVersions = objVersions.size > 1;
+  if (mixedVersions && campHistCap) {
+    campHistCap.textContent = "Mixed objective versions — convergence not shown across versions. Each run's history is on its own run page.";
+    if (campConvSvg) campConvSvg.style.display = "none";
+  } else {
+    const runsToLoad = entries.filter(e => e.best_run_id).slice(0, 8);  // cap at 8 families
+    Promise.allSettled(runsToLoad.map(e => api("/api/run/" + e.best_run_id).catch(() => null)))
+      .then(results => {
+        const campRoot = document.getElementById("camp-history-block");
+        if (!campRoot || !campRoot.isConnected) return;
+        const convergencePairs = [];
+        results.forEach((res, ri) => {
+          if (res.status !== "fulfilled" || !res.value) return;
+          const rd = res.value;
+          const jArr = (rd.J || []).filter(v => v != null && v < 999);
+          if (!jArr.length) return;
+          let rb2 = Infinity;
+          const best2 = jArr.map((j, i) => [i, (rb2 = Math.min(rb2, j))]);
+          convergencePairs.push({ name: runsToLoad[ri].name, color: familyColor(ri), pts: best2, n: rd.summary?.n || jArr.length });
+        });
+        if (!convergencePairs.length) {
+          if (campHistCap) campHistCap.textContent = "No convergence data available.";
+          return;
+        }
+        const maxN = Math.max(...convergencePairs.map(p => p.n));
+        const allJ = convergencePairs.flatMap(p => p.pts.map(pt => pt[1]));
+        const jMax = Math.max(...allJ, 1) * 1.1;
+        if (campHistCap) campHistCap.textContent = `Best-so-far curves per family. Same eval axis (max ${maxN} evals).`;
+        if (campConvSvg) {
+          chart(campConvSvg, {
+            H: 200, xlim: [0, maxN], ylim: [0, jMax],
+            xticks: niceTicks(0, maxN, 5), yticks: niceTicks(0, jMax, 4),
+            xlabel: "evaluation", ylabel: "score",
+            series: convergencePairs.map(p => ({ pts: p.pts, color: p.color, w: 1.8 })),
+            ariaLabel: "Cross-run convergence history per family",
+          });
+        }
+      });
+  }
 }
 
 // ── View 3: Runs list ──────────────────────────────────────────────
@@ -1349,7 +1565,7 @@ function renderRunsList(allRuns) {
       <div>
         <div class="eyebrow">All runs</div>
         <h2>Runs</h2>
-        <p class="muted" style="font-size:0.85rem">${allRuns.length} total · newest first</p>
+        <p class="muted" style="font-size:0.85rem">Every search and verification. ${allRuns.length} total. Screen runs are fast first-pass searches; verify runs re-solve the best designs at higher resolution.</p>
         <div id="runs-version-banner"></div>
       </div>
       <div class="filter-bar">
@@ -1362,8 +1578,15 @@ function renderRunsList(allRuns) {
           <option value="">All families</option>
           ${families.map(f => `<option value="${esc(f)}">${esc(f)}</option>`).join("")}
         </select>
+        <select id="run-filter-mode" aria-label="filter by run mode">
+          <option value="">Screen + verify</option>
+          <option value="screen">Screen runs</option>
+          <option value="verify">Verify runs</option>
+          <option value="has_verify">Runs with verified designs</option>
+        </select>
         <select id="run-sort" class="sort-sel" aria-label="sort runs">
-          <option value="date">Newest first</option>
+          <option value="activity">Last activity</option>
+          <option value="date">Newest run started</option>
           <option value="best_j">${tip("J", "Score")} (best first)</option>
           <option value="name">Name</option>
         </select>
@@ -1374,9 +1597,7 @@ function renderRunsList(allRuns) {
             <th>Date</th><th>Name</th><th>Family</th><th>Brief</th>
             <th class="r">${tip("J", "Score start → best")}</th>
             <th class="r">Change</th>
-            <th>${tip("dims", "Horn size W×H×D")}</th>
             <th class="r">Evals</th>
-            <th class="r">${tip("failures", "Fail %")}</th>
           </tr></thead>
           <tbody id="runs-tbody"></tbody>
         </table>
@@ -1388,7 +1609,9 @@ function renderRunsList(allRuns) {
     const bf = document.getElementById("run-filter-brief").value;
     const ff = document.getElementById("run-filter-family").value;
     const sort = document.getElementById("run-sort").value;
+    const mf = document.getElementById("run-filter-mode").value;
     let filtered = allRuns.filter(r =>
+      runModeMatches(r, mf) &&
       (!bf || r.brief === bf) &&
       (!ff || r.family === ff) &&
       (!q || (r.name || "").toLowerCase().includes(q) ||
@@ -1398,13 +1621,15 @@ function renderRunsList(allRuns) {
     // Version guard: a mixed-version table is grouped by objective definition, then sorted INSIDE
     // each group, so a v4 J never outranks a v7 J on the same axis without the banner saying so.
     filtered = sortRunsForTable(filtered, sort);
+    // Live runs (a row written in the last 2 min) are pinned on top whatever the sort.
+    filtered = [...filtered.filter(runIsLive), ...filtered.filter(r => !runIsLive(r))];
 
     const banner = document.getElementById("runs-version-banner");
     if (banner) banner.innerHTML = objectiveVersionBannerHtml(filtered);
 
     const tbody = document.getElementById("runs-tbody");
     if (!filtered.length) {
-      tbody.innerHTML = `<tr><td colspan="9" class="muted" style="text-align:center;padding:24px">No matching runs. <a href="#/launch">Launch a search →</a></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" class="muted" style="text-align:center;padding:24px">No matching runs. <a href="#/launch">Launch a search →</a></td></tr>`;
       return;
     }
 
@@ -1413,17 +1638,16 @@ function renderRunsList(allRuns) {
       const ch = betterPct(r.seed_j, r.best_j);
       const chCls = ch.endsWith("better") ? "good-text" : "";
       const failPct = r.n > 0 ? ((nf / r.n) * 100).toFixed(0) + "%" : "–";
-      const isRunning = !r.last || (Date.now() - new Date(r.last).getTime()) < 120000;
+      const isRunning = runIsLive(r);
       return `<tr class="clickable" onclick="location.hash='#/run/${esc(r.id)}'" ${isRunning ? 'style="background:var(--accent-soft)"' : ""}>
         <td class="muted mono" style="font-size:0.76rem;white-space:nowrap">${timeSince(r.started)}</td>
-        <td><b>${esc(r.name)}</b><br><span class="mono muted" style="font-size:0.72rem">${esc(r.id)}</span></td>
+        <td><b>${esc(r.name)}</b> ${runModeBadgesHtml(r, isRunning)}<br><span class="mono muted" style="font-size:0.72rem">${esc(r.id)}</span>${runParentLineHtml(r)}
+          <br><span class="muted" style="font-size:0.72rem">${r.dims ? esc(dimStr(r.dims)) : "size –"} · ${nf > 0 ? `<span class="warn-text">${esc(failPct)} failed</span>` : "no failures"}</span></td>
         <td>${esc(r.family || "–")}</td>
         <td>${esc(r.brief || "–")}</td>
         <td class="r num"><span class="mono muted" style="font-size:0.68rem">${esc(jVersionLabel(r))}</span><br>${r.seed_j != null && r.seed_j < 900 ? fmt(r.seed_j) : "–"} → <b>${fmt(r.best_j)}</b></td>
         <td class="r ${chCls}">${ch}</td>
-        <td style="font-size:0.82rem">${r.dims ? esc(dimStr(r.dims)) : "–"}</td>
         <td class="r">${r.n.toLocaleString()}</td>
-        <td class="r">${nf > 0 ? `<span class="warn-text">${esc(failPct)}</span>` : failPct}</td>
       </tr>`;
     }).join("");
   }
@@ -1433,6 +1657,54 @@ function renderRunsList(allRuns) {
   document.getElementById("run-filter-brief").addEventListener("change", render);
   document.getElementById("run-filter-family").addEventListener("change", render);
   document.getElementById("run-sort").addEventListener("change", render);
+  document.getElementById("run-filter-mode").addEventListener("change", render);
+}
+
+/** Pure: <option>s for the Compare pickers, filtered by free text (name/family/brief/id) and
+ *  optionally restricted to one brief; `keep` (a selected run id) is always included. */
+function compareOptionsHtml(runs, q, brief, keep = "") {
+  const needle = String(q || "").trim().toLowerCase();
+  return (runs || []).filter(r => r.id === keep || (
+      (!brief || r.brief === brief) &&
+      (!needle || [r.name, r.family, r.brief, r.id].some(v => String(v || "").toLowerCase().includes(needle)))))
+    .map(r => `<option value="${esc(r.id)}">${esc(r.name)} · ${esc(r.brief || "no brief")} · ${esc(jVersionLabel(r))} best ${fmt(r.best_j)}${r.mode === "verify" ? " · verify" : ""} — ${esc(r.id)}</option>`)
+    .join("");
+}
+
+/** A run is live when its newest row is under 2 minutes old (a run with no rows is NOT live). */
+function runIsLive(r) {
+  if (!r || !r.last) return false;
+  const t = new Date(r.last).getTime();
+  return isFinite(t) && (Date.now() - t) < 120000;
+}
+
+/** Mode filter: "" all, "screen", "verify", "has_verify" (inline verify folder or a linked verify run). */
+function runModeMatches(r, mode) {
+  if (!mode) return true;
+  const isVerify = r.mode === "verify";
+  if (mode === "verify") return isVerify;
+  if (mode === "screen") return !isVerify;
+  if (mode === "has_verify") return !!r.has_inline_verify || !!r.has_verify_runs;
+  return true;
+}
+
+/** Pills after a run's name: running · verify · verified designs (pure). */
+function runModeBadgesHtml(r, live) {
+  const out = [];
+  if (live) out.push(pill("running", "good"));
+  if (r.mode === "verify") out.push(pill("verify", "warn"));
+  else if (r.has_inline_verify || r.has_verify_runs) out.push(pill("verified designs", "good"));
+  return out.join(" ");
+}
+
+/** "↳ verification of <parent>" for a verify run (pure). A verify run without a parent in this
+ *  runs folder is either a single-design verification (search --mode verify) or one whose parent
+ *  was moved/deleted; the summary cannot tell those apart, so the line says exactly that. */
+function runParentLineHtml(r) {
+  if (r.mode !== "verify") return "";
+  if (r.verify_of_run_id)
+    return `<br><span style="font-size:0.72rem">↳ verification of <a href="#/run/${esc(r.verify_of_run_id)}" onclick="event.stopPropagation()" class="mono">${esc(r.verify_of_run_id)}</a></span>`;
+  return `<br><span class="muted" style="font-size:0.72rem">↳ single-design verification · no parent run in this folder</span>`;
 }
 
 // ── View 3 detail: Run detail ──────────────────────────────────────
@@ -1963,6 +2235,9 @@ function sortRunsForTable(runs, sort) {
   const byKey = (a, b) => {
     if (sort === "best_j") return (a.best_j ?? Infinity) - (b.best_j ?? Infinity);
     if (sort === "name") return String(a.name || "").localeCompare(String(b.name || ""));
+    // "activity" (default): newest written row first — a resumed run that is live today sorts on
+    // top even though its run id (and `started`) are weeks old.
+    if (sort === "activity") return String(b.last || b.started || "").localeCompare(String(a.last || a.started || ""));
     return String(b.started || "").localeCompare(String(a.started || ""));
   };
   if (objectiveVersions(arr).length <= 1) return arr.sort(byKey);
@@ -1982,19 +2257,49 @@ function gateAuditHtml(audit) {
     : `<span class="muted">–</span>`;
   entries.sort((a, b) => ((a[1].J ?? Infinity) - (b[1].J ?? Infinity)) || a[0].localeCompare(b[0]));
   const head = gates.map(g => `<th class="r">${esc(labels[g] || g)}</th>`).join("");
-  const rows = entries.map(([hash, e]) => {
+  const rowHtml = ([hash, e]) => {
     const g = e.gates || {};
     const cells = gates.map(k => `<td class="r">${chip(g[k])}</td>`).join("");
     return `<tr><td class="mono">${esc(hash)}</td><td class="r">${fmt(e.J, 3)}</td><td>${esc(e.tier || "–")}</td>${cells}</tr>`;
-  }).join("");
+  };
+  // Lead with the GATE_AUDIT_LEAD best-J rows plus every verify-tier row; the rest fold into
+  // "Show all" so the response charts below are not pushed thousands of pixels down.
+  const { lead, rest } = gateAuditSplit(entries);
+  const table = (rs) => `<div class="tbl-scroll">
+          <div class="tbl-scroll-hint" aria-hidden="true">scroll for all columns →</div>
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>Design</th><th class="r">J</th><th>${tip("audit_tier", "Audit tier")}</th>${head}</tr></thead>
+            <tbody>${rs.map(rowHtml).join("")}</tbody>
+          </table></div>
+        </div>`;
   return `<div class="fig" id="gate-audit-card">
         <h3>Gate audit</h3>
-        <div class="cap">Per-design pass/fail from <span class="mono">${esc(audit.source || "")}</span>. Only the gates present in that audit are shown.</div>
-        <div class="tbl-wrap"><table>
-          <thead><tr><th>Design</th><th class="r">J</th><th>Tier</th>${head}</tr></thead>
-          <tbody>${rows}</tbody>
-        </table></div>
+        <div class="cap">Per-design pass/fail from <span class="mono">${esc(audit.source || "")}</span>. All ${gates.length} audited gate columns are shown — scroll sideways when the card is narrow. Audit tier is the fidelity the audit scored that row at.</div>
+        ${table(lead)}
+        ${rest.length ? `<details class="gate-audit-more"><summary>Show all ${entries.length} audited designs (${rest.length} more)</summary>${table(rest)}</details>` : ""}
       </div>`;
+}
+
+/** Budget KPI text. A resumed run's `--budget` is the size of THAT resume, not the run's total,
+ *  so "996 / 117 over budget" is wrong: say "996 evals total · this resume +117" instead. */
+function budgetKpi(n, budget, command) {
+  const N = Number(n) || 0, B = Number(budget) || 0;
+  const resumed = /--resume(\s|=|$)/.test(String(command || ""));
+  if (B && resumed && N > B) return { text: `${N.toLocaleString()} evals total · this resume +${B.toLocaleString()}`, cls: "" };
+  const over = !!(B && N > B);
+  const pct = B ? Math.round((N / B) * 100) : 0;
+  return { text: `${N.toLocaleString()}${B ? " / " + B.toLocaleString() : ""}${over ? " over budget" : ""}`,
+           cls: over ? "bad" : pct >= 90 ? "warn" : "" };
+}
+
+const GATE_AUDIT_LEAD = 10;
+
+/** Split sorted gate-audit entries into the always-visible lead (best GATE_AUDIT_LEAD by J, plus
+ *  every verify-tier row) and the folded remainder. Order inside each part is preserved. */
+function gateAuditSplit(entries) {
+  const lead = [], rest = [];
+  entries.forEach((en, i) => ((i < GATE_AUDIT_LEAD || (en[1] && en[1].tier === "verify")) ? lead : rest).push(en));
+  return { lead, rest };
 }
 
 // ── E.2: lanes panel (Home card) ───────────────────────────────────
@@ -2260,7 +2565,9 @@ async function viewAnalysis(setId) {
       (server default <span class="mono">runs/analysis/</span>; override with
       <span class="mono">hornlab-search gui --analysis-dir</span>). The Group A tools
       (<span class="mono">tools/analysis/</span>) write <span class="mono">REPORT.md</span> + JSON + PNG
-      there; this page only renders what they wrote — it never runs an analysis.</p></div>`;
+      there; this page only renders what they wrote — it never runs an analysis.</p>
+      <p class="muted" style="margin:8px 0 4px">To make a report set, run this in a terminal at the repository root (the day spec lists which runs and tools):</p>
+      <div class="log-tail mono" style="max-height:none;user-select:all">.venv\\Scripts\\python.exe tools\\analysis\\report_day.py --spec tools\\analysis\\specs\\day_2026-11-12.yaml --out runs\\analysis\\day_2026-11-12</div></div>`;
     ROOT.innerHTML = `<div class="stack" style="gap:22px">
       <div><div class="eyebrow">Reports</div><h2>Analysis</h2></div>
       ${rows
@@ -2376,11 +2683,12 @@ export { runProvenanceGroup, renderProvenanceBadges, restartScheduleHtml, stepCh
 
 export { f0KpiHtml, mountingRankWarnHtml, seedDerivationHtml, objectiveVersionOptionsHtml,
          objectiveVersionOf, jVersionLabel, objectiveVersions, objectiveVersionBannerHtml,
-         sortRunsForTable, gateAuditHtml, J_VERSION_BANNER };
+         sortRunsForTable, gateAuditHtml, J_VERSION_BANNER, gateAuditSplit, budgetKpi,
+         runIsLive, runModeMatches, runModeBadgesHtml, runParentLineHtml, laneChipsHtml, compareOptionsHtml, homeLeadersFilter, homeLeadersHtml, verificationCardHtml };
 
 export { lanesPanelHtml, verdictChipHtml, eliteGateChips };
 
-export { continueRunAvailable, continueRunArgs };
+export { continueRunAvailable, continueRunArgs, runIsVerify };
 
 
 /** Compact run-detail card: top up an opened search run with N NEW evaluations while reusing the
@@ -2426,6 +2734,8 @@ async function viewRunDetail(id) {
   await loadParamCatalog();       // P9: catalog-grounded geometry-knob hover docs; failure degrades to raw keys
 
   const sum = d.summary || d;
+  // Verify runs re-solve designs from a screen run: search history does not apply (WP4 item 5).
+  const isVerify = runIsVerify(sum, d);
   const t = d.target || {};
   const S = d.seed || {};
   const B = d.best || {};
@@ -2459,7 +2769,8 @@ async function viewRunDetail(id) {
       <!-- Designer header: key facts -->
       <div class="kpis" id="kpi-strip"></div>
 
-      ${gateAuditHtml(d.gate_audit)}
+      <!-- Verification card + next step (GUI plan WP4): filled from /api/verify/<id> after paint -->
+      <div id="verify-card"></div>
 
       ${restartScheduleHtml(d, id)}
 
@@ -2467,9 +2778,9 @@ async function viewRunDetail(id) {
 
       <!-- Actions -->
       <div class="btn-row">
-        <a class="btn primary" href="#/run/${esc(id)}/evolution">▶ Evolution time-lapse</a>
+        ${isVerify ? "" : `<a class="btn primary" href="#/run/${esc(id)}/evolution">▶ Evolution time-lapse</a>
         <a class="btn" href="#/run/${esc(id)}/umap" title="2-D cloud of OK designs in the searchable unit box (UMAP if installed, else PCA); color by param quartiles or total J">◎ Design cloud</a>
-        <a class="btn" href="#/run/${esc(id)}/archive" title="Quality-diversity atlas: objective per descriptor bin (CMA-ME runs only)">QD atlas</a>
+        ${d.has_atlas ? `<a class="btn" href="#/run/${esc(id)}/archive" title="Quality-diversity atlas: objective per descriptor bin (CMA-ME runs only)">QD atlas</a>` : ""}`}
         <a class="btn" href="#/run/${esc(id)}/balloon" title="W6 Balloon: the stored directivity balloon in 3D — shape + colour = SPL, white isobar rings, radar slicer, freq × angle slice">◉ Balloon 3D</a>
         <a class="btn" href="#/run/${esc(id)}/3d">3D view</a>
         <a class="btn" href="#/compare?a=${esc(id)}">Compare with…</a>
@@ -2478,60 +2789,86 @@ async function viewRunDetail(id) {
           : `<button id="btn-gen-report" title="Builds the detailed HTML report (about 30 s)">Make full report</button>`}</span>
         <button id="btn-step" title="Writes closed STEP solids (mm) of the 3 best designs for CAD or 3D printing">Export STEP for CAD (top 3)</button>
       </div>
-      ${continueRunCardHtml(d, sum)}
+      ${isVerify ? "" : continueRunCardHtml(d, sum)}
       <div id="run-files" class="run-files"></div>
 
-      <!-- Acoustic performance charts (designer order) -->
+      <!-- Acoustic performance charts (C11 order: Isobars → BW H/V → DI → On-axis → Impedance → Wall → 3D) -->
+
+      <!-- Shared "show starting design" toggle (C5/C6): controls start curves on ALL charts below -->
+      <div class="fig-head" style="margin-bottom:4px">
+        <label class="evo-opt" style="color:var(--ink)"><input type="checkbox" id="show-start" checked> show starting design</label>
+      </div>
+
+      <!-- Polar maps (isobars) — first per C11 order -->
+      <div class="fig">
+        <div class="fig-head"><h3>${tip("polar", "Directivity (isobars)")}</h3></div>
+        <div class="cap">Level relative to on-axis at 2 m, in 3 dB colour bands from −30 to 0 dB (pale pink = above 0 dB), with white contour lines every 3 dB (heavier = −6 dB: beamwidth edge). Tick marks show solved frequencies. Hover for a readout. Interpolated between the ${((d.best || {}).freqs || []).length} solved frequencies (screen fidelity). Axis spans the brief band; the colour map is drawn only across the solved frequencies.</div>
+        <div class="maps iso-maps" id="polar-maps"></div>
+      </div>
+
+      <!-- Beamwidth H/V small multiples (C6) -->
       <div class="grid2">
         <div class="fig">
-          <h3>${tip("bw", "Beamwidth (−6 dB)")} vs target</h3>
-          <div class="cap">Total angle between the −6 dB points. Shaded: target ±10 %. Panel: the brief band. Dashed marker: the scoring floor f0.</div>
+          <h3>${tip("bw", "Beamwidth (−6 dB)")} — horizontal vs target</h3>
+          <div class="cap">Total angle between the −6 dB points. Panel: the brief band. Dashed marker: the scoring floor f0. Shaded band: target ±10 %. Dotted line: target. Markers at solved frequencies.</div>
           <div class="legend">
-            <span><i style="color:var(--best)"></i>best, horizontal</span>
-            <span><i style="color:var(--best)" class="dash"></i>best, vertical</span>
-            <span><i style="color:var(--seed)"></i>start H</span>
-            <span><i style="color:var(--seed)" class="dash"></i>start V</span>
-            <span><i style="color:var(--label)"></i>target H</span>
-            <span><i style="color:var(--label)" class="dash"></i>target V</span>
+            <span><i style="color:var(--best)"></i>best</span>
+            <span><i style="color:var(--seed)"></i>start</span>
           </div>
-          <svg id="c-bw"></svg>
+          <svg id="c-bwh"></svg>
         </div>
         <div class="fig">
+          <h3>${tip("bw", "Beamwidth (−6 dB)")} — vertical vs target</h3>
+          <div class="cap">Total angle between the −6 dB points. Shaded band: target ±10 %. Dotted line: target. Markers at solved frequencies.</div>
+          <div class="legend">
+            <span><i style="color:var(--best)"></i>best</span>
+            <span><i style="color:var(--seed)"></i>start</span>
+          </div>
+          <svg id="c-bwv"></svg>
+        </div>
+      </div>
+
+      <!-- DI + On-axis -->
+      <div class="grid2">
+        <div class="fig">
           <h3>${tip("di_db", "Directivity index")} vs target</h3>
+          <div class="cap">0–15 dB fixed range. Dotted line: DI target from brief. Markers at solved frequencies.</div>
           <div class="legend">
             <span><i style="color:var(--seed)"></i>start</span>
             <span><i style="color:var(--best)"></i>best</span>
-            <span><i style="color:var(--label)" class="dash"></i>DI target</span>
           </div>
           <svg id="c-di"></svg>
         </div>
         <div class="fig">
           <h3>${tip("on_axis", "On-axis response")} (mean removed)</h3>
+          <div class="cap">−15..+10 dB fixed range. Dotted line: 0 dB reference. Hatched region: not scored (below f0). Markers at solved frequencies.</div>
           <div class="legend">
             <span><i style="color:var(--seed)"></i>start</span>
             <span><i style="color:var(--best)"></i>best</span>
           </div>
           <svg id="c-axis"></svg>
         </div>
+      </div>
+
+      <!-- Throat impedance -->
+      <div class="grid2">
         <div class="fig">
           <h3>${tip("z_re", "Throat impedance")}</h3>
-          <div class="cap">Normalised to ρc. Resistance near 1 = the horn loads the driver well; below 0.7 counts as poor loading. Reactance: + = mass-like.</div>
+          <div class="cap">Normalised to ρc. Resistance near 1 = good loading; below 0.7 = poor. Reactance: + = mass-like. Dotted lines: 1 ρc, 0.7 ρc (loading floor). Markers at solved frequencies.</div>
           <div class="legend">
             <span><i style="color:var(--best)"></i>resistance (best)</span>
             <span><i style="color:var(--best)" class="dash"></i>reactance (best)</span>
             <span><i style="color:var(--seed)"></i>start</span>
-            <span><i style="color:var(--warn)" class="dash"></i>0.7 threshold</span>
           </div>
           <svg id="c-zre"></svg>
         </div>
-      </div>
-
-      <!-- Polar maps -->
-      <div class="fig">
-        <div class="fig-head"><h3>${tip("polar", "Directivity (isobars)")}</h3>
-          <label class="evo-opt" style="color:var(--ink)"><input type="checkbox" id="iso-start"> also show the starting design</label></div>
-        <div class="cap">Level relative to on-axis at 2 m, in 3 dB colour bands from −30 to 0 dB, with white contour lines every 3 dB (the heavier line is −6 dB: the beamwidth edge). Frequency across, angle up. Hover for a readout. Interpolated between the ${((d.best || {}).freqs || []).length} solved frequencies. Axis spans the brief band; the colour map is drawn only across the solved frequencies.</div>
-        <div class="maps iso-maps" id="polar-maps"></div>
+        <!-- Off-axis response family (C13) -->
+        <div class="fig">
+          <h3>Off-axis responses — horizontal (normalised)</h3>
+          <div class="cap">One curve per angle 0°/15°/30°/45°/60°/75°/90°, normalised to on-axis. Markers at solved frequencies.</div>
+          <div id="c-offaxis-legend" class="legend"></div>
+          <svg id="c-offaxis"></svg>
+        </div>
       </div>
 
       <!-- Wall profile -->
@@ -2558,27 +2895,42 @@ async function viewRunDetail(id) {
 
       <hr class="sep">
 
-      <!-- Search history -->
+      <!-- Gate audit: below the response charts (it can list hundreds of designs; see gateAuditSplit) -->
+      ${gateAuditHtml(d.gate_audit)}
+
+      ${isVerify ? "" : `<!-- Search history -->
       <h3>How the search went</h3>
       <div class="grid2">
         <div class="fig"><h3>Convergence</h3>
-          <div class="cap">Every eval (dots) and running best (line). Failures excluded.</div>
+          <div class="cap" id="conv-cap">Every eval (dots) and running best (line). Out-of-range evals (▲) and failures (×) are marked in the strip below the axis.</div>
           <svg id="c-conv"></svg>
+          <div class="cap" id="conv-cap2" style="margin-top:4px"></div>
         </div>
         <div class="fig"><h3>${tip("J", "Score")} breakdown: start vs best</h3>
-          <div class="cap">Weighted contribution per term. Upper bar = start, lower = best.</div>
+          <div class="cap">Weighted contribution per term × weight. Sorted by best contribution. Upper bar = start, lower = best.</div>
           <svg id="c-terms"></svg>
         </div>
       </div>
 
+      <!-- Search dynamics (H5): CMA internals from cma/*.dat; hidden when absent -->
+      <div class="fig" id="cma-dynamics-block" style="display:none">
+        <h3>${tip("cma_cov", "Search dynamics")}</h3>
+        <div class="cap">σ shrinking = the search is narrowing in; axis ratio growing = some knobs matter much more than others; a flat σ late = still exploring.</div>
+        <div class="grid2" style="gap:8px">
+          <div><div class="cap" style="font-weight:600">Step size σ (log)</div><svg id="c-dyn-sigma"></svg></div>
+          <div><div class="cap" style="font-weight:600">Axis ratio (log)</div><svg id="c-dyn-axratio"></svg></div>
+        </div>
+        <div style="margin-top:8px"><div class="cap" style="font-weight:600">Per-parameter σ (normalised to bound width)</div><div class="cap" style="font-size:0.74rem">Bar = final σ; band = min–max over generations. Shared σ scale; params with no data are labelled.</div><svg id="c-dyn-stddev" style="width:100%"></svg></div>
+      </div>`}
+
       <!-- Sensitivity -->
       <div class="fig">
         <h3>${tip("knob", "Shape parameters")}</h3>
-        <div class="cap">${tip("rho", "Influence")} = Spearman ρ. ${tip("pinned", "At-limit")} = of the 6 best designs how many sit at each bound.</div>
+        <div class="cap">${tip("rho", "Influence")} = Spearman ρ. ${tip("pinned", "At-limit")} = of the 6 best designs how many sit at each bound. Sparkline = best-so-far value vs eval.</div>
         <div class="tbl-wrap"><table id="sens-table"></table></div>
       </div>
 
-      <!-- CMA covariance (search distribution; absent on older runs) -->
+      ${isVerify ? "" : `<!-- CMA covariance (search distribution; absent on older runs) -->
       <div class="fig" id="cma-cov-block" style="display:none">
         <h3>${tip("cma_cov", "CMA covariance")}</h3>
         <div class="cap" id="cma-cov-cap">Unit-box search scales from the final ES. Large ${tip("cma_std", "σ√Cᵢᵢ")} ⇒ still exploring that knob; eigenvectors are coupled J-directions, not acoustic Sobol indices.</div>
@@ -2589,7 +2941,7 @@ async function viewRunDetail(id) {
           <div class="cap">Recommendations from CMA scales + Spearman guard. Does not change the config — run <code>hornlab-search pin-plan --run ${esc(sum.id || id)}</code> to write <code>PIN_PLAN.md</code> / a patched YAML.</div>
           <div class="tbl-wrap"><table id="pin-plan-table"></table></div>
         </div>
-      </div>
+      </div>`}
 
       <!-- Failures -->
       <div class="stack" style="gap:6px">
@@ -2600,24 +2952,32 @@ async function viewRunDetail(id) {
       ${d.command ? `<div class="stack" style="gap:6px"><h3>Command</h3><div class="log-tail" style="max-height:60px">${esc(d.command)}</div></div>` : ""}
     </div>`;
 
+  wireScrollHints(ROOT);   // gate-audit tables: reveal the scroll hint when clipped
+
   // KPI strip (designer-first order)
-  const budgetPct = sum.budget ? Math.round(((sum.n || 0) / sum.budget) * 100) : 0;
-  const overBudget = !!(sum.budget && sum.n > sum.budget);
+  // Name the fidelity on every score: a screen "best" is not a verified best (GUI plan G12/F6).
+  const tierWord = (sum.mode || d.mode) === "verify" ? "verify" : "screen";
   const kpis = [
     [`${tip("bw", "Coverage target")}`, coverTarget],
     [`${tip("band", "Band")}`, bandStr],
     [`${tip("dims", "Horn size")} <small style="font-family:var(--f-mono);font-size:0.6rem;color:var(--muted)">W×H×D outer</small>`, dimsStr],
-    [`${tip("J", "Score: start")} <small style="font-family:var(--f-mono);font-size:0.6rem;color:var(--muted)">${esc(jVersionLabel(d))}</small>`, fmt(sum.seed_j && sum.seed_j < 900 ? sum.seed_j : null)],
-    [`${tip("J", "Score: best")} <small style="font-family:var(--f-mono);font-size:0.6rem;color:var(--muted)">${esc(jVersionLabel(d))}</small>`, fmt(sum.best_j)],
-    ["Change vs start", ch],
-    [`${tip("budget", "Budget used")}`,
-     `${(sum.n || 0).toLocaleString()}${sum.budget ? " / " + sum.budget.toLocaleString() : ""}${overBudget ? " over budget" : ""}`,
-     overBudget ? "bad" : budgetPct >= 90 ? "warn" : ""],
+    [`${tip("J", `Start ${tierWord} score`)} <small style="font-family:var(--f-mono);font-size:0.6rem;color:var(--muted)">${esc(jVersionLabel(d))}</small>`, fmt(sum.seed_j && sum.seed_j < 900 ? sum.seed_j : null)],
+    [`${tip("J", `Best ${tierWord} score`)} <small style="font-family:var(--f-mono);font-size:0.6rem;color:var(--muted)">${esc(jVersionLabel(d))}</small>`, fmt(sum.best_j)],
+    ...(isVerify ? [] : [
+      ["Change vs start", ch],
+      [`${tip("budget", "Budget used")}`, budgetKpi(sum.n, sum.budget, d.command).text, budgetKpi(sum.n, sum.budget, d.command).cls],
+    ]),
     [`${tip("failures", "Failures")}`, `${nf} (${failPct}%)`],
     [`${tip("pinned", "At limit")}`, pinnedSens.length > 0 ? `<b class="bad">${pinnedSens.length}</b>` : pill("0", "good")],
   ].map(([k, v, cls]) => `<div class="kpi"><span>${k}</span><b${cls ? ` class="${cls}"` : ""}>${v}</b></div>`);
   kpis.splice(2, 0, f0KpiHtml(t));          // right after Band; "" when the brief carries no f0
   document.getElementById("kpi-strip").innerHTML = kpis.filter(Boolean).join("");
+  {
+    const card = document.getElementById("verify-card"), here = currentRoot();
+    if (card) api(`/api/verify/${encodeURIComponent(id)}`)
+      .then(rep => { if (here === currentRoot() && card.isConnected) card.innerHTML = verificationCardHtml(rep, id); })
+      .catch(() => {});   // an older server without /api/verify: the card stays absent
+  }
 
   const F = S.freqs || B.freqs || [];
   const band = [t.band_lo_hz || 700, t.band_hi_hz || 5500];
@@ -2625,80 +2985,218 @@ async function viewRunDetail(id) {
   const f0 = Number(t.f0_hz);
   const f0Finite = isFinite(f0) && f0 > 0 ? f0 : null;
 
-  // One convention on every chart: horizontal plane solid, vertical plane dashed; start amber, best teal.
-  const series2 = (key, w) => [
-    ...(S[key + "_h"] ? [{ pts: F.map((f, i) => [f, S[key + "_h"][i] ?? null]), color: css("--seed"), w: 1.7 }] : []),
-    ...(S[key + "_v"] ? [{ pts: F.map((f, i) => [f, S[key + "_v"][i] ?? null]), color: css("--seed"), w: 1.7, dash: true }] : []),
-    ...(B[key + "_h"] ? [{ pts: F.map((f, i) => [f, B[key + "_h"][i] ?? null]), color: css("--best"), w }] : []),
-    ...(B[key + "_v"] ? [{ pts: F.map((f, i) => [f, B[key + "_v"][i] ?? null]), color: css("--best"), w, dash: true }] : []),
-  ];
+  // One convention on every chart: best teal, start amber; markers at solved frequencies; fixed ranges.
+  // The shared "show starting design" toggle (C5/C6) gates all start/seed series.
+  const showStartBox = document.getElementById("show-start");
+  function showStart() { return !showStartBox || showStartBox.checked; }
+  if (showStartBox) showStartBox.onchange = () => redrawCharts();
 
-  // Beamwidth vs target, target ±10 % shaded per plane
-  if (F.length && (S.bw_h || B.bw_h)) {
+  // Build a standard vlines array: f0 marker line
+  const f0vline = f0Finite ? [{ x: f0Finite, color: css("--warn"), dash: true, label: "f0 " + fmtHz(f0Finite) }] : [];
+
+  // Per-chart helper: n solved frequencies chip for caption
+  const freqChip = F.length ? ` ${F.length} solved freq${F.length !== 1 ? "s" : ""}.` : "";
+
+  // C10: unscored hatch region (below f0, the unscored prefix)
+  const unscored = f0Finite ? [{ x0: xlim[0], x1: f0Finite, label: "not scored" }] : [];
+
+  // C7 helpers: yticks for fixed axes
+  function bwTicks(lo, hi, major) { const t = []; for (let v = lo; v <= hi + 1e-9; v += major) t.push(+v.toFixed(4)); return t; }
+
+  // ── Isobars (Boundary Lab style): best design H and V; start on request ───────────────────────
+  function drawIsobars() {
+    const mapsEl = document.getElementById("polar-maps");
+    if (!mapsEl) return;
+    mapsEl.innerHTML = "";
+    const withStart = showStart() && S.polar_h;
+    const plots = [["Best design · horizontal", B.polar_h, B], ["Best design · vertical", B.polar_v, B]];
+    if (withStart) plots.push(["Starting design · horizontal", S.polar_h, S], ["Starting design · vertical", S.polar_v, S]);
+    for (const [lbl, rows, D2] of plots) {
+      if (!rows) continue;
+      const sv = document.createElementNS(NS, "svg"); sv.setAttribute("class", "polar");
+      sv.setAttribute("role", "img"); sv.setAttribute("aria-label", lbl + " isobar plot");
+      mapsEl.appendChild(sv);
+      requestAnimationFrame(() => isobarMap(sv, rows, D2.angles || [], D2.freqs || F, { title: lbl, H: 300, xlim, f0: f0Finite }));
+    }
+  }
+
+  // ── Beamwidth H/V small multiples (C6) ──────────────────────────────────────────────────────
+  function drawBwCharts() {
     const th = t.coverage_h_deg, tv = t.coverage_v_deg;
-    const bwAll = [...(S.bw_h || []), ...(S.bw_v || []), ...(B.bw_h || []), ...(B.bw_v || []), th, tv].filter(v => v != null);
-    const bmax = Math.min(200, Math.ceil(Math.max(...bwAll) * 1.08 / 10) * 10) || 180;
-    const fill = [], hlines = [];
-    if (th) { fill.push({ y0: th * 0.9, y1: th * 1.1, color: css("--best"), opacity: 0.10 }); hlines.push({ y: th, color: css("--label") }); }
-    if (tv && tv !== th) { fill.push({ y0: tv * 0.9, y1: tv * 1.1, color: css("--best"), opacity: 0.07 }); hlines.push({ y: tv, color: css("--label"), dash: true }); }
-    chart(document.getElementById("c-bw"), {
-      xlog: true, xlim, ylim: [0, bmax], fill,
-      yticks: niceTicks(0, bmax, 5), xlabel: "Hz", ylabel: "deg", band, hlines,
-      vlines: f0Finite ? [{ x: f0Finite, color: css("--warn"), dash: true, label: "f0 " + fmtHz(f0Finite) }] : [],
-      series: series2("bw", 2.2),
-    });
+    function drawOneBw(svgId, key, tgtDeg, label) {
+      const svg = document.getElementById(svgId);
+      if (!svg) return;
+      const dataSets = [...(B[key] || []), ...(S[key] || [])].filter(v => v != null);
+      if (!dataSets.length && !tgtDeg) return;
+      const allVals = [...dataSets, tgtDeg].filter(v => v != null);
+      const spec = { ...AXES.beamwidth };
+      const range = fixedRange(spec, allVals);
+      const ticks = bwTicks(range.lo, range.hi, spec.major);
+      const yMinorBw = bwTicks(range.lo, range.hi, spec.minor || 15);
+      const seriesList = [
+        ...(showStart() && S[key] ? [{ pts: F.map((f, i) => [f, S[key][i] ?? null]), color: css("--seed"), w: 1.7 }] : []),
+        ...(B[key] ? [{ pts: F.map((f, i) => [f, B[key][i] ?? null]), color: css("--best"), w: 2.2 }] : []),
+      ];
+      const fill = tgtDeg ? [{ y0: tgtDeg * 0.9, y1: tgtDeg * 1.1, color: css("--best"), opacity: 0.10 }] : [];
+      const refLines = tgtDeg ? [{ y: tgtDeg, label: label + " " + tgtDeg + "°" }] : [];
+      chart(svg, {
+        xlog: true, xlim, ylim: [range.lo, range.hi], fill,
+        yticks: ticks, yMinor: yMinorBw, xlabel: "Hz", ylabel: "deg", band, refLines,
+        vlines: f0Finite ? [{ x: f0Finite, color: css("--warn"), dash: true, label: "f0 " + fmtHz(f0Finite) }] : [],
+        series: seriesList, markers: true, unscored,
+        ariaLabel: "Beamwidth −6 dB " + label,
+      });
+    }
+    drawOneBw("c-bwh", "bw_h", th, "target H");
+    drawOneBw("c-bwv", "bw_v", tv, "target V");
   }
 
-  // DI vs target
-  if (F.length && (S.di || B.di)) {
+  // ── DI vs target (C3: fixed 0..15 dB) ───────────────────────────────────────────────────────
+  function drawDiChart() {
+    const svg = document.getElementById("c-di");
+    if (!svg || !F.length || (!S.di && !B.di)) return;
     const dit = t.di_target_db ?? diFromCuts(t.coverage_h_deg || 90, t.coverage_v_deg || 90);
-    const dall = [...(S.di || []), ...(B.di || []), dit].filter(v => v != null);
-    const dlo = Math.floor(Math.min(...dall) - 1), dhi = Math.ceil(Math.max(...dall) + 1);
-    chart(document.getElementById("c-di"), {
-      xlog: true, xlim, ylim: [dlo, dhi],
-      yticks: niceTicks(dlo, dhi, 5), xlabel: "Hz", ylabel: "dB", band,
-      hlines: [{ y: dit, color: css("--label"), dash: true }],
+    const allDi = [...(S.di || []), ...(B.di || []), dit].filter(v => v != null);
+    const spec = { ...AXES.di };
+    const range = fixedRange(spec, allDi);
+    const ticks = bwTicks(range.lo, range.hi, spec.major);
+    chart(svg, {
+      xlog: true, xlim, ylim: [range.lo, range.hi],
+      yticks: ticks, xlabel: "Hz", ylabel: "dB", band,
+      refLines: dit != null ? [{ y: dit, label: "DI target" }] : [],
       vlines: f0Finite ? [{ x: f0Finite, color: css("--warn"), dash: true, label: "f0 " + fmtHz(f0Finite) }] : [],
       series: [
-        { pts: F.map((f, i) => [f, (S.di || [])[i] ?? null]), color: css("--seed"), w: 1.7 },
-        { pts: F.map((f, i) => [f, (B.di || [])[i] ?? null]), color: css("--best"), w: 2.2 },
+        ...(showStart() && S.di ? [{ pts: F.map((f, i) => [f, S.di[i] ?? null]), color: css("--seed"), w: 1.7 }] : []),
+        ...(B.di ? [{ pts: F.map((f, i) => [f, B.di[i] ?? null]), color: css("--best"), w: 2.2 }] : []),
       ],
+      markers: true, unscored, ariaLabel: "Directivity index vs target",
     });
   }
 
-  // On-axis (relative, mean removed)
-  if (F.length && (S.on_axis || B.on_axis)) {
-    const aall = [...(S.on_axis || []), ...(B.on_axis || [])].filter(v => v != null);
-    const alo = Math.floor(Math.min(...aall, -3) - 1), ahi = Math.ceil(Math.max(...aall, 3) + 1);
-    chart(document.getElementById("c-axis"), {
-      xlog: true, xlim, ylim: [alo, ahi],
-      yticks: niceTicks(alo, ahi, 5), xlabel: "Hz", ylabel: "dB", band,
-      hlines: [{ y: 0, color: css("--label") }],
+  // ── On-axis response (C2: fixed −15..+10 dB) ────────────────────────────────────────────────
+  function drawAxisChart() {
+    const svg = document.getElementById("c-axis");
+    if (!svg || !F.length || (!S.on_axis && !B.on_axis)) return;
+    const allAx = [...(S.on_axis || []), ...(B.on_axis || [])].filter(v => v != null);
+    const spec = { ...AXES.onAxis };
+    const range = fixedRange(spec, allAx);
+    const ticks = bwTicks(range.lo, range.hi, spec.major);
+    const yMinorAx = spec.minor ? bwTicks(range.lo, range.hi, spec.minor) : [];
+    chart(svg, {
+      xlog: true, xlim, ylim: [range.lo, range.hi],
+      yticks: ticks, yMinor: yMinorAx, xlabel: "Hz", ylabel: "dB", band,
+      refLines: [{ y: 0, label: "0 dB" }],
+      vlines: f0vline,
       series: [
-        { pts: F.map((f, i) => [f, (S.on_axis || [])[i] ?? null]), color: css("--seed"), w: 1.7 },
-        { pts: F.map((f, i) => [f, (B.on_axis || [])[i] ?? null]), color: css("--best"), w: 2.2 },
+        ...(showStart() && S.on_axis ? [{ pts: F.map((f, i) => [f, S.on_axis[i] ?? null]), color: css("--seed"), w: 1.7 }] : []),
+        ...(B.on_axis ? [{ pts: F.map((f, i) => [f, B.on_axis[i] ?? null]), color: css("--best"), w: 2.2 }] : []),
       ],
+      markers: true, unscored, ariaLabel: "On-axis response mean removed",
     });
   }
 
-  // Throat impedance, normalised to rho*c: resistance (solid) and reactance (dashed, engineering sign:
-  // + = mass-like). The solver works in exp(-i w t), so reactance X = -Im Z here.
-  if (F.length && (S.z_re || B.z_re)) {
-    const X = d => (d.z_im || []).map(v => v == null ? null : -v);
-    const zall = [...(S.z_re || []), ...(B.z_re || []), ...X(B), ...X(S)].filter(v => v != null);
-    const zlo = Math.min(0, Math.floor(Math.min(...zall) * 10) / 10), zhi = Math.max(1.2, Math.ceil(Math.max(...zall) * 10) / 10);
-    chart(document.getElementById("c-zre"), {
+  // ── Throat impedance (C14: allow y < 0 for negative reactance) ──────────────────────────────
+  function drawZreChart() {
+    const svg = document.getElementById("c-zre");
+    if (!svg || !F.length || (!S.z_re && !B.z_re)) return;
+    const Xreact = src => (src.z_im || []).map(v => v == null ? null : -v);
+    const zall = [...(S.z_re || []), ...(B.z_re || []), ...Xreact(B), ...Xreact(S)].filter(v => v != null);
+    const spec = { ...AXES.zrho };
+    const range = fixedRange(spec, zall);
+    // allow below 0 when reactance dips negative (C14 fix)
+    const zlo = Math.min(range.lo, Math.min(0, Math.floor(Math.min(...Xreact(B).filter(v => v != null), 0) * 10) / 10));
+    const zhi = range.hi;
+    const ticks = bwTicks(zlo, zhi, spec.major);
+    chart(svg, {
       xlog: true, xlim, ylim: [zlo, zhi],
-      yticks: niceTicks(zlo, zhi, 5), xlabel: "Hz", ylabel: "×ρc", band,
-      hlines: [{ y: 1.0, color: css("--label"), dash: true }, { y: 0.7, color: css("--warn"), dash: true }, { y: 0, color: css("--label") }],
+      yticks: ticks, xlabel: "Hz", ylabel: "×ρc", band,
+      refLines: [{ y: 1.0, label: "1 ρc" }, { y: 0.7, label: "0.7 ρc" }],
+      hlines: [{ y: 0, color: css("--label") }],
+      vlines: f0vline,
       series: [
-        { pts: F.map((f, i) => [f, (S.z_re || [])[i] ?? null]), color: css("--seed"), w: 1.7 },
-        { pts: F.map((f, i) => [f, X(S)[i] ?? null]), color: css("--seed"), w: 1.7, dash: true },
-        { pts: F.map((f, i) => [f, (B.z_re || [])[i] ?? null]), color: css("--best"), w: 2.2 },
-        { pts: F.map((f, i) => [f, X(B)[i] ?? null]), color: css("--best"), w: 1.8, dash: true },
+        ...(showStart() && S.z_re ? [
+          { pts: F.map((f, i) => [f, S.z_re[i] ?? null]), color: css("--seed"), w: 1.7 },
+          { pts: F.map((f, i) => [f, Xreact(S)[i] ?? null]), color: css("--seed"), w: 1.4, dash: true },
+        ] : []),
+        ...(B.z_re ? [
+          { pts: F.map((f, i) => [f, B.z_re[i] ?? null]), color: css("--best"), w: 2.2 },
+          { pts: F.map((f, i) => [f, Xreact(B)[i] ?? null]), color: css("--best"), w: 1.8, dash: true },
+        ] : []),
       ],
+      markers: true, unscored, ariaLabel: "Throat impedance normalised to rho c",
     });
   }
+
+  // ── Off-axis response family (C13) ──────────────────────────────────────────────────────────
+  // One curve per angle 0°/15°/30°/45°/60°/75°/90°, normalised to on-axis (column at 0°).
+  function drawOffAxisChart() {
+    const svg = document.getElementById("c-offaxis");
+    const legDiv = document.getElementById("c-offaxis-legend");
+    if (!svg || !B.polar_h || !B.angles || !F.length) {
+      if (svg) svg.innerHTML = "";
+      if (legDiv) legDiv.innerHTML = "";
+      return;
+    }
+    const angles = B.angles;
+    const rows = B.polar_h;         // [nf][na]
+    const targetAngles = [0, 15, 30, 45, 60, 75, 90];
+    // sequential colour ramp light → dark by angle
+    const rampColors = ["#aed6e8", "#78b8d8", "#4096c0", "#1a7aa8", "#0a5e88", "#064a6e", "#032e4c"];
+    // find nearest angle index
+    const nearestIdx = (a) => {
+      let best = 0, bestD = Infinity;
+      for (let i = 0; i < angles.length; i++) {
+        const d = Math.abs(angles[i] - a);
+        if (d < bestD) { best = i; bestD = d; }
+      }
+      return best;
+    };
+    // on-axis column (angle = 0)
+    const axIdx = nearestIdx(0);
+    const seriesList = [];
+    const legendItems = [];
+    for (let ai = 0; ai < targetAngles.length; ai++) {
+      const tgtA = targetAngles[ai];
+      const ci = nearestIdx(tgtA);
+      const realA = angles[ci];
+      // normalise each row to on-axis value at that frequency
+      const pts = F.map((f, fi) => {
+        const rowI = fi < rows.length ? fi : null;
+        if (rowI === null || !rows[rowI]) return [f, null];
+        const v = rows[rowI][ci];
+        const ref = rows[rowI][axIdx];
+        if (v == null || ref == null) return [f, null];
+        return [f, v - ref];
+      });
+      seriesList.push({ pts, color: rampColors[ai], w: 1.5 + (ai === 0 ? 0.5 : 0) });
+      legendItems.push(`<span><i style="color:${rampColors[ai]};border-top-color:${rampColors[ai]}"></i>${realA}°</span>`);
+    }
+    if (legDiv) legDiv.innerHTML = legendItems.join("");
+    const allV = seriesList.flatMap(s => s.pts.map(p => p[1])).filter(v => v != null && isFinite(v));
+    const spec = { lo: -30, hi: 0, major: 6 };
+    const range = fixedRange(spec, allV);
+    const ticks = bwTicks(range.lo, range.hi, spec.major);
+    chart(svg, {
+      xlog: true, xlim, ylim: [range.lo, range.hi],
+      yticks: ticks, xlabel: "Hz", ylabel: "dB", band,
+      refLines: [{ y: 0, label: "0 dB (on-axis)" }],
+      vlines: f0vline, series: seriesList, markers: true, unscored,
+      ariaLabel: "Off-axis responses horizontal normalised to on-axis",
+    });
+  }
+
+  // Single redraw function for the shared show-start toggle
+  function redrawCharts() {
+    drawIsobars();
+    drawBwCharts();
+    drawDiChart();
+    drawAxisChart();
+    drawZreChart();
+    drawOffAxisChart();
+  }
+
+  // Initial draw
+  redrawCharts();
 
   // Wall cross-section (true aspect): best filled, start as an outline
   wallSection(document.getElementById("c-prof"), [
@@ -2747,73 +3245,211 @@ async function viewRunDetail(id) {
     }
   }
 
-  // Directivity isobars (Boundary Lab style): best design H and V; the start design on request
-  const mapsEl = document.getElementById("polar-maps");
-  function drawIsobars() {
-    mapsEl.innerHTML = "";
-    const withStart = document.getElementById("iso-start")?.checked && S.polar_h;
-    const plots = [["Best design · horizontal", B.polar_h, B], ["Best design · vertical", B.polar_v, B]];
-    if (withStart) plots.push(["Starting design · horizontal", S.polar_h, S], ["Starting design · vertical", S.polar_v, S]);
-    for (const [lbl, rows, D2] of plots) {
-      if (!rows) continue;
-      const sv = document.createElementNS(NS, "svg"); sv.setAttribute("class", "polar");
-      sv.setAttribute("role", "img"); sv.setAttribute("aria-label", lbl + " isobar plot");
-      mapsEl.appendChild(sv);
-      // drawn after layout, so each plot is measured at its real width
-      requestAnimationFrame(() => isobarMap(sv, rows, D2.angles || [], D2.freqs || F, { title: lbl, H: 300, xlim, f0: f0Finite }));
+  // ── Convergence (H1-H4) ─────────────────────────────────────────────────────────────────────
+  if (d.J) {
+    const rawJ = d.J || [];
+    const nTotal = sum.n || rawJ.length;
+    const svg = document.getElementById("c-conv");
+    const FAIL_THRESH = 999.0;
+    // H1: separate out failures. data.py writes a null J for a failed row (999 only on older
+    // payloads), so counting just >= 999 hid every failure from the footer while the KPI strip
+    // (n - n_ok) counted them. Count the FULL history, resumed segments included.
+    const { ok: okPts, failed: failures } = convergenceCounts(rawJ, FAIL_THRESH);
+    // H1: determine y clip range so out-of-range dots are shown as ▲ markers
+    const okVals = okPts.map(p => p[1]);
+    const rawYmax = Math.max((sum.seed_j || 0) * 1.6, (sum.best_j || 0) * 2, 1);
+    const nAbove = (clipY => okVals.filter(v => v > clipY).length)(rawYmax);
+    const ymax = rawYmax;
+    // H3: per-generation band from cma_dynamics
+    const dyn = d.cma_dynamics || {};
+    const fillBand = [];
+    const medianLine = [];
+    const hatchGens = []; // generations where < 50% succeeded
+    if (dyn.available && dyn.gens && Array.isArray(dyn.gens)) {
+      const lam = Math.round(nTotal / Math.max(dyn.gens.length, 1));
+      dyn.gens.forEach((g, gi) => {
+        const e0 = gi * lam, e1 = e0 + lam;
+        const genPts = okPts.filter(p => p[0] >= e0 && p[0] < e1).map(p => p[1]);
+        const genFails = failures.filter(p => p[0] >= e0 && p[0] < e1).length;
+        const genTotal = genPts.length + genFails;
+        if (genTotal === 0) return;
+        const sorted = genPts.slice().sort((a, b) => a - b);
+        const q = (pct) => { const i = pct * (sorted.length - 1); const lo = Math.floor(i), hi = Math.ceil(i); return sorted[lo] + (sorted[hi] - sorted[lo]) * (i - lo); };
+        if (sorted.length >= 2) {
+          const p25 = q(0.25), p75 = q(0.75), med = q(0.5);
+          fillBand.push({ x0: e0, x1: e1, y0: Math.min(p25, ymax), y1: Math.min(p75, ymax) });
+          medianLine.push([e0 + lam / 2, Math.min(med, ymax)]);
+          if (genFails / genTotal > 0.5) hatchGens.push({ x0: e0, x1: e1 });
+        }
+      });
+    }
+    // H4: resume lines from run.json history (created_utc gaps → eval index boundaries)
+    const resumeLines = [];
+    if (d.history && Array.isArray(d.history) && d.history.length > 1) {
+      let evalOffset = 0;
+      for (let hi2 = 0; hi2 < d.history.length - 1; hi2++) {
+        const seg = d.history[hi2];
+        evalOffset += seg.n || 0;
+        if (evalOffset > 0 && evalOffset < nTotal)
+          resumeLines.push({ x: evalOffset, label: "resumed" });
+      }
+    }
+    // best-so-far line from ok pts only
+    let rb = Infinity;
+    const runBest = okPts.map(p => [p[0], (rb = Math.min(rb, p[1]))]);
+    if (svg) {
+      // compute IQR band fill & median as extra series
+      const bandSeries = fillBand.length ? [{ pts: medianLine, color: css("--accent"), w: 1.5 }] : [];
+      const unkeyedHatch = hatchGens.map(g => ({ ...g, label: "mostly failed" }));
+      const allVlines = [
+        ...(sum.seed_j != null && isFinite(sum.seed_j) ? [] : []),
+        ...resumeLines.map(r => ({ x: r.x, color: css("--muted"), dash: true, label: r.label })),
+      ];
+      // draw convergence: dots for ok evals, running best line, IQR band fill, median
+      const svgEl = svg;
+      svgEl.innerHTML = "";
+      const cW = svgEl.clientWidth || 500, cH = 220;
+      svgEl.setAttribute("viewBox", `0 0 ${cW} ${cH}`);
+      const PAD = { l: 46, r: 20, t: 14, b: 48 };
+      const xScale = v => PAD.l + (v / nTotal) * (cW - PAD.l - PAD.r);
+      const yScale = v => PAD.t + (1 - Math.min(v, ymax) / ymax) * (cH - PAD.t - PAD.b);
+      // H3: IQR band behind dots
+      fillBand.forEach(fb => {
+        el("rect", { x: xScale(fb.x0), y: yScale(fb.y1), width: xScale(fb.x1) - xScale(fb.x0),
+          height: yScale(fb.y0) - yScale(fb.y1), fill: css("--band"), opacity: "0.5" }, svgEl);
+      });
+      // H3: mostly-failed hatch
+      unkeyedHatch.forEach(hg => {
+        el("rect", { x: xScale(hg.x0), y: PAD.t, width: xScale(hg.x1) - xScale(hg.x0),
+          height: cH - PAD.t - PAD.b, fill: "url(#conv-hatch)", opacity: "0.3" }, svgEl);
+      });
+      // Define hatch pattern once
+      const defs = el("defs", {}, svgEl);
+      const pat = el("pattern", { id: "conv-hatch", patternUnits: "userSpaceOnUse", width: "6", height: "6",
+        patternTransform: "rotate(45)" }, defs);
+      el("line", { x1: "0", y1: "0", x2: "0", y2: "6", stroke: css("--warn"), "stroke-width": "1" }, pat);
+      // H4: resume vertical lines
+      resumeLines.forEach(r => {
+        const rx = xScale(r.x);
+        const ln = el("line", { x1: rx, y1: PAD.t, x2: rx, y2: cH - PAD.b, stroke: css("--muted"),
+          "stroke-dasharray": "3 3", "stroke-width": "1" }, svgEl);
+        const lt = el("text", { x: rx + 3, y: PAD.t + 10, fill: css("--label"), "font-size": "9" }, svgEl);
+        lt.textContent = "resumed";
+      });
+      // ok eval dots
+      const dotsG = el("g", { opacity: "0.6" }, svgEl);
+      const MAXDOTS = 2000;
+      const step = Math.max(1, Math.floor(okPts.length / MAXDOTS));
+      for (let oi = 0; oi < okPts.length; oi += step) {
+        const [ei, jv] = okPts[oi];
+        if (jv <= ymax) {
+          el("circle", { cx: xScale(ei), cy: yScale(jv), r: "1.5", fill: css("--muted") }, dotsG);
+        }
+      }
+      // H1: out-of-range ▲ markers in the bottom strip (never at the top above the line)
+      let aboveCount = 0;
+      const aboveY = cH - PAD.b + 26;
+      for (const [ei, jv] of okPts) { if (jv > ymax) { aboveCount++; const ax = xScale(ei); el("polygon", { points: `${ax},${aboveY - 7} ${ax - 4},${aboveY} ${ax + 4},${aboveY}`, fill: css("--warn") }, svgEl); } }
+      // H2: failure strip (grey × marks below axis, below the out-of-range row)
+      if (failures.length) {
+        const stripY = cH - PAD.b + 38;
+        const fstep = Math.max(1, Math.floor(failures.length / 500));
+        for (let fi = 0; fi < failures.length; fi += fstep) {
+          const [ei] = failures[fi];
+          const fx = xScale(ei);
+          el("text", { x: fx, y: stripY, "text-anchor": "middle", fill: css("--muted"), "font-size": "7" }, svgEl).textContent = "×";
+        }
+      }
+      // IQR median line
+      if (medianLine.length > 1) {
+        const pts2 = medianLine.map(([xi, yi]) => `${xScale(xi)},${yScale(yi)}`).join(" ");
+        el("polyline", { points: pts2, stroke: css("--accent"), fill: "none", "stroke-width": "1.5", "stroke-linejoin": "round" }, svgEl);
+      }
+      // best-so-far line
+      if (runBest.length > 1) {
+        const rpts = runBest.map(([xi, yi]) => `${xScale(xi)},${yScale(yi)}`).join(" ");
+        el("polyline", { points: rpts, stroke: css("--best"), fill: "none", "stroke-width": "2.2", "stroke-linejoin": "round" }, svgEl);
+      }
+      // seed_j dashed reference
+      if (sum.seed_j != null && isFinite(sum.seed_j) && sum.seed_j < ymax) {
+        const sy = yScale(sum.seed_j);
+        el("line", { x1: PAD.l, y1: sy, x2: cW - PAD.r, y2: sy, stroke: css("--seed"), "stroke-dasharray": "4 3", "stroke-width": "1.2" }, svgEl);
+      }
+      // y axis ticks
+      niceTicks(0, ymax, 5).forEach(tv => {
+        const ty = yScale(tv); if (ty < PAD.t || ty > cH - PAD.b) return;
+        el("line", { x1: PAD.l - 3, y1: ty, x2: PAD.l, y2: ty, stroke: css("--rule") }, svgEl);
+        const lbl = el("text", { x: PAD.l - 5, y: ty + 4, "text-anchor": "end", fill: css("--label"), "font-size": "10" }, svgEl);
+        lbl.textContent = tv.toFixed(tv < 10 ? 2 : 1);
+      });
+      // x axis ticks
+      niceTicks(0, nTotal, 5).forEach(tv => {
+        const tx = xScale(tv); if (tx < PAD.l || tx > cW - PAD.r) return;
+        el("line", { x1: tx, y1: cH - PAD.b, x2: tx, y2: cH - PAD.b + 3, stroke: css("--rule") }, svgEl);
+        const lbl = el("text", { x: tx, y: cH - PAD.b + 13, "text-anchor": "middle", fill: css("--label"), "font-size": "10" }, svgEl);
+        lbl.textContent = String(Math.round(tv));
+      });
+      el("line", { x1: PAD.l, y1: PAD.t, x2: PAD.l, y2: cH - PAD.b, stroke: css("--rule"), "stroke-width": "0.8" }, svgEl);
+      el("line", { x1: PAD.l, y1: cH - PAD.b, x2: cW - PAD.r, y2: cH - PAD.b, stroke: css("--rule"), "stroke-width": "0.8" }, svgEl);
+      const cap2 = document.getElementById("conv-cap2");
+      if (cap2) {
+        const pct = failures.length ? (100 * failures.length / Math.max(1, nTotal)) : 0;
+        const pctText = failures.length && pct < 0.1 ? "<0.1" : pct.toFixed(1);
+        const aboveNote = aboveCount ? ` · ${aboveCount} above axis range` : "";
+        cap2.textContent = `${okPts.length} evals ok, ${failures.length} failed (${pctText}%)${aboveNote}.`;
+      }
     }
   }
-  drawIsobars();
-  document.getElementById("iso-start").onchange = drawIsobars;
 
-  // Convergence
-  if (d.J && F.length) {
-    const Js = (d.J || []).map((j, i) => [i, j]).filter(p => p[1] != null);
-    let rb = Infinity; const runBest = Js.map(p => [p[0], (rb = Math.min(rb, p[1]))]);
-    const ymax = Math.max((sum.seed_j || 0) * 1.6, (sum.best_j || 0) * 2, 1);
-    const svg = document.getElementById("c-conv");
-    chart(svg, {
-      xlim: [0, sum.n || Js.length], ylim: [0, ymax],
-      xticks: niceTicks(0, sum.n || Js.length, 5), yticks: niceTicks(0, ymax, 5),
-      xlabel: "evaluation", ylabel: "score",
-      series: [
-        { pts: Js, color: css("--muted"), dots: true, opacity: 0.8 },
-        { pts: runBest, color: css("--best"), w: 2.2 },
-      ],
-      hlines: [{ y: sum.seed_j, color: css("--seed"), dash: true }],
-    });
-  }
-
-  // Terms bar chart
+  // ── H9: Score breakdown with weights ─────────────────────────────────────────────────────────
   if (d.terms_seed && d.terms_best) {
     const svgT = document.getElementById("c-terms");
-    svgT.innerHTML = "";
-    const W = 460, rowH = 32, H = TERM_ORDER.length * rowH + 30;
-    svgT.setAttribute("viewBox", `0 0 ${W} ${H}`);
-    const vals = TERM_ORDER.map(k => [w[k] * (d.terms_seed[k] || 0), w[k] * (d.terms_best[k] || 0)]);
-    const vmax = Math.max(...vals.flat(), 1e-9);
-    const L = 90, R = 54, X = v => L + v / vmax * (W - L - R);
-    TERM_ORDER.forEach((k, i) => {
-      const y = 6 + i * rowH;
-      const gEntry = GLOSSARY[k];
-      const label = gEntry ? gEntry.label : k;
-      const lab = el("text", { x: L - 8, y: y + 15, "text-anchor": "end" }, svgT);
-      lab.textContent = label + (w[k] ? "" : " (w=0)");
-      [[vals[i][0], "--seed", 0], [vals[i][1], "--best", 12]].forEach(([v, c, dy]) => {
-        el("rect", { x: L, y: y + dy, width: Math.max(0.5, X(v) - L), height: 10, rx: 2, fill: css(c) }, svgT);
-        const tv = el("text", { x: X(v) + 4, y: y + dy + 9 }, svgT); tv.textContent = v.toFixed(3);
+    if (svgT) {
+      svgT.innerHTML = "";
+      // Sort TERM_ORDER by best contribution descending (H9)
+      const sortedTerms = TERM_ORDER.slice().sort((a, b) => {
+        const vb_b = w[b] * (d.terms_best[b] || 0);
+        const vb_a = w[a] * (d.terms_best[a] || 0);
+        return vb_b - vb_a;
       });
-    });
-    const lg = el("text", { x: L, y: H - 4 }, svgT); lg.textContent = "upper = start · lower = best · weighted";
+      const W = 480, rowH = 32, H = sortedTerms.length * rowH + 30;
+      svgT.setAttribute("viewBox", `0 0 ${W} ${H}`);
+      const vals = sortedTerms.map(k => [w[k] * (d.terms_seed[k] || 0), w[k] * (d.terms_best[k] || 0)]);
+      const vmax = Math.max(...vals.flat(), 1e-9);
+      const L = 108, R = 54, X = v => L + v / vmax * (W - L - R);
+      sortedTerms.forEach((k, i) => {
+        const y = 6 + i * rowH;
+        const gEntry = GLOSSARY[k];
+        const label = gEntry ? gEntry.label : k;
+        const wLabel = w[k] ? `×${w[k]}` : "(w=0)";
+        const lab = el("text", { x: L - 8, y: y + 11, "text-anchor": "end", "font-size": "10", fill: css("--label") }, svgT);
+        lab.textContent = label;
+        const wlab = el("text", { x: L - 8, y: y + 22, "text-anchor": "end", "font-size": "9", fill: css("--muted") }, svgT);
+        wlab.textContent = wLabel;
+        [[vals[i][0], "--seed", 0], [vals[i][1], "--best", 12]].forEach(([v, c, dy]) => {
+          el("rect", { x: L, y: y + dy, width: Math.max(0.5, X(v) - L), height: 10, rx: 2, fill: css(c) }, svgT);
+          const tv = el("text", { x: X(v) + 4, y: y + dy + 9, "font-size": "9" }, svgT); tv.textContent = v.toFixed(3);
+        });
+      });
+      const lg = el("text", { x: L, y: H - 4, "font-size": "9", fill: css("--muted") }, svgT);
+      lg.textContent = "upper = start · lower = best · sorted by best contribution";
+    }
   }
 
-  // Sensitivity table
+  // ── Sensitivity table (H6: sparkline + bounds bar) ────────────────────────────────────────────
   const sensT = document.getElementById("sens-table");
   if (d.sens && d.sens.length) {
+    // Build best-so-far sparkline data from d.J if available (H6)
+    const jArr = d.J || [];
+    const FAIL_THRESH2 = 999.0;
+    // sens sparklines need per-param best-so-far: use sens order × evals from run.json sens_history if available
+    // If sens_history not present, omit sparkline (but still show bounds bar)
+    const hasSensHist = d.sens_history && Array.isArray(d.sens_history) && d.sens_history.length;
     let s = `<thead><tr>
       <th>Parameter</th><th class="r">Low limit</th><th class="r">High limit</th>
       <th class="r">Best value</th><th class="r">${tip("rho", "Influence ρ")}</th><th></th>
-      <th class="r">${tip("pinned", "Top-6 at low")}</th><th class="r">at high</th></tr></thead><tbody>`;
+      <th class="r">${tip("pinned", "Top-6 at low")}</th><th class="r">at high</th>
+      <th>${tip("knob", "Best over evals")}</th></tr></thead><tbody>`;
     for (const p of d.sens) {
       const bar = `<svg width="90" height="10" viewBox="0 0 90 10" aria-hidden="true">
         <rect x="45" y="0" width="0.8" height="10" fill="${css("--muted")}"/>
@@ -2821,17 +3457,130 @@ async function viewRunDetail(id) {
           fill="${css(p.rho > 0 ? "--seed" : "--best")}"/></svg>`;
       const flag = v => v >= 4 ? `<span class="pill bad">${v}/6</span>` : v >= 2 ? `<span class="pill warn">${v}/6</span>` : `${v}/6`;
       const atHi = p.at_hi != null ? p.at_hi : 0;
-      // P9: the raw key stays the visible text (it is the vocabulary the rest of the page uses);
-      // hover now carries the catalog's label [unit], meaning and search range for run <sum.name>.
+      // H6: bounds bar with best marker and top-6 spread
+      const lo = p.lo ?? 0, hi = p.hi ?? 1, bv = p.best ?? lo;
+      const rng = hi - lo || 1;
+      const bPct = Math.max(0, Math.min(100, ((bv - lo) / rng) * 100));
+      const sp6lo = p.top6_lo != null ? Math.max(0, ((p.top6_lo - lo) / rng) * 100) : null;
+      const sp6hi = p.top6_hi != null ? Math.min(100, ((p.top6_hi - lo) / rng) * 100) : null;
+      const boundsBar = `<svg width="80" height="14" viewBox="0 0 80 14" aria-label="bounds bar for ${esc(p.key)}" role="img">
+        <rect x="2" y="6" width="76" height="2" rx="1" fill="${css("--muted")}"/>
+        ${sp6lo != null && sp6hi != null ? `<rect x="${2 + sp6lo * 0.76}" y="4" width="${(sp6hi - sp6lo) * 0.76}" height="6" rx="1" fill="${css("--band")}" opacity="0.6"/>` : ""}
+        <circle cx="${2 + bPct * 0.76}" cy="7" r="4" fill="${css("--best")}"/>
+      </svg>`;
       s += `<tr><td class="mono">${paramTipHtml(sum.name, p.key, p.key)}</td>
         <td class="r">${fmt(p.lo, 3)}</td><td class="r">${fmt(p.hi, 3)}</td>
         <td class="r">${fmt(p.best, 3)}</td>
         <td class="r">${p.rho != null ? p.rho.toFixed(2) : "–"}</td>
-        <td>${bar}</td><td class="r">${flag(p.at_lo || 0)}</td><td class="r">${flag(atHi)}</td></tr>`;
+        <td>${bar}</td><td class="r">${flag(p.at_lo || 0)}</td><td class="r">${flag(atHi)}</td>
+        <td>${boundsBar}</td></tr>`;
     }
     sensT.innerHTML = s + "</tbody>";
   } else {
     sensT.innerHTML = "<tr><td class='muted'>No sensitivity data.</td></tr>";
+  }
+
+  // ── H5: Search dynamics card ──────────────────────────────────────────────────────────────────
+  const dynBlock = document.getElementById("cma-dynamics-block");
+  const dyn2 = d.cma_dynamics || {};
+  if (dynBlock) {
+    if (!dyn2.available) {
+      dynBlock.style.display = "";
+      dynBlock.innerHTML = `<p class="muted" style="padding:12px 0">Search dynamics not available — no <code>cma/</code> diagnostic files in this run.</p>`;
+    } else {
+      dynBlock.style.display = "";
+      const gens = dyn2.gens || [];
+      const nG = gens.length;
+      if (nG > 1) {
+        const evalIdxs = gens.map((g, i) => i * Math.round((sum.n || nG * 10) / nG));
+        // (a) Step size σ (log y)
+        const sigmaVals = gens.map(g => g.sigma != null && g.sigma > 0 ? g.sigma : null);
+        const svgSig = document.getElementById("c-dyn-sigma");
+        if (svgSig && sigmaVals.some(v => v != null)) {
+          const spts = evalIdxs.map((e, i) => [e, sigmaVals[i]]);
+          const finSig = sigmaVals.filter(v => v != null);
+          const sigLo = Math.pow(10, Math.floor(Math.log10(Math.min(...finSig))));
+          const sigHi = Math.pow(10, Math.ceil(Math.log10(Math.max(...finSig))));
+          chart(svgSig, { xlim: [0, sum.n || evalIdxs[nG - 1]], ylim: [sigLo, sigHi], ylog: true,
+            yticks: logTicks(sigLo, sigHi), xlabel: "eval", ylabel: "σ",
+            series: [{ pts: spts, color: css("--best"), w: 2 }], ariaLabel: "CMA step size sigma over evaluations" });
+        }
+        // (b) Axis ratio (log y)
+        const axRatioVals = gens.map(g => g.axis_ratio != null && g.axis_ratio > 0 ? g.axis_ratio : null);
+        const svgAx = document.getElementById("c-dyn-axratio");
+        if (svgAx && axRatioVals.some(v => v != null)) {
+          const apts = evalIdxs.map((e, i) => [e, axRatioVals[i]]);
+          const finAx = axRatioVals.filter(v => v != null);
+          const axLo = Math.pow(10, Math.floor(Math.log10(Math.min(...finAx))));
+          const axHi = Math.pow(10, Math.ceil(Math.log10(Math.max(...finAx))));
+          chart(svgAx, { xlim: [0, sum.n || evalIdxs[nG - 1]], ylim: [axLo, axHi], ylog: true,
+            yticks: logTicks(axLo, axHi), xlabel: "eval", ylabel: "axis ratio",
+            series: [{ pts: apts, color: css("--accent"), w: 2 }], ariaLabel: "CMA axis ratio over evaluations" });
+        }
+        // (c) Per-param σ as horizontal bars (stddev normalised to bound width), shared σ axis.
+        // The old heat strip encoded value as opacity, so a parameter with a small normalised σ
+        // (e.g. a wide bound) rendered effectively blank even though the data was present.
+        const svgStd = document.getElementById("c-dyn-stddev");
+        const paramNames = dyn2.param_names || [];
+        const stddevByGen = dyn2.stddev || [];   // [nG][nP]
+        if (svgStd && paramNames.length && stddevByGen.length) {
+          svgStd.innerHTML = "";
+          const barRows = stddevBars(stddevByGen, paramNames, d.sens || []);
+          const withData = barRows.filter(r => r.final != null);
+          const noData = barRows.filter(r => r.final == null);
+          const allVals = withData.flatMap(r => [r.lo, r.hi, r.final]).filter(v => v != null);
+          const svgW = Math.max(360, Math.round(svgStd.clientWidth || (svgStd.parentElement && svgStd.parentElement.clientWidth) || 500));
+          // Reserve a left margin proportional to the longest label; ellipsise anything longer.
+          const labelW = Math.min(180, Math.max(56, Math.max(...paramNames.map(pn => String(pn).length)) * 6 + 12));
+          const PAD2 = { l: labelW, r: 62, t: 12, b: 34 };
+          const rowH = 16;
+          const nRows = withData.length + noData.length;
+          const plotH = Math.max(40, nRows * rowH);
+          const svgH = plotH + PAD2.t + PAD2.b;
+          svgStd.setAttribute("viewBox", `0 0 ${svgW} ${svgH}`);
+          const xMax = Math.max(...allVals, 1e-6);
+          const plotW = Math.max(20, svgW - PAD2.l - PAD2.r);
+          const X = v => PAD2.l + (v / xMax) * plotW;
+          const axisY = PAD2.t + plotH;
+          const addLabel = (row, y) => {
+            const lt = el("text", { x: PAD2.l - 6, y: y + rowH / 2 + 3, "text-anchor": "end", "font-size": "10", fill: css("--label") }, svgStd);
+            lt.textContent = fitSvgLabel(row.key, PAD2.l - 10);
+            el("title", {}, lt).textContent = String(row.key);
+          };
+          withData.forEach((row, i) => {
+            const y = PAD2.t + i * rowH;
+            el("line", { x1: PAD2.l, y1: y + rowH / 2, x2: svgW - PAD2.r, y2: y + rowH / 2, stroke: css("--rule"), "stroke-width": "0.5", opacity: "0.45" }, svgStd);
+            // historical min–max band behind the final-σ bar
+            if (row.lo != null && row.hi != null && row.hi > row.lo) {
+              el("rect", { x: X(row.lo), y: y + rowH / 2 - 4, width: Math.max(0.6, X(row.hi) - X(row.lo)), height: 8, rx: 2, fill: css("--band"), opacity: "0.6" }, svgStd);
+            }
+            const barW = Math.max(2, X(row.final) - PAD2.l);
+            const rect = el("rect", { x: PAD2.l, y: y + rowH / 2 - 4, width: barW, height: 8, rx: 2, fill: css("--best"), opacity: "0.85" }, svgStd);
+            el("title", {}, rect).textContent = `${row.key}: final σ/bound = ${row.final.toPrecision(3)} (range ${row.lo.toPrecision(3)}–${row.hi.toPrecision(3)})`;
+            const vt = el("text", { x: Math.min(svgW - PAD2.r + 4, X(row.final) + 4), y: y + rowH / 2 + 3, "font-size": "9", fill: css("--label") }, svgStd);
+            vt.textContent = row.final.toPrecision(2);
+            addLabel(row, y);
+          });
+          noData.forEach((row, i) => {
+            const y = PAD2.t + (withData.length + i) * rowH;
+            addLabel(row, y);
+            const nt = el("text", { x: PAD2.l + 6, y: y + rowH / 2 + 3, "font-size": "9", fill: css("--muted") }, svgStd);
+            nt.textContent = "no data";
+          });
+          // shared x axis in σ / bound-width units (same scale for every row)
+          el("line", { x1: PAD2.l, y1: axisY, x2: svgW - PAD2.r, y2: axisY, stroke: css("--rule"), "stroke-width": "0.8" }, svgStd);
+          niceTicks(0, xMax, 4).forEach(tv => {
+            const tx = X(tv);
+            if (tx < PAD2.l - 0.5 || tx > svgW - PAD2.r + 0.5) return;
+            el("line", { x1: tx, y1: axisY, x2: tx, y2: axisY + 3, stroke: css("--rule") }, svgStd);
+            const lbl = el("text", { x: tx, y: axisY + 13, "text-anchor": "middle", fill: css("--label"), "font-size": "9" }, svgStd);
+            lbl.textContent = tv === 0 ? "0" : tv.toPrecision(2);
+          });
+          const xl = el("text", { x: svgW - PAD2.r, y: axisY + 26, "text-anchor": "end", fill: css("--muted"), "font-size": "9" }, svgStd);
+          xl.textContent = "σ / bound width";
+        }
+      }
+    }
   }
 
   // CMA covariance (final ES; from run.json cma_covariance)
@@ -3127,15 +3876,18 @@ async function viewCompare() {
   const preA = qaMatch ? qaMatch[1] : "";
   const preB = qbMatch ? qbMatch[1] : "";
 
-  const opts = allRuns.map(r =>
-    `<option value="${esc(r.id)}">${esc(r.name)} — ${esc(r.id.slice(0, 20))}… (${esc(jVersionLabel(r))}=${fmt(r.best_j)})</option>`
-  ).join("");
+  const opts = compareOptionsHtml(allRuns, "", "");
 
   ROOT.innerHTML = `
     <div class="stack" style="gap:24px">
       <div>
         <div class="eyebrow">Compare two runs</div>
         <h2>Compare</h2>
+        <p class="muted" style="font-size:0.85rem;max-width:70ch">Puts two runs' best designs side by side. Scores can only be ranked against each other when both runs use the same brief and objective version; otherwise the curves are still shown, without a verdict.</p>
+      </div>
+      <div class="filter-bar">
+        <input id="cmp-filter" type="search" placeholder="Type to narrow both lists: name, family, brief, run id…" aria-label="filter the run lists">
+        <label style="display:flex;gap:6px;align-items:center;font-size:0.85rem"><input type="checkbox" id="cmp-same-brief" checked> Run B: same brief as Run A</label>
       </div>
       <div class="compare-pickers">
         <div class="form-group">
@@ -3157,6 +3909,20 @@ async function viewCompare() {
 
   if (preA) document.getElementById("cmp-a").value = preA;
   if (preB) document.getElementById("cmp-b").value = preB;
+  // Narrowing keeps the current selections (an option list without the selected run re-adds it).
+  const refill = () => {
+    const q = document.getElementById("cmp-filter").value;
+    const selA = document.getElementById("cmp-a"), selB = document.getElementById("cmp-b");
+    const a = selA.value, b = selB.value;
+    const runA = allRuns.find(r => r.id === a);
+    const briefB = document.getElementById("cmp-same-brief").checked && runA ? (runA.brief || "") : "";
+    selA.innerHTML = `<option value="">— select —</option>` + compareOptionsHtml(allRuns, q, "", a);
+    selB.innerHTML = `<option value="">— select —</option>` + compareOptionsHtml(allRuns, q, briefB, b);
+    selA.value = a; selB.value = b;
+  };
+  document.getElementById("cmp-filter").addEventListener("input", refill);
+  document.getElementById("cmp-same-brief").addEventListener("change", refill);
+  document.getElementById("cmp-a").addEventListener("change", refill);
 
   async function doCompare() {
     const a = document.getElementById("cmp-a").value;
@@ -3257,25 +4023,29 @@ async function viewCompare() {
 
     if (!F.length) return;
 
-    function cmpChart(svgId, keyA, keyB, ylabel) {
+    function cmpChart(svgId, keyA, keyB, ylabel, axisSpec) {
       const svg = document.getElementById(svgId);
       if (!svg) return;
       const allV = [...(dA[keyA] || []), ...(dB[keyB] || [])].filter(v => v != null);
       if (!allV.length) return;
-      const lo = Math.floor(Math.min(...allV) - 1), hi = Math.ceil(Math.max(...allV) + 1);
+      const range = axisSpec ? fixedRange(axisSpec, allV) : { lo: Math.floor(Math.min(...allV) - 1), hi: Math.ceil(Math.max(...allV) + 1) };
+      const ticks = axisSpec
+        ? (() => { const t = []; for (let v = range.lo; v <= range.hi + 1e-9; v += axisSpec.major) t.push(+v.toFixed(4)); return t; })()
+        : niceTicks(range.lo, range.hi, 5);
       chart(svg, {
-        xlog: true, xlim, ylim: [lo, hi],
-        yticks: niceTicks(lo, hi, 5), xlabel: "Hz", ylabel, band, vlines,
+        xlog: true, xlim, ylim: [range.lo, range.hi],
+        yticks: ticks, xlabel: "Hz", ylabel, band, vlines,
         series: [
           { pts: F.map((f, i) => [f, (dA[keyA] || [])[i] ?? null]), color: css("--seed"), w: 1.8 },
           { pts: F.map((f, i) => [f, (dB[keyB] || [])[i] ?? null]), color: css("--best"), w: 1.8 },
         ],
+        markers: true,
       });
     }
-    cmpChart("cmp-bwh", "bw_h", "bw_h", "°");
-    cmpChart("cmp-bwv", "bw_v", "bw_v", "°");
-    cmpChart("cmp-di", "di", "di", "dB");
-    cmpChart("cmp-axis", "on_axis", "on_axis", "dB");
+    cmpChart("cmp-bwh", "bw_h", "bw_h", "°", AXES.beamwidth);
+    cmpChart("cmp-bwv", "bw_v", "bw_v", "°", AXES.beamwidth);
+    cmpChart("cmp-di", "di", "di", "dB", AXES.di);
+    cmpChart("cmp-axis", "on_axis", "on_axis", "dB", AXES.onAxis);
   }
 
   document.getElementById("btn-compare").onclick = doCompare;
@@ -3900,6 +4670,7 @@ async function viewCompose() {
       <div>
         <div class="eyebrow">Compose</div>
         <h2>Compose a run</h2>
+        <p style="font-size:0.9rem;margin:0 0 4px"><b>Recommended way to start work.</b> Build a run step by step. Experienced users with a saved config can use <a href="#/launch">Launch</a> instead.</p>
         <p class="muted" style="font-size:0.85rem">Shape first (which typologies), then the brief (the objective they are scored against), then the run. Every choice shows its exact command before anything executes — nothing is launched from here without a preview.</p>
       </div>
 
@@ -4426,7 +5197,7 @@ let _launchPollTimer = null;
 
 async function viewLaunch() {
   const ROOT = currentRoot();     // this view's own container (see route())
-  skel();
+  skel("Checking which saved configs can mesh… the first visit after starting the GUI can take about a minute; later visits are instant.");
   let briefs = [], jobs = [], configs = [], statusData = null;
   try {
     [briefs, jobs, configs, statusData] = await Promise.all([
@@ -4436,9 +5207,29 @@ async function viewLaunch() {
       api("/api/status").catch(() => null),
     ]);
   } catch (e) { ROOT.innerHTML = errBanner(e.message); return; }
-  const typs = await api("/api/typologies").catch(() => []);
   if (ROOT !== currentRoot()) return;   // the user navigated away while this loaded
-  renderLaunch(briefs, jobs, configs, statusData, typs);
+  // Render the form now; the typology list (slow on a cold server) fills in when it arrives.
+  // If the user already started filling the form, never re-render under them: offer a link instead.
+  renderLaunch(briefs, jobs, configs, statusData, []);
+  const note = document.createElement("div");
+  note.className = "hint"; note.id = "launch-typs-loading"; note.setAttribute("role", "status");
+  note.textContent = "Loading the horn-family list for campaigns… (the rest of this page is ready)";
+  ROOT.prepend(note);
+  let touched = false;
+  const touch = () => { touched = true; };
+  ROOT.addEventListener("input", touch, { once: true });
+  ROOT.addEventListener("change", touch, { once: true });
+  const typs = await api("/api/typologies").catch(() => null);
+  if (ROOT !== currentRoot()) return;
+  const n = document.getElementById("launch-typs-loading");
+  if (!typs) { if (n) n.textContent = "Horn-family list unavailable; reload the page to retry."; return; }
+  if (!touched) { renderLaunch(briefs, jobs, configs, statusData, typs); return; }
+  if (n) {
+    n.innerHTML = `Horn-family list ready. <a href="#" id="launch-typs-apply">Show it</a> (resets this form).`;
+    document.getElementById("launch-typs-apply").onclick = (ev) => {
+      ev.preventDefault(); renderLaunch(briefs, jobs, configs, statusData, typs);
+    };
+  }
 }
 
 function renderLaunch(briefs, jobs, configs, statusData, typs = []) {
@@ -4480,6 +5271,7 @@ function renderLaunch(briefs, jobs, configs, statusData, typs = []) {
       <div>
         <div class="eyebrow">Launch jobs</div>
         <h2>Launch</h2>
+        <p class="muted" style="font-size:0.85rem;margin:0 0 6px">Quick launch from a saved config or brief, for experienced users. New to this? <a href="#/compose">Compose a run</a> walks through it step by step.</p>
         <div id="launch-busy">${busyNote}</div>
       </div>
       <div class="card stack" style="gap:16px">

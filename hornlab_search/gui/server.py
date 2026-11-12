@@ -20,6 +20,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlparse
 
 from . import data as D
+from . import data_verify as DV
 from .jobs import JobError, JobManager
 
 STATIC = Path(__file__).with_name("static")
@@ -60,13 +61,15 @@ class App:
         if head == "campaign" and len(parts) == 2:
             return D.campaign_detail(self.runs, parts[1])
         if head == "mesh" and len(parts) == 3:
-            return D.mesh_surface(self.runs, parts[1], parts[2])
+            tier = (q.get("tier") or ["screen"])[0]
+            return D.mesh_surface(self.runs, parts[1], parts[2], tier=tier)
         if head == "preview-shape" and len(parts) == 2:
             return D.preview_shape(self.root, parts[1], q)
         if head == "balloon" and len(parts) == 2:
             return D.balloon_designs(self.runs, parts[1])
         if head == "balloon" and len(parts) == 3:
-            return D.balloon(self.runs, parts[1], parts[2])
+            tier = (q.get("tier") or ["screen"])[0]
+            return D.balloon(self.runs, parts[1], parts[2], tier=tier)
         if head == "briefs":
             return D.list_briefs(self.root)
         if head == "evolution" and len(parts) == 2:
@@ -107,6 +110,11 @@ class App:
                 raise FileNotFoundError(parts[1]) from None
         if head == "compare":
             return self._compare((q.get("a") or [""])[0], (q.get("b") or [""])[0])
+        if head == "verify" and len(parts) == 2:
+            return DV.verify_report(self.runs, parts[1], root=self.root)
+        if head == "design" and len(parts) == 3:
+            tier = (q.get("tier") or ["screen"])[0]
+            return DV.design_payload(self.runs, parts[1], parts[2], tier)
         raise FileNotFoundError(path)
 
     def _budget_hint(self, q: dict) -> dict:

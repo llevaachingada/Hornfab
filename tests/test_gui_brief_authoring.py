@@ -566,7 +566,7 @@ assert.equal(stopRegionHtml({ state: "idle" }), "");
 assert.equal(stopRegionHtml(null), "");
 const extStop = stopRegionHtml({ state: "external", lock: { pid: 4242, command: "hornlab-search search --config c.yaml" } });
 assert.match(extStop, /<button class="btn danger" id="btn-kill-run"/);
-assert.match(extStop, />Kill run<\/button>/);
+assert.match(extStop, />Kill GPU run<\/button>/);
 assert.match(extStop, /Kills the externally-started run that holds our GPU lock: pid 4242/);
 assert.ok(extStop.includes("external run · pid 4242"), extStop);   // the kill is pid-targeted, traceable
 assert.match(extStop, /id="st-kill-msg"/);
@@ -634,7 +634,7 @@ assert.doesNotMatch(toolbarPillHtml({ state: "idle" }), /<button/);       // and
 assert.match(toolbarPillHtml(null), /no run in progress/);   // null-safe: same honest idle face
 const extPill = toolbarPillHtml({ state: "external", lock: { pid: 4242, command: "hornlab-search search --config c.yaml" } });
 assert.match(extPill, /<button class="btn danger" id="tb-kill-run"/);
-assert.match(extPill, />■ Kill run<\/button>/);
+assert.match(extPill, />■ Kill GPU run<\/button>/);
 assert.match(extPill, /Kills the externally-started run that holds our GPU lock: pid 4242/);
 assert.ok(extPill.includes("external run · pid 4242"), extPill);
 assert.ok(extPill.includes('id="tb-kill-msg"'), extPill);
@@ -1133,7 +1133,7 @@ def test_toolbar_run_pill_is_wired():
     assert '"Confirm stop"' in src and '"Confirm resume"' in src
     assert "click again to confirm — process tree killed + gpu-clean" in src
     assert "stop requested — wait for the job to exit + the gpu-clean pass" in src
-    assert ">■ Kill run</button>" in src and "external run · pid" in src
+    assert ">■ Kill GPU run</button>" in src and "GPU lane · external run · pid" in src
     assert "Kills the externally-started run that holds our GPU lock" in src
     assert "cached evals replay free" in src and "budget is per invocation" in src
     # resume POST contract (LANDED jobs.py): --resume takes a RUN ID — sourced from the stopped
@@ -1176,7 +1176,7 @@ def test_continue_run_control_is_wired():
     src = APPJS.read_text(encoding="utf-8")
     # the card builder exists and is rendered in the run-detail template
     assert "function continueRunCardHtml(d, sum) {" in src
-    assert "${continueRunCardHtml(d, sum)}" in src
+    assert '${isVerify ? "" : continueRunCardHtml(d, sum)}' in src   # verify runs hide the card
     assert 'if (!continueRunAvailable(d)) return "";' in src      # only a search run gets a card
     # the five stable ids + a numeric, labelled, bounded input and a live status region
     for i in ("continue-run-card", "continue-run-n", "continue-run-help",

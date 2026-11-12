@@ -57,6 +57,98 @@
   **PASS** (5/5 designs within 0.2 dB; max 0.0356 dB, |dJ| <= 3.4e-5). No re-solve.
 - Note for `day/2026-11-12-queue`: its local GUI `_cpu_activity` reads `<run>/verify/search.ndjson`; when
   that branch merges it must also read `--verify-dir` / a `*-verify` run's `run.json.verify_of`.
+## 2026-11-12 (23:5xZ) - GUI FINISHING PASS: WP9/WP10 MERGE + STEP 2 FIXES + WP7 + LIVE ACCEPTANCE (feat/gui-integration)
+
+- Merged `feat/gui-charts-history` (WP9 chart standards C1-C15 + WP10 search history H1-H10) into
+  `feat/gui-integration` (`9a45d5e`); kept both sides in `app.js`/`app.css`/docs as the handoff
+  required. Full `-k gui` suite green (exit 0) and `node --check` clean after the merge.
+- Step 2 defect fixes (all verified live on port 8799 vs the real runs tree, read-only):
+  - `verify.js` table gate pills carry ✓/✗ (pass/fail in tooltip), not colour-only.
+  - Verify header shows `report.name` + brief + band. **Root cause fixed in `data_verify.py`:
+    `config.yaml` was read with `_read_json` (YAML ≠ JSON → `{}`), so name/band were null.** `brief`
+    added to the `verify_report` payload from the run config.
+  - Cut charts use 30° ticks (`angleTicks` in `charts.js`; −90/−60/−30/0/30/60/90), not ±50.
+  - `fidelity.screen.dof_range` == verify range on `…ed1da9` investigated and **legitimate**:
+    `n_dof` is a mesh property (all 5 screen rows 2006–2380); screen DOF is read from the screen
+    `response.npz`, verify DOF from the verify design dir — same mesh, same dof.
+  - Verify-mode run pages omit every search-history panel (WP4 item 5) via a single `runIsVerify`
+    branch in `viewRunDetail`; Verification card and gate audit stay.
+  - WP7 "Verify selected": `cli.py` already had `--designs/--designs-file`; `gui/jobs.py` `kind==verify`
+    now accepts `designs` (comma string or list, CLI-mirrored shape validation, mutual exclusivity
+    with `top`) and `designs_file` (+24 new tests, `tests/test_gui_jobs_verify_designs.py`); the Verify
+    view gained `renderVerifySelected` (hash checklist, select-all, POST `{kind:"verify",args:{run,designs}}`).
+    GPU-busy disabling verified against the live GPU lock (button disabled + title/hint while the real
+    search runs).
+- **Owner decision applied:** Home "Best horn per brief" window 14 → 31 days (`HOME_RECENT_DAYS`,
+  boundary tests for 30/32 days in `test_gui_shell_ux.py`).
+- **Merge regression caught during acceptance:** the WP10 search-dynamics block in `app.js` used
+  `logTicks` without importing it (`logTicks is not defined` on run detail); import added.
+- Live acceptance: `docs/GUI_VERIFY_ACCEPTANCE_2026-11-12.md` — Appendix B items 1–16 pass with
+  measured evidence (Home 1.2 s; runs-verify filter 16 rows / 7 parent links / 9 standalone;
+  ed1da9 verification card numbers; elites warm 2.51 s; launch 2.03 s; compare filter; both themes,
+  900/1400 px; screenshots in `docs/images/gui-acceptance-2026-11-12/`).
+- **Visual audit (same day, before push):** a full-page screenshot pass over run detail + verify view
+  found five render defects, all fixed and re-verified live:
+  - per-parameter σ heat strip was invisible (opacity encoding sent small normalised σ to ~0 alpha;
+    data was present — all 9 params) → replaced with real bars + label margin/ellipsis, min–max band,
+    shared x-axis (`data.py` keeps positional nulls now);
+  - circular polar overflowed its card (±60/±90 labels cut or outside, "on axis" collided with "0°")
+    → container-sized square viewBox + single `0° · on-axis` annotation;
+  - verify design table clipped at GATES (900 px) / pills overlapped DOF-TRIS (1400 px) →
+    horizontal-scroll wrappers + column min-widths + nowrap;
+  - gate-audit table clipped at 900 px → same scroll treatment;
+  - convergence footer claimed "0 failed (0%)" while 62 failures existed → honesty fix: footer now
+    counts null/invalid rows over the full resumed history ("139 evals ok, 62 failed (30.8%) · 72
+    above axis range"), matching the KPI strip; ▲ strip moved to the bottom per the caption.
+  New/updated tests: `test_gui_run_identity.py`, `test_gui_verify_panel.py`,
+  `test_gui_visual_audit_fixes.py` (new). Known cosmetic (ISSUES): light-theme balloon/polar
+  faintness, scatter label crowding, DI/On-axis single-card H+V series.
+- Tests: `tests/test_gui_chart_standards.py` (angleTicks), `tests/test_gui_verify_data.py`
+  (name/band/brief regression), `tests/test_gui_verify_panel.py` (WP7 helpers), 
+  `tests/test_gui_jobs_verify_designs.py` (24), `tests/test_gui_shell_ux.py` + `tests/test_gui_brief_authoring.py`
+  (verify-run panel hiding + 31-day window). Full `-k gui` suite green (exit 0) after all changes;
+  `node --check` clean on app.js/verify.js/charts.js/balloon.js/evolution.js.
+- Known cosmetic: default `/favicon.ico` 404 (no favicon declared) — one console error per session.
+
+## 2026-11-12 (22:10Z) - GUI VERIFY VIEW FRONT END (WP3 + WP6, feat/gui-verify-ui)
+
+- Implemented WP3 (verify table view) and WP6 (per-design panel) in `hornlab_search/gui/static/verify.js`.
+  Pure helpers exported: `parseVerifyQuery`, `buildVerifyQuery`, `deltaCellHtml`, `sortRows`,
+  `fidelityPillsHtml`, `summaryHtml`, `emptyStateHtml`, `standaloneHeaderHtml`, `nearestFreqIndex`,
+  `bandDeltaStats`, `checklistHtml`, `polarPlot`, `viewVerify`.
+- Added optional `tier` argument to `viewBalloon` and inner `loadDesign` fetch in `balloon.js`
+  (backward-compatible default `"screen"`).
+- Appended `/* verify view */` CSS block to `hornlab_search/gui/static/app.css` (KPI strip,
+  fidelity pills, table rows, delta text colours, panel, gates card, checklist, compare selector).
+- New tests: `tests/test_gui_verify_table.py` (20 tests, WP3 pure helpers) and
+  `tests/test_gui_verify_panel.py` (17 tests, WP6 pure helpers + node --check). All 37 green.
+- Full `-k gui` suite: **362 passed, 0 failed**.
+- Did NOT edit: `app.js`, `charts.js`, `data.py`, `data_verify.py`, `server.py`, `index.html`
+  (other-agent-owned). `polarPlot` lives in `verify.js` as directed; `charts.js` untouched.
+
+## 2026-11-12 (WP9/WP10) — CHART STANDARDS + SEARCH HISTORY
+
+- **WP9 (C1–C15) chart standards** applied across run detail, campaign, and compare views:
+  - `charts.js`: `logGrid()` (C1 minor freq gridlines), `AXES` constants (C2/C3/C4), `fixedRange()`,
+    `polarPlot()` export (C12), `refLines` dotted style (C5), `markers` at solved frequencies (C7),
+    `unscored` hatch (C10), over-range band in `isobarMap` (C8), freq ticks in isobar (C9),
+    `ylog` parameter added for H5 sigma/axis-ratio charts.
+  - `app.js` acoustic chart block replaced: H/V BW small multiples (C6), fixed ranges, C13 off-axis family,
+    shared show-start toggle, C14 impedance y < 0 allowed, C15 hover crosshair via existing code.
+- **WP10 (H1–H9/H10) search history** implemented:
+  - `data.py`: `cma_dynamics()` reads `cma/fit.dat`, `stddev.dat`, `axlen.dat`; `has_atlas` added to `run_detail`.
+  - Convergence (H1–H4): out-of-range ▲ markers, failure × strip, IQR band + median line per gen,
+    resume vertical lines from `run.json.history`.
+  - Search dynamics card (H5): sigma/axis-ratio on log-y, per-param σ heat strip.
+  - Sensitivity bounds bar (H6): lo–hi track with best-value marker, top-6 spread band.
+  - QD atlas link conditional (H7): only shown when `d.has_atlas`.
+  - Evolution 3D already hidden by default (H8) — verified correct.
+  - Score breakdown sorted by best contribution, weight shown next to each term (H9).
+  - Campaign BW/DI charts updated to use `fixedRange(AXES.*)` and `refLines`/`markers`.
+  - Cross-run convergence history per family (H10): lazy-loads run data, plots best-so-far curves.
+  - `app.css`: appended `/* charts */` block for new element classes.
+- **Tests**: `tests/test_gui_chart_standards.py` (8 tests) + `tests/test_gui_search_history.py` (16 tests).
+- **All GUI tests green**: 349 passed.
 
 ## 2026-11-12 (20:20Z) - GUI VERIFY / HIGH-RES VIEW PLAN (DESIGN PASS, PLAN ONLY)
 

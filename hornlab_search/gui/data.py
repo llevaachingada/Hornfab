@@ -40,6 +40,14 @@ PIN_FRAC = 0.02
 
 # ---------------------------------------------------------------------------- helpers
 
+_SAFE_LOADER = getattr(yaml, "CSafeLoader", yaml.SafeLoader)
+
+
+def _yaml_load(text: str) -> Any:
+    """``yaml.safe_load`` with the libyaml C loader when available (same safe tag set, ~10x faster
+    on the hundreds of configs the read-only views parse)."""
+    return yaml.load(text, Loader=_SAFE_LOADER)  # noqa: S506 - SafeLoader family only
+
 
 def clean(x: Any) -> Any:
     """Recursively make a value JSON-safe: numpy -> python, NaN/Inf -> None."""
@@ -143,7 +151,7 @@ def _run_dirs(runs: Path) -> list[Path]:
 
 def _config(run_dir: Path) -> dict:
     try:
-        return yaml.safe_load((run_dir / "config.yaml").read_text(encoding="utf-8")) or {}
+        return _yaml_load((run_dir / "config.yaml").read_text(encoding="utf-8")) or {}
     except (OSError, yaml.YAMLError):
         return {}
 
@@ -183,7 +191,13 @@ def run_summary(run_dir: Path) -> dict:
     every run on each refresh, and a finished run's summary never changes."""
     try:
         st = (run_dir / "search.ndjson").stat()
-        stamp = (st.st_mtime_ns, st.st_size)
+        stamp: tuple = (st.st_mtime_ns, st.st_size)
+        # WP1: include verify/search.ndjson in cache stamp so a new inline verify
+        # source invalidates the cached summary.
+        vp = run_dir / "verify" / "search.ndjson"
+        if vp.is_file():
+            vst = vp.stat()
+            stamp = stamp + (vst.st_mtime_ns, vst.st_size)
     except OSError:
         stamp = None
     key = str(run_dir.resolve())
@@ -203,9 +217,24 @@ _RUN_SUMMARY_CACHE: dict[str, tuple] = {}
 def _run_summary(run_dir: Path) -> dict:
     rows = read_ndjson(run_dir / "search.ndjson")
     cfg = _config(run_dir)
+    rj_sum = _as_dict(_read_json(run_dir / "run.json"))
     ok = [r for r in rows if r.get("ok")]
     best = min(ok, key=lambda r: r["objective"]) if ok else None
     brief = cfg.get("brief") if isinstance(cfg.get("brief"), dict) else None
+    # WP1: verify attachment fields — additive, absent on plain screen runs.
+    has_inline_verify = (run_dir / "verify" / "search.ndjson").is_file()
+    verify_of_run_id: str | None = None
+    if rj_sum.get("mode") == "verify" and "verify_of" in rj_sum:
+        from pathlib import PureWindowsPath as _PWin, PurePosixPath as _PPosix
+        vo_run = _as_dict(rj_sum.get("verify_of")).get("run") or ""
+        for _cls in (_PWin, _PPosix):
+            try:
+                name = _cls(vo_run).name
+                if name:
+                    verify_of_run_id = name
+                    break
+            except (ValueError, TypeError):
+                pass
     return clean({
         "id": run_dir.name,
         "name": cfg.get("name"),
@@ -227,13 +256,21 @@ def _run_summary(run_dir: Path) -> dict:
         "dims": horn_dims(best),
         "budget": _command_flags(run_dir).get("max_evals") or _command_flags(run_dir).get("budget"),
         "cma_seed": _command_flags(run_dir).get("cma_seed"),
+        "has_inline_verify": has_inline_verify,
+        "verify_of_run_id": verify_of_run_id,
     })
 
 
 def list_runs(runs: Path, limit: int | None = None) -> list[dict]:
     """Every run under ``runs`` (no cap: anything a search wrote must show up)."""
     dirs = _run_dirs(runs)
-    return [run_summary(d) for d in (dirs if limit is None else dirs[:limit])]
+    out = [run_summary(d) for d in (dirs if limit is None else dirs[:limit])]
+    # Additive (GUI plan WP4): mark parents that have a linked verify run, so the Runs list can
+    # badge "verified designs" without the client cross-referencing. Copies: run_summary is cached.
+    parents = {s.get("verify_of_run_id") for s in out if s.get("verify_of_run_id")}
+    if parents:
+        out = [dict(s, has_verify_runs=True) if s.get("id") in parents else s for s in out]
+    return out
 
 
 def _resolve_run(runs: Path, run_id: str) -> Path:
@@ -306,7 +343,31 @@ def _plane_chains(pts: np.ndarray, tris: np.ndarray, ax: int, tol: float = 1e-6)
     return chains
 
 
+#: wall profiles keyed by mesh path -> ((mtime, size), profile). Parsing a .msh costs ~75 ms and the
+#: campaign/typology views ask for the same few hundred designs on every call.
+_PROFILE_CACHE: dict[str, tuple] = {}
+_PROFILE_CACHE_MAX = 2048
+
+
 def _profile_from_mesh(msh: Path) -> dict:
+    try:
+        st = msh.stat()
+        stamp = (st.st_mtime, st.st_size)
+    except OSError:
+        stamp = None
+    key = str(msh)
+    hit = _PROFILE_CACHE.get(key)
+    if stamp is not None and hit and hit[0] == stamp:
+        return copy.deepcopy(hit[1])
+    prof = _profile_from_mesh_uncached(msh)
+    if stamp is not None:
+        if len(_PROFILE_CACHE) >= _PROFILE_CACHE_MAX:
+            _PROFILE_CACHE.pop(next(iter(_PROFILE_CACHE)))
+        _PROFILE_CACHE[key] = (stamp, copy.deepcopy(prof))
+    return prof
+
+
+def _profile_from_mesh_uncached(msh: Path) -> dict:
     """Wall cross-section in the H (x-z) and V (y-z) planes, in mm as [z, r] points.
     kind 'section': ordered outline from the plane's boundary edges (quarter meshes);
     kind 'nodes': unordered plane nodes (full meshes, where the planes are not mesh boundaries)."""
@@ -329,11 +390,24 @@ def _profile_from_mesh(msh: Path) -> dict:
     return prof
 
 
-def design_curves(run_dir: Path, h: str) -> dict | None:
-    """Per-frequency metrics, normalised polar maps and the wall profile of one solved design."""
+def design_curves(run_dir: Path, h: str, tier: str = "screen") -> dict | None:
+    """Per-frequency metrics, normalised polar maps and the wall profile of one solved design.
+
+    ``tier`` selects the design directory:
+    * ``"screen"`` (default): ``run_dir / "designs" / h``
+    * ``"verify"``: ``run_dir / "verify" / "designs" / h`` (inline verify layout)
+
+    For linked/standalone verify runs the caller passes the verify run's own ``run_dir``; in that
+    case use the default tier (the linked run's ``designs/`` dir is screen-layout relative to it).
+    """
+    if tier not in ("screen", "verify"):
+        raise ValueError(f"unknown tier {tier!r}; must be 'screen' or 'verify'")
     if not HASH.match(h):
         raise ValueError(f"not a design hash: {h!r}")
-    d = run_dir / "designs" / h
+    if tier == "verify":
+        d = run_dir / "verify" / "designs" / h
+    else:
+        d = run_dir / "designs" / h
     m = _read_json(d / "metrics.json")
     if m is None:
         return None
@@ -471,6 +545,115 @@ def _step_inventory(step_dir: Path, p: Path) -> Any:
     return None if cad is None else _cad_inventory(cad)
 
 
+def cma_dynamics(run_dir: Path) -> dict:
+    """Parse pycma diagnostic files from ``<run>/cma/`` into a JSON-safe structure.
+
+    Returns ``{"available": False}`` when ``cma/fit.dat`` is absent.
+
+    Output when available::
+
+        {
+          "available": True,
+          "gens": [
+            {"iter": int, "evals": int, "sigma": float, "axis_ratio": float,
+             "best": float|null, "p25": float|null, "median": float|null, "iqr": float|null},
+            ...
+          ],
+          "stddev": [[float, ...], ...],  // per-gen per-param σ (len = n_params)
+          "axis_lengths": [[float, ...], ...],  // sorted principal-axis lengths
+          "param_names": [str, ...]  // from parameters.json2 or config.yaml, len = n_params
+        }
+
+    ``fit.dat`` column order (from the ``%`` header):
+    iter(0) evals(1) sigma(2) axis_ratio(3) bestever(4) best(5) median(6) worst(7) iqr(8) p25(9)
+    Values ``≥ 1000`` are penalty sentinels and are nulled out (the failed-eval marker).
+    """
+    cma_dir = run_dir / "cma"
+    fit_path = cma_dir / "fit.dat"
+    if not fit_path.is_file():
+        return {"available": False}
+
+    _PENALTY = 999.0  # nulled when val >= this (1000.0 is the pycma penalty)
+
+    def _parse_dat(path: Path) -> list[list[float | None]]:
+        """Return data rows from a pycma .dat file; % header lines are skipped."""
+        rows: list[list[float | None]] = []
+        try:
+            with path.open(encoding="utf-8", errors="replace") as fh:
+                for line in fh:
+                    line = line.strip()
+                    if not line or line.startswith("%"):
+                        continue
+                    parts = line.split()
+                    row: list[float | None] = []
+                    for p in parts:
+                        try:
+                            v = float(p)
+                            row.append(None if v >= _PENALTY else v)
+                        except ValueError:
+                            row.append(None)
+                    if row:
+                        rows.append(row)
+        except OSError:
+            pass
+        return rows
+
+    fit_rows = _parse_dat(fit_path)
+    gens = []
+    for r in fit_rows:
+        if len(r) < 7:
+            continue
+        def _get(i: int) -> float | None:
+            return r[i] if i < len(r) else None
+        # column 3 = axis_ratio direct from fit.dat (already a ratio, never a penalty)
+        axis_ratio_raw = r[3] if len(r) > 3 else None
+        gens.append({
+            "iter": int(r[0]) if r[0] is not None else None,
+            "evals": int(r[1]) if r[1] is not None else None,
+            "sigma": r[2],
+            "axis_ratio": axis_ratio_raw,  # not a J value, no penalty null needed
+            "best": _get(5),
+            "p25": _get(9),
+            "median": _get(6),
+            "iqr": _get(8),
+        })
+
+    # stddev.dat: cols 0=iter 1=evals 2=sigma 3=void 4=void 5..N=per-param σ.
+    # Keep the columns positionally aligned with ``param_names``: dropping a null/penalty column
+    # would shift every later parameter and make the GUI draw a value in the wrong row.
+    stddev_rows = _parse_dat(cma_dir / "stddev.dat") if (cma_dir / "stddev.dat").is_file() else []
+    stddev = [r[5:] for r in stddev_rows]
+
+    # axlen.dat: cols 0=iter 1=evals 2=sigma 3=max 4=min 5..N=all principal axes
+    axlen_rows = _parse_dat(cma_dir / "axlen.dat") if (cma_dir / "axlen.dat").is_file() else []
+    axis_lengths = [r[5:] for r in axlen_rows]
+
+    # Parameter names: try parameters.json2 first, then config.yaml bounds keys
+    param_names: list[str] = []
+    params_path = cma_dir / "parameters.json2"
+    if params_path.is_file():
+        try:
+            import json as _json
+            with params_path.open(encoding="utf-8") as fh:
+                p_data = _json.load(fh)
+            if isinstance(p_data, dict) and "variable_names" in p_data:
+                param_names = [str(n) for n in p_data["variable_names"]]
+        except Exception:  # noqa: BLE001
+            pass
+    if not param_names:
+        cfg = _config(run_dir)
+        param_names = [k for k, v in (cfg.get("bounds") or {}).items()
+                       if isinstance(v, dict) and v.get("search", True)]
+
+    return clean({
+        "available": True,
+        "gens": gens,
+        "stddev": stddev,
+        "axis_lengths": axis_lengths,
+        "param_names": param_names,
+    })
+
+
 def _cma_files(run_dir: Path) -> list[dict]:
     """Every pycma log the C-5 route serves: ``cma/`` plus each ``cma/restart_k/`` directory.
 
@@ -550,6 +733,11 @@ def run_detail(runs: Path, run_id: str, root: Path | None = None) -> dict:
     gate_audit = run_gate_audit(repo_root, run_id)
     if gate_audit.get("available"):
         out["gate_audit"] = clean(gate_audit)
+    # WP1: verify attachment summary — always present so the detail view can offer "Open verify report".
+    out["verification"] = clean({
+        "has_inline_verify": (d / "verify" / "search.ndjson").is_file(),
+        "verify_of": run_json.get("verify_of") if isinstance(run_json.get("verify_of"), dict) else None,
+    })
     # Continue-run control: the last invocation's stop reason tells the run detail whether a budget
     # top-up is likely to do work (budget/interrupted) or the optimizer stopped on its own terms.
     # Same convention as below: present in run.json = pass it through, absent stays absent.
@@ -603,6 +791,11 @@ def run_detail(runs: Path, run_id: str, root: Path | None = None) -> dict:
     # C-5 companion: the exact pycma log files the raw route can serve, for direct restart-card
     # file chips. Sorted run-relative paths; [] when the run has no cma/ tree.
     out["cma_files"] = _cma_files(d)
+    # WP10: CMA-ES dynamics from cma/fit.dat, stddev.dat, axlen.dat.  Additive: absent when
+    # cma/ is missing (available:false is still included so the GUI knows it was attempted).
+    out["cma_dynamics"] = cma_dynamics(d)
+    # H7: atlas link visibility — show the QD atlas btn only when the file actually exists.
+    out["has_atlas"] = (d / "archive_heatmap.json").is_file()
     # S1a: the K-law feasibility preflight rides in the committed config.yaml (the merged cfg.raw
     # ``search/rundir.py::write_config_snapshot`` dumps). Pure passthrough — a truthy dict is
     # forwarded verbatim; an absent block stays absent (no shape invention).
@@ -869,17 +1062,27 @@ def run_archive(runs: Path, run_id: str) -> dict:
     return clean(out)
 
 
-def mesh_surface(runs: Path, run_id: str, h: str, max_tris: int = 60000) -> dict:
+def mesh_surface(runs: Path, run_id: str, h: str, tier: str = "screen",
+                 max_tris: int = 60000) -> dict:
     """Triangle surface of a solved design (mm), the meshed domain only (a quarter for quadrants '1',
-    an x/y half for '14'/'12')."""
+    an x/y half for '14'/'12').
+
+    ``tier`` selects the design directory (see ``design_curves`` for the convention).
+    """
+    if tier not in ("screen", "verify"):
+        raise ValueError(f"unknown tier {tier!r}; must be 'screen' or 'verify'")
     d = _resolve_run(runs, run_id)
     if not HASH.match(h):
         raise ValueError(f"not a design hash: {h!r}")
-    nt = mesh_nodes_tris(d / "designs" / h / "mesh.msh")
+    if tier == "verify":
+        design_dir = d / "verify" / "designs" / h
+    else:
+        design_dir = d / "designs" / h
+    nt = mesh_nodes_tris(design_dir / "mesh.msh")
     if nt is None:
         raise FileNotFoundError(f"{run_id}/{h}/mesh.msh")
     pts, tris = nt
-    meta = _read_json(d / "designs" / h / "mesh_meta.json") or {}
+    meta = _read_json(design_dir / "mesh_meta.json") or {}
     q = (meta.get("result") or {}).get("quadrants") or _row_quadrants(d, h) \
         or (_config(d).get("mesh") or {}).get("quadrants")
     snap_axes = {"1": (0, 1), "14": (0,), "12": (1,)}.get(str(q), ())
@@ -949,7 +1152,7 @@ def balloon_designs(runs: Path, run_id: str) -> dict:
     return clean({"run_id": run_id, "name": _config(d).get("name"), "designs": designs})
 
 
-def balloon(runs: Path, run_id: str, h: str) -> dict:
+def balloon(runs: Path, run_id: str, h: str, tier: str = "screen") -> dict:
     """One design's stored balloon (W6) for the GUI's three.js Balloon view.
 
     Reads only the ``response.npz`` the search already wrote. The per-direction order is
@@ -959,11 +1162,18 @@ def balloon(runs: Path, run_id: str, h: str) -> dict:
     closes the seam). Levels are relative to on-axis (the theta = 0 pole row), Float32-rounded
     and clipped to ``[BALLOON_MIN_DB, 0]`` dB — the Balloon display's window. Nothing is solved
     or interpolated here; bilinear interpolation on the grid is a viewer concern.
+
+    ``tier`` selects the design directory (see ``design_curves`` for the convention).
     """
+    if tier not in ("screen", "verify"):
+        raise ValueError(f"unknown tier {tier!r}; must be 'screen' or 'verify'")
     d = _resolve_run(runs, run_id)
     if not HASH.match(h):
         raise ValueError(f"not a design hash: {h!r}")
-    p = d / "designs" / h / "response.npz"
+    if tier == "verify":
+        p = d / "verify" / "designs" / h / "response.npz"
+    else:
+        p = d / "designs" / h / "response.npz"
     if not p.is_file():
         raise FileNotFoundError(f"{run_id}/{h}/response.npz")
     try:
@@ -1267,7 +1477,7 @@ def list_briefs(root: Path, cached: list[dict] | None = None) -> list[dict]:
         parent = p.parent.relative_to(shipped).as_posix()
         kind = "shipped" if parent == "." else ("user" if parent == "user" else parent)
         try:
-            raw = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+            raw = _yaml_load(p.read_text(encoding="utf-8")) or {}
         except yaml.YAMLError as exc:
             raw = {"_error": str(exc)}
         out.append(clean({"name": p.stem, "kind": kind,
@@ -1326,7 +1536,7 @@ def status(root: Path, runs: Path) -> dict:
     except OSError:
         pass
     ov = runs / "overnight"
-    queue_logs = sorted(ov.glob("queue_*.log")) if ov.is_dir() else []
+    queue_logs = sorted(ov.glob("queue_*.log"), key=lambda p: (_mt(p), p.name)) if ov.is_dir() else []  # newest by mtime: names sort by prefix, not date
     return clean({
         "gpu_lock": lock, "vram_mib": vram, "julia_procs": len(procs), "disk": disk,
         "queue_log": {"name": queue_logs[-1].name, "tail": tail_text(queue_logs[-1], 30),
@@ -1341,7 +1551,7 @@ def status(root: Path, runs: Path) -> dict:
 
 def catalog(root: Path) -> list[dict]:
     try:
-        raw = yaml.safe_load((root / "examples" / "catalog.yaml").read_text(encoding="utf-8-sig")) or {}
+        raw = _yaml_load((root / "examples" / "catalog.yaml").read_text(encoding="utf-8-sig")) or {}
     except (OSError, yaml.YAMLError):
         return []
     return [clean(e) for e in raw.get("entries", []) if isinstance(e, dict)]
@@ -1373,6 +1583,98 @@ def _config_seed_materializes(p: Path) -> bool:
 #: (no on-disk staleness to clean up; a generator code change needs a GUI restart, exactly like
 #: every other import).  Bounded by the number of config files.
 _SEED_GATE_CACHE: dict[tuple, bool] = {}
+
+# WP2b (GUI plan 2026-11-12): the march costs ~40 s cold for ~200 configs, paid on every GUI start.
+# The memo is ALSO persisted to a per-user cache file OUTSIDE the repo/runs tree. To keep the
+# "a generator code change needs a restart" guarantee, every entry carries a code fingerprint
+# (the design/ + mesh/ sources' paths, mtimes and sizes, plus the installed mesher version): any
+# code change makes every disk entry miss. HORNLAB_GUI_NO_DISK_CACHE=1 turns persistence off.
+_SEED_DISK: dict | None = None
+_SEED_DISK_DIRTY = False
+
+
+def _seed_cache_file() -> Path | None:
+    if os.environ.get("HORNLAB_GUI_NO_DISK_CACHE"):
+        return None
+    # Never touch the user's real cache file from the test suite unless a test opts in.
+    if os.environ.get("PYTEST_CURRENT_TEST") and not os.environ.get("HORNLAB_GUI_DISK_CACHE_IN_TESTS"):
+        return None
+    base = os.environ.get("LOCALAPPDATA") or os.path.join(os.path.expanduser("~"), ".cache")
+    return Path(base) / "hornlab-search" / "gui_seed_gate_cache.json"
+
+
+_CODE_STAMP: str | None = None
+
+
+def _code_stamp() -> str:
+    global _CODE_STAMP
+    if _CODE_STAMP is None:
+        import hashlib
+        pkg = Path(__file__).resolve().parents[1]
+        h = hashlib.sha256()
+        for sub in ("design", "mesh", "config.py"):
+            target = pkg / sub
+            files = sorted(target.rglob("*.py")) if target.is_dir() else [target]
+            for f in files:
+                try:
+                    st = f.stat()
+                except OSError:
+                    continue
+                h.update(f"{f.relative_to(pkg).as_posix()}|{st.st_mtime_ns}|{st.st_size}\n".encode())
+        try:
+            from importlib.metadata import version
+            h.update(("mesher=" + version("hornlab-waveguide-mesher")).encode())
+        except Exception:  # noqa: BLE001 - missing metadata just narrows the fingerprint
+            pass
+        _CODE_STAMP = h.hexdigest()[:16]
+    return _CODE_STAMP
+
+
+def _seed_disk_key(key: tuple) -> str:
+    return json.dumps([_code_stamp(), key])
+
+
+def _seed_disk_get(key: tuple) -> bool | None:
+    global _SEED_DISK
+    if _SEED_DISK is None:
+        _SEED_DISK = {}
+        f = _seed_cache_file()
+        if f is not None:
+            try:
+                data = json.loads(f.read_text(encoding="utf-8"))
+                if isinstance(data, dict):
+                    _SEED_DISK = {k: v for k, v in data.items() if isinstance(v, bool)}
+            except (OSError, ValueError):
+                pass
+    return _SEED_DISK.get(_seed_disk_key(key))
+
+
+def _seed_disk_put(key: tuple, disabled: bool) -> None:
+    global _SEED_DISK_DIRTY
+    if _SEED_DISK is None:
+        _seed_disk_get(key)
+    _SEED_DISK[_seed_disk_key(key)] = disabled
+    _SEED_DISK_DIRTY = True
+
+
+def _seed_disk_flush() -> None:
+    """Write the persisted memo once per list_configs call (atomic replace; failures are ignored —
+    the cache is an optimisation, never a source of truth). Entries for other code stamps are
+    dropped so the file cannot grow without bound."""
+    global _SEED_DISK_DIRTY
+    f = _seed_cache_file()
+    if not _SEED_DISK_DIRTY or f is None or _SEED_DISK is None:
+        return
+    stamp = json.dumps(_code_stamp())
+    keep = {k: v for k, v in _SEED_DISK.items() if k.startswith("[" + stamp + ",")}
+    try:
+        f.parent.mkdir(parents=True, exist_ok=True)
+        tmp = f.with_suffix(".tmp")
+        tmp.write_text(json.dumps(keep), encoding="utf-8")
+        os.replace(tmp, f)
+        _SEED_DISK_DIRTY = False
+    except OSError:
+        pass
 
 
 def _file_stamp(p: Path | None) -> tuple | None:
@@ -1407,7 +1709,7 @@ def list_configs(root: Path) -> list[dict]:
                 or p.relative_to(ex).parts[0] in ("briefs", "drivers")):
             continue
         try:
-            raw = yaml.safe_load(p.read_text(encoding="utf-8-sig")) or {}
+            raw = _yaml_load(p.read_text(encoding="utf-8-sig")) or {}
         except yaml.YAMLError:
             continue
         rel = p.relative_to(ex).as_posix()
@@ -1418,7 +1720,11 @@ def list_configs(root: Path) -> list[dict]:
         key = _seed_gate_key(p, raw, root)
         disabled = _SEED_GATE_CACHE.get(key)
         if disabled is None:
-            disabled = not _config_seed_materializes(p)
+            disabled = _seed_disk_get(key) if key[0] is not None else None
+            if disabled is None:
+                disabled = not _config_seed_materializes(p)
+                if key[0] is not None:
+                    _seed_disk_put(key, disabled)
             _SEED_GATE_CACHE[key] = disabled
         entry = clean({
             "path": p.relative_to(root).as_posix(), "name": raw.get("name") or p.stem,
@@ -1443,6 +1749,7 @@ def list_configs(root: Path) -> list[dict]:
         if bounds:              # the sandbox's fallback when the param catalog has no entry yet
             entry["bounds"] = clean(bounds)
         out.append(entry)
+    _seed_disk_flush()
     return out
 
 
@@ -1509,6 +1816,15 @@ def queue_steps(log: Path) -> list[dict]:
 TIER_RANK = {"compare": 2, "screen": 1}
 
 
+def _leader_run_facts(summary: dict | None) -> dict:
+    """Additive leaderboard fields from the leading run's summary: whether any of its designs were
+    verified (inline verify folder or a linked verify run), and its last activity (newest row)."""
+    if not summary:
+        return {"verified": False, "last_activity": None}
+    return {"verified": bool(summary.get("has_inline_verify") or summary.get("has_verify_runs")),
+            "last_activity": summary.get("last")}
+
+
 def leaders(runs: Path, snap: _Snapshot | None = None) -> list[dict]:
     """Per brief, the leading family of the latest campaign of the strongest tier (compare beats
     screen; dry-run has no scores). 'clearly_ahead' applies the ranking rule: the leader's median beats
@@ -1519,6 +1835,8 @@ def leaders(runs: Path, snap: _Snapshot | None = None) -> list[dict]:
     never built.  Both are per-call, so a campaign dir created between two calls is seen by the
     second one."""
     snap = snap if snap is not None else _snapshot(runs)
+    # Verification + recency per run (GUI plan WP5): one list_runs pass (summaries are cached).
+    by_id = {s.get("id"): s for s in list_runs(runs)}
     chosen: dict[str, dict] = {}
     for c in list_campaigns(runs, snap):                 # newest first
         tier, brief = c.get("tier"), c.get("brief")
@@ -1545,7 +1863,8 @@ def leaders(runs: Path, snap: _Snapshot | None = None) -> list[dict]:
                           "family": lead["name"], "group": lead.get("group"), "median_j": lead["median_j"],
                           "best_j": lead.get("best_j"), "spread": lead.get("spread"), "dims": lead.get("dims"),
                           "best_run_id": lead.get("best_run_id"), "runner_up": nxt["name"] if nxt else None,
-                          "gap": gap, "clearly_ahead": clearly, "n_families": len(scored)}))
+                          "gap": gap, "clearly_ahead": clearly, "n_families": len(scored),
+                          **_leader_run_facts(by_id.get(lead.get("best_run_id")))}))
     return out
 
 
@@ -3392,6 +3711,33 @@ def analysis_report(analysis_dir: Path, name: str) -> dict:
 # ---------------------------------------------------------------------------- elites catalog (E.3)
 
 
+#: elites payload keyed by runs dir -> ((CSV paths+mtimes, runs-dir mtime), payload). A new or
+#: changed audit CSV, or a run added/removed, invalidates it.
+_ELITES_CACHE: dict[str, tuple] = {}
+
+
+def _elite_run_info(run_dir: Path | None) -> tuple:
+    """One run's facts for the elites cards, read once per catalog build (not once per CSV row):
+    (has_run, objective version, {design_hash: lowest-objective atlas cell}, atlas descriptors)."""
+    has_run = bool(run_dir and (run_dir / "search.ndjson").is_file())
+    if not has_run:
+        return False, None, {}, {}
+    version = run_objective_version(run_dir)
+    best: dict[str, dict] = {}
+    descs: dict = {}
+    heat = _read_json(run_dir / "archive_heatmap.json")
+    if isinstance(heat, dict) and isinstance(heat.get("cells"), list):
+        descs = heat.get("descriptors") if isinstance(heat.get("descriptors"), dict) else {}
+        key = lambda c: c.get("objective") if isinstance(c.get("objective"), (int, float)) else float("inf")
+        for c in heat["cells"]:
+            if not isinstance(c, dict):
+                continue
+            h = c.get("design_hash")
+            if h is not None and (h not in best or key(c) < key(best[h])):
+                best[h] = c
+    return True, version, best, descs
+
+
 def elites_catalog(runs: Path, root: Path) -> dict:
     """The elites catalog: every design row recorded in a committed gate-audit CSV.
 
@@ -3408,8 +3754,13 @@ def elites_catalog(runs: Path, root: Path) -> dict:
     if not sources:
         return {"available": False, "sources": [], "cards": [],
                 "note": "no gate-audit CSV under docs/data/gate_audit_*/ or scratch/gate_audit_*/"}
+    stamp = (tuple((str(p), _mt(p)) for p in sources), _mt(runs))
+    hit = _ELITES_CACHE.get(str(runs))
+    if hit and hit[0] == stamp:
+        return hit[1]
     cards: list[dict] = []
     seen: set[tuple[str, str]] = set()
+    run_info: dict[str, tuple] = {}            # run_id -> (has_run, version, {hash: best cell}, descriptors)
     n_pass = 0
     for csv_path in sources:
         try:
@@ -3443,20 +3794,15 @@ def elites_catalog(runs: Path, root: Path) -> dict:
             tier = (r.get("tier") or "").strip() or None
             pass_all = _csv_bool(r.get("pass_all"))
             run_dir = runs / run_id if run_id and RUN_ID.match(run_id) else None
-            has_run = bool(run_dir and (run_dir / "search.ndjson").is_file())
-            version = run_objective_version(run_dir) if has_run else None
+            info = run_info.get(run_id)
+            if info is None:
+                info = run_info[run_id] = _elite_run_info(run_dir)
+            has_run, version, heat_cells, descs = info
             cell = None
-            if has_run:
-                heat = _read_json(run_dir / "archive_heatmap.json")
-                if isinstance(heat, dict) and isinstance(heat.get("cells"), list):
-                    descs = heat.get("descriptors") if isinstance(heat.get("descriptors"), dict) else {}
-                    hits = [c for c in heat["cells"]
-                            if isinstance(c, dict) and c.get("design_hash") == h]
-                    if hits:
-                        c = min(hits, key=lambda c: c.get("objective")
-                                if isinstance(c.get("objective"), (int, float)) else float("inf"))
-                        cell = {"descriptors": {"h": descs.get("h"), "v": descs.get("v")},
-                                "h_center": c.get("h_center"), "v_center": c.get("v_center")}
+            hit = heat_cells.get(h) if has_run else None
+            if hit is not None:
+                cell = {"descriptors": {"h": descs.get("h"), "v": descs.get("v")},
+                        "h_center": hit.get("h_center"), "v_center": hit.get("v_center")}
             cards.append(clean({
                 "run": run_id or None, "hash": h, "J": j, "tier": tier,
                 "gates": gate_vals, "pass_all": pass_all, "source": source,
@@ -3471,6 +3817,8 @@ def elites_catalog(runs: Path, root: Path) -> dict:
     gate_keys: set[str] = set()
     for c in cards:
         gate_keys |= set(c["gates"])
-    return {"available": True, "sources": sorted({c["source"] for c in cards}),
-            "labels": {k: GATE_AUDIT_LABELS.get(k, k) for k in sorted(gate_keys)},
-            "cards": cards, "n_pass": n_pass}
+    out = {"available": True, "sources": sorted({c["source"] for c in cards}),
+           "labels": {k: GATE_AUDIT_LABELS.get(k, k) for k in sorted(gate_keys)},
+           "cards": cards, "n_pass": n_pass}
+    _ELITES_CACHE[str(runs)] = (stamp, out)
+    return out
