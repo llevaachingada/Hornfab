@@ -1,6 +1,20 @@
 # CONTINUITY
 
 
+## 2026-11-12 (17:10Z) - DAY GROUP A: EVOLUTIONARY-ANALYSIS TOOLKIT COMPLETE
+
+- Day-plan group A (PR #38, branch `day/A-analysis`): A.0-A.10 complete under `tools/analysis/` —
+  `_common`, `convergence` (A.1), `seed_variance` (A.2 incl. bootstrap CIs + ECDF + >=5-seed verdict rule),
+  `sensitivity` (A.3 incl. sklearn surrogate permutation importance; Sobol skipped, SALib not installed),
+  `links` (A.4), `walls` (A.5), `ab_compare` (A.6), `lane_parity` (A.7 CP-7b 0.2 dB gate),
+  `term_balance` (A.9 per-term share of J + raw-unit top decile — the v8 tolerance-recalibration inputs),
+  `fidelity` (A.10 screen-vs-verify bias + top-5 rank agreement), `report_day` (A.8) +
+  `specs/day_2026-11-12.yaml` (today's lanes with <FILL_*> placeholders the orchestrator fills from
+  `runs/nights/{gpu,cpu}_day_2026-11-12/summary.jsonl`). Tools read run dirs read-only and write only `--out`.
+- Verified: 75 targeted Group-A tests green (75/0/0/0 junitxml); full offline suite green on the branch
+  (2 stored-data skips); schema.md is the output contract and stayed stable.
+- GUI group E codes against this schema (PR #36 landed already).
+
 ## 2026-11-12 (16:25Z) - DAY GROUP D: NIGHT/DATA OPS HARDENING
 
 - Day-plan group D (PR #35, branch `day/D-night-ops`): D.1 two-lane `night_status.py` (per-lane lock
