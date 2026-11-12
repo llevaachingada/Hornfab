@@ -6,6 +6,23 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({
   "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
 }[c]));
 const fmt = (v, d = 2) => (v == null || !isFinite(v) ? "–" : Number(v).toFixed(d));
+// Objective-version guard (L2.2): J clusters/rankings mean the same thing only inside one
+// objective definition. The API payload carries objective_version; v1 is the unlabelled default.
+const jVersionLabel = obj => "J v" + (Number.isFinite(Number(obj && obj.objective_version))
+  ? Number(obj.objective_version) : 1);
+
+function gateChips(cloud, p) {
+  const meta = cloud.gate_audit || {};
+  const gates = Array.isArray(meta.gates) ? meta.gates : [];
+  if (!gates.length || !p.gates) return "";
+  const labels = meta.labels || {};
+  return `<p class="cap" style="margin:6px 0 0">${gates.map(g => {
+    const v = p.gates[g];
+    const cls = v === true ? "good" : v === false ? "bad" : "";
+    const txt = v === true ? "pass" : v === false ? "fail" : "–";
+    return `<span class="pill ${cls}">${esc(labels[g] || g)}: ${txt}</span>`;
+  }).join(" ")}</p>`;
+}
 
 const TONES = [
   { id: "b0", css: "var(--best)" },
@@ -84,6 +101,7 @@ export async function viewUmap(root, runId) {
       <h2>${esc(data.name || runId)}</h2>
       <p class="muted" style="margin:2px 0 0">
         ${data.n_ok} OK designs · ${data.n_plot} plotted · method <span class="mono">${esc(data.method)}</span>
+        · <span class="pill mono" title="objective version that produced these J values">${esc(jVersionLabel(data))}</span>
         ${data.note ? " · " + esc(data.note) : ""}.
         Color by a searchable knob’s unit quartiles or by total J.
         <a href="#/run/${esc(runId)}">← back to the run</a>
@@ -143,8 +161,9 @@ export async function viewUmap(root, runId) {
       return `<tr><td>${esc(k)}</td><td class="mono" style="text-align:right">${fmt(val, 4)}</td>
         <td class="mono" style="text-align:right">${fmt(p.u[k], 3)}</td></tr>`;
     }).join("");
-    detail.innerHTML = `<p class="cap">${p.hash ? "hash " + esc(p.hash) + " · " : ""}J=${fmt(p.J, 3)}${p.b ? " · best" : ""}
+    detail.innerHTML = `<p class="cap">${p.hash ? "hash " + esc(p.hash) + " · " : ""}${esc(jVersionLabel(cloud))}=${fmt(p.J, 3)}${p.b ? " · best" : ""}
       · color channel ${esc(key)}=${fmt((p.params && p.params[key]) ?? phys(cloud.bounds, key, p.u[key]), 3)}</p>
+      ${gateChips(cloud, p)}
       <div class="tbl-wrap"><table>
         <thead><tr><th>param</th><th style="text-align:right">value</th><th style="text-align:right">unit</th></tr></thead>
         <tbody>${rows}</tbody>
@@ -163,9 +182,13 @@ export async function viewUmap(root, runId) {
     const b = cloud.bounds[key];
     hint.textContent = `${key} bounds ${fmt(b.lo, 2)}–${fmt(b.hi, 2)} · ${cloud.keys.length} searchable params · embed ${cloud.method}`;
 
+    // The J thresholds are relative to one objective definition: label the legend with the version
+    // that produced these scores, so a v7 cloud is never read against a v4 habit.
     const bands = mode === "param"
       ? paramBands(cloud, key)
-      : J_THRESH.map((t, i) => ({ ...t, tone: TONES[i].css }));
+      : J_THRESH.map((t, i) => ({
+        ...t, tone: TONES[i].css, label: t.label.replace(/^J/, jVersionLabel(cloud)),
+      }));
     const toneById = Object.fromEntries(bands.map(band => [band.id, band.tone]));
     const counts = Object.fromEntries(bands.map(band => [band.id, 0]));
     cloud.points.forEach(p => {
@@ -229,7 +252,7 @@ export async function viewUmap(root, runId) {
       c.setAttribute("opacity", "0.9");
       c.style.cursor = "pointer";
       c.appendChild(document.createElementNS(NS, "title")).textContent =
-        `${key}=${fmt((p.params && p.params[key]) ?? phys(cloud.bounds, key, p.u[key]), 3)} · J ${fmt(p.J, 2)}`;
+        `${key}=${fmt((p.params && p.params[key]) ?? phys(cloud.bounds, key, p.u[key]), 3)} · ${jVersionLabel(cloud)} ${fmt(p.J, 2)}`;
       c.addEventListener("click", () => {
         selected = i;
         showDetail(p);
@@ -246,7 +269,8 @@ export async function viewUmap(root, runId) {
       c.setAttribute("r", 5);
       c.setAttribute("fill", toneById[best._band] || "var(--best)");
       c.style.cursor = "pointer";
-      c.appendChild(document.createElementNS(NS, "title")).textContent = `best · J ${fmt(best.J, 2)}`;
+      c.appendChild(document.createElementNS(NS, "title")).textContent =
+        `best · ${jVersionLabel(cloud)} ${fmt(best.J, 2)}`;
       c.addEventListener("click", () => {
         selected = pts.indexOf(best);
         showDetail(best);

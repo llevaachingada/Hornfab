@@ -44,7 +44,7 @@ class App:
         if head == "runs":
             return D.list_runs(self.runs)
         if head == "run" and len(parts) == 2:
-            return D.run_detail(self.runs, parts[1])
+            return D.run_detail(self.runs, parts[1], root=self.root)
         if head == "campaigns":
             return D.list_campaigns(self.runs)
         if head == "campaign" and len(parts) == 2:
@@ -65,7 +65,7 @@ class App:
             return D.evolution_frames3d(self.runs, parts[1])
         if head == "umap" and len(parts) == 2:
             method = (q.get("method") or ["auto"])[0]
-            return D.run_umap_cloud(self.runs, parts[1], method=method)
+            return D.run_umap_cloud(self.runs, parts[1], method=method, root=self.root)
         if head == "archive" and len(parts) == 2:
             return D.run_archive(self.runs, parts[1])
         if head == "typologies":
@@ -148,6 +148,11 @@ class App:
             out[key] = D.design_curves(d, row["design_hash"])
         # C-2: the solve group each side belongs to + the keys that differ (never a silent mix).
         out["group_a"], out["group_b"], out["mixed_keys"] = D.solve_group_fingerprints(dirs["a"], dirs["b"])
+        # J is only comparable inside one objective definition: state both versions and whether the
+        # pair crosses them (the compare view renders the banner when this flag is true).
+        out["objective_version_a"] = D.run_objective_version(dirs["a"])
+        out["objective_version_b"] = D.run_objective_version(dirs["b"])
+        out["versions_mixed"] = out["objective_version_a"] != out["objective_version_b"]
         try:
             out["rows"] = D.clean(compare_metrics(*ms))
         except ValueError as exc:

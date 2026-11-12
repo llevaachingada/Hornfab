@@ -7,6 +7,7 @@ Nothing here solves, meshes or writes: every number comes from files the CLI alr
 from __future__ import annotations
 
 import copy
+import csv
 import json
 import math
 import os
@@ -219,6 +220,7 @@ def _run_summary(run_dir: Path) -> dict:
         "seed_j": rows[0].get("objective") if rows else None,
         "best_j": best["objective"] if best else None,
         "best_hash": best["design_hash"] if best else None,
+        "objective_version": run_objective_version(run_dir),
         "started": rows[0].get("created_utc") if rows else None,
         "last": rows[-1].get("created_utc") if rows else None,
         "has_report": (run_dir / "report.html").exists(),
@@ -504,8 +506,9 @@ def _cma_files(run_dir: Path) -> list[dict]:
     return sorted(out, key=lambda f: f["path"])
 
 
-def run_detail(runs: Path, run_id: str) -> dict:
+def run_detail(runs: Path, run_id: str, root: Path | None = None) -> dict:
     d = _resolve_run(runs, run_id)
+    repo_root = Path(root) if root is not None else runs.parent
     rows = read_ndjson(d / "search.ndjson")
     cfg = _config(d)
     run_json = _read_json(d / "run.json") or {}
@@ -540,7 +543,13 @@ def run_detail(runs: Path, run_id: str) -> dict:
         "command": run_json.get("command"),
         "step_files": step_files,
         "step_files_detail": step_files_detail,
+        "objective_version": run_objective_version(d),
     })
+    # Gate audit: a committed CSV (docs/data/gate_audit_*/ or scratch/gate_audit_*/) carries the
+    # per-design pass/fail truth. Absent audit = the key stays absent, so the view renders no column.
+    gate_audit = run_gate_audit(repo_root, run_id)
+    if gate_audit.get("available"):
+        out["gate_audit"] = clean(gate_audit)
     # Continue-run control: the last invocation's stop reason tells the run detail whether a budget
     # top-up is likely to do work (budget/interrupted) or the optimizer stopped on its own terms.
     # Same convention as below: present in run.json = pass it through, absent stays absent.
@@ -705,6 +714,132 @@ def solve_group_fingerprints(run_a: Path, run_b: Path) -> tuple[dict, dict, list
     ga, gb = _solve_group_fingerprint(run_a), _solve_group_fingerprint(run_b)
     mixed = sorted(k for k in set(ga) | set(gb) if ga.get(k) != gb.get(k))
     return ga, gb, mixed
+
+
+def run_objective_version(run_dir: Path) -> int:
+    """The run's objective version, with v1 as the unlabelled default.
+
+    Reads the same two places as ``_solve_group_fingerprint``: the committed config's
+    ``objective.version`` (top level or inside ``brief``) and ``run.json``'s
+    ``objective_version`` sidecar. A missing or malformed value is v1, never a guess.
+    """
+    cfg = _config(run_dir)
+    rj = _as_dict(_read_json(run_dir / "run.json"))
+    obj = _as_dict(cfg.get("objective")) or _as_dict(_as_dict(cfg.get("brief")).get("objective"))
+    version = obj.get("version")
+    if version is None:
+        version = rj.get("objective_version")
+    if isinstance(version, bool):
+        return 1
+    try:
+        return int(version) if version is not None else 1
+    except (TypeError, ValueError):
+        return 1
+
+
+#: Recognised gate-audit columns, in display order. The committed audit writes h/v/di/bw8k/
+#: load/throat; newer audits may add f11 and CD aliases. Only columns present in the CSV render.
+GATE_AUDIT_COLUMNS = ("throat", "load", "f11", "cd", "cd_h", "cd_v", "h", "v", "di", "bw8k")
+GATE_AUDIT_LABELS = {
+    "throat": "round throat",
+    "load": "loading",
+    "f11": "f11",
+    "cd": "CD",
+    "cd_h": "CD H",
+    "cd_v": "CD V",
+    "h": "CD H",
+    "v": "CD V",
+    "di": "DI rise",
+    "bw8k": "8 kHz BW",
+}
+
+
+def _csv_bool(value: Any) -> bool | None:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        return bool(value)
+    if isinstance(value, str):
+        text = value.strip().lower()
+        if text in ("true", "1", "yes", "pass", "y"):
+            return True
+        if text in ("false", "0", "no", "fail", "n"):
+            return False
+    return None
+
+
+def _gate_audit_paths(root: Path):
+    """Gate-audit CSVs under ``docs/data/gate_audit_*`` and ``scratch/gate_audit_*`` (newest first)."""
+    for rel in ("docs/data", "scratch"):
+        base = root / rel
+        if not base.is_dir():
+            continue
+        for d in sorted(base.glob("gate_audit_*"), key=lambda p: p.name, reverse=True):
+            p = d / "gate_audit.csv"
+            if p.is_file():
+                yield p
+
+
+def run_gate_audit(root: Path, run_id: str) -> dict:
+    """Per-design gate pass/fail for one run, from a committed gate-audit CSV.
+
+    Returns ``{"available": False}`` when no audit directory carries this run — the GUI must never
+    invent a gate column. When available: ``source`` (run-relative path), ``gates`` (only the
+    recognised columns present in the header), ``labels`` and ``designs`` mapping
+    ``design_hash -> {"gates": {column: bool}, "J": float|None, "tier": str|None}``. A design's
+    verify row replaces its screen row (the audit's own precedence), and the lower-J row wins a tie.
+    """
+    for csv_path in _gate_audit_paths(root):
+        try:
+            with csv_path.open(newline="", encoding="utf-8") as fh:
+                rows = list(csv.DictReader(fh))
+        except OSError:
+            continue
+        if not rows:
+            continue
+        header = set(rows[0].keys())
+        gates = [key for key in GATE_AUDIT_COLUMNS if key in header]
+        if not gates:
+            continue
+        sub = [r for r in rows if (r.get("run") or "").strip() == run_id]
+        if not sub:
+            continue
+        designs: dict[str, dict] = {}
+        for r in sub:
+            design = (r.get("design") or "").strip()
+            if not design:
+                continue
+            parsed = {key: _csv_bool(r.get(key)) for key in gates}
+            parsed = {key: val for key, val in parsed.items() if val is not None}
+            if not parsed:
+                continue
+            j_raw = r.get("J")
+            try:
+                j = float(j_raw) if j_raw not in (None, "") else None
+            except (TypeError, ValueError):
+                j = None
+            tier = (r.get("tier") or "").strip() or None
+            # verify rows outrank screen rows; then the lower J wins (deterministic).
+            score = (0 if tier == "verify" else 1, j if j is not None else float("inf"))
+            prev = designs.get(design)
+            if prev is None or prev["_score"] > score:
+                designs[design] = {"gates": parsed, "J": j, "tier": tier, "_score": score}
+        if not designs:
+            continue
+        for entry in designs.values():
+            entry.pop("_score", None)
+        try:
+            source = csv_path.relative_to(root).as_posix()
+        except ValueError:
+            source = str(csv_path)
+        return {
+            "available": True,
+            "source": source,
+            "gates": gates,
+            "labels": {key: GATE_AUDIT_LABELS.get(key, key) for key in gates},
+            "designs": designs,
+        }
+    return {"available": False}
 
 
 def run_archive(runs: Path, run_id: str) -> dict:
@@ -1848,7 +1983,7 @@ def _umap_2d(U: np.ndarray) -> np.ndarray | None:
     return np.asarray(reducer.fit_transform(U), dtype=float)
 
 
-def run_umap_cloud(runs: Path, run_id: str, method: str = "auto") -> dict:
+def run_umap_cloud(runs: Path, run_id: str, method: str = "auto", root: Path | None = None) -> dict:
     """2-D embedding of OK designs in the searchable unit box for the run explorer.
 
     Coordinates are **not** acoustic loadings: PCA (always) or UMAP when ``umap-learn`` is
@@ -1859,10 +1994,21 @@ def run_umap_cloud(runs: Path, run_id: str, method: str = "auto") -> dict:
     if want not in ("auto", "umap", "pca"):
         raise ValueError(f"method must be auto|umap|pca, got {method!r}")
     d = _resolve_run(runs, run_id)
+    repo_root = Path(root) if root is not None else runs.parent
     nd = d / "search.ndjson"
     st = nd.stat()
     rows = read_ndjson(nd)
     cfg = _config(d)
+    version = run_objective_version(d)
+    gate_audit = run_gate_audit(repo_root, run_id)
+    gate_designs = gate_audit.get("designs", {}) if gate_audit.get("available") else {}
+    gate_stamp = None
+    if gate_audit.get("available"):
+        try:
+            gst = (repo_root / gate_audit["source"]).stat()
+            gate_stamp = (gst.st_size, int(gst.st_mtime))
+        except OSError:
+            gate_stamp = None
     bounds = {
         k: b for k, b in (cfg.get("bounds") or {}).items()
         if isinstance(b, dict) and "lo" in b and "hi" in b and b.get("search", True)
@@ -1872,6 +2018,7 @@ def run_umap_cloud(runs: Path, run_id: str, method: str = "auto") -> dict:
         return clean({
             "run_id": run_id,
             "name": cfg.get("name"),
+            "objective_version": version,
             "method": "pca",
             "method_requested": want,
             "keys": [],
@@ -1909,6 +2056,7 @@ def run_umap_cloud(runs: Path, run_id: str, method: str = "auto") -> dict:
         return clean({
             "run_id": run_id,
             "name": cfg.get("name"),
+            "objective_version": version,
             "method": "pca",
             "method_requested": want,
             "keys": keys,
@@ -1940,7 +2088,8 @@ def run_umap_cloud(runs: Path, run_id: str, method: str = "auto") -> dict:
 
     cache = runs / ".gui_cache" / f"umap_{run_id}_{resolved}.json"
     old = _read_json(cache) if cache.exists() else None
-    key = [UMAP_VERSION, st.st_size, int(st.st_mtime), resolved, want]
+    key = [UMAP_VERSION, st.st_size, int(st.st_mtime), resolved, want,
+           version, list(gate_stamp) if gate_stamp else None]
     if old and old.get("key") == key and isinstance(old.get("data"), dict):
         return old["data"]
 
@@ -1968,7 +2117,8 @@ def run_umap_cloud(runs: Path, run_id: str, method: str = "auto") -> dict:
     for i in idx:
         u = {keys[j]: round(float(U[i, j]), 4) for j in range(len(keys))}
         params = {k: round(float(phys_list[i][k]), 6) for k in keys}
-        points.append({
+        gate = gate_designs.get(str(hash_list[i])) if gate_designs else None
+        point = {
             "x": round(float(Z[i, 0]), 4),
             "y": round(float(Z[i, 1]), 4),
             "J": round(float(J[i]), 4),
@@ -1976,11 +2126,15 @@ def run_umap_cloud(runs: Path, run_id: str, method: str = "auto") -> dict:
             "hash": hash_list[i],
             "u": u,
             "params": params,
-        })
+        }
+        if gate and gate.get("gates"):
+            point["gates"] = gate["gates"]
+        points.append(point)
 
     data = clean({
         "run_id": run_id,
         "name": cfg.get("name"),
+        "objective_version": version,
         "method": resolved,
         "method_requested": want,
         "keys": keys,
@@ -1995,9 +2149,16 @@ def run_umap_cloud(runs: Path, run_id: str, method: str = "auto") -> dict:
         "band_labels": list(UMAP_BAND_LABELS),
         "note": note,
     })
+    if gate_audit.get("available"):
+        data["gate_audit"] = {
+            "source": gate_audit["source"],
+            "gates": gate_audit["gates"],
+            "labels": gate_audit["labels"],
+        }
     # Re-key cache on the method that actually ran (auto→pca fallback shares pca cache).
     cache = runs / ".gui_cache" / f"umap_{run_id}_{resolved}.json"
-    key = [UMAP_VERSION, st.st_size, int(st.st_mtime), resolved, want]
+    key = [UMAP_VERSION, st.st_size, int(st.st_mtime), resolved, want,
+           version, list(gate_stamp) if gate_stamp else None]
     try:
         cache.parent.mkdir(parents=True, exist_ok=True)
         tmp = cache.with_suffix(".tmp")
