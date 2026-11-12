@@ -396,6 +396,46 @@ console.log("POLAR PLOT NULL SAFE OK");
     assert "POLAR PLOT NULL SAFE OK" in r.stdout
 
 
+@pytest.mark.usefixtures("_node")
+def test_polar_plot_fits_container_and_labels_stay_inside():
+    """D2 (2026-11-12 audit): size from the card width and keep every label inside the viewBox."""
+    r = _run_node_script(r"""
+const { polarPlot } = await import(pathToFileURL("VERIFY_JS_PATH").href);
+
+const mk = tag => ({ tag, attrs: {}, children: [], textContent: "",
+  setAttribute(k, v) { this.attrs[k] = String(v); },
+  appendChild(c) { this.children.push(c); } });
+globalThis.document.createElementNS = (_ns, tag) => mk(tag);
+
+const svg = mk("svg");
+svg.clientWidth = 540;                       // the ~540px .vfy-panel card
+polarPlot(svg, [[-5, -8, -15, 0, -15, -8, -5]], null,
+  [-90, -60, -30, 0, 30, 60, 90], 0, {});
+
+assert.equal(svg.attrs.viewBox, "0 0 540 540", "square viewBox from container width");
+
+const nodes = [];
+(function walk(n) { nodes.push(n); (n.children || []).forEach(walk); })(svg);
+const texts = nodes.filter(n => n.tag === "text");
+assert.ok(texts.length > 0, "labels drawn");
+for (const t of texts) {
+  const x = Number(t.attrs.x), y = Number(t.attrs.y);
+  assert.ok(isFinite(x) && x >= 0 && x <= 540, `label '${t.textContent}' x=${x} outside viewBox`);
+  assert.ok(isFinite(y) && y >= 0 && y <= 540, `label '${t.textContent}' y=${y} outside viewBox`);
+}
+// The ±60/±90 angle labels must survive the resize.
+for (const s of ["+60°", "+90°", "-60°", "-90°"]) {
+  assert.ok(texts.some(t => t.textContent === s), `missing ${s}`);
+}
+// One annotation only: "0° · on-axis" replaces the colliding pair.
+assert.equal(texts.filter(t => String(t.textContent).includes("on-axis")).length, 1);
+assert.equal(texts.filter(t => t.textContent === "0°").length, 0);
+console.log("POLAR FIT OK");
+""", VERIFY_JS)
+    assert r.returncode == 0, f"stdout: {r.stdout}\nstderr: {r.stderr}"
+    assert "POLAR FIT OK" in r.stdout
+
+
 # ── node --check ─────────────────────────────────────────────────────────────
 
 @pytest.mark.skipif(shutil.which("node") is None, reason="node not installed")

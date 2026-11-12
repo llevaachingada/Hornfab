@@ -43,14 +43,38 @@ evolution.js.
 5. Verify-mode run pages omit all search-history panels (WP4 item 5), keep the Verification card and gate audit.
 6. WP7: `verify` already had `--designs/--designs-file` in `cli.py`; `gui/jobs.py` gained `designs`/`designs_file` job args with CLI-mirrored validation (24 new tests); the Verify view gained the "Verify selected" card (`renderVerifySelected`), list of verified hashes, select-all, and a button that POSTs `{kind:"verify", args:{run, designs}}`. GPU-busy disabling verified **live against the real GPU lock**: `disabled=True`, `aria-disabled`, hint "GPU busy: … atlas__core_law — Verify selected is disabled until the GPU is free."
 
+## Visual audit (post-acceptance, same day)
+
+A full-page screenshot pass was audited against the plan's chart rules; five render defects were
+found and **fixed before push** (all re-captured and re-verified live on 8799, `-k gui` suite exit 0,
+424 tests):
+
+1. Run-detail per-parameter σ heat strip was effectively invisible (small normalised σ ⇒ near-zero
+   opacity) with labels spilling outside the card → replaced with per-parameter bars (label margin +
+   ellipsis, min–max band, shared x-axis, "no data" rows explicit). Root cause: opacity encoding, not
+   missing data (`stddev.dat` carries all 9 params; `data.py` now keeps positional nulls).
+2. Circular polar overflowed its card (±60/±90 labels cut / outside; "on axis" collided with "0°") →
+   container-sized square viewBox with label-ring radius; single `0° · on-axis` annotation.
+3. Verify design table clipped at the GATES column at 900 px and overlapped DOF/TRIS at 1400 px →
+   horizontal scrolling (.tbl-wrap overflow-x), column min-widths, nowrap cells.
+4. Gate-audit table clipped at 900 px → same scroll treatment (min-width 760 px).
+5. Convergence footer claimed "0 failed (0%)" while 62 failures existed (KPI agreed with 62) — an
+   honesty bug; footer now counts null/invalid rows over the full resumed history:
+   **"139 evals ok, 62 failed (30.8%) · 72 above axis range."** ▲ strip moved to the bottom per caption.
+
+Known cosmetic, recorded in `docs/ISSUES.md`, not fixed here: light-theme 3D-balloon annotations and
+circular-polar grid are faint (contrast-plan territory); scatter labels crowd when several designs
+share a J value (cluster around 4.6–5.0 on ed1da9); DI and On-axis render one card each with H+V
+series (Beamwidth has separate H and V cards) — consistent with C6's small multiple for BW only.
+
 ## Owner decision applied
 
 Home "Best horn per brief" window changed **14 → 31 days** (`HOME_RECENT_DAYS`, owner decision 2026-11-12). On the real tree nothing hidden changes today (every brief is active within 30 days); boundary assertions for 30/32 days were added to `test_gui_shell_ux.py`.
 
 ## Caveats / known cosmetic
 
-- One console resource error per session: the browser's default `/favicon.ico` 404 (index.html declares no favicon). Cosmetic; logged in ISSUES.
+- Known cosmetic: light-theme balloon/polar annotation faintness; scatter label crowding on a J cluster; DI and On-axis are single cards with H+V series (Beamwidth has separate H/V cards); one console resource error per session from the browser's default `/favicon.ico` 404 (no favicon declared) — logged in ISSUES.
 - The live tree changes under a reviewer: total runs grew 425 → 426 during the pass, and one reload (21:04) showed the runs table momentarily ordered by a pre-burst last-activity (the live run re-claimed row 0 seconds later). Noted, not reproduced after.
 - Item 1's resumed-run phrase and the runs-page 16-row count are stateful in a live tree; where the live state no longer exhibits them they are pinned by unit tests instead.
 
-Screenshots: `docs/images/gui-acceptance-2026-11-12/` (home, verify table, selected-design panel, run detail light 1400, verify view dark/light 1400). Remaining screenshots and `results.json` live in `%TEMP%\opencode\gui-acc\`.
+Screenshots: `docs/images/gui-acceptance-2026-11-12/` (home, verify table, selected-design panel, run detail light 1400, verify view dark/light 1400, plus post-visual-fix `10_run_detail_dark_900_v2.png` and `13_verify_selected_dark_900_v2.png`). Remaining screenshots and `results.json` live in `%TEMP%\opencode\gui-acc\` and `%TEMP%\opencode\gui-acc2\`.

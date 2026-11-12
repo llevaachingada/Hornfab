@@ -18,6 +18,41 @@ export function el(tag, attrs = {}, parent) {
   return e;
 }
 
+/**
+ * Wire a visible scroll affordance onto `.tbl-scroll` blocks. The inner `.tbl-wrap` is the
+ * clipping ancestor; when its content is wider than its scrollport we mark the outer box
+ * `is-scrollable` (which reveals the "scroll for all columns" hint and the right-edge shadow)
+ * and `at-end` once the user has reached the last column. Safe to call repeatedly.
+ */
+export function wireScrollHints(root) {
+  if (!root || typeof root.querySelectorAll !== "function") return;
+  const boxes = [];
+  if (typeof root.matches === "function" && root.matches(".tbl-scroll")) boxes.push(root);
+  root.querySelectorAll(".tbl-scroll").forEach(b => boxes.push(b));
+  boxes.forEach(box => {
+    const wrap = box.querySelector(".tbl-wrap");
+    if (!wrap) return;
+    const update = () => {
+      const overflow = wrap.scrollWidth > wrap.clientWidth + 1;
+      box.classList.toggle("is-scrollable", overflow);
+      box.classList.toggle("at-end",
+        overflow && wrap.scrollLeft + wrap.clientWidth >= wrap.scrollWidth - 2);
+    };
+    update();
+    if (!wrap.dataset.scrollHintWired) {
+      wrap.dataset.scrollHintWired = "1";
+      wrap.addEventListener("scroll", update, { passive: true });
+      if (typeof ResizeObserver !== "undefined") {
+        try {
+          const ro = new ResizeObserver(update);
+          ro.observe(wrap);
+          box._scrollHintRO = ro;   // keep a handle; the table outlives transient redraws
+        } catch (_) { /* older engines: the initial + scroll updates still work */ }
+      }
+    }
+  });
+}
+
 /** Compute ideal tick positions */
 export function niceTicks(lo, hi, n = 5) {
   const step0 = (hi - lo) / n;

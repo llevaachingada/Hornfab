@@ -3,7 +3,7 @@
 
 import { chart, heat, cmap, drawCbar, niceTicks, diFromCuts, groupColor,
          el, NS, css, fmt, DEFW, polarMap, wallSection, familyColor, measuredWidth, isobarMap,
-          logGrid, logTicks, AXES, fixedRange } from "./charts.js";
+          logGrid, logTicks, AXES, fixedRange, wireScrollHints } from "./charts.js";
 import { TERMS as GLOSSARY, TERM_ORDER, tip } from "./glossary.js";
 import { loadParamCatalog, paramTipHtml, typologyTipHtml, typologyChipsHtml } from "./paramtips.js";
 import { init3d } from "./view3d.js";
@@ -52,6 +52,63 @@ export function freqAxisLimits(band, freqs) {
   return hi > lo ? [lo, hi] : [lo, lo * 1.05];      // never a zero-width log axis
 }
 
+/**
+ * Convergence bucket counts over the FULL run history. ``data.py`` writes ``J[i] = null`` for a
+ * failed row (it writes ``999`` only on older payloads), so a null is a failure here too — otherwise
+ * the footer silently reports "0 failed" while the KPI strip counts the real failures. Pure.
+ *
+ * Returns ``{ok, failed}`` where each is an array of ``[evalIndex, value|null]`` pairs.
+ */
+export function convergenceCounts(rawJ, failThresh = 999) {
+  const ok = [], failed = [];
+  (Array.isArray(rawJ) ? rawJ : []).forEach((j, i) => {
+    if (j == null) { failed.push([i, null]); return; }
+    const v = Number(j);
+    if (!isFinite(v) || v >= failThresh) failed.push([i, isFinite(v) ? v : null]);
+    else ok.push([i, v]);
+  });
+  return { ok, failed };
+}
+
+/**
+ * Per-parameter CMA σ normalised to the parameter's bound width. Returns one row per parameter
+ * name, in names order, with ``final`` (last finite generation), ``lo``/``hi`` (range across
+ * generations) and ``n`` (finite generations). A parameter with no finite σ keeps ``final: null``
+ * so the view can show it as "no data" instead of silently drawing nothing. Pure.
+ */
+export function stddevBars(stddevByGen, paramNames, sens) {
+  const names = Array.isArray(paramNames) ? paramNames : [];
+  const gens = Array.isArray(stddevByGen) ? stddevByGen : [];
+  const byKey = new Map((Array.isArray(sens) ? sens : []).map(s => [s && s.key, s]));
+  const boundWidth = pn => {
+    const ps = byKey.get(pn);
+    const bw = ps ? Math.abs(Number(ps.hi) - Number(ps.lo)) : 0;
+    return isFinite(bw) && bw > 0 ? bw : 1;
+  };
+  const normalised = gens.map(g => names.map((pn, pi) => {
+    const raw = Array.isArray(g) ? g[pi] : null;
+    const v = Number(raw);
+    return raw != null && isFinite(v) ? v / boundWidth(pn) : null;
+  }));
+  return names.map((pn, pi) => {
+    const vals = normalised.map(r => r[pi]).filter(v => v != null);
+    return {
+      key: pn,
+      final: vals.length ? vals[vals.length - 1] : null,
+      lo: vals.length ? Math.min(...vals) : null,
+      hi: vals.length ? Math.max(...vals) : null,
+      n: vals.length,
+    };
+  });
+}
+
+/** Truncate an SVG label to fit ``maxPx`` at the given per-character estimate, ellipsis included. */
+export function fitSvgLabel(text, maxPx, charPx = 6) {
+  const s = String(text == null ? "" : text);
+  const maxChars = Math.max(1, Math.floor(Math.max(0, maxPx) / charPx));
+  return s.length <= maxChars ? s : s.slice(0, Math.max(1, maxChars - 1)) + "…";
+}
+
 // ── API helpers ────────────────────────────────────────────────────
 
 async function api(path) {
@@ -79,8 +136,8 @@ const ROUTES = [
   { re: /^#\/campaigns$/,               fn: () => viewCampaignsList() },
   { re: /^#\/campaign\/(.+)$/,          fn: m => viewCampaignDetail(m[1]) },
   { re: /^#\/runs$/,                    fn: () => viewRunsList() },
-  { re: /^#\/run\/([^\/?#]+)\/verify\/compare(?:\?(.*))?$/, fn: m => viewVerify(ROOT, m[1], "compare", m[2] || "") },
-  { re: /^#\/run\/([^\/?#]+)\/verify(?:\?(.*))?$/,         fn: m => viewVerify(ROOT, m[1], "table",   m[2] || "") },
+  { re: /^#\/run\/([^\/?#]+)\/verify\/compare(?:\?(.*))?$/, fn: m => viewVerify(ROOT, m[1], "compare", m[2] || ""), query: true },
+  { re: /^#\/run\/([^\/?#]+)\/verify(?:\?(.*))?$/,         fn: m => viewVerify(ROOT, m[1], "table",   m[2] || ""), query: true },
   { re: /^#\/run\/(.+)\/3d$/,           fn: m => viewRun3D(m[1]) },
   { re: /^#\/run\/(.+)\/balloon$/,      fn: m => viewBalloon(ROOT, m[1]) },     // W6: BL-style balloon
   { re: /^#\/run\/(.+)\/evolution$/,    fn: m => viewEvolution(ROOT, m[1]) },
@@ -119,8 +176,10 @@ function route() {
   ROOT.replaceWith(fresh); ROOT = fresh;
   const hash = location.hash || "#/home";
   const path = hash.split("?")[0];
-  for (const { re, fn } of ROUTES) {
-    const m = path.match(re);
+  for (const { re, fn, query } of ROUTES) {
+    // Verify routes own their query string (design/sort/compare selection); every other route
+    // matches the bare path so a stray ?param cannot leak into a captured run id.
+    const m = (query ? hash : path).match(re);
     if (m) { updateNav(path); return fn(m); }
   }
   ROOT.innerHTML = "";
@@ -2206,13 +2265,16 @@ function gateAuditHtml(audit) {
   // Lead with the GATE_AUDIT_LEAD best-J rows plus every verify-tier row; the rest fold into
   // "Show all" so the response charts below are not pushed thousands of pixels down.
   const { lead, rest } = gateAuditSplit(entries);
-  const table = (rs) => `<div class="tbl-wrap"><table>
-          <thead><tr><th>Design</th><th class="r">J</th><th>${tip("audit_tier", "Audit tier")}</th>${head}</tr></thead>
-          <tbody>${rs.map(rowHtml).join("")}</tbody>
-        </table></div>`;
+  const table = (rs) => `<div class="tbl-scroll">
+          <div class="tbl-scroll-hint" aria-hidden="true">scroll for all columns →</div>
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>Design</th><th class="r">J</th><th>${tip("audit_tier", "Audit tier")}</th>${head}</tr></thead>
+            <tbody>${rs.map(rowHtml).join("")}</tbody>
+          </table></div>
+        </div>`;
   return `<div class="fig" id="gate-audit-card">
         <h3>Gate audit</h3>
-        <div class="cap">Per-design pass/fail from <span class="mono">${esc(audit.source || "")}</span>. Only the gates present in that audit are shown. Audit tier is the fidelity the audit scored that row at.</div>
+        <div class="cap">Per-design pass/fail from <span class="mono">${esc(audit.source || "")}</span>. All ${gates.length} audited gate columns are shown — scroll sideways when the card is narrow. Audit tier is the fidelity the audit scored that row at.</div>
         ${table(lead)}
         ${rest.length ? `<details class="gate-audit-more"><summary>Show all ${entries.length} audited designs (${rest.length} more)</summary>${table(rest)}</details>` : ""}
       </div>`;
@@ -2840,7 +2902,7 @@ async function viewRunDetail(id) {
       <h3>How the search went</h3>
       <div class="grid2">
         <div class="fig"><h3>Convergence</h3>
-          <div class="cap" id="conv-cap">Every eval (dots) and running best (line). Failures shown as × strip below axis.</div>
+          <div class="cap" id="conv-cap">Every eval (dots) and running best (line). Out-of-range evals (▲) and failures (×) are marked in the strip below the axis.</div>
           <svg id="c-conv"></svg>
           <div class="cap" id="conv-cap2" style="margin-top:4px"></div>
         </div>
@@ -2858,7 +2920,7 @@ async function viewRunDetail(id) {
           <div><div class="cap" style="font-weight:600">Step size σ (log)</div><svg id="c-dyn-sigma"></svg></div>
           <div><div class="cap" style="font-weight:600">Axis ratio (log)</div><svg id="c-dyn-axratio"></svg></div>
         </div>
-        <div style="margin-top:8px"><div class="cap" style="font-weight:600">Per-parameter σ (normalised to bound width)</div><svg id="c-dyn-stddev" style="width:100%"></svg></div>
+        <div style="margin-top:8px"><div class="cap" style="font-weight:600">Per-parameter σ (normalised to bound width)</div><div class="cap" style="font-size:0.74rem">Bar = final σ; band = min–max over generations. Shared σ scale; params with no data are labelled.</div><svg id="c-dyn-stddev" style="width:100%"></svg></div>
       </div>`}
 
       <!-- Sensitivity -->
@@ -2889,6 +2951,8 @@ async function viewRunDetail(id) {
 
       ${d.command ? `<div class="stack" style="gap:6px"><h3>Command</h3><div class="log-tail" style="max-height:60px">${esc(d.command)}</div></div>` : ""}
     </div>`;
+
+  wireScrollHints(ROOT);   // gate-audit tables: reveal the scroll hint when clipped
 
   // KPI strip (designer-first order)
   // Name the fidelity on every score: a screen "best" is not a verified best (GUI plan G12/F6).
@@ -3187,9 +3251,10 @@ async function viewRunDetail(id) {
     const nTotal = sum.n || rawJ.length;
     const svg = document.getElementById("c-conv");
     const FAIL_THRESH = 999.0;
-    // H1: separate out failures (j >= 999) from real scores
-    const failures = rawJ.map((j, i) => [i, j]).filter(p => p[1] != null && p[1] >= FAIL_THRESH);
-    const okPts = rawJ.map((j, i) => [i, j]).filter(p => p[1] != null && p[1] < FAIL_THRESH);
+    // H1: separate out failures. data.py writes a null J for a failed row (999 only on older
+    // payloads), so counting just >= 999 hid every failure from the footer while the KPI strip
+    // (n - n_ok) counted them. Count the FULL history, resumed segments included.
+    const { ok: okPts, failed: failures } = convergenceCounts(rawJ, FAIL_THRESH);
     // H1: determine y clip range so out-of-range dots are shown as ▲ markers
     const okVals = okPts.map(p => p[1]);
     const rawYmax = Math.max((sum.seed_j || 0) * 1.6, (sum.best_j || 0) * 2, 1);
@@ -3245,7 +3310,7 @@ async function viewRunDetail(id) {
       svgEl.innerHTML = "";
       const cW = svgEl.clientWidth || 500, cH = 220;
       svgEl.setAttribute("viewBox", `0 0 ${cW} ${cH}`);
-      const PAD = { l: 46, r: 20, t: 14, b: 36 };
+      const PAD = { l: 46, r: 20, t: 14, b: 48 };
       const xScale = v => PAD.l + (v / nTotal) * (cW - PAD.l - PAD.r);
       const yScale = v => PAD.t + (1 - Math.min(v, ymax) / ymax) * (cH - PAD.t - PAD.b);
       // H3: IQR band behind dots
@@ -3281,18 +3346,18 @@ async function viewRunDetail(id) {
           el("circle", { cx: xScale(ei), cy: yScale(jv), r: "1.5", fill: css("--muted") }, dotsG);
         }
       }
-      // H1: out-of-range ▲ markers at ymax line
+      // H1: out-of-range ▲ markers in the bottom strip (never at the top above the line)
       let aboveCount = 0;
-      for (const [ei, jv] of okPts) { if (jv > ymax) { aboveCount++; const ax = xScale(ei); el("polygon", { points: `${ax},${PAD.t + 2} ${ax - 4},${PAD.t + 10} ${ax + 4},${PAD.t + 10}`, fill: css("--warn") }, svgEl); } }
-      if (aboveCount > 0) { const lt = el("text", { x: cW - PAD.r, y: PAD.t + 10, "text-anchor": "end", fill: css("--warn"), "font-size": "9" }, svgEl); lt.textContent = `${aboveCount} above ${ymax.toFixed(1)}`; }
-      // H2: failure strip (grey × marks below axis)
+      const aboveY = cH - PAD.b + 26;
+      for (const [ei, jv] of okPts) { if (jv > ymax) { aboveCount++; const ax = xScale(ei); el("polygon", { points: `${ax},${aboveY - 7} ${ax - 4},${aboveY} ${ax + 4},${aboveY}`, fill: css("--warn") }, svgEl); } }
+      // H2: failure strip (grey × marks below axis, below the out-of-range row)
       if (failures.length) {
-        const stripY = cH - PAD.b + 8;
+        const stripY = cH - PAD.b + 38;
         const fstep = Math.max(1, Math.floor(failures.length / 500));
         for (let fi = 0; fi < failures.length; fi += fstep) {
           const [ei] = failures[fi];
           const fx = xScale(ei);
-          el("text", { x: fx, y: stripY + 5, "text-anchor": "middle", fill: css("--muted"), "font-size": "7" }, svgEl).textContent = "×";
+          el("text", { x: fx, y: stripY, "text-anchor": "middle", fill: css("--muted"), "font-size": "7" }, svgEl).textContent = "×";
         }
       }
       // IQR median line
@@ -3327,7 +3392,12 @@ async function viewRunDetail(id) {
       el("line", { x1: PAD.l, y1: PAD.t, x2: PAD.l, y2: cH - PAD.b, stroke: css("--rule"), "stroke-width": "0.8" }, svgEl);
       el("line", { x1: PAD.l, y1: cH - PAD.b, x2: cW - PAD.r, y2: cH - PAD.b, stroke: css("--rule"), "stroke-width": "0.8" }, svgEl);
       const cap2 = document.getElementById("conv-cap2");
-      if (cap2) cap2.textContent = `${okPts.length} evals ok, ${failures.length} failed (${Math.round(100 * failures.length / Math.max(1, nTotal))}%).`;
+      if (cap2) {
+        const pct = failures.length ? (100 * failures.length / Math.max(1, nTotal)) : 0;
+        const pctText = failures.length && pct < 0.1 ? "<0.1" : pct.toFixed(1);
+        const aboveNote = aboveCount ? ` · ${aboveCount} above axis range` : "";
+        cap2.textContent = `${okPts.length} evals ok, ${failures.length} failed (${pctText}%)${aboveNote}.`;
+      }
     }
   }
 
@@ -3447,42 +3517,67 @@ async function viewRunDetail(id) {
             yticks: logTicks(axLo, axHi), xlabel: "eval", ylabel: "axis ratio",
             series: [{ pts: apts, color: css("--accent"), w: 2 }], ariaLabel: "CMA axis ratio over evaluations" });
         }
-        // (c) Per-param σ as heat strip (stddev normalised to bound width)
+        // (c) Per-param σ as horizontal bars (stddev normalised to bound width), shared σ axis.
+        // The old heat strip encoded value as opacity, so a parameter with a small normalised σ
+        // (e.g. a wide bound) rendered effectively blank even though the data was present.
         const svgStd = document.getElementById("c-dyn-stddev");
         const paramNames = dyn2.param_names || [];
         const stddevByGen = dyn2.stddev || [];   // [nG][nP]
         if (svgStd && paramNames.length && stddevByGen.length) {
-          // per-param bound widths from d.sens
-          const boundWidths = paramNames.map(pn => {
-            const ps = (d.sens || []).find(s2 => s2.key === pn);
-            return ps ? (ps.hi - ps.lo || 1) : 1;
+          svgStd.innerHTML = "";
+          const barRows = stddevBars(stddevByGen, paramNames, d.sens || []);
+          const withData = barRows.filter(r => r.final != null);
+          const noData = barRows.filter(r => r.final == null);
+          const allVals = withData.flatMap(r => [r.lo, r.hi, r.final]).filter(v => v != null);
+          const svgW = Math.max(360, Math.round(svgStd.clientWidth || (svgStd.parentElement && svgStd.parentElement.clientWidth) || 500));
+          // Reserve a left margin proportional to the longest label; ellipsise anything longer.
+          const labelW = Math.min(180, Math.max(56, Math.max(...paramNames.map(pn => String(pn).length)) * 6 + 12));
+          const PAD2 = { l: labelW, r: 62, t: 12, b: 34 };
+          const rowH = 16;
+          const nRows = withData.length + noData.length;
+          const plotH = Math.max(40, nRows * rowH);
+          const svgH = plotH + PAD2.t + PAD2.b;
+          svgStd.setAttribute("viewBox", `0 0 ${svgW} ${svgH}`);
+          const xMax = Math.max(...allVals, 1e-6);
+          const plotW = Math.max(20, svgW - PAD2.l - PAD2.r);
+          const X = v => PAD2.l + (v / xMax) * plotW;
+          const axisY = PAD2.t + plotH;
+          const addLabel = (row, y) => {
+            const lt = el("text", { x: PAD2.l - 6, y: y + rowH / 2 + 3, "text-anchor": "end", "font-size": "10", fill: css("--label") }, svgStd);
+            lt.textContent = fitSvgLabel(row.key, PAD2.l - 10);
+            el("title", {}, lt).textContent = String(row.key);
+          };
+          withData.forEach((row, i) => {
+            const y = PAD2.t + i * rowH;
+            el("line", { x1: PAD2.l, y1: y + rowH / 2, x2: svgW - PAD2.r, y2: y + rowH / 2, stroke: css("--rule"), "stroke-width": "0.5", opacity: "0.45" }, svgStd);
+            // historical min–max band behind the final-σ bar
+            if (row.lo != null && row.hi != null && row.hi > row.lo) {
+              el("rect", { x: X(row.lo), y: y + rowH / 2 - 4, width: Math.max(0.6, X(row.hi) - X(row.lo)), height: 8, rx: 2, fill: css("--band"), opacity: "0.6" }, svgStd);
+            }
+            const barW = Math.max(2, X(row.final) - PAD2.l);
+            const rect = el("rect", { x: PAD2.l, y: y + rowH / 2 - 4, width: barW, height: 8, rx: 2, fill: css("--best"), opacity: "0.85" }, svgStd);
+            el("title", {}, rect).textContent = `${row.key}: final σ/bound = ${row.final.toPrecision(3)} (range ${row.lo.toPrecision(3)}–${row.hi.toPrecision(3)})`;
+            const vt = el("text", { x: Math.min(svgW - PAD2.r + 4, X(row.final) + 4), y: y + rowH / 2 + 3, "font-size": "9", fill: css("--label") }, svgStd);
+            vt.textContent = row.final.toPrecision(2);
+            addLabel(row, y);
           });
-          const rows = stddevByGen.map(gArr => gArr.map((sv, pi) => sv != null ? sv / boundWidths[pi] : null));
-          const nP = paramNames.length;
-          const hStd = Math.max(60, nP * 14);
-          svgStd.setAttribute("viewBox", `0 0 500 ${hStd}`);
-          const PAD2 = { l: 80, r: 20, t: 14, b: 20 };
-          const pH = (hStd - PAD2.t - PAD2.b) / nP;
-          const W2 = 500 - PAD2.l - PAD2.r;
-          // find global max for colour scale
-          const allStd = rows.flat().filter(v => v != null);
-          const stdMax = Math.max(...allStd, 1e-6);
-          rows.forEach((gArr, gi) => {
-            const gx = PAD2.l + (gi / nG) * W2;
-            const gw = Math.max(1, W2 / nG - 1);
-            gArr.forEach((sv, pi) => {
-              if (sv == null) return;
-              const alpha = Math.min(1, sv / stdMax);
-              const gy = PAD2.t + pi * pH;
-              const rect = el("rect", { x: gx, y: gy, width: gw, height: pH - 1, fill: css("--best"), opacity: alpha.toFixed(2) }, svgStd);
-            });
+          noData.forEach((row, i) => {
+            const y = PAD2.t + (withData.length + i) * rowH;
+            addLabel(row, y);
+            const nt = el("text", { x: PAD2.l + 6, y: y + rowH / 2 + 3, "font-size": "9", fill: css("--muted") }, svgStd);
+            nt.textContent = "no data";
           });
-          paramNames.forEach((pn, pi) => {
-            const ly = PAD2.t + pi * pH + pH * 0.75;
-            const lt = el("text", { x: PAD2.l - 4, y: ly, "text-anchor": "end", fill: css("--label"), "font-size": "10" }, svgStd);
-            lt.textContent = pn;
+          // shared x axis in σ / bound-width units (same scale for every row)
+          el("line", { x1: PAD2.l, y1: axisY, x2: svgW - PAD2.r, y2: axisY, stroke: css("--rule"), "stroke-width": "0.8" }, svgStd);
+          niceTicks(0, xMax, 4).forEach(tv => {
+            const tx = X(tv);
+            if (tx < PAD2.l - 0.5 || tx > svgW - PAD2.r + 0.5) return;
+            el("line", { x1: tx, y1: axisY, x2: tx, y2: axisY + 3, stroke: css("--rule") }, svgStd);
+            const lbl = el("text", { x: tx, y: axisY + 13, "text-anchor": "middle", fill: css("--label"), "font-size": "9" }, svgStd);
+            lbl.textContent = tv === 0 ? "0" : tv.toPrecision(2);
           });
-          el("line", { x1: PAD2.l, y1: PAD2.t, x2: PAD2.l, y2: hStd - PAD2.b, stroke: css("--rule"), "stroke-width": "0.8" }, svgStd);
+          const xl = el("text", { x: svgW - PAD2.r, y: axisY + 26, "text-anchor": "end", fill: css("--muted"), "font-size": "9" }, svgStd);
+          xl.textContent = "σ / bound width";
         }
       }
     }

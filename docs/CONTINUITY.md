@@ -31,6 +31,22 @@
   measured evidence (Home 1.2 s; runs-verify filter 16 rows / 7 parent links / 9 standalone;
   ed1da9 verification card numbers; elites warm 2.51 s; launch 2.03 s; compare filter; both themes,
   900/1400 px; screenshots in `docs/images/gui-acceptance-2026-11-12/`).
+- **Visual audit (same day, before push):** a full-page screenshot pass over run detail + verify view
+  found five render defects, all fixed and re-verified live:
+  - per-parameter σ heat strip was invisible (opacity encoding sent small normalised σ to ~0 alpha;
+    data was present — all 9 params) → replaced with real bars + label margin/ellipsis, min–max band,
+    shared x-axis (`data.py` keeps positional nulls now);
+  - circular polar overflowed its card (±60/±90 labels cut or outside, "on axis" collided with "0°")
+    → container-sized square viewBox + single `0° · on-axis` annotation;
+  - verify design table clipped at GATES (900 px) / pills overlapped DOF-TRIS (1400 px) →
+    horizontal-scroll wrappers + column min-widths + nowrap;
+  - gate-audit table clipped at 900 px → same scroll treatment;
+  - convergence footer claimed "0 failed (0%)" while 62 failures existed → honesty fix: footer now
+    counts null/invalid rows over the full resumed history ("139 evals ok, 62 failed (30.8%) · 72
+    above axis range"), matching the KPI strip; ▲ strip moved to the bottom per the caption.
+  New/updated tests: `test_gui_run_identity.py`, `test_gui_verify_panel.py`,
+  `test_gui_visual_audit_fixes.py` (new). Known cosmetic (ISSUES): light-theme balloon/polar
+  faintness, scatter label crowding, DI/On-axis single-card H+V series.
 - Tests: `tests/test_gui_chart_standards.py` (angleTicks), `tests/test_gui_verify_data.py`
   (name/band/brief regression), `tests/test_gui_verify_panel.py` (WP7 helpers), 
   `tests/test_gui_jobs_verify_designs.py` (24), `tests/test_gui_shell_ux.py` + `tests/test_gui_brief_authoring.py`

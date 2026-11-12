@@ -10,6 +10,7 @@ Local-only, added 2026-11-12 (**GUI finishing pass; no GitHub issue state change
 - Owner decision (2026-11-12): Home "Best horn per brief" window 14 → 31 days.
 - Live acceptance `docs/GUI_VERIFY_ACCEPTANCE_2026-11-12.md`: Appendix B 1–16 pass; screenshots `docs/images/gui-acceptance-2026-11-12/`.
 - Known cosmetic (NOT a GitHub issue): browser-default `/favicon.ico` 404 — one console error per session; index.html declares no favicon.
+- Known cosmetic (NOT a GitHub issue, visual audit 2026-11-12): light theme — 3D-balloon annotations/wireframe and the circular-polar outer grid are faint grey-on-white (candidates for `docs/GUI_CONTRAST_PLAN.md`); verify scatter labels crowd when several designs share a J value (cluster on ed1da9); DI and On-axis render one card each with H+V series (Beamwidth has separate H/V cards — C6 small multiples cover BW only). Run-detail per-parameter σ, circular polar overflow, verify/gate-audit table clipping, and the dishonest "0 failed" convergence footer were all fixed before this push (see `docs/GUI_VERIFY_ACCEPTANCE_2026-11-12.md`).
 
 Local-only, added 2026-11-12 (**GUI verify view front end WP3+WP6 implemented; no GitHub issue state changed**):
 - `verify.js` WP3+WP6 front end: pure-helper exports for the verify table, KPI strip, polar plot,
