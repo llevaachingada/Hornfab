@@ -162,7 +162,8 @@ def test_real_meh_end_to_end_gpu(tmp_path):
 
     cfg = load_config(TYPOLOGIES / "meh_t2a.yaml")
     space = DesignSpace.from_config(cfg)
-    backend = BeatBackend("cuda")
+    # mirror cli/cma: the config's cuda_fused must reach the host env, or the fused-path proof refuses
+    backend = BeatBackend("cuda", cuda_fused=bool(cfg.solve.cuda_fused))
     ctx = evmod.make_context(cfg, cache_dir=tmp_path / "cache", lib_shas={})
     ctx.write_ndjson = False
     ev = evmod.evaluate(space.seed, space, cfg, "screen", tmp_path / "run", None, backend, ctx=ctx)

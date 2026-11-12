@@ -77,6 +77,30 @@
   `tests/test_design_generators_lecleach.py`, `tests/test_design_generators_grid_half.py`.
 
 Newest entry first. Every push updates this file and `docs/ISSUES.md` in the same commit.
+## 2026-11-03 - CPU-VS-CUDA AUDIT: "CPU 6.4x FASTER" WAS A VRAM SPILL; MULTI-CHANNEL FUSED CUDA FOR THE MEH
+
+- **Finding [measured]:** PR #19's CUDA arm was the four-operator path (fused refused >1 channel), which at 8,044
+  dofs needs ~14 GB and pages ~6.9 GB into WDDM shared system memory (per-process `Shared Usage` counter) -
+  38.8-43.8 s/freq. `nvidia-smi` cannot see that. The "fresh host" resets were `taskkill /IM julia.exe`, a no-op
+  for the worker_host tree. The 40-design bench had CUDA faster on 34/40 (median 2.2x). Full write-up and the
+  withdrawn PR #19 conclusion: `docs/evidence/BENCH_AUDIT_2026-11-03.md`.
+- **Fork:** beat-bem `hornlab-search/meh-fused-cuda` @ `0850ef3` (on 1efdc6f): fused CUDA accepts multi-channel -
+  LHS once, `assemble_burton_miller_rhs_cuda` per extra channel, one LU. Opt-in flag unchanged; single channel
+  untouched; VENDORING.md entry. Julia MEH testset CUDA **16/16** (new fused-vs-four-operator per-channel check),
+  CPU 7/7. **Pin bumped to `0850ef3`** (pyproject, TOOLCHAIN) - the fork branch must be pushed before this lands.
+- **Measured on the T2 mesh:** fused 2-channel **2.66 s/freq, 2.1 GB, 80 MiB shared**; CPU 5.5-6.0 (15.4 right
+  after a spill); four-operator 38.8. Channel SPL fused-vs-CPU 4.2e-4 dB max, impedance matrix 3.4e-6 rel.
+- **Configs:** all five `examples/typologies/meh_2026-10-30/*.yaml` set `solve.cuda_fused: true` and dof caps
+  12,000 (the measured fused safe value). Config hashes change for MEH runs (intended: new solve path).
+- **Tooling:** `tools/bench/_bench_common.py` (tree-kill host reset, `GpuMemPeak` with shared-memory spill
+  flag); the four bench scripts use it; `cpu_vs_cuda_meh.py --cuda-fused`. CLAUDE.md GPU rule 1 no longer says
+  `taskkill /IM julia.exe`; new rule 8 (spill is invisible to nvidia-smi; Prefer No Sysmem Fallback).
+- `tests/test_end_to_end_meh.py::test_real_meh_end_to_end_gpu` now passes `cuda_fused` from the config, like
+  cli/cma (it hand-built the backend and the fused-path proof correctly refused). Real-GPU run green.
+- **Verification [measured]:** full local suite (GPU-marked tests included) **1,850 passed, 0 failed**, exit 0.
+- **Owner actions (system settings, not done by an agent):** NVIDIA Control Panel `julia.exe` -> CUDA Sysmem
+  Fallback Policy -> Prefer No Sysmem Fallback; move Chrome/Claude/Terminal/rbassist to the iGPU for solve sessions.
+
 ## 2026-11-02 - P11 TURNED ON: PUBLIC HF DATASET REPO PUBLISHED FOR THE COLLABORATOR
 
 - **Owner directive:** set up Hugging Face storage so the GitHub collaborator can pull "the solves we've done".

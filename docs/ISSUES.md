@@ -18,6 +18,13 @@ Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 20
 | #11 | [Q] Collin: OK with the hornlab-search name? | closed (keep until objection) | user | `docs/plan/README.md` |
 | #13 | hardening-review: Stage A surrogate gate-integrity and real-data traps | **open — fixes MERGED to main** (FF to 6d1d5c7 on 2026-10-22 carries e0b9b61 + 11304f6 + cloud reconciliation 152a829 verbatim; oracle pre-merge sign-off; full offline suite 533 PASS at the merged tree; awaiting owner close) | phase-2 (cloud) | `docs/plan/11_PHASE2_SURROGATE.md` §4 |
 
+Local-only, added 2026-11-03 (**CPU-vs-CUDA audit; no GitHub issue state changed**):
+- **PR #19 (`meh/integration`, open):** its conclusion "CPU is the faster engine for the MEH" is withdrawn - the
+  CUDA arm spilled into shared system memory (`docs/evidence/BENCH_AUDIT_2026-11-03.md`). Body/doc correction
+  pending owner approval to edit the PR.
+- **Pin `0850ef3`** (multi-channel fused CUDA): fork branch `hornlab-search/meh-fused-cuda` is pushed (verified 2026-11-12).
+- **Owner:** set CUDA Sysmem Fallback Policy to Prefer No Sysmem Fallback for `julia.exe`.
+
 Local-only, added 2026-11-01 (**PR #17 merged to main + the hardware-neutrality rule; no GitHub issue state changed**):
 - **Merged (squash):** Metal backend + Mac path, Hansen budget hint, staged A/B harness, CMA
   covariance dump, CMA pin plan, restart controls (jamescollinharky's PR #17). Two merge defects
@@ -130,14 +137,14 @@ Local-only, not pushed 2026-10-31 (**MEH wave 1 merging into `meh/integration`; 
   under a new `meh` group, with the three derived artifacts regenerated. The three CAD-only seeds are
   intentionally not catalogued (the native domain requires knobs; multicell_3x3 is its only CAD exception), and
   the catalog comment records that choice.
-- **MEASURED (full range + threads, 2026-11-03):** CUDA completes the 41-point 120-12k band at 38.5 s/frequency
+- **SUPERSEDED (four-operator CUDA arm, spill; see `BENCH_AUDIT_2026-11-03.md`):** CUDA completes the 41-point 120-12k band at 38.5 s/frequency
   (1,577 s, 7,924 MiB) while CPU is ~18.2 s/frequency; on the real 12-point screen grid CUDA is 4.0x faster
   (25.7 vs 103.0 s). Julia threads 1/8/24 make CUDA slower (0.88/0.96x) - it is GPU-bound. Concurrent CUDA
   solves are ruled out on 8 GB by the 7.9 GB single-solve peak.
-- **MEASURED (40-design sweep, 2026-11-03):** neither backend wins outright. CPU beats CUDA below 1k dofs and
+- **SUPERSEDED by the fused multi-channel path (`BENCH_AUDIT_2026-11-03.md`; four-operator CUDA arm):** neither backend wins outright. CPU beats CUDA below 1k dofs and
   above ~7k dofs (8.5k: 18.9 vs 53.6 s); CUDA is 1.5-4x faster at 1-7k. Physics parity 3.6e-05 dB. Practical
   rule: CUDA screens for 1-7k dofs, CPU above ~7k. Script `tools/bench/cuda_cpu_40designs.py`.
-- **MEASURED (2026-11-03 benchmark):** CPU is 6.4x faster than the 8 GB card at the production 8,044-dof MEH
+- **WITHDRAWN 2026-11-03 (CUDA arm spilled to shared memory; `docs/evidence/BENCH_AUDIT_2026-11-03.md`):** CPU is 6.4x faster than the 8 GB card at the production 8,044-dof MEH
   mesh (5.86 vs 37.2 s/frequency, SPL parity 5.0e-4 dB) and solves the 25,171-dof 16 kHz mesh in 100.7 s,
   which needs ~47 GiB of CUDA storage. **Revisit the GPU-first hardware conclusion for screening** (CPU may be
   the cheaper engine for this dof regime); the 16 kHz wall-resolution caveat (~10.3 kHz walls) still stands.

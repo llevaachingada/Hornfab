@@ -12,7 +12,6 @@ Output: runs/bench_cuda_threads_<UTC>/{log.txt, summary.json}
 from __future__ import annotations
 
 import json
-import subprocess
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -21,6 +20,7 @@ import numpy as np
 
 from hornlab_beat_bem import ObservationConfig, SolveConfig
 from hornlab_beat_bem.sweep import solve_frequencies
+from _bench_common import kill_hosts  # tree-kill hosts; sees WDDM shared-memory spill
 
 ROOT = Path(__file__).resolve().parents[2]
 MESH = ROOT / "runs" / "bench_fullrange_20261103T022309Z" / "mesh" / "mesh.msh"
@@ -39,11 +39,6 @@ def log(msg: str) -> None:
     LINES.append(line)
     print(line, flush=True)
     LOG.write_text("\n".join(LINES) + "\n", encoding="utf-8", newline="\n")
-
-
-def kill_hosts() -> None:
-    subprocess.run(["taskkill", "/F", "/IM", "julia.exe"], capture_output=True)
-    time.sleep(2)
 
 
 def main() -> int:
