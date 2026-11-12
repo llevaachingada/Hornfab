@@ -632,3 +632,25 @@ svg .iso-title { font-family: var(--f-body); font-size: 12px; font-weight: 600; 
   .sbox-3dwrap { height: 300px; }
 }
 @media (prefers-reduced-motion: reduce) { .typ-card[data-open] { transition: none; } }
+
+/* charts — WP9/WP10 additions */
+/* Off-axis family legend */
+#c-offaxis-legend { display: flex; flex-wrap: wrap; gap: 6px; font-size: 0.78rem; margin-top: 4px; }
+#c-offaxis-legend span { display: inline-flex; align-items: center; gap: 4px; }
+#c-offaxis-legend i { display: inline-block; width: 18px; height: 0; border-top: 2px solid currentColor; }
+/* Campaign cross-run history block */
+#camp-history-block { margin-top: 8px; }
+#c-camp-conv { width: 100%; }
+/* CMA dynamics block */
+#cma-dynamics-block .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+#cma-dynamics-block .grid2 > div { min-width: 0; }
+#cma-dynamics-block svg { width: 100%; }
+/* Convergence: out-of-range ▲ markers and failure × strip */
+#c-conv { width: 100%; }
+/* Search dynamics heat strip */
+#c-dyn-stddev { width: 100%; }
+/* Bounds bar in sens table (H6) */
+.sens-bounds-bar { display: inline-block; }
+/* dash-ref legend item */
+.dash-ref { display: inline-flex; align-items: center; gap: 4px; font-size: 0.78rem; }
+.dash-ref::before { content: ""; display: inline-block; width: 18px; height: 0; border-top: 1px dashed var(--label); }

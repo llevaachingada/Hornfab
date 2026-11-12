@@ -1,6 +1,30 @@
 # CONTINUITY
 
 
+## 2026-11-12 (WP9/WP10) — CHART STANDARDS + SEARCH HISTORY
+
+- **WP9 (C1–C15) chart standards** applied across run detail, campaign, and compare views:
+  - `charts.js`: `logGrid()` (C1 minor freq gridlines), `AXES` constants (C2/C3/C4), `fixedRange()`,
+    `polarPlot()` export (C12), `refLines` dotted style (C5), `markers` at solved frequencies (C7),
+    `unscored` hatch (C10), over-range band in `isobarMap` (C8), freq ticks in isobar (C9),
+    `ylog` parameter added for H5 sigma/axis-ratio charts.
+  - `app.js` acoustic chart block replaced: H/V BW small multiples (C6), fixed ranges, C13 off-axis family,
+    shared show-start toggle, C14 impedance y < 0 allowed, C15 hover crosshair via existing code.
+- **WP10 (H1–H9/H10) search history** implemented:
+  - `data.py`: `cma_dynamics()` reads `cma/fit.dat`, `stddev.dat`, `axlen.dat`; `has_atlas` added to `run_detail`.
+  - Convergence (H1–H4): out-of-range ▲ markers, failure × strip, IQR band + median line per gen,
+    resume vertical lines from `run.json.history`.
+  - Search dynamics card (H5): sigma/axis-ratio on log-y, per-param σ heat strip.
+  - Sensitivity bounds bar (H6): lo–hi track with best-value marker, top-6 spread band.
+  - QD atlas link conditional (H7): only shown when `d.has_atlas`.
+  - Evolution 3D already hidden by default (H8) — verified correct.
+  - Score breakdown sorted by best contribution, weight shown next to each term (H9).
+  - Campaign BW/DI charts updated to use `fixedRange(AXES.*)` and `refLines`/`markers`.
+  - Cross-run convergence history per family (H10): lazy-loads run data, plots best-so-far curves.
+  - `app.css`: appended `/* charts */` block for new element classes.
+- **Tests**: `tests/test_gui_chart_standards.py` (8 tests) + `tests/test_gui_search_history.py` (16 tests).
+- **All GUI tests green**: 349 passed.
+
 ## 2026-11-12 (20:20Z) - GUI VERIFY / HIGH-RES VIEW PLAN (DESIGN PASS, PLAN ONLY)
 
 - Wrote `docs/GUI_VERIFY_VIEW_PLAN_2026-11-12.md` (design pass: designer lane + Boundary Lab research lane,
