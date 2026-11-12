@@ -1,6 +1,21 @@
 # CONTINUITY
 
 
+## 2026-11-12 (21:15Z) - G FOLLOW-UP: MEASURED V8 TOLERANCES + FULL RE-SCORE (PR #47)
+
+- The merged G proposal shipped `V8_MEASURED_TOLERANCES` as all 1.0 placeholders and brief §4 as
+  `<!-- V8_RESULTS -->`. This lands the finished full-dataset re-score: per-class A/B/C tolerances
+  in `scalar_v8.py` and the full §4 tables.
+- [measured] `v8_rescore.py` over the committed dataset: 23,833 rows scored; class A 18,145 / 0
+  refusals, tau(v8,v4)=0.5004, top-20 4/20; class B 4,063 / 3,545 refusals (87%) / 518 rankable,
+  tau 0.7687, top-20 0/20; class C 1,625 / 0, tau 0.8150, top-20 13/20. The class-B refusal rate
+  is a data-eligibility result, not a v8 quality result.
+- Regression test pins the A/B/C `cov` values and A `dislope` and rejects an all-1.0 table. v8
+  stays unregistered; no brief or default changes.
+- Targeted: 40/0/0/0; full offline suite local run + CI.
+- NOTE for the queue branch: its GUI `_cpu_activity` still needs the `--verify-dir` / `*-verify`
+  update from PR #44 before that branch merges.
+
 ## 2026-11-12 (20:40Z) - FIX: VERIFY OUTPUTS ARE PER BACKEND (PR #44)
 
 - `verify --backend X` used to write every backend into `<run>/verify/`; a CPU verify overwrote the GPU

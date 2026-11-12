@@ -3,6 +3,12 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-10-25 (M6/WP12 pushed: enclosure mounting plumbed end-to-end (`brief.mounting` → the mesher's OWN keys; `-mnt-` cache keys; mesh_meta/ndjson/record echoes; absent = byte-for-bit) and MEASURED on two finalists — dofs +199.4 %/+106.5 %, both under the UNCHANGED caps, enclosure J improves (a different objective landscape — never rank across mountings), reference parity 2.91e-06 dB; **WP13 axisymmetric backend OWNER-DEFERRED** ("don't know how necessary that is"); suite **1372/0/0/0**; focused 71/0/0; evidence `docs/evidence/M6_WP12_2026-10-25.md`, byte-check 21/21; no GitHub issue state changed).
 
+Local-only, added 2026-11-12 (**G follow-up: measured v8 tolerances + full re-score, PR #47; no GitHub issue state changed**):
+- `scalar_v8.py` now ships the full-dataset per-class tolerances (23,833 rows scored) instead of
+  the 1.0 placeholders; brief §4 has the counters/tolerance/tau tables and the class-B 87%
+  hard-refusal caveat; a regression test pins the measured values. v8 remains unregistered and no
+  defaults changed. Targeted 40/0/0/0; CI.
+
 Local-only, added 2026-11-12 (**fix: verify outputs per backend, PR #44; no GitHub issue state changed**):
 - `verify --backend X` wrote every backend into `<run>/verify/`, overwriting the other lane's
   `response.npz`/`metrics.json` and mixing the rows. New `--verify-dir PATH`; a `--backend` mismatch now

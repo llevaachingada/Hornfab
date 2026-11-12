@@ -126,6 +126,18 @@ def test_measured_default_tolerances_exist_for_every_class_and_every_term():
         V8Params.for_class("Z")
 
 
+def test_measured_defaults_are_the_full_dataset_calibration_not_placeholders():
+    # Measured 2026-11-12 by tools/analysis/v8_rescore.py over 23,833 committed rows; the
+    # durable summary is docs/research/OBJECTIVE_V8_PROPOSAL_2026-11-12.md section 4. These
+    # pinned values catch a regression to the pre-calibration 1.0 placeholders.
+    assert V8_MEASURED_TOLERANCES["A"]["cov"] == pytest.approx(8.757688573042602)
+    assert V8_MEASURED_TOLERANCES["B"]["cov"] == pytest.approx(22.719221938279105)
+    assert V8_MEASURED_TOLERANCES["C"]["cov"] == pytest.approx(14.381957593015777)
+    assert V8_MEASURED_TOLERANCES["A"]["dislope"] == pytest.approx(0.17439423463107215)
+    for cls, tolerances in V8_MEASURED_TOLERANCES.items():
+        assert any(v != 1.0 for v in tolerances.values()), cls
+
+
 def test_resolve_weights_warns_and_ignores_unknown_keys():
     w = resolve_v8_weights({"cov": 2.0, "nope": 9})
     assert w["cov"] == 2.0 and w["rip"] == 1.0 and "nope" not in w
