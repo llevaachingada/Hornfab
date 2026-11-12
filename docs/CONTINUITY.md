@@ -1,6 +1,29 @@
 # CONTINUITY
 
 
+## 2026-11-12 (16:00Z) - DAY GROUP R: SEARCH-MATH RESEARCH DOSSIER
+
+- Day-plan group R (research continuation, PR #34, branch `day/R-research-dossier`): wrote
+  `docs/research/SEARCH_MATH_DOSSIER_2026-11.md` (docs-only, single repo file). Ten sections, owner
+  summary, ranked change table. Sources: verified primary-source pack (Hansen GECCO'19 lq-CMA-ES + pycma
+  `fitness_models` internals; Nomura et al. AAAI'21 arXiv:2012.06932 WS-CMA-ES — plan's "Shibata"
+  attribution corrected; Fontaine & Nikolaidis GECCO'23 arXiv:2205.10752 CMA-MAE + pyribs v0.12.1 tutorial;
+  IOHprofiler/COCO ECDF refs; SALib given-data methods) + repo file:line spot-checks at tip 2ecbc69 +
+  installed pycma 4.5.0 / ribs 0.12.0 venv source (read-only). 16 claims tagged [TO-VERIFY] with exact
+  reference-to-check; no fabricated refs.
+- [measured] scripts (offline, READ-ONLY over `runs/`, in `C:\Users\hunte\study_2026-11-12\research\`,
+  never in the repo): refusal shares over 415 runs / 34,475 ndjson rows = 13.8% total (invalid_geometry
+  9.1%, mesh_too_large 2.6%, invalid_envelope 1.7%) — consistent with, slightly below, the senior 16%
+  (scope differs, both retained); §8 power table: detecting delta=10% of the spread needs n=106 (group,
+  spread 26%) or 546 (v6 spread 59%) — past n=2-10 A/Bs were underpowered.
+- Key recommendations feeding B.6-B.8 and G: feasibility resampling before telling J=1000 (16% refusals),
+  lq-CMA-ES only after an offline LQModel tau>=0.85 replay test, same-brief warm starts (mean/sigma/shrunk
+  C0 + pycma inject), config-only BIPOP for budgets >=300, CMA-MAE on ribs 0.12 (learning_rate 0.01-0.1,
+  improvement ranker, NO emitter bounds — two confirmed mismatch mechanisms: emitter-bounds resampling
+  distortion and refused rows borrowing the seed's cell), objective v8 = linear RMS error units +
+  tolerances calibrated from top-decile medians + gates as refusals.
+- INDEX.md line added (research section). No code, no GPU, no solver runs; CI green required before merge.
+
 ## 2026-11-12 (14:30Z) - DAY QUEUE: GPU + CPU LANES LAUNCHED FROM THE COMPUTE STUDY
 
 - Study: `C:/Users/hunte/Hrns/study_2026-11-12/COMPUTE_STUDY.md` (414 runs inventoried, sensitivity, bound walls). Its queue
