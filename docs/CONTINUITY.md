@@ -410,6 +410,15 @@ both lanes solved):
   2026-10-22: FF to 6d1d5c7 = e0b9b61 + 11304f6 + 152a829; suite 533 PASS); mirrored in `docs/ISSUES.md`.
 - Docs-only lane; no pytest applicability; CI green on PR #33.
 
+## 2026-11-12 (15:10Z) - DAY HARDENING PLAN WRITTEN (runs while the GPU + CPU lanes solve)
+
+- `docs/IMPLEMENTATION_PLAN_2026-11-12_DAY.md`: six parallel groups for a delegating orchestrator, file ownership
+  disjoint, defaults unchanged, no GPU: A evolutionary-analysis toolkit (answers today's seed/narrow/staged/parity
+  experiments), B search features (data warm start, linked knobs, `narrow` subcommand, valid-only budget,
+  round-throat brief flag), C calibration harness + n1 throughput evidence, D night/data ops (two-lane status,
+  runner robustness, CPU-dataset merge behind parity, auto night report), E GUI (analysis, lanes, elites), F docs.
+- State: PRs #24, #26-#31 merged; #25 (line endings) held until the queues finish. Every branch pushed.
+
 ## 2026-11-12 (14:30Z) - DAY QUEUE: GPU + CPU LANES LAUNCHED FROM THE COMPUTE STUDY
 
 - Study: `C:/Users/hunte/Hrns/study_2026-11-12/COMPUTE_STUDY.md` (414 runs inventoried, sensitivity, bound walls). Its queue

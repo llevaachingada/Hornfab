@@ -122,6 +122,8 @@ Local-only, added 2026-11-12 (**integration; GitHub: PRs #19, #22, #23 close as 
 Local-only, added 2026-11-12 (day queue): staged-search brief path fix; narrowed ath_core cell; two-lane day queue live.
 Local-only, added 2026-11-12 (GUI diagnosis, read-only pass; owner chose "diagnose only" — no code changed; no GitHub issue state changed):
 
+Local-only, added 2026-11-12: day hardening plan (groups A-F) in `docs/IMPLEMENTATION_PLAN_2026-11-12_DAY.md`; #25 held until queues end; #13 to close (plan F.4).
+
 | ID | Title | Status | Owner | Plan ref |
 |---|---|---|---|---|
 | GUI-1 | Recent runs/queue progress not shown on Home/Status/Runs | CLOSED 2026-11-12 (all root causes fixed; see below) | owner-decided | gui/data.py, gui/static/app.js |
