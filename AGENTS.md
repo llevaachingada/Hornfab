@@ -213,3 +213,11 @@ Rules:
    really exits (check the process list) and test it. `detach_workers()` leaving a host warm is
    intended inside a search; it is not acceptable at the end of a measurement or checkpoint.
 7. A solver crash or OOM is only a finding once it reproduces from a clean state (rule 1).
+
+**Two lanes (2026-11-12).** "One GPU solve at a time" means one CUDA solve, and one CPU-backend search
+may run beside it. Lane identity is the BEAT worker registry directory: each lane sets its own
+`HORNLAB_BEAT_WORKER_DIR` (`runs\lanes\gpu\workers`, `runs\lanes\cpu\workers`), host-cleanup code kills
+only host trees whose command line carries its own lane's `--dir`, and a host whose lane cannot be
+determined is never killed (logged as `unknown host, left alone`). A `runs\.cpu.lane.lock` marker (same
+mechanism as `search/gpulock.py`, separate file) is held by the CPU lane; `gpu-clean` and the night
+runner's pre/post hygiene must not touch hosts of a lane whose lock is live.

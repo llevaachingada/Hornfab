@@ -87,6 +87,69 @@ def test_clear_julia_empty_list():
     assert clear_julia(procs=[]) == []
 
 
+# ------------------------------------------------------------------ lane rule (two-lane night)
+
+
+def _host_cmd(lane):
+    return (f"python.exe -m hornlab_beat_bem.worker_host --key C:\\w\\k.json "
+            f"--dir C:\\r\\runs\\lanes\\{lane}\\workers")
+
+
+def test_clear_julia_with_a_lane_kills_only_that_lane(tmp_path):
+    import hornlab_search.search.hygiene as hyg_mod
+    procs = [
+        {"pid": 2001, "cmdline": _host_cmd("gpu")},
+        {"pid": 2002, "cmdline": _host_cmd("cpu")},
+        {"pid": 2003, "cmdline": "julia.exe /hornlab/beat_server.jl"},    # unknown lane
+    ]
+    with patch.object(hyg_mod, "_is_windows", return_value=True), \
+         patch("subprocess.run", return_value=MagicMock(returncode=0)):
+        killed = clear_julia(procs=procs, lane="gpu", runs_root=tmp_path)
+    assert killed == [2001]
+
+
+def test_clear_julia_with_a_lane_leaves_unknown_hosts_alone(tmp_path, caplog):
+    import hornlab_search.search.hygiene as hyg_mod
+    procs = [{"pid": 2010, "cmdline": "julia.exe /hornlab/beat_server.jl"}]
+    with patch.object(hyg_mod, "_is_windows", return_value=True), \
+         patch("subprocess.run", return_value=MagicMock(returncode=0)) as mock_run, \
+         caplog.at_level("INFO", logger="hornlab_search.search.hygiene"):
+        killed = clear_julia(procs=procs, lane="gpu", runs_root=tmp_path)
+    assert killed == []
+    mock_run.assert_not_called()
+    assert any("unknown host, left alone" in r.getMessage() for r in caplog.records)
+
+
+def test_clear_julia_respects_a_live_other_lane_lock(monkeypatch):
+    import hornlab_search.search.hygiene as hyg_mod
+    from hornlab_search.solve import worker
+    monkeypatch.setattr(worker, "live_locked_lanes", lambda root=None: {"cpu"})
+    procs = [
+        {"pid": 2020, "cmdline": _host_cmd("gpu")},
+        {"pid": 2021, "cmdline": _host_cmd("cpu")},
+    ]
+    with patch.object(hyg_mod, "_is_windows", return_value=True), \
+         patch("subprocess.run", return_value=MagicMock(returncode=0)):
+        killed = clear_julia(procs=procs, lane="gpu")
+    assert killed == [2020]                    # cpu host protected by its live lock
+
+
+def test_clear_julia_is_not_blocked_by_its_own_lane_lock(monkeypatch):
+    """The night controller holds .cpu.lane.lock and calls gpu-clean --lane cpu as a child; the
+    holder is this lane's authority, so the CPU lane's own hosts must still be cleaned."""
+    import hornlab_search.search.hygiene as hyg_mod
+    from hornlab_search.solve import worker
+    monkeypatch.setattr(worker, "live_locked_lanes", lambda root=None: {"cpu"})
+    procs = [
+        {"pid": 2030, "cmdline": _host_cmd("gpu")},
+        {"pid": 2031, "cmdline": _host_cmd("cpu")},
+    ]
+    with patch.object(hyg_mod, "_is_windows", return_value=True), \
+         patch("subprocess.run", return_value=MagicMock(returncode=0)):
+        killed = clear_julia(procs=procs, lane="cpu")
+    assert killed == [2031]                    # own lane cleaned, gpu left alone
+
+
 def test_clear_julia_skips_nonmatching():
     """When all processes are non-matching, nothing is killed."""
     import hornlab_search.search.hygiene as hyg_mod

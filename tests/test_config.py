@@ -31,7 +31,9 @@ OPTIONAL_FIELDS = {"search.popsize", "search.restarts", "search.qd", "mesh.band_
                    "solve.near_correction", "solve.near_correction_cutoff",
                    "solve.near_correction_order", "solve.solve_precision",
                    # WP16: J0 source-profile angle; absent = today.
-                   "solve.source_profile_alpha"}
+                   "solve.source_profile_alpha",
+                   # CPU lane 2026-11-12: Julia/BLAS thread count; absent = the library's "auto".
+                   "solve.julia_threads"}
 
 
 def _load_example(name):

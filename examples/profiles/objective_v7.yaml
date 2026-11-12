@@ -1,0 +1,18 @@
+# objective_v7: the objective keys identical across every brief in
+# examples/briefs/hardened_2026-10-29_v5/ (8 briefs; those briefs now say version 7 — the
+# 2026-10-29 "v5" objective was renumbered to v7 on 2026-11-12 because main's v5 is the MEH
+# system objective). The per-brief keys (tolerances.cov/diag/dislope/distd/rip, cov_below_f0)
+# differ between briefs and stay in each brief.
+# Partial file: only meaningful as a brief `extends:` base.
+objective:
+  version: 7
+  bw8k_floor: 0.75
+  cov_narrow_ratio: 2.0
+  lfp_crossover_ratio: 1.6
+  lfp_re_z: 0.2
+  loaded_re_z: 0.5
+  tolerances:
+    di: 0.4
+    flat: 1.5
+    flat_cv: 1.5
+    load: 0.3

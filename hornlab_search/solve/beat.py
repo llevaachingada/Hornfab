@@ -128,6 +128,15 @@ def _source_profile_kwargs(extra: dict | None) -> dict:
     return {"source_profile_alpha": float(extra["source_profile_alpha"])}
 
 
+def _julia_threads_kwargs(julia_threads: int | None) -> dict:
+    """CPU second lane (2026-11-12): the SolveConfig kwarg for the host's thread count.
+
+    The value must match the one ``warm_up``/``get_worker`` was keyed on, or the library starts a
+    SECOND host (H9). None -> NOT sent, so the library's own "auto" is today's exact config and no
+    existing solve changes."""
+    return {} if julia_threads is None else {"julia_threads": int(julia_threads)}
+
+
 def check_symmetry_pairing(mesh: MeshResult) -> None:
     """Silent killer #2: the symmetry flag must be the one ``mesh/sizing.SYMMETRY_PLANE`` derives
     from ``quadrants``. A mismatch is a bug, not a bad candidate, so it RAISES (never becomes a
@@ -614,14 +623,22 @@ class BeatBackend:
 
     def __init__(self, device: str, timeout_s: float | None = None, track_vram: bool = True,
                  per_frequency_calls: bool | None = None, notes_path=None,
-                 cuda_fused: bool = False, freq_batch_size: int | None = None):
+                 cuda_fused: bool = False, freq_batch_size: int | None = None,
+                 julia_threads: int | None = None):
         if device not in ("cuda", "metal", "cpu"):
             raise ValueError(f"device must be 'cuda', 'metal', or 'cpu', got {device!r}")
         if cuda_fused and device != "cuda":
             raise ValueError(f"cuda_fused is only implemented for the cuda backend, got {device!r}")
+        if julia_threads is not None and (isinstance(julia_threads, bool)
+                                          or not isinstance(julia_threads, int)
+                                          or julia_threads < 1):
+            raise ValueError(f"julia_threads must be a positive integer or None, got {julia_threads!r}")
         self.device = device
         self.name = f"beat_{device}"
         self.timeout_s = timeout_s
+        # CPU second lane: both warm_up (via worker.start_beat_worker) and SolveConfig MUST carry
+        # this same value, or the library keys a second host on the mismatch (H9).
+        self.julia_threads = julia_threads
         # nvidia-smi VRAM polling is CUDA-only; Metal uses unified memory (no separate pool probe).
         self.track_vram = bool(track_vram) and device == "cuda"
         # CUDA: mandatory (689 s vs 33 s at 5,140 dofs). CPU: measured no cliff (4,530 dofs, 4 freqs:
@@ -664,7 +681,7 @@ class BeatBackend:
     def warm(self) -> None:
         """Boot the persistent host and JIT the kernels. Use ``solve.worker.warm(backend)`` so
         stale hosts are cleared first and the call is idempotent."""
-        worker.start_beat_worker(self.device)
+        worker.start_beat_worker(self.device, julia_threads=self.julia_threads)
 
     def release(self) -> None:
         """Stop the host and verify it is gone (``worker.shutdown``). Raises
@@ -743,6 +760,9 @@ class BeatBackend:
             # WP16: forwarded under the library's own field name, ONLY when the key is present in
             # `extra` (absent = the SolveConfig default 0.0, i.e. today's dict byte-for-byte).
             **_source_profile_kwargs(spec.extra),
+            # CPU second lane: the SAME thread count the host was warmed with (H9: a mismatch
+            # spawns a second host). Absent = the library's "auto", exactly as before.
+            **_julia_threads_kwargs(getattr(self, "julia_threads", None)),
             sound_speed=C_AIR,
             observation=observation,
             frame_override=frame,

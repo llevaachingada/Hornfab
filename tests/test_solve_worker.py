@@ -286,6 +286,119 @@ def test_recover_after_failure_drops_warm_state_and_force_clears(monkeypatch):
     assert not worker.is_warm("beat_cuda") and t.killed == [100]
 
 
+# ------------------------------------------------------------------ lane identity (two-lane night)
+
+
+LANED_HOSTCMD = ("python.exe -m hornlab_beat_bem.worker_host --key C:\\w\\{k}.key.json "
+                 "--dir C:\\r\\runs\\lanes\\{lane}\\workers")
+
+
+def laned_host(base_pid: int, lane: str, key: str = "a", parent: int = 1):
+    cmd = LANED_HOSTCMD.format(k=key, lane=lane)
+    return [
+        ProcInfo(base_pid, parent, "python.exe", cmd),
+        ProcInfo(base_pid + 1, base_pid, "python.exe", cmd),
+        ProcInfo(base_pid + 2, base_pid + 1, "julialauncher.exe",
+                 r"julia.EXE --project=C:\v\hornlab_beat_bem\julia solver.jl --worker"),
+        ProcInfo(base_pid + 3, base_pid + 2, "julia.exe", r"C:\julia\bin\julia.exe"),
+    ]
+
+
+def test_derive_lane_reads_the_workers_parent_only():
+    assert worker.derive_lane(r"C:\r\runs\lanes\gpu\workers") == "gpu"
+    assert worker.derive_lane("/home/u/runs/lanes/CPU/workers") == "cpu"
+    assert worker.derive_lane(r"C:\w") is None            # not a registry dir
+    assert worker.derive_lane(r"C:\r\runs\lanes\gpu") is None
+    assert worker.derive_lane(None) is None
+
+
+def test_host_lane_parses_dir_forms():
+    assert worker.host_registry_dir("python -m x --dir C:\\a\\lanes\\gpu\\workers") == \
+        "C:\\a\\lanes\\gpu\\workers"
+    assert worker.host_registry_dir('python -m x --dir="C:\\a\\lanes\\cpu\\workers"') == \
+        "C:\\a\\lanes\\cpu\\workers"
+    assert worker.host_registry_dir("python -m x --key k") is None
+    assert worker.host_lane("python -m x --dir C:\\a\\lanes\\cpu\\workers") == "cpu"
+    assert worker.host_lane("julia.exe C:\\julia\\bin\\julia.exe") is None
+
+
+def test_lane_filter_kills_only_my_lane_and_keeps_unknown(caplog):
+    t = Table(BYSTANDERS + laned_host(100, "gpu") + laned_host(200, "cpu"))
+    with caplog.at_level(logging.INFO, logger="hornlab_search.solve.worker"):
+        killed = worker.clear_stale_hosts(lister=t.lister, killer=t.killer, vram_probe=lambda: None,
+                                          lane="gpu", force=True, sleep=nosleep)
+    assert killed == [100]
+    assert {p.pid for p in t.procs} == {p.pid for p in BYSTANDERS} | {200, 201, 202, 203}
+    assert not any("unknown host" in r.getMessage() for r in caplog.records)
+
+
+def test_unknown_lane_host_is_never_killed_and_logged(caplog):
+    t = Table(BYSTANDERS + host(100, "a"))            # --dir C:\w -> unknown lane
+    with caplog.at_level(logging.INFO, logger="hornlab_search.solve.worker"):
+        killed = worker.clear_stale_hosts(lister=t.lister, killer=t.killer, vram_probe=lambda: None,
+                                          lane="gpu", force=True, sleep=nosleep)
+    assert killed == [] and t.killed == []
+    assert any("unknown host, left alone" in r.getMessage() for r in caplog.records)
+
+
+def test_a_live_lane_lock_protects_that_lanes_hosts(monkeypatch):
+    t = Table(laned_host(100, "gpu") + laned_host(200, "cpu"))
+    monkeypatch.setattr(worker, "live_locked_lanes", lambda root=None: {"gpu"})
+    killed = worker.clear_stale_hosts(lister=t.lister, killer=t.killer, vram_probe=lambda: None,
+                                      force=True, sleep=nosleep)
+    assert killed == [200]                               # gpu protected, cpu cleared
+    assert {p.pid for p in t.procs} == {100, 101, 102, 103}
+
+
+def test_recover_after_failure_forwards_the_lane(monkeypatch):
+    seen = {}
+    monkeypatch.setattr(worker, "clear_stale_hosts", lambda **k: seen.update(k) or [])
+    worker.recover_after_failure("beat_cpu", drop_clients=lambda: None, lane="cpu")
+    assert seen["lane"] == "cpu" and seen["force"] is True
+
+
+def test_my_own_lanes_live_lock_does_not_block_my_cleanup(monkeypatch):
+    """The lock holder is this lane's authority (the night controller asks for hygiene), so its
+    live lock protects it from OTHER lanes, never from itself."""
+    t = Table(laned_host(100, "gpu") + laned_host(200, "cpu"))
+    monkeypatch.setattr(worker, "live_locked_lanes", lambda root=None: {"cpu"})
+    killed = worker.clear_stale_hosts(lister=t.lister, killer=t.killer, vram_probe=lambda: None,
+                                      lane="cpu", force=True, sleep=nosleep)
+    assert killed == [200]                               # my lane cleared, gpu left alone
+    assert {p.pid for p in t.procs} == {100, 101, 102, 103}
+
+
+def test_shutdown_in_a_lane_leaves_the_other_lane_and_unknown_hosts_alone():
+    t = Table(BYSTANDERS + laned_host(100, "gpu") + laned_host(200, "cpu") + host(300, "u"))
+    forced = worker.shutdown(lister=t.lister, killer=t.killer, sleep=nosleep, timeout_s=0.0,
+                             stop_fn=lambda: None, lane="gpu")
+    assert forced == [100]
+    assert t.killed == [100]
+    assert {100, 101, 102, 103}.isdisjoint({p.pid for p in t.procs})
+    assert {200, 201, 202, 203, 300, 301, 302, 303} <= {p.pid for p in t.procs}
+
+
+def test_shutdown_without_a_lane_keeps_the_historical_all_hosts_behaviour():
+    t = Table(BYSTANDERS + laned_host(100, "gpu") + laned_host(200, "cpu"))
+    forced = worker.shutdown(lister=t.lister, killer=t.killer, sleep=nosleep, timeout_s=0.0,
+                             stop_fn=lambda: None)
+    assert forced == [100, 200]
+    assert worker.list_beat_hosts(t.lister) == []
+
+
+def test_start_beat_worker_forwards_julia_threads_only_when_set(monkeypatch):
+    import sys
+    import types
+    seen: dict = {}
+    fake = types.SimpleNamespace(warm_up=lambda **k: seen.update(k))
+    monkeypatch.setitem(sys.modules, "hornlab_beat_bem", fake)
+    worker.start_beat_worker("cpu", julia_threads=12)
+    assert seen == {"beat_backend": "cpu", "mode": "tiny", "julia_threads": 12}
+    seen.clear()
+    worker.start_beat_worker("cpu")
+    assert seen == {"beat_backend": "cpu", "mode": "tiny"}   # absent == library "auto"
+
+
 # ------------------------------------------------------------------ handlers, vram monitor
 
 

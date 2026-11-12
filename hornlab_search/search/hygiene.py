@@ -25,6 +25,20 @@ log = logging.getLogger("hornlab_search.search.hygiene")
 # Keywords that identify Julia processes started by this project (CLAUDE.md rule)
 _PROJECT_KEYWORDS = ("hornlab", "beat")
 
+#: Default for ``lane=``: derive it from HORNLAB_BEAT_WORKER_DIR (and fall back to the historical
+#: keyword-only behaviour outside a lane). Distinct from an explicit None.
+_AUTO_LANE = object()
+
+
+def _lane_helpers():
+    """The shared lane classifier from ``solve.worker`` (one source of truth, no duplication)."""
+    from ..solve import worker
+    return worker
+
+
+def _default_lane() -> str | None:
+    return _lane_helpers().lane_from_env()
+
 
 def _is_windows() -> bool:
     return platform.system() == "Windows"
@@ -114,13 +128,33 @@ def _cmdline_matches(cmdline: str) -> bool:
 # ------------------------------------------------------------------ killing
 
 
-def clear_julia(procs: list[dict[str, Any]] | None = None) -> list[int]:
-    """Kill only Julia processes that belong to this project.
+def clear_julia(procs: list[dict[str, Any]] | None = None, *,
+                lane: str | None | object = _AUTO_LANE,
+                runs_root=None, force: bool = False) -> list[int]:
+    """Kill only Julia/BEAT processes that belong to this project AND to ``lane``.
 
     If ``procs`` is None, calls :func:`list_project_julia` first.
     Returns the list of PIDs that were killed (or attempted).
     Only processes whose command line contains 'hornlab' or 'beat' are touched.
+
+    Two-lane rule (2026-11-12). ``lane`` defaults to the lane named by
+    ``HORNLAB_BEAT_WORKER_DIR``. With a lane, a process is killed only when its ``--dir`` names the
+    SAME lane; a process whose lane cannot be determined is logged as ``unknown host, left alone``
+    and kept, and a host of ANOTHER lane whose lock is live is never touched (unless ``force``).
+    Our own lane's live lock never blocks us: its holder is this lane's authority (the night
+    controller), which is the process calling pre/post hygiene. With no lane at all the historical
+    keyword-only behaviour is preserved.
     """
+    worker_mod = _lane_helpers()
+    resolved_lane = _default_lane() if lane is _AUTO_LANE else (lane or None)
+    protected: set[str] = set()
+    if not force:
+        try:
+            protected = worker_mod.live_locked_lanes(runs_root)
+        except Exception:  # noqa: BLE001 - lock lookup must never stop a cleanup
+            protected = set()
+        if resolved_lane is not None:
+            protected.discard(str(resolved_lane).lower())
     if procs is None:
         procs = list_project_julia()
     killed = []
@@ -131,6 +165,18 @@ def clear_julia(procs: list[dict[str, Any]] | None = None) -> list[int]:
             log.warning("clear_julia: skipping pid %d — cmdline does not match project keywords: %.120s",
                         pid, cmdline)
             continue
+        pl = worker_mod.host_lane(cmdline)
+        if pl is not None and pl in protected:
+            log.warning("clear_julia: lane %s lock is live; leaving pid %d alone", pl, pid)
+            continue
+        if resolved_lane is not None:
+            if pl is None:
+                log.info("unknown host, left alone: pid %d (lane %s)", pid, resolved_lane)
+                continue
+            if pl != str(resolved_lane).lower():
+                log.info("clear_julia: pid %d belongs to lane %s (mine %s); left alone",
+                         pid, pl, resolved_lane)
+                continue
         log.info("clear_julia: killing julia pid %d (%.80s)", pid, cmdline)
         try:
             if _is_windows() or _SIGKILL is None:

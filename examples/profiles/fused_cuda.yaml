@@ -1,0 +1,10 @@
+# fused_cuda: backend overlay. Pull in with `extends: <rel>/profiles/fused_cuda.yaml`.
+# Enables the WP15 fused CUDA Burton-Miller path and raises the verify/final dof caps to the
+# measured safe value (docs/evidence/FUSED_CUDA_2026-10-24.md: 12,183 quarter dofs fused in
+# 13.7 s/freq on the 8 GB RTX 4060). Screen cap is left to the base config.
+# Partial file: only meaningful as an `extends:` base, not loadable on its own.
+solve:
+  cuda_fused: true
+mesh:
+  dof_cap_verify: 12000
+  dof_cap_final: 12000
