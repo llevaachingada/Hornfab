@@ -638,3 +638,83 @@ svg .iso-title { font-family: var(--f-body); font-size: 12px; font-weight: 600; 
   letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); }
 #app-nav ul li.nav-group-label:first-child { padding-top:4px; }
 @media (max-width:700px) { #app-nav ul li.nav-group-label { display:none; } }
+/* ── verify view ─────────────────────────────────────────────────────────────── */
+/* WP3 (table, KPIs, scatter) + WP6 (panel, compare) */
+
+/* KPI strip */
+.vfy-kpi-strip { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.vfy-kpi { display: flex; flex-direction: column; gap: 2px; }
+.vfy-kpi-val { font-family: var(--f-mono); font-size: 1.1rem; font-weight: 600;
+               color: var(--ink); line-height: 1.1; }
+.vfy-kpi-label { font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
+
+/* Fidelity pills */
+.vfy-fidelity-pills { gap: 6px; }
+.verify-fidelity-pill { background: color-mix(in srgb, var(--good) 15%, var(--surface));
+                        border: 1px solid color-mix(in srgb, var(--good) 30%, transparent); }
+.screen-fidelity-pill { background: color-mix(in srgb, var(--seed) 12%, var(--surface));
+                        border: 1px solid color-mix(in srgb, var(--seed) 25%, transparent); }
+.vfy-standalone-pill { background: color-mix(in srgb, var(--warn) 15%, var(--surface));
+                       border: 1px solid color-mix(in srgb, var(--warn) 30%, transparent); }
+.verify-tier-pill { background: color-mix(in srgb, var(--good) 15%, var(--surface));
+                    border: 1px solid color-mix(in srgb, var(--good) 30%, transparent);
+                    font-size: 0.72rem; }
+
+/* Table */
+.vfy-row { cursor: pointer; }
+.vfy-row:hover { background: var(--accent-soft, color-mix(in srgb, var(--accent) 8%, var(--surface))); }
+.vfy-row[aria-selected="true"] { background: color-mix(in srgb, var(--best) 12%, var(--surface)); }
+.vfy-row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.vfy-hash { font-family: var(--f-mono); font-size: 0.82rem; }
+.vfy-open-btn { font-size: 0.72rem; padding: 1px 7px; }
+.vfy-gates { max-width: 160px; }
+
+/* Delta text colours */
+.bad-text  { color: var(--bad); }
+.good-text { color: var(--good); }
+
+/* Toolbar */
+.vfy-copyable { background: var(--bg); border: 1px solid var(--rule); border-radius: 4px;
+               padding: 6px 10px; font-size: 0.82rem; white-space: pre-wrap; word-break: break-all;
+               user-select: all; }
+
+/* Empty state */
+.vfy-empty { max-width: 600px; }
+
+/* Panel */
+.vfy-panel { gap: 14px; }
+.vfy-panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.vfy-panel-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.vfy-freq-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 14px; }
+.vfy-freq-slider { flex: 1 1 160px; min-width: 80px; accent-color: var(--accent); }
+.vfy-ghost-label { display: flex; align-items: center; gap: 5px; font-size: 0.84rem; cursor: pointer; }
+.vfy-charts-row { align-items: start; }
+
+/* Gates card */
+.vfy-gates-card { padding: 10px 14px; }
+.vfy-gates-row { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* Density card */
+.vfy-density-card { padding: 10px 14px; font-size: 0.84rem; }
+
+/* Ready to print checklist */
+.vfy-checklist { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 8px; }
+.vfy-checklist-item { display: flex; gap: 10px; align-items: flex-start; font-size: 0.88rem; }
+.vfy-check-icon { font-size: 1rem; min-width: 1.1em; text-align: center; line-height: 1.4; }
+.vfy-checklist-item.pass .vfy-check-icon { color: var(--good); }
+.vfy-checklist-item.fail .vfy-check-icon { color: var(--bad); }
+.vfy-checklist-item.unknown .vfy-check-icon { color: var(--warn); }
+.vfy-checklist-item.na .vfy-check-icon { color: var(--muted); }
+
+/* Compare selector */
+.vfy-compare-sel { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 10px 14px; }
+
+/* Screen-reader only */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden;
+           clip: rect(0 0 0 0); white-space: nowrap; }
+
+@media (max-width: 760px) {
+  .vfy-kpi-strip { gap: 6px 12px; }
+  .vfy-kpi-val { font-size: 0.95rem; }
+  .vfy-charts-row { grid-template-columns: 1fr !important; }
+}

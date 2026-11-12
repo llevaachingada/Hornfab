@@ -487,10 +487,11 @@ export function drawRadar(canvas, payload, fi, azDeg) {
 
 // ── View ───────────────────────────────────────────────────────────
 
-export async function viewBalloon(root, runId) {
+export async function viewBalloon(root, runId, tier = "screen") {
   root.innerHTML = `<p class="muted">Loading balloon…</p>`;
   let pick;
-  try { pick = await api("/api/balloon/" + encodeURIComponent(runId)); }
+  const tierParam = tier && tier !== "screen" ? "?tier=" + encodeURIComponent(tier) : "";
+  try { pick = await api("/api/balloon/" + encodeURIComponent(runId) + tierParam); }
   catch (e) {
     if (root.isConnected) root.innerHTML = `<div class="alert error"><b>Error:</b> ${esc(e.message)}</div>`;
     return;
@@ -578,7 +579,7 @@ export async function viewBalloon(root, runId) {
   async function loadDesign(hash) {
     wrap.innerHTML = `<div class="view3d-fallback">Loading balloon…</div>`;
     let P;
-    try { P = await api(`/api/balloon/${encodeURIComponent(runId)}/${encodeURIComponent(hash)}`); }
+    try { P = await api(`/api/balloon/${encodeURIComponent(runId)}/${encodeURIComponent(hash)}${tierParam}`); }
     catch (e) {
       if (wrap.isConnected) wrap.innerHTML = `<div class="view3d-fallback">Could not load balloon: ${esc(e.message)}</div>`;
       return;

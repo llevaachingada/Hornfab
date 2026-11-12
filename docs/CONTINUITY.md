@@ -1,6 +1,23 @@
 # CONTINUITY
 
 
+## 2026-11-12 (22:10Z) - GUI VERIFY VIEW FRONT END (WP3 + WP6, feat/gui-verify-ui)
+
+- Implemented WP3 (verify table view) and WP6 (per-design panel) in `hornlab_search/gui/static/verify.js`.
+  Pure helpers exported: `parseVerifyQuery`, `buildVerifyQuery`, `deltaCellHtml`, `sortRows`,
+  `fidelityPillsHtml`, `summaryHtml`, `emptyStateHtml`, `standaloneHeaderHtml`, `nearestFreqIndex`,
+  `bandDeltaStats`, `checklistHtml`, `polarPlot`, `viewVerify`.
+- Added optional `tier` argument to `viewBalloon` and inner `loadDesign` fetch in `balloon.js`
+  (backward-compatible default `"screen"`).
+- Appended `/* verify view */` CSS block to `hornlab_search/gui/static/app.css` (KPI strip,
+  fidelity pills, table rows, delta text colours, panel, gates card, checklist, compare selector).
+- New tests: `tests/test_gui_verify_table.py` (20 tests, WP3 pure helpers) and
+  `tests/test_gui_verify_panel.py` (17 tests, WP6 pure helpers + node --check). All 37 green.
+- Full `-k gui` suite: **362 passed, 0 failed**.
+- Did NOT edit: `app.js`, `charts.js`, `data.py`, `data_verify.py`, `server.py`, `index.html`
+  (other-agent-owned). `polarPlot` lives in `verify.js` as directed; `charts.js` untouched.
+
+
 ## 2026-11-12 (20:20Z) - GUI VERIFY / HIGH-RES VIEW PLAN (DESIGN PASS, PLAN ONLY)
 
 - Wrote `docs/GUI_VERIFY_VIEW_PLAN_2026-11-12.md` (design pass: designer lane + Boundary Lab research lane,
