@@ -578,21 +578,10 @@ async function viewHome() {
     </div>`;
   }
 
-  // CPU second lane card (2026-11-12): its lock, tonight's queue job, and live verify output
-  const cpuLock = statusData.cpu_lock;
-  const cpuJob = statusData.cpu_job || {};
-  const cpuCur = statusData.cpu_current;
-  const cpuCard = (cpuLock && cpuLock.alive)
-    ? `<div class="card status-card">
-        <div class="label">CPU lane</div>
-        <div class="value">busy</div>
-        <div class="sub" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60ch">${esc(cpuJob.name || "working")}${cpuJob.started ? ` · started ${esc(timeSince(cpuJob.started))}` : ""}</div>
-        <div class="sub">${cpuCur ? `${cpuCur.n}${cpuJob.target ? " / " + cpuJob.target : ""} verified · latest ${esc(timeSince(cpuCur.last))}` : "no verify output yet"}</div>
-      </div>`
-    : `<div class="card status-card">
-        <div class="label">CPU lane</div>
-        <div class="value">idle</div>
-      </div>`;
+  // CPU second lane card (2026-11-12): same running-card treatment as the GPU lane, from the
+  // additive cpu_current block (or the older cpu_job/cpu_lock shape). Sits right after the GPU
+  // card so the two running lanes read as a pair.
+  const cpuCard = cpuRunningCardHtml(statusData, { home: true });
 
   // Best horn per brief: from /api/leaders (latest campaign of the strongest tier per brief, ranked by
   // median score; never from raw runs, which include superseded and out-of-envelope designs).
@@ -623,8 +612,8 @@ async function viewHome() {
     </div>
     ${guideHtml}
     ${gpuCard}
-    <div id="home-lanes"></div>
     ${cpuCard}
+    <div id="home-lanes"></div>
     <div id="home-leaders">${bestBriefHtml}</div>
     ${queuesBlockHtml(statusData)}
     ${quickLinks}
@@ -711,7 +700,7 @@ function renderStatus(data, jobs = []) {
       </div>
       <div class="status-grid" id="st-cards">
         <div id="st-lock">${lockCardHtml(lock)}</div>
-        <div id="st-cpu">${cpuLaneCardHtml(data)}</div>
+        <div id="st-cpu" class="status-card">${cpuLaneCardHtml(data)}</div>
         <div class="status-card">
           <div class="label">${tip("dims", "VRAM used")}</div>
           <div class="value num" id="st-vram">${data.vram_mib != null ? data.vram_mib.toFixed(0) : "–"} <small style="font-size:1rem">MiB</small></div>
@@ -727,6 +716,7 @@ function renderStatus(data, jobs = []) {
         </div>
       </div>
       <div id="st-current-card">${currentRunCard(cur, aff)}</div>
+      <div id="st-cpu-current-card">${cpuRunningCardHtml(data)}</div>
       <div class="btn-row">
         <button id="btn-refresh">↻ Refresh</button>
         <button id="btn-gpuclean" class="danger" ${lock && lock.alive ? "disabled title='A live job holds the GPU lock'" : ""}>gpu-clean</button>
@@ -1187,9 +1177,13 @@ function laneChipsHtml(lanes) {
     const busy = !!(l.lock && l.lock.alive);
     const what = l.job && l.job.name ? l.job.name
       : busy ? "running" : (l.last_job && l.last_job.id ? `idle · last ${l.last_job.id}` : "idle");
-    const rows = l.run && l.run.n != null ? ` · ${Number(l.run.n).toLocaleString()} evals` : "";
+    const n = l.run ? (l.run.session_n != null ? l.run.session_n : l.run.n_rows) : null;
+    const nNum = n != null ? Number(n) : NaN;
+    const rows = Number.isFinite(nNum) ? ` · ${nNum.toLocaleString()} evals` : "";
+    const rate = l.run && l.run.rate_per_h != null ? ` · ${Math.round(Number(l.run.rate_per_h))}/h` : "";
+    const eta = l.run && l.run.eta_min != null ? ` · ETA ${Math.round(Number(l.run.eta_min))} min` : "";
     const cls = l.alert ? "warn-text" : busy ? "" : "muted";
-    return `<span class="mono ${cls}" style="${SUB}" title="${esc(name)} lane: ${esc(what)}${esc(rows)}">${busy ? "●" : "○"} ${esc(name)} · ${esc(what)}${esc(rows)}</span>`;
+    return `<span class="mono ${cls}" style="${SUB}" title="${esc(name)} lane: ${esc(what)}${esc(rows)}${esc(rate)}${esc(eta)}">${busy ? "●" : "○"} ${esc(name)} · ${esc(what)}${esc(rows)}${esc(rate)}${esc(eta)}</span>`;
   }).join("");
   return `<div class="nav-lanes" role="status" aria-label="Solve lanes" style="padding:0 16px 6px;display:grid;gap:2px">${rows}</div>`;
 }
@@ -1264,15 +1258,110 @@ function currentRunCard(cur, aff = null) {
   </div>`;
 }
 
+/** Full-width CPU-lane card (pure): the same running-card treatment as currentRunCard, for a CPU
+ *  search or verify job. Handles both payload shapes: the additive `cpu_current` block AND older
+ *  servers (no `session` -> n vs cpu_job.target; no `kind` -> cpu_job.kind or mode). A null or
+ *  missing field prints "–" or drops its element — never a fabricated percentage, rate or ETA.
+ *  idle: Home keeps an honest Free card, Status renders nothing (`opts.home` gates it). */
+function cpuRunningCardHtml(data, opts = {}) {
+  const lock = (data && data.cpu_lock) || null;
+  const job = (data && data.cpu_job) || {};
+  const cur = (data && data.cpu_current) || null;
+  const alive = !!(lock && lock.alive);
+
+  if (!alive) {
+    if (!opts.home) return "";
+    return `<div class="card status-card">
+      <div class="label">CPU lane</div>
+      <div class="value good-text">Free</div>
+      <div class="sub">no CPU job running</div>
+    </div>`;
+  }
+
+  if (!cur) {
+    // lock alive, no evaluation row written yet: honest starting card, no invented numbers
+    const name = job.name || job.run_id || "working";
+    const started = job.started ? `started ${esc(timeSince(job.started))}` : "starting now";
+    const pid = lock.pid != null ? ` · PID ${esc(lock.pid)}` : "";
+    return `<div class="card running-card" style="margin-top:-4px">
+      <div class="eyebrow" style="margin-bottom:6px">Running now · CPU lane</div>
+      <div style="font-weight:500">${esc(name)}</div>
+      <p class="muted" style="font-size:0.82rem;margin:6px 0 0">${started} · waiting for the first evaluation row${pid}</p>
+    </div>`;
+  }
+
+  // kind: additive `kind` -> older cpu_job.kind -> the run mode
+  const kind = cur.kind || job.kind || cur.mode || "search";
+  const isVerify = kind === "verify" || cur.mode === "verify";
+  const n = Number(cur.n) || 0;
+  const ses = cur.session || null;
+  const sN = ses && ses.n != null ? Number(ses.n) : n;
+  // a session's budget belongs to THIS invocation; without a session block fall back to n/target
+  const budget = ses
+    ? (ses.budget != null && isFinite(Number(ses.budget)) ? Number(ses.budget) : null)
+    : (job.target != null && isFinite(Number(job.target)) ? Number(job.target) : null);
+  const known = budget != null && budget > 0;
+  const pct = known ? Math.min(100, Math.round((sN / budget) * 100)) : 0;
+  const over = !!(known && sN > budget);
+  const leftText = known
+    ? `<b${over ? ` class="bad"` : pct >= 90 ? ` class="warn"` : ""}>${sN.toLocaleString()} / ${budget.toLocaleString()} ${isVerify ? "verified" : "this session"} (${pct}%)${over ? " over budget" : ""}</b>`
+    : `${sN.toLocaleString()} ${isVerify ? "verified · target unknown" : "evals"}`;
+  const etaNum = cur.eta_min != null ? Number(cur.eta_min) : NaN;
+  const eta = isFinite(etaNum) ? `~${Math.round(etaNum)} min left` : "";
+  const rateNum = cur.rate_per_h != null ? Number(cur.rate_per_h) : NaN;
+  const rate = isFinite(rateNum) ? `${Math.round(rateNum)}/h` : "–";
+  const best = cur.best_j != null ? cur.best_j : cur.session_best_j;
+  const seed = cur.seed_j != null && cur.seed_j < 900 ? cur.seed_j : null;
+  const failures = cur.failures_session != null ? cur.failures_session : "–";
+  const name = job.name || cur.name || cur.run_id || "CPU job";
+  const bar = known
+    ? `<div class="progress-wrap" style="margin:8px 0 4px"><div class="progress-bar${over ? " bad" : pct >= 90 ? " warn" : ""}" style="width:${pct}%"></div></div>`
+    : "";
+  const open = cur.run_id ? `<a class="btn primary" href="#/run/${esc(cur.run_id)}">Open run →</a>` : "";
+
+  return `<div class="card running-card" style="margin-top:-4px">
+    <div class="eyebrow" style="margin-bottom:6px">Running now · CPU lane</div>
+    <div style="font-weight:500">${esc(name)}</div>
+    ${bar}
+    <div style="display:flex;justify-content:space-between;font-size:0.8rem;color:var(--muted)">
+      <span>${leftText}</span>
+      <span>${eta}</span>
+    </div>
+    <div class="kpis" style="margin-top:8px">
+      <div class="kpi"><span>Best score</span><b>${fmt(best)}</b></div>
+      ${isVerify ? "" : `<div class="kpi"><span>Started score</span><b>${fmt(seed)}</b></div>`}
+      <div class="kpi"><span>Rate (session)</span><b>${rate}</b></div>
+      <div class="kpi"><span>Failures (session)</span><b>${failures}</b></div>
+    </div>
+    <div class="btn-row" style="margin-top:8px">
+      ${open}
+      <a class="btn" href="#/status">Status</a>
+    </div>
+  </div>`;
+}
+
+/** Compact Status-grid CPU lane card (pure): label, busy/Free, job name, n/target + pct, PID.
+ *  Says "evals" for a search job and "verified" for a verify job; no row yet is stated plainly. */
 function cpuLaneCardHtml(data) {
-  const l = data.cpu_lock;
+  const l = (data && data.cpu_lock) || null;
   if (l && l.alive) {
-    const job = data.cpu_job || {};
-    const cu = data.cpu_current;
+    const job = (data && data.cpu_job) || {};
+    const cu = (data && data.cpu_current) || null;
+    const kind = (cu && (cu.kind || cu.mode)) || job.kind || "search";
+    const isVerify = kind === "verify";
+    const ses = cu && cu.session;
+    const n = ses && ses.n != null ? Number(ses.n)
+      : (cu && cu.n != null ? Number(cu.n) : null);
+    const target = ses && ses.budget != null ? Number(ses.budget)
+      : (job.target != null ? Number(job.target) : null);
+    const pct = n != null && isFinite(target) && target > 0 ? Math.min(100, Math.round((n / target) * 100)) : null;
+    const count = n != null
+      ? `${n.toLocaleString()}${isFinite(target) && target > 0 ? ` / ${target.toLocaleString()}` : ""} ${isVerify ? "verified" : "evals"}${pct != null ? ` (${pct}%)` : ""}`
+      : "no rows yet";
     return `<div class="label">CPU lane</div>
       <div class="value">busy</div>
       <div class="sub" title="${esc(l.command || "")}" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:30ch">${esc(job.name || (cu ? cu.run_id : "working"))}</div>
-      <div class="sub">${cu ? `${cu.n}${job.target ? " / " + job.target : ""} verified · last ${esc(timeSince(cu.last))}` : "no verify output yet"} · PID ${esc(l.pid)}</div>`;
+      <div class="sub">${count}${cu && cu.last ? ` · last ${esc(timeSince(cu.last))}` : ""} · PID ${esc(l.pid)}</div>`;
   }
   return `<div class="label">CPU lane</div><div class="value good-text">Free</div>`;
 }
@@ -1312,6 +1401,10 @@ function updateStatusInPlace(data, jobs = []) {
   // run starts, and the stop affordance always reflects the last poll's jobs/lock state
   const cc = document.getElementById("st-current-card");
   if (cc) { cc.innerHTML = currentRunCard(data.current, aff); wireStopButton(aff); }
+
+  // the CPU lane's full-width running card refreshes on the same poll as the GPU card
+  const ccp = document.getElementById("st-cpu-current-card");
+  if (ccp) ccp.innerHTML = cpuRunningCardHtml(data);
 
   const sv = document.getElementById("st-vram");
   if (sv) sv.innerHTML = `${data.vram_mib != null ? data.vram_mib.toFixed(0) : "–"} <small style="font-size:1rem">MiB</small>`;
@@ -2495,6 +2588,8 @@ function laneRowHtml(l) {
        : "idle");
   const run = l.run
     ? `${esc(l.run.n_rows)} rows · best ${fmt(l.run.best_j)} · newest ${ageLabel(l.run.newest_row_age_min)} ago`
+      + (l.run.rate_per_h != null ? ` · ${Math.round(Number(l.run.rate_per_h))}/h` : "")
+      + (l.run.eta_min != null ? ` · ETA ${Math.round(Number(l.run.eta_min))} min` : "")
     : (l.note ? `<span class="muted">${esc(l.note)}</span>` : "–");
   const runLink = l.run && l.run.id
     ? `<a href="#/run/${esc(l.run.id)}" style="font-size:0.8rem">run →</a>` : "";
@@ -4821,6 +4916,7 @@ async function viewElites() {
 export { runProvenanceGroup, renderProvenanceBadges, restartScheduleHtml, stepChipHtml,
          stepInvByName, qdProvenanceCaption, f11CaveatHtml,
          stopAffordanceFor, stopRegionHtml, currentRunCard,
+         cpuRunningCardHtml, cpuLaneCardHtml,
          toolbarPillFor, toolbarPillHtml, resumeArgsFor, resumeableSearchJob };
 
 

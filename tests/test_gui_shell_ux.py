@@ -39,7 +39,7 @@ const { laneChipsHtml, runModeMatches, runModeBadgesHtml, runParentLineHtml, com
 // lane lines: both lanes always listed, busy marker, empty payload renders nothing
 assert.equal(laneChipsHtml(null), "");
 const lanes = { lanes: [
-  { lane: "gpu", lock: { alive: true }, job: { name: "g2_core_law" }, run: { n: 996 } },
+  { lane: "gpu", lock: { alive: true }, job: { name: "g2_core_law" }, run: { n_rows: 996 } },
   { lane: "cpu", lock: null, job: null, last_job: { id: "c2b_verify" } } ] };
 const lc = laneChipsHtml(lanes);
 assert.ok(lc.includes("● GPU · g2_core_law · 996 evals"), lc);

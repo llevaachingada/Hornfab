@@ -10,6 +10,15 @@ Local-only, added 2026-11-13 ~24Z (**bo-study B4/B5/B8; no GitHub issue state ch
 - Open: S8 discovery/QD-Pareto analysis tooling not started.
 - Open (SENIOR DECISION): S7 refuses objective v4 because `surrogate/capability.py` supports only v1; widen or keep?
 
+Local-only, added 2026-11-13 (22:05Z) (**CPU lane GUI progress parity; no GitHub issue state changed**):
+- Resolved: CPU lane runs/solves now show status, progress bar, session %, rate/h, ETA, best/start
+  score and failures on Home and Status, matching the GPU running card; `/api/lanes` rows carry
+  rate/ETA/session/budget and resolve fresh `--config` jobs for both lanes.
+- Open (pre-existing, not introduced here): the lanes table matches queue logs by filename
+  (`queue_*gpu*`), so a GPU night named without `gpu` (e.g. `queue_home80x60_day_...`) shows idle
+  there while its full-width card is correct. A browser visual pass of the new cards is still
+  pending after a server restart.
+
 Local-only, added 2026-11-13 ~21Z (**solver speed plan; no GitHub issue state changed**):
 - Resolved: A1 namespaced caches landed. (was: solve/mesh cache does not check solver/mesher SHA (blocker before any fork pin bump). Plan: SOLVER_SPEED_IMPLEMENTATION_PLAN_2026-11-13 A1.
 - Resolved: A2 seam probe fixed.
@@ -22,6 +31,7 @@ Local-only, added 2026-11-13 ~21:2xZ (**final 2026-11-12 night report; no GitHub
 - Resolved: `docs/evidence/NIGHT_2026-11-12.md` (final, all six night files + section-6 orchestrator
   analysis) supersedes `NIGHT_2026-11-12_PARTIAL.md`; the 2026-11-12 GPU staged-vs-joint A/B verdict
   (joint wins, J 2.4389 vs 2.6290) is appended to `STAGED_SEARCH_AB_2026-10-31.md` and indexed.
+- Resolved (correction, ~22:0xZ): the earlier claim that the CPU lane slowed GPU evals/h (~-14%) is retracted; timeline audit shows ~10 min real GPU/CPU overlap, CPU lane filled GPU-down time after the 17:41Z restart (see NIGHT_2026-11-12.md correction section). Whether sustained two-lane fresh-search concurrency costs GPU rate remains unmeasured.
 - Open (owner/operator): L5.7 dataset re-pack + HF upload (`tools\hf_sync.py pack --groups
   text, dataset`, then `upload`) must run at the next GPU job boundary - the print-day p80x60
   searches write the dataset continuously until the 23:30 cut-off. Keep `HF_HUB_DISABLE_XET=1`.
@@ -111,7 +121,7 @@ Local-only, added 2026-11-13 (**bo-study-v1.1 final integration; offline; no Git
 - Note: untracked `cache_probe/` and `dataset_probe/` probe artifacts were produced by the parallel
   rev2 CPU-parity session (real CPU solves, `beat_cpu`); this session left them untouched.
 
-Local-only, added 2026-11-13 (**next-queue handoff + HF dataset upload; no GitHub issue state changed**):
+Local-only, added 2026-11-13 (**next-queue handoff + HF dataset upload COMPLETE; no GitHub issue state changed**):
 - `docs/research/NEXT_QUEUE_PLANNING_HANDOFF_2026-11-12.md`: verified night-queue status, decision
   lineage (compute-allocation study -> ATH 50x50 first task -> hardening/bo-study-v1.1), data
   inventory, K-law/8 GB retarget limits, constraints, adversarial verdict and three alternatives.
@@ -123,12 +133,14 @@ Local-only, added 2026-11-13 (**next-queue handoff + HF dataset upload; no GitHu
   only; (5) re-check the M0 freeze (origin still DRAFT) and CPU/GPU parity before trusting the day
   report. Owner must confirm coverage pair, driver (2-inch vs 1.4-inch), band top, envelope and
   build-vs-study.
-- **HF upload (scheduled, not executed at record time):** stage
-  `C:\Users\hunte\Hrns\.hf_stage_hunter` (8 tars, 12.82 GB, SHA-256 verified) -> root of
-  `chingadalleva/hornlab-search-data`; one-time task `Hornlab HF stage upload` at 2026-11-13
-  13:37:04 -05:00; log `C:\Users\hunte\Hrns\ops\hf_upload_2026-11-13.log`; Xet disabled. Stage
-  cutoff ~04:51-04:56Z (1,501/1,726 g9 rows); a completed-night tail needs a repack. Record:
-  `docs/evidence/HF_UPLOAD_2026-11-13.md`.
+- **HF upload COMPLETED 2026-11-13 21:37Z:** stage `C:\Users\hunte\Hrns\.hf_stage_hunter`
+  (8 tars, 12.82 GB, SHA-256 verified) uploaded to the root of
+  `chingadalleva/hornlab-search-data`; repo `last_modified 2026-11-13 21:36:46Z`; sizes and LFS
+  SHA-256 match `stage_hashes.json` (`ALL_MATCH=True`). Scheduled bulk task failed (non-interactive
+  session); succeeded via `ops/hf_upload_retry.ps1` per-file retry (commits `f0a403a`, `a3c7e01`,
+  `3babbe7`, `0e7d367`, `4cb907a`, `a1d4bee`, `f529366`, `ef36d14`); task unregistered. Stage cutoff
+  ~04:51-04:56Z (1,501/1,726 g9 rows). **L5.7 remains open for the final re-pack after the print-day
+  23:30 cut-off** (the `p80x60` searches keep writing). Record: `docs/evidence/HF_UPLOAD_2026-11-13.md`.
 
 Local-only, added 2026-11-13 (**Rev2 implementation pass, additive; no GitHub issue state changed**):
 - Open from Rev2: GUI balloon range selector, frequency-grid fidelity factor, J1/L1 generators, archive-wide manifest sweep. See QUEUE_PLAN_REV2 status table.
@@ -1869,3 +1881,4 @@ Local-only, added 2026-11-13 (**bo-study-v1.1 pushed; cloud completion kickoff i
 - Open: B8 full adversarial loop (fake evaluator through service/CLI/API/GUI, crash/idempotency matrix).
 - Open: pyproject optional `bayes` extra registration (isolated `bayes-venv` remains the sanctioned engine env).
 - Data note: 3 native shard-57 rows (276-278) uncatalogued at the S0 snapshot; refused at join (`catalog_row_missing`), recoverable by a fresh catalog export.
+

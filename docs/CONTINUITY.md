@@ -27,6 +27,35 @@
 - Pre-existing failures on main in the cloud env (not touched): experiments_manifest (Windows paths), bo_sensitivity_real (3), design_generated (1).
 - Next (same branch): lane_parity pooled mode, S5 config round-trip, S7 surrogate_validation, S8 descriptors/cards.
 
+## 2026-11-13 (22:05Z) - GUI: CPU LANE RUN PROGRESS + SPEED PARITY
+
+- `gui/data.py`: `current_cpu_run()` resolves a fresh `--config` CPU search from the newest
+  CPU-lane-tagged run folder — the job log's `output <dir>` line is block-buffered and can stay
+  invisible for the whole run (live 2026-11-13 case: `cpu_current` was null while the run wrote rows).
+  `cpu_current` now carries the GPU-card shape for BOTH job kinds: `kind`, `session {n, budget,
+  resumed, n_resumes, started}`, `rate_per_h`, `eta_min`, `best_j`/`seed_j`/`session_best_j`,
+  `failures_session`, `backend`. CPU verify jobs report n vs their `--top`/`--designs` target, rate
+  and ETA from their own filtered rows. A 120 s session-vs-job-start guard prevents claiming an
+  older completed run; unknown target/one row -> null bar/rate, never invented numbers.
+- `_lane_run_info` / `GET /api/lanes`: additive `rate_per_h`, `eta_min`, `session_n`, `budget`; the
+  lanes table now resolves fresh `--config` jobs for BOTH lanes (lane-tagged run fallback with the
+  same guard), not only `--resume`/`--run-dir` commands.
+- `gui/static/app.js`: `cpuRunningCardHtml` mirrors `currentRunCard` — progress bar, session %,
+  ETA, Best/Started/Rate/Failures KPIs, "Open run". Home CPU card sits directly under the GPU card;
+  Status gets a full-width `#st-cpu-current-card` below `#st-current-card` and the compact grid card
+  is a real `.status-card` that says evals vs verified. Sidebar lane chips now read the real
+  `session_n`/`n_rows` (the old `run.n` key never existed) and show rate/ETA when present.
+- Tests: **90 passed, exit 0** (CPU progress/lanes/node guards/home/shell/night-status/views/visual
+  audit/brief authoring/run identity/verify jobs/server warm); `compileall hornlab_search/gui` exit 0.
+- Live read-only evidence: CPU run `20261113T212428Z-screen-2c4d56` (4/120, ~6.1/h, ETA ~1141 min,
+  best 4.70, start 5.98) and GPU run `20261113T193536Z-screen-81c964` (125/200) resolve independently
+  through `App.get('/api/status')` / `'/api/lanes'`; the real ES module renders the live payload with
+  a progress bar and the expected KPI text.
+- Caveats: not visually verified in a browser (server restart + hard refresh required); verify-card
+  evidence is synthetic (no live CPU verify job). Pre-existing: the lanes table matches queue logs
+  by filename (`queue_*gpu*`), so a GPU night named without `gpu` (today's `queue_home80x60_day_...`)
+  still shows idle there — the GPU full-width card is unaffected.
+
 ## 2026-11-13 (~23Z) - A1 CACHE NAMESPACES + A2 SEAM FIX LANDED (offline)
 
 - A1: shared solve/mesh caches now live under `<cache>/{solve,mesh}/p2-<sha12>/` keyed on beat/bempp/mesher SHAs
@@ -66,6 +95,29 @@
 - GPU Wave B (G1 batching, G2 fork A/B, G3 screen fidelity, G4 rear, G5 band split) waits for queue slots and Gate 0.
 - No code, solve, queue or cache change in this commit. Handoff claims not re-verified; each package re-reads code.
 
+## 2026-11-13 (~21:37Z) - HF DATASET UPLOAD COMPLETE (per-file retry; verified)
+
+- Uploaded the 8-tar stage `C:\Users\hunte\Hrns\.hf_stage_hunter` (12.82 GB) to the root of
+  `chingadalleva/hornlab-search-data`. Repo `last_modified 2026-11-13 21:36:46Z`; all sizes and LFS
+  SHA-256 match `stage_hashes.json` (`ALL_MATCH=True`).
+- The 13:37 scheduled task verified hashes but its bulk `hf upload` exited 1 without a commit; a bulk
+  retry hit repeated S3 multipart resets. The successful path was a detached per-file retry loop
+  (`ops/hf_upload_retry.ps1`, commits `f0a403a`/`a3c7e01`/`3babbe7`/`0e7d367`/`4cb907a`/`a1d4bee`/
+  `f529366`/`ef36d14`). The task was unregistered. Record: `docs/evidence/HF_UPLOAD_2026-11-13.md`.
+- Snapshot cutoff remains ~04:51-04:56Z (1,501/1,726 g9 rows). The print-day `p80x60` searches are
+  still writing; ISSUES L5.7 remains open for the final re-pack after the 23:30 cut-off. No
+  code/queue/default change.
+
+## 2026-11-13 (~22:0xZ) - TWO-LANE SLOWDOWN CLAIM RETRACTED (timeline audit, docs only)
+
+- [measured] The section-6 night-report claim "GPU at 136/h with the CPU lane concurrent (~-14%)" is
+  retracted: c2b (CPU) ran 18:37-20:12Z, g2 (GPU) 20:02-22:15Z -> real overlap ~10 min (7.5% of g2).
+  c2b mostly ran while the GPU lane was DOWN (Windows-Update restart gap ~16:4x-20:02Z): the CPU lane
+  delivered 285 verify/screen evals into GPU-down time, nearly free. Solo fresh-screen spread
+  (g3b 114/h, g2 136/h, g4 178/h) is config/mesh variation, not a measured concurrency cost.
+- [inferred] Whether sustained GPU+CPU fresh-screen concurrency costs GPU rate remains unmeasured;
+  needs a window with both lanes running fresh screens for hours in parallel.
+- Correction appended to docs/evidence/NIGHT_2026-11-12.md; ISSUES updated in the same commit.
 ## 2026-11-13 (~21:2xZ) - FINAL NIGHT REPORT 2026-11-12 LANDED; STAGED A/B CROSS-REFERENCED (docs only; L5.7 still owed at next GPU boundary)
 
 - [measured] `docs/evidence/NIGHT_2026-11-12.md` finalised via `tools/night_report.py` across all six
@@ -4758,4 +4810,5 @@ PASS  round-trip        reserved for task 04
 - **Next (next agent):** The implementation plan's NON-OWNER-GATED work is COMPLETE as of M6/WP12: the machine carries the brief-agnostic shape surface (classical + splice/throat-blend/salmon + GRID + organic rows + rollback lecleach/iwata_ar/toroidal + saddle halves) + restarts schedules + the QD-atlas contract + the CAD→STEP multicell category + the enclosure-mounting route (measured: dofs +199 %/+107 %, both under the unchanged caps) + the WP16 source plug + WP17 fused-CUDA near correction (stage 1) on the hosted fork's pinned stack (`760a1ec`; installed == pinned — the mesh-pin tripwire is green). **Everything remaining needs the owner: [a] the brief-design consultation (deferred) — 2–4 real briefs turn the machinery from "calibrated" into "aimed"; [b] resume-or-park the deferred WP14 multicell PHYSICS (the fixture's mouth-topology defect + the full resume recipe live in `docs/ISSUES.md`'s deferred-WP14 block; WP17 stage 1 is ready for it); [c] P6a superformula campaign + P6b GSA-vs-CMA-ES bake-off (owner-gated); [d] the small parked proposals (W7 balloon density, the M3/5 calibration proposals); [e] WP17 stage 2 (fused + per-image symmetry near caches) only when symmetric-drive multicells need the GPU. WP13 axisymmetric backend = OWNER-DEFERRED ("don't know how necessary that is" 2026-10-25).** Nothing else runs without the owner.
 - **Open owner decisions:** v2 objective as brief DEFAULT (today opt-in); bound proposals (`docs/evidence/TYPOLOGY_COMPARE_2026-10-23.md`); mesher bump (post-beta); surrogate OSSE top-up; GUI contrast owner click-path check remains; **P6a/P6b + W7 + the brief-design consultation + resume-or-park the deferred WP14 multicell physics (all owner-gated — see Next). RESOLVED 2026-10-25: fork hosting + pin (hosted fork; `760a1ec` pinned; installed == pinned — tripwire green); WP13 = OWNER-DEFERRED.**
 - **Blockers:** none (owner gate on the pin hosting only).
+
 

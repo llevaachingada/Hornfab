@@ -1648,14 +1648,20 @@ def _lane_hosts(runs: Path, lane: str) -> dict:
 
 
 def _cpu_activity(runs: Path, since_local=None, run_id: str | None = None,
-                  max_age_s: float = 1800, command: str | None = None) -> dict | None:
-    """The CPU lane's visible verify work. With ``run_id`` (parsed from the queued job's own
-    ``--run``), count THAT run's ``verify/search.ndjson`` rows since the job started — even 0 rows
-    while the first design is still solving (the file may not exist yet). Without it, fall back to
-    the mtime-newest verify output (within ``max_age_s``). Verify jobs write into a subdir of the
-    run they verify, so plain run enumeration never sees them (2026-11-12: both tonight's CPU
-    verifies were invisible on every page)."""
+                  max_age_s: float = 1800, command: str | None = None,
+                  target: int | None = None, started: str | None = None) -> dict | None:
+    """The CPU lane's visible verify work, in the GPU card's progress shape. With ``run_id``
+    (parsed from the queued job's own ``--run``), count THAT run's ``verify/search.ndjson`` rows
+    since the job started — even 0 rows while the first design is still solving (the file may not
+    exist yet). Without it, fall back to the mtime-newest verify output (within ``max_age_s``).
+    Verify jobs write into a subdir of the run they verify, so plain run enumeration never sees
+    them (2026-11-12: both tonight's CPU verifies were invisible on every page).
+
+    ``target`` is the job's design count (``--top``/``--designs``); it drives the session bar and
+    ETA only — None means no bar data. All numbers come from the job's own filtered rows; a
+    single row yields rate/ETA None rather than an invented rate."""
     import time
+    f = None
     if run_id:
         run_dir = runs / run_id
         cmd = command or ""
@@ -1677,12 +1683,11 @@ def _cpu_activity(runs: Path, since_local=None, run_id: str | None = None,
                     meta = _as_dict(_read_json(candidate / "run.json"))
                     parent = _as_dict(meta.get("verify_of")).get("run")
                     if meta.get("mode") == "verify" and isinstance(parent, str) and _match_parent(parent, run_id, runs):
-                        started = _ts(meta.get("started_utc"))
-                        if since_local is None or (started and started >= since_local):
+                        cand_started = _ts(meta.get("started_utc"))
+                        if since_local is None or (cand_started and cand_started >= since_local):
                             candidates.append(candidate)
-                if not candidates:
-                    return clean({"run_id": run_id, "mode": "verify", "n": 0, "last": None})
-                f = max(candidates, key=_mt) / "search.ndjson"
+                if candidates:
+                    f = max(candidates, key=_mt) / "search.ndjson"
             else:
                 f = run_dir / "verify" / "search.ndjson"
     else:
@@ -1697,11 +1702,30 @@ def _cpu_activity(runs: Path, since_local=None, run_id: str | None = None,
         if best_f is None or time.time() - best_t > max_age_s:
             return None
         f = best_f
-    rows = read_ndjson(f) if f.exists() else []
+    rows = read_ndjson(f) if f is not None and f.exists() else []
     if since_local is not None:
         rows = [r for r in rows if (_t := _ts(r.get("created_utc"))) and _t.astimezone() >= since_local]
-    return clean({"run_id": run_id or f.parent.parent.name, "mode": "verify", "n": len(rows),
-                  "last": rows[-1].get("created_utc") if rows else None})
+    ok = [r for r in rows if r.get("ok") and r.get("objective") is not None]
+    best_j = min((r["objective"] for r in ok), default=None)
+    rate = _span_rate(rows)
+    n = len(rows)
+    left = (target - n) if target is not None else None
+    backend = next((r.get("backend") for r in rows if r.get("backend")), None)
+    if backend is None:
+        m = re.search(r'--backend(?:=|\s+)(\S+)', command or "")
+        backend = m.group(1).strip('"\'') if m else None
+    rid = run_id or (f.parent.parent.name if f is not None else None)
+    return clean({
+        "kind": "verify", "run_id": rid, "mode": "verify", "n": n,
+        "last": rows[-1].get("created_utc") if rows else None,
+        "session": {"n": n, "budget": target, "resumed": False, "n_resumes": 0,
+                    "started": started},
+        "rate_per_h": rate,
+        "eta_min": (left / rate * 60) if (rate and left is not None and left > 0) else None,
+        "best_j": best_j, "seed_j": None, "session_best_j": best_j,
+        "failures_session": sum(1 for r in rows if not r.get("ok")),
+        "started": started, "backend": backend,
+    })
 
 
 def _parse_wall_ts(s: str | None):
@@ -1738,6 +1762,67 @@ def _cpu_search_run_dir(runs: Path, night: str | None, job_id: str | None,
             if not p.is_absolute():
                 p = runs.parent / p
             return p if p.is_dir() else None
+    return None
+
+
+def _run_belongs_to_job(run_dir: Path, started_local) -> bool:
+    """True when a run dir's CURRENT session plausibly belongs to the queued job.
+
+    A fresh search's session starts at its first row (≈ job start); a resumed one at its last
+    ``run.json resumes`` timestamp (≈ job start). A completed run from earlier starts well before,
+    so the fallback resolver cannot claim it. Unknown timestamps are accepted (no evidence either
+    way), and a 120 s slack absorbs the queue-log local timestamp vs the row UTC stamp."""
+    if started_local is None:
+        return True
+    sess_started = _parse_wall_ts((run_progress(run_dir).get("session") or {}).get("started"))
+    return sess_started is None or (started_local - sess_started).total_seconds() <= 120
+
+
+def _cpu_current(runs: Path, cpu_lock: dict | None, cpu_job: dict | None,
+                 cpu_night: str | None) -> dict | None:
+    """The CPU lane's running job in the GPU card's ``current`` shape (progress bar, session,
+    rate/ETA, best, failures), or None when the lock is live but nothing resolves yet.
+
+    A SEARCH job resolves its run dir from ``--resume`` or the night job log's ``output <dir>``
+    line. That line is block-buffered in the redirected log and can stay invisible for the whole
+    run (live 2026-11-13 case), so fall back to :func:`current_cpu_run` — rejecting a fallback run
+    whose session began well before the queue-log job (a resumed run's session starts ≈ job start;
+    an older completed run does not). A VERIFY job's numbers come from ``_cpu_activity`` over the
+    job's own rows. Nothing is solved or written, and a one-row run reports rate/ETA None."""
+    if not (cpu_lock and cpu_lock.get("alive")):
+        return None
+    job = cpu_job or {}
+    cmd = str(job.get("command") or "")
+    job_started = _parse_wall_ts(job.get("started"))
+    if job.get("kind") == "search":
+        m = _RUN_DIR_FLAG.search(cmd)              # the search's --resume / --run-dir
+        resume_arg = m.group(1).strip('"') if m else None
+        rd = _cpu_search_run_dir(runs, cpu_night, job.get("name"), resume_arg)
+        if rd is None:
+            rd = current_cpu_run(runs)
+            if rd is not None and not _run_belongs_to_job(rd, job_started):
+                rd = None
+        if rd is None:
+            return None
+        p = run_progress(rd)
+        session = dict(p.get("session") or {})
+        if not session.get("budget"):
+            session["budget"] = job.get("target")
+        return clean({
+            "kind": "search", "run_id": rd.name, "mode": p.get("mode") or "screen",
+            "n": p.get("n"),
+            "last": p.get("last"), "session": session,
+            "rate_per_h": p.get("rate_per_h"), "eta_min": p.get("eta_min"),
+            "best_j": p.get("best_j"), "seed_j": p.get("seed_j"),
+            "session_best_j": p.get("session_best_j"),
+            "failures_session": p.get("failures_session"),
+            "started": job.get("started"),
+            "backend": _as_dict(_read_json(rd / "run.json")).get("backend"),
+        })
+    if job.get("kind") == "verify" or job.get("run_id"):
+        return _cpu_activity(runs, since_local=job_started, run_id=job.get("run_id"),
+                             target=job.get("target"), command=cmd,
+                             started=job.get("started"))
     return None
 
 
@@ -1792,20 +1877,10 @@ def status(root: Path, runs: Path) -> dict:
                     cpu_job = clean({"name": step.get("name"), "started": step.get("started"),
                                      "kind": "search" if is_search else "verify",
                                      "target": int(mbud.group(1)) if is_search and mbud else _verify_target(cmd),
-                                     "run_id": run_id})
-    cpu_since = _parse_wall_ts((cpu_job or {}).get("started")) if cpu_job else None
-    cpu_run = (cpu_job or {}).get("run_id")
-    cpu_current = None
-    if cpu_lock and cpu_lock.get("alive"):
-        if (cpu_job or {}).get("kind") == "search":
-            rp = _cpu_search_run_dir(runs, cpu_night, (cpu_job or {}).get("name"), cpu_run)
-            if rp is not None:
-                p = run_progress(rp)
-                cpu_current = clean({"run_id": rp.name, "mode": "screen", "n": p.get("n"),
-                                     "last": p.get("last"), "session": p.get("session"),
-                                     "rate_per_h": p.get("rate_per_h"), "eta_min": p.get("eta_min")})
-        elif cpu_job or cpu_run:
-            cpu_current = _cpu_activity(runs, since_local=cpu_since, run_id=cpu_run, command=cmd)
+                                     "run_id": run_id, "command": cmd})
+    # The job-local command rides in cpu_job (above), so the verify reader gets it explicitly
+    # instead of reaching for a `cmd` local that only exists while a queue step is open.
+    cpu_current = _cpu_current(runs, cpu_lock, cpu_job, cpu_night)
 
     gpu_hosts = _lane_hosts(runs, "gpu")
     cpu_hosts = _lane_hosts(runs, "cpu")
@@ -2098,6 +2173,32 @@ def current_run(runs: Path, max_age_s: float = 1800) -> Path | None:
         if m <= best_t:
             continue
         if _last_row_lane(f) == "cpu":
+            continue
+        best, best_t = d, m
+    return best if best and time.time() - best_t < max_age_s else None
+
+
+def current_cpu_run(runs: Path, max_age_s: float = 1800) -> Path | None:
+    """The CPU lane's run folder: the ``search.ndjson`` written most recently (within ``max_age_s``)
+    whose LAST row IS tagged to the CPU lane.
+
+    This is the fallback for a fresh ``--config`` CPU search whose ``output <dir>`` line is still
+    block-buffered into the redirected job log (live 2026-11-13 case: the CPU card said "no verify
+    output yet" while the search wrote rows). ``*-verify-*`` run dirs are skipped: their
+    ``search.ndjson`` is a re-solve artifact, never the running search. Mirrors
+    :func:`current_run`."""
+    best, best_t = None, 0.0
+    for d in _run_dirs(runs):
+        if "-verify-" in d.name:
+            continue
+        f = d / "search.ndjson"
+        try:
+            m = f.stat().st_mtime
+        except OSError:
+            continue
+        if m <= best_t:
+            continue
+        if _last_row_lane(f) != "cpu":
             continue
         best, best_t = d, m
     return best if best and time.time() - best_t < max_age_s else None
@@ -3811,7 +3912,9 @@ def _newest_row_age_min(nd: Path, rows: list[dict]) -> float | None:
 
 
 def _lane_run_info(runs: Path, rd: Path | None) -> dict | None:
-    """Row count / newest-row age / best J of the running job's run dir (read-only)."""
+    """Row count / newest-row age / best J of the running job's run dir (read-only), plus the
+    session progress :func:`run_progress` derives from the run's own timestamps (rate, ETA,
+    session rows and budget) so the lane card can draw the same bar as the GPU card."""
     if rd is None:
         return None
     nd = rd / "search.ndjson"
@@ -3821,11 +3924,15 @@ def _lane_run_info(runs: Path, rd: Path | None) -> dict | None:
     ok = [r for r in rows if r.get("ok")]
     best = min(ok, key=lambda r: r["objective"]) if ok else None
     rid = rd.name if RUN_ID.match(rd.name) else (rd.parent.name if RUN_ID.match(rd.parent.name) else None)
+    p = run_progress(rd)
+    session = p.get("session") or {}
     return clean({
         "id": rid, "path": str(rd), "n_rows": len(rows), "n_ok": len(ok),
         "best_j": best["objective"] if best else None,
         "newest_row_age_min": _newest_row_age_min(nd, rows),
         "last_row_utc": rows[-1].get("created_utc") if rows else None,
+        "rate_per_h": p.get("rate_per_h"), "eta_min": p.get("eta_min"),
+        "session_n": session.get("n"), "budget": session.get("budget"),
     })
 
 
@@ -3875,6 +3982,13 @@ def lane_status(runs: Path) -> dict:
             steps = queue_steps(qlog)
         running = _lane_running_step(steps)
         rd = _run_dir_from_command(runs, (running or {}).get("command"))
+        if rd is None and running is not None:
+            # A fresh --config job prints no run flags; the lane's newest run tagged to THIS lane
+            # is the running one (2026-11-13: the CPU card resolved such a run, the lane table
+            # still said "run dir not resolved"). Reject a stale run from an earlier job.
+            cand = current_cpu_run(runs) if lane == "cpu" else current_run(runs)
+            if cand is not None and _run_belongs_to_job(cand, _parse_wall_ts(running.get("started"))):
+                rd = cand
         run = _lane_run_info(runs, rd)
         last = _lane_last_completed(runs, lane)
         alert = None
