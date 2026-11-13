@@ -1,0 +1,63 @@
+# PRINT TARGET (owner 2026-11-13): 80 x 60 H/V, pattern held down to 700 Hz, 1.4-inch 300 Hz-class driver.
+# Derived from b3a_pa_80x80_600_square_v5 (objective v7, class C, LFP loading); only target/mouth/envelope changed.
+# K-LAW: H 25,400,000/(700*80) = 453.6 mm; V 25,400,000/(700*60) = 604.8 mm. Seeds use ~1.1x K-law
+#   (500 x 660), the same margin the 80x80 cell's 588-vs-529 seed carried. Envelope 600 x 780 x 650.
+# Loading hold to the 18 mm driver-exit f11 5653 Hz (explicit loaded_hi_hz), as in the parent brief.
+name: print_pa_80x60_700_v7
+description: (objective v7) PRINT target 80x60, f0 700 Hz, 1.4-inch 300 Hz class, K-law mouth 454x605, 600x780x650 envelope, band 350-8000 Hz, v7 LFP loading to loaded_hi_hz 5653
+driver:
+  exit_radius_mm: 18.0
+  exit_angle_deg: 2.0
+envelope:
+  max_mouth_w_mm: 600.0
+  max_mouth_h_mm: 780.0
+  max_depth_mm: 650.0
+symmetry: hv
+source:
+  cap: auto
+target:
+  coverage_h_deg: 80.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 350.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.0
+  f0_hz: 700.0
+  # Driver-exit (18 mm) f11: the loading hold runs [F_X, 5653] Hz; the stored 3809 Hz design
+  # main-throat f11 must NOT shorten it. 827.75 Hz is inside this window and still fails.
+  loaded_hi_hz: 5653.0
+  freq_weights:
+    band_hz:
+      - [2500.0, 5500.0, 2.0]
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 1.0
+  distd: 0.5
+  diag: 0.5
+  flat_cv: 0.5
+grid:
+  verify_points_per_octave: 6
+  screen_extra_hz: [250, 315, 400, 2573, 3311, 4260]
+objective:
+  version: 7   # objective v7 (was "5" on the hardened branch; renumbered 2026-11-12, main v5 = MEH)
+  tolerances:
+    cov: 4.5
+    rip: 2.0
+    di: 0.4
+    dislope: 36.0
+    flat: 1.5
+    load: 0.3
+    distd: 3.0
+    diag: 4.5
+    flat_cv: 1.5
+  cov_narrow_ratio: 2.0
+  cov_below_f0: one_sided
+  loaded_re_z: 0.5
+  lfp_re_z: 0.2
+  lfp_crossover_ratio: 1.6
+  bw8k_floor: 0.75

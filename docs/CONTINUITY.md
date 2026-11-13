@@ -17,7 +17,10 @@
 - **Review fixes (studies.js):** cancel no longer requires a ready panel; the policy selector reads a
   CLI-written `proposal_policy`. Open review notes: launch idempotency is in-memory (StudyRunBridge) and must become
   durable before a real launcher is wired; launch without a key returns invalid_input.
-- **Git split (owner):** BO/studies work goes to the local branch `bo-study` (not pushed); core goes to main.
+- **Git:** the owner asked for the BO/studies work to stay off main, but a concurrent integrator had already pushed it
+  to main (6b41e0e..a783b88). It was left there: botorch is lazily imported, real dispatch is off by default, and the full
+  offline suite is green (3642 tests, 0 failed, 18 skipped for the optional bayes venv). Moving it to a fork would mean reverting it from main
+  (an owner call). This commit adds the home brief/cells and S5 `tools/analysis/seed_pack.py` (+47 tests).
 
 ## 2026-11-13 (~17:xxZ) - BO-STUDY v1.1 CONTINUATION: S5 SEED PACKS, HOME TASK REGISTRY (offline; no solve)
 

@@ -6,6 +6,7 @@ Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 20
 Local-only, added 2026-11-13 ~20Z (**no GitHub issue state changed**):
 - Resolved: CP-7b GPU/CPU lane parity, closed in aggregate (4 pairs, max 0.079 dB).
 - Open: StudyRunBridge launch idempotency is in-memory; make it durable before any real launcher is wired.
+- Open (owner): BO/studies code is on main, though the owner preferred a local fork; reverting it would be a separate decision.
 - Open: lane_parity.py should pool pairs, so the per-pair FAIL label stops being misleading.
 
 Local-only, added 2026-11-13 (**S5 seed packs + home task registry; no GitHub issue state changed**):

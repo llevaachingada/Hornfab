@@ -1,0 +1,72 @@
+# HOME / LIVING-ROOM print brief (owner direction 2026-11-13, decisions delegated to the agent).
+# Parent: room_90x60_800_shelf_v5 (same room: ~20 x 14 x 10 ft, two horns in the front corners, toed in,
+#   goal = same level and tonal balance across the room). Changes and why:
+#   - 80 x 60 is INSPIRATION, not a hard spec: cov weight 1.0 -> 0.6 and cov tolerance 2.0 -> 4.0 deg-class,
+#     so hitting the exact angle matters less.
+#   - CONSISTENCY is the priority: dislope 0.5 -> 1.0 (DI slope flat = constant directivity),
+#     flat_cv 0.5 -> 1.0 (beamwidth steadiness vs frequency), diag 0.5 -> 1.0 (off-plane pattern
+#     matches the H/V planes).
+#   - Pattern control in BOTH planes from the 700 Hz crossover: f0 = f0_v = 700 (parent V started 1323).
+#   - Realistic loading to the crossover: load 0.5 -> 1.0, z_min 0.5; hold to the driver-exit f11.
+# DRIVER: FaitalPRO HF1440 (examples/drivers/faitalpro_hf1440.yaml): 1.4-inch, exit 35.8 mm, min_xo 700 Hz.
+#   f11 at the 17.9 mm exit = 100,250/17.9 = 5,600 Hz -> loaded_hi_hz 5600. Fits the other 1.4-inch
+#   300 Hz-class drivers researched (BMS 4594ND class, r0 18).
+# K-LAW at 700 Hz: H 25.4e6/(700*80) = 454 mm, V 25.4e6/(700*60) = 605 mm. Envelope 600 x 780 x 480:
+#   large for a shelf, acceptable for a printed corner/stand horn; the search may shrink it.
+name: room_80x60_700_hf1440_v7
+description: (objective v7) HOME living-room horn, ~80x60 inspiration, consistency-weighted, pattern+loading from 700 Hz crossover, FaitalPRO HF1440 1.4-inch, 600x780x450 envelope, band 350-8000 Hz
+driver:
+  exit_radius_mm: 18.0   # HF1440 exit is 17.9; 18.0 matches the pinned r0 of every 1.4-inch cell (0.1 mm, negligible)
+  exit_angle_deg: 2.0
+envelope:
+  max_mouth_w_mm: 600.0
+  max_mouth_h_mm: 780.0
+  max_depth_mm: 480.0
+symmetry: hv
+source:
+  cap: auto
+target:
+  coverage_h_deg: 80.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 350.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.5
+  f0_hz: 700.0
+  f0_v_hz: 700.0
+  loaded_hi_hz: 5600.0
+  freq_weights:
+    band_hz:
+      - [2500.0, 5500.0, 2.0]
+weights:
+  cov: 0.6
+  rip: 1.0
+  di: 0.3
+  dislope: 1.0
+  flat: 0.5
+  load: 1.0
+  distd: 0.5
+  diag: 1.0
+  flat_cv: 1.0
+grid:
+  verify_points_per_octave: 6
+  screen_extra_hz: [250, 315, 400, 2573, 3311, 4260]
+objective:
+  version: 7
+  tolerances:
+    cov: 4.0
+    rip: 1.0
+    di: 0.4
+    dislope: 9.0
+    flat: 1.5
+    load: 0.3
+    distd: 2.0
+    diag: 2.0
+    flat_cv: 1.5
+  cov_narrow_ratio: 2.0
+  cov_below_f0: mask
+  loaded_re_z: 0.5
+  lfp_re_z: 0.2
+  lfp_crossover_ratio: 1.6
+  bw8k_floor: 0.75
