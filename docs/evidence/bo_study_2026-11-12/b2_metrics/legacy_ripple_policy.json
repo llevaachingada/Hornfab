@@ -1,0 +1,116 @@
+{
+  "brief_hash": "e8b911dfc38471196cb46f0a7d85c89f28ca9e6b79f576de70cda92440d57e91",
+  "brief_name": "native_ath_core_2in_v4",
+  "cov_below_f0": "mask",
+  "cov_narrow_ratio": 2.0,
+  "diag_reference": "round",
+  "freq_weights_signature": [
+    [
+      2500.0,
+      5500.0,
+      2.0
+    ]
+  ],
+  "frequency_hz": [
+    500.0,
+    643.33,
+    827.75,
+    1065.04,
+    1370.35,
+    1763.18,
+    2268.63,
+    2918.96,
+    3755.72,
+    4832.36,
+    6217.63,
+    8000.0
+  ],
+  "frequency_weights": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    2.0,
+    2.0,
+    2.0,
+    1.0,
+    1.0
+  ],
+  "masks": {
+    "coverage_h": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "coverage_v": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "ripple": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "metric_spec_hash": "232aec8b8e1bb45e5c79b1dd4d435f43f971b5c87c07c55ed41ceb0b698dc767",
+  "objective_version": 4,
+  "reasons": [
+    "legacy_ripple_fallback",
+    "distinct_metric_spec",
+    "never_pooled_with_response_detrended"
+  ],
+  "restriction_name": null,
+  "ripple": "legacy_stored_ripple_partial",
+  "status": "partial",
+  "tolerances": {
+    "cov": 2.0,
+    "di": 0.4,
+    "diag": 2.0,
+    "dislope": 9.0,
+    "distd": 2.0,
+    "flat": 1.5,
+    "load": 0.3,
+    "rip": 1.0
+  },
+  "weights": {
+    "cov": 1.0,
+    "di": 0.3,
+    "diag": 0.5,
+    "dislope": 0.5,
+    "distd": 0.5,
+    "flat": 0.5,
+    "load": 0.0,
+    "rip": 1.0
+  }
+}

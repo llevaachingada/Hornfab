@@ -1,6 +1,28 @@
 # CONTINUITY
 
 
+## 2026-11-13 (~00:4xZ) - BO-STUDY M0-M2 LANDED, EVERYTHING COMMITTED AND PUSHED (owner-authorized, cloud completion next)
+
+- Owner-authorized full commit+push of the two-agent bo-study-v1.1 implementation. Slices on
+  main: M0 replay/rescoring + census + ledger (`3a48c27`), M1 parameter_study + source_fidelity
+  (`c4fc315`), S9 harness (`2ba3bac`), then this push: `bo/` engines+policy (locked scalar
+  GP/qNEI, pareto, contract/cost/TR, canonical metric policy, native TrainingSet 197x13),
+  `studies/` registry+job bridge+runner foundations, GUI analysis overhaul + six-page study
+  workspace + S10 renderers, `tools/experiments` pilot manifests, curated evidence
+  `docs/evidence/bo_study_2026-11-12/` and parent records `docs/research/bo_study/`.
+- Cloud completion kickoff: `docs/research/bo_study/CLOUD_COMPLETION_KICKOFF.md` (remaining:
+  M2 sensitivity evidence, execution package + pilot package, B8 full adversarial loop,
+  manifest executor fields, runner production adapter, docs rows — all offline).
+- Verification this session: 43 studies + 65 GUI + 46 bo-metrics/cohort + 35 registry/runner +
+  29 experiments + 9 bench suites green in the project venv; engine suites green in the
+  isolated bayes venv (botorch 0.18.1); one bayes-venv-only failure root-caused to a missing
+  hornlab_mesher and gated by the suite's existing `requires_mesher` convention (project venv
+  passes the same test); node --check app.js + studies.js clean; one defensive .remove() guard
+  fixed an eager route() shim TypeError that broke S10's node-execution test.
+- Native cohort frozen: 197 rows / 192 geometries, replay parity 197/200 max|dJ|=0, zero
+  backend calls; 3 shard-57 rows uncatalogued at snapshot (refused, recorded in ISSUES).
+- No BEM/GPU solve was started; live queue untouched.
+
 ## 2026-11-13 (~00:2xZ) - GUI WORK MERGED INTO LOCAL MAIN; OWNER'S 8765 GUI RESTARTED ON IT; PUSHED (feat/gui-integration fully landed)
 
 - The owner's own consolidation branch (`consolidation/local-main-2026-11-12`, `2ab94cf`) had already

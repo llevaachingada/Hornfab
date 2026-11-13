@@ -1,0 +1,563 @@
+{
+ "catalog_counts": {
+  "duplicate_physical_solve_rows": 716,
+  "exclusions": 0,
+  "failure_kinds": {
+   "exception": 63,
+   "invalid_envelope": 553,
+   "invalid_geometry": 3081,
+   "mesh_too_large": 882,
+   "solve_failed": 57
+  },
+  "geometries_with_multiple_solves": 537,
+  "index_malformed_lines": 0,
+  "index_orphans": 0,
+  "index_orphans_not_evaluated": 0,
+  "index_rows": 28676,
+  "index_torn_tail_bytes": 0,
+  "record_without_index": 0,
+  "records": 28676,
+  "records_complete_replayable": 8895,
+  "records_config_unknown": 6055,
+  "records_excluded": 0,
+  "records_experiment_unknown": 27855,
+  "records_failed": 4636,
+  "records_metadata_invalid": 0,
+  "records_missing_loading_arrays": 1507,
+  "records_missing_npz": 0,
+  "records_missing_score_arrays": 0,
+  "records_ok": 24040,
+  "records_shape_incoherent": 0,
+  "records_torn_artifact": 0,
+  "roots": 1,
+  "shard_malformed_lines": 0,
+  "shard_records": 28676,
+  "shard_torn_tail_bytes": 0,
+  "shards": 58,
+  "truncated": false,
+  "unique_configs": 128,
+  "unique_experiments_known": 5,
+  "unique_geometries": 23382,
+  "unique_mesh_specs": 28,
+  "unique_physical_solves": 23888,
+  "unique_score_identities": 86,
+  "unique_solve_specs": 21,
+  "unknown_field_counts": {
+   "brief_hash_missing": 11541,
+   "brief_missing": 11541,
+   "config_missing": 6055,
+   "mesh_n_dof_missing": 4636,
+   "objective_version_absent_defaults_to_v1": 14214,
+   "provenance_missing": 6055,
+   "run_id_missing": 27855
+  }
+ },
+ "eligibility": {
+  "complete_replayable_data": "eligible",
+  "independent_experiments": "insufficient_evidence",
+  "overall": "eligible_with_provenance_gaps"
+ },
+ "excluded_records": {
+  "brief_mismatch": 13950,
+  "brief_missing": 11541
+ },
+ "generated_utc": "2026-11-12T23:53:53Z",
+ "groups": [
+  {
+   "counts": {
+    "configs": [
+     "atlas__ath_core",
+     "atlas__core_law",
+     "crease__core_law_v4",
+     "native__ath_core_v4"
+    ],
+    "failures_by_type": {
+     "invalid_geometry": 299,
+     "mesh_too_large": 115
+    },
+    "gate_failures": {},
+    "grid_hashes": [
+     "7bd5a9d5825df12e"
+    ],
+    "missing_arrays": {},
+    "missing_loading_inputs": {},
+    "n_complete_replayable": 1499,
+    "n_failed": 414,
+    "n_gate_incomplete": 0,
+    "n_independent_experiments_known": 0,
+    "n_missing_npz": 0,
+    "n_ok": 1499,
+    "n_partial_loading_inputs": 0,
+    "n_partial_unsupported": 0,
+    "n_records": 1913,
+    "n_records_experiment_unknown": 1913,
+    "n_shape_incoherent": 0,
+    "n_torn_artifact": 0,
+    "n_unique_geometries": 1499,
+    "n_unique_physical_solves": 1499,
+    "n_unique_score_identities": 1,
+    "own_commits": {
+     "0cd1513aa5c837fa2467002e84b5f4d02f822c6b": 500,
+     "10d45b247d8819ee64505a7c6f27df0e8df86c7d": 413,
+     "24e06c41673c40f2745f49001aa61e0f2f244382": 300,
+     "64ccb203459c94e454ed2846c698732a6ee7b066": 700
+    },
+    "run_ids": [],
+    "shape_issues": {},
+    "software_hashes": {
+     "187e7e2a0f18a648": 300,
+     "5df9bae1cf4c352e": 500,
+     "a54d0d16045f8f4f": 700,
+     "f77cdc5a4c63f580": 413
+    },
+    "target_hashes": [
+     "add33bc8c5127916"
+    ],
+    "unknown_field_counts": {
+     "mesh_n_dof_missing": 414,
+     "run_id_missing": 1913
+    }
+   },
+   "dependency_shas": {
+    "hornlab_beat_bem": "760a1ecf6075f5ccdbf97a69874c7f88441e36c1",
+    "hornlab_bempp_bem": "8e6910602ece9abb2e9ce0db7a637f4bedf17f53",
+    "hornlab_mesher": "b922e807a5cf10cf732c4557ec0b9b495762afd7",
+    "hornlab_plots": "9e4a6d0dd2ccb6e735dd00233dccccb50d12ed44"
+   },
+   "group": {
+    "backend": "beat_cuda",
+    "dependency_hash": "e3614d0ba5956ded",
+    "fidelity": "screen"
+   },
+   "reason_codes": [
+    "experiment_identity_unknown_for_some_rows"
+   ],
+   "status": "eligible_with_provenance_gaps"
+  },
+  {
+   "counts": {
+    "configs": [
+     "atlas__ath_core",
+     "atlas__core_law",
+     "native__ath_core_v4_narrow"
+    ],
+    "failures_by_type": {
+     "invalid_geometry": 257,
+     "mesh_too_large": 98,
+     "solve_failed": 3
+    },
+    "gate_failures": {},
+    "grid_hashes": [
+     "7bd5a9d5825df12e"
+    ],
+    "missing_arrays": {},
+    "missing_loading_inputs": {},
+    "n_complete_replayable": 878,
+    "n_failed": 358,
+    "n_gate_incomplete": 0,
+    "n_independent_experiments_known": 4,
+    "n_missing_npz": 0,
+    "n_ok": 878,
+    "n_partial_loading_inputs": 0,
+    "n_partial_unsupported": 0,
+    "n_records": 1236,
+    "n_records_experiment_unknown": 425,
+    "n_shape_incoherent": 0,
+    "n_torn_artifact": 0,
+    "n_unique_geometries": 878,
+    "n_unique_physical_solves": 878,
+    "n_unique_score_identities": 1,
+    "own_commits": {
+     "08ad9dd4c9ecb4ce4505e557b0c0b3354612c8af": 425,
+     "79edc8d162f9194432f759fbc4adaab98b6d056f": 411,
+     "d6382311ebe95f8e6df7110da754f666a32bf83d": 400
+    },
+    "run_ids": [
+     "20261030T170642Z-screen-fbab4f",
+     "20261112T200219Z-screen-965593",
+     "20261112T221507Z-screen-b37eea",
+     "20261112T225013Z-screen-633b4f"
+    ],
+    "shape_issues": {},
+    "software_hashes": {
+     "70c15e03538a5104": 400,
+     "7cd76118ee23de08": 411,
+     "ae43520108f09f52": 425
+    },
+    "target_hashes": [
+     "add33bc8c5127916"
+    ],
+    "unknown_field_counts": {
+     "mesh_n_dof_missing": 358,
+     "run_id_missing": 425
+    }
+   },
+   "dependency_shas": {
+    "hornlab_beat_bem": "0850ef39b29d7c51f8fbb082184d3784d2ff8bef",
+    "hornlab_bempp_bem": "8e6910602ece9abb2e9ce0db7a637f4bedf17f53",
+    "hornlab_mesher": "55da4f46d662d8dcd7a9f94a609eeea4009fcd62",
+    "hornlab_plots": "9e4a6d0dd2ccb6e735dd00233dccccb50d12ed44"
+   },
+   "group": {
+    "backend": "beat_cuda",
+    "dependency_hash": "84709bd8e737cca4",
+    "fidelity": "screen"
+   },
+   "reason_codes": [
+    "experiment_identity_unknown_for_some_rows"
+   ],
+   "status": "eligible_with_provenance_gaps"
+  },
+  {
+   "counts": {
+    "configs": [
+     "atlas__ath_core",
+     "atlas__core_law",
+     "crease__core_law_v4",
+     "native__ath_core_v4"
+    ],
+    "failures_by_type": {},
+    "gate_failures": {},
+    "grid_hashes": [
+     "1793907e36c819f4"
+    ],
+    "missing_arrays": {},
+    "missing_loading_inputs": {},
+    "n_complete_replayable": 20,
+    "n_failed": 0,
+    "n_gate_incomplete": 0,
+    "n_independent_experiments_known": 0,
+    "n_missing_npz": 0,
+    "n_ok": 20,
+    "n_partial_loading_inputs": 0,
+    "n_partial_unsupported": 0,
+    "n_records": 20,
+    "n_records_experiment_unknown": 20,
+    "n_shape_incoherent": 0,
+    "n_torn_artifact": 0,
+    "n_unique_geometries": 20,
+    "n_unique_physical_solves": 20,
+    "n_unique_score_identities": 1,
+    "own_commits": {
+     "46cfafb2072913320976c9269a48290cbac9e745": 10,
+     "64ccb203459c94e454ed2846c698732a6ee7b066": 10
+    },
+    "run_ids": [],
+    "shape_issues": {},
+    "software_hashes": {
+     "a54d0d16045f8f4f": 10,
+     "ab6c41e5bcec09f6": 10
+    },
+    "target_hashes": [
+     "add33bc8c5127916"
+    ],
+    "unknown_field_counts": {
+     "run_id_missing": 20
+    }
+   },
+   "dependency_shas": {
+    "hornlab_beat_bem": "760a1ecf6075f5ccdbf97a69874c7f88441e36c1",
+    "hornlab_bempp_bem": "8e6910602ece9abb2e9ce0db7a637f4bedf17f53",
+    "hornlab_mesher": "b922e807a5cf10cf732c4557ec0b9b495762afd7",
+    "hornlab_plots": "9e4a6d0dd2ccb6e735dd00233dccccb50d12ed44"
+   },
+   "group": {
+    "backend": "beat_cuda",
+    "dependency_hash": "e3614d0ba5956ded",
+    "fidelity": "verify"
+   },
+   "reason_codes": [
+    "experiment_identity_unknown_for_some_rows"
+   ],
+   "status": "eligible_with_provenance_gaps"
+  },
+  {
+   "counts": {
+    "configs": [
+     "atlas__ath_core",
+     "atlas__core_law"
+    ],
+    "failures_by_type": {
+     "solve_failed": 1
+    },
+    "gate_failures": {},
+    "grid_hashes": [
+     "1793907e36c819f4"
+    ],
+    "missing_arrays": {},
+    "missing_loading_inputs": {},
+    "n_complete_replayable": 15,
+    "n_failed": 1,
+    "n_gate_incomplete": 0,
+    "n_independent_experiments_known": 1,
+    "n_missing_npz": 0,
+    "n_ok": 15,
+    "n_partial_loading_inputs": 0,
+    "n_partial_unsupported": 0,
+    "n_records": 16,
+    "n_records_experiment_unknown": 6,
+    "n_shape_incoherent": 0,
+    "n_torn_artifact": 0,
+    "n_unique_geometries": 15,
+    "n_unique_physical_solves": 15,
+    "n_unique_score_identities": 1,
+    "own_commits": {
+     "08ad9dd4c9ecb4ce4505e557b0c0b3354612c8af": 6,
+     "79edc8d162f9194432f759fbc4adaab98b6d056f": 10
+    },
+    "run_ids": [
+     "verify"
+    ],
+    "shape_issues": {},
+    "software_hashes": {
+     "7cd76118ee23de08": 10,
+     "ae43520108f09f52": 6
+    },
+    "target_hashes": [
+     "add33bc8c5127916"
+    ],
+    "unknown_field_counts": {
+     "mesh_n_dof_missing": 1,
+     "run_id_missing": 6
+    }
+   },
+   "dependency_shas": {
+    "hornlab_beat_bem": "0850ef39b29d7c51f8fbb082184d3784d2ff8bef",
+    "hornlab_bempp_bem": "8e6910602ece9abb2e9ce0db7a637f4bedf17f53",
+    "hornlab_mesher": "55da4f46d662d8dcd7a9f94a609eeea4009fcd62",
+    "hornlab_plots": "9e4a6d0dd2ccb6e735dd00233dccccb50d12ed44"
+   },
+   "group": {
+    "backend": "beat_cuda",
+    "dependency_hash": "84709bd8e737cca4",
+    "fidelity": "verify"
+   },
+   "reason_codes": [
+    "fewer_complete_replayable_than_min_geometries",
+    "fewer_unique_geometries_than_min_geometries"
+   ],
+   "status": "insufficient_evidence"
+  }
+ ],
+ "independent_experiments": {
+  "known": 5,
+  "note": "run_id is the only recorded experiment identity; absence is not inferred from timestamps or config names",
+  "records_experiment_unknown": 2364,
+  "status": "insufficient_evidence"
+ },
+ "matched_records": 3185,
+ "min_geometries": 16,
+ "operation": "ath_census",
+ "policy": {
+  "array_rule": "complete replayable v4 requires h/v angles, h/v SPL, balloon_dirs, spl_balloon_db and on_axis_db; z_throat/loading is separate and a missing loading input is never complete",
+  "group_by": [
+   "fidelity",
+   "backend",
+   "dependency_hash"
+  ],
+  "pool_across_groups": false,
+  "rule": "screen/verify, backend and external dependency identity are separate cohorts; a total across groups is descriptive only"
+ },
+ "primary_group": {
+  "counts": {
+   "configs": [
+    "atlas__ath_core",
+    "atlas__core_law",
+    "crease__core_law_v4",
+    "native__ath_core_v4"
+   ],
+   "failures_by_type": {
+    "invalid_geometry": 299,
+    "mesh_too_large": 115
+   },
+   "gate_failures": {},
+   "grid_hashes": [
+    "7bd5a9d5825df12e"
+   ],
+   "missing_arrays": {},
+   "missing_loading_inputs": {},
+   "n_complete_replayable": 1499,
+   "n_failed": 414,
+   "n_gate_incomplete": 0,
+   "n_independent_experiments_known": 0,
+   "n_missing_npz": 0,
+   "n_ok": 1499,
+   "n_partial_loading_inputs": 0,
+   "n_partial_unsupported": 0,
+   "n_records": 1913,
+   "n_records_experiment_unknown": 1913,
+   "n_shape_incoherent": 0,
+   "n_torn_artifact": 0,
+   "n_unique_geometries": 1499,
+   "n_unique_physical_solves": 1499,
+   "n_unique_score_identities": 1,
+   "own_commits": {
+    "0cd1513aa5c837fa2467002e84b5f4d02f822c6b": 500,
+    "10d45b247d8819ee64505a7c6f27df0e8df86c7d": 413,
+    "24e06c41673c40f2745f49001aa61e0f2f244382": 300,
+    "64ccb203459c94e454ed2846c698732a6ee7b066": 700
+   },
+   "run_ids": [],
+   "shape_issues": {},
+   "software_hashes": {
+    "187e7e2a0f18a648": 300,
+    "5df9bae1cf4c352e": 500,
+    "a54d0d16045f8f4f": 700,
+    "f77cdc5a4c63f580": 413
+   },
+   "target_hashes": [
+    "add33bc8c5127916"
+   ],
+   "unknown_field_counts": {
+    "mesh_n_dof_missing": 414,
+    "run_id_missing": 1913
+   }
+  },
+  "dependency_shas": {
+   "hornlab_beat_bem": "760a1ecf6075f5ccdbf97a69874c7f88441e36c1",
+   "hornlab_bempp_bem": "8e6910602ece9abb2e9ce0db7a637f4bedf17f53",
+   "hornlab_mesher": "b922e807a5cf10cf732c4557ec0b9b495762afd7",
+   "hornlab_plots": "9e4a6d0dd2ccb6e735dd00233dccccb50d12ed44"
+  },
+  "group": {
+   "backend": "beat_cuda",
+   "dependency_hash": "e3614d0ba5956ded",
+   "fidelity": "screen"
+  },
+  "reason_codes": [
+   "experiment_identity_unknown_for_some_rows"
+  ],
+  "status": "eligible_with_provenance_gaps"
+ },
+ "reason_codes": [
+  "experiment_identity_unknown_for_some_rows"
+ ],
+ "schema_version": 1,
+ "source_roots": [
+  "dataset"
+ ],
+ "spec": {
+  "backend": "beat_cuda",
+  "brief": "native_ath_core_2in_v4",
+  "brief_hash": "fa45251216b5",
+  "brief_path": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\briefs\\campaign_2026-10-26_v4\\native_ath_core_2in_v4.yaml",
+  "config_path": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\campaign_2026-10-26_v4\\native__ath_core_v4.yaml",
+  "cov_below_f0": "mask",
+  "cov_narrow_ratio": 2.0,
+  "diag_reference": "round",
+  "family": "OSSE",
+  "name": "native__ath_core_v4",
+  "note": "resolved from the real config + brief; never substitutes inline YAML targets",
+  "objective_version": 4,
+  "status": "ok",
+  "target": {
+   "band_hi_hz": 8000.0,
+   "band_lo_hz": 300.0,
+   "coverage_h_deg": 50.0,
+   "coverage_v_deg": 50.0,
+   "f0_hz": 1280.0,
+   "freq_weights": {
+    "band_hz": [
+     [
+      2500.0,
+      5500.0,
+      2.0
+     ]
+    ]
+   }
+  },
+  "tolerances": {
+   "cov": 2.0,
+   "di": 0.4,
+   "diag": 2.0,
+   "dislope": 9.0,
+   "distd": 2.0,
+   "flat": 1.5,
+   "load": 0.3,
+   "rip": 1.0
+  },
+  "weights": {
+   "cov": 1.0,
+   "di": 0.3,
+   "diag": 0.5,
+   "dislope": 0.5,
+   "distd": 0.5,
+   "flat": 0.5,
+   "load": 0.0,
+   "rip": 1.0
+  }
+ },
+ "status": "eligible_with_provenance_gaps",
+ "tool": "cohorts",
+ "totals_descriptive_only": {
+  "configs": [
+   "atlas__ath_core",
+   "atlas__core_law",
+   "crease__core_law_v4",
+   "native__ath_core_v4",
+   "native__ath_core_v4_narrow"
+  ],
+  "failures_by_type": {
+   "invalid_geometry": 556,
+   "mesh_too_large": 213,
+   "solve_failed": 4
+  },
+  "gate_failures": {},
+  "grid_hashes": [
+   "1793907e36c819f4",
+   "7bd5a9d5825df12e"
+  ],
+  "missing_arrays": {},
+  "missing_loading_inputs": {},
+  "n_complete_replayable": 2412,
+  "n_failed": 773,
+  "n_gate_incomplete": 0,
+  "n_independent_experiments_known": 5,
+  "n_missing_npz": 0,
+  "n_ok": 2412,
+  "n_partial_loading_inputs": 0,
+  "n_partial_unsupported": 0,
+  "n_records": 3185,
+  "n_records_experiment_unknown": 2364,
+  "n_shape_incoherent": 0,
+  "n_torn_artifact": 0,
+  "n_unique_geometries": 2377,
+  "n_unique_physical_solves": 2412,
+  "n_unique_score_identities": 1,
+  "own_commits": {
+   "08ad9dd4c9ecb4ce4505e557b0c0b3354612c8af": 431,
+   "0cd1513aa5c837fa2467002e84b5f4d02f822c6b": 500,
+   "10d45b247d8819ee64505a7c6f27df0e8df86c7d": 413,
+   "24e06c41673c40f2745f49001aa61e0f2f244382": 300,
+   "46cfafb2072913320976c9269a48290cbac9e745": 10,
+   "64ccb203459c94e454ed2846c698732a6ee7b066": 710,
+   "79edc8d162f9194432f759fbc4adaab98b6d056f": 421,
+   "d6382311ebe95f8e6df7110da754f666a32bf83d": 400
+  },
+  "run_ids": [
+   "20261030T170642Z-screen-fbab4f",
+   "20261112T200219Z-screen-965593",
+   "20261112T221507Z-screen-b37eea",
+   "20261112T225013Z-screen-633b4f",
+   "verify"
+  ],
+  "shape_issues": {},
+  "software_hashes": {
+   "187e7e2a0f18a648": 300,
+   "5df9bae1cf4c352e": 500,
+   "70c15e03538a5104": 400,
+   "7cd76118ee23de08": 421,
+   "a54d0d16045f8f4f": 710,
+   "ab6c41e5bcec09f6": 10,
+   "ae43520108f09f52": 431,
+   "f77cdc5a4c63f580": 413
+  },
+  "target_hashes": [
+   "add33bc8c5127916"
+  ],
+  "unknown_field_counts": {
+   "mesh_n_dof_missing": 773,
+   "run_id_missing": 2364
+  }
+ }
+}

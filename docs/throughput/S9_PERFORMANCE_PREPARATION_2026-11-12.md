@@ -1,0 +1,32 @@
+# S9 performance preparation (2026-11-12)
+
+Status: **offline preparation only**. No new real timing, speedup or physics claim. The live queue owns the solve lanes. Do not run the historical RUNBOOK cleanup commands while another lane is active; current AGENTS lane isolation applies. Schedule each measurement only after the lane owner confirms availability and authorizes it.
+
+## Offline ledger
+
+`tools/bench/timing_ledger.py` accepts a JSON manifest and reads existing `HORNLAB_STAGE_TIMING` NDJSON files without modifying them. Example fixture, with fabricated seconds and hashes:
+
+```json
+{"source":"synthetic","elapsed_s":20,"stage_files":["stage_timing.ndjson"],"identity":{"spec_hash":"fixture","cache_identity":"fixture","lib_shas":{"beat":"fixture"}},"attempts":[{"cache":"new","outcome":"physical_solve","thermal":"cold","verified_useful":true},{"cache":"hit","outcome":"refusal","thermal":"warm","verified_useful":false}],"overhead_seconds":{"training":2,"analysis":1}}
+```
+
+Run `.\.venv\Scripts\python.exe tools\bench\timing_ledger.py <manifest.json>`; stage paths are relative to the manifest. Supply elapsed independently from the whole experiment, and all attempts including failures and refusals. Use `null` for unknown verification. Verified useful/hour is withheld until every attempt's verification status is known; the criteria and verification costs must be predeclared. `identity`, attempt labels, elapsed, and overhead are operator-supplied, not independently verified. Keep the manifest and source hashes with the results. Snapshot live data only under the project's safe read rules; do not use this tool against changing files as if they were a stable snapshot.
+
+Stage rows are append-only and can contain repeated candidate evaluations; they do not uniquely identify attempts or invocations. Candidate totals, solve stages, nested solver timing, and concurrent prefetch can overlap. The diagnostic difference between summed candidate totals and wall time is not unexplained overhead. The ledger does not allocate stages to outcomes, determine cold/warm from records, infer verification or reconstruct a critical path. `solver_path.timings` may not expose separate assembly/LU/field components; absent numbers stay absent. `mesh_prefetch` uses a separate context and might not be recorded in a candidate file. Failed work with no flushed timer is likewise missing. Record separate whole-run elapsed and independently collected training, analysis, verification, startup, retry and failed-attempt costs, including any overlap, before drawing conclusions.
+
+## Scheduled A/B matrix
+
+For each task, freeze resolved config and score/physical identity, design and mesh hashes, solver/mesher pins and package versions, backend, mode, bounds, frequency array and ordering, observation grids, symmetry, source tags, driver, seed and cache state. Capture command, environment, start/end timestamps, lane, hardware/driver, and output hashes. Unknown identities make a comparison descriptive only. Use distinct fresh caches or report hits separately; never delete the active cache. Include failed calls, cheap refusals, cached/new counts and wall time. Use matching candidates and budget for paired search runs; `compare_search_runs.py` checks its documented row keys but does not establish full response parity.
+
+| Pair | Fixed inputs | Treatment | Measurements |
+|---|---|---|---|
+| Production baseline | Same frozen config and meshes, small 2–3k DOF and mid 5–9k DOF, plus applicable two-source mesh | Default grouping, prefetch off | Cold plus at least 3 warm reps; 12 and 25 frequency grids where safe; 41 only where known to fit |
+| Frequency grouping | Identical mesh/spec/frequencies | default, 1, 2, 4, full batch | Same cold/warm, failures, timings, device and shared memory, arrays |
+| End-to-end pipeline | Same resolved task, seed, candidates, budget and matched initial cache | prefetch off vs depth 2 | Repeated paired whole runs, attempt ledger, timer stages, prefetch stats, failed effort, verified useful/hour |
+| Separate later CPU/GPU study | Same physical spec and candidates, explicit backend as treatment | CPU alone, GPU alone, then concurrently where lane policy permits | Whole-run throughput, per-lane slowdown, isolation, machine load and parity |
+
+Counterbalance arm order and repeat independent pairs; report all trials, median and spread, with cold and warm separated. Before/after each authorized GPU measurement record baseline and peak device memory from an independent poller, and Windows per-host-tree shared GPU memory using `tools/bench/_bench_common.py` `GpuMemPeak`. Unknown or material shared-memory spill invalidates an unqualified GPU timing comparison. One CUDA solve at a time; lane-specific hosts and locks must be respected. Capture failed and aborted effort. `throughput_matrix.py` has a fake mode and production path but its current summaries do **not** prove shared-memory or full array parity: supplement its probes and archived response arrays before accepting a result.
+
+Require exact requested frequency order and shape, matching presence and shape for both polar cuts, balloon and complex throat impedance; compare values using tolerances fixed before the experiment and inspect per-frequency discrepancies. Verify relevant pressure/phase and impedance, beamwidth, DI, and objective/gates against an independent/converged reference where the treatment could alter physics. Predeclare verification criteria and account for all verification work. Reject failed or partial arrays, unmatched identity, unexpected cache hits or missing spill evidence. Accept a performance change only when the repeated benefit exceeds observed variability and verified quality and shortlist recall are maintained; otherwise record no gain or inconclusive.
+
+The pinned BEAT fork `0850ef39b29d7c51f8fbb082184d3784d2ff8bef`, `hornlab_beat_bem/julia/BeatEngineDriver.jl:1879–1882`, already describes fused multichannel LHS assembly, RHS-only extra channels and one LU per frequency. No LU reuse across changed frequency or geometry is assumed. No fork optimization is proposed until stage and spill measurements identify a reproducible bottleneck. A later fork change requires separate ownership, pinned commit and tests plus the analytic, independent-backend, same-mesh response parity and memory gates in `docs/FORKS.md`; it must not edit installed dependencies.

@@ -1,0 +1,2127 @@
+{
+ "label_a": "A",
+ "label_b": "B",
+ "sides": {
+  "a": {
+   "runs": [
+    "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\a0",
+    "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\a1",
+    "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\a2",
+    "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\a3",
+    "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\a4",
+    "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\a5"
+   ],
+   "n_runs": 6,
+   "n_new_valid_max": 6,
+   "cost": {
+    "index_rows": 35,
+    "cache_hits": 0,
+    "attempts_new": 35,
+    "valid_evaluations_new": 34,
+    "valid_evaluations_cached": 0,
+    "cheap_refusals": 1,
+    "geometry_refusals": 1,
+    "envelope_refusals": 0,
+    "resource_refusals": 0,
+    "solver_failures": 0,
+    "pipeline_failures": 0,
+    "unknown_failures": 0,
+    "actual_bem_calls_observed": 34,
+    "actual_bem_calls_inferred": 34,
+    "actual_bem_seconds": 51.0,
+    "timing_observations": 34,
+    "elapsed_seconds": {
+     "attempts_all_incl_failed_refused": 68.5,
+     "valid_new": 68.0,
+     "failed_refused_attempts": 0.5,
+     "cached_replay": 0.0,
+     "recorded_total": 68.5,
+     "wall_span": 68.0,
+     "unaccounted_overhead": -0.5,
+     "missing_seconds_attempts": 0.0
+    },
+    "failure_kinds": {
+     "invalid_geometry": 1
+    },
+    "cost_model_status": "eligible_not_fitted_in_m0"
+   },
+   "replicates": {
+    "n_run_dirs": 6,
+    "n_independent_replicates": 6,
+    "duplicate_seed_run_dirs": {},
+    "resumed_runs": [],
+    "restarted_runs": [],
+    "note": "duplicate run dirs sharing a CMA seed are not independent evidence"
+   },
+   "outcomes": {
+    "n_runs": 6,
+    "finished": 6,
+    "interrupted_or_unknown": 0,
+    "with_valid_eval": 6,
+    "all_failure": 0
+   }
+  },
+  "b": {
+   "runs": [
+    "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\b0",
+    "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\b1",
+    "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\b2",
+    "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\b3",
+    "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\b4",
+    "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\b5"
+   ],
+   "n_runs": 6,
+   "n_new_valid_max": 6,
+   "cost": {
+    "index_rows": 34,
+    "cache_hits": 0,
+    "attempts_new": 34,
+    "valid_evaluations_new": 34,
+    "valid_evaluations_cached": 0,
+    "cheap_refusals": 0,
+    "geometry_refusals": 0,
+    "envelope_refusals": 0,
+    "resource_refusals": 0,
+    "solver_failures": 0,
+    "pipeline_failures": 0,
+    "unknown_failures": 0,
+    "actual_bem_calls_observed": 34,
+    "actual_bem_calls_inferred": 34,
+    "actual_bem_seconds": 51.0,
+    "timing_observations": 34,
+    "elapsed_seconds": {
+     "attempts_all_incl_failed_refused": 68.0,
+     "valid_new": 68.0,
+     "failed_refused_attempts": 0.0,
+     "cached_replay": 0.0,
+     "recorded_total": 68.0,
+     "wall_span": 68.0,
+     "unaccounted_overhead": 0.0,
+     "missing_seconds_attempts": 0.0
+    },
+    "failure_kinds": {},
+    "cost_model_status": "eligible_not_fitted_in_m0"
+   },
+   "replicates": {
+    "n_run_dirs": 6,
+    "n_independent_replicates": 6,
+    "duplicate_seed_run_dirs": {},
+    "resumed_runs": [],
+    "restarted_runs": [],
+    "note": "duplicate run dirs sharing a CMA seed are not independent evidence"
+   },
+   "outcomes": {
+    "n_runs": 6,
+    "finished": 6,
+    "interrupted_or_unknown": 0,
+    "with_valid_eval": 6,
+    "all_failure": 0
+   }
+  }
+ },
+ "compatibility": {
+  "n_runs": 12,
+  "same": {
+   "objective_version": true,
+   "brief": true,
+   "family": true,
+   "mode": true,
+   "backend": true,
+   "grid_hash": true,
+   "target_hash": true
+  },
+  "differing": {},
+  "blocking": [],
+  "software_variants": {
+   "a74cfdfd0d462f68": 12
+  },
+  "compatible_for_descriptive": true,
+  "compatible_for_inference": true,
+  "fingerprints": [
+   {
+    "run_id": "a0",
+    "run_dir": "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\a0",
+    "brief": "synthetic",
+    "family": "OSSE",
+    "objective_version": 4,
+    "mode": "screen",
+    "cma_seed": 5101,
+    "backend": "beat_cuda",
+    "grid": {
+     "freqs_hz": [
+      500.0,
+      1000.0,
+      2000.0
+     ],
+     "angle_count": 73,
+     "balloon": true,
+     "balloon_points_screen": 512,
+     "quadrants": "1",
+     "backend": "beat_cuda"
+    },
+    "grid_hash": "25822c139d60977b",
+    "target": {
+     "band_lo_hz": 500.0,
+     "band_hi_hz": 2000.0
+    },
+    "target_hash": "84854fcebe007303",
+    "task_config_hash": "a5775bc6e744baf4",
+    "config_sha": null,
+    "software": {
+     "hornlab_beads": "not-a-real-pin",
+     "hornlab_search": "synthetic"
+    },
+    "software_hash": "a74cfdfd0d462f68",
+    "software_unknown": false,
+    "runtime": null
+   },
+   {
+    "run_id": "a1",
+    "run_dir": "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\a1",
+    "brief": "synthetic",
+    "family": "OSSE",
+    "objective_version": 4,
+    "mode": "screen",
+    "cma_seed": 5102,
+    "backend": "beat_cuda",
+    "grid": {
+     "freqs_hz": [
+      500.0,
+      1000.0,
+      2000.0
+     ],
+     "angle_count": 73,
+     "balloon": true,
+     "balloon_points_screen": 512,
+     "quadrants": "1",
+     "backend": "beat_cuda"
+    },
+    "grid_hash": "25822c139d60977b",
+    "target": {
+     "band_lo_hz": 500.0,
+     "band_hi_hz": 2000.0
+    },
+    "target_hash": "84854fcebe007303",
+    "task_config_hash": "a5775bc6e744baf4",
+    "config_sha": null,
+    "software": {
+     "hornlab_beads": "not-a-real-pin",
+     "hornlab_search": "synthetic"
+    },
+    "software_hash": "a74cfdfd0d462f68",
+    "software_unknown": false,
+    "runtime": null
+   },
+   {
+    "run_id": "a2",
+    "run_dir": "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\a2",
+    "brief": "synthetic",
+    "family": "OSSE",
+    "objective_version": 4,
+    "mode": "screen",
+    "cma_seed": 5103,
+    "backend": "beat_cuda",
+    "grid": {
+     "freqs_hz": [
+      500.0,
+      1000.0,
+      2000.0
+     ],
+     "angle_count": 73,
+     "balloon": true,
+     "balloon_points_screen": 512,
+     "quadrants": "1",
+     "backend": "beat_cuda"
+    },
+    "grid_hash": "25822c139d60977b",
+    "target": {
+     "band_lo_hz": 500.0,
+     "band_hi_hz": 2000.0
+    },
+    "target_hash": "84854fcebe007303",
+    "task_config_hash": "a5775bc6e744baf4",
+    "config_sha": null,
+    "software": {
+     "hornlab_beads": "not-a-real-pin",
+     "hornlab_search": "synthetic"
+    },
+    "software_hash": "a74cfdfd0d462f68",
+    "software_unknown": false,
+    "runtime": null
+   },
+   {
+    "run_id": "a3",
+    "run_dir": "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\a3",
+    "brief": "synthetic",
+    "family": "OSSE",
+    "objective_version": 4,
+    "mode": "screen",
+    "cma_seed": 5104,
+    "backend": "beat_cuda",
+    "grid": {
+     "freqs_hz": [
+      500.0,
+      1000.0,
+      2000.0
+     ],
+     "angle_count": 73,
+     "balloon": true,
+     "balloon_points_screen": 512,
+     "quadrants": "1",
+     "backend": "beat_cuda"
+    },
+    "grid_hash": "25822c139d60977b",
+    "target": {
+     "band_lo_hz": 500.0,
+     "band_hi_hz": 2000.0
+    },
+    "target_hash": "84854fcebe007303",
+    "task_config_hash": "a5775bc6e744baf4",
+    "config_sha": null,
+    "software": {
+     "hornlab_beads": "not-a-real-pin",
+     "hornlab_search": "synthetic"
+    },
+    "software_hash": "a74cfdfd0d462f68",
+    "software_unknown": false,
+    "runtime": null
+   },
+   {
+    "run_id": "a4",
+    "run_dir": "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\a4",
+    "brief": "synthetic",
+    "family": "OSSE",
+    "objective_version": 4,
+    "mode": "screen",
+    "cma_seed": 5105,
+    "backend": "beat_cuda",
+    "grid": {
+     "freqs_hz": [
+      500.0,
+      1000.0,
+      2000.0
+     ],
+     "angle_count": 73,
+     "balloon": true,
+     "balloon_points_screen": 512,
+     "quadrants": "1",
+     "backend": "beat_cuda"
+    },
+    "grid_hash": "25822c139d60977b",
+    "target": {
+     "band_lo_hz": 500.0,
+     "band_hi_hz": 2000.0
+    },
+    "target_hash": "84854fcebe007303",
+    "task_config_hash": "a5775bc6e744baf4",
+    "config_sha": null,
+    "software": {
+     "hornlab_beads": "not-a-real-pin",
+     "hornlab_search": "synthetic"
+    },
+    "software_hash": "a74cfdfd0d462f68",
+    "software_unknown": false,
+    "runtime": null
+   },
+   {
+    "run_id": "a5",
+    "run_dir": "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\a5",
+    "brief": "synthetic",
+    "family": "OSSE",
+    "objective_version": 4,
+    "mode": "screen",
+    "cma_seed": 5106,
+    "backend": "beat_cuda",
+    "grid": {
+     "freqs_hz": [
+      500.0,
+      1000.0,
+      2000.0
+     ],
+     "angle_count": 73,
+     "balloon": true,
+     "balloon_points_screen": 512,
+     "quadrants": "1",
+     "backend": "beat_cuda"
+    },
+    "grid_hash": "25822c139d60977b",
+    "target": {
+     "band_lo_hz": 500.0,
+     "band_hi_hz": 2000.0
+    },
+    "target_hash": "84854fcebe007303",
+    "task_config_hash": "a5775bc6e744baf4",
+    "config_sha": null,
+    "software": {
+     "hornlab_beads": "not-a-real-pin",
+     "hornlab_search": "synthetic"
+    },
+    "software_hash": "a74cfdfd0d462f68",
+    "software_unknown": false,
+    "runtime": null
+   },
+   {
+    "run_id": "b0",
+    "run_dir": "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\b0",
+    "brief": "synthetic",
+    "family": "OSSE",
+    "objective_version": 4,
+    "mode": "screen",
+    "cma_seed": 6101,
+    "backend": "beat_cuda",
+    "grid": {
+     "freqs_hz": [
+      500.0,
+      1000.0,
+      2000.0
+     ],
+     "angle_count": 73,
+     "balloon": true,
+     "balloon_points_screen": 512,
+     "quadrants": "1",
+     "backend": "beat_cuda"
+    },
+    "grid_hash": "25822c139d60977b",
+    "target": {
+     "band_lo_hz": 500.0,
+     "band_hi_hz": 2000.0
+    },
+    "target_hash": "84854fcebe007303",
+    "task_config_hash": "a5775bc6e744baf4",
+    "config_sha": null,
+    "software": {
+     "hornlab_beads": "not-a-real-pin",
+     "hornlab_search": "synthetic"
+    },
+    "software_hash": "a74cfdfd0d462f68",
+    "software_unknown": false,
+    "runtime": null
+   },
+   {
+    "run_id": "b1",
+    "run_dir": "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\b1",
+    "brief": "synthetic",
+    "family": "OSSE",
+    "objective_version": 4,
+    "mode": "screen",
+    "cma_seed": 6102,
+    "backend": "beat_cuda",
+    "grid": {
+     "freqs_hz": [
+      500.0,
+      1000.0,
+      2000.0
+     ],
+     "angle_count": 73,
+     "balloon": true,
+     "balloon_points_screen": 512,
+     "quadrants": "1",
+     "backend": "beat_cuda"
+    },
+    "grid_hash": "25822c139d60977b",
+    "target": {
+     "band_lo_hz": 500.0,
+     "band_hi_hz": 2000.0
+    },
+    "target_hash": "84854fcebe007303",
+    "task_config_hash": "a5775bc6e744baf4",
+    "config_sha": null,
+    "software": {
+     "hornlab_beads": "not-a-real-pin",
+     "hornlab_search": "synthetic"
+    },
+    "software_hash": "a74cfdfd0d462f68",
+    "software_unknown": false,
+    "runtime": null
+   },
+   {
+    "run_id": "b2",
+    "run_dir": "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\b2",
+    "brief": "synthetic",
+    "family": "OSSE",
+    "objective_version": 4,
+    "mode": "screen",
+    "cma_seed": 6103,
+    "backend": "beat_cuda",
+    "grid": {
+     "freqs_hz": [
+      500.0,
+      1000.0,
+      2000.0
+     ],
+     "angle_count": 73,
+     "balloon": true,
+     "balloon_points_screen": 512,
+     "quadrants": "1",
+     "backend": "beat_cuda"
+    },
+    "grid_hash": "25822c139d60977b",
+    "target": {
+     "band_lo_hz": 500.0,
+     "band_hi_hz": 2000.0
+    },
+    "target_hash": "84854fcebe007303",
+    "task_config_hash": "a5775bc6e744baf4",
+    "config_sha": null,
+    "software": {
+     "hornlab_beads": "not-a-real-pin",
+     "hornlab_search": "synthetic"
+    },
+    "software_hash": "a74cfdfd0d462f68",
+    "software_unknown": false,
+    "runtime": null
+   },
+   {
+    "run_id": "b3",
+    "run_dir": "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\b3",
+    "brief": "synthetic",
+    "family": "OSSE",
+    "objective_version": 4,
+    "mode": "screen",
+    "cma_seed": 6104,
+    "backend": "beat_cuda",
+    "grid": {
+     "freqs_hz": [
+      500.0,
+      1000.0,
+      2000.0
+     ],
+     "angle_count": 73,
+     "balloon": true,
+     "balloon_points_screen": 512,
+     "quadrants": "1",
+     "backend": "beat_cuda"
+    },
+    "grid_hash": "25822c139d60977b",
+    "target": {
+     "band_lo_hz": 500.0,
+     "band_hi_hz": 2000.0
+    },
+    "target_hash": "84854fcebe007303",
+    "task_config_hash": "a5775bc6e744baf4",
+    "config_sha": null,
+    "software": {
+     "hornlab_beads": "not-a-real-pin",
+     "hornlab_search": "synthetic"
+    },
+    "software_hash": "a74cfdfd0d462f68",
+    "software_unknown": false,
+    "runtime": null
+   },
+   {
+    "run_id": "b4",
+    "run_dir": "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\b4",
+    "brief": "synthetic",
+    "family": "OSSE",
+    "objective_version": 4,
+    "mode": "screen",
+    "cma_seed": 6105,
+    "backend": "beat_cuda",
+    "grid": {
+     "freqs_hz": [
+      500.0,
+      1000.0,
+      2000.0
+     ],
+     "angle_count": 73,
+     "balloon": true,
+     "balloon_points_screen": 512,
+     "quadrants": "1",
+     "backend": "beat_cuda"
+    },
+    "grid_hash": "25822c139d60977b",
+    "target": {
+     "band_lo_hz": 500.0,
+     "band_hi_hz": 2000.0
+    },
+    "target_hash": "84854fcebe007303",
+    "task_config_hash": "a5775bc6e744baf4",
+    "config_sha": null,
+    "software": {
+     "hornlab_beads": "not-a-real-pin",
+     "hornlab_search": "synthetic"
+    },
+    "software_hash": "a74cfdfd0d462f68",
+    "software_unknown": false,
+    "runtime": null
+   },
+   {
+    "run_id": "b5",
+    "run_dir": "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\b5",
+    "brief": "synthetic",
+    "family": "OSSE",
+    "objective_version": 4,
+    "mode": "screen",
+    "cma_seed": 6106,
+    "backend": "beat_cuda",
+    "grid": {
+     "freqs_hz": [
+      500.0,
+      1000.0,
+      2000.0
+     ],
+     "angle_count": 73,
+     "balloon": true,
+     "balloon_points_screen": 512,
+     "quadrants": "1",
+     "backend": "beat_cuda"
+    },
+    "grid_hash": "25822c139d60977b",
+    "target": {
+     "band_lo_hz": 500.0,
+     "band_hi_hz": 2000.0
+    },
+    "target_hash": "84854fcebe007303",
+    "task_config_hash": "a5775bc6e744baf4",
+    "config_sha": null,
+    "software": {
+     "hornlab_beads": "not-a-real-pin",
+     "hornlab_search": "synthetic"
+    },
+    "software_hash": "a74cfdfd0d462f68",
+    "software_unknown": false,
+    "runtime": null
+   }
+  ]
+ },
+ "cost_totals": {
+  "index_rows": 69,
+  "cache_hits": 0,
+  "attempts_new": 69,
+  "valid_evaluations_new": 68,
+  "valid_evaluations_cached": 0,
+  "cheap_refusals": 1,
+  "geometry_refusals": 1,
+  "envelope_refusals": 0,
+  "resource_refusals": 0,
+  "solver_failures": 0,
+  "pipeline_failures": 0,
+  "unknown_failures": 0,
+  "actual_bem_calls_observed": 68,
+  "actual_bem_calls_inferred": 68,
+  "actual_bem_seconds": 102.0,
+  "timing_observations": 68,
+  "elapsed_seconds": {
+   "attempts_all_incl_failed_refused": 136.5,
+   "valid_new": 136.0,
+   "failed_refused_attempts": 0.5,
+   "cached_replay": 0.0,
+   "recorded_total": 136.5,
+   "wall_span": 136.0,
+   "unaccounted_overhead": -0.5,
+   "missing_seconds_attempts": 0.0
+  },
+  "failure_kinds": {
+   "invalid_geometry": 1
+  },
+  "cost_model_status": "eligible_not_fitted_in_m0"
+ },
+ "cost_model": {
+  "target": "z=log(max(actual_uncached_BEM_seconds,1e-3))",
+  "min_observations": 30,
+  "n_timing_observations": 68,
+  "count_gate_passed": true,
+  "compatibility_gate_passed": true,
+  "compatibility_blocking": [],
+  "eligible": true,
+  "status": "eligible_not_fitted_in_m0",
+  "note": "M0 reports eligibility only; no cost GP is fitted and no speedup is claimed."
+ },
+ "equal_budget": [
+  {
+   "n": 1,
+   "best_a": 20.0,
+   "best_b": 22.0,
+   "n_observed_a": 6,
+   "n_observed_b": 6,
+   "n_censored_a": 0,
+   "n_censored_b": 0
+  },
+  {
+   "n": 2,
+   "best_a": 18.0,
+   "best_b": 20.0,
+   "n_observed_a": 6,
+   "n_observed_b": 6,
+   "n_censored_a": 0,
+   "n_censored_b": 0
+  },
+  {
+   "n": 3,
+   "best_a": 16.0,
+   "best_b": 18.0,
+   "n_observed_a": 6,
+   "n_observed_b": 6,
+   "n_censored_a": 0,
+   "n_censored_b": 0
+  },
+  {
+   "n": 4,
+   "best_a": 14.0,
+   "best_b": 16.0,
+   "n_observed_a": 6,
+   "n_observed_b": 6,
+   "n_censored_a": 0,
+   "n_censored_b": 0
+  }
+ ],
+ "fixed_cost": {
+  "budget_s": 10.0,
+  "budget_basis": "declared",
+  "median_a": 12.0,
+  "median_b": 14.0,
+  "n_observed_a": 6,
+  "n_observed_b": 6,
+  "n_censored_a": 2,
+  "n_censored_b": 1
+ },
+ "fixed_target": {
+  "target_j": 12.0,
+  "a": {
+   "ecdf_evals": {
+    "points": [
+     [
+      4.0,
+      0.0
+     ],
+     [
+      5.0,
+      0.8333333333333334
+     ]
+    ],
+    "n_runs": 6,
+    "n_reached": 5,
+    "n_censored": 1,
+    "censored_fraction": 0.16666666666666666,
+    "target_j": 12.0,
+    "x_key": "n",
+    "budget": 6,
+    "ecdf_is_lower_bound": true,
+    "note": "censored runs are placed at their last observed budget but are not counted as reached; the fraction is a lower bound"
+   },
+   "ecdf_cost_s": {
+    "points": [
+     [
+      8.0,
+      0.0
+     ],
+     [
+      10.0,
+      0.6666666666666666
+     ]
+    ],
+    "n_runs": 6,
+    "n_reached": 4,
+    "n_censored": 2,
+    "censored_fraction": 0.3333333333333333,
+    "target_j": 12.0,
+    "x_key": "cost_s",
+    "budget": 10.0,
+    "ecdf_is_lower_bound": true,
+    "note": "censored runs are placed at their last observed budget but are not counted as reached; the fraction is a lower bound"
+   },
+   "ert_evals": {
+    "ert": 5.8,
+    "status": "ok",
+    "n_runs": 6,
+    "n_success": 5,
+    "n_censored": 1,
+    "target_j": 12.0,
+    "x_key": "n",
+    "budget": 6,
+    "ert_is_lower_bound": true,
+    "assumption": "censored runs cost at least their last observed budget; ERT = sum(cost)/n_success, so the value is a lower bound"
+   },
+   "ert_cost_s": {
+    "ert": 14.125,
+    "status": "ok",
+    "n_runs": 6,
+    "n_success": 4,
+    "n_censored": 2,
+    "target_j": 12.0,
+    "x_key": "cost_s",
+    "budget": 10.0,
+    "ert_is_lower_bound": true,
+    "assumption": "censored runs cost at least their last observed budget; ERT = sum(cost)/n_success, so the value is a lower bound"
+   }
+  },
+  "b": {
+   "ecdf_evals": {
+    "points": [
+     [
+      4.0,
+      0.0
+     ],
+     [
+      6.0,
+      0.8333333333333334
+     ]
+    ],
+    "n_runs": 6,
+    "n_reached": 5,
+    "n_censored": 1,
+    "censored_fraction": 0.16666666666666666,
+    "target_j": 12.0,
+    "x_key": "n",
+    "budget": 6,
+    "ecdf_is_lower_bound": true,
+    "note": "censored runs are placed at their last observed budget but are not counted as reached; the fraction is a lower bound"
+   },
+   "ecdf_cost_s": {
+    "points": [
+     [
+      8.0,
+      0.0
+     ]
+    ],
+    "n_runs": 6,
+    "n_reached": 0,
+    "n_censored": 6,
+    "censored_fraction": 1.0,
+    "target_j": 12.0,
+    "x_key": "cost_s",
+    "budget": 10.0,
+    "ecdf_is_lower_bound": true,
+    "note": "censored runs are placed at their last observed budget but are not counted as reached; the fraction is a lower bound"
+   },
+   "ert_evals": {
+    "ert": 6.8,
+    "status": "ok",
+    "n_runs": 6,
+    "n_success": 5,
+    "n_censored": 1,
+    "target_j": 12.0,
+    "x_key": "n",
+    "budget": 6,
+    "ert_is_lower_bound": true,
+    "assumption": "censored runs cost at least their last observed budget; ERT = sum(cost)/n_success, so the value is a lower bound"
+   },
+   "ert_cost_s": {
+    "ert": null,
+    "status": "no_success",
+    "n_runs": 6,
+    "n_success": 0,
+    "n_censored": 6,
+    "target_j": 12.0,
+    "x_key": "cost_s",
+    "budget": 10.0
+   }
+  }
+ },
+ "final": {
+  "median_a": 10.0,
+  "median_b": 12.0,
+  "spread_a": 4.0,
+  "spread_b": 4.0
+ },
+ "verdict": {
+  "verdict": "a-beats-b",
+  "rule_holds": true,
+  "n_runs_per_side": 6,
+  "decision": "a_better",
+  "ci95_bootstrap_mean": [
+   -2.0,
+   -2.0
+  ],
+  "practical_delta": 1.0,
+  "pilot": true,
+  "evidence_class": "pilot",
+  "note": "Pilot-scale paired evidence; plan expansion from the paired variability."
+ },
+ "legacy_median_rule": {
+  "rule_holds": false,
+  "n_runs_per_side": 6,
+  "verdict": "no-verdict",
+  "note": "historical median-vs-spread label; not the pairing decision"
+ },
+ "paired": {
+  "pairing_declared": true,
+  "compatibility_blocked": false,
+  "pairs": [
+   {
+    "pair": "p0",
+    "a": "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\a0",
+    "b": "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\b0",
+    "seed_a": 5101,
+    "seed_b": 6101,
+    "shared_cma_seed": false,
+    "shared_seed_warning": "same RNG seed is not proof of shared candidates; pairing is valid only because it was predeclared",
+    "compatibility": {
+     "n_runs": 2,
+     "same": {
+      "objective_version": true,
+      "brief": true,
+      "family": true,
+      "mode": true,
+      "backend": true,
+      "grid_hash": true,
+      "target_hash": true
+     },
+     "differing": {},
+     "blocking": [],
+     "software_variants": {
+      "a74cfdfd0d462f68": 2
+     },
+     "compatible_for_descriptive": true,
+     "compatible_for_inference": true,
+     "fingerprints": [
+      {
+       "run_id": "a0",
+       "run_dir": "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\a0",
+       "brief": "synthetic",
+       "family": "OSSE",
+       "objective_version": 4,
+       "mode": "screen",
+       "cma_seed": 5101,
+       "backend": "beat_cuda",
+       "grid": {
+        "freqs_hz": [
+         500.0,
+         1000.0,
+         2000.0
+        ],
+        "angle_count": 73,
+        "balloon": true,
+        "balloon_points_screen": 512,
+        "quadrants": "1",
+        "backend": "beat_cuda"
+       },
+       "grid_hash": "25822c139d60977b",
+       "target": {
+        "band_lo_hz": 500.0,
+        "band_hi_hz": 2000.0
+       },
+       "target_hash": "84854fcebe007303",
+       "task_config_hash": "a5775bc6e744baf4",
+       "config_sha": null,
+       "software": {
+        "hornlab_beads": "not-a-real-pin",
+        "hornlab_search": "synthetic"
+       },
+       "software_hash": "a74cfdfd0d462f68",
+       "software_unknown": false,
+       "runtime": null
+      },
+      {
+       "run_id": "b0",
+       "run_dir": "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\b0",
+       "brief": "synthetic",
+       "family": "OSSE",
+       "objective_version": 4,
+       "mode": "screen",
+       "cma_seed": 6101,
+       "backend": "beat_cuda",
+       "grid": {
+        "freqs_hz": [
+         500.0,
+         1000.0,
+         2000.0
+        ],
+        "angle_count": 73,
+        "balloon": true,
+        "balloon_points_screen": 512,
+        "quadrants": "1",
+        "backend": "beat_cuda"
+       },
+       "grid_hash": "25822c139d60977b",
+       "target": {
+        "band_lo_hz": 500.0,
+        "band_hi_hz": 2000.0
+       },
+       "target_hash": "84854fcebe007303",
+       "task_config_hash": "a5775bc6e744baf4",
+       "config_sha": null,
+       "software": {
+        "hornlab_beads": "not-a-real-pin",
+        "hornlab_search": "synthetic"
+       },
+       "software_hash": "a74cfdfd0d462f68",
+       "software_unknown": false,
+       "runtime": null
+      }
+     ]
+    },
+    "final": {
+     "a_best_j": 10.0,
+     "b_best_j": 12.0,
+     "difference": -2.0
+    },
+    "fixed_eval_budget": {
+     "budget": 6,
+     "budget_basis": "declared",
+     "a": {
+      "value": 10.0,
+      "x": 6,
+      "censored": false,
+      "observed": true,
+      "x_key": "n",
+      "budget": 6
+     },
+     "b": {
+      "value": 12.0,
+      "x": 6,
+      "censored": false,
+      "observed": true,
+      "x_key": "n",
+      "budget": 6
+     },
+     "difference": -2.0,
+     "complete_pair": true
+    },
+    "fixed_cost_budget": {
+     "budget_s": 10.0,
+     "budget_basis": "declared",
+     "a": {
+      "value": 14.0,
+      "x": 8.5,
+      "censored": true,
+      "observed": true,
+      "x_key": "cost_s",
+      "budget": 10.0
+     },
+     "b": {
+      "value": 14.0,
+      "x": 10.0,
+      "censored": false,
+      "observed": true,
+      "x_key": "cost_s",
+      "budget": 10.0
+     },
+     "difference": 0.0,
+     "complete_pair": false
+    },
+    "time_to_target": {
+     "target_j": 12.0,
+     "evals": {
+      "a": {
+       "reached": true,
+       "value": 5,
+       "censored": false,
+       "x_key": "n",
+       "target_j": 12.0,
+       "censored_at": null
+      },
+      "b": {
+       "reached": true,
+       "value": 6,
+       "censored": false,
+       "x_key": "n",
+       "target_j": 12.0,
+       "censored_at": null
+      }
+     },
+     "cost_s": {
+      "a": {
+       "reached": false,
+       "value": null,
+       "censored": true,
+       "x_key": "cost_s",
+       "target_j": 12.0,
+       "censored_at": 8.5
+      },
+      "b": {
+       "reached": false,
+       "value": null,
+       "censored": true,
+       "x_key": "cost_s",
+       "target_j": 12.0,
+       "censored_at": 10.0
+      }
+     },
+     "difference_evals": -1,
+     "difference_cost_s": null
+    }
+   },
+   {
+    "pair": "p1",
+    "a": "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\a1",
+    "b": "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\b1",
+    "seed_a": 5102,
+    "seed_b": 6102,
+    "shared_cma_seed": false,
+    "shared_seed_warning": "same RNG seed is not proof of shared candidates; pairing is valid only because it was predeclared",
+    "compatibility": {
+     "n_runs": 2,
+     "same": {
+      "objective_version": true,
+      "brief": true,
+      "family": true,
+      "mode": true,
+      "backend": true,
+      "grid_hash": true,
+      "target_hash": true
+     },
+     "differing": {},
+     "blocking": [],
+     "software_variants": {
+      "a74cfdfd0d462f68": 2
+     },
+     "compatible_for_descriptive": true,
+     "compatible_for_inference": true,
+     "fingerprints": [
+      {
+       "run_id": "a1",
+       "run_dir": "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\a1",
+       "brief": "synthetic",
+       "family": "OSSE",
+       "objective_version": 4,
+       "mode": "screen",
+       "cma_seed": 5102,
+       "backend": "beat_cuda",
+       "grid": {
+        "freqs_hz": [
+         500.0,
+         1000.0,
+         2000.0
+        ],
+        "angle_count": 73,
+        "balloon": true,
+        "balloon_points_screen": 512,
+        "quadrants": "1",
+        "backend": "beat_cuda"
+       },
+       "grid_hash": "25822c139d60977b",
+       "target": {
+        "band_lo_hz": 500.0,
+        "band_hi_hz": 2000.0
+       },
+       "target_hash": "84854fcebe007303",
+       "task_config_hash": "a5775bc6e744baf4",
+       "config_sha": null,
+       "software": {
+        "hornlab_beads": "not-a-real-pin",
+        "hornlab_search": "synthetic"
+       },
+       "software_hash": "a74cfdfd0d462f68",
+       "software_unknown": false,
+       "runtime": null
+      },
+      {
+       "run_id": "b1",
+       "run_dir": "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\b1",
+       "brief": "synthetic",
+       "family": "OSSE",
+       "objective_version": 4,
+       "mode": "screen",
+       "cma_seed": 6102,
+       "backend": "beat_cuda",
+       "grid": {
+        "freqs_hz": [
+         500.0,
+         1000.0,
+         2000.0
+        ],
+        "angle_count": 73,
+        "balloon": true,
+        "balloon_points_screen": 512,
+        "quadrants": "1",
+        "backend": "beat_cuda"
+       },
+       "grid_hash": "25822c139d60977b",
+       "target": {
+        "band_lo_hz": 500.0,
+        "band_hi_hz": 2000.0
+       },
+       "target_hash": "84854fcebe007303",
+       "task_config_hash": "a5775bc6e744baf4",
+       "config_sha": null,
+       "software": {
+        "hornlab_beads": "not-a-real-pin",
+        "hornlab_search": "synthetic"
+       },
+       "software_hash": "a74cfdfd0d462f68",
+       "software_unknown": false,
+       "runtime": null
+      }
+     ]
+    },
+    "final": {
+     "a_best_j": 10.0,
+     "b_best_j": 12.0,
+     "difference": -2.0
+    },
+    "fixed_eval_budget": {
+     "budget": 6,
+     "budget_basis": "declared",
+     "a": {
+      "value": 10.0,
+      "x": 6,
+      "censored": false,
+      "observed": true,
+      "x_key": "n",
+      "budget": 6
+     },
+     "b": {
+      "value": 12.0,
+      "x": 6,
+      "censored": false,
+      "observed": true,
+      "x_key": "n",
+      "budget": 6
+     },
+     "difference": -2.0,
+     "complete_pair": true
+    },
+    "fixed_cost_budget": {
+     "budget_s": 10.0,
+     "budget_basis": "declared",
+     "a": {
+      "value": 12.0,
+      "x": 10.0,
+      "censored": false,
+      "observed": true,
+      "x_key": "cost_s",
+      "budget": 10.0
+     },
+     "b": {
+      "value": 14.0,
+      "x": 10.0,
+      "censored": false,
+      "observed": true,
+      "x_key": "cost_s",
+      "budget": 10.0
+     },
+     "difference": -2.0,
+     "complete_pair": true
+    },
+    "time_to_target": {
+     "target_j": 12.0,
+     "evals": {
+      "a": {
+       "reached": true,
+       "value": 5,
+       "censored": false,
+       "x_key": "n",
+       "target_j": 12.0,
+       "censored_at": null
+      },
+      "b": {
+       "reached": true,
+       "value": 6,
+       "censored": false,
+       "x_key": "n",
+       "target_j": 12.0,
+       "censored_at": null
+      }
+     },
+     "cost_s": {
+      "a": {
+       "reached": true,
+       "value": 10.0,
+       "censored": false,
+       "x_key": "cost_s",
+       "target_j": 12.0,
+       "censored_at": null
+      },
+      "b": {
+       "reached": false,
+       "value": null,
+       "censored": true,
+       "x_key": "cost_s",
+       "target_j": 12.0,
+       "censored_at": 10.0
+      }
+     },
+     "difference_evals": -1,
+     "difference_cost_s": null
+    }
+   },
+   {
+    "pair": "p2",
+    "a": "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\a2",
+    "b": "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\b2",
+    "seed_a": 5103,
+    "seed_b": 6103,
+    "shared_cma_seed": false,
+    "shared_seed_warning": "same RNG seed is not proof of shared candidates; pairing is valid only because it was predeclared",
+    "compatibility": {
+     "n_runs": 2,
+     "same": {
+      "objective_version": true,
+      "brief": true,
+      "family": true,
+      "mode": true,
+      "backend": true,
+      "grid_hash": true,
+      "target_hash": true
+     },
+     "differing": {},
+     "blocking": [],
+     "software_variants": {
+      "a74cfdfd0d462f68": 2
+     },
+     "compatible_for_descriptive": true,
+     "compatible_for_inference": true,
+     "fingerprints": [
+      {
+       "run_id": "a2",
+       "run_dir": "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\a2",
+       "brief": "synthetic",
+       "family": "OSSE",
+       "objective_version": 4,
+       "mode": "screen",
+       "cma_seed": 5103,
+       "backend": "beat_cuda",
+       "grid": {
+        "freqs_hz": [
+         500.0,
+         1000.0,
+         2000.0
+        ],
+        "angle_count": 73,
+        "balloon": true,
+        "balloon_points_screen": 512,
+        "quadrants": "1",
+        "backend": "beat_cuda"
+       },
+       "grid_hash": "25822c139d60977b",
+       "target": {
+        "band_lo_hz": 500.0,
+        "band_hi_hz": 2000.0
+       },
+       "target_hash": "84854fcebe007303",
+       "task_config_hash": "a5775bc6e744baf4",
+       "config_sha": null,
+       "software": {
+        "hornlab_beads": "not-a-real-pin",
+        "hornlab_search": "synthetic"
+       },
+       "software_hash": "a74cfdfd0d462f68",
+       "software_unknown": false,
+       "runtime": null
+      },
+      {
+       "run_id": "b2",
+       "run_dir": "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\b2",
+       "brief": "synthetic",
+       "family": "OSSE",
+       "objective_version": 4,
+       "mode": "screen",
+       "cma_seed": 6103,
+       "backend": "beat_cuda",
+       "grid": {
+        "freqs_hz": [
+         500.0,
+         1000.0,
+         2000.0
+        ],
+        "angle_count": 73,
+        "balloon": true,
+        "balloon_points_screen": 512,
+        "quadrants": "1",
+        "backend": "beat_cuda"
+       },
+       "grid_hash": "25822c139d60977b",
+       "target": {
+        "band_lo_hz": 500.0,
+        "band_hi_hz": 2000.0
+       },
+       "target_hash": "84854fcebe007303",
+       "task_config_hash": "a5775bc6e744baf4",
+       "config_sha": null,
+       "software": {
+        "hornlab_beads": "not-a-real-pin",
+        "hornlab_search": "synthetic"
+       },
+       "software_hash": "a74cfdfd0d462f68",
+       "software_unknown": false,
+       "runtime": null
+      }
+     ]
+    },
+    "final": {
+     "a_best_j": 10.0,
+     "b_best_j": 12.0,
+     "difference": -2.0
+    },
+    "fixed_eval_budget": {
+     "budget": 6,
+     "budget_basis": "declared",
+     "a": {
+      "value": 10.0,
+      "x": 6,
+      "censored": false,
+      "observed": true,
+      "x_key": "n",
+      "budget": 6
+     },
+     "b": {
+      "value": 12.0,
+      "x": 6,
+      "censored": false,
+      "observed": true,
+      "x_key": "n",
+      "budget": 6
+     },
+     "difference": -2.0,
+     "complete_pair": true
+    },
+    "fixed_cost_budget": {
+     "budget_s": 10.0,
+     "budget_basis": "declared",
+     "a": {
+      "value": 12.0,
+      "x": 10.0,
+      "censored": false,
+      "observed": true,
+      "x_key": "cost_s",
+      "budget": 10.0
+     },
+     "b": {
+      "value": 14.0,
+      "x": 10.0,
+      "censored": false,
+      "observed": true,
+      "x_key": "cost_s",
+      "budget": 10.0
+     },
+     "difference": -2.0,
+     "complete_pair": true
+    },
+    "time_to_target": {
+     "target_j": 12.0,
+     "evals": {
+      "a": {
+       "reached": true,
+       "value": 5,
+       "censored": false,
+       "x_key": "n",
+       "target_j": 12.0,
+       "censored_at": null
+      },
+      "b": {
+       "reached": true,
+       "value": 6,
+       "censored": false,
+       "x_key": "n",
+       "target_j": 12.0,
+       "censored_at": null
+      }
+     },
+     "cost_s": {
+      "a": {
+       "reached": true,
+       "value": 10.0,
+       "censored": false,
+       "x_key": "cost_s",
+       "target_j": 12.0,
+       "censored_at": null
+      },
+      "b": {
+       "reached": false,
+       "value": null,
+       "censored": true,
+       "x_key": "cost_s",
+       "target_j": 12.0,
+       "censored_at": 10.0
+      }
+     },
+     "difference_evals": -1,
+     "difference_cost_s": null
+    }
+   },
+   {
+    "pair": "p3",
+    "a": "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\a3",
+    "b": "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\b3",
+    "seed_a": 5104,
+    "seed_b": 6104,
+    "shared_cma_seed": false,
+    "shared_seed_warning": "same RNG seed is not proof of shared candidates; pairing is valid only because it was predeclared",
+    "compatibility": {
+     "n_runs": 2,
+     "same": {
+      "objective_version": true,
+      "brief": true,
+      "family": true,
+      "mode": true,
+      "backend": true,
+      "grid_hash": true,
+      "target_hash": true
+     },
+     "differing": {},
+     "blocking": [],
+     "software_variants": {
+      "a74cfdfd0d462f68": 2
+     },
+     "compatible_for_descriptive": true,
+     "compatible_for_inference": true,
+     "fingerprints": [
+      {
+       "run_id": "a3",
+       "run_dir": "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\a3",
+       "brief": "synthetic",
+       "family": "OSSE",
+       "objective_version": 4,
+       "mode": "screen",
+       "cma_seed": 5104,
+       "backend": "beat_cuda",
+       "grid": {
+        "freqs_hz": [
+         500.0,
+         1000.0,
+         2000.0
+        ],
+        "angle_count": 73,
+        "balloon": true,
+        "balloon_points_screen": 512,
+        "quadrants": "1",
+        "backend": "beat_cuda"
+       },
+       "grid_hash": "25822c139d60977b",
+       "target": {
+        "band_lo_hz": 500.0,
+        "band_hi_hz": 2000.0
+       },
+       "target_hash": "84854fcebe007303",
+       "task_config_hash": "a5775bc6e744baf4",
+       "config_sha": null,
+       "software": {
+        "hornlab_beads": "not-a-real-pin",
+        "hornlab_search": "synthetic"
+       },
+       "software_hash": "a74cfdfd0d462f68",
+       "software_unknown": false,
+       "runtime": null
+      },
+      {
+       "run_id": "b3",
+       "run_dir": "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\b3",
+       "brief": "synthetic",
+       "family": "OSSE",
+       "objective_version": 4,
+       "mode": "screen",
+       "cma_seed": 6104,
+       "backend": "beat_cuda",
+       "grid": {
+        "freqs_hz": [
+         500.0,
+         1000.0,
+         2000.0
+        ],
+        "angle_count": 73,
+        "balloon": true,
+        "balloon_points_screen": 512,
+        "quadrants": "1",
+        "backend": "beat_cuda"
+       },
+       "grid_hash": "25822c139d60977b",
+       "target": {
+        "band_lo_hz": 500.0,
+        "band_hi_hz": 2000.0
+       },
+       "target_hash": "84854fcebe007303",
+       "task_config_hash": "a5775bc6e744baf4",
+       "config_sha": null,
+       "software": {
+        "hornlab_beads": "not-a-real-pin",
+        "hornlab_search": "synthetic"
+       },
+       "software_hash": "a74cfdfd0d462f68",
+       "software_unknown": false,
+       "runtime": null
+      }
+     ]
+    },
+    "final": {
+     "a_best_j": 10.0,
+     "b_best_j": 12.0,
+     "difference": -2.0
+    },
+    "fixed_eval_budget": {
+     "budget": 6,
+     "budget_basis": "declared",
+     "a": {
+      "value": 10.0,
+      "x": 6,
+      "censored": false,
+      "observed": true,
+      "x_key": "n",
+      "budget": 6
+     },
+     "b": {
+      "value": 12.0,
+      "x": 6,
+      "censored": false,
+      "observed": true,
+      "x_key": "n",
+      "budget": 6
+     },
+     "difference": -2.0,
+     "complete_pair": true
+    },
+    "fixed_cost_budget": {
+     "budget_s": 10.0,
+     "budget_basis": "declared",
+     "a": {
+      "value": 12.0,
+      "x": 10.0,
+      "censored": false,
+      "observed": true,
+      "x_key": "cost_s",
+      "budget": 10.0
+     },
+     "b": {
+      "value": 14.0,
+      "x": 10.0,
+      "censored": false,
+      "observed": true,
+      "x_key": "cost_s",
+      "budget": 10.0
+     },
+     "difference": -2.0,
+     "complete_pair": true
+    },
+    "time_to_target": {
+     "target_j": 12.0,
+     "evals": {
+      "a": {
+       "reached": true,
+       "value": 5,
+       "censored": false,
+       "x_key": "n",
+       "target_j": 12.0,
+       "censored_at": null
+      },
+      "b": {
+       "reached": true,
+       "value": 6,
+       "censored": false,
+       "x_key": "n",
+       "target_j": 12.0,
+       "censored_at": null
+      }
+     },
+     "cost_s": {
+      "a": {
+       "reached": true,
+       "value": 10.0,
+       "censored": false,
+       "x_key": "cost_s",
+       "target_j": 12.0,
+       "censored_at": null
+      },
+      "b": {
+       "reached": false,
+       "value": null,
+       "censored": true,
+       "x_key": "cost_s",
+       "target_j": 12.0,
+       "censored_at": 10.0
+      }
+     },
+     "difference_evals": -1,
+     "difference_cost_s": null
+    }
+   },
+   {
+    "pair": "p4",
+    "a": "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\a4",
+    "b": "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\b4",
+    "seed_a": 5105,
+    "seed_b": 6105,
+    "shared_cma_seed": false,
+    "shared_seed_warning": "same RNG seed is not proof of shared candidates; pairing is valid only because it was predeclared",
+    "compatibility": {
+     "n_runs": 2,
+     "same": {
+      "objective_version": true,
+      "brief": true,
+      "family": true,
+      "mode": true,
+      "backend": true,
+      "grid_hash": true,
+      "target_hash": true
+     },
+     "differing": {},
+     "blocking": [],
+     "software_variants": {
+      "a74cfdfd0d462f68": 2
+     },
+     "compatible_for_descriptive": true,
+     "compatible_for_inference": true,
+     "fingerprints": [
+      {
+       "run_id": "a4",
+       "run_dir": "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\a4",
+       "brief": "synthetic",
+       "family": "OSSE",
+       "objective_version": 4,
+       "mode": "screen",
+       "cma_seed": 5105,
+       "backend": "beat_cuda",
+       "grid": {
+        "freqs_hz": [
+         500.0,
+         1000.0,
+         2000.0
+        ],
+        "angle_count": 73,
+        "balloon": true,
+        "balloon_points_screen": 512,
+        "quadrants": "1",
+        "backend": "beat_cuda"
+       },
+       "grid_hash": "25822c139d60977b",
+       "target": {
+        "band_lo_hz": 500.0,
+        "band_hi_hz": 2000.0
+       },
+       "target_hash": "84854fcebe007303",
+       "task_config_hash": "a5775bc6e744baf4",
+       "config_sha": null,
+       "software": {
+        "hornlab_beads": "not-a-real-pin",
+        "hornlab_search": "synthetic"
+       },
+       "software_hash": "a74cfdfd0d462f68",
+       "software_unknown": false,
+       "runtime": null
+      },
+      {
+       "run_id": "b4",
+       "run_dir": "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\b4",
+       "brief": "synthetic",
+       "family": "OSSE",
+       "objective_version": 4,
+       "mode": "screen",
+       "cma_seed": 6105,
+       "backend": "beat_cuda",
+       "grid": {
+        "freqs_hz": [
+         500.0,
+         1000.0,
+         2000.0
+        ],
+        "angle_count": 73,
+        "balloon": true,
+        "balloon_points_screen": 512,
+        "quadrants": "1",
+        "backend": "beat_cuda"
+       },
+       "grid_hash": "25822c139d60977b",
+       "target": {
+        "band_lo_hz": 500.0,
+        "band_hi_hz": 2000.0
+       },
+       "target_hash": "84854fcebe007303",
+       "task_config_hash": "a5775bc6e744baf4",
+       "config_sha": null,
+       "software": {
+        "hornlab_beads": "not-a-real-pin",
+        "hornlab_search": "synthetic"
+       },
+       "software_hash": "a74cfdfd0d462f68",
+       "software_unknown": false,
+       "runtime": null
+      }
+     ]
+    },
+    "final": {
+     "a_best_j": 10.0,
+     "b_best_j": 12.0,
+     "difference": -2.0
+    },
+    "fixed_eval_budget": {
+     "budget": 6,
+     "budget_basis": "declared",
+     "a": {
+      "value": 10.0,
+      "x": 6,
+      "censored": false,
+      "observed": true,
+      "x_key": "n",
+      "budget": 6
+     },
+     "b": {
+      "value": 12.0,
+      "x": 6,
+      "censored": false,
+      "observed": true,
+      "x_key": "n",
+      "budget": 6
+     },
+     "difference": -2.0,
+     "complete_pair": true
+    },
+    "fixed_cost_budget": {
+     "budget_s": 10.0,
+     "budget_basis": "declared",
+     "a": {
+      "value": 12.0,
+      "x": 10.0,
+      "censored": false,
+      "observed": true,
+      "x_key": "cost_s",
+      "budget": 10.0
+     },
+     "b": {
+      "value": 14.0,
+      "x": 10.0,
+      "censored": false,
+      "observed": true,
+      "x_key": "cost_s",
+      "budget": 10.0
+     },
+     "difference": -2.0,
+     "complete_pair": true
+    },
+    "time_to_target": {
+     "target_j": 12.0,
+     "evals": {
+      "a": {
+       "reached": true,
+       "value": 5,
+       "censored": false,
+       "x_key": "n",
+       "target_j": 12.0,
+       "censored_at": null
+      },
+      "b": {
+       "reached": true,
+       "value": 6,
+       "censored": false,
+       "x_key": "n",
+       "target_j": 12.0,
+       "censored_at": null
+      }
+     },
+     "cost_s": {
+      "a": {
+       "reached": true,
+       "value": 10.0,
+       "censored": false,
+       "x_key": "cost_s",
+       "target_j": 12.0,
+       "censored_at": null
+      },
+      "b": {
+       "reached": false,
+       "value": null,
+       "censored": true,
+       "x_key": "cost_s",
+       "target_j": 12.0,
+       "censored_at": 10.0
+      }
+     },
+     "difference_evals": -1,
+     "difference_cost_s": null
+    }
+   },
+   {
+    "pair": "p5",
+    "a": "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\a5",
+    "b": "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\b5",
+    "seed_a": 5106,
+    "seed_b": 6106,
+    "shared_cma_seed": false,
+    "shared_seed_warning": "same RNG seed is not proof of shared candidates; pairing is valid only because it was predeclared",
+    "compatibility": {
+     "n_runs": 2,
+     "same": {
+      "objective_version": true,
+      "brief": true,
+      "family": true,
+      "mode": true,
+      "backend": true,
+      "grid_hash": true,
+      "target_hash": true
+     },
+     "differing": {},
+     "blocking": [],
+     "software_variants": {
+      "a74cfdfd0d462f68": 2
+     },
+     "compatible_for_descriptive": true,
+     "compatible_for_inference": true,
+     "fingerprints": [
+      {
+       "run_id": "a5",
+       "run_dir": "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\a5",
+       "brief": "synthetic",
+       "family": "OSSE",
+       "objective_version": 4,
+       "mode": "screen",
+       "cma_seed": 5106,
+       "backend": "beat_cuda",
+       "grid": {
+        "freqs_hz": [
+         500.0,
+         1000.0,
+         2000.0
+        ],
+        "angle_count": 73,
+        "balloon": true,
+        "balloon_points_screen": 512,
+        "quadrants": "1",
+        "backend": "beat_cuda"
+       },
+       "grid_hash": "25822c139d60977b",
+       "target": {
+        "band_lo_hz": 500.0,
+        "band_hi_hz": 2000.0
+       },
+       "target_hash": "84854fcebe007303",
+       "task_config_hash": "a5775bc6e744baf4",
+       "config_sha": null,
+       "software": {
+        "hornlab_beads": "not-a-real-pin",
+        "hornlab_search": "synthetic"
+       },
+       "software_hash": "a74cfdfd0d462f68",
+       "software_unknown": false,
+       "runtime": null
+      },
+      {
+       "run_id": "b5",
+       "run_dir": "C:\\Users\\hunte\\Hrns\\oc-wt\\BO-M0-S3\\scratch\\bo_m0\\s3\\paired_fixture\\b5",
+       "brief": "synthetic",
+       "family": "OSSE",
+       "objective_version": 4,
+       "mode": "screen",
+       "cma_seed": 6106,
+       "backend": "beat_cuda",
+       "grid": {
+        "freqs_hz": [
+         500.0,
+         1000.0,
+         2000.0
+        ],
+        "angle_count": 73,
+        "balloon": true,
+        "balloon_points_screen": 512,
+        "quadrants": "1",
+        "backend": "beat_cuda"
+       },
+       "grid_hash": "25822c139d60977b",
+       "target": {
+        "band_lo_hz": 500.0,
+        "band_hi_hz": 2000.0
+       },
+       "target_hash": "84854fcebe007303",
+       "task_config_hash": "a5775bc6e744baf4",
+       "config_sha": null,
+       "software": {
+        "hornlab_beads": "not-a-real-pin",
+        "hornlab_search": "synthetic"
+       },
+       "software_hash": "a74cfdfd0d462f68",
+       "software_unknown": false,
+       "runtime": null
+      }
+     ]
+    },
+    "final": {
+     "a_best_j": 14.0,
+     "b_best_j": 16.0,
+     "difference": -2.0
+    },
+    "fixed_eval_budget": {
+     "budget": 6,
+     "budget_basis": "declared",
+     "a": {
+      "value": 14.0,
+      "x": 4,
+      "censored": true,
+      "observed": true,
+      "x_key": "n",
+      "budget": 6
+     },
+     "b": {
+      "value": 16.0,
+      "x": 4,
+      "censored": true,
+      "observed": true,
+      "x_key": "n",
+      "budget": 6
+     },
+     "difference": -2.0,
+     "complete_pair": false
+    },
+    "fixed_cost_budget": {
+     "budget_s": 10.0,
+     "budget_basis": "declared",
+     "a": {
+      "value": 14.0,
+      "x": 8.0,
+      "censored": true,
+      "observed": true,
+      "x_key": "cost_s",
+      "budget": 10.0
+     },
+     "b": {
+      "value": 16.0,
+      "x": 8.0,
+      "censored": true,
+      "observed": true,
+      "x_key": "cost_s",
+      "budget": 10.0
+     },
+     "difference": -2.0,
+     "complete_pair": false
+    },
+    "time_to_target": {
+     "target_j": 12.0,
+     "evals": {
+      "a": {
+       "reached": false,
+       "value": null,
+       "censored": true,
+       "x_key": "n",
+       "target_j": 12.0,
+       "censored_at": 4
+      },
+      "b": {
+       "reached": false,
+       "value": null,
+       "censored": true,
+       "x_key": "n",
+       "target_j": 12.0,
+       "censored_at": 4
+      }
+     },
+     "cost_s": {
+      "a": {
+       "reached": false,
+       "value": null,
+       "censored": true,
+       "x_key": "cost_s",
+       "target_j": 12.0,
+       "censored_at": 8.0
+      },
+      "b": {
+       "reached": false,
+       "value": null,
+       "censored": true,
+       "x_key": "cost_s",
+       "target_j": 12.0,
+       "censored_at": 8.0
+      }
+     },
+     "difference_evals": null,
+     "difference_cost_s": null
+    }
+   }
+  ],
+  "summaries": {
+   "final_best": {
+    "n_pairs": 6,
+    "difference_definition": "d = A - B (negative => A has lower J / is better)",
+    "practical_delta": 1.0,
+    "status": "ok",
+    "mean": -2.0,
+    "median": -2.0,
+    "sd": 0.0,
+    "ci95_bootstrap_mean": [
+     -2.0,
+     -2.0
+    ],
+    "ci95_bootstrap_median": [
+     -2.0,
+     -2.0
+    ],
+    "signs": {
+     "a_better": 6,
+     "b_better": 0,
+     "ties": 0
+    },
+    "direction": "a_better",
+    "decision": "a_better",
+    "evidence_class": "pilot",
+    "pilot": true,
+    "note": "Pilot-scale paired evidence; plan expansion from the paired variability."
+   },
+   "fixed_eval_budget": {
+    "n_pairs": 5,
+    "difference_definition": "d = A - B (negative => A has lower J / is better)",
+    "practical_delta": 1.0,
+    "status": "ok",
+    "mean": -2.0,
+    "median": -2.0,
+    "sd": 0.0,
+    "ci95_bootstrap_mean": [
+     -2.0,
+     -2.0
+    ],
+    "ci95_bootstrap_median": [
+     -2.0,
+     -2.0
+    ],
+    "signs": {
+     "a_better": 5,
+     "b_better": 0,
+     "ties": 0
+    },
+    "direction": "a_better",
+    "decision": "a_better",
+    "evidence_class": "pilot",
+    "pilot": true,
+    "note": "Pilot-scale paired evidence; plan expansion from the paired variability."
+   },
+   "fixed_cost_budget": {
+    "n_pairs": 4,
+    "difference_definition": "d = A - B (negative => A has lower J / is better)",
+    "practical_delta": 1.0,
+    "status": "ok",
+    "mean": -2.0,
+    "median": -2.0,
+    "sd": 0.0,
+    "ci95_bootstrap_mean": [
+     -2.0,
+     -2.0
+    ],
+    "ci95_bootstrap_median": [
+     -2.0,
+     -2.0
+    ],
+    "signs": {
+     "a_better": 4,
+     "b_better": 0,
+     "ties": 0
+    },
+    "direction": "a_better",
+    "decision": "pilot_only",
+    "evidence_class": "pilot",
+    "pilot": true,
+    "note": "Fewer than five pairs: pilot only; not a significance guarantee."
+   },
+   "preferred_basis": "fixed_eval_budget",
+   "summary": {
+    "n_pairs": 5,
+    "difference_definition": "d = A - B (negative => A has lower J / is better)",
+    "practical_delta": 1.0,
+    "status": "ok",
+    "mean": -2.0,
+    "median": -2.0,
+    "sd": 0.0,
+    "ci95_bootstrap_mean": [
+     -2.0,
+     -2.0
+    ],
+    "ci95_bootstrap_median": [
+     -2.0,
+     -2.0
+    ],
+    "signs": {
+     "a_better": 5,
+     "b_better": 0,
+     "ties": 0
+    },
+    "direction": "a_better",
+    "decision": "a_better",
+    "evidence_class": "pilot",
+    "pilot": true,
+    "note": "Pilot-scale paired evidence; plan expansion from the paired variability."
+   }
+  },
+  "power": {
+   "status": "unavailable",
+   "reason": "zero pilot paired-difference SD",
+   "pilot_n": 5
+  },
+  "note": "Paired inference over predeclared pairs; five pairs is a pilot."
+ },
+ "seed_rule": "Legacy descriptive label only: A beats B when medians differ by more than both spreads; not the decision.",
+ "tool": "ab_compare",
+ "generated_utc": "2026-11-12T23:03:46Z"
+}

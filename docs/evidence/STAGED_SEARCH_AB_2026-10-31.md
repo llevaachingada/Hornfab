@@ -108,3 +108,23 @@ Smoke-night joint reference on the same cell at budget 60: seed J 19.022 → bes
 .\.venv\Scripts\python.exe -m pytest tests\test_tools_staged_search.py -q
 .\.venv\Scripts\python.exe tools\run_staged_search.py --synthetic --dry-run --out runs\staged_ab_check
 ```
+
+## GPU A/B results (2026-11-12, owe from PR #17 cleared)
+
+First real acoustic staged-vs-joint A/B on the Le Cléac'h/rollback cell, launched by the
+2026-11-12 night chain (job `n7_staged_ab` failed to launch in the `gpu_2026-11-12` night and
+was delivered by `g5_staged_ab` in `gpu_day_2026-11-12_cont2`). Full detail:
+`runs/staged_ab_2026-11-12/COMPARE.md` (+ `summary.json`, per-stage logs).
+
+| Arm | best J | evals | valid |
+|---|---:|---:|---:|
+| stageA_macro | 11.280019 | 21 | 19 |
+| stageB_shape | 4.993692 | 21 | 15 |
+| stageC_polish | 2.629049 | 21 | 21 |
+| joint control | **2.438855** | 104 | 70 |
+
+Verdict: **joint wins** — staged final J 2.6290 vs joint J 2.4389 at equal total budget
+(63 staged arm evals vs 104 joint evals; joint reached a lower J on the same crease
+cell). Staged chain did close most of the gap (11.28 -> 2.63). Run dir of the joint
+control: `runs/20261113T020625Z-screen-0a9e5b`. The "promote into hornlab_search/search/"
+decision therefore stays NOT-YET; no scheduling change adopted.

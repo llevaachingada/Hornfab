@@ -1,0 +1,2067 @@
+{
+ "schema": "parameter-activity-v1",
+ "generated_utc": "2026-11-12T23:47:56Z",
+ "config": {
+  "path": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+  "name": "native__ath_core_v4",
+  "family": "OSSE",
+  "kind": "native",
+  "brief_file": "../../briefs/campaign_2026-10-26_v4/native_ath_core_2in_v4.yaml",
+  "brief_name": "native_ath_core_2in_v4",
+  "objective_version": 4,
+  "seed_design_hash": "b930c6c35b14",
+  "config_bound_source": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml"
+ },
+ "context": {
+  "native_or_generator": "native",
+  "family_key_table": "OSSE",
+  "generator": null
+ },
+ "search": {
+  "keys": [
+   "L_mm",
+   "a_deg",
+   "k",
+   "morph_corner_mm",
+   "morph_exponent",
+   "morph_fixed",
+   "morph_height_mm",
+   "morph_rate",
+   "morph_width_mm",
+   "n",
+   "q",
+   "s",
+   "s1",
+   "s2"
+  ],
+  "alphabetical": true,
+  "d": 14,
+  "bounds": {
+   "L_mm": {
+    "lo": 104.0,
+    "hi": 520.0,
+    "search": true,
+    "log": false,
+    "transform": "identity"
+   },
+   "a_deg": {
+    "lo": 10.0,
+    "hi": 80.0,
+    "search": true,
+    "log": false,
+    "transform": "identity"
+   },
+   "k": {
+    "lo": 0.3,
+    "hi": 5.0,
+    "search": true,
+    "log": false,
+    "transform": "identity"
+   },
+   "morph_corner_mm": {
+    "lo": 0.0,
+    "hi": 80.0,
+    "search": true,
+    "log": false,
+    "transform": "identity"
+   },
+   "morph_exponent": {
+    "lo": 2.0,
+    "hi": 10.0,
+    "search": true,
+    "log": false,
+    "transform": "identity"
+   },
+   "morph_fixed": {
+    "lo": 0.0,
+    "hi": 0.6,
+    "search": true,
+    "log": false,
+    "transform": "identity"
+   },
+   "morph_height_mm": {
+    "lo": 238.2,
+    "hi": 456.55,
+    "search": true,
+    "log": false,
+    "transform": "identity"
+   },
+   "morph_rate": {
+    "lo": 0.5,
+    "hi": 8.0,
+    "search": true,
+    "log": false,
+    "transform": "identity"
+   },
+   "morph_width_mm": {
+    "lo": 238.2,
+    "hi": 456.55,
+    "search": true,
+    "log": false,
+    "transform": "identity"
+   },
+   "n": {
+    "lo": 1.0,
+    "hi": 10.0,
+    "search": true,
+    "log": false,
+    "transform": "identity"
+   },
+   "q": {
+    "lo": 0.9,
+    "hi": 1.0,
+    "search": true,
+    "log": false,
+    "transform": "identity"
+   },
+   "s": {
+    "lo": 0.0,
+    "hi": 1.5,
+    "search": true,
+    "log": false,
+    "transform": "identity"
+   },
+   "s1": {
+    "lo": 1.0,
+    "hi": 1.3,
+    "search": true,
+    "log": false,
+    "transform": "identity"
+   },
+   "s2": {
+    "lo": 0.015,
+    "hi": 0.035,
+    "search": true,
+    "log": false,
+    "transform": "identity"
+   }
+  }
+ },
+ "counts": {
+  "searched": 4,
+  "fixed": 4,
+  "derived": 2,
+  "conditional": 9,
+  "inactive": 1,
+  "unresolved": 0
+ },
+ "controls": [
+  {
+   "key": "L_mm",
+   "base_knob": "L_mm",
+   "context": "native:osse",
+   "category": "searched",
+   "unit": "mm",
+   "unit_transform": "identity",
+   "resolved": {
+    "value": 260.0,
+    "bound": {
+     "lo": 104.0,
+     "hi": 520.0,
+     "search": true,
+     "log": false,
+     "transform": "identity"
+    }
+   },
+   "application_predicate": "always",
+   "affected_geometry_features": [
+    "axial depth",
+    "mouth-plane z",
+    "main OS-SE meridian"
+   ],
+   "source_refs": [
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 17
+    },
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 44
+    },
+    {
+     "file": "hornlab_search/design/families.py",
+     "line": 176
+    },
+    {
+     "file": "hornlab_search/design/params/knobs_native.py",
+     "line": 795
+    },
+    {
+     "file": "hornlab_mesher/profile_formulas.py",
+     "line": 515
+    }
+   ],
+   "evidence": {
+    "static_source": {
+     "status": "recorded",
+     "summary": "resolved by the native family KeySpec and the config seed/bound",
+     "refs": [
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 17
+      },
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 44
+      },
+      {
+       "file": "hornlab_search/design/families.py",
+       "line": 176
+      },
+      {
+       "file": "hornlab_search/design/params/knobs_native.py",
+       "line": 795
+      },
+      {
+       "file": "hornlab_mesher/profile_formulas.py",
+       "line": 515
+      }
+     ]
+    },
+    "geometry_test": {
+     "kind": "canonical_surface_perturbation",
+     "values": [
+      104.0,
+      520.0
+     ],
+     "max_abs_delta_mm": 54.71809283398246,
+     "mean_abs_delta_mm": 26.966061234795983,
+     "tolerance_mm": 1e-06,
+     "changed": true,
+     "surface_fingerprints_equal": false,
+     "resolution_mm": 12.0,
+     "api": "hornlab_mesher.config_builder.resolve_geometry",
+     "units": "mm"
+    },
+    "status": "confirmed_active_geometry"
+   },
+   "notes": []
+  },
+  {
+   "key": "a0_deg",
+   "base_knob": "a0_deg",
+   "context": "native:osse",
+   "category": "derived",
+   "unit": "deg",
+   "unit_transform": "identity",
+   "resolved": {
+    "value": 1.2,
+    "bound": {
+     "lo": 1.2,
+     "hi": 1.2,
+     "search": false,
+     "log": false,
+     "transform": "identity"
+    }
+   },
+   "application_predicate": "brief driver exit angle (pinned because throat_angle_policy: pin)",
+   "affected_geometry_features": [
+    "throat wall tangent",
+    "initial expansion"
+   ],
+   "source_refs": [
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 16
+    },
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 40
+    },
+    {
+     "file": "hornlab_search/design/families.py",
+     "line": 55
+    },
+    {
+     "file": "hornlab_search/design/params/knobs_native.py",
+     "line": 137
+    },
+    {
+     "file": "hornlab_mesher/profile_formulas.py",
+     "line": 169
+    },
+    {
+     "file": "hornlab_search/config.py",
+     "line": 1184
+    }
+   ],
+   "evidence": {
+    "static_source": {
+     "status": "recorded",
+     "summary": "config.py pins the native throat to the brief driver",
+     "refs": [
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 16
+      },
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 40
+      },
+      {
+       "file": "hornlab_search/design/families.py",
+       "line": 55
+      },
+      {
+       "file": "hornlab_search/design/params/knobs_native.py",
+       "line": 137
+      },
+      {
+       "file": "hornlab_mesher/profile_formulas.py",
+       "line": 169
+      },
+      {
+       "file": "hornlab_search/config.py",
+       "line": 1184
+      }
+     ]
+    },
+    "geometry_test": null,
+    "status": "static_source_only"
+   },
+   "notes": []
+  },
+  {
+   "key": "a_deg",
+   "base_knob": "a_deg",
+   "context": "native:osse",
+   "category": "searched",
+   "unit": "deg",
+   "unit_transform": "identity",
+   "resolved": {
+    "value": 24.2,
+    "bound": {
+     "lo": 10.0,
+     "hi": 80.0,
+     "search": true,
+     "log": false,
+     "transform": "identity"
+    }
+   },
+   "application_predicate": "always",
+   "affected_geometry_features": [
+    "coverage half-angle",
+    "flare rate",
+    "mouth width/height"
+   ],
+   "source_refs": [
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 18
+    },
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 47
+    },
+    {
+     "file": "hornlab_search/design/families.py",
+     "line": 54
+    },
+    {
+     "file": "hornlab_search/design/params/knobs_native.py",
+     "line": 111
+    },
+    {
+     "file": "hornlab_mesher/profile_formulas.py",
+     "line": 343
+    }
+   ],
+   "evidence": {
+    "static_source": {
+     "status": "recorded",
+     "summary": "resolved by the native family KeySpec and the config seed/bound",
+     "refs": [
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 18
+      },
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 47
+      },
+      {
+       "file": "hornlab_search/design/families.py",
+       "line": 54
+      },
+      {
+       "file": "hornlab_search/design/params/knobs_native.py",
+       "line": 111
+      },
+      {
+       "file": "hornlab_mesher/profile_formulas.py",
+       "line": 343
+      }
+     ]
+    },
+    "geometry_test": {
+     "kind": "canonical_surface_perturbation",
+     "values": [
+      10.0,
+      80.0
+     ],
+     "max_abs_delta_mm": 539.7686404674677,
+     "mean_abs_delta_mm": 304.30345802645616,
+     "tolerance_mm": 1e-06,
+     "changed": true,
+     "surface_fingerprints_equal": false,
+     "resolution_mm": 12.0,
+     "api": "hornlab_mesher.config_builder.resolve_geometry",
+     "units": "mm"
+    },
+    "status": "confirmed_active_geometry"
+   },
+   "notes": []
+  },
+  {
+   "key": "aspect_ratio",
+   "base_knob": "aspect_ratio",
+   "context": "native:osse",
+   "category": "fixed",
+   "unit": null,
+   "unit_transform": "identity",
+   "resolved": {
+    "value": 1.0,
+    "bound": {
+     "lo": 1.0,
+     "hi": 1.0,
+     "search": false,
+     "log": false,
+     "transform": "identity"
+    }
+   },
+   "application_predicate": "always (fixed cross-section aspect)",
+   "affected_geometry_features": [
+    "cross-section H/V aspect"
+   ],
+   "source_refs": [
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 24
+    },
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 66
+    },
+    {
+     "file": "hornlab_search/design/families.py",
+     "line": 66
+    },
+    {
+     "file": "hornlab_search/design/params/knobs_native.py",
+     "line": 307
+    }
+   ],
+   "evidence": {
+    "static_source": {
+     "status": "recorded",
+     "summary": "resolved by the native family KeySpec and the config seed/bound",
+     "refs": [
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 24
+      },
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 66
+      },
+      {
+       "file": "hornlab_search/design/families.py",
+       "line": 66
+      },
+      {
+       "file": "hornlab_search/design/params/knobs_native.py",
+       "line": 307
+      }
+     ]
+    },
+    "geometry_test": null,
+    "status": "static_source_only"
+   },
+   "notes": []
+  },
+  {
+   "key": "exponent",
+   "base_knob": "exponent",
+   "context": "native:osse",
+   "category": "fixed",
+   "unit": null,
+   "unit_transform": "identity",
+   "resolved": {
+    "value": 2.0,
+    "bound": {
+     "lo": 2.0,
+     "hi": 2.0,
+     "search": false,
+     "log": false,
+     "transform": "identity"
+    }
+   },
+   "application_predicate": "always (fixed cross-section outline)",
+   "affected_geometry_features": [
+    "cross-section superellipse outline"
+   ],
+   "source_refs": [
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 23
+    },
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 62
+    },
+    {
+     "file": "hornlab_search/design/families.py",
+     "line": 65
+    },
+    {
+     "file": "hornlab_search/design/params/knobs_native.py",
+     "line": 279
+    }
+   ],
+   "evidence": {
+    "static_source": {
+     "status": "recorded",
+     "summary": "resolved by the native family KeySpec and the config seed/bound",
+     "refs": [
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 23
+      },
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 62
+      },
+      {
+       "file": "hornlab_search/design/families.py",
+       "line": 65
+      },
+      {
+       "file": "hornlab_search/design/params/knobs_native.py",
+       "line": 279
+      }
+     ]
+    },
+    "geometry_test": null,
+    "status": "static_source_only"
+   },
+   "notes": []
+  },
+  {
+   "key": "k",
+   "base_knob": "k",
+   "context": "native:osse",
+   "category": "searched",
+   "unit": null,
+   "unit_transform": "identity",
+   "resolved": {
+    "value": 1.0,
+    "bound": {
+     "lo": 0.3,
+     "hi": 5.0,
+     "search": true,
+     "log": false,
+     "transform": "identity"
+    }
+   },
+   "application_predicate": "always",
+   "affected_geometry_features": [
+    "throat-to-mouth flare blend",
+    "wall curvature"
+   ],
+   "source_refs": [
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 22
+    },
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 59
+    },
+    {
+     "file": "hornlab_search/design/families.py",
+     "line": 56
+    },
+    {
+     "file": "hornlab_search/design/params/knobs_native.py",
+     "line": 151
+    },
+    {
+     "file": "hornlab_mesher/profile_formulas.py",
+     "line": 554
+    }
+   ],
+   "evidence": {
+    "static_source": {
+     "status": "recorded",
+     "summary": "resolved by the native family KeySpec and the config seed/bound",
+     "refs": [
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 22
+      },
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 59
+      },
+      {
+       "file": "hornlab_search/design/families.py",
+       "line": 56
+      },
+      {
+       "file": "hornlab_search/design/params/knobs_native.py",
+       "line": 151
+      },
+      {
+       "file": "hornlab_mesher/profile_formulas.py",
+       "line": 554
+      }
+     ]
+    },
+    "geometry_test": {
+     "kind": "canonical_surface_perturbation",
+     "values": [
+      0.3,
+      5.0
+     ],
+     "max_abs_delta_mm": 29.46426568039449,
+     "mean_abs_delta_mm": 16.269301432778967,
+     "tolerance_mm": 1e-06,
+     "changed": true,
+     "surface_fingerprints_equal": false,
+     "resolution_mm": 12.0,
+     "api": "hornlab_mesher.config_builder.resolve_geometry",
+     "units": "mm"
+    },
+    "status": "confirmed_active_geometry"
+   },
+   "notes": []
+  },
+  {
+   "key": "morph_allow_shrinkage",
+   "base_knob": "morph_allow_shrinkage",
+   "context": "native:osse",
+   "category": "fixed",
+   "unit": "0/1 flag",
+   "unit_transform": "identity",
+   "resolved": {
+    "value": 1.0,
+    "bound": {
+     "lo": 1.0,
+     "hi": 1.0,
+     "search": false,
+     "log": false,
+     "transform": "identity"
+    }
+   },
+   "application_predicate": "morph_target in {1, 2, 3} and the target is smaller than the base mouth extent",
+   "affected_geometry_features": [
+    "morph target dimension floor"
+   ],
+   "source_refs": [
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 34
+    },
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 98
+    },
+    {
+     "file": "hornlab_search/design/families.py",
+     "line": 80
+    },
+    {
+     "file": "hornlab_search/design/params/knobs_native.py",
+     "line": 462
+    }
+   ],
+   "evidence": {
+    "static_source": {
+     "status": "recorded",
+     "summary": "installed profile_morph.py branch for the active morph target",
+     "refs": [
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 34
+      },
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 98
+      },
+      {
+       "file": "hornlab_search/design/families.py",
+       "line": 80
+      },
+      {
+       "file": "hornlab_search/design/params/knobs_native.py",
+       "line": 462
+      }
+     ]
+    },
+    "geometry_test": null,
+    "status": "static_source_only"
+   },
+   "notes": []
+  },
+  {
+   "key": "morph_corner_mm",
+   "base_knob": "morph_corner_mm",
+   "context": "native:osse",
+   "category": "conditional",
+   "unit": "mm",
+   "unit_transform": "identity",
+   "resolved": {
+    "value": 16.5,
+    "bound": {
+     "lo": 0.0,
+     "hi": 80.0,
+     "search": true,
+     "log": false,
+     "transform": "identity"
+    }
+   },
+   "application_predicate": "morph_target == 1  (rounded-rectangle target only)",
+   "affected_geometry_features": [
+    "mouth corner radius",
+    "diagonal contour"
+   ],
+   "source_refs": [
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 30
+    },
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 86
+    },
+    {
+     "file": "hornlab_search/design/families.py",
+     "line": 76
+    },
+    {
+     "file": "hornlab_search/design/params/knobs_native.py",
+     "line": 410
+    },
+    {
+     "file": "hornlab_mesher/profile_morph.py",
+     "line": 604
+    }
+   ],
+   "evidence": {
+    "static_source": {
+     "status": "recorded",
+     "summary": "installed profile_morph.py branch for the active morph target",
+     "refs": [
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 30
+      },
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 86
+      },
+      {
+       "file": "hornlab_search/design/families.py",
+       "line": 76
+      },
+      {
+       "file": "hornlab_search/design/params/knobs_native.py",
+       "line": 410
+      },
+      {
+       "file": "hornlab_mesher/profile_morph.py",
+       "line": 604
+      }
+     ]
+    },
+    "geometry_test": {
+     "kind": "canonical_surface_perturbation",
+     "values": [
+      0.0,
+      80.0
+     ],
+     "max_abs_delta_mm": 33.13708498984755,
+     "mean_abs_delta_mm": 1.1223973712717388,
+     "tolerance_mm": 1e-06,
+     "changed": true,
+     "surface_fingerprints_equal": false,
+     "resolution_mm": 12.0,
+     "api": "hornlab_mesher.config_builder.resolve_geometry",
+     "units": "mm"
+    },
+    "status": "conditional_active"
+   },
+   "notes": []
+  },
+  {
+   "key": "morph_exponent",
+   "base_knob": "morph_exponent",
+   "context": "native:osse",
+   "category": "inactive",
+   "unit": null,
+   "unit_transform": "identity",
+   "resolved": {
+    "value": 4.0,
+    "bound": {
+     "lo": 2.0,
+     "hi": 10.0,
+     "search": true,
+     "log": false,
+     "transform": "identity"
+    }
+   },
+   "application_predicate": "morph_target == 3  (superellipse target only)",
+   "affected_geometry_features": [
+    "superellipse mouth contour (target 3 only)",
+    "diagonal contour"
+   ],
+   "source_refs": [
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 31
+    },
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 89
+    },
+    {
+     "file": "hornlab_search/design/families.py",
+     "line": 77
+    },
+    {
+     "file": "hornlab_search/design/params/knobs_native.py",
+     "line": 423
+    },
+    {
+     "file": "hornlab_mesher/profile_morph.py",
+     "line": 551
+    },
+    {
+     "file": "hornlab_mesher/profile_morph.py",
+     "line": 575
+    },
+    {
+     "file": "hornlab_mesher/profile_morph.py",
+     "line": 580
+    }
+   ],
+   "evidence": {
+    "static_source": {
+     "status": "recorded",
+     "summary": "installed profile_morph.py reads morphExponent only inside the target == 3 branch; target 1 returns the rounded-rectangle outline first",
+     "refs": [
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 31
+      },
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 89
+      },
+      {
+       "file": "hornlab_search/design/families.py",
+       "line": 77
+      },
+      {
+       "file": "hornlab_search/design/params/knobs_native.py",
+       "line": 423
+      },
+      {
+       "file": "hornlab_mesher/profile_morph.py",
+       "line": 551
+      },
+      {
+       "file": "hornlab_mesher/profile_morph.py",
+       "line": 575
+      },
+      {
+       "file": "hornlab_mesher/profile_morph.py",
+       "line": 580
+      }
+     ]
+    },
+    "geometry_test": {
+     "kind": "canonical_surface_perturbation",
+     "inactive_target": 1,
+     "active_target": 3,
+     "target_1": {
+      "kind": "canonical_surface_perturbation",
+      "values": [
+       2.0,
+       10.0
+      ],
+      "max_abs_delta_mm": 0.0,
+      "mean_abs_delta_mm": 0.0,
+      "tolerance_mm": 1e-06,
+      "changed": false,
+      "surface_fingerprints_equal": true,
+      "resolution_mm": 12.0,
+      "api": "hornlab_mesher.config_builder.resolve_geometry",
+      "units": "mm",
+      "target": 1
+     },
+     "target_3": {
+      "kind": "canonical_surface_perturbation",
+      "values": [
+       2.0,
+       10.0
+      ],
+      "max_abs_delta_mm": 63.4223202884196,
+      "mean_abs_delta_mm": 4.6961706384811155,
+      "tolerance_mm": 1e-06,
+      "changed": true,
+      "surface_fingerprints_equal": false,
+      "resolution_mm": 12.0,
+      "api": "hornlab_mesher.config_builder.resolve_geometry",
+      "units": "mm",
+      "target": 3
+     },
+     "tolerance_mm": 1e-06,
+     "resolution_mm": 12.0,
+     "api": "hornlab_mesher.config_builder.resolve_geometry",
+     "units": "mm",
+     "changed": true,
+     "inactive": true,
+     "conclusion": "target-1 surface is invariant to morph_exponent; target-3 surface changes, so inactivity is conditional on morph_target == 1"
+    },
+    "status": "confirmed_inactive_conditional"
+   },
+   "notes": [
+    "fixed target 1 is the rounded-rectangle target; the superellipse exponent is read only for target 3"
+   ]
+  },
+  {
+   "key": "morph_fixed",
+   "base_knob": "morph_fixed",
+   "context": "native:osse",
+   "category": "conditional",
+   "unit": null,
+   "unit_transform": "identity",
+   "resolved": {
+    "value": 0.0,
+    "bound": {
+     "lo": 0.0,
+     "hi": 0.6,
+     "search": true,
+     "log": false,
+     "transform": "identity"
+    }
+   },
+   "application_predicate": "morph_target in {1, 2, 3} and t > morph_fixed for some sampled t",
+   "affected_geometry_features": [
+    "morph start station",
+    "near-throat/interior wall",
+    "diagonal contour"
+   ],
+   "source_refs": [
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 33
+    },
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 95
+    },
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 9
+    },
+    {
+     "file": "hornlab_search/design/families.py",
+     "line": 79
+    },
+    {
+     "file": "hornlab_search/design/params/knobs_native.py",
+     "line": 449
+    },
+    {
+     "file": "hornlab_mesher/profile_morph.py",
+     "line": 663
+    }
+   ],
+   "evidence": {
+    "static_source": {
+     "status": "recorded",
+     "summary": "installed profile_morph.py branch for the active morph target",
+     "refs": [
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 33
+      },
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 95
+      },
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 9
+      },
+      {
+       "file": "hornlab_search/design/families.py",
+       "line": 79
+      },
+      {
+       "file": "hornlab_search/design/params/knobs_native.py",
+       "line": 449
+      },
+      {
+       "file": "hornlab_mesher/profile_morph.py",
+       "line": 663
+      }
+     ]
+    },
+    "geometry_test": {
+     "kind": "canonical_surface_perturbation",
+     "values": [
+      0.0,
+      0.6
+     ],
+     "max_abs_delta_mm": 31.05958671702321,
+     "mean_abs_delta_mm": 3.129983600193201,
+     "tolerance_mm": 1e-06,
+     "changed": true,
+     "surface_fingerprints_equal": false,
+     "resolution_mm": 12.0,
+     "api": "hornlab_mesher.config_builder.resolve_geometry",
+     "units": "mm"
+    },
+    "status": "conditional_active"
+   },
+   "notes": [
+    "resolved bound is 0.0-0.6 from the config's bounds block; the campaign comment mentions 0-0.1, but the bound is NOT changed (comment/bound provenance discrepancy recorded)",
+    "search bound source: config bounds.morph_fixed"
+   ]
+  },
+  {
+   "key": "morph_height_mm",
+   "base_knob": "morph_height_mm",
+   "context": "native:osse",
+   "category": "conditional",
+   "unit": "mm",
+   "unit_transform": "identity",
+   "resolved": {
+    "value": 397.0,
+    "bound": {
+     "lo": 238.2,
+     "hi": 456.55,
+     "search": true,
+     "log": false,
+     "transform": "identity"
+    }
+   },
+   "application_predicate": "morph_target in {1, 2, 3}",
+   "affected_geometry_features": [
+    "mouth contour height",
+    "V-plane outline",
+    "diagonal contour"
+   ],
+   "source_refs": [
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 29
+    },
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 83
+    },
+    {
+     "file": "hornlab_search/design/families.py",
+     "line": 75
+    },
+    {
+     "file": "hornlab_search/design/params/knobs_native.py",
+     "line": 397
+    },
+    {
+     "file": "hornlab_mesher/profile_morph.py",
+     "line": 486
+    }
+   ],
+   "evidence": {
+    "static_source": {
+     "status": "recorded",
+     "summary": "installed profile_morph.py branch for the active morph target",
+     "refs": [
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 29
+      },
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 83
+      },
+      {
+       "file": "hornlab_search/design/families.py",
+       "line": 75
+      },
+      {
+       "file": "hornlab_search/design/params/knobs_native.py",
+       "line": 397
+      },
+      {
+       "file": "hornlab_mesher/profile_morph.py",
+       "line": 486
+      }
+     ]
+    },
+    "geometry_test": {
+     "kind": "canonical_surface_perturbation",
+     "values": [
+      238.2,
+      456.55
+     ],
+     "max_abs_delta_mm": 126.15683344881398,
+     "mean_abs_delta_mm": 13.817175251697382,
+     "tolerance_mm": 1e-06,
+     "changed": true,
+     "surface_fingerprints_equal": false,
+     "resolution_mm": 12.0,
+     "api": "hornlab_mesher.config_builder.resolve_geometry",
+     "units": "mm"
+    },
+    "status": "conditional_active"
+   },
+   "notes": []
+  },
+  {
+   "key": "morph_rate",
+   "base_knob": "morph_rate",
+   "context": "native:osse",
+   "category": "conditional",
+   "unit": null,
+   "unit_transform": "identity",
+   "resolved": {
+    "value": 3.0,
+    "bound": {
+     "lo": 0.5,
+     "hi": 8.0,
+     "search": true,
+     "log": false,
+     "transform": "identity"
+    }
+   },
+   "application_predicate": "morph_target in {1, 2, 3} and t > morph_fixed for some sampled t",
+   "affected_geometry_features": [
+    "along-horn morph transition",
+    "interior wall",
+    "diagonal contour"
+   ],
+   "source_refs": [
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 32
+    },
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 92
+    },
+    {
+     "file": "hornlab_search/design/families.py",
+     "line": 78
+    },
+    {
+     "file": "hornlab_search/design/params/knobs_native.py",
+     "line": 436
+    },
+    {
+     "file": "hornlab_mesher/profile_morph.py",
+     "line": 639
+    }
+   ],
+   "evidence": {
+    "static_source": {
+     "status": "recorded",
+     "summary": "installed profile_morph.py branch for the active morph target",
+     "refs": [
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 32
+      },
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 92
+      },
+      {
+       "file": "hornlab_search/design/families.py",
+       "line": 78
+      },
+      {
+       "file": "hornlab_search/design/params/knobs_native.py",
+       "line": 436
+      },
+      {
+       "file": "hornlab_mesher/profile_morph.py",
+       "line": 639
+      }
+     ]
+    },
+    "geometry_test": {
+     "kind": "canonical_surface_perturbation",
+     "values": [
+      0.5,
+      8.0
+     ],
+     "max_abs_delta_mm": 58.90452191854499,
+     "mean_abs_delta_mm": 12.77143229219661,
+     "tolerance_mm": 1e-06,
+     "changed": true,
+     "surface_fingerprints_equal": false,
+     "resolution_mm": 12.0,
+     "api": "hornlab_mesher.config_builder.resolve_geometry",
+     "units": "mm"
+    },
+    "status": "conditional_active"
+   },
+   "notes": []
+  },
+  {
+   "key": "morph_target",
+   "base_knob": "morph_target",
+   "context": "native:osse",
+   "category": "fixed",
+   "unit": null,
+   "unit_transform": "identity",
+   "resolved": {
+    "value": 1.0,
+    "bound": {
+     "lo": 1.0,
+     "hi": 1.0,
+     "search": false,
+     "log": false,
+     "transform": "identity"
+    }
+   },
+   "application_predicate": "always (fixed in this task)",
+   "affected_geometry_features": [
+    "mouth contour family"
+   ],
+   "source_refs": [
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 27
+    },
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 76
+    },
+    {
+     "file": "hornlab_search/design/families.py",
+     "line": 73
+    },
+    {
+     "file": "hornlab_search/design/params/knobs_native.py",
+     "line": 370
+    },
+    {
+     "file": "hornlab_mesher/profile_morph.py",
+     "line": 358
+    },
+    {
+     "file": "hornlab_mesher/profile_morph.py",
+     "line": 379
+    }
+   ],
+   "evidence": {
+    "static_source": {
+     "status": "recorded",
+     "summary": "installed profile_morph.py branch for the active morph target",
+     "refs": [
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 27
+      },
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 76
+      },
+      {
+       "file": "hornlab_search/design/families.py",
+       "line": 73
+      },
+      {
+       "file": "hornlab_search/design/params/knobs_native.py",
+       "line": 370
+      },
+      {
+       "file": "hornlab_mesher/profile_morph.py",
+       "line": 358
+      },
+      {
+       "file": "hornlab_mesher/profile_morph.py",
+       "line": 379
+      }
+     ]
+    },
+    "geometry_test": {
+     "kind": "canonical_surface_perturbation",
+     "values": [
+      1,
+      3
+     ],
+     "max_abs_delta_mm": 37.82925602386365,
+     "changed": true,
+     "tolerance_mm": 1e-06,
+     "resolution_mm": 12.0,
+     "units": "mm",
+     "api": "hornlab_mesher.config_builder.resolve_geometry"
+    },
+    "status": "confirmed_active_geometry"
+   },
+   "notes": [
+    "pinned to 1 in seed_params and bounds; search: false"
+   ]
+  },
+  {
+   "key": "morph_width_mm",
+   "base_knob": "morph_width_mm",
+   "context": "native:osse",
+   "category": "conditional",
+   "unit": "mm",
+   "unit_transform": "identity",
+   "resolved": {
+    "value": 397.0,
+    "bound": {
+     "lo": 238.2,
+     "hi": 456.55,
+     "search": true,
+     "log": false,
+     "transform": "identity"
+    }
+   },
+   "application_predicate": "morph_target in {1, 2, 3}",
+   "affected_geometry_features": [
+    "mouth contour width",
+    "H-plane outline",
+    "diagonal contour"
+   ],
+   "source_refs": [
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 28
+    },
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 80
+    },
+    {
+     "file": "hornlab_search/design/families.py",
+     "line": 74
+    },
+    {
+     "file": "hornlab_search/design/params/knobs_native.py",
+     "line": 384
+    },
+    {
+     "file": "hornlab_mesher/profile_morph.py",
+     "line": 485
+    }
+   ],
+   "evidence": {
+    "static_source": {
+     "status": "recorded",
+     "summary": "installed profile_morph.py branch for the active morph target",
+     "refs": [
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 28
+      },
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 80
+      },
+      {
+       "file": "hornlab_search/design/families.py",
+       "line": 74
+      },
+      {
+       "file": "hornlab_search/design/params/knobs_native.py",
+       "line": 384
+      },
+      {
+       "file": "hornlab_mesher/profile_morph.py",
+       "line": 485
+      }
+     ]
+    },
+    "geometry_test": {
+     "kind": "canonical_surface_perturbation",
+     "values": [
+      238.2,
+      456.55
+     ],
+     "max_abs_delta_mm": 126.15683344881404,
+     "mean_abs_delta_mm": 13.817175251697364,
+     "tolerance_mm": 1e-06,
+     "changed": true,
+     "surface_fingerprints_equal": false,
+     "resolution_mm": 12.0,
+     "api": "hornlab_mesher.config_builder.resolve_geometry",
+     "units": "mm"
+    },
+    "status": "conditional_active"
+   },
+   "notes": []
+  },
+  {
+   "key": "n",
+   "base_knob": "n",
+   "context": "native:osse",
+   "category": "conditional",
+   "unit": null,
+   "unit_transform": "identity",
+   "resolved": {
+    "value": 6.75,
+    "bound": {
+     "lo": 1.0,
+     "hi": 10.0,
+     "search": true,
+     "log": false,
+     "transform": "identity"
+    }
+   },
+   "application_predicate": "s != 0  (OSSE termination term is skipped when s == 0)",
+   "affected_geometry_features": [
+    "OSSE termination exponent",
+    "mouth roll"
+   ],
+   "source_refs": [
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 19
+    },
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 50
+    },
+    {
+     "file": "hornlab_search/design/families.py",
+     "line": 177
+    },
+    {
+     "file": "hornlab_search/design/params/knobs_native.py",
+     "line": 837
+    },
+    {
+     "file": "hornlab_mesher/profile_formulas.py",
+     "line": 359
+    },
+    {
+     "file": "hornlab_mesher/profile_formulas.py",
+     "line": 264
+    }
+   ],
+   "evidence": {
+    "static_source": {
+     "status": "recorded",
+     "summary": "installed OSSE termination term is skipped while s == 0; seed has s != 0",
+     "refs": [
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 19
+      },
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 50
+      },
+      {
+       "file": "hornlab_search/design/families.py",
+       "line": 177
+      },
+      {
+       "file": "hornlab_search/design/params/knobs_native.py",
+       "line": 837
+      },
+      {
+       "file": "hornlab_mesher/profile_formulas.py",
+       "line": 359
+      },
+      {
+       "file": "hornlab_mesher/profile_formulas.py",
+       "line": 264
+      }
+     ]
+    },
+    "geometry_test": {
+     "kind": "canonical_surface_perturbation",
+     "values": [
+      1.0,
+      10.0
+     ],
+     "max_abs_delta_mm": 83.80188489913685,
+     "mean_abs_delta_mm": 49.30223426559236,
+     "tolerance_mm": 1e-06,
+     "changed": true,
+     "surface_fingerprints_equal": false,
+     "resolution_mm": 12.0,
+     "api": "hornlab_mesher.config_builder.resolve_geometry",
+     "units": "mm"
+    },
+    "status": "conditional_active"
+   },
+   "notes": []
+  },
+  {
+   "key": "q",
+   "base_knob": "q",
+   "context": "native:osse",
+   "category": "conditional",
+   "unit": null,
+   "unit_transform": "identity",
+   "resolved": {
+    "value": 0.996,
+    "bound": {
+     "lo": 0.9,
+     "hi": 1.0,
+     "search": true,
+     "log": false,
+     "transform": "identity"
+    }
+   },
+   "application_predicate": "s != 0  (OSSE termination term is skipped when s == 0)",
+   "affected_geometry_features": [
+    "OSSE termination saturation",
+    "mouth roll"
+   ],
+   "source_refs": [
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 21
+    },
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 56
+    },
+    {
+     "file": "hornlab_search/design/families.py",
+     "line": 57
+    },
+    {
+     "file": "hornlab_search/design/params/knobs_native.py",
+     "line": 165
+    },
+    {
+     "file": "hornlab_mesher/profile_formulas.py",
+     "line": 626
+    },
+    {
+     "file": "hornlab_mesher/profile_formulas.py",
+     "line": 264
+    }
+   ],
+   "evidence": {
+    "static_source": {
+     "status": "recorded",
+     "summary": "installed OSSE termination term is skipped while s == 0; seed has s != 0",
+     "refs": [
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 21
+      },
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 56
+      },
+      {
+       "file": "hornlab_search/design/families.py",
+       "line": 57
+      },
+      {
+       "file": "hornlab_search/design/params/knobs_native.py",
+       "line": 165
+      },
+      {
+       "file": "hornlab_mesher/profile_formulas.py",
+       "line": 626
+      },
+      {
+       "file": "hornlab_mesher/profile_formulas.py",
+       "line": 264
+      }
+     ]
+    },
+    "geometry_test": {
+     "kind": "canonical_surface_perturbation",
+     "values": [
+      0.9,
+      1.0
+     ],
+     "changed": null,
+     "error": "geometry sampling refused: geometry resolve failed: ConfigError: cannot fit the acoustic geometry to the requested mm resolution (throat 36 mm, mouth 36 mm): the axial chord is still 3.15x its limit; raise the throat/mouth resolution. Refinement stopped at the 2048-segment axial limit with a control grid of 26 x 2049 samples (corner-arc subdivision 4x).",
+     "resolution_mm": 12.0,
+     "api": "hornlab_mesher.config_builder.resolve_geometry",
+     "units": "mm"
+    },
+    "status": "static_source_only"
+   },
+   "notes": []
+  },
+  {
+   "key": "r0_mm",
+   "base_knob": "r0_mm",
+   "context": "native:osse",
+   "category": "derived",
+   "unit": "mm",
+   "unit_transform": "identity",
+   "resolved": {
+    "value": 25.4,
+    "bound": {
+     "lo": 25.4,
+     "hi": 25.4,
+     "search": false,
+     "log": false,
+     "transform": "identity"
+    }
+   },
+   "application_predicate": "brief driver exit radius (pinned)",
+   "affected_geometry_features": [
+    "throat radius",
+    "driver coupling"
+   ],
+   "source_refs": [
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 15
+    },
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 36
+    },
+    {
+     "file": "hornlab_search/design/families.py",
+     "line": 53
+    },
+    {
+     "file": "hornlab_search/design/params/knobs_native.py",
+     "line": 97
+    },
+    {
+     "file": "hornlab_mesher/profile_formulas.py",
+     "line": 170
+    },
+    {
+     "file": "hornlab_search/config.py",
+     "line": 1182
+    }
+   ],
+   "evidence": {
+    "static_source": {
+     "status": "recorded",
+     "summary": "config.py pins the native throat to the brief driver",
+     "refs": [
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 15
+      },
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 36
+      },
+      {
+       "file": "hornlab_search/design/families.py",
+       "line": 53
+      },
+      {
+       "file": "hornlab_search/design/params/knobs_native.py",
+       "line": 97
+      },
+      {
+       "file": "hornlab_mesher/profile_formulas.py",
+       "line": 170
+      },
+      {
+       "file": "hornlab_search/config.py",
+       "line": 1182
+      }
+     ]
+    },
+    "geometry_test": null,
+    "status": "static_source_only"
+   },
+   "notes": []
+  },
+  {
+   "key": "s",
+   "base_knob": "s",
+   "context": "native:osse",
+   "category": "searched",
+   "unit": null,
+   "unit_transform": "identity",
+   "resolved": {
+    "value": 0.715,
+    "bound": {
+     "lo": 0.0,
+     "hi": 1.5,
+     "search": true,
+     "log": false,
+     "transform": "identity"
+    }
+   },
+   "application_predicate": "always contributes the termination amplitude; s == 0 is a no-op for n/q",
+   "affected_geometry_features": [
+    "OSSE termination amplitude",
+    "mouth flare"
+   ],
+   "source_refs": [
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 20
+    },
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 53
+    },
+    {
+     "file": "hornlab_search/design/families.py",
+     "line": 178
+    },
+    {
+     "file": "hornlab_search/design/params/knobs_native.py",
+     "line": 863
+    },
+    {
+     "file": "hornlab_mesher/profile_formulas.py",
+     "line": 272
+    },
+    {
+     "file": "hornlab_mesher/profile_formulas.py",
+     "line": 264
+    }
+   ],
+   "evidence": {
+    "static_source": {
+     "status": "recorded",
+     "summary": "resolved by the native family KeySpec and the config seed/bound",
+     "refs": [
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 20
+      },
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 53
+      },
+      {
+       "file": "hornlab_search/design/families.py",
+       "line": 178
+      },
+      {
+       "file": "hornlab_search/design/params/knobs_native.py",
+       "line": 863
+      },
+      {
+       "file": "hornlab_mesher/profile_formulas.py",
+       "line": 272
+      },
+      {
+       "file": "hornlab_mesher/profile_formulas.py",
+       "line": 264
+      }
+     ]
+    },
+    "geometry_test": {
+     "kind": "canonical_surface_perturbation",
+     "values": [
+      0.0,
+      1.5
+     ],
+     "max_abs_delta_mm": 82.56622812310195,
+     "mean_abs_delta_mm": 23.25887592278741,
+     "tolerance_mm": 1e-06,
+     "changed": true,
+     "surface_fingerprints_equal": false,
+     "resolution_mm": 12.0,
+     "api": "hornlab_mesher.config_builder.resolve_geometry",
+     "units": "mm"
+    },
+    "status": "confirmed_active_geometry"
+   },
+   "notes": [
+    "s == 0 makes n and q inactive for OSSE; the searched bound includes 0"
+   ]
+  },
+  {
+   "key": "s1",
+   "base_knob": "s1",
+   "context": "native:osse",
+   "category": "conditional",
+   "unit": "mm/deg",
+   "unit_transform": "identity",
+   "resolved": {
+    "value": 1.14,
+    "bound": {
+     "lo": 1.0,
+     "hi": 1.3,
+     "search": true,
+     "log": false,
+     "transform": "identity"
+    }
+   },
+   "application_predicate": "s1 != 0 and s2 != 0  (the axial-stretch map is inactive if either is zero)",
+   "affected_geometry_features": [
+    "axial station mapping",
+    "throat stretch"
+   ],
+   "source_refs": [
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 25
+    },
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 70
+    },
+    {
+     "file": "hornlab_search/design/families.py",
+     "line": 58
+    },
+    {
+     "file": "hornlab_search/design/params/knobs_native.py",
+     "line": 209
+    },
+    {
+     "file": "hornlab_mesher/throat_stretch.py",
+     "line": 50
+    },
+    {
+     "file": "hornlab_mesher/profile_formulas.py",
+     "line": 503
+    }
+   ],
+   "evidence": {
+    "static_source": {
+     "status": "recorded",
+     "summary": "installed stretch_is_inactive is true when either coefficient is zero",
+     "refs": [
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 25
+      },
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 70
+      },
+      {
+       "file": "hornlab_search/design/families.py",
+       "line": 58
+      },
+      {
+       "file": "hornlab_search/design/params/knobs_native.py",
+       "line": 209
+      },
+      {
+       "file": "hornlab_mesher/throat_stretch.py",
+       "line": 50
+      },
+      {
+       "file": "hornlab_mesher/profile_formulas.py",
+       "line": 503
+      }
+     ]
+    },
+    "geometry_test": {
+     "kind": "canonical_surface_perturbation",
+     "values": [
+      1.0,
+      1.3
+     ],
+     "max_abs_delta_mm": 4.177445937666022,
+     "mean_abs_delta_mm": 1.8849466091759508,
+     "tolerance_mm": 1e-06,
+     "changed": true,
+     "surface_fingerprints_equal": false,
+     "resolution_mm": 12.0,
+     "api": "hornlab_mesher.config_builder.resolve_geometry",
+     "units": "mm",
+     "condition_test": {
+      "condition": "s2 == 0",
+      "changed": false,
+      "max_abs_delta_mm": 0.0
+     }
+    },
+    "status": "conditional_active"
+   },
+   "notes": []
+  },
+  {
+   "key": "s2",
+   "base_knob": "s2",
+   "context": "native:osse",
+   "category": "conditional",
+   "unit": "1/mm",
+   "unit_transform": "identity",
+   "resolved": {
+    "value": 0.025,
+    "bound": {
+     "lo": 0.015,
+     "hi": 0.035,
+     "search": true,
+     "log": false,
+     "transform": "identity"
+    }
+   },
+   "application_predicate": "s1 != 0 and s2 != 0  (the axial-stretch map is inactive if either is zero)",
+   "affected_geometry_features": [
+    "axial station mapping",
+    "throat stretch"
+   ],
+   "source_refs": [
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 26
+    },
+    {
+     "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+     "line": 73
+    },
+    {
+     "file": "hornlab_search/design/families.py",
+     "line": 59
+    },
+    {
+     "file": "hornlab_search/design/params/knobs_native.py",
+     "line": 223
+    },
+    {
+     "file": "hornlab_mesher/throat_stretch.py",
+     "line": 50
+    },
+    {
+     "file": "hornlab_mesher/profile_formulas.py",
+     "line": 503
+    }
+   ],
+   "evidence": {
+    "static_source": {
+     "status": "recorded",
+     "summary": "installed stretch_is_inactive is true when either coefficient is zero",
+     "refs": [
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 26
+      },
+      {
+       "file": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+       "line": 73
+      },
+      {
+       "file": "hornlab_search/design/families.py",
+       "line": 59
+      },
+      {
+       "file": "hornlab_search/design/params/knobs_native.py",
+       "line": 223
+      },
+      {
+       "file": "hornlab_mesher/throat_stretch.py",
+       "line": 50
+      },
+      {
+       "file": "hornlab_mesher/profile_formulas.py",
+       "line": 503
+      }
+     ]
+    },
+    "geometry_test": {
+     "kind": "canonical_surface_perturbation",
+     "values": [
+      0.015,
+      0.035
+     ],
+     "max_abs_delta_mm": 6.658377797417039,
+     "mean_abs_delta_mm": 3.4043245304230787,
+     "tolerance_mm": 1e-06,
+     "changed": true,
+     "surface_fingerprints_equal": false,
+     "resolution_mm": 12.0,
+     "api": "hornlab_mesher.config_builder.resolve_geometry",
+     "units": "mm",
+     "condition_test": {
+      "condition": "s1 == 0",
+      "changed": false,
+      "max_abs_delta_mm": 0.0
+     }
+    },
+    "status": "conditional_active"
+   },
+   "notes": []
+  }
+ ],
+ "active_projection": {
+  "version": "active-projection-v1",
+  "full_keys": [
+   "L_mm",
+   "a_deg",
+   "k",
+   "morph_corner_mm",
+   "morph_exponent",
+   "morph_fixed",
+   "morph_height_mm",
+   "morph_rate",
+   "morph_width_mm",
+   "n",
+   "q",
+   "s",
+   "s1",
+   "s2"
+  ],
+  "active_keys": [
+   "L_mm",
+   "a_deg",
+   "k",
+   "morph_corner_mm",
+   "morph_fixed",
+   "morph_height_mm",
+   "morph_rate",
+   "morph_width_mm",
+   "n",
+   "q",
+   "s",
+   "s1",
+   "s2"
+  ],
+  "fixed_values": {
+   "morph_exponent": 4.0
+  },
+  "conditions": {
+   "morph_target": 1
+  },
+  "reversible": true,
+  "reason": "static target-3-only source branch plus target-1 invariance / target-3 activity geometry test",
+  "refused": null
+ },
+ "task_eligibility": {
+  "status": "insufficient_evidence",
+  "scope": "B2 control/geometry audit only",
+  "note": "This ledger does not establish a compatible ATH archive cohort; S0/R0 own counts, comparability and replay. ATH eligibility remains unproven."
+ },
+ "geometry": {
+  "sampler": "tools/analysis/geometry_effects.py",
+  "api": "hornlab_mesher.config_builder.resolve_geometry",
+  "resolution_mm": 12.0,
+  "units": "mm",
+  "convergence": {
+   "checked": true,
+   "coarse_resolution_mm": 12.0,
+   "fine_resolution_mm": 6.0,
+   "coarse_grid": [
+    35,
+    112
+   ],
+   "fine_grid": [
+    60,
+    223
+   ],
+   "max_abs_radius_delta_mm": 0.16772851889624008,
+   "max_relative_radius_delta": 0.0006124007328483304,
+   "abs_tolerance_mm": 0.5,
+   "relative_tolerance": 0.01,
+   "converged": true,
+   "units": "mm",
+   "note": "geometry-sampling convergence only; not mesh, acoustic or BEM convergence"
+  },
+  "mesh_built": false,
+  "bem_called": false,
+  "cache_key_changed": false
+ },
+ "tool": "parameter_activity"
+}

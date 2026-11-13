@@ -1,0 +1,120 @@
+{
+  "brief_hash": "e8b911dfc38471196cb46f0a7d85c89f28ca9e6b79f576de70cda92440d57e91",
+  "brief_name": "native_ath_core_2in_v4",
+  "cov_below_f0": "mask",
+  "cov_narrow_ratio": 2.0,
+  "diag_reference": "round",
+  "freq_weights_signature": [
+    [
+      2500.0,
+      5500.0,
+      2.0
+    ]
+  ],
+  "frequency_hz": [
+    500.0,
+    643.33,
+    827.75,
+    1065.04,
+    1370.35,
+    1763.18,
+    2268.63,
+    2918.96,
+    3755.72,
+    4832.36,
+    6217.63,
+    8000.0
+  ],
+  "frequency_weights": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    2.0,
+    2.0,
+    2.0,
+    1.0,
+    1.0
+  ],
+  "masks": {
+    "coverage_h": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "coverage_v": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "ripple": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "metric_spec_hash": "87bc8368f0ff8e83da4bc41fafed49e0e9226ad8002ecf20218370a58613ceb0",
+  "objective_version": 4,
+  "reasons": [
+    "resolved_from_brief",
+    "objective_version=4",
+    "cov_narrow_ratio=2",
+    "cov_below_f0=mask",
+    "diag_reference=round",
+    "ripple=response_detrended_required",
+    "load_weight_zero_no_impedance_claim"
+  ],
+  "restriction_name": null,
+  "ripple": "response_detrended_required",
+  "status": "complete",
+  "tolerances": {
+    "cov": 2.0,
+    "di": 0.4,
+    "diag": 2.0,
+    "dislope": 9.0,
+    "distd": 2.0,
+    "flat": 1.5,
+    "load": 0.3,
+    "rip": 1.0
+  },
+  "weights": {
+    "cov": 1.0,
+    "di": 0.3,
+    "diag": 0.5,
+    "dislope": 0.5,
+    "distd": 0.5,
+    "flat": 0.5,
+    "load": 0.0,
+    "rip": 1.0
+  }
+}
