@@ -25,6 +25,7 @@ from ..search import evaluate as eval_mod
 from ..search import rundir
 from ..types import Design
 from . import ismo
+from .capability import require_supported
 
 #: How many early (non-surrogate-picked) SOLVED evaluations of a search are the random baseline.
 N_RANDOM = 40
@@ -165,6 +166,8 @@ def run_round(proposals_path, cfg, *, mode: str = "screen", out_dir=None, bundle
     """
     if mode not in ("screen", "verify", "final"):
         raise ValueError(f"mode must be screen|verify|final, got {mode!r}")
+    # Scoring capability is checked before proposals, predictors or any solver/GPU work.
+    require_supported(getattr(cfg, "objective_version", 1), context="surrogate round")
     if out_dir is None:
         raise ValueError("out_dir is required")
     props = load_proposals(proposals_path)                 # validation before any heavy import
