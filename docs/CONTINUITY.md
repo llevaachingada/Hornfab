@@ -1,6 +1,37 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-13 (22:1xZ) - CPU LANE NIGHT STOPPED AT OWNER REQUEST (TOO SLOW); GPU LANE UNTOUCHED; RESUME / MOVE-TO-GPU RECIPE
+
+- **Stopped (owner request, 17:11 local / 22:11Z):** night `home80x60_cpu_2026-11-13` - `queue.ps1` pid 27472
+  -> runner 14388/15196 -> search 30304/19532 (job 1 `cpu_p80x60__osse_ext_throat_s9012`, budget 120,
+  `--backend beat_cpu`) -> CPU worker host 39192/37852 -> julia 34360. Killed by explicit PID, CPU lane only:
+  no image-name kill, no `gpu-clean`, no forced host clear, no queue-file edit.
+- **Measured reason:** the run reached **5/120 candidates in ~47 min** and its in-flight solve wrote no row for
+  27 min; the GUI's independent read at 22:05Z reported 4/120 at ~6.1/h, ETA ~1141 min. The night file budgeted
+  ~103 s/eval from `rev2_cpu_parity2`, so this config costs ~5-6x more per eval than that baseline and 120 evals
+  could never fit the 4.5 h job timeout or the 23:30 cutoff. The Julia host was working, not wedged: +50 CPU-s in
+  8 s at ~1.5 GB RSS. Cause of the per-eval cost not diagnosed [inferred: the 80x60 extended-throat mesh/band,
+  not lane contention - the two-lane concurrency claim was retracted in `9019cbd`].
+- **State left behind:** `runs/20261113T212428Z-screen-2c4d56` (beat_cpu, cma_seed 9012, budget 120) holds
+  **5 partial candidates**, `run.json` still `status: running` (killed before the final write), `best.json`
+  present; `cache_cpu/` and `dataset_cpu/` intact; job 2 `cpu_p80x60__ath_core_14in_s5678` (budget 80) never
+  started. `runs/.cpu.lane.lock` is stale (holder pid 15196 gone); `cpu_lane_lock` takes over a stale holder,
+  so it was left in place.
+- **GPU lane verified untouched and progressing across the kill:** `home80x60_day_2026-11-13` (runner
+  20608/6848, search 33268/36636 on `p80x60__ath_core_14in_700_v7`, GPU host 39760/40920, julia 40236 ->
+  run `20261113T193536Z-screen-81c964`) went 129 -> 130 candidates with julia +21.9 CPU-s / 20 s right after
+  the kill. It is the only julia left alive.
+- **Restart A - resume on CPU (same physics):** `hornlab-search search --resume
+  runs/20261113T212428Z-screen-2c4d56 --budget 120 --backend beat_cpu --cache-dir cache_cpu --dataset-dir
+  dataset_cpu`; `run_campaign_night.py` also accepts `resume: <run dir>` in a job spec. Size the timeout from
+  the measured ~9.4 min/eval, not 103 s.
+- **Restart B - move to GPU (recommended, after 23:30 when `home80x60_day_2026-11-13` releases the GPU):** the
+  same two job commands with `--backend cuda`, without `--cache-dir cache_cpu --dataset-dir dataset_cpu`.
+  Prefer a **fresh** run over `--resume` of this directory so the run provenance stays single-backend; the 5
+  CPU candidates stay in `dataset_cpu` for the parity record.
+- Nothing was deleted: the partial run and both lane caches remain on disk for analysis.
+
 ## 2026-11-13 (22:05Z) - GUI: CPU LANE RUN PROGRESS + SPEED PARITY
 
 - `gui/data.py`: `current_cpu_run()` resolves a fresh `--config` CPU search from the newest

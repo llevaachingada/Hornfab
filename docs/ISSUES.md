@@ -3,6 +3,15 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-13 (**Elites tab redesigned for non-technical readers: brief/typology constraints and isometric horn thumbnails, best-per-typology / best-per-brief browsing, paginated 24 at a time, CSV-path noise removed; payload extended with brief/family/brief_target; bo-study-v1.1 final offline integration landed (M2 sensitivity/proposal evidence, immutable run package + `hornlab-search study` CLI, durable proposal-cadence recovery, B8 adversarial full loop); profile-outline thumbnail geometry fixed after live check (closed outline split at the mouth rim, outer wall kept); card hierarchy tuned per owner (constraint line + score largest, gate pills smaller); no GitHub issue state changed**).
 
+Local-only, added 2026-11-13 (22:1xZ) (**CPU lane night stopped by owner; no GitHub issue state changed**):
+- Open: `home80x60_cpu_2026-11-13` job 1 was stopped at 5/120 evals (~9.4 min/eval measured, vs the ~103 s/eval
+  the night file budgeted); job 2 never started. Partial run `runs/20261113T212428Z-screen-2c4d56`, resumable
+  (`search --resume`, or `resume: <dir>` in a night job).
+- Open (owner decision): run the two CPU jobs on the GPU lane after 23:30 (`--backend cuda`, fresh run), or
+  resume on CPU with a timeout sized from the measured rate. No CPU-lane eval-rate baseline exists for the
+  80x60 extended-throat config; measure it before scheduling CPU nights on it.
+- Not affected: GPU night `home80x60_day_2026-11-13` continued untouched (verified before and after the kill).
+
 Local-only, added 2026-11-13 (22:05Z) (**CPU lane GUI progress parity; no GitHub issue state changed**):
 - Resolved: CPU lane runs/solves now show status, progress bar, session %, rate/h, ETA, best/start
   score and failures on Home and Status, matching the GPU running card; `/api/lanes` rows carry
