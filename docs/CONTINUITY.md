@@ -12,6 +12,18 @@
   via `solve.cache.save_response`.
 - Next: owner pulls, shape_check, launch both nights, then run acoustic_v2_report + lane_parity.
 
+## 2026-11-13 - REV2 IMPLEMENTATION PASS (additive; nothing launched)
+
+- Status table for every Rev2 item: `docs/research/QUEUE_PLAN_REV2_2026-11-13.md`.
+- New: `metrics/acoustic_v2.py` (sphere DI quadrature, 3D lobes/islands, onsets, Keele estimate,
+  analyze_response), `dataset/identity_v2.py`, `tools/analysis/acoustic_v2_report.py`, E0 manifest
+  `docs/queue/rev2_E0_manifest_2026-11-13.json`. GUI balloon above-axis warning; K-law relabeled as heuristic
+  (GUI + report). Solana/SAWMOD configs labeled "-inspired" (comments only, config_sha unchanged).
+- Tests: `tests/test_metrics_acoustic_v2.py` 10 pass; analytic DI omni 0 / cardioid+dipole 4.77 dB.
+  Wider suite not run (owner call). Smoke: report tool ran end to end on synthetic responses saved
+  via `solve.cache.save_response`.
+- Next: owner pulls, shape_check, launch both nights, then run acoustic_v2_report + lane_parity.
+
 ## 2026-11-13 - REV2 QUEUE PREPARED (NOT LAUNCHED): MATCHED ABLATION + FIDELITY LADDER + CPU/GPU PARITY
 
 - From the owner's Senior Implementation Plan Rev2 (used as a guide). Plan, deviations and decision rule:
