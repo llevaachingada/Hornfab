@@ -124,3 +124,16 @@ def test_valid_values_load(tmp_path, smoke_cfg_path):
     assert cfg.search.budget_counts == "valid" and cfg.search.max_attempts == 7
     cfg = load_config(_write_cfg(tmp_path, smoke_cfg_path))
     assert cfg.search.budget_counts == "new" and cfg.search.max_attempts is None
+
+
+def test_default_run_json_has_no_strict_keys(smoke_cfg, tmp_path, monkeypatch):
+    # F0: an unconfigured run keeps today's schema exactly - no "strict" block, legacy policy.
+    cfg = fast_cfg(smoke_cfg)
+    assert cfg.search.error_policy == "legacy"
+    be = SyntheticBackend()
+    install_fakes(monkeypatch, be)
+    _run(cfg, tmp_path / "r", be, 4)
+    run_json = json.loads((tmp_path / "r" / "run.json").read_text())
+    assert "strict" not in run_json
+    assert "budget_counts" not in run_json
+    assert not (tmp_path / "r" / "cma" / "strict_state.json").exists()

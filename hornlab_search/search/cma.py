@@ -44,6 +44,7 @@ from ..types import Evaluation
 from . import rundir
 from . import links as links_mod
 from . import warmstart
+from . import outcomes
 from .pipeline import CandidatePipeline
 from .evaluate import (DETERMINISTIC_KINDS, collect_lib_shas, error_kind, evaluate, make_context,
                        read_ndjson)
@@ -59,6 +60,118 @@ EVALS_PER_PROJECTION = (1000, 10000)
 REFUSAL_KINDS = DETERMINISTIC_KINDS
 DEFAULT_ATTEMPTS_FACTOR = 4       # search.max_attempts default (valid mode only): 4 x budget
 RESAMPLE_CAP = 10                 # B.6: a refused candidate is resampled at most this many times
+
+# F0 (day 2026-11-12): opt-in strict plain-CMA policy.
+# ``infeasible_penalty: resample_strict`` replaces deterministic refusals from the CURRENT CMA
+# distribution (at most STRICT_REPLACEMENTS per slot) and never tells a refusal penalty.
+# ``error_policy: retry_same_then_stop`` retries the SAME candidate/spec at most
+# STRICT_BACKEND_ATTEMPTS total backend calls (no ask / RNG / model update between), then stops
+# resumably before ``tell``.  Both require a resolved total candidate-draw cap (``max_attempts``
+# or the valid-mode 4 x budget default); the resolved counters survive a resume.
+STRICT_PROTOCOL = "strict-cma-v1"
+STRICT_CODE_VERSION = "hornlab_search.search.cma/strict/1"
+STRICT_REPLACEMENTS = RESAMPLE_CAP          # per-slot deterministic replacement cap
+STRICT_BACKEND_ATTEMPTS = 2                 # total backend calls for one transient candidate
+
+STRICT_COUNTER_KEYS = ("draws", "replacements", "refusals", "cached_refusals", "attempts",
+                       "backend_calls", "retries", "scored", "told", "unknown_attempts", "valid")
+
+
+def strict_active(cfg) -> bool:
+    """True when either new F0 key opts into the strict path."""
+    return (str(getattr(cfg.search, "infeasible_penalty", "flat")) == "resample_strict"
+            or str(getattr(cfg.search, "error_policy", "legacy")) == "retry_same_then_stop")
+
+
+def strict_draw_cap(cfg, policy) -> int:
+    """The strict TOTAL candidate-draw cap (seed once + every replacement draw, cached included).
+
+    It is the resolved ``search.max_attempts`` (explicit, or the valid-mode 4 x budget default).
+    Strict mode refuses to run without one: an unbounded strict policy cannot be reconciled on
+    resume."""
+    cap = policy.get("attempts_cap")
+    if cap is None:
+        raise ConfigError("strict policy needs a resolved candidate-draw cap: set "
+                          "search.max_attempts or search.budget_counts: valid")
+    return int(cap)
+
+
+def _strict_identity(cfg, lib_shas) -> dict:
+    """Pinned protocol/spec/code identity for the resume artifact.
+
+    Budget/attempt extensions are recorded separately, so they are excluded from the spec hash;
+    changing any other search/objective/mesh/solve knob (or the installed libraries) refuses the
+    resume."""
+    import json as _json
+    from ..dataset.record import to_jsonable
+    raw = _json.loads(_json.dumps(to_jsonable(cfg.raw)))
+    s = raw.get("search")
+    if isinstance(s, dict):
+        s.pop("max_attempts", None)
+        s.pop("budget", None)
+    return {"protocol": STRICT_PROTOCOL,
+            "code": STRICT_CODE_VERSION,
+            "spec_sha": rundir.config_sha(raw),
+            "algorithm": str(cfg.search.algorithm),
+            "infeasible_penalty": str(cfg.search.infeasible_penalty),
+            "error_policy": str(cfg.search.error_policy),
+            "budget_counts": str(cfg.search.budget_counts),
+            "cma_seed": int(cfg.search.seed),
+            "lib_shas": {str(k): str(v) for k, v in (lib_shas or {}).items()}}
+
+
+def strict_state_path(run_dir):
+    return Path(run_dir) / "cma" / "strict_state.json"
+
+
+def read_strict_state(run_dir):
+    return rundir.read_json(strict_state_path(run_dir))
+
+
+def write_strict_state(run_dir, ss: dict) -> None:
+    rundir.write_json_atomic(strict_state_path(run_dir), ss)
+
+
+def _strict_boundary(ss: dict, state: dict) -> dict:
+    """The counters as of the last TOLD generation (the resume baseline).
+
+    A partial generation's attempts are deliberately excluded: on resume the same cached rows are
+    replayed and counted once as live work, so no attempt is double-counted after an interruption.
+    """
+    b = {k: int(ss.get(k, 0)) for k in STRICT_COUNTER_KEYS}
+    b.update({"generation": int(ss.get("generation", 0)),
+              "slot": int(ss.get("slot", 0)),
+              "n_new": int(state.get("n_new", 0)),
+              "n_valid": int(state.get("n_valid", 0)),
+              "n_refused_free": int(state.get("n_refused_free", 0))})
+    return b
+
+
+def _strict_run_json(ss: dict) -> dict:
+    out = {k: int(ss.get(k, 0)) for k in STRICT_COUNTER_KEYS}
+    out.update({
+        "protocol": ss.get("protocol"), "code": ss.get("code"),
+        "generation": int(ss.get("generation", 0)), "slot": int(ss.get("slot", 0)),
+        "stop_reason": ss.get("stop_reason", ""),
+        "seed": ss.get("seed"), "caps": ss.get("caps"),
+        "extensions": list(ss.get("extensions") or []),
+        "last_generation": ss.get("last_generation"),
+    })
+    return out
+
+
+def _new_strict_state(identity: dict, policy: dict, draw_cap: int) -> dict:
+    ss = {k: 0 for k in STRICT_COUNTER_KEYS}
+    ss.update({
+        "protocol": identity["protocol"], "code": identity["code"],
+        "identity": identity, "generation": 0, "slot": 0,
+        "stop_reason": "", "seed": None, "extensions": [],
+        "caps": {"draws": int(draw_cap), "budget": int(policy["budget"]),
+                 "max_attempts": policy.get("attempts_cap"), "deadline_s": None},
+        "pending": None, "last_generation": None, "boundary": None, "rng": None,
+    })
+    return ss
+
 
 
 def _refusal(ev: Evaluation) -> bool:
@@ -447,6 +560,10 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
     state = {"best": None, "best_no": None, "seed_ev": None, "n_new": 0, "stop": "",
              "solve_fail_streak": 0, "attempts": 0, "n_valid": 0, "n_refused_free": 0,
              "n_resampled": 0}
+    # F0: None on every legacy run, so run.json's schema and behaviour are untouched unless the
+    # new opt-in keys are present.
+    strict_state = None
+    strict_identity = None
 
     # On a resume the best so far is already on disk in search.ndjson: start from it, so a short
     # (or zero-budget) resume can never overwrite best.json with something worse.
@@ -498,6 +615,10 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
         if seed_ev is not None:
             upd["seed"] = {"design_hash": seed_ev.design_hash, "objective": seed_ev.objective,
                            "terms": seed_ev.terms}
+        if strict_state is not None:
+            # F0 additive block; absent on every legacy run (default schema unchanged).
+            strict_state["boundary"] = strict_state.get("boundary") or _strict_boundary(strict_state, state)
+            upd["strict"] = _strict_run_json(strict_state)
         if best is not None:
             upd["best"] = {"design_hash": best.design_hash, "objective": best.objective,
                            "eval_no": state["best_no"]}
@@ -532,7 +653,290 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
                  stats["mean_seconds_per_candidate"], stats["candidates_per_hour"],
                  stats["projected_hours"]["1000"], stats["projected_hours"]["10000"], suffix)
 
+    # ------------------------------------------------------------------ F0 strict path
+    # Everything below is inert unless ``search.infeasible_penalty: resample_strict`` or
+    # ``search.error_policy: retry_same_then_stop`` opted in. The legacy loops above are untouched.
+    replay = {"remaining": 0}
+
+    def _strict_checkpoint(*, stop_reason: str = "", pending: dict | None = None) -> None:
+        if strict_state is None:
+            return
+        if stop_reason:
+            strict_state["stop_reason"] = stop_reason
+        if pending is not None:
+            strict_state["pending"] = pending
+        import numpy as _np
+        try:
+            strict_state["rng"] = {"numpy_global": _np.random.get_state(), "restarts": None}
+        except Exception:  # noqa: BLE001 - artifact best effort
+            strict_state["rng"] = None
+        write_strict_state(run_dir, strict_state)
+
+    def _strict_setup() -> int:
+        """Create/restore the strict state; returns the resolved draw cap. Raises ConfigError for an
+        incompatible protocol/spec identity, a missing artifact on a run with strict history, or a
+        capped-down budget (extensions are explicit and recorded)."""
+        nonlocal strict_state, strict_identity
+        draw_cap = strict_draw_cap(cfg, policy)
+        strict_identity = _strict_identity(cfg, lib_shas)
+        strict_state = _new_strict_state(strict_identity, policy, draw_cap)
+        data = read_strict_state(run_dir)
+        if data is None:
+            # Exact rule: a strict resume is refused when the run already holds evaluations (a
+            # legacy/incomplete run without the strict artifact) but accepted for an empty/new run.
+            if (run_dir / "search.ndjson").exists() and read_ndjson(run_dir / "search.ndjson"):
+                raise ConfigError(
+                    f"{run_dir}: strict resume requires cma/strict_state.json, but this run has "
+                    f"history and no strict checkpoint; refusing to silently reset counters. "
+                    f"Start a fresh run directory or restore the artifact.")
+            _strict_checkpoint()
+            return draw_cap
+        have = data.get("identity") or {}
+        for key in ("protocol", "code", "spec_sha", "algorithm", "infeasible_penalty",
+                    "error_policy", "budget_counts", "cma_seed"):
+            if have.get(key) != strict_identity.get(key):
+                raise ConfigError(
+                    f"{run_dir}: strict resume refused: {key} changed "
+                    f"({have.get(key)!r} -> {strict_identity.get(key)!r}); the protocol/spec "
+                    f"identity must match")
+        if dict(have.get("lib_shas") or {}) != dict(strict_identity.get("lib_shas") or {}):
+            raise ConfigError(f"{run_dir}: strict resume refused: installed library SHAs changed")
+        boundary = data.get("boundary") or {k: data.get(k, 0) for k in STRICT_COUNTER_KEYS}
+        for k in STRICT_COUNTER_KEYS:
+            strict_state[k] = int(boundary.get(k, 0) or 0)
+        strict_state["generation"] = int(boundary.get("generation", 0) or 0)
+        strict_state["slot"] = int(boundary.get("slot", 0) or 0)
+        strict_state["boundary"] = boundary
+        state["n_new"] = int(boundary.get("n_new", strict_state["draws"]) or 0)
+        state["n_valid"] = int(boundary.get("n_valid", strict_state["valid"]) or 0)
+        state["attempts"] = int(strict_state["attempts"])
+        state["n_refused_free"] = int(boundary.get("n_refused_free",
+                                                   strict_state["refusals"]) or 0)
+        replay["remaining"] = int(strict_state["draws"])
+        old = data.get("caps") or {}
+        old_draw = old.get("draws")
+        old_budget = old.get("budget")
+        for name, old_v, new_v in (("draws", old_draw, draw_cap),
+                                   ("budget", old_budget, int(policy["budget"]))):
+            if old_v is None:
+                continue
+            old_v, new_v = int(old_v), int(new_v)
+            if new_v < old_v:
+                raise ConfigError(
+                    f"{run_dir}: strict resume refused: cumulative {name} cap would shrink "
+                    f"({old_v} -> {new_v}); caps persist unless explicitly extended")
+            if new_v > old_v:
+                strict_state["extensions"].append({"cap": name, "from": old_v, "to": new_v})
+        strict_state["caps"] = {"draws": int(draw_cap), "budget": int(policy["budget"]),
+                                "max_attempts": policy.get("attempts_cap"),
+                                "deadline_s": None}
+        _strict_checkpoint()
+        return draw_cap
+
+    def _backend_called(ev: Evaluation, out) -> bool:
+        """Did this evaluation actually reach the backend? A pre-solve deterministic refusal or a
+        cache hit did not; a solve/metric/complete outcome did."""
+        return bool(not ev.cached and ev.mesh is not None and not out.deterministic_refusal)
+
+    def strict_eval(design, *, draw: bool = True, retry: bool = False):
+        """Evaluate one candidate. Draws/attempts are counted once per candidate; a retry is an
+        extra backend call, never a new draw. Only an error-free complete score may become best."""
+        ss = strict_state
+        t0 = time.perf_counter()
+        ev = evaluate(design, space, cfg, mode, run_dir, store, backend, ctx=ctx)
+        dt = time.perf_counter() - t0
+        evals.append(ev)
+        if not ev.cached:
+            wall.append(dt)
+        out = outcomes.classify(ev)
+        replaying = replay["remaining"] > 0
+        if replaying:
+            replay["remaining"] -= 1
+        if not replaying and _backend_called(ev, out):
+            ss["backend_calls"] += 1
+        if retry and not replaying:
+            ss["retries"] += 1
+        if draw and not replaying:
+            # A sampled vector consumes a strict DRAW even when the evaluation is a cache hit
+            # (including a cached deterministic refusal: its rejection effort is real sampling
+            # effort). Budget/attempts, however, count NON-CACHED evaluations only: a cache hit is
+            # free and must never shrink the remaining budget or the new-attempt cap.
+            ss["draws"] += 1
+            if not ev.cached:
+                ss["attempts"] += 1
+                state["n_new"] = int(state.get("n_new", 0)) + 1
+                state["attempts"] = int(state.get("attempts", 0)) + 1
+            if out.deterministic_refusal:
+                if ev.cached:
+                    ss["cached_refusals"] += 1
+                else:
+                    ss["refusals"] += 1
+                state["n_refused_free"] = int(state.get("n_refused_free", 0)) + 1
+            if out.category == outcomes.CATEGORY_UNKNOWN:
+                ss["unknown_attempts"] += 1
+        if out.strict_tell_eligible:
+            if not replaying and not ev.cached:
+                ss["scored"] += 1
+                ss["valid"] += 1
+                state["n_valid"] = int(state.get("n_valid", 0)) + 1
+            b = state["best"]
+            if b is None or ev.objective < b.objective:
+                state["best"], state["best_no"] = ev, len(evals) - 1
+                rundir.write_best(run_dir, ev, mode, state["best_no"])
+        if not ev.cached and error_kind(ev.error) == "solve_failed":
+            state["solve_fail_streak"] += 1
+            if state["solve_fail_streak"] >= MAX_CONSECUTIVE_SOLVE_FAILURES:
+                raise SolverUnhealthyError(
+                    f"{state['solve_fail_streak']} consecutive solve_failed evaluations (last: "
+                    f"{ev.error.splitlines()[0][:200]}); the solver is unhealthy, not the designs. "
+                    f"Clear hosts (gpu-clean) and continue with --resume")
+        elif not ev.cached:
+            state["solve_fail_streak"] = 0
+        return ev, out
+
+    def run_strict() -> str:
+        draw_cap = _strict_setup()
+        ss = strict_state
+        resample_strict = str(cfg.search.infeasible_penalty) == "resample_strict"
+        cap_all = int(max_evals) if max_evals else None
+
+        def _caps_hit(replaying: bool) -> str:
+            if replaying:
+                return ""
+            used = (int(state.get("n_valid", 0)) if policy["mode"] == "valid"
+                    else int(state.get("n_new", 0)))
+            if used >= int(policy["budget"]):
+                return "budget"
+            if int(ss["draws"]) >= draw_cap:
+                return "strict_draw_cap"
+            if cap_all is not None and len(evals) >= cap_all:
+                return "max_evals"
+            return ""
+
+        # --- seed (evaluated once; retried in place when transient) -------------------------
+        seed_ev, seed_out = strict_eval(space.seed)
+        if seed_out.retry_same_candidate:
+            seed_ev, seed_out = strict_eval(space.seed, draw=False, retry=True)
+        state["seed_ev"] = seed_ev
+        ss["seed"] = {"design_hash": seed_ev.design_hash, "objective": float(seed_ev.objective),
+                      "category": seed_out.category, "kind": seed_out.kind,
+                      "eligible": bool(seed_out.strict_tell_eligible),
+                      "cached": bool(seed_ev.cached)}
+        if seed_out.category == outcomes.CATEGORY_TRANSIENT:
+            _strict_checkpoint(stop_reason="strict_infrastructure")
+            return "strict_infrastructure"
+        if seed_out.category == outcomes.CATEGORY_METRIC:
+            _strict_checkpoint(stop_reason="strict_metric_error")
+            return "strict_metric_error"
+        if seed_out.category == outcomes.CATEGORY_UNKNOWN:
+            _strict_checkpoint(stop_reason="strict_unknown_error")
+            return "strict_unknown_error"
+        if not seed_out.strict_tell_eligible and not seed_out.deterministic_refusal:
+            _strict_checkpoint(stop_reason="strict_uneligible_seed")
+            return "strict_uneligible_seed"
+        # A deterministic refusal stays the recorded FAILED baseline: best remains unset and the
+        # baseline is never replaced. Bounded generation sampling may continue from the distribution.
+        ss["boundary"] = _strict_boundary(ss, state)
+        _strict_checkpoint()
+
+        gen = int(ss["generation"])
+        while True:
+            gen_replaying = replay["remaining"] > 0
+            reason = _caps_hit(gen_replaying)
+            if reason:
+                _strict_checkpoint(stop_reason=reason)
+                return reason
+            stop = es.stop()
+            if stop:
+                reason = "cma: " + ", ".join(sorted(stop))
+                _strict_checkpoint(stop_reason=reason)
+                return reason
+            X = [np.asarray(x, dtype=float).reshape(-1) for x in es.ask()]
+            F: list[float] = []
+            vectors: list[list[float]] = []
+            hashes: list[str] = []
+            replacements: list[list[float]] = []
+            incomplete = ""
+            for i, x in enumerate(X):
+                reason = _caps_hit(gen_replaying)
+                if reason:
+                    incomplete = reason
+                    break
+                ev, out = strict_eval(space.denormalize(x))
+                slot_replacements: list[list[float]] = []
+                while resample_strict and out.deterministic_refusal:
+                    # Name the cap that actually fired (budget/max_evals/strict_draw_cap); only
+                    # the per-slot replacement cap gets its own reason.
+                    reason = _caps_hit(gen_replaying)
+                    if reason:
+                        incomplete = reason
+                        break
+                    if len(slot_replacements) >= STRICT_REPLACEMENTS:
+                        incomplete = "strict_refused_slot"
+                        break
+                    x_new = np.asarray(es.ask(1)[0], dtype=float).reshape(-1)
+                    slot_replacements.append([float(v) for v in x_new])
+                    if not gen_replaying:
+                        ss["replacements"] += 1
+                    x = x_new
+                    ev, out = strict_eval(space.denormalize(x))
+                if incomplete:
+                    break
+                if out.retry_same_candidate:
+                    ev, out = strict_eval(space.denormalize(x), draw=False, retry=True)
+                if out.category == outcomes.CATEGORY_METRIC:
+                    incomplete = "strict_metric_error"
+                    break
+                if out.category == outcomes.CATEGORY_UNKNOWN:
+                    incomplete = "strict_unknown_error"
+                    break
+                if out.category == outcomes.CATEGORY_TRANSIENT:
+                    incomplete = "strict_infrastructure"
+                    break
+                if not out.strict_tell_eligible and not (
+                        out.deterministic_refusal and not resample_strict):
+                    incomplete = "strict_uneligible"
+                    break
+                X[i] = x
+                F.append(float(ev.objective))
+                vectors.append([float(v) for v in x])
+                hashes.append(ev.design_hash)
+                replacements.append(slot_replacements)
+                ss["slot"] = i
+            if incomplete or len(F) < len(X):
+                pending = {"generation": gen, "slot": i, "evaluated": len(F),
+                           "draws_this_generation": len(F),
+                           "originals": [[float(v) for v in np.asarray(xx)] for xx in X],
+                           "evaluated_vectors": vectors, "design_hashes": hashes,
+                           "cached_refusals": int(ss.get("cached_refusals", 0))}
+                _strict_checkpoint(stop_reason=incomplete or "strict_incomplete", pending=pending)
+                return incomplete or "strict_incomplete"
+            # A fully completed eligible batch may be told once even when the next cap check stops.
+            es.tell(X, F)
+            if not gen_replaying:
+                ss["told"] += len(F)
+                ss["generation"] = gen + 1
+                ss["slot"] = 0
+                ss["last_generation"] = {"generation": gen, "originals": vectors,
+                                         "replacements": replacements,
+                                         "design_hashes": hashes}
+                ss["boundary"] = _strict_boundary(ss, state)
+            try:
+                es.logger.add()
+            except Exception:  # noqa: BLE001 - cma's own logging is optional
+                pass
+            gen += 1
+            log.info("strict generation %d: best overall %s (%d draws, %d told, stop %r)", gen,
+                     None if state["best"] is None else round(state["best"].objective, 4),
+                     ss["draws"], ss["told"], ss["stop_reason"])
+            if not gen_replaying:
+                _strict_checkpoint()
+
     try:
+        if strict_active(cfg):
+            state["stop"] = run_strict()
+            finish("finished")
+            return state["best"]
         # 1. the seed first: every later number is meaningless without the baseline it must beat
         seed_ev = run_one(space.seed)
         state["seed_ev"] = seed_ev

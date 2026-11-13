@@ -128,6 +128,9 @@ class SearchSettings:
     warm_start: dict | None = None     # B.1: {from_runs, top_k, sigma_from_spread,
                                        # allow_cross_brief}; absent = today's mean/sigma0
     surrogate: str | None = None       # B.7: 'lq' (pycma lq-CMA-ES surrogate); absent = plain CMA
+    error_policy: str = "legacy"       # F0: 'legacy' (default) | 'retry_same_then_stop'
+                                       # (same-candidate infrastructure retry then resumable stop;
+                                       # used by cma and, for infrastructure only, cma_me)
 
 
 @dataclass
@@ -834,10 +837,15 @@ def _validate_qd(block, where: str) -> dict | None:
             raise ConfigError(f"{where}.maes.learning_rate must be a number in [0.01, 0.1], "
                               f"got {lr!r}")
         jt = m.get("j_threshold")
+        # F0 safety cap: the CMA-MAE threshold_min = -j_threshold is the refusal-penalty boundary.
+        # A non-finite value or one at/above PENALTY_INVALID (1000) would treat a real refusal
+        # penalty as a feasible archive target. This is a validation ceiling, not a new default.
+        from .objective.terms import PENALTY_INVALID
         if isinstance(jt, bool) or not isinstance(jt, (int, float)) \
-                or not float(jt) > 0:
-            raise ConfigError(f"{where}.maes.j_threshold must be a positive number (the refusal "
-                              f"penalty J cap; archive threshold_min = -j_threshold), got {jt!r}")
+                or not math.isfinite(float(jt)) or not (0.0 < float(jt) < PENALTY_INVALID):
+            raise ConfigError(f"{where}.maes.j_threshold must be a finite positive number below "
+                              f"{PENALTY_INVALID:g} (the refusal penalty J cap; archive "
+                              f"threshold_min = -j_threshold), got {jt!r}")
         out["maes"] = {"learning_rate": float(lr), "j_threshold": float(jt)}
     return out
 
@@ -852,6 +860,21 @@ def _validate_budget_counts(value, where: str) -> str:
     all-refusing box. Exact tokens; anything else is a typo and is refused."""
     if not isinstance(value, str) or value not in ("new", "valid"):
         raise ConfigError(f"{where}: budget_counts must be 'new' or 'valid', got {value!r}")
+    return value
+
+
+def _validate_error_policy(value, where: str) -> str:
+    """F0 (day 2026-11-12): ``search.error_policy`` isolates machine failures from learning.
+
+    ``legacy`` (default/absent) is today's behaviour: a transient/metric/unknown failure is
+    scored/told exactly as before. ``retry_same_then_stop`` retries the SAME candidate/spec at
+    most twice total backend calls, then stops resumably before any contaminated ``tell``.
+    Exact tokens; anything else is a typo and is refused."""
+    if value is None:
+        return "legacy"
+    if not isinstance(value, str) or value not in ("legacy", "retry_same_then_stop"):
+        raise ConfigError(f"{where}: error_policy must be 'legacy' or 'retry_same_then_stop', "
+                          f"got {value!r}")
     return value
 
 
@@ -1355,14 +1378,24 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
     search = _build(SearchSettings, _require(raw, "search", where), f"{where}:search",
                     optional=("popsize", "infeasible_penalty", "restarts", "qd", "pipeline_prefetch",
                               "budget_counts", "max_attempts", "links", "warm_start",
-                              "surrogate"))
+                              "surrogate", "error_policy"))
     if "popsize" not in raw["search"]:
         search.popsize = None
     if "budget_counts" not in raw["search"]:
         search.budget_counts = "new"
-    if search.infeasible_penalty not in ("flat", "graded", "resample"):
-        raise ConfigError(f"{where}: search.infeasible_penalty must be 'flat', 'graded' or "
-                          f"'resample', got {search.infeasible_penalty!r}")
+    if "error_policy" not in raw["search"]:
+        search.error_policy = "legacy"
+    else:
+        search.error_policy = _validate_error_policy(search.error_policy,
+                                                      f"{where}:search.error_policy")
+    if search.infeasible_penalty not in ("flat", "graded", "resample", "resample_strict"):
+        raise ConfigError(f"{where}: search.infeasible_penalty must be 'flat', 'graded', "
+                          f"'resample' or 'resample_strict', got {search.infeasible_penalty!r}")
+    if search.infeasible_penalty == "resample_strict" and search.algorithm != "cma":
+        # F0: strict deterministic replacement is a plain-CMA policy. The ribs QD scheduler binds
+        # one result per asked solution, so only the legacy QD path exists until F1.
+        raise ConfigError(f"{where}: search.infeasible_penalty: resample_strict is only "
+                          f"supported with search.algorithm: cma (got {search.algorithm!r})")
     if search.infeasible_penalty == "resample" and search.algorithm == "cma_me":
         # B.6: ribs 0.12 scheduler.tell slices one results slice per emitter by its own
         # _num_emitted (.venv .../ribs/schedulers/_scheduler.py:401-411), so a CMA-ME batch
@@ -1422,6 +1455,37 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
     elif search.qd is not None:
         raise ConfigError(f"{where}:search.qd: search.qd is only used with "
                           f"search.algorithm: cma_me")
+    # F0 strict-mode cross-checks (only when a new key was actually opted into; absent keys leave
+    # every legacy configuration byte-for-byte identical). Strict chronology is only tested for the
+    # single-ES serial path, so restarts/lq/prefetch are refused until that work lands. Prefetch is
+    # deliberately rejected here (not "safely drained") so a strict stop cannot hide an in-flight
+    # dispatch; the serial loop still closes the (inert) pipeline on every exit.
+    strict_resample = search.infeasible_penalty == "resample_strict"
+    retry_infra = search.error_policy == "retry_same_then_stop"
+    if strict_resample:
+        if not retry_infra:
+            raise ConfigError(f"{where}:search.infeasible_penalty: resample_strict requires "
+                              f"search.error_policy: retry_same_then_stop (got "
+                              f"{search.error_policy!r})")
+        if search.budget_counts != "valid":
+            raise ConfigError(f"{where}:search.infeasible_penalty: resample_strict requires "
+                              f"search.budget_counts: valid (got {search.budget_counts!r}) so the "
+                              f"resolved draw/attempt cap is bounded")
+    if retry_infra or strict_resample:
+        if search.restarts is not None:
+            raise ConfigError(f"{where}:search: search.restarts is not supported with "
+                              f"search.error_policy: retry_same_then_stop / resample_strict until "
+                              f"strict chronology is tested")
+        if search.surrogate == "lq":
+            raise ConfigError(f"{where}:search: the lq surrogate is not supported with "
+                              f"search.error_policy: retry_same_then_stop / resample_strict")
+        if search.pipeline_prefetch and search.pipeline_prefetch > 0:
+            raise ConfigError(f"{where}:search: search.pipeline_prefetch is not supported with "
+                              f"search.error_policy: retry_same_then_stop / resample_strict")
+        if retry_infra and search.budget_counts != "valid" and search.max_attempts is None:
+            raise ConfigError(f"{where}:search.error_policy: retry_same_then_stop needs a bounded "
+                              f"policy: set search.budget_counts: valid or an explicit "
+                              f"search.max_attempts draw cap")
     objective_version = int((raw.get("objective") or {}).get("version", 1))
     objective_params = None
     if objective_version == 4:
