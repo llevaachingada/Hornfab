@@ -7,7 +7,7 @@ Local-only, added 2026-11-13 ~21Z (**solver speed plan; no GitHub issue state ch
 - Open: A1 solve/mesh cache does not check solver/mesher SHA (blocker before any fork pin bump). Plan: SOLVER_SPEED_IMPLEMENTATION_PLAN_2026-11-13 A1.
 - Open: `_seam_check` probes above the lower band's rated limit (A2).
 - Open: fused CUDA allocates unused GPU identity cache (A3 fork patch, G2 validation).
-- Open: no per-region mesh fidelity status (A4); no dense-memory feasibility preflight (A5).
+- Open: no per-region mesh fidelity status (A4); dense-memory preflight module landed, wiring pending (A5.4); beat_metal unmapped.
 - Closed (rev 2 review): replay v5-v7 already refuses explicitly (`R_REPLAY_VERSION_UNSUPPORTED`); former A6 dropped.
 - Open: A1b `compare/` and `tools/m3_measurement_pack.py` build their own cache roots; route through `solve.cache.namespace()` after A1.
 

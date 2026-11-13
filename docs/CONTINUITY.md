@@ -1,6 +1,11 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-13 (~22Z) - A5 FEASIBILITY PREFLIGHT LANDED (offline, not wired)
+
+- `hornlab_search/solve/feasibility.py` + `tests/test_solve_feasibility.py` (4 pass, conftest skipped: no numpy in cloud env).
+- Not wired into evaluate.py yet (A5.4 after A2). Open question: beat_metal raises ValueError (unmapped).
+
 ## 2026-11-13 (~22Z) - SOLVER SPEED PLAN REV 2: SENIOR REVIEW AGAINST CODE (docs only)
 
 - Plan rewritten as step-by-step packages a subagent can follow, checked against `a783b88`.
