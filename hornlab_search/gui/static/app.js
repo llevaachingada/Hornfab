@@ -3991,41 +3991,628 @@ function eliteGateChips(c, labels) {
     : `<span class="pill bad">${esc(labels[k] || k)} fail</span>`).join(" ");
 }
 
-function renderElitesHtml(data) {
-  if (!data || data.available !== true) {
-    return `<div class="card"><p class="muted">${esc((data && data.note)
-      || "No gate-audit CSV found under docs/data/gate_audit_*/ or scratch/gate_audit_*/.")}
-      This page lists the designs a committed gate audit recorded — an absent audit is an empty
-      catalog, never invented data.</p></div>`;
+// Owner redesign (2026-11-13): a non-technical reader sees the horn, the brief it came from and
+// its typology first. The audit plumbing (CSV paths, coverage cells) stays off the card. The whole
+// page is client-side over ONE /api/elites payload; horn thumbnails stream in from
+// /api/design/<run>/<hash> only for cards that actually reach the viewport.
+
+const ELITE_PAGE = 24;
+const ELITE_THUMB_CONCURRENCY = 4;
+const ELITE_THUMB_CACHE_MAX = 600;
+
+function _eliteText(v) {
+  return v == null ? "" : String(v).trim();
+}
+
+function _eliteHz(v) {
+  const x = Number(v);
+  if (!Number.isFinite(x)) return "";
+  if (x >= 1000) return `${(x / 1000).toFixed(x >= 10000 ? 0 : 1)} kHz`;
+  return `${Math.round(x)} Hz`;
+}
+
+/** Card title: typology label first, then the horn's size limit when the brief carries one. */
+function eliteHeadline(c) {
+  const card = c || {};
+  const family = _eliteText(card.family) || "Typology not recorded";
+  const t = card.brief_target || null;
+  const mm = t && t.max_mm != null && Number.isFinite(Number(t.max_mm)) ? Math.round(Number(t.max_mm)) : null;
+  return mm == null ? family : `${family} · ≤ ${mm} mm`;
+}
+
+/** The brief's design constraints, in the order a reader needs them: name, coverage, band. */
+function eliteConstraintLine(c) {
+  const card = c || {};
+  const t = card.brief_target || null;
+  const bits = [];
+  const brief = _eliteText(card.brief);
+  if (brief) bits.push(brief);
+  if (t) {
+    const h = Number(t.h_deg), v = Number(t.v_deg);
+    const hs = t.h_deg != null && Number.isFinite(h) ? `${Math.round(h)}°` : "";
+    const vs = t.v_deg != null && Number.isFinite(v) ? `${Math.round(v)}°` : "";
+    if (hs && vs) bits.push(`${hs}×${vs} H×V`);
+    else if (hs) bits.push(`${hs} H`);
+    else if (vs) bits.push(`${vs} V`);
+    const lo = _eliteHz(t.f_lo_hz), hi = _eliteHz(t.f_hi_hz);
+    if (lo && hi) bits.push(`${lo}–${hi}`);
+    else if (lo) bits.push(`from ${lo}`);
+    else if (hi) bits.push(`up to ${hi}`);
   }
-  const labels = data.labels || {};
-  const cards = (data.cards || []).map(c => {
-    const jv = c.run_linked
-      ? ` <small class="muted mono" style="font-size:0.68rem">${esc(jVersionLabel(c))}</small>` : "";
-    const cellObj = c.coverage_cell && typeof c.coverage_cell === "object" ? c.coverage_cell : null;
-    const cell = cellObj
-      ? `Coverage cell: ${esc((cellObj.descriptors || {}).h || "h")} ${fmt(cellObj.h_center, 0)}° × ${esc((cellObj.descriptors || {}).v || "v")} ${fmt(cellObj.v_center, 0)}°`
-      : null;
-    const runLink = c.run_linked && c.run
-      ? `<a class="btn" href="#/run/${esc(c.run)}">Open run →</a>` : "";
-    return `<article class="card">
-      <div class="eyebrow">${esc(c.tier || "audit")} · ${esc(c.run || "?")}</div>
-      <div class="mono" style="font-size:1.05rem">${esc(c.hash)}</div>
-      <div style="margin:4px 0"><b>${fmt(c.J, 3)}</b>${jv}
-        ${c.pass_all === true ? pill("all gates pass", "good")
-          : c.pass_all === false ? pill("not all gates pass", "warn") : ""}</div>
-      <div style="margin:4px 0">${eliteGateChips(c, labels)}</div>
-      ${cell ? `<div class="muted" style="margin:4px 0">${esc(cell)}</div>` : ""}
-      <div class="muted" style="font-size:0.75rem">Source: ${esc(c.source || "")}</div>
-      <div class="btn-row" style="margin-top:8px">${runLink}</div>
-    </article>`;
+  return bits.length ? bits.join(" · ") : "No brief recorded";
+}
+
+function _eliteOrder(a, b) {
+  const ja = Number(a && a.J), jb = Number(b && b.J);
+  const va = Number.isFinite(ja) ? ja : Infinity;
+  const vb = Number.isFinite(jb) ? jb : Infinity;
+  return va === vb ? 0 : va - vb;
+}
+
+function _eliteFilterArgs(state) {
+  const data = (state && state.data) || {};
+  return {
+    brief: (state && state.brief) || "",
+    family: (state && state.family) || "",
+    mode: (state && state.mode) === "all" ? "all" : "best",
+    knownBriefs: data.briefs || [],
+    knownFamilies: data.families || [],
+  };
+}
+
+/** Option names for a filter. Only values that actually have a browsable design are offered
+ *  (39 briefs with "(0)" would be exactly the noise the redesign removes); the payload's own
+ *  name lists are the fallback for a catalog whose designs carry no counts at all. */
+function _eliteNames(counts, extra) {
+  const names = Object.keys(counts).sort((a, b) => a.localeCompare(b));
+  if (names.length) return names;
+  const out = new Set();
+  for (const name of (Array.isArray(extra) ? extra : [])) {
+    const s = _eliteText(name);
+    if (s) out.add(s);
+  }
+  return [...out].sort((a, b) => a.localeCompare(b));
+}
+
+/** Client-side catalog filter + grouping. Pure: cards + filters in, ordered rows + counts out.
+ *  mode "best": a brief (no typology) shows the best design per typology, a typology (no brief)
+ *  the best per brief, and neither/both keep the plain best-first list. mode "all": every match,
+ *  best first. Only all-gate-pass rows are browsable (the whole audited set is the fallback when
+ *  an audit records no pass_all column at all). */
+function elitesFilter(cards, opts = {}) {
+  const all = Array.isArray(cards) ? cards : [];
+  const brief = _eliteText(opts.brief);
+  const family = _eliteText(opts.family);
+  const mode = opts.mode === "all" ? "all" : "best";
+  const passing = all.filter(c => c && c.pass_all === true);
+  const base = (passing.length ? passing : all.slice()).slice().sort(_eliteOrder);
+  const byBrief = {};
+  const byFamily = {};
+  const catalogFamilies = new Set();
+  for (const c of all) {
+    const f = _eliteText(c && c.family);
+    if (f) catalogFamilies.add(f);
+  }
+  for (const c of base) {
+    const b = _eliteText(c.brief);
+    const f = _eliteText(c.family);
+    if (b) byBrief[b] = (byBrief[b] || 0) + 1;
+    if (f) byFamily[f] = (byFamily[f] || 0) + 1;
+  }
+  const matched = base.filter(c =>
+    (!brief || _eliteText(c.brief) === brief) && (!family || _eliteText(c.family) === family));
+  const group = mode === "best" && brief && !family ? "family"
+              : mode === "best" && family && !brief ? "brief" : null;
+  let rows = matched;
+  if (group) {
+    const seen = new Set();
+    rows = [];
+    for (const c of matched) {
+      const key = _eliteText(c[group]) || "(none)";
+      if (seen.has(key)) continue;
+      seen.add(key);
+      rows.push(c);
+    }
+  }
+  return {
+    rows, matched: matched.length, group, mode,
+    total: all.length, pool: base.length, pass: passing.length,
+    briefs: _eliteNames(byBrief, opts.knownBriefs),
+    families: _eliteNames(byFamily, opts.knownFamilies),
+    catalogFamilies: catalogFamilies.size,
+    byBrief, byFamily,
+  };
+}
+
+function eliteCountsText(r) {
+  if (!r) return "";
+  const n = v => Number(v || 0).toLocaleString();
+  const k = Number(r.catalogFamilies != null ? r.catalogFamilies : (r.families || []).length);
+  let s;
+  if (r.pass > 0) {
+    s = `${n(r.pass)} passing ${r.pass === 1 ? "design" : "designs"} · ` +
+        `${n(r.total)} audited across ${n(k)} ${k === 1 ? "typology" : "typologies"}`;
+  } else {
+    s = `${n(r.total)} audited ${r.total === 1 ? "design" : "designs"} · no all-gate pass recorded`;
+  }
+  if (r.rows && r.rows.length !== r.pool) s += ` · showing ${n(r.rows.length)}`;
+  else if (r.matched != null && r.matched !== r.pool) s += ` · ${n(r.matched)} match`;
+  return s;
+}
+
+function elitesNoteText(state, r) {
+  if (!r) return "";
+  const n = v => Number(v || 0).toLocaleString();
+  if (!r.rows.length) return "";
+  if (r.group === "family") {
+    const k = r.rows.length;
+    const head = `Best design in each typology for this brief — ${n(k)} ` +
+                 `${k === 1 ? "typology" : "typologies"}`;
+    return k === r.matched ? `${head}.` : `${head}, chosen from ${n(r.matched)} passing designs.`;
+  }
+  if (r.group === "brief") {
+    const k = r.rows.length;
+    const head = `Best design for each brief — ${n(k)} ${k === 1 ? "brief" : "briefs"}`;
+    return k === r.matched ? `${head}.` : `${head}, chosen from ${n(r.matched)} passing designs.`;
+  }
+  const page = Math.max(ELITE_PAGE, Number((state && state.page) || ELITE_PAGE));
+  if (r.rows.length > page) return `Showing ${n(page)} of ${n(r.rows.length)} designs, best first.`;
+  if (r.rows.length !== r.pool || (state && (state.brief || state.family))) {
+    return `${n(r.rows.length)} designs match, best first.`;
+  }
+  return `${n(r.rows.length)} designs, best first.`;
+}
+
+function _eliteCoverageTitle(c) {
+  const cell = c && c.coverage_cell;
+  if (!cell || typeof cell !== "object") return "";
+  const h = Number(cell.h_center), v = Number(cell.v_center);
+  const hs = Number.isFinite(h) ? `${Math.round(h)}°` : "";
+  const vs = Number.isFinite(v) ? `${Math.round(v)}°` : "";
+  if (!hs && !vs) return "";
+  return `coverage cell ${hs || "–"} × ${vs || "–"}`;
+}
+
+// ── Horn thumbnails: isometric outline from the design's own wall profiles ────────────────
+
+/** One profile ([[z_mm, r_mm]...]) → n radius samples ordered throat → mouth. Full-mesh
+ *  profiles list nodes from both wall sides, so the radius is the absolute wall distance. */
+function _eliteProfileSeries(arr, n = 26) {
+  const raw = [];
+  if (Array.isArray(arr)) {
+    for (const p of arr) {
+      if (!p || p.length < 2) continue;
+      const z = Number(p[0]), r = Number(p[1]);
+      if (!Number.isFinite(z) || !Number.isFinite(r)) continue;
+      raw.push([z, Math.abs(r)]);
+    }
+  }
+  if (raw.length < 2) return null;
+  raw.sort((a, b) => a[0] - b[0]);
+  const z0 = raw[0][0], z1 = raw[raw.length - 1][0];
+  if (!(z1 > z0)) return null;
+  const half = (z1 - z0) / (n - 1) / 2;
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const z = z0 + (z1 - z0) * i / (n - 1);
+    let sum = 0, count = 0, near = 0, nearD = Infinity;
+    for (const [rz, rr] of raw) {
+      const d = Math.abs(rz - z);
+      if (d <= half) { sum += rr; count++; }
+      if (d < nearD) { nearD = d; near = rr; }
+    }
+    out.push(count ? sum / count : near);
+  }
+  return out;
+}
+
+/** Simple horn glyph for a design with no stored geometry (or an unreadable one). */
+function eliteThumbPlaceholder(opts = {}) {
+  const W = Math.max(80, Math.round(Number(opts.w) || 220));
+  const H = Math.max(60, Math.round(Number(opts.h) || 140));
+  const mx = W * 0.68, my = H * 0.62, depth = W * 0.42;
+  const dx = depth * Math.cos(Math.PI / 6), dy = depth * Math.sin(Math.PI / 6);
+  const tx = mx - dx, ty = my - dy;
+  const rx = W * 0.12, ry = H * 0.22;
+  return `<svg class="elite-horn elite-horn-empty" viewBox="0 0 ${W} ${H}"
+      preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
+    <ellipse class="elite-svg-glyph" cx="${mx.toFixed(1)}" cy="${my.toFixed(1)}"
+      rx="${rx.toFixed(1)}" ry="${ry.toFixed(1)}" />
+    <path class="elite-svg-glyph" d="M${(mx - rx).toFixed(1)} ${(my - ry).toFixed(1)}
+      L${tx.toFixed(1)} ${ty.toFixed(1)} M${(mx - rx).toFixed(1)} ${(my + ry).toFixed(1)}
+      L${tx.toFixed(1)} ${ty.toFixed(1)}" />
+    <text class="elite-svg-note" x="${(W / 2).toFixed(1)}" y="${(H - 12).toFixed(1)}"
+      text-anchor="middle">no geometry stored</text>
+  </svg>`;
+}
+
+/** Isometric horn from the profile: mouth ellipse + silhouette + a few interior ribs.
+ *  `profile` is /api/design's `profile` ({h:[[z_mm,r_mm]...], v:[...], kind}). Pure. */
+function eliteThumbSvg(profile, opts = {}) {
+  const W = Math.max(80, Math.round(Number(opts.w) || 220));
+  const H = Math.max(60, Math.round(Number(opts.h) || 140));
+  const p = profile || {};
+  const hs = _eliteProfileSeries(p.h);
+  const vs = _eliteProfileSeries(p.v);
+  if (!hs && !vs) return eliteThumbPlaceholder({ w: W, h: H });
+  const hN = (hs || vs).slice();
+  const vN = (vs || hs).slice();
+  const n = Math.min(hN.length, vN.length);
+  let rmax = 0;
+  for (let i = 0; i < n; i++) rmax = Math.max(rmax, hN[i], vN[i]);
+  if (!(rmax > 0)) return eliteThumbPlaceholder({ w: W, h: H });
+  // A horn is widest at its mouth: flip the series when the mesh stores z the other way round.
+  const head = hN[0] + hN[1] + hN[2] + vN[0] + vN[1] + vN[2];
+  const tail = hN[n - 1] + hN[n - 2] + hN[n - 3] + vN[n - 1] + vN[n - 2] + vN[n - 3];
+  if (head > tail) { hN.reverse(); vN.reverse(); }
+  const mx = W * 0.66, my = H * 0.66;
+  const depth = W * 0.44;
+  const dx = depth * Math.cos(Math.PI / 6);      // isometric 30° skew
+  const dy = depth * Math.sin(Math.PI / 6);
+  const sx = W * 0.245, sy = H * 0.265;
+  const ring = i => {
+    const t = i / (n - 1);
+    return {
+      cx: mx - dx * (1 - t), cy: my - dy * (1 - t),
+      rx: Math.max(1.5, (Math.max(0, hN[i]) / rmax) * sx),
+      ry: Math.max(1.5, (Math.max(0, vN[i]) / rmax) * sy),
+    };
+  };
+  const top = [], bot = [];
+  for (let i = 0; i < n; i++) {
+    const r = ring(i);
+    top.push(`${i ? "L" : "M"}${r.cx.toFixed(1)} ${(r.cy - r.ry).toFixed(1)}`);
+    bot.push(`${r.cx.toFixed(1)} ${(r.cy + r.ry).toFixed(1)}`);
+  }
+  const body = `${top.join(" ")} ${bot.reverse().map(q => `L${q}`).join(" ")} Z`;
+  const throat = ring(0);
+  const mouth = ring(n - 1);
+  const ribs = [0.28, 0.55, 0.78].map(t => {
+    const r = ring(Math.max(0, Math.min(n - 1, Math.round(t * (n - 1)))));
+    return `<ellipse class="elite-svg-rib" cx="${r.cx.toFixed(1)}" cy="${r.cy.toFixed(1)}" ` +
+           `rx="${r.rx.toFixed(1)}" ry="${r.ry.toFixed(1)}" />`;
   }).join("");
-  const srcs = (data.sources || []).map(s => `<span class="mono muted" style="font-size:0.75rem">${esc(s)}</span>`).join(", ");
-  return `<div>
-      <div class="eyebrow">Catalog</div><h2>Elites</h2>
-      <p class="muted">${esc(data.n_pass ?? 0)} of ${esc((data.cards || []).length)} audit rows passed all gates · ${srcs}</p>
+  return `<svg class="elite-horn" viewBox="0 0 ${W} ${H}"
+      preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
+    <path class="elite-svg-body" d="${body}" />
+    <ellipse class="elite-svg-throat" cx="${throat.cx.toFixed(1)}" cy="${throat.cy.toFixed(1)}"
+      rx="${throat.rx.toFixed(1)}" ry="${throat.ry.toFixed(1)}" />
+    ${ribs}
+    <ellipse class="elite-svg-mouth" cx="${mouth.cx.toFixed(1)}" cy="${mouth.cy.toFixed(1)}"
+      rx="${mouth.rx.toFixed(1)}" ry="${mouth.ry.toFixed(1)}" />
+    <ellipse class="elite-svg-rim" cx="${mouth.cx.toFixed(1)}" cy="${mouth.cy.toFixed(1)}"
+      rx="${(mouth.rx * 0.82).toFixed(1)}" ry="${(mouth.ry * 0.82).toFixed(1)}" />
+  </svg>`;
+}
+
+const _eliteThumbCache = new Map();     // "run/hash" -> svg markup
+const _eliteThumbWaiters = new Map();   // "run/hash" -> [elements awaiting that thumbnail]
+const _eliteThumbQueue = [];
+let _eliteThumbActive = 0;
+let _eliteThumbObserver = null;
+
+function _eliteThumbKey(run, hash) { return `${run}/${hash}`; }
+
+function _eliteThumbRemember(run, hash, svg) {
+  const key = _eliteThumbKey(run, hash);
+  if (_eliteThumbCache.size >= ELITE_THUMB_CACHE_MAX && !_eliteThumbCache.has(key)) {
+    const oldest = _eliteThumbCache.keys().next().value;
+    if (oldest != null) _eliteThumbCache.delete(oldest);
+  }
+  _eliteThumbCache.set(key, svg);
+}
+
+function _eliteThumbPaint(el, svg, failed) {
+  if (!el || el.isConnected === false) return;
+  if (el.classList) {
+    el.classList.remove("is-loading");
+    el.classList.add(failed ? "is-failed" : "is-ready");
+  }
+  if (el.setAttribute) {
+    el.setAttribute("aria-busy", "false");
+    el.setAttribute("aria-label", failed ? "no geometry stored" : "isometric horn outline");
+  }
+  el.innerHTML = svg;
+}
+
+function _eliteThumbFlush(key, svg, failed) {
+  const els = _eliteThumbWaiters.get(key) || [];
+  _eliteThumbWaiters.delete(key);
+  for (const el of els) _eliteThumbPaint(el, svg, failed);
+}
+
+function _eliteThumbPump() {
+  while (_eliteThumbActive < ELITE_THUMB_CONCURRENCY && _eliteThumbQueue.length) {
+    const job = _eliteThumbQueue.shift();
+    _eliteThumbActive++;
+    const url = `/api/design/${encodeURIComponent(job.run)}/${encodeURIComponent(job.hash)}?tier=screen`;
+    api(url)
+      .then(d => {
+        const prof = d && d.profile;
+        const svg = prof && (Array.isArray(prof.h) || Array.isArray(prof.v))
+          ? eliteThumbSvg(prof) : eliteThumbPlaceholder();
+        _eliteThumbRemember(job.run, job.hash, svg);
+        _eliteThumbFlush(job.key, svg, false);
+      })
+      .catch(() => {
+        const svg = eliteThumbPlaceholder();
+        _eliteThumbRemember(job.run, job.hash, svg);
+        _eliteThumbFlush(job.key, svg, true);
+      })
+      .finally(() => {
+        _eliteThumbActive = Math.max(0, _eliteThumbActive - 1);
+        _eliteThumbPump();
+      });
+  }
+}
+
+function _eliteThumbRequest(el, run, hash) {
+  const key = _eliteThumbKey(run, hash);
+  const hit = _eliteThumbCache.get(key);
+  if (hit) { _eliteThumbPaint(el, hit, false); return; }
+  const waiting = _eliteThumbWaiters.get(key);
+  if (waiting) { waiting.push(el); return; }
+  _eliteThumbWaiters.set(key, [el]);
+  _eliteThumbQueue.push({ key, run, hash });
+  _eliteThumbPump();
+}
+
+/** Re-arm the lazy loader after every render/page: cached thumbnails paint at once, the rest
+ *  wait for the IntersectionObserver (or load immediately where it does not exist). */
+function armEliteThumbs(scope) {
+  if (_eliteThumbObserver) {
+    try { _eliteThumbObserver.disconnect(); } catch { /* detached document */ }
+  }
+  if (!scope || !scope.querySelectorAll) return;
+  const pending = [];
+  for (const el of scope.querySelectorAll("[data-elite-thumb]")) {
+    const run = el.getAttribute ? el.getAttribute("data-run") : null;
+    const hash = el.getAttribute ? el.getAttribute("data-hash") : null;
+    if (!run || !hash) continue;
+    const hit = _eliteThumbCache.get(_eliteThumbKey(run, hash));
+    if (hit) { _eliteThumbPaint(el, hit, false); continue; }
+    pending.push([el, run, hash]);
+  }
+  if (!pending.length) return;
+  if (typeof IntersectionObserver === "undefined") {
+    for (const [el, run, hash] of pending) _eliteThumbRequest(el, run, hash);
+    return;
+  }
+  if (!_eliteThumbObserver) {
+    _eliteThumbObserver = new IntersectionObserver((entries, obs) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        obs.unobserve(entry.target);
+        const el = entry.target;
+        _eliteThumbRequest(el, el.getAttribute("data-run"), el.getAttribute("data-hash"));
+      }
+    }, { rootMargin: "240px 0px" });
+  }
+  for (const [el] of pending) _eliteThumbObserver.observe(el);
+}
+
+// ── Card / page markup ───────────────────────────────────────────────────
+
+function eliteCardHtml(c, labels) {
+  const card = c || {};
+  const title = eliteHeadline(card);
+  const constraint = eliteConstraintLine(card);
+  const hash = card.hash == null ? "" : String(card.hash);
+  const drawable = !!(card.run_linked && card.run && card.has_mesh);
+  const cellNote = _eliteCoverageTitle(card);
+  const chips = eliteGateChips(card, labels || {})
+    || (card.pass_all === true ? pill("all gates pass", "good") : "");
+  const j = card.J != null ? `<span class="elite-j">J ${fmt(card.J, 3)}</span>` : "";
+  const jver = card.run_linked && card.objective_version != null
+    ? ` <small class="elite-jver">${esc(jVersionLabel(card))}</small>` : "";
+  const open = card.run_linked && card.run
+    ? `<a class="btn elite-open" href="#/run/${esc(card.run)}">Open run →</a>` : "";
+  const thumb = drawable
+    ? `<div class="elite-thumb is-loading" data-elite-thumb data-run="${esc(card.run)}"
+         data-hash="${esc(hash)}" role="img" aria-busy="true" aria-label="horn outline, loading"></div>`
+    : `<div class="elite-thumb is-empty" role="img" aria-label="no geometry stored">${eliteThumbPlaceholder()}</div>`;
+  return `<article class="card elite-card">
+    ${thumb}
+    <div class="elite-copy">
+      <h3 class="elite-title">${esc(title)}</h3>
+      <p class="elite-constraints"><span class="elite-lab">Constraints</span>${esc(constraint)}</p>
+      <div class="pill-row elite-gates">${chips}</div>
+      <div class="elite-foot">
+        <span class="elite-hash mono" title="design id${cellNote ? " · " + esc(cellNote) : ""}">${esc(hash.slice(0, 8))}</span>
+        ${j}${jver}
+        ${open}
+      </div>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px">${cards}</div>`;
+  </article>`;
+}
+
+function elitesResultsHtml(state, r) {
+  const res = r || { rows: [], total: 0, pool: 0, matched: 0 };
+  if (!state.data || state.data.available !== true) return "";
+  if (!res.rows.length) {
+    const msg = res.pool === 0
+      ? "These audits recorded no designs yet."
+      : (state.brief || state.family)
+        ? "No designs match these filters — clear one to see more."
+        : "None of these designs passed every gate.";
+    return `<div class="card elites-empty"><p class="muted" style="margin:0">${esc(msg)}</p></div>`;
+  }
+  const shown = res.rows.slice(0, Math.max(ELITE_PAGE, Number(state.page) || ELITE_PAGE));
+  const labels = (state.data && state.data.labels) || {};
+  const more = res.rows.length > shown.length
+    ? `<div class="elites-more"><button type="button" id="elites-showmore">Show more designs ` +
+      `(${shown.length} of ${res.rows.length})</button></div>`
+    : "";
+  return `<div class="elites-grid">${shown.map(c => eliteCardHtml(c, labels)).join("")}</div>${more}`;
+}
+
+function elitesHeadHtml(state) {
+  const r = state && state.result;
+  return `<header class="elites-head">
+    <div class="eyebrow">Horn designs</div>
+    <h2>Elites</h2>
+    <p class="lede">Designs that passed every gate in the latest audits — best first.</p>
+    <div class="elites-counts" id="elites-counts">${r ? esc(eliteCountsText(r)) : ""}</div>
+  </header>`;
+}
+
+function elitesBarHtml(state) {
+  const r = state.result || { briefs: [], families: [], byBrief: {}, byFamily: {}, pool: 0 };
+  const n = v => Number(v || 0).toLocaleString();
+  const briefOpts = r.briefs.map(b =>
+    `<option value="${esc(b)}"${state.brief === b ? " selected" : ""}>${esc(b)} (${n(r.byBrief[b])})</option>`).join("");
+  const familyOpts = r.families.map(f =>
+    `<option value="${esc(f)}"${state.family === f ? " selected" : ""}>${esc(f)} (${n(r.byFamily[f])})</option>`).join("");
+  const briefOff = r.briefs.length ? "" : ` disabled title="No brief names were recorded for these designs"`;
+  const familyOff = r.families.length ? "" : ` disabled title="No typology names were recorded for these designs"`;
+  const best = state.mode !== "all";
+  return `<div class="filter-bar elites-bar">
+    <label class="filter-label" for="elites-brief">Brief</label>
+    <select id="elites-brief" aria-label="filter designs by brief"${briefOff}>
+      <option value="">All briefs (${n(r.pool)})</option>${briefOpts}
+    </select>
+    <label class="filter-label" for="elites-family">Typology</label>
+    <select id="elites-family" aria-label="filter designs by typology"${familyOff}>
+      <option value="">All typologies (${n(r.pool)})</option>${familyOpts}
+    </select>
+    <div class="elites-mode" role="group" aria-label="which designs to show">
+      <button type="button" data-elite-mode="best" aria-pressed="${best ? "true" : "false"}"
+        title="One best design per typology (per brief when a typology is picked)">Best picks</button>
+      <button type="button" data-elite-mode="all" aria-pressed="${best ? "false" : "true"}"
+        title="Every passing design, best first">All passing</button>
+    </div>
+    <button type="button" id="elites-refresh" aria-label="reload the designs from the latest audits">Refresh</button>
+    <button type="button" id="elites-clear" aria-label="clear the brief and typology filters"${state.brief || state.family || state.mode === "all" ? "" : " hidden"}>Clear</button>
+  </div>`;
+}
+
+/** The whole Elites page as HTML (plain unavailable state, or header + filters + first page).
+ *  Pure: one payload in, one string out. `opts` doubles as the live view state (result cached). */
+function renderElitesHtml(data, opts = {}) {
+  if (!data || data.available !== true) {
+    return `<div class="stack elites-view" style="gap:14px">
+      ${elitesHeadHtml({ data: data || {} })}
+      <div class="card"><p class="muted" style="margin:0">No gate audit has been recorded yet, so
+        there are no elite designs to show. They appear once an audit of a search run exists.</p></div>
+    </div>`;
+  }
+  const state = {
+    data,
+    brief: _eliteText(opts.brief),
+    family: _eliteText(opts.family),
+    mode: opts.mode === "all" ? "all" : "best",
+    page: Math.max(ELITE_PAGE, Number(opts.page) || ELITE_PAGE),
+    busy: false,
+  };
+  state.result = elitesFilter(data.cards || [], _eliteFilterArgs(state));
+  if (opts && typeof opts === "object") opts.result = state.result;
+  return `<div class="stack elites-view" style="gap:14px">
+    ${elitesHeadHtml(state)}
+    ${elitesBarHtml(state)}
+    <p class="elites-note" id="elites-note" role="status" aria-live="polite">${esc(elitesNoteText(state, state.result))}</p>
+    <div id="elites-results">${elitesResultsHtml(state, state.result)}</div>
+  </div>`;
+}
+
+function _paintEliteResults(ROOT, state) {
+  state.result = elitesFilter((state.data && state.data.cards) || [], _eliteFilterArgs(state));
+  const q = sel => (ROOT.querySelector ? ROOT.querySelector(sel) : null);
+  const results = q("#elites-results");
+  const note = q("#elites-note");
+  const counts = q("#elites-counts");
+  const clear = q("#elites-clear");
+  if (results) results.innerHTML = elitesResultsHtml(state, state.result);
+  if (note) note.textContent = elitesNoteText(state, state.result);
+  if (counts) counts.textContent = eliteCountsText(state.result);
+  if (clear) clear.hidden = !(state.brief || state.family || state.mode === "all");
+  armEliteThumbs(results);
+}
+
+function _wireEliteControls(ROOT, state) {
+  const q = sel => (ROOT.querySelector ? ROOT.querySelector(sel) : null);
+  const selBrief = q("#elites-brief");
+  const selFamily = q("#elites-family");
+  const btnBest = q('[data-elite-mode="best"]');
+  const btnAll = q('[data-elite-mode="all"]');
+  const btnClear = q("#elites-clear");
+  const btnRefresh = q("#elites-refresh");
+  const results = q("#elites-results");
+  const pageNow = () => Math.max(ELITE_PAGE, Number(state.page) || ELITE_PAGE);
+
+  if (selBrief) selBrief.addEventListener("change", () => {
+    state.brief = selBrief.value || "";
+    state.page = ELITE_PAGE;
+    _paintEliteResults(ROOT, state);
+  });
+  if (selFamily) selFamily.addEventListener("change", () => {
+    state.family = selFamily.value || "";
+    state.page = ELITE_PAGE;
+    _paintEliteResults(ROOT, state);
+  });
+  const setMode = mode => {
+    if (state.mode === mode) return;
+    state.mode = mode;
+    state.page = ELITE_PAGE;
+    if (btnBest) btnBest.setAttribute("aria-pressed", mode === "best" ? "true" : "false");
+    if (btnAll) btnAll.setAttribute("aria-pressed", mode === "all" ? "true" : "false");
+    _paintEliteResults(ROOT, state);
+  };
+  if (btnBest) btnBest.addEventListener("click", () => setMode("best"));
+  if (btnAll) btnAll.addEventListener("click", () => setMode("all"));
+  if (btnClear) btnClear.addEventListener("click", () => {
+    state.brief = "";
+    state.family = "";
+    state.mode = "best";
+    state.page = ELITE_PAGE;
+    if (selBrief) selBrief.value = "";
+    if (selFamily) selFamily.value = "";
+    if (btnBest) btnBest.setAttribute("aria-pressed", "true");
+    if (btnAll) btnAll.setAttribute("aria-pressed", "false");
+    _paintEliteResults(ROOT, state);
+  });
+  if (results) results.addEventListener("click", e => {
+    const target = e.target;
+    const more = target && target.closest ? target.closest("#elites-showmore") : null;
+    if (!more) return;
+    state.page = pageNow() + ELITE_PAGE;
+    _paintEliteResults(ROOT, state);
+    const again = q("#elites-showmore");
+    if (again) again.focus();
+  });
+  if (btnRefresh) btnRefresh.addEventListener("click", async () => {
+    if (state.busy) return;
+    state.busy = true;
+    btnRefresh.disabled = true;
+    btnRefresh.textContent = "Refreshing…";
+    btnRefresh.setAttribute("aria-busy", "true");
+    try {
+      const data = await api("/api/elites");
+      if (ROOT !== currentRoot()) return;
+      state.data = data;
+      const probe = elitesFilter((data && data.cards) || [], _eliteFilterArgs(state));
+      if (state.brief && !probe.briefs.includes(state.brief)) state.brief = "";
+      if (state.family && !probe.families.includes(state.family)) state.family = "";
+      state.page = ELITE_PAGE;
+      mountElites(ROOT, state);
+      showToast("Elite designs refreshed");
+    } catch (e) {
+      showToast("Could not refresh elites: " + e.message, "error");
+    } finally {
+      state.busy = false;
+      if (btnRefresh.isConnected !== false) {
+        btnRefresh.disabled = false;
+        btnRefresh.textContent = "Refresh";
+        btnRefresh.removeAttribute("aria-busy");
+      }
+    }
+  });
+}
+
+function mountElites(ROOT, state) {
+  ROOT.innerHTML = renderElitesHtml(state.data, state);
+  if (!state.data || state.data.available !== true) return;
+  _wireEliteControls(ROOT, state);
+  armEliteThumbs(ROOT.querySelector ? ROOT.querySelector("#elites-results") : null);
 }
 
 async function viewElites() {
@@ -4039,7 +4626,8 @@ async function viewElites() {
     return;
   }
   if (ROOT !== currentRoot()) return;
-  ROOT.innerHTML = `<div class="stack" style="gap:22px">${renderElitesHtml(data)}</div>`;
+  const state = { data, brief: "", family: "", mode: "best", page: ELITE_PAGE, busy: false };
+  mountElites(ROOT, state);
 }
 
 // Exported pure helpers for offline node tests (tests/test_gui_brief_authoring.py) — the
@@ -4055,7 +4643,9 @@ export { f0KpiHtml, mountingRankWarnHtml, seedDerivationHtml, objectiveVersionOp
          objectiveVersionCounts, verifyBlockHtml, sortRunsForTable, gateAuditHtml, J_VERSION_BANNER, gateAuditSplit, budgetKpi,
          runIsLive, runModeMatches, runModeBadgesHtml, runParentLineHtml, laneChipsHtml, compareOptionsHtml, homeLeadersFilter, homeLeadersHtml, verificationCardHtml };
 
-export { lanesPanelHtml, verdictChipHtml, eliteGateChips };
+export { lanesPanelHtml, verdictChipHtml, eliteGateChips, elitesFilter, eliteHeadline,
+         eliteConstraintLine, eliteThumbSvg, eliteThumbPlaceholder, eliteCountsText,
+         elitesNoteText, eliteCardHtml, elitesResultsHtml, renderElitesHtml };
 
 export { analysisParameterStudyHtml, analysisSourceFidelityHtml, studyCaveatHz };
 // Lane B visual-report builders (offline render checks; pure HTML, no DOM).

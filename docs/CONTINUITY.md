@@ -1,5 +1,39 @@
 # CONTINUITY
 
+
+## 2026-11-13 - ELITES TAB REDESIGN (owner request: readable by a non-technical user)
+
+- **Server (`gui/data.py`):** `elites_catalog()` cards now carry `brief`, `family` (typology) and
+  `brief_target` `{h_deg, v_deg, f_lo_hz, f_hi_hz, max_mm}` read from the run's `config.yaml`
+  (`target.coverage_h_deg/coverage_v_deg/band_lo_hz/band_hi_hz`, `envelope.max_mouth_w_mm/
+  max_mouth_h_mm/max_depth_mm`; max of the envelope dims becomes `max_mm`). Per-run config reads stay
+  memoized in `_elite_run_info` (once per run, not per card). Payload gains sorted distinct
+  `briefs`/`families`. All existing fields, sort order, dedupe, cache stamp and `available=False`
+  shape unchanged. Live check: 8,490 cards, families `[FREEFORM, OSSE, R-OSSE]`, a card carries
+  `brief_target {50°, 50°, 300–8000 Hz, 650 mm}`.
+- **Page (`static/app.js`, `static/app.css`):** replaced the audit-dump UI. New header
+  ("Horn designs / Elites / Designs that passed every gate … best first") with plain counts; the CSV
+  source list and per-card `Source: …` lines are gone; the hash is now an 8-char chip, not the title.
+  Cards show a **lazy isometric horn thumbnail** (drawn in SVG from the design's stored `profile`
+  h/v polylines via `/api/design/<run>/<hash>?tier=screen`; IntersectionObserver, 4 concurrent,
+  cached; placeholder when no geometry), a headline (`OSSE · ≤ 650 mm`), a constraints line
+  (`brief · 50°×50° H×V · 300 Hz–8.0 kHz`), gate pills, J and Open run. Filter bar: Brief and
+  Typology selects with counts, **Best picks / All passing** toggle (brief → best per typology,
+  typology → best per brief, both/neither → best-first list), Refresh (re-pulls `/api/elites`) and
+  Clear. Paginated 24 → 48 → … instead of rendering all 8,490 cards. Dark/light, 1500/900 px, theme
+  vars only. New pure helpers exported for node tests (`elitesFilter`, `eliteHeadline`,
+  `eliteConstraintLine`, `eliteThumbSvg`, `eliteCountsText`, `elitesNoteText`, `eliteCardHtml`,
+  `elitesResultsHtml`, `elitesNoteText`).
+- **Tests:** `tests/test_gui_elites_catalog.py` (payload) and `tests/test_gui_elites_ui.py`
+  (node-stub: best-per-family/best-per-brief/all, counts, empty states, SVG builder, page shape —
+  asserts no `docs/data`/`gate_audit`/`Source:` text). Full `-k gui` suite: 451 passed, 1 failed —
+  the failure is the **pre-existing, other-lane pin** `test_gui_freq_range.py::
+  test_feasibility_summary_and_objective_suffix` (shipped wording "V short: needs 498 mm" vs the pin's
+  old "does not fit"); its correction is in flight in the main checkout and is committed with this
+  merge so `main` stays green.
+- Screenshots (worktree server on 8801): `%TEMP%\opencode\elites_after\` — dark/light at 1500/900,
+  brief/family/both/all filters, page 2, empty state, card zoom.
+
 ## 2026-11-13 - REV2 IMPLEMENTATION PASS (additive; nothing launched)
 
 - Status table for every Rev2 item: `docs/research/QUEUE_PLAN_REV2_2026-11-13.md`.

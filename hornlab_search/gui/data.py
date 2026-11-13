@@ -4140,11 +4140,41 @@ _ELITES_CACHE: dict[str, tuple] = {}
 
 def _elite_run_info(run_dir: Path | None) -> tuple:
     """One run's facts for the elites cards, read once per catalog build (not once per CSV row):
-    (has_run, objective version, {design_hash: lowest-objective atlas cell}, atlas descriptors)."""
+    (has_run, objective version, {design_hash: lowest-objective atlas cell}, atlas descriptors,
+    brief name, family label, brief target constraints).
+
+    ``brief`` / ``family`` mirror ``_run_summary``: the brief's ``name`` from the run's
+    ``config.yaml``, and ``config.family`` with the first ndjson row's ``family`` as the fallback.
+    ``brief_target`` reads the brief's real YAML nesting — ``target.coverage_h_deg``,
+    ``target.coverage_v_deg``, ``target.band_lo_hz``, ``target.band_hi_hz`` and the envelope's
+    ``max_mouth_w_mm`` / ``max_mouth_h_mm`` / ``max_depth_mm`` — as the flat card shape
+    ``{h_deg, v_deg, f_lo_hz, f_hi_hz, max_mm}``. ``max_mm`` is the largest envelope dimension
+    (the brief's max outer size); every key is ``None`` when the brief lacks it. A missing run or
+    a run without a brief gets ``None`` for all three, never a guess."""
     has_run = bool(run_dir and (run_dir / "search.ndjson").is_file())
     if not has_run:
-        return False, None, {}, {}
+        return False, None, {}, {}, None, None, None
     version = run_objective_version(run_dir)
+    cfg = _config(run_dir)
+    brief = cfg.get("brief") if isinstance(cfg.get("brief"), dict) else None
+    brief_name = brief.get("name") if brief else None
+    family = cfg.get("family")
+    if not family:
+        rows = read_ndjson(run_dir / "search.ndjson")
+        family = rows[0].get("family") if rows else None
+    brief_target = None
+    if brief is not None:
+        target = _as_dict(brief.get("target"))
+        envelope = _as_dict(brief.get("envelope"))
+        dims = [envelope.get(k) for k in ("max_mouth_w_mm", "max_mouth_h_mm", "max_depth_mm")]
+        dims = [float(v) for v in dims if isinstance(v, (int, float)) and not isinstance(v, bool)]
+        brief_target = {
+            "h_deg": target.get("coverage_h_deg"),
+            "v_deg": target.get("coverage_v_deg"),
+            "f_lo_hz": target.get("band_lo_hz"),
+            "f_hi_hz": target.get("band_hi_hz"),
+            "max_mm": max(dims) if dims else None,
+        }
     best: dict[str, dict] = {}
     descs: dict = {}
     heat = _read_json(run_dir / "archive_heatmap.json")
@@ -4157,7 +4187,7 @@ def _elite_run_info(run_dir: Path | None) -> tuple:
             h = c.get("design_hash")
             if h is not None and (h not in best or key(c) < key(best[h])):
                 best[h] = c
-    return True, version, best, descs
+    return True, version, best, descs, brief_name, family, brief_target
 
 
 def elites_catalog(runs: Path, root: Path) -> dict:
@@ -4219,7 +4249,7 @@ def elites_catalog(runs: Path, root: Path) -> dict:
             info = run_info.get(run_id)
             if info is None:
                 info = run_info[run_id] = _elite_run_info(run_dir)
-            has_run, version, heat_cells, descs = info
+            has_run, version, heat_cells, descs, brief, family, brief_target = info
             cell = None
             hit = heat_cells.get(h) if has_run else None
             if hit is not None:
@@ -4231,6 +4261,7 @@ def elites_catalog(runs: Path, root: Path) -> dict:
                 "run_linked": has_run, "objective_version": version if has_run else None,
                 "coverage_cell": cell,
                 "has_mesh": bool(run_dir and (run_dir / "designs" / h / "mesh.msh").is_file()),
+                "brief": brief, "family": family, "brief_target": brief_target,
             }))
             if pass_all is True:
                 n_pass += 1
@@ -4239,8 +4270,11 @@ def elites_catalog(runs: Path, root: Path) -> dict:
     gate_keys: set[str] = set()
     for c in cards:
         gate_keys |= set(c["gates"])
+    briefs = sorted({c["brief"] for c in cards if c["brief"] is not None}, key=str)
+    families = sorted({c["family"] for c in cards if c["family"] is not None}, key=str)
     out = {"available": True, "sources": sorted({c["source"] for c in cards}),
            "labels": {k: GATE_AUDIT_LABELS.get(k, k) for k in sorted(gate_keys)},
-           "cards": cards, "n_pass": n_pass}
+           "cards": cards, "n_pass": n_pass,
+           "briefs": briefs, "families": families}
     _ELITES_CACHE[str(runs)] = (stamp, out)
     return out
