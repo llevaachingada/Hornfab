@@ -1,6 +1,41 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-13 (~21:1xZ) - LOCAL-WORK AUDIT: MAIN CLEAN AND PUSHED; LOCAL-ONLY REFS, ORPHANED STASHES AND THE HOME-LEVEL REPO RECORDED (docs only, no code change)
+
+- **Audit trigger (owner):** study all uncommitted local work that needs to reach GitHub. Snapshot
+  2026-11-13 15:54 local (~20:54Z): `main == origin/main == adc1e15`, working tree clean. The same-day
+  work was landed by the integrator while the audit ran: `8f5ae9e` (home 80x60/700 brief + cells, S5
+  seed packs) and `adc1e15` (Elites thumbnails are frozen shaded 3D renders, three.js). Nothing in the
+  canonical checkout is uncommitted.
+- **Verification run during the audit (read-only):** `node --check hornlab_search/gui/static/app.js`
+  exit 0; `.venv\Scripts\python.exe -m pytest tests/test_gui_elites_ui.py
+  tests/test_tools_analysis_seed_pack.py -q -p no:cacheprovider` -> **49 passed, exit 0**.
+- **Not on GitHub and outside `main` (recorded for senior review; NOT acted on):** 57 local-only branch
+  refs (28 `backup/consolidation/*`, 9 `swarm/*`, 8 `meh/*`, 7 `feat/gui-*`, `pr/22`, `pr/23`,
+  `integ/pr17`, `consolidation/local-main-2026-11-12`, `backup/pre-consolidation-main`,
+  `dev/fused-cuda-pin`). Only FOUR commits are reachable from no remote: `bf7f003`
+  (`backup/consolidation/T`; main's copy of the plan is newer, so superseded), `aa9011c`
+  (`backup/consolidation/L1`; only adds `.git-commit-msg-l3.txt`), `1078cd2` (`feat/gui-integration`
+  merge; both parents already in main, a topology artifact), `65c03de` (`dev/fused-cuda-pin`; a
+  `file://` fork pin whose message says dev-only, never main).
+- **Orphaned stash-like commits (unreachable; `git stash list` is empty):** `f4bddb6` (old Elites
+  app.js/app.css WIP, 676-line payload), `3bdb50e` (`bo_sensitivity.py` +1605), `1f6750d` (swarm-H
+  rescue), `0d3c8c1` (profiles). `e3081e3`, `2d445ab`, `08f849e` are byte-identical to main. The four
+  differing snapshots are the only copy of those states and are GC-eligible.
+- **Home-level repo `C:\Users\hunte\Hrns` (owner decision 2026-11-13: leave alone, log only):** 0
+  commits, branch `master`, no `.gitignore`, remote `https://github.com/llevaachingada/Hrns.git`
+  (reachable but empty), 30,123 untracked paths at audit time - 30,066 under `oc-wt/` because each
+  worktree's `.git` is a file, so git recurses into 28 full checkouts. Created by Codex turn-diff
+  checkpoints (`refs/codex/turn-diffs/...`; still zero commits). **Never `git add -A` there.**
+- **BO-on-main policy note:** the earlier entry says BO/studies work goes to a local `bo-study` branch
+  "(not pushed)", but no such branch exists and the BO commits are already public on `origin/main`
+  (`6b41e0e`, `5fb0d5d`, `9b798f5`, `c7dd6a3`, `d9493cb`, `44f1c69`). No going-forward policy chosen;
+  decisions listed in `docs/ISSUES.md` and `NOTES_FOR_SENIOR.md`.
+- **Doc gaps found:** `adc1e15` updated CONTINUITY but not `docs/ISSUES.md` (the push rule asks for
+  both); `oc-wt/bo-study/CONTINUATION_SLICE_MAP_2026-11-13.md` is the only bo-study handoff not mirrored
+  under `docs/research/bo_study/` (the other eight are identical or superseded there).
+
 ## 2026-11-13 (~20:1xZ) - HOME 80x60/700 DAY QUEUE, CP-7b PARITY CLOSED, BO/CORE COMMIT SPLIT
 
 - **Owner direction (decisions delegated):** printed horns for the living room; ~80x60 is inspiration only;

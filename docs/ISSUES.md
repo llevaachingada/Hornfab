@@ -3,6 +3,29 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-13 (**Elites tab redesigned for non-technical readers: brief/typology constraints and isometric horn thumbnails, best-per-typology / best-per-brief browsing, paginated 24 at a time, CSV-path noise removed; payload extended with brief/family/brief_target; bo-study-v1.1 final offline integration landed (M2 sensitivity/proposal evidence, immutable run package + `hornlab-search study` CLI, durable proposal-cadence recovery, B8 adversarial full loop); profile-outline thumbnail geometry fixed after live check (closed outline split at the mouth rim, outer wall kept); card hierarchy tuned per owner (constraint line + score largest, gate pills smaller); no GitHub issue state changed**).
 
+Local-only, added 2026-11-13 (**local-work audit; no GitHub issue state changed**):
+- Resolved: the canonical checkout is fully committed and pushed (`main == origin/main == adc1e15`):
+  `8f5ae9e` home 80x60/700 brief + cells and S5 seed packs; `adc1e15` Elites thumbnails as frozen
+  shaded 3D renders. Audit verification: `node --check app.js` exit 0; 49 tests passed
+  (`tests/test_gui_elites_ui.py`, `tests/test_tools_analysis_seed_pack.py`).
+- Open (SENIOR DECISION): 57 local-only branch refs; only 4 commits are on no remote (`bf7f003`
+  backup/consolidation/T - superseded; `aa9011c` backup/consolidation/L1 - commit-msg scratch only;
+  `1078cd2` feat/gui-integration - merge whose parents are already in main; `65c03de`
+  dev/fused-cuda-pin - `file://` fork pin, dev-only). Push-as-archive, leave, or prune?
+- Open (SENIOR DECISION): four orphaned stash-like commits are the only copy of their states and are
+  GC-eligible (`f4bddb6` old Elites app.js/css, `3bdb50e` bo_sensitivity, `1f6750d` swarm-H rescue,
+  `0d3c8c1` profiles). Rescue into one archive ref, or let GC take them?
+- Open (SENIOR DECISION): `C:\Users\hunte\Hrns` is a 0-commit home-level repo (remote
+  `llevaachingada/Hrns`, empty) with 30,123 untracked paths, 30,066 of them under `oc-wt/` because
+  worktree `.git` files make git recurse into 28 full checkouts. Owner chose "leave alone, log only".
+  Needs a `.gitignore` or removal before any tooling runs `git add -A` there.
+- Open (SENIOR DECISION): BO/studies code is already public on `origin/main` although an earlier
+  CONTINUITY entry said it would live on a local `bo-study` branch (which does not exist). Accept, or
+  route future BO work to a local branch (no history rewrite)?
+- Open: `adc1e15` did not update this file (push rule asks for CONTINUITY + ISSUES together).
+  `oc-wt/bo-study/CONTINUATION_SLICE_MAP_2026-11-13.md` is not mirrored under
+  `docs/research/bo_study/`; commit it (BO-local or docs) or leave it as a local handoff.
+
 Local-only, added 2026-11-13 ~20Z (**no GitHub issue state changed**):
 - Resolved: CP-7b GPU/CPU lane parity, closed in aggregate (4 pairs, max 0.079 dB).
 - Open: StudyRunBridge launch idempotency is in-memory; make it durable before any real launcher is wired.

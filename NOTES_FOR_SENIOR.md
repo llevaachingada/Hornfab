@@ -790,3 +790,87 @@ Follow-up to the 2026-11-12 GUI entry above. Repo state re-verified first: GUI r
 - Deferred, still open by owner choice: Kill-run/Stop typed-confirm (touched NOTHING this pass - kill affordances byte-identical), WP-D2 gate display, D4 elites catalog page, W6 balloon port, P8d compose classes, P9 sandbox, leaderboard latency, rate smoothing beyond session bound.
 - Note for the next agent: the two-lane live data now flows purely from artifacts (locks, queue logs, job logs, ndjson rows, verify subdirs); no new collection was added, no solver or queue code was touched; GUI restart after gui/* edits only (proven safe twice today).
 
+## 2026-11-13 (~21:1xZ) — local-work / push audit: decisions requested (NO code changed)
+
+Audit of "everything uncommitted that must reach GitHub", run read-only against
+`C:/Users/hunte/Hrns/hornlab-search`. Snapshot: `HEAD == origin/main == adc1e15`, working tree clean
+(`git status --porcelain=v1 -uall` empty). Everything in the canonical checkout is committed and
+pushed, including `8f5ae9e` (home 80x60/700 brief+cells, S5 seed packs) and `adc1e15` (Elites 3D
+thumbnails). Audit checks: `node --check hornlab_search/gui/static/app.js` -> exit 0;
+`.venv\Scripts\python.exe -m pytest tests/test_gui_elites_ui.py tests/test_tools_analysis_seed_pack.py
+-q -p no:cacheprovider` -> 49 passed, exit 0.
+
+What remains OUTSIDE `main` is below. Owner answered "not sure" on all three decisions; nothing was
+pushed, deleted, or ref-created by the auditor.
+
+### 1) Commits reachable from no remote (only four)
+Command: `git -C C:/Users/hunte/Hrns/hornlab-search log --oneline --branches --not --remotes`
+
+| commit | branch | content | assessment |
+|---|---|---|---|
+| `bf7f003` | `backup/consolidation/T` | `docs/GUI_VERIFY_VIEW_PLAN_2026-11-12.md` (56,123 B) + `docs/INDEX.md` | Superseded: main's copy is 56,955 B (newer). Preserve only if the older plan wording is wanted. |
+| `aa9011c` | `backup/consolidation/L1` | adds `.git-commit-msg-l3.txt` (28 lines, commit-message scratch) | No product content. |
+| `1078cd2` | `feat/gui-integration` | merge of `79edc8d` (day-queue) into `6534a69`; subject: session-aware runs/status + verify re-solves + CPU-lane cards | Both parents are already ancestors of `main` (`git merge-base --is-ancestor 79edc8d main` and `6534a69 main` both true) -> merge topology only, no unique content found. |
+| `65c03de` | `dev/fused-cuda-pin` | `TOOLCHAIN.md` + `pyproject.toml` pinning `hornlab-beat-bem` to a `file://` fused-cuda fork @ `fa99ee5` | Commit message: "DEV BRANCH ONLY - never main; GitHub hosting = owner action". Useless to others until the fork repo is hosted and the URL changed. |
+
+Options: (a) leave all four local; (b) push an archive branch/ref pointing at the two worth keeping
+(`git push origin bf7f003:refs/heads/archive/consolidation-T` style) after an explicit decision; (c)
+prune after confirming (b) is not needed. Do NOT merge `65c03de` into main.
+
+### 2) 57 local-only branch refs (no upstream)
+Command: `git -C ... for-each-ref --format='%(refname:short)|%(upstream:short)' refs/heads`
+53 of the 57 tips are already contained in `main` (only `backup/consolidation/L1`,
+`backup/consolidation/T`, `feat/gui-integration`, `dev/fused-cuda-pin` are not). Groups:
+`backup/consolidation/*` (28), `swarm/*` (9), `meh/*` (8), `feat/gui-*` (7), `pr/22`, `pr/23`,
+`integ/pr17`, `consolidation/local-main-2026-11-12`, `backup/pre-consolidation-main`,
+`dev/fused-cuda-pin`.
+Options: leave as local history (cheap), or delete the 53 contained tips after a fresh
+`git branch --merged main` audit. Pushing them all to GitHub is ref noise and not recommended.
+
+Already on GitHub but not merged to main: `beta-fixes`, `docs/data-ga-plan-2026-11-12-v2`,
+`swarm/F-2026-10-31`, `swarm/H-2026-10-31` (remote-only decision; no action needed to "not lose" them).
+
+### 3) Orphaned stash-like commits (GC-eligible)
+`git stash list` is empty, but `git fsck --lost-found` shows `WIP on <branch>` commits. Blob checks
+against `main`:
+- `f4bddb6` "WIP on feat/gui-elites" - app.js/app.css payload 676 insertions; blobs differ from main
+  (`app.js` 706a700... vs 55e3c85...). Superseded by `c13ee3a`/`1e6b738`/`adc1e15`, but it is the only
+  copy of that exact WIP state.
+- `3bdb50e` "WIP on main: 79b6651" - `tools/analysis/bo_sensitivity.py` +1605; differs from main
+  (c6df0e9... vs 2207eca...). Predates `c7dd6a3` (M2 sensitivity), so almost certainly an earlier draft.
+- `1f6750d` "wip(swarm H): uncommitted lane work rescued" - `search/evaluate.py` differs from main;
+  `dataset/record.py` identical.
+- `0d3c8c1` "wip(swarm F): rescued untracked profiles" - `objective_v4.yaml` identical;
+  `fused_cuda.yaml` and `objective_v5.yaml` differ from main.
+- `e3081e3`, `2d445ab`, `08f849e` are byte-identical to main -> safe.
+Rescue command shape if wanted (one archive ref, local or pushed):
+`git branch archive/stash-snapshots-2026-11-13 f4bddb6` (repeat per commit), then push only if the
+owner wants them public. Otherwise `git gc` eventually drops them; nothing else references them.
+
+### 4) Home-level repo `C:/Users/hunte/Hrns` (owner: leave alone, log only)
+State: 0 commits (`git rev-list --all --count` -> 0), branch `master`, **no `.gitignore`**, remote
+`https://github.com/llevaachingada/Hrns.git` (exists, `git ls-remote origin` returns no refs),
+30,123 untracked paths. 30,066 of them are under `oc-wt/` because each worktree's `.git` is a FILE, so
+git recurses into 28 complete checkouts; `hornlab-search/` itself is one entry (nested repo).
+The two refs `refs/codex/turn-diffs/checkpoints/...` are Codex undo checkpoints (trees, no commits).
+RISK: any tool/agent that runs `git add -A` at the home root would stage the worktrees ~28x plus
+`AppData/`, `forks/`, `consolidation-backup-*/`. Recommended (not done): add a `.gitignore`
+(`oc-wt/`, `AppData/`, `hornlab-search/`, `forks/`, `consolidation-backup-*/`, `*.tar`) or delete the
+`.git` directory; only if the owner wants a workspace archive should a curated subset be committed.
+
+### 5) BO-on-main policy mismatch
+An earlier CONTINUITY entry (2026-11-13 ~20:1x) says "BO/studies work goes to the local branch
+`bo-study` (not pushed); core goes to main", but no `bo-study` branch exists (`git rev-parse --verify
+bo-study` fails) and the BO commits are already public on `origin/main`: `6b41e0e`, `5fb0d5d`,
+`9b798f5`, `c7dd6a3`, `d9493cb`, `44f1c69`. Rewriting published history is worse than accepting it.
+Decision needed: (a) accept BO on main; (b) keep published commits, route only FUTURE BO/studies work
+to a new local branch; (c) something else. The owner's words were "We can keep the Bayesian stuff in a
+local fork, but everything else needs to go to main" (2026-11-13 ~14:19 local).
+
+### 6) Small doc-rule gaps found
+- `adc1e15` (pushed) touched `docs/CONTINUITY.md` but not `docs/ISSUES.md`; the push rule asks for both.
+- `oc-wt/bo-study/CONTINUATION_SLICE_MAP_2026-11-13.md` is the only bo-study handoff doc not mirrored
+  under `docs/research/bo_study/`; the other eight are identical to (or older than) the repo copies.
+- `docs/INDEX.md`/`CODE_MAP.md` have no row for the new Elites 3D helpers (`_eliteProfileAxis`,
+  `eliteHornGeometry`, `_eliteGLRender`); acceptable under the "new module" wording, noted for review.
+
