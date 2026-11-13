@@ -1,0 +1,90 @@
+# fid_ang145: REV2 matched ablation / fidelity ladder (2026-11-13). Pinned bench, budget 1, no CMA.
+# Plan: docs/research/QUEUE_PLAN_REV2_2026-11-13.md. Mechanism experiment, NOT a product candidate.
+name: fid_ang145
+family: FREEFORM
+brief_file: ../../briefs/organic_rollback_1in.yaml
+generator:
+  name: grid
+  rows:
+    type: salmon_elliptical
+  n_phi: 25
+  n_s: 32
+  wall_thickness_mm: 3.0
+  span: half
+seed_params:
+  g_fc_h_hz: 800.0
+  g_fc_v_hz: 1100.0
+  g_T: 0.8
+  g_stop_deg: 150.0
+  g_ripple_lobes: 12
+  g_ripple_amp_mm: 0.0
+  g_ripple_start: 0.8
+bounds:
+  g_fc_h_hz:
+    lo: 800.0
+    hi: 800.0
+    search: false
+  g_fc_v_hz:
+    lo: 1100.0
+    hi: 1100.0
+    search: false
+  g_T:
+    lo: 0.8
+    hi: 0.8
+    search: false
+  g_stop_deg:
+    lo: 150.0
+    hi: 150.0
+    search: false
+  g_ripple_lobes:
+    lo: 12
+    hi: 12
+    search: false
+  g_ripple_amp_mm:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  g_ripple_start:
+    lo: 0.8
+    hi: 0.8
+    search: false
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 0.0
+mesh:
+  epw: 8.0
+  quadrants: '14'
+  dof_cap_screen: 5000
+  dof_cap_verify: 7000
+  dof_cap_final: 8900
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 145
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+search:
+  algorithm: cma
+  sigma0: 0.25
+  seed: 1234
+  budget: 1
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+description: 'Fidelity: 145 polar angles (base 73).'

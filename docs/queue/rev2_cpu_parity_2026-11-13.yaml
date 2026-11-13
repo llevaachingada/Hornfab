@@ -1,0 +1,5 @@
+night: rev2_cpu_parity_2026-11-13
+lane: cpu
+jobs:
+  - {id: cpu_abl_s0_control, kind: search, config: examples/typologies/ablation_2026-11-13/abl_s0_control.yaml, budget: 1, mode: screen, backend: beat_cpu, cache_dir: cache_cpu, dataset_dir: dataset_cpu, timeout_s: 7200}
+  - {id: cpu_abl_m_rate4, kind: search, config: examples/typologies/ablation_2026-11-13/abl_m_rate4.yaml, budget: 1, mode: screen, backend: beat_cpu, cache_dir: cache_cpu, dataset_dir: dataset_cpu, timeout_s: 7200}

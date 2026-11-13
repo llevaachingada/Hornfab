@@ -1,5 +1,14 @@
 # CONTINUITY
 
+## 2026-11-13 - REV2 QUEUE PREPARED (NOT LAUNCHED): MATCHED ABLATION + FIDELITY LADDER + CPU/GPU PARITY
+
+- From the owner's Senior Implementation Plan Rev2 (used as a guide). Plan, deviations and decision rule:
+  `docs/research/QUEUE_PLAN_REV2_2026-11-13.md`.
+- 12 pinned budget-1 configs in `examples/typologies/ablation_2026-11-13/` (all `load_config` ok);
+  night files `docs/queue/rev2_gpu_ablation_2026-11-13.yaml` (13 jobs) and `rev2_cpu_parity_2026-11-13.yaml`
+  (2 jobs), both `--dry-run` clean. Not mesh-checked (cloud session has no gmsh): run `tools/shape_check.py` first.
+- No code, default, objective, contract or live-queue change. Large product CMA still deferred per Rev2.
+
 
 ## 2026-11-13 (~00:2xZ) - GUI WORK MERGED INTO LOCAL MAIN; OWNER'S 8765 GUI RESTARTED ON IT; PUSHED (feat/gui-integration fully landed)
 
