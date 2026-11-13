@@ -1,0 +1,23 @@
+{
+  "tool": "parameter_study",
+  "schema_version": 0,
+  "schema": "parameter-study-v0",
+  "generated_utc": "2026-11-10T09:00:00Z",
+  "task_identity": {
+    "config": "legacy/old_config.yaml",
+    "objective_version": 3
+  },
+  "controls": [
+    {"key": "L_mm", "state": "searched", "unit": "mm", "value": 100.0}
+  ],
+  "designs": [
+    {
+      "design_hash": "legacy-old-hash",
+      "params": {"L_mm": 100.0},
+      "j": 9.9,
+      "di": "cuts_estimate",
+      "size": {"width_mm": 111.0}
+    }
+  ],
+  "limitations": ["legacy artifact that predates the frozen M1 schema"]
+}

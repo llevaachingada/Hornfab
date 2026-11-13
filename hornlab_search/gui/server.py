@@ -31,12 +31,21 @@ _LOG = logging.getLogger(__name__)
 
 
 class App:
-    def __init__(self, root: Path, runs: Path | None = None, analysis_dir: Path | None = None):
+    def __init__(self, root: Path, runs: Path | None = None, analysis_dir: Path | None = None,
+                 study_service=None, study_jobs=None):
         self.root = root.resolve()
         self.runs = (runs or self.root / "runs").resolve()
         self.analysis_dir = (Path(analysis_dir) if analysis_dir is not None
                              else self.runs / "analysis").resolve()
         self.jobs = JobManager(self.root, self.runs)
+        self._study_service = study_service
+        self._study_jobs = study_jobs
+
+    def _studies(self):
+        if self._study_service is None:
+            from hornlab_search.studies.service import StudyService
+            self._study_service = StudyService(self.runs / "studies")
+        return self._study_service
 
     # GET routes return (status, json-able) ; raise FileNotFoundError / ValueError for 404 / 400
     def get(self, path: str, q: dict) -> object:
@@ -46,6 +55,47 @@ class App:
             return D.status(self.root, self.runs)
         if head == "lanes":
             return D.lane_status(self.runs)
+        if head == "studies":
+            from .data_studies import build_study_view, study_summaries
+            service = self._studies()
+            if len(parts) == 1:
+                return {"studies": study_summaries(service.list_studies(limit=50))}
+            if len(parts) == 2:
+                return service.get_study(parts[1])
+            if len(parts) == 3 and parts[2] == "jobs":
+                return {"jobs": service.list_cpu_jobs(parts[1], limit=50)}
+            if len(parts) == 3:
+                study = service.get_study(parts[1])
+                artifact = None
+                if parts[2] == "overview":
+                    artifact = {"status": "partial", "revision": study["revision"],
+                                "data": {"spec": study["spec"], "readiness": service.readiness(parts[1])},
+                                "provenance": {"spec_hash": study["spec_hash"]}}
+                elif parts[2] in {"data", "explain", "propose", "execute", "decide"}:
+                    kind = {"data": "snapshot", "explain": "analysis", "propose": "proposal",
+                            "execute": "results", "decide": "decision"}[parts[2]]
+                    meta = service.get_artifact_metadata(parts[1], kind)
+                    if meta.get("status") == "available":
+                        raw = service.store.read_artifact(meta["sha256"])
+                        if len(raw) > 128_000:
+                            artifact = {"status": "partial", "revision": study["revision"],
+                                        "data": {}, "provenance": {"sha256": meta["sha256"]},
+                                        "reasons": ["Artifact exceeds the bounded panel size."]}
+                        else:
+                            try:
+                                content = json.loads(raw)
+                            except (UnicodeDecodeError, json.JSONDecodeError):
+                                content = None
+                            artifact = {"status": "unknown", "revision": study["revision"],
+                                        "data": content if isinstance(content, dict) else {},
+                                        "provenance": {"sha256": meta["sha256"]},
+                                        "reasons": ["Artifact semantics and dependencies are not yet validated."]}
+                    elif meta.get("status") in {"stale", "unavailable"}:
+                        artifact = {"status": "stale" if meta["status"] == "stale" else "failed",
+                                    "revision": study["revision"], "data": {},
+                                    "provenance": {"sha256": meta.get("sha256")},
+                                    "reasons": [meta.get("reason", "Artifact is not available.")]}
+                return build_study_view(study, parts[2], artifact).to_dict()
         if head == "runs":
             return D.list_runs(self.runs)
         if head == "analysis" and len(parts) == 1:
@@ -180,6 +230,21 @@ class App:
     def post(self, path: str, body: dict) -> object:
         parts = [unquote(p) for p in path.strip("/").split("/")][1:]
         head = parts[0] if parts else ""
+        if head == "studies":
+            from hornlab_search.studies.schema import StudyError
+            service = self._studies()
+            if len(parts) == 1:
+                return service.create_study(body.get("spec"), body.get("idempotency_key"), body.get("parent_id"))
+            if len(parts) == 3 and parts[2] == "revise":
+                return service.revise(parts[1], body.get("spec"), body.get("expected_revision"), body.get("idempotency_key"))
+            if len(parts) == 3 and parts[2] == "decide":
+                return service.decide(parts[1], body.get("expected_revision"), body.get("outcome"),
+                                      body.get("rationale"), body.get("idempotency_key"))
+            if len(parts) == 3 and parts[2] == "jobs":
+                from .study_jobs import StudyCpuJobs
+                bridge = self._study_jobs or StudyCpuJobs(service)
+                return bridge.submit(parts[1], body)
+            raise StudyError("unsupported study operation")
         if head == "save-bounds":
             # Deliberately OUTSIDE the generic handler try: a malformed body raises ValueError
             # and reaches do_POST's 400 mapping, while an unknown config (FileNotFoundError)
@@ -253,12 +318,18 @@ def make_handler(app: App, port: int):
                     return self._json(200, app.get(u.path, parse_qs(u.query)))
                 if u.path.startswith("/runs/"):
                     return self._report(u.path)
+                if u.path.startswith("/analysis/"):
+                    return self._analysis_file(u.path)
                 return self._static(u.path)
             except FileNotFoundError as exc:
                 return self._json(404, {"error": f"not found: {exc}"})
             except ValueError as exc:
                 return self._json(400, {"error": str(exc)})
             except Exception as exc:  # noqa: BLE001
+                from hornlab_search.studies.schema import StudyError
+                from .study_jobs import StudyJobError
+                if isinstance(exc, (StudyError, StudyJobError)):
+                    return self._json(getattr(exc, "status_code", getattr(exc, "http_status", 400)), {"error": str(exc)})
                 traceback.print_exc()
                 return self._json(500, {"error": f"{type(exc).__name__}: {exc}"})
 
@@ -273,6 +344,12 @@ def make_handler(app: App, port: int):
             raw = self.rfile.read(n) if n else b""       # always drain: replying early aborts the socket on Windows
             if not self._host_ok():
                 return
+            origin = self.headers.get("Origin")
+            if origin:
+                parsed = urlparse(origin)
+                if (parsed.scheme != "http" or parsed.netloc not in allowed_hosts
+                        or parsed.path not in ("", "/") or parsed.query or parsed.fragment):
+                    return self._json(403, {"error": "bad Origin header"})
             if not self.headers.get("Content-Type", "").startswith("application/json"):
                 return self._json(415, {"error": "POST must be application/json"})
             try:
@@ -284,6 +361,13 @@ def make_handler(app: App, port: int):
                 return self._json(404, {"error": f"not found: {exc}"})
             except ValueError as exc:
                 return self._json(400, {"error": str(exc)})
+            except Exception as exc:  # noqa: BLE001
+                from hornlab_search.studies.schema import StudyError
+                from .study_jobs import StudyJobError
+                if isinstance(exc, (StudyError, StudyJobError)):
+                    return self._json(getattr(exc, "status_code", getattr(exc, "http_status", 400)), {"error": str(exc)})
+                traceback.print_exc()
+                return self._json(500, {"error": f"{type(exc).__name__}: {exc}"})
 
         def _static(self, path: str) -> None:
             rel = "index.html" if path in ("", "/") else path.lstrip("/")
@@ -294,6 +378,43 @@ def make_handler(app: App, port: int):
             if p.suffix == ".js":
                 ctype = "text/javascript"
             self._send(200, p.read_bytes(), ctype + ("; charset=utf-8" if ctype.startswith("text") else ""))
+
+        def _analysis_file(self, path: str) -> None:
+            """Only these kinds of analysis files are served: <set>/<name> and
+            <set>/<section>/<name>, where <name> ends in .png/.md/.json/.html. The set and
+            section ids use D.ANALYSIS_SET_ID semantics and the file name uses
+            D.ANALYSIS_FILE_NAME; the resolved base must stay inside app.analysis_dir (same
+            guard pattern as analysis_report). No directory listing, no generic static handler."""
+            parts = [unquote(x) for x in path.strip("/").split("/")]
+            if len(parts) == 3:
+                set_id, section_id, name = parts[1], None, parts[2]
+            elif len(parts) == 4:
+                set_id, section_id, name = parts[1], parts[2], parts[3]
+            else:
+                raise FileNotFoundError(path)
+            if not D.ANALYSIS_SET_ID.match(set_id):
+                raise FileNotFoundError(path)
+            if section_id is not None and not D.ANALYSIS_SET_ID.match(section_id):
+                raise FileNotFoundError(path)
+            if not D.ANALYSIS_FILE_NAME.match(name):
+                raise FileNotFoundError(path)
+            if Path(name).suffix.lower() not in D.ANALYSIS_FILE_SUFFIXES:
+                raise FileNotFoundError(path)
+            base = app.analysis_dir / (set_id if set_id != "." else "")
+            if section_id is not None:
+                base = base / section_id
+            try:
+                root_res = app.analysis_dir.resolve()
+                base_res = base.resolve()
+            except OSError:
+                raise FileNotFoundError(path) from None
+            if base_res != root_res and root_res not in base_res.parents:
+                raise FileNotFoundError(path)
+            p = base / name
+            if not p.is_file():
+                raise FileNotFoundError(path)
+            ctype = mimetypes.guess_type(p.name)[0] or "application/octet-stream"
+            self._send(200, p.read_bytes(), ctype)
 
         def _report(self, path: str) -> None:
             """Only three kinds of run files are served: runs/<id>/report.html,

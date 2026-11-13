@@ -3917,21 +3917,50 @@ def lane_status(runs: Path) -> dict:
 # ``<tool>.json`` through verbatim. Unknown fields ride along (the client ignores them);
 # missing fields render as "not present".
 
-#: The tool JSONs Group A writes (schema revision 2026-11-12). Files with other stems are
-#: disclosed as ``extra_tools`` but never parsed.
+#: The tool JSONs Group A writes (schema revision 2026-11-12) plus the two frozen M1 study
+#: artifacts (``bo-study-v1.1``, PARENT_M0_FREEZE.md §8). Files with other stems are disclosed
+#: as ``extra_tools`` but never parsed.
 ANALYSIS_TOOL_JSONS = ("convergence", "seed_variance", "sensitivity", "links", "walls",
-                       "ab_compare", "lane_parity", "term_balance", "fidelity", "report_day")
+                       "ab_compare", "lane_parity", "term_balance", "fidelity", "report_day",
+                       "parameter_study", "source_fidelity")
 #: REPORT.md is passed through as text (rendered in the page), capped for the API body.
 ANALYSIS_REPORT_MD_MAX = 200_000
 #: One report-set folder name under the analysis root ("." = the root itself).
 ANALYSIS_SET_ID = re.compile(r"^[A-Za-z0-9_.\-]{1,80}$")
+#: One served analysis file name (no separators, so it can never escape its base folder).
+ANALYSIS_FILE_NAME = re.compile(r"^[A-Za-z0-9_.\-]{1,120}$")
+#: The only analysis file kinds the GUI serves (reports, payloads, section PNGs).
+ANALYSIS_FILE_SUFFIXES = (".png", ".md", ".json", ".html")
 
 
 def analysis_sets(analysis_dir: Path) -> list[dict]:
     """The report sets found under ``analysis_dir``: the folder itself (id ``.``) plus every
     immediate subdirectory that holds ``*.json`` or ``REPORT.md`` output. A set carries the
     tool JSONs it holds (parsed only for their ``tool``/``generated_utc`` header — the reports
-    themselves are served verbatim by :func:`analysis_report`). Nothing found = empty list."""
+    themselves are served verbatim by :func:`analysis_report`). Nothing found = empty list.
+
+    ``report_day.py`` writes each section into its own subdirectory, so one level of section
+    subdirectories is also discovered: a subdirectory that contains a recognised
+    ``<tool>.json`` counts once toward ``n_sections`` and contributes that tool to the union
+    list ``tools`` (in ``ANALYSIS_TOOL_JSONS`` order). The ``.`` entry is the analysis root
+    itself; its immediate subdirectories are report sets, never sections. ``n_errors`` counts
+    the ``status == "error"`` entries of ``<set>/report_day.json``; a missing/unreadable/
+    malformed report contributes 0 and never raises."""
+    def _section_dirs(base: Path) -> list[Path]:
+        try:
+            children = sorted((p for p in base.iterdir() if p.is_dir()), key=lambda p: p.name)
+        except OSError:
+            return []
+        return [sub for sub in children
+                if any((sub / f"{tool}.json").is_file() for tool in ANALYSIS_TOOL_JSONS)]
+
+    def _n_errors(base: Path) -> int:
+        d = _read_json(base / "report_day.json")
+        sections = d.get("sections") if isinstance(d, dict) else None
+        if not isinstance(sections, list):
+            return 0
+        return sum(1 for s in sections if isinstance(s, dict) and s.get("status") == "error")
+
     def _one(sid: str, base: Path) -> None:
         files: list[str] = []
         try:
@@ -3939,18 +3968,24 @@ def analysis_sets(analysis_dir: Path) -> list[dict]:
                            if p.is_file() and (p.suffix == ".json" or p.name == "REPORT.md"))
         except OSError:
             files = []
-        if not files:
+        section_dirs = [] if sid == "." else _section_dirs(base)
+        if not files and not section_dirs:
             return
+        root_payloads = {tool: _read_json(base / f"{tool}.json") for tool in ANALYSIS_TOOL_JSONS}
         tools, generated = [], None
         for tool in ANALYSIS_TOOL_JSONS:
-            d = _read_json(base / f"{tool}.json")
-            if isinstance(d, dict) and d.get("tool"):
+            d = root_payloads[tool]
+            has_root = isinstance(d, dict) and bool(d.get("tool"))
+            has_section = any((sub / f"{tool}.json").is_file() for sub in section_dirs)
+            if has_root or has_section:
                 tools.append(tool)
+            if has_root:
                 g = d.get("generated_utc")
                 if isinstance(g, str) and (generated is None or g > generated):
                     generated = g
         out.append(clean({"id": sid, "files": files, "tools": tools,
-                          "generated_utc": generated, "has_report_md": "REPORT.md" in files}))
+                          "generated_utc": generated, "has_report_md": "REPORT.md" in files,
+                          "n_sections": len(section_dirs), "n_errors": _n_errors(base)}))
 
     out: list[dict] = []
     if not analysis_dir.is_dir():
@@ -3969,7 +4004,18 @@ def analysis_report(analysis_dir: Path, name: str) -> dict:
     """One report set: every ``<tool>.json`` verbatim (missing/invalid JSON = absent — never
     invented), ``REPORT.md`` as capped text, and the names of unknown-tool JSONs under
     ``extra_tools`` (passed through as names only; Group A may add fields/tools at any time).
-    The set id ``.`` is the analysis root itself."""
+    The set id ``.`` is the analysis root itself.
+
+    Sets written by ``report_day.py`` keep each section in its own subdirectory; those are
+    returned in ``sections`` (sorted by ``ANALYSIS_TOOL_JSONS`` order then section id), with
+    ``errors`` copied verbatim from ``<set>/report_day.json``, ``n_sections`` and
+    ``section_index`` (tool -> section ids).
+
+    Flat compatibility rule: a tool with exactly one section payload keeps its payload under
+    the flat ``out[tool]`` key exactly as before (so flat fixtures keep working); a tool with
+    two or more sections omits the flat key and is carried only by ``sections``. A tool with no
+    section payload still falls back to its root-level ``<tool>.json`` when present.
+    """
     if name == ".":
         base = analysis_dir
     else:
@@ -3992,11 +4038,58 @@ def analysis_report(analysis_dir: Path, name: str) -> dict:
         if isinstance(d, dict) and d:
             payloads[tool] = d
     out["tools"] = list(payloads)
+
+    # report_day.py layout: <set>/<section>/<tool>.json (+ .md / .png siblings).
+    try:
+        subdirs = sorted((p for p in base.iterdir() if p.is_dir()), key=lambda p: p.name)
+    except OSError:
+        subdirs = []
+    section_records: list[dict] = []
+    for sub in subdirs:
+        tool = next((t for t in ANALYSIS_TOOL_JSONS if (sub / f"{t}.json").is_file()), None)
+        if tool is None:
+            continue
+        data = _read_json(sub / f"{tool}.json")
+        try:
+            names = sorted(p.name for p in sub.iterdir() if p.is_file())
+        except OSError:
+            names = []
+        pngs = [n for n in names if n.lower().endswith(".png")]
+        section_records.append({"id": sub.name, "tool": tool,
+                                "data": data if isinstance(data, dict) else {},
+                                "files": names, "has_png": bool(pngs), "pngs": pngs})
+    order = {tool: i for i, tool in enumerate(ANALYSIS_TOOL_JSONS)}
+    section_records.sort(key=lambda r: (order[r["tool"]], r["id"]))
+    out["sections"] = section_records
+    out["n_sections"] = len(section_records)
+    section_index: dict[str, list[str]] = {}
+    for r in section_records:
+        section_index.setdefault(r["tool"], []).append(r["id"])
+    out["section_index"] = section_index
+
+    rd = _read_json(base / "report_day.json")
+    raw_sections = rd.get("sections") if isinstance(rd, dict) else None
+    errors: list[dict] = []
+    if isinstance(raw_sections, list):
+        for s in raw_sections:
+            if isinstance(s, dict) and s.get("status") == "error":
+                errors.append({k: s.get(k) for k in ("id", "tool", "status", "error")})
+    out["errors"] = errors
+
     try:
         json_stems = {p.stem for p in base.glob("*.json")}
     except OSError:
         json_stems = set()
-    out["extra_tools"] = sorted(json_stems - set(payloads) - set(ANALYSIS_TOOL_JSONS))
+    section_stems: set[str] = set()
+    for sub in subdirs:
+        if not any((sub / f"{t}.json").is_file() for t in ANALYSIS_TOOL_JSONS):
+            continue
+        try:
+            section_stems.update(p.stem for p in sub.glob("*.json"))
+        except OSError:
+            continue
+    out["extra_tools"] = sorted((json_stems - set(payloads) - set(ANALYSIS_TOOL_JSONS))
+                                | (section_stems - set(ANALYSIS_TOOL_JSONS)))
     generated = None
     for d in payloads.values():
         g = d.get("generated_utc")
@@ -4004,7 +4097,18 @@ def analysis_report(analysis_dir: Path, name: str) -> dict:
             generated = g
     if generated is not None:
         out["generated_utc"] = generated
-    out.update(clean(payloads))
+
+    by_tool: dict[str, list[dict]] = {}
+    for r in section_records:
+        by_tool.setdefault(r["tool"], []).append(r)
+    flat: dict[str, dict] = {}
+    for tool in ANALYSIS_TOOL_JSONS:
+        chosen = by_tool.get(tool, [])
+        if len(chosen) == 1:
+            flat[tool] = chosen[0]["data"]
+        elif not chosen and tool in payloads:
+            flat[tool] = payloads[tool]
+    out.update(clean(flat))
     try:
         report_md = (base / "REPORT.md").read_text(encoding="utf-8")
     except OSError:

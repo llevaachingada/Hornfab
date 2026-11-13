@@ -8,12 +8,17 @@ analysis is ever executed and no solve runs.
 from __future__ import annotations
 
 import json
+import socket
+import threading
+import urllib.error
+import urllib.request
+from http.server import ThreadingHTTPServer
 from pathlib import Path
 
 import pytest
 
 from hornlab_search.gui import data as D
-from hornlab_search.gui.server import App
+from hornlab_search.gui.server import App, make_handler
 
 GEN = "2026-11-12T18:00:00Z"
 
@@ -150,3 +155,229 @@ def test_analysis_api_routes(analysis):
     other = App(root, runs, analysis_dir=adir / "day_2026-11-12").get("/api/analysis", {})
     assert [(s["id"], s["tools"]) for s in other] == [
         (".", ["convergence", "seed_variance", "sensitivity", "links", "walls"])]
+
+
+# ------------------------------------------------------------------ nested report_day sets
+#
+# `report_day.py` writes one subdirectory per section (convergence_g1/, walls_g6/, …), not the
+# flat `<tool>.json` layout above. These payloads mirror the real evidence fixture's shape:
+# seven tools reach the set (six section tools + root report_day.json), twelve section dirs,
+# and one honest refusal (`v6_seeds`) that has no output directory.
+
+NESTED_GEN = "2026-11-12T23:30:10Z"
+
+NESTED_CONV_G1 = {
+    "run_dir": "runs/20261111T000000Z-screen-aaaaaa", "brief": "atlas__core_law",
+    "family": "OSSE", "objective_version": 4,
+    "curve": [{"n": 1, "best": 22.5}, {"n": 2, "best": 12.34}],
+    "last20_improvement": False,
+}
+NESTED_SENS_G1 = {
+    "run_dir": "runs/20261111T000000Z-screen-aaaaaa", "n_valid": 110,
+    "spearman": [{"key": "a_deg", "rho": -0.41, "rho_abs": 0.41, "n": 110}],
+}
+NESTED_LINKS_G1 = {
+    "run_dir": "runs/20261111T000000Z-screen-aaaaaa",
+    "proposed_links": [{"knob_b": "n", "knob_a": "a_deg", "scale": 0.104, "offset": 1.88,
+                        "r2": 0.55}],
+}
+NESTED_WALLS_G1 = {
+    "run_dir": "runs/20261111T000000Z-screen-aaaaaa",
+    "walls": [{"key": "L_mm", "lo": 140.0, "hi": 420.0, "frac_lo": 0.18, "frac_hi": 0.55,
+               "wall_hi": True, "wall_lo": False}],
+}
+NESTED_TERM_G1 = {
+    "run_dir": "runs/20261111T000000Z-screen-aaaaaa",
+    "shares": {"median": {"a_deg": 0.5, "L_mm": 0.5}},
+}
+NESTED_FIDELITY_G1 = {
+    "run_dir": "runs/20261111T000000Z-screen-aaaaaa",
+    "bias_median_pct": 3.2, "spearman_all": 0.7, "n_pairs": 8,
+}
+
+#: section directory -> (tool, payload). Twelve physical sections, six tools.
+NESTED_SECTIONS = {
+    "convergence_c2": ("convergence", {"brief": "c2", "family": "OSSE",
+                                       "objective_version": 4, "curve": [{"n": 1, "best": 9.0}]}),
+    "convergence_g1": ("convergence", NESTED_CONV_G1),
+    "convergence_g8": ("convergence", {"brief": "g8", "family": "OSSE",
+                                       "objective_version": 4, "curve": [{"n": 1, "best": 8.0}]}),
+    "convergence_g9": ("convergence", {"brief": "g9", "family": "OSSE",
+                                       "objective_version": 4, "curve": [{"n": 1, "best": 7.0}]}),
+    "sensitivity_g1": ("sensitivity", NESTED_SENS_G1),
+    "sensitivity_g6": ("sensitivity", {"run_dir": "runs/x", "n_valid": 20, "spearman": []}),
+    "links_g1": ("links", NESTED_LINKS_G1),
+    "walls_g1": ("walls", NESTED_WALLS_G1),
+    "walls_g6": ("walls", {"run_dir": "runs/x", "walls": []}),
+    "term_balance_g1": ("term_balance", NESTED_TERM_G1),
+    "term_balance_g6": ("term_balance", {"run_dir": "runs/x",
+                                         "shares": {"median": {"a_deg": 1.0}}}),
+    "fidelity_g1": ("fidelity", NESTED_FIDELITY_G1),
+}
+
+NESTED_ERROR = ("ValueError: group 'v6_seeds' is not one task/scoring identity: "
+                "['task_config_hash_mismatch']")
+NESTED_REPORT_DAY = {
+    "tool": "report_day", "generated_utc": NESTED_GEN,
+    "n_sections": 13, "n_ok": 12, "n_error": 1,
+    "sections": [
+        {"id": "g1", "tool": "convergence", "status": "ok"},
+        {"id": "c2", "tool": "convergence", "status": "ok"},
+        {"id": "g8", "tool": "convergence", "status": "ok"},
+        {"id": "g9", "tool": "convergence", "status": "ok"},
+        {"id": "v6_seeds", "tool": "seed_variance", "status": "error", "error": NESTED_ERROR},
+        {"id": "g1", "tool": "sensitivity", "status": "ok"},
+        {"id": "g6", "tool": "sensitivity", "status": "ok"},
+        {"id": "g1", "tool": "links", "status": "ok"},
+        {"id": "g1", "tool": "walls", "status": "ok"},
+        {"id": "g6", "tool": "walls", "status": "ok"},
+        {"id": "g1", "tool": "term_balance", "status": "ok"},
+        {"id": "g6", "tool": "term_balance", "status": "ok"},
+        {"id": "g1", "tool": "fidelity", "status": "ok"},
+    ],
+}
+
+#: expected sections order: (tool order per ANALYSIS_TOOL_JSONS, section id)
+NESTED_EXPECTED_SECTIONS = [
+    ("convergence_c2", "convergence"),
+    ("convergence_g1", "convergence"),
+    ("convergence_g8", "convergence"),
+    ("convergence_g9", "convergence"),
+    ("sensitivity_g1", "sensitivity"),
+    ("sensitivity_g6", "sensitivity"),
+    ("links_g1", "links"),
+    ("walls_g1", "walls"),
+    ("walls_g6", "walls"),
+    ("term_balance_g1", "term_balance"),
+    ("term_balance_g6", "term_balance"),
+    ("fidelity_g1", "fidelity"),
+]
+
+
+@pytest.fixture()
+def nested(tmp_path: Path) -> tuple[Path, Path, Path]:
+    root = tmp_path / "nested_repo"
+    adir = root / "runs" / "analysis"
+    day = adir / "day_2026-11-12"
+    for sid, (tool, payload) in NESTED_SECTIONS.items():
+        sub = day / sid
+        _write(sub, f"{tool}.json", payload)
+        (sub / f"{tool}.md").write_text(f"# {sid}\n", encoding="utf-8")
+        if sid == "convergence_g1":
+            (sub / "convergence_1.png").write_bytes(b"\x89PNG\r\n\x1a\n")
+        elif sid in ("links_g1", "walls_g1", "term_balance_g1", "fidelity_g1"):
+            (sub / f"{tool}.png").write_bytes(b"\x89PNG\r\n\x1a\n")
+    _write(day, "report_day.json", NESTED_REPORT_DAY)
+    (day / "REPORT.md").write_text("# Day report\n", encoding="utf-8")
+    (day / "report_day.md").write_text("# day\n", encoding="utf-8")
+    # a second set whose report_day.json is genuinely malformed (not merely wrong-shaped)
+    bad = adir / "bad_day"
+    (bad / "fidelity_g1").mkdir(parents=True)
+    _write(bad / "fidelity_g1", "fidelity.json", {"run_dir": "runs/y"})
+    (bad / "report_day.json").write_text("{not json", encoding="utf-8")
+    return root, root / "runs", adir
+
+
+@pytest.fixture()
+def nested_server(nested):
+    root, runs, adir = nested
+    s = socket.socket()
+    s.bind(("127.0.0.1", 0))
+    port = s.getsockname()[1]
+    s.close()
+    httpd = ThreadingHTTPServer(("127.0.0.1", port),
+                                make_handler(App(root, runs, analysis_dir=adir), port))
+    t = threading.Thread(target=httpd.serve_forever, daemon=True)
+    t.start()
+    yield f"http://127.0.0.1:{port}"
+    httpd.shutdown()
+    httpd.server_close()
+
+
+def test_nested_set_lists_tools_sections_and_errors(nested):
+    _, _, adir = nested
+    sets = {s["id"]: s for s in D.analysis_sets(adir)}
+    day = sets["day_2026-11-12"]
+    assert day["tools"] == ["convergence", "sensitivity", "links", "walls",
+                            "term_balance", "fidelity", "report_day"]
+    assert day["n_sections"] == 12
+    assert day["n_errors"] == 1
+    assert day["has_report_md"] is True
+    assert day["generated_utc"] == NESTED_GEN
+    assert sets["bad_day"]["n_sections"] == 1 and sets["bad_day"]["n_errors"] == 0
+
+
+def test_nested_report_sections_payloads(nested):
+    _, _, adir = nested
+    d = D.analysis_report(adir, "day_2026-11-12")
+    assert d["n_sections"] == 12 and len(d["sections"]) == 12
+    assert [(s["id"], s["tool"]) for s in d["sections"]] == NESTED_EXPECTED_SECTIONS
+    by_id = {s["id"]: s for s in d["sections"]}
+    for sid, (_tool, payload) in NESTED_SECTIONS.items():
+        assert by_id[sid]["data"] == payload
+    g1 = by_id["convergence_g1"]
+    assert g1["files"] == ["convergence.json", "convergence.md", "convergence_1.png"]
+    assert g1["has_png"] is True and g1["pngs"] == ["convergence_1.png"]
+    assert by_id["sensitivity_g1"]["has_png"] is False and by_id["sensitivity_g1"]["pngs"] == []
+    assert d["section_index"]["convergence"] == [
+        "convergence_c2", "convergence_g1", "convergence_g8", "convergence_g9"]
+    assert d["section_index"]["fidelity"] == ["fidelity_g1"]
+    assert "seed_variance" not in d["section_index"]     # errored: no output directory
+
+
+def test_nested_report_errors_are_verbatim(nested):
+    _, _, adir = nested
+    d = D.analysis_report(adir, "day_2026-11-12")
+    assert len(d["errors"]) == 1
+    err = d["errors"][0]
+    assert err == {"id": "v6_seeds", "tool": "seed_variance", "status": "error",
+                   "error": NESTED_ERROR}
+    assert "task_config_hash_mismatch" in err["error"]
+
+
+def test_nested_flat_compatibility_rule(nested):
+    _, _, adir = nested
+    d = D.analysis_report(adir, "day_2026-11-12")
+    # 2+ sections -> no flat key; exactly 1 -> flat key as before; root-only -> flat key
+    assert "convergence" not in d
+    assert "sensitivity" not in d and "walls" not in d and "term_balance" not in d
+    assert d["links"] == NESTED_LINKS_G1
+    assert d["fidelity"] == NESTED_FIDELITY_G1
+    assert d["report_day"]["tool"] == "report_day"
+
+
+def test_malformed_report_day_never_raises(nested):
+    _, _, adir = nested
+    d = D.analysis_report(adir, "bad_day")
+    assert d["errors"] == []
+    assert d["n_sections"] == 1
+
+
+def test_analysis_report_refuses_traversal_set_id(nested):
+    _, _, adir = nested
+    with pytest.raises(ValueError):
+        D.analysis_report(adir, "../..")
+
+
+def _get_raw(url: str):
+    try:
+        with urllib.request.urlopen(url, timeout=20) as resp:
+            return resp.status, resp.headers.get("Content-Type"), resp.read()
+    except urllib.error.HTTPError as e:
+        return e.code, e.headers.get("Content-Type"), e.read()
+
+
+def test_analysis_file_route_serves_only_contained_known_files(nested_server):
+    valid = nested_server + "/analysis/day_2026-11-12/convergence_g1/convergence_1.png"
+    code, ctype, body = _get_raw(valid)
+    assert code == 200 and ctype == "image/png" and body.startswith(b"\x89PNG")
+    code, ctype, _ = _get_raw(nested_server + "/analysis/day_2026-11-12/report_day.json")
+    assert code == 200 and ctype == "application/json"
+    # traversal set id (encoded separators keep it one path segment)
+    assert _get_raw(nested_server + "/analysis/..%2f..%2fetc/day_2026-11-12/convergence_1.png")[0] == 404
+    # traversal file name
+    assert _get_raw(nested_server + "/analysis/day_2026-11-12/convergence_g1/..%2f..%2f..%2fetc")[0] == 404
+    # unknown extension, missing file, and a directory are all refused
+    assert _get_raw(nested_server + "/analysis/day_2026-11-12/convergence_g1/convergence.exe")[0] == 404
+    assert _get_raw(nested_server + "/analysis/day_2026-11-12/convergence_g1/nope.png")[0] == 404
+    assert _get_raw(nested_server + "/analysis/day_2026-11-12/convergence_g1")[0] == 404

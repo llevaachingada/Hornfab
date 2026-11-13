@@ -1,0 +1,365 @@
+{
+  "tool": "parameter_study",
+  "schema_version": 1,
+  "protocol": "bo-study-v1.1",
+  "generated_utc": "2026-11-12T18:00:00Z",
+  "task_identity": {
+    "config": "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml",
+    "brief_name": "native_ath_core_2in_v4",
+    "brief_hash": "b930c6c35b14",
+    "brief_path": "examples/briefs/campaign_2026-10-26_v4/native_ath_core_2in_v4.yaml",
+    "objective_version": 4,
+    "resolved_target": {
+      "coverage_h_deg": 50.0,
+      "coverage_v_deg": 50.0,
+      "band_lo_hz": 300.0,
+      "band_hi_hz": 8000.0,
+      "di_target_db": null,
+      "f0_hz": 1280.0,
+      "f0_v_hz": 1280.0,
+      "loaded_hi_hz": null
+    },
+    "weights": {
+      "cov": 1.0, "rip": 1.0, "di": 0.3, "dislope": 0.5,
+      "flat": 0.5, "load": 0.0, "distd": 0.5, "diag": 0.5
+    },
+    "tolerances": {
+      "cov": 2.0, "rip": 1.0, "di": 0.4, "dislope": 9.0,
+      "flat": 1.5, "load": 0.3, "distd": 2.0, "diag": 2.0
+    },
+    "cov_narrow_ratio": 2.0,
+    "cov_below_f0": "mask",
+    "diag_reference": "round",
+    "resolution_source": "hornlab_search.objective.replay.load_brief_context (resolved config brief; no inline YAML target)"
+  },
+  "cohort": {
+    "rows": 197,
+    "unique_geometries": 192,
+    "run_ids_missing": true,
+    "exclusions": {
+      "catalog_failed_rows": 18,
+      "catalog_failure_kinds": {"missing_npz": 3},
+      "replay_exclusions": {"replay_status:partial_unsupported": 5},
+      "config_unknown_rows": 4
+    },
+    "generated_utc": "2026-11-12T18:00:00Z",
+    "native_only": true,
+    "config_name": "native__ath_core_v4",
+    "scored_exact_complete": 197,
+    "unique_physical_solves": 197,
+    "unique_design_hashes": 192,
+    "experiment_identity": {
+      "status": "insufficient_evidence",
+      "run_ids_present": 0,
+      "experiment_ids_present": 0,
+      "reason_code": "run_id_and_experiment_id_absent_on_native_rows",
+      "note": "absence is not inferred from timestamps or config names; repeated designs are not independent experiments"
+    }
+  },
+  "controls": [
+    {
+      "key": "L_mm",
+      "base_knob": "L_mm",
+      "context": "native:osse",
+      "category": "searched",
+      "unit": "mm",
+      "unit_transform": "identity",
+      "resolved": {"value": 260.0, "bound": {"lo": 140.0, "hi": 420.0, "log": false}},
+      "application_predicate": "always",
+      "affected_geometry_features": ["path length"],
+      "source_refs": ["examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml"],
+      "evidence": {"static_source": {"status": "recorded"}, "geometry_test": {"status": "tested"}, "status": "recorded"},
+      "notes": "Searched bound from the resolved config."
+    },
+    {
+      "key": "a_deg",
+      "base_knob": "a_deg",
+      "context": "native:osse",
+      "category": "searched",
+      "unit": "deg",
+      "unit_transform": "identity",
+      "resolved": {"value": 40.0, "bound": {"lo": 20.0, "hi": 60.0, "log": false}},
+      "application_predicate": "always",
+      "affected_geometry_features": ["flare angle"],
+      "source_refs": ["examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml"],
+      "evidence": {"static_source": {"status": "recorded"}, "geometry_test": {"status": "tested"}, "status": "recorded"},
+      "notes": "Searched bound from the resolved config."
+    },
+    {
+      "key": "n",
+      "base_knob": "n",
+      "context": "native:osse",
+      "category": "searched",
+      "unit": null,
+      "unit_transform": "identity",
+      "resolved": {"value": 7.0, "bound": {"lo": 3.0, "hi": 12.0, "log": false}},
+      "application_predicate": "always",
+      "affected_geometry_features": ["flare law exponent"],
+      "source_refs": ["hornlab_mesher:profile"],
+      "evidence": {"static_source": {"status": "recorded"}, "geometry_test": {"status": "tested"}, "status": "recorded"},
+      "notes": "Dimensionless flare-law exponent."
+    },
+    {
+      "key": "q",
+      "base_knob": "q",
+      "context": "native:osse",
+      "category": "searched",
+      "unit": null,
+      "unit_transform": "identity",
+      "resolved": {"value": 0.85, "bound": {"lo": 0.5, "hi": 1.2, "log": false}},
+      "application_predicate": "always",
+      "affected_geometry_features": ["flare law"],
+      "source_refs": ["hornlab_mesher:profile"],
+      "evidence": {"static_source": {"status": "recorded"}, "geometry_test": {"status": "tested"}, "status": "recorded"},
+      "notes": "Dimensionless flare-law coefficient."
+    },
+    {
+      "key": "morph_exponent",
+      "base_knob": "morph_exponent",
+      "context": "native:osse",
+      "category": "inactive",
+      "unit": null,
+      "unit_transform": "identity",
+      "resolved": {"value": 4.0, "bound": {"lo": 3.0, "hi": 6.0, "log": false}},
+      "application_predicate": "morph_target == 3",
+      "affected_geometry_features": ["mouth contour"],
+      "source_refs": ["hornlab_mesher:morph"],
+      "evidence": {"static_source": {"status": "recorded"}, "geometry_test": {"status": "tested", "inactive": true}, "status": "proven_noop_target_1"},
+      "notes": "Inactive at morph_target=1; target 3 must remain active."
+    },
+    {
+      "key": "morph_fixed",
+      "base_knob": "morph_fixed",
+      "context": "native:osse",
+      "category": "fixed",
+      "unit": null,
+      "unit_transform": "identity",
+      "resolved": {"value": 0.0, "bound": {"lo": 0.0, "hi": 0.6, "log": false}},
+      "application_predicate": "always",
+      "affected_geometry_features": ["mouth contour"],
+      "source_refs": ["examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml"],
+      "evidence": {"static_source": {"status": "recorded"}, "geometry_test": null, "status": "recorded"},
+      "notes": "Fixed at the seed; resolved bound is 0-0.6."
+    },
+    {
+      "key": "mouth_width_mm",
+      "base_knob": "mouth_width_mm",
+      "context": "native:osse",
+      "category": "derived",
+      "unit": "mm",
+      "unit_transform": "identity",
+      "resolved": {"value": 421.3, "bound": null},
+      "application_predicate": "derived from L_mm, a_deg, n, q",
+      "affected_geometry_features": ["mouth"],
+      "source_refs": ["hornlab_mesher:resolve_geometry"],
+      "evidence": {"static_source": {"status": "recorded"}, "geometry_test": {"status": "tested"}, "status": "recorded"},
+      "notes": "Computed from the geometry law; not searched directly."
+    }
+  ],
+  "designs": [
+    {
+      "design_hash": "a1b2c3d4e5f6a7b8",
+      "params": {"L_mm": 260.0, "a_deg": 40.0, "n": 7.0, "q": 0.85, "k": 0.7, "morph_exponent": 4.0, "morph_fixed": 0.0},
+      "geometry_descriptors": {
+        "status": "ok",
+        "units": "mm",
+        "descriptors": {
+          "throat_radius_mm": 12.7,
+          "mouth_width_mm": 421.3,
+          "mouth_height_mm": 308.6,
+          "depth_mm": 260.0,
+          "area_sampled_mm2": 101345.2,
+          "symmetry_factor": 4,
+          "aspect_ratio": 1.365,
+          "mouth_radial_ratio": 1.0,
+          "circular_mouth": false,
+          "noncircular_station_fractions": [0.1, 0.2, 0.3],
+          "station_z_spread_mm": 0.0,
+          "s1": 0.0,
+          "s2": 0.0,
+          "stretch_active": false,
+          "canonical_z_note": "expected 0 for a symmetric axial station grid"
+        },
+        "grid": {"resolution_mm": 12.0, "quadrants": "1234", "canonical_n_azimuth": 24},
+        "provenance": {"api": "hornlab_mesher.config_builder.resolve_geometry"},
+        "convergence": {"converged": true, "max_abs_radius_delta_mm": 0.12, "units": "mm", "note": "geometry-sampling convergence only; not mesh, acoustic or BEM convergence"},
+        "sampling_note": "canonical final-surface sample through the installed hornlab_mesher API; sampling approximation, not a production cache key or a mesh/BEM convergence claim"
+      },
+      "response_bands_hz": {
+        "status": "ok",
+        "frequencies_hz": [300.0, 400.0, 500.0, 630.0, 800.0],
+        "band_edges_hz": [300.0, 2000.0, 3957.0, 8000.0],
+        "source_caveat_hz": 3957.0,
+        "stored_f11_hz": 3957.0,
+        "bands": [
+          {
+            "band_hz": [300.0, 2000.0],
+            "source_label": "below_source_caveat",
+            "n_stored_bins": 18,
+            "stats": {
+              "di_db": {"median": 4.9, "min": 4.2, "max": 5.4, "n_finite": 18},
+              "bw_h_deg": {"median": 52.0, "min": 47.0, "max": 57.0, "n_finite": 18},
+              "ripple_h_db": {"median": 1.2, "min": 0.6, "max": 2.1, "n_finite": 18}
+            }
+          },
+          {
+            "band_hz": [3957.0, 8000.0],
+            "source_label": "above_source_caveat_geometry_comparison",
+            "n_stored_bins": 22,
+            "stats": {
+              "di_db": {"median": 4.4, "min": 3.8, "max": 5.1, "n_finite": 22},
+              "bw_h_deg": {"median": 45.0, "min": 39.0, "max": 51.0, "n_finite": 22}
+            }
+          }
+        ],
+        "note": "measured stored arrays only; the 2-inch uniform-piston source caveat f11 ~= 3957 Hz means above-caveat bands are geometry comparisons under that excitation, not a universal validity boundary"
+      },
+      "source_caveat_hz": 3957.0,
+      "score_terms": {
+        "term_semantics": "objective_v4 terms are normalized (raw/tolerance); weighted = weight * normalized; total = sum(weighted)",
+        "raw": {"cov": 1.4, "rip": 0.9, "di": 0.6, "dislope": 1.1, "flat": 0.8, "load": 0.0, "distd": 0.5, "diag": 0.2},
+        "normalized": {"cov": 0.7, "rip": 0.9, "di": 1.5, "dislope": 0.12, "flat": 0.53, "load": 0.0, "distd": 0.25, "diag": 0.1},
+        "weighted": {"cov": 0.7, "rip": 0.9, "di": 0.45, "dislope": 0.06, "flat": 0.265, "load": 0.0, "distd": 0.125, "diag": 0.05},
+        "total": 2.55,
+        "total_matches_replay_j": true,
+        "extras": {"n_in_band": 184, "n_nan": 0, "di_estimated": false}
+      },
+      "identities": {
+        "physical_id": "phys-3d9c1f0e8a7b6c5d4e3f2a1b0c9d8e7f",
+        "metric_id": "met-7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f",
+        "score_id": "scr-1f2e3d4c5b6a79880716253443526170"
+      },
+      "provenance": {
+        "shard": 0,
+        "row": 17,
+        "dataset": "dataset",
+        "design_hash": "a1b2c3d4e5f6a7b8",
+        "mesh_hash": "mesh-aa11bb22cc33dd44",
+        "solve_hash": "solve-1122334455667788",
+        "config_name": "native__ath_core_v4",
+        "fidelity": "screen",
+        "backend": "beat_cuda",
+        "run_id": null,
+        "experiment_id": null,
+        "independent_experiment_identity": "insufficient_evidence",
+        "replay_status": "exact_complete"
+      },
+      "selection_reason": {
+        "rule": "lowest_j_then_maximin",
+        "frozen_j": 2.55,
+        "bucket": "low_j"
+      }
+    },
+    {
+      "design_hash": "b2c3d4e5f6a7b8c9",
+      "params": {"L_mm": 232.5, "a_deg": 38.0, "n": 6.4, "q": 0.92, "k": 0.7, "morph_exponent": 4.0, "morph_fixed": 0.0},
+      "geometry_descriptors": {
+        "status": "ok",
+        "units": "mm",
+        "descriptors": {
+          "throat_radius_mm": 12.7,
+          "mouth_width_mm": 398.4,
+          "mouth_height_mm": 291.7,
+          "depth_mm": 232.5,
+          "aspect_ratio": 1.366,
+          "circular_mouth": false,
+          "station_z_spread_mm": 0.0
+        },
+        "convergence": {"converged": true, "max_abs_radius_delta_mm": 0.09, "units": "mm"}
+      },
+      "response_bands_hz": {
+        "status": "ok",
+        "frequencies_hz": [300.0, 400.0, 500.0],
+        "band_edges_hz": [300.0, 2000.0, 3957.0, 8000.0],
+        "source_caveat_hz": 3957.0,
+        "stored_f11_hz": 3957.0,
+        "bands": [
+          {
+            "band_hz": [300.0, 2000.0],
+            "source_label": "below_source_caveat",
+            "n_stored_bins": 17,
+            "stats": {"di_db": {"median": 4.7, "min": 4.0, "max": 5.2, "n_finite": 17}}
+          }
+        ],
+        "note": "measured stored arrays only"
+      },
+      "source_caveat_hz": 3957.0,
+      "score_terms": {
+        "term_semantics": "objective_v4 terms are normalized (raw/tolerance); weighted = weight * normalized; total = sum(weighted)",
+        "raw": {"cov": 1.6, "rip": 1.0, "di": 0.5, "dislope": 0.9, "flat": 0.7, "load": 0.0, "distd": 0.4, "diag": 0.3},
+        "normalized": {"cov": 0.8, "rip": 1.0, "di": 1.25, "dislope": 0.1, "flat": 0.47, "load": 0.0, "distd": 0.2, "diag": 0.15},
+        "weighted": {"cov": 0.8, "rip": 1.0, "di": 0.375, "dislope": 0.05, "flat": 0.235, "load": 0.0, "distd": 0.1, "diag": 0.075},
+        "total": 2.635,
+        "total_matches_replay_j": true
+      },
+      "identities": {
+        "physical_id": "phys-0a1b2c3d4e5f60718293a4b5c6d7e8f9",
+        "metric_id": "met-9f8e7d6c5b4a39281706f5e4d3c2b1a0",
+        "score_id": "scr-2a3b4c5d6e7f8091122334455667788"
+      },
+      "provenance": {
+        "shard": 0, "row": 44, "dataset": "dataset", "design_hash": "b2c3d4e5f6a7b8c9",
+        "mesh_hash": "mesh-bb22cc33dd44ee55", "solve_hash": "solve-2233445566778899",
+        "config_name": "native__ath_core_v4", "fidelity": "screen", "backend": "beat_cuda",
+        "run_id": null, "experiment_id": null,
+        "independent_experiment_identity": "insufficient_evidence", "replay_status": "exact_complete"
+      },
+      "selection_reason": {"rule": "lowest_j_then_maximin", "frozen_j": 2.635, "bucket": "low_j"}
+    },
+    {
+      "design_hash": "c3d4e5f6a7b8c9d0",
+      "params": {"L_mm": 281.0, "a_deg": 42.0, "n": 7.6, "q": 0.8, "k": 0.7, "morph_exponent": 4.0, "morph_fixed": 0.0},
+      "geometry_descriptors": {
+        "status": "unavailable",
+        "reason": "geometry_effects import failed: module not importable in this environment"
+      },
+      "response_bands_hz": {
+        "status": "unavailable",
+        "reason": "no stored frequency array"
+      },
+      "source_caveat_hz": 3957.0,
+      "score_terms": {
+        "term_semantics": "objective_v4 terms are normalized (raw/tolerance); weighted = weight * normalized; total = sum(weighted)",
+        "raw": {"cov": 1.1, "rip": 1.1, "di": 0.7, "dislope": 1.3, "flat": 0.9, "load": 0.0, "distd": 0.6, "diag": 0.4},
+        "normalized": {"cov": 0.55, "rip": 1.1, "di": 1.75, "dislope": 0.14, "flat": 0.6, "load": 0.0, "distd": 0.3, "diag": 0.2},
+        "weighted": {"cov": 0.55, "rip": 1.1, "di": 0.525, "dislope": 0.07, "flat": 0.3, "load": 0.0, "distd": 0.15, "diag": 0.1},
+        "total": 2.795,
+        "total_matches_replay_j": true
+      },
+      "identities": {
+        "physical_id": "phys-5e6f708192a3b4c5d6e7f8091a2b3c4d",
+        "metric_id": "met-3c2b1a09f8e7d6c5b4a39281706f5e4d",
+        "score_id": "scr-4e5f60718293a4b5c6d7e8f90a1b2c3d"
+      },
+      "provenance": {
+        "shard": 0, "row": 71, "dataset": "dataset", "design_hash": "c3d4e5f6a7b8c9d0",
+        "mesh_hash": "mesh-cc33dd44ee55ff66", "solve_hash": "solve-33445566778899aa",
+        "config_name": "native__ath_core_v4", "fidelity": "screen", "backend": "beat_cuda",
+        "run_id": null, "experiment_id": null,
+        "independent_experiment_identity": "insufficient_evidence", "replay_status": "exact_complete"
+      },
+      "selection_reason": {"rule": "lowest_j_then_maximin", "frozen_j": 2.795, "bucket": "low_j"}
+    }
+  ],
+  "evidence": {
+    "parity": {
+      "n_replayed": 197,
+      "n_compared": 195,
+      "max_abs_delta": 0.0,
+      "within_1e-6": 195
+    },
+    "heldout": {
+      "method": "deterministic 5-fold KFold over designs (shuffle, fixed seed)",
+      "mae_j": 0.31,
+      "rmse_j": 0.44
+    },
+    "support": "197 native-only rows and 192 unique geometries; independent-experiment identity is insufficient_evidence because no run id was recorded."
+  },
+  "limitations": [
+    "Cohort is native-only (config_name == native__ath_core_v4); the four-config descriptive pool is never pooled for GP/advisory comparisons.",
+    "No run id was recorded for the native rows, so independent-experiment identity stays insufficient_evidence.",
+    "2-inch uniform piston, f11 approx 3957 Hz: above it results compare geometry under that excitation.",
+    "Loading weight is 0: there are no loading, efficiency or distortion claims.",
+    "J is reported per objective v4 only; J must never be ranked across objective versions."
+  ]
+}
