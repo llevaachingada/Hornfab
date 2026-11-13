@@ -3,6 +3,14 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-13 (**Elites tab redesigned for non-technical readers: brief/typology constraints and isometric horn thumbnails, best-per-typology / best-per-brief browsing, paginated 24 at a time, CSV-path noise removed; payload extended with brief/family/brief_target; bo-study-v1.1 final offline integration landed (M2 sensitivity/proposal evidence, immutable run package + `hornlab-search study` CLI, durable proposal-cadence recovery, B8 adversarial full loop); profile-outline thumbnail geometry fixed after live check (closed outline split at the mouth rim, outer wall kept); card hierarchy tuned per owner (constraint line + score largest, gate pills smaller); no GitHub issue state changed**).
 
+Local-only, added 2026-11-13 (22:3xZ) (**backlog committed and pushed; no GitHub issue state changed**):
+- Resolved: the bo/gui/analysis backlog is on `main` and pushed (`5f15275`, 73 files; `a4dccef` surrogate
+  refinements). 63 + 21 tests green; compileall clean. C1's configs + audit doc also land on `main`.
+- Open: `tools/analysis/geometry_descriptors.py` and `tests/test_tools_analysis_surrogate_validation.py` were
+  being written live at commit time and remain uncommitted for their author.
+- Open (housekeeping): `solver-speed-orch2` is content-redundant on `main` except for its C1 CONTINUITY/ISSUES
+  write-up; leave it for review or delete after merging that text.
+
 Local-only, added 2026-11-13 (22:2xZ) (**CPU jobs re-queued on the GPU lane, fused CUDA; no GitHub issue state changed**):
 - Queued: `home80x60_gpu_rerun_2026-11-13` - 2 fused-CUDA command jobs (osse_ext_throat seed 9012 budget 120;
   ath_core_14in seed 5678 budget 80) behind `home80x60_day_2026-11-13`; starts when that runner exits, cutoff 23:59.

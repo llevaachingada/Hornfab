@@ -1,6 +1,25 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-13 (22:3xZ) - BACKLOG COMMITTED AND PUSHED (owner request): BO STRICT GATE, GUI STUDY QA, S5/S10/S11 EVIDENCE, FOUR ANALYSIS TOOLS
+
+- Owner request: commit and push the checkout's uncommitted work. Two commits, both pushed: `5f15275`
+  (73 files: strict native training gate, GUI study-panel QA fixes, bo-study S5/S10/S11 + M2 gate evidence,
+  `tools/analysis/{geometry_descriptors,hypothesis_cards,qd_compare,surrogate_validation}.py` + 4 new tests,
+  `tools/lane_speed_report.py`, INDEX/CODE_MAP rows, AGENTS routing paragraph) and `a4dccef`
+  (`surrogate_validation.py` refinements, committed only after its SHA was stable for 45 s).
+- The C1 artifacts previously pushed on `solver-speed-orch2` (16 rear-density configs + the audit doc) also
+  land on `main` with `5f15275`, so main is self-contained; the branch keeps only the C1 write-up.
+- Verification before pushing: `compileall hornlab_search tools tests` exit 0; the six new test files +
+  `test_b8_adversarial_workflow.py` -> **63 passed in 13.52s**; `test_tools_analysis_surrogate_validation.py`
+  -> **21 passed**.
+- Deliberately left uncommitted: `tools/analysis/geometry_descriptors.py` and
+  `tests/test_tools_analysis_surrogate_validation.py` were being written live (mtimes 17:33:08 / 17:33:32,
+  seconds before this entry). They are the other session's in-flight work, not a backlog.
+- Process note: this checkout has had two agents writing at once, and the second session left its bo/gui/
+  analysis work uncommitted for hours. Orchestrator 2 does not fold another session's half-written files into
+  its own commits, which is why the sweep was a separate, explicitly attributed commit.
+
 ## 2026-11-13 (22:2xZ) - CPU-LANE JOBS RE-QUEUED ON THE GPU LANE (FUSED CUDA), BEHIND `home80x60_day_2026-11-13`
 
 - **Owner request:** move the stopped CPU jobs to the GPU queue, and make sure the queue runs **fused CUDA** on the
