@@ -127,8 +127,8 @@ assert.ok(h.includes("K-law mouth 332 × 498 mm"), h);
 assert.ok(h.includes("envelope 406 × 406 mm"), h);
 assert.ok(h.includes("held at f0 by the envelope: H 74° / V 74°"), h);
 assert.ok(h.includes("H fits"), h);
-assert.ok(h.includes("498") && h.includes("does not fit"), h);
-assert.match(h, /class="pill warn" title="does not fit the envelope"/);
+assert.ok(h.includes("V short: needs 498 mm"), h);
+assert.match(h, /class="pill warn" title="below the Keele ESTIMATE for this envelope/);
 assert.ok(!h.includes("76°"), "held coverage must round to the stored 74°");
 
 // One argument keeps the historical suffix verbatim.
@@ -178,7 +178,7 @@ def test_freq_axis_limits_union_band_and_data(tmp_path):
 
 
 def test_feasibility_summary_and_objective_suffix(tmp_path):
-    """K-law facts render (498 mm short / does not fit); one_sided names itself; one arg is stable."""
+    """K-law facts render (498 mm shortfall warning); one_sided names itself; one arg is stable."""
     _run_node(_SEED_SCRIPT, APPJS, tmp_path, "freq_seed_under_test.mjs", "FREQ SEED OK")
 
 
