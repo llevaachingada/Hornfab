@@ -347,3 +347,40 @@ def test_repo_pilot_overlays_validate(overlay_path: Path) -> None:
     assert [f for f in findings if f.level == "error"] == []
     result = mf.validate_manifest(manifest)
     assert result.ok, result.as_dict()
+
+
+#: Committed built manifests (docs/evidence copy of the validated scratch originals).
+COMMITTED_S11 = REPO / "docs" / "evidence" / "bo_study_2026-11-12" / "s11"
+
+
+@pytest.mark.parametrize("name", [
+    "pilot1_cold_vs_warm_native_ath_core_v4.json",
+    "pilot2_verify_allocation_crease_core_law_v4.json",
+])
+def test_committed_pilot_manifests_validate_clean(name: str) -> None:
+    """Both committed manifests validate with zero errors/warnings, no execution."""
+    manifest = json.loads((COMMITTED_S11 / name).read_text(encoding="utf-8"))
+    result = mf.validate_manifest(manifest)
+    assert result.ok, result.as_dict()
+    assert result.errors == [], result.as_dict()
+    assert result.warnings == [], result.as_dict()
+    assert manifest["execution_authorized"] is False
+    assert manifest["stop_rules"]["deadline"]["deadline_required"] is True
+    per_arm = manifest["budget"]["per_arm_per_replicate"]
+    assert per_arm["screen_new_bem"] == 18
+    assert per_arm["verify_new_bem"] == 6
+    assert per_arm["total_new_bem"] == 24
+    assert per_arm["candidate_attempts"] == 120
+
+
+@pytest.mark.parametrize("name", [
+    "pilot1_cold_vs_warm_native_ath_core_v4.json",
+    "pilot2_verify_allocation_crease_core_law_v4.json",
+])
+def test_committed_pilot_commands_validate_against_live_cli(name: str) -> None:
+    """Executor-facing argv templates match the real CLI parser (never executed)."""
+    manifest = json.loads((COMMITTED_S11 / name).read_text(encoding="utf-8"))
+    schema = mf.cli_schema()
+    for command in manifest["cli_commands"]:
+        findings = mf.validate_argv(command["argv"], schema, command["name"])
+        assert findings == [], findings

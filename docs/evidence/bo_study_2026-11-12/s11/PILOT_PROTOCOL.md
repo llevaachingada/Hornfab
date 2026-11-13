@@ -22,9 +22,14 @@ Interpreter used for every command below:
 | `scratch/bo_m0/s11/pilot2_verify_allocation_crease_core_law_v4.yaml` | pilot 2 overlay |
 | `scratch/bo_m0/s11/built/pilot1_cold_vs_warm_native_ath_core_v4.json` | built/validated pilot 1 manifest |
 | `scratch/bo_m0/s11/built/pilot2_verify_allocation_crease_core_law_v4.json` | built/validated pilot 2 manifest |
+| `docs/evidence/bo_study_2026-11-12/s11/pilot1_cold_vs_warm_native_ath_core_v4.json` | committed copy of the built/validated pilot 1 manifest |
+| `docs/evidence/bo_study_2026-11-12/s11/pilot2_verify_allocation_crease_core_law_v4.json` | committed copy of the built/validated pilot 2 manifest |
+| `docs/evidence/bo_study_2026-11-12/s11/validation_pilot*.json` | committed CLI validation result for each manifest |
 
 The overlays are manifest inputs, not runnable jobs and not applied configs.
-`scratch/` is gitignored; these are local evidence artifacts, not commits.
+`scratch/` is gitignored: the built manifests are committed under
+`docs/evidence/bo_study_2026-11-12/s11/` so their hashes are reviewable, while the
+scratch originals regenerate locally from the overlays.
 
 ### Commands
 
@@ -388,5 +393,40 @@ tests/test_tools_experiments_manifest.py ............................ [100%]
 - **Comparability is descriptive.** The crease config-specific independent-
   experiment count is not established by the pooled S0 group, and `run_id` is
   missing on group rows.
-- **Scratch artifacts are not committed.** `scratch/` is gitignored; the built
-  JSON and this protocol are local evidence, not repository history.
+
+---
+
+## 12. Committed validation record (2026-11-13)
+
+Both committed manifests were re-validated against the real CLI parser (no
+execution, no solve, no writes outside the evidence directory). The command
+below imports `hornlab_search.cli.build_parser`, so every `cli_commands` argv is
+checked against the flags that actually exist today.
+
+```powershell
+$PY = "C:\Users\hunte\Hrns\hornlab-search\.venv\Scripts\python.exe"
+$E  = "docs\evidence\bo_study_2026-11-12\s11"
+& $PY tools\experiments\manifest.py validate `
+    --manifest "$E\pilot1_cold_vs_warm_native_ath_core_v4.json" `
+    --json-out "$E\validation_pilot1_cold_vs_warm_native_ath_core_v4.json"
+& $PY tools\experiments\manifest.py validate `
+    --manifest "$E\pilot2_verify_allocation_crease_core_law_v4.json" `
+    --json-out "$E\validation_pilot2_verify_allocation_crease_core_law_v4.json"
+```
+
+Both exited `0` with `SUMMARY errors=0 warnings=0 ok=true`; the two
+`validation_pilot*.json` files are the machine-readable copies of those results.
+`tests/test_tools_experiments_manifest.py` pins this behavior:
+`test_committed_pilot_manifests_validate_clean` and
+`test_committed_pilot_commands_validate_against_live_cli` (33 focused tests).
+
+Rollback/adoption records are already enumerated in each manifest's
+`rollback_and_adoption` (`fail_or_no_gain_rollback`, `owner_adoption_decisions`
+D1-D2/D3 as applicable); they are unchanged by validation. The wall `deadline`
+stays an explicit `null` placeholder with `deadline_required: true` — it must be
+chosen from comparable measured logs at scheduling time. Neither manifest
+authorizes execution (`execution_authorized: false`).
+
+S11 is therefore complete as preparation-only evidence: both pilots are built,
+hash-bound, CLI-validated and carry rollback/adoption decisions. Executing
+either pilot remains a separate owner-scheduled action.

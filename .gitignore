@@ -4,6 +4,8 @@ __pycache__/
 /runs/
 /cache/
 /dataset/
+/cache_cpu/
+/dataset_cpu/
 /scratch/
 *.msh
 report.html
