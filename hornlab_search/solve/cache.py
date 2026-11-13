@@ -13,6 +13,7 @@ array including complex dtypes. ``meta`` must be JSON-native (``base.jsonable`` 
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import os
@@ -40,6 +41,30 @@ _SCALAR_FIELDS = ("backend", "n_dof", "meta") + _MEH_JSON_FIELDS
 #: A None MEH field is written as this 0-d string so the npz key set is the full Response schema
 #: (test_solve_cache's "every field present for a full response"); load maps it back to None.
 _NULL = "null"
+
+
+CACHE_SCHEMA = 2
+#: libraries whose code changes physics; hornlab_search/hornlab_plots excluded on purpose
+PHYSICS_LIBS = {"solve": ("hornlab_beat_bem", "hornlab_bempp_bem", "hornlab_mesher"),
+                "mesh": ("hornlab_mesher",)}
+
+
+def namespace(lib_shas: dict, kind: str) -> str | None:
+    """'p<schema>-<sha12>' for this set of physics library SHAs, or None when any of
+    them is missing/'unknown' (then the caller must not use a shared cache)."""
+    payload: dict = {"schema": CACHE_SCHEMA, "kind": kind}
+    for lib in PHYSICS_LIBS[kind]:
+        v = (lib_shas or {}).get(lib)
+        if not v or v == "unknown":
+            return None
+        payload[lib] = v
+    try:
+        import gmsh  # noqa: PLC0415
+        payload["gmsh"] = str(gmsh.__version__)
+    except Exception:  # noqa: BLE001 - optional, never raise
+        pass
+    canon = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    return f"p{CACHE_SCHEMA}-{hashlib.sha256(canon.encode()).hexdigest()[:12]}"
 
 
 def _field_names() -> set[str]:
@@ -161,6 +186,7 @@ def store(k: str, root: Path, resp: Response | None, status: dict) -> None:
     d.mkdir(parents=True, exist_ok=True)
     st = dict(status)
     st.setdefault("ok", resp is not None)
+    st.setdefault("cache_schema", CACHE_SCHEMA)
     if st["ok"] is True and resp is None:
         raise ValueError("store(): status ok=True requires a Response")
     # invalidate any previous good entry before rewriting its parts

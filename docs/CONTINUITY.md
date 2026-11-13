@@ -1,6 +1,16 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-13 (~23Z) - A1 CACHE NAMESPACES + A2 SEAM FIX LANDED (offline)
+
+- A1: shared solve/mesh caches now live under `<cache>/{solve,mesh}/p2-<sha12>/` keyed on beat/bempp/mesher SHAs
+  (+gmsh); unknown SHA disables the shared cache. Legacy flat entries untouched (first run after this re-solves).
+  Failure markers move with the namespace. `identity_v2.implementation_solve_id` added (unwired).
+- A2: seam probe = lower band's last frequency, solved on the UPPER mesh; per-edge `pass`, `meta.seam_ok`,
+  `meta.band_meshes`. Warning only.
+- Tests: 41 passed, 1 skipped (build123d) across cache/evaluate/seam/feasibility/mesh_fidelity. Full suite not run here.
+- Next: A5.4 wiring (feasibility into record meta); A1b `tools/m3_measurement_pack.py:340` flat root.
+
 ## 2026-11-13 (~22Z) - A4 MESH FIDELITY TOOL LANDED (offline)
 
 - `tools/analysis/mesh_fidelity.py` + test (2 pass, fixture only). Source tag = SD1D1001; uses build.read_msh_summary
