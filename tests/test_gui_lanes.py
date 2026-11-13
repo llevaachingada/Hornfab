@@ -98,6 +98,31 @@ def test_lane_running_job_from_queue_log(tmp_path: Path):
     assert cpu["lock"] is None and cpu["job"] is None and cpu["alert"] is None
 
 
+def test_lane_run_carries_progress_fields(tmp_path: Path):
+    """A running lane with a resolvable run dir now also carries the GPU-card progress fields:
+    session rate, ETA, session row count and the session budget (from the run's own command)."""
+    root, runs = _repo(tmp_path)
+    rid = "20261111T010000Z-screen-bbbbbb"
+    now = dt.datetime.now(dt.timezone.utc)
+    rows = [_row(i, (now - dt.timedelta(minutes=6 * (2 - i))).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                 5.0 - i) for i in range(3)]          # 3 rows, 6 min apart (12 min span)
+    _write_ndjson(runs, rid, rows)
+    command = f"hornlab-search search --resume runs/{rid} --budget 60"
+    (runs / rid / "run.json").write_text(json.dumps({"command": command}), encoding="utf-8")
+    _queue_log(runs / "overnight" / "queue_gpu_progress.log", command, rid)
+    (runs / ".gpu.lock").write_text(
+        json.dumps({"pid": os.getpid(), "command": "night gpu", "start_time": "x"}),
+        encoding="utf-8")
+
+    out = D.lane_status(runs)
+    gpu = next(l for l in out["lanes"] if l["lane"] == "gpu")
+    run = gpu["run"]
+    assert run["n_rows"] == 3 and run["n_ok"] == 3
+    assert abs(run["rate_per_h"] - 10.0) < 0.5
+    assert abs(run["eta_min"] - 342.0) < 2.0
+    assert run["session_n"] == 3 and run["budget"] == 60
+
+
 def test_lane_alert_when_newest_row_is_stale(tmp_path: Path):
     """D.1: newest row older than 30 min while the job runs -> ALERT."""
     root, runs = _repo(tmp_path)

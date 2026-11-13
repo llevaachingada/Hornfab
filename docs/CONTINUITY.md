@@ -1,6 +1,35 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-13 (22:05Z) - GUI: CPU LANE RUN PROGRESS + SPEED PARITY
+
+- `gui/data.py`: `current_cpu_run()` resolves a fresh `--config` CPU search from the newest
+  CPU-lane-tagged run folder — the job log's `output <dir>` line is block-buffered and can stay
+  invisible for the whole run (live 2026-11-13 case: `cpu_current` was null while the run wrote rows).
+  `cpu_current` now carries the GPU-card shape for BOTH job kinds: `kind`, `session {n, budget,
+  resumed, n_resumes, started}`, `rate_per_h`, `eta_min`, `best_j`/`seed_j`/`session_best_j`,
+  `failures_session`, `backend`. CPU verify jobs report n vs their `--top`/`--designs` target, rate
+  and ETA from their own filtered rows. A 120 s session-vs-job-start guard prevents claiming an
+  older completed run; unknown target/one row -> null bar/rate, never invented numbers.
+- `_lane_run_info` / `GET /api/lanes`: additive `rate_per_h`, `eta_min`, `session_n`, `budget`; the
+  lanes table now resolves fresh `--config` jobs for BOTH lanes (lane-tagged run fallback with the
+  same guard), not only `--resume`/`--run-dir` commands.
+- `gui/static/app.js`: `cpuRunningCardHtml` mirrors `currentRunCard` — progress bar, session %,
+  ETA, Best/Started/Rate/Failures KPIs, "Open run". Home CPU card sits directly under the GPU card;
+  Status gets a full-width `#st-cpu-current-card` below `#st-current-card` and the compact grid card
+  is a real `.status-card` that says evals vs verified. Sidebar lane chips now read the real
+  `session_n`/`n_rows` (the old `run.n` key never existed) and show rate/ETA when present.
+- Tests: **90 passed, exit 0** (CPU progress/lanes/node guards/home/shell/night-status/views/visual
+  audit/brief authoring/run identity/verify jobs/server warm); `compileall hornlab_search/gui` exit 0.
+- Live read-only evidence: CPU run `20261113T212428Z-screen-2c4d56` (4/120, ~6.1/h, ETA ~1141 min,
+  best 4.70, start 5.98) and GPU run `20261113T193536Z-screen-81c964` (125/200) resolve independently
+  through `App.get('/api/status')` / `'/api/lanes'`; the real ES module renders the live payload with
+  a progress bar and the expected KPI text.
+- Caveats: not visually verified in a browser (server restart + hard refresh required); verify-card
+  evidence is synthetic (no live CPU verify job). Pre-existing: the lanes table matches queue logs
+  by filename (`queue_*gpu*`), so a GPU night named without `gpu` (today's `queue_home80x60_day_...`)
+  still shows idle there — the GPU full-width card is unaffected.
+
 ## 2026-11-13 (~23Z) - A1 CACHE NAMESPACES + A2 SEAM FIX LANDED (offline)
 
 - A1: shared solve/mesh caches now live under `<cache>/{solve,mesh}/p2-<sha12>/` keyed on beat/bempp/mesher SHAs

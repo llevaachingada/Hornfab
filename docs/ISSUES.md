@@ -3,6 +3,15 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-13 (**Elites tab redesigned for non-technical readers: brief/typology constraints and isometric horn thumbnails, best-per-typology / best-per-brief browsing, paginated 24 at a time, CSV-path noise removed; payload extended with brief/family/brief_target; bo-study-v1.1 final offline integration landed (M2 sensitivity/proposal evidence, immutable run package + `hornlab-search study` CLI, durable proposal-cadence recovery, B8 adversarial full loop); profile-outline thumbnail geometry fixed after live check (closed outline split at the mouth rim, outer wall kept); card hierarchy tuned per owner (constraint line + score largest, gate pills smaller); no GitHub issue state changed**).
 
+Local-only, added 2026-11-13 (22:05Z) (**CPU lane GUI progress parity; no GitHub issue state changed**):
+- Resolved: CPU lane runs/solves now show status, progress bar, session %, rate/h, ETA, best/start
+  score and failures on Home and Status, matching the GPU running card; `/api/lanes` rows carry
+  rate/ETA/session/budget and resolve fresh `--config` jobs for both lanes.
+- Open (pre-existing, not introduced here): the lanes table matches queue logs by filename
+  (`queue_*gpu*`), so a GPU night named without `gpu` (e.g. `queue_home80x60_day_...`) shows idle
+  there while its full-width card is correct. A browser visual pass of the new cards is still
+  pending after a server restart.
+
 Local-only, added 2026-11-13 ~21Z (**solver speed plan; no GitHub issue state changed**):
 - Resolved: A1 namespaced caches landed. (was: solve/mesh cache does not check solver/mesher SHA (blocker before any fork pin bump). Plan: SOLVER_SPEED_IMPLEMENTATION_PLAN_2026-11-13 A1.
 - Resolved: A2 seam probe fixed.
