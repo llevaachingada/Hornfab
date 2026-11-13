@@ -1,6 +1,141 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-13 (~20:1xZ) - HOME 80x60/700 DAY QUEUE, CP-7b PARITY CLOSED, BO/CORE COMMIT SPLIT
+
+- **Owner direction (decisions delegated):** printed horns for the living room; ~80x60 is inspiration only;
+  priority is consistent directivity in both planes plus realistic loading down to a 700 Hz crossover with the
+  researched 1.4-inch drivers. New brief `examples/briefs/print_80x60_2026-11-13/room_80x60_700_hf1440_v7.yaml`
+  (parent room_90x60_800_shelf_v5; FaitalPRO HF1440, min_xo 700; cov weight 0.6, tolerance 4; dislope, flat_cv
+  and diag weights 1.0; load 1.0, z_min 0.5, loaded_hi 5600; f0 = f0_v = 700; envelope 600x780x480).
+  Cells are in `examples/typologies/print_80x60_2026-11-13/` (osse_ext_throat with seeds 1234 and 5678, plus
+  ath_core_14in), and all pass shape_check. keele, lecleach and rosse were dropped because their seed mouths are 706 mm.
+- **GPU night `home80x60_day_2026-11-13`** launched 11:30, cutoff 23:30, budgets 250/200/200 (runs/nights/).
+  First seed: pattern break H 584-635 Hz, V 641 Hz.
+- **CP-7b closed in aggregate:** four independent GPU/CPU pairs (s0, m4, s1, a1core); max |dSPL| 0.079 dB and
+  every pair within 0.2 dB. lane_parity.py counts one design per pair, so each per-pair file still reads FAIL.
+- **Review fixes (studies.js):** cancel no longer requires a ready panel; the policy selector reads a
+  CLI-written `proposal_policy`. Open review notes: launch idempotency is in-memory (StudyRunBridge) and must become
+  durable before a real launcher is wired; launch without a key returns invalid_input.
+- **Git split (owner):** BO/studies work goes to the local branch `bo-study` (not pushed); core goes to main.
+
+## 2026-11-13 (~17:xxZ) - BO-STUDY v1.1 CONTINUATION: S5 SEED PACKS, HOME TASK REGISTRY (offline; no solve)
+
+- Authorized continuation from the 15:0xZ session (parent integrates; no git push from this agent).
+  No BEM/GPU solve, no gpu-clean, no queue edit, no dataset/cache/run-dir write.
+- **S5 seed packs (`tools/analysis/seed_pack.py` + `tests/test_tools_analysis_seed_pack.py`):**
+  `build_seed_pack()` reads a catalog.json/CSV (catalog.py output) and optional offline_scores.json,
+  filters to complete-score records matching task/family/fidelity/objective_version, deduplicates
+  by design_hash, applies optional score-percentile floor, then selects k diverse exemplars with
+  greedy max-min diversity (feature: normalised J score; fallback to best-k when numpy absent).
+  Every selection keeps full source provenance (shard/row/run_id/design_hash/score/fidelity/config);
+  round-trip is "hash_identity" (recorded hash is non-empty hex) or "hash_missing"; full geometric
+  round-trip (calling config's GeneratedSpace.to_design and comparing resulting hash) is flagged
+  `needs_config=True` and NOT run here — no mesher dependency. Duplicate hashes, missing
+  provenance, and score/shard gaps are labelled, not silently dropped. No fabricated warm starts;
+  all selected hashes are verified verbatim present in the input catalog.
+  47 fake-fixture tests (no mesh or BEM); all pass.
+- **Home task registry (item e, `hornlab_search/studies/builders.py`):** second registered task
+  `p80x60__osse_ext_throat_home700_v7` (config `examples/typologies/print_80x60_2026-11-13/
+  p80x60__osse_ext_throat_700_v7.yaml`, brief `examples/briefs/print_80x60_2026-11-13/
+  room_80x60_700_hf1440_v7.yaml`, objective version 7) added to `_TASK_REGISTRY` and
+  `_ALLOWED_TASK_NAMES`. `_read_task()` now looks up the registry for defaults when no explicit
+  config/brief paths are supplied; the M0 native contract (`DEFAULT_CONFIG`/`DEFAULT_BRIEF`/v4)
+  is unchanged. Home task has no evidence root yet — any snapshot/training build without explicit
+  source paths raises `Unavailable` (insufficient data until first cohort). M0 test suite still
+  passes (7 builder + 9 evaluator + 1 lifecycle tests).
+- **Verification (this session):** project venv `pytest tests/test_tools_analysis_seed_pack.py
+  tests/test_study_builders.py tests/test_study_evaluator.py tests/test_gui_study_lifecycle.py
+  tests/test_bo_extensions.py tests/test_bo_policy.py tests/test_bo_pareto.py
+  tests/test_surrogate_capability.py tests/test_search_outcomes.py -p no:cacheprovider` →
+  **154 passed, exit 0**; studies suite (58 tests) → **58 passed, exit 0**; isolated bayes-venv
+  `tests/test_bo_*.py` → **101 passed, 4 skipped (mesher absent), exit 0**; `node --check`
+  `hornlab_search/gui/static/studies.js` + `app.js` → clean exit 0; `gui_study_lifecycle.mjs` →
+  "study lifecycle ok", exit 0. Full offline suite running in background.
+- **Committed and pushed** by the parent integrator at the owner's explicit request on 2026-11-13
+  (no merge, no force-push; the working-tree changes are split into the logical commits above).
+
+## 2026-11-13 (~15:0xZ) - BO-STUDY v1.1 COMPLETION: F0/F1/S1/S2, B7 WIRING, M3 BUILDERS/API/GUI (offline; no solve)
+
+- Owner-authorized continuation to full offline completion (3-worker waves + parent integrator,
+  one canonical checkout). No BEM/GPU solve, no gpu-clean, no queue edit, no dataset/cache write
+  from this session; only read-only evidence scans and synthetic/fake tests were run.
+- **M0 freeze signed** (`docs/research/bo_study/PARENT_M0_FREEZE.md`): status SIGNED 2026-11-13,
+  checklist complete, ATH eligibility statement recorded. Eligible for offline advisory M2/M3
+  work (197 native rows / 192 geometries / 197 physical solves; parity 197 compared / 200 replayed,
+  max |dJ| 0, zero backend calls); **not** eligible for a closed-loop benefit claim because
+  independent experiment groups are `insufficient_evidence`. No pooling of the four-config census,
+  narrow config, other brief/version/backend/fidelity, or the stale inline target.
+- **F0 (plain CMA, `cma.py`/new `search/outcomes.py`/config):** typed outcome classification
+  (complete/measured-gate/deterministic geometry-envelope-resource/transient/metric/unknown), new
+  opt-in `infeasible_penalty: resample_strict` + `error_policy: retry_same_then_stop`; strict
+  refusals are replaced ≤10x and never told; transient `solve_failed` retried on the same
+  candidate/spec at most 2 total backend calls, then a resumable stop before tell; metric/unknown
+  stop diagnostically; bounded draw cap includes seed/replacements/cached refusals while cache hits
+  consume no new/valid/attempt budget; only eligible complete scores become `best`;
+  `cma/strict_state.json` restores cumulative counters/caps, records explicit extensions and refuses
+  shrink/incompatible protocol. Missing-input gate penalties are **not** tell-eligible; only an
+  explicitly measured gate (`gate_measured`) is (v8 remains unregistered and does not emit it yet).
+- **S1/F1 (CMA-ME, `cma_me.py`):** archives the normalized geometry actually evaluated (warm mean
+  stays the emitter mean); `FailureExcludingGridArchive` excludes non-complete/missing-descriptor
+  rows from both search and result archives with full-batch status/value stitching and a
+  failure-last ranker (`qd.protocol=cma-me-archive-v2`, disclosed non-trajectory-neutral); MAE
+  thresholds are finite and `<1000`; opt-in infrastructure retry before `tell`; pending-intent
+  `qd/pending_batch.json` + `qd/strict_state.json` reconcile durable failures and unknown attempts
+  before any `ask`, with cumulative counters/caps persisted across resumes and explicit extensions.
+  Deterministic QD refusals retain the disclosed legacy finite-penalty emitter policy; no
+  feasible-only learning claim. The parent-review contract for a future constrained emitter is
+  recorded in `docs/research/bo_study/QD_CONSTRAINED_EMITTER_DESIGN.md` (proposed, not active).
+- **B7 wiring:** `bo/policy.py` unified `scalar`/`pareto`/`cma_seed`/`exploration` capability and
+  `fit_and_propose` dispatcher; `bo/__init__` exports the Pareto/constraint/cost/trust-region
+  surface; `bo.propose_by_policy` lazy delegate. Runner/GUI now select the policy; Pareto stays
+  capability-gated on validated cohort + complete canonical metrics + engine.
+- **M3 (studies/GUI):** `studies/builders.py` (contained snapshot/training/analysis/model/pool/
+  proposal artifacts; signed native evidence reuse; capability refusals are artifacts, never fake
+  candidates), `studies/evaluator.py` (`PipelineStudyEvaluator` with injected evaluate/lookup/
+  preflight/fit/propose, screen caps, 4-finalist+2-audit selection, outcome mapping, progress/RNG
+  restore; production wiring refuses until the real pipeline/lane are injected), `service.artifact_view`
+  (bounded, path-like rejection, binary/NPZ metadata only), package `proposal_policy` + a semantic
+  gate that refuses capability/model/pool-refusal proposals (accepts a selected candidate or a
+  labelled exploration fallback), CLI snapshot/analyze/propose now build/attach, and API
+  `GET /api/studies/<id>/artifacts/<kind-or-sha>` + `POST .../{package,launch,cancel,decision}`
+  (`/decide` preserved). Launch is an explicit 503 until an integrator injects the production
+  launcher; no shell/GPU cleanup path. GUI adds the frozen policy selector/capability card,
+  package/budget/lane/deadline/stop-recovery/verification/progress view, Package/Launch/Cancel/
+  Decision actions, typed artifact panels, idempotent duplicate-click handling, stale-generation/
+  abort/timer disposal, and a DOM-stub route-lifecycle test (no jsdom/Playwright is installed; full
+  browser render remains untested).
+- **S2 (read-only):** `tools/analysis/cache_producer_audit.py` + evidence
+  `docs/evidence/bo_study_2026-11-12/s2/{cache_producer_audit.json,md}`. Bounded sample: 25,931
+  entries (25,707 main + 224 CPU), 400 sampled, **400/400 with unknown producer evidence** (no
+  library pins in the status keys), 399/400 score-only reusable under today's lookup; 28
+  source-level caller sites recorded. No enforcement, no cache write/deletion, no default change;
+  legacy unknown stays unknown.
+- **Surrogate capability:** explicit v1-only matrix (`SUPPORTED_OBJECTIVE_VERSIONS=(1,)`, typed
+  `UnsupportedObjectiveError`, `capability_status`/`require_supported`); bundles record
+  `objective_version`/`scoring_capability`; train/predict/round/CLI refuse v2+ and incomplete v1
+  inputs instead of scoring newer objectives with v1 math or fabricating throat impedance.
+- **Dependency:** `pyproject.toml` optional `bayes` extra registered (`torch`, `botorch==0.18.1`,
+  `gpytorch==1.15.2`, `linear_operator==0.6.1`); the live venv is unchanged and BoTorch stays
+  lazily imported.
+- **Independent review:** an oracle review of F0/F1/S1/S2 found 4 real gaps (QD transient resume,
+  unmeasured-gate classification, QD cumulative caps, strict stop-reason). All four were fixed and
+  pinned by tests before the final suite.
+- **Verification (current tree):** project venv `pytest tests -o addopts='' -q -m "not gpu and not
+  crosscheck and not slow"` -> **3577 passed, 18 skipped, 21 deselected, exit 0** (23:30);
+  isolated bayes venv bo suite -> **131 passed, 4 skipped, exit 0**; `compileall` over
+  search/config/bo/studies/gui/surrogate/tools and `node --check` studies.js+app.js clean; CLI
+  smoke: create/snapshot/analyze built artifacts in both venvs, propose returned an honest
+  `capability_missing` artifact (project venv lacks BoTorch; bayes venv lacks hornlab_mesher for
+  candidate revalidation), package correctly refused that proposal, and a valid fixture package
+  `run --dry-run` returned exit 0 with the exact 18/6/24/120 budget/lane/deadline. No real BEM
+  solve or acoustic/speed claim.
+- **Environment limit:** no single sanctioned interpreter currently has **both** BoTorch and
+  `hornlab_mesher`; a live study fit+revalidation needs a combined `bayes` environment (or the
+  M2 split-engine path). The committed M2 proposal remains the real precomputed evidence; the
+  study builder code path is fixture/engine-tested. Real pilots/adoption remain owner-gated.
+- **No git push/merge** from this session; only the parent integrator edited files.
+
 ## 2026-11-13 (~06:2xZ) - BO-STUDY v1.1 FINAL INTEGRATION: M2 EVIDENCE, EXECUTION PACKAGE, B8 FULL LOOP (offline; no solve)
 
 - Owner-authorized final offline pass (3 background lanes + parent integrator, one canonical

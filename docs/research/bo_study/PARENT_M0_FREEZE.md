@@ -1,7 +1,10 @@
-# Parent M0 freeze — draft (bo-study-v1.1)
+# Parent M0 freeze — SIGNED (bo-study-v1.1)
 
-Status: DRAFT pending the R0 brief-target rescore rerun and S0 native-only census. Parent commits
-and version-bumps this file once those two reports land. B2 is treated as deliverable-complete.
+Status: **SIGNED 2026-11-13.** The R0 brief-target rescore/native-only replay and the S0 native-only
+census landed; the parent re-read both artifacts and the M2 interface tests before signing. B2 is
+deliverable-complete. This signature freezes the task/cohort/encoding/metric contract for offline
+M2/M3 work; it does not authorize a real solve, a production default change, or an acoustic benefit
+claim. Evidence paths are relative to `docs/evidence/bo_study_2026-11-12/`.
 
 ## 1. Frozen candidate task
 
@@ -50,16 +53,28 @@ and version-bumps this file once those two reports land. B2 is treated as delive
 - Per-plane f0 masks come from the resolved Target (`f0_effective_hz`, `f0_v_hz`);
   cov mask = band ∧ f ≥ f0; diag uses the round reference 50°.
 
-## 5. Cohort and eligibility (current evidence, to be finalized)
+## 5. Cohort and eligibility (final evidence)
 
 - Parent-observed native-only: **197 ok rows** (192 screen + 5 verify), 192 unique geometries,
   197 unique physical solves; run_id absent on all native rows → independent-experiment identity
-  is `insufficient_evidence` unless recovered from run provenance explicitly.
-- S0 four-config descriptive census: 3,185 records / 2,412 complete replayable rows.
-- R0 replay pilot: 200 scored rows, 195 parity-compared, max |ΔJ| 0, zero backend calls; the
-  five unpaired rows are stored-v3 records replayed under a v4 variant.
-- **Pending R0 fix**: brief-target scoring (`2500–5500 ×2`) + native-only replay counts.
-- **Pending S0**: native-only census section.
+  is `insufficient_evidence` unless recovered from run provenance explicitly. Source
+  `s0/cohorts.json` (`ath_native_census`).
+- S0 four-config descriptive census: 3,185 records / 2,412 complete replayable rows; native-only
+  census status `eligible_with_provenance_gaps`, `independent_experiments:
+  insufficient_evidence`. Source `s0/cohorts.json`.
+- R0 replay final: **200 replayed / 197 parity-compared, max |ΔJ| = 0**, zero backend calls; the
+  five unpaired rows are stored-v3 records replayed under a v4 variant and are labelled
+  unpaired, not silently compared. Brief-target scoring (`2500–5500 Å⁻²`) is included in the
+  replayed identity. Source `r0/offline_scores.json` (`parity.n_compared = 197`,
+  `parity.max_abs_delta = 0.0`, `backend_guard.calls = 0`).
+- M1 evidence (`s4/parameter_study.json`, `s6/source_fidelity.json`) was regenerated against the
+  final R0 artifact: 200 replayed, 197 compared, five actual selectable designs, recommendation
+  status suppressed because independent experiment groups are not established. This is an honest
+  descriptive/insufficient-evidence outcome, not a failure of the replay machinery and not a
+  reason to pool another brief.
+- The native cohort remains **descriptive/advisory** for M2: 197 rows but fewer than the frozen
+  independent-group eligibility policy. BoTorch proposals may be generated and tested; they are
+  off-policy predictions, never closed-loop benefit evidence.
 
 ## 6. Advisory BoTorch dependency (frozen)
 
@@ -73,9 +88,33 @@ Live venv unchanged; lazy import only; `model_unavailable` when absent.
 - [x] B2 activity ledger + geometry fixtures + encoding/pool fixtures (tests offline green)
 - [x] S0 catalog/cohorts mechanics (88 new tests green)
 - [x] R0 replay/parity/preservation mechanics (zero backend calls)
-- [ ] R0 brief-target rescore + native-only counts
-- [ ] S0 native-only census
-- [ ] Parent freeze signed; ATH eligibility statement recorded
+- [x] R0 brief-target rescore + native-only counts: `r0/offline_scores.json`, 200 replayed /
+      197 compared / max |ΔJ| 0 / zero backend calls.
+- [x] S0 native-only census: `s0/cohorts.json`, `eligible_with_provenance_gaps`;
+      independent experiments `insufficient_evidence`.
+- [x] Parent freeze signed; ATH eligibility statement recorded (section 9).
+
+## 9. ATH eligibility statement (signed)
+
+The candidate task **is eligible for offline advisory M2/M3 work** and **is not yet eligible for a
+closed-loop optimization claim**:
+
+- Eligible: `native__ath_core_v4` resolved through `native_ath_core_2in_v4` has 197 complete
+  replayable native rows / 192 unique geometries / 197 unique physical solves with exact v4 replay
+  parity and zero backend calls. That supports a real TrainingSet, pool, scalar fit and advisory
+  proposals under the frozen encoding (d=13, `morph_exponent` projected at 4.0).
+- Not eligible: the archive does not establish independent experiment groups (run identity is
+  absent), so held-out/importance recommendations are suppressed and a closed-loop BO speed or
+  acoustic-benefit claim is not supported. Five nominal verify rows are not five independent
+  replicates.
+- Still excluded: pooling the four-config descriptive census, the narrow `native__ath_core_v4_narrow`
+  config, other briefs/objective versions/backends/fidelity specs, or treating the inline YAML
+  target (500–5500 Hz) as the resolved brief (300–8000 Hz, f0 1280 Hz, narrow ratio 2).
+- Context limits stay visible: 2-inch uniform-piston source with the f11≈3957 Hz caveat; loading
+  weight 0; v8 remains unregistered; above the source marker these are geometry comparisons under
+  that excitation, not driver-efficiency/SPL/distortion evidence.
+- A real pilot still requires the separately scheduled budget/deadline/lane approval. This
+  signature authorizes no solve, dataset/cache/queue/default change, or adoption decision.
 
 ## 8. M1 artifact schema v1 (parent-frozen)
 
@@ -96,8 +135,8 @@ Two immutable analysis artifacts under `scratch/bo_m0/m1/` (then `runs/analysis/
   "limitations": [ ... ] }
 ```
 
-**`source_fidelity.json`** (S6 owner): per-design fidelity/source context � DI source,
-balloon-vs-cuts, verify pairing status, physical size, missingness � read-only from runs.
+**`source_fidelity.json`** (S6 owner): per-design fidelity/source context � DI source,
+balloon-vs-cuts, verify pairing status, physical size, missingness � read-only from runs.
 
 S10 renders both through the existing `viewAnalysis` (`ANALYSIS_TOOL_JSONS` += the two tool names;
 backend `analysis_report` already passes JSON verbatim; no DB, no jobs, no solve action).

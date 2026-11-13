@@ -3,6 +3,41 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-13 (**Elites tab redesigned for non-technical readers: brief/typology constraints and isometric horn thumbnails, best-per-typology / best-per-brief browsing, paginated 24 at a time, CSV-path noise removed; payload extended with brief/family/brief_target; bo-study-v1.1 final offline integration landed (M2 sensitivity/proposal evidence, immutable run package + `hornlab-search study` CLI, durable proposal-cadence recovery, B8 adversarial full loop); profile-outline thumbnail geometry fixed after live check (closed outline split at the mouth rim, outer wall kept); card hierarchy tuned per owner (constraint line + score largest, gate pills smaller); no GitHub issue state changed**).
 
+Local-only, added 2026-11-13 ~20Z (**no GitHub issue state changed**):
+- Resolved: CP-7b GPU/CPU lane parity, closed in aggregate (4 pairs, max 0.079 dB).
+- Open: StudyRunBridge launch idempotency is in-memory; make it durable before any real launcher is wired.
+- Open: lane_parity.py should pool pairs, so the per-pair FAIL label stops being misleading.
+
+Local-only, added 2026-11-13 (**S5 seed packs + home task registry; no GitHub issue state changed**):
+- Resolved: `tools/analysis/seed_pack.py` (S5) created with 47 fake-fixture tests; greedy max-min
+  diversity selection, full provenance, no fabricated warm starts, hash-identity round-trip.
+- Resolved: home target task `p80x60__osse_ext_throat_home700_v7` (objective v7, 80x60/700) added to
+  `studies/builders.py` task registry. Home task returns Unavailable (insufficient data) until an
+  explicit evidence source is provided; M0 freeze contract unchanged.
+- Open (unchanged): production launcher/factory not wired (503); no combined BoTorch+mesher venv; home
+  task evidence root does not exist until first cohort; S5 full geometric round-trip requires config loading.
+
+Local-only, added 2026-11-13 (**bo-study-v1.1 offline completion: F0/F1/S1/S2 + B7 + M3 builders/API/GUI; no GitHub issue state changed**):
+- Resolved: F0 typed outcomes/strict plain-CMA policy (`resample_strict`, same-candidate retry,
+  bounded draws, `cma/strict_state.json`), S1 CMA-ME seed identity, F1 QD failure exclusion in both
+  archives + pending/cumulative resume, B7 Pareto/constraint/cost/trust-region exports + unified
+  `bo/policy.py`, M3 study builders/evaluator/API endpoints/package policy gate, GUI policy selector
+  + package/launch/cancel/artifact lifecycle, S2 read-only cache-producer audit, and the explicit
+  surrogate v1-only capability refusal. M0 freeze signed with the ATH eligibility statement;
+  `pyproject.toml` `bayes` extra registered.
+- Fixed during the pass: strict cache hits no longer consume new/valid/attempt budget; failed seeds
+  are never `best`; unmeasured-gate penalties are not tell-eligible; QD transient stops are
+  resumable from durable rows; QD cumulative caps persist/refuse shrink/extensions; strict stop
+  reasons name the cap that fired; a capability/model/pool-refusal proposal cannot be packaged.
+- Open (by design, not implementation gaps): no production `pipeline_factory`/launcher is wired, so
+  GUI/API launch returns 503 until an integrator injects the real lane/journal adapter; real BEM
+  execution, acoustic validation, and pilots remain owner-scheduled. No single sanctioned venv has
+  both BoTorch and `hornlab_mesher`, so a live study proposal fit+revalidation is not executable
+  here; the M2 proposal is the real precomputed evidence. GUI lifecycle is a DOM-stub test (no
+  jsdom/Playwright), not a full browser render. S2 is audit-only; no producer enforcement.
+- Verification: project venv 3577 passed / 18 skipped / 21 deselected, exit 0; isolated bayes venv
+  131 passed / 4 skipped, exit 0; compileall and node checks clean.
+
 Local-only, added 2026-11-13 (**bo-study-v1.1 final integration; offline; no GitHub issue state changed**):
 - Fixed: `parameter_study` artifact predated the independent-evidence gate (claimed recommendation
   allowed); regenerated suppressed with parity 197/200 max|dJ| 0. `source_fidelity` now joins the
@@ -14,13 +49,16 @@ Local-only, added 2026-11-13 (**bo-study-v1.1 final integration; offline; no Git
   while the isolated bayes venv runs them. Stale rev2 GUI K-law pin aligned to the shipped wording.
 - S11 complete: both pilot manifests validate through the live CLI (`errors=0 warnings=0`), with
   committed validation records; the superseded prototype test was removed.
-- Open: production study evaluator/lane adapter is not implemented (`StudyEvaluatorAdapter`
-  returns `capability_missing`; `run_package` refuses without the `b5-journal-*`/`b5-owned-lane-v1`
-  contracts). This blocks executing the S9 A/B matrix; real pilots remain owner-scheduled.
-- Open: `studies/cli.py` snapshot/analyze/propose report an existing artifact and return typed
-  `Unavailable` (exit 6); the real builders are not implemented.
-- Open: `pyproject.toml` optional `bayes` extra is not registered; the sanctioned engine is the
-  isolated `C:\Users\hunte\Hrns\oc-wt\bo-study\bayes-venv` (botorch 0.18.1).
+- Resolved in the newer F0/F1/M3 entry: `PipelineStudyEvaluator` + `build_production_wiring` provide
+  the production-shaped evaluator contract and are offline-tested with injected fakes; the real
+  BEM pipeline/lane launcher still requires an integrator injection, so launch is an explicit 503
+  and the S9 A/B matrix/pilots remain owner-scheduled.
+- Resolved: `studies/cli.py` `snapshot`/`analyze`/`propose` now build and attach snapshot/training/
+  analysis/model/pool/proposal artifacts; a proposal that is a capability/model/pool refusal is
+  reported as such and cannot be packaged.
+- Resolved: `pyproject.toml` now registers the optional `bayes` extra (`botorch==0.18.1`,
+  `gpytorch==1.15.2`, `linear_operator==0.6.1`, `torch>=2.2`); the sanctioned engine is still the
+  isolated `C:\Users\hunte\Hrns\oc-wt\bo-study\bayes-venv`, and the live venv is unchanged.
 - Open: 3 native rows (shard 57, rows 276-278) were uncatalogued at snapshot time; a later catalog
   regeneration picks them up. The S4 artifact records its own snapshot counts/timestamp.
 - Note: untracked `cache_probe/` and `dataset_probe/` probe artifacts were produced by the parallel
