@@ -427,6 +427,87 @@ class StudyService:
         return self._mutate(f'{study_id}:job:{job_id}', idempotency_key, payload, action)[0]
 
 
+    # ---------------------------------------------------------------- B4/B5 launch claims
+    @staticmethod
+    def _launch(row):
+        if row is None:
+            return None
+        out = {'study_id': row['study_id'], 'package_id': row['package_id'],
+               'idempotency_key': row['idempotency_key'], 'status': row['status'],
+               'result': json.loads(row['result_json']) if row['result_json'] else None}
+        if row['error']:
+            out['error'] = row['error']
+        return out
+
+    def get_launch(self, study_id, package_id):
+        """Durable launch record for ``(study, package)`` or None; survives restarts."""
+        with closing(self.store.connect()) as conn:
+            return self._launch(conn.execute('SELECT * FROM launches WHERE study_id=? AND package_id=?',
+                                             (study_id, package_id)).fetchone())
+
+    def claim_launch(self, study_id, package_id, idempotency_key):
+        """Atomically reserve the single launch of a package BEFORE dispatch.
+
+        Returns ``(record, created)``.  ``created`` is False when any earlier
+        claim exists (whatever its key or status); the caller decides replay vs
+        conflict.  Never deletes or overwrites an existing claim.
+        """
+        if not isinstance(idempotency_key, str) or not idempotency_key:
+            raise StudyError('idempotency key required')
+        conn = self.store.connect()
+        try:
+            conn.execute('BEGIN IMMEDIATE')
+            self._study(conn, study_id)
+            row = conn.execute('SELECT * FROM launches WHERE study_id=? AND package_id=?',
+                               (study_id, package_id)).fetchone()
+            if row is not None:
+                conn.commit()
+                return self._launch(row), False
+            conn.execute("INSERT INTO launches(study_id,package_id,idempotency_key,status) VALUES (?,?,?,'launching')",
+                         (study_id, package_id, idempotency_key))
+            row = conn.execute('SELECT * FROM launches WHERE study_id=? AND package_id=?',
+                               (study_id, package_id)).fetchone()
+            conn.commit()
+            return self._launch(row), True
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            conn.close()
+
+    def settle_launch(self, study_id, package_id, idempotency_key, status, *, result=None, error=None):
+        """Move a 'launching' claim to 'launched' (with result) or 'unknown'.
+
+        CAS on (key, status='launching'); a settled record is never rewritten.
+        """
+        if status not in ('launched', 'unknown'):
+            raise StudyError('launch status must be launched or unknown')
+        conn = self.store.connect()
+        try:
+            conn.execute('BEGIN IMMEDIATE')
+            cur = conn.execute("UPDATE launches SET status=?,result_json=?,error=? WHERE study_id=? AND package_id=? "
+                               "AND idempotency_key=? AND status='launching'",
+                               (status, canonical(result) if result is not None else None, error,
+                                study_id, package_id, idempotency_key))
+            if cur.rowcount != 1:
+                raise Conflict('launch claim is not pending for this key')
+            row = conn.execute('SELECT * FROM launches WHERE study_id=? AND package_id=?',
+                               (study_id, package_id)).fetchone()
+            conn.commit()
+            return self._launch(row)
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            conn.close()
+
+    def release_launch(self, study_id, package_id, idempotency_key):
+        """Drop a 'launching' claim ONLY after a typed refusal proved nothing was dispatched."""
+        with closing(self.store.connect()) as conn:
+            conn.execute("DELETE FROM launches WHERE study_id=? AND package_id=? AND idempotency_key=? "
+                         "AND status='launching'", (study_id, package_id, idempotency_key))
+
+
 class DraftAttemptJournal:
     """Durable attempt mechanics for testing; not an execution authorization adapter.
 

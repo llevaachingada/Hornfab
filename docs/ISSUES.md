@@ -1,7 +1,12 @@
-﻿# ISSUES
+# ISSUES
 
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-13 (**Elites tab redesigned for non-technical readers: brief/typology constraints and isometric horn thumbnails, best-per-typology / best-per-brief browsing, paginated 24 at a time, CSV-path noise removed; payload extended with brief/family/brief_target; bo-study-v1.1 final offline integration landed (M2 sensitivity/proposal evidence, immutable run package + `hornlab-search study` CLI, durable proposal-cadence recovery, B8 adversarial full loop); profile-outline thumbnail geometry fixed after live check (closed outline split at the mouth rim, outer wall kept); card hierarchy tuned per owner (constraint line + score largest, gate pills smaller); no GitHub issue state changed**).
+
+Local-only, added 2026-11-13 ~24Z (**bo-study B4/B5/B8; no GitHub issue state changed**):
+- Resolved: launch idempotency is durable across GUI restarts (`launches` table, migration 2).
+- Resolved: B8 offline end-to-end through CLI and HTTP.
+- Open: S7 surrogate validation, S8 discovery/QD-Pareto, S5 config round-trip, lane_parity pooled mode (branch claude/eloquent-ride-owt01w).
 
 Local-only, added 2026-11-13 ~21Z (**solver speed plan; no GitHub issue state changed**):
 - Resolved: A1 namespaced caches landed. (was: solve/mesh cache does not check solver/mesher SHA (blocker before any fork pin bump). Plan: SOLVER_SPEED_IMPLEMENTATION_PLAN_2026-11-13 A1.

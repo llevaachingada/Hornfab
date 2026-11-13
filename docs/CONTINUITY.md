@@ -1,5 +1,18 @@
-﻿# CONTINUITY
+# CONTINUITY
 
+
+## 2026-11-13 (~24Z) - B4/B5 DURABLE LAUNCH IDEMPOTENCY + B8 CLI/HTTP END-TO-END + INDEX DEDUPE (offline)
+
+- B4/B5: `StudyRunBridge` launch dedup moved from the in-memory `_launched` dict into the studies SQLite
+  registry (`launches` table, store migration 2). Claim is written before the launcher runs; same key replays,
+  other key 409 `launch_conflict`, ambiguous launch or crash mid-launch = 503 `unknown` (never relaunched).
+  Absent key returns `missing_idempotency_key` (400) on launch/cancel/CPU submit. Tests: `tests/test_study_launch_durable.py` (7).
+- B8: `tests/test_b8_end_to_end_cli_http.py` (2) drives create -> snapshot -> explain -> propose -> package ->
+  dry-run -> fake run -> decide -> export via `hornlab-search study` and via a real in-process HTTP server
+  (restart replays the launch). New read-only route `GET /api/studies/<id>/export`.
+- docs/INDEX.md: duplicated second half merged; 6 unique rows kept, 1 stale pre-archive row dropped (archived copy listed).
+- Pre-existing failures on main in the cloud env (not touched): experiments_manifest (Windows paths), bo_sensitivity_real (3), design_generated (1).
+- Next (same branch): lane_parity pooled mode, S5 config round-trip, S7 surrogate_validation, S8 descriptors/cards.
 
 ## 2026-11-13 (~23Z) - A1 CACHE NAMESPACES + A2 SEAM FIX LANDED (offline)
 
