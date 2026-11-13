@@ -1,0 +1,13 @@
+# Speed program, ROUND A - today's solver (pin 0850ef39). Design: docs/queue/SPEED_PROGRAM_2026-11-13.md
+# Two arms only, batch 1, --budget 1 (seed geometry only, so every arm solves the same design).
+# These are the baselines: Round B is compared against them, and new-b1 vs these arms IS the fused-path parity check.
+# Run AFTER finishing the interrupted night (search/cma.py refuses a strict resume after a library-SHA change).
+night: speed_round_a_2026-11-14
+lane: gpu
+jobs:
+  - {id: base_b1_osse, kind: search, budget: 1, mode: screen, timeout_s: 3600,
+     config: examples/typologies/print_80x60_2026-11-13/p80x60__osse_ext_throat_700_v7.yaml,
+     env: {HORNLAB_FREQ_BATCH_SIZE: "1"}}
+  - {id: base_b1_ath,  kind: search, budget: 1, mode: screen, timeout_s: 3600,
+     config: examples/typologies/print_80x60_2026-11-13/p80x60__ath_core_14in_700_v7.yaml,
+     env: {HORNLAB_FREQ_BATCH_SIZE: "1"}}

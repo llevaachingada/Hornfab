@@ -1,5 +1,10 @@
 # Combined solver-speed campaign (2026-11-13/14)
 
+**SUPERSEDED 2026-11-13** by `docs/queue/SPEED_PROGRAM_2026-11-13.md` (Oracle-reviewed). Kept for history: the
+program changes the arm set (old-solver batch-12 arms dropped, part two folded into the new solver SHA) and fixes
+the ordering (finish the interrupted night before the solver swap - strict resume refuses after a library-SHA change).
+Do not launch the night files this document names; they are deleted.
+
 **Purpose.** Adopt more than one speedup at once, and prove the combination, instead of adopting G2 in isolation and
 discovering later that the wins overlap.
 

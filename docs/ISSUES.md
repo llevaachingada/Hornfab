@@ -3,6 +3,20 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-13 (**Elites tab redesigned for non-technical readers: brief/typology constraints and isometric horn thumbnails, best-per-typology / best-per-brief browsing, paginated 24 at a time, CSV-path noise removed; payload extended with brief/family/brief_target; bo-study-v1.1 final offline integration landed (M2 sensitivity/proposal evidence, immutable run package + `hornlab-search study` CLI, durable proposal-cadence recovery, B8 adversarial full loop); profile-outline thumbnail geometry fixed after live check (closed outline split at the mouth rim, outer wall kept); card hierarchy tuned per owner (constraint line + score largest, gate pills smaller); no GitHub issue state changed**).
 
+Local-only, added 2026-11-13 (23:3xZ) (**Oracle-reviewed speed program replaces the campaign design; no GitHub issue state changed**):
+- Ready (not launched): `docs/queue/SPEED_PROGRAM_2026-11-13.md`; `speed_round_a` (2 arms) and `speed_round_b`
+  (4 arms), both `--dry-run` exit 0. Old campaign doc superseded, its night files deleted.
+- **Ordering is binding:** finish the interrupted night (`--resume runs/20261113T193536Z-screen-81c964 --budget 200`)
+  **before** the solver swap - `search/cma.py:702` refuses a strict resume after a library-SHA change.
+- Open (next, no GPU): write solver upgrade part two (host-side identity guard) on top of the existing fork commit,
+  one new SHA; Julia CPU testset green.
+- Open: batching must become `solve.freq_batch_size` (config key) if adopted, so it appears in `config_sha`; the env
+  var is the trial mechanism only.
+- Open: shared (WDDM) spill is still unmeasured by the night runner; the <512 MiB bar needs the `_bench_common`
+  counter on the batch-12 arms.
+- Open: mesher ancestry check - `merge-base --is-ancestor d740c28 55da4f46` after fetching from `jamescollinharky`
+  (the local checkout's `origin` is upstream `m3gnus`, the pin is on the fork).
+
 Local-only, added 2026-11-13 (23:3xZ) (**combined speed campaign designed; no GitHub issue state changed**):
 - Ready (not launched): `docs/queue/speed_combo_2026-11-14_{oldpin,newpin}.yaml`, a pin x batch factorial on two print
   cells, `--dry-run` exit 0. Design + pre-declared rules: `docs/queue/SPEED_COMBINED_2026-11-13.md`. ~45-55 GPU-min.

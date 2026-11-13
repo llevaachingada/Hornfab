@@ -1,6 +1,30 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-13 (23:3xZ) - ORACLE-REVIEWED SPEED PROGRAM REPLACES THE CAMPAIGN DESIGN (ordering fixed; part two folded in)
+
+- The Oracle review of the campaign found three design faults, all now fixed in
+  `docs/queue/SPEED_PROGRAM_2026-11-13.md` (the campaign doc is marked SUPERSEDED; its night files are deleted):
+  1. **Ordering.** The interrupted night must be finished **before** the solver swap: `search/cma.py:702` refuses a
+     strict resume after any library-SHA change, so swapping first would strand the 153 candidates already paid for.
+     Program order is now: finish -> write part two -> baseline -> swap -> measure -> merge.
+  2. **Wasted arms.** Old-solver batch-12 arms prove batching on a solver that is about to be replaced; dropped. The
+     new-solver arms (batch 1 vs 12 on both designs) carry the batching effect, the upgrade effect and the interaction.
+  3. **Part two should not be a third measured level.** The host-side identity-matrix guard is folded into the **same**
+     new fork SHA; if attribution is ever needed, bisect the two fork commits instead of spending 4 arms and 2 swaps.
+- **Merge decisions recorded:** upgrade = merge fully (becomes the pin) if it passes the bars; part two = folded in;
+  batching = merge **behind a config key** (`freq_batch_size`), default 12 in CUDA examples, env var as fallback;
+  mesher = **out of scope** unless the pinned SHA provably predates upstream's FREEFORM density/cost fix **and** a live
+  typology is FREEFORM.
+- **Bars unchanged from the campaign** (0.85 wall ratio, 0.039 dB / 1 deg parity, peak VRAM lower, shared spill
+  < 512 MiB) and every arm still records frequency count and DOF.
+- **Mesher check is three commands, zero GPU** (`git fetch` the pin from `jamescollinharky`, then
+  `merge-base --is-ancestor d740c28 55da4f46`). Note the remotes differ: the local checkout's `origin` is upstream
+  `m3gnus`, the pin lives on the fork.
+- Ceiling points calibrated CPU-only: mouth-res 5.03 / 4.46 / 4.09 = **15,878 / 20,152 / 23,850** quarter DOF.
+- Night files: `docs/queue/speed_round_a_2026-11-14.yaml` (2 arms) and `..._round_b_2026-11-14.yaml` (4 arms), both
+  `--dry-run` exit 0. Nothing launched; the pin is still `0850ef39`.
+
 ## 2026-11-13 (23:3xZ) - COMBINED SPEED CAMPAIGN DESIGNED (PIN x BATCHING FACTORIAL); THREE RECON LANES REPORTED
 
 - **Why combined:** the owner wants to adopt more than G2 at once. A3 (skip the fused identity cache) and frequency
