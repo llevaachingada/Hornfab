@@ -4177,7 +4177,12 @@ function _eliteCoverageTitle(c) {
 
 /** One profile ([[z_mm, r_mm]...]) → n radius samples ordered throat → mouth. Full-mesh
  *  profiles list nodes from both wall sides, so the radius is the absolute wall distance. */
-function _eliteProfileSeries(arr, n = 26) {
+function _eliteProfileSeries(arr, n = 24) {
+  // /api/design's profile is a CLOSED 2-D outline: it walks out along the outer wall to the
+  // mouth rim and back along the axis/inner side. Binning every point by z and averaging the
+  // two branches therefore melts the wall into a midpoint (the old "flat lollipop" thumbnail).
+  // Split the outline at its widest point (the mouth rim), bin each branch separately, and keep
+  // the OUTER branch (per-z max) — that is the silhouette a horn actually has.
   const raw = [];
   if (Array.isArray(arr)) {
     for (const p of arr) {
@@ -4188,21 +4193,35 @@ function _eliteProfileSeries(arr, n = 26) {
     }
   }
   if (raw.length < 2) return null;
-  raw.sort((a, b) => a[0] - b[0]);
-  const z0 = raw[0][0], z1 = raw[raw.length - 1][0];
+  const z0 = Math.min(...raw.map(p => p[0])), z1 = Math.max(...raw.map(p => p[0]));
   if (!(z1 > z0)) return null;
-  const half = (z1 - z0) / (n - 1) / 2;
+  // Split in the OUTLINE'S OWN ORDER (sorting first would put every mouth-rim point last and
+  // collapse one branch to a single point — the series then reads as a constant).
+  let imax = 0;
+  for (let i = 1; i < raw.length; i++) if (raw[i][1] > raw[imax][1]) imax = i;
+  const outer = raw.slice(0, imax + 1);      // throat -> mouth rim (one side)
+  const back = raw.slice(imax);              // mouth rim -> throat (other side / axis)
+  const binNearest = (pts) => {
+    const out = new Array(n).fill(null);
+    for (let i = 0; i < n; i++) {
+      const z = z0 + (z1 - z0) * i / (n - 1);
+      let best = null, bestD = Infinity;
+      for (const [rz, rr] of pts) {
+        const d = Math.abs(rz - z);
+        if (d < bestD) { bestD = d; best = rr; }
+      }
+      out[i] = best;
+    }
+    return out;
+  };
+  const a = binNearest(outer), b = binNearest(back);
   const out = [];
   for (let i = 0; i < n; i++) {
-    const z = z0 + (z1 - z0) * i / (n - 1);
-    let sum = 0, count = 0, near = 0, nearD = Infinity;
-    for (const [rz, rr] of raw) {
-      const d = Math.abs(rz - z);
-      if (d <= half) { sum += rr; count++; }
-      if (d < nearD) { nearD = d; near = rr; }
-    }
-    out.push(count ? sum / count : near);
+    const va = a[i] == null ? 0 : a[i], vb = b[i] == null ? 0 : b[i];
+    out.push(Math.max(va, vb));
   }
+  // Orient throat -> mouth: the mouth is the wide end.
+  if (out[0] > out[n - 1]) out.reverse();
   return out;
 }
 

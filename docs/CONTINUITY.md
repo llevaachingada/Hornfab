@@ -99,6 +99,14 @@
   test_feasibility_summary_and_objective_suffix` (shipped wording "V short: needs 498 mm" vs the pin's
   old "does not fit"); its correction is in flight in the main checkout and is committed with this
   merge so `main` stays green.
+- **Thumbnail geometry fix (found live after the first ship):** `/api/design`'s `profile` is a
+  **closed 2-D outline** (out along the outer wall to the mouth rim, back along the axis), not a
+  radius-along-axis series. The first implementation binned every point by z and averaged the two
+  branches, which flattened the wall into a midpoint (constant 203 mm in practice) — the cards drew
+  a "lollipop" (big mouth ellipse + sliver). `_eliteProfileSeries` now splits the outline **in its
+  original order** at the widest point (mouth rim), bins each branch separately and keeps the per-z
+  outer wall; the series runs 25 → 203 mm for `…d7d61a7e4c4d`, and the thumbnails render a proper
+  throat → flare → mouth isometric horn. Verified live on 8765 (12 thumbnails, no page errors).
 - Screenshots (worktree server on 8801): `%TEMP%\opencode\elites_after\` — dark/light at 1500/900,
   brief/family/both/all filters, page 2, empty state, card zoom.
 
