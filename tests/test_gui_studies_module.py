@@ -35,6 +35,10 @@ const link = m.studyRunLink("run1", "study1", "execute", true);
 assert.ok(link.startsWith("#/run/run1/verify?") && link.includes("study=study1") && link.includes("return="));
 assert.equal(m.studyRunLink("javascript:alert", "study1"), null);
 assert.throws(() => m.studyRoute("../x"));
+const policyHtml = m.renderStudyPanel(study, {...common, phase:"propose", data:{}});
+for (const text of ["scalar", "coverage-ripple", "cma-seed", "exploration", "Policy capabilities are not present"]) assert.ok(policyHtml.includes(text));
+const execHtml = m.renderStudyPanel(study, {...common, phase:"execute", data:{lane:"cpu", verification:{finalists:4, audits:2}}});
+assert.ok(execHtml.includes("4 finalists") && execHtml.includes("2 audits") && execHtml.includes("cpu"));
 
 let clickHandler, requests = 0, sends = 0, aborted = false, resolveAction;
 const root = {innerHTML:"", addEventListener:(name,fn)=>clickHandler=fn, removeEventListener:(name,fn)=>{if(fn===clickHandler) clickHandler=null;}, contains:()=>true};

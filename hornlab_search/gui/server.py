@@ -32,7 +32,7 @@ _LOG = logging.getLogger(__name__)
 
 class App:
     def __init__(self, root: Path, runs: Path | None = None, analysis_dir: Path | None = None,
-                 study_service=None, study_jobs=None):
+                 study_service=None, study_jobs=None, study_runs=None, study_launcher=None):
         self.root = root.resolve()
         self.runs = (runs or self.root / "runs").resolve()
         self.analysis_dir = (Path(analysis_dir) if analysis_dir is not None
@@ -40,12 +40,20 @@ class App:
         self.jobs = JobManager(self.root, self.runs)
         self._study_service = study_service
         self._study_jobs = study_jobs
+        self._study_runs = study_runs
+        self._study_launcher = study_launcher
 
     def _studies(self):
         if self._study_service is None:
             from hornlab_search.studies.service import StudyService
             self._study_service = StudyService(self.runs / "studies")
         return self._study_service
+
+    def _study_run_bridge(self):
+        if self._study_runs is None:
+            from .study_jobs import StudyRunBridge
+            self._study_runs = StudyRunBridge(self._studies(), launcher=self._study_launcher)
+        return self._study_runs
 
     # GET routes return (status, json-able) ; raise FileNotFoundError / ValueError for 404 / 400
     def get(self, path: str, q: dict) -> object:
@@ -64,6 +72,8 @@ class App:
                 return service.get_study(parts[1])
             if len(parts) == 3 and parts[2] == "jobs":
                 return {"jobs": service.list_cpu_jobs(parts[1], limit=50)}
+            if len(parts) == 4 and parts[2] == "artifacts":
+                return service.artifact_view(parts[1], parts[3])
             if len(parts) == 3:
                 study = service.get_study(parts[1])
                 artifact = None
@@ -237,9 +247,15 @@ class App:
                 return service.create_study(body.get("spec"), body.get("idempotency_key"), body.get("parent_id"))
             if len(parts) == 3 and parts[2] == "revise":
                 return service.revise(parts[1], body.get("spec"), body.get("expected_revision"), body.get("idempotency_key"))
-            if len(parts) == 3 and parts[2] == "decide":
+            if len(parts) == 3 and parts[2] in ("decide", "decision"):
                 return service.decide(parts[1], body.get("expected_revision"), body.get("outcome"),
                                       body.get("rationale"), body.get("idempotency_key"))
+            if len(parts) == 3 and parts[2] == "package":
+                return self._study_run_bridge().prepare_package(parts[1], body)
+            if len(parts) == 3 and parts[2] == "launch":
+                return self._study_run_bridge().launch(parts[1], body)
+            if len(parts) == 3 and parts[2] == "cancel":
+                return self._study_run_bridge().cancel(parts[1], body)
             if len(parts) == 3 and parts[2] == "jobs":
                 from .study_jobs import StudyCpuJobs
                 bridge = self._study_jobs or StudyCpuJobs(service)

@@ -2,7 +2,13 @@ from copy import deepcopy
 
 import pytest
 
-from hornlab_search.gui.data_studies import build_study_view, study_summaries
+from hornlab_search.gui.data_studies import (
+    artifact_panel,
+    build_study_view,
+    execute_view,
+    policy_cards,
+    study_summaries,
+)
 from hornlab_search.gui.study_jobs import StudyCpuJobs, StudyJobError, contained_path
 
 
@@ -124,3 +130,98 @@ def test_actual_registry_reservation_reopens_and_preserves_job(tmp_path):
     second = reopened.submit(study["id"], data)
     assert first["id"] == second["id"] and second["status"] == "running" and len(seen) == 1
     assert reopened.reconcile_after_restart(study["id"])[0]["status"] == "unknown"
+
+
+def test_policy_cards_are_explicit_bounded_and_never_infer_readiness():
+    fallback = policy_cards(None)
+    assert [card["label"] for card in fallback] == ["scalar", "coverage-ripple", "cma-seed", "exploration"]
+    assert [card["mode"] for card in fallback] == ["scalar", "pareto", "cma_seed", "exploration"]
+    assert all(card["status"] == "unknown" and card["reason"] and card["available"] is False
+               for card in fallback)
+
+    cards = policy_cards([
+        {"id": "scalar", "label": "Scalar", "status": "ready",
+         "requires": ["training_set"], "verification_mode": "scalar"},
+        {"id": "pareto", "label": "Pareto", "status": "capability_missing",
+         "reason": "BoTorch absent", "requires": ["cohort"]},
+        {"id": "odd", "label": "Odd", "status": "not-a-real-status"},
+    ])
+    assert cards[0]["available"] is True and cards[0]["reason"] is None
+    assert cards[1]["available"] is False and cards[1]["status"] == "capability_missing"
+    assert cards[1]["reason"] == "BoTorch absent"
+    assert cards[2]["status"] == "unknown" and cards[2]["reason"]
+
+    with pytest.raises(ValueError):
+        policy_cards([{"id": ""}])
+    with pytest.raises(ValueError):
+        policy_cards([{"id": "ok", "label": "x"}] * 51)
+
+
+def test_execute_view_is_bounded_and_never_fabricates_readiness():
+    unknown = execute_view(None)
+    assert unknown["status"] == "unknown" and unknown["reason"]
+    assert "package" in unknown and unknown["score_math"] is False
+
+    view = execute_view({
+        "status": "ready",
+        "package": {"hash": "a" * 64, "revision": 2},
+        "budget": {"screen": 18},
+        "lane": "cpu",
+        "deadline": {"required": True, "seconds": 3600},
+        "stop_recovery": {"max_infrastructure_failures": 3},
+        "verification": {"finalists": 4, "audits": 2},
+        "progress": {"proposed": 3, "started": 2, "solved": 1, "cached": 1, "refused": 0,
+                     "infeasible": 0, "infrastructure_failed": 0, "verified": 0, "unknown": 0},
+        "job": {"id": "job1", "status": "running"},
+        "actions": [{"kind": "launch", "enabled": True, "package_hash": "a" * 64,
+                     "package_revision": 2, "argv": ["rm", "-rf"]}],
+    })
+    assert view["status"] == "ready"
+    assert view["package_hash"] == "a" * 64 and view["package_revision"] == 2
+    assert view["verification"] == {"finalists": 4, "audits": 2}
+    assert view["progress"]["infrastructure_failed"] == 0
+    assert view["job"] == {"id": "job1", "status": "running"}
+    assert view["actions"][0]["enabled"] is True
+    assert "argv" not in view["actions"][0]
+
+    # A mapping without an explicit status is unknown, never implicitly ready.
+    assert execute_view({"package": {"hash": "a" * 64}})["status"] == "unknown"
+
+    with pytest.raises(ValueError):
+        execute_view({"budget": {"j": float("nan")}})
+    with pytest.raises(ValueError):
+        execute_view({"budget": {"rows": list(range(51))}})
+    with pytest.raises(ValueError):
+        execute_view({"progress": {"bogus": 1}})
+    with pytest.raises(ValueError):
+        execute_view({"verification": {"finalists": -1}})
+
+
+def test_artifact_panel_is_metadata_only_and_refuses_unbounded_data():
+    panel = artifact_panel({
+        "status": "ready", "kind": "proposal", "sha256": "a" * 64, "revision": 2,
+        "data": {"summary": {"coverage_deg": 4}},
+        "provenance": {"sha256": "a" * 64}, "reasons": [],
+    })
+    assert panel["metadata_only"] is True and panel["arrays_included"] is False
+    assert panel["sha256"] == "a" * 64
+    assert panel["data"]["summary"]["coverage_deg"] == 4
+
+    missing = artifact_panel(None)
+    assert missing["status"] == "missing" and missing["reason"]
+    assert artifact_panel({"status": "ready", "validated": False})["status"] == "unknown"
+    # Registry "available" is not semantic validation: no false ready, no false "unavailable".
+    available = artifact_panel({"status": "available", "kind": "snapshot", "sha256": "b" * 64})
+    assert available["status"] == "unknown" and "not validated" in available["reason"]
+    validated = artifact_panel({"status": "available", "kind": "snapshot", "sha256": "b" * 64,
+                                "validated": True})
+    assert validated["status"] == "ready" and validated["reason"] is None
+
+    with pytest.raises(ValueError):
+        artifact_panel({"sha256": "not-a-sha"})
+    with pytest.raises(ValueError):
+        artifact_panel({"data": {"values": list(range(51))}})
+    with pytest.raises(ValueError):
+        artifact_panel({"data": {"value": float("inf")}})
+    with pytest.raises(ValueError):
+        artifact_panel({"kind": "../escape"})

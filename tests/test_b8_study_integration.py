@@ -60,6 +60,15 @@ def test_pareto_requires_bound_complete_canonical_metrics(monkeypatch):
     assert pareto.fit_pareto(cohort, bad).reason == "metric_observation_incomplete_or_incompatible"
 
 
+def test_production_wiring_refuses_without_a_pipeline_factory():
+    from hornlab_search.studies.evaluator import build_production_wiring
+    result = build_production_wiring(None, {'package_id': 'p'}, root='.',
+                                     config_path=None, pipeline_factory=None)
+    assert result['status'] == 'capability_missing'
+    assert result['reason'] == 'production_wiring_unavailable'
+    assert 'pipeline_factory' in result['missing']
+
+
 def test_real_http_study_routes_conflict_and_missing_engine(tmp_path):
     import json
     import threading

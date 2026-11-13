@@ -112,3 +112,33 @@ def test_default_penalty_token_still_loads(tmp_path, smoke_cfg_path):
     p = tmp_path / "cfg.yaml"
     p.write_text(yaml.safe_dump(raw, sort_keys=False), encoding="utf-8")
     assert load_config(p).search.infeasible_penalty == "flat"
+
+
+# F0 (day 2026-11-12): the strict token is a NEW opt-in plain-CMA policy, not a change to
+# ``resample`` (whose bounded-then-tell legacy fallback above stays byte-for-byte).
+def test_resample_strict_loads_only_with_its_required_companions(tmp_path, smoke_cfg_path):
+    from pathlib import Path
+    import yaml
+    raw = yaml.safe_load(Path(smoke_cfg_path).read_text(encoding="utf-8"))
+    raw["search"].update({"infeasible_penalty": "resample_strict",
+                          "error_policy": "retry_same_then_stop", "budget_counts": "valid"})
+    p = tmp_path / "cfg.yaml"
+    p.write_text(yaml.safe_dump(raw, sort_keys=False), encoding="utf-8")
+    cfg = load_config(p)
+    assert cfg.search.infeasible_penalty == "resample_strict"
+    assert cfg.search.error_policy == "retry_same_then_stop"
+
+
+def test_resample_strict_is_refused_for_cma_me(tmp_path, smoke_cfg_path):
+    from pathlib import Path
+    import yaml
+    raw = yaml.safe_load(Path(smoke_cfg_path).read_text(encoding="utf-8"))
+    raw["search"].update({"algorithm": "cma_me",
+                          "qd": {"descriptor_h": "mean_bw_h_deg",
+                                 "descriptor_v": "mean_bw_v_deg", "bins_h": 8, "bins_v": 8},
+                          "infeasible_penalty": "resample_strict",
+                          "error_policy": "retry_same_then_stop", "budget_counts": "valid"})
+    p = tmp_path / "cfg.yaml"
+    p.write_text(yaml.safe_dump(raw, sort_keys=False), encoding="utf-8")
+    with pytest.raises(ConfigError, match="cma_me"):
+        load_config(p)

@@ -1134,11 +1134,18 @@ def _cmd_surrogate(args) -> int:
     from hornlab_search.objective.scalar import resolve_weights
     from hornlab_search.surrogate import gates as gates_mod
     from hornlab_search.surrogate import ismo
+    from hornlab_search.surrogate.capability import UnsupportedObjectiveError, require_supported
     from hornlab_search.surrogate.predict import Surrogate
     from hornlab_search.surrogate.train import train_surrogate
     from hornlab_search.targets.spec import Target
     from hornlab_search.surrogate.features import UnsupportedConfigError, require_surrogate_config
     cfg = load_config(args.config)
+    try:
+        require_supported(getattr(cfg, "objective_version", 1),
+                          context=f"surrogate {args.action}")
+    except UnsupportedObjectiveError as exc:
+        print(f"surrogate {args.action} REFUSED: {exc.reason_code}: {exc}")
+        return 1
     try:
         require_surrogate_config(cfg)
     except UnsupportedConfigError as exc:
@@ -1196,7 +1203,8 @@ def _cmd_surrogate(args) -> int:
             return 1
         try:
             _, rep = train_surrogate(arrays, space, target, weights, ensemble=args.ensemble,
-                                     epochs=args.epochs, out_path=out, lib_sha=args.lib_sha)
+                                     epochs=args.epochs, out_path=out, lib_sha=args.lib_sha,
+                                     objective_version=getattr(cfg, "objective_version", 1))
         except ValueError as e:          # DI provenance / unresolved keys: refuse, never guess
             print(f"surrogate train FAILED: {e}")
             return 1
@@ -1226,7 +1234,8 @@ def _cmd_surrogate(args) -> int:
         return 0 if rep["pass"] else 1
     # -- propose: the bundle must match the config it is proposed with, and must carry a verdict.
     sur = Surrogate.load(out)
-    mismatch = sur.config_mismatch(space, freqs_hz=mode_freqs(args.mode, cfg))
+    mismatch = sur.config_mismatch(space, freqs_hz=mode_freqs(args.mode, cfg),
+                                   objective_version=getattr(cfg, "objective_version", 1))
     if mismatch is not None:
         print(f"surrogate propose REFUSED: {out} does not match --config: {mismatch}")
         return 1

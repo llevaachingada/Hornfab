@@ -18,7 +18,7 @@ from hornlab_search.config import ConfigError, load_config
 from hornlab_search.search import cma_me as qd_mod
 from test_search_cma_me import knob_eval, qd_block, run_json, run_qd, two_knob_cfg
 
-MAES = {"learning_rate": 0.05, "j_threshold": 1000.0}
+MAES = {"learning_rate": 0.05, "j_threshold": 999.0}
 
 
 @pytest.fixture
@@ -37,7 +37,7 @@ def _cfg(tmp_path, qd):
 
 def test_maes_block_loads(tmp_path, smoke_cfg_path):
     cfg = _cfg(tmp_path, qd_block(maes=dict(MAES)))
-    assert cfg.search.qd["maes"] == {"learning_rate": 0.05, "j_threshold": 1000.0}
+    assert cfg.search.qd["maes"] == {"learning_rate": 0.05, "j_threshold": 999.0}
 
 
 def test_absent_maes_keeps_the_cma_me_block_unchanged(tmp_path, smoke_cfg_path):
@@ -46,9 +46,12 @@ def test_absent_maes_keeps_the_cma_me_block_unchanged(tmp_path, smoke_cfg_path):
 
 
 @pytest.mark.parametrize("qd,match", [
-    (qd_block(maes={"learning_rate": 0.4, "j_threshold": 1000.0}), "learning_rate"),
-    (qd_block(maes={"learning_rate": 0.005, "j_threshold": 1000.0}), "learning_rate"),
+    (qd_block(maes={"learning_rate": 0.4, "j_threshold": 999.0}), "learning_rate"),
+    (qd_block(maes={"learning_rate": 0.005, "j_threshold": 999.0}), "learning_rate"),
     (qd_block(maes={"learning_rate": 0.05, "j_threshold": 0.0}), "j_threshold"),
+    (qd_block(maes={"learning_rate": 0.05, "j_threshold": 1000.0}), "j_threshold"),
+    (qd_block(maes={"learning_rate": 0.05, "j_threshold": 1500.0}), "j_threshold"),
+    (qd_block(maes={"learning_rate": 0.05, "j_threshold": float("nan")}), "j_threshold"),
     (qd_block(maes={"learning_rate": 0.05}), "j_threshold"),
     (qd_block(maes={"magic": 1}), "unknown key"),
     (qd_block(maes=5), "must be a mapping"),
@@ -65,7 +68,7 @@ def test_cma_mae_run_records_maes_in_run_json(tmp_path, smoke_cfg, monkeypatch):
     monkeypatch.setattr(qd_mod, "evaluate", knob_eval(smoke))
     run_qd(smoke, rd, 6)
     run_json_ = run_json(rd)
-    assert run_json_["qd"]["maes"] == {"learning_rate": 0.05, "j_threshold": 1000.0}
+    assert run_json_["qd"]["maes"] == {"learning_rate": 0.05, "j_threshold": 999.0}
     assert run_json_["status"] == "finished"
     assert (rd / "archive_heatmap.json").exists()
     assert (rd / "archive.json").exists()

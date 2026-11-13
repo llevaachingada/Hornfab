@@ -522,6 +522,17 @@ def propose_one(model_result, candidate_pool, proposal_policy=None, history=None
                              versions=result.library_versions)
     return result
 
+
+def propose_by_policy(*args, **kwargs):
+    """Delegate to the frozen multi-policy dispatcher (B7).
+
+    Imported lazily so the scalar module keeps its existing import graph and an absent optional
+    engine never breaks importing :mod:`hornlab_search.bo`.
+    """
+    from .policy import fit_and_propose
+    return fit_and_propose(*args, **kwargs)
+
+
 __all__ = [
     "PROPOSE_POLICY",
     "EXPLORATION_EVERY",
@@ -533,5 +544,6 @@ __all__ = [
     "ProposalHistory",
     "ProposalResult",
     "propose_one",
+    "propose_by_policy",
 ]
 

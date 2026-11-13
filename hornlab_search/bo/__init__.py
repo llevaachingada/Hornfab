@@ -64,7 +64,40 @@ from .propose import (
     ProposalHistory,
     ProposalPolicy,
     ProposalResult,
+    propose_by_policy,
     propose_one,
+)
+from .pareto import (
+    PARETO_POLICY,
+    ParetoFit,
+    acquisition_scores,
+    fit_constrained_pareto,
+    fit_pareto,
+    frozen_reference,
+    nondominated,
+    propose_pareto,
+    select_subset,
+)
+from .extensions import (
+    TrustRegion,
+    cost_aware_log_score,
+    fit_cost_model,
+    loading_margins,
+    trust_box,
+    update_trust_region,
+)
+from .policy import (
+    ENGINE_POLICIES,
+    POLICY_CMA_SEED,
+    POLICY_EXPLORATION,
+    POLICY_PARETO,
+    POLICY_SCALAR,
+    PROPOSAL_POLICIES,
+    PROPOSAL_POLICY_LABELS,
+    ProposalOutcome,
+    capability_status,
+    fit_and_propose,
+    verification_mode,
 )
 
 __all__ = [
@@ -119,4 +152,34 @@ __all__ = [
     "ProposalHistory",
     "ProposalResult",
     "propose_one",
+    "propose_by_policy",
+    # B7 Pareto engine
+    "PARETO_POLICY",
+    "ParetoFit",
+    "frozen_reference",
+    "nondominated",
+    "select_subset",
+    "fit_pareto",
+    "propose_pareto",
+    "acquisition_scores",
+    "fit_constrained_pareto",
+    # B7 constrained/cost/trust-region extensions
+    "loading_margins",
+    "cost_aware_log_score",
+    "fit_cost_model",
+    "TrustRegion",
+    "trust_box",
+    "update_trust_region",
+    # B7 unified proposal-policy dispatcher
+    "POLICY_SCALAR",
+    "POLICY_PARETO",
+    "POLICY_CMA_SEED",
+    "POLICY_EXPLORATION",
+    "PROPOSAL_POLICIES",
+    "PROPOSAL_POLICY_LABELS",
+    "ENGINE_POLICIES",
+    "ProposalOutcome",
+    "verification_mode",
+    "capability_status",
+    "fit_and_propose",
 ]

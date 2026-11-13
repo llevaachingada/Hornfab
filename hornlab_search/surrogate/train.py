@@ -9,6 +9,7 @@ from ..dataset.store import Y_METRIC_KEYS
 from ..objective.scalar import objective
 from ..types import MetricSet
 from . import gates
+from .capability import require_supported
 from .features import cluster_holdout, unit_matrix
 from .model import MetricMLP, bundle_gates_passed, save_bundle
 from .predict import Surrogate
@@ -75,12 +76,16 @@ def _recompute_true_objectives(arrays: dict, held: np.ndarray, target, weights: 
 def train_surrogate(arrays: dict, space, target, weights: dict, *, ensemble: int = 5,
                     hidden: int = 256, layers: int = 3, epochs: int = 300, lr: float = 2e-3,
                     holdout_frac: float = 0.15, seed: int = 0, out_path=None,
-                    lib_sha: str | None = None) -> tuple[Surrogate, dict]:
+                    lib_sha: str | None = None, objective_version: int = 1) -> tuple[Surrogate, dict]:
     """``arrays`` MUST come from ``to_training_arrays(store, family=..., keys=space.keys(),
     ok_only=False)`` (failures teach the validity head). Returns (surrogate, report); the report
     holds the gates on the cluster-held-out set, and the SAME verdict is frozen into the bundle meta
     (``meta['gate_report']``) so ``surrogate propose`` can refuse an unvalidated model. A model
-    failing a gate must not be used."""
+    failing a gate must not be used.
+
+    Only objective v1 scoring is implemented; any other requested version is refused before
+    training (``UnsupportedObjectiveError``) instead of writing a mislabelled bundle."""
+    capability = require_supported(objective_version, context="surrogate train")
     _check_di_source(arrays)
     arrays, dropped = _dedup_by_design_hash(arrays)
     U = unit_matrix(arrays["X"], arrays["key_names"], space)
@@ -122,7 +127,13 @@ def train_surrogate(arrays: dict, space, target, weights: dict, *, ensemble: int
                            "log": bool(space.bounds[k].log)} for k in space.keys()},
             "metric_names": list(Y_METRIC_KEYS), "hidden": hidden, "layers": layers,
             "lib_sha": lib_sha, "n_train": int(tr.sum()), "n_heldout": int(held.sum()),
-            "n_duplicates_dropped": int(dropped)}
+            "n_duplicates_dropped": int(dropped),
+            "objective_version": capability["objective_version"],
+            "scoring_capability": {
+                **capability,
+                "metric_source": "predicted_metric_curves",
+                "fabricated_throat_impedance": False,
+            }}
     sur = Surrogate(states, meta, mu, sd)
     rep = evaluate_heldout(sur, arrays, U, held, target, weights)
     rep["n_duplicates_dropped"] = int(dropped)
