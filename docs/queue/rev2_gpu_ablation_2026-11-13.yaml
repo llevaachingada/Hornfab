@@ -1,21 +1,30 @@
+# rev2 GPU lane — 18 jobs, matched ablation + fidelity ladder (E0 manifest rev2_ablation_2026-11-13).
+#
+# CHANGED 2026-11-13 after launch: every job was `kind: search` with `budget: 1`. These configs
+# are fully pinned (all bounds lo==hi with search:false), so the CMA path builds an empty x0 and
+# aborts immediately:
+#   search ABORTED: TypeError: ufunc 'isinf' not supported for the input types ...
+# (observed on the first CPU parity attempt, 2026-11-13T05:27Z). The config headers already say
+# "budget 1, no CMA"; `hornlab-search run` is the CLI's "evaluate the seed design once" path, so
+# each job is now a command job running `run`. Same one seed solve per job, no optimizer.
 night: rev2_gpu_ablation_2026-11-13
 lane: gpu
 jobs:
-  - {id: abl_s0_control, kind: search, config: examples/typologies/ablation_2026-11-13/abl_s0_control.yaml, budget: 1, mode: screen, timeout_s: 3600}
-  - {id: abl_s1_lip12_a3, kind: search, config: examples/typologies/ablation_2026-11-13/abl_s1_lip12_a3.yaml, budget: 1, mode: screen, timeout_s: 3600}
-  - {id: abl_s1_lip6_a3, kind: search, config: examples/typologies/ablation_2026-11-13/abl_s1_lip6_a3.yaml, budget: 1, mode: screen, timeout_s: 3600}
-  - {id: abl_s1_lip12_a6, kind: search, config: examples/typologies/ablation_2026-11-13/abl_s1_lip12_a6.yaml, budget: 1, mode: screen, timeout_s: 3600}
-  - {id: abl_s2_wall12_a3, kind: search, config: examples/typologies/ablation_2026-11-13/abl_s2_wall12_a3.yaml, budget: 1, mode: screen, timeout_s: 3600}
-  - {id: abl_m_rate4, kind: search, config: examples/typologies/ablation_2026-11-13/abl_m_rate4.yaml, budget: 1, mode: screen, timeout_s: 3600}
-  - {id: abl_m_rate2, kind: search, config: examples/typologies/ablation_2026-11-13/abl_m_rate2.yaml, budget: 1, mode: screen, timeout_s: 3600}
-  - {id: abl_m_rate8, kind: search, config: examples/typologies/ablation_2026-11-13/abl_m_rate8.yaml, budget: 1, mode: screen, timeout_s: 3600}
-  - {id: ath_a0_control, kind: search, config: examples/typologies/ablation_2026-11-13/ath_a0_control.yaml, budget: 1, mode: screen, timeout_s: 3600}
-  - {id: ath_a1_core, kind: search, config: examples/typologies/ablation_2026-11-13/ath_a1_core.yaml, budget: 1, mode: screen, timeout_s: 3600}
-  - {id: ath_a1_sf_only, kind: search, config: examples/typologies/ablation_2026-11-13/ath_a1_sf_only.yaml, budget: 1, mode: screen, timeout_s: 3600}
-  - {id: ath_a1_cos_only, kind: search, config: examples/typologies/ablation_2026-11-13/ath_a1_cos_only.yaml, budget: 1, mode: screen, timeout_s: 3600}
-  - {id: ath_a2_hex, kind: search, config: examples/typologies/ablation_2026-11-13/ath_a2_hex.yaml, budget: 1, mode: screen, timeout_s: 3600}
-  - {id: fid_base_verify, kind: search, config: examples/typologies/ablation_2026-11-13/abl_s0_control.yaml, budget: 1, mode: verify, timeout_s: 3600}
-  - {id: fid_epw6, kind: search, config: examples/typologies/ablation_2026-11-13/fid_epw6.yaml, budget: 1, mode: verify, timeout_s: 3600}
-  - {id: fid_epw10, kind: search, config: examples/typologies/ablation_2026-11-13/fid_epw10.yaml, budget: 1, mode: verify, timeout_s: 3600}
-  - {id: fid_dist8m, kind: search, config: examples/typologies/ablation_2026-11-13/fid_dist8m.yaml, budget: 1, mode: verify, timeout_s: 3600}
-  - {id: fid_ang145, kind: search, config: examples/typologies/ablation_2026-11-13/fid_ang145.yaml, budget: 1, mode: verify, timeout_s: 3600}
+  - {id: abl_s0_control, kind: command, timeout_s: 3600, argv: [.venv/Scripts/hornlab-search.exe, run, --config, examples/typologies/ablation_2026-11-13/abl_s0_control.yaml, --mode, screen]}
+  - {id: abl_s1_lip12_a3, kind: command, timeout_s: 3600, argv: [.venv/Scripts/hornlab-search.exe, run, --config, examples/typologies/ablation_2026-11-13/abl_s1_lip12_a3.yaml, --mode, screen]}
+  - {id: abl_s1_lip6_a3, kind: command, timeout_s: 3600, argv: [.venv/Scripts/hornlab-search.exe, run, --config, examples/typologies/ablation_2026-11-13/abl_s1_lip6_a3.yaml, --mode, screen]}
+  - {id: abl_s1_lip12_a6, kind: command, timeout_s: 3600, argv: [.venv/Scripts/hornlab-search.exe, run, --config, examples/typologies/ablation_2026-11-13/abl_s1_lip12_a6.yaml, --mode, screen]}
+  - {id: abl_s2_wall12_a3, kind: command, timeout_s: 3600, argv: [.venv/Scripts/hornlab-search.exe, run, --config, examples/typologies/ablation_2026-11-13/abl_s2_wall12_a3.yaml, --mode, screen]}
+  - {id: abl_m_rate4, kind: command, timeout_s: 3600, argv: [.venv/Scripts/hornlab-search.exe, run, --config, examples/typologies/ablation_2026-11-13/abl_m_rate4.yaml, --mode, screen]}
+  - {id: abl_m_rate2, kind: command, timeout_s: 3600, argv: [.venv/Scripts/hornlab-search.exe, run, --config, examples/typologies/ablation_2026-11-13/abl_m_rate2.yaml, --mode, screen]}
+  - {id: abl_m_rate8, kind: command, timeout_s: 3600, argv: [.venv/Scripts/hornlab-search.exe, run, --config, examples/typologies/ablation_2026-11-13/abl_m_rate8.yaml, --mode, screen]}
+  - {id: ath_a0_control, kind: command, timeout_s: 3600, argv: [.venv/Scripts/hornlab-search.exe, run, --config, examples/typologies/ablation_2026-11-13/ath_a0_control.yaml, --mode, screen]}
+  - {id: ath_a1_core, kind: command, timeout_s: 3600, argv: [.venv/Scripts/hornlab-search.exe, run, --config, examples/typologies/ablation_2026-11-13/ath_a1_core.yaml, --mode, screen]}
+  - {id: ath_a1_sf_only, kind: command, timeout_s: 3600, argv: [.venv/Scripts/hornlab-search.exe, run, --config, examples/typologies/ablation_2026-11-13/ath_a1_sf_only.yaml, --mode, screen]}
+  - {id: ath_a1_cos_only, kind: command, timeout_s: 3600, argv: [.venv/Scripts/hornlab-search.exe, run, --config, examples/typologies/ablation_2026-11-13/ath_a1_cos_only.yaml, --mode, screen]}
+  - {id: ath_a2_hex, kind: command, timeout_s: 3600, argv: [.venv/Scripts/hornlab-search.exe, run, --config, examples/typologies/ablation_2026-11-13/ath_a2_hex.yaml, --mode, screen]}
+  - {id: fid_base_verify, kind: command, timeout_s: 3600, argv: [.venv/Scripts/hornlab-search.exe, run, --config, examples/typologies/ablation_2026-11-13/abl_s0_control.yaml, --mode, verify]}
+  - {id: fid_epw6, kind: command, timeout_s: 3600, argv: [.venv/Scripts/hornlab-search.exe, run, --config, examples/typologies/ablation_2026-11-13/fid_epw6.yaml, --mode, verify]}
+  - {id: fid_epw10, kind: command, timeout_s: 3600, argv: [.venv/Scripts/hornlab-search.exe, run, --config, examples/typologies/ablation_2026-11-13/fid_epw10.yaml, --mode, verify]}
+  - {id: fid_dist8m, kind: command, timeout_s: 3600, argv: [.venv/Scripts/hornlab-search.exe, run, --config, examples/typologies/ablation_2026-11-13/fid_dist8m.yaml, --mode, verify]}
+  - {id: fid_ang145, kind: command, timeout_s: 3600, argv: [.venv/Scripts/hornlab-search.exe, run, --config, examples/typologies/ablation_2026-11-13/fid_ang145.yaml, --mode, verify]}

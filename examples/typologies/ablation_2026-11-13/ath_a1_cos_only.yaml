@@ -22,7 +22,11 @@ seed_params:
   az_sf_n3: 16.0
   az_sf_a: 1.0
   az_sf_b: 0.618
-  az_a_cos_amp: -15.0
+  # 2026-11-13: was -15.0, which cannot be built. With az_a_sf_amp: 0 this arm has no
+  # superformula term to offset the notch, so a(0 deg) = 5.0 - 15.0 = -10.0, outside the
+  # (0.5, 89.5) deg wall-angle band (the core arm only meshes because +35 sf offsets it).
+  # Clamped to the strongest buildable notch: a(0 deg) = 0.6 deg.
+  az_a_cos_amp: -4.4
   az_a_cos_pow: 10.0
   az_n_cos2_amp: 1.5
   az_s_cos2_amp: 0.23
@@ -112,8 +116,8 @@ bounds:
     hi: 0.618
     search: false
   az_a_cos_amp:
-    lo: -15.0
-    hi: -15.0
+    lo: -4.4
+    hi: -4.4
     search: false
   az_a_cos_pow:
     lo: 10.0

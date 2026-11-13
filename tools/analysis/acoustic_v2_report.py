@@ -34,6 +34,9 @@ PAIRS = {
     "abl_m_rate2": "abl_m_rate4", "abl_m_rate8": "abl_m_rate4",
     "ath_a1_core": "ath_a0_control", "ath_a1_sf_only": "ath_a0_control",
     "ath_a1_cos_only": "ath_a0_control", "ath_a2_hex": "ath_a0_control",
+    # 2026-11-13: ath_a2_hex (m=6) has no mirror symmetry and cannot be built on a quarter
+    # model; ath_a2_oct (m=8, amp 34) is the substituted petal arm.
+    "ath_a2_oct": "ath_a0_control",
 }
 FIDELITY = ("fid_epw6", "fid_epw10", "fid_dist8m", "fid_ang145")
 FID_BASE = "fid_base_verify"

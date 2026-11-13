@@ -89,3 +89,59 @@ Fidelity ladder on `abl_s0_control`, all `--mode verify`, one factor each: base 
 - Mouth phase / aperture field: only where `p_h`/`p_balloon` are stored; reported as `available.phase`.
 - J1 JBL-PT and L1 loading-to-CD generators (new geometry adapter; R9 research first).
 - Physical-manifest sweep over the whole historical archive (the M0 catalog already covers physical ids).
+
+## Execution record (2026-11-13, owner machine)
+
+| Stage | Result |
+|---|---|
+| Mesh check (`shape_check.py`) | 15/17 build. `ath_a1_cos_only` and `ath_a2_hex` fail; see below. |
+| GPU ablation night | 16/18 ok in 13m40s (two failures were the unbuildable ATH arms). |
+| CPU parity night | 2/2 ok, 1 eval each. |
+| Verify pass (13 arms) | 13/13 ok; `ath_a1_cos_only` falls back to negative at verify (see below). |
+| Readout | `analysed 18 job(s), 10 arm pair(s), missing 0` |
+
+### Two corrections made at launch
+
+1. **`kind: search` + `budget: 1` cannot run these configs.** Every bound is `lo == hi` with
+   `search: false`, so the CMA path builds an empty `x0` and aborts with
+   `TypeError: ufunc 'isinf' not supported for the input types`. Both night files now use
+   `kind: command` with `hornlab-search run` (the CLI's "evaluate the seed design once" path),
+   which is what the config headers already specified ("budget 1, no CMA"). Same one seed solve
+   per job, no optimizer.
+2. **Two ATH arms are not buildable as authored.**
+   - `ath_a1_cos_only`: with `az_a_sf_amp: 0` there is no superformula term to offset the cosine
+     notch, so `a(0 deg) = 5.0 - 15.0 = -10.0`, outside the `(0.5, 89.5)` wall-angle band. The core
+     arm only builds because `+35` sf offsets it. `az_a_cos_amp` clamped to **-4.4**
+     (`a(0) = 0.6 deg`), the strongest buildable notch.
+   - `ath_a2_hex`: an m=6 law has no mirror symmetry (`a(0)=40.0` but `a(180)=23.4`), so no
+     quarter or half model can tile it, and `mesh.quadrants: '1'` is a quarter model
+     (`QUADRANT_FACTOR = {"1234":1, "12":2, "14":2, "1":4}`). `m=4` would be a byte-duplicate of
+     `ath_a1_core`. Substituted **`ath_a2_oct`** (m=8, nearest legal petal count). The CORE
+     amplitude 35 overshoots the brief envelope at m=8 (518x665 vs 650 mm), so the arm runs at
+     **34** (503x642, 8288 dofs). Note: oct(amp 34) vs core(amp 35) conflates petal count with
+     amplitude; vs `ath_a0_control` the comparison is clean.
+
+### Verify-fidelity outcome (the stop rule fired once)
+
+Accepted at screen and still accepted at verify: `abl_m_rate2` (-6.36 / -6.33 dB BW6),
+`abl_m_rate8` (-5.97 / -4.40), `ath_a1_core` (-3.91 / -6.91), `ath_a1_sf_only` (-2.06 / -6.84),
+`ath_a2_oct` (-7.25 / -4.92). **`ath_a1_cos_only` was "accept" at screen and is negative at
+verify** (+0.36 / -0.04) - its screen accept rested entirely on a 0.45 pp outside-power change, so
+the cosine mechanism is recorded as not moving the field. The S family stays inside the noise
+floor at both fidelities.
+
+### E8 lane parity
+
+| Pair | shared designs | max abs dSPL | abs dJ | gate |
+|---|---|---|---|---|
+| `abl_s0_control` | 1 | 0.0035 dB | 3.8e-06 | FAIL (needs >=3 designs) |
+| `abl_m_rate4` | 1 | 0.0013 dB | 1.7e-03 | FAIL (needs >=3 designs) |
+
+Both are ~500x inside the 0.2 dB rule, but each night job is budget-1, so only one design hash is
+shared and `lane_parity.py` cannot pass on count. Agreement is supported; E8 is not formally closed.
+
+### Far field
+
+`fid_dist8m` minus the 2 m base: **+3.49 dB H / +2.31 dB V** beamwidth, +0.10 dB outside peak,
+-0.19 dB DI. It dominates the whole fidelity ladder, so per the pre-declared rule 2 m balloon
+claims for mouths over 400 mm carry `far_field_validated: false`.
