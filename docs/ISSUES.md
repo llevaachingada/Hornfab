@@ -3,6 +3,19 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-13 (**Elites tab redesigned for non-technical readers: brief/typology constraints and isometric horn thumbnails, best-per-typology / best-per-brief browsing, paginated 24 at a time, CSV-path noise removed; payload extended with brief/family/brief_target; bo-study-v1.1 final offline integration landed (M2 sensitivity/proposal evidence, immutable run package + `hornlab-search study` CLI, durable proposal-cadence recovery, B8 adversarial full loop); profile-outline thumbnail geometry fixed after live check (closed outline split at the mouth rim, outer wall kept); card hierarchy tuned per owner (constraint line + score largest, gate pills smaller); no GitHub issue state changed**).
 
+Local-only, added 2026-11-13 (23:1xZ) (**G2 independently reviewed; evidence corrected; no GitHub issue state changed**):
+- Open (owner): G2 verdict is adopt-with-conditions. Adopt = pin `9ec86b0` + `pyproject.toml`/`TOOLCHAIN.md` +
+  A5 recalibration; rollback = old SHA. The pin is unchanged until the owner decides.
+- Open (must do before the bump is final): fused-path output parity A/B (`docs/FORKS.md` 6.3) - the analytic selftest
+  does not exercise the fused route; ceiling re-measurement on pin B at ~15.9k/20.2k/24k with dedicated **and shared**
+  memory; one production-shape screen solve per pin.
+- Corrected: the G2 evidence doc's mechanism section (skipped payload is `8(N²+N·E)`, not `8N²` plus pool rounding) and
+  its parity claim (non-fused only). Both were fixed in `docs/evidence/G2_FORK_AB_2026-11-13.md`.
+- Open: `docs/evidence/FUSED_CUDA_2026-10-24.md`'s 12,000 caps and the 20,237-DOF refusal predicate are pin-A
+  arithmetic and are plausibly stale by 1.5-2x under pin B; do not raise them before the ceiling re-measurement.
+- Not a real item: `julia/coupled_solver.jl:909-910` builds the same identity cache but is unreachable from the worker
+  (`solver.jl` includes only `BeatEngineCore.jl`/`BeatEngineDriver.jl`); dormant duplicate.
+
 Local-only, added 2026-11-13 (23:0xZ) (**G2 measured and passed; GPU night paused; no GitHub issue state changed**):
 - Resolved: G2 measured - 18 solves, 3 quarter-DOF points x 3 fresh-process reps x 2 commits. A3 `9ec86b0` saves
   55 / 66 / 70 % fused peak VRAM and 20-30 % per-frequency wall with an identical analytic self-test. Evidence

@@ -1,6 +1,33 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-13 (23:1xZ) - G2 INDEPENDENTLY REVIEWED: ADOPT-WITH-CONDITIONS; EVIDENCE DOC CORRECTED (MECHANISM + PARITY GAP)
+
+- Owner asked for an independent review before deciding the pin bump. Oracle verdict: **adopt-with-conditions**
+  (confidence ~0.85 memory/safety, ~0.7 wall). Adopt command and rollback are in the evidence doc; the pin is still
+  `0850ef39` pending the owner's call.
+- **Correction 1 (my error, retracted in the doc):** the skipped device payload is **two** matrices, `identity_p1_p1`
+  (N×N) **and** `identity_p1_dp0` (**N×E**, E = triangles, `assemble_l2_identity_matrix` allocates
+  `zeros(T, test_dof, trial_dof)`), i.e. `8·(N² + N·E)`. That matches the measured savings to within 2-4.5 %
+  (390/1,453/3,227 MiB nominal vs 384/1,388/3,150 measured). The earlier "2.7-2.8x, CUDA pool segment rounding"
+  explanation was wrong and is retracted; no pool effect is needed.
+- **Correction 2 (gap):** `selftest.py::_spec` never sets `cuda_fused`, so the identical analytic numbers prove the
+  **non-fused** path is unchanged, not the fused one. Fused-path output parity is a code argument, not a measurement;
+  `docs/FORKS.md` step 6.3 compare was not run. Also the harness records dedicated VRAM only, so the plan's zero-spill
+  requirement is one field short.
+- **Confirmed by the review:** the only cache reader is `pressure_for_drives`, reached solely from the non-fused
+  `else`; the default CUDA path is byte-identical between pins; symmetry, near-correction, MEH and warm-host routes
+  cannot reach it; and `coupled_solver.jl:909-910` builds the same cache but is unreachable from the worker
+  (`solver.jl` includes only `BeatEngineCore.jl`/`BeatEngineDriver.jl`), so it is dormant, not an open cost.
+- **Required follow-ups, value per GPU-minute:** (1) ceiling re-measurement on pin B at ~15.9k/20.2k/24k DOF with
+  dedicated **and shared** recorded - the 12,000 caps and the 20k refusal were set by pin-A memory and are plausibly
+  stale by 1.5-2x; (2) fused-path output compare (FORKS 6.3); (3) one production-shape screen solve per pin;
+  (4) pool live-vs-reserved instrumentation; (5) non-fused and 2-channel MEH control points.
+- **A5 guidance corrected:** model pin B as `8·N² + ~0.2-0.3 GiB`, not a multiplier (`delta/8N²` drifts 2.41 → 1.43 →
+  1.24). The `20,237 -> refuse` feasibility test is stale under pin-B arithmetic but must be re-based on the measured
+  20k point (rule 7), not on arithmetic.
+- No pin change, no code change, no GPU work in this commit.
+
 ## 2026-11-13 (23:0xZ) - G2 MEASURED AND PASSED: A3 CUTS FUSED VRAM 55-70% AT IDENTICAL PHYSICS; GPU NIGHT PAUSED FOR IT
 
 - **Owner request:** pause the running GPU work and run the G2 gate.
