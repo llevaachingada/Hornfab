@@ -1,7 +1,7 @@
 # ISSUES
 
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
-Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-13 (**all GUI work pushed via consolidated main: WP0-WP10 + finishing pass + visual-audit fixes + day-queue lane (GUI-1/GUI-2 closed) + main checkout switched to main + owner's 8765 GUI restarted on the merged code; suite 426 tests green on main; no GitHub issue state changed**).
+Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-13 (**Elites tab redesigned for non-technical readers: brief/typology constraints and isometric horn thumbnails, best-per-typology / best-per-brief browsing, paginated 24 at a time, CSV-path noise removed; payload extended with brief/family/brief_target; no GitHub issue state changed**).
 
 Local-only, added 2026-11-13 (**Rev2 implementation pass, additive; no GitHub issue state changed**):
 - Open from Rev2: GUI balloon range selector, frequency-grid fidelity factor, J1/L1 generators, archive-wide manifest sweep. See QUEUE_PLAN_REV2 status table.
@@ -1736,7 +1736,7 @@ Local-only, added 2026-10-29 (fast-BEM research; no code/GPU; no GitHub issue st
 - Report path: `docs/research/MATRIX_FREE_GPU_GMRES_FMM_2026-10-29.md`; priorities `NEXT_DEV_PRIORITIES.md` P13; research basis `plan/12_RESEARCH_BASIS.md` section 18.
 
 Local-only, added 2026-11-13 (**bo-study-v1.1 pushed; cloud completion kickoff in docs/research/bo_study/; no GitHub issue state changed**):
-- Open: runner production evaluator adapter (blocks the S9 A/B matrix execution) — owner `docs/throughput/BO_STUDY_PERF_PREP_2026-11-12.md`.
+- Open: runner production evaluator adapter (blocks the S9 A/B matrix execution) ï¿½ owner `docs/throughput/BO_STUDY_PERF_PREP_2026-11-12.md`.
 - Open: execute the validated S11 pilot manifests (execution_authorized=false by design; wall deadline owner-gated).
 - Open: M2 sensitivity/pool diagnostic evidence over the real 197-row native TrainingSet (`hornlab_search/bo/data.py::build_native_training_set`).
 - Open: B8 full adversarial loop (fake evaluator through service/CLI/API/GUI, crash/idempotency matrix).
