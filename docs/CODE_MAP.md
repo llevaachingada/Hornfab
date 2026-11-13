@@ -1,5 +1,11 @@
 # Code map
 
+S8 additions (2026-11-13): `tools/analysis/geometry_descriptors.py` resolves Design-only
+geometry plus a separate band-aware behavior view; `hypothesis_cards.py` checks source-backed
+parents, canonical candidate geometry and parent/combination/ablation configs;
+`qd_compare.py` compares explicit equal-cost result manifests with frozen physical axes/reference
+and production F1 outcome gates. Contracts and research: [S8 resolution](research/S8_DISCOVERY_RESOLUTION_2026-11-13.md).
+
 Data-analysis and optimization roadmap (planning, not shipped modules): [reviewed S0-S11 plan](research/COUNCIL_REVIEW_AND_IMPL_PLAN_2026-11-12.md), [locked Bayesian Design Study/GUI orchestrator spec](research/BAYESIAN_STUDY_ORCHESTRATOR_SPEC_2026-11-12.md) and [complete implementation prompts, starting at B0](research/DATA_GA_IMPLEMENTATION_PROMPTS_2026-11-12.md). The documents distinguish existing code from proposed catalog/effects/seed/discovery tools and additive `studies/`/`bo/` modules.
 
 Latest governing scope: [horn-specific hardening after two Terra reviews](research/HORN_OPTIMIZATION_HARDENING_2026-11-12.md). Preserve physical/metric/score identities and prove offline rescoring; explain parameter/geometry/acoustics through existing GUI. BoTorch stays in full implementation scope: pure adapter work can parallelize after contracts, then integrate persistent study/propose/serial run/verify feedback. Production defaults/adoption remain separate evidence gates.
@@ -132,6 +138,7 @@ bempp_cpu) → `metrics` (beamwidth, ripple, DI, impedance) → `objective` (sca
 |---|---|
 | `tools/bench/throughput_matrix.py` | Production-path solve timing: fixture meshes x freq sets (12/25/36/41) x batch sizes, cold + N warm reps, nvidia-smi polled from a thread, CSV/JSON + env info + parity. `--fake`/`--dry-run` offline. |
 | `tools/bench/_hosts.py` | Guarded `kill_hosts()` (only host trees the script started) + `bench_solve_kwargs()` (opt-in fused/symmetry for the legacy bench scripts). |
+| `tools/lane_speed_report.py` | Read-only report (2026-11-13): scans `runs/*/search.ndjson`, tags each real solve SOLO or CONCURRENT (overlaps another lane's run window), prints median solve s and s/kdof per lane/backend and the concurrent/solo ratio; `--since`, `--csv`. |
 | `tools/bench/cpu_gpu_concurrent.py` | WP3 pilot: CPU lane + CUDA lane, separate processes/worker dirs, own-tree cleanup, aggregate candidates/h + parity. Bench only. |
 | `tools/bench/mesh_policy_study.py` | WP4: baseline vs `curvature_npts` meshes (N/E, edge stats, build seconds; optional `--solve`). |
 | `tools/bench/compare_search_runs.py` | Compare two run dirs' `search.ndjson` (same designs/order/objectives) + candidates/hour. |

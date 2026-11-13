@@ -374,6 +374,17 @@ NATIVE_R_DESIGN_HASH_MISMATCH = "design_hash_mismatch"
 NATIVE_R_ENCODE_REFUSED = "encode_refused"
 NATIVE_R_NONFINITE_VECTOR = "nonfinite_vector"
 NATIVE_R_MISSING_PROVENANCE = "missing_provenance"
+NATIVE_R_OBJECTIVE_VERSION = "objective_version_mismatch"
+NATIVE_R_METRIC_POLICY = "metric_policy_unsupported"
+
+#: Cohort-level policy fields that must be identical across every accepted row (the same
+#: shared-policy semantics as ``bo.cohort.validate_cohort``).  ``fidelity``/``grid_hash``/
+#: ``solve_hash`` are reported separately: the signed M0 freeze declares the native cohort
+#: as 192 screen + 5 verify rows, so a mixed-fidelity cohort is published as such (or refused
+#: with ``require_single_fidelity=True``), never silently treated as single-fidelity.
+NATIVE_POLICY_FIELDS = ("backend", "brief_hash", "dependency_hash", "task_identity",
+                        "objective_version", "target", "weights", "metric_source")
+NATIVE_FIDELITY_FIELDS = ("fidelity", "grid_hash", "solve_hash")
 
 NATIVE_REFUSAL_REASONS = {
     NATIVE_R_CATALOG_ROW_MISSING: "the S0 catalog has no row for this (root, shard, row)",
@@ -389,6 +400,9 @@ NATIVE_REFUSAL_REASONS = {
     NATIVE_R_ENCODE_REFUSED: "the bo encoding refused the historical params/geometry",
     NATIVE_R_NONFINITE_VECTOR: "the encoded active vector is not finite",
     NATIVE_R_MISSING_PROVENANCE: "the score row has no usable shard/row provenance",
+    NATIVE_R_OBJECTIVE_VERSION: "the score/catalog objective version is not the brief's version",
+    NATIVE_R_METRIC_POLICY: ("the replay does not evidence the frozen metric policy "
+                             "(response-detrended ripple, resolved target and weights)"),
 }
 
 
@@ -431,7 +445,8 @@ def _read_shard_metas(dataset_root, shard: int, cache: dict) -> dict[int, dict |
 
 
 def build_native_training_set(config_path, *, scores_json, catalog_csv, limit=None,
-                              dataset_root=None) -> TrainingSet:
+                              dataset_root=None,
+                              require_single_fidelity: bool = False) -> TrainingSet:
     """Build a real :class:`TrainingSet` from the native ATH score/replay artifacts.
 
     The score rows come from the R0 ``offline_scores.json`` artifact (exact v4 ``j`` plus
@@ -445,6 +460,16 @@ def build_native_training_set(config_path, *, scores_json, catalog_csv, limit=No
     A row whose params/geometry/identity is missing or unrepresentable is skipped with a
     reason code; no value is invented.  The returned ``meta`` publishes the refused rows and
     their reasons, the identity triple, and the retained/excluded subset IDs.
+
+    Strict policy (2026-11-13, M2 gate audit): every accepted row must carry the brief's
+    objective version and the replay's response-detrended ripple evidence, and the accepted
+    rows must share one backend / brief hash / dependency hash / task identity / resolved
+    target / weights / metric source (``NATIVE_POLICY_FIELDS``).  A disagreement or a missing
+    policy value makes the whole set ``incompatible_cohort`` / ``capability_missing`` (no
+    partial pooling), as ``bo.cohort.validate_cohort`` would.  Fidelity/grid/solve-hash mixing
+    is published in ``meta['cohort_policy']``; it refuses only with
+    ``require_single_fidelity=True`` because the signed M0 freeze declares the mixed
+    192-screen + 5-verify native cohort.
     """
     from ..config import load_config
     from ..design.space import DesignSpace
@@ -457,7 +482,11 @@ def build_native_training_set(config_path, *, scores_json, catalog_csv, limit=No
     config_path = Path(config_path)
     cfg = load_config(config_path)
     space = DesignSpace.from_config(cfg)
-    projection = ActiveProjection.from_space(space, no_ops={"morph_exponent": 4.0})
+    # ``morph_exponent`` is the audited no-op only where that knob exists (the frozen
+    # native task).  A registered task without it (the home v7 task has six knobs)
+    # uses the identity projection; a missing no-op must not crash the build.
+    no_ops = {"morph_exponent": 4.0} if "morph_exponent" in space.keys() else {}
+    projection = ActiveProjection.from_space(space, no_ops=no_ops)
     d = int(projection.d)
 
     payload = json.loads(Path(scores_json).read_text(encoding="utf-8"))
@@ -465,6 +494,11 @@ def build_native_training_set(config_path, *, scores_json, catalog_csv, limit=No
     rows = all_rows if limit is None else all_rows[:int(limit)]
     expected_config = str((payload.get("cohort") or {}).get("native_config")
                           or config_path.stem)
+    brief_block = payload.get("brief") if isinstance(payload.get("brief"), Mapping) else {}
+    expected_version = brief_block.get("objective_version")
+    if expected_version is None:
+        expected_version = getattr(cfg, "objective_version", None)
+    policy_values: dict[str, dict[str, str]] = {}
 
     dataset_root = Path(dataset_root) if dataset_root is not None else _repo_root() / "dataset"
     root_key = dataset_root.name
@@ -617,8 +651,43 @@ def build_native_training_set(config_path, *, scores_json, catalog_csv, limit=No
                    detail=f"non-dropped parameter(s) changed: {changed[:8]}")
             continue
 
+        # Frozen metric/score policy evidence (checked after the representability checks so
+        # earlier, more specific refusal reasons keep precedence).
+        row_version = score_row.get("objective_version")
+        catalog_version = str(catalog_row.get("objective_version") or "")
+        if (row_version is None or expected_version is None
+                or str(row_version) != str(expected_version)
+                or (catalog_version and catalog_version != str(expected_version))):
+            refuse(obs_id, [NATIVE_R_OBJECTIVE_VERSION], shard=shard, row=row_idx,
+                   detail=f"score={row_version!r} catalog={catalog_version!r} "
+                          f"expected={expected_version!r}")
+            continue
+        diagnostics = score_row.get("diagnostics")
+        target = score_row.get("target")
+        weights = score_row.get("weights")
+        if (not isinstance(diagnostics, Mapping)
+                or diagnostics.get("ripple_used_response") is not True
+                or not isinstance(target, Mapping) or not target
+                or not isinstance(weights, Mapping) or not weights
+                or not score_row.get("metric_source")):
+            refuse(obs_id, [NATIVE_R_METRIC_POLICY], shard=shard, row=row_idx)
+            continue
+
         geometry_hash = str(meta_design_hash or actual_design_hash)
         solve_hash = meta.get("solve_hash")
+        policy_values[obs_id] = {
+            "backend": str(catalog_row.get("backend") or ""),
+            "brief_hash": str(catalog_row.get("brief_hash") or ""),
+            "dependency_hash": str(catalog_row.get("dependency_hash") or ""),
+            "task_identity": str(catalog_row.get("task_identity") or ""),
+            "objective_version": str(row_version),
+            "target": json.dumps(target, sort_keys=True, separators=(",", ":"), default=str),
+            "weights": json.dumps(weights, sort_keys=True, separators=(",", ":"), default=str),
+            "metric_source": str(score_row.get("metric_source") or ""),
+            "fidelity": str(catalog_row.get("fidelity") or ""),
+            "grid_hash": str(catalog_row.get("grid_hash") or ""),
+            "solve_hash": "" if solve_hash is None else str(solve_hash),
+        }
         observations.append(TrainingObservation(
             observation_id=obs_id, x=x, J=J, status="ok", eligible=True,
             geometry_hash=geometry_hash,
@@ -641,7 +710,52 @@ def build_native_training_set(config_path, *, scores_json, catalog_csv, limit=No
             "stored_objective_version": score_row.get("stored_objective_version"),
         }
 
+    def _distinct(field_name):
+        counts: dict[str, int] = {}
+        for values in policy_values.values():
+            counts[values[field_name]] = counts.get(values[field_name], 0) + 1
+        return dict(sorted(counts.items()))
+
+    policy_report = {f: _distinct(f) for f in NATIVE_POLICY_FIELDS + NATIVE_FIDELITY_FIELDS}
+    policy_conflicts = sorted(f for f in NATIVE_POLICY_FIELDS if len(policy_report[f]) > 1)
+    policy_missing = sorted(f for f in NATIVE_POLICY_FIELDS if "" in policy_report[f])
+    mixed_fidelity = sorted(f for f in NATIVE_FIDELITY_FIELDS if len(policy_report[f]) > 1)
+    if not policy_values:
+        policy_status = "no_observations"
+    elif policy_missing:
+        policy_status = "capability_missing"
+    elif policy_conflicts or (mixed_fidelity and require_single_fidelity):
+        policy_status = "incompatible"
+    elif mixed_fidelity:
+        policy_status = "ok_mixed_fidelity_declared"
+    else:
+        policy_status = "ok"
+
+    def _short(field_name, counts):
+        if field_name not in ("target", "weights"):
+            return counts
+        return {hashlib.sha256(k.encode()).hexdigest()[:16]: n for k, n in counts.items()}
+
+    cohort_policy = {
+        "status": policy_status,
+        "require_single_fidelity": bool(require_single_fidelity),
+        "expected_objective_version": expected_version,
+        "policy_fields": list(NATIVE_POLICY_FIELDS),
+        "fidelity_fields": list(NATIVE_FIDELITY_FIELDS),
+        "values": {f: _short(f, v) for f, v in policy_report.items()},
+        "conflicts": policy_conflicts,
+        "missing": policy_missing,
+        "mixed_fidelity_fields": mixed_fidelity,
+        "note": ("Policy identity is checked across the accepted rows from the joined S0 "
+                 "catalog and R0 replay values; it is evidence from those artifacts, not an "
+                 "independent re-derivation of their source files."),
+    }
+
     ts = build_training_set(observations, encoding=projection)
+    if policy_status == "incompatible":
+        ts = replace(ts, status="incompatible_cohort")
+    elif policy_status == "capability_missing":
+        ts = replace(ts, status="capability_missing")
     refusal_counts: dict[str, int] = {}
     for rec in refused:
         for reason in rec["reasons"]:
@@ -662,6 +776,7 @@ def build_native_training_set(config_path, *, scores_json, catalog_csv, limit=No
         "refusal_reasons": dict(sorted(refusal_counts.items())),
         "n_unique_design_hashes": len({o.geometry_hash for o in observations}),
         "identities": identities,
+        "cohort_policy": cohort_policy,
         "subset_policy": {
             "method": "build_training_set",
             "n_min": ts.n_min,

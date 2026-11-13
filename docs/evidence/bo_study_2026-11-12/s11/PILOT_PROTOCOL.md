@@ -17,7 +17,7 @@ Interpreter used for every command below:
 |---|---|
 | `tools/experiments/__init__.py` | package marker (offline experiment prep) |
 | `tools/experiments/manifest.py` | manifest builder + validator + S3-style results/cost parser |
-| `tests/test_tools_experiments_manifest.py` | focused offline tests (29) |
+| `tests/test_tools_experiments_manifest.py` | focused offline tests (33) |
 | `scratch/bo_m0/s11/pilot1_cold_vs_warm_native_ath_core_v4.yaml` | pilot 1 overlay |
 | `scratch/bo_m0/s11/pilot2_verify_allocation_crease_core_law_v4.yaml` | pilot 2 overlay |
 | `scratch/bo_m0/s11/built/pilot1_cold_vs_warm_native_ath_core_v4.json` | built/validated pilot 1 manifest |
@@ -25,6 +25,12 @@ Interpreter used for every command below:
 | `docs/evidence/bo_study_2026-11-12/s11/pilot1_cold_vs_warm_native_ath_core_v4.json` | committed copy of the built/validated pilot 1 manifest |
 | `docs/evidence/bo_study_2026-11-12/s11/pilot2_verify_allocation_crease_core_law_v4.json` | committed copy of the built/validated pilot 2 manifest |
 | `docs/evidence/bo_study_2026-11-12/s11/validation_pilot*.json` | committed CLI validation result for each manifest |
+| `docs/evidence/bo_study_2026-11-12/s11/overlays/pilot*.yaml` | committed reviewable copies of both overlays |
+| `docs/evidence/bo_study_2026-11-12/s11/overlays/evidence_measured.json` | shared measured-evidence helper used by both overlays |
+
+The committed overlays under `docs/evidence/bo_study_2026-11-12/s11/overlays/` are the reviewable
+inputs; the `scratch/` copies remain local working files. The 2026-11-13 rebuild in section 12 uses
+the committed overlay paths.
 
 The overlays are manifest inputs, not runnable jobs and not applied configs.
 `scratch/` is gitignored: the built manifests are committed under
@@ -102,6 +108,13 @@ loader (read-only), re-hashes each input file, and checks:
     required; no speedup claim.
 14. **Rollback/adoption** — fail/no-gain rollback list and owner adoption
     decisions with `adopt_if` and `otherwise`.
+
+**Preparation-time pins and blockers (2026-11-13 rebuild).** Both manifests also carry
+`task.pins` (the source-run library SHAs, the checkout head at preparation, and
+`status: blocked_until_scheduling`) and `task.blocked_evidence` (execution pin set, wall deadline,
+paired-difference power plan, and the owner execution gate). These are recorded preparation facts,
+not execution authorization: `execution_authorized` stays `false`, the deadline stays an explicit
+placeholder, and a pin set is chosen only when the owner schedules the pilot.
 
 The results parser (`parse_run_outcomes`, `measure_run_cost`) mirrors the
 S3 concepts in `tools/analysis/_common.py` without importing or editing that
@@ -419,6 +432,31 @@ Both exited `0` with `SUMMARY errors=0 warnings=0 ok=true`; the two
 `tests/test_tools_experiments_manifest.py` pins this behavior:
 `test_committed_pilot_manifests_validate_clean` and
 `test_committed_pilot_commands_validate_against_live_cli` (33 focused tests).
+
+**2026-11-13 local-pass rebuild.** The manifests were rebuilt from the committed overlays so the
+new `task.pins` / `task.blocked_evidence` blocks are in the published JSON, then re-validated:
+
+```powershell
+$PY = "C:\Users\hunte\Hrns\hornlab-search\.venv\Scripts\python.exe"
+$E  = "docs\evidence\bo_study_2026-11-12\s11"
+& $PY tools\experiments\manifest.py build `
+    --overlay "$E\overlays\pilot1_cold_vs_warm_native_ath_core_v4.yaml" `
+    --out "$E\pilot1_cold_vs_warm_native_ath_core_v4.json"
+& $PY tools\experiments\manifest.py validate `
+    --manifest "$E\pilot1_cold_vs_warm_native_ath_core_v4.json" `
+    --json-out "$E\validation_pilot1_cold_vs_warm_native_ath_core_v4.json"
+& $PY tools\experiments\manifest.py build `
+    --overlay "$E\overlays\pilot2_verify_allocation_crease_core_law_v4.yaml" `
+    --out "$E\pilot2_verify_allocation_crease_core_law_v4.json"
+& $PY tools\experiments\manifest.py validate `
+    --manifest "$E\pilot2_verify_allocation_crease_core_law_v4.json" `
+    --json-out "$E\validation_pilot2_verify_allocation_crease_core_law_v4.json"
+```
+
+All four commands exited `0` with `SUMMARY errors=0 warnings=0 ok=true`. Overwriting the committed
+manifest JSONs is intentional (the new pin/blocker records and measured-evidence blocks); the
+validation result JSONs were unchanged. No `task.pins` / `task.blocked_evidence` validation error
+occurred, and the manifests remain `execution_authorized: false`.
 
 Rollback/adoption records are already enumerated in each manifest's
 `rollback_and_adoption` (`fail_or_no_gain_rollback`, `owner_adoption_decisions`

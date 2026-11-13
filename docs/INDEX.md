@@ -1,5 +1,9 @@
 # Docs index
 
+[S8 discovery resolution](research/S8_DISCOVERY_RESOLUTION_2026-11-13.md): geometry/behavior
+separation, source-backed hypothesis cards, equal-cost QD/Pareto rules, research sources and
+the correction distinguishing a shared scoring context from per-design replay `score_id`.
+
 Start here. Code map: [`CODE_MAP.md`](CODE_MAP.md). Rules for agents: [`../CLAUDE.md`](../CLAUDE.md), [`../AGENTS.md`](../AGENTS.md).
 Keep this file current: a new doc gets a line here in the same commit.
 
@@ -158,6 +162,7 @@ Keep this file current: a new doc gets a line here in the same commit.
 ## Evidence (measured results; `evidence/README.md` explains the rules)
 | Doc | What it is |
 |---|---|
+| [evidence/G2_FORK_AB_2026-11-13.md](evidence/G2_FORK_AB_2026-11-13.md) | **G2 gate (A3 fork A/B):** 18 fused-CUDA solves, 3 quarter-DOF points x 3 fresh-process reps x 2 commits. `9ec86b0` saves **55 / 66 / 70 %** peak VRAM and 20-30 % per-frequency wall vs the pin `0850ef39`, with an identical analytic self-test (R(ka) 0.020 dB, convergence 0.0204/0.0051/0.0013). Adopt criterion met; A5's 4.0x fused factor is now ~3x too pessimistic. |
 | [evidence/M6_WP12_2026-10-25.md](evidence/M6_WP12_2026-10-25.md) | WP12 enclosure mounting: brief.mounting → the mesher's OWN keys (plumbing + cache keys + all echoes; absent = byte-for-bit); measured on two finalists — dofs +199.4 % / +106.5 %, both under the UNCHANGED caps, J improves under the enclosure (different objective landscape — never rank across mountings), reference parity 2.91e-06 dB; focused 71/0/0; suite 1372/0/0/0; WP13 OWNER-DEFERRED; byte-check tools/evidence_bytecheck_m6.py 21/21. |
 | [evidence/M5B_WP14_WP16_WP17_2026-10-25.md](evidence/M5B_WP14_WP16_WP17_2026-10-25.md) | M5B: WP14 multicell category (CAD→STEP route + solve keys + record honesty) + WP16 source plug + WP17 stage-1 fused-CUDA near correction — fork branches GPU-validated (Julia 46/46 incl. all four CUDA testsets; selftests 0.020/0.0390 dB; 3-arm A/B worst 4.94e-06 dB); fork HOSTED (github.com/llevaachingada/hornlab-beat-bem) + pin moved there → `test_mesh_pin` tripwire RESOLVED; suite **1325/0/0/0**; multicell physics DEFERRED (mouth-topology diagnosis + resume recipe inside); byte-check tools/evidence_bytecheck_m5b.py 33/33. |
 | [evidence/M5_WP11_2026-10-25.md](evidence/M5_WP11_2026-10-25.md) | M5 WP11: restarts (IPOP/BIPOP mirroring pycma) + CMA-ME QD atlas (ribs 0.12.0; `archive.json`/`archive_heatmap.json` contract + read-only GUI atlas view); offline suite 1234/0/1/0 (intended tripwire; +40 additive) + 4 GPU screens proving budget exactness (fired run: 4 ES instances, BIPOP schedule visible, VRAM 430→2305 MiB [measured]); byte-check tools/evidence_bytecheck_m5.py 30/30. |

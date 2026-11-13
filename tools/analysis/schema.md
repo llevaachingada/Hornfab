@@ -1,5 +1,21 @@
 # Analysis-report JSON schemas (Group A, 2026-11-12)
 
+S8 contracts are documented by the module docstrings in `geometry_descriptors.py`,
+`hypothesis_cards.py`, and `qd_compare.py` and in
+`docs/research/S8_DISCOVERY_RESOLUTION_2026-11-13.md`. Geometry input is strictly
+`Design(family, params)` with recursive score-column assertions. The admitted native families are
+`ICW`, `OSSE`, `R-OSSE` and `FREEFORM`. `MEH`, any `mid_ports` params, `cad` (external STEP) and
+`grid` (point-grid recipe) inputs are refused before resolution rather than approximated. Behavior descriptors
+are a separate measured-metric artifact with explicit frequency band. Hypothesis cards
+carry actual parent source IDs/digests and reconstructed configs for parents, combination,
+feature removals and broad control. `validation: canonical_geometry_resolved` means the
+point-grid API succeeded; physical feasibility remains unverified until normal evaluation.
+QD/Pareto comparison requires matching objective versions, shared scoring context and
+physical task/spec, explicit complete cost ledgers and frozen physical axes/reference.
+`qd_compare` equal budgets are integer **attempt-equivalent** evaluations that charge failed,
+refused and duplicate attempts; they are an accounting equality, not measured wall-time equality.
+Per-result replay `score_id` is retained as provenance, never used as a shared cohort ID.
+
 Every tool in `tools/analysis/` writes `<name>.json` (machine-readable, shape below),
 `<name>.md` (tables) and PNG charts into the `--out` folder. Never writes into `runs/`.
 `null` marks "not computable from this data" (missing timestamps, no sklearn, <3 rows, ...).

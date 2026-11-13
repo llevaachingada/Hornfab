@@ -51,17 +51,25 @@ def _tiny_fixture(root: Path):
             "metric_id": f"metric-{i:04d}", "score_id": f"score-{i:04d}",
             "design_hash": design_hash, "stored_j": 1.0 + 0.1 * i,
             "stored_objective_version": 4, "parity_delta": 0.0,
+            # Strict native policy gate: the replay must evidence the frozen metric policy.
+            "objective_version": 4, "metric_source": "stored",
+            "diagnostics": {"ripple_used_response": True},
+            "target": {"band_lo_hz": 300.0, "band_hi_hz": 8000.0},
+            "weights": {"cov": 1.0, "rip": 1.0},
         })
     (dataset / "shard-0000.jsonl").write_text(
         "".join(json.dumps(row) + "\n" for row in shard_rows), encoding="utf-8")
     catalog = fixture / "catalog.csv"
     catalog.write_text(
-        "root,shard_index,row,config_name\n"
-        + "".join(f"dataset,0,{i},native__ath_core_v4\n" for i in range(ROWS)),
+        "root,shard_index,row,config_name,objective_version,backend,brief_hash,"
+        "dependency_hash,task_identity,fidelity,grid_hash\n"
+        + "".join(f"dataset,0,{i},native__ath_core_v4,4,beat_cuda,brief-fixture,"
+                  f"dep-fixture,task-fixture,screen,grid-fixture\n" for i in range(ROWS)),
         encoding="utf-8")
     scores = fixture / "scores.json"
     scores.write_text(json.dumps({
         "cohort": {"native_config": "native__ath_core_v4"},
+        "brief": {"objective_version": 4},
         "parity": {"n": ROWS, "n_compared": ROWS, "max_abs_delta": 0.0},
         "rows": score_rows,
     }), encoding="utf-8")
