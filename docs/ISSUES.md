@@ -6,6 +6,7 @@ Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 20
 Local-only, added 2026-11-13 (23:3xZ) (**senior implementation plan for review; six verification corrections; no GitHub issue state changed**):
 - Ready for review (not executed): `docs/queue/SPEED_ARCHITECTURE_PLAN_2026-11-13.md` - C1-C6 inventory, I1-I8
   invariants, E0-E9 gated sequence, H1-H4 test design with statistics, R1-R10 risks, rollback, 12 open questions.
+  C2 is now DONE at fork **`38e5b1f`** (pushed to `ourfork`); the installed-SHA target for the trial is `38e5b1f`.
 - Fixed (test design): the Round A/B arms shared a cache, so the second arm on the same seed would have been a cache
   hit and faked the speedup. Per-arm `cache_dir`/`dataset_dir` under `scratch/` now; both night files re-dry-run clean.
 - Corrected: resume `--budget` counts new evals (45, not 200); the interrupted run is not strict, so the library-SHA

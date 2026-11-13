@@ -35,7 +35,7 @@ numbers that count as results.
 | Repo HEAD | `0980b8c` (`main`, pushed) | `git log` |
 | Installed beat pin | `0850ef39b29d7c51f8fbb082184d3784d2ff8bef` | `dist-info/direct_url.json` |
 | Fork branch | `perf/skip-fused-identity-cache` @ `9ec86b0` + **uncommitted part-two edit** | `git status` in fork |
-| Part-two diff shape | `BeatEngineDriver.jl` +16/−3, under test | fork `git diff --stat` |
+| Part-two commit | **`38e5b1f`** (+16/−3), pushed to `ourfork` | fork `git show`, `git ls-remote` |
 | Interrupted run | `runs/20261113T193536Z-screen-81c964`, **158/200** rows, resume job RUNNING | `search.ndjson` count, runner pids |
 | Resume job | night `resume_print_night_2026-11-14`, budget **45**, timeout 9000 s | `runs/nights/queue_resume_print_2026-11-14.log` |
 | GPU | busy with the resume (~2 GB), no other Julia host | `nvidia-smi`, process list |
@@ -90,17 +90,25 @@ therefore visible in the data, and A1's cache namespace keys on the three physic
   numerically identical.
 - **Known gap:** fused-path output parity is **not** measured (§7 H1 closes it). Shared memory not recorded (§8).
 
-### C2 — Solver upgrade, part two (RUNNING; uncommitted in the fork)
+### C2 — Solver upgrade, part two (DONE: fork commit `38e5b1f`, pushed to `ourfork`)
 
-- **Edit:** skip the two host dense identity assemblies (`BeatEngineDriver.jl:1534-1535`) and their immediate
-  consumers **only** when `beat_backend == :cuda && fused_burton_miller_cuda`. Every other backend unchanged.
-- **Why safe:** the fused CUDA assembler writes the analytic identity directly (`BeatEngineCore.jl:443-460`); the host
-  matrices are consumed only by CPU/Metal (`:1931-1932`, `:2012`) and non-fused CUDA (`:758`).
-- **Blast radius:** `identity_cache` dict (`:1636`), `metal_fused_identity_cache` (`:1716`),
-  `selected_identity_p1_p1/dp0` (`:1809-1821`). The implementer must prove none is reachable on fused CUDA or stop.
-- **Gating:** folded into the **same new installed SHA** as C1; not measured as a separate pin level.
-- **Evidence required before adoption:** Julia CPU suite (parent: 3830 pass / 0 fail / 4 broken) and the analytic
-  exterior validation, both green.
+- **Edit (+16/−3):** move the two host dense identity assemblies after the fusion decision and skip them **only** when
+  `fused_burton_miller_cuda`; leave `nothing` as the explicit never-read value. Also leave `identity_cache` as an empty
+  `Dict{Int,Any}()` on that route (its only reader is the CPU quadrature-order lookup, `BeatEngineDriver.jl:1827`,
+  inside `beat_backend == :cpu`). Every other backend is byte-identical.
+- **Why safe (verified at source, not just asserted):** `fused_burton_miller_cuda` is assigned at `:1574`, before the
+  guarded assembly at `:1586-1589`; the only consumer that would break is the CUDA cache build at `:1681`, itself
+  inside `if !fused_burton_miller_cuda` (`:1680`); `metal_fused_identity_cache` (`:1729`) is inside the Metal branch;
+  `selected_identity_*` alias `nothing` on fused CUDA and are dereferenced only on CPU (`:2016`, `:2025`), Metal, and
+  the non-fused `else` (`:2056`).
+- **Evidence:** the Julia CPU suite was re-run independently by the integrator after the change: **exit 0**, 3830 pass
+  / 0 fail / 4 broken (the four CUDA testsets skip because CUDA is not a dependency of the CPU project), matching the
+  parent commit. `validate_analytic_exterior.jl` -> `ANALYTIC_EXTERIOR_VALIDATION_OK`, controls still failing as
+  required. No GPU used.
+- **Gating:** installed as the **same new SHA** as C1 (fork history `0850ef3` -> `9ec86b0` -> **`38e5b1f`**), not
+  measured as a separate pin level.
+- **Residual risk:** `identity_cache` is empty on fused CUDA, so a future reader there fails loudly (KeyError) instead
+  of silently receiving `nothing`. Recorded deliberately.
 
 ### C3 — Batching becomes a real setting (NOT written)
 
@@ -161,7 +169,7 @@ design is a cache hit and the measured "speedup" is an artefact.
 |---|---|---|---|---|
 | E0 | Finish the interrupted run (RUNNING, 158/200, budget 45) | night queue | `search.ndjson` = 200, runner exit 0 | row count 200 and no solve failures |
 | E1 | Review + commit C2 in the fork; run Julia CPU suite + analytic exterior | fixer + integrator | fork SHA, test lines | 0 fail; dataflow proof |
-| E2 | Build the new installed SHA = C1+C2; record it | integrator | fork commit + push to `ourfork` | `git ls-remote` shows it |
+| E2 | Install SHA = C1+C2 = **`38e5b1f`** (DONE: committed and pushed) | integrator | fork commit, `git ls-remote` | `direct_url.json` matches at E4 |
 | E3 | Round A (2 arms, cold caches) | night queue | `speed_round_a` summary + run dirs | both arms complete, shared recorded (C4 first) |
 | E4 | Swap install + `provision --backend cpu`; verify SHA and patch markers | integrator | `direct_url.json`, grep markers, tests | exact SHA match |
 | E5 | Round B (4 arms, cold caches) + shared watcher | night queue | `speed_round_b` summary | all arms complete, no spill |
@@ -289,8 +297,8 @@ Remotes differ: the checkout's `origin` is upstream `m3gnus` (contains `d740c28`
    ratios). Alternative: budget 2 and time only the second candidate — worth the extra GPU time?
 3. Is `solve.freq_batch_size` the right home for C3, or should it be a `search.*` key? (Proposal: solve, because it is a
    solver-call concern and rides in the solve spec.)
-4. Should C1 and C2 ship as one installed SHA (proposed) or as two, with a bisect-ready pair of commits (they remain two
-   commits in the fork either way)?
+4. C1 and C2 ship as one installed SHA (**`38e5b1f`**) over two commits (`9ec86b0`, `38e5b1f`). Is that the right
+   packaging, and is the bisect pair sufficient for attribution if the bundle ever looks slow?
 5. Is the 0.039 dB / 1° parity bar meaningful when the fused kernels are untouched? Should we additionally require
    bitwise-identical response `.npz` for the same design, and if so, is the current harness capable of it?
 6. Is a non-fused control arm needed after all, to demonstrate the patches left the default path identical?
@@ -328,3 +336,5 @@ Get-CimInstance Win32_Process -Filter "Name='julia.exe' OR Name='python.exe'"   
 - Round A/B arms need **per-arm cold caches** (C6), otherwise the second arm is a cache hit.
 - The G2 mechanism is `8(N²+N·E)`, not pool rounding (see `docs/evidence/G2_FORK_AB_2026-11-13.md`).
 - The analytic selftest does **not** exercise the fused path.
+- C2 is committed as `38e5b1f` (on top of `9ec86b0`); the CPU suite was re-run independently by the integrator after
+  the change: exit 0, counts unchanged (3830 / 0 / 4).

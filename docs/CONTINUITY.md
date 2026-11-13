@@ -1,6 +1,23 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-13 (23:4xZ) - PART TWO COMMITTED (fork `38e5b1f`) AND RE-VERIFIED BY THE INTEGRATOR; PLAN READY FOR REVIEW
+
+- Fork commit `38e5b1f` on `perf/skip-fused-identity-cache` (on top of `9ec86b0`): the two dense **host** L2 identity
+  assemblies are moved after the fusion decision and skipped only on `fused_burton_miller_cuda`; `identity_cache` is
+  left empty there (its only reader is the CPU quadrature-order lookup); every other backend is byte-identical.
+  Pushed to `ourfork`; installed-SHA target for the trial is therefore **`38e5b1f`**.
+- **Independent verification (not just the implementer's report):** I read the guard at source - flag assigned at
+  `:1574`, guarded assembly at `:1586-1589`, and the only consumer that would break (the CUDA cache build at `:1681`)
+  is already inside `if !fused_burton_miller_cuda` (`:1680`); `identity_cache` is read only inside
+  `beat_backend == :cpu` (`:1827`). I then re-ran the Julia CPU suite myself: **exit 0**, counts unchanged
+  (3830 pass / 0 fail / 4 broken; the CUDA testsets skip because CUDA is not a dependency of the CPU project).
+  `validate_analytic_exterior.jl` -> `ANALYTIC_EXTERIOR_VALIDATION_OK`.
+- The senior plan (`docs/queue/SPEED_ARCHITECTURE_PLAN_2026-11-13.md`) was updated to record C2 as DONE at `38e5b1f`,
+  with the verified dataflow and the residual risk (an empty `identity_cache` fails loudly if a future reader appears).
+  **The plan is frozen for the owner's reviewer**; nothing in E3-E9 has been executed.
+- Resume job still running: **181/200** rows at this writing; pin still `0850ef39`; no other GPU work.
+
 ## 2026-11-13 (23:3xZ) - SENIOR IMPLEMENTATION PLAN WRITTEN FOR REVIEW; SIX VERIFICATION CORRECTIONS (ONE TEST-DESIGN FLAW)
 
 - Wrote `docs/queue/SPEED_ARCHITECTURE_PLAN_2026-11-13.md` for a higher-thinking agent to review **before** execution:
