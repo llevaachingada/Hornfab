@@ -1677,6 +1677,12 @@ def build_parser() -> argparse.ArgumentParser:
     gui = sub.add_parser("gui", parents=[common], help="local web GUI (127.0.0.1) over runs, briefs and jobs")
     gui.add_argument("--port", type=int, default=8765)
     gui.add_argument("--no-browser", action="store_true", help="do not open a browser tab")
+    st = sub.add_parser("study", parents=[common],
+                        help="Bayesian design study workflow (bo-study-v1.1: "
+                             "validate | create | snapshot | analyze | propose | package | run --dry-run | "
+                             "reconcile | decide | export)")
+    st.add_argument("study_args", nargs=argparse.REMAINDER,
+                    help="study action and its flags; global flags must precede 'study'")
     return p
 
 
@@ -1751,6 +1757,9 @@ def main(argv: list[str] | None = None) -> int:
             from hornlab_search.gui.server import serve
             return serve(REPO, args.port, not args.no_browser,
                          runs=Path(args.runs_dir) if args.runs_dir else None)
+        if args.cmd == "study":
+            from hornlab_search.studies.cli import main as _study_main
+            return _study_main(args.study_args)
     except KeyboardInterrupt:
         print(f"{args.cmd} INTERRUPTED")
         return 1

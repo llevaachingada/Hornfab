@@ -228,6 +228,56 @@ class StudyService:
                 'reason': 'artifact integrity does not validate schemas, policies, M2 gate or dispatch authorization',
                 'dispatch_authorized': False}
 
+    def prepare_run_package(self, study_id, **kwargs):
+        """Bind the current revision/artifacts into an immutable run package."""
+        from .package import prepare_run_package
+        return prepare_run_package(self, study_id, **kwargs)
+
+    def export_study(self, study_id):
+        """Return a durable, artifact-reference-only study record for export.
+
+        Response arrays and artifact bytes stay in their own stores; this record
+        contains identities, revisions, hashes, events, decisions and lineage.
+        """
+        with closing(self.store.connect()) as conn:
+            conn.execute('BEGIN')
+            study = self._study(conn, study_id)
+            revisions = [dict(r) for r in conn.execute(
+                'SELECT revision,spec_hash FROM revisions WHERE study_id=? ORDER BY revision',
+                (study_id,))]
+            artifacts = [dict(r) for r in conn.execute(
+                'SELECT revision,kind,sha256,dependencies_json FROM artifacts '
+                'WHERE study_id=? ORDER BY revision,kind', (study_id,))]
+            decisions = [dict(r) for r in conn.execute(
+                'SELECT seq,revision,outcome,rationale FROM decisions '
+                'WHERE study_id=? ORDER BY seq', (study_id,))]
+            events = [dict(r) for r in conn.execute(
+                'SELECT seq,kind,payload_json FROM events WHERE study_id=? ORDER BY seq',
+                (study_id,))]
+            children = [r[0] for r in conn.execute(
+                'SELECT id FROM studies WHERE parent_id=? ORDER BY rowid', (study_id,))]
+            current = conn.execute('SELECT spec_json FROM revisions WHERE study_id=? AND revision=?',
+                                   (study_id, study['spec_revision'])).fetchone()
+            conn.commit()
+        for item in artifacts:
+            item['dependencies'] = json.loads(item.pop('dependencies_json'))
+        for item in events:
+            item['payload'] = json.loads(item.pop('payload_json'))
+        return {
+            'protocol': json.loads(current['spec_json']).get('protocol'),
+            'study': {'id': study_id, 'parent_id': study['parent_id'],
+                      'revision': study['spec_revision'], 'event_seq': study['event_seq'],
+                      'spec': json.loads(current['spec_json'])},
+            'parent_id': study['parent_id'],
+            'children': children,
+            'revisions': revisions,
+            'artifacts': artifacts,
+            'decisions': decisions,
+            'events': events,
+            'artifact_directory': str(self.store.artifacts),
+            'recovery_diagnostics': self.store.recovery_diagnostics(),
+        }
+
     @staticmethod
     def _job(row):
         if row is None:
@@ -337,6 +387,11 @@ class DraftAttemptJournal:
             stored = json.loads(self.store.read_artifact(ref['sha256']))
         except (ValueError, UnicodeDecodeError) as exc:
             raise Unavailable('package artifact must contain JSON') from exc
+        if isinstance(stored, dict) and 'package_id' not in stored:
+            # Prepared packages publish only the canonical body; the identifier is
+            # its content hash. Reconstruct before comparing to the caller object.
+            from .package import package_hash
+            stored = {'package_id': package_hash(stored), **stored}
         if canonical(stored) != canonical(package):
             raise Conflict('package differs from registered artifact')
 
@@ -548,8 +603,14 @@ class DraftAttemptJournal:
             if not package:
                 raise NotFound('package not found')
             row = conn.execute('SELECT * FROM proposal_state WHERE package_id=?', (package_id,)).fetchone()
+            stored = json.loads(row['rng_json']) if row and row['rng_json'] else None
+            history = (stored.get('proposal_history')
+                       if isinstance(stored, dict) and 'proposal_history' in stored else None)
             return {'proposal_index': row['proposal_index'] if row else 0,
-                    'rng_state': json.loads(row['rng_json']) if row and row['rng_json'] else None,
+                    # Whole persisted proposal state (history + RNG streams), when the
+                    # caller staged it with ``encode_proposal_history``.
+                    'rng_state': stored,
+                    'proposal_history': history,
                     'pending_candidate': json.loads(row['pending_json']) if row and row['pending_json'] else None,
                     'observations': self.observations(package_id)}
 

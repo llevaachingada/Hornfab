@@ -420,3 +420,65 @@ def test_verification_excludes_missing_or_predicted_evidence():
              'already_verified': False, 'j': 1}]
     out = select_verification(rows, mode='scalar', audit_seed=1)
     assert out['finalists'] == [] and out['audits'] == []
+
+# ---------------------------------------------------------------- B3 durable proposal state
+
+def test_proposal_cadence_and_rng_survive_resume(tmp_path):
+    import json
+    from hornlab_search.bo.propose import ProposalHistory, ProposalPolicy
+    from hornlab_search.studies.runner import decode_proposal_history, encode_proposal_history
+    from hornlab_search.studies.service import DraftAttemptJournal, StudyService
+
+    service = StudyService(tmp_path)
+    sid = service.create_study({'protocol': 'bo-study-v1.1', 'task': {'name': 'fake'}},
+                               'create')['id']
+    p = {**package(), 'study_id': sid}
+    service.attach_artifact(sid, 1, 'package', json.dumps(p).encode(), {}, 'package')
+
+    class V2Journal(DraftAttemptJournal):
+        durable_contract = 'b5-journal-v2'
+
+    journal = V2Journal(service)
+    assert journal.claim(p)
+    policy = ProposalPolicy()
+    for index in range(4):
+        progress = journal.load_progress('p')
+        restored = decode_proposal_history(progress.get('proposal_history'),
+                                           progress['proposal_index'])
+        assert restored.proposal_index == index
+        assert policy.is_exploration(index) is (index == 3)
+        candidate = {'kind': 'screen', 'solve_id': f's{index}'}
+        state = encode_proposal_history(ProposalHistory(proposal_index=index + 1),
+                                        {'seed': 7, 'counter': index})
+        journal.stage_proposal(p, candidate, index, state, f'stage{index}')
+        attempt = journal.begin(p, candidate, True)
+        assert attempt
+        journal.finish(attempt, {'solve_id': f's{index}', 'call_status': 'called',
+                                 'outcome': 'success'})
+
+    # A fresh process restores the index instead of restarting the maximin cadence.
+    reopened = V2Journal(StudyService(tmp_path))
+    progress = reopened.load_progress('p')
+    restored = decode_proposal_history(progress.get('proposal_history'),
+                                       progress['proposal_index'])
+    assert restored.proposal_index == 4
+    assert not policy.is_exploration(restored.proposal_index)
+    assert progress['rng_state']['rng_state'] == {'seed': 7, 'counter': 3}
+    assert progress['pending_candidate'] is None
+
+    # Unknown attempts still block relaunch after resume.
+    unresolved = reopened.begin(p, {'kind': 'screen', 'solve_id': 'unknown'}, True)
+    assert unresolved
+    assert V2Journal(StudyService(tmp_path)).claim(p) is False
+
+
+def test_evaluator_skeleton_reports_capability_missing_without_dispatch():
+    from hornlab_search.studies.runner import StudyEvaluatorAdapter
+    skeleton = StudyEvaluatorAdapter()
+    assert skeleton.capability_status()['status'] == 'capability_missing'
+    lane = Lane()
+    journal = Journal()
+    result = run_package(package(), skeleton, lane, journal)
+    assert result['status'] == 'capability_missing'
+    assert result['reason'] == 'evaluator_adapter_unavailable'
+    assert lane.entered == 0 and journal.items == {}

@@ -15,6 +15,75 @@ class ContractError(ValueError):
     pass
 
 
+class CapabilityMissing(RuntimeError):
+    """Raised by an adapter that is deliberately not implemented yet."""
+
+
+CAPABILITY_MISSING = 'capability_missing'
+
+
+class StudyEvaluatorAdapter:
+    """Production-shaped evaluator skeleton; performs no mesh, BEM or GPU work.
+
+    No real adapter ships in this slice.  An authorized M3 worker must implement
+    the following contract before dispatching a package:
+
+    * ``next_candidate(state)`` selects from the frozen legal candidate pool using
+      the durable :class:`hornlab_search.bo.propose.ProposalHistory` (proposal
+      index drives the every-fourth-maximin cadence), returns the candidate dict
+      with an exact ``solve_id``, or ``None`` only for real pool exhaustion.
+    * ``lookup(candidate)`` checks the exact solve identity in the normal
+      run/cache/dataset stores and returns an already-persisted result or ``None``.
+      It must not consume a new-call reservation.
+    * ``preflight(candidate)`` performs cheap deterministic checks only and
+      returns a refusal result or ``None``; it never meshes or solves.
+    * ``evaluate(candidate, attempt_id)`` performs at most one normal pipeline
+      evaluation under the owned lane, persisting the normal run/dataset artifacts,
+      and returns ``call_status`` ``called``/``not_called`` (never guesses).
+    * ``observe(result)`` updates the in-memory training state; ``False`` pauses
+      BO on a numerical model failure.
+    * ``restore_progress(progress)`` restores observations and
+      :class:`ProposalHistory`/RNG state from ``journal.load_progress`` so resume
+      cannot reset the cadence; unknown attempts must remain unresolved.
+    * ``proposal_rng_state()`` returns JSON-serializable RNG/proposal state for
+      ``journal.stage_proposal``.
+
+    Until then every operation is an explicit capability gap.
+    """
+
+    adapter_contract = 'b5-evaluator-skeleton-v1'
+
+    def capability_status(self):
+        return {'status': CAPABILITY_MISSING,
+                'reason': 'evaluator_adapter_unavailable',
+                'detail': 'no production mesh/BEM evaluator adapter is wired in this build'}
+
+    def _missing(self):
+        raise CapabilityMissing('production evaluator adapter is not implemented')
+
+    def next_candidate(self, state):
+        self._missing()
+
+    def lookup(self, candidate):
+        self._missing()
+
+    def preflight(self, candidate):
+        self._missing()
+
+    def evaluate(self, candidate, attempt_id):
+        self._missing()
+
+    def observe(self, result):
+        self._missing()
+
+    def restore_progress(self, progress):
+        self._missing()
+
+    def proposal_rng_state(self):
+        self._missing()
+
+
+
 def _validate(package, dry_run):
     if package.get('execution_mode') != 'adaptive_serial':
         raise ContractError('adaptive_serial required')
@@ -64,6 +133,13 @@ def run_package(package, evaluator_adapter, lane_adapter, journal, *, dry_run=Fa
     deadline = _validate(package, dry_run)
     if dry_run:
         return {'status': 'dry_run', 'deadline_required': not bool(package.get('deadline'))}
+    # An explicitly unavailable evaluator must fail before launch ownership or
+    # any dispatch decision; returning pool_exhausted would misreport a gap.
+    capability = getattr(evaluator_adapter, 'capability_status', None)
+    if callable(capability):
+        status = capability()
+        if isinstance(status, dict) and status.get('status') == CAPABILITY_MISSING:
+            return status
     # Production wiring must opt in only after implementing the documented atomic
     # revision, launch, reservation, recovery and budget contract. No implicit fallback.
     contract = getattr(journal, 'durable_contract', None)
@@ -146,6 +222,106 @@ def run_package(package, evaluator_adapter, lane_adapter, journal, *, dry_run=Fa
     finally:
         journal.release(package['package_id'], status)
     return {'status': status}
+
+
+def _history_vectors(values):
+    vectors = []
+    for row in values:
+        row = tuple(float(x) for x in row)
+        if any(x != x or x in (float('inf'), float('-inf')) for x in row):
+            raise ContractError('proposal history vectors must be finite')
+        vectors.append(row)
+    return tuple(vectors)
+
+
+def encode_proposal_history(history, rng_state=None):
+    """Serialize a ``ProposalHistory`` plus RNG/JSON state for durable staging.
+
+    The returned object is JSON-canonicalizable and is what an adapter passes to
+    ``journal.stage_proposal`` / restores from ``journal.load_progress``.  The
+    proposal index is persisted explicitly so the every-fourth-maximin cadence
+    cannot reset across process restarts.
+    """
+    from hornlab_search.bo.propose import ProposalHistory
+
+    if not isinstance(history, ProposalHistory):
+        raise ContractError('ProposalHistory required')
+    index = history.proposal_index
+    if type(index) is not int or index < 0:
+        raise ContractError('proposal_index must be a non-negative integer')
+    return {
+        'proposal_history': {
+            'proposal_index': index,
+            'excluded_geometry_hashes': [str(v) for v in history.excluded_geometry_hashes],
+            'excluded_design_hashes': [str(v) for v in history.excluded_design_hashes],
+            'excluded_solve_identities': [[str(a), str(b)] for a, b in history.excluded_solve_identities],
+            'pending_identities': [[str(a), str(b)] for a, b in history.pending_identities],
+            'pending_vectors': [[float(x) for x in row] for row in history.pending_vectors],
+            'excluded_vectors': [[float(x) for x in row] for row in history.excluded_vectors],
+        },
+        'rng_state': rng_state,
+    }
+
+
+def decode_proposal_history(state, proposal_index=None):
+    """Restore a durable ``ProposalHistory``; never silently reset the cadence.
+
+    ``state`` may be the full object returned by :func:`encode_proposal_history`,
+    its nested ``proposal_history`` payload, or ``None`` (legacy rows), in which
+    case the persisted integer ``proposal_index`` column is used.  A stored index
+    that disagrees with the column is a corrupted/ambiguous state, not something
+    to normalize away.
+    """
+    from hornlab_search.bo.propose import ProposalHistory
+
+    if state is None:
+        return ProposalHistory(proposal_index=int(proposal_index or 0))
+    if not isinstance(state, dict):
+        raise ContractError('invalid persisted proposal state')
+    payload = state.get('proposal_history', state)
+    if not isinstance(payload, dict):
+        raise ContractError('invalid persisted proposal history')
+    index = payload.get('proposal_index')
+    if type(index) is not int or index < 0:
+        raise ContractError('persisted proposal_index is invalid')
+    if proposal_index is not None and int(proposal_index) != index:
+        raise ContractError('persisted proposal index disagrees with the journal column')
+
+    def strings(values, name):
+        if not isinstance(values, (list, tuple)):
+            raise ContractError(f'persisted {name} must be a list')
+        return tuple(str(v) for v in values)
+
+    def identities(values, name):
+        if not isinstance(values, (list, tuple)):
+            raise ContractError(f'persisted {name} must be a list')
+        out = []
+        for pair in values:
+            if not isinstance(pair, (list, tuple)) or len(pair) != 2:
+                raise ContractError(f'persisted {name} entries must be pairs')
+            out.append((str(pair[0]), str(pair[1])))
+        return tuple(out)
+
+    def vectors(values, name):
+        if values is None:
+            return ()
+        if not isinstance(values, (list, tuple)):
+            raise ContractError(f'persisted {name} must be a list')
+        return _history_vectors(values)
+
+    return ProposalHistory(
+        proposal_index=index,
+        excluded_geometry_hashes=strings(payload.get('excluded_geometry_hashes', []),
+                                         'excluded_geometry_hashes'),
+        excluded_design_hashes=strings(payload.get('excluded_design_hashes', []),
+                                       'excluded_design_hashes'),
+        excluded_solve_identities=identities(payload.get('excluded_solve_identities', []),
+                                             'excluded_solve_identities'),
+        pending_identities=identities(payload.get('pending_identities', []),
+                                      'pending_identities'),
+        pending_vectors=vectors(payload.get('pending_vectors', []), 'pending_vectors'),
+        excluded_vectors=vectors(payload.get('excluded_vectors', []), 'excluded_vectors'),
+    )
 
 
 def select_verification(rows, *, mode, audit_seed, objective_box=None, limit=4):
