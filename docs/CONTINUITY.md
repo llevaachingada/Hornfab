@@ -1,6 +1,32 @@
 # CONTINUITY
 
 
+## 2026-11-13 (~23Z) - MAIN MOVED AHEAD (S7 + S8 LANDED THERE) AND IS CURRENTLY RED; PR #55 NOT MERGED WITH IT
+
+- `origin/main` advanced from `9019cbd` to `87c0944` during this verification: `5f15275` (S5/S10/S11 evidence,
+  the S8 trio `geometry_descriptors.py` / `hypothesis_cards.py` / `qd_compare.py` + 4 tests,
+  `tools/lane_speed_report.py`, and a strict native `TrainingSet` gate in `bo/data.py` + `studies/builders.py`),
+  `a4dccef` (S7 refinements, 506 lines), `87c0944` (docs).
+- Consequence: this branch's S7 draft (310 lines, v1-only gate) is superseded by main's version, whose
+  `--advisory-stored-j` mode runs v4 rows as **exact stored labels** (one canonical `score_spec` per row,
+  matching `score_identity`, `label_evidence` with a per-result `score_id` and an exactly equal J; mixed
+  identities refused). S8 is no longer an open lane. The unique PR content is now B4/B5 durable launches,
+  B8 CLI/HTTP end-to-end + `GET .../export`, S5 `--config-roundtrip` hints, `lane_parity --pair`, INDEX dedupe.
+- Merge attempt with the newer main was made in the isolated worktree and **aborted, not pushed**, because it
+  goes red: main's strict native gate makes `build_training` refuse the synthetic fixtures, so
+  `tests/test_b8_end_to_end_cli_http.py` exits 6 at `analyze`.
+- **Main is already red on its own tree** (clean `origin/main` worktree, reproduced): 6
+  `tests/test_study_builders.py` tests fail with `training set is 'needs_initial_data'; n_min=28 n=0` (stale
+  synthetic fixture vs the new native gate), and
+  `test_tools_analysis_surrogate_validation.py::test_resume_reuses_complete_result_and_ood_falls_back` fails
+  because the tool now requires `x` in the unit cube while the test's OOD row is `[9.0, 9.0]`.
+- Branch state: still green against its base (`9019cbd`): 72 new tests + 62 neighbouring b8/study/gui tests
+  passed, `compileall` exit 0, INDEX dedupe checked by link-target set (166 -> 165; only the pre-archive
+  `HANDOFF_COLLABORATOR_2026-10-23.md` row dropped, archived copy listed).
+- Next (needs the parent/owner call): at reconciliation, drop this branch's S7 file + tests in favour of main's,
+  then either point the B8 workflow at a native fixture or have the gate owner relocate the synthetic builder
+  tests. Do not weaken the gate or the tests to force green.
+
 ## 2026-11-13 (~25Z) - PR #55 MERGED UP TO MAIN, VERIFIED OFFLINE; S7 v4 GATE KEPT (offline)
 
 - Merged `main` (`9019cbd`) into `claude/eloquent-ride-owt01w`: two conflicts, both docs, both sides kept
@@ -16,6 +42,8 @@
   makes J comparable only within one objective version + brief/weights/tolerances — the S7 row contract carries
   no brief/score identity. A v4 path needs `objective/replay.py`'s `score_id` in the row contract and
   same-identity enforcement as a separate change, not a widened constant.
+  **Superseded the same day by main's `a4dccef`** (`--advisory-stored-j`, canonical `score_spec` per row): see
+  the ~23Z entry. This branch still ships the v1-only draft.
 - Still open: S8 (geometry/behaviour descriptors, hypothesis cards, QD-vs-Pareto) not started; full offline
   suite not re-run in this environment (targeted tests above only).
 

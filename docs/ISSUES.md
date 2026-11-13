@@ -3,6 +3,16 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-13 (**Elites tab redesigned for non-technical readers: brief/typology constraints and isometric horn thumbnails, best-per-typology / best-per-brief browsing, paginated 24 at a time, CSV-path noise removed; payload extended with brief/family/brief_target; bo-study-v1.1 final offline integration landed (M2 sensitivity/proposal evidence, immutable run package + `hornlab-search study` CLI, durable proposal-cadence recovery, B8 adversarial full loop); profile-outline thumbnail geometry fixed after live check (closed outline split at the mouth rim, outer wall kept); card hierarchy tuned per owner (constraint line + score largest, gate pills smaller); no GitHub issue state changed**).
 
+Local-only, added 2026-11-13 ~23Z (**main moved ahead with S7 + S8 and is currently red; no GitHub issue state changed**):
+- Superseded: main's `5f15275` landed the S8 trio (`geometry_descriptors`, `hypothesis_cards`, `qd_compare`) and
+  `a4dccef` landed the S7 `--advisory-stored-j` v4 stored-label mode. This branch's S7 draft is redundant; S8 is
+  no longer open.
+- Open (blocker on merging this PR with main): main's strict native `TrainingSet` gate refuses the synthetic
+  fixtures used by `tests/test_b8_end_to_end_cli_http.py` (exit 6 at `analyze`), so the merge was aborted.
+- Open (main-side red, reproduced on a clean `origin/main` worktree): 6 `tests/test_study_builders.py` tests fail
+  (`needs_initial_data; n_min=28 n=0`) and the S7 OOD test fails because `x` must now be in the unit cube.
+- Not weakened: no gate, tolerance or test was changed to force green.
+
 Local-only, added 2026-11-13 ~25Z (**PR #55 merged up to main, verified offline; no GitHub issue state changed**):
 - Resolved: `main` (`9019cbd`) merged into the PR; only doc conflicts (`CONTINUITY`, `ISSUES`), both sides kept.
 - Verified: compileall exit 0; 72 new tests passed; 62 neighbouring b8/study/gui-study tests passed; INDEX
