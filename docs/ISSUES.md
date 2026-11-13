@@ -104,7 +104,7 @@ Local-only, added 2026-11-13 (**bo-study-v1.1 final integration; offline; no Git
 - Note: untracked `cache_probe/` and `dataset_probe/` probe artifacts were produced by the parallel
   rev2 CPU-parity session (real CPU solves, `beat_cpu`); this session left them untouched.
 
-Local-only, added 2026-11-13 (**next-queue handoff + HF dataset upload; no GitHub issue state changed**):
+Local-only, added 2026-11-13 (**next-queue handoff + HF dataset upload COMPLETE; no GitHub issue state changed**):
 - `docs/research/NEXT_QUEUE_PLANNING_HANDOFF_2026-11-12.md`: verified night-queue status, decision
   lineage (compute-allocation study -> ATH 50x50 first task -> hardening/bo-study-v1.1), data
   inventory, K-law/8 GB retarget limits, constraints, adversarial verdict and three alternatives.
@@ -116,12 +116,14 @@ Local-only, added 2026-11-13 (**next-queue handoff + HF dataset upload; no GitHu
   only; (5) re-check the M0 freeze (origin still DRAFT) and CPU/GPU parity before trusting the day
   report. Owner must confirm coverage pair, driver (2-inch vs 1.4-inch), band top, envelope and
   build-vs-study.
-- **HF upload (scheduled, not executed at record time):** stage
-  `C:\Users\hunte\Hrns\.hf_stage_hunter` (8 tars, 12.82 GB, SHA-256 verified) -> root of
-  `chingadalleva/hornlab-search-data`; one-time task `Hornlab HF stage upload` at 2026-11-13
-  13:37:04 -05:00; log `C:\Users\hunte\Hrns\ops\hf_upload_2026-11-13.log`; Xet disabled. Stage
-  cutoff ~04:51-04:56Z (1,501/1,726 g9 rows); a completed-night tail needs a repack. Record:
-  `docs/evidence/HF_UPLOAD_2026-11-13.md`.
+- **HF upload COMPLETED 2026-11-13 21:37Z:** stage `C:\Users\hunte\Hrns\.hf_stage_hunter`
+  (8 tars, 12.82 GB, SHA-256 verified) uploaded to the root of
+  `chingadalleva/hornlab-search-data`; repo `last_modified 2026-11-13 21:36:46Z`; sizes and LFS
+  SHA-256 match `stage_hashes.json` (`ALL_MATCH=True`). Scheduled bulk task failed (non-interactive
+  session); succeeded via `ops/hf_upload_retry.ps1` per-file retry (commits `f0a403a`, `a3c7e01`,
+  `3babbe7`, `0e7d367`, `4cb907a`, `a1d4bee`, `f529366`, `ef36d14`); task unregistered. Stage cutoff
+  ~04:51-04:56Z (1,501/1,726 g9 rows). **L5.7 remains open for the final re-pack after the print-day
+  23:30 cut-off** (the `p80x60` searches keep writing). Record: `docs/evidence/HF_UPLOAD_2026-11-13.md`.
 
 Local-only, added 2026-11-13 (**Rev2 implementation pass, additive; no GitHub issue state changed**):
 - Open from Rev2: GUI balloon range selector, frequency-grid fidelity factor, J1/L1 generators, archive-wide manifest sweep. See QUEUE_PLAN_REV2 status table.
