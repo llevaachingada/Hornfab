@@ -1,6 +1,11 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-13 (~22Z) - A4 MESH FIDELITY TOOL LANDED (offline)
+
+- `tools/analysis/mesh_fidelity.py` + test (2 pass, fixture only). Source tag = SD1D1001; uses build.read_msh_summary
+  plus a small $Elements tag loop (meshio not installed). Not yet run on a real project mesh.
+
 ## 2026-11-13 (~22Z) - A5 FEASIBILITY PREFLIGHT LANDED (offline, not wired)
 
 - `hornlab_search/solve/feasibility.py` + `tests/test_solve_feasibility.py` (4 pass, conftest skipped: no numpy in cloud env).
