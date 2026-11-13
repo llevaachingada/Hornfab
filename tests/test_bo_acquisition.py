@@ -92,6 +92,7 @@ def test_missing_model_is_a_tagged_unavailability(candidates):
     assert scores.values is None  # never zero predictions
 
 
+@requires_botorch
 def test_nonfinite_acquisition_never_returns_scores(monkeypatch):
     torch = pytest.importorskip("torch")
 

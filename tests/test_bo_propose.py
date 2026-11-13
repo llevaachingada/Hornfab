@@ -135,6 +135,7 @@ def test_pending_contains_only_dispatched_unresolved_identities(fitted):
     assert result2.candidate_id in {"pool-00", "pool-01"}
 
 
+@requires_botorch
 def test_near_duplicate_tolerance_is_one_e_minus_six(training, fitted):
     train_vec = np.array(training.X[0], copy=True)
     vectors = [
@@ -152,6 +153,7 @@ def test_near_duplicate_tolerance_is_one_e_minus_six(training, fitted):
     assert result.candidate_id not in {"pool-00", "pool-02"}
 
 
+@requires_botorch
 def test_proposal_cadence_is_locked_and_survives_resume(fitted, pool):
     seen = []
     history = ProposalHistory(proposal_index=0)
@@ -174,6 +176,7 @@ def test_proposal_cadence_is_locked_and_survives_resume(fitted, pool):
     assert seventh.selection_reason == "exploration"
 
 
+@requires_botorch
 def test_exploration_uses_the_farthest_pool_point(fitted):
     pool = _make_pool([[0.9, 0.9], [0.2, 0.2], [0.5, 0.5]])
     # Index 3 is the exploration arm.
@@ -206,6 +209,7 @@ def test_optional_engine_absent_propagates_capability_error(fitted, pool, monkey
 # ------------------------------------------------------------------ engine proposals
 
 
+@requires_botorch
 def test_acquisition_failure_returns_model_unavailable_without_predictions(
         fitted, pool, monkeypatch):
     torch = pytest.importorskip("torch")
@@ -224,6 +228,7 @@ def test_acquisition_failure_returns_model_unavailable_without_predictions(
     assert "nonfinite_acquisition" in (result.detail or "")
 
 
+@requires_botorch
 def test_posterior_failure_returns_model_unavailable_without_predictions(
         fitted, pool, monkeypatch):
     forced = PredictionResult(status="unavailable", reason="model_unavailable",
