@@ -1,6 +1,33 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-13 (23:0xZ) - G2 MEASURED AND PASSED: A3 CUTS FUSED VRAM 55-70% AT IDENTICAL PHYSICS; GPU NIGHT PAUSED FOR IT
+
+- **Owner request:** pause the running GPU work and run the G2 gate.
+- **Paused first:** queue controller 39096 (it was waiting on the night runner and would have started the rerun the
+  moment the night exited), then the GPU night `home80x60_day_2026-11-13`: runner 20608/6848, search 33268/36636
+  (job 2 `p80x60__ath_core_14in`, run `20261113T193536Z-screen-81c964`) stopped at **153/200 candidates**, worker
+  host 15868/40856, julia 8028. Job 3 (`p80x60__osse_ext_throat_s5678`) never started. VRAM back to 660-891 MiB.
+  Resume: `search --resume runs/20261113T193536Z-screen-81c964 --budget 200`; job 3 separately. The GPU rerun
+  night is still on disk but is **not** queued.
+- **G2 protocol:** `measure_fused_ceiling.py` (M2: one solve per fresh process, out-of-process VRAM poll,
+  `gpu-clean` between measurements), fused on, at quarter DOF **4,168 / 8,021 / 11,938** (mouth-res 10.0 / 7.1 /
+  5.8, calibrated CPU-only), 3 reps per point per commit.
+- **Result [measured]:** A `0850ef39` median delta **703 / 2,091 / 4,493 MiB** at **2.93 / 5.90 / 9.72 s** per
+  frequency; B `9ec86b0` **319 / 703 / 1,343 MiB** at **2.15 / 4.17 / 7.82 s**. Savings **-55 % / -66 % / -70 %**
+  VRAM and -27 % / -29 % / -20 % per-frequency wall. No OOM at any point on either commit.
+- **Parity [measured]:** `selftest --analytic` identical on both commits - R(ka) spread 0.020 dB (tol 0.5),
+  convergence 0.0204 / 0.0051 / 0.0013, spreading 6.0206 dB per ka, omnidirectionality <= 0.0050 dB.
+- **Verdict:** the G2 adopt criterion is met. Evidence: `docs/evidence/G2_FORK_AB_2026-11-13.md`.
+- **A5 consequence:** the 4.0x fused factor (calibrated at 12,183 DOF ~4.7 GB on the old pin) is now ~3x too
+  pessimistic - 12k DOF measures 1,343 MiB. Recalibrate it with the pin bump, before A5.4 is wired.
+- **Not done:** the pin is **not** bumped yet. That is one commit (pyproject + TOOLCHAIN pin table + the A5 factor)
+  after owner go-ahead; rollback is the old SHA. The venv was restored to `0850ef39` and the CPU runtime
+  re-provisioned, so the checkout is repo-consistent and the GPU is idle.
+- **Two artefacts, not regressions** (both explained in the evidence doc): a `pip --force-reinstall` drops the
+  per-backend CPU readiness marker, which made `sub5` read `n/a` until `provision --backend cpu` ran; and one B rep
+  exited 1 on a Julia-host teardown race after emitting a complete result.
+
 ## 2026-11-13 (23:0xZ) - S8 DISCOVERY CONTRACTS AND S7 ADVISORY VALIDATION FINISHED (offline; no solve, no default change)
 
 - **Scope:** four offline analysis tools plus their tests, already on `main` (`5f15275`, `a4dccef`);

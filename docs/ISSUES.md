@@ -3,6 +3,18 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-13 (**Elites tab redesigned for non-technical readers: brief/typology constraints and isometric horn thumbnails, best-per-typology / best-per-brief browsing, paginated 24 at a time, CSV-path noise removed; payload extended with brief/family/brief_target; bo-study-v1.1 final offline integration landed (M2 sensitivity/proposal evidence, immutable run package + `hornlab-search study` CLI, durable proposal-cadence recovery, B8 adversarial full loop); profile-outline thumbnail geometry fixed after live check (closed outline split at the mouth rim, outer wall kept); card hierarchy tuned per owner (constraint line + score largest, gate pills smaller); no GitHub issue state changed**).
 
+Local-only, added 2026-11-13 (23:0xZ) (**G2 measured and passed; GPU night paused; no GitHub issue state changed**):
+- Resolved: G2 measured - 18 solves, 3 quarter-DOF points x 3 fresh-process reps x 2 commits. A3 `9ec86b0` saves
+  55 / 66 / 70 % fused peak VRAM and 20-30 % per-frequency wall with an identical analytic self-test. Evidence
+  `docs/evidence/G2_FORK_AB_2026-11-13.md`.
+- Open (owner): adopt = bump the pin to `9ec86b0` in `pyproject.toml` + the `TOOLCHAIN.md` pin table, and
+  recalibrate A5's 4.0x fused factor (~1.2x from the measured 1,343 MiB at 12k). Rollback = the old SHA.
+- Open: GPU night `home80x60_day_2026-11-13` paused at job 2 153/200 (`20261113T193536Z-screen-81c964`); job 3 never
+  ran; the GPU rerun night is on disk but NOT queued. Resume: `search --resume runs/20261113T193536Z-screen-81c964
+  --budget 200`, then job 3 as its own job.
+- Note: `pip install --force-reinstall` of hornlab-beat-bem drops the per-backend CPU readiness marker - run
+  `python -m hornlab_beat_bem.provision --backend cpu` after any pin swap (the GPU runtime is unaffected).
+
 Local-only, added 2026-11-13 23:0xZ (**S8 discovery contracts + S7 advisory validation finished;
 no GitHub issue state changed**):
 - Resolved: `geometry_descriptors.py`, `hypothesis_cards.py`, `qd_compare.py` and
