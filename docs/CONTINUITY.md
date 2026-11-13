@@ -1,6 +1,45 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-13 (~24Z) - ORCHESTRATOR 2 ON THE OWNER'S MACHINE: A3 FORK PATCH + C1 MESH AUDIT; CLOUD BRANCH MERGED
+
+- **Merge (local only, not pushed):** `claude/practical-cori-fn5psg` (`2b4e883`) -> `main` as `7277795`
+  (`--no-ff`), bringing A1 namespaced caches, A2 seam fix, A4 `tools/analysis/mesh_fidelity.py`, A5
+  `solve/feasibility.py`, the plan and both handoffs. Conflicts were only the append-only logs; resolved as
+  union. `NOTES_FOR_SENIOR.md` kept main's body (the branch carried an EOL/whitespace rewrite of the whole
+  file) plus the branch's deferred-work block; `docs/INDEX.md` and `docs/CODE_MAP.md` merged automatically.
+- **Verification after the merge (CPU only):** `tests/test_solve_cache_namespace.py tests/test_search_band_seam.py
+  tests/test_solve_feasibility.py tests/test_tools_analysis_mesh_fidelity.py tests/test_search_evaluate.py`
+  -> **29 passed in 7.54s**; plan section-1 rule-6 regression `tests/test_solve_cache.py tests/test_search_evaluate.py`
+  -> **29 passed in 6.36s**.
+- **A3 fork patch:** new commit `9ec86b0c22d65573240a36199210ada517b67928` on
+  `perf/skip-fused-identity-cache` from the pin `0850ef39b29d7c51f8fbb082184d3784d2ff8bef`, one hunk in
+  `julia/BeatEngineDriver.jl`: the `cuda_solve_identity_cache` build now sits inside `if !fused_burton_miller_cuda`.
+  All 8 `cuda_solve_identity_cache` sites are outside the fused path (`fused_burton_miller_cuda` is assigned once,
+  `:1576`, read at `:1585/:1586` before the build and `:1850` after; on CUDA `kind === :fused_cuda` iff the flag is
+  true), and the `nothing` init at `:1632` means the `finally` release guard at `:2253` already tolerated nothing.
+  CPU validation only: `runtests.jl` **3830 pass / 0 fail / 4 broken** (the CUDA testsets are skipped because CUDA is
+  not a dependency of the CPU project), and `validate_analytic_exterior.jl` -> `ANALYTIC_EXTERIOR_VALIDATION_OK`,
+  `level_db_worst=0.022305` (tolerance 0.0500). **HornFab's pin is unchanged**; the A/B and the pin bump are G2.
+- **A3 out-of-scope observation:** `julia/coupled_solver.jl:910` also builds a CUDA Burton-Miller identity cache on the
+  coupled route. Different path from `solve_request_impl`, not touched here; the same saving may apply (separate package).
+- **C1 rear-density audit:** `docs/evidence/REAR_DENSITY_MESH_AUDIT_2026-11-13.md` + 16 configs under
+  `examples/studies/rear_density_2026-11-13/` (4 seeds x `rear_res_factor` 1.0/1.5/2.0/2.5, nothing else changed).
+  All 16 meshed through the mesh-only path (`mesh_policy_study.py`, no `--solve`) into a scratch dir; all 16
+  `mesh_fidelity.py` runs exit 0. Recommendation for G4: **test `rear_res_factor` 1.5 and 2.0**.
+- **C1 contract finding:** the mesher exports **no rear physical tag**. Tag 1 `SD1G0` is every rigid surface (inner
+  bore, outer wall, rear cap, mouth); tag 2 `SD1D1001` is the source (T2 adds tag 10 `mid_port_exit_left`). The plan's
+  "rear-tag triangles / rear h_max" columns are therefore **n/a**; the audit records the measured `SD1G0` proxy plus
+  `mesh_meta.json` `result.res_mm.rear`. A per-region audit needs the A4 role-summary artifact already on the deferred list.
+- **C1 measured effect:** DOF saved at 1.5 = OSSE 21.0 %, R-OSSE 16.3 %, ATH-like 16.1 % (ATH-like is flat from 1.5);
+  `rear_res_factor` is a **no-op on the CAD/MEH route** (T2 = 6032 DOF at every factor). Mesh-resolution evidence only;
+  the acoustic bars are G4.
+- **Safety:** no GPU, no `gpu-clean`, no host kills, no queue or night-file edits, no solve, nothing written to `runs/`,
+  an existing cache or the dataset. The `home80x60_day_2026-11-13` night (GPU until 23:30) was not touched.
+- **Docs:** in this same commit `docs/INDEX.md` gains the evidence row (first Evidence section) and `docs/CODE_MAP.md` gains the `examples/studies/rear_density_2026-11-13/` config folder; A4's `tools/analysis/mesh_fidelity.py` line had already arrived with the merge.
+- This commit lands on the local branch `solver-speed-orch2` (cut from the merge), not on `main`, so the C1/G4
+  decision and the fork patch can be reviewed on their own.
+
 ## 2026-11-13 (~23Z) - A1 CACHE NAMESPACES + A2 SEAM FIX LANDED (offline)
 
 - A1: shared solve/mesh caches now live under `<cache>/{solve,mesh}/p2-<sha12>/` keyed on beat/bempp/mesher SHAs

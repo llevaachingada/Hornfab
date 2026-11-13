@@ -3,6 +3,23 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-13 (**Elites tab redesigned for non-technical readers: brief/typology constraints and isometric horn thumbnails, best-per-typology / best-per-brief browsing, paginated 24 at a time, CSV-path noise removed; payload extended with brief/family/brief_target; bo-study-v1.1 final offline integration landed (M2 sensitivity/proposal evidence, immutable run package + `hornlab-search study` CLI, durable proposal-cadence recovery, B8 adversarial full loop); profile-outline thumbnail geometry fixed after live check (closed outline split at the mouth rim, outer wall kept); card hierarchy tuned per owner (constraint line + score largest, gate pills smaller); no GitHub issue state changed**).
 
+Local-only, added 2026-11-13 ~24Z (**Orchestrator 2: A3 fork patch + C1 rear-density audit; no GitHub issue state changed**):
+- Resolved: A3 skips the unused fused-CUDA identity cache. Fork branch `perf/skip-fused-identity-cache` @
+  `9ec86b0c22d6`, one hunk in `julia/BeatEngineDriver.jl`; CPU suite 3830 pass / 0 fail / 4 broken (CUDA skipped),
+  analytic exterior OK. HornFab pin still `0850ef39`.
+- Open: G2 must A/B `0850ef39` vs `9ec86b0c22d6` (4k/8k/12k DOF, cold + 2 warm, dedicated + shared VRAM) before any
+  pin bump, and recalibrate A5's fused factor from the result.
+- Open: `hornlab_beat_bem/julia/coupled_solver.jl:910` builds its own CUDA Burton-Miller identity cache on the coupled
+  route (outside A3's scope); the same saving may apply there.
+- Resolved: C1 rear-density audit measured (`docs/evidence/REAR_DENSITY_MESH_AUDIT_2026-11-13.md`, 16 configs, mesh
+  only, no solves). Recommendation for G4: test `rear_res_factor` 1.5 and 2.0 (1.5: OSSE -21.0 %, R-OSSE -16.3 %,
+  ATH-like -16.1 %; ATH-like is flat from 1.5).
+- Open (contract): the `.msh` has no rear physical tag (tag 1 `SD1G0` = all rigid surfaces, tag 2 `SD1D1001` =
+  source), so a per-region rear triangle/edge audit is impossible; A4 needs the offline role-summary artifact from the
+  mesher fork before G4 can be judged per region.
+- Open: `rear_res_factor` is a no-op on the CAD/MEH route (`mesh/step_build.py` sizes from mouth/throat only):
+  T2 = 6032 DOF at 1.0/1.5/2.0/2.5.
+
 Local-only, added 2026-11-13 ~21Z (**solver speed plan; no GitHub issue state changed**):
 - Resolved: A1 namespaced caches landed. (was: solve/mesh cache does not check solver/mesher SHA (blocker before any fork pin bump). Plan: SOLVER_SPEED_IMPLEMENTATION_PLAN_2026-11-13 A1.
 - Resolved: A2 seam probe fixed.
