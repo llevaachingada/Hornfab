@@ -1,4 +1,4 @@
-# CONTINUITY
+﻿# CONTINUITY
 
 
 ## 2026-11-13 (~06:2xZ) - BO-STUDY v1.1 FINAL INTEGRATION: M2 EVIDENCE, EXECUTION PACKAGE, B8 FULL LOOP (offline; no solve)
@@ -99,6 +99,7 @@
   test_feasibility_summary_and_objective_suffix` (shipped wording "V short: needs 498 mm" vs the pin's
   old "does not fit"); its correction is in flight in the main checkout and is committed with this
   merge so `main` stays green.
+- **Card hierarchy (owner request, same day):** the constraint line (brief - H x V coverage - band) is now the card's largest text and the score (`J 1.975` + `J v4`) matches it; the typology/size headline is a quiet label and the green gate pills shrink to small status chips. CSS-only change in `app.css` (`.elite-constraints` 1.02rem ink, `.elite-j` 1.02rem/600, `.elite-gates .pill` 0.62rem, `.elite-title` 0.8rem muted). Verified live on 8765 (computed sizes + dark 1500/900 screenshots).
 - **Thumbnail geometry fix (found live after the first ship):** `/api/design`'s `profile` is a
   **closed 2-D outline** (out along the outer wall to the mouth rim, back along the axis), not a
   radius-along-axis series. The first implementation binned every point by z and averaged the two

@@ -905,18 +905,23 @@ svg .iso-title { font-family: var(--f-body); font-size: 12px; font-weight: 600; 
 @media (prefers-reduced-motion: reduce) { .elite-thumb.is-loading { animation:none; } }
 .elite-thumb.is-empty { color:var(--muted); }
 .elite-copy { display:flex; flex-direction:column; gap:6px; flex:1; padding:12px 14px 14px; }
-.elite-title { margin:0; font-family:var(--f-display); font-size:1rem; font-weight:500;
-  letter-spacing:0.01em; }
-.elite-constraints { margin:0; font-size:0.78rem; line-height:1.45; color:var(--muted); }
-.elite-lab { display:block; font-family:var(--f-mono); font-size:0.6rem; letter-spacing:0.12em;
+/* Hierarchy (owner request): the brief/constraint line is the card's primary text, the score
+   next, and the typology headline / gate pills are supporting detail. */
+.elite-title { margin:0; font-family:var(--f-display); font-size:0.8rem; font-weight:500;
+  letter-spacing:0.02em; color:var(--muted); }
+.elite-constraints { margin:0; font-size:1.02rem; line-height:1.4; color:var(--ink);
+  font-weight:500; }
+.elite-lab { display:block; font-family:var(--f-mono); font-size:0.58rem; letter-spacing:0.12em;
   text-transform:uppercase; color:var(--accent); margin-bottom:1px; }
 .elite-gates { margin:0; }
+/* Support detail: gate pills read as small status chips, not as the headline. */
+.elite-gates .pill { font-size:0.62rem; padding:0 6px; line-height:1.5; }
 .elite-foot { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin-top:auto;
   padding-top:6px; }
 .elite-hash { font-size:0.66rem; color:var(--muted); border:1px solid var(--rule);
   border-radius:4px; padding:0 5px; cursor:help; }
-.elite-j { font-family:var(--f-mono); font-size:0.74rem; color:var(--label); }
-.elite-jver { font-size:0.64rem; color:var(--muted); font-family:var(--f-mono); }
+.elite-j { font-family:var(--f-mono); font-size:1.02rem; font-weight:600; color:var(--ink); }
+.elite-jver { font-size:0.78rem; color:var(--muted); font-family:var(--f-mono); }
 .elite-open { margin-left:auto; font-size:0.76rem; padding:3px 9px; }
 
 .elite-horn .elite-svg-body { fill:var(--accent-soft); stroke:currentColor; stroke-width:1.4;
