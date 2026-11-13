@@ -70,12 +70,12 @@
    "reconstruction_exclusions": {},
    "config_unknown_rows": 1330
   },
-  "generated_utc": "2026-11-13T04:28:10Z",
+  "generated_utc": "2026-11-13T05:08:41Z",
   "native_only": true,
   "config_name": "native__ath_core_v4",
   "scored_exact_complete": 200,
   "parity_compared": 197,
-  "counts_note": "scored rows (200) are the R0 pilot's native-filtered replay candidates; the catalog census is 197 ok native rows (192 screen + 5 verify). 197/200 replay parity comparisons passed; the three unpaired rows are the pilot's distinct unsupported/partial case, reported separately and never substituted into the scored cohort.",
+  "counts_note": "Counts come from the supplied pilot and catalog snapshots; reconstruction counts describe this report's replayed subset.",
   "native_catalog_ok_rows": 197,
   "native_catalog_fidelities": {
    "screen": 192,
@@ -97,8 +97,8 @@
    "status": "insufficient_evidence",
    "run_ids_present": 0,
    "experiment_ids_present": 0,
-   "reason_code": "run_id_and_experiment_id_absent_on_native_rows",
-   "note": "absence is not inferred from timestamps or config names; repeated designs are not independent experiments"
+   "reason_code": "independent_experiment_groups_not_established",
+   "note": "Group membership is not reconstructed from identifiers in this implementation; repeated designs are not independent experiments."
   },
   "reconstruction": {
    "n_replayed": 200,
@@ -112,22 +112,22 @@
    "note": "the R0 pilot artifact supplies the frozen cohort counts/parity; rows were re-read and replayed through the canonical adapter only to attach per-row features for this report"
   },
   "source_scan": {
-   "rows_seen": 30044,
-   "rows_ok": 25261,
-   "rows_failed": 4783,
-   "rows_with_npz": 25261,
-   "rows_with_traces": 1267,
-   "ath_core": 3864,
-   "ath_full": 3864,
-   "ath_full_ok_with_npz": 2981,
+   "rows_seen": 30127,
+   "rows_ok": 25323,
+   "rows_failed": 4804,
+   "rows_with_npz": 25323,
+   "rows_with_traces": 1269,
+   "ath_core": 3947,
+   "ath_full": 3947,
+   "ath_full_ok_with_npz": 3043,
    "ath_full_stored_versions": {
     "3": 112,
-    "4": 2869
+    "4": 2931
    },
    "rows_native": 407,
    "ath_full_native": 393,
    "ath_full_native_ok_with_npz": 393,
-   "config_unknown": 1372
+   "config_unknown": 1455
   },
   "backend_calls": 0,
   "pilot_artifact": "scratch/bo_m0/r0/offline_scores_native_full/offline_scores.json",
@@ -4845,7 +4845,7 @@
     "max_abs_delta": 0.0,
     "within_1e-6": 197
    },
-   "note": "parity is a stored-vs-replayed J comparison; the three unpaired rows are a distinct unsupported/partial case and are never pooled as parity",
+   "note": "Parity compares stored and replayed J only where the replay reports a comparison; uncompared rows are not parity successes.",
    "pilot_join": {
     "artifact_rows_exposed": 200,
     "joined": 200,
@@ -4898,10 +4898,11 @@
     ]
    },
    "passed": true,
-   "recommendation_status": "allowed",
-   "reason_code": null
+   "recommendation_status": "suppressed_insufficient_independent_evidence",
+   "reason_code": "independent_group_validation_and_effect_stability_not_established",
+   "note": "passed describes only the row-level predictive diagnostic; it does not satisfy the independent-group or stable-effect recommendation gates"
   },
-  "support": "native-only ATH v4 cohort; 196-200 scored rows are below the spec's 100-unique-observations/five-independent-group screening policy and the archive has no recorded run/experiment identity. Effects and interactions are descriptive model diagnostics, never recommendations.",
+  "support": "The 100 unique observations and five independent groups are separate screens. Design-level folds do not establish independent groups or stable supported effects. Effects and interactions are descriptive, not recommendations.",
   "effects": {
    "status": "produced",
    "model": "ExtraTreesRegressor",
@@ -4932,16 +4933,17 @@
    ],
    "clipped_features": [],
    "validation": {
-    "method": "deterministic 5-fold KFold over designs (shuffle, fixed seed)",
+    "method": "deterministic 5-fold KFold over rows (shuffle, fixed seed)",
     "folds": 5,
     "baseline": "training-fold mean",
-    "note": "design-level folds, not independent experiments; no run_id is recorded for this cohort"
+    "note": "row-level folds, not independent experiments; group identity is not established for this cohort"
    },
    "screening_policy": {
-    "min_unique_observations_per_group": 100,
-    "independent_groups_known": 0,
+    "min_unique_observations": 100,
+    "min_independent_groups": 5,
+    "independent_groups_known": null,
     "status": "below_policy_descriptive_diagnostic",
-    "note": "196-200 rows are below the spec's 100-per-group policy and the archive has no recorded independent experiment groups; results are descriptive diagnostics, never recommendations"
+    "note": "This implementation uses row-level folds and does not establish independent experiment groups or stable supported effects; results are descriptive only."
    },
    "outputs": {
     "j": {
@@ -5394,8 +5396,9 @@
      ]
     },
     "passed": true,
-    "recommendation_status": "allowed",
-    "reason_code": null
+    "recommendation_status": "suppressed_insufficient_independent_evidence",
+    "reason_code": "independent_group_validation_and_effect_stability_not_established",
+    "note": "passed describes only the row-level predictive diagnostic; it does not satisfy the independent-group or stable-effect recommendation gates"
    }
   },
   "effect_curves": {
@@ -23097,50 +23100,47 @@
    "n_anchors": 20,
    "nn_distance_95pct_cutoff": 0.4387489472728943,
    "support_policy": {
-    "supported_if": "all four endpoint nearest-training distances <= 95th percentile AND at least one training design in the 2D +/-h projection",
+    "supported_if": "all four endpoint nearest-training distances <= 95th percentile AND at least one other training design in the 2D +/-h projection",
     "min_supported_anchors_per_step": 5,
     "boundary_anchors": "excluded explicitly per step; never clipped",
     "note": "nearest-neighbour distance and 2D projected support are diagnostics, not a joint-support certificate"
    },
    "independent_group_coverage": {
-    "n_groups": 0,
+    "n_groups": null,
     "status": "insufficient_evidence",
-    "reason_code": "run_id_and_experiment_id_absent"
+    "reason_code": "independent_group_coverage_not_established"
    },
-   "pair_order_stability_spearman": {
-    "0.025_vs_0.05": 0.4739999795771008,
-    "0.05_vs_0.1": 0.7186525043454878
-   },
+   "pair_order_stability_spearman": {},
    "pairs": [
     {
      "pair": [
       "L_mm",
       "a_deg"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 8,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.0,
-       "mean_D": 0.00046490661384608335,
-       "sign_positive": 5,
-       "sign_negative": 4,
-       "sign_zero": 11
+       "median_abs_D": 0.001519378113490788,
+       "mean_D": -0.00011286738988186551,
+       "sign_positive": 3,
+       "sign_negative": 3,
+       "sign_zero": 2
       },
       {
        "step": 0.05,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 16,
        "n_boundary_excluded": 0,
-       "median_abs_D": 3.552713678800501e-15,
-       "mean_D": 0.007086891126076589,
+       "median_abs_D": 0.0027731604361858064,
+       "mean_D": 0.008858613907595736,
        "sign_positive": 10,
        "sign_negative": 2,
-       "sign_zero": 8
+       "sign_zero": 4
       },
       {
        "step": 0.1,
@@ -23160,41 +23160,41 @@
       "L_mm",
       "k"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 12,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.0,
-       "mean_D": -0.0031877739503801683,
+       "median_abs_D": 0.004671093843722218,
+       "mean_D": -0.004616104349436416,
        "sign_positive": 2,
-       "sign_negative": 7,
-       "sign_zero": 11
+       "sign_negative": 6,
+       "sign_zero": 4
       },
       {
        "step": 0.05,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 18,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.0070700927739104635,
-       "mean_D": -0.0050381189274483875,
+       "median_abs_D": 0.008516136400990248,
+       "mean_D": -0.005597909919387097,
        "sign_positive": 4,
        "sign_negative": 10,
-       "sign_zero": 6
+       "sign_zero": 4
       },
       {
        "step": 0.1,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 19,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.013439538984151067,
-       "mean_D": -0.005867549206747769,
+       "median_abs_D": 0.013533692632102579,
+       "mean_D": -0.006176367586050282,
        "sign_positive": 5,
        "sign_negative": 10,
-       "sign_zero": 5
+       "sign_zero": 4
       }
      ]
     },
@@ -23203,41 +23203,41 @@
       "L_mm",
       "morph_corner_mm"
      ],
-     "status": "unstable_nonadditivity",
-     "reason_code": "sign_changes_across_steps",
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 13,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.0,
-       "mean_D": -0.0009645545671112865,
+       "median_abs_D": 8.881784197001252e-16,
+       "mean_D": -0.0014839301032481332,
        "sign_positive": 2,
        "sign_negative": 5,
-       "sign_zero": 13
+       "sign_zero": 6
       },
       {
        "step": 0.05,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 16,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.0003502026481485565,
-       "mean_D": -0.001982562971100399,
+       "median_abs_D": 0.006171161809168657,
+       "mean_D": -0.0024782037138754986,
        "sign_positive": 4,
        "sign_negative": 7,
-       "sign_zero": 9
+       "sign_zero": 5
       },
       {
        "step": 0.1,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 19,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.00904866358237788,
-       "mean_D": 0.009708567866079676,
+       "median_abs_D": 0.010687106849054828,
+       "mean_D": 0.010219545122189132,
        "sign_positive": 5,
        "sign_negative": 6,
-       "sign_zero": 9
+       "sign_zero": 8
       }
      ]
     },
@@ -23246,30 +23246,30 @@
       "L_mm",
       "morph_fixed"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 16,
        "n_boundary_excluded": 0,
-       "median_abs_D": 1.7763568394002505e-15,
-       "mean_D": 0.002810695720170764,
+       "median_abs_D": 0.0009367899477283892,
+       "mean_D": 0.003513369650213455,
        "sign_positive": 7,
        "sign_negative": 6,
-       "sign_zero": 7
+       "sign_zero": 3
       },
       {
        "step": 0.05,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 19,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.0020036303304036274,
-       "mean_D": 0.005830557186099305,
+       "median_abs_D": 0.0024507935974860118,
+       "mean_D": 0.006137428616946637,
        "sign_positive": 9,
        "sign_negative": 5,
-       "sign_zero": 6
+       "sign_zero": 5
       },
       {
        "step": 0.1,
@@ -23289,19 +23289,19 @@
       "L_mm",
       "morph_height_mm"
      ],
-     "status": "unstable_nonadditivity",
-     "reason_code": "sign_changes_across_steps",
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 16,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.0,
-       "mean_D": -0.00022636414486871815,
+       "median_abs_D": 1.3322676295501878e-15,
+       "mean_D": -0.0002829551810858977,
        "sign_positive": 5,
        "sign_negative": 4,
-       "sign_zero": 11
+       "sign_zero": 7
       },
       {
        "step": 0.05,
@@ -23332,41 +23332,41 @@
       "L_mm",
       "morph_rate"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 13,
        "n_boundary_excluded": 0,
-       "median_abs_D": 2.6645352591003757e-15,
-       "mean_D": 0.005665235865832852,
+       "median_abs_D": 0.0026852805469133045,
+       "mean_D": 0.008715747485896763,
        "sign_positive": 7,
-       "sign_negative": 6,
-       "sign_zero": 7
+       "sign_negative": 5,
+       "sign_zero": 1
       },
       {
        "step": 0.05,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 17,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.009939994063954849,
-       "mean_D": 0.013864401559186024,
+       "median_abs_D": 0.015239387264929682,
+       "mean_D": 0.01631106065786591,
        "sign_positive": 9,
        "sign_negative": 4,
-       "sign_zero": 7
+       "sign_zero": 4
       },
       {
        "step": 0.1,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 19,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.034293084121885364,
-       "mean_D": 0.028904437991301,
+       "median_abs_D": 0.0371804028204874,
+       "mean_D": 0.030425724201369474,
        "sign_positive": 10,
        "sign_negative": 4,
-       "sign_zero": 6
+       "sign_zero": 5
       }
      ]
     },
@@ -23375,30 +23375,30 @@
       "L_mm",
       "morph_width_mm"
      ],
-     "status": "unstable_nonadditivity",
-     "reason_code": "sign_changes_across_steps",
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 14,
-       "n_supported": 14,
+       "n_supported": 7,
        "n_boundary_excluded": 6,
-       "median_abs_D": 0.0,
-       "mean_D": -0.005095333658134622,
+       "median_abs_D": 8.881784197001252e-16,
+       "mean_D": -0.010190667316269244,
        "sign_positive": 1,
        "sign_negative": 3,
-       "sign_zero": 10
+       "sign_zero": 3
       },
       {
        "step": 0.05,
        "n_evaluated": 14,
-       "n_supported": 14,
+       "n_supported": 12,
        "n_boundary_excluded": 6,
-       "median_abs_D": 0.016212089816542985,
-       "mean_D": -0.001689912911505839,
+       "median_abs_D": 0.023820006548375794,
+       "mean_D": -0.0019715650634234785,
        "sign_positive": 4,
        "sign_negative": 5,
-       "sign_zero": 5
+       "sign_zero": 3
       },
       {
        "step": 0.1,
@@ -23418,41 +23418,41 @@
       "L_mm",
       "n"
      ],
-     "status": "unstable_nonadditivity",
-     "reason_code": "sign_changes_across_steps",
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 19,
-       "n_supported": 19,
+       "n_supported": 14,
        "n_boundary_excluded": 1,
-       "median_abs_D": 0.0,
-       "mean_D": 0.0007058651043776571,
+       "median_abs_D": 8.881784197001252e-16,
+       "mean_D": 0.0009579597845127884,
        "sign_positive": 4,
-       "sign_negative": 4,
-       "sign_zero": 11
+       "sign_negative": 3,
+       "sign_zero": 7
       },
       {
        "step": 0.05,
        "n_evaluated": 19,
-       "n_supported": 19,
+       "n_supported": 18,
        "n_boundary_excluded": 1,
-       "median_abs_D": 0.0014421256557599627,
-       "mean_D": -0.0013454536183796655,
+       "median_abs_D": 0.0026555345420822274,
+       "mean_D": -0.0014202010416229803,
        "sign_positive": 8,
        "sign_negative": 4,
-       "sign_zero": 7
+       "sign_zero": 6
       },
       {
        "step": 0.1,
        "n_evaluated": 17,
-       "n_supported": 17,
+       "n_supported": 16,
        "n_boundary_excluded": 3,
-       "median_abs_D": 0.019659551890597093,
-       "mean_D": -0.019031591905525086,
+       "median_abs_D": 0.019827089502167716,
+       "mean_D": -0.020221066399620402,
        "sign_positive": 3,
        "sign_negative": 7,
-       "sign_zero": 7
+       "sign_zero": 6
       }
      ]
     },
@@ -23461,30 +23461,30 @@
       "L_mm",
       "q"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 15,
-       "n_supported": 15,
+       "n_supported": 10,
        "n_boundary_excluded": 5,
-       "median_abs_D": 4.440892098500626e-16,
-       "mean_D": 0.00029783990455613344,
+       "median_abs_D": 3.552713678800501e-15,
+       "mean_D": 0.0004467598568342002,
        "sign_positive": 2,
        "sign_negative": 6,
-       "sign_zero": 7
+       "sign_zero": 2
       },
       {
        "step": 0.05,
        "n_evaluated": 13,
-       "n_supported": 13,
+       "n_supported": 11,
        "n_boundary_excluded": 7,
-       "median_abs_D": 0.007017315069882457,
-       "mean_D": 0.0036617786037964448,
+       "median_abs_D": 0.011958079544264422,
+       "mean_D": 0.004327556531759435,
        "sign_positive": 6,
        "sign_negative": 2,
-       "sign_zero": 5
+       "sign_zero": 3
       },
       {
        "step": 0.1,
@@ -23504,30 +23504,30 @@
       "L_mm",
       "s"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 10,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": -0.0033521947375223073,
-       "sign_positive": 4,
+       "mean_D": -0.007738489002790861,
+       "sign_positive": 1,
        "sign_negative": 3,
-       "sign_zero": 13
+       "sign_zero": 6
       },
       {
        "step": 0.05,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 17,
        "n_boundary_excluded": 0,
-       "median_abs_D": 1.3322676295501878e-15,
-       "mean_D": -0.0067720105409156735,
+       "median_abs_D": 3.552713678800501e-15,
+       "mean_D": -0.007967071224606674,
        "sign_positive": 5,
        "sign_negative": 7,
-       "sign_zero": 8
+       "sign_zero": 5
       },
       {
        "step": 0.1,
@@ -23547,41 +23547,41 @@
       "L_mm",
       "s1"
      ],
-     "status": "unstable_nonadditivity",
-     "reason_code": "sign_changes_across_steps",
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 13,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": -0.00021080076889954392,
-       "sign_positive": 2,
+       "mean_D": -0.0003243088752303408,
+       "sign_positive": 1,
        "sign_negative": 4,
-       "sign_zero": 14
+       "sign_zero": 8
       },
       {
        "step": 0.05,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 15,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.0,
-       "mean_D": 0.0016955672300357216,
+       "median_abs_D": 8.881784197001252e-16,
+       "mean_D": 0.0022607563067142955,
        "sign_positive": 5,
        "sign_negative": 3,
-       "sign_zero": 12
+       "sign_zero": 7
       },
       {
        "step": 0.1,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 19,
        "n_boundary_excluded": 0,
-       "median_abs_D": 4.440892098500626e-16,
-       "mean_D": 0.006194962847648466,
+       "median_abs_D": 8.881784197001252e-16,
+       "mean_D": 0.006521013523840491,
        "sign_positive": 6,
        "sign_negative": 4,
-       "sign_zero": 10
+       "sign_zero": 9
       }
      ]
     },
@@ -23590,30 +23590,30 @@
       "L_mm",
       "s2"
      ],
-     "status": "unstable_nonadditivity",
-     "reason_code": "sign_changes_across_steps",
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 11,
        "n_boundary_excluded": 0,
-       "median_abs_D": 2.220446049250313e-16,
-       "mean_D": -0.00034185203188386026,
-       "sign_positive": 6,
+       "median_abs_D": 3.552713678800501e-15,
+       "mean_D": -0.0006215491488799074,
+       "sign_positive": 5,
        "sign_negative": 4,
-       "sign_zero": 10
+       "sign_zero": 2
       },
       {
        "step": 0.05,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 17,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.0,
-       "mean_D": 0.0025038111534007703,
+       "median_abs_D": 1.7763568394002505e-15,
+       "mean_D": 0.002945660180471494,
        "sign_positive": 6,
        "sign_negative": 3,
-       "sign_zero": 11
+       "sign_zero": 8
       },
       {
        "step": 0.1,
@@ -23633,41 +23633,41 @@
       "a_deg",
       "k"
      ],
-     "status": "unstable_nonadditivity",
-     "reason_code": "sign_changes_across_steps",
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 11,
        "n_boundary_excluded": 0,
-       "median_abs_D": 8.881784197001252e-16,
-       "mean_D": -0.0008358332152631265,
-       "sign_positive": 6,
+       "median_abs_D": 0.0016523339337064513,
+       "mean_D": -0.0015196967550241893,
+       "sign_positive": 5,
        "sign_negative": 4,
-       "sign_zero": 10
+       "sign_zero": 2
       },
       {
        "step": 0.05,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 16,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.0,
-       "mean_D": 0.0015947662532812324,
+       "median_abs_D": 0.005097350367197606,
+       "mean_D": 0.0019934578166015404,
        "sign_positive": 4,
        "sign_negative": 5,
-       "sign_zero": 11
+       "sign_zero": 7
       },
       {
        "step": 0.1,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 19,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.0026286691464560974,
-       "mean_D": 0.0045389264323745905,
+       "median_abs_D": 0.004016360236047234,
+       "mean_D": 0.004777817297236411,
        "sign_positive": 5,
        "sign_negative": 6,
-       "sign_zero": 9
+       "sign_zero": 8
       }
      ]
     },
@@ -23676,30 +23676,30 @@
       "a_deg",
       "morph_corner_mm"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 9,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": -0.0005873573919909392,
+       "mean_D": -0.0013052386488685563,
        "sign_positive": 2,
-       "sign_negative": 2,
-       "sign_zero": 16
+       "sign_negative": 1,
+       "sign_zero": 6
       },
       {
        "step": 0.05,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 16,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": -0.00018150809341390683,
+       "mean_D": -0.00022688511676738354,
        "sign_positive": 3,
        "sign_negative": 3,
-       "sign_zero": 14
+       "sign_zero": 10
       },
       {
        "step": 0.1,
@@ -23719,19 +23719,19 @@
       "a_deg",
       "morph_fixed"
      ],
-     "status": "unstable_nonadditivity",
-     "reason_code": "sign_changes_across_steps",
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 14,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.0,
-       "mean_D": -9.43189453404214e-05,
+       "median_abs_D": 2.220446049250313e-16,
+       "mean_D": -0.00013474135048631628,
        "sign_positive": 6,
        "sign_negative": 1,
-       "sign_zero": 13
+       "sign_zero": 7
       },
       {
        "step": 0.05,
@@ -23762,30 +23762,30 @@
       "a_deg",
       "morph_height_mm"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 13,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": 5.551115123125783e-16,
+       "mean_D": 8.540177112501204e-16,
        "sign_positive": 5,
        "sign_negative": 0,
-       "sign_zero": 15
+       "sign_zero": 8
       },
       {
        "step": 0.05,
        "n_evaluated": 19,
-       "n_supported": 19,
+       "n_supported": 16,
        "n_boundary_excluded": 1,
        "median_abs_D": 0.0,
-       "mean_D": 1.805940338178421e-05,
+       "mean_D": 2.144554151586875e-05,
        "sign_positive": 2,
        "sign_negative": 2,
-       "sign_zero": 15
+       "sign_zero": 12
       },
       {
        "step": 0.1,
@@ -23805,41 +23805,41 @@
       "a_deg",
       "morph_rate"
      ],
-     "status": "unstable_nonadditivity",
-     "reason_code": "sign_changes_across_steps",
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 11,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": -0.000592011070676568,
+       "mean_D": -0.0010763837648664872,
        "sign_positive": 2,
        "sign_negative": 2,
-       "sign_zero": 16
+       "sign_zero": 7
       },
       {
        "step": 0.05,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 13,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.00026668266283835784,
-       "mean_D": 0.0027543079195229137,
+       "median_abs_D": 0.004112320385612378,
+       "mean_D": 0.004237396799266021,
        "sign_positive": 8,
        "sign_negative": 3,
-       "sign_zero": 9
+       "sign_zero": 2
       },
       {
        "step": 0.1,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 19,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.008409958168246412,
-       "mean_D": -0.0016708690765084855,
+       "median_abs_D": 0.009135689948386982,
+       "mean_D": -0.0017588095542194584,
        "sign_positive": 9,
        "sign_negative": 4,
-       "sign_zero": 7
+       "sign_zero": 6
       }
      ]
     },
@@ -23848,41 +23848,41 @@
       "a_deg",
       "morph_width_mm"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 14,
-       "n_supported": 14,
+       "n_supported": 8,
        "n_boundary_excluded": 6,
-       "median_abs_D": 0.0,
-       "mean_D": 0.003516359542903112,
-       "sign_positive": 4,
+       "median_abs_D": 4.440892098500626e-16,
+       "mean_D": 0.006153629200080224,
+       "sign_positive": 3,
        "sign_negative": 1,
-       "sign_zero": 9
+       "sign_zero": 4
       },
       {
        "step": 0.05,
        "n_evaluated": 14,
-       "n_supported": 14,
+       "n_supported": 12,
        "n_boundary_excluded": 6,
-       "median_abs_D": 0.0012790236094541996,
-       "mean_D": 0.0075606956564678385,
+       "median_abs_D": 0.003717726287646883,
+       "mean_D": 0.008820811599212478,
        "sign_positive": 5,
        "sign_negative": 2,
-       "sign_zero": 7
+       "sign_zero": 5
       },
       {
        "step": 0.1,
        "n_evaluated": 14,
-       "n_supported": 14,
+       "n_supported": 13,
        "n_boundary_excluded": 6,
-       "median_abs_D": 0.015802004571431105,
-       "mean_D": 0.025640941056463022,
+       "median_abs_D": 0.01600199020281856,
+       "mean_D": 0.027613321137729407,
        "sign_positive": 9,
        "sign_negative": 3,
-       "sign_zero": 2
+       "sign_zero": 1
       }
      ]
     },
@@ -23891,41 +23891,41 @@
       "a_deg",
       "n"
      ],
-     "status": "unstable_nonadditivity",
-     "reason_code": "sign_changes_across_steps",
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 19,
-       "n_supported": 19,
+       "n_supported": 9,
        "n_boundary_excluded": 1,
        "median_abs_D": 0.0,
-       "mean_D": -4.674623261579606e-17,
+       "mean_D": 0.0,
        "sign_positive": 1,
-       "sign_negative": 2,
-       "sign_zero": 16
+       "sign_negative": 1,
+       "sign_zero": 7
       },
       {
        "step": 0.05,
        "n_evaluated": 19,
-       "n_supported": 19,
+       "n_supported": 12,
        "n_boundary_excluded": 1,
-       "median_abs_D": 4.440892098500626e-16,
-       "mean_D": 0.002202683161354331,
-       "sign_positive": 7,
+       "median_abs_D": 2.6645352591003757e-15,
+       "mean_D": 0.0034875816721442097,
+       "sign_positive": 6,
        "sign_negative": 3,
-       "sign_zero": 9
+       "sign_zero": 3
       },
       {
        "step": 0.1,
        "n_evaluated": 17,
-       "n_supported": 17,
+       "n_supported": 16,
        "n_boundary_excluded": 3,
-       "median_abs_D": 0.003709294160272769,
-       "mean_D": 0.006851764343308155,
+       "median_abs_D": 0.004511407047463445,
+       "mean_D": 0.007279999614764915,
        "sign_positive": 10,
        "sign_negative": 3,
-       "sign_zero": 4
+       "sign_zero": 3
       }
      ]
     },
@@ -23934,30 +23934,30 @@
       "a_deg",
       "q"
      ],
-     "status": "unstable_nonadditivity",
-     "reason_code": "sign_changes_across_steps",
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 15,
-       "n_supported": 15,
+       "n_supported": 12,
        "n_boundary_excluded": 5,
        "median_abs_D": 0.0,
-       "mean_D": 2.0724163126336256e-16,
+       "mean_D": 2.590520390792032e-16,
        "sign_positive": 2,
        "sign_negative": 2,
-       "sign_zero": 11
+       "sign_zero": 8
       },
       {
        "step": 0.05,
        "n_evaluated": 13,
-       "n_supported": 13,
+       "n_supported": 11,
        "n_boundary_excluded": 7,
        "median_abs_D": 0.0,
-       "mean_D": 0.0002759893654984584,
+       "mean_D": 0.0003261692501345418,
        "sign_positive": 4,
        "sign_negative": 1,
-       "sign_zero": 8
+       "sign_zero": 6
       },
       {
        "step": 0.1,
@@ -23977,41 +23977,41 @@
       "a_deg",
       "s"
      ],
-     "status": "unstable_nonadditivity",
-     "reason_code": "sign_changes_across_steps",
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 9,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": 1.1102230246251565e-16,
-       "sign_positive": 3,
+       "mean_D": 1.4802973661668753e-16,
+       "sign_positive": 2,
        "sign_negative": 2,
-       "sign_zero": 15
+       "sign_zero": 5
       },
       {
        "step": 0.05,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 16,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.0,
-       "mean_D": -0.0009075735994034994,
+       "median_abs_D": 8.881784197001252e-16,
+       "mean_D": -0.0011344669992543743,
        "sign_positive": 5,
        "sign_negative": 4,
-       "sign_zero": 11
+       "sign_zero": 7
       },
       {
        "step": 0.1,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 18,
        "n_boundary_excluded": 0,
-       "median_abs_D": 1.7763568394002505e-15,
-       "mean_D": -0.011012283452703952,
+       "median_abs_D": 0.0017672321682011827,
+       "mean_D": -0.012235870503004391,
        "sign_positive": 4,
        "sign_negative": 8,
-       "sign_zero": 8
+       "sign_zero": 6
       }
      ]
     },
@@ -24020,30 +24020,30 @@
       "a_deg",
       "s1"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 9,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": -2.220446049250313e-16,
+       "mean_D": -9.868649107779169e-17,
        "sign_positive": 0,
-       "sign_negative": 2,
-       "sign_zero": 18
+       "sign_negative": 1,
+       "sign_zero": 8
       },
       {
        "step": 0.05,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 17,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": -6.661338147750939e-17,
+       "mean_D": -7.836868409118753e-17,
        "sign_positive": 1,
        "sign_negative": 3,
-       "sign_zero": 16
+       "sign_zero": 13
       },
       {
        "step": 0.1,
@@ -24063,30 +24063,30 @@
       "a_deg",
       "s2"
      ],
-     "status": "unstable_nonadditivity",
-     "reason_code": "sign_changes_across_steps",
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 14,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": 0.0003486008376268002,
+       "mean_D": 0.0004980011966097145,
        "sign_positive": 4,
        "sign_negative": 2,
-       "sign_zero": 14
+       "sign_zero": 8
       },
       {
        "step": 0.05,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 18,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": -0.0012783849934285608,
+       "mean_D": -0.0014204277704761787,
        "sign_positive": 4,
        "sign_negative": 3,
-       "sign_zero": 13
+       "sign_zero": 11
       },
       {
        "step": 0.1,
@@ -24106,30 +24106,30 @@
       "k",
       "morph_corner_mm"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 11,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": -0.0015344546463493369,
+       "mean_D": -0.002789917538816976,
        "sign_positive": 2,
        "sign_negative": 2,
-       "sign_zero": 16
+       "sign_zero": 7
       },
       {
        "step": 0.05,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 16,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.0,
-       "mean_D": -0.007843496251754335,
+       "median_abs_D": 0.004254549666360408,
+       "mean_D": -0.009804370314692917,
        "sign_positive": 3,
        "sign_negative": 6,
-       "sign_zero": 11
+       "sign_zero": 7
       },
       {
        "step": 0.1,
@@ -24149,41 +24149,41 @@
       "k",
       "morph_fixed"
      ],
-     "status": "unstable_nonadditivity",
-     "reason_code": "sign_changes_across_steps",
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 18,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": -0.00033929662587008915,
+       "mean_D": -0.0003769962509667657,
        "sign_positive": 3,
        "sign_negative": 1,
-       "sign_zero": 16
+       "sign_zero": 14
       },
       {
        "step": 0.05,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 18,
        "n_boundary_excluded": 0,
-       "median_abs_D": 1.7763568394002505e-15,
-       "mean_D": 0.0042152696203224815,
+       "median_abs_D": 0.0019009003486880616,
+       "mean_D": 0.004683632911469424,
        "sign_positive": 7,
        "sign_negative": 4,
-       "sign_zero": 9
+       "sign_zero": 7
       },
       {
        "step": 0.1,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 19,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.011093736907421992,
-       "mean_D": -0.0004516837300141185,
+       "median_abs_D": 0.012014708282469755,
+       "mean_D": -0.0004754565579095985,
        "sign_positive": 12,
        "sign_negative": 5,
-       "sign_zero": 3
+       "sign_zero": 2
       }
      ]
     },
@@ -24192,41 +24192,41 @@
       "k",
       "morph_height_mm"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 13,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": 0.0023682547443036883,
-       "sign_positive": 6,
+       "mean_D": 0.0036434688373900162,
+       "sign_positive": 5,
        "sign_negative": 1,
-       "sign_zero": 13
+       "sign_zero": 7
       },
       {
        "step": 0.05,
        "n_evaluated": 19,
-       "n_supported": 19,
+       "n_supported": 15,
        "n_boundary_excluded": 1,
-       "median_abs_D": 8.881784197001252e-16,
-       "mean_D": 0.00064000998072262,
+       "median_abs_D": 3.552713678800501e-15,
+       "mean_D": 0.0008106793089153186,
        "sign_positive": 8,
        "sign_negative": 2,
-       "sign_zero": 9
+       "sign_zero": 5
       },
       {
        "step": 0.1,
        "n_evaluated": 19,
-       "n_supported": 19,
+       "n_supported": 17,
        "n_boundary_excluded": 1,
-       "median_abs_D": 0.004295933619028247,
-       "mean_D": 0.0028143986566032267,
+       "median_abs_D": 0.005143509552605785,
+       "mean_D": 0.003145504380909593,
        "sign_positive": 8,
-       "sign_negative": 6,
-       "sign_zero": 5
+       "sign_negative": 5,
+       "sign_zero": 4
       }
      ]
     },
@@ -24235,30 +24235,30 @@
       "k",
       "morph_rate"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 12,
        "n_boundary_excluded": 0,
-       "median_abs_D": 8.881784197001252e-16,
-       "mean_D": -0.01451589273113556,
-       "sign_positive": 5,
+       "median_abs_D": 0.0053818418741853336,
+       "mean_D": -0.024193154551892748,
+       "sign_positive": 4,
        "sign_negative": 5,
-       "sign_zero": 10
+       "sign_zero": 3
       },
       {
        "step": 0.05,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 16,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.011243221399633185,
-       "mean_D": -0.03621113994426883,
+       "median_abs_D": 0.015827308768996406,
+       "mean_D": -0.0444860737246654,
        "sign_positive": 3,
-       "sign_negative": 9,
-       "sign_zero": 8
+       "sign_negative": 8,
+       "sign_zero": 5
       },
       {
        "step": 0.1,
@@ -24278,30 +24278,30 @@
       "k",
       "morph_width_mm"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 14,
-       "n_supported": 14,
+       "n_supported": 8,
        "n_boundary_excluded": 6,
-       "median_abs_D": 1.7763568394002505e-15,
-       "mean_D": 0.01208240219191278,
-       "sign_positive": 6,
-       "sign_negative": 2,
-       "sign_zero": 6
+       "median_abs_D": 0.01562051806526732,
+       "mean_D": 0.021144203835847142,
+       "sign_positive": 5,
+       "sign_negative": 1,
+       "sign_zero": 2
       },
       {
        "step": 0.05,
        "n_evaluated": 14,
-       "n_supported": 14,
+       "n_supported": 11,
        "n_boundary_excluded": 6,
-       "median_abs_D": 0.028163849141352504,
-       "mean_D": 0.03782596779053847,
-       "sign_positive": 10,
+       "median_abs_D": 0.03094167307563911,
+       "mean_D": 0.04433478530674498,
+       "sign_positive": 8,
        "sign_negative": 1,
-       "sign_zero": 3
+       "sign_zero": 2
       },
       {
        "step": 0.1,
@@ -24321,30 +24321,30 @@
       "k",
       "n"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 19,
-       "n_supported": 19,
+       "n_supported": 8,
        "n_boundary_excluded": 1,
-       "median_abs_D": 0.0,
-       "mean_D": 5.127483593796094e-05,
+       "median_abs_D": 4.440892098500626e-16,
+       "mean_D": 0.00012177773535265723,
        "sign_positive": 4,
        "sign_negative": 0,
-       "sign_zero": 15
+       "sign_zero": 4
       },
       {
        "step": 0.05,
        "n_evaluated": 19,
-       "n_supported": 19,
+       "n_supported": 16,
        "n_boundary_excluded": 1,
-       "median_abs_D": 0.0,
-       "mean_D": 0.002527553397573081,
+       "median_abs_D": 4.440892098500626e-15,
+       "mean_D": 0.0030014696596180335,
        "sign_positive": 6,
        "sign_negative": 3,
-       "sign_zero": 10
+       "sign_zero": 7
       },
       {
        "step": 0.1,
@@ -24364,41 +24364,41 @@
       "k",
       "q"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 15,
-       "n_supported": 15,
+       "n_supported": 10,
        "n_boundary_excluded": 5,
-       "median_abs_D": 0.0,
-       "mean_D": -0.009962740647798748,
+       "median_abs_D": 0.014628655506663923,
+       "mean_D": -0.014944110971698121,
        "sign_positive": 2,
        "sign_negative": 5,
-       "sign_zero": 8
+       "sign_zero": 3
       },
       {
        "step": 0.05,
        "n_evaluated": 13,
-       "n_supported": 13,
+       "n_supported": 9,
        "n_boundary_excluded": 7,
-       "median_abs_D": 0.0005743346770321622,
-       "mean_D": -0.03699831580863888,
+       "median_abs_D": 0.06200744873277442,
+       "mean_D": -0.0534420117235895,
        "sign_positive": 2,
        "sign_negative": 6,
-       "sign_zero": 5
+       "sign_zero": 1
       },
       {
        "step": 0.1,
        "n_evaluated": 8,
-       "n_supported": 8,
+       "n_supported": 7,
        "n_boundary_excluded": 12,
        "median_abs_D": 8.881784197001252e-16,
-       "mean_D": -0.06310338503055501,
+       "mean_D": -0.0721181543206343,
        "sign_positive": 0,
        "sign_negative": 5,
-       "sign_zero": 3
+       "sign_zero": 2
       }
      ]
     },
@@ -24407,41 +24407,41 @@
       "k",
       "s"
      ],
-     "status": "unstable_nonadditivity",
-     "reason_code": "sign_changes_across_steps",
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 9,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": -0.00013128247578906294,
-       "sign_positive": 3,
+       "mean_D": -0.0027657034840132453,
+       "sign_positive": 2,
        "sign_negative": 2,
-       "sign_zero": 15
+       "sign_zero": 5
       },
       {
        "step": 0.05,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 15,
        "n_boundary_excluded": 0,
-       "median_abs_D": 8.881784197001252e-16,
-       "mean_D": 0.0027567999293203636,
+       "median_abs_D": 1.7763568394002505e-15,
+       "mean_D": 0.0036757332390938775,
        "sign_positive": 7,
-       "sign_negative": 4,
-       "sign_zero": 9
+       "sign_negative": 3,
+       "sign_zero": 5
       },
       {
        "step": 0.1,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 18,
        "n_boundary_excluded": 0,
-       "median_abs_D": 6.661338147750939e-16,
-       "mean_D": -0.005456683845027488,
+       "median_abs_D": 1.3322676295501878e-15,
+       "mean_D": -0.006062982050030542,
        "sign_positive": 6,
        "sign_negative": 5,
-       "sign_zero": 9
+       "sign_zero": 7
       }
      ]
     },
@@ -24450,41 +24450,41 @@
       "k",
       "s1"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 13,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
        "mean_D": 0.0,
        "sign_positive": 0,
        "sign_negative": 0,
-       "sign_zero": 20
+       "sign_zero": 13
       },
       {
        "step": 0.05,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 16,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": 0.0014103642460725264,
-       "sign_positive": 4,
+       "mean_D": 0.00028125590530339584,
+       "sign_positive": 3,
        "sign_negative": 3,
-       "sign_zero": 13
+       "sign_zero": 10
       },
       {
        "step": 0.1,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 19,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.00021401140087973225,
-       "mean_D": 0.006814376776614717,
+       "median_abs_D": 0.0004280228017585763,
+       "mean_D": 0.007173028185910228,
        "sign_positive": 7,
        "sign_negative": 4,
-       "sign_zero": 9
+       "sign_zero": 8
       }
      ]
     },
@@ -24493,41 +24493,41 @@
       "k",
       "s2"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 14,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": 0.004078500206241342,
-       "sign_positive": 5,
+       "mean_D": 0.0030080928025893855,
+       "sign_positive": 4,
        "sign_negative": 2,
-       "sign_zero": 13
+       "sign_zero": 8
       },
       {
        "step": 0.05,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 18,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.0,
-       "mean_D": 0.008831653128756223,
+       "median_abs_D": 4.440892098500626e-16,
+       "mean_D": 0.009812947920840247,
        "sign_positive": 7,
        "sign_negative": 2,
-       "sign_zero": 11
+       "sign_zero": 9
       },
       {
        "step": 0.1,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 19,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.0016226448063298982,
-       "mean_D": 0.01268502532557898,
+       "median_abs_D": 0.003245289612658908,
+       "mean_D": 0.013352658237451558,
        "sign_positive": 8,
        "sign_negative": 3,
-       "sign_zero": 9
+       "sign_zero": 8
       }
      ]
     },
@@ -24536,41 +24536,41 @@
       "morph_corner_mm",
       "morph_fixed"
      ],
-     "status": "unstable_nonadditivity",
-     "reason_code": "sign_changes_across_steps",
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 15,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": 0.0015436403842668644,
+       "mean_D": 0.002058187179022486,
        "sign_positive": 5,
        "sign_negative": 0,
-       "sign_zero": 15
+       "sign_zero": 10
       },
       {
        "step": 0.05,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 17,
        "n_boundary_excluded": 0,
-       "median_abs_D": 4.440892098500626e-16,
-       "mean_D": -0.000505709078024319,
+       "median_abs_D": 3.552713678800501e-15,
+       "mean_D": -0.0005949518564991987,
        "sign_positive": 4,
        "sign_negative": 6,
-       "sign_zero": 10
+       "sign_zero": 7
       },
       {
        "step": 0.1,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 19,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.012959270821299107,
-       "mean_D": -0.007194585985965163,
+       "median_abs_D": 0.01615792119616799,
+       "mean_D": -0.007573248406279119,
        "sign_positive": 4,
        "sign_negative": 10,
-       "sign_zero": 6
+       "sign_zero": 5
       }
      ]
     },
@@ -24579,30 +24579,30 @@
       "morph_corner_mm",
       "morph_height_mm"
      ],
-     "status": "unstable_nonadditivity",
-     "reason_code": "sign_changes_across_steps",
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 10,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": 2.4424906541753446e-16,
-       "sign_positive": 4,
+       "mean_D": 3.9968028886505636e-16,
+       "sign_positive": 3,
        "sign_negative": 1,
-       "sign_zero": 15
+       "sign_zero": 6
       },
       {
        "step": 0.05,
        "n_evaluated": 19,
-       "n_supported": 19,
+       "n_supported": 15,
        "n_boundary_excluded": 1,
        "median_abs_D": 0.0,
-       "mean_D": -0.005800420207048097,
+       "mean_D": -0.0073471989289274715,
        "sign_positive": 2,
-       "sign_negative": 4,
-       "sign_zero": 13
+       "sign_negative": 3,
+       "sign_zero": 10
       },
       {
        "step": 0.1,
@@ -24622,30 +24622,30 @@
       "morph_corner_mm",
       "morph_rate"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 13,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": 0.004426350835622062,
+       "mean_D": 0.006809770516341633,
        "sign_positive": 2,
        "sign_negative": 4,
-       "sign_zero": 14
+       "sign_zero": 7
       },
       {
        "step": 0.05,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 17,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.0,
-       "mean_D": 0.014262452356904532,
+       "median_abs_D": 1.7763568394002505e-15,
+       "mean_D": 0.01677935571400533,
        "sign_positive": 6,
        "sign_negative": 3,
-       "sign_zero": 11
+       "sign_zero": 8
       },
       {
        "step": 0.1,
@@ -24665,30 +24665,30 @@
       "morph_corner_mm",
       "morph_width_mm"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 14,
-       "n_supported": 14,
+       "n_supported": 6,
        "n_boundary_excluded": 6,
-       "median_abs_D": 1.7763568394002505e-15,
-       "mean_D": 0.007980393543943658,
-       "sign_positive": 4,
-       "sign_negative": 3,
-       "sign_zero": 7
+       "median_abs_D": 0.01079126223214244,
+       "mean_D": 0.01480638057085093,
+       "sign_positive": 3,
+       "sign_negative": 2,
+       "sign_zero": 1
       },
       {
        "step": 0.05,
        "n_evaluated": 14,
-       "n_supported": 14,
+       "n_supported": 10,
        "n_boundary_excluded": 6,
-       "median_abs_D": 0.003489427958676128,
-       "mean_D": 0.017693546691292385,
+       "median_abs_D": 0.02942229914342498,
+       "mean_D": 0.024770965367809337,
        "sign_positive": 5,
        "sign_negative": 3,
-       "sign_zero": 6
+       "sign_zero": 2
       },
       {
        "step": 0.1,
@@ -24708,41 +24708,41 @@
       "morph_corner_mm",
       "n"
      ],
-     "status": "unstable_nonadditivity",
-     "reason_code": "sign_changes_across_steps",
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 19,
-       "n_supported": 19,
+       "n_supported": 8,
        "n_boundary_excluded": 1,
-       "median_abs_D": 0.0,
-       "mean_D": -0.00023856581271876709,
+       "median_abs_D": 4.440892098500626e-16,
+       "mean_D": -0.0005665938052065167,
        "sign_positive": 3,
-       "sign_negative": 3,
-       "sign_zero": 13
+       "sign_negative": 1,
+       "sign_zero": 4
       },
       {
        "step": 0.05,
        "n_evaluated": 19,
-       "n_supported": 19,
+       "n_supported": 15,
        "n_boundary_excluded": 1,
        "median_abs_D": 0.0,
-       "mean_D": 0.0015851557856073793,
+       "mean_D": 0.0020078639951026803,
        "sign_positive": 4,
        "sign_negative": 2,
-       "sign_zero": 13
+       "sign_zero": 9
       },
       {
        "step": 0.1,
        "n_evaluated": 17,
-       "n_supported": 17,
+       "n_supported": 16,
        "n_boundary_excluded": 3,
-       "median_abs_D": 0.012907462784880863,
-       "mean_D": -0.0013469224273122888,
+       "median_abs_D": 0.013662670479061667,
+       "mean_D": -0.001431105079019307,
        "sign_positive": 3,
        "sign_negative": 8,
-       "sign_zero": 6
+       "sign_zero": 5
       }
      ]
     },
@@ -24751,19 +24751,19 @@
       "morph_corner_mm",
       "q"
      ],
-     "status": "unstable_nonadditivity",
-     "reason_code": "sign_changes_across_steps",
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 15,
-       "n_supported": 15,
+       "n_supported": 9,
        "n_boundary_excluded": 5,
-       "median_abs_D": 0.0,
-       "mean_D": 0.0003392336750294156,
+       "median_abs_D": 3.552713678800501e-15,
+       "mean_D": 0.0005653894583823593,
        "sign_positive": 3,
        "sign_negative": 3,
-       "sign_zero": 9
+       "sign_zero": 3
       },
       {
        "step": 0.05,
@@ -24794,41 +24794,41 @@
       "morph_corner_mm",
       "s"
      ],
-     "status": "unstable_nonadditivity",
-     "reason_code": "sign_changes_across_steps",
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 10,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": 0.0006008790845505096,
+       "mean_D": 0.0012017581691011082,
        "sign_positive": 3,
-       "sign_negative": 2,
-       "sign_zero": 15
+       "sign_negative": 1,
+       "sign_zero": 6
       },
       {
        "step": 0.05,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 15,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": 0.00037163424390780354,
+       "mean_D": 0.0004955123252104048,
        "sign_positive": 3,
        "sign_negative": 4,
-       "sign_zero": 13
+       "sign_zero": 8
       },
       {
        "step": 0.1,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 19,
        "n_boundary_excluded": 0,
        "median_abs_D": 8.881784197001252e-16,
-       "mean_D": -0.0032793655873996075,
+       "mean_D": -0.0034519637762101133,
        "sign_positive": 5,
        "sign_negative": 6,
-       "sign_zero": 9
+       "sign_zero": 8
       }
      ]
     },
@@ -24837,41 +24837,41 @@
       "morph_corner_mm",
       "s1"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 10,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": 7.300397227760769e-05,
+       "mean_D": 0.00014600794455521537,
        "sign_positive": 3,
        "sign_negative": 0,
-       "sign_zero": 17
+       "sign_zero": 7
       },
       {
        "step": 0.05,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 18,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": 0.0010607740909853725,
+       "mean_D": 0.001178637878872636,
        "sign_positive": 2,
        "sign_negative": 2,
-       "sign_zero": 16
+       "sign_zero": 14
       },
       {
        "step": 0.1,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 19,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": 0.0002991167565086661,
+       "mean_D": 0.00031485974369333274,
        "sign_positive": 4,
        "sign_negative": 4,
-       "sign_zero": 12
+       "sign_zero": 11
       }
      ]
     },
@@ -24880,30 +24880,30 @@
       "morph_corner_mm",
       "s2"
      ],
-     "status": "unstable_nonadditivity",
-     "reason_code": "sign_changes_across_steps",
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 7,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.0,
-       "mean_D": -0.0007814874904625846,
-       "sign_positive": 4,
-       "sign_negative": 3,
-       "sign_zero": 13
+       "median_abs_D": 8.881784197001252e-16,
+       "mean_D": -0.0006427241184296305,
+       "sign_positive": 2,
+       "sign_negative": 2,
+       "sign_zero": 3
       },
       {
        "step": 0.05,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 16,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": -0.0015204522377550989,
+       "mean_D": -0.0019005652971938736,
        "sign_positive": 1,
        "sign_negative": 6,
-       "sign_zero": 13
+       "sign_zero": 9
       },
       {
        "step": 0.1,
@@ -24923,30 +24923,30 @@
       "morph_fixed",
       "morph_height_mm"
      ],
-     "status": "unstable_nonadditivity",
-     "reason_code": "sign_changes_across_steps",
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 17,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": -0.00043888350087954996,
+       "mean_D": -0.0005163335304465294,
        "sign_positive": 4,
        "sign_negative": 2,
-       "sign_zero": 14
+       "sign_zero": 11
       },
       {
        "step": 0.05,
        "n_evaluated": 19,
-       "n_supported": 19,
+       "n_supported": 17,
        "n_boundary_excluded": 1,
        "median_abs_D": 0.0,
-       "mean_D": -0.0009875328947625988,
+       "mean_D": -0.0011037132353229045,
        "sign_positive": 1,
        "sign_negative": 3,
-       "sign_zero": 15
+       "sign_zero": 13
       },
       {
        "step": 0.1,
@@ -24966,41 +24966,41 @@
       "morph_fixed",
       "morph_rate"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 16,
        "n_boundary_excluded": 0,
-       "median_abs_D": 8.881784197001252e-16,
-       "mean_D": -0.00033699945599918735,
+       "median_abs_D": 1.3322676295501878e-15,
+       "mean_D": -0.0004212493199989842,
        "sign_positive": 5,
        "sign_negative": 7,
-       "sign_zero": 8
+       "sign_zero": 4
       },
       {
        "step": 0.05,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 18,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.0038142027999794603,
-       "mean_D": -0.0081180905558079,
+       "median_abs_D": 0.007566457329303722,
+       "mean_D": -0.009020100617564333,
        "sign_positive": 5,
        "sign_negative": 8,
-       "sign_zero": 7
+       "sign_zero": 5
       },
       {
        "step": 0.1,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 19,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.020047313889589136,
-       "mean_D": -0.030582882598826355,
+       "median_abs_D": 0.02317776278014616,
+       "mean_D": -0.03219250799876459,
        "sign_positive": 3,
        "sign_negative": 11,
-       "sign_zero": 6
+       "sign_zero": 5
       }
      ]
     },
@@ -25009,30 +25009,30 @@
       "morph_fixed",
       "morph_width_mm"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 14,
-       "n_supported": 14,
+       "n_supported": 10,
        "n_boundary_excluded": 6,
-       "median_abs_D": 8.881784197001252e-16,
-       "mean_D": -0.0014949553310503103,
+       "median_abs_D": 3.552713678800501e-15,
+       "mean_D": -0.0020929374634704343,
        "sign_positive": 4,
        "sign_negative": 3,
-       "sign_zero": 7
+       "sign_zero": 3
       },
       {
        "step": 0.05,
        "n_evaluated": 14,
-       "n_supported": 14,
+       "n_supported": 12,
        "n_boundary_excluded": 6,
-       "median_abs_D": 0.007769582481632398,
-       "mean_D": -0.0030061062448611003,
+       "median_abs_D": 0.00946399634496764,
+       "mean_D": -0.0035071239523379503,
        "sign_positive": 4,
        "sign_negative": 5,
-       "sign_zero": 5
+       "sign_zero": 3
       },
       {
        "step": 0.1,
@@ -25052,41 +25052,41 @@
       "morph_fixed",
       "n"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 19,
-       "n_supported": 19,
+       "n_supported": 16,
        "n_boundary_excluded": 1,
        "median_abs_D": 0.0,
-       "mean_D": 0.00012626789826470684,
-       "sign_positive": 6,
+       "mean_D": 0.00014994312918928387,
+       "sign_positive": 5,
        "sign_negative": 1,
-       "sign_zero": 12
+       "sign_zero": 10
       },
       {
        "step": 0.05,
        "n_evaluated": 19,
-       "n_supported": 19,
+       "n_supported": 18,
        "n_boundary_excluded": 1,
        "median_abs_D": 0.0,
-       "mean_D": 0.0013045840094429411,
+       "mean_D": 0.0013770608988564377,
        "sign_positive": 3,
        "sign_negative": 3,
-       "sign_zero": 13
+       "sign_zero": 12
       },
       {
        "step": 0.1,
        "n_evaluated": 17,
-       "n_supported": 17,
+       "n_supported": 16,
        "n_boundary_excluded": 3,
-       "median_abs_D": 0.0005796317720641042,
-       "mean_D": 0.006748140376469249,
+       "median_abs_D": 0.003795080753859814,
+       "mean_D": 0.0071698991499985765,
        "sign_positive": 9,
        "sign_negative": 3,
-       "sign_zero": 5
+       "sign_zero": 4
       }
      ]
     },
@@ -25095,41 +25095,41 @@
       "morph_fixed",
       "q"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 15,
-       "n_supported": 15,
+       "n_supported": 12,
        "n_boundary_excluded": 5,
        "median_abs_D": 0.0,
-       "mean_D": -0.0006654619452616473,
+       "mean_D": -0.0008318274315770591,
        "sign_positive": 1,
        "sign_negative": 2,
-       "sign_zero": 12
+       "sign_zero": 9
       },
       {
        "step": 0.05,
        "n_evaluated": 13,
-       "n_supported": 13,
+       "n_supported": 11,
        "n_boundary_excluded": 7,
-       "median_abs_D": 0.0,
-       "mean_D": -0.0027147965915415187,
+       "median_abs_D": 3.552713678800501e-15,
+       "mean_D": -0.003208395971821795,
        "sign_positive": 1,
        "sign_negative": 5,
-       "sign_zero": 7
+       "sign_zero": 5
       },
       {
        "step": 0.1,
        "n_evaluated": 8,
-       "n_supported": 8,
+       "n_supported": 7,
        "n_boundary_excluded": 12,
-       "median_abs_D": 0.00595579125702228,
-       "mean_D": -0.005694852640955761,
+       "median_abs_D": 0.010591343739448256,
+       "mean_D": -0.006508403018235155,
        "sign_positive": 1,
        "sign_negative": 5,
-       "sign_zero": 2
+       "sign_zero": 1
       }
      ]
     },
@@ -25138,41 +25138,41 @@
       "morph_fixed",
       "s"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 14,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": 2.220446049250313e-16,
+       "mean_D": 3.1720657846433045e-16,
        "sign_positive": 3,
        "sign_negative": 0,
-       "sign_zero": 17
+       "sign_zero": 11
       },
       {
        "step": 0.05,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 18,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": 0.0008516785150231021,
+       "mean_D": 0.0009463094611367801,
        "sign_positive": 4,
        "sign_negative": 2,
-       "sign_zero": 14
+       "sign_zero": 12
       },
       {
        "step": 0.1,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 19,
        "n_boundary_excluded": 0,
-       "median_abs_D": 4.440892098500626e-16,
-       "mean_D": 0.00061855373579216,
+       "median_abs_D": 8.881784197001252e-16,
+       "mean_D": 0.0006511091955706947,
        "sign_positive": 7,
        "sign_negative": 3,
-       "sign_zero": 10
+       "sign_zero": 9
       }
      ]
     },
@@ -25181,19 +25181,19 @@
       "morph_fixed",
       "s1"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 17,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": 6.889577690445403e-05,
+       "mean_D": 8.105385518171063e-05,
        "sign_positive": 3,
        "sign_negative": 1,
-       "sign_zero": 16
+       "sign_zero": 13
       },
       {
        "step": 0.05,
@@ -25224,30 +25224,30 @@
       "morph_fixed",
       "s2"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 15,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": 0.001992407880458047,
+       "mean_D": 0.0026565438406107294,
        "sign_positive": 2,
        "sign_negative": 2,
-       "sign_zero": 16
+       "sign_zero": 11
       },
       {
        "step": 0.05,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 18,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": 0.0048471503223861175,
+       "mean_D": 0.00538572258042902,
        "sign_positive": 6,
        "sign_negative": 1,
-       "sign_zero": 13
+       "sign_zero": 11
       },
       {
        "step": 0.1,
@@ -25267,30 +25267,30 @@
       "morph_height_mm",
       "morph_rate"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 11,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.0,
-       "mean_D": -0.0008765145782898998,
-       "sign_positive": 4,
+       "median_abs_D": 1.7763568394002505e-15,
+       "mean_D": -0.0015936628696180803,
+       "sign_positive": 3,
        "sign_negative": 4,
-       "sign_zero": 12
+       "sign_zero": 4
       },
       {
        "step": 0.05,
        "n_evaluated": 19,
-       "n_supported": 19,
+       "n_supported": 16,
        "n_boundary_excluded": 1,
-       "median_abs_D": 1.7763568394002505e-15,
-       "mean_D": -0.0041023880971000045,
+       "median_abs_D": 0.004109954364966306,
+       "mean_D": -0.004871585865306255,
        "sign_positive": 4,
        "sign_negative": 6,
-       "sign_zero": 9
+       "sign_zero": 6
       },
       {
        "step": 0.1,
@@ -25310,40 +25310,40 @@
       "morph_height_mm",
       "morph_width_mm"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 14,
-       "n_supported": 14,
+       "n_supported": 12,
        "n_boundary_excluded": 6,
        "median_abs_D": 0.0,
-       "mean_D": 4.440892098500626e-16,
+       "mean_D": 5.181040781584064e-16,
        "sign_positive": 4,
        "sign_negative": 0,
-       "sign_zero": 10
+       "sign_zero": 8
       },
       {
        "step": 0.05,
        "n_evaluated": 14,
-       "n_supported": 14,
+       "n_supported": 12,
        "n_boundary_excluded": 6,
-       "median_abs_D": 1.3322676295501878e-15,
-       "mean_D": 0.005715947848945595,
+       "median_abs_D": 2.6645352591003757e-15,
+       "mean_D": 0.0066686058237698615,
        "sign_positive": 6,
        "sign_negative": 2,
-       "sign_zero": 6
+       "sign_zero": 4
       },
       {
        "step": 0.1,
        "n_evaluated": 14,
-       "n_supported": 14,
+       "n_supported": 13,
        "n_boundary_excluded": 6,
-       "median_abs_D": 0.030659709835437976,
-       "mean_D": 0.011342561738745196,
+       "median_abs_D": 0.034727668929171784,
+       "mean_D": 0.01274708162431216,
        "sign_positive": 7,
-       "sign_negative": 5,
+       "sign_negative": 4,
        "sign_zero": 2
       }
      ]
@@ -25353,30 +25353,30 @@
       "morph_height_mm",
       "n"
      ],
-     "status": "unstable_nonadditivity",
-     "reason_code": "sign_changes_across_steps",
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 19,
-       "n_supported": 19,
+       "n_supported": 7,
        "n_boundary_excluded": 1,
        "median_abs_D": 0.0,
-       "mean_D": -0.00024635709633379294,
-       "sign_positive": 5,
-       "sign_negative": 1,
-       "sign_zero": 13
+       "mean_D": 5.709718412357948e-16,
+       "sign_positive": 2,
+       "sign_negative": 0,
+       "sign_zero": 5
       },
       {
        "step": 0.05,
        "n_evaluated": 18,
-       "n_supported": 18,
+       "n_supported": 17,
        "n_boundary_excluded": 2,
        "median_abs_D": 0.0,
-       "mean_D": 0.0013274427989612054,
+       "mean_D": 0.0014055276694883352,
        "sign_positive": 3,
        "sign_negative": 1,
-       "sign_zero": 14
+       "sign_zero": 13
       },
       {
        "step": 0.1,
@@ -25396,41 +25396,41 @@
       "morph_height_mm",
       "q"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 15,
-       "n_supported": 15,
+       "n_supported": 11,
        "n_boundary_excluded": 5,
        "median_abs_D": 0.0,
-       "mean_D": 3.2566542055671256e-16,
+       "mean_D": 4.440892098500626e-16,
        "sign_positive": 2,
-       "sign_negative": 1,
-       "sign_zero": 12
-      },
-      {
-       "step": 0.05,
-       "n_evaluated": 12,
-       "n_supported": 12,
-       "n_boundary_excluded": 8,
-       "median_abs_D": 0.0,
-       "mean_D": 0.00075492002709913,
-       "sign_positive": 3,
        "sign_negative": 1,
        "sign_zero": 8
       },
       {
+       "step": 0.05,
+       "n_evaluated": 12,
+       "n_supported": 9,
+       "n_boundary_excluded": 8,
+       "median_abs_D": 0.0,
+       "mean_D": 0.0010065600361321733,
+       "sign_positive": 3,
+       "sign_negative": 1,
+       "sign_zero": 5
+      },
+      {
        "step": 0.1,
        "n_evaluated": 7,
-       "n_supported": 7,
+       "n_supported": 6,
        "n_boundary_excluded": 13,
-       "median_abs_D": 0.0,
-       "mean_D": 0.0013335338547687061,
+       "median_abs_D": 0.0019273090363354228,
+       "mean_D": 0.0015557894972301571,
        "sign_positive": 1,
        "sign_negative": 2,
-       "sign_zero": 4
+       "sign_zero": 3
       }
      ]
     },
@@ -25439,30 +25439,30 @@
       "morph_height_mm",
       "s"
      ],
-     "status": "unstable_nonadditivity",
-     "reason_code": "sign_changes_across_steps",
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 12,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": 3.9968028886505636e-16,
-       "sign_positive": 4,
+       "mean_D": 5.921189464667501e-16,
+       "sign_positive": 3,
        "sign_negative": 1,
-       "sign_zero": 15
+       "sign_zero": 8
       },
       {
        "step": 0.05,
        "n_evaluated": 19,
-       "n_supported": 19,
+       "n_supported": 13,
        "n_boundary_excluded": 1,
        "median_abs_D": 0.0,
-       "mean_D": -0.0005375783444490897,
+       "mean_D": -0.0007856914265025156,
        "sign_positive": 3,
        "sign_negative": 2,
-       "sign_zero": 14
+       "sign_zero": 8
       },
       {
        "step": 0.1,
@@ -25482,41 +25482,41 @@
       "morph_height_mm",
       "s1"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 11,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": 0.0003764788159159371,
+       "mean_D": 0.0006845069380289766,
        "sign_positive": 3,
        "sign_negative": 1,
-       "sign_zero": 16
+       "sign_zero": 7
       },
       {
        "step": 0.05,
        "n_evaluated": 19,
-       "n_supported": 19,
+       "n_supported": 16,
        "n_boundary_excluded": 1,
        "median_abs_D": 0.0,
-       "mean_D": 0.0005866582805515062,
+       "mean_D": 0.0006966567081549135,
        "sign_positive": 4,
        "sign_negative": 1,
-       "sign_zero": 14
+       "sign_zero": 11
       },
       {
        "step": 0.1,
        "n_evaluated": 19,
-       "n_supported": 19,
+       "n_supported": 18,
        "n_boundary_excluded": 1,
        "median_abs_D": 0.0,
-       "mean_D": 0.00020994557844204658,
+       "mean_D": 0.00022160922168882694,
        "sign_positive": 5,
        "sign_negative": 3,
-       "sign_zero": 11
+       "sign_zero": 10
       }
      ]
     },
@@ -25525,30 +25525,30 @@
       "morph_height_mm",
       "s2"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 10,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": -0.0002030162429596416,
-       "sign_positive": 2,
+       "mean_D": -0.0004060324859196385,
+       "sign_positive": 1,
        "sign_negative": 1,
-       "sign_zero": 17
+       "sign_zero": 8
       },
       {
        "step": 0.05,
        "n_evaluated": 19,
-       "n_supported": 19,
+       "n_supported": 16,
        "n_boundary_excluded": 1,
        "median_abs_D": 0.0,
-       "mean_D": -0.0009937857592383402,
+       "mean_D": -0.001180120589095529,
        "sign_positive": 0,
        "sign_negative": 4,
-       "sign_zero": 15
+       "sign_zero": 12
       },
       {
        "step": 0.1,
@@ -25568,30 +25568,30 @@
       "morph_rate",
       "morph_width_mm"
      ],
-     "status": "unstable_nonadditivity",
-     "reason_code": "sign_changes_across_steps",
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 14,
-       "n_supported": 14,
+       "n_supported": 8,
        "n_boundary_excluded": 6,
        "median_abs_D": 0.0,
-       "mean_D": -0.00023840949077597834,
-       "sign_positive": 3,
+       "mean_D": -0.001322313773482242,
+       "sign_positive": 1,
        "sign_negative": 2,
-       "sign_zero": 9
+       "sign_zero": 5
       },
       {
        "step": 0.05,
        "n_evaluated": 14,
-       "n_supported": 14,
+       "n_supported": 10,
        "n_boundary_excluded": 6,
-       "median_abs_D": 0.017622758453597953,
-       "mean_D": -0.015991631618137627,
+       "median_abs_D": 0.029849958001910704,
+       "mean_D": -0.01667319666038285,
        "sign_positive": 3,
-       "sign_negative": 5,
-       "sign_zero": 6
+       "sign_negative": 4,
+       "sign_zero": 3
       },
       {
        "step": 0.1,
@@ -25611,30 +25611,30 @@
       "morph_rate",
       "n"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 19,
-       "n_supported": 19,
+       "n_supported": 14,
        "n_boundary_excluded": 1,
-       "median_abs_D": 0.0,
-       "mean_D": 0.000298934566711484,
-       "sign_positive": 2,
-       "sign_negative": 7,
-       "sign_zero": 10
+       "median_abs_D": 4.440892098500626e-16,
+       "mean_D": -0.0010398875137640484,
+       "sign_positive": 1,
+       "sign_negative": 6,
+       "sign_zero": 7
       },
       {
        "step": 0.05,
        "n_evaluated": 19,
-       "n_supported": 19,
+       "n_supported": 18,
        "n_boundary_excluded": 1,
-       "median_abs_D": 0.0014240622709840167,
-       "mean_D": 0.005784278884984649,
+       "median_abs_D": 0.002309342680445692,
+       "mean_D": 0.006105627711928241,
        "sign_positive": 7,
        "sign_negative": 4,
-       "sign_zero": 8
+       "sign_zero": 7
       },
       {
        "step": 0.1,
@@ -25654,41 +25654,41 @@
       "morph_rate",
       "q"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 15,
-       "n_supported": 15,
+       "n_supported": 10,
        "n_boundary_excluded": 5,
-       "median_abs_D": 0.0,
-       "mean_D": 0.002458608001505258,
-       "sign_positive": 5,
+       "median_abs_D": 2.6645352591003757e-15,
+       "mean_D": 0.0036879120022575316,
+       "sign_positive": 4,
        "sign_negative": 2,
-       "sign_zero": 8
+       "sign_zero": 4
       },
       {
        "step": 0.05,
        "n_evaluated": 13,
-       "n_supported": 13,
+       "n_supported": 11,
        "n_boundary_excluded": 7,
-       "median_abs_D": 0.010709768095143346,
-       "mean_D": 0.039072440711462535,
+       "median_abs_D": 0.011097660853111702,
+       "mean_D": 0.04617652084081936,
        "sign_positive": 6,
        "sign_negative": 3,
-       "sign_zero": 4
+       "sign_zero": 2
       },
       {
        "step": 0.1,
        "n_evaluated": 8,
-       "n_supported": 8,
+       "n_supported": 6,
        "n_boundary_excluded": 12,
-       "median_abs_D": 0.00588255986004782,
-       "mean_D": 0.09046976975477466,
+       "median_abs_D": 0.027318021387495506,
+       "mean_D": 0.12062635967303288,
        "sign_positive": 4,
        "sign_negative": 1,
-       "sign_zero": 3
+       "sign_zero": 1
       }
      ]
     },
@@ -25697,41 +25697,41 @@
       "morph_rate",
       "s"
      ],
-     "status": "unstable_nonadditivity",
-     "reason_code": "sign_changes_across_steps",
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 8,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.0,
-       "mean_D": 0.001712053324447682,
-       "sign_positive": 5,
+       "median_abs_D": 0.003754791992257589,
+       "mean_D": 0.004188271300335944,
+       "sign_positive": 4,
        "sign_negative": 3,
-       "sign_zero": 12
+       "sign_zero": 1
       },
       {
        "step": 0.05,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 18,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.0,
-       "mean_D": 0.002101643003196951,
+       "median_abs_D": 8.881784197001252e-16,
+       "mean_D": 0.002335158892441057,
        "sign_positive": 6,
        "sign_negative": 3,
-       "sign_zero": 11
+       "sign_zero": 9
       },
       {
        "step": 0.1,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 19,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.005103100401746108,
-       "mean_D": -0.006701472827581911,
+       "median_abs_D": 0.006982791358423057,
+       "mean_D": -0.007054181923770433,
        "sign_positive": 8,
        "sign_negative": 5,
-       "sign_zero": 7
+       "sign_zero": 6
       }
      ]
     },
@@ -25740,41 +25740,41 @@
       "morph_rate",
       "s1"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 11,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": -0.0009541481370190175,
-       "sign_positive": 1,
+       "mean_D": -0.0029427525669557027,
+       "sign_positive": 0,
        "sign_negative": 3,
-       "sign_zero": 16
+       "sign_zero": 8
       },
       {
        "step": 0.05,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 17,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.0001469382000358621,
-       "mean_D": -0.009267441967531731,
+       "median_abs_D": 0.002172444317651845,
+       "mean_D": -0.010902872902978507,
        "sign_positive": 4,
        "sign_negative": 7,
-       "sign_zero": 9
+       "sign_zero": 6
       },
       {
        "step": 0.1,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 18,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.007662488496715358,
-       "mean_D": -0.01716399833316422,
+       "median_abs_D": 0.009789421373131102,
+       "mean_D": -0.019071109259071357,
        "sign_positive": 3,
        "sign_negative": 8,
-       "sign_zero": 9
+       "sign_zero": 7
       }
      ]
     },
@@ -25783,41 +25783,41 @@
       "morph_rate",
       "s2"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 9,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.0,
-       "mean_D": 0.0043462461107409926,
-       "sign_positive": 6,
+       "median_abs_D": 0.002125487430793438,
+       "mean_D": 0.00858732282630608,
+       "sign_positive": 4,
        "sign_negative": 2,
-       "sign_zero": 12
+       "sign_zero": 3
       },
       {
        "step": 0.05,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 15,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.0010627437153978292,
-       "mean_D": 0.012056023092014145,
+       "median_abs_D": 0.006763088879377932,
+       "mean_D": 0.01607469745601886,
        "sign_positive": 10,
        "sign_negative": 1,
-       "sign_zero": 9
+       "sign_zero": 4
       },
       {
        "step": 0.1,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 19,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.010664154909666657,
-       "mean_D": 0.03254636000826967,
+       "median_abs_D": 0.01342614336808623,
+       "mean_D": 0.03425932632449439,
        "sign_positive": 10,
        "sign_negative": 2,
-       "sign_zero": 8
+       "sign_zero": 7
       }
      ]
     },
@@ -25826,30 +25826,30 @@
       "morph_width_mm",
       "n"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 14,
-       "n_supported": 14,
+       "n_supported": 7,
        "n_boundary_excluded": 6,
        "median_abs_D": 0.0,
-       "mean_D": -0.0012758671478103928,
-       "sign_positive": 2,
-       "sign_negative": 3,
-       "sign_zero": 9
+       "mean_D": -1.2688263138573217e-16,
+       "sign_positive": 1,
+       "sign_negative": 1,
+       "sign_zero": 5
       },
       {
        "step": 0.05,
        "n_evaluated": 14,
-       "n_supported": 14,
+       "n_supported": 12,
        "n_boundary_excluded": 6,
-       "median_abs_D": 0.001975429183826538,
-       "mean_D": -0.0008473123270848402,
+       "median_abs_D": 0.004018401240292402,
+       "mean_D": -0.0009885310482656469,
        "sign_positive": 3,
        "sign_negative": 5,
-       "sign_zero": 6
+       "sign_zero": 4
       },
       {
        "step": 0.1,
@@ -25869,30 +25869,30 @@
       "morph_width_mm",
       "q"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 10,
-       "n_supported": 10,
+       "n_supported": 7,
        "n_boundary_excluded": 10,
-       "median_abs_D": 8.881784197001252e-16,
-       "mean_D": 0.0017500514975665737,
-       "sign_positive": 4,
+       "median_abs_D": 1.7763568394002505e-15,
+       "mean_D": 0.0025000735679519943,
+       "sign_positive": 3,
        "sign_negative": 1,
-       "sign_zero": 5
+       "sign_zero": 3
       },
       {
        "step": 0.05,
        "n_evaluated": 8,
-       "n_supported": 8,
+       "n_supported": 6,
        "n_boundary_excluded": 12,
-       "median_abs_D": 0.015138175032166856,
-       "mean_D": 0.008145504765942446,
+       "median_abs_D": 0.03163186220319503,
+       "mean_D": 0.010860673021256595,
        "sign_positive": 4,
        "sign_negative": 2,
-       "sign_zero": 2
+       "sign_zero": 0
       },
       {
        "step": 0.1,
@@ -25912,30 +25912,30 @@
       "morph_width_mm",
       "s"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 14,
-       "n_supported": 14,
+       "n_supported": 5,
        "n_boundary_excluded": 6,
-       "median_abs_D": 0.0,
-       "mean_D": 0.003269349725129584,
-       "sign_positive": 4,
+       "median_abs_D": 1.7763568394002505e-15,
+       "mean_D": 0.009154179230361947,
+       "sign_positive": 2,
        "sign_negative": 1,
-       "sign_zero": 9
+       "sign_zero": 2
       },
       {
        "step": 0.05,
        "n_evaluated": 14,
-       "n_supported": 14,
+       "n_supported": 10,
        "n_boundary_excluded": 6,
-       "median_abs_D": 1.3322676295501878e-15,
-       "mean_D": 0.00814218908878209,
+       "median_abs_D": 0.0072793563640702885,
+       "mean_D": 0.011399064724294927,
        "sign_positive": 6,
        "sign_negative": 2,
-       "sign_zero": 6
+       "sign_zero": 2
       },
       {
        "step": 0.1,
@@ -25955,30 +25955,30 @@
       "morph_width_mm",
       "s1"
      ],
-     "status": "unstable_nonadditivity",
-     "reason_code": "sign_changes_across_steps",
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 14,
-       "n_supported": 14,
+       "n_supported": 6,
        "n_boundary_excluded": 6,
        "median_abs_D": 0.0,
        "mean_D": 0.0,
        "sign_positive": 0,
        "sign_negative": 0,
-       "sign_zero": 14
+       "sign_zero": 6
       },
       {
        "step": 0.05,
        "n_evaluated": 14,
-       "n_supported": 14,
+       "n_supported": 11,
        "n_boundary_excluded": 6,
        "median_abs_D": 0.0,
-       "mean_D": -0.0009084302073025162,
-       "sign_positive": 3,
+       "mean_D": -0.0011561839002035253,
+       "sign_positive": 2,
        "sign_negative": 3,
-       "sign_zero": 8
+       "sign_zero": 6
       },
       {
        "step": 0.1,
@@ -25998,30 +25998,30 @@
       "morph_width_mm",
       "s2"
      ],
-     "status": "unstable_nonadditivity",
-     "reason_code": "sign_changes_across_steps",
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 14,
-       "n_supported": 14,
+       "n_supported": 8,
        "n_boundary_excluded": 6,
        "median_abs_D": 0.0,
-       "mean_D": -0.00024136814742841444,
-       "sign_positive": 3,
+       "mean_D": -0.0004223942580001694,
+       "sign_positive": 2,
        "sign_negative": 1,
-       "sign_zero": 10
+       "sign_zero": 5
       },
       {
        "step": 0.05,
        "n_evaluated": 14,
-       "n_supported": 14,
+       "n_supported": 13,
        "n_boundary_excluded": 6,
        "median_abs_D": 0.0,
-       "mean_D": 0.009689617815561023,
+       "mean_D": 0.01043497303214264,
        "sign_positive": 3,
        "sign_negative": 1,
-       "sign_zero": 10
+       "sign_zero": 9
       },
       {
        "step": 0.1,
@@ -26041,30 +26041,30 @@
       "n",
       "q"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 14,
-       "n_supported": 14,
+       "n_supported": 9,
        "n_boundary_excluded": 6,
-       "median_abs_D": 2.220446049250313e-16,
-       "mean_D": -0.0003252284282845456,
+       "median_abs_D": 4.440892098500626e-16,
+       "mean_D": -0.0005059108884422317,
        "sign_positive": 3,
-       "sign_negative": 4,
-       "sign_zero": 7
+       "sign_negative": 3,
+       "sign_zero": 3
       },
       {
        "step": 0.05,
        "n_evaluated": 12,
-       "n_supported": 12,
+       "n_supported": 10,
        "n_boundary_excluded": 8,
-       "median_abs_D": 1.3322676295501878e-15,
-       "mean_D": -0.0035008662498883978,
+       "median_abs_D": 1.7763568394002505e-15,
+       "mean_D": -0.0042010394998660775,
        "sign_positive": 4,
        "sign_negative": 3,
-       "sign_zero": 5
+       "sign_zero": 3
       },
       {
        "step": 0.1,
@@ -26084,41 +26084,41 @@
       "n",
       "s"
      ],
-     "status": "unstable_nonadditivity",
-     "reason_code": "sign_changes_across_steps",
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 19,
-       "n_supported": 19,
+       "n_supported": 9,
        "n_boundary_excluded": 1,
-       "median_abs_D": 0.0,
-       "mean_D": -0.0006230760065561068,
-       "sign_positive": 4,
-       "sign_negative": 4,
-       "sign_zero": 11
+       "median_abs_D": 4.440892098500626e-16,
+       "mean_D": -1.4802973661668753e-16,
+       "sign_positive": 2,
+       "sign_negative": 3,
+       "sign_zero": 4
       },
       {
        "step": 0.05,
        "n_evaluated": 19,
-       "n_supported": 19,
+       "n_supported": 15,
        "n_boundary_excluded": 1,
-       "median_abs_D": 8.881784197001252e-16,
-       "mean_D": -0.000313158573772121,
-       "sign_positive": 6,
+       "median_abs_D": 1.7763568394002505e-15,
+       "mean_D": -0.001494301364297653,
+       "sign_positive": 5,
        "sign_negative": 5,
-       "sign_zero": 8
+       "sign_zero": 5
       },
       {
        "step": 0.1,
        "n_evaluated": 17,
-       "n_supported": 17,
+       "n_supported": 16,
        "n_boundary_excluded": 3,
-       "median_abs_D": 3.552713678800501e-15,
-       "mean_D": 0.0016088456421368658,
+       "median_abs_D": 0.0018918333386270803,
+       "mean_D": 0.00170939849477042,
        "sign_positive": 7,
        "sign_negative": 4,
-       "sign_zero": 6
+       "sign_zero": 5
       }
      ]
     },
@@ -26127,30 +26127,30 @@
       "n",
       "s1"
      ],
-     "status": "unstable_nonadditivity",
-     "reason_code": "sign_changes_across_steps",
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 19,
-       "n_supported": 19,
+       "n_supported": 8,
        "n_boundary_excluded": 1,
        "median_abs_D": 0.0,
-       "mean_D": 0.001009206047105579,
-       "sign_positive": 2,
+       "mean_D": 5.551115123125783e-17,
+       "sign_positive": 1,
        "sign_negative": 0,
-       "sign_zero": 17
+       "sign_zero": 7
       },
       {
        "step": 0.05,
        "n_evaluated": 19,
-       "n_supported": 19,
+       "n_supported": 16,
        "n_boundary_excluded": 1,
        "median_abs_D": 0.0,
-       "mean_D": 0.0008710145043714777,
+       "mean_D": 0.0010343297239411298,
        "sign_positive": 2,
        "sign_negative": 3,
-       "sign_zero": 14
+       "sign_zero": 11
       },
       {
        "step": 0.1,
@@ -26170,41 +26170,41 @@
       "n",
       "s2"
      ],
-     "status": "unstable_nonadditivity",
-     "reason_code": "sign_changes_across_steps",
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 19,
-       "n_supported": 19,
+       "n_supported": 10,
        "n_boundary_excluded": 1,
        "median_abs_D": 0.0,
-       "mean_D": -1.4023869784738819e-16,
+       "mean_D": 1.7763568394002506e-16,
        "sign_positive": 3,
-       "sign_negative": 3,
-       "sign_zero": 13
+       "sign_negative": 1,
+       "sign_zero": 6
       },
       {
        "step": 0.05,
        "n_evaluated": 19,
-       "n_supported": 19,
+       "n_supported": 14,
        "n_boundary_excluded": 1,
-       "median_abs_D": 4.440892098500626e-16,
-       "mean_D": 0.0026040783846928107,
+       "median_abs_D": 8.881784197001252e-16,
+       "mean_D": 0.003534106379226211,
        "sign_positive": 6,
-       "sign_negative": 5,
-       "sign_zero": 8
+       "sign_negative": 4,
+       "sign_zero": 4
       },
       {
        "step": 0.1,
        "n_evaluated": 17,
-       "n_supported": 17,
+       "n_supported": 16,
        "n_boundary_excluded": 3,
-       "median_abs_D": 3.552713678800501e-15,
-       "mean_D": 0.006164095878663864,
+       "median_abs_D": 0.0004822079607702534,
+       "mean_D": 0.0065493518710803555,
        "sign_positive": 7,
        "sign_negative": 4,
-       "sign_zero": 6
+       "sign_zero": 5
       }
      ]
     },
@@ -26213,41 +26213,41 @@
       "q",
       "s"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 15,
-       "n_supported": 15,
+       "n_supported": 10,
        "n_boundary_excluded": 5,
-       "median_abs_D": 0.0,
-       "mean_D": 0.00013602955759770552,
+       "median_abs_D": 6.661338147750939e-16,
+       "mean_D": 0.00020404433639655827,
        "sign_positive": 3,
        "sign_negative": 3,
-       "sign_zero": 9
+       "sign_zero": 4
       },
       {
        "step": 0.05,
        "n_evaluated": 13,
-       "n_supported": 13,
+       "n_supported": 9,
        "n_boundary_excluded": 7,
        "median_abs_D": 0.0,
-       "mean_D": 0.0014333192859696466,
+       "mean_D": 0.002070350079733934,
        "sign_positive": 3,
        "sign_negative": 1,
-       "sign_zero": 9
+       "sign_zero": 5
       },
       {
        "step": 0.1,
        "n_evaluated": 8,
-       "n_supported": 8,
+       "n_supported": 6,
        "n_boundary_excluded": 12,
-       "median_abs_D": 0.002894154271781968,
-       "mean_D": 0.016013100797366286,
+       "median_abs_D": 0.007967118301257958,
+       "mean_D": 0.021350801063155195,
        "sign_positive": 3,
-       "sign_negative": 2,
-       "sign_zero": 3
+       "sign_negative": 1,
+       "sign_zero": 2
       }
      ]
     },
@@ -26256,41 +26256,41 @@
       "q",
       "s1"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 15,
-       "n_supported": 15,
+       "n_supported": 11,
        "n_boundary_excluded": 5,
        "median_abs_D": 0.0,
-       "mean_D": -1.1842378929335003e-16,
+       "mean_D": -1.6148698540002277e-16,
        "sign_positive": 0,
        "sign_negative": 3,
-       "sign_zero": 12
+       "sign_zero": 8
       },
       {
        "step": 0.05,
        "n_evaluated": 13,
-       "n_supported": 13,
+       "n_supported": 10,
        "n_boundary_excluded": 7,
-       "median_abs_D": 0.0,
-       "mean_D": -0.0012578622355565044,
+       "median_abs_D": 3.552713678800501e-15,
+       "mean_D": -0.0016352209062234558,
        "sign_positive": 0,
        "sign_negative": 6,
-       "sign_zero": 7
+       "sign_zero": 4
       },
       {
        "step": 0.1,
        "n_evaluated": 8,
-       "n_supported": 8,
+       "n_supported": 7,
        "n_boundary_excluded": 12,
-       "median_abs_D": 4.440892098500626e-16,
-       "mean_D": -0.004979167299167753,
+       "median_abs_D": 8.881784197001252e-16,
+       "mean_D": -0.0056904769133345745,
        "sign_positive": 2,
        "sign_negative": 2,
-       "sign_zero": 4
+       "sign_zero": 3
       }
      ]
     },
@@ -26299,30 +26299,30 @@
       "q",
       "s2"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 15,
-       "n_supported": 15,
+       "n_supported": 10,
        "n_boundary_excluded": 5,
-       "median_abs_D": 4.440892098500626e-16,
-       "mean_D": -0.0007359628590668521,
+       "median_abs_D": 3.552713678800501e-15,
+       "mean_D": -0.0011039442886002782,
        "sign_positive": 4,
        "sign_negative": 4,
-       "sign_zero": 7
+       "sign_zero": 2
       },
       {
        "step": 0.05,
        "n_evaluated": 13,
-       "n_supported": 13,
+       "n_supported": 11,
        "n_boundary_excluded": 7,
-       "median_abs_D": 0.00034825026258022973,
-       "mean_D": -0.005027019888891708,
+       "median_abs_D": 0.007758400743232308,
+       "mean_D": -0.0059410235050538366,
        "sign_positive": 4,
        "sign_negative": 4,
-       "sign_zero": 5
+       "sign_zero": 3
       },
       {
        "step": 0.1,
@@ -26342,41 +26342,41 @@
       "s",
       "s1"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 9,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": -1.3322676295501878e-16,
+       "mean_D": -1.9737298215558337e-16,
        "sign_positive": 0,
-       "sign_negative": 2,
-       "sign_zero": 18
+       "sign_negative": 1,
+       "sign_zero": 8
       },
       {
        "step": 0.05,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 17,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": -0.000560882501636839,
+       "mean_D": -0.0006598617666315231,
        "sign_positive": 0,
-       "sign_negative": 4,
-       "sign_zero": 16
+       "sign_negative": 3,
+       "sign_zero": 14
       },
       {
        "step": 0.1,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 19,
        "n_boundary_excluded": 0,
-       "median_abs_D": 6.661338147750939e-16,
-       "mean_D": -0.0013385640933162967,
+       "median_abs_D": 8.881784197001252e-16,
+       "mean_D": -0.001409014835069786,
        "sign_positive": 6,
        "sign_negative": 5,
-       "sign_zero": 9
+       "sign_zero": 8
       }
      ]
     },
@@ -26385,41 +26385,41 @@
       "s",
       "s2"
      ],
-     "status": "estimable_model_nonadditivity",
-     "reason_code": null,
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 10,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.0,
-       "mean_D": 0.0010104814712440734,
-       "sign_positive": 6,
+       "median_abs_D": 4.440892098500626e-16,
+       "mean_D": 0.0015544244183113953,
+       "sign_positive": 5,
        "sign_negative": 0,
-       "sign_zero": 14
+       "sign_zero": 5
       },
       {
        "step": 0.05,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 15,
        "n_boundary_excluded": 0,
-       "median_abs_D": 0.0,
-       "mean_D": 0.0018257587855392999,
+       "median_abs_D": 8.881784197001252e-16,
+       "mean_D": 0.002434345047385733,
        "sign_positive": 6,
        "sign_negative": 2,
-       "sign_zero": 12
+       "sign_zero": 7
       },
       {
        "step": 0.1,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 18,
        "n_boundary_excluded": 0,
-       "median_abs_D": 2.6645352591003757e-15,
-       "mean_D": 0.0032451981198142743,
+       "median_abs_D": 3.552713678800501e-15,
+       "mean_D": 0.003605775688682527,
        "sign_positive": 7,
        "sign_negative": 4,
-       "sign_zero": 9
+       "sign_zero": 7
       }
      ]
     },
@@ -26428,30 +26428,30 @@
       "s1",
       "s2"
      ],
-     "status": "unstable_nonadditivity",
-     "reason_code": "sign_changes_across_steps",
+     "status": "not_estimable",
+     "reason_code": "independent_group_support_and_stability_not_established",
      "steps": [
       {
        "step": 0.025,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 15,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": -0.00013927683046013328,
+       "mean_D": -0.00018570244061351105,
        "sign_positive": 3,
        "sign_negative": 2,
-       "sign_zero": 15
+       "sign_zero": 10
       },
       {
        "step": 0.05,
        "n_evaluated": 20,
-       "n_supported": 20,
+       "n_supported": 18,
        "n_boundary_excluded": 0,
        "median_abs_D": 0.0,
-       "mean_D": 0.00018108698289127646,
+       "mean_D": 0.00020120775876808494,
        "sign_positive": 2,
        "sign_negative": 5,
-       "sign_zero": 13
+       "sign_zero": 11
       },
       {
        "step": 0.1,
@@ -26538,20 +26538,20 @@
    "clipped_features": []
   },
   "recommendation": {
-   "status": "allowed",
-   "reason": "heldout_passed",
+   "status": "suppressed",
+   "reason": "independent_group_validation_and_effect_stability_not_established",
    "note": "no design is pinned; the report is an explanation artifact"
   }
  },
  "limitations": [
   "Source-piston caveat: the task uses a 2-inch uniform piston source with f11 ~= 3957 Hz; 300-8000 Hz results above the caveat are geometry comparisons under that excitation, not a universal validity boundary.",
   "Loading weight is 0.0: no loading, efficiency, distortion or maximum-SPL claims are made.",
-  "No independent experiment identity: run_id/experiment_id are absent on every native row; rows are not five independent groups and design-level folds are not experimental replicates.",
+  "Independent experiment groups are not established by this report; row-level folds are not experimental replicates.",
   "ExtraTrees is discontinuous: permutation importance is held-out R2 loss, never delta-J; interaction D_ij are finite model changes, not physical derivatives or causal acoustic interactions.",
   "Exact normalized steps 0.025/0.05/0.10 are MODEL diagnostics only; unsupported or boundary-truncated pairs are reported as not_estimable, never clipped.",
   "Geometry descriptors are a canonical sampled-surface approximation through the installed hornlab_mesher API; they are not production cache keys and not a mesh / BEM convergence proof.",
-  "The cohort is below the protocol's 100-per-group screening policy and historical search sampling is biased; effect curves and interaction rankings are descriptive.",
+  "Independent-group validation and stable supported effects are not established; historical search sampling is biased; effect curves and interaction rankings are descriptive.",
   "J is not comparable across objective versions; this report is v4 only and the three replay identities are reported separately."
  ],
- "generated_utc": "2026-11-13T04:28:10Z"
+ "generated_utc": "2026-11-13T05:08:41Z"
 }

@@ -1,6 +1,6 @@
 # Source fidelity / source context (S6, bo-study-v1.1)
 
-- generated: `2026-11-13T04:02:03Z`
+- generated: `2026-11-13T05:09:17Z`
 - config: `native__ath_core_v4`
 - **rows: 197** (192 unique design hashes; 192 screen / 5 verify)
 - with balloon arrays: **197**; with throat-impedance: **197**
@@ -429,8 +429,8 @@
 
 ## Offline-scores join
 
-- matched design hashes: 50 / 197
-- exposed rows in the R0 artifact: 50 (reported scored: 200)
+- matched design hashes: 197 / 197
+- exposed rows in the R0 artifact: 200 (reported scored: 200)
 
 ## Limitations
 

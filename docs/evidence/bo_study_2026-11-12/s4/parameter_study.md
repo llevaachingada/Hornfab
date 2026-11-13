@@ -48,8 +48,8 @@ Selection rule: seed = lowest frozen-J scored design; remaining slots = maximin 
 
 - pilot parity: 197/200 compared, max |dJ| 0
 - reconstruction parity: 197/200 compared, max |dJ| 0
-- held-out frozen J: R2_oof 0.24838, RMSE 4.2029 vs training-mean baseline 4.9496; passed **True**
-- recommendation: **allowed** (heldout_passed)
+- row-level diagnostic held-out frozen J: R2_oof 0.24838, RMSE 4.2029 vs training-mean baseline 4.9496; passed **True**
+- recommendation: **suppressed** (independent_group_validation_and_effect_stability_not_established)
 - effects: **produced**; screening policy **below_policy_descriptive_diagnostic**
 - interactions: **produced** (produced)
 
@@ -81,29 +81,29 @@ Selection rule: seed = lowest frozen-J scored design; remaining slots = maximin 
 
 - status: **produced**; anchors: 20; steps: [0.025, 0.05, 0.1]
 - independent-group coverage: **insufficient_evidence**
-- step-order stability (Spearman): `{'0.025_vs_0.05': 0.4739999795771008, '0.05_vs_0.1': 0.7186525043454878}`
+- step-order stability (Spearman): `{}`
 - interpretation: local MODEL nonadditivity, not a derivative, causal acoustic interaction, fANOVA or p-value.
 
 | pair | status | median abs D @0.05 | supported anchors @0.05 |
 |---|---|---:|---:|
-| `k, morph_width_mm` | estimable_model_nonadditivity | 0.02816 | 14/14 |
-| `morph_rate, morph_width_mm` | unstable_nonadditivity | 0.01762 | 14/14 |
-| `L_mm, morph_width_mm` | unstable_nonadditivity | 0.01621 | 14/14 |
-| `morph_width_mm, q` | estimable_model_nonadditivity | 0.01514 | 8/8 |
-| `k, morph_rate` | estimable_model_nonadditivity | 0.01124 | 20/20 |
-| `morph_rate, q` | estimable_model_nonadditivity | 0.01071 | 13/13 |
-| `L_mm, morph_rate` | estimable_model_nonadditivity | 0.00994 | 20/20 |
-| `morph_fixed, morph_width_mm` | estimable_model_nonadditivity | 0.00777 | 14/14 |
-| `L_mm, k` | estimable_model_nonadditivity | 0.00707 | 20/20 |
-| `L_mm, q` | estimable_model_nonadditivity | 0.007017 | 13/13 |
+| `L_mm, a_deg` | not_estimable | 0.002773 | 16/20 |
+| `L_mm, k` | not_estimable | 0.008516 | 18/20 |
+| `L_mm, morph_corner_mm` | not_estimable | 0.006171 | 16/20 |
+| `L_mm, morph_fixed` | not_estimable | 0.002451 | 19/20 |
+| `L_mm, morph_height_mm` | not_estimable | 0 | 19/19 |
+| `L_mm, morph_rate` | not_estimable | 0.01524 | 17/20 |
+| `L_mm, morph_width_mm` | not_estimable | 0.02382 | 12/14 |
+| `L_mm, n` | not_estimable | 0.002656 | 18/19 |
+| `L_mm, q` | not_estimable | 0.01196 | 11/13 |
+| `L_mm, s` | not_estimable | 3.553e-15 | 17/20 |
 
 ## Limitations
 
 - Source-piston caveat: the task uses a 2-inch uniform piston source with f11 ~= 3957 Hz; 300-8000 Hz results above the caveat are geometry comparisons under that excitation, not a universal validity boundary.
 - Loading weight is 0.0: no loading, efficiency, distortion or maximum-SPL claims are made.
-- No independent experiment identity: run_id/experiment_id are absent on every native row; rows are not five independent groups and design-level folds are not experimental replicates.
+- Independent experiment groups are not established by this report; row-level folds are not experimental replicates.
 - ExtraTrees is discontinuous: permutation importance is held-out R2 loss, never delta-J; interaction D_ij are finite model changes, not physical derivatives or causal acoustic interactions.
 - Exact normalized steps 0.025/0.05/0.10 are MODEL diagnostics only; unsupported or boundary-truncated pairs are reported as not_estimable, never clipped.
 - Geometry descriptors are a canonical sampled-surface approximation through the installed hornlab_mesher API; they are not production cache keys and not a mesh / BEM convergence proof.
-- The cohort is below the protocol's 100-per-group screening policy and historical search sampling is biased; effect curves and interaction rankings are descriptive.
+- Independent-group validation and stable supported effects are not established; historical search sampling is biased; effect curves and interaction rankings are descriptive.
 - J is not comparable across objective versions; this report is v4 only and the three replay identities are reported separately.
