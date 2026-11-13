@@ -12,6 +12,7 @@ import { viewBalloon } from "./balloon.js";
 import { viewTypologySandbox } from "./sandbox.js";
 import { viewUmap } from "./umap.js";
 import { viewVerify } from "./verify.js";
+import { mountStudy, mountStudyList } from "./studies.js";
 
 // ── XSS helper ─────────────────────────────────────────────────────
 function esc(s) {
@@ -129,6 +130,25 @@ async function post(path, body) {
 // moved on then writes into a detached element instead of painting over the current page.
 let ROOT = document.getElementById("view-root");
 const currentRoot = () => ROOT;
+let disposeStudy = null;
+async function studyRequest(path, options = {}) {
+  const response = await fetch(path, options);
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) { const error = new Error(data.error || "Study request failed"); error.status = response.status; throw error; }
+  return data;
+}
+const studyApi = {
+  listStudies: ({signal}) => studyRequest("/api/studies", {signal}),
+  createStudy: ({spec, key}, {signal}) => studyRequest("/api/studies", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({spec, idempotency_key:key}), signal}),
+  getStudy: (id, {signal}) => studyRequest(`/api/studies/${encodeURIComponent(id)}`, {signal}),
+  getPanel: (id, phase, {signal}) => studyRequest(`/api/studies/${encodeURIComponent(id)}/${encodeURIComponent(phase)}`, {signal}),
+  action: (id, kind, payload, {signal}) => {
+    const paths = {decision:"decide", revise:"revise", analyze:"jobs", propose:"jobs"};
+    if (!paths[kind]) throw new Error("This action is not available");
+    const body = kind === "analyze" || kind === "propose" ? {...payload, kind} : payload;
+    return studyRequest(`/api/studies/${encodeURIComponent(id)}/${paths[kind]}`, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body), signal});
+  },
+};
 
 const ROUTES = [
   { re: /^#\/$|^#\/home$/,              fn: () => viewHome() },
@@ -144,6 +164,8 @@ const ROUTES = [
   { re: /^#\/run\/(.+)\/umap$/,         fn: m => viewUmap(ROOT, m[1]) },
   { re: /^#\/run\/(.+)\/archive$/,      fn: m => viewRunArchive(m[1]) },
   { re: /^#\/run\/(.+)$/,               fn: m => viewRunDetail(m[1]) },
+  { re: /^#\/analysis\/studies$/,       fn: () => { disposeStudy = mountStudyList(ROOT, {api:studyApi, onCreated: s => { location.hash = `#/analysis/study/${encodeURIComponent(s.id)}/overview`; }}); } },
+  { re: /^#\/analysis\/study\/([^\/?#]+)\/(overview|data|explain|propose|execute|decide)$/, fn: m => { disposeStudy = mountStudy(ROOT, {studyId:decodeURIComponent(m[1]), phase:m[2], api:studyApi}); } },
   { re: /^#\/analysis$/,                fn: () => viewAnalysis() },
   { re: /^#\/analysis\/([^\/?#]+)$/,    fn: m => viewAnalysis(m[1]) },
   { re: /^#\/elites$/,                  fn: () => viewElites() },
@@ -157,6 +179,11 @@ const ROUTES = [
 ];
 
 function route() {
+  if (disposeStudy) { disposeStudy(); disposeStudy = null; }
+  // Guard the remove() beyond optional-chaining: headless guards/older shims can hand back
+  // element-like objects without .remove(); browsers always have it, so behavior is identical.
+  const _srcEl = document.getElementById("study-return-context");
+  if (_srcEl && typeof _srcEl.remove === "function") _srcEl.remove();
   // Dispose any 3D scene: every init3d-tagged container carries [data-v3d] (the 3D page's
   // #view3d-wrap, the run page's inline viewer, the evolution player). Sweeping the marker — rather
   // than only the old #view3d-wrap id — kills every live renderer and rAF loop while its container
@@ -176,6 +203,17 @@ function route() {
   ROOT.replaceWith(fresh); ROOT = fresh;
   const hash = location.hash || "#/home";
   const path = hash.split("?")[0];
+  if (path.startsWith("#/run/") && hash.includes("?")) {
+    const params = new URLSearchParams(hash.split("?")[1]);
+    const back = params.get("return") || "";
+    const study = params.get("study") || "";
+    const match = back.match(/^#\/analysis\/study\/([A-Za-z0-9_-]+)\/(overview|data|explain|propose|execute|decide)$/);
+    if (match && match[1] === study) {
+      const link = document.createElement("a"); link.id = "study-return-context";
+      link.href = back; link.textContent = "← Return to study";
+      ROOT.before(link);
+    }
+  }
   for (const { re, fn, query } of ROUTES) {
     // Verify routes own their query string (design/sort/compare selection); every other route
     // matches the bare path so a stray ?param cannot leak into a captured run id.
@@ -2494,186 +2532,1429 @@ function verdictChipHtml(verdict) {
 }
 
 // ── E.1: analysis page (#/analysis) ────────────────────────────────
-// Read-only renderers over stored Group A outputs (convergence / seed variance / sensitivity
-// / links / walls at schema revision 2026-11-12). Unknown fields ride along and are ignored;
-// a missing section renders as absent — the page never runs an analysis itself.
+// Read-only visual report over stored Group A outputs (convergence / seed variance /
+// sensitivity / links / walls / term balance / fidelity, schema revision 2026-11-12) plus the
+// frozen M1 study cards. The API may deliver a nested ``sections[]`` list (report_day layout)
+// or the older flat ``<tool>`` keys; both render through the same pure HTML builders. Every
+// number printed here comes from the stored JSON — nothing is estimated, derived or ranked
+// across objective versions. A missing payload renders nothing; a missing ``sections`` list is
+// rebuilt from the flat keys with id "default" (degrade path). No analysis ever runs in the GUI.
+//
+// The builders are pure HTML (no DOM). Charts register a draw job and the view runs it in a
+// requestAnimationFrame after insertion, so a window resize (which re-runs route()) redraws.
+
+const ANALYSIS_SECTION_TOOLS = ["convergence", "seed_variance", "sensitivity", "links",
+  "walls", "term_balance", "fidelity", "parameter_study", "source_fidelity"];
+const ANALYSIS_TERM_PALETTE = 8;
+
+let _AN_CHART_JOBS = [];
 
 function _runBaseName(p) {
   return String(p || "").split(/[\\/]/).pop() || "run";
 }
 
-function analysisConvergenceChart(svg, cv) {
-  const runs = (cv && cv.runs) || [];
-  const rows = runs.map(r => (Array.isArray(r.curve) ? r.curve.filter(
-    p => p && p.n != null && p.best != null && isFinite(p.n) && isFinite(p.best)) : []));
-  const ys = rows.flat().map(p => p.best);
-  if (!ys.length) return;
-  const maxN = Math.max(1, ...(rows.map(a => (a.length ? a[a.length - 1].n : 0))));
-  const ymin = Math.min(...ys), ymax = Math.max(...ys);
-  const pad = Math.max((ymax - ymin) * 0.05, 1e-9);
+function _anNum(v, d = 2) {
+  return (v == null || !isFinite(Number(v))) ? "–" : fmt(Number(v), d);
+}
+
+function _anPct(v, d = 1) {
+  return (v == null || !isFinite(Number(v))) ? "–" : `${Number(v).toFixed(d)}%`;
+}
+
+function _anObj(v) {
+  return (v && typeof v === "object" && !Array.isArray(v)) ? v : {};
+}
+
+function _anArr(v) {
+  return Array.isArray(v) ? v : [];
+}
+
+function _anRunId(runDir) {
+  const id = _runBaseName(runDir);
+  return (id && id !== "run") ? id : null;
+}
+
+function _anRunLink(runDir, report = true) {
+  const id = _anRunId(runDir);
+  if (!id) return "";
+  const run = `<a href="#/run/${encodeURIComponent(id)}" class="mono">${esc(id)}</a>`;
+  const rep = report
+    ? ` · <a href="/runs/${encodeURIComponent(id)}/report.html" target="_blank" rel="noopener">↗ report</a>` : "";
+  return `<span class="muted">${run}${rep}</span>`;
+}
+
+/** One section record per tool. Prefers lane A's nested ``sections[]``; falls back to the flat
+ *  ``<tool>`` keys with id "default" so old fixtures and M1 root artifacts still render. */
+function analysisSectionsOf(d) {
+  const out = [];
+  if (d && Array.isArray(d.sections)) {
+    for (const s of d.sections) {
+      if (!s || typeof s !== "object" || !s.tool) continue;
+      const tool = String(s.tool);
+      if (!ANALYSIS_SECTION_TOOLS.includes(tool)) continue;
+      out.push({
+        id: s.id != null ? String(s.id) : "default",
+        tool,
+        data: s.data,
+        files: _anArr(s.files).map(String),
+        has_png: s.has_png === true,
+        pngs: _anArr(s.pngs).map(String),
+      });
+    }
+  }
+  for (const tool of ANALYSIS_SECTION_TOOLS) {
+    if (!d || d[tool] == null || out.some(s => s.tool === tool)) continue;
+    out.push({ id: "default", tool, data: d[tool], files: [], has_png: false, pngs: [] });
+  }
+  out.sort((a, b) => ANALYSIS_SECTION_TOOLS.indexOf(a.tool) - ANALYSIS_SECTION_TOOLS.indexOf(b.tool)
+    || String(a.id).localeCompare(String(b.id)));
+  return out;
+}
+
+/** Lane A's ``errors[]``; old payloads may only carry ``report_day.sections[]``. */
+function analysisErrorsOf(d) {
+  if (d && Array.isArray(d.errors)) return d.errors.filter(e => e && typeof e === "object");
+  const rd = _anObj(d && d.report_day);
+  if (Array.isArray(rd.sections)) {
+    return rd.sections.filter(s => s && s.status === "error")
+      .map(s => ({ id: s.id, tool: s.tool, status: s.status, error: s.error }));
+  }
+  return [];
+}
+
+/** Every convergence run object, whether stored per-section (real) or in an old ``runs[]``. */
+function analysisConvergenceRuns(sections) {
+  const runs = [];
+  for (const sec of sections) {
+    if (sec.tool !== "convergence" || !sec.data) continue;
+    const x = sec.data;
+    if (Array.isArray(x.runs) && x.runs.length) {
+      for (const r of x.runs) if (r && typeof r === "object") runs.push({ sec, run: r });
+    } else if (Array.isArray(x.curve)) {
+      runs.push({ sec, run: x });
+    }
+  }
+  return runs;
+}
+
+function _anChartJob(kind, payload) {
+  const id = `an-chart-${_AN_CHART_JOBS.length}`;
+  _AN_CHART_JOBS.push({ id, kind, payload });
+  return id;
+}
+
+function _anDrawCharts() {
+  for (const job of _AN_CHART_JOBS) {
+    const svg = document.getElementById(job.id);
+    if (!svg) continue;
+    if (job.kind === "convergence") _anDrawConvergence(svg, job.payload);
+    else if (job.kind === "fidelity") _anDrawFidelity(svg, job.payload);
+  }
+}
+
+function _anCurve(curve) {
+  return _anArr(curve).filter(p => p && p.n != null && p.best != null
+    && isFinite(Number(p.n)) && isFinite(Number(p.best)))
+    .map(p => [Number(p.n), Number(p.best)]);
+}
+
+function _anDrawConvergence(svg, run) {
+  const pts = _anCurve(run && run.curve);
+  if (!pts.length) return;
+  const maxN = Math.max(1, ...pts.map(p => p[0]));
+  const maxBest = Math.max(0, ...pts.map(p => p[1]));
+  const hi = maxBest > 0 ? maxBest * 1.05 : 1;
   chart(svg, {
-    xlim: [0, maxN], ylim: [ymin - pad, ymax + pad],
-    xticks: niceTicks(0, maxN, 6), yticks: niceTicks(ymin - pad, ymax + pad, 5),
-    xlabel: "new valid evaluations", ylabel: "best J (lower is better)",
-    series: rows.map((a, i) => ({ pts: a.map(p => [p.n, p.best]), color: familyColor(i), w: 1.8 })),
+    xlim: [0, maxN], ylim: [0, hi],
+    xticks: niceTicks(0, maxN, 6), yticks: niceTicks(0, hi, 5),
+    xlabel: "new valid evaluations", ylabel: "objective J",
+    series: [{ pts, color: css("--best"), w: 2 }],
+    refLines: [{ y: pts[0][1], label: "seed", dash: true }],
+    markers: false,
+    ariaLabel: `best-so-far objective for ${_runBaseName(run && run.run_dir)}`,
   });
 }
 
-function analysisConvergenceHtml(cv) {
-  if (!cv || !Array.isArray(cv.runs) || !cv.runs.length) return "";
-  const legend = cv.runs.map((r, i) => {
-    const extra = [
-      `best ${fmt(r.final_best)}`, `${r.n_new_valid ?? r.n_valid ?? 0} new valid evals`,
-      r.evals_to_5pct != null ? `5% target at ${r.evals_to_5pct}` : null,
-      r.evals_to_1pct != null ? `1% at ${r.evals_to_1pct}` : null,
-    ].filter(Boolean).join(" · ");
-    const still = r.last20_improvement ? ` · <span class="pill warn">still improving</span>` : "";
-    return `<span class="pill"><span style="display:inline-block;width:0.7em;height:0.7em;border-radius:2px;background:${familyColor(i)};margin-right:4px;vertical-align:-1px"></span>${esc(_runBaseName(r.run_dir))} · ${esc(extra)}${still}</span>`;
-  }).join(" ");
+function _anDrawFidelity(svg, data) {
+  const pts = _anArr(data && data.pairs)
+    .filter(p => p && isFinite(Number(p.j_screen)) && isFinite(Number(p.j_verify)))
+    .map(p => [Number(p.j_screen), Number(p.j_verify)]);
+  if (!pts.length) return;
+  const vals = pts.flat();
+  const lo = Math.min(...vals), hi = Math.max(...vals);
+  const pad = hi > lo ? (hi - lo) * 0.05 : Math.max(1, Math.abs(hi) * 0.05);
+  chart(svg, {
+    xlim: [lo - pad, hi + pad], ylim: [lo - pad, hi + pad],
+    xticks: niceTicks(lo - pad, hi + pad, 5), yticks: niceTicks(lo - pad, hi + pad, 5),
+    xlabel: "screen J", ylabel: "verify J",
+    series: [
+      { pts: [[lo, lo], [hi, hi]], color: css("--rule"), w: 1, dash: true },
+      { pts, color: css("--accent"), dots: true, r: 3 },
+    ],
+    markers: false,
+    ariaLabel: "screen versus verify objective scatter with the 45-degree line",
+  });
+}
+
+function _anSectionHead(sec, extra = "") {
+  const d = _anObj(sec && sec.data);
+  const bits = [];
+  if (d.brief) bits.push(`<span>${esc(d.brief)}</span>`);
+  if (d.family) bits.push(`<span>${esc(d.family)}</span>`);
+  if (d.objective_version != null) bits.push(`<span>${esc(jVersionLabel(d))}</span>`);
+  if (extra) bits.push(`<span>${esc(extra)}</span>`);
+  return `<div class="an-sec-head"><b class="mono">${esc(sec && sec.id)}</b> ${bits.join(" · ")}</div>`;
+}
+
+// A. Hero -----------------------------------------------------------------
+
+function _anKpi(label, value, cls, sub) {
+  return `<div class="kpi"><span>${esc(label)}</span>`
+    + `<b${cls ? ` class="${cls}"` : ""}>${value}</b>`
+    + (sub ? `<div class="an-kpi-sub mono">${esc(sub)}</div>` : "") + `</div>`;
+}
+
+function analysisHeroHtml(d, sections, errors) {
+  const conv = analysisConvergenceRuns(sections);
+  const wallSecs = sections.filter(s => s.tool === "walls" && s.data);
+  const atLimit = wallSecs.flatMap(s => _anArr(s.data.walls))
+    .filter(w => w && (w.wall_lo || w.wall_hi)).length;
+  const fid = sections.find(s => s.tool === "fidelity" && s.data);
+  const fd = fid ? _anObj(fid.data) : null;
+  const still = conv.filter(c => c.run && c.run.last20_improvement === true).length;
+  const nErrors = Array.isArray(errors) ? errors.length : 0;
+
+  const bestByVersion = new Map();
+  for (const c of conv) {
+    const v = objectiveVersionOf(c.run);
+    const b = Number(c.run && c.run.final_best);
+    if (!isFinite(b)) continue;
+    const cur = bestByVersion.get(v);
+    if (!cur || b < cur.best) bestByVersion.set(v, { best: b, run: _anRunId(c.run.run_dir) });
+  }
+  const perVersion = [...bestByVersion.entries()].sort((a, b) => b[0] - a[0]);
+
+  const sentences = [];
+  if (conv.length) sentences.push(`${fmt(conv.length, 0)} search runs analysed.`);
+  if (still > 0) {
+    sentences.push(`${fmt(still, 0)} were still improving when their budget ended — their budgets may be too small.`);
+  }
+  if (wallSecs.length && atLimit > 0) {
+    sentences.push(`${fmt(atLimit, 0)} knob${atLimit === 1 ? " is" : "s are"} pressed against a search limit — widening them is the cheapest next experiment.`);
+  }
+  if (fd && fd.bias_median_pct != null) {
+    const rank = (Number(fd.spearman_all) >= 0.6) ? "acceptably" : "weakly only";
+    sentences.push(`Screening overstates J by ${_anPct(fd.bias_median_pct)} versus verify and ranks designs ${rank}.`);
+  }
+  if (nErrors === 1) sentences.push("One section refused to run — see the callout below.");
+  else if (nErrors > 1) sentences.push(`${fmt(nErrors, 0)} sections refused to run — see the callout below.`);
+
+  const kpis = [];
+  if (conv.length) kpis.push(_anKpi("runs analysed", fmt(conv.length, 0)));
+  for (const [v, x] of perVersion) {
+    kpis.push(_anKpi(`best J · J v${v}`, _anNum(x.best), "", x.run ? `run ${x.run}` : ""));
+  }
+  if (conv.length) {
+    kpis.push(_anKpi("converged / still improving", `${fmt(conv.length - still, 0)} / ${fmt(still, 0)}`));
+  }
+  if (wallSecs.length) kpis.push(_anKpi("knobs at a limit", fmt(atLimit, 0), atLimit ? "warn" : ""));
+  if (fd && fd.bias_median_pct != null) {
+    kpis.push(_anKpi("screen→verify bias", _anPct(fd.bias_median_pct),
+      Math.abs(Number(fd.bias_median_pct)) >= 10 ? "warn" : ""));
+  }
+  if (d && Array.isArray(d.errors)) {
+    kpis.push(_anKpi("section errors", fmt(nErrors, 0), nErrors ? "bad" : "good"));
+  }
+
+  const meta = [d && d.generated_utc ? `generated ${esc(d.generated_utc)}` : null,
+    d && d.base ? esc(d.base) : null].filter(Boolean).join(" · ");
   return `<div class="card">
-    <div class="eyebrow" style="margin-bottom:6px">Convergence — best-so-far J vs new valid evaluations (one colour per seed/run)</div>
-    <svg id="c-an-conv" style="width:100%" role="img" aria-label="best-so-far convergence, one curve per run"></svg>
-    <div class="cap" style="margin-top:6px">${legend}</div>
+    <div class="eyebrow">Analysis report</div>
+    <h2>${esc((d && d.id) || "analysis")}</h2>
+    <p class="muted">${meta}</p>
+    ${sentences.length ? `<p class="lede">${sentences.join(" ")}</p>` : ""}
+    ${kpis.length ? `<div class="kpis">${kpis.join("")}</div>` : ""}
   </div>`;
 }
 
-function analysisSeedVarianceHtml(sv) {
-  if (!sv) return "";
-  let html = "";
-  const groups = (sv.groups && typeof sv.groups === "object") ? sv.groups : {};
-  const names = Object.keys(groups);
-  if (names.length) {
-    const rows = names.map(n => {
-      const g = groups[n] || {};
-      const ci = Array.isArray(g.ci95_median_best)
-        ? `${fmt(g.ci95_median_best[0])}…${fmt(g.ci95_median_best[1])}` : "–";
-      const seeds = (Array.isArray(g.seeds) ? g.seeds : []).map(
-        s => esc(`${fmt(s.best_j)}${s.run_dir ? " (" + _runBaseName(s.run_dir) + ")" : ""}`)).join("<br>");
-      return `<tr><td class="mono">${esc(n)}</td>
-        <td class="r">${esc(g.n_seeds ?? "–")}</td>
-        <td class="r">${fmt(g.median_best)}</td><td class="r">${fmt(g.spread_best)}</td>
-        <td class="r">${ci}</td><td class="r mono">${seeds || "–"}</td></tr>`;
-    }).join("");
-    html += `<div class="card"><h3>Seed variance</h3>
-      <div class="cap">Per seed group: n, median/spread of best J, bootstrap 95% CI of the median, and per-seed best J.</div>
-      <div class="tbl-wrap"><table>
-        <thead><tr><th>Group</th><th class="r">Seeds</th><th class="r">Median best J</th><th class="r">Spread</th><th class="r">95% CI</th><th class="r">Per-seed best J</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table></div></div>`;
-  }
-  const verdicts = Array.isArray(sv.verdicts) ? sv.verdicts : [];
-  if (verdicts.length) {
-    const rows = verdicts.map(v => `<tr>
-      <td class="mono">${esc(v.a || "–")} vs ${esc(v.b || "–")}</td>
-      <td class="r">${fmt(v.median_a)} vs ${fmt(v.median_b)}</td>
-      <td class="r">${fmt(v.spread_a)} / ${fmt(v.spread_b)}</td>
-      <td class="r">${esc(v.n_seeds ?? "–")}</td>
-      <td>${verdictChipHtml(v.verdict)}${v.rule_holds === false ? ` <span class="muted">(rule does not hold)</span>` : ""}</td>
-    </tr>`).join("");
-    html += `<div class="card"><h3>Seed-variance verdicts</h3>
-      <div class="cap">${esc(sv.seed_rule || "A beats B only when the medians differ by more than both spreads")}</div>
-      <div class="tbl-wrap"><table>
-        <thead><tr><th>Pair</th><th class="r">Median J</th><th class="r">Spread a / b</th><th class="r">n seeds</th><th>Verdict</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table></div></div>`;
-  }
-  return html;
-}
+// B. Convergence small multiples ------------------------------------------
 
-function analysisSensitivityHtml(s) {
-  if (!s || !Array.isArray(s.spearman) || !s.spearman.length) return "";
-  const maxAbs = Math.max(1e-9, ...(s.spearman.map(p => Math.abs(p.rho_abs ?? p.rho ?? 0))));
-  const rows = s.spearman.map(p => {
-    const rho = (p.rho ?? p.rho_abs);
-    const w = maxAbs > 0 ? (Math.abs(rho ?? 0) / maxAbs) * 90 : 0;
-    const bar = `<svg width="90" height="10" viewBox="0 0 90 10" aria-hidden="true">
-      <rect x="45" y="2" width="${w.toFixed(1)}" height="6" rx="1" fill="${rho >= 0 ? css("--seed") : css("--best")}"/></svg>`;
-    return `<tr><td class="mono">${esc(p.key)}</td><td class="r">${rho != null ? Number(rho).toFixed(2) : "–"}</td><td class="r">${esc(p.n ?? "–")}</td><td>${bar}</td></tr>`;
+function _anRefusalStrip(rows) {
+  const arr = _anArr(rows).filter(r => r && isFinite(Number(r.rate)));
+  if (!arr.length) return "";
+  const segs = arr.map(r => {
+    const w = Math.max(0, Math.min(100, Number(r.rate) * 100));
+    const kinds = Object.entries(_anObj(r.kinds)).map(([k, v]) => `${k} ${v}`).join(", ");
+    const win = _anArr(r.w).length === 2 ? `${r.w[0]}–${r.w[1]}` : "";
+    return `<div class="an-refusal-seg" style="width:${w.toFixed(2)}%" title="${esc(`${win}: ${kinds}`)}"></div>`;
   }).join("");
-  let html = `<div class="card"><h3>Sensitivity — per-knob Spearman ρ vs J (valid rows)</h3>
-    <div class="cap">ρ in [−1, 1]; Spearman on optimizer samples is biased — read it beside the surrogate importance below.</div>
-    <div class="tbl-wrap"><table>
-      <thead><tr><th>Knob</th><th class="r">ρ</th><th class="r">n</th><th>|ρ|</th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table></div>`;
-  const shift = Array.isArray(s.top_decile_shift) ? s.top_decile_shift : [];
-  if (shift.length) {
-    html += `<h3 style="margin-top:10px">Top-decile vs all shift</h3><div class="tbl-wrap"><table>
-      <thead><tr><th>Knob</th><th class="r">Mean all</th><th class="r">Mean top decile</th><th class="r">Shift (norm)</th></tr></thead>
-      <tbody>${shift.map(p => `<tr><td class="mono">${esc(p.key)}</td><td class="r">${fmt(p.mean_all)}</td><td class="r">${fmt(p.mean_top)}</td><td class="r">${p.shift_norm != null ? Number(p.shift_norm).toFixed(3) : "–"}</td></tr>`).join("")}</tbody>
-    </table></div>`;
-  }
-  const sur = (s.surrogate && s.surrogate.available && Array.isArray(s.surrogate.importance))
-    ? s.surrogate : null;
-  if (sur) {
-    html += `<h3 style="margin-top:10px">Surrogate permutation importance (${esc(sur.model || "?")}, R² ${esc(sur.r2)})</h3>
-    <div class="tbl-wrap"><table>
-      <thead><tr><th>Knob</th><th class="r">Importance (mean ΔJ)</th><th class="r">± std</th></tr></thead>
-      <tbody>${sur.importance.map(i => `<tr><td class="mono">${esc(i.key)}</td><td class="r">${fmt(i.permutation_importance, 3)}</td><td class="r">${fmt(i.std, 3)}</td></tr>`).join("")}</tbody>
-    </table></div>`;
-  }
-  return html + `</div>`;
+  return `<div class="an-refusal-strip" role="img" aria-label="refusal rate by evaluation window">${segs}</div>`;
 }
 
-function analysisLinksHtml(lnk) {
-  if (!lnk) return "";
-  let html = "";
-  const pairs = Array.isArray(lnk.pairs) ? lnk.pairs : [];
-  const proposed = Array.isArray(lnk.proposed_links) ? lnk.proposed_links : [];
-  if (pairs.length || proposed.length) html += `<div class="card">`;
-  if (pairs.length) {
-    const rows = pairs.map(p => {
-      const f = (p.fit && typeof p.fit === "object") ? p.fit : {};
-      return `<tr><td class="mono">${esc(p.a)} · ${esc(p.b)}</td><td class="r">${p.rho != null ? Number(p.rho).toFixed(2) : "–"}</td>
-        <td class="r mono">${f.scale != null ? esc(Number(f.scale).toPrecision(4)) : "–"}</td>
-        <td class="r mono">${f.offset != null ? esc(Number(f.offset).toPrecision(4)) : "–"}</td>
-        <td class="r">${f.r2 != null ? Number(f.r2).toFixed(2) : "–"}</td></tr>`;
+function _anRefusalKinds(refusals) {
+  const entries = Object.entries(_anObj(refusals)).filter(([, v]) => isFinite(Number(v)));
+  return entries.length
+    ? entries.map(([k, v]) => `<span class="mono">${esc(k)} ${fmt(v, 0)}</span>`).join(" · ") : "";
+}
+
+function analysisConvergenceCardHtml(sec, run) {
+  const pts = _anCurve(run && run.curve);
+  if (!pts.length) return "";
+  const id = sec.id !== "default" ? sec.id : (_anRunId(run.run_dir) || "run");
+  const title = [esc(id)];
+  if (run.brief) title.push(esc(run.brief));
+  if (run.family) title.push(esc(run.family));
+  title.push(esc(jVersionLabel(run)));
+  const badge = run.last20_improvement === true
+    ? `<span class="pill warn">still improving${run.last20_improvement_pct != null ? ` (+${_anPct(run.last20_improvement_pct)})` : ""}</span>`
+    : `<span class="pill good">converged</span>`;
+  const chartId = _anChartJob("convergence", run);
+  const lineBits = [];
+  if (run.final_best != null) lineBits.push(`best J ${_anNum(run.final_best)}`);
+  if (run.n_new_valid != null) lineBits.push(`${fmt(run.n_new_valid, 0)} new valid evals`);
+  if (run.evals_to_1pct != null) lineBits.push(`within 1% after ${fmt(run.evals_to_1pct, 0)} evals`);
+  const kinds = _anRefusalKinds(run.refusals);
+  const strip = _anRefusalStrip(run.refusal_rate_by_kind);
+  return `<div class="card an-card">
+    <div class="eyebrow">Convergence</div>
+    <div class="an-card-head"><h3>${title.join(" · ")}</h3>${badge}</div>
+    <p class="muted">Best-so-far J against new valid evaluations. The dashed line is the seed score the search started from.</p>
+    <svg id="${chartId}" class="an-chart" style="width:100%" role="img" aria-label="best-so-far objective"></svg>
+    ${lineBits.length ? `<div class="an-meta mono">${lineBits.join(" · ")}</div>` : ""}
+    ${strip}
+    ${kinds ? `<div class="an-meta mono">refusals by kind: ${kinds}</div>` : ""}
+    <div class="an-meta">${_anRunLink(run.run_dir)}</div>
+  </div>`;
+}
+
+function analysisConvergenceGridHtml(sections) {
+  const cards = analysisConvergenceRuns(sections)
+    .map(({ sec, run }) => analysisConvergenceCardHtml(sec, run)).filter(Boolean);
+  return cards.length ? `<div class="grid2">${cards.join("")}</div>` : "";
+}
+
+// C. Objective term balance (prominent, full width) -----------------------
+
+function analysisTermBalanceHtml(sections) {
+  const secs = sections.filter(s => s.tool === "term_balance" && s.data
+    && Object.keys(_anObj(s.data.shares)).length);
+  if (!secs.length) return "";
+  const body = secs.map(sec => {
+    const d = sec.data;
+    const shares = _anObj(d.shares), weights = _anObj(d.weights), tol = _anObj(d.tolerances);
+    const terms = Object.keys(shares).sort((a, b) =>
+      (Number(shares[b] && shares[b].median) || 0) - (Number(shares[a] && shares[a].median) || 0));
+    const bar = (kind, label) => {
+      const segs = terms.map((t, i) => {
+        const v = Number(shares[t] && shares[t][kind]);
+        if (!isFinite(v) || v <= 0) return "";
+        const w = Math.max(0, Math.min(100, v * 100));
+        const cls = `an-term-seg an-term-seg-${(i % ANALYSIS_TERM_PALETTE) + 1}`;
+        return `<div class="${cls}" style="width:${w.toFixed(2)}%" title="${esc(`${t} ${w.toFixed(1)}%`)}"></div>`;
+      }).join("");
+      return `<div class="an-term-bar-row"><span class="an-bar-label">${esc(label)}</span>
+        <div class="an-term-bar" role="img" aria-label="${esc(label)} term shares">${segs}</div></div>`;
+    };
+    const legend = terms.map((t, i) => {
+      const cls = `an-term-swatch an-term-seg-${(i % ANALYSIS_TERM_PALETTE) + 1}`;
+      const w = weights[t] != null ? `w ${fmt(weights[t], 2)}` : "w –";
+      const tl = tol[t] != null ? `tol ${fmt(tol[t], 2)}` : "tol –";
+      return `<span class="an-term-key"><span class="${cls}"></span>`
+        + `<span class="mono">${esc(t)}</span><span class="muted">${esc(w)} · ${esc(tl)}</span></span>`;
     }).join("");
-    html += `<h3>Link candidates (top-decile knob pairs)</h3>
-      <div class="tbl-wrap"><table>
-        <thead><tr><th>Pair (a · b)</th><th class="r">ρ</th><th class="r">scale</th><th class="r">offset</th><th class="r">R²</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table></div>`;
-  }
-  if (proposed.length) {
-    html += `<h3 style="margin-top:10px">Proposed links for config \`links:\`</h3>
-      <p style="margin:4px 0">${proposed.map(p =>
-        `<span class="pill mono">${esc(p.knob_b)} = ${esc(Number(p.scale).toPrecision(4))}·${esc(p.knob_a)} + ${esc(Number(p.offset).toPrecision(4))} <span class="muted">(R² ${esc(Number(p.r2).toFixed(2))})</span></span>`).join(" ")}</p>`;
-  }
-  const dirs = Array.isArray(lnk.cma_directions) ? lnk.cma_directions : [];
-  if (dirs.length) {
-    html += `<h3 style="margin-top:10px">CMA dominant directions</h3><p style="margin:4px 0">${dirs.map(d =>
-      `<span class="pill">#${esc(d.rank)} λ=${esc(d.eigenvalue)} (${esc(d.fraction)} of norm) · ${esc((d.keys || []).join(", "))}</span>`).join(" ")}</p>`;
-  }
-  if (html) html += `</div>`;
-  return html;
+    const raw = _anObj(d.top_decile_raw);
+    const rawTerms = Object.keys(raw).sort((a, b) =>
+      (Number(raw[b] && raw[b].median) || 0) - (Number(raw[a] && raw[a].median) || 0));
+    const rawTable = rawTerms.length ? `<details class="an-details"><summary>For the technical reader — raw top-decile values</summary>
+      <div class="tbl-wrap"><table><thead><tr><th>Term</th><th class="r">median</th><th class="r">p10</th><th class="r">p90</th></tr></thead>
+      <tbody>${rawTerms.map(t => `<tr><td class="mono">${esc(t)}</td><td class="r">${_anNum(raw[t] && raw[t].median, 3)}</td><td class="r">${_anNum(raw[t] && raw[t].p10, 3)}</td><td class="r">${_anNum(raw[t] && raw[t].p90, 3)}</td></tr>`).join("")}</tbody></table></div></details>` : "";
+    return `<div class="an-sec">
+      ${_anSectionHead(sec, d.n_valid != null ? `n valid ${fmt(d.n_valid, 0)}` : "")}
+      <div class="an-term-bars">${bar("median", "median")}${bar("mean", "mean")}</div>
+      <div class="an-term-legend">${legend}</div>
+      ${rawTable}
+    </div>`;
+  }).join("");
+  return `<div class="card">
+    <div class="eyebrow">Objective term balance</div>
+    <h2>What the score is actually made of</h2>
+    <p class="muted">Each bar is one run's score split by term. A term that fills most of the bar is what the optimiser spent its effort on; the weight and tolerance are what the brief asked for.</p>
+    ${body}
+  </div>`;
 }
 
-function analysisWallsHtml(w) {
-  if (!w) return "";
-  const walls = Array.isArray(w.walls) ? w.walls : [];
-  const prop = Array.isArray(w.proposal) ? w.proposal : [];
-  if (!walls.length && !prop.length) return "";
-  let html = `<div class="card">`;
-  if (walls.length) {
-    const rows = walls.map(x => `<tr><td class="mono">${esc(x.key)}</td>
-      <td class="r">${fmt(x.lo)}</td><td class="r">${fmt(x.hi)}</td>
-      <td class="r">${x.frac_lo != null ? (Number(x.frac_lo) * 100).toFixed(0) + "%" : "–"}</td>
-      <td class="r">${x.frac_hi != null ? (Number(x.frac_hi) * 100).toFixed(0) + "%" : "–"}</td>
-      <td>${x.wall_lo ? pill("wall low", "warn") : ""} ${x.wall_hi ? pill("wall high", "warn") : ""}${!x.wall_lo && !x.wall_hi ? `<span class="muted">–</span>` : ""}</td></tr>`).join("");
-    html += `<h3>Bound walls (top-decile rows within 3% of a bound)</h3>
-      <div class="tbl-wrap"><table>
-        <thead><tr><th>Knob</th><th class="r">Low</th><th class="r">High</th><th class="r">% at low</th><th class="r">% at high</th><th>Wall</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table></div>`;
-  }
-  if (prop.length) {
-    html += `<h3 style="margin-top:10px">Proposals (candidates for \`narrow\` / box widening — never applied here)</h3>
-      <ul class="guide-steps" style="margin:4px 0">${prop.map(p =>
-        `<li><b>${esc(p.key)}</b> → ${esc(p.action)}: new bounds ${esc(p.new_lo)} … ${esc(p.new_hi)} — ${esc(p.reason || "")}</li>`).join("")}</ul>`;
-  }
-  return html + `</div>`;
+// D. Bound walls ----------------------------------------------------------
+
+function analysisWallsSectionHtml(sections) {
+  const secs = sections.filter(s => s.tool === "walls" && s.data
+    && (_anArr(s.data.walls).length || _anArr(s.data.proposal).length));
+  if (!secs.length) return "";
+  return secs.map(sec => {
+    const d = sec.data, walls = _anArr(d.walls), prop = _anArr(d.proposal);
+    const rows = walls.map(w => {
+      if (!w || w.key == null) return "";
+      const fl = isFinite(Number(w.frac_lo)) ? Math.max(0, Math.min(100, Number(w.frac_lo) * 100)) : 0;
+      const fh = isFinite(Number(w.frac_hi)) ? Math.max(0, Math.min(100, Number(w.frac_hi) * 100)) : 0;
+      const gauge = `<div class="an-gauge" role="img" aria-label="${esc(`${w.key}: ${_anPct(fl, 0)} near low, ${_anPct(fh, 0)} near high`)}">`
+        + `<div class="an-gauge-fill lo" style="width:${fl.toFixed(2)}%"></div>`
+        + `<div class="an-gauge-fill hi" style="width:${fh.toFixed(2)}%"></div></div>`;
+      const chips = `${w.wall_lo ? pill("wall lo", "warn") : ""}${w.wall_hi ? pill("wall hi", "warn") : ""}`
+        || `<span class="muted">–</span>`;
+      return `<tr><td class="mono">${esc(w.key)}</td><td class="r mono">${_anNum(w.lo, 3)} … ${_anNum(w.hi, 3)}</td>
+        <td>${gauge}<div class="an-meta mono">${_anPct(fl, 0)} near low · ${_anPct(fh, 0)} near high</div></td>
+        <td>${chips}</td></tr>`;
+    }).join("");
+    const propList = prop.length ? `<ul class="guide-steps">${prop.map(p =>
+      `<li><b class="mono">${esc(p.key)}</b> → ${esc(p.action)}: new bounds ${esc(_anNum(p.new_lo, 3))} … ${esc(_anNum(p.new_hi, 3))} — ${esc(p.reason || "")}</li>`).join("")}</ul>` : "";
+    return `<div class="card">
+      <div class="eyebrow">Bound walls</div>
+      <h2>Knobs pushed against a limit</h2>
+      <p class="muted">A wall means most of the best designs sit as close to a limit as the search allows. The knob may want more room than the box gives it.</p>
+      ${_anSectionHead(sec)}
+      ${rows ? `<div class="tbl-wrap"><table><thead><tr><th>Knob</th><th class="r">Range</th><th>Position in range</th><th>Wall</th></tr></thead><tbody>${rows}</tbody></table></div>` : ""}
+      ${propList ? `<h3>Widen / narrow proposals</h3><p class="muted">Candidates only — never applied here.</p>${propList}` : ""}
+      <div class="an-meta">${_anRunLink(d.run_dir)}</div>
+    </div>`;
+  }).join("");
 }
+
+// E. Sensitivity ----------------------------------------------------------
+
+function analysisSensitivitySectionHtml(sections) {
+  const secs = sections.filter(s => s.tool === "sensitivity" && s.data && _anArr(s.data.spearman).length);
+  if (!secs.length) return "";
+  return secs.map(sec => {
+    const d = sec.data;
+    const rows = _anArr(d.spearman).filter(p => p && p.key != null)
+      .sort((a, b) => Math.abs(Number(b.rho_abs != null ? b.rho_abs : b.rho) || 0)
+        - Math.abs(Number(a.rho_abs != null ? a.rho_abs : a.rho) || 0))
+      .map(p => {
+        const rho = Number(p.rho != null ? p.rho : p.rho_abs);
+        const rr = isFinite(rho) ? rho : 0;
+        const w = Math.max(0, Math.min(50, Math.abs(rr) * 50));
+        return `<div class="an-div-row">
+          <span class="mono an-div-key">${esc(p.key)}</span>
+          <div class="an-div-track"><div class="an-div-centre"></div>
+            <div class="an-div-fill ${rr >= 0 ? "pos" : "neg"}" style="width:${w.toFixed(2)}%"></div></div>
+          <span class="r mono">${isFinite(rho) ? rho.toFixed(2) : "–"}</span>
+          <span class="r muted mono">n ${_anNum(p.n, 0)}</span>
+        </div>`;
+      }).join("");
+    const sur = _anObj(d.surrogate);
+    const imp = _anArr(sur.importance).filter(i => i && i.key != null && isFinite(Number(i.permutation_importance)));
+    const maxImp = imp.length ? Math.max(...imp.map(i => Math.abs(Number(i.permutation_importance)))) : 0;
+    const impRows = (sur.available === true && imp.length) ? `<h3>Importance (${esc(sur.model || "surrogate")}, R² = ${_anNum(sur.r2, 2)})</h3>
+      <p class="muted">Permutation importance: mean change in J when the knob is shuffled.</p>
+      ${imp.slice().sort((a, b) => Number(b.permutation_importance) - Number(a.permutation_importance)).map(i => {
+        const v = Number(i.permutation_importance);
+        const w = maxImp > 0 ? Math.max(0, Math.min(100, (Math.abs(v) / maxImp) * 100)) : 0;
+        return `<div class="an-div-row"><span class="mono an-div-key">${esc(i.key)}</span>
+          <div class="an-imp-track"><div class="an-imp-fill" style="width:${w.toFixed(2)}%"></div></div>
+          <span class="r mono">${_anNum(v, 3)}</span>
+          <span class="r muted mono">${i.std != null ? `± ${_anNum(i.std, 3)}` : ""}</span></div>`;
+      }).join("")}` : "";
+    return `<div class="card">
+      <div class="eyebrow">Sensitivity</div>
+      <h2>Which knobs move the score</h2>
+      <p class="muted">Rank correlation between a knob and J. Bars to the right mean bigger = worse; bars to the left mean bigger = better. This is a descriptive ranking, not a causal claim.</p>
+      ${_anSectionHead(sec, d.n_valid != null ? `n ${fmt(d.n_valid, 0)}` : "")}
+      <div class="an-div-list">${rows}</div>
+      ${impRows}
+    </div>`;
+  }).join("");
+}
+
+// F. Seed variance --------------------------------------------------------
+
+function _anSeedGroups(sv) {
+  const direct = _anObj(sv && sv.groups);
+  if (Object.keys(direct).length) return direct;
+  return _anObj(_anObj(sv && sv.descriptive_historical).groups);
+}
+
+function _anSeedStrip(g) {
+  const seeds = _anArr(g.seeds).filter(s => s && isFinite(Number(s.best_j)));
+  if (!seeds.length) return "";
+  const vals = seeds.map(s => Number(s.best_j));
+  const lo = Math.min(...vals), hi = Math.max(...vals);
+  const span = hi > lo ? hi - lo : 1;
+  const pos = v => 2 + ((Number(v) - lo) / span) * 96;
+  const ci = _anArr(g.ci95_median_best).map(Number).filter(isFinite);
+  let band = "";
+  if (ci.length === 2) {
+    const a = Math.max(2, Math.min(98, pos(ci[0]))), b = Math.max(2, Math.min(98, pos(ci[1])));
+    band = `<div class="an-sv-band" style="left:${Math.min(a, b).toFixed(2)}%;width:${Math.abs(b - a).toFixed(2)}%"></div>`;
+  }
+  const med = isFinite(Number(g.median_best))
+    ? `<div class="an-sv-median" style="left:${Math.max(2, Math.min(98, pos(g.median_best))).toFixed(2)}%"></div>` : "";
+  const dots = seeds.map(s => {
+    const title = `best J ${_anNum(s.best_j)}${s.run_dir ? " · " + _runBaseName(s.run_dir) : ""}`;
+    return `<span class="an-sv-dot" style="left:${pos(s.best_j).toFixed(2)}%" title="${esc(title)}"></span>`;
+  }).join("");
+  return `<div class="an-sv-track"><div class="an-sv-axis"></div>${band}${dots}${med}</div>`;
+}
+
+function analysisSeedVarianceSectionHtml(sections) {
+  const secs = sections.filter(s => s.tool === "seed_variance" && s.data
+    && Object.keys(_anSeedGroups(s.data)).length);
+  if (!secs.length) return "";
+  return secs.map(sec => {
+    const d = sec.data, groups = _anSeedGroups(d);
+    const rows = Object.keys(groups).sort().map(name => {
+      const g = _anObj(groups[name]);
+      const n = Number(g.n_seeds);
+      const pilot = isFinite(n) && n < 5 ? `<span class="pill warn">pilot — not a verdict</span>` : "";
+      const stats = [
+        g.n_seeds != null ? `n seeds ${fmt(g.n_seeds, 0)}` : null,
+        g.median_best != null ? `median best J ${_anNum(g.median_best)}` : null,
+        g.spread_best != null ? `spread ${_anNum(g.spread_best)}` : null,
+        _anArr(g.ci95_median_best).length === 2
+          ? `95% CI ${_anNum(g.ci95_median_best[0])}…${_anNum(g.ci95_median_best[1])}` : null,
+      ].filter(Boolean).join(" · ");
+      return `<div class="an-sec"><div class="an-card-head"><b class="mono">${esc(name)}</b>${pilot}</div>
+        ${_anSeedStrip(g)}
+        <div class="an-meta mono">${stats}</div></div>`;
+    }).join("");
+    const verdicts = _anArr(d.verdicts).filter(v => v && v.verdict && v.verdict !== "indicative");
+    const vHtml = verdicts.length ? `<div class="pill-row">${verdicts.map(v => verdictChipHtml(v.verdict)).join("")}</div>` : "";
+    return `<div class="card">
+      <div class="eyebrow">Seed variance</div>
+      <h2>Are the results repeatable across seeds?</h2>
+      <p class="muted">One run per seed. A wide spread means the best J depends on luck. The docs treat fewer than five seeds as a pilot, not a verdict.</p>
+      ${_anSectionHead(sec)}
+      ${rows}
+      ${vHtml}
+    </div>`;
+  }).join("");
+}
+
+// G. Fidelity (screen vs verify) ------------------------------------------
+
+function analysisFidelitySectionHtml(sections) {
+  const secs = sections.filter(s => s.tool === "fidelity" && s.data && _anArr(s.data.pairs).length);
+  if (!secs.length) return "";
+  return secs.map(sec => {
+    const d = sec.data;
+    const pairs = _anArr(d.pairs).filter(p => p && isFinite(Number(p.j_screen)) && isFinite(Number(p.j_verify)));
+    const chartId = _anChartJob("fidelity", d);
+    const chips = [
+      d.bias_median_pct != null ? `<span class="pill ${Math.abs(Number(d.bias_median_pct)) >= 10 ? "warn" : ""}">bias median ${_anPct(d.bias_median_pct)}</span>` : "",
+      d.spearman_all != null ? `<span class="pill">Spearman all ${_anNum(d.spearman_all, 3)}</span>` : "",
+      d.spearman_top5 != null ? `<span class="pill">top-5 ${_anNum(d.spearman_top5, 3)}</span>` : "",
+      d.n_pairs != null ? `<span class="pill">n pairs ${fmt(d.n_pairs, 0)}</span>` : "",
+    ].filter(Boolean).join(" ");
+    const table = pairs.length ? `<details class="an-details"><summary>Screen vs verify pairs</summary>
+      <div class="tbl-wrap"><table><thead><tr><th>Design</th><th class="r">screen J</th><th class="r">verify J</th><th class="r">bias %</th></tr></thead>
+      <tbody>${pairs.map(p => `<tr><td class="mono">${esc(p.design_hash || "–")}</td><td class="r">${_anNum(p.j_screen)}</td><td class="r">${_anNum(p.j_verify)}</td><td class="r">${_anNum(p.bias_pct)}</td></tr>`).join("")}</tbody></table></div></details>` : "";
+    return `<div class="card">
+      <div class="eyebrow">Fidelity</div>
+      <h2>How honest is a screen score?</h2>
+      <p class="muted">A screen solve is cheap and a verify solve is accurate. Points above the dashed line were flattered by the screen. Ranking agreement is what matters when choosing finalists.</p>
+      ${_anSectionHead(sec)}
+      ${chips ? `<div class="pill-row">${chips}</div>` : ""}
+      <svg id="${chartId}" class="an-chart" style="width:100%" role="img" aria-label="screen versus verify objective"></svg>
+      ${table}
+      <div class="an-meta">${_anRunLink(d.run_dir)}</div>
+    </div>`;
+  }).join("");
+}
+
+// H. Link candidates ------------------------------------------------------
+
+function analysisLinksSectionHtml(sections) {
+  const secs = sections.filter(s => s.tool === "links" && s.data && _anArr(s.data.proposed_links).length);
+  if (!secs.length) return "";
+  return secs.map(sec => {
+    const d = sec.data;
+    const cards = _anArr(d.proposed_links).filter(p => p && p.knob_b && p.knob_a).map(p => {
+      const offN = Number(p.offset);
+      const offTxt = isFinite(offN) ? `${offN < 0 ? "−" : "+"} ${Math.abs(offN).toPrecision(4)}` : "+ ?";
+      const eq = `<span class="mono">${esc(p.knob_b)} = ${_anNum(p.scale, 4)} · ${esc(p.knob_a)} ${offTxt}</span>`;
+      const r2 = Number(p.r2);
+      const badge = isFinite(r2) && r2 < 0.8
+        ? pill("candidate only — below the 0.8 bar", "warn") : pill("strong fit", "good");
+      return `<div class="an-sec"><div class="an-card-head"><span>${eq}</span>${badge}</div>
+        <div class="an-meta mono">R² ${_anNum(p.r2, 3)} · ${esc(p.source || "proposed")}</div></div>`;
+    }).join("");
+    return `<div class="card">
+      <div class="eyebrow">Link candidates</div>
+      <h2>Knob pairs that move together</h2>
+      <p class="muted">Observed correlations only. Nothing here is applied to a configuration.</p>
+      ${_anSectionHead(sec)}
+      ${cards}
+      <div class="an-meta">${_anRunLink(d.run_dir)}</div>
+    </div>`;
+  }).join("");
+}
+
+// I. Errors (honest callout) ----------------------------------------------
+
+function analysisErrorsHtml(errors) {
+  if (!Array.isArray(errors) || !errors.length) return "";
+  return `<div class="card">
+    <div class="eyebrow">Errors</div>
+    <h2>One section was not reported</h2>
+    ${errors.map(e => `<div class="an-sec"><div class="an-card-head"><b class="mono">${esc(e.id != null ? e.id : "?")}</b>
+      <span class="mono muted">${esc(e.tool || "?")}</span></div>
+      <div class="log-tail mono">${esc(e.error != null ? e.error : (e.status || "not reported"))}</div></div>`).join("")}
+    <p class="muted">A refuse-to-run is a result: this tool will not pool runs that are not one task/scoring identity. Nothing was estimated in its place.</p>
+  </div>`;
+}
+
+// J. Technical appendix (collapsed) ---------------------------------------
+
+const ANALYSIS_APPENDIX_FIELDS = {
+  convergence: ["run_dir", "brief", "family", "objective_version", "n_rows", "n_valid",
+    "n_new_valid", "n_cached", "final_best", "evals_to_1pct", "evals_to_5pct",
+    "last20_improvement", "last20_improvement_pct", "refusals"],
+  term_balance: ["run_dir", "brief", "family", "objective_version", "n_valid", "n_top",
+    "weights", "tolerances"],
+  walls: ["run_dir", "family", "top_decile_n", "wall_rel", "wall_frac", "note"],
+  sensitivity: ["run_dir", "family", "objective_version", "n_valid", "top_decile_n"],
+  links: ["run_dir", "family", "top_decile_n"],
+  fidelity: ["run_dir", "brief", "objective_version", "family", "n_screen", "n_verify",
+    "n_pairs", "bias_median_pct", "spearman_all", "spearman_top5", "note"],
+  seed_variance: ["seed_rule"],
+  parameter_study: ["schema_version", "protocol"],
+  source_fidelity: ["schema_version", "protocol"],
+};
+
+function _anRawValue(v) {
+  if (v == null) return "–";
+  if (typeof v === "object") return `<span class="mono">${esc(JSON.stringify(v))}</span>`;
+  if (typeof v === "boolean") return v ? "true" : "false";
+  return esc(String(v));
+}
+
+function _anFileLinks(d, sec) {
+  if (!d || !d.id || sec.id === "default") return "";
+  const names = [...new Set([..._anArr(sec.files), ..._anArr(sec.pngs)])].filter(Boolean);
+  if (!names.length) return "";
+  const base = `/analysis/${encodeURIComponent(d.id)}/${encodeURIComponent(sec.id)}/`;
+  return `<div class="run-files">${names.map(n =>
+    `<a class="pill mono" href="${base}${encodeURIComponent(n)}" target="_blank" rel="noopener">${esc(n)}</a>`).join("")}</div>`;
+}
+
+/** Tool-specific raw tables the scalar field list cannot carry (Spearman ρ, R², seed CI, …). */
+function _anAppendixExtra(sec) {
+  const d = _anObj(sec.data);
+  if (sec.tool === "sensitivity") {
+    const sp = _anArr(d.spearman).filter(p => p && p.key != null);
+    const sur = _anObj(d.surrogate);
+    const spTbl = sp.length ? `<div class="tbl-wrap"><table><thead><tr><th>Knob</th><th class="r">ρ</th><th class="r">n</th></tr></thead>
+      <tbody>${sp.map(p => `<tr><td class="mono">${esc(p.key)}</td><td class="r">${_anNum(p.rho != null ? p.rho : p.rho_abs, 3)}</td><td class="r">${_anNum(p.n, 0)}</td></tr>`).join("")}</tbody></table></div>` : "";
+    const surTxt = sur.available === true
+      ? `<p class="an-meta mono">surrogate ${esc(sur.model || "?")} · R² ${_anNum(sur.r2, 3)} · n_train ${_anNum(sur.n_train, 0)} · n_test ${_anNum(sur.n_test, 0)}</p>` : "";
+    return spTbl + surTxt;
+  }
+  if (sec.tool === "links") {
+    const pairs = _anArr(d.pairs).filter(p => p && p.a && p.b);
+    return pairs.length ? `<div class="tbl-wrap"><table><thead><tr><th>Pair</th><th class="r">ρ</th><th class="r">scale</th><th class="r">offset</th><th class="r">R²</th></tr></thead>
+      <tbody>${pairs.map(p => {
+        const f = _anObj(p.fit);
+        return `<tr><td class="mono">${esc(p.a)} · ${esc(p.b)}</td><td class="r">${_anNum(p.rho, 3)}</td><td class="r">${_anNum(f.scale, 4)}</td><td class="r">${_anNum(f.offset, 4)}</td><td class="r">${_anNum(f.r2, 3)}</td></tr>`;
+      }).join("")}</tbody></table></div>` : "";
+  }
+  if (sec.tool === "seed_variance") {
+    const groups = _anSeedGroups(d);
+    const names = Object.keys(groups).sort();
+    return names.length ? `<div class="tbl-wrap"><table><thead><tr><th>Group</th><th class="r">Seeds</th><th class="r">Median</th><th class="r">Spread</th><th class="r">95% CI</th></tr></thead>
+      <tbody>${names.map(n => {
+        const g = _anObj(groups[n]);
+        const ci = _anArr(g.ci95_median_best).length === 2
+          ? `${_anNum(g.ci95_median_best[0])}…${_anNum(g.ci95_median_best[1])}` : "–";
+        return `<tr><td class="mono">${esc(n)}</td><td class="r">${_anNum(g.n_seeds, 0)}</td><td class="r">${_anNum(g.median_best)}</td><td class="r">${_anNum(g.spread_best)}</td><td class="r">${ci}</td></tr>`;
+      }).join("")}</tbody></table></div>` : "";
+  }
+  if (sec.tool === "walls") {
+    const prop = _anArr(d.proposal);
+    return prop.length ? `<div class="tbl-wrap"><table><thead><tr><th>Knob</th><th>Action</th><th class="r">New lo</th><th class="r">New hi</th><th>Reason</th></tr></thead>
+      <tbody>${prop.map(p => `<tr><td class="mono">${esc(p.key)}</td><td>${esc(p.action)}</td><td class="r">${_anNum(p.new_lo, 3)}</td><td class="r">${_anNum(p.new_hi, 3)}</td><td class="muted">${esc(p.reason || "")}</td></tr>`).join("")}</tbody></table></div>` : "";
+  }
+  return "";
+}
+
+function _anAppendixTable(d, sec) {
+  const fields = ANALYSIS_APPENDIX_FIELDS[sec.tool] || [];
+  const data = _anObj(sec.data);
+  const rows = fields.filter(k => data[k] != null).map(k => {
+    const value = (k === "run_dir" && typeof data[k] === "string") ? _anRunLink(data[k]) : _anRawValue(data[k]);
+    return `<tr><td class="mono">${esc(k)}</td><td class="r">${value}</td></tr>`;
+  }).join("");
+  return `<h3>${esc(sec.tool)} · ${esc(sec.id)}</h3>
+    ${rows ? `<div class="tbl-wrap"><table><thead><tr><th>Field</th><th class="r">Stored value</th></tr></thead><tbody>${rows}</tbody></table></div>`
+      : `<p class="muted">no scalar fields recorded</p>`}
+    ${_anAppendixExtra(sec)}
+    ${_anFileLinks(d, sec)}`;
+}
+
+function analysisAppendixHtml(d, sections, errors) {
+  const report = d && d.report_md != null
+    ? `<details class="card guide"><summary><b>REPORT.md</b>${d.report_md_truncated ? " (truncated)" : ""}</summary>
+       <pre style="white-space:pre-wrap">${esc(d.report_md)}</pre></details>` : "";
+  if (!sections.length) {
+    return report || `<div class="card"><p class="muted">No analysis outputs are recorded for this set.</p></div>`;
+  }
+  const tables = sections.map(s => _anAppendixTable(d, s)).join("");
+  const errText = errors.length ? `<h3>Errors (verbatim)</h3>${errors.map(e =>
+    `<div class="log-tail mono">${esc(e.error != null ? e.error : "not reported")}</div>`).join("")}` : "";
+  const appendix = `<details class="card"><summary><b>For the technical reader</b></summary>
+    ${tables || `<p class="muted">no stored tool fields</p>`}${errText}</details>`;
+  return appendix + report;
+}
+
+function analysisM1Html(sections) {
+  const ps = sections.filter(s => s.tool === "parameter_study" && s.data);
+  const sf = sections.filter(s => s.tool === "source_fidelity" && s.data);
+  if (!ps.length && !sf.length) return "";
+  const psHtml = ps.map(s => analysisParameterStudyHtml(s.data)).join("");
+  const caveatHz = studyCaveatHz(ps.length ? ps[0].data : null);
+  const sfHtml = sf.map(s => analysisSourceFidelityHtml(s.data, caveatHz)).join("");
+  return psHtml + sfHtml;
+}
+
+function analysisExtrasHtml(d) {
+  const extras = _anArr(d && d.extra_tools);
+  return extras.length ? `<div class="card"><div class="eyebrow">Other tool outputs</div>
+    <p class="muted">${extras.map(t => `<span class="pill mono">${esc(t)}</span>`).join(" ")} — no dedicated renderer; read them in <span class="mono">REPORT.md</span> and the raw JSON. Their contents are never guessed here.</p></div>` : "";
+}
+
+/** The whole report body for one set (no view chrome). Pure HTML; registers chart jobs. */
+function analysisPageHtml(d) {
+  _AN_CHART_JOBS = [];
+  const sections = analysisSectionsOf(d);
+  const errors = analysisErrorsOf(d);
+  return [
+    analysisHeroHtml(d, sections, errors),
+    objectiveVersionBannerHtml(analysisConvergenceRuns(sections).map(c => c.run)),
+    analysisTermBalanceHtml(sections),
+    analysisConvergenceGridHtml(sections),
+    analysisWallsSectionHtml(sections),
+    analysisSensitivitySectionHtml(sections),
+    analysisSeedVarianceSectionHtml(sections),
+    analysisFidelitySectionHtml(sections),
+    analysisLinksSectionHtml(sections),
+    analysisM1Html(sections),
+    analysisErrorsHtml(errors),
+    analysisExtrasHtml(d),
+    analysisAppendixHtml(d, sections, errors),
+  ].filter(Boolean).join("");
+}
+
+/** Index page (#/analysis, no set id). Empty state and its command stay verbatim. */
+function analysisIndexHtml(data) {
+  const rows = _anArr(data).filter(s => s && typeof s === "object").map(s => {
+    const nErr = Number(s.n_errors);
+    const errCell = (s.n_errors == null) ? `<span class="muted">–</span>`
+      : (nErr > 0 ? pill(fmt(nErr, 0), "bad") : `<span class="muted">0</span>`);
+    return `<tr class="clickable" onclick="location.hash='#/analysis/${encodeURIComponent(s.id)}'">
+      <td class="mono">${esc(s.id === "." ? "(analysis folder itself)" : s.id)}</td>
+      <td>${_anArr(s.tools).map(t => `<span class="pill">${esc(t)}</span>`).join(" ") || `<span class="muted">no tool headers parsed</span>`}</td>
+      <td class="r">${s.n_sections != null ? fmt(s.n_sections, 0) : `<span class="muted">–</span>`}</td>
+      <td class="r">${errCell}</td>
+      <td class="r">${esc(s.generated_utc || "–")}</td>
+    </tr>`;
+  }).join("");
+  const empty = `<div class="card"><p class="muted">No analysis outputs under the configured folder yet
+    (server default <span class="mono">runs/analysis/</span>; override with
+    <span class="mono">hornlab-search gui --analysis-dir</span>). The Group A tools
+    (<span class="mono">tools/analysis/</span>) write <span class="mono">REPORT.md</span> + JSON + PNG
+    there; this page only renders what they wrote — it never runs an analysis.</p>
+    <p class="muted" style="margin:8px 0 4px">To make a report set, run this in a terminal at the repository root (the day spec lists which runs and tools):</p>
+    <div class="log-tail mono" style="max-height:none;user-select:all">.venv\\Scripts\\python.exe tools\\analysis\\report_day.py --spec tools\\analysis\\specs\\day_2026-11-12.yaml --out runs\\analysis\\day_2026-11-12</div></div>`;
+  return `<div class="stack" style="gap:22px">
+    <div><div class="eyebrow">Reports</div><h2>Analysis</h2><a href="#/analysis/studies">Studies</a></div>
+    ${rows ? `<div class="card"><div class="eyebrow" style="margin-bottom:8px">Report sets</div>
+      <div class="tbl-wrap"><table><thead><tr><th>Set</th><th>Tools</th><th class="r">Sections</th><th class="r">Errors</th><th class="r">Generated</th></tr></thead>
+      <tbody>${rows}</tbody></table></div></div>` : empty}
+  </div>`;
+}
+
+// ── M1 (bo-study-v1.1): parameter study + source & fidelity ──────
+// Read-only renderers over the two frozen study artifacts (PARENT_M0_FREEZE.md §8).
+// They never load arrays/NPZ, never call a solver and never rank J across objective
+// versions. A missing/old-schema payload degrades to an explicit note (never invented).
+
+const STUDY_UNIT_SUFFIX = [
+  ["_khz", "kHz"], ["_hz", "Hz"], ["_mm", "mm"], ["_deg", "°"], ["_db", "dB"],
+  ["_pct", "%"], ["_ms", "ms"], ["_s", "s"], ["_m", "m"],
+];
+
+function _studyFmt(v, unit) {
+  let body;
+  const n = (typeof v === "number") ? v
+    : ((typeof v === "string" && v.trim() !== "" && isFinite(Number(v))) ? Number(v) : null);
+  if (n != null) body = isFinite(n) ? fmt(n, Number.isInteger(n) ? 0 : 2) : "–";
+  else body = v == null ? "–" : String(v);
+  return unit ? `${esc(body)} ${esc(unit)}` : esc(body);
+}
+
+function _studyBareValue(v) {
+  if (v == null) return "–";
+  if (typeof v === "object" && !Array.isArray(v) && v.value != null) return _studyFmt(v.value, null);
+  if (typeof v === "number" || (typeof v === "string" && v.trim() !== "" && isFinite(Number(v)))) {
+    return _studyFmt(v, null);
+  }
+  if (Array.isArray(v)) {
+    if (v.length > 8) return `<span class="mono">${esc(v.slice(0, 8).join(", "))} … (${v.length} values)</span>`;
+    return esc(v.join(", "));
+  }
+  if (typeof v === "object") return `<span class="mono">${esc(JSON.stringify(v).slice(0, 160))}</span>`;
+  return esc(v);
+}
+
+/** Unit from an explicit {value, unit} object, else from the key suffix; null when unknown. */
+function studyUnitForKey(key, value) {
+  if (value && typeof value === "object" && value.unit != null && String(value.unit) !== "") {
+    return String(value.unit);
+  }
+  const k = String(key || "").toLowerCase();
+  for (const [suffix, unit] of STUDY_UNIT_SUFFIX) if (k.endsWith(suffix)) return unit;
+  return null;
+}
+
+function studyActivityBadge(category) {
+  const c = String(category || "unknown").toLowerCase();
+  const cls = c === "searched" ? "good"
+    : (c === "inactive" ? "bad"
+    : ((c === "conditional" || c === "unresolved") ? "warn" : ""));
+  return `<span class="pill ${cls}">${esc(c)}</span>`;
+}
+
+/** Schema gate: absent payload renders nothing; an old/unknown payload renders a note only. */
+function studySchemaGate(payload, tool) {
+  if (payload == null || typeof payload !== "object" || Array.isArray(payload)) {
+    return { ok: false, html: "" };
+  }
+  if (!Object.keys(payload).length) return { ok: false, html: "" };
+  const label = tool === "parameter_study" ? "Parameter study" : "Source &amp; fidelity";
+  if (payload.tool != null && String(payload.tool) !== tool) {
+    return { ok: false, html: `<div class="card"><div class="eyebrow">${label}</div>
+      <p class="muted">The payload names tool <span class="mono">${esc(payload.tool)}</span>; this page renders
+      <span class="mono">${esc(tool)}</span> only. Contents are not interpreted.</p></div>` };
+  }
+  if (payload.schema_version == null) {
+    return { ok: false, html: `<div class="card"><div class="eyebrow">${label}</div>
+      <p class="muted">No <span class="mono">schema_version</span> recorded (this page renders schema v1 only).
+      Contents are not interpreted.</p></div>` };
+  }
+  if (Number(payload.schema_version) !== 1) {
+    return { ok: false, html: `<div class="card"><div class="eyebrow">${label}</div>
+      <p class="muted"><span class="mono">schema_version ${esc(payload.schema_version)}</span> is not rendered
+      (this page renders v1 only). Contents are not interpreted.</p></div>` };
+  }
+  return { ok: true, html: "" };
+}
+
+function _studyObjectRowsHtml(obj, keyLabel) {
+  if (!obj || typeof obj !== "object" || Array.isArray(obj)) return "";
+  const keys = Object.keys(obj).filter(k => obj[k] != null).sort();
+  if (!keys.length) return "";
+  const rows = keys.map(k => {
+    const v = obj[k];
+    const unit = studyUnitForKey(k, v);
+    const shown = unit || (typeof v === "number" ? "unitless" : "—");
+    return `<tr><td class="mono">${esc(k)}</td><td class="r mono">${_studyBareValue(v)}</td><td>${esc(shown)}</td></tr>`;
+  }).join("");
+  return `<div class="tbl-wrap"><table><thead><tr><th>${esc(keyLabel || "Descriptor")}</th><th class="r">Value</th><th>Unit</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+function _studyTaskIdentityHtml(ti) {
+  if (!ti || typeof ti !== "object" || Array.isArray(ti)) return "";
+  const rt = (ti.resolved_target && typeof ti.resolved_target === "object") ? ti.resolved_target : {};
+  const rows = [];
+  const add = (label, value, unit) => {
+    if (value == null || value === "") return;
+    let text;
+    if (Array.isArray(value)) text = `<span class="mono">${value.map(v => esc(v)).join(" – ")}</span>`;
+    else if (typeof value === "object") text = `<span class="mono">${esc(JSON.stringify(value))}</span>`;
+    else text = `<span class="mono">${esc(String(value))}</span>`;
+    rows.push(`<tr><td>${esc(label)}</td><td class="r">${text}</td><td>${esc(unit || "—")}</td></tr>`);
+  };
+  add("Config", ti.config);
+  add("Brief", ti.brief_name);
+  add("Brief hash", ti.brief_hash);
+  add("Objective version", ti.objective_version != null ? "v" + ti.objective_version : null);
+  const band = rt.band_hz != null ? rt.band_hz
+    : (rt.band_lo_hz != null && rt.band_hi_hz != null ? [rt.band_lo_hz, rt.band_hi_hz] : ti.band_hz);
+  const cov = rt.coverage_deg != null ? rt.coverage_deg
+    : (rt.coverage_h_deg != null && rt.coverage_v_deg != null
+       ? [rt.coverage_h_deg, rt.coverage_v_deg] : null);
+  add("Band", band, "Hz");
+  add("Coverage (H × V)", cov, "°");
+  add("f0", rt.f0_hz != null ? rt.f0_hz : ti.f0_hz, "Hz");
+  add("Coverage narrow ratio", rt.cov_narrow_ratio != null ? rt.cov_narrow_ratio : ti.cov_narrow_ratio, "unitless");
+  add("Coverage below f0", rt.cov_below_f0 != null ? rt.cov_below_f0 : ti.cov_below_f0);
+  add("DI reference", rt.diag_reference != null ? rt.diag_reference : ti.diag_reference);
+  const w = (ti.weights && typeof ti.weights === "object") ? ti.weights : {};
+  const t = (ti.tolerances && typeof ti.tolerances === "object") ? ti.tolerances : {};
+  const termKeys = [...new Set([...Object.keys(w), ...Object.keys(t)])].sort();
+  if (!rows.length && !termKeys.length) return "";
+  const wrows = termKeys.map(k => `<tr><td class="mono">${esc(k)}</td>
+    <td class="r">${w[k] != null ? _studyFmt(w[k], null) : "–"}</td>
+    <td class="r">${t[k] != null ? _studyFmt(t[k], null) : "–"}</td></tr>`).join("");
+  return `<h3>Task identity</h3>
+    <div class="tbl-wrap"><table><thead><tr><th>Field</th><th class="r">Value</th><th>Unit</th></tr></thead>
+    <tbody>${rows.join("")}</tbody></table></div>
+    ${wrows ? `<h4 style="margin:10px 0 4px">Weights and tolerances</h4>
+      <div class="cap">Weights are unitless; tolerances are in each objective term's metric units.</div>
+      <div class="tbl-wrap"><table><thead><tr><th>Term</th><th class="r">Weight (unitless)</th><th class="r">Tolerance (metric units)</th></tr></thead>
+      <tbody>${wrows}</tbody></table></div>` : ""}`;
+}
+
+function _studyCohortHtml(co) {
+  if (!co || typeof co !== "object" || Array.isArray(co)) return "";
+  const bits = [];
+  if (co.rows != null) bits.push(`<span class="pill">${esc(String(co.rows))} rows (count)</span>`);
+  if (co.unique_geometries != null) {
+    bits.push(`<span class="pill">${esc(String(co.unique_geometries))} unique geometries (count)</span>`);
+  }
+  if (co.unique_design_hash != null) {
+    bits.push(`<span class="pill">${esc(String(co.unique_design_hash))} unique design hashes (count)</span>`);
+  }
+  if (co.unique_physical_solves != null) {
+    bits.push(`<span class="pill">${esc(String(co.unique_physical_solves))} unique physical solves (count)</span>`);
+  }
+  if (co.scored_exact_complete != null) {
+    bits.push(`<span class="pill">${esc(String(co.scored_exact_complete))} exact-complete scores (count)</span>`);
+  }
+  if (co.run_ids_missing === true) bits.push(`<span class="pill warn">run ids missing</span>`);
+  else if (co.run_ids_missing === false) bits.push(`<span class="pill good">run ids recorded</span>`);
+  if (co.generated_utc) bits.push(`<span class="muted">generated ${esc(co.generated_utc)}</span>`);
+  const chiplists = [];
+  for (const key of ["di_source_counts", "pairing_status_counts", "run_provenance_counts",
+                     "screen_vs_verify", "native_catalog_fidelities", "objective_versions"]) {
+    const v = co[key];
+    if (!v || typeof v !== "object" || Array.isArray(v)) continue;
+    const chips = Object.entries(v).filter(([, x]) => x != null)
+      .map(([k, x]) => `<span class="pill mono">${esc(k)} ${esc(String(x))}</span>`).join(" ");
+    if (chips) chiplists.push(`<p class="cap">${esc(key.replace(/_/g, " "))}: ${chips}</p>`);
+  }
+  if (co.experiment_identity && typeof co.experiment_identity === "object"
+      && co.experiment_identity.status != null) {
+    const st = String(co.experiment_identity.status);
+    const cls = st === "insufficient_evidence" ? "warn" : "";
+    chiplists.push(`<p class="cap">Independent-experiment identity: ${pill(st, cls)}
+      ${co.experiment_identity.note ? `<span class="muted">${esc(co.experiment_identity.note)}</span>` : ""}</p>`);
+  }
+  const ex = co.exclusions;
+  let exHtml = "";
+  if (Array.isArray(ex)) {
+    const items = ex.filter(x => x != null);
+    if (items.length) exHtml = `<p class="cap">Exclusions: ${items.map(x => esc(typeof x === "string" ? x : JSON.stringify(x))).join(" · ")}</p>`;
+  } else if (ex && typeof ex === "object" && Object.keys(ex).length) {
+    exHtml = `<h4 style="margin:8px 0 4px">Exclusions (as recorded)</h4>${_studyRawPairsHtml(ex)}`;
+  }
+  if (!bits.length && !chiplists.length && !exHtml) return "";
+  return `<h3>Cohort</h3>
+    ${bits.length ? `<p style="margin:4px 0">${bits.join(" ")}</p>` : ""}
+    ${chiplists.join("")}${exHtml}`;
+}
+
+function _studyControlsHtml(controls) {
+  const arr = Array.isArray(controls) ? controls.filter(c => c && typeof c === "object") : [];
+  if (!arr.length) return "";
+  const rows = arr.map(c => {
+    const res = (c.resolved && typeof c.resolved === "object") ? c.resolved : {};
+    const bound = (res.bound && typeof res.bound === "object") ? res.bound : {};
+    const unit = (c.unit != null && String(c.unit) !== "")
+      ? String(c.unit) : (studyUnitForKey(c.key || c.base_knob, res.value) || "unitless");
+    const ev = (c.evidence && typeof c.evidence === "object") ? c.evidence : {};
+    const rng = (bound.lo != null || bound.hi != null)
+      ? `${_studyFmt(bound.lo, null)} – ${_studyFmt(bound.hi, null)}` : "–";
+    return `<tr>
+      <td class="mono">${esc(c.key || c.base_knob || "?")}</td>
+      <td>${studyActivityBadge(c.category != null ? c.category : c.state)}</td>
+      <td class="r mono">${_studyFmt(res.value, null)}</td>
+      <td>${esc(unit)}</td>
+      <td class="r mono">${rng}</td>
+      <td>${esc(c.unit_transform || c.transform || "—")}</td>
+      <td>${esc(ev.status || c.evidence_status || "—")}</td>
+    </tr>`;
+  }).join("");
+  return `<h3>Controls — activity</h3>
+    <div class="cap">B2 activity ledger: searched / fixed / derived / conditional / inactive / unresolved. Units are the control's own.</div>
+    <div class="tbl-wrap"><table><thead><tr><th>Control</th><th>Activity</th><th class="r">Resolved value</th><th>Unit</th><th class="r">Bound</th><th>Transform</th><th>Evidence</th></tr></thead>
+    <tbody>${rows}</tbody></table></div>`;
+}
+
+/** The S4 ``response_band_summary`` shape: observed band edges + median stats per metric. */
+function _studyBandSummaryHtml(summary) {
+  const bands = Array.isArray(summary.bands) ? summary.bands : [];
+  if (!bands.length) {
+    return summary.reason ? `<p class="muted">${esc(String(summary.reason))}</p>` : "";
+  }
+  const rows = bands.map(b => {
+    const lo = Array.isArray(b.band_hz) ? b.band_hz[0] : null;
+    const hi = Array.isArray(b.band_hz) ? b.band_hz[1] : null;
+    const label = b.source_label != null ? String(b.source_label) : "";
+    const cls = label.includes("above_source_caveat") ? "warn" : (label ? "good" : "");
+    const stats = (b.stats && typeof b.stats === "object") ? b.stats : {};
+    const chips = Object.keys(stats).sort().map(k => {
+      const st = stats[k] || {};
+      if (st.median == null) return "";
+      const unit = studyUnitForKey(k, st.median) || "unitless";
+      return `<span class="pill mono" title="median (min-max), n finite">${esc(k)} ${_studyFmt(st.median, unit)}</span>`;
+    }).filter(Boolean).join(" ");
+    return `<tr><td class="mono">${_studyFmt(lo, "Hz")} – ${_studyFmt(hi, "Hz")}</td>
+      <td>${label ? pill(label.replace(/_/g, " "), cls) : "—"}</td>
+      <td class="r">${esc(String(b.n_stored_bins != null ? b.n_stored_bins : "–"))} bins</td>
+      <td>${chips || `<span class="muted">no stored stats</span>`}</td></tr>`;
+  }).join("");
+  const meta = [];
+  if (summary.stored_f11_hz != null) meta.push(`stored f11 ${_studyFmt(summary.stored_f11_hz, "Hz")}`);
+  if (summary.note) meta.push(esc(String(summary.note)));
+  return `<div class="cap">Observed stored-array summary; median in each metric's units (not a prediction).</div>
+    <div class="tbl-wrap"><table><thead><tr><th>Band</th><th>Source label</th><th class="r">Stored bins</th><th>Median by metric</th></tr></thead>
+    <tbody>${rows}</tbody></table></div>
+    ${meta.length ? `<p class="cap">${meta.join(" · ")}</p>` : ""}`;
+}
+
+function _studyBandsHtml(bands) {
+  if (bands == null) return "";
+  if (typeof bands === "object" && !Array.isArray(bands) && Array.isArray(bands.bands)) {
+    return _studyBandSummaryHtml(bands);
+  }
+  let entries = [];
+  if (Array.isArray(bands)) {
+    entries = bands.map((b, i) => [String((b && (b.metric || b.label || b.plane)) || ("band " + (i + 1))), b]);
+  } else if (typeof bands === "object") {
+    entries = Object.entries(bands);
+  }
+  if (!entries.length) return "";
+  const rows = entries.map(([label, b]) => {
+    let value = "–", unit = "—", note = "";
+    if (Array.isArray(b) && b.length >= 2) {
+      value = `${_studyBareValue(b[0])} – ${_studyBareValue(b[1])}`;
+      unit = "Hz";
+    } else if (b && typeof b === "object") {
+      const band = Array.isArray(b.band_hz) ? b.band_hz : null;
+      const lo = b.lo_hz != null ? b.lo_hz : (b.low_hz != null ? b.low_hz : (b.lo != null ? b.lo : (band ? band[0] : null)));
+      const hi = b.hi_hz != null ? b.hi_hz : (b.high_hz != null ? b.high_hz : (b.hi != null ? b.hi : (band ? band[1] : null)));
+      if (lo != null || hi != null) {
+        value = `${_studyBareValue(lo)} – ${_studyBareValue(hi)}`;
+        unit = "Hz";
+      } else if (b.hz != null) {
+        value = _studyBareValue(b.hz);
+        unit = "Hz";
+      } else {
+        value = `<span class="mono">${esc(JSON.stringify(b).slice(0, 160))}</span>`;
+      }
+      note = [b.status, b.note].filter(x => x != null && x !== "").map(x => esc(String(x))).join(" · ");
+    } else if (typeof b === "number" || (typeof b === "string" && b.trim() !== "" && isFinite(Number(b)))) {
+      value = _studyBareValue(b);
+      unit = "Hz";
+    } else if (b != null) {
+      value = esc(String(b));
+    }
+    return `<tr><td class="mono">${esc(label)}</td><td class="r mono">${value}</td><td>${esc(unit)}</td><td class="cap">${note}</td></tr>`;
+  }).join("");
+  return `<div class="cap">Observed response bands from stored solves (not predictions).</div>
+    <div class="tbl-wrap"><table><thead><tr><th>Band</th><th class="r">Covered</th><th>Unit</th><th>Note</th></tr></thead>
+    <tbody>${rows}</tbody></table></div>`;
+}
+
+function _studyScoreHtml(st, objectiveVersion) {
+  if (!st || typeof st !== "object" || Array.isArray(st)) return "";
+  const ver = objectiveVersion != null ? "J v" + objectiveVersion : "J (objective version not recorded)";
+  const semantics = st.term_semantics != null ? `<div class="cap">${esc(String(st.term_semantics))}</div>` : "";
+  const check = st.total_matches_replay_j === true ? `<span class="pill good">total matches replay J</span>`
+    : (st.total_matches_replay_j === false ? `<span class="pill bad">total does not match replay J</span>`
+    : `<span class="pill">replay-J check not recorded</span>`);
+  const parts = ["raw", "normalized", "weighted"];
+  const isObj = k => st[k] && typeof st[k] === "object" && !Array.isArray(st[k]);
+  if (!parts.some(isObj)) {
+    const chips = parts.filter(k => st[k] != null)
+      .map(k => `<span class="pill">${esc(k)} ${_studyFmt(st[k], "J")}</span>`).join(" ");
+    if (!chips && st.total == null) return "";
+    return `<div class="cap">${esc(ver)} — observed (lower is better; never rank J across versions).</div>
+      ${semantics}
+      <p style="margin:4px 0">${chips}${st.total != null ? ` <span class="pill good">total ${_studyFmt(st.total, "J")}</span>` : ""} ${check}</p>`;
+  }
+  const terms = [...new Set(parts.flatMap(k => isObj(k) ? Object.keys(st[k]) : []))].sort();
+  if (!terms.length && st.total == null) return "";
+  const cell = (k, t) => isObj(k)
+    ? (st[k][t] != null ? _studyFmt(st[k][t], null) : "–")
+    : "–";
+  const rows = terms.map(t => `<tr><td class="mono">${esc(t)}</td>${parts.map(k => `<td class="r">${cell(k, t)}</td>`).join("")}</tr>`).join("");
+  const total = st.total != null
+    ? `<tr><td><b>total</b></td><td class="r">–</td><td class="r">–</td><td class="r"><b>${_studyFmt(st.total, null)}</b></td></tr>` : "";
+  return `<div class="cap">${esc(ver)} — exact observed J terms, raw / normalized / weighted (unit: J). Lower is better; no cross-version ranking.</div>
+    ${semantics}
+    <div class="tbl-wrap"><table><thead><tr><th>Term</th><th class="r">raw (J)</th><th class="r">normalized (J)</th><th class="r">weighted (J)</th></tr></thead>
+    <tbody>${rows}${total}</tbody></table></div>
+    <p style="margin:6px 0 0">${check}</p>`;
+}
+
+function _studyIdentitiesHtml(idn) {
+  if (!idn || typeof idn !== "object" || Array.isArray(idn)) return "";
+  const defs = [["physical_id", "physical"], ["metric_id", "metric"], ["score_id", "score"]];
+  const chips = defs.filter(([k]) => idn[k] != null && String(idn[k]) !== "").map(([k, label]) => {
+    const full = String(idn[k]);
+    return `<span class="pill mono" title="${esc(full)}">${esc(label)} ${esc(full.slice(0, 12))}${full.length > 12 ? "…" : ""}</span>`;
+  });
+  if (!chips.length) return "";
+  return `<h3>Identities (immutable)</h3><p style="margin:4px 0">${chips.join(" ")}</p>
+    <div class="cap">Physical / metric / score identities, truncated here; the artifact stores the full hashes.</div>`;
+}
+
+function _studyRawPairsHtml(obj) {
+  if (!obj || typeof obj !== "object" || Array.isArray(obj)) return "";
+  const entries = Object.entries(obj).filter(([, v]) => v != null);
+  if (!entries.length) return "";
+  const rows = entries.map(([k, v]) => {
+    let text;
+    if (v && typeof v === "object") text = `<span class="mono">${esc(JSON.stringify(v).slice(0, 200))}</span>`;
+    else text = esc(String(v));
+    return `<tr><td class="mono">${esc(k)}</td><td class="r mono">${text}</td></tr>`;
+  }).join("");
+  return `<div class="tbl-wrap"><table><thead><tr><th>Field (as recorded)</th><th class="r">Value (artifact units)</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+function _studyEvidenceHtml(ev) {
+  if (!ev || typeof ev !== "object" || Array.isArray(ev)) return "";
+  const pieces = [];
+  if (ev.support != null) pieces.push(`<p style="margin:4px 0">${esc(String(ev.support))}</p>`);
+  if (ev.parity && typeof ev.parity === "object") {
+    pieces.push(`<h4 style="margin:8px 0 4px">Parity — observed replay comparison</h4>${_studyRawPairsHtml(ev.parity)}`);
+  }
+  if (ev.heldout && typeof ev.heldout === "object") {
+    pieces.push(`<h4 style="margin:8px 0 4px">Held-out — predictive error</h4>${_studyRawPairsHtml(ev.heldout)}`);
+  }
+  if (!pieces.length) return "";
+  return `<h3>Evidence</h3>${pieces.join("")}`;
+}
+
+function _studyLimitationsHtml(lim) {
+  const arr = Array.isArray(lim) ? lim.filter(x => x != null) : [];
+  if (!arr.length) return "";
+  return `<h3>Limitations</h3><ul class="guide-steps" style="margin:4px 0">${arr.map(x =>
+    `<li>${esc(typeof x === "string" ? x : JSON.stringify(x))}</li>`).join("")}</ul>`;
+}
+
+/** Run provenance is only a link when the artifact actually recorded a run id. */
+function _studyProvenanceHtml(prov) {
+  const p = (prov && typeof prov === "object") ? prov : {};
+  const bits = [];
+  if (p.shard != null) bits.push(`shard <span class="mono">${esc(p.shard)}</span>`);
+  if (p.row != null) bits.push(`row <span class="mono">${esc(p.row)}</span>`);
+  const runId = (p.run_id != null && String(p.run_id).trim() !== "") ? String(p.run_id) : null;
+  const link = runId
+    ? `<a href="#/run/${esc(runId)}" style="font-size:0.8rem">open run →</a>`
+    : `<span class="muted">no run id recorded</span>`;
+  return `${bits.length ? bits.join(" · ") : `<span class="muted">not recorded</span>`} · ${link}`;
+}
+
+function studyCaveatNoteHtml(hz) {
+  if (hz == null || !isFinite(Number(hz))) return "";
+  return `<p class="cap" role="note" style="margin:6px 0 0"><span class="warn-text">Source caveat:</span>
+    2-inch uniform piston, f11 ${Math.round(Number(hz))} Hz — above it results compare geometry under that excitation.
+    Loading weight is 0: no loading/efficiency/distortion claims.</p>`;
+}
+
+function _studyCaveatBannerHtml(hz, text) {
+  const hasHz = hz != null && isFinite(Number(hz));
+  const hasText = text != null && String(text).trim() !== "";
+  if (!hasHz && !hasText) return "";
+  let body;
+  if (hasText) {
+    body = esc(String(text));
+    if (hasHz) body += ` <span class="muted">(source_caveat_hz = ${Math.round(Number(hz))} Hz)</span>`;
+  } else {
+    body = `2-inch uniform piston, f11 ${Math.round(Number(hz))} Hz — above it results compare geometry under that excitation. Loading weight is 0: no loading/efficiency/distortion claims.`;
+  }
+  return `<div class="alert info" role="note" style="margin:8px 0"><b>Source caveat:</b> ${body}</div>`;
+}
+
+function studyCaveatHz(ps) {
+  if (!ps || typeof ps !== "object") return null;
+  if (ps.source_caveat_hz != null && isFinite(Number(ps.source_caveat_hz))) return Number(ps.source_caveat_hz);
+  const designs = Array.isArray(ps.designs) ? ps.designs : [];
+  for (const d of designs) {
+    if (d && d.source_caveat_hz != null && isFinite(Number(d.source_caveat_hz))) return Number(d.source_caveat_hz);
+  }
+  return null;
+}
+
+/** S4 geometry block: a sampling status + nested ``descriptors`` (units from the sample). */
+function _studyGeometryHtml(geom) {
+  if (!geom || typeof geom !== "object" || Array.isArray(geom)) return "";
+  const status = geom.status != null ? String(geom.status) : null;
+  if (status && status !== "ok") {
+    const why = geom.reason != null ? geom.reason : geom.error;
+    return `<p class="muted">Geometry descriptors ${esc(status)}${why ? " — " + esc(String(why)) : ""}</p>`;
+  }
+  const desc = (geom.descriptors && typeof geom.descriptors === "object") ? geom.descriptors : geom;
+  const rows = _studyObjectRowsHtml(desc, "Descriptor");
+  if (!rows) return "";
+  const meta = [];
+  if (geom.units) meta.push(`sample units ${esc(String(geom.units))}`);
+  if (geom.convergence && typeof geom.convergence === "object" && geom.convergence.converged != null) {
+    meta.push(geom.convergence.converged
+      ? `<span class="pill good">sampling converged</span>`
+      : `<span class="pill warn">sampling not converged</span>`);
+  }
+  if (geom.sampling_note) meta.push(esc(String(geom.sampling_note)));
+  return `${rows}${meta.length ? `<p class="cap">${meta.join(" · ")}</p>` : ""}`;
+}
+
+function _studySelectionReasonHtml(v) {
+  if (v == null) return "";
+  if (typeof v !== "object" || Array.isArray(v)) {
+    return `<p class="cap" style="margin:4px 0">Selection reason: ${esc(String(v))}</p>`;
+  }
+  const bits = Object.entries(v).filter(([, x]) => x != null && x !== "").map(([k, x]) => {
+    if (x && typeof x === "object") {
+      return `<span class="pill mono">${esc(k)} ${esc(JSON.stringify(x).slice(0, 80))}</span>`;
+    }
+    const unit = k === "frozen_j" ? "J" : null;
+    const shown = (typeof x === "number" || (typeof x === "string" && isFinite(Number(x))))
+      ? _studyFmt(x, unit) : esc(String(x));
+    return `<span class="pill mono">${esc(k)} ${shown}</span>`;
+  });
+  return bits.length ? `<p class="cap" style="margin:4px 0">Selection reason: ${bits.join(" ")}</p>` : "";
+}
+
+function _studyDesignBlockHtml(d, i, n, ti) {
+  if (!d || typeof d !== "object") return "";
+  const hash = d.design_hash != null ? String(d.design_hash) : null;
+  const params = _studyObjectRowsHtml(d.params, "Knob");
+  const gd = d.geometry_descriptors;
+  const geom = (gd && typeof gd === "object" && !Array.isArray(gd) && (gd.descriptors || gd.status))
+    ? _studyGeometryHtml(gd)
+    : _studyObjectRowsHtml(gd, "Descriptor");
+  const bands = _studyBandsHtml(d.response_bands_hz);
+  const objV = d.objective_version != null ? d.objective_version
+    : (ti && ti.objective_version != null ? ti.objective_version : null);
+  const score = _studyScoreHtml(d.score_terms, objV);
+  const identities = _studyIdentitiesHtml(d.identities);
+  const caveat = (d.source_caveat_hz != null && isFinite(Number(d.source_caveat_hz)))
+    ? ` <span class="pill warn">source caveat ≥ ${Math.round(Number(d.source_caveat_hz))} Hz</span>` : "";
+  return `<div style="border:1px solid var(--rule);border-radius:6px;padding:10px;margin-top:10px">
+    <div class="eyebrow">Design ${i + 1}/${n}${hash ? ` · <span class="mono">${esc(hash.slice(0, 12))}</span>` : ""} · <span class="pill">observed</span></div>
+    ${_studySelectionReasonHtml(d.selection_reason)}
+    ${params ? `<h3>Knobs</h3>${params}` : ""}
+    ${geom ? `<h3>Geometry descriptors</h3>${geom}` : ""}
+    ${bands ? `<h3>Response bands (observed)</h3>${bands}` : ""}
+    ${score ? `<h3>J decomposition</h3>${score}` : ""}
+    ${identities}
+    <p class="cap" style="margin:6px 0 0">Provenance: ${_studyProvenanceHtml(d.provenance)}${caveat}</p>
+  </div>`;
+}
+
+/** "Parameter study" tool card: task identity, controls, 3-5 observed designs, evidence. */
+function analysisParameterStudyHtml(ps) {
+  const gate = studySchemaGate(ps, "parameter_study");
+  if (!gate.ok) return gate.html;
+  const ti = (ps.task_identity && typeof ps.task_identity === "object") ? ps.task_identity : {};
+  const co = (ps.cohort && typeof ps.cohort === "object") ? ps.cohort : {};
+  const tiHtml = _studyTaskIdentityHtml(ti);
+  const coHtml = _studyCohortHtml(co);
+  const ctlHtml = _studyControlsHtml(ps.controls);
+  const evHtml = _studyEvidenceHtml(ps.evidence);
+  const limHtml = _studyLimitationsHtml(ps.limitations);
+  const designs = Array.isArray(ps.designs) ? ps.designs.filter(d => d && typeof d === "object") : [];
+  if (!tiHtml && !coHtml && !ctlHtml && !designs.length && !evHtml && !limHtml) return "";
+  const protocol = ps.protocol ? `<span class="pill">${esc(ps.protocol)}</span>` : "";
+  return `<div class="card">
+    <div class="eyebrow">Parameter study ${protocol} <span class="pill">schema v${esc(String(ps.schema_version))}</span></div>
+    <div class="cap">Observed cohort and exact stored score terms. "Predictive" appears only on held-out evidence; no predicted horn response is shown as measured.</div>
+    ${tiHtml}${coHtml}${ctlHtml}
+    ${designs.length ? `<h3>Designs (${designs.length}) — observed</h3>${designs.map((d, i) => _studyDesignBlockHtml(d, i, designs.length, ti)).join("")}` : ""}
+    ${evHtml}${limHtml}
+  </div>`;
+}
+
+function _diSourceRowHtml(v) {
+  if (v == null) return "";
+  let used = null, note = "";
+  if (typeof v === "string") used = v;
+  else if (typeof v === "object") {
+    used = v.used != null ? v.used : (v.source != null ? v.source : (v.value != null ? v.value : v.status));
+    note = [v.note, v.declared != null ? "declared " + v.declared : null].filter(Boolean).join(" · ");
+  }
+  if (used == null) return "";
+  const s = String(used);
+  const cls = s === "balloon" ? "good" : (s === "cuts_estimate" ? "warn" : "");
+  const label = s === "cuts_estimate" ? "cuts estimate (not real DI)" : s;
+  return `<tr><td>DI source (observed)</td><td>${pill(label, cls)}${note ? ` <span class="muted">${esc(note)}</span>` : ""}</td></tr>`;
+}
+
+function _balloonVsCutsRowHtml(v) {
+  if (v == null) return "";
+  if (typeof v !== "object") return `<tr><td>Balloon vs cuts (observed)</td><td>${esc(String(v))}</td></tr>`;
+  const b = v.balloon_di_db != null ? v.balloon_di_db : v.balloon_db;
+  const c = v.cuts_estimate_di_db != null ? v.cuts_estimate_di_db
+    : (v.cuts_di_db != null ? v.cuts_di_db : v.cuts_db);
+  const d = v.delta_db != null ? v.delta_db : v.diff_db;
+  const status = v.status != null ? String(v.status) : "";
+  const bits = [];
+  if (b != null) bits.push(`balloon ${_studyFmt(b, "dB")}`);
+  if (c != null) bits.push(`cuts ${_studyFmt(c, "dB")}`);
+  if (d != null) bits.push(`Δ ${_studyFmt(d, "dB")}`);
+  if (!bits.length && !status) return "";
+  return `<tr><td>Balloon vs cuts (observed)</td><td>${status ? pill(status, "") + " " : ""}${bits.join(" · ")}</td></tr>`;
+}
+
+function _diSourceEvidenceRowHtml(v) {
+  if (!v || typeof v !== "object" || Array.isArray(v)) return "";
+  const bits = [];
+  if (v.stored_field != null) bits.push(`field ${esc(String(v.stored_field))}`);
+  if (v.stored_value != null) bits.push(`stored ${esc(String(v.stored_value))}`);
+  if (v.di_estimated_term === true) bits.push(`<span class="pill warn">DI estimated term</span>`);
+  if (v.reason != null) bits.push(`<span class="muted">${esc(String(v.reason))}</span>`);
+  if (!bits.length) return "";
+  return `<tr><td>DI evidence (observed)</td><td>${bits.join(" · ")}</td></tr>`;
+}
+
+function _verifyPairingRowHtml(v) {
+  if (v == null) return "";
+  if (typeof v !== "object") return `<tr><td>Verify pairing (observed)</td><td>${esc(String(v))}</td></tr>`;
+  let status = v.status != null ? String(v.status) : "";
+  if (!status && typeof v.paired === "boolean") status = v.paired ? "paired" : "unpaired";
+  if (!status) return "";
+  const cls = status === "paired" ? "good"
+    : (/unpaired|unavailable|no_verify|missing/.test(status) ? "warn" : "");
+  const bits = [];
+  if (v.delta_j != null) bits.push(`ΔJ ${_studyFmt(v.delta_j, "J")}`);
+  if (v.verify_design_hash != null) bits.push(`verify design ${esc(String(v.verify_design_hash).slice(0, 12))}`);
+  if (v.paired_design_hash != null) bits.push(`paired design ${esc(String(v.paired_design_hash).slice(0, 12))}`);
+  if (v.paired_fidelity != null) bits.push(`paired ${esc(String(v.paired_fidelity))} row`);
+  if (Array.isArray(v.reasons) && v.reasons.length) bits.push(`reasons: ${v.reasons.map(r => esc(String(r))).join(", ")}`);
+  if (v.note != null) bits.push(esc(String(v.note)));
+  return `<tr><td>Verify pairing (observed)</td><td>${pill(status, cls)}${bits.length ? ` <span class="muted">${bits.join(" · ")}</span>` : ""}</td></tr>`;
+}
+
+function _physicalSizeRowHtml(v) {
+  if (v == null) return "";
+  if (typeof v !== "object" || Array.isArray(v)) {
+    return `<tr><td>Physical size (observed)</td><td>${esc(String(v))}</td></tr>`;
+  }
+  const keys = Object.keys(v).filter(k => v[k] != null);
+  if (!keys.length) return "";
+  const chips = [], extras = [];
+  for (const k of keys) {
+    const x = v[k];
+    const unit = studyUnitForKey(k, x);
+    const numeric = typeof x === "number" || (x && typeof x === "object" && x.value != null);
+    if (numeric && (unit || k !== "value")) {
+      chips.push(`<span class="pill mono">${esc(k)} ${_studyFmt(x && x.value != null ? x.value : x, unit || "unitless")}</span>`);
+    } else if (k === "note" || k === "source") {
+      extras.push(`${esc(k)}: ${esc(String(x))}`);
+    } else if (k === "b2_geometry_descriptors" && x && typeof x === "object") {
+      if (x.joinable === false) extras.push(`B2 per-design descriptors: not joinable${x.reason ? " — " + esc(String(x.reason)) : ""}`);
+    }
+  }
+  if (!chips.length && !extras.length) return "";
+  return `<tr><td>Physical size (observed)</td><td>${chips.join(" ")}${extras.length ? ` <span class="muted">${extras.join(" · ")}</span>` : ""}</td></tr>`;
+}
+
+function _missingnessRowHtml(v) {
+  if (v == null) return "";
+  if (Array.isArray(v)) {
+    if (!v.length) return `<tr><td>Missingness (observed)</td><td><span class="muted">none recorded</span></td></tr>`;
+    return `<tr><td>Missingness (observed)</td><td>${v.map(x => pill(typeof x === "string" ? x : JSON.stringify(x), "")).join(" ")}</td></tr>`;
+  }
+  if (typeof v !== "object") return `<tr><td>Missingness (observed)</td><td>${esc(String(v))}</td></tr>`;
+  const chips = [];
+  if (typeof v.npz_readable === "boolean") {
+    chips.push(`<span class="pill ${v.npz_readable ? "good" : "bad"}">npz ${v.npz_readable ? "readable" : "unreadable"}</span>`);
+  }
+  for (const k of ["balloon", "cuts", "z"]) {
+    const x = v[k];
+    if (!x || typeof x !== "object") continue;
+    const present = x.present === true;
+    const missing = Array.isArray(x.missing_arrays) ? x.missing_arrays : [];
+    chips.push(`<span class="pill ${present ? "good" : "warn"}">${esc(k)} ${present ? "present" : "missing"}` +
+      `${!present && missing.length ? ` (${missing.map(m => esc(String(m))).join(", ")})` : ""}</span>`);
+  }
+  if (Array.isArray(v.stored_npz_keys)) {
+    chips.push(`<span class="pill mono">${esc(String(v.stored_npz_keys.length))} stored arrays</span>`);
+  }
+  const known = new Set(["npz_readable", "balloon", "cuts", "z", "stored_npz_keys"]);
+  for (const [k, x] of Object.entries(v)) {
+    if (known.has(k) || x == null) continue;
+    chips.push(`<span class="pill mono">${esc(k)} ${esc(typeof x === "object" ? JSON.stringify(x).slice(0, 80) : String(x))}</span>`);
+  }
+  if (!chips.length) return "";
+  return `<tr><td>Missingness (observed)</td><td>${chips.join(" ")}</td></tr>`;
+}
+
+/** Source cards carry provenance at the top level plus a recovered run_provenance block. */
+function _sourceProvenanceHtml(d) {
+  const p = (d.provenance && typeof d.provenance === "object") ? d.provenance : {};
+  const bits = [];
+  const shard = p.shard != null ? p.shard : d.shard;
+  const row = p.row != null ? p.row : d.row;
+  if (shard != null) bits.push(`shard <span class="mono">${esc(String(shard))}</span>`);
+  if (row != null) bits.push(`row <span class="mono">${esc(String(row))}</span>`);
+  const rp = (d.run_provenance && typeof d.run_provenance === "object") ? d.run_provenance : null;
+  let runId = null;
+  if (rp && rp.status === "resolved" && Array.isArray(rp.run_ids) && rp.run_ids.length === 1) {
+    runId = String(rp.run_ids[0]);
+  } else if (d.catalog_run_id != null && String(d.catalog_run_id).trim() !== "") {
+    runId = String(d.catalog_run_id);
+  } else if (p.run_id != null && String(p.run_id).trim() !== "") {
+    runId = String(p.run_id);
+  }
+  const link = runId
+    ? `<a href="#/run/${esc(runId)}" style="font-size:0.8rem">open run →</a>`
+    : `<span class="muted">no run id recorded</span>`;
+  const rpNote = (rp && rp.status && rp.status !== "resolved")
+    ? ` · <span class="pill warn">run provenance ${esc(String(rp.status))}</span>`
+      + (Array.isArray(rp.reasons) && rp.reasons.length
+         ? ` <span class="muted">${rp.reasons.map(x => esc(String(x))).join(", ")}</span>` : "")
+    : "";
+  return `${bits.length ? bits.join(" · ") : `<span class="muted">location not recorded</span>`} · ${link}${rpNote}`;
+}
+
+function _sourceDesignHtml(d, i, n) {
+  if (!d || typeof d !== "object") return "";
+  const hash = d.design_hash != null ? String(d.design_hash) : null;
+  const rows = [
+    _diSourceRowHtml(d.di_source != null ? d.di_source : d.di),
+    _diSourceEvidenceRowHtml(d.di_source_evidence),
+    _balloonVsCutsRowHtml(d.balloon_vs_cuts != null ? d.balloon_vs_cuts : d.balloon_vs_cuts_di),
+    _verifyPairingRowHtml(d.verify_pairing != null ? d.verify_pairing : d.verify),
+    _physicalSizeRowHtml(d.physical_size != null ? d.physical_size : d.size),
+    _missingnessRowHtml(d.missingness != null ? d.missingness : d.missing),
+  ].filter(Boolean).join("");
+  return `<div style="border:1px solid var(--rule);border-radius:6px;padding:10px;margin-top:10px">
+    <div class="eyebrow">Design ${i + 1}/${n}${hash ? ` · <span class="mono">${esc(hash.slice(0, 12))}</span>` : ""} · <span class="pill">observed</span></div>
+    ${rows ? `<div class="tbl-wrap"><table><thead><tr><th>Field</th><th>Recorded source / fidelity</th></tr></thead><tbody>${rows}</tbody></table></div>`
+           : `<p class="muted">no per-design source fields recorded</p>`}
+    <p class="cap" style="margin:6px 0 0">Provenance: ${_sourceProvenanceHtml(d)}</p>
+  </div>`;
+}
+
+/** "Source & fidelity" tool card: DI source honesty, verify pairing, size, missingness, caveat. */
+function analysisSourceFidelityHtml(sf, fallbackCaveatHz) {
+  const gate = studySchemaGate(sf, "source_fidelity");
+  if (!gate.ok) return gate.html;
+  const co = (sf.cohort && typeof sf.cohort === "object") ? sf.cohort : {};
+  const coHtml = _studyCohortHtml(co);
+  const tiHtml = _studyTaskIdentityHtml(sf.task_identity);
+  const limHtml = _studyLimitationsHtml(sf.limitations);
+  const ctx = (sf.source_assumption_context && typeof sf.source_assumption_context === "object")
+    ? sf.source_assumption_context : {};
+  const hz = sf.source_caveat_hz != null ? sf.source_caveat_hz
+    : (ctx.f11_hz != null ? ctx.f11_hz : fallbackCaveatHz);
+  const caveatText = sf.source_caveat != null ? sf.source_caveat
+    : (ctx.f11_statement != null ? ctx.f11_statement : null);
+  const banner = _studyCaveatBannerHtml(hz, caveatText);
+  const designs = Array.isArray(sf.designs) ? sf.designs.filter(d => d && typeof d === "object") : [];
+  if (!designs.length && !coHtml && !tiHtml && !limHtml && !banner) return "";
+  const protocol = sf.protocol ? `<span class="pill">${esc(sf.protocol)}</span>` : "";
+  return `<div class="card" id="source-fidelity-card">
+    <div class="eyebrow">Source &amp; fidelity ${protocol} <span class="pill">schema v${esc(String(sf.schema_version))}</span></div>
+    ${banner}
+    ${tiHtml}${coHtml}
+    ${designs.length ? `<h3>Per-design source and fidelity (observed)</h3>${designs.map((d, i) => _sourceDesignHtml(d, i, designs.length)).join("")}` : ""}
+    ${limHtml}
+  </div>`;
+}
+
+
 
 async function viewAnalysis(setId) {
   const ROOT = currentRoot();
@@ -2687,62 +3968,15 @@ async function viewAnalysis(setId) {
   }
   if (ROOT !== currentRoot()) return;
   if (!setId) {
-    // ── index over stored report sets ──
-    const rows = (Array.isArray(data) ? data : []).map(s => `<tr class="clickable" onclick="location.hash='#/analysis/${encodeURIComponent(s.id)}'">
-      <td class="mono">${esc(s.id === "." ? "(analysis folder itself)" : s.id)}</td>
-      <td>${(s.tools || []).map(t => `<span class="pill">${esc(t)}</span>`).join(" ") || `<span class="muted">no tool headers parsed</span>`}</td>
-      <td class="r">${esc(s.files.length)} files${s.has_report_md ? ` · <span class="pill">REPORT.md</span>` : ""}</td>
-      <td class="r">${esc(s.generated_utc || "–")}</td>
-    </tr>`).join("");
-    const empty = `<div class="card"><p class="muted">No analysis outputs under the configured folder yet
-      (server default <span class="mono">runs/analysis/</span>; override with
-      <span class="mono">hornlab-search gui --analysis-dir</span>). The Group A tools
-      (<span class="mono">tools/analysis/</span>) write <span class="mono">REPORT.md</span> + JSON + PNG
-      there; this page only renders what they wrote — it never runs an analysis.</p>
-      <p class="muted" style="margin:8px 0 4px">To make a report set, run this in a terminal at the repository root (the day spec lists which runs and tools):</p>
-      <div class="log-tail mono" style="max-height:none;user-select:all">.venv\\Scripts\\python.exe tools\\analysis\\report_day.py --spec tools\\analysis\\specs\\day_2026-11-12.yaml --out runs\\analysis\\day_2026-11-12</div></div>`;
-    ROOT.innerHTML = `<div class="stack" style="gap:22px">
-      <div><div class="eyebrow">Reports</div><h2>Analysis</h2></div>
-      ${rows
-        ? `<div class="card"><div class="eyebrow" style="margin-bottom:8px">Report sets</div>
-           <div class="tbl-wrap"><table><thead><tr><th>Set</th><th>Tools</th><th class="r">Files</th><th class="r">Generated</th></tr></thead>
-           <tbody>${rows}</tbody></table></div></div>`
-        : empty}
-    </div>`;
+    ROOT.innerHTML = analysisIndexHtml(data);
     return;
   }
   const d = data || {};
-  const banner = objectiveVersionBannerHtml(((d.convergence || {}).runs) || []);
-  const sections = [
-    analysisConvergenceHtml(d.convergence), analysisSeedVarianceHtml(d.seed_variance),
-    analysisSensitivityHtml(d.sensitivity), analysisLinksHtml(d.links),
-    analysisWallsHtml(d.walls),
-  ].join("");
-  const extras = (d.extra_tools || []).length
-    ? `<div class="card"><div class="eyebrow">Other tool outputs</div>
-       <p class="muted">${d.extra_tools.map(t => `<span class="pill mono">${esc(t)}</span>`).join(" ")} — no dedicated renderer; read them in <span class="mono">REPORT.md</span> and the raw JSON. Their contents are never guessed here.</p></div>`
-    : "";
-  const report = d.report_md != null
-    ? `<details class="card guide"><summary><b>REPORT.md</b>${d.report_md_truncated ? " (truncated)" : ""}</summary>
-       <pre style="white-space:pre-wrap">${esc(d.report_md)}</pre></details>`
-    : "";
-  const missing = ["convergence", "seed_variance", "sensitivity", "links", "walls"]
-    .filter(t => !(d.tools || []).includes(t));
   ROOT.innerHTML = `<div class="stack" style="gap:22px">
     <p><a href="#/analysis">← Analysis outputs</a></p>
-    <div>
-      <div class="eyebrow">Analysis report</div>
-      <h2>${esc(d.id === "." ? "(analysis folder itself)" : d.id)}</h2>
-      <p class="muted">${esc(d.base || "")}${d.generated_utc ? " · generated " + esc(d.generated_utc) : ""}</p>
-      ${missing.length ? `<p class="muted" style="font-size:0.8rem">Not present in this set: ${missing.map(t => `<span class="pill">${esc(t)}</span>`).join(" ")}</p>` : ""}
-    </div>
-    ${banner}
-    ${sections}
-    ${extras}
-    ${report}
+    ${analysisPageHtml(d)}
   </div>`;
-  const svg = document.getElementById("c-an-conv");
-  if (svg) requestAnimationFrame(() => analysisConvergenceChart(svg, d.convergence));
+  requestAnimationFrame(() => { if (ROOT === currentRoot()) _anDrawCharts(); });
 }
 
 // ── E.3: elites catalog (#/elites) ─────────────────────────────────
@@ -2820,6 +4054,10 @@ export { f0KpiHtml, mountingRankWarnHtml, seedDerivationHtml, objectiveVersionOp
          runIsLive, runModeMatches, runModeBadgesHtml, runParentLineHtml, laneChipsHtml, compareOptionsHtml, homeLeadersFilter, homeLeadersHtml, verificationCardHtml };
 
 export { lanesPanelHtml, verdictChipHtml, eliteGateChips };
+
+export { analysisParameterStudyHtml, analysisSourceFidelityHtml, studyCaveatHz };
+// Lane B visual-report builders (offline render checks; pure HTML, no DOM).
+export { analysisPageHtml, analysisIndexHtml, analysisSectionsOf, analysisErrorsOf, _anDrawCharts };
 
 export { continueRunAvailable, continueRunArgs, runIsVerify };
 

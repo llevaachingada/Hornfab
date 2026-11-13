@@ -128,14 +128,16 @@ def pack(out: Path, groups: list[str], dry_run: bool, *,
             if tf is None or size >= SHARD_BYTES:
                 if tf:
                     tf.close()
+                    shard += 1          # rotate: never reopen the same tar (it truncated at 2 GB)
                 tf = tarfile.open(out / f"{g}-{shard:03d}.tar", "w")
+                size = 0
             arcname = (p.relative_to(REPO).as_posix() if dataset_root is None
                        else p.relative_to(root.parent).as_posix())
             tf.add(p, arcname=arcname)
             size += p.stat().st_size
         if tf:
             tf.close()
-        print(f"  wrote {shard} shard(s) to {out}")
+        print(f"  wrote {shard + 1} shard(s) to {out}")
     if not dry_run and "dataset" not in groups and manifest_file.is_file():
         # The dataset group was not packed; the manifest must still travel (spec: "always includes").
         with tarfile.open(out / "manifest-000.tar", "w") as tf:

@@ -1,0 +1,16 @@
+{
+  "tool": "source_fidelity",
+  "schema_version": 0,
+  "schema": "source-fidelity-v0",
+  "generated_utc": "2026-11-10T09:00:00Z",
+  "source_caveat_hz": 3957,
+  "designs": [
+    {
+      "design_hash": "legacy-old-hash",
+      "di_source": {"used": "cuts_estimate"},
+      "physical_size": {"width_mm": 111.0},
+      "missingness": ["balloon_di"]
+    }
+  ],
+  "limitations": ["legacy artifact that predates the frozen M1 schema"]
+}

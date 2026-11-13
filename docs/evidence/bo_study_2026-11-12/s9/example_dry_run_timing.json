@@ -1,0 +1,323 @@
+{
+  "attempts": [
+    {
+      "cache": "new",
+      "n": 0,
+      "outcome": "solver_failure",
+      "thermal": "cold",
+      "verified_useful": null
+    },
+    {
+      "cache": "hit",
+      "n": 1,
+      "outcome": "cached_valid",
+      "thermal": "hit",
+      "verified_useful": null
+    },
+    {
+      "cache": "new",
+      "n": 2,
+      "outcome": "refusal",
+      "thermal": "warm",
+      "verified_useful": null
+    },
+    {
+      "cache": "hit",
+      "n": 3,
+      "outcome": "cached_valid",
+      "thermal": "hit",
+      "verified_useful": null
+    },
+    {
+      "cache": "hit",
+      "n": 4,
+      "outcome": "cached_valid",
+      "thermal": "hit",
+      "verified_useful": null
+    },
+    {
+      "cache": "new",
+      "n": 5,
+      "outcome": "valid",
+      "thermal": "warm",
+      "verified_useful": null
+    },
+    {
+      "cache": "new",
+      "n": 6,
+      "outcome": "valid",
+      "thermal": "warm",
+      "verified_useful": null
+    },
+    {
+      "cache": "new",
+      "n": 7,
+      "outcome": "valid",
+      "thermal": "warm",
+      "verified_useful": null
+    },
+    {
+      "cache": "hit",
+      "n": 8,
+      "outcome": "cached_valid",
+      "thermal": "hit",
+      "verified_useful": null
+    },
+    {
+      "cache": "new",
+      "n": 9,
+      "outcome": "refusal",
+      "thermal": "warm",
+      "verified_useful": null
+    },
+    {
+      "cache": "new",
+      "n": 10,
+      "outcome": "valid",
+      "thermal": "warm",
+      "verified_useful": null
+    },
+    {
+      "cache": "new",
+      "n": 11,
+      "outcome": "valid",
+      "thermal": "warm",
+      "verified_useful": null
+    },
+    {
+      "cache": "new",
+      "n": 12,
+      "outcome": "refusal",
+      "thermal": "warm",
+      "verified_useful": null
+    },
+    {
+      "cache": "new",
+      "n": 13,
+      "outcome": "valid",
+      "thermal": "warm",
+      "verified_useful": null
+    },
+    {
+      "cache": "new",
+      "n": 14,
+      "outcome": "valid",
+      "thermal": "warm",
+      "verified_useful": null
+    },
+    {
+      "cache": "new",
+      "n": 15,
+      "outcome": "valid",
+      "thermal": "warm",
+      "verified_useful": null
+    },
+    {
+      "cache": "new",
+      "n": 16,
+      "outcome": "valid",
+      "thermal": "warm",
+      "verified_useful": null
+    },
+    {
+      "cache": "new",
+      "n": 17,
+      "outcome": "valid",
+      "thermal": "warm",
+      "verified_useful": null
+    },
+    {
+      "cache": "new",
+      "n": 18,
+      "outcome": "refusal",
+      "thermal": "warm",
+      "verified_useful": null
+    },
+    {
+      "cache": "new",
+      "n": 19,
+      "outcome": "solver_failure",
+      "thermal": "warm",
+      "verified_useful": null
+    },
+    {
+      "cache": "hit",
+      "n": 20,
+      "outcome": "cached_valid",
+      "thermal": "hit",
+      "verified_useful": null
+    },
+    {
+      "cache": "new",
+      "n": 21,
+      "outcome": "valid",
+      "thermal": "warm",
+      "verified_useful": null
+    },
+    {
+      "cache": "new",
+      "n": 22,
+      "outcome": "valid",
+      "thermal": "warm",
+      "verified_useful": null
+    },
+    {
+      "cache": "new",
+      "n": 23,
+      "outcome": "valid",
+      "thermal": "warm",
+      "verified_useful": null
+    }
+  ],
+  "candidates": 24,
+  "dry_run": true,
+  "guards": {
+    "acoustic_records_written": 0,
+    "fixture_files_written": 0,
+    "solve_processes_started": 0,
+    "solver_or_mesher_imported": false
+  },
+  "identity": {
+    "batch_size": 12,
+    "cache_identity": "6cb0eeb4edacec88",
+    "fixture": true,
+    "frequency_array_sha": "6e11dc3ba7b0f5a5",
+    "lib_shas": {
+      "beat": "dc0852bed7848bd9",
+      "bempp": "c9d3a66651e67136",
+      "mesher": "0baf43f1a6127d7c"
+    },
+    "note": "synthetic identity; never a real design, mesh or solve identity",
+    "spec_hash": "5819c92e9727d291"
+  },
+  "ledger": {
+    "actual_bem_calls_inferred": 15,
+    "actual_bem_calls_observed": 14,
+    "actual_bem_seconds": 73.614263,
+    "attempts_new": 19,
+    "cache_hits": 5,
+    "cached_flag_unknown": 0,
+    "cheap_refusals": 4,
+    "cost_label": "accumulated_candidate_cost_no_wall_span",
+    "cost_model_gate": {
+      "eligible": false,
+      "min_timing_observations": 30,
+      "n_timing_observations": 14,
+      "note": "M0 reports eligibility only; no cost GP is fitted and no speedup is claimed.",
+      "status": "unavailable_insufficient_timing",
+      "target": "z=log(max(actual_uncached_BEM_seconds,1e-3))"
+    },
+    "elapsed_seconds": {
+      "attempts_all_incl_failed_refused": 124.33287699999998,
+      "cached_replay": 0.358693,
+      "failed_refused_attempts": 8.071092,
+      "missing_seconds_attempts": 0,
+      "recorded_total": 124.69156999999998,
+      "unaccounted_overhead": null,
+      "valid_new": 116.26178499999999,
+      "wall_span": null
+    },
+    "envelope_refusals": 0,
+    "failure_kinds": {
+      "invalid_geometry": 3,
+      "mesh_too_large": 1,
+      "solve_failed": 2
+    },
+    "geometry_refusals": 3,
+    "index_rows": 24,
+    "pipeline_failures": 0,
+    "resource_refusals": 1,
+    "run_stats": {
+      "cache_hits": 5,
+      "evaluations": 24,
+      "failures": 6,
+      "non_cached": 19,
+      "total_gpu_seconds": 73.614263,
+      "total_mesh_seconds": 22.384303
+    },
+    "solver_failures": 2,
+    "stats_reconciliation": {
+      "attempts_new_equal_non_cached": true,
+      "cache_hits_equal": true,
+      "failures_equal": true,
+      "index_rows_equal_evaluations": true
+    },
+    "timing_observations": 14,
+    "unknown_failures": 0,
+    "valid_evaluations_cached": 5,
+    "valid_evaluations_new": 13,
+    "valid_evaluations_total": 18,
+    "z_log_seconds": [
+      0.756917907,
+      2.130708042,
+      0.785735022,
+      1.505141275,
+      1.426166785,
+      2.156211361,
+      1.451347984,
+      2.164361107,
+      0.761641461,
+      1.461131389,
+      2.147619448,
+      0.778797215,
+      1.468007749,
+      2.202485382
+    ]
+  },
+  "notes": [
+    "All rows and seconds are fabricated; this is an accounting rehearsal, not a solver timing or a speedup claim.",
+    "verified_useful is null for every synthetic attempt; verified-useful/hour is withheld by the S3 ledger until an operator decides it.",
+    "The S3 ledger is consumed as-is from tools/analysis/_common.py (read-only); this harness adds stage/prefetch reconciliation only."
+  ],
+  "schema": "s9-fake-harness-v1",
+  "seed": 7,
+  "stage_timing": {
+    "additive_rule": "elapsed = candidate_total_sum + run_overhead_s + prefetch_wait_s; top-level stages are inside candidate_total, nested stages are subsets, and mesh_prefetch overlaps the main loop",
+    "candidate_total_rows": 19,
+    "candidate_total_sum_s": 124.332877,
+    "checks": {
+      "candidate_total_rows_equal_new_attempts": true,
+      "elapsed_equals_candidate_total_plus_overhead_plus_wait": true,
+      "naive_stage_sum_overcounts_elapsed": true,
+      "top_level_stages_equal_candidate_total": true,
+      "unaccounted_seconds_is_zero": true
+    },
+    "elapsed_s": 124.922877,
+    "naive_all_stage_sum_s": 281.772441,
+    "naive_overcount_vs_elapsed_s": 156.849564,
+    "nested_solver_seconds": {
+      "assembly": 40.487846,
+      "field": 11.042138,
+      "lu": 14.722852,
+      "solve": 7.361428
+    },
+    "nested_stage_seconds": {
+      "meh_inner_optimize": 10.722384
+    },
+    "prefetch_adds_to_elapsed_s": 0.0,
+    "prefetch_overlap_s": 22.384303,
+    "prefetch_seconds": 22.384303,
+    "prefetch_wait_s": 0.0,
+    "run_overhead_s": 0.59,
+    "schema": "s9-stage-reconciliation-v1",
+    "source": "synthetic_fixture",
+    "stage_env_flag": "HORNLAB_STAGE_TIMING",
+    "stage_file_name": "stage_timing.ndjson",
+    "stage_rows": 151,
+    "stage_seconds": {
+      "cache_store": 0.410967,
+      "candidate_total": 124.332877,
+      "meh_inner_optimize": 10.722384,
+      "mesh_build": 22.384303,
+      "mesh_prefetch": 22.384303,
+      "metrics": 25.326744,
+      "persist": 1.594287,
+      "score": 1.002313,
+      "solve": 73.614263,
+      "solver_path": 0.0
+    },
+    "top_level_stage_sum_s": 124.332877,
+    "unaccounted_s": 0.0
+  },
+  "synthetic": true
+}

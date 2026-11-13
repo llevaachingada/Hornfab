@@ -805,3 +805,66 @@ svg .iso-title { font-family: var(--f-body); font-size: 12px; font-weight: 600; 
   box-shadow: inset -14px 0 14px -14px color-mix(in srgb, var(--ink) 45%, transparent);
 }
 
+/* ── Analysis visual report (2026-11-12) ─────────────────────────────
+   Lane B: hero/KPIs, convergence small multiples, term-balance bars, wall gauges,
+   sensitivity bars, seed strips, fidelity/link cards. Theme tokens only. */
+.an-card-head { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:6px 10px; }
+.an-card-head h3 { margin:0; }
+.an-sec { display:grid; gap:8px; padding:12px 0; border-top:1px solid var(--rule); }
+.an-sec:first-of-type { border-top:none; padding-top:0; }
+.an-sec-head { display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 8px; font-size:0.86rem; }
+.an-meta { font-family:var(--f-mono); font-size:0.74rem; color:var(--muted); }
+.an-kpi-sub { font-family:var(--f-mono); font-size:0.66rem; color:var(--muted);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
+.an-chart { width:100%; min-height:200px; display:block; }
+.an-refusal-strip { display:flex; height:8px; border-radius:99px; overflow:hidden; background:var(--rule); }
+.an-refusal-seg { height:100%; background:var(--warn); }
+.an-term-bars, .an-div-list { display:grid; gap:6px; }
+.an-term-bar-row { display:grid; grid-template-columns:60px minmax(0,1fr); gap:8px; align-items:center; }
+.an-bar-label { font-family:var(--f-mono); font-size:0.7rem; color:var(--label);
+  text-transform:uppercase; letter-spacing:0.06em; }
+.an-term-bar { display:flex; height:22px; border-radius:4px; overflow:hidden;
+  background:var(--viz-canvas); border:1px solid var(--rule); }
+.an-term-seg { height:100%; min-width:0; }
+.an-term-seg-1 { background:var(--accent); }
+.an-term-seg-2 { background:var(--seed); }
+.an-term-seg-3 { background:var(--good); }
+.an-term-seg-4 { background:var(--warn); }
+.an-term-seg-5 { background:var(--bad); }
+.an-term-seg-6 { background:var(--accent-strong); }
+.an-term-seg-7 { background:var(--muted); }
+.an-term-seg-8 { background:var(--label); }
+.an-term-swatch { display:inline-block; width:10px; height:10px; border-radius:2px; flex:none; }
+.an-term-legend { display:flex; flex-wrap:wrap; gap:4px 14px; font-size:0.76rem; }
+.an-term-key { display:inline-flex; align-items:center; gap:5px; min-width:0; }
+.an-term-key .mono { font-size:0.76rem; }
+.an-details { margin-top:6px; }
+.an-details summary { cursor:pointer; color:var(--muted); font-size:0.82rem; }
+.an-gauge { position:relative; height:10px; min-width:150px; background:var(--viz-canvas);
+  border:1px solid var(--rule); border-radius:99px; overflow:hidden; }
+.an-gauge-fill { position:absolute; top:0; bottom:0; }
+.an-gauge-fill.lo { left:0; background:var(--warn); }
+.an-gauge-fill.hi { right:0; background:var(--bad); }
+.an-div-row { display:grid; grid-template-columns:minmax(110px,1.1fr) minmax(140px,2fr) 56px 64px;
+  gap:8px; align-items:center; font-size:0.8rem; }
+.an-div-key { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.an-div-track, .an-imp-track { position:relative; height:12px; background:var(--viz-canvas);
+  border:1px solid var(--rule); border-radius:3px; }
+.an-div-centre { position:absolute; left:50%; top:-2px; bottom:-2px; width:1px; background:var(--label); }
+.an-div-fill { position:absolute; top:1px; bottom:1px; }
+.an-div-fill.pos { left:50%; background:var(--seed); }
+.an-div-fill.neg { right:50%; background:var(--best); }
+.an-imp-fill { position:absolute; left:0; top:1px; bottom:1px; background:var(--accent); }
+.an-sv-track { position:relative; height:24px; margin:4px 0; }
+.an-sv-axis { position:absolute; left:0; right:0; top:50%; border-top:1px solid var(--rule); }
+.an-sv-band { position:absolute; top:25%; height:50%; background:var(--band); border-radius:2px; }
+.an-sv-dot { position:absolute; top:50%; width:8px; height:8px; border-radius:50%;
+  background:var(--best); transform:translate(-50%,-50%); }
+.an-sv-median { position:absolute; top:10%; height:80%; width:2px;
+  background:var(--seed); transform:translateX(-50%); }
+@media (max-width:600px) {
+  .an-div-row { grid-template-columns:minmax(90px,1fr) minmax(100px,1.6fr) 48px; }
+  .an-div-row .muted:last-child { display:none; }
+  .an-term-bar-row { grid-template-columns:48px minmax(0,1fr); }
+}
+

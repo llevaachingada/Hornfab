@@ -390,3 +390,18 @@ term_balance:  [{id, run}]
 fidelity:      [{id, run}]
 runs_root:     optional base directory prepended to relative run paths
 ```
+
+## bo-study-v1.1 analysis artifacts
+
+`parameter_study.json` is a descriptive, versioned report with `task_identity`,
+`cohort`, `controls`, selected measured `designs`, `evidence`, and `limitations`.
+Row-level held-out fits are diagnostics; recommendations and interaction rankings
+remain suppressed when independent-group support or stability is unavailable.
+`source_fidelity.json` carries per-design source and fidelity context, including
+pairing and DI provenance; missing or unpaired evidence is explicit. Both are
+read-only reports: the Analysis renderer does not initiate a solve.
+
+`bo_sensitivity` is an offline diagnostic harness, not a validated optimization
+result. It requires explicitly validated cohort and group inputs and independent
+fit/proposal adapters; missing evidence returns unavailable and synthetic fixtures
+do not establish a performance claim or pass the M2 gate.

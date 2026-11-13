@@ -1731,3 +1731,11 @@ Local-only, added 2026-10-29 (fast-BEM research; no code/GPU; no GitHub issue st
 - [ ] **OPEN: do NOT default GMRES.** The cost-model router (`BeatEngineDenseSolve.jl:317-355`) exists because a threshold is wrong across machines and backends.
 - [ ] **OPEN: any new flag must ride `SolveSpec.extra` and change the solve hash** (`hornlab_search/types.py:96-101`); absent = byte-identical to today. Also fix the double-misnomer: `gmres_tol` is hashed/recorded but never applied on Beat (`solve/beat.py:24-25`), and `CAMPAIGN_SMOKE`'s "iterative solve" is a dense LU.
 - Report path: `docs/research/MATRIX_FREE_GPU_GMRES_FMM_2026-10-29.md`; priorities `NEXT_DEV_PRIORITIES.md` P13; research basis `plan/12_RESEARCH_BASIS.md` section 18.
+
+Local-only, added 2026-11-13 (**bo-study-v1.1 pushed; cloud completion kickoff in docs/research/bo_study/; no GitHub issue state changed**):
+- Open: runner production evaluator adapter (blocks the S9 A/B matrix execution) — owner `docs/throughput/BO_STUDY_PERF_PREP_2026-11-12.md`.
+- Open: execute the validated S11 pilot manifests (execution_authorized=false by design; wall deadline owner-gated).
+- Open: M2 sensitivity/pool diagnostic evidence over the real 197-row native TrainingSet (`hornlab_search/bo/data.py::build_native_training_set`).
+- Open: B8 full adversarial loop (fake evaluator through service/CLI/API/GUI, crash/idempotency matrix).
+- Open: pyproject optional `bayes` extra registration (isolated `bayes-venv` remains the sanctioned engine env).
+- Data note: 3 native shard-57 rows (276-278) uncatalogued at the S0 snapshot; refused at join (`catalog_row_missing`), recoverable by a fresh catalog export.
