@@ -1,6 +1,15 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-13 (~22Z) - SOLVER SPEED PLAN REV 2: SENIOR REVIEW AGAINST CODE (docs only)
+
+- Plan rewritten as step-by-step packages a subagent can follow, checked against `a783b88`.
+- A1 changed to namespaced cache roots (`<cache>/solve/<ns>/<key>`), because `cache.store()` would overwrite a
+  legacy entry stored under the same key; `hornlab_search`/`hornlab_plots` SHAs excluded so commits don't empty the cache.
+- A6 dropped (replay already refuses v5+). A1 and A2 now run in parallel (disjoint regions of evaluate.py).
+- A5 fused-CUDA memory factor 4x calibrated on FUSED_CUDA_2026-10-24 (12,183 DOF ~4.7 GB).
+- Orchestrator 2 (fork + mesher) must run on the owner's machine; Wave B waits for the home80x60 night to end.
+
 ## 2026-11-13 (~21Z) - SOLVER SPEED PLAN: TWO HANDOFFS MERGED INTO ONE PARALLEL PLAN (docs only)
 
 - Owner asked to implement both 2026-11-13 handoffs (local-agent senior review; Huygens solver-speed review).

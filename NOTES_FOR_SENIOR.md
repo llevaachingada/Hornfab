@@ -800,3 +800,5 @@ Follow-up to the 2026-11-12 GUI entry above. Repo state re-verified first: GUI r
 - `curvature_npts` is a refiner, not a DOF saver: diagnostic use only.
 - UI fidelity selector (Fast search / Detailed verification / Full-range check) and Simulation-details panel: after D2.
 - Mesher role labels may not survive export physical tags; A4 may need an offline role-summary artifact from the mesher fork.
+- A1b: after A1, route `compare/hornfab_side.py`, `compare/fake.py`, `tools/m3_measurement_pack.py` cache roots through `solve.cache.namespace()`.
+- Optional legacy-cache adopt tool (hardlink legacy solve entries into a namespace) only if the owner confirms pins were unchanged over a date range.
