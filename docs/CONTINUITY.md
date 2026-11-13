@@ -1,6 +1,45 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-13 (22:4xZ) - BO-STUDY v1.1 LOCAL PASS: STRICT NATIVE GATE, S10 STUDY QA FIXES, S11 REBUILT, HOME/S5 READINESS (offline; no solve)
+
+- **Strict native gate (M2 bypass audit):** `hornlab_search/bo/data.py::build_native_training_set` now enforces
+  the brief objective version, response-detrended ripple evidence, target/weights presence, and one shared
+  backend/brief/dependency/task/target/weights/metric-source policy across accepted rows. A disagreement is
+  `incompatible_cohort`, a missing value `capability_missing`; no partial pooling. Fidelity/grid/solve-hash
+  mixing is published (`ok_mixed_fidelity_declared`) and refused only with `require_single_fidelity=True`.
+  The `morph_exponent` no-op is applied only when the space has that knob, so the six-knob home v7 task uses
+  the identity projection instead of raising `UnsupportedSpaceError`. Tests: `test_bo_native_policy_gate.py` (9).
+- **M2 gate evidence:** `m2/GATE.md` + `m2/gate/*` (fresh catalog rebuild, target probe, diagnostics, sensitivity
+  rerun). Verdict `insufficient_evidence`: the interfaces pass, but the frozen native cohort is one connected
+  independent group, not the five group-held-out validation requires. No BO benefit or speed-up claim.
+- **Home readiness:** `home/READINESS.md`. 217 catalog-ok rows (250 total, 33 failed) >= n_min 16, but the replay
+  artifact has 0 score rows (the offline scan is ATH-target-only; replay dispatches v1-4 only; home is v7) and
+  all 217 ok rows lack `impedance_matrix` (loading weight 1.0). `freeze_snapshot` ok; `build_training`
+  `Unavailable` (`n_min=16 n=0`). Input SHA-256s are recorded.
+- **S5:** `s5/STATUS.md`. Both seed packs are empty because `seed_pack._hex40` rejects the real 12-hex design
+  hash (30,723/30,723 catalog rows). The cloud PR owns the parser; regenerate the packs after it merges.
+- **S11:** both pilot manifests rebuilt from the committed `s11/overlays/` (new `task.pins` /
+  `task.blocked_evidence`) and re-validated against the live CLI: `errors=0 warnings=0`, exit 0. The committed
+  manifests are overwritten by design; the validation JSONs are unchanged. No pin/blocker validation error.
+- **GUI S10 QA fixes:** bounded artifact previews (`bounded_preview`), recorded decisions on Decide
+  (`decision_panel_artifact`), Execute falls back to the prepared package when no results exist, and
+  `studies.js` requires a real string id (`#/run/undefined` fixed). `tests/test_gui_studies_qa_fixes.py` (5);
+  the stale Execute `missing` assertion in `test_b8_adversarial_workflow.py` now asserts the explicit package
+  fallback. S10 screenshots carry a README warning that their "idle" lanes came from a temp runs root.
+- **Stale A1 tests fixed:** `test_design_generated.py` and `test_mesh_build_grid.py` read failure markers from
+  the physics-namespaced solve cache (`ctx.solve_cache_root/failures`), not the retired flat
+  `cache/solve/failures`; the `test_study_builders.py` tiny fixture now carries the strict policy fields. All
+  were red on the first full suite after A1/the strict gate and pass in the final run.
+- **Verification:** full offline suite `python -m pytest -q -p no:cacheprovider tests -m "not slow and not gpu and not crosscheck"`
+  -> **3721 passed, 18 skipped (optional bayes venv), exit 0**; isolated bayes-venv
+  `test_bo_{model,acquisition,propose,pareto}.py` **44 passed, exit 0**. `compileall` on the changed modules,
+  `node --check studies.js`, and `tests/test_tools_experiments_manifest.py` (33 passed) clean. No solve, GPU,
+  queue, cache, `gpu-clean` or live dataset write; the home80x60 GPU night was untouched.
+- **Docs ownership:** `docs/INDEX.md` is owned by the concurrent cloud PR, so this commit does not edit it;
+  the new evidence docs are referenced here and by their parent evidence files.
+- **Push rule:** this commit carries this entry, the ISSUES rows, and the evidence it describes.
+
 ## 2026-11-13 (22:3xZ) - BACKLOG COMMITTED AND PUSHED (owner request): BO STRICT GATE, GUI STUDY QA, S5/S10/S11 EVIDENCE, FOUR ANALYSIS TOOLS
 
 - Owner request: commit and push the checkout's uncommitted work. Two commits, both pushed: `5f15275`

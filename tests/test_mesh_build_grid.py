@@ -182,7 +182,9 @@ def test_grid_self_approach_classifies_invalid_geometry_and_is_memoized(tmp_path
     ev1 = E.evaluate(space.seed, space, cfg, "screen", tmp_path / "run1", None, None, ctx=ctx)
     assert E.error_kind(ev1.error) == E.KIND_INVALID, ev1.error
     assert "self-approach" in ev1.error, ev1.error                  # it IS the guard that failed
-    markers = list((tmp_path / "cache" / "solve" / "failures").glob("*.json"))
+    # A1: failure markers live under the physics-namespaced solve cache, not the flat root.
+    assert ctx.solve_cache_root is not None
+    markers = list((ctx.solve_cache_root / "failures").glob("*.json"))
     assert len(markers) >= 1
     ctx2 = E.make_context(cfg, None, cache_dir=tmp_path / "cache")
     ev2 = E.evaluate(space.seed, space, cfg, "screen", tmp_path / "run2", None, None, ctx=ctx2)

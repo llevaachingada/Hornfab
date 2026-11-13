@@ -196,7 +196,9 @@ def test_failure_marker_replays_without_counting(tmp_path):
     ctx1 = E.make_context(cfg, None, cache_dir=tmp_path / "cache")
     ev1 = E.evaluate(bad, space, cfg, "screen", tmp_path / "run1", None, None, ctx=ctx1)
     assert ev1.error.startswith("invalid_geometry") and not ev1.cached
-    markers = list((tmp_path / "cache" / "solve" / "failures").glob("*.json"))
+    # A1: failure markers live under the physics-namespaced solve cache, not the flat root.
+    assert ctx1.solve_cache_root is not None
+    markers = list((ctx1.solve_cache_root / "failures").glob("*.json"))
     assert len(markers) == 1 and json.loads(markers[0].read_text())["kind"] == "invalid_geometry"
     ctx2 = E.make_context(cfg, None, cache_dir=tmp_path / "cache")
     ev2 = E.evaluate(bad, space, cfg, "screen", tmp_path / "run2", None, None, ctx=ctx2)
