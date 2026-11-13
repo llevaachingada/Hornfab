@@ -1,6 +1,6 @@
 # Integrated solver-speed program (2026-11-13, Oracle-reviewed)
 
-**Status:** approved design, **not launched**. Supersedes `docs/queue/SPEED_COMBINED_2026-11-13.md` (kept for history).
+**Status:** approved design, **not launched**. Operational one-pager only - the implementation and architecture detail, invariants, test statistics and open questions live in `docs/queue/SPEED_ARCHITECTURE_PLAN_2026-11-13.md`. Supersedes `docs/queue/SPEED_COMBINED_2026-11-13.md` (kept for history).
 **Owner constraint:** nothing may reduce frequency, angular or mesh resolution, accuracy or coverage on numbers that
 count as results.
 

@@ -3,6 +3,18 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-13 (**Elites tab redesigned for non-technical readers: brief/typology constraints and isometric horn thumbnails, best-per-typology / best-per-brief browsing, paginated 24 at a time, CSV-path noise removed; payload extended with brief/family/brief_target; bo-study-v1.1 final offline integration landed (M2 sensitivity/proposal evidence, immutable run package + `hornlab-search study` CLI, durable proposal-cadence recovery, B8 adversarial full loop); profile-outline thumbnail geometry fixed after live check (closed outline split at the mouth rim, outer wall kept); card hierarchy tuned per owner (constraint line + score largest, gate pills smaller); no GitHub issue state changed**).
 
+Local-only, added 2026-11-13 (23:3xZ) (**senior implementation plan for review; six verification corrections; no GitHub issue state changed**):
+- Ready for review (not executed): `docs/queue/SPEED_ARCHITECTURE_PLAN_2026-11-13.md` - C1-C6 inventory, I1-I8
+  invariants, E0-E9 gated sequence, H1-H4 test design with statistics, R1-R10 risks, rollback, 12 open questions.
+- Fixed (test design): the Round A/B arms shared a cache, so the second arm on the same seed would have been a cache
+  hit and faked the speedup. Per-arm `cache_dir`/`dataset_dir` under `scratch/` now; both night files re-dry-run clean.
+- Corrected: resume `--budget` counts new evals (45, not 200); the interrupted run is not strict, so the library-SHA
+  resume guard is inert; night files must be copied to `runs/nights/`; `kind: search` needs `config:` even on resume;
+  `selftest --analytic` is not fused-path parity.
+- Running: resume job live (159/200); part-two fork edit under CPU test; pin unchanged; no other GPU work.
+- Open (owner/reviewer): answer the 12 questions in the plan, in particular the repeat policy (one rep vs two), the
+  `--budget 1` probe shape, and whether a bitwise fused-response comparison should replace the 0.039 dB bar.
+
 Local-only, added 2026-11-13 (23:3xZ) (**Oracle-reviewed speed program replaces the campaign design; no GitHub issue state changed**):
 - Ready (not launched): `docs/queue/SPEED_PROGRAM_2026-11-13.md`; `speed_round_a` (2 arms) and `speed_round_b`
   (4 arms), both `--dry-run` exit 0. Old campaign doc superseded, its night files deleted.

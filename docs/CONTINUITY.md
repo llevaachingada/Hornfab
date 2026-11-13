@@ -1,6 +1,27 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-13 (23:3xZ) - SENIOR IMPLEMENTATION PLAN WRITTEN FOR REVIEW; SIX VERIFICATION CORRECTIONS (ONE TEST-DESIGN FLAW)
+
+- Wrote `docs/queue/SPEED_ARCHITECTURE_PLAN_2026-11-13.md` for a higher-thinking agent to review **before** execution:
+  verified ground truth, architecture/dataflow, change inventory C1-C6, invariants I1-I8, E0-E9 sequence with gates,
+  hypotheses H1-H4 with arms/statistics/falsification, measurement infrastructure, risks R1-R10, rollback, and 12 open
+  questions. The program doc is now explicitly the operational one-pager; this is the implementation reference.
+- **Test-design flaw found and fixed:** the Round A/B arms shared one cache, so the second arm on the same seed design
+  would have been a **cache hit** and its wall time would have collapsed - faking the effect being measured. Every arm
+  now has its own `cache_dir` + `dataset_dir` under `scratch/` (C6); both night files re-dry-run clean.
+- **Five more corrections from the verification pass:** (1) `--budget` on a resume counts **new** evaluations, so the
+  interrupted run needs **45**, not 200 (validated: 153 -> 155 with a 2-eval probe); (2) that run is
+  `infeasible_penalty: graded` / `error_policy: legacy`, so the strict library-SHA resume guard is inert - the ordering
+  rule stays as a general rule, not because it bites here; (3) night files must be copied into `runs/nights/` before
+  queuing (queue.ps1 looks only there); (4) `kind: search` requires a `config:` key even with `resume:`, so the resume
+  job is `kind: command`; (5) the analytic selftest never sets `cuda_fused`, so it is not fused-path parity evidence.
+- **Running state:** resume job `resume_print_night_2026-11-14` live, run at **159/200**; part-two patch edited in the
+  fork (+16/-3) and under CPU test; pin still `0850ef39`; GPU busy with the resume only.
+- **Ceiling calibration (CPU-only):** mouth-res 5.03 / 4.46 / 4.09 = **15,878 / 20,152 / 23,850** quarter DOF.
+- Nothing beyond the already-approved Step 1/2 has been executed; Rounds A/B, the swap and the ceiling sweep wait for
+  the plan's review and for the resume to finish.
+
 ## 2026-11-13 (23:3xZ) - ORACLE-REVIEWED SPEED PROGRAM REPLACES THE CAMPAIGN DESIGN (ordering fixed; part two folded in)
 
 - The Oracle review of the campaign found three design faults, all now fixed in
