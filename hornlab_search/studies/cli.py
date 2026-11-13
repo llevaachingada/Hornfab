@@ -42,9 +42,12 @@ _STATUS_EXIT = {
 _COMMANDS = {
     'validate': ({'--spec'}, {'--root'}),
     'create': ({'--spec'}, {'--root', '--key', '--parent'}),
-    'snapshot': ({'--study'}, {'--root'}),
-    'analyze': ({'--study'}, {'--root'}),
-    'propose': ({'--study'}, {'--root'}),
+    'snapshot': ({'--study'}, {'--root', '--key', '--config', '--brief', '--scores',
+                               '--catalog', '--dataset-root'}),
+    'analyze': ({'--study'}, {'--root', '--key', '--config', '--brief', '--scores',
+                              '--catalog', '--dataset-root'}),
+    'propose': ({'--study'}, {'--root', '--key', '--config', '--brief', '--scores',
+                              '--catalog', '--dataset-root', '--policy', '--seed'}),
     'package': ({'--study', '--out'},
                 {'--root', '--lane', '--deadline', '--key', '--revision'}),
     'run': ({'--package'}, {'--root', '--dry-run'}),
@@ -161,6 +164,122 @@ def _artifact(service, study_id, kind):
     return {'study_id': study_id, 'kind': kind, 'artifact': metadata}
 
 
+def _flag_path(root, values, flag):
+    raw = values.get(flag)
+    if raw is None:
+        return None
+    if not isinstance(raw, str) or not raw.strip():
+        raise UsageError(f'{flag} requires a path')
+    path = Path(raw)
+    if path.is_absolute():
+        return str(path)
+    return str(_contained(root, raw, flag))
+
+
+def _spec_with_flags(service, study_id, root, values):
+    """Merge explicit CLI inputs into a copy of the current draft spec.
+
+    This never revises or persists the study; it only supplies validated inputs
+    to the builder for this invocation.
+    """
+    import copy
+    spec = copy.deepcopy(service.get_study(study_id)['spec'])
+    if not isinstance(spec, dict):
+        raise StudyError('study spec is not an object')
+    task = spec.get('task') if isinstance(spec.get('task'), dict) else {}
+    source = spec.get('source') if isinstance(spec.get('source'), dict) else {}
+    config = _flag_path(root, values, '--config')
+    brief = _flag_path(root, values, '--brief')
+    scores = _flag_path(root, values, '--scores')
+    catalog = _flag_path(root, values, '--catalog')
+    dataset = _flag_path(root, values, '--dataset-root')
+    if config:
+        task['config'] = config
+    if brief:
+        task['brief'] = brief
+    if scores:
+        source['scores_json'] = scores
+    if catalog:
+        source['catalog_csv'] = catalog
+    if dataset:
+        source['dataset_root'] = dataset
+    if task:
+        spec['task'] = task
+    if source:
+        spec['source'] = source
+    if values.get('--policy') is not None:
+        policy = spec.get('policy') if isinstance(spec.get('policy'), dict) else {}
+        policy['proposal_policy'] = values['--policy']
+        spec['policy'] = policy
+    return spec
+
+
+def _build_chain(service, study_id, root, values, *, through):
+    """Build snapshot -> training -> analysis (and proposal when requested)."""
+    from . import builders
+
+    spec = _spec_with_flags(service, study_id, root, values)
+    key = values.get('--key')
+
+    def key_for(name):
+        return f'{key}:{name}' if key else None
+
+    snapshot = service.get_artifact_metadata(study_id, 'snapshot')
+    if snapshot.get('status') != 'available':
+        snapshot_result = builders.freeze_snapshot(
+            service, study_id, root=root, spec=spec, idempotency_key=key_for('snapshot'))
+    else:
+        snapshot_result = {'snapshot': snapshot, 'artifact': snapshot, 'idempotent': True}
+    if through == 'snapshot':
+        return {'status': 'ok', 'snapshot': snapshot_result.get('artifact', snapshot),
+                'artifact': snapshot_result.get('artifact', snapshot),
+                'idempotent': snapshot_result.get('idempotent', False)}
+
+    training_result = builders.build_training(
+        service, study_id, root=root, spec=spec, idempotency_key=key_for('training'))
+    if through == 'training':
+        return {'status': 'ok', 'snapshot': snapshot_result.get('artifact'),
+                'training': training_result['training'],
+                'training_ids': training_result['training_ids'],
+                'training_manifest': training_result['training_manifest'],
+                'idempotent': training_result.get('idempotent', False)}
+
+    analysis_result = builders.build_analysis(
+        service, study_id, root=root, spec=spec, idempotency_key=key_for('analysis'))
+    if through == 'analysis':
+        return {'status': 'ok', 'snapshot': snapshot_result.get('artifact'),
+                'training': training_result['training'],
+                'training_ids': training_result['training_ids'],
+                'training_manifest': training_result['training_manifest'],
+                'analysis': analysis_result['artifact'],
+                'idempotent': analysis_result.get('idempotent', False)}
+
+    seed = values.get('--seed')
+    if seed is not None:
+        if not seed.isdigit():
+            raise UsageError('--seed must be a non-negative integer')
+        seed = int(seed)
+    proposal_result = builders.build_proposal(
+        service, study_id, root=root, spec=spec, policy=values.get('--policy'),
+        seed=seed, idempotency_key=key_for('proposal'))
+    return {
+        'status': proposal_result.get('status', 'ok'),
+        'snapshot': snapshot_result.get('artifact'),
+        'training': training_result['training'],
+        'training_ids': training_result['training_ids'],
+        'training_manifest': training_result['training_manifest'],
+        'analysis': analysis_result['artifact'],
+        'model': proposal_result.get('model'),
+        'pool': proposal_result.get('pool'),
+        'proposal': proposal_result.get('proposal', proposal_result.get('artifact')),
+        'artifact': proposal_result.get('artifact'),
+        'proposal_policy': proposal_result.get('proposal_policy'),
+        'verification_mode': proposal_result.get('verification_mode'),
+        'reason': proposal_result.get('reason'),
+        'idempotent': proposal_result.get('idempotent', False),
+    }
+
+
 class _NoEvidenceProbe:
     """Conservative probe: absence of evidence is never evidence of no call."""
 
@@ -206,11 +325,11 @@ def _dispatch(command, values):
         return {'study': service.create_study(spec, key, parent_id=parent_id)}
 
     if command == 'snapshot':
-        return _artifact(service, values['--study'], 'snapshot')
+        return _build_chain(service, values['--study'], root, values, through='snapshot')
     if command == 'analyze':
-        return _artifact(service, values['--study'], 'analysis')
+        return _build_chain(service, values['--study'], root, values, through='analysis')
     if command == 'propose':
-        return _artifact(service, values['--study'], 'proposal')
+        return _build_chain(service, values['--study'], root, values, through='proposal')
 
     if command == 'package':
         out = _contained(root, values['--out'], '--out')

@@ -136,6 +136,88 @@ class StudyService:
             conn.commit()
             return result
 
+    @staticmethod
+    def _hex_hash(value):
+        return (isinstance(value, str) and len(value) == 64
+                and all(c in '0123456789abcdef' for c in value))
+
+    def find_artifact_reference(self, study_id, artifact_id, revision=None):
+        """Resolve a known kind or a registered 64-hex SHA to one study artifact.
+
+        The identifier never becomes a filesystem path: kinds are looked up in the
+        registry table and SHAs are validated hex strings read through the
+        content-addressed store.  Anything else is a ``NotFound``.
+        """
+        if not isinstance(artifact_id, str) or not artifact_id:
+            raise StudyError('artifact id required')
+        # A kind is a registry label, never a path: separators/traversal are 404s.
+        if '/' in artifact_id or '\\' in artifact_id or artifact_id in ('.', '..') \
+                or '..' in artifact_id:
+            raise NotFound('artifact id is not a registry kind or SHA-256')
+        with closing(self.store.connect()) as conn:
+            study = self._study(conn, study_id)
+            rev = study['spec_revision'] if revision is None else revision
+            if self._hex_hash(artifact_id):
+                row = conn.execute(
+                    'SELECT * FROM artifacts WHERE study_id=? AND revision=? AND sha256=? LIMIT 1',
+                    (study_id, rev, artifact_id)).fetchone()
+                if row is None:
+                    raise NotFound('artifact not found for this study revision')
+            else:
+                if len(artifact_id) > 128:
+                    raise NotFound('unknown artifact kind')
+                row = conn.execute(
+                    'SELECT * FROM artifacts WHERE study_id=? AND revision=? AND kind=?',
+                    (study_id, rev, artifact_id)).fetchone()
+                if row is None:
+                    raise NotFound('artifact kind not bound for this revision')
+            return {'study_id': study_id, 'revision': rev, 'kind': row['kind'],
+                    'sha256': row['sha256'],
+                    'status': 'stale' if rev != study['spec_revision'] else 'available',
+                    'dependencies': json.loads(row['dependencies_json'])}
+
+    def artifact_view(self, study_id, artifact_id, *, revision=None, max_bytes=192_000):
+        """Bounded typed artifact view; NPZ/binary artifacts return metadata only."""
+        ref = self.find_artifact_reference(study_id, artifact_id, revision=revision)
+        target = self.store.artifacts / ref['sha256']
+        try:
+            size = target.stat().st_size
+        except OSError:
+            size = None
+        if size is not None and size > max_bytes:
+            # Do not read a large/hostile payload into memory just to say it is large.
+            return {**ref, 'size': size, 'binary': True, 'data': None,
+                    'provenance': {'dependencies': ref['dependencies']},
+                    'reasons': ['artifact exceeds the bounded view size; metadata only'],
+                    'status': 'partial' if ref['status'] == 'available' else ref['status']}
+        try:
+            data = self.store.read_artifact(ref['sha256'])
+        except Unavailable as exc:
+            return {**ref, 'size': None, 'binary': True, 'data': None,
+                    'provenance': {'dependencies': ref['dependencies']},
+                    'reasons': [str(exc)], 'status': 'unavailable'}
+        view = {'study_id': ref['study_id'], 'revision': ref['revision'],
+                'kind': ref['kind'], 'sha256': ref['sha256'], 'size': len(data),
+                'status': ref['status'], 'binary': False, 'data': None,
+                'provenance': {'dependencies': ref['dependencies']}, 'reasons': []}
+        if len(data) > max_bytes:
+            view['status'] = 'partial' if view['status'] == 'available' else view['status']
+            view['binary'] = True
+            view['reasons'].append('artifact exceeds the bounded view size; metadata only')
+            return view
+        if data[:2] == b'PK' or b'\x00' in data[:4096]:
+            view['binary'] = True
+            view['reasons'].append('binary artifact; metadata only (no array flood)')
+            return view
+        try:
+            content = json.loads(data.decode('utf-8'))
+        except (UnicodeDecodeError, ValueError):
+            view['binary'] = True
+            view['reasons'].append('artifact is not JSON; metadata only')
+            return view
+        view['data'] = content
+        return view
+
     def revise(self, study_id, spec, expected_revision, key):
         spec = validate_spec(spec)
         payload = {'spec': spec, 'expected_revision': expected_revision}

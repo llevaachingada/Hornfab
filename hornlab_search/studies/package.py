@@ -11,6 +11,7 @@ the existing atomic, hash-verified :meth:`StudyStore.publish` path through
 """
 from __future__ import annotations
 
+import json
 from datetime import datetime
 
 from .schema import PROTOCOL, Conflict, StudyError, Unavailable, canonical, digest
@@ -87,6 +88,51 @@ def _timezone_deadline(value):
     return value
 
 
+def _proposal_identity(service, study_id, revision, spec):
+    """Read the current proposal policy (or the spec/default) for the package body.
+
+    Older fixtures predate the explicit policy block; they default to ``scalar``
+    so every existing package keeps working.  The value is descriptive of the
+    verified selection rule and never grants new execution authority.
+    """
+    from hornlab_search.bo import policy as policy_mod
+
+    source = 'default'
+    policy = None
+    detail = service.get_artifact_metadata(study_id, 'proposal', revision=revision)
+    if detail.get('status') == 'available':
+        sha = detail.get('sha256')
+        try:
+            proposal = service.store.read_artifact(sha)
+            try:
+                payload = json.loads(proposal.decode('utf-8'))
+            except (UnicodeDecodeError, ValueError):
+                payload = None
+            if isinstance(payload, dict):
+                policy = (payload.get('proposal_policy')
+                          or payload.get('policy')
+                          or (payload.get('selection') or {}).get('proposal_policy'))
+                if policy:
+                    source = 'proposal'
+        except Unavailable:
+            policy = None
+    if not policy and isinstance(spec, dict):
+        block = spec.get('policy') if isinstance(spec.get('policy'), dict) else {}
+        policy = block.get('proposal_policy')
+        if not policy and block.get('mode') in policy_mod.PROPOSAL_POLICIES:
+            policy = block['mode']
+        if policy:
+            source = 'spec'
+    if not policy:
+        policy = policy_mod.POLICY_SCALAR
+        source = 'default'
+    if policy not in policy_mod.PROPOSAL_POLICIES:
+        raise StudyError(f'unsupported proposal policy {policy!r}')
+    return {'policy': policy,
+            'verification_mode': policy_mod.verification_mode(policy),
+            'source': source}
+
+
 def package_hash(package):
     """Return the SHA-256 identity over the canonical package body.
 
@@ -126,7 +172,42 @@ def verify_package(package):
         raise StudyError('package budget must exactly match the frozen execution budget')
     if package.get('status_note') != STATUS_NOTE:
         raise StudyError('package status_note must state cheap-check-only eligibility')
+    proposal_policy = package.get('proposal_policy')
+    if proposal_policy is not None:
+        from hornlab_search.bo import policy as policy_mod
+        if not isinstance(proposal_policy, dict):
+            raise StudyError('package proposal_policy must be an object')
+        policy = proposal_policy.get('policy')
+        if policy not in policy_mod.PROPOSAL_POLICIES:
+            raise StudyError('package carries an unsupported proposal policy')
+        if proposal_policy.get('verification_mode') != policy_mod.verification_mode(policy):
+            raise StudyError('package verification_mode disagrees with the proposal policy')
     return package
+
+
+def _validate_proposal_payload(raw):
+    """A package may only bind a proposal that actually selected a candidate.
+
+    Legacy fixtures predate the explicit ``status`` field and are accepted. New
+    artifacts must be ``ok``, or an explicitly labelled non-BO fallback with a
+    candidate; a capability/model/pool refusal must not be packaged as if it were
+    a reviewable initial proposal.
+    """
+    try:
+        payload = json.loads(raw.decode('utf-8'))
+    except (UnicodeDecodeError, ValueError) as exc:
+        raise Unavailable('current proposal artifact is not JSON') from exc
+    if not isinstance(payload, dict):
+        raise Unavailable('current proposal artifact must contain an object')
+    status = payload.get('status')
+    if status is None or status == 'ok':
+        return
+    if (status == 'model_unavailable' and payload.get('fallback') is True
+            and isinstance(payload.get('candidate'), dict)):
+        return
+    reason = payload.get('reason')
+    raise Unavailable(f'current proposal artifact is {status}'
+                      + (f': {reason}' if reason else ''))
 
 
 def _current_artifact(service, study_id, revision, kind):
@@ -140,7 +221,9 @@ def _current_artifact(service, study_id, revision, kind):
     if not isinstance(sha, str) or not sha:
         raise Unavailable(f'current {kind} artifact has no hash')
     # Re-read the exact bytes so a corrupted file can never bind a package.
-    service.store.read_artifact(sha)
+    raw = service.store.read_artifact(sha)
+    if kind == 'proposal':
+        _validate_proposal_payload(raw)
     return sha
 
 
@@ -202,6 +285,7 @@ def prepare_run_package(service, study_id, *, expected_revision=None, lane='cpu'
         'recovery_rules': list(RECOVERY_RULES),
         'adaptive_policy': dict(ADAPTIVE_POLICY),
         'verification_policy': dict(VERIFICATION_POLICY),
+        'proposal_policy': _proposal_identity(service, study_id, revision, spec),
         'artifacts': artifacts,
         'status_note': STATUS_NOTE,
     }
