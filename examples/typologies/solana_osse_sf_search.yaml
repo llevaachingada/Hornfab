@@ -1,4 +1,7 @@
 # solana_osse_sf_search: Solana Ath WG with searchable SF / guiding-curve + morph.
+# REV2 LABEL (2026-11-13): SOLANA-INSPIRED, not a matched Solana 2.0 replica. The athscript-keyed mesh
+# lands ~450x450 mm vs the published 353x353 morph target (docs/evidence/SOLANA_WG_2026-11-01.md);
+# MEH/source/baffle also differ. Comment only: parsed config and config_sha unchanged.
 #
 # PURPOSE: CMA over the Ath OS-SE + GCurve.SF + Morph knobs that actually define
 # the Solana waveguide. The MEH CAD pyramid (solana_meh*) cannot express SF /

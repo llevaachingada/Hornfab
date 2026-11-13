@@ -2232,14 +2232,16 @@ function seedKlawHtml(feas) {
   const planePill = (label, ok, need) => {
     if (ok === true) return pill(`${label} fits`, "good");
     if (ok === false)
-      return `<span class="pill warn" title="does not fit the envelope">${esc(`${label} short: needs ${roundOrDash(need)} mm`)}</span>`;
+      return `<span class="pill warn" title="below the Keele ESTIMATE for this envelope; a heuristic, not proof the pattern cannot be held">${esc(`${label} short: needs ${roundOrDash(need)} mm`)}</span>`;
     return `<span class="muted">–</span>`;
   };
   return `<div class="seed-klaw">` +
     `<p class="hint" style="margin:0" role="note">f0 ${esc(f0s)} · K-law mouth ${esc(mouth)} · envelope ${esc(env)}</p>` +
     `<p class="hint" style="margin:2px 0 0" role="note">held at f0 by the envelope: ${esc(held)}</p>` +
     `<div class="pill-row" style="margin:6px 0 0">${planePill("H", feas.feasible_w, feas.required_mouth_w_mm)}` +
-    `${planePill("V", feas.feasible_v, feas.required_mouth_h_mm)}</div></div>`;
+    `${planePill("V", feas.feasible_v, feas.required_mouth_h_mm)}</div>` +
+    `<p class="hint" style="margin:4px 0 0" role="note">K-law = Keele-style heuristic estimate: a planning guide, ` +
+    `not a physical limit and not the measured pattern-control onset (that comes from the solved field).</p></div>`;
 }
 
 /** The brief-driven seed derivation card (S1a feasibility record, written to the run's config.yaml

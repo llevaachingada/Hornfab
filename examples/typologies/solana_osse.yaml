@@ -1,4 +1,7 @@
 # solana_osse: Solana 2.0 waveguide from the published Ath4 script (Advanced/athscript.cfg).
+# REV2 LABEL (2026-11-13): SOLANA-INSPIRED, not a matched Solana 2.0 replica. The athscript-keyed mesh
+# lands ~450x450 mm vs the published 353x353 morph target (docs/evidence/SOLANA_WG_2026-11-01.md);
+# MEH/source/baffle also differ. Comment only: parsed config and config_sha unchanged.
 #
 # PRIMARY: Solana DIY Guide Rev 2.0 (John White, 2026-08-31) + athscript.cfg in
 #   docs/research/typologies/solana_2026-11-01/

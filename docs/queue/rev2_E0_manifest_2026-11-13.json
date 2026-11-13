@@ -1,0 +1,68 @@
+{
+ "manifest": "E0",
+ "experiment_id": "rev2_ablation_2026-11-13",
+ "status": "proposed_owner_approval_required",
+ "plan": "docs/research/QUEUE_PLAN_REV2_2026-11-13.md",
+ "hypotheses": {
+  "S": "Lip ripple / upstream wall relief on a fixed salmon core changes main-lobe width or out-of-main lobes beyond the fidelity noise floor",
+  "M": "Morph evolution rate at a fixed 280x196 mouth changes the 3D pattern (SAWMOD control family)",
+  "A": "ATH CORE-style azimuth law terms (superformula, cosine, m=6 petals) at a fixed 399x399 morph target change the 3D pattern vs the smooth OSSE control",
+  "F": "Screen fidelity (epw, radius, angular sampling) moves v2 descriptors less than the arms do",
+  "E8": "CPU (beat_cpu) and GPU (beat_cuda) agree on identical geometry (lane_parity.py, 0.2 dB rule)"
+ },
+ "matching": {
+  "S": "scheme b: same core contour",
+  "M": "scheme a: same mouth outline",
+  "A": "scheme a: same morph target (check bbox: allow_shrinkage 0)"
+ },
+ "controls": {
+  "S": "abl_s0_control",
+  "M": "abl_m_rate4",
+  "A": "ath_a0_control",
+  "F": "fid_base_verify"
+ },
+ "frozen": {
+  "source": "per brief: 1in (S, M), 2in (A); uniform normal velocity, unit-acceleration output basis",
+  "mount": "free-standing as in each brief",
+  "medium": "air, C_AIR",
+  "backend": "beat_cuda (GPU night), beat_cpu (CPU night)",
+  "score": "legacy J recorded but NOT the readout; acoustic_v2.0 descriptors are"
+ },
+ "decision_rule": "arm accepted only if |delta| of bw6_main_h/v, outside_peak_db or outside_power_fraction vs its control exceeds the max one-factor fidelity spread for that metric; else record negative",
+ "jobs_gpu": [
+  "abl_s0_control",
+  "abl_s1_lip12_a3",
+  "abl_s1_lip6_a3",
+  "abl_s1_lip12_a6",
+  "abl_s2_wall12_a3",
+  "abl_m_rate4",
+  "abl_m_rate2",
+  "abl_m_rate8",
+  "ath_a0_control",
+  "ath_a1_core",
+  "ath_a1_sf_only",
+  "ath_a1_cos_only",
+  "ath_a2_hex",
+  "fid_base_verify",
+  "fid_epw6",
+  "fid_epw10",
+  "fid_dist8m",
+  "fid_ang145"
+ ],
+ "jobs_cpu": [
+  "cpu_abl_s0_control",
+  "cpu_abl_m_rate4"
+ ],
+ "budget": {
+  "new_bem_cap": 20,
+  "gpu_hours_est": "1.5-2",
+  "cpu_hours_est": "<=4"
+ },
+ "analysis": [
+  "tools/analysis/acoustic_v2_report.py --night runs/nights/rev2_gpu_ablation_2026-11-13 --out runs/analysis/rev2_2026-11-13",
+  "tools/analysis/lane_parity.py --gpu <abl_s0_control run> --cpu <cpu_abl_s0_control run> --out runs/analysis/rev2_parity_s0",
+  "tools/analysis/lane_parity.py --gpu <abl_m_rate4 run> --cpu <cpu_abl_m_rate4 run> --out runs/analysis/rev2_parity_m4"
+ ],
+ "stop": "any arm whose gain disappears at verify; any mesh/bbox mismatch breaking the matching scheme; parity fail blocks pooling CPU with GPU",
+ "evidence_labels": "computed (BEM) / inferred / hypothesis; nothing here is measured hardware"
+}

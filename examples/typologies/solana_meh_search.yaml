@@ -1,4 +1,7 @@
 # Solana 2.0 MEH SEARCH — same drivers/envelope as solana_meh.yaml, C9 knobs free.
+# REV2 LABEL (2026-11-13): SOLANA-INSPIRED, not a matched Solana 2.0 replica. The athscript-keyed mesh
+# lands ~450x450 mm vs the published 353x353 morph target (docs/evidence/SOLANA_WG_2026-11-01.md);
+# MEH/source/baffle also differ. Comment only: parsed config and config_sha unchanged.
 #
 # Primary source: DIY Guide Rev 2.0 (docs/research/typologies/SOLANA_WAVEGUIDE_2026-11-01.md).
 # Screen uses a shortened freq grid vs the full 41-pt MEH contract band so a 24 GB

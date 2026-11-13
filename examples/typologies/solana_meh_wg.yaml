@@ -1,4 +1,7 @@
 # solana_meh_wg: WG estimate in MEH context (CD + 4 midports).
+# REV2 LABEL (2026-11-13): SOLANA-INSPIRED, not a matched Solana 2.0 replica. The athscript-keyed mesh
+# lands ~450x450 mm vs the published 353x353 morph target (docs/evidence/SOLANA_WG_2026-11-01.md);
+# MEH/source/baffle also differ. Comment only: parsed config and config_sha unchanged.
 #
 # This is the Solana waveguide as a multiple-entry horn: MEH CAD pyramid air
 # path with tblr entry ports for 4 x B&C 6NDL38 + B&C DH450. Midports ARE

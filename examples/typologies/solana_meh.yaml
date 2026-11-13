@@ -1,4 +1,7 @@
 # Solana 2.0 MEH CAD seed — 4 x B&C 6NDL38 (tblr) + B&C DH450.
+# REV2 LABEL (2026-11-13): SOLANA-INSPIRED, not a matched Solana 2.0 replica. The athscript-keyed mesh
+# lands ~450x450 mm vs the published 353x353 morph target (docs/evidence/SOLANA_WG_2026-11-01.md);
+# MEH/source/baffle also differ. Comment only: parsed config and config_sha unchanged.
 #
 # Drivers / envelope / 90x90 from DIY Guide Rev 2.0 (same source as
 # docs/research/typologies/SOLANA_WAVEGUIDE_2026-11-01.md). Geometry is the

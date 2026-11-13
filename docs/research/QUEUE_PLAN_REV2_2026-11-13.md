@@ -62,11 +62,30 @@ Fidelity ladder on `abl_s0_control`, all `--mode verify`, one factor each: base 
 - If CPU vs GPU |dJ| and cut differences are at the ~1e-4 level seen on 2026-11-12, close E8 for these geometries.
 - Only then: a bounded BO/CMA pilot (Rev2 8, 24 new BEM max), separately authorized.
 
-## Code landed with this queue
+## Rev2 implementation status (2026-11-13)
 
-- `hornlab_search/metrics/acoustic_v2.py`: `main_lobe()` first-crossing main-lobe width with per-side `valid`/`censored`, off-axis peak and outside-main-lobe peak. Additive; no objective uses it. Tests: `tests/test_metrics_acoustic_v2.py`.
-- `gui/data.py::balloon` now also returns `max_above_axis_db` and `clip_count_above_axis` per frequency (unclipped), so hot spots above axis are no longer hidden by the 0 dB display clip.
+| Rev2 item | Status | Where |
+|---|---|---|
+| 3.1 Keele as heuristic, not proof | Done (labels) | `acoustic_v2.keele_estimate` (method=heuristic, binding=false); GUI K-law card note + tooltip; report html wording. Legacy `feasible_w/v` and seed derivation unchanged. |
+| 3.2 finite-radius / far field | Queued + labeled | `fid_dist8m` job; every v2 analysis carries `observation_kind=finite_radius_pressure`, `far_field_validated=false` until the 8 m check says otherwise. |
+| 3.3 main-lobe vs outer beamwidth | Done | `acoustic_v2.main_lobe` (first crossings, per-side censored, off-axis and outside-main peaks). Legacy `beamwidth_deg` untouched. |
+| 3.3 sphere DI quadrature | Done | `sphere_weights` / `balloon_di`: one sin(theta) trapezoid path, `invalid` status instead of 0 dB. Analytic omni 0 / cardioid / dipole 4.77 dB tests. |
+| 3.3 3D lobes / islands / outside power | Done | `balloon_lobes`: connected boresight region on the theta-phi grid with phi wrap, island count, outside power fraction, max above axis. |
+| 3.3 GUI clipping | Done | `gui/data.py::balloon` returns `max_above_axis_db` + `clip_count_above_axis`; `balloon.js` shows an above-axis warning line per frequency and states "magnitude, not wavefront". Range is still fixed at -30 dB. |
+| 5 loading / pattern-control onset | Done | `loading_onset` (Re z sustained, bracket, `missing`), `pattern_control_onset` (target +/- tol + outside-lobe limit + dwell, `not_reached`/`censored_low`). |
+| 6 identity layers | Done (additive) | `dataset/identity_v2.py`: physical_solve_id = the M0 catalog formula (reused), analysis_id, score_id, study_id, compatibility(), append-only jsonl. No cache/dataset rekey. |
+| 6 analysis records + replay | Done for v2 | `tools/analysis/acoustic_v2_report.py` writes `analyses.jsonl` (ids + response sha256), `RESULTS.json`, `DECISION.md`. Legacy J replay is the owner's M0 `objective/replay.py` + `offline_scores.py`. |
+| 4 sculpted tracks R0/A1/A2/S1/S2/S3 | Queued | 18-job GPU night (this doc). J1 (JBL PT) and L1 (loading-to-CD) need a new generator: not done. |
+| 4 Solana / SAWMOD honesty | Done (labels) | header labels on every `solana_*.yaml` and `sawmod_control_osse.yaml`; comment only, config_sha unchanged. |
+| 7 E0 manifest | Done | `docs/queue/rev2_E0_manifest_2026-11-13.json` |
+| E8 CPU/GPU parity | Queued | CPU night + existing `tools/analysis/lane_parity.py`. |
+| 8 BoTorch M0-M2 | Owner landed separately (main 41fc6d1) | untouched here |
+| MEH | Owner-paused | untouched |
 
-## Still open from Rev2 (not done here)
+## Still open (named, not hidden)
 
-Identity layers D0/D1, balloon quadrature audit P0, Keele relabel in reports, GUI legend/range control in balloon.js, Solana 353 vs 450 mm audit, BoTorch M0 reconciliation (needs the local uncommitted files on the owner machine).
+- GUI balloon range selector (-30/-40/-60 dB); needs a `min_db` API param.
+- Frequency-grid factor in the fidelity ladder (needs a brief copy with a denser grid).
+- Mouth phase / aperture field: only where `p_h`/`p_balloon` are stored; reported as `available.phase`.
+- J1 JBL-PT and L1 loading-to-CD generators (new geometry adapter; R9 research first).
+- Physical-manifest sweep over the whole historical archive (the M0 catalog already covers physical ids).
