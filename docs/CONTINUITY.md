@@ -1,6 +1,32 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-13 (22:2xZ) - CPU-LANE JOBS RE-QUEUED ON THE GPU LANE (FUSED CUDA), BEHIND `home80x60_day_2026-11-13`
+
+- **Owner request:** move the stopped CPU jobs to the GPU queue, and make sure the queue runs **fused CUDA** on the
+  current repo/plan.
+- **New night** `runs/nights/home80x60_gpu_rerun_2026-11-13.yaml` (night files are gitignored): 2 command jobs, same
+  designs/seeds/budgets as the stopped CPU night - `p80x60__osse_ext_throat_700_v7` seed 9012 budget 120
+  (timeout 3 h) and `p80x60__ath_core_14in_700_v7` seed 5678 budget 80 (timeout 2 h), both `--backend beat_cuda`,
+  with no cache/dataset overrides (the GPU lane writes the shared `cache/` + `dataset/`; the 5 CPU candidates stay
+  in `dataset_cpu`).
+- **Fused path verified, not assumed:** `load_config(..., cma_seed=..., backend="beat_cuda")` on both configs resolves
+  `solve.backend=beat_cuda`, `solve.cuda_fused=True`, caps (12000, 12000, 12000), objective v7, 73 angles, balloon on.
+  `--backend beat_cuda` is the same backend, so `cuda_fused` is NOT dropped by the override path
+  (`config.py::load_config` pops it only when the effective backend is not `beat_cuda`). Solver pin unchanged at
+  `0850ef39`; the A3 fork patch is deliberately not installed until G2.
+- **Queue launched detached** (WMI) as pid 39096: `queue.ps1 -Nights home80x60_gpu_rerun_2026-11-13 -Cutoff 23:59
+  -WaitPid 20608 -WaitMatch home80x60_day_2026-11-13`, log `runs\nights\queue_gpu_rerun_2026-11-13.log`. It waits for
+  the running GPU night's runner (verified alive and matching) so the two nights never overlap; the new night starts
+  when that night exits (expected ~21:00-22:30 local) and no later than 23:59.
+- `run_campaign_night --dry-run` on the new night: **exit 0**, both argv blocks resolve and every path exists.
+- **Repo state at queue time:** local `main` `5b8e352` (`origin/main` `9019cbd`); the working tree also carries the
+  other session's uncommitted bo/gui work, which is off the solve path. The queued night runs the Wave A merge
+  `7277795` (A1 namespaced caches, A2 seam fix, A4, A5), so its searches populate the new
+  `cache/solve/p2-<sha12>/` namespace instead of reusing legacy flat entries.
+- **Not done here:** no pin change, no reordering of the running night, no GPU work now (the current night still owns
+  the GPU until it exits), no code change.
+
 ## 2026-11-13 (22:1xZ) - CPU LANE NIGHT STOPPED AT OWNER REQUEST (TOO SLOW); GPU LANE UNTOUCHED; RESUME / MOVE-TO-GPU RECIPE
 
 - **Stopped (owner request, 17:11 local / 22:11Z):** night `home80x60_cpu_2026-11-13` - `queue.ps1` pid 27472

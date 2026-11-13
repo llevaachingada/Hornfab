@@ -3,6 +3,16 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-13 (**Elites tab redesigned for non-technical readers: brief/typology constraints and isometric horn thumbnails, best-per-typology / best-per-brief browsing, paginated 24 at a time, CSV-path noise removed; payload extended with brief/family/brief_target; bo-study-v1.1 final offline integration landed (M2 sensitivity/proposal evidence, immutable run package + `hornlab-search study` CLI, durable proposal-cadence recovery, B8 adversarial full loop); profile-outline thumbnail geometry fixed after live check (closed outline split at the mouth rim, outer wall kept); card hierarchy tuned per owner (constraint line + score largest, gate pills smaller); no GitHub issue state changed**).
 
+Local-only, added 2026-11-13 (22:2xZ) (**CPU jobs re-queued on the GPU lane, fused CUDA; no GitHub issue state changed**):
+- Queued: `home80x60_gpu_rerun_2026-11-13` - 2 fused-CUDA command jobs (osse_ext_throat seed 9012 budget 120;
+  ath_core_14in seed 5678 budget 80) behind `home80x60_day_2026-11-13`; starts when that runner exits, cutoff 23:59.
+  Queue pid 39096, log `runs/nights/queue_gpu_rerun_2026-11-13.log`; `--dry-run` exit 0.
+- Open: if the running GPU night overruns 23:59 the cutoff skips the queued night and it must be re-queued.
+- Open: the CPU-lane eval-rate baseline for the 80x60 extended-throat config is still missing; the queued jobs are
+  the GPU path, not a CPU measurement.
+- Not affected: the running GPU night continues; its measured rate (~100 evals / 81 min) sizes the queued timeouts
+  at 3 h and 2 h.
+
 Local-only, added 2026-11-13 (22:1xZ) (**CPU lane night stopped by owner; no GitHub issue state changed**):
 - Open: `home80x60_cpu_2026-11-13` job 1 was stopped at 5/120 evals (~9.4 min/eval measured, vs the ~103 s/eval
   the night file budgeted); job 2 never started. Partial run `runs/20261113T212428Z-screen-2c4d56`, resumable
