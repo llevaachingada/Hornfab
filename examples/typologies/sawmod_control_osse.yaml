@@ -1,4 +1,6 @@
 # sawmod_control_osse: Ath OS-SE + rectangular morph control waveguide from the
+# REV2 LABEL (2026-11-13): SAWMOD-control-INSPIRED. a_deg and morph W/H are dossier estimates (not in the
+# paper text); the paper control ran half-space infinite baffle in AKABAK. Compare only under one mounting.
 # SAWMOD whitepaper (John White, 2026-04-07). NO knuckles — the paper's AKABAK
 # control twin (same guiding curve / morph as SAWMOD, monotonic flare).
 #

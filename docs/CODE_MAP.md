@@ -133,3 +133,6 @@ bempp_cpu) → `metrics` (beamwidth, ripple, DI, impedance) → `objective` (sca
 | `tools/bench/compare_search_runs.py` | Compare two run dirs' `search.ndjson` (same designs/order/objectives) + candidates/hour. |
 | `docs/throughput/` | `RUNBOOK.md` (owner steps + gates), `WP1_FUSED_IDENTITY_CACHE_PATCH.md` (fork proposal). |
 | `tools/data/renumber_objective_v5_to_v7.py` | 2026-11-12 one-off relabel of the hardened branch's objective "5" to v7 in dataset shards and run dirs (dry run by default, backup, os.replace). |
+| `hornlab_search/metrics/acoustic_v2.py` | Rev2 additive metrics: main-lobe first crossings, sphere DI quadrature, 3D lobes/islands, loading and pattern-control onset, Keele estimate, analyze_response. Not used by any objective. |
+| `hornlab_search/dataset/identity_v2.py` | Rev2 four identity layers (physical = M0 catalog formula, analysis, score, study), compatibility states, append-only jsonl. Additive. |
+| `tools/analysis/acoustic_v2_report.py` | Rev2 zero-BEM v2 analysis of a night's stored responses; matched arm vs control vs fidelity noise floor; RESULTS.json + DECISION.md. |

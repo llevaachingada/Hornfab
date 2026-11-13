@@ -1,4 +1,7 @@
 # budget 300 CMA restart of solana_osse_meh_sf (2026-11-03).
+# REV2 LABEL (2026-11-13): SOLANA-INSPIRED, not a matched Solana 2.0 replica. The athscript-keyed mesh
+# lands ~450x450 mm vs the published 353x353 morph target (docs/evidence/SOLANA_WG_2026-11-01.md);
+# MEH/source/baffle also differ. Comment only: parsed config and config_sha unchanged.
 # solana_osse_meh_sf: Ath OSSE + SF/gcurve + morph WITH MEH midports (tag 10).
 #
 # PURPOSE: Solana waveguide estimate in MEH context — native Ath surface (SF +

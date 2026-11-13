@@ -3,6 +3,12 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-13 (**all GUI work pushed via consolidated main: WP0-WP10 + finishing pass + visual-audit fixes + day-queue lane (GUI-1/GUI-2 closed) + main checkout switched to main + owner's 8765 GUI restarted on the merged code; suite 426 tests green on main; no GitHub issue state changed**).
 
+Local-only, added 2026-11-13 (**Rev2 implementation pass, additive; no GitHub issue state changed**):
+- Open from Rev2: GUI balloon range selector, frequency-grid fidelity factor, J1/L1 generators, archive-wide manifest sweep. See QUEUE_PLAN_REV2 status table.
+
+Local-only, added 2026-11-13 (**Rev2 queue prepared, not launched; no GitHub issue state changed**):
+- `docs/research/QUEUE_PLAN_REV2_2026-11-13.md`, configs `examples/typologies/ablation_2026-11-13/`, night files `docs/queue/`. Open: mesh-check on owner machine; E8 parity pending these runs.
+
 Local-only, added 2026-11-12 (**GUI finishing pass; no GitHub issue state changed**):
 - WP9+WP10 merged into `feat/gui-integration`; merge regression fixed (app.js used `logTicks` without importing it — run detail threw `logTicks is not defined`).
 - `data_verify.py` root-cause fix: `config.yaml` was read via `_read_json` (YAML ≠ JSON), nulling the verify report's name/band; `brief` added to the payload. `verify.js` header/chips/30°-ticks fixes; verify-mode run pages hide search-history panels (WP4 item 5).

@@ -534,10 +534,13 @@ export async function viewBalloon(root, runId, tier = "screen") {
       <h3>3D balloon — shape and colour both encode level</h3>
       <div class="cap">Radius = SPL above −30 dB (on-axis = full radius), colour = the directivity
         palette, white rings = −6 / −12 / −18 / −24 dB isobars. Not equal-area-sampled: shading is
-        interpolated on the sphere, per the grid's sin(θ) layout note. Drag to orbit · scroll to
+        interpolated on the sphere, per the grid's sin(θ) layout note. Relative MAGNITUDE only: the
+        surface is not a wavefront and carries no phase. Levels above on-axis are clipped to 0 dB in
+        the drawing; the line under the plot reports them unclipped. Drag to orbit · scroll to
         zoom · right-drag to pan.</div>
       <div id="balloon-wrap" data-v3d><div class="view3d-fallback">Loading 3D…</div></div>
       <div id="balloon-hover" class="mono" aria-live="polite"></div>
+      <div id="balloon-hot" class="mono" role="note" aria-live="polite"></div>
     </div>
     <div class="grid2">
       <div class="fig">
@@ -566,6 +569,17 @@ export async function viewBalloon(root, runId, tier = "screen") {
   const radarCv = document.getElementById("balloon-radar");
   const sliceSvg = document.getElementById("balloon-slice");
   const wrap = document.getElementById("balloon-wrap");
+  const hotEl = document.getElementById("balloon-hot");
+
+  // Rev2 3.3: the draw clips at 0 dB, so an off-axis hot spot above on-axis would be invisible.
+  function hotText() {
+    if (!payload || !Array.isArray(payload.max_above_axis_db)) return "";
+    const v = payload.max_above_axis_db[fi], n = (payload.clip_count_above_axis || [])[fi] || 0;
+    if (v == null) return "Peak vs on-axis: n/a";
+    return v > 0.05
+      ? `⚠ Off-axis level up to +${v.toFixed(1)} dB ABOVE on-axis at this frequency (${n} grid points clipped to 0 dB in the drawing)`
+      : `Peak vs on-axis: ${v.toFixed(1)} dB (nothing above on-axis, nothing clipped)`;
+  }
 
   function captionFor() {
     if (!payload) return "";
@@ -594,6 +608,7 @@ export async function viewBalloon(root, runId, tier = "screen") {
     freqIn.value = String(fi);
     freqVal.textContent = `${fmtHz(payload.freqs_hz[fi])} · ${fi + 1}/${payload.freqs_hz.length}`;
     hoverEl.textContent = "";
+    hotEl.textContent = hotText();
     if (view3d) { view3d.dispose(); view3d = null; }
     view3d = await initBalloon3d(wrap, payload, { hover: t => { hoverEl.textContent = t; } });
     if (view3d && !wrap.isConnected) { view3d.dispose(); view3d = null; return; }  // gone mid-await
@@ -628,6 +643,7 @@ export async function viewBalloon(root, runId, tier = "screen") {
     fi = Math.max(0, Math.min(payload.spl.length - 1, +freqIn.value | 0));
     freqVal.textContent = `${fmtHz(payload.freqs_hz[fi])} · ${fi + 1}/${payload.freqs_hz.length}`;
     view3d?.setFreq(fi);
+    hotEl.textContent = hotText();
     redraw2d();
   });
   azIn.addEventListener("input", () => {

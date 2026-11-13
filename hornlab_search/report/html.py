@@ -397,7 +397,7 @@ The floor is set by the two-solver disagreement, not by mesh refinement. Caveat:
 <table><tr><th></th><th>needed (m)</th><th>seed (m)</th><th>best (m)</th></tr>
 <tr><td>mouth width (H)</td><td>{{ feas.need_h }}</td><td>{{ feas.seed_h }}</td><td>{{ feas.best_h }}</td></tr>
 <tr><td>mouth height (V)</td><td>{{ feas.need_v }}</td><td>{{ feas.seed_v }}</td><td>{{ feas.best_v }}</td></tr></table>
-<p class="muted">needed = {{ keele }} / (f_low &times; coverage), with f_low = {{ band_lo }} Hz and coverage the TOTAL included angle (Hughes / Keele). A design check, never a constraint on the search. Actual sizes are the outer bounding box of the solved mesh and include the shell.</p></div>
+<p class="muted">needed = {{ keele }} / (f_low &times; coverage), with f_low = {{ band_lo }} Hz and coverage the TOTAL included angle (Hughes / Keele). A Keele-style heuristic ESTIMATE and design check: never a constraint on the search, never proof of feasibility or of the actual pattern-control onset (that comes from the solved field). Actual sizes are the outer bounding box of the solved mesh and include the shell.</p></div>
 
 <!-- 4. convergence -->
 <h2>Convergence</h2>

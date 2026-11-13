@@ -1260,7 +1260,12 @@ def balloon(runs: Path, run_id: str, h: str, tier: str = "screen") -> dict:
         raise ValueError(f"balloon_grid {grid!r} does not match spl_balloon_db shape {spl.shape}")
     nT, nP = int(grid[0]), int(grid[1])
     ref = spl[:, 0:nP].mean(axis=1)                      # on-axis pole row (all phi, one direction)
-    rel = np.clip(spl - ref[:, None], BALLOON_MIN_DB, 0.0).astype(np.float32)
+    raw = spl - ref[:, None]
+    rel = np.clip(raw, BALLOON_MIN_DB, 0.0).astype(np.float32)
+    # Rev2 3.3: the display clip at 0 dB hides off-axis hot spots. Report them, unclipped.
+    with np.errstate(invalid="ignore"):
+        above = np.where(np.isfinite(raw), raw, -np.inf).max(axis=1)
+    above = np.where(np.isfinite(above), above, np.nan)
     return clean({
         "run_id": run_id, "design": h, "label": _balloon_label(d / "designs" / h),
         "freqs_hz": _rnd(freqs, 1),
@@ -1269,6 +1274,8 @@ def balloon(runs: Path, run_id: str, h: str, tier: str = "screen") -> dict:
         "n_dof": n_dof,
         "distance_m": meta.get("distance_m") if isinstance(meta.get("distance_m"), (int, float)) else None,
         "min_db": BALLOON_MIN_DB,
+        "max_above_axis_db": _rnd(above, 2),
+        "clip_count_above_axis": [int(c) for c in (raw > 0.05).sum(axis=1)],
         "spl": rel.tolist(),
     })
 
