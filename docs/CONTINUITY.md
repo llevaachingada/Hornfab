@@ -40,6 +40,19 @@
 - GPU Wave B (G1 batching, G2 fork A/B, G3 screen fidelity, G4 rear, G5 band split) waits for queue slots and Gate 0.
 - No code, solve, queue or cache change in this commit. Handoff claims not re-verified; each package re-reads code.
 
+## 2026-11-13 (~21:37Z) - HF DATASET UPLOAD COMPLETE (per-file retry; verified)
+
+- Uploaded the 8-tar stage `C:\Users\hunte\Hrns\.hf_stage_hunter` (12.82 GB) to the root of
+  `chingadalleva/hornlab-search-data`. Repo `last_modified 2026-11-13 21:36:46Z`; all sizes and LFS
+  SHA-256 match `stage_hashes.json` (`ALL_MATCH=True`).
+- The 13:37 scheduled task verified hashes but its bulk `hf upload` exited 1 without a commit; a bulk
+  retry hit repeated S3 multipart resets. The successful path was a detached per-file retry loop
+  (`ops/hf_upload_retry.ps1`, commits `f0a403a`/`a3c7e01`/`3babbe7`/`0e7d367`/`4cb907a`/`a1d4bee`/
+  `f529366`/`ef36d14`). The task was unregistered. Record: `docs/evidence/HF_UPLOAD_2026-11-13.md`.
+- Snapshot cutoff remains ~04:51-04:56Z (1,501/1,726 g9 rows). The print-day `p80x60` searches are
+  still writing; ISSUES L5.7 remains open for the final re-pack after the 23:30 cut-off. No
+  code/queue/default change.
+
 ## 2026-11-13 (~21:2xZ) - FINAL NIGHT REPORT 2026-11-12 LANDED; STAGED A/B CROSS-REFERENCED (docs only; L5.7 still owed at next GPU boundary)
 
 - [measured] `docs/evidence/NIGHT_2026-11-12.md` finalised via `tools/night_report.py` across all six
