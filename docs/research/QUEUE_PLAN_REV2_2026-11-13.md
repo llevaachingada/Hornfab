@@ -16,7 +16,7 @@ Status: night files written and `--dry-run` clean on Linux; **not launched, not 
 ## Deviations from Rev2 (senior call)
 
 1. **Ablation before metrics_v2, not after.** The solves are cheap (about 13 GPU solves, under 1 h at measured 10-60 s/eval) and the raw balloon/cuts are cached, so v2 descriptors can be computed later with zero BEM. Waiting on P1 would idle the GPU.
-2. **No ATH azimuth-law or petal arm yet.** Those need a reference audit (Rev2 4, R9 gate). The lip/wall ripple generator and the SAWMOD morph already exist and are pinned to published or documented seeds.
+2. **ATH arms added on owner call (2026-11-13).** Built from the atlas2 CORE-law seed (already researched for the atlas). Labeled 'ATH CORE-style', never a claimed ATH product (R9).
 3. **Score J is NOT the readout.** Read raw H/V cuts, balloon, off-axis peak above axis, DI, and `z_throat` per pair. J is recorded only because the runner prints it.
 
 ## Experiment matrix (`examples/typologies/ablation_2026-11-13/`)
@@ -35,12 +35,16 @@ Scheme (a), same mouth outline (SAWMOD control OS-SE, 280x196 morph target, brie
 `abl_m_rate4` (published control), `abl_m_rate2`, `abl_m_rate8`. Factor: morph evolution rate (Rev2 S3).
 Backend forced to `beat_cuda` (the source config says `beat_metal`).
 
+Scheme (a), ATH azimuth law, same 399x399 morph target (brief `native_ath_core_2in_v4_atlas2`, 2 in, full model, slower 40-60 s/eval):
+`ath_a0_control` (all azimuth amplitudes 0), `ath_a1_core` (CORE law), `ath_a1_sf_only`, `ath_a1_cos_only`, `ath_a2_hex` (superformula m=6 petals).
+Note: `morph_allow_shrinkage: 0`, so the smooth control's raw mouth may exceed 399 mm; check bbox in shape_check and report it.
+
 Fidelity ladder on `abl_s0_control`, all `--mode verify`, one factor each: base epw 8 / 73 angles / 2 m;
 `fid_epw6`, `fid_epw10`, `fid_dist8m` (Fraunhofer check, Rev2 3.2), `fid_ang145`.
 
 ## Night files (`docs/queue/`, copy to `runs/nights/` to launch)
 
-- `rev2_gpu_ablation_2026-11-13.yaml`: 13 jobs, lane gpu.
+- `rev2_gpu_ablation_2026-11-13.yaml`: 18 jobs, lane gpu, about 1.5-2 h.
 - `rev2_cpu_parity_2026-11-13.yaml`: 2 jobs, lane cpu, `beat_cpu`, `cache_cpu`/`dataset_cpu`. Pairs with GPU `abl_s0_control` and `abl_m_rate4`.
 
 ## Launch checklist (owner machine)
@@ -57,3 +61,12 @@ Fidelity ladder on `abl_s0_control`, all `--mode verify`, one factor each: base 
 - If `fid_dist8m` beamwidth/DI differs materially from 2 m, all historical 2 m balloon claims for >400 mm mouths get a `far_field_validated: false` label.
 - If CPU vs GPU |dJ| and cut differences are at the ~1e-4 level seen on 2026-11-12, close E8 for these geometries.
 - Only then: a bounded BO/CMA pilot (Rev2 8, 24 new BEM max), separately authorized.
+
+## Code landed with this queue
+
+- `hornlab_search/metrics/acoustic_v2.py`: `main_lobe()` first-crossing main-lobe width with per-side `valid`/`censored`, off-axis peak and outside-main-lobe peak. Additive; no objective uses it. Tests: `tests/test_metrics_acoustic_v2.py`.
+- `gui/data.py::balloon` now also returns `max_above_axis_db` and `clip_count_above_axis` per frequency (unclipped), so hot spots above axis are no longer hidden by the 0 dB display clip.
+
+## Still open from Rev2 (not done here)
+
+Identity layers D0/D1, balloon quadrature audit P0, Keele relabel in reports, GUI legend/range control in balloon.js, Solana 353 vs 450 mm audit, BoTorch M0 reconciliation (needs the local uncommitted files on the owner machine).

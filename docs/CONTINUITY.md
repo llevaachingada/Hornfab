@@ -7,7 +7,10 @@
 - 12 pinned budget-1 configs in `examples/typologies/ablation_2026-11-13/` (all `load_config` ok);
   night files `docs/queue/rev2_gpu_ablation_2026-11-13.yaml` (13 jobs) and `rev2_cpu_parity_2026-11-13.yaml`
   (2 jobs), both `--dry-run` clean. Not mesh-checked (cloud session has no gmsh): run `tools/shape_check.py` first.
-- No code, default, objective, contract or live-queue change. Large product CMA still deferred per Rev2.
+- Owner follow-up: ATH CORE-style arms added (5 configs, GPU night now 18 jobs). Added `metrics/acoustic_v2.py`
+  (main-lobe first crossings, censoring, off-axis peaks) and unclipped above-axis stats in `gui/data.py::balloon`.
+  Targeted tests passed (acoustic_v2 + gui_balloon, 13); wider suite not run per owner. Pushed to main per owner.
+- No default, objective, contract or live-queue change. Large product CMA still deferred per Rev2.
 
 
 ## 2026-11-13 (~00:2xZ) - GUI WORK MERGED INTO LOCAL MAIN; OWNER'S 8765 GUI RESTARTED ON IT; PUSHED (feat/gui-integration fully landed)

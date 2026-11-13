@@ -9,6 +9,11 @@ jobs:
   - {id: abl_m_rate4, kind: search, config: examples/typologies/ablation_2026-11-13/abl_m_rate4.yaml, budget: 1, mode: screen, timeout_s: 3600}
   - {id: abl_m_rate2, kind: search, config: examples/typologies/ablation_2026-11-13/abl_m_rate2.yaml, budget: 1, mode: screen, timeout_s: 3600}
   - {id: abl_m_rate8, kind: search, config: examples/typologies/ablation_2026-11-13/abl_m_rate8.yaml, budget: 1, mode: screen, timeout_s: 3600}
+  - {id: ath_a0_control, kind: search, config: examples/typologies/ablation_2026-11-13/ath_a0_control.yaml, budget: 1, mode: screen, timeout_s: 3600}
+  - {id: ath_a1_core, kind: search, config: examples/typologies/ablation_2026-11-13/ath_a1_core.yaml, budget: 1, mode: screen, timeout_s: 3600}
+  - {id: ath_a1_sf_only, kind: search, config: examples/typologies/ablation_2026-11-13/ath_a1_sf_only.yaml, budget: 1, mode: screen, timeout_s: 3600}
+  - {id: ath_a1_cos_only, kind: search, config: examples/typologies/ablation_2026-11-13/ath_a1_cos_only.yaml, budget: 1, mode: screen, timeout_s: 3600}
+  - {id: ath_a2_hex, kind: search, config: examples/typologies/ablation_2026-11-13/ath_a2_hex.yaml, budget: 1, mode: screen, timeout_s: 3600}
   - {id: fid_base_verify, kind: search, config: examples/typologies/ablation_2026-11-13/abl_s0_control.yaml, budget: 1, mode: verify, timeout_s: 3600}
   - {id: fid_epw6, kind: search, config: examples/typologies/ablation_2026-11-13/fid_epw6.yaml, budget: 1, mode: verify, timeout_s: 3600}
   - {id: fid_epw10, kind: search, config: examples/typologies/ablation_2026-11-13/fid_epw10.yaml, budget: 1, mode: verify, timeout_s: 3600}
