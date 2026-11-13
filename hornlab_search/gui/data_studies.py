@@ -449,3 +449,105 @@ def artifact_panel(artifact) -> dict:
     if len(json.dumps(result, allow_nan=False).encode()) > MAX_BYTES:
         raise ValueError("artifact view exceeds payload limit")
     return result
+
+
+# --------------------------------------------------------------------------- bounded preview
+
+
+def bounded_preview(value, *, max_items: int = MAX_ITEMS, max_bytes: int = MAX_BYTES - 8_000):
+    """Return ``(preview, truncations)``: a display-only copy of a real artifact that fits
+    the panel limits, with every shortening made explicit.
+
+    Real study artifacts (snapshots, training manifests, proposals) routinely hold more
+    than 50 ids/configs; :func:`build_study_view` deliberately refuses such data. This helper
+    produces the bounded view the panel may show: lists keep their first items plus a
+    ``"... N more items not shown"`` marker, mappings keep their first keys plus a
+    ``"_truncated_keys"`` count, long strings are cut with a marker, and nesting deeper than
+    eight levels is summarised. It never invents or reorders values. When the result still
+    exceeds the byte budget the item cap is reduced (50 -> 20 -> 10 -> 5 -> 2).
+    """
+    caps = [c for c in (max_items, 20, 10, 5, 2) if c <= max_items] or [2]
+    for cap in caps:
+        count = [0]
+        preview = _preview(value, cap, 0, count)
+        try:
+            size = len(json.dumps(preview, allow_nan=False).encode())
+        except ValueError:
+            continue
+        if size <= max_bytes:
+            return preview, count[0]
+    return {"_truncated": "artifact too large for the bounded panel; open the artifact file"}, 1
+
+
+def _preview(value, cap, depth, count):
+    if value is None or isinstance(value, (bool, int)):
+        return value
+    if isinstance(value, float):
+        if math.isfinite(value):
+            return value
+        count[0] += 1
+        return None
+    if isinstance(value, str):
+        if len(value) > 4096:
+            count[0] += 1
+            return value[:4000] + f"... ({len(value) - 4000} more characters not shown)"
+        return value
+    if depth >= 8:
+        count[0] += 1
+        return "... (nested detail not shown)"
+    if isinstance(value, (list, tuple)):
+        items = [_preview(v, cap, depth + 1, count) for v in list(value)[:cap - 1 if len(value) > cap else cap]]
+        if len(value) > cap:
+            count[0] += 1
+            items.append(f"... {len(value) - (cap - 1)} more items not shown")
+        return items
+    if isinstance(value, Mapping):
+        keys = [k for k in value if isinstance(k, str)]
+        skipped_non_str = len(value) - len(keys)
+        shown = keys if len(keys) <= cap else keys[:cap - 1]
+        out = {k: _preview(value[k], cap, depth + 1, count) for k in shown}
+        hidden = len(keys) - len(shown) + skipped_non_str
+        if hidden:
+            count[0] += 1
+            out["_truncated_keys"] = hidden
+        return out
+    count[0] += 1
+    return "... (non-JSON value not shown)"
+
+
+def decision_panel_artifact(study, export_record):
+    """Decide-phase panel input built from the registry's recorded decisions.
+
+    ``service.decide`` records decisions in the registry (not as a ``decision`` artifact), so
+    before this the Decide phase showed "missing" even after a decision was recorded (S10 QA
+    finding). Returns ``None`` when nothing is recorded. Status stays ``partial``: a recorded
+    decision is not a validated decision artifact or export bundle.
+    """
+    if not isinstance(export_record, Mapping):
+        return None
+    decisions = [d for d in export_record.get("decisions") or () if isinstance(d, Mapping)]
+    if not decisions:
+        return None
+    recent = decisions[-20:]
+    artifacts = [{"kind": a.get("kind"), "sha256": a.get("sha256"), "revision": a.get("revision")}
+                 for a in (export_record.get("artifacts") or ()) if isinstance(a, Mapping)][:MAX_ITEMS]
+    reasons = ["Decisions are read from the study registry; no validated decision artifact or "
+               "export bundle backs them."]
+    if len(decisions) > len(recent):
+        reasons.append(f"Showing the latest {len(recent)} of {len(decisions)} recorded decisions.")
+    return {
+        "status": "partial",
+        "revision": study.get("revision"),
+        "data": {
+            "recorded_decisions": [{"seq": d.get("seq"), "revision": d.get("revision"),
+                                    "outcome": d.get("outcome"),
+                                    "rationale": str(d.get("rationale") or "")[:2000]}
+                                   for d in recent],
+            "current_revision_decided": any(d.get("revision") == study.get("revision")
+                                            for d in decisions),
+            "children": list(export_record.get("children") or ())[:MAX_ITEMS],
+            "artifacts": artifacts,
+        },
+        "provenance": {"source": "study registry decisions table"},
+        "reasons": reasons,
+    }

@@ -17,6 +17,9 @@ const STATES = {
 const ACTIONS = new Set(["save_draft", "select_evidence", "analyze", "propose", "package", "launch", "cancel", "decision", "revise", "save_seeds", "create_child"]);
 const MUTATING_READY = new Set(["select_evidence", "analyze", "propose", "package", "launch", "decision", "save_seeds", "create_child"]);
 const ID = /^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/;
+// RegExp.test coerces its argument, so ID.test(undefined) is true ("undefined"); identity
+// checks must require a real string first.
+const isId = value => typeof value === "string" && ID.test(value);
 const SHA256 = /^[a-f0-9]{64}$/i;
 const ARTIFACT_REF = /^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/;
 const POLICY_MODES = new Set(["scalar", "pareto", "cma_seed", "exploration"]);
@@ -33,13 +36,13 @@ const esc = value => String(value ?? "—").replace(/[&<>"']/g, c => ({"&":"&amp
 const label = s => String(s).replace(/_/g, " ");
 
 export function studyRoute(id, phase = "overview") {
-  if (!ID.test(id) || !STUDY_PHASES.includes(phase)) throw new Error("Invalid study route");
+  if (!isId(id) || !STUDY_PHASES.includes(phase)) throw new Error("Invalid study route");
   return `#/analysis/study/${encodeURIComponent(id)}/${phase}`;
 }
 
 // Only construct links to existing internal run/verify routes; never trust a provided URL.
 export function studyRunLink(runId, studyId, phase = "execute", verify = false) {
-  if (!ID.test(runId) || !ID.test(studyId) || !STUDY_PHASES.includes(phase)) return null;
+  if (!isId(runId) || !isId(studyId) || !STUDY_PHASES.includes(phase)) return null;
   const back = studyRoute(studyId, phase);
   return `#/run/${encodeURIComponent(runId)}${verify ? "/verify" : ""}?${new URLSearchParams({return: back, study: studyId})}`;
 }

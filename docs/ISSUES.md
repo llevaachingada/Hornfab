@@ -31,6 +31,33 @@ Local-only, added 2026-11-13 (22:05Z) (**CPU lane GUI progress parity; no GitHub
   there while its full-width card is correct. A browser visual pass of the new cards is still
   pending after a server restart.
 
+Local-only, added 2026-11-13 ~22:1xZ (**bo-study-v1.1 local pass: strict native gate, GUI QA fixes,
+S11 rebuild, home/S5 readiness; no GitHub issue state changed**):
+- Open: replay metric regeneration drift in `hornlab_search/objective/replay.py` — a brief target that
+  differs **only** in `driver_exit_radius_mm` regenerates `di`/`dislope`/`distd` and moves stored J
+  1.813 to 4.187 (row 57/387) and frozen row 37/356 from 2.969 to 5.338. Evidence
+  `docs/evidence/bo_study_2026-11-12/m2/gate/target_probe.json`, finding `m2/GATE.md` section 6.
+  The R0 changed-target variant is suspect until `objective/replay.py` is reviewed.
+- Open: `tools/analysis/seed_pack.py::_hex40` rejects the real 12-hex design hash (30,723/30,723
+  catalog rows), so both S5 seed packs are empty. The cloud PR owns the parser; regenerate the packs
+  after it merges. Evidence `docs/evidence/bo_study_2026-11-12/s5/STATUS.md`.
+- Open: GUI study panels emit no actions, so every phase renders "No action available" (S10
+  headless QA; screenshots under `docs/evidence/bo_study_2026-11-12/s10/`). Bounded previews,
+  recorded decisions and the Execute package fallback are fixed; the upstream action payload is not.
+- Open: `propose` needs BoTorch (isolated `bayes-venv`) and `hornlab_mesher` (project venv) in one
+  interpreter; no single sanctioned venv has both, so a live fit + revalidation cannot run here.
+- Open: the M2 gate verdict is `insufficient_evidence`: the frozen native cohort is one connected
+  experiment group (197 rows), not the five independent groups that group-held-out validation
+  requires. `m2/GATE.md`; no pooling or invented groups.
+- Open (home task): 217 catalog-ok rows >= n_min 16, but zero replayable score rows — the offline
+  scan is ATH-target-only, replay dispatches v1-4 only (home is objective v7), and all 217 rows are
+  missing `impedance_matrix` while loading weight is 1.0. `home/READINESS.md`.
+- Fixed in this pass: `bo.data.build_native_training_set` now enforces the strict
+  version/ripple/policy gate and applies the `morph_exponent` no-op only when the key exists (the
+  six-knob home task uses the identity projection); GUI study panels get bounded previews, recorded
+  decisions and the Execute package fallback; `studies.js` no longer renders `#/run/undefined`
+  links. Tests: `test_bo_native_policy_gate.py` (9), `test_gui_studies_qa_fixes.py` (5).
+
 Local-only, added 2026-11-13 ~21Z (**solver speed plan; no GitHub issue state changed**):
 - Resolved: A1 namespaced caches landed. (was: solve/mesh cache does not check solver/mesher SHA (blocker before any fork pin bump). Plan: SOLVER_SPEED_IMPLEMENTATION_PLAN_2026-11-13 A1.
 - Resolved: A2 seam probe fixed.

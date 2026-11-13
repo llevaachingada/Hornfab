@@ -1,0 +1,169 @@
+{
+ "require_single_fidelity=False": {
+  "status": "ok",
+  "n": 197,
+  "n_eligible": 197,
+  "refusal_reasons": {
+   "catalog_row_missing": 3
+  },
+  "cohort_policy": {
+   "status": "ok_mixed_fidelity_declared",
+   "require_single_fidelity": false,
+   "expected_objective_version": 4,
+   "policy_fields": [
+    "backend",
+    "brief_hash",
+    "dependency_hash",
+    "task_identity",
+    "objective_version",
+    "target",
+    "weights",
+    "metric_source"
+   ],
+   "fidelity_fields": [
+    "fidelity",
+    "grid_hash",
+    "solve_hash"
+   ],
+   "values": {
+    "backend": {
+     "beat_cuda": 197
+    },
+    "brief_hash": {
+     "fa45251216b5": 197
+    },
+    "dependency_hash": {
+     "e3614d0ba5956ded": 197
+    },
+    "task_identity": {
+     "c6826f76bb1de9fa": 197
+    },
+    "objective_version": {
+     "4": 197
+    },
+    "target": {
+     "1d6fd0e17786cfe0": 197
+    },
+    "weights": {
+     "c2b1ed83614b8e69": 197
+    },
+    "metric_source": {
+     "stored": 197
+    },
+    "fidelity": {
+     "screen": 192,
+     "verify": 5
+    },
+    "grid_hash": {
+     "1793907e36c819f4": 5,
+     "7bd5a9d5825df12e": 192
+    },
+    "solve_hash": {
+     "3181879c7477": 192,
+     "4d7ec3ee2758": 5
+    }
+   },
+   "conflicts": [],
+   "missing": [],
+   "mixed_fidelity_fields": [
+    "fidelity",
+    "grid_hash",
+    "solve_hash"
+   ],
+   "note": "Policy identity is checked across the accepted rows from the joined S0 catalog and R0 replay values; it is evidence from those artifacts, not an independent re-derivation of their source files."
+  },
+  "ids_sha256": "4b4fccc45aabeaa5923703a36d23cda1c57f89ca2dbafa74a8ee75c9c25d1b9a",
+  "x_sha256": "e359ce20f649f5b836553c4b21c89c1be740d430b5bdda5210ea6affa4b17dd2",
+  "j_sha256": "2e813ff90fe3c134c857677275577e4424202ad967b40a6d292ac7ab05bc702a"
+ },
+ "require_single_fidelity=True": {
+  "status": "incompatible_cohort",
+  "n": 197,
+  "n_eligible": 197,
+  "refusal_reasons": {
+   "catalog_row_missing": 3
+  },
+  "cohort_policy": {
+   "status": "incompatible",
+   "require_single_fidelity": true,
+   "expected_objective_version": 4,
+   "policy_fields": [
+    "backend",
+    "brief_hash",
+    "dependency_hash",
+    "task_identity",
+    "objective_version",
+    "target",
+    "weights",
+    "metric_source"
+   ],
+   "fidelity_fields": [
+    "fidelity",
+    "grid_hash",
+    "solve_hash"
+   ],
+   "values": {
+    "backend": {
+     "beat_cuda": 197
+    },
+    "brief_hash": {
+     "fa45251216b5": 197
+    },
+    "dependency_hash": {
+     "e3614d0ba5956ded": 197
+    },
+    "task_identity": {
+     "c6826f76bb1de9fa": 197
+    },
+    "objective_version": {
+     "4": 197
+    },
+    "target": {
+     "1d6fd0e17786cfe0": 197
+    },
+    "weights": {
+     "c2b1ed83614b8e69": 197
+    },
+    "metric_source": {
+     "stored": 197
+    },
+    "fidelity": {
+     "screen": 192,
+     "verify": 5
+    },
+    "grid_hash": {
+     "1793907e36c819f4": 5,
+     "7bd5a9d5825df12e": 192
+    },
+    "solve_hash": {
+     "3181879c7477": 192,
+     "4d7ec3ee2758": 5
+    }
+   },
+   "conflicts": [],
+   "missing": [],
+   "mixed_fidelity_fields": [
+    "fidelity",
+    "grid_hash",
+    "solve_hash"
+   ],
+   "note": "Policy identity is checked across the accepted rows from the joined S0 catalog and R0 replay values; it is evidence from those artifacts, not an independent re-derivation of their source files."
+  },
+  "ids_sha256": "4b4fccc45aabeaa5923703a36d23cda1c57f89ca2dbafa74a8ee75c9c25d1b9a",
+  "x_sha256": "e359ce20f649f5b836553c4b21c89c1be740d430b5bdda5210ea6affa4b17dd2",
+  "j_sha256": "2e813ff90fe3c134c857677275577e4424202ad967b40a6d292ac7ab05bc702a"
+ },
+ "committed_hashes": {
+  "ids_sha256": "bd5994337731891e0c39c00bc6e8e38da9027018d068d8d7c67d2442689bc710",
+  "j_sha256": "2e813ff90fe3c134c857677275577e4424202ad967b40a6d292ac7ab05bc702a",
+  "x_sha256": "e359ce20f649f5b836553c4b21c89c1be740d430b5bdda5210ea6affa4b17dd2",
+  "y_phys_sha256": "2e813ff90fe3c134c857677275577e4424202ad967b40a6d292ac7ab05bc702a",
+  "y_sha256": "7b7df119afe0ff256dcfbe89ececfdc16917929b571932315dee2d65445aa93c"
+ },
+ "inputs_sha256": {
+  "examples\\typologies\\campaign_2026-10-26_v4\\native__ath_core_v4.yaml": "e86d516548015afff6a3d8e6e3535e9abfe16fbfebc70c1617090894c791b317",
+  "scratch\\bo_m0\\r0\\offline_scores_native_full\\offline_scores.json": "2e5f24708b7095675e84da6ab1848056ab293fa1f6f2c34943bed093887da964",
+  "scratch\\bo_m0\\s0\\catalog\\catalog.csv": "ba9b1211ba39b46cee6fa337956916141d27133e32b4833f496b6820c2bf3d5f",
+  "docs\\evidence\\bo_study_2026-11-12\\b2_native\\native_trainingset.json": "42fb1e342d5bfe30c144e423acecbaf15a85530b2f7833059811eb760361313d"
+ }
+}

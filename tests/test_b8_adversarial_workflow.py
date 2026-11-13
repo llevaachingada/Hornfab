@@ -46,7 +46,13 @@ def test_complete_coupled_study_workflow(tmp_path):
     assert data['data'] == SNAPSHOT
     explain = app.get(f'/api/studies/{sid}/explain', {})
     assert explain['data']['reference'] == REFERENCE
-    assert app.get(f'/api/studies/{sid}/execute', {})['status'] == 'missing'
+    # No run results yet: the Execute phase shows the prepared package (S10 QA fix),
+    # explicitly not launched and not validated.
+    execute_missing = app.get(f'/api/studies/{sid}/execute', {})
+    assert execute_missing['status'] == 'unknown'
+    assert execute_missing['provenance']['sha256'] == package['package_id']
+    assert execute_missing['data']['execution_mode'] == 'adaptive_serial'
+    assert any('prepared run package' in reason for reason in execute_missing['reasons'])
 
     # propose view keeps predicted rows and original units/signs -------------
     proposal_view = app.get(f'/api/studies/{sid}/propose', {})

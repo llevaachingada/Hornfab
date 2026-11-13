@@ -1,0 +1,35 @@
+{
+ "below_percentile_excluded": 0,
+ "duplicates_excluded": 0,
+ "eligible": {
+  "by_config": {},
+  "by_run": {},
+  "total": 0
+ },
+ "generated_utc": "2026-11-13T21:40:11Z",
+ "input": {
+  "catalog": "scratch\\bo_m0\\m2_gate\\catalog_20261113\\catalog.csv",
+  "malformed_records": 30723,
+  "scores": "scratch\\bo_m0\\r0\\offline_scores_native_full\\offline_scores.json",
+  "total_raw_records": 30723
+ },
+ "limitations": [
+  "Diversity selection uses only the recorded score (J); geometric descriptors are not in the catalog and would improve basin detection.",
+  "Round-trip kind 'hash_identity' confirms the catalog row's own design_hash is non-empty hex; it does NOT re-derive the geometry from knob values (needs_config=True for all designs).",
+  "Full geometric round-trip (calling GeneratedSpace.to_design and comparing the resulting hash) requires loading the typology config and is not performed here.  Run the round-trip check with the config's search module for each selected design before use.",
+  "Screen-only designs are labelled; prefer matched verify data when available."
+ ],
+ "missing_provenance_count": 0,
+ "schema_version": 1,
+ "selections": [],
+ "spec": {
+  "family": "OSSE",
+  "fidelity": "screen",
+  "k": 8,
+  "min_score_percentile": 0.0,
+  "objective_version": 4,
+  "seed": 0,
+  "task": "native__ath_core_v4"
+ },
+ "tool": "seed_pack"
+}

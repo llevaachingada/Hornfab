@@ -185,20 +185,13 @@ PRs into `main` only, with complete unedited checkpoint output pasted in the bod
 
 ## Agent routing (opencode, this repo)
 
-Configured in `.opencode/oh-my-opencode-slim.json` (preset `fm-cloud`):
+All agents use the shared **`deepseek-flash-max`** preset defined in
+`~/.config/opencode/oh-my-opencode-slim.json`. `Hrns` and `hornlab-search` are one project; do not
+add a separate preset here. This repo's `.opencode/oh-my-opencode-slim.json` only selects that preset
+and grants the HornLab skills to `fixer` and `designer`; it defines no presets of its own.
 
-- **Orchestrator**: `deepseek/deepseek-flash` (DeepSeek V4.1 Flash, DeepSeek API)
-- **designer**: `ollama-cloud/glm-5.3-flash`
-- **fixer / explorer / librarian / council**: `deepseek/deepseek-flash` (DeepSeek V4.1 Flash —
-  the live DeepSeek API's flash tier; the older `deepseek-v4-flash` ID appears in public model
-  registries but is no longer served by the live DeepSeek or ollama-cloud APIs), falling back to
-  `ollama-cloud/deepseek-v4.1-flash` if deepseek is rate-limited or out of tokens
-- **oracle**: `ollama-cloud/glm-5.3` on variant `high`
-- **Background agents**: up to 3 concurrent on deepseek and 3 on ollama-cloud (up to 6 total)
-- **Council critics** (global config, all live-verified): `nemotron-3-super`, `minimax-m3`,
-  `kimi-k3` — all on ollama-cloud, run in parallel
-
-Even with 6 background agents, the same rule binds: **one GPU solve at a time.**
+- **Background agents**: up to 3 concurrent on deepseek and 6 on ollama-cloud.
+- Even with 6 background agents, the same rule binds: **one GPU solve at a time.**
 
 **Skills (OpenCode reads `.claude/skills/` and `.opencode/skills/`; this file, not CLAUDE.md, is what
 OpenCode loads):** `hornlab-gpu-job` (any GPU/solve job), `hornlab-night-queue` (unattended nights),

@@ -1,0 +1,608 @@
+schema_version: 1
+protocol: bo-study-v1.1
+manifest_id: s11-pilot2-verify-allocation-crease-core-law-v4
+kind: overlay
+mode: prepare_only
+execution_authorized: false
+question: 'Hypothesis (not a claim): on crease__core_law_v4, an enriched audit verification allocation
+  (2 finalists + 4 audit) changes the verified top-3 rank or the accept/reject decision relative to the
+  current 4-finalist + 2-audit allocation at the same six verify calls.  No speedup or improvement is
+  promised.'
+notes: This is a second physical task, not a second copy of pilot 1.  It shares the brief/scoring family
+  but has different geometry/bounds and more searched knobs. Results are never pooled with native__ath_core_v4.  The
+  overlay is never applied by this tool.
+task:
+  config: examples/typologies/campaign_2026-10-26_v4/crease__core_law_v4.yaml
+  brief: examples/briefs/campaign_2026-10-26_v4/native_ath_core_2in_v4.yaml
+  backend: beat_cuda
+  role: second_task_verification_allocation
+  source_caveat_hz: 3957
+  source_caveat: 2-inch uniform-piston f11 is approximately 3957 Hz; above it the 300-8000 Hz result is
+    a geometry comparison under that excitation, not real 2-inch driver exit behaviour.
+  cohort:
+    census: scratch/bo_m0/s0/ath_census/cohorts.json
+    offline_scores: scratch/bo_m0/r0/offline_scores_native_full/offline_scores.json
+    native_only: true
+    pool_across_configs: false
+    note: The S0 primary screen group contains native__ath_core_v4, atlas__ath_core, atlas__core_law and
+      crease__core_law_v4 at the same grid/dependency/target hash.  The census reports pooled group counts
+      (1,499 complete replayable rows), not a config-specific count for crease.
+  comparability:
+    reference_task: native__ath_core_v4
+    relation: Different physical task, same brief family and objective v4; descriptive group membership
+      only, never a pooled comparison.
+    shared_identity:
+    - same brief file native_ath_core_2in_v4.yaml and objective v4 weights/tolerances/cov_narrow_ratio
+      2.0
+    - 'S0 primary screen group: grid_hash 7bd5a9d5825df12e, dependency_hash e3614d0ba5956ded, target_hash
+      add33bc8c5127916'
+    caveats:
+    - 'Different physical task: crease__core_law_v4 adds the published per-direction a/n/s law (az_* knobs)
+      and pins a 399x399 mouth; its results are not pooled with native__ath_core_v4.'
+    - The S0 census gives pooled four-config group counts, not config-specific counts; it does not establish
+      a config-level independent-experiment count for crease.
+    - run_id is missing on all rows of the S0 screen group; independent-experiment identity is insufficient_evidence.  Local
+      crease run dirs are used read-only for runtime timing, not as independent proof.
+    - Pilot 2 compares two verification allocations on the same second task; it does not compare across
+      tasks.
+    - Brief-target replay regeneration drift (M2 GATE.md 6) applies to any replayed comparison; pilot
+      endpoints use the pilot runs' own runtime verify J.
+    pool_across_tasks: false
+  pins:
+    status: blocked_until_scheduling
+    rule: Execution pins are the lib SHAs recorded in each arm run.json at dispatch; both arms of every
+      pair must run under one identical pin set, recorded before the first dispatch.  A pin change mid-pilot
+      is a new revision.
+    checkout_head_at_preparation: 72777950e4f9ec9cde8ae35bd3c65fc492ba6408
+    source_run_pins:
+    - run: runs/20261027T052720Z-screen-e7f4f8
+      lib_shas: &id001
+        hornlab_beat_bem: 760a1ecf6075f5ccdbf97a69874c7f88441e36c1
+        hornlab_bempp_bem: 8e6910602ece9abb2e9ce0db7a637f4bedf17f53
+        hornlab_mesher: b922e807a5cf10cf732c4557ec0b9b495762afd7
+        hornlab_plots: 9e4a6d0dd2ccb6e735dd00233dccccb50d12ed44
+        hornlab_search: 10d45b247d8819ee64505a7c6f27df0e8df86c7d
+    blocked_reason: the live checkout has moved since the source runs (beat/mesher/hornlab_search SHAs
+      differ between source runs); the pin set must be chosen and frozen by the owner when the pilot is
+      scheduled.
+  blocked_evidence:
+  - item: stop_rules.deadline.deadline_utc
+    status: blocked
+    reason: owner availability and lane schedule; GPU queue busy until 23:30 local 2026-11-13
+  - item: task.pins (execution pin set)
+    status: blocked
+    reason: the live checkout has moved since the source runs (beat/mesher/hornlab_search SHAs differ
+      between source runs); the pin set must be chosen and frozen by the owner when the pilot is scheduled.
+  - item: paired-difference SD / power plan
+    status: blocked
+    reason: no paired crease replicates exist yet; expansion is planned from the pilot pairs
+  - item: execution_authorized
+    status: blocked
+    reason: owner gate; prepare-only manifest
+arms:
+- id: current_fidelity_allocation
+  label: 'current allocation: up to 4 finalists + 2 audit verify calls'
+  policy: current_fidelity_allocation
+  hypothesis_id: H2
+  cma_seeds:
+  - 5201
+  - 5202
+  - 5203
+  - 5204
+  - 5205
+  - 5206
+  - 5207
+  - 5208
+  - 5209
+  - 5210
+  - 5211
+  - 5212
+  - 5213
+  - 5214
+  - 5215
+  - 5216
+  - 5217
+  - 5218
+  - 5219
+  - 5220
+  - 5221
+  - 5222
+  - 5223
+  - 5224
+  - 5225
+  config_overlay:
+    search:
+      budget_counts: valid
+      max_attempts: 120
+  config_overlay_applied: false
+  config_overlay_note: Existing config-schema keys only.  A reviewed runner must materialize this overlay
+    before dispatch; this tool never writes examples/ or any live config.
+  verification:
+    finalist_count: 4
+    audit_count: 2
+    selection_rule: Up to four distinct screen finalists by frozen J, then two uniformly selected remaining
+      eligible screened designs from the reserved audit RNG seed; no duplicates or already-verified specs.
+  commands:
+    search:
+      argv:
+      - search
+      - --config
+      - '{config}'
+      - --brief
+      - '{brief}'
+      - --budget
+      - '18'
+      - --mode
+      - screen
+      - --cma-seed
+      - '{seed}'
+      - --runs-dir
+      - '{out}/runs'
+      - --cache-dir
+      - '{out}/cache'
+      - --dataset-dir
+      - '{out}/dataset'
+      - --backend
+      - beat_cuda
+    verify_finalists:
+      argv:
+      - verify
+      - --run
+      - '{screen_run_dir}'
+      - --designs
+      - '{finalist_hashes}'
+      - --brief
+      - '{brief}'
+      - --runs-dir
+      - '{out}/runs'
+      - --cache-dir
+      - '{out}/cache'
+      - --dataset-dir
+      - '{out}/dataset'
+      - --backend
+      - beat_cuda
+      - --verify-dir
+      - '{out}/verify/finalists'
+    verify_audit:
+      argv:
+      - verify
+      - --run
+      - '{screen_run_dir}'
+      - --designs-file
+      - '{audit_designs_csv}'
+      - --brief
+      - '{brief}'
+      - --runs-dir
+      - '{out}/runs'
+      - --cache-dir
+      - '{out}/cache'
+      - --dataset-dir
+      - '{out}/dataset'
+      - --backend
+      - beat_cuda
+      - --verify-dir
+      - '{out}/verify/audit'
+- id: enriched_audit_verification
+  label: 'enriched audit: 2 finalists + 4 audit verify calls'
+  policy: enriched_audit_verification
+  hypothesis_id: H2
+  cma_seeds:
+  - 5201
+  - 5202
+  - 5203
+  - 5204
+  - 5205
+  - 5206
+  - 5207
+  - 5208
+  - 5209
+  - 5210
+  - 5211
+  - 5212
+  - 5213
+  - 5214
+  - 5215
+  - 5216
+  - 5217
+  - 5218
+  - 5219
+  - 5220
+  - 5221
+  - 5222
+  - 5223
+  - 5224
+  - 5225
+  config_overlay:
+    search:
+      budget_counts: valid
+      max_attempts: 120
+  config_overlay_applied: false
+  config_overlay_note: Existing config-schema keys only.  Verification allocation is a study policy, not
+    a config default; it is not written into examples/.
+  verification:
+    finalist_count: 2
+    audit_count: 4
+    selection_rule: Up to two distinct screen finalists by frozen J, then four uniformly selected remaining
+      eligible screened designs from the reserved audit RNG seed; no duplicates or already-verified specs.
+  commands:
+    search:
+      argv:
+      - search
+      - --config
+      - '{config}'
+      - --brief
+      - '{brief}'
+      - --budget
+      - '18'
+      - --mode
+      - screen
+      - --cma-seed
+      - '{seed}'
+      - --runs-dir
+      - '{out}/runs'
+      - --cache-dir
+      - '{out}/cache'
+      - --dataset-dir
+      - '{out}/dataset'
+      - --backend
+      - beat_cuda
+    verify_finalists:
+      argv:
+      - verify
+      - --run
+      - '{screen_run_dir}'
+      - --designs
+      - '{finalist_hashes}'
+      - --brief
+      - '{brief}'
+      - --runs-dir
+      - '{out}/runs'
+      - --cache-dir
+      - '{out}/cache'
+      - --dataset-dir
+      - '{out}/dataset'
+      - --backend
+      - beat_cuda
+      - --verify-dir
+      - '{out}/verify/finalists'
+    verify_audit:
+      argv:
+      - verify
+      - --run
+      - '{screen_run_dir}'
+      - --designs-file
+      - '{audit_designs_csv}'
+      - --brief
+      - '{brief}'
+      - --runs-dir
+      - '{out}/runs'
+      - --cache-dir
+      - '{out}/cache'
+      - --dataset-dir
+      - '{out}/dataset'
+      - --backend
+      - beat_cuda
+      - --verify-dir
+      - '{out}/verify/audit'
+budget:
+  per_arm_per_replicate:
+    screen_new_bem: 18
+    verify_new_bem: 6
+    total_new_bem: 24
+    candidate_attempts: 120
+    screen_semantics: 'search.budget_counts: valid means the 18 budget units count VALID screen evaluations;
+      deterministic refusals consume the 120-attempt cap, not the 18-valid budget.'
+    retries_count_against_total: true
+  cost_accounting:
+    attempts_include_cheap_refusals: true
+    cheap_refusal_is_not_a_bem_call: true
+    new_bem_calls_separate: true
+    verify_calls_separate: true
+    retries_reserve_another_unit: true
+    unknown_attempt_retains_reservation: true
+    cache_hits_not_new_bem: true
+    note: The enriched-audit arm spends the same six verify calls as the current arm; a larger verify
+      budget would be a new revision.  Attempts, retries and unknown reservations are accounted exactly
+      as in pilot 1.
+  replication_aggregate:
+    n_pairs: 25
+    n_arms: 2
+    screen_new_bem: 900
+    verify_new_bem: 300
+    total_new_bem: 1200
+    candidate_attempts: 6000
+    planning_only: true
+    execution_authorized: false
+    note: Arithmetic expansion of the 25-seed paired schedule.  This aggregate is a planning figure only;
+      no execution is authorized by this manifest.
+replicates:
+  seeds:
+  - 5201
+  - 5202
+  - 5203
+  - 5204
+  - 5205
+  - 5206
+  - 5207
+  - 5208
+  - 5209
+  - 5210
+  - 5211
+  - 5212
+  - 5213
+  - 5214
+  - 5215
+  - 5216
+  - 5217
+  - 5218
+  - 5219
+  - 5220
+  - 5221
+  - 5222
+  - 5223
+  - 5224
+  - 5225
+  pairing:
+    predeclared: true
+    method: paired_by_seed_index
+    unit: cma_seed_index
+    difference_definition: d = A - B (negative => A has lower J / is better)
+    same_seed_is_not_shared_candidates: true
+    replicate_unit: run_dir
+    resume_segments_are_one_replicate: true
+    note: Pair seed 5201 in the current-allocation arm with seed 5201 in the enriched-audit arm, etc.  A
+      shared CMA seed is not proof of shared candidates; pairing is valid only because it is predeclared.  Pilot
+      2 uses its own 5201-5225 schedule; 5101-5125 is reserved for pilot 1.
+  run_order:
+    policy: alternate_or_randomize
+    note: 'Alternate allocation order by seed index (odd current-first, even enriched-first) or predeclare
+      a fixed random permutation before the first dispatch and record it.  Never run the two arms concurrently:
+      the GPU lane is serial.'
+verification_policy:
+  verify_new_bem_cap: 6
+  audit_rng_seed: 90212
+  exclude_duplicates_and_already_verified: true
+  shortfall: verify fewer designs and report the shortfall; never duplicate or substitute predicted designs
+  selection_rule: The current arm uses up to four finalists + two audit designs; the enriched arm uses
+    up to two finalists + four audit designs.  Both spend exactly six verify calls and use the same reserved
+    audit RNG seed and audit eligibility rule; the only difference is the finalist/audit split.
+  allocation_comparison: true
+stop_rules:
+  budget:
+    enabled: true
+    rule: Stop dispatching at 24 new BEM calls or 120 new attempts for an arm/seed block, whichever comes
+      first; preserve partial results and the attempt journal.
+  deadline:
+    enabled: true
+    deadline_required: true
+    deadline_utc: null
+    placeholder: true
+    rule: A wall deadline must be chosen from comparable measured logs and owner availability before real
+      scheduling.  This prepared manifest leaves the deadline as an explicit placeholder.
+  cancellation:
+    enabled: true
+    rule: An explicit cancellation stops future dispatch, cancels only the owned lane/process tree, and
+      preserves partial results.  CPU analysis/proposal work never invokes GPU cleanup.
+  pool_exhaustion:
+    enabled: true
+    rule: If the legal candidate pool has no novel candidate after the declared retries, stop with pool_exhausted;
+      do not widen bounds or fabricate a design.
+  infrastructure_failures:
+    enabled: true
+    consecutive_threshold: 3
+    rule: Stop after three consecutive infrastructure/solver-host failures; an unknown in-flight attempt
+      retains its reservation and is reconciled, not relaunched automatically.
+  stale_package:
+    enabled: true
+    rule: Stop if the manifest revision/config hash no longer matches the approved package; a resumed
+      package reconciles all prior attempts first.
+lane_ownership:
+  primary: gpu
+  gpu:
+    backend: beat_cuda
+    lock: existing GPU solve lock (search/gpulock.py)
+    worker_dir: runs/lanes/gpu/workers
+    one_cuda_solve_at_a_time: true
+    no_cross_lane_cleanup: true
+    note: The study runner must own the GPU lock for the full serial run.  Never clean hosts from another
+      or an unknown lane.
+  cpu_if_beat_cpu:
+    backend: beat_cpu
+    lock: runs/.cpu.lane.lock
+    worker_dir: runs/lanes/cpu/workers
+    enabled_when: solve.backend == beat_cpu
+    rule: If the owner selects beat_cpu, the study runner must explicitly hold runs/.cpu.lane.lock.  The
+      current CLI _solve_lock is a null context for CPU because the night runner owns the CPU lock.  gpu-clean
+      and night hygiene must not touch hosts of a lane whose lock is live.
+runtime_estimates:
+  method: Measured S3-style cost ledger of a local crease__core_law_v4 screen run, then arithmetic extrapolation
+    to the declared 24-call block.  No speedup is claimed.
+  source_runs:
+  - runs/20261027T052720Z-screen-e7f4f8
+  block_estimate:
+    basis: '18 valid screen BEM calls + 6 verify calls; ~22 attempts to reach 18 valid at the measured
+      ~19% refusal rate.  Verify timing is MEASURED on the 5 e7f4f8 verify solves: 39.6-146.2 s each (1.51-5.56x
+      the screen mean 26.3 s).'
+    screen_new_bem: 18
+    verify_new_bem: 6
+    est_screen_seconds:
+    - 402.5
+    - 402.5
+    est_verify_seconds:
+    - 237.6
+    - 877.2
+    est_block_seconds:
+    - 640.1
+    - 1279.7
+    est_block_minutes:
+    - 10.67
+    - 21.33
+    est_attempt_cap_seconds: 2639.3
+    est_attempt_cap_minutes: 43.99
+    est_aggregate_seconds:
+    - 32005.0
+    - 63985.0
+    est_aggregate_hours:
+    - 8.89
+    - 17.77
+    est_aggregate_attempt_cap_hours: 36.66
+  caveats:
+  - Measured on one historical crease__core_law_v4 screen run (2026-10-27), not on this pilot; host/cache
+    state is not controlled and there is no timing spread estimate.
+  - The measured run's wall_span is 28,125 s because of pauses; use its accumulated candidate cost (~4,399
+    s), not wall span.
+  - The ~19% cheap-refusal rate is task-specific; a different candidate pool may change the attempt count.
+  - Arithmetic extrapolation only; not a speedup claim.  Real scheduling uses owner availability and a
+    required deadline.
+  - Verify cost measured on 5 historical crease verify solves with a 3.7x spread (39.6-146.2 s); not on
+    this pilot.
+  speedup_claimed: false
+  measured_evidence:
+  - run: runs/20261027T052720Z-screen-e7f4f8
+    lib_shas: *id001
+    cma_seed: 1234
+    screen_valid: 172
+    attempts: 210
+    screen_seconds_mean: 26.3
+    best_stored_j_at_18_valid: 4.0266
+    verify_seconds:
+    - 81.5
+    - 146.2
+    - 74.2
+    - 47.0
+    - 39.6
+    verify_over_screen:
+    - 1.51
+    - 5.56
+    screen_to_verify_j: &id002
+    - - 1.705
+      - 2.597
+    - - 1.818
+      - 2.719
+    - - 2.027
+      - 2.769
+    - - 2.042
+      - 3.037
+    - - 2.284
+      - 3.076
+    screen_top3_equals_verified_top3: true
+    verify_minus_screen_j:
+    - 0.742
+    - 0.995
+analysis_plan:
+  primary_endpoint: Verified top-3 rank agreement and the recorded accept/reject decision under the two
+    verification allocations at equal six-call verify cost.
+  practical_improvement:
+    metric: verified-rank / decision stability
+    criterion: Enriched audit changes the verified top-3 set or the accept/reject decision in at least
+      20% of complete pairs, or reduces the mean absolute rank shift of the screened top-3 by at least
+      one position, with no increase in new BEM calls.
+    direction: decision_stability
+    label: declared_practical_threshold_not_a_speedup_claim
+    rationale: A verification allocation is decision support, not an optimizer.  The criterion asks whether
+      the extra audit samples change a decision; it is a declared pilot criterion, not a promise of superiority.
+    evidence:
+      historical_verified_top3_unchanged_by_verify:
+        crease_e7f4f8: true
+        native_d37d64: false
+      screen_to_verify_j_pairs:
+        crease_e7f4f8: *id002
+        native_d37d64:
+        - - 1.597
+          - 2.542
+        - - 1.728
+          - 2.618
+        - - 1.911
+          - 3.096
+        - - 1.912
+          - 2.857
+        - - 1.959
+          - 2.992
+      note: 'Historical 5-finalist verify sets: crease kept its screen top-3 at verify; native did not
+        (one swap).  This is the only rank-change evidence; it motivates but does not size the 20% decision-change
+        criterion.'
+  stopping_rule: 'Predeclared paired analysis by seed index: report the proportion of complete pairs whose
+    verified top-3 set or decision changes, the mean absolute rank shift, and a bootstrap 95% CI with
+    right-censoring at the six-call verify budget.  Fewer than five complete pairs is pilot_only, not
+    a significance guarantee.'
+  hypotheses:
+  - id: H2
+    statement: Enriched audit verification (2 finalists + 4 audit) changes the verified rank/decision
+      relative to the current 4+2 allocation on crease__core_law_v4 at equal verify cost.
+    label: hypothesis
+    falsified_if: No complete pair changes its verified top-3 set or decision, or the change rate is below
+      the declared 20% criterion.
+    evidence_class: prospective_pilot
+  - id: H0
+    statement: The two verification allocations agree; the extra audit samples add no decision-relevant
+      information at this budget.
+    label: hypothesis
+    falsified_if: Enriched audit changes the verified top-3 set or decision in at least 20% of complete
+      pairs.
+    evidence_class: prospective_pilot
+  results_parser:
+    input: search.ndjson + verify directories
+    outcome_classes:
+    - valid
+    - cached_replay
+    - cheap_refusal
+    - solver_failure
+    - pipeline_failure
+    - unknown_failure
+    - unknown
+    failure_to_objective_mapping: none
+    unknown_representation: unknown
+    censoring: Right-censored at the declared budget/attempt cap; censored pairs remain in the denominator
+      and are never counted as reached.
+    verify_calls: Reported separately when mode=verify is recorded; otherwise null with verify_calls_unknown=true.
+    note: A solver failure, a cheap pre-BEM refusal and an unclassified row are distinct outcomes.  None
+      becomes J=1000 or a silent pass.
+rollback_and_adoption:
+  fail_or_no_gain_rollback:
+  - Preparing or validating this manifest changes no production default, objective version, tolerance/weight,
+    cache/dataset behavior, GUI/CLI behavior or registration.
+  - If the pilot is not scheduled, discard the scratch overlay; no live file was written.
+  - If enriched audit adds no decision-relevant information, keep the current 4-finalist + 2-audit allocation.
+  - If enriched audit changes a decision but the change is not supported by measured verified evidence,
+    do not adopt it.
+  - If the comparison is inconclusive, do not silently enlarge the verify budget; a larger audit is a
+    new revision.
+  - A cancellation or crash preserves partial results; unknown attempts are reconciled, never relaunched
+    automatically.
+  owner_adoption_decisions:
+  - id: D1
+    decision: Adopt enriched 2-finalist + 4-audit verification for this task family
+    adopt_if: Prospective paired evidence meets the declared decision-change criterion with no increase
+      in new-BEM cost.
+    otherwise: Keep the current 4-finalist + 2-audit allocation.
+  - id: D2
+    decision: Keep the protocol verification policy unchanged
+    adopt_if: Enriched audit does not meet the decision-change criterion.
+    otherwise: If adopted, prepare a separately reviewed policy revision; do not flip a default.
+  - id: D3
+    decision: Schedule a larger verification-allocation study
+    adopt_if: Pilot variability supports a power plan at the declared criterion.
+    otherwise: Stop at the pilot; no budget creep or silent criterion change.
+outputs:
+  reserved_root: scratch/bo_m0/s11/out/s11-pilot2-verify-allocation-crease-core-law-v4
+  creates_nothing: true
+  reserved:
+  - '{out}/runs/'
+  - '{out}/cache/'
+  - '{out}/dataset/'
+  - '{out}/verify/finalists/'
+  - '{out}/verify/audit/'
+  - '{out}/journals/'
+  - '{out}/results/'
+  - '{out}/configs/'
+  - '{out}/logs/'
+no_default_changes:
+  production_defaults: false
+  objective_version: false
+  score_tolerances_or_weights: false
+  registration: false
+  cache_or_dataset_behavior: false
+  gui_or_cli_behavior: false
+  speedup_claimed: false
+  statement: No default, objective version, score tolerance/weight, registration, cache/dataset or GUI/CLI
+    change is made or implied.  This is a prepare-only scratch manifest; overlays are not applied.

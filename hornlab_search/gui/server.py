@@ -85,6 +85,19 @@ class App:
                     kind = {"data": "snapshot", "explain": "analysis", "propose": "proposal",
                             "execute": "results", "decide": "decision"}[parts[2]]
                     meta = service.get_artifact_metadata(parts[1], kind)
+                    fallback_reason = None
+                    if parts[2] == "execute" and meta.get("status") == "missing":
+                        # No run results yet: show the prepared run package (S10 QA finding).
+                        package_meta = service.get_artifact_metadata(parts[1], "package")
+                        if package_meta.get("status") == "available":
+                            meta = package_meta
+                            fallback_reason = ("No run results are recorded; showing the prepared run "
+                                               "package (not launched).")
+                    if parts[2] == "decide" and meta.get("status") == "missing":
+                        from .data_studies import decision_panel_artifact
+                        recorded = decision_panel_artifact(study, service.export_study(parts[1]))
+                        if recorded is not None:
+                            return build_study_view(study, parts[2], recorded).to_dict()
                     if meta.get("status") == "available":
                         raw = service.store.read_artifact(meta["sha256"])
                         if len(raw) > 128_000:
@@ -96,10 +109,20 @@ class App:
                                 content = json.loads(raw)
                             except (UnicodeDecodeError, json.JSONDecodeError):
                                 content = None
+                            # Real artifacts hold >50 ids/configs; show a bounded, explicitly
+                            # truncated preview instead of failing the whole panel (S10 QA).
+                            from .data_studies import bounded_preview
+                            preview, truncated = bounded_preview(content if isinstance(content, dict) else {})
+                            reasons = ["Artifact semantics and dependencies are not yet validated."]
+                            if fallback_reason:
+                                reasons.insert(0, fallback_reason)
+                            if truncated:
+                                reasons.append(f"Display preview: {truncated} long list(s)/mapping(s) were "
+                                               "shortened to the bounded panel size; the stored artifact is unchanged.")
                             artifact = {"status": "unknown", "revision": study["revision"],
-                                        "data": content if isinstance(content, dict) else {},
+                                        "data": preview if isinstance(preview, dict) else {},
                                         "provenance": {"sha256": meta["sha256"]},
-                                        "reasons": ["Artifact semantics and dependencies are not yet validated."]}
+                                        "reasons": reasons}
                     elif meta.get("status") in {"stale", "unavailable"}:
                         artifact = {"status": "stale" if meta["status"] == "stale" else "failed",
                                     "revision": study["revision"], "data": {},

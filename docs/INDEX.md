@@ -1,5 +1,9 @@
 # Docs index
 
+[S8 discovery resolution](research/S8_DISCOVERY_RESOLUTION_2026-11-13.md): geometry/behavior
+separation, source-backed hypothesis cards, equal-cost QD/Pareto rules, research sources and
+the correction distinguishing a shared scoring context from per-design replay `score_id`.
+
 Start here. Code map: [`CODE_MAP.md`](CODE_MAP.md). Rules for agents: [`../CLAUDE.md`](../CLAUDE.md), [`../AGENTS.md`](../AGENTS.md).
 Keep this file current: a new doc gets a line here in the same commit.
 
