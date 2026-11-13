@@ -15,8 +15,11 @@ A "generator round-trip" in this tool means:
   4. Full geometric verification (calling the config's ``GeneratedSpace.to_design``
      and comparing the resulting hash) requires loading the typology config and is
      labelled ``round_trip_needs_config=True``; it is a separately documented step
-     and is NOT run here (it would require the mesher dependency and an actual
-     mesh call for native-horn families).
+     and is NOT run by default.  Opt in with ``--config-roundtrip CONFIG --dataset-root DIR``:
+     native configs rebuild (family, params) and pass through the config's DesignSpace
+     (hash must match, no clipping); generated configs or a missing mesher/config degrade
+     to ``needs_config``.  ``local_search`` then gives advisory sigma0/box hints plus a
+     cold broad control arm (nothing is applied).
 
 This tool never writes to live dataset/cache/run roots and never calls a mesh,
 solver or metric pipeline.  All outputs go under ``--out``.
@@ -576,6 +579,154 @@ def build_seed_pack(catalog_path: Path, *, k: int, task: str | None,
     }
 
 
+# --------------------------------------------------------------------------- S5 opt-in config round-trip
+
+
+def _shard_row(dataset_root: Path, source: dict) -> dict | None:
+    """The recorded dataset row for a selection (read-only), or None."""
+    shard = source.get("shard_index", source.get("shard"))
+    row = source.get("row")
+    if shard is None or row is None:
+        return None
+    path = Path(dataset_root) / f"shard-{int(shard):04d}.jsonl"
+    try:
+        with path.open(encoding="utf-8") as fh:
+            for i, line in enumerate(fh):
+                if i == int(row):
+                    rec = json.loads(line)
+                    return rec if isinstance(rec, dict) else None
+    except (OSError, ValueError):
+        return None
+    return None
+
+
+def config_round_trip(selections: list[dict], config_path: Path,
+                      dataset_root: Path | None) -> dict:
+    """Rebuild each selected design through the config's own space and compare hashes.
+
+    Native configs: recorded (family, params) -> ``Design.hash()`` must equal the
+    recorded design_hash, and ``space.denormalize(space.normalize(design))`` must give
+    the same hash (no silent clipping).  Generated configs (``generator:``) need the
+    generator stack; when it (or the mesher) cannot be imported, or the config/rows
+    are absent, the status is ``needs_config`` with a reason, never a fake pass.
+    Never writes anything and never meshes or solves.
+    """
+    out = {"config": str(config_path), "status": "ok", "results": []}
+    try:
+        from hornlab_search.config import load_config
+        from hornlab_search.design.space import DesignSpace
+        from hornlab_search.types import Design
+        cfg = load_config(Path(config_path))
+    except Exception as exc:  # noqa: BLE001 - degrade, never crash
+        out.update(status="needs_config", reason=f"config not loadable: {type(exc).__name__}: {exc}")
+        return out
+    generated = bool(getattr(cfg, "generator", None)) or (
+        isinstance(getattr(cfg, "raw", None), dict) and "generator" in cfg.raw)
+    try:
+        if generated:
+            from hornlab_search.design.generated import GeneratedSpace  # noqa: F401
+            import importlib.util
+            if importlib.util.find_spec("hornlab_mesher") is None:
+                raise ImportError("hornlab_mesher not installed")
+        space = DesignSpace.from_config(cfg)
+    except Exception as exc:  # noqa: BLE001
+        out.update(status="needs_config", reason=f"design space unavailable: {type(exc).__name__}: {exc}")
+        return out
+    if dataset_root is None:
+        out.update(status="needs_config", reason="--dataset-root required to read recorded params")
+        return out
+    for sel in selections:
+        res = {"design_hash": sel["design_hash"], "status": "needs_config", "reason": None}
+        rec = _shard_row(dataset_root, sel.get("source") or {})
+        if rec is None or not isinstance(rec.get("params"), dict) or not rec.get("family"):
+            res["reason"] = "recorded row/params not found"
+        elif generated:
+            res["reason"] = "generated config: generator-knob round-trip not reconstructable from materialized params"
+        else:
+            try:
+                design = Design(rec["family"], dict(rec["params"]))
+                rebuilt = design.hash()
+                again = space.denormalize(space.normalize(design)).hash()
+                res.update(rebuilt_hash=rebuilt, space_hash=again,
+                           status="match" if rebuilt == sel["design_hash"] == again else "mismatch",
+                           clipped=again != rebuilt)
+            except Exception as exc:  # noqa: BLE001 - out-of-space design etc.
+                res.update(status="mismatch", reason=f"{type(exc).__name__}: {exc}")
+        out["results"].append(res)
+    statuses = {r["status"] for r in out["results"]}
+    out["status"] = ("mismatch" if "mismatch" in statuses else
+                     "needs_config" if "needs_config" in statuses or not statuses else "ok")
+    return out
+
+
+# --------------------------------------------------------------------------- S5 local search recommendations
+
+SIGMA_BOUNDS = (0.05, 0.3)  # normalized [0,1]^k units; pycma sigma0 rule of thumb range
+
+
+def local_search_recommendations(selections: list[dict], vectors: dict[str, list[float]] | None,
+                                 keys: list[str] | None = None) -> dict:
+    """Advisory sigma0 + box suggestions from the normalized spread of the selected exemplars.
+
+    ``vectors`` maps design_hash -> normalized [0,1] vector (from the config round-trip
+    space).  Sigma0 = median per-axis std of the exemplars, clipped to SIGMA_BOUNDS
+    (lower bound first).  Narrow/widen are hints only; a narrowed box must contain
+    every exemplar plus a margin, and a broad cold control arm is always kept.
+    Never changes a config or default.
+    """
+    rec = {"advisory_only": True, "status": "insufficient_data",
+           "sigma_bounds": list(SIGMA_BOUNDS),
+           "arms": [{"name": "cold_broad_control", "warm_start": False, "box": "config bounds"}]}
+    vecs = [vectors[s["design_hash"]] for s in selections if vectors and s["design_hash"] in vectors]
+    if len(vecs) < 2:
+        rec["reason"] = "need >= 2 exemplars with normalized vectors (run --config-roundtrip)"
+        return rec
+    import numpy as np
+    X = np.asarray(vecs, dtype=float)
+    std = X.std(axis=0)
+    raw = float(np.median(std))
+    sigma = min(max(raw, SIGMA_BOUNDS[0]), SIGMA_BOUNDS[1])
+    lo = np.clip(X.min(axis=0) - 0.1, 0.0, 1.0)
+    hi = np.clip(X.max(axis=0) + 0.1, 0.0, 1.0)
+    names = keys or [f"x{i}" for i in range(X.shape[1])]
+    hints = []
+    for i, n in enumerate(names):
+        wall = bool((X[:, i] <= 0.02).any() or (X[:, i] >= 0.98).any())
+        hints.append({"key": n, "exemplar_lo": float(X[:, i].min()), "exemplar_hi": float(X[:, i].max()),
+                      "suggest": "consider_widen (exemplar on a wall)" if wall else
+                                 ("consider_narrow" if hi[i] - lo[i] < 0.5 else "keep"),
+                      "box_unit": [float(lo[i]), float(hi[i])]})
+    rec.update(status="ok", sigma0_raw=raw, sigma0=sigma,
+               sigma_rule="median per-axis std of exemplars, clipped to [lo, hi]",
+               clipped_sigma=sigma != raw, n_exemplars=len(vecs), hints=hints,
+               evidence_note="narrow/pin/link needs held-out effect evidence; these are hypotheses")
+    rec["arms"].append({"name": "warm_seed_pack", "warm_start": True, "sigma0": sigma,
+                        "box": "config bounds (narrowing NOT applied automatically)"})
+    return rec
+
+
+
+def _normalized_vectors(selections, rt, config_path, dataset_root):
+    """design_hash -> normalized vector for selections whose round-trip matched."""
+    if rt.get("status") == "needs_config" and not rt.get("results"):
+        return None, None
+    try:
+        from hornlab_search.config import load_config
+        from hornlab_search.design.space import DesignSpace
+        from hornlab_search.types import Design
+        space = DesignSpace.from_config(load_config(config_path))
+    except Exception:  # noqa: BLE001
+        return None, None
+    ok = {r["design_hash"] for r in rt.get("results", []) if r.get("status") == "match"}
+    out = {}
+    for sel in selections:
+        if sel["design_hash"] in ok:
+            rec = _shard_row(dataset_root, sel.get("source") or {})
+            out[sel["design_hash"]] = [float(v) for v in
+                                       space.normalize(Design(rec["family"], dict(rec["params"])))]
+    return out, list(space.keys())
+
+
 # --------------------------------------------------------------------------- I/O
 
 
@@ -620,6 +771,10 @@ def _build_parser():
                    help="RNG seed for tie-breaking")
     p.add_argument("--dry-run", action="store_true",
                    help="Print summary without writing files")
+    p.add_argument("--config-roundtrip", default=None, metavar="CONFIG_YAML",
+                   help="Opt-in: rebuild each selection via this typology config and compare hashes")
+    p.add_argument("--dataset-root", default=None,
+                   help="Dataset dir holding shard-NNNN.jsonl (read-only) for --config-roundtrip")
     return p
 
 
@@ -644,6 +799,15 @@ def main(argv=None):
         scores_path=scores_path,
         seed=int(args.seed),
     )
+    if args.config_roundtrip:
+        rt = config_round_trip(payload.get("selections") or [], Path(args.config_roundtrip),
+                               Path(args.dataset_root) if args.dataset_root else None)
+        payload["config_round_trip"] = rt
+        vectors, keys = _normalized_vectors(payload.get("selections") or [], rt,
+                                            Path(args.config_roundtrip),
+                                            Path(args.dataset_root) if args.dataset_root else None)
+        payload["local_search"] = local_search_recommendations(payload.get("selections") or [],
+                                                               vectors, keys)
     n_sel = len(payload.get("selections") or [])
     n_elig = (payload.get("eligible") or {}).get("total", 0)
     print(f"selected {n_sel}/{n_elig} eligible designs")

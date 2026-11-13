@@ -119,3 +119,43 @@ def test_cli_report_and_chart(tmp_path):
     md = (out / "lane_parity.md").read_text(encoding="utf-8")
     assert "**PASS**" in md and "CP-7b" in md
     assert (out / "lane_parity.png").exists()
+
+
+# ------------------------------------------------------------------ pooled mode (--pair)
+
+def _named_pair(tmp_path, name, deltas):
+    sub = tmp_path / name
+    sub.mkdir()
+    return _pair(sub, deltas)
+
+
+def test_pooled_passes_when_three_distinct_designs_span_pairs(tmp_path):
+    p1 = _named_pair(tmp_path, "p1", {"dhA": 0.05, "dhB": 0.10})
+    p2 = _named_pair(tmp_path, "p2", {"dhC": 0.15, "dhD": 0.5})
+    assert lp.analyse(*p1)["pass"] is False and lp.analyse(*p2)["pass"] is False
+    pooled = lp.analyse_pooled([p1, p2])
+    assert pooled["n_pairs"] == 2 and pooled["n_distinct_compared"] == 4
+    assert pooled["within_hashes"] == ["dhA", "dhB", "dhC"]
+    assert pooled["pass"] is True and pooled["gate"] == "CP-7b"
+
+
+def test_pooled_counts_a_repeated_hash_once(tmp_path):
+    p1 = _named_pair(tmp_path, "p1", {"dhA": 0.05, "dhB": 0.10})
+    p2 = _named_pair(tmp_path, "p2", {"dhA": 0.01, "dhB": 0.3})
+    pooled = lp.analyse_pooled([p1, p2])
+    assert pooled["n_distinct_compared"] == 2 and pooled["n_within_0p2"] == 2
+    assert pooled["pass"] is False
+
+
+def test_pooled_cli_and_usage_errors(tmp_path):
+    p1 = _named_pair(tmp_path, "p1", {"dhA": 0.05, "dhB": 0.10})
+    p2 = _named_pair(tmp_path, "p2", {"dhC": 0.15})
+    proc = run_cli("lane_parity", ["--pair", f"{p1[0]},{p1[1]}", "--pair", f"{p2[0]},{p2[1]}"],
+                   tmp_path)
+    assert proc.returncode == 0, proc.stderr
+    doc = run_json_payload(tmp_path / "out", "lane_parity")
+    assert doc["mode"] == "pooled" and doc["pass"] is True
+    bad = run_cli("lane_parity", ["--gpu", str(p1[0]), "--pair", f"{p2[0]},{p2[1]}"], tmp_path, "o2")
+    assert bad.returncode == 2
+    bad = run_cli("lane_parity", ["--pair", str(p1[0])], tmp_path, "o3")
+    assert bad.returncode == 2

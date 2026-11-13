@@ -317,6 +317,9 @@ separately. J is only comparable when both sides share objective version, brief 
 
 ## lane_parity.json (`tools/analysis/lane_parity.py`)
 
+Pooled mode (`--pair GPU,CPU` repeated): `{mode: "pooled", pairs: [<single-pair payload>...], n_pairs, n_distinct_compared, n_within_0p2, within_hashes, threshold_db, min_designs, pass, gate, dedupe}`; a design_hash counts once across pairs (its best compared pair).
+
+
 ```json
 {
   "tool": "lane_parity", "generated_utc": "...",

@@ -571,3 +571,65 @@ def test_family_mixing_prevented_by_filter(tmp_path):
     osse_hashes = {r["design_hash"] for r in osse}
     for s in payload["selections"]:
         assert s["design_hash"] in osse_hashes, "LECTRON design leaked into OSSE selection"
+
+
+# --------------------------------------------------------------------------- S5 config round-trip + local search
+
+NATIVE = (Path(__file__).resolve().parents[1] / "examples" / "typologies"
+          / "campaign_2026-10-26_v4" / "native__ath_core_v4.yaml")
+
+
+def _native_fixture(tmp_path, n=6, corrupt=None):
+    import numpy as np
+    from hornlab_search.config import load_config
+    from hornlab_search.design.space import DesignSpace
+    space = DesignSpace.from_config(load_config(NATIVE))
+    dataset = tmp_path / "dataset"
+    dataset.mkdir()
+    rows, selections = [], []
+    for i in range(n):
+        u = np.full(len(space.keys()), 0.1 + 0.8 * i / max(n - 1, 1))
+        d = space.denormalize(u)
+        rows.append({"ok": True, "family": d.family, "params": dict(d.params), "design_hash": d.hash()})
+        dh = d.hash() if i != corrupt else "f" * 40
+        selections.append({"design_hash": dh, "source": {"shard_index": 0, "row": i}})
+    (dataset / "shard-0000.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows))
+    return dataset, selections
+
+
+def test_config_round_trip_matches_native_designs(tmp_path):
+    dataset, sels = _native_fixture(tmp_path)
+    rt = sp.config_round_trip(sels, NATIVE, dataset)
+    assert rt["status"] == "ok", rt
+    assert all(r["status"] == "match" and r["clipped"] is False for r in rt["results"])
+
+
+def test_config_round_trip_flags_hash_mismatch(tmp_path):
+    dataset, sels = _native_fixture(tmp_path, corrupt=2)
+    rt = sp.config_round_trip(sels, NATIVE, dataset)
+    assert rt["status"] == "mismatch"
+    assert [r["status"] for r in rt["results"]].count("mismatch") == 1
+
+
+def test_config_round_trip_degrades_to_needs_config(tmp_path):
+    dataset, sels = _native_fixture(tmp_path)
+    assert sp.config_round_trip(sels, tmp_path / "absent.yaml", dataset)["status"] == "needs_config"
+    assert sp.config_round_trip(sels, NATIVE, None)["status"] == "needs_config"
+    missing = [{"design_hash": sels[0]["design_hash"], "source": {"shard_index": 0, "row": 99}}]
+    rt = sp.config_round_trip(missing, NATIVE, dataset)
+    assert rt["status"] == "needs_config" and rt["results"][0]["reason"]
+
+
+def test_local_search_recommendations_are_bounded_advisory_with_control(tmp_path):
+    sels = [{"design_hash": h} for h in "abcd"]
+    vecs = {"a": [0.0, 0.5], "b": [0.1, 0.52], "c": [0.2, 0.48], "d": [0.3, 0.5]}
+    rec = sp.local_search_recommendations(sels, vecs, ["k1", "k2"])
+    assert rec["advisory_only"] is True and rec["status"] == "ok"
+    lo, hi = rec["sigma_bounds"]
+    assert lo <= rec["sigma0"] <= hi
+    assert {a["name"] for a in rec["arms"]} >= {"cold_broad_control", "warm_seed_pack"}
+    k1 = rec["hints"][0]
+    assert k1["suggest"].startswith("consider_widen")          # exemplar sits on the wall
+    for h in rec["hints"]:                                    # box keeps every exemplar
+        assert h["box_unit"][0] <= h["exemplar_lo"] and h["box_unit"][1] >= h["exemplar_hi"]
+    assert sp.local_search_recommendations(sels[:1], vecs)["status"] == "insufficient_data"

@@ -125,6 +125,48 @@ def analyse(gpu_dir: Path, cpu_dir: Path) -> dict:
             "note": "PASS decides whether dataset_cpu may join dataset/"}
 
 
+def analyse_pooled(pairs) -> dict:
+    """CP-7b across several (gpu_dir, cpu_dir) pairs.
+
+    Each pair is analysed independently (no cross-pair response comparison). A design
+    hash counts once across pairs; it counts as within-threshold when its BEST compared
+    pair is within 0.2 dB, and it is listed with every pair it appeared in.
+    """
+    pairs = [(Path(g), Path(c)) for g, c in pairs]
+    if not pairs:
+        raise ValueError("pooled mode needs at least one --pair")
+    per_pair = [analyse(g, c) for g, c in pairs]
+    best: dict[str, dict] = {}
+    for idx, payload in enumerate(per_pair):
+        for d in payload["designs"]:
+            if not d["compared"]:
+                continue
+            cur = best.get(d["design_hash"])
+            if cur is None or d["max_abs_dspl_db"] < cur["max_abs_dspl_db"]:
+                best[d["design_hash"]] = {**d, "pair_index": idx}
+    within = sorted(h for h, d in best.items() if d["max_abs_dspl_db"] <= THRESHOLD_DB)
+    return {"mode": "pooled", "pairs": per_pair,
+            "n_pairs": len(per_pair),
+            "n_distinct_compared": len(best),
+            "n_within_0p2": len(within), "within_hashes": within,
+            "threshold_db": THRESHOLD_DB, "min_designs": MIN_DESIGNS,
+            "pass": len(within) >= MIN_DESIGNS, "gate": _G,
+            "dedupe": "design_hash counted once across pairs (best compared pair)",
+            "note": "PASS decides whether dataset_cpu may join dataset/"}
+
+
+def _md_pooled(payload: dict) -> str:
+    lines = ["# Lane parity (GPU vs CPU), pooled", "",
+             f"- pairs: **{payload['n_pairs']}**; distinct designs compared: "
+             f"**{payload['n_distinct_compared']}**; within {payload['threshold_db']} dB: "
+             f"**{payload['n_within_0p2']}**",
+             f"- gate **{payload['gate']}**: PASS needs >= {payload['min_designs']} distinct designs"
+             f" -> **{'PASS' if payload['pass'] else 'FAIL'}**", ""]
+    for i, p in enumerate(payload["pairs"]):
+        lines += [f"## Pair {i}", "", _md(p)]
+    return "\n".join(lines)
+
+
 def _md(payload: dict) -> str:
     lines = ["# Lane parity (GPU vs CPU)", "",
              f"- GPU: `{payload['gpu_dir']}`", f"- CPU: `{payload['cpu_dir']}`",
@@ -167,10 +209,29 @@ def charts(payload: dict) -> dict:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=( __doc__ or "").splitlines()[0])
-    ap.add_argument("--gpu", required=True, help="verify run dir produced on the GPU lane")
-    ap.add_argument("--cpu", required=True, help="verify run dir produced on the CPU lane")
+    ap.add_argument("--gpu", help="verify run dir produced on the GPU lane")
+    ap.add_argument("--cpu", help="verify run dir produced on the CPU lane")
+    ap.add_argument("--pair", action="append", default=[], metavar="GPU_DIR,CPU_DIR",
+                    help="pooled mode: repeat for several GPU/CPU run-dir pairs")
     add_out_arg(ap)
     args = ap.parse_args(argv)
+    if args.pair:
+        if args.gpu or args.cpu:
+            ap.error("use either --gpu/--cpu or --pair, not both")
+        pairs = []
+        for raw in args.pair:
+            parts = raw.split(",")
+            if len(parts) != 2 or not all(p.strip() for p in parts):
+                ap.error(f"--pair needs GPU_DIR,CPU_DIR, got {raw!r}")
+            pairs.append((parts[0].strip(), parts[1].strip()))
+        payload = analyse_pooled(pairs)
+        write_report(Path(args.out), TOOL, payload, _md_pooled(payload), {})
+        print(f"lane_parity pooled OK: {payload['n_pairs']} pairs, "
+              f"{payload['n_within_0p2']} distinct designs within {THRESHOLD_DB} dB -> "
+              f"{'PASS' if payload['pass'] else 'FAIL'} ({_G})")
+        return 0
+    if not (args.gpu and args.cpu):
+        ap.error("--gpu and --cpu are required (or use --pair)")
     payload = analyse(Path(args.gpu), Path(args.cpu))
 
     write_report(Path(args.out), TOOL, payload, _md(payload), charts(payload))
