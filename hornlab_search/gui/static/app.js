@@ -4305,6 +4305,164 @@ function eliteThumbSvg(profile, opts = {}) {
   </svg>`;
 }
 
+/** Pure: the outer-wall axis profile for BOTH section series on one shared z grid.
+ *  /api/design's profile is a CLOSED outline (wall out to the mouth rim, back along the axis):
+ *  split each series in its OWN order at the widest point, bin each branch on the shared grid and
+ *  keep the per-z outer wall (the wall a surface of revolution actually has). Returns
+ *  {z0, z1, rh[i], rv[i]} both oriented throat -> mouth, or null. */
+function _eliteProfileAxis(arrH, arrV, n = 24) {
+  const parse = (arr) => {
+    const raw = [];
+    if (Array.isArray(arr)) {
+      for (const p of arr) {
+        if (!p || p.length < 2) continue;
+        const z = Number(p[0]), r = Number(p[1]);
+        if (!Number.isFinite(z) || !Number.isFinite(r)) continue;
+        raw.push([z, Math.abs(r)]);
+      }
+    }
+    return raw.length >= 2 ? raw : null;
+  };
+  const H = parse(arrH), V = parse(arrV);
+  const Hf = H || V, Vf = V || H;
+  if (!Hf || !Vf) return null;
+  const z0 = Math.min(...Hf.map(p => p[0]), ...Vf.map(p => p[0]));
+  const z1 = Math.max(...Hf.map(p => p[0]), ...Vf.map(p => p[0]));
+  if (!(z1 > z0)) return null;
+  const axisOf = (raw) => {
+    let imax = 0;
+    for (let i = 1; i < raw.length; i++) if (raw[i][1] > raw[imax][1]) imax = i;
+    return [raw.slice(0, imax + 1), raw.slice(imax)];   // wall out / back, outline order
+  };
+  const [hOut, hBack] = axisOf(Hf), [vOut, vBack] = axisOf(Vf);
+  const binNearest = (pts) => {
+    const out = new Array(n).fill(0);
+    for (let i = 0; i < n; i++) {
+      const z = z0 + (z1 - z0) * i / (n - 1);
+      let best = 0, bestD = Infinity;
+      for (const [rz, rr] of pts) {
+        const d = Math.abs(rz - z);
+        if (d < bestD) { bestD = d; best = rr; }
+      }
+      out[i] = best;
+    }
+    return out;
+  };
+  const wall = (outA, backA) => {
+    const a = binNearest(outA), b = binNearest(backA);
+    return a.map((v, i) => Math.max(v, b[i]));
+  };
+  let rh = wall(hOut, hBack), rv = wall(vOut, vBack);
+  if (rh[0] + rv[0] > rh[n - 1] + rv[n - 1]) { rh.reverse(); rv.reverse(); }
+  return { z0, z1, rh, rv };
+}
+
+/** Pure: a lofted superellipse horn solid from the stored profile + design params.
+ *  `params.n` is the section's superellipse exponent (2 = ellipse, higher = squarer) — the same
+ *  law the mesher used, so a square-mouth morph renders square. Returns
+ *  {positions: number[], indices: number[], rMax, zEye}, or null without geometry. Positions are
+ *  centred on the axis mid-depth with the mouth rim at +z (zEye = the rim's z, for the camera). */
+function eliteHornGeometry(profile, params, opts = {}) {
+  const L = Math.max(8, Math.min(48, Math.round(Number(opts.levels) || 24)));
+  const S = Math.max(8, Math.min(64, Math.round(Number(opts.segments) || 32)));
+  const ax = _eliteProfileAxis(profile && profile.h, profile && profile.v, L);
+  if (!ax) return null;
+  let n = Number(params && (params.n != null ? params.n : params.exponent));
+  n = Number.isFinite(n) ? Math.min(12, Math.max(1.05, n)) : 2;
+  const pow2n = 2 / n;
+  const zMid = (ax.z0 + ax.z1) / 2;
+  let rMax = 0;
+  for (let i = 0; i < L; i++) rMax = Math.max(rMax, ax.rh[i], ax.rv[i]);
+  if (!(rMax > 0)) return null;
+  const positions = new Array(L * S * 3);
+  const indices = [];
+  let pi = 0;
+  for (let li = 0; li < L; li++) {
+    const z = (ax.z0 + (ax.z1 - ax.z0) * li / (L - 1)) - zMid;
+    for (let si = 0; si < S; si++) {
+      const th = 2 * Math.PI * si / S;
+      const c = Math.cos(th), s = Math.sin(th);
+      const xd = Math.sign(c) * Math.pow(Math.abs(c), pow2n);
+      const yd = Math.sign(s) * Math.pow(Math.abs(s), pow2n);
+      positions[pi++] = ax.rh[li] * xd;
+      positions[pi++] = ax.rv[li] * yd;
+      positions[pi++] = z;
+    }
+  }
+  for (let li = 0; li < L - 1; li++) {
+    for (let si = 0; si < S; si++) {
+      const sn = (si + 1) % S;
+      const a = li * S + si, b = (li + 1) * S + si, c2 = (li + 1) * S + sn, d = li * S + sn;
+      indices.push(a, b, c2, a, c2, d);
+    }
+  }
+  return { positions, indices, rMax, zEye: ax.z1 - zMid };
+}
+
+// ── Shared offscreen WebGL renderer: one context, one frozen frame per thumbnail ──
+let _eliteGL = null;
+
+function _eliteGLDispose() {
+  if (!_eliteGL) return;
+  try { _eliteGL.renderer.dispose(); } catch {}
+  try { _eliteGL.renderer.forceContextLoss(); } catch {}
+  if (_eliteGL.canvas && _eliteGL.canvas.remove) _eliteGL.canvas.remove();
+  _eliteGL = null;
+}
+
+async function _eliteGLRender(geom, W, H) {
+  const THREE = await loadThree();
+  if (!THREE || !geom) return null;
+  let gl = _eliteGL;
+  if (!gl) {
+    try {
+      const canvas = document.createElement("canvas");
+      canvas.width = W; canvas.height = H;
+      canvas.className = "elite-gl-offscreen";
+      canvas.setAttribute("aria-hidden", "true");
+      document.body.appendChild(canvas);
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true,
+                                                 preserveDrawingBuffer: true });
+      renderer.setSize(W, H, false);
+      renderer.setClearColor(0x000000, 0);       // transparent: the card's own background shows
+      const scene = new THREE.Scene();
+      const hemi = new THREE.HemisphereLight(0xffffff, 0x37414a, 0.95);
+      const key = new THREE.DirectionalLight(0xffffff, 1.35);
+      const fill = new THREE.DirectionalLight(0xdde7ef, 0.5);
+      scene.add(hemi, key, fill);
+      const camera = new THREE.PerspectiveCamera(33, W / H, 1, 20000);
+      gl = _eliteGL = { renderer, scene, camera, hemi, key, fill, mesh: null, canvas };
+    } catch (e) {
+      _eliteGL = null;
+      return null;
+    }
+  }
+  const { renderer, scene, camera } = gl;
+  renderer.setSize(W, H, false);
+  if (gl.mesh) {
+    scene.remove(gl.mesh);
+    if (gl.mesh.geometry) gl.mesh.geometry.dispose();
+    gl.mesh = null;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(geom.positions), 3));
+  geo.setIndex(geom.indices);
+  geo.computeVertexNormals();
+  const mat = new THREE.MeshStandardMaterial({ color: 0xb7bfc6, metalness: 0.06, roughness: 0.58,
+                                               side: THREE.DoubleSide });
+  gl.mesh = new THREE.Mesh(geo, mat);
+  scene.add(gl.mesh);
+  // Look INTO the mouth (the reference render): camera sits past the mouth rim, slightly off-axis.
+  const d = geom.rMax / Math.tan(camera.fov * Math.PI / 360) * 1.22;
+  camera.position.set(d * 0.30, d * 0.22, geom.zEye + d);
+  camera.lookAt(0, 0, geom.zEye);
+  gl.key.position.set(geom.rMax * 0.9, geom.rMax * 1.3, d * 0.5);
+  gl.fill.position.set(-geom.rMax * 1.2, -geom.rMax * 0.6, d * 0.35);
+  gl.hemi.position.set(0, d, 0);
+  renderer.render(scene, camera);
+  return renderer.domElement.toDataURL("image/png");
+}
+
 const _eliteThumbCache = new Map();     // "run/hash" -> svg markup
 const _eliteThumbWaiters = new Map();   // "run/hash" -> [elements awaiting that thumbnail]
 const _eliteThumbQueue = [];
@@ -4346,24 +4504,31 @@ function _eliteThumbPump() {
     const job = _eliteThumbQueue.shift();
     _eliteThumbActive++;
     const url = `/api/design/${encodeURIComponent(job.run)}/${encodeURIComponent(job.hash)}?tier=screen`;
+    const finish = (markup, failed) => {
+      _eliteThumbRemember(job.run, job.hash, markup);
+      _eliteThumbFlush(job.key, markup, failed);
+      _eliteThumbActive = Math.max(0, _eliteThumbActive - 1);
+      _eliteThumbPump();
+    };
     api(url)
-      .then(d => {
-        const prof = d && d.profile;
-        const svg = prof && (Array.isArray(prof.h) || Array.isArray(prof.v))
-          ? eliteThumbSvg(prof) : eliteThumbPlaceholder();
-        _eliteThumbRemember(job.run, job.hash, svg);
-        _eliteThumbFlush(job.key, svg, false);
-      })
-      .catch(() => {
-        const svg = eliteThumbPlaceholder();
-        _eliteThumbRemember(job.run, job.hash, svg);
-        _eliteThumbFlush(job.key, svg, true);
-      })
-      .finally(() => {
-        _eliteThumbActive = Math.max(0, _eliteThumbActive - 1);
-        _eliteThumbPump();
-      });
+      .then(d => { return _eliteThumbBuild(d); })
+      .then(markup => { finish(markup, !markup); })
+      .catch(() => { finish(eliteThumbPlaceholder(), true); });
   }
+}
+
+/** Frozen 3D render of one design (async): superellipse loft from the stored profile, shaded by
+ *  the shared offscreen renderer, returned as an <img> data-url. Falls back to the SVG outline
+ *  when WebGL/three.js is unavailable. Pure output given the payload; never throws. */
+async function _eliteThumbBuild(d) {
+  const prof = d && d.profile;
+  if (!prof || !(Array.isArray(prof.h) || Array.isArray(prof.v))) return eliteThumbPlaceholder();
+  const geom = eliteHornGeometry(prof, d.params);
+  if (geom) {
+    const url = await _eliteGLRender(geom, 340, 212);
+    if (url) return `<img class="elite-thumb-img" src="${url}" alt="" aria-hidden="true" draggable="false">`;
+  }
+  return eliteThumbSvg(prof) || eliteThumbPlaceholder();
 }
 
 function _eliteThumbRequest(el, run, hash) {
@@ -4637,6 +4802,7 @@ function mountElites(ROOT, state) {
 
 async function viewElites() {
   const ROOT = currentRoot();
+  _eliteGLDispose();          // one WebGL context per page visit (never leak scenes)
   skel("Loading elites…");
   let data;
   try {
@@ -4665,7 +4831,8 @@ export { f0KpiHtml, mountingRankWarnHtml, seedDerivationHtml, objectiveVersionOp
 
 export { lanesPanelHtml, verdictChipHtml, eliteGateChips, elitesFilter, eliteHeadline,
          eliteConstraintLine, eliteThumbSvg, eliteThumbPlaceholder, eliteCountsText,
-         elitesNoteText, eliteCardHtml, elitesResultsHtml, renderElitesHtml };
+         elitesNoteText, eliteCardHtml, elitesResultsHtml, renderElitesHtml,
+         _eliteProfileAxis, eliteHornGeometry };
 
 export { analysisParameterStudyHtml, analysisSourceFidelityHtml, studyCaveatHz };
 // Lane B visual-report builders (offline render checks; pure HTML, no DOM).

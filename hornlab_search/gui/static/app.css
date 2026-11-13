@@ -897,6 +897,8 @@ svg .iso-title { font-family: var(--f-body); font-size: 12px; font-weight: 600; 
   background:linear-gradient(155deg,var(--viz-canvas),var(--surface));
   border-bottom:1px solid var(--rule); color:var(--accent); overflow:hidden; }
 .elite-thumb svg { width:100%; height:100%; display:block; }
+.elite-thumb img { width:100%; height:100%; display:block; object-fit:cover; }
+.elite-gl-offscreen { position:fixed; left:-12000px; top:-12000px; pointer-events:none; }
 .elite-thumb.is-loading {
   background-image:linear-gradient(100deg,var(--viz-canvas) 30%,
     color-mix(in srgb,var(--surface) 72%,var(--viz-canvas)) 50%,var(--viz-canvas) 70%);

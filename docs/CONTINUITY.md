@@ -262,6 +262,19 @@
   original order** at the widest point (mouth rim), bins each branch separately and keeps the per-z
   outer wall; the series runs 25 → 203 mm for `…d7d61a7e4c4d`, and the thumbnails render a proper
   throat → flare → mouth isometric horn. Verified live on 8765 (12 thumbnails, no page errors).
+- **Thumbnails are now real shaded 3D renders (owner rejected line art):** each card renders the
+  design's horn as a frozen WebGL frame — a superellipse loft built from the stored profile
+  (`eliteHornGeometry`: outer-wall axis from `_eliteProfileAxis`, section exponent from the design's
+  own `params.n`, e.g. 7.58 → squarish mouth like the mesher's) run through a **single shared
+  offscreen three.js renderer** (`_eliteGLRender`, imported via `view3d.js::loadThree`; camera looks
+  into the mouth like the reference render, transparent background, MeshStandardMaterial). One frame
+  per card, captured to a data-url `<img>` and cached; one WebGL context total, disposed at each
+  Elites page entry (`_eliteGLDispose`); queue concurrency 1; SVG outline stays only as the
+  WebGL-unavailable fallback, and the placeholder for missing geometry. New pure helpers exported
+  for node tests: `_eliteProfileAxis`, `eliteHornGeometry` (`tests/test_gui_elites_ui.py::
+  test_elites_3d_geometry_guard` — outer-wall orientation, superellipse exponent vs ellipse, vertex
+  counts, degenerate-outline refusal). Verified live on 8765: 11 WebGL thumbs + 1 fallback in the
+  first viewport, no page errors.
 - Screenshots (worktree server on 8801): `%TEMP%\opencode\elites_after\` — dark/light at 1500/900,
   brief/family/both/all filters, page 2, empty state, card zoom.
 

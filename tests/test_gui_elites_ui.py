@@ -197,3 +197,77 @@ def test_elites_ui_helpers_guard(tmp_path: Path):
     r = subprocess.run([node, str(script), str(APPJS)],
                        capture_output=True, text=True, encoding="utf-8", cwd=str(tmp_path))
     assert "ELITES UI GUARD OK" in r.stdout, f"node test failed:\nstdout: {r.stdout}\nstderr: {r.stderr}"
+
+_3D_GUARD_SCRIPT = r'''
+﻿import { pathToFileURL } from "node:url";
+import assert from "node:assert/strict";
+
+const fake = () => ({ className: "", id: "", style: {}, dataset: {}, innerHTML: "", textContent: "",
+  setAttribute() {}, getAttribute: () => null, replaceWith() {}, appendChild() {},
+  addEventListener() {}, removeEventListener() {}, closest: () => null,
+  classList: { toggle() {}, add() {}, remove() {} }, querySelector: () => null, querySelectorAll: () => [] });
+globalThis.document = {
+  getElementById: () => fake(), createElement: () => fake(), createElementNS: () => fake(),
+  querySelector: () => null, querySelectorAll: () => [], addEventListener() {},
+  documentElement: { hasAttribute: () => true, setAttribute() {}, getAttribute: () => null, style: {} },
+  body: { appendChild() {} },
+};
+globalThis.window = { addEventListener() {}, matchMedia: () => ({ matches: false, addEventListener() {} }) };
+globalThis.matchMedia = () => ({ matches: false, addEventListener() {} });
+globalThis.MutationObserver = class { observe() {} disconnect() {} };
+globalThis.location = { hash: "#/elites", search: "" };
+globalThis.localStorage = { getItem: () => null, setItem() {}, removeItem() {} };
+globalThis.fetch = () => Promise.reject(new Error("offline guard"));
+globalThis.requestAnimationFrame = (f) => 0;
+
+const app = await import(pathToFileURL(process.argv[2]).href);
+
+const outline = [];
+for (let i = 0; i <= 40; i++) outline.push([i * 10, 25 + i * 4]);
+for (let i = 0; i <= 10; i++) outline.push([400 - i * 40, 9]);
+
+const ax = app._eliteProfileAxis(outline, outline, 6);
+assert.ok(ax, "axis profile resolves");
+assert.ok(Math.abs(ax.z0) < 1e-9 && Math.abs(ax.z1 - 400) < 1e-9, JSON.stringify(ax && { z0: ax.z0, z1: ax.z1 }));
+assert.ok(ax.rh[0] < ax.rh[ax.rh.length - 1], "oriented throat -> mouth");
+assert.ok(Math.abs(ax.rh[ax.rh.length - 1] - 185) < 8, "mouth radius kept (outer wall)");
+assert.ok(ax.rh.every((r) => r >= 0 && r <= 186), "outer wall, no invented radii");
+
+const geom = app.eliteHornGeometry({ h: outline, v: outline }, { n: 8 }, { levels: 8, segments: 8 });
+assert.ok(geom, "geometry resolves");
+assert.equal(geom.positions.length, 8 * 8 * 3, "levels x segments vertices");
+assert.equal(geom.indices.length, (8 - 1) * 8 * 6, "quad strip indices");
+const L = 8, S = 8;
+const ringR = (li) => {
+  let m = 0;
+  for (let si = 0; si < S; si++) {
+    const x = geom.positions[(li * S + si) * 3], y = geom.positions[(li * S + si) * 3 + 1];
+    m = Math.max(m, Math.hypot(x, y));
+  }
+  return m;
+};
+assert.ok(ringR(L - 1) > ringR(0) * 4, "mouth ring far wider than the throat ring");
+const geom2 = app.eliteHornGeometry({ h: outline, v: outline }, { n: 2 }, { levels: 8, segments: 8 });
+const diag = (g) => {
+  const si = 1;
+  const x = g.positions[si * 3], y = g.positions[si * 3 + 1];
+  return Math.hypot(x, y);
+};
+assert.ok(diag(geom) > diag(geom2) * 1.15, "higher exponent -> squarer section (larger 45 deg radius)");
+assert.equal(app.eliteHornGeometry(null, null), null, "no profile -> no geometry");
+assert.equal(app.eliteHornGeometry({ h: [[0, 0]], v: [[0, 0]] }, null), null, "degenerate outline -> no geometry");
+assert.ok(geom.zEye > 0, "mouth rim at +z for the camera");
+
+console.log("ELITES 3D GUARD OK");
+'''
+
+
+def test_elites_3d_geometry_guard(tmp_path: Path):
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("node not installed")
+    script = tmp_path / "elites_3d_under_test.mjs"
+    script.write_text(_3D_GUARD_SCRIPT, encoding="utf-8")
+    r = subprocess.run([node, str(script), str(APPJS)],
+                       capture_output=True, text=True, encoding="utf-8", cwd=str(tmp_path))
+    assert "ELITES 3D GUARD OK" in r.stdout, f"node test failed:\nstdout: {r.stdout}\nstderr: {r.stderr}"
