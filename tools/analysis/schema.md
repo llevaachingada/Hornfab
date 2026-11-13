@@ -355,23 +355,35 @@ Pooled mode (`--pair GPU,CPU` repeated): `{mode: "pooled", pairs: [<single-pair 
 ## surrogate_validation.json (`tools/analysis/surrogate_validation.py`)
 
 S7 advisory surrogate check. Read-only over a rows JSONL (`row_id, design_hash, t, objective_version, x,
-ok, j, metrics`); never solves, never changes a default. A refusal is a result: `status: "refused"` with
-`reason` one of `insufficient_rows` (< 8 rows), `mixed_objective_versions`, `unsupported_objective_version`,
-`missing_inputs`, plus `detail`. Only objective versions the legacy metric surrogate can actually score pass
-(`surrogate/capability.py`, currently v1): v4+ is refused by design because a v4 J also needs tolerances,
-target terms and measured throat impedance the surrogate cannot supply, and J is only comparable within one
-objective version **and** brief/weights/tolerances — the row contract carries no such identity. Rows are
-split chronologically into the latest `test_frac`; same-`design_hash` test rows seen in train are dropped and
-the check is reported. Predictions are hypotheses, `measured: false`.
+ok, j, metrics`); never solves, never changes a default. Two modes, reported as `validation_mode`:
+
+- `legacy_capability` (default): every row's objective version must pass
+  `hornlab_search.surrogate.capability.require_supported` (currently v1 only). It never claims the legacy
+  metric surrogate can score a newer objective.
+- `advisory_stored_j` (`--advisory-stored-j`, objective v4 only): J is an **exact stored label**, not a
+  predicted score. Every `ok` row must carry `score_spec` (canonical `brief`, `brief_hash`,
+  `objective_version`, `target`, `weights`, `objective_block`, `terms_keys`, `score_schema_version`), a
+  `score_identity` equal to its hash, and `label_evidence` with a per-result `score_id` plus a J equal to the
+  row's J. Rows must share one score identity; a per-design replay `score_id` is provenance, never a cohort id.
+
+A refusal is a result: `status: "refused"` with `reason` and `detail`. Reasons include `insufficient_rows`
+(< 8 rows), `mixed_objective_versions`, `unsupported_objective_version` (default mode), `missing_inputs`,
+`duplicate_row_id`, `missing_score_identity`, `invalid_score_spec`, `incomplete_score_spec`,
+`score_identity_mismatch`, `mixed_score_identities`, `incomplete_label_evidence`, `label_value_mismatch`,
+`advisory_stored_j_requires_v4`, `empty_chronological_split`, and the output-path guards `bad_input`,
+`bad_output`, `forbidden_output`. Rows are split chronologically into the latest `test_frac`; same-`design_hash`
+test rows seen in train are dropped and the check is reported. Predictions are hypotheses, `measured: false`.
 
 ```json
 {
   "tool": "surrogate_validation", "schema_version": 1, "input_key": "<sha256 of rows+pool+params>",
-  "params": {"test_frac": 0.25, "k": 5, "topk": 5, "n_propose": 6},
+  "params": {"test_frac": 0.25, "k": 5, "topk": 5, "n_propose": 6, "advisory_stored_j": false},
   "advisory_only": true, "changes_defaults": false, "resumed": false, "stale_partial_replaced": false,
   "input": {"rows": "<path>", "pool": "<path|null>"},
   "status": "ok",                                        // or "refused" + reason/detail
   "objective_version": 1, "metric_names": ["bw_h_deg", "..."],
+  "validation_mode": "legacy_capability",                // or "advisory_stored_j" (v4, stored labels)
+  "score_identity": null,                                // advisory mode only: shared resolved-spec hash
   "split": {"kind": "chronological",
             "checks": {"max_train_t": 29, "min_test_t": 30,
                        "no_future_rows_in_train": true, "same_geometry_removed_from_test": 1,

@@ -3,15 +3,25 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-13 (**Elites tab redesigned for non-technical readers: brief/typology constraints and isometric horn thumbnails, best-per-typology / best-per-brief browsing, paginated 24 at a time, CSV-path noise removed; payload extended with brief/family/brief_target; bo-study-v1.1 final offline integration landed (M2 sensitivity/proposal evidence, immutable run package + `hornlab-search study` CLI, durable proposal-cadence recovery, B8 adversarial full loop); profile-outline thumbnail geometry fixed after live check (closed outline split at the mouth rim, outer wall kept); card hierarchy tuned per owner (constraint line + score largest, gate pills smaller); no GitHub issue state changed**).
 
-Local-only, added 2026-11-13 ~23Z (**main moved ahead with S7 + S8 and is currently red; no GitHub issue state changed**):
+Local-only, added 2026-11-13 ~23:5xZ (**PR #55 reconciled with main; worktrees consolidated; no GitHub issue state changed**):
+- Resolved: main went green (`46a28ec` fixture adaptation, `dc64fd7` S8 contracts + S7 hardening) and the PR merged
+  `origin/main` (`a717650`) as `4d6f4da`, taking main's `surrogate_validation.py` + tests. S7's v4
+  `--advisory-stored-j` mode is main's answer; this branch's S7 draft is gone. S8 closed.
+- Verified: compileall exit 0; 151 passed (durable launch, B8 e2e, seed_pack, lane_parity, S7, S8 trio) and 116
+  passed for the b8/study/gui/builder/native-gate neighbours. B8 reaches `export` again on native fixtures.
+- Resolved (housekeeping): worktrees 28 -> 3 (main, `hf-wt/pr55`, `oc-wt/gui-int`); 25 clean+merged worktrees
+  removed with every branch ref kept. Safety: `backup/main-pre-reconcile`, `backup/pr55-pre-reconcile` tags and a
+  verified all-refs bundle; 4 local-only branches pushed to origin.
+- Open: merge PR #55 on GitHub, then remove `hf-wt/pr55` / delete `pr55-local`.
+- Open: `feat/gui-integration` (`oc-wt/gui-int`, now on origin) needs a deliberate merge-or-retire decision.
+- Not weakened: no gate, tolerance or test was changed to force green.
+
+Local-only, added 2026-11-13 ~23Z (**superseded by the ~23:5xZ block**):
 - Superseded: main's `5f15275` landed the S8 trio (`geometry_descriptors`, `hypothesis_cards`, `qd_compare`) and
   `a4dccef` landed the S7 `--advisory-stored-j` v4 stored-label mode. This branch's S7 draft is redundant; S8 is
   no longer open.
-- Open (blocker on merging this PR with main): main's strict native `TrainingSet` gate refuses the synthetic
-  fixtures used by `tests/test_b8_end_to_end_cli_http.py` (exit 6 at `analyze`), so the merge was aborted.
-- Open (main-side red, reproduced on a clean `origin/main` worktree): 6 `tests/test_study_builders.py` tests fail
-  (`needs_initial_data; n_min=28 n=0`) and the S7 OOD test fails because `x` must now be in the unit cube.
-- Not weakened: no gate, tolerance or test was changed to force green.
+- Closed 2026-11-13 ~23:5xZ: main's strict native gate blocker was fixed on main (`46a28ec` adapted the
+  `test_study_builders` fixtures; `dc64fd7` fixed the S7 unit-cube OOD test), and the PR merge now passes.
 
 Local-only, added 2026-11-13 ~25Z (**PR #55 merged up to main, verified offline; no GitHub issue state changed**):
 - Resolved: `main` (`9019cbd`) merged into the PR; only doc conflicts (`CONTINUITY`, `ISSUES`), both sides kept.
