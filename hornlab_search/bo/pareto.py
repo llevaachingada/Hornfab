@@ -11,6 +11,10 @@ import numpy as np
 
 from .model import fit_model
 
+#: Frozen Pareto engine identity (B7 commit 1).  A study records this name so a different
+#: reference/model policy cannot be silently substituted.
+PARETO_POLICY = "pareto_pool_v1"
+
 
 def frozen_reference(errors):
     """Freeze original-unit limits and the maximization-space reference."""
