@@ -1,6 +1,19 @@
 # CONTINUITY
 
 
+## 2026-11-13 (~24:30Z) - S7 SURROGATE VALIDATION, S5 CONFIG ROUND-TRIP, LANE_PARITY POOLED (offline)
+
+- S7: `tools/analysis/surrogate_validation.py` (numpy kNN, advisory only): chronological split with leakage
+  checks (no future rows, same-geometry rows removed from test), train-only preprocessing, OOD fallback,
+  feasibility Brier/reliability, 95% interval coverage, top-k recall/regret, resume-safe keyed output,
+  exploit/uncertainty/diversity proposals labelled hypotheses. Respects `surrogate/capability.py`: v2+ refused
+  (so the v4 native cohort is refused today; widening capability is a separate decision). 4 tests.
+- S5: `seed_pack.py --config-roundtrip CONFIG --dataset-root DIR` rebuilds native designs and compares hashes
+  (needs_config when config/rows/mesher absent; generated configs not reconstructable); `local_search` advisory
+  sigma0/box hints + cold control arm. 4 new tests.
+- lane_parity: repeatable `--pair GPU,CPU` pooled CP-7b (hash counted once across pairs). 3 new tests.
+- NOT DONE: S8 (geometry/behaviour descriptors, hypothesis cards, QD-vs-Pareto). Full suite not re-run after these.
+
 ## 2026-11-13 (~24Z) - B4/B5 DURABLE LAUNCH IDEMPOTENCY + B8 CLI/HTTP END-TO-END + INDEX DEDUPE (offline)
 
 - B4/B5: `StudyRunBridge` launch dedup moved from the in-memory `_launched` dict into the studies SQLite

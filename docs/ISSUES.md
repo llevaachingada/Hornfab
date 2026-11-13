@@ -6,7 +6,9 @@ Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 20
 Local-only, added 2026-11-13 ~24Z (**bo-study B4/B5/B8; no GitHub issue state changed**):
 - Resolved: launch idempotency is durable across GUI restarts (`launches` table, migration 2).
 - Resolved: B8 offline end-to-end through CLI and HTTP.
-- Open: S7 surrogate validation, S8 discovery/QD-Pareto, S5 config round-trip, lane_parity pooled mode (branch claude/eloquent-ride-owt01w).
+- Resolved: S7 surrogate validation tool, S5 config round-trip + local search hints, lane_parity pooled mode.
+- Open: S8 discovery/QD-Pareto analysis tooling not started.
+- Open (SENIOR DECISION): S7 refuses objective v4 because `surrogate/capability.py` supports only v1; widen or keep?
 
 Local-only, added 2026-11-13 ~21Z (**solver speed plan; no GitHub issue state changed**):
 - Resolved: A1 namespaced caches landed. (was: solve/mesh cache does not check solver/mesher SHA (blocker before any fork pin bump). Plan: SOLVER_SPEED_IMPLEMENTATION_PLAN_2026-11-13 A1.
