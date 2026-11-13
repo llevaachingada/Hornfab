@@ -1,0 +1,20 @@
+# Combined speed campaign, block 1 of 2 - CURRENT PIN 0850ef39.
+# Design: docs/queue/SPEED_COMBINED_2026-11-13.md. Four arms: {batch 1, batch 12} x {D1 osse_ext_throat, D2 ath_core}.
+# budget 1 = seed candidate only, so every arm solves the same geometry and the comparison is about the engine.
+# Fused CUDA comes from each config (solve.cuda_fused: true, backend beat_cuda); batching is the env var only.
+# After this block: swap the pin to 9ec86b0 and run speed_combo_2026-11-14_newpin. Do not put pip inside a night job.
+night: speed_combo_2026-11-14_oldpin
+lane: gpu
+jobs:
+  - {id: combo_old_b1_osse,  kind: search, budget: 1, mode: screen, timeout_s: 3600,
+     config: examples/typologies/print_80x60_2026-11-13/p80x60__osse_ext_throat_700_v7.yaml,
+     env: {HORNLAB_FREQ_BATCH_SIZE: "1"}}
+  - {id: combo_old_b12_osse, kind: search, budget: 1, mode: screen, timeout_s: 3600,
+     config: examples/typologies/print_80x60_2026-11-13/p80x60__osse_ext_throat_700_v7.yaml,
+     env: {HORNLAB_FREQ_BATCH_SIZE: "12"}}
+  - {id: combo_old_b1_ath,   kind: search, budget: 1, mode: screen, timeout_s: 3600,
+     config: examples/typologies/print_80x60_2026-11-13/p80x60__ath_core_14in_700_v7.yaml,
+     env: {HORNLAB_FREQ_BATCH_SIZE: "1"}}
+  - {id: combo_old_b12_ath,  kind: search, budget: 1, mode: screen, timeout_s: 3600,
+     config: examples/typologies/print_80x60_2026-11-13/p80x60__ath_core_14in_700_v7.yaml,
+     env: {HORNLAB_FREQ_BATCH_SIZE: "12"}}

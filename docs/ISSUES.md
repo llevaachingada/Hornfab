@@ -3,6 +3,20 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-13 (**Elites tab redesigned for non-technical readers: brief/typology constraints and isometric horn thumbnails, best-per-typology / best-per-brief browsing, paginated 24 at a time, CSV-path noise removed; payload extended with brief/family/brief_target; bo-study-v1.1 final offline integration landed (M2 sensitivity/proposal evidence, immutable run package + `hornlab-search study` CLI, durable proposal-cadence recovery, B8 adversarial full loop); profile-outline thumbnail geometry fixed after live check (closed outline split at the mouth rim, outer wall kept); card hierarchy tuned per owner (constraint line + score largest, gate pills smaller); no GitHub issue state changed**).
 
+Local-only, added 2026-11-13 (23:3xZ) (**combined speed campaign designed; no GitHub issue state changed**):
+- Ready (not launched): `docs/queue/speed_combo_2026-11-14_{oldpin,newpin}.yaml`, a pin x batch factorial on two print
+  cells, `--dry-run` exit 0. Design + pre-declared rules: `docs/queue/SPEED_COMBINED_2026-11-13.md`. ~45-55 GPU-min.
+- Open: the pin swap between blocks is an operator step, not a night job (`pip install` + `provision --backend cpu`).
+- Open: shared (WDDM) memory is still not recorded by the night runner, so the zero-spill gate needs one arm through
+  `tools/bench/_bench_common.GpuMemPeak`.
+- Open: `HORNLAB_FREQ_BATCH_SIZE` is an env var, not a config key, so an adopted batching value would not appear in
+  `config_sha`; add `solve.freq_batch_size` if adopted.
+- Open (candidate B, Lane C): the fused route builds two dense host N x N identity matrices per request that it never
+  reads (`BeatEngineDriver.jl:1534-1535`); a second A3-shaped fork patch, ~0.5 GB host RAM + O(N^2) host assembly per
+  request at 8k DOF. Not implemented.
+- Open: the mesher fork checkout is stale (branch `hornlab-search/base` @ `b922e80`; the pinned `55da4f4` object is
+  absent locally), so any fork-state conclusion from it is unreliable until a fetch.
+
 Local-only, added 2026-11-13 (23:1xZ) (**G2 independently reviewed; evidence corrected; no GitHub issue state changed**):
 - Open (owner): G2 verdict is adopt-with-conditions. Adopt = pin `9ec86b0` + `pyproject.toml`/`TOOLCHAIN.md` +
   A5 recalibration; rollback = old SHA. The pin is unchanged until the owner decides.

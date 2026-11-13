@@ -1,6 +1,30 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-13 (23:3xZ) - COMBINED SPEED CAMPAIGN DESIGNED (PIN x BATCHING FACTORIAL); THREE RECON LANES REPORTED
+
+- **Why combined:** the owner wants to adopt more than G2 at once. A3 (skip the fused identity cache) and frequency
+  batching (G1) both amortise *per-request* setup, and A3's per-request cache build is part of what batching would
+  amortise - so sequential adoption double-counts the overlap. A factorial measures the interaction.
+- **Design:** `docs/queue/SPEED_COMBINED_2026-11-13.md`; night files
+  `docs/queue/speed_combo_2026-11-14_{oldpin,newpin}.yaml` (both `--dry-run` exit 0). Two blocks of four arms:
+  `{batch 1, batch 12} x {p80x60__osse_ext_throat_700_v7, p80x60__ath_core_14in_700_v7}`, `--budget 1` so every arm
+  solves the same seed geometry. Block 1 on pin `0850ef39` (current), block 2 after the swap to `9ec86b0`.
+  Pre-declared rules: adopt a factor only at wall ratio <= 0.85, compare <= 0.039 dB / 1 deg, lower peak VRAM, zero
+  shared spill. Budget ~45-55 GPU-minutes including the ceiling sweep.
+- **Lane summary (three parallel recon lanes):** (1) every speed idea already documented, with status/measured
+  gain/GPU cost/resolution flag; (2) the mesh state - C1 audit is the only landed mesh work, production defaults are
+  untouched (`rear_res_factor 1.0`, `curvature_npts 0`), the mesher fork checkout is stale (at `b922e80`, the pinned
+  `55da4f4` object is absent locally); (3) the per-frequency lifecycle - **the batching knob is not used in
+  production** (`cma._prepare` never passes it; one request per frequency, so caches + `GC.gc(true)` + `cuda.reclaim()`
+  recur per frequency), and the fused route also builds two dense **host** N x N identity matrices per request that it
+  never reads (Lane C candidate B, a second A3-shaped patch).
+- **Excluded by the owner's rule** (recorded so they are not re-proposed as speedups): rear-shell density (coarsens a
+  coupled surface), quadrature order reduction, coarse epw, fewer angles/frequencies, FP32 Krylov, reduced-order sweeps,
+  UI fidelity selector.
+- **Docs:** INDEX row added for the campaign doc. No code, pin, GPU or queue change in this commit; the campaign is
+  designed, not launched.
+
 ## 2026-11-13 (23:1xZ) - G2 INDEPENDENTLY REVIEWED: ADOPT-WITH-CONDITIONS; EVIDENCE DOC CORRECTED (MECHANISM + PARITY GAP)
 
 - Owner asked for an independent review before deciding the pin bump. Oracle verdict: **adopt-with-conditions**
