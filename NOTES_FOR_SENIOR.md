@@ -790,3 +790,13 @@ Follow-up to the 2026-11-12 GUI entry above. Repo state re-verified first: GUI r
 - Deferred, still open by owner choice: Kill-run/Stop typed-confirm (touched NOTHING this pass - kill affordances byte-identical), WP-D2 gate display, D4 elites catalog page, W6 balloon port, P8d compose classes, P9 sandbox, leaderboard latency, rate smoothing beyond session bound.
 - Note for the next agent: the two-lane live data now flows purely from artifacts (locks, queue logs, job logs, ndjson rows, verify subdirs); no new collection was added, no solver or queue code was touched; GUI restart after gui/* edits only (proven safe twice today).
 
+## 2026-11-13 - Deferred from SOLVER_SPEED_IMPLEMENTATION_PLAN_2026-11-13 (to-do, not scheduled)
+- Dense GMRES on CUDA/CPU with block-Jacobi (Huygens P3); bounded assembly/solve pipelining (Huygens P4).
+- Persistent GPU context; direct-device pressure-to-field path; LU workspace pooling (profile first).
+- Matrix-free/FMM spike (NumCalc first, Bempp OSRC, FMM3D kernels); adjoint/adaptive BEM; BEMAO/curved elements.
+- Axisymmetric multimodal solver; half-space infinite-baffle formulation; reduced-order frequency sweeps.
+- Huygens / hornlab-metal-bem same-mesh head-to-head on the collaborator Mac (chip/RAM not yet recorded).
+- Geometric rear simplification (flat rear) as a physics ablation, only after C1/G4 density results.
+- `curvature_npts` is a refiner, not a DOF saver: diagnostic use only.
+- UI fidelity selector (Fast search / Detailed verification / Full-range check) and Simulation-details panel: after D2.
+- Mesher role labels may not survive export physical tags; A4 may need an offline role-summary artifact from the mesher fork.

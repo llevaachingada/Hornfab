@@ -3,6 +3,12 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-13 (**Elites tab redesigned for non-technical readers: brief/typology constraints and isometric horn thumbnails, best-per-typology / best-per-brief browsing, paginated 24 at a time, CSV-path noise removed; payload extended with brief/family/brief_target; bo-study-v1.1 final offline integration landed (M2 sensitivity/proposal evidence, immutable run package + `hornlab-search study` CLI, durable proposal-cadence recovery, B8 adversarial full loop); profile-outline thumbnail geometry fixed after live check (closed outline split at the mouth rim, outer wall kept); card hierarchy tuned per owner (constraint line + score largest, gate pills smaller); no GitHub issue state changed**).
 
+Local-only, added 2026-11-13 ~21Z (**solver speed plan; no GitHub issue state changed**):
+- Open: A1 solve/mesh cache does not check solver/mesher SHA (blocker before any fork pin bump). Plan: SOLVER_SPEED_IMPLEMENTATION_PLAN_2026-11-13 A1.
+- Open: `_seam_check` probes above the lower band's rated limit (A2).
+- Open: fused CUDA allocates unused GPU identity cache (A3 fork patch, G2 validation).
+- Open: no per-region mesh fidelity status (A4); no dense-memory feasibility preflight (A5); replay v5-v7 support unreported (A6).
+
 Local-only, added 2026-11-13 ~20Z (**no GitHub issue state changed**):
 - Resolved: CP-7b GPU/CPU lane parity, closed in aggregate (4 pairs, max 0.079 dB).
 - Open: StudyRunBridge launch idempotency is in-memory; make it durable before any real launcher is wired.

@@ -1,6 +1,16 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-13 (~21Z) - SOLVER SPEED PLAN: TWO HANDOFFS MERGED INTO ONE PARALLEL PLAN (docs only)
+
+- Owner asked to implement both 2026-11-13 handoffs (local-agent senior review; Huygens solver-speed review).
+  Both added verbatim under `docs/throughput/`; merged plan `docs/throughput/SOLVER_SPEED_IMPLEMENTATION_PLAN_2026-11-13.md`.
+- **Next:** Wave A, two orchestrators in parallel, offline only. Orch 1 (HornFab Python): A1 cache provenance
+  (blocker for any pin change), A4 mesh fidelity tool, A5 feasibility preflight, A6 replay honesty, then A2 seam fix.
+  Orch 2: A3 BEAT fork identity-cache patch (pin unchanged), C1 CPU-only rear-density mesh audit.
+- GPU Wave B (G1 batching, G2 fork A/B, G3 screen fidelity, G4 rear, G5 band split) waits for queue slots and Gate 0.
+- No code, solve, queue or cache change in this commit. Handoff claims not re-verified; each package re-reads code.
+
 ## 2026-11-13 (~20:1xZ) - HOME 80x60/700 DAY QUEUE, CP-7b PARITY CLOSED, BO/CORE COMMIT SPLIT
 
 - **Owner direction (decisions delegated):** printed horns for the living room; ~80x60 is inspiration only;
