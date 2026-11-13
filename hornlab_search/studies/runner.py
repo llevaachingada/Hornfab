@@ -161,12 +161,15 @@ def run_package(package, evaluator_adapter, lane_adapter, journal, *, dry_run=Fa
                 state = journal.state(package['package_id'])
                 if state.get('unresolved'):
                     status = 'unknown'; break
+                # Cancellation must be reported before staleness: a cancelled package
+                # is also "not current", but the operator-visible stop reason is
+                # ``cancelled``, not ``stale``.
+                if journal.cancelled(package['package_id']):
+                    status = 'cancelled'; break
                 if not journal.is_current(package):
                     status = 'stale'; break
                 if clock() >= deadline:
                     status = 'deadline'; break
-                if journal.cancelled(package['package_id']):
-                    status = 'cancelled'; break
                 if state.get('consecutive_failures', 0) >= 3:
                     status = 'infrastructure_failures'; break
                 if state.get('attempts', 0) >= package['budget']['attempts']:
@@ -191,12 +194,12 @@ def run_package(package, evaluator_adapter, lane_adapter, journal, *, dry_run=Fa
                 cached = evaluator_adapter.lookup(candidate)
                 refusal = None if cached is not None else evaluator_adapter.preflight(candidate)
                 # Preflight/cache inspection may take time; no dispatch after a stop boundary.
+                if journal.cancelled(package['package_id']):
+                    status = 'cancelled'; break
                 if not journal.is_current(package):
                     status = 'stale'; break
                 if clock() >= deadline:
                     status = 'deadline'; break
-                if journal.cancelled(package['package_id']):
-                    status = 'cancelled'; break
                 reserve = cached is None and refusal is None
                 # Atomic begin must recheck revision, call caps and attempts; cache
                 # recheck happened while owning the lane. Unknown stays reserved.
