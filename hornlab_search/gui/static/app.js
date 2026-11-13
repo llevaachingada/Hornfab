@@ -6,7 +6,7 @@ import { chart, heat, cmap, drawCbar, niceTicks, diFromCuts, groupColor,
           logGrid, logTicks, AXES, fixedRange, wireScrollHints } from "./charts.js";
 import { TERMS as GLOSSARY, TERM_ORDER, tip } from "./glossary.js";
 import { loadParamCatalog, paramTipHtml, typologyTipHtml, typologyChipsHtml } from "./paramtips.js";
-import { init3d } from "./view3d.js";
+import { init3d, loadThree } from "./view3d.js";
 import { viewEvolution } from "./evolution.js";
 import { viewBalloon } from "./balloon.js";
 import { viewTypologySandbox } from "./sandbox.js";
@@ -142,8 +142,9 @@ const studyApi = {
   createStudy: ({spec, key}, {signal}) => studyRequest("/api/studies", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({spec, idempotency_key:key}), signal}),
   getStudy: (id, {signal}) => studyRequest(`/api/studies/${encodeURIComponent(id)}`, {signal}),
   getPanel: (id, phase, {signal}) => studyRequest(`/api/studies/${encodeURIComponent(id)}/${encodeURIComponent(phase)}`, {signal}),
+  getArtifact: (id, artifact, {signal}) => studyRequest(`/api/studies/${encodeURIComponent(id)}/artifacts/${encodeURIComponent(artifact)}`, {signal}),
   action: (id, kind, payload, {signal}) => {
-    const paths = {decision:"decide", revise:"revise", analyze:"jobs", propose:"jobs"};
+    const paths = {decision:"decision", revise:"revise", analyze:"jobs", propose:"jobs", package:"package", launch:"launch", cancel:"cancel"};
     if (!paths[kind]) throw new Error("This action is not available");
     const body = kind === "analyze" || kind === "propose" ? {...payload, kind} : payload;
     return studyRequest(`/api/studies/${encodeURIComponent(id)}/${paths[kind]}`, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body), signal});
@@ -3997,7 +3998,7 @@ function eliteGateChips(c, labels) {
 // /api/design/<run>/<hash> only for cards that actually reach the viewport.
 
 const ELITE_PAGE = 24;
-const ELITE_THUMB_CONCURRENCY = 4;
+const ELITE_THUMB_CONCURRENCY = 1;    // one WebGL render at a time (shared offscreen renderer)
 const ELITE_THUMB_CACHE_MAX = 600;
 
 function _eliteText(v) {
