@@ -3,12 +3,22 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-13 (**Elites tab redesigned for non-technical readers: brief/typology constraints and isometric horn thumbnails, best-per-typology / best-per-brief browsing, paginated 24 at a time, CSV-path noise removed; payload extended with brief/family/brief_target; bo-study-v1.1 final offline integration landed (M2 sensitivity/proposal evidence, immutable run package + `hornlab-search study` CLI, durable proposal-cadence recovery, B8 adversarial full loop); profile-outline thumbnail geometry fixed after live check (closed outline split at the mouth rim, outer wall kept); card hierarchy tuned per owner (constraint line + score largest, gate pills smaller); no GitHub issue state changed**).
 
+Local-only, added 2026-11-13 ~25Z (**PR #55 merged up to main, verified offline; no GitHub issue state changed**):
+- Resolved: `main` (`9019cbd`) merged into the PR; only doc conflicts (`CONTINUITY`, `ISSUES`), both sides kept.
+- Verified: compileall exit 0; 72 new tests passed; 62 neighbouring b8/study/gui-study tests passed; INDEX
+  dedupe confirmed against main by link-target set (one intended pre-archive row dropped).
+- Decided (S7 v4): keep `surrogate/capability.py` v1-only; a v4 path requires a `score_id` row identity plus
+  same-identity enforcement (schema.md comparability rule), as a separate change.
+- Open: S8 discovery/QD-Pareto tooling not started.
+- Open: full offline suite not re-run in this environment.
+
 Local-only, added 2026-11-13 ~24Z (**bo-study B4/B5/B8; no GitHub issue state changed**):
 - Resolved: launch idempotency is durable across GUI restarts (`launches` table, migration 2).
 - Resolved: B8 offline end-to-end through CLI and HTTP.
 - Resolved: S7 surrogate validation tool, S5 config round-trip + local search hints, lane_parity pooled mode.
 - Open: S8 discovery/QD-Pareto analysis tooling not started.
-- Open (SENIOR DECISION): S7 refuses objective v4 because `surrogate/capability.py` supports only v1; widen or keep?
+- Decided 2026-11-13 ~25Z: S7 keeps `surrogate/capability.py` v1-only (see the ~25Z block); widening needs a
+  `score_id` row identity, not a constant change.
 
 Local-only, added 2026-11-13 (22:05Z) (**CPU lane GUI progress parity; no GitHub issue state changed**):
 - Resolved: CPU lane runs/solves now show status, progress bar, session %, rate/h, ETA, best/start

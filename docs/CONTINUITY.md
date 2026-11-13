@@ -1,6 +1,24 @@
 # CONTINUITY
 
 
+## 2026-11-13 (~25Z) - PR #55 MERGED UP TO MAIN, VERIFIED OFFLINE; S7 v4 GATE KEPT (offline)
+
+- Merged `main` (`9019cbd`) into `claude/eloquent-ride-owt01w`: two conflicts, both docs, both sides kept
+  newest-first (`CONTINUITY`, `ISSUES`). No code conflicts. Merge done in an isolated worktree because the
+  canonical checkout had unrelated uncommitted work.
+- Verified (worktree code, `PYTHONPATH` pinned to it): `compileall hornlab_search tools/analysis` exit 0;
+  72 passed for the new tests (durable launch, B8 CLI/HTTP end-to-end, lane_parity pooled, seed_pack
+  round-trip, surrogate_validation); 62 passed for the neighbouring b8/study/gui-study tests; `docs/INDEX.md`
+  dedupe checked by link-target set (166 -> 165 targets; the only dropped row is the pre-archive
+  `HANDOFF_COLLABORATOR_2026-10-23.md`, whose `archive/` copy is listed).
+- DECIDED (was the open senior question): S7 keeps `surrogate/capability.py` at v1-only. v4 needs
+  tolerances/terms plus measured throat impedance the surrogate cannot supply, and `tools/analysis/schema.md`
+  makes J comparable only within one objective version + brief/weights/tolerances — the S7 row contract carries
+  no brief/score identity. A v4 path needs `objective/replay.py`'s `score_id` in the row contract and
+  same-identity enforcement as a separate change, not a widened constant.
+- Still open: S8 (geometry/behaviour descriptors, hypothesis cards, QD-vs-Pareto) not started; full offline
+  suite not re-run in this environment (targeted tests above only).
+
 ## 2026-11-13 (~24:30Z) - S7 SURROGATE VALIDATION, S5 CONFIG ROUND-TRIP, LANE_PARITY POOLED (offline)
 
 - S7: `tools/analysis/surrogate_validation.py` (numpy kNN, advisory only): chronological split with leakage
