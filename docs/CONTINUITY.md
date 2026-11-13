@@ -204,6 +204,22 @@
   pushed; this entry + ISSUES are committed for the push-rule). No further push from this session
   without explicit owner authorization.
 
+## 2026-11-13 (~13:45Z) - NEXT-QUEUE HANDOFF SAVED; HF DATASET UPLOAD SCHEDULED
+
+- Added `docs/research/NEXT_QUEUE_PLANNING_HANDOFF_2026-11-12.md`: self-contained briefing for the
+  next senior queue planner (verified night status, decision lineage, data inventory, K-law/8 GB
+  retarget limits, constraints, adversarial verdict, three alternatives). No code/queue/default
+  change. A status update inside notes that the M2/M3 integration and F0/F1 landed after the
+  handoff's 03:52Z snapshot; the 50x50-vs-60-80 deg conclusion is unchanged.
+- Night queue finished: g9 `atlas__ath_core` 1,726 evals, best J 1.66554 at 06:26:53Z. The 50x50
+  work is benchmark data; the owner's 60-80 deg / ~700 Hz target is the product direction.
+- HF dataset upload: stage `C:\Users\hunte\Hrns\.hf_stage_hunter` (8 tars, 12.82 GB) SHA-256
+  verified; all tars differ from the 2026-11-03 repo state (v7 relabel + new rows/cache/text;
+  `dataset-002.tar` is new). One-time task `Hornlab HF stage upload` at 2026-11-13 13:37:04 -05:00;
+  log `C:\Users\hunte\Hrns\ops\hf_upload_2026-11-13.log`; `HF_HUB_DISABLE_XET=1`. The stage cutoff
+  is ~04:51-04:56Z (1,501/1,726 g9 rows); a completed-night tail needs a repack. Record:
+  `docs/evidence/HF_UPLOAD_2026-11-13.md`.
+
 ## 2026-11-13 - ELITES TAB REDESIGN (owner request: readable by a non-technical user)
 
 - **Server (`gui/data.py`):** `elites_catalog()` cards now carry `brief`, `family` (typology) and
