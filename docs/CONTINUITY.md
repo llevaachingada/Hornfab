@@ -1,6 +1,50 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-13 (23:0xZ) - S8 DISCOVERY CONTRACTS AND S7 ADVISORY VALIDATION FINISHED (offline; no solve, no default change)
+
+- **Scope:** four offline analysis tools plus their tests, already on `main` (`5f15275`, `a4dccef`);
+  this pass finished the S7 advisory hardening and closed the S8 documentation/validation checkpoint.
+  No optimizer, default, dataset, cache, queue or installed library was changed. MEH stays paused.
+- **`tools/analysis/geometry_descriptors.py`:** strict `Design`-only input with a recursive,
+  case-insensitive score/task-key assertion (now also `score_identity`, `score_spec`,
+  `scoring_context_id`, `scalar_score`, `objective_j`, each proven by a test). Admitted native families
+  are `ICW`, `OSSE`, `R-OSSE`, `FREEFORM`; MEH, `mid_ports`, CAD STEP and GRID recipes are refused
+  before resolution. Uses the installed canonical point-grid resolver (no gmsh/BEM), records resolver
+  SHA provenance, reports absolute length/mouth W-H, projected throat/mouth areas, oriented aspect,
+  area ratio and normalized dimensions. `behavior_descriptors(MetricSet, band_hz)` is a separate
+  band-aware view; standardised PCA and seeded multi-init k-means are labelled navigation-only.
+- **`tools/analysis/hypothesis_cards.py`:** verifies two distinct actual parent IDs against the source
+  JSON and `Design.hash()`, reconstructs every config, resolves candidate geometry canonically, and
+  requires all six roles (parents, combination, both ablations, broad control). Acoustic/mesh
+  feasibility stays explicitly unverified; MEH is refused.
+- **`tools/analysis/qd_compare.py`:** requires one objective version, `scoring_context_id` and
+  physical task/spec, two oriented physical axes with units and a frozen HV reference from the input
+  manifest, and every attempted result with a checked `Design.hash()` and strict `ok`. Reuses
+  `search.outcomes.classify` and nsga nondominance so failures/duplicates are charged but excluded.
+  Budgets are integer **attempt-equivalent** evaluations (training/other costs included), i.e.
+  accounting equality, not measured wall-time or hardware parity. `search/cma_me.py` untouched.
+- **`tools/analysis/surrogate_validation.py` (S7):** the default legacy capability gate is unchanged
+  and `surrogate/capability.py` untouched. `--advisory-stored-j` accepts only stored complete v4
+  labels sharing one canonical `score_spec`/`score_identity` plus declared completeness evidence;
+  the per-result replay `score_id` is provenance only (it embeds metric/physical identity and
+  normally differs by design). Hardening: strict row contract (finite metrics/timestamps, unique IDs,
+  unit-cube `x`), refusal instead of a crash on an empty chronological split, average-rank Spearman,
+  code-versioned resume keys, regression support from successful training rows only, null predictions
+  for OOD proposal rows, and a live-root output guard. It validates supplied evidence; it does not
+  reconstruct raw arrays and does not add v4 scoring capability.
+- **pr55-local:** read only. The S7 tool and tests were brought into canonical `main` earlier and
+  extended here; no merge and no other PR55 files were taken.
+- **Verification (this pass, terminal):**
+  `python -m pytest tests/test_tools_analysis_*.py -m "not slow and not gpu and not crosscheck" -q`
+  -> **308 passed, exit 0** (`scratch/2026-11-13_s8/focused-s8.xml`); the preceding S8-scope broad run
+  (all analysis tests + `test_search_cma_me.py`, `test_search_qd_failure_isolation.py`,
+  `test_search_nsga.py`) -> **329 passed, exit 0**
+  (`scratch/2026-11-13_s8/regression-final.xml`); `python -m compileall -q tools/analysis` -> exit 0.
+- **Limits:** offline machinery establishes contracts and reproducibility only. It does not establish
+  acoustic improvement, family validity or optimizer superiority, and the attempt-equivalent budget is
+  not a timing result.
+
 ## 2026-11-13 (22:4xZ) - BO-STUDY v1.1 LOCAL PASS: STRICT NATIVE GATE, S10 STUDY QA FIXES, S11 REBUILT, HOME/S5 READINESS (offline; no solve)
 
 - **Strict native gate (M2 bypass audit):** `hornlab_search/bo/data.py::build_native_training_set` now enforces

@@ -6,7 +6,9 @@ establish a new horn family, or claim an acoustic improvement. MEH remains pause
 ## Decisions
 
 - Geometry coordinates come solely from a `Design` and the existing geometry implementation.
-  Absolute dimensions remain alongside dimensionless ratios. A larger copy of a horn has
+  The admitted native families are `ICW`, `OSSE`, `R-OSSE` and `FREEFORM`; MEH, `mid_ports`,
+  CAD STEP input and GRID point-grid recipes are refused before resolution rather than
+  approximated. Absolute dimensions remain alongside dimensionless ratios. A larger copy of a horn has
   different behavior at a fixed frequency even when its normalized shape is identical.
   Opening areas describe projected geometric apertures, not spherical wavefront areas.
 - Behavioral coordinates have their own measured-metric and frequency-band context.
@@ -16,6 +18,9 @@ establish a new horn family, or claim an acoustic improvement. MEH remains pause
   results under one scoring context and physical specification, matched cost limits and
   predeclared seeds. Retain failure/training/verification expense. Archive admission uses
   the production complete-outcome policy, with failures excluded from both archives.
+  Equal budgets are integer attempt-equivalent evaluations (failed, refused and duplicate
+  attempts are charged), so an equal-budget comparison is accounting equality, not
+  measured wall-time or hardware parity.
 - Hypervolume uses two explicitly oriented physical axes and a reference frozen in the
   input manifest. Never derive the reference from the observed front or pool objective
   versions. Out-of-reference points are reported rather than extending the reference.

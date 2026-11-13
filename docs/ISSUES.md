@@ -3,6 +3,23 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-13 (**Elites tab redesigned for non-technical readers: brief/typology constraints and isometric horn thumbnails, best-per-typology / best-per-brief browsing, paginated 24 at a time, CSV-path noise removed; payload extended with brief/family/brief_target; bo-study-v1.1 final offline integration landed (M2 sensitivity/proposal evidence, immutable run package + `hornlab-search study` CLI, durable proposal-cadence recovery, B8 adversarial full loop); profile-outline thumbnail geometry fixed after live check (closed outline split at the mouth rim, outer wall kept); card hierarchy tuned per owner (constraint line + score largest, gate pills smaller); no GitHub issue state changed**).
 
+Local-only, added 2026-11-13 23:0xZ (**S8 discovery contracts + S7 advisory validation finished;
+no GitHub issue state changed**):
+- Resolved: `geometry_descriptors.py`, `hypothesis_cards.py`, `qd_compare.py` and
+  `surrogate_validation.py` ship with tests on `main`; 308 analysis tests pass (exit 0) and the
+  S8-scope broad run is 329 passed (exit 0). Docs `research/S8_DISCOVERY_RESOLUTION_2026-11-13.md`
+  and `tools/analysis/schema.md` now name the admitted families (`ICW`, `OSSE`, `R-OSSE`,
+  `FREEFORM`) and the MEH/`mid_ports`/CAD/GRID refusals.
+- Open (by design): `qd_compare` equal budgets are integer attempt-equivalent evaluations, so any
+  speed or efficiency claim still needs a separate wall-time ledger; the tool reports no timing result.
+- Open (by design): `surrogate_validation --advisory-stored-j` validates supplied stored v4 label
+  evidence only. It cannot reconstruct raw arrays, and production metric-surrogate capability for v4
+  remains absent (`surrogate/capability.py` untouched).
+- Open (by design): PCA and k-means descriptors are navigation views; their neighbourhoods are not
+  acoustic similarity or causal evidence.
+- Open (unchanged): MEH stays paused, and no offline S8 artifact establishes acoustic improvement or
+  optimizer superiority.
+
 Local-only, added 2026-11-13 22:4xZ (**bo-study-v1.1 local pass: strict native gate, GUI QA fixes,
 S11 rebuild, home/S5 readiness; no GitHub issue state changed**):
 - Open: replay metric regeneration drift in `hornlab_search/objective/replay.py` — a brief target that

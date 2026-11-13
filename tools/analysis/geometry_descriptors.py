@@ -33,6 +33,7 @@ FORBIDDEN_SCORE_KEYS = frozenset({
     "j", "score", "scores", "objective", "objective_version", "score_id",
     "metrics", "metric", "terms", "weights", "target", "brief", "behavior",
     "behaviour", "fitness", "reward", "rank", "hypervolume",
+    "score_identity", "score_spec", "scoring_context_id", "scalar_score", "objective_j",
 })
 
 NUMERIC_DESCRIPTOR_KEYS = (

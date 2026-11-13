@@ -39,6 +39,14 @@ def test_strict_design_only_and_recursive_score_assertion():
         gd.assert_no_score_leakage({"nested": [{"objective": 1.0}]})
 
 
+@pytest.mark.parametrize("key", sorted(gd.FORBIDDEN_SCORE_KEYS))
+def test_every_declared_forbidden_key_is_rejected_at_any_depth(key):
+    with pytest.raises(AssertionError, match="forbidden"):
+        gd.assert_no_score_leakage({"nested": [{"deeper": [{key: 1.0}]}]})
+    with pytest.raises(AssertionError, match="forbidden"):
+        gd.assert_no_score_leakage({key.upper(): 0})
+
+
 def test_meh_and_mid_ports_are_refused_before_resolution():
     from hornlab_search.types import Design
 
