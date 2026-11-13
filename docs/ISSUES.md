@@ -3,6 +3,14 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-13 (**Elites tab redesigned for non-technical readers: brief/typology constraints and isometric horn thumbnails, best-per-typology / best-per-brief browsing, paginated 24 at a time, CSV-path noise removed; payload extended with brief/family/brief_target; bo-study-v1.1 final offline integration landed (M2 sensitivity/proposal evidence, immutable run package + `hornlab-search study` CLI, durable proposal-cadence recovery, B8 adversarial full loop); profile-outline thumbnail geometry fixed after live check (closed outline split at the mouth rim, outer wall kept); card hierarchy tuned per owner (constraint line + score largest, gate pills smaller); no GitHub issue state changed**).
 
+Local-only, added 2026-11-13 ~21:2xZ (**final 2026-11-12 night report; no GitHub issue state changed**):
+- Resolved: `docs/evidence/NIGHT_2026-11-12.md` (final, all six night files + section-6 orchestrator
+  analysis) supersedes `NIGHT_2026-11-12_PARTIAL.md`; the 2026-11-12 GPU staged-vs-joint A/B verdict
+  (joint wins, J 2.4389 vs 2.6290) is appended to `STAGED_SEARCH_AB_2026-10-31.md` and indexed.
+- Open (owner/operator): L5.7 dataset re-pack + HF upload (`tools\hf_sync.py pack --groups
+  text, dataset`, then `upload`) must run at the next GPU job boundary - the print-day p80x60
+  searches write the dataset continuously until the 23:30 cut-off. Keep `HF_HUB_DISABLE_XET=1`.
+
 Local-only, added 2026-11-13 (**local-work audit; no GitHub issue state changed**):
 - Resolved: the canonical checkout is fully committed and pushed (`main == origin/main == adc1e15`):
   `8f5ae9e` home 80x60/700 brief + cells and S5 seed packs; `adc1e15` Elites thumbnails as frozen

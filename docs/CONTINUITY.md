@@ -1,6 +1,28 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-13 (~21:2xZ) - FINAL NIGHT REPORT 2026-11-12 LANDED; STAGED A/B CROSS-REFERENCED (docs only; L5.7 still owed at next GPU boundary)
+
+- [measured] `docs/evidence/NIGHT_2026-11-12.md` finalised via `tools/night_report.py` across all six
+  night files (gpu_2026-11-12, gpu_day_2026-11-12, cpu_day_2026-11-12, gpu_day_2026-11-12_cont,
+  cpu_day_2026-11-12_cont, gpu_day_2026-11-12_cont2) with the orchestrator section-6 analysis appended:
+  GPU 4818 evals (3937 valid / 903 refused), CPU 285 (273 / 17); fresh-search rates g3b 114/h, g4 178/h,
+  g2 with the CPU lane concurrent 136/h (~-14% vs the 157.8/h CAMPAIGN_SMOKE baseline); ~43% GPU idle
+  share over the 27.6 h chain span, dominated by the 17:41Z Windows-Update restart and human-paced
+  night-file edits; n1 headlines cross-referenced (fused ON wins; b12 1.9-4.7x warm wins; 8k fused-off
+  OOM at 7499-7731 MiB = hard 8 GB ceiling, no WDDM spill reading); atlas `377bbe` +398 cells
+  (1328 -> 1726 rows, best J 1.666 -> 1.6655); Le Cleach v6 450 rows best J 1.52916; cross-backend
+  parity c2 0.831889 (CPU, seed 1236) vs g7 0.831933 (GPU, seed 1235), dJ 4.4e-5; no section-4
+  failovers taken (only the planned n1 bench OOM; n7's launch failure was repaired by g5 in cont2).
+- `docs/evidence/STAGED_SEARCH_AB_2026-10-31.md`: the 2026-11-12 GPU acoustic A/B verdict is appended
+  (joint control wins, J 2.438855 vs staged 2.629049 at ~equal budget; "promote staged into
+  hornlab_search/search" stays NOT-YET). INDEX: final NIGHT row added; both STAGED rows carry the GPU
+  result; the PARTIAL row points at the final report.
+- **L5.7 still owed:** `hf_sync pack --groups text,dataset` + `upload` at the next GPU job boundary
+  (dataset continuously written by the print-day p80x60 searches until the 23:30 cut-off tonight);
+  recorded in `NOTES_FOR_SENIOR.md` (append-only) and `docs/ISSUES.md`.
+- Push rule: this commit carries the CONTINUITY entry + ISSUES line + INDEX rows it describes.
+
 ## 2026-11-13 (~21:1xZ) - LOCAL-WORK AUDIT: MAIN CLEAN AND PUSHED; LOCAL-ONLY REFS, ORPHANED STASHES AND THE HOME-LEVEL REPO RECORDED (docs only, no code change)
 
 - **Audit trigger (owner):** study all uncommitted local work that needs to reach GitHub. Snapshot

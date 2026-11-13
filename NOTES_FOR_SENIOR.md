@@ -874,3 +874,15 @@ local fork, but everything else needs to go to main" (2026-11-13 ~14:19 local).
 - `docs/INDEX.md`/`CODE_MAP.md` have no row for the new Elites 3D helpers (`_eliteProfileAxis`,
   `eliteHornGeometry`, `_eliteGLRender`); acceptable under the "new module" wording, noted for review.
 
+
+## 2026-11-13 ~21:2xZ - L5.7 dataset re-pack still owed (orchestrator, night-report wrap)
+- The dataset has been under continuous write by the 2026-11-12/13 night chains and today's
+  print-day p80x60 searches; `hf_sync pack --groups text,dataset` + `upload` needs a GPU job
+  boundary so the shards are not torn. Window missed at 01:26Z (2026-11-12_cont2 queue done) because
+  a new print-day controller had already started; the next boundary is expected at/before the
+  23:30 cut-off tonight (home80x60_day_2026-11-13).
+- Next operator catching a boundary: check `tools\night_status.py` shows no live GPU search, then run
+  `PY tools\hf_sync.py pack --groups text,dataset` and `PY tools\hf_sync.py upload` (PY =
+  `.venv\Scripts\python.exe`; check `--help` first for exact flags; keep HF_HUB_DISABLE_XET=1).
+- Final 2026-11-12 night report is committed: docs/evidence/NIGHT_2026-11-12.md (six night files +
+  section-6 analysis); staged-vs-joint A/B verdict appended to STAGED_SEARCH_AB_2026-10-31.md.
