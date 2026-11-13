@@ -82,6 +82,16 @@
   still writing; ISSUES L5.7 remains open for the final re-pack after the 23:30 cut-off. No
   code/queue/default change.
 
+## 2026-11-13 (~22:0xZ) - TWO-LANE SLOWDOWN CLAIM RETRACTED (timeline audit, docs only)
+
+- [measured] The section-6 night-report claim "GPU at 136/h with the CPU lane concurrent (~-14%)" is
+  retracted: c2b (CPU) ran 18:37-20:12Z, g2 (GPU) 20:02-22:15Z -> real overlap ~10 min (7.5% of g2).
+  c2b mostly ran while the GPU lane was DOWN (Windows-Update restart gap ~16:4x-20:02Z): the CPU lane
+  delivered 285 verify/screen evals into GPU-down time, nearly free. Solo fresh-screen spread
+  (g3b 114/h, g2 136/h, g4 178/h) is config/mesh variation, not a measured concurrency cost.
+- [inferred] Whether sustained GPU+CPU fresh-screen concurrency costs GPU rate remains unmeasured;
+  needs a window with both lanes running fresh screens for hours in parallel.
+- Correction appended to docs/evidence/NIGHT_2026-11-12.md; ISSUES updated in the same commit.
 ## 2026-11-13 (~21:2xZ) - FINAL NIGHT REPORT 2026-11-12 LANDED; STAGED A/B CROSS-REFERENCED (docs only; L5.7 still owed at next GPU boundary)
 
 - [measured] `docs/evidence/NIGHT_2026-11-12.md` finalised via `tools/night_report.py` across all six
@@ -4774,4 +4784,5 @@ PASS  round-trip        reserved for task 04
 - **Next (next agent):** The implementation plan's NON-OWNER-GATED work is COMPLETE as of M6/WP12: the machine carries the brief-agnostic shape surface (classical + splice/throat-blend/salmon + GRID + organic rows + rollback lecleach/iwata_ar/toroidal + saddle halves) + restarts schedules + the QD-atlas contract + the CAD→STEP multicell category + the enclosure-mounting route (measured: dofs +199 %/+107 %, both under the unchanged caps) + the WP16 source plug + WP17 fused-CUDA near correction (stage 1) on the hosted fork's pinned stack (`760a1ec`; installed == pinned — the mesh-pin tripwire is green). **Everything remaining needs the owner: [a] the brief-design consultation (deferred) — 2–4 real briefs turn the machinery from "calibrated" into "aimed"; [b] resume-or-park the deferred WP14 multicell PHYSICS (the fixture's mouth-topology defect + the full resume recipe live in `docs/ISSUES.md`'s deferred-WP14 block; WP17 stage 1 is ready for it); [c] P6a superformula campaign + P6b GSA-vs-CMA-ES bake-off (owner-gated); [d] the small parked proposals (W7 balloon density, the M3/5 calibration proposals); [e] WP17 stage 2 (fused + per-image symmetry near caches) only when symmetric-drive multicells need the GPU. WP13 axisymmetric backend = OWNER-DEFERRED ("don't know how necessary that is" 2026-10-25).** Nothing else runs without the owner.
 - **Open owner decisions:** v2 objective as brief DEFAULT (today opt-in); bound proposals (`docs/evidence/TYPOLOGY_COMPARE_2026-10-23.md`); mesher bump (post-beta); surrogate OSSE top-up; GUI contrast owner click-path check remains; **P6a/P6b + W7 + the brief-design consultation + resume-or-park the deferred WP14 multicell physics (all owner-gated — see Next). RESOLVED 2026-10-25: fork hosting + pin (hosted fork; `760a1ec` pinned; installed == pinned — tripwire green); WP13 = OWNER-DEFERRED.**
 - **Blockers:** none (owner gate on the pin hosting only).
+
 

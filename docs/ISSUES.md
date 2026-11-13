@@ -24,6 +24,7 @@ Local-only, added 2026-11-13 ~21:2xZ (**final 2026-11-12 night report; no GitHub
 - Resolved: `docs/evidence/NIGHT_2026-11-12.md` (final, all six night files + section-6 orchestrator
   analysis) supersedes `NIGHT_2026-11-12_PARTIAL.md`; the 2026-11-12 GPU staged-vs-joint A/B verdict
   (joint wins, J 2.4389 vs 2.6290) is appended to `STAGED_SEARCH_AB_2026-10-31.md` and indexed.
+- Resolved (correction, ~22:0xZ): the earlier claim that the CPU lane slowed GPU evals/h (~-14%) is retracted; timeline audit shows ~10 min real GPU/CPU overlap, CPU lane filled GPU-down time after the 17:41Z restart (see NIGHT_2026-11-12.md correction section). Whether sustained two-lane fresh-search concurrency costs GPU rate remains unmeasured.
 - Open (owner/operator): L5.7 dataset re-pack + HF upload (`tools\hf_sync.py pack --groups
   text, dataset`, then `upload`) must run at the next GPU job boundary - the print-day p80x60
   searches write the dataset continuously until the 23:30 cut-off. Keep `HF_HUB_DISABLE_XET=1`.
@@ -1873,3 +1874,4 @@ Local-only, added 2026-11-13 (**bo-study-v1.1 pushed; cloud completion kickoff i
 - Open: B8 full adversarial loop (fake evaluator through service/CLI/API/GUI, crash/idempotency matrix).
 - Open: pyproject optional `bayes` extra registration (isolated `bayes-venv` remains the sanctioned engine env).
 - Data note: 3 native shard-57 rows (276-278) uncatalogued at the S0 snapshot; refused at join (`catalog_row_missing`), recoverable by a fresh catalog export.
+
