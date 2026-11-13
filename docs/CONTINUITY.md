@@ -1,6 +1,30 @@
 # CONTINUITY
 
 
+## 2026-11-13 (03:52Z) - NEXT-QUEUE PLANNING HANDOFF (50x50 vs 60-80 deg / ~700 Hz)
+
+- Wrote `docs/research/NEXT_QUEUE_PLANNING_HANDOFF_2026-11-12.md` (self-contained briefing for the
+  next senior planner; paths + line refs, no repo digging required).
+- [verified] Night queue `runs/nights/gpu_day_2026-11-12_cont2`: g3b 211 evals best J 1.93281
+  (narrow), g4 201 evals best J 1.74155 (control), g5 staged A/B 21 evals/stage (COMPARE.md; the
+  night summary counts 0 nested evals), g6 450 evals best J 1.52916, g7 301 evals best J 0.831933,
+  g8 401 evals best J 6.6361 unchanged (+120 invalid geometry), g9 (atlas__ath_core +400, 50x50)
+  running at compile time; c1b ok (18 evals), c2b failed (2/10 worker_exit; CPU/GPU parity still
+  unmeasured).
+- Decision lineage recorded: the queue came from the morning compute-allocation study
+  (`study_2026-11-12/COMPUTE_STUDY.md`), and 50x50 came from the bo-study first-task selection
+  (`native__ath_core_v4`, a native OSSE task with an existing cohort), not from an acoustic
+  requirement. The owner now wants 60-80 deg coverage solid to ~700 Hz; K-law says 50 deg at 700 Hz
+  needs 726 mm (impossible in the 650 mm envelope) while 80 deg needs 454 mm. BoTorch stays
+  committed through GUI/propose/run/verify.
+- Handoff recommends: freeze a new brief (prefer 80x80 @ f0 700, band top ~5.5 kHz for screen
+  solvability), run the zero-solve rescore pass over existing raw responses, then one or two CMA
+  seeds (300-400 evals) plus verify; stop extending the 50 deg atlas and the v7 ext-throat cell;
+  fix the stale day-analysis spec and CPU parity first. No code, queue, solve, cache, dataset or
+  default change in this pass.
+- Also recorded in `docs/INDEX.md` and the ISSUES TO-DO list; the three governing research docs
+  remain the authority (hardening > council plan; bo-study-v1.1).
+
 ## 2026-11-12 (21:35Z) - RESEARCH PLAN + EXTERNAL REVIEW HANDOFF SAVED (PR #46)
 
 - Saved `docs/research/DATA_GA_RESEARCH_PLAN_2026-11-12.md` (research-only: inventory of today's

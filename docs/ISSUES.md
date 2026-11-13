@@ -3,6 +3,21 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-10-25 (M6/WP12 pushed: enclosure mounting plumbed end-to-end (`brief.mounting` → the mesher's OWN keys; `-mnt-` cache keys; mesh_meta/ndjson/record echoes; absent = byte-for-bit) and MEASURED on two finalists — dofs +199.4 %/+106.5 %, both under the UNCHANGED caps, enclosure J improves (a different objective landscape — never rank across mountings), reference parity 2.91e-06 dB; **WP13 axisymmetric backend OWNER-DEFERRED** ("don't know how necessary that is"); suite **1372/0/0/0**; focused 71/0/0; evidence `docs/evidence/M6_WP12_2026-10-25.md`, byte-check 21/21; no GitHub issue state changed).
 
+Local-only, added 2026-11-13 (**next-queue planning handoff; no GitHub issue state changed**):
+- `docs/research/NEXT_QUEUE_PLANNING_HANDOFF_2026-11-12.md`: verified status of the running night
+  queue, decision lineage (compute-allocation study -> ATH 50x50 first task -> hardening/bo-study-v1.1),
+  full data inventory (28,575 records, 414 runs, atlas/sensitivity/throughput, M0 cohort/replay), the
+  K-law and 8 GB limits for a 60-80 deg / ~700 Hz retarget, constraints, adversarial verdict and
+  three queue alternatives. No code/queue/solve/default change.
+- **TO-DO (next round, owner-gated):** plan the next queue around the owner's 60-80 deg / ~700 Hz
+  goal. Recommended order: (1) freeze a new brief (prefer 80x80 @ f0 700, band 300-5500 for screen
+  solvability, or the owner's chosen pair) as a new score identity; (2) zero-solve rescore of existing
+  raw responses under it (R0/`offline_scores`), asserting zero backend calls; (3) one or two CMA
+  seeds, 300-400 evals each, plus verify 4-6; (4) keep 50x50 and v7 ext-throat as benchmark data
+  only; (5) fix the stale day-analysis spec and measure CPU/GPU parity before trusting the day
+  report. Owner must confirm coverage pair, driver (2-inch vs 1.4-inch), band top, envelope, and
+  build-vs-study.
+
 Local-only, added 2026-11-12 (**research plan + external review handoff saved, PR #46; no GitHub issue state changed**):
 - `docs/research/DATA_GA_RESEARCH_PLAN_2026-11-12.md` and
   `docs/research/COUNCIL_REVIEW_HANDOFF_2026-11-12.md` saved (raw/pending external review). No code,

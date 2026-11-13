@@ -1,5 +1,7 @@
 # Council review handoff — data-analysis / GA plan (2026-11-12)
 
+**Review delivered:** see [COUNCIL_REVIEW_AND_IMPL_PLAN_2026-11-12.md](COUNCIL_REVIEW_AND_IMPL_PLAN_2026-11-12.md), [the expanded locked BoTorch/GUI workflow specification](BAYESIAN_STUDY_ORCHESTRATOR_SPEC_2026-11-12.md) and [the complete slice prompt pack, starting with B0](DATA_GA_IMPLEMENTATION_PROMPTS_2026-11-12.md). This handoff remains a historical brief. Its repeated G-placeholder/26-seed instructions are superseded; the completed review distinguishes inspected state, scientific corrections and planned work.
+
 **Purpose:** hand this file to an independent senior review board (council) so it can harden the saved research plan and produce a senior-reviewed implementation plan for the major high-value items. The orchestrator is skipping its own council pass; this handoff is self-contained.
 
 **Status of the repo at handoff:** `origin/main` = **15644ca** (PR #47 merged: the measured v8 tolerances + brief §4; PR #46, this plan/handoff, is open). PR #25 is open and must merge last. No queue or code changes are part of this handoff.
