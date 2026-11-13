@@ -228,7 +228,7 @@ def test_invalid_envelope_failure_marker_is_scoped_to_the_brief(tmp_path):
     ev3 = evaluate(bad, space, cfg2, "screen", tmp_path / "r3", None, None,
                    ctx=make_context(cfg2, None, lib_shas=LIBS, cache_dir=cache))
     assert not ev3.cached and ev3.error.startswith("invalid_envelope")
-    marker = next((cache / "solve" / "failures").glob("*.json"))
+    marker = next((cache / "solve").glob("p2-*/failures/*.json"))
     rec = json.loads(marker.read_text(encoding="utf-8"))
     assert rec["kind"] == "invalid_envelope"
     assert rec["brief_hash"] == brief_hash(tight)      # re-evaluated and rewritten under cfg2
@@ -340,7 +340,7 @@ def test_band_split_seam_check_runs_only_in_verify(monkeypatch, smoke_cfg, tmp_p
     assert not ev.error
     resp = load_response(tmp_path / "verify" / "designs" / ev.design_hash / "response.npz")
     seam = resp.meta["seam_check"]["3000"]
-    f_seam = next(f for f in mode_freqs("verify", cfg) if f > 3000.0)
+    f_seam = max(f for f in mode_freqs("verify", cfg) if f <= 3000.0)
     assert seam["freq_hz"] == f_seam
     assert seam["on_axis_delta_db"] == pytest.approx(0.0, abs=1e-12)
     assert seam["bw_h_delta_deg"] == pytest.approx(0.0, abs=1e-12)

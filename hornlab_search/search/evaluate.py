@@ -195,13 +195,28 @@ class EvalContext:
     objective_version: int = 1                         # WP1: 2 when the brief/config opts in
     objective_params: object | None = None             # v4: the validated ``V4Params`` (tolerances...)
 
+    def _ns_root(self, sub: str) -> Path | None:
+        if self.cache_dir is None:
+            return None
+        ns = solve_cache.namespace(self.lib_shas, sub)
+        if ns is None:
+            global _NS_WARNED
+            if not _NS_WARNED:
+                _NS_WARNED = True
+                log.warning("shared solve cache disabled: physics library SHA unknown")
+            return None
+        return Path(self.cache_dir) / sub / ns
+
     @property
     def solve_cache_root(self) -> Path | None:
-        return None if self.cache_dir is None else Path(self.cache_dir) / "solve"
+        return self._ns_root("solve")
 
     @property
     def mesh_cache_root(self) -> Path | None:
-        return None if self.cache_dir is None else Path(self.cache_dir) / "mesh"
+        return self._ns_root("mesh")
+
+
+_NS_WARNED = False
 
 
 def record_provenance(cfg) -> dict:
@@ -806,35 +821,34 @@ def split_freq_bands(freqs_hz, edges_hz) -> list[tuple[float, ...]]:
     return bands
 
 
-def _first_above(freqs_hz, edge_hz: float) -> float:
-    for f in freqs_hz:
-        if float(f) > edge_hz:
-            return float(f)
-    raise ValueError(f"band_split seam check: no frequency above edge {edge_hz:g} Hz")
+# Provisional seam thresholds (LA section 4); enforcement is a reporting decision for G5.
+SEAM_MAX_AXIS_DB = 0.5
+SEAM_MAX_BW_DEG = 2.0
 
 
 def _seam_check(design_hash: str, sspec, mesh_specs, meshes, merged: Response, backend,
-                ctx) -> dict:
-    """Verify-mode only: solve the first frequency above each edge on the LOWER band's mesh and
-    record the on-axis / beamwidth difference against the upper band's value (WP8 seam gate)."""
+                ctx, bands) -> dict:
+    """Verify-mode only: for each edge, solve the LAST frequency of the lower band (valid for
+    the lower mesh) on the UPPER band's mesh and record the on-axis / beamwidth difference
+    against the merged value, which came from the lower mesh (WP8 seam gate)."""
     from ..metrics.polar import beamwidth_deg
 
     out: dict = {}
     axis = merged.axis_index
     resp_freqs = [float(f) for f in merged.freqs_hz]
     for i, edge in enumerate(sspec.extra["band_edges_hz"]):
-        f = _first_above(sspec.freqs_hz, edge)
+        f = float(max(bands[i]))
         seam_spec = dataclasses.replace(sspec, freqs_hz=(f,))
-        bkey = solve_cache.key(design_hash, mesh_specs[i].hash(), seam_spec.hash())
+        bkey = solve_cache.key(design_hash, mesh_specs[i + 1].hash(), seam_spec.hash())
         root = ctx.solve_cache_root
         resp = solve_cache.lookup(bkey, root) if root is not None else None
         if resp is None:
-            outcome = backend.solve(meshes[i], seam_spec)
+            outcome = backend.solve(meshes[i + 1], seam_spec)
             if not outcome.ok or outcome.response is None:
                 msg = (outcome.message or "no response")[:300]
                 log.warning("band-split seam check at %.0f Hz failed: %s", edge, msg)
                 # Oracle NICE (M3): write the failure so an absent seam edge is never ambiguous.
-                out[f"{edge:g}"] = {"freq_hz": f, "error": msg}
+                out[f"{edge:g}"] = {"freq_hz": f, "error": msg, "pass": False}
                 continue
             resp = outcome.response
             if root is not None:
@@ -850,11 +864,16 @@ def _seam_check(design_hash: str, sspec, mesh_specs, meshes, merged: Response, b
         bw_uh, _ = beamwidth_deg(merged.h_angles_deg, np.asarray(merged.spl_h_db, dtype=float)[j])
         bw_lv, _ = beamwidth_deg(merged.v_angles_deg, np.asarray(resp.spl_v_db, dtype=float)[0])
         bw_uv, _ = beamwidth_deg(merged.v_angles_deg, np.asarray(merged.spl_v_db, dtype=float)[j])
+        d_ax = lower_ax - upper_ax
+        d_h = float(bw_lh - bw_uh)
+        d_v = float(bw_lv - bw_uv)
         out[f"{edge:g}"] = {
             "freq_hz": f,
-            "on_axis_delta_db": lower_ax - upper_ax,
-            "bw_h_delta_deg": float(bw_lh - bw_uh),
-            "bw_v_delta_deg": float(bw_lv - bw_uv),
+            "on_axis_delta_db": d_ax,
+            "bw_h_delta_deg": d_h,
+            "bw_v_delta_deg": d_v,
+            "pass": bool(abs(d_ax) <= SEAM_MAX_AXIS_DB and abs(d_h) <= SEAM_MAX_BW_DEG
+                         and abs(d_v) <= SEAM_MAX_BW_DEG),
         }
     return out
 
@@ -1240,9 +1259,15 @@ def _compute_band_split(design, cfg, mode, mspec, sspec, design_dir, backend, ct
 
     merged = stack_responses(responses, sspec.freqs_hz)
     if mode == "verify":
-        seam = _seam_check(design.hash(), sspec, mesh_specs, meshes, merged, backend, ctx)
+        seam = _seam_check(design.hash(), sspec, mesh_specs, meshes, merged, backend, ctx, bands)
         if seam:
             merged.meta["seam_check"] = seam
+            merged.meta["seam_ok"] = all(e["pass"] for e in seam.values())
+            if not merged.meta["seam_ok"]:
+                log.warning("band-split seam check failed for %s: %s", design.hash(),
+                            {k: v for k, v in seam.items() if not v["pass"]})
+        merged.meta["band_meshes"] = [{"mesh_hash": ms.hash(), "n_dof": r.n_dof}
+                                      for ms, r in zip(mesh_specs, responses)]
     st["resp"] = merged
     st["mesh"] = meshes[-1]
     st["area"], st["grid"] = _grid_info(design_dir / f"band{len(bands) - 1}")

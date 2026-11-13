@@ -1,6 +1,45 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-13 (~23Z) - A1 CACHE NAMESPACES + A2 SEAM FIX LANDED (offline)
+
+- A1: shared solve/mesh caches now live under `<cache>/{solve,mesh}/p2-<sha12>/` keyed on beat/bempp/mesher SHAs
+  (+gmsh); unknown SHA disables the shared cache. Legacy flat entries untouched (first run after this re-solves).
+  Failure markers move with the namespace. `identity_v2.implementation_solve_id` added (unwired).
+- A2: seam probe = lower band's last frequency, solved on the UPPER mesh; per-edge `pass`, `meta.seam_ok`,
+  `meta.band_meshes`. Warning only.
+- Tests: 41 passed, 1 skipped (build123d) across cache/evaluate/seam/feasibility/mesh_fidelity. Full suite not run here.
+- Next: A5.4 wiring (feasibility into record meta); A1b `tools/m3_measurement_pack.py:340` flat root.
+
+## 2026-11-13 (~22Z) - A4 MESH FIDELITY TOOL LANDED (offline)
+
+- `tools/analysis/mesh_fidelity.py` + test (2 pass, fixture only). Source tag = SD1D1001; uses build.read_msh_summary
+  plus a small $Elements tag loop (meshio not installed). Not yet run on a real project mesh.
+
+## 2026-11-13 (~22Z) - A5 FEASIBILITY PREFLIGHT LANDED (offline, not wired)
+
+- `hornlab_search/solve/feasibility.py` + `tests/test_solve_feasibility.py` (4 pass, conftest skipped: no numpy in cloud env).
+- Not wired into evaluate.py yet (A5.4 after A2). Open question: beat_metal raises ValueError (unmapped).
+
+## 2026-11-13 (~22Z) - SOLVER SPEED PLAN REV 2: SENIOR REVIEW AGAINST CODE (docs only)
+
+- Plan rewritten as step-by-step packages a subagent can follow, checked against `a783b88`.
+- A1 changed to namespaced cache roots (`<cache>/solve/<ns>/<key>`), because `cache.store()` would overwrite a
+  legacy entry stored under the same key; `hornlab_search`/`hornlab_plots` SHAs excluded so commits don't empty the cache.
+- A6 dropped (replay already refuses v5+). A1 and A2 now run in parallel (disjoint regions of evaluate.py).
+- A5 fused-CUDA memory factor 4x calibrated on FUSED_CUDA_2026-10-24 (12,183 DOF ~4.7 GB).
+- Orchestrator 2 (fork + mesher) must run on the owner's machine; Wave B waits for the home80x60 night to end.
+
+## 2026-11-13 (~21Z) - SOLVER SPEED PLAN: TWO HANDOFFS MERGED INTO ONE PARALLEL PLAN (docs only)
+
+- Owner asked to implement both 2026-11-13 handoffs (local-agent senior review; Huygens solver-speed review).
+  Both added verbatim under `docs/throughput/`; merged plan `docs/throughput/SOLVER_SPEED_IMPLEMENTATION_PLAN_2026-11-13.md`.
+- **Next:** Wave A, two orchestrators in parallel, offline only. Orch 1 (HornFab Python): A1 cache provenance
+  (blocker for any pin change), A4 mesh fidelity tool, A5 feasibility preflight, A6 replay honesty, then A2 seam fix.
+  Orch 2: A3 BEAT fork identity-cache patch (pin unchanged), C1 CPU-only rear-density mesh audit.
+- GPU Wave B (G1 batching, G2 fork A/B, G3 screen fidelity, G4 rear, G5 band split) waits for queue slots and Gate 0.
+- No code, solve, queue or cache change in this commit. Handoff claims not re-verified; each package re-reads code.
+
 ## 2026-11-13 (~21:2xZ) - FINAL NIGHT REPORT 2026-11-12 LANDED; STAGED A/B CROSS-REFERENCED (docs only; L5.7 still owed at next GPU boundary)
 
 - [measured] `docs/evidence/NIGHT_2026-11-12.md` finalised via `tools/night_report.py` across all six

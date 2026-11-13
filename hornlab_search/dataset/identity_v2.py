@@ -42,6 +42,11 @@ def physical_solve_id(design_hash: str | None, mesh_hash: str | None, solve_hash
     return sha16([design_hash, mesh_hash, solve_hash])
 
 
+def implementation_solve_id(physical_id: str, solve_ns: str | None) -> str:
+    """physical_solve_id qualified by the physics-library namespace. physical_solve_id stays the join key."""
+    return sha16([physical_id, solve_ns])
+
+
 def analysis_id(response_sha256: str, method: str, options: dict | None = None) -> str:
     return sha16({"layer": "analysis", "response": response_sha256, "method": method,
                   "options": options or {}})

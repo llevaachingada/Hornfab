@@ -140,3 +140,5 @@ bempp_cpu) → `metrics` (beamwidth, ripple, DI, impedance) → `objective` (sca
 | `hornlab_search/metrics/acoustic_v2.py` | Rev2 additive metrics: main-lobe first crossings, sphere DI quadrature, 3D lobes/islands, loading and pattern-control onset, Keele estimate, analyze_response. Not used by any objective. |
 | `hornlab_search/dataset/identity_v2.py` | Rev2 four identity layers (physical = M0 catalog formula, analysis, score, study), compatibility states, append-only jsonl. Additive. |
 | `tools/analysis/acoustic_v2_report.py` | Rev2 zero-BEM v2 analysis of a night's stored responses; matched arm vs control vs fidelity noise floor; RESULTS.json + DECISION.md. |
+
+- `tools/analysis/mesh_fidelity.py`: read-only per-physical-tag edge stats and `mesh_fidelity_status` (plan A4, 2026-11-13).

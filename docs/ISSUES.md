@@ -3,6 +3,14 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-13 (**Elites tab redesigned for non-technical readers: brief/typology constraints and isometric horn thumbnails, best-per-typology / best-per-brief browsing, paginated 24 at a time, CSV-path noise removed; payload extended with brief/family/brief_target; bo-study-v1.1 final offline integration landed (M2 sensitivity/proposal evidence, immutable run package + `hornlab-search study` CLI, durable proposal-cadence recovery, B8 adversarial full loop); profile-outline thumbnail geometry fixed after live check (closed outline split at the mouth rim, outer wall kept); card hierarchy tuned per owner (constraint line + score largest, gate pills smaller); no GitHub issue state changed**).
 
+Local-only, added 2026-11-13 ~21Z (**solver speed plan; no GitHub issue state changed**):
+- Resolved: A1 namespaced caches landed. (was: solve/mesh cache does not check solver/mesher SHA (blocker before any fork pin bump). Plan: SOLVER_SPEED_IMPLEMENTATION_PLAN_2026-11-13 A1.
+- Resolved: A2 seam probe fixed.
+- Open: fused CUDA allocates unused GPU identity cache (A3 fork patch, G2 validation).
+- Resolved: A4 mesh fidelity tool landed; dense-memory preflight module landed, wiring pending (A5.4); beat_metal unmapped.
+- Closed (rev 2 review): replay v5-v7 already refuses explicitly (`R_REPLAY_VERSION_UNSUPPORTED`); former A6 dropped.
+- Open: A1b `compare/` and `tools/m3_measurement_pack.py` build their own cache roots; route through `solve.cache.namespace()`; only real caller is `tools/m3_measurement_pack.py:340` (compare/ only uses explicit paths).
+
 Local-only, added 2026-11-13 ~21:2xZ (**final 2026-11-12 night report; no GitHub issue state changed**):
 - Resolved: `docs/evidence/NIGHT_2026-11-12.md` (final, all six night files + section-6 orchestrator
   analysis) supersedes `NIGHT_2026-11-12_PARTIAL.md`; the 2026-11-12 GPU staged-vs-joint A/B verdict

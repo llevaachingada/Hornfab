@@ -886,3 +886,16 @@ local fork, but everything else needs to go to main" (2026-11-13 ~14:19 local).
   `.venv\Scripts\python.exe`; check `--help` first for exact flags; keep HF_HUB_DISABLE_XET=1).
 - Final 2026-11-12 night report is committed: docs/evidence/NIGHT_2026-11-12.md (six night files +
   section-6 analysis); staged-vs-joint A/B verdict appended to STAGED_SEARCH_AB_2026-10-31.md.
+
+## 2026-11-13 - Deferred from SOLVER_SPEED_IMPLEMENTATION_PLAN_2026-11-13 (to-do, not scheduled)
+- Dense GMRES on CUDA/CPU with block-Jacobi (Huygens P3); bounded assembly/solve pipelining (Huygens P4).
+- Persistent GPU context; direct-device pressure-to-field path; LU workspace pooling (profile first).
+- Matrix-free/FMM spike (NumCalc first, Bempp OSRC, FMM3D kernels); adjoint/adaptive BEM; BEMAO/curved elements.
+- Axisymmetric multimodal solver; half-space infinite-baffle formulation; reduced-order frequency sweeps.
+- Huygens / hornlab-metal-bem same-mesh head-to-head on the collaborator Mac (chip/RAM not yet recorded).
+- Geometric rear simplification (flat rear) as a physics ablation, only after C1/G4 density results.
+- `curvature_npts` is a refiner, not a DOF saver: diagnostic use only.
+- UI fidelity selector (Fast search / Detailed verification / Full-range check) and Simulation-details panel: after D2.
+- Mesher role labels may not survive export physical tags; A4 may need an offline role-summary artifact from the mesher fork.
+- A1b: after A1, route `compare/hornfab_side.py`, `compare/fake.py`, `tools/m3_measurement_pack.py` cache roots through `solve.cache.namespace()`.
+- Optional legacy-cache adopt tool (hardlink legacy solve entries into a namespace) only if the owner confirms pins were unchanged over a date range.
