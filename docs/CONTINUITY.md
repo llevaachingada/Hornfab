@@ -1,6 +1,74 @@
 # CONTINUITY
 
 
+## 2026-11-13 (~06:2xZ) - BO-STUDY v1.1 FINAL INTEGRATION: M2 EVIDENCE, EXECUTION PACKAGE, B8 FULL LOOP (offline; no solve)
+
+- Owner-authorized final offline pass (3 background lanes + parent integrator, one canonical
+  checkout). No BEM/GPU solve, no gpu-clean, no queue edit, no dataset/cache write from this
+  session; the live GPU night queue and a parallel rev2 CPU-parity night ran independently.
+- **M2 evidence (lane A, committed `c7dd6a3`):** real 197x13 native TrainingSet sensitivity over
+  7 subsets (frozen / all / stratified-64/128 / lowJ+maximin-64/128 / screen-only 192) x noise
+  0.1/1/10 x two independent 4096-Sobol pools; 14 off-policy BO proposals + 2 maximin
+  space-filling references; descriptive only (no independent-group links). Immutable
+  `m2/proposal.json`: frozen scalar_pool_v1 fit, candidate `pool-20261112-03873-5c02b169`,
+  predicted J 3.914145, unclamped sign-reversed credible interval [-4.144184, 11.972474],
+  acquisition -0.174728 labelled a ranking diagnostic, materialized geometry revalidated
+  (envelope/throat/hashes); predictions never appended as measured rows. `m2/pool_manifest.json`
+  is content-identical to the committed B2 4096 pool (3143 cheap-check-passed candidates).
+- **Execution package + study CLI (lane B, committed `9b798f5`):** `studies/package.py`
+  (`prepare_run_package` binds current spec revision + snapshot/model/proposal artifact hashes +
+  protocol/pins/lane; body-only canonical artifact where `package_id == artifact hash`; budget
+  exactly 18 screen / 6 verify / 24 total / 120 attempts; `deadline_required: true`; stop,
+  recovery, adaptive-child and 4-finalist+2-audit verification policies; "cheap-check-passed;
+  mesh/acoustic eligibility unknown"). `studies/cli.py` implements validate/create/snapshot/
+  analyze/propose/package/run --dry-run/reconcile/decide/export with contained `--root`, strict
+  argv allow-lists, typed JSON exit codes 0/2/3/4/5/6, and a dry-run that constructs no
+  service/lane/adapter and spawns no solve. Parent wired `hornlab-search study ...`
+  (`hornlab_search/cli.py`, REMAINDER passthrough). ProposalHistory index/RNG now round-trips on
+  resume so the every-4th-maximin cadence never resets; `StudyEvaluatorAdapter` is a
+  capability-gated skeleton (`capability_missing`), not a BEM adapter.
+- **B8 adversarial (lane C, committed `1e02e88`):** 23 new tests across workflow, crash/
+  idempotency/concurrency, lane/bounded-GUI, CLI-leg and regression modules. Full fake-evaluator
+  study create -> artifacts -> views -> package -> dry-run -> serial screen -> 4 finalists + 2
+  seeded audits -> refit -> decide -> export -> child; crash injection after intent, dispatch,
+  evaluator persistence, journal result and registry update; duplicate launch/retry/stale
+  revision; CPU-lock ownership and no nested GPU lock; dry-run zero subprocess/dataset/NPZ/
+  registry writes. One real defect found and fixed by the parent: explicit cancellation was
+  reported as `stale` because `is_current()` was checked first; `runner.py` now checks
+  `journal.cancelled()` before staleness at both stop boundaries (33 B8 tests green).
+- **M1 regenerated (`79b6651`):** the committed `parameter_study` predated the tightened
+  independent-evidence gate (said `recommendation_status: allowed` while the tool suppresses);
+  regenerated to 200 replayed / 197 compared / max|dJ| 0 / 5 designs (hashes unchanged),
+  recommendation suppressed. `source_fidelity` regenerated against the authoritative 200-row
+  offline-scores artifact (197/197 cards carry `offline_score`, was 50; pairing unchanged at
+  10 paired / 187 no-verify; DI balloon 197/197; source guard 212 files unchanged).
+- **S11 complete (`9648ef9`):** both committed pilot manifests re-validated through the live
+  `hornlab_search.cli` parser (no execution): `errors=0 warnings=0 ok=true`; validation records
+  committed; removed the dead prototype test that imported a non-existent `parse_results/
+  prepare/validate` API (superseded by 33 focused tests); `/cache_cpu/` and `/dataset_cpu/`
+  ignored as CPU-lane runtime roots.
+- **Suite hygiene:** 6 engine-only acquisition/propose tests now carry the existing
+  `requires_botorch` marker (`829feb0`) so the project venv skips them honestly; the rev2 GUI
+  honesty-copy commit left the K-law feasibility node pin stale, aligned in `ec84811` (parallel
+  session) to the shipped "below the Keele ESTIMATE" wording.
+- **Verification (current HEAD):** project venv `pytest tests -q -m "not gpu and not crosscheck
+  and not slow"` -> exit 0 (3417 collected; optional-BoTorch tests skip honestly); isolated
+  bayes venv combined bo suite -> 120 passed, 4 skipped (mesher absent there), exit 0;
+  `compileall` over bo/studies/gui/tools and `node --check` app.js + studies.js clean; top-level
+  `hornlab-search study package` then `study run --dry-run` smoke -> exit 0 with the exact
+  budget/lane/deadline-required/artifacts. Live-dataset counters moved during the pass (expected);
+  M1 artifacts record `generated_utc` and their own snapshot counts.
+- Native cohort unchanged: 197 rows / 192 geometries, parity 197/200 max|dJ| = 0, zero backend
+  calls; three shard-57 rows remain uncatalogued at snapshot time. v8 stays unregistered; no
+  objective/default/config change; no ranking across objective versions.
+- Unverified by design: production study evaluator/lane adapter (so the S9 A/B matrix is still
+  not executable), real snapshot/analyze/propose builders (CLI reports existing artifacts only),
+  real BoTorch in the project venv, and any acoustic benefit/speedup. Adoption/pilots remain
+  owner-gated.
+- Git: all slices committed; `origin/main` already contains them (the parallel rev2/GUI session
+  pushed; this entry + ISSUES are committed for the push-rule). No further push from this session
+  without explicit owner authorization.
+
 ## 2026-11-13 - ELITES TAB REDESIGN (owner request: readable by a non-technical user)
 
 - **Server (`gui/data.py`):** `elites_catalog()` cards now carry `brief`, `family` (typology) and

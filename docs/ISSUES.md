@@ -1,7 +1,30 @@
 # ISSUES
 
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
-Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-13 (**Elites tab redesigned for non-technical readers: brief/typology constraints and isometric horn thumbnails, best-per-typology / best-per-brief browsing, paginated 24 at a time, CSV-path noise removed; payload extended with brief/family/brief_target; no GitHub issue state changed**).
+Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-13 (**Elites tab redesigned for non-technical readers: brief/typology constraints and isometric horn thumbnails, best-per-typology / best-per-brief browsing, paginated 24 at a time, CSV-path noise removed; payload extended with brief/family/brief_target; bo-study-v1.1 final offline integration landed (M2 sensitivity/proposal evidence, immutable run package + `hornlab-search study` CLI, durable proposal-cadence recovery, B8 adversarial full loop); no GitHub issue state changed**).
+
+Local-only, added 2026-11-13 (**bo-study-v1.1 final integration; offline; no GitHub issue state changed**):
+- Fixed: `parameter_study` artifact predated the independent-evidence gate (claimed recommendation
+  allowed); regenerated suppressed with parity 197/200 max|dJ| 0. `source_fidelity` now joins the
+  authoritative 200-row scores artifact (197/197 cards, was 50). Both under
+  `docs/evidence/bo_study_2026-11-12/{s4,s6}/`.
+- Fixed: explicit study cancellation was reported `stale`; `studies/runner.py` checks
+  `journal.cancelled()` before `is_current()` (regression pinned in `tests/test_b8_regressions.py`).
+- Fixed: 6 engine-only bo tests now carry `requires_botorch`; the project venv skips them honestly
+  while the isolated bayes venv runs them. Stale rev2 GUI K-law pin aligned to the shipped wording.
+- S11 complete: both pilot manifests validate through the live CLI (`errors=0 warnings=0`), with
+  committed validation records; the superseded prototype test was removed.
+- Open: production study evaluator/lane adapter is not implemented (`StudyEvaluatorAdapter`
+  returns `capability_missing`; `run_package` refuses without the `b5-journal-*`/`b5-owned-lane-v1`
+  contracts). This blocks executing the S9 A/B matrix; real pilots remain owner-scheduled.
+- Open: `studies/cli.py` snapshot/analyze/propose report an existing artifact and return typed
+  `Unavailable` (exit 6); the real builders are not implemented.
+- Open: `pyproject.toml` optional `bayes` extra is not registered; the sanctioned engine is the
+  isolated `C:\Users\hunte\Hrns\oc-wt\bo-study\bayes-venv` (botorch 0.18.1).
+- Open: 3 native rows (shard 57, rows 276-278) were uncatalogued at snapshot time; a later catalog
+  regeneration picks them up. The S4 artifact records its own snapshot counts/timestamp.
+- Note: untracked `cache_probe/` and `dataset_probe/` probe artifacts were produced by the parallel
+  rev2 CPU-parity session (real CPU solves, `beat_cpu`); this session left them untouched.
 
 Local-only, added 2026-11-13 (**Rev2 implementation pass, additive; no GitHub issue state changed**):
 - Open from Rev2: GUI balloon range selector, frequency-grid fidelity factor, J1/L1 generators, archive-wide manifest sweep. See QUEUE_PLAN_REV2 status table.
