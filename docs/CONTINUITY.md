@@ -1,4 +1,21 @@
-﻿# CONTINUITY
+# CONTINUITY
+
+## 2026-11-14 (15:2x local) - GITHUB PAGES ENABLED (owner-approved; docs only)
+
+- Owner approved enabling GitHub Pages on llevaachingada/Hornfab: source `main` `/docs`, legacy build.
+  Site root https://llevaachingada.github.io/Hornfab/ ; the status brief page is
+  https://llevaachingada.github.io/Hornfab/status/2026-11-14/ (its `index.html`).
+- Added `docs/.nojekyll` so Pages serves files verbatim (no Jekyll/Liquid pass over the docs tree).
+  The repo was already public, so nothing new is exposed. No code/config change.
+
+## 2026-11-14 (15:1x local) - COLLABORATOR STATUS BRIEF PUBLISHED (docs only)
+
+- Added `docs/status/2026-11-14/`: `README.md` (GitHub-rendered brief with 19 static chart PNGs in `img/`) and
+  `index.html` (the same page, self-contained with embedded data, live SVG charts). Content: the 12 Nov day report
+  (`runs/analysis/day_2026-11-12`), the 12-14 Nov changes on main through `878d381`, CMA-ES internals of
+  `20261112T144510Z-screen-00cf9c` (fit/sigma/stddev/xmean/covariance from its `cma/` logs), CMA-ME archive
+  heatmaps, objective balance, walls, sensitivity, fidelity, best-design beamwidth/DI, pull steps, open issues.
+- Numbers are a snapshot read from existing run/analysis files; no solve, queue, config or code change.
 
 
 ## 2026-11-14 (13:xx local) - COLLABORATOR HANDOFF SWEEP: BRANCHES PUSHED, PLANS ARCHIVED, HF REFRESH

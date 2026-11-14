@@ -31,6 +31,7 @@ Keep this file current: a new doc gets a line here in the same commit.
 | Doc | What it is |
 |---|---|
 | [CONTINUITY.md](CONTINUITY.md) | Status block + dated log, newest first. The source of truth for "where are we". |
+| [status/2026-11-14/README.md](status/2026-11-14/README.md) | Collaborator status brief (14 Nov): 12 Nov day report, 12-14 Nov changes, CMA-ES/CMA-ME/fidelity charts, pull steps, open issues; `index.html` beside it is the interactive version. |
 | [ISSUES.md](ISSUES.md) | Open issues and the TO-DO list (next-round priorities at the top). |
 | [history/CONTINUITY_2026-10-12_2026-10-22.md](history/CONTINUITY_2026-10-12_2026-10-22.md) | Diary archive: CONTINUITY entries 2026-10-12 to 2026-10-22, rotated verbatim (newest first) on 2026-10-30. |
 | [history/ISSUES_closed.md](history/ISSUES_closed.md) | Closed GitHub issue rows #1–#11, rotated verbatim from ISSUES.md on 2026-10-30. |

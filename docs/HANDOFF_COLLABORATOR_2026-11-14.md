@@ -212,7 +212,8 @@ acquisition (q > 1) only helps if you queue the batch; there is no parallel solv
 
 ## 9. Reading order
 
-1. This file.
+1. This file. For a dated status snapshot with charts, see the companion brief
+   `docs/status/2026-11-14/` (README + interactive page, also on GitHub Pages).
 2. `docs/research/COUNCIL_REVIEW_AND_IMPL_PLAN_2026-11-12.md`, sections 1, 4.5 and 5: the plan
    behind the analysis and BO work, with the literature table.
 3. `docs/research/BAYESIAN_STUDY_ORCHESTRATOR_SPEC_2026-11-12.md`: the locked BO spec.
