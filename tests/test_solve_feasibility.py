@@ -46,13 +46,14 @@ def test_fused_cuda_refuses_beyond_last_measured_anchor():
 
 
 def test_fused_cuda_production_caps_must_stay_fit():
-    # Owner guard: the production dof caps (12,000 screen/verify/final in the print and
-    # fused_cuda profiles) must remain inside the FIT band under the calibrated envelope.
-    # If a future re-base pushes 12,000 out of "fit", that re-base is wrong or the anchors
-    # must be re-measured BEFORE any cap change — the owner constraint forbids silently
-    # vetoing existing production sizes.
-    result = assess(12000, "beat_cuda", cuda_fused=True)
-    assert result["verdict"] == "fit", result["reason"]
+    # Owner guard (caps raised 12,000 -> 24,000 by owner decision 2026-11-14): the production
+    # dof caps in the print configs + fused_cuda profile must remain inside the FIT band under
+    # the calibrated envelope. If a future re-base pushes these out of "fit", that re-base is
+    # wrong or the anchors must be re-measured BEFORE any cap change — the owner constraint
+    # forbids silently vetoing existing production sizes. 24,000 interpolates to ~4.7 GiB.
+    for n in (12000, 24000):
+        result = assess(n, "beat_cuda", cuda_fused=True)
+        assert result["verdict"] == "fit", f"caps {n}: " + result["reason"]
 
 
 def test_fused_cuda_need_gib_is_monotone_and_matches_anchor_points():

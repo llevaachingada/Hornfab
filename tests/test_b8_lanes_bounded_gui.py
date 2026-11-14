@@ -218,11 +218,13 @@ const mountRoot = {innerHTML:"", addEventListener(){}, removeEventListener(){}, 
 const staleApi = {getStudy:() => call("study"), getPanel:() => call("panel")};
 const dispose2 = m.mountStudy(mountRoot,{studyId:"study1",phase:"overview",api:staleApi,pollMs:5000});
 await new Promise(r => setImmediate(r));   // refresh #1 pending at resolvers[0..1]
-tick2();                                    // refresh #2 pending at resolvers[2..3]
+tick2();                                    // a slow refresh is allowed to finish
 await new Promise(r => setImmediate(r));
-assert.equal(resolvers.length, 4);
-resolvers[2].resolve({id:"study1", revision:4});
-resolvers[3].resolve({phase:"overview",status:"ready",revision:4,data:{marker:"newer"}});
+assert.equal(resolvers.length, 2);           // no repeated abort/restart starvation
+dispose2();
+const newerApi = {getStudy:async () => ({id:"study1", revision:4}),
+ getPanel:async () => ({phase:"overview",status:"ready",revision:4,data:{marker:"newer"}})};
+const disposeNew = m.mountStudy(mountRoot,{studyId:"study1",phase:"overview",api:newerApi,pollMs:0});
 await new Promise(r => setImmediate(r));
 resolvers[0].resolve({id:"study1", revision:3});
 resolvers[1].resolve({phase:"overview",status:"ready",revision:3,data:{marker:"older"}});
@@ -230,7 +232,7 @@ await new Promise(r => setImmediate(r));
 assert.ok(mountRoot.innerHTML.includes("Revision 4"), mountRoot.innerHTML);
 assert.ok(mountRoot.innerHTML.includes("newer"), mountRoot.innerHTML);
 assert.ok(!mountRoot.innerHTML.includes("older"), mountRoot.innerHTML);
-dispose2();
+disposeNew();
 console.log("b8 gui disposal ok");
 ''', encoding='utf-8')
     result = subprocess.run(['node', str(script), str(module)],

@@ -12,6 +12,8 @@ the existing atomic, hash-verified :meth:`StudyStore.publish` path through
 from __future__ import annotations
 
 import json
+import hashlib
+from pathlib import Path
 from datetime import datetime
 
 from .schema import PROTOCOL, Conflict, StudyError, Unavailable, canonical, digest
@@ -31,6 +33,12 @@ EXECUTION_BUDGET = {
 
 REQUIRED_ARTIFACTS = ('snapshot', 'model', 'proposal')
 STATUS_NOTE = 'cheap-check-passed; mesh/acoustic eligibility unknown'
+# Include every executable input: replay, metric/scoring helpers, configuration,
+# geometry links and proposal policy all affect a resumed study's decisions.
+EXECUTION_CODE_FILES = tuple(sorted(
+    path.relative_to(Path(__file__).resolve().parents[2]).as_posix()
+    for path in Path(__file__).resolve().parents[1].rglob('*.py')
+))
 
 STOP_RULES = (
     'stop on total/screen/verify/attempt budget exhaustion',
@@ -267,6 +275,19 @@ def prepare_run_package(service, study_id, *, expected_revision=None, lane='cpu'
                  for kind in REQUIRED_ARTIFACTS}
     dependencies = dict(artifacts)
 
+    # Bind the execution stack even when a draft omitted explicit pins. Metadata
+    # collection imports no Bayesian engine and performs no backend work.
+    frozen_dependencies = _pins(dependency_pins, spec, 'dependency_pins')
+    if not frozen_dependencies:
+        from hornlab_search.search.evaluate import collect_lib_shas
+        frozen_dependencies = {k: v for k, v in collect_lib_shas().items()
+                               if k in ('hornlab_mesher', 'hornlab_beat_bem', 'hornlab_plots')}
+    frozen_code = _pins(code_pins, spec, 'code_pins')
+    if not frozen_code:
+        repository = Path(__file__).resolve().parents[2]
+        frozen_code = {name: hashlib.sha256((repository / name).read_bytes()).hexdigest()
+                       for name in EXECUTION_CODE_FILES}
+
     body = {
         'schema': PACKAGE_SCHEMA,
         'protocol': PROTOCOL,
@@ -278,8 +299,8 @@ def prepare_run_package(service, study_id, *, expected_revision=None, lane='cpu'
         'deadline': deadline,
         'budget': dict(EXECUTION_BUDGET),
         'lane': lane,
-        'code_pins': _pins(code_pins, spec, 'code_pins'),
-        'dependency_pins': _pins(dependency_pins, spec, 'dependency_pins'),
+        'code_pins': frozen_code,
+        'dependency_pins': frozen_dependencies,
         'resolved_config': ({} if resolved_config is None else resolved_config),
         'stop_rules': list(STOP_RULES),
         'recovery_rules': list(RECOVERY_RULES),

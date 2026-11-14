@@ -87,6 +87,9 @@ class PipelineStudyEvaluator:
         self.space = space
         self.encoding = encoding
         self.training_set = training_set
+        # The immutable historical cohort remains the base of every adaptive refit.
+        self._initial_training = training_set
+        self._initial_observations = self._training_observations(training_set)
         self.pool = pool
         self.policy = policy
         self.evaluate_fn = evaluate_fn
@@ -101,6 +104,8 @@ class PipelineStudyEvaluator:
         self.pipeline_factory = pipeline_factory
         self.runtime = None
         self.history = ProposalHistory()
+        # Journal staging counts all candidates; BO exploration cadence counts screens only.
+        self._proposal_sequence = 0
         self.observations = {}
         self._vectors = {}
         self._measured = []
@@ -112,6 +117,26 @@ class PipelineStudyEvaluator:
         self._plan = None
         self.last_outcome = None
         self._last_fit = None
+
+    @staticmethod
+    def _training_observations(training):
+        from hornlab_search.bo.data import TrainingObservation
+        if training is None or training.X is None or training.J is None:
+            return {}
+        if training.status != "ok":
+            raise ContractError("historical training cohort is not eligible")
+        identities = (training.meta or {}).get("identities", {})
+        rows = {}
+        for i, oid in enumerate(training.ids):
+            identity = identities.get(oid, {})
+            rows[oid] = TrainingObservation(
+                observation_id=oid, x=np.asarray(training.X[i], dtype=float).copy(),
+                J=float(np.asarray(training.J).reshape(-1)[i]),
+                geometry_hash=identity.get("design_hash"),
+                solve_hash=identity.get("solve_hash"),
+                y_phys=(tuple(np.asarray(training.Y_phys[i]).reshape(-1))
+                        if training.Y_phys is not None else None))
+        return rows
 
     # ------------------------------------------------------------------ capability
 
@@ -222,6 +247,7 @@ class PipelineStudyEvaluator:
             excluded_geometry_hashes=tuple(exc_geo),
             excluded_design_hashes=tuple(exc_design))
         self.screen_index += 1
+        self._proposal_sequence += 1
         self._issued.add(candidate["solve_id"])
         return candidate
 
@@ -303,6 +329,7 @@ class PipelineStudyEvaluator:
             if candidate is None:
                 continue
             candidate["solve_id"] = solve_id
+            self._proposal_sequence += 1
             return candidate
         return None
 
@@ -378,8 +405,6 @@ class PipelineStudyEvaluator:
         terms = getattr(evaluation, "terms", None) or {}
         score_id = _sha({"objective": objective, "terms": terms})
         metrics = getattr(evaluation, "metrics", None)
-        coverage = _finite(terms.get("cov")) if isinstance(terms, dict) else None
-        ripple = _finite(terms.get("rip")) if isinstance(terms, dict) else None
         result = {
             "solve_id": candidate["solve_id"],
             "kind": candidate.get("kind"),
@@ -389,9 +414,10 @@ class PipelineStudyEvaluator:
             "physical_id": physical_id,
             "score_id": score_id,
             "observed_j": objective if outcome.complete and objective is not None else None,
-            "coverage_deg": coverage,
-            "ripple_db": ripple,
-            "units": {"j": "dimensionless", "coverage_deg": "degree", "ripple_db": "dB"},
+            # v4/v7 terms are tolerance-normalised objective contributions,
+            # never physical degrees or dB. Physical curves live in metrics.json.
+            "normalized_terms": {key: _finite(terms.get(key)) for key in ("cov", "rip")},
+            "units": {"j": "dimensionless", "normalized_terms": "dimensionless"},
             "design_hash": getattr(evaluation, "design_hash", None),
             "geometry_hash": getattr(evaluation, "design_hash", None),
             "mesh_hash": getattr(evaluation, "mesh_hash", None),
@@ -415,6 +441,8 @@ class PipelineStudyEvaluator:
         return vector
 
     def _add_observation(self, result):
+        if result.get("kind") in ("verify", "audit"):
+            return False
         if result.get("outcome") not in ("success", "cached"):
             return False
         if result.get("eligible") is not True:
@@ -422,6 +450,8 @@ class PipelineStudyEvaluator:
         j = _finite(result.get("observed_j"))
         physical_id = result.get("physical_id")
         if j is None or not isinstance(physical_id, str) or not physical_id:
+            return False
+        if physical_id in self._initial_observations or physical_id in self.observations:
             return False
         vector = self._observation_vectors(result)
         if vector is None:
@@ -431,7 +461,7 @@ class PipelineStudyEvaluator:
             observation_id=physical_id, x=np.asarray(vector, dtype=float), J=j,
             status="ok", eligible=True,
             geometry_hash=result.get("design_hash") or result.get("geometry_id"),
-            solve_hash=physical_id)
+            solve_hash=result.get("solve_hash") or physical_id)
         return True
 
     def _refit(self):
@@ -444,8 +474,15 @@ class PipelineStudyEvaluator:
         if d is None:
             first = next(iter(self.observations.values()))
             d = int(np.asarray(first.x).reshape(-1).size)
-        training = build_training_set(list(self.observations.values()),
-                                      encoding=self.encoding, d=d)
+        training = build_training_set(
+            [*self._initial_observations.values(), *self.observations.values()],
+            encoding=self.encoding, d=d, seed=self.seed,
+            n_max=getattr(self._initial_training, "n_max", 256))
+        training = replace(training, meta={
+            **getattr(self._initial_training, "meta", {}), **training.meta,
+            "adaptive_historical_ids": list(self._initial_observations),
+            "adaptive_observation_ids": list(self.observations),
+        })
         if training.status != "ok":
             # Below n_min is not a numerical failure; keep collecting observations.
             self.training_set = training
@@ -471,8 +508,12 @@ class PipelineStudyEvaluator:
         kind = result.get("kind")
         if kind in ("verify", "audit"):
             geometry = result.get("geometry_id")
-            if geometry:
+            if (geometry and result.get("outcome") in ("success", "cached")
+                    and _finite(result.get("observed_j")) is not None):
                 self._verified_geometry_ids.add(str(geometry))
+            return True
+        if any(r.get("physical_id") == result.get("physical_id")
+               for r in self._measured if result.get("physical_id")):
             return True
         if self._add_observation(result):
             self._measured.append(result)
@@ -486,9 +527,20 @@ class PipelineStudyEvaluator:
     def restore_progress(self, progress):
         if not isinstance(progress, dict):
             raise ContractError("journal progress must be an object")
-        self.history = decode_proposal_history(progress.get("rng_state"),
-                                               progress.get("proposal_index"))
         stored = progress.get("rng_state")
+        extra = stored.get("rng_state") if isinstance(stored, dict) else None
+        sequence = extra.get("proposal_sequence") if isinstance(extra, dict) else None
+        if sequence is not None:
+            if (type(sequence) is not int or sequence < 0
+                    or (progress.get("proposal_index") is not None
+                        and sequence != progress["proposal_index"])):
+                raise ContractError("persisted candidate sequence disagrees with the journal")
+            self._proposal_sequence = sequence
+            self.history = decode_proposal_history(stored)
+        else:
+            # Older checkpoints used one shared screen/journal index.
+            self.history = decode_proposal_history(stored, progress.get("proposal_index"))
+            self._proposal_sequence = self.history.proposal_index
         if isinstance(stored, dict):
             extra = stored.get("rng_state")
             if isinstance(extra, dict):
@@ -498,21 +550,29 @@ class PipelineStudyEvaluator:
                 if extra.get("screens_exhausted"):
                     self._screens_exhausted = True
         self.observations = {}
+        self.training_set = self._initial_training
+        self._vectors = {}
+        self._issued = set()
+        self._plan = None
         self._measured = []
         for item in progress.get("observations") or ():
             result = item.get("result") or {}
             candidate = item.get("candidate") or {}
             if isinstance(candidate, dict) and candidate.get("solve_id") and result.get("x") is None:
                 result = {**result, "x": candidate.get("x"), "params": candidate.get("params")}
+            if result.get("kind") in ("verify", "audit"):
+                self.observe(result)
+                continue
             if self._add_observation(result):
                 self._measured.append(result)
-        return True
+        return self._refit()
 
     def proposal_rng_state(self):
         extra = {
             "audit_seed": self.audit_seed,
             "policy": self.policy,
             "screen_index": self.screen_index,
+            "proposal_sequence": self._proposal_sequence,
             "screens_exhausted": self._screens_exhausted,
             "verified_geometry_ids": sorted(self._verified_geometry_ids),
             "verification_selection": self.selection,

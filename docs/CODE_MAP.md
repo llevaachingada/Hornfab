@@ -5,6 +5,12 @@ GUI viz kit (2026-11-14): `gui/static/charts.js` exports `catColor`/`CAT_N`, `fm
 self-redrawing `chart()` (`square` option); `app.js::brk()` wraps ids; tokens `--cat-*`,
 `--control-border` live in `app.css`. Tests: `tests/test_gui_report_v2.py`.
 
+Scalar study execution: `studies/production.py` bridges immutable packages to the
+existing evaluator in an owned serial worker; `tools/analysis/study_cohort.py`
+prepares task-specific canonical v4/v7 evidence without solving. See the
+[runbook](BAYESIAN_STUDIES_RUNBOOK.md). `bo/data.py::canonical_design` reuses the
+production links and throat-coupling transformation for all Bayesian geometry.
+
 S8 additions (2026-11-13): `tools/analysis/geometry_descriptors.py` resolves Design-only
 geometry plus a separate band-aware behavior view; `hypothesis_cards.py` checks source-backed
 parents, canonical candidate geometry and parent/combination/ablation configs;

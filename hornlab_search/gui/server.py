@@ -42,6 +42,8 @@ class App:
         self._study_jobs = study_jobs
         self._study_runs = study_runs
         self._study_launcher = study_launcher
+        self._study_processes = {}
+        self._study_bridge_lock = threading.Lock()
 
     def _studies(self):
         if self._study_service is None:
@@ -52,8 +54,63 @@ class App:
     def _study_run_bridge(self):
         if self._study_runs is None:
             from .study_jobs import StudyRunBridge
-            self._study_runs = StudyRunBridge(self._studies(), launcher=self._study_launcher)
+            def launch(package):
+                from hornlab_search.studies.production import launch_study
+                return launch_study(package, root=self.root, study_root=self._studies().store.root)
+            self._study_runs = StudyRunBridge(self._studies(), launcher=self._study_launcher or launch)
         return self._study_runs
+
+    def _study_cpu_bridge(self):
+        # The GUI polls panels concurrently; initialize/reconcile exactly once before
+        # any request may submit a fresh job into the same registry.
+        with self._study_bridge_lock:
+            return self._create_study_cpu_bridge()
+
+    def _create_study_cpu_bridge(self):
+        if self._study_jobs is None:
+            from .study_jobs import StudyCpuJobs
+            service = self._studies()
+            def prerequisite(sid, kind, rev, package):
+                return service.get_study(sid)["revision"] == rev
+            def valid(sid, jid, identity):
+                meta = service.get_artifact_metadata(sid, identity.get("kind", ""))
+                job = service.get_cpu_job(sid, jid)
+                return (meta.get("status") == "available" and meta.get("sha256") == identity.get("sha256")
+                        and job["revision"] == meta.get("revision"))
+            def dispatch(kind, sid, jid):
+                import subprocess
+                from hornlab_search.studies.production import study_interpreter
+                folder = service.store.root / "workers" / jid
+                folder.mkdir(parents=True, exist_ok=True)
+                log_path = folder / "worker.log"
+                argv = [str(study_interpreter(self.root)), "-m", "hornlab_search.studies.cli", kind,
+                        "--root", str(service.store.root), "--study", sid, "--key", jid,
+                        "--expected-revision", str(service.get_cpu_job(sid, jid)["revision"])]
+                with log_path.open("ab") as output:
+                    process = subprocess.Popen(argv, cwd=self.root, stdout=output, stderr=subprocess.STDOUT,
+                                               creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+                self._study_processes[jid] = process
+                def finish():
+                    code = process.wait()
+                    self._study_processes.pop(jid, None)
+                    if service.get_cpu_job(sid, jid)["status"] != "running":
+                        return
+                    artifact_kind = "analysis" if kind == "analyze" else "proposal"
+                    meta = service.get_artifact_metadata(sid, artifact_kind)
+                    if code == 0 and (meta.get("status") != "available"
+                                      or meta.get("revision") != service.get_cpu_job(sid, jid)["revision"]):
+                        code = 6
+                    self._study_jobs.finish(sid, jid, exit_code=code,
+                                           artifact_identity={"kind": artifact_kind, "sha256": meta.get("sha256")})
+                threading.Thread(target=finish, daemon=True).start()
+                return {"pid": process.pid, "log": str(log_path)}
+            self._study_jobs = StudyCpuJobs(service, dispatcher=dispatch,
+                                            prerequisite=prerequisite, artifact_validator=valid)
+            # A prior server's PID cannot establish ownership in this process. Preserve
+            # ambiguous jobs durably and require reconciliation; never launch them again.
+            for study in service.list_studies(limit=1000):
+                self._study_jobs.reconcile_after_restart(study["id"], limit=50)
+        return self._study_jobs
 
     # GET routes return (status, json-able) ; raise FileNotFoundError / ValueError for 404 / 400
     def get(self, path: str, q: dict) -> object:
@@ -71,6 +128,7 @@ class App:
             if len(parts) == 2:
                 return service.get_study(parts[1])
             if len(parts) == 3 and parts[2] == "jobs":
+                self._study_cpu_bridge()
                 return {"jobs": service.list_cpu_jobs(parts[1], limit=50)}
             if len(parts) == 4 and parts[2] == "artifacts":
                 return service.artifact_view(parts[1], parts[3])
@@ -78,6 +136,7 @@ class App:
                 # B8: the same read-only export record the CLI `study export` writes.
                 return service.export_study(parts[1])
             if len(parts) == 3:
+                self._study_cpu_bridge()
                 study = service.get_study(parts[1])
                 artifact = None
                 if parts[2] == "overview":
@@ -100,7 +159,9 @@ class App:
                         from .data_studies import decision_panel_artifact
                         recorded = decision_panel_artifact(study, service.export_study(parts[1]))
                         if recorded is not None:
-                            return build_study_view(study, parts[2], recorded).to_dict()
+                            from .data_studies import workflow_panel
+                            return workflow_panel(service, study, parts[2], recorded, root=self.root,
+                                                  launcher_available=True)
                     if meta.get("status") == "available":
                         raw = service.store.read_artifact(meta["sha256"])
                         if len(raw) > 128_000:
@@ -131,7 +192,9 @@ class App:
                                     "revision": study["revision"], "data": {},
                                     "provenance": {"sha256": meta.get("sha256")},
                                     "reasons": [meta.get("reason", "Artifact is not available.")]}
-                return build_study_view(study, parts[2], artifact).to_dict()
+                from .data_studies import workflow_panel
+                return workflow_panel(service, study, parts[2], artifact, root=self.root,
+                                      launcher_available=True)
         if head == "runs":
             return D.list_runs(self.runs)
         if head == "analysis" and len(parts) == 1:
@@ -281,11 +344,17 @@ class App:
             if len(parts) == 3 and parts[2] == "launch":
                 return self._study_run_bridge().launch(parts[1], body)
             if len(parts) == 3 and parts[2] == "cancel":
+                if body.get("job_id"):
+                    # Validate ownership in the registry before touching our child process.
+                    result = self._study_cpu_bridge().cancel(parts[1], {
+                        "job_id": body["job_id"], "idempotency_key": body.get("idempotency_key")})
+                    process = self._study_processes.get(body["job_id"])
+                    if process is not None and process.poll() is None:
+                        process.terminate()
+                    return result
                 return self._study_run_bridge().cancel(parts[1], body)
             if len(parts) == 3 and parts[2] == "jobs":
-                from .study_jobs import StudyCpuJobs
-                bridge = self._study_jobs or StudyCpuJobs(service)
-                return bridge.submit(parts[1], body)
+                return self._study_cpu_bridge().submit(parts[1], body)
             raise StudyError("unsupported study operation")
         if head == "save-bounds":
             # Deliberately OUTSIDE the generic handler try: a malformed body raises ValueError

@@ -43,7 +43,8 @@ def test_complete_coupled_study_workflow(tmp_path):
     overview = app.get(f'/api/studies/{sid}/overview', {})
     assert overview['status'] == 'partial' and overview['revision'] == 1
     data = app.get(f'/api/studies/{sid}/data', {})
-    assert data['data'] == SNAPSHOT
+    assert {key: data['data'][key] for key in SNAPSHOT} == SNAPSHOT
+    assert any(action['kind'] == 'analyze' for action in data['data']['actions'])
     explain = app.get(f'/api/studies/{sid}/explain', {})
     assert explain['data']['reference'] == REFERENCE
     # No run results yet: the Execute phase shows the prepared package (S10 QA fix),
@@ -147,7 +148,8 @@ def test_complete_coupled_study_workflow(tmp_path):
                             {'results': results['sha256']}, 'verification')
 
     execute_view = app.get(f'/api/studies/{sid}/execute', {})
-    assert execute_view['data'] == results_content
+    assert {key: execute_view['data'][key] for key in results_content} == results_content
+    assert execute_view['data']['call_counts']['total_calls'] == state['total_calls']
     assert all(row['solve_id'].startswith('screen-') for row in execute_view['data']['measured'])
     assert not any(row['solve_id'].startswith('pred-') for row in execute_view['data']['measured'])
 

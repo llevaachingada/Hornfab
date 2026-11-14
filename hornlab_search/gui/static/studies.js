@@ -97,7 +97,7 @@ function policyCards(data) {
 }
 
 function currentPolicyMode(study, data) {
-  const mode = study?.spec?.policy?.mode ?? study?.spec?.policy?.proposal_policy ?? data?.current_policy ?? data?.policy?.mode ?? data?.policy_mode;
+  const mode = study?.spec?.policy?.proposal_policy ?? study?.spec?.policy?.mode ?? data?.current_policy ?? data?.policy?.mode ?? data?.policy_mode;
   return typeof mode === "string" && mode ? mode : null;
 }
 
@@ -115,7 +115,8 @@ function proposeBlocked(study, panel, data) {
 
 function actionEnabled(action, panel, study, data = null) {
   if (!action || !ACTIONS.has(action.kind) || action.enabled !== true) return false;
-  if (MUTATING_READY.has(action.kind) && panel.status !== "ready") return false;
+  if (MUTATING_READY.has(action.kind) && panel.status !== "ready" && !["analyze", "propose", "package", "launch", "decision"].includes(action.kind)) return false;
+  if (panel.status === "stale") return false;
   if (panel.revision !== study.revision) return false;
   if (action.kind === "propose" && proposeBlocked(study, panel, data)) return false;
   if (action.kind === "launch" && (!validPackageHash(action.package_hash) || action.package_revision !== study.revision)) return false;
@@ -130,9 +131,9 @@ function intervalCell(value, fallbackUnit = "") {
   if (typeof value === "number") return Number.isFinite(value) ? `${esc(value)}${fallbackUnit ? ` ${esc(fallbackUnit)}` : ""}` : '<span class="muted">Unknown</span>';
   if (typeof value === "object") {
     const unit = value.unit != null ? safeText(value.unit, 32) : fallbackUnit;
-    const point = value.value ?? value.mean ?? value.j ?? value.J;
-    const lo = value.lower ?? value.lo ?? value.min;
-    const hi = value.upper ?? value.hi ?? value.max;
+    const point = value.value ?? value.mean ?? value.j_mean ?? value.j ?? value.J;
+    const lo = value.lower ?? value.j_lower ?? value.lo ?? value.min;
+    const hi = value.upper ?? value.j_upper ?? value.hi ?? value.max;
     if (point != null && Number.isFinite(Number(point))) {
       const span = lo != null && hi != null && Number.isFinite(Number(lo)) && Number.isFinite(Number(hi)) ? ` [${esc(lo)}, ${esc(hi)}]` : "";
       return `${esc(point)}${span}${unit ? ` ${esc(unit)}` : ""}`;
@@ -190,8 +191,10 @@ function renderExecute(data) {
   const stop = data?.stop_recovery ?? data?.stop_rules ?? packageData?.stop_recovery ?? packageData?.stop_rules;
   const verification = data?.verification ?? data?.verification_policy ?? packageData?.verification ?? packageData?.verification_policy;
   const job = data?.job || (data?.job_status != null ? {id:data?.job_id, status:data?.job_status} : null);
+  const counts = data?.call_counts;
+  const measuredProgress = data?.run_status || counts ? `<section aria-label="Measured study progress"><h3>Study execution</h3><p>Status: ${esc(data?.run_status?.cancelled ? "cancellation requested" : data?.run_status?.status || "not launched")}</p>${counts ? `<table><thead><tr><th>Screen solve calls</th><th>Verify solve calls</th><th>Total solve calls</th></tr></thead><tbody><tr><td>${esc(counts.screen_calls ?? 0)}</td><td>${esc(counts.verify_calls ?? 0)}</td><td>${esc(counts.total_calls ?? 0)}</td></tr></tbody></table><p class="muted">Counts are persisted backend calls. Cache hits and cheap refusals consume no solve calls.</p>` : ""}${renderProgress(data?.progress)}</section>` : "";
   if (![packageHash, packageRevision, lane, deadline, budget, stop, verification, job, data?.progress].some(v => v != null)) return "";
-  return `<section aria-label="Execution package"><h3>Run package</h3>${packageHash ? `<p>Package hash: <span class="mono">${esc(safeText(packageHash, 128))}</span>${packageRevision != null ? ` · revision ${esc(packageRevision)}` : ""}</p>` : ""}${lane != null || deadline != null ? `<p>${lane != null ? `Lane: ${esc(safeText(lane, 64))}` : ""}${lane != null && deadline != null ? " · " : ""}${deadline != null ? `Deadline: ${display(deadline)}` : ""}</p>` : ""}${budget != null ? `<h4>Budget</h4>${display(budget)}` : ""}${stop != null ? `<h4>Stop and recovery</h4>${display(stop)}` : ""}${renderVerification(verification)}${renderProgress(data?.progress)}${job ? `<h4>Job status</h4><p>${job.id ? `Job ${esc(safeText(job.id, 128))} · ` : ""}${esc(safeText(job.status || "unknown", 64))}</p>` : ""}</section>`;
+  return `${measuredProgress}<section aria-label="Execution package"><h3>Run package</h3>${packageHash ? `<p>Package hash: <span class="mono">${esc(safeText(packageHash, 128))}</span>${packageRevision != null ? ` · revision ${esc(packageRevision)}` : ""}</p>` : ""}${lane != null || deadline != null ? `<p>${lane != null ? `Lane: ${esc(safeText(lane, 64))}` : ""}${lane != null && deadline != null ? " · " : ""}${deadline != null ? `Deadline: ${display(deadline)}` : ""}</p>` : ""}${budget != null ? `<h4>Budget</h4>${display(budget)}` : ""}${stop != null ? `<h4>Stop and recovery</h4>${display(stop)}` : ""}${renderVerification(verification)}${!measuredProgress ? renderProgress(data?.progress) : ""}${job ? `<h4>Job status</h4><p>${job.id ? `Job ${esc(safeText(job.id, 128))} · ` : ""}${esc(safeText(job.status || "unknown", 64))}</p>` : ""}</section>`;
 }
 
 function artifactChip(artifact) {
@@ -221,8 +224,10 @@ export function renderStudyPanel(study, panel, selected = null, notice = "", sta
   const renderState = {busy:state?.busy === true, artifact:state?.artifact || null};
   const tabs = STUDY_PHASES.map(p => `<a href="${esc(studyRoute(study.id, p))}"${p === phase ? ' aria-current="page"' : ""}>${esc(PHASE_LABELS[p])}</a>`).join(" · ");
   const actionHtml = actions.map(({action: a, index: i}) => {
-    const inputs = a.kind === "decision" ? `<label>Decision <select data-study-field="outcome"><option value="inconclusive">Inconclusive</option><option value="accept">Accept</option><option value="reject">Reject</option></select></label><label>Rationale <textarea data-study-field="rationale" maxlength="4000"></textarea></label>` : a.kind === "save_draft" || a.kind === "create_child" ? `<label>Study question <input data-study-field="question" maxlength="500"></label>` : "";
-    return `<div data-study-action-group="${i}">${inputs} <button type="button" data-study-action="${i}"${actionEnabled(a, activePanel, study, data) && !renderState.busy ? "" : " disabled"}>${esc(a.label || label(a.kind))}</button></div>`;
+    const outcomes = Array.isArray(a.allowed_outcomes) ? a.allowed_outcomes.filter(x => ["inconclusive", "accept", "reject"].includes(x)) : ["inconclusive", "accept", "reject"];
+    const inputs = a.kind === "decision" ? `<label>Decision <select data-study-field="outcome">${outcomes.map(x => `<option value="${x}">${esc(label(x))}</option>`).join("")}</select></label><label>Rationale <textarea data-study-field="rationale" maxlength="4000"></textarea></label>` : a.kind === "save_draft" || a.kind === "create_child" ? `<label>Study question <input data-study-field="question" maxlength="500"></label>` : "";
+    const packageInputs = a.kind === "package" ? `<label>Solve lane <select data-study-field="lane"><option value="gpu">GPU</option><option value="cpu">CPU</option></select></label><label>Stop deadline (ISO 8601 with timezone) <input data-study-field="deadline" placeholder="2026-11-15T18:00:00-05:00" required></label>` : "";
+    return `<div data-study-action-group="${i}">${a.reason ? `<p>${esc(a.reason)}</p>` : ""}${inputs}${packageInputs} <button type="button" data-study-action="${i}"${actionEnabled(a, activePanel, study, data) && !renderState.busy ? "" : " disabled"}>${esc(a.label || label(a.kind))}</button></div>`;
   }).join(" ");
   const selector = Array.isArray(data.candidates) ? data.candidates.slice(0, 50).map((c, i) => `<button type="button" data-study-select="${i}">${esc(c.label || c.id || `Candidate ${i + 1}`)}</button>`).join(" ") : "";
   const policyHtml = renderPolicySelector(study, activePanel, data, renderState);
@@ -233,9 +238,10 @@ export function renderStudyPanel(study, panel, selected = null, notice = "", sta
   ${notice ? `<p role="alert">${esc(notice)}</p>` : ""}
   <p role="status"><strong>${esc(label(status))}</strong>${STATES[status] ? `: ${esc(STATES[status])}` : ""}</p>
   ${Array.isArray(panel.reasons) && panel.reasons.length ? display(panel.reasons) : ""}
-  <div class="study-layout"><main><h2>${esc(PHASE_LABELS[phase])}</h2>${display(visibleData)}${executeHtml}${policyHtml}${candidateHtml}${artifactHtml}<h3>Provenance</h3>${display(panel.provenance || null)}${selector}<p>${renderLinks(data, study.id, phase)}</p></main>
+  <div class="study-layout"><main><h2>${esc(PHASE_LABELS[phase])}</h2>${candidateHtml}${executeHtml}${policyHtml}${["propose", "execute"].includes(phase) ? `<details><summary>${phase === "propose" ? "Proposal" : "Execution"} details and diagnostics</summary>${display(visibleData)}</details>` : display(visibleData)}${artifactHtml}<h3>Provenance</h3>${display(panel.provenance || null)}${selector}<p>${renderLinks(data, study.id, phase)}</p></main>
   <aside aria-label="Selected horn"><h2>Selected horn</h2><p>Predicted, screen, and verified results are distinct.</p>${display(selected || data.selected_horn || null)}${renderLinks(selected, study.id, phase)}</aside></div>
   <section aria-label="Next action"><h2>Next action</h2>${actionHtml || '<p class="muted">No action is currently available.</p>'}</section>
+  <p><a href="/api/studies/${encodeURIComponent(study.id)}/export" download="study-${esc(study.id)}.json">Export study record and artifact identities</a></p>
   <p class="muted">Acquisition values are technical ranking diagnostics, not horn quality. No chart selection starts a solve.</p></section>`;
 }
 
@@ -263,11 +269,15 @@ function actionFailure(error) {
  */
 export function mountStudy(root, {studyId, phase = "overview", api, pollMs = 5000, onError = () => {}}) {
   if (!root || !ID.test(studyId || "") || !STUDY_PHASES.includes(phase) || !api || typeof api.getStudy !== "function" || typeof api.getPanel !== "function") throw new Error("Invalid study mount");
-  let disposed = false, controller = null, timer = null, generation = 0, busy = false;
+  let disposed = false, controller = null, timer = null, generation = 0, busy = false, refreshing = false;
   let study = null, panel = null, selected = null, notice = "", pendingKey = null, artifact = null;
   const makeKey = () => globalThis.crypto?.randomUUID?.() || `study-${Date.now()}-${Math.random().toString(36).slice(2)}`;
   const draw = () => { if (!disposed && study && panel) root.innerHTML = renderStudyPanel(study, panel, selected, notice, {busy, artifact}); };
   async function refresh() {
+    // A slow panel must be allowed to finish. Polling must not repeatedly abort
+    // it and leave the workspace blank under CPU/solver load.
+    if (refreshing || disposed) return;
+    refreshing = true;
     const current = ++generation;
     controller?.abort(); controller = new AbortController();
     try {
@@ -279,6 +289,8 @@ export function mountStudy(root, {studyId, phase = "overview", api, pollMs = 500
       if (disposed || current !== generation || error?.name === "AbortError") return;
       notice = "Study data could not be loaded. Retry or inspect the service status."; onError(error); draw();
       if (!study || !panel) root.innerHTML = `<p role="alert">${esc(notice)}</p>`;
+    } finally {
+      refreshing = false;
     }
   }
   async function loadArtifact(key) {
@@ -328,17 +340,21 @@ export function mountStudy(root, {studyId, phase = "overview", api, pollMs = 500
     }
     const action = panel.data?.actions?.[Number(target.dataset.studyAction)];
     if (busy || !actionEnabled(action, panel, study, panel.data) || typeof api.action !== "function") return;
-    busy = true; target.disabled = true; draw();
     const payload = sanitisePayload(action.payload);
     payload.expected_revision = study.revision;
     const group = target.closest("[data-study-action-group]");
     for (const field of group?.querySelectorAll("[data-study-field]") || []) payload[field.dataset.studyField] = field.value;
+    busy = true; target.disabled = true; draw();
     if (action.kind === "decision" && !String(payload.rationale || "").trim()) {
       notice = "Enter a rationale before recording a decision."; busy = false; draw(); return;
+    }
+    if (action.kind === "decision" && Array.isArray(action.allowed_outcomes) && !action.allowed_outcomes.includes(payload.outcome)) {
+      notice = "Complete verification before accepting or rejecting this study."; busy = false; draw(); return;
     }
     if (selected && typeof selected.id === "string" && ID.test(selected.id)) payload.selected_id = selected.id;
     if (action.kind === "launch") payload.package_hash = action.package_hash;
     if (action.kind === "cancel") {
+      delete payload.expected_revision;
       if (ID.test(action.job_id || "")) payload.job_id = action.job_id;
       if (ID.test(action.package_id || "")) payload.package_id = action.package_id;
       if (payload.job_id == null && payload.package_id == null) { busy = false; draw(); return; }
@@ -366,7 +382,7 @@ export function mountStudy(root, {studyId, phase = "overview", api, pollMs = 500
 export function renderStudyList(studies, notice = "") {
   if (!Array.isArray(studies) || studies.length > 100) throw new Error("Invalid study list");
   const rows = studies.map(s => ID.test(s?.id || "") ? `<li><a href="${esc(studyRoute(s.id))}">${esc(s.name || s.question || s.id)}</a> · revision ${esc(s.revision ?? "unknown")} · ${esc(s.status || "draft")}</li>` : "").join("");
-  return `<section aria-label="Studies"><h1>Studies</h1><p><a href="#/analysis">Analysis reports</a></p>${notice ? `<p role="alert">${esc(notice)}</p>` : ""}<h2>Existing studies</h2>${rows ? `<ul>${rows}</ul>` : "<p>No studies are available.</p>"}<h2>New draft</h2><form data-study-create><label>Study question <input name="question" maxlength="500" required></label> <button type="submit">Save draft</button></form></section>`;
+  return `<section aria-label="Studies"><h1>Studies</h1><p><a href="#/analysis">Analysis reports</a></p>${notice ? `<p role="alert">${esc(notice)}</p>` : ""}<h2>Existing studies</h2>${rows ? `<ul>${rows}</ul>` : "<p>No studies are available.</p>"}<h2>New draft</h2><form data-study-create><label>Study question <input name="question" maxlength="500" required></label><label>Horn task <select name="task"><option value="p80x60__osse_ext_throat_home700_v7_seed5678">Home 80 × 60 / 700 Hz — current solver cohort, seed 5678 (v7)</option><option value="p80x60__osse_ext_throat_home700_v7">Home 80 × 60 / 700 Hz — original cohort (v7)</option><option value="native__ath_core_v4">Frozen native ATH validation (v4)</option></select></label><fieldset><legend>Compatible measured cohort (explicit paths for home task)</legend><label>Offline scores JSON <input name="scores_json"></label><label>Catalog CSV <input name="catalog_csv"></label><label>Dataset directory <input name="dataset_root"></label><label>Candidate pool JSON (optional) <input name="pool_json"></label></fieldset><button type="submit">Save draft</button></form></section>`;
 }
 
 /** List/create entry point. api.listStudies({signal}); api.createStudy({spec,key},{signal}). */
@@ -391,13 +407,18 @@ export function mountStudyList(root, {api, onError = () => {}, onCreated = () =>
     if (!event.target?.matches?.("[data-study-create]")) return;
     event.preventDefault();
     if (disposed || busy || typeof api.createStudy !== "function") return;
-    const question = String(new FormData(event.target).get("question") || "").trim();
+    const form = new FormData(event.target);
+    const question = String(form.get("question") || "").trim();
+    const task = String(form.get("task") || "native__ath_core_v4");
+    const source = Object.fromEntries(["scores_json", "catalog_csv", "dataset_root", "pool_json"].map(k => [k, String(form.get(k) || "").trim()]).filter(([,v]) => v));
+    const spec = {protocol:"bo-study-v1.1", question, task:{name:task}, policy:{proposal_policy:"scalar"}, ...(Object.keys(source).length ? {source} : {})};
     if (!question || question.length > 500) { notice = "Enter a study question."; draw(); return; }
     busy = true;
     const button = event.target.querySelector("button"); if (button) button.disabled = true;
-    if (!pending || pending.question !== question) pending = {question, key: globalThis.crypto?.randomUUID?.() || `draft-${Date.now()}-${Math.random().toString(36).slice(2)}`};
+    const fingerprint = JSON.stringify(spec);
+    if (!pending || pending.fingerprint !== fingerprint) pending = {fingerprint, key: globalThis.crypto?.randomUUID?.() || `draft-${Date.now()}-${Math.random().toString(36).slice(2)}`};
     try {
-      const created = await api.createStudy({spec:{protocol:"bo-study-v1.1", question}, key:pending.key}, {signal:controller.signal});
+      const created = await api.createStudy({spec, key:pending.key}, {signal:controller.signal});
       if (disposed) return;
       if (!ID.test(created?.id || "")) throw new Error("Invalid created study identity");
       pending = null; notice = "Draft saved."; await load(); if (!disposed) onCreated(created);

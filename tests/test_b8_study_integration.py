@@ -104,7 +104,8 @@ def test_real_http_study_routes_conflict_and_missing_engine(tmp_path):
         stale = {"spec": create["spec"], "idempotency_key": "edit", "expected_revision": 0}
         assert request(f"/api/studies/{sid}/revise", stale)[0] == 409
         job = {"kind": "propose", "expected_revision": 1, "idempotency_key": "job", "package_hash": "a"*64}
-        assert request(f"/api/studies/{sid}/jobs", job)[0] == 503
+        # The production dispatcher now exists, but an unregistered package is refused.
+        assert request(f"/api/studies/{sid}/jobs", job)[0] == 422
         assert service.list_cpu_jobs(sid) == []
         assert request("/api/studies/nonexistent")[0] == 404
     finally:

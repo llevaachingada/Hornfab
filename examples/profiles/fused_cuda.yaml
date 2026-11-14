@@ -6,5 +6,5 @@
 solve:
   cuda_fused: true
 mesh:
-  dof_cap_verify: 12000
-  dof_cap_final: 12000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000

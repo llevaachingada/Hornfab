@@ -65,6 +65,8 @@ HOME_CONFIG = (REPO_ROOT / "examples" / "typologies" / "print_80x60_2026-11-13"
 HOME_BRIEF = (REPO_ROOT / "examples" / "briefs" / "print_80x60_2026-11-13"
               / "room_80x60_700_hf1440_v7.yaml")
 HOME_OBJECTIVE_VERSION = 7
+HOME_SEED5678_TASK_NAME = "p80x60__osse_ext_throat_home700_v7_seed5678"
+HOME_SEED5678_CONFIG = (HOME_CONFIG.parent / "p80x60__osse_ext_throat_700_v7_seed5678.yaml")
 
 # Task registry: maps every accepted task name to its (config, brief, objective_version).
 # A task in this registry may be used by _read_task as a named task; a name absent from
@@ -82,6 +84,11 @@ _TASK_REGISTRY: dict[str, dict] = {
         "brief": HOME_BRIEF,
         "objective_version": HOME_OBJECTIVE_VERSION,
     },
+    HOME_SEED5678_TASK_NAME: {
+        "config": HOME_SEED5678_CONFIG,
+        "brief": HOME_BRIEF,
+        "objective_version": HOME_OBJECTIVE_VERSION,
+    },
 }
 
 SNAPSHOT_SCHEMA = "study-snapshot-v1"
@@ -96,6 +103,7 @@ POOL_STATUS_NOTE = "cheap-check-passed; mesh/acoustic eligibility unknown"
 _ALLOWED_TASK_NAMES = {
     DEFAULT_TASK_NAME, DEFAULT_CONFIG.stem, DEFAULT_BRIEF_NAME, DEFAULT_BRIEF.stem,
     HOME_TASK_NAME, HOME_CONFIG.stem, HOME_BRIEF_NAME, HOME_BRIEF.stem,
+    HOME_SEED5678_TASK_NAME, HOME_SEED5678_CONFIG.stem,
 }
 
 
@@ -264,9 +272,13 @@ def _read_task(task, *, root, config=None, brief=None):
             candidate = (config_path.parent / str(brief_ref))
             raw_brief = candidate.resolve() if candidate.exists() else None
     brief_path = _resolve_input(root, raw_brief, effective_brief_default, "task brief")
-    version = task.get("objective_version", effective_version_default)
+    from hornlab_search.config import load_config
+    resolved_version = load_config(config_path).objective_version
+    version = task.get("objective_version", resolved_version)
     if isinstance(version, bool) or not isinstance(version, int) or version < 0:
         raise StudyError("task objective_version must be a non-negative integer")
+    if version != resolved_version:
+        raise Unavailable("task objective_version disagrees with its resolved configuration")
     return {
         "config": config_path,
         "brief": brief_path,
@@ -467,6 +479,8 @@ def _load_or_build_training(*, config_path, sources, root):
     from hornlab_search.bo.data import build_native_training_set
 
     if sources is None:
+        if Path(config_path).resolve() != DEFAULT_CONFIG.resolve():
+            raise Unavailable("this task requires explicit compatible score/catalog/dataset sources")
         if (DEFAULT_TRAINING_JSON.is_file()
                 and DEFAULT_TRAINING_JSON.with_suffix(".npz").is_file()):
             from tools.analysis.bo_sensitivity import load_native_training_set
@@ -478,7 +492,15 @@ def _load_or_build_training(*, config_path, sources, root):
         sources = _read_sources({}, root=root)
     training = build_native_training_set(
         config_path, scores_json=sources["scores_json"],
-        catalog_csv=sources["catalog_csv"], dataset_root=sources["dataset_root"])
+        catalog_csv=sources["catalog_csv"], dataset_root=sources["dataset_root"],
+        require_single_fidelity=Path(config_path).resolve() != DEFAULT_CONFIG.resolve())
+    payload = _load_json(sources['scores_json'], 'score source')
+    selection = payload.get('selection') if isinstance(payload.get('selection'), dict) else {}
+    measured_pins = selection.get('dependency_pins')
+    if isinstance(measured_pins, dict):
+        from dataclasses import replace
+        training = replace(training, meta={**training.meta,
+                                           'measured_dependency_pins': dict(measured_pins)})
     return training, None, "native_build"
 
 
@@ -543,6 +565,7 @@ def build_training(service, study_id, *, root, spec=None, idempotency_key=None):
         "origin": origin,
         "training_set_id": dataset_sha,
         "status": training.status,
+        "meta": dict(training.meta),
         "d": int(training.d),
         "n": int(training.n),
         "n_min": int(training.n_min),
@@ -703,14 +726,30 @@ def build_analysis(service, study_id, *, root, spec=None, idempotency_key=None):
 # --------------------------------------------------------------------------- proposal
 
 
-def _load_pool(pool_arg, source_spec, config_path, *, root):
+def _task_encoding(space):
+    from hornlab_search.bo.encoding import ActiveProjection
+    no_ops = ({"morph_exponent": 4.0}
+              if "morph_exponent" in space.keys()
+              and int(space.seed.params.get("morph_target", 0)) == 1 else {})
+    return ActiveProjection.from_space(space, no_ops=no_ops)
+
+
+def _load_pool(pool_arg, source_spec, config_path, *, root, seed=0):
     from tools.analysis.bo_sensitivity import load_candidate_pool
     if pool_arg is not None:
         return pool_arg
     source = source_spec if isinstance(source_spec, dict) else {}
     raw = source.get("pool_json")
+    if raw is None and Path(config_path).resolve() != DEFAULT_CONFIG.resolve():
+        from hornlab_search.bo.data import build_candidate_pool
+        from hornlab_search.config import load_config
+        from hornlab_search.design.space import DesignSpace
+        cfg = load_config(config_path)
+        space = DesignSpace.from_config(cfg)
+        return build_candidate_pool(space, _task_encoding(space), cfg, seed=int(seed))
     path = _resolve_input(root, raw,
-                          DEFAULT_POOL_JSON if DEFAULT_POOL_JSON.is_file() else None,
+                          DEFAULT_POOL_JSON if (Path(config_path).resolve() == DEFAULT_CONFIG.resolve()
+                                                and DEFAULT_POOL_JSON.is_file()) else None,
                           "pool_json")
     return load_candidate_pool(path)
 
@@ -739,12 +778,13 @@ def _pool_manifest(pool, *, policy, config_path, encoding):
         "summary": summary,
         "n_candidates": len(getattr(pool, "candidates", ()) or ()),
         "candidate_sample": sample,
+        "candidates": [c.as_dict(include_vectors=True) for c in pool.candidates],
         "status_note": POOL_STATUS_NOTE,
         "no_backend_calls": True,
     }
 
 
-def _proposal_limitations(policy):
+def _proposal_limitations(policy, objective_version=4):
     return [
         "Advisory offline proposal; no BEM/GPU solve was run.",
         POOL_STATUS_NOTE,
@@ -752,7 +792,7 @@ def _proposal_limitations(policy):
         "are never appended as measured rows.",
         "The acquisition value is a technical ranking diagnostic, not predicted J or a "
         "probability of success.",
-        "J is objective v4 only; no cross-version ranking.",
+        f"J uses objective v{objective_version}; no cross-version ranking.",
         "The every-fourth exploration cadence is stateful and does not reset on resume.",
         f"proposal policy: {policy}; verification mode follows the frozen selection rule.",
     ]
@@ -800,12 +840,12 @@ def build_proposal(service, study_id, *, root, policy=None, seed=None, idempoten
 
     cfg = load_config(task["config"])
     space = DesignSpace.from_config(cfg)
-    encoding = ActiveProjection.from_space(space, no_ops={"morph_exponent": 4.0})
+    encoding = _task_encoding(space)
     manifest = _load_json(service.store.artifacts / manifest_meta["sha256"], "training manifest")
     import numpy as np
     with np.load(service.store.artifacts / training_meta["sha256"], allow_pickle=False) as arrays:
         training_set = TrainingSet(
-            status="ok", d=int(manifest["d"]), n=int(manifest["n"]),
+            status=manifest["status"], d=int(manifest["d"]), n=int(manifest["n"]),
             X=np.asarray(arrays["X"], dtype=np.float64),
             J=np.asarray(arrays["J"], dtype=np.float64).reshape(-1, 1),
             Y=np.asarray(arrays["Y"], dtype=np.float64).reshape(-1, 1),
@@ -820,12 +860,16 @@ def build_proposal(service, study_id, *, root, policy=None, seed=None, idempoten
             n_min=int(manifest["n_min"]), n_max=int(manifest["n_max"]),
             active_keys=tuple(manifest["active_keys"]),
             projection_version=manifest.get("projection_version"), preparation=None,
-            meta={})
+            meta=dict(manifest.get("meta") or {}))
+    if (training_set.d != encoding.d
+            or training_set.active_keys != tuple(encoding.active_keys)):
+        raise Unavailable("training encoding does not match the selected task")
 
     candidate_pool = None
     pool_error = None
     try:
-        candidate_pool = _load_pool(pool, effective.get("source"), task["config"], root=root)
+        candidate_pool = _load_pool(pool, effective.get("source"), task["config"], root=root,
+                                    seed=seed)
     except (Unavailable, StudyError, OSError, ValueError) as exc:
         pool_error = str(exc)
 
@@ -919,7 +963,7 @@ def build_proposal(service, study_id, *, root, policy=None, seed=None, idempoten
                              else capability.get("library_versions")),
         "predictions_appended_to_measured_rows": False,
         "status_note": POOL_STATUS_NOTE,
-        "limitations": _proposal_limitations(chosen),
+        "limitations": _proposal_limitations(chosen, task["objective_version"]),
     }
     if proposal["proposal"] is not None:
         proposal["proposal"].setdefault("status_note", POOL_STATUS_NOTE)

@@ -624,7 +624,7 @@ class BeatBackend:
     def __init__(self, device: str, timeout_s: float | None = None, track_vram: bool = True,
                  per_frequency_calls: bool | None = None, notes_path=None,
                  cuda_fused: bool = False, freq_batch_size: int | None = None,
-                 julia_threads: int | None = None):
+                 julia_threads: int | None = None, retry_worker_exit: bool = True):
         if device not in ("cuda", "metal", "cpu"):
             raise ValueError(f"device must be 'cuda', 'metal', or 'cpu', got {device!r}")
         if cuda_fused and device != "cuda":
@@ -636,6 +636,9 @@ class BeatBackend:
         self.device = device
         self.name = f"beat_{device}"
         self.timeout_s = timeout_s
+        # Study journals reserve one attempt at a time; they must own retries.
+        # Existing interactive/CMA callers retain the historical one-retry policy.
+        self.retry_worker_exit = bool(retry_worker_exit)
         # CPU second lane: both warm_up (via worker.start_beat_worker) and SolveConfig MUST carry
         # this same value, or the library keys a second host on the mismatch (H9).
         self.julia_threads = julia_threads
@@ -808,7 +811,7 @@ class BeatBackend:
         candidate retried ONCE, so a host crash is not scored as the design's failure. OOM and
         other failures are not retried (an OOM would recur on the same mesh)."""
         outcome, traces = self._attempt(mesh, spec, surface_traces=surface_traces)
-        if outcome.ok or not outcome.message.startswith("[worker_exit]"):
+        if outcome.ok or not self.retry_worker_exit or not outcome.message.startswith("[worker_exit]"):
             return outcome, traces
         log.warning("BEAT worker host died (%s); re-warming once and retrying this candidate",
                     outcome.message.splitlines()[0][:200])

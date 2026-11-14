@@ -6,9 +6,9 @@ Usage from the project interpreter::
     ...
     .venv\\Scripts\\python.exe -m hornlab_search.studies.cli run --root ROOT --package package.json --dry-run
 
-All paths are resolved inside an explicit study root; no shell strings are
-executed and no solver/GPU/lane ownership is acquired.  ``run`` is dry-run only
-in this build: real scheduling remains a separately authorized action.
+Artifact paths are resolved inside an explicit study root. ``run --dry-run``
+acquires no lane and creates no solver. ``run --execute`` uses the production
+worker and requires a current immutable package, dependencies and deadline.
 """
 from __future__ import annotations
 
@@ -45,18 +45,18 @@ _COMMANDS = {
     'snapshot': ({'--study'}, {'--root', '--key', '--config', '--brief', '--scores',
                                '--catalog', '--dataset-root'}),
     'analyze': ({'--study'}, {'--root', '--key', '--config', '--brief', '--scores',
-                              '--catalog', '--dataset-root'}),
+                              '--catalog', '--dataset-root', '--expected-revision'}),
     'propose': ({'--study'}, {'--root', '--key', '--config', '--brief', '--scores',
-                              '--catalog', '--dataset-root', '--policy', '--seed'}),
+                              '--catalog', '--dataset-root', '--policy', '--seed', '--expected-revision'}),
     'package': ({'--study', '--out'},
                 {'--root', '--lane', '--deadline', '--key', '--revision'}),
-    'run': ({'--package'}, {'--root', '--dry-run'}),
-    'reconcile': ({'--study'}, {'--root'}),
+    'run': ({'--package'}, {'--root', '--dry-run', '--execute', '--project-root'}),
+    'reconcile': ({'--study'}, {'--root', '--project-root'}),
     'decide': ({'--study', '--payload'}, {'--root', '--key'}),
     'export': ({'--study', '--out'}, {'--root'}),
 }
 
-_BOOLEAN_FLAGS = {'--dry-run'}
+_BOOLEAN_FLAGS = {'--dry-run', '--execute'}
 
 
 class UsageError(Exception):
@@ -217,6 +217,27 @@ def _spec_with_flags(service, study_id, root, values):
 def _build_chain(service, study_id, root, values, *, through):
     """Build snapshot -> training -> analysis (and proposal when requested)."""
     from . import builders
+    from .schema import Conflict
+    base_service = service
+    captured_revision = service.get_study(study_id)['revision']
+    if values.get('--expected-revision') is not None:
+        expected = values['--expected-revision']
+        if not expected.isdigit() or int(expected) < 1:
+            raise UsageError('--expected-revision must be a positive integer')
+        if service.get_study(study_id)['revision'] != int(expected):
+            raise Conflict('stale study revision before worker build')
+
+    class RevisionBoundService:
+        def __getattr__(self, name):
+            return getattr(base_service, name)
+
+        def get_study(self, requested_id):
+            study = base_service.get_study(requested_id)
+            if requested_id == study_id and study['revision'] != captured_revision:
+                raise Conflict('study revision changed during worker build')
+            return study
+
+    service = RevisionBoundService()
 
     spec = _spec_with_flags(service, study_id, root, values)
     key = values.get('--key')
@@ -294,10 +315,17 @@ def _dispatch(command, values):
         return {'status': 'valid', 'spec_hash': digest(spec)}
 
     if command == 'run':
-        if not values.get('--dry-run'):
-            raise UsageError('run requires --dry-run; real runs are scheduled separately')
+        if bool(values.get('--dry-run')) == bool(values.get('--execute')):
+            raise UsageError('run requires exactly one of --dry-run or --execute')
         package = verify_package(_read_json(
             _contained(root, values['--package'], '--package'), '--package'))
+        if not values.get('--dry-run'):
+            from .production import execute_study
+            project_root = Path(values.get('--project-root', Path(__file__).resolve().parents[2])).resolve()
+            result = execute_study(StudyService(root), package, root=project_root)
+            if result.get('status') == 'capability_missing':
+                raise Unavailable(result.get('detail') or result.get('reason'))
+            return result
         # Handle dry-run before opening the registry: zero registry/acoustic writes.
         # Passing no adapters and dry_run=True is the zero-spawn guard.
         result = run_package(package, None, None, None, dry_run=True)
@@ -351,7 +379,9 @@ def _dispatch(command, values):
     if command == 'reconcile':
         service.get_study(values['--study'])
         journal = DraftAttemptJournal(service)
-        result = reconcile_study(values['--study'], _NoEvidenceProbe(), journal)
+        from .production import reconcile_production
+        project_root = Path(values.get('--project-root', Path(__file__).resolve().parents[2])).resolve()
+        result = reconcile_production(service, values['--study'], root=project_root)
         result['pending'] = journal.unresolved(values['--study'])
         return result
 

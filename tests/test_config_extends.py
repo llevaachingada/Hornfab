@@ -141,8 +141,12 @@ def test_fused_cuda_profile_has_mesh_dof_caps_not_solve():
     assert "dof_cap_final" not in data.get("solve", {}), (
         "fused_cuda.yaml must put dof_cap_final under mesh:, not solve:")
     mesh = data.get("mesh", {})
-    assert mesh.get("dof_cap_verify") == 12000
-    assert mesh.get("dof_cap_final") == 12000
+    # Caps raised 12,000 -> 24,000 by owner decision 2026-11-14, on the measured fused-CUDA
+    # envelope: 24,000 interpolates to ~4.7 GiB need (fit), the measured 24,973-DOF anchor
+    # itself fits at 5.8 GiB device peak with zero spill (docs/evidence/SPEED_ADOPTION_2026-11-14.md
+    # §6; feasibility anchors re-based the same day).
+    assert mesh.get("dof_cap_verify") == 24000
+    assert mesh.get("dof_cap_final") == 24000
     assert data.get("solve", {}).get("cuda_fused") is True
 
 
@@ -165,5 +169,5 @@ def test_fused_cuda_profile_merges_into_a_real_cell(tmp_path):
     child_path.write_text(yaml.safe_dump(child, sort_keys=False), encoding="utf-8")
     cfg = load_config(child_path)
     assert cfg.solve.cuda_fused is True
-    assert cfg.mesh.dof_cap_verify == 12000
-    assert cfg.mesh.dof_cap_final == 12000
+    assert cfg.mesh.dof_cap_verify == 24000
+    assert cfg.mesh.dof_cap_final == 24000

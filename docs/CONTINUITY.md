@@ -1,6 +1,66 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-14 (05:4xZ) - OWNER DECISIONS EXECUTED: COHORT GAP CLOSING, CAPS 12k -> 24k, BATCH-12 FOR HEAVY RUNS
+
+- **Cohort gap (approved):** the print80x60 day night budgeted job 1 at 250 evals but the interrupted+resumed
+  run closed at 200 — the ≥250-row BO training cohort was 50 short. Night `cohort_extend50_2026-11-14`
+  (`kind: command`, `search --resume runs/20261113T193536Z-screen-81c964 --budget 50 --mode screen`) launched
+  07:35:05Z; rows 1-200 replay free, the 50 new evals solve at `38e5b1f` (parity ~1e-5 dB justifies mixed
+  pins; every row carries its own `lib_shas`). Rows 1-200 read the cap-12,000 config at process start; the
+  cap edits below landed AFTER, so the cohort extension stays cap-12,000-consistent by construction (a
+  mid-run restart would re-read the edited config — accepted, monitored).
+- **Caps raised 12,000 -> 24,000 (approved, measured basis):** edited the four LIVE config files only — the
+  three `examples/typologies/print_80x60_2026-11-13/*.yaml` (screen/verify/final) and
+  `examples/profiles/fused_cuda.yaml` (verify/final), 11 lines total. Basis: the measured envelope gives
+  24,000 -> ~4.7 GiB need = `fit`; the 24,973-DOF anchor itself measured-fit at 5.8 GiB device peak, zero
+  spill. Historical study/ablation configs (~40 files) deliberately left at 12,000 — their provenance stays
+  under the policy they were run under. Tests re-based by fix (`test_config_extends.py` now pins 24,000)
+  and the feasibility guard extended to hold BOTH 12,000 and 24,000 in the `fit` band. Offline pytest green
+  (27 tests). Caps are UPPER BOUNDS: existing designs below the cap are unaffected; heavier mesh refinement
+  is now allowed where the mesher wants it.
+- **Batch 12 for heavy runs (approved recipe):** screen-tier searches stay unbatched (pre-declared bar);
+  verify/final-style heavy runs set `HORNLAB_FREQ_BATCH_SIZE="12"` via the night job env (archived night
+  YAML = provenance) or `solve.freq_batch_size: 12` in a config that only serves heavy runs. RUNBOOK row
+  updated. Honest caveat recorded: the 13-15 % whole-candidate win was measured at screen scale (18 freqs,
+  6-8k DOF); heavy-tier expectations are extrapolated — measure the first heavy run with
+  `run_with_memwatch.py` + watch `run.json.stats`.
+
+## 2026-11-14 - SCALAR BAYESIAN STUDIES INTEGRATED AND LIVE-PILOT VERIFIED
+
+- Implemented the scalar v4/v7 production worker/CLI and Studies GUI actions; kept CMA defaults.
+  Optional isolated Bayesian interpreter now includes the project's pinned HornLab stack.
+- Fixed historical training loss on refit/resume, screen-vs-verification proposal cadence,
+  task-specific projection and canonical derived-throat geometry; added v7 canonical replay and
+  read-only homogeneous cohort intake. Proposed and evaluated geometry now share production links.
+- Immutable packages retain complete candidate pools, measured dependency pins and executable-source
+  hashes. Each solve attempt reserves its own budget; studies disable hidden backend retries.
+  Unknown attempts remain conservative; duplicate workers cannot replace the active owner's files.
+- Measured live pilot `72834b64942a29f1...`: 18 screen + 6 verify/audit calls, two cheap refusals,
+  all 24 results exact-replayed with max absolute score delta zero; six selected designs verified,
+  no shortfall or unresolved reservation. Best screen J 3.105495448486849, not a CMA benefit claim.
+- Broad offline validation before final ownership/source-pin hardening: 3833 passed / 19 optional
+  engine skips; combined-engine integration 128 passed / no skips; final guards 39 passed.
+  Final release results are retained under `scratch/2026-11-14_bayes/release.{log,xml}`.
+- Runbook: `docs/BAYESIAN_STUDIES_RUNBOOK.md`; byte-checked terminal pilot evidence:
+  `docs/evidence/BAYESIAN_STUDY_INTEGRATION_2026-11-14.md`. Production Pareto and matched CMA
+  adoption comparisons remain future work. Existing briefs, queues and unrelated edits preserved.
+
+## 2026-11-14 (07:1x local) - CPU-LANE RE-REQUEST: NO RELAUNCH, LIVE NIGHT RE-VERIFIED
+
+- Owner asked again (hornlab-night-queue skill) to add the CPU-lane search beside
+  `home80x60_day_2026-11-13` (backend beat_cpu, lane cpu, own HORNLAB_BEAT_WORKER_DIR / cache_cpu /
+  dataset_cpu / `runs\.cpu.lane.lock`, brief `room_80x60_700_hf1440_v7.yaml`, a typology cell the GPU
+  is not running, cutoff 23:30). **Every element is already live in `home80x60_cpu2_2026-11-14`
+  (launched 05:55); per skill rule 3 a second CPU-lane runner would pre-hygiene-kill the live lane's
+  host, so nothing was launched.**
+- Fresh live evidence: runner pids 25596 (controller 4816) + 28820 (search child, `runs\.cpu.lane.lock`
+  holder, "night home80x60_cpu2_2026-11-14") alive; queue log `runs\nights\queue_2026-11-14_cpu.log`
+  shows "cutoff 23:30". Run `runs/20261114T105532Z-screen-4f9fd4`: **8 evals done** (n=0..7), newest
+  row n=7 created 12:11Z, rows carry `"lane":"cpu","backend":"beat_cpu"`; best-so-far J 6.413 (n=1) vs
+  later 11.48/66.42 rows. `runs\.gpu.lock` absent (GPU night drained 02:25; two-lane rule still
+  honored). Brief file untouched (it is the config's `brief_file`); GPU lane hosts never touched.
+
 ## 2026-11-14 (06:4x local) - GUI / DATA-VIZ UX PASS (front-end only)
 
 - Analysis report rebuilt decision-first (next-solve actions with follow-through links, run
@@ -16,6 +76,39 @@
   globePlot, seg-toggle, control-border). Details: docs/GUI_UX_PASS_2026-11-14.md.
 - Tests: new tests/test_gui_report_v2.py; four source pins updated; GUI suite green. No server,
   data, solver or scoring change.
+
+## 2026-11-14 (05:5x local) - CPU-LANE NIGHT home80x60_cpu2_2026-11-14 LAUNCHED (hornlab-night-queue skill)
+
+- Added one `lane: cpu` night beside the `home80x60_day_2026-11-13` GPU queue:
+  `runs/nights/home80x60_cpu2_2026-11-14.yaml`, job `cpu_p80x60__ath_core_14in_s7890`
+  (kind command): `hornlab-search search --config examples/typologies/print_80x60_2026-11-13/p80x60__ath_core_14in_700_v7.yaml
+  --mode screen --budget 300 --cma-seed 7890 --backend beat_cpu --cache-dir cache_cpu --dataset-dir dataset_cpu`.
+- Cell choice: ath_core_14in's first other-seed replicate — the GPU night(s) ran it ONLY at seed 1234
+  (osse_ext_throat replicates are covered: GPU 1234/5678, CPU 9012 earlier night), so no design overlap.
+  Brief is the config's brief_file `room_80x60_700_hf1440_v7.yaml` (untouched, not edited).
+- Lane isolation verified live: own `HORNLAB_BEAT_WORKER_DIR` `runs\lanes\cpu\workers` (job log line),
+  stale `runs\.cpu.lane.lock` holder (pid 15196, night home80x60_cpu_2026-11-13, gone) taken over by
+  the search child (pid 28820, "night home80x60_cpu2_2026-11-14"); pre/post hygiene is
+  `gpu-clean --lane cpu` only (log: rc=0, "no project Julia/BEAT processes found"); the GPU lane's
+  hosts and `runs\.gpu.lock` (free all morning) were never touched by this launch.
+- Timing: ~103 s/eval measured (rev2_cpu_parity2) → budget 300 ≈ 8.6 h, expected finish ~14:45;
+  job timeout 57,600 s caps it ~22:00 worst case; queue launched detached via launch_detached.ps1 +
+  queue.ps1 `-Nights home80x60_cpu2_2026-11-14 -Cutoff 23:30 -Log runs\nights\queue_2026-11-14_cpu.log`
+  (controller pid 4816, parent WmiPrvSE.exe, log "starting home80x60_cpu2_2026-11-14"; cutoff 23:30).
+  `--dry-run` clean before launch (path validation passed).
+- Launch-time GPU state (read-only): `.gpu.lock` absent, no julia.exe pre-existing (one new host
+  spawned by the CPU search as expected). Note: at 05:5x the GPU queue had ALREADY drained overnight
+  (print80x60_jobs23_2026-11-14 finished 02:25, all 8 speed-round nights 1-eval batches done); the
+  CPU night still honors "beside the GPU night" per the two-lane rule (one CUDA solve + one CPU search).
+- AMENDMENT 06:4x local (owner asked again to add this lane; it is already live, so it was NOT
+  duplicated - a second CPU-lane runner would pre-hygiene-kill the live lane's host, rule 3).
+  Health check from the run's own artifacts (`runs/20261114T105532Z-screen-4f9fd4`): 2 evals done,
+  newest `search.ndjson` row n=1 best J 6.413; runner pid 28820 alive, lane lock holder fresh,
+  `nvidia-smi` shows no CUDA process (1168 MiB / 33% is desktop-only baseline). MEASURED RATE IS
+  ~10.4-10.7 min/eval, NOT 103 s/eval: eval 0 mesh 05:55:38 -> done 06:06:03, eval 1 mesh 06:06:09
+  -> done 06:16:48. So budget 300 is unreachable - the 57,600 s timeout caps it near 21:55 with
+  ~110-120 evals; `-Cutoff 23:30` only prevents later nights from starting. No relaunch made: the
+  timeout path is the documented outcome and the rows persist (`resume:` re-runs the rest).
 
 ## 2026-11-13 (21:0x local) - PARAMETER DOC SPLIT: `--check` IS NOW A REAL CI GATE
 

@@ -626,7 +626,7 @@ def build_native_training_set(config_path, *, scores_json, catalog_csv, limit=No
                 continue
         try:
             x = projection.normalize_design(design, verify_round_trip=False)
-            reconstructed = projection.denormalize(x)
+            reconstructed = canonical_design(projection.denormalize(x), cfg, space=space)
         except EncodingError as exc:
             refuse(obs_id, [f"{NATIVE_R_ENCODE_REFUSED}:{type(exc).__name__}"],
                    shard=shard, row=row_idx, detail=str(exc)[:200])
@@ -829,12 +829,23 @@ def _expected_throat_radius(params: Mapping[str, Any]) -> float | None:
     return r0
 
 
+def canonical_design(design, config, *, space=None):
+    """Apply the production pipeline's existing links and driver coupling, without a solve."""
+    from hornlab_search.search.links import apply_links
+    from hornlab_search.search.evaluate import _derive_throat_coupling
+    if space is None and getattr(getattr(config, "search", None), "links", None):
+        from hornlab_search.design.space import DesignSpace
+        space = DesignSpace.from_config(config)
+    return _derive_throat_coupling(apply_links(design, space, config), config)
+
+
 def materialize_geometry(design, config, *, resolution_mm: float = 20.0) -> dict:
     """Resolve the installed mesher's canonical point grid without meshing.
 
     Returns the inner surface ``(n_phi, n_station+1, 3)`` in millimetres plus identity metadata.
     CAD/grid designs are refused because they have no supported radial surface representation.
     """
+    design = canonical_design(design, config)
     params = getattr(design, "params", None)
     if isinstance(params, dict) and ("cad" in params or "grid" in params):
         raise UnsupportedGeometryError(
@@ -1036,7 +1047,7 @@ def build_candidate_pool(space, encoding, config, *, n: int = POOL_SIZE, seed: i
             active = np.asarray(unit[i], dtype=float)
             try:
                 full = encoding.to_full(active)
-                design = space.denormalize(full)
+                design = canonical_design(space.denormalize(full), config, space=space)
             except Exception:  # noqa: BLE001 - a bad decoded corner is a rejected candidate
                 counts["schema_rejected"] += 1
                 continue

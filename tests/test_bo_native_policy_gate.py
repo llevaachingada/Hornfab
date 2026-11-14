@@ -151,3 +151,63 @@ def test_home_space_without_morph_exponent_uses_identity_projection(tmp_path):
     assert ts.d == 6
     assert ts.status == "needs_initial_data"
     assert ts.n == 0 and ts.n_min == 16
+
+
+def test_home_historical_derived_throat_roundtrips_through_production_rules(tmp_path):
+    import numpy as np
+    from hornlab_search.config import load_config
+    from hornlab_search.design.space import DesignSpace
+    from hornlab_search.bo.data import canonical_design
+    config = REPO / "examples/typologies/print_80x60_2026-11-13/p80x60__osse_ext_throat_700_v7_seed5678.yaml"
+    cfg = load_config(config)
+    space = DesignSpace.from_config(cfg)
+    dataset = tmp_path / "dataset"
+    dataset.mkdir()
+    metas, scores, catalog = [], [], [CATALOG_HEADER]
+    for i in range(16):
+        design = canonical_design(space.denormalize(np.full(len(space.keys()), (i + 1) / 18)),
+                                  cfg, space=space)
+        assert design.params["r0_mm"] != space.seed.params["r0_mm"]
+        metas.append({"ok": True, "family": design.family, "params": design.params,
+                      "design_hash": design.hash(), "solve_hash": "screen-spec"})
+        scores.append({"shard": 0, "row": i, "config_name": cfg.name,
+                       "status": "exact_complete", "complete": True, "j": i + 0.5,
+                       "physical_id": f"p{i}", "metric_id": f"m{i}", "score_id": f"s{i}",
+                       "design_hash": design.hash(), "objective_version": 7,
+                       "metric_source": "stored", "diagnostics": {"ripple_used_response": True},
+                       "target": TARGET, "weights": WEIGHTS})
+        catalog.append(f"dataset,0,{i},{cfg.name},7,beat_cuda,b1,d1,t1,screen,g1\n")
+    (dataset / "shard-0000.jsonl").write_text("\n".join(map(json.dumps, metas)), encoding="utf-8")
+    (tmp_path / "catalog.csv").write_text("".join(catalog), encoding="utf-8")
+    (tmp_path / "scores.json").write_text(json.dumps({"cohort": {"native_config": cfg.name},
+        "brief": {"objective_version": 7}, "rows": scores}), encoding="utf-8")
+    training = build_native_training_set(config, scores_json=tmp_path / "scores.json",
+        catalog_csv=tmp_path / "catalog.csv", dataset_root=dataset, require_single_fidelity=True)
+    assert training.status == "ok", training.meta
+    assert training.n == 16 and training.meta["n_refused"] == 0
+
+
+def test_home_pool_uses_same_canonical_design_as_actual_evaluation(monkeypatch):
+    import numpy as np
+    from hornlab_search.config import load_config
+    from hornlab_search.design.space import DesignSpace
+    from hornlab_search.bo.encoding import ActiveProjection
+    from hornlab_search.bo import data
+    from hornlab_search.bo.propose import validate_selected_candidate
+    cfg = load_config(REPO / "examples/typologies/print_80x60_2026-11-13/p80x60__osse_ext_throat_700_v7_seed5678.yaml")
+    space = DesignSpace.from_config(cfg)
+    encoding = ActiveProjection.identity(space)
+    seen = []
+    def materialize(design, config, **kwargs):
+        seen.append(design)
+        # Fixture keeps geometry checks isolated from the installed mesher.
+        return {"inner_points": np.ones((4, 3, 3)), "formula": "fixture"}
+    monkeypatch.setattr(data, "materialize_geometry", materialize)
+    monkeypatch.setattr(data, "_envelope_ok", lambda *args: True)
+    monkeypatch.setattr(data, "_throat_ok", lambda *args: True)
+    pool = data.build_candidate_pool(space, encoding, cfg, n=1, seed=13)
+    candidate = pool.candidates[0]
+    canonical = data.canonical_design(encoding.denormalize(candidate.active_vector), cfg, space=space)
+    assert candidate.params == canonical.params
+    assert candidate.design_hash == canonical.hash() == seen[0].hash()
+    validate_selected_candidate(candidate, pool, encoding=encoding, config=cfg)

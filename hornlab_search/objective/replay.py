@@ -56,6 +56,7 @@ from .scalar import resolve_weights as _resolve_weights
 from .scalar_v2 import (_cut_arrays, _on_axis_index, _v2_ripple_values, objective_v2,
                         objective_v3)
 from .scalar_v4 import V4Params, _diag_term, objective_v4, resolve_v4_weights
+from .scalar_v7 import V7Params, objective_v7, resolve_v7_weights
 from .terms import NAN_TERM_FILL
 from .versions import SUPPORTED_OBJECTIVE_VERSIONS, is_supported_objective_version
 
@@ -175,7 +176,11 @@ class Brief:
 
 
 def _params_from_block(version: int, block: dict | None):
-    """Validate/build the canonical params object for a version (only v4 is needed here)."""
+    """Validate the canonical scoring parameters without copying score mathematics."""
+    if version == 7:
+        if block is None:
+            raise ValueError("objective v7 needs its objective block (tolerances)")
+        return block if isinstance(block, V7Params) else V7Params.from_block(dict(block))
     if version == 4:
         if block is None:
             raise ValueError("objective v4 needs its objective block (tolerances)")
@@ -561,10 +566,14 @@ def _dispatch(version: int, metrics: MetricSet, response: Response | None, targe
         return objective_v3(metrics, response, True, target, weights)
     if version == 4:
         return objective_v4(metrics, response, True, target, weights, params)
+    if version == 7:
+        return objective_v7(metrics, response, True, target, weights, params)
     raise ValueError(f"no replay dispatch for objective version {version}")
 
 
 def _weight_for(version: int, weights: dict, key: str) -> float:
+    if version == 7:
+        return float(resolve_v7_weights(weights).get(key, 0.0))
     if version == 4:
         return float(resolve_v4_weights(weights).get(key, 0.0))
     return float(_resolve_weights(weights).get(key, 0.0))
@@ -631,14 +640,14 @@ def _replay_core(
     if weights is None:
         return _refuse(meta, arrays, response, stored_metrics, requested_target, brief, version,
                        weights, block, R_NO_SCORE_CONFIG)
-    if version == 4 and block is None:
+    if version in (4, 7) and block is None:
         return _refuse(meta, arrays, response, stored_metrics, requested_target, brief, version,
                        weights, block, R_NO_SCORE_CONFIG)
 
     if not is_supported_objective_version(version):
         return _refuse(meta, arrays, response, stored_metrics, requested_target, brief, version,
                        weights, block, R_UNSUPPORTED_OBJECTIVE)
-    if version not in (1, 2, 3, 4):
+    if version not in (1, 2, 3, 4, 7):
         return _refuse(meta, arrays, response, stored_metrics, requested_target, brief, version,
                        weights, block, R_REPLAY_VERSION_UNSUPPORTED)
 
@@ -722,10 +731,10 @@ def _replay_core(
                        weights, block, R_MISSING_THROAT)
 
     # ---- canonical score ------------------------------------------------------------------
-    diag_active = version == 4 and _weight_for(version, weights, "diag") > 0.0
+    diag_active = version in (4, 7) and _weight_for(version, weights, "diag") > 0.0
     diag_available = None
     if diag_active:
-        assert score is not None and isinstance(params, V4Params)
+        assert score is not None and isinstance(params, (V4Params, V7Params))
         try:
             diag_val = _diag_term(metrics, response, requested_target, f, score, params)
             diag_available = (math.isfinite(float(diag_val))

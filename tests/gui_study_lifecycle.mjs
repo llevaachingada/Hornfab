@@ -103,7 +103,7 @@ const executePanel = {...ready, phase:"execute", data:{lane:"cpu", actions:[{kin
   disposeNew();
 }
 
-// ── 3. an older generation resolving after a newer refresh is ignored ────────────────────────
+// ── 3. slow panels finish before another poll, preventing abort starvation ───────────────────
 {
   const root = makeRoot();
   const firstStudy = deferred(), firstPanel = deferred();
@@ -117,11 +117,16 @@ const executePanel = {...ready, phase:"execute", data:{lane:"cpu", actions:[{kin
   const poll = [...intervalState.callbacks.values()].at(-1);
   poll();
   await tick();
-  assert.ok(root.innerHTML.includes("NEW-GENERATION"), "newer refresh painted");
+  assert.equal(studyCalls, 1, "poll does not restart the in-flight study request");
+  assert.equal(panelCalls, 1, "poll does not restart the in-flight panel request");
   firstStudy.resolve(study);
-  firstPanel.resolve({...ready, phase:"execute", data:{marker:"STALE-GENERATION"}});
+  firstPanel.resolve({...ready, phase:"execute", data:{marker:"FIRST-GENERATION"}});
   await tick();
-  assert.ok(!root.innerHTML.includes("STALE-GENERATION"), "stale generation ignored");
+  assert.ok(root.innerHTML.includes("FIRST-GENERATION"), "slow first panel eventually paints");
+  poll();
+  await tick();
+  assert.equal(studyCalls, 2);
+  assert.ok(root.innerHTML.includes("NEW-GENERATION"), "next completed poll replaces older data");
   dispose();
 }
 

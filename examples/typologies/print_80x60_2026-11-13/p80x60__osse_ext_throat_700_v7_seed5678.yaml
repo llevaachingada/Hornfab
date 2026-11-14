@@ -151,9 +151,9 @@ weights:
 mesh:
   epw: 6.0
   quadrants: '1'
-  dof_cap_screen: 12000
-  dof_cap_verify: 12000
-  dof_cap_final: 12000
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
   dof_per_triangle: 0.51
 solve:
   backend: beat_cuda

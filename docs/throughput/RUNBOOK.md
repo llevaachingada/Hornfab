@@ -15,7 +15,7 @@ the GPU lock). Close other GPU programs. Read results from the output files, not
 | Stage timer (WP0) | `$env:HORNLAB_STAGE_TIMING="1"` | off; writes `designs\<hash>\stage_timing.ndjson` |
 | Throughput matrix (WP0) | `tools\bench\throughput_matrix.py` | a tool, nothing runs by itself |
 | Mesh prefetch (WP2) | `$env:HORNLAB_PIPELINE_PREFETCH="2"` or `search: {pipeline_prefetch: 2}` | 0 = serial, as today |
-| Frequency batching (WP5) | `--batch-sizes` in the matrix, or `$env:HORNLAB_FREQ_BATCH_SIZE="4"`, or the config key `solve.freq_batch_size` (adopted 2026-11-14, default `None` = env fallback governs) | off = today's grouping |
+| Frequency batching (WP5) | `--batch-sizes` in the matrix, or `$env:HORNLAB_FREQ_BATCH_SIZE="4"`, or the config key `solve.freq_batch_size` (default `None` = env fallback governs). **Owner decision 2026-11-14:** batch **12** approved for HEAVY runs (verify/final tiers, many-frequency grids) — set `$env:HORNLAB_FREQ_BATCH_SIZE="12"` (or `env:` in the night job, which the archived night YAML records as provenance). Screen-tier searches stay unbatched by default (the pre-declared whole-candidate bar rejected batch 12 there, 0.851/0.865). | off = today's grouping |
 | Curvature meshing (WP4) | `mesh: {curvature_npts: 12}` (CAD/MEH route only) | 0 = off = today's meshes |
 | CPU+GPU pilot (WP3) | `tools\bench\cpu_gpu_concurrent.py` | a tool, bench only |
 | Solver identity-skip (WP1, G2) | **ADOPTED 2026-11-14** as solver `38e5b1f` (whole-candidate wall −24.7 %/−28.0 %, parity ~1e-5 dB, zero spill, measured ceiling 24,973 quarter-DOF; `docs/evidence/SPEED_ADOPTION_2026-11-14.md`) | on in the installed solver |

@@ -136,6 +136,51 @@ def test_snapshot_training_analysis_attach_exact_hashes_and_dependencies(tmp_pat
     assert analysis_payload["subset"]["retained"] == ROWS
 
 
+def test_home_task_requires_its_own_training_sources(tmp_path):
+    with pytest.raises(Unavailable, match="explicit compatible"):
+        builders._load_or_build_training(
+            config_path=builders.HOME_CONFIG, sources=None, root=tmp_path)
+
+
+def test_home_task_generates_its_own_seeded_pool(tmp_path, monkeypatch):
+    from hornlab_search.bo import data
+    calls = []
+    def build(space, encoding, config, *, seed):
+        calls.append((encoding.d, tuple(encoding.active_keys), seed))
+        return _pool(d=encoding.d)
+    monkeypatch.setattr(data, "build_candidate_pool", build)
+    value = builders._load_pool(None, {}, builders.HOME_CONFIG, root=tmp_path, seed=13)
+    assert value.candidates[0].active_vector.size == 6
+    assert calls[0][0] == 6 and calls[0][2] == 13
+    assert "morph_exponent" not in calls[0][1]
+
+
+def test_pool_artifact_preserves_full_vectors_for_immutable_execution():
+    manifest = builders._pool_manifest(_pool(), policy="scalar",
+                                       config_path=NATIVE_CONFIG, encoding=None)
+    assert len(manifest["candidates"]) == 4
+    assert len(manifest["candidates"][0]["active_vector"]) == 13
+
+
+def test_proposal_labels_use_the_selected_objective_version():
+    assert "J uses objective v7; no cross-version ranking." in builders._proposal_limitations("scalar", 7)
+
+
+def test_current_home_seed5678_is_a_separate_registered_task(tmp_path):
+    task = builders._read_task({"name": builders.HOME_SEED5678_TASK_NAME}, root=tmp_path)
+    assert task["config"] == builders.HOME_SEED5678_CONFIG
+    assert task["brief"] == builders.HOME_BRIEF
+    assert task["objective_version"] == 7
+
+
+def test_explicit_home_config_infers_its_real_objective_version(tmp_path):
+    task = builders._read_task({"config": str(builders.HOME_SEED5678_CONFIG)}, root=tmp_path)
+    assert task["objective_version"] == 7
+    with pytest.raises(Unavailable, match="disagrees"):
+        builders._read_task({"config": str(builders.HOME_CONFIG), "objective_version": 4},
+                            root=tmp_path)
+
+
 def test_repeated_builds_are_idempotent_and_keep_the_same_bytes(tmp_path):
     root = tmp_path / "registry"
     service, sid = _service_with_study(root)

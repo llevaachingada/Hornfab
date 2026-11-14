@@ -85,7 +85,7 @@ class StudyCpuJobs:
         _id(key, "idempotency key")
         if kind not in KINDS or isinstance(rev, bool) or not isinstance(rev, int) or rev < 0:
             raise StudyJobError("invalid_input", "invalid kind or revision", 400)
-        if not isinstance(package, str) or not _HASH.fullmatch(package):
+        if package is not None and (not isinstance(package, str) or not _HASH.fullmatch(package)):
             raise StudyJobError("invalid_input", "invalid package hash", 400)
         if self.dispatcher is None:
             raise StudyJobError("capability_missing", "CPU job dispatcher unavailable", 503)
@@ -104,6 +104,9 @@ class StudyCpuJobs:
             identity = self.dispatcher(kind, study_id, job_id)
             if not isinstance(identity, dict) or not identity:
                 raise ValueError("dispatcher did not return a process identity")
+            current = self.registry.get_cpu_job(study_id, job_id)
+            if current.get("status") != "running":
+                return current
             return self.registry.compare_and_set_cpu_job(study_id, job_id, ("running",), "running",
                                                          {"process_identity": identity}, f"process-{job_id}")
         except Exception as exc:
@@ -299,6 +302,9 @@ class StudyRunBridge:
         if has_job:
             return StudyCpuJobs(self.registry).cancel(study_id, {
                 "job_id": payload["job_id"], "idempotency_key": payload["idempotency_key"]})
+        if self.registry.get_artifact_metadata(study_id, "package").get("status") == "missing":
+            raise StudyJobError("not_found", "package not found for this study", 404)
+        self._stored_package(study_id, payload["package_id"])
         if self.canceller is None:
             from hornlab_search.studies.schema import NotFound
             from hornlab_search.studies.service import DraftAttemptJournal

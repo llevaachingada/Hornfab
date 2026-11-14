@@ -60,6 +60,25 @@ def test_a_second_worker_exit_is_reported_once_and_not_retried_again(backend, mo
     assert calls["warm"] == 1
 
 
+@pytest.mark.parametrize('surface_traces', [False, True])
+def test_journal_owned_retry_disables_hidden_worker_attempts(monkeypatch, surface_traces):
+    """One study reservation covers exactly one adapter attempt, including traces."""
+    from hornlab_search.types import SolveOutcome
+    be = beat_mod.BeatBackend('cuda', track_vram=False, retry_worker_exit=False)
+    attempts = []
+    failure = SolveOutcome(False, None, .1, None, '[worker_exit] connection reset')
+
+    def attempt(mesh, spec, *, surface_traces):
+        attempts.append(surface_traces)
+        return failure, None
+
+    monkeypatch.setattr(be, '_attempt', attempt)
+    monkeypatch.setattr(worker, 'warm', lambda _: pytest.fail('hidden retry warm-up'))
+    out = be.solve_traced(MESH, None)[0] if surface_traces else be.solve(MESH, None)
+    assert out is failure
+    assert attempts == [surface_traces]
+
+
 def test_other_failures_are_not_retried(backend, monkeypatch):
     be, calls = backend
     log = scripted(be, monkeypatch, [ValueError("singular system"), object()])

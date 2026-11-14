@@ -477,7 +477,7 @@ def validate_selected_candidate(candidate, candidate_pool, *, encoding, config, 
     """
     from .data import (materialize_geometry, intended_solve_identity, _geometry_hash,
                        _surface_descriptors, _brief_envelope, _envelope_ok,
-                       _expected_throat_radius, _throat_ok, _jsonable_params)
+                       _expected_throat_radius, _throat_ok, _jsonable_params, canonical_design)
     from hornlab_search.design import families
     if encoding is None or config is None:
         raise ValueError("resolved encoding and config required to validate proposal")
@@ -487,7 +487,7 @@ def validate_selected_candidate(candidate, candidate_pool, *, encoding, config, 
     full = encoding.to_full(active)
     if not np.array_equal(full, np.asarray(candidate.full_vector, dtype=float)):
         raise ValueError("selected full vector disagrees with projection")
-    design = encoding.space.denormalize(full)
+    design = canonical_design(encoding.space.denormalize(full), config, space=encoding.space)
     families.validate(design)
     if design.hash() != candidate.design_hash or _jsonable_params(design.params) != candidate.params:
         raise ValueError("selected design or parameters disagree with pool")

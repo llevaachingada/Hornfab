@@ -1,7 +1,7 @@
 ﻿# ISSUES
 
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
-Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-14 (**speed program ADOPTED: solver `38e5b1f` at −25/−28 % whole-candidate wall, parity ~1e-5 dB, zero spill, batching default rejected by the pre-declared bar, A5 re-based on measured anchors, E1b raw evidence archived; plus the S8/S7 GUI panels; no GitHub issue state changed**).
+Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-14 (**owner decisions executed: cohort gap closing (+50 resume at 38e5b1f), caps 12k→24k on the four live configs, batch-12 approved for heavy verify/final-style runs; plus the scalar-Bayes and CI work; no GitHub issue state changed**).
 
 Local-only, added 2026-11-14 (06:4x local) (**GUI / data-viz UX pass; no GitHub issue state changed**):
 - Done: decision-first analysis report, verdict-first run detail, Boundary Lab isobars + Globe view,
@@ -1459,6 +1459,15 @@ Local-only, added 2026-11-02 (no GitHub issue state changed): GUI frequency-axis
 Local-only, added 2026-11-02 (no GitHub issue state changed): **P11 HF data sync DONE** - public dataset repo <https://huggingface.co/datasets/chingadalleva/hornlab-search-data> (7 tar shards, 10.77 GB packed: text/solve/dataset; meshes not uploaded), `tools/hf_sync.py` corrected to `hf upload`. Owner-machine finding: Xet uploads stall here; upload with `HF_HUB_DISABLE_XET=1`. Still open in P11: merge to `main` (which branches) and the two v4 re-runs.
 
 # ISSUES
+
+Local-only, 2026-11-14 (**scalar Bayesian integration; no GitHub issue state changed**):
+- Completed: production scalar v4/v7 study worker and GUI actions; canonical task geometry,
+  v7 replay/intake, historical-plus-new adaptive training/resume, immutable full pool,
+  measured dependency/source pins, journal-owned retries and duplicate-worker protection.
+- Measured pilot: 18 screen + 6 verify/audit calls, 24 exact replays, zero unresolved attempts;
+  see [integration evidence](evidence/BAYESIAN_STUDY_INTEGRATION_2026-11-14.md).
+- Open by design: production Pareto execution, a matched CMA benefit campaign, and automatic
+  resolution of genuinely unknown attempts. Scalar adoption remains explicit/opt-in.
 
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-12 (WP9/WP10 chart standards + search history merged; no open issues changed; 349 GUI tests pass).
