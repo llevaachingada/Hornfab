@@ -248,6 +248,78 @@
   UI fidelity selector.
 - **Docs:** INDEX row added for the campaign doc. No code, pin, GPU or queue change in this commit; the campaign is
   designed, not launched.
+## 2026-11-13 (~23:5xZ) - PR #55 RECONCILED WITH MAIN (S7 TAKEN FROM MAIN); WORKTREES CONSOLIDATED 28 -> 3
+
+- Main went green before the merge: `46a28ec` adapted the builder fixtures to the strict native gate and
+  `dc64fd7` finished the S8 contracts + S7 advisory hardening (including the unit-cube OOD test). Verified on a
+  clean `origin/main` worktree (`a717650`): `test_study_builders`, the S7 file and the S8 trio -> 90 passed.
+- PR #55 merged `origin/main` (`a717650`) as `4d6f4da`. Conflicts were the four expected add/adds: took **main's**
+  `tools/analysis/surrogate_validation.py` and `tests/test_tools_analysis_surrogate_validation.py` (its 8 tests
+  contain the branch's original 4 plus 4 v4 `--advisory-stored-j` tests), merged `docs/CONTINUITY.md` /
+  `docs/ISSUES.md` keeping both sides, and kept the PR's `schema.md` S7 section (now describing both modes).
+- Kept from the PR: B4/B5 durable launches (`launches` table, migration 2), B8 CLI/HTTP end-to-end +
+  `GET /api/studies/<id>/export`, S5 `--config-roundtrip` + local-search hints, `lane_parity --pair`,
+  `docs/INDEX.md` dedupe. The branch's own S7 draft is gone; the S7 v4 question is answered by main's
+  stored-label mode, and S8 is closed.
+- Verified on the merged branch: `compileall` exit 0; **151 passed** (durable launch, B8 e2e, seed_pack,
+  lane_parity, S7, S8 descriptors/cards/qd_compare), **116 passed** for the b8/study/gui/builder/native-gate
+  neighbours, and the analysis-tool suite green (26 files, 1 skip: local S4 inputs absent).
+- Worktree consolidation (owner request; nothing lost): 25 worktrees removed from the registry, each verified
+  clean and merged into main; every branch ref kept (no `branch -d/-D`). Kept `hf-wt/pr55` (the PR),
+  `oc-wt/gui-int` (`feat/gui-integration`, unique) and `oc-wt/bo-study` (885 MB `bayes-venv`, not a worktree).
+  `oc-wt/L1`'s one scratch file was copied to `%TEMP%\opencode\L1.git-commit-msg-l3.txt` before removal.
+- Safety net: tags `backup/main-pre-reconcile` (`87c0944`) and `backup/pr55-pre-reconcile` (`da09812`); a 64.6 MB
+  all-refs bundle verified complete (`%TEMP%\opencode\hornlab-all-20261113.bundle`) - **copy it off-machine**.
+  The four local-only unique branches are now on origin: `feat/gui-integration`, `dev/fused-cuda-pin`,
+  `backup/consolidation/T`, `backup/consolidation/L1`.
+- Next: merge PR #55 on GitHub (merge-commit style), then `git worktree remove hf-wt/pr55` and
+  `git branch -d pr55-local`; `feat/gui-integration` still needs a deliberate merge-or-retire call.
+
+## 2026-11-13 (~25Z) - PR #55 MERGED UP TO MAIN, VERIFIED OFFLINE; S7 v4 GATE KEPT (offline)
+
+- Merged `main` (`9019cbd`) into `claude/eloquent-ride-owt01w`: two conflicts, both docs, both sides kept
+  newest-first (`CONTINUITY`, `ISSUES`). No code conflicts. Merge done in an isolated worktree because the
+  canonical checkout had unrelated uncommitted work.
+- Verified (worktree code, `PYTHONPATH` pinned to it): `compileall hornlab_search tools/analysis` exit 0;
+  72 passed for the new tests (durable launch, B8 CLI/HTTP end-to-end, lane_parity pooled, seed_pack
+  round-trip, surrogate_validation); 62 passed for the neighbouring b8/study/gui-study tests; `docs/INDEX.md`
+  dedupe checked by link-target set (166 -> 165 targets; the only dropped row is the pre-archive
+  `HANDOFF_COLLABORATOR_2026-10-23.md`, whose `archive/` copy is listed).
+- DECIDED (was the open senior question): S7 keeps `surrogate/capability.py` at v1-only. v4 needs
+  tolerances/terms plus measured throat impedance the surrogate cannot supply, and `tools/analysis/schema.md`
+  makes J comparable only within one objective version + brief/weights/tolerances — the S7 row contract carries
+  no brief/score identity. A v4 path needs `objective/replay.py`'s `score_id` in the row contract and
+  same-identity enforcement as a separate change, not a widened constant.
+  **Superseded the same day by main's `a4dccef`** (`--advisory-stored-j`, canonical `score_spec` per row): see
+  the ~23:5xZ entry. This branch took main's implementation at reconciliation (`4d6f4da`); the draft is gone.
+- Still open: S8 (geometry/behaviour descriptors, hypothesis cards, QD-vs-Pareto) not started; full offline
+  suite not re-run in this environment (targeted tests above only).
+
+## 2026-11-13 (~24:30Z) - S7 SURROGATE VALIDATION, S5 CONFIG ROUND-TRIP, LANE_PARITY POOLED (offline)
+
+- S7: `tools/analysis/surrogate_validation.py` (numpy kNN, advisory only): chronological split with leakage
+  checks (no future rows, same-geometry rows removed from test), train-only preprocessing, OOD fallback,
+  feasibility Brier/reliability, 95% interval coverage, top-k recall/regret, resume-safe keyed output,
+  exploit/uncertainty/diversity proposals labelled hypotheses. Respects `surrogate/capability.py`: v2+ refused
+  (so the v4 native cohort is refused today; widening capability is a separate decision). 4 tests.
+- S5: `seed_pack.py --config-roundtrip CONFIG --dataset-root DIR` rebuilds native designs and compares hashes
+  (needs_config when config/rows/mesher absent; generated configs not reconstructable); `local_search` advisory
+  sigma0/box hints + cold control arm. 4 new tests.
+- lane_parity: repeatable `--pair GPU,CPU` pooled CP-7b (hash counted once across pairs). 3 new tests.
+- NOT DONE: S8 (geometry/behaviour descriptors, hypothesis cards, QD-vs-Pareto). Full suite not re-run after these.
+
+## 2026-11-13 (~24Z) - B4/B5 DURABLE LAUNCH IDEMPOTENCY + B8 CLI/HTTP END-TO-END + INDEX DEDUPE (offline)
+
+- B4/B5: `StudyRunBridge` launch dedup moved from the in-memory `_launched` dict into the studies SQLite
+  registry (`launches` table, store migration 2). Claim is written before the launcher runs; same key replays,
+  other key 409 `launch_conflict`, ambiguous launch or crash mid-launch = 503 `unknown` (never relaunched).
+  Absent key returns `missing_idempotency_key` (400) on launch/cancel/CPU submit. Tests: `tests/test_study_launch_durable.py` (7).
+- B8: `tests/test_b8_end_to_end_cli_http.py` (2) drives create -> snapshot -> explain -> propose -> package ->
+  dry-run -> fake run -> decide -> export via `hornlab-search study` and via a real in-process HTTP server
+  (restart replays the launch). New read-only route `GET /api/studies/<id>/export`.
+- docs/INDEX.md: duplicated second half merged; 6 unique rows kept, 1 stale pre-archive row dropped (archived copy listed).
+- Pre-existing failures on main in the cloud env (not touched): experiments_manifest (Windows paths), bo_sensitivity_real (3), design_generated (1).
+- Next (same branch): lane_parity pooled mode, S5 config round-trip, S7 surrogate_validation, S8 descriptors/cards.
 
 ## 2026-11-13 (23:1xZ) - G2 INDEPENDENTLY REVIEWED: ADOPT-WITH-CONDITIONS; EVIDENCE DOC CORRECTED (MECHANISM + PARITY GAP)
 

@@ -132,6 +132,35 @@ Local-only, added 2026-11-13 (23:3xZ) (**combined speed campaign designed; no Gi
 - Open: the mesher fork checkout is stale (branch `hornlab-search/base` @ `b922e80`; the pinned `55da4f4` object is
   absent locally), so any fork-state conclusion from it is unreliable until a fetch.
 
+Local-only, added 2026-11-13 ~23:5xZ (**PR #55 reconciled with main; worktrees consolidated; no GitHub issue state changed**):
+- Resolved: main went green (`46a28ec` fixture adaptation, `dc64fd7` S8 contracts + S7 hardening) and the PR merged
+  `origin/main` (`a717650`) as `4d6f4da`, taking main's `surrogate_validation.py` + tests. S7's v4
+  `--advisory-stored-j` mode is main's answer; this branch's S7 draft is gone. S8 closed.
+- Verified: compileall exit 0; 151 passed (durable launch, B8 e2e, seed_pack, lane_parity, S7, S8 trio), 116
+  passed for the b8/study/gui/builder/native-gate neighbours, analysis-tool suite green.
+- Resolved (housekeeping): worktrees 28 -> 3 (main, `hf-wt/pr55`, `oc-wt/gui-int`); 25 clean+merged worktrees
+  removed with every branch ref kept. Safety: `backup/main-pre-reconcile`, `backup/pr55-pre-reconcile` tags and a
+  verified all-refs bundle; 4 local-only branches pushed to origin.
+- Open: merge PR #55 on GitHub, then remove `hf-wt/pr55` / delete `pr55-local`.
+- Open: `feat/gui-integration` (`oc-wt/gui-int`, now on origin) needs a deliberate merge-or-retire decision.
+- Not weakened: no gate, tolerance or test was changed to force green.
+
+Local-only, added 2026-11-13 ~25Z (**PR #55 merged up to main, verified offline; no GitHub issue state changed**):
+- Resolved: `main` (`9019cbd`) merged into the PR; only doc conflicts (`CONTINUITY`, `ISSUES`), both sides kept.
+- Verified: compileall exit 0; 72 new tests passed; 62 neighbouring b8/study/gui-study tests passed; INDEX
+  dedupe confirmed against main by link-target set (one intended pre-archive row dropped).
+- Decided (S7 v4): main's `--advisory-stored-j` mode is the v4 path (canonical `score_spec` + label evidence);
+  see the ~23:5xZ block. No constant was widened.
+- Open: S8 discovery/QD-Pareto tooling not started.
+- Open: full offline suite not re-run in this environment.
+
+Local-only, added 2026-11-13 ~24Z (**bo-study B4/B5/B8; no GitHub issue state changed**):
+- Resolved: launch idempotency is durable across GUI restarts (`launches` table, migration 2).
+- Resolved: B8 offline end-to-end through CLI and HTTP.
+- Resolved: S7 surrogate validation tool, S5 config round-trip + local search hints, lane_parity pooled mode.
+- Open: S8 discovery/QD-Pareto analysis tooling not started.
+- Decided (S7 v4): main's `--advisory-stored-j` mode is the v4 path; see the ~23:5xZ block.
+
 Local-only, added 2026-11-13 (23:1xZ) (**G2 independently reviewed; evidence corrected; no GitHub issue state changed**):
 - Open (owner): G2 verdict is adopt-with-conditions. Adopt = pin `9ec86b0` + `pyproject.toml`/`TOOLCHAIN.md` +
   A5 recalibration; rollback = old SHA. The pin is unchanged until the owner decides.

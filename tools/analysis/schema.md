@@ -333,6 +333,9 @@ separately. J is only comparable when both sides share objective version, brief 
 
 ## lane_parity.json (`tools/analysis/lane_parity.py`)
 
+Pooled mode (`--pair GPU,CPU` repeated): `{mode: "pooled", pairs: [<single-pair payload>...], n_pairs, n_distinct_compared, n_within_0p2, within_hashes, threshold_db, min_designs, pass, gate, dedupe}`; a design_hash counts once across pairs (its best compared pair).
+
+
 ```json
 {
   "tool": "lane_parity", "generated_utc": "...",
@@ -346,6 +349,62 @@ separately. J is only comparable when both sides share objective version, brief 
   "threshold_db": 0.2, "min_designs": 3,
   "pass": true,                                            // CP-7b: >= 3 designs within 0.2 dB
   "gate": "CP-7b"
+}
+```
+
+## surrogate_validation.json (`tools/analysis/surrogate_validation.py`)
+
+S7 advisory surrogate check. Read-only over a rows JSONL (`row_id, design_hash, t, objective_version, x,
+ok, j, metrics`); never solves, never changes a default. Two modes, reported as `validation_mode`:
+
+- `legacy_capability` (default): every row's objective version must pass
+  `hornlab_search.surrogate.capability.require_supported` (currently v1 only). It never claims the legacy
+  metric surrogate can score a newer objective.
+- `advisory_stored_j` (`--advisory-stored-j`, objective v4 only): J is an **exact stored label**, not a
+  predicted score. Every `ok` row must carry `score_spec` (canonical `brief`, `brief_hash`,
+  `objective_version`, `target`, `weights`, `objective_block`, `terms_keys`, `score_schema_version`), a
+  `score_identity` equal to its hash, and `label_evidence` with a per-result `score_id` plus a J equal to the
+  row's J. Rows must share one score identity; a per-design replay `score_id` is provenance, never a cohort id.
+
+A refusal is a result: `status: "refused"` with `reason` and `detail`. Reasons include `insufficient_rows`
+(< 8 rows), `mixed_objective_versions`, `unsupported_objective_version` (default mode), `missing_inputs`,
+`duplicate_row_id`, `missing_score_identity`, `invalid_score_spec`, `incomplete_score_spec`,
+`score_identity_mismatch`, `mixed_score_identities`, `incomplete_label_evidence`, `label_value_mismatch`,
+`advisory_stored_j_requires_v4`, `empty_chronological_split`, and the output-path guards `bad_input`,
+`bad_output`, `forbidden_output`. Rows are split chronologically into the latest `test_frac`; same-`design_hash`
+test rows seen in train are dropped and the check is reported. Predictions are hypotheses, `measured: false`.
+
+```json
+{
+  "tool": "surrogate_validation", "schema_version": 1, "input_key": "<sha256 of rows+pool+params>",
+  "params": {"test_frac": 0.25, "k": 5, "topk": 5, "n_propose": 6, "advisory_stored_j": false},
+  "advisory_only": true, "changes_defaults": false, "resumed": false, "stale_partial_replaced": false,
+  "input": {"rows": "<path>", "pool": "<path|null>"},
+  "status": "ok",                                        // or "refused" + reason/detail
+  "objective_version": 1, "metric_names": ["bw_h_deg", "..."],
+  "validation_mode": "legacy_capability",                // or "advisory_stored_j" (v4, stored labels)
+  "score_identity": null,                                // advisory mode only: shared resolved-spec hash
+  "split": {"kind": "chronological",
+            "checks": {"max_train_t": 29, "min_test_t": 30,
+                       "no_future_rows_in_train": true, "same_geometry_removed_from_test": 1,
+                       "duplicate_test_rows_removed": 0, "tie_rows_moved_to_train": 0,
+                       "shared_design_hashes": 0},
+            "train_ids": ["r0"], "test_ids": ["r39"]},
+  "evaluation": {"n_train": 30, "n_test": 10, "n_ood_fallback": 0, "support_radius": 1.42,
+                 "feasibility": {"brier": 0.09, "brier_baseline": 0.14,
+                                 "reliability_bins": [{"bin": [0.0, 0.2], "n": 4,
+                                                       "mean_pred": 0.1, "observed": 0.0}]},
+                 "regression": {"status": "ok", "n_eval": 6,
+                                "targets": {"j": {"mae": 0.31, "mae_baseline": 0.55,
+                                                  "spearman": 0.82, "interval_95_coverage": 1.0,
+                                                  "topk": 5, "topk_recall": 0.8, "regret": 0.04,
+                                                  "direction": "minimize"}}}},
+  "proposals": {"status": "ok",
+                "proposals": [{"candidate_id": "c3", "role": "exploit", "predicted_j": 1.02,
+                               "uncertainty": 0.11, "in_support": true,
+                               "measured": false, "status": "hypothesis"}],
+                "note": "predictions are hypotheses; validate with the normal evaluator (BEM) later"},
+  "complete": true, "path": "<out>/surrogate_validation-<key16>.json"
 }
 ```
 

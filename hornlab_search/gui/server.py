@@ -74,6 +74,9 @@ class App:
                 return {"jobs": service.list_cpu_jobs(parts[1], limit=50)}
             if len(parts) == 4 and parts[2] == "artifacts":
                 return service.artifact_view(parts[1], parts[3])
+            if len(parts) == 3 and parts[2] == "export":
+                # B8: the same read-only export record the CLI `study export` writes.
+                return service.export_study(parts[1])
             if len(parts) == 3:
                 study = service.get_study(parts[1])
                 artifact = None

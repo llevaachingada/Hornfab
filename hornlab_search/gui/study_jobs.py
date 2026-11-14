@@ -35,6 +35,12 @@ class JobRegistry(Protocol):
     def list_cpu_jobs(self, study_id, limit): ...
 
 
+def _require_key(payload):
+    """A missing idempotency key is its own typed error, not generic invalid input."""
+    if not isinstance(payload, dict) or payload.get("idempotency_key") in (None, ""):
+        raise StudyJobError("missing_idempotency_key", "idempotency_key is required", 400)
+
+
 def _id(value, label):
     if not isinstance(value, str) or not _ID.fullmatch(value):
         raise StudyJobError("invalid_input", f"invalid {label}", 400)
@@ -71,6 +77,8 @@ class StudyCpuJobs:
 
     def submit(self, study_id, payload):
         _id(study_id, "study id")
+        if isinstance(payload, dict):
+            _require_key(payload)
         if not isinstance(payload, dict) or set(payload) != {"kind", "expected_revision", "idempotency_key", "package_hash"}:
             raise StudyJobError("invalid_input", "invalid request fields", 400)
         kind, rev, key, package = (payload[k] for k in ("kind", "expected_revision", "idempotency_key", "package_hash"))
@@ -156,15 +164,21 @@ class StudyRunBridge:
     never a shell string.  Without an injected launcher, launch is an explicit
     503 capability gap; package preparation and cancellation still work.  A
     duplicate click reuses the same ``(study, package)`` launch result for the
-    same idempotency key and conflicts for a different one; the durable journal
-    claim remains the final authority in a real launcher.
+    same idempotency key and conflicts for a different one.
+
+    Launch idempotency is durable (B4/B5): the claim lives in the studies SQLite
+    registry (``launches`` table, migration 2), written BEFORE the launcher is
+    called, so a GUI/server restart cannot re-dispatch a launched package.  A
+    claim whose outcome is ambiguous (launcher raised, or the process died
+    between claim and settle) is ``unknown`` and is never relaunched
+    automatically.  The durable journal claim remains the final authority in a
+    real launcher.
     """
 
     def __init__(self, registry, *, launcher=None, canceller=None):
         self.registry = registry
         self.launcher = launcher
         self.canceller = canceller
-        self._launched = {}
 
     def prepare_package(self, study_id, payload):
         _id(study_id, "study id")
@@ -215,6 +229,7 @@ class StudyRunBridge:
         if not isinstance(payload, dict) or set(payload) - {
                 "package_id", "package_hash", "expected_revision", "idempotency_key"}:
             raise StudyJobError("invalid_input", "invalid launch request fields", 400)
+        _require_key(payload)
         package_id = payload.get("package_id") or payload.get("package_hash")
         if (payload.get("package_id") and payload.get("package_hash")
                 and payload["package_id"] != payload["package_hash"]):
@@ -237,29 +252,44 @@ class StudyRunBridge:
             raise StudyJobError("conflict", "stale package revision", 409)
         if self.launcher is None:
             raise StudyJobError("capability_missing", "study launch adapter unavailable", 503)
-        launch_key = (study_id, package["package_id"])
-        prior = self._launched.get(launch_key)
-        if prior is not None:
-            if prior["idempotency_key"] == key:
-                return prior["result"]
-            raise StudyJobError("launch_conflict", "package already launched", 409)
+        pid = package["package_id"]
+        for name in ("claim_launch", "settle_launch", "release_launch"):
+            if not callable(getattr(self.registry, name, None)):
+                raise StudyJobError("capability_missing", "durable launch registry unavailable", 503)
+        claim, created = self.registry.claim_launch(study_id, pid, key)
+        if not created:
+            return self._replay(claim, key)
         try:
             result = self.launcher(package)
         except StudyJobError:
+            # A typed refusal is raised before anything is dispatched: free the claim.
+            self.registry.release_launch(study_id, pid, key)
             raise
         except Exception as exc:  # noqa: BLE001 - ambiguous launch outcome
+            self.registry.settle_launch(study_id, pid, key, "unknown",
+                                        error=f"launch outcome unknown: {type(exc).__name__}")
             raise StudyJobError("unknown", f"launch outcome unknown: {type(exc).__name__}", 503) from exc
         if not isinstance(result, dict) or not result:
+            self.registry.settle_launch(study_id, pid, key, "unknown",
+                                        error="launcher returned no process identity")
             raise StudyJobError("unknown", "launcher returned no process identity", 503)
-        self._launched[launch_key] = {"idempotency_key": key, "result": result}
-        return result
+        return self.registry.settle_launch(study_id, pid, key, "launched", result=result)["result"]
+
+    @staticmethod
+    def _replay(claim, key):
+        if claim["idempotency_key"] != key:
+            raise StudyJobError("launch_conflict", "package already launched", 409)
+        if claim["status"] == "launched":
+            return claim["result"]
+        # 'launching' after a restart, or 'unknown': never re-dispatch blindly.
+        raise StudyJobError("unknown", f"launch outcome unknown ({claim['status']}); "
+                            "reconcile before relaunching", 503)
 
     def cancel(self, study_id, payload):
         _id(study_id, "study id")
-        if (not isinstance(payload, dict)
-                or set(payload) - {"package_id", "job_id", "idempotency_key"}
-                or "idempotency_key" not in payload):
+        if not isinstance(payload, dict) or set(payload) - {"package_id", "job_id", "idempotency_key"}:
             raise StudyJobError("invalid_input", "invalid cancel request fields", 400)
+        _require_key(payload)
         if not isinstance(payload.get("idempotency_key"), str):
             raise StudyJobError("invalid_input", "idempotency key required", 400)
         has_package = "package_id" in payload

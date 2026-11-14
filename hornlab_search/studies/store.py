@@ -23,6 +23,12 @@ CREATE TABLE packages (id TEXT PRIMARY KEY, study_id TEXT NOT NULL REFERENCES st
 CREATE TABLE attempts (id TEXT PRIMARY KEY, study_id TEXT NOT NULL REFERENCES studies(id), package_id TEXT NOT NULL REFERENCES packages(id), solve_id TEXT NOT NULL, kind TEXT NOT NULL, candidate_json TEXT NOT NULL, reserved INTEGER NOT NULL, status TEXT NOT NULL, result_json TEXT);
 CREATE TABLE observations (study_id TEXT NOT NULL REFERENCES studies(id), package_id TEXT NOT NULL REFERENCES packages(id), observation_seq INTEGER NOT NULL, attempt_id TEXT NOT NULL UNIQUE REFERENCES attempts(id), physical_id TEXT NOT NULL, score_id TEXT NOT NULL, UNIQUE(study_id,physical_id), PRIMARY KEY(package_id,observation_seq));
 CREATE TABLE proposal_state (package_id TEXT PRIMARY KEY REFERENCES packages(id), proposal_index INTEGER NOT NULL, rng_json TEXT, pending_json TEXT);
+''',
+# B4/B5: durable launch idempotency. One row per (study, package); the row is
+# written BEFORE the launcher is called, so a restart can never re-dispatch a
+# package whose launch outcome is unknown (status 'launching' or 'unknown').
+2: '''
+CREATE TABLE launches (study_id TEXT NOT NULL REFERENCES studies(id), package_id TEXT NOT NULL, idempotency_key TEXT NOT NULL, status TEXT NOT NULL CHECK(status IN ('launching','launched','unknown')), result_json TEXT, error TEXT, PRIMARY KEY(study_id,package_id));
 '''}
 
 
