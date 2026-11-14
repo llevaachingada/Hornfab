@@ -3,6 +3,10 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-14 (**owner decisions executed: cohort gap closing (+50 resume at 38e5b1f), caps 12k→24k on the four live configs, batch-12 approved for heavy verify/final-style runs; plus the scalar-Bayes and CI work; no GitHub issue state changed**).
 
+Local-only, added 2026-11-14 (15:3x local) (**project atlas tool + snapshot; no GitHub issue state changed**):
+- Done: `tools/atlas/` whole-project report; snapshot at `docs/atlas/` (GitHub Pages).
+- Open: atlas verdict thresholds (`RULES` in build_atlas.py) are first-pass heuristics; tune after owner review.
+
 Local-only, added 2026-11-14 (15:2x local) (**GitHub Pages enabled from main /docs; no GitHub issue state changed**):
 - Done: Pages live; `docs/.nojekyll` added. HTML reports under `docs/` now have browser links.
 
