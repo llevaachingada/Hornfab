@@ -5,8 +5,9 @@ separation, source-backed hypothesis cards, equal-cost QD/Pareto rules, research
 the correction distinguishing a shared scoring context from per-design replay `score_id`.
 
 [GUI handoff for the S8/S7 panels](HANDOFF_S8_S7_GUI_2026-11-13.md): the four tools' artifact
-contracts, the current Analysis-page plumbing (file:line), the gap list and the recommended
-implementation paths for geometry, hypothesis-card, QD/Pareto and surrogate-validation panels.
+contracts, the Analysis-page plumbing (file:line), the gap list, the implementation paths and the
+record of the 2026-11-13 implementation (geometry, hypothesis-card, QD/Pareto and
+surrogate-validation panels).
 
 Start here. Code map: [`CODE_MAP.md`](CODE_MAP.md). Rules for agents: [`../CLAUDE.md`](../CLAUDE.md), [`../AGENTS.md`](../AGENTS.md).
 Keep this file current: a new doc gets a line here in the same commit.

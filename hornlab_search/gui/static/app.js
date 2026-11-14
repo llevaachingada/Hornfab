@@ -2642,7 +2642,8 @@ function verdictChipHtml(verdict) {
 // requestAnimationFrame after insertion, so a window resize (which re-runs route()) redraws.
 
 const ANALYSIS_SECTION_TOOLS = ["convergence", "seed_variance", "sensitivity", "links",
-  "walls", "term_balance", "fidelity", "parameter_study", "source_fidelity"];
+  "walls", "term_balance", "fidelity", "parameter_study", "source_fidelity",
+  "qd_compare", "geometry_descriptors", "hypothesis_cards", "surrogate_validation"];
 const ANALYSIS_TERM_PALETTE = 8;
 
 let _AN_CHART_JOBS = [];
@@ -2657,6 +2658,10 @@ function _anNum(v, d = 2) {
 
 function _anPct(v, d = 1) {
   return (v == null || !isFinite(Number(v))) ? "–" : `${Number(v).toFixed(d)}%`;
+}
+
+function _anInt(v) {
+  return (v == null || !isFinite(Number(v))) ? "–" : String(Math.trunc(Number(v)));
 }
 
 function _anObj(v) {
@@ -2702,7 +2707,9 @@ function analysisSectionsOf(d) {
   }
   for (const tool of ANALYSIS_SECTION_TOOLS) {
     if (!d || d[tool] == null || out.some(s => s.tool === tool)) continue;
-    out.push({ id: "default", tool, data: d[tool], files: [], has_png: false, pngs: [] });
+    out.push({ id: "default", tool, data: d[tool],
+      files: _anArr((_anObj(d && d.tool_files) || {})[tool]).map(String),
+      has_png: false, pngs: [] });
   }
   out.sort((a, b) => ANALYSIS_SECTION_TOOLS.indexOf(a.tool) - ANALYSIS_SECTION_TOOLS.indexOf(b.tool)
     || String(a.id).localeCompare(String(b.id)));
@@ -2747,6 +2754,8 @@ function _anDrawCharts() {
     if (!svg) continue;
     if (job.kind === "convergence") _anDrawConvergence(svg, job.payload);
     else if (job.kind === "fidelity") _anDrawFidelity(svg, job.payload);
+    else if (job.kind === "geometry-navigation") _anDrawGeometryNavigation(svg, job.payload);
+    else if (job.kind === "qd-front") _anDrawQdFront(svg, job.payload);
   }
 }
 
@@ -2791,6 +2800,79 @@ function _anDrawFidelity(svg, data) {
     ],
     markers: false,
     ariaLabel: "screen versus verify objective scatter with the 45-degree line",
+  });
+}
+
+function _anPadDomain(lo, hi) {
+  const span = hi > lo ? hi - lo : Math.max(1, Math.abs(hi) * 0.05);
+  return [lo - span * 0.05, hi + span * 0.05];
+}
+
+/** Geometry navigation only: one dot series per k-means cluster (never a ranking). */
+function _anDrawGeometryNavigation(svg, nav) {
+  const rows = _anArr(nav && nav.rows)
+    .filter(r => r && isFinite(Number(r.pc1)) && isFinite(Number(r.pc2)));
+  if (!rows.length) return;
+  const keys = [...new Set(rows.map(r => String(r.cluster == null ? "–" : r.cluster)))];
+  keys.sort((a, b) => {
+    const na = Number(a), nb = Number(b);
+    if (isFinite(na) && isFinite(nb)) return na - nb;
+    return a.localeCompare(b);
+  });
+  const palette = ["--accent", "--best", "--seed", "--warn", "--good"].map(n => css(n));
+  const series = keys.map((key, i) => ({
+    pts: rows.filter(r => String(r.cluster == null ? "–" : r.cluster) === key)
+      .map(r => [Number(r.pc1), Number(r.pc2)]),
+    color: palette[i % palette.length],
+    dots: true,
+    r: 3,
+  })).filter(s => s.pts.length);
+  if (!series.length) return;
+  const xs = rows.map(r => Number(r.pc1)), ys = rows.map(r => Number(r.pc2));
+  const [xlo, xhi] = _anPadDomain(Math.min(...xs), Math.max(...xs));
+  const [ylo, yhi] = _anPadDomain(Math.min(...ys), Math.max(...ys));
+  chart(svg, {
+    xlim: [xlo, xhi], ylim: [ylo, yhi],
+    xticks: niceTicks(xlo, xhi, 5), yticks: niceTicks(ylo, yhi, 5),
+    xlabel: "PC1", ylabel: "PC2",
+    series,
+    markers: false,
+    ariaLabel: "geometry navigation map (navigation only): PC1 versus PC2 coloured by k-means cluster",
+  });
+}
+
+/** Eligible QD front only: dots + sorted front polyline + dashed frozen reference lines. */
+function _anDrawQdFront(svg, payload) {
+  const p = _anObj(payload);
+  const front = _anArr(p.arm && p.arm.front)
+    .filter(x => x && Array.isArray(x.objectives) && x.objectives.length >= 2
+      && isFinite(Number(x.objectives[0])) && isFinite(Number(x.objectives[1])));
+  if (!front.length) return;
+  const pts = front.map(x => [Number(x.objectives[0]), Number(x.objectives[1])]);
+  const sorted = pts.slice().sort((a, b) => a[0] - b[0]);
+  const ref = _anArr(p.reference).map(Number);
+  const xs = pts.map(x => x[0]), ys = pts.map(x => x[1]);
+  if (isFinite(ref[0])) xs.push(ref[0]);
+  if (isFinite(ref[1])) ys.push(ref[1]);
+  const [xlo, xhi] = _anPadDomain(Math.min(...xs), Math.max(...xs));
+  const [ylo, yhi] = _anPadDomain(Math.min(...ys), Math.max(...ys));
+  const axes = _anArr(p.axes);
+  const axLabel = (a) => {
+    const o = _anObj(a);
+    return `${o.name == null ? "–" : String(o.name)} [${o.unit == null ? "–" : String(o.unit)}]`;
+  };
+  chart(svg, {
+    xlim: [xlo, xhi], ylim: [ylo, yhi],
+    xticks: niceTicks(xlo, xhi, 5), yticks: niceTicks(ylo, yhi, 5),
+    xlabel: axLabel(axes[0]), ylabel: axLabel(axes[1]),
+    series: [
+      { pts: sorted, color: css("--accent"), w: 2 },
+      { pts, color: css("--best"), dots: true, r: 3 },
+    ],
+    vlines: isFinite(ref[0]) ? [{ x: ref[0], color: css("--warn"), dash: true }] : [],
+    hlines: isFinite(ref[1]) ? [{ y: ref[1], color: css("--warn"), dash: true }] : [],
+    markers: false,
+    ariaLabel: "eligible QD front with the frozen reference lines (excluded rows are not plotted)",
   });
 }
 
@@ -3215,6 +3297,12 @@ const ANALYSIS_APPENDIX_FIELDS = {
   seed_variance: ["seed_rule"],
   parameter_study: ["schema_version", "protocol"],
   source_fidelity: ["schema_version", "protocol"],
+  qd_compare: ["schema", "hypervolume_difference_a_minus_b", "equal_cost", "frozen_reference",
+    "interpretation"],
+  geometry_descriptors: ["schema_version", "descriptor_keys", "geometry_only"],
+  hypothesis_cards: ["status", "card_id", "resolved_context_sha256", "evidence"],
+  surrogate_validation: ["schema_version", "code_version", "input_key", "validation_mode",
+    "advisory_only", "changes_defaults", "complete"],
 };
 
 function _anRawValue(v) {
@@ -3225,10 +3313,14 @@ function _anRawValue(v) {
 }
 
 function _anFileLinks(d, sec) {
-  if (!d || !d.id || sec.id === "default") return "";
+  if (!d || !d.id) return "";
   const names = [...new Set([..._anArr(sec.files), ..._anArr(sec.pngs)])].filter(Boolean);
   if (!names.length) return "";
-  const base = `/analysis/${encodeURIComponent(d.id)}/${encodeURIComponent(sec.id)}/`;
+  // Flat-key sections have id "default": their tool_files live in the set root, not a
+  // per-section subdirectory (which is the nested report_day layout).
+  const base = sec.id === "default"
+    ? `/analysis/${encodeURIComponent(d.id)}/`
+    : `/analysis/${encodeURIComponent(d.id)}/${encodeURIComponent(sec.id)}/`;
   return `<div class="run-files">${names.map(n =>
     `<a class="pill mono" href="${base}${encodeURIComponent(n)}" target="_blank" rel="noopener">${esc(n)}</a>`).join("")}</div>`;
 }
@@ -3311,6 +3403,296 @@ function analysisM1Html(sections) {
   return psHtml + sfHtml;
 }
 
+function _anBoolText(v) {
+  return v === true ? "true" : (v === false ? "false" : "–");
+}
+
+function _anIdChip(label, value) {
+  return `<span class="pill mono">${esc(label)} ${esc(value == null || value === "" ? "not present" : value)}</span>`;
+}
+
+function _anListHtml(items, heading) {
+  const xs = _anArr(items).filter(x => x != null && String(x) !== "");
+  if (!xs.length) return "";
+  return `<h3>${esc(heading)}</h3><ul class="guide-steps">${xs.map(x => `<li>${esc(x)}</li>`).join("")}</ul>`;
+}
+
+function analysisGeometrySectionHtml(gd) {
+  if (!gd || typeof gd !== "object" || Array.isArray(gd)) return "";
+  if (!Object.keys(gd).length) return "";
+  const designs = _anArr(gd.designs).filter(x => x && typeof x === "object");
+  const d0 = designs.length ? designs[0] : {};
+  const prov = _anObj(d0.provenance);
+  const fams = new Set(designs.map(x => String(x.family == null ? "–" : x.family)));
+  const sha = prov.resolver_source_sha256 == null ? null : String(prov.resolver_source_sha256);
+  const kpis = [
+    _anKpi("designs", fmt(designs.length, 0)),
+    _anKpi("families", fmt(fams.size, 0)),
+    _anKpi("resolution", prov.resolution_mm != null ? `${_anNum(prov.resolution_mm, 3)} mm` : "–"),
+    _anKpi("resolver", sha ? `<span class="mono">${esc(sha.slice(0, 12))}</span>` : "not present"),
+  ].join("");
+  const rows = designs.map(x => {
+    const geo = _anObj(x.geometry);
+    return `<tr>
+      <td class="mono" title="${esc(x.design_hash || "")}">${esc(x.design_hash || "–")}</td>
+      <td>${esc(x.family || "–")}</td>
+      <td class="r">${_anNum(geo.length_mm, 3)}</td>
+      <td class="r">${_anNum(geo.mouth_width_mm, 3)} × ${_anNum(geo.mouth_height_mm, 3)}</td>
+      <td class="r">${_anNum(geo.mouth_aspect_w_h, 3)}</td>
+      <td class="r">${_anNum(geo.mouth_to_throat_area_ratio, 3)}</td>
+      <td class="r">${_anNum(geo.mouth_width_over_length, 3)}</td>
+      <td class="r">${_anNum(geo.mouth_height_over_length, 3)}</td>
+    </tr>`;
+  }).join("");
+  const table = designs.length ? `<div class="tbl-wrap"><table>
+    <thead><tr><th>Design</th><th>Family</th><th class="r">Length mm</th><th class="r">Mouth W × H mm</th>
+      <th class="r">Aspect W/H</th><th class="r">Mouth/throat area</th><th class="r">W/L</th><th class="r">H/L</th></tr></thead>
+    <tbody>${rows}</tbody></table></div>` : `<p class="muted">no designs recorded</p>`;
+  const nav = _anObj(gd.navigation);
+  let navHtml = "";
+  if (Array.isArray(nav.rows)) {
+    const chartId = _anChartJob("geometry-navigation", nav);
+    const ratio = _anArr(_anObj(nav.pca).explained_variance_ratio).map(Number);
+    const km = _anObj(nav.kmeans);
+    navHtml = `<h3>Navigation map</h3>
+      <svg id="${chartId}" class="an-chart" style="width:100%" role="img" aria-label="geometry navigation map (navigation only): PC1 versus PC2"></svg>
+      <div class="an-meta mono">PCA explained variance ${_anPct(ratio[0] * 100, 1)} / ${_anPct(ratio[1] * 100, 1)} · k-means ${_anInt(km.clusters)} clusters · seed ${_anInt(km.seed)}</div>
+      ${nav.note != null ? `<p class="cap muted">${esc(nav.note)}</p>` : ""}`;
+  }
+  return `<div class="card" id="an-geometry-panel">
+    <div class="eyebrow">Geometry descriptors — geometry only</div>
+    <h2>Geometry descriptors</h2>
+    <div class="kpis">${kpis}</div>
+    ${table}
+    <h3>Provenance</h3>
+    <div class="an-meta mono">${esc(prov.api || "not present")} · ${esc(prov.resolver_module || "not present")} · ${esc(sha || "not present")}</div>
+    <div class="an-meta mono">mesh_built ${_anBoolText(prov.mesh_built)} · gmsh_called ${_anBoolText(prov.gmsh_called)} · bem_called ${_anBoolText(prov.bem_called)}</div>
+    ${navHtml}
+    <p class="muted">Geometry only and scale-aware: a larger copy behaves differently at a fixed frequency. PCA/k-means are navigation aids, not acoustic similarity or quality.</p>
+  </div>`;
+}
+
+function analysisHypothesisSectionHtml(card) {
+  if (!card || typeof card !== "object" || Array.isArray(card)) return "";
+  if (!Object.keys(card).length) return "";
+  const ident = _anObj(card.identity);
+  const parents = _anArr(card.parents).filter(p => p && typeof p === "object");
+  const exps = _anArr(card.experiments).filter(e => e && typeof e === "object");
+  const cardId = card.card_id == null ? null : String(card.card_id);
+  const status = card.status == null ? "not present" : String(card.status);
+  const chips = [
+    `<span class="pill">${esc(status)}</span>`,
+    `<span class="pill mono" title="${esc(cardId || "")}">${esc(cardId ? cardId.slice(0, 12) : "not present")}</span>`,
+    _anIdChip("objective", ident.objective_version != null ? `v${ident.objective_version}` : null),
+    _anIdChip("task", ident.task_id),
+    _anIdChip("scoring context", ident.scoring_context_id),
+    _anIdChip("physical spec", ident.physical_spec_id),
+  ].join(" ");
+  const parentHtml = parents.map(p => {
+    const sha = p.source_sha256 == null ? null : String(p.source_sha256);
+    return `<div class="an-sec"><div class="an-card-head"><b class="mono">${esc(p.id || "–")}</b>
+      <span class="muted">${esc(p.family || "–")}</span></div>
+      <div class="an-meta mono">design ${esc(p.design_hash || "–")} · source ${esc(p.source || "–")} · sha ${esc(sha ? sha.slice(0, 12) : "not present")}</div>
+      <details class="an-details"><summary>params</summary><pre class="mono">${esc(JSON.stringify(p.params == null ? {} : p.params, null, 1))}</pre></details></div>`;
+  }).join("");
+  const expRows = exps.map(e => `<tr>
+    <td class="mono">${esc(e.role || "–")}</td>
+    <td class="mono">${esc(e.design_hash || "–")}</td>
+    <td>${esc(typeof e.config === "string" ? e.config : (e.config == null ? "-" : JSON.stringify(e.config)))}</td>
+    <td>${esc(e.removed_feature != null ? e.removed_feature : "-")}</td>
+    <td>${esc(e.validation || "–")}</td>
+    <td>${esc(e.physical_feasibility || "–")}</td>
+  </tr>`).join("");
+  const expTable = exps.length ? `<div class="tbl-wrap"><table><thead><tr>
+    <th>Role</th><th>Design</th><th>Config</th><th>Removed feature</th><th>Validation</th><th>Physical feasibility</th>
+    </tr></thead><tbody>${expRows}</tbody></table></div>` : `<p class="muted">no experiments recorded</p>`;
+  const band = _anArr(card.expected_band_hz);
+  const bandText = band.length >= 2 ? `${_anInt(band[0])} – ${_anInt(band[1])} Hz`
+    : (band.length ? `${_anInt(band[0])} Hz` : "–");
+  return `<div class="card" id="an-hypothesis-panel">
+    <div class="eyebrow">Hypothesis card — proposed experiment</div>
+    <h2>Hypothesis card</h2>
+    <div class="pill-row">${chips}</div>
+    <h3>Parents</h3>
+    ${parentHtml || `<p class="muted">no parents recorded</p>`}
+    <h3>Role matrix</h3>
+    ${expTable}
+    <div class="an-meta">expected band Hz: <span class="mono">${bandText}</span></div>
+    <div class="an-meta">trade-off: ${esc(card.trade_off != null ? card.trade_off : "–")}</div>
+    ${_anListHtml(card.features, "Features")}
+    ${_anListHtml(card.unknowns, "Unknowns")}
+    ${_anListHtml(card.constraints, "Constraints")}
+    <p class="muted">Hypothesis only: acoustic effects and mesh feasibility are unmeasured until the normal evaluator runs.</p>
+  </div>`;
+}
+
+function analysisQdSectionHtml(qd) {
+  if (!qd || typeof qd !== "object" || Array.isArray(qd)) return "";
+  if (!Object.keys(qd).length) return "";
+  const ident = _anObj(qd.identity);
+  const axes = _anArr(qd.axes);
+  const arms = _anArr(qd.arms).filter(a => a && typeof a === "object");
+  const manifests = _anObj(qd.input_manifests);
+  const manifestHtml = Object.keys(manifests).sort().map(k => {
+    const m = _anObj(manifests[k]);
+    const sha = m.sha256 == null ? null : String(m.sha256);
+    return `<span class="mono">${esc(k)}: ${esc(m.source || "not present")} @ ${esc(sha ? sha.slice(0, 12) : "not present")}</span>`;
+  }).join(" · ");
+  const identity = [
+    _anIdChip("objective", ident.objective_version != null ? `v${ident.objective_version}` : null),
+    _anIdChip("scoring context", ident.scoring_context_id),
+    _anIdChip("task", ident.task_id),
+    _anIdChip("spec", ident.spec_id),
+    _anIdChip("family", ident.family),
+  ].join(" ");
+  const ax0 = _anObj(axes[0]), ax1 = _anObj(axes[1]);
+  const axisLine = axes.length >= 2
+    ? `x: ${esc(ax0.name == null ? "–" : ax0.name)} [${esc(ax0.unit == null ? "–" : ax0.unit)}] · minimize · y: ${esc(ax1.name == null ? "–" : ax1.name)} [${esc(ax1.unit == null ? "–" : ax1.unit)}] · minimize`
+    : "axes not present";
+  const ec = _anObj(qd.equal_cost);
+  const total = ec.total != null ? fmt(ec.total, 0) : "–";
+  const armRows = arms.map(a => {
+    const dup = _anArr(a.duplicate_eligible_attempt_ids);
+    return `<tr>
+      <td class="mono">${esc(a.arm_id || "–")}</td>
+      <td>${esc(a.algorithm || "–")}</td>
+      <td class="r">${_anNum(a.n_eligible, 0)}</td>
+      <td class="r">${_anNum(a.n_eligible_attempts, 0)}</td>
+      <td class="r">${_anNum(dup.length, 0)}</td>
+      <td class="r">${_anNum(a.n_excluded, 0)}</td>
+      <td class="r">${_anNum(a.hypervolume, 4)}</td>
+    </tr>`;
+  }).join("");
+  const armTable = arms.length ? `<div class="tbl-wrap"><table><thead><tr>
+    <th>Arm</th><th>Algorithm</th><th class="r">Eligible</th><th class="r">Eligible attempts</th>
+    <th class="r">Duplicates</th><th class="r">Excluded</th><th class="r">Hypervolume</th></tr></thead>
+    <tbody>${armRows}</tbody></table></div>` : `<p class="muted">no arms recorded</p>`;
+  const charts = arms.map(a => {
+    const chartId = _anChartJob("qd-front", { axes: qd.axes, reference: qd.frozen_reference, arm: a });
+    const excl = _anArr(a.excluded_ids);
+    const dup = _anArr(a.duplicate_eligible_attempt_ids);
+    const ids = (xs) => xs.length ? xs.map(String).map(esc).join(", ") : "-";
+    return `<div class="an-sec">
+      <div class="an-card-head"><b class="mono">${esc(a.arm_id || "–")}</b><span class="muted">${esc(a.algorithm || "–")}</span></div>
+      <svg id="${chartId}" class="an-chart" style="width:100%" role="img" aria-label="eligible QD front for ${esc(a.arm_id || "arm")}"></svg>
+      <div class="an-meta mono">excluded (${excl.length}): ${ids(excl)}</div>
+      <div class="an-meta mono">duplicates (${dup.length}): ${ids(dup)}</div>
+    </div>`;
+  }).join("");
+  return `<div class="card" id="an-qd-panel">
+    <div class="eyebrow">Equal-cost QD / Pareto comparison</div>
+    <h2>Equal-cost QD / Pareto comparison</h2>
+    <div class="pill-row">${identity}</div>
+    <div class="an-meta mono">${manifestHtml || "manifest sources not present"}</div>
+    <div class="an-meta mono">${axisLine}</div>
+    <div class="pill-row"><span class="pill mono">Equal total: ${esc(total)} attempt-equivalent evaluations (successful + failed + refused + training + other; not elapsed time).</span></div>
+    ${armTable}
+    ${charts}
+    <div class="an-meta">A - B (descriptive, not a win claim): <span class="mono">${_anNum(qd.hypervolume_difference_a_minus_b, 4)}</span></div>
+    ${qd.interpretation != null ? `<p class="cap muted">${esc(qd.interpretation)}</p>` : ""}
+  </div>`;
+}
+
+function analysisSurrogateSectionHtml(sv, candidates) {
+  if (!sv || typeof sv !== "object" || Array.isArray(sv)) return "";
+  if (!Object.keys(sv).length) return "";
+  const status = sv.status == null ? "not present" : String(sv.status);
+  const key = sv.input_key == null ? null : String(sv.input_key);
+  const chips = [
+    `<span class="pill ${sv.status === "ok" ? "good" : (sv.status === "refused" ? "bad" : "")}">${esc(status)}</span>`,
+    _anIdChip("mode", sv.validation_mode),
+    `<span class="pill mono">advisory_only ${_anBoolText(sv.advisory_only)}</span>`,
+    `<span class="pill mono">changes_defaults ${_anBoolText(sv.changes_defaults)}</span>`,
+    _anIdChip("code", sv.code_version),
+    `<span class="pill mono" title="${esc(key || "")}">input_key ${esc(key ? key.slice(0, 12) : "not present")}</span>`,
+    `<span class="pill mono">resumed ${_anBoolText(sv.resumed)}</span>`,
+    `<span class="pill mono">stale_partial_replaced ${_anBoolText(sv.stale_partial_replaced)}</span>`,
+  ].join(" ");
+  const cands = _anArr(candidates)
+    .filter(c => c && typeof c === "object")
+    .map(c => `${c.name == null ? "–" : String(c.name)} (${c.status == null ? "–" : String(c.status)})`)
+    .join(", ");
+  const candHtml = cands ? `<div class="an-meta mono">candidates: ${esc(cands)}</div>` : "";
+  if (status !== "ok") {
+    return `<div class="card" id="an-surrogate-panel">
+      <div class="eyebrow">Advisory surrogate validation</div>
+      <h2>Advisory surrogate validation</h2>
+      <div class="pill-row">${chips}</div>
+      ${candHtml}
+      <div class="log-tail mono">${esc(sv.reason != null ? sv.reason : "not present")}</div>
+      <div class="log-tail mono">${esc(sv.detail != null ? sv.detail : "not present")}</div>
+    </div>`;
+  }
+  const ev = _anObj(sv.evaluation);
+  const split = _anObj(sv.split);
+  const checks = _anObj(split.checks);
+  const checkRows = Object.keys(checks).map(k =>
+    `<tr><td class="mono">${esc(k)}</td><td class="r">${_anRawValue(checks[k])}</td></tr>`).join("");
+  const splitHtml = `<h3>Split</h3>
+    <div class="an-meta mono">n_train ${_anNum(ev.n_train, 0)} · n_test ${_anNum(ev.n_test, 0)} · n_ood_fallback ${_anNum(ev.n_ood_fallback, 0)} · support_radius ${_anNum(ev.support_radius, 4)}</div>
+    ${checkRows ? `<div class="tbl-wrap"><table><thead><tr><th>Check</th><th class="r">Value</th></tr></thead><tbody>${checkRows}</tbody></table></div>` : ""}`;
+  const feas = _anObj(ev.feasibility);
+  const bins = _anArr(feas.reliability_bins).filter(b => b && typeof b === "object");
+  const binRows = bins.map(b => {
+    const bin = _anArr(b.bin);
+    return `<tr><td class="mono">${_anNum(bin[0], 3)}–${_anNum(bin[1], 3)}</td>
+      <td class="r">${_anNum(b.n, 0)}</td><td class="r">${_anNum(b.mean_pred, 3)}</td><td class="r">${_anNum(b.observed, 3)}</td></tr>`;
+  }).join("");
+  const feasHtml = `<h3>Feasibility</h3>
+    <div class="an-meta mono">Brier ${_anNum(feas.brier, 4)} · baseline ${_anNum(feas.brier_baseline, 4)} (lower is better)</div>
+    ${binRows ? `<div class="tbl-wrap"><table><thead><tr><th>Bin lo–hi</th><th class="r">n</th><th class="r">mean_pred</th><th class="r">observed</th></tr></thead><tbody>${binRows}</tbody></table></div>` : ""}`;
+  const reg = _anObj(ev.regression);
+  let regHtml = "";
+  if (reg.status === "insufficient_data") {
+    regHtml = `<h3>Regression</h3><div class="an-meta mono">status insufficient_data · n_ood_fallback ${_anNum(reg.n_ood_fallback, 0)}</div>`;
+  } else if (reg.status === "ok") {
+    const targets = _anObj(reg.targets);
+    const rows = Object.keys(targets).map(name => {
+      const t = _anObj(targets[name]);
+      const isJ = name === "j";
+      return `<tr><td class="mono">${esc(name)}</td><td class="r">${_anNum(t.mae, 4)}</td>
+        <td class="r">${_anNum(t.mae_baseline, 4)}</td><td class="r">${_anNum(t.spearman, 3)}</td>
+        <td class="r">${_anNum(t.interval_95_coverage, 3)}</td>
+        <td class="r">${isJ ? _anNum(t.topk_recall, 3) : "–"}</td>
+        <td class="r">${isJ ? _anNum(t.regret, 4) : "–"}</td>
+        <td>${isJ ? esc(t.direction || "minimize") : "–"}</td></tr>`;
+    }).join("");
+    regHtml = `<h3>Regression</h3>${rows ? `<div class="tbl-wrap"><table><thead><tr>
+      <th>Target</th><th class="r">MAE</th><th class="r">Baseline MAE</th><th class="r">Spearman</th>
+      <th class="r">95% coverage</th><th class="r">Top-k recall (j)</th><th class="r">Regret (j)</th><th>Direction</th>
+      </tr></thead><tbody>${rows}</tbody></table></div>` : `<p class="muted">no targets recorded</p>`}`;
+  } else if (reg.status != null) {
+    regHtml = `<h3>Regression</h3><div class="an-meta mono">status ${esc(reg.status)}</div>`;
+  }
+  const prop = _anObj(sv.proposals);
+  const list = _anArr(prop.proposals).filter(p => p && typeof p === "object");
+  const propRows = list.map(p => `<tr>
+    <td class="mono">${esc(p.candidate_id || "–")}</td>
+    <td>${esc(p.role || "–")}</td>
+    <td>${p.predicted_j == null ? `<span class="muted">no prediction (outside training support)</span>` : _anNum(p.predicted_j, 4)}</td>
+    <td class="r">${_anNum(p.uncertainty, 4)}</td>
+    <td>${_anBoolText(p.in_support)}</td>
+    <td>${_anBoolText(p.measured)}</td>
+    <td>${esc(p.status || "–")}</td>
+  </tr>`).join("");
+  const propHtml = Object.keys(prop).length ? `<h3>Proposals</h3>
+    ${list.length ? `<div class="tbl-wrap"><table><thead><tr><th>Candidate</th><th>Role</th><th>Prediction</th>
+      <th class="r">Uncertainty</th><th>In support</th><th>Measured</th><th>Status</th></tr></thead>
+      <tbody>${propRows}</tbody></table></div>` : `<p class="muted">no proposals recorded</p>`}
+    ${prop.note != null ? `<p class="cap muted">${esc(prop.note)}</p>` : ""}` : "";
+  return `<div class="card" id="an-surrogate-panel">
+    <div class="eyebrow">Advisory surrogate validation</div>
+    <h2>Advisory surrogate validation</h2>
+    <div class="pill-row">${chips}</div>
+    ${candHtml}
+    ${splitHtml}
+    ${feasHtml}
+    ${regHtml}
+    ${propHtml}
+    <p class="muted">Advisory only: stored-label mode validates supplied evidence. It cannot reconstruct raw arrays and does not make the production surrogate score v4.</p>
+  </div>`;
+}
+
 function analysisExtrasHtml(d) {
   const extras = _anArr(d && d.extra_tools);
   return extras.length ? `<div class="card"><div class="eyebrow">Other tool outputs</div>
@@ -3322,6 +3704,10 @@ function analysisPageHtml(d) {
   _AN_CHART_JOBS = [];
   const sections = analysisSectionsOf(d);
   const errors = analysisErrorsOf(d);
+  const toolData = (tool) => {
+    const sec = sections.find(s => s.tool === tool && s.data != null);
+    return sec ? sec.data : (d ? d[tool] : null);
+  };
   return [
     analysisHeroHtml(d, sections, errors),
     objectiveVersionBannerHtml(analysisConvergenceRuns(sections).map(c => c.run)),
@@ -3333,6 +3719,11 @@ function analysisPageHtml(d) {
     analysisFidelitySectionHtml(sections),
     analysisLinksSectionHtml(sections),
     analysisM1Html(sections),
+    analysisGeometrySectionHtml(toolData("geometry_descriptors")),
+    analysisHypothesisSectionHtml(toolData("hypothesis_cards")),
+    analysisQdSectionHtml(toolData("qd_compare")),
+    analysisSurrogateSectionHtml(toolData("surrogate_validation"),
+      d ? d.surrogate_validation_candidates : null),
     analysisErrorsHtml(errors),
     analysisExtrasHtml(d),
     analysisAppendixHtml(d, sections, errors),
@@ -4932,7 +5323,9 @@ export { lanesPanelHtml, verdictChipHtml, eliteGateChips, elitesFilter, eliteHea
 
 export { analysisParameterStudyHtml, analysisSourceFidelityHtml, studyCaveatHz };
 // Lane B visual-report builders (offline render checks; pure HTML, no DOM).
-export { analysisPageHtml, analysisIndexHtml, analysisSectionsOf, analysisErrorsOf, _anDrawCharts };
+export { analysisPageHtml, analysisIndexHtml, analysisSectionsOf, analysisErrorsOf, _anDrawCharts,
+         analysisGeometrySectionHtml, analysisHypothesisSectionHtml, analysisQdSectionHtml,
+         analysisSurrogateSectionHtml, _anDrawGeometryNavigation, _anDrawQdFront };
 
 export { continueRunAvailable, continueRunArgs, runIsVerify };
 

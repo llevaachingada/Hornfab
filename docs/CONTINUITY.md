@@ -1,6 +1,36 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-13 (20:2x local) - S8/S7 ANALYSIS PANELS LAND: GEOMETRY, HYPOTHESIS, QD/PARETO, SURROGATE (GUI only; no solve)
+
+- **`gui/data.py`:** `geometry_descriptors`, `hypothesis_cards`, `qd_compare` and
+  `surrogate_validation` are now registered analysis tools; the report exposes `tool_files`
+  (JSON/Markdown/PNG names per tool) and discovers keyed `surrogate_validation-<16 hex>.json`
+  outputs, selecting the newest complete payload and disclosing every candidate
+  (`surrogate_validation_candidates`: name/status/reason/input_key/complete/readable/mtime).
+  Keyed stems are no longer misreported as `extra_tools`; a malformed keyed file is disclosed as
+  `readable: false`, never raised.
+- **`gui/static/app.js`:** four read-only panels in `#/analysis` after the M1 cards
+  (`an-geometry-panel`, `an-hypothesis-panel`, `an-qd-panel`, `an-surrogate-panel`), with two
+  inline-SVG scatters (`geometry-navigation`, `qd-front`) and the technical appendix carrying the
+  stored scalars. Wording is contractual: geometry/hypothesis show no score or rank; QD states
+  "attempt-equivalent ... not elapsed time" and "not a win claim", and never plots excluded rows;
+  the surrogate panel prints `no prediction (outside training support)` for OOD proposals and the
+  advisory-only disclaimer. Flat sections now link their `tool_files` (root route), which also
+  makes the M1/other registered tools' Markdown discoverable.
+- **Decisions:** keyed surrogate discovery is GUI-side (no tool change); the tools' `runs/` output
+  guard is unchanged, so the workflow remains `hornlab-search gui --analysis-dir <set>`; no
+  separate tab, no new dependency, no new colour, no `fetch`, no `tools/` import.
+- **Verification (terminal):** `node --check hornlab_search/gui/static/app.js` -> exit 0;
+  `python -m compileall -q hornlab_search/gui` -> exit 0;
+  `pytest tests/test_gui_views_analysis_s8.py tests/test_gui_views_analysis.py tests/test_gui_views_analysis_m1.py tests/test_gui_chart_standards.py -q`
+  -> **34 passed, exit 0**; `pytest tests/test_gui_*.py -m "not slow and not gpu and not crosscheck" -q`
+  -> **432 passed, exit 0** (`scratch/2026-11-13_s8/gui-s8-final.xml`). The new node guard executes
+  the real builders and page composition over literal tool payloads.
+- **Docs:** `docs/HANDOFF_S8_S7_GUI_2026-11-13.md` §15 records the implementation and residual
+  limits; `docs/CODE_MAP.md` and `docs/INDEX.md` updated. No dataset/cache/queue/installed file
+  was written and no analysis ran from the GUI.
+
 ## 2026-11-13 (20:3x local) - CI SPEED IS LIVE; C3 CONTRACT BREAK FIXED (ONE LINE)
 
 - [measured] CI test step: **385.3 s before -> 201.9 s after** (`-n 2 --dist loadscope`, one trigger,

@@ -1,10 +1,11 @@
 # Handoff — GUI architecture and planning for the S8 discovery and S7 surrogate-validation tools (2026-11-13)
 
-Status of this document: **planning and implementation brief. No GUI change for these tools exists yet.**
-The four analysis tools and their tests are merged on `main` at `dc64fd7`. The GUI Analysis page
-(`#/analysis`) already renders older Group A tools; it has **no dedicated panels** for these four and
-does not parse their JSON. This document records what was built, the exact artifact contracts, the
-current GUI plumbing with file:line references, and concrete implementation paths.
+Status of this document: **implemented 2026-11-13 (same pass).** The planning sections below remain
+the contract of record; §15 records what was actually built, the decisions taken and the terminal
+evidence. The four analysis tools and their tests are merged on `main` at `dc64fd7`. The GUI Analysis
+page (`#/analysis`) now registers and renders all four; before this pass it had no dedicated panels
+and did not parse their JSON. This document records what was built, the exact artifact contracts, the
+GUI plumbing with file:line references, and the implementation paths.
 
 Owner request that produced this handoff (verbatim):
 
@@ -592,3 +593,54 @@ its own tests and CONTINUITY evidence. The parent integrator commits; do not hav
   <https://ci-labo-omu.github.io/assets/paper/pdf_file/multiobjective/ecj_gecco2017_hv.pdf>
 - Keele horn-mouth research:
   <https://aes.org/publications/elibrary/elibrary-page/?id=1693>
+
+---
+
+## 15. Implementation status (2026-11-13, same pass)
+
+Option A was implemented in two lanes with disjoint write scopes: the data/API lane
+(`gui/data.py`) and the client lane (`gui/static/app.js`), then integrated and verified together.
+
+### 15.1 What was built
+
+| File | Change |
+|---|---|
+| `gui/data.py` | Registered the four tools in `ANALYSIS_TOOL_JSONS`; added `tool_files` (root JSON/Markdown/PNG names per registered tool); added keyed `surrogate_validation-<16 hex>.json` discovery (`_surrogate_candidates`, `_selected_surrogate`), exposed as `surrogate_validation` plus `surrogate_validation_candidates`; keyed stems are excluded from `extra_tools`; malformed keyed files are disclosed as `readable: false`, never raised. |
+| `gui/static/app.js` | Added the four names to `ANALYSIS_SECTION_TOOLS`; flat sections now take `files` from `tool_files`; added the four `ANALYSIS_APPENDIX_FIELDS` entries; added the four panel builders (`an-geometry-panel`, `an-hypothesis-panel`, `an-qd-panel`, `an-surrogate-panel`) wired after the M1 cards; added two inline-SVG chart kinds (`geometry-navigation`, `qd-front`); `_anFileLinks` now links root-level `tool_files` for flat `"default"` sections. Reused existing classes/CSS vars only; no new dependency, no new colour, no `fetch`, no `tools/` import. |
+| `tests/test_gui_views_analysis_s8.py` | 9 tests: registration/listing, verbatim payloads, `tool_files`, API route, keyed selection (complete beats newer incomplete), fixed-name precedence, malformed keyed file, degraded payloads, and a node guard that executes the real builders and page composition. |
+
+### 15.2 Decisions taken (§13 resolved)
+
+1. Surrogate keyed files: **GUI glob** (Option 1). The newest `complete: true` payload is selected;
+   every candidate is disclosed with `name/status/reason/input_key/complete/readable/mtime`.
+2. `runs/` output guard: **kept unchanged**. The supported workflow is
+   `gui --analysis-dir <set>`; no tool-side exception was added.
+3. Markdown links: exposed through `tool_files` in the report (not by changing the set-level
+   `files` list, which stays JSON + `REPORT.md`).
+4. Panel placement: all four after the M1 study cards, before errors/extras/appendix.
+5. Charts: inline SVG for the geometry navigation map and the per-arm QD front only; everything
+   else is tables/KPIs.
+6. No separate tab; the panels live in the existing Analysis tab.
+
+### 15.3 Verification (terminal, this pass)
+
+- `node --check hornlab_search/gui/static/app.js` -> exit 0.
+- `python -m compileall -q hornlab_search/gui` -> exit 0.
+- `pytest tests/test_gui_views_analysis_s8.py tests/test_gui_views_analysis.py tests/test_gui_views_analysis_m1.py tests/test_gui_chart_standards.py -q` -> **34 passed, exit 0**.
+- `pytest tests/test_gui_*.py -m "not slow and not gpu and not crosscheck" -q` -> **432 passed, exit 0**
+  (`scratch/2026-11-13_s8/gui-s8-final.xml`).
+- The node guard asserts the panel ids, real stored values, the exact honesty lines
+  ("not acoustic similarity", "Hypothesis only", "attempt-equivalent ... not elapsed time",
+  "not a win claim", "no prediction (outside training support)", "Advisory only"), refusal
+  reason passthrough, and that absent payloads render nothing.
+
+### 15.4 Residual limits / honest scope
+
+- The QD scatter plots only `arm.front` (the payload exposes the nondominated front and counts,
+  not every eligible row); excluded rows are never plotted and are listed by id.
+- The surrogate panel lists candidate file names but does not offer a selector; the selected
+  payload is the newest complete one by the documented rule.
+- The panels render artifacts only. The GUI still runs no analysis and imports no `tools/` code;
+  producing the files remains a CLI step with `--analysis-dir` pointing at the output folder.
+- No acoustic, ranking or optimizer claim is added by this GUI work. The labels are
+  navigation-only, hypothesis-only, attempt-equivalent and advisory-only.

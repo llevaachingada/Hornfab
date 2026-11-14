@@ -3,6 +3,20 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-13 (**speed program: senior review landed (ADOPT with corrections), E0 done, C3+C4 landed, C5 mesher question closed, E1b raw-evidence rerun running, Round A armed; plus the earlier same-day Elites-tab/test-suite work; no GitHub issue state changed**).
 
+Local-only, added 2026-11-13 (20:2x local) (**S8/S7 analysis panels landed; no GitHub issue state
+changed**):
+- Resolved: the four S8/S7 tools now render in `#/analysis` — geometry descriptors (scale-aware
+  table + resolver SHA + navigation map), hypothesis cards (parents, six roles, ablations), equal-cost
+  QD/Pareto (ledger, front, frozen reference) and advisory surrogate validation (split, Brier,
+  regression, OOD proposals). `gui/data.py` exposes `tool_files` and selects the newest complete
+  keyed `surrogate_validation-<hash>.json`, listing all candidates. 432 GUI tests pass, exit 0.
+- Open (by design): the QD scatter plots only the nondominated `arm.front`; the payload carries no
+  full eligible list, so excluded/duplicate rows stay in tables.
+- Open (by design): surrogate candidates are disclosed but not selectable; the newest complete
+  payload is shown. Add a selector only if a real multi-run workflow needs it.
+- Open (by design): the tools refuse `--out` under `runs/`, so the GUI needs
+  `--analysis-dir <set>`; no exception was added.
+
 Local-only, added 2026-11-13 (20:2x local) (**speed program: review landed + E0 done + C3/C4 landed; no GitHub issue state changed**):
 - Resolved (senior review): `SPEED_ARCHITECTURE_PLAN_2026-11-13.md` ADOPTED with corrections (§14); all 12 open questions
   decided: one rep per arm + hardened repeat rule (fresh roots, median-of-3, gray median rejects); keep `--budget 1`;
