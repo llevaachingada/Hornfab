@@ -6,7 +6,7 @@ you need to read the optimization problem. Everything here points at a file you 
 
 **State of the repo at handoff:** every code change of the last three weeks is merged into `main`
 (PRs #47-#58). Branches that never merged are listed in section 8 with the reason. The data is on
-Hugging Face (section 7). Superseded plans and handoffs moved to `docs/archive/2026-11-14/`.
+Hugging Face (section 7), refreshed 2026-11-14 with 31,287 rows (26,317 ok). Superseded plans and handoffs moved to `docs/archive/2026-11-14/`.
 
 ---
 

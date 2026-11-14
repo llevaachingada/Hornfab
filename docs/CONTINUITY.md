@@ -22,7 +22,7 @@
   writing at 10:21 local; its queue log has no end line and pid 28820 is gone, so `runs\.cpu.lane.lock` is
   stale. Rows persist; `--resume` continues it. No GPU job was running (`runs\.gpu.lock` absent).
 - **HF:** with no queue writing, repacked text/solve/dataset into `..\.hf_stage_hunter_20261114` for upload
-  to `chingadalleva/hornlab-search-data`; result in `docs/evidence/HF_UPLOAD_2026-11-14.md`.
+  to `chingadalleva/hornlab-search-data`; **uploaded and verified** (all 8 sizes + LFS SHA-256 match; 31,287 rows, 26,317 ok, `created_utc_max` 2026-11-14T13:26:55Z); record `docs/evidence/HF_UPLOAD_2026-11-14.md`.
 
 ## 2026-11-14 - BAYESIAN INTEGRATION FINAL VALIDATION / COMMIT FOLLOW-UP
 
