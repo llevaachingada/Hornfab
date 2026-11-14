@@ -203,9 +203,15 @@ def _sample_once(pids_fn, collector: _Collector) -> None:
         collector.add(_iso_now(), per[0], per[1], pids)
 
 
-def _sample_loop(stop: threading.Event, period: float, pids_fn, collector: _Collector) -> None:
+def _sample_loop(stop: threading.Event, period: float, pids_fn, collector: _Collector,
+                 on_sample=None) -> None:
     while not stop.is_set():
         _sample_once(pids_fn, collector)
+        if on_sample is not None:
+            try:
+                on_sample()
+            except Exception as exc:  # snapshot failure must never stop the watch
+                print(f"memwatch: snapshot write failed: {exc}", file=sys.stderr, flush=True)
         if stop.wait(period):
             return
 
@@ -213,11 +219,11 @@ def _sample_loop(stop: threading.Event, period: float, pids_fn, collector: _Coll
 # ------------------------------------------------------------------ JSON
 
 
-def _build_record(*, child_cmd, exit_code: int, wall_s: float, agg: dict,
+def _build_record(*, child_cmd, exit_code: int | None, wall_s: float, agg: dict,
                   pids_sampled, off_windows: bool) -> dict:
     return {
         "child_cmd": child_cmd,
-        "exit_code": int(exit_code),
+        "exit_code": None if exit_code is None else int(exit_code),
         "wall_s": round(float(wall_s), 6),
         "dedicated_peak_mib": agg["dedicated_peak_mib"],
         "shared_peak_mib": agg["shared_peak_mib"],
@@ -236,10 +242,39 @@ def _write_json(path, record: dict) -> None:
     out.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
 
 
+def _snapshot_writer(out, write_every_s: float | None):
+    """Incremental snapshots for long watches — a lost window must not lose its evidence.
+
+    Returns ``None`` when disabled, else a dict with ``write(snapshot, wall_s, now)`` and
+    ``due(now)``. Snapshot payloads carry ``"partial": true``; the FINAL record written by
+    ``run_spawn``/``run_attach`` supersedes it (no ``partial`` key, or absent = final).
+    Snapshot ``exit_code`` is ``None`` while the watch is still running.
+    """
+    if not write_every_s or write_every_s <= 0:
+        return None
+    state = {"last": float("-inf")}
+
+    def write(snapshot: dict, wall_s: float, now: float) -> None:
+        record = _build_record(child_cmd=snapshot["child_cmd"],
+                               exit_code=snapshot["exit_code"],
+                               wall_s=wall_s, agg=snapshot["agg"],
+                               pids_sampled=snapshot["pids_sampled"],
+                               off_windows=snapshot["off_windows"])
+        record["partial"] = True
+        _write_json(out, record)
+        state["last"] = now
+
+    def due(now: float) -> bool:
+        return (now - state["last"]) >= write_every_s
+
+    return {"write": write, "due": due}
+
+
 # ------------------------------------------------------------------ modes
 
 
-def run_spawn(child_cmd: list[str], out, period: float = DEFAULT_PERIOD_S) -> int:
+def run_spawn(child_cmd: list[str], out, period: float = DEFAULT_PERIOD_S,
+              write_every_s: float | None = None) -> int:
     """Spawn ``child_cmd``, watch its tree, write the record, return the child's exit code."""
     try:
         baseline_hosts = set(_hosts.snapshot())
@@ -265,9 +300,23 @@ def run_spawn(child_cmd: list[str], out, period: float = DEFAULT_PERIOD_S) -> in
     def pids_fn() -> set[int]:
         return _spawn_tree_pids(proc.pid, baseline_hosts, worker.list_processes())
 
+    off_windows = os.name != "nt"
+    snapper = _snapshot_writer(out, write_every_s)
+
+    def snapshot() -> dict:
+        samples, pids = collector.snapshot()
+        return {"child_cmd": list(child_cmd), "exit_code": None, "agg": aggregate_samples(samples),
+                "pids_sampled": pids, "off_windows": off_windows}
+
     stop = threading.Event()
+
+    def on_sample() -> None:
+        if snapper is not None and snapper["due"](time.monotonic()):
+            snapper["write"](snapshot(), time.monotonic() - start, time.monotonic())
+
     thread = threading.Thread(name="memwatch", target=_sample_loop,
                               args=(stop, max(0.05, float(period)), pids_fn, collector),
+                              kwargs={"on_sample": on_sample},
                               daemon=True)
     thread.start()
     try:
@@ -283,18 +332,26 @@ def run_spawn(child_cmd: list[str], out, period: float = DEFAULT_PERIOD_S) -> in
     agg = aggregate_samples(samples)
     _write_json(out, _build_record(child_cmd=list(child_cmd), exit_code=exit_code,
                                    wall_s=wall_s, agg=agg, pids_sampled=pids,
-                                   off_windows=os.name != "nt"))
+                                   off_windows=off_windows))
     return int(exit_code)
 
 
 def run_attach(*, lane: str, runs_dir, deadline_s: float, out,
-               period: float = DEFAULT_PERIOD_S) -> int:
+               period: float = DEFAULT_PERIOD_S,
+               write_every_s: float | None = None) -> int:
     """Watch one lane's BEAT host trees for ``deadline_s`` seconds and write the record."""
     start = time.monotonic()
     collector = _Collector()
     saw_hosts = False
     period = max(0.05, float(period))
     deadline_s = max(0.0, float(deadline_s))
+    off_windows = os.name != "nt"
+    snapper = _snapshot_writer(out, write_every_s)
+
+    def snapshot() -> dict:
+        samples, pids = collector.snapshot()
+        return {"child_cmd": None, "exit_code": None, "agg": aggregate_samples(samples),
+                "pids_sampled": pids, "off_windows": off_windows}
 
     while True:
         elapsed = time.monotonic() - start
@@ -316,6 +373,9 @@ def run_attach(*, lane: str, runs_dir, deadline_s: float, out,
                 per = None
             if per is not None:
                 collector.add(_iso_now(), per[0], per[1], pids)
+        if snapper is not None and snapper["due"](time.monotonic()):
+            snapper["write"](snapshot(), deadline_s - (deadline_s - (time.monotonic() - start)),
+                             time.monotonic())
         remaining = deadline_s - (time.monotonic() - start)
         if remaining <= 0:
             break
@@ -349,6 +409,9 @@ def _parser() -> argparse.ArgumentParser:
                    help="attach mode: how long to watch")
     p.add_argument("--period", type=float, default=DEFAULT_PERIOD_S,
                    help=f"sample cadence in seconds (default {DEFAULT_PERIOD_S:g})")
+    p.add_argument("--write-every-seconds", type=float, default=None,
+                   help="also rewrite the record incrementally every this many seconds "
+                        "(partial records carry partial: true; the final write supersedes)")
     return p
 
 
@@ -367,10 +430,11 @@ def main(argv=None) -> int:
             parser.error("--attach needs --deadline-seconds > 0")
         return run_attach(lane=args.lane, runs_dir=args.runs_dir,
                           deadline_s=args.deadline_seconds, out=args.out,
-                          period=args.period)
+                          period=args.period, write_every_s=args.write_every_seconds)
     if not child:
         parser.error("spawn mode needs '-- <child command + args...>'")
-    return run_spawn(child, args.out, period=args.period)
+    return run_spawn(child, args.out, period=args.period,
+                     write_every_s=args.write_every_seconds)
 
 
 if __name__ == "__main__":

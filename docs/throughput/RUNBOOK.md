@@ -15,10 +15,11 @@ the GPU lock). Close other GPU programs. Read results from the output files, not
 | Stage timer (WP0) | `$env:HORNLAB_STAGE_TIMING="1"` | off; writes `designs\<hash>\stage_timing.ndjson` |
 | Throughput matrix (WP0) | `tools\bench\throughput_matrix.py` | a tool, nothing runs by itself |
 | Mesh prefetch (WP2) | `$env:HORNLAB_PIPELINE_PREFETCH="2"` or `search: {pipeline_prefetch: 2}` | 0 = serial, as today |
-| Frequency batching (WP5) | `--batch-sizes` in the matrix, or `$env:HORNLAB_FREQ_BATCH_SIZE="4"` | off = today's grouping |
+| Frequency batching (WP5) | `--batch-sizes` in the matrix, or `$env:HORNLAB_FREQ_BATCH_SIZE="4"`, or the config key `solve.freq_batch_size` (adopted 2026-11-14, default `None` = env fallback governs) | off = today's grouping |
 | Curvature meshing (WP4) | `mesh: {curvature_npts: 12}` (CAD/MEH route only) | 0 = off = today's meshes |
 | CPU+GPU pilot (WP3) | `tools\bench\cpu_gpu_concurrent.py` | a tool, bench only |
-| Solver identity-cache skip (WP1) | proposal doc only, **not applied** | `docs\throughput\WP1_FUSED_IDENTITY_CACHE_PATCH.md` |
+| Solver identity-skip (WP1, G2) | **ADOPTED 2026-11-14** as solver `38e5b1f` (whole-candidate wall −24.7 %/−28.0 %, parity ~1e-5 dB, zero spill, measured ceiling 24,973 quarter-DOF; `docs/evidence/SPEED_ADOPTION_2026-11-14.md`) | on in the installed solver |
+| Spill watchdog | `tools\bench\run_with_memwatch.py` (attach/spawn; shared VRAM = the counter nvidia-smi cannot see) | a tool, observer only |
 
 ## 1. Pull and run the offline tests (no GPU)
 

@@ -104,3 +104,48 @@ def test_attach_no_hosts_writes_record_and_exits_zero(tmp_path):
     assert data["exit_code"] == 0
     assert data["wall_s"] > 0
     assert data["off_windows"] == (os.name != "nt")
+
+
+# ------------------------------------------------------------------ snapshot hardening
+
+
+def test_snapshot_writer_stamps_partial_and_build_record_tolerates_exit_none():
+    snapper = memwatch._snapshot_writer("DUMMY", 0.5)
+    assert snapper is not None
+    assert snapper["due"](0.0) is True
+    assert memwatch._snapshot_writer("DUMMY", None) is None
+    assert memwatch._snapshot_writer("DUMMY", 0) is None
+    # a running watch has no exit code yet: the record builder must emit null, not crash
+    record = memwatch._build_record(child_cmd=["x"], exit_code=None, wall_s=1.0,
+                                    agg=memwatch.aggregate_samples([]),
+                                    pids_sampled=[], off_windows=False)
+    assert record["exit_code"] is None
+
+
+def test_snapshot_writer_writes_partial_records_at_intervals(tmp_path):
+    out = tmp_path / "snap.json"
+    snapper = memwatch._snapshot_writer(out, 0.05)
+    agg0 = memwatch.aggregate_samples([{"at": "t", "dedicated_mib": 10, "shared_mib": 5}])
+    snapper["write"]({"child_cmd": None, "exit_code": None, "agg": agg0,
+                      "pids_sampled": {1}, "off_windows": False}, wall_s=0.1, now=0.1)
+    data = json.loads(out.read_text(encoding="utf-8"))
+    assert data["partial"] is True
+    assert data["exit_code"] is None
+    assert data["dedicated_peak_mib"] == 10
+    # final record (no partial key) supersedes the snapshot
+    agg1 = memwatch.aggregate_samples([{"at": "t", "dedicated_mib": 20, "shared_mib": 6}])
+    memwatch._write_json(out, memwatch._build_record(
+        child_cmd=None, exit_code=0, wall_s=2.0, agg=agg1, pids_sampled=[], off_windows=False))
+    final = json.loads(out.read_text(encoding="utf-8"))
+    assert final.get("partial", False) is False
+    assert final["exit_code"] == 0
+
+
+def test_spawn_mode_with_write_every_still_writes_final_record(tmp_path):
+    out = tmp_path / "spawn_snap.json"
+    rc = memwatch.main(["--out", str(out), "--write-every-seconds", "0.05", "--",
+                        sys.executable, "-c", "print('ok')"])
+    assert rc == 0
+    data = json.loads(out.read_text(encoding="utf-8"))
+    assert data["exit_code"] == 0
+    assert data.get("partial", False) is False

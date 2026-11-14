@@ -45,6 +45,16 @@ def test_fused_cuda_refuses_beyond_last_measured_anchor():
     assert result["verdict"] == "refuse"
 
 
+def test_fused_cuda_production_caps_must_stay_fit():
+    # Owner guard: the production dof caps (12,000 screen/verify/final in the print and
+    # fused_cuda profiles) must remain inside the FIT band under the calibrated envelope.
+    # If a future re-base pushes 12,000 out of "fit", that re-base is wrong or the anchors
+    # must be re-measured BEFORE any cap change — the owner constraint forbids silently
+    # vetoing existing production sizes.
+    result = assess(12000, "beat_cuda", cuda_fused=True)
+    assert result["verdict"] == "fit", result["reason"]
+
+
 def test_fused_cuda_need_gib_is_monotone_and_matches_anchor_points():
     for i, (n_dof, peak_mib) in enumerate(FUSED_CUDA_MEASURED_ANCHORS):
         if i == 0:
