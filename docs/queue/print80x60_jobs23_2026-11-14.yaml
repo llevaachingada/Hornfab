@@ -1,0 +1,9 @@
+# PRINT 80x60 / 700 Hz day queue, jobs 2+3 RE-LAUNCH (2026-11-14). Speed-program E9: the same jobs as
+# runs/nights/print80x60_day_2026-11-13.yaml minus job 1 (finished via the resume night at 200/200),
+# relaunched FRESH under the adopted solver 38e5b1f. Brief examples/briefs/print_80x60_2026-11-13/
+# print_pa_80x60_700_v7.yaml (objective v7, class C, LFP loading). All seeds passed shape_check.
+night: print80x60_jobs23_2026-11-14
+lane: gpu
+jobs:
+  - {id: p80x60__ath_core_14in, kind: search, budget: 200, mode: screen, timeout_s: 16200, config: examples/typologies/print_80x60_2026-11-13/p80x60__ath_core_14in_700_v7.yaml}
+  - {id: p80x60__osse_ext_throat_s5678, kind: search, budget: 200, mode: screen, timeout_s: 14400, config: examples/typologies/print_80x60_2026-11-13/p80x60__osse_ext_throat_700_v7_seed5678.yaml}

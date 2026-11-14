@@ -28,8 +28,10 @@
   dedicated peak 4,074 MiB, **shared peak 80 MiB (no WDDM spill)** — the number nvidia-smi cannot see.
   julia.exe's Windows wrapper does not carry `Start-Process` redirections (first E1b attempt lost; archived
   0 bytes, re-run archived complete).
-- **E9 NEXT:** relaunch production fresh with the print night's un-run jobs (ath_core b200 + osse seed5678
-  b200) under the adopted solver. Rollback unchanged (§9 of the prompt; old pin `0850ef39`).
+- **E9 RUNNING:** production relaunched fresh 2026-11-13T20:59:15Z with the print night's un-run jobs
+  (`runs/nights/print80x60_jobs23_2026-11-14.yaml`: ath_core b200 + osse seed5678 b200; first run dir
+  `runs/20261114T015916Z-screen-db8e2f`) under the adopted solver. Rollback unchanged (§9 of the prompt;
+  old pin `0850ef39`).
 
 ## 2026-11-13 (20:4x local) - CI REPAIR: 7 RED CLUSTERS FIXED ON MAIN (NO TOLERANCE OR EXPECTED VALUE CHANGED)
 

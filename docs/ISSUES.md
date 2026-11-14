@@ -32,7 +32,9 @@ Local-only, added 2026-11-14 (~02:0xZ) (**speed program ADOPTED: solver 38e5b1f 
 - Re-based (measured): `solve/feasibility.py` fused-CUDA anchors — 20,237 refusal falsified by measurement; 24,973
   quarter-DOF fits (risky band); refuse ≥ ~26k; `tests/test_solve_feasibility.py` re-based by fix. Cap values unchanged
   (owner decision).
-- Next: E9 production relaunch (print night's un-run jobs) under the adopted solver.
+- Next: E9 production relaunch (print night's un-run jobs) under the adopted solver — **running since
+  2026-11-13T20:59:15Z** (`runs/nights/print80x60_jobs23_2026-11-14.yaml`, first run dir
+  `runs/20261114T015916Z-screen-db8e2f`).
 - Still open from earlier: A1 cache namespace means the pin swap invalidates solve caches ONCE (expected; first
   post-merge runs re-solve at `38e5b1f`).
 
