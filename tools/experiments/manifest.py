@@ -41,7 +41,7 @@ import re
 import sys
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any
 
 import yaml
@@ -891,18 +891,30 @@ def _check_task(manifest: dict, repo: Path, result: ValidationResult) -> None:
         result.add("error", "task_unresolved", "resolved_task", "task could not be resolved")
         return
     task_in = manifest.get("task") if isinstance(manifest.get("task"), dict) else {}
+    located: dict[str, Path] = {}
     for declared_key, resolved_key in (("config", "config_path"), ("brief", "brief_path")):
         declared = resolve_path(str(task_in.get(declared_key, "")), repo)
-        actual = Path(str(task.get(resolved_key, "")))
+        recorded = str(task.get(resolved_key, ""))
+        rel = task.get(f"{declared_key}_rel")
+        # The repo-relative locator is the portable identity; the absolute path is provenance
+        # from the building host/checkout. Re-verify by the locator so a manifest built in one
+        # checkout validates in another, and require the recorded absolute path to end in that
+        # locator (separator-agnostic) so the two cannot silently disagree.
+        actual = resolve_path(str(rel), repo) if rel else Path(recorded)
         try:
             same = declared.resolve() == actual.resolve()
         except OSError:
             same = False
+        if same and rel and not Path(str(rel)).is_absolute():
+            rel_parts = PurePosixPath(str(rel)).parts
+            rec_parts = PureWindowsPath(recorded).parts
+            same = tuple(rec_parts[-len(rel_parts):]) == rel_parts
         if not same:
             result.add("error", "task_path_mismatch", f"resolved_task.{resolved_key}",
-                       f"task.{declared_key} ({declared}) does not match {actual}")
-    config_path = Path(task.get("config_path", ""))
-    brief_path = Path(task.get("brief_path", ""))
+                       f"task.{declared_key} ({declared}) does not match {recorded}")
+        located[declared_key] = actual
+    config_path = located["config"]
+    brief_path = located["brief"]
     for label, path, key in (("config", config_path, "config_sha256"),
                              ("brief", brief_path, "brief_sha256")):
         if not path.is_file():

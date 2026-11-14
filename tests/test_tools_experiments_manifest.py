@@ -16,8 +16,10 @@ import yaml
 from tools.experiments import manifest as mf
 
 REPO = Path(__file__).resolve().parents[1]
-PILOT1 = REPO / "scratch" / "bo_m0" / "s11" / "pilot1_cold_vs_warm_native_ath_core_v4.yaml"
-PILOT2 = REPO / "scratch" / "bo_m0" / "s11" / "pilot2_verify_allocation_crease_core_law_v4.yaml"
+# Committed copies of the scratch/bo_m0/s11 pilot overlays (scratch/ is gitignored).
+S11_FIXTURES = REPO / "tests" / "fixtures" / "experiments" / "s11"
+PILOT1 = S11_FIXTURES / "pilot1_cold_vs_warm_native_ath_core_v4.yaml"
+PILOT2 = S11_FIXTURES / "pilot2_verify_allocation_crease_core_law_v4.yaml"
 NATIVE_CONFIG = "examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml"
 NATIVE_BRIEF = "examples/briefs/campaign_2026-10-26_v4/native_ath_core_2in_v4.yaml"
 
@@ -363,7 +365,16 @@ def test_committed_pilot_manifests_validate_clean(name: str) -> None:
     result = mf.validate_manifest(manifest)
     assert result.ok, result.as_dict()
     assert result.errors == [], result.as_dict()
-    assert result.warnings == [], result.as_dict()
+    # Warm-start source runs live under gitignored runs/. Where they exist (the building host)
+    # the manifest must be warning-free; where they are absent, the only tolerated warning is
+    # the validator's own "re-check before dispatch" for exactly those missing sources.
+    absent = {str(mf.resolve_path(src.get("run_dir", ""))) for arm in manifest.get("arms", [])
+              for src in ((arm.get("warm_start") or {}).get("resolved_sources") or [])
+              if not mf.resolve_path(src.get("run_dir", "")).is_dir()}
+    unexpected = [w for w in result.warnings
+                  if not (w.code == "warm_source_unavailable"
+                          and any(w.message.startswith(a) for a in absent))]
+    assert unexpected == [], result.as_dict()
     assert manifest["execution_authorized"] is False
     assert manifest["stop_rules"]["deadline"]["deadline_required"] is True
     per_arm = manifest["budget"]["per_arm_per_replicate"]

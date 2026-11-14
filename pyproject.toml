@@ -38,6 +38,9 @@ bayes = [
 # WP11b CMA-ME atlas. The PyPI distribution is `ribs` (`import ribs`); `pyribs` is an alias that
 # does not resolve, so pin the import name exactly.
 qd = ["ribs==0.12.0"]
+# tools/analysis/parameter_study.py fit_effects (held-out effect screening) uses scikit-learn;
+# without it the fit reports status "unavailable" instead of producing effects.
+analysis = ["scikit-learn>=1.3"]
 # WP14 optional dep: tools/cad/multicell.py builds the multicell air volume and needs OCP.
 cad = ["build123d==0.13.0"]
 

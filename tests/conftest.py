@@ -54,6 +54,9 @@ requires_bempp = pytest.mark.skipif(
 # WP14: tools/cad/multicell.py builds its solid with the optional `cad` extra.
 requires_build123d = pytest.mark.skipif(
     not _have("build123d"), reason="build123d (optional [cad] extra) not installed")
+# QD archives (hornlab_search.search.cma_me) need the optional `qd` extra.
+requires_ribs = pytest.mark.skipif(
+    not _have("ribs"), reason="ribs (optional [qd] extra) not installed")
 
 
 # ------------------------------------------------------------------ helpers
