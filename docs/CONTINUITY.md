@@ -1,5 +1,22 @@
 # CONTINUITY
 
+## 2026-11-14 (15:3x local) - PROJECT ATLAS: REUSABLE WHOLE-PROJECT VISUAL REPORT (tools/atlas)
+
+- New `tools/atlas/build_atlas.py` + `atlas_template.html`: read-only over every run folder (`run.json`,
+  `search.ndjson`, inline `verify/`, Bayesian `study-*/screen`) -> one self-contained `index.html`
+  (data embedded, vanilla JS/SVG/canvas, light+dark, phone width). ~3 s over 482 runs / 37.9k rows.
+- Sections: scale + cumulative solves by family, run timeline, solves/day by objective version, solver
+  seconds-per-candidate by pin and DOF-vs-seconds, refusal economy, optimiser convergence (normalised
+  best/first J vs budget share; CMA-ES vs CMA-ME vs Bayes, per family), settle-time and gain distributions,
+  decision map (search lines: solves vs late gain), per-brief leaderboards with verdict tags, beamwidth and
+  size clouds of all solved designs, J per objective version, all screen/verify pairs, horn render gallery
+  (`--gallery scratch/top2/cards`), auto-generated next steps with their printed rules.
+- Snapshot published at `docs/atlas/index.html` -> https://llevaachingada.github.io/Hornfab/atlas/ .
+  This snapshot: 26,914 solves (26,247 distinct), 5,253 refused (16%), 132.4 compute h, 482 runs,
+  233 search lines, 227 screen/verify pairs. Verdicts are heuristics for a human decision, never applied.
+- Regenerate after any checkpoint: `.venv\Scripts\python.exe tools/atlas/build_atlas.py --out docs/atlas
+  --gallery scratch/top2/cards`. Tests: `tests/test_tools_atlas.py` (4 pass). No solve/config change.
+
 ## 2026-11-14 (15:2x local) - GITHUB PAGES ENABLED (owner-approved; docs only)
 
 - Owner approved enabling GitHub Pages on llevaachingada/Hornfab: source `main` `/docs`, legacy build.
