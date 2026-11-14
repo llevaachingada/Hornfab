@@ -339,6 +339,17 @@ def test_command_templates_validate_against_cli(built: dict) -> None:
 
 
 @pytest.mark.parametrize("overlay_path", [PILOT1, PILOT2])
+def test_s11_fixtures_match_scratch_originals(overlay_path: Path) -> None:
+    """The committed fixtures stand in for the gitignored scratch overlays; where the originals
+    exist they must be byte-identical, so a scratch edit cannot silently diverge from CI."""
+    original = REPO / "scratch" / "bo_m0" / "s11" / overlay_path.name
+    if not original.is_file():
+        pytest.skip(f"scratch original not present: {original.name}")
+    assert overlay_path.read_bytes() == original.read_bytes(), (
+        f"{overlay_path.name} differs from scratch/bo_m0/s11; re-copy it into tests/fixtures")
+
+
+@pytest.mark.parametrize("overlay_path", [PILOT1, PILOT2])
 def test_repo_pilot_overlays_validate(overlay_path: Path) -> None:
     overlay = yaml.safe_load(overlay_path.read_text(encoding="utf-8"))
     missing = [p for p in (overlay.get("runtime_estimates") or {}).get("source_runs", [])
