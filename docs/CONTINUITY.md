@@ -41,6 +41,21 @@
 - Execution authority for the remaining gated steps (E4 swap, Round B, ceilings, decision, merge): 
   `docs/queue/SPEED_IMPLEMENTATION_PROMPT_2026-11-13.md` (hand to the integrator verbatim; where it differs from plan §6,
   the prompt wins).
+## 2026-11-13 (20:0x local) - CI INTEGRATED: ONE TRIGGER, PIP CACHE, `-n 2`, DOCS FAST LANE
+
+- `.github/workflows/ci.yml`: triggers reduced to `pull_request` + `push: branches:[main]` (the old
+  `on: push` fired a second identical run per branch push); `cache: pip`; docs paths ignored; the test
+  step is now `-n 2 --dist loadscope` with the same single-thread BLAS/OpenMP env as the local lane.
+- New `.github/workflows/docs.yml`: docs-only changes run the cheap guards instead of the full suite
+  (`tests/test_param_catalog.py tests/test_config.py`).
+- **Finding (pre-existing): `tools/gen_param_catalog.py --check` FAILS on main.** `PARAMETERS.md`
+  carries a hand-maintained "Search-config keys" section the generator does not emit, so `--check`
+  says STALE and `--write` **deletes 158 lines** of hand-written contract text (verified, then
+  reverted). The docs job therefore does NOT gate `--check`; the reason is written in the workflow and
+  in ISSUES. Fold the search/brief keys into the generator before adding that step.
+- Still owner-action: branch protection / required checks on `main` (GitHub setting, not code).
+- Not in scope here: CI is red on main for 23 pre-existing failures + 24 errors (listed in ISSUES);
+  none of them come from the test-suite work — the same set fails on the four commits before it.
 
 ## 2026-11-13 (19:3x local) - TEST SUITE 3.1x FASTER (xdist), GPU LANE ON FUSED CUDA, GPU LOCK NOW ADVISORY
 
