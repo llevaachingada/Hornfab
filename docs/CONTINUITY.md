@@ -14,6 +14,12 @@
 - `.github/workflows/docs.yml` gates `tools/gen_param_catalog.py --check` again, plus the catalog/config
   tests. `docs/INDEX.md` lists the new file.
 - Verified: `--check` exit 0; `tests/test_param_catalog.py tests/test_config.py` 70 passed.
+- `--check` resolves `code_ref` symbols, and 29 of the 33 point into
+  `hornlab_mesher.{freeform,profile_formulas,profile_morph,throat_stretch}` — so the docs job installs
+  the pinned mesher with `--no-deps` (those modules import only stdlib + numpy at module scope). The
+  MAIN test job must not install it: that would flip 199 `requires_mesher` tests from skip to run. The
+  docs job's path filter also covers `hornlab_search/design/**`, `examples/**` and the generator, so a
+  code-only PR that stales the reference is caught too.
 - No content lost: the 155-line search-key body moved verbatim and is diff-visible in this commit.
   Verified mechanically: the moved block is **byte-identical** (150 lines, normalised line endings) to
   the block removed from PARAMETERS.md.

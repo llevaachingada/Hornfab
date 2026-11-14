@@ -7,14 +7,29 @@ name: Docs check
 # generated PARAMETERS.md into reference/SEARCH_CONFIG_KEYS.md, so the generated file is now 100 %
 # generated and the byte-check is meaningful on a clean tree.
 #
+# It needs `hornlab_mesher` importable because 29 of the 33 `code_ref`s resolve into
+# hornlab_mesher.{freeform,profile_formulas,profile_morph,throat_stretch}; those modules import only
+# stdlib + numpy at module scope, so `--no-deps` is enough (no gmsh, no GPU). The MAIN test job must
+# NOT install the mesher: that would flip 199 `requires_mesher` tests from skip to run.
+#
+# The path filter includes the code that drives generation (design params/families/generators,
+# examples, the generator itself), so a code-only PR that stales the reference also gets checked.
+#
 # Also gated: tests/test_param_catalog.py pins `gui/static/param-catalog.v1.json` to the code
 # byte-for-byte, and tests/test_config.py pins the config contract.
 on:
   pull_request:
-    paths: ["docs/**", "**/*.md", "NOTES_FOR_SENIOR.md"]
+    paths: &paths
+      - "docs/**"
+      - "**/*.md"
+      - "NOTES_FOR_SENIOR.md"
+      - "hornlab_search/design/**"
+      - "hornlab_search/gui/static/param-catalog.v1.json"
+      - "examples/**"
+      - "tools/gen_param_catalog.py"
   push:
     branches: [main]
-    paths: ["docs/**", "**/*.md", "NOTES_FOR_SENIOR.md"]
+    paths: *paths
 
 jobs:
   docs:
@@ -29,6 +44,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install numpy scipy pyyaml pytest
+          # Pinned same SHA as pyproject.toml. --no-deps: only the modules that hold code_ref targets
+          # must import (stdlib + numpy); this must never drag gmsh or a solver into the docs lane.
+          python -m pip install --no-deps "hornlab-waveguide-mesher @ git+https://github.com/jamescollinharky/hornlab-waveguide-mesher.git@55da4f46d662d8dcd7a9f94a609eeea4009fcd62"
           python -m pip install -e . --no-deps
       - name: Generated docs are byte-identical to the code
         run: python tools/gen_param_catalog.py --check
