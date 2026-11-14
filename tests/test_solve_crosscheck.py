@@ -19,7 +19,7 @@ from hornlab_search.solve.bempp import BemppBackend
 from test_solve_support import (build_seed_mesh, clean_host_state, emit, normalized_db,
                                 release_and_verify, spec_with)
 
-pytestmark = [requires_beat, requires_bempp, requires_mesher, pytest.mark.crosscheck, pytest.mark.slow]
+pytestmark = [requires_beat, requires_bempp, requires_mesher, pytest.mark.crosscheck]
 
 FREQS = [500.0, 1000.0, 2000.0, 3000.0, 4000.0]
 

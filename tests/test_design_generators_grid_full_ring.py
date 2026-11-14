@@ -149,7 +149,7 @@ def test_ripple_delivers_its_mm_height_at_the_widest_station():
 # ------------------------------------------------------------- the FULL ring
 
 @requires_mesher
-def test_full_ring_lecleach_asym_meshes_through_the_real_adapter():
+def test_full_ring_lecleach_asym_meshes_through_the_real_adapter(tmp_path):
     """The capability probe: a closed full-ring point grid (quadrants '1234') meshes on
     the CPU exactly like the mesher's native closed mode; no solve, no GPU."""
     from hornlab_search.mesh import build
@@ -161,7 +161,8 @@ def test_full_ring_lecleach_asym_meshes_through_the_real_adapter():
     json.dumps(space.seed.params)
     spec = dataclasses.replace(mesh_spec("screen", cfg), f_max_hz=2000.0)
     design = Design("FREEFORM", {"grid": space.seed.params["grid"]})
-    result = build.build_mesh(design, spec, cfg, Path("runs") / "c2_probe", mode="screen")
+    # tmp_path, not the shared repo runs/: parallel workers must not collide (2026-11-13).
+    result = build.build_mesh(design, spec, cfg, tmp_path / "c2_probe", mode="screen")
     assert result.quadrants == "1234" and result.symmetry_plane is None
     assert result.n_triangles > 0 and Path(result.path).is_file()
     print(f"\nfull-ring mesh: {result.n_triangles} tris; bbox = "
@@ -169,7 +170,7 @@ def test_full_ring_lecleach_asym_meshes_through_the_real_adapter():
 
 
 @requires_mesher
-def test_full_ring_rejects_a_quadrant_mismatch():
+def test_full_ring_rejects_a_quadrant_mismatch(tmp_path):
     from hornlab_search.mesh import grid_build
 
     cfg = load_config(TYP / "lecleach_asym_odd.yaml")
@@ -183,6 +184,6 @@ def test_full_ring_rejects_a_quadrant_mismatch():
         grid_build.build_grid_mesh(
             {"inner_points": inner, "meta": meta, "wall_thickness_mm": 3.0},
             dataclasses.replace(ms, quadrants="1"),
-            Path("runs") / "c2_probe_mismatch", cfg, mode="screen")
+            tmp_path / "c2_probe_mismatch", cfg, mode="screen")
 
 import dataclasses  # noqa: E402

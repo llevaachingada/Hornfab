@@ -71,7 +71,7 @@ def test_second_acquire_live_pid_raises(tmp_path):
     old = os.environ.pop(_LOCK_OWNER_ENV, None)
     try:
         with pytest.raises(GpuBusyError) as exc_info:
-            with gpu_lock("new command", runs_root=tmp_path):
+            with gpu_lock("new command", runs_root=tmp_path, policy="refuse"):
                 pass
         msg = str(exc_info.value)
         assert "GPU busy" in msg
@@ -90,7 +90,7 @@ def test_error_message_fields(tmp_path):
     old = os.environ.pop(_LOCK_OWNER_ENV, None)
     try:
         with pytest.raises(GpuBusyError) as exc_info:
-            with gpu_lock("new", runs_root=tmp_path):
+            with gpu_lock("new", runs_root=tmp_path, policy="refuse"):
                 pass
         msg = str(exc_info.value)
         assert "alice" in msg
@@ -145,7 +145,7 @@ def test_reentrancy_env_var_wrong_pid(tmp_path):
     os.environ[_LOCK_OWNER_ENV] = str(dead)
     try:
         with pytest.raises(GpuBusyError):
-            with gpu_lock("child", runs_root=tmp_path):
+            with gpu_lock("child", runs_root=tmp_path, policy="refuse"):
                 pass
     finally:
         if old is None:
@@ -184,3 +184,59 @@ def test_env_var_set_and_restored(tmp_path):
     finally:
         if old is not None:
             os.environ[_LOCK_OWNER_ENV] = old
+
+
+# ---------------------------------------------------------------------------
+# live-holder policy (owner decision 2026-11-13: warn by default, refuse opt-in)
+# ---------------------------------------------------------------------------
+
+
+def _held_lock(tmp_path) -> Path:
+    lp = _lock_path(tmp_path)
+    _write_foreign_lock(lp, os.getpid(), user="holder", command="a live job")
+    return lp
+
+
+def test_live_holder_warns_and_proceeds_by_default(tmp_path, monkeypatch, capsys):
+    """The default is not fatal: the owner may overlap a live GPU job. The warning says so,
+    and the holder's lock file is left untouched (we never acquired it)."""
+    monkeypatch.delenv("HORNLAB_GPU_LOCK", raising=False)
+    monkeypatch.delenv(_LOCK_OWNER_ENV, raising=False)
+    lp = _held_lock(tmp_path)
+    entered = []
+    with gpu_lock("interactive test", runs_root=tmp_path):
+        entered.append(True)
+        assert lp.exists(), "proceeding unlocked must not remove the holder's lock"
+    assert entered == [True]
+    err = capsys.readouterr().err
+    assert "GPU busy" in err and "Proceeding WITHOUT the GPU lock" in err
+    assert lp.exists()
+    assert json.loads(lp.read_text(encoding="utf-8"))["command"] == "a live job"
+
+
+def test_live_holder_off_policy_is_silent(tmp_path, monkeypatch, capsys):
+    monkeypatch.setenv("HORNLAB_GPU_LOCK", "off")
+    monkeypatch.delenv(_LOCK_OWNER_ENV, raising=False)
+    _held_lock(tmp_path)
+    with gpu_lock("quiet test", runs_root=tmp_path):
+        pass
+    assert capsys.readouterr().err == ""
+
+
+def test_env_refuse_restores_the_fatal_behaviour(tmp_path, monkeypatch):
+    """Unattended runs (nights, measurements) keep the old refusal via one env var."""
+    monkeypatch.setenv("HORNLAB_GPU_LOCK", "refuse")
+    monkeypatch.delenv(_LOCK_OWNER_ENV, raising=False)
+    _held_lock(tmp_path)
+    with pytest.raises(GpuBusyError, match="GPU busy"):
+        with gpu_lock("night run", runs_root=tmp_path):
+            pass
+
+
+def test_unknown_policy_is_refused(tmp_path, monkeypatch):
+    monkeypatch.setenv("HORNLAB_GPU_LOCK", "maybe")
+    monkeypatch.delenv(_LOCK_OWNER_ENV, raising=False)
+    _held_lock(tmp_path)
+    with pytest.raises(ValueError, match="unknown GPU lock policy"):
+        with gpu_lock("typo", runs_root=tmp_path):
+            pass

@@ -150,7 +150,6 @@ def test_t2_brief_has_the_home_target():
 # ------------------------------------------------------------------ real run (GPU lane)
 
 
-@pytest.mark.slow
 @pytest.mark.gpu
 @requires_beat
 @requires_mesher

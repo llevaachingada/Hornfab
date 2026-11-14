@@ -18,7 +18,7 @@ from hornlab_search.search.evaluate import read_ndjson
 from hornlab_search.solve import worker
 from test_solve_support import clean_host_state, release_and_verify
 
-pytestmark = [requires_beat, requires_mesher, pytest.mark.slow]
+pytestmark = [requires_beat, requires_mesher, pytest.mark.gpu]
 
 
 @pytest.fixture(scope="module")

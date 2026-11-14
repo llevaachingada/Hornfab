@@ -3,6 +3,19 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-13 (**Elites tab redesigned for non-technical readers: brief/typology constraints and isometric horn thumbnails, best-per-typology / best-per-brief browsing, paginated 24 at a time, CSV-path noise removed; payload extended with brief/family/brief_target; bo-study-v1.1 final offline integration landed (M2 sensitivity/proposal evidence, immutable run package + `hornlab-search study` CLI, durable proposal-cadence recovery, B8 adversarial full loop); profile-outline thumbnail geometry fixed after live check (closed outline split at the mouth rim, outer wall kept); card hierarchy tuned per owner (constraint line + score largest, gate pills smaller); no GitHub issue state changed**).
 
+Local-only, added 2026-11-13 (19:3x local) (**test-suite speed + GPU lane; no GitHub issue state changed**):
+- Applied (branch `test/testspeed-2026-11-13`, merged to main): `pytest-xdist -n 6 --dist loadscope` with
+  single-thread BLAS/OpenMP caps takes the offline suite from **18.2 min to 5.9 min (3.1x)** at equal
+  coverage; `-n 8` measured worse (poles 56 s -> 186 s) and is excluded.
+- GPU lane now runs the shipping **fused CUDA** path (`cuda_fused=True` in `test_solve_beat.py`,
+  `meta["cuda_fused"] is True` pinned); `slow` retired from `tests/`.
+- GPU lock default changed to `warn` (was refuse); `HORNLAB_GPU_LOCK=refuse` for nights/measurements.
+- **Open / pre-existing failure:** `tests/test_tools_experiments_manifest.py` fails 4 + 24 collection
+  errors with `FileNotFoundError` on a local path, under a *serial* run in `oc-wt/testspeed`. It is not
+  caused by this work. Owner or the file's author needs to decide whether it should be a `local_data`
+  skip (the audit's category) or a fixture that materialises its input.
+- **Open / pre-existing gap (safety):** 18 `requires_botorch` tests never run in CI or the default venv;
+  they need the isolated `bayes-venv`. Decide: `[bayes]` CI job or a documented gap.
 Local-only, added 2026-11-13 (23:5xZ) (**S8/S7 GUI handoff written; no GitHub issue state changed**):
 - Open: the four S8/S7 tools have no GUI panels. They are absent from `ANALYSIS_TOOL_JSONS`
   (`gui/data.py:4044`) and `ANALYSIS_SECTION_TOOLS` (`app.js:2644`), so their JSON is never parsed

@@ -24,7 +24,7 @@ dependencies = [
 
 [project.optional-dependencies]
 crosscheck = ["hornlab-bempp-bem @ git+https://github.com/m3gnus/hornlab-bempp-bem.git@8e6910602ece9abb2e9ce0db7a637f4bedf17f53"]
-dev = ["pytest>=8", "pytest-timeout"]
+dev = ["pytest>=8", "pytest-timeout", "pytest-xdist>=3"]
 surrogate = ["torch>=2.2"]
 # bo-study-v1.1 advisory Bayesian engine (B3/M2). Optional and lazily imported; the normal GUI/CMA
 # startup must work when this extra is absent. The sanctioned offline engine is the isolated

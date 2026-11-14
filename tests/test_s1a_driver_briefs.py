@@ -227,7 +227,7 @@ def test_organic_and_lecleach_seeds_march_and_fit_every_family_brief(name, brief
 
 
 @requires_mesher
-def test_ripple12_reseeded_seed_fits_the_screen_dof_cap():
+def test_ripple12_reseeded_seed_fits_the_screen_dof_cap(tmp_path):
     """The dofs sanity bound (mesher-gated, run locally): the reseeded ripple seed meshes
     under the 5,000-dof screen cap (measured 2,567 derived / 2,852 YAML-seed dofs; the
     shipped 170-deg seed was 5,358)."""
@@ -241,6 +241,7 @@ def test_ripple12_reseeded_seed_fits_the_screen_dof_cap():
     cfg, space = _march("salmon_ripple12", BRIEFS / "organic_rollback_1in.yaml")
     families.validate(space.seed)
     spec = dataclasses.replace(mesh_spec("screen", cfg), f_max_hz=5500.0)
+    # tmp_path, not the shared repo runs/: parallel workers must not collide (2026-11-13).
     result = build.build_mesh(Design("FREEFORM", {"grid": space.seed.params["grid"]}),
-                              spec, cfg, Path("runs") / "s1a_probe", mode="screen")
+                              spec, cfg, tmp_path / "s1a_probe", mode="screen")
     assert result.n_triangles * cfg.mesh.dof_per_triangle <= cfg.mesh.dof_cap_screen

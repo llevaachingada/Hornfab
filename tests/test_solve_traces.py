@@ -87,7 +87,6 @@ def test_cut_points_follow_the_solver_convention():
 @requires_beat
 @requires_bempp
 @requires_mesher
-@pytest.mark.slow
 @pytest.mark.gpu
 def test_19_traces_reproduce_the_solvers_own_far_field(quarter6, tmp_path, capsys):
     state = clean_host_state()

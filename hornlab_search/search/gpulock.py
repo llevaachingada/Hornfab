@@ -29,12 +29,20 @@ import datetime
 import getpass
 import json
 import os
+import sys
 import time
 from pathlib import Path
 from typing import Callable
 
 # Env-var set by the lock holder so child processes can skip acquisition.
 _LOCK_OWNER_ENV = "HORNLAB_GPU_LOCK_OWNER"
+#: Policy when the lock is held by a LIVE process. Owner decision 2026-11-13: an interactive
+#: operator is allowed to overlap another GPU job ("I'm smart enough to not be running testing
+#: while I'm doing a solve"), so the default is to WARN and proceed instead of refusing. Set
+#: ``HORNLAB_GPU_LOCK=refuse`` for an unattended night/measurement run, or ``off`` to be silent.
+_POLICY_ENV = "HORNLAB_GPU_LOCK"
+_POLICIES = ("refuse", "warn", "off")
+_DEFAULT_POLICY = "warn"
 #: The CPU lane's own marker/lock, held by the nightly controller (2026-11-12 two-lane night).
 #: Same mechanism, separate file: a live CPU lock means the CPU lane's Julia hosts must be left
 #: alone by the GPU lane's gpu-clean/night hygiene, and vice versa.
@@ -181,8 +189,17 @@ def _acquire(path: Path, command: str) -> bool:
     return True
 
 
+def _resolve_policy(policy: str | None) -> str:
+    """``policy`` argument > ``HORNLAB_GPU_LOCK`` env > :data:`_DEFAULT_POLICY`."""
+    raw = policy if policy is not None else os.environ.get(_POLICY_ENV, "")
+    value = str(raw).strip().lower() or _DEFAULT_POLICY
+    if value not in _POLICIES:
+        raise ValueError(f"unknown GPU lock policy {value!r} (known: {_POLICIES})")
+    return value
+
+
 @contextlib.contextmanager
-def _locked(command: str, path: Path, owner_env: str):
+def _locked(command: str, path: Path, owner_env: str, policy: str | None = None):
     """The shared lock mechanism: exclusive file create, stale takeover, reentrancy via
     ``owner_env``, and removal on exit only when the lock is still ours."""
     my_pid = os.getpid()
@@ -227,9 +244,17 @@ def _locked(command: str, path: Path, owner_env: str):
         user = lock_data.get("user", "?")
         cmd = lock_data.get("command", "?")
         start = lock_data.get("start_time", "?")
-        raise GpuBusyError(
-            f'GPU busy: {user} running "{cmd}" (pid {holder_pid}) since {start}'
-        )
+        busy = f'GPU busy: {user} running "{cmd}" (pid {holder_pid}) since {start}'
+        resolved = _resolve_policy(policy)
+        if resolved == "refuse":
+            raise GpuBusyError(busy)
+        if resolved == "warn":
+            print(f"WARNING: {busy}. Proceeding WITHOUT the GPU lock "
+                  f"(HORNLAB_GPU_LOCK=refuse to make this fatal; run `hornlab-search gpu-clean` "
+                  f"before the next measurement).", file=sys.stderr)
+        # warn/off: proceed unlocked. We never acquired, so the finally below must not unlink.
+        yield
+        return
 
     # ---- set env var for children
     old_env = os.environ.get(owner_env)
@@ -253,17 +278,19 @@ def _locked(command: str, path: Path, owner_env: str):
 
 
 @contextlib.contextmanager
-def gpu_lock(command: str, runs_root: Path | None = None):
+def gpu_lock(command: str, runs_root: Path | None = None, policy: str | None = None):
     """Context manager that acquires the GPU lock for the duration of *command*.
 
-    Raises :class:`GpuBusyError` if the lock is held by a live process.
-    Takes over a stale lock whose PID is gone.
+    A live holder is handled per :func:`_resolve_policy`: ``refuse`` raises
+    :class:`GpuBusyError`, ``warn`` (the default, owner decision 2026-11-13) prints a loud
+    warning and proceeds unlocked, ``off`` proceeds silently. Stale locks (dead PID) are taken
+    over regardless of policy.
     Child processes whose ``HORNLAB_GPU_LOCK_OWNER`` env-var names the current
     lock PID proceed without acquiring (reentrancy for campaign subprocesses).
     Removes the lock on exit even on KeyboardInterrupt, but only when it still
     owns the lock.
     """
-    with _locked(command, _lock_path(runs_root), _LOCK_OWNER_ENV):
+    with _locked(command, _lock_path(runs_root), _LOCK_OWNER_ENV, policy):
         yield
 
 

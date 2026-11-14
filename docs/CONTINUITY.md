@@ -1,6 +1,40 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-13 (19:3x local) - TEST SUITE 3.1x FASTER (xdist), GPU LANE ON FUSED CUDA, GPU LOCK NOW ADVISORY
+
+- Branch `test/testspeed-2026-11-13` (worktree `oc-wt/testspeed`, owner-requested isolation), merged to
+  main this session. Plan/evidence: `docs/research/TEST_SUITE_OPTIMIZATION_2026-11-13.md`.
+- **[measured] Serial baseline:** 3,739 cases, 975.8 s test time, **1,092 s wall (18.2 min)**, 0 failed,
+  18 skipped, 21 deselected (`-m "not slow and not gpu and not crosscheck"`, full local venv).
+  Cost concentration: 41 tests >= 5 s carry **57.0 %**; 2,913 tests < 50 ms carry 2 %.
+- **[measured] `-n 6 --dist loadscope` + single-thread BLAS: 353.0 s wall (5.9 min) = 3.1x**, 3,766 cases.
+  The BLAS/OpenMP caps are REQUIRED: without them six workers each spawn a pool and the suite inflates
+  1.39x -> 1.83x (gmsh/OCCT tests 46 s -> 90 s). **`-n 8` is worse** (2,933 s test time; poles 56 s ->
+  186 s); 6 is the measured sweet spot, `auto` is not allowed on this box.
+- Parallel-safety fixes: `test_design_generators_grid_full_ring.py` (x2) and `test_s1a_driver_briefs.py`
+  wrote fixed `runs/c2_probe*` / `runs/s1a_probe`; now `tmp_path`. `pytest-xdist>=3` added to `[dev]`.
+- **GPU lane on the shipping path:** `test_solve_beat.py` builds `BeatBackend("cuda", cuda_fused=True)`,
+  routes every spec through `_spec()` (`spec_with(..., cuda_fused=True)` -> `SolveSpec.extra`), and
+  `test_11` asserts `meta["cuda_fused"] is True`. Rationale: fused wins at every size (1.42x at ~4k) and
+  fused-off FAILS at ~8k (`THROUGHPUT_N1_2026-11-12`); 154 configs set `cuda_fused: true`, 0 set false.
+  `test_solve_beat_fused_cuda.py` stays the one deliberate A/B; `test_solve_traces::test_19` stays
+  unfused (the trace contract was never validated against the fused assembler).
+- **`slow` retired:** removed from the 6 files that used it (16 of its 21 tests already carried
+  `gpu`/`crosscheck`; the other 5 were real BEM solves). `test_end_to_end.py` is now `gpu`. No nightly
+  tier; heavy CPU tests run in the parallel lane.
+- **GPU lock policy (owner directive):** default is now `warn` - a live holder prints the holder and the
+  command proceeds unlocked. `HORNLAB_GPU_LOCK=refuse` restores the old fatal behaviour (nights,
+  measurements, checkpoints); `off` silences. `gpu-clean` keeps its own refusal unless `--force`.
+  `_cmd_selftest` KEEPS its lock on purpose: its verified `worker.shutdown` would otherwise kill a live
+  job's host (the 2026-10-25 bug). Lock files are still written when free - they are the ownership
+  signal `worker.live_locked_lanes` uses.
+- **Pre-existing, NOT caused here:** `tests/test_tools_experiments_manifest.py` fails 4 + 24 collection
+  errors (FileNotFoundError on local data) under a *serial* run in this checkout, and the xdist run
+  reproduces exactly that and nothing else. Reported in ISSUES.
+- Verification: 42 lock/CLI/selftest tests pass (3 refusal cases now pass `policy="refuse"` explicitly;
+  4 new policy tests); 51 mesher tests (full-ring + s1a) pass with no stray `runs/` dirs; `compileall`
+  clean; `test_end_to_end.py` confirmed deselected from the CPU lane.
 ## 2026-11-13 (23:5xZ) - HANDOFF WRITTEN: GUI ARCHITECTURE FOR THE S8/S7 ANALYSIS TOOLS (docs only; no product change)
 
 - `docs/HANDOFF_S8_S7_GUI_2026-11-13.md` records the finished S8/S7 lane (`dc64fd7`) and plans the
