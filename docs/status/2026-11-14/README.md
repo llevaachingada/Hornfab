@@ -4,9 +4,9 @@ For the collaborator, before pulling. It covers the 12 Nov day report (`runs/ana
 and everything that landed on `main` from 12 to 14 Nov (265 commits, through `878d381`). J is the objective score;
 **lower is better**, and J is only comparable inside one objective version.
 
-**Interactive version** (same content, hover-free but live charts, light/dark):
-[open `index.html` rendered](https://htmlpreview.github.io/?https://github.com/llevaachingada/Hornfab/blob/docs/status-brief-2026-11-14/docs/status/2026-11-14/index.html)
-· source: [`index.html`](index.html). The charts below are static renders of that page.
+**Best viewed as the live page: https://llevaachingada.github.io/Hornfab/status/2026-11-14/**
+(same content with live charts, light/dark, phone-friendly; source: [`index.html`](index.html)).
+The charts below are static renders of that page.
 
 ## The short version
 
