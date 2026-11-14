@@ -1,6 +1,18 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-13 (20:3x local) - CI SPEED IS LIVE; C3 CONTRACT BREAK FIXED (ONE LINE)
+
+- [measured] CI test step: **385.3 s before -> 201.9 s after** (`-n 2 --dist loadscope`, one trigger,
+  pip cache); job wall 8m18s -> 4m15s. Same selection, same skips (3,386 passed / 296 skipped).
+- **C3 regression fixed:** 66d8509 added `SolveSettings.freq_batch_size` with
+  `None = absent = today's grouping`, but `tests/test_config.py::OPTIONAL_FIELDS` did not declare it,
+  so `test_examples_load_with_no_none_in_required_fields` failed for all 5 examples (+5 CI failures,
+  first caught by the new docs job in 31 s). Declared `solve.freq_batch_size` optional — the
+  mechanism the file already documents for every other opt-in key; no assertion changed.
+- CI failure count on main is still **23 pre-existing** (unchanged ids; see ISSUES). This commit
+  removes the +5 that C3 introduced; the remaining 23 are the other lane's lane.
+
 ## 2026-11-13 (20:2x local) - SPEED PROGRAM: SENIOR REVIEW LANDED (ADOPT WITH CORRECTIONS); E0 DONE; C3+C4 LANDED; E1b RUNNING; ROUND A ARMED
 
 - Four independent verification lanes (repo/run provenance, `hornlab_search` code, fork/Julia dataflow, evidence provenance)

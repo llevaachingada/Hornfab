@@ -24,6 +24,14 @@ Local-only, added 2026-11-13 (20:2x local) (**speed program: review landed + E0 
 - Open (from the review): A5 stale `20,237 → refuse` test must be RE-BASED (fix, not weaken) at the merge, per plan §14.
 
 
+Local-only, added 2026-11-13 (20:3x local) (**CI speed live; C3 contract break fixed; no GitHub issue state changed**):
+- [measured] CI test step 385.3 s -> **201.9 s** (job 8m18s -> 4m15s) with one trigger + pip cache +
+  `-n 2 --dist loadscope`. Skips unchanged (296-297).
+- Fixed: 66d8509's `SolveSettings.freq_batch_size` (documented `None = absent`) was missing from
+  `tests/test_config.py::OPTIONAL_FIELDS`; 5 example-param failures. Declared optional, assertions
+  untouched. The new `Docs check` job surfaced it in 31 s.
+- Still open: the 23 pre-existing CI failures below (unchanged ids).
+
 Local-only, added 2026-11-13 (20:0x local) (**CI topology integrated; two pre-existing repo issues surfaced**):
 - Applied: single CI trigger (PR + main), pip cache, docs paths ignored by the full job, a new
   `docs.yml` fast lane, and `-n 2 --dist loadscope` in CI. No GitHub issue state changed.

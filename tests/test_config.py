@@ -34,6 +34,10 @@ OPTIONAL_FIELDS = {"search.popsize", "search.restarts", "search.qd", "mesh.band_
                    "solve.source_profile_alpha",
                    # CPU lane 2026-11-12: Julia/BLAS thread count; absent = the library's "auto".
                    "solve.julia_threads",
+                   # C3 speed program: opt-in frequency-sweep batch size; None = absent = today's
+                   # grouping (per-frequency on CUDA/Metal, one call on CPU) and every existing hash
+                   # (config.py SolveSettings.freq_batch_size docstring).
+                   "solve.freq_batch_size",
                    # Day 2026-11-12 group B: all opt-in; absent = today's behaviour.
                    # (max_attempts unset in 'valid' mode means 4 x budget at runtime.)
                    "search.max_attempts", "search.links", "search.warm_start", "search.surrogate"}
