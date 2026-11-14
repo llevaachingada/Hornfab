@@ -83,8 +83,8 @@ Local-only, added 2026-11-13 (20:0x local) (**CI topology integrated; two pre-ex
 - **Fixed: `.gitignore` `reference/` was unanchored** and matched `docs/reference/`, silently ignoring
   every new file added there. Now `/reference/` (root CAD dir only).
 - Note for the docs job: `--check` imports the mesher (29/33 `code_ref`s), so `docs.yml` installs the
-  pinned mesher `--no-deps`. Do not add it to the main test job — it would turn 199 `requires_mesher`
-  skips into runs.
+  pinned mesher. Do not add it to the main test job — it would turn 199 `requires_mesher` skips into
+  runs. Both gates are green on main as of `0e1364a` (CI 4m21s, Docs check 27s).
 - **Open (pre-existing): CI is red on main** — 23 failed + 24 errors, identical on the four commits
   before the test-suite change. Groups: `test_search_qd_failure_isolation` (10, ribs missing in CI →
   ImportError instead of a skip), `test_bo_sensitivity_real` (2, absolute path baked into the test),
