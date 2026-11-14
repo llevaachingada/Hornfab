@@ -390,15 +390,25 @@ These are real inefficiencies, not "slow tests":
 
 **Gate:** per-file junit time before/after pasted; assertions untouched; no test renamed away.
 
-### Phase 3 — CI topology (≈1 h, ~5× fewer CI minutes) — R1/R2/R3/R6 from the prior review, still unapplied
+### Phase 3 — CI topology — APPLIED 2026-11-13
 
-1. One trigger: `pull_request` + `push: branches: [main]` (ends the 2-runs-per-push).
+Applied in `.github/workflows/`:
+
+1. One trigger: `pull_request` + `push: branches: [main]` (ends the 2-runs-per-push; 122 runs in one
+   day on 2026-11-12).
 2. `cache: pip` on `setup-python`.
-3. `paths-ignore: [docs/**, **/*.md]` on the main job + a small `docs` job that keeps
-   `tools/gen_param_catalog.py --check` and `tests/test_param_catalog.py tests/test_config.py`
-   (docs are a generated SSOT — this must not be dropped).
-4. `-n 2` in the CI test step.
-5. Turn on the required check on `main` (a red merge on 2026-11-12 cost two fix PRs).
+3. `paths-ignore: ["docs/**", "**/*.md", "NOTES_FOR_SENIOR.md"]` on the main job, plus a new
+   `docs.yml` that runs on docs-only changes and executes `tests/test_param_catalog.py tests/test_config.py`.
+4. `-n 2 --dist loadscope` in the CI test step, with the same single-thread BLAS/OpenMP env as local.
+5. Required check on `main`: **not done** — that is a GitHub branch-protection setting, owner action.
+
+**`gen_param_catalog.py --check` is deliberately NOT gated.** It fails on a clean tree today:
+`docs/reference/PARAMETERS.md` carries a hand-maintained "Search-config keys" section that the
+generator does not emit, so `--check` reports STALE and `--write` deletes 158 lines of hand-written
+contract text. `docs.yml` documents the gap and gates the JSON byte-equality test instead. Fold the
+search/brief keys into the generator, then add the `--check` step.
+
+Remaining from the prior review: R5 (CI-as-merge-gate protocol) and R6 (required checks).
 
 **Gate:** one PR shows before/after wall time and a green required check; total CI minutes for a week
 compared against the 824-min/day baseline.

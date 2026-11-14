@@ -3,6 +3,20 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-13 (**Elites tab redesigned for non-technical readers: brief/typology constraints and isometric horn thumbnails, best-per-typology / best-per-brief browsing, paginated 24 at a time, CSV-path noise removed; payload extended with brief/family/brief_target; bo-study-v1.1 final offline integration landed (M2 sensitivity/proposal evidence, immutable run package + `hornlab-search study` CLI, durable proposal-cadence recovery, B8 adversarial full loop); profile-outline thumbnail geometry fixed after live check (closed outline split at the mouth rim, outer wall kept); card hierarchy tuned per owner (constraint line + score largest, gate pills smaller); no GitHub issue state changed**).
 
+Local-only, added 2026-11-13 (20:0x local) (**CI topology integrated; two pre-existing repo issues surfaced**):
+- Applied: single CI trigger (PR + main), pip cache, docs paths ignored by the full job, a new
+  `docs.yml` fast lane, and `-n 2 --dist loadscope` in CI. No GitHub issue state changed.
+- **Open (pre-existing): `tools/gen_param_catalog.py --check` fails on main.** `PARAMETERS.md` has a
+  hand-maintained "Search-config keys" section the generator does not emit; `--check` reports STALE and
+  `--write` deletes 158 lines of hand-written text. Fix = fold those keys into the generator, then gate
+  `--check` in `docs.yml`.
+- **Open (pre-existing): CI is red on main** — 23 failed + 24 errors, identical on the four commits
+  before the test-suite change. Groups: `test_search_qd_failure_isolation` (10, ribs missing in CI →
+  ImportError instead of a skip), `test_bo_sensitivity_real` (2, absolute path baked into the test),
+  `test_tools_analysis_parameter_study` (4, KeyErrors), `test_tools_analysis_geometry_descriptors` +
+  `_hypothesis_cards` (2, no `hornlab_mesher` in CI), `test_design_generated` (1),
+  `test_tools_experiments_manifest` (4 + 24 errors, local `scratch/` data). Needs its own lane.
+
 Local-only, added 2026-11-13 (19:3x local) (**test-suite speed + GPU lane; no GitHub issue state changed**):
 - Applied (branch `test/testspeed-2026-11-13`, merged to main): `pytest-xdist -n 6 --dist loadscope` with
   single-thread BLAS/OpenMP caps takes the offline suite from **18.2 min to 5.9 min (3.1x)** at equal
