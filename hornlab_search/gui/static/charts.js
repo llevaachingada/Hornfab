@@ -1,6 +1,7 @@
 // charts.js — hornlab-search GUI
 // AGPL-3.0-or-later.  Adapted from tools/review/review_template.html (same author).
-// Exports: el, chart, heat, cmap, niceTicks, angleTicks, diFromCuts, logGrid, AXES, fixedRange, polarPlot
+// Exports: el, chart, heat, cmap, niceTicks, angleTicks, diFromCuts, logGrid, AXES, fixedRange, polarPlot,
+//          catColor/CAT_N (validated categorical palette), fmtSmart, fmtLogTick, sparkline, stackBarHtml
 
 export const NS = "http://www.w3.org/2000/svg";
 
@@ -170,12 +171,30 @@ export function measuredWidth(svg, fallback) {
   return w >= 120 ? w : fallback;
 }
 
-export function chart(svg, { W = 460, H = 240, xlog = false, ylog = false, xlim, ylim,
+/** One shared observer: a chart whose own box changes width (grid reflow, late font load, a
+ *  details panel opening, the nav collapsing) is redrawn 1:1 at the new width with the options it
+ *  was last drawn with, instead of being stretched or squashed by CSS. */
+const _chartRO = (typeof ResizeObserver !== "undefined") ? new ResizeObserver(entries => {
+  for (const e of entries) {
+    const svg = e.target;
+    if (!svg.isConnected || !svg._chartOpts) { _chartRO.unobserve(svg); continue; }
+    const w = Math.round(e.contentRect.width);
+    if (w >= 120 && Math.abs(w - (svg._chartW || 0)) > 2) {
+      requestAnimationFrame(() => { if (svg.isConnected && svg._chartOpts) chart(svg, svg._chartOpts); });
+    }
+  }
+}) : null;
+
+export function chart(svg, opts) {
+  let { W = 460, H = 240, xlog = false, ylog = false, xlim, ylim,
     xticks, yticks, xlabel, ylabel, band, hlines = [], vlines = [], series, fill,
-    yMinor, refLines = [], markers = false, unscored = [], ariaLabel }) {
+    yMinor, refLines = [], markers = false, unscored = [], ariaLabel, square = false } = opts;
   svg.innerHTML = "";
   W = measuredWidth(svg, W);
   const m = { l: 44, r: 12, t: ylabel ? 20 : 10, b: 32 };   // unit label sits above the plot, clear of the top tick
+  if (square) H = W - m.l - m.r + m.t + m.b;                 // equal-scale axes stay visually equal
+  svg._chartOpts = opts; svg._chartW = W;
+  if (_chartRO) { try { _chartRO.observe(svg); } catch (_) { /* non-element shims in tests */ } }
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
   svg.setAttribute("width", W); svg.setAttribute("height", H);
   if (ariaLabel) { svg.setAttribute("role", "img"); svg.setAttribute("aria-label", ariaLabel); }
@@ -234,7 +253,7 @@ export function chart(svg, { W = 460, H = 240, xlog = false, ylog = false, xlim,
     const yt = Y(t); if (yt == null) continue;
     el("line", { x1: m.l, x2: W - m.r, y1: yt, y2: yt }, g);
     const tt = el("text", { x: m.l - 6, y: yt + 3, "text-anchor": "end" }, svg);
-    tt.textContent = ylog ? (t >= 1 ? t : t.toExponential(0)) : t;
+    tt.textContent = ylog ? fmtLogTick(t) : t;
   }
   // C1: minor x gridlines for log axis (lighter, unlabelled)
   if (xlog) {
@@ -250,7 +269,12 @@ export function chart(svg, { W = 460, H = 240, xlog = false, ylog = false, xlim,
     tt.textContent = t >= 1000 ? (t / 1000) + "k" : t;
   }
   if (xlabel) { const t = el("text", { x: W - m.r, y: H - 3, "text-anchor": "end" }, svg); t.textContent = xlabel; }
-  if (ylabel) { const t = el("text", { x: m.l - 6, y: 11, "text-anchor": "end" }, svg); t.textContent = ylabel; }
+  // Unit label sits above the y axis, left-aligned to the chart edge so long labels never clip.
+  if (ylabel) {
+    const short = String(ylabel).length * 6.6 <= m.l - 8;     // fits beside the axis: original placement
+    const t = el("text", short ? { x: m.l - 6, y: 11, "text-anchor": "end" } : { x: 2, y: 11, "text-anchor": "start" }, svg);
+    t.textContent = ylabel;
+  }
   for (const h of hlines) {
     const hy = Y(h.y); if (hy == null) continue;
     el("line", { x1: m.l, x2: W - m.r, y1: hy, y2: hy, stroke: h.color, "stroke-width": 1.5, "stroke-dasharray": h.dash ? "5 4" : "none" }, svg);
@@ -324,6 +348,96 @@ export function chart(svg, { W = 460, H = 240, xlog = false, ylog = false, xlim,
   }
 }
 
+// ── Shared data-viz kit (2026-11-14) ────────────────────────────────
+// One validated categorical palette, one number formatter, and small HTML/SVG marks that any
+// view can drop in (sparklines, 100% stacked bars). Colours resolve from app.css tokens so light
+// and dark themes each get their own validated steps.
+
+/** Validated categorical order (dataviz validator, 2026-11-14: worst adjacent CVD ΔE 9.1 light on
+ *  #ffffff / 8.4 dark on #151d23; normal-vision ≥ 19.3). Light steps double as the no-CSS fallback. */
+export const CAT_N = 8;
+export const CAT_LIGHT = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#6250d6", "#e34948"];
+const _cssSafe = (n) => { try { return css(n); } catch (_) { return ""; } };
+
+/** Categorical colour for slot i (0-based). Never cycles: slots past 8 get the neutral "other". */
+export function catColor(i) {
+  const k = Number(i);
+  if (!Number.isInteger(k) || k < 0 || k >= CAT_N) return _cssSafe("--cat-other") || "#8a96a0";
+  return _cssSafe(`--cat-${k + 1}`) || CAT_LIGHT[k];
+}
+
+/** Expand [lo, hi] (> 0) outward to the nearest 1-2-5 decade steps, so log-axis end ticks are
+ *  round numbers and never collide with an interior tick. */
+export function logNiceLimits(lo, hi) {
+  lo = Number(lo); hi = Number(hi);
+  if (!(lo > 0) || !(hi > 0)) return [lo, hi];
+  if (hi < lo) { const t = lo; lo = hi; hi = t; }
+  const steps = (e) => [1, 2, 5].map(m => m * Math.pow(10, e));
+  let a = lo, b = hi;
+  for (let e = Math.floor(Math.log10(lo)); e >= Math.floor(Math.log10(lo)) - 1; e--) {
+    const c = steps(e).filter(v => v <= lo * 0.98); if (c.length) { a = +Math.max(...c).toPrecision(3); break; }
+  }
+  for (let e = Math.floor(Math.log10(hi)); e <= Math.floor(Math.log10(hi)) + 1; e++) {
+    const c = steps(e).filter(v => v >= hi * 1.02); if (c.length) { b = +Math.min(...c).toPrecision(3); break; }
+  }
+  return [a, b];
+}
+
+/** Log-axis tick label: 2 significant digits, plain notation (0.5 not 5e-1). */
+export function fmtLogTick(t) {
+  const n = Number(t);
+  if (!isFinite(n)) return "";
+  if (n !== 0 && Math.abs(n) < 0.001) return n.toExponential(0);
+  const v = +n.toPrecision(2);
+  return v >= 1000 ? `${+(v / 1000).toPrecision(2)}k` : String(v);
+}
+
+/** Display number with sensible precision for its size: 600 · 12.3 · 2.13 · 0.687. */
+export function fmtSmart(v) {
+  const n = Number(v);
+  if (v == null || v === "" || !isFinite(n)) return "–";
+  const a = Math.abs(n);
+  const d = a >= 100 ? 0 : a >= 10 ? 1 : a >= 1 ? 2 : 3;
+  return fmt(n, d);
+}
+
+const _escAttr = (s) => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+/** Inline SVG sparkline (string). pts: [[x, y], ...]. log: log10 y (for J-style curves whose
+ *  first drop would flatten a linear axis). Ends with a dot on the last value. */
+export function sparkline(pts, { W = 140, H = 36, log = false, color = "var(--best)", label = "" } = {}) {
+  const P = (pts || []).filter(p => p && isFinite(Number(p[0])) && isFinite(Number(p[1])) && (!log || Number(p[1]) > 0))
+    .map(p => [Number(p[0]), log ? Math.log10(Number(p[1])) : Number(p[1])]);
+  if (P.length < 2) return "";
+  const pad = 3;
+  const xs = P.map(p => p[0]), ys = P.map(p => p[1]);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+  const X = v => pad + (x1 > x0 ? (v - x0) / (x1 - x0) : 0) * (W - 2 * pad);
+  const Y = v => pad + (y1 > y0 ? (y1 - v) / (y1 - y0) : 0.5) * (H - 2 * pad);
+  const d = P.map((p, i) => `${i ? "L" : "M"}${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join("");
+  const lp = P[P.length - 1];
+  const aria = label ? `role="img" aria-label="${_escAttr(label)}"` : `aria-hidden="true"`;
+  return `<svg class="spark" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" ${aria}>`
+    + `<path d="${d}" fill="none" stroke="${color}" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>`
+    + `<circle cx="${X(lp[0]).toFixed(1)}" cy="${Y(lp[1]).toFixed(1)}" r="2.6" fill="${color}"/></svg>`;
+}
+
+/** 100% stacked horizontal bar (HTML string). segs: [{value, cls?, color?, title?, label?}].
+ *  Widths are value / total (total defaults to the sum). Segments are separated by a 2px surface
+ *  gap (.stackbar CSS); a label prints inside a segment only when it is at least minLabelPct wide. */
+export function stackBarHtml(segs, { total, cls = "", ariaLabel = "", minLabelPct = 9 } = {}) {
+  const S = (segs || []).filter(s => s && isFinite(Number(s.value)) && Number(s.value) > 0);
+  const T = isFinite(Number(total)) && Number(total) > 0 ? Number(total) : S.reduce((a, s) => a + Number(s.value), 0);
+  if (!(T > 0) || !S.length) return "";
+  const body = S.map(s => {
+    const w = Math.max(0, Math.min(100, Number(s.value) / T * 100));
+    const style = `width:${w.toFixed(2)}%${s.color ? `;background:${s.color}` : ""}`;
+    const lab = s.label && w >= minLabelPct ? `<span class="stackbar-lab">${_escAttr(s.label)}</span>` : "";
+    return `<span class="stackbar-seg${s.cls ? " " + s.cls : ""}" style="${style}"${s.title ? ` title="${_escAttr(s.title)}"` : ""}>${lab}</span>`;
+  }).join("");
+  return `<div class="stackbar${cls ? " " + cls : ""}" role="img"${ariaLabel ? ` aria-label="${_escAttr(ariaLabel)}"` : ""}>${body}</div>`;
+}
+
 /** Perceptual colour ramp: dark navy → teal → pale yellow. -6 dB lands in yellow-green. */
 const STOPS = [[0,[18,22,48]],[0.35,[36,70,120]],[0.6,[24,134,140]],[0.85,[120,196,120]],[0.95,[230,220,110]],[1,[255,248,200]]];
 export function cmap(t) {
@@ -380,11 +494,11 @@ export const TERMS = ["cov", "rip", "di", "dislope", "flat", "load"];
 export const DEFW  = { cov: 1, rip: 1, di: 0.3, dislope: 0.5, flat: 0.5, load: 0 };
 
 /** Deterministic group colour palette (8 slots). */
-const GROUP_COLORS = ["#0d6e7a","#a3713a","#2f7d3b","#b23a3a","#7a4a9a","#2a6d9a","#9a6a2a","#5a7a3a"];
 const _gidx = {};
+/** Stable colour per group name, in first-seen order (colour follows the entity, never its rank). */
 export function groupColor(g) {
-  if (!(g in _gidx)) _gidx[g] = Object.keys(_gidx).length % GROUP_COLORS.length;
-  return GROUP_COLORS[_gidx[g]];
+  if (!(g in _gidx)) _gidx[g] = Object.keys(_gidx).length;
+  return catColor(_gidx[g]);
 }
 
 
@@ -462,8 +576,10 @@ export function polarMap(svg, rows, angles, freqs, { H = 230, isobars = [-3, -6,
 }
 
 /** Family palette: distinct hues by index (not by group), readable on light and dark backgrounds. */
-export const FAMILY_COLORS = ["#2a9db0", "#d98a2b", "#7fb43a", "#c9566e", "#8b6fd1", "#3b7dd8", "#b8a23a", "#5fb8a0", "#d46a3c", "#9a9a9a"];
-export function familyColor(i) { return FAMILY_COLORS[i % FAMILY_COLORS.length]; }
+/** Families / design entries share the validated categorical palette (catColor). Past slot 8 an
+ *  entry folds to the neutral "other" colour instead of re-using a hue (legends carry the name). */
+export const FAMILY_COLORS = CAT_LIGHT;
+export function familyColor(i) { return catColor(i); }
 
 /** Wall cross-section, true aspect: H plane to the right (+r), V plane mirrored left (−r), depth z up.
  *  designs: [{profile: {h: [[z, r]...], v: [...], kind}, color, label, filled}]. Section outlines
@@ -591,16 +707,26 @@ export function wallSection(svg, designs, { H = 300, compact = false, extent = n
 // Frequency on a log x-axis, angle on y, level relative to on-axis in DISCRETE 3 dB colour bands from
 // -30 to 0 dB (10 bands, navy -> dark red), white contour lines every 3 dB (-6 dB drawn heavier: the
 // beamwidth edge), a labelled colour bar, and a hover crosshair that reads frequency / angle / dB.
+// ── Directivity isobar map (v3, 2026-11-14) ─────────────────────────────────────────────────
+// Classic 3 dB rainbow bands (the convention of ARTA / CLIO / VituixCAD maps, kept at the owner's
+// request) with a hairline contour between every band and a slightly heavier −6 dB beamwidth edge.
+// Clean frame: ticks sit outside, no grid over the data, one shared scale for a set of maps.
+
+export const ISOBAR_MIN = -30, ISOBAR_MAX = 0, ISOBAR_STEP = 3;
+const _N_BANDS = (ISOBAR_MAX - ISOBAR_MIN) / ISOBAR_STEP;
+/** The ten 3 dB band colours, quietest first (also the 3D balloon's ramp: one scale, two views). */
 export const ISOBAR_COLORS = ["#00008F", "#0000FF", "#006FFF", "#00DFFF", "#4FFFBF",
                               "#BFFF4F", "#FFDF00", "#FF6F00", "#FF0000", "#8F0000"];
-export const ISOBAR_MIN = -30, ISOBAR_MAX = 0, ISOBAR_STEP = 3;
+const _BAND_RGB = ISOBAR_COLORS.map(h => { const n = parseInt(h.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; });
+// C8 over-range: an off-axis lobe more than OVER_MIN dB louder than on-axis. 0..+1 dB stays in the
+// top band: the map is normalised to 0° per frequency, so a sub-dB excess is a tiny on-axis dip.
+export const OVER_RANGE_COLOR = "#FFB0C8", OVER_MIN = 1;
 
-function bandColor(v) {
-  const n = ISOBAR_COLORS.length;
-  const t = (Math.min(Math.max(v, ISOBAR_MIN), ISOBAR_MAX - 1e-9) - ISOBAR_MIN) / (ISOBAR_MAX - ISOBAR_MIN);
-  return ISOBAR_COLORS[Math.min(n - 1, Math.floor(t * n))];
+function isoRGB(v) {
+  if (v > OVER_MIN) return [255, 176, 200];
+  if (v < ISOBAR_MIN) return _BAND_RGB[0];
+  return _BAND_RGB[Math.min(_N_BANDS - 1, Math.floor((Math.min(v, ISOBAR_MAX - 1e-9) - ISOBAR_MIN) / ISOBAR_STEP))];
 }
-function hexRgb(h) { const n = parseInt(h.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; }
 
 /** Bilinear sample of rows[fi][ai] at fractional indices (fi, ai). */
 function sample(rows, fi, ai) {
@@ -615,11 +741,74 @@ function sample(rows, fi, ai) {
 const MS = { 1: ["l", "t"], 2: ["t", "r"], 3: ["l", "r"], 4: ["r", "b"], 5: ["l", "t", "r", "b"], 6: ["t", "b"], 7: ["l", "b"],
              8: ["l", "b"], 9: ["t", "b"], 10: ["t", "r", "l", "b"], 11: ["r", "b"], 12: ["l", "r"], 13: ["t", "r"], 14: ["l", "t"] };
 
-export function isobarMap(svg, rows, angles, freqs, { H = 300, title = "", angleTicks = null, xlim, f0 } = {}) {
+/** Marching-squares contour of a regular grid (row-major vals, NaN = no data) at level L, as an
+ *  SVG path. Cell (px, py) centre maps to (ox + (px + 0.5) * sx, oy + (py + 0.5) * sy). Shared by
+ *  isobarMap and globePlot so both draw the same −6 dB edge. */
+function _msPath(vals, cw, chh, L, ox, oy, sx, sy) {
+  let d = "";
+  for (let py = 0; py < chh - 1; py++) for (let px = 0; px < cw - 1; px++) {
+    const v0 = vals[py * cw + px], v1 = vals[py * cw + px + 1], v2 = vals[(py + 1) * cw + px + 1], v3 = vals[(py + 1) * cw + px];
+    if (!isFinite(v0) || !isFinite(v1) || !isFinite(v2) || !isFinite(v3)) continue;
+    const c = (v0 > L) | ((v1 > L) << 1) | ((v2 > L) << 2) | ((v3 > L) << 3);
+    if (c === 0 || c === 15) continue;
+    const it = (va, vb) => (L - va) / (vb - va);
+    const P = { t: () => [px + it(v0, v1), py], r: () => [px + 1, py + it(v1, v2)],
+                b: () => [px + it(v3, v2), py + 1], l: () => [px, py + it(v0, v3)] };
+    const segs = MS[c];
+    for (let k = 0; k < segs.length; k += 2) {
+      const p1 = P[segs[k]](), p2 = P[segs[k + 1]]();
+      d += "M" + (ox + (p1[0] + 0.5) * sx).toFixed(1) + "," + (oy + (p1[1] + 0.5) * sy).toFixed(1) +
+           "L" + (ox + (p2[0] + 0.5) * sx).toFixed(1) + "," + (oy + (p2[1] + 0.5) * sy).toFixed(1);
+    }
+  }
+  return d;
+}
+
+/** Draw the isobar contour set into `parent`: a white hairline between every 3 dB band, the −6 dB
+ *  beamwidth edge a little heavier, and a dotted outline round any lobe above +1 dB. */
+function _isoContours(parent, vals, cw, chh, vmax, ox, oy, sx, sy) {
+  for (let L = ISOBAR_MIN + ISOBAR_STEP; L < ISOBAR_MAX; L += ISOBAR_STEP) {
+    const d = _msPath(vals, cw, chh, L, ox, oy, sx, sy);
+    if (!d) continue;
+    const edge = L === -6;
+    el("path", { d, fill: "none", stroke: "#ffffff", "stroke-opacity": edge ? 0.95 : 0.6,
+                 "stroke-width": edge ? 1.1 : 0.5, "stroke-linejoin": "round" }, parent);
+  }
+  if (vmax > OVER_MIN) {
+    const d = _msPath(vals, cw, chh, OVER_MIN, ox, oy, sx, sy);
+    if (d) el("path", { d, fill: "none", stroke: "#ffffff", "stroke-opacity": 0.9, "stroke-width": 0.7, "stroke-dasharray": "1.5 1.5" }, parent);
+  }
+}
+
+/** Shared legend for a set of isobar maps (HTML string): the band scale once, plus the line keys.
+ *  Use with isobarMap(..., { legend: false }) so small multiples do not each repeat a colour bar. */
+export function isobarLegendHtml({ target = false, f0 = false, over = false } = {}) {
+  const sw = ISOBAR_COLORS.slice().reverse();          // loud → quiet, left → right
+  const ticks = [];
+  for (let L = ISOBAR_MAX; L >= ISOBAR_MIN; L -= 6) ticks.push(L);
+  const bar = `<span class="iso-scale">${sw.map(c => `<i style="background:${c}"></i>`).join("")}</span>`;
+  const lab = `<span class="iso-scale-lab">${ticks.map(L => `<span>${L === 0 ? "0" : "−" + Math.abs(L)}</span>`).join("")}</span>`;
+  const keys = [
+    `<span class="iso-key"><svg width="22" height="8" aria-hidden="true"><line x1="0" x2="22" y1="4" y2="4" stroke="currentColor" stroke-width="1.1"/></svg>−6 dB beamwidth edge (thin lines: every 3 dB)</span>`,
+    target ? `<span class="iso-key"><svg width="22" height="8" aria-hidden="true"><line x1="0" x2="22" y1="4" y2="4" stroke="currentColor" stroke-width="0.9" stroke-dasharray="4 3"/></svg>coverage target</span>` : "",
+    f0 ? `<span class="iso-key iso-key-f0"><svg width="22" height="8" aria-hidden="true"><line x1="11" x2="11" y1="0" y2="8" stroke="currentColor" stroke-width="1" stroke-dasharray="2 2"/></svg>f0 scoring floor</span>` : "",
+    over ? `<span class="iso-key"><i class="iso-over" style="background:${OVER_RANGE_COLOR}"></i>off-axis lobe &gt; +1 dB</span>` : "",
+  ].filter(Boolean).join("");
+  return `<div class="iso-legend"><div class="iso-scale-wrap"><span class="iso-unit">dB re on-axis</span>${bar}${lab}</div><div class="iso-keys">${keys}</div></div>`;
+}
+
+/** Directivity isobar map (sonogram): level re on-axis vs log frequency (x) and angle (y).
+ *  Options: title; H; angleTicks (default ±90 in 30° steps); xlim (axis domain, colour only over the
+ *  solved grid); f0 (scoring floor, Hz); target (full coverage angle, deg → ±target/2 guides);
+ *  legend (default true: a slim per-map scale; false when a shared isobarLegendHtml() is shown). */
+export function isobarMap(svg, rows, angles, freqs, { H = 300, title = "", angleTicks = null, xlim, f0, target, legend = true } = {}) {
   svg.innerHTML = "";
   if (!rows || !rows.length || !angles || !angles.length || !freqs || freqs.length < 2) return;
   const W = measuredWidth(svg, 520);
-  const m = { l: 46, r: 64, t: title ? 22 : 10, b: 34 };
+  const ink = css("--ink") || "#15202a", muted = css("--muted") || "#5a6873", rule = css("--rule") || "#a9b4bb";
+  const tg = Number(target), hasTarget = isFinite(tg) && tg > 0;
+  const hasF0 = isFinite(Number(f0)) && Number(f0) > 0;
+  const m = { l: 46, r: legend ? 64 : (hasTarget ? 34 : 12), t: (title ? 22 : 10) + (hasF0 ? 12 : 0), b: 34 };
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.setAttribute("width", W); svg.setAttribute("height", H);
   svg.dataset.chart = "1";
   const pw = W - m.l - m.r, ph = H - m.t - m.b;
@@ -638,28 +827,35 @@ export function isobarMap(svg, rows, angles, freqs, { H = 300, title = "", angle
   const a0 = angles[0], a1 = angles[angles.length - 1];
   const X = f => m.l + (Math.log10(f) - xlo) / (xhi - xlo) * pw;
   const Y = a => m.t + (a1 - a) / (a1 - a0) * ph;                     // +90 at the top
-  // fractional row index of a log-frequency (rows are on the solved, log-spaced grid)
   const fIndex = l => { let i = 0; while (i < lf.length - 2 && l > lf[i + 1]) i++; return i + Math.max(0, Math.min(1, (l - lf[i]) / (lf[i + 1] - lf[i]))); };
   const aIndex = a => (a - a0) / (a1 - a0) * (angles.length - 1);
-  // raster: smooth (bilinear) data shown in discrete colour bands, one canvas pixel per ~2 screen pixels
-  const cw = Math.max(80, Math.round(pw / 2)), chh = Math.max(60, Math.round(ph / 2));
-  const cv = document.createElement("canvas"); cv.width = cw; cv.height = chh;
-  const ctx = cv.getContext("2d"), img = ctx.createImageData(cw, chh);
-  const vals = new Float32Array(cw * chh);
-  // Only the solved data domain carries colour; band margins stay transparent and carry a NaN
-  // sentinel so marching squares skips them (never extrapolate the edge colours into the margins).
   const tol = 1e-9 * Math.max(1, Math.abs(lf0), Math.abs(lf1));
-  // C8: over-range colour for values > 0 dB (pale pink), so off-axis lobes louder than on-axis are visible
-  const OVER_RANGE_COLOR = "#FFB0C8";
+  const solvedAt = lg => lg >= lf0 - tol && lg <= lf1 + tol;
+
+  // contour grid (~2 screen px per cell) for the −6 dB edge and the over-range outline
+  const cw = Math.max(80, Math.round(pw / 2)), chh = Math.max(60, Math.round(ph / 2));
+  const vals = new Float32Array(cw * chh);
+  let vmax = -Infinity;
   for (let py = 0; py < chh; py++) {
     const ai = aIndex(a1 - (py + 0.5) / chh * (a1 - a0));
     for (let px = 0; px < cw; px++) {
       const lg = xlo + (px + 0.5) / cw * (xhi - xlo);
-      if (lg < lf0 - tol || lg > lf1 + tol) { vals[py * cw + px] = NaN; continue; }
-      const v = sample(rows, fIndex(lg), ai);
+      const v = solvedAt(lg) ? sample(rows, fIndex(lg), ai) : NaN;   // unsolved margin: NaN, skipped
       vals[py * cw + px] = v;
-      const c = v > 0 ? hexRgb(OVER_RANGE_COLOR) : hexRgb(bandColor(v));
-      const o = (py * cw + px) * 4;
+      if (v > vmax) vmax = v;
+    }
+  }
+  // filled bands at device resolution (smooth edges); the unsolved margin stays transparent
+  const dpr = Math.max(1, Math.min(2, (typeof window !== "undefined" && window.devicePixelRatio) || 1));
+  const fw = Math.max(80, Math.min(1800, Math.round(pw * dpr))), fh = Math.max(60, Math.min(1000, Math.round(ph * dpr)));
+  const cv = document.createElement("canvas"); cv.width = fw; cv.height = fh;
+  const ctx = cv.getContext("2d"), img = ctx.createImageData(fw, fh);
+  for (let py = 0; py < fh; py++) {
+    const ai = aIndex(a1 - (py + 0.5) / fh * (a1 - a0));
+    for (let px = 0; px < fw; px++) {
+      const lg = xlo + (px + 0.5) / fw * (xhi - xlo);
+      if (!solvedAt(lg)) continue;
+      const c = isoRGB(sample(rows, fIndex(lg), ai)), o = (py * fw + px) * 4;
       img.data[o] = c[0]; img.data[o + 1] = c[1]; img.data[o + 2] = c[2]; img.data[o + 3] = 255;
     }
   }
@@ -669,112 +865,236 @@ export function isobarMap(svg, rows, angles, freqs, { H = 300, title = "", angle
   el("rect", { x: m.l, y: m.t, width: pw, height: ph }, el("clipPath", { id: clipId }, defs));
   const clipped = el("g", { "clip-path": `url(#${clipId})` }, svg);
   el("image", { href: cv.toDataURL(), x: m.l, y: m.t, width: pw, height: ph, preserveAspectRatio: "none" }, clipped);
-  // contour lines every 3 dB (marching squares on the raster grid), white as in Boundary Lab
-  const sx = pw / cw, sy = ph / chh;
-  for (let L = ISOBAR_MIN + ISOBAR_STEP; L < ISOBAR_MAX; L += ISOBAR_STEP) {
-    let d = "";
-    for (let py = 0; py < chh - 1; py++) for (let px = 0; px < cw - 1; px++) {
-      const v0 = vals[py * cw + px], v1 = vals[py * cw + px + 1], v2 = vals[(py + 1) * cw + px + 1], v3 = vals[(py + 1) * cw + px];
-      if (!isFinite(v0) || !isFinite(v1) || !isFinite(v2) || !isFinite(v3)) continue;   // unsolved margin cell
-      const c = (v0 > L) | ((v1 > L) << 1) | ((v2 > L) << 2) | ((v3 > L) << 3);
-      if (c === 0 || c === 15) continue;
-      const it = (va, vb) => (L - va) / (vb - va);
-      const P = { t: () => [px + it(v0, v1), py], r: () => [px + 1, py + it(v1, v2)],
-                  b: () => [px + it(v3, v2), py + 1], l: () => [px, py + it(v0, v3)] };
-      const segs = MS[c];
-      for (let k = 0; k < segs.length; k += 2) {
-        const p1 = P[segs[k]](), p2 = P[segs[k + 1]]();
-        d += "M" + (m.l + (p1[0] + 0.5) * sx).toFixed(1) + "," + (m.t + (p1[1] + 0.5) * sy).toFixed(1) +
-             "L" + (m.l + (p2[0] + 0.5) * sx).toFixed(1) + "," + (m.t + (p2[1] + 0.5) * sy).toFixed(1);
-      }
-    }
-    if (d) {
-      // dark halo first (under), white core second (over): the 0.55-opaque halo composites
-      // ≈ 3.7:1 over #FFDF00 and the white core on it ≈ 5:1 — legible on every colormap band
-      el("path", { d, fill: "none", stroke: "#10181d", "stroke-opacity": 0.55,
-                   "stroke-width": L === -6 ? 3.4 : 2.6 }, clipped);
-      el("path", { d, fill: "none", stroke: "#ffffff", "stroke-opacity": L === -6 ? 0.98 : 0.8,
-                   "stroke-width": L === -6 ? 1.8 : 1.1 }, clipped);
+
+  // contours: hairline between every band, −6 dB heavier, dotted > +1 dB outline
+  _isoContours(clipped, vals, cw, chh, vmax, m.l, m.t, pw / cw, ph / chh);
+  // coverage target: thin dashed guides the −6 dB edge should follow; labelled in the right margin
+  if (hasTarget) {
+    for (const a of [tg / 2, -tg / 2]) {
+      if (a < a0 || a > a1) continue;
+      el("line", { x1: m.l, x2: m.l + pw, y1: Y(a), y2: Y(a), stroke: "#ffffff", "stroke-opacity": 0.95,
+                   "stroke-width": 0.9, "stroke-dasharray": "4 3" }, clipped);
+      if (!legend) el("text", { x: m.l + pw + 4, y: Y(a) + 3, style: `fill:${muted};font-size:9px` }, svg).textContent =
+        `${a > 0 ? "+" : "−"}${+Math.abs(a).toFixed(1)}°`;
     }
   }
-  // grid and axes (angleTicks: optional — the balloon view passes 0..180 theta ticks over a
-  // 0..180 polar-angle slice; default keeps the ±90° behaviour all other callers rely on)
+
+  // Boundary Lab frame: grey grid over the data, labels outside, solved frequencies ticked below
   const g = el("g", {}, svg);
-  // C1: minor log gridlines (lighter) at 3,4,6,7,8,9 × decade
   const { minor: xMinorIso } = logGrid(dLo, dHi);
   for (const t of xMinorIso) {
-    el("line", { x1: X(t), x2: X(t), y1: m.t, y2: m.t + ph, stroke: "#808080", "stroke-opacity": 0.3, "stroke-width": 0.8 }, g);
+    if (t <= dLo || t >= dHi) continue;
+    el("line", { x1: X(t), x2: X(t), y1: m.t, y2: m.t + ph, stroke: "#808080", "stroke-opacity": 0.3, "stroke-width": 0.6 }, g);
   }
   for (const t of logTicks(dLo, dHi)) {
-    el("line", { x1: X(t), x2: X(t), y1: m.t, y2: m.t + ph, stroke: "#808080", "stroke-opacity": 0.7, "stroke-width": 1.0 }, g);
+    el("line", { x1: X(t), x2: X(t), y1: m.t, y2: m.t + ph, stroke: "#808080", "stroke-opacity": 0.6, "stroke-width": 0.8 }, g);
     el("text", { x: X(t), y: m.t + ph + 14, "text-anchor": "middle" }, svg).textContent = t >= 1000 ? t / 1000 + "k" : t;
   }
   for (const a of (angleTicks || [-90, -60, -30, 0, 30, 60, 90])) {
     if (a < a0 || a > a1) continue;
-    el("line", { x1: m.l, x2: m.l + pw, y1: Y(a), y2: Y(a), stroke: "#808080", "stroke-opacity": a === 0 ? 0.9 : 0.7, "stroke-width": 1.0 }, g);
+    el("line", { x1: m.l, x2: m.l + pw, y1: Y(a), y2: Y(a), stroke: "#808080", "stroke-opacity": a === 0 ? 0.8 : 0.6, "stroke-width": 0.8 }, g);
     el("text", { x: m.l - 6, y: Y(a) + 3, "text-anchor": "end" }, svg).textContent = (a > 0 ? "+" : "") + a + "°";
   }
-  el("rect", { x: m.l, y: m.t, width: pw, height: ph, fill: "none", stroke: css("--rule") }, svg);
-  // scoring floor: dashed vertical marker inside the plot, edge-aware label at the top
-  // (drawn after the grid so the marker and its halo label stay on top)
-  const f0n = Number(f0);
-  if (isFinite(f0n) && f0n > 0 && f0n >= dLo && f0n <= dHi) {
-    const lx = X(f0n);
-    el("line", { x1: lx, x2: lx, y1: m.t, y2: m.t + ph, stroke: css("--warn"),
-                 "stroke-width": 1.5, "stroke-dasharray": "5 4" }, clipped);
-    const anchor = (lx - m.l) < 0.12 * pw ? "start" : (lx > m.l + pw - 0.12 * pw) ? "end" : "middle";
-    const dx = anchor === "start" ? 4 : anchor === "end" ? -4 : 0;
-    const tt = el("text", { x: lx + dx, y: m.t + 11, "text-anchor": anchor,
-      style: `fill:${css("--warn")};paint-order:stroke;stroke:${css("--surface")};stroke-width:3px;stroke-linejoin:round` }, svg);
-    tt.textContent = `f0 ${Number.isInteger(f0n) ? f0n : +f0n.toFixed(1)} Hz`;
-  }
+  el("rect", { x: m.l, y: m.t, width: pw, height: ph, fill: "none", stroke: rule }, svg);
   el("text", { x: m.l + pw / 2, y: H - 4, "text-anchor": "middle" }, svg).textContent = "Frequency (Hz)";
-  if (title) el("text", { x: m.l, y: 14, class: "iso-title" }, svg).textContent = title;
-  // colour bar: the same discrete bands, 3 dB ticks, plus C8 over-range swatch at top
-  const bx = m.l + pw + 12, bw = 12, bandH = ph / ISOBAR_COLORS.length;
-  // C8: over-range swatch above 0 dB
-  const overH = Math.max(8, Math.round(bandH * 0.6));
-  el("rect", { x: bx, y: m.t - overH - 2, width: bw, height: overH, rx: 2, fill: OVER_RANGE_COLOR }, svg);
-  el("text", { x: bx + bw + 5, y: m.t - 2 - overH / 2 + 3, style: "font-size:9px" }, svg).textContent = ">0";
-  ISOBAR_COLORS.forEach((c, i) => el("rect", { x: bx, y: m.t + ph - (i + 1) * bandH, width: bw, height: bandH + 0.5, fill: c }, svg));
-  for (let L = ISOBAR_MIN; L <= ISOBAR_MAX; L += ISOBAR_STEP) {
-    const y = m.t + ph - (L - ISOBAR_MIN) / (ISOBAR_MAX - ISOBAR_MIN) * ph;
-    el("line", { x1: bx + bw, x2: bx + bw + 3, y1: y, y2: y, stroke: css("--muted") }, svg);
-    el("text", { x: bx + bw + 5, y: y + 3 }, svg).textContent = String(L);
-  }
-  el("text", { x: bx, y: m.t - 3 }, svg).textContent = "dB";
   // C9: solved-frequency tick marks below the x axis
-  const tickY = m.t + ph;
   for (const f of freqs) {
     if (f <= dLo || f >= dHi) continue;
-    const lx = X(f);
-    el("line", { x1: lx, x2: lx, y1: tickY, y2: tickY + 4, stroke: css("--muted"), "stroke-width": 1 }, svg);
+    el("line", { x1: X(f), x2: X(f), y1: m.t + ph, y2: m.t + ph + 4, stroke: muted, "stroke-width": 1 }, svg);
   }
-  // hover crosshair with a frequency / angle / level readout (Boundary Lab has the same)
+  // scoring floor: thin dashed marker, label in the top margin
+  const f0n = Number(f0);
+  if (hasF0 && f0n >= dLo && f0n <= dHi) {
+    const lx = X(f0n);
+    el("line", { x1: lx, x2: lx, y1: m.t, y2: m.t + ph, stroke: "#ffffff", "stroke-opacity": 0.8,
+                 "stroke-width": 0.8, "stroke-dasharray": "2 2" }, clipped);
+    const anchor = (lx - m.l) < 0.12 * pw ? "start" : (lx > m.l + pw - 0.12 * pw) ? "end" : "middle";
+    el("text", { x: lx + (anchor === "start" ? -2 : anchor === "end" ? 2 : 0), y: m.t - 3, "text-anchor": anchor,
+      style: `fill:${muted};font-size:9px` }, svg).textContent = `f0 ${Number.isInteger(f0n) ? f0n : +f0n.toFixed(1)} Hz`;
+  }
+  if (title) el("text", { x: m.l, y: 13, class: "iso-title" }, svg).textContent = title;
+
+  // slim per-map scale (omitted when a shared isobarLegendHtml() sits above a set of maps)
+  if (legend) {
+    const bx = m.l + pw + 12, bw = 12, bandH = ph / _N_BANDS;
+    ISOBAR_COLORS.forEach((c, i) => el("rect", { x: bx, y: m.t + ph - (i + 1) * bandH, width: bw, height: bandH + 0.4, fill: c }, svg));
+    for (let L = ISOBAR_MIN; L <= ISOBAR_MAX; L += ISOBAR_STEP) {
+      const y = m.t + ph - (L - ISOBAR_MIN) / (ISOBAR_MAX - ISOBAR_MIN) * ph;
+      el("line", { x1: bx + bw, x2: bx + bw + 3, y1: y, y2: y, stroke: muted }, svg);
+      el("text", { x: bx + bw + 5, y: y + 3 }, svg).textContent = String(L);
+    }
+    el("text", { x: bx, y: m.t - 4, style: `fill:${muted};font-size:9px` }, svg).textContent = "dB";
+    if (vmax > OVER_MIN) {
+      el("rect", { x: bx, y: m.t - 16, width: bw, height: 6, fill: OVER_RANGE_COLOR }, svg);
+      el("text", { x: bx + bw + 5, y: m.t - 10, style: `fill:${muted};font-size:9px` }, svg).textContent = ">+1";
+    }
+  }
+
+  // hover crosshair with a frequency / angle / level readout
   const cross = el("g", { style: "pointer-events:none;display:none" }, svg);
-  const vl = el("line", { stroke: "#fff", "stroke-width": 1, "stroke-dasharray": "3 2" }, cross);
-  const hl = el("line", { stroke: "#fff", "stroke-width": 1, "stroke-dasharray": "3 2" }, cross);
-  const box = el("rect", { rx: 3, fill: "rgba(0,0,0,0.78)" }, cross);
-  const txt = el("text", { style: "fill:#fff;font-size:11px" }, cross);
+  const vl = el("line", { stroke: "#fff", "stroke-opacity": 0.8, "stroke-width": 0.75 }, cross);
+  const hl = el("line", { stroke: "#fff", "stroke-opacity": 0.8, "stroke-width": 0.75 }, cross);
+  const box = el("rect", { rx: 3, fill: "rgba(11,15,20,0.85)" }, cross);
+  const txt = el("text", { style: "fill:#fff;font-size:10.5px" }, cross);
   const hit = el("rect", { x: m.l, y: m.t, width: pw, height: ph, fill: "transparent", style: "cursor:crosshair" }, svg);
   const move = ev => {
     const r = svg.getBoundingClientRect(), k = W / r.width;
     const x = (ev.clientX - r.left) * k, y = (ev.clientY - r.top) * k;
     if (x < m.l || x > m.l + pw || y < m.t || y > m.t + ph) { cross.style.display = "none"; return; }
     const f = Math.pow(10, xlo + (x - m.l) / pw * (xhi - xlo)), a = a1 - (y - m.t) / ph * (a1 - a0);
-    const lg = Math.log10(f), solved = lg >= lf0 - tol && lg <= lf1 + tol;
+    const lg = Math.log10(f), solved = solvedAt(lg);
     const v = solved ? sample(rows, fIndex(lg), aIndex(a)) : null;
     vl.setAttribute("x1", x); vl.setAttribute("x2", x); vl.setAttribute("y1", m.t); vl.setAttribute("y2", m.t + ph);
     hl.setAttribute("x1", m.l); hl.setAttribute("x2", m.l + pw); hl.setAttribute("y1", y); hl.setAttribute("y2", y);
     txt.textContent = (f >= 1000 ? (f / 1000).toFixed(2) + " kHz" : Math.round(f) + " Hz") + " · " +
       (a >= 0 ? "+" : "") + a.toFixed(0) + "° · " +
       (solved ? (v < ISOBAR_MIN ? "below " + ISOBAR_MIN : v.toFixed(1)) + " dB" : "no solved data");
-    const tx = x + 190 > m.l + pw ? x - 188 : x + 10, ty = y < m.t + 24 ? y + 22 : y - 8;
+    const tx = x + 180 > m.l + pw ? x - 176 : x + 10, ty = y < m.t + 24 ? y + 22 : y - 8;
     txt.setAttribute("x", tx + 6); txt.setAttribute("y", ty);
-    box.setAttribute("x", tx); box.setAttribute("y", ty - 13); box.setAttribute("width", 178); box.setAttribute("height", 18);
+    box.setAttribute("x", tx); box.setAttribute("y", ty - 12); box.setAttribute("width", 166); box.setAttribute("height", 17);
     cross.style.display = "";
   };
   hit.addEventListener("mousemove", move);
+  hit.addEventListener("mouseleave", () => { cross.style.display = "none"; });
+}
+
+/** ── Globe plot (polar sonogram), 2026-11-14 ─────────────────────────────────────────────────
+ *  The same level-vs-angle-vs-frequency data as isobarMap, wrapped into a circle: direction around
+ *  the circle (0° = front, pointing down; +90° to the right; ±180° = back at the top), log frequency
+ *  along the radius (lowest solved frequency at the centre, highest at the rim), level as the same
+ *  3 dB isobar bands. Data spanning ±90° draws as the front half-globe; wider data fills more of
+ *  the circle. Same lines as the rectangular map: −6 dB edge, coverage-target rays, f0 ring.
+ *  Options: title, H (max height), target (full coverage angle, deg), f0 (Hz), legend (slim scale).
+ */
+export function globePlot(svg, rows, angles, freqs, { H = 360, title = "", target, f0, legend = true } = {}) {
+  svg.innerHTML = "";
+  if (!rows || !rows.length || !angles || angles.length < 2 || !freqs || freqs.length < 2) return;
+  const W = measuredWidth(svg, 420);
+  const muted = css("--muted") || "#5a6873", rule = css("--rule") || "#a9b4bb";
+  const a0 = Number(angles[0]), a1 = Number(angles[angles.length - 1]);
+  const lf = freqs.map(Number).map(Math.log10), lf0 = lf[0], lf1 = lf[lf.length - 1];
+  if (!(isFinite(lf0) && isFinite(lf1) && lf1 > lf0 && a1 > a0)) return;
+  const half = a0 >= -90 - 1e-6 && a1 <= 90 + 1e-6;           // front hemisphere only
+  const top = (title ? 20 : 6), labPad = 18;                     // rim labels need room
+  const sideR = (W - (legend ? 48 : 8) - 2 * labPad) / 2;
+  const R = Math.max(60, Math.min(sideR, half ? H - top - 2 * labPad : (H - top - 2 * labPad) / 2));
+  const cx = labPad + R + 4, cy = top + labPad + (half ? 0 : R);
+  const Ht = Math.round(cy + R + labPad + 4);
+  svg.setAttribute("viewBox", `0 0 ${W} ${Ht}`); svg.setAttribute("width", W); svg.setAttribute("height", Ht);
+  svg.dataset.chart = "1";
+  // screen direction of an angle: 0° down, +90° right, ±180° up
+  const dir = a => { const t = a * Math.PI / 180; return [Math.sin(t), Math.cos(t)]; };
+  const rOf = f => (Math.log10(f) - lf0) / (lf1 - lf0) * R;
+  const fIndex = l => { let i = 0; while (i < lf.length - 2 && l > lf[i + 1]) i++; return i + Math.max(0, Math.min(1, (l - lf[i]) / (lf[i + 1] - lf[i]))); };
+  const aIndex = a => (a - a0) / (a1 - a0) * (angles.length - 1);
+  // pixel → (angle, log f), or null outside the solved wedge/disc
+  const polarAt = (x, y) => {
+    const dx = x - cx, dy = y - cy, r = Math.hypot(dx, dy);
+    if (r > R) return null;
+    const a = Math.atan2(dx, dy) * 180 / Math.PI;             // 0 at +y (down), +90 at +x
+    if (a < a0 - 1e-6 || a > a1 + 1e-6) return null;
+    return { a, lg: lf0 + r / R * (lf1 - lf0) };
+  };
+  const bx0 = cx - R, by0 = half ? cy : cy - R, bw = 2 * R, bh = half ? R : 2 * R;
+
+  // contour grid (~2 px per cell) and level maximum
+  const cw = Math.max(60, Math.round(bw / 2)), chh = Math.max(30, Math.round(bh / 2));
+  const vals = new Float32Array(cw * chh);
+  let vmax = -Infinity;
+  for (let py = 0; py < chh; py++) for (let px = 0; px < cw; px++) {
+    const p = polarAt(bx0 + (px + 0.5) * bw / cw, by0 + (py + 0.5) * bh / chh);
+    const v = p ? sample(rows, fIndex(p.lg), aIndex(p.a)) : NaN;
+    vals[py * cw + px] = v;
+    if (v > vmax) vmax = v;
+  }
+  // filled bands at device resolution
+  const dpr = Math.max(1, Math.min(2, (typeof window !== "undefined" && window.devicePixelRatio) || 1));
+  const fw = Math.max(60, Math.min(1600, Math.round(bw * dpr))), fh = Math.max(30, Math.min(1600, Math.round(bh * dpr)));
+  const cv = document.createElement("canvas"); cv.width = fw; cv.height = fh;
+  const ctx = cv.getContext("2d"), img = ctx.createImageData(fw, fh);
+  for (let py = 0; py < fh; py++) for (let px = 0; px < fw; px++) {
+    const p = polarAt(bx0 + (px + 0.5) * bw / fw, by0 + (py + 0.5) * bh / fh);
+    if (!p) continue;
+    const c = isoRGB(sample(rows, fIndex(p.lg), aIndex(p.a))), o = (py * fw + px) * 4;
+    img.data[o] = c[0]; img.data[o + 1] = c[1]; img.data[o + 2] = c[2]; img.data[o + 3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+  el("image", { href: cv.toDataURL(), x: bx0, y: by0, width: bw, height: bh, preserveAspectRatio: "none" }, svg);
+  const g = el("g", {}, svg);
+
+  // frequency rings (faint) at the 1-2-5 ticks, labelled along the +90° edge
+  for (const t of logTicks(Math.pow(10, lf0), Math.pow(10, lf1))) {
+    const r = rOf(t);
+    if (!(r > 2 && r < R - 2)) continue;
+    const [sx0, sy0] = dir(a0), [sx1, sy1] = dir(a1);
+    const large = (a1 - a0) > 180 ? 1 : 0;
+    el("path", { d: `M${(cx + r * sx0).toFixed(1)},${(cy + r * sy0).toFixed(1)}A${r.toFixed(1)},${r.toFixed(1)} 0 ${large} 0 ${(cx + r * sx1).toFixed(1)},${(cy + r * sy1).toFixed(1)}`,
+      fill: "none", stroke: "#ffffff", "stroke-opacity": 0.28, "stroke-width": 0.6 }, g);
+    if (half) el("text", { x: cx + r, y: cy - 4, "text-anchor": "middle", style: `fill:${muted};font-size:9px` }, svg).textContent = fmtLogTick(t);
+  }
+  if (half) el("text", { x: cx, y: cy - 4, "text-anchor": "middle", style: `fill:${muted};font-size:9px` }, svg).textContent = fmtLogTick(Math.pow(10, lf0));
+  // spokes every 30° (faint) with rim labels
+  for (let a = Math.ceil(a0 / 30) * 30; a <= a1 + 1e-6; a += 30) {
+    const [sx, sy] = dir(a);
+    if (a !== a0 && a !== a1) el("line", { x1: cx, y1: cy, x2: cx + R * sx, y2: cy + R * sy, stroke: "#ffffff", "stroke-opacity": 0.22, "stroke-width": 0.6 }, g);
+    const lx = cx + (R + 10) * sx, ly = cy + (R + 10) * sy + 3;
+    el("text", { x: lx, y: ly, "text-anchor": Math.abs(sx) < 0.2 ? "middle" : sx > 0 ? "start" : "end",
+      style: `fill:${muted};font-size:9.5px` }, svg).textContent = (a > 0 ? "+" : a < 0 ? "−" : "") + Math.abs(a) + "°";
+  }
+  // rim and (half-globe) diameter
+  const [rx0, ry0] = dir(a0), [rx1, ry1] = dir(a1);
+  el("path", { d: half
+      ? `M${cx - R},${cy}A${R},${R} 0 0 0 ${cx + R},${cy}Z`
+      : `M${(cx + R * rx0).toFixed(1)},${(cy + R * ry0).toFixed(1)}A${R},${R} 0 ${(a1 - a0) > 180 ? 1 : 0} 0 ${(cx + R * rx1).toFixed(1)},${(cy + R * ry1).toFixed(1)}`,
+    fill: "none", stroke: rule, "stroke-width": 0.75 }, svg);
+
+  // −6 dB edge, over-range outline, f0 ring, target rays
+  const sxC = bw / cw, syC = bh / chh;
+  _isoContours(svg, vals, cw, chh, vmax, bx0, by0, sxC, syC);
+  const f0n = Number(f0);
+  if (isFinite(f0n) && f0n > 0 && Math.log10(f0n) > lf0 && Math.log10(f0n) < lf1) {
+    const r = rOf(f0n), [sx0, sy0] = dir(a0), [sx1, sy1] = dir(a1);
+    el("path", { d: `M${(cx + r * sx0).toFixed(1)},${(cy + r * sy0).toFixed(1)}A${r.toFixed(1)},${r.toFixed(1)} 0 ${(a1 - a0) > 180 ? 1 : 0} 0 ${(cx + r * sx1).toFixed(1)},${(cy + r * sy1).toFixed(1)}`,
+      fill: "none", stroke: "#ffffff", "stroke-opacity": 0.8, "stroke-width": 0.8, "stroke-dasharray": "2 2" }, svg);
+  }
+  const tg = Number(target);
+  if (isFinite(tg) && tg > 0) {
+    for (const a of [tg / 2, -tg / 2]) {
+      if (a < a0 || a > a1) continue;
+      const [sx, sy] = dir(a);
+      el("line", { x1: cx, y1: cy, x2: cx + R * sx, y2: cy + R * sy, stroke: "#ffffff", "stroke-opacity": 0.95,
+                   "stroke-width": 0.9, "stroke-dasharray": "4 3" }, svg);
+    }
+  }
+  if (title) el("text", { x: 4, y: 13, class: "iso-title" }, svg).textContent = title;
+  if (legend) {
+    const lx = W - 40, bwid = 7, lh = Math.min(R, 160), ly = top + labPad, bandH = lh / ISOBAR_COLORS.length;
+    ISOBAR_COLORS.forEach((c, i) => el("rect", { x: lx, y: ly + lh - (i + 1) * bandH, width: bwid, height: bandH + 0.4, fill: c }, svg));
+    for (let L = ISOBAR_MIN; L <= ISOBAR_MAX; L += 6) {
+      const y = ly + lh - (L - ISOBAR_MIN) / (ISOBAR_MAX - ISOBAR_MIN) * lh;
+      el("text", { x: lx + bwid + 4, y: y + 3, style: `fill:${muted};font-size:9px` }, svg).textContent = L === 0 ? "0" : "−" + Math.abs(L);
+    }
+    el("text", { x: lx, y: ly - 5, style: `fill:${muted};font-size:9px` }, svg).textContent = "dB";
+  }
+
+  // hover readout
+  const cross = el("g", { style: "pointer-events:none;display:none" }, svg);
+  const box = el("rect", { rx: 3, fill: "rgba(11,15,20,0.85)" }, cross);
+  const txt = el("text", { style: "fill:#fff;font-size:10.5px" }, cross);
+  const hit = el("rect", { x: bx0, y: by0, width: bw, height: bh, fill: "transparent", style: "cursor:crosshair" }, svg);
+  hit.addEventListener("mousemove", ev => {
+    const r = svg.getBoundingClientRect(), k = W / r.width;
+    const x = (ev.clientX - r.left) * k, y = (ev.clientY - r.top) * k;
+    const p = polarAt(x, y);
+    if (!p) { cross.style.display = "none"; return; }
+    const f = Math.pow(10, p.lg), v = sample(rows, fIndex(p.lg), aIndex(p.a));
+    txt.textContent = (f >= 1000 ? (f / 1000).toFixed(2) + " kHz" : Math.round(f) + " Hz") + " · " +
+      (p.a >= 0 ? "+" : "") + p.a.toFixed(0) + "° · " + (v < ISOBAR_MIN ? "below " + ISOBAR_MIN : v.toFixed(1)) + " dB";
+    const tx = x + 176 > W ? x - 172 : x + 10, ty = y < 24 ? y + 22 : y - 8;
+    txt.setAttribute("x", tx + 6); txt.setAttribute("y", ty);
+    box.setAttribute("x", tx); box.setAttribute("y", ty - 12); box.setAttribute("width", 162); box.setAttribute("height", 17);
+    cross.style.display = "";
+  });
   hit.addEventListener("mouseleave", () => { cross.style.display = "none"; });
 }
 

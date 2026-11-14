@@ -1,5 +1,8 @@
 # Docs index
 
+[GUI / data-viz UX pass 2026-11-14](GUI_UX_PASS_2026-11-14.md): decision-first analysis report,
+verdict-first run page, Boundary Lab isobars + Globe view, New run entry, shared viz kit and its rules.
+
 [S8 discovery resolution](research/S8_DISCOVERY_RESOLUTION_2026-11-13.md): geometry/behavior
 separation, source-backed hypothesis cards, equal-cost QD/Pareto rules, research sources and
 the correction distinguishing a shared scoring context from per-design replay `score_id`.

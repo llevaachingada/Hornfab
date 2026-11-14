@@ -3,7 +3,8 @@
 
 import { chart, heat, cmap, drawCbar, niceTicks, diFromCuts, groupColor,
          el, NS, css, fmt, DEFW, polarMap, wallSection, familyColor, measuredWidth, isobarMap,
-          logGrid, logTicks, AXES, fixedRange, wireScrollHints } from "./charts.js";
+          logGrid, logTicks, AXES, fixedRange, wireScrollHints, isobarLegendHtml, globePlot,
+         catColor, fmtSmart, sparkline, stackBarHtml, logNiceLimits } from "./charts.js";
 import { TERMS as GLOSSARY, TERM_ORDER, tip } from "./glossary.js";
 import { loadParamCatalog, paramTipHtml, typologyTipHtml, typologyChipsHtml } from "./paramtips.js";
 import { init3d, loadThree } from "./view3d.js";
@@ -22,6 +23,22 @@ function esc(s) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
+}
+
+/** "New run" has two modes on two routes: the guided Compose wizard and the Quick launch form.
+ *  The same switch heads both pages (the nav carries one "New run" item). */
+function newRunModeHtml(active) {
+  const tab = (href, key, label, sub) => `<a class="run-tab-link" href="${href}"${active === key ? ' aria-current="page"' : ""}>${label} <span class="muted" style="font-weight:400">${sub}</span></a>`;
+  return `<nav class="run-tabs new-run-modes" aria-label="New run mode">
+    ${tab("#/compose", "compose", "Guided", "— step by step")}
+    ${tab("#/launch", "launch", "Quick launch", "— from a saved config or brief")}
+  </nav>`;
+}
+
+/** Escape an identifier and give it line-break points after _ - . / so long snake_case run,
+ *  brief and family names wrap at a joint instead of forcing their column (or tile) wider. */
+function brk(s) {
+  return esc(s).replace(/([_\-./])/g, "$1<wbr>");
 }
 
 // ── Number / unit helpers ───────────────────────────────────────────
@@ -240,6 +257,7 @@ function updateNav(hash) {
       (h === "#/compare" && hash === "#/compare") ||
       (h === "#/briefs" && hash === "#/briefs") ||
       (h === "#/compose" && hash === "#/compose") ||
+      (h === "#/compose" && hash.split("?")[0] === "#/launch") ||   // one "New run" item covers both modes
       (h === "#/launch" && hash === "#/launch") ||
       (h === "#/typologies" && (hash === "#/typologies" || hash.startsWith("#/typology/"))) ||
       (h === "#/glossary" && hash === "#/glossary");
@@ -411,8 +429,8 @@ function homeLeadersHtml(leaders, pending = false) {
     const link = l.best_run_id ? `href="#/run/${esc(l.best_run_id)}"` : "";
     return `<a class="best-brief-row" ${link}>
       <div>
-        <div class="bbr-name">${esc(l.brief)}</div>
-        <div class="bbr-meta">${esc(l.family)} · ${esc(l.dims ? dimStr(l.dims) : "–")} · ${verdict} ${ver}</div>
+        <div class="bbr-name">${brk(l.brief)}</div>
+        <div class="bbr-meta">${brk(l.family)} · ${esc(l.dims ? dimStr(l.dims) : "–")} · ${verdict} ${ver}</div>
         <div class="bbr-meta muted">${esc(l.tier)} campaign, ${esc(l.n_families)} families${l.runner_up ? `; next: ${esc(l.runner_up)} (+${fmt(l.gap)})` : ""}</div>
       </div>
       <div class="bbr-score" title="median score over repeats (lower is better)">${fmt(l.median_j)}</div>
@@ -611,8 +629,7 @@ async function viewHome() {
       <h2>Home</h2>
     </div>
     ${guideHtml}
-    ${gpuCard}
-    ${cpuCard}
+    <div class="home-lane-cards">${gpuCard}${cpuCard}</div>
     <div id="home-lanes"></div>
     <div id="home-leaders">${bestBriefHtml}</div>
     ${queuesBlockHtml(statusData)}
@@ -1005,7 +1022,8 @@ function toolbarPillHtml(pill) {
   const wrap = inner =>
     `<div class="nav-runctl" style="padding:6px 16px 4px;display:grid;gap:4px;margin-top:2px">${inner}</div>`;
   const BTN = "width:100%;padding:5px 10px;font-size:0.8rem;line-height:1.25";
-  const SUB = "font-size:0.64rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap";
+  // wrap (never ellipsis): the job id / resume target is what the operator needs to read
+  const SUB = "font-size:0.64rem;line-height:1.35;white-space:normal;overflow-wrap:anywhere";
   const MSG = "font-size:0.66rem;line-height:1.3;white-space:normal";
   if (state === "external") {
     const l = pill.lock || {};
@@ -1444,12 +1462,12 @@ async function viewCampaignsList() {
   }
 
   let rows = camps.map(c => `<tr class="clickable ${c.superseded ? "superseded" : ""}" onclick="location.hash='#/campaign/${esc(c.id)}'">
-    <td><b>${esc(c.id)}</b>${c.superseded ? ` ${pill("superseded", "warn")}` : ""}</td>
+    <td><b>${brk(c.id)}</b>${c.superseded ? ` ${pill("superseded", "warn")}` : ""}</td>
     <td>${pill(c.tier || "–", c.tier === "compare" ? "warn" : c.tier === "screen" ? "info" : "good")}</td>
-    <td>${esc(c.brief || "–")}</td>
+    <td>${brk(c.brief || "–")}</td>
     <td class="r">${esc(c.n_entries)}</td>
     <td class="r">${esc((c.seeds || []).join(", "))}</td>
-    <td class="muted" style="font-size:0.82rem">${esc((c.families || []).slice(0, 4).join(", ")) + (c.families && c.families.length > 4 ? " …" : "")}</td>
+    <td class="muted" style="font-size:0.82rem">${brk((c.families || []).slice(0, 4).join(", ")) + (c.families && c.families.length > 4 ? " …" : "")}</td>
   </tr>`).join("");
 
   ROOT.innerHTML = `
@@ -1851,12 +1869,13 @@ function renderRunsList(allRuns) {
       const chCls = ch.endsWith("better") ? "good-text" : "";
       const failPct = r.n > 0 ? ((nf / r.n) * 100).toFixed(0) + "%" : "–";
       const isRunning = runIsLive(r);
-      return `<tr class="clickable" onclick="location.hash='#/run/${esc(r.id)}'" ${isRunning ? 'style="background:var(--accent-soft)"' : ""}>
+      const flat = !isRunning && ch === "no change";
+      return `<tr class="clickable${flat ? " row-flat" : ""}" onclick="location.hash='#/run/${esc(r.id)}'" ${isRunning ? 'style="background:var(--accent-soft)"' : ""}>
         <td class="muted mono" style="font-size:0.76rem;white-space:nowrap">${isRunning ? `<span class="live-dot" title="rows written in the last 2 min">●</span> ` : "⏸ "}${timeSince(r.last || r.started)}<br><span style="font-size:0.7rem">started ${timeSince(r.started)}</span></td>
-        <td><b>${esc(r.name)}</b> ${runModeBadgesHtml(r, isRunning)}<br><span class="mono muted" style="font-size:0.72rem">${esc(r.id)}</span>${runParentLineHtml(r)}
+        <td><b>${brk(r.name)}</b> ${runModeBadgesHtml(r, isRunning)}<br><span class="mono muted" style="font-size:0.72rem">${brk(r.id)}</span>${runParentLineHtml(r)}
           <br><span class="muted" style="font-size:0.72rem">${r.dims ? esc(dimStr(r.dims)) : "size –"} · ${nf > 0 ? `<span class="warn-text">${esc(failPct)} failed</span>` : "no failures"}</span></td>
-        <td>${esc(r.family || "–")}</td>
-        <td>${esc(r.brief || "–")}</td>
+        <td>${brk(r.family || "–")}</td>
+        <td>${brk(r.brief || "–")}</td>
         <td class="r num"><span class="mono muted" style="font-size:0.68rem">${esc(jVersionLabel(r))}</span><br>${r.seed_j != null && r.seed_j < 900 ? fmt(r.seed_j) : "–"} → <b>${fmt(r.best_j)}</b></td>
         <td class="r ${chCls}">${ch}</td>
         <td class="r">${r.n.toLocaleString()}${r.resumed && r.session_n != null ? `<br><span class="mono muted" style="font-size:0.66rem" title="rows in the current session (resumed ×${r.n_resumes})">sess ${r.session_n.toLocaleString()}</span>` : ""}</td>
@@ -2456,8 +2475,8 @@ function objectiveVersionBannerHtml(runs) {
     ? `v${counts[0][0]} and v${counts[1][0]}`
     : `v${counts[counts.length - 1][0]}…v${counts[0][0]}`;
   const chips = counts.map(([v, n]) => `<span class="pill" style="margin:2px 6px 0 0">J v${v} ×${n}</span>`).join("");
-  return `<div class="alert info" role="note">${esc(J_VERSION_BANNER)}
-    <span class="muted">this table spans ${esc(span)}:</span><div style="margin-top:4px">${chips}</div></div>`;
+  return `<div class="alert info" role="note">${esc(J_VERSION_BANNER)}.
+    <span class="muted">This list spans ${esc(span)}:</span><div style="margin-top:4px">${chips}</div></div>`;
 }
 
 /** Runs-table order. When the set mixes versions, group by objective version (newest definition
@@ -2581,7 +2600,12 @@ function ageLabel(min) {
 }
 
 function laneRowHtml(l) {
-  const job = l.job
+  // A stale lock means the process that took it is gone: never call that job "running" (the
+  // Status page and the lane card already say the lane is free).
+  const staleLock = !!(l.lock && !l.lock.alive);
+  const job = l.job && staleLock
+    ? `<span class="warn-text">not running</span> <span class="muted">— stale lock left by ${esc(l.job.name || "?")}${l.job.started ? ` (started ${esc(l.job.started)})` : ""}</span>`
+    : l.job
     ? `running: ${esc(l.job.name || "?")}${l.job.started ? ` · since ${esc(l.job.started)}` : ""}`
     : (l.last_job
        ? `idle · last: ${esc(l.last_job.id || "?")} exit ${esc(l.last_job.exit_code ?? "–")}`
@@ -2590,7 +2614,7 @@ function laneRowHtml(l) {
     ? `${esc(l.run.n_rows)} rows · best ${fmt(l.run.best_j)} · newest ${ageLabel(l.run.newest_row_age_min)} ago`
       + (l.run.rate_per_h != null ? ` · ${Math.round(Number(l.run.rate_per_h))}/h` : "")
       + (l.run.eta_min != null ? ` · ETA ${Math.round(Number(l.run.eta_min))} min` : "")
-    : (l.note ? `<span class="muted">${esc(l.note)}</span>` : "–");
+    : (l.note && !staleLock ? `<span class="muted">${esc(l.note)}</span>` : "–");
   const runLink = l.run && l.run.id
     ? `<a href="#/run/${esc(l.run.id)}" style="font-size:0.8rem">run →</a>` : "";
   const lockPill = !l.lock ? pill("free", "good")
@@ -2601,6 +2625,7 @@ function laneRowHtml(l) {
     <td>${job}</td>
     <td class="r">${run} ${runLink}</td>
     <td>${l.alert ? `<span class="pill bad">ALERT</span> <span class="muted">${esc(l.alert.reason || "")}</span>`
+                   : staleLock ? `<span title="The lane lock file is still on disk but the process that took it has exited">${pill("stale lock", "warn")}</span>`
                    : pill("ok", "good")}</td>
   </tr>`;
 }
@@ -2765,44 +2790,6 @@ function _anCurve(curve) {
     .map(p => [Number(p.n), Number(p.best)]);
 }
 
-function _anDrawConvergence(svg, run) {
-  const pts = _anCurve(run && run.curve);
-  if (!pts.length) return;
-  const maxN = Math.max(1, ...pts.map(p => p[0]));
-  const maxBest = Math.max(0, ...pts.map(p => p[1]));
-  const hi = maxBest > 0 ? maxBest * 1.05 : 1;
-  chart(svg, {
-    xlim: [0, maxN], ylim: [0, hi],
-    xticks: niceTicks(0, maxN, 6), yticks: niceTicks(0, hi, 5),
-    xlabel: "new valid evaluations", ylabel: "objective J",
-    series: [{ pts, color: css("--best"), w: 2 }],
-    refLines: [{ y: pts[0][1], label: "seed", dash: true }],
-    markers: false,
-    ariaLabel: `best-so-far objective for ${_runBaseName(run && run.run_dir)}`,
-  });
-}
-
-function _anDrawFidelity(svg, data) {
-  const pts = _anArr(data && data.pairs)
-    .filter(p => p && isFinite(Number(p.j_screen)) && isFinite(Number(p.j_verify)))
-    .map(p => [Number(p.j_screen), Number(p.j_verify)]);
-  if (!pts.length) return;
-  const vals = pts.flat();
-  const lo = Math.min(...vals), hi = Math.max(...vals);
-  const pad = hi > lo ? (hi - lo) * 0.05 : Math.max(1, Math.abs(hi) * 0.05);
-  chart(svg, {
-    xlim: [lo - pad, hi + pad], ylim: [lo - pad, hi + pad],
-    xticks: niceTicks(lo - pad, hi + pad, 5), yticks: niceTicks(lo - pad, hi + pad, 5),
-    xlabel: "screen J", ylabel: "verify J",
-    series: [
-      { pts: [[lo, lo], [hi, hi]], color: css("--rule"), w: 1, dash: true },
-      { pts, color: css("--accent"), dots: true, r: 3 },
-    ],
-    markers: false,
-    ariaLabel: "screen versus verify objective scatter with the 45-degree line",
-  });
-}
-
 function _anPadDomain(lo, hi) {
   const span = hi > lo ? hi - lo : Math.max(1, Math.abs(hi) * 0.05);
   return [lo - span * 0.05, hi + span * 0.05];
@@ -2819,11 +2806,12 @@ function _anDrawGeometryNavigation(svg, nav) {
     if (isFinite(na) && isFinite(nb)) return na - nb;
     return a.localeCompare(b);
   });
-  const palette = ["--accent", "--best", "--seed", "--warn", "--good"].map(n => css(n));
+  // Shared validated categorical palette (--accent and --best were the same hue, so clusters 1
+  // and 2 were indistinguishable). Clusters past slot 8 fold to the neutral "other" colour.
   const series = keys.map((key, i) => ({
     pts: rows.filter(r => String(r.cluster == null ? "–" : r.cluster) === key)
       .map(r => [Number(r.pc1), Number(r.pc2)]),
-    color: palette[i % palette.length],
+    color: catColor(i),
     dots: true,
     r: 3,
   })).filter(s => s.pts.length);
@@ -2886,7 +2874,12 @@ function _anSectionHead(sec, extra = "") {
   return `<div class="an-sec-head"><b class="mono">${esc(sec && sec.id)}</b> ${bits.join(" · ")}</div>`;
 }
 
-// A. Hero -----------------------------------------------------------------
+// A. Shared lookups + hero -------------------------------------------------
+// Report v2 (2026-11-14): decision-first. The page opens with what to change in the next
+// solves, then a per-run scoreboard, then the evidence sections. Percentages, ratios and
+// durations are plain arithmetic over stored fields (n_rows, refusals, curve[].wall_s,
+// evals_to_1pct, top_decile_raw / tolerances …); nothing is re-estimated, and J is never
+// compared across objective versions.
 
 function _anKpi(label, value, cls, sub) {
   return `<div class="kpi"><span>${esc(label)}</span>`
@@ -2894,115 +2887,437 @@ function _anKpi(label, value, cls, sub) {
     + (sub ? `<div class="an-kpi-sub mono">${esc(sub)}</div>` : "") + `</div>`;
 }
 
-function analysisHeroHtml(d, sections, errors) {
-  const conv = analysisConvergenceRuns(sections);
+/** Compact human number (shared fmtSmart): 600 · 12.3 · 2.13 · 0.687. */
+const _anVal = fmtSmart;
+
+function _anDur(s) {
+  const n = Number(s);
+  if (!isFinite(n) || n < 0) return "";
+  return n < 5400 ? `${Math.round(n / 60)} min` : `${(n / 3600).toFixed(1)} h`;
+}
+
+/** "convergence_g1" → "g1" (the day-spec tag the owner uses for a run). */
+function _anTag(sec) {
+  const id = String((sec && sec.id) || "");
+  const t = String((sec && sec.tool) || "");
+  return id.startsWith(t + "_") ? id.slice(t.length + 1) : id;
+}
+
+/** run id → {brief, family, version, tags}, gathered from every section that names the run. */
+function _anRunIndex(sections) {
+  const idx = new Map();
+  for (const sec of sections) {
+    const d = _anObj(sec.data);
+    const id = _anRunId(d.run_dir);
+    if (!id) continue;
+    const cur = idx.get(id) || { id, brief: null, family: null, version: null, tags: new Set() };
+    if (d.brief && !cur.brief) cur.brief = String(d.brief);
+    if (d.family && !cur.family) cur.family = String(d.family);
+    if (d.objective_version != null && cur.version == null) cur.version = d.objective_version;
+    if (sec.id !== "default") cur.tags.add(_anTag(sec));
+    idx.set(id, cur);
+  }
+  return idx;
+}
+
+/** Human run name: "brief · family" (withFamily) or just the brief, falling back to family / id. */
+function _anRunLabel(idx, runDir, fallback, withFamily = true) {
+  const id = _anRunId(runDir);
+  const info = id ? idx.get(id) : null;
+  const name = info && (info.brief || info.family)
+    ? (withFamily || !info.brief ? [info.brief, info.family] : [info.brief]).filter(Boolean).join(" · ")
+    : (id || fallback || "run");
+  return `<b class="mono">${esc(name)}</b>`;
+}
+
+/** Convergence facts the page states; every field comes from the stored run object. */
+function _anConvStats(run) {
+  const curve = _anArr(run && run.curve)
+    .filter(p => p && isFinite(Number(p.n)) && isFinite(Number(p.best)));
+  if (!curve.length) return null;
+  const last = curve[curve.length - 1];
+  const seed = Number(curve[0].best);
+  const best = isFinite(Number(run.final_best)) ? Number(run.final_best) : Number(last.best);
+  const nNew = isFinite(Number(run.n_new_valid)) ? Number(run.n_new_valid) : Number(last.n);
+  const plateau = isFinite(Number(run.evals_to_1pct)) ? Number(run.evals_to_1pct) : null;
+  const kinds = Object.entries(_anObj(run.refusals)).filter(([, v]) => isFinite(Number(v)))
+    .map(([k, v]) => [k, Number(v)]).sort((a, b) => b[1] - a[1]);
+  const refused = kinds.reduce((a, [, v]) => a + v, 0);
+  const rows = isFinite(Number(run.n_rows)) ? Number(run.n_rows) : null;
+  const wallAt = (n) => {
+    let w = null;
+    for (const p of curve) if (Number(p.n) <= n && isFinite(Number(p.wall_s))) w = Number(p.wall_s);
+    return w;
+  };
+  const wallEnd = wallAt(Infinity);
+  const wallPlateau = plateau != null ? wallAt(plateau) : null;
+  return {
+    seed, best, nNew, plateau, refused, rows, kinds, wallEnd, wallPlateau,
+    still: run.last20_improvement === true,
+    stillPct: isFinite(Number(run.last20_improvement_pct)) ? Number(run.last20_improvement_pct) : null,
+    improvePct: seed > 0 ? (seed - best) / seed * 100 : null,
+    refusedPct: rows ? refused / rows * 100 : null,
+    slackPct: (plateau != null && nNew > 0) ? Math.max(0, (nNew - plateau) / nNew * 100) : null,
+  };
+}
+
+/** Rule-built next-solve actions. Each rule fires only when its stored evidence exists. */
+function analysisActions(sections, errors) {
+  const idx = _anRunIndex(sections);
+  const acts = [];
   const wallSecs = sections.filter(s => s.tool === "walls" && s.data);
-  const atLimit = wallSecs.flatMap(s => _anArr(s.data.walls))
-    .filter(w => w && (w.wall_lo || w.wall_hi)).length;
+
+  // 1. Walls with a widen proposal: the search wanted more room.
+  for (const sec of wallSecs) {
+    const d = sec.data;
+    const walls = new Map(_anArr(d.walls).filter(w => w && w.key != null).map(w => [String(w.key), w]));
+    const items = _anArr(d.proposal).filter(p => p && p.key != null && /^widen/.test(String(p.action || ""))).map(p => {
+      const w = walls.get(String(p.key)) || {};
+      const lower = /_lo$/.test(String(p.action)), upper = /_hi$/.test(String(p.action));
+      const frac = Number(lower ? w.frac_lo : upper ? w.frac_hi : NaN);
+      const from = lower ? `${_anVal(w.lo)} → <b>${_anVal(p.new_lo)}</b>` : upper ? `${_anVal(w.hi)} → <b>${_anVal(p.new_hi)}</b>`
+        : `${_anVal(p.new_lo)} … ${_anVal(p.new_hi)}`;
+      return { p, frac, side: lower ? "lower" : upper ? "upper" : "", from };
+    });
+    if (!items.length) continue;
+    const fracTxt = (it) => isFinite(it.frac) ? `${_anPct(it.frac * 100, 0)} of the best designs` : "most of the best designs";
+    const one = items.length === 1 ? items[0] : null;
+    acts.push({ pri: 1, kind: "Bounds",
+      title: one
+        ? `Widen <span class="mono">${esc(one.p.key)}</span> ${one.side} limit: <span class="mono">${one.from}</span>`
+        : `Widen ${fmt(items.length, 0)} ${esc(d.family || "")} limits the best designs are pressed against`,
+      detail: (one
+        ? `${fracTxt(one)} sit pressed against this limit — the optimiser wanted to go further than the box allowed.`
+        : `<ul class="an-act-list">${items.map(it => `<li><span class="mono">${esc(it.p.key)}</span> ${it.side} limit <span class="mono">${it.from}</span> — ${fracTxt(it)} sit at it</li>`).join("")}</ul>The optimiser wanted to go further than the box allowed.`)
+        + " Check each new value is physically safe before using it.",
+      ev: `${_anRunLabel(idx, d.run_dir)} · ${esc(items[0].p.reason || "")}`,
+      go: _anGoLaunch(idx, d.run_dir, "edit the family bounds first — launch does not change them") });
+  }
+
+  // 2/5. Budget: still improving (too short) or settled early (budget slack).
+  for (const { sec, run } of analysisConvergenceRuns(sections)) {
+    const st = _anConvStats(run);
+    if (!st) continue;
+    const who = _anRunLabel(idx, run.run_dir, sec.id);
+    if (st.still) {
+      acts.push({ pri: 1, kind: "Budget",
+        title: `Give ${who} more evaluations`,
+        detail: `Best J was still falling in the last 20% of the run${st.stillPct != null ? ` (${_anPct(st.stillPct)} further gain)` : ""} after ${fmt(st.nNew, 0)} valid evaluations${st.wallEnd ? ` and ${_anDur(st.wallEnd)}` : ""}. The search had not finished — continue it from its best, or re-run with a larger budget.`,
+        ev: `${_runBaseName(run.run_dir)}`, go: _anGoRun(run.run_dir, "Open the run to continue it (Run setup & controls)") });
+    } else if (st.slackPct != null && st.slackPct >= 50) {
+      const tail = (st.wallEnd != null && st.wallPlateau != null) ? ` (${_anDur(st.wallEnd - st.wallPlateau)})` : "";
+      acts.push({ pri: 3, kind: "Budget",
+        title: `${who} settled early — budget to spare`,
+        detail: `It came within 1% of its final best after ${fmt(st.plateau, 0)} of ${fmt(st.nNew, 0)} valid evaluations; the last ${_anPct(st.slackPct, 0)}${tail} improved J by less than 1%. A shorter budget, or the same budget split across extra seeds, buys more information.`,
+        ev: `${_runBaseName(run.run_dir)}` });
+    }
+    // 3. Refusals: budget spent without a solve.
+    if (st.refusedPct != null && st.refusedPct >= 25 && st.kinds.length) {
+      const [k0, v0] = st.kinds[0];
+      acts.push({ pri: 2, kind: "Bounds",
+        title: `Stop spending ${_anPct(st.refusedPct, 0)} of ${who}'s budget on refused designs`,
+        detail: `${fmt(st.refused, 0)} of ${fmt(st.rows, 0)} evaluations never reached the solver — mostly <span class="mono">${esc(k0)}</span> (${fmt(v0, 0)}). Narrowing the box to where good designs live (below) turns more of the budget into real solves.`,
+        ev: `${_runBaseName(run.run_dir)} · ${st.kinds.map(([k, v]) => `${esc(k)} ${fmt(v, 0)}`).join(" · ")}` });
+    }
+  }
+
+  // 4. Narrow proposals, one action per walls section.
+  for (const sec of wallSecs) {
+    const d = sec.data;
+    const walls = new Map(_anArr(d.walls).filter(w => w && w.key != null).map(w => [String(w.key), w]));
+    const nar = _anArr(d.proposal).filter(p => p && p.key != null && String(p.action) === "narrow")
+      .map(p => {
+        const w = walls.get(String(p.key)) || {};
+        const span = Number(w.hi) - Number(w.lo), nspan = Number(p.new_hi) - Number(p.new_lo);
+        return { p, w, keep: (span > 0 && isFinite(nspan)) ? nspan / span : 1 };
+      }).sort((a, b) => a.keep - b.keep);
+    if (!nar.length) continue;
+    const top = nar.slice(0, 3).map(({ p, w }) =>
+      `<span class="mono">${esc(p.key)}</span> ${_anVal(w.lo)}…${_anVal(w.hi)} → <b class="mono">${_anVal(p.new_lo)}…${_anVal(p.new_hi)}</b>`).join("; ");
+    acts.push({ pri: 2, kind: "Bounds",
+      title: `Narrow ${fmt(nar.length, 0)} ${esc(d.family || "")} knob${nar.length === 1 ? "" : "s"} to where the best 10% live`,
+      detail: `Biggest cuts: ${top}. A tighter box focuses the next search on proven ground; keep the wide box for exploration runs. Full list under “Where the best designs live”.`,
+      ev: `${_anRunLabel(idx, d.run_dir)} · top-decile span padded 5%`,
+      go: _anGoLaunch(idx, d.run_dir, "edit the family bounds first — launch does not change them") });
+  }
+
+  // 6. Screen fidelity.
+  for (const sec of sections.filter(s => s.tool === "fidelity" && s.data)) {
+    const d = sec.data;
+    const bias = Number(d.bias_median_pct), t5 = Number(d.spearman_top5);
+    if (!(isFinite(bias) && Math.abs(bias) >= 10) && !(isFinite(t5) && t5 < 0.7)) continue;
+    const dir = bias >= 0 ? "higher (worse)" : "lower (better)";
+    acts.push({ pri: 2, kind: "Verify",
+      title: `Verify more than the screen's #1`,
+      detail: `On ${fmt(d.n_pairs, 0)} designs solved both ways, verify J came out ${_anPct(Math.abs(bias))} ${dir} than screen J (median)${isFinite(t5) ? `, and the screen's ranking of its top 5 agrees with verify only at ρ = ${_anNum(t5)}` : ""}. Send the top 5 or more to verify and pick the winner on verify J.`,
+      ev: `${_anRunLabel(idx, d.run_dir)}`, go: _anGoRun(d.run_dir, "Open the run for its verify command") });
+  }
+
+  // 7. Objective bottleneck: a big share of J AND still over tolerance in the best 10%.
+  for (const sec of sections.filter(s => s.tool === "term_balance" && s.data)) {
+    const d = sec.data, sh = _anObj(d.shares), raw = _anObj(d.top_decile_raw), tol = _anObj(d.tolerances);
+    for (const t of Object.keys(sh)) {
+      const share = Number(sh[t] && sh[t].median), r = Number(raw[t] && raw[t].median), tl = Number(tol[t]);
+      if (!(share >= 0.15 && tl > 0 && isFinite(r) && r / tl > 1)) continue;
+      acts.push({ pri: 2, kind: "Objective",
+        title: `<span class="mono">${esc(t)}</span> is what holds ${_anRunLabel(idx, d.run_dir)} back`,
+        detail: `It makes up ${_anPct(share * 100, 0)} of J, and even the best 10% of designs sit at ${(r / tl).toFixed(1)}× its tolerance (${_anVal(r)} vs ${_anVal(tl)}). Either this geometry family can't reach that target, or the tolerance is stricter than the brief needs — decide which before the next run.`,
+        ev: `term_balance ${esc(_anTag(sec))} · weight ${_anVal(_anObj(d.weights)[t])}`,
+        go: `<a class="an-go" href="#/briefs">Review the brief's tolerances →</a>` });
+    }
+  }
+
+  // 8. Dominant driver (only when the surrogate explains J reasonably well).
+  for (const sec of sections.filter(s => s.tool === "sensitivity" && s.data)) {
+    const d = sec.data, sur = _anObj(d.surrogate);
+    const imp = _anArr(sur.importance).filter(i => i && i.key != null && isFinite(Number(i.permutation_importance)))
+      .sort((a, b) => Number(b.permutation_importance) - Number(a.permutation_importance));
+    if (sur.available !== true || !(Number(sur.r2) >= 0.4) || imp.length < 2) continue;
+    const a = Number(imp[0].permutation_importance), b = Number(imp[1].permutation_importance);
+    if (!(a > 0 && a >= 2 * Math.max(b, 0))) continue;
+    const sp = _anArr(d.spearman).find(p => p && String(p.key) === String(imp[0].key));
+    const shift = _anArr(d.top_decile_shift).find(p => p && String(p.key) === String(imp[0].key));
+    const rho = sp ? Number(sp.rho) : NaN;
+    const dirTxt = isFinite(rho) && Math.abs(rho) >= 0.1
+      ? ` Larger values went with ${rho < 0 ? "better (lower)" : "worse (higher)"} J (ρ = ${rho.toFixed(2)}).` : "";
+    const shiftTxt = shift && isFinite(Number(shift.mean_top)) && isFinite(Number(shift.mean_all))
+      ? ` The best 10% average ${_anVal(shift.mean_top)} against ${_anVal(shift.mean_all)} overall.` : "";
+    acts.push({ pri: 3, kind: "Insight",
+      title: `<span class="mono">${esc(imp[0].key)}</span> drives J in ${_anRunLabel(idx, d.run_dir)}`,
+      detail: `Shuffling it moves J by ${_anVal(a)} on average — ${b > 0 ? `${(a / b).toFixed(1)}×` : "far more than"} the next knob (<span class="mono">${esc(imp[1].key)}</span>).${dirTxt}${shiftTxt} Spend exploration on this knob; the weak ones can stay fixed.`,
+      ev: `sensitivity ${esc(_anTag(sec))} · surrogate R² ${_anNum(sur.r2)}` });
+  }
+
+  // 9. Sections that refused to run are knowledge gaps.
+  for (const e of _anArr(errors)) {
+    const msg = String(e && e.error || "");
+    const seed = String(e && e.tool) === "seed_variance";
+    acts.push({ pri: 3, kind: "Gap",
+      title: seed ? "Seed repeatability is still unknown" : `${esc(e.tool || "a section")} was not computed`,
+      detail: seed
+        ? "The seed check refused to pool its runs because they are not one task/scoring identity, so nobody can yet say whether a best J is skill or luck. Run five seeds of one brief, on one lane, with one identical config."
+        : "This section refused to run; nothing was estimated in its place. See the message below.",
+      ev: `<span class="mono">${esc(e && e.id)}</span> · ${esc(msg.length > 90 ? msg.slice(0, 90) + "…" : msg)}` });
+  }
+  return acts.sort((a, b) => a.pri - b.pri);
+}
+
+const _AN_PRI_HEAD = { 1: "Do first", 2: "Then", 3: "Good to know" };
+
+/** Follow-through links for an action: open the run (continue / verify live there) or open Quick
+ *  launch with the run's brief prefilled. Bounds are family-config edits the launch form cannot
+ *  carry, so that link says so instead of implying the change is applied. */
+function _anGoRun(runDir, label) {
+  const id = _anRunId(runDir);
+  return id ? `<a class="an-go" href="#/run/${encodeURIComponent(id)}">${esc(label)} →</a>` : "";
+}
+function _anGoLaunch(idx, runDir, note) {
+  const id = _anRunId(runDir), info = id ? idx.get(id) : null;
+  if (!info || !info.brief) return "";
+  return `<a class="an-go" href="#/launch?brief=${encodeURIComponent(info.brief)}&tier=screen">New screen run on ${esc(info.brief)} →</a>${note ? ` <span class="muted">${esc(note)}</span>` : ""}`;
+}
+
+function analysisActionsHtml(acts) {
+  if (!acts.length) return "";
+  let n = 0, lastPri = null;
+  const items = acts.map(a => {
+    const head = a.pri !== lastPri ? `<li class="an-act-group">${esc(_AN_PRI_HEAD[a.pri] || "")}</li>` : "";
+    lastPri = a.pri;
+    n += 1;
+    return `${head}<li class="an-act an-act-p${a.pri}">
+      <span class="an-act-n" aria-hidden="true">${n}</span>
+      <div class="an-act-body">
+        <div class="an-act-title">${a.title}</div>
+        <div class="an-act-text">${a.detail}</div>
+        <div class="an-meta">${a.ev}</div>
+        ${a.go ? `<div class="an-go-row">${a.go}</div>` : ""}
+      </div>
+      <span class="an-act-kind">${esc(a.kind)}</span>
+    </li>`;
+  }).join("");
+  return `<section class="card an-block" id="an-s-actions">
+    <div class="eyebrow">Next solves</div>
+    <h2>What to change before the next run</h2>
+    <p class="muted">Built from the evidence below. Nothing here is applied automatically — each line says which run it came from.</p>
+    <ol class="an-acts">${items}</ol>
+  </section>`;
+}
+
+function _anNavHtml(have) {
+  const links = [["actions", "Actions"], ["runs", "Runs"], ["score", "Score"], ["bounds", "Bounds"],
+    ["drivers", "Drivers"], ["fidelity", "Screen vs verify"], ["gaps", "Not computed"], ["tech", "Technical"]]
+    .filter(([k]) => have.has(k));
+  if (links.length < 3) return "";
+  return `<nav class="an-nav" aria-label="Report sections">${links.map(([k, t]) =>
+    `<button type="button" class="an-nav-btn" onclick="document.getElementById('an-s-${k}')?.scrollIntoView({behavior:'smooth',block:'start'})">${esc(t)}</button>`).join("")}</nav>`;
+}
+
+function _anTitleOf(id) {
+  const m = /^day_(\d{4})-(\d{2})-(\d{2})$/.exec(String(id || ""));
+  if (!m) return esc(id || "analysis");
+  const dt = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+  return `Day report · ${dt.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" })}`;
+}
+
+function analysisHeroHtml(d, sections, errors, acts) {
+  const conv = analysisConvergenceRuns(sections);
+  const stats = conv.map(c => _anConvStats(c.run)).filter(Boolean);
+  const still = stats.filter(s => s.still).length;
+  const rows = stats.reduce((a, s) => a + (s.rows || 0), 0);
+  const refused = stats.reduce((a, s) => a + (s.rows ? s.refused : 0), 0);
+  const props = sections.filter(s => s.tool === "walls" && s.data).flatMap(s => _anArr(s.data.proposal));
+  const widen = props.filter(p => p && /^widen/.test(String(p.action || ""))).length;
+  const narrow = props.filter(p => p && String(p.action) === "narrow").length;
   const fid = sections.find(s => s.tool === "fidelity" && s.data);
   const fd = fid ? _anObj(fid.data) : null;
-  const still = conv.filter(c => c.run && c.run.last20_improvement === true).length;
+  const versions = [...new Set(conv.map(c => objectiveVersionOf(c.run)))].sort((a, b) => b - a);
   const nErrors = Array.isArray(errors) ? errors.length : 0;
 
-  const bestByVersion = new Map();
+  const kpis = [];
+  if (conv.length) {
+    kpis.push(_anKpi("runs analysed", fmt(conv.length, 0), "",
+      `${fmt(conv.length - still, 0)} settled · ${fmt(still, 0)} still improving`));
+  }
+  if (rows > 0) {
+    const pct = refused / rows * 100;
+    kpis.push(_anKpi("budget never solved", _anPct(pct, 0), pct >= 25 ? "warn" : "",
+      `${fmt(refused, 0)} of ${fmt(rows, 0)} evaluations refused`));
+  }
+  if (props.length) kpis.push(_anKpi("bound changes proposed", fmt(widen + narrow, 0), widen ? "warn" : "", `${fmt(widen, 0)} widen · ${fmt(narrow, 0)} narrow`));
+  if (fd && fd.bias_median_pct != null) {
+    const b = Number(fd.bias_median_pct);
+    kpis.push(_anKpi("screen optimism", `${b >= 0 ? "+" : "−"}${_anPct(Math.abs(b), 0)}`,
+      Math.abs(b) >= 10 ? "warn" : "", "verify J vs screen J, median"));
+  }
+  if (nErrors) kpis.push(_anKpi("not computed", fmt(nErrors, 0), "bad", `section${nErrors === 1 ? "" : "s"} refused to run`));
+
+  const p1 = acts.filter(a => a.pri === 1).length;
+  const lede = [
+    conv.length ? `${fmt(conv.length, 0)} search run${conv.length === 1 ? "" : "s"}${versions.length > 1 ? ` across ${versions.length} objective versions (J v${versions.join(", v")})` : ""}.` : "",
+    p1 ? `${fmt(p1, 0)} change${p1 === 1 ? "" : "s"} should go into the next solves first; ${fmt(acts.length - p1, 0)} more below.` : (acts.length ? `${fmt(acts.length, 0)} findings below.` : ""),
+  ].filter(Boolean).join(" ");
+
+  const meta = [d && d.generated_utc ? `generated ${esc(String(d.generated_utc).replace("T", " ").replace("Z", " UTC"))}` : null,
+    d && d.id ? `<span class="mono">${esc(d.id)}</span>` : null].filter(Boolean).join(" · ");
+  return `<header class="card an-hero">
+    <div class="eyebrow">Analysis report</div>
+    <h1 class="an-h1">${_anTitleOf(d && d.id)}</h1>
+    ${lede ? `<p class="lede">${lede}</p>` : ""}
+    ${kpis.length ? `<div class="kpis">${kpis.join("")}</div>` : ""}
+    <p class="an-meta">${meta}</p>
+  </header>`;
+}
+
+// B. Runs at a glance: scoreboard + convergence small multiples -----------
+
+function _anSpark(curve) {
+  return sparkline(_anCurve(curve), { log: true, label: "best-so-far J, log scale" });
+}
+
+function _anBudgetBar(st) {
+  if (!st || !st.rows) return "";
+  const useful = st.still || st.plateau == null ? st.nNew : Math.min(st.plateau, st.nNew);
+  const after = Math.max(0, st.nNew - useful);
+  const other = Math.max(0, st.rows - st.nNew - st.refused);
+  const pct = v => _anPct(v / st.rows * 100, 0);
+  return stackBarHtml([
+    { value: useful, cls: "an-bud-use", title: `solved while improving: ${fmt(useful, 0)} (${pct(useful)})` },
+    { value: after, cls: "an-bud-late", title: `solved after settling (<1% gain): ${fmt(after, 0)} (${pct(after)})` },
+    { value: st.refused, cls: "an-bud-ref", title: `refused before solving: ${fmt(st.refused, 0)} (${pct(st.refused)})` },
+    { value: other, cls: "an-bud-oth", title: `cached / other: ${fmt(other, 0)}` },
+  ], { total: st.rows, cls: "an-bud",
+    ariaLabel: `${fmt(useful, 0)} solved while improving, ${fmt(after, 0)} solved after settling, ${fmt(st.refused, 0)} refused, of ${fmt(st.rows, 0)}` })
+    + `<div class="an-meta">${fmt(st.nNew, 0)} solved · ${fmt(st.refused, 0)} refused${st.wallEnd ? ` · ${_anDur(st.wallEnd)}` : ""}</div>`;
+}
+
+function analysisScoreboardHtml(sections) {
+  const conv = analysisConvergenceRuns(sections);
+  if (!conv.length) return "";
+  const byV = new Map();
   for (const c of conv) {
     const v = objectiveVersionOf(c.run);
-    const b = Number(c.run && c.run.final_best);
-    if (!isFinite(b)) continue;
-    const cur = bestByVersion.get(v);
-    if (!cur || b < cur.best) bestByVersion.set(v, { best: b, run: _anRunId(c.run.run_dir) });
+    if (!byV.has(v)) byV.set(v, []);
+    byV.get(v).push(c);
   }
-  const perVersion = [...bestByVersion.entries()].sort((a, b) => b[0] - a[0]);
-
-  const sentences = [];
-  if (conv.length) sentences.push(`${fmt(conv.length, 0)} search runs analysed.`);
-  if (still > 0) {
-    sentences.push(`${fmt(still, 0)} were still improving when their budget ended — their budgets may be too small.`);
-  }
-  if (wallSecs.length && atLimit > 0) {
-    sentences.push(`${fmt(atLimit, 0)} knob${atLimit === 1 ? " is" : "s are"} pressed against a search limit — widening them is the cheapest next experiment.`);
-  }
-  if (fd && fd.bias_median_pct != null) {
-    const rank = (Number(fd.spearman_all) >= 0.6) ? "acceptably" : "weakly only";
-    sentences.push(`Screening overstates J by ${_anPct(fd.bias_median_pct)} versus verify and ranks designs ${rank}.`);
-  }
-  if (nErrors === 1) sentences.push("One section refused to run — see the callout below.");
-  else if (nErrors > 1) sentences.push(`${fmt(nErrors, 0)} sections refused to run — see the callout below.`);
-
-  const kpis = [];
-  if (conv.length) kpis.push(_anKpi("runs analysed", fmt(conv.length, 0)));
-  for (const [v, x] of perVersion) {
-    kpis.push(_anKpi(`best J · J v${v}`, _anNum(x.best), "", x.run ? `run ${x.run}` : ""));
-  }
-  if (conv.length) {
-    kpis.push(_anKpi("converged / still improving", `${fmt(conv.length - still, 0)} / ${fmt(still, 0)}`));
-  }
-  if (wallSecs.length) kpis.push(_anKpi("knobs at a limit", fmt(atLimit, 0), atLimit ? "warn" : ""));
-  if (fd && fd.bias_median_pct != null) {
-    kpis.push(_anKpi("screen→verify bias", _anPct(fd.bias_median_pct),
-      Math.abs(Number(fd.bias_median_pct)) >= 10 ? "warn" : ""));
-  }
-  if (d && Array.isArray(d.errors)) {
-    kpis.push(_anKpi("section errors", fmt(nErrors, 0), nErrors ? "bad" : "good"));
-  }
-
-  const meta = [d && d.generated_utc ? `generated ${esc(d.generated_utc)}` : null,
-    d && d.base ? esc(d.base) : null].filter(Boolean).join(" · ");
-  return `<div class="card">
-    <div class="eyebrow">Analysis report</div>
-    <h2>${esc((d && d.id) || "analysis")}</h2>
-    <p class="muted">${meta}</p>
-    ${sentences.length ? `<p class="lede">${sentences.join(" ")}</p>` : ""}
-    ${kpis.length ? `<div class="kpis">${kpis.join("")}</div>` : ""}
-  </div>`;
-}
-
-// B. Convergence small multiples ------------------------------------------
-
-function _anRefusalStrip(rows) {
-  const arr = _anArr(rows).filter(r => r && isFinite(Number(r.rate)));
-  if (!arr.length) return "";
-  const segs = arr.map(r => {
-    const w = Math.max(0, Math.min(100, Number(r.rate) * 100));
-    const kinds = Object.entries(_anObj(r.kinds)).map(([k, v]) => `${k} ${v}`).join(", ");
-    const win = _anArr(r.w).length === 2 ? `${r.w[0]}–${r.w[1]}` : "";
-    return `<div class="an-refusal-seg" style="width:${w.toFixed(2)}%" title="${esc(`${win}: ${kinds}`)}"></div>`;
+  const groups = [...byV.entries()].sort((a, b) => b[0] - a[0]).map(([v, list]) => {
+    const rows = list.map(({ sec, run }) => {
+      const st = _anConvStats(run);
+      if (!st) return "";
+      const id = _anRunId(run.run_dir);
+      const status = st.still
+        ? `<span class="pill warn">▲ still improving${st.stillPct != null ? ` +${_anPct(st.stillPct)}` : ""}</span>`
+        : `<span class="pill good">✓ settled</span>`;
+      const when = st.plateau != null ? `<div class="an-meta">within 1% after ${fmt(st.plateau, 0)} evals</div>` : "";
+      return `<div class="an-sb-row" role="row">
+        <div class="an-sb-name" role="cell"><b class="mono">${esc(run.brief || id || sec.id)}</b>
+          <div class="an-meta">${[run.family ? esc(run.family) : "", sec.id !== "default" ? `<span class="an-tag">${esc(_anTag(sec))}</span>` : "",
+            id ? `<a href="#/run/${encodeURIComponent(id)}" class="mono">${esc(id.replace(/^(\d{8})T(\d{4})\d*Z-/, "$1 $2 · "))}</a>` : ""].filter(Boolean).join(" ")}</div></div>
+        <div class="an-sb-spark" role="cell">${_anSpark(run.curve)}</div>
+        <div class="an-sb-j" role="cell"><span class="an-sb-seed">${_anVal(st.seed)} →</span> <b>${_anVal(st.best)}</b>
+          ${st.improvePct != null ? `<div class="an-meta">−${_anPct(st.improvePct, 0)} from seed</div>` : ""}</div>
+        <div class="an-sb-status" role="cell">${status}${when}</div>
+        <div class="an-sb-bud" role="cell">${_anBudgetBar(st)}</div>
+      </div>`;
+    }).join("");
+    return `<div class="an-sb-group" role="rowgroup"><div class="an-sb-ghead">Objective J v${esc(_trimNum(v))}<span class="muted"> — compare J only inside this group</span></div>${rows}</div>`;
   }).join("");
-  return `<div class="an-refusal-strip" role="img" aria-label="refusal rate by evaluation window">${segs}</div>`;
+  const cards = conv.map(({ sec, run }) => analysisConvergenceCardHtml(sec, run)).filter(Boolean).join("");
+  return `<section class="card an-block" id="an-s-runs">
+    <div class="eyebrow">Runs at a glance</div>
+    <h2>How each search went</h2>
+    <p class="muted">Lower J is better. The line is best-so-far J (log scale). The bar shows where the evaluation budget went.</p>
+    <div class="an-legend">
+      <span><i class="an-sw an-bud-use"></i>solved while improving</span>
+      <span><i class="an-sw an-bud-late"></i>solved after settling (&lt;1% gain)</span>
+      <span><i class="an-sw an-bud-ref"></i>refused before solving</span>
+    </div>
+    <div class="an-sb" role="table" aria-label="Run scoreboard">
+      <div class="an-sb-row an-sb-head" role="row"><div role="columnheader">Run</div><div role="columnheader">Best J over time</div>
+        <div role="columnheader">Seed → best J</div><div role="columnheader">Status</div><div role="columnheader">Budget</div></div>
+      ${groups}
+    </div>
+    ${cards ? `<details class="an-details an-conv-details" open><summary>Convergence detail — one chart per run</summary><div class="an-conv-grid">${cards}</div></details>` : ""}
+  </section>`;
 }
 
-function _anRefusalKinds(refusals) {
-  const entries = Object.entries(_anObj(refusals)).filter(([, v]) => isFinite(Number(v)));
-  return entries.length
-    ? entries.map(([k, v]) => `<span class="mono">${esc(k)} ${fmt(v, 0)}</span>`).join(" · ") : "";
+
+function _anDrawConvergence(svg, run) {
+  const pts = _anCurve(run && run.curve).filter(p => p[1] > 0);
+  if (!pts.length) return;
+  const maxN = Math.max(1, ...pts.map(p => p[0]));
+  const ys = pts.map(p => p[1]);
+  const [lo, hi] = logNiceLimits(Math.min(...ys), Math.max(...ys));
+  // Under one decade the 1-2-5 ladder gives only the ends; fall back to evenly spaced values.
+  let ylt = logTicks(lo, hi);
+  if (ylt.length < 3) ylt = niceTicks(lo, hi, 4).filter(v => v >= lo && v <= hi);
+  const plateau = Number(run && run.evals_to_1pct);
+  const settled = run && run.last20_improvement !== true && isFinite(plateau) && plateau < maxN;
+  chart(svg, {
+    H: 200, ylog: true,
+    xlim: [0, maxN], ylim: [lo, hi],
+    xticks: niceTicks(0, maxN, 5), yticks: ylt,
+    xlabel: "valid evaluations", ylabel: "best J",
+    series: [{ pts, color: css("--best"), w: 2 }],
+    refLines: [{ y: pts[0][1], label: "seed", dash: true }],
+    unscored: settled ? [{ x0: plateau, x1: maxN, label: "<1% gain" }] : [],
+    markers: false,
+    ariaLabel: `best-so-far objective for ${_runBaseName(run && run.run_dir)}, log scale`,
+  });
 }
 
 function analysisConvergenceCardHtml(sec, run) {
-  const pts = _anCurve(run && run.curve);
-  if (!pts.length) return "";
-  const id = sec.id !== "default" ? sec.id : (_anRunId(run.run_dir) || "run");
-  const title = [esc(id)];
-  if (run.brief) title.push(esc(run.brief));
-  if (run.family) title.push(esc(run.family));
-  title.push(esc(jVersionLabel(run)));
-  const badge = run.last20_improvement === true
-    ? `<span class="pill warn">still improving${run.last20_improvement_pct != null ? ` (+${_anPct(run.last20_improvement_pct)})` : ""}</span>`
-    : `<span class="pill good">converged</span>`;
+  const st = _anConvStats(run);
+  if (!st) return "";
+  const badge = st.still
+    ? `<span class="pill warn">▲ still improving</span>` : `<span class="pill good">✓ settled</span>`;
   const chartId = _anChartJob("convergence", run);
-  const lineBits = [];
-  if (run.final_best != null) lineBits.push(`best J ${_anNum(run.final_best)}`);
-  if (run.n_new_valid != null) lineBits.push(`${fmt(run.n_new_valid, 0)} new valid evals`);
-  if (run.evals_to_1pct != null) lineBits.push(`within 1% after ${fmt(run.evals_to_1pct, 0)} evals`);
-  const kinds = _anRefusalKinds(run.refusals);
-  const strip = _anRefusalStrip(run.refusal_rate_by_kind);
-  return `<div class="card an-card">
-    <div class="eyebrow">Convergence</div>
-    <div class="an-card-head"><h3>${title.join(" · ")}</h3>${badge}</div>
-    <p class="muted">Best-so-far J against new valid evaluations. The dashed line is the seed score the search started from.</p>
+  const bits = [`best J ${_anVal(st.best)}`, `${fmt(st.nNew, 0)} valid evals`];
+  if (st.plateau != null) bits.push(`within 1% after ${fmt(st.plateau, 0)}`);
+  return `<div class="an-conv">
+    <div class="an-card-head"><h3 class="an-h3"><span class="mono">${esc(run.brief || _anRunId(run.run_dir) || sec.id)}</span>
+      <span class="muted">${esc([run.family, jVersionLabel(run)].filter(Boolean).join(" · "))}</span></h3>${badge}</div>
     <svg id="${chartId}" class="an-chart" style="width:100%" role="img" aria-label="best-so-far objective"></svg>
-    ${lineBits.length ? `<div class="an-meta mono">${lineBits.join(" · ")}</div>` : ""}
-    ${strip}
-    ${kinds ? `<div class="an-meta mono">refusals by kind: ${kinds}</div>` : ""}
+    <div class="an-meta">${bits.join(" · ")}</div>
     <div class="an-meta">${_anRunLink(run.run_dir)}</div>
   </div>`;
 }
@@ -3010,138 +3325,170 @@ function analysisConvergenceCardHtml(sec, run) {
 function analysisConvergenceGridHtml(sections) {
   const cards = analysisConvergenceRuns(sections)
     .map(({ sec, run }) => analysisConvergenceCardHtml(sec, run)).filter(Boolean);
-  return cards.length ? `<div class="grid2">${cards.join("")}</div>` : "";
+  return cards.length ? `<div class="an-conv-grid">${cards.join("")}</div>` : "";
 }
 
-// C. Objective term balance (prominent, full width) -----------------------
+// C. What the score is made of ---------------------------------------------
 
 function analysisTermBalanceHtml(sections) {
   const secs = sections.filter(s => s.tool === "term_balance" && s.data
     && Object.keys(_anObj(s.data.shares)).length);
   if (!secs.length) return "";
+  const idx = _anRunIndex(sections);
   const body = secs.map(sec => {
     const d = sec.data;
-    const shares = _anObj(d.shares), weights = _anObj(d.weights), tol = _anObj(d.tolerances);
-    const terms = Object.keys(shares).sort((a, b) =>
-      (Number(shares[b] && shares[b].median) || 0) - (Number(shares[a] && shares[a].median) || 0));
-    const bar = (kind, label) => {
-      const segs = terms.map((t, i) => {
-        const v = Number(shares[t] && shares[t][kind]);
-        if (!isFinite(v) || v <= 0) return "";
-        const w = Math.max(0, Math.min(100, v * 100));
-        const cls = `an-term-seg an-term-seg-${(i % ANALYSIS_TERM_PALETTE) + 1}`;
-        return `<div class="${cls}" style="width:${w.toFixed(2)}%" title="${esc(`${t} ${w.toFixed(1)}%`)}"></div>`;
-      }).join("");
-      return `<div class="an-term-bar-row"><span class="an-bar-label">${esc(label)}</span>
-        <div class="an-term-bar" role="img" aria-label="${esc(label)} term shares">${segs}</div></div>`;
-    };
-    const legend = terms.map((t, i) => {
-      const cls = `an-term-swatch an-term-seg-${(i % ANALYSIS_TERM_PALETTE) + 1}`;
-      const w = weights[t] != null ? `w ${fmt(weights[t], 2)}` : "w –";
-      const tl = tol[t] != null ? `tol ${fmt(tol[t], 2)}` : "tol –";
-      return `<span class="an-term-key"><span class="${cls}"></span>`
-        + `<span class="mono">${esc(t)}</span><span class="muted">${esc(w)} · ${esc(tl)}</span></span>`;
+    const shares = _anObj(d.shares), weights = _anObj(d.weights), tol = _anObj(d.tolerances), raw = _anObj(d.top_decile_raw);
+    const med = t => Number(shares[t] && shares[t].median) || 0;
+    const terms = Object.keys(shares).sort((a, b) => med(b) - med(a));
+    const slot = (i) => i < ANALYSIS_TERM_PALETTE - 1 ? i + 1 : ANALYSIS_TERM_PALETTE;   // slot 8 = "other"
+    const bar = stackBarHtml(terms.map((t, i) => ({
+      value: med(t), cls: `cat-${slot(i)}`, label: `${t} ${(med(t) * 100).toFixed(0)}%`,
+      title: `${t}: ${(med(t) * 100).toFixed(1)}% of J (median), mean ${_anPct(Number(shares[t] && shares[t].mean) * 100)}`,
+    })), { cls: "an-term-bar-lg", ariaLabel: "median share of J by term" });
+    const rows = terms.map((t, i) => {
+      const r = Number(raw[t] && raw[t].median), tl = Number(tol[t]);
+      const ratio = (tl > 0 && isFinite(r)) ? r / tl : null;
+      const over = ratio != null && ratio > 1;
+      const bullet = ratio != null
+        ? `<div class="an-tol" title="${esc(`best-10% median ${_anVal(r)} vs tolerance ${_anVal(tl)}`)}"><div class="an-tol-fill${over ? " over" : ""}" style="width:${(Math.min(ratio, 3) / 3 * 100).toFixed(1)}%"></div><div class="an-tol-mark"></div></div>
+           <span class="mono${over ? " an-over" : ""}">${ratio.toFixed(2)}×${over ? " over" : ""}</span>` : `<span class="muted">–</span>`;
+      return `<tr><td><span class="an-sw cat-${slot(i)}"></span> <span class="mono">${esc(t)}</span></td>
+        <td class="r mono">${_anPct(med(t) * 100, 0)}</td>
+        <td class="r mono">${weights[t] != null ? _anVal(weights[t]) : "–"}</td>
+        <td class="r mono">${tol[t] != null ? _anVal(tol[t]) : "–"}</td>
+        <td class="r mono">${isFinite(r) ? _anVal(r) : "–"}</td>
+        <td class="an-tol-cell">${bullet}</td></tr>`;
     }).join("");
-    const raw = _anObj(d.top_decile_raw);
-    const rawTerms = Object.keys(raw).sort((a, b) =>
-      (Number(raw[b] && raw[b].median) || 0) - (Number(raw[a] && raw[a].median) || 0));
-    const rawTable = rawTerms.length ? `<details class="an-details"><summary>For the technical reader — raw top-decile values</summary>
-      <div class="tbl-wrap"><table><thead><tr><th>Term</th><th class="r">median</th><th class="r">p10</th><th class="r">p90</th></tr></thead>
-      <tbody>${rawTerms.map(t => `<tr><td class="mono">${esc(t)}</td><td class="r">${_anNum(raw[t] && raw[t].median, 3)}</td><td class="r">${_anNum(raw[t] && raw[t].p10, 3)}</td><td class="r">${_anNum(raw[t] && raw[t].p90, 3)}</td></tr>`).join("")}</tbody></table></div></details>` : "";
     return `<div class="an-sec">
-      ${_anSectionHead(sec, d.n_valid != null ? `n valid ${fmt(d.n_valid, 0)}` : "")}
-      <div class="an-term-bars">${bar("median", "median")}${bar("mean", "mean")}</div>
-      <div class="an-term-legend">${legend}</div>
-      ${rawTable}
+      <div class="an-sec-head">${_anRunLabel(idx, d.run_dir, sec.id, false)} <span class="muted">${esc([d.family, jVersionLabel(d), d.n_valid != null ? `${fmt(d.n_valid, 0)} valid designs` : ""].filter(Boolean).join(" · "))}</span></div>
+      ${bar}
+      <div class="tbl-wrap"><table class="an-tbl"><thead><tr><th>Term</th><th class="r">Share of J</th><th class="r">Weight</th><th class="r">Tolerance</th><th class="r">Best 10% (median)</th><th>vs tolerance <span class="muted">(1× = on target)</span></th></tr></thead>
+        <tbody>${rows}</tbody></table></div>
     </div>`;
   }).join("");
-  return `<div class="card">
-    <div class="eyebrow">Objective term balance</div>
-    <h2>What the score is actually made of</h2>
-    <p class="muted">Each bar is one run's score split by term. A term that fills most of the bar is what the optimiser spent its effort on; the weight and tolerance are what the brief asked for.</p>
+  return `<section class="card an-block" id="an-s-score">
+    <div class="eyebrow">Objective balance</div>
+    <h2>What the score is made of</h2>
+    <p class="muted">Each bar splits J into its terms — the big segments are where the optimiser spent its effort. The right-hand column asks whether the best 10% of designs actually reach each term's tolerance; a term that is both large and over tolerance is the bottleneck.</p>
     ${body}
-  </div>`;
+  </section>`;
 }
 
-// D. Bound walls ----------------------------------------------------------
+// D. Where the best designs live (bound walls + proposals) ------------------
 
 function analysisWallsSectionHtml(sections) {
   const secs = sections.filter(s => s.tool === "walls" && s.data
     && (_anArr(s.data.walls).length || _anArr(s.data.proposal).length));
   if (!secs.length) return "";
-  return secs.map(sec => {
-    const d = sec.data, walls = _anArr(d.walls), prop = _anArr(d.proposal);
-    const rows = walls.map(w => {
-      if (!w || w.key == null) return "";
-      const fl = isFinite(Number(w.frac_lo)) ? Math.max(0, Math.min(100, Number(w.frac_lo) * 100)) : 0;
-      const fh = isFinite(Number(w.frac_hi)) ? Math.max(0, Math.min(100, Number(w.frac_hi) * 100)) : 0;
-      const gauge = `<div class="an-gauge" role="img" aria-label="${esc(`${w.key}: ${_anPct(fl, 0)} near low, ${_anPct(fh, 0)} near high`)}">`
-        + `<div class="an-gauge-fill lo" style="width:${fl.toFixed(2)}%"></div>`
-        + `<div class="an-gauge-fill hi" style="width:${fh.toFixed(2)}%"></div></div>`;
-      const chips = `${w.wall_lo ? pill("wall lo", "warn") : ""}${w.wall_hi ? pill("wall hi", "warn") : ""}`
-        || `<span class="muted">–</span>`;
-      return `<tr><td class="mono">${esc(w.key)}</td><td class="r mono">${_anNum(w.lo, 3)} … ${_anNum(w.hi, 3)}</td>
-        <td>${gauge}<div class="an-meta mono">${_anPct(fl, 0)} near low · ${_anPct(fh, 0)} near high</div></td>
-        <td>${chips}</td></tr>`;
+  const idx = _anRunIndex(sections);
+  const body = secs.map(sec => {
+    const d = sec.data, walls = _anArr(d.walls).filter(w => w && w.key != null);
+    const prop = new Map(_anArr(d.proposal).filter(p => p && p.key != null).map(p => [String(p.key), p]));
+    const show = [], quiet = [];
+    for (const w of walls) {
+      const p = prop.get(String(w.key));
+      if (w.wall_lo || w.wall_hi || p) show.push({ w, p }); else quiet.push(String(w.key));
+    }
+    for (const [k, p] of prop) if (!walls.some(w => String(w.key) === k)) show.push({ w: { key: k }, p });
+    const rank = ({ w, p }) => (w.wall_lo || w.wall_hi) ? 0 : (p && /^widen/.test(String(p.action))) ? 1 : 2;
+    const keep = ({ w, p }) => {
+      const s = Number(w.hi) - Number(w.lo), n = p ? Number(p.new_hi) - Number(p.new_lo) : s;
+      return s > 0 && isFinite(n) ? n / s : 1;
+    };
+    show.sort((a, b) => rank(a) - rank(b) || keep(a) - keep(b));
+    const rows = show.map(({ w, p }) => {
+      const lo = Number(w.lo), hi = Number(w.hi), nlo = p ? Number(p.new_lo) : lo, nhi = p ? Number(p.new_hi) : hi;
+      const vals = [lo, hi, nlo, nhi].filter(isFinite);
+      if (!vals.length) return "";
+      const a = Math.min(...vals), b = Math.max(...vals), span = b > a ? b - a : 1;
+      const L = v => ((v - a) / span * 100).toFixed(2);
+      const box = isFinite(lo) && isFinite(hi) ? `<div class="an-bx-box" style="left:${L(lo)}%;width:${(Number(L(hi)) - Number(L(lo))).toFixed(2)}%"></div>` : "";
+      const pr = p && isFinite(nlo) && isFinite(nhi) ? `<div class="an-bx-prop" style="left:${L(nlo)}%;width:${(Number(L(nhi)) - Number(L(nlo))).toFixed(2)}%"></div>` : "";
+      const wl = w.wall_lo && isFinite(lo) ? `<div class="an-bx-wall" style="left:${L(lo)}%" title="${esc(`${_anPct(Number(w.frac_lo) * 100, 0)} of the best designs at the lower limit`)}"></div>` : "";
+      const wh = w.wall_hi && isFinite(hi) ? `<div class="an-bx-wall" style="left:${L(hi)}%" title="${esc(`${_anPct(Number(w.frac_hi) * 100, 0)} of the best designs at the upper limit`)}"></div>` : "";
+      const verdict = (w.wall_lo || w.wall_hi)
+        ? `<span class="an-flag warn">wall ${w.wall_lo ? "low" : "high"} · ${_anPct(Number(w.wall_lo ? w.frac_lo : w.frac_hi) * 100, 0)}</span>`
+        : p ? `<span class="an-flag">${esc(String(p.action).replace(/_/g, " "))}</span>` : "";
+      const nums = `${_anVal(lo)} … ${_anVal(hi)}${p ? ` → <b>${_anVal(nlo)} … ${_anVal(nhi)}</b>` : ""}`;
+      return `<div class="an-bx-row" title="${esc(p && p.reason ? p.reason : "")}">
+        <span class="mono an-bx-key">${esc(w.key)}</span>
+        <div class="an-bx-track" role="img" aria-label="${esc(`${w.key}: current ${_anVal(lo)} to ${_anVal(hi)}${p ? `, proposed ${_anVal(nlo)} to ${_anVal(nhi)}` : ""}`)}">${box}${pr}${wl}${wh}</div>
+        <span class="mono an-bx-nums">${nums}</span>
+        <span class="an-bx-verdict">${verdict}</span>
+      </div>`;
     }).join("");
-    const propList = prop.length ? `<ul class="guide-steps">${prop.map(p =>
-      `<li><b class="mono">${esc(p.key)}</b> → ${esc(p.action)}: new bounds ${esc(_anNum(p.new_lo, 3))} … ${esc(_anNum(p.new_hi, 3))} — ${esc(p.reason || "")}</li>`).join("")}</ul>` : "";
-    return `<div class="card">
-      <div class="eyebrow">Bound walls</div>
-      <h2>Knobs pushed against a limit</h2>
-      <p class="muted">A wall means most of the best designs sit as close to a limit as the search allows. The knob may want more room than the box gives it.</p>
-      ${_anSectionHead(sec)}
-      ${rows ? `<div class="tbl-wrap"><table><thead><tr><th>Knob</th><th class="r">Range</th><th>Position in range</th><th>Wall</th></tr></thead><tbody>${rows}</tbody></table></div>` : ""}
-      ${propList ? `<h3>Widen / narrow proposals</h3><p class="muted">Candidates only — never applied here.</p>${propList}` : ""}
+    return `<div class="an-sec">
+      <div class="an-sec-head">${_anRunLabel(idx, d.run_dir, sec.id, false)} <span class="muted">${esc([d.family, d.top_decile_n != null ? `best ${fmt(d.top_decile_n, 0)} designs` : ""].filter(Boolean).join(" · "))}</span></div>
+      ${rows ? `<div class="an-bx">${rows}</div>` : ""}
+      ${quiet.length ? `<p class="an-meta">No change suggested for ${fmt(quiet.length, 0)} knob${quiet.length === 1 ? "" : "s"}: ${quiet.map(esc).join(", ")}</p>` : ""}
       <div class="an-meta">${_anRunLink(d.run_dir)}</div>
     </div>`;
   }).join("");
+  return `<section class="card an-block" id="an-s-bounds">
+    <div class="eyebrow">Search box</div>
+    <h2>Where the best designs live</h2>
+    <p class="muted">Each track is one knob's search range. A wall marker means most of the best 10% of designs sat at that limit, so the optimiser wanted more room. Proposals are candidates only; nothing is applied here.</p>
+    <div class="an-legend">
+      <span><i class="an-sw an-bx-box-sw"></i>current range</span>
+      <span><i class="an-sw an-bx-prop-sw"></i>proposed range (best 10% span + 5%)</span>
+      <span><i class="an-sw an-bx-wall-sw"></i>wall</span>
+    </div>
+    ${body}
+  </section>`;
 }
 
-// E. Sensitivity ----------------------------------------------------------
+// E. What moves the score (sensitivity) -------------------------------------
 
 function analysisSensitivitySectionHtml(sections) {
   const secs = sections.filter(s => s.tool === "sensitivity" && s.data && _anArr(s.data.spearman).length);
   if (!secs.length) return "";
-  return secs.map(sec => {
-    const d = sec.data;
-    const rows = _anArr(d.spearman).filter(p => p && p.key != null)
-      .sort((a, b) => Math.abs(Number(b.rho_abs != null ? b.rho_abs : b.rho) || 0)
-        - Math.abs(Number(a.rho_abs != null ? a.rho_abs : a.rho) || 0))
-      .map(p => {
-        const rho = Number(p.rho != null ? p.rho : p.rho_abs);
-        const rr = isFinite(rho) ? rho : 0;
-        const w = Math.max(0, Math.min(50, Math.abs(rr) * 50));
-        return `<div class="an-div-row">
-          <span class="mono an-div-key">${esc(p.key)}</span>
-          <div class="an-div-track"><div class="an-div-centre"></div>
-            <div class="an-div-fill ${rr >= 0 ? "pos" : "neg"}" style="width:${w.toFixed(2)}%"></div></div>
-          <span class="r mono">${isFinite(rho) ? rho.toFixed(2) : "–"}</span>
-          <span class="r muted mono">n ${_anNum(p.n, 0)}</span>
-        </div>`;
-      }).join("");
-    const sur = _anObj(d.surrogate);
-    const imp = _anArr(sur.importance).filter(i => i && i.key != null && isFinite(Number(i.permutation_importance)));
-    const maxImp = imp.length ? Math.max(...imp.map(i => Math.abs(Number(i.permutation_importance)))) : 0;
-    const impRows = (sur.available === true && imp.length) ? `<h3>Importance (${esc(sur.model || "surrogate")}, R² = ${_anNum(sur.r2, 2)})</h3>
-      <p class="muted">Permutation importance: mean change in J when the knob is shuffled.</p>
-      ${imp.slice().sort((a, b) => Number(b.permutation_importance) - Number(a.permutation_importance)).map(i => {
-        const v = Number(i.permutation_importance);
-        const w = maxImp > 0 ? Math.max(0, Math.min(100, (Math.abs(v) / maxImp) * 100)) : 0;
-        return `<div class="an-div-row"><span class="mono an-div-key">${esc(i.key)}</span>
-          <div class="an-imp-track"><div class="an-imp-fill" style="width:${w.toFixed(2)}%"></div></div>
-          <span class="r mono">${_anNum(v, 3)}</span>
-          <span class="r muted mono">${i.std != null ? `± ${_anNum(i.std, 3)}` : ""}</span></div>`;
-      }).join("")}` : "";
-    return `<div class="card">
-      <div class="eyebrow">Sensitivity</div>
-      <h2>Which knobs move the score</h2>
-      <p class="muted">Rank correlation between a knob and J. Bars to the right mean bigger = worse; bars to the left mean bigger = better. This is a descriptive ranking, not a causal claim.</p>
-      ${_anSectionHead(sec, d.n_valid != null ? `n ${fmt(d.n_valid, 0)}` : "")}
-      <div class="an-div-list">${rows}</div>
-      ${impRows}
+  const idx = _anRunIndex(sections);
+  const body = secs.map(sec => {
+    const d = sec.data, sur = _anObj(d.surrogate);
+    const useImp = sur.available === true && _anArr(sur.importance).length > 0;
+    const imp = new Map(_anArr(sur.importance).filter(i => i && i.key != null).map(i => [String(i.key), i]));
+    const rho = new Map(_anArr(d.spearman).filter(p => p && p.key != null).map(p => [String(p.key), p]));
+    const shift = new Map(_anArr(d.top_decile_shift).filter(p => p && p.key != null).map(p => [String(p.key), p]));
+    const keys = [...new Set([...rho.keys(), ...imp.keys()])];
+    const impOf = k => Number(imp.get(k) && imp.get(k).permutation_importance);
+    const rhoOf = k => { const p = rho.get(k); return p ? Number(p.rho != null ? p.rho : p.rho_abs) : NaN; };
+    const maxImp = Math.max(0, ...keys.map(impOf).filter(isFinite));
+    const score = k => useImp ? (isFinite(impOf(k)) ? impOf(k) : -1) : Math.abs(rhoOf(k)) || 0;
+    keys.sort((a, b) => score(b) - score(a));
+    const matters = k => (useImp && maxImp > 0 && impOf(k) > 0.02 * maxImp) || Math.abs(rhoOf(k)) >= 0.15;
+    const shown = keys.filter(matters), rest = keys.filter(k => !matters(k));
+    const row = k => {
+      const iv = impOf(k), r = rhoOf(k), sh = shift.get(k);
+      const iw = useImp && maxImp > 0 && isFinite(iv) ? Math.max(0, Math.min(100, iv / maxImp * 100)) : 0;
+      const dir = !isFinite(r) ? `<span class="muted">–</span>`
+        : Math.abs(r) < 0.1 ? `<span class="muted">no clear trend</span>`
+        : `<span class="an-dir ${r < 0 ? "good" : "bad"}">larger → ${r < 0 ? "better" : "worse"}</span>`;
+      const rw = isFinite(r) ? Math.min(50, Math.abs(r) * 50) : 0;
+      const sh2 = sh && isFinite(Number(sh.mean_top)) && isFinite(Number(sh.mean_all))
+        ? `<span class="mono">${_anVal(sh.mean_top)}</span> <span class="muted">vs ${_anVal(sh.mean_all)}</span>` : `<span class="muted">–</span>`;
+      return `<tr><td class="mono">${esc(k)}</td>
+        ${useImp ? `<td><div class="an-ibar"><div class="an-ibar-fill" style="width:${iw.toFixed(1)}%"></div></div></td><td class="r mono">${isFinite(iv) ? _anVal(iv) : "–"}</td>` : ""}
+        <td><div class="an-rho"><div class="an-rho-mid"></div><div class="an-rho-fill ${r < 0 ? "neg" : "pos"}" style="width:${rw.toFixed(1)}%"></div></div></td>
+        <td class="r mono">${isFinite(r) ? r.toFixed(2) : "–"}</td>
+        <td>${dir}</td>
+        ${shift.size ? `<td class="r">${sh2}</td>` : ""}</tr>`;
+    };
+    const head = `<tr><th>Knob</th>${useImp ? `<th colspan="2">Importance <span class="muted">(ΔJ when shuffled)</span></th>` : ""}<th colspan="2">Rank correlation <span class="nocaps">ρ</span></th><th>Direction</th>${shift.size ? `<th class="r">Best 10% vs all (mean)</th>` : ""}</tr>`;
+    const r2 = Number(sur.r2);
+    const caveat = useImp ? `<p class="an-meta">Importance from a ${esc(sur.model || "surrogate")} fit that explains ${_anPct(r2 * 100, 0)} of J's variation (R²)${r2 < 0.6 ? " — treat the ranking as rough" : ""}. ρ is descriptive, not causal.</p>` : `<p class="an-meta">ρ is descriptive, not causal; no surrogate importance was stored.</p>`;
+    return `<div class="an-sec">
+      <div class="an-sec-head">${_anRunLabel(idx, d.run_dir, sec.id, false)} <span class="muted">${esc([d.family, jVersionLabel(d), d.n_valid != null ? `n ${fmt(d.n_valid, 0)}` : ""].filter(Boolean).join(" · "))}</span></div>
+      <div class="tbl-wrap"><table class="an-tbl"><thead>${head}</thead><tbody>${shown.map(row).join("")}</tbody></table></div>
+      ${rest.length ? `<p class="an-meta">No measurable effect (${fmt(rest.length, 0)}): ${rest.map(esc).join(", ")}</p>` : ""}
+      ${caveat}
     </div>`;
   }).join("");
+  return `<section class="card an-block" id="an-s-drivers">
+    <div class="eyebrow">Sensitivity</div>
+    <h2>Which knobs move the score</h2>
+    <p class="muted">Importance says how much J depends on a knob; direction says which way to push it. “Larger → better” means bigger values went with lower J. Knobs with no measurable effect are candidates to freeze.</p>
+    ${body}
+  </section>`;
 }
 
 // F. Seed variance --------------------------------------------------------
@@ -3210,33 +3557,67 @@ function analysisSeedVarianceSectionHtml(sections) {
 
 // G. Fidelity (screen vs verify) ------------------------------------------
 
+function _anDrawFidelity(svg, data) {
+  const pts = _anArr(data && data.pairs)
+    .filter(p => p && isFinite(Number(p.j_screen)) && isFinite(Number(p.j_verify)))
+    .map(p => [Number(p.j_screen), Number(p.j_verify)]);
+  if (!pts.length) return;
+  const vals = pts.flat();
+  const lo = Math.min(...vals), hi = Math.max(...vals);
+  const pad = hi > lo ? (hi - lo) * 0.08 : Math.max(1, Math.abs(hi) * 0.05);
+  // Same scale on both axes and a square plot area, so the 45° agreement line really is 45°.
+  chart(svg, {
+    W: 360, square: true,
+    xlim: [lo - pad, hi + pad], ylim: [lo - pad, hi + pad],
+    xticks: niceTicks(lo - pad, hi + pad, 5), yticks: niceTicks(lo - pad, hi + pad, 5),
+    xlabel: "screen J (cheap solve)", ylabel: "verify J",
+    series: [
+      { pts: [[lo - pad, lo - pad], [hi + pad, hi + pad]], color: css("--rule"), w: 1, dash: true },
+      { pts, color: css("--accent"), dots: true, r: 4, opacity: 0.85 },
+    ],
+    markers: false,
+    ariaLabel: "screen versus verify objective scatter with the equal-score diagonal",
+  });
+}
+
 function analysisFidelitySectionHtml(sections) {
   const secs = sections.filter(s => s.tool === "fidelity" && s.data && _anArr(s.data.pairs).length);
   if (!secs.length) return "";
-  return secs.map(sec => {
+  const idx = _anRunIndex(sections);
+  const body = secs.map(sec => {
     const d = sec.data;
     const pairs = _anArr(d.pairs).filter(p => p && isFinite(Number(p.j_screen)) && isFinite(Number(p.j_verify)));
+    const above = pairs.filter(p => Number(p.j_verify) > Number(p.j_screen)).length;
     const chartId = _anChartJob("fidelity", d);
-    const chips = [
-      d.bias_median_pct != null ? `<span class="pill ${Math.abs(Number(d.bias_median_pct)) >= 10 ? "warn" : ""}">bias median ${_anPct(d.bias_median_pct)}</span>` : "",
-      d.spearman_all != null ? `<span class="pill">Spearman all ${_anNum(d.spearman_all, 3)}</span>` : "",
-      d.spearman_top5 != null ? `<span class="pill">top-5 ${_anNum(d.spearman_top5, 3)}</span>` : "",
-      d.n_pairs != null ? `<span class="pill">n pairs ${fmt(d.n_pairs, 0)}</span>` : "",
-    ].filter(Boolean).join(" ");
-    const table = pairs.length ? `<details class="an-details"><summary>Screen vs verify pairs</summary>
-      <div class="tbl-wrap"><table><thead><tr><th>Design</th><th class="r">screen J</th><th class="r">verify J</th><th class="r">bias %</th></tr></thead>
-      <tbody>${pairs.map(p => `<tr><td class="mono">${esc(p.design_hash || "–")}</td><td class="r">${_anNum(p.j_screen)}</td><td class="r">${_anNum(p.j_verify)}</td><td class="r">${_anNum(p.bias_pct)}</td></tr>`).join("")}</tbody></table></div></details>` : "";
-    return `<div class="card">
-      <div class="eyebrow">Fidelity</div>
-      <h2>How honest is a screen score?</h2>
-      <p class="muted">A screen solve is cheap and a verify solve is accurate. Points above the dashed line were flattered by the screen. Ranking agreement is what matters when choosing finalists.</p>
-      ${_anSectionHead(sec)}
-      ${chips ? `<div class="pill-row">${chips}</div>` : ""}
-      <svg id="${chartId}" class="an-chart" style="width:100%" role="img" aria-label="screen versus verify objective"></svg>
+    const bias = Number(d.bias_median_pct);
+    const kpis = [
+      isFinite(bias) ? _anKpi("verify vs screen", `${bias >= 0 ? "+" : "−"}${_anPct(Math.abs(bias), 0)}`,
+        Math.abs(bias) >= 10 ? "warn" : "", bias >= 0 ? "screen looks better than it is" : "screen looks worse than it is") : "",
+      d.spearman_all != null ? _anKpi("rank agreement, all", _anNum(d.spearman_all), Number(d.spearman_all) >= 0.6 ? "good" : "warn",
+        `Spearman ρ over ${fmt(d.n_pairs != null ? d.n_pairs : pairs.length, 0)} pairs`) : "",
+      d.spearman_top5 != null ? _anKpi("rank agreement, top 5", _anNum(d.spearman_top5), Number(d.spearman_top5) >= 0.7 ? "good" : "warn",
+        "what matters when picking finalists") : "",
+    ].filter(Boolean).join("");
+    const table = pairs.length ? `<details class="an-details"><summary>All ${fmt(pairs.length, 0)} pairs</summary>
+      <div class="tbl-wrap"><table class="an-tbl"><thead><tr><th>Design</th><th class="r">screen J</th><th class="r">verify J</th><th class="r">bias %</th></tr></thead>
+      <tbody>${pairs.slice().sort((a, b) => Number(a.j_screen) - Number(b.j_screen)).map(p => `<tr><td class="mono">${esc(p.design_hash || "–")}</td><td class="r mono">${_anNum(p.j_screen)}</td><td class="r mono">${_anNum(p.j_verify)}</td><td class="r mono">${_anNum(p.bias_pct, 1)}</td></tr>`).join("")}</tbody></table></div></details>` : "";
+    return `<div class="an-sec">
+      <div class="an-sec-head">${_anRunLabel(idx, d.run_dir, sec.id, false)} <span class="muted">${esc([d.family, jVersionLabel(d), d.n_verify != null ? `${fmt(d.n_verify, 0)} verified of ${fmt(d.n_screen, 0)} screened` : ""].filter(Boolean).join(" · "))}</span></div>
+      <div class="an-fid">
+        <svg id="${chartId}" class="an-chart an-fid-chart" role="img" aria-label="screen versus verify objective"></svg>
+        ${kpis ? `<div class="kpis an-fid-kpis">${kpis}</div>` : ""}
+      </div>
+      <p class="an-meta">${fmt(above, 0)} of ${fmt(pairs.length, 0)} points sit above the dashed line — those designs scored worse once verified.</p>
       ${table}
       <div class="an-meta">${_anRunLink(d.run_dir)}</div>
     </div>`;
   }).join("");
+  return `<section class="card an-block" id="an-s-fidelity">
+    <div class="eyebrow">Fidelity</div>
+    <h2>Can we trust a screen score?</h2>
+    <p class="muted">A screen solve is cheap; a verify solve is accurate. On the dashed line both agree. What matters most is whether the screen puts the right designs at the top.</p>
+    ${body}
+  </section>`;
 }
 
 // H. Link candidates ------------------------------------------------------
@@ -3244,41 +3625,45 @@ function analysisFidelitySectionHtml(sections) {
 function analysisLinksSectionHtml(sections) {
   const secs = sections.filter(s => s.tool === "links" && s.data && _anArr(s.data.proposed_links).length);
   if (!secs.length) return "";
-  return secs.map(sec => {
+  const idx = _anRunIndex(sections);
+  const body = secs.map(sec => {
     const d = sec.data;
     const cards = _anArr(d.proposed_links).filter(p => p && p.knob_b && p.knob_a).map(p => {
       const offN = Number(p.offset);
       const offTxt = isFinite(offN) ? `${offN < 0 ? "−" : "+"} ${Math.abs(offN).toPrecision(4)}` : "+ ?";
-      const eq = `<span class="mono">${esc(p.knob_b)} = ${_anNum(p.scale, 4)} · ${esc(p.knob_a)} ${offTxt}</span>`;
       const r2 = Number(p.r2);
-      const badge = isFinite(r2) && r2 < 0.8
-        ? pill("candidate only — below the 0.8 bar", "warn") : pill("strong fit", "good");
-      return `<div class="an-sec"><div class="an-card-head"><span>${eq}</span>${badge}</div>
-        <div class="an-meta mono">R² ${_anNum(p.r2, 3)} · ${esc(p.source || "proposed")}</div></div>`;
+      const strong = isFinite(r2) && r2 >= 0.8;
+      return `<div class="an-link">
+        <div class="mono an-link-eq">${esc(p.knob_b)} ≈ ${_anNum(p.scale, 3)} · ${esc(p.knob_a)} ${offTxt}</div>
+        <div class="an-r2"><div class="an-r2-fill${strong ? " ok" : ""}" style="width:${(Math.max(0, Math.min(1, r2)) * 100).toFixed(1)}%"></div><div class="an-r2-bar" title="0.8 bar"></div></div>
+        <div class="an-meta">R² ${_anNum(r2, 2)} · ${strong ? "strong enough to consider tying these knobs" : "below the 0.8 bar — a hint, not a rule"} · ${esc(p.source || "proposed")}</div>
+      </div>`;
     }).join("");
-    return `<div class="card">
-      <div class="eyebrow">Link candidates</div>
-      <h2>Knob pairs that move together</h2>
-      <p class="muted">Observed correlations only. Nothing here is applied to a configuration.</p>
-      ${_anSectionHead(sec)}
+    return `<div class="an-sec">
+      <div class="an-sec-head">${_anRunLabel(idx, d.run_dir, sec.id, false)} <span class="muted">${esc([d.family, d.top_decile_n != null ? `best ${fmt(d.top_decile_n, 0)} designs` : ""].filter(Boolean).join(" · "))}</span></div>
       ${cards}
-      <div class="an-meta">${_anRunLink(d.run_dir)}</div>
     </div>`;
   }).join("");
+  return `<section class="card an-block" id="an-s-links">
+    <div class="eyebrow">Link candidates</div>
+    <h2>Knob pairs that move together</h2>
+    <p class="muted">Among the best designs these knobs rise and fall together. A strong link could become one knob, shrinking the search. Observed correlation only; nothing is applied.</p>
+    ${body}
+  </section>`;
 }
 
-// I. Errors (honest callout) ----------------------------------------------
+// I. Not computed (honest callout) ----------------------------------------
 
 function analysisErrorsHtml(errors) {
   if (!Array.isArray(errors) || !errors.length) return "";
-  return `<div class="card">
-    <div class="eyebrow">Errors</div>
-    <h2>One section was not reported</h2>
+  return `<section class="card an-block an-gap" id="an-s-gaps">
+    <div class="eyebrow">Not computed</div>
+    <h2>${errors.length === 1 ? "One section was not reported" : `${fmt(errors.length, 0)} sections were not reported`}</h2>
+    <p class="muted">A refuse-to-run is a result: this tool will not pool runs that are not one task/scoring identity. Nothing was estimated in its place.</p>
     ${errors.map(e => `<div class="an-sec"><div class="an-card-head"><b class="mono">${esc(e.id != null ? e.id : "?")}</b>
       <span class="mono muted">${esc(e.tool || "?")}</span></div>
       <div class="log-tail mono">${esc(e.error != null ? e.error : (e.status || "not reported"))}</div></div>`).join("")}
-    <p class="muted">A refuse-to-run is a result: this tool will not pool runs that are not one task/scoring identity. Nothing was estimated in its place.</p>
-  </div>`;
+  </section>`;
 }
 
 // J. Technical appendix (collapsed) ---------------------------------------
@@ -3388,7 +3773,8 @@ function analysisAppendixHtml(d, sections, errors) {
   const tables = sections.map(s => _anAppendixTable(d, s)).join("");
   const errText = errors.length ? `<h3>Errors (verbatim)</h3>${errors.map(e =>
     `<div class="log-tail mono">${esc(e.error != null ? e.error : "not reported")}</div>`).join("")}` : "";
-  const appendix = `<details class="card"><summary><b>For the technical reader</b></summary>
+  const appendix = `<details class="card an-block" id="an-s-tech"><summary><b>For the technical reader</b> <span class="muted">— every stored field, raw tables and source files</span></summary>
+    <p class="an-meta">Percentages, ratios and durations elsewhere on this page are simple arithmetic over these stored fields; nothing is re-estimated.</p>
     ${tables || `<p class="muted">no stored tool fields</p>`}${errText}</details>`;
   return appendix + report;
 }
@@ -3708,15 +4094,28 @@ function analysisPageHtml(d) {
     const sec = sections.find(s => s.tool === tool && s.data != null);
     return sec ? sec.data : (d ? d[tool] : null);
   };
+  const acts = analysisActions(sections, errors);
+  const parts = {
+    actions: analysisActionsHtml(acts),
+    runs: analysisScoreboardHtml(sections),
+    score: analysisTermBalanceHtml(sections),
+    bounds: analysisWallsSectionHtml(sections),
+    drivers: analysisSensitivitySectionHtml(sections),
+    fidelity: analysisFidelitySectionHtml(sections),
+    gaps: analysisErrorsHtml(errors),
+  };
+  const have = new Set(Object.entries(parts).filter(([, v]) => v).map(([k]) => k));
+  if (sections.length) have.add("tech");
   return [
-    analysisHeroHtml(d, sections, errors),
-    objectiveVersionBannerHtml(analysisConvergenceRuns(sections).map(c => c.run)),
-    analysisTermBalanceHtml(sections),
-    analysisConvergenceGridHtml(sections),
-    analysisWallsSectionHtml(sections),
-    analysisSensitivitySectionHtml(sections),
+    analysisHeroHtml(d, sections, errors, acts),
+    _anNavHtml(have),
+    parts.actions,
+    parts.runs,
+    parts.score,
+    parts.bounds,
+    parts.drivers,
     analysisSeedVarianceSectionHtml(sections),
-    analysisFidelitySectionHtml(sections),
+    parts.fidelity,
     analysisLinksSectionHtml(sections),
     analysisM1Html(sections),
     analysisGeometrySectionHtml(toolData("geometry_descriptors")),
@@ -3724,7 +4123,7 @@ function analysisPageHtml(d) {
     analysisQdSectionHtml(toolData("qd_compare")),
     analysisSurrogateSectionHtml(toolData("surrogate_validation"),
       d ? d.surrogate_validation_candidates : null),
-    analysisErrorsHtml(errors),
+    parts.gaps,
     analysisExtrasHtml(d),
     analysisAppendixHtml(d, sections, errors),
   ].filter(Boolean).join("");
@@ -5405,31 +5804,31 @@ async function viewRunDetail(id) {
         ${f11CaveatHtml(d)}
       </div>
 
-      <!-- Designer header: key facts -->
-      <div class="kpis" id="kpi-strip"></div>
+      <!-- Verdict first: the key numbers (best score, change, size) lead, reference facts follow -->
+      <div class="kpis run-kpis" id="kpi-strip"></div>
 
       <!-- Verification card + next step (GUI plan WP4): filled from /api/verify/<id> after paint -->
       <div id="verify-card"></div>
       ${verifyBlockHtml(d.verify)}
 
-      ${restartScheduleHtml(d, id)}
-
-      ${seedDerivationHtml(d.feasibility, d.objective)}
-
-      <!-- Actions -->
-      <div class="btn-row">
-        ${isVerify ? "" : `<a class="btn primary" href="#/run/${esc(id)}/evolution">▶ Evolution time-lapse</a>
-        <a class="btn" href="#/run/${esc(id)}/umap" title="2-D cloud of OK designs in the searchable unit box (UMAP if installed, else PCA); color by param quartiles or total J">◎ Design cloud</a>
-        ${d.has_atlas ? `<a class="btn" href="#/run/${esc(id)}/archive" title="Quality-diversity atlas: objective per descriptor bin (CMA-ME runs only)">QD atlas</a>` : ""}`}
-        <a class="btn" href="#/run/${esc(id)}/balloon" title="W6 Balloon: the stored directivity balloon in 3D — shape + colour = SPL, white isobar rings, radar slicer, freq × angle slice">◉ Balloon 3D</a>
-        <a class="btn" href="#/run/${esc(id)}/3d">3D view</a>
-        <a class="btn" href="#/compare?a=${esc(id)}">Compare with…</a>
-        <span id="report-slot">${sum.has_report
-          ? `<a class="btn" href="/runs/${esc(id)}/report.html" target="_blank" rel="noopener">Open full report ↗</a>`
-          : `<button id="btn-gen-report" title="Builds the detailed HTML report (about 30 s)">Make full report</button>`}</span>
-        <button id="btn-step" title="Writes closed STEP solids (mm) of the 3 best designs for CAD or 3D printing">Export STEP for CAD (top 3)</button>
+      <!-- View tabs (pages about this run) + the run's actions, kept apart -->
+      <div class="run-toolbar">
+        <nav class="run-tabs" aria-label="Views of this run">
+          <a class="run-tab-link" aria-current="page" href="#/run/${esc(id)}">Overview</a>
+          <a class="run-tab-link" href="#/run/${esc(id)}/3d">3D</a>
+          <a class="run-tab-link" href="#/run/${esc(id)}/balloon" title="The stored directivity balloon in 3D — shape + colour = SPL, isobar rings, radar slicer, freq × angle slice">Balloon</a>
+          ${isVerify ? "" : `<a class="run-tab-link" href="#/run/${esc(id)}/evolution">Evolution</a>
+          <a class="run-tab-link" href="#/run/${esc(id)}/umap" title="2-D cloud of OK designs in the searchable unit box (UMAP if installed, else PCA); color by param quartiles or total J">Design cloud</a>
+          ${d.has_atlas ? `<a class="run-tab-link" href="#/run/${esc(id)}/archive" title="Quality-diversity atlas: objective per descriptor bin (CMA-ME runs only)">QD atlas</a>` : ""}`}
+          <a class="run-tab-link" href="#/compare?a=${esc(id)}">Compare…</a>
+        </nav>
+        <div class="run-actions">
+          <span id="report-slot">${sum.has_report
+            ? `<a class="btn btn-sm" href="/runs/${esc(id)}/report.html" target="_blank" rel="noopener">Full report ↗</a>`
+            : `<button id="btn-gen-report" class="btn-sm" title="Builds the detailed HTML report (about 30 s)">Make full report</button>`}</span>
+          <button id="btn-step" class="primary btn-sm" title="Writes closed STEP solids (mm) of the 3 best designs for CAD or 3D printing">Export STEP (top 3)</button>
+        </div>
       </div>
-      ${isVerify ? "" : continueRunCardHtml(d, sum)}
       <div id="run-files" class="run-files"></div>
 
       <!-- Acoustic performance charts (C11 order: Isobars → BW H/V → DI → On-axis → Impedance → Wall → 3D) -->
@@ -5441,8 +5840,13 @@ async function viewRunDetail(id) {
 
       <!-- Polar maps (isobars) — first per C11 order -->
       <div class="fig">
-        <div class="fig-head"><h3>${tip("polar", "Directivity (isobars)")}</h3></div>
-        <div class="cap">Level relative to on-axis at 2 m, in 3 dB colour bands from −30 to 0 dB (pale pink = above 0 dB), with white contour lines every 3 dB (heavier = −6 dB: beamwidth edge). Tick marks show solved frequencies. Hover for a readout. Interpolated between the ${((d.best || {}).freqs || []).length} solved frequencies (screen fidelity). Axis spans the brief band; the colour map is drawn only across the solved frequencies.</div>
+        <div class="fig-head"><h3>${tip("polar", "Directivity (isobars)")}</h3>
+          <div class="seg-toggle" role="group" aria-label="Directivity view">
+            <button type="button" data-isoview="rect" aria-pressed="true">Rectangular</button>
+            <button type="button" data-isoview="globe" aria-pressed="false">Globe</button>
+          </div></div>
+        <div class="cap">Level relative to on-axis at 2 m, in 3 dB colour bands (thin lines every 3 dB; the heavier line is the −6 dB beamwidth edge). A good design keeps its −6 dB edge on the coverage-target guides. Hover for values. Interpolated between the ${((d.best || {}).freqs || []).length} solved frequencies (screen fidelity), ticked below the frequency axis. Globe view: the same data wrapped into a half-circle (front at the bottom, frequency rising outward from the centre). Axis spans the brief band; the colour map is drawn only across the solved frequencies.</div>
+        <div id="polar-legend"></div>
         <div class="maps iso-maps" id="polar-maps"></div>
       </div>
 
@@ -5533,6 +5937,18 @@ async function viewRunDetail(id) {
         <div class="hint" id="inline3d-note" role="status"></div>
       </div>
 
+      <!-- Setup & controls: how this run was configured, and continuing it — reference, not the result -->
+      <details class="card run-setup" id="run-setup">
+        <summary><b>Run setup &amp; controls</b> <span class="muted">— seed derivation, restart schedule${isVerify ? "" : ", continue this run"}</span></summary>
+        <div class="stack" style="gap:16px;margin-top:12px">
+      ${restartScheduleHtml(d, id)}
+
+      ${seedDerivationHtml(d.feasibility, d.objective)}
+
+      ${isVerify ? "" : continueRunCardHtml(d, sum)}
+        </div>
+      </details>
+
       <hr class="sep">
 
       <!-- Gate audit: below the response charts (it can list hundreds of designs; see gateAuditSplit) -->
@@ -5602,14 +6018,14 @@ async function viewRunDetail(id) {
     [`${tip("band", "Band")}`, bandStr],
     [`${tip("dims", "Horn size")} <small style="font-family:var(--f-mono);font-size:0.6rem;color:var(--muted)">W×H×D outer</small>`, dimsStr],
     [`${tip("J", `Start ${tierWord} score`)} <small style="font-family:var(--f-mono);font-size:0.6rem;color:var(--muted)">${esc(jVersionLabel(d))}</small>`, fmt(sum.seed_j && sum.seed_j < 900 ? sum.seed_j : null)],
-    [`${tip("J", `Best ${tierWord} score`)} <small style="font-family:var(--f-mono);font-size:0.6rem;color:var(--muted)">${esc(jVersionLabel(d))}</small>`, fmt(sum.best_j)],
+    [`${tip("J", `Best ${tierWord} score`)} <small style="font-family:var(--f-mono);font-size:0.6rem;color:var(--muted)">${esc(jVersionLabel(d))}</small>`, fmt(sum.best_j), "", "key"],
     ...(isVerify ? [] : [
-      ["Change vs start", ch],
+      ["Change vs start", ch, ch.endsWith("better") ? "good" : "", "key"],
       [`${tip("budget", "Budget used")}`, budgetKpi(sum.n, sum.budget, d.command).text, budgetKpi(sum.n, sum.budget, d.command).cls],
     ]),
     [`${tip("failures", "Failures")}`, `${nf} (${failPct}%)`],
     [`${tip("pinned", "At limit")}`, pinnedSens.length > 0 ? `<b class="bad">${pinnedSens.length}</b>` : pill("0", "good")],
-  ].map(([k, v, cls]) => `<div class="kpi"><span>${k}</span><b${cls ? ` class="${cls}"` : ""}>${v}</b></div>`);
+  ].map(([k, v, cls, key]) => `<div class="kpi${key ? " kpi-key" : ""}"><span>${k}</span><b${cls ? ` class="${cls}"` : ""}>${v}</b></div>`);
   kpis.splice(2, 0, f0KpiHtml(t));          // right after Band; "" when the brief carries no f0
   document.getElementById("kpi-strip").innerHTML = kpis.filter(Boolean).join("");
   {
@@ -5649,14 +6065,32 @@ async function viewRunDetail(id) {
     if (!mapsEl) return;
     mapsEl.innerHTML = "";
     const withStart = showStart() && S.polar_h;
+    // one shared scale + line key above the small multiples, instead of a colour bar on every map
+    const legEl = document.getElementById("polar-legend");
+    const anyOver = [B.polar_h, B.polar_v, withStart ? S.polar_h : null, withStart ? S.polar_v : null]
+      .some(r => Array.isArray(r) && r.some(row => Array.isArray(row) && row.some(v => v != null && v > 1)));
+    if (legEl) legEl.innerHTML = "" && isobarLegendHtml({ target: !!(t.coverage_h_deg || t.coverage_v_deg), f0: !!f0Finite, over: anyOver });
     const plots = [["Best design · horizontal", B.polar_h, B], ["Best design · vertical", B.polar_v, B]];
     if (withStart) plots.push(["Starting design · horizontal", S.polar_h, S], ["Starting design · vertical", S.polar_v, S]);
+    // view: rectangular map (frequency x angle) or globe (angle around, frequency out); remembered
+    let view = "rect";
+    try { view = localStorage.getItem("hl.isoView") === "globe" ? "globe" : "rect"; } catch (_) { /* storage blocked */ }
+    document.querySelectorAll("[data-isoview]").forEach(b => {
+      b.setAttribute("aria-pressed", String(b.dataset.isoview === view));
+      b.onclick = () => { try { localStorage.setItem("hl.isoView", b.dataset.isoview); } catch (_) { /* ignore */ } drawIsobars(); };
+    });
+    mapsEl.classList.toggle("iso-globes", view === "globe");
     for (const [lbl, rows, D2] of plots) {
       if (!rows) continue;
       const sv = document.createElementNS(NS, "svg"); sv.setAttribute("class", "polar");
-      sv.setAttribute("role", "img"); sv.setAttribute("aria-label", lbl + " isobar plot");
+      sv.setAttribute("role", "img"); sv.setAttribute("aria-label", lbl + (view === "globe" ? " globe plot" : " isobar plot"));
       mapsEl.appendChild(sv);
-      requestAnimationFrame(() => isobarMap(sv, rows, D2.angles || [], D2.freqs || F, { title: lbl, H: 300, xlim, f0: f0Finite }));
+      const tgt = /vertical/.test(lbl) ? t.coverage_v_deg : t.coverage_h_deg;
+      if (view === "globe") {
+        requestAnimationFrame(() => globePlot(sv, rows, D2.angles || [], D2.freqs || F, { title: lbl, H: 320, f0: f0Finite, target: tgt }));
+      } else {
+        requestAnimationFrame(() => isobarMap(sv, rows, D2.angles || [], D2.freqs || F, { title: lbl, H: 300, xlim, f0: f0Finite, target: tgt }));
+      }
     }
   }
 
@@ -5746,7 +6180,8 @@ async function viewRunDetail(id) {
     // allow below 0 when reactance dips negative (C14 fix)
     const zlo = Math.min(range.lo, Math.min(0, Math.floor(Math.min(...Xreact(B).filter(v => v != null), 0) * 10) / 10));
     const zhi = range.hi;
-    const ticks = bwTicks(zlo, zhi, spec.major);
+    let ticks = bwTicks(zlo, zhi, spec.major);
+    if (ticks.length > 8) ticks = niceTicks(zlo, zhi, 6);   // wide reactance range: keep labels apart
     chart(svg, {
       xlog: true, xlim, ylim: [zlo, zhi],
       yticks: ticks, xlabel: "Hz", ylabel: "×ρc", band,
@@ -6785,20 +7220,46 @@ async function viewBriefs() {
         <span id="typo-pick-msg" class="hint" role="status"></span>
       </div>
       ${configs.length ? "" : `<p class="hint">Typology list unavailable — New brief still works.</p>`}
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px" id="briefs-list"></div>
+      <input type="search" id="briefs-filter" class="briefs-filter" placeholder="Filter briefs by name or source…" aria-label="Filter briefs">
+      <div id="briefs-list" class="briefs-groups"></div>
       <div id="brief-detail"></div>
     </div>`;
 
   const listEl = document.getElementById("briefs-list");
-  briefs.forEach(b => {
-    const btn = document.createElement("button");
-    btn.className = "card";
-    btn.style.cssText = "text-align:left;cursor:pointer;";
-    btn.innerHTML = `<div style="font-weight:500">${esc(b.name)}</div>
-      <div class="muted mono" style="font-size:0.75rem">${esc(b.kind)}</div>`;
-    btn.onclick = () => showBriefDetail(b, briefs);
-    listEl.appendChild(btn);
-  });
+  // Grouped by where the brief came from (your own first, then shipped, then dated sets newest
+  // first), each group alphabetical; the filter narrows by name or source as you type.
+  const kindRank = k => k === "user" ? 0 : k === "shipped" ? 1 : 2;
+  const renderBriefTiles = () => {
+    const q = (document.getElementById("briefs-filter")?.value || "").trim().toLowerCase();
+    const groups = new Map();
+    for (const b of briefs) {
+      if (q && !String(b.name).toLowerCase().includes(q) && !String(b.kind || "").toLowerCase().includes(q)) continue;
+      const k = String(b.kind || "other");
+      if (!groups.has(k)) groups.set(k, []);
+      groups.get(k).push(b);
+    }
+    const keys = [...groups.keys()].sort((a, b) => kindRank(a) - kindRank(b) || b.localeCompare(a));
+    listEl.innerHTML = "";
+    if (!keys.length) { listEl.innerHTML = `<p class="muted">No brief matches “${esc(q)}”.</p>`; return; }
+    for (const k of keys) {
+      const sec = document.createElement("section");
+      sec.className = "briefs-group";
+      const label = k === "user" ? "Your briefs" : k === "shipped" ? "Shipped with hornlab" : k;
+      sec.innerHTML = `<h3 class="briefs-group-h">${esc(label)} <span class="muted mono">${groups.get(k).length}</span></h3><div class="briefs-grid"></div>`;
+      const grid = sec.querySelector(".briefs-grid");
+      groups.get(k).sort((a, b) => String(a.name).localeCompare(String(b.name))).forEach(b => {
+        const btn = document.createElement("button");
+        btn.className = "card brief-tile";
+        btn.innerHTML = `<div class="brief-tile-name">${brk(b.name)}</div>`;
+        btn.title = `${b.name} · ${b.kind}`;
+        btn.onclick = () => showBriefDetail(b, briefs);
+        grid.appendChild(btn);
+      });
+      listEl.appendChild(sec);
+    }
+  };
+  renderBriefTiles();
+  document.getElementById("briefs-filter")?.addEventListener("input", renderBriefTiles);
 
   document.getElementById("btn-new-brief").onclick = async () => {
     await showBriefDetail(newBriefDraft(), briefs, { mode: "new", scroll: true });
@@ -7308,9 +7769,10 @@ async function viewCompose() {
   ROOT.innerHTML = `
     <div class="stack" style="gap:24px">
       <div>
-        <div class="eyebrow">Compose</div>
+        <div class="eyebrow">New run</div>
         <h2>Compose a run</h2>
-        <p style="font-size:0.9rem;margin:0 0 4px"><b>Recommended way to start work.</b> Build a run step by step. Experienced users with a saved config can use <a href="#/launch">Launch</a> instead.</p>
+        ${newRunModeHtml("compose")}
+        <p style="font-size:0.9rem;margin:10px 0 4px"><b>Recommended way to start work.</b> Build a run step by step. Experienced users with a saved config can use <a href="#/launch">Quick launch</a> instead.</p>
         <p class="muted" style="font-size:0.85rem">Shape first (which typologies), then the brief (the objective they are scored against), then the run. Every choice shows its exact command before anything executes — nothing is launched from here without a preview.</p>
       </div>
 
@@ -7909,9 +8371,10 @@ function renderLaunch(briefs, jobs, configs, statusData, typs = []) {
   ROOT.innerHTML = `
     <div class="stack" style="gap:24px">
       <div>
-        <div class="eyebrow">Launch jobs</div>
-        <h2>Launch</h2>
-        <p class="muted" style="font-size:0.85rem;margin:0 0 6px">Quick launch from a saved config or brief, for experienced users. New to this? <a href="#/compose">Compose a run</a> walks through it step by step.</p>
+        <div class="eyebrow">New run</div>
+        <h2>Quick launch</h2>
+        ${newRunModeHtml("launch")}
+        <p class="muted" style="font-size:0.85rem;margin:10px 0 6px">Launch from a saved config or brief, for experienced users. New to this? <a href="#/compose">Guided</a> walks through it step by step.</p>
         <div id="launch-busy">${busyNote}</div>
       </div>
       <div class="card stack" style="gap:16px">
@@ -8048,6 +8511,16 @@ function renderLaunch(briefs, jobs, configs, statusData, typs = []) {
   if (pre.get("brief")) {
     const o = [...document.getElementById("lf-brief").options].find(x => x.dataset.name === pre.get("brief"));
     if (o) document.getElementById("lf-brief").value = o.value;
+    else {
+      // never silently fall back to the first brief: say the requested one is not a saved brief
+      const sel = document.getElementById("lf-brief");
+      const note = document.createElement("div");
+      note.className = "alert warn"; note.setAttribute("role", "status"); note.style.marginTop = "6px";
+      note.textContent = `“${pre.get("brief")}” is not a saved brief file (runs started from a typology config carry their own brief), so nothing is preselected. Pick a brief here, or re-run that config from its run page.`;
+      sel.value = "";
+      if (!sel.value && sel.options.length) sel.selectedIndex = -1;
+      sel.insertAdjacentElement("afterend", note);
+    }
   }
   if (pre.get("tier")) document.getElementById("lf-tier").value = pre.get("tier");
   const briefName = () => document.getElementById("lf-brief").selectedOptions[0]?.dataset.name || "";
@@ -8496,9 +8969,9 @@ async function viewTypologies() {
 
 function typCard(t, briefs) {
   const res = (t.results || []).map(r => r.no_valid
-    ? `<tr><td>${esc(r.brief)}</td><td>${esc(r.tier)}</td><td colspan="3" class="warn-text">no valid design under this brief (starting design outside its size envelope)</td></tr>`
+    ? `<tr><td>${brk(r.brief)}</td><td>${esc(r.tier)}</td><td colspan="3" class="warn-text">no valid design under this brief (starting design outside its size envelope)</td></tr>`
     : `<tr>
-      <td>${esc(r.brief)}</td><td>${esc(r.tier)}</td>
+      <td>${brk(r.brief)}</td><td>${esc(r.tier)}</td>
       <td class="r">${r.rank}/${r.of}</td>
       <td class="r">${r.best_run_id ? `<a href="#/run/${esc(r.best_run_id)}" title="open the best run">${fmt(r.median_j)}</a>` : fmt(r.median_j)}</td>
       <td class="r">${r.dims ? esc(Math.round(r.dims.mouth_w_mm) + "×" + Math.round(r.dims.mouth_h_mm) + "×" + Math.round(r.dims.depth_mm)) : "–"}</td></tr>`).join("");
@@ -8524,6 +8997,7 @@ function typCard(t, briefs) {
     ${typologyChipsHtml(t.name)}
     ${res ? `<div class="tbl-wrap"><table class="compact"><thead><tr><th>Brief</th><th>Tier</th><th class="r">Rank</th><th class="r">Score</th><th class="r">W×H×D mm</th></tr></thead><tbody>${res}</tbody></table></div>`
           : `<p class="muted" style="margin:0">Not run in any campaign yet.</p>`}
-    <div class="typ-fits"><span class="muted">Screen on:</span> ${fits}</div>
+    <details class="typ-fits-wrap"><summary class="muted">Screen on a brief <span class="mono">(${briefs.filter(b => ((t.compat || {})[b.name] || { ok: true }).ok && !t.disabled).length} of ${briefs.length} fit)</span></summary>
+      <div class="typ-fits">${fits}</div></details>
   </article>`;
 }

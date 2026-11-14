@@ -124,7 +124,7 @@ def test_verify_runs_omit_search_history_panels():
     src = APPJS.read_text(encoding="utf-8")
     assert "const isVerify = runIsVerify(sum, d);" in src
     # Evolution / Design cloud / QD atlas are one gated actions block
-    assert '${isVerify ? "" : `<a class="btn primary" href="#/run/${esc(id)}/evolution">' in src
+    assert '${isVerify ? "" : `<a class="run-tab-link" href="#/run/${esc(id)}/evolution">' in src
     assert '${isVerify ? "" : continueRunCardHtml(d, sum)}' in src
     # Convergence + score breakdown + H5 search dynamics
     assert '${isVerify ? "" : `<!-- Search history -->' in src
@@ -134,7 +134,7 @@ def test_verify_runs_omit_search_history_panels():
     assert 'id="pin-plan-wrap"' in src and "Pin plan" in src
     # KPI strip omits Change vs start / Budget used for verify runs
     assert "...(isVerify ? [] : [" in src
-    assert '["Change vs start", ch]' in src
+    assert '["Change vs start", ch,' in src     # emphasised as a key KPI since 2026-11-14
     # not gated: the Verification card fetch and the gate audit
     assert 'api(`/api/verify/${encodeURIComponent(id)}`)' in src
     assert "${gateAuditHtml(d.gate_audit)}" in src

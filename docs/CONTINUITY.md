@@ -1,6 +1,22 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-14 (06:4x local) - GUI / DATA-VIZ UX PASS (front-end only)
+
+- Analysis report rebuilt decision-first (next-solve actions with follow-through links, run
+  scoreboard grouped by objective version, objective balance vs tolerance, search-box ranges,
+  sensitivity, square screen-vs-verify scatter). Fixed the reversed "screening overstates J"
+  headline and the refusal strip that summed past 100 %.
+- Run detail: key numbers + Next step first, view tabs, Export STEP as the one primary action,
+  setup / Continue-run collapsed below the charts. Isobars keep the Boundary Lab frame with
+  rainbow 3 dB bands + hairline contours; over-range flagged only > +1 dB; new Globe view.
+- One "New run" nav item (Guided | Quick launch); Launch warns instead of silently picking the
+  first brief for a non-file brief. Tables/tiles wrap long ids; brief-band panel 0.30 -> 0.10.
+- Shared kit in charts.js / app.css (validated categorical palette, sparkline, stacked bar,
+  globePlot, seg-toggle, control-border). Details: docs/GUI_UX_PASS_2026-11-14.md.
+- Tests: new tests/test_gui_report_v2.py; four source pins updated; GUI suite green. No server,
+  data, solver or scoring change.
+
 ## 2026-11-13 (21:0x local) - PARAMETER DOC SPLIT: `--check` IS NOW A REAL CI GATE
 
 - Resolved the last blocking contradiction from the CI integration. `docs/reference/PARAMETERS.md` is

@@ -3,6 +3,12 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-14 (**speed program ADOPTED: solver `38e5b1f` at −25/−28 % whole-candidate wall, parity ~1e-5 dB, zero spill, batching default rejected by the pre-declared bar, A5 re-based on measured anchors, E1b raw evidence archived; plus the S8/S7 GUI panels; no GitHub issue state changed**).
 
+Local-only, added 2026-11-14 (06:4x local) (**GUI / data-viz UX pass; no GitHub issue state changed**):
+- Done: decision-first analysis report, verdict-first run detail, Boundary Lab isobars + Globe view,
+  single New run entry, shared viz kit (docs/GUI_UX_PASS_2026-11-14.md). Front-end only.
+- Open: Quick launch cannot carry family-bound edits; analysis bounds actions say so. Typology-config
+  briefs are not saved brief files, so `?brief=` prefill for them shows a note instead.
+
 Local-only, added 2026-11-14 (01:xx local) (**CI repair hardening; no GitHub issue state changed**):
 - Done: CI now installs `ribs==0.12.0` (QD failure-isolation suite runs on CI: +38 real tests); fixture drift guard for
   the S11 pilot overlays. Verified #56 validator against tampering and #55 merge integrity.

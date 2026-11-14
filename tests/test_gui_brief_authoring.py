@@ -183,7 +183,7 @@ def test_compose_view_is_wired():
     idx = (ROOT / "hornlab_search" / "gui" / "static" / "index.html").read_text(encoding="utf-8")
     assert "function viewCompose" in app
     assert re.search(r"re: /\^#\\/compose\$/", app)          # route registered
-    assert 'href="#/compose"' in idx and 'aria-label="Compose"' in idx
+    assert 'href="#/compose"' in idx and 'aria-label="New run"' in idx   # one nav item for Compose + Quick launch
     assert re.search(r'h === "#/compose" && hash === "#/compose"', app)   # nav highlight
     # the wizard reuses the briefs editor (mount) and the stem-matching loader, not copies
     assert "opts.mount" in app and "function findBriefByFile" in app and "function newBriefDraft" in app
@@ -275,7 +275,7 @@ def test_balloon_entry_point_already_wired():
     src = APPJS.read_text(encoding="utf-8")
     assert "import { viewBalloon } from \"./balloon.js\";" in src
     assert re.search(r"re: /\^#\\/run\\/\(\.\+\)\\/balloon\$/", src)          # route registered
-    assert 'href="#/run/${esc(id)}/balloon" title="W6 Balloon:' in src           # run-detail entry
+    assert 'class="run-tab-link" href="#/run/${esc(id)}/balloon"' in src        # run-detail view tab
     assert src.count('href="#/run/${esc(id)}/balloon"') >= 2                     # + the 3D view page
     assert "◉ Balloon 3D" in src
 
@@ -884,8 +884,10 @@ def test_s1a_views_are_wired():
     assert 'kpis.filter(Boolean).join("")' in src
     # task 3: the mounting warn rides with the generic banner (kept) and the DI guard
     assert "[badgeRows, mixedBanner, mountingRankWarnHtml(mixed), diNote]" in src
-    # task 4: seed card between the restart schedule and the Actions row, fed d.feasibility
-    assert "${restartScheduleHtml(d, id)}\n\n      ${seedDerivationHtml(d.feasibility, d.objective)}\n\n      <!-- Actions -->" in src
+    # task 4: seed card right after the restart schedule, fed d.feasibility; since the 2026-11-14
+    # UX pass both sit in the collapsed "Run setup & controls" block below the response charts
+    assert "${restartScheduleHtml(d, id)}\n\n      ${seedDerivationHtml(d.feasibility, d.objective)}" in src
+    assert src.index('id="run-setup"') < src.index("${restartScheduleHtml(d, id)}")
 
 
 # ── Inline 3D + 3D time-lapse (owner requests, views only) ───────────────────────────────

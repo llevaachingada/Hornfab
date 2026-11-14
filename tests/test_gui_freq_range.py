@@ -198,7 +198,7 @@ def test_frequency_charts_and_floor_marker_are_wired():
     # c-bw and c-di mark the scoring floor; c-axis / c-zre do not
     marker = 'vlines: f0Finite ? [{ x: f0Finite, color: css("--warn"), dash: true, label: "f0 " + fmtHz(f0Finite) }] : [],'
     assert src.count(marker) == 2
-    assert "isobarMap(sv, rows, D2.angles || [], D2.freqs || F, { title: lbl, H: 300, xlim, f0: f0Finite })" in src
+    assert "isobarMap(sv, rows, D2.angles || [], D2.freqs || F, { title: lbl, H: 300, xlim, f0: f0Finite, target: tgt })" in src
     assert "${seedDerivationHtml(d.feasibility, d.objective)}" in src
     # charts.js: span-derived default ticks, marker lines, and a per-instance clip path
     assert "if (xlog && !xticks) xticks = logTicks(xlim[0], xlim[1]);" in charts_src

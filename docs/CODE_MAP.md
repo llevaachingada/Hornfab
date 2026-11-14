@@ -1,5 +1,10 @@
 # Code map
 
+GUI viz kit (2026-11-14): `gui/static/charts.js` exports `catColor`/`CAT_N`, `fmtSmart`,
+`fmtLogTick`, `logNiceLimits`, `sparkline`, `stackBarHtml`, `isobarLegendHtml`, `globePlot` and a
+self-redrawing `chart()` (`square` option); `app.js::brk()` wraps ids; tokens `--cat-*`,
+`--control-border` live in `app.css`. Tests: `tests/test_gui_report_v2.py`.
+
 S8 additions (2026-11-13): `tools/analysis/geometry_descriptors.py` resolves Design-only
 geometry plus a separate band-aware behavior view; `hypothesis_cards.py` checks source-backed
 parents, canonical candidate geometry and parent/combination/ablation configs;
