@@ -1,0 +1,13 @@
+# Speed program, ROUND B-4 fallback - H2 batch-12 median ratio > 0.85 on both designs (0.8512 / 0.8653).
+# Pre-declared fallback (SPEED_PROGRAM 3 / plan R2): measure batch 4. Same solver 38e5b1f, fresh roots.
+night: speed_round_b4_2026-11-14
+lane: gpu
+jobs:
+  - {id: new_b4_osse, kind: search, budget: 1, mode: screen, timeout_s: 3600,
+     config: examples/typologies/print_80x60_2026-11-13/p80x60__osse_ext_throat_700_v7.yaml,
+     cache_dir: scratch/speed_round_b/new_b4_osse, dataset_dir: scratch/speed_dataset/new_b4_osse,
+     env: {HORNLAB_FREQ_BATCH_SIZE: "4"}}
+  - {id: new_b4_ath, kind: search, budget: 1, mode: screen, timeout_s: 3600,
+     config: examples/typologies/print_80x60_2026-11-13/p80x60__ath_core_14in_700_v7.yaml,
+     cache_dir: scratch/speed_round_b/new_b4_ath, dataset_dir: scratch/speed_dataset/new_b4_ath,
+     env: {HORNLAB_FREQ_BATCH_SIZE: "4"}}

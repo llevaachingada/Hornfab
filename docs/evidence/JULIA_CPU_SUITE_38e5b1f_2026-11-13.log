@@ -1,0 +1,140 @@
+[ Info: Set BLAB_RUN_COUPLED_REFERENCE=1 to run the full dense FEM-BEM fixture validation.
+[ Info: Set BLAB_RUN_COUPLED_CUDA=1 to run the GPU-resident coupled solve validation.
+[ Info: Set BLAB_RUN_COUPLED_ROCM=1 to run the ROCm coupled solve validation.
+[ Info: Set BLAB_RUN_COUPLED_REFERENCE=1 to run the condensed coupled solver validation.
+┌ Warning: BEAT GMRES stopped; falling back to the dense LU.
+│   dofs = 64
+│   drives = 1
+│   reason = :iteration_limit
+│   iterations = 1-element Vector{Int64}: …
+│   relative_residuals = 1-element Vector{Float32}: …
+└ @ Main.BeatEngineCore C:\Users\hunte\Hrns\forks\hornlab-beat-bem\hornlab_beat_bem\julia\src\BeatEngineDenseSolve.jl:1005
+┌ Warning: BEAT GMRES stopped; falling back to the dense LU.
+│   dofs = 64
+│   drives = 1
+│   reason = :iteration_budget
+│   iterations = 1-element Vector{Int64}: …
+│   relative_residuals = 1-element Vector{Float32}: …
+└ @ Main.BeatEngineCore C:\Users\hunte\Hrns\forks\hornlab-beat-bem\hornlab_beat_bem\julia\src\BeatEngineDenseSolve.jl:1005
+┌ Warning: BEAT GMRES stopped; falling back to the dense LU.
+│   dofs = 64
+│   drives = 2
+│   reason = :deadline
+│   iterations = Int64[]
+│   relative_residuals = Float32[]
+└ @ Main.BeatEngineCore C:\Users\hunte\Hrns\forks\hornlab-beat-bem\hornlab_beat_bem\julia\src\BeatEngineDenseSolve.jl:1005
+┌ Warning: BEAT GMRES stopped; falling back to the dense LU.
+│   dofs = 64
+│   drives = 1
+│   reason = :iteration_budget
+│   iterations = 1-element Vector{Int64}: …
+│   relative_residuals = 1-element Vector{Float32}: …
+└ @ Main.BeatEngineCore C:\Users\hunte\Hrns\forks\hornlab-beat-bem\hornlab_beat_bem\julia\src\BeatEngineDenseSolve.jl:1005
+┌ Warning: BEAT GMRES stopped; falling back to the dense LU.
+│   dofs = 64
+│   drives = 1
+│   reason = :iteration_budget
+│   iterations = 1-element Vector{Int64}: …
+│   relative_residuals = 1-element Vector{Float32}: …
+└ @ Main.BeatEngineCore C:\Users\hunte\Hrns\forks\hornlab-beat-bem\hornlab_beat_bem\julia\src\BeatEngineDenseSolve.jl:1005
+┌ Warning: Unreorthogonalized Float32 MGS did not degrade on this host, so the Krylov agreement assertions above are weaker here than intended. single MGS: 39 iterations, Float64: 20.
+└ @ Main C:\Users\hunte\Hrns\forks\hornlab-beat-bem\hornlab_beat_bem\julia\tests\runtests.jl:882
+Test Summary:           | Pass  Total  Time
+symmetry plane snapping |    4      4  0.7s
+Test Summary: | Pass  Total  Time
+mesh setup    |    6      6  1.1s
+Test Summary:                              | Pass  Total  Time
+electrodynamic voice-coil impedance models |    5      5  0.1s
+Test Summary:                       | Pass  Total  Time
+FEM consistent/lumped mass blending |    5      5  1.1s
+Test Summary:                             | Pass  Total  Time
+affine quadratic tetrahedron FEM assembly |    7      7  1.4s
+Test Summary:                      | Pass  Total  Time
+blocked exact FEM Schur complement |    3      3  1.0s
+Test Summary:                     | Pass  Total  Time
+disconnected BEM mesh aggregation |   10     10  0.3s
+Test Summary:                     | Pass  Total  Time
+double-precision P1 FEM reference |   13     13  2.7s
+Test Summary:                    | Pass  Total  Time
+single-precision P1 FEM assembly |    4      4  0.5s
+Test Summary:                               | Pass  Total  Time
+per-region FEM loss and Miki wall impedance |    4      4  0.3s
+Test Summary:                                         | Pass  Total  Time
+FEM volume-group restriction compacts active topology |    7      7  1.1s
+Test Summary:          | Pass  Total  Time
+sealed unit-cube modes |    3      3  0.9s
+Test Summary:                          | Pass  Total  Time
+conforming FEM-BEM interface operators |    8      8  0.5s
+Test Summary:                     | Pass  Total  Time
+empty FEM-BEM interface operators |    4      4  0.0s
+Test Summary:                                    | Pass  Total  Time
+mixed FEM and BEM prescribed-velocity excitation |    6      6  1.8s
+Test Summary:                                 | Pass  Total  Time
+rigid-piston electrodynamic surface operators |    9      9  0.6s
+Test Summary:              | Pass  Total  Time
+Schur condensation algebra |   53     53  4.7s
+Test Summary:                                              | Pass  Total  Time
+Condensed regular assembly matches the shared CPU assembly |   49     49  3.4s
+Test Summary:                   | Pass  Total  Time
+Wavelength quadrature selection |   15     15  0.5s
+Test Summary:                          | Pass  Total  Time
+Condensed per-order quadrature bundles |   29     29  7.3s
+Test Summary:   | Pass  Total  Time
+CPU fast sincos |    6      6  0.6s
+Test Summary:                | Pass  Total  Time
+CPU regular kernel selection |    6      6  0.1s
+Test Summary:          | Pass  Total   Time
+CPU SIMD fused systems | 1289   1289  11.5s
+Test Summary:                   | Pass  Total  Time
+CPU SIMD trial block boundaries |   72     72  0.5s
+Test Summary:           | Pass  Total  Time
+CPU SIMD four operators |  392    392  6.9s
+Test Summary:                                        | Pass  Total  Time
+CPU SIMD coincident regular points and empty subsets |  112    112  1.0s
+Test Summary:             | Pass  Total  Time
+CPU SIMD field evaluation |   63     63  1.2s
+Test Summary:                 | Pass  Total  Time
+CPU SIMD singular corrections |  160    160  2.5s
+Test Summary:             | Pass  Total  Time
+In-place square transpose |   17     17  0.0s
+Test Summary:                            | Pass  Total  Time
+CPU SIMD kernels with signed wavenumbers |   72     72  1.2s
+Test Summary:                                     | Pass  Total  Time
+fixed regular quadrature default on graded meshes |   58     58  0.5s
+Test Summary:                                  | Pass  Total  Time
+MEH radiator impedance matrix (helper algebra) |    5      5  0.2s
+Test Summary:                                    | Pass  Total  Time
+MEH radiator impedance matrix (symmetry scaling) |    8      8  0.1s
+Test Summary:                                            | Pass  Total  Time
+MEH radiator impedance matrix (driver-level reciprocity) |    7      7  8.8s
+Test Summary:          | Pass  Total  Time
+cpu BLAS thread policy |    8      8  0.0s
+Test Summary:           | Pass  Total  Time
+cpu production pipeline |   24     24  2.9s
+Test Summary:                                         | Pass  Total  Time
+cpu fused Burton-Miller equals the four-operator path |   18     18  2.4s
+Test Summary:           | Pass  Total  Time
+cpu x symmetry assembly |   13     13  0.2s
+Test Summary:            | Pass  Total  Time
+cpu xy symmetry assembly |   11     11  0.1s
+Test Summary:        | Pass  Total  Time
+adaptive dense solve |  221    221  4.5s
+Test Summary:                      | Pass  Total  Time
+rigid y0 half-space Green function |    7      7  0.2s
+Test Summary:                      | Pass  Total  Time
+close-pair higher-order correction |   25     25  0.8s
+Test Summary:            | Broken  Total  Time
+cuda production pipeline |      1      1  0.0s
+Test Summary:                        | Broken  Total  Time
+cuda fused Burton-Miller driver path |      1      1  0.0s
+Test Summary:              | Pass  Total  Time
+WP16 radial source profile |  825    825  0.7s
+Test Summary:                              | Broken  Total  Time
+cuda fused WP16 source profile driver path |      1      1  0.0s
+Test Summary:             | Pass  Total  Time
+WP17 near-correction gate |  155    155  0.0s
+Test Summary:                        | Pass  Total  Time
+WP17 thin-septum CPU near correction |   12     12  0.1s
+Test Summary:                               | Broken  Total  Time
+cuda fused WP17 near-correction driver path |      1      1  0.0s
+SUITE_EXIT=0 

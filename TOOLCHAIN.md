@@ -17,7 +17,7 @@ Recorded by task 02 on 2026-10-12. **Status: PARTIAL — M2/M3/M4 and M5-after-d
 
 ## Pinned dependencies (40-char SHAs)
 - hornlab-waveguide-mesher: `55da4f46d662d8dcd7a9f94a609eeea4009fcd62` (fork `jamescollinharky/hornlab-waveguide-mesher` branch `hornlab-search/osse-midports`; base `b922e807`; opt-in `mid_ports` L1 flush tag-10 patches on native OSSE(+SF) walls; absent = byte-identical. 2026-11-03)
-- hornlab-beat-bem:           `0850ef39b29d7c51f8fbb082184d3784d2ff8bef`
+- hornlab-beat-bem:           `38e5b1f8ca840ebf6351c54611a08fedb1a0750f` (adopted 2026-11-13 speed program: C1 `9ec86b0` + C2 `38e5b1f` skipped-identity fused-CUDA route; validated by the E3/E5 whole-candidate A/B and the E6 measured ceiling anchors)
 - hornlab-plots:              `9e4a6d0dd2ccb6e735dd00233dccccb50d12ed44`
 - hornlab-bempp-bem:          `8e6910602ece9abb2e9ce0db7a637f4bedf17f53` (installed OK, with bempp-cl 0.4.2 and numba 0.68.0)
 

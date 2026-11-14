@@ -1,0 +1,23 @@
+# Speed program, ROUND B REPEAT (rep2) - triggered by the pre-declared repeat rule: both H2 decision
+# ratios landed in [0.80, 0.92] on first run (osse 0.8483, ath 0.8667). Design: SPEED_ARCHITECTURE_PLAN §7
+# + SPEED_IMPLEMENTATION_PROMPT §3. Same solver (38e5b1f installed), fresh per-arm cache/dataset roots,
+# reverse order per pair (b12 first, then b1) to expose drift. --budget 1, mode screen, batch via env.
+night: speed_round_b_rep2_2026-11-14
+lane: gpu
+jobs:
+  - {id: new_b12_osse_rep2, kind: search, budget: 1, mode: screen, timeout_s: 3600,
+     config: examples/typologies/print_80x60_2026-11-13/p80x60__osse_ext_throat_700_v7.yaml,
+     cache_dir: scratch/speed_round_b/new_b12_osse_rep2, dataset_dir: scratch/speed_dataset/new_b12_osse_rep2,
+     env: {HORNLAB_FREQ_BATCH_SIZE: "12"}}
+  - {id: new_b1_osse_rep2, kind: search, budget: 1, mode: screen, timeout_s: 3600,
+     config: examples/typologies/print_80x60_2026-11-13/p80x60__osse_ext_throat_700_v7.yaml,
+     cache_dir: scratch/speed_round_b/new_b1_osse_rep2, dataset_dir: scratch/speed_dataset/new_b1_osse_rep2,
+     env: {HORNLAB_FREQ_BATCH_SIZE: "1"}}
+  - {id: new_b12_ath_rep2, kind: search, budget: 1, mode: screen, timeout_s: 3600,
+     config: examples/typologies/print_80x60_2026-11-13/p80x60__ath_core_14in_700_v7.yaml,
+     cache_dir: scratch/speed_round_b/new_b12_ath_rep2, dataset_dir: scratch/speed_dataset/new_b12_ath_rep2,
+     env: {HORNLAB_FREQ_BATCH_SIZE: "12"}}
+  - {id: new_b1_ath_rep2, kind: search, budget: 1, mode: screen, timeout_s: 3600,
+     config: examples/typologies/print_80x60_2026-11-13/p80x60__ath_core_14in_700_v7.yaml,
+     cache_dir: scratch/speed_round_b/new_b1_ath_rep2, dataset_dir: scratch/speed_dataset/new_b1_ath_rep2,
+     env: {HORNLAB_FREQ_BATCH_SIZE: "1"}}

@@ -1,0 +1,37 @@
+backend=cpu precision=Float64
+sphere radius=0.1000 m faces=1280 p1_dofs=642 subdivisions=3
+frequency=1000.0 Hz k=18.3183 1/m ka=1.8318 wavelength=0.3430 m
+quadrature regular_order=4 singular_order=4
+elements per wavelength=34.7 (median edge 0.0099 m)
+icosphere area deficit=-0.479020% (0.041707 dB on a monopole's volume velocity)
+
+Case 1  pulsating sphere, free field, closed form
+  beat vs closed form              level_db_worst=0.022305 level_db_rms=0.022294 phase_deg_worst=0.2334 relative_l2=0.481% relative_worst=0.5%
+
+Case 2  interior monopole, free field, geometry-exact
+  beat vs closed form              level_db_worst=0.018793 level_db_rms=0.018789 phase_deg_worst=0.0770 relative_l2=0.255% relative_worst=0.3%
+
+sphere centre height=0.5000 m minimum vertex y=0.400000 m image separation=1.0000 m (2.92 wavelengths)
+half-space observation points=128 at radius 3.00 m
+
+Case 3  rigid-image monopole over y = 0, symmetry_mode=:ground
+  beat vs closed form              level_db_worst=0.020331 level_db_rms=0.018583 phase_deg_worst=0.0939 relative_l2=0.254% relative_worst=0.3%
+
+Case 4  the ground image counts as one radiator, not two
+  body at y=2.000 m, 20 radii above the plane, image separation 11.66 wavelengths
+  reported impedance, ground vs free: +0.0004 dB
+  control, force scaled by symmetry_reduction_factor(:ground)=2: +6.0210 dB, MUST FAIL
+
+Control A  globally conjugated kernel (k -> -k), MUST FAIL
+  free field vs closed form        level_db_worst=0.018798 level_db_rms=0.018789 phase_deg_worst=90.7471 relative_l2=142.494% relative_worst=142.5%
+  half space vs closed form        level_db_worst=1.806990 level_db_rms=0.350222 phase_deg_worst=179.9575 relative_l2=190.455% relative_worst=198.6%
+  image-equivalence check: +k relative=1.203e-15  -k relative=1.203e-15  <- both pass, this is the blind spot
+
+Control B  pressure-release (sign-flipped) image, MUST FAIL
+  half space vs soft reference     level_db_worst=29.750622 level_db_rms=11.590502 phase_deg_worst=88.8872 relative_l2=127.745% relative_worst=1556.1%
+
+tolerance level_db_worst<=0.0500 phase_deg_worst<=0.5000
+controls must miss the phase tolerance by >=10x, i.e. phase_deg_worst>=5.00
+tolerance impedance move <=1.00 dB, control >1.00 dB
+ANALYTIC_EXTERIOR_VALIDATION_OK
+ANALYTIC_EXIT=0 

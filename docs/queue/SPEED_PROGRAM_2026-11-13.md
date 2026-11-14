@@ -1,6 +1,6 @@
 # Integrated solver-speed program (2026-11-13, Oracle-reviewed)
 
-**Status:** senior-reviewed 2026-11-13 (see `SPEED_ARCHITECTURE_PLAN` §14); **running** — Step 1 resume in progress; execution follows `docs/queue/SPEED_IMPLEMENTATION_PROMPT_2026-11-13.md`. Operational one-pager only - the implementation and architecture detail, invariants, test statistics and open questions live in `docs/queue/SPEED_ARCHITECTURE_PLAN_2026-11-13.md`. Supersedes `docs/queue/SPEED_COMBINED_2026-11-13.md` (kept for history).
+**Status:** **ADOPTED 2026-11-14** — solver `38e5b1f` merged (wall −24.7 %/−28.0 %, parity ~1e-5 dB, zero spill, ceiling re-measured to 24,973 quarter-DOF); batching default REJECTED by the pre-declared bar (batch-12 median 0.8512/0.8653, batch-4 0.8771/0.9131; `solve.freq_batch_size` lands as default-None, env stays the trial knob); A5 re-based on measured anchors. Full record: `docs/evidence/SPEED_ADOPTION_2026-11-14.md`. Operational one-pager only - the implementation and architecture detail, invariants, test statistics and open questions live in `docs/queue/SPEED_ARCHITECTURE_PLAN_2026-11-13.md`. Supersedes `docs/queue/SPEED_COMBINED_2026-11-13.md` (kept for history).
 **Owner constraint:** nothing may reduce frequency, angular or mesh resolution, accuracy or coverage on numbers that
 count as results.
 

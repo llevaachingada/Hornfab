@@ -1,7 +1,7 @@
 ﻿# ISSUES
 
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
-Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-13 (**speed program: senior review landed (ADOPT with corrections), E0 done, C3+C4 landed, C5 mesher question closed, E1b raw-evidence rerun running, Round A armed; plus the earlier same-day Elites-tab/test-suite work; no GitHub issue state changed**).
+Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-14 (**speed program ADOPTED: solver `38e5b1f` at −25/−28 % whole-candidate wall, parity ~1e-5 dB, zero spill, batching default rejected by the pre-declared bar, A5 re-based on measured anchors, E1b raw evidence archived; plus the S8/S7 GUI panels; no GitHub issue state changed**).
 
 Local-only, added 2026-11-13 (20:4x local) (**CI repair; no GitHub issue state changed**):
 - Done: main CI red on 8 env/portability clusters fixed (manifest locator portability + fixtures, PureWindowsPath in
@@ -21,6 +21,20 @@ changed**):
   payload is shown. Add a selector only if a real multi-run workflow needs it.
 - Open (by design): the tools refuse `--out` under `runs/`, so the GUI needs
   `--analysis-dir <set>`; no exception was added.
+
+Local-only, added 2026-11-14 (~02:0xZ) (**speed program ADOPTED: solver 38e5b1f at -25/-28% wall, parity ~1e-5 dB, zero spill; batching default rejected by the pre-declared bar; A5 re-based on measured anchors; no GitHub issue state changed**):
+- Adopted: beat pin → `38e5b1f8ca840ebf6351c54611a08fedb1a0750f` (`pyproject.toml` + `TOOLCHAIN.md`); whole-candidate
+  wall −24.7 % (osse) / −28.0 % (ath); parity max diffs ≤ 4.4e-05 dB / 3.6e-05° (bar 0.039 dB / 1°, computed by hand —
+  `compare` is report-only); `solve_hash` identical across all 12 arms; zero shared spill anywhere (lane watcher shared
+  peak 80 MiB; `tools/bench/run_with_memwatch.py` now exists for future runs). Evidence: `docs/evidence/SPEED_ADOPTION_2026-11-14.md`.
+- Rejected (pre-declared bar): batch-12 default (median ratios 0.8512/0.8653 > 0.85 after the mandated repeats) and the
+  batch-4 fallback (0.8771/0.9131). `solve.freq_batch_size` lands as default-None provenance key; env var = owner trial knob.
+- Re-based (measured): `solve/feasibility.py` fused-CUDA anchors — 20,237 refusal falsified by measurement; 24,973
+  quarter-DOF fits (risky band); refuse ≥ ~26k; `tests/test_solve_feasibility.py` re-based by fix. Cap values unchanged
+  (owner decision).
+- Next: E9 production relaunch (print night's un-run jobs) under the adopted solver.
+- Still open from earlier: A1 cache namespace means the pin swap invalidates solve caches ONCE (expected; first
+  post-merge runs re-solve at `38e5b1f`).
 
 Local-only, added 2026-11-13 (20:2x local) (**speed program: review landed + E0 done + C3/C4 landed; no GitHub issue state changed**):
 - Resolved (senior review): `SPEED_ARCHITECTURE_PLAN_2026-11-13.md` ADOPTED with corrections (§14); all 12 open questions

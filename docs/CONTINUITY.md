@@ -1,6 +1,36 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-14 (~02:0xZ) - SPEED PROGRAM ADOPTED: SOLVER 38e5b1f (-25/-28% WALL, PARITY ~1e-5 dB, ZERO SPILL); BATCHING NOT ADOPTED; A5 RE-BASED ON MEASURED ANCHORS
+
+- **Full campaign executed overnight per `docs/queue/SPEED_IMPLEMENTATION_PROMPT_2026-11-13.md`:** E0 ✓
+  (200/200, runner exit 0, 1 recorded transient documented) → E1b ✓ (raw Julia suite **3830/0/4** +
+  analytic OK archived under `docs/evidence/*_38e5b1f_2026-11-13.log`; first attempt lost to the
+  julia.exe Windows-wrapper redirect bug, re-run under `cmd /c` with exit stamps) → E4 ✓ (installed
+  `38e5b1f` from the GitHub fork, `direct_url.json` exact, C1+C2 markers verified, CPU reprovisioned)
+  → E3/E5 ✓ (10 arms) → mandated repeats + b4 fallback ✓ → E6 ceilings ✓ → E7 decision → **E8 merge (this commit)**.
+- **H1 ADOPTED:** whole-candidate wall `new_b1/base_b1` = **0.7533 (osse, 54.47→41.03 s)** / **0.7201 (ath,
+  83.77→60.32 s)** — outside the ambiguity band; `solve_hash` identical across all arms; `hornlab-search
+  compare` max diffs ≤ 4.4e-05 dB / 3.6e-05° (bar 0.039 dB / 1°; compare is report-only, bars computed).
+  The measured fused-CUDA ceiling is now **24,973 quarter-DOF fits** (5.8 GiB device peak; 23,850 fits at
+  4.7 GiB, shared 80 MiB everywhere). Full tables: `docs/evidence/SPEED_ADOPTION_2026-11-14.md`.
+- **H2 NOT ADOPTED (pre-declared rule held):** batch-12 ratios hit the ambiguity band (0.8483/0.8667) →
+  repeated both pairs on fresh roots → median ratios **0.8512 / 0.8653 > 0.85** → rejected; batch-4
+  fallback **0.8771 / 0.9131** → rejected. N1's 1.9-4.7x solver-only win is only 13-15% whole-candidate.
+  `solve.freq_batch_size` lands as a default-`None` provenance key (C3, committed `66d8509`);
+  `HORNLAB_FREQ_BATCH_SIZE` stays the owner's trial knob.
+- **A5 re-based on measured anchors (rule-sanctioned fix):** `solve/feasibility.py` replaces the pin-A
+  `4.0 × 8N²` model with `FUSED_CUDA_MEASURED_ANCHORS` (piecewise envelope): the 12,000-cap fits at 1.77 GiB,
+  the old 20,237 refusal is now a fit (3.35 GiB), the measured 24,973 anchor is `risky`, ≥ ~26k `refuse`.
+  `tests/test_solve_feasibility.py` re-based by fix (the stale test G2 called "provably stale"). Offline
+  pytest green (feasibility 7 + freq_batch_config 8 + config_extends 11 + memwatch 5), `compileall` clean.
+- **Evidence-tool gotchas recorded:** `run_with_memwatch.py` (C4) attached over the whole Round B window:
+  dedicated peak 4,074 MiB, **shared peak 80 MiB (no WDDM spill)** — the number nvidia-smi cannot see.
+  julia.exe's Windows wrapper does not carry `Start-Process` redirections (first E1b attempt lost; archived
+  0 bytes, re-run archived complete).
+- **E9 NEXT:** relaunch production fresh with the print night's un-run jobs (ath_core b200 + osse seed5678
+  b200) under the adopted solver. Rollback unchanged (§9 of the prompt; old pin `0850ef39`).
+
 ## 2026-11-13 (20:4x local) - CI REPAIR: 7 RED CLUSTERS FIXED ON MAIN (NO TOLERANCE OR EXPECTED VALUE CHANGED)
 
 - Main CI (55fbf7f) was red on 8 clusters, none a product regression. Fixed in `fix/ci-repair-2026-11-13`:
