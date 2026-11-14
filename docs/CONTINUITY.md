@@ -1,6 +1,24 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-14 (03:2xZ) - SPEED PROGRAM COMPLETE THROUGH E9: FIRST FULLY-PROVENANCED PRODUCTION NIGHT AT 38e5b1f
+
+- **E9 verified:** night `print80x60_jobs23_2026-11-14` finished 2026-11-14T02:25:18Z, runner exit 0,
+  **400/400 evals** (ath b200: mean 45.22 s/cand, 79.6 candidates/h; osse seed5678 b200: mean 52.33 s/cand,
+  68.8 candidates/h; both run dirs carry `lib_shas.hornlab_beat_bem = 38e5b1f8…`). Zero GPU failures class
+  unchanged; peaks 2.0-2.3 GiB. NOTE: the two runs re-solved from cold A1 caches at the new pin (expected
+  one-time invalidation) and use different designs than the A/B arms — the mean-s/cand above are production
+  rates, not a clean A/B (the clean A/B is in the adoption evidence).
+- **Spill watchdog over the production tail:** `tools/bench/run_with_memwatch.py --attach` (snapshot
+  mode, 120 s cadence): dedicated peak 586 MiB, **shared peak 80 MiB, no spill** — final record at
+  `scratch/speed_runs/memwatch_e9.json`.
+- **Hardening landed while the night ran (`7fa7d5e`→`dc8dc03`):** memwatch `--write-every-seconds`
+  incremental snapshots (a lost window can no longer lose evidence); CI guard pinning production caps
+  (12,000 DOF) inside the A5 `fit` band; throughput runbook rows refreshed (batch config key, adoption,
+  spill watchdog).
+- **Speed program E0-E9 COMPLETE.** Rollback path unchanged; the adoption evidence
+  (`docs/evidence/SPEED_ADOPTION_2026-11-14.md`) is the single record of the measured campaign.
+
 ## 2026-11-14 (01:xx local) - CI REPAIR HARDENING PASS: RIBS IN CI (+38 REAL TESTS), FIXTURE DRIFT GUARD
 
 - Senior verification of the 2026-11-13 CI repair (#56) and the #55 merge:
