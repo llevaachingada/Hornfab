@@ -1,6 +1,27 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-13 (21:0x local) - PARAMETER DOC SPLIT: `--check` IS NOW A REAL CI GATE
+
+- Resolved the last blocking contradiction from the CI integration. `docs/reference/PARAMETERS.md` is
+  produced by `tools/gen_param_catalog.py`, but it carried a hand-maintained "Search-config keys"
+  section the generator never emits — so `--check` failed on a clean tree and `--write` deleted 158
+  lines of hand-written contract text. Both facts made the gate unusable.
+- Fix: the hand-written block now lives in `docs/reference/SEARCH_CONFIG_KEYS.md` (with a header saying
+  it is deliberately not generated and must be folded into the generator later), and the generated
+  PARAMETERS.md emits a one-line pointer to it from `catalog.render_parameters_markdown`. Regenerated
+  with `--write`; **`--check` now passes**: "param catalog OK: all three artifacts match a fresh build".
+- `.github/workflows/docs.yml` gates `tools/gen_param_catalog.py --check` again, plus the catalog/config
+  tests. `docs/INDEX.md` lists the new file.
+- Verified: `--check` exit 0; `tests/test_param_catalog.py tests/test_config.py` 70 passed.
+- No content lost: the 155-line search-key body moved verbatim and is diff-visible in this commit.
+  Verified mechanically: the moved block is **byte-identical** (150 lines, normalised line endings) to
+  the block removed from PARAMETERS.md.
+- **Found and fixed while doing it: `.gitignore`'s `reference/` rule was unanchored**, so it matched
+  `docs/reference/` as well as the root CAD dir. Every new file in `docs/reference/` was silently
+  ignored — which is why the new doc needed no force-add after anchoring it to `/reference/`. This
+  would have quietly swallowed any future generated reference doc.
+
 ## 2026-11-14 (03:2xZ) - SPEED PROGRAM COMPLETE THROUGH E9: FIRST FULLY-PROVENANCED PRODUCTION NIGHT AT 38e5b1f
 
 - **E9 verified:** night `print80x60_jobs23_2026-11-14` finished 2026-11-14T02:25:18Z, runner exit 0,

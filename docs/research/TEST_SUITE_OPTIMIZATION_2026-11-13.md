@@ -402,11 +402,12 @@ Applied in `.github/workflows/`:
 4. `-n 2 --dist loadscope` in the CI test step, with the same single-thread BLAS/OpenMP env as local.
 5. Required check on `main`: **not done** — that is a GitHub branch-protection setting, owner action.
 
-**`gen_param_catalog.py --check` is deliberately NOT gated.** It fails on a clean tree today:
-`docs/reference/PARAMETERS.md` carries a hand-maintained "Search-config keys" section that the
-generator does not emit, so `--check` reports STALE and `--write` deletes 158 lines of hand-written
-contract text. `docs.yml` documents the gap and gates the JSON byte-equality test instead. Fold the
-search/brief keys into the generator, then add the `--check` step.
+**`gen_param_catalog.py --check` IS gated** (resolved 2026-11-13, 21:0x local). It used to fail on a
+clean tree because `PARAMETERS.md` carried a hand-maintained "Search-config keys" section the generator
+never emits (`--write` deleted 158 lines of it). The hand-written block now lives in
+`docs/reference/SEARCH_CONFIG_KEYS.md`, the generated file emits a pointer to it from
+`catalog.render_parameters_markdown`, and `docs.yml` gates `--check` plus the catalog/config tests.
+Optional follow-up: teach the generator to emit the search keys and delete that file.
 
 Remaining from the prior review: R5 (CI-as-merge-gate protocol) and R6 (required checks).
 

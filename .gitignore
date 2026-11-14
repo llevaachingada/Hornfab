@@ -25,7 +25,9 @@ docs/evidence/objective_v2_rescore/
 
 # Third-party converters (LibreDWG, ODA File Converter) and owner-supplied reference CAD (Funktion-One, copyrighted): local only
 third_party/
-reference/
+# ROOT ONLY. An unanchored `reference/` also matched docs/reference/, silently ignoring every new
+# generated/hand-written reference doc; those ARE tracked and byte-checked (tools/gen_param_catalog.py).
+/reference/
 
 # Cloud GPU secrets (RunPod API keys); keep tools/cloud/runpod_env.example only
 tools/cloud/.env.local

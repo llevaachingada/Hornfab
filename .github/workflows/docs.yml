@@ -3,14 +3,11 @@ name: Docs check
 # The fast lane for docs-only changes: the main CI job ignores docs paths, so a docs-only PR needs
 # something cheap that still runs the guards docs can actually break.
 #
-# NOT gated here on purpose: `tools/gen_param_catalog.py --check`. The generator overwrites
-# docs/reference/PARAMETERS.md wholesale while the file still carries a HAND-MAINTAINED
-# "Search-config keys" section that the generator does not emit (the file says so in its own comment,
-# and NOTES_FOR_SENIOR.md 2026-11-12 records the gap). `--check` therefore fails on a clean tree, and
-# `--write` would delete that section. Gate it once the search/brief keys are folded into the
-# generator.
+# `gen_param_catalog.py --check` IS gated: the hand-maintained search/solve keys were split out of the
+# generated PARAMETERS.md into reference/SEARCH_CONFIG_KEYS.md, so the generated file is now 100 %
+# generated and the byte-check is meaningful on a clean tree.
 #
-# What IS gated: tests/test_param_catalog.py pins `gui/static/param-catalog.v1.json` to the code
+# Also gated: tests/test_param_catalog.py pins `gui/static/param-catalog.v1.json` to the code
 # byte-for-byte, and tests/test_config.py pins the config contract.
 on:
   pull_request:
@@ -33,5 +30,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install numpy scipy pyyaml pytest
           python -m pip install -e . --no-deps
+      - name: Generated docs are byte-identical to the code
+        run: python tools/gen_param_catalog.py --check
       - name: Catalog + config contract
         run: python -m pytest -q tests/test_param_catalog.py tests/test_config.py

@@ -75,10 +75,13 @@ Local-only, added 2026-11-13 (20:3x local) (**CI speed live; C3 contract break f
 Local-only, added 2026-11-13 (20:0x local) (**CI topology integrated; two pre-existing repo issues surfaced**):
 - Applied: single CI trigger (PR + main), pip cache, docs paths ignored by the full job, a new
   `docs.yml` fast lane, and `-n 2 --dist loadscope` in CI. No GitHub issue state changed.
-- **Open (pre-existing): `tools/gen_param_catalog.py --check` fails on main.** `PARAMETERS.md` has a
-  hand-maintained "Search-config keys" section the generator does not emit; `--check` reports STALE and
-  `--write` deletes 158 lines of hand-written text. Fix = fold those keys into the generator, then gate
-  `--check` in `docs.yml`.
+- **RESOLVED 2026-11-13 (21:0x local): `gen_param_catalog.py --check` can be gated.** The
+  hand-maintained search/solve keys moved to `docs/reference/SEARCH_CONFIG_KEYS.md`; the generated
+  `PARAMETERS.md` carries a pointer emitted by `catalog.render_parameters_markdown`. `--check` passes
+  and `docs.yml` gates it. Remaining follow-up (optional): teach the generator to emit those keys and
+  delete the separate file.
+- **Fixed: `.gitignore` `reference/` was unanchored** and matched `docs/reference/`, silently ignoring
+  every new file added there. Now `/reference/` (root CAD dir only).
 - **Open (pre-existing): CI is red on main** — 23 failed + 24 errors, identical on the four commits
   before the test-suite change. Groups: `test_search_qd_failure_isolation` (10, ribs missing in CI →
   ImportError instead of a skip), `test_bo_sensitivity_real` (2, absolute path baked into the test),
