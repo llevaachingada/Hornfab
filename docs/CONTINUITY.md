@@ -1,4 +1,13 @@
-﻿# CONTINUITY
+# CONTINUITY
+
+## 2026-11-14 (15:1x local) - COLLABORATOR STATUS BRIEF PUBLISHED (docs only)
+
+- Added `docs/status/2026-11-14/`: `README.md` (GitHub-rendered brief with 19 static chart PNGs in `img/`) and
+  `index.html` (the same page, self-contained with embedded data, live SVG charts). Content: the 12 Nov day report
+  (`runs/analysis/day_2026-11-12`), the 12-14 Nov changes on main through `878d381`, CMA-ES internals of
+  `20261112T144510Z-screen-00cf9c` (fit/sigma/stddev/xmean/covariance from its `cma/` logs), CMA-ME archive
+  heatmaps, objective balance, walls, sensitivity, fidelity, best-design beamwidth/DI, pull steps, open issues.
+- Numbers are a snapshot read from existing run/analysis files; no solve, queue, config or code change.
 
 
 ## 2026-11-14 - BAYESIAN INTEGRATION FINAL VALIDATION / COMMIT FOLLOW-UP
