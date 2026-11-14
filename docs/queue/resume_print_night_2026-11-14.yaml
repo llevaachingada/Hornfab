@@ -1,0 +1,10 @@
+# Step 1 of docs/queue/SPEED_PROGRAM_2026-11-13.md: finish the interrupted night on the CURRENT solver.
+# Run 20261113T193536Z-screen-81c964 was killed at 153 rows of its 200-candidate budget.
+# `--budget` counts NEW evaluations on a resume (validated with a 2-eval probe: 153 -> 155, stop "budget"),
+# so 45 finishes the original 200. Do NOT resume this run after a solver/mesher version change.
+# kind: command (not search) because `kind: search` demands a `config:` key even on a resume.
+night: resume_print_night_2026-11-14
+lane: gpu
+jobs:
+  - {id: resume_ath_b200, kind: command, timeout_s: 9000,
+     argv: [.venv/Scripts/hornlab-search.exe, search, --resume, runs/20261113T193536Z-screen-81c964, --budget, "45", --mode, screen]}

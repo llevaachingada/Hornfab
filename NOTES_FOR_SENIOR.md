@@ -899,3 +899,7 @@ local fork, but everything else needs to go to main" (2026-11-13 ~14:19 local).
 - Mesher role labels may not survive export physical tags; A4 may need an offline role-summary artifact from the mesher fork.
 - A1b: after A1, route `compare/hornfab_side.py`, `compare/fake.py`, `tools/m3_measurement_pack.py` cache roots through `solve.cache.namespace()`.
 - Optional legacy-cache adopt tool (hardlink legacy solve entries into a namespace) only if the owner confirms pins were unchanged over a date range.
+
+## 2026-11-13 - C3 contract gap: `solve.freq_batch_size` (speed program E8)
+
+Config key `solve.freq_batch_size` is a contract gap: a new `solve.*` key not enumerated in frozen `01_CONTRACTS.md`. Authorized under the owner's speed program (docs/queue/SPEED_ARCHITECTURE_PLAN_2026-11-13.md §14 Q3; implementation prompt E8), following the existing `cuda_fused` SolveSettings-field precedent. Added before the merge step; default None keeps every existing config and hash unchanged.

@@ -7,6 +7,7 @@ import yaml
 
 from hornlab_search.config import load_config
 from hornlab_search.design.space import DesignSpace
+from conftest import requires_mesher
 from test_tools_analysis_common import load_tool
 
 hc = load_tool("hypothesis_cards")
@@ -36,6 +37,7 @@ def fixture(tmp_path):
                             for role in sorted(hc.ROLES)]}
 
 
+@requires_mesher
 def test_card_roundtrip_and_markdown(tmp_path):
     spec = fixture(tmp_path)
     card = hc.build_card(spec, base=tmp_path)

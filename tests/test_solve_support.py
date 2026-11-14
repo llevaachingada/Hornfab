@@ -43,12 +43,25 @@ def build_seed_mesh(out_dir: Path, quadrants: str, f_max_hz: float, *, epw: floa
     return build.build_mesh(seed_design(cfg), ms, cfg, Path(out_dir), mode=mode)
 
 
-def spec_with(freqs, *, balloon: bool = True, mode: str = "screen") -> SolveSpec:
+def spec_with(freqs, *, balloon: bool = True, mode: str = "screen",
+              cuda_fused: bool = False) -> SolveSpec:
+    """A screen/verify SolveSpec for *freqs*.
+
+    ``cuda_fused=True`` carries ``solve.cuda_fused`` in ``SolveSpec.extra``, which is what
+    ``solve.beat._assert_cuda_fused_path`` reads: the solve is REFUSED unless the driver's own
+    diagnostics prove ``assembly_path == "fused_cuda"``, and ``Response.meta["cuda_fused"]`` is
+    recorded from this flag. Setting it also requires the backend to be built with
+    ``BeatBackend(..., cuda_fused=True)`` so the Julia host inherits
+    ``HORNLAB_BEAT_FUSED_BM_CUDA=1`` at spawn time.
+    """
     spec = solve_spec(mode, seed_cfg())
     obs = spec.observation
     if not balloon:
         obs = dataclasses.replace(obs, balloon=False, balloon_points=0)
-    return dataclasses.replace(spec, freqs_hz=tuple(float(f) for f in freqs), observation=obs)
+    spec = dataclasses.replace(spec, freqs_hz=tuple(float(f) for f in freqs), observation=obs)
+    if cuda_fused:
+        spec = dataclasses.replace(spec, extra={**(spec.extra or {}), "cuda_fused": True})
+    return spec
 
 
 def normalized_db(spl: np.ndarray, axis_index: int) -> np.ndarray:

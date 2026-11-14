@@ -1,0 +1,24 @@
+# Speed program, ROUND B - new solver (both upgrade parts, one fork SHA). Design: docs/queue/SPEED_ARCHITECTURE_PLAN_2026-11-13.md
+# Run only after installing the new SHA from the GitHub URL and re-provisioning the CPU backend.
+# Four arms: {batch 1, batch 12} x {D1 osse_ext_throat, D2 ath_core}, --budget 1.
+# PER-ARM cache/dataset roots: every arm must solve COLD, otherwise b1 and b12 on the same design
+# hit each other's cache and the comparison is meaningless.
+night: speed_round_b_2026-11-14
+lane: gpu
+jobs:
+  - {id: new_b1_osse,  kind: search, budget: 1, mode: screen, timeout_s: 3600,
+     config: examples/typologies/print_80x60_2026-11-13/p80x60__osse_ext_throat_700_v7.yaml,
+     cache_dir: scratch/speed_round_b/new_b1_osse, dataset_dir: scratch/speed_dataset/new_b1_osse,
+     env: {HORNLAB_FREQ_BATCH_SIZE: "1"}}
+  - {id: new_b12_osse, kind: search, budget: 1, mode: screen, timeout_s: 3600,
+     config: examples/typologies/print_80x60_2026-11-13/p80x60__osse_ext_throat_700_v7.yaml,
+     cache_dir: scratch/speed_round_b/new_b12_osse, dataset_dir: scratch/speed_dataset/new_b12_osse,
+     env: {HORNLAB_FREQ_BATCH_SIZE: "12"}}
+  - {id: new_b1_ath,   kind: search, budget: 1, mode: screen, timeout_s: 3600,
+     config: examples/typologies/print_80x60_2026-11-13/p80x60__ath_core_14in_700_v7.yaml,
+     cache_dir: scratch/speed_round_b/new_b1_ath, dataset_dir: scratch/speed_dataset/new_b1_ath,
+     env: {HORNLAB_FREQ_BATCH_SIZE: "1"}}
+  - {id: new_b12_ath,  kind: search, budget: 1, mode: screen, timeout_s: 3600,
+     config: examples/typologies/print_80x60_2026-11-13/p80x60__ath_core_14in_700_v7.yaml,
+     cache_dir: scratch/speed_round_b/new_b12_ath, dataset_dir: scratch/speed_dataset/new_b12_ath,
+     env: {HORNLAB_FREQ_BATCH_SIZE: "12"}}

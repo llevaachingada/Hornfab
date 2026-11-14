@@ -1,7 +1,136 @@
 ﻿# ISSUES
 
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
-Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-13 (**Elites tab redesigned for non-technical readers: brief/typology constraints and isometric horn thumbnails, best-per-typology / best-per-brief browsing, paginated 24 at a time, CSV-path noise removed; payload extended with brief/family/brief_target; bo-study-v1.1 final offline integration landed (M2 sensitivity/proposal evidence, immutable run package + `hornlab-search study` CLI, durable proposal-cadence recovery, B8 adversarial full loop); profile-outline thumbnail geometry fixed after live check (closed outline split at the mouth rim, outer wall kept); card hierarchy tuned per owner (constraint line + score largest, gate pills smaller); no GitHub issue state changed**).
+Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-13 (**speed program: senior review landed (ADOPT with corrections), E0 done, C3+C4 landed, C5 mesher question closed, E1b raw-evidence rerun running, Round A armed; plus the earlier same-day Elites-tab/test-suite work; no GitHub issue state changed**).
+
+Local-only, added 2026-11-13 (20:4x local) (**CI repair; no GitHub issue state changed**):
+- Done: main CI red on 8 env/portability clusters fixed (manifest locator portability + fixtures, PureWindowsPath in
+  bo_sensitivity, requires_ribs, mesher split/gates, sklearn in CI + `[analysis]` extra, pinned SHAs in marker test;
+  freq_batch_size was fixed separately on main in 50b6f06).
+ No tolerance/expected value changed; evidence sha256 unchanged. Then PR #55 refresh + merge.
+Local-only, added 2026-11-13 (20:2x local) (**S8/S7 analysis panels landed; no GitHub issue state
+changed**):
+- Resolved: the four S8/S7 tools now render in `#/analysis` — geometry descriptors (scale-aware
+  table + resolver SHA + navigation map), hypothesis cards (parents, six roles, ablations), equal-cost
+  QD/Pareto (ledger, front, frozen reference) and advisory surrogate validation (split, Brier,
+  regression, OOD proposals). `gui/data.py` exposes `tool_files` and selects the newest complete
+  keyed `surrogate_validation-<hash>.json`, listing all candidates. 432 GUI tests pass, exit 0.
+- Open (by design): the QD scatter plots only the nondominated `arm.front`; the payload carries no
+  full eligible list, so excluded/duplicate rows stay in tables.
+- Open (by design): surrogate candidates are disclosed but not selectable; the newest complete
+  payload is shown. Add a selector only if a real multi-run workflow needs it.
+- Open (by design): the tools refuse `--out` under `runs/`, so the GUI needs
+  `--analysis-dir <set>`; no exception was added.
+
+Local-only, added 2026-11-13 (20:2x local) (**speed program: review landed + E0 done + C3/C4 landed; no GitHub issue state changed**):
+- Resolved (senior review): `SPEED_ARCHITECTURE_PLAN_2026-11-13.md` ADOPTED with corrections (§14); all 12 open questions
+  decided: one rep per arm + hardened repeat rule (fresh roots, median-of-3, gray median rejects); keep `--budget 1`;
+  `solve.freq_batch_size` config key behind a rule-3 note; one install SHA `38e5b1f`; keep 0.039 dB / 1° and record max
+  diffs (0.0 expected; no bitwise gate); no non-fused control; ceiling sweep stays after Round B; A5 refit (`8N² + c`,
+  ≥ 30 % refusal margin) only after measurement; mesher pin stands — **C5 answered: the pin predates upstream `d740c28`**
+  (fetch + `merge-base --is-ancestor` exit 1), bump is a post-beta program; `worker_restart_every` unset in arms,
+  batch-4 fallback on spill; batch 12 lands in the two print configs at the adopt merge.
+- Done: **E0** — resume night finished runner exit 0, 200/200 rows. Deviation recorded: 1 of 200 was a transient
+  `solve_failed` (10054 worker reset, n=187), left as an honest failure row, not re-run.
+- Done: **C3** `solve.freq_batch_size` (config key + ≥ 1 validation + `_prepare` plumbing; env fallback preserved when the
+  key is absent; refused for `bempp_cpu`; offline tests pass; `config_sha` unchanged for key-absent configs) and **C4**
+  `tools/bench/run_with_memwatch.py` (spawn + attach modes; shared-usage/WDDM-spill observer; offline tests pass; live
+  attach smoke sane). Landed before Round A so the arms' `lib_shas` record a clean HEAD.
+- Done: **C5** mesher ancestry check (zero GPU).
+- Running: **E1b** Julia CPU suite + analytic-exterior raw-evidence rerun (first attempt archived 0 bytes — julia.exe's
+  Windows wrapper drops `Start-Process` redirections; now under `cmd /c` with inline exit stamps). **Round A is armed
+  behind E1b** (`-WaitPid` chain). Execution authority: `docs/queue/SPEED_IMPLEMENTATION_PROMPT_2026-11-13.md`.
+- Open (from the review): A5 stale `20,237 → refuse` test must be RE-BASED (fix, not weaken) at the merge, per plan §14.
+
+
+Local-only, added 2026-11-13 (20:3x local) (**CI speed live; C3 contract break fixed; no GitHub issue state changed**):
+- [measured] CI test step 385.3 s -> **201.9 s** (job 8m18s -> 4m15s) with one trigger + pip cache +
+  `-n 2 --dist loadscope`. Skips unchanged (296-297).
+- Fixed: 66d8509's `SolveSettings.freq_batch_size` (documented `None = absent`) was missing from
+  `tests/test_config.py::OPTIONAL_FIELDS`; 5 example-param failures. Declared optional, assertions
+  untouched. The new `Docs check` job surfaced it in 31 s.
+- Still open: the 23 pre-existing CI failures below (unchanged ids).
+
+Local-only, added 2026-11-13 (20:0x local) (**CI topology integrated; two pre-existing repo issues surfaced**):
+- Applied: single CI trigger (PR + main), pip cache, docs paths ignored by the full job, a new
+  `docs.yml` fast lane, and `-n 2 --dist loadscope` in CI. No GitHub issue state changed.
+- **Open (pre-existing): `tools/gen_param_catalog.py --check` fails on main.** `PARAMETERS.md` has a
+  hand-maintained "Search-config keys" section the generator does not emit; `--check` reports STALE and
+  `--write` deletes 158 lines of hand-written text. Fix = fold those keys into the generator, then gate
+  `--check` in `docs.yml`.
+- **Open (pre-existing): CI is red on main** — 23 failed + 24 errors, identical on the four commits
+  before the test-suite change. Groups: `test_search_qd_failure_isolation` (10, ribs missing in CI →
+  ImportError instead of a skip), `test_bo_sensitivity_real` (2, absolute path baked into the test),
+  `test_tools_analysis_parameter_study` (4, KeyErrors), `test_tools_analysis_geometry_descriptors` +
+  `_hypothesis_cards` (2, no `hornlab_mesher` in CI), `test_design_generated` (1),
+  `test_tools_experiments_manifest` (4 + 24 errors, local `scratch/` data). Needs its own lane.
+
+Local-only, added 2026-11-13 (19:3x local) (**test-suite speed + GPU lane; no GitHub issue state changed**):
+- Applied (branch `test/testspeed-2026-11-13`, merged to main): `pytest-xdist -n 6 --dist loadscope` with
+  single-thread BLAS/OpenMP caps takes the offline suite from **18.2 min to 5.9 min (3.1x)** at equal
+  coverage; `-n 8` measured worse (poles 56 s -> 186 s) and is excluded.
+- GPU lane now runs the shipping **fused CUDA** path (`cuda_fused=True` in `test_solve_beat.py`,
+  `meta["cuda_fused"] is True` pinned); `slow` retired from `tests/`.
+- GPU lock default changed to `warn` (was refuse); `HORNLAB_GPU_LOCK=refuse` for nights/measurements.
+- **Open / pre-existing failure:** `tests/test_tools_experiments_manifest.py` fails 4 + 24 collection
+  errors with `FileNotFoundError` on a local path, under a *serial* run in `oc-wt/testspeed`. It is not
+  caused by this work. Owner or the file's author needs to decide whether it should be a `local_data`
+  skip (the audit's category) or a fixture that materialises its input.
+- **Open / pre-existing gap (safety):** 18 `requires_botorch` tests never run in CI or the default venv;
+  they need the isolated `bayes-venv`. Decide: `[bayes]` CI job or a documented gap.
+Local-only, added 2026-11-13 (23:5xZ) (**S8/S7 GUI handoff written; no GitHub issue state changed**):
+- Open: the four S8/S7 tools have no GUI panels. They are absent from `ANALYSIS_TOOL_JSONS`
+  (`gui/data.py:4044`) and `ANALYSIS_SECTION_TOOLS` (`app.js:2644`), so their JSON is never parsed
+  and the page shows only `extra_tools` name pills ("no dedicated renderer"). Plan, contracts and
+  implementation paths: `docs/HANDOFF_S8_S7_GUI_2026-11-13.md`. S10 row in
+  `docs/research/COUNCIL_REVIEW_AND_IMPL_PLAN_2026-11-12.md:235`.
+- Open (decision): `surrogate_validation` writes keyed `surrogate_validation-<hash>.json` files with
+  no `.md`, so the exact-name analysis lookup never finds them. Options are a GUI glob of the newest
+  complete file, a tool-side stable alias (needs owner approval and a tool test), or deferral.
+- Open (decision): the S8/S7 tools refuse `--out` under `runs/`, while the GUI default analysis root
+  is `runs/analysis/`; today the supported path is `--analysis-dir <scratch set>`. Keep that workflow
+  or add a narrow tested exception.
+
+Local-only, added 2026-11-13 (23:3xZ) (**senior implementation plan for review; six verification corrections; no GitHub issue state changed**):
+- Ready for review (not executed): `docs/queue/SPEED_ARCHITECTURE_PLAN_2026-11-13.md` - C1-C6 inventory, I1-I8
+  invariants, E0-E9 gated sequence, H1-H4 test design with statistics, R1-R10 risks, rollback, 12 open questions.
+  C2 is now DONE at fork **`38e5b1f`** (pushed to `ourfork`); the installed-SHA target for the trial is `38e5b1f`.
+- Fixed (test design): the Round A/B arms shared a cache, so the second arm on the same seed would have been a cache
+  hit and faked the speedup. Per-arm `cache_dir`/`dataset_dir` under `scratch/` now; both night files re-dry-run clean.
+- Corrected: resume `--budget` counts new evals (45, not 200); the interrupted run is not strict, so the library-SHA
+  resume guard is inert; night files must be copied to `runs/nights/`; `kind: search` needs `config:` even on resume;
+  `selftest --analytic` is not fused-path parity.
+- Running: resume job live (159/200); part-two fork edit under CPU test; pin unchanged; no other GPU work.
+- Open (owner/reviewer): answer the 12 questions in the plan, in particular the repeat policy (one rep vs two), the
+  `--budget 1` probe shape, and whether a bitwise fused-response comparison should replace the 0.039 dB bar.
+
+Local-only, added 2026-11-13 (23:3xZ) (**Oracle-reviewed speed program replaces the campaign design; no GitHub issue state changed**):
+- Ready (not launched): `docs/queue/SPEED_PROGRAM_2026-11-13.md`; `speed_round_a` (2 arms) and `speed_round_b`
+  (4 arms), both `--dry-run` exit 0. Old campaign doc superseded, its night files deleted.
+- **Ordering is binding:** finish the interrupted night (`--resume runs/20261113T193536Z-screen-81c964 --budget 200`)
+  **before** the solver swap - `search/cma.py:702` refuses a strict resume after a library-SHA change.
+- Open (next, no GPU): write solver upgrade part two (host-side identity guard) on top of the existing fork commit,
+  one new SHA; Julia CPU testset green.
+- Open: batching must become `solve.freq_batch_size` (config key) if adopted, so it appears in `config_sha`; the env
+  var is the trial mechanism only.
+- Open: shared (WDDM) spill is still unmeasured by the night runner; the <512 MiB bar needs the `_bench_common`
+  counter on the batch-12 arms.
+- Open: mesher ancestry check - `merge-base --is-ancestor d740c28 55da4f46` after fetching from `jamescollinharky`
+  (the local checkout's `origin` is upstream `m3gnus`, the pin is on the fork).
+
+Local-only, added 2026-11-13 (23:3xZ) (**combined speed campaign designed; no GitHub issue state changed**):
+- Ready (not launched): `docs/queue/speed_combo_2026-11-14_{oldpin,newpin}.yaml`, a pin x batch factorial on two print
+  cells, `--dry-run` exit 0. Design + pre-declared rules: `docs/queue/SPEED_COMBINED_2026-11-13.md`. ~45-55 GPU-min.
+- Open: the pin swap between blocks is an operator step, not a night job (`pip install` + `provision --backend cpu`).
+- Open: shared (WDDM) memory is still not recorded by the night runner, so the zero-spill gate needs one arm through
+  `tools/bench/_bench_common.GpuMemPeak`.
+- Open: `HORNLAB_FREQ_BATCH_SIZE` is an env var, not a config key, so an adopted batching value would not appear in
+  `config_sha`; add `solve.freq_batch_size` if adopted.
+- Open (candidate B, Lane C): the fused route builds two dense host N x N identity matrices per request that it never
+  reads (`BeatEngineDriver.jl:1534-1535`); a second A3-shaped fork patch, ~0.5 GB host RAM + O(N^2) host assembly per
+  request at 8k DOF. Not implemented.
+- Open: the mesher fork checkout is stale (branch `hornlab-search/base` @ `b922e80`; the pinned `55da4f4` object is
+  absent locally), so any fork-state conclusion from it is unreliable until a fetch.
 
 Local-only, added 2026-11-13 ~23:5xZ (**PR #55 reconciled with main; worktrees consolidated; no GitHub issue state changed**):
 - Resolved: main went green (`46a28ec` fixture adaptation, `dc64fd7` S8 contracts + S7 hardening) and the PR merged

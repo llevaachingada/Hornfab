@@ -31,7 +31,7 @@ import hashlib
 import json
 from dataclasses import replace
 from datetime import datetime, timezone
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from typing import Any, Callable
 
 import numpy as np
@@ -353,14 +353,14 @@ def load_native_training_set(json_path=None, npz_path=None, *, config_path=None,
             provenance=provenance)
 
     artifact_config = str(payload.get('config') or '')
-    artifact_config_name = Path(artifact_config).name if artifact_config else ''
+    artifact_config_name = PureWindowsPath(artifact_config).name if artifact_config else ''
     if artifact_config_name != NATIVE_CONFIG_NAME:
         return _artifact_unavailable(
             f'cohort config {artifact_config_name!r} is not the frozen '
             f'{NATIVE_CONFIG_NAME!r}', provenance=provenance)
-    if config_path is not None and Path(config_path).name != NATIVE_CONFIG_NAME:
+    if config_path is not None and PureWindowsPath(str(config_path)).name != NATIVE_CONFIG_NAME:
         return _artifact_unavailable(
-            f'requested config {Path(config_path).name!r} is not the frozen '
+            f'requested config {PureWindowsPath(str(config_path)).name!r} is not the frozen '
             f'{NATIVE_CONFIG_NAME!r}', provenance=provenance)
 
     expected = dict(payload.get('hashes') or {})

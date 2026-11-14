@@ -22,9 +22,16 @@ from hornlab_search.solve.base import Backend, arc_angles_deg
 from hornlab_search.solve.beat import BeatBackend
 from hornlab_search.types import Response
 from test_solve_support import (build_seed_mesh, clean_host_state, emit, normalized_db,
-                                release_and_verify, seed_cfg, spec_with)
+                                release_and_verify, seed_cfg, spec_with as _base_spec)
 
-pytestmark = [requires_beat, requires_mesher, pytest.mark.slow, pytest.mark.gpu]
+pytestmark = [requires_beat, requires_mesher, pytest.mark.gpu]
+
+# This module runs the SHIPPING path: fused CUDA Burton-Miller (WP15). The measured A/B agreement
+# with the unfused path lives in test_solve_beat_fused_cuda.py; that file is the only one that still
+# spawns an unfused host on purpose. Fused also wins on an 8 GB card: 1.42x at ~4k dofs and the only
+# arm that survives ~8k (docs/evidence/THROUGHPUT_N1_2026-11-12.md).
+def _spec(freqs, **kwargs):
+    return _base_spec(freqs, cuda_fused=True, **kwargs)
 
 # The seed horn is large (bbox 0.80 x 0.64 x 0.27 m), so f_max is chosen per mesh to hit a target dof count
 # (measured with the real mesher): quarter 4200 Hz -> 2,316 dofs; quarter 3200 Hz -> 1,388;
@@ -36,7 +43,7 @@ F_QA, F_QB, F_FA, F_FC = 4200.0, 3200.0, 3100.0, 2000.0
 def solver(tmp_path_factory):
     state = clean_host_state()
     assert state["hosts_left"] == [], f"BEAT hosts survived the pre-test clear: {state}"
-    be = BeatBackend("cuda")
+    be = BeatBackend("cuda", cuda_fused=True)
     ok, why = be.available()
     assert ok, why
     be.baseline = state                         # recorded for the report
@@ -70,7 +77,7 @@ def test_14_warm_worker_cold_then_warm_then_post_detach(solver, quarter_a, capsy
     import logging
     caplog.set_level(logging.INFO, logger="hornlab_search.solve.worker")
     worker.mark_cold()
-    spec = spec_with([1000.0])
+    spec = _spec([1000.0])
     emit(capsys, f"baseline: {solver.baseline}")
     t = []
     for label in ("cold", "warm"):
@@ -104,7 +111,7 @@ def test_14b_worker_warm_then_solve_and_verified_release(solver, quarter_a, caps
     t_warm = time.perf_counter() - t0
     worker.warm(solver)                                           # idempotent: instant
     t_again = time.perf_counter() - t0 - t_warm
-    spec = spec_with([1000.0])
+    spec = _spec([1000.0])
     times = []
     for _ in range(2):
         out = solver.solve(quarter_a, spec)
@@ -117,11 +124,12 @@ def test_14b_worker_warm_then_solve_and_verified_release(solver, quarter_a, caps
 
 # 11
 def test_11_three_frequencies_valid_response(solver, quarter_a, capsys):
-    spec = spec_with([1000.0, 2000.0, 4000.0])
+    spec = _spec([1000.0, 2000.0, 4000.0])
     out = solver.solve(quarter_a, spec)
     assert out.ok, out.message
     r = out.response
     assert isinstance(r, Response) and r.backend == "beat_cuda"
+    assert r.meta["cuda_fused"] is True, "the GPU lane must exercise the shipping fused path"
     assert r.spl_h_db.shape == r.spl_v_db.shape == (3, 73)
     assert np.array_equal(r.h_angles_deg, arc_angles_deg(73)) and r.axis_index == 36
     assert np.all(np.isfinite(r.spl_h_db)) and np.all(np.isfinite(r.spl_v_db))
@@ -147,7 +155,7 @@ def test_12_mirror_symmetry_of_the_cuts_is_the_noise_floor(solver, quarter_a, fu
     freqs = [500.0, 1000.0, 2000.0, 3000.0]
     results = {}
     for label, mesh in (("quarter(2.3k dof)", quarter_a), ("full(4.9k dof)", full_a)):
-        out = solver.solve(mesh, spec_with(freqs, balloon=False))
+        out = solver.solve(mesh, _spec(freqs, balloon=False))
         assert out.ok, out.message
         r = out.response
         mirror_h = np.abs(r.spl_h_db - r.spl_h_db[:, ::-1]).max()
@@ -164,7 +172,7 @@ def test_12b_full_domain_and_quarter_domain_agree(solver, quarter_b, full_a, cap
     """Orchestrator CP-3 addendum: the same horn, full vs quarter domain, on meshes that resolve
     the whole band (f_max 3.1-3.2 kHz at epw 6), 0.1 dB."""
     freqs = [500.0, 1000.0, 2000.0, 3000.0]
-    spec = spec_with(freqs, balloon=False)
+    spec = _spec(freqs, balloon=False)
     rf = solver.solve(full_a, spec)
     rq = solver.solve(quarter_b, spec)
     assert rf.ok and rq.ok, (rf.message, rq.message)
@@ -184,7 +192,7 @@ def test_12b_full_domain_and_quarter_domain_agree(solver, quarter_b, full_a, cap
 
 # 13
 def test_13_idempotence_two_identical_solves(solver, quarter_a, capsys):
-    spec = spec_with([500.0, 1000.0, 2000.0, 4000.0, 8000.0])
+    spec = _spec([500.0, 1000.0, 2000.0, 4000.0, 8000.0])
     a = solver.solve(quarter_a, spec)
     b = solver.solve(quarter_a, spec)
     assert a.ok and b.ok, (a.message, b.message)
@@ -201,7 +209,7 @@ def test_13_idempotence_two_identical_solves(solver, quarter_a, capsys):
 
 # 15
 def test_15_symmetry_flag_mismatch_is_loudly_wrong(solver, quarter_b, capsys):
-    spec = spec_with([500.0, 1000.0, 2000.0, 3000.0], balloon=False)
+    spec = _spec([500.0, 1000.0, 2000.0, 3000.0], balloon=False)
     good = solver.solve(quarter_b, spec)
     assert good.ok, good.message
     cfg_bad = dataclasses.replace(solver.make_config(quarter_b, spec), native_symmetry_plane=None)
@@ -219,7 +227,7 @@ def test_16_solver_dof_count_vs_sizing_estimate(solver, quarter_a, full_a, capsy
     cfg = seed_cfg()
     rows = []
     for label, mesh in (("quarter 2.3k", quarter_a), ("full 4.9k", full_a)):
-        out = solver.solve(mesh, spec_with([1000.0], balloon=False))
+        out = solver.solve(mesh, _spec([1000.0], balloon=False))
         assert out.ok, out.message
         est = estimate_dofs(mesh.n_triangles, mesh.quadrants, cfg.mesh.dof_per_triangle)
         rows.append((label, mesh.n_triangles, out.response.n_dof, est))
@@ -240,7 +248,7 @@ def test_18_asymmetric_placement_has_the_predicted_sign(solver, full_coarse, cap
     its own symmetry planes."""
     d = 0.15
     freqs = [800.0, 1600.0]
-    spec = spec_with(freqs, balloon=False)
+    spec = _spec(freqs, balloon=False)
     a = arc_angles_deg(73)
     pos, neg = a > 9.0, a < -9.0
     lines = []

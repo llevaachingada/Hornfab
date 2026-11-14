@@ -1,0 +1,15 @@
+# Speed program, ROUND A - today's solver (pin 0850ef39). Design: docs/queue/SPEED_ARCHITECTURE_PLAN_2026-11-13.md
+# Two arms only, batch 1, --budget 1 (seed geometry only, so every arm solves the same design).
+# PER-ARM cache/dataset roots: each arm must solve COLD. Sharing a cache makes the second arm a
+# cache hit and fakes the effect being measured.
+night: speed_round_a_2026-11-14
+lane: gpu
+jobs:
+  - {id: base_b1_osse, kind: search, budget: 1, mode: screen, timeout_s: 3600,
+     config: examples/typologies/print_80x60_2026-11-13/p80x60__osse_ext_throat_700_v7.yaml,
+     cache_dir: scratch/speed_round_a/base_b1_osse, dataset_dir: scratch/speed_dataset/base_b1_osse,
+     env: {HORNLAB_FREQ_BATCH_SIZE: "1"}}
+  - {id: base_b1_ath,  kind: search, budget: 1, mode: screen, timeout_s: 3600,
+     config: examples/typologies/print_80x60_2026-11-13/p80x60__ath_core_14in_700_v7.yaml,
+     cache_dir: scratch/speed_round_a/base_b1_ath, dataset_dir: scratch/speed_dataset/base_b1_ath,
+     env: {HORNLAB_FREQ_BATCH_SIZE: "1"}}

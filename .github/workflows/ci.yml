@@ -1,28 +1,47 @@
 name: CI
 
+# One run per commit: PRs are the merge path, main is the trunk. The old `on: push` fired a second
+# identical run for every branch push (2 runs/commit, 824 CI-minutes in one day on 2026-11-12).
+# Docs-only changes get their fast `Docs check` job instead of the full suite (docs are a generated
+# SSOT, so they still need `gen_param_catalog.py --check`).
 on:
-  push:
   pull_request:
+    paths-ignore: ["docs/**", "**/*.md", "NOTES_FOR_SENIOR.md"]
+  push:
+    branches: [main]
+    paths-ignore: ["docs/**", "**/*.md", "NOTES_FOR_SENIOR.md"]
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    # One BLAS/OpenMP thread per xdist worker. Without these the workers oversubscribe the runner
+    # and the native mesher/OCCT tests inflate instead of speeding up (measured locally: 1.39x ->
+    # 1.83x test-time inflation).
+    env:
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      NUMEXPR_NUM_THREADS: "1"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: "pip"
       - name: Install
         run: |
           python -m pip install --upgrade pip
           # Offline tests need only numpy, scipy, pyyaml and pytest. Install the
           # heavy git deps with --no-deps so the HornLab packages resolve as
           # importable-but-inert (their tests are gated by requires_* markers).
-          python -m pip install numpy scipy cma pyyaml jinja2 pytest pytest-timeout
+          python -m pip install numpy scipy cma pyyaml jinja2 pytest pytest-timeout pytest-xdist
           # The report tests render real figures through hornlab_plots (pinned SHA, same as pyproject.toml).
           python -m pip install "hornlab-plots @ git+https://github.com/m3gnus/hornlab-plots.git@9e4a6d0dd2ccb6e735dd00233dccccb50d12ed44"
+          # parameter_study fit_effects tests need scikit-learn (pyproject [analysis] extra).
+          python -m pip install scikit-learn
           # Phase-2 surrogate tests need CPU torch (otherwise they importorskip).
           python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
           python -m pip install -e . --no-deps
       - name: Test
-        run: python -m pytest -m "not slow and not gpu and not crosscheck"
+        # -n 2 on the 2-core runner, module-scoped ordering so module fixtures stay shared.
+        run: python -m pytest -m "not slow and not gpu and not crosscheck" -n 2 --dist loadscope

@@ -1,6 +1,253 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-13 (20:4x local) - CI REPAIR: 7 RED CLUSTERS FIXED ON MAIN (NO TOLERANCE OR EXPECTED VALUE CHANGED)
+
+- Main CI (55fbf7f) was red on 8 clusters, none a product regression. Fixed in `fix/ci-repair-2026-11-13`:
+  1. `test_tools_experiments_manifest` (24 setup errors + 4): fixtures read gitignored `scratch/bo_m0/s11/*.yaml` -> committed
+     copies under `tests/fixtures/experiments/s11/`; `manifest._check_task` re-verifies by the stored repo-relative
+     `config_rel`/`brief_rel` locator (absolute path = provenance, must end in the locator, separator-agnostic); committed-manifest
+     test stays zero-warning where warm-start `runs/` exist and tolerates only `warm_source_unavailable` for runs absent on the host.
+  2. `bo_sensitivity`: cohort-config name read with `PureWindowsPath` (POSIX `Path` kept the whole `C:\...` string).
+  3. ribs-gated QD archive tests: new `requires_ribs` marker in conftest (4 tests incl. protocol-refusal, which also needs ribs).
+  4. geometry_descriptors: split; `resolve failed` under `requires_mesher`, new no-mesher test pins `canonical resolver is unavailable`.
+  5. hypothesis_cards roundtrip: `requires_mesher` (build path needs the resolver).
+  6. parameter_study: scikit-learn installed in CI and declared as `[analysis]` extra (no test edits).
+  7. `test_failure_marker_replays_without_counting`: pinned physics SHAs so the namespaced marker path runs on every host.
+  8. `test_config` freq_batch_size: already fixed on main by 50b6f06 (dropped from this change).
+- Evidence bytes untouched (sha256 before = after): pilot1 `8c28c569...`, pilot2 `c7b1e243...`, native_trainingset `f24f2768...`.
+- Verified: touched files 199 pass / 5 skip (owner venv); CI-shaped venv (no ribs/mesher) rc=0; owner-host shape (runs/+scratch
+  linked) manifest 33/33 no skips; full suite result in PR body.
+## 2026-11-13 (20:2x local) - S8/S7 ANALYSIS PANELS LAND: GEOMETRY, HYPOTHESIS, QD/PARETO, SURROGATE (GUI only; no solve)
+
+- **`gui/data.py`:** `geometry_descriptors`, `hypothesis_cards`, `qd_compare` and
+  `surrogate_validation` are now registered analysis tools; the report exposes `tool_files`
+  (JSON/Markdown/PNG names per tool) and discovers keyed `surrogate_validation-<16 hex>.json`
+  outputs, selecting the newest complete payload and disclosing every candidate
+  (`surrogate_validation_candidates`: name/status/reason/input_key/complete/readable/mtime).
+  Keyed stems are no longer misreported as `extra_tools`; a malformed keyed file is disclosed as
+  `readable: false`, never raised.
+- **`gui/static/app.js`:** four read-only panels in `#/analysis` after the M1 cards
+  (`an-geometry-panel`, `an-hypothesis-panel`, `an-qd-panel`, `an-surrogate-panel`), with two
+  inline-SVG scatters (`geometry-navigation`, `qd-front`) and the technical appendix carrying the
+  stored scalars. Wording is contractual: geometry/hypothesis show no score or rank; QD states
+  "attempt-equivalent ... not elapsed time" and "not a win claim", and never plots excluded rows;
+  the surrogate panel prints `no prediction (outside training support)` for OOD proposals and the
+  advisory-only disclaimer. Flat sections now link their `tool_files` (root route), which also
+  makes the M1/other registered tools' Markdown discoverable.
+- **Decisions:** keyed surrogate discovery is GUI-side (no tool change); the tools' `runs/` output
+  guard is unchanged, so the workflow remains `hornlab-search gui --analysis-dir <set>`; no
+  separate tab, no new dependency, no new colour, no `fetch`, no `tools/` import.
+- **Verification (terminal):** `node --check hornlab_search/gui/static/app.js` -> exit 0;
+  `python -m compileall -q hornlab_search/gui` -> exit 0;
+  `pytest tests/test_gui_views_analysis_s8.py tests/test_gui_views_analysis.py tests/test_gui_views_analysis_m1.py tests/test_gui_chart_standards.py -q`
+  -> **34 passed, exit 0**; `pytest tests/test_gui_*.py -m "not slow and not gpu and not crosscheck" -q`
+  -> **432 passed, exit 0** (`scratch/2026-11-13_s8/gui-s8-final.xml`). The new node guard executes
+  the real builders and page composition over literal tool payloads.
+- **Docs:** `docs/HANDOFF_S8_S7_GUI_2026-11-13.md` §15 records the implementation and residual
+  limits; `docs/CODE_MAP.md` and `docs/INDEX.md` updated. No dataset/cache/queue/installed file
+  was written and no analysis ran from the GUI.
+
+## 2026-11-13 (20:3x local) - CI SPEED IS LIVE; C3 CONTRACT BREAK FIXED (ONE LINE)
+
+- [measured] CI test step: **385.3 s before -> 201.9 s after** (`-n 2 --dist loadscope`, one trigger,
+  pip cache); job wall 8m18s -> 4m15s. Same selection, same skips (3,386 passed / 296 skipped).
+- **C3 regression fixed:** 66d8509 added `SolveSettings.freq_batch_size` with
+  `None = absent = today's grouping`, but `tests/test_config.py::OPTIONAL_FIELDS` did not declare it,
+  so `test_examples_load_with_no_none_in_required_fields` failed for all 5 examples (+5 CI failures,
+  first caught by the new docs job in 31 s). Declared `solve.freq_batch_size` optional — the
+  mechanism the file already documents for every other opt-in key; no assertion changed.
+- CI failure count on main is still **23 pre-existing** (unchanged ids; see ISSUES). This commit
+  removes the +5 that C3 introduced; the remaining 23 are the other lane's lane.
+
+## 2026-11-13 (20:2x local) - SPEED PROGRAM: SENIOR REVIEW LANDED (ADOPT WITH CORRECTIONS); E0 DONE; C3+C4 LANDED; E1b RUNNING; ROUND A ARMED
+
+- Four independent verification lanes (repo/run provenance, `hornlab_search` code, fork/Julia dataflow, evidence provenance)
+  reviewed `docs/queue/SPEED_ARCHITECTURE_PLAN_2026-11-13.md`: verdict **ADOPT with corrections** — full dataflow proves the
+  C2 guard complete and fused-CUDA output untouched (the fused assembler forms its identity on device,
+  `BeatEngineCudaBurtonMiller.jl:20-29`); batch composition is output-irrelevant on the fused route; the 0.039 dB / 1° parity
+  bar is the CP-7f noise floor codified in `docs/FORKS.md:49-51`. Corrections + all 12 open-question decisions recorded in a
+  new plan §14.
+- Four claims invalidated and fixed: (1) the "≤ 5 % replicate spread" is not in G2 (its 4,168-DOF row shows ~11 % wall /
+  ~18 % VRAM spread) — repeat rule hardened: both arms on fresh cache roots, median-of-3 decides, a gray median REJECTS;
+  (2) A5 is implemented as `FUSED_CUDA_FACTOR 4.0 × 8N²` (`solve/feasibility.py:17-37`), not "8N² + constant";
+  (3) "repo rule 7 requires the measured 20,152" was a mis-cite (throughput-program rule,
+  `docs/throughput/WP1_FUSED_IDENTITY_CACHE_PATCH.md:67`); (4) the 3830/0/4 Julia-suite result was prose-only attestation —
+  no raw log existed (rule 6). `hornlab-search compare` confirmed **report-only**: bars must be computed from its output.
+- **E0 DONE** (gate deviation recorded): resume night finished 2026-11-13T19:22:24Z, runner exit 0, **200/200 rows**
+  (170 ok; 30 recorded failures: 26 invalid_geometry + 3 mesh_too_large + **1 transient `solve_failed`** — 10054 worker reset
+  at n=187; the recovery re-warmed the host but the design was not re-attempted and the row stays an honest failure per
+  `error_policy: legacy`; not re-run: disproportionate GPU rework for a recorded infra transient).
+- **C5 answered, closed (zero GPU):** after fetching `jamescollinharky:hornlab-search/osse-midports`,
+  `merge-base --is-ancestor d740c28 55da4f46` → exit **1**: the pin **predates** the upstream FREEFORM density/cost fix. Pin
+  stays for the beta (owner policy `docs/ISSUES.md:1167`); a bump would invalidate every mesh hash — own post-beta program.
+- **C3 implemented (env-only knob → provenanced config key):** `SolveSettings.freq_batch_size: int | None = None`
+  validated (`None` or int ≥ 1), wired into `_prepare` — passed **only when explicitly set**, so the
+  `HORNLAB_FREQ_BATCH_SIZE` env fallback still governs absent keys (probe-verified: env 12 → backend 12, config 6 → 6,
+  absent → env). Landed AFTER the hard-rule-3 contract-gap note in `NOTES_FOR_SENIOR.md` (append-only). Edge closed: refused
+  for `bempp_cpu` (would otherwise TypeError in `BemppBackend`). Offline tests: `tests/test_solve_freq_batch_config.py` (8) +
+  `tests/test_config_extends.py` (11) pass; `compileall` clean; `config_sha` unchanged for configs without the key.
+- **C4 implemented:** `tools/bench/run_with_memwatch.py` — observer-only shared/dedicated-VRAM watcher
+  (`spawn` + `attach` modes), reusing `_bench_common.GpuMemPeak`/`SPILL_MIB=512` and worker-host discovery; JSON records
+  `dedicated_peak_mib`/`shared_peak_mib`/`spill_mib`/`spilled`; live attach smoke against the running gpu lane recorded
+  dedicated 2972 / shared 80 / no spill; `tests/test_run_with_memwatch.py` (5) pass offline. **Tooling gotcha recorded:**
+  julia.exe's Windows wrapper does not carry `Start-Process` redirections (first E1b attempt archived 0 bytes) — E1b now runs
+  under a `cmd /c ... > log` wrapper with exit codes stamped inline.
+- **E1b RUNNING** (`julia -t auto --project=hornlab_beat_bem/julia .../tests/runtests.jl` + `validate_analytic_exterior.jl`,
+  raw logs to `docs/evidence/*_38e5b1f_2026-11-13.log`; expected 3830 / 0 / 4 and `ANALYTIC_EXTERIOR_VALIDATION_OK`).
+  **Round A is armed behind E1b** (queue `-WaitPid` chain): `runs/nights/speed_round_a_2026-11-14.yaml`, 2 arms, batch 1,
+  `--budget 1`, per-arm cold caches. Pin still `0850ef39`; GPU idle at this writing.
+- Execution authority for the remaining gated steps (E4 swap, Round B, ceilings, decision, merge): 
+  `docs/queue/SPEED_IMPLEMENTATION_PROMPT_2026-11-13.md` (hand to the integrator verbatim; where it differs from plan §6,
+  the prompt wins).
+## 2026-11-13 (20:0x local) - CI INTEGRATED: ONE TRIGGER, PIP CACHE, `-n 2`, DOCS FAST LANE
+
+- `.github/workflows/ci.yml`: triggers reduced to `pull_request` + `push: branches:[main]` (the old
+  `on: push` fired a second identical run per branch push); `cache: pip`; docs paths ignored; the test
+  step is now `-n 2 --dist loadscope` with the same single-thread BLAS/OpenMP env as the local lane.
+- New `.github/workflows/docs.yml`: docs-only changes run the cheap guards instead of the full suite
+  (`tests/test_param_catalog.py tests/test_config.py`).
+- **Finding (pre-existing): `tools/gen_param_catalog.py --check` FAILS on main.** `PARAMETERS.md`
+  carries a hand-maintained "Search-config keys" section the generator does not emit, so `--check`
+  says STALE and `--write` **deletes 158 lines** of hand-written contract text (verified, then
+  reverted). The docs job therefore does NOT gate `--check`; the reason is written in the workflow and
+  in ISSUES. Fold the search/brief keys into the generator before adding that step.
+- Still owner-action: branch protection / required checks on `main` (GitHub setting, not code).
+- Not in scope here: CI is red on main for 23 pre-existing failures + 24 errors (listed in ISSUES);
+  none of them come from the test-suite work — the same set fails on the four commits before it.
+
+## 2026-11-13 (19:3x local) - TEST SUITE 3.1x FASTER (xdist), GPU LANE ON FUSED CUDA, GPU LOCK NOW ADVISORY
+
+- Branch `test/testspeed-2026-11-13` (worktree `oc-wt/testspeed`, owner-requested isolation), merged to
+  main this session. Plan/evidence: `docs/research/TEST_SUITE_OPTIMIZATION_2026-11-13.md`.
+- **[measured] Serial baseline:** 3,739 cases, 975.8 s test time, **1,092 s wall (18.2 min)**, 0 failed,
+  18 skipped, 21 deselected (`-m "not slow and not gpu and not crosscheck"`, full local venv).
+  Cost concentration: 41 tests >= 5 s carry **57.0 %**; 2,913 tests < 50 ms carry 2 %.
+- **[measured] `-n 6 --dist loadscope` + single-thread BLAS: 353.0 s wall (5.9 min) = 3.1x**, 3,766 cases.
+  The BLAS/OpenMP caps are REQUIRED: without them six workers each spawn a pool and the suite inflates
+  1.39x -> 1.83x (gmsh/OCCT tests 46 s -> 90 s). **`-n 8` is worse** (2,933 s test time; poles 56 s ->
+  186 s); 6 is the measured sweet spot, `auto` is not allowed on this box.
+- Parallel-safety fixes: `test_design_generators_grid_full_ring.py` (x2) and `test_s1a_driver_briefs.py`
+  wrote fixed `runs/c2_probe*` / `runs/s1a_probe`; now `tmp_path`. `pytest-xdist>=3` added to `[dev]`.
+- **GPU lane on the shipping path:** `test_solve_beat.py` builds `BeatBackend("cuda", cuda_fused=True)`,
+  routes every spec through `_spec()` (`spec_with(..., cuda_fused=True)` -> `SolveSpec.extra`), and
+  `test_11` asserts `meta["cuda_fused"] is True`. Rationale: fused wins at every size (1.42x at ~4k) and
+  fused-off FAILS at ~8k (`THROUGHPUT_N1_2026-11-12`); 154 configs set `cuda_fused: true`, 0 set false.
+  `test_solve_beat_fused_cuda.py` stays the one deliberate A/B; `test_solve_traces::test_19` stays
+  unfused (the trace contract was never validated against the fused assembler).
+- **`slow` retired:** removed from the 6 files that used it (16 of its 21 tests already carried
+  `gpu`/`crosscheck`; the other 5 were real BEM solves). `test_end_to_end.py` is now `gpu`. No nightly
+  tier; heavy CPU tests run in the parallel lane.
+- **GPU lock policy (owner directive):** default is now `warn` - a live holder prints the holder and the
+  command proceeds unlocked. `HORNLAB_GPU_LOCK=refuse` restores the old fatal behaviour (nights,
+  measurements, checkpoints); `off` silences. `gpu-clean` keeps its own refusal unless `--force`.
+  `_cmd_selftest` KEEPS its lock on purpose: its verified `worker.shutdown` would otherwise kill a live
+  job's host (the 2026-10-25 bug). Lock files are still written when free - they are the ownership
+  signal `worker.live_locked_lanes` uses.
+- **Pre-existing, NOT caused here:** `tests/test_tools_experiments_manifest.py` fails 4 + 24 collection
+  errors (FileNotFoundError on local data) under a *serial* run in this checkout, and the xdist run
+  reproduces exactly that and nothing else. Reported in ISSUES.
+- Verification: 42 lock/CLI/selftest tests pass (3 refusal cases now pass `policy="refuse"` explicitly;
+  4 new policy tests); 51 mesher tests (full-ring + s1a) pass with no stray `runs/` dirs; `compileall`
+  clean; `test_end_to_end.py` confirmed deselected from the CPU lane.
+## 2026-11-13 (23:5xZ) - HANDOFF WRITTEN: GUI ARCHITECTURE FOR THE S8/S7 ANALYSIS TOOLS (docs only; no product change)
+
+- `docs/HANDOFF_S8_S7_GUI_2026-11-13.md` records the finished S8/S7 lane (`dc64fd7`) and plans the
+  GUI work an implementer needs: exact artifact contracts for `geometry_descriptors`,
+  `hypothesis_cards`, `qd_compare` and `surrogate_validation`, the current `#/analysis` plumbing with
+  file:line references, the gap list, per-panel data bindings, the surrogate keyed-filename problem,
+  test/acceptance commands, ownership and open decisions.
+- Finding recorded: the four tools are **not** registered in `ANALYSIS_TOOL_JSONS`
+  (`gui/data.py:4044`) or `ANALYSIS_SECTION_TOOLS` (`app.js:2644`), so their JSON is never parsed and
+  they render only as `extra_tools` name pills. The S8/S7 tools also refuse `--out` under `runs/`,
+  while the GUI default root is `runs/analysis/`; the documented workflow is `--analysis-dir`.
+- No code, test, default, dataset, cache, queue or installed file changed by this entry; no solve.
+
+## 2026-11-13 (23:4xZ) - PART TWO COMMITTED (fork `38e5b1f`) AND RE-VERIFIED BY THE INTEGRATOR; PLAN READY FOR REVIEW
+
+- Fork commit `38e5b1f` on `perf/skip-fused-identity-cache` (on top of `9ec86b0`): the two dense **host** L2 identity
+  assemblies are moved after the fusion decision and skipped only on `fused_burton_miller_cuda`; `identity_cache` is
+  left empty there (its only reader is the CPU quadrature-order lookup); every other backend is byte-identical.
+  Pushed to `ourfork`; installed-SHA target for the trial is therefore **`38e5b1f`**.
+- **Independent verification (not just the implementer's report):** I read the guard at source - flag assigned at
+  `:1574`, guarded assembly at `:1586-1589`, and the only consumer that would break (the CUDA cache build at `:1681`)
+  is already inside `if !fused_burton_miller_cuda` (`:1680`); `identity_cache` is read only inside
+  `beat_backend == :cpu` (`:1827`). I then re-ran the Julia CPU suite myself: **exit 0**, counts unchanged
+  (3830 pass / 0 fail / 4 broken; the CUDA testsets skip because CUDA is not a dependency of the CPU project).
+  `validate_analytic_exterior.jl` -> `ANALYTIC_EXTERIOR_VALIDATION_OK`.
+- The senior plan (`docs/queue/SPEED_ARCHITECTURE_PLAN_2026-11-13.md`) was updated to record C2 as DONE at `38e5b1f`,
+  with the verified dataflow and the residual risk (an empty `identity_cache` fails loudly if a future reader appears).
+  **The plan is frozen for the owner's reviewer**; nothing in E3-E9 has been executed.
+- Resume job still running: **181/200** rows at this writing; pin still `0850ef39`; no other GPU work.
+
+## 2026-11-13 (23:3xZ) - SENIOR IMPLEMENTATION PLAN WRITTEN FOR REVIEW; SIX VERIFICATION CORRECTIONS (ONE TEST-DESIGN FLAW)
+
+- Wrote `docs/queue/SPEED_ARCHITECTURE_PLAN_2026-11-13.md` for a higher-thinking agent to review **before** execution:
+  verified ground truth, architecture/dataflow, change inventory C1-C6, invariants I1-I8, E0-E9 sequence with gates,
+  hypotheses H1-H4 with arms/statistics/falsification, measurement infrastructure, risks R1-R10, rollback, and 12 open
+  questions. The program doc is now explicitly the operational one-pager; this is the implementation reference.
+- **Test-design flaw found and fixed:** the Round A/B arms shared one cache, so the second arm on the same seed design
+  would have been a **cache hit** and its wall time would have collapsed - faking the effect being measured. Every arm
+  now has its own `cache_dir` + `dataset_dir` under `scratch/` (C6); both night files re-dry-run clean.
+- **Five more corrections from the verification pass:** (1) `--budget` on a resume counts **new** evaluations, so the
+  interrupted run needs **45**, not 200 (validated: 153 -> 155 with a 2-eval probe); (2) that run is
+  `infeasible_penalty: graded` / `error_policy: legacy`, so the strict library-SHA resume guard is inert - the ordering
+  rule stays as a general rule, not because it bites here; (3) night files must be copied into `runs/nights/` before
+  queuing (queue.ps1 looks only there); (4) `kind: search` requires a `config:` key even with `resume:`, so the resume
+  job is `kind: command`; (5) the analytic selftest never sets `cuda_fused`, so it is not fused-path parity evidence.
+- **Running state:** resume job `resume_print_night_2026-11-14` live, run at **159/200**; part-two patch edited in the
+  fork (+16/-3) and under CPU test; pin still `0850ef39`; GPU busy with the resume only.
+- **Ceiling calibration (CPU-only):** mouth-res 5.03 / 4.46 / 4.09 = **15,878 / 20,152 / 23,850** quarter DOF.
+- Nothing beyond the already-approved Step 1/2 has been executed; Rounds A/B, the swap and the ceiling sweep wait for
+  the plan's review and for the resume to finish.
+
+## 2026-11-13 (23:3xZ) - ORACLE-REVIEWED SPEED PROGRAM REPLACES THE CAMPAIGN DESIGN (ordering fixed; part two folded in)
+
+- The Oracle review of the campaign found three design faults, all now fixed in
+  `docs/queue/SPEED_PROGRAM_2026-11-13.md` (the campaign doc is marked SUPERSEDED; its night files are deleted):
+  1. **Ordering.** The interrupted night must be finished **before** the solver swap: `search/cma.py:702` refuses a
+     strict resume after any library-SHA change, so swapping first would strand the 153 candidates already paid for.
+     Program order is now: finish -> write part two -> baseline -> swap -> measure -> merge.
+  2. **Wasted arms.** Old-solver batch-12 arms prove batching on a solver that is about to be replaced; dropped. The
+     new-solver arms (batch 1 vs 12 on both designs) carry the batching effect, the upgrade effect and the interaction.
+  3. **Part two should not be a third measured level.** The host-side identity-matrix guard is folded into the **same**
+     new fork SHA; if attribution is ever needed, bisect the two fork commits instead of spending 4 arms and 2 swaps.
+- **Merge decisions recorded:** upgrade = merge fully (becomes the pin) if it passes the bars; part two = folded in;
+  batching = merge **behind a config key** (`freq_batch_size`), default 12 in CUDA examples, env var as fallback;
+  mesher = **out of scope** unless the pinned SHA provably predates upstream's FREEFORM density/cost fix **and** a live
+  typology is FREEFORM.
+- **Bars unchanged from the campaign** (0.85 wall ratio, 0.039 dB / 1 deg parity, peak VRAM lower, shared spill
+  < 512 MiB) and every arm still records frequency count and DOF.
+- **Mesher check is three commands, zero GPU** (`git fetch` the pin from `jamescollinharky`, then
+  `merge-base --is-ancestor d740c28 55da4f46`). Note the remotes differ: the local checkout's `origin` is upstream
+  `m3gnus`, the pin lives on the fork.
+- Ceiling points calibrated CPU-only: mouth-res 5.03 / 4.46 / 4.09 = **15,878 / 20,152 / 23,850** quarter DOF.
+- Night files: `docs/queue/speed_round_a_2026-11-14.yaml` (2 arms) and `..._round_b_2026-11-14.yaml` (4 arms), both
+  `--dry-run` exit 0. Nothing launched; the pin is still `0850ef39`.
+
+## 2026-11-13 (23:3xZ) - COMBINED SPEED CAMPAIGN DESIGNED (PIN x BATCHING FACTORIAL); THREE RECON LANES REPORTED
+
+- **Why combined:** the owner wants to adopt more than G2 at once. A3 (skip the fused identity cache) and frequency
+  batching (G1) both amortise *per-request* setup, and A3's per-request cache build is part of what batching would
+  amortise - so sequential adoption double-counts the overlap. A factorial measures the interaction.
+- **Design:** `docs/queue/SPEED_COMBINED_2026-11-13.md`; night files
+  `docs/queue/speed_combo_2026-11-14_{oldpin,newpin}.yaml` (both `--dry-run` exit 0). Two blocks of four arms:
+  `{batch 1, batch 12} x {p80x60__osse_ext_throat_700_v7, p80x60__ath_core_14in_700_v7}`, `--budget 1` so every arm
+  solves the same seed geometry. Block 1 on pin `0850ef39` (current), block 2 after the swap to `9ec86b0`.
+  Pre-declared rules: adopt a factor only at wall ratio <= 0.85, compare <= 0.039 dB / 1 deg, lower peak VRAM, zero
+  shared spill. Budget ~45-55 GPU-minutes including the ceiling sweep.
+- **Lane summary (three parallel recon lanes):** (1) every speed idea already documented, with status/measured
+  gain/GPU cost/resolution flag; (2) the mesh state - C1 audit is the only landed mesh work, production defaults are
+  untouched (`rear_res_factor 1.0`, `curvature_npts 0`), the mesher fork checkout is stale (at `b922e80`, the pinned
+  `55da4f4` object is absent locally); (3) the per-frequency lifecycle - **the batching knob is not used in
+  production** (`cma._prepare` never passes it; one request per frequency, so caches + `GC.gc(true)` + `cuda.reclaim()`
+  recur per frequency), and the fused route also builds two dense **host** N x N identity matrices per request that it
+  never reads (Lane C candidate B, a second A3-shaped patch).
+- **Excluded by the owner's rule** (recorded so they are not re-proposed as speedups): rear-shell density (coarsens a
+  coupled surface), quadrature order reduction, coarse epw, fewer angles/frequencies, FP32 Krylov, reduced-order sweeps,
+  UI fidelity selector.
+- **Docs:** INDEX row added for the campaign doc. No code, pin, GPU or queue change in this commit; the campaign is
+  designed, not launched.
 ## 2026-11-13 (~23:5xZ) - PR #55 RECONCILED WITH MAIN (S7 TAKEN FROM MAIN); WORKTREES CONSOLIDATED 28 -> 3
 
 - Main went green before the merge: `46a28ec` adapted the builder fixtures to the strict native gate and

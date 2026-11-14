@@ -4043,7 +4043,17 @@ def lane_status(runs: Path) -> dict:
 #: as ``extra_tools`` but never parsed.
 ANALYSIS_TOOL_JSONS = ("convergence", "seed_variance", "sensitivity", "links", "walls",
                        "ab_compare", "lane_parity", "term_balance", "fidelity", "report_day",
-                       "parameter_study", "source_fidelity")
+                       "parameter_study", "source_fidelity",
+                       # S8/S7 discovery tools (2026-11-13): geometry-only descriptors,
+                       # provenance-checked hypothesis cards, equal-cost QD/Pareto comparison and
+                       # the advisory surrogate validation. Payloads are passed through verbatim.
+                       "qd_compare", "geometry_descriptors", "hypothesis_cards",
+                       "surrogate_validation")
+#: Tools whose output file name carries an input key (``<tool>-<16 hex>.json``) instead of the
+#: fixed ``<tool>.json``. The set still exposes the selected payload under the plain tool key.
+_KEYED_TOOL_STEM = {
+    "surrogate_validation": re.compile(r"^surrogate_validation-[0-9a-f]{16}\.json$"),
+}
 #: REPORT.md is passed through as text (rendered in the page), capped for the API body.
 ANALYSIS_REPORT_MD_MAX = 200_000
 #: One report-set folder name under the analysis root ("." = the root itself).
@@ -4052,6 +4062,67 @@ ANALYSIS_SET_ID = re.compile(r"^[A-Za-z0-9_.\-]{1,80}$")
 ANALYSIS_FILE_NAME = re.compile(r"^[A-Za-z0-9_.\-]{1,120}$")
 #: The only analysis file kinds the GUI serves (reports, payloads, section PNGs).
 ANALYSIS_FILE_SUFFIXES = (".png", ".md", ".json", ".html")
+
+
+def _stat_mtime(path: Path) -> float:
+    try:
+        return float(path.stat().st_mtime)
+    except OSError:
+        return 0.0
+
+
+def _surrogate_candidates(base: Path) -> list[dict]:
+    """The keyed ``surrogate_validation-<hash>.json`` files in one set: header facts only.
+
+    The S7 tool writes one file per input+code key and no fixed ``<tool>.json``; the GUI selects
+    one complete payload (newest first) and lists the rest as candidates. Unreadable files are
+    disclosed as ``readable: false`` and never parsed further.
+    """
+    rx = _KEYED_TOOL_STEM["surrogate_validation"]
+    try:
+        paths = sorted(p for p in base.iterdir() if p.is_file() and rx.match(p.name))
+    except OSError:
+        return []
+    out: list[dict] = []
+    for p in paths:
+        d = _read_json(p)
+        payload = d if isinstance(d, dict) else {}
+        out.append({"name": p.name,
+                    "status": payload.get("status") if isinstance(payload.get("status"), str) else None,
+                    "reason": payload.get("reason") if isinstance(payload.get("reason"), str) else None,
+                    "input_key": (payload.get("input_key")
+                                  if isinstance(payload.get("input_key"), str) else None),
+                    "complete": payload.get("complete") is True,
+                    "readable": bool(payload),
+                    "mtime": _stat_mtime(p)})
+    out.sort(key=lambda c: (c["complete"], c["mtime"]), reverse=True)
+    return out
+
+
+def _selected_surrogate(base: Path, candidates: list[dict]) -> tuple[str | None, dict | None]:
+    """The first complete keyed payload (candidates are already complete-first, newest-first)."""
+    for c in candidates:
+        if not c["complete"]:
+            continue
+        d = _read_json(base / c["name"])
+        if isinstance(d, dict) and d:
+            return c["name"], d
+    return None, None
+
+
+def _tool_root_files(base: Path, tool: str) -> list[str]:
+    """Root-level files one tool wrote: ``<tool>.json``/``.md`` and ``<tool>_<n>.png``.
+
+    ``analysis_sets`` lists only JSON and REPORT.md at the set level; the analysis report adds
+    these names so a panel can link its Markdown report without guessing a path.
+    """
+    try:
+        names = sorted(p.name for p in base.iterdir() if p.is_file())
+    except OSError:
+        return []
+    prefixes = (f"{tool}.", f"{tool}_")
+    return [n for n in names
+            if n.startswith(prefixes) and n.lower().endswith(ANALYSIS_FILE_SUFFIXES)]
 
 
 def analysis_sets(analysis_dir: Path) -> list[dict]:
@@ -4093,12 +4164,15 @@ def analysis_sets(analysis_dir: Path) -> list[dict]:
         if not files and not section_dirs:
             return
         root_payloads = {tool: _read_json(base / f"{tool}.json") for tool in ANALYSIS_TOOL_JSONS}
+        keyed_surrogate = (_surrogate_candidates(base)
+                           if "surrogate_validation" in ANALYSIS_TOOL_JSONS else [])
         tools, generated = [], None
         for tool in ANALYSIS_TOOL_JSONS:
             d = root_payloads[tool]
             has_root = isinstance(d, dict) and bool(d.get("tool"))
+            has_keyed = tool == "surrogate_validation" and bool(keyed_surrogate)
             has_section = any((sub / f"{tool}.json").is_file() for sub in section_dirs)
-            if has_root or has_section:
+            if has_root or has_keyed or has_section:
                 tools.append(tool)
             if has_root:
                 g = d.get("generated_utc")
@@ -4158,6 +4232,15 @@ def analysis_report(analysis_dir: Path, name: str) -> dict:
         d = _read_json(base / f"{tool}.json")
         if isinstance(d, dict) and d:
             payloads[tool] = d
+    # S7 writes one keyed file per input+code key and no fixed <tool>.json. Select the first
+    # complete payload (newest first) and expose every candidate's header, never invent one.
+    candidates: list[dict] = []
+    selected_keyed: str | None = None
+    if "surrogate_validation" in ANALYSIS_TOOL_JSONS and "surrogate_validation" not in payloads:
+        candidates = _surrogate_candidates(base)
+        selected_keyed, chosen = _selected_surrogate(base, candidates)
+        if isinstance(chosen, dict) and chosen:
+            payloads["surrogate_validation"] = chosen
     out["tools"] = list(payloads)
 
     # report_day.py layout: <set>/<section>/<tool>.json (+ .md / .png siblings).
@@ -4209,8 +4292,24 @@ def analysis_report(analysis_dir: Path, name: str) -> dict:
             section_stems.update(p.stem for p in sub.glob("*.json"))
         except OSError:
             continue
-    out["extra_tools"] = sorted((json_stems - set(payloads) - set(ANALYSIS_TOOL_JSONS))
-                                | (section_stems - set(ANALYSIS_TOOL_JSONS)))
+    out["extra_tools"] = sorted(
+        ((json_stems - set(payloads) - set(ANALYSIS_TOOL_JSONS))
+         | (section_stems - set(ANALYSIS_TOOL_JSONS)))
+        - {stem for stem in (json_stems | section_stems)
+           if any(rx.match(f"{stem}.json") for rx in _KEYED_TOOL_STEM.values())})
+    # The set listing can only afford file names; expose each registered tool's root files
+    # (JSON + Markdown + section PNGs) so a panel can link its report without guessing.
+    tool_files: dict[str, list[str]] = {}
+    for tool in ANALYSIS_TOOL_JSONS:
+        names = _tool_root_files(base, tool)
+        if tool == "surrogate_validation" and selected_keyed:
+            names = sorted(set(names) | {selected_keyed})
+        if names:
+            tool_files[tool] = names
+    if tool_files:
+        out["tool_files"] = tool_files
+    if candidates:
+        out["surrogate_validation_candidates"] = candidates
     generated = None
     for d in payloads.values():
         g = d.get("generated_utc")

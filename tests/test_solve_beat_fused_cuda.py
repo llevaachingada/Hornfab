@@ -27,7 +27,7 @@ from hornlab_search.solve import worker
 from hornlab_search.solve.beat import BeatBackend
 from test_solve_support import build_seed_mesh, clean_host_state, emit, release_and_verify, seed_cfg
 
-pytestmark = [requires_beat, requires_mesher, pytest.mark.slow, pytest.mark.gpu]
+pytestmark = [requires_beat, requires_mesher, pytest.mark.gpu]
 
 F_HZ = 2000.0          # the CP-7 seed quarter mesh at 2 kHz: small, fast, kR in the fine range
 TOL_ON_DB = 0.01       # plan step 9: on-axis within 0.01 dB

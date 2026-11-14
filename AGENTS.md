@@ -181,6 +181,39 @@ PRs into `main` only, with complete unedited checkpoint output pasted in the bod
 - Analytic expectations (cardioid = 180.0°, dipole/cardio DI = 4.771 dB) are written down in
   advance. Failing one is information; do not round it away.
 
+### Test profiles (owner decision 2026-11-13: no `slow` tier — everything runs)
+
+The suite is **parallel** and the GPU is a **concurrent lane**, not a deferred one. There is no
+nightly-only tier; the `slow` marker is gone from `tests/`.
+
+```powershell
+# every edit / every lane — 3,7xx tests, measured 5.9 min on this box
+$env:OMP_NUM_THREADS="1"; $env:OPENBLAS_NUM_THREADS="1"; $env:MKL_NUM_THREADS="1"
+$env:NUMEXPR_NUM_THREADS="1"; $env:VECLIB_MAXIMUM_THREADS="1"
+.venv\Scripts\python.exe -m pytest -m "not slow and not gpu and not crosscheck" `
+    -n 6 --dist loadscope -p no:cacheprovider
+
+# GPU lane — run it CONCURRENTLY with the command above (separate terminal); 19 tests in 5 files
+.venv\Scripts\python.exe -m pytest -m "gpu"
+```
+
+- Do **not** use `-n auto` (24 workers on a box that also runs a GPU lane and a GUI) and do **not**
+  drop the thread caps: without them six workers each spawn a BLAS pool and the suite inflates 1.83×
+  instead of 1.39×.
+- The GPU lane exercises the **fused CUDA** path (`cuda_fused=True`, `SolveSpec.extra["cuda_fused"]`);
+  `test_solve_beat_fused_cuda.py` is the one deliberate A/B against the unfused arm. Do not "fix" a
+  fused refusal by clearing host state mid-test — it means a warm host was spawned before
+  `HORNLAB_BEAT_FUSED_BM_CUDA=1`; `gpu-clean` first.
+- **GPU lock policy (2026-11-13):** `gpu_lock` no longer refuses by default — a live holder produces a
+  loud warning and the command proceeds unlocked (`HORNLAB_GPU_LOCK=warn`). Set
+  `HORNLAB_GPU_LOCK=refuse` for nights, measurements and checkpoints; `off` silences it. `gpu-clean`
+  keeps its own refusal unless `--force`. The lock file is still written whenever the lock is free —
+  it is the ownership signal `worker.live_locked_lanes` uses to avoid killing another lane's Julia
+  host, so never delete `runs/.gpu.lock` by hand.
+- After an interrupted solve, run `hornlab-search gpu-clean` before the next **measurement**. An
+  interrupted job leaves a warm host holding ~1 GB, and the next timing then reads as a false OOM or
+  a 5–10× slow solve that looks real.
+
 ---
 
 ## Agent routing (opencode, this repo)
@@ -224,7 +257,10 @@ Rules:
 2. **One measurement per fresh process, with Julia cleared between jobs.** Never compare VRAM or
    timings across solves of different meshes inside one warm worker (the pool keeps growing).
 3. **Record the baseline** (`memory.used` before the solve) next to every peak-VRAM number.
-4. **Never run two GPU jobs at once**, and don't run provisioning while measuring.
+4. **Never run two GPU jobs at once**, and don't run provisioning while measuring. (The 2026-11-13
+   lock policy lets an interactive operator proceed with a warning instead of being refused; that is a
+   convenience override, not a licence to record a measurement while another CUDA job is live — rule 2
+   still binds.)
 5. **Poll `nvidia-smi` from a separate process or thread.** A Python-side poll that reads 0 is a bug in
    the probe, not a result.
 6. Every run script ends by clearing its workers. Task 05 (`solve/worker.py`) must verify the host
