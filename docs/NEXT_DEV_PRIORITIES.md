@@ -17,7 +17,7 @@ day; the lanes executed the plan on top of it:
 - L2 GUI versions/gates/views - **DONE, PR #26 merged** (objective v1-v7 selector, J version guard, gate-audit chips).
 - L3 scoring truth: offline v6-vs-v7 re-score + loading-objectives reconciliation - **DONE, PR #27 merged**.
 - L4 hygiene (`.gitattributes` + EOL renormalise, docs completions) - **PR #25 still OPEN, merges LAST today**
-  (it touches every file, so it is merged after all day-plan lanes; see `docs/IMPLEMENTATION_PLAN_2026-11-12_DAY.md` merge order).
+  (it touches every file, so it is merged after all day-plan lanes; see `docs/archive/2026-11-14/IMPLEMENTATION_PLAN_2026-11-12_DAY.md` merge order).
 - L5 two-way data interop with the collaborator - **DONE, PR #28 merged** (dataset MANIFEST, `export_config.py`,
   `labs/` two-way HF, foreign-data ingest with the CP-7b parity gate).
 - Also merged 2026-11-12: PR #30 (AGENTS.md GPU rules for OpenCode; handoff F/H assignments) and PR #31
@@ -35,7 +35,7 @@ day; the lanes executed the plan on top of it:
 
 ## P15 (added 2026-11-12, orchestrator). The 2026-11-12 day hardening plan (lanes running today)
 
-**Plan: `docs/IMPLEMENTATION_PLAN_2026-11-12_DAY.md` (lands via PR #32).** Groups A-F run in parallel from
+**Plan: `docs/archive/2026-11-14/IMPLEMENTATION_PLAN_2026-11-12_DAY.md` (lands via PR #32).** Groups A-F run in parallel from
 `origin/main` while the two-lane day queue produces replicate, narrowed-vs-control, staged-vs-joint and v6 evidence:
 Group A - evolutionary-analysis toolkit (turns today's runs into answers); B - search features (data warm start,
 linked knobs, `narrow`, valid-only budget, round-throat gate flag); C - calibration harness + n1 throughput
@@ -278,7 +278,7 @@ replace it. GPU cost is small everywhere; W1 is free.
   real owner briefs exist (the brief-design pass), set weight where perception lives (roughly 2–5 kHz: beamwidth
   and harshness) and down-weight broad, predictable regions — the machinery is already built for exactly this
   (WP4). Also record the M3/WP5 calibration outcomes (distance_m, screen balloon, source_motion) as adopted
-  baseline defaults with owner sign-off (`docs/HANDOFF_BRIEF_DESIGN_2026-10-24.md` plans this).
+  baseline defaults with owner sign-off (`docs/archive/2026-11-14/HANDOFF_BRIEF_DESIGN_2026-10-24.md` plans this).
 
 Suggested homes: W1 + W2 + W5 → the brief-design pass (its deliverables are exactly the baseline-settings doc and
 the POC build-gate); W4 → any small offline commit (e.g. alongside the in-flight M3/M4 lanes); W3 → the next
@@ -427,7 +427,7 @@ reseeded with `gcurve_dist` 1.0, objective v4) are DONE; items 4-7 and section 9
   collaborator re-score offline (keyed on geometry + solver settings, not the objective).
   Collaborator-facing runbook: `docs/COLLABORATOR_PULL_RUNBOOK_2026-11-02.md` (commands, sha256 table,
   verification counts, troubleshooting, agent rules); short version in
-  `docs/HANDOFF_COLLABORATOR_2026-10-27.md` section 4.
+  `docs/archive/2026-11-14/HANDOFF_COLLABORATOR_2026-10-27.md` section 4.
   - `tools/hf_sync.py` corrected against current docs (2026-11-02): `hf upload` replaced the deprecated
     `hf upload-large-folder` (gone in hub v2), `pull` now filters `--include "*.tar"`, and `upload` sets
     the Xet workaround below.

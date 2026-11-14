@@ -17,7 +17,7 @@ Tools (all in the repo): `tools/run_campaign_night.py` (one night file, strictly
    its lifetime. Wall-clock deadlines inside waiters jump across sleep.
 3. **Never start a runner while another runs.** Every job's pre-hygiene KILLS `julia.exe`. Wait on the live
    runner (`-WaitPid <pid> -WaitMatch <text from its command line>`), never on a sleep.
-   **Exception, only once the lane-aware runner is merged** (`docs/OPENCODE_HANDOFF_2026-11-12.md` L1: no
+   **Exception, only once the lane-aware runner is merged** (`docs/archive/2026-11-14/OPENCODE_HANDOFF_2026-11-12.md` L1: no
    image-name kill, `lane: cpu` nights, `.cpu.lane.lock`): ONE `lane: gpu` runner and ONE `lane: cpu` runner may
    run together. Check `tools/run_campaign_night.py` has no `taskkill /F /IM julia.exe` before relying on it.
 4. **During a live night: no pytest solver tests, no GPU work, and no `hornlab-search run --dry-run`** (it calls

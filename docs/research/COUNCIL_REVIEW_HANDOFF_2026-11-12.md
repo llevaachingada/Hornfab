@@ -20,7 +20,7 @@
 - `C:\Users\hunte\Hrns\oc-wt\plan\docs\IMPLEMENTATION_PLAN_2026-11-12_DAY.md` — the day plan (groups A–F, §5 amendments, group G).
 - `C:\Users\hunte\Hrns\oc-wt\plan\docs\SENIOR_PLAN_2026-11-12.md` and `OPENCODE_HANDOFF_2026-11-12.md`.
 - `C:\Users\hunte\Hrns\oc-wt\DOCS\docs\CONTINUITY.md` (top ~170 lines), `docs/ISSUES.md`, `docs/NEXT_DEV_PRIORITIES.md`, `docs/CODE_MAP.md`, `docs/INDEX.md`.
-- `docs/research/SEARCH_MATH_DOSSIER_2026-11.md` (group R), `docs/research/OBJECTIVE_V8_PROPOSAL_2026-11-12.md` (merged but §4 is a placeholder), `docs/research/TEST_SUITE_EFFICIENCY_2026-11-12.md`, `docs/GUI_VERIFY_VIEW_PLAN_2026-11-12.md`.
+- `docs/research/SEARCH_MATH_DOSSIER_2026-11.md` (group R), `docs/research/OBJECTIVE_V8_PROPOSAL_2026-11-12.md` (merged but §4 is a placeholder), `docs/research/TEST_SUITE_EFFICIENCY_2026-11-12.md`, `docs/archive/2026-11-14/GUI_VERIFY_VIEW_PLAN_2026-11-12.md`.
 - `docs/evidence/THROUGHPUT_N1_2026-11-12.md`, the A/B/C/D/G evidence already on main.
 
 **Implementation to check**

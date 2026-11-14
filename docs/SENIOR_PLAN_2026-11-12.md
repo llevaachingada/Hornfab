@@ -7,7 +7,7 @@ work and with the outside research; speed up the solve; make the GUI show what i
 issues, branches and docs. The senior lead (this document's author) decides order and scope.
 
 Referenced from `docs/NEXT_DEV_PRIORITIES.md` (P14). Supersedes the ordering of P10's later items and of
-`docs/HANDOFF_NEXT_RUNS_2026-10-30.md` section 4 where they conflict.
+`docs/archive/2026-11-14/HANDOFF_NEXT_RUNS_2026-10-30.md` section 4 where they conflict.
 
 ## 0. State at the start of this plan [measured 2026-11-12]
 
@@ -57,7 +57,7 @@ D (GUI) in parallel lanes. One GPU job at a time; GPU work only from the night w
 **Status column (added 2026-11-12 evening, docs-hygiene lane group F; verified against merged PRs and
 `docs/CONTINUITY.md` - "done" is used only where verifiable. Lanes L1-L5 of the executable handoff ran the
 work packages: L1=PR #29, L2=PR #26, L3=PR #27, L4=PR #25, L5=PR #28; the 2026-11-12 day plan
-`docs/IMPLEMENTATION_PLAN_2026-11-12_DAY.md` carries the remainder via PR #32):**
+`docs/archive/2026-11-14/IMPLEMENTATION_PLAN_2026-11-12_DAY.md` carries the remainder via PR #32):**
 
 | WP | Status | Where it landed / what is still open |
 |---|---|---|
@@ -152,7 +152,7 @@ readiness items (link 3 partial, link 4 fail, `docs/evidence/MEH_M8_2026-10-31.m
 
 ## 3. GPU night and the CPU second lane (8-24 h unattended)
 
-**Executable handoff: `docs/OPENCODE_HANDOFF_2026-11-12.md`** (OpenCode orchestrator + parallel workers).
+**Executable handoff: `docs/archive/2026-11-14/OPENCODE_HANDOFF_2026-11-12.md`** (OpenCode orchestrator + parallel workers).
 
 - The night runs from the **main checkout**: the CLI keeps `runs/`, `cache/`, `dataset/` there, so a worktree
   night would lose every cache hit. Coding workers use their own worktrees under `C:\Users\hunte\Hrns\oc-wt\`

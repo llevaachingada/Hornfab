@@ -1,6 +1,6 @@
 # PR #15 (Boundary Lab learnings) — local GPU test plan, 2026-10-22
 
-Plan: `docs/BL_LEARNINGS_IMPLEMENTATION.md` section 4. `main` fast-forwarded `b822dd5 -> 265133f` (PR #15 tip) and
+Plan: `docs/archive/2026-11-14/BL_LEARNINGS_IMPLEMENTATION.md` section 4. `main` fast-forwarded `b822dd5 -> 265133f` (PR #15 tip) and
 pushed; package reinstalled (`pip install -e .`). RTX 4060 Laptop 8 GB, driver 610.62, Julia 1.12.7.
 GPU hygiene before and after every GPU step (julia none before; the one BEAT host left after each search was killed;
 VRAM 586-618 MiB throughout). End state: no julia, 618 MiB.

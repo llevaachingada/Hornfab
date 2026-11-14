@@ -585,7 +585,7 @@ its own tests and CONTINUITY evidence. The parent integrator commits; do not hav
   sources.
 - `docs/research/COUNCIL_REVIEW_AND_IMPL_PLAN_2026-11-12.md` — S8 row (`:233`) and S10 row (`:235`:
   "trade-off/novelty maps, hypothesis cards", "add S3/S4/S6/S8 panels incrementally").
-- `docs/HANDOFF_ANALYSIS_PAGE_2026-11-12.md` — the E.1 visual-report work order and its definition
+- `docs/archive/2026-11-14/HANDOFF_ANALYSIS_PAGE_2026-11-12.md` — the E.1 visual-report work order and its definition
   of done; the same visual grammar applies here.
 - `docs/CODE_MAP.md:3-7` — where the four tools are mapped today.
 - pyribs CMA-MAE recipe: <https://docs.pyribs.org/en/stable/tutorials/cma_mae.html>

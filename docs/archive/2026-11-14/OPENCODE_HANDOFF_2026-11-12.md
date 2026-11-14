@@ -157,7 +157,7 @@ section ONLY (one paragraph, see L1.6).
 - L1.8 **Finish swarm lane F** (`extends:` for configs/briefs; rescued uncommitted work is commits `4ff42ce`
   (`config.py`) and `17e0520` (`examples/profiles/`) on branch `swarm/F-2026-10-31`, pushed).
   `git cherry-pick 4ff42ce 17e0520` into L1's branch; then RENAME `examples/profiles/objective_v5.yaml` to
-  `objective_v7.yaml` and set `version: 7` in it (that profile is the hardened objective); then meet `docs/SWARM_PLAN_2026-10-30.md` section F exactly: `extends:` resolved before
+  `objective_v7.yaml` and set `version: 7` in it (that profile is the hardened objective); then meet `docs/archive/2026-11-14/SWARM_PLAN_2026-10-30.md` section F exactly: `extends:` resolved before
   `config_sha`/solve hash; existing goldens unchanged; tests = flat-vs-extends identical `Config` and
   `config_sha` for 3 real cells, cycle detection, missing-file error naming the chain; add
   `examples/profiles/fused_cuda.yaml` and `examples/profiles/objective_v4.yaml`/`objective_v7.yaml` (NOT v5:
@@ -277,7 +277,7 @@ the gpu-clean path there): L5's entry points are `python -m hornlab_search.datas
   `swarm/H-2026-10-31`, pushed; touches `dataset/record.py` + the `_persist` call in `search/evaluate.py`).
   `git cherry-pick 68a16da` into L5's branch (L5 therefore also owns `hornlab_search/dataset/record.py`,
   the `_persist` function in `search/evaluate.py`, `tools/data/keepers.py`, `tests/test_dataset_record*.py`),
-  then meet `docs/SWARM_PLAN_2026-10-30.md` section H: optional record fields `run_id`, `config_name`,
+  then meet `docs/archive/2026-11-14/SWARM_PLAN_2026-10-30.md` section H: optional record fields `run_id`, `config_name`,
   `typology` (omitted when absent); `tools/data/keepers.py` backfills them for old rows by joining
   `runs/*/search.ndjson` with `runs/*/config.yaml` `name` (write the backfill as a dry-run-by-default command
   with backup, like `tools/data/renumber_objective_v5_to_v7.py`; run `--apply` only between GPU jobs);

@@ -132,7 +132,7 @@ Known defects / cautions before you trust the day report:
    sections, 1 honest error; see section 5.6).
 2. **The `v6_seeds` error is correct, not a bug.** The spec groups g6 (beat_cuda) with c2
    (beat_cpu); `seed_variance` refuses to pool two backends. The message is
-   `task_config_hash_mismatch`. `docs/HANDOFF_ANALYSIS_PAGE_2026-11-12.md:75-76,105-110`.
+   `task_config_hash_mismatch`. `docs/archive/2026-11-14/HANDOFF_ANALYSIS_PAGE_2026-11-12.md:75-76,105-110`.
 3. **g8 contradicted its own plan.** `COMPUTE_STUDY.md:253-254` says do not expand
    `atlas__osse_ext_throat` until the HARDENED_D evidence is re-evaluated; the executed queue did
    +200 evals anyway, for zero improvement. Do not repeat this.
@@ -313,7 +313,7 @@ The canonical checkout is dirty with uncommitted M0 work: untracked
 `hornlab_search/bo/{__init__,data,encoding}.py`, `hornlab_search/objective/replay.py`,
 `tools/analysis/{catalog,cohorts,offline_scores,parameter_activity,geometry_effects}.py`, matching
 `tests/test_bo_*.py`, `tests/test_obj_replay.py`, `tests/test_tools_analysis_*.py`, plus
-`docs/HANDOFF_ANALYSIS_PAGE_2026-11-12.md`, `cache_cpu/`, `dataset_cpu/`.
+`docs/archive/2026-11-14/HANDOFF_ANALYSIS_PAGE_2026-11-12.md`, `cache_cpu/`, `dataset_cpu/`.
 
 **Cleanup note (editor LSP, compile time):** type diagnostics exist in the uncommitted
 `hornlab_search/objective/replay.py` (narrowing to dict at 299/441, `float | None` at 468,
@@ -431,7 +431,7 @@ From `PARENT_M0_FREEZE.md:53-63`:
 The analysis report already written: `runs/analysis/day_2026-11-12/` contains `REPORT.md`,
 `report_day.json`, and per-section JSON/MD/PNG for `convergence_g1|c2|g8|g9`, `sensitivity_g1|g6`,
 `walls_g1|g6`, `term_balance_g1|g6`, `links_g1`, `fidelity_g1`; the only error is `v6_seeds`
-(backend mismatch). `docs/HANDOFF_ANALYSIS_PAGE_2026-11-12.md:94-110`.
+(backend mismatch). `docs/archive/2026-11-14/HANDOFF_ANALYSIS_PAGE_2026-11-12.md:94-110`.
 
 ### 5.7 Tonight's results, with interpretation
 

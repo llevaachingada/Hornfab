@@ -3,6 +3,12 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-14 (**owner decisions executed: cohort gap closing (+50 resume at 38e5b1f), caps 12k→24k on the four live configs, batch-12 approved for heavy verify/final-style runs; plus the scalar-Bayes and CI work; no GitHub issue state changed**).
 
+Local-only, added 2026-11-14 (13:xx local) (**collaborator handoff sweep; no GitHub issue state changed; zero open GitHub issues**):
+- Done: local-only branches pushed as `archive/*` refs; 13 finished plans archived; collaborator handoff doc.
+- Open: CPU night `home80x60_cpu2_2026-11-14` died silently at ~10:21 local (stale `runs\.cpu.lane.lock`, no
+  queue end line); resume or close it. Cause not investigated.
+- Open (carried): pre-mesh refusal timing test at 104.4 ms vs 100 ms under load; rerun on a quiet host.
+
 Local-only, added 2026-11-14 (06:4x local) (**GUI / data-viz UX pass; no GitHub issue state changed**):
 - Done: decision-first analysis report, verdict-first run detail, Boundary Lab isobars + Globe view,
   single New run entry, shared viz kit (docs/GUI_UX_PASS_2026-11-14.md). Front-end only.

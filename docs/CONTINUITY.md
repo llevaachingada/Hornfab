@@ -1,6 +1,29 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-14 (13:xx local) - COLLABORATOR HANDOFF SWEEP: BRANCHES PUSHED, PLANS ARCHIVED, HF REFRESH
+
+- **Status now:** all code is on `main` (PRs #47-#58); no open GitHub issues. New entry point for the
+  collaborator: `docs/HANDOFF_COLLABORATOR_2026-11-14.md` (plain-language system summary, objective J,
+  every optimizer, the BoTorch study system, open BO problems, data location). The `## Status` block at
+  the bottom of this file is historical (2026-10-25); the newest entries here are the current status.
+- **Branches:** local-only branches pushed as archive refs so nothing exists only on the owner machine:
+  `archive/dev-fused-cuda-pin` (file:// pin, never mergeable), `archive/swarm-{F,H}-2026-10-31` (rescued,
+  untested WIP), `archive/backup-consolidation-{L1,T}`. `gui/ux-pass-2026-11-14` and
+  `feat/hardened-plan-2026-10-29` pushed (their commits were already in main). Unmerged-by-design
+  remote branches are listed in the handoff doc section 8.
+- **Docs:** 13 finished plans/handoffs moved to `docs/archive/2026-11-14/` (README lists why); every live
+  inbound link rewritten and checked; docs referenced by code/tests left in place. Brought into the repo:
+  the 2026-11-12 compute-allocation study (`docs/research/compute_study_2026-11-12/`, previously only in
+  `..\study_2026-11-12`) and `docs/research/bo_study/CONTINUATION_SLICE_MAP_2026-11-13.md` (previously
+  only in `..\oc-wto-study`). CODE_MAP gained a gap-sweep line for 9 unmapped modules; INDEX fixed a
+  dead HANDOFF/HANDOFF_LOCAL link.
+- **Live lanes:** the CPU night `home80x60_cpu2_2026-11-14` (run `20261114T105532Z-screen-4f9fd4`) stopped
+  writing at 10:21 local; its queue log has no end line and pid 28820 is gone, so `runs\.cpu.lane.lock` is
+  stale. Rows persist; `--resume` continues it. No GPU job was running (`runs\.gpu.lock` absent).
+- **HF:** with no queue writing, repacked text/solve/dataset into `..\.hf_stage_hunter_20261114` for upload
+  to `chingadalleva/hornlab-search-data`; result in `docs/evidence/HF_UPLOAD_2026-11-14.md`.
+
 ## 2026-11-14 - BAYESIAN INTEGRATION FINAL VALIDATION / COMMIT FOLLOW-UP
 
 - Concurrent owner-authorized `5e86c8b` included the staged scalar study implementation and

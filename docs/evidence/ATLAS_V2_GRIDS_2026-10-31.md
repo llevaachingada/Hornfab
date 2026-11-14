@@ -1,6 +1,6 @@
 # Atlas v2 screen grids (2026-10-31, swarm lane C)
 
-Spec: docs/SWARM_PLAN_2026-10-30.md section C. Grids printed with `hornlab_search.config.mode_freqs("screen", load_config(cfg))`
+Spec: docs/archive/2026-11-14/SWARM_PLAN_2026-10-30.md section C. Grids printed with `hornlab_search.config.mode_freqs("screen", load_config(cfg))`
 from this worktree [measured]. Base grid: `freq_grid(500, 10000, 12)` clipped to band_hi 8000, then `grid.screen_extra_hz`
 merged by `_merge_screen_extra` (top-clipped, bottom never clipped).
 

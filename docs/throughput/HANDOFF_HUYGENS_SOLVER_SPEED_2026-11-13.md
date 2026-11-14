@@ -144,7 +144,7 @@ The senior reviewer may re-order packages based on local benchmark evidence. Eve
 
 **Goal:** Determine actual current bottlenecks without solver changes or new GPU runs initially.
 
-**Read first:** `AGENTS.md`, `CLAUDE.md`, `docs/CONTINUITY.md`, `docs/ISSUES.md`, `docs/plan/01_CONTRACTS.md`, `TOOLCHAIN.md`, `docs/FORKS.md`, `docs/GUI_VERIFY_VIEW_PLAN_2026-11-12.md`, `docs/research/MATRIX_FREE_GPU_GMRES_FMM_2026-10-29.md`, performance evidence above.
+**Read first:** `AGENTS.md`, `CLAUDE.md`, `docs/CONTINUITY.md`, `docs/ISSUES.md`, `docs/plan/01_CONTRACTS.md`, `TOOLCHAIN.md`, `docs/FORKS.md`, `docs/archive/2026-11-14/GUI_VERIFY_VIEW_PLAN_2026-11-12.md`, `docs/research/MATRIX_FREE_GPU_GMRES_FMM_2026-10-29.md`, performance evidence above.
 
 **Inspect:** `hornlab_search/solve/beat.py`, `hornlab_search/search/evaluate.py`, `hornlab_search/config.py`, `hornlab_search/mesh/sizing.py`, `hornlab_search/mesh/build.py`, `hornlab_search/solve/cache.py`, `hornlab_search/types.py`, `pyproject.toml`, fork `BeatEngineDriver.jl`, `BeatEngineCudaBurtonMiller.jl`, `BeatEngineDenseSolve.jl`.
 
@@ -311,7 +311,7 @@ Use existing config/brief pattern and jobs system. **Proposed labels, not curren
 - Place deep numeric details in a collapsible expert-only **Simulation details** panel. Proposed contents: method, source, mesh and DOF by band, effective frequency grid, time by stage, peak VRAM/RAM, convergence status, implementation SHA, fallback and crosscheck result.
 - Use existing backend JSON API and `gui/jobs.py` allow-listed subprocess runner. No in-process solve in `gui/server.py`; no new JS build/dependency unless separately justified.
 
-**UI safety gates:** Honor `docs/GUI_VERIFY_VIEW_PLAN_2026-11-12.md`: only measured values (missing `–`/unknown), screen and verify explicitly distinguished, accessible status words not merely colors, no duplicated stale run listings or log flooding. Tests should cover disabled actions during live GPU lock and reliable missing metadata for old runs.
+**UI safety gates:** Honor `docs/archive/2026-11-14/GUI_VERIFY_VIEW_PLAN_2026-11-12.md`: only measured values (missing `–`/unknown), screen and verify explicitly distinguished, accessible status words not merely colors, no duplicated stale run listings or log flooding. Tests should cover disabled actions during live GPU lock and reliable missing metadata for old runs.
 
 ### Normal design workflow after successful implementation
 

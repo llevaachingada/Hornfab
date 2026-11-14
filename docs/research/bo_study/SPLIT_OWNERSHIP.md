@@ -26,7 +26,7 @@ Commits:
   `tests/test_bo_{pareto,extensions,sensitivity,cohort_gate,proposal_validation}.py`,
   `tests/test_gui_views_analysis_m1.py` (+ fixtures above, `git add -f`),
   `tests/test_gui_views_analysis.py` (your modified version — it encodes the new section layout),
-  `docs/HANDOFF_ANALYSIS_PAGE_2026-11-12.md`, `docs/CODE_MAP.md`, `docs/INDEX.md`, `NOTES_FOR_SENIOR.md` entries.
+  `docs/archive/2026-11-14/HANDOFF_ANALYSIS_PAGE_2026-11-12.md`, `docs/CODE_MAP.md`, `docs/INDEX.md`, `NOTES_FOR_SENIOR.md` entries.
 
 ## Rules
 1. Never touch the other session's paths; never reformat or revert them.

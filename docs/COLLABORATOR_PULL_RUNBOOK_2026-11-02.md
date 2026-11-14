@@ -136,7 +136,7 @@ contains `response.npz` (266,816 B) + `status.json` (92 B).
 ## 5. What to do with it next
 
 - **Results table (already in git, no download needed):** `docs/data/campaign_v4_2026-10-27/evals.csv`,
-  `cells_summary.csv`, `best_designs.json` — read `docs/HANDOFF_COLLABORATOR_2026-10-27.md` section 2-3 first.
+  `cells_summary.csv`, `best_designs.json` — read `docs/archive/2026-11-14/HANDOFF_COLLABORATOR_2026-10-27.md` section 2-3 first.
 - **Offline re-score:** copy `tools/rescore/rescore_v2.py`'s pattern (read `cache/solve/<key>/response.npz`,
   rebuild `Response`, call the objective). No GPU, runs on a laptop.
 - **Config that produced a design:** `examples/briefs/campaign_2026-10-26_v4/*_v4.yaml` (weights, tolerances)

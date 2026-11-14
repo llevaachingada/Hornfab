@@ -1,7 +1,7 @@
 # Swarm implementation plan — 2026-10-30 (runs while night `n2_gapfill_2026-10-30` is live)
 
 For an orchestrator agent that dispatches sub-agents. Read `CLAUDE.md` first, then this file, then only your own
-lane. Context: `docs/HANDOFF_NEXT_RUNS_2026-10-30.md` (coverage-atlas results) and `docs/DATA_CONSOLIDATION_PLAN_2026-10-29.md`.
+lane. Context: `docs/archive/2026-11-14/HANDOFF_NEXT_RUNS_2026-10-30.md` (coverage-atlas results) and `docs/DATA_CONSOLIDATION_PLAN_2026-10-29.md`.
 
 ## 0. Rules while the night runs (binding for every lane)
 

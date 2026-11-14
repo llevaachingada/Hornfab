@@ -233,7 +233,7 @@ OpenCode loads):** `hornlab-gpu-job` (any GPU/solve job), `hornlab-night-queue` 
 designer are granted the hornlab skills in `.opencode/oh-my-opencode-slim.json` so delegated lanes can load them.
 
 **Current state (2026-11-12):** read `docs/SENIOR_PLAN_2026-11-12.md` and, for tonight, execute
-`docs/OPENCODE_HANDOFF_2026-11-12.md`. New MEH work is paused by the owner. Objective versions: 4 =
+`docs/archive/2026-11-14/OPENCODE_HANDOFF_2026-11-12.md`. New MEH work is paused by the owner. Objective versions: 4 =
 tolerance-normalised, 5 = MEH, 6 = loading_smooth (Le Cléac'h), 7 = hardened CD objective (written "5" on the
 old hardened branch; data relabelled). Never rank J across versions.
 ## GPU / Julia hygiene (measured 2026-10-12; applies to every agent)
@@ -252,7 +252,7 @@ Rules:
    `nvidia-smi --query-gpu=memory.used --format=csv`. **Never `taskkill /IM julia.exe`** (by image name): the
    host is a `python -m hornlab_beat_bem.worker_host` tree that respawns julia, so an image-name kill leaves the
    warm host alive, and it kills every other Julia on the machine, including a CPU solve lane
-   (`docs/OPENCODE_HANDOFF_2026-11-12.md` L1). Desktop apps rendering on the NVIDIA GPU can hold 1-2 GB; record
+   (`docs/archive/2026-11-14/OPENCODE_HANDOFF_2026-11-12.md` L1). Desktop apps rendering on the NVIDIA GPU can hold 1-2 GB; record
    that baseline.
 2. **One measurement per fresh process, with Julia cleared between jobs.** Never compare VRAM or
    timings across solves of different meshes inside one warm worker (the pool keeps growing).

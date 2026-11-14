@@ -134,7 +134,7 @@ Line numbers are from the `origin/main` code at `5f7c116` (same code as the G2 w
   9.8% of generations at least half flat-penalty; rejected designs are a truncated-sampling problem;
   recommendation: pre-mesh feasibility predicate + pycma resampling, graded penalty, widen walls, keep
   the penalty bedrock (never inf).
-- `docs/IMPLEMENTATION_PLAN_2026-11-12_DAY.md` §5 — the measurements behind the amendments.
+- `docs/archive/2026-11-14/IMPLEMENTATION_PLAN_2026-11-12_DAY.md` §5 — the measurements behind the amendments.
 
 ---
 

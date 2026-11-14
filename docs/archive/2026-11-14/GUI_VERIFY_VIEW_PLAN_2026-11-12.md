@@ -13,7 +13,7 @@ design pass of the same date. v2 was hardened against a
 **live inspection** of the GUI (built-in browser on `hornlab-search gui` against the real `runs/` tree, 425 runs,
 24 inline verify folders, 16 verify runs, GPU + CPU lanes running), and widened by owner request to the
 highest-value UI/UX and data-display fixes across the whole GUI, aimed at a **non-technical user**.
-**Related:** `docs/GUI_PLAN.md`, `docs/GUI_INTEGRATION_PLAN_2026-10-25.md`, `docs/GUI_CONTRAST_PLAN.md`,
+**Related:** `docs/GUI_PLAN.md`, `docs/GUI_INTEGRATION_PLAN_2026-10-25.md`, `docs/archive/2026-11-14/GUI_CONTRAST_PLAN.md`,
 `docs/research/TEST_SUITE_EFFICIENCY_2026-11-12.md`, `docs/BOUNDARY_LAB_0.5_RESEARCH.md`.
 
 **How to use this document (implementing agents).** Read section 0 (rules) and section 1 (facts). Then read **only

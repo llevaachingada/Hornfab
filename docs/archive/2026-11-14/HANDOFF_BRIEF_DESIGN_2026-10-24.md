@@ -61,7 +61,7 @@ adopt M3's WP5 calibration proposals. Run the two passes' pushes strictly one at
 
 **Boundary Lab (the professional BEM app we borrowed renderer/engineering conventions from)**
 - Committed knowledge NOW ON MAIN: `docs/research/boundary_lab_0.5/bl_inventory.md` + `beat_compat.md`,
-  `docs/BOUNDARY_LAB_INTEGRATION_PLAN.md`, `docs/BL_LEARNINGS_IMPLEMENTATION.md` +
+  `docs/BOUNDARY_LAB_INTEGRATION_PLAN.md`, `docs/archive/2026-11-14/BL_LEARNINGS_IMPLEMENTATION.md` +
   `docs/evidence/BL_LEARNINGS_GPU.md`. What BL teaches: isobar-style polar rendering, sidechain, qualification
   screens, per-frequency per-plane conventions, QSS of a real BEM workflow.
 - NOTE: the BL source checkout previously used (`JWSound/boundary-lab`) is NO LONGER on disk at that path —

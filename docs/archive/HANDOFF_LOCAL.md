@@ -1,4 +1,4 @@
-> **Archived 2026-10-30.** Superseded by [HANDOFF_COLLABORATOR_2026-10-27.md](../HANDOFF_COLLABORATOR_2026-10-27.md) and [HANDOFF_BETA.md](../HANDOFF_BETA.md).
+> **Archived 2026-10-30.** Superseded by [HANDOFF_COLLABORATOR_2026-10-27.md](../archive/2026-11-14/HANDOFF_COLLABORATOR_2026-10-27.md) and [HANDOFF_BETA.md](../HANDOFF_BETA.md).
 
 # HANDOFF FOR THE LOCAL AGENT (Windows GPU box) — start here
 

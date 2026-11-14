@@ -5,7 +5,7 @@ capability the implementation plan adds by its end (WP1–WP17 + P6a/P6b). This 
 building the owner-gated features — their GUI hooks are specified so landing them later is additive.
 Origin: handoff `HORNLAB-SEARCH HANDOFF — GUI-INTEGRATION PLANNING PASS` (2026-10-25, after M5 WP11);
 inventories file-verified against the tree on 2026-10-25 (in-flight WIP disclosed in §13). Oracle
-review: pending → applied (see Status, §12). Commit discipline mirrors `docs/GUI_CONTRAST_PLAN.md`.
+review: pending → applied (see Status, §12). Commit discipline mirrors `docs/archive/2026-11-14/GUI_CONTRAST_PLAN.md`.
 
 ## Goal
 

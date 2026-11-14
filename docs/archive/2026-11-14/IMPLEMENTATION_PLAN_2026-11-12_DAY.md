@@ -9,7 +9,7 @@ A/B and a CPU-vs-GPU cross-check (`runs/nights/{gpu,cpu}_day_2026-11-12.yaml`). 
 is (1) the analysis tooling that turns those runs into answers, (2) search features that use the answers (data
 warm starts, linked knobs, automatic narrowing, valid-only budgets), (3) the calibration harness the next night
 needs, and (4) data/ops hardening. Inputs: `C:\Users\hunte\Hrns\study_2026-11-12\COMPUTE_STUDY.md` (+ its
-`sensitivity_analysis.py`, `runs_inventory.csv`), `docs/SENIOR_PLAN_2026-11-12.md`, `docs/OPENCODE_HANDOFF_2026-11-12.md`,
+`sensitivity_analysis.py`, `runs_inventory.csv`), `docs/SENIOR_PLAN_2026-11-12.md`, `docs/archive/2026-11-14/OPENCODE_HANDOFF_2026-11-12.md`,
 PR #27's evidence (v6 vs v7 top-20 shortlists disagree: tau < 0 in every class).
 
 ---
@@ -176,7 +176,7 @@ Start after A.0 is on A's branch (read the schema from that branch: `git show da
   `scratch/gate_audit_elites_*`), each with J vN, coverage cell, gate chips (reuse L2's chips), links to the run.
 - Headless tests per view (follow `tests/test_gui_views_l2.py`).
 
-### Group F - docs and issue hygiene (owns `docs/history/**`, `docs/NEXT_DEV_PRIORITIES.md`, `docs/SENIOR_PLAN_2026-11-12.md`, `docs/OPENCODE_HANDOFF_2026-11-12.md`)
+### Group F - docs and issue hygiene (owns `docs/history/**`, `docs/NEXT_DEV_PRIORITIES.md`, `docs/SENIOR_PLAN_2026-11-12.md`, `docs/archive/2026-11-14/OPENCODE_HANDOFF_2026-11-12.md`)
 
 - **F.1** `docs/CONTINUITY.md` order is broken by merges: produce the re-ordered file (entries sorted newest first by
   their leading `YYYY-MM-DD` + time when present, stable otherwise; entries before 2026-11-01 moved to

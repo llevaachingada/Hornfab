@@ -1,7 +1,7 @@
 # GUI verify-view + UX pass: handoff (2026-11-12, 16:00 EST)
 
 You are finishing a multi-branch GUI implementation in `hornlab-search`. Read this whole file first, then
-`docs/GUI_VERIFY_VIEW_PLAN_2026-11-12.md` (the plan; work packages WP0–WP10, Appendix B = acceptance checklist).
+`docs/archive/2026-11-14/GUI_VERIFY_VIEW_PLAN_2026-11-12.md` (the plan; work packages WP0–WP10, Appendix B = acceptance checklist).
 Repo rules: `CLAUDE.md` (every pushed commit updates `docs/CONTINUITY.md` + `docs/ISSUES.md`; new docs/modules
 get lines in `docs/INDEX.md` / `docs/CODE_MAP.md`).
 
