@@ -100,6 +100,11 @@ class SolveSettings:
     # solve-spec hash (two configs differing only here share a solve hash and a warm host).
     # None = absent = the library's own "auto". Validated as a positive integer.
     julia_threads: int | None = None
+    # C3 (speed program E8): opt-in frequency-sweep batch size, mirroring the backend's own
+    # ``freq_batch_size``. It rides in ``raw`` so the choice is provenanced in ``config_sha``.
+    # None = absent = today's grouping (per-frequency on CUDA/Metal, one call on CPU) and every
+    # existing hash; the HORNLAB_FREQ_BATCH_SIZE env fallback still governs when this is unset.
+    freq_batch_size: int | None = None
 
     def balloon_points(self, mode: str) -> int:
         if not self.balloon:
@@ -1095,6 +1100,18 @@ def _validate_julia_threads(value, where: str) -> int:
     return int(value)
 
 
+def _validate_freq_batch_size(value, where: str) -> int:
+    """C3 (speed program E8): ``solve.freq_batch_size`` is a positive integer or omitted.
+
+    It mirrors ``BeatBackend.freq_batch_size`` (a typo is refused here before any worker/host is
+    built). ``None`` (key absent) keeps today's grouping and lets HORNLAB_FREQ_BATCH_SIZE govern.
+    """
+    if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+        raise ConfigError(
+            f"{where}: freq_batch_size must be a positive integer or omitted, got {value!r}")
+    return int(value)
+
+
 def _validate_source_motion(value, backend: str, where: str) -> str:
     """WP5: ``solve.source_motion`` is 'normal' (today) or 'axial' (rigid piston). Only the beat
     adapter implements it; a non-beat backend with a non-default value is refused loudly."""
@@ -1349,9 +1366,16 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
     solve = _build(SolveSettings, solve_section, f"{where}:solve",
                    optional=("cuda_fused", "source_motion", "near_correction",
                              "near_correction_cutoff", "near_correction_order",
-                             "solve_precision", "source_profile_alpha", "julia_threads"))
+                             "solve_precision", "source_profile_alpha", "julia_threads",
+                             "freq_batch_size"))
     if solve.julia_threads is not None:
         solve.julia_threads = _validate_julia_threads(solve.julia_threads, f"{where}:solve")
+    if solve.freq_batch_size is not None:
+        solve.freq_batch_size = _validate_freq_batch_size(
+            solve.freq_batch_size, f"{where}:solve")
+        if str(solve.backend) == "bempp_cpu":
+            raise ConfigError(f"{where}: solve.freq_batch_size only applies to the BEAT backends "
+                              f"(beat_cuda/beat_metal/beat_cpu); got backend bempp_cpu")
     if solve.cuda_fused and str(solve.backend) != "beat_cuda":
         raise ConfigError(f"{where}: solve.cuda_fused is only implemented for backend: beat_cuda "
                           f"(got {solve.backend!r})")

@@ -380,6 +380,11 @@ def _prepare(cfg, run_dir: Path, mode: str, backend, store, cache_dir, trace_fra
         _threads = getattr(cfg.solve, "julia_threads", None)
         if _threads is not None:
             kw["julia_threads"] = int(_threads)
+        # C3 (speed program E8): only an explicit config value reaches the constructor; when the
+        # key is absent the backend keeps its HORNLAB_FREQ_BATCH_SIZE env fallback.
+        _batch = getattr(cfg.solve, "freq_batch_size", None)
+        if _batch is not None:
+            kw["freq_batch_size"] = int(_batch)
         backend = get_backend(cfg.solve.backend, **kw)
     worker.warm(backend)                       # once, before the seed; idempotent
     lib_shas = lib_shas or collect_lib_shas()

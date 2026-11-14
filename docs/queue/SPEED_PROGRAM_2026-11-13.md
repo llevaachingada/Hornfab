@@ -1,6 +1,6 @@
 # Integrated solver-speed program (2026-11-13, Oracle-reviewed)
 
-**Status:** approved design, **not launched**. Operational one-pager only - the implementation and architecture detail, invariants, test statistics and open questions live in `docs/queue/SPEED_ARCHITECTURE_PLAN_2026-11-13.md`. Supersedes `docs/queue/SPEED_COMBINED_2026-11-13.md` (kept for history).
+**Status:** senior-reviewed 2026-11-13 (see `SPEED_ARCHITECTURE_PLAN` §14); **running** — Step 1 resume in progress; execution follows `docs/queue/SPEED_IMPLEMENTATION_PROMPT_2026-11-13.md`. Operational one-pager only - the implementation and architecture detail, invariants, test statistics and open questions live in `docs/queue/SPEED_ARCHITECTURE_PLAN_2026-11-13.md`. Supersedes `docs/queue/SPEED_COMBINED_2026-11-13.md` (kept for history).
 **Owner constraint:** nothing may reduce frequency, angular or mesh resolution, accuracy or coverage on numbers that
 count as results.
 
@@ -10,16 +10,18 @@ count as results.
 |---|---|---|---|
 | **Solver upgrade (part one)** | The fused GPU route built two giant identity-matrix lookup tables per solve that nothing reads. One hunk stops building them. | "pin bump", "G2", "A3", "patch 1", "new pin" | written, measured (`9ec86b0`) |
 | **Batching switch** | Today each frequency is a separate request, paying setup 12+ times. A switch hands the solver 12 frequencies per request. | "G1", "batch 12", "the env var" | exists, off in production |
-| **Solver upgrade (part two)** | The same tables are also built in main memory on the fused route. Same one-hunk idea, host side. | "patch 2", "Lane C candidate B" | **not written** |
+| **Solver upgrade (part two)** | The same tables are also built in main memory on the fused route. Same one-hunk idea, host side. | "patch 2", "Lane C candidate B" | **written, committed `38e5b1f`, pushed to `ourfork`** — install pending at the swap |
 | **Mesher question** | No local edits exist. The question is whether our pinned mesher predates an upstream FREEFORM cost fix. | "the mesher unknown" | question, not a change |
 | **Round A / Round B** | The two GPU sessions: today's solver, then the new solver. The solver is a venv install and cannot vary inside one night. | "block 1 / block 2" | planned |
 
 ## 2. The six steps
 
 **Step 1 — finish the interrupted night on today's solver.** `search --resume runs/20261113T193536Z-screen-81c964
---budget 200` (~47 candidates left), current pin. **Why first:** `search/cma.py:702` refuses a strict resume after any
-library-SHA change, so swapping the solver first would strand the 153 candidates already paid for. Its unstarted
-third job relaunches **fresh after adoption**. ~30-60 GPU-min.
+--budget 45` — on a resume the budget counts **new** evaluations only (code-verified `cma.py:204-222`; validated live
+153 → 155 with a 2-eval probe), so 45 covers the remaining rows. This replaces the earlier `--budget 200` draft.
+Current pin. **Why first:** a strict resume refuses after any library-SHA change (`cma.py:702`); this run is not
+strict (graded/legacy) so its guard is inert — the finish-before-swap ordering still stands as durable policy. Its
+unstarted third job relaunches **fresh after adoption**. ~30-60 GPU-min.
 
 **Step 2 — write "solver upgrade part two" into the fork (no GPU).** Guard the two host-side dense identity builds
 (`julia/BeatEngineDriver.jl:1534-1535`; they are never read on the fused route) **on top of** the existing upgrade
@@ -39,7 +41,8 @@ parity check), the batching effect, and that the combination erodes neither. The
 
 **Step 6 — the merge (one commit).** If the bars in §4 pass: solver pin lines (`pyproject.toml`, `TOOLCHAIN.md`),
 `freq_batch_size: 12` as a real **config key** wired into the search path (visible in provenance, replacing the hidden
-env var), A5 memory model re-based on the **measured** 20.2k point (repo rule 7 — not on arithmetic), docs. Then
+env var), A5 memory model re-based on the **measured** 20.2k point (throughput-program rule,
+`docs/throughput/WP1_FUSED_IDENTITY_CACHE_PATCH.md:67` — not on arithmetic), docs. Then
 production nights relaunch fresh under the adopted settings, absorbing the old night's deferred third job.
 
 ## 3. Merge decisions

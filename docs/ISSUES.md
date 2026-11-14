@@ -1,7 +1,28 @@
 ﻿# ISSUES
 
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
-Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-13 (**Elites tab redesigned for non-technical readers: brief/typology constraints and isometric horn thumbnails, best-per-typology / best-per-brief browsing, paginated 24 at a time, CSV-path noise removed; payload extended with brief/family/brief_target; bo-study-v1.1 final offline integration landed (M2 sensitivity/proposal evidence, immutable run package + `hornlab-search study` CLI, durable proposal-cadence recovery, B8 adversarial full loop); profile-outline thumbnail geometry fixed after live check (closed outline split at the mouth rim, outer wall kept); card hierarchy tuned per owner (constraint line + score largest, gate pills smaller); no GitHub issue state changed**).
+Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-13 (**speed program: senior review landed (ADOPT with corrections), E0 done, C3+C4 landed, C5 mesher question closed, E1b raw-evidence rerun running, Round A armed; plus the earlier same-day Elites-tab/test-suite work; no GitHub issue state changed**).
+
+Local-only, added 2026-11-13 (20:2x local) (**speed program: review landed + E0 done + C3/C4 landed; no GitHub issue state changed**):
+- Resolved (senior review): `SPEED_ARCHITECTURE_PLAN_2026-11-13.md` ADOPTED with corrections (§14); all 12 open questions
+  decided: one rep per arm + hardened repeat rule (fresh roots, median-of-3, gray median rejects); keep `--budget 1`;
+  `solve.freq_batch_size` config key behind a rule-3 note; one install SHA `38e5b1f`; keep 0.039 dB / 1° and record max
+  diffs (0.0 expected; no bitwise gate); no non-fused control; ceiling sweep stays after Round B; A5 refit (`8N² + c`,
+  ≥ 30 % refusal margin) only after measurement; mesher pin stands — **C5 answered: the pin predates upstream `d740c28`**
+  (fetch + `merge-base --is-ancestor` exit 1), bump is a post-beta program; `worker_restart_every` unset in arms,
+  batch-4 fallback on spill; batch 12 lands in the two print configs at the adopt merge.
+- Done: **E0** — resume night finished runner exit 0, 200/200 rows. Deviation recorded: 1 of 200 was a transient
+  `solve_failed` (10054 worker reset, n=187), left as an honest failure row, not re-run.
+- Done: **C3** `solve.freq_batch_size` (config key + ≥ 1 validation + `_prepare` plumbing; env fallback preserved when the
+  key is absent; refused for `bempp_cpu`; offline tests pass; `config_sha` unchanged for key-absent configs) and **C4**
+  `tools/bench/run_with_memwatch.py` (spawn + attach modes; shared-usage/WDDM-spill observer; offline tests pass; live
+  attach smoke sane). Landed before Round A so the arms' `lib_shas` record a clean HEAD.
+- Done: **C5** mesher ancestry check (zero GPU).
+- Running: **E1b** Julia CPU suite + analytic-exterior raw-evidence rerun (first attempt archived 0 bytes — julia.exe's
+  Windows wrapper drops `Start-Process` redirections; now under `cmd /c` with inline exit stamps). **Round A is armed
+  behind E1b** (`-WaitPid` chain). Execution authority: `docs/queue/SPEED_IMPLEMENTATION_PROMPT_2026-11-13.md`.
+- Open (from the review): A5 stale `20,237 → refuse` test must be RE-BASED (fix, not weaken) at the merge, per plan §14.
+
 
 Local-only, added 2026-11-13 (19:3x local) (**test-suite speed + GPU lane; no GitHub issue state changed**):
 - Applied (branch `test/testspeed-2026-11-13`, merged to main): `pytest-xdist -n 6 --dist loadscope` with

@@ -1,6 +1,47 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-13 (20:2x local) - SPEED PROGRAM: SENIOR REVIEW LANDED (ADOPT WITH CORRECTIONS); E0 DONE; C3+C4 LANDED; E1b RUNNING; ROUND A ARMED
+
+- Four independent verification lanes (repo/run provenance, `hornlab_search` code, fork/Julia dataflow, evidence provenance)
+  reviewed `docs/queue/SPEED_ARCHITECTURE_PLAN_2026-11-13.md`: verdict **ADOPT with corrections** — full dataflow proves the
+  C2 guard complete and fused-CUDA output untouched (the fused assembler forms its identity on device,
+  `BeatEngineCudaBurtonMiller.jl:20-29`); batch composition is output-irrelevant on the fused route; the 0.039 dB / 1° parity
+  bar is the CP-7f noise floor codified in `docs/FORKS.md:49-51`. Corrections + all 12 open-question decisions recorded in a
+  new plan §14.
+- Four claims invalidated and fixed: (1) the "≤ 5 % replicate spread" is not in G2 (its 4,168-DOF row shows ~11 % wall /
+  ~18 % VRAM spread) — repeat rule hardened: both arms on fresh cache roots, median-of-3 decides, a gray median REJECTS;
+  (2) A5 is implemented as `FUSED_CUDA_FACTOR 4.0 × 8N²` (`solve/feasibility.py:17-37`), not "8N² + constant";
+  (3) "repo rule 7 requires the measured 20,152" was a mis-cite (throughput-program rule,
+  `docs/throughput/WP1_FUSED_IDENTITY_CACHE_PATCH.md:67`); (4) the 3830/0/4 Julia-suite result was prose-only attestation —
+  no raw log existed (rule 6). `hornlab-search compare` confirmed **report-only**: bars must be computed from its output.
+- **E0 DONE** (gate deviation recorded): resume night finished 2026-11-13T19:22:24Z, runner exit 0, **200/200 rows**
+  (170 ok; 30 recorded failures: 26 invalid_geometry + 3 mesh_too_large + **1 transient `solve_failed`** — 10054 worker reset
+  at n=187; the recovery re-warmed the host but the design was not re-attempted and the row stays an honest failure per
+  `error_policy: legacy`; not re-run: disproportionate GPU rework for a recorded infra transient).
+- **C5 answered, closed (zero GPU):** after fetching `jamescollinharky:hornlab-search/osse-midports`,
+  `merge-base --is-ancestor d740c28 55da4f46` → exit **1**: the pin **predates** the upstream FREEFORM density/cost fix. Pin
+  stays for the beta (owner policy `docs/ISSUES.md:1167`); a bump would invalidate every mesh hash — own post-beta program.
+- **C3 implemented (env-only knob → provenanced config key):** `SolveSettings.freq_batch_size: int | None = None`
+  validated (`None` or int ≥ 1), wired into `_prepare` — passed **only when explicitly set**, so the
+  `HORNLAB_FREQ_BATCH_SIZE` env fallback still governs absent keys (probe-verified: env 12 → backend 12, config 6 → 6,
+  absent → env). Landed AFTER the hard-rule-3 contract-gap note in `NOTES_FOR_SENIOR.md` (append-only). Edge closed: refused
+  for `bempp_cpu` (would otherwise TypeError in `BemppBackend`). Offline tests: `tests/test_solve_freq_batch_config.py` (8) +
+  `tests/test_config_extends.py` (11) pass; `compileall` clean; `config_sha` unchanged for configs without the key.
+- **C4 implemented:** `tools/bench/run_with_memwatch.py` — observer-only shared/dedicated-VRAM watcher
+  (`spawn` + `attach` modes), reusing `_bench_common.GpuMemPeak`/`SPILL_MIB=512` and worker-host discovery; JSON records
+  `dedicated_peak_mib`/`shared_peak_mib`/`spill_mib`/`spilled`; live attach smoke against the running gpu lane recorded
+  dedicated 2972 / shared 80 / no spill; `tests/test_run_with_memwatch.py` (5) pass offline. **Tooling gotcha recorded:**
+  julia.exe's Windows wrapper does not carry `Start-Process` redirections (first E1b attempt archived 0 bytes) — E1b now runs
+  under a `cmd /c ... > log` wrapper with exit codes stamped inline.
+- **E1b RUNNING** (`julia -t auto --project=hornlab_beat_bem/julia .../tests/runtests.jl` + `validate_analytic_exterior.jl`,
+  raw logs to `docs/evidence/*_38e5b1f_2026-11-13.log`; expected 3830 / 0 / 4 and `ANALYTIC_EXTERIOR_VALIDATION_OK`).
+  **Round A is armed behind E1b** (queue `-WaitPid` chain): `runs/nights/speed_round_a_2026-11-14.yaml`, 2 arms, batch 1,
+  `--budget 1`, per-arm cold caches. Pin still `0850ef39`; GPU idle at this writing.
+- Execution authority for the remaining gated steps (E4 swap, Round B, ceilings, decision, merge): 
+  `docs/queue/SPEED_IMPLEMENTATION_PROMPT_2026-11-13.md` (hand to the integrator verbatim; where it differs from plan §6,
+  the prompt wins).
+
 ## 2026-11-13 (19:3x local) - TEST SUITE 3.1x FASTER (xdist), GPU LANE ON FUSED CUDA, GPU LOCK NOW ADVISORY
 
 - Branch `test/testspeed-2026-11-13` (worktree `oc-wt/testspeed`, owner-requested isolation), merged to
