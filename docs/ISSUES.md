@@ -3,6 +3,11 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-13 (**speed program: senior review landed (ADOPT with corrections), E0 done, C3+C4 landed, C5 mesher question closed, E1b raw-evidence rerun running, Round A armed; plus the earlier same-day Elites-tab/test-suite work; no GitHub issue state changed**).
 
+Local-only, added 2026-11-13 (20:4x local) (**CI repair; no GitHub issue state changed**):
+- Done: main CI red on 8 env/portability clusters fixed (manifest locator portability + fixtures, PureWindowsPath in
+  bo_sensitivity, requires_ribs, mesher split/gates, sklearn in CI + `[analysis]` extra, pinned SHAs in marker test;
+  freq_batch_size was fixed separately on main in 50b6f06).
+ No tolerance/expected value changed; evidence sha256 unchanged. Then PR #55 refresh + merge.
 Local-only, added 2026-11-13 (20:2x local) (**S8/S7 analysis panels landed; no GitHub issue state
 changed**):
 - Resolved: the four S8/S7 tools now render in `#/analysis` — geometry descriptors (scale-aware

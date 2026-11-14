@@ -1,0 +1,414 @@
+# S11 / M2 pilot 1 (PREPARE ONLY): broad cold CMA vs diverse warm-start CMA
+# on the frozen native__ath_core_v4 task.
+#
+# This is an OVERLAY consumed by tools/experiments/manifest.py.  It is not a
+# runnable job, not a queue entry and not an applied config.  No solve is run,
+# no live run/cache/dataset file is written, and no default/objective/
+# registration changes are made.
+#
+# Budget interpretation (bo-study-v1.1 section 4): per ARM and per seed
+# replicate, 18 valid screen evaluations + 6 verify calls = 24 new BEM calls,
+# with a hard 120-new-attempt cap.  The 25-seed schedule is the predeclared
+# replication plan; the aggregate is planning-only and is not authorized here.
+schema_version: 1
+protocol: bo-study-v1.1
+manifest_id: s11-pilot1-cold-vs-warm-native-ath-core-v4
+kind: overlay
+mode: prepare_only
+execution_authorized: false
+question: >-
+  Hypothesis (not a claim): on the frozen native__ath_core_v4 task, a diverse
+  warm-start CMA arm reaches a lower frozen v4 J at the same 18-valid-screen /
+  6-verify / 24-new-BEM budget than a broad cold CMA arm.  No speedup or
+  improvement is promised; a no-gain or inconclusive result is a valid result.
+notes: >-
+  Both arms use the same physical task, brief, scoring identity, grid, backend
+  and budget policy.  The only intentional treatment difference is the CMA
+  initial mean/sigma: cold uses the config seed; warm uses search.warm_start
+  from two local native__ath_core_v4 screen runs (same family, objective v4,
+  brief and searched knob names).  The overlay is never applied by this tool.
+
+task:
+  config: examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4.yaml
+  brief: examples/briefs/campaign_2026-10-26_v4/native_ath_core_2in_v4.yaml
+  backend: beat_cuda
+  role: frozen_m2_native_task
+  source_caveat_hz: 3957
+  source_caveat: >-
+    2-inch uniform-piston f11 is approximately 3957 Hz; above it the 300-8000 Hz
+    result is a geometry comparison under that excitation, not real 2-inch
+    driver exit behaviour.  Loading weight is 0: no loading/efficiency/
+    distortion claim.
+  cohort:
+    census: scratch/bo_m0/s0/ath_census/cohorts.json
+    offline_scores: scratch/bo_m0/r0/offline_scores_native_full/offline_scores.json
+    native_only: true
+    pool_across_configs: false
+    note: >-
+      Frozen native-only identity (config_name == native__ath_core_v4).  The
+      four-config brief family is descriptive only and is never pooled for GP
+      or advisory comparisons.  run_id is absent on native rows, so independent
+      experiment identity is insufficient_evidence.
+  comparability: null
+
+arms:
+  - id: broad_cold_cma
+    label: "broad cold CMA (config seed, no warm start)"
+    policy: cold_start
+    hypothesis_id: H1
+    cma_seeds: [5101, 5102, 5103, 5104, 5105, 5106, 5107, 5108, 5109, 5110,
+                5111, 5112, 5113, 5114, 5115, 5116, 5117, 5118, 5119, 5120,
+                5121, 5122, 5123, 5124, 5125]
+    config_overlay:
+      search:
+        budget_counts: valid
+        max_attempts: 120
+    config_overlay_applied: false
+    config_overlay_note: >-
+      Existing config-schema keys only.  A reviewed runner must materialize this
+      overlay before dispatch; this tool never writes examples/ or any live
+      config.
+    verification:
+      finalist_count: 4
+      audit_count: 2
+      selection_rule: >-
+        Up to four distinct screen finalists by frozen J, then two uniformly
+        selected remaining eligible screened designs from the reserved audit RNG
+        seed; no duplicates or already-verified specs.
+    commands:
+      search:
+        argv: [search, --config, "{config}", --brief, "{brief}",
+               --budget, "18", --mode, screen, --cma-seed, "{seed}",
+               --runs-dir, "{out}/runs", --cache-dir, "{out}/cache",
+               --dataset-dir, "{out}/dataset", --backend, beat_cuda]
+      verify_finalists:
+        argv: [verify, --run, "{screen_run_dir}", --designs, "{finalist_hashes}",
+               --brief, "{brief}", --runs-dir, "{out}/runs",
+               --cache-dir, "{out}/cache", --dataset-dir, "{out}/dataset",
+               --backend, beat_cuda, --verify-dir, "{out}/verify/finalists"]
+      verify_audit:
+        argv: [verify, --run, "{screen_run_dir}", --designs-file, "{audit_designs_csv}",
+               --brief, "{brief}", --runs-dir, "{out}/runs",
+               --cache-dir, "{out}/cache", --dataset-dir, "{out}/dataset",
+               --backend, beat_cuda, --verify-dir, "{out}/verify/audit"]
+
+  - id: diverse_warm_cma
+    label: "diverse warm-start CMA (top-k spread from two native runs)"
+    policy: warm_start_diverse
+    hypothesis_id: H1
+    cma_seeds: [5101, 5102, 5103, 5104, 5105, 5106, 5107, 5108, 5109, 5110,
+                5111, 5112, 5113, 5114, 5115, 5116, 5117, 5118, 5119, 5120,
+                5121, 5122, 5123, 5124, 5125]
+    warm_start:
+      from_runs:
+        - runs/20261027T070736Z-screen-d37d64
+        - runs/20261113T004133Z-screen-46b68c
+      top_k: 16
+      sigma_from_spread: true
+      allow_cross_brief: false
+    config_overlay:
+      search:
+        budget_counts: valid
+        max_attempts: 120
+        warm_start:
+          from_runs:
+            - runs/20261027T070736Z-screen-d37d64
+            - runs/20261113T004133Z-screen-46b68c
+          top_k: 16
+          sigma_from_spread: true
+          allow_cross_brief: false
+    config_overlay_applied: false
+    config_overlay_note: >-
+      Existing config-schema keys only (search.budget_counts, search.max_attempts,
+      search.warm_start).  warm_start is validated by the normal config loader at
+      execution time; it refuses family/objective/brief/knob-name mismatches.
+    verification:
+      finalist_count: 4
+      audit_count: 2
+      selection_rule: >-
+        Same verification allocation as the cold arm: up to four distinct screen
+        finalists by frozen J, then two uniformly selected remaining eligible
+        screened designs from the reserved audit RNG seed.
+    commands:
+      search:
+        argv: [search, --config, "{config}", --brief, "{brief}",
+               --budget, "18", --mode, screen, --cma-seed, "{seed}",
+               --runs-dir, "{out}/runs", --cache-dir, "{out}/cache",
+               --dataset-dir, "{out}/dataset", --backend, beat_cuda]
+      verify_finalists:
+        argv: [verify, --run, "{screen_run_dir}", --designs, "{finalist_hashes}",
+               --brief, "{brief}", --runs-dir, "{out}/runs",
+               --cache-dir, "{out}/cache", --dataset-dir, "{out}/dataset",
+               --backend, beat_cuda, --verify-dir, "{out}/verify/finalists"]
+      verify_audit:
+        argv: [verify, --run, "{screen_run_dir}", --designs-file, "{audit_designs_csv}",
+               --brief, "{brief}", --runs-dir, "{out}/runs",
+               --cache-dir, "{out}/cache", --dataset-dir, "{out}/dataset",
+               --backend, beat_cuda, --verify-dir, "{out}/verify/audit"]
+
+budget:
+  per_arm_per_replicate:
+    screen_new_bem: 18
+    verify_new_bem: 6
+    total_new_bem: 24
+    candidate_attempts: 120
+    screen_semantics: >-
+      search.budget_counts: valid means the 18 budget units count VALID screen
+      evaluations; deterministic refusals consume the 120-attempt cap, not the
+      18-valid budget.
+    retries_count_against_total: true
+  cost_accounting:
+    attempts_include_cheap_refusals: true
+    cheap_refusal_is_not_a_bem_call: true
+    new_bem_calls_separate: true
+    verify_calls_separate: true
+    retries_reserve_another_unit: true
+    unknown_attempt_retains_reservation: true
+    cache_hits_not_new_bem: true
+    note: >-
+      An attempt is reserved before dispatch.  A crash/unknown attempt keeps its
+      reservation until reconciled; a retry reserves another unit.  Cache hits
+      retain elapsed cost but do not consume a new-BEM count.
+  replication_aggregate:
+    n_pairs: 25
+    n_arms: 2
+    screen_new_bem: 900
+    verify_new_bem: 300
+    total_new_bem: 1200
+    candidate_attempts: 6000
+    planning_only: true
+    execution_authorized: false
+    note: >-
+      Arithmetic expansion of the 25-seed paired schedule.  This aggregate is a
+      planning figure only; no execution is authorized by this manifest.
+
+replicates:
+  seeds: [5101, 5102, 5103, 5104, 5105, 5106, 5107, 5108, 5109, 5110,
+          5111, 5112, 5113, 5114, 5115, 5116, 5117, 5118, 5119, 5120,
+          5121, 5122, 5123, 5124, 5125]
+  pairing:
+    predeclared: true
+    method: paired_by_seed_index
+    unit: cma_seed_index
+    difference_definition: "d = A - B (negative => A has lower J / is better)"
+    same_seed_is_not_shared_candidates: true
+    replicate_unit: run_dir
+    resume_segments_are_one_replicate: true
+    note: >-
+      Pair seed 5101 in the cold arm with seed 5101 in the warm arm, etc.  A
+      shared CMA seed is not proof of shared candidates; pairing is valid only
+      because it is predeclared here.  Resume segments/restarts inside one run
+      dir are one replicate, not extra seeds.
+  run_order:
+    policy: alternate_or_randomize
+    note: >-
+      Alternate arm order by seed index (odd cold-first, even warm-first) or
+      predeclare a fixed random permutation before the first dispatch and record
+      it.  Never run the two arms concurrently: the GPU lane is serial.
+
+verification_policy:
+  verify_new_bem_cap: 6
+  audit_rng_seed: 90211
+  exclude_duplicates_and_already_verified: true
+  shortfall: "verify fewer designs and report the shortfall; never duplicate or substitute predicted designs"
+  selection_rule: >-
+    Up to four distinct screen finalists by actual frozen J, plus two uniformly
+    selected remaining eligible screened designs using the reserved audit RNG
+    seed.  All compared arms receive the same policy.
+
+stop_rules:
+  budget:
+    enabled: true
+    rule: >-
+      Stop dispatching at 24 new BEM calls or 120 new attempts for an arm/seed
+      block, whichever comes first; preserve partial results and the attempt
+      journal.
+  deadline:
+    enabled: true
+    deadline_required: true
+    deadline_utc: null
+    placeholder: true
+    rule: >-
+      A wall deadline must be chosen from comparable measured logs and owner
+      availability before real scheduling.  This prepared manifest leaves the
+      deadline as an explicit placeholder.
+  cancellation:
+    enabled: true
+    rule: >-
+      An explicit cancellation stops future dispatch, cancels only the owned
+      lane/process tree, and preserves partial results.  CPU analysis/proposal
+      work never invokes GPU cleanup.
+  pool_exhaustion:
+    enabled: true
+    rule: >-
+      If the legal candidate pool has no novel candidate after the declared
+      retries, stop with pool_exhausted; do not widen bounds or fabricate a
+      design.
+  infrastructure_failures:
+    enabled: true
+    consecutive_threshold: 3
+    rule: >-
+      Stop after three consecutive infrastructure/solver-host failures; an
+      unknown in-flight attempt retains its reservation and is reconciled, not
+      relaunched automatically.
+  stale_package:
+    enabled: true
+    rule: >-
+      Stop if the manifest revision/config hash no longer matches the approved
+      package; a resumed package reconciles all prior attempts first.
+
+lane_ownership:
+  primary: gpu
+  gpu:
+    backend: beat_cuda
+    lock: "existing GPU solve lock (search/gpulock.py)"
+    worker_dir: runs/lanes/gpu/workers
+    one_cuda_solve_at_a_time: true
+    no_cross_lane_cleanup: true
+    note: >-
+      The study runner must own the GPU lock for the full serial run.  Never
+      clean hosts from another or an unknown lane.
+  cpu_if_beat_cpu:
+    backend: beat_cpu
+    lock: runs/.cpu.lane.lock
+    worker_dir: runs/lanes/cpu/workers
+    enabled_when: "solve.backend == beat_cpu"
+    rule: >-
+      If the owner selects beat_cpu, the study runner must explicitly hold
+      runs/.cpu.lane.lock.  The current CLI _solve_lock is a null context for
+      CPU because the night runner owns the CPU lock.  gpu-clean and night
+      hygiene must not touch hosts of a lane whose lock is live.
+
+runtime_estimates:
+  method: >-
+    Measured S3-style cost ledgers of two local native__ath_core_v4 screen runs,
+    then arithmetic extrapolation to the declared 24-call block.  No speedup is
+    claimed.
+  source_runs:
+    - runs/20261027T070736Z-screen-d37d64
+    - runs/20261113T004133Z-screen-46b68c
+  block_estimate:
+    basis: >-
+      18 valid screen BEM calls + 6 verify calls; expected attempts to reach 18
+      valid evaluations are approximately 19 at the measured 2-5% cheap-refusal
+      rate.  Verify fidelity (1024 balloon points) has no measured timing; the
+      range assumes 1x-2x the screen per-BEM cost.
+    screen_new_bem: 18
+    verify_new_bem: 6
+    est_screen_seconds: [313.0, 335.8]
+    est_verify_seconds: [104.3, 223.9]
+    est_block_seconds: [417.3, 559.7]
+    est_block_minutes: [6.96, 9.33]
+    est_attempt_cap_seconds: 2426.8
+    est_attempt_cap_minutes: 40.45
+    est_aggregate_seconds: [20864.4, 27987.0]
+    est_aggregate_hours: [5.80, 7.77]
+    est_aggregate_attempt_cap_hours: 33.71
+  caveats:
+    - "Measured on historical native screen runs (2026-10-27 / 2026-11-13), not on this pilot; host/cache state is not controlled."
+    - "d37d64 wall_span is 29,216 s because of pauses; use its accumulated candidate cost (~3,697 s), not wall span."
+    - "Verify-fidelity cost is unmeasured; the 1x-2x multiplier is an assumption, not a measurement."
+    - "Warm-start arm timing may differ from cold; no warm-start timing was measured."
+    - "Arithmetic extrapolation only; not a speedup claim.  Real scheduling uses owner availability and a required deadline."
+  speedup_claimed: false
+
+analysis_plan:
+  primary_endpoint: >-
+    Frozen v4 J at the declared equal budget (18 valid screen + 6 verify).
+  practical_improvement:
+    metric: "frozen v4 J"
+    delta: 0.5
+    units: J
+    direction: lower_is_better
+    label: declared_practical_threshold_not_a_speedup_claim
+    rationale: >-
+      0.5 J is roughly 5% of the native replay median (~10 J in the R0 native
+      scores).  It is a declared pilot planning threshold, not a protocol
+      constant or a promise of improvement.
+  stopping_rule: >-
+    Predeclared paired analysis: d = A - B per seed pair; bootstrap 95% CI of
+    the mean paired difference with right-censoring at the declared budget and
+    attempt cap.  Declare a_better only if the CI upper bound is below -0.5 J,
+    b_better only if the CI lower bound is above +0.5 J, otherwise inconclusive.
+    Fewer than five complete pairs is pilot_only, not a significance guarantee.
+  hypotheses:
+    - id: H1
+      statement: >-
+        Diverse warm-start CMA reaches a lower frozen v4 J than broad cold CMA
+        at the same budget on native__ath_core_v4.
+      label: hypothesis
+      falsified_if: >-
+        The paired CI is inconclusive, or it favors cold at the declared 0.5 J
+        threshold.
+      evidence_class: prospective_pilot
+    - id: H0
+      statement: >-
+        Warm start and cold start are indistinguishable at this pilot budget.
+      label: hypothesis
+      falsified_if: >-
+        The paired CI excludes zero at the declared threshold in either
+        direction.
+      evidence_class: prospective_pilot
+  results_parser:
+    input: "search.ndjson + verify directories"
+    outcome_classes: [valid, cached_replay, cheap_refusal, solver_failure,
+                      pipeline_failure, unknown_failure, unknown]
+    failure_to_objective_mapping: none
+    unknown_representation: unknown
+    censoring: >-
+      Right-censored at the declared budget/attempt cap; censored pairs remain
+      in the denominator and are never counted as reached.
+    verify_calls: >-
+      Reported separately when mode=verify is recorded; otherwise null with
+      verify_calls_unknown=true.
+    note: >-
+      A solver failure, a cheap pre-BEM refusal and an unclassified row are
+      distinct outcomes.  None becomes J=1000 or a silent pass.
+
+rollback_and_adoption:
+  fail_or_no_gain_rollback:
+    - "Preparing or validating this manifest changes no production default, objective version, tolerance/weight, cache/dataset behavior, GUI/CLI behavior or registration."
+    - "If the pilot is not scheduled, discard the scratch overlay; no live file was written."
+    - "If warm start fails to beat cold at the declared threshold, do not adopt it; keep search.warm_start absent in production configs."
+    - "If the pilot is inconclusive, do not silently widen the budget; a larger study is a new revision with its own review."
+    - "A cancellation or crash preserves partial results; unknown attempts are reconciled, never relaunched automatically."
+  owner_adoption_decisions:
+    - id: D1
+      decision: "Adopt diverse warm start for native__ath_core_v4"
+      adopt_if: "Prospective paired evidence is a_better with CI upper < -0.5 J and no increase in new-BEM cost."
+      otherwise: "Keep cold start; do not change the config."
+    - id: D2
+      decision: "Schedule a larger replication"
+      adopt_if: "Pilot paired variability supports a power plan at the declared 0.5 J delta."
+      otherwise: "Stop at the pilot; no budget creep or silent threshold change."
+    - id: D3
+      decision: "Keep the protocol 4-finalist + 2-audit verification allocation"
+      adopt_if: "This pilot is not a verification-allocation experiment; the protocol default remains in force."
+      otherwise: "If allocation becomes the question, prepare a separate revision (pilot 2 pattern)."
+
+outputs:
+  reserved_root: scratch/bo_m0/s11/out/s11-pilot1-cold-vs-warm-native-ath-core-v4
+  creates_nothing: true
+  reserved:
+    - "{out}/runs/"
+    - "{out}/cache/"
+    - "{out}/dataset/"
+    - "{out}/verify/finalists/"
+    - "{out}/verify/audit/"
+    - "{out}/journals/"
+    - "{out}/results/"
+    - "{out}/configs/"
+    - "{out}/logs/"
+
+no_default_changes:
+  production_defaults: false
+  objective_version: false
+  score_tolerances_or_weights: false
+  registration: false
+  cache_or_dataset_behavior: false
+  gui_or_cli_behavior: false
+  speedup_claimed: false
+  statement: >-
+    No default, objective version, score tolerance/weight, registration,
+    cache/dataset or GUI/CLI change is made or implied.  This is a prepare-only
+    scratch manifest; overlays are not applied.

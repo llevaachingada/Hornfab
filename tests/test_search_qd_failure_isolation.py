@@ -17,7 +17,7 @@ import numpy as np
 import pytest
 import yaml
 
-from conftest import EXAMPLES
+from conftest import EXAMPLES, requires_ribs
 from hornlab_search.config import ConfigError, load_config
 from hornlab_search.design.space import DesignSpace
 from hornlab_search.search import cma as cma_mod
@@ -402,6 +402,7 @@ def mae_archive(j_threshold, *, learning_rate=0.1):
         learning_rate=learning_rate, threshold_min=-float(j_threshold), seed=0)
 
 
+@requires_ribs
 @pytest.mark.parametrize("label,archive_factory,admit_success", [
     ("me", me_archive, True),
     ("mae999", lambda: mae_archive(999.0), True),
@@ -438,6 +439,7 @@ def test_failures_are_never_admitted_at_any_threshold(label, archive_factory, ad
         assert len(arc) == 0
 
 
+@requires_ribs
 def test_large_successful_objective_is_admitted_and_only_mask_decides():
     arc = me_archive()
     meas = np.asarray([[90.0, 90.0]], dtype=float)
@@ -456,6 +458,7 @@ def test_large_successful_objective_is_admitted_and_only_mask_decides():
     assert ok3["status"].tolist() == [2] and len(arc3) == 1
 
 
+@requires_ribs
 def test_duplicate_identities_in_one_batch_occupy_one_cell():
     arc = me_archive()
     meas = np.asarray([[90.0, 90.0], [90.0, 90.0]], dtype=float)
@@ -842,6 +845,7 @@ def test_shrinking_a_cumulative_cap_refuses_resume(smoke_cfg, tmp_path, monkeypa
         run_qd(cfg, None, 3, resume=rd)
 
 
+@requires_ribs
 def test_protocol_mismatch_and_missing_protocol_are_refused(tmp_path, monkeypatch):
     cfg = two_knob_cfg(load_config(EXAMPLES / "search_smoke.yaml"))
     for i, qd in enumerate(({"protocol": "old-protocol"}, {})):

@@ -1,6 +1,23 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-13 (20:4x local) - CI REPAIR: 7 RED CLUSTERS FIXED ON MAIN (NO TOLERANCE OR EXPECTED VALUE CHANGED)
+
+- Main CI (55fbf7f) was red on 8 clusters, none a product regression. Fixed in `fix/ci-repair-2026-11-13`:
+  1. `test_tools_experiments_manifest` (24 setup errors + 4): fixtures read gitignored `scratch/bo_m0/s11/*.yaml` -> committed
+     copies under `tests/fixtures/experiments/s11/`; `manifest._check_task` re-verifies by the stored repo-relative
+     `config_rel`/`brief_rel` locator (absolute path = provenance, must end in the locator, separator-agnostic); committed-manifest
+     test stays zero-warning where warm-start `runs/` exist and tolerates only `warm_source_unavailable` for runs absent on the host.
+  2. `bo_sensitivity`: cohort-config name read with `PureWindowsPath` (POSIX `Path` kept the whole `C:\...` string).
+  3. ribs-gated QD archive tests: new `requires_ribs` marker in conftest (4 tests incl. protocol-refusal, which also needs ribs).
+  4. geometry_descriptors: split; `resolve failed` under `requires_mesher`, new no-mesher test pins `canonical resolver is unavailable`.
+  5. hypothesis_cards roundtrip: `requires_mesher` (build path needs the resolver).
+  6. parameter_study: scikit-learn installed in CI and declared as `[analysis]` extra (no test edits).
+  7. `test_failure_marker_replays_without_counting`: pinned physics SHAs so the namespaced marker path runs on every host.
+  8. `test_config` freq_batch_size: already fixed on main by 50b6f06 (dropped from this change).
+- Evidence bytes untouched (sha256 before = after): pilot1 `8c28c569...`, pilot2 `c7b1e243...`, native_trainingset `f24f2768...`.
+- Verified: touched files 199 pass / 5 skip (owner venv); CI-shaped venv (no ribs/mesher) rc=0; owner-host shape (runs/+scratch
+  linked) manifest 33/33 no skips; full suite result in PR body.
 ## 2026-11-13 (20:2x local) - S8/S7 ANALYSIS PANELS LAND: GEOMETRY, HYPOTHESIS, QD/PARETO, SURROGATE (GUI only; no solve)
 
 - **`gui/data.py`:** `geometry_descriptors`, `hypothesis_cards`, `qd_compare` and

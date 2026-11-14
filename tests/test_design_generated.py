@@ -193,14 +193,17 @@ def test_failure_marker_replays_without_counting(tmp_path):
     cfg = _cfg("conical")
     space = DesignSpace.from_config(cfg)
     bad = space.design_from_knobs({**space.seed_knobs, "h_rm_mm": 400.0})   # envelope -> invalid
-    ctx1 = E.make_context(cfg, None, cache_dir=tmp_path / "cache")
+    # Pin physics SHAs: with unknown SHAs (no physics libs installed) the shared solve cache is
+    # deliberately disabled, so the marker path would never run. Pinning exercises it everywhere.
+    shas = {k: "0" * 40 for k in ("hornlab_beat_bem", "hornlab_bempp_bem", "hornlab_mesher")}
+    ctx1 = E.make_context(cfg, None, cache_dir=tmp_path / "cache", lib_shas=shas)
     ev1 = E.evaluate(bad, space, cfg, "screen", tmp_path / "run1", None, None, ctx=ctx1)
     assert ev1.error.startswith("invalid_geometry") and not ev1.cached
     # A1: failure markers live under the physics-namespaced solve cache, not the flat root.
     assert ctx1.solve_cache_root is not None
     markers = list((ctx1.solve_cache_root / "failures").glob("*.json"))
     assert len(markers) == 1 and json.loads(markers[0].read_text())["kind"] == "invalid_geometry"
-    ctx2 = E.make_context(cfg, None, cache_dir=tmp_path / "cache")
+    ctx2 = E.make_context(cfg, None, cache_dir=tmp_path / "cache", lib_shas=shas)
     ev2 = E.evaluate(bad, space, cfg, "screen", tmp_path / "run2", None, None, ctx=ctx2)
     assert ev2.error.startswith("invalid_geometry") and ev2.cached
     row = json.loads((tmp_path / "run2" / "search.ndjson").read_text().splitlines()[0])

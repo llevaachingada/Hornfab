@@ -7,7 +7,7 @@ import math
 import pytest
 import numpy as np
 
-from conftest import requires_mesher
+from conftest import _have, requires_mesher
 from test_tools_analysis_common import load_tool
 
 gd = load_tool("geometry_descriptors")
@@ -149,14 +149,24 @@ def test_osse_families_resolve_without_approximating(family, params, termination
                for k in gd.NUMERIC_DESCRIPTOR_KEYS)
 
 
-def test_nonfinite_and_malformed_inputs_refuse():
-    from hornlab_search.types import Design
-
+def test_nonfinite_resolution_refuses():
     with pytest.raises(gd.GeometryDescriptorError, match="resolution_mm"):
         gd.geometry_descriptors(_freeform(), resolution_mm=float("nan"))
+
+
+@requires_mesher
+def test_malformed_profile_refuses_at_resolve():
     bad = _freeform()
     bad.params["profileH"]["points"][1][1] = float("nan")
     with pytest.raises(gd.GeometryDescriptorError, match="resolve failed"):
+        gd.geometry_descriptors(bad)
+
+
+@pytest.mark.skipif(_have("hornlab_mesher"), reason="covers the no-mesher environment only")
+def test_without_mesher_descriptors_refuse_explicitly():
+    bad = _freeform()
+    bad.params["profileH"]["points"][1][1] = float("nan")
+    with pytest.raises(gd.GeometryDescriptorError, match="canonical resolver is unavailable"):
         gd.geometry_descriptors(bad)
 
 
