@@ -3,6 +3,10 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-14 (**speed program ADOPTED: solver `38e5b1f` at −25/−28 % whole-candidate wall, parity ~1e-5 dB, zero spill, batching default rejected by the pre-declared bar, A5 re-based on measured anchors, E1b raw evidence archived; plus the S8/S7 GUI panels; no GitHub issue state changed**).
 
+Local-only, added 2026-11-14 (01:xx local) (**CI repair hardening; no GitHub issue state changed**):
+- Done: CI now installs `ribs==0.12.0` (QD failure-isolation suite runs on CI: +38 real tests); fixture drift guard for
+  the S11 pilot overlays. Verified #56 validator against tampering and #55 merge integrity.
+
 Local-only, added 2026-11-13 (20:4x local) (**CI repair; no GitHub issue state changed**):
 - Done: main CI red on 8 env/portability clusters fixed (manifest locator portability + fixtures, PureWindowsPath in
   bo_sensitivity, requires_ribs, mesher split/gates, sklearn in CI + `[analysis]` extra, pinned SHAs in marker test;

@@ -1,6 +1,22 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-14 (01:xx local) - CI REPAIR HARDENING PASS: RIBS IN CI (+38 REAL TESTS), FIXTURE DRIFT GUARD
+
+- Senior verification of the 2026-11-13 CI repair (#56) and the #55 merge:
+  - `manifest._check_task` adversarial probes on the committed pilot-1 manifest: every tamper (locator to another file,
+    absolute path to another filename/truncated/None, empty or dropped locator, `../` escape, sha edit, brief=config) is
+    refused; only a different host prefix with the same repo-relative locator is accepted (the intended portability).
+  - #55 merge (643f05d): every CONTINUITY heading from both sides kept, none added; no conflict markers in docs. The 34
+    duplicate headings in CONTINUITY pre-date this work (present at 55fbf7f).
+  - Main CI confirmed: 3455 passed / 309 skipped; scikit-learn 1.9.1 installed and parameter_study runs.
+- Gap found: on CI the QD failure-isolation safety suite was effectively all skipped (ribs absent; pre-existing
+  `importorskip` + the new `requires_ribs`). Fix: CI installs the pinned `[qd]` extra `ribs==0.12.0`. CI-shaped venv: all 6
+  ribs test files 85 passed / 0 skipped (38 previously skipped), ~36 s.
+- Gap found: committed `tests/fixtures/experiments/s11/` overlays could silently drift from the scratch originals. New
+  `test_s11_fixtures_match_scratch_originals`: byte-identical where originals exist, skips otherwise; verified pass on
+  real originals, FAIL on a drifted copy, skip with no scratch.
+
 ## 2026-11-14 (~02:0xZ) - SPEED PROGRAM ADOPTED: SOLVER 38e5b1f (-25/-28% WALL, PARITY ~1e-5 dB, ZERO SPILL); BATCHING NOT ADOPTED; A5 RE-BASED ON MEASURED ANCHORS
 
 - **Full campaign executed overnight per `docs/queue/SPEED_IMPLEMENTATION_PROMPT_2026-11-13.md`:** E0 ✓
