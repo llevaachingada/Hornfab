@@ -3,6 +3,19 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-13 (**Elites tab redesigned for non-technical readers: brief/typology constraints and isometric horn thumbnails, best-per-typology / best-per-brief browsing, paginated 24 at a time, CSV-path noise removed; payload extended with brief/family/brief_target; bo-study-v1.1 final offline integration landed (M2 sensitivity/proposal evidence, immutable run package + `hornlab-search study` CLI, durable proposal-cadence recovery, B8 adversarial full loop); profile-outline thumbnail geometry fixed after live check (closed outline split at the mouth rim, outer wall kept); card hierarchy tuned per owner (constraint line + score largest, gate pills smaller); no GitHub issue state changed**).
 
+Local-only, added 2026-11-13 (23:5xZ) (**S8/S7 GUI handoff written; no GitHub issue state changed**):
+- Open: the four S8/S7 tools have no GUI panels. They are absent from `ANALYSIS_TOOL_JSONS`
+  (`gui/data.py:4044`) and `ANALYSIS_SECTION_TOOLS` (`app.js:2644`), so their JSON is never parsed
+  and the page shows only `extra_tools` name pills ("no dedicated renderer"). Plan, contracts and
+  implementation paths: `docs/HANDOFF_S8_S7_GUI_2026-11-13.md`. S10 row in
+  `docs/research/COUNCIL_REVIEW_AND_IMPL_PLAN_2026-11-12.md:235`.
+- Open (decision): `surrogate_validation` writes keyed `surrogate_validation-<hash>.json` files with
+  no `.md`, so the exact-name analysis lookup never finds them. Options are a GUI glob of the newest
+  complete file, a tool-side stable alias (needs owner approval and a tool test), or deferral.
+- Open (decision): the S8/S7 tools refuse `--out` under `runs/`, while the GUI default analysis root
+  is `runs/analysis/`; today the supported path is `--analysis-dir <scratch set>`. Keep that workflow
+  or add a narrow tested exception.
+
 Local-only, added 2026-11-13 (23:3xZ) (**senior implementation plan for review; six verification corrections; no GitHub issue state changed**):
 - Ready for review (not executed): `docs/queue/SPEED_ARCHITECTURE_PLAN_2026-11-13.md` - C1-C6 inventory, I1-I8
   invariants, E0-E9 gated sequence, H1-H4 test design with statistics, R1-R10 risks, rollback, 12 open questions.

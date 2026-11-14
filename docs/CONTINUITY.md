@@ -1,6 +1,19 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-13 (23:5xZ) - HANDOFF WRITTEN: GUI ARCHITECTURE FOR THE S8/S7 ANALYSIS TOOLS (docs only; no product change)
+
+- `docs/HANDOFF_S8_S7_GUI_2026-11-13.md` records the finished S8/S7 lane (`dc64fd7`) and plans the
+  GUI work an implementer needs: exact artifact contracts for `geometry_descriptors`,
+  `hypothesis_cards`, `qd_compare` and `surrogate_validation`, the current `#/analysis` plumbing with
+  file:line references, the gap list, per-panel data bindings, the surrogate keyed-filename problem,
+  test/acceptance commands, ownership and open decisions.
+- Finding recorded: the four tools are **not** registered in `ANALYSIS_TOOL_JSONS`
+  (`gui/data.py:4044`) or `ANALYSIS_SECTION_TOOLS` (`app.js:2644`), so their JSON is never parsed and
+  they render only as `extra_tools` name pills. The S8/S7 tools also refuse `--out` under `runs/`,
+  while the GUI default root is `runs/analysis/`; the documented workflow is `--analysis-dir`.
+- No code, test, default, dataset, cache, queue or installed file changed by this entry; no solve.
+
 ## 2026-11-13 (23:4xZ) - PART TWO COMMITTED (fork `38e5b1f`) AND RE-VERIFIED BY THE INTEGRATOR; PLAN READY FOR REVIEW
 
 - Fork commit `38e5b1f` on `perf/skip-fused-identity-cache` (on top of `9ec86b0`): the two dense **host** L2 identity
