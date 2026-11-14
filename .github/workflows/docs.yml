@@ -19,6 +19,7 @@ name: Docs check
 # Also gated: tests/test_param_catalog.py pins `gui/static/param-catalog.v1.json` to the code
 # byte-for-byte, and tests/test_config.py pins the config contract.
 on:
+  workflow_dispatch:
   pull_request:
     paths: &paths
       - "docs/**"
@@ -28,6 +29,7 @@ on:
       - "hornlab_search/gui/static/param-catalog.v1.json"
       - "examples/**"
       - "tools/gen_param_catalog.py"
+      - ".github/workflows/docs.yml"
   push:
     branches: [main]
     paths: *paths
