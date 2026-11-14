@@ -1461,6 +1461,10 @@ Local-only, added 2026-11-02 (no GitHub issue state changed): **P11 HF data sync
 # ISSUES
 
 Local-only, 2026-11-14 (**scalar Bayesian integration; no GitHub issue state changed**):
+- Validation follow-up: live 18+6 pilot completed; 116 study tests and 25 final guard tests pass.
+  Broad release: 3840 passed / 19 skipped / 3 failures; targeted reruns fixed polling and passed
+  dataset timing, but the unmodified mesh refusal timing guard still measured 104.4 ms against
+  100 ms while owner CPU/GPU lanes were active. No tolerance changed; full suite not claimed green.
 - Completed: production scalar v4/v7 study worker and GUI actions; canonical task geometry,
   v7 replay/intake, historical-plus-new adaptive training/resume, immutable full pool,
   measured dependency/source pins, journal-owned retries and duplicate-worker protection.

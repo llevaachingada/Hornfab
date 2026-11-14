@@ -73,3 +73,31 @@ its credible interval, package budgets, durable running counters, duplicate
 launch disabling, cooperative stop controls, and the export link. Final-stage
 render/lifecycle checks are in `tests/study_gui_final_stages.mjs` and
 `tests/gui_study_lifecycle.mjs`. No default optimizer or horn brief was changed.
+
+## Final release validation and remaining timing limit
+
+The final broad run (`release.xml`) recorded **3840 passed, 19 skipped, three
+failures** in 771.29 s. Two were existing wall-clock assertions (500 dataset
+appends <5 s and the pre-mesh refusal guard <100 ms). The third was the previous
+polling contract collected before its source/test update. The corrected lifecycle
+and ownership guard set subsequently passed all 25 tests (`final_guards.xml`),
+and all 116 study-focused tests passed (`study_release.xml`).
+
+The unchanged thresholds were rerun without the six-worker suite. Dataset append
+and the corrected polling test passed. The mesh guard still failed at **104.4 ms**
+against its existing **100 ms** limit; its no-mesh-written assertion passed.
+`release_rerun.xml` therefore records two passes and one failure. Separate owner
+CPU/GPU jobs were active; they were preserved. No timing threshold was loosened.
+The full suite is **not claimed green**. This remaining unmodified performance
+check needs a quiet-host rerun or its own measured performance investigation.
+
+Verbatim tail from `release_rerun.log` (preceding traceback omitted):
+
+```text
+MeshTooLargeError raised in 104.4 ms
+=========================== short test summary info ===========================
+FAILED tests/test_mesh_build.py::test_too_large_is_refused_before_any_mesh_is_written
+```
+
+The implementation was included by a concurrent owner-authorized commit
+`5e86c8b`; final validation is recorded separately without rewriting that commit.

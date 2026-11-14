@@ -1,6 +1,19 @@
 ﻿# CONTINUITY
 
 
+## 2026-11-14 - BAYESIAN INTEGRATION FINAL VALIDATION / COMMIT FOLLOW-UP
+
+- Concurrent owner-authorized `5e86c8b` included the staged scalar study implementation and
+  pushed it with the config decisions below; this follow-up preserves that history.
+- Completed real pilot: 18 screens + 6 verification/audit calls, 24 exact canonical replays,
+  zero unresolved attempts; four finalists and two audits verified with no shortfall.
+- Final study-focused suite 116/0/0 and ownership/polling guard set 25/0/0. Broad release:
+  3840 passed / 19 skipped / 3 failed; corrected polling and dataset timing passed targeted reruns.
+  The unmodified pre-mesh refusal timing assertion still failed at 104.4 ms vs 100 ms under
+  the owner's active CPU/GPU jobs. Full suite is not claimed green; no thresholds weakened.
+- Details and byte-checked output: `docs/evidence/BAYESIAN_STUDY_INTEGRATION_2026-11-14.md`.
+  The timing issue is recorded for a quiet-host rerun; unrelated running lanes were preserved.
+
 ## 2026-11-14 (05:4xZ) - OWNER DECISIONS EXECUTED: COHORT GAP CLOSING, CAPS 12k -> 24k, BATCH-12 FOR HEAVY RUNS
 
 - **Cohort gap (approved):** the print80x60 day night budgeted job 1 at 250 evals but the interrupted+resumed

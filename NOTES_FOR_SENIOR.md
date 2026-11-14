@@ -903,3 +903,15 @@ local fork, but everything else needs to go to main" (2026-11-13 ~14:19 local).
 ## 2026-11-13 - C3 contract gap: `solve.freq_batch_size` (speed program E8)
 
 Config key `solve.freq_batch_size` is a contract gap: a new `solve.*` key not enumerated in frozen `01_CONTRACTS.md`. Authorized under the owner's speed program (docs/queue/SPEED_ARCHITECTURE_PLAN_2026-11-13.md §14 Q3; implementation prompt E8), following the existing `cuda_fused` SolveSettings-field precedent. Added before the merge step; default None keeps every existing config and hash unchanged.
+
+## 2026-11-14 - Bayesian integration release: timing check remains blocked
+
+Real scalar pilot completed 18 screen + 6 verification calls with exact replay.
+The broad release run failed the unmodified pre-mesh refusal timing guard at
+264.0 ms; a targeted rerun failed at 104.4 ms against its unchanged 100 ms bar.
+Its no-mesh-written assertion passed. Per the repeated-error rule, this line
+stops here: owner CPU and GPU jobs are active and are not interrupted to obtain
+a quiet measurement. No tolerance/test skip was changed. A quiet-host rerun or
+separate measured performance investigation remains required before calling the
+entire suite green. Sources: scratch/2026-11-14_bayes/release.log and
+release_rerun.log; full report docs/evidence/BAYESIAN_STUDY_INTEGRATION_2026-11-14.md.
