@@ -11,6 +11,9 @@ Section-based horn experiment: tools/geometry/crowe_panel.py and crowe_panel_cli
 provide the separate section-constrained surface and explicit body; plot_crowe_sections.py
 plots generated cuts against source readings. Reference table lives in
 examples/prototypes/rolled_rect_2026-11-15/crowe_section_reference.yaml; recipe identity covers it.
+Width, height and depth scale the digitized sections independently; the swept-H construction needs
+depth <= 0.57 x width (0.66 x at h_depth_scale 1.1). Home-sized searchable cell:
+`examples/typologies/home_landscape_2026-11-15/hl__crowe_panel_home_v7.yaml` (search and verify via crowe_panel_cli.py).
 
 
 Rolled-rectangle experiment (2026-11-15): `tools/geometry/rolled_rect.py` defines the original

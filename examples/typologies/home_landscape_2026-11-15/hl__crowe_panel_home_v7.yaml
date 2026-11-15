@@ -1,0 +1,38 @@
+# HOME-SIZED CROWE ES-600 FAMILY (2026-11-15). Owner: keep the Crowe jobs and make them work properly.
+# Parent: rolled_rect_2026-11-15/rr__crowe_panel_es600_v7 (section-constrained reconstruction of the ES-600 drawing,
+# 417 W x 203 H x 198 D). That cell froze the mouth at the drawing size and searched depth +-4%, so every run scored the
+# replica (screen J 22.8): a 203 mm mouth cannot hold the 50 deg V pattern near the 700 Hz crossover, and its near-straight
+# (2 deg) throat flare narrows the beam with frequency (dislope ~9 of J). Here the SAME digitized H/V profiles are scaled
+# into the home envelope (generator scales width, height and depth independently): seed = ES-600 proportions at 560 mm
+# wide; width 480-590 > height 220-420 (landscape by construction), depth 170-300 (changes the throat-region flare rate;
+# the swept-H construction needs depth <= 0.57 x width at H/V depth ratio 0.9, 0.66 x at 1.1, measured 15 Nov),
+# H/V depth ratio 0.9-1.1, crown 10-40 mm, corner junction 16-48. Throat blend fixed (generator: < 20% of depth).
+# Mandatory entry point: tools/geometry/crowe_panel_cli.py (search | shape-check | preflight | verify-night).
+name: hl__crowe_panel_home_v7
+family: FREEFORM
+brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
+generator:
+  name: grid
+  rows: {type: crowe_panel}
+  seed_policy: explicit
+  span: quarter
+  n_phi: 49
+  n_s: 96
+  wall_thickness_mm: 3.0
+seed_params: {g_width_mm: 560.0, g_height_mm: 280.0, g_depth_mm: 270.0, g_h_depth_scale: 1.0, g_crown_mm: 26.0, g_throat_blend_mm: 20.0,
+  g_junction_power: 32.0}
+bounds:
+  g_width_mm: {lo: 480.0, hi: 590.0}
+  g_height_mm: {lo: 220.0, hi: 420.0}
+  g_depth_mm: {lo: 170.0, hi: 300.0}
+  g_h_depth_scale: {lo: 0.9, hi: 1.1}
+  g_crown_mm: {lo: 10.0, hi: 40.0}
+  g_throat_blend_mm: {lo: 20.0, hi: 20.0, search: false}
+  g_junction_power: {lo: 16.0, hi: 48.0}
+mesh: {epw: 6.0, quadrants: '1', dof_cap_screen: 10000, dof_cap_verify: 24000, dof_cap_final: 24000, dof_per_triangle: 0.51,
+  rear_res_factor: 1.5}
+solve: {backend: beat_cuda, distance_m: 10.0, angle_count: 73, balloon: true, balloon_points_screen: 512, balloon_points_verify: 1024,
+  gmres_tol: 1.0e-05, timeout_s: 900, cuda_fused: true}
+search: {algorithm: cma, sigma0: 0.2, seed: 1234, budget: 96, popsize: 8, tolfun: 0.001, infeasible_penalty: flat}
+description: 'HOME: Crowe ES-600 section family (digitized H/V meridians, crowned sweep, solid body) scaled into the 600 x
+  480 x 480 home envelope; size, depth ratio, crown and corner junction searched'

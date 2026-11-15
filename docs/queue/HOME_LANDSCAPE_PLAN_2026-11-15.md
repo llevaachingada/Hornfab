@@ -92,10 +92,13 @@ Night B trained on 0 rows (encoder bug, see CONTINUITY 15 Nov 14:25) and solved 
 
 | Night | Jobs | Purpose |
 |---|---|---|
-| D `home_landscape_d_2026-11-15` (13:54) | BO scalar, TuRBO, Pareto (60 + 6 each) on ext-throat; Crowe x96 cut live (`cut_jobs.ps1`) | the BO comparison night B should have been |
-| E `home_landscape_e_2026-11-15` (after D) | TuRBO s62001 rerun (night D's arm stopped at 21/60: a GPU-marked test run killed the shared worker 14:19-14:30) -> CMA x100: ext-throat s9012, s3456; OSSE rounded-rect s5678, s9012, s3456 -> verify top 3 of each + night C's OSSE run -> cohort rebuild -> BO round 2 (scalar, TuRBO x2, Pareto) | grow both cohorts (BO solves do not feed the cohort), get OSSE rounded-rect past 100 rows, then BO on the bigger ext-throat cohort |
+| D `home_landscape_d_2026-11-15` (13:54) | BO scalar, TuRBO, Pareto (60 + 6 each) on ext-throat; Crowe ES-600 replica x96 + verify (kept, owner) | the BO comparison night B should have been |
+| E `home_landscape_e_2026-11-15` (after D) | TuRBO s62001 rerun (night D's arm stopped at 21/60: a GPU-marked test run killed the shared worker 14:19-14:30) -> home-sized Crowe `hl__crowe_panel_home_v7` 2 seeds x 96 + Crowe verify top 3 -> CMA x100: ext-throat s9012, s3456; OSSE rounded-rect s5678, s9012, s3456 -> verify top 3 of each + night C's OSSE run -> cohort rebuild -> BO round 2 (scalar, TuRBO x2, Pareto) | grow both cohorts (BO solves do not feed the cohort), get OSSE rounded-rect past 100 rows, then BO on the bigger ext-throat cohort |
 
 **Rule (owner, 15 Nov): BoTorch only on a typology with existing data.** `prepare_study.py --min-rows` (default 100).
+
+Crowe: the replica cell can only re-score the ES-600 drawing size; `hl__crowe_panel_home_v7` keeps the digitized
+sections and searches size inside the envelope (depth <= 0.57 x width is a hard limit of the swept-H construction).
 
 Next after E: register `hl__osse_rrect_morph_v7` as a BO task (code change, only while no study is queued), fix the
 biradial throat, then pick the home horn on verify J + `hifi_rescore.py --verify`.

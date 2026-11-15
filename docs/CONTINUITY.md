@@ -11,13 +11,20 @@
   then Crowe ES600 x96. **TuRBO stopped at 21/60** (3 `worker_exit` ConnectionResets): a full local pytest run without CI's
   `-m "not slow and not gpu and not crosscheck"` filter ran a warm-worker GPU test mid-night and killed the shared host
   (Pareto lost 1 solve and continued). Rerun prepended to night E. Lesson: while a GPU night runs, only the CI-filtered suite.
-  The Crowe jobs are cut live by the new `tools/night_queue/cut_jobs.ps1` (the runner reads a night
-  file once). **Night E** chained behind D (~6 h): 5 CMA x 100 (ext-throat x2, OSSE rounded-rect x3), verify top 3 of each
+  The Crowe jobs were briefly set to be cut by the new `tools/night_queue/cut_jobs.ps1`; **owner overruled (14:42): keep
+  the Crowe jobs and make them work.** The cutter was stopped before it killed anything; night D's replica Crowe x96 runs. **Night E** chained behind D (~6 h): 5 CMA x 100 (ext-throat x2, OSSE rounded-rect x3), verify top 3 of each
   plus night C's OSSE run, cohort rebuild, BO round 2 (scalar, turbo, pareto, turbo) on ext-throat.
 - **Why the Crowe / rolled-rect / Le Cleach / ES-rollback families score 19-29 vs 3.1**: same brief and objective as the
   winners, so the scoring is fair. They are undersized (Crowe mouth frozen at 417 x 203 mm, 205 mm deep; V pattern
   control lost below ~1.5 kHz) and their beams keep narrowing with frequency (dislope 8-10 vs 0.02; H 90->46 deg,
-  V 137->41 deg). No further GPU on them until a cell lets the size grow into the 600 x 480 x 480 envelope.
+  V 137->41 deg).
+- **Crowe made to work (owner, 14:42):** the replica cell `rr__crowe_panel_es600_v7` froze the mouth at the ES-600 drawing
+  size and searched depth +-4%, so CMA could only re-score the replica. New `hl__crowe_panel_home_v7`: the same digitized
+  H/V sections scaled into the home envelope - width 480-590 > height 220-420, depth 170-300, H/V depth ratio 0.9-1.1,
+  crown 10-40, junction 16-48; seed = ES-600 proportions at 560 x 280 x 270. Measured: the swept-H construction needs
+  depth <= 0.57 x width (0.66 x at ratio 1.1; height does not matter) - deeper raises `nonpositive sweep pivot`.
+  Shape-check: seed + 5/6 corners mesh (3.3-6.1k DOFs, round throat, fit); preflight 62/64 box samples valid.
+  Queued in night E right after the TuRBO rerun: 2 CMA seeds x 96 + Crowe-CLI verify of the top 3 each.
 - **ES450-style biradial** (`hl__biradial_es_style_v7`): 17/19 screens refused, throat not round (area 1.03-1.05x an
   ellipse; `mesh/throat_check.py` tolerance 0.03). Needs a generator change (round throat blend before the per-plane
   laws diverge); not queued.

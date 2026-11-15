@@ -3,8 +3,9 @@
 Local-only, 2026-11-15 14:25 (**BO cohort encoder fix, BO data gate, nights D/E; no GitHub issue open**):
 - Fixed: `bo/data.py` refused `morph_target = 0` rows, so night B trained on 0 rows and never solved.
 - New gate: `prepare_study.py --min-rows` (default 100); BoTorch only on typologies with existing data.
+- Crowe: replica cell kept running (owner); home-sized `hl__crowe_panel_home_v7` queued in night E (2 x 96 + verify).
 - Open: ES450-style biradial throat not round (generator fix needed); study rows do not feed
-  `study_cohort`; Crowe/rolled-rect families undersized for the home brief; OSSE rounded-rect needs a
+  `study_cohort`; Crowe swept-H construction limited to depth <= 0.57 x width; OSSE rounded-rect needs a
   registered BO task once night E gives it >= 100 rows.
 
 
