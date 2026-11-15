@@ -1,5 +1,18 @@
 # CONTINUITY
 
+## 2026-11-15 - FOUR HORN PILOTS AND VERIFICATIONS COMPLETE
+
+- Original night completed 12:11:40 local; section-study follow-up completed 12:19:05.
+  All four searches have 32/32 valid evaluations; all four top1 verifications succeeded.
+- Screen / verify J: reference 29.423 / 31.796; moderate pucker 28.434 / 30.813;
+  strong pucker 27.407 / 29.839; section study 22.756 / 24.299. Same objective-v7 brief;
+  the smaller section study is not an equal-size pucker A/B. Further mesh convergence is open.
+- Section-study winner 7e454d58122c at n29, first improvement n4; depth204.703,
+  H-depth-scale1.02979, crown17.765. Seed J23.086. Saved winner renders and exact run
+  provenance published in gallery results.html/results.json. Encoding corrected in builder.
+- No outstanding jobs in these two queues; unrelated workers were preserved.
+
+
 ## 2026-11-15 - SECTION-CONSTRAINED ES-600 CORRECTION, VALIDATED AND QUEUED
 
 - Owner rejected the front geometry; inspected manufacturer drawing 1148-01-001 B-B/C-C,

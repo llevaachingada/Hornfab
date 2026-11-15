@@ -93,3 +93,19 @@ proven pattern control. Printed mounting and wall strength remain unverified.
 Gallery: `docs/renders/2026-11-15-rolled-rect/index.html` (15 original mesh renders, five angles).
 Raw shape checks, preflight JSON, test XML and local reference contact sheets live under
 `scratch/2026-11-15_rolled_rect/`. No copyrighted reference photograph is included in the public gallery.
+
+## Completed readout
+
+Both queues finished with exit0; all four searches yielded 32/32 valid evaluations and
+all four top1 verifications succeeded.
+
+| Study | Seed J | Best screen J | Best n | Verify J |
+|---|---:|---:|---:|---:|
+| Original reference | 30.362 | 29.423 | 31 | 31.796 |
+| Moderate H/V pucker | 29.447 | 28.434 | 29 | 30.813 |
+| Strong H/V pucker | 28.503 | 27.407 | 25 | 29.839 |
+| Section-based ES-600 study | 23.086 | 22.756 | 29 | 24.299 |
+
+The section-study first improved at n4 and won at n29, consistent with its first-generation
+improvement hypothesis. Verification shifts scores by 5-9 percent; acoustic mesh convergence
+is not established. See [complete results and winner renders](../renders/2026-11-15-rolled-rect/results.html).
