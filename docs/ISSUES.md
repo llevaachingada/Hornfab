@@ -3,6 +3,11 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-14 (**owner decisions executed: cohort gap closing (+50 resume at 38e5b1f), caps 12k→24k on the four live configs, batch-12 approved for heavy verify/final-style runs; plus the scalar-Bayes and CI work; no GitHub issue state changed**).
 
+Local-only, added 2026-11-15 (09:xx local) (**BoTorch vs CMA collaborator report, docs only; no GitHub issue state changed**):
+- Done: `docs/status/2026-11-15-bo-vs-cma/` (README + index.html + data.json). BoTorch wins the matched home-task test.
+- Open: cold-start BoTorch vs CMA comparison (this test was a warm start from a converged CMA optimum).
+- Open: TuRBO/Pareto modes (branch feat/bo-turbo-pareto) and the night re-order branch are not on main yet.
+
 Local-only, added 2026-11-14 (15:3x local) (**project atlas tool + snapshot; no GitHub issue state changed**):
 - Done: `tools/atlas/` whole-project report; snapshot at `docs/atlas/` (GitHub Pages).
 - Open: atlas verdict thresholds (`RULES` in build_atlas.py) are first-pass heuristics; tune after owner review.

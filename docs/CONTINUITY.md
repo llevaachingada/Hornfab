@@ -1,5 +1,17 @@
 # CONTINUITY
 
+## 2026-11-15 (09:xx local) - BOTORCH VS CMA MATCHED TEST: BOTORCH WINS (report published, docs only)
+
+- Home task HOME_SEED5678 (objective v7), same prior (run 18985d, 185 rows), 60 screens + 6 verify per arm, 3 seeds each.
+  BoTorch best verify J 3.107 / 3.251 / 3.189 (median 3.189); CMA 3.827 / 3.827 / 3.392 (median 3.827). Gap 0.638 >
+  both seed spreads (0.145 / 0.436), so BoTorch wins per the pre-declared rule. CMA never beat its start (3.2328) in 60 solves;
+  its best design scores 3.233 at screen but 3.827 at verify (+18 %). CMA lost 14-29 solves to size refusals; BoTorch 0-3.
+  BoTorch winners share a shorter, steeper throat extension (~110-127 mm at 4.3-4.8 deg vs 172 mm at 3.2 deg).
+- Caveat (owner, 15 Nov): the CMA arms restarted from an already-converged CMA optimum, so this measures improving an
+  optimized design, not cold-start search; a cold-start comparison is still to do.
+- Report: `docs/status/2026-11-15-bo-vs-cma/` (README with PNGs, interactive index.html, data.json). The study code
+  (budget profiles, TuRBO/Pareto) lives on unmerged branches; this commit is docs only.
+
 ## 2026-11-14 (15:3x local) - PROJECT ATLAS: REUSABLE WHOLE-PROJECT VISUAL REPORT (tools/atlas)
 
 - New `tools/atlas/build_atlas.py` + `atlas_template.html`: read-only over every run folder (`run.json`,
