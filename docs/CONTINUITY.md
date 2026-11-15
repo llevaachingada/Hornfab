@@ -1,5 +1,13 @@
 # CONTINUITY
 
+## 2026-11-15 - VERIFICATION FIDELITY CLARIFICATION
+
+- Inspected saved rows: section-study screen and verify both have3084 DOFs and identical
+  throat/mouth/rear mesh spacing 3.573/7.146/10.719 mm. Verify uses29 frequency points,
+  screen18. The 22.756 to24.299 score shift is frequency-grid sensitivity, not a spatial
+  mesh-refinement result. All four completed searches and verifications remain successful.
+
+
 ## 2026-11-15 - FOUR HORN PILOTS AND VERIFICATIONS COMPLETE
 
 - Original night completed 12:11:40 local; section-study follow-up completed 12:19:05.

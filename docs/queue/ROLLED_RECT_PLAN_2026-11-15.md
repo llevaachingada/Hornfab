@@ -109,3 +109,7 @@ all four top1 verifications succeeded.
 The section-study first improved at n4 and won at n29, consistent with its first-generation
 improvement hypothesis. Verification shifts scores by 5-9 percent; acoustic mesh convergence
 is not established. See [complete results and winner renders](../renders/2026-11-15-rolled-rect/results.html).
+
+Readout correction: section-study verification used 29 frequency points versus 18 screen
+points, with identical 3.573 / 7.146 / 10.719 mm throat / mouth / rear mesh spacing.
+The score shift is frequency-grid sensitivity, not evidence of spatial mesh convergence.

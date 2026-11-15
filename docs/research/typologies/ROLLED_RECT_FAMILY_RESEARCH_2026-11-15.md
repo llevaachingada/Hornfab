@@ -250,7 +250,7 @@ not an equal-size acoustic A/B against the original ES-450-proportioned surfaces
 
 The original night started while this correction was developed. Its live file/configs were not
 edited. The follow-up is a separate `home_crowe_sections_2026-11-15` night, waiting for the
-original controller, with the section study first and then top-1 higher-resolution verification.
+original controller, with the section study first and then top-1 denser-frequency verification.
 
 Detached follow-up controller: 31224, WMI parent 35188, waiting on original controller 42084.
 Log: `runs/nights/queue_home_crowe_sections.log`. No concurrent solve was started.
@@ -261,3 +261,7 @@ Both nights and all four verifications completed successfully. Each arm had 32/3
 search evaluations. The section study improved from seed J23.086 to screen J22.756 at n29
 (first improvement n4), and verification returned J24.299. This score shift means acoustic
 mesh convergence remains open. [Run provenance and winner renders](../../renders/2026-11-15-rolled-rect/results.html).
+
+Readout correction: section-study verification used 29 frequency points versus 18 screen
+points, with identical 3.573 / 7.146 / 10.719 mm throat / mouth / rear mesh spacing.
+The score shift is frequency-grid sensitivity, not evidence of spatial mesh convergence.
