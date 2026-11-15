@@ -55,6 +55,15 @@ all `hornlab_search/*.py`, so merging mid-night would change the code under the 
   - Success = new nondominated designs that the scalar arms did not find.
 - About 14 h GPU (BoTorch arm ≈ 2-2.5 h including CPU refits and verify).
 
+## 3b. Owner decision (2026-11-15): Pareto coverage objective stays plain
+
+The Pareto metric policy now accepts objective-v7 briefs (`bo/metrics.py` `freeze_metric_policy`, distinct v7 metric
+hash; v4 unchanged). Its coverage objective is the **plain coverage error** from the unchanged raw helper
+(`scalar_v8.v8_raw_terms`, with the brief's narrow ratio / below-f0 / diagonal conventions). It deliberately does
+**not** add v7's one-sided 8 kHz narrow-beam floor penalty. Owner confirmed "keep it plain": the frontier is a menu
+of physical coverage-vs-ripple trade-offs. J (which keeps the 8 kHz floor) is still reported next to every
+frontier design.
+
 ## 4. Not in scope (recorded)
 - Multi-region TuRBO-m: a single region fits our 6-15 knobs.
 - Constraint GPs for loading: margins exist in `bo/extensions.py` but are not wired in.
