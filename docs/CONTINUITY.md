@@ -7,6 +7,8 @@
   both seed spreads (0.145 / 0.436), so BoTorch wins per the pre-declared rule. CMA never beat its start (3.2328) in 60 solves;
   its best design scores 3.233 at screen but 3.827 at verify (+18 %). CMA lost 14-29 solves to size refusals; BoTorch 0-3.
   BoTorch winners share a shorter, steeper throat extension (~110-127 mm at 4.3-4.8 deg vs 172 mm at 3.2 deg).
+- Caveat (owner, 15 Nov): the CMA arms restarted from an already-converged CMA optimum, so this measures improving an
+  optimized design, not cold-start search; a cold-start comparison is still to do.
 - Report: `docs/status/2026-11-15-bo-vs-cma/` (README with PNGs, interactive index.html, data.json). The study code
   (budget profiles, TuRBO/Pareto) lives on unmerged branches; this commit is docs only.
 

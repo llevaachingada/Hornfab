@@ -38,6 +38,7 @@ li{margin:4px 0}
 <h2>What BoTorch found: a different horn</h2><div class="card"><table id="knobs"></table></div>
 <div class="sub" style="margin-top:6px">All three BoTorch arms, and CMA arm 3's best verified design, moved to a <b>shorter, steeper throat extension</b> (about 110&ndash;127 mm at 4.3&ndash;4.8&deg;, against 172 mm at 3.2&deg;). The two methods independently found the same region. Coverage is similar, about 66 &times; 68&ndash;71&deg;.</div>
 <h2>Caveats</h2><ul>
+<li><b>Warm start from an already-optimized horn.</b> The shared prior was a finished 200-design CMA run, and its best design (J 3.2328) is where two independent CMA seeds had already converged. CMA restarted there with a small step, so it had little room left in that basin; BoTorch&#39;s global model could jump to a different basin. This tests &ldquo;which method improves an already-optimized design?&rdquo;, not &ldquo;which searches better from scratch&rdquo;; a cold-start comparison is still to do.</li>
 <li>One task, one objective (v7), 3 seeds per method, warm-started from CMA data. A cold start was not tested.</li>
 <li>CMA spent 14&ndash;29 of its 60 solves on designs refused as too large. BoTorch pre-checks size and lost 0&ndash;3.</li>
 <li>A BoTorch step takes about 73 s against about 55 s for CMA, because of the model refit. The comparison counts solves, not wall time.</li>

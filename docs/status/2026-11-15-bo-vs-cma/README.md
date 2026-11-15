@@ -44,6 +44,7 @@ Task: OSSE extended-throat home horn, brief `room_80x60_700_hf1440_v7` (objectiv
 
 ## Caveats
 
+- **Warm start from an already-optimized horn.** The shared prior was a finished 200-design CMA run, and its best design (J 3.2328) is where two independent CMA seeds had already converged. CMA restarted from that converged point with a small step (σ₀ 0.15), so it had little room left in that basin; BoTorch's global model could jump to a different basin. This test answers "which method improves an already-optimized design?", not "which searches better from scratch". A cold-start comparison is still to do.
 - **Narrow test:** one task, objective v7 and 3 seeds per method, warm-started from CMA data. A cold start was not tested.
 - **Speed:** a BoTorch step takes about 73 s against about 55 s for CMA, because of the model refit. The comparison counts solves, not wall time.
 - **Next:** the TuRBO (trust-region) and Pareto (coverage × ripple) BoTorch modes, tested the same way.

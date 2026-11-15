@@ -5,6 +5,7 @@ Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 20
 
 Local-only, added 2026-11-15 (09:xx local) (**BoTorch vs CMA collaborator report, docs only; no GitHub issue state changed**):
 - Done: `docs/status/2026-11-15-bo-vs-cma/` (README + index.html + data.json). BoTorch wins the matched home-task test.
+- Open: cold-start BoTorch vs CMA comparison (this test was a warm start from a converged CMA optimum).
 - Open: TuRBO/Pareto modes (branch feat/bo-turbo-pareto) and the night re-order branch are not on main yet.
 
 Local-only, added 2026-11-14 (15:3x local) (**project atlas tool + snapshot; no GitHub issue state changed**):
