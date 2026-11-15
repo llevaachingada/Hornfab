@@ -1,5 +1,13 @@
 # ISSUES
 
+Local-only, 2026-11-15 14:25 (**BO cohort encoder fix, BO data gate, nights D/E; no GitHub issue open**):
+- Fixed: `bo/data.py` refused `morph_target = 0` rows, so night B trained on 0 rows and never solved.
+- New gate: `prepare_study.py --min-rows` (default 100); BoTorch only on typologies with existing data.
+- Open: ES450-style biradial throat not round (generator fix needed); study rows do not feed
+  `study_cohort`; Crowe/rolled-rect families undersized for the home brief; OSSE rounded-rect needs a
+  registered BO task once night E gives it >= 100 rows.
+
+
 Local-only, 2026-11-15 (**section-based H/V relief extension; no GitHub issue state changed**):
 - Done: exact zero-pucker control, independent H/V relief, source/attachment preservation,
   three seeded configs, all 72 corners, 192 random box meshes, 145 CPU checks and 15 renders.

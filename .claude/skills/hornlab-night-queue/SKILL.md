@@ -34,13 +34,17 @@ Tools (all in the repo): `tools/run_campaign_night.py` (one night file, strictly
    Resume a killed search in its own run dir with `budget` = the missing new evals.
 2. `--dry-run` each night file (prints jobs, runs no hygiene - safe any time).
 3. Mesh-check every new config with `tools/shape_check.py` (dofs <= cap, envelope, round coupling).
-4. Pre-flight: `Get-Process julia` (none unless a night is live), `nvidia-smi` baseline, `runs/.gpu.lock` (a dead
+4. Economy-check every search job with `tools/search_preflight.py` (skill: `hornlab-search-economy`): pass the
+   prior runs with `--from-runs` and sample the box with `--samples 64`. A job that starts at the converged
+   incumbent, or whose expected hits say the budget cannot reach the basin, is a wasted night even if every eval
+   succeeds.
+5. Pre-flight: `Get-Process julia` (none unless a night is live), `nvidia-smi` baseline, `runs/.gpu.lock` (a dead
    holder's lock is taken over by the runner automatically since 2026-10-28; a LIVE holder means wait).
-5. Launch:
+6. Launch:
    ```
    powershell -NoProfile -ExecutionPolicy Bypass -File tools\night_queue\launch_detached.ps1 -Script tools\night_queue\queue.ps1 -ScriptArgs "-Nights A,B,C -Cutoff 17:30 -Log runs\nights\queue_<date>.log"
    ```
-6. Verify within a minute: the controller pid is alive with parent `WmiPrvSE`, the log says "starting <night>",
+7. Verify within a minute: the controller pid is alive with parent `WmiPrvSE`, the log says "starting <night>",
    a `julia` host appears, and the active run's `search.ndjson` gains rows.
 
 Budget a day from measured s/eval (`tools/night_status.py` shows minutes per job; quarter-model rows horns
@@ -63,3 +67,6 @@ only within a brief). Then render the winners with the hornlab-render skill.
 - Job timed out / killed: its run dir keeps the rows; re-run with `resume:` and the missing budget.
 - `exit 124` with `run dir not parsed`: the runner buffers job logs; find the run dir by time (`ls -t runs`).
 - Record every stop, re-run and re-order in `docs/CONTINUITY.md` (and ISSUES on a push).
+
+## BoTorch jobs need data (owner, 2026-11-15)
+Queue a BoTorch study only on a typology whose cohort already has >= 100 usable training rows (`study_cohort` -> `prepare_study.py` counts them and refuses below `--min-rows`, default 100). New families get CMA first; BoTorch comes after.

@@ -42,6 +42,8 @@ def main(argv=None) -> int:
     ap.add_argument("--task", default=TASK, help="registered study task name (default: the 15 Nov comparison task)")
     ap.add_argument("--policy", default="scalar", choices=("scalar", "turbo", "pareto"),
                     help="proposal policy (turbo = turbo_pool_v1 trust region; pareto = coverage/ripple)")
+    ap.add_argument("--min-rows", type=int, default=100,
+                    help="refuse unless the cohort gives at least this many usable training rows (default 100)")
     a = ap.parse_args(argv)
 
     from hornlab_search.studies import builders
@@ -61,6 +63,18 @@ def main(argv=None) -> int:
         if not Path(source[k]).is_file():
             print(f"missing cohort file {source[k]}", file=sys.stderr)
             return 2
+    # Owner rule (2026-11-15): BoTorch only on a typology that already has enough solved designs.
+    # The model's own floor (2*(d+1)) is far too lax for spending GPU hours; refuse before any study exists.
+    from hornlab_search.bo.data import build_native_training_set
+    cfg = builders._read_task({"name": a.task}, root=REPO)["config"]
+    tr = build_native_training_set(cfg, scores_json=source["scores_json"], catalog_csv=source["catalog_csv"],
+                                   dataset_root=source["dataset_root"], require_single_fidelity=True)
+    n_ok = int(getattr(tr, "n", 0) or 0)
+    if getattr(tr, "status", None) != "ok" or n_ok < a.min_rows:
+        print(f"refusing: task {a.task} has {n_ok} usable training rows (< --min-rows {a.min_rows}); "
+              f"build a CMA cohort first", file=sys.stderr)
+        return 3
+    print(f"training rows: {n_ok} (min {a.min_rows})", file=sys.stderr)
     root.mkdir(parents=True, exist_ok=True)
     spec = {"protocol": "bo-study-v1.1",
             "question": f"BO-vs-CMA matched comparison arm {a.label} (seed {a.seed}, {PROFILE})",

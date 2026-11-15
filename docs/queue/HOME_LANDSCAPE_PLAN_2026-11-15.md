@@ -68,3 +68,34 @@ Skipped: quatrefoil, because it is 4-fold symmetric (H = V by construction).
   Render it, then print and measure one.
 - Cold-start BoTorch vs CMA (same small random starting set) remains open.
 - Log each adaptive pick's prediction in the study journal (open issue).
+
+## 6. Night C revised and run (15 Nov ~10:00, owner review of the seeds)
+
+The extreme seeds (8-lobe ridges, salmon X flutes, petal X, superformula X) were dropped before any GPU time: real
+ATH-style waveguides are smooth OS/R-OSSE profiles with rounded-rectangle mouths, and sharp features raise
+diffraction (Geddes). Renders: `img_home_landscape_seeds_v2_2026-11-15.png`. Screen results (80 each, lower J is better):
+
+| Cell | Best screen J | Note |
+|---|---|---|
+| `hl__osse_rrect_morph_v7` (ATH-style OSSE, rounded-rect landscape mouth) | **3.99** | only new family near the ext-throat winner (3.10) |
+| `hl__ath_core_petal_hvlaw_v7` (gentle petals) | 5.32 | |
+| `hl__lecleach_iwata_ar_landscape_v7` | 19.4 | beam narrows with frequency |
+| `hl__es_style_rollback_v7` | 20.9 | same |
+| `hl__biradial_es_style_v7` (ES450-style) | refused | throat not round (1.03-1.05x ellipse area, tolerance 0.03): generator fix needed |
+
+The parallel rolled-rect / Crowe-section / section-pucker pilots scored 22.8-29.4: same brief, but the mouth is frozen
+small (Crowe 417 x 203 mm, 205 mm deep), so the vertical is uncontrolled below ~1.5 kHz and both beams keep narrowing.
+
+## 7. Nights D and E (15 Nov 14:00; ~7 h of GPU)
+
+Night B trained on 0 rows (encoder bug, see CONTINUITY 15 Nov 14:25) and solved nothing. Fixed, then:
+
+| Night | Jobs | Purpose |
+|---|---|---|
+| D `home_landscape_d_2026-11-15` (13:54) | BO scalar, TuRBO, Pareto (60 + 6 each) on ext-throat; Crowe x96 cut live (`cut_jobs.ps1`) | the BO comparison night B should have been |
+| E `home_landscape_e_2026-11-15` (after D) | TuRBO s62001 rerun (night D's arm stopped at 21/60: a GPU-marked test run killed the shared worker 14:19-14:30) -> CMA x100: ext-throat s9012, s3456; OSSE rounded-rect s5678, s9012, s3456 -> verify top 3 of each + night C's OSSE run -> cohort rebuild -> BO round 2 (scalar, TuRBO x2, Pareto) | grow both cohorts (BO solves do not feed the cohort), get OSSE rounded-rect past 100 rows, then BO on the bigger ext-throat cohort |
+
+**Rule (owner, 15 Nov): BoTorch only on a typology with existing data.** `prepare_study.py --min-rows` (default 100).
+
+Next after E: register `hl__osse_rrect_morph_v7` as a BO task (code change, only while no study is queued), fix the
+biradial throat, then pick the home horn on verify J + `hifi_rescore.py --verify`.

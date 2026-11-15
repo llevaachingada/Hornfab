@@ -1,5 +1,32 @@
 # CONTINUITY
 
+## 2026-11-15 (14:25 local) - BO NIGHT B WAS EMPTY (ENCODER BUG, FIXED); NIGHTS D + E QUEUED; BO DATA GATE
+
+- **Night B never solved.** `bo/data.py` refused every row with `morph_target != 1`; the landscape task has the morph off
+  (`morph_target = 0`, where `morph_exponent` is just as inert), so the cohort's 136 usable rows became 0 training rows,
+  `prepare_study` raised `needs_initial_data`, and the three `studies.cli run` jobs exited 0 in ~1 s (package missing).
+  Fix: accept `morph_target` 0 or 1. Training set now 136/136; 102 BO tests pass; prep dry run ok.
+- **GPU idle 13:36-13:54**: nights A, B, C and the rolled-rect / Crowe-section / section-pucker pilots had all drained.
+- **Night D** (`home_landscape_d_2026-11-15`, started 13:54): the three BO arms rerun (scalar done 19 min, 60+6 solves),
+  then Crowe ES600 x96. **TuRBO stopped at 21/60** (3 `worker_exit` ConnectionResets): a full local pytest run without CI's
+  `-m "not slow and not gpu and not crosscheck"` filter ran a warm-worker GPU test mid-night and killed the shared host
+  (Pareto lost 1 solve and continued). Rerun prepended to night E. Lesson: while a GPU night runs, only the CI-filtered suite.
+  The Crowe jobs are cut live by the new `tools/night_queue/cut_jobs.ps1` (the runner reads a night
+  file once). **Night E** chained behind D (~6 h): 5 CMA x 100 (ext-throat x2, OSSE rounded-rect x3), verify top 3 of each
+  plus night C's OSSE run, cohort rebuild, BO round 2 (scalar, turbo, pareto, turbo) on ext-throat.
+- **Why the Crowe / rolled-rect / Le Cleach / ES-rollback families score 19-29 vs 3.1**: same brief and objective as the
+  winners, so the scoring is fair. They are undersized (Crowe mouth frozen at 417 x 203 mm, 205 mm deep; V pattern
+  control lost below ~1.5 kHz) and their beams keep narrowing with frequency (dislope 8-10 vs 0.02; H 90->46 deg,
+  V 137->41 deg). No further GPU on them until a cell lets the size grow into the 600 x 480 x 480 envelope.
+- **ES450-style biradial** (`hl__biradial_es_style_v7`): 17/19 screens refused, throat not round (area 1.03-1.05x an
+  ellipse; `mesh/throat_check.py` tolerance 0.03). Needs a generator change (round throat blend before the per-plane
+  laws diverge); not queued.
+- **Owner rule: BoTorch only on typologies with existing data.** `tools/bo_compare/prepare_study.py --min-rows`
+  (default 100) refuses before any study exists. Study rows do not enter `study_cohort`, so extra BO rounds need fresh
+  CMA data first. Noted in the `hornlab-night-queue` skill.
+- Also committed: the 2026-11-14 search-economy preflight (`tools/search_preflight.py`, skill) and the rolled-family
+  generator work from the parallel sessions, after the full offline suite passed.
+
 ## 2026-11-15 - SECTION REFERENCE WITH H/V PUCKERING, VALIDATED / RUNNING
 
 - Added a separate original H/V mouth-relief extension of the corrected section reference;
@@ -79,6 +106,31 @@
 - Seed gallery: `docs/renders/2026-11-15-rolled-rect/` (15 original renders, five angles, responsive
   synchronized comparison and accessible enlargement). Acoustic performance remains unmeasured.
 
+
+## 2026-11-14 (23:09 local) - SEARCH-ECONOMY PREFLIGHT: THE "BEST AT n=0" GATE (skill + tool)
+
+- Added the reusable gate behind the 22:5x night result: `.claude/skills/hornlab-search-economy/SKILL.md`
+  (six pre-flight questions: seed-in-box, nested-incumbent headroom, sigma/budget power, refusal economy,
+  graded inertness, A/B attribution) and `tools/search_preflight.py` +
+  `tests/test_tools_search_preflight.py` (12 pass, offline). Numbers are derived from the config and the
+  `--from-runs` history; there is no per-run threshold table.
+- What it computes: seed-in-box HARD (`DesignSpace.normalize()` clips silently while eval 0 scores the
+  unclipped seed); `no_headroom` including the nested case (same seed on every shared knob, only new keys
+  added - the H1 9-knob config vs the 6-knob `51328c` prior); prior top-k spread -> recommended sigma and
+  chi-square expected hits (`sigma_too_large`, `low_hits`); `--samples N` uniform box probe through the real
+  validator (refusal fraction/kinds, labelled as an upper bound away from the seed because CMA concentrates
+  near it); generated-family history fallback (`params.grid.knobs`, because `warmstart.mean_and_sigma` cannot
+  read grid rows today); and `--ab` matched-pair / inactive-key / binding-key / added-region reporting. Exit 1
+  on hard faults, `--strict` refuses warnings.
+- Regressions pinned from this night: `sab__lecleach_fc540_T_narrow.yaml` seed `g_T=0.8` outside
+  `[0.687, 0.777]` (HARD); H1 nested `no_headroom` (prior J 3.2325); L1 ctrl vs fc540 `sigma_too_large`
+  (spread 0.017 vs sigma0 0.25), `low_hits` (0.02 expected), `ab_treatment_misses_binding_key`
+  (`g_stop_deg` at lo 120.338, treatment moved `g_fc_hz`), and the added [540,600) region as INFO (the
+  fc540 run did sample it: 48/125 evals below 600).
+- Wired into the process: `hornlab-night-queue` launch step 4, `hornlab-shape-check` hand-off,
+  `docs/INDEX.md`, `docs/CODE_MAP.md`, `AGENTS.md` OpenCode skill list, fixer grant in
+  `.opencode/oh-my-opencode-slim.json`. `run_campaign_night.py --dry-run` deliberately unchanged for now
+  (manual gate first). No solve/config change; no GPU time.
 
 ## 2026-11-14 (22:5x local) - SUGGESTION A/B NIGHT, HI-FI SCORE PROBE, BO-VS-CMA PREP; NIGHT RE-ORDERED
 
