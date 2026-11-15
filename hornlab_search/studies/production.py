@@ -46,6 +46,43 @@ def _write(path, value):
     os.replace(temporary, path)
 
 
+#: Policies the production worker can execute.  Pareto additionally needs frozen bindings.
+PRODUCTION_POLICIES = ('scalar', 'turbo', 'pareto')
+
+
+def pareto_bindings(service, sid, proposal=None):
+    '''Return the frozen Pareto bindings or raise ``Unavailable`` naming what is missing.
+
+    Requires the proposal to bind a ``pareto_metrics`` artifact (dependency hash) that carries
+    the frozen metric policy (payload + matching hash), the frozen hypervolume reference and
+    complete per-row metric observations for the training cohort.
+    '''
+    proposal = proposal if proposal is not None else _json(service, sid, 'proposal')
+    binding = proposal.get('pareto') if isinstance(proposal, dict) else None
+    if not isinstance(binding, dict) or not binding.get('pareto_metrics'):
+        raise Unavailable('pareto proposal does not bind a frozen pareto_metrics artifact '
+                          '(metric policy, reference and cohort metric observations)')
+    meta = service.get_artifact_metadata(sid, 'pareto_metrics')
+    if meta.get('status') != 'available' or meta.get('sha256') != binding['pareto_metrics']:
+        raise Unavailable('pareto_metrics artifact is missing or differs from the proposal binding')
+    payload = json.loads(service.store.read_artifact(meta['sha256']))
+    policy = payload.get('metric_policy') or {}
+    text = policy.get('payload_json')
+    if (not isinstance(text, str)
+            or hashlib.sha256(text.encode()).hexdigest() != policy.get('physical_metric_spec_hash')):
+        raise Unavailable('frozen metric policy is missing or its hash does not match')
+    reference = payload.get('reference') or {}
+    point = reference.get('ref_point') or ()
+    if (reference != binding.get('reference') or len(point) != 2
+            or not all(isinstance(v, (int, float)) and math.isfinite(v) for v in point)):
+        raise Unavailable('frozen hypervolume reference is missing or differs from the proposal')
+    if binding.get('metric_spec_hash') != policy.get('physical_metric_spec_hash'):
+        raise Unavailable('proposal metric spec hash differs from the frozen metric policy')
+    if not payload.get('observations'):
+        raise Unavailable('no complete cohort metric observation is bound')
+    return payload
+
+
 def execution_capability(service, package, *, root):
     """Validate the immutable inputs without creating a backend or writing files."""
     try:
@@ -80,8 +117,10 @@ def execution_capability(service, package, *, root):
             raise Unavailable('execution requires a timezone-aware deadline')
         if datetime.fromisoformat(package['deadline'].replace('Z', '+00:00')) <= datetime.now(timezone.utc):
             raise Unavailable('execution deadline has expired')
-        if (package.get('proposal_policy') or {}).get('policy') != 'scalar':
-            raise Unavailable('production worker currently supports scalar policy only')
+        policy = (package.get('proposal_policy') or {}).get('policy')
+        if policy not in PRODUCTION_POLICIES:
+            raise Unavailable('production worker supports scalar, turbo and pareto policies only; '
+                              f'got {policy!r}')
         interpreter = study_interpreter(root)
         if interpreter.resolve() != Path(sys.executable).resolve():
             probe = subprocess.run([str(interpreter), '-c',
@@ -140,6 +179,18 @@ def execution_capability(service, package, *, root):
         for key, value in package.get('dependency_pins', {}).items():
             if current_pins.get(key) != value:
                 raise Unavailable(f'dependency pin changed: {key}')
+        if policy != 'scalar':
+            proposal = _json(service, study['id'], 'proposal')
+            if proposal.get('proposal_policy') != policy:
+                raise Unavailable('proposal artifact policy differs from the package policy')
+            if policy == 'turbo':
+                from hornlab_search.bo.turbo import TurboState
+                record = proposal.get('trust_region')
+                if not isinstance(record, dict) or record.get('state_after') is None:
+                    raise Unavailable('turbo proposal lacks its persisted trust-region state')
+                TurboState.from_dict(record['state_after'])
+            if policy == 'pareto':
+                pareto_bindings(service, study['id'], proposal)
         return {'status': 'ok', 'reason': None, 'detail': None}
     except (Unavailable, KeyError, ValueError, OSError) as exc:
         return {'status': 'capability_missing', 'reason': 'production_inputs_unavailable', 'detail': str(exc)}
@@ -241,8 +292,33 @@ def build_worker(service, package, *, root, backend_factory=None):
         def _propose_through_policy(self):
             if self.history.proposal_index == 0:
                 proposal = _json(service, package['study_id'], 'proposal')
+                if self.policy == 'turbo':
+                    self.adopt_trust_region(proposal.get('trust_region'))
                 return proposal.get('candidate') or proposal.get('proposal')
             return super()._propose_through_policy()
+
+        def _pareto_metric(self, design_hash):
+            '''Measure this screen's physical errors with the SAME frozen metric policy.'''
+            from hornlab_search.bo.metrics import FrozenSupport, measure_metrics
+            from hornlab_search.objective import replay
+            from hornlab_search.solve.cache import load_response
+            frozen = FrozenSupport(pareto_payload['metric_policy']['payload_json'],
+                                   pareto_payload['metric_policy']['physical_metric_spec_hash'])
+            ddir = run_root / 'screen' / 'designs' / str(design_hash)
+            try:
+                response = load_response(ddir / 'response.npz')
+                metrics = replay._metrics_from_json(
+                    json.loads((ddir / 'metrics.json').read_text(encoding='utf-8')))
+                if metrics is None:
+                    raise ValueError('metrics.json missing')
+                obs = measure_metrics(frozen, metrics, response)
+            except (OSError, ValueError, TypeError, KeyError) as exc:
+                return {'status': 'capability_missing', 'reason': f'stored screen arrays: {exc}',
+                        'physical_metric_spec_hash': frozen.physical_metric_spec_hash,
+                        'coverage_deg': None, 'ripple_db': None}
+            return {'status': obs.status, 'reason': obs.reason,
+                    'physical_metric_spec_hash': obs.physical_metric_spec_hash,
+                    'coverage_deg': obs.coverage_deg, 'ripple_db': obs.ripple_db}
 
         def next_candidate(self, state):
             candidate = super().next_candidate(state)
@@ -351,14 +427,24 @@ def build_worker(service, package, *, root, backend_factory=None):
             # Successful cached responses are measured evidence under the current score.
             if result['eligible']:
                 result['outcome'] = 'success' if calls[0] else 'cached'
+            if self.policy == 'pareto' and result['eligible']:
+                result['pareto_metric'] = self._pareto_metric(evaluation.design_hash)
             result['attempt_id'] = attempt_id
             _write(run_root / 'results' / (candidate['solve_id'] + '.json'), result)
             return result
 
     seed = int((_json(service, package['study_id'], 'model')).get('seed', 0))
+    policy = (package.get('proposal_policy') or {}).get('policy') or 'scalar'
+    training = _training(service, package['study_id'])
+    pareto_payload = pareto_training = None
+    if policy == 'pareto':
+        from .builders import pareto_training_from_artifacts
+        pareto_payload = pareto_bindings(service, package['study_id'])
+        pareto_training = pareto_training_from_artifacts(training, pareto_payload)
     evaluator = WorkerEvaluator(service, package, config=cfg, space=space, encoding=encoding,
-        training_set=_training(service, package['study_id']), pool=_pool(service, package['study_id']),
-        seed=seed, audit_seed=seed, evaluate_fn=lambda *args: None)
+        training_set=training, pool=_pool(service, package['study_id']),
+        seed=seed, audit_seed=seed, evaluate_fn=lambda *args: None, policy=policy,
+        pareto_training=pareto_training)
     return evaluator, lane, ProductionJournal(service)
 
 

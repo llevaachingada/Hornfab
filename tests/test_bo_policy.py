@@ -124,7 +124,7 @@ def test_export_surface_is_complete():
         assert hasattr(bo, name), name
     assert PARETO_POLICY == "pareto_pool_v1"
     assert TrustRegion is bo.TrustRegion
-    assert PROPOSAL_POLICIES == ("scalar", "pareto", "cma_seed", "exploration")
+    assert PROPOSAL_POLICIES == ("scalar", "pareto", "cma_seed", "exploration", "turbo")
     assert set(PROPOSAL_POLICY_LABELS) == set(PROPOSAL_POLICIES)
     assert "trade-off" in PROPOSAL_POLICY_LABELS["pareto"]
     assert "seed" in PROPOSAL_POLICY_LABELS["cma_seed"].lower()
