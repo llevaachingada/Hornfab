@@ -72,7 +72,9 @@ def plan(rows: dict[str, dict], jobs: list[str], top: int, top_for: dict[str, in
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--night", required=True, help="night name (runs/nights/<night>/summary.jsonl)")
+    ap.add_argument("--night", required=True, action="append",
+                    help="night name (runs/nights/<night>/summary.jsonl); repeatable for a re-ordered "
+                         "queue split over several nights - later nights win for a repeated job id")
     ap.add_argument("--jobs", required=True, help="comma-separated job ids of that night")
     ap.add_argument("--top", type=int, default=5, help="designs per job (default 5)")
     ap.add_argument("--top-for", action="append", default=[], metavar="JOB=N",
@@ -96,7 +98,9 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         top_for[job] = int(n)
     jobs = [j.strip() for j in a.jobs.split(",") if j.strip()]
-    rows = latest_rows(Path(a.nights_dir) / a.night / "summary.jsonl")
+    rows: dict[str, dict] = {}
+    for night in a.night:
+        rows.update(latest_rows(Path(a.nights_dir) / night / "summary.jsonl"))
     todo, skipped = plan(rows, jobs, a.top, top_for)
     for job, why in skipped:
         print(f"[verify_night_jobs] SKIP {job}: {why}", flush=True)
@@ -105,7 +109,7 @@ def main(argv: list[str] | None = None) -> int:
         env["HORNLAB_FREQ_BATCH_SIZE"] = str(a.freq_batch_size)
     print(f"[verify_night_jobs] HORNLAB_FREQ_BATCH_SIZE={env.get('HORNLAB_FREQ_BATCH_SIZE', '<unset>')}"
           f" memwatch={'off' if a.no_memwatch else 'on'}", flush=True)
-    mw_dir = Path(a.nights_dir) / a.night / "memwatch"
+    mw_dir = Path(a.nights_dir) / a.night[-1] / "memwatch"
     failed = []
     for job, run_dir, n in todo:
         argv_v = [str(CLI), "verify", "--run", run_dir, "--top", str(n)]
