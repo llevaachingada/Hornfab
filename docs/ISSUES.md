@@ -1,5 +1,10 @@
 # ISSUES
 
+Local-only, 2026-11-15 (**verification clarification**):
+- Confirmed section-study verification refines the frequency grid (18 to29 points), with
+  unchanged mesh spacing. Score sensitivity is frequency-related; spatial convergence is untested.
+
+
 Local-only, 2026-11-15 (**horn pilot completion; no GitHub issue state changed**):
 - Done: four searches, 128/128 valid screen evaluations, successful top1 verification
   for every arm; both controllers exited0. Results and winner renders published.
