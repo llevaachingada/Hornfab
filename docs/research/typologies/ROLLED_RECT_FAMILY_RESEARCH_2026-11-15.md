@@ -15,9 +15,9 @@ Owner brief remains the HF1440, 36 mm round exit, 700 Hz crossover, 80 H x 50 V 
 | [ES-600 No.1978](https://josephcrowe.com/products/es-600-bi-radial-wood-horn-no-1978) | Photos of finished/raw wood and revised mounting; 416 x 203 x 198 nominal dimensions | primary (author, commercial); separate revision |
 | [ES-600 No.3150](https://josephcrowe.com/products/es-600-biradial-horn-no-3150-baffle-mount-version) | Baffle-mounted variant; 400 x 260 x 183, 9 degree H and 7 degree V throat half-angles | primary (author, commercial); not transferable specifications for legacy model |
 | [Crowe circular baffle](https://josephcrowe.com/products/circular-baffle-for-fostex-fe108ez-drawing-plans), [actual linked white paper](https://cdn.shopify.com/s/files/1/0142/2848/8292/files/ES_Circular_Baffle_White_Paper.pdf?19=) | Describes progressively decreasing curve radius; white paper is comparative measurements, not ES construction math | primary (author); no disclosed ES equation found |
-| [Batík OS-SE paper](https://at-horns.eu/release/OS-SE%20Waveguide.pdf) | OS throat plus smooth termination and azimuth-dependent parameters/morphing | primary (author) |
-| [Batík R-OSSE rev7](https://at-horns.eu/release/R-OSSE%20Waveguide%20rev7.pdf) | Parametric folded contour, contrasted with single-valued OS-SE r(z) | primary (author); geometrical baseline, not Crowe construction |
-| [Batík Tritonia design](https://at-horns.eu/tritonia.html) | Published azimuth-dependent OS-SE coverage/termination, followed by rectangle morph; enclosure dependence | primary (author); attribution reference, not a claim all ATH mouths share one law |
+| [BatÃƒÂ­k OS-SE paper](https://at-horns.eu/release/OS-SE%20Waveguide.pdf) | OS throat plus smooth termination and azimuth-dependent parameters/morphing | primary (author) |
+| [BatÃƒÂ­k R-OSSE rev7](https://at-horns.eu/release/R-OSSE%20Waveguide%20rev7.pdf) | Parametric folded contour, contrasted with single-valued OS-SE r(z) | primary (author); geometrical baseline, not Crowe construction |
+| [BatÃƒÂ­k Tritonia design](https://at-horns.eu/tritonia.html) | Published azimuth-dependent OS-SE coverage/termination, followed by rectangle morph; enclosure dependence | primary (author); attribution reference, not a claim all ATH mouths share one law |
 | [Keele patent US4308932A](https://patents.google.com/patent/US4308932A/en) | Distinct wall-pair/surface-of-revolution bi-radial construction and throat transition | primary (inventor); no evidence Crowe uses that construction |
 | [Geddes waveguide chapter](https://www.gedlee.com/downloads/AT/Chapter_6.pdf), [What is a Waveguide](https://www.gedlee.com/Papers/What%20is%20a%20Waveguide.pdf) | Mouth diffraction, wavefront/mode concerns; area-only horn equations do not determine full directivity | primary (author); physical context |
 
@@ -74,7 +74,7 @@ An unchanged existing production config supplies mesh resolution and brief only.
    `psi=atan2(y/v,x/h)` and W is a quintic window beginning after the selected turn.
    Positive A advances the centres of the four walls relative to their diagonal junctions.
    This leaves x/y unchanged and cannot produce a star silhouette. Zero A is the base
-   family exactly. It is an ATH-influenced experiment, not Batík's Tritonia formula.
+   family exactly. It is an ATH-influenced experiment, not BatÃƒÂ­k's Tritonia formula.
 
 Reference case for independent checks, b=0.7 (unit scale):
 
@@ -160,3 +160,97 @@ The full offline suite is recorded separately; the concurrent GPU lane was left 
 The initial publication gallery includes all three seeds from five camera angles. The local
 side-by-side source comparison stays in scratch; public assets contain only our own renders.
 See [the queue plan](../../queue/ROLLED_RECT_PLAN_2026-11-15.md).
+
+## Section-constrained ES-600 study (owner correction, 2026-11-15)
+
+The owner rejected the first front geometry and directed inspection of cut sections. A proposed
+bowed four-panel loft was also rejected locally and was never queued or published. The correction
+uses the actual [ES-600 detail drawing 1148-01-001](https://cdn.shopify.com/s/files/1/0142/2848/8292/products/1148-01-001.jpg?v=1586452428)
+from the [manufacturer CAD page](https://josephcrowe.com/products/es-600-bi-radial-horn-3d-cad-file).
+Its B-B horizontal cut and C-C vertical cut are different profiles, not scaled copies. The vertical
+passage remains shallow for most of its depth and then turns rapidly up around the forward lip.
+The horizontal flare spreads much earlier and its forward extremum is substantially behind the
+vertical one. A thin offset tube also misses the material behind the rolled lip shown in the cuts.
+
+Additional primary checks were the author's [ES-800 vector section drawing](https://cdn.shopify.com/s/files/1/0142/2848/8292/files/ES-800.PDF?21=),
+[ES-450 cut drawing](https://cdn.shopify.com/s/files/1/0142/2848/8292/files/1939-002_480x480.png?v=1678724129),
+[ES-250 partial/full wrap explanation](https://josephcrowe.com/products/es-250-biradial-no-2213-3d-cad-files-plans),
+[Arai original design material](https://www.araihorn.com/p/horn-design.html?m=1), and
+[Keele's bi-radial construction patent](https://patents.google.com/patent/US4308932A/en).
+The latter supplies a documented swept-wall construction, not evidence that Crowe uses it.
+ES-800 dimensions (297 x 120 x 146) and ES-450 dimensions are not substituted for legacy ES-600.
+The extra source files and enlarged cuts are retained locally in
+`scratch/2026-11-15_crowe_panel/section-references/`; copyrighted originals are not republished.
+
+### Construction and identifiable parameters
+
+`examples/prototypes/rolled_rect_2026-11-15/crowe_section_reference.yaml` records sparse manual
+radius/depth readings in millimetres, the reference dimensions, and the exact source URL.
+Raster reading uncertainty is of order 1-3 mm; these are not original CAD control points. PCHIP
+interpolates each meridian independently. Width, height, depth and an H depth scale transform them;
+the source 17.78 mm throat is adapted to the owner's 18 mm radius. A short blend preserves the
+owner's isotropic 2 degree exit angle, rather than silently using the drawing's 17/12 degree
+included angles. The displayed section figure plots the generated surfaces, including this blend
+and the reconstructed body, over the drawing readings.
+
+For horizontal samples `(xH,zH)` and vertical samples `(yV,zV)`, choose positive pivot P such that
+`max(hypot(xH,zH+P)) = P+max(zV)`. The implementation calculates
+`P=max((xH^2+zH^2-DV^2)/(2*(DV-zH)))`. It refuses invalid or multiply peaked inverse domains.
+Invert the ascending and returning horizontal-radius branches separately at `R=P+zV` to obtain
+junction `(xc,zc)`. The two unrounded walls are:
+
+- Side wall: `x=xc`, `z=zc`, varying y.
+- Top wall: `y=yV-d*(x/xc)^2`, `z=sqrt(R^2-x^2)-P`, varying x.
+
+Here `d=crown_mm*S((yV-r0)/(H/2-r0))`; the bounded transverse crown fits the front-view arch while
+preserving the centre vertical cut. This crown is an **inferred fitting degree of freedom**, not
+published ES math. The exact ideal join satisfies `xc^2+(zc+P)^2=R^2` and
+`yc=yV-d`. Both outward and returning branches are retained. The eye-shaped front consists of
+wall transitions and rolled-surface silhouette; it is not a star-shaped mouth boundary.
+A finite power-32 radial smooth minimum rounds the join, using the same partition of unity for
+axial blending. The ideal join is shown in the chart, rather than falsely labelled as an exact
+crease of the rounded model. The small initial interval where the sweep inverse does not exist
+has zero swept-wall participation, followed by the driver-preserving blend.
+
+The vertical outer flat is continued only far enough to meet the measured horizontal roll end.
+An explicit rear annulus and exterior body close the same model for rendering and BEM. Its rear
+corner radius is four wall thicknesses; exterior fillets and transverse details are inferred.
+No cosmetic solid or copied source image is substituted for the solved geometry. This remains
+an approximate reconstruction, **not an exact copy of Crowe CAD or a recovered ES equation**.
+
+### Validation and bounded search
+
+Separate module `tools/geometry/crowe_panel.py` and entry point `crowe_panel_cli.py` leave all bytes
+and recipe identities of the original three arms unchanged. The new saved recipe includes its
+schema, driver and implementation digest, now also covering the reference YAML. The adapter
+supplies the explicit body only for this schema and refuses an additional enclosure. Installed
+packages and `hornlab_search/` source remain unchanged.
+
+```text
+| rr__crowe_panel_es600_v7 | yes | 3197 / 6000 | 417 x 203 | 201 | fits | round, matches the exit |
+9 focused section-study tests passed (CPU only).
+126 related geometry, grid, mesh-adapter, catalog and replay tests passed in 46.183 s.
+64-point uniform box feasibility: 63 valid, 1 invalid_geometry, no unvalidated samples.
+```
+
+The initial power-law-free sharp intersection made excessive CAD facets; rounding the geometric
+join removes that artificial seam. The final seed uses 49 azimuth rows and 96 stations, as the
+original pilot. A doubled sampling check agrees at shared stations to 0.03 mm; generated centre
+cuts track source sections beyond the throat blend within a 0.6 mm 99th-percentile sample error.
+This establishes surface construction and mesh feasibility, not acoustic convergence or exact
+reference reconstruction. The 6000 screen and 24000 verify DOF caps and epw=6 remain unchanged.
+
+The independent 32-attempt local search varies depth [190,206] mm, H depth scale [0.97,1.03],
+and crown [16,24] mm at seed 1234, sigma0 0.15, popsize 8. It starts from a new visual seed,
+not an acoustic incumbent; headroom and expected basin hits are unmeasured. Predict best-at >0
+and first improvement within the first generation (n=1..8); this is a hypothesis to compare with
+readout. Uniform-box refusal estimate 1/64 predicts about 31.5 valid attempts of 32. Flat invalid
+penalties are explicit; no claim of a graded mesh-refusal signal. This smaller ES-600 study is
+not an equal-size acoustic A/B against the original ES-450-proportioned surfaces.
+
+The original night started while this correction was developed. Its live file/configs were not
+edited. The follow-up is a separate `home_crowe_sections_2026-11-15` night, waiting for the
+original controller, with the section study first and then top-1 higher-resolution verification.
+
+Detached follow-up controller: 31224, WMI parent 35188, waiting on original controller 42084.
+Log: `runs/nights/queue_home_crowe_sections.log`. No concurrent solve was started.

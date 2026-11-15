@@ -1,5 +1,13 @@
 # ISSUES
 
+Local-only, 2026-11-15 (**ES-600 section correction; no GitHub issue state changed**):
+- Done: independent drawing readings, section-based surface/body, 126 CPU checks, 63/64
+  sampled feasibility, four-seed gallery with cut views and versioned replay.
+- Queued: home_crowe_sections_2026-11-15, search32 + top1 verify, controller31224 after42084.
+- Open: acoustic verification/readout, exact intermediate reference sections and exterior
+  fillets, acoustic mesh convergence, and print/structural acceptance. Reconstruction is approximate.
+
+
 Local-only, added 2026-11-15 (**original rolled-rectangle geometry pilot; no GitHub issue state changed**):
 - Done: source research/corrections, original base + moderate/strong H/V-pucker geometry,
   round-coupling/envelope/mesh checks, 64-sample feasibility per box, versioned replay adapter,
