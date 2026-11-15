@@ -23,7 +23,9 @@ from tools.analysis import catalog
 from tools.analysis.offline_scores import iter_dataset_rows
 
 
-def prepare(config, dataset, out, *, limit=256):
+def prepare(config, dataset, out, *, limit=256, run_ids=None):
+    """``run_ids`` (optional) keeps only records whose catalog run id is listed, so a matched
+    comparison can train on exactly one prior run (e.g. never a previous study's own rows)."""
     config, dataset, out = map(lambda p: Path(p).resolve(), (config, dataset, out))
     if out == dataset or dataset in out.parents:
         raise ValueError('output must be outside the source dataset')
@@ -42,6 +44,9 @@ def prepare(config, dataset, out, *, limit=256):
         entry = catalog._record_entry(dataset, {'shard': shard, 'name': f'shard-{shard:04d}.jsonl'},
                                       {'row': row, 'meta': meta, 'line': row + 1, 'offset': None},
                                       index_entry=None)
+        if run_ids is not None and entry.get('run_id') not in run_ids:
+            excluded['other_runs'] += 1
+            continue
         # bo.data joins catalog locators by the explicit dataset root's name.
         entry['source']['root'] = dataset.name
         prov = entry['provenance']
@@ -77,7 +82,8 @@ def prepare(config, dataset, out, *, limit=256):
                'selection': {'group': list(key), 'group_count': len(groups),
                              'dependency_pins': {k: v for k, v in selected[0][2].get('lib_shas', {}).items()
                                                  if k in ('hornlab_mesher', 'hornlab_beat_bem', 'hornlab_plots')},
-                             'available': len(selected), 'limit': limit, 'excluded': dict(excluded)},
+                             'available': len(selected), 'limit': limit, 'excluded': dict(excluded),
+                             'run_ids': sorted(run_ids) if run_ids is not None else None},
                'counts': dict(counts), 'no_backend_calls': True}
     (out / 'offline_scores.json').write_text(json.dumps(payload, allow_nan=False, indent=2), encoding='utf-8')
     return {'source': {'scores_json': str(out / 'offline_scores.json'),
@@ -91,10 +97,13 @@ def main(argv=None):
     parser.add_argument('--dataset', required=True)
     parser.add_argument('--out', required=True)
     parser.add_argument('--limit', type=int, default=256)
+    parser.add_argument('--run-id', action='append', default=None,
+                        help='keep only records of this catalog run id (repeatable)')
     args = parser.parse_args(argv)
     if args.limit < 1:
         parser.error('--limit must be positive')
-    print(json.dumps(prepare(args.config, args.dataset, args.out, limit=args.limit), indent=2))
+    print(json.dumps(prepare(args.config, args.dataset, args.out, limit=args.limit,
+                             run_ids=set(args.run_id) if args.run_id else None), indent=2))
     return 0
 
 

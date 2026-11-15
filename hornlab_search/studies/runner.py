@@ -93,7 +93,13 @@ def _validate(package, dry_run):
         if package.get(key) is None:
             raise ContractError(f'{key} required')
     budget = package.get('budget') or {}
-    for key, cap in (('screen_calls', 18), ('verify_calls', 6), ('total_calls', 24), ('attempts', 120)):
+    from .package import budget_caps
+    from .schema import StudyError
+    try:
+        caps = budget_caps(package)
+    except StudyError as exc:
+        raise ContractError(str(exc)) from exc
+    for key, cap in ((k, caps[k]) for k in ('screen_calls', 'verify_calls', 'total_calls', 'attempts')):
         value = budget.get(key)
         if type(value) is not int or value < 0 or value > cap:
             raise ContractError(f'invalid {key} cap')

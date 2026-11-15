@@ -49,7 +49,7 @@ _COMMANDS = {
     'propose': ({'--study'}, {'--root', '--key', '--config', '--brief', '--scores',
                               '--catalog', '--dataset-root', '--policy', '--seed', '--expected-revision'}),
     'package': ({'--study', '--out'},
-                {'--root', '--lane', '--deadline', '--key', '--revision'}),
+                {'--root', '--lane', '--deadline', '--key', '--revision', '--budget-profile'}),
     'run': ({'--package'}, {'--root', '--dry-run', '--execute', '--project-root'}),
     'reconcile': ({'--study'}, {'--root', '--project-root'}),
     'decide': ({'--study', '--payload'}, {'--root', '--key'}),
@@ -369,7 +369,8 @@ def _dispatch(command, values):
         package = prepare_run_package(
             service, values['--study'], expected_revision=expected,
             lane=values.get('--lane', 'cpu'), deadline=values.get('--deadline'),
-            idempotency_key=values.get('--key'))
+            idempotency_key=values.get('--key'),
+            budget_profile=values.get('--budget-profile', 'baseline'))
         _write_json(out, package)
         return {'path': str(out), 'package': package, 'package_id': package['package_id'],
                 'budget': package['budget'], 'lane': package['lane'],

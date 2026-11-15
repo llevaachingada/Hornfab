@@ -31,6 +31,25 @@ EXECUTION_BUDGET = {
     'attempts': 120,
 }
 
+#: Named budget profiles (2026-11-14, docs/queue/BO_VS_CMA_PLAN_2026-11-15.md). ``baseline`` IS the
+#: frozen bo-study-v1.1 budget above and stays the default: a package without ``budget_profile``
+#: must carry it exactly, as before. ``comparison-60`` exists ONLY for matched BO-vs-CMA campaigns at
+#: equal new-solve budget; a package selects it explicitly and the profile name is part of the
+#: package body, so its identity hash records the choice. Unknown profiles are refused.
+BUDGET_PROFILES = {
+    'baseline': dict(EXECUTION_BUDGET),
+    'comparison-60': {'screen_calls': 60, 'verify_calls': 6, 'total_calls': 66, 'attempts': 300},
+}
+
+
+def budget_caps(package) -> dict:
+    """The exact budget a package must carry: its named profile, ``baseline`` when absent."""
+    profile = (package or {}).get('budget_profile', 'baseline')
+    if profile not in BUDGET_PROFILES:
+        raise StudyError(f'unknown budget_profile {profile!r} (known: {sorted(BUDGET_PROFILES)})')
+    return dict(BUDGET_PROFILES[profile])
+
+
 REQUIRED_ARTIFACTS = ('snapshot', 'model', 'proposal')
 STATUS_NOTE = 'cheap-check-passed; mesh/acoustic eligibility unknown'
 # Include every executable input: replay, metric/scoring helpers, configuration,
@@ -176,8 +195,9 @@ def verify_package(package):
     if package.get('deadline_required') is not True:
         raise StudyError('package deadline_required must be true')
     _timezone_deadline(package.get('deadline'))
-    if package.get('budget') != EXECUTION_BUDGET:
-        raise StudyError('package budget must exactly match the frozen execution budget')
+    if package.get('budget') != budget_caps(package):
+        raise StudyError('package budget must exactly match its budget profile '
+                         '(the frozen execution budget unless budget_profile is set)')
     if package.get('status_note') != STATUS_NOTE:
         raise StudyError('package status_note must state cheap-check-only eligibility')
     proposal_policy = package.get('proposal_policy')
@@ -252,7 +272,7 @@ def _pins(explicit, spec, key):
 
 def prepare_run_package(service, study_id, *, expected_revision=None, lane='cpu',
                         deadline=None, idempotency_key=None, code_pins=None,
-                        dependency_pins=None, resolved_config=None):
+                        dependency_pins=None, resolved_config=None, budget_profile='baseline'):
     """Bind the current study revision and artifacts into an immutable package.
 
     ``expected_revision`` defaults to the current revision.  A concurrent manual
@@ -262,6 +282,8 @@ def prepare_run_package(service, study_id, *, expected_revision=None, lane='cpu'
     """
     if lane not in ('cpu', 'gpu'):
         raise StudyError('lane must be cpu or gpu')
+    if budget_profile not in BUDGET_PROFILES:
+        raise StudyError(f'unknown budget_profile {budget_profile!r} (known: {sorted(BUDGET_PROFILES)})')
     deadline = _timezone_deadline(deadline)
     study = service.get_study(study_id)
     revision = study['revision'] if expected_revision is None else expected_revision
@@ -297,7 +319,7 @@ def prepare_run_package(service, study_id, *, expected_revision=None, lane='cpu'
         'spec_hash': study['spec_hash'],
         'deadline_required': True,
         'deadline': deadline,
-        'budget': dict(EXECUTION_BUDGET),
+        'budget': dict(BUDGET_PROFILES[budget_profile]),
         'lane': lane,
         'code_pins': frozen_code,
         'dependency_pins': frozen_dependencies,
@@ -310,6 +332,8 @@ def prepare_run_package(service, study_id, *, expected_revision=None, lane='cpu'
         'artifacts': artifacts,
         'status_note': STATUS_NOTE,
     }
+    if budget_profile != 'baseline':     # baseline packages keep their exact historical body
+        body['budget_profile'] = budget_profile
     if not isinstance(body['resolved_config'], dict):
         raise StudyError('resolved_config must be an object')
 
@@ -332,7 +356,9 @@ __all__ = [
     'PACKAGE_SCHEMA',
     'PACKAGE_KIND',
     'EXECUTION_MODE',
+    'BUDGET_PROFILES',
     'EXECUTION_BUDGET',
+    'budget_caps',
     'STATUS_NOTE',
     'STOP_RULES',
     'RECOVERY_RULES',

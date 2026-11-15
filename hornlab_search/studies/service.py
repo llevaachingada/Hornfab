@@ -534,7 +534,9 @@ class DraftAttemptJournal:
         budget = package.get('budget')
         if not isinstance(budget, dict):
             raise StudyError('budget required')
-        for name, maximum in (('screen_calls', 18), ('verify_calls', 6), ('total_calls', 24), ('attempts', 120)):
+        from .package import budget_caps
+        caps = budget_caps(package)
+        for name, maximum in ((k, caps[k]) for k in ('screen_calls', 'verify_calls', 'total_calls', 'attempts')):
             if type(budget.get(name)) is not int or not 0 <= budget[name] <= maximum:
                 raise StudyError(f'invalid {name} budget')
         return deadline
