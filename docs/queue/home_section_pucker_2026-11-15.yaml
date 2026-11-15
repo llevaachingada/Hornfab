@@ -1,0 +1,55 @@
+night: home_section_pucker_2026-11-15
+lane: gpu
+jobs:
+- id: sp_control_s1234
+  kind: command
+  timeout_s: 5400
+  argv:
+  - .venv/Scripts/python.exe
+  - tools/geometry/section_pucker_cli.py
+  - search
+  - --config
+  - examples/typologies/section_pucker_2026-11-15/sp__control_v7.yaml
+  - --mode
+  - screen
+  - --budget
+  - '48'
+- id: sp_moderate_s1234
+  kind: command
+  timeout_s: 5400
+  argv:
+  - .venv/Scripts/python.exe
+  - tools/geometry/section_pucker_cli.py
+  - search
+  - --config
+  - examples/typologies/section_pucker_2026-11-15/sp__moderate_v7.yaml
+  - --mode
+  - screen
+  - --budget
+  - '48'
+- id: sp_strong_s1234
+  kind: command
+  timeout_s: 5400
+  argv:
+  - .venv/Scripts/python.exe
+  - tools/geometry/section_pucker_cli.py
+  - search
+  - --config
+  - examples/typologies/section_pucker_2026-11-15/sp__strong_v7.yaml
+  - --mode
+  - screen
+  - --budget
+  - '48'
+- id: sp_verify_top1_each
+  kind: command
+  timeout_s: 10800
+  argv:
+  - .venv/Scripts/python.exe
+  - tools/geometry/section_pucker_cli.py
+  - verify-night
+  - --night
+  - home_section_pucker_2026-11-15
+  - --jobs
+  - sp_control_s1234,sp_moderate_s1234,sp_strong_s1234
+  - --top
+  - '1'

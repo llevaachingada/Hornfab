@@ -1,5 +1,10 @@
 # Docs index
 
+[Section-based H/V pucker construction](research/typologies/SECTION_PUCKER_RESEARCH_2026-11-15.md),
+[three-arm queue plan](queue/SECTION_PUCKER_PLAN_2026-11-15.md), and
+[seed renders and measured bounds](renders/2026-11-15-rolled-rect/puckers/index.html).
+
+
 [Section-based ES-600 reconstruction, generated cuts and four-seed gallery](renders/2026-11-15-rolled-rect/index.html#sections),
 [reference research](research/typologies/ROLLED_RECT_FAMILY_RESEARCH_2026-11-15.md#section-constrained-es-600-study-owner-correction-2026-11-15),
 [separate follow-up queue](queue/home_crowe_sections_2026-11-15.yaml).
