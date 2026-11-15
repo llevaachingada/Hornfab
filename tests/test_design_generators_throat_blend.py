@@ -201,3 +201,31 @@ def test_envelope_short_blend_does_not_touch_the_zero_default():
         cfg.generator, {**space.seed_knobs, "h_throat_blend_mm": 8.0}, cfg.brief)
     assert blended != space.seed.params
     assert GENERATOR_ERROR_KEY not in blended
+
+
+# ---------------------------------------------------------------------------
+# Biradial (added 2026-11-15): blend from the driver exit angle into US4308932A
+# ---------------------------------------------------------------------------
+
+_BIR = {"h_rm_mm": 280.0, "h_a_deg": 38.0, "h_n": 5.5}
+
+
+@requires_mesher
+def test_biradial_without_blend_is_unchanged_and_starts_at_its_full_angle():
+    m = _meridian("biradial", dict(_BIR), 300.0)
+    ref = P.biradial_contour(R0, 280.0, 300.0, 38.0, 5.5)
+    assert np.array_equal(m.r_mm, ref.r_mm) and np.array_equal(m.z_mm, ref.z_mm)
+    assert m.theta_deg[0] == pytest.approx(38.0)        # the throat kink the blend removes
+
+
+@requires_mesher
+def test_biradial_blend_starts_at_driver_angle_and_lands_on_the_patent_contour():
+    L_b = 30.0
+    m = _meridian("biradial", {**_BIR, "h_throat_blend_mm": L_b}, 300.0)
+    ref = P.biradial_contour(R0, 280.0, 300.0, 38.0, 5.5)
+    assert m.r_mm[0] == pytest.approx(R0)
+    assert m.theta_deg[0] == pytest.approx(A0, abs=1e-9)
+    beyond = m.z_mm > L_b + 1e-6
+    assert np.allclose(m.r_mm[beyond], np.interp(m.z_mm[beyond], ref.z_mm, ref.r_mm), atol=1e-6)
+    assert m.r_mm[-1] == pytest.approx(280.0)
+    assert np.all(np.diff(m.r_mm) > 0) and np.all(m.theta_deg < 90.0)
