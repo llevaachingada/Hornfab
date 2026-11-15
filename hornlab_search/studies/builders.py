@@ -68,6 +68,14 @@ HOME_OBJECTIVE_VERSION = 7
 HOME_SEED5678_TASK_NAME = "p80x60__osse_ext_throat_home700_v7_seed5678"
 HOME_SEED5678_CONFIG = (HOME_CONFIG.parent / "p80x60__osse_ext_throat_700_v7_seed5678.yaml")
 
+# Home LANDSCAPE task (registered 2026-11-15, objective v7): 80H x 50V, no K-law mouth, vertical half-weighted.
+# Cohort comes from night home_landscape_a_2026-11-15 (CMA seeds of this exact config).
+LANDSCAPE_TASK_NAME = "hl__ext_throat_hvlaw_v7"
+LANDSCAPE_CONFIG = (REPO_ROOT / "examples" / "typologies" / "home_landscape_2026-11-15"
+                    / "hl__ext_throat_hvlaw_v7.yaml")
+LANDSCAPE_BRIEF = (REPO_ROOT / "examples" / "briefs" / "home_landscape_2026-11-15"
+                   / "room_landscape_80x50_700_hf1440_v7.yaml")
+
 # Task registry: maps every accepted task name to its (config, brief, objective_version).
 # A task in this registry may be used by _read_task as a named task; a name absent from
 # this registry is refused.  The M0 contract is frozen; registry additions do NOT alter it.
@@ -89,6 +97,11 @@ _TASK_REGISTRY: dict[str, dict] = {
         "brief": HOME_BRIEF,
         "objective_version": HOME_OBJECTIVE_VERSION,
     },
+    LANDSCAPE_TASK_NAME: {
+        "config": LANDSCAPE_CONFIG,
+        "brief": LANDSCAPE_BRIEF,
+        "objective_version": 7,
+    },
 }
 
 SNAPSHOT_SCHEMA = "study-snapshot-v1"
@@ -106,6 +119,7 @@ _ALLOWED_TASK_NAMES = {
     DEFAULT_TASK_NAME, DEFAULT_CONFIG.stem, DEFAULT_BRIEF_NAME, DEFAULT_BRIEF.stem,
     HOME_TASK_NAME, HOME_CONFIG.stem, HOME_BRIEF_NAME, HOME_BRIEF.stem,
     HOME_SEED5678_TASK_NAME, HOME_SEED5678_CONFIG.stem,
+    LANDSCAPE_TASK_NAME, LANDSCAPE_CONFIG.stem,
 }
 
 
