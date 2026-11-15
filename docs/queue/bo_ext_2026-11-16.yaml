@@ -1,0 +1,62 @@
+# TuRBO vs scalar BO (+ Pareto frontier) matched test - DRAFT 2026-11-14. Plan: docs/queue/BO_EXT_PLAN_2026-11-16.md.
+# PREREQUISITES: bo_vs_cma_2026-11-15 and sab_home_gpu_rest_2026-11-15 FINISHED; branch feat/bo-turbo-pareto merged
+# (adds prepare_study.py --policy and the turbo/pareto production wiring); this file passes --dry-run.
+# Shared prior P2 for every arm: run 18985d + every BoTorch study screen row on task HOME_SEED5678 (run id "screen").
+night: bo_ext_2026-11-16
+lane: gpu
+jobs:
+  - {id: prep_cohort_p2, kind: command, timeout_s: 1800,
+     argv: [.venv/Scripts/python.exe, -m, tools.analysis.study_cohort,
+            --config, examples/typologies/print_80x60_2026-11-13/p80x60__osse_ext_throat_700_v7_seed5678.yaml,
+            --dataset, dataset, --out, runs/bo_ext_2026-11-16/cohort,
+            --run-id, 20261114T043025Z-screen-18985d, --run-id, screen]}
+  # ---- round 1: turbo, scalar, pareto ----
+  - {id: prep_turbo_s51001, kind: command, timeout_s: 3600,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, tools/bo_compare/prepare_study.py,
+            --root, runs/bo_ext_2026-11-16/turbo_s51001, --cohort, runs/bo_ext_2026-11-16/cohort,
+            --policy, turbo, --seed, "51001", --deadline-hours, "5", --label, turbo_s51001]}
+  - {id: turbo_s51001, kind: command, timeout_s: 21600,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, -m, hornlab_search.studies.cli, run,
+            --root, runs/bo_ext_2026-11-16/turbo_s51001, --package, package.json, --execute,
+            --project-root, C:/Users/hunte/Hrns/hornlab-search]}
+  - {id: prep_scalar_s52001, kind: command, timeout_s: 3600,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, tools/bo_compare/prepare_study.py,
+            --root, runs/bo_ext_2026-11-16/scalar_s52001, --cohort, runs/bo_ext_2026-11-16/cohort,
+            --policy, scalar, --seed, "52001", --deadline-hours, "5", --label, scalar_s52001]}
+  - {id: scalar_s52001, kind: command, timeout_s: 21600,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, -m, hornlab_search.studies.cli, run,
+            --root, runs/bo_ext_2026-11-16/scalar_s52001, --package, package.json, --execute,
+            --project-root, C:/Users/hunte/Hrns/hornlab-search]}
+  - {id: prep_pareto_s53001, kind: command, timeout_s: 3600,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, tools/bo_compare/prepare_study.py,
+            --root, runs/bo_ext_2026-11-16/pareto_s53001, --cohort, runs/bo_ext_2026-11-16/cohort,
+            --policy, pareto, --seed, "53001", --deadline-hours, "5", --label, pareto_s53001]}
+  - {id: pareto_s53001, kind: command, timeout_s: 21600,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, -m, hornlab_search.studies.cli, run,
+            --root, runs/bo_ext_2026-11-16/pareto_s53001, --package, package.json, --execute,
+            --project-root, C:/Users/hunte/Hrns/hornlab-search]}
+  # ---- round 2: second seeds ----
+  - {id: prep_turbo_s51002, kind: command, timeout_s: 3600,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, tools/bo_compare/prepare_study.py,
+            --root, runs/bo_ext_2026-11-16/turbo_s51002, --cohort, runs/bo_ext_2026-11-16/cohort,
+            --policy, turbo, --seed, "51002", --deadline-hours, "5", --label, turbo_s51002]}
+  - {id: turbo_s51002, kind: command, timeout_s: 21600,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, -m, hornlab_search.studies.cli, run,
+            --root, runs/bo_ext_2026-11-16/turbo_s51002, --package, package.json, --execute,
+            --project-root, C:/Users/hunte/Hrns/hornlab-search]}
+  - {id: prep_scalar_s52002, kind: command, timeout_s: 3600,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, tools/bo_compare/prepare_study.py,
+            --root, runs/bo_ext_2026-11-16/scalar_s52002, --cohort, runs/bo_ext_2026-11-16/cohort,
+            --policy, scalar, --seed, "52002", --deadline-hours, "5", --label, scalar_s52002]}
+  - {id: scalar_s52002, kind: command, timeout_s: 21600,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, -m, hornlab_search.studies.cli, run,
+            --root, runs/bo_ext_2026-11-16/scalar_s52002, --package, package.json, --execute,
+            --project-root, C:/Users/hunte/Hrns/hornlab-search]}
+  - {id: prep_pareto_s53002, kind: command, timeout_s: 3600,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, tools/bo_compare/prepare_study.py,
+            --root, runs/bo_ext_2026-11-16/pareto_s53002, --cohort, runs/bo_ext_2026-11-16/cohort,
+            --policy, pareto, --seed, "53002", --deadline-hours, "5", --label, pareto_s53002]}
+  - {id: pareto_s53002, kind: command, timeout_s: 21600,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, -m, hornlab_search.studies.cli, run,
+            --root, runs/bo_ext_2026-11-16/pareto_s53002, --package, package.json, --execute,
+            --project-root, C:/Users/hunte/Hrns/hornlab-search]}
