@@ -1,0 +1,30 @@
+# Separate follow-up: never edit the live rolled-rectangle night.
+night: home_crowe_sections_2026-11-15
+lane: gpu
+jobs:
+- id: crowe_sections_s1234
+  kind: command
+  timeout_s: 5400
+  argv:
+  - .venv/Scripts/python.exe
+  - tools/geometry/crowe_panel_cli.py
+  - search
+  - --config
+  - examples/typologies/rolled_rect_2026-11-15/rr__crowe_panel_es600_v7.yaml
+  - --mode
+  - screen
+  - --budget
+  - '32'
+- id: crowe_sections_verify
+  kind: command
+  timeout_s: 5400
+  argv:
+  - .venv/Scripts/python.exe
+  - tools/geometry/crowe_panel_cli.py
+  - verify-night
+  - --night
+  - home_crowe_sections_2026-11-15
+  - --jobs
+  - crowe_sections_s1234
+  - --top
+  - '1'

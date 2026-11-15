@@ -1,5 +1,24 @@
 # Rolled-rectangle home-horn pilot, 2026-11-15
 
+Owner correction: the follow-up uses separately measured ES-600 horizontal/vertical sections,
+a swept-wall junction, bounded front crown and explicit rear body. The rejected bowed-panel
+loft was never queued or published. Seed bbox 417 x 203 x 201 mm; 3197 / 6000 DOFs; round
+36 mm throat; envelope fits. The ES-600 source dimensions are 417 x 203 x 198 mm; the extra
+3 mm depth belongs to the reconstructed shell/source region. This is an approximation.
+
+New source night: [home_crowe_sections_2026-11-15.yaml](home_crowe_sections_2026-11-15.yaml).
+It waits behind the live original rolled-rectangle controller, then runs a 32-attempt search
+followed by top-1 verification through `tools/geometry/crowe_panel_cli.py`. The running original
+night was not changed. Depth [190,206], H depth scale [0.97,1.03], crown [16,24]; sigma0 .15,
+seed 1234, popsize 8. Uniform-box feasibility: 63/64 valid, one invalid_geometry; explicit flat
+penalty, predicted 31.5/32 valid attempts. This new visual seed has no prior acoustic history.
+Prediction to test: best-at >0, first improvement n=1..8. This is not an equal-size A/B against
+the larger original arms. Higher-resolution verification is required before acoustic conclusions.
+Related CPU regression: 126 passed in 46.183 s. Nine section-study tests cover section residuals, round throat, sweep domain, sampling
+convergence, exterior validity, source-file digest and correct replay/verification entry point.
+Detached follow-up controller 31224 (WMI parent 35188) waits on original controller 42084.
+Log: `runs/nights/queue_home_crowe_sections.log`; no overlapping solve is launched.
+
 Owner authorization: research Crowe geometry, tune a close starting seed, add a separate
 ATH-influenced H/V-puckered variant, integrate short runs into the current queue, commit/push,
 and publish multi-angle renders on GitHub Pages. Source dossier:

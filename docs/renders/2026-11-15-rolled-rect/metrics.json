@@ -1,5 +1,13 @@
 [
   {
+    "variant": "Section-based ES-600 study",
+    "mesh": "scratch\\2026-11-15_rolled_rect\\crowe-panel-mesh\\rr__crowe_panel_es600_v7\\mesh.msh",
+    "quarter_mesh_nodes": 3197,
+    "full_width_mm": 416.97060237351144,
+    "full_height_mm": 203.0220544864142,
+    "depth_mm": 200.94722575168603
+  },
+  {
     "variant": "Reference",
     "mesh": "scratch\\2026-11-15_rolled_rect\\split-meshes\\rr__reference_v7\\mesh.msh",
     "quarter_mesh_nodes": 4499,

@@ -1,5 +1,11 @@
 # Code map
 
+Section-based horn experiment: tools/geometry/crowe_panel.py and crowe_panel_cli.py
+provide the separate section-constrained surface and explicit body; plot_crowe_sections.py
+plots generated cuts against source readings. Reference table lives in
+examples/prototypes/rolled_rect_2026-11-15/crowe_section_reference.yaml; recipe identity covers it.
+
+
 Rolled-rectangle experiment (2026-11-15): `tools/geometry/rolled_rect.py` defines the original
 point-grid surface; `rolled_rect_cli.py` supplies opt-in, versioned process-local dispatch into
 the existing pipeline; `verify_rolled_rect_night.py` preserves that entry point for serial

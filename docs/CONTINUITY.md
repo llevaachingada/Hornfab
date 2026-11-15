@@ -1,5 +1,23 @@
 # CONTINUITY
 
+## 2026-11-15 - SECTION-CONSTRAINED ES-600 CORRECTION, VALIDATED AND QUEUED
+
+- Owner rejected the front geometry; inspected manufacturer drawing 1148-01-001 B-B/C-C,
+  ES-800 vector sections and additional ES-450/ES-250 sources. Replaced the unpublished
+  panel loft with independently measured H/V profiles, swept intersection, bounded crown,
+  rounded join and explicit rear body. This is an inferred reconstruction, not Crowe CAD.
+- Separate crowe_panel.py / crowe_panel_cli.py; reference YAML included in replay digest.
+  Old three arms and all core/installed source bytes unchanged. Same geometry rendered/solved.
+- Seed: 3197 / 6000 DOFs, 417 x 203 x 201 mm, circular 36 mm throat, envelope fits.
+  126 related CPU tests passed in 46.183 s; uniform-box sample 63/64 valid, one geometry refusal.
+  New 32-attempt local search varies depth, H depth scale and crown; explicit flat penalties.
+- Original night is live. Follow-up home_crowe_sections_2026-11-15 has search + top1 verify;
+  detached controller 31224, WMI parent 35188, waits for original controller 42084.
+  This records queue integration, not completed acoustic validation.
+- Gallery now has four seeds, 20 renders and generated solid H/V section comparisons, with
+  source links and inference labels. Code on the feature branch; static publication on main.
+
+
 ## 2026-11-15 - ROLLED RECTANGLE + H/V PUCKER PILOT, CPU VALIDATED / QUEUED
 
 - Original shrinking-curvature contour, independent H/V axial development, round-to-rectangle
