@@ -52,6 +52,7 @@ include = ["hornlab_search*"]
 
 [tool.setuptools.package-data]
 "hornlab_search.gui" = ["static/*"]
+"hornlab_search.design.generators" = ["data/*.yaml"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

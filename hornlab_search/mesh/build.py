@@ -502,9 +502,15 @@ def _build_grid_mesh(design: Design, mesh: MeshSpec, cfg, out_dir: Path, *,
         raise GeometryInvalidError(str(exc)) from exc
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
+    geometry = {"inner_points": inner, "meta": meta,
+                "wall_thickness_mm": float(block.get("wall_thickness_mm", 3.0))}
+    from ..design.generators import rolled_family
+    if rolled_family.is_family_spec(block):
+        if mounting is not None:
+            raise GeometryInvalidError('rolled-family explicit body cannot be combined with enclosure')
+        geometry.update(rolled_family.resolve_grid(block, brief))
     return grid_build.build_grid_mesh(
-        {"inner_points": inner, "meta": meta,
-         "wall_thickness_mm": float(block.get("wall_thickness_mm", 3.0))},
+        geometry,
         mesh, out_dir / "mesh.msh", cfg, mode=mode, mounting=mounting)
 
 

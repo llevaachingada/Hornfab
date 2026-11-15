@@ -195,9 +195,9 @@ def local_candidates(encoding, config, lo, hi, *, seed: int, n: int = LOCAL_SOBO
     """
     from hornlab_search.design import families
 
-    from .data import (POOL_STATUS_NOTE, NEAR_DUPLICATE_TOL, PoolCandidate, _brief_envelope,
-                       _empty_counts, _envelope_ok, _expected_throat_radius, _geometry_hash,
-                       _jsonable_params, _sobol_unit, _surface_descriptors, _throat_ok,
+    from .data import (POOL_STATUS_NOTE, NEAR_DUPLICATE_TOL, PoolCandidate,
+                       _empty_counts, geometry_checks, materialized_geometry_hash,
+                       _jsonable_params, _sobol_unit,
                        canonical_design, intended_solve_identity, is_near_duplicate,
                        materialize_geometry)
 
@@ -210,7 +210,6 @@ def local_candidates(encoding, config, lo, hi, *, seed: int, n: int = LOCAL_SOBO
     unit, method = _sobol_unit(d, int(n), int(seed))
     points = np.clip(lo + (hi - lo) * unit, 0.0, 1.0)
     solve_hash = intended_solve_identity(config)
-    env = _brief_envelope(config)
     counts = _empty_counts()
     counts["generated"] = int(points.shape[0])
     accepted, vectors, seen = [], [], set()
@@ -236,15 +235,14 @@ def local_candidates(encoding, config, lo, hi, *, seed: int, n: int = LOCAL_SOBO
         except Exception:  # noqa: BLE001
             counts["geometry_rejected"] += 1
             continue
-        desc = _surface_descriptors(mat["inner_points"])
-        if not _envelope_ok(desc, env):
+        desc, envelope_ok, throat_ok = geometry_checks(mat, config, params)
+        if not envelope_ok:
             counts["envelope_rejected"] += 1
             continue
-        if not _throat_ok(desc["throat_radius_mm"],
-                          _expected_throat_radius(params if isinstance(params, dict) else {})):
+        if not throat_ok:
             counts["throat_rejected"] += 1
             continue
-        ghash = _geometry_hash(mat["inner_points"], mat["formula"])
+        ghash = materialized_geometry_hash(mat)
         if (ghash, solve_hash) in seen:
             counts["geometry_duplicate"] += 1
             continue

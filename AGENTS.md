@@ -228,9 +228,11 @@ and grants the HornLab skills to `fixer` and `designer`; it defines no presets o
 
 **Skills (OpenCode reads `.claude/skills/` and `.opencode/skills/`; this file, not CLAUDE.md, is what
 OpenCode loads):** `hornlab-gpu-job` (any GPU/solve job), `hornlab-night-queue` (unattended nights),
-`hornlab-evidence` (evidence docs), `hornlab-shape-check` (new configs, before GPU), `hornlab-render`
-(images), `hornlab-typology-research` (new typology/objective work). The orchestrator has all skills; fixer and
-designer are granted the hornlab skills in `.opencode/oh-my-opencode-slim.json` so delegated lanes can load them.
+`hornlab-evidence` (evidence docs), `hornlab-shape-check` (new configs, before GPU), `hornlab-search-economy`
+(before queueing a search: headroom, sigma/budget power, refusal budget, A/B attribution; backed by
+`tools/search_preflight.py`), `hornlab-render` (images), `hornlab-typology-research` (new typology/objective work).
+The orchestrator has all skills; fixer and designer are granted the hornlab skills in
+`.opencode/oh-my-opencode-slim.json` so delegated lanes can load them.
 
 **Current state (2026-11-12):** read `docs/SENIOR_PLAN_2026-11-12.md` and, for tonight, execute
 `docs/OPENCODE_HANDOFF_2026-11-12.md`. New MEH work is paused by the owner. Objective versions: 4 =

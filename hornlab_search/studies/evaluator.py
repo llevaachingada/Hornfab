@@ -71,6 +71,17 @@ def _engine_available() -> bool:
                for name in ("torch", "botorch", "gpytorch"))
 
 
+def _family_geometry_hash(candidate):
+    """Return a proposal's surface identity only for the versioned grid family."""
+    params = candidate.get("params") or {}
+    grid = params.get("grid") if isinstance(params, dict) else None
+    if not isinstance(grid, dict):
+        return None
+    from hornlab_search.design.generators.rolled_family import is_family_spec
+    value = candidate.get("geometry_hash")
+    return value if is_family_spec(grid) and isinstance(value, str) and value else None
+
+
 class PipelineStudyEvaluator:
     """Evaluator protocol implementation with dependency-injected side effects."""
 
@@ -111,7 +122,11 @@ class PipelineStudyEvaluator:
         self.seed = int(seed)
         self.pipeline_factory = pipeline_factory
         self.runtime = None
-        self.history = ProposalHistory()
+        identities = (getattr(training_set, "meta", {}) or {}).get("identities") or {}
+        self._family_history_hashes = tuple(dict.fromkeys(
+            str(identity["geometry_hash"]) for identity in identities.values()
+            if identity.get("geometry_hash")))
+        self.history = ProposalHistory(excluded_geometry_hashes=self._family_history_hashes)
         # Journal staging counts all candidates; BO exploration cadence counts screens only.
         self._proposal_sequence = 0
         self.observations = {}
@@ -140,7 +155,7 @@ class PipelineStudyEvaluator:
             rows[oid] = TrainingObservation(
                 observation_id=oid, x=np.asarray(training.X[i], dtype=float).copy(),
                 J=float(np.asarray(training.J).reshape(-1)[i]),
-                geometry_hash=identity.get("design_hash"),
+                geometry_hash=identity.get("geometry_hash") or identity.get("design_hash"),
                 solve_hash=identity.get("solve_hash"),
                 y_phys=(tuple(np.asarray(training.Y_phys[i]).reshape(-1))
                         if training.Y_phys is not None else None))
@@ -454,6 +469,9 @@ class PipelineStudyEvaluator:
             "params": candidate.get("params") or {},
             "physical_measurement": bool(outcome.complete),
         }
+        family_hash = _family_geometry_hash(candidate)
+        if family_hash:
+            result["geometry_hash"] = family_hash
         return result
 
     # ------------------------------------------------------------------ learning
@@ -485,7 +503,8 @@ class PipelineStudyEvaluator:
         self.observations[physical_id] = TrainingObservation(
             observation_id=physical_id, x=np.asarray(vector, dtype=float), J=j,
             status="ok", eligible=True,
-            geometry_hash=result.get("design_hash") or result.get("geometry_id"),
+            geometry_hash=(_family_geometry_hash(result) or result.get("design_hash")
+                           or result.get("geometry_id")),
             solve_hash=result.get("solve_hash") or physical_id)
         return True
 
@@ -659,6 +678,8 @@ class PipelineStudyEvaluator:
             # Older checkpoints used one shared screen/journal index.
             self.history = decode_proposal_history(stored, progress.get("proposal_index"))
             self._proposal_sequence = self.history.proposal_index
+        self.history = replace(self.history, excluded_geometry_hashes=tuple(dict.fromkeys(
+            (*self.history.excluded_geometry_hashes, *self._family_history_hashes))))
         if isinstance(stored, dict):
             extra = stored.get("rng_state")
             if isinstance(extra, dict):
@@ -683,6 +704,11 @@ class PipelineStudyEvaluator:
             candidate = item.get("candidate") or {}
             if isinstance(candidate, dict) and candidate.get("solve_id") and result.get("x") is None:
                 result = {**result, "x": candidate.get("x"), "params": candidate.get("params")}
+            # Old journals recorded the design hash in results, but retain the
+            # validated proposal and its complete-surface identity separately.
+            family_hash = _family_geometry_hash(candidate) if isinstance(candidate, dict) else None
+            if family_hash:
+                result = {**result, "params": candidate.get("params"), "geometry_hash": family_hash}
             if result.get("kind") in ("verify", "audit"):
                 self.observe(result)
                 continue

@@ -472,12 +472,11 @@ def _propose_one(model_result, candidate_pool, proposal_policy=None, history=Non
 def validate_selected_candidate(candidate, candidate_pool, *, encoding, config, resolution_mm=30.0):
     """Recreate the selected design and verify pool identities before publication.
 
-    This resolves one surface only, never creates a mesh or calls a solver. The caller
+    This resolves the geometry, never creates a mesh or calls a solver. The caller
     must pass the same resolved config, encoding, and sampling resolution as the pool.
     """
-    from .data import (materialize_geometry, intended_solve_identity, _geometry_hash,
-                       _surface_descriptors, _brief_envelope, _envelope_ok,
-                       _expected_throat_radius, _throat_ok, _jsonable_params, canonical_design)
+    from .data import (materialize_geometry, intended_solve_identity, materialized_geometry_hash,
+                       geometry_checks, _jsonable_params, canonical_design)
     from hornlab_search.design import families
     if encoding is None or config is None:
         raise ValueError("resolved encoding and config required to validate proposal")
@@ -495,11 +494,10 @@ def validate_selected_candidate(candidate, candidate_pool, *, encoding, config, 
     if solve_hash != candidate.intended_solve_hash or solve_hash != candidate_pool.intended_solve_hash:
         raise ValueError("intended solve identity disagrees with pool")
     mat = materialize_geometry(design, config, resolution_mm=resolution_mm)
-    if _geometry_hash(mat["inner_points"], mat["formula"]) != candidate.geometry_hash:
+    if materialized_geometry_hash(mat) != candidate.geometry_hash:
         raise ValueError("materialized geometry identity disagrees with pool")
-    desc = _surface_descriptors(mat["inner_points"])
-    if not _envelope_ok(desc, _brief_envelope(config)) or not _throat_ok(
-            desc["throat_radius_mm"], _expected_throat_radius(design.params)):
+    _, envelope_ok, throat_ok = geometry_checks(mat, config, design.params)
+    if not envelope_ok or not throat_ok:
         raise ValueError("selected geometry fails cheap checks")
 
 
