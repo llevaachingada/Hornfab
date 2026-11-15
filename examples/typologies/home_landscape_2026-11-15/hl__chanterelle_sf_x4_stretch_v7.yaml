@@ -1,0 +1,39 @@
+# HOME LANDSCAPE chanterelle-hybrid cell (2026-11-15). Brief room_landscape_80x50_700_hf1440_v7 (no K-law).
+# Parent: chanterelle_hybrid_2026-10-28_v4/hybrid__sf_x4_v4 (rows osse_rollback with a STRONG superformula X mouth:
+# m 4, n1 1.2, n2 8 = points on the diagonals, sf_amt 0.75, window opening at 30 % so the coupling plane stays round,
+# smooth curled lip). Differs from hl__petal_os_x4_landscape_v7 (mild X, unstretched) in two ways: the X is sharp, and the
+# superformula is STRETCHED with sf_ab != 1 (allowed for m 4) so the mouth itself is landscape, on top of a_h > a_v.
+# sf_ab box 0.6-1.0: ab < 1 widens W (checked: ab 0.8 -> 538 x 400, ab 1.25 -> 367 x 472). Quatrefoil cells were NOT used: their fc_union
+# law is four-fold symmetric (H = V by construction). LABELED HYPOTHESIS-SHAPE EXPERIMENT.
+# Searched (10): a_h, a_v, k, L, r_lip, wrap, sf n1, sf ab, sf amt, sf start.
+name: hl__chanterelle_sf_x4_stretch_v7
+family: FREEFORM
+brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
+generator:
+  name: grid
+  rows: {type: osse_rollback}
+  n_phi: 25
+  n_s: 40
+  wall_thickness_mm: 3.0
+  seed_policy: explicit
+  span: quarter
+seed_params: {g_a_h_deg: 38.0, g_a_v_deg: 26.0, g_k: 1.0, g_L_mm: 220.0, g_r_lip_mm: 30.0, g_wrap_deg: 110.0,
+  g_sf_m: 4, g_sf_n1: 1.2, g_sf_n2: 8.0, g_sf_ab: 0.8, g_sf_amt: 0.6, g_sf_start: 0.3}
+bounds:
+  g_a_h_deg: {lo: 32.0, hi: 46.0}
+  g_a_v_deg: {lo: 20.0, hi: 31.0}
+  g_k: {lo: 0.8, hi: 2.0}
+  g_L_mm: {lo: 170.0, hi: 300.0}
+  g_r_lip_mm: {lo: 15.0, hi: 45.0}
+  g_wrap_deg: {lo: 80.0, hi: 140.0}
+  g_sf_m: {lo: 4, hi: 4, search: false}
+  g_sf_n1: {lo: 0.9, hi: 2.5}
+  g_sf_n2: {lo: 8.0, hi: 8.0, search: false}
+  g_sf_ab: {lo: 0.6, hi: 1.0}
+  g_sf_amt: {lo: 0.3, hi: 0.9}
+  g_sf_start: {lo: 0.2, hi: 0.5}
+description: 'HOME LANDSCAPE 80Hx50V: chanterelle-hybrid sharp superformula X, stretched landscape (sf_ab), a_h > a_v, curled lip, no K-law'
+mesh: {epw: 6.0, quadrants: '1', dof_cap_screen: 24000, dof_cap_verify: 24000, dof_cap_final: 24000, dof_per_triangle: 0.51}
+solve: {backend: beat_cuda, distance_m: 10.0, angle_count: 73, balloon: true, balloon_points_screen: 512, balloon_points_verify: 1024,
+  gmres_tol: 1.0e-05, timeout_s: 900, cuda_fused: true}
+search: {algorithm: cma, sigma0: 0.2, seed: 1234, budget: 80, popsize: null, tolfun: 0.001, infeasible_penalty: graded}
