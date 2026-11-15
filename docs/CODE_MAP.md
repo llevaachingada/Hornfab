@@ -1,5 +1,13 @@
 # Code map
 
+Rolled-rectangle experiment (2026-11-15): `tools/geometry/rolled_rect.py` defines the original
+point-grid surface; `rolled_rect_cli.py` supplies opt-in, versioned process-local dispatch into
+the existing pipeline; `verify_rolled_rect_night.py` preserves that entry point for serial
+verification; `build_rolled_rect_page.py` publishes the geometry gallery. Configs:
+`examples/typologies/rolled_rect_2026-11-15/`; geometry-only recipes:
+`examples/prototypes/rolled_rect_2026-11-15/`. No default generator/solver changes.
+
+
 GUI viz kit (2026-11-14): `gui/static/charts.js` exports `catColor`/`CAT_N`, `fmtSmart`,
 `fmtLogTick`, `logNiceLimits`, `sparkline`, `stackBarHtml`, `isobarLegendHtml`, `globePlot` and a
 self-redrawing `chart()` (`square` option); `app.js::brk()` wraps ids; tokens `--cat-*`,

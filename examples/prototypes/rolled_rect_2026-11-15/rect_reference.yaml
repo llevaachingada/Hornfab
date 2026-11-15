@@ -1,0 +1,19 @@
+schema: rolled-rect-experiment-v1
+name: rect_reference
+mesh_config: ../../typologies/rolled_rect_2026-11-15/rr__reference_v7.yaml
+shape:
+  width_mm: 542.0
+  height_mm: 299.0
+  depth_mm: 238.0
+  depth_h_ratio: 0.68
+  decay: 0.7
+  rect_exponent: 12.0
+  rect_turn_deg: 65.0
+  throat_turn_deg: 25.0
+  terminal_deg: 270.0
+  pucker_h_mm: 0.0
+  pucker_v_mm: 0.0
+  pucker_start_deg: 55.0
+  wall_thickness_mm: 3.0
+  n_phi: 49
+  n_s: 96

@@ -1,0 +1,22 @@
+# Owner-authorized 2026-11-15: closest Crowe-family seed, then short H+V pucker arms.
+# Same brief, seed, 3 searched dimensions, sigma, and budget in each arm.
+# Entry point is mandatory: stock CLI rejects these original, versioned recipes.
+night: home_rolled_rect_2026-11-15
+lane: gpu
+jobs:
+  - id: rr_reference_s1234
+    kind: command
+    timeout_s: 5400
+    argv: [.venv/Scripts/python.exe, tools/geometry/rolled_rect_cli.py, search, --config, examples/typologies/rolled_rect_2026-11-15/rr__reference_v7.yaml, --mode, screen, --budget, '32']
+  - id: rr_pucker_moderate_s1234
+    kind: command
+    timeout_s: 5400
+    argv: [.venv/Scripts/python.exe, tools/geometry/rolled_rect_cli.py, search, --config, examples/typologies/rolled_rect_2026-11-15/rr__pucker_hv_moderate_v7.yaml, --mode, screen, --budget, '32']
+  - id: rr_pucker_strong_s1234
+    kind: command
+    timeout_s: 5400
+    argv: [.venv/Scripts/python.exe, tools/geometry/rolled_rect_cli.py, search, --config, examples/typologies/rolled_rect_2026-11-15/rr__pucker_hv_strong_v7.yaml, --mode, screen, --budget, '32']
+  - id: rr_verify_top1_each
+    kind: command
+    timeout_s: 10800
+    argv: [.venv/Scripts/python.exe, tools/geometry/verify_rolled_rect_night.py, --night, home_rolled_rect_2026-11-15, --jobs, 'rr_reference_s1234,rr_pucker_moderate_s1234,rr_pucker_strong_s1234', --top, '1']

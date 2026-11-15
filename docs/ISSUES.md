@@ -1,5 +1,15 @@
 # ISSUES
 
+Local-only, added 2026-11-15 (**original rolled-rectangle geometry pilot; no GitHub issue state changed**):
+- Done: source research/corrections, original base + moderate/strong H/V-pucker geometry,
+  round-coupling/envelope/mesh checks, 64-sample feasibility per box, versioned replay adapter,
+  sequential verification helper and multi-angle gallery.
+- Queued: `home_rolled_rect_2026-11-15`, three budget-32 arms + top-1 verify each, after active C.
+- Open: acoustic loading/coverage/diagonal/DI/flatness evidence, winner readout, print mounting
+  and structural checks; stock GUI/catalog registration is outside this experimental slice.
+- Existing B preparation failed with needs_initial_data n=0; preserved, not fixed by this task.
+
+
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-14 (**owner decisions executed: cohort gap closing (+50 resume at 38e5b1f), caps 12k→24k on the four live configs, batch-12 approved for heavy verify/final-style runs; plus the scalar-Bayes and CI work; no GitHub issue state changed**).
 
