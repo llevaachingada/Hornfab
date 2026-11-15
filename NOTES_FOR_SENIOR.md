@@ -919,9 +919,13 @@ release_rerun.log; full report docs/evidence/BAYESIAN_STUDY_INTEGRATION_2026-11-
 ## 2026-11-15 - BO GUI WORK IS READY BUT NOT MERGED (MERGE AFTER THE NIGHTS)
 
 - Worktree `C:\Users\hunte\Hrns\bogui-wt`, branch `feat/bo-gui`, based on `feat/bo-turbo-pareto`
-  (`e25da03`) + `feat/sab-home-2026-11-14` (`29d202d`). The working tree is **uncommitted**; commit
-  it before merging. Design: `docs/research/BO_GUI_DESIGN_2026-11-15.md`; evidence:
-  `docs/evidence/bo_gui_2026-11-15/`.
+  (`e25da03`) + `feat/sab-home-2026-11-14` (`29d202d`, then merged to `77635a2`). The tree is
+  committed and pushed as `origin/feat/bo-gui` (`ef6a38a` + merge `56a3eb8`). Design:
+  `docs/research/BO_GUI_DESIGN_2026-11-15.md`; evidence: `docs/evidence/bo_gui_2026-11-15/`.
+- **Owner decision 2026-11-15:** keep it branch-only until the nights finish; no main PR/merge yet.
+  The branch is 21 commits ahead of `origin/main` because it contains the in-flight
+  `feat/sab-home-2026-11-14` integration (turbo, v7 flat band, landscape configs), not GUI-only
+  changes.
 - **Merge gate:** no merge while `bo_vs_cma_2026-11-15` or `sab_home_gpu_rest_2026-11-15` is
   queued/running, and no merge while any study is queued/running. The GUI is still inside
   `EXECUTION_CODE_FILES`, so any `hornlab_search/gui/**` edit invalidates a live study preflight.

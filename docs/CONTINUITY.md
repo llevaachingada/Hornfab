@@ -23,7 +23,8 @@
   based on `feat/bo-turbo-pareto` (`e25da03`) + `feat/sab-home-2026-11-14`. Do not merge while
   `bo_vs_cma_2026-11-15` or `sab_home_gpu_rest_2026-11-15` is queued/running, and not while any
   study is queued or running (`runs/nights/queue_*.log`, `tools/night_status.py`).
-  **Before merge:** commit the uncommitted `bogui-wt` working tree; confirm no runner and no live
+  **Before merge:** the tree is committed and pushed as `origin/feat/bo-gui`
+  (`ef6a38a` + merge `56a3eb8`); confirm no runner and no live
   Julia host; merge `feat/bo-turbo-pareto` first if the target does not already contain it, then
   merge `feat/bo-gui` (it already contains turbo + the 15 Nov docs); resolve `CONTINUITY`,
   `ISSUES`, `INDEX` and `CODE_MAP` in the merge commit; run `compileall` and the offline
@@ -31,6 +32,10 @@
   original pinned hashes; verify the `production_inputs_unavailable` line was only the
   worktree/canonical pin mismatch. Excluding `gui/**` from `EXECUTION_CODE_FILES` remains an
   owner decision.
+- **Owner decision 2026-11-15:** keep the work on `origin/feat/bo-gui` only; do **not** open or
+  merge a main PR until the nights finish. The branch is 21 commits ahead of `origin/main` because
+  it contains the in-flight `feat/sab-home-2026-11-14` integration (turbo, v7 flat band, landscape
+  configs), not GUI-only changes.
 - Deferred (handoff-optional slice 7): partial-dependence curves and per-study dataset row
   identity. The lengthscale sensitivity bar is the first-pass sensitivity view.
 

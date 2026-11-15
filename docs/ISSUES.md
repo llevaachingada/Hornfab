@@ -12,8 +12,10 @@ Local-only, added 2026-11-15 (02:0x local) (**BO GUI slices 1-6; no GitHub issue
 **OPEN / DO NOT FORGET - merge after the testing finishes:**
 - Merge gate: wait for `bo_vs_cma_2026-11-15` AND `sab_home_gpu_rest_2026-11-15` to finish, then
   confirm `tools/night_status.py` shows no runner/Julia host and no queued study.
-- Commit the uncommitted `bogui-wt` tree; merge `feat/bo-turbo-pareto` first if needed, then
-  `feat/bo-gui`; resolve docs in the merge commit.
+- The branch is committed and pushed as `origin/feat/bo-gui` (`ef6a38a` + merge `56a3eb8`);
+  merge `feat/bo-turbo-pareto` first if needed, then `feat/bo-gui`; resolve docs in the merge
+  commit. Owner decision 2026-11-15: keep it branch-only until the nights finish; it is 21 commits
+  ahead of `origin/main` because it contains the in-flight `feat/sab-home` integration.
 - Run `compileall` + the offline GUI/study suite; check a new package preflight.
 - Do not merge while any study is queued/running: `hornlab_search/gui/**` is still in
   `EXECUTION_CODE_FILES`.

@@ -13,9 +13,13 @@ after the beta session.** Items are in priority order. Background: `docs/HIGH_FR
   The GUI lives under `hornlab_search/gui/**`, which is inside `EXECUTION_CODE_FILES`; editing it
   invalidates a queued/running study's preflight.
 - When both nights finish: confirm `tools/night_status.py` shows no runner and no live Julia host;
-  commit the uncommitted `bogui-wt` tree; merge `feat/bo-turbo-pareto` first if the target does not
-  already contain it, then `feat/bo-gui` (it already contains turbo + the 15 Nov docs); resolve
+  the branch is already committed and pushed as `origin/feat/bo-gui` (`ef6a38a` + merge
+  `56a3eb8`); merge `feat/bo-turbo-pareto` first if the target does not already contain it, then
+  `feat/bo-gui` (it already contains turbo + the 15 Nov docs); resolve
   `CONTINUITY`/`ISSUES`/`INDEX`/`CODE_MAP` in the merge commit.
+- Owner decision 2026-11-15: keep it branch-only until the nights finish. It is 21 commits ahead of
+  `origin/main` because it contains the in-flight `feat/sab-home-2026-11-14` integration, not
+  GUI-only changes.
 - Run `compileall` + the offline GUI/study suite, then check a **new** package preflight. Old
   packages keep their pinned hashes. Excluding `gui/**` from the pin remains an owner decision.
 - Slice 7 optional follow-ups: partial-dependence curves (new Bayesian-subprocess job + cached
