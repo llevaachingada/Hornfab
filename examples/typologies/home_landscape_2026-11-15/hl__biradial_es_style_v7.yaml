@@ -1,0 +1,37 @@
+# HOME LANDSCAPE Bi-Radial (2026-11-15), owner request: "a biradial like the Joseph Crowe ES450 (for TAD TD-4002),
+# within our size constraints". Read from the product page 2026-11-15: 450 Hz cutoff, crossover 600-800 Hz, throat
+# matched to the driver with no conical adapter (smooth exponential throat loading), "even off-axis coverage"; the
+# photos show the classic Bi-Radial look - narrow throat slot flaring to a WIDE, SHORT mouth with a large rolled lip.
+# Construction: the repo's published Keele/JBL Bi-Radial contour (US4308932A; profiles.biradial_contour,
+# docs/research/typologies/biradial_iwata_300_research_2026-10-25.md): y = a + b x + c x^n per plane with INDEPENDENT
+# H and V flare (the "bi" in Bi-Radial). Parent: examples/typologies/biradial_keele.yaml.
+# Landscape by construction: H mouth half-width 230-300 mm above V 150-235 mm (seed 560 W x 380 H), wider H wall angle.
+# generator.seed_policy: explicit - the brief's f0 would otherwise re-aim the mouth with the patent's K-law (owner: no Keele
+# mouth sizing). NOT modelled (say so in reports): the ES450's rolled-back mouth lip and its two-piece construction;
+# this is 'Bi-Radial-style', not a copy of the ES450. mesh.rear_res_factor 1.5: coarser outer shell / rear cap only
+# (13 Nov audit: -16..21 % DOF, inner bore untouched; acoustic bar G4 still to confirm).
+name: hl__biradial_es_style_v7
+family: FREEFORM
+brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
+generator:
+  name: typology
+  profile_h: {type: biradial}
+  profile_v: {type: biradial}
+  n_anchors: 16
+  max_wall_deg: 80.0
+  mouth: ellipse
+  seed_policy: explicit
+seed_params: {L_mm: 300.0, h_a_deg: 38.0, v_a_deg: 22.0, h_rm_mm: 280.0, v_rm_mm: 190.0, h_n: 5.5, v_n: 4.0}
+bounds:
+  L_mm: {lo: 220.0, hi: 420.0}
+  h_a_deg: {lo: 30.0, hi: 44.0}
+  v_a_deg: {lo: 16.0, hi: 28.0}
+  h_rm_mm: {lo: 230.0, hi: 300.0}
+  v_rm_mm: {lo: 150.0, hi: 235.0}
+  h_n: {lo: 2.0, hi: 8.0}
+  v_n: {lo: 2.0, hi: 8.0}
+mesh: {epw: 6.0, quadrants: '1', dof_cap_screen: 24000, dof_cap_verify: 24000, dof_cap_final: 24000, dof_per_triangle: 0.51,
+  rear_res_factor: 1.5}
+solve: {backend: beat_cuda, distance_m: 10.0, angle_count: 73, balloon: true, balloon_points_screen: 512, balloon_points_verify: 1024,
+  gmres_tol: 1.0e-05, timeout_s: 900, cuda_fused: true}
+search: {algorithm: cma, sigma0: 0.2, seed: 1234, budget: 80, popsize: null, tolfun: 0.001, infeasible_penalty: graded}

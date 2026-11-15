@@ -5,6 +5,7 @@
 # Retargeted: throat = brief exit r 18 mm (round, AR_t 1); AR_m box >= 1.2 so the mouth is always wider than tall
 # (direction checked with shape_check: AR_m > 1 -> W > H); 1.4-in brief, quarter model.
 # Searched (4): fc, stop, AR_m, AR p (T pinned).
+# mesh.rear_res_factor 1.5 (2026-11-15): coarser outer shell / rear cap only (13 Nov audit -16..21 % DOF).
 name: hl__lecleach_iwata_ar_landscape_v7
 family: FREEFORM
 brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
@@ -22,8 +23,10 @@ bounds:
   g_stop_deg: {lo: 110.0, hi: 200.0}
   g_ar_m: {lo: 1.2, hi: 2.4}
   g_ar_p: {lo: 0.5, hi: 2.0}
-description: 'HOME LANDSCAPE 80Hx50V: Le Cleach march + area-preserving landscape aspect ratio from a round 1.4in throat, no K-law'
-mesh: {epw: 6.0, quadrants: '1', dof_cap_screen: 24000, dof_cap_verify: 24000, dof_cap_final: 24000, dof_per_triangle: 0.51}
+description: 'HOME LANDSCAPE 80Hx50V: Le Cleach march + area-preserving landscape aspect ratio from a round 1.4in throat,
+  no K-law'
+mesh: {epw: 6.0, quadrants: '1', dof_cap_screen: 24000, dof_cap_verify: 24000, dof_cap_final: 24000, dof_per_triangle: 0.51,
+  rear_res_factor: 1.5}
 solve: {backend: beat_cuda, distance_m: 10.0, angle_count: 73, balloon: true, balloon_points_screen: 512, balloon_points_verify: 1024,
   gmres_tol: 1.0e-05, timeout_s: 900, cuda_fused: true}
 search: {algorithm: cma, sigma0: 0.2, seed: 1234, budget: 80, popsize: null, tolfun: 0.001, infeasible_penalty: graded}
