@@ -1,5 +1,27 @@
 # CONTINUITY
 
+## 2026-11-15 - ROLLED RECTANGLE + H/V PUCKER PILOT, CPU VALIDATED / QUEUED
+
+- Original shrinking-curvature contour, independent H/V axial development, round-to-rectangle
+  wall transitions, optional separate H/V pucker; not a reproduction of Crowe ES or ATH Tritonia.
+  Research/corrections: `docs/research/typologies/ROLLED_RECT_FAMILY_RESEARCH_2026-11-15.md`.
+- Explicit experimental entry point `tools/geometry/rolled_rect_cli.py`; delegates to existing
+  CMA, evaluator and mesh/BEM pipeline. Distinct row types, code digest and driver in saved
+  recipes; stock CLI rejects them. No `hornlab_search/**/*.py` or existing config was changed.
+- Three seeds: 4499 / 4465 / 4459 DOFs, 542 x 299 mm, depths 241 / 244 / 246 mm; all fit,
+  circular 36 mm driver coupling. Each arm's uniform box preflight: 64/64 valid, no refusals.
+  Focused regression: 72 passed. Broader offline result is recorded in the research dossier.
+- Night `home_rolled_rect_2026-11-15`: three matched 32-budget searches, then top-1 verification
+  per arm via its required adapter and batch-12/memwatch helper. Controller 42084, WMI parent,
+  waits on active C controller 36944; no solve launched here. A completed queue setup is not
+  completed acoustics. Plan: `docs/queue/ROLLED_RECT_PLAN_2026-11-15.md`.
+- Existing night B ended with needs_initial_data (n_min=18, n=0); its studies did not complete.
+  Preserved A/C workers and all prior dirty files. New code/configs committed on the existing
+  feature branch; only the gallery/research publication is promoted to Pages on main.
+- Seed gallery: `docs/renders/2026-11-15-rolled-rect/` (15 original renders, five angles, responsive
+  synchronized comparison and accessible enlargement). Acoustic performance remains unmeasured.
+
+
 ## 2026-11-15 (09:3x local) - BOTORCH VS CMA REPORT: DEEPER OFFLINE ANALYSIS ADDED (docs only)
 
 - Screen->verify drift: BoTorch median +3.4 % (rank 0.86) vs CMA +9.4 % (rank 0.76) over all verified designs.

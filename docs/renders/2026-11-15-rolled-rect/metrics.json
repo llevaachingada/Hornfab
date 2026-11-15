@@ -1,0 +1,32 @@
+[
+  {
+    "variant": "Reference",
+    "mesh": "scratch\\2026-11-15_rolled_rect\\split-meshes\\rr__reference_v7\\mesh.msh",
+    "quarter_mesh_nodes": 4499,
+    "full_width_mm": 541.9999319848636,
+    "full_height_mm": 298.9999891131036,
+    "depth_mm": 240.94056617547284,
+    "pucker_h_mm": 0.0,
+    "pucker_v_mm": 0.0
+  },
+  {
+    "variant": "Moderate",
+    "mesh": "scratch\\2026-11-15_rolled_rect\\split-meshes\\rr__pucker_hv_moderate_v7\\mesh.msh",
+    "quarter_mesh_nodes": 4465,
+    "full_width_mm": 541.9997130654438,
+    "full_height_mm": 298.9997740516038,
+    "depth_mm": 243.6123325699468,
+    "pucker_h_mm": 12.0,
+    "pucker_v_mm": 16.0
+  },
+  {
+    "variant": "Strong",
+    "mesh": "scratch\\2026-11-15_rolled_rect\\split-meshes\\rr__pucker_hv_strong_v7\\mesh.msh",
+    "quarter_mesh_nodes": 4459,
+    "full_width_mm": 541.9998941715983,
+    "full_height_mm": 298.9999662121086,
+    "depth_mm": 246.47519334930894,
+    "pucker_h_mm": 24.0,
+    "pucker_v_mm": 28.0
+  }
+]
