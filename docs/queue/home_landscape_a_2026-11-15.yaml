@@ -1,0 +1,12 @@
+# HOME LANDSCAPE night A (2026-11-15): first solves of the landscape home brief room_landscape_80x50_700_hf1440_v7.
+# Plan: docs/queue/HOME_LANDSCAPE_PLAN_2026-11-15.md. Two CMA seeds of the core landscape cell (same config file,
+# --cma-seed) = the training cohort the BoTorch scalar/TuRBO/Pareto arms need (night B). sigma0 0.2 for exploration.
+night: home_landscape_a_2026-11-15
+lane: gpu
+jobs:
+  - {id: hl_ext_s1234, kind: command, timeout_s: 9000,
+     argv: [.venv/Scripts/hornlab-search.exe, search, --config, examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml,
+            --mode, screen, --budget, "100", --cma-seed, "1234"]}
+  - {id: hl_ext_s5678, kind: command, timeout_s: 9000,
+     argv: [.venv/Scripts/hornlab-search.exe, search, --config, examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml,
+            --mode, screen, --budget, "100", --cma-seed, "5678"]}
