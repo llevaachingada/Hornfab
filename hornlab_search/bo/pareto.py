@@ -35,7 +35,7 @@ def nondominated(errors):
                      for p in a], dtype=bool)
 
 
-def select_subset(X, errors, J, geometry_ids, *, cap=256):
+def select_subset(X, errors, J, geometry_ids, *, cap=256, reference=None):
     """Select physical frontier/crowding then scalar and unit-box diversity."""
     X, errors, J = np.asarray(X, float), np.asarray(errors, float), np.asarray(J, float).reshape(-1)
     ids = tuple(map(str, geometry_ids))
@@ -45,7 +45,8 @@ def select_subset(X, errors, J, geometry_ids, *, cap=256):
             or not np.isfinite(errors).all() or not np.isfinite(J).all()
             or len(set(ids)) != n or cap < 1 or cap > 256):
         raise ValueError("invalid or duplicate eligible observations")
-    reference = frozen_reference(errors)
+    # A study-frozen reference (spec 3.5) normalises crowding; default is this snapshot.
+    reference = frozen_reference(errors) if reference is None else dict(reference)
     front = np.flatnonzero(nondominated(errors)).tolist()
     crowd = {i: 0.0 for i in front}
     for axis in range(2):
@@ -124,7 +125,7 @@ def fit_constrained_pareto(base, margin_observations, *, ids, seed=0):
         return ParetoFit("unavailable", "capability_missing")
 
 
-def _fit_pareto_numeric(X, errors, ids, *, reference, seed=0):
+def _fit_pareto_numeric(X, errors, ids, *, reference, seed=0, require_dominating=True):
     """Fit independent locked models; reference must come from the full snapshot."""
     X, errors = np.asarray(X, float), np.asarray(errors, float)
     ids = tuple(ids)
@@ -133,7 +134,8 @@ def _fit_pareto_numeric(X, errors, ids, *, reference, seed=0):
         return ParetoFit("unavailable", "invalid_inputs")
     try:
         ref = np.asarray(reference["ref_point"], float)
-        if ref.shape != (2,) or not np.isfinite(ref).all() or not np.all(-errors > ref):
+        if ref.shape != (2,) or not np.isfinite(ref).all() or (
+                require_dominating and not np.all(-errors > ref)):
             raise ValueError("reference must be worse than all training observations")
     except (KeyError, TypeError, ValueError):
         return ParetoFit("unavailable", "invalid_reference")
@@ -213,6 +215,64 @@ def fit_pareto(cohort, metric_observations, *, seed=0, cap=256):
                                    reference=subset["reference"], seed=seed)
     except (ValueError, TypeError, IndexError) as exc:
         return ParetoFit("unavailable", f"invalid_cohort: {exc}")
+
+
+@dataclass(frozen=True)
+class ParetoTraining:
+    """Measured, ID-bound Pareto training rows with a study-frozen reference.
+
+    ``errors`` are physical coverage (deg) / ripple (dB) errors measured by one frozen
+    metric policy (``metric_spec_hash``).  ``reference`` is frozen ONCE from the training
+    snapshot (spec 3.5) and is never recomputed when adaptive rows are added: later rows may
+    lie beyond it (they still train the GPs; they just add no hypervolume).
+    """
+    X: object
+    errors: object
+    J: object
+    ids: tuple
+    geometry_ids: tuple
+    reference: dict
+    metric_spec_hash: str
+
+
+def validate_pareto_training(pt):
+    X, errors, J = (np.asarray(pt.X, float), np.asarray(pt.errors, float),
+                    np.asarray(pt.J, float).reshape(-1))
+    n = len(pt.ids)
+    if (X.ndim != 2 or X.shape[0] != n or errors.shape != (n, 2) or len(J) != n
+            or len(pt.geometry_ids) != n or n == 0):
+        raise ValueError("pareto training arrays disagree in shape")
+    if not (np.isfinite(X).all() and np.isfinite(errors).all() and np.isfinite(J).all()):
+        raise ValueError("pareto training rows must be finite")
+    if np.any(errors < 0):
+        raise ValueError("physical errors must be nonnegative")
+    if len(set(map(str, pt.ids))) != n or len(set(map(str, pt.geometry_ids))) != n:
+        raise ValueError("duplicate observation or geometry identity")
+    h = pt.metric_spec_hash
+    if not isinstance(h, str) or len(h) != 64 or any(c not in "0123456789abcdef" for c in h):
+        raise ValueError("metric spec hash missing")
+    ref = np.asarray((pt.reference or {}).get("ref_point"), float)
+    lim = np.asarray((pt.reference or {}).get("limits"), float)
+    if ref.shape != (2,) or lim.shape != (2,) or not np.isfinite(ref).all()             or not np.allclose(ref, -lim):
+        raise ValueError("frozen reference missing or malformed")
+    return X, errors, J
+
+
+def fit_pareto_training(pt, *, seed=0, cap=256):
+    """Fit the locked independent GPs on study-artifact rows with the frozen reference."""
+    try:
+        X, errors, J = validate_pareto_training(pt)
+    except (AttributeError, TypeError, ValueError) as exc:
+        return ParetoFit("unavailable", f"invalid_pareto_training: {exc}")
+    try:
+        subset = select_subset(X, errors, J, [str(g) for g in pt.geometry_ids], cap=cap,
+                               reference=pt.reference)
+    except (ValueError, TypeError, IndexError) as exc:
+        return ParetoFit("unavailable", f"invalid_pareto_training: {exc}")
+    idx = subset["indices"]
+    return _fit_pareto_numeric(X[idx], errors[idx], [str(pt.ids[i]) for i in idx],
+                               reference=dict(pt.reference), seed=seed,
+                               require_dominating=False)
 
 
 def acquisition_scores(fit, candidates, *, seed=0, pending=None):

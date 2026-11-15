@@ -39,6 +39,8 @@ def main(argv=None) -> int:
     ap.add_argument("--deadline-hours", type=float, default=6.0)
     ap.add_argument("--label", required=True)
     ap.add_argument("--lane", default="gpu", choices=("gpu", "cpu"))
+    ap.add_argument("--policy", default="scalar", choices=("scalar", "turbo", "pareto"),
+                    help="proposal policy (turbo = turbo_pool_v1 trust region; pareto = coverage/ripple)")
     a = ap.parse_args(argv)
 
     from hornlab_search.studies import builders
@@ -62,7 +64,7 @@ def main(argv=None) -> int:
     spec = {"protocol": "bo-study-v1.1",
             "question": f"BO-vs-CMA matched comparison arm {a.label} (seed {a.seed}, {PROFILE})",
             "task": {"name": TASK}, "source": source,
-            "policy": {"proposal_policy": "scalar", "seed": a.seed}}
+            "policy": {"proposal_policy": a.policy, "seed": a.seed}}
     service = StudyService(root)
     sid = service.create_study(spec, f"bo-vs-cma-{a.label}")["id"]
     steps = {}
@@ -73,7 +75,7 @@ def main(argv=None) -> int:
     deadline = (datetime.now(timezone.utc) + timedelta(hours=a.deadline_hours)).isoformat()
     package = prepare_run_package(service, sid, lane=a.lane, deadline=deadline, budget_profile=PROFILE)
     (root / "package.json").write_text(json.dumps(package), encoding="utf-8")
-    print(json.dumps({"study_id": sid, "package_id": package["package_id"], "budget": package["budget"],
+    print(json.dumps({"study_id": sid, "policy": a.policy, "package_id": package["package_id"], "budget": package["budget"],
                       "budget_profile": package.get("budget_profile"), "deadline": deadline,
                       "steps": steps, "preflight": execution_capability(service, package, root=REPO)},
                      default=str), flush=True)

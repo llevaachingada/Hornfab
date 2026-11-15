@@ -80,7 +80,7 @@ class PipelineStudyEvaluator:
                  training_set=None, pool=None, policy="scalar", evaluate_fn=None,
                  lookup_fn=None, fit_fn=None, propose_fn=None, preflight_fn=None,
                  run_root=None, resolution_mm=30.0, audit_seed=0, seed=0,
-                 pipeline_factory=None):
+                 pipeline_factory=None, pareto_training=None):
         self.service = service
         self.package = package
         self.config = config
@@ -92,6 +92,14 @@ class PipelineStudyEvaluator:
         self._initial_observations = self._training_observations(training_set)
         self.pool = pool
         self.policy = policy
+        # turbo: durable trust-region state (spec 3.6); pareto: frozen-reference metric rows.
+        self.turbo_state = None
+        if policy == "turbo" and training_set is not None and training_set.X is not None:
+            from hornlab_search.bo.turbo import initial_state
+            self.turbo_state = initial_state(training_set)
+        self.pareto_training = pareto_training
+        self._pareto_rows = {}
+        self.pareto_excluded = {}
         self.evaluate_fn = evaluate_fn
         self.lookup_fn = lookup_fn
         self.fit_fn = fit_fn
@@ -216,11 +224,22 @@ class PipelineStudyEvaluator:
         from hornlab_search.bo import policy as policy_mod
         if self.policy == "exploration" or self.policy == "cma_seed":
             params = {}
+        extra = {}
+        if self.policy == "turbo":
+            extra["turbo_state"] = self.turbo_state
+        elif self.policy == "pareto":
+            current = self.current_pareto_training()
+            if current is None:
+                self.last_outcome = None
+                return None
+            extra["pareto_training"] = current
         outcome = policy_mod.fit_and_propose(
             self.policy, training_set=self.training_set, pool=self.pool,
             history=self.history, seed=self.seed, encoding=self.encoding,
-            config=self.config, resolution_mm=self.resolution_mm)
+            config=self.config, resolution_mm=self.resolution_mm, **extra)
         self.last_outcome = outcome
+        if self.policy == "turbo":
+            self.adopt_trust_region(getattr(outcome, "trust_region", None))
         if outcome.status != "ok" or outcome.proposal is None:
             return None
         return outcome.proposal
@@ -281,7 +300,13 @@ class PipelineStudyEvaluator:
         objective_box = None
         if mode == "pareto":
             values = [r["objectives"] for r in rows if r.get("objectives") is not None]
-            if values:
+            limits = ((self.pareto_training.reference or {}).get("limits")
+                      if self.pareto_training is not None else None)
+            if values and limits is not None:
+                # Fixed reference-normalised box (spec 3.5): [0, frozen limit] per error.
+                objective_box = [[0.0, max(float(limits[i]), max(v[i] for v in values))]
+                                 for i in range(2)]
+            elif values:
                 objective_box = [[min(v[i] for v in values), max(v[i] for v in values)]
                                  for i in range(2)]
         try:
@@ -464,8 +489,99 @@ class PipelineStudyEvaluator:
             solve_hash=result.get("solve_hash") or physical_id)
         return True
 
+    # ------------------------------------------------------------------ turbo / pareto state
+
+    def adopt_trust_region(self, record):
+        """Adopt ``record['state_after']`` from a turbo proposal (artifact or live)."""
+        if not isinstance(record, dict) or record.get("state_after") is None:
+            return
+        from hornlab_search.bo.turbo import TurboState
+        self.turbo_state = TurboState.from_dict(record["state_after"])
+
+    def _turbo_observe(self, result):
+        """Update the trust region once per completed screen; infra/unknown never update it."""
+        if self.policy != "turbo" or self.turbo_state is None or result.get("kind") != "screen":
+            return
+        from hornlab_search.bo.turbo import OUTCOME_MEASURED, OUTCOME_REFUSAL, update_state
+        solve_id = result.get("solve_id")
+        outcome = result.get("outcome")
+        j = _finite(result.get("observed_j"))
+        if outcome in ("success", "cached") and result.get("eligible") is True and j is not None:
+            vector = self._observation_vectors(result)
+            if vector is None:
+                return
+            self.turbo_state = update_state(self.turbo_state, outcome=OUTCOME_MEASURED,
+                                            candidate=[float(v) for v in vector], J=j,
+                                            solve_id=solve_id)
+        elif outcome == "cheap_refusal":
+            self.turbo_state = update_state(self.turbo_state, outcome=OUTCOME_REFUSAL,
+                                            solve_id=solve_id)
+
+    def _pareto_observe(self, result):
+        """Bind the screen's measured physical errors (same frozen policy) or record exclusion."""
+        if self.policy != "pareto" or self.pareto_training is None:
+            return
+        physical_id = result.get("physical_id")
+        if (result.get("kind") != "screen" or result.get("eligible") is not True
+                or not physical_id or physical_id not in self.observations):
+            return
+        metric = result.get("pareto_metric")
+        expected = self.pareto_training.metric_spec_hash
+        reason = None
+        if not isinstance(metric, dict):
+            reason = "metric observation missing"
+        elif metric.get("status") != "complete":
+            reason = f"metric observation {metric.get('status')}: {metric.get('reason')}"
+        elif metric.get("physical_metric_spec_hash") != expected:
+            reason = "metric observation uses a different metric spec hash"
+        else:
+            cov, rip = _finite(metric.get("coverage_deg")), _finite(metric.get("ripple_db"))
+            if cov is None or rip is None or cov < 0 or rip < 0:
+                reason = "metric observation is non-finite or negative"
+        if reason is not None:
+            self.pareto_excluded[physical_id] = reason
+            return
+        obs = self.observations[physical_id]
+        self._pareto_rows[physical_id] = (np.asarray(obs.x, dtype=float), cov, rip, float(obs.J),
+                                          str(obs.geometry_hash or physical_id))
+        result["objectives"] = [cov, rip]
+
+    def current_pareto_training(self):
+        """Historical rows + this run's measured rows; the reference stays frozen."""
+        base = self.pareto_training
+        if base is None:
+            return None
+        if not self._pareto_rows:
+            return base
+        from hornlab_search.bo.pareto import ParetoTraining
+        ids = list(base.ids)
+        geo = list(base.geometry_ids)
+        X = [np.asarray(base.X, dtype=float)]
+        errors = [np.asarray(base.errors, dtype=float)]
+        J = [np.asarray(base.J, dtype=float).reshape(-1)]
+        for oid, (x, cov, rip, j, g) in self._pareto_rows.items():
+            if oid in ids or g in geo:
+                continue
+            ids.append(oid)
+            geo.append(g)
+            X.append(x.reshape(1, -1))
+            errors.append(np.asarray([[cov, rip]]))
+            J.append(np.asarray([j]))
+        return ParetoTraining(X=np.vstack(X), errors=np.vstack(errors), J=np.concatenate(J),
+                              ids=tuple(ids), geometry_ids=tuple(geo),
+                              reference=dict(base.reference),
+                              metric_spec_hash=base.metric_spec_hash)
+
     def _refit(self):
         from hornlab_search.bo.data import build_training_set
+        if self.policy == "pareto" and self._pareto_rows and not callable(self.fit_fn):
+            from hornlab_search.bo.pareto import fit_pareto_training
+            fitted = fit_pareto_training(self.current_pareto_training(), seed=self.seed)
+            self._last_pareto_fit = fitted
+            reason = str(getattr(fitted, "reason", "") or "")
+            if getattr(fitted, "status", None) != "ok" and any(
+                    reason.startswith(r) for r in _NUMERICAL_MODEL_FAILURES):
+                return False
         if not self.observations:
             return True
         d = getattr(self.encoding, "d", None)
@@ -512,10 +628,12 @@ class PipelineStudyEvaluator:
                     and _finite(result.get("observed_j")) is not None):
                 self._verified_geometry_ids.add(str(geometry))
             return True
+        self._turbo_observe(result)
         if any(r.get("physical_id") == result.get("physical_id")
                for r in self._measured if result.get("physical_id")):
             return True
         if self._add_observation(result):
+            self._pareto_observe(result)
             self._measured.append(result)
             return self._refit()
         if result.get("eligible") is True and result.get("outcome") == "success":
@@ -549,6 +667,11 @@ class PipelineStudyEvaluator:
                     str(x) for x in (extra.get("verified_geometry_ids") or ()))
                 if extra.get("screens_exhausted"):
                     self._screens_exhausted = True
+                if self.policy == "turbo" and extra.get("turbo_state") is not None:
+                    from hornlab_search.bo.turbo import TurboState
+                    self.turbo_state = TurboState.from_dict(extra["turbo_state"])
+        self._pareto_rows = {}
+        self.pareto_excluded = {}
         self.observations = {}
         self.training_set = self._initial_training
         self._vectors = {}
@@ -563,7 +686,10 @@ class PipelineStudyEvaluator:
             if result.get("kind") in ("verify", "audit"):
                 self.observe(result)
                 continue
+            # Already-applied solve IDs are skipped, so replay after a staged state is exact.
+            self._turbo_observe(result)
             if self._add_observation(result):
+                self._pareto_observe(result)
                 self._measured.append(result)
         return self._refit()
 
@@ -577,6 +703,10 @@ class PipelineStudyEvaluator:
             "verified_geometry_ids": sorted(self._verified_geometry_ids),
             "verification_selection": self.selection,
         }
+        if self.policy == "turbo" and self.turbo_state is not None:
+            extra["turbo_state"] = self.turbo_state.to_dict()
+        if self.policy == "pareto":
+            extra["pareto_excluded"] = dict(sorted(self.pareto_excluded.items()))
         return encode_proposal_history(self.history, extra)
 
 

@@ -98,6 +98,8 @@ MODEL_MANIFEST_SCHEMA = "study-model-manifest-v1"
 POOL_MANIFEST_SCHEMA = "study-pool-manifest-v1"
 PROPOSAL_SCHEMA = "study-proposal-v1"
 DATASET_SCHEMA = "study-training-dataset-v1"
+PARETO_METRICS_SCHEMA = "study-pareto-metrics-v1"
+PARETO_METRICS_KIND = "pareto_metrics"
 
 POOL_STATUS_NOTE = "cheap-check-passed; mesh/acoustic eligibility unknown"
 _ALLOWED_TASK_NAMES = {
@@ -795,7 +797,164 @@ def _proposal_limitations(policy, objective_version=4):
         f"J uses objective v{objective_version}; no cross-version ranking.",
         "The every-fourth exploration cadence is stateful and does not reset on resume.",
         f"proposal policy: {policy}; verification mode follows the frozen selection rule.",
-    ]
+    ] + ([
+        "turbo_pool_v1: candidates are restricted to a trust-region box around the best measured "
+        "design; there is no every-fourth exploration cadence (the box manages exploration); "
+        "the trust-region state is persisted and never silently restarted.",
+    ] if policy == "turbo" else []) + ([
+        "pareto_pool_v1: coverage/ripple trade-off frontier against a hypervolume reference "
+        "frozen once from the training snapshot; not the acoustic optimum.",
+    ] if policy == "pareto" else [])
+
+
+def _read_dataset_record(dataset_root: Path, shard: int, row: int):
+    """Read one stored record (meta line + arrays) read-only; ``(None, None)`` when absent."""
+    import numpy as np
+    meta = None
+    jsonl = dataset_root / f"shard-{int(shard):04d}.jsonl"
+    try:
+        with open(jsonl, encoding="utf-8") as fh:
+            for index, line in enumerate(fh):
+                if index == int(row):
+                    meta = json.loads(line)
+                    break
+    except (OSError, ValueError):
+        return None, None
+    npz = dataset_root / f"shard-{int(shard):04d}" / f"rec-{int(row):04d}.npz"
+    arrays = None
+    if npz.is_file():
+        try:
+            with np.load(npz, allow_pickle=False) as values:
+                arrays = {key: values[key] for key in values.files}
+        except Exception:  # noqa: BLE001 - corrupt arrays are an exclusion, not a fill
+            arrays = None
+    return meta, arrays
+
+
+def measure_record_metrics(policy, meta, arrays, target):
+    """Physical coverage/ripple error of one stored record under a frozen metric policy.
+
+    Reuses the replay module's stored-array readers and ``bo.metrics.measure_metrics``; no
+    metric math lives here.  Returns a ``MetricObservation``.
+    """
+    from hornlab_search.bo.metrics import MetricObservation, measure_metrics
+    from hornlab_search.objective import replay
+    if meta is None or arrays is None:
+        return MetricObservation("capability_missing", "stored record or arrays missing",
+                                 policy.physical_metric_spec_hash)
+    metrics, _reasons = replay._metricset_from_arrays(meta, arrays, target)
+    response, missing = replay._response_from_arrays(meta, arrays)
+    if metrics is None or response is None:
+        return MetricObservation("capability_missing", missing or "stored metrics missing",
+                                 policy.physical_metric_spec_hash)
+    return measure_metrics(policy, metrics, response)
+
+
+def build_pareto_metrics(service, study_id, *, root, idempotency_key=None):
+    """Attach ``pareto_metrics``: frozen metric policy, per-row physical errors, frozen reference.
+
+    Every training row is re-read from its stored dataset record (shard/row from the training
+    manifest identities) and measured with ONE frozen metric policy (``freeze_metric_policy``
+    on the resolved task brief and the cohort's frequency grid).  Rows whose observation is
+    not ``complete`` are excluded and listed with the reason -- never filled.  The hypervolume
+    reference is frozen here, once, from the complete training rows (spec 3.5).
+    """
+    study, _ = _study_spec(service, study_id, None)
+    revision = study["revision"]
+    existing = _existing(service, study_id, revision, PARETO_METRICS_KIND)
+    if existing is not None:
+        return {"status": "ok", "revision": revision, "artifact": existing, "idempotent": True}
+    snapshot_meta = _require(service, study_id, "snapshot")
+    training_meta = _require(service, study_id, "training")
+    manifest_meta = _require(service, study_id, "training_manifest")
+    snapshot = _load_json(service.store.artifacts / snapshot_meta["sha256"], "snapshot")
+    manifest = _load_json(service.store.artifacts / manifest_meta["sha256"], "training manifest")
+    identities = (manifest.get("meta") or {}).get("identities") or {}
+    dataset_raw = (manifest.get("sources") or {}).get("dataset_root")
+    if not dataset_raw or not identities:
+        raise Unavailable("pareto metrics need a native-build training manifest with per-row "
+                          "dataset identities (shard/row) and a dataset_root")
+    dataset_root = _resolve_input(root, dataset_raw, None, "dataset_root")
+    from hornlab_search.bo.metrics import freeze_metric_policy
+    from hornlab_search.bo.pareto import frozen_reference
+    from hornlab_search.objective import replay
+    brief = replay.brief_from_config(snapshot["task"]["config"])
+    ids = list(manifest["ids"])
+    records = {}
+    for oid in ids:
+        ident = identities.get(oid) or {}
+        if "shard" not in ident or "row" not in ident:
+            records[oid] = (None, None)
+            continue
+        records[oid] = _read_dataset_record(dataset_root, ident["shard"], ident["row"])
+    grid = next((a["freqs_hz"] for _m, a in records.values()
+                 if a is not None and a.get("freqs_hz") is not None), None)
+    if grid is None:
+        raise Unavailable("no training record carries a stored frequency grid")
+    try:
+        policy = freeze_metric_policy(brief, grid)
+    except ValueError as exc:
+        raise Unavailable(f"metric policy cannot be frozen for this task: {exc}") from exc
+    observations, excluded = {}, {}
+    for oid in ids:
+        meta, arrays = records[oid]
+        obs = measure_record_metrics(policy, meta, arrays, brief.target)
+        row = {"status": obs.status, "reason": obs.reason,
+               "physical_metric_spec_hash": obs.physical_metric_spec_hash,
+               "coverage_deg": obs.coverage_deg, "ripple_db": obs.ripple_db}
+        if obs.status == "complete":
+            observations[oid] = row
+        else:
+            excluded[oid] = row
+    if not observations:
+        raise Unavailable("no training row has a complete physical metric observation")
+    import numpy as np
+    errors = np.asarray([[observations[o]["coverage_deg"], observations[o]["ripple_db"]]
+                         for o in ids if o in observations], dtype=float)
+    reference = frozen_reference(errors)
+    payload = {
+        "tool": "study_pareto_metrics", "schema": PARETO_METRICS_SCHEMA, "schema_version": 1,
+        "protocol": PROTOCOL, "generated_utc": _utc_now(), "study_id": study_id,
+        "revision": revision, "status": "ok",
+        "training_set_id": manifest.get("training_set_id"),
+        "metric_policy": {"physical_metric_spec_hash": policy.physical_metric_spec_hash,
+                          "payload_json": policy.payload_json,
+                          "objective_version": brief.objective_version},
+        "reference": reference,
+        "reference_policy": "frozen once from the complete training rows; never recomputed",
+        "observations": observations, "excluded": excluded,
+        "n_complete": len(observations), "n_excluded": len(excluded),
+        "dataset_root": str(dataset_root), "no_backend_calls": True,
+        "limitations": [
+            "Physical errors from the frozen v8 raw helper (coverage deg, response-detrended "
+            "ripple dB); rows without complete support are excluded, never filled.",
+        ],
+    }
+    deps = {"snapshot": snapshot_meta["sha256"], "training": training_meta["sha256"],
+            "training_manifest": manifest_meta["sha256"]}
+    content = _json_bytes(payload)
+    meta = _attach_once(service, study_id, revision, PARETO_METRICS_KIND, content, deps,
+                        idempotency_key or f"pareto_metrics:{revision}:{_sha256_bytes(content)}")
+    return {"status": "ok", "revision": revision, "artifact": meta, "idempotent": False,
+            "n_complete": len(observations), "n_excluded": len(excluded),
+            "reference": reference}
+
+
+def pareto_training_from_artifacts(training_set, pareto_metrics):
+    """Join the training arrays with the complete metric rows into a ``ParetoTraining``."""
+    import numpy as np
+    from hornlab_search.bo.pareto import ParetoTraining
+    obs = pareto_metrics.get("observations") or {}
+    identities = (getattr(training_set, "meta", {}) or {}).get("identities") or {}
+    J = np.asarray(training_set.J, dtype=float).reshape(-1)
+    rows = [i for i, oid in enumerate(training_set.ids) if str(oid) in obs]
+    ids = tuple(str(training_set.ids[i]) for i in rows)
+    geo = tuple(str((identities.get(oid) or {}).get("design_hash") or oid) for oid in ids)
+    return ParetoTraining(
+        X=np.asarray(training_set.X, dtype=float)[rows], J=J[rows],
+        errors=np.asarray([[obs[o]["coverage_deg"], obs[o]["ripple_db"]] for o in ids], float),
+        ids=ids, geometry_ids=geo, reference=dict(pareto_metrics["reference"]),
+        metric_spec_hash=pareto_metrics["metric_policy"]["physical_metric_spec_hash"])
 
 
 def build_proposal(service, study_id, *, root, policy=None, seed=None, idempotency_key=None,
@@ -873,10 +1032,28 @@ def build_proposal(service, study_id, *, root, policy=None, seed=None, idempoten
     except (Unavailable, StudyError, OSError, ValueError) as exc:
         pool_error = str(exc)
 
+    pareto_training = None
+    pareto_meta = None
+    pareto_error = None
+    if chosen == "pareto" and cohort is None and metric_observations is None:
+        # Production path: bindings come from the study's own frozen pareto_metrics artifact.
+        try:
+            build_pareto_metrics(service, study_id, root=root)
+            pareto_meta = _require(service, study_id, PARETO_METRICS_KIND)
+            pareto_payload = _load_json(service.store.artifacts / pareto_meta["sha256"],
+                                        "pareto metrics")
+            pareto_training = pareto_training_from_artifacts(training_set, pareto_payload)
+        except Unavailable as exc:
+            pareto_training, pareto_meta, pareto_error = None, None, str(exc)
+    extra = {"pareto_training": pareto_training} if pareto_training is not None else {}
     capability = policy_mod.capability_status(
         chosen, training_set=training_set, cohort=cohort,
         metric_observations=metric_observations, pool=candidate_pool,
-        seeds=cma_seed_candidates)
+        seeds=cma_seed_candidates, **extra)
+    if pareto_error is not None:
+        # Keep the existing refusal reason; name the missing production binding.
+        capability = dict(capability, detail=(f"{capability.get('detail')}; frozen "
+                                              f"pareto_metrics bindings unavailable: {pareto_error}"))
     pool_payload = (_pool_manifest(candidate_pool, policy=chosen, config_path=task["config"],
                                    encoding=encoding) if candidate_pool is not None else {
         "tool": "study_pool_manifest", "schema": POOL_MANIFEST_SCHEMA,
@@ -894,7 +1071,7 @@ def build_proposal(service, study_id, *, root, policy=None, seed=None, idempoten
             chosen, training_set=training_set, cohort=cohort,
             metric_observations=metric_observations, pool=candidate_pool,
             seed=int(seed), encoding=encoding, config=cfg,
-            cma_seed_candidates=cma_seed_candidates)
+            cma_seed_candidates=cma_seed_candidates, **extra)
         status = outcome.status
         reason = outcome.reason
         detail = outcome.detail
@@ -967,9 +1144,18 @@ def build_proposal(service, study_id, *, root, policy=None, seed=None, idempoten
     }
     if proposal["proposal"] is not None:
         proposal["proposal"].setdefault("status_note", POOL_STATUS_NOTE)
+    if chosen == "turbo":
+        proposal["trust_region"] = getattr(outcome, "trust_region", None)
+    if chosen == "pareto" and pareto_meta is not None:
+        proposal["pareto"] = {"pareto_metrics": pareto_meta["sha256"],
+                              "reference": dict(pareto_training.reference),
+                              "metric_spec_hash": pareto_training.metric_spec_hash,
+                              "n_training": len(pareto_training.ids)}
     deps_proposal = {"snapshot": snapshot_meta["sha256"], "training": training_meta["sha256"],
                      "analysis": analysis_meta["sha256"], "model": model_meta["sha256"],
                      "pool": pool_meta["sha256"], "training_manifest": manifest_meta["sha256"]}
+    if chosen == "pareto" and pareto_meta is not None:
+        deps_proposal[PARETO_METRICS_KIND] = pareto_meta["sha256"]
     proposal_meta = _attach_once(service, study_id, revision, "proposal", _json_bytes(proposal),
                                  deps_proposal,
                                  f"proposal:{revision}:{chosen}:{_sha256_bytes(_json_bytes(proposal))}")
@@ -987,4 +1173,6 @@ __all__ = [
     "DEFAULT_CONFIG", "DEFAULT_BRIEF", "DEFAULT_EVIDENCE_ROOT", "DEFAULT_SCORES",
     "DEFAULT_CATALOG", "DEFAULT_DATASET_ROOT", "DEFAULT_TRAINING_JSON", "DEFAULT_POOL_JSON",
     "freeze_snapshot", "build_training", "build_analysis", "build_proposal",
+    "build_pareto_metrics", "measure_record_metrics", "pareto_training_from_artifacts",
+    "PARETO_METRICS_KIND",
 ]

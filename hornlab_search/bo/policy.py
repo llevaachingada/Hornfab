@@ -2,12 +2,13 @@
 
 The M3 runner and GUI consume exactly one selector surface:
 
-``PROPOSAL_POLICIES = ("scalar", "pareto", "cma_seed", "exploration")``
+``PROPOSAL_POLICIES = ("scalar", "pareto", "cma_seed", "exploration", "turbo")``
 
 * ``scalar``      -- scalar Bayesian proposal (locked scalar-pool v1 engine);
 * ``pareto``      -- coverage/ripple trade-off frontier (locked Pareto engine);
 * ``cma_seed``    -- an explicit, caller-supplied CMA archive seed pack; **no score math**;
-* ``exploration`` -- fixed non-BO maximin exploration from the same legal pool.
+* ``exploration`` -- fixed non-BO maximin exploration from the same legal pool;
+* ``turbo``       -- scalar GP + qLogNEI inside a trust region (``turbo_pool_v1``, spec 3.6).
 
 Nothing here invents a candidate, a prediction or a score.  Failed fits and missing
 capabilities are tagged and propagated exactly; a ``proposal`` may be attached to a tagged
@@ -43,9 +44,11 @@ POLICY_SCALAR = "scalar"
 POLICY_PARETO = "pareto"
 POLICY_CMA_SEED = "cma_seed"
 POLICY_EXPLORATION = "exploration"
+POLICY_TURBO = "turbo"
 
 #: Frozen order for GUI/runner menus.
-PROPOSAL_POLICIES = (POLICY_SCALAR, POLICY_PARETO, POLICY_CMA_SEED, POLICY_EXPLORATION)
+PROPOSAL_POLICIES = (POLICY_SCALAR, POLICY_PARETO, POLICY_CMA_SEED, POLICY_EXPLORATION,
+                     POLICY_TURBO)
 
 #: User-facing meanings.  Acquisition values and seed picks are technical rankings, not
 #: acoustic quality and not a claim about a horn.
@@ -54,13 +57,14 @@ PROPOSAL_POLICY_LABELS = {
     POLICY_PARETO: "coverage/ripple trade-offs",
     POLICY_CMA_SEED: "CMA archive seed pack",
     POLICY_EXPLORATION: "fixed exploration",
+    POLICY_TURBO: "scalar Bayesian, trust region",
 }
 
 STATUS_CAPABILITY_MISSING = "capability_missing"
 STATUS_POOL_EXHAUSTED = "pool_exhausted"
 
 #: Engine-dependent policies.  ``cma_seed``/``exploration`` are explicitly non-BO.
-ENGINE_POLICIES = frozenset({POLICY_SCALAR, POLICY_PARETO})
+ENGINE_POLICIES = frozenset({POLICY_SCALAR, POLICY_PARETO, POLICY_TURBO})
 
 REASON_UNSUPPORTED_POLICY = "unsupported_policy"
 REASON_TRAINING_SET_REQUIRED = "training_set_required"
@@ -104,13 +108,15 @@ class ProposalOutcome:
     library_versions: dict = field(default_factory=dict)
     detail: str | None = None
     counts: dict = field(default_factory=dict)
+    #: turbo only: durable trust-region record (state before/after, box, attempts).
+    trust_region: dict | None = None
 
     @property
     def ok(self) -> bool:
         return self.status == STATUS_OK
 
     def to_dict(self) -> dict:
-        return {
+        out = {
             "status": self.status,
             "reason": self.reason,
             "policy": self.policy,
@@ -124,6 +130,9 @@ class ProposalOutcome:
             "detail": self.detail,
             "counts": dict(self.counts),
         }
+        if self.trust_region is not None:
+            out["trust_region"] = self.trust_region
+        return out
 
 
 def verification_mode(policy: str) -> str:
@@ -134,7 +143,7 @@ def verification_mode(policy: str) -> str:
     """
     if policy == POLICY_PARETO:
         return "pareto"
-    if policy in (POLICY_SCALAR, POLICY_CMA_SEED, POLICY_EXPLORATION):
+    if policy in (POLICY_SCALAR, POLICY_CMA_SEED, POLICY_EXPLORATION, POLICY_TURBO):
         return "scalar"
     raise ValueError(f"unknown proposal policy {policy!r}")
 
@@ -269,6 +278,23 @@ def _pareto_data_status(cohort, metric_observations) -> dict:
                      "a finite two-objective frozen reference cannot be formed")
     return _data(STATUS_OK, REASON_OK, None, frozen_reference=reference,
                  n=len(values), metric_spec_hash=metric_hash)
+
+
+def _pareto_training_status(pareto_training) -> dict:
+    """Gate for the study-artifact Pareto path (frozen reference + measured metric rows)."""
+    try:
+        _pareto.validate_pareto_training(pareto_training)
+    except (AttributeError, TypeError, ValueError) as exc:
+        return _data(STATUS_UNAVAILABLE, REASON_METRIC_INCOMPLETE,
+                     f"pareto training bindings are invalid: {exc}")
+    n = len(pareto_training.ids)
+    d = int(np.asarray(pareto_training.X).shape[1])
+    n_min = n_min_for(d)
+    if n < n_min:
+        return _data(STATUS_UNAVAILABLE, REASON_INSUFFICIENT_TRAINING_DATA,
+                     f"{n} complete metric observations is below n_min={n_min}", n=n, n_min=n_min)
+    return _data(STATUS_OK, REASON_OK, None, frozen_reference=dict(pareto_training.reference),
+                 n=n, n_min=n_min, metric_spec_hash=pareto_training.metric_spec_hash)
 
 
 def _pool_data_status(pool) -> dict:
@@ -407,7 +433,8 @@ def _select_seed(entries) -> dict:
 
 
 def capability_status(policy: str, *, training_set=None, cohort=None,
-                      metric_observations=None, pool=None, seeds=None) -> dict:
+                      metric_observations=None, pool=None, seeds=None,
+                      pareto_training=None) -> dict:
     """Explicit preflight for a proposal policy.
 
     Returns ``status``/``reason``/``detail``/``required_inputs`` plus the data gate
@@ -428,6 +455,16 @@ def capability_status(policy: str, *, training_set=None, cohort=None,
     if policy == POLICY_SCALAR:
         data = _scalar_data_status(training_set)
         required = ["training_set"]
+    elif policy == POLICY_TURBO:
+        data = _scalar_data_status(training_set)
+        if data["status"] == STATUS_OK:
+            pool_state = _pool_data_status(pool)
+            if pool_state["status"] != STATUS_OK:
+                data = pool_state
+        required = ["training_set", "pool"]
+    elif policy == POLICY_PARETO and pareto_training is not None:
+        data = _pareto_training_status(pareto_training)
+        required = ["pareto_training"]
     elif policy == POLICY_PARETO:
         data = _pareto_data_status(cohort, metric_observations)
         required = ["cohort", "metric_observations"]
@@ -556,7 +593,8 @@ def _outcome_from_pareto_proposal(result: dict) -> ProposalOutcome:
 def fit_and_propose(policy: str, *, training_set=None, cohort=None,
                     metric_observations=None, pool=None, history=None, seed: int = 0,
                     encoding=None, config=None, cma_seed_candidates=None,
-                    resolution_mm: float = 30.0) -> ProposalOutcome:
+                    resolution_mm: float = 30.0, turbo_state=None,
+                    pareto_training=None) -> ProposalOutcome:
     """Fit (when required) and select one proposal for ``policy``.
 
     Scalar calls the locked ``fit_model`` + ``propose_one``; Pareto calls ``fit_pareto`` +
@@ -586,6 +624,44 @@ def fit_and_propose(policy: str, *, training_set=None, cohort=None,
             fitted, pool, history=history, encoding=encoding, config=config,
             resolution_mm=resolution_mm)
         return _outcome_from_proposal_result(POLICY_SCALAR, result)
+
+    if policy == POLICY_TURBO:
+        from dataclasses import replace as _replace
+
+        from . import turbo as _turbo
+        if training_set is None:
+            return _failure(POLICY_TURBO, REASON_TRAINING_SET_REQUIRED,
+                            "a TrainingSet produced by bo.data is required")
+        try:
+            state = turbo_state if turbo_state is not None else _turbo.initial_state(training_set)
+        except (AttributeError, TypeError, ValueError) as exc:
+            return _failure(POLICY_TURBO, _turbo.REASON_TRUST_REGION_INVALID, str(exc))
+        if not state.active:
+            result, record = _turbo.propose_turbo(None, pool, history, state, encoding=encoding,
+                                                  config=config, seed=int(seed))
+            return _replace(_outcome_from_proposal_result(POLICY_TURBO, result),
+                            trust_region=record)
+        fitted = _model.fit_model(training_set, seed=int(seed))
+        if getattr(fitted, "status", None) != STATUS_OK:
+            reason = getattr(fitted, "reason", None) or "model_unavailable"
+            return _failure(POLICY_TURBO, reason, getattr(fitted, "detail", None),
+                            status=getattr(fitted, "status", STATUS_UNAVAILABLE),
+                            library_versions=getattr(fitted, "library_versions", None))
+        result, record = _turbo.propose_turbo(
+            fitted, pool, history, state, encoding=encoding, config=config, seed=int(seed),
+            resolution_mm=resolution_mm)
+        return _replace(_outcome_from_proposal_result(POLICY_TURBO, result), trust_region=record)
+
+    if policy == POLICY_PARETO and pareto_training is not None:
+        fitted = _pareto.fit_pareto_training(pareto_training, seed=int(seed))
+        if getattr(fitted, "status", None) != STATUS_OK:
+            return _failure(POLICY_PARETO, getattr(fitted, "reason", None) or "model_unavailable",
+                            None, status=getattr(fitted, "status", STATUS_UNAVAILABLE))
+        hist = history if history is not None else ProposalHistory()
+        result = _pareto.propose_pareto(
+            fitted, pool, hist, encoding=encoding, config=config, seed=int(seed),
+            resolution_mm=resolution_mm)
+        return _outcome_from_pareto_proposal(result)
 
     if policy == POLICY_PARETO:
         if cohort is None:
@@ -677,6 +753,7 @@ __all__ = [
     "POLICY_PARETO",
     "POLICY_CMA_SEED",
     "POLICY_EXPLORATION",
+    "POLICY_TURBO",
     "PROPOSAL_POLICIES",
     "PROPOSAL_POLICY_LABELS",
     "ENGINE_POLICIES",

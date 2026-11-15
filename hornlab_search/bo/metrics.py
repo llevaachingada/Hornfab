@@ -526,13 +526,24 @@ class MetricObservation:
 
 def freeze_metric_policy(brief: Brief, freqs_hz, *, restricted_mask=None,
                          restriction_name: str | None = None) -> FrozenSupport:
-    """Freeze a brief and frequency support; a shared restriction is explicitly partial."""
-    if not isinstance(brief, Brief) or brief.objective_version != 4:
-        raise ValueError("a resolved v4 replay Brief is required")
+    """Freeze a brief and frequency support; a shared restriction is explicitly partial.
+
+    Objective v4 and v7 briefs are accepted.  Both blocks carry the same three coverage
+    conventions the raw helper consumes (``cov_narrow_ratio``, ``cov_below_f0``,
+    ``diag_reference``); the measurement itself is the unchanged ``v8_raw_terms`` helper.  A v7
+    policy records ``objective_version: 7`` and ``v7_params`` so its hash is a distinct metric
+    identity; v4 payloads are byte-identical to before.
+    """
+    if not isinstance(brief, Brief) or brief.objective_version not in (4, 7):
+        raise ValueError("a resolved v4 or v7 replay Brief is required")
     block = brief.objective_block
     if not isinstance(block, dict):
-        raise ValueError("objective v4 needs its validated objective block")
-    params = V4Params.from_block(block)
+        raise ValueError(f"objective v{brief.objective_version} needs its validated objective block")
+    if brief.objective_version == 7:
+        from ..objective.scalar_v7 import V7Params
+        params = V7Params.from_block(block)
+    else:
+        params = V4Params.from_block(block)
     if params.cov_below_f0 != "mask" or params.diag_reference != "round":
         raise ValueError("unsupported coverage or diagonal convention")
     t = Target.from_dict(asdict(brief.target))
@@ -564,8 +575,9 @@ def freeze_metric_policy(brief: Brief, freqs_hz, *, restricted_mask=None,
     # positive weights.
     code = {m.__name__: hashlib.sha256(Path(str(m.__file__)).read_bytes()).hexdigest()
             for m in (scalar_v2, scalar_v8, smoothness)}
-    payload = {"schema": METRIC_SCHEMA, "objective_version": 4,
-               "target": asdict(t), "v4_params": params.to_block(),
+    params_key = "v4_params" if brief.objective_version == 4 else "v7_params"
+    payload = {"schema": METRIC_SCHEMA, "objective_version": int(brief.objective_version),
+               "target": asdict(t), params_key: params.to_block(),
                "brief_hash": brief.brief_hash(), "objective_weights": brief.weights,
                "frequency_hz": f.tolist(),
                "masks": {"ripple": band.tolist(), "coverage_h": h.tolist(),
@@ -603,7 +615,11 @@ def measure_metrics(policy: FrozenSupport, metrics, response) -> MetricObservati
         if not used or values.shape != f.shape or not np.all(np.isfinite(values[band])):
             return missing("response-detrended ripple unavailable on intended bins")
         # A separate helper diagnostic detects legacy fallback before v8_raw_terms recomputes it.
-        v4 = V4Params.from_block(p["v4_params"])
+        if "v4_params" in p:
+            v4 = V4Params.from_block(p["v4_params"])
+        else:
+            from ..objective.scalar_v7 import V7Params
+            v4 = V7Params.from_block(p["v7_params"])
         helper_params = scalar_v8.V8Params(tolerances={}, cov_narrow_ratio=v4.cov_narrow_ratio,
                                            cov_below_f0=v4.cov_below_f0,
                                            diag_reference=v4.diag_reference, gates=())
