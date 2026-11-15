@@ -1,0 +1,72 @@
+# BoTorch vs CMA-ES, matched comparison on the home task + the strict 80x60 track (prepared 2026-11-14).
+# Plan and decision rules: docs/queue/BO_VS_CMA_PLAN_2026-11-15.md.
+# PREREQUISITES before launch (all three):
+#   1. sab_home_gpu_2026-11-14 has FINISHED (never start a GPU runner while another runs).
+#   2. Branch feat/study-budget-profiles (worktree C:\Users\hunte\Hrns\bobudget-wt) is merged into the main
+#      checkout: it adds the explicit `comparison-60` study budget profile, `study_cohort --run-id` and
+#      tools/bo_compare/prepare_study.py. Without it, the prep_bo_* jobs fail fast (no solves are wasted).
+#   3. `run_campaign_night.py --night <this file> --dry-run` passes.
+# Shared prior for BOTH methods: run 20261114T043025Z-screen-18985d (185 valid CMA rows, task HOME_SEED5678).
+# BO uses it as training data (cohort built with --run-id so the 14 Nov pilot's rows cannot leak in);
+# CMA uses it as x0 = that run's best design. Equal new budget: 60 screens + 6 verify calls per arm.
+# Estimated ~14 h GPU: BO arm ~2-2.5 h (60 screens + CPU refits + 6 verify), CMA arm ~1 h + its verify,
+# 80x60 track ~2.2 h per seed. Pairs are adjacent so a -Cutoff never strands half a pair.
+night: bo_vs_cma_2026-11-15
+lane: gpu
+jobs:
+  - {id: prep_cohort, kind: command, timeout_s: 1800,
+     argv: [.venv/Scripts/python.exe, -m, tools.analysis.study_cohort,
+            --config, examples/typologies/print_80x60_2026-11-13/p80x60__osse_ext_throat_700_v7_seed5678.yaml,
+            --dataset, dataset, --out, runs/bo_vs_cma_2026-11-15/cohort,
+            --run-id, 20261114T043025Z-screen-18985d]}
+  # ---- pair 1 ----
+  - {id: prep_bo_s31001, kind: command, timeout_s: 3600,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, tools/bo_compare/prepare_study.py,
+            --root, runs/bo_vs_cma_2026-11-15/bo_s31001, --cohort, runs/bo_vs_cma_2026-11-15/cohort,
+            --seed, "31001", --deadline-hours, "5", --label, bo_s31001]}
+  - {id: bo_s31001, kind: command, timeout_s: 21600,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, -m, hornlab_search.studies.cli, run,
+            --root, runs/bo_vs_cma_2026-11-15/bo_s31001, --package, package.json,
+            --execute, --project-root, C:/Users/hunte/Hrns/hornlab-search]}
+  - {id: cma_s3101, kind: command, timeout_s: 7200,
+     argv: [.venv/Scripts/hornlab-search.exe, search, --config, examples/typologies/bo_vs_cma_2026-11-15/p80x60__ext_throat_cmacmp_v7.yaml,
+            --mode, screen, --budget, "60", --cma-seed, "3101"]}
+  # ---- strict 80x60 track, seed 1 ----
+  - {id: hv_cov_s4101, kind: command, timeout_s: 16200,
+     argv: [.venv/Scripts/hornlab-search.exe, search, --config, examples/typologies/bo_vs_cma_2026-11-15/p80x60__ext_throat_hvlaw_cov_v7.yaml,
+            --mode, screen, --budget, "120", --cma-seed, "4101"]}
+  # ---- pair 2 ----
+  - {id: prep_bo_s31002, kind: command, timeout_s: 3600,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, tools/bo_compare/prepare_study.py,
+            --root, runs/bo_vs_cma_2026-11-15/bo_s31002, --cohort, runs/bo_vs_cma_2026-11-15/cohort,
+            --seed, "31002", --deadline-hours, "5", --label, bo_s31002]}
+  - {id: bo_s31002, kind: command, timeout_s: 21600,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, -m, hornlab_search.studies.cli, run,
+            --root, runs/bo_vs_cma_2026-11-15/bo_s31002, --package, package.json,
+            --execute, --project-root, C:/Users/hunte/Hrns/hornlab-search]}
+  - {id: cma_s3102, kind: command, timeout_s: 7200,
+     argv: [.venv/Scripts/hornlab-search.exe, search, --config, examples/typologies/bo_vs_cma_2026-11-15/p80x60__ext_throat_cmacmp_v7.yaml,
+            --mode, screen, --budget, "60", --cma-seed, "3102"]}
+  # ---- pair 3 ----
+  - {id: prep_bo_s31003, kind: command, timeout_s: 3600,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, tools/bo_compare/prepare_study.py,
+            --root, runs/bo_vs_cma_2026-11-15/bo_s31003, --cohort, runs/bo_vs_cma_2026-11-15/cohort,
+            --seed, "31003", --deadline-hours, "5", --label, bo_s31003]}
+  - {id: bo_s31003, kind: command, timeout_s: 21600,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, -m, hornlab_search.studies.cli, run,
+            --root, runs/bo_vs_cma_2026-11-15/bo_s31003, --package, package.json,
+            --execute, --project-root, C:/Users/hunte/Hrns/hornlab-search]}
+  - {id: cma_s3103, kind: command, timeout_s: 7200,
+     argv: [.venv/Scripts/hornlab-search.exe, search, --config, examples/typologies/bo_vs_cma_2026-11-15/p80x60__ext_throat_cmacmp_v7.yaml,
+            --mode, screen, --budget, "60", --cma-seed, "3103"]}
+  # ---- CMA verify: 6 calls per arm, matching BO's 4 finalists + 2 audits (batch-12 heavy recipe) ----
+  - {id: v_cma_top6, kind: command, timeout_s: 10800,
+     argv: [.venv/Scripts/python.exe, tools/night_queue/verify_night_jobs.py, --night, bo_vs_cma_2026-11-15, --top, "6",
+            --jobs, "cma_s3101,cma_s3102,cma_s3103"]}
+  # ---- strict 80x60 track, seed 2 + verify ----
+  - {id: hv_cov_s4102, kind: command, timeout_s: 16200,
+     argv: [.venv/Scripts/hornlab-search.exe, search, --config, examples/typologies/bo_vs_cma_2026-11-15/p80x60__ext_throat_hvlaw_cov_v7.yaml,
+            --mode, screen, --budget, "120", --cma-seed, "4102"]}
+  - {id: v_hv_top3, kind: command, timeout_s: 7200,
+     argv: [.venv/Scripts/python.exe, tools/night_queue/verify_night_jobs.py, --night, bo_vs_cma_2026-11-15, --top, "3",
+            --jobs, "hv_cov_s4101,hv_cov_s4102"]}

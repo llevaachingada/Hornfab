@@ -1,0 +1,29 @@
+# SUGGESTION A/B (2026-11-14), report items 1, 6, 9: lecleach_rollback scored by the objective v6 brief
+# lecleach_rollback_1in_v6 (as night job g7 passed it via --brief). Identical to examples/typologies/lecleach_rollback.yaml
+# except name, brief_file and: g_fc_hz lo 600 -> 540 AND g_T 0.3..1.0 -> 0.687..0.777.
+# SAFETY CHECK (rows generator called directly at stop 240): fc 540 builds for T >= 0.73 (mouth 345 mm, depth <= 211 mm,
+# inside the 520 x 420 x 260 envelope); fc <= 540 with T 0.687 is an invalid march (graded refusal, not a crash).
+# NOT APPLIED: g_stop_deg hi 240 -> 264. The rows generator's hard range is [90, 240]
+# (grid.py ROWS_LECLEACH_STOP_RANGE): every stop > 240 is refused, so that widen would only add refusals.
+# CAVEAT: objective v6 reads the design's own g_fc_hz as its loading corner, so a lower fc also moves the score's
+# reference. Judge the arms on raw load / DI metrics as well as J.
+name: sab__lecleach_fc540_T_narrow
+family: FREEFORM
+brief_file: ../../briefs/lecleach_rollback_1in_v6.yaml
+generator:
+  name: grid
+  rows: {type: lecleach}
+  n_phi: 15
+  n_s: 32
+  wall_thickness_mm: 3.0
+seed_params: {g_fc_hz: 800.0, g_T: 0.8, g_stop_deg: 170.0}
+bounds:
+  g_fc_hz: {lo: 540.0, hi: 1200.0}
+  g_T: {lo: 0.687, hi: 0.777}
+  g_stop_deg: {lo: 120.0, hi: 240.0}
+target: {coverage_h_deg: 90.0, coverage_v_deg: 90.0, band_lo_hz: 700.0, band_hi_hz: 5500.0, di_target_db: null, di_slope_target: 0.0}
+weights: {cov: 1.0, rip: 1.0, di: 0.3, dislope: 0.5, flat: 0.5, load: 0.0}
+mesh: {epw: 8.0, quadrants: '1', dof_cap_screen: 5000, dof_cap_verify: 7000, dof_cap_final: 8900, dof_per_triangle: 0.51}
+solve: {backend: beat_cuda, distance_m: 2.0, angle_count: 73, balloon: true, balloon_points_screen: 512, balloon_points_verify: 1024,
+  gmres_tol: 1.0e-05, timeout_s: 900}
+search: {algorithm: cma, sigma0: 0.25, seed: 1234, budget: 200, popsize: null, tolfun: 0.001, infeasible_penalty: graded}

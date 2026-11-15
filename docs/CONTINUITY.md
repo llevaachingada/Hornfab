@@ -1,5 +1,23 @@
 # CONTINUITY
 
+## 2026-11-14 (22:5x local) - SUGGESTION A/B NIGHT, HI-FI SCORE PROBE, BO-VS-CMA PREP; NIGHT RE-ORDERED
+
+- Night `sab_home_gpu_2026-11-14` (+ CPU `sab_lecleach_cpu_2026-11-14`) tests the 12 Nov report's suggestions
+  (`docs/queue/SAB_HOME_PLAN_2026-11-14.md`, configs `examples/typologies/suggest_ab_2026-11-14/`). Finished:
+  H1 ext-throat + ATH petal law s1234/s5678 -> best stays the nested no-law incumbent 3.23253 (petal NEGATIVE on
+  that family); C1 core_law s2401 narrow 1.970 vs wide 2.128 (narrow box better, 71 vs 64 % valid; 24k cap cut
+  mesh_too_large 106 -> 7); L1 lecleach fc540 / g_T-narrow WORSE on both seeds (0.839-0.896 vs ctrl 0.826; best
+  designs now at fc ~640 Hz, stop 120 deg, g_T ~0.6 - the 12 Nov walls were seed-local). g_stop_deg > 240 is a hard
+  generator refusal (not queued).
+- Re-ordered at ~22:5x on owner request: the night is stopped right after H2 s1234 finished; the BO-vs-CMA night
+  (`docs/queue/BO_VS_CMA_PLAN_2026-11-15.md`) runs next, then a remainder night with the unrun SAB jobs.
+- New `tools/night_queue/verify_night_jobs.py` (verify top-N of jobs from a night's summary.jsonl; batch-12 heavy
+  recipe + run_with_memwatch by default). New `tools/analysis/hifi_rescore.py` (offline CTA-2034-style DSP/passive
+  re-score; 870 home designs: agrees with v7, Spearman 0.95-0.99) + `docs/research/ONAXIS_WEIGHTING_2026-11-14.md`.
+- Strict-coverage brief twin `room_80x60_700_hf1440_v7_cov` + 80x60 H/V wall-angle cell (`bo_vs_cma_2026-11-15/`).
+- Separate branches: `feat/study-budget-profiles` (comparison-60 study budget, study_cohort --run-id,
+  tools/bo_compare) merged next; `feat/v7-flat-band` (opt-in `flat` from the XO) NOT merged yet.
+
 ## 2026-11-14 (15:3x local) - PROJECT ATLAS: REUSABLE WHOLE-PROJECT VISUAL REPORT (tools/atlas)
 
 - New `tools/atlas/build_atlas.py` + `atlas_template.html`: read-only over every run folder (`run.json`,

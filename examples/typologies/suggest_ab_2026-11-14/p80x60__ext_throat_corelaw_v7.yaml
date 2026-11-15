@@ -1,0 +1,78 @@
+# HOME 80x60 / 700 Hz (brief room_80x60_700_hf1440_v7, objective v7), 2026-11-14. Owner direction: ATH-style
+# horns with the rippled / petal mouth. Parent: p80x60__osse_ext_throat_700_v7 (best home family; seeds 1234 and 5678
+# both converged to J 3.2325 / 3.2328 = the INCUMBENT). This cell adds the ATH CORE-style per-direction law
+# (hornlab_search/design/families.py "azlaw"):
+#   a(p) = a_deg + az_a_sf_amp*SF(p) + az_a_cos_amp*|cos p|^pow,   s(p) = s + az_s_cos2_amp*cos^2 p.
+# Evidence it can matter: rev2 ablation 2026-11-13 (docs/research/QUEUE_PLAN_REV2_2026-11-13.md): the CORE law moved the
+# field at verify (ath_a1_core vs ath_a0_control: diag 2.06 -> 0.68, J 11.4 -> 6.2 on the 2-in 50x50 brief); the
+# cosine-only notch and the lip-ripple (S) family did NOT. 'ATH CORE-style', not a claimed ATH product.
+# NESTED DESIGN: seed = the incumbent's searched knobs with every law amplitude 0, so the cell can match 3.2325; if the
+# five seeds leave the amplitudes near 0, the law does not help this brief (a real negative).
+# Superformula SHAPE pinned at the g1 atlas__core_law best (n1 7.50, n2 12.44, n3 13.44, b 0.857, m 4; permutation
+# importance ~0 in the 12 Nov report): SF(p) = 1.00 / 1.38 / 0.76 at p = 0 / 45 / 90 deg. The three searched
+# amplitudes use the report's item-5 narrowed boxes. a_deg lo 30 -> 15 so the base can drop while the law adds angle.
+# r0/a0 stay derived per design (search/evaluate.py::_derive_throat_coupling). ~5-8 % of the box is a(p)-invalid
+# (cheap graded refusal, sampled offline). Five seeds share THIS FILE via --cma-seed (seed and budget are stripped
+# from the task identity), so the runs form one seed-variance group and one BO cohort.
+name: p80x60__ext_throat_corelaw_v7
+family: OSSE
+seed_params: {r0_mm: 27.4145, a0_deg: 3.1882, a_deg: 36.1555, L_mm: 298.5605, n: 6.0, s: 0.5353, q: 0.996, k: 1.0, exponent: 2.0,
+  aspect_ratio: 1.0, throat_ext_length_mm: 169.0161, throat_ext_angle_deg: 3.1882, slot_length_mm: 0.0, morph_target: 1, morph_width_mm: 500.0,
+  morph_height_mm: 660.0, morph_corner_mm: 35.0, morph_exponent: 4.0, morph_rate: 4.1236, morph_fixed: 0.0, morph_allow_shrinkage: 0,
+  wall_thickness_mm: 5.0, az_sf_m: 4.0, az_sf_n1: 7.4958, az_sf_n2: 12.4449, az_sf_n3: 13.4442, az_sf_a: 1.0, az_sf_b: 0.8569,
+  az_a_cos_pow: 3.9648, az_n_cos2_amp: 0.0, az_a_sf_amp: 0.0, az_a_cos_amp: 0.0, az_s_cos2_amp: 0.0}
+bounds:
+  r0_mm: {lo: 27.4145, hi: 27.4145, search: false}
+  a0_deg: {lo: 3.1882, hi: 3.1882, search: false}
+  a_deg: {lo: 15.0, hi: 55.0}
+  L_mm: {lo: 200.0, hi: 320.0}
+  n: {lo: 6.0, hi: 6.0, search: false}
+  s: {lo: 0.3, hi: 0.9}
+  q: {lo: 0.996, hi: 0.996, search: false}
+  k: {lo: 1.0, hi: 1.0, search: false}
+  exponent: {lo: 2.0, hi: 2.0, search: false}
+  aspect_ratio: {lo: 1.0, hi: 1.0, search: false}
+  throat_ext_length_mm: {lo: 80.0, hi: 220.0}
+  throat_ext_angle_deg: {lo: 1.5, hi: 5.0}
+  slot_length_mm: {lo: 0.0, hi: 0.0, search: false}
+  morph_target: {lo: 1, hi: 1, search: false}
+  morph_width_mm: {lo: 500.0, hi: 500.0, search: false}
+  morph_height_mm: {lo: 660.0, hi: 660.0, search: false}
+  morph_corner_mm: {lo: 35.0, hi: 35.0, search: false}
+  morph_exponent: {lo: 4.0, hi: 4.0, search: false}
+  morph_rate: {lo: 0.5, hi: 6.0}
+  morph_fixed: {lo: 0.0, hi: 0.0, search: false}
+  morph_allow_shrinkage: {lo: 0, hi: 0, search: false}
+  wall_thickness_mm: {lo: 5.0, hi: 5.0, search: false}
+  az_sf_m: {lo: 4.0, hi: 4.0, search: false}
+  az_sf_n1: {lo: 7.4958, hi: 7.4958, search: false}
+  az_sf_n2: {lo: 12.4449, hi: 12.4449, search: false}
+  az_sf_n3: {lo: 13.4442, hi: 13.4442, search: false}
+  az_sf_a: {lo: 1.0, hi: 1.0, search: false}
+  az_sf_b: {lo: 0.8569, hi: 0.8569, search: false}
+  az_a_cos_pow: {lo: 3.9648, hi: 3.9648, search: false}
+  az_n_cos2_amp: {lo: 0.0, hi: 0.0, search: false}
+  az_a_sf_amp: {lo: -10.0, hi: 35.42}
+  az_a_cos_amp: {lo: -29.05, hi: 7.65}
+  az_s_cos2_amp: {lo: -0.255, hi: 0.5}
+target:
+  coverage_h_deg: 80.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 350.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.5
+  f0_hz: 700.0
+  loaded_hi_hz: 5600.0
+  freq_weights:
+    band_hz:
+    - [2500.0, 5500.0, 2.0]
+weights: {cov: 1.0, rip: 1.0, di: 0.3, dislope: 0.5, flat: 0.5, load: 1.0, distd: 0.5, diag: 0.5, flat_cv: 0.5}
+mesh: {epw: 6.0, quadrants: '1', dof_cap_screen: 24000, dof_cap_verify: 24000, dof_cap_final: 24000, dof_per_triangle: 0.51}
+solve: {backend: beat_cuda, distance_m: 10.0, angle_count: 73, balloon: true, balloon_points_screen: 512, balloon_points_verify: 1024,
+  gmres_tol: 1.0e-05, timeout_s: 900, cuda_fused: true}
+search: {algorithm: cma, sigma0: 0.15, seed: 1234, budget: 100, popsize: null, tolfun: 0.001, infeasible_penalty: graded}
+description: 'HOME 80x60/700: OSSE ext-throat (incumbent J 3.233) + ATH CORE-style superformula azimuth law; nested: amplitudes
+  0 = the incumbent'
+brief_file: ../../briefs/print_80x60_2026-11-13/room_80x60_700_hf1440_v7.yaml

@@ -1,0 +1,58 @@
+# BO-vs-CMA MATCHED COMPARISON, CMA arm (2026-11-15). Plan: docs/queue/BO_VS_CMA_PLAN_2026-11-15.md.
+# Task = examples/typologies/print_80x60_2026-11-13/p80x60__osse_ext_throat_700_v7_seed5678.yaml (the BoTorch
+# study task HOME_SEED5678, brief room_80x60_700_hf1440_v7, objective v7): IDENTICAL bounds, brief, mesh, solve.
+# Shared prior knowledge for both arms = run 20261114T043025Z-screen-18985d (185 valid CMA rows). BoTorch uses
+# it as training data; CMA uses it the only way CMA can: x0 = that run's best design (J 3.2328).
+# Only differences vs the task config: name, seed_params (x0), the pinned r0/a0 = that design's own derived
+# throat coupling (search/evaluate.py re-derives r0/a0 per design anyway; this only makes shape_check agree),
+# and search.budget 60 (= the BO arm's 60 screens). Seeds via --cma-seed 3101/3102/3103.
+name: p80x60__ext_throat_cmacmp_v7
+family: OSSE
+seed_params: {r0_mm: 27.5104, a0_deg: 3.1589, a_deg: 35.7683, L_mm: 309.5987, n: 6.0, s: 0.4658, q: 0.996, k: 1.0, exponent: 2.0,
+  aspect_ratio: 1.0, throat_ext_length_mm: 172.3253, throat_ext_angle_deg: 3.1589, slot_length_mm: 0.0, morph_target: 1, morph_width_mm: 500.0,
+  morph_height_mm: 660.0, morph_corner_mm: 35.0, morph_exponent: 4.0, morph_rate: 4.2179, morph_fixed: 0.0, morph_allow_shrinkage: 0,
+  wall_thickness_mm: 5.0}
+bounds:
+  r0_mm: {lo: 27.5104, hi: 27.5104, search: false}
+  a0_deg: {lo: 3.1589, hi: 3.1589, search: false}
+  a_deg: {lo: 30.0, hi: 55.0}
+  L_mm: {lo: 200.0, hi: 320.0}
+  n: {lo: 6.0, hi: 6.0, search: false}
+  s: {lo: 0.3, hi: 0.9}
+  q: {lo: 0.996, hi: 0.996, search: false}
+  k: {lo: 1.0, hi: 1.0, search: false}
+  exponent: {lo: 2.0, hi: 2.0, search: false}
+  aspect_ratio: {lo: 1.0, hi: 1.0, search: false}
+  throat_ext_length_mm: {lo: 80.0, hi: 220.0}
+  throat_ext_angle_deg: {lo: 1.5, hi: 5.0}
+  slot_length_mm: {lo: 0.0, hi: 0.0, search: false}
+  morph_target: {lo: 1, hi: 1, search: false}
+  morph_width_mm: {lo: 500.0, hi: 500.0, search: false}
+  morph_height_mm: {lo: 660.0, hi: 660.0, search: false}
+  morph_corner_mm: {lo: 35.0, hi: 35.0, search: false}
+  morph_exponent: {lo: 4.0, hi: 4.0, search: false}
+  morph_rate: {lo: 0.5, hi: 6.0}
+  morph_fixed: {lo: 0.0, hi: 0.0, search: false}
+  morph_allow_shrinkage: {lo: 0, hi: 0, search: false}
+  wall_thickness_mm: {lo: 5.0, hi: 5.0, search: false}
+target:
+  coverage_h_deg: 80.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 350.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.5
+  f0_hz: 700.0
+  loaded_hi_hz: 5600.0
+  freq_weights:
+    band_hz:
+    - [2500.0, 5500.0, 2.0]
+weights: {cov: 1.0, rip: 1.0, di: 0.3, dislope: 0.5, flat: 0.5, load: 1.0, distd: 0.5, diag: 0.5, flat_cv: 0.5}
+mesh: {epw: 6.0, quadrants: '1', dof_cap_screen: 24000, dof_cap_verify: 24000, dof_cap_final: 24000, dof_per_triangle: 0.51}
+solve: {backend: beat_cuda, distance_m: 10.0, angle_count: 73, balloon: true, balloon_points_screen: 512, balloon_points_verify: 1024,
+  gmres_tol: 1.0e-05, timeout_s: 900, cuda_fused: true}
+search: {algorithm: cma, sigma0: 0.15, seed: 5678, budget: 60, popsize: null, tolfun: 0.001, infeasible_penalty: graded}
+description: 'BO-vs-CMA matched comparison, CMA arm: the seed5678 task, x0 = the prior run 18985d best (J 3.2328); bounds/brief/mesh/solve
+  identical to the task config'
+brief_file: ../../briefs/print_80x60_2026-11-13/room_80x60_700_hf1440_v7.yaml

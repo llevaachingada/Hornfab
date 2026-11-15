@@ -1,0 +1,27 @@
+# SUGGESTION A/B, CPU lane (2026-11-14): lecleach_rollback fc widen + g_T narrow (report items 1, 6, 9).
+# Runs BESIDE sab_home_gpu_2026-11-14 (lane-aware runner: own worker dir, runs\.cpu.lane.lock). All arms in ONE lane,
+# so the comparison never crosses backends. Plan: docs/queue/SAB_HOME_PLAN_2026-11-14.md.
+# Arms: ctrl (original box) | fc540 (g_fc_hz lo 600 -> 540) | fc540_T_narrow (+ g_T 0.687..0.777). Two seeds each,
+# interleaved so a stop leaves complete seed pairs. g_stop_deg 264 is NOT tested: the generator refuses stop > 240.
+# ~1.1-1.4k dofs; beat_cpu estimate ~10-15 s/eval -> ~3-4 h for 900 evals.
+night: sab_lecleach_cpu_2026-11-14
+lane: cpu
+jobs:
+  - {id: l1_ctrl_s2301, kind: command, timeout_s: 10800,
+     argv: [.venv/Scripts/hornlab-search.exe, search, --config, examples/typologies/suggest_ab_2026-11-14/sab__lecleach_ctrl.yaml,
+            --mode, screen, --budget, "150", --cma-seed, "2301", --backend, beat_cpu, --cache-dir, cache_cpu, --dataset-dir, dataset_cpu]}
+  - {id: l1_fc540_s2301, kind: command, timeout_s: 10800,
+     argv: [.venv/Scripts/hornlab-search.exe, search, --config, examples/typologies/suggest_ab_2026-11-14/sab__lecleach_fc540.yaml,
+            --mode, screen, --budget, "150", --cma-seed, "2301", --backend, beat_cpu, --cache-dir, cache_cpu, --dataset-dir, dataset_cpu]}
+  - {id: l1_fc540_Tn_s2301, kind: command, timeout_s: 10800,
+     argv: [.venv/Scripts/hornlab-search.exe, search, --config, examples/typologies/suggest_ab_2026-11-14/sab__lecleach_fc540_T_narrow.yaml,
+            --mode, screen, --budget, "150", --cma-seed, "2301", --backend, beat_cpu, --cache-dir, cache_cpu, --dataset-dir, dataset_cpu]}
+  - {id: l1_ctrl_s2302, kind: command, timeout_s: 10800,
+     argv: [.venv/Scripts/hornlab-search.exe, search, --config, examples/typologies/suggest_ab_2026-11-14/sab__lecleach_ctrl.yaml,
+            --mode, screen, --budget, "150", --cma-seed, "2302", --backend, beat_cpu, --cache-dir, cache_cpu, --dataset-dir, dataset_cpu]}
+  - {id: l1_fc540_s2302, kind: command, timeout_s: 10800,
+     argv: [.venv/Scripts/hornlab-search.exe, search, --config, examples/typologies/suggest_ab_2026-11-14/sab__lecleach_fc540.yaml,
+            --mode, screen, --budget, "150", --cma-seed, "2302", --backend, beat_cpu, --cache-dir, cache_cpu, --dataset-dir, dataset_cpu]}
+  - {id: l1_fc540_Tn_s2302, kind: command, timeout_s: 10800,
+     argv: [.venv/Scripts/hornlab-search.exe, search, --config, examples/typologies/suggest_ab_2026-11-14/sab__lecleach_fc540_T_narrow.yaml,
+            --mode, screen, --budget, "150", --cma-seed, "2302", --backend, beat_cpu, --cache-dir, cache_cpu, --dataset-dir, dataset_cpu]}
