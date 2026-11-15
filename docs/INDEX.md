@@ -1,5 +1,11 @@
 # Docs index
 
+[BO GUI design and implementation plan 2026-11-15](research/BO_GUI_DESIGN_2026-11-15.md): the
+read-only BO analysis layer (convergence, calibration, sensitivity, Pareto, trust region, method
+board), the study-root index, the backend instrumentation, the slices and their evidence.
+[BO GUI evidence 2026-11-15](evidence/bo_gui_2026-11-15/README.md): desktop/phone light/dark
+screenshots of the execute, explain and compare-methods pages on the real bo_s31001 arm.
+
 [GUI / data-viz UX pass 2026-11-14](GUI_UX_PASS_2026-11-14.md): decision-first analysis report,
 verdict-first run page, Boundary Lab isobars + Globe view, New run entry, shared viz kit and its rules.
 

@@ -14,6 +14,8 @@ import { viewTypologySandbox } from "./sandbox.js";
 import { viewUmap } from "./umap.js";
 import { viewVerify } from "./verify.js";
 import { mountStudy, mountStudyList } from "./studies.js";
+import { drawStudyCharts } from "./study_charts.js";
+import { mountCompareMethods } from "./compare_methods.js";
 
 // ── XSS helper ─────────────────────────────────────────────────────
 function esc(s) {
@@ -154,18 +156,24 @@ async function studyRequest(path, options = {}) {
   if (!response.ok) { const error = new Error(data.error || "Study request failed"); error.status = response.status; throw error; }
   return data;
 }
+const studyQuery = root => root ? `?root=${encodeURIComponent(root)}` : "";
 const studyApi = {
   listStudies: ({signal}) => studyRequest("/api/studies", {signal}),
   createStudy: ({spec, key}, {signal}) => studyRequest("/api/studies", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({spec, idempotency_key:key}), signal}),
-  getStudy: (id, {signal}) => studyRequest(`/api/studies/${encodeURIComponent(id)}`, {signal}),
-  getPanel: (id, phase, {signal}) => studyRequest(`/api/studies/${encodeURIComponent(id)}/${encodeURIComponent(phase)}`, {signal}),
-  getArtifact: (id, artifact, {signal}) => studyRequest(`/api/studies/${encodeURIComponent(id)}/artifacts/${encodeURIComponent(artifact)}`, {signal}),
-  action: (id, kind, payload, {signal}) => {
-    const paths = {decision:"decision", revise:"revise", analyze:"jobs", propose:"jobs", package:"package", launch:"launch", cancel:"cancel"};
+  getStudy: (id, {root, signal}) => studyRequest(`/api/studies/${encodeURIComponent(id)}${studyQuery(root)}`, {signal}),
+  getPanel: (id, phase, {root, signal}) => studyRequest(`/api/studies/${encodeURIComponent(id)}/${encodeURIComponent(phase)}${studyQuery(root)}`, {signal}),
+  getArtifact: (id, artifact, {root, signal}) => studyRequest(`/api/studies/${encodeURIComponent(id)}/artifacts/${encodeURIComponent(artifact)}${studyQuery(root)}`, {signal}),
+  action: (id, kind, payload, {root, signal}) => {
+    const paths = {decision:"decision", revise:"revise", analyze:"jobs", propose:"jobs", package:"package", launch:"launch", cancel:"cancel", queue_study:"queue", create_child:"child"};
     if (!paths[kind]) throw new Error("This action is not available");
-    const body = kind === "analyze" || kind === "propose" ? {...payload, kind} : payload;
+    const body = kind === "analyze" || kind === "propose" ? {...payload, kind} : {...payload};
+    if (root) body.root = root;
     return studyRequest(`/api/studies/${encodeURIComponent(id)}/${paths[kind]}`, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body), signal});
   },
+};
+const comparisonApi = {
+  list: ({signal}) => studyRequest("/api/comparisons", {signal}),
+  board: (name, {signal}) => studyRequest(`/api/comparisons/${encodeURIComponent(name)}`, {signal}),
 };
 
 const ROUTES = [
@@ -177,13 +185,14 @@ const ROUTES = [
   { re: /^#\/run\/([^\/?#]+)\/verify\/compare(?:\?(.*))?$/, fn: m => viewVerify(ROOT, m[1], "compare", m[2] || ""), query: true },
   { re: /^#\/run\/([^\/?#]+)\/verify(?:\?(.*))?$/,         fn: m => viewVerify(ROOT, m[1], "table",   m[2] || ""), query: true },
   { re: /^#\/run\/(.+)\/3d$/,           fn: m => viewRun3D(m[1]) },
-  { re: /^#\/run\/(.+)\/balloon$/,      fn: m => viewBalloon(ROOT, m[1]) },     // W6: BL-style balloon
+  { re: /^#\/run\/(.+)\/balloon(?:\?(.*))?$/, fn: m => viewBalloon(ROOT, m[1], "screen", m[2] || ""), query: true },     // W6: BL-style balloon
   { re: /^#\/run\/(.+)\/evolution$/,    fn: m => viewEvolution(ROOT, m[1]) },
   { re: /^#\/run\/(.+)\/umap$/,         fn: m => viewUmap(ROOT, m[1]) },
   { re: /^#\/run\/(.+)\/archive$/,      fn: m => viewRunArchive(m[1]) },
   { re: /^#\/run\/(.+)$/,               fn: m => viewRunDetail(m[1]) },
-  { re: /^#\/analysis\/studies$/,       fn: () => { disposeStudy = mountStudyList(ROOT, {api:studyApi, onCreated: s => { location.hash = `#/analysis/study/${encodeURIComponent(s.id)}/overview`; }}); } },
-  { re: /^#\/analysis\/study\/([^\/?#]+)\/(overview|data|explain|propose|execute|decide)$/, fn: m => { disposeStudy = mountStudy(ROOT, {studyId:decodeURIComponent(m[1]), phase:m[2], api:studyApi}); } },
+  { re: /^#\/analysis\/studies$/,       fn: () => { disposeStudy = mountStudyList(ROOT, {api:studyApi, onCreated: s => { location.hash = `#/analysis/study/${encodeURIComponent(s.id)}/overview${s.root ? `?root=${encodeURIComponent(s.root)}` : ""}`; }}); } },
+  { re: /^#\/analysis\/study\/([^\/?#]+)\/(overview|data|explain|propose|execute|decide)(?:\?(.*))?$/, query: true, fn: m => { const root = new URLSearchParams(m[3] || "").get("root"); disposeStudy = mountStudy(ROOT, {studyId:decodeURIComponent(m[1]), phase:m[2], api:studyApi, rootId:root, drawCharts:drawStudyCharts, onError:error => console.error("study panel", error)}); } },
+  { re: /^#\/analysis\/compare-methods$/, fn: () => { disposeStudy = mountCompareMethods(ROOT, {api:comparisonApi}); } },
   { re: /^#\/analysis$/,                fn: () => viewAnalysis() },
   { re: /^#\/analysis\/([^\/?#]+)$/,    fn: m => viewAnalysis(m[1]) },
   { re: /^#\/elites$/,                  fn: () => viewElites() },
@@ -225,7 +234,7 @@ function route() {
     const params = new URLSearchParams(hash.split("?")[1]);
     const back = params.get("return") || "";
     const study = params.get("study") || "";
-    const match = back.match(/^#\/analysis\/study\/([A-Za-z0-9_-]+)\/(overview|data|explain|propose|execute|decide)$/);
+    const match = back.match(/^#\/analysis\/study\/([A-Za-z0-9_-]+)\/(overview|data|explain|propose|execute|decide)(?:\?.*)?$/);
     if (match && match[1] === study) {
       const link = document.createElement("a"); link.id = "study-return-context";
       link.href = back; link.textContent = "← Return to study";
@@ -4151,7 +4160,7 @@ function analysisIndexHtml(data) {
     <p class="muted" style="margin:8px 0 4px">To make a report set, run this in a terminal at the repository root (the day spec lists which runs and tools):</p>
     <div class="log-tail mono" style="max-height:none;user-select:all">.venv\\Scripts\\python.exe tools\\analysis\\report_day.py --spec tools\\analysis\\specs\\day_2026-11-12.yaml --out runs\\analysis\\day_2026-11-12</div></div>`;
   return `<div class="stack" style="gap:22px">
-    <div><div class="eyebrow">Reports</div><h2>Analysis</h2><a href="#/analysis/studies">Studies</a></div>
+    <div><div class="eyebrow">Reports</div><h2>Analysis</h2><a href="#/analysis/studies">Studies</a> · <a href="#/analysis/compare-methods">Compare methods</a></div>
     ${rows ? `<div class="card"><div class="eyebrow" style="margin-bottom:8px">Report sets</div>
       <div class="tbl-wrap"><table><thead><tr><th>Set</th><th>Tools</th><th class="r">Sections</th><th class="r">Errors</th><th class="r">Generated</th></tr></thead>
       <tbody>${rows}</tbody></table></div></div>` : empty}

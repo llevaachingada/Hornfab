@@ -134,7 +134,8 @@ def test_list_and_detail_endpoints_do_not_read_artifact_bytes(tmp_path, monkeypa
     listing = app.get('/api/studies', {})
     assert listing['studies'][0]['id'] == sid
     assert set(listing['studies'][0]) <= {
-        'id', 'study_id', 'name', 'question', 'revision', 'spec_revision', 'status', 'readiness'}
+        'id', 'study_id', 'name', 'question', 'revision', 'spec_revision', 'status', 'readiness',
+        'root', 'root_label'}
     assert 'spec' not in listing['studies'][0]
     detail = app.get(f'/api/studies/{sid}', {})
     assert detail['id'] == sid and detail['revision'] == 1

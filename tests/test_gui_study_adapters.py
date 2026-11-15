@@ -134,8 +134,9 @@ def test_actual_registry_reservation_reopens_and_preserves_job(tmp_path):
 
 def test_policy_cards_are_explicit_bounded_and_never_infer_readiness():
     fallback = policy_cards(None)
-    assert [card["label"] for card in fallback] == ["scalar", "coverage-ripple", "cma-seed", "exploration"]
-    assert [card["mode"] for card in fallback] == ["scalar", "pareto", "cma_seed", "exploration"]
+    assert [card["label"] for card in fallback] == [
+        "scalar", "turbo (trust region)", "coverage-ripple", "cma-seed", "exploration"]
+    assert [card["mode"] for card in fallback] == ["scalar", "turbo", "pareto", "cma_seed", "exploration"]
     assert all(card["status"] == "unknown" and card["reason"] and card["available"] is False
                for card in fallback)
 

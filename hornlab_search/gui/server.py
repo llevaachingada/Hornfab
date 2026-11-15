@@ -32,7 +32,8 @@ _LOG = logging.getLogger(__name__)
 
 class App:
     def __init__(self, root: Path, runs: Path | None = None, analysis_dir: Path | None = None,
-                 study_service=None, study_jobs=None, study_runs=None, study_launcher=None):
+                 study_service=None, study_jobs=None, study_runs=None, study_launcher=None,
+                 study_roots=()):
         self.root = root.resolve()
         self.runs = (runs or self.root / "runs").resolve()
         self.analysis_dir = (Path(analysis_dir) if analysis_dir is not None
@@ -42,8 +43,13 @@ class App:
         self._study_jobs = study_jobs
         self._study_runs = study_runs
         self._study_launcher = study_launcher
+        self._extra_study_roots = tuple(Path(p) for p in study_roots)
+        self._study_index_obj = None
         self._study_processes = {}
         self._study_bridge_lock = threading.Lock()
+        self._study_jobs_by_root = {}
+        self._study_runs_by_root = {}
+        self._study_runs_lock = threading.Lock()
 
     def _studies(self):
         if self._study_service is None:
@@ -51,66 +57,106 @@ class App:
             self._study_service = StudyService(self.runs / "studies")
         return self._study_service
 
-    def _study_run_bridge(self):
-        if self._study_runs is None:
-            from .study_jobs import StudyRunBridge
-            def launch(package):
-                from hornlab_search.studies.production import launch_study
-                return launch_study(package, root=self.root, study_root=self._studies().store.root)
-            self._study_runs = StudyRunBridge(self._studies(), launcher=self._study_launcher or launch)
-        return self._study_runs
+    def _study_index(self):
+        if self._study_index_obj is None:
+            from .study_index import StudyIndex
+            # Tests and embedders may inject a service whose root is not runs/studies.
+            primary = (self._studies().store.root if self._study_service is not None
+                       else self.runs / "studies")
+            self._study_index_obj = StudyIndex(
+                self.root, primary_root=primary,
+                extra_roots=self._extra_study_roots)
+        return self._study_index_obj
 
-    def _study_cpu_bridge(self):
+    def _study_run_bridge(self, service=None):
+        service = service or self._studies()
+        root = service.store.root.resolve()
+        if root == self._studies().store.root.resolve() and self._study_runs is not None:
+            return self._study_runs
+        with self._study_runs_lock:
+            bridge = self._study_runs_by_root.get(root)
+            if bridge is None:
+                from .study_jobs import StudyRunBridge
+                def launch(package, _service=service):
+                    from hornlab_search.studies.production import launch_study
+                    return launch_study(package, root=self.root, study_root=_service.store.root)
+                bridge = StudyRunBridge(service, launcher=self._study_launcher or launch)
+                self._study_runs_by_root[root] = bridge
+            return bridge
+
+    def _is_primary(self, service) -> bool:
+        try:
+            return service.store.root.resolve() == self._studies().store.root.resolve()
+        except Exception:  # noqa: BLE001
+            return False
+
+    def _study_cpu_bridge(self, service=None, *, reconcile=False):
         # The GUI polls panels concurrently; initialize/reconcile exactly once before
         # any request may submit a fresh job into the same registry.
+        service = service or self._studies()
+        root = service.store.root.resolve()
+        if self._is_primary(service) and self._study_jobs is not None:
+            return self._study_jobs
         with self._study_bridge_lock:
-            return self._create_study_cpu_bridge()
+            return self._create_study_cpu_bridge(service, reconcile=reconcile)
 
-    def _create_study_cpu_bridge(self):
-        if self._study_jobs is None:
-            from .study_jobs import StudyCpuJobs
-            service = self._studies()
-            def prerequisite(sid, kind, rev, package):
-                return service.get_study(sid)["revision"] == rev
-            def valid(sid, jid, identity):
-                meta = service.get_artifact_metadata(sid, identity.get("kind", ""))
-                job = service.get_cpu_job(sid, jid)
-                return (meta.get("status") == "available" and meta.get("sha256") == identity.get("sha256")
-                        and job["revision"] == meta.get("revision"))
-            def dispatch(kind, sid, jid):
-                import subprocess
-                from hornlab_search.studies.production import study_interpreter
-                folder = service.store.root / "workers" / jid
-                folder.mkdir(parents=True, exist_ok=True)
-                log_path = folder / "worker.log"
-                argv = [str(study_interpreter(self.root)), "-m", "hornlab_search.studies.cli", kind,
-                        "--root", str(service.store.root), "--study", sid, "--key", jid,
-                        "--expected-revision", str(service.get_cpu_job(sid, jid)["revision"])]
-                with log_path.open("ab") as output:
-                    process = subprocess.Popen(argv, cwd=self.root, stdout=output, stderr=subprocess.STDOUT,
-                                               creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
-                self._study_processes[jid] = process
-                def finish():
-                    code = process.wait()
-                    self._study_processes.pop(jid, None)
-                    if service.get_cpu_job(sid, jid)["status"] != "running":
-                        return
-                    artifact_kind = "analysis" if kind == "analyze" else "proposal"
-                    meta = service.get_artifact_metadata(sid, artifact_kind)
-                    if code == 0 and (meta.get("status") != "available"
-                                      or meta.get("revision") != service.get_cpu_job(sid, jid)["revision"]):
-                        code = 6
-                    self._study_jobs.finish(sid, jid, exit_code=code,
-                                           artifact_identity={"kind": artifact_kind, "sha256": meta.get("sha256")})
-                threading.Thread(target=finish, daemon=True).start()
-                return {"pid": process.pid, "log": str(log_path)}
-            self._study_jobs = StudyCpuJobs(service, dispatcher=dispatch,
-                                            prerequisite=prerequisite, artifact_validator=valid)
-            # A prior server's PID cannot establish ownership in this process. Preserve
-            # ambiguous jobs durably and require reconciliation; never launch them again.
+    def _create_study_cpu_bridge(self, service, *, reconcile=False):
+        root = service.store.root.resolve()
+        existing = self._study_jobs_by_root.get(root)
+        if existing is not None:
+            if reconcile and not getattr(existing, "_gui_reconciled", False):
+                for study in service.list_studies(limit=1000):
+                    existing.reconcile_after_restart(study["id"], limit=50)
+                setattr(existing, "_gui_reconciled", True)
+            return existing
+        from .study_jobs import StudyCpuJobs
+        def prerequisite(sid, kind, rev, package):
+            return service.get_study(sid)["revision"] == rev
+        def valid(sid, jid, identity):
+            meta = service.get_artifact_metadata(sid, identity.get("kind", ""))
+            job = service.get_cpu_job(sid, jid)
+            return (meta.get("status") == "available" and meta.get("sha256") == identity.get("sha256")
+                    and job["revision"] == meta.get("revision"))
+        def dispatch(kind, sid, jid):
+            import subprocess
+            from hornlab_search.studies.production import study_interpreter
+            folder = service.store.root / "workers" / jid
+            folder.mkdir(parents=True, exist_ok=True)
+            log_path = folder / "worker.log"
+            argv = [str(study_interpreter(self.root)), "-m", "hornlab_search.studies.cli", kind,
+                    "--root", str(service.store.root), "--study", sid, "--key", jid,
+                    "--expected-revision", str(service.get_cpu_job(sid, jid)["revision"])]
+            with log_path.open("ab") as output:
+                process = subprocess.Popen(argv, cwd=self.root, stdout=output, stderr=subprocess.STDOUT,
+                                           creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+            self._study_processes[jid] = process
+            def finish():
+                code = process.wait()
+                self._study_processes.pop(jid, None)
+                if service.get_cpu_job(sid, jid)["status"] != "running":
+                    return
+                artifact_kind = "analysis" if kind == "analyze" else "proposal"
+                meta = service.get_artifact_metadata(sid, artifact_kind)
+                if code == 0 and (meta.get("status") != "available"
+                                  or meta.get("revision") != service.get_cpu_job(sid, jid)["revision"]):
+                    code = 6
+                self._study_jobs_by_root[root].finish(
+                    sid, jid, exit_code=code,
+                    artifact_identity={"kind": artifact_kind, "sha256": meta.get("sha256")})
+            threading.Thread(target=finish, daemon=True).start()
+            return {"pid": process.pid, "log": str(log_path)}
+        bridge = StudyCpuJobs(service, dispatcher=dispatch,
+                              prerequisite=prerequisite, artifact_validator=valid)
+        self._study_jobs_by_root[root] = bridge
+        # A prior server's PID cannot establish ownership in this process. Preserve
+        # ambiguous jobs durably and require reconciliation; never launch them again.
+        # A read-only view of a night-arm registry must not mutate its jobs, so discovery
+        # reconciles only when this process is about to own/submit work (or is the primary).
+        if reconcile or self._is_primary(service):
             for study in service.list_studies(limit=1000):
-                self._study_jobs.reconcile_after_restart(study["id"], limit=50)
-        return self._study_jobs
+                bridge.reconcile_after_restart(study["id"], limit=50)
+            setattr(bridge, "_gui_reconciled", True)
+        return bridge
 
     # GET routes return (status, json-able) ; raise FileNotFoundError / ValueError for 404 / 400
     def get(self, path: str, q: dict) -> object:
@@ -122,13 +168,18 @@ class App:
             return D.lane_status(self.runs)
         if head == "studies":
             from .data_studies import build_study_view, study_summaries
-            service = self._studies()
+            index = self._study_index()
             if len(parts) == 1:
-                return {"studies": study_summaries(service.list_studies(limit=50))}
+                return {"studies": study_summaries(index.list_studies(limit=50)),
+                        "roots": [{"id": item["id"], "label": item["label"]}
+                                  for item in index.roots()]}
+            root_id = (q.get("root") or [None])[0]
+            item, service, study = index.resolve(parts[1], root_id)
+            study = {**study, "root": item["id"], "root_label": item["label"]}
             if len(parts) == 2:
-                return service.get_study(parts[1])
+                return study
             if len(parts) == 3 and parts[2] == "jobs":
-                self._study_cpu_bridge()
+                self._study_cpu_bridge(service, reconcile=self._is_primary(service))
                 return {"jobs": service.list_cpu_jobs(parts[1], limit=50)}
             if len(parts) == 4 and parts[2] == "artifacts":
                 return service.artifact_view(parts[1], parts[3])
@@ -136,8 +187,7 @@ class App:
                 # B8: the same read-only export record the CLI `study export` writes.
                 return service.export_study(parts[1])
             if len(parts) == 3:
-                self._study_cpu_bridge()
-                study = service.get_study(parts[1])
+                self._study_cpu_bridge(service, reconcile=self._is_primary(service))
                 artifact = None
                 if parts[2] == "overview":
                     artifact = {"status": "partial", "revision": study["revision"],
@@ -161,7 +211,7 @@ class App:
                         if recorded is not None:
                             from .data_studies import workflow_panel
                             return workflow_panel(service, study, parts[2], recorded, root=self.root,
-                                                  launcher_available=True)
+                                                  runs_root=self.runs, launcher_available=True)
                     if meta.get("status") == "available":
                         raw = service.store.read_artifact(meta["sha256"])
                         if len(raw) > 128_000:
@@ -194,7 +244,22 @@ class App:
                                     "reasons": [meta.get("reason", "Artifact is not available.")]}
                 from .data_studies import workflow_panel
                 return workflow_panel(service, study, parts[2], artifact, root=self.root,
-                                      launcher_available=True)
+                                      runs_root=self.runs, launcher_available=True)
+        if head == "comparisons":
+            from .data_bo import load_comparison_specs
+            if len(parts) == 1:
+                return {"comparisons": [{"name": item["name"], "label": item["label"]}
+                                        for item in load_comparison_specs(self.root)]}
+            if len(parts) == 2 and D.ANALYSIS_SET_ID.match(parts[1]):
+                from .data_bo import method_board_view
+                match = next((item for item in load_comparison_specs(self.root)
+                              if item["name"] == parts[1]), None)
+                if match is None:
+                    raise FileNotFoundError(parts[1])
+                def service_for(path):
+                    return self._study_index().service_for_path(path)
+                return method_board_view(match["spec"], root=self.root, runs_root=self.runs,
+                                         service_for=service_for)
         if head == "runs":
             return D.list_runs(self.runs)
         if head == "analysis" and len(parts) == 1:
@@ -331,30 +396,43 @@ class App:
         head = parts[0] if parts else ""
         if head == "studies":
             from hornlab_search.studies.schema import StudyError
-            service = self._studies()
+            root_id = body.pop("root", None) if isinstance(body, dict) else None
             if len(parts) == 1:
-                return service.create_study(body.get("spec"), body.get("idempotency_key"), body.get("parent_id"))
+                service = self._studies()
+                created = service.create_study(body.get("spec"), body.get("idempotency_key"),
+                                                body.get("parent_id"))
+                self._study_index().roots(force=True)
+                return created
+            _item, service, _study = self._study_index().resolve(parts[1], root_id)
             if len(parts) == 3 and parts[2] == "revise":
                 return service.revise(parts[1], body.get("spec"), body.get("expected_revision"), body.get("idempotency_key"))
             if len(parts) == 3 and parts[2] in ("decide", "decision"):
                 return service.decide(parts[1], body.get("expected_revision"), body.get("outcome"),
                                       body.get("rationale"), body.get("idempotency_key"))
             if len(parts) == 3 and parts[2] == "package":
-                return self._study_run_bridge().prepare_package(parts[1], body)
+                return self._study_run_bridge(service).prepare_package(parts[1], body)
             if len(parts) == 3 and parts[2] == "launch":
-                return self._study_run_bridge().launch(parts[1], body)
+                return self._study_run_bridge(service).launch(parts[1], body)
             if len(parts) == 3 and parts[2] == "cancel":
                 if body.get("job_id"):
                     # Validate ownership in the registry before touching our child process.
-                    result = self._study_cpu_bridge().cancel(parts[1], {
+                    result = self._study_cpu_bridge(service, reconcile=True).cancel(parts[1], {
                         "job_id": body["job_id"], "idempotency_key": body.get("idempotency_key")})
                     process = self._study_processes.get(body["job_id"])
                     if process is not None and process.poll() is None:
                         process.terminate()
                     return result
-                return self._study_run_bridge().cancel(parts[1], body)
+                return self._study_run_bridge(service).cancel(parts[1], body)
             if len(parts) == 3 and parts[2] == "jobs":
-                return self._study_cpu_bridge().submit(parts[1], body)
+                return self._study_cpu_bridge(service, reconcile=True).submit(parts[1], body)
+            if len(parts) == 3 and parts[2] == "queue":
+                from .study_queue import queue_study
+                return queue_study(service, parts[1], root=self.root, runs_root=self.runs, payload=body)
+            if len(parts) == 3 and parts[2] == "child":
+                from .study_child import create_child
+                return create_child(service, parts[1], question=str(body.get("question") or ""),
+                                    policy=body.get("policy"),
+                                    idempotency_key=str(body.get("idempotency_key") or ""))
             raise StudyError("unsupported study operation")
         if head == "save-bounds":
             # Deliberately OUTSIDE the generic handler try: a malformed body raises ValueError
@@ -602,8 +680,8 @@ def warm_in_background(app: App, delay_s: float = 1.0) -> threading.Timer:
 
 
 def serve(root: Path, port: int = DEFAULT_PORT, open_browser: bool = True, runs: Path | None = None,
-          analysis_dir: Path | None = None) -> int:
-    app = App(root, runs, analysis_dir)
+          analysis_dir: Path | None = None, study_roots=()) -> int:
+    app = App(root, runs, analysis_dir, study_roots=study_roots)
     httpd = ThreadingHTTPServer(("127.0.0.1", port), make_handler(app, port))
     url = f"http://127.0.0.1:{port}/"
     print(f"hornlab-search gui: {url}  (Ctrl-C to stop; local only)")
@@ -624,8 +702,14 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--port", type=int, default=DEFAULT_PORT)
     ap.add_argument("--no-browser", action="store_true")
     ap.add_argument("--root", default=str(Path(__file__).resolve().parents[2]), help="repository root")
+    ap.add_argument("--runs", default=None,
+                    help="run folder (default: <root>/runs); point this at the canonical runs when a worktree is used")
+    ap.add_argument("--study-root", action="append", default=[], dest="study_roots",
+                    help="extra study registry root (repeatable; e.g. a scratch pilot)")
     ap.add_argument("--analysis-dir", default=None,
                     help="folder the analysis reports render from (default: runs/analysis)")
     a = ap.parse_args(argv)
     return serve(Path(a.root), a.port, not a.no_browser,
-                 analysis_dir=Path(a.analysis_dir) if a.analysis_dir else None)
+                 runs=Path(a.runs) if a.runs else None,
+                 analysis_dir=Path(a.analysis_dir) if a.analysis_dir else None,
+                 study_roots=a.study_roots)

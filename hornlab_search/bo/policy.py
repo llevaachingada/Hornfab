@@ -23,7 +23,7 @@ from __future__ import annotations
 import importlib.metadata
 import importlib.util
 import json
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any
 
 import numpy as np
@@ -110,6 +110,8 @@ class ProposalOutcome:
     counts: dict = field(default_factory=dict)
     #: turbo only: durable trust-region record (state before/after, box, attempts).
     trust_region: dict | None = None
+    #: fitted GP hyperparameters (lengthscales etc.); additive for the GUI sensitivity view.
+    model_hyperparameters: dict | None = None
 
     @property
     def ok(self) -> bool:
@@ -132,6 +134,8 @@ class ProposalOutcome:
         }
         if self.trust_region is not None:
             out["trust_region"] = self.trust_region
+        if self.model_hyperparameters is not None:
+            out["model_hyperparameters"] = self.model_hyperparameters
         return out
 
 
@@ -623,7 +627,8 @@ def fit_and_propose(policy: str, *, training_set=None, cohort=None,
         result = _propose.propose_one(
             fitted, pool, history=history, encoding=encoding, config=config,
             resolution_mm=resolution_mm)
-        return _outcome_from_proposal_result(POLICY_SCALAR, result)
+        return replace(_outcome_from_proposal_result(POLICY_SCALAR, result),
+                       model_hyperparameters=dict(getattr(fitted, "hyperparameters", {}) or {}))
 
     if policy == POLICY_TURBO:
         from dataclasses import replace as _replace
@@ -650,7 +655,9 @@ def fit_and_propose(policy: str, *, training_set=None, cohort=None,
         result, record = _turbo.propose_turbo(
             fitted, pool, history, state, encoding=encoding, config=config, seed=int(seed),
             resolution_mm=resolution_mm)
-        return _replace(_outcome_from_proposal_result(POLICY_TURBO, result), trust_region=record)
+        return _replace(_outcome_from_proposal_result(POLICY_TURBO, result),
+                        trust_region=record,
+                        model_hyperparameters=dict(getattr(fitted, "hyperparameters", {}) or {}))
 
     if policy == POLICY_PARETO and pareto_training is not None:
         fitted = _pareto.fit_pareto_training(pareto_training, seed=int(seed))
@@ -661,7 +668,10 @@ def fit_and_propose(policy: str, *, training_set=None, cohort=None,
         result = _pareto.propose_pareto(
             fitted, pool, hist, encoding=encoding, config=config, seed=int(seed),
             resolution_mm=resolution_mm)
-        return _outcome_from_pareto_proposal(result)
+        hyper = {"outputs": [dict(getattr(item, "hyperparameters", {}) or {})
+                             for item in getattr(fitted, "outputs", ())]}
+        return replace(_outcome_from_pareto_proposal(result),
+                       model_hyperparameters=hyper if hyper["outputs"] else None)
 
     if policy == POLICY_PARETO:
         if cohort is None:
@@ -679,7 +689,10 @@ def fit_and_propose(policy: str, *, training_set=None, cohort=None,
         result = _pareto.propose_pareto(
             fitted, pool, hist, encoding=encoding, config=config, seed=int(seed),
             resolution_mm=resolution_mm)
-        return _outcome_from_pareto_proposal(result)
+        hyper = {"outputs": [dict(getattr(item, "hyperparameters", {}) or {})
+                             for item in getattr(fitted, "outputs", ())]}
+        return replace(_outcome_from_pareto_proposal(result),
+                       model_hyperparameters=hyper if hyper["outputs"] else None)
 
     if policy == POLICY_CMA_SEED:
         entries, error = _seed_table(cma_seed_candidates)

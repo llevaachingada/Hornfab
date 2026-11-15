@@ -915,3 +915,29 @@ a quiet measurement. No tolerance/test skip was changed. A quiet-host rerun or
 separate measured performance investigation remains required before calling the
 entire suite green. Sources: scratch/2026-11-14_bayes/release.log and
 release_rerun.log; full report docs/evidence/BAYESIAN_STUDY_INTEGRATION_2026-11-14.md.
+
+## 2026-11-15 - BO GUI WORK IS READY BUT NOT MERGED (MERGE AFTER THE NIGHTS)
+
+- Worktree `C:\Users\hunte\Hrns\bogui-wt`, branch `feat/bo-gui`, based on `feat/bo-turbo-pareto`
+  (`e25da03`) + `feat/sab-home-2026-11-14` (`29d202d`). The working tree is **uncommitted**; commit
+  it before merging. Design: `docs/research/BO_GUI_DESIGN_2026-11-15.md`; evidence:
+  `docs/evidence/bo_gui_2026-11-15/`.
+- **Merge gate:** no merge while `bo_vs_cma_2026-11-15` or `sab_home_gpu_rest_2026-11-15` is
+  queued/running, and no merge while any study is queued/running. The GUI is still inside
+  `EXECUTION_CODE_FILES`, so any `hornlab_search/gui/**` edit invalidates a live study preflight.
+  Confirm with `tools/night_status.py` + `runs/nights/queue_*.log` that no runner and no Julia host
+  are live.
+- **Order:** merge `feat/bo-turbo-pareto` first if the target lacks it, then `feat/bo-gui` (which
+  already contains turbo + the 15 Nov docs). Resolve `docs/CONTINUITY.md`, `docs/ISSUES.md`,
+  `docs/INDEX.md`, `docs/CODE_MAP.md` in the merge commit. Then run `compileall` and the offline
+  GUI/study suite; check a **new** package preflight. Old packages keep their original pinned
+  hashes and remain readable/runnable.
+- **Already implemented:** slices 1-6 (BO view models + study-root index; convergence/calibration/
+  sensitivity/design-space/trust-region/Pareto panels; turbo strategy card; compare-methods board;
+  safe queue-write + child study) and the per-proposal prediction/trust-region/hyperparameter
+  instrumentation. Final offline evidence: 57 focused tests pass, `compileall` and `node --check`
+  clean, 12 screenshots at 1440/500 px in light/dark.
+- **Deferred (handoff-optional slice 7):** partial-dependence curves and per-study dataset row
+  identity. Excluding `gui/**` from the code pin is still an owner decision. The queue action writes
+  a night file and never launches a second GPU runner; the owner launches it.
+

@@ -4,6 +4,24 @@ Written 2026-10-22 22:35 EDT by the local orchestrator, at the user's request. *
 after the beta session.** Items are in priority order. Background: `docs/HIGH_FREQUENCY_OPTIONS.md` (2026-10-13),
 `docs/CLOUD_GPU_REPORT.md`, `TOOLCHAIN.md` M2/M3.
 
+## P16 (added 2026-11-15, TOP OF THE LIST). Merge the BO GUI after the current nights, then the optional slice 7
+
+**Worktree:** `C:\Users\hunte\Hrns\bogui-wt`, branch `feat/bo-gui`. Design and evidence:
+`docs/research/BO_GUI_DESIGN_2026-11-15.md`, `docs/evidence/bo_gui_2026-11-15/`.
+
+- **DO NOT MERGE** while `bo_vs_cma_2026-11-15` or `sab_home_gpu_rest_2026-11-15` is queued/running.
+  The GUI lives under `hornlab_search/gui/**`, which is inside `EXECUTION_CODE_FILES`; editing it
+  invalidates a queued/running study's preflight.
+- When both nights finish: confirm `tools/night_status.py` shows no runner and no live Julia host;
+  commit the uncommitted `bogui-wt` tree; merge `feat/bo-turbo-pareto` first if the target does not
+  already contain it, then `feat/bo-gui` (it already contains turbo + the 15 Nov docs); resolve
+  `CONTINUITY`/`ISSUES`/`INDEX`/`CODE_MAP` in the merge commit.
+- Run `compileall` + the offline GUI/study suite, then check a **new** package preflight. Old
+  packages keep their pinned hashes. Excluding `gui/**` from the pin remains an owner decision.
+- Slice 7 optional follow-ups: partial-dependence curves (new Bayesian-subprocess job + cached
+  artifact) and per-study dataset row identity (`screen`/`verify` disambiguation). Not required
+  for the first merge.
+
 ## P14 (added 2026-11-12, owner-directed: TOP OF THE LIST). One main, one truth, then speed and the GUI
 
 **Plan: `docs/SENIOR_PLAN_2026-11-12.md`.** Integration of Collin's PR #22, #19, #23, the CUDA fix and the hardened

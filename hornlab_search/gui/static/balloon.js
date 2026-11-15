@@ -487,8 +487,10 @@ export function drawRadar(canvas, payload, fi, azDeg) {
 
 // ── View ───────────────────────────────────────────────────────────
 
-export async function viewBalloon(root, runId, tier = "screen") {
+export async function viewBalloon(root, runId, tier = "screen", query = "") {
   root.innerHTML = `<p class="muted">Loading balloon…</p>`;
+  const params = new URLSearchParams(query || "");
+  const wanted = params.get("design") || "";
   let pick;
   const tierParam = tier && tier !== "screen" ? "?tier=" + encodeURIComponent(tier) : "";
   try { pick = await api("/api/balloon/" + encodeURIComponent(runId) + tierParam); }
@@ -507,7 +509,7 @@ export async function viewBalloon(root, runId, tier = "screen") {
       <p><a href="#/run/${esc(runId)}">← back to the run</a></p></div>`;
     return;
   }
-  const hash0 = designs[0].hash;
+  const hash0 = designs.some(x => x.hash === wanted) ? wanted : designs[0].hash;
   root.innerHTML = `<div class="stack" style="gap:16px">
     <div>
       <div class="eyebrow">Balloon · directivity sphere</div>
@@ -517,8 +519,8 @@ export async function viewBalloon(root, runId, tier = "screen") {
       <div class="pill-row" style="margin:8px 0 0">
         <label for="balloon-design" class="fam-meta">Design</label>
         <select id="balloon-design" aria-label="Design" class="sort-sel">
-          ${designs.map(x => `<option value="${esc(x.hash)}">${esc(x.hash)} · J ${esc(
-            x.objective == null ? "–" : fmt(x.objective, 2))}${x.hash === hash0 ? " · best" : ""}</option>`).join("")}
+          ${designs.map(x => `<option value="${esc(x.hash)}"${x.hash === hash0 ? " selected" : ""}>${esc(x.hash)} · J ${esc(
+            x.objective == null ? "–" : fmt(x.objective, 2))}${x.hash === hash0 ? " · selected" : (x.hash === designs[0].hash ? " · best" : "")}</option>`).join("")}
         </select>
       </div>
     </div>

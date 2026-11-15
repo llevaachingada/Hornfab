@@ -1,5 +1,12 @@
 # Code map
 
+BO study GUI (2026-11-15): `gui/data_bo.py` builds the bounded convergence, calibration,
+sensitivity, trust-region, Pareto, design-space and method-board view models from study artifacts
+and run rows; `gui/study_index.py` discovers/routes study registries (night arms plus
+`runs/studies`); `gui/static/study_charts.js` renders them through `charts.js`;
+`gui/static/compare_methods.js` renders `tools/analysis/specs/bo_*.yaml`; `gui/study_queue.py` writes a night file (never launches) and `gui/study_child.py` clones a parent spec with a child policy. Design and evidence:
+[BO GUI design](research/BO_GUI_DESIGN_2026-11-15.md).
+
 GUI viz kit (2026-11-14): `gui/static/charts.js` exports `catColor`/`CAT_N`, `fmtSmart`,
 `fmtLogTick`, `logNiceLimits`, `sparkline`, `stackBarHtml`, `isobarLegendHtml`, `globePlot` and a
 self-redrawing `chart()` (`square` option); `app.js::brk()` wraps ids; tokens `--cat-*`,
