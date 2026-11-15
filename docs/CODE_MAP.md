@@ -1,5 +1,12 @@
 # Code map
 
+Section-reference relief extension: `tools/geometry/section_pucker.py` deforms only axial
+mouth development and preserves the frozen parent geometry at zero amplitudes;
+`section_pucker_cli.py` supplies independent versioned replay/meshing/search dispatch.
+`build_section_pucker_page.py` publishes seeds and sampled-bound evidence. Configs:
+`examples/typologies/section_pucker_2026-11-15/`; tests: `test_tools_section_pucker.py`.
+
+
 Section-based horn experiment: tools/geometry/crowe_panel.py and crowe_panel_cli.py
 provide the separate section-constrained surface and explicit body; plot_crowe_sections.py
 plots generated cuts against source readings. Reference table lives in

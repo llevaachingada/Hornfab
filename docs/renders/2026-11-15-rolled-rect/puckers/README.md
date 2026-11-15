@@ -1,0 +1,1 @@
+Section-based H/V relief seeds. Rebuild with `.venv/Scripts/python.exe tools/geometry/build_section_pucker_page.py` after CPU seed meshing/rendering and box validation. Images are the actual screen meshes; fine bands are mesh artifacts. Acoustic results are separate.

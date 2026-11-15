@@ -1,5 +1,24 @@
 # CONTINUITY
 
+## 2026-11-15 - SECTION REFERENCE WITH H/V PUCKERING, VALIDATED / RUNNING
+
+- Added a separate original H/V mouth-relief extension of the corrected section reference;
+  parent modules and old recipes remain byte-identical. New opt-in section_pucker_cli.py
+  covers the six source/reference inputs in recipe identity; same explicit body is solved/rendered.
+- Control, moderate (H3/V4 mm) and strong (H7/V9 mm) seeds: 3306/3152/3134 DOFs;
+  all round 36 mm, 417 x 203 mm outline, envelope fits. Common box depth 192..204,
+  H depth scale .98..1.02, crown 18..22. Moderate H 0..6/V 0..8; strong H 4..10/V 6..12.
+- All 72 bound corners passed (max 4055/6000 DOFs). Random boxes 63/64,62/64,62/64;
+  five invalid_geometry refusals remain guarded/charged. No cap/density/tolerance widened.
+  145 related CPU tests passed in 48.378 s, including 19 new geometry/replay/window checks.
+- Night home_section_pucker_2026-11-15: three 48-attempt searches, control first, then
+  top1 denser-frequency verification per arm. Detached controller 10256, WMI parent 35188,
+  started 13:01:07 local; first run runs/20261115T180109Z-screen-0f2ab5.
+- New gallery puckers/ includes 15 renders and full bounds/meshing evidence. See
+  docs/queue/SECTION_PUCKER_PLAN_2026-11-15.md and SECTION_PUCKER_RESEARCH_2026-11-15.md.
+  Acoustic outcomes remain pending; the surface is ATH-inspired, not the ATH formula.
+
+
 ## 2026-11-15 - VERIFICATION FIDELITY CLARIFICATION
 
 - Inspected saved rows: section-study screen and verify both have3084 DOFs and identical

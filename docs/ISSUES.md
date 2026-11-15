@@ -1,5 +1,13 @@
 # ISSUES
 
+Local-only, 2026-11-15 (**section-based H/V relief extension; no GitHub issue state changed**):
+- Done: exact zero-pucker control, independent H/V relief, source/attachment preservation,
+  three seeded configs, all 72 corners, 192 random box meshes, 145 CPU checks and 15 renders.
+- Running: home_section_pucker_2026-11-15, control/moderate/strong 48 attempts each plus
+  top1 verification; controller 10256. Five sampled geometry refusals are charged flat.
+- Open: acoustic readout, 5D treatment basin estimation and spatial mesh convergence.
+
+
 Local-only, 2026-11-15 (**verification clarification**):
 - Confirmed section-study verification refines the frequency grid (18 to29 points), with
   unchanged mesh spacing. Score sensitivity is frequency-related; spatial convergence is untested.

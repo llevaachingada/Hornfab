@@ -1,0 +1,1940 @@
+{
+  "schema": "section-pucker-box-evidence-v1",
+  "notes": [
+    "CPU-only real screen mesher checks; not a proof of every continuous-box point",
+    "Historical 3D optimization cannot estimate basin widths for the new 5D H/V relief searches",
+    "Flat refusal penalties are charged to the 48-attempt budget"
+  ],
+  "arms": [
+    {
+      "name": "control",
+      "config": "examples/typologies/section_pucker_2026-11-15/sp__control_v7.yaml",
+      "config_sha256": "c3500e4e8684e17bdadf8bf2142f0668346fd5fbb53476e82cae67867e72dc37",
+      "seed": {
+        "g_width_mm": 417.0,
+        "g_height_mm": 203.0,
+        "g_depth_mm": 198.0,
+        "g_h_depth_scale": 1.0,
+        "g_crown_mm": 20.0,
+        "g_throat_blend_mm": 20.0,
+        "g_junction_power": 32.0,
+        "g_pucker_h_mm": 0.0,
+        "g_pucker_v_mm": 0.0,
+        "g_pucker_start_s": 0.3,
+        "g_pucker_peak_s": 0.8,
+        "g_pucker_end_s": 0.96
+      },
+      "bounds": {
+        "g_width_mm": {
+          "lo": 417.0,
+          "hi": 417.0,
+          "search": false
+        },
+        "g_height_mm": {
+          "lo": 203.0,
+          "hi": 203.0,
+          "search": false
+        },
+        "g_depth_mm": {
+          "lo": 192.0,
+          "hi": 204.0
+        },
+        "g_h_depth_scale": {
+          "lo": 0.98,
+          "hi": 1.02
+        },
+        "g_crown_mm": {
+          "lo": 18.0,
+          "hi": 22.0
+        },
+        "g_throat_blend_mm": {
+          "lo": 20.0,
+          "hi": 20.0,
+          "search": false
+        },
+        "g_junction_power": {
+          "lo": 32.0,
+          "hi": 32.0,
+          "search": false
+        },
+        "g_pucker_h_mm": {
+          "lo": 0.0,
+          "hi": 0.0,
+          "search": false
+        },
+        "g_pucker_v_mm": {
+          "lo": 0.0,
+          "hi": 0.0,
+          "search": false
+        },
+        "g_pucker_start_s": {
+          "lo": 0.3,
+          "hi": 0.3,
+          "search": false
+        },
+        "g_pucker_peak_s": {
+          "lo": 0.8,
+          "hi": 0.8,
+          "search": false
+        },
+        "g_pucker_end_s": {
+          "lo": 0.96,
+          "hi": 0.96,
+          "search": false
+        }
+      },
+      "preflight": {
+        "strict": false,
+        "exit_code": 0,
+        "configs": [
+          {
+            "path": "examples/typologies/section_pucker_2026-11-15/sp__control_v7.yaml",
+            "name": "sp__control_v7",
+            "family": "FREEFORM",
+            "generator": "grid",
+            "searched_keys": [
+              "g_crown_mm",
+              "g_depth_mm",
+              "g_h_depth_scale"
+            ],
+            "seed_outside_box": [],
+            "seed_key_missing": [],
+            "seed_design_hash": "27914ae077f9",
+            "prior_bests": [],
+            "history": {
+              "from_runs": [
+                "runs\\20261115T171150Z-screen-d66ffb"
+              ],
+              "top_k": 10,
+              "sources": [
+                {
+                  "path": "runs\\20261115T171150Z-screen-d66ffb",
+                  "config_sha": "42007620a6d7",
+                  "objective_version": 7
+                }
+              ],
+              "mean_design_hash": null,
+              "mean_objective": 22.756336837898132,
+              "sigma0": 0.15,
+              "sigma_from_spread": {
+                "median_spread": 0.3976700424999976,
+                "sigma0": 0.15,
+                "top_k": 10
+              },
+              "rows": 10,
+              "source": "preflight-fallback"
+            },
+            "sigma": {
+              "config_sigma0": 0.15,
+              "recommended_sigma": 0.15,
+              "median_spread": 0.3976700424999976,
+              "dims": 3,
+              "expected_hits": 43.89550470903476,
+              "min_expected_hits": 3.0,
+              "refusal_fraction": 0.015625
+            },
+            "sampling": {
+              "samples": 64,
+              "status": "meshed (screen mesh + envelope)",
+              "distribution": "uniform box",
+              "valid": 63,
+              "refused": 1,
+              "unvalidated": 0,
+              "kinds": {
+                "invalid_geometry": 1
+              },
+              "valid_fraction": 0.984375,
+              "refusal_fraction": 0.015625,
+              "predicted_valid_evals": 47.25
+            },
+            "refusals": {
+              "distribution": "uniform box",
+              "valid_fraction": 0.984375,
+              "refusal_fraction": 0.015625,
+              "predicted_valid_evals": 47.25,
+              "kinds": {
+                "invalid_geometry": 1
+              }
+            },
+            "graded": {
+              "infeasible_penalty": "flat",
+              "sampled_refusals": 1,
+              "invalid_envelope": 0
+            },
+            "ab": null,
+            "findings": [
+              {
+                "severity": "WARN",
+                "code": "refusals",
+                "message": "1/64 sampled designs were refused [invalid_geometry=1]; valid fraction 0.984375, predicted valid evals 47.25 of 48; uniform box sample (an upper bound away from the seed; CMA concentrates near it); 2026-11-14 had 22-36% refusals",
+                "config": "examples/typologies/section_pucker_2026-11-15/sp__control_v7.yaml"
+              }
+            ]
+          }
+        ],
+        "hards": [],
+        "warnings": [
+          {
+            "severity": "WARN",
+            "code": "refusals",
+            "message": "1/64 sampled designs were refused [invalid_geometry=1]; valid fraction 0.984375, predicted valid evals 47.25 of 48; uniform box sample (an upper bound away from the seed; CMA concentrates near it); 2026-11-14 had 22-36% refusals",
+            "config": "examples/typologies/section_pucker_2026-11-15/sp__control_v7.yaml"
+          }
+        ],
+        "infos": []
+      },
+      "corners": {
+        "name": "control",
+        "keys": [
+          "g_crown_mm",
+          "g_depth_mm",
+          "g_h_depth_scale"
+        ],
+        "corners": 8,
+        "valid": 8,
+        "results": [
+          {
+            "unit": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ok": true,
+            "dofs": 3608,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.2084981756352751,
+              0.1015000108835828,
+              0.1919554853432046
+            ]
+          },
+          {
+            "unit": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "ok": true,
+            "dofs": 3137,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.2084838815098274,
+              0.1015027175210411,
+              0.1919927883259247
+            ]
+          },
+          {
+            "unit": [
+              0.0,
+              1.0,
+              0.0
+            ],
+            "ok": true,
+            "dofs": 3845,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003,
+              0.2084840732696492,
+              0.1015008803082197,
+              0.2039918064781605
+            ]
+          },
+          {
+            "unit": [
+              0.0,
+              1.0,
+              1.0
+            ],
+            "ok": true,
+            "dofs": 3674,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003,
+              0.20848699510896102,
+              0.10154032674019339,
+              0.2039830643765338
+            ]
+          },
+          {
+            "unit": [
+              1.0,
+              0.0,
+              0.0
+            ],
+            "ok": true,
+            "dofs": 3436,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.0030000000000000022,
+              0.208498092077553,
+              0.10151918720583519,
+              0.1919570190233429
+            ]
+          },
+          {
+            "unit": [
+              1.0,
+              0.0,
+              1.0
+            ],
+            "ok": true,
+            "dofs": 3161,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.2084811613255885,
+              0.10150009258162881,
+              0.19199764477297232
+            ]
+          },
+          {
+            "unit": [
+              1.0,
+              1.0,
+              0.0
+            ],
+            "ok": true,
+            "dofs": 3563,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.208496084553934,
+              0.10150084977537721,
+              0.2039934542852998
+            ]
+          },
+          {
+            "unit": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "ok": true,
+            "dofs": 3540,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.2084873269451618,
+              0.1015365908428209,
+              0.20398410315342422
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "moderate",
+      "config": "examples/typologies/section_pucker_2026-11-15/sp__moderate_v7.yaml",
+      "config_sha256": "3503a26bb65b079dd4fd22b751a3e1fb70b2e1252fd8a5f90d1c013a8c6a7bb3",
+      "seed": {
+        "g_width_mm": 417.0,
+        "g_height_mm": 203.0,
+        "g_depth_mm": 198.0,
+        "g_h_depth_scale": 1.0,
+        "g_crown_mm": 20.0,
+        "g_throat_blend_mm": 20.0,
+        "g_junction_power": 32.0,
+        "g_pucker_h_mm": 3.0,
+        "g_pucker_v_mm": 4.0,
+        "g_pucker_start_s": 0.3,
+        "g_pucker_peak_s": 0.8,
+        "g_pucker_end_s": 0.96
+      },
+      "bounds": {
+        "g_width_mm": {
+          "lo": 417.0,
+          "hi": 417.0,
+          "search": false
+        },
+        "g_height_mm": {
+          "lo": 203.0,
+          "hi": 203.0,
+          "search": false
+        },
+        "g_depth_mm": {
+          "lo": 192.0,
+          "hi": 204.0
+        },
+        "g_h_depth_scale": {
+          "lo": 0.98,
+          "hi": 1.02
+        },
+        "g_crown_mm": {
+          "lo": 18.0,
+          "hi": 22.0
+        },
+        "g_throat_blend_mm": {
+          "lo": 20.0,
+          "hi": 20.0,
+          "search": false
+        },
+        "g_junction_power": {
+          "lo": 32.0,
+          "hi": 32.0,
+          "search": false
+        },
+        "g_pucker_h_mm": {
+          "lo": 0.0,
+          "hi": 6.0
+        },
+        "g_pucker_v_mm": {
+          "lo": 0.0,
+          "hi": 8.0
+        },
+        "g_pucker_start_s": {
+          "lo": 0.3,
+          "hi": 0.3,
+          "search": false
+        },
+        "g_pucker_peak_s": {
+          "lo": 0.8,
+          "hi": 0.8,
+          "search": false
+        },
+        "g_pucker_end_s": {
+          "lo": 0.96,
+          "hi": 0.96,
+          "search": false
+        }
+      },
+      "preflight": {
+        "strict": false,
+        "exit_code": 0,
+        "configs": [
+          {
+            "path": "examples/typologies/section_pucker_2026-11-15/sp__moderate_v7.yaml",
+            "name": "sp__moderate_v7",
+            "family": "FREEFORM",
+            "generator": "grid",
+            "searched_keys": [
+              "g_crown_mm",
+              "g_depth_mm",
+              "g_h_depth_scale",
+              "g_pucker_h_mm",
+              "g_pucker_v_mm"
+            ],
+            "seed_outside_box": [],
+            "seed_key_missing": [],
+            "seed_design_hash": "56444e4ed0ec",
+            "prior_bests": [],
+            "history": null,
+            "sigma": {
+              "config_sigma0": 0.15,
+              "recommended_sigma": null,
+              "median_spread": null,
+              "dims": 5,
+              "expected_hits": null,
+              "min_expected_hits": 3.0,
+              "refusal_fraction": 0.03125
+            },
+            "sampling": {
+              "samples": 64,
+              "status": "meshed (screen mesh + envelope)",
+              "distribution": "uniform box",
+              "valid": 62,
+              "refused": 2,
+              "unvalidated": 0,
+              "kinds": {
+                "invalid_geometry": 2
+              },
+              "valid_fraction": 0.96875,
+              "refusal_fraction": 0.03125,
+              "predicted_valid_evals": 46.5
+            },
+            "refusals": {
+              "distribution": "uniform box",
+              "valid_fraction": 0.96875,
+              "refusal_fraction": 0.03125,
+              "predicted_valid_evals": 46.5,
+              "kinds": {
+                "invalid_geometry": 2
+              }
+            },
+            "graded": {
+              "infeasible_penalty": "flat",
+              "sampled_refusals": 2,
+              "invalid_envelope": 0
+            },
+            "ab": null,
+            "findings": [
+              {
+                "severity": "WARN",
+                "code": "history_unusable",
+                "message": "generator history is unusable: fewer than 2 usable prior rows (0)",
+                "config": "examples/typologies/section_pucker_2026-11-15/sp__moderate_v7.yaml"
+              },
+              {
+                "severity": "WARN",
+                "code": "history_unusable",
+                "message": "warm-start history is unusable: runs\\20261115T171150Z-screen-d66ffb: warm_start refuses knob-name mismatch (run ['g_crown_mm', 'g_depth_mm', 'g_h_depth_scale'] vs this config ['g_crown_mm', 'g_depth_mm', 'g_h_depth_scale', 'g_pucker_h_mm', 'g_pucker_v_mm'] \u2014 the SAME searched knobs are required)",
+                "config": "examples/typologies/section_pucker_2026-11-15/sp__moderate_v7.yaml"
+              },
+              {
+                "severity": "WARN",
+                "code": "refusals",
+                "message": "2/64 sampled designs were refused [invalid_geometry=2]; valid fraction 0.96875, predicted valid evals 46.5 of 48; uniform box sample (an upper bound away from the seed; CMA concentrates near it); 2026-11-14 had 22-36% refusals",
+                "config": "examples/typologies/section_pucker_2026-11-15/sp__moderate_v7.yaml"
+              }
+            ]
+          }
+        ],
+        "hards": [],
+        "warnings": [
+          {
+            "severity": "WARN",
+            "code": "history_unusable",
+            "message": "generator history is unusable: fewer than 2 usable prior rows (0)",
+            "config": "examples/typologies/section_pucker_2026-11-15/sp__moderate_v7.yaml"
+          },
+          {
+            "severity": "WARN",
+            "code": "history_unusable",
+            "message": "warm-start history is unusable: runs\\20261115T171150Z-screen-d66ffb: warm_start refuses knob-name mismatch (run ['g_crown_mm', 'g_depth_mm', 'g_h_depth_scale'] vs this config ['g_crown_mm', 'g_depth_mm', 'g_h_depth_scale', 'g_pucker_h_mm', 'g_pucker_v_mm'] \u2014 the SAME searched knobs are required)",
+            "config": "examples/typologies/section_pucker_2026-11-15/sp__moderate_v7.yaml"
+          },
+          {
+            "severity": "WARN",
+            "code": "refusals",
+            "message": "2/64 sampled designs were refused [invalid_geometry=2]; valid fraction 0.96875, predicted valid evals 46.5 of 48; uniform box sample (an upper bound away from the seed; CMA concentrates near it); 2026-11-14 had 22-36% refusals",
+            "config": "examples/typologies/section_pucker_2026-11-15/sp__moderate_v7.yaml"
+          }
+        ],
+        "infos": []
+      },
+      "corners": {
+        "name": "moderate",
+        "keys": [
+          "g_crown_mm",
+          "g_depth_mm",
+          "g_h_depth_scale",
+          "g_pucker_h_mm",
+          "g_pucker_v_mm"
+        ],
+        "corners": 32,
+        "valid": 32,
+        "results": [
+          {
+            "unit": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ok": true,
+            "dofs": 3608,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.2084981756352751,
+              0.1015000108835828,
+              0.1919554853432046
+            ]
+          },
+          {
+            "unit": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "ok": true,
+            "dofs": 3497,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.2084976141504418,
+              0.1015122126167497,
+              0.19996120086857722
+            ]
+          },
+          {
+            "unit": [
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            "ok": true,
+            "dofs": 3602,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.2084979898757778,
+              0.1015435268923525,
+              0.1919643445079752
+            ]
+          },
+          {
+            "unit": [
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              1.0
+            ],
+            "ok": true,
+            "dofs": 3620,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.2084976685879853,
+              0.1015518236269223,
+              0.1999506061698556
+            ]
+          },
+          {
+            "unit": [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            "ok": true,
+            "dofs": 3137,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.2084838815098274,
+              0.1015027175210411,
+              0.1919927883259247
+            ]
+          },
+          {
+            "unit": [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              1.0
+            ],
+            "ok": true,
+            "dofs": 2947,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.2084839205800046,
+              0.1015002430324579,
+              0.1999504519027257
+            ]
+          },
+          {
+            "unit": [
+              0.0,
+              0.0,
+              1.0,
+              1.0,
+              0.0
+            ],
+            "ok": true,
+            "dofs": 3138,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.2084939403531829,
+              0.1015114249723613,
+              0.1919927866298679
+            ]
+          },
+          {
+            "unit": [
+              0.0,
+              0.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "ok": true,
+            "dofs": 3064,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.20849261005532718,
+              0.1015000862050497,
+              0.1998994143999476
+            ]
+          },
+          {
+            "unit": [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ok": true,
+            "dofs": 3845,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003,
+              0.2084840732696492,
+              0.1015008803082197,
+              0.2039918064781605
+            ]
+          },
+          {
+            "unit": [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "ok": true,
+            "dofs": 3435,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003,
+              0.20849173604894422,
+              0.1015000578281387,
+              0.2117359946400631
+            ]
+          },
+          {
+            "unit": [
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            "ok": true,
+            "dofs": 3867,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003,
+              0.20849799095477492,
+              0.101500884256885,
+              0.20399180513908322
+            ]
+          },
+          {
+            "unit": [
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              1.0
+            ],
+            "ok": true,
+            "dofs": 3455,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003,
+              0.2084976160418144,
+              0.1015021616078937,
+              0.2117652575166301
+            ]
+          },
+          {
+            "unit": [
+              0.0,
+              1.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            "ok": true,
+            "dofs": 3674,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003,
+              0.20848699510896102,
+              0.10154032674019339,
+              0.2039830643765338
+            ]
+          },
+          {
+            "unit": [
+              0.0,
+              1.0,
+              1.0,
+              0.0,
+              1.0
+            ],
+            "ok": true,
+            "dofs": 3525,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.208487151965948,
+              0.1015448303036617,
+              0.21184385526959
+            ]
+          },
+          {
+            "unit": [
+              0.0,
+              1.0,
+              1.0,
+              1.0,
+              0.0
+            ],
+            "ok": true,
+            "dofs": 3670,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003,
+              0.2084857157959556,
+              0.1015402847466543,
+              0.20398306346208922
+            ]
+          },
+          {
+            "unit": [
+              0.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "ok": true,
+            "dofs": 3640,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.20848555701674662,
+              0.1015318108646608,
+              0.2119671260557301
+            ]
+          },
+          {
+            "unit": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ok": true,
+            "dofs": 3436,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.0030000000000000022,
+              0.208498092077553,
+              0.10151918720583519,
+              0.1919570190233429
+            ]
+          },
+          {
+            "unit": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "ok": true,
+            "dofs": 3330,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.0030000000000000022,
+              0.2084978819971195,
+              0.1015000713372346,
+              0.1999507773371222
+            ]
+          },
+          {
+            "unit": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            "ok": true,
+            "dofs": 3433,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.0030000000000000022,
+              0.20849547329148602,
+              0.1015000103659431,
+              0.1919591162180139
+            ]
+          },
+          {
+            "unit": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              1.0
+            ],
+            "ok": true,
+            "dofs": 3423,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.0030000000000000022,
+              0.2084978247133608,
+              0.1015490813657892,
+              0.19995748950606612
+            ]
+          },
+          {
+            "unit": [
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            "ok": true,
+            "dofs": 3161,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.2084811613255885,
+              0.10150009258162881,
+              0.19199764477297232
+            ]
+          },
+          {
+            "unit": [
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              1.0
+            ],
+            "ok": true,
+            "dofs": 2953,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.2084921394411549,
+              0.1015000059317686,
+              0.1999778978466347
+            ]
+          },
+          {
+            "unit": [
+              1.0,
+              0.0,
+              1.0,
+              1.0,
+              0.0
+            ],
+            "ok": true,
+            "dofs": 3173,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.2084945951216176,
+              0.1015022177399084,
+              0.1919976412646009
+            ]
+          },
+          {
+            "unit": [
+              1.0,
+              0.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "ok": true,
+            "dofs": 3087,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.2084877775312248,
+              0.10150007039762901,
+              0.1998708118724499
+            ]
+          },
+          {
+            "unit": [
+              1.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ok": true,
+            "dofs": 3563,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.208496084553934,
+              0.10150084977537721,
+              0.2039934542852998
+            ]
+          },
+          {
+            "unit": [
+              1.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "ok": true,
+            "dofs": 3173,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.2084972634723171,
+              0.1015000576814589,
+              0.2116934807527376
+            ]
+          },
+          {
+            "unit": [
+              1.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            "ok": true,
+            "dofs": 3570,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.20849758673951582,
+              0.1015008536643401,
+              0.20399345145617928
+            ]
+          },
+          {
+            "unit": [
+              1.0,
+              1.0,
+              0.0,
+              1.0,
+              1.0
+            ],
+            "ok": true,
+            "dofs": 3218,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.2084950808965534,
+              0.1015000592967641,
+              0.21172649773168228
+            ]
+          },
+          {
+            "unit": [
+              1.0,
+              1.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            "ok": true,
+            "dofs": 3540,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.2084873269451618,
+              0.1015365908428209,
+              0.20398410315342422
+            ]
+          },
+          {
+            "unit": [
+              1.0,
+              1.0,
+              1.0,
+              0.0,
+              1.0
+            ],
+            "ok": true,
+            "dofs": 3404,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.2084846771803409,
+              0.10153885863404621,
+              0.2118077245500938
+            ]
+          },
+          {
+            "unit": [
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              0.0
+            ],
+            "ok": true,
+            "dofs": 3535,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.2084852983761371,
+              0.1015365527605781,
+              0.2039841013913678
+            ]
+          },
+          {
+            "unit": [
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "ok": true,
+            "dofs": 3488,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.20848401982387949,
+              0.1015321581897192,
+              0.21195554933239671
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "strong",
+      "config": "examples/typologies/section_pucker_2026-11-15/sp__strong_v7.yaml",
+      "config_sha256": "8c92804f7a2c0289e34a7f82fdc02e9aaf8849c0c40b5e3265decff467ff8590",
+      "seed": {
+        "g_width_mm": 417.0,
+        "g_height_mm": 203.0,
+        "g_depth_mm": 198.0,
+        "g_h_depth_scale": 1.0,
+        "g_crown_mm": 20.0,
+        "g_throat_blend_mm": 20.0,
+        "g_junction_power": 32.0,
+        "g_pucker_h_mm": 7.0,
+        "g_pucker_v_mm": 9.0,
+        "g_pucker_start_s": 0.3,
+        "g_pucker_peak_s": 0.8,
+        "g_pucker_end_s": 0.96
+      },
+      "bounds": {
+        "g_width_mm": {
+          "lo": 417.0,
+          "hi": 417.0,
+          "search": false
+        },
+        "g_height_mm": {
+          "lo": 203.0,
+          "hi": 203.0,
+          "search": false
+        },
+        "g_depth_mm": {
+          "lo": 192.0,
+          "hi": 204.0
+        },
+        "g_h_depth_scale": {
+          "lo": 0.98,
+          "hi": 1.02
+        },
+        "g_crown_mm": {
+          "lo": 18.0,
+          "hi": 22.0
+        },
+        "g_throat_blend_mm": {
+          "lo": 20.0,
+          "hi": 20.0,
+          "search": false
+        },
+        "g_junction_power": {
+          "lo": 32.0,
+          "hi": 32.0,
+          "search": false
+        },
+        "g_pucker_h_mm": {
+          "lo": 4.0,
+          "hi": 10.0
+        },
+        "g_pucker_v_mm": {
+          "lo": 6.0,
+          "hi": 12.0
+        },
+        "g_pucker_start_s": {
+          "lo": 0.3,
+          "hi": 0.3,
+          "search": false
+        },
+        "g_pucker_peak_s": {
+          "lo": 0.8,
+          "hi": 0.8,
+          "search": false
+        },
+        "g_pucker_end_s": {
+          "lo": 0.96,
+          "hi": 0.96,
+          "search": false
+        }
+      },
+      "preflight": {
+        "strict": false,
+        "exit_code": 0,
+        "configs": [
+          {
+            "path": "examples/typologies/section_pucker_2026-11-15/sp__strong_v7.yaml",
+            "name": "sp__strong_v7",
+            "family": "FREEFORM",
+            "generator": "grid",
+            "searched_keys": [
+              "g_crown_mm",
+              "g_depth_mm",
+              "g_h_depth_scale",
+              "g_pucker_h_mm",
+              "g_pucker_v_mm"
+            ],
+            "seed_outside_box": [],
+            "seed_key_missing": [],
+            "seed_design_hash": "6562d079d0af",
+            "prior_bests": [],
+            "history": null,
+            "sigma": {
+              "config_sigma0": 0.15,
+              "recommended_sigma": null,
+              "median_spread": null,
+              "dims": 5,
+              "expected_hits": null,
+              "min_expected_hits": 3.0,
+              "refusal_fraction": 0.03125
+            },
+            "sampling": {
+              "samples": 64,
+              "status": "meshed (screen mesh + envelope)",
+              "distribution": "uniform box",
+              "valid": 62,
+              "refused": 2,
+              "unvalidated": 0,
+              "kinds": {
+                "invalid_geometry": 2
+              },
+              "valid_fraction": 0.96875,
+              "refusal_fraction": 0.03125,
+              "predicted_valid_evals": 46.5
+            },
+            "refusals": {
+              "distribution": "uniform box",
+              "valid_fraction": 0.96875,
+              "refusal_fraction": 0.03125,
+              "predicted_valid_evals": 46.5,
+              "kinds": {
+                "invalid_geometry": 2
+              }
+            },
+            "graded": {
+              "infeasible_penalty": "flat",
+              "sampled_refusals": 2,
+              "invalid_envelope": 0
+            },
+            "ab": null,
+            "findings": [
+              {
+                "severity": "WARN",
+                "code": "history_unusable",
+                "message": "generator history is unusable: fewer than 2 usable prior rows (0)",
+                "config": "examples/typologies/section_pucker_2026-11-15/sp__strong_v7.yaml"
+              },
+              {
+                "severity": "WARN",
+                "code": "history_unusable",
+                "message": "warm-start history is unusable: runs\\20261115T171150Z-screen-d66ffb: warm_start refuses knob-name mismatch (run ['g_crown_mm', 'g_depth_mm', 'g_h_depth_scale'] vs this config ['g_crown_mm', 'g_depth_mm', 'g_h_depth_scale', 'g_pucker_h_mm', 'g_pucker_v_mm'] \u2014 the SAME searched knobs are required)",
+                "config": "examples/typologies/section_pucker_2026-11-15/sp__strong_v7.yaml"
+              },
+              {
+                "severity": "WARN",
+                "code": "refusals",
+                "message": "2/64 sampled designs were refused [invalid_geometry=2]; valid fraction 0.96875, predicted valid evals 46.5 of 48; uniform box sample (an upper bound away from the seed; CMA concentrates near it); 2026-11-14 had 22-36% refusals",
+                "config": "examples/typologies/section_pucker_2026-11-15/sp__strong_v7.yaml"
+              }
+            ]
+          }
+        ],
+        "hards": [],
+        "warnings": [
+          {
+            "severity": "WARN",
+            "code": "history_unusable",
+            "message": "generator history is unusable: fewer than 2 usable prior rows (0)",
+            "config": "examples/typologies/section_pucker_2026-11-15/sp__strong_v7.yaml"
+          },
+          {
+            "severity": "WARN",
+            "code": "history_unusable",
+            "message": "warm-start history is unusable: runs\\20261115T171150Z-screen-d66ffb: warm_start refuses knob-name mismatch (run ['g_crown_mm', 'g_depth_mm', 'g_h_depth_scale'] vs this config ['g_crown_mm', 'g_depth_mm', 'g_h_depth_scale', 'g_pucker_h_mm', 'g_pucker_v_mm'] \u2014 the SAME searched knobs are required)",
+            "config": "examples/typologies/section_pucker_2026-11-15/sp__strong_v7.yaml"
+          },
+          {
+            "severity": "WARN",
+            "code": "refusals",
+            "message": "2/64 sampled designs were refused [invalid_geometry=2]; valid fraction 0.96875, predicted valid evals 46.5 of 48; uniform box sample (an upper bound away from the seed; CMA concentrates near it); 2026-11-14 had 22-36% refusals",
+            "config": "examples/typologies/section_pucker_2026-11-15/sp__strong_v7.yaml"
+          }
+        ],
+        "infos": []
+      },
+      "corners": {
+        "name": "strong",
+        "keys": [
+          "g_crown_mm",
+          "g_depth_mm",
+          "g_h_depth_scale",
+          "g_pucker_h_mm",
+          "g_pucker_v_mm"
+        ],
+        "corners": 32,
+        "valid": 32,
+        "results": [
+          {
+            "unit": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ok": true,
+            "dofs": 3510,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.2084976632039063,
+              0.101505732091298,
+              0.1979292453798097
+            ]
+          },
+          {
+            "unit": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "ok": true,
+            "dofs": 3733,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.20849836061523702,
+              0.10151265710010701,
+              0.2038591134805981
+            ]
+          },
+          {
+            "unit": [
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            "ok": true,
+            "dofs": 3617,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.208495454724848,
+              0.1015501636360998,
+              0.1979754701444461
+            ]
+          },
+          {
+            "unit": [
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              1.0
+            ],
+            "ok": true,
+            "dofs": 3897,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.208498434434022,
+              0.1015417401974418,
+              0.2038199064102974
+            ]
+          },
+          {
+            "unit": [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            "ok": true,
+            "dofs": 2958,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.2084875952253114,
+              0.10150000671028479,
+              0.1979808902522657
+            ]
+          },
+          {
+            "unit": [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              1.0
+            ],
+            "ok": true,
+            "dofs": 3183,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.2084801738819568,
+              0.1015126567127181,
+              0.20392092102323822
+            ]
+          },
+          {
+            "unit": [
+              0.0,
+              0.0,
+              1.0,
+              1.0,
+              0.0
+            ],
+            "ok": true,
+            "dofs": 3108,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.2084942547680081,
+              0.1015002327801348,
+              0.19790595958848373
+            ]
+          },
+          {
+            "unit": [
+              0.0,
+              0.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "ok": true,
+            "dofs": 3421,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.2084928680785899,
+              0.1015054734342133,
+              0.2039200644306553
+            ]
+          },
+          {
+            "unit": [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ok": true,
+            "dofs": 3483,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003,
+              0.2084821500702469,
+              0.10150005739969441,
+              0.209796408317545
+            ]
+          },
+          {
+            "unit": [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "ok": true,
+            "dofs": 3642,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003,
+              0.208460698400616,
+              0.1015000550801257,
+              0.2158167283688552
+            ]
+          },
+          {
+            "unit": [
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            "ok": true,
+            "dofs": 3491,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003,
+              0.2084969707329605,
+              0.10150023197354971,
+              0.20979541429131002
+            ]
+          },
+          {
+            "unit": [
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              1.0
+            ],
+            "ok": true,
+            "dofs": 3732,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003,
+              0.20849758016785092,
+              0.1015005138408394,
+              0.2158306107622562
+            ]
+          },
+          {
+            "unit": [
+              0.0,
+              1.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            "ok": true,
+            "dofs": 3525,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.20848289233789002,
+              0.10151175584555411,
+              0.2098652231409685
+            ]
+          },
+          {
+            "unit": [
+              0.0,
+              1.0,
+              1.0,
+              0.0,
+              1.0
+            ],
+            "ok": true,
+            "dofs": 3785,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.20848521611228468,
+              0.10154818375699451,
+              0.21578363437390471
+            ]
+          },
+          {
+            "unit": [
+              0.0,
+              1.0,
+              1.0,
+              1.0,
+              0.0
+            ],
+            "ok": true,
+            "dofs": 3644,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.2084864034197577,
+              0.1015456975118994,
+              0.2099194466643738
+            ]
+          },
+          {
+            "unit": [
+              0.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "ok": true,
+            "dofs": 3983,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.20848669350111168,
+              0.1015461320035665,
+              0.215933798213754
+            ]
+          },
+          {
+            "unit": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ok": true,
+            "dofs": 3316,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.0030000000000000022,
+              0.2084982616014241,
+              0.1015246645200811,
+              0.1979100271977329
+            ]
+          },
+          {
+            "unit": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "ok": true,
+            "dofs": 4055,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.0030000000000000022,
+              0.208497091760168,
+              0.10151158285536781,
+              0.20395482926519382
+            ]
+          },
+          {
+            "unit": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            "ok": true,
+            "dofs": 3465,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.0030000000000000022,
+              0.208498003850767,
+              0.101547581684454,
+              0.19797712844498533
+            ]
+          },
+          {
+            "unit": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              1.0
+            ],
+            "ok": true,
+            "dofs": 3724,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.0030000000000000022,
+              0.2084978405709569,
+              0.10153744325282589,
+              0.203958863607815
+            ]
+          },
+          {
+            "unit": [
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            "ok": true,
+            "dofs": 2980,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.2084947565885972,
+              0.1015000063149926,
+              0.1979907688467732
+            ]
+          },
+          {
+            "unit": [
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              1.0
+            ],
+            "ok": true,
+            "dofs": 3200,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.20849497891120972,
+              0.10151477266059329,
+              0.2039334759465278
+            ]
+          },
+          {
+            "unit": [
+              1.0,
+              0.0,
+              1.0,
+              1.0,
+              0.0
+            ],
+            "ok": true,
+            "dofs": 3121,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.2084942244209897,
+              0.10150006857489631,
+              0.1978668033403993
+            ]
+          },
+          {
+            "unit": [
+              1.0,
+              0.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "ok": true,
+            "dofs": 3432,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.2084924349782195,
+              0.1015054763893944,
+              0.2039300938345703
+            ]
+          },
+          {
+            "unit": [
+              1.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ok": true,
+            "dofs": 3217,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.2084764567471714,
+              0.1015000572233532,
+              0.2097898733530195
+            ]
+          },
+          {
+            "unit": [
+              1.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "ok": true,
+            "dofs": 3387,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.20849797165897602,
+              0.1015000511443416,
+              0.215832925103114
+            ]
+          },
+          {
+            "unit": [
+              1.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            "ok": true,
+            "dofs": 3217,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.2084885493671271,
+              0.1015000602508571,
+              0.2097614845880652
+            ]
+          },
+          {
+            "unit": [
+              1.0,
+              1.0,
+              0.0,
+              1.0,
+              1.0
+            ],
+            "ok": true,
+            "dofs": 3501,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.20849796136963722,
+              0.10150057485554591,
+              0.21581258004463852
+            ]
+          },
+          {
+            "unit": [
+              1.0,
+              1.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            "ok": true,
+            "dofs": 3362,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.208487356796673,
+              0.1015071133423458,
+              0.2098809873240052
+            ]
+          },
+          {
+            "unit": [
+              1.0,
+              1.0,
+              1.0,
+              0.0,
+              1.0
+            ],
+            "ok": true,
+            "dofs": 3623,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.2084802473986836,
+              0.10154886060202421,
+              0.2158247077622652
+            ]
+          },
+          {
+            "unit": [
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              0.0
+            ],
+            "ok": true,
+            "dofs": 3494,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.208486939944938,
+              0.1015207650441319,
+              0.20990336702647452
+            ]
+          },
+          {
+            "unit": [
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "ok": true,
+            "dofs": 3814,
+            "bbox_m": [
+              0.0,
+              0.0,
+              -0.003000000000000001,
+              0.2084817646721406,
+              0.1015221089496278,
+              0.2159375443748813
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

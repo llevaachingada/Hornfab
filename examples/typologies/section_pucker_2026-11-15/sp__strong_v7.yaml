@@ -1,0 +1,98 @@
+# Use tools/geometry/section_pucker_cli.py for all operations.
+name: sp__strong_v7
+family: FREEFORM
+brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
+generator:
+  name: grid
+  rows:
+    type: section_pucker
+  seed_policy: explicit
+  span: quarter
+  n_phi: 65
+  n_s: 128
+  wall_thickness_mm: 3.0
+seed_params:
+  g_width_mm: 417.0
+  g_height_mm: 203.0
+  g_depth_mm: 198.0
+  g_h_depth_scale: 1.0
+  g_crown_mm: 20.0
+  g_throat_blend_mm: 20.0
+  g_junction_power: 32.0
+  g_pucker_h_mm: 7.0
+  g_pucker_v_mm: 9.0
+  g_pucker_start_s: 0.3
+  g_pucker_peak_s: 0.8
+  g_pucker_end_s: 0.96
+bounds:
+  g_width_mm:
+    lo: 417.0
+    hi: 417.0
+    search: false
+  g_height_mm:
+    lo: 203.0
+    hi: 203.0
+    search: false
+  g_depth_mm:
+    lo: 192.0
+    hi: 204.0
+  g_h_depth_scale:
+    lo: 0.98
+    hi: 1.02
+  g_crown_mm:
+    lo: 18.0
+    hi: 22.0
+  g_throat_blend_mm:
+    lo: 20.0
+    hi: 20.0
+    search: false
+  g_junction_power:
+    lo: 32.0
+    hi: 32.0
+    search: false
+  g_pucker_h_mm:
+    lo: 4.0
+    hi: 10.0
+  g_pucker_v_mm:
+    lo: 6.0
+    hi: 12.0
+  g_pucker_start_s:
+    lo: 0.3
+    hi: 0.3
+    search: false
+  g_pucker_peak_s:
+    lo: 0.8
+    hi: 0.8
+    search: false
+  g_pucker_end_s:
+    lo: 0.96
+    hi: 0.96
+    search: false
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 6000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+  rear_res_factor: 1.5
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.15
+  seed: 1234
+  budget: 48
+  popsize: 8
+  tolfun: 0.001
+  infeasible_penalty: flat
+description: Original section-based horn strong H/V mouth-relief experiment; not the
+  ATH formula
