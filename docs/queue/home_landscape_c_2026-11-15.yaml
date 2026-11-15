@@ -1,0 +1,22 @@
+# HOME LANDSCAPE night C (2026-11-15): exploratory pass over the exotic landscape shapes (brief room_landscape_80x50_700_hf1440_v7).
+# Plan: docs/queue/HOME_LANDSCAPE_PLAN_2026-11-15.md. One CMA seed x 80 per family (sigma0 0.2): the question is
+# "which shape family is worth a BoTorch study next", not a final optimum. Ordered by prior evidence: the ATH CORE-style
+# law (only positive petal result, 15 Nov) first, Le Cleac'h last. All seeds passed shape_check (landscape mouths, <= 4.1k dofs).
+night: home_landscape_c_2026-11-15
+lane: gpu
+jobs:
+  - {id: hlc_ath_petal, kind: command, timeout_s: 7200,
+     argv: [.venv/Scripts/hornlab-search.exe, search, --config, examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml, --mode, screen, --budget, "80"]}
+  - {id: hlc_ath_ridge8, kind: command, timeout_s: 7200,
+     argv: [.venv/Scripts/hornlab-search.exe, search, --config, examples/typologies/home_landscape_2026-11-15/hl__ath_ridge8_hvlaw_v7.yaml, --mode, screen, --budget, "80"]}
+  - {id: hlc_salmon_x_flute8, kind: command, timeout_s: 7200,
+     argv: [.venv/Scripts/hornlab-search.exe, search, --config, examples/typologies/home_landscape_2026-11-15/hl__salmon_x_flute8_landscape_v7.yaml, --mode, screen, --budget, "80"]}
+  - {id: hlc_petal_os_x4, kind: command, timeout_s: 7200,
+     argv: [.venv/Scripts/hornlab-search.exe, search, --config, examples/typologies/home_landscape_2026-11-15/hl__petal_os_x4_landscape_v7.yaml, --mode, screen, --budget, "80"]}
+  - {id: hlc_chanterelle_sfx4, kind: command, timeout_s: 7200,
+     argv: [.venv/Scripts/hornlab-search.exe, search, --config, examples/typologies/home_landscape_2026-11-15/hl__chanterelle_sf_x4_stretch_v7.yaml, --mode, screen, --budget, "80"]}
+  - {id: hlc_lecleach_ar, kind: command, timeout_s: 7200,
+     argv: [.venv/Scripts/hornlab-search.exe, search, --config, examples/typologies/home_landscape_2026-11-15/hl__lecleach_iwata_ar_landscape_v7.yaml, --mode, screen, --budget, "80"]}
+  - {id: v_hlc_top3, kind: command, timeout_s: 10800,
+     argv: [.venv/Scripts/python.exe, tools/night_queue/verify_night_jobs.py, --night, home_landscape_c_2026-11-15, --top, "3",
+            --jobs, "hlc_ath_petal,hlc_ath_ridge8,hlc_salmon_x_flute8,hlc_petal_os_x4,hlc_chanterelle_sfx4,hlc_lecleach_ar"]}
