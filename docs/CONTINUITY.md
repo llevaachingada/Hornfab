@@ -1,5 +1,14 @@
 # CONTINUITY
 
+## 2026-11-15 (09:3x local) - BOTORCH VS CMA REPORT: DEEPER OFFLINE ANALYSIS ADDED (docs only)
+
+- Screen->verify drift: BoTorch median +3.4 % (rank 0.86) vs CMA +9.4 % (rank 0.76) over all verified designs.
+- Model check: per-pick predictions were not logged, so they were replayed by refitting the locked model; ranking
+  0.68-0.83, error near best 0.2-0.4 J, but the 95 % intervals are very wide (median ~4.6 J), so they are not informative.
+  Follow-up: log each adaptive pick's prediction in the study journal.
+- Hi-fi on verify data: seat-to-seat spread is a tie (0.37 vs 0.33 dB); the BoTorch winner has a smoother listening
+  window (shape 0.92 vs 1.25 dB). Side-view renders of both horns were added to the report.
+
 ## 2026-11-15 (09:xx local) - BOTORCH VS CMA MATCHED TEST: BOTORCH WINS (report published, docs only)
 
 - Home task HOME_SEED5678 (objective v7), same prior (run 18985d, 185 rows), 60 screens + 6 verify per arm, 3 seeds each.

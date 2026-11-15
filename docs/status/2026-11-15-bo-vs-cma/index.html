@@ -37,6 +37,19 @@ li{margin:4px 0}
 <h2>Every arm</h2><div class="card"><table id="arms"></table></div>
 <h2>What BoTorch found: a different horn</h2><div class="card"><table id="knobs"></table></div>
 <div class="sub" style="margin-top:6px">All three BoTorch arms, and CMA arm 3's best verified design, moved to a <b>shorter, steeper throat extension</b> (about 110&ndash;127 mm at 4.3&ndash;4.8&deg;, against 172 mm at 3.2&deg;). The two methods independently found the same region. Coverage is similar, about 66 &times; 68&ndash;71&deg;.</div>
+<h2>Deeper analysis (offline, no new solves)</h2>
+<div class="kpis">
+<div class="k"><b>0.68–0.83</b><span>rank agreement, BoTorch predicted vs measured (per arm; its 95 % intervals are too wide to be informative)</span></div>
+<div class="k"><b>+3.4 % vs +9.4 %</b><span>median score drift at verify, BoTorch vs CMA</span></div>
+<div class="k"><b>0.92 vs 1.25 dB</b><span>listening-window broad shape (EQ work), winner vs incumbent</span></div>
+<div class="k"><b>0.37 vs 0.33 dB</b><span>seat-to-seat spread (a tie, inaudible)</span></div></div>
+<div class="card"><img src="img/calibration.png" alt="Predicted vs measured J with 95% intervals" style="max-width:100%"></div>
+<div class="sub" style="margin:6px 0 14px">Predictions reconstructed by refitting the same locked model on the data available before each pick (the study did not log them). The ranking is good and the error near the best designs is 0.2–0.4 J, but the 95 % intervals are very wide (median ≈ 4.6 J), so they are not a useful confidence measure.</div>
+<div class="card"><img src="img/hifi.png" alt="Hi-fi checks on verified designs" style="max-width:100%"></div>
+<div class="sub" style="margin:6px 0 14px">Seat-to-seat consistency is a tie. BoTorch's horn has the smoother listening window, so the J win doesn't trade away hi-fi behaviour.</div>
+<div class="card" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:center">
+<div><img src="img/botorch_winner_s.png" alt="BoTorch winner, side view" style="max-width:100%"><div class="sub">BoTorch winner &middot; verify 3.107 &middot; throat ext 114 mm @ 4.3&deg;</div></div>
+<div><img src="img/cma_incumbent_s.png" alt="CMA incumbent, side view" style="max-width:100%"><div class="sub">CMA incumbent &middot; verify 3.827 &middot; throat ext 172 mm @ 3.2&deg;</div></div></div>
 <h2>Caveats</h2><ul>
 <li><b>Warm start from an already-optimized horn.</b> The shared prior was a finished 200-design CMA run, and its best design (J 3.2328) is where two independent CMA seeds had already converged. CMA restarted there with a small step, so it had little room left in that basin; BoTorch&#39;s global model could jump to a different basin. This tests &ldquo;which method improves an already-optimized design?&rdquo;, not &ldquo;which searches better from scratch&rdquo;; a cold-start comparison is still to do.</li>
 <li>One task, one objective (v7), 3 seeds per method, warm-started from CMA data. A cold start was not tested.</li>
