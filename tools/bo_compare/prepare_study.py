@@ -39,6 +39,7 @@ def main(argv=None) -> int:
     ap.add_argument("--deadline-hours", type=float, default=6.0)
     ap.add_argument("--label", required=True)
     ap.add_argument("--lane", default="gpu", choices=("gpu", "cpu"))
+    ap.add_argument("--task", default=TASK, help="registered study task name (default: the 15 Nov comparison task)")
     ap.add_argument("--policy", default="scalar", choices=("scalar", "turbo", "pareto"),
                     help="proposal policy (turbo = turbo_pool_v1 trust region; pareto = coverage/ripple)")
     a = ap.parse_args(argv)
@@ -63,7 +64,7 @@ def main(argv=None) -> int:
     root.mkdir(parents=True, exist_ok=True)
     spec = {"protocol": "bo-study-v1.1",
             "question": f"BO-vs-CMA matched comparison arm {a.label} (seed {a.seed}, {PROFILE})",
-            "task": {"name": TASK}, "source": source,
+            "task": {"name": a.task}, "source": source,
             "policy": {"proposal_policy": a.policy, "seed": a.seed}}
     service = StudyService(root)
     sid = service.create_study(spec, f"bo-vs-cma-{a.label}")["id"]

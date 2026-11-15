@@ -453,3 +453,89 @@ def test_v4_dispatch_entry_is_unchanged_and_only_v5_is_added():
     assert tuple(sorted(_OBJECTIVE_SCORERS)) == SUPPORTED_OBJECTIVE_VERSIONS
     assert tuple(sorted(WEIGHTED_KEYS)) == tuple(sorted(("cov", "rip", "di", "dislope", "flat",
                                                          "load")))
+
+
+# ------------------------------------------------------------------ flat_band (2026-11-14)
+# docs/research/ONAXIS_WEIGHTING_2026-11-14.md: with band_lo below the crossover f0, the legacy
+# ``flat`` scores the horn's own roll-off under the XO. ``flat_band: scored`` is the opt-in fix.
+
+def _rolloff_case():
+    t = _target(band_lo_hz=350.0, band_hi_hz=8000.0, f0_hz=700.0)
+    f = np.geomspace(350.0, 8000.0, 18)
+    # flat above the XO, a steep horn roll-off below it (the woofer's region)
+    on_axis = np.where(f < 700.0, -12.0 * np.log2(700.0 / f) ** 2, 0.0)
+    return t, f, _metrics(f, t, on_axis=on_axis)
+
+
+def test_flat_band_default_is_band_and_is_not_emitted():
+    p = _params()
+    assert p.flat_band == "band"
+    assert "flat_band" not in p.to_block()              # existing configs keep their config_sha
+    assert _params(flat_band="band").to_block() == p.to_block()
+
+
+def test_flat_band_scored_is_emitted_and_validated():
+    assert _params(flat_band="scored").to_block()["flat_band"] == "scored"
+    with pytest.raises(ValueError, match="flat_band"):
+        _params(flat_band="xo")
+
+
+def test_flat_band_scored_ignores_the_rolloff_below_the_crossover():
+    t, _, m = _rolloff_case()
+    _, legacy = objective_v7(m, None, True, t, {"flat": 1.0}, _params())
+    _, scored = objective_v7(m, None, True, t, {"flat": 1.0}, _params(flat_band="scored"))
+    assert legacy["flat"] > 1.0                          # the sub-XO roll-off dominates
+    assert scored["flat"] == pytest.approx(0.0, abs=1e-9)
+
+
+def test_flat_band_scored_changes_only_flat():
+    t, _, m = _rolloff_case()
+    w = {k: 1.0 for k in V7_WEIGHTED_KEYS}
+    _, legacy = objective_v7(m, None, True, t, w, _params())
+    _, scored = objective_v7(m, None, True, t, w, _params(flat_band="scored"))
+    for k in V7_WEIGHTED_KEYS:
+        if k != "flat":
+            assert scored[k] == pytest.approx(legacy[k], rel=1e-12, abs=1e-12), k
+    assert scored["total"] == pytest.approx(legacy["total"] - legacy["flat"] + scored["flat"])
+
+
+def test_flat_band_scored_equals_legacy_when_f0_is_at_band_lo():
+    t = _target(band_lo_hz=350.0, band_hi_hz=8000.0, f0_hz=350.0)
+    f = np.geomspace(350.0, 8000.0, 18)
+    m = _metrics(f, t, on_axis=2.0 * np.sin(np.log2(f)))
+    _, legacy = objective_v7(m, None, True, t, {"flat": 1.0}, _params())
+    _, scored = objective_v7(m, None, True, t, {"flat": 1.0}, _params(flat_band="scored"))
+    assert scored["flat"] == pytest.approx(legacy["flat"], rel=1e-12)
+
+
+# ------------------------------------------------------------------ cov_v_weight (2026-11-15)
+
+def test_cov_v_weight_default_is_legacy_and_not_emitted():
+    assert _params().cov_v_weight == 1.0
+    assert "cov_v_weight" not in _params().to_block()
+    assert _params(cov_v_weight=0.5).to_block()["cov_v_weight"] == 0.5
+    for bad in (-0.1, 1.5, True, "x"):
+        with pytest.raises(ValueError, match="cov_v_weight"):
+            _params(cov_v_weight=bad)
+
+
+def test_cov_v_weight_scales_only_the_vertical_share():
+    t = _target(coverage_h_deg=80.0, coverage_v_deg=50.0, band_lo_hz=700.0, band_hi_hz=8000.0, f0_hz=700.0)
+    f = np.geomspace(700.0, 8000.0, 12)
+    m_v = _metrics(f, t, bw_h=np.full(f.size, 80.0), bw_v=np.full(f.size, 70.0))    # V 20 deg too wide
+    m_h = _metrics(f, t, bw_h=np.full(f.size, 60.0), bw_v=np.full(f.size, 50.0))    # H 20 deg too narrow
+    _, full_v = objective_v7(m_v, None, True, t, {"cov": 1.0}, _params())
+    _, half_v = objective_v7(m_v, None, True, t, {"cov": 1.0}, _params(cov_v_weight=0.5))
+    assert half_v["cov"] == pytest.approx(0.5 * full_v["cov"], rel=1e-9)
+    _, full_h = objective_v7(m_h, None, True, t, {"cov": 1.0}, _params())
+    _, half_h = objective_v7(m_h, None, True, t, {"cov": 1.0}, _params(cov_v_weight=0.5))
+    assert half_h["cov"] == pytest.approx(full_h["cov"], rel=1e-9)      # H error unaffected
+
+
+def test_cov_v_weight_one_equals_legacy_path_exactly():
+    t = _target(coverage_h_deg=80.0, coverage_v_deg=50.0, band_lo_hz=700.0, band_hi_hz=8000.0, f0_hz=700.0)
+    f = np.geomspace(700.0, 8000.0, 12)
+    m = _metrics(f, t, bw_h=np.linspace(60, 90, f.size), bw_v=np.linspace(70, 45, f.size))
+    _, a = objective_v7(m, None, True, t, {"cov": 1.0}, _params())
+    _, b = objective_v7(m, None, True, t, {"cov": 1.0}, _params(cov_v_weight=1.0))
+    assert a["cov"] == b["cov"]

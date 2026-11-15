@@ -1,0 +1,33 @@
+# HOME LANDSCAPE "ES-style" exponential rollback (2026-11-15, owner request: a typology based on Joseph Crowe's ES Bi-Radials).
+# Source read 2026-11-15 (josephcrowe.com technical library): ES-600 = 417 W x 203 H x 198 D mm, 1.4" throat, 600 Hz-20 kHz,
+# his exponential "ES flare" with a FULL 270-deg WRAP-AROUND (rolled-back) mouth to cut edge diffraction and resonance; the
+# exponential flare is chosen to keep the treble as flat as possible (CD horns fall faster). Measured with a Faital HF1460
+# (1.4"): clean loading from ~500 Hz, 0/15 deg nearly identical, 30 deg -2..3 dB, 45 deg down 4-10 dB above 2 kHz.
+# Construction here: the repo's verified Le Cleac'h march (exponential-family, rolls back past 180 deg via stop_deg) with
+# the Iwata area-preserving aspect-ratio stretch from a round 18 mm throat. Seed fc 520 Hz, stop 230 deg, AR 2.0
+# -> 506 W x 259 H x 196 D: the ES-600's 2:1 proportion and depth, scaled ~1.2x for the 700 Hz crossover.
+# 'ES-style', not a copy of Crowe's proprietary ES geometry (unpublished). Rows generator stop_deg hard max is 240.
+name: hl__es_style_rollback_v7
+family: FREEFORM
+brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
+generator:
+  name: grid
+  rows: {type: iwata_ar}
+  n_phi: 15
+  n_s: 32
+  seed_policy: explicit
+  wall_thickness_mm: 3.0
+seed_params: {g_fc_hz: 520.0, g_T: 0.6, g_stop_deg: 230.0, g_ar_m: 2.0, g_ar_p: 1.0}
+bounds:
+  g_fc_hz: {lo: 450.0, hi: 700.0}
+  g_T: {lo: 0.5, hi: 0.9}
+  g_stop_deg: {lo: 170.0, hi: 240.0}
+  g_ar_m: {lo: 1.6, hi: 2.4}
+  g_ar_p: {lo: 0.5, hi: 2.0}
+description: 'HOME LANDSCAPE ES-style: exponential (Le Cleac''h march) flare with full rollback lip, ~2:1 landscape aspect
+  (after J. Crowe ES-600)'
+mesh: {epw: 6.0, quadrants: '1', dof_cap_screen: 24000, dof_cap_verify: 24000, dof_cap_final: 24000, dof_per_triangle: 0.51,
+  rear_res_factor: 1.5}
+solve: {backend: beat_cuda, distance_m: 10.0, angle_count: 73, balloon: true, balloon_points_screen: 512, balloon_points_verify: 1024,
+  gmres_tol: 1.0e-05, timeout_s: 900, cuda_fused: true}
+search: {algorithm: cma, sigma0: 0.2, seed: 1234, budget: 80, popsize: null, tolfun: 0.001, infeasible_penalty: graded}
