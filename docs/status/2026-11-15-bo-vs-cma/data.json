@@ -824,5 +824,101 @@
   "cma_spread": 0.4355,
   "gap": 0.6383,
   "bo_wins": true
+ },
+ "deeper": {
+  "calibration": {
+   "picks": 180,
+   "inside_95": 157,
+   "per_arm": {
+    "BoTorch s31001": {
+     "picks": 60,
+     "inside_95": 52
+    },
+    "BoTorch s31002": {
+     "picks": 60,
+     "inside_95": 49
+    },
+    "BoTorch s31003": {
+     "picks": 60,
+     "inside_95": 56
+    }
+   }
+  },
+  "reliability": {
+   "bo": {
+    "n": 24,
+    "median_bias_pct": 3.4,
+    "max_bias_pct": 13.8,
+    "rank_corr": 0.86
+   },
+   "cma": {
+    "n": 18,
+    "median_bias_pct": 9.4,
+    "max_bias_pct": 18.4,
+    "rank_corr": 0.76
+   }
+  },
+  "hifi_best": {
+   "BoTorch s31001": {
+    "arm": "BoTorch s31001",
+    "kind": "bo",
+    "design": "2ac988a2",
+    "verify_J": 3.1067,
+    "n_freq": 29,
+    "seat_spread_db": 0.368,
+    "xo_spread_db": 0.165,
+    "pir_shape_db": 0.082,
+    "lw_rough_db": 0.804,
+    "lw_shape_db": 0.919
+   },
+   "BoTorch s31003": {
+    "arm": "BoTorch s31003",
+    "kind": "bo",
+    "design": "57bdfc8c",
+    "verify_J": 3.1891,
+    "n_freq": 29,
+    "seat_spread_db": 0.374,
+    "xo_spread_db": 0.168,
+    "pir_shape_db": 0.095,
+    "lw_rough_db": 0.761,
+    "lw_shape_db": 0.938
+   },
+   "BoTorch pilot": {
+    "arm": "BoTorch pilot",
+    "kind": "bo",
+    "design": "c27e1bd3",
+    "verify_J": 3.1173,
+    "n_freq": 29,
+    "seat_spread_db": 0.334,
+    "xo_spread_db": 0.164,
+    "pir_shape_db": 0.084,
+    "lw_rough_db": 0.836,
+    "lw_shape_db": 0.891
+   },
+   "CMA s3101": {
+    "arm": "CMA s3101",
+    "kind": "cma",
+    "design": "f6315ce4",
+    "verify_J": 3.8274,
+    "n_freq": 29,
+    "seat_spread_db": 0.334,
+    "xo_spread_db": 0.166,
+    "pir_shape_db": 0.07,
+    "lw_rough_db": 0.973,
+    "lw_shape_db": 1.251
+   },
+   "CMA s3103": {
+    "arm": "CMA s3103",
+    "kind": "cma",
+    "design": "2eab21c9",
+    "verify_J": 3.3919,
+    "n_freq": 29,
+    "seat_spread_db": 0.324,
+    "xo_spread_db": 0.177,
+    "pir_shape_db": 0.127,
+    "lw_rough_db": 0.846,
+    "lw_shape_db": 0.968
+   }
+  }
  }
 }

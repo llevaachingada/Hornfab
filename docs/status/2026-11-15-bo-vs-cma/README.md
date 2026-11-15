@@ -42,6 +42,47 @@ Task: OSSE extended-throat home horn, brief `room_80x60_700_hf1440_v7` (objectiv
 - **Independent confirmation:** CMA arm 3's best verified design went to the same region (120 mm).
 - **Coverage is similar:** about 66 × 68–71° (1–8 kHz).
 
+## Deeper analysis (offline, no new solves)
+
+**1. Do the scores hold up?** For every verified design, verify J against screen J:
+
+| | designs | median drift at verify | worst drift | rank agreement screen↔verify |
+|---|---:|---:|---:|---:|
+| BoTorch | 24 | +3.4 % | +13.8 % | 0.86 |
+| CMA | 18 | +9.4 % | +18.4 % | 0.76 |
+
+BoTorch's picks survive the finer solve better: smaller drift, and the ranking holds.
+
+**2. Was BoTorch's model right?**
+- BoTorch's per-pick predictions were not logged, so I reconstructed them exactly: refit the same locked, deterministic model on the data it had before each pick, then predict that design.
+- **Ranking: good.** Predicted and measured order agree at rank correlation 0.68–0.83 per arm, which is what drives its picks.
+- **Accuracy near the best designs: decent.** For designs measuring J < 4.5, the typical error was 0.2–0.4.
+- **Confidence intervals: not useful.** They are very wide (median 95 % width ≈ 4.6 J units), so 157/180 landing inside them tells us little. The model is honest but vague about absolute values.
+
+![calibration](img/calibration.png)
+
+**3. Hi-fi checks on the finer verify data** (CTA-2034-style listening window, 29 frequencies):
+
+| design | verify J | seat-to-seat spread | listening-window roughness | broad shape (EQ work) |
+|---|---:|---:|---:|---:|
+| BoTorch winner `2ac988a2` | 3.107 | 0.37 dB | 0.80 dB | 0.92 dB |
+| CMA incumbent `f6315ce4` | 3.827 | 0.33 dB | 0.97 dB | 1.25 dB |
+
+- **Seat-to-seat consistency** (what DSP can't fix) is a tie: a 0.04 dB difference is far below audibility.
+- **Listening window:** BoTorch's horn has the smoother response, with less fine roughness and less broad shape to EQ.
+- So its J win doesn't come at the cost of hi-fi behaviour.
+
+![hi-fi](img/hifi.png)
+
+**4. The two horns** (side view; the throat is on the right):
+
+| BoTorch winner (J 3.107 verify) | CMA incumbent (J 3.827 verify) |
+|---|---|
+| ![BoTorch winner](img/botorch_winner_s.png) | ![CMA incumbent](img/cma_incumbent_s.png) |
+| throat extension 114 mm at 4.3°, length 297 mm | throat extension 172 mm at 3.2°, length 310 mm |
+
+Logging fix noted for the code: store each adaptive pick's prediction in the study journal, so this check doesn't need a replay next time.
+
 ## Caveats
 
 - **Warm start from an already-optimized horn.** The shared prior was a finished 200-design CMA run, and its best design (J 3.2328) is where two independent CMA seeds had already converged. CMA restarted from that converged point with a small step (σ₀ 0.15), so it had little room left in that basin; BoTorch's global model could jump to a different basin. This test answers "which method improves an already-optimized design?", not "which searches better from scratch". A cold-start comparison is still to do.
