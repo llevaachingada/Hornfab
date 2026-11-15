@@ -1,5 +1,12 @@
 # ISSUES
 
+Local-only, 2026-11-15 (**horn pilot completion; no GitHub issue state changed**):
+- Done: four searches, 128/128 valid screen evaluations, successful top1 verification
+  for every arm; both controllers exited0. Results and winner renders published.
+- Open: 5-9 percent screen-to-verify score sensitivity, further acoustic mesh convergence,
+  meeting target loading/coverage, and exact reference exterior/intermediate geometry.
+
+
 Local-only, 2026-11-15 (**ES-600 section correction; no GitHub issue state changed**):
 - Done: independent drawing readings, section-based surface/body, 126 CPU checks, 63/64
   sampled feasibility, four-seed gallery with cut views and versioned replay.

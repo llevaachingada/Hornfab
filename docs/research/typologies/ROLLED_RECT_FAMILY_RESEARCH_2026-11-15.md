@@ -254,3 +254,10 @@ original controller, with the section study first and then top-1 higher-resoluti
 
 Detached follow-up controller: 31224, WMI parent 35188, waiting on original controller 42084.
 Log: `runs/nights/queue_home_crowe_sections.log`. No concurrent solve was started.
+
+## Completed pilot
+
+Both nights and all four verifications completed successfully. Each arm had 32/32 valid
+search evaluations. The section study improved from seed J23.086 to screen J22.756 at n29
+(first improvement n4), and verification returned J24.299. This score shift means acoustic
+mesh convergence remains open. [Run provenance and winner renders](../../renders/2026-11-15-rolled-rect/results.html).

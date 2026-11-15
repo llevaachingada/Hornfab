@@ -1,0 +1,58 @@
+[
+  {
+    "name": "Original reference",
+    "run": "runs/20261115T163824Z-screen-d4a7c4",
+    "attempts": 32,
+    "valid": 32,
+    "seed_J": 30.362443405957578,
+    "best_screen_J": 29.422981398850794,
+    "best_at": 31,
+    "first_improvement": 1,
+    "design_hash": "dd23c8704459",
+    "verify_ok": true,
+    "verify_J": 31.796059493386,
+    "verify_dofs": 4134
+  },
+  {
+    "name": "Moderate H/V pucker",
+    "run": "runs/20261115T164910Z-screen-f94955",
+    "attempts": 32,
+    "valid": 32,
+    "seed_J": 29.447167275376867,
+    "best_screen_J": 28.43408839576063,
+    "best_at": 29,
+    "first_improvement": 1,
+    "design_hash": "186097de51e9",
+    "verify_ok": true,
+    "verify_J": 30.81319918386459,
+    "verify_dofs": 4122
+  },
+  {
+    "name": "Strong H/V pucker",
+    "run": "runs/20261115T165937Z-screen-4d8a33",
+    "attempts": 32,
+    "valid": 32,
+    "seed_J": 28.50302163047591,
+    "best_screen_J": 27.40706454147391,
+    "best_at": 25,
+    "first_improvement": 1,
+    "design_hash": "f076900d07e9",
+    "verify_ok": true,
+    "verify_J": 29.83855872157557,
+    "verify_dofs": 3894
+  },
+  {
+    "name": "Section-based ES-600 study",
+    "run": "runs/20261115T171150Z-screen-d66ffb",
+    "attempts": 32,
+    "valid": 32,
+    "seed_J": 23.085943064983923,
+    "best_screen_J": 22.756336837898132,
+    "best_at": 29,
+    "first_improvement": 4,
+    "design_hash": "7e454d58122c",
+    "verify_ok": true,
+    "verify_J": 24.29916195578309,
+    "verify_dofs": 3084
+  }
+]
