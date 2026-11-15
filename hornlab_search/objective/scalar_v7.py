@@ -64,8 +64,8 @@ from ..constants import BESSEL_J1P_11, C_AIR
 from ..metrics.polar import beamwidth_edges_deg
 from ..targets.spec import Target
 from .scalar import penalty_result
-from .scalar_v2 import (_cut_arrays, _objective_v3, _plain_mean, _weighted_mean,
-                        freq_weight_vector)
+from .scalar_v2 import (_cut_arrays, _objective_v3, _plain_mean, _v2_flat_value,
+                        _weighted_mean, freq_weight_vector)
 from .scalar_v4 import (V4_ALL_KEYS, V4_DEFAULT_WEIGHTS, V4_WEIGHTED_KEYS, _cov_term, _diag_term,
                         _side_weight)
 from .terms import NAN_TERM_FILL, PENALTY_FAILED, WEIGHTED_KEYS
@@ -87,7 +87,12 @@ V7_DEFAULT_WEIGHTS = {**V4_DEFAULT_WEIGHTS, "flat_cv": 0.0}
 _COV_BELOW_F0 = ("mask", "one_sided")
 _DIAG_REFERENCES = ("round",)
 _BLOCK_KEYS = {"version", "tolerances", "cov_narrow_ratio", "cov_below_f0", "diag_reference",
-               "loaded_re_z", "lfp_re_z", "lfp_crossover_ratio", "bw8k_floor"}
+               "loaded_re_z", "lfp_re_z", "lfp_crossover_ratio", "bw8k_floor", "flat_band", "cov_v_weight"}
+#: ``flat`` frequency set (2026-11-14, docs/research/ONAXIS_WEIGHTING_2026-11-14.md): "band" (the
+#: legacy default: every in-band frequency, so a brief whose band_lo sits below its crossover f0
+#: scores the horn's own roll-off under the XO, which the woofer covers) or "scored" (only
+#: f >= f0_effective, the same set every pattern term uses). Opt-in; the default is byte-identical.
+_FLAT_BANDS = ("band", "scored")
 #: The C2 constant-velocity band's upper edge (Hz), owner-directed.
 FLAT_CV_BAND_HI_HZ = 3000.0
 #: The C3 floor is measured at or below this frequency (Hz).
@@ -106,6 +111,10 @@ class V7Params:
     lfp_re_z: float = 0.20
     lfp_crossover_ratio: float = 1.6
     bw8k_floor: float = 0.75
+    flat_band: str = "band"
+    #: Opt-in (2026-11-15, owner: "vertical dispersion matters less than horizontal to my ears"):
+    #: the vertical plane's share of ``cov`` is multiplied by this. 1.0 = legacy (never emitted).
+    cov_v_weight: float = 1.0
 
     @classmethod
     def from_block(cls, block: dict) -> "V7Params":
@@ -146,6 +155,12 @@ class V7Params:
         ref = block.get("diag_reference", "round")
         if ref not in _DIAG_REFERENCES:
             raise ValueError(f"objective.diag_reference must be one of {list(_DIAG_REFERENCES)}, got {ref!r}")
+        flat_band = block.get("flat_band", "band")
+        if flat_band not in _FLAT_BANDS:
+            raise ValueError(f"objective.flat_band must be one of {list(_FLAT_BANDS)}, got {flat_band!r}")
+        cov_v_weight = block.get("cov_v_weight", 1.0)
+        if isinstance(cov_v_weight, bool) or not isinstance(cov_v_weight, (int, float))                 or not math.isfinite(float(cov_v_weight)) or not 0.0 <= float(cov_v_weight) <= 1.0:
+            raise ValueError(f"objective.cov_v_weight must be a number in [0, 1], got {cov_v_weight!r}")
         constants = {}
         for key, default in (("loaded_re_z", 0.50), ("lfp_re_z", 0.20),
                              ("lfp_crossover_ratio", 1.6), ("bw8k_floor", 0.75)):
@@ -155,15 +170,24 @@ class V7Params:
                 raise ValueError(f"objective.{key} must be a finite number > 0, got {v!r}")
             constants[key] = float(v)
         return cls(tolerances=clean, cov_narrow_ratio=float(ratio), cov_below_f0=str(below),
-                   diag_reference=str(ref), **constants)
+                   diag_reference=str(ref), flat_band=str(flat_band),
+                   cov_v_weight=float(cov_v_weight), **constants)
 
     def to_block(self) -> dict:
-        """The normalised mapping stored in the config (so ``config_sha`` covers every choice)."""
-        return {"version": 7, "tolerances": dict(self.tolerances),
-                "cov_narrow_ratio": self.cov_narrow_ratio, "cov_below_f0": self.cov_below_f0,
-                "diag_reference": self.diag_reference, "loaded_re_z": self.loaded_re_z,
-                "lfp_re_z": self.lfp_re_z, "lfp_crossover_ratio": self.lfp_crossover_ratio,
-                "bw8k_floor": self.bw8k_floor}
+        """The normalised mapping stored in the config (so ``config_sha`` covers every choice).
+
+        ``flat_band`` is emitted ONLY when it is not the legacy "band", so every existing v7
+        config keeps its exact block and therefore its config_sha / task identity."""
+        out = {"version": 7, "tolerances": dict(self.tolerances),
+               "cov_narrow_ratio": self.cov_narrow_ratio, "cov_below_f0": self.cov_below_f0,
+               "diag_reference": self.diag_reference, "loaded_re_z": self.loaded_re_z,
+               "lfp_re_z": self.lfp_re_z, "lfp_crossover_ratio": self.lfp_crossover_ratio,
+               "bw8k_floor": self.bw8k_floor}
+        if self.flat_band != "band":
+            out["flat_band"] = self.flat_band
+        if self.cov_v_weight != 1.0:
+            out["cov_v_weight"] = self.cov_v_weight
+        return out
 
 
 def resolve_v7_weights(weights: dict | None) -> dict:
@@ -404,6 +428,27 @@ def _cov_h_plane(metrics, target: Target, f: np.ndarray, band: np.ndarray,
     return float(m)
 
 
+def _cov_v_plane(metrics, target: Target, f: np.ndarray, band: np.ndarray,
+                 params: V7Params) -> float:
+    """Vertical coverage exactly as v4's per-plane loop (its own f0_v), for the weighted split."""
+    wv = freq_weight_vector(f, target)
+    f0_v = float(target.f0_v_hz) if target.f0_v_hz is not None else target.f0_effective_hz()
+    err = np.asarray(metrics.bw_v_deg, dtype=float) - float(target.coverage_v_deg)
+    above = f >= f0_v
+    side = _side_weight(err, params.cov_narrow_ratio)
+    if params.cov_below_f0 == "one_sided":
+        included = band
+        side = np.where(~above & (err > 0.0), 0.0, side)
+    else:
+        included = band & above
+    contrib = (side * err ** 2)[included] / 100.0
+    if target.freq_weights is not None:
+        m, _ = _weighted_mean(contrib, wv[included])
+    else:
+        m, _ = _plain_mean(contrib)
+    return float(m)
+
+
 def _cov_v_asymmetric(resp, target: Target, f: np.ndarray, band: np.ndarray,
                       params: V7Params) -> float | None:
     """C5: signed V -6 dB edges vs the two target halves, frequency-weighted like cov.
@@ -454,7 +499,10 @@ def _cov_term_v5(metrics, resp, target: Target, f: np.ndarray, band: np.ndarray,
         v = _cov_v_asymmetric(resp, target, f, band, params)
         if v is None:
             return NAN_TERM_FILL
-        base = _cov_h_plane(metrics, target, f, band, params) + v
+        base = _cov_h_plane(metrics, target, f, band, params) + params.cov_v_weight * v
+    elif params.cov_v_weight != 1.0:
+        base = (_cov_h_plane(metrics, target, f, band, params)
+                + params.cov_v_weight * _cov_v_plane(metrics, target, f, band, params))
     else:
         base = _cov_term(metrics, target, f, band, params)
     floor = _bw8k_floor_penalty(metrics, target, f, params)
@@ -482,6 +530,8 @@ def _objective_v7(metrics, resp, ok, target: Target, weights, params: V7Params):
     score = band & (f >= target.f0_effective_hz())
 
     t_raw = {k: float(raw[k]) for k in WEIGHTED_KEYS}
+    if params.flat_band == "scored":        # opt-in: on-axis flatness from the crossover up only
+        t_raw["flat"] = _v2_flat_value(metrics, resp, target, score)
     t_raw["cov"] = _cov_term_v5(metrics, resp, target, f, band, params)
 
     if w["distd"] != 0.0:
