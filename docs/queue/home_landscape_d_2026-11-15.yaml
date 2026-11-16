@@ -1,0 +1,28 @@
+# HOME LANDSCAPE night D (2026-11-15 13:50): rerun of night B's three BoTorch arms after the fix in bo/data.py
+# (the encoder refused morph_target=0 rows, so night B trained on 0 of 136 cohort rows and never solved).
+# Reuses night B's cohort. Then a longer Crowe-panel biradial (ES600-style) search: 96 screens + verify top 1.
+night: home_landscape_d_2026-11-15
+lane: gpu
+jobs:
+  - {id: prep_hl_scalar_s61001, kind: command, timeout_s: 3600,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, tools/bo_compare/prepare_study.py, --task, hl__ext_throat_hvlaw_v7, --policy, scalar, --seed, "61001",
+            --root, runs/home_landscape_d_2026-11-15/scalar_s61001, --cohort, runs/home_landscape_b_2026-11-15/cohort, --deadline-hours, "5", --label, hl_scalar_s61001]}
+  - {id: hl_scalar_s61001, kind: command, timeout_s: 21600,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, -m, hornlab_search.studies.cli, run, --root, runs/home_landscape_d_2026-11-15/scalar_s61001, --package, package.json, --execute,
+            --project-root, C:/Users/hunte/Hrns/hornlab-search]}
+  - {id: prep_hl_turbo_s62001, kind: command, timeout_s: 3600,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, tools/bo_compare/prepare_study.py, --task, hl__ext_throat_hvlaw_v7, --policy, turbo, --seed, "62001",
+            --root, runs/home_landscape_d_2026-11-15/turbo_s62001, --cohort, runs/home_landscape_b_2026-11-15/cohort, --deadline-hours, "5", --label, hl_turbo_s62001]}
+  - {id: hl_turbo_s62001, kind: command, timeout_s: 21600,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, -m, hornlab_search.studies.cli, run, --root, runs/home_landscape_d_2026-11-15/turbo_s62001, --package, package.json, --execute,
+            --project-root, C:/Users/hunte/Hrns/hornlab-search]}
+  - {id: prep_hl_pareto_s63001, kind: command, timeout_s: 3600,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, tools/bo_compare/prepare_study.py, --task, hl__ext_throat_hvlaw_v7, --policy, pareto, --seed, "63001",
+            --root, runs/home_landscape_d_2026-11-15/pareto_s63001, --cohort, runs/home_landscape_b_2026-11-15/cohort, --deadline-hours, "5", --label, hl_pareto_s63001]}
+  - {id: hl_pareto_s63001, kind: command, timeout_s: 21600,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, -m, hornlab_search.studies.cli, run, --root, runs/home_landscape_d_2026-11-15/pareto_s63001, --package, package.json, --execute,
+            --project-root, C:/Users/hunte/Hrns/hornlab-search]}
+  - {id: crowe_es600_b96, kind: command, timeout_s: 9000,
+     argv: [.venv/Scripts/python.exe, tools/geometry/crowe_panel_cli.py, search, --config, examples/typologies/rolled_rect_2026-11-15/rr__crowe_panel_es600_v7.yaml, --mode, screen, --budget, "96"]}
+  - {id: crowe_es600_verify, kind: command, timeout_s: 5400,
+     argv: [.venv/Scripts/python.exe, tools/geometry/crowe_panel_cli.py, verify-night, --night, home_landscape_d_2026-11-15, --jobs, crowe_es600_b96, --top, "1"]}

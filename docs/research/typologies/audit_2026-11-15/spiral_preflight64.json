@@ -1,0 +1,160 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{
+  "strict": false,
+  "exit_code": 0,
+  "configs": [
+    {
+      "path": "examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml",
+      "name": "hl__rolled_es_spiral_v7",
+      "family": "FREEFORM",
+      "generator": "grid",
+      "searched_keys": [
+        "g_decay",
+        "g_depth_h_ratio",
+        "g_depth_mm",
+        "g_height_mm",
+        "g_pucker_h_mm",
+        "g_pucker_v_mm",
+        "g_rect_exponent",
+        "g_rect_turn_deg",
+        "g_terminal_deg",
+        "g_width_mm"
+      ],
+      "seed_outside_box": [],
+      "seed_key_missing": [],
+      "seed_design_hash": null,
+      "prior_bests": [],
+      "history": null,
+      "sigma": {
+        "config_sigma0": 0.2,
+        "recommended_sigma": null,
+        "median_spread": null,
+        "dims": 10,
+        "expected_hits": null,
+        "min_expected_hits": 3.0,
+        "refusal_fraction": 0.03125
+      },
+      "sampling": {
+        "samples": 64,
+        "status": "meshed (screen mesh + envelope)",
+        "distribution": "uniform box",
+        "valid": 62,
+        "refused": 2,
+        "unvalidated": 0,
+        "kinds": {
+          "invalid_geometry": 2
+        },
+        "valid_fraction": 0.96875,
+        "refusal_fraction": 0.03125,
+        "predicted_valid_evals": 93.0
+      },
+      "refusals": {
+        "distribution": "uniform box",
+        "valid_fraction": 0.96875,
+        "refusal_fraction": 0.03125,
+        "predicted_valid_evals": 93.0,
+        "kinds": {
+          "invalid_geometry": 2
+        }
+      },
+      "graded": {
+        "infeasible_penalty": "resample_strict",
+        "sampled_refusals": 2,
+        "invalid_envelope": 0
+      },
+      "ab": null,
+      "findings": [
+        {
+          "severity": "INFO",
+          "code": "no_history",
+          "message": "--from-runs absent: no prior-run history, seed-headroom/spread/expected-hits checks are informational only",
+          "config": "examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml"
+        },
+        {
+          "severity": "WARN",
+          "code": "refusals",
+          "message": "2/64 sampled designs were refused [invalid_geometry=2]; valid fraction 0.96875, predicted valid evals 93 of 96; uniform box sample (an upper bound away from the seed; CMA concentrates near it); 2026-11-14 had 22-36% refusals",
+          "config": "examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml"
+        }
+      ]
+    }
+  ],
+  "hards": [],
+  "warnings": [
+    {
+      "severity": "WARN",
+      "code": "refusals",
+      "message": "2/64 sampled designs were refused [invalid_geometry=2]; valid fraction 0.96875, predicted valid evals 93 of 96; uniform box sample (an upper bound away from the seed; CMA concentrates near it); 2026-11-14 had 22-36% refusals",
+      "config": "examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml"
+    }
+  ],
+  "infos": [
+    {
+      "severity": "INFO",
+      "code": "no_history",
+      "message": "--from-runs absent: no prior-run history, seed-headroom/spread/expected-hits checks are informational only",
+      "config": "examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml"
+    }
+  ]
+}

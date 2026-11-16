@@ -429,6 +429,380 @@ Domains covered: `generators`, `rows`, `native`
 | `span` | Row span | — | — | — | — | — | How much of the azimuth circle the rows model covers. |
 | `wall_thickness_mm` | Shell thickness | mm | 3.0 | — | — | — | Outer-shell thickness of a freestanding rows model. |
 
+## `hl__ath_core_petal_hvlaw_v7`
+
+- **Family:** OSSE
+- **Kind:** native
+- **Group:** home
+- **Symmetry:** hv
+- **Description:** HOME landscape ATH CORE-style OSSE, cosine H/V wall-angle law plus gentle superformula petals; no mouth morph
+- **Source status:** catalog
+- **Config:** `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml`
+- **Brief:** `examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml`
+- **Documented:** true
+- **Knobs:** 31
+
+| Knob | Label | Unit | Default | Search | Hard lo | Hard hi | Summary |
+|---|---|---|---|---|---|---|---|
+| `L_mm` | OSSE main-section length | mm | 250.0 | 160.0 .. 340.0 | — | — | Length of the main OSSE section; extension and slot may add to the total. |
+| `a0_deg` | Throat half-angle | deg | 1.9863 | 1.0 .. 3.0 | — | — | Wall half-angle at the throat, passed to the OSSE, R-OSSE and ICW meridian. |
+| `a_deg` | Native coverage half-angle | deg | 24.0 | 12.0 .. 36.0 | — | — | OSSE/R-OSSE coverage half-angle in the mesher's own convention. |
+| `aspect_ratio` | Cross-section aspect ratio | — | 1.0 | 1.0 .. 1.0 | — | — | Width-to-height scaling of the cross-section relative to the meridian radius. |
+| `az_a_cos_amp` | Per-direction cos-power amplitude | deg | 14.0 | 0.0 .. 25.0 | -60.0 | 60.0 | Adds amp * |cos p|^pow to the wall angle. |
+| `az_a_cos_pow` | Per-direction cos power | — | 2.0 | 1.0 .. 6.0 | 0.5 | 40.0 | Exponent of the |cos p| term on the wall angle. |
+| `az_a_sf_amp` | Per-direction superformula amplitude | deg | 3.0 | 0.0 .. 8.0 | -60.0 | 60.0 | Adds a superformula-shaped term to the wall angle, so the coverage differs in every direction. |
+| `az_n_cos2_amp` | Per-direction termination n | — | 0.0 | 0.0 .. 0.0 | -10.0 | 10.0 | Adds amp * cos^2 p to the OSSE termination shape n. |
+| `az_s_cos2_amp` | Per-direction termination s | — | 0.0 | -0.25 .. 0.5 | -1.0 | 1.0 | Adds amp * cos^2 p to the OSSE termination strength s. |
+| `az_sf_a` | Superformula a | — | 1.0 | 1.0 .. 1.0 | 0.05 | 5.0 | Scale of the cosine part of the superformula term. |
+| `az_sf_b` | Superformula b | — | 0.8569 | 0.8569 .. 0.8569 | 0.05 | 5.0 | Scale of the sine part of the superformula term. |
+| `az_sf_m` | Superformula lobes | — | 4.0 | 4.0 .. 4.0 | 4.0 | 12.0 | Number of lobes of the superformula term (a multiple of 4). |
+| `az_sf_n1` | Superformula n1 | — | 7.4958 | 7.4958 .. 7.4958 | 0.1 | 40.0 | Overall sharpness of the superformula term. |
+| `az_sf_n2` | Superformula n2 | — | 12.4449 | 12.4449 .. 12.4449 | 0.1 | 40.0 | Exponent on the cosine part of the superformula term. |
+| `az_sf_n3` | Superformula n3 | — | 13.4442 | 13.4442 .. 13.4442 | 0.1 | 40.0 | Exponent on the sine part of the superformula term. |
+| `exponent` | Native cross-section exponent | — | 2.0 | 2.0 .. 2.0 | — | — | Superellipse exponent of the outline; the documented default is disputed. |
+| `k` | OS-SE shape factor | — | 1.2163 | 0.3 .. 3.0 | — | — | Blends the OS-SE base radius between its radius term and its tangent term. |
+| `morph_allow_shrinkage` | Allow morph shrinkage | — | 0 | 0 .. 0 | — | — | 0/1 flag that lets a morph target be smaller than the current mouth extent. |
+| `morph_corner_mm` | Morph corner radius | mm | 15.0 | 15.0 .. 15.0 | — | — | Corner radius of a rounded-rectangle morph target. |
+| `morph_exponent` | Morph superellipse exponent | — | 4.5 | 4.5 .. 4.5 | 2.0 | 16.0 | Superellipse exponent of a morph target 3 outline. |
+| `morph_fixed` | Morph fixed part | — | 0.0 | 0.0 .. 0.0 | — | — | Axial fraction where the morph begins; zero starts at the throat. |
+| `morph_height_mm` | Morph target height | mm | 400.0 | 400.0 .. 400.0 | — | — | Full target height of a rectangular or superellipse morph at the mouth. |
+| `morph_rate` | Morph rate | — | 3.46 | 3.46 .. 3.46 | 0.0 | — | Power-law rate of the morph blend from the fixed part to the mouth. |
+| `morph_target` | Morph target shape | — | 0 | 0 .. 0 | 0 | 3 | Cross-section shape the mouth morphs toward: off, rectangle, circle or superellipse. |
+| `morph_width_mm` | Morph target width | mm | 540.0 | 540.0 .. 540.0 | — | — | Full target width of a rectangular or superellipse morph at the mouth. |
+| `n` | OSSE termination exponent | — | 6.9046 | 2.0 .. 10.0 | — | — | Superellipse exponent of the OSSE termination term. |
+| `q` | OSSE termination saturation | — | 0.9869 | 0.9 .. 1.0 | — | — | Superellipse saturation of the OSSE termination; positive while s is nonzero. |
+| `r0_mm` | Throat radius | mm | 18.0 | 18.0 .. 18.0 | — | — | Throat radius every native family starts its meridian from. |
+| `s` | Termination amplitude | — | 0.7503 | 0.2 .. 1.2 | — | — | OSSE superellipse termination amplitude; zero leaves the plain OS wall. |
+| `s1` | Throat stretch coefficient 1 | mm/deg | 1.1799 | 1.1799 .. 1.1799 | 0.0 | 10.0 | Strength of the OSSE/R-OSSE nonlinear throat-stretch mapping. |
+| `s2` | Throat stretch coefficient 2 | 1/mm | 0.0286 | 0.0286 .. 0.0286 | 0.0 | 10.0 | Inverse-length scale inside the throat-stretch arctangent. |
+
+## `hl__biradial_es_style_v7`
+
+- **Family:** FREEFORM
+- **Kind:** generator
+- **Group:** home
+- **Symmetry:** hv
+- **Description:** HOME landscape Keele Bi-Radial (US4308932A) with a 25 mm OS throat blend and an ES-450-style squarish landscape mouth
+- **Source status:** catalog
+- **Config:** `examples/typologies/home_landscape_2026-11-15/hl__biradial_es_style_v7.yaml`
+- **Brief:** `examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml`
+- **Documented:** true
+- **Knobs:** 13
+
+| Knob | Label | Unit | Default | Search | Hard lo | Hard hi | Summary |
+|---|---|---|---|---|---|---|---|
+| `L_mm` | Depth | mm | 255.0 | 220.0 .. 320.0 | — | — | Axial depth shared by both meridians, throat to mouth. |
+| `h_a_deg` | H-plane bi-radial initial wall half-angle | deg | 36.0 | 32.0 .. 37.0 | — | — | Plain initial-wall half-angle of the Keele/JBL power-series contour. |
+| `h_n` | H-plane bi-radial flare exponent | — | 5.0 | 3.0 .. 7.0 | — | — | Power-series flare exponent of the Keele/JBL bi-radial wall contour. |
+| `h_rm_mm` | H-plane mouth radius | mm | 280.0 | 260.0 .. 292.0 | — | — | Per-plane target mouth radius for conical, exponential and hypex walls. |
+| `h_throat_blend_mm` | H-plane throat blend length | mm | 25.0 | 25.0 .. 25.0 | — | — | Length over which an OS throat is blended into a classical wall; zero skips it. |
+| `max_wall_deg` | Generator wall-angle cap | deg | 80.0 | — | — | — | Upper bound applied to every selected anchor's wall angle. |
+| `mouth` | Mouth cross-section | — | superellipse | — | — | — | Mouth cross-section family: ellipse, superellipse or rounded rectangle. |
+| `mouth_exponent` | Mouth superellipse exponent | — | 3.0 | 2.2 .. 5.0 | — | — | Superellipse exponent of a superellipse mouth cross-section. |
+| `n_anchors` | Anchor count | — | 16 | — | — | — | Number of [z, r, wall-angle] anchors selected per meridian. |
+| `v_a_deg` | V-plane bi-radial initial wall half-angle | deg | 22.5 | 18.0 .. 24.0 | — | — | Plain initial-wall half-angle of the Keele/JBL power-series contour. |
+| `v_n` | V-plane bi-radial flare exponent | — | 5.0 | 3.0 .. 7.0 | — | — | Power-series flare exponent of the Keele/JBL bi-radial wall contour. |
+| `v_rm_mm` | V-plane mouth radius | mm | 175.0 | 162.0 .. 230.0 | — | — | Per-plane target mouth radius for conical, exponential and hypex walls. |
+| `v_throat_blend_mm` | V-plane throat blend length | mm | 25.0 | 25.0 .. 25.0 | — | — | Length over which an OS throat is blended into a classical wall; zero skips it. |
+
+## `hl__crowe_es_biradial_rr_v7`
+
+- **Family:** FREEFORM
+- **Kind:** generator
+- **Group:** home
+- **Symmetry:** hv
+- **Description:** HOME landscape Crowe ES-style biradial, round throat to a 2:1 rounded-rectangle mouth with independent H/V hypex walls
+- **Source status:** catalog
+- **Config:** `examples/typologies/home_landscape_2026-11-15/hl__crowe_es_biradial_rr_v7.yaml`
+- **Brief:** `examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml`
+- **Documented:** true
+- **Knobs:** 10
+
+| Knob | Label | Unit | Default | Search | Hard lo | Hard hi | Summary |
+|---|---|---|---|---|---|---|---|
+| `L_mm` | Depth | mm | 200.0 | 170.0 .. 260.0 | — | — | Axial depth shared by both meridians, throat to mouth. |
+| `h_T` | H-plane hypex T factor | — | 1.0 | 0.6 .. 1.0 | — | — | Selects the hyperbolic-exponential member between catenoidal and exponential. |
+| `h_rm_mm` | H-plane mouth radius | mm | 250.0 | 215.0 .. 290.0 | — | — | Per-plane target mouth radius for conical, exponential and hypex walls. |
+| `max_wall_deg` | Generator wall-angle cap | deg | 85.0 | — | — | — | Upper bound applied to every selected anchor's wall angle. |
+| `mouth` | Mouth cross-section | — | rounded_rectangle | — | — | — | Mouth cross-section family: ellipse, superellipse or rounded rectangle. |
+| `mouth_corner_mm` | Mouth corner radius | mm | 40.0 | 20.0 .. 80.0 | — | — | Corner radius of a rounded-rectangle mouth cross-section. |
+| `n_anchors` | Anchor count | — | 20 | — | — | — | Number of [z, r, wall-angle] anchors selected per meridian. |
+| `v_T` | V-plane hypex T factor | — | 1.0 | 0.6 .. 1.0 | — | — | Selects the hyperbolic-exponential member between catenoidal and exponential. |
+| `v_rm_mm` | V-plane mouth radius | mm | 125.0 | 105.0 .. 160.0 | — | — | Per-plane target mouth radius for conical, exponential and hypex walls. |
+| `wall_thickness_mm` | Shell thickness | mm | 4.0 | — | 0.0 | — | Freestanding outer-shell thickness the mesher offsets from the wall. |
+
+## `hl__crowe_panel_home_v7`
+
+- **Family:** FREEFORM
+- **Kind:** rows
+- **Group:** home
+- **Symmetry:** hv
+- **Description:** HOME Crowe ES-600 digitized-section family scaled to the home envelope; bridge cell; GUI preview works, run via crowe_panel_cli.py
+- **Source status:** gui-only
+- **Config:** `examples/typologies/home_landscape_2026-11-15/hl__crowe_panel_home_v7.yaml`
+- **Brief:** `examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml`
+- **Documented:** true
+- **Knobs:** 11
+
+| Knob | Label | Unit | Default | Search | Hard lo | Hard hi | Summary |
+|---|---|---|---|---|---|---|---|
+| `g_crown_mm` | Crown rise (rows) | mm | 26.0 | 10.0 .. 40.0 | — | — | Crown rise of the Crowe section surface between its profiles. |
+| `g_depth_mm` | Depth (rows) | mm | 270.0 | 170.0 .. 300.0 | — | — | Axial depth of a rolled-family rows construction. |
+| `g_h_depth_scale` | H/V depth ratio (rows) | — | 1.0 | 0.9 .. 1.1 | — | — | Horizontal-to-vertical depth ratio of the Crowe section construction. |
+| `g_height_mm` | Mouth height (rows) | mm | 280.0 | 220.0 .. 420.0 | — | — | Full mouth height target of a rolled-family rows construction. |
+| `g_junction_power` | Corner junction exponent (rows) | — | 32.0 | 16.0 .. 48.0 | — | — | Exponent of the Crowe section's corner junction blend. |
+| `g_throat_blend_mm` | Throat blend length (rows) | mm | 20.0 | 20.0 .. 20.0 | — | — | Length of the Crowe section's blend from the round driver exit. |
+| `g_width_mm` | Mouth width (rows) | mm | 560.0 | 480.0 .. 590.0 | — | — | Full mouth width target of a rolled-family rows construction. |
+| `n_phi` | Azimuth row count | — | 49 | — | — | — | Number of azimuth rows in the rows/grid model. |
+| `n_s` | Axial station count | — | 96 | — | — | — | Number of axial stations along each row. |
+| `span` | Row span | — | quarter | — | — | — | How much of the azimuth circle the rows model covers. |
+| `wall_thickness_mm` | Shell thickness | mm | 3.0 | — | — | — | Outer-shell thickness of a freestanding rows model. |
+
+## `hl__crowe_x_osse_cd_v7`
+
+- **Family:** FREEFORM
+- **Kind:** rows
+- **Group:** home
+- **Symmetry:** hv
+- **Description:** HOME Crowe ES-style X (bow-tie creases plus curled lip) on a CD OSSE throat; labelled hypothesis shape (rows osse_rollback)
+- **Source status:** catalog
+- **Config:** `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml`
+- **Brief:** `examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml`
+- **Documented:** true
+- **Knobs:** 19
+
+| Knob | Label | Unit | Default | Search | Hard lo | Hard hi | Summary |
+|---|---|---|---|---|---|---|---|
+| `g_L_mm` | Depth (rows) | mm | 240.0 | 200.0 .. 260.0 | — | — | Shared axial depth of both meridians used by the GRID radius field. |
+| `g_a_h_deg` | Horizontal coverage half-angle (rows) | deg | 38.0 | 33.0 .. 40.0 | — | — | Horizontal coverage half-angle of a per-azimuth OSSE rows kind. |
+| `g_a_v_deg` | Vertical coverage half-angle (rows) | deg | 24.0 | 20.0 .. 28.0 | — | — | Vertical coverage half-angle of a per-azimuth OSSE rows kind. |
+| `g_k` | Throat expansion (rows) | — | 1.0 | 1.0 .. 1.0 | — | — | OS throat-expansion exponent in the OSSE and R-OSSE rows kinds. |
+| `g_n` | Termination exponent (rows) | — | 2.0 | 1.8 .. 3.2 | — | — | OSSE termination exponent; controls where the mouth flare is packed. |
+| `g_q` | OSSE shape exponent (rows) | — | 0.996 | 0.996 .. 0.996 | — | — | OSSE profile shape exponent near the mouth. |
+| `g_r_lip_mm` | Torus lip radius (rows) | mm | 25.0 | 8.0 .. 30.0 | — | 100.0 | Tangent-continuous circular lip radius on the rollback rows; zero leaves the wall. |
+| `g_s` | Termination fraction (rows) | — | 0.35 | 0.2 .. 0.45 | — | — | Fraction of the mouth radius carried by the OSSE termination. |
+| `g_sf_ab` | Superformula a/b ratio (rows) | — | 0.8 | 0.7 .. 0.9 | — | — | Anisotropy ratio of the two Gielis superformula radii. |
+| `g_sf_amt` | X-crease amplitude (rows) | — | 0.3 | 0.15 .. 0.38 | — | — | Amplitude of the superformula X modulation on the wall. |
+| `g_sf_m` | Superformula symmetry (rows) | — | 4 | 4 .. 4 | — | — | Gielis superformula symmetry order of the X-shaped mouth term. |
+| `g_sf_n1` | Superformula exponent n1 (rows) | — | 1.8 | 1.8 .. 1.8 | — | — | First Gielis superformula exponent of the X mouth term. |
+| `g_sf_n2` | Superformula exponent n2 (rows) | — | 7.0 | 7.0 .. 7.0 | — | — | Second Gielis superformula exponent of the X mouth term. |
+| `g_sf_start` | X ramp start (rows) | — | 0.25 | 0.25 .. 0.25 | — | — | Normalised wall fraction where the X modulation starts. |
+| `g_wrap_deg` | Lip wrap angle (rows) | deg | 130.0 | 80.0 .. 160.0 | — | — | How far the curled mouth lip wraps around. |
+| `n_phi` | Azimuth row count | — | 25 | — | — | — | Number of azimuth rows in the rows/grid model. |
+| `n_s` | Axial station count | — | 40 | — | — | — | Number of axial stations along each row. |
+| `span` | Row span | — | quarter | — | — | — | How much of the azimuth circle the rows model covers. |
+| `wall_thickness_mm` | Shell thickness | mm | 3.0 | — | — | — | Outer-shell thickness of a freestanding rows model. |
+
+## `hl__es_style_rollback_v7`
+
+- **Family:** FREEFORM
+- **Kind:** rows
+- **Group:** home
+- **Symmetry:** hv
+- **Description:** HOME landscape Crowe ES-style exponential rollback on the verified Iwata AR rows; deep rollback, roughly 2:1 mouth
+- **Source status:** catalog
+- **Config:** `examples/typologies/home_landscape_2026-11-15/hl__es_style_rollback_v7.yaml`
+- **Brief:** `examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml`
+- **Documented:** true
+- **Knobs:** 9
+
+| Knob | Label | Unit | Default | Search | Hard lo | Hard hi | Summary |
+|---|---|---|---|---|---|---|---|
+| `g_T` | Rows family factor (rows) | — | 0.6 | 0.5 .. 0.9 | — | — | Salmon family T on the Salmon rows; Fourcade area-law T on the Le Cleac'h rows. |
+| `g_ar_m` | Iwata mouth aspect ratio (rows) | — | 2.0 | 1.6 .. 2.4 | — | — | Mouth aspect ratio of the iwata_ar stretch on the verified march. |
+| `g_ar_p` | Iwata AR exponent (rows) | — | 1.0 | 0.5 .. 2.0 | — | — | Exponent of the iwata_ar aspect-ratio evolution. |
+| `g_fc_hz` | Axisymmetric rows cutoff (rows) | Hz | 520.0 | 450.0 .. 700.0 | — | — | Single cutoff of an axisymmetric Le Cleac'h rows march. |
+| `g_stop_deg` | Rows march stop (rows) | deg | 230.0 | 170.0 .. 240.0 | — | — | Wall-angle stop of the per-azimuth rows march; the legal window depends on the kind. |
+| `n_phi` | Azimuth row count | — | 15 | — | — | — | Number of azimuth rows in the rows/grid model. |
+| `n_s` | Axial station count | — | 32 | — | — | — | Number of axial stations along each row. |
+| `span` | Row span | — | — | — | — | — | How much of the azimuth circle the rows model covers. |
+| `wall_thickness_mm` | Shell thickness | mm | 3.0 | — | — | — | Outer-shell thickness of a freestanding rows model. |
+
+## `hl__ext_throat_hvlaw_v7`
+
+- **Family:** OSSE
+- **Kind:** native
+- **Group:** home
+- **Symmetry:** hv
+- **Description:** HOME landscape OSSE + extended throat with a per-direction cosine wall-angle law; the BoTorch home task (8 searchable knobs)
+- **Source status:** catalog
+- **Config:** `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml`
+- **Brief:** `examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml`
+- **Documented:** true
+- **Knobs:** 33
+
+| Knob | Label | Unit | Default | Search | Hard lo | Hard hi | Summary |
+|---|---|---|---|---|---|---|---|
+| `L_mm` | OSSE main-section length | mm | 250.0 | 180.0 .. 330.0 | — | — | Length of the main OSSE section; extension and slot may add to the total. |
+| `a0_deg` | Throat half-angle | deg | 4.5 | 4.5 .. 4.5 | — | — | Wall half-angle at the throat, passed to the OSSE, R-OSSE and ICW meridian. |
+| `a_deg` | Native coverage half-angle | deg | 24.0 | 15.0 .. 40.0 | — | — | OSSE/R-OSSE coverage half-angle in the mesher's own convention. |
+| `aspect_ratio` | Cross-section aspect ratio | — | 1.0 | 1.0 .. 1.0 | — | — | Width-to-height scaling of the cross-section relative to the meridian radius. |
+| `az_a_cos_amp` | Per-direction cos-power amplitude | deg | 14.0 | 0.0 .. 25.0 | -60.0 | 60.0 | Adds amp * |cos p|^pow to the wall angle. |
+| `az_a_cos_pow` | Per-direction cos power | — | 2.0 | 1.0 .. 6.0 | 0.5 | 40.0 | Exponent of the |cos p| term on the wall angle. |
+| `az_a_sf_amp` | Per-direction superformula amplitude | deg | 0.0 | 0.0 .. 0.0 | -60.0 | 60.0 | Adds a superformula-shaped term to the wall angle, so the coverage differs in every direction. |
+| `az_n_cos2_amp` | Per-direction termination n | — | 0.0 | 0.0 .. 0.0 | -10.0 | 10.0 | Adds amp * cos^2 p to the OSSE termination shape n. |
+| `az_s_cos2_amp` | Per-direction termination s | — | 0.0 | -0.25 .. 0.5 | -1.0 | 1.0 | Adds amp * cos^2 p to the OSSE termination strength s. |
+| `az_sf_a` | Superformula a | — | 1.0 | 1.0 .. 1.0 | 0.05 | 5.0 | Scale of the cosine part of the superformula term. |
+| `az_sf_b` | Superformula b | — | 0.8569 | 0.8569 .. 0.8569 | 0.05 | 5.0 | Scale of the sine part of the superformula term. |
+| `az_sf_m` | Superformula lobes | — | 4.0 | 4.0 .. 4.0 | 4.0 | 12.0 | Number of lobes of the superformula term (a multiple of 4). |
+| `az_sf_n1` | Superformula n1 | — | 7.4958 | 7.4958 .. 7.4958 | 0.1 | 40.0 | Overall sharpness of the superformula term. |
+| `az_sf_n2` | Superformula n2 | — | 12.4449 | 12.4449 .. 12.4449 | 0.1 | 40.0 | Exponent on the cosine part of the superformula term. |
+| `az_sf_n3` | Superformula n3 | — | 13.4442 | 13.4442 .. 13.4442 | 0.1 | 40.0 | Exponent on the sine part of the superformula term. |
+| `exponent` | Native cross-section exponent | — | 2.0 | 2.0 .. 2.0 | — | — | Superellipse exponent of the outline; the documented default is disputed. |
+| `k` | OS-SE shape factor | — | 1.0 | 1.0 .. 1.0 | — | — | Blends the OS-SE base radius between its radius term and its tangent term. |
+| `morph_allow_shrinkage` | Allow morph shrinkage | — | 0 | 0 .. 0 | — | — | 0/1 flag that lets a morph target be smaller than the current mouth extent. |
+| `morph_corner_mm` | Morph corner radius | mm | 35.0 | 35.0 .. 35.0 | — | — | Corner radius of a rounded-rectangle morph target. |
+| `morph_exponent` | Morph superellipse exponent | — | 4.0 | 4.0 .. 4.0 | 2.0 | 16.0 | Superellipse exponent of a morph target 3 outline. |
+| `morph_fixed` | Morph fixed part | — | 0.0 | 0.0 .. 0.0 | — | — | Axial fraction where the morph begins; zero starts at the throat. |
+| `morph_height_mm` | Morph target height | mm | 660.0 | 660.0 .. 660.0 | — | — | Full target height of a rectangular or superellipse morph at the mouth. |
+| `morph_rate` | Morph rate | — | 4.1236 | 4.1236 .. 4.1236 | 0.0 | — | Power-law rate of the morph blend from the fixed part to the mouth. |
+| `morph_target` | Morph target shape | — | 0 | 0 .. 0 | 0 | 3 | Cross-section shape the mouth morphs toward: off, rectangle, circle or superellipse. |
+| `morph_width_mm` | Morph target width | mm | 500.0 | 500.0 .. 500.0 | — | — | Full target width of a rectangular or superellipse morph at the mouth. |
+| `n` | OSSE termination exponent | — | 6.0 | 6.0 .. 6.0 | — | — | Superellipse exponent of the OSSE termination term. |
+| `q` | OSSE termination saturation | — | 0.996 | 0.996 .. 0.996 | — | — | Superellipse saturation of the OSSE termination; positive while s is nonzero. |
+| `r0_mm` | Throat radius | mm | 27.0507 | 27.0507 .. 27.0507 | — | — | Throat radius every native family starts its meridian from. |
+| `s` | Termination amplitude | — | 0.55 | 0.3 .. 0.9 | — | — | OSSE superellipse termination amplitude; zero leaves the plain OS wall. |
+| `slot_length_mm` | Slot length | mm | 0.0 | 0.0 .. 0.0 | — | — | Straight cylindrical section at the throat radius between extension and main horn. |
+| `throat_ext_angle_deg` | Throat extension angle | deg | 4.5 | 1.5 .. 6.0 | — | — | Taper angle of the prepended throat extension, measured from the axis. |
+| `throat_ext_length_mm` | Throat extension length | mm | 115.0 | 60.0 .. 220.0 | — | — | Length of the tapered tube prepended before the main OSSE/R-OSSE meridian. |
+| `wall_thickness_mm` | Native shell thickness | mm | 5.0 | 5.0 .. 5.0 | 0.0 | — | Mesh-section shell thickness for the native families. |
+
+## `hl__lecleach_iwata_ar_landscape_v7`
+
+- **Family:** FREEFORM
+- **Kind:** rows
+- **Group:** home
+- **Symmetry:** hv
+- **Description:** HOME landscape verified Le Cleac'h / Iwata aspect-ratio rows march from a round throat to a landscape mouth (4 knobs)
+- **Source status:** catalog
+- **Config:** `examples/typologies/home_landscape_2026-11-15/hl__lecleach_iwata_ar_landscape_v7.yaml`
+- **Brief:** `examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml`
+- **Documented:** true
+- **Knobs:** 9
+
+| Knob | Label | Unit | Default | Search | Hard lo | Hard hi | Summary |
+|---|---|---|---|---|---|---|---|
+| `g_T` | Rows family factor (rows) | — | 0.5 | 0.5 .. 0.5 | — | — | Salmon family T on the Salmon rows; Fourcade area-law T on the Le Cleac'h rows. |
+| `g_ar_m` | Iwata mouth aspect ratio (rows) | — | 1.5 | 1.2 .. 2.4 | — | — | Mouth aspect ratio of the iwata_ar stretch on the verified march. |
+| `g_ar_p` | Iwata AR exponent (rows) | — | 1.0 | 0.5 .. 2.0 | — | — | Exponent of the iwata_ar aspect-ratio evolution. |
+| `g_fc_hz` | Axisymmetric rows cutoff (rows) | Hz | 550.0 | 450.0 .. 900.0 | — | — | Single cutoff of an axisymmetric Le Cleac'h rows march. |
+| `g_stop_deg` | Rows march stop (rows) | deg | 180.0 | 110.0 .. 200.0 | — | — | Wall-angle stop of the per-azimuth rows march; the legal window depends on the kind. |
+| `n_phi` | Azimuth row count | — | 15 | — | — | — | Number of azimuth rows in the rows/grid model. |
+| `n_s` | Axial station count | — | 32 | — | — | — | Number of axial stations along each row. |
+| `span` | Row span | — | — | — | — | — | How much of the azimuth circle the rows model covers. |
+| `wall_thickness_mm` | Shell thickness | mm | 3.0 | — | — | — | Outer-shell thickness of a freestanding rows model. |
+
+## `hl__osse_rrect_morph_v7`
+
+- **Family:** OSSE
+- **Kind:** native
+- **Group:** home
+- **Symmetry:** hv
+- **Description:** HOME landscape ATH-style smooth OSSE morphed to a rounded-rectangle superellipse mouth, landscape by construction
+- **Source status:** catalog
+- **Config:** `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml`
+- **Brief:** `examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml`
+- **Documented:** true
+- **Knobs:** 31
+
+| Knob | Label | Unit | Default | Search | Hard lo | Hard hi | Summary |
+|---|---|---|---|---|---|---|---|
+| `L_mm` | OSSE main-section length | mm | 250.0 | 160.0 .. 340.0 | — | — | Length of the main OSSE section; extension and slot may add to the total. |
+| `a0_deg` | Throat half-angle | deg | 1.9863 | 1.0 .. 3.0 | — | — | Wall half-angle at the throat, passed to the OSSE, R-OSSE and ICW meridian. |
+| `a_deg` | Native coverage half-angle | deg | 30.0 | 20.0 .. 40.0 | — | — | OSSE/R-OSSE coverage half-angle in the mesher's own convention. |
+| `aspect_ratio` | Cross-section aspect ratio | — | 1.0 | 1.0 .. 1.0 | — | — | Width-to-height scaling of the cross-section relative to the meridian radius. |
+| `az_a_cos_amp` | Per-direction cos-power amplitude | deg | 8.0 | 0.0 .. 15.0 | -60.0 | 60.0 | Adds amp * |cos p|^pow to the wall angle. |
+| `az_a_cos_pow` | Per-direction cos power | — | 2.0 | 1.0 .. 6.0 | 0.5 | 40.0 | Exponent of the |cos p| term on the wall angle. |
+| `az_a_sf_amp` | Per-direction superformula amplitude | deg | 0.0 | 0.0 .. 0.0 | -60.0 | 60.0 | Adds a superformula-shaped term to the wall angle, so the coverage differs in every direction. |
+| `az_n_cos2_amp` | Per-direction termination n | — | 0.0 | 0.0 .. 0.0 | -10.0 | 10.0 | Adds amp * cos^2 p to the OSSE termination shape n. |
+| `az_s_cos2_amp` | Per-direction termination s | — | 0.0 | -0.25 .. 0.5 | -1.0 | 1.0 | Adds amp * cos^2 p to the OSSE termination strength s. |
+| `az_sf_a` | Superformula a | — | 1.0 | 1.0 .. 1.0 | 0.05 | 5.0 | Scale of the cosine part of the superformula term. |
+| `az_sf_b` | Superformula b | — | 0.8569 | 0.8569 .. 0.8569 | 0.05 | 5.0 | Scale of the sine part of the superformula term. |
+| `az_sf_m` | Superformula lobes | — | 4.0 | 4.0 .. 4.0 | 4.0 | 12.0 | Number of lobes of the superformula term (a multiple of 4). |
+| `az_sf_n1` | Superformula n1 | — | 7.4958 | 7.4958 .. 7.4958 | 0.1 | 40.0 | Overall sharpness of the superformula term. |
+| `az_sf_n2` | Superformula n2 | — | 12.4449 | 12.4449 .. 12.4449 | 0.1 | 40.0 | Exponent on the cosine part of the superformula term. |
+| `az_sf_n3` | Superformula n3 | — | 13.4442 | 13.4442 .. 13.4442 | 0.1 | 40.0 | Exponent on the sine part of the superformula term. |
+| `exponent` | Native cross-section exponent | — | 2.0 | 2.0 .. 2.0 | — | — | Superellipse exponent of the outline; the documented default is disputed. |
+| `k` | OS-SE shape factor | — | 1.2163 | 0.3 .. 3.0 | — | — | Blends the OS-SE base radius between its radius term and its tangent term. |
+| `morph_allow_shrinkage` | Allow morph shrinkage | — | 1 | 1 .. 1 | — | — | 0/1 flag that lets a morph target be smaller than the current mouth extent. |
+| `morph_corner_mm` | Morph corner radius | mm | 60.0 | 30.0 .. 100.0 | — | — | Corner radius of a rounded-rectangle morph target. |
+| `morph_exponent` | Morph superellipse exponent | — | 4.0 | 4.0 .. 4.0 | 2.0 | 16.0 | Superellipse exponent of a morph target 3 outline. |
+| `morph_fixed` | Morph fixed part | — | 0.0 | 0.0 .. 0.0 | — | — | Axial fraction where the morph begins; zero starts at the throat. |
+| `morph_height_mm` | Morph target height | mm | 380.0 | 320.0 .. 460.0 | — | — | Full target height of a rectangular or superellipse morph at the mouth. |
+| `morph_rate` | Morph rate | — | 3.0 | 1.0 .. 6.0 | 0.0 | — | Power-law rate of the morph blend from the fixed part to the mouth. |
+| `morph_target` | Morph target shape | — | 1 | 1 .. 1 | 0 | 3 | Cross-section shape the mouth morphs toward: off, rectangle, circle or superellipse. |
+| `morph_width_mm` | Morph target width | mm | 540.0 | 480.0 .. 600.0 | — | — | Full target width of a rectangular or superellipse morph at the mouth. |
+| `n` | OSSE termination exponent | — | 6.9046 | 2.0 .. 10.0 | — | — | Superellipse exponent of the OSSE termination term. |
+| `q` | OSSE termination saturation | — | 0.9869 | 0.9 .. 1.0 | — | — | Superellipse saturation of the OSSE termination; positive while s is nonzero. |
+| `r0_mm` | Throat radius | mm | 18.0 | 18.0 .. 18.0 | — | — | Throat radius every native family starts its meridian from. |
+| `s` | Termination amplitude | — | 0.7503 | 0.2 .. 1.2 | — | — | OSSE superellipse termination amplitude; zero leaves the plain OS wall. |
+| `s1` | Throat stretch coefficient 1 | mm/deg | 1.1799 | 1.1799 .. 1.1799 | 0.0 | 10.0 | Strength of the OSSE/R-OSSE nonlinear throat-stretch mapping. |
+| `s2` | Throat stretch coefficient 2 | 1/mm | 0.0286 | 0.0286 .. 0.0286 | 0.0 | 10.0 | Inverse-length scale inside the throat-stretch arctangent. |
+
+## `hl__rolled_es_spiral_v7`
+
+- **Family:** FREEFORM
+- **Kind:** rows
+- **Group:** home
+- **Symmetry:** hv
+- **Description:** HOME Crowe ES-style exponential-spiral rolled rectangle (narrowing, non-CD by design); bridge cell; GUI preview works, run via rolled_rect_cli.py
+- **Source status:** gui-only
+- **Config:** `examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml`
+- **Brief:** `examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml`
+- **Documented:** true
+- **Knobs:** 16
+
+| Knob | Label | Unit | Default | Search | Hard lo | Hard hi | Summary |
+|---|---|---|---|---|---|---|---|
+| `g_decay` | Spiral decay (rows) | — | 0.7 | 0.4 .. 1.0 | — | — | Exponential-spiral decay rate of the rolled-rectangle kind. |
+| `g_depth_h_ratio` | Horizontal depth fraction (rows) | — | 0.68 | 0.55 .. 1.0 | — | — | Share of the rolled-rectangle depth assigned to the horizontal walls. |
+| `g_depth_mm` | Depth (rows) | mm | 238.0 | 200.0 .. 380.0 | — | — | Axial depth of a rolled-family rows construction. |
+| `g_height_mm` | Mouth height (rows) | mm | 299.0 | 260.0 .. 420.0 | — | — | Full mouth height target of a rolled-family rows construction. |
+| `g_pucker_h_mm` | Horizontal pucker (rows) | mm | 6.0 | 0.0 .. 18.0 | — | — | Horizontal-plane inward pucker of the rolled-rectangle rim. |
+| `g_pucker_start_deg` | Pucker start angle (rows) | deg | 55.0 | 55.0 .. 55.0 | — | — | Roll turn where the rolled-rectangle rim pucker starts. |
+| `g_pucker_v_mm` | Vertical pucker (rows) | mm | 8.0 | 0.0 .. 24.0 | — | — | Vertical-plane inward pucker of the rolled-rectangle rim. |
+| `g_rect_exponent` | Rectangle corner exponent (rows) | — | 12.0 | 4.0 .. 14.0 | — | — | Superellipse corner exponent of the rectangular mouth. |
+| `g_rect_turn_deg` | Rectangle transition angle (rows) | deg | 65.0 | 45.0 .. 85.0 | — | — | Roll turn where the rolled-rectangle cross-section becomes rectangular. |
+| `g_terminal_deg` | Terminal roll angle (rows) | deg | 270.0 | 200.0 .. 275.0 | — | — | Final roll turn of the rolled-rectangle mouth. |
+| `g_throat_turn_deg` | Throat turn angle (rows) | deg | 25.0 | 25.0 .. 25.0 | — | — | Roll turn used by the round throat blend of the rolled rectangle. |
+| `g_width_mm` | Mouth width (rows) | mm | 542.0 | 480.0 .. 590.0 | — | — | Full mouth width target of a rolled-family rows construction. |
+| `n_phi` | Azimuth row count | — | 49 | — | — | — | Number of azimuth rows in the rows/grid model. |
+| `n_s` | Axial station count | — | 96 | — | — | — | Number of axial stations along each row. |
+| `span` | Row span | — | quarter | — | — | — | How much of the azimuth circle the rows model covers. |
+| `wall_thickness_mm` | Shell thickness | mm | 3.0 | — | — | — | Outer-shell thickness of a freestanding rows model. |
+
+## `hl__rosse_rect_cd_v7`
+
+- **Family:** FREEFORM
+- **Kind:** rows
+- **Group:** home
+- **Symmetry:** hv
+- **Description:** HOME rolled rectangular mouth on ATH R-OSSE per azimuth; bridge cell; GUI preview works, run via tools/geometry/rosse_rect_cli.py
+- **Source status:** gui-only
+- **Config:** `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml`
+- **Brief:** `examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml`
+- **Documented:** true
+- **Knobs:** 16
+
+| Knob | Label | Unit | Default | Search | Hard lo | Hard hi | Summary |
+|---|---|---|---|---|---|---|---|
+| `g_a_diag_deg` | Diagonal coverage half-angle (rows) | deg | 0.0 | 0.0 .. 0.0 | — | — | Diagonal wall-angle term of the per-azimuth R-OSSE rows kind. |
+| `g_a_h_deg` | Horizontal coverage half-angle (rows) | deg | 40.0 | 32.0 .. 46.0 | — | — | Horizontal coverage half-angle of a per-azimuth OSSE rows kind. |
+| `g_a_v_deg` | Vertical coverage half-angle (rows) | deg | 25.0 | 18.0 .. 30.0 | — | — | Vertical coverage half-angle of a per-azimuth OSSE rows kind. |
+| `g_b` | Rollback bend (rows) | — | 0.2 | 0.0 .. 0.4 | — | — | Dimensionless R-OSSE bend term of the rolled mouth. |
+| `g_height_mm` | Mouth height (rows) | mm | 360.0 | 280.0 .. 420.0 | — | — | Full mouth height target of a rolled-family rows construction. |
+| `g_k` | Throat expansion (rows) | — | 1.0 | 0.8 .. 3.0 | — | — | OS throat-expansion exponent in the OSSE and R-OSSE rows kinds. |
+| `g_m` | R-OSSE shape exponent (rows) | — | 0.85 | 0.85 .. 0.85 | — | — | Shape exponent of the R-OSSE meridian. |
+| `g_q` | OSSE shape exponent (rows) | — | 3.0 | 3.0 .. 3.0 | — | — | OSSE profile shape exponent near the mouth. |
+| `g_r` | Rollback radius (rows) | mm | 0.4 | 0.25 .. 0.6 | — | — | R-OSSE rollback radius of the rolled mouth. |
+| `g_rect_exponent` | Rectangle corner exponent (rows) | — | 4.0 | 2.5 .. 8.0 | — | — | Superellipse corner exponent of the rectangular mouth. |
+| `g_tmax` | Rollback extent (rows) | — | 1.0 | 0.85 .. 1.0 | — | — | Normalised extent of the R-OSSE rollback. |
+| `g_width_mm` | Mouth width (rows) | mm | 560.0 | 480.0 .. 590.0 | — | — | Full mouth width target of a rolled-family rows construction. |
+| `n_phi` | Azimuth row count | — | 25 | — | — | — | Number of azimuth rows in the rows/grid model. |
+| `n_s` | Axial station count | — | 48 | — | — | — | Number of axial stations along each row. |
+| `span` | Row span | — | quarter | — | — | — | How much of the azimuth circle the rows model covers. |
+| `wall_thickness_mm` | Shell thickness | mm | 3.0 | — | — | — | Outer-shell thickness of a freestanding rows model. |
+
 ## `hyb_osse_h_hypex_v`
 
 - **Family:** FREEFORM

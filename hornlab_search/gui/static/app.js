@@ -5853,8 +5853,9 @@ async function viewRunDetail(id) {
           <div class="seg-toggle" role="group" aria-label="Directivity view">
             <button type="button" data-isoview="rect" aria-pressed="true">Rectangular</button>
             <button type="button" data-isoview="globe" aria-pressed="false">Globe</button>
+            <button type="button" data-isoview="globe360" aria-pressed="false">Full globe</button>
           </div></div>
-        <div class="cap">Level relative to on-axis at 2 m, in 3 dB colour bands (thin lines every 3 dB; the heavier line is the −6 dB beamwidth edge). A good design keeps its −6 dB edge on the coverage-target guides. Hover for values. Interpolated between the ${((d.best || {}).freqs || []).length} solved frequencies (screen fidelity), ticked below the frequency axis. Globe view: the same data wrapped into a half-circle (front at the bottom, frequency rising outward from the centre). Axis spans the brief band; the colour map is drawn only across the solved frequencies.</div>
+        <div class="cap">Level relative to on-axis at 2 m, in 3 dB colour bands (thin lines every 3 dB; the heavier line is the −6 dB beamwidth edge). A good design keeps its −6 dB edge on the coverage-target guides. Hover for values. Interpolated between the ${((d.best || {}).freqs || []).length} solved frequencies (screen fidelity), ticked below the frequency axis. Globe view: the cut data wrapped into a half-circle (front at the bottom, frequency rising outward from the centre). Full globe: the stored balloon sampled right around the circle (front at the bottom, ±180° at the top) — no extra solves, just a different slice of the same data. Axis spans the brief band; the colour map is drawn only across the solved frequencies.</div>
         <div id="polar-legend"></div>
         <div class="maps iso-maps" id="polar-maps"></div>
       </div>
@@ -6081,20 +6082,32 @@ async function viewRunDetail(id) {
     if (legEl) legEl.innerHTML = "" && isobarLegendHtml({ target: !!(t.coverage_h_deg || t.coverage_v_deg), f0: !!f0Finite, over: anyOver });
     const plots = [["Best design · horizontal", B.polar_h, B], ["Best design · vertical", B.polar_v, B]];
     if (withStart) plots.push(["Starting design · horizontal", S.polar_h, S], ["Starting design · vertical", S.polar_v, S]);
-    // view: rectangular map (frequency x angle) or globe (angle around, frequency out); remembered
+    // view: rectangular map (frequency x angle), half globe (cut data) or full globe (balloon data)
     let view = "rect";
-    try { view = localStorage.getItem("hl.isoView") === "globe" ? "globe" : "rect"; } catch (_) { /* storage blocked */ }
+    try { const v = localStorage.getItem("hl.isoView"); view = (v === "globe" || v === "globe360") ? v : "rect"; } catch (_) { /* storage blocked */ }
     document.querySelectorAll("[data-isoview]").forEach(b => {
       b.setAttribute("aria-pressed", String(b.dataset.isoview === view));
       b.onclick = () => { try { localStorage.setItem("hl.isoView", b.dataset.isoview); } catch (_) { /* ignore */ } drawIsobars(); };
     });
-    mapsEl.classList.toggle("iso-globes", view === "globe");
+    mapsEl.classList.toggle("iso-globes", view !== "rect");
     for (const [lbl, rows, D2] of plots) {
+      const vert = /vertical/.test(lbl);
+      if (view === "globe360") {
+        // full circle needs the stored balloon; older runs without one simply skip this view
+        const r360 = vert ? D2.polar_v360 : D2.polar_h360;
+        if (!r360 || !D2.angles360) continue;
+        const sv = document.createElementNS(NS, "svg"); sv.setAttribute("class", "polar");
+        sv.setAttribute("role", "img"); sv.setAttribute("aria-label", lbl + " full globe plot");
+        mapsEl.appendChild(sv);
+        const tgt = vert ? t.coverage_v_deg : t.coverage_h_deg;
+        requestAnimationFrame(() => globePlot(sv, r360, D2.angles360, D2.freqs || F, { title: lbl, H: 360, f0: f0Finite, target: tgt }));
+        continue;
+      }
       if (!rows) continue;
       const sv = document.createElementNS(NS, "svg"); sv.setAttribute("class", "polar");
       sv.setAttribute("role", "img"); sv.setAttribute("aria-label", lbl + (view === "globe" ? " globe plot" : " isobar plot"));
       mapsEl.appendChild(sv);
-      const tgt = /vertical/.test(lbl) ? t.coverage_v_deg : t.coverage_h_deg;
+      const tgt = vert ? t.coverage_v_deg : t.coverage_h_deg;
       if (view === "globe") {
         requestAnimationFrame(() => globePlot(sv, rows, D2.angles || [], D2.freqs || F, { title: lbl, H: 320, f0: f0Finite, target: tgt }));
       } else {
@@ -8921,6 +8934,7 @@ const TYP_GROUP = {
   hybrid: ["Hybrids", "Combinations: a different profile in each plane (H/V), a convex blend of two profiles, or small monotone perturbations of a classical wall."],
   magnus: ["Magnus mesher families", "OSSE, R-OSSE, ICW and FREEFORM as Magnus's mesher defines them."],
   legacy: ["Utility / legacy", "Test and adapter configs, not meant for typology comparison."],
+  home: ["Home landscape (2026-11-15)", "The landscape 80 H x 50 V / 700 Hz home-horn cells. Bridge cells (rolled rectangle, R-OSSE rectangle, Crowe sections) need their own CLI entry point, so they are listed disabled here."],
 };
 
 /** Morph status pill: "Morph searched" when the config searches Ath Morph knobs, "Morph" when it
@@ -8990,7 +9004,11 @@ function typCard(t, briefs) {
       ? `<a class="pill good" href="#/launch?brief=${encodeURIComponent(b.name)}&families=${encodeURIComponent(t.name)}&tier=screen" title="Screen ${esc(t.name)} on ${esc(b.name)}">▶ ${esc(b.name)}</a>`
       : `<span class="pill" title="${esc(c.reason || "disabled")}" style="opacity:0.55">${esc(b.name)}</span>`;
   }).join(" ");
+  const fitCount = briefs.filter(b => ((t.compat || {})[b.name] || { ok: true }).ok && !t.disabled).length;
   const hasProf = (t.results || []).some(r => r.profile);
+  const previewOnly = t.preview_only
+    ? ` <span class="pill" style="font-size:0.66rem" title="bridge geometry: the sandbox preview runs through the cell's own CLI; a search must be launched there, not by the stock campaign path">preview only</span>`
+    : "";
   // The whole card opens the typology's shape sandbox (owner ask 2). The affordance is an
   // honest small link (works without the click handler, keeps its own href); the card itself
   // is focusable + keyboard-activatable, and every existing link/button inside still wins.
@@ -8999,14 +9017,14 @@ function typCard(t, briefs) {
     <div class="typ-head">
       <div><div class="typ-name">${typologyTipHtml(t)}</div>
         <a class="typ-open" href="#/typology/${esc(t.name)}" title="open the shape sandbox for this typology">open sandbox →</a>
-        <div class="muted typ-meta">${esc(t.symmetry === "axisymmetric" ? "axisymmetric" : "H/V (different planes)")} · ${t.n_knobs} shape parameters · screen ${t.budget.screen} / compare 2 × ${t.budget.compare} evals${morphPill(t)}</div></div>
-      ${hasProf ? `<svg class="typ-prof" data-name="${esc(t.name)}" aria-label="best design cross-section"></svg>` : `<div class="typ-prof empty muted">no solved design yet</div>`}
+        <div class="muted typ-meta">${esc(t.symmetry === "axisymmetric" ? "axisymmetric" : "H/V (different planes)")} · ${t.n_knobs} shape parameters · screen ${t.budget.screen} / compare 2 × ${t.budget.compare} evals${morphPill(t)}${previewOnly}</div></div>
+      ${hasProf ? `<svg class="typ-prof" data-name="${esc(t.name)}" aria-label="best design cross-section"></svg>` : `<div class="typ-prof empty muted">${t.preview_only ? "no solved design yet - open the sandbox for the live seed preview" : "no solved design yet"}</div>`}
     </div>
     <p class="typ-desc">${esc(t.description || "")}</p>
     ${typologyChipsHtml(t.name)}
     ${res ? `<div class="tbl-wrap"><table class="compact"><thead><tr><th>Brief</th><th>Tier</th><th class="r">Rank</th><th class="r">Score</th><th class="r">W×H×D mm</th></tr></thead><tbody>${res}</tbody></table></div>`
           : `<p class="muted" style="margin:0">Not run in any campaign yet.</p>`}
-    <details class="typ-fits-wrap"><summary class="muted">Screen on a brief <span class="mono">(${briefs.filter(b => ((t.compat || {})[b.name] || { ok: true }).ok && !t.disabled).length} of ${briefs.length} fit)</span></summary>
-      <div class="typ-fits">${fits}</div></details>
+    <details class="typ-fits-wrap"><summary class="muted">${t.preview_only ? "Preview / launch" : "Screen on a brief"} <span class="mono">${t.preview_only ? "preview only - launch via its own CLI" : `(${fitCount} of ${briefs.length} fit)`}</span></summary>
+      <div class="typ-fits">${t.preview_only ? `<p class="muted" style="margin:0">This bridge cell is previewable in the sandbox; its search must be launched through its own geometry CLI (see the description).</p>` : fits}</div></details>
   </article>`;
 }

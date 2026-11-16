@@ -6,6 +6,39 @@ and run rows; `gui/study_index.py` discovers/routes study registries (night arms
 `runs/studies`); `gui/static/study_charts.js` renders them through `charts.js`;
 `gui/static/compare_methods.js` renders `tools/analysis/specs/bo_*.yaml`; `gui/study_queue.py` writes a night file (never launches) and `gui/study_child.py` clones a parent spec with a child policy. Design and evidence:
 [BO GUI design](research/BO_GUI_DESIGN_2026-11-15.md).
+Section-reference relief extension: `tools/geometry/section_pucker.py` deforms only axial
+mouth development and preserves the frozen parent geometry at zero amplitudes;
+`section_pucker_cli.py` supplies independent versioned replay/meshing/search dispatch.
+`build_section_pucker_page.py` publishes seeds and sampled-bound evidence. Configs:
+`examples/typologies/section_pucker_2026-11-15/`; tests: `test_tools_section_pucker.py`.
+
+
+Section-based horn experiment: tools/geometry/crowe_panel.py and crowe_panel_cli.py
+provide the separate section-constrained surface and explicit body; plot_crowe_sections.py
+plots generated cuts against source readings. Reference table lives in
+examples/prototypes/rolled_rect_2026-11-15/crowe_section_reference.yaml; recipe identity covers it.
+Width, height and depth scale the digitized sections independently; the swept-H construction needs
+depth <= 0.57 x width (0.66 x at h_depth_scale 1.1). Home-sized searchable cell:
+`examples/typologies/home_landscape_2026-11-15/hl__crowe_panel_home_v7.yaml` (search and verify via crowe_panel_cli.py).
+Rectangular R-OSSE rolled mouth (2026-11-15): `tools/geometry/rosse_rect.py` evaluates Magnus's R-OSSE
+(`hornlab_mesher.profile_formulas.profile_points`) once per azimuth with a superellipse mouth R(p) and H/V coverage a(p);
+`rosse_rect_cli.py` rebinds the rolled_rect bridge (search / verify / shape-check / preflight / verify-night). Cell
+`hl__rosse_rect_cd_v7`. Study: `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md`.
+GUI bridge preview (2026-11-15): `tools/geometry/gui_preview.py` installs exactly one bridge in a fresh process and
+calls the normal GUI preview; `hornlab_search/gui/data.py::_bridge_preview` routes the three bridge rows kinds
+(`rosse_rect`, `rolled_rect_pucker`, `crowe_panel`). The 8 stock-loadable home cells are in
+`examples/catalog.yaml`; the 3 bridge cells are preview-only entries in `examples/catalog.gui.yaml` (launch stays
+disabled because the stock campaign cannot materialize the custom rows kind). Test:
+`tests/test_gui_bridge_preview.py`.
+
+
+Rolled-rectangle experiment (2026-11-15): `tools/geometry/rolled_rect.py` defines the original
+point-grid surface; `rolled_rect_cli.py` supplies opt-in, versioned process-local dispatch into
+the existing pipeline; `verify_rolled_rect_night.py` preserves that entry point for serial
+verification; `build_rolled_rect_page.py` publishes the geometry gallery. Configs:
+`examples/typologies/rolled_rect_2026-11-15/`; geometry-only recipes:
+`examples/prototypes/rolled_rect_2026-11-15/`. No default generator/solver changes.
+
 
 GUI viz kit (2026-11-14): `gui/static/charts.js` exports `catColor`/`CAT_N`, `fmtSmart`,
 `fmtLogTick`, `logNiceLimits`, `sparkline`, `stackBarHtml`, `isobarLegendHtml`, `globePlot` and a
@@ -15,7 +48,8 @@ self-redrawing `chart()` (`square` option); `app.js::brk()` wraps ids; tokens `-
 Study execution (scalar, turbo, pareto): `studies/production.py` bridges immutable packages to the
 existing evaluator in an owned serial worker; `tools/analysis/study_cohort.py`
 prepares task-specific canonical v4/v7 evidence without solving. See the
-[runbook](BAYESIAN_STUDIES_RUNBOOK.md). `bo/data.py::canonical_design` reuses the
+[runbook](BAYESIAN_STUDIES_RUNBOOK.md). `bo/data.py` accepts history rows with `morph_target` 0 (no morph) or 1 (rectangle), where the dropped
+`morph_exponent` is inert. `bo/data.py::canonical_design` reuses the
 production links and throat-coupling transformation for all Bayesian geometry.
 
 S8 additions (2026-11-13): `tools/analysis/geometry_descriptors.py` resolves Design-only
@@ -107,6 +141,7 @@ bempp_cpu) → `metrics` (beamwidth, ripple, DI, impedance) → `objective` (sca
 | `tools/review/` | Builds the self-contained review page (`build_review_data.py`, `review_template.html`, `assemble.py`). |
 | `tools/loudness_report.py` | Zero-GPU horn loudness and horn x driver tables over stored runs (`--run/--night/--cells-csv`, `--top`, `--driver` repeatable, `--md/--csv`): output gap at f0, loaded-from frequency, throat W x H vs exit, sensitivity 2.83 V / 1 W, excursion, max SPL, efficiency. |
 | `tools/shape_check.py` | CPU mesh-only check of configs before GPU time (safe during a night; never calls the CLI dry-run): generator refusal, dofs vs screen cap, mouth W x H + depth vs the brief envelope, driver coupling plane (mesh tag 2) vs exit; `--brief`, `--mode`, `--save-mesh`, `--geometry-only`; exit 1 on any failure. Skill: `hornlab-shape-check`. |
+| `tools/search_preflight.py` | Search-economy gate before queueing (2026-11-14): seed-in-box (catches the silent `DesignSpace.normalize()` clip), nested-incumbent headroom, prior top-k spread -> recommended sigma + chi-square expected hits, `--samples N` uniform box probe through the real generator/mesher (refusal fraction/kinds, labelled as an upper bound away from the seed), generated-family `grid.knobs` history fallback, graded-penalty inertness, and `--ab` matched-pair / inactive / binding-key / added-region attribution. Derived numbers only; exit 1 on hard faults, `--strict` promotes warnings. Skill: `hornlab-search-economy`. Tests: `tests/test_tools_search_preflight.py`. |
 | `tools/render/render_views.py` | Horn view renders (pyvista; run with `%LOCALAPPDATA%/hornlab/vizenv`, outside the repo): targets `label=PATH` (mesh.msh, design dir, run dir -> best), `--views a,b,c,s,u`, `--color`; mirrors quarter/half meshes; one plotter per view. Skill: `hornlab-render`. |
 | `tools/render/compose.py` | Layouts from those renders (.venv): `stack` (owner's card: two views, then H and V dispersion full width), `card`, `sheet`; `--loudness` adds output gap / loaded-from / coupling check. |
 | `tools/render/top2_pick.py`, `top2_sheet.py` | Pick the best 2 designs per typology from every night summary (`scratch/top2/picks.json`) and build per-typology sheets (two stack cards + the #1 frequency response). Run from the repo root after render_views/compose into `scratch/top2/`. |
@@ -114,14 +149,14 @@ bempp_cpu) → `metrics` (beamwidth, ripple, DI, impedance) → `objective` (sca
 | `tools/cad/plughorn.py` morph layer | `m_*` keys (0 = off) -> `resolve_morph()` derives the raw dimensions from horn-theory levers (compression ratio, wall angles, mouth corner, roll-out, axe head relative to the horn, plate margin, bowl from cone); `derived()` adds `theory()` diagnostics (K-law pattern control, mouth cut-off, front-chamber cut-off, path spread). |
 | `tools/cad/sat_dump.py` | Reads the ACIS body of a DXF 3DSOLID (DWG -> DXF R2000 via the ODA File Converter in `third_party/oda`, local only) and dumps vertices / edges / faces to JSON for studying reference CAD. |
 | `tools/render/cad_edges.py`, `render_lines.py` | Drawing-style renders: true CAD edges (project venv) drawn over the BEM mesh (viz env): front (orthographic), 3/4, section. |
-| `tools/night_queue/` | `queue.ps1` (several night files back to back, keep-awake, `-Cutoff`, `-WaitPid/-WaitMatch` on a live runner) + `launch_detached.ps1` (WMI launch outside the session's job object). `verify_night_jobs.py`: verify the top-N of search jobs that ran earlier in the same night (reads the night's `summary.jsonl` for run dirs). Skill: `hornlab-night-queue`. |
+| `tools/night_queue/` | `queue.ps1` (several night files back to back, keep-awake, `-Cutoff`, `-WaitPid/-WaitMatch` on a live runner) + `launch_detached.ps1` (WMI launch outside the session's job object). `verify_night_jobs.py`: verify the top-N of search jobs that ran earlier in the same night (reads the night's `summary.jsonl` for run dirs). `cut_jobs.ps1`: kill named jobs of an already-running night as they start (the runner reads a night file once). Skill: `hornlab-night-queue`. |
 | `tools/cloud/` | RunPod-first cloud GPU path (2026-11-02): `runpod_ctl.py` (create/status/ssh/stop/terminate), `bootstrap_linux.sh`, `run_job.sh` (force-clear hosts → CLI with explicit `beat_cuda` → verified shutdown → `runs/cloud_job_*.json`), `runpod_env.example`. Runbook: `docs/CLOUD_GPU_RUNBOOK.md`. |
 | `tools/night_status.py` | Read-only two-lane night status: per-lane lock holders (alive/stale), the running job per lane from the queue logs, its run-dir row count and newest-row age, ALERT when a lane is quiet > 30 min; queue tails, finished jobs, best designs per brief. |
 | `tools/calibration/plan_calibration.py` | P0 calibration night generator (2026-11-12, group C): top-N finalists -> 3-6-line `extends:` overlays in `examples/calibration/<date>/` -> runnable night YAML in the runner format (default `--top 20`). |
 | `tools/calibration/compare_calibration.py` | Calibration verdicts (group C): per-aspect max |delta| vs Re z +-0.03 / BW +-2 deg / DI +-0.2 dB, Spearman screen-vs-verify, verify-J-only finalist ranking; writes `compare.json` + `COMPARE.md`. |
 | `tools/analysis/` (package) | Day-plan Group A offline analysis toolkit (schema: `tools/analysis/schema.md`; read-only over run dirs, outputs to `--out`): `_common.py` (ndjson/config readers, top-decile, best-so-far curve, refusal windows, spearman/bootstrap, JSON writer with allow_nan=False), `convergence.py` (A.1 best-so-far vs new-valid-eval index), `seed_variance.py` (A.2 seed groups, spreads, bootstrap CI, ECDF, 2026-10-23 verdict rule), `sensitivity.py` (A.3 Spearman + sklearn surrogate permutation importance), `links.py` (A.4 top-decile knob pairs -> Group B `links:` + CMA covariance eigen-directions), `walls.py` (A.5 bound walls -> narrow/widen proposals), `ab_compare.py` (A.6 equal-budget A/B), `lane_parity.py` (A.7 CP-7b GPU/CPU 0.2 dB gate; pooled `--pair` mode), `term_balance.py` (A.9 share of J per term + raw-unit top decile), `fidelity.py` (A.10 screen-vs-verify bias), `report_day.py` (A.8 one YAML spec -> one REPORT.md; specs/day_2026-11-12.yaml shipped). bo-study-v1.1 additions: `offline_scores.py` (R0), `catalog.py`/`cohorts.py` (S0 census + native-only cohort groups), `parameter_activity.py`/`geometry_effects.py` (B2 activity ledger + canonical final-surface bridge), `parameter_study.py` (M1 parameter/effect/score artifact), `source_fidelity.py` (M1 source/DI/verify-pairing cards), `bo_sensitivity.py` (M2 subset/noise/pool diagnostics + real-cohort immutable proposal; descriptive unless independent groups exist), `cache_producer_audit.py` (S2 read-only, bounded, deterministic producer-evidence/caller inventory + opt-in rollout/rollback proposal; never mutates a cache), `surrogate_validation.py` (S7 advisory kNN surrogate validation: chronological leak-checked split, calibration/coverage, OOD fallback, resume-safe; the default path refuses unsupported objective versions, and the v4-only `--advisory-stored-j` mode treats J as an exact stored label that needs one canonical `score_spec` plus label evidence), `seed_pack.py` (S5 diverse feasible exemplar selection; opt-in `--config-roundtrip` + advisory `local_search` from catalog records: greedy max-min diversity, full provenance, hash-identity round-trip, no fabricated warm starts; tested in `tests/test_tools_analysis_seed_pack.py`). |
 | `tools/analysis/hifi_rescore.py` | Offline DSP-aware / passive hi-fi re-score of stored designs (2026-11-14): CTA-2034-style LW / ER / SP / PIR from each `response.npz`, non-EQ-able terms (seat spread, XO spread, PIR-LW shape, LW roughness) + passive `lw_shape`; J_dsp = J_v7 - flat/flat_cv + calibrated hi-fi terms; `--verify` reads `<run>/verify`. Evidence: `docs/research/ONAXIS_WEIGHTING_2026-11-14.md`. Tests: `tests/test_tools_analysis_hifi_rescore.py`. |
-| `tools/bo_compare/prepare_study.py` | Prepares ONE BoTorch study package (`--policy scalar/turbo/pareto`, default scalar) for the matched BO-vs-CMA campaign (2026-11-15): task HOME_SEED5678, explicit cohort dir (built with `tools/analysis/study_cohort.py --run-id` so earlier studies cannot leak in), per-arm policy seed, explicit `comparison-60` budget profile (`hornlab_search/studies/package.py` BUDGET_PROFILES; `baseline` = the frozen 18+6 default). Run with the Bayesian interpreter. Plan: `docs/queue/BO_VS_CMA_PLAN_2026-11-15.md`. Tests: `tests/test_studies_budget_profiles.py`, `tests/test_study_cohort_intake.py`. |
+| `tools/bo_compare/prepare_study.py` | Prepares ONE BoTorch study package (`--policy scalar/turbo/pareto`, default scalar) for the matched BO-vs-CMA campaign (2026-11-15): task HOME_SEED5678, explicit cohort dir (built with `tools/analysis/study_cohort.py --run-id` so earlier studies cannot leak in), per-arm policy seed, explicit `comparison-60` budget profile (`hornlab_search/studies/package.py` BUDGET_PROFILES; `baseline` = the frozen 18+6 default). Run with the Bayesian interpreter. `--task` picks a registered task; `--min-rows` (default 100) refuses a cohort with too few usable training rows (owner rule 2026-11-15). Plan: `docs/queue/BO_VS_CMA_PLAN_2026-11-15.md`. Tests: `tests/test_studies_budget_profiles.py`, `tests/test_study_cohort_intake.py`. |
 | `tools/analysis/v8_rescore.py` | Offline v8 proposal re-score (day group G): read-only over dataset shards via gate_audit.parse_stored_row; re-scores v4/v6/v7 + v8 (calibrated tolerances, hard-refusal gates); per-class Kendall tau + top-20 overlap; JSON+MD to --out. |
 | `tools/night_report.py` | Per-lane morning report from `summary.jsonl` + run dirs ([measured]/[inferred]): jobs, exits, evals, valid/refused, best J, evals/hour, VRAM peaks, first error lines (D.4, 2026-11-12). |
 | `tools/data/merge_lane_dataset.py` | Parity-gated merge of `dataset_cpu` records into `dataset/` (D.3, 2026-11-12): dry run by default, `provenance.lane: "cpu"` tag, backup + atomic writes, idempotent; refuses without a recognised A.7 PASS. |
@@ -170,3 +205,7 @@ bempp_cpu) → `metrics` (beamwidth, ripple, DI, impedance) → `objective` (sca
 | `tools/analysis/acoustic_v2_report.py` | Rev2 zero-BEM v2 analysis of a night's stored responses; matched arm vs control vs fidelity noise floor; RESULTS.json + DECISION.md. |
 
 - `tools/analysis/mesh_fidelity.py`: read-only per-physical-tag edge stats and `mesh_fidelity_status` (plan A4, 2026-11-13).
+
+## Rolled readiness audit tooling (2026-11-15)
+
+`docs/research/typologies/audit_2026-11-15/` contains reproducible source-equation, domain, mesh topology, offline objective, spiral mock/resume and evidence-packaging scripts. They are research tooling, not production generators. `docs/queue/rolled_readiness_2026-11-15/reviewed_job.py` is an additive fail-closed queue gate;26 frozen configs and matching entry points are recorded in admission.json. See that packet's README before use; no full-search admission granted.

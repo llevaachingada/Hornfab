@@ -1,0 +1,77 @@
+# Section-constrained reconstruction; original Crowe CAD/equation not reproduced.
+# Mandatory entry point: tools/geometry/crowe_panel_cli.py
+name: rr__crowe_panel_es600_v7
+family: FREEFORM
+brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
+generator:
+  name: grid
+  rows:
+    type: crowe_panel
+  seed_policy: explicit
+  span: quarter
+  n_phi: 49
+  n_s: 96
+  wall_thickness_mm: 3.0
+seed_params:
+  g_width_mm: 417.0
+  g_height_mm: 203.0
+  g_depth_mm: 198.0
+  g_h_depth_scale: 1.0
+  g_crown_mm: 20.0
+  g_throat_blend_mm: 20.0
+  g_junction_power: 32.0
+bounds:
+  g_width_mm:
+    lo: 417.0
+    hi: 417.0
+    search: false
+  g_height_mm:
+    lo: 203.0
+    hi: 203.0
+    search: false
+  g_depth_mm:
+    lo: 190.0
+    hi: 206.0
+  g_h_depth_scale:
+    lo: 0.97
+    hi: 1.03
+  g_crown_mm:
+    lo: 16.0
+    hi: 24.0
+  g_throat_blend_mm:
+    lo: 20.0
+    hi: 20.0
+    search: false
+  g_junction_power:
+    lo: 32.0
+    hi: 32.0
+    search: false
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 6000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+  rear_res_factor: 1.5
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.15
+  seed: 1234
+  budget: 32
+  popsize: 8
+  tolfun: 0.001
+  infeasible_penalty: flat
+description: Section-constrained ES-600 visual reconstruction; separately measured
+  H/V profiles, crowned sweep and solid body; original inferred construction, acoustics
+  unmeasured

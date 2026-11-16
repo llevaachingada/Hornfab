@@ -1,0 +1,5 @@
+night: rolled_review_spiral_30x2_2026-11-15 lane=gpu (2 job(s))
+  1. spiral_s1234 [command] timeout=3600s
+     argv: .venv/Scripts/python.exe docs/queue/rolled_readiness_2026-11-15/reviewed_job.py --cell hl__rolled_es_spiral_v7 --seed 1234
+  2. spiral_s5678 [command] timeout=3600s
+     argv: .venv/Scripts/python.exe docs/queue/rolled_readiness_2026-11-15/reviewed_job.py --cell hl__rolled_es_spiral_v7 --seed 5678

@@ -1,0 +1,7 @@
+18:21:23 INFO    hornlab_search.solve.worker: worker beat_cuda warmed in 13.70 s
+18:21:54 INFO    hornlab_search.solve.worker: beat_cuda first solve: 29.64 s (host pid 42524)
+18:21:54 INFO    hornlab_search.search.evaluate: eval 2aa7e67a9aa0 J=29.9136 mesh=0.8s solve=29.6s dofs=5277 cached=False
+
+
+  terms (raw): cov=5.844  rip=0.04145  di=4.976  dislope=11.31  flat=0.7676  load=0.5886  penalty=0  total J=29.9136  n_nan=0  DI source=balloon
+run OK: seed J=29.9136, 5277 dofs, solve 29.6 s; output scratch\2026-11-15_readiness\spiral_acoustics\epw8\runs\20261115T232108Z-screen-efd5fe

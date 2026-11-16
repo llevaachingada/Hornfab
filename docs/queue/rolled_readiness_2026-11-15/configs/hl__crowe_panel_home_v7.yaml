@@ -1,0 +1,73 @@
+name: hl__crowe_panel_home_v7
+family: FREEFORM
+brief_file: C:\Users\hunte\Hrns\hornlab-search\docs\queue\rolled_readiness_2026-11-15\briefs\7d7d2d0cf048.yaml
+generator:
+  name: grid
+  rows:
+    type: crowe_panel
+  seed_policy: explicit
+  span: quarter
+  n_phi: 49
+  n_s: 96
+  wall_thickness_mm: 3.0
+seed_params:
+  g_width_mm: 560.0
+  g_height_mm: 280.0
+  g_depth_mm: 270.0
+  g_h_depth_scale: 1.0
+  g_crown_mm: 26.0
+  g_throat_blend_mm: 20.0
+  g_junction_power: 32.0
+bounds:
+  g_width_mm:
+    lo: 480.0
+    hi: 590.0
+  g_height_mm:
+    lo: 220.0
+    hi: 420.0
+  g_depth_mm:
+    lo: 170.0
+    hi: 300.0
+  g_h_depth_scale:
+    lo: 0.9
+    hi: 1.1
+  g_crown_mm:
+    lo: 10.0
+    hi: 40.0
+  g_throat_blend_mm:
+    lo: 20.0
+    hi: 20.0
+    search: false
+  g_junction_power:
+    lo: 16.0
+    hi: 48.0
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 10000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+  rear_res_factor: 1.5
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.2
+  seed: 1234
+  budget: 30
+  popsize: 8
+  tolfun: 0.001
+  infeasible_penalty: flat
+  max_attempts: 45
+description: 'HOME: Crowe ES-600 section family (digitized H/V meridians, crowned
+  sweep, solid body) scaled into the 600 x 480 x 480 home envelope; size, depth ratio,
+  crown and corner junction searched'

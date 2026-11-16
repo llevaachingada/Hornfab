@@ -359,3 +359,57 @@ entries:
     group: cone
     symmetry: full
     description: Evo-7SH topology with the 14 morph knobs on, 12-inch cone (the cone size is an assumption until measured)
+
+  # ---- Home landscape cells (home_landscape_2026-11-15) ----
+  # The landscape 80 H x 50 V / 700 Hz research cells that run through the stock
+  # generator/CLI path. The three bridge cells (rosse_rect, rolled_rect, crowe_panel) REQUIRE
+  # their own process-local entry point (tools/geometry/{rosse_rect,rolled_rect,crowe_panel}_cli.py);
+  # they are listed for the GUI in examples/catalog.gui.yaml instead, so `--families all` never
+  # sends them to a stock search that cannot materialize them.
+  - name: hl__ext_throat_hvlaw_v7
+    config: typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml
+    group: home
+    symmetry: hv
+    description: HOME landscape OSSE + extended throat with a per-direction cosine wall-angle law; the BoTorch home task (8 searchable knobs)
+
+  - name: hl__ath_core_petal_hvlaw_v7
+    config: typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml
+    group: home
+    symmetry: hv
+    description: HOME landscape ATH CORE-style OSSE, cosine H/V wall-angle law plus gentle superformula petals; no mouth morph
+
+  - name: hl__osse_rrect_morph_v7
+    config: typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml
+    group: home
+    symmetry: hv
+    description: HOME landscape ATH-style smooth OSSE morphed to a rounded-rectangle superellipse mouth, landscape by construction
+
+  - name: hl__lecleach_iwata_ar_landscape_v7
+    config: typologies/home_landscape_2026-11-15/hl__lecleach_iwata_ar_landscape_v7.yaml
+    group: home
+    symmetry: hv
+    description: HOME landscape verified Le Cleac'h / Iwata aspect-ratio rows march from a round throat to a landscape mouth (4 knobs)
+
+  - name: hl__es_style_rollback_v7
+    config: typologies/home_landscape_2026-11-15/hl__es_style_rollback_v7.yaml
+    group: home
+    symmetry: hv
+    description: HOME landscape Crowe ES-style exponential rollback on the verified Iwata AR rows; deep rollback, roughly 2:1 mouth
+
+  - name: hl__biradial_es_style_v7
+    config: typologies/home_landscape_2026-11-15/hl__biradial_es_style_v7.yaml
+    group: home
+    symmetry: hv
+    description: HOME landscape Keele Bi-Radial (US4308932A) with a 25 mm OS throat blend and an ES-450-style squarish landscape mouth
+
+  - name: hl__crowe_es_biradial_rr_v7
+    config: typologies/home_landscape_2026-11-15/hl__crowe_es_biradial_rr_v7.yaml
+    group: home
+    symmetry: hv
+    description: HOME landscape Crowe ES-style biradial, round throat to a 2:1 rounded-rectangle mouth with independent H/V hypex walls
+
+  - name: hl__crowe_x_osse_cd_v7
+    config: typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml
+    group: home
+    symmetry: hv
+    description: HOME Crowe ES-style X (bow-tie creases plus curled lip) on a CD OSSE throat; labelled hypothesis shape (rows osse_rollback)

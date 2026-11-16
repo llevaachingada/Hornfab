@@ -34,6 +34,7 @@ _RIPPLE = "docs/research/typologies/MOUTH_RIPPLE_SERRATION_RESEARCH_2026-10-25.m
 _JMLC_VAR = "docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md"
 _JMLC = "docs/research/typologies/JMLC_LECLEACH_RESEARCH_2026-10-25.md"
 _BIRADIAL = "docs/research/typologies/BIRADIAL_IWATA_300_RESEARCH_2026-10-25.md"
+_CROWE = "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md"
 
 _G = "hornlab_search.design.generators.grid."
 
@@ -609,6 +610,445 @@ ROWS_KNOBS: dict[str, KnobDoc] = {
         physical="Changes the printed wall thickness, not the acoustic inner surface.",
         code_ref=_G + "_rows_check_spec",
         doc_ref=(_WP9, "### 2.4 organic/elliptical + X-shape (WP9b)"),
+    ),
+    # ------------------------------------------------ home-landscape rolled / OSSE-X rows
+    # The 2026-11-15 home cells introduced rows kinds whose physical knobs are not part of
+    # the older Salmon/Le Cleac'h families. They are documented here (same prose-only rule:
+    # values still come from the config/grid authorities) so the GUI parameter catalog can
+    # describe them. See docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md.
+    "width_mm": _doc(
+        "width_mm",
+        label="Mouth width",
+        unit="mm",
+        summary="Full mouth width target of a rolled-family rows construction.",
+        detail=("The rolled-rectangle and R-OSSE-rectangle kinds build the mouth from this "
+                "explicit full width and the matching height, not from a K-law. The "
+                "generator measures the built surface against the brief envelope."),
+        formula=None,
+        physical="Moves the horizontal mouth edge; the flare follows the construction.",
+        code_ref=_G + "rows_grid_points",
+        doc_ref=(_CROWE, "## 4. What was built"),
+    ),
+    "height_mm": _doc(
+        "height_mm",
+        label="Mouth height",
+        unit="mm",
+        summary="Full mouth height target of a rolled-family rows construction.",
+        detail=("The vertical partner of the explicit mouth width. The rolled and section "
+                "kinds scale their meridians to this full height; a landscape cell keeps "
+                "the width above the height by construction."),
+        formula=None,
+        physical="Moves the vertical mouth edge; the flare follows the construction.",
+        code_ref=_G + "rows_grid_points",
+        doc_ref=(_CROWE, "## 4. What was built"),
+    ),
+    "depth_mm": _doc(
+        "depth_mm",
+        label="Depth",
+        unit="mm",
+        summary="Axial depth of a rolled-family rows construction.",
+        detail=("Depth scales the section spacing or spiral advance. The Crowe section "
+                "construction additionally requires depth below about 0.57 times the "
+                "mouth width; the generator refuses a section the sweep cannot build."),
+        formula=None,
+        physical="Moves the mouth plane along the axis and changes the flare rate.",
+        code_ref=_G + "rows_grid_points",
+        doc_ref=(_CROWE, "## 4. What was built"),
+    ),
+    "a_h_deg": _doc(
+        "a_h_deg",
+        label="Horizontal coverage half-angle",
+        unit="deg",
+        summary="Horizontal coverage half-angle of a per-azimuth OSSE rows kind.",
+        detail=("The OSSE wall angle is blended per azimuth from the horizontal and "
+                "vertical values. This is the horizontal endpoint; it sets the high-"
+                "frequency horizontal beamwidth in the constant-directivity throat."),
+        formula="a(phi) = a_h cos^2(phi) + a_v sin^2(phi)",
+        physical="Widens or narrows the horizontal beam and the horizontal mouth.",
+        code_ref=_G + "rows_grid_points",
+        doc_ref=(_CROWE, "## 4. What was built"),
+    ),
+    "a_v_deg": _doc(
+        "a_v_deg",
+        label="Vertical coverage half-angle",
+        unit="deg",
+        summary="Vertical coverage half-angle of a per-azimuth OSSE rows kind.",
+        detail=("The vertical endpoint of the same per-azimuth wall-angle blend. It sets "
+                "the vertical high-frequency beamwidth and works together with the "
+                "horizontal value; the mouth follows the walls."),
+        formula="a(phi) = a_h cos^2(phi) + a_v sin^2(phi)",
+        physical="Widens or narrows the vertical beam and the vertical mouth.",
+        code_ref=_G + "rows_grid_points",
+        doc_ref=(_CROWE, "## 4. What was built"),
+    ),
+    "a_diag_deg": _doc(
+        "a_diag_deg",
+        label="Diagonal coverage half-angle",
+        unit="deg",
+        summary="Diagonal wall-angle term of the per-azimuth R-OSSE rows kind.",
+        detail=("Adds a diagonal angle contribution around the azimuth. The study found "
+                "that a positive value fans creases out of the throat, so the shipped "
+                "R-OSSE cell pins it at zero."),
+        formula=None,
+        physical="Raises or lowers the diagonal wall angle; positive values crease the throat.",
+        code_ref=_G + "rows_grid_points",
+        doc_ref=(_CROWE, "## 4. What was built"),
+    ),
+    "k": _doc(
+        "k",
+        label="Throat expansion",
+        unit=None,
+        summary="OS throat-expansion exponent in the OSSE and R-OSSE rows kinds.",
+        detail=("The OS profile's throat term sets how quickly the wall leaves the driver "
+                "exit. The study used it to tune loading near the 700 Hz crossover, with "
+                "the CD throat setting high-frequency coverage."),
+        formula=None,
+        physical="Changes throat loading and how abruptly the flare starts.",
+        code_ref=_G + "rows_grid_points",
+        doc_ref=(_CROWE, "## 4. What was built"),
+    ),
+    "n": _doc(
+        "n",
+        label="Termination exponent",
+        unit=None,
+        summary="OSSE termination exponent; controls where the mouth flare is packed.",
+        detail=("A high exponent packs the flare into the last part of the wall (a flat "
+                "'plate' side view); a lower exponent spreads it into a bowl. The Crowe-X "
+                "study searches this to let the BEM judge the rim shape."),
+        formula=None,
+        physical="Moves the mouth flare earlier or later along the wall.",
+        code_ref=_G + "rows_grid_points",
+        doc_ref=(_CROWE, "## 4. What was built"),
+    ),
+    "q": _doc(
+        "q",
+        label="OSSE shape exponent",
+        unit=None,
+        summary="OSSE profile shape exponent near the mouth.",
+        detail=("A dimensionless OSSE shape constant close to one. It shapes the "
+                "transition toward the mouth termination and is pinned in the shipped "
+                "home cells rather than searched."),
+        formula=None,
+        physical="Subtly rounds or tightens the mouth-side profile.",
+        code_ref=_G + "rows_grid_points",
+        doc_ref=(_CROWE, "## 4. What was built"),
+    ),
+    "s": _doc(
+        "s",
+        label="Termination fraction",
+        unit=None,
+        summary="Fraction of the mouth radius carried by the OSSE termination.",
+        detail=("Together with the termination exponent, this sets how much of the mouth "
+                "flare belongs to the rollback section. Keeping it moderate holds the "
+                "width inside the home envelope."),
+        formula=None,
+        physical="Changes the size and abruptness of the mouth rollback.",
+        code_ref=_G + "rows_grid_points",
+        doc_ref=(_CROWE, "## 4. What was built"),
+    ),
+    "r": _doc(
+        "r",
+        label="Rollback radius",
+        unit="mm",
+        summary="R-OSSE rollback radius of the rolled mouth.",
+        detail=("The R-OSSE meridian bends the wall through this radius before the mouth. "
+                "It sets how tight the roll reads and how much the mouth termination "
+                "turns away from the axis."),
+        formula=None,
+        physical="Tightens or loosens the rolled mouth termination.",
+        code_ref=_G + "rows_grid_points",
+        doc_ref=(_CROWE, "## 4. What was built"),
+    ),
+    "b": _doc(
+        "b",
+        label="Rollback bend",
+        unit=None,
+        summary="Dimensionless R-OSSE bend term of the rolled mouth.",
+        detail=("The bend term changes how the R-OSSE roll distributes curvature between "
+                "the wall and the mouth rim. It is an R-OSSE profile knob, not a physical "
+                "length."),
+        formula=None,
+        physical="Moves curvature between the flare and the rolled rim.",
+        code_ref=_G + "rows_grid_points",
+        doc_ref=(_CROWE, "## 4. What was built"),
+    ),
+    "m": _doc(
+        "m",
+        label="R-OSSE shape exponent",
+        unit=None,
+        summary="Shape exponent of the R-OSSE meridian.",
+        detail=("The R-OSSE exponent controls the profile family between the throat and "
+                "the mouth. The home cell fixes it at the ATH-typical value rather than "
+                "searching it."),
+        formula=None,
+        physical="Rounds or straightens the meridian between throat and roll.",
+        code_ref=_G + "rows_grid_points",
+        doc_ref=(_CROWE, "## 4. What was built"),
+    ),
+    "tmax": _doc(
+        "tmax",
+        label="Rollback extent",
+        unit=None,
+        summary="Normalised extent of the R-OSSE rollback.",
+        detail=("A dimensionless fraction selecting how far the rollback parameter runs. "
+                "A value near one is a full natural roll; lower values stop earlier."),
+        formula=None,
+        physical="Chooses how far the mouth rolls back.",
+        code_ref=_G + "rows_grid_points",
+        doc_ref=(_CROWE, "## 4. What was built"),
+    ),
+    "rect_exponent": _doc(
+        "rect_exponent",
+        label="Rectangle corner exponent",
+        unit=None,
+        summary="Superellipse corner exponent of the rectangular mouth.",
+        detail=("The mouth outline blends a circle and a rectangle with this exponent. "
+                "Higher values square the corners; lower values keep a rounder "
+                "superellipse."),
+        formula=None,
+        physical="Squares off or rounds the mouth corners.",
+        code_ref=_G + "rows_grid_points",
+        doc_ref=(_CROWE, "## 4. What was built"),
+    ),
+    "sf_m": _doc(
+        "sf_m",
+        label="Superformula symmetry",
+        unit=None,
+        summary="Gielis superformula symmetry order of the X-shaped mouth term.",
+        detail=("The Gielis m term sets the rotational symmetry of the superformula "
+                "modulation. The Crowe-X cell fixes it at four, which gives the bow-tie "
+                "crease pattern."),
+        formula=None,
+        physical="Sets the number of superformula lobes around the mouth.",
+        code_ref=_G + "rows_grid_points",
+        doc_ref=(_CROWE, "## 4. What was built"),
+    ),
+    "sf_n1": _doc(
+        "sf_n1",
+        label="Superformula exponent n1",
+        unit=None,
+        summary="First Gielis superformula exponent of the X mouth term.",
+        detail=("The n1 exponent bends the superformula between its radial and angular "
+                "terms. It shapes the X outline together with n2 and the a/b ratio."),
+        formula=None,
+        physical="Changes the curvature of the X lobes.",
+        code_ref=_G + "rows_grid_points",
+        doc_ref=(_CROWE, "## 4. What was built"),
+    ),
+    "sf_n2": _doc(
+        "sf_n2",
+        label="Superformula exponent n2",
+        unit=None,
+        summary="Second Gielis superformula exponent of the X mouth term.",
+        detail=("The n2 partner of n1. A high value straightens the lobe edges; the "
+                "Crowe-X cell fixes it to keep the X lobes crisp."),
+        formula=None,
+        physical="Straightens or softens the X lobe edges.",
+        code_ref=_G + "rows_grid_points",
+        doc_ref=(_CROWE, "## 4. What was built"),
+    ),
+    "sf_ab": _doc(
+        "sf_ab",
+        label="Superformula a/b ratio",
+        unit=None,
+        summary="Anisotropy ratio of the two Gielis superformula radii.",
+        detail=("The a/b ratio stretches the superformula lobes along one azimuth. It is "
+                "searched in the Crowe-X cell to tune how far the X reaches toward the "
+                "mouth corners."),
+        formula=None,
+        physical="Stretches the X lobes horizontally versus vertically.",
+        code_ref=_G + "rows_grid_points",
+        doc_ref=(_CROWE, "## 4. What was built"),
+    ),
+    "sf_amt": _doc(
+        "sf_amt",
+        label="X-crease amplitude",
+        unit=None,
+        summary="Amplitude of the superformula X modulation on the wall.",
+        detail=("Blends the superformula shape into the radius after the start fraction. "
+                "Zero is a plain OSSE wall; larger values deepen the diagonal creases "
+                "toward the four corners."),
+        formula=None,
+        physical="Deepens or removes the diagonal X creases.",
+        code_ref=_G + "rows_grid_points",
+        doc_ref=(_CROWE, "## 4. What was built"),
+    ),
+    "sf_start": _doc(
+        "sf_start",
+        label="X ramp start",
+        unit=None,
+        summary="Normalised wall fraction where the X modulation starts.",
+        detail=("The X term ramps in after this fraction of the wall, so the throat stays "
+                "clean. The shipped cell fixes it at one quarter of the wall."),
+        formula=None,
+        physical="Moves where the diagonal creases begin along the horn.",
+        code_ref=_G + "rows_grid_points",
+        doc_ref=(_CROWE, "## 4. What was built"),
+    ),
+    "wrap_deg": _doc(
+        "wrap_deg",
+        label="Lip wrap angle",
+        unit="deg",
+        summary="How far the curled mouth lip wraps around.",
+        detail=("The tangent-continuous lip is followed through this angle. Larger wraps "
+                "make the thick rolled bead seen on the Crowe-style rim; the search "
+                "bounds keep the lip inside the home envelope."),
+        formula=None,
+        physical="Changes the thickness and depth of the rolled mouth lip.",
+        code_ref=_G + "rows_grid_points",
+        doc_ref=(_CROWE, "## 4. What was built"),
+    ),
+    "decay": _doc(
+        "decay",
+        label="Spiral decay",
+        unit=None,
+        summary="Exponential-spiral decay rate of the rolled-rectangle kind.",
+        detail=("The log-spiral construction advances with this decay. It is the analogue "
+                "of Crowe's exponential ES flare: a lower value keeps the wall turning "
+                "more gradually."),
+        formula=None,
+        physical="Changes how fast the rolled wall narrows with depth.",
+        code_ref=_G + "rows_grid_points",
+        doc_ref=(_CROWE, "## 4. What was built"),
+    ),
+    "depth_h_ratio": _doc(
+        "depth_h_ratio",
+        label="Horizontal depth fraction",
+        unit=None,
+        summary="Share of the rolled-rectangle depth assigned to the horizontal walls.",
+        detail=("The top and bottom lips can sit forward of the side walls. This fraction "
+                "splits the depth between the two; the study used it to match the Crowe "
+                "ES mouth's forward top and bottom."),
+        formula=None,
+        physical="Moves the top and bottom lips relative to the sides.",
+        code_ref=_G + "rows_grid_points",
+        doc_ref=(_CROWE, "## 4. What was built"),
+    ),
+    "pucker_h_mm": _doc(
+        "pucker_h_mm",
+        label="Horizontal pucker",
+        unit="mm",
+        summary="Horizontal-plane inward pucker of the rolled-rectangle rim.",
+        detail=("The pucker relief pulls the mouth rim inward in the horizontal plane "
+                "after the start angle. It is a local rim-shape relief, not a global "
+                "horn radius."),
+        formula=None,
+        physical="Ripples the horizontal rim inward.",
+        code_ref=_G + "rows_grid_points",
+        doc_ref=(_CROWE, "## 4. What was built"),
+    ),
+    "pucker_v_mm": _doc(
+        "pucker_v_mm",
+        label="Vertical pucker",
+        unit="mm",
+        summary="Vertical-plane inward pucker of the rolled-rectangle rim.",
+        detail=("The vertical partner of the rim pucker. Both amplitudes are searched so "
+                "the BEM can judge whether the local rim relief helps or hurts."),
+        formula=None,
+        physical="Ripples the vertical rim inward.",
+        code_ref=_G + "rows_grid_points",
+        doc_ref=(_CROWE, "## 4. What was built"),
+    ),
+    "pucker_start_deg": _doc(
+        "pucker_start_deg",
+        label="Pucker start angle",
+        unit="deg",
+        summary="Roll turn where the rolled-rectangle rim pucker starts.",
+        detail=("The relief is zero before this roll angle and ramps in after it. The "
+                "home cell pins it so the pucker starts near the rim, not on the throat."),
+        formula=None,
+        physical="Moves the pucker onset along the rolled wall.",
+        code_ref=_G + "rows_grid_points",
+        doc_ref=(_CROWE, "## 4. What was built"),
+    ),
+    "rect_turn_deg": _doc(
+        "rect_turn_deg",
+        label="Rectangle transition angle",
+        unit="deg",
+        summary="Roll turn where the rolled-rectangle cross-section becomes rectangular.",
+        detail=("The wall starts from a round throat and transitions to the rectangle at "
+                "this turn. It is independent of the throat turn and must stay above it."),
+        formula=None,
+        physical="Changes where the round throat becomes a rectangular mouth.",
+        code_ref=_G + "rows_grid_points",
+        doc_ref=(_CROWE, "## 4. What was built"),
+    ),
+    "throat_turn_deg": _doc(
+        "throat_turn_deg",
+        label="Throat turn angle",
+        unit="deg",
+        summary="Roll turn used by the round throat blend of the rolled rectangle.",
+        detail=("The throat section is blended from a round driver exit over this turn. "
+                "The generator fixes it in the shipped cell so the coupling plane stays "
+                "round."),
+        formula=None,
+        physical="Changes the length of the round-to-rolled throat transition.",
+        code_ref=_G + "rows_grid_points",
+        doc_ref=(_CROWE, "## 4. What was built"),
+    ),
+    "terminal_deg": _doc(
+        "terminal_deg",
+        label="Terminal roll angle",
+        unit="deg",
+        summary="Final roll turn of the rolled-rectangle mouth.",
+        detail=("The rolled wall is followed to this angle before the mouth is cut. A "
+                "larger terminal angle wraps the lip further around the horn."),
+        formula=None,
+        physical="Rolls the mouth lip further back or stops it earlier.",
+        code_ref=_G + "rows_grid_points",
+        doc_ref=(_CROWE, "## 4. What was built"),
+    ),
+    "crown_mm": _doc(
+        "crown_mm",
+        label="Crown rise",
+        unit="mm",
+        summary="Crown rise of the Crowe section surface between its profiles.",
+        detail=("The section construction crowns the swept surface by this amount so the "
+                "digitised top and bottom sections meet smoothly. It is a surface relief, "
+                "not the mouth radius."),
+        formula=None,
+        physical="Bows the Crowe section surface outward.",
+        code_ref=_G + "rows_grid_points",
+        doc_ref=(_CROWE, "## 4. What was built"),
+    ),
+    "h_depth_scale": _doc(
+        "h_depth_scale",
+        label="H/V depth ratio",
+        unit=None,
+        summary="Horizontal-to-vertical depth ratio of the Crowe section construction.",
+        detail=("The top/bottom and side profiles can be scaled in depth independently. "
+                "The swept-H construction needs a shallow-enough section; the generator "
+                "refuses one the sweep cannot build."),
+        formula=None,
+        physical="Moves the side walls forward or back relative to the top and bottom.",
+        code_ref=_G + "rows_grid_points",
+        doc_ref=(_CROWE, "## 4. What was built"),
+    ),
+    "throat_blend_mm": _doc(
+        "throat_blend_mm",
+        label="Throat blend length",
+        unit="mm",
+        summary="Length of the Crowe section's blend from the round driver exit.",
+        detail=("The digitised section starts at a round 18 mm coupling plane and blends "
+                "into the section contour over this length. The shipped home cell fixes "
+                "it at 20 mm, under the generator's 20 percent-of-depth rule."),
+        formula=None,
+        physical="Changes the length of the round-to-section throat transition.",
+        code_ref=_G + "rows_grid_points",
+        doc_ref=(_CROWE, "## 4. What was built"),
+    ),
+    "junction_power": _doc(
+        "junction_power",
+        label="Corner junction exponent",
+        unit=None,
+        summary="Exponent of the Crowe section's corner junction blend.",
+        detail=("The H and V profile junctions meet through a smooth power blend. A "
+                "higher exponent keeps the junction tighter to the corner; the search "
+                "range lets the BEM judge the crease."),
+        formula=None,
+        physical="Sharpens or softens the section's corner junction.",
+        code_ref=_G + "rows_grid_points",
+        doc_ref=(_CROWE, "## 4. What was built"),
     ),
 }
 

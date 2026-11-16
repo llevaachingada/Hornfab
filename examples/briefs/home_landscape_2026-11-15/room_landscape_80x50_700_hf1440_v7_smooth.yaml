@@ -1,0 +1,81 @@
+# SMOOTH-DIRECTIVITY VARIANT of room_landscape_80x50_700_hf1440_v7 (2026-11-15 study,
+# docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md). Same target, band, envelope, driver, loading and
+# flatness rules; only the three constant-directivity assumptions are relaxed so horns that narrow SMOOTHLY by
+# design (Crowe ES exponential spiral, Le Cleach, exponential) are scored on what a home listener hears:
+#   di_slope_target 0 -> 5 dB/decade (~1.5 dB/oct, a typical well-rated home speaker; flat DI is no longer the goal)
+#   cov tolerance 3 -> 8 and cov_narrow_ratio 2 -> 1 (coverage still scored, narrowing no longer double-penalised)
+#   di weight 0.3 -> 0 (no fixed DI target), distd 0.5 -> 1.0 (a lumpy/jumpy DI is what is penalised instead)
+# Ripple, flatness from the XO up, diagonal, loading stay strict. J values are NOT comparable with the base brief.
+# HOME LANDSCAPE brief (owner direction 2026-11-15). Replaces the portrait-biased room_80x60_700_hf1440_v7 for new work.
+# WHY: the 80x60 home cells were sized with Keele's mouth rule (25.4e6/(angle*f): 454 W x 605 H at 700 Hz), written in
+#   as a 500 x 660 PORTRAIT morph mouth inside a 600 W x 780 H envelope, while every cell had ONE wall angle all
+#   round. The only H/V asymmetry was then the tall mouth, which flares the vertical walls and WIDENS V: across 396
+#   ATH-core designs only 4 could even have W > H and only 27 came out with H wider than V
+#   (Spearman mouth H/W vs beam V/H = +0.55). Owner: "stop making portrait horns".
+# WHAT CHANGED vs room_80x60_700_hf1440_v7 (everything else identical, same driver/room/crossover):
+#   - target 80 H x 50 V (middle of the owner's home range: 60-90 H, 40-60 V);
+#   - envelope LANDSCAPE 600 W x 480 H x 480 deep (780 mm tall was too big);
+#   - NO Keele/K-law mouth sizing anywhere in this brief or its cells: mouth shape is searched or follows the walls;
+#   - vertical coverage counts half (objective.cov_v_weight 0.5; owner: vertical matters less to my ears);
+#   - coverage is a real requirement again: cov weight 1.0, tolerance 3.0 (was 0.6 / 4.0);
+#   - on-axis `flat` is scored from the 700 Hz crossover up (objective.flat_band: scored), not over the woofer's band.
+# DRIVER: FaitalPRO HF1440, 1.4-inch, exit 35.8 mm; f11 at the exit 5,600 Hz -> loaded_hi_hz 5600.
+name: room_landscape_80x50_700_hf1440_v7_smooth
+description: (objective v7) HOME living-room horn, LANDSCAPE 80H x 50V, vertical half-weighted, no K-law mouth, pattern+loading from 700 Hz XO, HF1440 1.4-inch, 600W x 480H x 480D envelope, band 350-8000 Hz
+driver:
+  exit_radius_mm: 18.0
+  exit_angle_deg: 2.0
+envelope:
+  max_mouth_w_mm: 600.0
+  max_mouth_h_mm: 480.0
+  max_depth_mm: 480.0
+symmetry: hv
+source:
+  cap: auto
+target:
+  coverage_h_deg: 80.0
+  coverage_v_deg: 50.0
+  band_lo_hz: 350.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 5.0
+  z_min: 0.5
+  f0_hz: 700.0
+  f0_v_hz: 700.0
+  loaded_hi_hz: 5600.0
+  freq_weights:
+    band_hz:
+      - [2500.0, 5500.0, 2.0]
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.0
+  dislope: 1.0
+  flat: 0.5
+  load: 1.0
+  distd: 1.0
+  diag: 1.0
+  flat_cv: 1.0
+grid:
+  verify_points_per_octave: 6
+  screen_extra_hz: [250, 315, 400, 2573, 3311, 4260]
+objective:
+  version: 7
+  flat_band: scored
+  cov_v_weight: 0.5
+  tolerances:
+    cov: 8.0
+    rip: 1.0
+    di: 0.4
+    dislope: 9.0
+    flat: 1.5
+    load: 0.3
+    distd: 2.0
+    diag: 2.0
+    flat_cv: 1.5
+  cov_narrow_ratio: 1.0
+  cov_below_f0: mask
+  loaded_re_z: 0.5
+  lfp_re_z: 0.2
+  lfp_crossover_ratio: 1.6
+  bw8k_floor: 0.75

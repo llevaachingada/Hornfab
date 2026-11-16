@@ -1,0 +1,47 @@
+# HOME CROWE ES-STYLE EXPONENTIAL-SPIRAL ROLLED RECTANGLE (2026-11-15 study: docs/research/typologies/
+# BIRADIAL_CROWE_STUDY_2026-11-15.md). Crowe's 'ES flare' is an Exponential Spiral (log spiral); the rolled_rect
+# construction (dz/dt = e^-bt cos t, du/dt = e^-bt sin t) is a fair stand-in. The parent pilot cells froze every knob
+# that matters (W/H fixed at the ES-450 drawing, depth +-9%, depth split fixed, wrap fixed) so CMA could only re-score
+# the drawing. Here: mouth W 480-590 > H 260-420, depth 200-380, spiral rate (decay = the ES flare constant) 0.4-1.0,
+# H/V depth split 0.55-1.0 (top/bottom lips forward of the sides, as on the ES), corner exponent 4-14, rectangle
+# transition 45-85 deg, wrap (terminal) 200-275 deg, H/V pucker 0-18 / 0-24 mm. Throat blend turn fixed 25 deg.
+# HONEST LIMIT: the wall leaves the throat axially and keeps turning, so the beam narrows with frequency (as Crowe's own
+# ES polars do: ~90 deg to 7 kHz, ~50 deg above 10 kHz). Score it on v7 AND on the CD-agnostic listening terms.
+# Mandatory entry point: tools/geometry/rolled_rect_cli.py.
+name: hl__rolled_es_spiral_v7
+family: FREEFORM
+brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
+generator:
+  name: grid
+  rows: {type: rolled_rect_pucker}
+  seed_policy: explicit
+  span: quarter
+  n_phi: 49
+  n_s: 96
+  wall_thickness_mm: 3.0
+seed_params: {g_width_mm: 542.0, g_height_mm: 299.0, g_depth_mm: 238.0, g_depth_h_ratio: 0.68, g_decay: 0.7, g_rect_exponent: 12.0,
+  g_rect_turn_deg: 65.0, g_throat_turn_deg: 25.0, g_terminal_deg: 270.0, g_pucker_h_mm: 6.0, g_pucker_v_mm: 8.0, g_pucker_start_deg: 55.0}
+bounds:
+  g_width_mm: {lo: 480.0, hi: 590.0}
+  g_height_mm: {lo: 260.0, hi: 420.0}
+  g_depth_mm: {lo: 200.0, hi: 380.0}
+  g_depth_h_ratio: {lo: 0.55, hi: 1.0}
+  g_decay: {lo: 0.4, hi: 1.0}
+  g_rect_exponent: {lo: 4.0, hi: 14.0}
+  g_rect_turn_deg: {lo: 45.0, hi: 85.0}
+  g_throat_turn_deg: {lo: 25.0, hi: 25.0, search: false}
+  g_terminal_deg: {lo: 200.0, hi: 275.0}
+  g_pucker_h_mm: {lo: 0.0, hi: 18.0}
+  g_pucker_v_mm: {lo: 0.0, hi: 24.0}
+  g_pucker_start_deg: {lo: 55.0, hi: 55.0, search: false}
+mesh: {epw: 6.0, quadrants: '1', dof_cap_screen: 10000, dof_cap_verify: 24000, dof_cap_final: 24000, dof_per_triangle: 0.51,
+  rear_res_factor: 1.5}
+solve: {backend: beat_cuda, distance_m: 10.0, angle_count: 73, balloon: true, balloon_points_screen: 512, balloon_points_verify: 1024,
+  gmres_tol: 1.0e-05, timeout_s: 900, cuda_fused: true}
+# resample_strict + budget_counts: valid: the rolled_rect bridge refuses on the mesh/envelope side, where
+# `graded` is inert (preflight 2026-11-15). Strict mode replaces deterministic refusals so the 96 budget is 96
+# valid solves; error_policy is required by the config schema for this mode.
+search: {algorithm: cma, sigma0: 0.2, seed: 1234, budget: 96, popsize: null, tolfun: 0.001,
+  infeasible_penalty: resample_strict, budget_counts: valid, error_policy: retry_same_then_stop}
+description: 'HOME: Crowe ES-style exponential-spiral rolled rectangle (log-spiral analogue, rolled_rect), every shape knob
+  searchable inside the home envelope; a narrowing (non-CD) horn by design'

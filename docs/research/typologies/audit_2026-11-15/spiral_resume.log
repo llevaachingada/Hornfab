@@ -1,0 +1,21 @@
+
+
+
+
+
+
+
+
+
+
+FIRST {"backend_calls": 5, "strict": {"draws": 5, "valid": 5, "refusals": 0, "told": 4, "stop_reason": "budget", "boundary": {"attempts": 5, "backend_calls": 5, "cached_refusals": 0, "draws": 5, "generation": 1, "n_new": 5, "n_refused_free": 0, "n_valid": 5, "refusals": 0, "replacements": 0, "retries": 0, "scored": 5, "slot": 0, "told": 4, "unknown_attempts": 0, "valid": 5}}}
+
+
+
+
+
+
+
+
+RESUME {"backend_calls_resume": 4, "prefix_unchanged": true, "journal_rows": 9, "dataset_rows": 9, "surface_checks": 9, "best": {"design_hash": "2aa7e67a9aa0", "cold": {"design_hash": "2aa7e67a9aa0", "surface_hash": "58430028507d1c0dc659a2964fdd9b20219ee681a7670c10bde5638fe6f720e0", "inner_shape": [49, 97, 3], "outer_shape": [49, 97, 3]}}, "strict": {"draws": 9, "valid": 9, "refusals": 0, "told": 8, "stop_reason": "budget", "extensions": [{"cap": "draws", "from": 20, "to": 36}, {"cap": "budget", "from": 5, "to": 9}]}}
+SAVED WINNER GUARDS {"digest": "rolled_rect: implementation digest or schema differs from persisted recipe", "driver": "rolled_rect: driver differs from persisted recipe"}

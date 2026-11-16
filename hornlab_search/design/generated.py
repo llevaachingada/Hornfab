@@ -134,6 +134,9 @@ class GeneratedSpace:
         self.gen = dict(gen)
         self.brief = dict(brief)
         self.bounds = dict(bounds)
+        from .generators import rolled_family
+        if rolled_family.is_family_spec(self.gen):
+            rolled_family.validate_search_config(self.gen, seed_knobs, self.bounds, self.brief)
         # Harmonic stop-law knobs are JSON lists of floats (grid rows); every other
         # generator knob is a scalar. Keep both forms (a list must not be float()ed).
         knobs = {}
@@ -210,7 +213,7 @@ class GeneratedSpace:
     def normalize(self, d: Design) -> np.ndarray:
         """Design -> [0,1]^k for a design this space produced (the seed or a denormalized
         vector). Geometry cannot be inverted to knobs, so any other design raises."""
-        knobs = self._knobs_by_hash.get(d.hash())
+        knobs = self.knobs_for(d)
         if knobs is None:
             raise ValueError("GeneratedSpace.normalize: design was not produced by this space "
                              "(generator knobs cannot be recovered from geometry)")
@@ -218,6 +221,19 @@ class GeneratedSpace:
 
     def knobs_for(self, d: Design) -> dict | None:
         k = self._knobs_by_hash.get(d.hash())
+        if k is None:
+            from .generators import rolled_family
+            block = d.params.get('grid') if isinstance(d.params, dict) else None
+            if rolled_family.is_family_spec(block) and rolled_family.is_family_spec(self.gen):
+                rolled_family.resolve_grid(block, self.brief)
+                candidate = block.get('knobs')
+                if not isinstance(candidate, dict) or set(candidate) != set(self.seed_knobs):
+                    raise ValueError('saved rolled-family knob set differs from configured task')
+                rebuilt = Design('FREEFORM', materialize(self.gen, candidate, self.brief))
+                if rebuilt.hash() != d.hash():
+                    raise ValueError('saved rolled-family recipe differs from configured task')
+                k = candidate
+                self._knobs_by_hash[d.hash()] = dict(k)
         return None if k is None else copy.deepcopy(k)
 
     def provenance(self, d: Design) -> dict | None:

@@ -533,6 +533,18 @@ def _config_sources(root: Path) -> list[tuple[str, str, dict | None]]:
             continue
         seen_files.add(rel)
         sources.append((path.stem, rel, None))
+    # GUI-only preview cells: documentation and parameter tips only. They are deliberately
+    # NOT in examples/catalog.yaml (the stock campaign cannot materialize their custom rows
+    # kinds), but the sandbox still needs their knob prose and config identity.
+    gui_catalog_path = examples / "catalog.gui.yaml"
+    if gui_catalog_path.is_file():
+        gui_catalog = yaml.safe_load(gui_catalog_path.read_text(encoding="utf-8")) or {}
+        for entry in gui_catalog.get("entries") or []:
+            rel = f"examples/{Path(str(entry['config'])).as_posix()}"
+            if rel in seen_files:
+                continue
+            seen_files.add(rel)
+            sources.append((str(entry["name"]), rel, {**entry, "gui_only": True}))
     return sources
 
 
@@ -571,7 +583,9 @@ def build_catalog(root: Path) -> dict:
             description = str(entry.get("description") or "")
             brief_tied = entry.get("brief_tied")
             driver_exit = entry.get("driver_exit_mm")
-            source_status = "catalog-brief-tied" if brief_tied else "catalog"
+            gui_only = bool(entry.get("gui_only"))
+            source_status = ("gui-only" if gui_only else
+                             ("catalog-brief-tied" if brief_tied else "catalog"))
 
         knobs = _knob_entries(
             name,
@@ -617,6 +631,7 @@ def build_catalog(root: Path) -> dict:
             "config_path": config_rel,
             "brief_file": brief_rel,
             "source_status": source_status,
+            "preview_only": bool(entry.get("gui_only")) if entry is not None else False,
             "documented": documented,
             "knobs": knobs,
             "knob_names": [k["knob"] for k in knobs],

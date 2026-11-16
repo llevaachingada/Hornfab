@@ -1,0 +1,17 @@
+extends: rr__reference_v7.yaml
+name: rr__pucker_hv_strong_v7
+generator:
+  name: grid
+  rows: {type: rolled_rect_pucker}
+  seed_policy: explicit
+  span: quarter
+  n_phi: 49
+  n_s: 96
+  wall_thickness_mm: 3.0
+seed_params:
+  g_pucker_h_mm: 24.0
+  g_pucker_v_mm: 28.0
+bounds:
+  g_pucker_h_mm: {lo: 24.0, hi: 24.0, search: false}
+  g_pucker_v_mm: {lo: 28.0, hi: 28.0, search: false}
+description: 'Original ATH-influenced four-wall pucker: side ridges 24 mm, upper/lower ridges 28 mm; geometric comparison arm'

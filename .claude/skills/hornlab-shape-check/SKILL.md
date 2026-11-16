@@ -52,3 +52,5 @@ mm per axis) inside the envelope, then run `shape_check.py` on the written confi
 ## Hand-off
 
 Queue with the hornlab-night-queue skill; render with hornlab-render (`--save-mesh` output works directly).
+A geometry that meshes is not yet a search worth running: before the night, run the economy gate in
+`hornlab-search-economy` (`tools/search_preflight.py`) on every new box.

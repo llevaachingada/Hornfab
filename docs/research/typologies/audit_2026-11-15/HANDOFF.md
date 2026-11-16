@@ -1,0 +1,30 @@
+# Next senior: finish admission, preserve this evidence
+
+Read [READINESS.md](READINESS.md) first, then [the updated queue](../../../queue/rolled_readiness_2026-11-15/README.md). Canonical checkout is `C:/Users/hunte/Hrns/hornlab-search`; expected branch `feat/sab-home-2026-11-14`, HEAD `7124902d5296c2943384068f2b740b433e6b2f01`. Refresh Git/process state: substantial concurrent uncommitted GUI/docs/config work exists. No commits or production generator changes were made by this audit. Do not reset, clean, stash or replace original designs.
+
+Owner's final instructions this pass: prioritize `hl__rolled_es_spiral_v7`; ensure it can actually run. A few isolated acoustic diagnostics are authorized where needed; **full searches stay held until the source/objective/geometry is figured out**. No Bayesian work on new typologies. Prefer short≈30-call pilots, two/three seeds. User requested wrap-up due usage; do not redo this audit or re-fetch every source.
+
+Completed: primary Crowe/ATH/source correction;26 configs/600 parameter rows and exact domains;17 historical histories;32 original-score/DI replays with zero delta; explicit raw winding/dihedral audit of7 original meshes;61 native CPU+9 wrapper+5 generic strict-resume tests; dedicated spiral real CMA/refusal/retry mock and actual CPU meshing/journal/resume with9 exact full-surface cold replays. Synthetic data are labeled in `scratch/spiral_resume_synthetic/`; never count them as acoustics.
+
+Two **real**, uncached spiral diagnostics are complete, fresh processes/caches:
+
+- EPW6: `scratch/2026-11-15_readiness/spiral_acoustics/epw6/runs/20261115T231838Z-screen-f9de68`, design `2aa7e67a9aa0`,4500DOFs,J29.915059.
+- EPW8: `scratch/2026-11-15_readiness/spiral_acoustics/epw8/runs/20261115T232108Z-screen-efd5fe`, same design/solve hash,5277DOFs,J29.913599. Max DI change0.008153dB; H/V width0.12382/0.06135deg. Only spatial settings changed; two meshes do not establish convergence. Raw responses/meshes remain local; text evidence and hashes in `SPIRAL_ACOUSTICS.json`, logs and memory-monitor JSON.
+- A third angular-refinement config exists at `scratch/2026-11-15_readiness/spiral_acoustics/spiral_epw8_angular.yaml` but **was not solved**. No need to run it unless the next numerical question justifies it. GPU workers were cleaned after the second solve.
+
+Priority remaining work (senior parent retains physical/objective decisions; Terra for disjoint audits):
+
+1. **Driver/source:** read DRIVER_SOURCE.md. Manufacturer HF1440 combined exit35.8mm does not establish a2-degree cone. Preserve historical18mm/2deg recipes; adopt explicitly labeled idealized source or establish the physical interface/field before claiming a real-driver match. R-OSSE nominal a0 is not automatically its physical limiting tangent; extended throat entrance is separate.
+2. **Objective:** zero slope is a legitimate constancy target, not universal preference. The5dB/dec smooth brief is also unsupported as a universal target, and `distd` penalizes a smooth rise. Current absolute-DI reference13.079574dB; diagonal65deg is a shape prior with different crossing semantics. Select explicit room/system priorities, keep coverage and loading meaningful, and compare offline before any brief copy is approved. Do not swap one unsupported slope for another.
+3. **Body/capability:** acute Crowe junction reproduced, inverted winding not proven. Need role-aware intersection/clearance and true fixed-z area/derivative checks; native section kernels require their own evidence. Spiral is software runnable but shared H/V normalized flare and source/curvature/termination coupling may limit broad optimization. R-OSSE rect is a plausible separate control law, not a Tritonia/Crowe replica. Do not enlarge boxes or freeze useful controls to hide law inadequacy.
+4. **Shared paths:** bridge/direct-helper paths are essential. Spiral-specific resume now tested. Exact strict spiral config cannot simply switch to CMA-ME/MAE; schema refuses that policy. BO materializer rejects generic grids; no BO admission requested. GUI launchable/preview-only is separate from acoustic readiness.
+5. **Queue:**26 frozen configs load; only two guarded spiral pilot jobs are drafted. Inspect admission.json and pilot_HELD.yaml. Reconcile30-call total including retries/verification; current draft has30 valid targets and45 proposal draws. Approve final brief/domain/step/cost only after evidence; update pins and per-cell admission. Never resume E wholesale, never add BO, never launch before explicit campaign release. Third seed9012 is conditional on informative first-two results.
+
+Use [IMPLEMENTATION_SLICES.md](IMPLEMENTATION_SLICES.md): A diagnostics/B body witnesses/C identity can run disjoint; D GUI/E domain follow; F queue last. Those prompts are reviewable future work, not instructions to launch solves. Current partial diagnostic permission supersedes the older blanket hold only for a few isolated checks. Parent must update stale wording before reusing a prompt.
+
+To continue with minimal rediscovery, paste:
+
+```text
+Model: senior high/xhigh; use gpt-6.1-terra high for disjoint code/source audit lanes.
+Continue in C:/Users/hunte/Hrns/hornlab-search. Read docs/research/typologies/audit_2026-11-15/HANDOFF.md then READINESS.md and docs/queue/rolled_readiness_2026-11-15/README.md. Preserve dirty work and all original/reference/pucker variants. The audit and source/equation checks are done; do not restart research wholesale. Finish driver/source and objective decision, full-body/capability gates, and bounded30-call queue accounting. Priority hl__rolled_es_spiral_v7 has passed real seed EPW6/8 diagnostics,62/64 fresh box meshes, real CPU-mesh/synthetic-backend journal/resume and9 full-surface cold replays. These are not full physical readiness. Only a few isolated diagnostic solves are authorized if needed; no full search until gates/release; no Bayesian jobs.26 frozen horn configs and a guarded two-seed spiral queue draft already exist. Work from the saved evidence, finish admission or state the exact blocker, and hand the owner a concrete queue they can review.
+```

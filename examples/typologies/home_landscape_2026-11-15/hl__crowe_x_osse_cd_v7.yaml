@@ -1,0 +1,48 @@
+# HOME CROWE-X ON A CD THROAT (2026-11-15 study, docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md).
+# Crowe's ES look (X creases from the throat to the four corners, bow-tie outline, rolled lip) on the osse_rollback rows:
+# per-azimuth OSSE wall a(phi) = a_h cos^2 + a_v sin^2 (Magnus's profile_points; constant directivity), Gielis
+# superformula X (m 4) ramping in after 25% of the wall, tangent-continuous curled lip. Labelled hypothesis shape,
+# NOT Crowe's (exponential) geometry: his ES flare beams at HF by design (his own ES-600 report: 45 deg -4..-10 dB above
+# 2 kHz); here the CD throat sets HF coverage (a_h 33-40 / a_v 20-28 half-angles ~ the 80 x 50 target; the BO winner
+# uses 38 / 24). Study findings that set this box:
+#  - the fork's round-3 seeds (a_h 24 / a_v 14) were ~48 x 28 deg at HF: too narrow, they only shrank to fit 600 mm;
+#  - OSSE termination n = 4 packs the mouth flare into the last ~20 mm (flat 'plate' side view); n 1.8-3.2 spreads it
+#    into a bowl; the flare adds ~0.9 s L (n 2) vs 0.64 s L (n 4), so s 0.2-0.45 keeps W <= 600;
+#  - the 'chunky bar' rim is the lip: r_lip >= 30 with wrap >= 140 (old seeds) is a thick bar and overshoots W;
+#    lip 8-30 mm / wrap 80-160 deg are searched so the BEM decides whether a big roll pays.
+# Fixed for the look: sf_m 4, sf_n1 1.8 (between round and star), sf_n2 7 (straight edges), sf_start 0.25, k 1, q 0.996.
+name: hl__crowe_x_osse_cd_v7
+family: FREEFORM
+brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
+generator:
+  name: grid
+  rows: {type: osse_rollback}
+  n_phi: 25
+  n_s: 40
+  wall_thickness_mm: 3.0
+  seed_policy: explicit
+  span: quarter
+seed_params: {g_a_h_deg: 38.0, g_a_v_deg: 24.0, g_k: 1.0, g_L_mm: 240.0, g_s: 0.35, g_n: 2.0, g_q: 0.996, g_r_lip_mm: 25.0,
+  g_wrap_deg: 130.0, g_sf_m: 4, g_sf_n1: 1.8, g_sf_n2: 7.0, g_sf_ab: 0.8, g_sf_amt: 0.3, g_sf_start: 0.25}
+bounds:
+  g_a_h_deg: {lo: 33.0, hi: 40.0}
+  g_a_v_deg: {lo: 20.0, hi: 28.0}
+  g_k: {lo: 1.0, hi: 1.0, search: false}
+  g_L_mm: {lo: 200.0, hi: 260.0}
+  g_s: {lo: 0.2, hi: 0.45}
+  g_n: {lo: 1.8, hi: 3.2}
+  g_q: {lo: 0.996, hi: 0.996, search: false}
+  g_r_lip_mm: {lo: 8.0, hi: 30.0}
+  g_wrap_deg: {lo: 80.0, hi: 160.0}
+  g_sf_m: {lo: 4, hi: 4, search: false}
+  g_sf_n1: {lo: 1.8, hi: 1.8, search: false}
+  g_sf_n2: {lo: 7.0, hi: 7.0, search: false}
+  g_sf_ab: {lo: 0.7, hi: 0.9}
+  g_sf_amt: {lo: 0.15, hi: 0.38}
+  g_sf_start: {lo: 0.25, hi: 0.25, search: false}
+mesh: {epw: 6.0, quadrants: '1', dof_cap_screen: 24000, dof_cap_verify: 24000, dof_cap_final: 24000, dof_per_triangle: 0.51}
+solve: {backend: beat_cuda, distance_m: 10.0, angle_count: 73, balloon: true, balloon_points_screen: 512, balloon_points_verify: 1024,
+  gmres_tol: 1.0e-05, timeout_s: 900, cuda_fused: true}
+search: {algorithm: cma, sigma0: 0.2, seed: 1234, budget: 96, popsize: null, tolfun: 0.001, infeasible_penalty: graded}
+description: 'HOME: Crowe ES-style X (bow-tie creases, rolled lip) on a constant-directivity OSSE throat; labelled hypothesis
+  shape, not Crowe geometry'

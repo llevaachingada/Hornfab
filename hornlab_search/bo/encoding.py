@@ -193,7 +193,29 @@ class ActiveProjection:
         from ..design.generated import GeneratedSpace
 
         if isinstance(self.space, GeneratedSpace):
-            knobs = self.space.knobs_for(design)
+            try:
+                knobs = self.space.knobs_for(design)
+            except Exception as exc:
+                raise HashMismatchError(f"persisted generator recipe refused: {exc}") from exc
+            # A trusted persisted grid contains the complete generating knobs.  Rebuild it
+            # against this space and brief, rather than assuming a hash cache survived a
+            # process restart.  The resolver checks the implementation and driver binding.
+            params = getattr(design, "params", None)
+            block = params.get("grid") if isinstance(params, dict) else None
+            if isinstance(block, dict):
+                from ..design.generators import rolled_family
+            if isinstance(block, dict) and rolled_family.is_family_spec(block):
+                persisted = block.get("knobs")
+                if not isinstance(persisted, dict) or set(persisted) != set(self.space.seed_knobs):
+                    raise HashMismatchError("persisted generator knob set differs from the task")
+                try:
+                    rolled_family.resolve_grid(block, self.space.brief)
+                    rebuilt = self.space.design_from_knobs(dict(persisted))
+                except Exception as exc:
+                    raise HashMismatchError(f"persisted generator recipe refused: {exc}") from exc
+                if rebuilt.hash() != design.hash():
+                    raise HashMismatchError("persisted generator recipe differs from the task")
+                knobs = persisted
             if knobs is None:
                 raise HashMismatchError(
                     "GeneratedSpace.normalize: design was not produced by this space "
@@ -276,11 +298,11 @@ class ActiveProjection:
                 out[key] = float(self.fixed_values[key])
                 continue
             try:
-                if isinstance(params, dict):
+                if hasattr(self.space, "seed_knobs"):
+                    out[key] = float(self.space.seed_knobs[key])
+                elif isinstance(params, dict):
                     from ..design import families
                     out[key] = float(families.param_get(self.space.family, params, key))
-                elif hasattr(self.space, "seed_knobs"):
-                    out[key] = float(self.space.seed_knobs[key])
                 else:
                     out[key] = None
             except Exception:  # noqa: BLE001 - reference display is best-effort

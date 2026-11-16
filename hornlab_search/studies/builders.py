@@ -750,11 +750,13 @@ def _task_encoding(space):
     return ActiveProjection.from_space(space, no_ops=no_ops)
 
 
-def _load_pool(pool_arg, source_spec, config_path, *, root, seed=0):
-    from tools.analysis.bo_sensitivity import load_candidate_pool
+def _load_pool(pool_arg, source_spec, config_path, *, root, seed=0,
+               known_geometry_hashes=None, trusted_family=False):
+    source = source_spec if isinstance(source_spec, dict) else {}
+    if trusted_family and (pool_arg is not None or source.get("pool_json") is not None):
+        raise Unavailable("rolled-family external pools require authenticated surface replay")
     if pool_arg is not None:
         return pool_arg
-    source = source_spec if isinstance(source_spec, dict) else {}
     raw = source.get("pool_json")
     if raw is None and Path(config_path).resolve() != DEFAULT_CONFIG.resolve():
         from hornlab_search.bo.data import build_candidate_pool
@@ -762,11 +764,15 @@ def _load_pool(pool_arg, source_spec, config_path, *, root, seed=0):
         from hornlab_search.design.space import DesignSpace
         cfg = load_config(config_path)
         space = DesignSpace.from_config(cfg)
+        if trusted_family:
+            return build_candidate_pool(space, _task_encoding(space), cfg, seed=int(seed),
+                                        known_geometry_hashes=known_geometry_hashes)
         return build_candidate_pool(space, _task_encoding(space), cfg, seed=int(seed))
     path = _resolve_input(root, raw,
                           DEFAULT_POOL_JSON if (Path(config_path).resolve() == DEFAULT_CONFIG.resolve()
                                                 and DEFAULT_POOL_JSON.is_file()) else None,
                           "pool_json")
+    from tools.analysis.bo_sensitivity import load_candidate_pool
     return load_candidate_pool(path)
 
 
@@ -963,7 +969,8 @@ def pareto_training_from_artifacts(training_set, pareto_metrics):
     J = np.asarray(training_set.J, dtype=float).reshape(-1)
     rows = [i for i, oid in enumerate(training_set.ids) if str(oid) in obs]
     ids = tuple(str(training_set.ids[i]) for i in rows)
-    geo = tuple(str((identities.get(oid) or {}).get("design_hash") or oid) for oid in ids)
+    geo = tuple(str((identities.get(oid) or {}).get("geometry_hash")
+                    or (identities.get(oid) or {}).get("design_hash") or oid) for oid in ids)
     return ParetoTraining(
         X=np.asarray(training_set.X, dtype=float)[rows], J=J[rows],
         errors=np.asarray([[obs[o]["coverage_deg"], obs[o]["ripple_db"]] for o in ids], float),
@@ -1041,8 +1048,22 @@ def build_proposal(service, study_id, *, root, policy=None, seed=None, idempoten
     candidate_pool = None
     pool_error = None
     try:
+        from hornlab_search.design.generators import rolled_family
+        is_family = rolled_family.is_family_spec(getattr(space, "gen", None))
+        known_geometry_hashes = None
+        if is_family:
+            identities = (training_set.meta or {}).get("identities") or {}
+            if (not isinstance(identities, dict)
+                    or any(not isinstance(item, dict) or not item.get("geometry_hash")
+                           for item in identities.values())
+                    or any(not (identities.get(str(oid)) or {}).get("geometry_hash")
+                    for oid in training_set.ids)
+                    ):
+                raise Unavailable("rolled-family training lacks verified surface identities")
+            known_geometry_hashes = [str(item["geometry_hash"]) for item in identities.values()]
         candidate_pool = _load_pool(pool, effective.get("source"), task["config"], root=root,
-                                    seed=seed)
+                                    seed=seed, known_geometry_hashes=known_geometry_hashes,
+                                    trusted_family=is_family)
     except (Unavailable, StudyError, OSError, ValueError) as exc:
         pool_error = str(exc)
 

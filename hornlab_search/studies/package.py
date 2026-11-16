@@ -54,10 +54,15 @@ REQUIRED_ARTIFACTS = ('snapshot', 'model', 'proposal')
 STATUS_NOTE = 'cheap-check-passed; mesh/acoustic eligibility unknown'
 # Include every executable input: replay, metric/scoring helpers, configuration,
 # geometry links and proposal policy all affect a resumed study's decisions.
-EXECUTION_CODE_FILES = tuple(sorted(
+EXECUTION_CODE_FILES = tuple(sorted({
     path.relative_to(Path(__file__).resolve().parents[2]).as_posix()
     for path in Path(__file__).resolve().parents[1].rglob('*.py')
-))
+} | {
+    'hornlab_search/design/generators/rolled_family.py',
+    'hornlab_search/design/generators/_rolled_rect_v1.py',
+    'hornlab_search/design/generators/_crowe_section_v2.py',
+    'hornlab_search/design/generators/data/crowe_section_reference_v1.yaml',
+}))
 
 STOP_RULES = (
     'stop on total/screen/verify/attempt budget exhaustion',

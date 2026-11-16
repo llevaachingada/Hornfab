@@ -1,15 +1,16 @@
-# HOME LANDSCAPE Bi-Radial (2026-11-15), owner request: "a biradial like the Joseph Crowe ES450 (for TAD TD-4002),
-# within our size constraints". Read from the product page 2026-11-15: 450 Hz cutoff, crossover 600-800 Hz, throat
-# matched to the driver with no conical adapter (smooth exponential throat loading), "even off-axis coverage"; the
-# photos show the classic Bi-Radial look - narrow throat slot flaring to a WIDE, SHORT mouth with a large rolled lip.
-# Construction: the repo's published Keele/JBL Bi-Radial contour (US4308932A; profiles.biradial_contour,
-# docs/research/typologies/biradial_iwata_300_research_2026-10-25.md): y = a + b x + c x^n per plane with INDEPENDENT
-# H and V flare (the "bi" in Bi-Radial). Parent: examples/typologies/biradial_keele.yaml.
-# Landscape by construction: H mouth half-width 230-300 mm above V 150-235 mm (seed 560 W x 380 H), wider H wall angle.
-# generator.seed_policy: explicit - the brief's f0 would otherwise re-aim the mouth with the patent's K-law (owner: no Keele
-# mouth sizing). NOT modelled (say so in reports): the ES450's rolled-back mouth lip and its two-piece construction;
-# this is 'Bi-Radial-style', not a copy of the ES450. mesh.rear_res_factor 1.5: coarser outer shell / rear cap only
-# (13 Nov audit: -16..21 % DOF, inner bore untouched; acoustic bar G4 still to confirm).
+# HOME KEELE BI-RADIAL, ES-450-STYLE MOUTH (revised 2026-11-15 study: docs/research/typologies/
+# BIRADIAL_CROWE_STUDY_2026-11-15.md). Per plane the US4308932A law r = r0 + tan(a) z + c z^n (registry 'biradial').
+# FIX: the law starts at its full wall angle (36 / 22.5 deg) right at the 2-deg driver exit - a throat kink the mesher
+# closed with a domed source cap (17/19 screens refused 'not round'). Now h/v_throat_blend_mm 25 (same both planes, so the
+# throat stays round) blends an OS throat from the driver exit angle into the patent contour (registry THROAT_BLEND_TYPES
+# gained 'biradial'; default 0 is bit-for-bit unchanged). Seeds by Keele's rule: initial wall angle = 0.9 x half-coverage
+# (80 H -> 36, 50 V -> 22.5); box 32-37 H / 18-24 V. The same law needs rm >= r0 + tan(a) L (the cone must close before
+# c z^n can add flare); the earlier 32-42 / 18-28 / L<=400 box violated that on 32/64 random samples. Box coupled:
+# L 220-320, h_rm 260-292 (>= 18 + tan(37) 320), v_rm 162-230 (>= 18 + tan(24) 320) -> 64/64 random samples mesh, fit
+# the envelope and keep a round coupling plane. Mouth half-sizes h 260-292 > v 162-230 (landscape), flare exponents 3-7
+# (patent claim range 2-8, paper prefers 4-6), mouth superellipse exponent 2.2-5 (ES-450 is squarish). seed_policy
+# explicit (no K-law re-aim). V pattern control to 700 Hz needs ~794 mm of mouth by the K-law (A = 0.9 B, 50 deg);
+# impossible in 480 mm - at 700 Hz the 480 mm height supports only ~83 deg. Accepted (vertical misses are half-weighted).
 name: hl__biradial_es_style_v7
 family: FREEFORM
 brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
@@ -19,19 +20,25 @@ generator:
   profile_v: {type: biradial}
   n_anchors: 16
   max_wall_deg: 80.0
-  mouth: ellipse
+  mouth: superellipse
   seed_policy: explicit
-seed_params: {L_mm: 300.0, h_a_deg: 38.0, v_a_deg: 22.0, h_rm_mm: 280.0, v_rm_mm: 190.0, h_n: 5.5, v_n: 4.0}
+seed_params: {L_mm: 255.0, h_a_deg: 36.0, v_a_deg: 22.5, h_rm_mm: 280.0, v_rm_mm: 175.0, h_n: 5.0, v_n: 5.0, h_throat_blend_mm: 25.0,
+  v_throat_blend_mm: 25.0, mouth_exponent: 3.0}
 bounds:
-  L_mm: {lo: 220.0, hi: 420.0}
-  h_a_deg: {lo: 30.0, hi: 44.0}
-  v_a_deg: {lo: 16.0, hi: 28.0}
-  h_rm_mm: {lo: 230.0, hi: 300.0}
-  v_rm_mm: {lo: 150.0, hi: 235.0}
-  h_n: {lo: 2.0, hi: 8.0}
-  v_n: {lo: 2.0, hi: 8.0}
+  L_mm: {lo: 220.0, hi: 320.0}
+  h_a_deg: {lo: 32.0, hi: 37.0}
+  v_a_deg: {lo: 18.0, hi: 24.0}
+  h_rm_mm: {lo: 260.0, hi: 292.0}
+  v_rm_mm: {lo: 162.0, hi: 230.0}
+  h_n: {lo: 3.0, hi: 7.0}
+  v_n: {lo: 3.0, hi: 7.0}
+  h_throat_blend_mm: {lo: 25.0, hi: 25.0, search: false}
+  v_throat_blend_mm: {lo: 25.0, hi: 25.0, search: false}
+  mouth_exponent: {lo: 2.2, hi: 5.0}
 mesh: {epw: 6.0, quadrants: '1', dof_cap_screen: 24000, dof_cap_verify: 24000, dof_cap_final: 24000, dof_per_triangle: 0.51,
   rear_res_factor: 1.5}
 solve: {backend: beat_cuda, distance_m: 10.0, angle_count: 73, balloon: true, balloon_points_screen: 512, balloon_points_verify: 1024,
   gmres_tol: 1.0e-05, timeout_s: 900, cuda_fused: true}
-search: {algorithm: cma, sigma0: 0.2, seed: 1234, budget: 80, popsize: null, tolfun: 0.001, infeasible_penalty: graded}
+search: {algorithm: cma, sigma0: 0.2, seed: 1234, budget: 96, popsize: null, tolfun: 0.001, infeasible_penalty: graded}
+description: 'HOME: Keele Bi-Radial (US4308932A per-plane law), ES-450-style squarish landscape mouth, OS throat blend from
+  the driver exit angle (fixes the throat kink), Keele 0.9 x half-coverage seed angles, closure-coupled bounds'

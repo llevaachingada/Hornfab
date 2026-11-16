@@ -1,0 +1,17 @@
+extends: rr__reference_v7.yaml
+name: rr__pucker_hv_moderate_v7
+generator:
+  name: grid
+  rows: {type: rolled_rect_pucker}
+  seed_policy: explicit
+  span: quarter
+  n_phi: 49
+  n_s: 96
+  wall_thickness_mm: 3.0
+seed_params:
+  g_pucker_h_mm: 12.0
+  g_pucker_v_mm: 16.0
+bounds:
+  g_pucker_h_mm: {lo: 12.0, hi: 12.0, search: false}
+  g_pucker_v_mm: {lo: 16.0, hi: 16.0, search: false}
+description: 'Original ATH-influenced four-wall pucker: side ridges 12 mm, upper/lower ridges 16 mm; not a Tritonia reproduction'

@@ -1,0 +1,22 @@
+{
+  "current": "held",
+  "new_queue": "docs\\queue\\rolled_readiness_2026-11-15\\pilot_HELD.yaml",
+  "old_E_tail": "do not resume; retain evidence; long CMA/verify/cohort/BO jobs quarantined by plan",
+  "new_jobs": [
+    "spiral_s1234",
+    "spiral_s5678"
+  ],
+  "valid_target_each": 30,
+  "proposal_draw_cap_each": 45,
+  "real_diagnostic_calls_completed": 2,
+  "bayesian_jobs": 0,
+  "controller_started": false,
+  "remaining_gates": [
+    "source model",
+    "objective",
+    "full body",
+    "control capability",
+    "retry+validation total cost",
+    "explicit campaign release"
+  ]
+}

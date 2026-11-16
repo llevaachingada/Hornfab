@@ -57,3 +57,15 @@ Boundary Lab is the reference for directivity layout.
 legend). Four source-pin assertions updated to the new run-detail / nav structure
 (`test_gui_brief_authoring.py`, `test_gui_shell_ux.py`, `test_gui_freq_range.py`).
 `pytest tests -k gui -m "not slow and not gpu"`: all pass.
+
+## Addendum 2026-11-15 - Full globe (360° balloon re-slice)
+
+The isobar card's view switch is now `Rectangular | Globe | Full globe`. `Globe` is the
+original half-circle wrap of the ±90° H/V cuts. `Full globe` uses the stored balloon (a full sphere
+already, screen 16x32 / verify up to 23x45) to sample a closed 360° great circle in the H-plane
+(x-z) or V-plane (y-z): 0deg front at the bottom, ±180° at the top, log frequency outward, the same
+3 dB bands and -6 dB edge. No extra solves or data. `gui/data.py` emits `angles360` +
+`polar_h360`/`polar_v360` (145 azimuth points, bilinear on the theta-major grid) and
+`charts.js::globePlot` now draws a true circle for a ±180° span. Restart the GUI server after
+pulling: the API caches imports, so a stale process serves payloads without the 360° keys and the
+full-globe panels stay blank.

@@ -605,7 +605,8 @@ def build_native_training_set(config_path, *, scores_json, catalog_csv, limit=No
                           f"{meta_design_hash!r}")
             continue
 
-        # The projection drops only ``morph_exponent`` (inactive at ``morph_target == 1``).
+        # The projection drops only ``morph_exponent`` (inactive at ``morph_target`` 0 = no morph
+        # and 1 = rectangle; it shapes only the superellipse/circle targets 2-3).
         # Its historical value may legally differ from the 4.0 reconstruction reference, so a
         # hash-exact round-trip is NOT required for that one dropped key.  Every other stored
         # parameter must round-trip exactly; a difference there means the historical design is
@@ -618,7 +619,7 @@ def build_native_training_set(config_path, *, scores_json, catalog_csv, limit=No
                        shard=shard, row=row_idx,
                        detail=f"morph_target={params['morph_target']!r} is not an integer")
                 continue
-            if morph_target != 1:
+            if morph_target not in (0, 1):
                 refuse(obs_id, [f"{NATIVE_R_ENCODE_REFUSED}:morph_exponent_active"],
                        shard=shard, row=row_idx,
                        detail=f"morph_target={params['morph_target']!r} makes morph_exponent "
@@ -674,6 +675,20 @@ def build_native_training_set(config_path, *, scores_json, catalog_csv, limit=No
             continue
 
         geometry_hash = str(meta_design_hash or actual_design_hash)
+        block = params.get("grid")
+        if isinstance(block, dict):
+            from ..design.generators import rolled_family
+            if rolled_family.is_family_spec(block):
+                try:
+                    mat = materialize_geometry(design, cfg)
+                    _, envelope_ok, throat_ok = geometry_checks(mat, cfg, params)
+                    if not envelope_ok or not throat_ok:
+                        raise ValueError("historical surface fails envelope or throat checks")
+                    geometry_hash = materialized_geometry_hash(mat)
+                except Exception as exc:  # noqa: BLE001 - historical data must fail closed
+                    refuse(obs_id, [f"{NATIVE_R_ENCODE_REFUSED}:surface_replay"],
+                           shard=shard, row=row_idx, detail=str(exc)[:200])
+                    continue
         solve_hash = meta.get("solve_hash")
         policy_values[obs_id] = {
             "backend": str(catalog_row.get("backend") or ""),
@@ -698,7 +713,7 @@ def build_native_training_set(config_path, *, scores_json, catalog_csv, limit=No
             "physical_id": str(physical_id),
             "metric_id": str(metric_id),
             "score_id": str(score_id),
-            "design_hash": geometry_hash,
+            "design_hash": str(meta_design_hash or actual_design_hash),
             "solve_hash": None if solve_hash is None else str(solve_hash),
             "shard": int(shard),
             "row": int(row_idx),
@@ -709,6 +724,8 @@ def build_native_training_set(config_path, *, scores_json, catalog_csv, limit=No
                              else float(score_row["parity_delta"])),
             "stored_objective_version": score_row.get("stored_objective_version"),
         }
+        if geometry_hash != str(meta_design_hash or actual_design_hash):
+            identities[obs_id]["geometry_hash"] = geometry_hash
 
     def _distinct(field_name):
         counts: dict[str, int] = {}
@@ -807,6 +824,18 @@ def _geometry_hash(points: np.ndarray, formula: str) -> str:
     return h.hexdigest()[:20]
 
 
+def materialized_geometry_hash(mat: Mapping[str, Any]) -> str:
+    """Hash the complete resolved surface, preserving historical native identities."""
+    if mat["formula"] != "rolled-family-v1":
+        return _geometry_hash(mat["inner_points"], mat["formula"])
+    h = hashlib.sha256(b"rolled-family-v1\0")
+    for points in (mat["inner_points"], mat["outer_points"]):
+        rounded = np.round(np.asarray(points, dtype=np.float64), 6)
+        h.update(str(tuple(rounded.shape)).encode())
+        h.update(np.ascontiguousarray(rounded, dtype="<f8").tobytes())
+    return h.hexdigest()[:20]
+
+
 def _brief_envelope(config) -> dict:
     brief = getattr(config, "brief", None)
     if not isinstance(brief, dict):
@@ -843,10 +872,39 @@ def materialize_geometry(design, config, *, resolution_mm: float = 20.0) -> dict
     """Resolve the installed mesher's canonical point grid without meshing.
 
     Returns the inner surface ``(n_phi, n_station+1, 3)`` in millimetres plus identity metadata.
-    CAD/grid designs are refused because they have no supported radial surface representation.
+    Only the versioned rolled-family point-grid recipe has a trusted grid resolver;
+    other grid and CAD recipes are refused.
     """
     design = canonical_design(design, config)
     params = getattr(design, "params", None)
+    if isinstance(params, dict) and "grid" in params:
+        from hornlab_search.design.generators import rolled_family
+        block = params["grid"]
+        if rolled_family.is_family_spec(block):
+            try:
+                brief = getattr(config, "brief", None)
+                if not isinstance(brief, dict):
+                    raise ValueError("a resolved brief is required")
+                if getattr(config, "mounting", None) is not None:
+                    raise ValueError("rolled-family solid cannot use an enclosure mounting")
+                grid = rolled_family.resolve_grid(block, brief)
+                inner = np.asarray(grid["inner_points"], dtype=np.float64)
+                outer = np.asarray(grid["outer_points"], dtype=np.float64)
+                if (inner.ndim != 3 or inner.shape[-1] != 3 or inner.shape != outer.shape
+                        or min(inner.shape[:2]) < 2 or not np.isfinite(inner).all()
+                        or not np.isfinite(outer).all()):
+                    raise ValueError("invalid or nonfinite resolved surfaces")
+                sampling = dict(grid.get("meta") or {})
+                sampling.update(fixed_recipe_sampling=True,
+                                requested_resolution_mm=float(resolution_mm))
+                return {"inner_points": inner, "outer_points": outer,
+                        "formula": "rolled-family-v1", "mode": "solid",
+                        "quadrants": "1", "native_symmetry_plane": "yz+xz",
+                        "surface_fit": None, "sampling_metadata": sampling,
+                        "resolution_mm": float(resolution_mm),
+                        "api": "hornlab_search.design.generators.rolled_family.resolve_grid"}
+            except Exception as exc:
+                raise UnsupportedGeometryError(f"rolled-family resolve failed: {exc}") from exc
     if isinstance(params, dict) and ("cad" in params or "grid" in params):
         raise UnsupportedGeometryError(
             "CAD/point-grid designs are unsupported by the canonical radial surface sampler")
@@ -1024,7 +1082,6 @@ def build_candidate_pool(space, encoding, config, *, n: int = POOL_SIZE, seed: i
         raise DataError(f"n must be >= 1, got {n}")
     d = int(encoding.d)
     solve_hash = intended_solve_identity(config)
-    env = _brief_envelope(config)
     known = {str(h) for h in (known_geometry_hashes or ())}
     known_ids = {(str(a), str(b)) for a, b in (known_identities or ())}
     if known:
@@ -1066,15 +1123,14 @@ def build_candidate_pool(space, encoding, config, *, n: int = POOL_SIZE, seed: i
             except Exception:  # noqa: BLE001 - unsupported/resolve failure
                 counts["geometry_rejected"] += 1
                 continue
-            desc = _surface_descriptors(mat["inner_points"])
-            if not _envelope_ok(desc, env):
+            desc, envelope_ok, throat_ok = geometry_checks(mat, config, params)
+            if not envelope_ok:
                 counts["envelope_rejected"] += 1
                 continue
-            expected_throat = _expected_throat_radius(params if isinstance(params, dict) else {})
-            if not _throat_ok(desc["throat_radius_mm"], expected_throat):
+            if not throat_ok:
                 counts["throat_rejected"] += 1
                 continue
-            ghash = _geometry_hash(mat["inner_points"], mat["formula"])
+            ghash = materialized_geometry_hash(mat)
             identity = (ghash, solve_hash)
             if identity in seen_geometry:
                 counts["geometry_duplicate"] += 1
@@ -1189,6 +1245,37 @@ def _throat_ok(throat_radius_mm: float, expected: float | None) -> bool:
     if not math.isfinite(expected) or expected <= 0.0:
         return False
     return abs(float(throat_radius_mm) - expected) <= max(0.5, 0.02 * expected)
+
+
+def geometry_checks(mat: Mapping[str, Any], config, params: Mapping[str, Any]):
+    """Shared candidate checks; grid family uses its complete closed surface.
+
+    The rolled-family resolver also validates throat slope, driver and source metadata
+    against its frozen recipe.  Here every sampled throat radius is checked, rather
+    than relying on an average which could hide an out-of-round inlet.
+    """
+    inner = np.asarray(mat["inner_points"], dtype=float)
+    desc = _surface_descriptors(inner)
+    if mat["formula"] != "rolled-family-v1":
+        return (desc, _envelope_ok(desc, _brief_envelope(config)),
+                _throat_ok(desc["throat_radius_mm"], _expected_throat_radius(params)))
+    outer = np.asarray(mat["outer_points"], dtype=float)
+    both = np.concatenate((inner.reshape(-1, 3), outer.reshape(-1, 3)))
+    desc.update(mouth_width_mm=2.0 * float(np.max(np.abs(both[:, 0]))),
+                mouth_height_mm=2.0 * float(np.max(np.abs(both[:, 1]))),
+                depth_mm=float(np.ptp(both[:, 2])))
+    driver = (getattr(config, "brief", None) or {}).get("driver") or {}
+    try:
+        expected = float(driver["exit_radius_mm"])
+        angle = float(driver["exit_angle_deg"])
+        actual_angle = float(mat["sampling_metadata"]["source_auto_angle_deg"])
+        radii = np.hypot(inner[:, 0, 0], inner[:, 0, 1])
+        throat_ok = (math.isfinite(angle) and angle > 0.0 and
+                     math.isclose(angle, actual_angle, rel_tol=0.0, abs_tol=1e-9) and
+                     all(_throat_ok(float(r), expected) for r in radii))
+    except (KeyError, TypeError, ValueError):
+        throat_ok = False
+    return desc, _envelope_ok(desc, _brief_envelope(config)), bool(throat_ok)
 
 
 __all__ = [

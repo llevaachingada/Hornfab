@@ -80,8 +80,13 @@ FIXED_SIZE = ("conical", "exponential", "hypex", "osse")
 MOUTHS = ("ellipse", "superellipse", "rounded_rectangle")
 
 #: Typologies that accept the WP9 G3 ``{p}_throat_blend_mm`` knob (the OS throat is
-#: blended in over [0, L_b]; default 0 skips the blend entirely).
-THROAT_BLEND_TYPES = ("conical", "exponential", "hypex", "tractrix")
+#: blended in over [0, L_b]; default 0 skips the blend entirely). ``biradial`` added
+#: 2026-11-15: the US4308932A contour starts at its full initial wall angle (e.g. 38 deg H /
+#: 22 deg V) right at the driver exit, a throat kink the mesher closes with a domed source
+#: cap (throat check: "not round, area 1.04x"); the blend starts the wall at the driver exit
+#: angle and lands on the patent contour at L_b (study: docs/research/typologies/
+#: BIRADIAL_CROWE_STUDY_2026-11-15.md).
+THROAT_BLEND_TYPES = ("conical", "exponential", "hypex", "tractrix", "biradial")
 
 #: Knob defaults used when a config does not set a knob (mm, Hz, deg). Values sit inside the
 #: hi-fi brief's envelope and are typical of 1-inch compression-driver horns.

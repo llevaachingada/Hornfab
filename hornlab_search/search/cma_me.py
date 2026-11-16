@@ -373,9 +373,13 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
     # B.8 (opt-in): search.qd.maes turns the CMA-ME archive into a CMA-MAE soft archive
     # (Fontaine & Nikolaidis 2023): learning_rate in [0.01, 0.1] and threshold_min = the NEGATIVE
     # J threshold (the archive MAXIMISES -J = -(-1000) = 1000 for refusal-penalty rows), the
-    # emitter ranks with "imp" and carries NO bounds (candidates are clipped in
-    # DesignSpace.denormalize exactly like the plain CMA path). Absent maes = today's archive.
+    # emitter ranks with "imp". Legacy CMA-MAE keeps its unbounded emitter; the
+    # rolled family uses unit bounds so distinct asks cannot collapse by clipping.
     maes = qd.get("maes") if isinstance(qd, dict) else None
+    family_bounded = False
+    if maes:
+        from ..design.generators.rolled_family import is_family_spec
+        family_bounded = is_family_spec(getattr(cfg, "generator", None))
 
     def make_archive() -> FailureExcludingGridArchive:
         kwargs = dict(solution_dim=solution_dim, dims=list(bins),
@@ -395,7 +399,7 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
         archive, x0=np.asarray(x0, dtype=float), sigma0=sigma0_eff,
         ranker=(lambda seed: _FailureLastRanker(seed, maes=bool(maes))),
         es="cma_es", selection_rule="mu",
-        bounds=None if maes else [(0.0, 1.0)] * solution_dim,
+        bounds=None if maes and not family_bounded else [(0.0, 1.0)] * solution_dim,
         batch_size=int(cfg.search.popsize) if cfg.search.popsize else None,
         seed=int(cfg.search.seed))
     scheduler = Scheduler(archive, [emitter], result_archive=result_archive)

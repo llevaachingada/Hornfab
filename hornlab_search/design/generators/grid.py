@@ -2613,6 +2613,13 @@ def rows_per_azimuth(base_spec_with_rows: dict, knobs: dict, brief: dict,
 def rows_grid_points(spec: dict, knobs: dict, brief: dict,
                      prefix: str = "g") -> tuple[np.ndarray, dict]:
     """Public rows-route entry used by ``mesh/build.py`` and ``design_params``."""
+    from . import rolled_family
+    if rolled_family.is_family_spec(spec):
+        if prefix != 'g':
+            raise registry.GeneratorError('rolled-family knobs require the g prefix')
+        block = rolled_family.design_params(spec, knobs, brief)['grid'] if 'implementation_sha256' not in spec['rows'] else {**spec, 'knobs': knobs}
+        resolved = rolled_family.resolve_grid(block, brief)
+        return resolved['inner_points'], resolved['meta']
     return rows_per_azimuth(spec, knobs, brief, prefix=prefix)
 
 
@@ -2692,6 +2699,9 @@ def design_params(spec: dict, knobs: dict, brief: dict) -> dict:
     The knob prefix is always ``"g"`` (the wire-in contract); knobs equal to the GRID defaults are
     canonicalised away so an explicit zero and an absent zero hash identically.
     """
+    from . import rolled_family
+    if rolled_family.is_family_spec(spec):
+        return rolled_family.design_params(spec, knobs, brief)
     knob_map = _knob_map(knobs)
     if isinstance(spec, dict) and "rows" in spec:
         # Rows kind: the depth comes from each row's march, so ``L_mm`` is NOT part of the
@@ -2731,6 +2741,10 @@ def validate_grid_params(block: dict) -> None:
     Same structural ranges as :func:`grid_points`; meridian/brief-dependent legality was already
     enforced when the design was materialised. Raises ``registry.GeneratorError``.
     """
+    from . import rolled_family
+    if rolled_family.is_family_spec(block):
+        rolled_family.validate_grid_params(block)
+        return
     if not isinstance(block, dict):
         raise registry.GeneratorError(
             f"grid params must be a mapping, got {type(block).__name__}")
@@ -2787,6 +2801,11 @@ def envelope_extents(spec: dict, knobs: dict, brief: dict) -> tuple[float, float
     radial envelope of the modulated section is taken as ``max_phi r(1, phi)`` for both width and
     height (conservative; mirrors ``registry.envelope_overshoot_estimate``'s max-radius rule).
     """
+    from . import rolled_family
+    if rolled_family.is_family_spec(spec):
+        block = rolled_family.design_params(spec, knobs, brief)['grid'] if 'implementation_sha256' not in spec['rows'] else {**spec, 'knobs': knobs}
+        meta = rolled_family.resolve_grid(block, brief)['meta']
+        return meta['mouth_w_mm'], meta['mouth_h_mm'], meta['x_span_mm']
     if isinstance(spec, dict) and "rows" in spec:
         # WP9b rows: extents come from the same per-azimuth marches the mesher will use
         # (no superellipse radius field, no meshing).  Conservative outer shell included.
