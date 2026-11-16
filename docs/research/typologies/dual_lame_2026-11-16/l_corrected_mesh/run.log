@@ -1,0 +1,46 @@
+
+
+
+L01 {'config': 'l01', 'ok': True, 'note': '', 'dofs': 1534, 'cap': 24000, 'quadrants': '1', 'mouth_w': 420.970733027457, 'mouth_h': 276.9544296233272, 'depth': 218.0585214891801, 'throat': 'round, matches the exit', 'throat_ok': True, 'saved': 'C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l01\\mesh.msh', 'envelope': 'fits'}
+
+
+
+L02 {'config': 'l02', 'ok': True, 'note': '', 'dofs': 1884, 'cap': 24000, 'quadrants': '1', 'mouth_w': 470.8344660933024, 'mouth_h': 268.2706330833706, 'depth': 234.72176047772484, 'throat': 'round, matches the exit', 'throat_ok': True, 'saved': 'C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l02\\mesh.msh', 'envelope': 'fits'}
+
+
+
+L03 {'config': 'l03', 'ok': True, 'note': '', 'dofs': 2094, 'cap': 24000, 'quadrants': '1', 'mouth_w': 565.5006980866024, 'mouth_h': 270.767635665149, 'depth': 267.552137316414, 'throat': 'round, matches the exit', 'throat_ok': True, 'saved': 'C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l03\\mesh.msh', 'envelope': 'fits'}
+
+
+
+L04 {'config': 'l04', 'ok': True, 'note': '', 'dofs': 1604, 'cap': 24000, 'quadrants': '1', 'mouth_w': 374.498566700789, 'mouth_h': 241.6119785166382, 'depth': 285.8153800413356, 'throat': 'round, matches the exit', 'throat_ok': True, 'saved': 'C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l04\\mesh.msh', 'envelope': 'fits'}
+
+
+
+L05 {'config': 'l05', 'ok': True, 'note': '', 'dofs': 3270, 'cap': 24000, 'quadrants': '1', 'mouth_w': 586.7661185117757, 'mouth_h': 321.04685999784, 'depth': 312.8774980153103, 'throat': 'round, matches the exit', 'throat_ok': True, 'saved': 'C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l05\\mesh.msh', 'envelope': 'fits'}
+
+
+
+L06 {'config': 'l06', 'ok': True, 'note': '', 'dofs': 1835, 'cap': 24000, 'quadrants': '1', 'mouth_w': 466.8278522750382, 'mouth_h': 268.2871795947344, 'depth': 238.54552140807584, 'throat': 'round, matches the exit', 'throat_ok': True, 'saved': 'C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l06\\mesh.msh', 'envelope': 'fits'}
+
+
+
+L07 {'config': 'l07', 'ok': True, 'note': '', 'dofs': 1463, 'cap': 24000, 'quadrants': '1', 'mouth_w': 384.0061702395152, 'mouth_h': 240.003856399697, 'depth': 236.8056065486757, 'throat': 'round, matches the exit', 'throat_ok': True, 'saved': 'C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l07\\mesh.msh', 'envelope': 'fits'}
+
+
+
+L08 {'config': 'l08', 'ok': True, 'note': '', 'dofs': 1835, 'cap': 24000, 'quadrants': '1', 'mouth_w': 492.7978543424644, 'mouth_h': 289.881090789685, 'depth': 206.6524849379714, 'throat': 'round, matches the exit', 'throat_ok': True, 'saved': 'C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l08\\mesh.msh', 'envelope': 'fits'}
+
+
+
+L09 {'config': 'l09', 'ok': True, 'note': '', 'dofs': 1468, 'cap': 24000, 'quadrants': '1', 'mouth_w': 439.1291992174618, 'mouth_h': 240.464272707937, 'depth': 195.2212640337734, 'throat': 'round, matches the exit', 'throat_ok': True, 'saved': 'C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l09\\mesh.msh', 'envelope': 'fits'}
+
+
+
+L10 {'config': 'l10', 'ok': True, 'note': '', 'dofs': 2141, 'cap': 24000, 'quadrants': '1', 'mouth_w': 437.1174366768188, 'mouth_h': 349.2426388585104, 'depth': 246.4601931972944, 'throat': 'round, matches the exit', 'throat_ok': True, 'saved': 'C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l10\\mesh.msh', 'envelope': 'fits'}
+
+
+
+L11 {'config': 'l11', 'ok': True, 'note': '', 'dofs': 1759, 'cap': 24000, 'quadrants': '1', 'mouth_w': 415.2209816467044, 'mouth_h': 241.4075474690144, 'depth': 271.82502199019245, 'throat': 'round, matches the exit', 'throat_ok': True, 'saved': 'C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l11\\mesh.msh', 'envelope': 'fits'}
+L12 {'type': 'GeometryInvalidError', 'message': 'generator seed is not a legal horn: invalid_envelope: max_mouth_w_mm 633.063 exceeds 600.0', 'traceback': 'Traceback (most recent call last):\n  File "C:\\Users\\hunte\\Hrns\\hornlab-search\\hornlab_search\\design\\generated.py", line 157, in __init__\n    params = materialize(self.gen, knobs, self.brief)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "C:\\Users\\hunte\\Hrns\\hornlab-search\\hornlab_search\\design\\generated.py", line 53, in materialize\n    return grid_gen.design_params(gen, knobs, brief)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "C:\\Users\\hunte\\Hrns\\hornlab-search\\hornlab_search\\design\\generators\\grid.py", line 2896, in design_params\n    return family.design_params(spec, knobs, brief)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "C:\\Users\\hunte\\Hrns\\hornlab-search\\hornlab_search\\design\\generators\\lecleach_swept_hv.py", line 242, in design_params\n    resolve_grid(block, brief)\n  File "C:\\Users\\hunte\\Hrns\\hornlab-search\\hornlab_search\\design\\generators\\lecleach_swept_hv.py", line 229, in resolve_grid\n    raise GeneratorError(f\'invalid_envelope: {key} {actual:.3f} exceeds {limit}\')\nhornlab_search.design.generators.registry.GeneratorError: invalid_envelope: max_mouth_w_mm 633.063 exceeds 600.0\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\run.py", line 74, in <module>\n    result[\'shape_check\'] = shape_check.check(str(cfgpath), None, \'screen\', HERE / \'meshes\', False)\n                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "C:\\Users\\hunte\\Hrns\\hornlab-search\\tools\\shape_check.py", line 43, in check\n    space = DesignSpace.from_config(cfg)\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "C:\\Users\\hunte\\Hrns\\hornlab-search\\hornlab_search\\design\\space.py", line 163, in from_config\n    return GeneratedSpace.from_config(cfg)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "C:\\Users\\hunte\\Hrns\\hornlab-search\\hornlab_search\\design\\generated.py", line 167, in from_config\n    return cls(cfg.generator, cfg.brief, dict(cfg.seed_params), bounds)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "C:\\Users\\hunte\\Hrns\\hornlab-search\\hornlab_search\\design\\generated.py", line 159, in __init__\n    raise GeometryInvalidError(f"generator seed is not a legal horn: {exc}") from exc\nhornlab_search.types.GeometryInvalidError: generator seed is not a legal horn: invalid_envelope: max_mouth_w_mm 633.063 exceeds 600.0\n'}
+Completed 12 seeds.

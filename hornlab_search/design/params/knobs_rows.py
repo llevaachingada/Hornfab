@@ -1177,6 +1177,28 @@ def _note(label: str, summary: str, detail: str, *, formula: str | None = None,
 
 #: Per-typology prose where the SAME base knob means something specific. Keyed by the
 #: 11 rows typology ids, then by the unprefixed base knob name.
+
+# Canonical K/L geometry controls. Existing shared row names retain their authored meanings.
+_DUAL_LAME = "docs/research/typologies/dual_lame_2026-11-16/mesh_audit/README.md"
+for _key, _label, _unit, _summary, _detail, _ref in (
+    ("aspect", "Target aspect ratio", None, "Target horizontal-to-vertical section ratio.", "K morphs from a round throat to this ratio with a quintic gate.", "klangfilm_lame_family"),
+    ("lame_p", "Lamé exponent", None, "Target Lamé section exponent.", "K transitions from a round throat to this exponent; larger values make sections squarer.", "klangfilm_lame_family"),
+    ("end_frac", "Parent termination fraction", None, "Sets the parent cap height at termination relative to its radius.", "Changes how far the K parent continues around its rollback.", "klangfilm_lame_family"),
+    ("rim_sweep_ratio", "Rim sweep ratio", None, "Sets horizontal rim setback relative to the horizontal section size.", "A quintic gate applies the K sweep toward the rim; zero disables it.", "klangfilm_lame_family"),
+    ("morph_frac", "Morph fraction", None, "Sets where the K section morph reaches its target.", "It is a fraction of the parent pre-shoulder arc length.", "klangfilm_lame_family"),
+    ("source_blend_ratio", "Source blend ratio", None, "Sets the optional entrance blend length relative to throat diameter.", "Zero disables the experimental entrance tangent blend.", "klangfilm_lame_family"),
+    ("entry_half_angle_deg", "Entrance half-angle", "deg", "Target wall half-angle for the optional K entrance blend.", "This setting is inactive when source blend is zero and is not a driver datasheet claim.", "klangfilm_lame_family"),
+    ("lame_p_mouth", "Mouth Lamé exponent", None, "Sets the L mouth section exponent.", "The section transitions from a round throat toward this exponent.", "lecleach_swept_hv"),
+    ("lip_radius_mm", "Lip radius", "mm", "Radius of the optional tangent-arc lip.", "Zero leaves the lip extension off.", "lecleach_swept_hv"),
+    ("rim_sweep_mm", "Rim sweep", "mm", "Horizontal rim setback in millimetres.", "The L sweep varies around the section and grows toward the mouth.", "lecleach_swept_hv"),
+    ("axial_length_factor", "Axial length factor", None, "Sets the target axial length relative to the unswept parent.", "Changes the L axial progression to reach the target depth.", "lecleach_swept_hv"),
+):
+    ROWS_KNOBS[_key] = _doc(_key, label=_label, unit=_unit, summary=_summary,
+                           detail=_detail, formula=None, physical=_summary,
+                           code_ref="hornlab_search.design.generators." + _ref + (".resolve_grid" if _ref == "klangfilm_lame_family" else ".make_grid"),
+                           doc_ref=(_DUAL_LAME, "# Saved CPU mesh audit"))
+
+
 ROWS_TYPOLOGY_NOTES: dict[str, dict[str, KnobContext]] = {
     "grid_ellipse": {
         "L_mm": _note(

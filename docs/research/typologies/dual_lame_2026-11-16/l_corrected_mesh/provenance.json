@@ -1,0 +1,28 @@
+{
+  "input_sha256": {
+    "docs\\research\\typologies\\dual_lame_2026-11-16\\k_visual_seeds_supplied.yaml": "fcd324ebd42dc9b11ee8327217739da346ae186c4567f7537e74d0c398d8ec44",
+    "docs\\research\\typologies\\dual_lame_2026-11-16\\L\\seeds.yaml": "4217aaf2fab35c7cb136eaf42f0acc52d804df707c978f32747569a33cbe6369",
+    "docs\\research\\typologies\\dual_lame_2026-11-16\\screen\\candidate_geometry.jsonl": "8fc823cd10664d053c4d71c0a42acf5db06c48986cab3ba9cf92368e21f7bbb1",
+    "docs\\research\\typologies\\dual_lame_2026-11-16\\screen\\invalid_geometry.jsonl": "908f6feb09f7bd6c70c86c9415806deeb8ad4d0a6cf5549fc3c4827f617e903c",
+    "examples\\typologies\\dual_lame_2026-11-16\\k01_geometry_only.yaml": "7d6326acad1105c83bb9a3b54fa4504cc5aca750bfb7f9f7852281d7a0492310",
+    "examples\\typologies\\dual_lame_2026-11-16\\l01_geometry_only.yaml": "99227c352c311d5d99685e4507d0f0600ac6deef6ada3c7a42f72328924e2897",
+    "examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7_smooth.yaml": "e58b595e5fcf14965e6beff31fde7b75d0cac1ec98cfbe36e6f3abc6cd6bdbd8",
+    "tools\\shape_check.py": "ab6b01ac0e9b5e6b45d260693618ec3d5c5e695dcd4a559208c4d8b341427ef3",
+    "docs\\research\\typologies\\dual_lame_2026-11-16\\mesh_audit\\audit_mesh.py": "986793a3ba8bd2d8f50199ec24faa78969119351afc1f803f031e3f528d12756",
+    "docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\run.py": "6f4a7cca617d046e12560d2ed5376bf0ae0c70b5a03059128fb892fa52cd73e0",
+    "hornlab_search\\design\\generators\\klangfilm_lame_family.py": "79b96a69da60a1ccfd3aebdaea5bf83c469e2c9d3ae733f4a836780f09366e2a",
+    "hornlab_search\\design\\generators\\_klangfilm_lame_v1.py": "25e8395ca84d9e8907fa387753af2320260c8d07ee9f29d4d39ae7fac0513dc3",
+    "hornlab_search\\design\\generators\\_lame_cap_v1.py": "9f0f06091d34fdb3b3499a1852432b74b3305aa6242c645c5452e7550484c9ae",
+    "hornlab_search\\design\\generators\\lecleach_swept_hv.py": "356d280c1e4408c54713ff795ea2aec48134a6601756975dd70fe73ead1ba8e9",
+    "hornlab_search\\design\\generators\\section_lame.py": "80cfc0da8f14a7a22e243436e5f852df9f06dba481c74db0a3f58e88ad1977df",
+    "hornlab_search\\design\\generators\\profiles.py": "100a5e3ae023f6734a9b48392469268bc9948220dc84608b825805c685c8ffe9",
+    "hornlab_search\\design\\generators\\lame_shell.py": "e8d810742a3372fae620c26876e02cb2b10924f5ef2fadbbb8d5c779e0b7d2e8",
+    "hornlab_search\\design\\generators\\grid.py": "fdfa5438b7c280938174badbf41cbb7f9b18f0ff2c0cd4acf3bf3ba7282ea54c"
+  },
+  "python": "3.12.10",
+  "numpy": "2.5.4",
+  "scipy": "1.18.1",
+  "pyyaml": "6.0.3",
+  "scope": "CPU mesh only; no solve, GPU or queue",
+  "mapping": "K rim_sweep -> g_rim_sweep_ratio; K additional fixed knobs from K01. L core keys kept, extension prefixed g_. All other config settings copied from K01/L01; brief path re-rooted only."
+}

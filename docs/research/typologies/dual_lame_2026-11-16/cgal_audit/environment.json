@@ -1,0 +1,15 @@
+{
+  "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "cgal_package": "6.0.1.post202410241521",
+  "numpy": "2.5.5",
+  "files_sha256": {
+    "README.md": "8ff1a441a7bebe424645e53a8354099e8b7a9cc1d9461bde4e496fd00de0010d",
+    "fixtures.py": "15b65d48b839181790b8b11001cc4302d583dfd9d7380a3e4be9abb6819c5bdf",
+    "fixtures.json": "60031c0a4b1445dab189f558d711ae7da16d23d240b2700a9f52f74414ce0b46",
+    "check_meshes.py": "c9ac9977b30f6791440e176879cb57b424d6e80211737b88f315d2313a7c7fd6",
+    "initial_meshes.json": "3671d622ec03fd2f267f38a5f49d3b05b24d3105b884b83a4cba804c59723f33",
+    "pre_lip_correction_meshes.json": "89b895761c2d3daaeb562ab8a6fec719964104d11a96d0cd2aab6c2d6316d239",
+    "meshes.json": "085b1bda8c6e682462937f2166725bfa877e2743a29d2f168cc8ccc09f9d8bac"
+  }
+}

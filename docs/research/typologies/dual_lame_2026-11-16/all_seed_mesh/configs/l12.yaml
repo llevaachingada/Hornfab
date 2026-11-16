@@ -1,0 +1,90 @@
+name: l12_geometry_only
+family: FREEFORM
+brief_file: ../../../../../../examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml
+generator:
+  name: grid
+  rows:
+    type: lecleach_swept_hv
+    schema: lecleach-swept-hv-v1
+    area_mode: flat_section_parent
+    aspect_progression: quintic
+    lame_progression: quintic
+    lip_model: tangent_arc
+  n_phi: 25
+  n_s: 96
+  wall_thickness_mm: 3.0
+  span: quarter
+seed_params:
+  g_fc_hz: 430
+  g_T: 0.48
+  g_stop_deg: 135
+  g_ar_m: 2.28
+  g_ar_p: 1.55
+  g_lame_p_mouth: 2.1
+  g_lip_radius_mm: 12
+  g_rim_sweep_mm: 20
+  g_axial_length_factor: 1.0
+bounds:
+  g_fc_hz:
+    lo: 430
+    hi: 430
+    search: false
+  g_T:
+    lo: 0.48
+    hi: 0.48
+    search: false
+  g_stop_deg:
+    lo: 135
+    hi: 135
+    search: false
+  g_ar_m:
+    lo: 2.28
+    hi: 2.28
+    search: false
+  g_ar_p:
+    lo: 1.55
+    hi: 1.55
+    search: false
+  g_lame_p_mouth:
+    lo: 2.1
+    hi: 2.1
+    search: false
+  g_lip_radius_mm:
+    lo: 12
+    hi: 12
+    search: false
+  g_rim_sweep_mm:
+    lo: 20
+    hi: 20
+    search: false
+  g_axial_length_factor:
+    lo: 1.0
+    hi: 1.0
+    search: false
+description: Geometry diagnostic only; no acoustic readiness or queue admission.
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+  rear_res_factor: 1.5
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.2
+  seed: 1234
+  budget: 80
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded

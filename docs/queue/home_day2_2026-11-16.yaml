@@ -1,6 +1,3 @@
-# Continuation of home_day_2026-11-16 (handed over ~15:00 so the new runner code - pin_ignore + resume-aware watchdog -
-# is live). Same jobs, same order, minus those already done/running in home_day. Verify jobs still read
-# home_day_2026-11-16's summary for the d_* jobs.
 night: home_day2_2026-11-16
 lane: gpu
 jobs:
@@ -68,6 +65,216 @@ jobs:
   - runs/20261116T145634Z-screen-e4c778
   - --budget
   - '60'
+- id: k_lame_A_s1234
+  kind: command
+  timeout_s: 9000
+  argv:
+  - .venv/Scripts/python.exe
+  - tools/geometry/klangfilm_lame_cli.py
+  - search
+  - --config
+  - examples/typologies/home_landscape_2026-11-15/hl__klangfilm_lame_curved_v1.yaml
+  - --mode
+  - screen
+  - --budget
+  - '60'
+  - --cma-seed
+  - '1234'
+- id: k_lame_P1_s11001
+  kind: command
+  timeout_s: 9000
+  argv:
+  - .venv/Scripts/python.exe
+  - tools/geometry/klangfilm_lame_cli.py
+  - search
+  - --config
+  - examples/typologies/home_landscape_2026-11-15/hl__klangfilm_lame_curved_v1_seedP1.yaml
+  - --mode
+  - screen
+  - --budget
+  - '60'
+  - --cma-seed
+  - '11001'
+- id: k_lame_P1b_s11011
+  kind: command
+  timeout_s: 9000
+  argv:
+  - .venv/Scripts/python.exe
+  - tools/geometry/klangfilm_lame_cli.py
+  - search
+  - --config
+  - examples/typologies/home_landscape_2026-11-15/hl__klangfilm_lame_curved_v1_seedP1.yaml
+  - --mode
+  - screen
+  - --budget
+  - '60'
+  - --cma-seed
+  - '11011'
+- id: k_lame_P1c_s11021
+  kind: command
+  timeout_s: 9000
+  argv:
+  - .venv/Scripts/python.exe
+  - tools/geometry/klangfilm_lame_cli.py
+  - search
+  - --config
+  - examples/typologies/home_landscape_2026-11-15/hl__klangfilm_lame_curved_v1_seedP1.yaml
+  - --mode
+  - screen
+  - --budget
+  - '60'
+  - --cma-seed
+  - '11021'
+- id: k_lame_P2_s11002
+  kind: command
+  timeout_s: 9000
+  argv:
+  - .venv/Scripts/python.exe
+  - tools/geometry/klangfilm_lame_cli.py
+  - search
+  - --config
+  - examples/typologies/home_landscape_2026-11-15/hl__klangfilm_lame_curved_v1_seedP2.yaml
+  - --mode
+  - screen
+  - --budget
+  - '60'
+  - --cma-seed
+  - '11002'
+- id: k_lame_P3_s11003
+  kind: command
+  timeout_s: 9000
+  argv:
+  - .venv/Scripts/python.exe
+  - tools/geometry/klangfilm_lame_cli.py
+  - search
+  - --config
+  - examples/typologies/home_landscape_2026-11-15/hl__klangfilm_lame_curved_v1_seedP3.yaml
+  - --mode
+  - screen
+  - --budget
+  - '60'
+  - --cma-seed
+  - '11003'
+- id: k_lame_P4_s11004
+  kind: command
+  timeout_s: 9000
+  argv:
+  - .venv/Scripts/python.exe
+  - tools/geometry/klangfilm_lame_cli.py
+  - search
+  - --config
+  - examples/typologies/home_landscape_2026-11-15/hl__klangfilm_lame_curved_v1_seedP4.yaml
+  - --mode
+  - screen
+  - --budget
+  - '60'
+  - --cma-seed
+  - '11004'
+- id: k_lame_E2_s11031
+  kind: command
+  timeout_s: 9000
+  argv:
+  - .venv/Scripts/python.exe
+  - tools/geometry/klangfilm_lame_cli.py
+  - search
+  - --config
+  - examples/typologies/home_landscape_2026-11-15/hl__klangfilm_lame_curved_v1_seedE2.yaml
+  - --mode
+  - screen
+  - --budget
+  - '60'
+  - --cma-seed
+  - '11031'
+- id: k_lame_E3_s11041
+  kind: command
+  timeout_s: 8000
+  argv:
+  - .venv/Scripts/python.exe
+  - tools/geometry/klangfilm_lame_cli.py
+  - search
+  - --config
+  - examples/typologies/home_landscape_2026-11-15/hl__klangfilm_lame_curved_v1_seedE3.yaml
+  - --mode
+  - screen
+  - --budget
+  - '50'
+  - --cma-seed
+  - '11041'
+- id: k_lame_V5_s11051
+  kind: command
+  timeout_s: 9000
+  argv:
+  - .venv/Scripts/python.exe
+  - tools/geometry/klangfilm_lame_cli.py
+  - search
+  - --config
+  - examples/typologies/home_landscape_2026-11-15/hl__klangfilm_lame_curved_v1_seedV5.yaml
+  - --mode
+  - screen
+  - --budget
+  - '60'
+  - --cma-seed
+  - '11051'
+- id: k_lame_S1_s11005
+  kind: command
+  timeout_s: 9000
+  argv:
+  - .venv/Scripts/python.exe
+  - tools/geometry/klangfilm_lame_cli.py
+  - search
+  - --config
+  - examples/typologies/home_landscape_2026-11-15/hl__klangfilm_lame_curved_v1_seedS1.yaml
+  - --mode
+  - screen
+  - --budget
+  - '60'
+  - --cma-seed
+  - '11005'
+- id: k_lame_S2_s11006
+  kind: command
+  timeout_s: 9000
+  argv:
+  - .venv/Scripts/python.exe
+  - tools/geometry/klangfilm_lame_cli.py
+  - search
+  - --config
+  - examples/typologies/home_landscape_2026-11-15/hl__klangfilm_lame_curved_v1_seedS2.yaml
+  - --mode
+  - screen
+  - --budget
+  - '60'
+  - --cma-seed
+  - '11006'
+- id: k_lame_S3_s11007
+  kind: command
+  timeout_s: 9000
+  argv:
+  - .venv/Scripts/python.exe
+  - tools/geometry/klangfilm_lame_cli.py
+  - search
+  - --config
+  - examples/typologies/home_landscape_2026-11-15/hl__klangfilm_lame_curved_v1_seedS3.yaml
+  - --mode
+  - screen
+  - --budget
+  - '60'
+  - --cma-seed
+  - '11007'
+- id: k_lame_S4_s11008
+  kind: command
+  timeout_s: 9000
+  argv:
+  - .venv/Scripts/python.exe
+  - tools/geometry/klangfilm_lame_cli.py
+  - search
+  - --config
+  - examples/typologies/home_landscape_2026-11-15/hl__klangfilm_lame_curved_v1_seedS4.yaml
+  - --mode
+  - screen
+  - --budget
+  - '60'
+  - --cma-seed
+  - '11008'
 - id: c_rosse_s5678
   kind: command
   timeout_s: 9000

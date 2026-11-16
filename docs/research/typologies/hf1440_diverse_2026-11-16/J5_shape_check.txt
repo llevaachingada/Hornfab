@@ -1,0 +1,6 @@
+| config | ok | dofs / cap | mouth W x H mm | depth mm | envelope | driver coupling | note |
+|---|---|---|---|---|---|---|---|
+
+
+| J5_PRE-FLIGHT_PINNED | yes | 2003 / 24000 | 465 x 327 | 272 | fits | round, matches the exit |  |
+

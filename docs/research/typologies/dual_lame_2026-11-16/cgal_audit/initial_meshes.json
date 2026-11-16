@@ -1,0 +1,30 @@
+[
+  {
+    "file": "docs\\research\\typologies\\dual_lame_2026-11-16\\mesh_audit\\k01_geometry_only.msh",
+    "sha256": "c3a4628d0a039fe5c95c4425548446e595d08c5c0654fea14e8886837f49e078",
+    "nodes": 3072,
+    "triangles": 5912,
+    "element_types": {
+      "2": 5912
+    },
+    "cgal_vertices": 3072,
+    "cgal_faces": 5912,
+    "valid_polyhedron": true,
+    "closed": false,
+    "self_intersects": false
+  },
+  {
+    "file": "docs\\research\\typologies\\dual_lame_2026-11-16\\mesh_audit\\l01_geometry_only.msh",
+    "sha256": "b22dff6b46099f26cc488f15c01123bf61b8280960c69562d0acef05e93ebdbc",
+    "nodes": 1534,
+    "triangles": 2876,
+    "element_types": {
+      "2": 2876
+    },
+    "cgal_vertices": 1534,
+    "cgal_faces": 2876,
+    "valid_polyhedron": true,
+    "closed": false,
+    "self_intersects": false
+  }
+]

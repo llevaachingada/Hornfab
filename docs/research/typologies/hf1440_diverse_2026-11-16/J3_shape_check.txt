@@ -1,0 +1,4 @@
+| config | ok | dofs / cap | mouth W x H mm | depth mm | envelope | driver coupling | note |
+|---|---|---|---|---|---|---|---|
+| J3_PRE-FLIGHT_PINNED | NO | - | - x - | - | - | - | CONFIG ERROR: GeometryInvalidError: generator seed is not a legal horn: iwata_ar rows: stop_deg must be in [90, 240], got 87.0 |
+

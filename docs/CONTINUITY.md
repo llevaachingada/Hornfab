@@ -1,5 +1,46 @@
 # CONTINUITY
 
+## 2026-11-16 - Dual Lamé geometry and HF1440 seed gallery (CPU only)
+
+- Added distinct digest-bound Klangfilm-Lamé and derived Le Cléac'h H/V GRID recipes,
+  sampled 3-D normal shells, fixed geometry-only examples and GUI previews. Historical
+  bridge and ellipse paths are preserved. Parent and extension assumptions, source
+  dimensions and remaining validation gates are in
+  `docs/research/typologies/DUAL_LAME_INTEGRATION_2026-11-16.md`.
+- The 16 K and 12 derived L source seeds have matched-view sheets and reproducible
+  diagnostics. K01–K16 and corrected L01–L11 mesh and pass source/envelope checks;
+  L12 is refused for width 633.063 mm. CGAL detected no self-intersection in those
+  27 saved open quarter meshes. This does not certify continuous surfaces, mirrored
+  volumes, convergence, driver field or acoustic performance. The L lip is tangent
+  to the discrete parent interpolant; its continuous-source fidelity is unproven.
+- The separately supplied single-file HF1440 gallery describes six *existing*
+  `iwata_ar` J seeds and six preview-only K seeds with a different mm sweep law;
+  they are not identical to the earlier 28-seed pack. See
+  `docs/research/typologies/hf1440_diverse_2026-11-16/RESULTS.md` for exact outcomes,
+  generator compatibility and J3's 87-degree stop refusal. No new GPU or acoustic
+  campaign was launched during this work. Existing concurrent queue changes are
+  preserved; queue content itself is not evidence that a job ran or passed.
+- Focused family tests passed; the broad run reported 259 passes, eight temporary
+  Windows hard-link permission failures later passed outside the sandbox (18 worker
+  tests), and two catalog failures fixed by regeneration (38 catalog tests passed).
+  GUI and preview tests passed (41). No claim of a complete full-suite pass.
+
+## 2026-11-16 (16:30) - Klangfilm-Lame geometry family implemented (CPU only; no GPU, nothing queued)
+
+- New `tools/geometry/lame_cap.py` (superellipsoid-cap area, quintic C2 gate, ratio-locked area solve) and
+  `tools/geometry/klangfilm_lame.py` + `klangfilm_lame_cli.py` (`rows.type: klangfilm_lame`, schema `klangfilm-lame-v1`).
+  Knobs: fc_hz, aspect, lame_p, end_frac, rim_sweep_ratio, morph_frac; source blend OFF (`source_blend_ratio` 0,
+  `entry_half_angle_deg` only used when blend > 0) and pinned. The 2018 port `klangfilm_ellipse.py` is untouched.
+- Throat provenance (v3 addendum): HF1440 publishes NO numeric exit angle; `exit_angle_deg: 2` stays a simulation
+  assumption (meta `angle_provenance: assumed_legacy`). Raw parent wall half-angle is derived: 10.617223 deg (tested).
+  Nothing forces 2 deg. Diagnostics: `klangfilm_lame.diagnostics`.
+- Tests `tests/test_tools_klangfilm_lame.py` (16, green): sphere/ellipsoid/area-lock invariants, p=2 reduction, throat
+  round + area residual < 1e-8, sweep H-only, blend off/on, determinism. Cell `hl__klangfilm_lame_curved_v1` (not queued).
+- NOT done (needs local machine): 3-D mesh/shell/normals checks, camera-matched renders, driver coupling A/B, BEM
+  comparisons, `lame_tail_mode` follow_parent, true 3-D normal outer shell, JMLC-derived parent. Handoff copied to
+  `docs/research/typologies/klangfilm_lame_handoff_2026-11-16/`. Direct port of the non-commercial 2018 workbook: check
+  licence before distribution.
+
 ## 2026-11-16 (15:00) - Every watchdog-stopped run continued; watchdog: resume-aware + pin_ignore
 
 - Runner (`tools/run_campaign_night.py`): a job with `--resume DIR` is watched on that DIR and judged only on the rows

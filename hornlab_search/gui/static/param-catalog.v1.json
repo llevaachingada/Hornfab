@@ -12537,7 +12537,7 @@
       "bounds_index": {
         "g_L_mm": {
           "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml",
-          "hi": 260.0,
+          "hi": 285.0,
           "key": "bounds.g_L_mm",
           "lo": 200.0,
           "log": false,
@@ -12697,7 +12697,7 @@
           "code_ref": "hornlab_search.design.generators.grid._meridians",
           "context": "rows",
           "contexts": [],
-          "default": 240.0,
+          "default": 259.603653,
           "default_source": {
             "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml",
             "key": "seed_params.g_L_mm"
@@ -12726,7 +12726,7 @@
           "prefix": "g",
           "role": "rows",
           "search": {
-            "hi": 260.0,
+            "hi": 285.0,
             "lo": 200.0,
             "log": false,
             "search": true
@@ -12743,7 +12743,7 @@
           "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
           "context": "rows",
           "contexts": [],
-          "default": 38.0,
+          "default": 36.388866,
           "default_source": {
             "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml",
             "key": "seed_params.g_a_h_deg"
@@ -12789,7 +12789,7 @@
           "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
           "context": "rows",
           "contexts": [],
-          "default": 24.0,
+          "default": 22.707717,
           "default_source": {
             "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml",
             "key": "seed_params.g_a_v_deg"
@@ -12881,7 +12881,7 @@
           "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
           "context": "rows",
           "contexts": [],
-          "default": 2.0,
+          "default": 2.143998,
           "default_source": {
             "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml",
             "key": "seed_params.g_n"
@@ -12973,7 +12973,7 @@
           "code_ref": "hornlab_search.design.generators.grid.append_tangent_lip",
           "context": "rows",
           "contexts": [],
-          "default": 25.0,
+          "default": 18.284822,
           "default_source": {
             "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml",
             "key": "seed_params.g_r_lip_mm"
@@ -13022,7 +13022,7 @@
           "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
           "context": "rows",
           "contexts": [],
-          "default": 0.35,
+          "default": 0.389835,
           "default_source": {
             "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml",
             "key": "seed_params.g_s"
@@ -13068,7 +13068,7 @@
           "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
           "context": "rows",
           "contexts": [],
-          "default": 0.8,
+          "default": 0.847983,
           "default_source": {
             "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml",
             "key": "seed_params.g_sf_ab"
@@ -13114,7 +13114,7 @@
           "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
           "context": "rows",
           "contexts": [],
-          "default": 0.3,
+          "default": 0.239269,
           "default_source": {
             "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml",
             "key": "seed_params.g_sf_amt"
@@ -13344,7 +13344,7 @@
           "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
           "context": "rows",
           "contexts": [],
-          "default": 130.0,
+          "default": 86.087609,
           "default_source": {
             "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml",
             "key": "seed_params.g_wrap_deg"
@@ -20184,7 +20184,7 @@
           "file": "examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml",
           "hi": 30.0,
           "key": "bounds.g_a_v_deg",
-          "lo": 18.0,
+          "lo": 12.0,
           "log": false,
           "search": true
         },
@@ -20208,7 +20208,7 @@
           "file": "examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml",
           "hi": 3.0,
           "key": "bounds.g_k",
-          "lo": 0.8,
+          "lo": 0.5,
           "log": false,
           "search": true
         },
@@ -20232,7 +20232,7 @@
           "file": "examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml",
           "hi": 0.6,
           "key": "bounds.g_r",
-          "lo": 0.25,
+          "lo": 0.1,
           "log": false,
           "search": true
         },
@@ -20345,7 +20345,7 @@
           "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
           "context": "rows",
           "contexts": [],
-          "default": 40.0,
+          "default": 35.667049,
           "default_source": {
             "file": "examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml",
             "key": "seed_params.g_a_h_deg"
@@ -20391,7 +20391,7 @@
           "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
           "context": "rows",
           "contexts": [],
-          "default": 25.0,
+          "default": 19.192696,
           "default_source": {
             "file": "examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml",
             "key": "seed_params.g_a_v_deg"
@@ -20421,7 +20421,7 @@
           "role": "rows",
           "search": {
             "hi": 30.0,
-            "lo": 18.0,
+            "lo": 12.0,
             "log": false,
             "search": true
           },
@@ -20437,7 +20437,7 @@
           "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
           "context": "rows",
           "contexts": [],
-          "default": 0.2,
+          "default": 0.04501,
           "default_source": {
             "file": "examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml",
             "key": "seed_params.g_b"
@@ -20483,7 +20483,7 @@
           "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
           "context": "rows",
           "contexts": [],
-          "default": 360.0,
+          "default": 410.778704,
           "default_source": {
             "file": "examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml",
             "key": "seed_params.g_height_mm"
@@ -20529,7 +20529,7 @@
           "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
           "context": "rows",
           "contexts": [],
-          "default": 1.0,
+          "default": 0.967541,
           "default_source": {
             "file": "examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml",
             "key": "seed_params.g_k"
@@ -20559,7 +20559,7 @@
           "role": "rows",
           "search": {
             "hi": 3.0,
-            "lo": 0.8,
+            "lo": 0.5,
             "log": false,
             "search": true
           },
@@ -20667,7 +20667,7 @@
           "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
           "context": "rows",
           "contexts": [],
-          "default": 0.4,
+          "default": 0.376617,
           "default_source": {
             "file": "examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml",
             "key": "seed_params.g_r"
@@ -20697,7 +20697,7 @@
           "role": "rows",
           "search": {
             "hi": 0.6,
-            "lo": 0.25,
+            "lo": 0.1,
             "log": false,
             "search": true
           },
@@ -20713,7 +20713,7 @@
           "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
           "context": "rows",
           "contexts": [],
-          "default": 4.0,
+          "default": 5.381518,
           "default_source": {
             "file": "examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml",
             "key": "seed_params.g_rect_exponent"
@@ -20759,7 +20759,7 @@
           "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
           "context": "rows",
           "contexts": [],
-          "default": 1.0,
+          "default": 0.998015,
           "default_source": {
             "file": "examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml",
             "key": "seed_params.g_tmax"
@@ -20805,7 +20805,7 @@
           "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
           "context": "rows",
           "contexts": [],
-          "default": 560.0,
+          "default": 560.968198,
           "default_source": {
             "file": "examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml",
             "key": "seed_params.g_width_mm"
@@ -23420,6 +23420,1331 @@
       "preview_only": false,
       "source_status": "catalog",
       "symmetry": "axisymmetric"
+    },
+    "k01_geometry_only": {
+      "bounds_index": {
+        "g_aspect": {
+          "file": "examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml",
+          "hi": 1.6,
+          "key": "bounds.g_aspect",
+          "lo": 1.6,
+          "log": false,
+          "search": false
+        },
+        "g_end_frac": {
+          "file": "examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml",
+          "hi": 1.25,
+          "key": "bounds.g_end_frac",
+          "lo": 1.25,
+          "log": false,
+          "search": false
+        },
+        "g_entry_half_angle_deg": {
+          "file": "examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml",
+          "hi": 2.0,
+          "key": "bounds.g_entry_half_angle_deg",
+          "lo": 2.0,
+          "log": false,
+          "search": false
+        },
+        "g_fc_hz": {
+          "file": "examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml",
+          "hi": 560.0,
+          "key": "bounds.g_fc_hz",
+          "lo": 560.0,
+          "log": false,
+          "search": false
+        },
+        "g_lame_p": {
+          "file": "examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml",
+          "hi": 2.0,
+          "key": "bounds.g_lame_p",
+          "lo": 2.0,
+          "log": false,
+          "search": false
+        },
+        "g_morph_frac": {
+          "file": "examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml",
+          "hi": 0.3,
+          "key": "bounds.g_morph_frac",
+          "lo": 0.3,
+          "log": false,
+          "search": false
+        },
+        "g_rim_sweep_ratio": {
+          "file": "examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml",
+          "hi": 0.0,
+          "key": "bounds.g_rim_sweep_ratio",
+          "lo": 0.0,
+          "log": false,
+          "search": false
+        },
+        "g_source_blend_ratio": {
+          "file": "examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml",
+          "hi": 0.0,
+          "key": "bounds.g_source_blend_ratio",
+          "lo": 0.0,
+          "log": false,
+          "search": false
+        }
+      },
+      "brief_file": "examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml",
+      "brief_tied": null,
+      "config_path": "examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml",
+      "description": "Klangfilm-Lam\u00e9 geometry preview; sampled checks only, not an acoustic-ready design.",
+      "documented": true,
+      "driver_exit_mm": null,
+      "empty_reason": null,
+      "family": "FREEFORM",
+      "group": "home",
+      "kind": "rows",
+      "knob_names": [
+        "g_aspect",
+        "g_end_frac",
+        "g_entry_half_angle_deg",
+        "g_fc_hz",
+        "g_lame_p",
+        "g_morph_frac",
+        "g_rim_sweep_ratio",
+        "g_source_blend_ratio",
+        "n_phi",
+        "n_s",
+        "span",
+        "wall_thickness_mm"
+      ],
+      "knobs": [
+        {
+          "base_knob": "aspect",
+          "bounds_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml",
+            "key": "bounds.g_aspect"
+          },
+          "code_ref": "hornlab_search.design.generators.klangfilm_lame_family.resolve_grid",
+          "context": "rows",
+          "contexts": [],
+          "default": 1.6,
+          "default_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml",
+            "key": "seed_params.g_aspect"
+          },
+          "detail": "K morphs from a round throat to this ratio with a quintic gate.",
+          "doc_ref": [
+            "docs/research/typologies/dual_lame_2026-11-16/mesh_audit/README.md",
+            "# Saved CPU mesh audit"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_aspect",
+          "label": "Target aspect ratio (rows)",
+          "physical": "Target horizontal-to-vertical section ratio.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 1.6,
+            "lo": 1.6,
+            "log": false,
+            "search": false
+          },
+          "summary": "Target horizontal-to-vertical section ratio.",
+          "unit": null
+        },
+        {
+          "base_knob": "end_frac",
+          "bounds_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml",
+            "key": "bounds.g_end_frac"
+          },
+          "code_ref": "hornlab_search.design.generators.klangfilm_lame_family.resolve_grid",
+          "context": "rows",
+          "contexts": [],
+          "default": 1.25,
+          "default_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml",
+            "key": "seed_params.g_end_frac"
+          },
+          "detail": "Changes how far the K parent continues around its rollback.",
+          "doc_ref": [
+            "docs/research/typologies/dual_lame_2026-11-16/mesh_audit/README.md",
+            "# Saved CPU mesh audit"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_end_frac",
+          "label": "Parent termination fraction (rows)",
+          "physical": "Sets the parent cap height at termination relative to its radius.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 1.25,
+            "lo": 1.25,
+            "log": false,
+            "search": false
+          },
+          "summary": "Sets the parent cap height at termination relative to its radius.",
+          "unit": null
+        },
+        {
+          "base_knob": "entry_half_angle_deg",
+          "bounds_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml",
+            "key": "bounds.g_entry_half_angle_deg"
+          },
+          "code_ref": "hornlab_search.design.generators.klangfilm_lame_family.resolve_grid",
+          "context": "rows",
+          "contexts": [],
+          "default": 2.0,
+          "default_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml",
+            "key": "seed_params.g_entry_half_angle_deg"
+          },
+          "detail": "This setting is inactive when source blend is zero and is not a driver datasheet claim.",
+          "doc_ref": [
+            "docs/research/typologies/dual_lame_2026-11-16/mesh_audit/README.md",
+            "# Saved CPU mesh audit"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_entry_half_angle_deg",
+          "label": "Entrance half-angle (rows)",
+          "physical": "Target wall half-angle for the optional K entrance blend.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 2.0,
+            "lo": 2.0,
+            "log": false,
+            "search": false
+          },
+          "summary": "Target wall half-angle for the optional K entrance blend.",
+          "unit": "deg"
+        },
+        {
+          "base_knob": "fc_hz",
+          "bounds_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml",
+            "key": "bounds.g_fc_hz"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_lecleach_knobs",
+          "context": "rows",
+          "contexts": [
+            "rows"
+          ],
+          "default": 560.0,
+          "default_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml",
+            "key": "seed_params.g_fc_hz"
+          },
+          "detail": "The verified Fourcade march has no per-azimuth split, so fc_hz is the only cutoff. The iwata and AR stretch keep this axisymmetric base.",
+          "doc_ref": [
+            "docs/research/typologies/JMLC_LECLEACH_RESEARCH_2026-10-25.md",
+            "## 2. Construction comparison"
+          ],
+          "documented": true,
+          "flags": [
+            "overloaded"
+          ],
+          "formula": "m = 4 pi fc / c",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_fc_hz",
+          "label": "Axisymmetric rows cutoff (rows)",
+          "physical": "Sets the rollback size and loading corner.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 560.0,
+            "lo": 560.0,
+            "log": false,
+            "search": false
+          },
+          "summary": "Single cutoff of an axisymmetric Le Cleac'h rows march.",
+          "unit": "Hz"
+        },
+        {
+          "base_knob": "lame_p",
+          "bounds_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml",
+            "key": "bounds.g_lame_p"
+          },
+          "code_ref": "hornlab_search.design.generators.klangfilm_lame_family.resolve_grid",
+          "context": "rows",
+          "contexts": [],
+          "default": 2.0,
+          "default_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml",
+            "key": "seed_params.g_lame_p"
+          },
+          "detail": "K transitions from a round throat to this exponent; larger values make sections squarer.",
+          "doc_ref": [
+            "docs/research/typologies/dual_lame_2026-11-16/mesh_audit/README.md",
+            "# Saved CPU mesh audit"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_lame_p",
+          "label": "Lam\u00e9 exponent (rows)",
+          "physical": "Target Lam\u00e9 section exponent.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 2.0,
+            "lo": 2.0,
+            "log": false,
+            "search": false
+          },
+          "summary": "Target Lam\u00e9 section exponent.",
+          "unit": null
+        },
+        {
+          "base_knob": "morph_frac",
+          "bounds_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml",
+            "key": "bounds.g_morph_frac"
+          },
+          "code_ref": "hornlab_search.design.generators.klangfilm_lame_family.resolve_grid",
+          "context": "rows",
+          "contexts": [],
+          "default": 0.3,
+          "default_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml",
+            "key": "seed_params.g_morph_frac"
+          },
+          "detail": "It is a fraction of the parent pre-shoulder arc length.",
+          "doc_ref": [
+            "docs/research/typologies/dual_lame_2026-11-16/mesh_audit/README.md",
+            "# Saved CPU mesh audit"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_morph_frac",
+          "label": "Morph fraction (rows)",
+          "physical": "Sets where the K section morph reaches its target.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 0.3,
+            "lo": 0.3,
+            "log": false,
+            "search": false
+          },
+          "summary": "Sets where the K section morph reaches its target.",
+          "unit": null
+        },
+        {
+          "base_knob": "rim_sweep_ratio",
+          "bounds_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml",
+            "key": "bounds.g_rim_sweep_ratio"
+          },
+          "code_ref": "hornlab_search.design.generators.klangfilm_lame_family.resolve_grid",
+          "context": "rows",
+          "contexts": [],
+          "default": 0.0,
+          "default_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml",
+            "key": "seed_params.g_rim_sweep_ratio"
+          },
+          "detail": "A quintic gate applies the K sweep toward the rim; zero disables it.",
+          "doc_ref": [
+            "docs/research/typologies/dual_lame_2026-11-16/mesh_audit/README.md",
+            "# Saved CPU mesh audit"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_rim_sweep_ratio",
+          "label": "Rim sweep ratio (rows)",
+          "physical": "Sets horizontal rim setback relative to the horizontal section size.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 0.0,
+            "lo": 0.0,
+            "log": false,
+            "search": false
+          },
+          "summary": "Sets horizontal rim setback relative to the horizontal section size.",
+          "unit": null
+        },
+        {
+          "base_knob": "source_blend_ratio",
+          "bounds_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml",
+            "key": "bounds.g_source_blend_ratio"
+          },
+          "code_ref": "hornlab_search.design.generators.klangfilm_lame_family.resolve_grid",
+          "context": "rows",
+          "contexts": [],
+          "default": 0.0,
+          "default_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml",
+            "key": "seed_params.g_source_blend_ratio"
+          },
+          "detail": "Zero disables the experimental entrance tangent blend.",
+          "doc_ref": [
+            "docs/research/typologies/dual_lame_2026-11-16/mesh_audit/README.md",
+            "# Saved CPU mesh audit"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_source_blend_ratio",
+          "label": "Source blend ratio (rows)",
+          "physical": "Sets the optional entrance blend length relative to throat diameter.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 0.0,
+            "lo": 0.0,
+            "log": false,
+            "search": false
+          },
+          "summary": "Sets the optional entrance blend length relative to throat diameter.",
+          "unit": null
+        },
+        {
+          "base_knob": "n_phi",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [],
+          "default": 19,
+          "default_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml",
+            "key": "generator.n_phi"
+          },
+          "detail": "The row count sets the angular sampling of the point grid. The quarter model, half model and full ring each have their own minimum and parity rules in the generator. It is a count, not a length.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "n_phi",
+          "label": "Azimuth row count",
+          "physical": "Raises angular fidelity at the cost of more grid rows.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Number of azimuth rows in the rows/grid model.",
+          "unit": null
+        },
+        {
+          "base_knob": "n_s",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [],
+          "default": 64,
+          "default_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml",
+            "key": "generator.n_s"
+          },
+          "detail": "Each row is sampled at equal axial (or equal-arc, for the rows march) fractions. This count sets the longitudinal resolution. It is a count, not a length.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "n_s",
+          "label": "Axial station count",
+          "physical": "Raises longitudinal fidelity at the cost of more points.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Number of axial stations along each row.",
+          "unit": null
+        },
+        {
+          "base_knob": "span",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_span_requested",
+          "context": "rows",
+          "contexts": [],
+          "default": "quarter",
+          "default_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml",
+            "key": "generator.span"
+          },
+          "detail": "The legal spans are the ones the generator handles, and their names are read from the generator's own span constant rather than retyped here. A kind can force a span: an odd-cosine asymmetry forces the full ring and a b-term forces the half model.",
+          "doc_ref": [
+            "docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md",
+            "### 2.5 Up/down-asymmetric saddle"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": [
+              "quarter",
+              "half",
+              "half_xz",
+              "full"
+            ],
+            "hi": null,
+            "kind": "str",
+            "lo": null,
+            "note": "named grid.py cap",
+            "section": null,
+            "source": {
+              "file": "hornlab_search/design/generators/grid.py",
+              "key": "ROWS_SPANS"
+            }
+          },
+          "knob": "span",
+          "label": "Row span",
+          "physical": "Chooses whether the mesh uses mirror planes or a seam-free full ring.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "How much of the azimuth circle the rows model covers.",
+          "unit": null
+        },
+        {
+          "base_knob": "wall_thickness_mm",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [],
+          "default": 3.0,
+          "default_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml",
+            "key": "generator.wall_thickness_mm"
+          },
+          "detail": "The point-grid route builds an explicit outer shell offset from each row's own profile. This is the printed shell thickness, not an acoustic dimension. The generator also uses it in its self-approach guard.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "wall_thickness_mm",
+          "label": "Shell thickness",
+          "physical": "Changes the printed wall thickness, not the acoustic inner surface.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Outer-shell thickness of a freestanding rows model.",
+          "unit": "mm"
+        }
+      ],
+      "name": "k01_geometry_only",
+      "non_native_keys": [],
+      "preview_only": true,
+      "source_status": "gui-only",
+      "symmetry": "hv"
+    },
+    "l01_geometry_only": {
+      "bounds_index": {
+        "g_T": {
+          "file": "examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml",
+          "hi": 0.5,
+          "key": "bounds.g_T",
+          "lo": 0.5,
+          "log": false,
+          "search": false
+        },
+        "g_ar_m": {
+          "file": "examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml",
+          "hi": 1.52,
+          "key": "bounds.g_ar_m",
+          "lo": 1.52,
+          "log": false,
+          "search": false
+        },
+        "g_ar_p": {
+          "file": "examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml",
+          "hi": 1.05,
+          "key": "bounds.g_ar_p",
+          "lo": 1.05,
+          "log": false,
+          "search": false
+        },
+        "g_axial_length_factor": {
+          "file": "examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml",
+          "hi": 1.0,
+          "key": "bounds.g_axial_length_factor",
+          "lo": 1.0,
+          "log": false,
+          "search": false
+        },
+        "g_fc_hz": {
+          "file": "examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml",
+          "hi": 500.0,
+          "key": "bounds.g_fc_hz",
+          "lo": 500.0,
+          "log": false,
+          "search": false
+        },
+        "g_lame_p_mouth": {
+          "file": "examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml",
+          "hi": 2.0,
+          "key": "bounds.g_lame_p_mouth",
+          "lo": 2.0,
+          "log": false,
+          "search": false
+        },
+        "g_lip_radius_mm": {
+          "file": "examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml",
+          "hi": 0.0,
+          "key": "bounds.g_lip_radius_mm",
+          "lo": 0.0,
+          "log": false,
+          "search": false
+        },
+        "g_rim_sweep_mm": {
+          "file": "examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml",
+          "hi": 0.0,
+          "key": "bounds.g_rim_sweep_mm",
+          "lo": 0.0,
+          "log": false,
+          "search": false
+        },
+        "g_stop_deg": {
+          "file": "examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml",
+          "hi": 118.0,
+          "key": "bounds.g_stop_deg",
+          "lo": 118.0,
+          "log": false,
+          "search": false
+        }
+      },
+      "brief_file": "examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml",
+      "brief_tied": null,
+      "config_path": "examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml",
+      "description": "Derived Le Cl\u00e9ac'h H/V Lam\u00e9 geometry preview; sampled checks only, not an acoustic-ready design.",
+      "documented": true,
+      "driver_exit_mm": null,
+      "empty_reason": null,
+      "family": "FREEFORM",
+      "group": "home",
+      "kind": "rows",
+      "knob_names": [
+        "g_T",
+        "g_ar_m",
+        "g_ar_p",
+        "g_axial_length_factor",
+        "g_fc_hz",
+        "g_lame_p_mouth",
+        "g_lip_radius_mm",
+        "g_rim_sweep_mm",
+        "g_stop_deg",
+        "n_phi",
+        "n_s",
+        "span",
+        "wall_thickness_mm"
+      ],
+      "knobs": [
+        {
+          "base_knob": "T",
+          "bounds_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml",
+            "key": "bounds.g_T"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "rows"
+          ],
+          "default": 0.5,
+          "default_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml",
+            "key": "seed_params.g_T"
+          },
+          "detail": "The two row families share the spelling but not the equation. The Salmon rows use it in the family area law; the verified Le Cleac'h rows use it in the Fourcade wavefront-area law.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [
+            "overloaded"
+          ],
+          "formula": "Salmon family law; Fourcade eq. 42",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_T",
+          "label": "Rows family factor (rows)",
+          "physical": "Selects the family member and its expansion profile.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 0.5,
+            "lo": 0.5,
+            "log": false,
+            "search": false
+          },
+          "summary": "Salmon family T on the Salmon rows; Fourcade area-law T on the Le Cleac'h rows.",
+          "unit": null
+        },
+        {
+          "base_knob": "ar_m",
+          "bounds_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml",
+            "key": "bounds.g_ar_m"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_iwata_ar_knobs",
+          "context": "rows",
+          "contexts": [],
+          "default": 1.52,
+          "default_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml",
+            "key": "seed_params.g_ar_m"
+          },
+          "detail": "The iwata_ar kind applies an area-preserving aspect-ratio evolution to the verified Le Cleac'h march, with T pinned by its config. It is our reconstruction of the principle, never the Iwata product.",
+          "doc_ref": [
+            "docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md",
+            "### 2.2 Iwata / quasi-Iwata / \"FH-N2\""
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "AR evolution with ar_m at the mouth",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_ar_m",
+          "label": "Iwata mouth aspect ratio (rows)",
+          "physical": "Makes the mouth wider than tall (or the reverse).",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 1.52,
+            "lo": 1.52,
+            "log": false,
+            "search": false
+          },
+          "summary": "Mouth aspect ratio of the iwata_ar stretch on the verified march.",
+          "unit": null
+        },
+        {
+          "base_knob": "ar_p",
+          "bounds_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml",
+            "key": "bounds.g_ar_p"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_iwata_ar_knobs",
+          "context": "rows",
+          "contexts": [],
+          "default": 1.05,
+          "default_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml",
+            "key": "seed_params.g_ar_p"
+          },
+          "detail": "Shapes how quickly the aspect-ratio stretch develops along the normalized arc. The construction is our reconstruction, not a published Iwata recipe.",
+          "doc_ref": [
+            "docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md",
+            "### 2.2 Iwata / quasi-Iwata / \"FH-N2\""
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "AR(l) = 1 + (ar_m - 1) (l / L0)^ar_p",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_ar_p",
+          "label": "Iwata AR exponent (rows)",
+          "physical": "Moves the aspect-ratio change toward the throat or the mouth.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 1.05,
+            "lo": 1.05,
+            "log": false,
+            "search": false
+          },
+          "summary": "Exponent of the iwata_ar aspect-ratio evolution.",
+          "unit": null
+        },
+        {
+          "base_knob": "axial_length_factor",
+          "bounds_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml",
+            "key": "bounds.g_axial_length_factor"
+          },
+          "code_ref": "hornlab_search.design.generators.lecleach_swept_hv.make_grid",
+          "context": "rows",
+          "contexts": [],
+          "default": 1.0,
+          "default_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml",
+            "key": "seed_params.g_axial_length_factor"
+          },
+          "detail": "Changes the L axial progression to reach the target depth.",
+          "doc_ref": [
+            "docs/research/typologies/dual_lame_2026-11-16/mesh_audit/README.md",
+            "# Saved CPU mesh audit"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_axial_length_factor",
+          "label": "Axial length factor (rows)",
+          "physical": "Sets the target axial length relative to the unswept parent.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 1.0,
+            "lo": 1.0,
+            "log": false,
+            "search": false
+          },
+          "summary": "Sets the target axial length relative to the unswept parent.",
+          "unit": null
+        },
+        {
+          "base_knob": "fc_hz",
+          "bounds_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml",
+            "key": "bounds.g_fc_hz"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_lecleach_knobs",
+          "context": "rows",
+          "contexts": [
+            "rows"
+          ],
+          "default": 500.0,
+          "default_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml",
+            "key": "seed_params.g_fc_hz"
+          },
+          "detail": "The verified Fourcade march has no per-azimuth split, so fc_hz is the only cutoff. The iwata and AR stretch keep this axisymmetric base.",
+          "doc_ref": [
+            "docs/research/typologies/JMLC_LECLEACH_RESEARCH_2026-10-25.md",
+            "## 2. Construction comparison"
+          ],
+          "documented": true,
+          "flags": [
+            "overloaded"
+          ],
+          "formula": "m = 4 pi fc / c",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_fc_hz",
+          "label": "Axisymmetric rows cutoff (rows)",
+          "physical": "Sets the rollback size and loading corner.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 500.0,
+            "lo": 500.0,
+            "log": false,
+            "search": false
+          },
+          "summary": "Single cutoff of an axisymmetric Le Cleac'h rows march.",
+          "unit": "Hz"
+        },
+        {
+          "base_knob": "lame_p_mouth",
+          "bounds_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml",
+            "key": "bounds.g_lame_p_mouth"
+          },
+          "code_ref": "hornlab_search.design.generators.lecleach_swept_hv.make_grid",
+          "context": "rows",
+          "contexts": [],
+          "default": 2.0,
+          "default_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml",
+            "key": "seed_params.g_lame_p_mouth"
+          },
+          "detail": "The section transitions from a round throat toward this exponent.",
+          "doc_ref": [
+            "docs/research/typologies/dual_lame_2026-11-16/mesh_audit/README.md",
+            "# Saved CPU mesh audit"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_lame_p_mouth",
+          "label": "Mouth Lam\u00e9 exponent (rows)",
+          "physical": "Sets the L mouth section exponent.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 2.0,
+            "lo": 2.0,
+            "log": false,
+            "search": false
+          },
+          "summary": "Sets the L mouth section exponent.",
+          "unit": null
+        },
+        {
+          "base_knob": "lip_radius_mm",
+          "bounds_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml",
+            "key": "bounds.g_lip_radius_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.lecleach_swept_hv.make_grid",
+          "context": "rows",
+          "contexts": [],
+          "default": 0.0,
+          "default_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml",
+            "key": "seed_params.g_lip_radius_mm"
+          },
+          "detail": "Zero leaves the lip extension off.",
+          "doc_ref": [
+            "docs/research/typologies/dual_lame_2026-11-16/mesh_audit/README.md",
+            "# Saved CPU mesh audit"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_lip_radius_mm",
+          "label": "Lip radius (rows)",
+          "physical": "Radius of the optional tangent-arc lip.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 0.0,
+            "lo": 0.0,
+            "log": false,
+            "search": false
+          },
+          "summary": "Radius of the optional tangent-arc lip.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "rim_sweep_mm",
+          "bounds_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml",
+            "key": "bounds.g_rim_sweep_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.lecleach_swept_hv.make_grid",
+          "context": "rows",
+          "contexts": [],
+          "default": 0.0,
+          "default_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml",
+            "key": "seed_params.g_rim_sweep_mm"
+          },
+          "detail": "The L sweep varies around the section and grows toward the mouth.",
+          "doc_ref": [
+            "docs/research/typologies/dual_lame_2026-11-16/mesh_audit/README.md",
+            "# Saved CPU mesh audit"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_rim_sweep_mm",
+          "label": "Rim sweep (rows)",
+          "physical": "Horizontal rim setback in millimetres.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 0.0,
+            "lo": 0.0,
+            "log": false,
+            "search": false
+          },
+          "summary": "Horizontal rim setback in millimetres.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "stop_deg",
+          "bounds_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml",
+            "key": "bounds.g_stop_deg"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._rows_shape_knobs",
+          "context": "rows",
+          "contexts": [
+            "rows"
+          ],
+          "default": 118.0,
+          "default_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml",
+            "key": "seed_params.g_stop_deg"
+          },
+          "detail": "The verified Le Cleac'h rows use the published stop window and allow rollback past vertical. The Salmon rows stop below or above the cap-area asymptote, and modulated Salmon rows keep the plan's rollback window. A per-typology note narrows this.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [
+            "overloaded"
+          ],
+          "formula": "march stops when phi >= stop_deg",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_stop_deg",
+          "label": "Rows march stop (rows)",
+          "physical": "Chooses how far around the rollback each row is followed.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 118.0,
+            "lo": 118.0,
+            "log": false,
+            "search": false
+          },
+          "summary": "Wall-angle stop of the per-azimuth rows march; the legal window depends on the kind.",
+          "unit": "deg"
+        },
+        {
+          "base_knob": "n_phi",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [],
+          "default": 25,
+          "default_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml",
+            "key": "generator.n_phi"
+          },
+          "detail": "The row count sets the angular sampling of the point grid. The quarter model, half model and full ring each have their own minimum and parity rules in the generator. It is a count, not a length.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "n_phi",
+          "label": "Azimuth row count",
+          "physical": "Raises angular fidelity at the cost of more grid rows.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Number of azimuth rows in the rows/grid model.",
+          "unit": null
+        },
+        {
+          "base_knob": "n_s",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [],
+          "default": 96,
+          "default_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml",
+            "key": "generator.n_s"
+          },
+          "detail": "Each row is sampled at equal axial (or equal-arc, for the rows march) fractions. This count sets the longitudinal resolution. It is a count, not a length.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "n_s",
+          "label": "Axial station count",
+          "physical": "Raises longitudinal fidelity at the cost of more points.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Number of axial stations along each row.",
+          "unit": null
+        },
+        {
+          "base_knob": "span",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_span_requested",
+          "context": "rows",
+          "contexts": [],
+          "default": "quarter",
+          "default_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml",
+            "key": "generator.span"
+          },
+          "detail": "The legal spans are the ones the generator handles, and their names are read from the generator's own span constant rather than retyped here. A kind can force a span: an odd-cosine asymmetry forces the full ring and a b-term forces the half model.",
+          "doc_ref": [
+            "docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md",
+            "### 2.5 Up/down-asymmetric saddle"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": [
+              "quarter",
+              "half",
+              "half_xz",
+              "full"
+            ],
+            "hi": null,
+            "kind": "str",
+            "lo": null,
+            "note": "named grid.py cap",
+            "section": null,
+            "source": {
+              "file": "hornlab_search/design/generators/grid.py",
+              "key": "ROWS_SPANS"
+            }
+          },
+          "knob": "span",
+          "label": "Row span",
+          "physical": "Chooses whether the mesh uses mirror planes or a seam-free full ring.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "How much of the azimuth circle the rows model covers.",
+          "unit": null
+        },
+        {
+          "base_knob": "wall_thickness_mm",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [],
+          "default": 3.0,
+          "default_source": {
+            "file": "examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml",
+            "key": "generator.wall_thickness_mm"
+          },
+          "detail": "The point-grid route builds an explicit outer shell offset from each row's own profile. This is the printed shell thickness, not an acoustic dimension. The generator also uses it in its self-approach guard.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "wall_thickness_mm",
+          "label": "Shell thickness",
+          "physical": "Changes the printed wall thickness, not the acoustic inner surface.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Outer-shell thickness of a freestanding rows model.",
+          "unit": "mm"
+        }
+      ],
+      "name": "l01_geometry_only",
+      "non_native_keys": [],
+      "preview_only": true,
+      "source_status": "gui-only",
+      "symmetry": "hv"
     },
     "lecleach_asym_odd": {
       "bounds_index": {

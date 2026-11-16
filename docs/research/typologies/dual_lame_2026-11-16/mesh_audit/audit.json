@@ -1,0 +1,112 @@
+
+
+[
+  {
+    "file": "docs\\research\\typologies\\dual_lame_2026-11-16\\mesh_audit\\k01_geometry_only.msh",
+    "sha256": "c3a4628d0a039fe5c95c4425548446e595d08c5c0654fea14e8886837f49e078",
+    "coordinate_units": "metres (converted to mm below)",
+    "points": 3072,
+    "triangles": 5912,
+    "triangles_by_physical_tag": {
+      "1": 5856,
+      "2": 56
+    },
+    "zero_area_triangles": 0,
+    "duplicate_triangle_node_sets": 0,
+    "edge_connected_triangle_components": [
+      5912
+    ],
+    "boundary_edges": 230,
+    "boundary_edges_on_x_zero": 106,
+    "boundary_edges_on_y_zero": 124,
+    "boundary_edges_on_both_planes": 0,
+    "boundary_edges_off_both_planes": 0,
+    "nonmanifold_edges": 0,
+    "two_face_inconsistent_orientation_edges": 0,
+    "two_face_edges_by_tag_pair": {
+      "1-1": 8671,
+      "1-2": 8,
+      "2-2": 74
+    },
+    "source": {
+      "tag": 2,
+      "node_count": 39,
+      "triangle_count": 56,
+      "x_range_mm": [
+        0.0,
+        18.000000000000004
+      ],
+      "y_range_mm": [
+        0.0,
+        18.000000000000004
+      ],
+      "z_range_mm": [
+        0.0,
+        0.3141911687079073
+      ],
+      "area_mm2_as_stored": 252.89119631002194,
+      "area_mm2_fourfold": 1011.5647852400878,
+      "source_boundary_edges": 20,
+      "source_boundary_nodes_including_symmetry_radii": 20,
+      "curved_rim_nonaxis_radius_mm_range": [
+        17.99999290314527,
+        18.000018527270896
+      ]
+    },
+    "scope": "Surface incidence and source measurements only; no geometric intersection test, volume closure or acoustic validation."
+  },
+  {
+    "file": "docs\\research\\typologies\\dual_lame_2026-11-16\\mesh_audit\\l01_geometry_only.msh",
+    "sha256": "b22dff6b46099f26cc488f15c01123bf61b8280960c69562d0acef05e93ebdbc",
+    "coordinate_units": "metres (converted to mm below)",
+    "points": 1534,
+    "triangles": 2876,
+    "triangles_by_physical_tag": {
+      "1": 2818,
+      "2": 58
+    },
+    "zero_area_triangles": 0,
+    "duplicate_triangle_node_sets": 0,
+    "edge_connected_triangle_components": [
+      2876
+    ],
+    "boundary_edges": 190,
+    "boundary_edges_on_x_zero": 89,
+    "boundary_edges_on_y_zero": 101,
+    "boundary_edges_on_both_planes": 0,
+    "boundary_edges_off_both_planes": 0,
+    "nonmanifold_edges": 0,
+    "two_face_inconsistent_orientation_edges": 0,
+    "two_face_edges_by_tag_pair": {
+      "1-1": 4134,
+      "1-2": 8,
+      "2-2": 77
+    },
+    "source": {
+      "tag": 2,
+      "node_count": 40,
+      "triangle_count": 58,
+      "x_range_mm": [
+        0.0,
+        18.000000000000004
+      ],
+      "y_range_mm": [
+        0.0,
+        18.000000000000004
+      ],
+      "z_range_mm": [
+        0.0,
+        0.3141911687079073
+      ],
+      "area_mm2_as_stored": 252.8910351188218,
+      "area_mm2_fourfold": 1011.5641404752872,
+      "source_boundary_edges": 20,
+      "source_boundary_nodes_including_symmetry_radii": 20,
+      "curved_rim_nonaxis_radius_mm_range": [
+        18.000000000000004,
+        18.00000000000001
+      ]
+    },
+    "scope": "Surface incidence and source measurements only; no geometric intersection test, volume closure or acoustic validation."
+  }
+]

@@ -15,6 +15,20 @@
 #
 # Fields match examples/catalog.yaml. Do not add these names to examples/catalog.yaml.
 entries:
+  - name: k01_geometry_only
+    gui_only: true
+    config: typologies/dual_lame_2026-11-16/k01_geometry_only.yaml
+    group: home
+    symmetry: hv
+    description: "Klangfilm-Lamé geometry preview; sampled checks only, not an acoustic-ready design."
+
+  - name: l01_geometry_only
+    gui_only: true
+    config: typologies/dual_lame_2026-11-16/l01_geometry_only.yaml
+    group: home
+    symmetry: hv
+    description: "Derived Le Cléac'h H/V Lamé geometry preview; sampled checks only, not an acoustic-ready design."
+
   - name: hl__rosse_rect_cd_v7
     gui_only: true
     config: typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml

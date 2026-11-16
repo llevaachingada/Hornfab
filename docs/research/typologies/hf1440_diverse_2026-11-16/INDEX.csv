@@ -1,0 +1,13 @@
+id,kind,style,W_mm,H_mm,D_mm,envelope_pass,status
+J0,REAL_REPO_IWATA_AR,current repo smooth-brief anchor,,,,False,"GENERATOR REJECTED: rows grid spec: foreign key(s) ['seed_policy'] (allowed: ['knobs', 'n_phi', 'n_s', 'name', 'rows', 'span', 'wall_thickness_mm'])"
+J1,REAL_REPO_IWATA_AR,balanced longer oval,,,,False,"GENERATOR REJECTED: rows grid spec: foreign key(s) ['seed_policy'] (allowed: ['knobs', 'n_phi', 'n_s', 'name', 'rows', 'span', 'wall_thickness_mm'])"
+J2,REAL_REPO_IWATA_AR,broad horizontal quasi-Iwata,,,,False,"GENERATOR REJECTED: rows grid spec: foreign key(s) ['seed_policy'] (allowed: ['knobs', 'n_phi', 'n_s', 'name', 'rows', 'span', 'wall_thickness_mm'])"
+J3,REAL_REPO_IWATA_AR,long shallow-termination,,,,False,"GENERATOR REJECTED: rows grid spec: foreign key(s) ['seed_policy'] (allowed: ['knobs', 'n_phi', 'n_s', 'name', 'rows', 'span', 'wall_thickness_mm'])"
+J4,REAL_REPO_IWATA_AR,flared / deeper lip-rollback,,,,False,"GENERATOR REJECTED: rows grid spec: foreign key(s) ['seed_policy'] (allowed: ['knobs', 'n_phi', 'n_s', 'name', 'rows', 'span', 'wall_thickness_mm'])"
+J5,REAL_REPO_IWATA_AR,loading-biased broad oval,,,,False,"GENERATOR REJECTED: rows grid spec: foreign key(s) ['seed_policy'] (allowed: ['knobs', 'n_phi', 'n_s', 'name', 'rows', 'span', 'wall_thickness_mm'])"
+K0,RESEARCH_ONLY_KLANGFILM_LAME,gentle 2018-like ellipse control,476.2,307.24,150.44,True,preview only; NOT safe to BEM
+K1,RESEARCH_ONLY_KLANGFILM_LAME,large soft organic mouth,514.54,308.08,175.07,True,preview only; NOT safe to BEM
+K2,RESEARCH_ONLY_KLANGFILM_LAME,rounded rectangle / balanced,491.92,280.2,171.59,True,preview only; NOT safe to BEM
+K3,RESEARCH_ONLY_KLANGFILM_LAME,high-Lame 2019-inspired curl,441.8,262.26,209.54,True,preview only; NOT safe to BEM
+K4,RESEARCH_ONLY_KLANGFILM_LAME,strong winglike rim sweep,468.45,262.34,194.85,True,preview only; NOT safe to BEM
+K5,RESEARCH_ONLY_KLANGFILM_LAME,full-roll oval / soft edge,451.41,282.15,206.07,True,preview only; NOT safe to BEM

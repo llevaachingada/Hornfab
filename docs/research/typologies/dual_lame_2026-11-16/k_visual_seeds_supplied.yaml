@@ -1,0 +1,212 @@
+schema: hornfab.visual_seed_pack.v1
+family: klangfilm_lame
+target: VISUAL_DIAGNOSTIC_NOT_OPTIMIZATION_WINNERS
+code_availability: NOT_FOUND_ON_PUBLIC_MAIN_2026_11_16_VERIFY_LOCAL_PR
+driver: FaitalPRO HF1440
+brief: room_landscape_80x50_700_hf1440_v7_smooth
+hard_envelope_mm:
+  W: 600
+  H: 480
+  D: 480
+driver_exit_diameter_mm: 35.8
+source_note: Port must retain round true exit; Lame p=2 and no extra deformations should match original elliptical construction
+parameter_units:
+  fc_hz: Hz parent spherical wave parameter NOT demonstrated usable cutoff
+  aspect: W/H geometry ratio in local candidate, verify exactly
+  lame_p: dimensionless cross-section Lame exponent
+  end_frac: h_end/r0 termination parameter
+  rim_sweep: local candidate dimensionless control; inspect implementation to determine physical mapping
+parameter_binds_required: true
+samples:
+- id: K01
+  style: Original ellipse control
+  params:
+    fc_hz: 560
+    aspect: 1.6
+    lame_p: 2.0
+    end_frac: 1.25
+    rim_sweep: 0.0
+  intent: Pure ellipse, minimally swept; useful attribution control
+  screening_class: unverified_geometry
+  acoustic_status: UNSOLVED
+  envelope_status: UNKNOWN_UNTIL_GENERATED
+- id: K02
+  style: Balanced organic
+  params:
+    fc_hz: 530
+    aspect: 1.78
+    lame_p: 3.2
+    end_frac: 1.42
+    rim_sweep: 0.08
+  intent: Moderate roll and soft rectangle
+  screening_class: unverified_geometry
+  acoustic_status: UNSOLVED
+  envelope_status: UNKNOWN_UNTIL_GENERATED
+- id: K03
+  style: H/V biased broad
+  params:
+    fc_hz: 540
+    aspect: 1.85
+    lame_p: 3.6
+    end_frac: 1.48
+    rim_sweep: 0.1
+  intent: Moderate higher H/V aspect; no beamwidth assumption
+  screening_class: unverified_geometry
+  acoustic_status: UNSOLVED
+  envelope_status: UNKNOWN_UNTIL_GENERATED
+- id: K04
+  style: Low-fc wide mouth
+  params:
+    fc_hz: 500
+    aspect: 1.7
+    lame_p: 2.9
+    end_frac: 1.25
+    rim_sweep: 0.06
+  intent: Large-mouth loading hypothesis, not proven loading
+  screening_class: unverified_geometry
+  acoustic_status: UNSOLVED
+  envelope_status: UNKNOWN_UNTIL_GENERATED
+- id: K05
+  style: Wide low-roll
+  params:
+    fc_hz: 510
+    aspect: 1.95
+    lame_p: 3.8
+    end_frac: 1.22
+    rim_sweep: 0.05
+  intent: Wide, relatively flat termination
+  screening_class: unverified_geometry
+  acoustic_status: UNSOLVED
+  envelope_status: UNKNOWN_UNTIL_GENERATED
+- id: K06
+  style: Squarish open mouth
+  params:
+    fc_hz: 520
+    aspect: 1.9
+    lame_p: 4.8
+    end_frac: 1.35
+    rim_sweep: 0.08
+  intent: High Lame, less rollback
+  screening_class: unverified_geometry
+  acoustic_status: UNSOLVED
+  envelope_status: UNKNOWN_UNTIL_GENERATED
+- id: K07
+  style: Deep roll classic
+  params:
+    fc_hz: 570
+    aspect: 1.68
+    lame_p: 4.8
+    end_frac: 1.68
+    rim_sweep: 0.1
+  intent: Rolled-back square-ish style
+  screening_class: unverified_geometry
+  acoustic_status: UNSOLVED
+  envelope_status: UNKNOWN_UNTIL_GENERATED
+- id: K08
+  style: Deep roll oval
+  params:
+    fc_hz: 560
+    aspect: 1.62
+    lame_p: 3.4
+    end_frac: 1.72
+    rim_sweep: 0.06
+  intent: Deep rollback and softer cross-section
+  screening_class: unverified_geometry
+  acoustic_status: UNSOLVED
+  envelope_status: UNKNOWN_UNTIL_GENERATED
+- id: K09
+  style: High Lame full curl
+  params:
+    fc_hz: 575
+    aspect: 1.75
+    lame_p: 5.5
+    end_frac: 1.72
+    rim_sweep: 0.1
+  intent: High-exponent March-2019-inspired experimental limit
+  screening_class: unverified_geometry
+  acoustic_status: UNSOLVED
+  envelope_status: UNKNOWN_UNTIL_GENERATED
+- id: K10
+  style: Swept organic
+  params:
+    fc_hz: 555
+    aspect: 1.82
+    lame_p: 3.8
+    end_frac: 1.52
+    rim_sweep: 0.18
+  intent: Stronger rim sweep without extreme curl
+  screening_class: unverified_geometry
+  acoustic_status: UNSOLVED
+  envelope_status: UNKNOWN_UNTIL_GENERATED
+- id: K11
+  style: Swept wings
+  params:
+    fc_hz: 570
+    aspect: 1.88
+    lame_p: 4.2
+    end_frac: 1.55
+    rim_sweep: 0.24
+  intent: Aggressive azimuth sweep for visual range
+  screening_class: unverified_geometry
+  acoustic_status: UNSOLVED
+  envelope_status: UNKNOWN_UNTIL_GENERATED
+- id: K12
+  style: Flange-like termination
+  params:
+    fc_hz: 540
+    aspect: 1.72
+    lame_p: 3.0
+    end_frac: 1.05
+    rim_sweep: 0.03
+  intent: Minimum-roll reference
+  screening_class: unverified_geometry
+  acoustic_status: UNSOLVED
+  envelope_status: UNKNOWN_UNTIL_GENERATED
+- id: K13
+  style: Taller softer bell
+  params:
+    fc_hz: 600
+    aspect: 1.38
+    lame_p: 2.1
+    end_frac: 1.6
+    rim_sweep: 0.01
+  intent: Lower H/V aspect reference; intentional coverage challenger
+  screening_class: unverified_geometry
+  acoustic_status: UNSOLVED
+  envelope_status: UNKNOWN_UNTIL_GENERATED
+- id: K14
+  style: Broad square flange
+  params:
+    fc_hz: 520
+    aspect: 1.5
+    lame_p: 5.8
+    end_frac: 1.15
+    rim_sweep: 0.0
+  intent: Very square with little sweep
+  screening_class: unverified_geometry
+  acoustic_status: UNSOLVED
+  envelope_status: UNKNOWN_UNTIL_GENERATED
+- id: K15
+  style: Compact swept beak
+  params:
+    fc_hz: 620
+    aspect: 2.1
+    lame_p: 3.8
+    end_frac: 1.35
+    rim_sweep: 0.21
+  intent: Compact + high aspect + swept, plausibly different silhouette
+  screening_class: unverified_geometry
+  acoustic_status: UNSOLVED
+  envelope_status: UNKNOWN_UNTIL_GENERATED
+- id: K16
+  style: Oversize area stress
+  params:
+    fc_hz: 490
+    aspect: 1.45
+    lame_p: 2.4
+    end_frac: 1.75
+    rim_sweep: 0.03
+  intent: May exceed envelope; retain as explicitly infeasible sentinel
+  screening_class: intentional_stress_if_over_envelope
+  acoustic_status: UNSOLVED
+  envelope_status: UNKNOWN_UNTIL_GENERATED

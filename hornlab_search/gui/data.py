@@ -3453,14 +3453,15 @@ def preview_shape(root: Path, config_name: str, q: dict) -> dict:
             # (2) GRID/ROWS: the config's own march arrays. NO grid block into the preview.
             gspec = gen
             wall_mm = float(gspec.get("wall_thickness_mm", 3.0))
-            from hornlab_search.design.generators import rolled_family
-            if is_rows and rolled_family.is_family_spec(gspec):
-                # The canonical rolled family owns both sheets (radial/axial relief,
-                # source/return guards); the generic rows march rejects its mode key.
-                block = (rolled_family.design_params(gspec, effective, cfg.brief)["grid"]
+            from hornlab_search.design.generators import rolled_family, klangfilm_lame_family, lecleach_swept_hv
+            family = next((f for f in (rolled_family, klangfilm_lame_family, lecleach_swept_hv)
+                           if is_rows and f.is_family_spec(gspec)), None)
+            if family is not None:
+                # Versioned families own both sheets; preview the same body as meshing.
+                block = (family.design_params(gspec, effective, cfg.brief)["grid"]
                          if "implementation_sha256" not in gspec["rows"]
                          else {**gspec, "knobs": effective})
-                resolved = rolled_family.resolve_grid(block, cfg.brief)
+                resolved = family.resolve_grid(block, cfg.brief)
                 inner = resolved["inner_points"]
                 outer = resolved["outer_points"]
                 meta = resolved["meta"]

@@ -1,0 +1,44 @@
+{
+  "cross": {
+    "expected": true,
+    "actual": true,
+    "valid_input": true,
+    "pass": true
+  },
+  "coplanar_containment": {
+    "expected": true,
+    "actual": true,
+    "valid_input": true,
+    "pass": true
+  },
+  "coplanar_cross": {
+    "expected": true,
+    "actual": true,
+    "valid_input": true,
+    "pass": true
+  },
+  "separate": {
+    "expected": false,
+    "actual": false,
+    "valid_input": true,
+    "pass": true
+  },
+  "near_parallel": {
+    "expected": false,
+    "actual": false,
+    "valid_input": true,
+    "pass": true
+  },
+  "shared_edge": {
+    "expected": false,
+    "actual": false,
+    "valid_input": true,
+    "pass": true
+  },
+  "adjacent_overlap": {
+    "expected": true,
+    "actual": true,
+    "valid_input": true,
+    "pass": true
+  }
+}

@@ -1,0 +1,558 @@
+{
+  "scope": "Inner sampled quarter-grid geometry only. No shell, mesh, acoustic solve, validity or readiness assertion.",
+  "input_sha256": {
+    "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\k_visual_seeds_supplied.yaml": "fcd324ebd42dc9b11ee8327217739da346ae186c4567f7537e74d0c398d8ec44",
+    "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\home_landscape_2026-11-15\\hl__klangfilm_lame_curved_v1.yaml": "c7b044e5b8e3ef1bc7d20660514086ec6a07b5ca88a08460e9043e3eaf609bf8",
+    "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7_smooth.yaml": "e58b595e5fcf14965e6beff31fde7b75d0cac1ec98cfbe36e6f3abc6cd6bdbd8",
+    "C:\\Users\\hunte\\Hrns\\hornlab-search\\tools\\geometry\\k_visual_seed_diagnostic_20261116.py": "8f6bd1a97a40439fd80314880bd9025e800724034fa6183807d528e56ffa6b87",
+    "C:\\Users\\hunte\\Hrns\\hornlab-search\\tools\\geometry\\klangfilm_lame.py": "728615be2a9f4070010f4cd4df448fc0ed322eaf74830fe3368083f0cd6d087e",
+    "C:\\Users\\hunte\\Hrns\\hornlab-search\\tools\\geometry\\lame_cap.py": "9f0f06091d34fdb3b3499a1852432b74b3305aa6242c645c5452e7550484c9ae"
+  },
+  "environment": {
+    "python": "3.12.10",
+    "numpy": "2.5.4",
+    "scipy": "1.18.1",
+    "pyyaml": "6.0.3"
+  },
+  "base_shape_defaults": {
+    "fc_hz": 560.0,
+    "aspect": 1.6,
+    "lame_p": 3.5,
+    "end_frac": 1.5,
+    "rim_sweep_ratio": 0.12,
+    "morph_frac": 0.3,
+    "source_blend_ratio": 0.0,
+    "entry_half_angle_deg": 2.0,
+    "n_phi": 19,
+    "n_s": 64,
+    "wall_thickness_mm": 3.0
+  },
+  "brief_driver": {
+    "exit_radius_mm": 18.0,
+    "exit_angle_deg": 2.0
+  },
+  "pack_exit_diameter_mm": 35.8,
+  "envelope_mm": {
+    "W": 600,
+    "H": 480,
+    "D": 480
+  },
+  "bbox_method": "Sampled inner quarter-grid, reflected across x=0 and y=0; width=2*max(x), height=2*max(y), depth=max(z)-min(z). Excludes wall thickness and unsampled extrema.",
+  "binding": {
+    "rim_sweep": "rim_sweep_ratio; edge setback = ratio * max sampled semi-width, gated by station and cos(phi)^2"
+  },
+  "cases": [
+    {
+      "id": "K01",
+      "style": "Original ellipse control",
+      "params": {
+        "fc_hz": 560,
+        "aspect": 1.6,
+        "lame_p": 2.0,
+        "end_frac": 1.25,
+        "rim_sweep_ratio": 0.0,
+        "morph_frac": 0.3,
+        "source_blend_ratio": 0.0,
+        "entry_half_angle_deg": 2.0,
+        "n_phi": 19,
+        "n_s": 64,
+        "wall_thickness_mm": 3.0
+      },
+      "inner_bbox_mm": {
+        "W": 482.4474899619314,
+        "H": 301.5296812262071,
+        "D": 150.40067078637085
+      },
+      "inner_bbox_within_pack_envelope": true,
+      "finite": true,
+      "grid_shape": [
+        19,
+        65,
+        3
+      ],
+      "grid_sha256": "dd2463c3cad7e23f88f084bf57c64d41b3c0207f1c885b7ab149e8572f32a250",
+      "cap_area_resid_max": 4.4503956075914175e-11,
+      "exception": null
+    },
+    {
+      "id": "K02",
+      "style": "Balanced organic",
+      "params": {
+        "fc_hz": 530,
+        "aspect": 1.78,
+        "lame_p": 3.2,
+        "end_frac": 1.42,
+        "rim_sweep_ratio": 0.08,
+        "morph_frac": 0.3,
+        "source_blend_ratio": 0.0,
+        "entry_half_angle_deg": 2.0,
+        "n_phi": 19,
+        "n_s": 64,
+        "wall_thickness_mm": 3.0
+      },
+      "inner_bbox_mm": {
+        "W": 495.9473509957089,
+        "H": 278.62210730096007,
+        "D": 171.3948259745562
+      },
+      "inner_bbox_within_pack_envelope": true,
+      "finite": true,
+      "grid_shape": [
+        19,
+        65,
+        3
+      ],
+      "grid_sha256": "fd2e600857ed01b8293405741ca4f0adecb988964493bb894c9b9a2d3fa9a382",
+      "cap_area_resid_max": 3.486255728546439e-11,
+      "exception": null
+    },
+    {
+      "id": "K03",
+      "style": "H/V biased broad",
+      "params": {
+        "fc_hz": 540,
+        "aspect": 1.85,
+        "lame_p": 3.6,
+        "end_frac": 1.48,
+        "rim_sweep_ratio": 0.1,
+        "morph_frac": 0.3,
+        "source_blend_ratio": 0.0,
+        "entry_half_angle_deg": 2.0,
+        "n_phi": 19,
+        "n_s": 64,
+        "wall_thickness_mm": 3.0
+      },
+      "inner_bbox_mm": {
+        "W": 487.82721879331586,
+        "H": 263.6903885369275,
+        "D": 183.1888609623617
+      },
+      "inner_bbox_within_pack_envelope": true,
+      "finite": true,
+      "grid_shape": [
+        19,
+        65,
+        3
+      ],
+      "grid_sha256": "db78eb8861f17a9393671aea1a36829d27d71330f1971accc311532351f23ce2",
+      "cap_area_resid_max": 4.94575491671867e-11,
+      "exception": null
+    },
+    {
+      "id": "K04",
+      "style": "Low-fc wide mouth",
+      "params": {
+        "fc_hz": 500,
+        "aspect": 1.7,
+        "lame_p": 2.9,
+        "end_frac": 1.25,
+        "rim_sweep_ratio": 0.06,
+        "morph_frac": 0.3,
+        "source_blend_ratio": 0.0,
+        "entry_half_angle_deg": 2.0,
+        "n_phi": 19,
+        "n_s": 64,
+        "wall_thickness_mm": 3.0
+      },
+      "inner_bbox_mm": {
+        "W": 522.3595087415231,
+        "H": 307.2702992597195,
+        "D": 180.65933511342286
+      },
+      "inner_bbox_within_pack_envelope": true,
+      "finite": true,
+      "grid_shape": [
+        19,
+        65,
+        3
+      ],
+      "grid_sha256": "064b5d40270a219bcda2f53e076c6cb2c9f01d1946f87b3c20ed0a0bd960ce6d",
+      "cap_area_resid_max": 4.244937734654286e-11,
+      "exception": null
+    },
+    {
+      "id": "K05",
+      "style": "Wide low-roll",
+      "params": {
+        "fc_hz": 510,
+        "aspect": 1.95,
+        "lame_p": 3.8,
+        "end_frac": 1.22,
+        "rim_sweep_ratio": 0.05,
+        "morph_frac": 0.3,
+        "source_blend_ratio": 0.0,
+        "entry_half_angle_deg": 2.0,
+        "n_phi": 19,
+        "n_s": 64,
+        "wall_thickness_mm": 3.0
+      },
+      "inner_bbox_mm": {
+        "W": 524.4037696650063,
+        "H": 268.92501008461863,
+        "D": 175.06784065329595
+      },
+      "inner_bbox_within_pack_envelope": true,
+      "finite": true,
+      "grid_shape": [
+        19,
+        65,
+        3
+      ],
+      "grid_sha256": "9923f2dc9793550ec05b389c96ea6584f43d99f2a3021a250df837e59375b3d9",
+      "cap_area_resid_max": 3.634625933557345e-11,
+      "exception": null
+    },
+    {
+      "id": "K06",
+      "style": "Squarish open mouth",
+      "params": {
+        "fc_hz": 520,
+        "aspect": 1.9,
+        "lame_p": 4.8,
+        "end_frac": 1.35,
+        "rim_sweep_ratio": 0.08,
+        "morph_frac": 0.3,
+        "source_blend_ratio": 0.0,
+        "entry_half_angle_deg": 2.0,
+        "n_phi": 19,
+        "n_s": 64,
+        "wall_thickness_mm": 3.0
+      },
+      "inner_bbox_mm": {
+        "W": 499.0338655053445,
+        "H": 262.64940289754975,
+        "D": 169.61575290148718
+      },
+      "inner_bbox_within_pack_envelope": true,
+      "finite": true,
+      "grid_shape": [
+        19,
+        65,
+        3
+      ],
+      "grid_sha256": "abcf715ee7d41851d9cf2ec8865f66fe48e3b93d85e9952773483f54a274a9c3",
+      "cap_area_resid_max": 4.5754289246247026e-11,
+      "exception": null
+    },
+    {
+      "id": "K07",
+      "style": "Deep roll classic",
+      "params": {
+        "fc_hz": 570,
+        "aspect": 1.68,
+        "lame_p": 4.8,
+        "end_frac": 1.68,
+        "rim_sweep_ratio": 0.1,
+        "morph_frac": 0.3,
+        "source_blend_ratio": 0.0,
+        "entry_half_angle_deg": 2.0,
+        "n_phi": 19,
+        "n_s": 64,
+        "wall_thickness_mm": 3.0
+      },
+      "inner_bbox_mm": {
+        "W": 433.41431454935054,
+        "H": 257.98471104128015,
+        "D": 204.2844033950439
+      },
+      "inner_bbox_within_pack_envelope": true,
+      "finite": true,
+      "grid_shape": [
+        19,
+        65,
+        3
+      ],
+      "grid_sha256": "1ae2ea13141a539f6a1c83e0145c08c89bed2d3525a54391d56bdef3dc6d8907",
+      "cap_area_resid_max": 4.73188155325488e-11,
+      "exception": null
+    },
+    {
+      "id": "K08",
+      "style": "Deep roll oval",
+      "params": {
+        "fc_hz": 560,
+        "aspect": 1.62,
+        "lame_p": 3.4,
+        "end_frac": 1.72,
+        "rim_sweep_ratio": 0.06,
+        "morph_frac": 0.3,
+        "source_blend_ratio": 0.0,
+        "entry_half_angle_deg": 2.0,
+        "n_phi": 19,
+        "n_s": 64,
+        "wall_thickness_mm": 3.0
+      },
+      "inner_bbox_mm": {
+        "W": 448.55920493538116,
+        "H": 276.88839810825993,
+        "D": 206.03689731019716
+      },
+      "inner_bbox_within_pack_envelope": true,
+      "finite": true,
+      "grid_shape": [
+        19,
+        65,
+        3
+      ],
+      "grid_sha256": "e3d9387997896b4526a1d251aed6de514edb916fb4b28f99d0461632a4b502ea",
+      "cap_area_resid_max": 3.509392776379627e-11,
+      "exception": null
+    },
+    {
+      "id": "K09",
+      "style": "High Lame full curl",
+      "params": {
+        "fc_hz": 575,
+        "aspect": 1.75,
+        "lame_p": 5.5,
+        "end_frac": 1.72,
+        "rim_sweep_ratio": 0.1,
+        "morph_frac": 0.3,
+        "source_blend_ratio": 0.0,
+        "entry_half_angle_deg": 2.0,
+        "n_phi": 19,
+        "n_s": 64,
+        "wall_thickness_mm": 3.0
+      },
+      "inner_bbox_mm": {
+        "W": 432.6931005324087,
+        "H": 247.2532003042336,
+        "D": 209.16395245585954
+      },
+      "inner_bbox_within_pack_envelope": true,
+      "finite": true,
+      "grid_shape": [
+        19,
+        65,
+        3
+      ],
+      "grid_sha256": "a8a3acd6bf5b78cd1c76d3309f02f452fec6d895fe48b406a3c498b85b100193",
+      "cap_area_resid_max": 4.197497904812053e-11,
+      "exception": null
+    },
+    {
+      "id": "K10",
+      "style": "Swept organic",
+      "params": {
+        "fc_hz": 555,
+        "aspect": 1.82,
+        "lame_p": 3.8,
+        "end_frac": 1.52,
+        "rim_sweep_ratio": 0.18,
+        "morph_frac": 0.3,
+        "source_blend_ratio": 0.0,
+        "entry_half_angle_deg": 2.0,
+        "n_phi": 19,
+        "n_s": 64,
+        "wall_thickness_mm": 3.0
+      },
+      "inner_bbox_mm": {
+        "W": 469.08028378933983,
+        "H": 257.73641966447246,
+        "D": 203.26491502906563
+      },
+      "inner_bbox_within_pack_envelope": true,
+      "finite": true,
+      "grid_shape": [
+        19,
+        65,
+        3
+      ],
+      "grid_sha256": "ae3edd22ae8485e732509ae03316d6cb52e67f8ef02e731fe662b011e9b2f89b",
+      "cap_area_resid_max": 4.266831332699894e-11,
+      "exception": null
+    },
+    {
+      "id": "K11",
+      "style": "Swept wings",
+      "params": {
+        "fc_hz": 570,
+        "aspect": 1.88,
+        "lame_p": 4.2,
+        "end_frac": 1.55,
+        "rim_sweep_ratio": 0.24,
+        "morph_frac": 0.3,
+        "source_blend_ratio": 0.0,
+        "entry_half_angle_deg": 2.0,
+        "n_phi": 19,
+        "n_s": 64,
+        "wall_thickness_mm": 3.0
+      },
+      "inner_bbox_mm": {
+        "W": 458.3435037045995,
+        "H": 243.79973601308487,
+        "D": 216.5625438790824
+      },
+      "inner_bbox_within_pack_envelope": true,
+      "finite": true,
+      "grid_shape": [
+        19,
+        65,
+        3
+      ],
+      "grid_sha256": "354f1fb99c480dce483b223f2316b627ead51da8e47280cb2597ace6abdccb09",
+      "cap_area_resid_max": 4.509959072862557e-11,
+      "exception": null
+    },
+    {
+      "id": "K12",
+      "style": "Flange-like termination",
+      "params": {
+        "fc_hz": 540,
+        "aspect": 1.72,
+        "lame_p": 3.0,
+        "end_frac": 1.05,
+        "rim_sweep_ratio": 0.03,
+        "morph_frac": 0.3,
+        "source_blend_ratio": 0.0,
+        "entry_half_angle_deg": 2.0,
+        "n_phi": 19,
+        "n_s": 64,
+        "wall_thickness_mm": 3.0
+      },
+      "inner_bbox_mm": {
+        "W": 483.9030247070018,
+        "H": 281.33896785290807,
+        "D": 159.60153246794292
+      },
+      "inner_bbox_within_pack_envelope": true,
+      "finite": true,
+      "grid_shape": [
+        19,
+        65,
+        3
+      ],
+      "grid_sha256": "5f38e5880f50a6e51929b9f883783ae6c70d21246a99aa79b12dd3589857f14b",
+      "cap_area_resid_max": 4.3394510207406256e-11,
+      "exception": null
+    },
+    {
+      "id": "K13",
+      "style": "Taller softer bell",
+      "params": {
+        "fc_hz": 600,
+        "aspect": 1.38,
+        "lame_p": 2.1,
+        "end_frac": 1.6,
+        "rim_sweep_ratio": 0.01,
+        "morph_frac": 0.3,
+        "source_blend_ratio": 0.0,
+        "entry_half_angle_deg": 2.0,
+        "n_phi": 19,
+        "n_s": 64,
+        "wall_thickness_mm": 3.0
+      },
+      "inner_bbox_mm": {
+        "W": 419.26554831595683,
+        "H": 303.8156147217079,
+        "D": 163.2884249301284
+      },
+      "inner_bbox_within_pack_envelope": true,
+      "finite": true,
+      "grid_shape": [
+        19,
+        65,
+        3
+      ],
+      "grid_sha256": "18b20c610d7a60a4cc1f93d742effe0c7ff663a5ccb959aeacadc9d863358bfb",
+      "cap_area_resid_max": 4.401434772205448e-11,
+      "exception": null
+    },
+    {
+      "id": "K14",
+      "style": "Broad square flange",
+      "params": {
+        "fc_hz": 520,
+        "aspect": 1.5,
+        "lame_p": 5.8,
+        "end_frac": 1.15,
+        "rim_sweep_ratio": 0.0,
+        "morph_frac": 0.3,
+        "source_blend_ratio": 0.0,
+        "entry_half_angle_deg": 2.0,
+        "n_phi": 19,
+        "n_s": 64,
+        "wall_thickness_mm": 3.0
+      },
+      "inner_bbox_mm": {
+        "W": 447.07004749889,
+        "H": 298.0466983325934,
+        "D": 169.688923797095
+      },
+      "inner_bbox_within_pack_envelope": true,
+      "finite": true,
+      "grid_shape": [
+        19,
+        65,
+        3
+      ],
+      "grid_sha256": "a7c1c07dc2f01d43a5c7a0ae0266f5801d92e5a4f7ce841d986b0678e51158c0",
+      "cap_area_resid_max": 4.000932918302169e-11,
+      "exception": null
+    },
+    {
+      "id": "K15",
+      "style": "Compact swept beak",
+      "params": {
+        "fc_hz": 620,
+        "aspect": 2.1,
+        "lame_p": 3.8,
+        "end_frac": 1.35,
+        "rim_sweep_ratio": 0.21,
+        "morph_frac": 0.3,
+        "source_blend_ratio": 0.0,
+        "entry_half_angle_deg": 2.0,
+        "n_phi": 19,
+        "n_s": 64,
+        "wall_thickness_mm": 3.0
+      },
+      "inner_bbox_mm": {
+        "W": 443.5854761495087,
+        "H": 211.23117911881366,
+        "D": 166.02831526404083
+      },
+      "inner_bbox_within_pack_envelope": true,
+      "finite": true,
+      "grid_shape": [
+        19,
+        65,
+        3
+      ],
+      "grid_sha256": "03b51336e6dfbdfa711105cc890063b655094bc0204b8ec568f1cdd257d0bf18",
+      "cap_area_resid_max": 4.4102721474814643e-11,
+      "exception": null
+    },
+    {
+      "id": "K16",
+      "style": "Oversize area stress",
+      "params": {
+        "fc_hz": 490,
+        "aspect": 1.45,
+        "lame_p": 2.4,
+        "end_frac": 1.75,
+        "rim_sweep_ratio": 0.03,
+        "morph_frac": 0.3,
+        "source_blend_ratio": 0.0,
+        "entry_half_angle_deg": 2.0,
+        "n_phi": 19,
+        "n_s": 64,
+        "wall_thickness_mm": 3.0
+      },
+      "inner_bbox_mm": {
+        "W": 512.6277250350104,
+        "H": 353.5363620931106,
+        "D": 233.4654636940098
+      },
+      "inner_bbox_within_pack_envelope": true,
+      "finite": true,
+      "grid_shape": [
+        19,
+        65,
+        3
+      ],
+      "grid_sha256": "5093410da00435ffa3153508b896872620c268da11a19cc325c2725ffcc735eb",
+      "cap_area_resid_max": 4.4116044151110145e-11,
+      "exception": null
+    }
+  ]
+}

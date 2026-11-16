@@ -1,0 +1,66 @@
+name: hf1440_gallery_j1
+family: FREEFORM
+brief_file: ../../../../examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml
+generator:
+  name: grid
+  rows:
+    type: iwata_ar
+  n_phi: 15
+  n_s: 32
+  seed_policy: explicit
+  wall_thickness_mm: 3.0
+seed_params:
+  g_fc_hz: 470.0
+  g_T: 0.56
+  g_stop_deg: 100.0
+  g_ar_m: 1.5
+  g_ar_p: 1.15
+bounds:
+  g_fc_hz:
+    lo: 470.0
+    hi: 470.0
+    search: false
+  g_T:
+    lo: 0.56
+    hi: 0.56
+    search: false
+  g_stop_deg:
+    lo: 100.0
+    hi: 100.0
+    search: false
+  g_ar_m:
+    lo: 1.5
+    hi: 1.5
+    search: false
+  g_ar_p:
+    lo: 1.15
+    hi: 1.15
+    search: false
+description: 'RENDER/PREFLIGHT seed J1: balanced longer oval; no acoustic performance
+  established'
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+  rear_res_factor: 1.5
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.2
+  seed: 1234
+  budget: 80
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded

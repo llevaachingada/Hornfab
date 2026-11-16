@@ -1,5 +1,9 @@
 # Docs index
 
+[HF1440 12-seed supplied gallery and verification](research/typologies/hf1440_diverse_2026-11-16/RESULTS.md): distinct existing-code J seeds and K preview shapes, compatibility and CPU preflight results.
+
+[Dual Lamé geometry integration research and gate](research/typologies/DUAL_LAME_INTEGRATION_2026-11-16.md): distinct parent constructions, source and identity findings, and validation limits.
+
 [Home CMA/BO continuation through 2026-11-17 morning](queue/HOME_CONTINUATION_2026-11-16.md): recent-run audit, 80+2 profile, live extension, exclusions and validation.
 
 [Crowe / ATH / rolled-family evidence and readiness handoff (2026-11-15)](research/typologies/ROLLED_FAMILY_EVIDENCE_HANDOFF_2026-11-15.md):
@@ -33,6 +37,8 @@ the 0.60 seed) and the section pucker's vertical strength collapses to 0.37–3.
 [matched short-run queue plan](queue/ROLLED_RECT_PLAN_2026-11-15.md), and
 [five-angle seed gallery](renders/2026-11-15-rolled-rect/index.html).
 
+
+[Klangfilm-Lame handoff v3 2026-11-16](research/typologies/klangfilm_lame_handoff_2026-11-16/00_START_HERE.md): Lame/rollback research dossier + HF1440 throat-coupling addendum (no published exit angle); implemented by `tools/geometry/klangfilm_lame.py`.
 
 [Klangfilm elliptical horn hand-off 2026-11-16](research/typologies/KLANGFILM_ELLIPSE_HANDOFF_2026-11-16.md): port of Ahlswede's Klangfilm elliptical calculator (formulas, knobs, sources, why built this way, open mismatch with the owner's reference); sweep sheet `queue/klangfilm_param_sheet_hires.png`.
 [Home optimizer comparison 2026-11-16](queue/HOME_OPTIMIZER_COMPARISON_2026-11-16.md) / [score audit](queue/HOME_SCORE_AUDIT_2026-11-16.md) / [matched home protocol](queue/MATCHED_HOME_PROTOCOL_2026-11-16.md): concurrent-session BO vs CMA switching review, read-only queue scoring audit, frozen-cohort matched comparison protocol.

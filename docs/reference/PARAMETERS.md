@@ -3701,8 +3701,8 @@ Domains covered: `generators`, `rows`, `native`
 - **Formula:** `z = s L, with s the normalised axial fraction`
 - **Physical effect:** Moves the mouth plane in or out along the horn axis.
 - **Context:** `rows`
-- **Default:** 240.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `seed_params.g_L_mm`)
-- **Search bounds:** 200.0 .. 260.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `bounds.g_L_mm`)
+- **Default:** 259.603653 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `seed_params.g_L_mm`)
+- **Search bounds:** 200.0 .. 285.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `bounds.g_L_mm`)
 - **Hard limits:** none (not a mesher family key)
 - **Code:** `hornlab_search.design.generators.grid._meridians`
 - **Doc:** `docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md` § ### 2.4 organic/elliptical + X-shape (WP9b)
@@ -3715,7 +3715,7 @@ Domains covered: `generators`, `rows`, `native`
 - **Formula:** `a(phi) = a_h cos^2(phi) + a_v sin^2(phi)`
 - **Physical effect:** Widens or narrows the horizontal beam and the horizontal mouth.
 - **Context:** `rows`
-- **Default:** 38.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `seed_params.g_a_h_deg`)
+- **Default:** 36.388866 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `seed_params.g_a_h_deg`)
 - **Search bounds:** 33.0 .. 40.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `bounds.g_a_h_deg`)
 - **Hard limits:** none (not a mesher family key)
 - **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
@@ -3729,7 +3729,7 @@ Domains covered: `generators`, `rows`, `native`
 - **Formula:** `a(phi) = a_h cos^2(phi) + a_v sin^2(phi)`
 - **Physical effect:** Widens or narrows the vertical beam and the vertical mouth.
 - **Context:** `rows`
-- **Default:** 24.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `seed_params.g_a_v_deg`)
+- **Default:** 22.707717 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `seed_params.g_a_v_deg`)
 - **Search bounds:** 20.0 .. 28.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `bounds.g_a_v_deg`)
 - **Hard limits:** none (not a mesher family key)
 - **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
@@ -3757,7 +3757,7 @@ Domains covered: `generators`, `rows`, `native`
 - **Formula:** not stated
 - **Physical effect:** Moves the mouth flare earlier or later along the wall.
 - **Context:** `rows`
-- **Default:** 2.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `seed_params.g_n`)
+- **Default:** 2.143998 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `seed_params.g_n`)
 - **Search bounds:** 1.8 .. 3.2 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `bounds.g_n`)
 - **Hard limits:** none (not a mesher family key)
 - **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
@@ -3785,7 +3785,7 @@ Domains covered: `generators`, `rows`, `native`
 - **Formula:** `circular arc tangent at the joint, wrap = half a turn`
 - **Physical effect:** Adds a rolled-back lip at the mouth.
 - **Context:** `rows`
-- **Default:** 25.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `seed_params.g_r_lip_mm`)
+- **Default:** 18.284822 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `seed_params.g_r_lip_mm`)
 - **Search bounds:** 8.0 .. 30.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `bounds.g_r_lip_mm`)
 - **Hard limits:** lo=—, hi=100.0, kind=—, section=— (`hornlab_search/design/generators/grid.py` `ROWS_MAX_R_LIP_MM`)
 - **Code:** `hornlab_search.design.generators.grid.append_tangent_lip`
@@ -3799,7 +3799,7 @@ Domains covered: `generators`, `rows`, `native`
 - **Formula:** not stated
 - **Physical effect:** Changes the size and abruptness of the mouth rollback.
 - **Context:** `rows`
-- **Default:** 0.35 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `seed_params.g_s`)
+- **Default:** 0.389835 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `seed_params.g_s`)
 - **Search bounds:** 0.2 .. 0.45 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `bounds.g_s`)
 - **Hard limits:** none (not a mesher family key)
 - **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
@@ -3813,7 +3813,7 @@ Domains covered: `generators`, `rows`, `native`
 - **Formula:** not stated
 - **Physical effect:** Stretches the X lobes horizontally versus vertically.
 - **Context:** `rows`
-- **Default:** 0.8 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `seed_params.g_sf_ab`)
+- **Default:** 0.847983 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `seed_params.g_sf_ab`)
 - **Search bounds:** 0.7 .. 0.9 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `bounds.g_sf_ab`)
 - **Hard limits:** none (not a mesher family key)
 - **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
@@ -3827,7 +3827,7 @@ Domains covered: `generators`, `rows`, `native`
 - **Formula:** not stated
 - **Physical effect:** Deepens or removes the diagonal X creases.
 - **Context:** `rows`
-- **Default:** 0.3 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `seed_params.g_sf_amt`)
+- **Default:** 0.239269 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `seed_params.g_sf_amt`)
 - **Search bounds:** 0.15 .. 0.38 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `bounds.g_sf_amt`)
 - **Hard limits:** none (not a mesher family key)
 - **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
@@ -3897,7 +3897,7 @@ Domains covered: `generators`, `rows`, `native`
 - **Formula:** not stated
 - **Physical effect:** Changes the thickness and depth of the rolled mouth lip.
 - **Context:** `rows`
-- **Default:** 130.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `seed_params.g_wrap_deg`)
+- **Default:** 86.087609 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `seed_params.g_wrap_deg`)
 - **Search bounds:** 80.0 .. 160.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `bounds.g_wrap_deg`)
 - **Hard limits:** none (not a mesher family key)
 - **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
@@ -5682,7 +5682,7 @@ Domains covered: `generators`, `rows`, `native`
 - **Formula:** `a(phi) = a_h cos^2(phi) + a_v sin^2(phi)`
 - **Physical effect:** Widens or narrows the horizontal beam and the horizontal mouth.
 - **Context:** `rows`
-- **Default:** 40.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `seed_params.g_a_h_deg`)
+- **Default:** 35.667049 (source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `seed_params.g_a_h_deg`)
 - **Search bounds:** 32.0 .. 46.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `bounds.g_a_h_deg`)
 - **Hard limits:** none (not a mesher family key)
 - **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
@@ -5696,8 +5696,8 @@ Domains covered: `generators`, `rows`, `native`
 - **Formula:** `a(phi) = a_h cos^2(phi) + a_v sin^2(phi)`
 - **Physical effect:** Widens or narrows the vertical beam and the vertical mouth.
 - **Context:** `rows`
-- **Default:** 25.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `seed_params.g_a_v_deg`)
-- **Search bounds:** 18.0 .. 30.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `bounds.g_a_v_deg`)
+- **Default:** 19.192696 (source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `seed_params.g_a_v_deg`)
+- **Search bounds:** 12.0 .. 30.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `bounds.g_a_v_deg`)
 - **Hard limits:** none (not a mesher family key)
 - **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
 - **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
@@ -5710,7 +5710,7 @@ Domains covered: `generators`, `rows`, `native`
 - **Formula:** not stated
 - **Physical effect:** Moves curvature between the flare and the rolled rim.
 - **Context:** `rows`
-- **Default:** 0.2 (source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `seed_params.g_b`)
+- **Default:** 0.04501 (source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `seed_params.g_b`)
 - **Search bounds:** 0.0 .. 0.4 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `bounds.g_b`)
 - **Hard limits:** none (not a mesher family key)
 - **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
@@ -5724,7 +5724,7 @@ Domains covered: `generators`, `rows`, `native`
 - **Formula:** not stated
 - **Physical effect:** Moves the vertical mouth edge; the flare follows the construction.
 - **Context:** `rows`
-- **Default:** 360.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `seed_params.g_height_mm`)
+- **Default:** 410.778704 (source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `seed_params.g_height_mm`)
 - **Search bounds:** 280.0 .. 420.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `bounds.g_height_mm`)
 - **Hard limits:** none (not a mesher family key)
 - **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
@@ -5738,8 +5738,8 @@ Domains covered: `generators`, `rows`, `native`
 - **Formula:** not stated
 - **Physical effect:** Changes throat loading and how abruptly the flare starts.
 - **Context:** `rows`
-- **Default:** 1.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `seed_params.g_k`)
-- **Search bounds:** 0.8 .. 3.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `bounds.g_k`)
+- **Default:** 0.967541 (source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `seed_params.g_k`)
+- **Search bounds:** 0.5 .. 3.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `bounds.g_k`)
 - **Hard limits:** none (not a mesher family key)
 - **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
 - **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
@@ -5780,8 +5780,8 @@ Domains covered: `generators`, `rows`, `native`
 - **Formula:** not stated
 - **Physical effect:** Tightens or loosens the rolled mouth termination.
 - **Context:** `rows`
-- **Default:** 0.4 (source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `seed_params.g_r`)
-- **Search bounds:** 0.25 .. 0.6 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `bounds.g_r`)
+- **Default:** 0.376617 (source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `seed_params.g_r`)
+- **Search bounds:** 0.1 .. 0.6 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `bounds.g_r`)
 - **Hard limits:** none (not a mesher family key)
 - **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
 - **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
@@ -5794,7 +5794,7 @@ Domains covered: `generators`, `rows`, `native`
 - **Formula:** not stated
 - **Physical effect:** Squares off or rounds the mouth corners.
 - **Context:** `rows`
-- **Default:** 4.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `seed_params.g_rect_exponent`)
+- **Default:** 5.381518 (source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `seed_params.g_rect_exponent`)
 - **Search bounds:** 2.5 .. 8.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `bounds.g_rect_exponent`)
 - **Hard limits:** none (not a mesher family key)
 - **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
@@ -5808,7 +5808,7 @@ Domains covered: `generators`, `rows`, `native`
 - **Formula:** not stated
 - **Physical effect:** Chooses how far the mouth rolls back.
 - **Context:** `rows`
-- **Default:** 1.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `seed_params.g_tmax`)
+- **Default:** 0.998015 (source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `seed_params.g_tmax`)
 - **Search bounds:** 0.85 .. 1.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `bounds.g_tmax`)
 - **Hard limits:** none (not a mesher family key)
 - **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
@@ -5822,7 +5822,7 @@ Domains covered: `generators`, `rows`, `native`
 - **Formula:** not stated
 - **Physical effect:** Moves the horizontal mouth edge; the flare follows the construction.
 - **Context:** `rows`
-- **Default:** 560.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `seed_params.g_width_mm`)
+- **Default:** 560.968198 (source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `seed_params.g_width_mm`)
 - **Search bounds:** 480.0 .. 590.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `bounds.g_width_mm`)
 - **Hard limits:** none (not a mesher family key)
 - **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
@@ -5879,6 +5879,374 @@ Domains covered: `generators`, `rows`, `native`
 - **Physical effect:** Changes the printed wall thickness, not the acoustic inner surface.
 - **Context:** `rows`
 - **Default:** 3.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `generator.wall_thickness_mm`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_check_spec`
+- **Doc:** `docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md` § ### 2.4 organic/elliptical + X-shape (WP9b)
+- **Flags:** —
+
+### k01_geometry_only — FREEFORM / rows
+
+- **Group:** home
+- **Symmetry:** hv
+- **Config:** `examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml`
+- **Brief:** `examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml`
+- **Source status:** gui-only
+- **Description:** Klangfilm-Lamé geometry preview; sampled checks only, not an acoustic-ready design.
+
+#### `g_aspect` — Target aspect ratio (rows)
+
+- **Summary:** Target horizontal-to-vertical section ratio.
+- **Detail:** K morphs from a round throat to this ratio with a quintic gate.
+- **Formula:** not stated
+- **Physical effect:** Target horizontal-to-vertical section ratio.
+- **Context:** `rows`
+- **Default:** 1.6 (source: `examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml` `seed_params.g_aspect`)
+- **Search bounds:** 1.6 .. 1.6 (search=false, log=false; source: `examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml` `bounds.g_aspect`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.klangfilm_lame_family.resolve_grid`
+- **Doc:** `docs/research/typologies/dual_lame_2026-11-16/mesh_audit/README.md` § # Saved CPU mesh audit
+- **Flags:** —
+
+#### `g_end_frac` — Parent termination fraction (rows)
+
+- **Summary:** Sets the parent cap height at termination relative to its radius.
+- **Detail:** Changes how far the K parent continues around its rollback.
+- **Formula:** not stated
+- **Physical effect:** Sets the parent cap height at termination relative to its radius.
+- **Context:** `rows`
+- **Default:** 1.25 (source: `examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml` `seed_params.g_end_frac`)
+- **Search bounds:** 1.25 .. 1.25 (search=false, log=false; source: `examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml` `bounds.g_end_frac`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.klangfilm_lame_family.resolve_grid`
+- **Doc:** `docs/research/typologies/dual_lame_2026-11-16/mesh_audit/README.md` § # Saved CPU mesh audit
+- **Flags:** —
+
+#### `g_entry_half_angle_deg` — Entrance half-angle (rows) (deg)
+
+- **Summary:** Target wall half-angle for the optional K entrance blend.
+- **Detail:** This setting is inactive when source blend is zero and is not a driver datasheet claim.
+- **Formula:** not stated
+- **Physical effect:** Target wall half-angle for the optional K entrance blend.
+- **Context:** `rows`
+- **Default:** 2.0 (source: `examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml` `seed_params.g_entry_half_angle_deg`)
+- **Search bounds:** 2.0 .. 2.0 (search=false, log=false; source: `examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml` `bounds.g_entry_half_angle_deg`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.klangfilm_lame_family.resolve_grid`
+- **Doc:** `docs/research/typologies/dual_lame_2026-11-16/mesh_audit/README.md` § # Saved CPU mesh audit
+- **Flags:** —
+
+#### `g_fc_hz` — Axisymmetric rows cutoff (rows) (Hz)
+
+- **Summary:** Single cutoff of an axisymmetric Le Cleac'h rows march.
+- **Detail:** The verified Fourcade march has no per-azimuth split, so fc_hz is the only cutoff. The iwata and AR stretch keep this axisymmetric base.
+- **Formula:** `m = 4 pi fc / c`
+- **Physical effect:** Sets the rollback size and loading corner.
+- **Context:** `rows`
+- **Default:** 560.0 (source: `examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml` `seed_params.g_fc_hz`)
+- **Search bounds:** 560.0 .. 560.0 (search=false, log=false; source: `examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml` `bounds.g_fc_hz`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_lecleach_knobs`
+- **Doc:** `docs/research/typologies/JMLC_LECLEACH_RESEARCH_2026-10-25.md` § ## 2. Construction comparison
+- **Flags:** overloaded
+
+#### `g_lame_p` — Lamé exponent (rows)
+
+- **Summary:** Target Lamé section exponent.
+- **Detail:** K transitions from a round throat to this exponent; larger values make sections squarer.
+- **Formula:** not stated
+- **Physical effect:** Target Lamé section exponent.
+- **Context:** `rows`
+- **Default:** 2.0 (source: `examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml` `seed_params.g_lame_p`)
+- **Search bounds:** 2.0 .. 2.0 (search=false, log=false; source: `examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml` `bounds.g_lame_p`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.klangfilm_lame_family.resolve_grid`
+- **Doc:** `docs/research/typologies/dual_lame_2026-11-16/mesh_audit/README.md` § # Saved CPU mesh audit
+- **Flags:** —
+
+#### `g_morph_frac` — Morph fraction (rows)
+
+- **Summary:** Sets where the K section morph reaches its target.
+- **Detail:** It is a fraction of the parent pre-shoulder arc length.
+- **Formula:** not stated
+- **Physical effect:** Sets where the K section morph reaches its target.
+- **Context:** `rows`
+- **Default:** 0.3 (source: `examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml` `seed_params.g_morph_frac`)
+- **Search bounds:** 0.3 .. 0.3 (search=false, log=false; source: `examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml` `bounds.g_morph_frac`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.klangfilm_lame_family.resolve_grid`
+- **Doc:** `docs/research/typologies/dual_lame_2026-11-16/mesh_audit/README.md` § # Saved CPU mesh audit
+- **Flags:** —
+
+#### `g_rim_sweep_ratio` — Rim sweep ratio (rows)
+
+- **Summary:** Sets horizontal rim setback relative to the horizontal section size.
+- **Detail:** A quintic gate applies the K sweep toward the rim; zero disables it.
+- **Formula:** not stated
+- **Physical effect:** Sets horizontal rim setback relative to the horizontal section size.
+- **Context:** `rows`
+- **Default:** 0.0 (source: `examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml` `seed_params.g_rim_sweep_ratio`)
+- **Search bounds:** 0.0 .. 0.0 (search=false, log=false; source: `examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml` `bounds.g_rim_sweep_ratio`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.klangfilm_lame_family.resolve_grid`
+- **Doc:** `docs/research/typologies/dual_lame_2026-11-16/mesh_audit/README.md` § # Saved CPU mesh audit
+- **Flags:** —
+
+#### `g_source_blend_ratio` — Source blend ratio (rows)
+
+- **Summary:** Sets the optional entrance blend length relative to throat diameter.
+- **Detail:** Zero disables the experimental entrance tangent blend.
+- **Formula:** not stated
+- **Physical effect:** Sets the optional entrance blend length relative to throat diameter.
+- **Context:** `rows`
+- **Default:** 0.0 (source: `examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml` `seed_params.g_source_blend_ratio`)
+- **Search bounds:** 0.0 .. 0.0 (search=false, log=false; source: `examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml` `bounds.g_source_blend_ratio`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.klangfilm_lame_family.resolve_grid`
+- **Doc:** `docs/research/typologies/dual_lame_2026-11-16/mesh_audit/README.md` § # Saved CPU mesh audit
+- **Flags:** —
+
+#### `n_phi` — Azimuth row count
+
+- **Summary:** Number of azimuth rows in the rows/grid model.
+- **Detail:** The row count sets the angular sampling of the point grid. The quarter model, half model and full ring each have their own minimum and parity rules in the generator. It is a count, not a length.
+- **Formula:** not stated
+- **Physical effect:** Raises angular fidelity at the cost of more grid rows.
+- **Context:** `rows`
+- **Default:** 19 (source: `examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml` `generator.n_phi`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_check_spec`
+- **Doc:** `docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md` § ### 2.4 organic/elliptical + X-shape (WP9b)
+- **Flags:** —
+
+#### `n_s` — Axial station count
+
+- **Summary:** Number of axial stations along each row.
+- **Detail:** Each row is sampled at equal axial (or equal-arc, for the rows march) fractions. This count sets the longitudinal resolution. It is a count, not a length.
+- **Formula:** not stated
+- **Physical effect:** Raises longitudinal fidelity at the cost of more points.
+- **Context:** `rows`
+- **Default:** 64 (source: `examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml` `generator.n_s`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_check_spec`
+- **Doc:** `docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md` § ### 2.4 organic/elliptical + X-shape (WP9b)
+- **Flags:** —
+
+#### `span` — Row span
+
+- **Summary:** How much of the azimuth circle the rows model covers.
+- **Detail:** The legal spans are the ones the generator handles, and their names are read from the generator's own span constant rather than retyped here. A kind can force a span: an odd-cosine asymmetry forces the full ring and a b-term forces the half model.
+- **Formula:** not stated
+- **Physical effect:** Chooses whether the mesh uses mirror planes or a seam-free full ring.
+- **Context:** `rows`
+- **Default:** quarter (source: `examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml` `generator.span`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** lo=—, hi=—, kind=str, section=— (`hornlab_search/design/generators/grid.py` `ROWS_SPANS`)
+- **Code:** `hornlab_search.design.generators.grid._rows_span_requested`
+- **Doc:** `docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md` § ### 2.5 Up/down-asymmetric saddle
+- **Flags:** —
+
+#### `wall_thickness_mm` — Shell thickness (mm)
+
+- **Summary:** Outer-shell thickness of a freestanding rows model.
+- **Detail:** The point-grid route builds an explicit outer shell offset from each row's own profile. This is the printed shell thickness, not an acoustic dimension. The generator also uses it in its self-approach guard.
+- **Formula:** not stated
+- **Physical effect:** Changes the printed wall thickness, not the acoustic inner surface.
+- **Context:** `rows`
+- **Default:** 3.0 (source: `examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml` `generator.wall_thickness_mm`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_check_spec`
+- **Doc:** `docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md` § ### 2.4 organic/elliptical + X-shape (WP9b)
+- **Flags:** —
+
+### l01_geometry_only — FREEFORM / rows
+
+- **Group:** home
+- **Symmetry:** hv
+- **Config:** `examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml`
+- **Brief:** `examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml`
+- **Source status:** gui-only
+- **Description:** Derived Le Cléac'h H/V Lamé geometry preview; sampled checks only, not an acoustic-ready design.
+
+#### `g_T` — Rows family factor (rows)
+
+- **Summary:** Salmon family T on the Salmon rows; Fourcade area-law T on the Le Cleac'h rows.
+- **Detail:** The two row families share the spelling but not the equation. The Salmon rows use it in the family area law; the verified Le Cleac'h rows use it in the Fourcade wavefront-area law.
+- **Formula:** `Salmon family law; Fourcade eq. 42`
+- **Physical effect:** Selects the family member and its expansion profile.
+- **Context:** `rows`
+- **Default:** 0.5 (source: `examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml` `seed_params.g_T`)
+- **Search bounds:** 0.5 .. 0.5 (search=false, log=false; source: `examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml` `bounds.g_T`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_shape_knobs`
+- **Doc:** `docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md` § ### 2.4 organic/elliptical + X-shape (WP9b)
+- **Flags:** overloaded
+
+#### `g_ar_m` — Iwata mouth aspect ratio (rows)
+
+- **Summary:** Mouth aspect ratio of the iwata_ar stretch on the verified march.
+- **Detail:** The iwata_ar kind applies an area-preserving aspect-ratio evolution to the verified Le Cleac'h march, with T pinned by its config. It is our reconstruction of the principle, never the Iwata product.
+- **Formula:** `AR evolution with ar_m at the mouth`
+- **Physical effect:** Makes the mouth wider than tall (or the reverse).
+- **Context:** `rows`
+- **Default:** 1.52 (source: `examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml` `seed_params.g_ar_m`)
+- **Search bounds:** 1.52 .. 1.52 (search=false, log=false; source: `examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml` `bounds.g_ar_m`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_iwata_ar_knobs`
+- **Doc:** `docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md` § ### 2.2 Iwata / quasi-Iwata / "FH-N2"
+- **Flags:** —
+
+#### `g_ar_p` — Iwata AR exponent (rows)
+
+- **Summary:** Exponent of the iwata_ar aspect-ratio evolution.
+- **Detail:** Shapes how quickly the aspect-ratio stretch develops along the normalized arc. The construction is our reconstruction, not a published Iwata recipe.
+- **Formula:** `AR(l) = 1 + (ar_m - 1) (l / L0)^ar_p`
+- **Physical effect:** Moves the aspect-ratio change toward the throat or the mouth.
+- **Context:** `rows`
+- **Default:** 1.05 (source: `examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml` `seed_params.g_ar_p`)
+- **Search bounds:** 1.05 .. 1.05 (search=false, log=false; source: `examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml` `bounds.g_ar_p`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_iwata_ar_knobs`
+- **Doc:** `docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md` § ### 2.2 Iwata / quasi-Iwata / "FH-N2"
+- **Flags:** —
+
+#### `g_axial_length_factor` — Axial length factor (rows)
+
+- **Summary:** Sets the target axial length relative to the unswept parent.
+- **Detail:** Changes the L axial progression to reach the target depth.
+- **Formula:** not stated
+- **Physical effect:** Sets the target axial length relative to the unswept parent.
+- **Context:** `rows`
+- **Default:** 1.0 (source: `examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml` `seed_params.g_axial_length_factor`)
+- **Search bounds:** 1.0 .. 1.0 (search=false, log=false; source: `examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml` `bounds.g_axial_length_factor`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.lecleach_swept_hv.make_grid`
+- **Doc:** `docs/research/typologies/dual_lame_2026-11-16/mesh_audit/README.md` § # Saved CPU mesh audit
+- **Flags:** —
+
+#### `g_fc_hz` — Axisymmetric rows cutoff (rows) (Hz)
+
+- **Summary:** Single cutoff of an axisymmetric Le Cleac'h rows march.
+- **Detail:** The verified Fourcade march has no per-azimuth split, so fc_hz is the only cutoff. The iwata and AR stretch keep this axisymmetric base.
+- **Formula:** `m = 4 pi fc / c`
+- **Physical effect:** Sets the rollback size and loading corner.
+- **Context:** `rows`
+- **Default:** 500.0 (source: `examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml` `seed_params.g_fc_hz`)
+- **Search bounds:** 500.0 .. 500.0 (search=false, log=false; source: `examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml` `bounds.g_fc_hz`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_lecleach_knobs`
+- **Doc:** `docs/research/typologies/JMLC_LECLEACH_RESEARCH_2026-10-25.md` § ## 2. Construction comparison
+- **Flags:** overloaded
+
+#### `g_lame_p_mouth` — Mouth Lamé exponent (rows)
+
+- **Summary:** Sets the L mouth section exponent.
+- **Detail:** The section transitions from a round throat toward this exponent.
+- **Formula:** not stated
+- **Physical effect:** Sets the L mouth section exponent.
+- **Context:** `rows`
+- **Default:** 2.0 (source: `examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml` `seed_params.g_lame_p_mouth`)
+- **Search bounds:** 2.0 .. 2.0 (search=false, log=false; source: `examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml` `bounds.g_lame_p_mouth`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.lecleach_swept_hv.make_grid`
+- **Doc:** `docs/research/typologies/dual_lame_2026-11-16/mesh_audit/README.md` § # Saved CPU mesh audit
+- **Flags:** —
+
+#### `g_lip_radius_mm` — Lip radius (rows) (mm)
+
+- **Summary:** Radius of the optional tangent-arc lip.
+- **Detail:** Zero leaves the lip extension off.
+- **Formula:** not stated
+- **Physical effect:** Radius of the optional tangent-arc lip.
+- **Context:** `rows`
+- **Default:** 0.0 (source: `examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml` `seed_params.g_lip_radius_mm`)
+- **Search bounds:** 0.0 .. 0.0 (search=false, log=false; source: `examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml` `bounds.g_lip_radius_mm`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.lecleach_swept_hv.make_grid`
+- **Doc:** `docs/research/typologies/dual_lame_2026-11-16/mesh_audit/README.md` § # Saved CPU mesh audit
+- **Flags:** —
+
+#### `g_rim_sweep_mm` — Rim sweep (rows) (mm)
+
+- **Summary:** Horizontal rim setback in millimetres.
+- **Detail:** The L sweep varies around the section and grows toward the mouth.
+- **Formula:** not stated
+- **Physical effect:** Horizontal rim setback in millimetres.
+- **Context:** `rows`
+- **Default:** 0.0 (source: `examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml` `seed_params.g_rim_sweep_mm`)
+- **Search bounds:** 0.0 .. 0.0 (search=false, log=false; source: `examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml` `bounds.g_rim_sweep_mm`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.lecleach_swept_hv.make_grid`
+- **Doc:** `docs/research/typologies/dual_lame_2026-11-16/mesh_audit/README.md` § # Saved CPU mesh audit
+- **Flags:** —
+
+#### `g_stop_deg` — Rows march stop (rows) (deg)
+
+- **Summary:** Wall-angle stop of the per-azimuth rows march; the legal window depends on the kind.
+- **Detail:** The verified Le Cleac'h rows use the published stop window and allow rollback past vertical. The Salmon rows stop below or above the cap-area asymptote, and modulated Salmon rows keep the plan's rollback window. A per-typology note narrows this.
+- **Formula:** `march stops when phi >= stop_deg`
+- **Physical effect:** Chooses how far around the rollback each row is followed.
+- **Context:** `rows`
+- **Default:** 118.0 (source: `examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml` `seed_params.g_stop_deg`)
+- **Search bounds:** 118.0 .. 118.0 (search=false, log=false; source: `examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml` `bounds.g_stop_deg`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_shape_knobs`
+- **Doc:** `docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md` § ### 2.4 organic/elliptical + X-shape (WP9b)
+- **Flags:** overloaded
+
+#### `n_phi` — Azimuth row count
+
+- **Summary:** Number of azimuth rows in the rows/grid model.
+- **Detail:** The row count sets the angular sampling of the point grid. The quarter model, half model and full ring each have their own minimum and parity rules in the generator. It is a count, not a length.
+- **Formula:** not stated
+- **Physical effect:** Raises angular fidelity at the cost of more grid rows.
+- **Context:** `rows`
+- **Default:** 25 (source: `examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml` `generator.n_phi`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_check_spec`
+- **Doc:** `docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md` § ### 2.4 organic/elliptical + X-shape (WP9b)
+- **Flags:** —
+
+#### `n_s` — Axial station count
+
+- **Summary:** Number of axial stations along each row.
+- **Detail:** Each row is sampled at equal axial (or equal-arc, for the rows march) fractions. This count sets the longitudinal resolution. It is a count, not a length.
+- **Formula:** not stated
+- **Physical effect:** Raises longitudinal fidelity at the cost of more points.
+- **Context:** `rows`
+- **Default:** 96 (source: `examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml` `generator.n_s`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_check_spec`
+- **Doc:** `docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md` § ### 2.4 organic/elliptical + X-shape (WP9b)
+- **Flags:** —
+
+#### `span` — Row span
+
+- **Summary:** How much of the azimuth circle the rows model covers.
+- **Detail:** The legal spans are the ones the generator handles, and their names are read from the generator's own span constant rather than retyped here. A kind can force a span: an odd-cosine asymmetry forces the full ring and a b-term forces the half model.
+- **Formula:** not stated
+- **Physical effect:** Chooses whether the mesh uses mirror planes or a seam-free full ring.
+- **Context:** `rows`
+- **Default:** quarter (source: `examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml` `generator.span`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** lo=—, hi=—, kind=str, section=— (`hornlab_search/design/generators/grid.py` `ROWS_SPANS`)
+- **Code:** `hornlab_search.design.generators.grid._rows_span_requested`
+- **Doc:** `docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md` § ### 2.5 Up/down-asymmetric saddle
+- **Flags:** —
+
+#### `wall_thickness_mm` — Shell thickness (mm)
+
+- **Summary:** Outer-shell thickness of a freestanding rows model.
+- **Detail:** The point-grid route builds an explicit outer shell offset from each row's own profile. This is the printed shell thickness, not an acoustic dimension. The generator also uses it in its self-approach guard.
+- **Formula:** not stated
+- **Physical effect:** Changes the printed wall thickness, not the acoustic inner surface.
+- **Context:** `rows`
+- **Default:** 3.0 (source: `examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml` `generator.wall_thickness_mm`)
 - **Search bounds:** none (this is a block value, not a searched knob)
 - **Hard limits:** none (not a mesher family key)
 - **Code:** `hornlab_search.design.generators.grid._rows_check_spec`

@@ -1,5 +1,11 @@
 # ISSUES
 
+## 2026-11-16 (16:30) - Klangfilm-Lame validation open
+
+- OPEN (local): run shape-check/mesh on `hl__klangfilm_lame_curved_v1` (dof cap, symmetry, shell clearance, source tag 2); render vs reference.
+- OPEN (local): small acoustic A/B of throat variants (raw 10.6 vs derived 2/5 deg) under a fixed source model; BEM vs bempp cross-check.
+- OPEN: 3-D-normal outer shell, `follow_parent_stretch` tail mode, JMLC-derived parent (not implemented).
+
 ## 2026-11-16 (15:00) - Watchdog continuations queued; envelope 700 mm decision
 
 - DONE: watchdog-stopped runs continued (resume or widened + reseeded), queue `home_day2_2026-11-16`.

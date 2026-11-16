@@ -1,0 +1,51 @@
+schema: hornfab.klangfilm_lame.preview.v1
+kind: RESEARCH_GEOMETRY_NOT_BEM_READY
+throat_diameter_mm: 36.0
+envelope_mm:
+  W: 600.0
+  H: 480.0
+  D: 480.0
+area_model: ratio-locked generalized superellipsoid cap (our proposal, not 2018 macro)
+candidates:
+- id: K0
+  style: gentle 2018-like ellipse control
+  fc_hz: 560.0
+  aspect: 1.55
+  lame_p: 2.0
+  end_frac: 1.13
+  rim_sweep_mm: 0.0
+- id: K1
+  style: large soft organic mouth
+  fc_hz: 510.0
+  aspect: 1.7
+  lame_p: 2.8
+  end_frac: 1.3
+  rim_sweep_mm: 8.0
+- id: K2
+  style: rounded rectangle / balanced
+  fc_hz: 530.0
+  aspect: 1.85
+  lame_p: 4.0
+  end_frac: 1.45
+  rim_sweep_mm: 15.0
+- id: K3
+  style: high-Lame 2019-inspired curl
+  fc_hz: 560.0
+  aspect: 1.75
+  lame_p: 6.0
+  end_frac: 1.75
+  rim_sweep_mm: 12.0
+- id: K4
+  style: strong winglike rim sweep
+  fc_hz: 560.0
+  aspect: 1.9
+  lame_p: 4.2
+  end_frac: 1.46
+  rim_sweep_mm: 45.0
+- id: K5
+  style: full-roll oval / soft edge
+  fc_hz: 580.0
+  aspect: 1.6
+  lame_p: 2.4
+  end_frac: 1.82
+  rim_sweep_mm: 4.0

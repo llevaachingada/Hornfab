@@ -573,21 +573,21 @@ Domains covered: `generators`, `rows`, `native`
 
 | Knob | Label | Unit | Default | Search | Hard lo | Hard hi | Summary |
 |---|---|---|---|---|---|---|---|
-| `g_L_mm` | Depth (rows) | mm | 240.0 | 200.0 .. 260.0 | — | — | Shared axial depth of both meridians used by the GRID radius field. |
-| `g_a_h_deg` | Horizontal coverage half-angle (rows) | deg | 38.0 | 33.0 .. 40.0 | — | — | Horizontal coverage half-angle of a per-azimuth OSSE rows kind. |
-| `g_a_v_deg` | Vertical coverage half-angle (rows) | deg | 24.0 | 20.0 .. 28.0 | — | — | Vertical coverage half-angle of a per-azimuth OSSE rows kind. |
+| `g_L_mm` | Depth (rows) | mm | 259.603653 | 200.0 .. 285.0 | — | — | Shared axial depth of both meridians used by the GRID radius field. |
+| `g_a_h_deg` | Horizontal coverage half-angle (rows) | deg | 36.388866 | 33.0 .. 40.0 | — | — | Horizontal coverage half-angle of a per-azimuth OSSE rows kind. |
+| `g_a_v_deg` | Vertical coverage half-angle (rows) | deg | 22.707717 | 20.0 .. 28.0 | — | — | Vertical coverage half-angle of a per-azimuth OSSE rows kind. |
 | `g_k` | Throat expansion (rows) | — | 1.0 | 1.0 .. 1.0 | — | — | OS throat-expansion exponent in the OSSE and R-OSSE rows kinds. |
-| `g_n` | Termination exponent (rows) | — | 2.0 | 1.8 .. 3.2 | — | — | OSSE termination exponent; controls where the mouth flare is packed. |
+| `g_n` | Termination exponent (rows) | — | 2.143998 | 1.8 .. 3.2 | — | — | OSSE termination exponent; controls where the mouth flare is packed. |
 | `g_q` | OSSE shape exponent (rows) | — | 0.996 | 0.996 .. 0.996 | — | — | OSSE profile shape exponent near the mouth. |
-| `g_r_lip_mm` | Torus lip radius (rows) | mm | 25.0 | 8.0 .. 30.0 | — | 100.0 | Tangent-continuous circular lip radius on the rollback rows; zero leaves the wall. |
-| `g_s` | Termination fraction (rows) | — | 0.35 | 0.2 .. 0.45 | — | — | Fraction of the mouth radius carried by the OSSE termination. |
-| `g_sf_ab` | Superformula a/b ratio (rows) | — | 0.8 | 0.7 .. 0.9 | — | — | Anisotropy ratio of the two Gielis superformula radii. |
-| `g_sf_amt` | X-crease amplitude (rows) | — | 0.3 | 0.15 .. 0.38 | — | — | Amplitude of the superformula X modulation on the wall. |
+| `g_r_lip_mm` | Torus lip radius (rows) | mm | 18.284822 | 8.0 .. 30.0 | — | 100.0 | Tangent-continuous circular lip radius on the rollback rows; zero leaves the wall. |
+| `g_s` | Termination fraction (rows) | — | 0.389835 | 0.2 .. 0.45 | — | — | Fraction of the mouth radius carried by the OSSE termination. |
+| `g_sf_ab` | Superformula a/b ratio (rows) | — | 0.847983 | 0.7 .. 0.9 | — | — | Anisotropy ratio of the two Gielis superformula radii. |
+| `g_sf_amt` | X-crease amplitude (rows) | — | 0.239269 | 0.15 .. 0.38 | — | — | Amplitude of the superformula X modulation on the wall. |
 | `g_sf_m` | Superformula symmetry (rows) | — | 4 | 4 .. 4 | — | — | Gielis superformula symmetry order of the X-shaped mouth term. |
 | `g_sf_n1` | Superformula exponent n1 (rows) | — | 1.8 | 1.8 .. 1.8 | — | — | First Gielis superformula exponent of the X mouth term. |
 | `g_sf_n2` | Superformula exponent n2 (rows) | — | 7.0 | 7.0 .. 7.0 | — | — | Second Gielis superformula exponent of the X mouth term. |
 | `g_sf_start` | X ramp start (rows) | — | 0.25 | 0.25 .. 0.25 | — | — | Normalised wall fraction where the X modulation starts. |
-| `g_wrap_deg` | Lip wrap angle (rows) | deg | 130.0 | 80.0 .. 160.0 | — | — | How far the curled mouth lip wraps around. |
+| `g_wrap_deg` | Lip wrap angle (rows) | deg | 86.087609 | 80.0 .. 160.0 | — | — | How far the curled mouth lip wraps around. |
 | `n_phi` | Azimuth row count | — | 25 | — | — | — | Number of azimuth rows in the rows/grid model. |
 | `n_s` | Axial station count | — | 40 | — | — | — | Number of axial stations along each row. |
 | `span` | Row span | — | quarter | — | — | — | How much of the azimuth circle the rows model covers. |
@@ -822,17 +822,17 @@ Domains covered: `generators`, `rows`, `native`
 | Knob | Label | Unit | Default | Search | Hard lo | Hard hi | Summary |
 |---|---|---|---|---|---|---|---|
 | `g_a_diag_deg` | Diagonal coverage half-angle (rows) | deg | 0.0 | 0.0 .. 0.0 | — | — | Diagonal wall-angle term of the per-azimuth R-OSSE rows kind. |
-| `g_a_h_deg` | Horizontal coverage half-angle (rows) | deg | 40.0 | 32.0 .. 46.0 | — | — | Horizontal coverage half-angle of a per-azimuth OSSE rows kind. |
-| `g_a_v_deg` | Vertical coverage half-angle (rows) | deg | 25.0 | 18.0 .. 30.0 | — | — | Vertical coverage half-angle of a per-azimuth OSSE rows kind. |
-| `g_b` | Rollback bend (rows) | — | 0.2 | 0.0 .. 0.4 | — | — | Dimensionless R-OSSE bend term of the rolled mouth. |
-| `g_height_mm` | Mouth height (rows) | mm | 360.0 | 280.0 .. 420.0 | — | — | Full mouth height target of a rolled-family rows construction. |
-| `g_k` | Throat expansion (rows) | — | 1.0 | 0.8 .. 3.0 | — | — | OS throat-expansion exponent in the OSSE and R-OSSE rows kinds. |
+| `g_a_h_deg` | Horizontal coverage half-angle (rows) | deg | 35.667049 | 32.0 .. 46.0 | — | — | Horizontal coverage half-angle of a per-azimuth OSSE rows kind. |
+| `g_a_v_deg` | Vertical coverage half-angle (rows) | deg | 19.192696 | 12.0 .. 30.0 | — | — | Vertical coverage half-angle of a per-azimuth OSSE rows kind. |
+| `g_b` | Rollback bend (rows) | — | 0.04501 | 0.0 .. 0.4 | — | — | Dimensionless R-OSSE bend term of the rolled mouth. |
+| `g_height_mm` | Mouth height (rows) | mm | 410.778704 | 280.0 .. 420.0 | — | — | Full mouth height target of a rolled-family rows construction. |
+| `g_k` | Throat expansion (rows) | — | 0.967541 | 0.5 .. 3.0 | — | — | OS throat-expansion exponent in the OSSE and R-OSSE rows kinds. |
 | `g_m` | R-OSSE shape exponent (rows) | — | 0.85 | 0.85 .. 0.85 | — | — | Shape exponent of the R-OSSE meridian. |
 | `g_q` | OSSE shape exponent (rows) | — | 3.0 | 3.0 .. 3.0 | — | — | OSSE profile shape exponent near the mouth. |
-| `g_r` | Rollback radius (rows) | mm | 0.4 | 0.25 .. 0.6 | — | — | R-OSSE rollback radius of the rolled mouth. |
-| `g_rect_exponent` | Rectangle corner exponent (rows) | — | 4.0 | 2.5 .. 8.0 | — | — | Superellipse corner exponent of the rectangular mouth. |
-| `g_tmax` | Rollback extent (rows) | — | 1.0 | 0.85 .. 1.0 | — | — | Normalised extent of the R-OSSE rollback. |
-| `g_width_mm` | Mouth width (rows) | mm | 560.0 | 480.0 .. 590.0 | — | — | Full mouth width target of a rolled-family rows construction. |
+| `g_r` | Rollback radius (rows) | mm | 0.376617 | 0.1 .. 0.6 | — | — | R-OSSE rollback radius of the rolled mouth. |
+| `g_rect_exponent` | Rectangle corner exponent (rows) | — | 5.381518 | 2.5 .. 8.0 | — | — | Superellipse corner exponent of the rectangular mouth. |
+| `g_tmax` | Rollback extent (rows) | — | 0.998015 | 0.85 .. 1.0 | — | — | Normalised extent of the R-OSSE rollback. |
+| `g_width_mm` | Mouth width (rows) | mm | 560.968198 | 480.0 .. 590.0 | — | — | Full mouth width target of a rolled-family rows construction. |
 | `n_phi` | Azimuth row count | — | 25 | — | — | — | Number of azimuth rows in the rows/grid model. |
 | `n_s` | Axial station count | — | 48 | — | — | — | Number of axial stations along each row. |
 | `span` | Row span | — | quarter | — | — | — | How much of the azimuth circle the rows model covers. |
@@ -960,6 +960,63 @@ Domains covered: `generators`, `rows`, `native`
 | `termination` | Flat baffle in this config | — | flat_baffle | — | — | — | termination selects flat_baffle, so the L/R/coverage/hold targets are active. |
 | `theta1_deg` | Present but not the active termination | deg | 16.0 | 2.0 .. 30.0 | — | — | theta1_deg is a rollback target and is not read in this flat-baffle config. |
 | `theta_max_deg` | Rollback wall-angle cap | deg | 91.0 | — | — | — | Rollback-only cap on the wall angle, above vertical and at most a half turn. |
+
+## `k01_geometry_only`
+
+- **Family:** FREEFORM
+- **Kind:** rows
+- **Group:** home
+- **Symmetry:** hv
+- **Description:** Klangfilm-Lamé geometry preview; sampled checks only, not an acoustic-ready design.
+- **Source status:** gui-only
+- **Config:** `examples/typologies/dual_lame_2026-11-16/k01_geometry_only.yaml`
+- **Brief:** `examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml`
+- **Documented:** true
+- **Knobs:** 12
+
+| Knob | Label | Unit | Default | Search | Hard lo | Hard hi | Summary |
+|---|---|---|---|---|---|---|---|
+| `g_aspect` | Target aspect ratio (rows) | — | 1.6 | 1.6 .. 1.6 | — | — | Target horizontal-to-vertical section ratio. |
+| `g_end_frac` | Parent termination fraction (rows) | — | 1.25 | 1.25 .. 1.25 | — | — | Sets the parent cap height at termination relative to its radius. |
+| `g_entry_half_angle_deg` | Entrance half-angle (rows) | deg | 2.0 | 2.0 .. 2.0 | — | — | Target wall half-angle for the optional K entrance blend. |
+| `g_fc_hz` | Axisymmetric rows cutoff (rows) | Hz | 560.0 | 560.0 .. 560.0 | — | — | Single cutoff of an axisymmetric Le Cleac'h rows march. |
+| `g_lame_p` | Lamé exponent (rows) | — | 2.0 | 2.0 .. 2.0 | — | — | Target Lamé section exponent. |
+| `g_morph_frac` | Morph fraction (rows) | — | 0.3 | 0.3 .. 0.3 | — | — | Sets where the K section morph reaches its target. |
+| `g_rim_sweep_ratio` | Rim sweep ratio (rows) | — | 0.0 | 0.0 .. 0.0 | — | — | Sets horizontal rim setback relative to the horizontal section size. |
+| `g_source_blend_ratio` | Source blend ratio (rows) | — | 0.0 | 0.0 .. 0.0 | — | — | Sets the optional entrance blend length relative to throat diameter. |
+| `n_phi` | Azimuth row count | — | 19 | — | — | — | Number of azimuth rows in the rows/grid model. |
+| `n_s` | Axial station count | — | 64 | — | — | — | Number of axial stations along each row. |
+| `span` | Row span | — | quarter | — | — | — | How much of the azimuth circle the rows model covers. |
+| `wall_thickness_mm` | Shell thickness | mm | 3.0 | — | — | — | Outer-shell thickness of a freestanding rows model. |
+
+## `l01_geometry_only`
+
+- **Family:** FREEFORM
+- **Kind:** rows
+- **Group:** home
+- **Symmetry:** hv
+- **Description:** Derived Le Cléac'h H/V Lamé geometry preview; sampled checks only, not an acoustic-ready design.
+- **Source status:** gui-only
+- **Config:** `examples/typologies/dual_lame_2026-11-16/l01_geometry_only.yaml`
+- **Brief:** `examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml`
+- **Documented:** true
+- **Knobs:** 13
+
+| Knob | Label | Unit | Default | Search | Hard lo | Hard hi | Summary |
+|---|---|---|---|---|---|---|---|
+| `g_T` | Rows family factor (rows) | — | 0.5 | 0.5 .. 0.5 | — | — | Salmon family T on the Salmon rows; Fourcade area-law T on the Le Cleac'h rows. |
+| `g_ar_m` | Iwata mouth aspect ratio (rows) | — | 1.52 | 1.52 .. 1.52 | — | — | Mouth aspect ratio of the iwata_ar stretch on the verified march. |
+| `g_ar_p` | Iwata AR exponent (rows) | — | 1.05 | 1.05 .. 1.05 | — | — | Exponent of the iwata_ar aspect-ratio evolution. |
+| `g_axial_length_factor` | Axial length factor (rows) | — | 1.0 | 1.0 .. 1.0 | — | — | Sets the target axial length relative to the unswept parent. |
+| `g_fc_hz` | Axisymmetric rows cutoff (rows) | Hz | 500.0 | 500.0 .. 500.0 | — | — | Single cutoff of an axisymmetric Le Cleac'h rows march. |
+| `g_lame_p_mouth` | Mouth Lamé exponent (rows) | — | 2.0 | 2.0 .. 2.0 | — | — | Sets the L mouth section exponent. |
+| `g_lip_radius_mm` | Lip radius (rows) | mm | 0.0 | 0.0 .. 0.0 | — | — | Radius of the optional tangent-arc lip. |
+| `g_rim_sweep_mm` | Rim sweep (rows) | mm | 0.0 | 0.0 .. 0.0 | — | — | Horizontal rim setback in millimetres. |
+| `g_stop_deg` | Rows march stop (rows) | deg | 118.0 | 118.0 .. 118.0 | — | — | Wall-angle stop of the per-azimuth rows march; the legal window depends on the kind. |
+| `n_phi` | Azimuth row count | — | 25 | — | — | — | Number of azimuth rows in the rows/grid model. |
+| `n_s` | Axial station count | — | 96 | — | — | — | Number of axial stations along each row. |
+| `span` | Row span | — | quarter | — | — | — | How much of the azimuth circle the rows model covers. |
+| `wall_thickness_mm` | Shell thickness | mm | 3.0 | — | — | — | Outer-shell thickness of a freestanding rows model. |
 
 ## `lecleach_asym_odd`
 

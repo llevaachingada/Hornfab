@@ -1,0 +1,156 @@
+[
+  {
+    "file": "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l01\\mesh.msh",
+    "sha256": "b22dff6b46099f26cc488f15c01123bf61b8280960c69562d0acef05e93ebdbc",
+    "nodes": 1534,
+    "triangles": 2876,
+    "element_types": {
+      "2": 2876
+    },
+    "cgal_vertices": 1534,
+    "cgal_faces": 2876,
+    "valid_polyhedron": true,
+    "closed": false,
+    "self_intersects": false
+  },
+  {
+    "file": "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l02\\mesh.msh",
+    "sha256": "d1dee302efc6cb3419843e5b4789ecdc93e0465a4c12b0983defe0979ebd5bb5",
+    "nodes": 1884,
+    "triangles": 3561,
+    "element_types": {
+      "2": 3561
+    },
+    "cgal_vertices": 1884,
+    "cgal_faces": 3561,
+    "valid_polyhedron": true,
+    "closed": false,
+    "self_intersects": false
+  },
+  {
+    "file": "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l03\\mesh.msh",
+    "sha256": "33f11cad829d5f61bd886e2bdcb046dcac398fd935427309b2644d839832cd8e",
+    "nodes": 2094,
+    "triangles": 3959,
+    "element_types": {
+      "2": 3959
+    },
+    "cgal_vertices": 2094,
+    "cgal_faces": 3959,
+    "valid_polyhedron": true,
+    "closed": false,
+    "self_intersects": false
+  },
+  {
+    "file": "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l04\\mesh.msh",
+    "sha256": "d0137d3c5b75a8105706de8e334515a1e2713f8437973daba56d99bfa9af01c1",
+    "nodes": 1604,
+    "triangles": 2993,
+    "element_types": {
+      "2": 2993
+    },
+    "cgal_vertices": 1604,
+    "cgal_faces": 2993,
+    "valid_polyhedron": true,
+    "closed": false,
+    "self_intersects": false
+  },
+  {
+    "file": "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l05\\mesh.msh",
+    "sha256": "e10859a558219325b9b3b0694430ae153a794d7b6d1c37fed126a5cc919ced01",
+    "nodes": 3270,
+    "triangles": 6261,
+    "element_types": {
+      "2": 6261
+    },
+    "cgal_vertices": 3270,
+    "cgal_faces": 6261,
+    "valid_polyhedron": true,
+    "closed": false,
+    "self_intersects": false
+  },
+  {
+    "file": "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l06\\mesh.msh",
+    "sha256": "934891a7ce441b88e213ec77a3f90282463a49a643b93fe7d3a4b931f2a3d4e7",
+    "nodes": 1835,
+    "triangles": 3464,
+    "element_types": {
+      "2": 3464
+    },
+    "cgal_vertices": 1835,
+    "cgal_faces": 3464,
+    "valid_polyhedron": true,
+    "closed": false,
+    "self_intersects": false
+  },
+  {
+    "file": "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l07\\mesh.msh",
+    "sha256": "01c66f91d554756f9a92dbd8d37a03e48dc68435ce73f6d6b0a6b18f3a6cedf9",
+    "nodes": 1463,
+    "triangles": 2736,
+    "element_types": {
+      "2": 2736
+    },
+    "cgal_vertices": 1463,
+    "cgal_faces": 2736,
+    "valid_polyhedron": true,
+    "closed": false,
+    "self_intersects": false
+  },
+  {
+    "file": "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l08\\mesh.msh",
+    "sha256": "9973eb6b7ddd29c0db3ad931d5e1bd1c499c91f7d149c0f567287e2310b21790",
+    "nodes": 1835,
+    "triangles": 3472,
+    "element_types": {
+      "2": 3472
+    },
+    "cgal_vertices": 1835,
+    "cgal_faces": 3472,
+    "valid_polyhedron": true,
+    "closed": false,
+    "self_intersects": false
+  },
+  {
+    "file": "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l09\\mesh.msh",
+    "sha256": "ca2856f8543313ccb2cb30c142f4f11238754f418916ee6237f6c795cd60299c",
+    "nodes": 1468,
+    "triangles": 2763,
+    "element_types": {
+      "2": 2763
+    },
+    "cgal_vertices": 1468,
+    "cgal_faces": 2763,
+    "valid_polyhedron": true,
+    "closed": false,
+    "self_intersects": false
+  },
+  {
+    "file": "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l10\\mesh.msh",
+    "sha256": "0969f73dcffcbaabdf2b85d45098524722939ed8a928db2280edf4a3b6f04a45",
+    "nodes": 2141,
+    "triangles": 4062,
+    "element_types": {
+      "2": 4062
+    },
+    "cgal_vertices": 2141,
+    "cgal_faces": 4062,
+    "valid_polyhedron": true,
+    "closed": false,
+    "self_intersects": false
+  },
+  {
+    "file": "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l11\\mesh.msh",
+    "sha256": "313e515135fead68ecd2d1a26e967a3e4cbbf71b4b2324b875b2adab574340df",
+    "nodes": 1759,
+    "triangles": 3302,
+    "element_types": {
+      "2": 3302
+    },
+    "cgal_vertices": 1759,
+    "cgal_faces": 3302,
+    "valid_polyhedron": true,
+    "closed": false,
+    "self_intersects": false
+  }
+]

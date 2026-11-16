@@ -1,0 +1,994 @@
+[
+  {
+    "id": "L01",
+    "family": "L",
+    "adapter_screen_status": "sampled_checks_only",
+    "adapter_screen_passed": true,
+    "adapter_screen_implementation_sha256": "35205f1d87eb5d236f58f7a818510ff5b930125d96a416438f8de7b52000fe6c",
+    "params": {
+      "g_fc_hz": 500,
+      "g_T": 0.5,
+      "g_stop_deg": 118,
+      "g_ar_m": 1.52,
+      "g_ar_p": 1.05,
+      "g_lame_p_mouth": 2.0,
+      "g_lip_radius_mm": 0,
+      "g_rim_sweep_mm": 0,
+      "g_axial_length_factor": 1.0
+    },
+    "config_sha256": "a878adf139647ce4c6ab05f71b6789ba2b91d542f0a9a277aef5e51dd9cb4117",
+    "shape_check": {
+      "config": "l01",
+      "ok": true,
+      "note": "",
+      "dofs": 1534,
+      "cap": 24000,
+      "quadrants": "1",
+      "mouth_w": 420.970733027457,
+      "mouth_h": 276.9544296233272,
+      "depth": 218.0585214891801,
+      "throat": "round, matches the exit",
+      "throat_ok": true,
+      "saved": "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l01\\mesh.msh",
+      "envelope": "fits"
+    },
+    "mesh_audit": {
+      "file": "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l01\\mesh.msh",
+      "sha256": "b22dff6b46099f26cc488f15c01123bf61b8280960c69562d0acef05e93ebdbc",
+      "coordinate_units": "metres (converted to mm below)",
+      "points": 1534,
+      "triangles": 2876,
+      "triangles_by_physical_tag": {
+        "1": 2818,
+        "2": 58
+      },
+      "zero_area_triangles": 0,
+      "duplicate_triangle_node_sets": 0,
+      "edge_connected_triangle_components": [
+        2876
+      ],
+      "boundary_edges": 190,
+      "boundary_edges_on_x_zero": 89,
+      "boundary_edges_on_y_zero": 101,
+      "boundary_edges_on_both_planes": 0,
+      "boundary_edges_off_both_planes": 0,
+      "nonmanifold_edges": 0,
+      "two_face_inconsistent_orientation_edges": 0,
+      "two_face_edges_by_tag_pair": {
+        "1-1": 4134,
+        "1-2": 8,
+        "2-2": 77
+      },
+      "source": {
+        "tag": 2,
+        "node_count": 40,
+        "triangle_count": 58,
+        "x_range_mm": [
+          0.0,
+          18.000000000000004
+        ],
+        "y_range_mm": [
+          0.0,
+          18.000000000000004
+        ],
+        "z_range_mm": [
+          0.0,
+          0.3141911687079073
+        ],
+        "area_mm2_as_stored": 252.8910351188218,
+        "area_mm2_fourfold": 1011.5641404752872,
+        "source_boundary_edges": 20,
+        "source_boundary_nodes_including_symmetry_radii": 20,
+        "curved_rim_nonaxis_radius_mm_range": [
+          18.000000000000004,
+          18.00000000000001
+        ]
+      },
+      "scope": "Surface incidence and source measurements only; no geometric intersection test, volume closure or acoustic validation."
+    }
+  },
+  {
+    "id": "L02",
+    "family": "L",
+    "adapter_screen_status": "sampled_checks_only",
+    "adapter_screen_passed": true,
+    "adapter_screen_implementation_sha256": "35205f1d87eb5d236f58f7a818510ff5b930125d96a416438f8de7b52000fe6c",
+    "params": {
+      "g_fc_hz": 465,
+      "g_T": 0.6,
+      "g_stop_deg": 112,
+      "g_ar_m": 1.77,
+      "g_ar_p": 1.25,
+      "g_lame_p_mouth": 2.4,
+      "g_lip_radius_mm": 8,
+      "g_rim_sweep_mm": 4,
+      "g_axial_length_factor": 1.0
+    },
+    "config_sha256": "c16c7cc34d914d0f035c0b799e123cebe85aaa6df18f76f90e282b98d66d54f9",
+    "shape_check": {
+      "config": "l02",
+      "ok": true,
+      "note": "",
+      "dofs": 1884,
+      "cap": 24000,
+      "quadrants": "1",
+      "mouth_w": 470.8344660933024,
+      "mouth_h": 268.2706330833706,
+      "depth": 234.72176047772484,
+      "throat": "round, matches the exit",
+      "throat_ok": true,
+      "saved": "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l02\\mesh.msh",
+      "envelope": "fits"
+    },
+    "mesh_audit": {
+      "file": "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l02\\mesh.msh",
+      "sha256": "d1dee302efc6cb3419843e5b4789ecdc93e0465a4c12b0983defe0979ebd5bb5",
+      "coordinate_units": "metres (converted to mm below)",
+      "points": 1884,
+      "triangles": 3561,
+      "triangles_by_physical_tag": {
+        "1": 3503,
+        "2": 58
+      },
+      "zero_area_triangles": 0,
+      "duplicate_triangle_node_sets": 0,
+      "edge_connected_triangle_components": [
+        3561
+      ],
+      "boundary_edges": 205,
+      "boundary_edges_on_x_zero": 94,
+      "boundary_edges_on_y_zero": 111,
+      "boundary_edges_on_both_planes": 0,
+      "boundary_edges_off_both_planes": 0,
+      "nonmanifold_edges": 0,
+      "two_face_inconsistent_orientation_edges": 0,
+      "two_face_edges_by_tag_pair": {
+        "1-1": 5154,
+        "1-2": 8,
+        "2-2": 77
+      },
+      "source": {
+        "tag": 2,
+        "node_count": 40,
+        "triangle_count": 58,
+        "x_range_mm": [
+          0.0,
+          18.000000000000014
+        ],
+        "y_range_mm": [
+          0.0,
+          18.000000000000014
+        ],
+        "z_range_mm": [
+          0.0,
+          0.3141911687079073
+        ],
+        "area_mm2_as_stored": 252.89105734440633,
+        "area_mm2_fourfold": 1011.5642293776253,
+        "source_boundary_edges": 20,
+        "source_boundary_nodes_including_symmetry_radii": 20,
+        "curved_rim_nonaxis_radius_mm_range": [
+          18.000000000000004,
+          18.00000000000001
+        ]
+      },
+      "scope": "Surface incidence and source measurements only; no geometric intersection test, volume closure or acoustic validation."
+    }
+  },
+  {
+    "id": "L03",
+    "family": "L",
+    "adapter_screen_status": "sampled_checks_only",
+    "adapter_screen_passed": true,
+    "adapter_screen_implementation_sha256": "35205f1d87eb5d236f58f7a818510ff5b930125d96a416438f8de7b52000fe6c",
+    "params": {
+      "g_fc_hz": 430,
+      "g_T": 0.55,
+      "g_stop_deg": 120,
+      "g_ar_m": 2.1,
+      "g_ar_p": 1.4,
+      "g_lame_p_mouth": 2.6,
+      "g_lip_radius_mm": 10,
+      "g_rim_sweep_mm": 10,
+      "g_axial_length_factor": 1.0
+    },
+    "config_sha256": "acbe2a2f9a8d479add735411190fe566a02427bb3469296f21fb865e2baab45d",
+    "shape_check": {
+      "config": "l03",
+      "ok": true,
+      "note": "",
+      "dofs": 2094,
+      "cap": 24000,
+      "quadrants": "1",
+      "mouth_w": 565.5006980866024,
+      "mouth_h": 270.767635665149,
+      "depth": 267.552137316414,
+      "throat": "round, matches the exit",
+      "throat_ok": true,
+      "saved": "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l03\\mesh.msh",
+      "envelope": "fits"
+    },
+    "mesh_audit": {
+      "file": "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l03\\mesh.msh",
+      "sha256": "33f11cad829d5f61bd886e2bdcb046dcac398fd935427309b2644d839832cd8e",
+      "coordinate_units": "metres (converted to mm below)",
+      "points": 2094,
+      "triangles": 3959,
+      "triangles_by_physical_tag": {
+        "1": 3901,
+        "2": 58
+      },
+      "zero_area_triangles": 0,
+      "duplicate_triangle_node_sets": 0,
+      "edge_connected_triangle_components": [
+        3959
+      ],
+      "boundary_edges": 227,
+      "boundary_edges_on_x_zero": 101,
+      "boundary_edges_on_y_zero": 126,
+      "boundary_edges_on_both_planes": 0,
+      "boundary_edges_off_both_planes": 0,
+      "nonmanifold_edges": 0,
+      "two_face_inconsistent_orientation_edges": 0,
+      "two_face_edges_by_tag_pair": {
+        "1-1": 5740,
+        "1-2": 8,
+        "2-2": 77
+      },
+      "source": {
+        "tag": 2,
+        "node_count": 40,
+        "triangle_count": 58,
+        "x_range_mm": [
+          0.0,
+          18.000000000000004
+        ],
+        "y_range_mm": [
+          0.0,
+          18.000000000000004
+        ],
+        "z_range_mm": [
+          0.0,
+          0.3141911687079073
+        ],
+        "area_mm2_as_stored": 252.89108573484006,
+        "area_mm2_fourfold": 1011.5643429393602,
+        "source_boundary_edges": 20,
+        "source_boundary_nodes_including_symmetry_radii": 20,
+        "curved_rim_nonaxis_radius_mm_range": [
+          18.000000000000004,
+          18.00000000000001
+        ]
+      },
+      "scope": "Surface incidence and source measurements only; no geometric intersection test, volume closure or acoustic validation."
+    }
+  },
+  {
+    "id": "L04",
+    "family": "L",
+    "adapter_screen_status": "sampled_checks_only",
+    "adapter_screen_passed": true,
+    "adapter_screen_implementation_sha256": "35205f1d87eb5d236f58f7a818510ff5b930125d96a416438f8de7b52000fe6c",
+    "params": {
+      "g_fc_hz": 470,
+      "g_T": 0.5,
+      "g_stop_deg": 85,
+      "g_ar_m": 1.55,
+      "g_ar_p": 1.3,
+      "g_lame_p_mouth": 2.0,
+      "g_lip_radius_mm": 0,
+      "g_rim_sweep_mm": 0,
+      "g_axial_length_factor": 1.2
+    },
+    "config_sha256": "5df9e5d0eded91214f23a5464f6bb243e73dd6ad98288a4566e3ea935390d12e",
+    "shape_check": {
+      "config": "l04",
+      "ok": true,
+      "note": "",
+      "dofs": 1604,
+      "cap": 24000,
+      "quadrants": "1",
+      "mouth_w": 374.498566700789,
+      "mouth_h": 241.6119785166382,
+      "depth": 285.8153800413356,
+      "throat": "round, matches the exit",
+      "throat_ok": true,
+      "saved": "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l04\\mesh.msh",
+      "envelope": "fits"
+    },
+    "mesh_audit": {
+      "file": "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l04\\mesh.msh",
+      "sha256": "d0137d3c5b75a8105706de8e334515a1e2713f8437973daba56d99bfa9af01c1",
+      "coordinate_units": "metres (converted to mm below)",
+      "points": 1604,
+      "triangles": 2993,
+      "triangles_by_physical_tag": {
+        "1": 2937,
+        "2": 56
+      },
+      "zero_area_triangles": 0,
+      "duplicate_triangle_node_sets": 0,
+      "edge_connected_triangle_components": [
+        2993
+      ],
+      "boundary_edges": 213,
+      "boundary_edges_on_x_zero": 102,
+      "boundary_edges_on_y_zero": 111,
+      "boundary_edges_on_both_planes": 0,
+      "boundary_edges_off_both_planes": 0,
+      "nonmanifold_edges": 0,
+      "two_face_inconsistent_orientation_edges": 0,
+      "two_face_edges_by_tag_pair": {
+        "1-1": 4301,
+        "1-2": 8,
+        "2-2": 74
+      },
+      "source": {
+        "tag": 2,
+        "node_count": 39,
+        "triangle_count": 56,
+        "x_range_mm": [
+          0.0,
+          18.000000000000004
+        ],
+        "y_range_mm": [
+          0.0,
+          18.000000000000004
+        ],
+        "z_range_mm": [
+          0.0,
+          0.3141911687079073
+        ],
+        "area_mm2_as_stored": 252.89103851671098,
+        "area_mm2_fourfold": 1011.5641540668439,
+        "source_boundary_edges": 20,
+        "source_boundary_nodes_including_symmetry_radii": 20,
+        "curved_rim_nonaxis_radius_mm_range": [
+          18.000000000000004,
+          18.00000000000001
+        ]
+      },
+      "scope": "Surface incidence and source measurements only; no geometric intersection test, volume closure or acoustic validation."
+    }
+  },
+  {
+    "id": "L05",
+    "family": "L",
+    "adapter_screen_status": "sampled_checks_only",
+    "adapter_screen_passed": true,
+    "adapter_screen_implementation_sha256": "35205f1d87eb5d236f58f7a818510ff5b930125d96a416438f8de7b52000fe6c",
+    "params": {
+      "g_fc_hz": 390,
+      "g_T": 0.5,
+      "g_stop_deg": 125,
+      "g_ar_m": 1.83,
+      "g_ar_p": 1.4,
+      "g_lame_p_mouth": 2.5,
+      "g_lip_radius_mm": 6,
+      "g_rim_sweep_mm": 0,
+      "g_axial_length_factor": 1.0
+    },
+    "config_sha256": "ea7cee399d8ab1f325925272673d416b4f439ad4ad21e9f1c79e85f3f74143d6",
+    "shape_check": {
+      "config": "l05",
+      "ok": true,
+      "note": "",
+      "dofs": 3270,
+      "cap": 24000,
+      "quadrants": "1",
+      "mouth_w": 586.7661185117757,
+      "mouth_h": 321.04685999784,
+      "depth": 312.8774980153103,
+      "throat": "round, matches the exit",
+      "throat_ok": true,
+      "saved": "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l05\\mesh.msh",
+      "envelope": "fits"
+    },
+    "mesh_audit": {
+      "file": "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l05\\mesh.msh",
+      "sha256": "e10859a558219325b9b3b0694430ae153a794d7b6d1c37fed126a5cc919ced01",
+      "coordinate_units": "metres (converted to mm below)",
+      "points": 3270,
+      "triangles": 6261,
+      "triangles_by_physical_tag": {
+        "1": 6203,
+        "2": 58
+      },
+      "zero_area_triangles": 0,
+      "duplicate_triangle_node_sets": 0,
+      "edge_connected_triangle_components": [
+        6261
+      ],
+      "boundary_edges": 277,
+      "boundary_edges_on_x_zero": 125,
+      "boundary_edges_on_y_zero": 152,
+      "boundary_edges_on_both_planes": 0,
+      "boundary_edges_off_both_planes": 0,
+      "nonmanifold_edges": 0,
+      "two_face_inconsistent_orientation_edges": 0,
+      "two_face_edges_by_tag_pair": {
+        "1-1": 9168,
+        "1-2": 8,
+        "2-2": 77
+      },
+      "source": {
+        "tag": 2,
+        "node_count": 40,
+        "triangle_count": 58,
+        "x_range_mm": [
+          0.0,
+          18.000000000000014
+        ],
+        "y_range_mm": [
+          0.0,
+          18.000000000000014
+        ],
+        "z_range_mm": [
+          0.0,
+          0.3141911687079073
+        ],
+        "area_mm2_as_stored": 252.8910635898307,
+        "area_mm2_fourfold": 1011.5642543593228,
+        "source_boundary_edges": 20,
+        "source_boundary_nodes_including_symmetry_radii": 20,
+        "curved_rim_nonaxis_radius_mm_range": [
+          18.000000000000004,
+          18.00000000000001
+        ]
+      },
+      "scope": "Surface incidence and source measurements only; no geometric intersection test, volume closure or acoustic validation."
+    }
+  },
+  {
+    "id": "L06",
+    "family": "L",
+    "adapter_screen_status": "sampled_checks_only",
+    "adapter_screen_passed": true,
+    "adapter_screen_implementation_sha256": "35205f1d87eb5d236f58f7a818510ff5b930125d96a416438f8de7b52000fe6c",
+    "params": {
+      "g_fc_hz": 460,
+      "g_T": 0.6,
+      "g_stop_deg": 118,
+      "g_ar_m": 1.75,
+      "g_ar_p": 1.25,
+      "g_lame_p_mouth": 3.5,
+      "g_lip_radius_mm": 10,
+      "g_rim_sweep_mm": 5,
+      "g_axial_length_factor": 1.0
+    },
+    "config_sha256": "2aee9281f6b85c1c61205291de63e8ebe718ca2e8631a2facf1adf779d59cd71",
+    "shape_check": {
+      "config": "l06",
+      "ok": true,
+      "note": "",
+      "dofs": 1835,
+      "cap": 24000,
+      "quadrants": "1",
+      "mouth_w": 466.8278522750382,
+      "mouth_h": 268.2871795947344,
+      "depth": 238.54552140807584,
+      "throat": "round, matches the exit",
+      "throat_ok": true,
+      "saved": "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l06\\mesh.msh",
+      "envelope": "fits"
+    },
+    "mesh_audit": {
+      "file": "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l06\\mesh.msh",
+      "sha256": "934891a7ce441b88e213ec77a3f90282463a49a643b93fe7d3a4b931f2a3d4e7",
+      "coordinate_units": "metres (converted to mm below)",
+      "points": 1835,
+      "triangles": 3464,
+      "triangles_by_physical_tag": {
+        "1": 3406,
+        "2": 58
+      },
+      "zero_area_triangles": 0,
+      "duplicate_triangle_node_sets": 0,
+      "edge_connected_triangle_components": [
+        3464
+      ],
+      "boundary_edges": 204,
+      "boundary_edges_on_x_zero": 94,
+      "boundary_edges_on_y_zero": 110,
+      "boundary_edges_on_both_planes": 0,
+      "boundary_edges_off_both_planes": 0,
+      "nonmanifold_edges": 0,
+      "two_face_inconsistent_orientation_edges": 0,
+      "two_face_edges_by_tag_pair": {
+        "1-1": 5009,
+        "1-2": 8,
+        "2-2": 77
+      },
+      "source": {
+        "tag": 2,
+        "node_count": 40,
+        "triangle_count": 58,
+        "x_range_mm": [
+          0.0,
+          18.000000000000004
+        ],
+        "y_range_mm": [
+          0.0,
+          18.000000000000014
+        ],
+        "z_range_mm": [
+          0.0,
+          0.3141911687079073
+        ],
+        "area_mm2_as_stored": 252.89105650317387,
+        "area_mm2_fourfold": 1011.5642260126955,
+        "source_boundary_edges": 20,
+        "source_boundary_nodes_including_symmetry_radii": 20,
+        "curved_rim_nonaxis_radius_mm_range": [
+          18.000000000000004,
+          18.00000000000001
+        ]
+      },
+      "scope": "Surface incidence and source measurements only; no geometric intersection test, volume closure or acoustic validation."
+    }
+  },
+  {
+    "id": "L07",
+    "family": "L",
+    "adapter_screen_status": "sampled_checks_only",
+    "adapter_screen_passed": true,
+    "adapter_screen_implementation_sha256": "35205f1d87eb5d236f58f7a818510ff5b930125d96a416438f8de7b52000fe6c",
+    "params": {
+      "g_fc_hz": 460,
+      "g_T": 0.62,
+      "g_stop_deg": 85,
+      "g_ar_m": 1.6,
+      "g_ar_p": 1.05,
+      "g_lame_p_mouth": 2.1,
+      "g_lip_radius_mm": 0,
+      "g_rim_sweep_mm": 0,
+      "g_axial_length_factor": 1.0
+    },
+    "config_sha256": "a7ff3e65dbf387d654b1af2e571e451fe93da277387b00eda0d14dfc46d605ac",
+    "shape_check": {
+      "config": "l07",
+      "ok": true,
+      "note": "",
+      "dofs": 1463,
+      "cap": 24000,
+      "quadrants": "1",
+      "mouth_w": 384.0061702395152,
+      "mouth_h": 240.003856399697,
+      "depth": 236.8056065486757,
+      "throat": "round, matches the exit",
+      "throat_ok": true,
+      "saved": "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l07\\mesh.msh",
+      "envelope": "fits"
+    },
+    "mesh_audit": {
+      "file": "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l07\\mesh.msh",
+      "sha256": "01c66f91d554756f9a92dbd8d37a03e48dc68435ce73f6d6b0a6b18f3a6cedf9",
+      "coordinate_units": "metres (converted to mm below)",
+      "points": 1463,
+      "triangles": 2736,
+      "triangles_by_physical_tag": {
+        "1": 2678,
+        "2": 58
+      },
+      "zero_area_triangles": 0,
+      "duplicate_triangle_node_sets": 0,
+      "edge_connected_triangle_components": [
+        2736
+      ],
+      "boundary_edges": 188,
+      "boundary_edges_on_x_zero": 88,
+      "boundary_edges_on_y_zero": 100,
+      "boundary_edges_on_both_planes": 0,
+      "boundary_edges_off_both_planes": 0,
+      "nonmanifold_edges": 0,
+      "two_face_inconsistent_orientation_edges": 0,
+      "two_face_edges_by_tag_pair": {
+        "1-1": 3925,
+        "1-2": 8,
+        "2-2": 77
+      },
+      "source": {
+        "tag": 2,
+        "node_count": 40,
+        "triangle_count": 58,
+        "x_range_mm": [
+          0.0,
+          18.000000000000014
+        ],
+        "y_range_mm": [
+          0.0,
+          18.000000000000004
+        ],
+        "z_range_mm": [
+          0.0,
+          0.3141911687079073
+        ],
+        "area_mm2_as_stored": 252.89104038434803,
+        "area_mm2_fourfold": 1011.5641615373921,
+        "source_boundary_edges": 20,
+        "source_boundary_nodes_including_symmetry_radii": 20,
+        "curved_rim_nonaxis_radius_mm_range": [
+          18.000000000000004,
+          18.00000000000001
+        ]
+      },
+      "scope": "Surface incidence and source measurements only; no geometric intersection test, volume closure or acoustic validation."
+    }
+  },
+  {
+    "id": "L08",
+    "family": "L",
+    "adapter_screen_status": "sampled_checks_only",
+    "adapter_screen_passed": true,
+    "adapter_screen_implementation_sha256": "35205f1d87eb5d236f58f7a818510ff5b930125d96a416438f8de7b52000fe6c",
+    "params": {
+      "g_fc_hz": 490,
+      "g_T": 0.75,
+      "g_stop_deg": 175,
+      "g_ar_m": 1.7,
+      "g_ar_p": 1.15,
+      "g_lame_p_mouth": 2.2,
+      "g_lip_radius_mm": 0,
+      "g_rim_sweep_mm": 0,
+      "g_axial_length_factor": 1.0
+    },
+    "config_sha256": "03d454f55c4bbd17dd665ecc568021782437f0b69e8024b21e0176233ea08a1e",
+    "shape_check": {
+      "config": "l08",
+      "ok": true,
+      "note": "",
+      "dofs": 1835,
+      "cap": 24000,
+      "quadrants": "1",
+      "mouth_w": 492.7978543424644,
+      "mouth_h": 289.881090789685,
+      "depth": 206.6524849379714,
+      "throat": "round, matches the exit",
+      "throat_ok": true,
+      "saved": "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l08\\mesh.msh",
+      "envelope": "fits"
+    },
+    "mesh_audit": {
+      "file": "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l08\\mesh.msh",
+      "sha256": "9973eb6b7ddd29c0db3ad931d5e1bd1c499c91f7d149c0f567287e2310b21790",
+      "coordinate_units": "metres (converted to mm below)",
+      "points": 1835,
+      "triangles": 3472,
+      "triangles_by_physical_tag": {
+        "1": 3414,
+        "2": 58
+      },
+      "zero_area_triangles": 0,
+      "duplicate_triangle_node_sets": 0,
+      "edge_connected_triangle_components": [
+        3472
+      ],
+      "boundary_edges": 196,
+      "boundary_edges_on_x_zero": 89,
+      "boundary_edges_on_y_zero": 107,
+      "boundary_edges_on_both_planes": 0,
+      "boundary_edges_off_both_planes": 0,
+      "nonmanifold_edges": 0,
+      "two_face_inconsistent_orientation_edges": 0,
+      "two_face_edges_by_tag_pair": {
+        "1-1": 5025,
+        "1-2": 8,
+        "2-2": 77
+      },
+      "source": {
+        "tag": 2,
+        "node_count": 40,
+        "triangle_count": 58,
+        "x_range_mm": [
+          0.0,
+          18.000000000000014
+        ],
+        "y_range_mm": [
+          0.0,
+          18.000000000000014
+        ],
+        "z_range_mm": [
+          0.0,
+          0.3141911687079073
+        ],
+        "area_mm2_as_stored": 252.89104907572948,
+        "area_mm2_fourfold": 1011.5641963029179,
+        "source_boundary_edges": 20,
+        "source_boundary_nodes_including_symmetry_radii": 20,
+        "curved_rim_nonaxis_radius_mm_range": [
+          18.000000000000004,
+          18.00000000000001
+        ]
+      },
+      "scope": "Surface incidence and source measurements only; no geometric intersection test, volume closure or acoustic validation."
+    }
+  },
+  {
+    "id": "L09",
+    "family": "L",
+    "adapter_screen_status": "sampled_checks_only",
+    "adapter_screen_passed": true,
+    "adapter_screen_implementation_sha256": "35205f1d87eb5d236f58f7a818510ff5b930125d96a416438f8de7b52000fe6c",
+    "params": {
+      "g_fc_hz": 520,
+      "g_T": 0.65,
+      "g_stop_deg": 120,
+      "g_ar_m": 1.84,
+      "g_ar_p": 1.25,
+      "g_lame_p_mouth": 3.0,
+      "g_lip_radius_mm": 14,
+      "g_rim_sweep_mm": 35,
+      "g_axial_length_factor": 1.0
+    },
+    "config_sha256": "5e302e4019e6c0a837e8c8a2eb63e621ae30af4ae1a4ac72b921f096e347c2bf",
+    "shape_check": {
+      "config": "l09",
+      "ok": true,
+      "note": "",
+      "dofs": 1468,
+      "cap": 24000,
+      "quadrants": "1",
+      "mouth_w": 439.1291992174618,
+      "mouth_h": 240.464272707937,
+      "depth": 195.2212640337734,
+      "throat": "round, matches the exit",
+      "throat_ok": true,
+      "saved": "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l09\\mesh.msh",
+      "envelope": "fits"
+    },
+    "mesh_audit": {
+      "file": "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l09\\mesh.msh",
+      "sha256": "ca2856f8543313ccb2cb30c142f4f11238754f418916ee6237f6c795cd60299c",
+      "coordinate_units": "metres (converted to mm below)",
+      "points": 1468,
+      "triangles": 2763,
+      "triangles_by_physical_tag": {
+        "1": 2707,
+        "2": 56
+      },
+      "zero_area_triangles": 0,
+      "duplicate_triangle_node_sets": 0,
+      "edge_connected_triangle_components": [
+        2763
+      ],
+      "boundary_edges": 171,
+      "boundary_edges_on_x_zero": 79,
+      "boundary_edges_on_y_zero": 92,
+      "boundary_edges_on_both_planes": 0,
+      "boundary_edges_off_both_planes": 0,
+      "nonmanifold_edges": 0,
+      "two_face_inconsistent_orientation_edges": 0,
+      "two_face_edges_by_tag_pair": {
+        "1-1": 3977,
+        "1-2": 8,
+        "2-2": 74
+      },
+      "source": {
+        "tag": 2,
+        "node_count": 39,
+        "triangle_count": 56,
+        "x_range_mm": [
+          0.0,
+          18.000000000000004
+        ],
+        "y_range_mm": [
+          0.0,
+          18.000000000000004
+        ],
+        "z_range_mm": [
+          0.0,
+          0.3141911687079073
+        ],
+        "area_mm2_as_stored": 252.8910598311897,
+        "area_mm2_fourfold": 1011.5642393247588,
+        "source_boundary_edges": 20,
+        "source_boundary_nodes_including_symmetry_radii": 20,
+        "curved_rim_nonaxis_radius_mm_range": [
+          18.000000000000004,
+          18.00000000000001
+        ]
+      },
+      "scope": "Surface incidence and source measurements only; no geometric intersection test, volume closure or acoustic validation."
+    }
+  },
+  {
+    "id": "L10",
+    "family": "L",
+    "adapter_screen_status": "sampled_checks_only",
+    "adapter_screen_passed": true,
+    "adapter_screen_implementation_sha256": "35205f1d87eb5d236f58f7a818510ff5b930125d96a416438f8de7b52000fe6c",
+    "params": {
+      "g_fc_hz": 460,
+      "g_T": 0.5,
+      "g_stop_deg": 140,
+      "g_ar_m": 1.25,
+      "g_ar_p": 1.1,
+      "g_lame_p_mouth": 2.2,
+      "g_lip_radius_mm": 8,
+      "g_rim_sweep_mm": 0,
+      "g_axial_length_factor": 1.0
+    },
+    "config_sha256": "2b6024632b0f83e5207fe75287ffa3325490792f1723d0d2121b32d0f521f4a5",
+    "shape_check": {
+      "config": "l10",
+      "ok": true,
+      "note": "",
+      "dofs": 2141,
+      "cap": 24000,
+      "quadrants": "1",
+      "mouth_w": 437.1174366768188,
+      "mouth_h": 349.2426388585104,
+      "depth": 246.4601931972944,
+      "throat": "round, matches the exit",
+      "throat_ok": true,
+      "saved": "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l10\\mesh.msh",
+      "envelope": "fits"
+    },
+    "mesh_audit": {
+      "file": "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l10\\mesh.msh",
+      "sha256": "0969f73dcffcbaabdf2b85d45098524722939ed8a928db2280edf4a3b6f04a45",
+      "coordinate_units": "metres (converted to mm below)",
+      "points": 2141,
+      "triangles": 4062,
+      "triangles_by_physical_tag": {
+        "1": 4006,
+        "2": 56
+      },
+      "zero_area_triangles": 0,
+      "duplicate_triangle_node_sets": 0,
+      "edge_connected_triangle_components": [
+        4062
+      ],
+      "boundary_edges": 218,
+      "boundary_edges_on_x_zero": 105,
+      "boundary_edges_on_y_zero": 113,
+      "boundary_edges_on_both_planes": 0,
+      "boundary_edges_off_both_planes": 0,
+      "nonmanifold_edges": 0,
+      "two_face_inconsistent_orientation_edges": 0,
+      "two_face_edges_by_tag_pair": {
+        "1-1": 5902,
+        "1-2": 8,
+        "2-2": 74
+      },
+      "source": {
+        "tag": 2,
+        "node_count": 39,
+        "triangle_count": 56,
+        "x_range_mm": [
+          0.0,
+          18.000000000000004
+        ],
+        "y_range_mm": [
+          0.0,
+          18.000000000000004
+        ],
+        "z_range_mm": [
+          0.0,
+          0.3141911687079073
+        ],
+        "area_mm2_as_stored": 252.89102980656355,
+        "area_mm2_fourfold": 1011.5641192262542,
+        "source_boundary_edges": 20,
+        "source_boundary_nodes_including_symmetry_radii": 20,
+        "curved_rim_nonaxis_radius_mm_range": [
+          18.000000000000004,
+          18.00000000000001
+        ]
+      },
+      "scope": "Surface incidence and source measurements only; no geometric intersection test, volume closure or acoustic validation."
+    }
+  },
+  {
+    "id": "L11",
+    "family": "L",
+    "adapter_screen_status": "sampled_checks_only",
+    "adapter_screen_passed": true,
+    "adapter_screen_implementation_sha256": "35205f1d87eb5d236f58f7a818510ff5b930125d96a416438f8de7b52000fe6c",
+    "params": {
+      "g_fc_hz": 500,
+      "g_T": 0.5,
+      "g_stop_deg": 115,
+      "g_ar_m": 1.72,
+      "g_ar_p": 1.25,
+      "g_lame_p_mouth": 3.2,
+      "g_lip_radius_mm": 0,
+      "g_rim_sweep_mm": 0,
+      "g_axial_length_factor": 1.25
+    },
+    "config_sha256": "8f48d9f42b0aaf78188f2ea9b19f404d6c20f97e58ecfa4725024184612ea95b",
+    "shape_check": {
+      "config": "l11",
+      "ok": true,
+      "note": "",
+      "dofs": 1759,
+      "cap": 24000,
+      "quadrants": "1",
+      "mouth_w": 415.2209816467044,
+      "mouth_h": 241.4075474690144,
+      "depth": 271.82502199019245,
+      "throat": "round, matches the exit",
+      "throat_ok": true,
+      "saved": "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l11\\mesh.msh",
+      "envelope": "fits"
+    },
+    "mesh_audit": {
+      "file": "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\meshes\\l11\\mesh.msh",
+      "sha256": "313e515135fead68ecd2d1a26e967a3e4cbbf71b4b2324b875b2adab574340df",
+      "coordinate_units": "metres (converted to mm below)",
+      "points": 1759,
+      "triangles": 3302,
+      "triangles_by_physical_tag": {
+        "1": 3246,
+        "2": 56
+      },
+      "zero_area_triangles": 0,
+      "duplicate_triangle_node_sets": 0,
+      "edge_connected_triangle_components": [
+        3302
+      ],
+      "boundary_edges": 214,
+      "boundary_edges_on_x_zero": 100,
+      "boundary_edges_on_y_zero": 114,
+      "boundary_edges_on_both_planes": 0,
+      "boundary_edges_off_both_planes": 0,
+      "nonmanifold_edges": 0,
+      "two_face_inconsistent_orientation_edges": 0,
+      "two_face_edges_by_tag_pair": {
+        "1-1": 4764,
+        "1-2": 8,
+        "2-2": 74
+      },
+      "source": {
+        "tag": 2,
+        "node_count": 39,
+        "triangle_count": 56,
+        "x_range_mm": [
+          0.0,
+          18.000000000000004
+        ],
+        "y_range_mm": [
+          0.0,
+          18.000000000000004
+        ],
+        "z_range_mm": [
+          0.0,
+          0.3141911687079073
+        ],
+        "area_mm2_as_stored": 252.89104797423585,
+        "area_mm2_fourfold": 1011.5641918969434,
+        "source_boundary_edges": 20,
+        "source_boundary_nodes_including_symmetry_radii": 20,
+        "curved_rim_nonaxis_radius_mm_range": [
+          18.000000000000004,
+          18.00000000000001
+        ]
+      },
+      "scope": "Surface incidence and source measurements only; no geometric intersection test, volume closure or acoustic validation."
+    }
+  },
+  {
+    "id": "L12",
+    "family": "L",
+    "adapter_screen_status": "sampled_checks_only",
+    "adapter_screen_passed": false,
+    "adapter_screen_implementation_sha256": "35205f1d87eb5d236f58f7a818510ff5b930125d96a416438f8de7b52000fe6c",
+    "params": {
+      "g_fc_hz": 430,
+      "g_T": 0.48,
+      "g_stop_deg": 135,
+      "g_ar_m": 2.28,
+      "g_ar_p": 1.55,
+      "g_lame_p_mouth": 2.1,
+      "g_lip_radius_mm": 12,
+      "g_rim_sweep_mm": 20,
+      "g_axial_length_factor": 1.0
+    },
+    "config_sha256": "235d7e74da129d2711821568b24259235f665356482880d780a9695d9c236de0",
+    "exception": {
+      "type": "GeometryInvalidError",
+      "message": "generator seed is not a legal horn: invalid_envelope: max_mouth_w_mm 633.063 exceeds 600.0",
+      "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\hunte\\Hrns\\hornlab-search\\hornlab_search\\design\\generated.py\", line 157, in __init__\n    params = materialize(self.gen, knobs, self.brief)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\hunte\\Hrns\\hornlab-search\\hornlab_search\\design\\generated.py\", line 53, in materialize\n    return grid_gen.design_params(gen, knobs, brief)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\hunte\\Hrns\\hornlab-search\\hornlab_search\\design\\generators\\grid.py\", line 2896, in design_params\n    return family.design_params(spec, knobs, brief)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\hunte\\Hrns\\hornlab-search\\hornlab_search\\design\\generators\\lecleach_swept_hv.py\", line 242, in design_params\n    resolve_grid(block, brief)\n  File \"C:\\Users\\hunte\\Hrns\\hornlab-search\\hornlab_search\\design\\generators\\lecleach_swept_hv.py\", line 229, in resolve_grid\n    raise GeneratorError(f'invalid_envelope: {key} {actual:.3f} exceeds {limit}')\nhornlab_search.design.generators.registry.GeneratorError: invalid_envelope: max_mouth_w_mm 633.063 exceeds 600.0\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\research\\typologies\\dual_lame_2026-11-16\\l_corrected_mesh\\run.py\", line 74, in <module>\n    result['shape_check'] = shape_check.check(str(cfgpath), None, 'screen', HERE / 'meshes', False)\n                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\hunte\\Hrns\\hornlab-search\\tools\\shape_check.py\", line 43, in check\n    space = DesignSpace.from_config(cfg)\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\hunte\\Hrns\\hornlab-search\\hornlab_search\\design\\space.py\", line 163, in from_config\n    return GeneratedSpace.from_config(cfg)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\hunte\\Hrns\\hornlab-search\\hornlab_search\\design\\generated.py\", line 167, in from_config\n    return cls(cfg.generator, cfg.brief, dict(cfg.seed_params), bounds)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\hunte\\Hrns\\hornlab-search\\hornlab_search\\design\\generated.py\", line 159, in __init__\n    raise GeometryInvalidError(f\"generator seed is not a legal horn: {exc}\") from exc\nhornlab_search.types.GeometryInvalidError: generator seed is not a legal horn: invalid_envelope: max_mouth_w_mm 633.063 exceeds 600.0\n"
+    }
+  }
+]

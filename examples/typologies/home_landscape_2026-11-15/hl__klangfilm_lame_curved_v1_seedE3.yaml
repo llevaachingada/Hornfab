@@ -1,0 +1,67 @@
+# SEED E3 (owner 2026-11-16): deepest option - fc 390, aspect 1.6, Lame 5, end_frac 0.7 (no curl), sweep 0.2; 596x372x266 mm. Same name/brief/box as seedE2.
+# Owner 2026-11-16: less exaggerated rollbacks -> end_frac box 1.0-1.6 (was 1.8). morph_frac 0.6 (was 0.3): 0.3 stalled the V wall at 25-60 mm (slope 0.18 -> 0.06-0.09), a visible kink..
+# fc_hz floor 480 -> 300 (owner): run A (8b22b5) watchdog-stopped with 3/6 top designs pinned at fc 480; envelope gate still enforces 600 mm.
+# Klangfilm-Lame (derived, schema klangfilm-lame-v1): 2018 Klangfilm parent + Lame section exponent + curved-cap area lock
+# + rollback + optional rim sweep. Geometry: tools/geometry/klangfilm_lame.py (+ lame_cap.py). Entry point for search AND
+# verify: tools/geometry/klangfilm_lame_cli.py. NOT Ahlswede 2019 exact. Raw wall half-angle is derived (10.617 deg at
+# fc 560 / r 18); brief exit_angle_deg 2 is a simulation assumption (HF1440 publishes no numeric exit angle).
+# Source blend is OFF (source_blend_ratio 0) and not searched. Campaign A genes: fc_hz, aspect, lame_p, end_frac,
+# rim_sweep_ratio (morph_frac pinned until sensitivity shown). Not queued; CPU checks only until owner approves.
+name: hl__klangfilm_lame_curved_v1
+family: FREEFORM
+brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml
+generator:
+  name: grid
+  rows:
+    type: klangfilm_lame
+  n_phi: 19
+  n_s: 64
+  wall_thickness_mm: 3.0
+  seed_policy: explicit
+  span: quarter
+seed_params:
+  g_fc_hz: 390.0
+  g_aspect: 1.6
+  g_lame_p: 5.0
+  g_end_frac: 0.7
+  g_rim_sweep_ratio: 0.2
+  g_morph_frac: 0.6
+  g_source_blend_ratio: 0.0
+  g_entry_half_angle_deg: 2.0
+bounds:
+  g_fc_hz: {lo: 300.0, hi: 800.0}
+  g_aspect: {lo: 1.15, hi: 2.3}
+  g_lame_p: {lo: 2.5, hi: 5.5}
+  g_end_frac: {lo: 0.6, hi: 1.05}
+  g_rim_sweep_ratio: {lo: 0.15, hi: 0.3}
+  g_morph_frac: {lo: 0.6, hi: 0.6, search: false}
+  g_source_blend_ratio: {lo: 0.0, hi: 0.0, search: false}
+  g_entry_half_angle_deg: {lo: 2.0, hi: 2.0, search: false}
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.25
+  seed: 1234
+  budget: 60
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+  budget_counts: valid
+  max_attempts: 150
+description: HOME LANDSCAPE Klangfilm-Lame curved-cap horn (derived, source blend off), smooth brief

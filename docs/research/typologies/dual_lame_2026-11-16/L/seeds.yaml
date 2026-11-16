@@ -1,0 +1,243 @@
+schema: hornfab.visual_seed_pack.v1
+family: lecleach_swept_hv
+source_family: grid rows iwata_ar core existing; new family is not deployed
+target: VISUAL_DIAGNOSTIC_NOT_OPTIMIZATION_WINNERS
+code_availability: NEW_FAMILY_REQUIRES_IMPLEMENTATION
+driver: FaitalPRO HF1440
+brief: room_landscape_80x50_700_hf1440_v7_smooth
+hard_envelope_mm:
+  W: 600
+  H: 480
+  D: 480
+implementation_note: Never pass proposed_extension fields to current iwata_ar; they will be refused or ignored. Build
+  new namespaced generator and validate all. The core_existing_iwata_ar values can be used in diagnostic existing-code
+  tests only.
+samples:
+- id: L01
+  style: Classical oval LeCleach
+  core_existing_iwata_ar:
+    g_fc_hz: 500
+    g_T: 0.5
+    g_stop_deg: 118
+    g_ar_m: 1.52
+    g_ar_p: 1.05
+  proposed_extension:
+    lame_p_mouth: 2.0
+    lip_radius_mm: 0
+    rim_sweep_mm: 0
+    axial_length_factor: 1.0
+  required_capabilities: []
+  intent: 'Classical baseline: no post-warp'
+  acoustic_status: UNSOLVED
+  geometry_status: UNVALIDATED
+- id: L02
+  style: Balanced quasi-Iwata
+  core_existing_iwata_ar:
+    g_fc_hz: 465
+    g_T: 0.6
+    g_stop_deg: 112
+    g_ar_m: 1.77
+    g_ar_p: 1.25
+  proposed_extension:
+    lame_p_mouth: 2.4
+    lip_radius_mm: 8
+    rim_sweep_mm: 4
+    axial_length_factor: 1.0
+  required_capabilities:
+  - LAME_CROSS_SECTION
+  - TANGENT_LIP
+  - RIM_SWEEP
+  intent: Moderate landscape transition and mild rim
+  acoustic_status: UNSOLVED
+  geometry_status: UNVALIDATED
+- id: L03
+  style: Broad fan-mouth
+  core_existing_iwata_ar:
+    g_fc_hz: 430
+    g_T: 0.55
+    g_stop_deg: 120
+    g_ar_m: 2.1
+    g_ar_p: 1.4
+  proposed_extension:
+    lame_p_mouth: 2.6
+    lip_radius_mm: 10
+    rim_sweep_mm: 10
+    axial_length_factor: 1.0
+  required_capabilities:
+  - LAME_CROSS_SECTION
+  - TANGENT_LIP
+  - RIM_SWEEP
+  intent: Wider horizontal mouth; not proven to be 80x50
+  acoustic_status: UNSOLVED
+  geometry_status: UNVALIDATED
+- id: L04
+  style: Long elegant oval
+  core_existing_iwata_ar:
+    g_fc_hz: 470
+    g_T: 0.5
+    g_stop_deg: 85
+    g_ar_m: 1.55
+    g_ar_p: 1.3
+  proposed_extension:
+    lame_p_mouth: 2.0
+    lip_radius_mm: 0
+    rim_sweep_mm: 0
+    axial_length_factor: 1.2
+  required_capabilities:
+  - SMOOTH_AXIAL_WARP
+  intent: Longer form from independently tested smooth axial warp
+  acoustic_status: UNSOLVED
+  geometry_status: UNVALIDATED
+- id: L05
+  style: Large-mouth loading probe
+  core_existing_iwata_ar:
+    g_fc_hz: 390
+    g_T: 0.5
+    g_stop_deg: 125
+    g_ar_m: 1.83
+    g_ar_p: 1.4
+  proposed_extension:
+    lame_p_mouth: 2.5
+    lip_radius_mm: 6
+    rim_sweep_mm: 0
+    axial_length_factor: 1.0
+  required_capabilities:
+  - LAME_CROSS_SECTION
+  - TANGENT_LIP
+  intent: Low parent fc and broad mouth; screen likely envelope overflow
+  acoustic_status: UNSOLVED
+  geometry_status: UNVALIDATED
+- id: L06
+  style: Soft rectangular wavefront
+  core_existing_iwata_ar:
+    g_fc_hz: 460
+    g_T: 0.6
+    g_stop_deg: 118
+    g_ar_m: 1.75
+    g_ar_p: 1.25
+  proposed_extension:
+    lame_p_mouth: 3.5
+    lip_radius_mm: 10
+    rim_sweep_mm: 5
+    axial_length_factor: 1.0
+  required_capabilities:
+  - LAME_CROSS_SECTION
+  - TANGENT_LIP
+  - RIM_SWEEP
+  intent: Lame family extension vs legacy ellipse
+  acoustic_status: UNSOLVED
+  geometry_status: UNVALIDATED
+- id: L07
+  style: Minimal-flange transition
+  core_existing_iwata_ar:
+    g_fc_hz: 460
+    g_T: 0.62
+    g_stop_deg: 85
+    g_ar_m: 1.6
+    g_ar_p: 1.05
+  proposed_extension:
+    lame_p_mouth: 2.1
+    lip_radius_mm: 0
+    rim_sweep_mm: 0
+    axial_length_factor: 1.0
+  required_capabilities:
+  - LAME_CROSS_SECTION
+  intent: Short stop angle and no lip, reference
+  acoustic_status: UNSOLVED
+  geometry_status: UNVALIDATED
+- id: L08
+  style: Natural deep JMLC roll
+  core_existing_iwata_ar:
+    g_fc_hz: 490
+    g_T: 0.75
+    g_stop_deg: 175
+    g_ar_m: 1.7
+    g_ar_p: 1.15
+  proposed_extension:
+    lame_p_mouth: 2.2
+    lip_radius_mm: 0
+    rim_sweep_mm: 0
+    axial_length_factor: 1.0
+  required_capabilities:
+  - LAME_CROSS_SECTION
+  intent: Long continued parent march with intrinsic rollback
+  acoustic_status: UNSOLVED
+  geometry_status: UNVALIDATED
+- id: L09
+  style: Swept-lip modern
+  core_existing_iwata_ar:
+    g_fc_hz: 520
+    g_T: 0.65
+    g_stop_deg: 120
+    g_ar_m: 1.84
+    g_ar_p: 1.25
+  proposed_extension:
+    lame_p_mouth: 3.0
+    lip_radius_mm: 14
+    rim_sweep_mm: 35
+    axial_length_factor: 1.0
+  required_capabilities:
+  - LAME_CROSS_SECTION
+  - TANGENT_LIP
+  - RIM_SWEEP
+  intent: Strong explicitly curved rim
+  acoustic_status: UNSOLVED
+  geometry_status: UNVALIDATED
+- id: L10
+  style: Tall vertical-control challenger
+  core_existing_iwata_ar:
+    g_fc_hz: 460
+    g_T: 0.5
+    g_stop_deg: 140
+    g_ar_m: 1.25
+    g_ar_p: 1.1
+  proposed_extension:
+    lame_p_mouth: 2.2
+    lip_radius_mm: 8
+    rim_sweep_mm: 0
+    axial_length_factor: 1.0
+  required_capabilities:
+  - LAME_CROSS_SECTION
+  - TANGENT_LIP
+  intent: More vertical height, needed comparison at 700 Hz
+  acoustic_status: UNSOLVED
+  geometry_status: UNVALIDATED
+- id: L11
+  style: Long superellipse
+  core_existing_iwata_ar:
+    g_fc_hz: 500
+    g_T: 0.5
+    g_stop_deg: 115
+    g_ar_m: 1.72
+    g_ar_p: 1.25
+  proposed_extension:
+    lame_p_mouth: 3.2
+    lip_radius_mm: 0
+    rim_sweep_mm: 0
+    axial_length_factor: 1.25
+  required_capabilities:
+  - LAME_CROSS_SECTION
+  - SMOOTH_AXIAL_WARP
+  intent: Lengthened parent + superellipse; geometry experiment only
+  acoustic_status: UNSOLVED
+  geometry_status: UNVALIDATED
+- id: L12
+  style: Winged quasi-Iwata
+  core_existing_iwata_ar:
+    g_fc_hz: 430
+    g_T: 0.48
+    g_stop_deg: 135
+    g_ar_m: 2.28
+    g_ar_p: 1.55
+  proposed_extension:
+    lame_p_mouth: 2.1
+    lip_radius_mm: 12
+    rim_sweep_mm: 20
+    axial_length_factor: 1.0
+  required_capabilities:
+  - LAME_CROSS_SECTION
+  - TANGENT_LIP
+  - RIM_SWEEP
+  intent: High aspect, traditional curvature, moderate sweep
+  acoustic_status: UNSOLVED
+  geometry_status: UNVALIDATED

@@ -1,0 +1,25 @@
+{
+  "status": "SURFACE_ONLY_UNVALIDATED",
+  "seed_sha256": "4217aaf2fab35c7cb136eaf42f0acc52d804df707c978f32747569a33cbe6369",
+  "script_sha256": "5464dd336b707fdab98a13aad2bd61255bbed432fe692eb13350bb0ae9445ea0",
+  "source_sha256": {
+    "hornlab_search/design/generators/lecleach_swept_hv.py": "356d280c1e4408c54713ff795ea2aec48134a6601756975dd70fe73ead1ba8e9",
+    "hornlab_search/design/generators/section_lame.py": "80cfc0da8f14a7a22e243436e5f852df9f06dba481c74db0a3f58e88ad1977df",
+    "hornlab_search/design/generators/profiles.py": "100a5e3ae023f6734a9b48392469268bc9948220dc84608b825805c685c8ffe9"
+  },
+  "python": "3.12.10",
+  "numpy": "2.5.4",
+  "scipy": "1.18.1",
+  "pyyaml": "6.0.3",
+  "driver": {
+    "throat_radius_mm": 18.0,
+    "throat_half_angle_deg": 2.0,
+    "note": "legacy modeling assumptions; 36 mm diameter versus 35.8 mm manufacturer outlet"
+  },
+  "sampling": {
+    "n_phi": 25,
+    "n_s": 96,
+    "dl_mm": 1.0
+  },
+  "limitations": "Point surfaces only. No shell, intersection, curvature, mesh, acoustic or readiness validation. Lip follows the discrete parent endpoint tangent; 45-degree wrap. Width/height/depth are sampled surface bounds."
+}

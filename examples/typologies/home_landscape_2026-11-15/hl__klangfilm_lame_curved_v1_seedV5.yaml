@@ -1,0 +1,82 @@
+# SEED V5 (owner 2026-11-16): V4 look made deeper. Shallow V seen from above: NEGATIVE rim sweep puts the side (H) lips
+# ahead of the top/bottom (V) lips, extending H wall control to lower frequency (aim: hold 80 deg H while V narrows to 50).
+# Aspect ~1.8 (tan40/tan25); Lame 3.6 + fc 450 = deeper inside 600 mm; end_frac 1.1 mild roll. Needs klangfilm_lame.py
+# rim_sweep_ratio bound (-0.6, 0.6) (was 0..0.6). Same name/brief as hl__klangfilm_lame_curved_v1.
+name: hl__klangfilm_lame_curved_v1
+family: FREEFORM
+brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml
+generator:
+  name: grid
+  rows:
+    type: klangfilm_lame
+  n_phi: 19
+  n_s: 64
+  wall_thickness_mm: 3.0
+  seed_policy: explicit
+  span: quarter
+seed_params:
+  g_fc_hz: 450.0
+  g_aspect: 1.8
+  g_lame_p: 3.6
+  g_end_frac: 1.1
+  g_rim_sweep_ratio: -0.18
+  g_morph_frac: 0.6
+  g_source_blend_ratio: 0.0
+  g_entry_half_angle_deg: 2.0
+bounds:
+  g_fc_hz:
+    lo: 300.0
+    hi: 800.0
+  g_aspect:
+    lo: 1.6
+    hi: 2.0
+  g_lame_p:
+    lo: 2.5
+    hi: 5.0
+  g_end_frac:
+    lo: 0.9
+    hi: 1.3
+  g_rim_sweep_ratio:
+    lo: -0.3
+    hi: -0.05
+  g_morph_frac:
+    lo: 0.6
+    hi: 0.6
+    search: false
+  g_source_blend_ratio:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  g_entry_half_angle_deg:
+    lo: 2.0
+    hi: 2.0
+    search: false
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.25
+  seed: 1234
+  budget: 60
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+  budget_counts: valid
+  max_attempts: 150
+description: HOME LANDSCAPE Klangfilm-Lame curved-cap horn (derived, source blend
+  off), smooth brief

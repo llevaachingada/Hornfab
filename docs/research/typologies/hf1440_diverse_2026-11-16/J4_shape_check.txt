@@ -1,0 +1,6 @@
+| config | ok | dofs / cap | mouth W x H mm | depth mm | envelope | driver coupling | note |
+|---|---|---|---|---|---|---|---|
+
+
+| J4_PRE-FLIGHT_PINNED | yes | 1776 / 24000 | 474 x 306 | 219 | fits | round, matches the exit |  |
+
