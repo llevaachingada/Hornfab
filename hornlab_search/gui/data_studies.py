@@ -8,6 +8,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 import json
 import math
+from pathlib import Path
 import re
 from typing import Any, Mapping
 
@@ -25,6 +26,7 @@ _PROGRESS_KEYS = ("proposed", "started", "solved", "cached", "refused", "infeasi
 _EXECUTE_ACTION_KINDS = frozenset({
     "save_draft", "select_evidence", "analyze", "propose", "diagnose", "package", "launch",
     "cancel", "decision", "revise", "save_seeds", "create_child", "queue_study",
+    "solve_design",
 })
 
 # Frozen fallback selector labels. The ``mode`` is the backend proposal-policy value; the
@@ -140,6 +142,17 @@ def workflow_panel(service, study, phase, artifact=None, *, root, runs_root=None
             return {}
         view = service.artifact_view(sid, kind)
         return view.get("data") if isinstance(view.get("data"), dict) else {}
+
+    def read_results():
+        # A results artifact carries every journal row (and each row's canonical replay); it can
+        # be larger than the default metadata-only ceiling.  It is still a bounded read.
+        if metadata["results"].get("status") != "available":
+            return {}
+        try:
+            view = service.artifact_view(sid, "results", max_bytes=4_000_000) or {}
+        except Exception:  # noqa: BLE001 - a missing/unreadable artifact is not a panel failure
+            return {}
+        return view if isinstance(view, dict) else {}
     manifest, proposal, package = read("training_manifest"), read("proposal"), read("package")
     import subprocess
     import sys
@@ -217,6 +230,15 @@ def workflow_panel(service, study, phase, artifact=None, *, root, runs_root=None
                                "minimum_rows": manifest.get("n_min"), "reason": readiness_reason},
                  "artifacts": [{"kind": k, "sha256": m["sha256"]} for k, m in metadata.items() if m.get("status") == "available"],
                  "actions": []})
+    if phase in ("execute", "decide"):
+        # The study has no run folder of its own; the results artifact's observations are the
+        # solve list, and the ledger links a design to the verify run this GUI already wrote.
+        results_view = read_results()
+        if results_view:
+            from .study_jobs import read_solve_ledger
+            data["solves"] = study_solves(
+                results_view.get("data"), study_id=sid, runs_root=runs_root,
+                ledger=read_solve_ledger(service.store.root))
     action = lambda kind, label, enabled, **extra: {"kind": kind, "label": label, "enabled": enabled, **extra}
     if phase in ("overview", "data", "explain"):
         data["actions"].append(action("analyze", "Build snapshot and analyze compatible data", active is None,
@@ -593,6 +615,147 @@ def execute_view(data, *, status: str | None = None, reason: str | None = None) 
     if len(json.dumps(result, allow_nan=False).encode()) > MAX_BYTES:
         raise ValueError("execution view exceeds payload limit")
     return result
+
+
+# --------------------------------------------------------------------------- solves view
+
+#: A GUI run folder (``hornlab_search.gui.data.RUN_ID``) that a ``#/run/<id>`` link can resolve.
+_RUN_ID_RE = re.compile(r"^[0-9]{8}T[0-9]{6}Z-[a-z]+-[0-9a-f]{6}$")
+_REFUSAL_OUTCOMES = frozenset({"cheap_refusal", "refused", "refusal"})
+
+
+def _finite_number(value):
+    """A finite float or None.  Never coerces a missing string/NaN into a displayed number."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    number = float(value)
+    return number if math.isfinite(number) else None
+
+
+def _bounded_value(value):
+    try:
+        return _json_value(value)
+    except ValueError:
+        return None
+
+
+def _mapping(value) -> Mapping:
+    return value if isinstance(value, Mapping) else {}
+
+
+def _pareto_units(result: Mapping) -> tuple[float | None, float | None]:
+    """Physical coverage/ripple only.
+
+    ``normalized_terms`` are dimensionless objective contributions (types.py / evaluator.py);
+    showing them as degrees or dB would invent units.  The observation's ``pareto_metric`` (or
+    the legacy two-item ``objectives`` pair) is the only physical source.
+    """
+    for key in ("pareto_metric", "pareto"):
+        value = result.get(key)
+        if isinstance(value, Mapping) and value.get("status", "complete") == "complete":
+            return (_finite_number(value.get("coverage_deg")),
+                    _finite_number(value.get("ripple_db")))
+    objectives = result.get("objectives")
+    if isinstance(objectives, (list, tuple)) and len(objectives) == 2:
+        return _finite_number(objectives[0]), _finite_number(objectives[1])
+    return None, None
+
+
+def _ledger_run_id(ledger: Mapping | None, study_id: str | None, design_hash: str,
+                   runs_root) -> str | None:
+    """The verify run recorded for this design, and only when that folder still exists."""
+    if not isinstance(ledger, Mapping) or not study_id:
+        return None
+    solves = _mapping(ledger.get("solves"))
+    entry = solves.get(f"{study_id}/{design_hash}")
+    if not isinstance(entry, Mapping):
+        return None
+    run_id = entry.get("run_id")
+    if not isinstance(run_id, str) or not _RUN_ID_RE.fullmatch(run_id):
+        return None
+    if runs_root is not None and not (Path(runs_root) / run_id).is_dir():
+        return None       # a deleted/never-written run is never linked
+    return run_id
+
+
+def _active_ledger_job(ledger: Mapping | None, study_id: str | None) -> dict | None:
+    if not isinstance(ledger, Mapping) or not study_id:
+        return None
+    jobs = _mapping(ledger.get("jobs"))
+    for job in jobs.values():
+        if (isinstance(job, Mapping) and job.get("study_id") == study_id
+                and job.get("status") in ("queued", "running")):
+            return {"id": job.get("job_id") or job.get("id"),
+                    "design_hash": job.get("design_hash"),
+                    "status": job.get("status")}
+    return None
+
+
+def study_solves(results, *, study_id: str | None = None, runs_root=None,
+                 ledger: Mapping | None = None, limit: int = MAX_ITEMS) -> dict:
+    """Bounded solves table from a study's ``results`` artifact payload.
+
+    One row per observed attempt with an identity: ``{design_hash, kind, j, physical, outcome,
+    coverage_deg, ripple_db, params, descriptors, verify_run_id}``, sorted by J ascending (a
+    missing J sorts last) and capped at ``limit``.  No score, unit or link is ever synthesized:
+    physical coverage/ripple come only from ``pareto_metric``/``pareto``/``objectives``, and
+    ``verify_run_id`` comes only from the solve ledger (and only while its run folder exists).
+    """
+    if isinstance(limit, bool) or not isinstance(limit, int) or not 1 <= limit <= MAX_ITEMS:
+        raise ValueError("invalid solves limit")
+    observations = results.get("observations") if isinstance(results, Mapping) else None
+    total = len(observations) if isinstance(observations, list) else 0
+    measured = refused = 0
+    scored: list[dict] = []
+    if isinstance(observations, list):
+        for item in observations:
+            if not isinstance(item, Mapping):
+                continue
+            candidate = _mapping(item.get("candidate"))
+            result = _mapping(item.get("result"))
+            physical = result.get("physical_measurement") is True
+            outcome = result.get("outcome") if isinstance(result.get("outcome"), str) else None
+            if physical:
+                measured += 1
+            if outcome in _REFUSAL_OUTCOMES:
+                refused += 1
+            design_hash = (candidate.get("design_hash") or result.get("design_hash")
+                           or candidate.get("geometry_hash"))
+            if not isinstance(design_hash, str) or not design_hash:
+                continue       # nothing actionable can be shown without an identity
+            coverage, ripple = _pareto_units(result)
+            params = result.get("params") if isinstance(result.get("params"), Mapping) else candidate.get("params")
+            descriptors = candidate.get("descriptors")
+            row = {
+                "design_hash": design_hash,
+                "kind": (result.get("kind") if isinstance(result.get("kind"), str)
+                         else candidate.get("kind") if isinstance(candidate.get("kind"), str) else None),
+                "j": _finite_number(result.get("observed_j")),
+                "physical": physical,
+                "outcome": outcome,
+                "coverage_deg": coverage,
+                "ripple_db": ripple,
+                "params": _bounded_value(params) if isinstance(params, Mapping) else None,
+                "descriptors": _bounded_value(descriptors) if isinstance(descriptors, Mapping) else None,
+                "verify_run_id": _ledger_run_id(ledger, study_id, design_hash, runs_root),
+            }
+            scored.append(row)
+    scored.sort(key=lambda row: (row["j"] is None, row["j"] if row["j"] is not None else 0.0))
+    truncated = len(scored) > limit
+    out = {
+        "rows": scored[:limit],
+        "n_total": total,
+        "n_measured": measured,
+        "n_refused": refused,
+        "truncated": truncated,
+    }
+    job = _active_ledger_job(ledger, study_id)
+    if job is not None:
+        out["job"] = job
+    if not isinstance(observations, list):
+        out["status"] = "partial"
+        out["reason"] = "The results artifact has no readable observations."
+    return out
 
 
 # --------------------------------------------------------------------------- artifact panel

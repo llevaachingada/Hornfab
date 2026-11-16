@@ -50,6 +50,8 @@ class App:
         self._study_jobs_by_root = {}
         self._study_runs_by_root = {}
         self._study_runs_lock = threading.Lock()
+        self._study_solve_jobs_by_root = {}
+        self._study_solve_jobs_lock = threading.Lock()
 
     def _studies(self):
         if self._study_service is None:
@@ -191,6 +193,18 @@ class App:
                 bridge.reconcile_after_restart(study["id"], limit=50)
             setattr(bridge, "_gui_reconciled", True)
         return bridge
+
+    def _study_solve_jobs(self, service=None):
+        """One durable ``solve_design`` job bridge per study registry root."""
+        service = service or self._studies()
+        root = service.store.root.resolve()
+        with self._study_solve_jobs_lock:
+            bridge = self._study_solve_jobs_by_root.get(root)
+            if bridge is None:
+                from .study_jobs import StudySolveDesignJobs
+                bridge = StudySolveDesignJobs(service, runs_root=self.runs, root=self.root)
+                self._study_solve_jobs_by_root[root] = bridge
+            return bridge
 
     # GET routes return (status, json-able) ; raise FileNotFoundError / ValueError for 404 / 400
     def get(self, path: str, q: dict) -> object:
@@ -458,6 +472,9 @@ class App:
                     return result
                 return self._study_run_bridge(service).cancel(parts[1], body)
             if len(parts) == 3 and parts[2] == "jobs":
+                if isinstance(body, dict) and body.get("kind") == "solve_design":
+                    # GPU verify job: its own durable ledger, same GPU lane as the search.
+                    return self._study_solve_jobs(service).submit(parts[1], body)
                 return self._study_cpu_bridge(service, reconcile=True).submit(parts[1], body)
             if len(parts) == 3 and parts[2] == "queue":
                 from .study_queue import queue_study

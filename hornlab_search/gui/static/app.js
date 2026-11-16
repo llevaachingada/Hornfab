@@ -164,9 +164,9 @@ const studyApi = {
   getPanel: (id, phase, {root, signal}) => studyRequest(`/api/studies/${encodeURIComponent(id)}/${encodeURIComponent(phase)}${studyQuery(root)}`, {signal}),
   getArtifact: (id, artifact, {root, signal}) => studyRequest(`/api/studies/${encodeURIComponent(id)}/artifacts/${encodeURIComponent(artifact)}${studyQuery(root)}`, {signal}),
   action: (id, kind, payload, {root, signal}) => {
-    const paths = {decision:"decision", revise:"revise", analyze:"jobs", propose:"jobs", diagnose:"jobs", package:"package", launch:"launch", cancel:"cancel", queue_study:"queue", create_child:"child"};
+    const paths = {decision:"decision", revise:"revise", analyze:"jobs", propose:"jobs", diagnose:"jobs", solve_design:"jobs", package:"package", launch:"launch", cancel:"cancel", queue_study:"queue", create_child:"child"};
     if (!paths[kind]) throw new Error("This action is not available");
-    const body = kind === "analyze" || kind === "propose" || kind === "diagnose" ? {...payload, kind} : {...payload};
+    const body = kind === "analyze" || kind === "propose" || kind === "diagnose" || kind === "solve_design" ? {...payload, kind} : {...payload};
     if (root) body.root = root;
     return studyRequest(`/api/studies/${encodeURIComponent(id)}/${paths[kind]}`, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body), signal});
   },
