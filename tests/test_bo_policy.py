@@ -131,6 +131,12 @@ def test_export_surface_is_complete():
     assert PROPOSAL_POLICY_LABELS["exploration"] == "fixed exploration"
 
 
+def test_policy_turbo_is_exported_and_registered():
+    from hornlab_search import bo as bo_pkg
+    assert bo_pkg.POLICY_TURBO == "turbo"
+    assert bo_pkg.POLICY_TURBO in bo_pkg.PROPOSAL_POLICIES
+
+
 def test_verification_modes_are_frozen():
     assert verification_mode("pareto") == "pareto"
     for policy in ("scalar", "cma_seed", "exploration"):

@@ -32,6 +32,8 @@ _EXECUTE_ACTION_KINDS = frozenset({
 POLICY_FALLBACKS = (
     {"id": "scalar", "mode": "scalar", "label": "scalar",
      "requires": ["training_set"], "verification_mode": "scalar"},
+    {"id": "turbo", "mode": "turbo", "label": "scalar, trust region",
+     "requires": ["training_set", "pool"], "verification_mode": "scalar"},
     {"id": "coverage-ripple", "mode": "pareto", "label": "coverage-ripple",
      "requires": ["cohort", "metric_observations"], "verification_mode": "pareto"},
     {"id": "cma-seed", "mode": "cma_seed", "label": "cma-seed",
@@ -317,7 +319,7 @@ def policy_cards(policies) -> list[dict]:
     """Bounded policy selector cards with explicit status/reason.
 
     ``policies`` is the panel's ``policies`` list (``{id,label,status,reason,requires,
-    verification_mode}``). When absent, the frozen scalar/coverage-ripple/cma-seed/
+    verification_mode}``). When absent, the frozen scalar/turbo/coverage-ripple/cma-seed/
     exploration labels are returned with status ``unknown`` — never inferred from files.
     """
     if policies is None:

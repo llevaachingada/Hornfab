@@ -35,3 +35,31 @@ entries:
     group: home
     symmetry: hv
     description: HOME Crowe ES-600 digitized-section family scaled to the home envelope; bridge cell; GUI preview works, run via crowe_panel_cli.py
+
+  - name: rf__rect_radial_wide_v7
+    gui_only: true
+    config: typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml
+    group: home
+    symmetry: hv
+    description: "Spiral radial-relief experiment (soft inner waist/diagonal ridge). This is NOT the section-pucker rim fold in strong_a.png and NOT the square-X reference photo; use sp__strong_v7 for the strong_a mouth pucker and hl__crowe_x_square_v7 for the square X. Seed 12/16 mm; starts 6/8, 12/16, 16/22; window 0.50/0.80/0.96; shape-only."
+
+  - name: hl__crowe_x_square_v7
+    gui_only: true
+    config: typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml
+    group: home
+    symmetry: hv
+    description: "Near-square Crowe-X-inspired probe: four concave panels, diagonal ridge, 479x479 mouth; the reference-image X family. Look-first; a square mouth will not hold 50 deg vertical at 700 Hz. Seed sf_amt 0.60, sf_start 0.12, a_h/a_v 34/34, L 220, lip 24, wrap 120."
+
+  - name: rf__section_axial_home_v7
+    gui_only: true
+    config: typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml
+    group: home
+    symmetry: hv
+    description: "OPTIMIZATION CELL: home-scaled section family. Searches width 480-600, height 220-420, depth 170-300, H/V depth split 0.9-1.1, crown 10-40, junction 16-48, and axial H/V pucker 0-12/0-14. Width/height set coverage and pattern control; depth sets loading/flare; H/V depth split sets top/bottom vs side termination; crown/junction set section curvature; the axial pucker is a secondary mouth-rim/diagonal phase lever, not a coverage law. Seed = best home-panel design + 7/9 pucker."
+
+  - name: rf__section_axial_strong_v7
+    gui_only: true
+    config: typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml
+    group: home
+    symmetry: hv
+    description: "VISUAL REFERENCE ONLY: exact strong_a.png rim-pucker look, fixed 417x203 ES-600 mouth, axial 7/9. Same geometry as legacy sp__strong_v7 (max point diff 9.6e-7). Its fixed mouth/depth/crown box is not an acoustic optimization cell; use rf__section_axial_home_v7 for that."

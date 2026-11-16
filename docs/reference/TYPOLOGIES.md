@@ -593,6 +593,41 @@ Domains covered: `generators`, `rows`, `native`
 | `span` | Row span | — | quarter | — | — | — | How much of the azimuth circle the rows model covers. |
 | `wall_thickness_mm` | Shell thickness | mm | 3.0 | — | — | — | Outer-shell thickness of a freestanding rows model. |
 
+## `hl__crowe_x_square_v7`
+
+- **Family:** FREEFORM
+- **Kind:** rows
+- **Group:** home
+- **Symmetry:** hv
+- **Description:** Near-square Crowe-X-inspired probe: four concave panels, diagonal ridge, 479x479 mouth; the reference-image X family. Look-first; a square mouth will not hold 50 deg vertical at 700 Hz. Seed sf_amt 0.60, sf_start 0.12, a_h/a_v 34/34, L 220, lip 24, wrap 120.
+- **Source status:** gui-only
+- **Config:** `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml`
+- **Brief:** `examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml`
+- **Documented:** true
+- **Knobs:** 19
+
+| Knob | Label | Unit | Default | Search | Hard lo | Hard hi | Summary |
+|---|---|---|---|---|---|---|---|
+| `g_L_mm` | Depth (rows) | mm | 220.0 | 210.0 .. 240.0 | — | — | Shared axial depth of both meridians used by the GRID radius field. |
+| `g_a_h_deg` | Horizontal coverage half-angle (rows) | deg | 34.0 | 32.0 .. 36.0 | — | — | Horizontal coverage half-angle of a per-azimuth OSSE rows kind. |
+| `g_a_v_deg` | Vertical coverage half-angle (rows) | deg | 34.0 | 32.0 .. 36.0 | — | — | Vertical coverage half-angle of a per-azimuth OSSE rows kind. |
+| `g_k` | Throat expansion (rows) | — | 1.0 | 1.0 .. 1.0 | — | — | OS throat-expansion exponent in the OSSE and R-OSSE rows kinds. |
+| `g_n` | Termination exponent (rows) | — | 2.0 | 1.8 .. 2.4 | — | — | OSSE termination exponent; controls where the mouth flare is packed. |
+| `g_q` | OSSE shape exponent (rows) | — | 0.996 | 0.996 .. 0.996 | — | — | OSSE profile shape exponent near the mouth. |
+| `g_r_lip_mm` | Torus lip radius (rows) | mm | 24.0 | 18.0 .. 30.0 | — | 100.0 | Tangent-continuous circular lip radius on the rollback rows; zero leaves the wall. |
+| `g_s` | Termination fraction (rows) | — | 0.32 | 0.25 .. 0.4 | — | — | Fraction of the mouth radius carried by the OSSE termination. |
+| `g_sf_ab` | Superformula a/b ratio (rows) | — | 1.0 | 1.0 .. 1.0 | — | — | Anisotropy ratio of the two Gielis superformula radii. |
+| `g_sf_amt` | X-crease amplitude (rows) | — | 0.6 | 0.4 .. 0.8 | — | — | Amplitude of the superformula X modulation on the wall. |
+| `g_sf_m` | Superformula symmetry (rows) | — | 4 | 4 .. 4 | — | — | Gielis superformula symmetry order of the X-shaped mouth term. |
+| `g_sf_n1` | Superformula exponent n1 (rows) | — | 1.5 | 1.5 .. 1.5 | — | — | First Gielis superformula exponent of the X mouth term. |
+| `g_sf_n2` | Superformula exponent n2 (rows) | — | 6.0 | 6.0 .. 6.0 | — | — | Second Gielis superformula exponent of the X mouth term. |
+| `g_sf_start` | X ramp start (rows) | — | 0.12 | 0.12 .. 0.12 | — | — | Normalised wall fraction where the X modulation starts. |
+| `g_wrap_deg` | Lip wrap angle (rows) | deg | 120.0 | 90.0 .. 150.0 | — | — | How far the curled mouth lip wraps around. |
+| `n_phi` | Azimuth row count | — | 33 | — | — | — | Number of azimuth rows in the rows/grid model. |
+| `n_s` | Axial station count | — | 56 | — | — | — | Number of axial stations along each row. |
+| `span` | Row span | — | quarter | — | — | — | How much of the azimuth circle the rows model covers. |
+| `wall_thickness_mm` | Shell thickness | mm | 3.0 | — | — | — | Outer-shell thickness of a freestanding rows model. |
+
 ## `hl__es_style_rollback_v7`
 
 - **Family:** FREEFORM
@@ -1309,6 +1344,110 @@ No knob prose applies to this typology in the current domains (generators, rows,
 | `n_anchors` | Anchor count | — | 16 | — | — | — | Number of [z, r, wall-angle] anchors selected per meridian. |
 | `v_R_arc_mm` | V-plane throat arc radius | mm | 45.0 | 25.0 .. 80.0 | — | — | Radius of the circular throat arc in the QTW arc rule; the mouth radius is derived. |
 | `v_a_deg` | V-plane QTW half-dispersion angle | deg | 30.0 | 22.0 .. 33.0 | — | — | Half the dispersion angle in the quadratic-throat arc rule. |
+
+## `rf__rect_radial_wide_v7`
+
+- **Family:** FREEFORM
+- **Kind:** rows
+- **Group:** home
+- **Symmetry:** hv
+- **Description:** Spiral radial-relief experiment (soft inner waist/diagonal ridge). This is NOT the section-pucker rim fold in strong_a.png and NOT the square-X reference photo; use sp__strong_v7 for the strong_a mouth pucker and hl__crowe_x_square_v7 for the square X. Seed 12/16 mm; starts 6/8, 12/16, 16/22; window 0.50/0.80/0.96; shape-only.
+- **Source status:** gui-only
+- **Config:** `examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml`
+- **Brief:** `examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml`
+- **Documented:** true
+- **Knobs:** 20
+
+| Knob | Label | Unit | Default | Search | Hard lo | Hard hi | Summary |
+|---|---|---|---|---|---|---|---|
+| `g_axial_h_mm` | Horizontal axial relief (rows) | mm | 0.0 | 0.0 .. 0.0 | — | — | Signed axial relief at the horizontal axis of the rolled family. |
+| `g_axial_v_mm` | Vertical axial relief (rows) | mm | 0.0 | 0.0 .. 0.0 | — | — | Signed axial relief at the vertical axis of the rolled family. |
+| `g_decay` | Spiral decay (rows) | — | 0.7 | 0.65 .. 0.75 | — | — | Exponential-spiral decay rate of the rolled-rectangle kind. |
+| `g_depth_h_ratio` | Horizontal depth fraction (rows) | — | 0.68 | 0.68 .. 0.68 | — | — | Share of the rolled-rectangle depth assigned to the horizontal walls. |
+| `g_depth_mm` | Depth (rows) | mm | 238.0 | 230.0 .. 246.0 | — | — | Axial depth of a rolled-family rows construction. |
+| `g_height_mm` | Mouth height (rows) | mm | 299.0 | 299.0 .. 299.0 | — | — | Full mouth height target of a rolled-family rows construction. |
+| `g_inward_h_mm` | Horizontal inward relief (rows) | mm | 12.0 | 0.0 .. 30.0 | — | — | Radial inward relief at the horizontal axis of the rolled family. |
+| `g_inward_v_mm` | Vertical inward relief (rows) | mm | 16.0 | 0.0 .. 40.0 | — | — | Radial inward relief at the vertical axis of the rolled family. |
+| `g_rect_exponent` | Rectangle corner exponent (rows) | — | 12.0 | 10.0 .. 14.0 | — | — | Superellipse corner exponent of the rectangular mouth. |
+| `g_rect_turn_deg` | Rectangle transition angle (rows) | deg | 65.0 | 65.0 .. 65.0 | — | — | Roll turn where the rolled-rectangle cross-section becomes rectangular. |
+| `g_relief_end_s` | Relief end station (rows) | — | 0.96 | 0.96 .. 0.96 | — | — | Normalized station where the rolled-family relief returns to zero. |
+| `g_relief_peak_s` | Relief peak station (rows) | — | 0.8 | 0.8 .. 0.8 | — | — | Normalized station where the rolled-family relief reaches full strength. |
+| `g_relief_start_s` | Relief start station (rows) | — | 0.5 | 0.5 .. 0.5 | — | — | Normalized station where the rolled-family relief starts. |
+| `g_terminal_deg` | Terminal roll angle (rows) | deg | 270.0 | 270.0 .. 270.0 | — | — | Final roll turn of the rolled-rectangle mouth. |
+| `g_throat_turn_deg` | Throat turn angle (rows) | deg | 25.0 | 25.0 .. 25.0 | — | — | Roll turn used by the round throat blend of the rolled rectangle. |
+| `g_width_mm` | Mouth width (rows) | mm | 542.0 | 542.0 .. 542.0 | — | — | Full mouth width target of a rolled-family rows construction. |
+| `n_phi` | Azimuth row count | — | 65 | — | — | — | Number of azimuth rows in the rows/grid model. |
+| `n_s` | Axial station count | — | 128 | — | — | — | Number of axial stations along each row. |
+| `span` | Row span | — | quarter | — | — | — | How much of the azimuth circle the rows model covers. |
+| `wall_thickness_mm` | Shell thickness | mm | 3.0 | — | — | — | Outer-shell thickness of a freestanding rows model. |
+
+## `rf__section_axial_home_v7`
+
+- **Family:** FREEFORM
+- **Kind:** rows
+- **Group:** home
+- **Symmetry:** hv
+- **Description:** OPTIMIZATION CELL: home-scaled section family. Searches width 480-600, height 220-420, depth 170-300, H/V depth split 0.9-1.1, crown 10-40, junction 16-48, and axial H/V pucker 0-12/0-14. Width/height set coverage and pattern control; depth sets loading/flare; H/V depth split sets top/bottom vs side termination; crown/junction set section curvature; the axial pucker is a secondary mouth-rim/diagonal phase lever, not a coverage law. Seed = best home-panel design + 7/9 pucker.
+- **Source status:** gui-only
+- **Config:** `examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml`
+- **Brief:** `examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml`
+- **Documented:** true
+- **Knobs:** 18
+
+| Knob | Label | Unit | Default | Search | Hard lo | Hard hi | Summary |
+|---|---|---|---|---|---|---|---|
+| `g_axial_h_mm` | Horizontal axial relief (rows) | mm | 7.0 | 0.0 .. 12.0 | — | — | Signed axial relief at the horizontal axis of the rolled family. |
+| `g_axial_v_mm` | Vertical axial relief (rows) | mm | 9.0 | 0.0 .. 14.0 | — | — | Signed axial relief at the vertical axis of the rolled family. |
+| `g_crown_mm` | Crown rise (rows) | mm | 39.7 | 10.0 .. 40.0 | — | — | Crown rise of the Crowe section surface between its profiles. |
+| `g_depth_mm` | Depth (rows) | mm | 262.0 | 170.0 .. 300.0 | — | — | Axial depth of a rolled-family rows construction. |
+| `g_h_depth_scale` | H/V depth ratio (rows) | — | 1.098 | 0.9 .. 1.1 | — | — | Horizontal-to-vertical depth ratio of the Crowe section construction. |
+| `g_height_mm` | Mouth height (rows) | mm | 290.0 | 220.0 .. 420.0 | — | — | Full mouth height target of a rolled-family rows construction. |
+| `g_inward_h_mm` | Horizontal inward relief (rows) | mm | 0.0 | 0.0 .. 0.0 | — | — | Radial inward relief at the horizontal axis of the rolled family. |
+| `g_inward_v_mm` | Vertical inward relief (rows) | mm | 0.0 | 0.0 .. 0.0 | — | — | Radial inward relief at the vertical axis of the rolled family. |
+| `g_junction_power` | Corner junction exponent (rows) | — | 24.4 | 16.0 .. 48.0 | — | — | Exponent of the Crowe section's corner junction blend. |
+| `g_relief_end_s` | Relief end station (rows) | — | 0.96 | 0.96 .. 0.96 | — | — | Normalized station where the rolled-family relief returns to zero. |
+| `g_relief_peak_s` | Relief peak station (rows) | — | 0.8 | 0.8 .. 0.8 | — | — | Normalized station where the rolled-family relief reaches full strength. |
+| `g_relief_start_s` | Relief start station (rows) | — | 0.3 | 0.3 .. 0.3 | — | — | Normalized station where the rolled-family relief starts. |
+| `g_throat_blend_mm` | Throat blend length (rows) | mm | 20.0 | 20.0 .. 20.0 | — | — | Length of the Crowe section's blend from the round driver exit. |
+| `g_width_mm` | Mouth width (rows) | mm | 580.0 | 480.0 .. 600.0 | — | — | Full mouth width target of a rolled-family rows construction. |
+| `n_phi` | Azimuth row count | — | 49 | — | — | — | Number of azimuth rows in the rows/grid model. |
+| `n_s` | Axial station count | — | 96 | — | — | — | Number of axial stations along each row. |
+| `span` | Row span | — | quarter | — | — | — | How much of the azimuth circle the rows model covers. |
+| `wall_thickness_mm` | Shell thickness | mm | 3.0 | — | — | — | Outer-shell thickness of a freestanding rows model. |
+
+## `rf__section_axial_strong_v7`
+
+- **Family:** FREEFORM
+- **Kind:** rows
+- **Group:** home
+- **Symmetry:** hv
+- **Description:** VISUAL REFERENCE ONLY: exact strong_a.png rim-pucker look, fixed 417x203 ES-600 mouth, axial 7/9. Same geometry as legacy sp__strong_v7 (max point diff 9.6e-7). Its fixed mouth/depth/crown box is not an acoustic optimization cell; use rf__section_axial_home_v7 for that.
+- **Source status:** gui-only
+- **Config:** `examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml`
+- **Brief:** `examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml`
+- **Documented:** true
+- **Knobs:** 18
+
+| Knob | Label | Unit | Default | Search | Hard lo | Hard hi | Summary |
+|---|---|---|---|---|---|---|---|
+| `g_axial_h_mm` | Horizontal axial relief (rows) | mm | 7.0 | 4.0 .. 10.0 | — | — | Signed axial relief at the horizontal axis of the rolled family. |
+| `g_axial_v_mm` | Vertical axial relief (rows) | mm | 9.0 | 6.0 .. 12.0 | — | — | Signed axial relief at the vertical axis of the rolled family. |
+| `g_crown_mm` | Crown rise (rows) | mm | 20.0 | 18.0 .. 22.0 | — | — | Crown rise of the Crowe section surface between its profiles. |
+| `g_depth_mm` | Depth (rows) | mm | 198.0 | 194.0 .. 202.0 | — | — | Axial depth of a rolled-family rows construction. |
+| `g_h_depth_scale` | H/V depth ratio (rows) | — | 1.0 | 0.99 .. 1.01 | — | — | Horizontal-to-vertical depth ratio of the Crowe section construction. |
+| `g_height_mm` | Mouth height (rows) | mm | 203.0 | 203.0 .. 203.0 | — | — | Full mouth height target of a rolled-family rows construction. |
+| `g_inward_h_mm` | Horizontal inward relief (rows) | mm | 0.0 | 0.0 .. 0.0 | — | — | Radial inward relief at the horizontal axis of the rolled family. |
+| `g_inward_v_mm` | Vertical inward relief (rows) | mm | 0.0 | 0.0 .. 0.0 | — | — | Radial inward relief at the vertical axis of the rolled family. |
+| `g_junction_power` | Corner junction exponent (rows) | — | 32.0 | 32.0 .. 32.0 | — | — | Exponent of the Crowe section's corner junction blend. |
+| `g_relief_end_s` | Relief end station (rows) | — | 0.96 | 0.96 .. 0.96 | — | — | Normalized station where the rolled-family relief returns to zero. |
+| `g_relief_peak_s` | Relief peak station (rows) | — | 0.8 | 0.8 .. 0.8 | — | — | Normalized station where the rolled-family relief reaches full strength. |
+| `g_relief_start_s` | Relief start station (rows) | — | 0.3 | 0.3 .. 0.3 | — | — | Normalized station where the rolled-family relief starts. |
+| `g_throat_blend_mm` | Throat blend length (rows) | mm | 20.0 | 20.0 .. 20.0 | — | — | Length of the Crowe section's blend from the round driver exit. |
+| `g_width_mm` | Mouth width (rows) | mm | 417.0 | 417.0 .. 417.0 | — | — | Full mouth width target of a rolled-family rows construction. |
+| `n_phi` | Azimuth row count | — | 65 | — | — | — | Number of azimuth rows in the rows/grid model. |
+| `n_s` | Axial station count | — | 128 | — | — | — | Number of axial stations along each row. |
+| `span` | Row span | — | quarter | — | — | — | How much of the azimuth circle the rows model covers. |
+| `wall_thickness_mm` | Shell thickness | mm | 3.0 | — | — | — | Outer-shell thickness of a freestanding rows model. |
 
 ## `rosse_baseline`
 

@@ -976,3 +976,27 @@ changed only evidence/docs; no code, bounds, briefs, queues, processes or solves
 ## 2026-11-15 — Rolled/ATH/Crowe audit completion and remaining admission gates
 
 Read `docs/research/typologies/audit_2026-11-15/HANDOFF.md`. Critical new source finding: FaitalPRO HF1440 specifies35.8mm combined exit, not a2deg cone; preserve18mm/2deg as historical model assumptions.32 stored scores replay exactly. Crowe raw fold angles reproduce but original indexed winding is consistent. Source/body/physical control and objective decisions remain senior work. Priority spiral execution, actual CPU mesh/resume and two real spatial-resolution seed diagnostics now have evidence;26 frozen configs load. Guarded queue is held, no BO and no launch. Budget30 valid targets does not hard-cap retries/verification; finish accounting before release. No original source/brief/domain changes or commits in this audit.
+
+## 2026-11-15 — Senior admission pass: spiral cell approved, release stays owner-held
+
+Follow-up to the audit block above; read
+`docs/research/typologies/audit_2026-11-15/ADMISSION_DECISIONS.md` first. Decisions recorded:
+source = idealized-source target (18mm/2deg historical interface preserved); objective = brief
+7d7d2d0cf048 frozen (no slope swap); convergence left open and carried explicitly by pilot
+validation. New evidence: `SPIRAL_CAPABILITY.json` (3 isolated box-extreme solves: dJ −0.111 /
+−1.071 / +3.475 = 76x/734x/2380x the −0.00146 two-mesh noise) and `spiral_body_witness.json`
+(zero transversal nonadjacent triangle intersections on seed EPW6 + 3 extreme meshes; min
+sampled nonadjacent clearance ≈0.000733–0.000745 m in wrap/lip regions; true fixed-z quarter
+sections computed; witness predicate has crossing/fold/parallel fixtures).
+
+Queue accounting reconciled at code level (strict mode): 45 draws INCLUDE the seed, cache hits
+consume draws not budget, retries consume backend_calls not draws, refusals consume draws; ALL
+strict stops exit 0 so morning review must read run.json stop_reason/budget_counts/strict.
+Winner verification route = `tools/geometry/verify_rolled_rect_night.py` (rolled_rect_cli has NO
+verify-night; its pinned bytes must not be patched); verify identity ≈3–4× a screen solve, 2
+extra solves for the night, outside the 30/45 accounting. Night planned total = 64 fresh acoustic
+solves (2×30 discovery + 2×1 verification). admission.json: spiral cell status=approved with gate
+ledger + accounting; `full_search_released` stays false — verified fail-closed (launch attempt
+exits 1 with HELD). Do NOT link scratch diagnostic caches into the default cache (namespace
+p2-b4bfdad98ff1 would hand the seed a free budget row). No commits, no original recipe edits, no
+Bayesian jobs; GPU hosts cleared after each of the 3 diagnostics (VRAM back to desktop baseline).

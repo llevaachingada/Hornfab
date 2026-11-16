@@ -34,6 +34,10 @@ bayes = [
   "botorch==0.18.1",
   "gpytorch==1.15.2",
   "linear_operator==0.6.1",
+  # BoTorch's fused qLogEHVI JIT kernel needs ninja on PATH (plus MSVC cl.exe inside a
+  # Developer Command Prompt on Windows). Without it the pure-Python path is still correct,
+  # just ~3x slower; see docs/BAYESIAN_STUDIES_RUNBOOK.md "Fused qLogEHVI kernel".
+  "ninja>=1.11",
 ]
 # WP11b CMA-ME atlas. The PyPI distribution is `ribs` (`import ribs`); `pyribs` is an alias that
 # does not resolve, so pin the import name exactly.

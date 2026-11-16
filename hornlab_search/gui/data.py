@@ -3286,6 +3286,7 @@ _BRIDGE_ROWS = {
     "rolled_rect": "rolled_rect_cli",
     "rolled_rect_pucker": "rolled_rect_cli",
     "crowe_panel": "crowe_panel_cli",
+    "section_pucker": "section_pucker_cli",
 }
 _BRIDGE_PREVIEW_HELPER = Path(__file__).resolve().parents[2] / "tools" / "geometry" / "gui_preview.py"
 

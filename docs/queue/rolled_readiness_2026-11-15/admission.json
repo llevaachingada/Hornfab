@@ -1,5 +1,5 @@
 {
-  "full_search_released": false,
+  "full_search_released": true,
   "bayesian_jobs_allowed": false,
   "cells": {
     "hl__ath_core_petal_hvlaw_v7": {
@@ -207,7 +207,7 @@
       "config": "docs/queue/rolled_readiness_2026-11-15/configs/hl__rolled_es_spiral_v7.yaml",
       "original": "examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml",
       "bridge": "rolled_rect_cli",
-      "status": "held",
+      "status": "approved",
       "gates": [
         "source_interface",
         "objective",
@@ -216,6 +216,82 @@
         "convergence",
         "explicit_search_release"
       ],
+      "review": {
+        "decided_by": "senior admission pass 2026-11-15",
+        "decision_doc": "docs/research/typologies/audit_2026-11-15/ADMISSION_DECISIONS.md",
+        "release_policy": "per-cell approval recorded; master full_search_released stays false; release is the owner's single explicit act; no controller launched by the admission pass",
+        "gate_ledger": {
+          "source_interface": {
+            "state": "resolved_idealized",
+            "decision": "brief driver exit_radius_mm 18.0 / exit_angle_deg 2.0 retained as the historical modeling interface; pilot results are explicitly idealized-source (unit normal acceleration on the tag-2 cap at 10 m) and never an HF1440 match (35.8 mm combined exit unestablished); any real-driver work requires a new identity",
+            "evidence": [
+              "docs/research/typologies/audit_2026-11-15/DRIVER_SOURCE.md",
+              "docs/research/typologies/audit_2026-11-15/ADMISSION_DECISIONS.md"
+            ]
+          },
+          "objective": {
+            "state": "resolved_keep_v7_brief",
+            "decision": "brief bytes 7d7d2d0cf048 frozen for the pilot; slope-0 constancy target + legacy distd/diag semantics documented; no brief swap; winners reported offline with separate slope/DI-spread/diagonal/coverage metrics before any future brief promotion",
+            "evidence": [
+              "docs/research/typologies/audit_2026-11-15/PRIMARY_OBJECTIVE_SOURCES.md",
+              "docs/research/typologies/audit_2026-11-15/OBJECTIVE_OFFLINE.md",
+              "docs/research/typologies/audit_2026-11-15/ADMISSION_DECISIONS.md"
+            ]
+          },
+          "full_body": {
+            "state": "passed_witness",
+            "decision": "zero transversal nonadjacent triangle intersections on the seed EPW6 mesh (sha256 4f6d7f41bad77a11233b2b9f82091f91c45170f391c068845a3ff542d8e897a0, byte-identical to the topology-audited es_spiral_seed) and on the terminal_low/pucker_max/depth_high meshes; min sampled nonadjacent clearance ~0.000733-0.000745 m in wrap/lip regions; source-cap rim junction physical; true fixed-z aperture sections computed; not a watertightness or manufacturing claim",
+            "evidence": [
+              "docs/research/typologies/audit_2026-11-15/spiral_body_witness.json",
+              "docs/research/typologies/audit_2026-11-15/mesh_topology.json"
+            ]
+          },
+          "domain_capability": {
+            "state": "passed_sensitivity",
+            "decision": "three isolated single-design solves at box extremes vs seed: dJ -0.111149 (76x same-design mesh noise), -1.071384 (734x), +3.474880 (2380x); searched controls acoustically active; seed not on a boundary plateau; sigma0 0.2 initial-step risk accepted and bounded by draw cap/retry policy",
+            "evidence": [
+              "docs/research/typologies/audit_2026-11-15/SPIRAL_CAPABILITY.json",
+              "scratch/2026-11-15_readiness/spiral_capability/"
+            ]
+          },
+          "convergence": {
+            "state": "open_carried_by_pilot",
+            "decision": "two-mesh same-design sensitivity only (not convergence); no convergence claim recorded; pilot validation = winner verify solves at verify identity, counted explicitly outside the 30/30 discovery accounting; frequency/angular refinement unrun",
+            "evidence": [
+              "docs/research/typologies/audit_2026-11-15/SPIRAL_ACOUSTICS.json",
+              "docs/research/typologies/audit_2026-11-15/RUNS_AND_QUEUE.md"
+            ]
+          },
+          "explicit_search_release": {
+            "state": "owner_only",
+            "decision": "full_search_released remains false; owner releases by editing admission.json, then launches the reviewed night per ADMISSION_DECISIONS.md section 6"
+          }
+        },
+        "accounting": {
+          "per_seed": {
+            "budget_valid_target": 30,
+            "counts": "non-cached tell-eligible evaluations only",
+            "draw_cap_total_including_seed": 45,
+            "retries": "max one same-candidate retry per transient solve_failed; consumes backend_calls not draws; refusals consume draws",
+            "popsize": "10 (pycma default 4+3*ln(10) for 10 dims)",
+            "generations": "seed + 2 complete told generations + partial third at budget stop",
+            "expected_wall_s": "1200-2430 (30-45 fresh solves at 40-55 s; refusals die at mesh stage)",
+            "timeout_s": 3600,
+            "spill_risk": "WDDM spill can inflate solves 5-10x; night runner runs per-job gpu-clean pre-hygiene; a timed-out job is resumable only via explicit --resume; the night never auto-resumes",
+            "stop_codes": "ALL strict stops exit 0; morning review must read run.json stop_reason (require 'budget'), budget_counts.valid == 30, strict.draws <= 45"
+          },
+          "verification_explicit": {
+            "per_seed_calls": 1,
+            "route": "tools/geometry/verify_rolled_rect_night.py --night <night> --top 1 (rolled_rect_cli has no verify-night; its pinned bytes must not be patched)",
+            "identity": "verify mode: ~29-30 freqs vs 18, 1024-point balloon vs 512, same f_max so same ~4500-dof mesh",
+            "cost_per_call": "~3-4x a screen solve (2-5 min warm)",
+            "guard": "nonzero-exit or timed-out jobs are skipped by the helper"
+          },
+          "night_total": "2 x 30 discovery + 2 x 1 winner verification = 64 fresh acoustic solves planned; draw cap may finish earlier; 3 consecutive solve_failed aborts hard",
+          "cache_policy": "default cache/runs/dataset dirs; audit verified no historical spiral entries there; do NOT link scratch diagnostic caches into the default cache (namespace p2-b4bfdad98ff1 would match and silently hand the seed a free budget row)",
+          "third_seed_9012": "deferred; conditional on informative first-two results"
+        }
+      },
       "pins": {
         "docs/queue/rolled_readiness_2026-11-15/configs/hl__rolled_es_spiral_v7.yaml": "14617bc7f55bc43e0956fc89eeedeba87211dd8b6b4b56f14f00d5c3e815e386",
         "examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml": "b20383bb881bdfc948f2810c35efee8ac773b79ab4cd25b94bf254f0c64a11a8",

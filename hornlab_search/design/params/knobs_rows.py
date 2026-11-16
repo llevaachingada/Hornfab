@@ -35,6 +35,7 @@ _JMLC_VAR = "docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.m
 _JMLC = "docs/research/typologies/JMLC_LECLEACH_RESEARCH_2026-10-25.md"
 _BIRADIAL = "docs/research/typologies/BIRADIAL_IWATA_300_RESEARCH_2026-10-25.md"
 _CROWE = "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md"
+_RADIAL = "docs/research/typologies/SPIRAL_PUCKER_VS_RADIAL_RIDGE_2026-11-15.md"
 
 _G = "hornlab_search.design.generators.grid."
 
@@ -948,6 +949,102 @@ ROWS_KNOBS: dict[str, KnobDoc] = {
         physical="Ripples the vertical rim inward.",
         code_ref=_G + "rows_grid_points",
         doc_ref=(_CROWE, "## 4. What was built"),
+    ),
+    "inward_h_mm": _doc(
+        "inward_h_mm",
+        label="Horizontal inward relief",
+        unit="mm",
+        summary="Radial inward relief at the horizontal axis of the rolled family.",
+        detail=("Positive values pull the horizontal wall centre inward at the relief "
+                "peak; the normalized diagonal is unchanged, so the diagonal becomes a "
+                "ridge. The generator applies it through the relief window and keeps the "
+                "source and returned lip untouched. This is a local radial approximation "
+                "of ATH's per-direction law, not a z offset."),
+        formula="rho_new = rho - (H cos^2 psi + V sin^2 psi) cos^2(2 psi) w",
+        physical="Moves the horizontal wall inward near the relief peak.",
+        code_ref="hornlab_search.design.generators.rolled_family.resolve_grid",
+        doc_ref=(_RADIAL, "## Finding 4 — the correct alternate: radial relief"),
+    ),
+    "inward_v_mm": _doc(
+        "inward_v_mm",
+        label="Vertical inward relief",
+        unit="mm",
+        summary="Radial inward relief at the vertical axis of the rolled family.",
+        detail=("The vertical partner of the radial relief. Positive values pull the "
+                "vertical wall centre inward; the diagonal stays put. Use it to balance "
+                "the horizontal relief and to control how strong the diagonal ridge "
+                "reads. Negative values are the outward experiment and are rejected by "
+                "the current v1 mode."),
+        formula="rho_new = rho - (H cos^2 psi + V sin^2 psi) cos^2(2 psi) w",
+        physical="Moves the vertical wall inward near the relief peak.",
+        code_ref="hornlab_search.design.generators.rolled_family.resolve_grid",
+        doc_ref=(_RADIAL, "## Finding 4 — the correct alternate: radial relief"),
+    ),
+    "axial_h_mm": _doc(
+        "axial_h_mm",
+        label="Horizontal axial relief",
+        unit="mm",
+        summary="Signed axial relief at the horizontal axis of the rolled family.",
+        detail=("This is the old z-only experiment in the canonical family: positive "
+                "advances the horizontal wall centre toward the mouth, negative retards "
+                "it. It is a fore-aft corrugation, not ATH's radial ridge. Keep it zero "
+                "when the goal is the ATH look."),
+        formula="z += (H cos^2 psi + V sin^2 psi) cos(4 psi) w",
+        physical="Advances or retards the horizontal wall along the axis.",
+        code_ref="hornlab_search.design.generators.rolled_family.resolve_grid",
+        doc_ref=(_RADIAL, "## Finding 1 — the rolled spiral’s axial pucker"),
+    ),
+    "axial_v_mm": _doc(
+        "axial_v_mm",
+        label="Vertical axial relief",
+        unit="mm",
+        summary="Signed axial relief at the vertical axis of the rolled family.",
+        detail=("The vertical partner of the old z-only pucker. It is a signed axial "
+                "corrugation with the same saturating-window caveat as the historical "
+                "rolled-rect pucker. The radial inward keys are the ATH-like path."),
+        formula="z += (H cos^2 psi + V sin^2 psi) cos(4 psi) w",
+        physical="Advances or retards the vertical wall along the axis.",
+        code_ref="hornlab_search.design.generators.rolled_family.resolve_grid",
+        doc_ref=(_RADIAL, "## Finding 1 — the rolled spiral’s axial pucker"),
+    ),
+    "relief_start_s": _doc(
+        "relief_start_s",
+        label="Relief start station",
+        unit=None,
+        summary="Normalized station where the rolled-family relief starts.",
+        detail=("The smooth onset of the radial or axial relief. It must sit after the "
+                "source matching region so the driver coupling stays untouched. The "
+                "generator rejects a start that intersects the source."),
+        formula=None,
+        physical="Moves the relief onset along the horn.",
+        code_ref="hornlab_search.design.generators.rolled_family.resolve_grid",
+        doc_ref=(_RADIAL, "## Finding 4 — the correct alternate: radial relief"),
+    ),
+    "relief_peak_s": _doc(
+        "relief_peak_s",
+        label="Relief peak station",
+        unit=None,
+        summary="Normalized station where the rolled-family relief reaches full strength.",
+        detail=("The peak of the smooth start/peak/end window. It must lie between the "
+                "start and end and is the station where the H/V inward amplitudes are "
+                "fully applied."),
+        formula=None,
+        physical="Moves the strongest relief point along the horn.",
+        code_ref="hornlab_search.design.generators.rolled_family.resolve_grid",
+        doc_ref=(_RADIAL, "## Finding 4 — the correct alternate: radial relief"),
+    ),
+    "relief_end_s": _doc(
+        "relief_end_s",
+        label="Relief end station",
+        unit=None,
+        summary="Normalized station where the rolled-family relief returns to zero.",
+        detail=("The smooth return. It must stay at or below 0.96 in the shipped family "
+                "so the returned lip is not displaced. A relief that reaches the lip "
+                "reintroduces the wavy rim that the radial mode is meant to avoid."),
+        formula=None,
+        physical="Controls how far the relief runs before the mouth return.",
+        code_ref="hornlab_search.design.generators.rolled_family.resolve_grid",
+        doc_ref=(_RADIAL, "## Finding 4 — the correct alternate: radial relief"),
     ),
     "pucker_start_deg": _doc(
         "pucker_start_deg",

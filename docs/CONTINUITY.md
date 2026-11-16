@@ -1,5 +1,58 @@
-﻿# CONTINUITY
+# CONTINUITY
 
+## 2026-11-15 (later) - Section pucker folded into canonical family; square-X cell added
+
+- Verification: legacy `sp__strong_v7` is the canonical section family with axial pucker
+  7/9 mm; `sp__strong_v7` vs `rf__section_axial_v7` at 7/9/0.30/0.80/0.96 differs by at most
+  **9.6e-7 mm** on the inner grid. The pucker is a parameter, not a typology.
+- Parameter correction: the fixed 417 x 203 `rf__section_axial_strong_v7` is the exact
+  `strong_a.png` visual reference, not an optimization cell. Its old depth 194-202,
+  `h_depth_scale` 0.99-1.01 and crown 18-22 boxes were cosmetic. The latest home-panel best
+  sat at width 579.7, height 292.9, depth 262.1, `h_depth_scale` 1.098, crown 39.7,
+  junction 24.4; those are the acoustic levers.
+- New optimization cell `rf__section_axial_home_v7`: width 480-600, height 220-420, depth
+  170-300, `h_depth_scale` 0.9-1.1, crown 10-40, junction 16-48, axial pucker 0-12/0-14;
+  seed = the home best + 7/9 pucker; mesh 580 x 290 x 274 mm, 3,988 DOF. Eight active keys;
+  25 evals is a coarse pilot (home panel used 96).
+- GUI catalog: removed the three `sp__*` entries; added `rf__section_axial_home_v7` and kept
+  `rf__section_axial_strong_v7` as the visual reference. `hl__crowe_x_square_v7` remains the
+  square-X look. All preview with `available:true`, `shape3d.available:true`.
+- Renders: `docs/renders/2026-11-15-pucker/strong_a_vs_canonical.png`,
+  `rf__section_axial_strong_card.png`, `rf__section_axial_home_card.png`.
+- 25 x 2 solve plan now targets `rf__section_axial_home_v7` and `hl__crowe_x_square_v7`
+  (seeds 1234/5678), ready but **not launched**: `bo_cov_pilot_2026-11-16` holds the GPU
+  lock/Julia host. Do not interrupt it.
+
+## 2026-11-15 (20:08) - OWNER AUTHORISED ONE BOTORCH ARM; cov pilot LAUNCHED
+
+- Owner chose a single-arm pilot instead of the four-arm night. Launched detached at 20:08 (controller pid
+  26816, parent WmiPrvSE) via `tools/night_queue/launch_detached.ps1` -> `queue.ps1` ->
+  `run_campaign_night.py`: night `bo_cov_pilot_2026-11-16`, admission packet
+  `docs/queue/bo_cov_pilot_2026-11-16.admission.json` (3 job ids: preflight, prep_cov, bo_cov).
+- Arm: `p80x60__ext_throat_hvlaw_cov_v7`, 231 strict rows, d=9, seed 71001, `comparison-25`
+  (25 screens + 6 verify = 31 calls, 150 attempts). Preflight job passed (rows/pins/profile all ok);
+  prep reported `training rows: 231 (min 100)`. Logs: `runs\nights\queue_bo_cov_pilot_2026-11-16.log`,
+  `runs\nights\bo_cov_pilot_2026-11-16_runner_{stdout,stderr}.log`; night dir
+  `runs\nights\bo_cov_pilot_2026-11-16`.
+- `queue.ps1` gained `-Admission` and `-DryRun` (it previously forwarded only `--night`, which
+  would have bypassed the new admission gate). Full chain dry-run tested: admission accepted, 3 jobs,
+  exit 0; a bad packet aborts with exit 2.
+- The other three arms (ath14, corelaw, hvlaw) remain staged and unadmitted in
+  `docs/queue/bo_multityp_2026-11-16.yaml`.
+- Owner decision 20:40: **skip verification entirely** for the exploratory arms. New profile
+  `comparison-25x0` (25 screens + 0 verify = 25 calls, 150 attempts) in `studies/package.py`;
+  the three staged arms and their admission packet use it. `comparison-25x2` (25+2) also exists.
+  Evaluator change: `_build_verification_plan` now truncates to the remaining verify capacity and
+  reports `shortfall`/`audit_shortfall`; with zero capacity it emits no verification candidate at
+  all, so the arm ends `pool_exhausted` instead of `budget_exhausted_or_stale` (the old behaviour
+  when a plan exceeded the cap). Tests: `test_study_evaluator.py` (0- and 2-verify cases) and the
+  budget-profile suite. Trade-off recorded: a screen-only arm has **no verified finalist**.
+  The running `cov` pilot keeps its prepared `comparison-25` package (6 verify) - repackaging
+  would start a new package with zero observations and discard ~13 solved designs.
+- Stale-lock observation: `runs\.gpu.lock` held pid 28408
+  (`rf__rect_radial_wide_v7` screen 25 @ seed 1234, started 19:59:43) which was already dead; the
+  runner took the lock over per policy. That CMA run `20261116T005943Z-screen-20db0d` stopped ~20:01
+  with partial records and is NOT ours to resume; whoever owns the radial-wide cell must decide.
 ## 2026-11-15 (latest) - Full-circle globe view from the stored balloon; no new solves
 
 - The `Directivity (isobars)` view now has three modes: `Rectangular | Globe | Full globe`.
@@ -38,7 +91,10 @@
 - GUI: added `examples/catalog.gui.yaml` entry and regenerated the parameter catalog
   (`param-catalog.v1.json`, `PARAMETERS.md`, `TYPOLOGIES.md`). The typology list now shows
   `rf__rect_radial_wide_v7` (enabled, 5 knobs); suggested starts 6/8 subtle, 12/16 clear,
-  16/22 dramatic. Hard-refresh the GUI.
+  16/22 dramatic. The sandbox preview now resolves `rolled_family` through its canonical
+  `resolve_grid` (the generic rows march rejected the `mode` key); verified `available:true`,
+  `shape3d.available:true`, dims 535.7 x 294.7 x 235.1 mm. Hard-refresh and restart the GUI
+  server (the preview fix is Python code).
 - Evidence: `docs/renders/2026-11-15-pucker/` (six-view comparison, relief range sheet,
   three-view card). No GPU solve; the 2026-11-15 17:15 owner pause still binds. The new
   config is uncommitted.
@@ -5921,6 +5977,7 @@ PASS  round-trip        reserved for task 04
 - **Next (next agent):** The implementation plan's NON-OWNER-GATED work is COMPLETE as of M6/WP12: the machine carries the brief-agnostic shape surface (classical + splice/throat-blend/salmon + GRID + organic rows + rollback lecleach/iwata_ar/toroidal + saddle halves) + restarts schedules + the QD-atlas contract + the CADâ†’STEP multicell category + the enclosure-mounting route (measured: dofs +199 %/+107 %, both under the unchanged caps) + the WP16 source plug + WP17 fused-CUDA near correction (stage 1) on the hosted fork's pinned stack (`760a1ec`; installed == pinned â€” the mesh-pin tripwire is green). **Everything remaining needs the owner: [a] the brief-design consultation (deferred) â€” 2â€“4 real briefs turn the machinery from "calibrated" into "aimed"; [b] resume-or-park the deferred WP14 multicell PHYSICS (the fixture's mouth-topology defect + the full resume recipe live in `docs/ISSUES.md`'s deferred-WP14 block; WP17 stage 1 is ready for it); [c] P6a superformula campaign + P6b GSA-vs-CMA-ES bake-off (owner-gated); [d] the small parked proposals (W7 balloon density, the M3/5 calibration proposals); [e] WP17 stage 2 (fused + per-image symmetry near caches) only when symmetric-drive multicells need the GPU. WP13 axisymmetric backend = OWNER-DEFERRED ("don't know how necessary that is" 2026-10-25).** Nothing else runs without the owner.
 - **Open owner decisions:** v2 objective as brief DEFAULT (today opt-in); bound proposals (`docs/evidence/TYPOLOGY_COMPARE_2026-10-23.md`); mesher bump (post-beta); surrogate OSSE top-up; GUI contrast owner click-path check remains; **P6a/P6b + W7 + the brief-design consultation + resume-or-park the deferred WP14 multicell physics (all owner-gated â€” see Next). RESOLVED 2026-10-25: fork hosting + pin (hosted fork; `760a1ec` pinned; installed == pinned â€” tripwire green); WP13 = OWNER-DEFERRED.**
 - **Blockers:** none (owner gate on the pin hosting only).
+
 
 
 

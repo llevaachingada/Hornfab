@@ -1,8 +1,11 @@
 # TuRBO + Pareto BoTorch policies: integration plan and matched test (drafted 2026-11-14)
 
-Status: **draft**. Code is being built on branch `feat/bo-turbo-pareto` (worktree `C:\Users\hunte\Hrns\boext-wt`).
-It merges only after `bo_vs_cma_2026-11-15` AND `sab_home_gpu_rest_2026-11-15` finish: every study pins a hash of
-all `hornlab_search/*.py`, so merging mid-night would change the code under the remaining arms.
+Status: **landed in canonical** (`e25da03` "feat(bo): turbo_pool_v1 trust-region policy + production
+Pareto (qLogNEHVI) wiring"). Both policies are registered, production-executable
+(`studies/production.py:50`), GUI-selectable, and covered by `tests/test_bo_turbo.py` /
+`tests/test_bo_pareto.py` plus the production suites. This file is kept as the design record; the
+"merges only after" note below is historical — the merge already happened, and the two nights it
+waits on are still the gating events for any *new* study, not for the code.
 
 ## 1. Research basis
 

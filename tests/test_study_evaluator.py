@@ -165,6 +165,34 @@ def test_full_serial_loop_screens_then_four_finalists_and_two_audits():
     assert not {i['geometry_id'] for i in verify} & {i['geometry_id'] for i in audit}
 
 
+def test_zero_verify_budget_skips_verification_entirely():
+    """comparison-25x0 (owner decision 2026-11-15): screens only, no candidate the journal refuses."""
+    budget = {'screen_calls': 8, 'verify_calls': 0, 'total_calls': 8, 'attempts': 120}
+    evaluator_adapter = evaluator(package_value=package(budget=budget))
+    journal = Journal()
+    result = run_package(package(budget=budget), evaluator_adapter, Lane(), journal)
+    kinds = [i['kind'] for i in journal.items.values()]
+    assert result['status'] == 'pool_exhausted'
+    assert kinds.count('screen') == 8
+    assert 'verify' not in kinds and 'audit' not in kinds
+    assert evaluator_adapter.selection['shortfall'] == 4
+    assert evaluator_adapter.selection['audit_shortfall'] == 2
+
+
+def test_two_verify_budget_verifies_exactly_two_finalists_and_no_audit():
+    """comparison-25x2: the plan is truncated to the verify cap instead of over-spending."""
+    budget = {'screen_calls': 8, 'verify_calls': 2, 'total_calls': 10, 'attempts': 120}
+    evaluator_adapter = evaluator(package_value=package(budget=budget))
+    journal = Journal()
+    result = run_package(package(budget=budget), evaluator_adapter, Lane(), journal)
+    verify = [i for i in journal.items.values() if i['kind'] == 'verify']
+    audit = [i for i in journal.items.values() if i['kind'] == 'audit']
+    assert result['status'] == 'pool_exhausted'
+    assert len(verify) == 2 and not audit
+    assert evaluator_adapter.selection['shortfall'] == 2
+    assert evaluator_adapter.selection['audit_shortfall'] == 2
+
+
 def test_cache_hit_is_not_called_and_never_evaluated():
     calls = []
     cached = {'solve_id': 's0', 'kind': 'screen', 'geometry_id': 'g0',

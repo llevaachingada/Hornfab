@@ -1,5 +1,6 @@
 """Study budget profiles (2026-11-14): ``baseline`` stays the frozen bo-study-v1.1 budget and the
-default; ``comparison-60`` is an explicit opt-in for matched BO-vs-CMA campaigns. Synthetic roots only."""
+default; ``comparison-25``/``comparison-30``/``comparison-60`` are explicit opt-ins for matched
+BO-vs-CMA campaigns. Synthetic roots only."""
 from __future__ import annotations
 
 import json
@@ -45,6 +46,31 @@ def test_unknown_profile_is_refused(tmp_path):
     service, sid, _ = seed_study(tmp_path)
     with pytest.raises(StudyError, match='budget_profile'):
         make_package(service, sid, budget_profile='unlimited')
+
+
+@pytest.mark.parametrize('profile, caps', [
+    ('comparison-25', {'screen_calls': 25, 'verify_calls': 6,
+                       'total_calls': 31, 'attempts': 150}),
+    ('comparison-25x2', {'screen_calls': 25, 'verify_calls': 2,
+                         'total_calls': 27, 'attempts': 150}),
+    ('comparison-25x0', {'screen_calls': 25, 'verify_calls': 0,
+                         'total_calls': 25, 'attempts': 150}),
+    ('comparison-30', {'screen_calls': 30, 'verify_calls': 6,
+                       'total_calls': 36, 'attempts': 180}),
+])
+def test_new_comparison_profiles_are_exact_and_verifiable(tmp_path, profile, caps):
+    assert BUDGET_PROFILES[profile] == caps
+    assert budget_caps({'budget_profile': profile}) == caps
+    service, sid, _ = seed_study(tmp_path)
+    package = make_package(service, sid, budget_profile=profile)
+    assert package['budget_profile'] == profile
+    assert package['budget'] == caps
+    assert verify_package(package) is package
+
+
+def test_budget_caps_refuses_an_unknown_profile():
+    with pytest.raises(StudyError, match='budget_profile'):
+        budget_caps({'budget_profile': 'comparison-40'})
 
 
 def test_a_baseline_package_cannot_carry_a_bigger_budget(tmp_path):

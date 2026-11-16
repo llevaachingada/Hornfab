@@ -26,10 +26,17 @@ param(
     [string]$Cutoff = "",                                # HH:mm - no night starts after this (today)
     [int]$WaitPid = 0,                                   # optional: a runner to wait for first
     [string]$WaitMatch = "",                             # required with WaitPid: text in that process's command line
+    [string]$Admission = "",                             # optional: admission packet JSON passed to every runner
+    [switch]$DryRun,                                     # print each night's plan instead of solving
     [string]$Log = "runs\nights\queue.log",
     [string]$Repo = "C:\Users\hunte\Hrns\hornlab-search"
 )
 Set-Location $Repo
+$admPath = ""
+if ($Admission) {
+    $admPath = if ([System.IO.Path]::IsPathRooted($Admission)) { $Admission } else { Join-Path $Repo $Admission }
+    if (-not (Test-Path $admPath)) { Write-Error "queue.ps1: admission packet not found: $admPath"; exit 2 }
+}
 $logPath = Join-Path $Repo $Log
 function Note($m) { "$(Get-Date -Format s) $m" | Out-File -FilePath $logPath -Append -Encoding utf8 }
 Add-Type -Namespace W -Name P -MemberDefinition '[DllImport("kernel32.dll")] public static extern uint SetThreadExecutionState(uint f);'
@@ -56,7 +63,11 @@ foreach ($n in $list) {
     if ($cut -and (Get-Date) -ge $cut) { Note "cutoff $Cutoff reached; NOT starting $n or later nights"; break }
     Awake
     Note "starting $n"
-    $r = Start-Process -FilePath $py -ArgumentList '-u', 'tools\run_campaign_night.py', '--night', "runs\nights\$n.yaml" `
+    # A packet must travel with the night: the runner refuses a job set that the packet does not name.
+    $runnerArgs = @('-u', 'tools\run_campaign_night.py', '--night', "runs\nights\$n.yaml")
+    if ($admPath) { $runnerArgs += @('--admission', $admPath) }
+    if ($DryRun) { $runnerArgs += '--dry-run' }
+    $r = Start-Process -FilePath $py -ArgumentList $runnerArgs `
          -WorkingDirectory $Repo -NoNewWindow -Wait -PassThru `
          -RedirectStandardOutput (Join-Path $Repo "runs\nights\${n}_runner_stdout.log") `
          -RedirectStandardError (Join-Path $Repo "runs\nights\${n}_runner_stderr.log")

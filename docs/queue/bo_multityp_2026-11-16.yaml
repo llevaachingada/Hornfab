@@ -1,0 +1,77 @@
+# BoTorch on the four best-populated EXECUTABLE typologies: 25 new screens each (STAGED, NOT LAUNCHED).
+# Plan, selection evidence, dependency-pin finding and release procedure:
+#   docs/queue/BO_MULTITYPOLOGY_PLAN_2026-11-16.md
+# Admission packet (required to launch): docs/queue/bo_multityp_2026-11-16.admission.json
+#
+# PRECONDITIONS before launch (all four):
+#   1. Owner releases the 2026-11-15 17:15 solve hold (brief / DI-slope / lip-waist question).
+#   2. No other GPU runner is live (tools/night_status.py; one CUDA solve at a time).
+#   3. tools/bo_compare/preflight_arms.py exits 0 for every arm (registry + cohort + rows + pins + profile).
+#   4. run_campaign_night.py --night <this file> --admission <packet> --dry-run passes.
+#
+# Cohorts are PREBUILT and verified (strict build_native_training_set, require_single_fidelity=True)
+# AND their measured dependency pins match the executing interpreter. The preflight job re-proves all
+# of it read-only. No cohort build job is included, so a launched night cannot silently rebuild a
+# cohort under different data.
+#
+# One arm = prep (create study + package, CPU only) then run (adaptive serial solves, exclusive GPU lane).
+# A failed prep leaves no package.json, so its run job fails fast and the next arm is unaffected.
+night: bo_multityp_2026-11-16
+lane: gpu
+jobs:
+  - {id: preflight, kind: command, timeout_s: 900,
+     argv: [.venv/Scripts/python.exe, tools/bo_compare/preflight_arms.py,
+            --budget-profile, comparison-25x0, --min-rows, "100",
+            --arm, "ext_throat_hvlaw_cov=p80x60__ext_throat_hvlaw_cov_v7:runs/bo_multityp_2026-11-16/ext_throat_hvlaw_cov/cohort",
+            --arm, "ath_core_14in=p80x60__ath_core_14in_home700_v7:runs/bo_multityp_2026-11-16/ath_core_14in/cohort",
+            --arm, "ext_throat_corelaw=p80x60__ext_throat_corelaw_v7:runs/bo_multityp_2026-11-16/ext_throat_corelaw/cohort",
+            --arm, "ext_throat_hvlaw=hl__ext_throat_hvlaw_v7:runs/home_landscape_b_2026-11-15/cohort"]}
+
+  # ---- arm 1: strict-80x60 ext throat + H/V cosine law, 231 usable rows, d=9, seed 71001 ----
+  - {id: prep_cov, kind: command, timeout_s: 3600,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, tools/bo_compare/prepare_study.py,
+            --root, runs/bo_multityp_2026-11-16/bo_cov_s71001,
+            --cohort, runs/bo_multityp_2026-11-16/ext_throat_hvlaw_cov/cohort,
+            --task, p80x60__ext_throat_hvlaw_cov_v7, --policy, scalar, --budget-profile, comparison-25x0,
+            --seed, "71001", --deadline-hours, "6", --label, bo_cov_s71001]}
+  - {id: bo_cov, kind: command, timeout_s: 14400,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, -m, hornlab_search.studies.cli, run,
+            --root, runs/bo_multityp_2026-11-16/bo_cov_s71001, --package, package.json,
+            --execute, --project-root, C:/Users/hunte/Hrns/hornlab-search]}
+
+  # ---- arm 2: ATH-core 14 in, 219 usable rows, d=14, seed 71002 ----
+  - {id: prep_ath14, kind: command, timeout_s: 3600,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, tools/bo_compare/prepare_study.py,
+            --root, runs/bo_multityp_2026-11-16/bo_ath14_s71002,
+            --cohort, runs/bo_multityp_2026-11-16/ath_core_14in/cohort,
+            --task, p80x60__ath_core_14in_home700_v7, --policy, scalar, --budget-profile, comparison-25x0,
+            --seed, "71002", --deadline-hours, "6", --label, bo_ath14_s71002]}
+  - {id: bo_ath14, kind: command, timeout_s: 14400,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, -m, hornlab_search.studies.cli, run,
+            --root, runs/bo_multityp_2026-11-16/bo_ath14_s71002, --package, package.json,
+            --execute, --project-root, C:/Users/hunte/Hrns/hornlab-search]}
+
+  # ---- arm 3: ext throat + ATH core-law wall angle, 206 usable rows, d=9, seed 71003 ----
+  - {id: prep_corelaw, kind: command, timeout_s: 3600,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, tools/bo_compare/prepare_study.py,
+            --root, runs/bo_multityp_2026-11-16/bo_corelaw_s71003,
+            --cohort, runs/bo_multityp_2026-11-16/ext_throat_corelaw/cohort,
+            --task, p80x60__ext_throat_corelaw_v7, --policy, scalar, --budget-profile, comparison-25x0,
+            --seed, "71003", --deadline-hours, "6", --label, bo_corelaw_s71003]}
+  - {id: bo_corelaw, kind: command, timeout_s: 14400,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, -m, hornlab_search.studies.cli, run,
+            --root, runs/bo_multityp_2026-11-16/bo_corelaw_s71003, --package, package.json,
+            --execute, --project-root, C:/Users/hunte/Hrns/hornlab-search]}
+
+  # ---- arm 4: landscape 80x50 ext throat, 136 usable rows, d=8, seed 71004 ----
+  - {id: prep_hvlaw, kind: command, timeout_s: 3600,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, tools/bo_compare/prepare_study.py,
+            --root, runs/bo_multityp_2026-11-16/bo_hvlaw_s71004,
+            --cohort, runs/home_landscape_b_2026-11-15/cohort,
+            --task, hl__ext_throat_hvlaw_v7, --policy, scalar, --budget-profile, comparison-25x0,
+            --seed, "71004", --deadline-hours, "6", --label, bo_hvlaw_s71004]}
+  - {id: bo_hvlaw, kind: command, timeout_s: 14400,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, -m, hornlab_search.studies.cli, run,
+            --root, runs/bo_multityp_2026-11-16/bo_hvlaw_s71004, --package, package.json,
+            --execute, --project-root, C:/Users/hunte/Hrns/hornlab-search]}
+

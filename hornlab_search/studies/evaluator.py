@@ -306,7 +306,23 @@ class PipelineStudyEvaluator:
             rows.append(row)
         return rows
 
-    def _build_verification_plan(self):
+    def _verify_capacity_used(self, state):
+        """Verification calls already spent plus those currently reserved."""
+        reservations = state.get("reservations") or {}
+        return (int(state.get("verify_calls", 0) or 0)
+                + int(reservations.get("verify_calls", 0) or 0))
+
+    def _build_verification_plan(self, state=None):
+        # A profile may budget zero verification calls (owner decision 2026-11-15: exploratory
+        # arms skip verification). Never emit a candidate the journal will refuse: report the
+        # full shortfall and stop cleanly instead.
+        remaining = None if state is None else (
+            int(self._budget().get("verify_calls", 6)) - self._verify_capacity_used(state))
+        if remaining is not None and remaining <= 0:
+            self.selection = {"finalists": [], "audits": [], "shortfall": 4,
+                              "audit_shortfall": 2, "audit_seed": self.audit_seed}
+            self._plan = []
+            return
         rows = self._verification_rows()
         if not rows:
             self._plan = []
@@ -334,7 +350,19 @@ class PipelineStudyEvaluator:
                               "audit_shortfall": 2, "audit_seed": self.audit_seed}
         plan = ([("verify", gid) for gid in self.selection["finalists"]]
                 + [("audit", gid) for gid in self.selection["audits"]])
-        self._plan = [(kind, gid) for kind, gid in plan if gid not in self._issued]
+        plan = [(kind, gid) for kind, gid in plan if gid not in self._issued]
+        if remaining is not None:
+            # Never propose more verification than the profile budgets (2 in comparison-25x2).
+            kept = plan[:max(0, remaining)]
+            dropped = plan[len(kept):]
+            if dropped:
+                self.selection["shortfall"] = int(self.selection.get("shortfall") or 0) + sum(
+                    1 for kind, _ in dropped if kind == "verify")
+                self.selection["audit_shortfall"] = int(
+                    self.selection.get("audit_shortfall") or 0) + sum(
+                    1 for kind, _ in dropped if kind == "audit")
+            plan = kept
+        self._plan = plan
 
     def next_candidate(self, state):
         budget = self._budget()
@@ -347,7 +375,7 @@ class PipelineStudyEvaluator:
             else:
                 self._screens_exhausted = True
         if self._plan is None:
-            self._build_verification_plan()
+            self._build_verification_plan(state)
         while self._plan:
             kind, geometry = self._plan.pop(0)
             solve_id = f"{kind}:{geometry}"

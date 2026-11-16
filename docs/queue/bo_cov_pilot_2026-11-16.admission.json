@@ -1,0 +1,11 @@
+{
+  "night": "bo_cov_pilot_2026-11-16",
+  "note": "Admission packet for the single-arm BoTorch pilot (strict-80x60 ext-throat cov, 231 rows, seed 71001). Owner authorised this arm on 2026-11-15 ~20:00. Passing this packet to the runner is the release record for exactly these three job ids; the other three arms stay staged and are not admitted here.",
+  "prepared": "2026-11-15",
+  "plan": "docs/queue/BO_MULTITYPOLOGY_PLAN_2026-11-16.md",
+  "budget_profile": "comparison-25",
+  "budget": {"screen_calls": 25, "verify_calls": 6, "total_calls": 31, "attempts": 150},
+  "arm": {"slug": "ext_throat_hvlaw_cov", "task": "p80x60__ext_throat_hvlaw_cov_v7",
+          "cohort": "runs/bo_multityp_2026-11-16/ext_throat_hvlaw_cov/cohort", "rows": 231, "d": 9, "seed": 71001},
+  "allowed_job_ids": ["preflight", "prep_cov", "bo_cov"]
+}

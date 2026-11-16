@@ -166,6 +166,30 @@ def test_durable_journal_reservation_reconciliation_and_reopen(tmp_path):
     assert again.state('p')['attempts'] == 2
 
 
+NEW_OBJECTIVE_V7_TASKS = (
+    'atlas__osse_ext_throat',
+    'p80x60__ext_throat_hvlaw_cov_v7',
+    'p80x60__ath_core_14in_home700_v7',
+    'p80x60__ext_throat_corelaw_v7',
+)
+
+
+def test_objective_v7_tasks_resolve_with_existing_config_and_brief(tmp_path):
+    from hornlab_search.studies import builders
+    for name in NEW_OBJECTIVE_V7_TASKS:
+        resolved = builders._read_task({'name': name}, root=tmp_path)
+        assert resolved['config'].exists(), name
+        assert resolved['brief'].exists(), name
+        assert resolved['objective_version'] == 7, name
+        entry = builders._TASK_REGISTRY[name]
+        assert entry['config'] == resolved['config']
+        assert entry['brief'] == resolved['brief']
+        assert entry['objective_version'] == 7
+        assert name in builders._ALLOWED_TASK_NAMES
+    with pytest.raises(Unavailable):
+        builders._read_task({'name': 'nope__not_a_task_v7'}, root=tmp_path)
+
+
 def test_verification_candidate_cap_counts_cache_hits_and_deduplicates_retries(tmp_path):
     svc = StudyService(tmp_path)
     sid = svc.create_study(SPEC, 'c')['id']

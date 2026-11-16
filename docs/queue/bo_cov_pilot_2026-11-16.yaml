@@ -1,0 +1,26 @@
+# BoTorch pilot: ONE arm, strict-80x60 ext-throat + H/V cosine law (231 usable rows, d=9).
+# Owner authorised this single arm on 2026-11-15 ~20:00; the other three arms stay staged in
+# docs/queue/bo_multityp_2026-11-16.yaml and are NOT part of this night.
+# Plan: docs/queue/BO_MULTITYPOLOGY_PLAN_2026-11-16.md (arm "cov").
+# Admission packet: docs/queue/bo_cov_pilot_2026-11-16.admission.json
+#
+# Budget 25 screens + 6 verify = 31 calls, 150 attempts (comparison-25). Est. ~1-1.5 h GPU.
+night: bo_cov_pilot_2026-11-16
+lane: gpu
+jobs:
+  - {id: preflight, kind: command, timeout_s: 900,
+     argv: [.venv/Scripts/python.exe, tools/bo_compare/preflight_arms.py,
+            --budget-profile, comparison-25, --min-rows, "100",
+            --arm, "ext_throat_hvlaw_cov=p80x60__ext_throat_hvlaw_cov_v7:runs/bo_multityp_2026-11-16/ext_throat_hvlaw_cov/cohort"]}
+
+  - {id: prep_cov, kind: command, timeout_s: 3600,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, tools/bo_compare/prepare_study.py,
+            --root, runs/bo_multityp_2026-11-16/bo_cov_s71001,
+            --cohort, runs/bo_multityp_2026-11-16/ext_throat_hvlaw_cov/cohort,
+            --task, p80x60__ext_throat_hvlaw_cov_v7, --policy, scalar, --budget-profile, comparison-25,
+            --seed, "71001", --deadline-hours, "6", --label, bo_cov_s71001]}
+
+  - {id: bo_cov, kind: command, timeout_s: 14400,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, -m, hornlab_search.studies.cli, run,
+            --root, runs/bo_multityp_2026-11-16/bo_cov_s71001, --package, package.json,
+            --execute, --project-root, C:/Users/hunte/Hrns/hornlab-search]}

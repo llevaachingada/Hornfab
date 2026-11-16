@@ -22,10 +22,11 @@ const ID = /^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/;
 const isId = value => typeof value === "string" && ID.test(value);
 const SHA256 = /^[a-f0-9]{64}$/i;
 const ARTIFACT_REF = /^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/;
-const POLICY_MODES = new Set(["scalar", "pareto", "cma_seed", "exploration"]);
+const POLICY_MODES = new Set(["scalar", "turbo", "pareto", "cma_seed", "exploration"]);
 // Frozen fallback labels; ``mode`` is the backend proposal-policy value.
 const POLICY_FALLBACKS = [
   {id:"scalar", mode:"scalar", label:"scalar", requires:["training_set"], verification_mode:"scalar"},
+  {id:"turbo", mode:"turbo", label:"scalar, trust region", requires:["training_set", "pool"], verification_mode:"scalar"},
   {id:"coverage-ripple", mode:"pareto", label:"coverage-ripple", requires:["cohort", "metric_observations"], verification_mode:"pareto"},
   {id:"cma-seed", mode:"cma_seed", label:"cma-seed", requires:["seeds"], verification_mode:"scalar"},
   {id:"exploration", mode:"exploration", label:"exploration", requires:["pool"], verification_mode:"scalar"},

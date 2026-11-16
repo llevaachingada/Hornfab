@@ -1,4 +1,4 @@
-﻿# Docs index
+# Docs index
 
 [Crowe / ATH / rolled-family evidence and readiness handoff (2026-11-15)](research/typologies/ROLLED_FAMILY_EVIDENCE_HANDOFF_2026-11-15.md):
 **read before changing these families, bounds, briefs, or optimizer mappings.** Preserves primary research,
@@ -8,8 +8,9 @@ gates. Sampled mesh/replay success does not establish acoustic optimization read
 [Spiral pucker vs ATH-style radial ridges (2026-11-15)](research/typologies/SPIRAL_PUCKER_VS_RADIAL_RIDGE_2026-11-15.md):
 plain-English why the rolled spiral's axial pucker bows the H/V faces, why the screenshot's per-direction
 law is V-dominant with the visible sliders, the ATH diagonal-ridge mechanism, the existing radial-relief
-mode, and the new shape-only `rf__rect_radial_wide_v7` cell; [six-view comparison](renders/2026-11-15-pucker/pucker_compare.png).
-No GPU solves; owner hold preserved.
+mode, and the new shape-only `rf__rect_radial_wide_v7` cell; [six-view comparison](renders/2026-11-15-pucker/pucker_compare.png),
+[relief range sheet](renders/2026-11-15-pucker/relief_versions.png), [three-view card](renders/2026-11-15-pucker/rf__rect_radial_wide_v7_card.png).
+Verification: legacy `sp__strong_v7` is the canonical section family at axial 7/9 mm (max point diff 9.6e-7); the pucker is a parameter, not a typology. **Parameter correction:** the fixed 417x203 `rf__section_axial_strong_v7` is only the visual reference; the optimization cell is `rf__section_axial_home_v7` (width/height/depth/H-V depth split/crown/junction + axial pucker, 8 active keys; the latest home-panel best sat at width 579.7, height 292.9, depth 262.1, h_depth_scale 1.098, crown 39.7). `hl__crowe_x_square_v7` remains the separate square-X look. All three are visible in the GUI (group `home`); legacy `sp__*` entries removed. No GPU solves; owner hold preserved.
 
 [Section-based H/V pucker construction](research/typologies/SECTION_PUCKER_RESEARCH_2026-11-15.md),
 [three-arm queue plan](queue/SECTION_PUCKER_PLAN_2026-11-15.md), and
@@ -196,6 +197,8 @@ Keep this file current: a new doc gets a line here in the same commit.
 | [research/typologies/HORN_WHITEPAPERS_2026-11-15.md](research/typologies/HORN_WHITEPAPERS_2026-11-15.md) | **External white-paper research (2026-11-15):** annotated bibliography and confidence labels for Keele/US4071112/US4308932A/AES 933, Geddes OS/mouth termination, ATH OS-SE/R-OSSE/roundover/EXAR, Fourcade/Le Cleac'h, Crowe ES measurements, Kolbrek BEM, COMSOL, Smolen & Halley, Sridhar, TuRBO/CMA-ES, JASA 2025; synthesis of what is acoustically grounded vs cosmetic; BEM/metrics/optimization checklist; corrections to earlier notes (A=0.9B K-law, 496/794 mm at 700 Hz, Â¼Î» lip rule, unverified 270-degree wrap). |
 | [research/typologies/BIRADIAL_CROWE_SOURCES_2026-11-15.md](research/typologies/BIRADIAL_CROWE_SOURCES_2026-11-15.md) | Research notes (subagent, corrected header): Keele US4071112 CD horn, US4308932A, Crowe ES pages and HF1460 report, ATH R-OSSE / Tritonia / roundover study, knob tables. |
 | [research/typologies/SCORING_NON_CD_SOURCES_2026-11-15.md](research/typologies/SCORING_NON_CD_SOURCES_2026-11-15.md) | Research notes (subagent, caveat header): v7 term definitions, which terms assume constant directivity, smooth-directivity brief proposal. |
+| [research/BO_GUI_HANDOFF_2026-11-16.md](research/BO_GUI_HANDOFF_2026-11-16.md) | **BoTorch GUI handoff (2026-11-15/16):** the verified reason the GUI shows no studies (server reads only `runs/studies`, 15 other study roots on disk), the artifact and per-solve field contracts, the eight BO views with data sources, an implementation slice plan (0-11) with acceptance tests, the code-pin/GPU/no-torch gotchas, fixture studies to develop against, and five owner questions. Supersedes `BO_GUI_HANDOFF_2026-11-15.md`. |
+| [research/BO_GUI_IMPLEMENTATION_PLAN_2026-11-16.md](research/BO_GUI_IMPLEMENTATION_PLAN_2026-11-16.md) | **BoTorch GUI implementation plan (orchestrator-ready):** senior review of the handoff, owner questions decided, new `study-model-diagnostics-v1` artifact (BoTorch `efficient_loo_cv`, lengthscale relevance, posterior slices, `is_non_dominated`/`Hypervolume`), API contract, 8 work packages in 4 waves with file ownership for parallel agents, light testing. |
 | [queue/BO_MULTITYPOLOGY_PLAN_2026-11-16.md](queue/BO_MULTITYPOLOGY_PLAN_2026-11-16.md) | **BoTorch on the four best-populated typologies - 25 screens each (STAGED, NOT LAUNCHED, 2026-11-15):** measured strict cohort counts for 12 candidate configs, why three of four arms are OSSE-ext-throat variants (that is where the data is), the `comparison-25` budget (25+6), four registered v7 tasks with seeds 71001-71004, fixed readout rules against each arm own cohort, the preflight command, and the owner blockers. Night file + admission packet in `docs/queue/`. |
 | [queue/HOME_LANDSCAPE_PLAN_2026-11-15.md](queue/HOME_LANDSCAPE_PLAN_2026-11-15.md) | **Home landscape plan (2026-11-15):** why home horns came out portrait (Keele mouth target in a tall envelope), the 80 H x 50 V / 600 x 480 x 480 brief, smooth research-backed shape cells, nights A-E (CMA cohort, BoTorch scalar/TuRBO/Pareto, shape families, BO round 2), the >= 100-row BoTorch rule. Night files `docs/queue/home_landscape_*_2026-11-15.yaml`. |
 | [queue/SAB_HOME_PLAN_2026-11-14.md](queue/SAB_HOME_PLAN_2026-11-14.md) | **Suggestion A/B + home ATH-law queue (2026-11-14):** tests the 12 Nov report's 11 next-solve suggestions as matched A/Bs (core_law wide vs narrow box from the g1 best, lecleach fc 540 on the CPU lane) and carries them to the home 80x60/700 brief with the ATH CORE-style petal law (H1 ext-throat 5 seeds = repeatability group + BO cohort; H2 ATH-core 1.4in); suggestion-by-suggestion disposition, pre-declared decision rules, launch. Night files `docs/queue/sab_*_2026-11-14.yaml`, configs `examples/typologies/suggest_ab_2026-11-14/`. |
@@ -271,4 +274,5 @@ Keep this file current: a new doc gets a line here in the same commit.
 - [Next senior handoff](research/typologies/audit_2026-11-15/HANDOFF.md)
 - [Exact domains and coupled constraints](research/typologies/audit_2026-11-15/PARAMETER_DOMAINS.md)
 - [Held queue and26 prepared horn files](queue/rolled_readiness_2026-11-15/README.md)
+
 

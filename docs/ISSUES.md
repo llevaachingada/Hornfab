@@ -1,4 +1,4 @@
-﻿# ISSUES
+# ISSUES
 
 Local-only, 2026-11-15 (latest, **GUI full-circle globe; no solves**):
 - `Directivity (isobars)` gains a `Full globe` mode beside `Rectangular | Globe`: the stored balloon
@@ -16,7 +16,8 @@ Local-only, 2026-11-15 late (**BoTorch readiness: staged, still owner-held**):
   four registered v7 study tasks with >=100-row strict cohorts, GUI TuRBO card (Python + JS),
   `tools/bo_compare/preflight_arms.py`, and an optional night-runner `--admission` packet gate.
   Fused qLogEHVI now compiles and caches (ninja + MSVC vcvars64), so the Pareto fallback warning is gone.
-- Staged and NOT launched: `docs/queue/bo_multityp_2026-11-16.yaml` (4 arms x 25 screens + 6 verify).
+- LAUNCHED 2026-11-15 20:08 (owner-authorised): single-arm pilot `bo_cov_pilot_2026-11-16` (cov, 231 rows, seed 71001, 25+6; the staged three use `comparison-25x0` = 25 screens and no
+  verification per owner decision, i.e. screen-only arms with no verified finalist). The other three arms stay staged and unadmitted in `docs/queue/bo_multityp_2026-11-16.yaml`.
   Read `docs/queue/BO_MULTITYPOLOGY_PLAN_2026-11-16.md` first.
 - Still open (owner): brief/DI-slope decision and the lip/waist law (v7 J is what these arms optimise);
   the 17:15 solve pause; Crowe/rolled bridge typologies cannot execute in the study worker; Le Cleac'h
@@ -2333,5 +2334,6 @@ Local-only, added 2026-11-13 (**bo-study-v1.1 pushed; cloud completion kickoff i
 - Open: B8 full adversarial loop (fake evaluator through service/CLI/API/GUI, crash/idempotency matrix).
 - Open: pyproject optional `bayes` extra registration (isolated `bayes-venv` remains the sanctioned engine env).
 - Data note: 3 native shard-57 rows (276-278) uncatalogued at the S0 snapshot; refused at join (`catalog_row_missing`), recoverable by a fresh catalog export.
+
 
 

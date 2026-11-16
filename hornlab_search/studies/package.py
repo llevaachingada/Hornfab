@@ -33,11 +33,22 @@ EXECUTION_BUDGET = {
 
 #: Named budget profiles (2026-11-14, docs/queue/BO_VS_CMA_PLAN_2026-11-15.md). ``baseline`` IS the
 #: frozen bo-study-v1.1 budget above and stays the default: a package without ``budget_profile``
-#: must carry it exactly, as before. ``comparison-60`` exists ONLY for matched BO-vs-CMA campaigns at
-#: equal new-solve budget; a package selects it explicitly and the profile name is part of the
-#: package body, so its identity hash records the choice. Unknown profiles are refused.
+#: must carry it exactly, as before. ``comparison-*`` profiles exist ONLY for matched BO-vs-CMA
+#: campaigns at equal new-solve budget; a package selects one explicitly and the profile name is part
+#: of the package body, so its identity hash records the choice. Unknown profiles are refused.
+#: ``comparison-25``/``comparison-30`` are the small multi-typology campaign budgets. The frozen
+#: verification rule selects up to 4 finalists + 2 audits; a profile with fewer ``verify_calls``
+#: verifies fewer and the runner reports the shortfall (it never substitutes a predicted design).
+#: Owner decisions 2026-11-15: ``comparison-25x2`` = 25 screens + 2 verify (two finalists, no audits);
+#: ``comparison-25x0`` = 25 screens, NO verification at all (screen-only arm, cheapest). Neither can
+#: evaluate the campaign rule "the improvement survives the audit pair"; use ``comparison-25`` when
+#: the decision depends on a verified finalist.
 BUDGET_PROFILES = {
     'baseline': dict(EXECUTION_BUDGET),
+    'comparison-25': {'screen_calls': 25, 'verify_calls': 6, 'total_calls': 31, 'attempts': 150},
+    'comparison-25x2': {'screen_calls': 25, 'verify_calls': 2, 'total_calls': 27, 'attempts': 150},
+    'comparison-25x0': {'screen_calls': 25, 'verify_calls': 0, 'total_calls': 25, 'attempts': 150},
+    'comparison-30': {'screen_calls': 30, 'verify_calls': 6, 'total_calls': 36, 'attempts': 180},
     'comparison-60': {'screen_calls': 60, 'verify_calls': 6, 'total_calls': 66, 'attempts': 300},
 }
 

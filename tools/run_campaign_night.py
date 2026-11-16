@@ -40,6 +40,12 @@ become ``--backend``, ``--cache-dir``, ``--dataset-dir`` and the child environme
 
 Also writes a short ``SUMMARY.md`` table. The module is deliberately import-light: stdlib plus
 PyYAML, with the parsing/accounting helpers pure so the whole protocol can be exercised offline.
+
+Optional admission gate (``--admission PATH``): the packet is a JSON object naming the night and
+the exact job ids that may run (``{"night": ..., "allowed_job_ids": [...]}``). It is loaded and
+checked before any job runs, dry-run included; an unlisted job, a stale id, or any malformed
+packet refuses the WHOLE night. This is a policy gate, not a sandbox: it exists so a held BO
+packet cannot be launched by accident.
 """
 from __future__ import annotations
 
@@ -448,6 +454,77 @@ def load_night(path: Path | str, *, repo_root: Path | str | None = None,
         else:
             raise ValueError(f"job {job_id!r}: kind must be 'search' or 'command', got {kind!r}")
     return NightPlan(night=night, jobs=tuple(jobs), path=path, lane=lane)
+
+
+# ------------------------------------------------------------------ admission gate
+
+
+def load_admission(path: Path | str) -> dict:
+    """Load and structurally validate an admission packet (policy gate, not a sandbox).
+
+    The packet must be a JSON object with a non-empty ``night`` string and a non-empty
+    ``allowed_job_ids`` list of unique, non-empty strings. Returns the normalised packet; every
+    violation is a :class:`ValueError` naming the file and the offending field/value, so the CLI
+    refuses before a single job runs.
+    """
+    path = Path(path)
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise ValueError(f"cannot read admission file {path}: {exc}") from exc
+    try:
+        raw = json.loads(text)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"invalid JSON in admission file {path}: {exc}") from exc
+    if not isinstance(raw, dict):
+        raise ValueError(f"{path}: admission must be a JSON object")
+
+    night = raw.get("night")
+    if not isinstance(night, str) or not night:
+        raise ValueError(f"{path}: admission 'night' must be a non-empty string")
+
+    allowed = raw.get("allowed_job_ids")
+    if not isinstance(allowed, list):
+        raise ValueError(f"{path}: admission 'allowed_job_ids' must be a list")
+    if not allowed:
+        raise ValueError(f"{path}: admission 'allowed_job_ids' must not be empty")
+
+    seen: set[str] = set()
+    for index, item in enumerate(allowed):
+        if not isinstance(item, str) or not item:
+            raise ValueError(
+                f"{path}: admission allowed_job_ids[{index}] must be a non-empty string, "
+                f"got {item!r}")
+        if item in seen:
+            raise ValueError(
+                f"{path}: admission allowed_job_ids contains duplicate id {item!r}")
+        seen.add(item)
+    return {"night": night, "allowed_job_ids": tuple(allowed)}
+
+
+def check_admission(plan: NightPlan, admission: dict) -> None:
+    """Refuse the whole night unless the packet names exactly its jobs.
+
+    A job in the night but not in ``allowed_job_ids`` is refused (never a partial run), and an
+    allowed id that is not in the night is refused as a stale packet. ``admission`` must already
+    have passed :func:`load_admission`.
+    """
+    night = admission.get("night")
+    if night != plan.night:
+        raise ValueError(
+            f"admission night {night!r} does not match night {plan.night!r} from {plan.path}")
+    allowed = set(admission.get("allowed_job_ids") or ())
+    plan_ids = [job.id for job in plan.jobs]
+    unlisted = [job_id for job_id in plan_ids if job_id not in allowed]
+    if unlisted:
+        raise ValueError(
+            f"night {plan.night!r} contains job id(s) not in admission allowed_job_ids: "
+            f"{', '.join(unlisted)}; refusing the whole night")
+    stale = sorted(allowed - set(plan_ids))
+    if stale:
+        raise ValueError(
+            f"admission allowed_job_ids names job id(s) not in night {plan.night!r} "
+            f"(stale packet): {', '.join(stale)}")
 
 
 def write_queue_line(log: Path, text: str) -> None:
@@ -1055,6 +1132,9 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
     parser.add_argument("--dry-run", action="store_true",
                         help="print the resolved job list; launch nothing, run no hygiene")
     parser.add_argument("--only", metavar="ID", help="run only the job with this id")
+    parser.add_argument("--admission", metavar="JSON", default=None,
+                        help="admission packet JSON (policy gate: night + allowed_job_ids); "
+                             "loaded before any job runs, dry-run included")
     return parser.parse_args(argv)
 
 
@@ -1065,6 +1145,15 @@ def main(argv: list[str] | None = None) -> int:
     except ValueError as exc:
         print(f"night runner: {exc}", file=sys.stderr)
         return 2
+    if args.admission is not None:
+        try:
+            admission = load_admission(args.admission)
+            check_admission(plan, admission)
+        except ValueError as exc:
+            print(f"night runner: {exc}", file=sys.stderr)
+            return 2
+        print(f"admission accepted for night {plan.night}: "
+              f"{len(admission['allowed_job_ids'])} job(s) allowed")
     try:
         results = run_night(plan, dry_run=args.dry_run, only=args.only)
     except ValueError as exc:

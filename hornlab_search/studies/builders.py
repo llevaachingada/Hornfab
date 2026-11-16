@@ -76,6 +76,47 @@ LANDSCAPE_CONFIG = (REPO_ROOT / "examples" / "typologies" / "home_landscape_2026
 LANDSCAPE_BRIEF = (REPO_ROOT / "examples" / "briefs" / "home_landscape_2026-11-15"
                    / "room_landscape_80x50_700_hf1440_v7.yaml")
 
+# Home 80x60 strict-coverage cell (registered 2026-11-15, objective v7): 231 usable rows, d=9.
+# Cohort: runs/bo_multityp_2026-11-16/ext_throat_hvlaw_cov/cohort.
+P80X60_EXT_THROAT_HVLAW_COV_TASK_NAME = "p80x60__ext_throat_hvlaw_cov_v7"
+P80X60_EXT_THROAT_HVLAW_COV_CONFIG = (
+    REPO_ROOT / "examples" / "typologies" / "bo_vs_cma_2026-11-15"
+    / "p80x60__ext_throat_hvlaw_cov_v7.yaml")
+P80X60_EXT_THROAT_HVLAW_COV_BRIEF = (
+    REPO_ROOT / "examples" / "briefs" / "print_80x60_2026-11-13"
+    / "room_80x60_700_hf1440_v7_cov.yaml")
+
+# PRINT 80x60/700 ATH-core cell (registered 2026-11-15, objective v7): 219 usable rows, d=14.
+# Cohort: runs/bo_multityp_2026-11-16/ath_core_14in/cohort.
+P80X60_ATH_CORE_14IN_HOME700_TASK_NAME = "p80x60__ath_core_14in_home700_v7"
+P80X60_ATH_CORE_14IN_HOME700_CONFIG = (
+    REPO_ROOT / "examples" / "typologies" / "print_80x60_2026-11-13"
+    / "p80x60__ath_core_14in_700_v7.yaml")
+P80X60_ATH_CORE_14IN_HOME700_BRIEF = (
+    REPO_ROOT / "examples" / "briefs" / "print_80x60_2026-11-13"
+    / "room_80x60_700_hf1440_v7.yaml")
+
+# HOME 80x60 ATH CORE-style law cell (registered 2026-11-15, objective v7): 206 usable rows, d=9.
+# Cohort: runs/bo_multityp_2026-11-16/ext_throat_corelaw/cohort.
+P80X60_EXT_THROAT_CORELAW_TASK_NAME = "p80x60__ext_throat_corelaw_v7"
+P80X60_EXT_THROAT_CORELAW_CONFIG = (
+    REPO_ROOT / "examples" / "typologies" / "suggest_ab_2026-11-14"
+    / "p80x60__ext_throat_corelaw_v7.yaml")
+P80X60_EXT_THROAT_CORELAW_BRIEF = (
+    REPO_ROOT / "examples" / "briefs" / "print_80x60_2026-11-13"
+    / "room_80x60_700_hf1440_v7.yaml")
+
+# Atlas OSSE ext-throat cell (registered 2026-11-15, objective v7): 256 rows (limit-capped), d=6.
+# Cohort: runs/bo_multityp_2026-11-16/atlas_osse_ext_throat/cohort. Brief resolved from the
+# config's own brief_file (the filename says _v5 but the applied objective is v7).
+ATLAS_OSSE_EXT_THROAT_TASK_NAME = "atlas__osse_ext_throat"
+ATLAS_OSSE_EXT_THROAT_CONFIG = (
+    REPO_ROOT / "examples" / "typologies" / "atlas_2026-10-30"
+    / "atlas__osse_ext_throat.yaml")
+ATLAS_OSSE_EXT_THROAT_BRIEF = (
+    REPO_ROOT / "examples" / "briefs" / "hardened_2026-10-29_v5"
+    / "b1w_hifi_90x60_850_wide_v5.yaml")
+
 # Task registry: maps every accepted task name to its (config, brief, objective_version).
 # A task in this registry may be used by _read_task as a named task; a name absent from
 # this registry is refused.  The M0 contract is frozen; registry additions do NOT alter it.
@@ -102,6 +143,26 @@ _TASK_REGISTRY: dict[str, dict] = {
         "brief": LANDSCAPE_BRIEF,
         "objective_version": 7,
     },
+    P80X60_EXT_THROAT_HVLAW_COV_TASK_NAME: {
+        "config": P80X60_EXT_THROAT_HVLAW_COV_CONFIG,
+        "brief": P80X60_EXT_THROAT_HVLAW_COV_BRIEF,
+        "objective_version": 7,
+    },
+    P80X60_ATH_CORE_14IN_HOME700_TASK_NAME: {
+        "config": P80X60_ATH_CORE_14IN_HOME700_CONFIG,
+        "brief": P80X60_ATH_CORE_14IN_HOME700_BRIEF,
+        "objective_version": 7,
+    },
+    P80X60_EXT_THROAT_CORELAW_TASK_NAME: {
+        "config": P80X60_EXT_THROAT_CORELAW_CONFIG,
+        "brief": P80X60_EXT_THROAT_CORELAW_BRIEF,
+        "objective_version": 7,
+    },
+    ATLAS_OSSE_EXT_THROAT_TASK_NAME: {
+        "config": ATLAS_OSSE_EXT_THROAT_CONFIG,
+        "brief": ATLAS_OSSE_EXT_THROAT_BRIEF,
+        "objective_version": 7,
+    },
 }
 
 SNAPSHOT_SCHEMA = "study-snapshot-v1"
@@ -120,6 +181,10 @@ _ALLOWED_TASK_NAMES = {
     HOME_TASK_NAME, HOME_CONFIG.stem, HOME_BRIEF_NAME, HOME_BRIEF.stem,
     HOME_SEED5678_TASK_NAME, HOME_SEED5678_CONFIG.stem,
     LANDSCAPE_TASK_NAME, LANDSCAPE_CONFIG.stem,
+    P80X60_EXT_THROAT_HVLAW_COV_TASK_NAME, P80X60_EXT_THROAT_HVLAW_COV_CONFIG.stem,
+    P80X60_ATH_CORE_14IN_HOME700_TASK_NAME, P80X60_ATH_CORE_14IN_HOME700_CONFIG.stem,
+    P80X60_EXT_THROAT_CORELAW_TASK_NAME, P80X60_EXT_THROAT_CORELAW_CONFIG.stem,
+    ATLAS_OSSE_EXT_THROAT_TASK_NAME, ATLAS_OSSE_EXT_THROAT_CONFIG.stem,
 }
 
 

@@ -1,6 +1,8 @@
 # Bayesian design studies: locked implementation and GUI specification
 
-**Status: designed, not implemented. Owner-directed expansion, 2026-11-12.** This is the execution specification for the BoTorch and persistent GUI-workflow track of [the reviewed plan](COUNCIL_REVIEW_AND_IMPL_PLAN_2026-11-12.md). The [prompt pack](DATA_GA_IMPLEMENTATION_PROMPTS_2026-11-12.md) contains an orchestrator block and bounded parallel-worker blocks. This document resolves the core integration and mathematical choices; implementation workers must not substitute their own algorithms, signs, targets or workflow.
+**Status: implemented for §3.1–§3.6 (scalar, Pareto, and the declared trust-region variant), with
+the §3.6 constraint/cost extensions present but not wired into any production path (2026-11-15 audit).**
+This is the execution specification for the BoTorch and persistent GUI-workflow track of [the reviewed plan](COUNCIL_REVIEW_AND_IMPL_PLAN_2026-11-12.md). The [prompt pack](DATA_GA_IMPLEMENTATION_PROMPTS_2026-11-12.md) contains an orchestrator block and bounded parallel-worker blocks. This document resolves the core integration and mathematical choices; implementation workers must not substitute their own algorithms, signs, targets or workflow.
 
 **Product outcome:** one persistent **Design Study**, from a question about a horn through comparable evidence, parameter explanations, candidate proposals, scheduled solves, verification, a recorded decision and the next study. BoTorch becomes a planned proposal engine inside this workflow. CMA remains the experimental baseline; existing analysis, surrogate, run, dataset and verify code remains in use.
 

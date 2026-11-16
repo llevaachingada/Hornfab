@@ -1,8 +1,8 @@
 """Advisory Bayesian-proposal adapters (B2, protocol bo-study-v1.1).
 
-Pure, offline, backend-free data/encoding helpers consumed by B3/B4/B5.  This package does NOT
-implement scorer math (``bo/metrics.py`` is deferred until R0 lands) and is never imported by the
-normal GUI or CMA startup path.
+Pure, offline, backend-free data/encoding helpers consumed by B3/B4/B5.  The scorer math lives in
+``bo/metrics.py`` (landed for objective v4 + v7); this package is never imported by the normal GUI
+or CMA startup path.
 """
 from __future__ import annotations
 
@@ -92,6 +92,7 @@ from .policy import (
     POLICY_EXPLORATION,
     POLICY_PARETO,
     POLICY_SCALAR,
+    POLICY_TURBO,
     PROPOSAL_POLICIES,
     PROPOSAL_POLICY_LABELS,
     ProposalOutcome,
@@ -175,6 +176,7 @@ __all__ = [
     "POLICY_PARETO",
     "POLICY_CMA_SEED",
     "POLICY_EXPLORATION",
+    "POLICY_TURBO",
     "PROPOSAL_POLICIES",
     "PROPOSAL_POLICY_LABELS",
     "ENGINE_POLICIES",

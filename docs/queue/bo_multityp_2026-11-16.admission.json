@@ -1,0 +1,56 @@
+{
+  "night": "bo_multityp_2026-11-16",
+  "note": "Admission packet for the four-arm BoTorch typology campaign. Passing this packet to run_campaign_night.py --admission is the release record for this exact job set; regenerating the night file requires regenerating this packet. It does not lift the owner's 2026-11-15 17:15 solve hold by itself.",
+  "prepared": "2026-11-15",
+  "plan": "docs/queue/BO_MULTITYPOLOGY_PLAN_2026-11-16.md",
+  "budget_profile": "comparison-25x0",
+  "budget": {
+    "screen_calls": 25,
+    "verify_calls": 0,
+    "total_calls": 25,
+    "attempts": 150
+  },
+  "cohort_counts_source": "strict build_native_training_set(require_single_fidelity=True) + measured dependency pins vs the executing interpreter, 2026-11-15",
+  "budget_note": "Owner decision 2026-11-15 (final for now): exploratory arms skip verification entirely (25 screens + 0 verify = 25 calls). These arms are SCREEN-ONLY: no finalist is re-solved at the verification fidelity, so screen J is reported as-is and the campaign rule 'improvement survives the audit pair' cannot be evaluated. Use comparison-25 (25+6) for any decision-bearing arm.",
+  "arms": {
+    "ext_throat_hvlaw_cov": {
+      "task": "p80x60__ext_throat_hvlaw_cov_v7",
+      "rows": 231,
+      "d": 9,
+      "seed": 71001
+    },
+    "ath_core_14in": {
+      "task": "p80x60__ath_core_14in_home700_v7",
+      "rows": 219,
+      "d": 14,
+      "seed": 71002
+    },
+    "ext_throat_corelaw": {
+      "task": "p80x60__ext_throat_corelaw_v7",
+      "rows": 206,
+      "d": 9,
+      "seed": 71003
+    },
+    "ext_throat_hvlaw": {
+      "task": "hl__ext_throat_hvlaw_v7",
+      "rows": 136,
+      "d": 8,
+      "seed": 71004
+    }
+  },
+  "excluded": {
+    "atlas__osse_ext_throat": "largest cohort (256 rows) but solved with hornlab_beat_bem 0850ef39 while execution uses 38e5b1f8; production.py refuses a pin mismatch, so the arm is not executable today",
+    "p80x60__osse_ext_throat_home700_v7_seed5678": "185 rows, current pins, but already has a 66-call BoTorch comparison (nights B/D)"
+  },
+  "allowed_job_ids": [
+    "preflight",
+    "prep_cov",
+    "bo_cov",
+    "prep_ath14",
+    "bo_ath14",
+    "prep_corelaw",
+    "bo_corelaw",
+    "prep_hvlaw",
+    "bo_hvlaw"
+  ]
+}

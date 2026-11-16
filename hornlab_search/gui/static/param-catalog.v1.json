@@ -13548,6 +13548,1021 @@
       "source_status": "catalog",
       "symmetry": "hv"
     },
+    "hl__crowe_x_square_v7": {
+      "bounds_index": {
+        "g_L_mm": {
+          "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+          "hi": 240.0,
+          "key": "bounds.g_L_mm",
+          "lo": 210.0,
+          "log": false,
+          "search": true
+        },
+        "g_a_h_deg": {
+          "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+          "hi": 36.0,
+          "key": "bounds.g_a_h_deg",
+          "lo": 32.0,
+          "log": false,
+          "search": true
+        },
+        "g_a_v_deg": {
+          "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+          "hi": 36.0,
+          "key": "bounds.g_a_v_deg",
+          "lo": 32.0,
+          "log": false,
+          "search": true
+        },
+        "g_k": {
+          "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+          "hi": 1.0,
+          "key": "bounds.g_k",
+          "lo": 1.0,
+          "log": false,
+          "search": false
+        },
+        "g_n": {
+          "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+          "hi": 2.4,
+          "key": "bounds.g_n",
+          "lo": 1.8,
+          "log": false,
+          "search": true
+        },
+        "g_q": {
+          "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+          "hi": 0.996,
+          "key": "bounds.g_q",
+          "lo": 0.996,
+          "log": false,
+          "search": false
+        },
+        "g_r_lip_mm": {
+          "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+          "hi": 30.0,
+          "key": "bounds.g_r_lip_mm",
+          "lo": 18.0,
+          "log": false,
+          "search": true
+        },
+        "g_s": {
+          "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+          "hi": 0.4,
+          "key": "bounds.g_s",
+          "lo": 0.25,
+          "log": false,
+          "search": true
+        },
+        "g_sf_ab": {
+          "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+          "hi": 1.0,
+          "key": "bounds.g_sf_ab",
+          "lo": 1.0,
+          "log": false,
+          "search": false
+        },
+        "g_sf_amt": {
+          "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+          "hi": 0.8,
+          "key": "bounds.g_sf_amt",
+          "lo": 0.4,
+          "log": false,
+          "search": true
+        },
+        "g_sf_m": {
+          "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+          "hi": 4,
+          "key": "bounds.g_sf_m",
+          "lo": 4,
+          "log": false,
+          "search": false
+        },
+        "g_sf_n1": {
+          "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+          "hi": 1.5,
+          "key": "bounds.g_sf_n1",
+          "lo": 1.5,
+          "log": false,
+          "search": false
+        },
+        "g_sf_n2": {
+          "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+          "hi": 6.0,
+          "key": "bounds.g_sf_n2",
+          "lo": 6.0,
+          "log": false,
+          "search": false
+        },
+        "g_sf_start": {
+          "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+          "hi": 0.12,
+          "key": "bounds.g_sf_start",
+          "lo": 0.12,
+          "log": false,
+          "search": false
+        },
+        "g_wrap_deg": {
+          "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+          "hi": 150.0,
+          "key": "bounds.g_wrap_deg",
+          "lo": 90.0,
+          "log": false,
+          "search": true
+        }
+      },
+      "brief_file": "examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+      "brief_tied": null,
+      "config_path": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+      "description": "Near-square Crowe-X-inspired probe: four concave panels, diagonal ridge, 479x479 mouth; the reference-image X family. Look-first; a square mouth will not hold 50 deg vertical at 700 Hz. Seed sf_amt 0.60, sf_start 0.12, a_h/a_v 34/34, L 220, lip 24, wrap 120.",
+      "documented": true,
+      "driver_exit_mm": null,
+      "empty_reason": null,
+      "family": "FREEFORM",
+      "group": "home",
+      "kind": "rows",
+      "knob_names": [
+        "g_L_mm",
+        "g_a_h_deg",
+        "g_a_v_deg",
+        "g_k",
+        "g_n",
+        "g_q",
+        "g_r_lip_mm",
+        "g_s",
+        "g_sf_ab",
+        "g_sf_amt",
+        "g_sf_m",
+        "g_sf_n1",
+        "g_sf_n2",
+        "g_sf_start",
+        "g_wrap_deg",
+        "n_phi",
+        "n_s",
+        "span",
+        "wall_thickness_mm"
+      ],
+      "knobs": [
+        {
+          "base_knob": "L_mm",
+          "bounds_source": {
+            "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+            "key": "bounds.g_L_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.grid._meridians",
+          "context": "rows",
+          "contexts": [],
+          "default": 220.0,
+          "default_source": {
+            "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+            "key": "seed_params.g_L_mm"
+          },
+          "detail": "The grid interpolates the horizontal and vertical meridians onto one common z grid, so the depth is shared rather than a per-plane length. It is not the march length of a rows kind; those derive depth from their stop. The brief envelope still bounds the final design.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "z = s L, with s the normalised axial fraction",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_L_mm",
+          "label": "Depth (rows)",
+          "physical": "Moves the mouth plane in or out along the horn axis.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 240.0,
+            "lo": 210.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Shared axial depth of both meridians used by the GRID radius field.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "a_h_deg",
+          "bounds_source": {
+            "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+            "key": "bounds.g_a_h_deg"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
+          "context": "rows",
+          "contexts": [],
+          "default": 34.0,
+          "default_source": {
+            "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+            "key": "seed_params.g_a_h_deg"
+          },
+          "detail": "The OSSE wall angle is blended per azimuth from the horizontal and vertical values. This is the horizontal endpoint; it sets the high-frequency horizontal beamwidth in the constant-directivity throat.",
+          "doc_ref": [
+            "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+            "## 4. What was built"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "a(phi) = a_h cos^2(phi) + a_v sin^2(phi)",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_a_h_deg",
+          "label": "Horizontal coverage half-angle (rows)",
+          "physical": "Widens or narrows the horizontal beam and the horizontal mouth.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 36.0,
+            "lo": 32.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Horizontal coverage half-angle of a per-azimuth OSSE rows kind.",
+          "unit": "deg"
+        },
+        {
+          "base_knob": "a_v_deg",
+          "bounds_source": {
+            "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+            "key": "bounds.g_a_v_deg"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
+          "context": "rows",
+          "contexts": [],
+          "default": 34.0,
+          "default_source": {
+            "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+            "key": "seed_params.g_a_v_deg"
+          },
+          "detail": "The vertical endpoint of the same per-azimuth wall-angle blend. It sets the vertical high-frequency beamwidth and works together with the horizontal value; the mouth follows the walls.",
+          "doc_ref": [
+            "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+            "## 4. What was built"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "a(phi) = a_h cos^2(phi) + a_v sin^2(phi)",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_a_v_deg",
+          "label": "Vertical coverage half-angle (rows)",
+          "physical": "Widens or narrows the vertical beam and the vertical mouth.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 36.0,
+            "lo": 32.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Vertical coverage half-angle of a per-azimuth OSSE rows kind.",
+          "unit": "deg"
+        },
+        {
+          "base_knob": "k",
+          "bounds_source": {
+            "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+            "key": "bounds.g_k"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
+          "context": "rows",
+          "contexts": [],
+          "default": 1.0,
+          "default_source": {
+            "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+            "key": "seed_params.g_k"
+          },
+          "detail": "The OS profile's throat term sets how quickly the wall leaves the driver exit. The study used it to tune loading near the 700 Hz crossover, with the CD throat setting high-frequency coverage.",
+          "doc_ref": [
+            "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+            "## 4. What was built"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_k",
+          "label": "Throat expansion (rows)",
+          "physical": "Changes throat loading and how abruptly the flare starts.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 1.0,
+            "lo": 1.0,
+            "log": false,
+            "search": false
+          },
+          "summary": "OS throat-expansion exponent in the OSSE and R-OSSE rows kinds.",
+          "unit": null
+        },
+        {
+          "base_knob": "n",
+          "bounds_source": {
+            "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+            "key": "bounds.g_n"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
+          "context": "rows",
+          "contexts": [],
+          "default": 2.0,
+          "default_source": {
+            "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+            "key": "seed_params.g_n"
+          },
+          "detail": "A high exponent packs the flare into the last part of the wall (a flat 'plate' side view); a lower exponent spreads it into a bowl. The Crowe-X study searches this to let the BEM judge the rim shape.",
+          "doc_ref": [
+            "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+            "## 4. What was built"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_n",
+          "label": "Termination exponent (rows)",
+          "physical": "Moves the mouth flare earlier or later along the wall.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 2.4,
+            "lo": 1.8,
+            "log": false,
+            "search": true
+          },
+          "summary": "OSSE termination exponent; controls where the mouth flare is packed.",
+          "unit": null
+        },
+        {
+          "base_knob": "q",
+          "bounds_source": {
+            "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+            "key": "bounds.g_q"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
+          "context": "rows",
+          "contexts": [],
+          "default": 0.996,
+          "default_source": {
+            "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+            "key": "seed_params.g_q"
+          },
+          "detail": "A dimensionless OSSE shape constant close to one. It shapes the transition toward the mouth termination and is pinned in the shipped home cells rather than searched.",
+          "doc_ref": [
+            "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+            "## 4. What was built"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_q",
+          "label": "OSSE shape exponent (rows)",
+          "physical": "Subtly rounds or tightens the mouth-side profile.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 0.996,
+            "lo": 0.996,
+            "log": false,
+            "search": false
+          },
+          "summary": "OSSE profile shape exponent near the mouth.",
+          "unit": null
+        },
+        {
+          "base_knob": "r_lip_mm",
+          "bounds_source": {
+            "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+            "key": "bounds.g_r_lip_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.append_tangent_lip",
+          "context": "rows",
+          "contexts": [],
+          "default": 24.0,
+          "default_source": {
+            "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+            "key": "seed_params.g_r_lip_mm"
+          },
+          "detail": "The lip continues the terminal wall tangent with a circular arc that curls back for half a turn. It is an [inferred] geometric analogue, not a published lip construction. A zero value is byte-identical to the plain march.",
+          "doc_ref": [
+            "docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md",
+            "### 2.3 Ferguson / toroidal roll"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "circular arc tangent at the joint, wrap = half a turn",
+          "hard": {
+            "choices": null,
+            "hi": 100.0,
+            "kind": null,
+            "lo": null,
+            "note": "named grid.py cap",
+            "section": null,
+            "source": {
+              "file": "hornlab_search/design/generators/grid.py",
+              "key": "ROWS_MAX_R_LIP_MM"
+            }
+          },
+          "knob": "g_r_lip_mm",
+          "label": "Torus lip radius (rows)",
+          "physical": "Adds a rolled-back lip at the mouth.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 30.0,
+            "lo": 18.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Tangent-continuous circular lip radius on the rollback rows; zero leaves the wall.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "s",
+          "bounds_source": {
+            "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+            "key": "bounds.g_s"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
+          "context": "rows",
+          "contexts": [],
+          "default": 0.32,
+          "default_source": {
+            "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+            "key": "seed_params.g_s"
+          },
+          "detail": "Together with the termination exponent, this sets how much of the mouth flare belongs to the rollback section. Keeping it moderate holds the width inside the home envelope.",
+          "doc_ref": [
+            "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+            "## 4. What was built"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_s",
+          "label": "Termination fraction (rows)",
+          "physical": "Changes the size and abruptness of the mouth rollback.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 0.4,
+            "lo": 0.25,
+            "log": false,
+            "search": true
+          },
+          "summary": "Fraction of the mouth radius carried by the OSSE termination.",
+          "unit": null
+        },
+        {
+          "base_knob": "sf_ab",
+          "bounds_source": {
+            "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+            "key": "bounds.g_sf_ab"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
+          "context": "rows",
+          "contexts": [],
+          "default": 1.0,
+          "default_source": {
+            "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+            "key": "seed_params.g_sf_ab"
+          },
+          "detail": "The a/b ratio stretches the superformula lobes along one azimuth. It is searched in the Crowe-X cell to tune how far the X reaches toward the mouth corners.",
+          "doc_ref": [
+            "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+            "## 4. What was built"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_sf_ab",
+          "label": "Superformula a/b ratio (rows)",
+          "physical": "Stretches the X lobes horizontally versus vertically.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 1.0,
+            "lo": 1.0,
+            "log": false,
+            "search": false
+          },
+          "summary": "Anisotropy ratio of the two Gielis superformula radii.",
+          "unit": null
+        },
+        {
+          "base_knob": "sf_amt",
+          "bounds_source": {
+            "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+            "key": "bounds.g_sf_amt"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
+          "context": "rows",
+          "contexts": [],
+          "default": 0.6,
+          "default_source": {
+            "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+            "key": "seed_params.g_sf_amt"
+          },
+          "detail": "Blends the superformula shape into the radius after the start fraction. Zero is a plain OSSE wall; larger values deepen the diagonal creases toward the four corners.",
+          "doc_ref": [
+            "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+            "## 4. What was built"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_sf_amt",
+          "label": "X-crease amplitude (rows)",
+          "physical": "Deepens or removes the diagonal X creases.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 0.8,
+            "lo": 0.4,
+            "log": false,
+            "search": true
+          },
+          "summary": "Amplitude of the superformula X modulation on the wall.",
+          "unit": null
+        },
+        {
+          "base_knob": "sf_m",
+          "bounds_source": {
+            "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+            "key": "bounds.g_sf_m"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
+          "context": "rows",
+          "contexts": [],
+          "default": 4,
+          "default_source": {
+            "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+            "key": "seed_params.g_sf_m"
+          },
+          "detail": "The Gielis m term sets the rotational symmetry of the superformula modulation. The Crowe-X cell fixes it at four, which gives the bow-tie crease pattern.",
+          "doc_ref": [
+            "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+            "## 4. What was built"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_sf_m",
+          "label": "Superformula symmetry (rows)",
+          "physical": "Sets the number of superformula lobes around the mouth.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 4,
+            "lo": 4,
+            "log": false,
+            "search": false
+          },
+          "summary": "Gielis superformula symmetry order of the X-shaped mouth term.",
+          "unit": null
+        },
+        {
+          "base_knob": "sf_n1",
+          "bounds_source": {
+            "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+            "key": "bounds.g_sf_n1"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
+          "context": "rows",
+          "contexts": [],
+          "default": 1.5,
+          "default_source": {
+            "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+            "key": "seed_params.g_sf_n1"
+          },
+          "detail": "The n1 exponent bends the superformula between its radial and angular terms. It shapes the X outline together with n2 and the a/b ratio.",
+          "doc_ref": [
+            "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+            "## 4. What was built"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_sf_n1",
+          "label": "Superformula exponent n1 (rows)",
+          "physical": "Changes the curvature of the X lobes.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 1.5,
+            "lo": 1.5,
+            "log": false,
+            "search": false
+          },
+          "summary": "First Gielis superformula exponent of the X mouth term.",
+          "unit": null
+        },
+        {
+          "base_knob": "sf_n2",
+          "bounds_source": {
+            "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+            "key": "bounds.g_sf_n2"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
+          "context": "rows",
+          "contexts": [],
+          "default": 6.0,
+          "default_source": {
+            "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+            "key": "seed_params.g_sf_n2"
+          },
+          "detail": "The n2 partner of n1. A high value straightens the lobe edges; the Crowe-X cell fixes it to keep the X lobes crisp.",
+          "doc_ref": [
+            "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+            "## 4. What was built"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_sf_n2",
+          "label": "Superformula exponent n2 (rows)",
+          "physical": "Straightens or softens the X lobe edges.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 6.0,
+            "lo": 6.0,
+            "log": false,
+            "search": false
+          },
+          "summary": "Second Gielis superformula exponent of the X mouth term.",
+          "unit": null
+        },
+        {
+          "base_knob": "sf_start",
+          "bounds_source": {
+            "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+            "key": "bounds.g_sf_start"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
+          "context": "rows",
+          "contexts": [],
+          "default": 0.12,
+          "default_source": {
+            "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+            "key": "seed_params.g_sf_start"
+          },
+          "detail": "The X term ramps in after this fraction of the wall, so the throat stays clean. The shipped cell fixes it at one quarter of the wall.",
+          "doc_ref": [
+            "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+            "## 4. What was built"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_sf_start",
+          "label": "X ramp start (rows)",
+          "physical": "Moves where the diagonal creases begin along the horn.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 0.12,
+            "lo": 0.12,
+            "log": false,
+            "search": false
+          },
+          "summary": "Normalised wall fraction where the X modulation starts.",
+          "unit": null
+        },
+        {
+          "base_knob": "wrap_deg",
+          "bounds_source": {
+            "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+            "key": "bounds.g_wrap_deg"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
+          "context": "rows",
+          "contexts": [],
+          "default": 120.0,
+          "default_source": {
+            "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+            "key": "seed_params.g_wrap_deg"
+          },
+          "detail": "The tangent-continuous lip is followed through this angle. Larger wraps make the thick rolled bead seen on the Crowe-style rim; the search bounds keep the lip inside the home envelope.",
+          "doc_ref": [
+            "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+            "## 4. What was built"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_wrap_deg",
+          "label": "Lip wrap angle (rows)",
+          "physical": "Changes the thickness and depth of the rolled mouth lip.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 150.0,
+            "lo": 90.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "How far the curled mouth lip wraps around.",
+          "unit": "deg"
+        },
+        {
+          "base_knob": "n_phi",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [],
+          "default": 33,
+          "default_source": {
+            "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+            "key": "generator.n_phi"
+          },
+          "detail": "The row count sets the angular sampling of the point grid. The quarter model, half model and full ring each have their own minimum and parity rules in the generator. It is a count, not a length.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "n_phi",
+          "label": "Azimuth row count",
+          "physical": "Raises angular fidelity at the cost of more grid rows.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Number of azimuth rows in the rows/grid model.",
+          "unit": null
+        },
+        {
+          "base_knob": "n_s",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [],
+          "default": 56,
+          "default_source": {
+            "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+            "key": "generator.n_s"
+          },
+          "detail": "Each row is sampled at equal axial (or equal-arc, for the rows march) fractions. This count sets the longitudinal resolution. It is a count, not a length.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "n_s",
+          "label": "Axial station count",
+          "physical": "Raises longitudinal fidelity at the cost of more points.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Number of axial stations along each row.",
+          "unit": null
+        },
+        {
+          "base_knob": "span",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_span_requested",
+          "context": "rows",
+          "contexts": [],
+          "default": "quarter",
+          "default_source": {
+            "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+            "key": "generator.span"
+          },
+          "detail": "The legal spans are the ones the generator handles, and their names are read from the generator's own span constant rather than retyped here. A kind can force a span: an odd-cosine asymmetry forces the full ring and a b-term forces the half model.",
+          "doc_ref": [
+            "docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md",
+            "### 2.5 Up/down-asymmetric saddle"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": [
+              "quarter",
+              "half",
+              "half_xz",
+              "full"
+            ],
+            "hi": null,
+            "kind": "str",
+            "lo": null,
+            "note": "named grid.py cap",
+            "section": null,
+            "source": {
+              "file": "hornlab_search/design/generators/grid.py",
+              "key": "ROWS_SPANS"
+            }
+          },
+          "knob": "span",
+          "label": "Row span",
+          "physical": "Chooses whether the mesh uses mirror planes or a seam-free full ring.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "How much of the azimuth circle the rows model covers.",
+          "unit": null
+        },
+        {
+          "base_knob": "wall_thickness_mm",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [],
+          "default": 3.0,
+          "default_source": {
+            "file": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml",
+            "key": "generator.wall_thickness_mm"
+          },
+          "detail": "The point-grid route builds an explicit outer shell offset from each row's own profile. This is the printed shell thickness, not an acoustic dimension. The generator also uses it in its self-approach guard.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "wall_thickness_mm",
+          "label": "Shell thickness",
+          "physical": "Changes the printed wall thickness, not the acoustic inner surface.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Outer-shell thickness of a freestanding rows model.",
+          "unit": "mm"
+        }
+      ],
+      "name": "hl__crowe_x_square_v7",
+      "non_native_keys": [],
+      "preview_only": true,
+      "source_status": "gui-only",
+      "symmetry": "hv"
+    },
     "hl__es_style_rollback_v7": {
       "bounds_index": {
         "g_T": {
@@ -30217,6 +31232,2987 @@
       "non_native_keys": [],
       "preview_only": false,
       "source_status": "catalog",
+      "symmetry": "hv"
+    },
+    "rf__rect_radial_wide_v7": {
+      "bounds_index": {
+        "g_axial_h_mm": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+          "hi": 0.0,
+          "key": "bounds.g_axial_h_mm",
+          "lo": 0.0,
+          "log": false,
+          "search": false
+        },
+        "g_axial_v_mm": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+          "hi": 0.0,
+          "key": "bounds.g_axial_v_mm",
+          "lo": 0.0,
+          "log": false,
+          "search": false
+        },
+        "g_decay": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+          "hi": 0.75,
+          "key": "bounds.g_decay",
+          "lo": 0.65,
+          "log": false,
+          "search": true
+        },
+        "g_depth_h_ratio": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+          "hi": 0.68,
+          "key": "bounds.g_depth_h_ratio",
+          "lo": 0.68,
+          "log": false,
+          "search": false
+        },
+        "g_depth_mm": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+          "hi": 246.0,
+          "key": "bounds.g_depth_mm",
+          "lo": 230.0,
+          "log": false,
+          "search": true
+        },
+        "g_height_mm": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+          "hi": 299.0,
+          "key": "bounds.g_height_mm",
+          "lo": 299.0,
+          "log": false,
+          "search": false
+        },
+        "g_inward_h_mm": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+          "hi": 30.0,
+          "key": "bounds.g_inward_h_mm",
+          "lo": 0.0,
+          "log": false,
+          "search": true
+        },
+        "g_inward_v_mm": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+          "hi": 40.0,
+          "key": "bounds.g_inward_v_mm",
+          "lo": 0.0,
+          "log": false,
+          "search": true
+        },
+        "g_rect_exponent": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+          "hi": 14.0,
+          "key": "bounds.g_rect_exponent",
+          "lo": 10.0,
+          "log": false,
+          "search": true
+        },
+        "g_rect_turn_deg": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+          "hi": 65.0,
+          "key": "bounds.g_rect_turn_deg",
+          "lo": 65.0,
+          "log": false,
+          "search": false
+        },
+        "g_relief_end_s": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+          "hi": 0.96,
+          "key": "bounds.g_relief_end_s",
+          "lo": 0.96,
+          "log": false,
+          "search": false
+        },
+        "g_relief_peak_s": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+          "hi": 0.8,
+          "key": "bounds.g_relief_peak_s",
+          "lo": 0.8,
+          "log": false,
+          "search": false
+        },
+        "g_relief_start_s": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+          "hi": 0.5,
+          "key": "bounds.g_relief_start_s",
+          "lo": 0.5,
+          "log": false,
+          "search": false
+        },
+        "g_terminal_deg": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+          "hi": 270.0,
+          "key": "bounds.g_terminal_deg",
+          "lo": 270.0,
+          "log": false,
+          "search": false
+        },
+        "g_throat_turn_deg": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+          "hi": 25.0,
+          "key": "bounds.g_throat_turn_deg",
+          "lo": 25.0,
+          "log": false,
+          "search": false
+        },
+        "g_width_mm": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+          "hi": 542.0,
+          "key": "bounds.g_width_mm",
+          "lo": 542.0,
+          "log": false,
+          "search": false
+        }
+      },
+      "brief_file": "examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+      "brief_tied": null,
+      "config_path": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+      "description": "Spiral radial-relief experiment (soft inner waist/diagonal ridge). This is NOT the section-pucker rim fold in strong_a.png and NOT the square-X reference photo; use sp__strong_v7 for the strong_a mouth pucker and hl__crowe_x_square_v7 for the square X. Seed 12/16 mm; starts 6/8, 12/16, 16/22; window 0.50/0.80/0.96; shape-only.",
+      "documented": true,
+      "driver_exit_mm": null,
+      "empty_reason": null,
+      "family": "FREEFORM",
+      "group": "home",
+      "kind": "rows",
+      "knob_names": [
+        "g_axial_h_mm",
+        "g_axial_v_mm",
+        "g_decay",
+        "g_depth_h_ratio",
+        "g_depth_mm",
+        "g_height_mm",
+        "g_inward_h_mm",
+        "g_inward_v_mm",
+        "g_rect_exponent",
+        "g_rect_turn_deg",
+        "g_relief_end_s",
+        "g_relief_peak_s",
+        "g_relief_start_s",
+        "g_terminal_deg",
+        "g_throat_turn_deg",
+        "g_width_mm",
+        "n_phi",
+        "n_s",
+        "span",
+        "wall_thickness_mm"
+      ],
+      "knobs": [
+        {
+          "base_knob": "axial_h_mm",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+            "key": "bounds.g_axial_h_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.rolled_family.resolve_grid",
+          "context": "rows",
+          "contexts": [],
+          "default": 0.0,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+            "key": "seed_params.g_axial_h_mm"
+          },
+          "detail": "This is the old z-only experiment in the canonical family: positive advances the horizontal wall centre toward the mouth, negative retards it. It is a fore-aft corrugation, not ATH's radial ridge. Keep it zero when the goal is the ATH look.",
+          "doc_ref": [
+            "docs/research/typologies/SPIRAL_PUCKER_VS_RADIAL_RIDGE_2026-11-15.md",
+            "## Finding 1 \u2014 the rolled spiral\u2019s axial pucker"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "z += (H cos^2 psi + V sin^2 psi) cos(4 psi) w",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_axial_h_mm",
+          "label": "Horizontal axial relief (rows)",
+          "physical": "Advances or retards the horizontal wall along the axis.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 0.0,
+            "lo": 0.0,
+            "log": false,
+            "search": false
+          },
+          "summary": "Signed axial relief at the horizontal axis of the rolled family.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "axial_v_mm",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+            "key": "bounds.g_axial_v_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.rolled_family.resolve_grid",
+          "context": "rows",
+          "contexts": [],
+          "default": 0.0,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+            "key": "seed_params.g_axial_v_mm"
+          },
+          "detail": "The vertical partner of the old z-only pucker. It is a signed axial corrugation with the same saturating-window caveat as the historical rolled-rect pucker. The radial inward keys are the ATH-like path.",
+          "doc_ref": [
+            "docs/research/typologies/SPIRAL_PUCKER_VS_RADIAL_RIDGE_2026-11-15.md",
+            "## Finding 1 \u2014 the rolled spiral\u2019s axial pucker"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "z += (H cos^2 psi + V sin^2 psi) cos(4 psi) w",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_axial_v_mm",
+          "label": "Vertical axial relief (rows)",
+          "physical": "Advances or retards the vertical wall along the axis.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 0.0,
+            "lo": 0.0,
+            "log": false,
+            "search": false
+          },
+          "summary": "Signed axial relief at the vertical axis of the rolled family.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "decay",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+            "key": "bounds.g_decay"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
+          "context": "rows",
+          "contexts": [],
+          "default": 0.7,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+            "key": "seed_params.g_decay"
+          },
+          "detail": "The log-spiral construction advances with this decay. It is the analogue of Crowe's exponential ES flare: a lower value keeps the wall turning more gradually.",
+          "doc_ref": [
+            "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+            "## 4. What was built"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_decay",
+          "label": "Spiral decay (rows)",
+          "physical": "Changes how fast the rolled wall narrows with depth.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 0.75,
+            "lo": 0.65,
+            "log": false,
+            "search": true
+          },
+          "summary": "Exponential-spiral decay rate of the rolled-rectangle kind.",
+          "unit": null
+        },
+        {
+          "base_knob": "depth_h_ratio",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+            "key": "bounds.g_depth_h_ratio"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
+          "context": "rows",
+          "contexts": [],
+          "default": 0.68,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+            "key": "seed_params.g_depth_h_ratio"
+          },
+          "detail": "The top and bottom lips can sit forward of the side walls. This fraction splits the depth between the two; the study used it to match the Crowe ES mouth's forward top and bottom.",
+          "doc_ref": [
+            "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+            "## 4. What was built"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_depth_h_ratio",
+          "label": "Horizontal depth fraction (rows)",
+          "physical": "Moves the top and bottom lips relative to the sides.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 0.68,
+            "lo": 0.68,
+            "log": false,
+            "search": false
+          },
+          "summary": "Share of the rolled-rectangle depth assigned to the horizontal walls.",
+          "unit": null
+        },
+        {
+          "base_knob": "depth_mm",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+            "key": "bounds.g_depth_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
+          "context": "rows",
+          "contexts": [],
+          "default": 238.0,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+            "key": "seed_params.g_depth_mm"
+          },
+          "detail": "Depth scales the section spacing or spiral advance. The Crowe section construction additionally requires depth below about 0.57 times the mouth width; the generator refuses a section the sweep cannot build.",
+          "doc_ref": [
+            "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+            "## 4. What was built"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_depth_mm",
+          "label": "Depth (rows)",
+          "physical": "Moves the mouth plane along the axis and changes the flare rate.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 246.0,
+            "lo": 230.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Axial depth of a rolled-family rows construction.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "height_mm",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+            "key": "bounds.g_height_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
+          "context": "rows",
+          "contexts": [],
+          "default": 299.0,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+            "key": "seed_params.g_height_mm"
+          },
+          "detail": "The vertical partner of the explicit mouth width. The rolled and section kinds scale their meridians to this full height; a landscape cell keeps the width above the height by construction.",
+          "doc_ref": [
+            "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+            "## 4. What was built"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_height_mm",
+          "label": "Mouth height (rows)",
+          "physical": "Moves the vertical mouth edge; the flare follows the construction.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 299.0,
+            "lo": 299.0,
+            "log": false,
+            "search": false
+          },
+          "summary": "Full mouth height target of a rolled-family rows construction.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "inward_h_mm",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+            "key": "bounds.g_inward_h_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.rolled_family.resolve_grid",
+          "context": "rows",
+          "contexts": [],
+          "default": 12.0,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+            "key": "seed_params.g_inward_h_mm"
+          },
+          "detail": "Positive values pull the horizontal wall centre inward at the relief peak; the normalized diagonal is unchanged, so the diagonal becomes a ridge. The generator applies it through the relief window and keeps the source and returned lip untouched. This is a local radial approximation of ATH's per-direction law, not a z offset.",
+          "doc_ref": [
+            "docs/research/typologies/SPIRAL_PUCKER_VS_RADIAL_RIDGE_2026-11-15.md",
+            "## Finding 4 \u2014 the correct alternate: radial relief"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "rho_new = rho - (H cos^2 psi + V sin^2 psi) cos^2(2 psi) w",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_inward_h_mm",
+          "label": "Horizontal inward relief (rows)",
+          "physical": "Moves the horizontal wall inward near the relief peak.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 30.0,
+            "lo": 0.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Radial inward relief at the horizontal axis of the rolled family.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "inward_v_mm",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+            "key": "bounds.g_inward_v_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.rolled_family.resolve_grid",
+          "context": "rows",
+          "contexts": [],
+          "default": 16.0,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+            "key": "seed_params.g_inward_v_mm"
+          },
+          "detail": "The vertical partner of the radial relief. Positive values pull the vertical wall centre inward; the diagonal stays put. Use it to balance the horizontal relief and to control how strong the diagonal ridge reads. Negative values are the outward experiment and are rejected by the current v1 mode.",
+          "doc_ref": [
+            "docs/research/typologies/SPIRAL_PUCKER_VS_RADIAL_RIDGE_2026-11-15.md",
+            "## Finding 4 \u2014 the correct alternate: radial relief"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "rho_new = rho - (H cos^2 psi + V sin^2 psi) cos^2(2 psi) w",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_inward_v_mm",
+          "label": "Vertical inward relief (rows)",
+          "physical": "Moves the vertical wall inward near the relief peak.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 40.0,
+            "lo": 0.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Radial inward relief at the vertical axis of the rolled family.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "rect_exponent",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+            "key": "bounds.g_rect_exponent"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
+          "context": "rows",
+          "contexts": [],
+          "default": 12.0,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+            "key": "seed_params.g_rect_exponent"
+          },
+          "detail": "The mouth outline blends a circle and a rectangle with this exponent. Higher values square the corners; lower values keep a rounder superellipse.",
+          "doc_ref": [
+            "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+            "## 4. What was built"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_rect_exponent",
+          "label": "Rectangle corner exponent (rows)",
+          "physical": "Squares off or rounds the mouth corners.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 14.0,
+            "lo": 10.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Superellipse corner exponent of the rectangular mouth.",
+          "unit": null
+        },
+        {
+          "base_knob": "rect_turn_deg",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+            "key": "bounds.g_rect_turn_deg"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
+          "context": "rows",
+          "contexts": [],
+          "default": 65.0,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+            "key": "seed_params.g_rect_turn_deg"
+          },
+          "detail": "The wall starts from a round throat and transitions to the rectangle at this turn. It is independent of the throat turn and must stay above it.",
+          "doc_ref": [
+            "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+            "## 4. What was built"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_rect_turn_deg",
+          "label": "Rectangle transition angle (rows)",
+          "physical": "Changes where the round throat becomes a rectangular mouth.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 65.0,
+            "lo": 65.0,
+            "log": false,
+            "search": false
+          },
+          "summary": "Roll turn where the rolled-rectangle cross-section becomes rectangular.",
+          "unit": "deg"
+        },
+        {
+          "base_knob": "relief_end_s",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+            "key": "bounds.g_relief_end_s"
+          },
+          "code_ref": "hornlab_search.design.generators.rolled_family.resolve_grid",
+          "context": "rows",
+          "contexts": [],
+          "default": 0.96,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+            "key": "seed_params.g_relief_end_s"
+          },
+          "detail": "The smooth return. It must stay at or below 0.96 in the shipped family so the returned lip is not displaced. A relief that reaches the lip reintroduces the wavy rim that the radial mode is meant to avoid.",
+          "doc_ref": [
+            "docs/research/typologies/SPIRAL_PUCKER_VS_RADIAL_RIDGE_2026-11-15.md",
+            "## Finding 4 \u2014 the correct alternate: radial relief"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_relief_end_s",
+          "label": "Relief end station (rows)",
+          "physical": "Controls how far the relief runs before the mouth return.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 0.96,
+            "lo": 0.96,
+            "log": false,
+            "search": false
+          },
+          "summary": "Normalized station where the rolled-family relief returns to zero.",
+          "unit": null
+        },
+        {
+          "base_knob": "relief_peak_s",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+            "key": "bounds.g_relief_peak_s"
+          },
+          "code_ref": "hornlab_search.design.generators.rolled_family.resolve_grid",
+          "context": "rows",
+          "contexts": [],
+          "default": 0.8,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+            "key": "seed_params.g_relief_peak_s"
+          },
+          "detail": "The peak of the smooth start/peak/end window. It must lie between the start and end and is the station where the H/V inward amplitudes are fully applied.",
+          "doc_ref": [
+            "docs/research/typologies/SPIRAL_PUCKER_VS_RADIAL_RIDGE_2026-11-15.md",
+            "## Finding 4 \u2014 the correct alternate: radial relief"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_relief_peak_s",
+          "label": "Relief peak station (rows)",
+          "physical": "Moves the strongest relief point along the horn.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 0.8,
+            "lo": 0.8,
+            "log": false,
+            "search": false
+          },
+          "summary": "Normalized station where the rolled-family relief reaches full strength.",
+          "unit": null
+        },
+        {
+          "base_knob": "relief_start_s",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+            "key": "bounds.g_relief_start_s"
+          },
+          "code_ref": "hornlab_search.design.generators.rolled_family.resolve_grid",
+          "context": "rows",
+          "contexts": [],
+          "default": 0.5,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+            "key": "seed_params.g_relief_start_s"
+          },
+          "detail": "The smooth onset of the radial or axial relief. It must sit after the source matching region so the driver coupling stays untouched. The generator rejects a start that intersects the source.",
+          "doc_ref": [
+            "docs/research/typologies/SPIRAL_PUCKER_VS_RADIAL_RIDGE_2026-11-15.md",
+            "## Finding 4 \u2014 the correct alternate: radial relief"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_relief_start_s",
+          "label": "Relief start station (rows)",
+          "physical": "Moves the relief onset along the horn.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 0.5,
+            "lo": 0.5,
+            "log": false,
+            "search": false
+          },
+          "summary": "Normalized station where the rolled-family relief starts.",
+          "unit": null
+        },
+        {
+          "base_knob": "terminal_deg",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+            "key": "bounds.g_terminal_deg"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
+          "context": "rows",
+          "contexts": [],
+          "default": 270.0,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+            "key": "seed_params.g_terminal_deg"
+          },
+          "detail": "The rolled wall is followed to this angle before the mouth is cut. A larger terminal angle wraps the lip further around the horn.",
+          "doc_ref": [
+            "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+            "## 4. What was built"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_terminal_deg",
+          "label": "Terminal roll angle (rows)",
+          "physical": "Rolls the mouth lip further back or stops it earlier.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 270.0,
+            "lo": 270.0,
+            "log": false,
+            "search": false
+          },
+          "summary": "Final roll turn of the rolled-rectangle mouth.",
+          "unit": "deg"
+        },
+        {
+          "base_knob": "throat_turn_deg",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+            "key": "bounds.g_throat_turn_deg"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
+          "context": "rows",
+          "contexts": [],
+          "default": 25.0,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+            "key": "seed_params.g_throat_turn_deg"
+          },
+          "detail": "The throat section is blended from a round driver exit over this turn. The generator fixes it in the shipped cell so the coupling plane stays round.",
+          "doc_ref": [
+            "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+            "## 4. What was built"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_throat_turn_deg",
+          "label": "Throat turn angle (rows)",
+          "physical": "Changes the length of the round-to-rolled throat transition.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 25.0,
+            "lo": 25.0,
+            "log": false,
+            "search": false
+          },
+          "summary": "Roll turn used by the round throat blend of the rolled rectangle.",
+          "unit": "deg"
+        },
+        {
+          "base_knob": "width_mm",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+            "key": "bounds.g_width_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
+          "context": "rows",
+          "contexts": [],
+          "default": 542.0,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+            "key": "seed_params.g_width_mm"
+          },
+          "detail": "The rolled-rectangle and R-OSSE-rectangle kinds build the mouth from this explicit full width and the matching height, not from a K-law. The generator measures the built surface against the brief envelope.",
+          "doc_ref": [
+            "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+            "## 4. What was built"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_width_mm",
+          "label": "Mouth width (rows)",
+          "physical": "Moves the horizontal mouth edge; the flare follows the construction.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 542.0,
+            "lo": 542.0,
+            "log": false,
+            "search": false
+          },
+          "summary": "Full mouth width target of a rolled-family rows construction.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "n_phi",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [],
+          "default": 65,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+            "key": "generator.n_phi"
+          },
+          "detail": "The row count sets the angular sampling of the point grid. The quarter model, half model and full ring each have their own minimum and parity rules in the generator. It is a count, not a length.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "n_phi",
+          "label": "Azimuth row count",
+          "physical": "Raises angular fidelity at the cost of more grid rows.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Number of azimuth rows in the rows/grid model.",
+          "unit": null
+        },
+        {
+          "base_knob": "n_s",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [],
+          "default": 128,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+            "key": "generator.n_s"
+          },
+          "detail": "Each row is sampled at equal axial (or equal-arc, for the rows march) fractions. This count sets the longitudinal resolution. It is a count, not a length.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "n_s",
+          "label": "Axial station count",
+          "physical": "Raises longitudinal fidelity at the cost of more points.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Number of axial stations along each row.",
+          "unit": null
+        },
+        {
+          "base_knob": "span",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_span_requested",
+          "context": "rows",
+          "contexts": [],
+          "default": "quarter",
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+            "key": "generator.span"
+          },
+          "detail": "The legal spans are the ones the generator handles, and their names are read from the generator's own span constant rather than retyped here. A kind can force a span: an odd-cosine asymmetry forces the full ring and a b-term forces the half model.",
+          "doc_ref": [
+            "docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md",
+            "### 2.5 Up/down-asymmetric saddle"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": [
+              "quarter",
+              "half",
+              "half_xz",
+              "full"
+            ],
+            "hi": null,
+            "kind": "str",
+            "lo": null,
+            "note": "named grid.py cap",
+            "section": null,
+            "source": {
+              "file": "hornlab_search/design/generators/grid.py",
+              "key": "ROWS_SPANS"
+            }
+          },
+          "knob": "span",
+          "label": "Row span",
+          "physical": "Chooses whether the mesh uses mirror planes or a seam-free full ring.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "How much of the azimuth circle the rows model covers.",
+          "unit": null
+        },
+        {
+          "base_knob": "wall_thickness_mm",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [],
+          "default": 3.0,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+            "key": "generator.wall_thickness_mm"
+          },
+          "detail": "The point-grid route builds an explicit outer shell offset from each row's own profile. This is the printed shell thickness, not an acoustic dimension. The generator also uses it in its self-approach guard.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "wall_thickness_mm",
+          "label": "Shell thickness",
+          "physical": "Changes the printed wall thickness, not the acoustic inner surface.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Outer-shell thickness of a freestanding rows model.",
+          "unit": "mm"
+        }
+      ],
+      "name": "rf__rect_radial_wide_v7",
+      "non_native_keys": [],
+      "preview_only": true,
+      "source_status": "gui-only",
+      "symmetry": "hv"
+    },
+    "rf__section_axial_home_v7": {
+      "bounds_index": {
+        "g_axial_h_mm": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+          "hi": 12.0,
+          "key": "bounds.g_axial_h_mm",
+          "lo": 0.0,
+          "log": false,
+          "search": true
+        },
+        "g_axial_v_mm": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+          "hi": 14.0,
+          "key": "bounds.g_axial_v_mm",
+          "lo": 0.0,
+          "log": false,
+          "search": true
+        },
+        "g_crown_mm": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+          "hi": 40.0,
+          "key": "bounds.g_crown_mm",
+          "lo": 10.0,
+          "log": false,
+          "search": true
+        },
+        "g_depth_mm": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+          "hi": 300.0,
+          "key": "bounds.g_depth_mm",
+          "lo": 170.0,
+          "log": false,
+          "search": true
+        },
+        "g_h_depth_scale": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+          "hi": 1.1,
+          "key": "bounds.g_h_depth_scale",
+          "lo": 0.9,
+          "log": false,
+          "search": true
+        },
+        "g_height_mm": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+          "hi": 420.0,
+          "key": "bounds.g_height_mm",
+          "lo": 220.0,
+          "log": false,
+          "search": true
+        },
+        "g_inward_h_mm": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+          "hi": 0.0,
+          "key": "bounds.g_inward_h_mm",
+          "lo": 0.0,
+          "log": false,
+          "search": false
+        },
+        "g_inward_v_mm": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+          "hi": 0.0,
+          "key": "bounds.g_inward_v_mm",
+          "lo": 0.0,
+          "log": false,
+          "search": false
+        },
+        "g_junction_power": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+          "hi": 48.0,
+          "key": "bounds.g_junction_power",
+          "lo": 16.0,
+          "log": false,
+          "search": true
+        },
+        "g_relief_end_s": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+          "hi": 0.96,
+          "key": "bounds.g_relief_end_s",
+          "lo": 0.96,
+          "log": false,
+          "search": false
+        },
+        "g_relief_peak_s": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+          "hi": 0.8,
+          "key": "bounds.g_relief_peak_s",
+          "lo": 0.8,
+          "log": false,
+          "search": false
+        },
+        "g_relief_start_s": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+          "hi": 0.3,
+          "key": "bounds.g_relief_start_s",
+          "lo": 0.3,
+          "log": false,
+          "search": false
+        },
+        "g_throat_blend_mm": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+          "hi": 20.0,
+          "key": "bounds.g_throat_blend_mm",
+          "lo": 20.0,
+          "log": false,
+          "search": false
+        },
+        "g_width_mm": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+          "hi": 600.0,
+          "key": "bounds.g_width_mm",
+          "lo": 480.0,
+          "log": false,
+          "search": true
+        }
+      },
+      "brief_file": "examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+      "brief_tied": null,
+      "config_path": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+      "description": "OPTIMIZATION CELL: home-scaled section family. Searches width 480-600, height 220-420, depth 170-300, H/V depth split 0.9-1.1, crown 10-40, junction 16-48, and axial H/V pucker 0-12/0-14. Width/height set coverage and pattern control; depth sets loading/flare; H/V depth split sets top/bottom vs side termination; crown/junction set section curvature; the axial pucker is a secondary mouth-rim/diagonal phase lever, not a coverage law. Seed = best home-panel design + 7/9 pucker.",
+      "documented": true,
+      "driver_exit_mm": null,
+      "empty_reason": null,
+      "family": "FREEFORM",
+      "group": "home",
+      "kind": "rows",
+      "knob_names": [
+        "g_axial_h_mm",
+        "g_axial_v_mm",
+        "g_crown_mm",
+        "g_depth_mm",
+        "g_h_depth_scale",
+        "g_height_mm",
+        "g_inward_h_mm",
+        "g_inward_v_mm",
+        "g_junction_power",
+        "g_relief_end_s",
+        "g_relief_peak_s",
+        "g_relief_start_s",
+        "g_throat_blend_mm",
+        "g_width_mm",
+        "n_phi",
+        "n_s",
+        "span",
+        "wall_thickness_mm"
+      ],
+      "knobs": [
+        {
+          "base_knob": "axial_h_mm",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+            "key": "bounds.g_axial_h_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.rolled_family.resolve_grid",
+          "context": "rows",
+          "contexts": [],
+          "default": 7.0,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+            "key": "seed_params.g_axial_h_mm"
+          },
+          "detail": "This is the old z-only experiment in the canonical family: positive advances the horizontal wall centre toward the mouth, negative retards it. It is a fore-aft corrugation, not ATH's radial ridge. Keep it zero when the goal is the ATH look.",
+          "doc_ref": [
+            "docs/research/typologies/SPIRAL_PUCKER_VS_RADIAL_RIDGE_2026-11-15.md",
+            "## Finding 1 \u2014 the rolled spiral\u2019s axial pucker"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "z += (H cos^2 psi + V sin^2 psi) cos(4 psi) w",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_axial_h_mm",
+          "label": "Horizontal axial relief (rows)",
+          "physical": "Advances or retards the horizontal wall along the axis.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 12.0,
+            "lo": 0.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Signed axial relief at the horizontal axis of the rolled family.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "axial_v_mm",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+            "key": "bounds.g_axial_v_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.rolled_family.resolve_grid",
+          "context": "rows",
+          "contexts": [],
+          "default": 9.0,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+            "key": "seed_params.g_axial_v_mm"
+          },
+          "detail": "The vertical partner of the old z-only pucker. It is a signed axial corrugation with the same saturating-window caveat as the historical rolled-rect pucker. The radial inward keys are the ATH-like path.",
+          "doc_ref": [
+            "docs/research/typologies/SPIRAL_PUCKER_VS_RADIAL_RIDGE_2026-11-15.md",
+            "## Finding 1 \u2014 the rolled spiral\u2019s axial pucker"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "z += (H cos^2 psi + V sin^2 psi) cos(4 psi) w",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_axial_v_mm",
+          "label": "Vertical axial relief (rows)",
+          "physical": "Advances or retards the vertical wall along the axis.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 14.0,
+            "lo": 0.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Signed axial relief at the vertical axis of the rolled family.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "crown_mm",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+            "key": "bounds.g_crown_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
+          "context": "rows",
+          "contexts": [],
+          "default": 39.7,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+            "key": "seed_params.g_crown_mm"
+          },
+          "detail": "The section construction crowns the swept surface by this amount so the digitised top and bottom sections meet smoothly. It is a surface relief, not the mouth radius.",
+          "doc_ref": [
+            "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+            "## 4. What was built"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_crown_mm",
+          "label": "Crown rise (rows)",
+          "physical": "Bows the Crowe section surface outward.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 40.0,
+            "lo": 10.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Crown rise of the Crowe section surface between its profiles.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "depth_mm",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+            "key": "bounds.g_depth_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
+          "context": "rows",
+          "contexts": [],
+          "default": 262.0,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+            "key": "seed_params.g_depth_mm"
+          },
+          "detail": "Depth scales the section spacing or spiral advance. The Crowe section construction additionally requires depth below about 0.57 times the mouth width; the generator refuses a section the sweep cannot build.",
+          "doc_ref": [
+            "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+            "## 4. What was built"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_depth_mm",
+          "label": "Depth (rows)",
+          "physical": "Moves the mouth plane along the axis and changes the flare rate.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 300.0,
+            "lo": 170.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Axial depth of a rolled-family rows construction.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "h_depth_scale",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+            "key": "bounds.g_h_depth_scale"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
+          "context": "rows",
+          "contexts": [],
+          "default": 1.098,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+            "key": "seed_params.g_h_depth_scale"
+          },
+          "detail": "The top/bottom and side profiles can be scaled in depth independently. The swept-H construction needs a shallow-enough section; the generator refuses one the sweep cannot build.",
+          "doc_ref": [
+            "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+            "## 4. What was built"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_h_depth_scale",
+          "label": "H/V depth ratio (rows)",
+          "physical": "Moves the side walls forward or back relative to the top and bottom.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 1.1,
+            "lo": 0.9,
+            "log": false,
+            "search": true
+          },
+          "summary": "Horizontal-to-vertical depth ratio of the Crowe section construction.",
+          "unit": null
+        },
+        {
+          "base_knob": "height_mm",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+            "key": "bounds.g_height_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
+          "context": "rows",
+          "contexts": [],
+          "default": 290.0,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+            "key": "seed_params.g_height_mm"
+          },
+          "detail": "The vertical partner of the explicit mouth width. The rolled and section kinds scale their meridians to this full height; a landscape cell keeps the width above the height by construction.",
+          "doc_ref": [
+            "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+            "## 4. What was built"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_height_mm",
+          "label": "Mouth height (rows)",
+          "physical": "Moves the vertical mouth edge; the flare follows the construction.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 420.0,
+            "lo": 220.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Full mouth height target of a rolled-family rows construction.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "inward_h_mm",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+            "key": "bounds.g_inward_h_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.rolled_family.resolve_grid",
+          "context": "rows",
+          "contexts": [],
+          "default": 0.0,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+            "key": "seed_params.g_inward_h_mm"
+          },
+          "detail": "Positive values pull the horizontal wall centre inward at the relief peak; the normalized diagonal is unchanged, so the diagonal becomes a ridge. The generator applies it through the relief window and keeps the source and returned lip untouched. This is a local radial approximation of ATH's per-direction law, not a z offset.",
+          "doc_ref": [
+            "docs/research/typologies/SPIRAL_PUCKER_VS_RADIAL_RIDGE_2026-11-15.md",
+            "## Finding 4 \u2014 the correct alternate: radial relief"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "rho_new = rho - (H cos^2 psi + V sin^2 psi) cos^2(2 psi) w",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_inward_h_mm",
+          "label": "Horizontal inward relief (rows)",
+          "physical": "Moves the horizontal wall inward near the relief peak.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 0.0,
+            "lo": 0.0,
+            "log": false,
+            "search": false
+          },
+          "summary": "Radial inward relief at the horizontal axis of the rolled family.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "inward_v_mm",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+            "key": "bounds.g_inward_v_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.rolled_family.resolve_grid",
+          "context": "rows",
+          "contexts": [],
+          "default": 0.0,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+            "key": "seed_params.g_inward_v_mm"
+          },
+          "detail": "The vertical partner of the radial relief. Positive values pull the vertical wall centre inward; the diagonal stays put. Use it to balance the horizontal relief and to control how strong the diagonal ridge reads. Negative values are the outward experiment and are rejected by the current v1 mode.",
+          "doc_ref": [
+            "docs/research/typologies/SPIRAL_PUCKER_VS_RADIAL_RIDGE_2026-11-15.md",
+            "## Finding 4 \u2014 the correct alternate: radial relief"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "rho_new = rho - (H cos^2 psi + V sin^2 psi) cos^2(2 psi) w",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_inward_v_mm",
+          "label": "Vertical inward relief (rows)",
+          "physical": "Moves the vertical wall inward near the relief peak.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 0.0,
+            "lo": 0.0,
+            "log": false,
+            "search": false
+          },
+          "summary": "Radial inward relief at the vertical axis of the rolled family.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "junction_power",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+            "key": "bounds.g_junction_power"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
+          "context": "rows",
+          "contexts": [],
+          "default": 24.4,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+            "key": "seed_params.g_junction_power"
+          },
+          "detail": "The H and V profile junctions meet through a smooth power blend. A higher exponent keeps the junction tighter to the corner; the search range lets the BEM judge the crease.",
+          "doc_ref": [
+            "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+            "## 4. What was built"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_junction_power",
+          "label": "Corner junction exponent (rows)",
+          "physical": "Sharpens or softens the section's corner junction.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 48.0,
+            "lo": 16.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Exponent of the Crowe section's corner junction blend.",
+          "unit": null
+        },
+        {
+          "base_knob": "relief_end_s",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+            "key": "bounds.g_relief_end_s"
+          },
+          "code_ref": "hornlab_search.design.generators.rolled_family.resolve_grid",
+          "context": "rows",
+          "contexts": [],
+          "default": 0.96,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+            "key": "seed_params.g_relief_end_s"
+          },
+          "detail": "The smooth return. It must stay at or below 0.96 in the shipped family so the returned lip is not displaced. A relief that reaches the lip reintroduces the wavy rim that the radial mode is meant to avoid.",
+          "doc_ref": [
+            "docs/research/typologies/SPIRAL_PUCKER_VS_RADIAL_RIDGE_2026-11-15.md",
+            "## Finding 4 \u2014 the correct alternate: radial relief"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_relief_end_s",
+          "label": "Relief end station (rows)",
+          "physical": "Controls how far the relief runs before the mouth return.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 0.96,
+            "lo": 0.96,
+            "log": false,
+            "search": false
+          },
+          "summary": "Normalized station where the rolled-family relief returns to zero.",
+          "unit": null
+        },
+        {
+          "base_knob": "relief_peak_s",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+            "key": "bounds.g_relief_peak_s"
+          },
+          "code_ref": "hornlab_search.design.generators.rolled_family.resolve_grid",
+          "context": "rows",
+          "contexts": [],
+          "default": 0.8,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+            "key": "seed_params.g_relief_peak_s"
+          },
+          "detail": "The peak of the smooth start/peak/end window. It must lie between the start and end and is the station where the H/V inward amplitudes are fully applied.",
+          "doc_ref": [
+            "docs/research/typologies/SPIRAL_PUCKER_VS_RADIAL_RIDGE_2026-11-15.md",
+            "## Finding 4 \u2014 the correct alternate: radial relief"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_relief_peak_s",
+          "label": "Relief peak station (rows)",
+          "physical": "Moves the strongest relief point along the horn.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 0.8,
+            "lo": 0.8,
+            "log": false,
+            "search": false
+          },
+          "summary": "Normalized station where the rolled-family relief reaches full strength.",
+          "unit": null
+        },
+        {
+          "base_knob": "relief_start_s",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+            "key": "bounds.g_relief_start_s"
+          },
+          "code_ref": "hornlab_search.design.generators.rolled_family.resolve_grid",
+          "context": "rows",
+          "contexts": [],
+          "default": 0.3,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+            "key": "seed_params.g_relief_start_s"
+          },
+          "detail": "The smooth onset of the radial or axial relief. It must sit after the source matching region so the driver coupling stays untouched. The generator rejects a start that intersects the source.",
+          "doc_ref": [
+            "docs/research/typologies/SPIRAL_PUCKER_VS_RADIAL_RIDGE_2026-11-15.md",
+            "## Finding 4 \u2014 the correct alternate: radial relief"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_relief_start_s",
+          "label": "Relief start station (rows)",
+          "physical": "Moves the relief onset along the horn.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 0.3,
+            "lo": 0.3,
+            "log": false,
+            "search": false
+          },
+          "summary": "Normalized station where the rolled-family relief starts.",
+          "unit": null
+        },
+        {
+          "base_knob": "throat_blend_mm",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+            "key": "bounds.g_throat_blend_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
+          "context": "rows",
+          "contexts": [],
+          "default": 20.0,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+            "key": "seed_params.g_throat_blend_mm"
+          },
+          "detail": "The digitised section starts at a round 18 mm coupling plane and blends into the section contour over this length. The shipped home cell fixes it at 20 mm, under the generator's 20 percent-of-depth rule.",
+          "doc_ref": [
+            "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+            "## 4. What was built"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_throat_blend_mm",
+          "label": "Throat blend length (rows)",
+          "physical": "Changes the length of the round-to-section throat transition.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 20.0,
+            "lo": 20.0,
+            "log": false,
+            "search": false
+          },
+          "summary": "Length of the Crowe section's blend from the round driver exit.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "width_mm",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+            "key": "bounds.g_width_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
+          "context": "rows",
+          "contexts": [],
+          "default": 580.0,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+            "key": "seed_params.g_width_mm"
+          },
+          "detail": "The rolled-rectangle and R-OSSE-rectangle kinds build the mouth from this explicit full width and the matching height, not from a K-law. The generator measures the built surface against the brief envelope.",
+          "doc_ref": [
+            "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+            "## 4. What was built"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_width_mm",
+          "label": "Mouth width (rows)",
+          "physical": "Moves the horizontal mouth edge; the flare follows the construction.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 600.0,
+            "lo": 480.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Full mouth width target of a rolled-family rows construction.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "n_phi",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [],
+          "default": 49,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+            "key": "generator.n_phi"
+          },
+          "detail": "The row count sets the angular sampling of the point grid. The quarter model, half model and full ring each have their own minimum and parity rules in the generator. It is a count, not a length.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "n_phi",
+          "label": "Azimuth row count",
+          "physical": "Raises angular fidelity at the cost of more grid rows.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Number of azimuth rows in the rows/grid model.",
+          "unit": null
+        },
+        {
+          "base_knob": "n_s",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [],
+          "default": 96,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+            "key": "generator.n_s"
+          },
+          "detail": "Each row is sampled at equal axial (or equal-arc, for the rows march) fractions. This count sets the longitudinal resolution. It is a count, not a length.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "n_s",
+          "label": "Axial station count",
+          "physical": "Raises longitudinal fidelity at the cost of more points.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Number of axial stations along each row.",
+          "unit": null
+        },
+        {
+          "base_knob": "span",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_span_requested",
+          "context": "rows",
+          "contexts": [],
+          "default": "quarter",
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+            "key": "generator.span"
+          },
+          "detail": "The legal spans are the ones the generator handles, and their names are read from the generator's own span constant rather than retyped here. A kind can force a span: an odd-cosine asymmetry forces the full ring and a b-term forces the half model.",
+          "doc_ref": [
+            "docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md",
+            "### 2.5 Up/down-asymmetric saddle"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": [
+              "quarter",
+              "half",
+              "half_xz",
+              "full"
+            ],
+            "hi": null,
+            "kind": "str",
+            "lo": null,
+            "note": "named grid.py cap",
+            "section": null,
+            "source": {
+              "file": "hornlab_search/design/generators/grid.py",
+              "key": "ROWS_SPANS"
+            }
+          },
+          "knob": "span",
+          "label": "Row span",
+          "physical": "Chooses whether the mesh uses mirror planes or a seam-free full ring.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "How much of the azimuth circle the rows model covers.",
+          "unit": null
+        },
+        {
+          "base_knob": "wall_thickness_mm",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [],
+          "default": 3.0,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_v7.yaml",
+            "key": "generator.wall_thickness_mm"
+          },
+          "detail": "The point-grid route builds an explicit outer shell offset from each row's own profile. This is the printed shell thickness, not an acoustic dimension. The generator also uses it in its self-approach guard.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "wall_thickness_mm",
+          "label": "Shell thickness",
+          "physical": "Changes the printed wall thickness, not the acoustic inner surface.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Outer-shell thickness of a freestanding rows model.",
+          "unit": "mm"
+        }
+      ],
+      "name": "rf__section_axial_home_v7",
+      "non_native_keys": [],
+      "preview_only": true,
+      "source_status": "gui-only",
+      "symmetry": "hv"
+    },
+    "rf__section_axial_strong_v7": {
+      "bounds_index": {
+        "g_axial_h_mm": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+          "hi": 10.0,
+          "key": "bounds.g_axial_h_mm",
+          "lo": 4.0,
+          "log": false,
+          "search": true
+        },
+        "g_axial_v_mm": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+          "hi": 12.0,
+          "key": "bounds.g_axial_v_mm",
+          "lo": 6.0,
+          "log": false,
+          "search": true
+        },
+        "g_crown_mm": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+          "hi": 22.0,
+          "key": "bounds.g_crown_mm",
+          "lo": 18.0,
+          "log": false,
+          "search": true
+        },
+        "g_depth_mm": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+          "hi": 202.0,
+          "key": "bounds.g_depth_mm",
+          "lo": 194.0,
+          "log": false,
+          "search": true
+        },
+        "g_h_depth_scale": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+          "hi": 1.01,
+          "key": "bounds.g_h_depth_scale",
+          "lo": 0.99,
+          "log": false,
+          "search": true
+        },
+        "g_height_mm": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+          "hi": 203.0,
+          "key": "bounds.g_height_mm",
+          "lo": 203.0,
+          "log": false,
+          "search": false
+        },
+        "g_inward_h_mm": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+          "hi": 0.0,
+          "key": "bounds.g_inward_h_mm",
+          "lo": 0.0,
+          "log": false,
+          "search": false
+        },
+        "g_inward_v_mm": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+          "hi": 0.0,
+          "key": "bounds.g_inward_v_mm",
+          "lo": 0.0,
+          "log": false,
+          "search": false
+        },
+        "g_junction_power": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+          "hi": 32.0,
+          "key": "bounds.g_junction_power",
+          "lo": 32.0,
+          "log": false,
+          "search": false
+        },
+        "g_relief_end_s": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+          "hi": 0.96,
+          "key": "bounds.g_relief_end_s",
+          "lo": 0.96,
+          "log": false,
+          "search": false
+        },
+        "g_relief_peak_s": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+          "hi": 0.8,
+          "key": "bounds.g_relief_peak_s",
+          "lo": 0.8,
+          "log": false,
+          "search": false
+        },
+        "g_relief_start_s": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+          "hi": 0.3,
+          "key": "bounds.g_relief_start_s",
+          "lo": 0.3,
+          "log": false,
+          "search": false
+        },
+        "g_throat_blend_mm": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+          "hi": 20.0,
+          "key": "bounds.g_throat_blend_mm",
+          "lo": 20.0,
+          "log": false,
+          "search": false
+        },
+        "g_width_mm": {
+          "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+          "hi": 417.0,
+          "key": "bounds.g_width_mm",
+          "lo": 417.0,
+          "log": false,
+          "search": false
+        }
+      },
+      "brief_file": "examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+      "brief_tied": null,
+      "config_path": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+      "description": "VISUAL REFERENCE ONLY: exact strong_a.png rim-pucker look, fixed 417x203 ES-600 mouth, axial 7/9. Same geometry as legacy sp__strong_v7 (max point diff 9.6e-7). Its fixed mouth/depth/crown box is not an acoustic optimization cell; use rf__section_axial_home_v7 for that.",
+      "documented": true,
+      "driver_exit_mm": null,
+      "empty_reason": null,
+      "family": "FREEFORM",
+      "group": "home",
+      "kind": "rows",
+      "knob_names": [
+        "g_axial_h_mm",
+        "g_axial_v_mm",
+        "g_crown_mm",
+        "g_depth_mm",
+        "g_h_depth_scale",
+        "g_height_mm",
+        "g_inward_h_mm",
+        "g_inward_v_mm",
+        "g_junction_power",
+        "g_relief_end_s",
+        "g_relief_peak_s",
+        "g_relief_start_s",
+        "g_throat_blend_mm",
+        "g_width_mm",
+        "n_phi",
+        "n_s",
+        "span",
+        "wall_thickness_mm"
+      ],
+      "knobs": [
+        {
+          "base_knob": "axial_h_mm",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+            "key": "bounds.g_axial_h_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.rolled_family.resolve_grid",
+          "context": "rows",
+          "contexts": [],
+          "default": 7.0,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+            "key": "seed_params.g_axial_h_mm"
+          },
+          "detail": "This is the old z-only experiment in the canonical family: positive advances the horizontal wall centre toward the mouth, negative retards it. It is a fore-aft corrugation, not ATH's radial ridge. Keep it zero when the goal is the ATH look.",
+          "doc_ref": [
+            "docs/research/typologies/SPIRAL_PUCKER_VS_RADIAL_RIDGE_2026-11-15.md",
+            "## Finding 1 \u2014 the rolled spiral\u2019s axial pucker"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "z += (H cos^2 psi + V sin^2 psi) cos(4 psi) w",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_axial_h_mm",
+          "label": "Horizontal axial relief (rows)",
+          "physical": "Advances or retards the horizontal wall along the axis.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 10.0,
+            "lo": 4.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Signed axial relief at the horizontal axis of the rolled family.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "axial_v_mm",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+            "key": "bounds.g_axial_v_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.rolled_family.resolve_grid",
+          "context": "rows",
+          "contexts": [],
+          "default": 9.0,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+            "key": "seed_params.g_axial_v_mm"
+          },
+          "detail": "The vertical partner of the old z-only pucker. It is a signed axial corrugation with the same saturating-window caveat as the historical rolled-rect pucker. The radial inward keys are the ATH-like path.",
+          "doc_ref": [
+            "docs/research/typologies/SPIRAL_PUCKER_VS_RADIAL_RIDGE_2026-11-15.md",
+            "## Finding 1 \u2014 the rolled spiral\u2019s axial pucker"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "z += (H cos^2 psi + V sin^2 psi) cos(4 psi) w",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_axial_v_mm",
+          "label": "Vertical axial relief (rows)",
+          "physical": "Advances or retards the vertical wall along the axis.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 12.0,
+            "lo": 6.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Signed axial relief at the vertical axis of the rolled family.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "crown_mm",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+            "key": "bounds.g_crown_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
+          "context": "rows",
+          "contexts": [],
+          "default": 20.0,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+            "key": "seed_params.g_crown_mm"
+          },
+          "detail": "The section construction crowns the swept surface by this amount so the digitised top and bottom sections meet smoothly. It is a surface relief, not the mouth radius.",
+          "doc_ref": [
+            "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+            "## 4. What was built"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_crown_mm",
+          "label": "Crown rise (rows)",
+          "physical": "Bows the Crowe section surface outward.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 22.0,
+            "lo": 18.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Crown rise of the Crowe section surface between its profiles.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "depth_mm",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+            "key": "bounds.g_depth_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
+          "context": "rows",
+          "contexts": [],
+          "default": 198.0,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+            "key": "seed_params.g_depth_mm"
+          },
+          "detail": "Depth scales the section spacing or spiral advance. The Crowe section construction additionally requires depth below about 0.57 times the mouth width; the generator refuses a section the sweep cannot build.",
+          "doc_ref": [
+            "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+            "## 4. What was built"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_depth_mm",
+          "label": "Depth (rows)",
+          "physical": "Moves the mouth plane along the axis and changes the flare rate.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 202.0,
+            "lo": 194.0,
+            "log": false,
+            "search": true
+          },
+          "summary": "Axial depth of a rolled-family rows construction.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "h_depth_scale",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+            "key": "bounds.g_h_depth_scale"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
+          "context": "rows",
+          "contexts": [],
+          "default": 1.0,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+            "key": "seed_params.g_h_depth_scale"
+          },
+          "detail": "The top/bottom and side profiles can be scaled in depth independently. The swept-H construction needs a shallow-enough section; the generator refuses one the sweep cannot build.",
+          "doc_ref": [
+            "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+            "## 4. What was built"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_h_depth_scale",
+          "label": "H/V depth ratio (rows)",
+          "physical": "Moves the side walls forward or back relative to the top and bottom.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 1.01,
+            "lo": 0.99,
+            "log": false,
+            "search": true
+          },
+          "summary": "Horizontal-to-vertical depth ratio of the Crowe section construction.",
+          "unit": null
+        },
+        {
+          "base_knob": "height_mm",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+            "key": "bounds.g_height_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
+          "context": "rows",
+          "contexts": [],
+          "default": 203.0,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+            "key": "seed_params.g_height_mm"
+          },
+          "detail": "The vertical partner of the explicit mouth width. The rolled and section kinds scale their meridians to this full height; a landscape cell keeps the width above the height by construction.",
+          "doc_ref": [
+            "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+            "## 4. What was built"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_height_mm",
+          "label": "Mouth height (rows)",
+          "physical": "Moves the vertical mouth edge; the flare follows the construction.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 203.0,
+            "lo": 203.0,
+            "log": false,
+            "search": false
+          },
+          "summary": "Full mouth height target of a rolled-family rows construction.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "inward_h_mm",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+            "key": "bounds.g_inward_h_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.rolled_family.resolve_grid",
+          "context": "rows",
+          "contexts": [],
+          "default": 0.0,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+            "key": "seed_params.g_inward_h_mm"
+          },
+          "detail": "Positive values pull the horizontal wall centre inward at the relief peak; the normalized diagonal is unchanged, so the diagonal becomes a ridge. The generator applies it through the relief window and keeps the source and returned lip untouched. This is a local radial approximation of ATH's per-direction law, not a z offset.",
+          "doc_ref": [
+            "docs/research/typologies/SPIRAL_PUCKER_VS_RADIAL_RIDGE_2026-11-15.md",
+            "## Finding 4 \u2014 the correct alternate: radial relief"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "rho_new = rho - (H cos^2 psi + V sin^2 psi) cos^2(2 psi) w",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_inward_h_mm",
+          "label": "Horizontal inward relief (rows)",
+          "physical": "Moves the horizontal wall inward near the relief peak.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 0.0,
+            "lo": 0.0,
+            "log": false,
+            "search": false
+          },
+          "summary": "Radial inward relief at the horizontal axis of the rolled family.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "inward_v_mm",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+            "key": "bounds.g_inward_v_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.rolled_family.resolve_grid",
+          "context": "rows",
+          "contexts": [],
+          "default": 0.0,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+            "key": "seed_params.g_inward_v_mm"
+          },
+          "detail": "The vertical partner of the radial relief. Positive values pull the vertical wall centre inward; the diagonal stays put. Use it to balance the horizontal relief and to control how strong the diagonal ridge reads. Negative values are the outward experiment and are rejected by the current v1 mode.",
+          "doc_ref": [
+            "docs/research/typologies/SPIRAL_PUCKER_VS_RADIAL_RIDGE_2026-11-15.md",
+            "## Finding 4 \u2014 the correct alternate: radial relief"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": "rho_new = rho - (H cos^2 psi + V sin^2 psi) cos^2(2 psi) w",
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_inward_v_mm",
+          "label": "Vertical inward relief (rows)",
+          "physical": "Moves the vertical wall inward near the relief peak.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 0.0,
+            "lo": 0.0,
+            "log": false,
+            "search": false
+          },
+          "summary": "Radial inward relief at the vertical axis of the rolled family.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "junction_power",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+            "key": "bounds.g_junction_power"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
+          "context": "rows",
+          "contexts": [],
+          "default": 32.0,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+            "key": "seed_params.g_junction_power"
+          },
+          "detail": "The H and V profile junctions meet through a smooth power blend. A higher exponent keeps the junction tighter to the corner; the search range lets the BEM judge the crease.",
+          "doc_ref": [
+            "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+            "## 4. What was built"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_junction_power",
+          "label": "Corner junction exponent (rows)",
+          "physical": "Sharpens or softens the section's corner junction.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 32.0,
+            "lo": 32.0,
+            "log": false,
+            "search": false
+          },
+          "summary": "Exponent of the Crowe section's corner junction blend.",
+          "unit": null
+        },
+        {
+          "base_knob": "relief_end_s",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+            "key": "bounds.g_relief_end_s"
+          },
+          "code_ref": "hornlab_search.design.generators.rolled_family.resolve_grid",
+          "context": "rows",
+          "contexts": [],
+          "default": 0.96,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+            "key": "seed_params.g_relief_end_s"
+          },
+          "detail": "The smooth return. It must stay at or below 0.96 in the shipped family so the returned lip is not displaced. A relief that reaches the lip reintroduces the wavy rim that the radial mode is meant to avoid.",
+          "doc_ref": [
+            "docs/research/typologies/SPIRAL_PUCKER_VS_RADIAL_RIDGE_2026-11-15.md",
+            "## Finding 4 \u2014 the correct alternate: radial relief"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_relief_end_s",
+          "label": "Relief end station (rows)",
+          "physical": "Controls how far the relief runs before the mouth return.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 0.96,
+            "lo": 0.96,
+            "log": false,
+            "search": false
+          },
+          "summary": "Normalized station where the rolled-family relief returns to zero.",
+          "unit": null
+        },
+        {
+          "base_knob": "relief_peak_s",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+            "key": "bounds.g_relief_peak_s"
+          },
+          "code_ref": "hornlab_search.design.generators.rolled_family.resolve_grid",
+          "context": "rows",
+          "contexts": [],
+          "default": 0.8,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+            "key": "seed_params.g_relief_peak_s"
+          },
+          "detail": "The peak of the smooth start/peak/end window. It must lie between the start and end and is the station where the H/V inward amplitudes are fully applied.",
+          "doc_ref": [
+            "docs/research/typologies/SPIRAL_PUCKER_VS_RADIAL_RIDGE_2026-11-15.md",
+            "## Finding 4 \u2014 the correct alternate: radial relief"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_relief_peak_s",
+          "label": "Relief peak station (rows)",
+          "physical": "Moves the strongest relief point along the horn.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 0.8,
+            "lo": 0.8,
+            "log": false,
+            "search": false
+          },
+          "summary": "Normalized station where the rolled-family relief reaches full strength.",
+          "unit": null
+        },
+        {
+          "base_knob": "relief_start_s",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+            "key": "bounds.g_relief_start_s"
+          },
+          "code_ref": "hornlab_search.design.generators.rolled_family.resolve_grid",
+          "context": "rows",
+          "contexts": [],
+          "default": 0.3,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+            "key": "seed_params.g_relief_start_s"
+          },
+          "detail": "The smooth onset of the radial or axial relief. It must sit after the source matching region so the driver coupling stays untouched. The generator rejects a start that intersects the source.",
+          "doc_ref": [
+            "docs/research/typologies/SPIRAL_PUCKER_VS_RADIAL_RIDGE_2026-11-15.md",
+            "## Finding 4 \u2014 the correct alternate: radial relief"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_relief_start_s",
+          "label": "Relief start station (rows)",
+          "physical": "Moves the relief onset along the horn.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 0.3,
+            "lo": 0.3,
+            "log": false,
+            "search": false
+          },
+          "summary": "Normalized station where the rolled-family relief starts.",
+          "unit": null
+        },
+        {
+          "base_knob": "throat_blend_mm",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+            "key": "bounds.g_throat_blend_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
+          "context": "rows",
+          "contexts": [],
+          "default": 20.0,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+            "key": "seed_params.g_throat_blend_mm"
+          },
+          "detail": "The digitised section starts at a round 18 mm coupling plane and blends into the section contour over this length. The shipped home cell fixes it at 20 mm, under the generator's 20 percent-of-depth rule.",
+          "doc_ref": [
+            "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+            "## 4. What was built"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_throat_blend_mm",
+          "label": "Throat blend length (rows)",
+          "physical": "Changes the length of the round-to-section throat transition.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 20.0,
+            "lo": 20.0,
+            "log": false,
+            "search": false
+          },
+          "summary": "Length of the Crowe section's blend from the round driver exit.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "width_mm",
+          "bounds_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+            "key": "bounds.g_width_mm"
+          },
+          "code_ref": "hornlab_search.design.generators.grid.rows_grid_points",
+          "context": "rows",
+          "contexts": [],
+          "default": 417.0,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+            "key": "seed_params.g_width_mm"
+          },
+          "detail": "The rolled-rectangle and R-OSSE-rectangle kinds build the mouth from this explicit full width and the matching height, not from a K-law. The generator measures the built surface against the brief envelope.",
+          "doc_ref": [
+            "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+            "## 4. What was built"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "g_width_mm",
+          "label": "Mouth width (rows)",
+          "physical": "Moves the horizontal mouth edge; the flare follows the construction.",
+          "plane": null,
+          "prefix": "g",
+          "role": "rows",
+          "search": {
+            "hi": 417.0,
+            "lo": 417.0,
+            "log": false,
+            "search": false
+          },
+          "summary": "Full mouth width target of a rolled-family rows construction.",
+          "unit": "mm"
+        },
+        {
+          "base_knob": "n_phi",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [],
+          "default": 65,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+            "key": "generator.n_phi"
+          },
+          "detail": "The row count sets the angular sampling of the point grid. The quarter model, half model and full ring each have their own minimum and parity rules in the generator. It is a count, not a length.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "n_phi",
+          "label": "Azimuth row count",
+          "physical": "Raises angular fidelity at the cost of more grid rows.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Number of azimuth rows in the rows/grid model.",
+          "unit": null
+        },
+        {
+          "base_knob": "n_s",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [],
+          "default": 128,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+            "key": "generator.n_s"
+          },
+          "detail": "Each row is sampled at equal axial (or equal-arc, for the rows march) fractions. This count sets the longitudinal resolution. It is a count, not a length.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "n_s",
+          "label": "Axial station count",
+          "physical": "Raises longitudinal fidelity at the cost of more points.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Number of axial stations along each row.",
+          "unit": null
+        },
+        {
+          "base_knob": "span",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_span_requested",
+          "context": "rows",
+          "contexts": [],
+          "default": "quarter",
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+            "key": "generator.span"
+          },
+          "detail": "The legal spans are the ones the generator handles, and their names are read from the generator's own span constant rather than retyped here. A kind can force a span: an odd-cosine asymmetry forces the full ring and a b-term forces the half model.",
+          "doc_ref": [
+            "docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md",
+            "### 2.5 Up/down-asymmetric saddle"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": [
+              "quarter",
+              "half",
+              "half_xz",
+              "full"
+            ],
+            "hi": null,
+            "kind": "str",
+            "lo": null,
+            "note": "named grid.py cap",
+            "section": null,
+            "source": {
+              "file": "hornlab_search/design/generators/grid.py",
+              "key": "ROWS_SPANS"
+            }
+          },
+          "knob": "span",
+          "label": "Row span",
+          "physical": "Chooses whether the mesh uses mirror planes or a seam-free full ring.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "How much of the azimuth circle the rows model covers.",
+          "unit": null
+        },
+        {
+          "base_knob": "wall_thickness_mm",
+          "bounds_source": null,
+          "code_ref": "hornlab_search.design.generators.grid._rows_check_spec",
+          "context": "rows",
+          "contexts": [],
+          "default": 3.0,
+          "default_source": {
+            "file": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_strong_v7.yaml",
+            "key": "generator.wall_thickness_mm"
+          },
+          "detail": "The point-grid route builds an explicit outer shell offset from each row's own profile. This is the printed shell thickness, not an acoustic dimension. The generator also uses it in its self-approach guard.",
+          "doc_ref": [
+            "docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md",
+            "### 2.4 organic/elliptical + X-shape (WP9b)"
+          ],
+          "documented": true,
+          "flags": [],
+          "formula": null,
+          "hard": {
+            "choices": null,
+            "hi": null,
+            "kind": null,
+            "lo": null,
+            "note": "the grid validator enforces this knob without a named cap constant",
+            "section": null,
+            "source": null
+          },
+          "knob": "wall_thickness_mm",
+          "label": "Shell thickness",
+          "physical": "Changes the printed wall thickness, not the acoustic inner surface.",
+          "plane": null,
+          "prefix": "",
+          "role": null,
+          "search": null,
+          "summary": "Outer-shell thickness of a freestanding rows model.",
+          "unit": "mm"
+        }
+      ],
+      "name": "rf__section_axial_strong_v7",
+      "non_native_keys": [],
+      "preview_only": true,
+      "source_status": "gui-only",
       "symmetry": "hv"
     },
     "rosse_baseline": {

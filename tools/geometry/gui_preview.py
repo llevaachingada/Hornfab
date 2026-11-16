@@ -33,7 +33,8 @@ def _install(cli: str):
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--cli", required=True,
-                    choices=("rosse_rect_cli", "rolled_rect_cli", "crowe_panel_cli"))
+                    choices=("rosse_rect_cli", "rolled_rect_cli", "crowe_panel_cli",
+                             "section_pucker_cli"))
     ap.add_argument("--config", required=True)
     ap.add_argument("--root", default=str(ROOT))
     ap.add_argument("--detail", default="2d", choices=("2d", "3d"))
@@ -55,6 +56,10 @@ def main(argv=None) -> int:
             from tools.geometry import crowe_panel
             inner, meta = bridge._points(spec, knobs, brief)
             outer = crowe_panel.outer_points(inner, shape)
+        elif args.cli == "section_pucker_cli":
+            from tools.geometry import section_pucker
+            inner, meta = bridge._points(spec, knobs, brief)
+            outer = section_pucker.outer_points(inner, shape)
         else:
             inner, meta = base._points(spec, knobs, brief)
             outer = original_outer(inner, float(shape["wall_thickness_mm"]))
