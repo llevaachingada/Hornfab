@@ -135,7 +135,7 @@ class App:
                 self._study_processes.pop(jid, None)
                 if service.get_cpu_job(sid, jid)["status"] != "running":
                     return
-                artifact_kind = "analysis" if kind == "analyze" else "proposal"
+                artifact_kind = {"analyze": "analysis", "diagnose": "diagnostics"}.get(kind, "proposal")
                 meta = service.get_artifact_metadata(sid, artifact_kind)
                 if code == 0 and (meta.get("status") != "available"
                                   or meta.get("revision") != service.get_cpu_job(sid, jid)["revision"]):

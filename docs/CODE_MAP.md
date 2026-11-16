@@ -1,5 +1,7 @@
 # Code map
 
+BO model diagnostics (2026-11-16): `bo/diagnostics.py` + `studies/cli.py diagnose` write the `diagnostics` artifact (`study-model-diagnostics-v1`: BoTorch LOO, 1-D slices, Pareto front/HV trace); `gui/data_bo.py` reads it for the calibration, sensitivity and Pareto views; `diagnose` is a CPU job kind in `gui/study_jobs.py`. Nav is the `#/bayes/*` group.
+
 BO study GUI (2026-11-15): `gui/data_bo.py` builds the bounded convergence, calibration,
 sensitivity, trust-region, Pareto, design-space and method-board view models from study artifacts
 and run rows; `gui/study_index.py` discovers/routes study registries (night arms plus

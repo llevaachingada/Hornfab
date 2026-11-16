@@ -23,7 +23,7 @@ _ARTIFACT_STATUSES = frozenset(STATES) | {"available", "unavailable"}
 _PROGRESS_KEYS = ("proposed", "started", "solved", "cached", "refused", "infeasible",
                   "infrastructure_failed", "verified", "unknown")
 _EXECUTE_ACTION_KINDS = frozenset({
-    "save_draft", "select_evidence", "analyze", "propose", "package", "launch",
+    "save_draft", "select_evidence", "analyze", "propose", "diagnose", "package", "launch",
     "cancel", "decision", "revise", "save_seeds", "create_child", "queue_study",
 })
 
@@ -217,6 +217,9 @@ def workflow_panel(service, study, phase, artifact=None, *, root, runs_root=None
     action = lambda kind, label, enabled, **extra: {"kind": kind, "label": label, "enabled": enabled, **extra}
     if phase in ("overview", "data", "explain"):
         data["actions"].append(action("analyze", "Build snapshot and analyze compatible data", active is None,
+                                      payload={"package_hash": None}))
+    if phase == "explain" and manifest.get("n"):
+        data["actions"].append(action("diagnose", "Compute model diagnostics (LOO + slices)", active is None,
                                       payload={"package_hash": None}))
     if phase == "propose":
         data["actions"].append(action("propose", f"Generate {current_policy} proposal",

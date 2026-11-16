@@ -272,6 +272,77 @@ function drawDesignSpace(svg, view) {
   });
 }
 
+
+const finiteRow = (...v) => v.every(finite);
+
+/** Pure helper (tested): limits for the LOO scatter including the +/-2 sd whiskers. */
+export function looLimits(loo) {
+  const rows = Array.isArray(loo?.rows) ? loo.rows.filter(r => finiteRow(r.j_obs, r.j_mean)) : [];
+  if (!rows.length) return null;
+  const vals = [];
+  for (const r of rows) {
+    const sd = finite(r.j_sd) ? r.j_sd : 0;
+    vals.push(r.j_obs, r.j_mean - 2 * sd, r.j_mean + 2 * sd);
+  }
+  const [lo, hi] = padRange(Math.min(...vals), Math.max(...vals));
+  return { lim: [lo, hi] };
+}
+
+function drawLoo(svg, loo) {
+  if (!svg || !loo || loo.available !== true) return;
+  const limits = looLimits(loo);
+  if (!limits) return;
+  const rows = loo.rows.filter(r => finiteRow(r.j_obs, r.j_mean));
+  const accent = color("--accent", "#2a78d6");
+  const label = color("--label", "#667");
+  const series = [{ pts: [[limits.lim[0], limits.lim[0]], [limits.lim[1], limits.lim[1]]], color: label, w: 1, dash: true, opacity: 0.7 }];
+  // whiskers run along x (the model's +/-2 sd) at the observed y
+  const whiskers = rows.filter(r => finite(r.j_sd) && r.j_sd > 0)
+    .map(r => ({ pts: [[r.j_mean - 2 * r.j_sd, r.j_obs], [r.j_mean + 2 * r.j_sd, r.j_obs]], color: accent, w: 1, opacity: 0.45 }));
+  chart(svg, {
+    W: 460, H: 260, xlim: limits.lim, ylim: limits.lim,
+    xticks: niceTicks(limits.lim[0], limits.lim[1], 5), yticks: niceTicks(limits.lim[0], limits.lim[1], 5),
+    xlabel: "LOO predicted J (+/-2 sd)", ylabel: "observed J (training)",
+    series: [series[0], ...whiskers, { pts: rows.map(r => [r.j_mean, r.j_obs]), dots: true, r: 3, color: accent }],
+    ariaLabel: "Leave-one-out predicted J with two standard deviation whiskers against observed J, with the y equals x guide",
+  });
+}
+
+/** Pure helper (tested): chart limits for one 1-D slice (mean +/- 2 sd). */
+export function sliceLimits(slice) {
+  const xs = (slice?.x || []).filter(finite);
+  if (xs.length < 2) return null;
+  const ys = [];
+  (slice.j_mean || []).forEach((m, i) => {
+    const sd = finite(slice.j_sd?.[i]) ? slice.j_sd[i] : 0;
+    if (finite(m)) ys.push(m - 2 * sd, m + 2 * sd);
+  });
+  if (!ys.length) return null;
+  return { xlim: [Math.min(...xs), Math.max(...xs)], ylim: padRange(Math.min(...ys), Math.max(...ys)) };
+}
+
+function drawSlice(svg, slice) {
+  const limits = sliceLimits(slice);
+  if (!svg || !limits) return;
+  const accent = color("--accent", "#2a78d6");
+  const label = color("--label", "#667");
+  const pairs = slice.x.map((x, i) => [x, slice.j_mean[i], slice.j_sd[i]]).filter(p => finiteRow(p[0], p[1]));
+  const sd = p => (finite(p[2]) ? p[2] : 0);
+  const chartOpts = {
+    W: 300, H: 170, xlim: limits.xlim, ylim: limits.ylim,
+    xticks: niceTicks(limits.xlim[0], limits.xlim[1], 4), yticks: niceTicks(limits.ylim[0], limits.ylim[1], 4),
+    xlabel: slice.key, ylabel: "J",
+    series: [
+      { pts: pairs.map(p => [p[0], p[1] + 2 * sd(p)]), color: accent, w: 1, dash: true, opacity: 0.5 },
+      { pts: pairs.map(p => [p[0], p[1] - 2 * sd(p)]), color: accent, w: 1, dash: true, opacity: 0.5 },
+      { pts: pairs.map(p => [p[0], p[1]]), color: accent, w: 2 },
+    ],
+    vlines: finite(slice.anchor_x) ? [{ x: slice.anchor_x, color: label, dash: true }] : [],
+    ariaLabel: `Model J along ${slice.key} with plus and minus two standard deviations; the tick marks the incumbent`,
+  };
+  chart(svg, chartOpts);
+}
+
 export function drawStudyCharts(root, panel) {
   if (!root || typeof root.querySelector !== "function") return;
   const bo = panel?.data?.bo;
@@ -281,6 +352,13 @@ export function drawStudyCharts(root, panel) {
   if (convergence) drawConvergence(convergence, bo.convergence);
   const calibration = find("calibration");
   if (calibration) drawCalibration(calibration, bo.calibration);
+  const loo = find("calibration_loo");
+  if (loo) drawLoo(loo, bo.calibration?.loo);
+  const sliceList = Array.isArray(bo.sensitivity?.slices) ? bo.sensitivity.slices : [];
+  root.querySelectorAll('svg[data-study-slice]').forEach(node => {
+    const slice = sliceList.find(item => item.key === node.getAttribute("data-study-slice"));
+    if (slice) drawSlice(node, slice);
+  });
   const pareto = find("pareto");
   if (pareto) drawPareto(pareto, bo.pareto);
   const trust = find("trust_region");

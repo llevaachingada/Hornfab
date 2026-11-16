@@ -1,6 +1,11 @@
 ﻿# ISSUES
 
-Local-only, 2026-11-15 (latest, **GUI full-circle globe; no solves**):
+Local-only, 2026-11-16 (latest, **BO GUI cloud pass on `feat/bo-gui`; no solves**):
+- `feat/bo-gui` is pushed but deliberately unmerged (merge gate: no study running). It adds `diagnose` (BoTorch LOO/slices/HV),
+  the Bayes nav group and the study Live tab. `diagnose` is untested against a real study; run it locally on the fixture
+  studies after the solves finish. 8 offline failures remain that are environment-only or pre-existing (see CONTINUITY).
+
+Local-only, 2026-11-15 (**GUI full-circle globe; no solves**):
 - `Directivity (isobars)` gains a `Full globe` mode beside `Rectangular | Globe`: the stored balloon
   is re-sliced around a closed 360° H/V great circle (the back half is interpolated from the existing
   sphere grid), so no new data or solves are required. `Globe` stays the ±90° cut half-circle.

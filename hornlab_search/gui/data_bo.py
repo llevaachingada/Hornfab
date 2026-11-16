@@ -184,6 +184,16 @@ def _pareto_metrics(service, study_id):
     return _artifact(service, study_id, "pareto_metrics", max_bytes=4_000_000)
 
 
+def _diagnostics(service, study_id):
+    """The optional ``diagnostics`` artifact; ``(content_or_None, can_compute)``."""
+    content, _meta, _reason = _artifact(service, study_id, "diagnostics", max_bytes=1_000_000)
+    if isinstance(content, Mapping) and content.get("schema") == "study-model-diagnostics-v1" \
+            and content.get("status", "ok") == "ok":
+        return content, True
+    arrays, _why = _training_arrays(service, study_id)
+    return None, arrays is not None
+
+
 def _verification(service, study_id):
     return _artifact(service, study_id, "verification", max_bytes=1_000_000)
 
@@ -609,7 +619,7 @@ def convergence_view(service, study, *, runs_root, root=None, comparison=None) -
                  notes=notes)
 
 
-def calibration_view(service, study) -> dict:
+def _calibration_core(service, study) -> dict:
     sid = study["id"]
     results, _meta, reason = _results(service, sid)
     if results is None:
@@ -702,7 +712,67 @@ def calibration_view(service, study) -> dict:
                  notes=["Predicted values are model credible intervals, never measured J."])
 
 
+def calibration_view(service, study) -> dict:
+    """Predicted-vs-measured half plus, when diagnosed, a "LOO on training data" half."""
+    view = _calibration_core(service, study)
+    diag, can_compute = _diagnostics(service, study["id"])
+    loo = _mapping(diag.get("loo")) if diag else {}
+    rows = loo.get("rows") if isinstance(loo.get("rows"), list) else []
+    if diag and rows:
+        clean = []
+        for row in rows[:400]:
+            row = _mapping(row)
+            obs, mean, sd = _finite(row.get("j_obs")), _finite(row.get("j_mean")), _finite(row.get("j_sd"))
+            if obs is None or mean is None:
+                continue
+            clean.append({"id": _clip_text(row.get("id"), 80), "j_obs": obs, "j_mean": mean, "j_sd": sd})
+        view["loo"] = {"available": True, "n": len(clean), "rows": clean,
+                       "truncated": bool(loo.get("truncated")),
+                       "summary": dict(_mapping(loo.get("summary"))),
+                       "method": _clip_text(loo.get("method"), 300)}
+        if view.get("status") == "missing":
+            view["status"] = "partial"
+            view.pop("reason", None)
+    else:
+        view["loo"] = {"available": False, "can_compute": bool(can_compute)}
+    return view
+
+
 def sensitivity_view(service, study) -> dict:
+    view = _sensitivity_core(service, study)
+    diag, can_compute = _diagnostics(service, study["id"])
+    per_key = _mapping(_mapping(diag.get("slices")).get("per_key")) if diag else {}
+    if not per_key:
+        view["diagnostics"] = {"available": False, "can_compute": bool(can_compute)}
+        return view
+    slices = []
+    for key, item in list(per_key.items())[:24]:
+        item = _mapping(item)
+        xs, ms, sds = (item.get(k) for k in ("x", "j_mean", "j_sd"))
+        if not (isinstance(xs, list) and isinstance(ms, list) and isinstance(sds, list)
+                and len(xs) == len(ms) == len(sds) and 2 <= len(xs) <= 100):
+            continue
+        slices.append({"key": _clip_text(key, 80), "x": [_finite(v) for v in xs],
+                       "j_mean": [_finite(v) for v in ms], "j_sd": [_finite(v) for v in sds],
+                       "anchor_x": _finite(item.get("anchor_x")), "unit": item.get("unit") or item.get("x_unit")})
+    view["diagnostics"] = {"available": bool(slices), "can_compute": bool(can_compute),
+                           "anchor": _clip_text(_mapping(diag.get("slices")).get("anchor"), 80),
+                           "grid_n": _int(_mapping(diag.get("slices")).get("grid_n"))}
+    view["slices"] = slices
+    if view.get("status") == "missing":
+        relevance = [r for r in (diag.get("relevance") or []) if isinstance(r, Mapping)]
+        total = sum(_finite(r.get("inv_lengthscale")) or 0.0 for r in relevance)
+        if total > 0:
+            view["knobs"] = [{"key": _clip_text(r.get("key"), 80),
+                              "lengthscale": None,
+                              "importance": round((_finite(r.get("inv_lengthscale")) or 0.0) / total, 6)}
+                             for r in relevance[:MAX_TABLE]]
+            view["status"] = "partial"
+            view.pop("reason", None)
+    return view
+
+
+def _sensitivity_core(service, study) -> dict:
     sid = study["id"]
     model, _meta, reason = _model(service, sid)
     if model is None:
@@ -898,7 +968,16 @@ def pareto_view(service, study, *, runs_root=None) -> dict:
         notes.extend(str(x) for x in payload["limitations"][:6])
     status = "ready" if reference is not None and points else "partial"
     paths = _run_paths(runs_root, service, sid) if runs_root is not None else {}
-    return _view(status, None, reference=reference, points=points, hypervolume=hv,
+    diag, can_compute = _diagnostics(service, sid)
+    diag_pareto = _mapping(diag.get("pareto")) if diag else {}
+    front_ids = [str(x) for x in diag_pareto.get("front_ids", [])[:MAX_POINTS]] \
+        if isinstance(diag_pareto.get("front_ids"), list) else None
+    hv_trace = [[_int(r.get("seq")), _finite(r.get("hv"))] for r in diag_pareto.get("hv_trace", [])[:MAX_SERIES]
+                if isinstance(r, Mapping)] if isinstance(diag_pareto.get("hv_trace"), list) else None
+    diagnostics = ({"available": True, "front_ids": front_ids, "hv_trace": hv_trace}
+                   if front_ids is not None or hv_trace is not None
+                   else {"available": False, "can_compute": bool(can_compute)})
+    return _view(status, None, reference=reference, points=points, hypervolume=hv, diagnostics=diagnostics,
                  n_complete=_int(payload.get("n_complete")), n_excluded=_int(payload.get("n_excluded")),
                  predicted=predicted[:MAX_TABLE], metric_policy=payload.get("metric_policy"),
                  run_id=paths.get("run_id"),

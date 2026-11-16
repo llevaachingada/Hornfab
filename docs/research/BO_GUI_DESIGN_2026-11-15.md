@@ -551,4 +551,5 @@ desktop + phone width in light and dark. No GPU/study run is started by this wor
 | 2026-11-15 | 4 — Pareto | `pareto_view`, frontier table/drill-down, reference/hypervolume notes | `test_gui_bo_views.py` |
 | 2026-11-15 | 5 — trust region | `trust_region_view`, L series, box bars, converged state | `test_gui_bo_views.py` |
 | 2026-11-15 | 6 — queue + child | `study_queue.py` (writes, never launches), `study_child.py`, UI actions | `test_gui_study_queue.py` |
-| — | 7 — optional | partial-dependence job and per-study dataset identity: designed, not built | this document §7/§9 |
+| 2026-11-16 | 7 — diagnostics + nav (cloud) | `bo/diagnostics.py`, `studies/cli.py diagnose`, `diagnose` CPU job, LOO/slice/HV views, `study_charts.js`, Bayes nav + Live tab | `test_bo_diagnostics.py`, `test_gui_bo_views.py` |
+| — | 8 — optional | per-study dataset row identity: designed, not built | this document §7/§9 |

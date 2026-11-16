@@ -15,7 +15,7 @@ from typing import Protocol
 
 _ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$")
 _HASH = re.compile(r"^[0-9a-f]{64}$")
-KINDS = frozenset({"analyze", "propose"})
+KINDS = frozenset({"analyze", "propose", "diagnose"})
 
 
 @dataclass

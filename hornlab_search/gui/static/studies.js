@@ -1,7 +1,11 @@
 // Study workspace. The host owns routes, HTTP protection and the concrete service API.
 // This module consumes B4 StudyPanel models and never computes or ranks scores.
 export const STUDY_PHASES = ["overview", "data", "explain", "propose", "execute", "decide"];
-const PHASE_LABELS = {overview: "Overview", data: "Data", explain: "Explain", propose: "Propose", execute: "Run & Verify", decide: "Decide"};
+// "live" is a view over the execute panel (same backend data), shown as a tab only when a package exists.
+export const LIVE_PHASE = "live";
+const ROUTE_PHASES = [LIVE_PHASE, ...STUDY_PHASES];
+const LIVE_POLL_MS = 10000;
+const PHASE_LABELS = {live: "Live", overview: "Overview", data: "Data", explain: "Explain", propose: "Propose", execute: "Run & Verify", decide: "Decide"};
 const STATES = {
   missing: "Evidence is missing. Prepare the required input before continuing.",
   stale: "This evidence belongs to an older revision. Refresh it before continuing.",
@@ -14,8 +18,8 @@ const STATES = {
   fit_failed: "Model fitting failed. Review diagnostics or use the labeled exploration fallback.",
   busy: "The requested lane is busy. Review the actual queue status.",
 };
-const ACTIONS = new Set(["save_draft", "select_evidence", "analyze", "propose", "package", "launch", "cancel", "decision", "revise", "save_seeds", "create_child", "queue_study"]);
-const MUTATING_READY = new Set(["select_evidence", "analyze", "propose", "package", "launch", "decision", "save_seeds", "create_child"]);
+const ACTIONS = new Set(["save_draft", "select_evidence", "analyze", "propose", "diagnose", "package", "launch", "cancel", "decision", "revise", "save_seeds", "create_child", "queue_study"]);
+const MUTATING_READY = new Set(["select_evidence", "analyze", "propose", "diagnose", "package", "launch", "decision", "save_seeds", "create_child"]);
 const ID = /^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/;
 // RegExp.test coerces its argument, so ID.test(undefined) is true ("undefined"); identity
 // checks must require a real string first.
@@ -70,10 +74,27 @@ const esc = value => String(value ?? "—").replace(/[&<>"']/g, c => ({"&":"&amp
 const label = s => String(s).replace(/_/g, " ");
 
 export function studyRoute(id, phase = "overview", rootId = null) {
-  if (!isId(id) || !STUDY_PHASES.includes(phase)) throw new Error("Invalid study route");
+  if (!isId(id) || !ROUTE_PHASES.includes(phase)) throw new Error("Invalid study route");
   if (rootId != null && !isId(rootId)) throw new Error("Invalid study root");
   const query = rootId ? `?${new URLSearchParams({root: rootId})}` : "";
-  return `#/analysis/study/${encodeURIComponent(id)}/${phase}${query}`;
+  return `#/bayes/study/${encodeURIComponent(id)}/${phase}${query}`;
+}
+
+// True when a panel carries run-package evidence (package hash/revision, job or package object).
+export function hasPackageData(data) {
+  if (!data || typeof data !== "object") return false;
+  return data.package_hash != null || data.package_revision != null
+    || (data.package !== null && typeof data.package === "object")
+    || (data.job !== null && typeof data.job === "object") || data.job_id != null;
+}
+
+// Packages seen this session (per module instance); used to decide whether the Live tab shows.
+const packagedStudies = new Set();
+
+function studyIsRunning(study, data) {
+  const running = ["running", "queued"];
+  const jobStatus = data?.run_status?.status ?? data?.job_status ?? data?.job?.status;
+  return running.includes(study?.status) || running.includes(jobStatus);
 }
 
 // Only construct links to existing internal run/verify routes; never trust a provided URL.
@@ -166,7 +187,7 @@ function proposeBlocked(study, panel, data) {
 
 function actionEnabled(action, panel, study, data = null) {
   if (!action || !ACTIONS.has(action.kind) || action.enabled !== true) return false;
-  if (MUTATING_READY.has(action.kind) && panel.status !== "ready" && !["analyze", "propose", "package", "launch", "decision", "create_child", "queue_study"].includes(action.kind)) return false;
+  if (MUTATING_READY.has(action.kind) && panel.status !== "ready" && !["analyze", "propose", "diagnose", "package", "launch", "decision", "create_child", "queue_study"].includes(action.kind)) return false;
   if (panel.status === "stale") return false;
   if (panel.revision !== study.revision) return false;
   if (action.kind === "propose" && proposeBlocked(study, panel, data)) return false;
@@ -317,7 +338,26 @@ function renderCalibration(view) {
   const rows = points.slice(0, 50).map(point => `<tr><td class="mono">${esc(point.solve_id)}</td><td class="r mono">${fmtNum(point.predicted)}</td><td class="r mono">[${fmtNum(point.lower)}, ${fmtNum(point.upper)}]</td><td class="r mono">${fmtNum(point.measured)}</td><td>${point.inside ? '<span class="pill good">inside</span>' : '<span class="pill warn">outside</span>'}</td></tr>`).join("");
   const stats = `<p><span class="pill">n ${fmtNum(view.n, 0)}</span>${view.coverage != null ? ` <span class="pill">coverage ${fmtNum(view.coverage * 100, 1)} %</span>` : ""}${view.spearman != null ? ` <span class="pill">rank ρ ${fmtNum(view.spearman, 3)}</span>` : ""}</p>`;
   return boPanel("calibration", "Predicted vs measured J", view,
-    `${chartBlock("calibration", "Predicted model J against measured screen J with the y equals x guide")}${stats}<p class="muted">${esc(view.interval_label || "Model credible interval")}</p>${rows ? `<div class="tbl-scroll"><table><thead><tr><th>Solve</th><th class="r">Predicted</th><th class="r">Interval</th><th class="r">Measured</th><th>Coverage</th></tr></thead><tbody>${rows}</tbody></table></div><p class="bo-scroll-hint">Scroll horizontally for all columns →</p>` : ""}`);
+    `${chartBlock("calibration", "Predicted model J against measured screen J with the y equals x guide")}${stats}<p class="muted">${esc(view.interval_label || "Model credible interval")}</p>${rows ? `<div class="tbl-scroll"><table><thead><tr><th>Solve</th><th class="r">Predicted</th><th class="r">Interval</th><th class="r">Measured</th><th>Coverage</th></tr></thead><tbody>${rows}</tbody></table></div><p class="bo-scroll-hint">Scroll horizontally for all columns →</p>` : ""}${renderLoo(view.loo)}`);
+}
+
+function renderLoo(loo) {
+  if (!loo) return "";
+  if (loo.available !== true) {
+    return loo.can_compute ? `<p class="muted">LOO on training data: not computed yet. Use “Compute model diagnostics” in the actions above.</p>` : "";
+  }
+  const sm = loo.summary || {};
+  const chips = `<p><span class="pill">n ${fmtNum(loo.n, 0)}${loo.truncated ? " (truncated)" : ""}</span>${sm.coverage_95 != null ? ` <span class="pill">±2σ coverage ${fmtNum(sm.coverage_95 * 100, 1)} %</span>` : ""}${sm.spearman != null ? ` <span class="pill">rank ρ ${fmtNum(sm.spearman, 3)}</span>` : ""}${sm.rmse != null ? ` <span class="pill">RMSE ${fmtNum(sm.rmse, 3)}</span>` : ""}</p>`;
+  return `<h4>LOO on training data</h4>${chartBlock("calibration_loo", "Leave-one-out predicted J against observed J with whiskers")}${chips}<p class="muted">${esc(loo.method || "Leave-one-out from the fitted model; no refit per row.")}</p>`;
+}
+
+function renderSlices(view) {
+  const slices = Array.isArray(view.slices) ? view.slices : [];
+  if (!slices.length) {
+    return view.diagnostics?.can_compute ? `<p class="muted">1-D model slices: not computed yet. Use “Compute model diagnostics” in the actions above.</p>` : "";
+  }
+  const cells = slices.map(item => `<figure class="study-chart"><svg data-study-slice="${esc(item.key)}" role="img" aria-label="${esc(`Model J along ${item.key}`)}"></svg><figcaption class="muted mono">${esc(item.key)}</figcaption></figure>`).join("");
+  return `<h4>Model slices through the incumbent</h4><div class="bo-slices">${cells}</div><p class="muted">Line is the model mean, dashed lines are ±2σ, the vertical tick is the incumbent.</p>`;
 }
 
 function renderSensitivity(view) {
@@ -328,7 +368,7 @@ function renderSensitivity(view) {
     return `<div class="bo-bar-row"><span class="bo-bar-label mono">${esc(knob.key)}</span><div class="bo-bar-track" aria-hidden="true"><i style="width:${pct}%"></i></div><span class="bo-bar-value mono">${pct} %</span><span class="muted mono">ℓ ${fmtNum(knob.lengthscale, 3)}</span></div>`;
   }).join("");
   return boPanel("sensitivity", "How strongly J reacts to each knob", view,
-    `<div class="bo-bars">${rows}</div><p class="muted">Relative knob sensitivity is 1/lengthscale, normalized; it describes the model, not a proven acoustic effect. Engine: ${esc(view.engine?.engine || "—")} ${esc(view.engine?.torch || "")}</p>`);
+    `<div class="bo-bars">${rows}</div><p class="muted">Relative knob sensitivity is 1/lengthscale, normalized; it describes the model, not a proven acoustic effect. Engine: ${esc(view.engine?.engine || "—")} ${esc(view.engine?.torch || "")}</p>${renderSlices(view)}`);
 }
 
 function renderTrustRegion(view) {
@@ -432,8 +472,52 @@ function renderArtifacts(data, state) {
   return `<section aria-label="Artifacts"><h3>Artifacts</h3>${links.length ? `<p>${links.join(" ")}</p>` : ""}${panel}</section>`;
 }
 
+const DASH = "–";
+const finiteOrNull = value => (value != null && Number.isFinite(Number(value)) ? Number(value) : null);
+const minOf = values => { const nums = values.map(finiteOrNull).filter(v => v != null); return nums.length ? Math.min(...nums) : null; };
+const ratioText = (used, total) => {
+  const u = finiteOrNull(used);
+  if (u == null) return DASH;
+  const t = finiteOrNull(total);
+  return `${fmtNum(u, 0)} / ${t == null ? DASH : fmtNum(t, 0)}`;
+};
+const jOrDash = value => (value == null ? DASH : fmtNum(value));
+function kpiCell(name, value, detail = "") {
+  return `<div class="bo-kpi"><span class="bo-kpi-label">${esc(name)}</span><strong class="bo-kpi-value mono">${esc(value)}</strong>${detail ? `<span class="muted bo-kpi-detail">${detail}</span>` : ""}</div>`;
+}
+
+/** Live view: KPI strip, convergence chart and current pick, all from the execute panel's bo/progress data. */
+function renderLive(data, selected) {
+  const bo = data.bo && typeof data.bo === "object" ? data.bo : {};
+  const run = bo.run && typeof bo.run === "object" ? bo.run : {};
+  const conv = bo.convergence && typeof bo.convergence === "object" ? bo.convergence : null;
+  const trust = bo.trust_region && typeof bo.trust_region === "object" ? bo.trust_region : {};
+  const counts = data.call_counts && typeof data.call_counts === "object" ? data.call_counts : {};
+  const arms = Array.isArray(conv?.arms) ? conv.arms : [];
+  const budget = run.budget && typeof run.budget === "object" ? run.budget : {};
+  const eta = conv?.eta && typeof conv.eta === "object" ? conv.eta : null;
+  const etaSeconds = eta ? [finiteOrNull(eta.screen_seconds), finiteOrNull(eta.verify_seconds)] : [null, null];
+  const etaTotal = etaSeconds.every(v => v != null) ? fmtDuration(etaSeconds[0] + etaSeconds[1]) : DASH;
+  const etaDetail = eta ? `screen ${fmtDuration(eta.screen_seconds)} · verify ${fmtDuration(eta.verify_seconds)}` : "ETA is unavailable until this run records solve times";
+  const refused = data.progress && typeof data.progress === "object" ? data.progress.refused : null;
+  const kpis = [
+    kpiCell("Screens used / total", ratioText(counts.screen_calls ?? trust.budget?.used, budget.screen_calls ?? trust.budget?.total)),
+    kpiCell("Verify used / total", ratioText(counts.verify_calls, budget.verify_calls)),
+    kpiCell("Best verify J", jOrDash(minOf(arms.map(a => a?.best_verify_j)))),
+    kpiCell("Best screen J", jOrDash(minOf(arms.map(a => a?.best_j)))),
+    kpiCell("ETA", etaTotal, etaDetail),
+    kpiCell("Refusals", finiteOrNull(refused) == null ? DASH : fmtNum(refused, 0)),
+  ].join("");
+  const pick = conv?.incumbent ?? data.selected_horn ?? selected;
+  const pickHtml = pick && typeof pick === "object"
+    ? `<section class="bo-pick" aria-label="Current pick"><h3>Current pick</h3><p>${esc(safeText(pick.label || pick.id || "Best so far", 200))}</p><p class="mono">J ${esc(fmtNum(pick.j ?? pick.best_j ?? NaN))}</p><p class="muted">Screen J is reported but does not decide; verify J is the comparison endpoint.</p></section>`
+    : `<section class="bo-pick" aria-label="Current pick"><h3>Current pick</h3><p class="muted">No pick is recorded yet.</p></section>`;
+  const convergence = conv && conv.status !== "not_applicable" ? renderConvergence(conv) : '<p class="muted">Convergence is not recorded for this study yet.</p>';
+  return `<div class="bo-kpis" role="list" aria-label="Live KPIs">${kpis}</div>${convergence}${pickHtml}`;
+}
+
 export function renderStudyPanel(study, panel, selected = null, notice = "", state = {}) {
-  if (!study || !ID.test(study.id || "") || !STUDY_PHASES.includes(panel?.phase)) throw new Error("Invalid study view");
+  if (!study || !ID.test(study.id || "") || !ROUTE_PHASES.includes(panel?.phase)) throw new Error("Invalid study view");
   const phase = panel.phase;
   const stale = panel.revision !== study.revision;
   const status = stale ? "stale" : (panel.status || "unknown");
@@ -442,7 +526,11 @@ export function renderStudyPanel(study, panel, selected = null, notice = "", sta
   const visibleData = Object.fromEntries(Object.entries(data).filter(([k]) => !["actions", "selected_horn", "policies", "candidates", "package", "budget", "lane", "deadline", "stop_recovery", "stop_rules", "verification", "verification_policy", "progress", "job", "job_id", "job_status", "package_hash", "package_revision", "artifacts", "bo"].includes(k)));
   const activePanel = {...panel, status};
   const renderState = {busy:state?.busy === true, artifact:state?.artifact || null};
-  const tabs = STUDY_PHASES.map(p => `<a href="${esc(studyRoute(study.id, p, study.root || null))}"${p === phase ? ' aria-current="page"' : ""}>${esc(PHASE_LABELS[p])}</a>`).join(" · ");
+  const isLive = phase === LIVE_PHASE;
+  const linkPhase = isLive ? "execute" : phase;
+  const hasPackage = state?.hasPackage === true || packagedStudies.has(study.id) || hasPackageData(data);
+  const liveTab = hasPackage ? `<a href="${esc(studyRoute(study.id, LIVE_PHASE, study.root || null))}"${isLive ? ' aria-current="page"' : ""}>${esc(PHASE_LABELS[LIVE_PHASE])}</a>` : "";
+  const tabs = [liveTab, ...STUDY_PHASES.map(p => `<a href="${esc(studyRoute(study.id, p, study.root || null))}"${p === phase ? ' aria-current="page"' : ""}>${esc(PHASE_LABELS[p])}</a>`)].filter(Boolean).join(" · ");
   const actionHtml = actions.map(({action: a, index: i}) => {
     const outcomes = Array.isArray(a.allowed_outcomes) ? a.allowed_outcomes.filter(x => ["inconclusive", "accept", "reject"].includes(x)) : ["inconclusive", "accept", "reject"];
     const inputs = a.kind === "decision" ? `<label>Decision <select data-study-field="outcome">${outcomes.map(x => `<option value="${x}">${esc(label(x))}</option>`).join("")}</select></label><label>Rationale <textarea data-study-field="rationale" maxlength="4000"></textarea></label>` : a.kind === "save_draft" ? `<label>Study question <input data-study-field="question" maxlength="500"></label>` : a.kind === "create_child" ? `<label>Child study question <input data-study-field="question" maxlength="500"></label><label>Child policy <select data-study-field="policy"><option value="scalar">scalar</option><option value="turbo">turbo (trust region)</option><option value="pareto">coverage-ripple</option></select></label>` : "";
@@ -455,12 +543,15 @@ export function renderStudyPanel(study, panel, selected = null, notice = "", sta
   const executeHtml = phase === "execute" ? renderExecute(data) : "";
   const boHtml = renderBo(phase, data, study, study.root || null);
   const artifactHtml = phase === "decide" ? renderArtifacts(data, renderState) : "";
-  return `<section class="study-workspace" aria-label="Study workspace"><header><p><a href="#/analysis">Analysis</a> / Studies</p><h1>${esc(study.name || study.question || study.spec?.question || "Study")}</h1><p>Revision ${esc(study.revision)} · ${esc(study.status || "unknown")} · ${esc(study.protocol || "bo-study-v1.1")}${study.root_label ? ` · ${esc(study.root_label)}` : ""}</p><nav aria-label="Study phases">${tabs}</nav></header>
+  const bodyHtml = isLive
+    ? renderLive(data, selected)
+    : `${candidateHtml}${executeHtml}${boHtml}${policyHtml}${["propose", "execute"].includes(phase) ? `<details><summary>${phase === "propose" ? "Proposal" : "Execution"} details and diagnostics</summary>${display(visibleData)}</details>` : display(visibleData)}`;
+  return `<section class="study-workspace" aria-label="Study workspace"><header><p><a href="#/bayes/studies">Bayes</a> / Studies</p><h1>${esc(study.name || study.question || study.spec?.question || "Study")}</h1><p>Revision ${esc(study.revision)} · ${esc(study.status || "unknown")} · ${esc(study.protocol || "bo-study-v1.1")}${study.root_label ? ` · ${esc(study.root_label)}` : ""}</p><nav aria-label="Study phases">${tabs}</nav></header>
   ${notice ? `<p role="alert">${esc(notice)}</p>` : ""}
   <p role="status"><strong>${esc(label(status))}</strong>${STATES[status] ? `: ${esc(STATES[status])}` : ""}</p>
   ${Array.isArray(panel.reasons) && panel.reasons.length ? display(panel.reasons) : ""}
-  <div class="study-layout"><main><h2>${esc(PHASE_LABELS[phase])}</h2>${candidateHtml}${executeHtml}${boHtml}${policyHtml}${["propose", "execute"].includes(phase) ? `<details><summary>${phase === "propose" ? "Proposal" : "Execution"} details and diagnostics</summary>${display(visibleData)}</details>` : display(visibleData)}${artifactHtml}<h3>Provenance</h3>${display(panel.provenance || null)}${selector}<p>${renderLinks(data, study.id, phase, study.root || null)}</p></main>
-  <aside aria-label="Selected horn"><h2>Selected horn</h2><p>Predicted, screen, and verified results are distinct.</p>${display(selected || data.selected_horn || null)}${renderLinks(selected, study.id, phase, study.root || null)}</aside></div>
+  <div class="study-layout"><main><h2>${esc(PHASE_LABELS[phase])}</h2>${bodyHtml}${artifactHtml}<h3>Provenance</h3>${display(panel.provenance || null)}${selector}<p>${renderLinks(data, study.id, linkPhase, study.root || null)}</p></main>
+  <aside aria-label="Selected horn"><h2>Selected horn</h2><p>Predicted, screen, and verified results are distinct.</p>${display(selected || data.selected_horn || null)}${renderLinks(selected, study.id, linkPhase, study.root || null)}</aside></div>
   <section aria-label="Next action"><h2>Next action</h2>${actionHtml || '<p class="muted">No action is currently available.</p>'}</section>
   <p><a href="/api/studies/${encodeURIComponent(study.id)}/export" download="study-${esc(study.id)}.json">Export study record and artifact identities</a></p>
   <p class="muted">Acquisition values are technical ranking diagnostics, not horn quality. No chart selection starts a solve.</p></section>`;
@@ -489,14 +580,16 @@ function actionFailure(error) {
  * (studyId, kind, payload, {signal}). No URLs, argv or user code come from artifacts.
  */
 export function mountStudy(root, {studyId, phase = "overview", api, pollMs = 5000, onError = () => {}, rootId = null, drawCharts = null}) {
-  if (!root || !ID.test(studyId || "") || !STUDY_PHASES.includes(phase) || !api || typeof api.getStudy !== "function" || typeof api.getPanel !== "function") throw new Error("Invalid study mount");
+  if (!root || !ID.test(studyId || "") || !ROUTE_PHASES.includes(phase) || !api || typeof api.getStudy !== "function" || typeof api.getPanel !== "function") throw new Error("Invalid study mount");
   let rootRef = isId(rootId || "") ? rootId : null;
   let disposed = false, controller = null, timer = null, generation = 0, busy = false, refreshing = false;
   let study = null, panel = null, selected = null, notice = "", pendingKey = null, artifact = null;
+  const isLive = phase === LIVE_PHASE;
+  const fetchPhase = isLive ? "execute" : phase;
   const makeKey = () => globalThis.crypto?.randomUUID?.() || `study-${Date.now()}-${Math.random().toString(36).slice(2)}`;
   const draw = () => {
     if (disposed || !study || !panel) return;
-    root.innerHTML = renderStudyPanel(study, panel, selected, notice, {busy, artifact});
+    root.innerHTML = renderStudyPanel(study, panel, selected, notice, {busy, artifact, hasPackage: packagedStudies.has(studyId) || hasPackageData(panel.data)});
     if (typeof drawCharts === "function") {
       try { drawCharts(root, panel); }
       catch (error) { onError(error); }
@@ -510,11 +603,14 @@ export function mountStudy(root, {studyId, phase = "overview", api, pollMs = 500
     const current = ++generation;
     controller?.abort(); controller = new AbortController();
     try {
-      const [nextStudy, nextPanel] = await Promise.all([api.getStudy(studyId, {root: rootRef, signal: controller.signal}), api.getPanel(studyId, phase, {root: rootRef, signal: controller.signal})]);
+      const [nextStudy, nextPanel] = await Promise.all([api.getStudy(studyId, {root: rootRef, signal: controller.signal}), api.getPanel(studyId, fetchPhase, {root: rootRef, signal: controller.signal})]);
       if (disposed || current !== generation) return;
       if (!rootRef && isId(nextStudy?.root || "")) rootRef = nextStudy.root;
       if (study && study.revision !== nextStudy.revision) selected = null;
-      study = nextStudy; panel = nextPanel; draw();
+      if (hasPackageData(nextPanel?.data)) packagedStudies.add(studyId);
+      // The Live view is only for studies with a run package; otherwise land on Overview.
+      if (isLive && !packagedStudies.has(studyId)) { location.hash = studyRoute(studyId, "overview", rootRef || null); return; }
+      study = nextStudy; panel = isLive ? {...nextPanel, phase: LIVE_PHASE} : nextPanel; draw();
     } catch (error) {
       if (disposed || current !== generation || error?.name === "AbortError") return;
       notice = "Study data could not be loaded. Retry or inspect the service status."; onError(error); draw();
@@ -615,14 +711,20 @@ export function mountStudy(root, {studyId, phase = "overview", api, pollMs = 500
   }
   root.addEventListener("click", click);
   refresh();
-  if (Number.isFinite(pollMs) && pollMs > 0) timer = setInterval(() => { if (!busy) refresh(); }, Math.max(1000, pollMs));
+  // Live polls every 10 s, and only while the study is running; the timer is cleared on dispose.
+  const livePoll = isLive ? LIVE_POLL_MS : pollMs;
+  if (Number.isFinite(livePoll) && livePoll > 0) timer = setInterval(() => {
+    if (busy) return;
+    if (isLive && !studyIsRunning(study, panel?.data)) return;
+    refresh();
+  }, Math.max(1000, livePoll));
   return () => { disposed = true; generation++; controller?.abort(); if (timer != null) clearInterval(timer); root.removeEventListener("click", click); };
 }
 
 export function renderStudyList(studies, notice = "") {
   if (!Array.isArray(studies) || studies.length > 100) throw new Error("Invalid study list");
-  const rows = studies.map(s => ID.test(s?.id || "") ? `<li><a href="${esc(studyRoute(s.id, "overview", s.root || null))}">${esc(s.name || s.question || s.id)}</a> · revision ${esc(s.revision ?? "unknown")} · ${esc(s.status || "draft")}${s.root_label ? ` · <span class="muted mono">${esc(s.root_label)}</span>` : ""}</li>` : "").join("");
-  return `<section aria-label="Studies"><h1>Studies</h1><p><a href="#/analysis">Analysis reports</a> · <a href="#/analysis/compare-methods">Compare methods</a></p>${notice ? `<p role="alert">${esc(notice)}</p>` : ""}<h2>Existing studies</h2>${rows ? `<ul>${rows}</ul>` : "<p>No studies are available.</p>"}<h2>New draft</h2><form data-study-create><label>Study question <input name="question" maxlength="500" required></label><label>Horn task <select name="task"><option value="p80x60__osse_ext_throat_home700_v7_seed5678">Home 80 × 60 / 700 Hz — current solver cohort, seed 5678 (v7)</option><option value="p80x60__osse_ext_throat_home700_v7">Home 80 × 60 / 700 Hz — original cohort (v7)</option><option value="native__ath_core_v4">Frozen native ATH validation (v4)</option></select></label><fieldset><legend>Compatible measured cohort (explicit paths for home task)</legend><label>Offline scores JSON <input name="scores_json"></label><label>Catalog CSV <input name="catalog_csv"></label><label>Dataset directory <input name="dataset_root"></label><label>Candidate pool JSON (optional) <input name="pool_json"></label></fieldset><button type="submit">Save draft</button></form></section>`;
+  const rows = studies.map(s => ID.test(s?.id || "") ? `<li><a href="${esc(studyRoute(s.id, LIVE_PHASE, s.root || null))}">${esc(s.name || s.question || s.id)}</a> · revision ${esc(s.revision ?? "unknown")} · ${esc(s.status || "draft")}${s.root_label ? ` · <span class="muted mono">${esc(s.root_label)}</span>` : ""}</li>` : "").join("");
+  return `<section aria-label="Studies"><h1>Studies</h1><p><a href="#/analysis">Analysis reports</a> · <a href="#/bayes/board">Method board</a></p>${notice ? `<p role="alert">${esc(notice)}</p>` : ""}<h2>Existing studies</h2>${rows ? `<ul>${rows}</ul>` : "<p>No studies are available.</p>"}<h2>New draft</h2><form data-study-create><label>Study question <input name="question" maxlength="500" required></label><label>Horn task <select name="task"><option value="p80x60__osse_ext_throat_home700_v7_seed5678">Home 80 × 60 / 700 Hz — current solver cohort, seed 5678 (v7)</option><option value="p80x60__osse_ext_throat_home700_v7">Home 80 × 60 / 700 Hz — original cohort (v7)</option><option value="native__ath_core_v4">Frozen native ATH validation (v4)</option></select></label><fieldset><legend>Compatible measured cohort (explicit paths for home task)</legend><label>Offline scores JSON <input name="scores_json"></label><label>Catalog CSV <input name="catalog_csv"></label><label>Dataset directory <input name="dataset_root"></label><label>Candidate pool JSON (optional) <input name="pool_json"></label></fieldset><button type="submit">Save draft</button></form></section>`;
 }
 
 /** List/create entry point. api.listStudies({signal}); api.createStudy({spec,key},{signal}). */

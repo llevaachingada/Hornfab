@@ -289,3 +289,49 @@ def test_method_board_applies_the_declared_rule(tmp_path):
     assert board["methods"]["cma"]["median_verify_j"] == pytest.approx(3.55)
     assert board["comparisons"][0]["verdict"] == "bo"
     assert board["arms"][0]["screens_to_target"] is not None
+
+
+def _diag_artifact(with_pareto=False):
+    xs = [0.0, 0.5, 1.0]
+    out = {
+        "schema": "study-model-diagnostics-v1", "status": "ok",
+        "relevance": [{"key": "k1", "inv_lengthscale": 2.0}, {"key": "k2", "inv_lengthscale": 1.0}],
+        "loo": {"method": "efficient LOO, no refit", "n": 3, "truncated": False,
+                "rows": [{"id": "a", "j_obs": 1.0, "j_mean": 1.1, "j_sd": 0.2},
+                         {"id": "b", "j_obs": 2.0, "j_mean": 1.8, "j_sd": 0.3},
+                         {"id": "c", "j_obs": 3.0, "j_mean": 3.2, "j_sd": 0.1}],
+                "summary": {"rmse": 0.2, "spearman": 1.0, "coverage_95": 1.0}},
+        "slices": {"anchor": "inc", "grid_n": 3,
+                   "per_key": {"k1": {"x": xs, "j_mean": [1, 2, 3], "j_sd": [.1, .1, .1], "anchor_x": 0.5}}},
+        "pareto": None,
+    }
+    if with_pareto:
+        out["pareto"] = {"front_ids": ["a", "b"], "hv_trace": [{"seq": 1, "hv": 0.1}, {"seq": 2, "hv": 0.3}]}
+    return out
+
+
+def test_diagnostics_absent_reports_can_compute_flag(tmp_path):
+    service, study, _runs = _fixture(tmp_path)
+    cal = calibration_view(service, study)
+    assert cal["loo"]["available"] is False and "can_compute" in cal["loo"]
+    sens = sensitivity_view(service, study)
+    assert sens["diagnostics"]["available"] is False and "can_compute" in sens["diagnostics"]
+
+
+def test_diagnostics_artifact_feeds_loo_and_slices(tmp_path):
+    service, study, _runs = _fixture(tmp_path)
+    _attach(service, study["id"], "diagnostics", _diag_artifact())
+    cal = calibration_view(service, study)
+    assert cal["loo"]["available"] is True and cal["loo"]["n"] == 3
+    assert cal["loo"]["summary"]["coverage_95"] == 1.0
+    sens = sensitivity_view(service, study)
+    assert sens["diagnostics"]["available"] is True
+    assert sens["slices"][0]["key"] == "k1" and len(sens["slices"][0]["x"]) == 3
+
+
+def test_pareto_view_prefers_diagnostics_front_and_hv_trace(tmp_path):
+    service, study, runs = _fixture(tmp_path, policy="pareto", with_pareto=True)
+    _attach(service, study["id"], "diagnostics", _diag_artifact(with_pareto=True))
+    view = pareto_view(service, study, runs_root=runs)
+    assert view["diagnostics"]["front_ids"] == ["a", "b"]
+    assert view["diagnostics"]["hv_trace"][-1] == [2, 0.3]

@@ -1,6 +1,26 @@
 ﻿# CONTINUITY
 
-## 2026-11-15 (latest) - Full-circle globe view from the stored balloon; no new solves
+## 2026-11-16 (latest) - BO GUI cloud pass on `feat/bo-gui`: sab-home merged, BoTorch diagnostics, Bayes nav + Live tab; no solves
+
+- Cloud session (offline, no GPU, no `runs/`, no merge to main). `feat/bo-gui` merged
+  `origin/feat/sab-home-2026-11-14`; only docs conflicted (union; CONTINUITY kept the correctly encoded side).
+- New `hornlab_search/bo/diagnostics.py` + `studies/cli.py diagnose`: artifact kind `diagnostics`, schema
+  `study-model-diagnostics-v1` (BoTorch 0.18.1 `efficient_loo_cv` LOO, 25-point 1-D slices through the incumbent,
+  Pareto `front_ids` + `hv_trace`). It refits from the stored training set, so it works for old studies.
+- GUI: `sensitivity_view` adds slices, `calibration_view` adds a "LOO on training data" half, `pareto_view` adds
+  diagnostics front/HV when present (else `available:false, can_compute`). `diagnose` is a CPU job kind
+  (`study_jobs.py`, `server.py`, `service.reserve_cpu_job`) shown as an Explain-phase action.
+  `study_charts.js` draws slice small-multiples and the LOO scatter.
+- Nav: top-level **Bayes** group (`#/bayes/studies`, `#/bayes/board`); old `#/analysis/studies*` and
+  `#/analysis/compare-methods` redirect. Study page gets a **Live** tab (KPI strip, convergence, current pick, 10 s poll while running).
+- Tests (cloud): `tests/test_bo_diagnostics.py` (4), 3 new cases in `test_gui_bo_views.py`, `gui_study_lifecycle.mjs` ok.
+  Environment-only/stale failures, not from this work: `test_gui_bridge_preview` (6, needs `hornlab_mesher`),
+  `test_study_production::...current` (mesher pin), `test_gui_brief_authoring::test_balloon_entry_point_already_wired`
+  (route regex changed on the sab-home branch).
+- **Not verified:** `diagnose` against a real study (no data in the cloud box); no screenshots. Do the visual pass locally.
+- **Next (owner, local):** after solves finish, run `diagnose` on the fixture studies, start the GUI and look; merge into the GUI checkout branch.
+
+## 2026-11-15 - Full-circle globe view from the stored balloon; no new solves
 
 - The `Directivity (isobars)` view now has three modes: `Rectangular | Globe | Full globe`.
   `Globe` is unchanged (the ±90° H/V cuts wrapped into a half-circle). `Full globe` re-samples the
