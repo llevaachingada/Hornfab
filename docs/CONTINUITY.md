@@ -1,5 +1,21 @@
 # CONTINUITY
 
+## 2026-11-16 (16:30) - Klangfilm-Lame geometry family implemented (CPU only; no GPU, nothing queued)
+
+- New `tools/geometry/lame_cap.py` (superellipsoid-cap area, quintic C2 gate, ratio-locked area solve) and
+  `tools/geometry/klangfilm_lame.py` + `klangfilm_lame_cli.py` (`rows.type: klangfilm_lame`, schema `klangfilm-lame-v1`).
+  Knobs: fc_hz, aspect, lame_p, end_frac, rim_sweep_ratio, morph_frac; source blend OFF (`source_blend_ratio` 0,
+  `entry_half_angle_deg` only used when blend > 0) and pinned. The 2018 port `klangfilm_ellipse.py` is untouched.
+- Throat provenance (v3 addendum): HF1440 publishes NO numeric exit angle; `exit_angle_deg: 2` stays a simulation
+  assumption (meta `angle_provenance: assumed_legacy`). Raw parent wall half-angle is derived: 10.617223 deg (tested).
+  Nothing forces 2 deg. Diagnostics: `klangfilm_lame.diagnostics`.
+- Tests `tests/test_tools_klangfilm_lame.py` (16, green): sphere/ellipsoid/area-lock invariants, p=2 reduction, throat
+  round + area residual < 1e-8, sweep H-only, blend off/on, determinism. Cell `hl__klangfilm_lame_curved_v1` (not queued).
+- NOT done (needs local machine): 3-D mesh/shell/normals checks, camera-matched renders, driver coupling A/B, BEM
+  comparisons, `lame_tail_mode` follow_parent, true 3-D normal outer shell, JMLC-derived parent. Handoff copied to
+  `docs/research/typologies/klangfilm_lame_handoff_2026-11-16/`. Direct port of the non-commercial 2018 workbook: check
+  licence before distribution.
+
 ## 2026-11-16 (15:00) - Every watchdog-stopped run continued; watchdog: resume-aware + pin_ignore
 
 - Runner (`tools/run_campaign_night.py`): a job with `--resume DIR` is watched on that DIR and judged only on the rows

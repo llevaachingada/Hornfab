@@ -34,6 +34,8 @@ the 0.60 seed) and the section pucker's vertical strength collapses to 0.37–3.
 [five-angle seed gallery](renders/2026-11-15-rolled-rect/index.html).
 
 
+[Klangfilm-Lame handoff v3 2026-11-16](research/typologies/klangfilm_lame_handoff_2026-11-16/00_START_HERE.md): Lame/rollback research dossier + HF1440 throat-coupling addendum (no published exit angle); implemented by `tools/geometry/klangfilm_lame.py`.
+
 [Klangfilm elliptical horn hand-off 2026-11-16](research/typologies/KLANGFILM_ELLIPSE_HANDOFF_2026-11-16.md): port of Ahlswede's Klangfilm elliptical calculator (formulas, knobs, sources, why built this way, open mismatch with the owner's reference); sweep sheet `queue/klangfilm_param_sheet_hires.png`.
 [Home optimizer comparison 2026-11-16](queue/HOME_OPTIMIZER_COMPARISON_2026-11-16.md) / [score audit](queue/HOME_SCORE_AUDIT_2026-11-16.md) / [matched home protocol](queue/MATCHED_HOME_PROTOCOL_2026-11-16.md): concurrent-session BO vs CMA switching review, read-only queue scoring audit, frozen-cohort matched comparison protocol.
 

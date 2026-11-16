@@ -22,6 +22,8 @@ examples/prototypes/rolled_rect_2026-11-15/crowe_section_reference.yaml; recipe 
 Width, height and depth scale the digitized sections independently; the swept-H construction needs
 depth <= 0.57 x width (0.66 x at h_depth_scale 1.1). Home-sized searchable cell:
 `examples/typologies/home_landscape_2026-11-15/hl__crowe_panel_home_v7.yaml` (search and verify via crowe_panel_cli.py).
+Klangfilm-Lame (2026-11-16): `tools/geometry/lame_cap.py` (superellipsoid-cap area math), `klangfilm_lame.py` (derived family `klangfilm-lame-v1`: Lame section, curved-cap area lock, rim sweep, optional source blend, diagnostics), `klangfilm_lame_cli.py` (bridge entry), cell `hl__klangfilm_lame_curved_v1`, tests `tests/test_tools_klangfilm_lame.py`.
+
 Elliptical Klangfilm horn (2026-11-16): `tools/geometry/klangfilm_ellipse.py` ports Ahlswede's `draw_klangfilm` VBA
 (spherical-wave Klangfilm profile + area-matched ellipsoid wavefront cap; 0.001 mm parity with the workbook) plus two
 owner knobs (`bend_radius_mm` front arc, `throat_ellipse`); `klangfilm_ellipse_cli.py` rebinds the rolled_rect bridge
