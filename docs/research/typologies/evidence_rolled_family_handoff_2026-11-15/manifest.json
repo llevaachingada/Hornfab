@@ -1,0 +1,585 @@
+{
+  "purpose": "Evidence preservation only; no geometry/optimizer/queue edits or new solves. Passing historical audits does not establish acoustic readiness.",
+  "captured_utc": "2026-11-15T22:49:28.660173+00:00",
+  "checkout": "C:\\Users\\hunte\\Hrns\\hornlab-search",
+  "branch": "feat/sab-home-2026-11-14",
+  "head": "7124902d5296c2943384068f2b740b433e6b2f01",
+  "owner_hold": "CONTINUITY 2026-11-15 17:15 local: no new solves until brief/DI-slope question investigated and settled; refresh on pickup.",
+  "artifacts": [
+    {
+      "source": "scratch/2026-11-15_family_master/audit-rect_axial.json",
+      "saved_as": "docs/research/typologies/evidence_rolled_family_handoff_2026-11-15/audit-rect_axial.json",
+      "sha256": "0a43bc6a608930f25d09773b1d527d12eeae2195961dc4ede3d2bd233b02f132",
+      "bytes": 44402,
+      "execution": "historical saved artifact; not rerun for this handoff",
+      "schema": "rolled-family-box-audit-v1",
+      "ok": true,
+      "summary": {
+        "seed": {
+          "valid": 1,
+          "tested": 1
+        },
+        "corner": {
+          "valid": 32,
+          "tested": 32
+        },
+        "uniform": {
+          "valid": 64,
+          "tested": 64
+        }
+      },
+      "config": "examples/typologies/rolled_family_2026-11-15/rf__rect_axial_v7.yaml",
+      "config_sha256": "36836a07b4e311e0014eb8b42784d7d9fbd2917a3b9c33eaae17f8bf31eecd40",
+      "implementation_sha256": "41fc24b2815951be0be62cdece83119b1ef6dcafe22983da3cf01b36017d4b50",
+      "jacobian_rank": 5
+    },
+    {
+      "source": "scratch/2026-11-15_family_master/audit-rect_control.json",
+      "saved_as": "docs/research/typologies/evidence_rolled_family_handoff_2026-11-15/audit-rect_control.json",
+      "sha256": "c110085565e05976e32b19d1da6f5519a71498631a410ea71870a0dd4a1f69ed",
+      "bytes": 31192,
+      "execution": "historical saved artifact; not rerun for this handoff",
+      "schema": "rolled-family-box-audit-v1",
+      "ok": true,
+      "summary": {
+        "seed": {
+          "valid": 1,
+          "tested": 1
+        },
+        "corner": {
+          "valid": 8,
+          "tested": 8
+        },
+        "uniform": {
+          "valid": 64,
+          "tested": 64
+        }
+      },
+      "config": "examples/typologies/rolled_family_2026-11-15/rf__rect_control_v7.yaml",
+      "config_sha256": "f814f6884067f558d2205a2f953844c939c4012a0997d62d15ea2c6aff5e55cf",
+      "implementation_sha256": "41fc24b2815951be0be62cdece83119b1ef6dcafe22983da3cf01b36017d4b50",
+      "jacobian_rank": 3
+    },
+    {
+      "source": "scratch/2026-11-15_family_master/audit-rect_radial.json",
+      "saved_as": "docs/research/typologies/evidence_rolled_family_handoff_2026-11-15/audit-rect_radial.json",
+      "sha256": "ac1022642a97b5fb3992ea8ac0a86db3c6a4316ffea297a2327fb55977e036fb",
+      "bytes": 44497,
+      "execution": "historical saved artifact; not rerun for this handoff",
+      "schema": "rolled-family-box-audit-v1",
+      "ok": true,
+      "summary": {
+        "seed": {
+          "valid": 1,
+          "tested": 1
+        },
+        "corner": {
+          "valid": 32,
+          "tested": 32
+        },
+        "uniform": {
+          "valid": 64,
+          "tested": 64
+        }
+      },
+      "config": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_v7.yaml",
+      "config_sha256": "4a69670fa63e10bdaa298b701217e177474e551f1b565cd25f206eff784ec623",
+      "implementation_sha256": "41fc24b2815951be0be62cdece83119b1ef6dcafe22983da3cf01b36017d4b50",
+      "jacobian_rank": 5
+    },
+    {
+      "source": "scratch/2026-11-15_family_master/audit-rect_radial_strong.json",
+      "saved_as": "docs/research/typologies/evidence_rolled_family_handoff_2026-11-15/audit-rect_radial_strong.json",
+      "sha256": "32edf2396739bda58be942330db48611b52c8c9bc50cc7e1df76d23ba568a9dd",
+      "bytes": 44376,
+      "execution": "historical saved artifact; not rerun for this handoff",
+      "schema": "rolled-family-box-audit-v1",
+      "ok": true,
+      "summary": {
+        "seed": {
+          "valid": 1,
+          "tested": 1
+        },
+        "corner": {
+          "valid": 32,
+          "tested": 32
+        },
+        "uniform": {
+          "valid": 64,
+          "tested": 64
+        }
+      },
+      "config": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_strong_v7.yaml",
+      "config_sha256": "0fb31ef73693dd0673fd12782c3807f30aa6c0276ac6448aa3a6efe89d4f52f2",
+      "implementation_sha256": "41fc24b2815951be0be62cdece83119b1ef6dcafe22983da3cf01b36017d4b50",
+      "jacobian_rank": 5
+    },
+    {
+      "source": "scratch/2026-11-15_family_master/final-section_axial.json",
+      "saved_as": "docs/research/typologies/evidence_rolled_family_handoff_2026-11-15/final-section_axial.json",
+      "sha256": "1ca683f376782ef0976e5d0a095b0437d200113c542a676cc0e71dc42af85c2b",
+      "bytes": 44112,
+      "execution": "historical saved artifact; not rerun for this handoff",
+      "schema": "rolled-family-box-audit-v1",
+      "ok": true,
+      "summary": {
+        "seed": {
+          "valid": 1,
+          "tested": 1
+        },
+        "corner": {
+          "valid": 32,
+          "tested": 32
+        },
+        "uniform": {
+          "valid": 64,
+          "tested": 64
+        }
+      },
+      "config": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_v7.yaml",
+      "config_sha256": "37187af0671b038fa81e233b7cc00745fa6fa075d6e40809a3f2f28d8c5db0b4",
+      "implementation_sha256": "1879ad5acca2cb3d64753ddb96b5aa5ba9a2a30007997870b97ad0a052b95f7c",
+      "jacobian_rank": 5
+    },
+    {
+      "source": "scratch/2026-11-15_family_master/final-section_control.json",
+      "saved_as": "docs/research/typologies/evidence_rolled_family_handoff_2026-11-15/final-section_control.json",
+      "sha256": "e49458582060e1a47c89f2a90dae83558dd0b44f6241c8c0ec4a0ed5f7faa6c1",
+      "bytes": 30917,
+      "execution": "historical saved artifact; not rerun for this handoff",
+      "schema": "rolled-family-box-audit-v1",
+      "ok": true,
+      "summary": {
+        "seed": {
+          "valid": 1,
+          "tested": 1
+        },
+        "corner": {
+          "valid": 8,
+          "tested": 8
+        },
+        "uniform": {
+          "valid": 64,
+          "tested": 64
+        }
+      },
+      "config": "examples/typologies/rolled_family_2026-11-15/rf__section_control_v7.yaml",
+      "config_sha256": "edf9f99279a50f7b940153b4c17aab6e4761de2626fa5d10d798a85d3d25bb41",
+      "implementation_sha256": "1879ad5acca2cb3d64753ddb96b5aa5ba9a2a30007997870b97ad0a052b95f7c",
+      "jacobian_rank": 3
+    },
+    {
+      "source": "scratch/2026-11-15_family_master/final-section_radial.json",
+      "saved_as": "docs/research/typologies/evidence_rolled_family_handoff_2026-11-15/final-section_radial.json",
+      "sha256": "ea60e90ba93a69e714b068f96f7ea6232e6c5edad76e6cc9ab76e65e75d2ad27",
+      "bytes": 43286,
+      "execution": "historical saved artifact; not rerun for this handoff",
+      "schema": "rolled-family-box-audit-v1",
+      "ok": true,
+      "summary": {
+        "seed": {
+          "valid": 1,
+          "tested": 1
+        },
+        "corner": {
+          "valid": 32,
+          "tested": 32
+        },
+        "uniform": {
+          "valid": 64,
+          "tested": 64
+        }
+      },
+      "config": "examples/typologies/rolled_family_2026-11-15/rf__section_radial_v7.yaml",
+      "config_sha256": "3c5108ae6cce802bb658b25fc07beec4fe8484cf02861e9f7ceb7500adaf33b6",
+      "implementation_sha256": "1879ad5acca2cb3d64753ddb96b5aa5ba9a2a30007997870b97ad0a052b95f7c",
+      "jacobian_rank": 5
+    },
+    {
+      "source": "scratch/2026-11-15_family_master/final-section_radial_strong.json",
+      "saved_as": "docs/research/typologies/evidence_rolled_family_handoff_2026-11-15/final-section_radial_strong.json",
+      "sha256": "72d9bc386aec58eb217c3d2fe73136bb8ef113788e473f3731caf935cac1e4be",
+      "bytes": 43133,
+      "execution": "historical saved artifact; not rerun for this handoff",
+      "schema": "rolled-family-box-audit-v1",
+      "ok": true,
+      "summary": {
+        "seed": {
+          "valid": 1,
+          "tested": 1
+        },
+        "corner": {
+          "valid": 32,
+          "tested": 32
+        },
+        "uniform": {
+          "valid": 64,
+          "tested": 64
+        }
+      },
+      "config": "examples/typologies/rolled_family_2026-11-15/rf__section_radial_strong_v7.yaml",
+      "config_sha256": "37d2fc21b97cc482cbcbd60728785ca7b465763d2ac1f65171dc86679f6513c9",
+      "implementation_sha256": "1879ad5acca2cb3d64753ddb96b5aa5ba9a2a30007997870b97ad0a052b95f7c",
+      "jacobian_rank": 5
+    },
+    {
+      "source": "scratch/2026-11-15_family_master/audit-section_control.json",
+      "saved_as": "docs/research/typologies/evidence_rolled_family_handoff_2026-11-15/audit-section_control.json",
+      "sha256": "598e99a1b39de3e0746376e5fd3db678f2771a1091fefa0fa4a5a3837f4afe96",
+      "bytes": 30779,
+      "execution": "historical saved artifact; not rerun for this handoff",
+      "schema": "rolled-family-box-audit-v1",
+      "ok": false,
+      "summary": {
+        "seed": {
+          "valid": 1,
+          "tested": 1
+        },
+        "corner": {
+          "valid": 8,
+          "tested": 8
+        },
+        "uniform": {
+          "valid": 63,
+          "tested": 64
+        }
+      },
+      "config": "examples/typologies/rolled_family_2026-11-15/rf__section_control_v7.yaml",
+      "config_sha256": "edf9f99279a50f7b940153b4c17aab6e4761de2626fa5d10d798a85d3d25bb41",
+      "implementation_sha256": "41fc24b2815951be0be62cdece83119b1ef6dcafe22983da3cf01b36017d4b50",
+      "jacobian_rank": 3
+    },
+    {
+      "source": "scratch/2026-11-15_family_master/bo_synthetic_smoke.json",
+      "saved_as": "docs/research/typologies/evidence_rolled_family_handoff_2026-11-15/bo_synthetic_smoke.json",
+      "sha256": "93b7bfee15e2164e22c6d2a74a0358e9b2e0c3bf974a077f7e5f26b4e4717e31",
+      "bytes": 2735,
+      "execution": "historical saved artifact; not rerun for this handoff",
+      "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\rolled_family_2026-11-15\\rf__section_radial_v7.yaml",
+      "status": "ok",
+      "data": "synthetic only; no acoustic measurement or inference",
+      "gpu_or_bem_calls": 0,
+      "training_n": 16,
+      "pool_count": 8
+    },
+    {
+      "source": "scratch/2026-11-15_family_master/bo_synthetic_smoke.py",
+      "saved_as": "docs/research/typologies/evidence_rolled_family_handoff_2026-11-15/bo_synthetic_smoke.py",
+      "sha256": "dc38fa3499dbfaf98a1b99228384c6684cb76b48a8d8d2666e1dd6e749c76d24",
+      "bytes": 5507,
+      "execution": "historical saved artifact; not rerun for this handoff"
+    }
+  ],
+  "observed_live_files": [
+    {
+      "path": "docs/research/typologies/STARTING_SEEDS_2026-11-15.html",
+      "exists": true,
+      "sha256": "efcd9ff8e3f183e038badef39c9fc19db8bc3c5e8564409c6e2af28a947ab3f6",
+      "bytes": 51930
+    },
+    {
+      "path": "docs/research/typologies/STARTING_SEEDS_PLAIN_2026-11-15.md",
+      "exists": true,
+      "sha256": "8d89a5f1a9178a11d1468fff088ec7825f17660c16961e038d81d8b6905620fd",
+      "bytes": 34363
+    },
+    {
+      "path": "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
+      "exists": true,
+      "sha256": "a614108d44e6867ffd6a00f4d3e61fbf9277e53c5e49bf34b8adfc303428dbb4",
+      "bytes": 21470
+    },
+    {
+      "path": "docs/research/typologies/BIRADIAL_CROWE_SOURCES_2026-11-15.md",
+      "exists": true,
+      "sha256": "781990a08e39a91b72348d1edaac78ed29bf0c70dd1944ac4aa2d5af0cf8ec2c",
+      "bytes": 36813
+    },
+    {
+      "path": "docs/research/typologies/HORN_WHITEPAPERS_2026-11-15.md",
+      "exists": true,
+      "sha256": "376fdb61c36e6db37819969af7b48db5a02276b9aeb6f4b14ea68e80f8c3e0b4",
+      "bytes": 26131
+    },
+    {
+      "path": "docs/research/typologies/SCORING_NON_CD_SOURCES_2026-11-15.md",
+      "exists": true,
+      "sha256": "4f5107a7fa6596c4a184b4c043adb9b909ef5b5b2e3f8f660a3ec85619314415",
+      "bytes": 19242
+    },
+    {
+      "path": "hornlab_search/design/generators/rolled_family.py",
+      "exists": true,
+      "sha256": "fe2b22f0b7dfc1575ba7632c2ff4cda1f8e1e49b47781a27631f35ab6a3f255a",
+      "bytes": 13984
+    },
+    {
+      "path": "hornlab_search/design/generators/_rolled_rect_v1.py",
+      "exists": true,
+      "sha256": "c897ef62b9e6efcceab8535106174050bc774dd8914fbe62b84d0d321adacb4d",
+      "bytes": 6554
+    },
+    {
+      "path": "hornlab_search/design/generators/_crowe_section_v2.py",
+      "exists": true,
+      "sha256": "8953a6d76de8185036fd580a0be7223b56e0f64298c559ccb86dc8672313927b",
+      "bytes": 9296
+    },
+    {
+      "path": "hornlab_search/design/generators/data/crowe_section_reference_v1.yaml",
+      "exists": true,
+      "sha256": "cc493712804e8381e62634913fab7a3db83cf2dc98845300678657c511dfbed8",
+      "bytes": 859
+    },
+    {
+      "path": "tools/geometry/rolled_rect.py",
+      "exists": true,
+      "sha256": "4cf9899d1bc2f7414b371f2c8bce6dd151f8e05dc5275d97274488541cfe7553",
+      "bytes": 9380
+    },
+    {
+      "path": "tools/geometry/crowe_panel.py",
+      "exists": true,
+      "sha256": "5a56211f78477e200b0251417c1e2d6a9bbe57133452849d13c54220e76debce",
+      "bytes": 8982
+    },
+    {
+      "path": "tools/geometry/section_pucker.py",
+      "exists": true,
+      "sha256": "6efde7106b19ff085848d6f4a654164c0da26e6d4852f0170c5d8c00ce964320",
+      "bytes": 3605
+    },
+    {
+      "path": "tools/geometry/rosse_rect.py",
+      "exists": true,
+      "sha256": "84987be58ad76310b7aa9ed59bb0fe88e00ea04eb4998438e5c577ac8b2b057c",
+      "bytes": 6789
+    },
+    {
+      "path": "tools/bo_compare/prepare_study.py",
+      "exists": true,
+      "sha256": "00e96112f29733d80289c15af9f0f05aa268948ec003f5e81e9cc3d8c4c7b50c",
+      "bytes": 5708
+    },
+    {
+      "path": "examples/typologies/rolled_family_2026-11-15/rf__rect_axial_v7.yaml",
+      "exists": true,
+      "sha256": "36836a07b4e311e0014eb8b42784d7d9fbd2917a3b9c33eaae17f8bf31eecd40",
+      "bytes": 2295
+    },
+    {
+      "path": "examples/typologies/rolled_family_2026-11-15/rf__rect_control_v7.yaml",
+      "exists": true,
+      "sha256": "f814f6884067f558d2205a2f953844c939c4012a0997d62d15ea2c6aff5e55cf",
+      "bytes": 2336
+    },
+    {
+      "path": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_strong_v7.yaml",
+      "exists": true,
+      "sha256": "0fb31ef73693dd0673fd12782c3807f30aa6c0276ac6448aa3a6efe89d4f52f2",
+      "bytes": 2311
+    },
+    {
+      "path": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_v7.yaml",
+      "exists": true,
+      "sha256": "4a69670fa63e10bdaa298b701217e177474e551f1b565cd25f206eff784ec623",
+      "bytes": 2296
+    },
+    {
+      "path": "examples/typologies/rolled_family_2026-11-15/rf__section_axial_v7.yaml",
+      "exists": true,
+      "sha256": "37187af0671b038fa81e233b7cc00745fa6fa075d6e40809a3f2f28d8c5db0b4",
+      "bytes": 2127
+    },
+    {
+      "path": "examples/typologies/rolled_family_2026-11-15/rf__section_control_v7.yaml",
+      "exists": true,
+      "sha256": "edf9f99279a50f7b940153b4c17aab6e4761de2626fa5d10d798a85d3d25bb41",
+      "bytes": 2168
+    },
+    {
+      "path": "examples/typologies/rolled_family_2026-11-15/rf__section_radial_strong_v7.yaml",
+      "exists": true,
+      "sha256": "37d2fc21b97cc482cbcbd60728785ca7b465763d2ac1f65171dc86679f6513c9",
+      "bytes": 2143
+    },
+    {
+      "path": "examples/typologies/rolled_family_2026-11-15/rf__section_radial_v7.yaml",
+      "exists": true,
+      "sha256": "3c5108ae6cce802bb658b25fc07beec4fe8484cf02861e9f7ceb7500adaf33b6",
+      "bytes": 2128
+    },
+    {
+      "path": "examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml",
+      "exists": true,
+      "sha256": "a56c824b0906ac7203a509db199331fc7ced16fe6dfddee5b2f3713bc801f4c6",
+      "bytes": 3587
+    },
+    {
+      "path": "examples/typologies/home_landscape_2026-11-15/hl__biradial_es_style_v7.yaml",
+      "exists": true,
+      "sha256": "9a113bf349143c89b788b6f016e0a1a3a5531ff5112c1939b7b28d28a8131a03",
+      "bytes": 3086
+    },
+    {
+      "path": "examples/typologies/home_landscape_2026-11-15/hl__crowe_es_biradial_rr_v7.yaml",
+      "exists": true,
+      "sha256": "77739a930e0ce61eede18658bd5cc8f376104dc6e40cc5ed3193819e049add5b",
+      "bytes": 2303
+    },
+    {
+      "path": "examples/typologies/home_landscape_2026-11-15/hl__crowe_panel_home_v7.yaml",
+      "exists": true,
+      "sha256": "3960c358d2c65e2c5f8a86e2cc1b5cf99a542743cdaaa2115e4a07c0c43de6fe",
+      "bytes": 2554
+    },
+    {
+      "path": "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml",
+      "exists": true,
+      "sha256": "31fb58d2cf5372531ce9071061e62e403b9beaed3a5dc14efe2f9ea2e4c92f73",
+      "bytes": 3066
+    },
+    {
+      "path": "examples/typologies/home_landscape_2026-11-15/hl__es_style_rollback_v7.yaml",
+      "exists": true,
+      "sha256": "018bd20e4ad17e26cf5c2e2af60a39184bf11d55e6f461165061ec6f5392c0e7",
+      "bytes": 2189
+    },
+    {
+      "path": "examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml",
+      "exists": true,
+      "sha256": "ce3baa6fafbddd55781d82ac7ed58cb59846f924b61c70c8af1bbf4c79b7c876",
+      "bytes": 4286
+    },
+    {
+      "path": "examples/typologies/home_landscape_2026-11-15/hl__lecleach_iwata_ar_landscape_v7.yaml",
+      "exists": true,
+      "sha256": "6dc449200a0eb4087d66b1036d1979e41654c4d21a70857e7a21f3fb07ea5321",
+      "bytes": 1951
+    },
+    {
+      "path": "examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml",
+      "exists": true,
+      "sha256": "b98fcbced85b8e23eb231216a1990c2343f05c9484fbdea2c01b7ff884de7908",
+      "bytes": 3632
+    },
+    {
+      "path": "examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml",
+      "exists": true,
+      "sha256": "b20383bb881bdfc948f2810c35efee8ac773b79ab4cd25b94bf254f0c64a11a8",
+      "bytes": 3165
+    },
+    {
+      "path": "examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml",
+      "exists": true,
+      "sha256": "ab9129c35fc53ac7414792952839db0b408f5574c51b39abe02d46305c24e938",
+      "bytes": 2692
+    }
+  ],
+  "packet_local_images": [
+    {
+      "src": "img_biradial_crowe_2026-11-15/packet/biradial_hero.png",
+      "exists": true
+    },
+    {
+      "src": "img_biradial_crowe_2026-11-15/packet/biradial_turntable.gif",
+      "exists": true
+    },
+    {
+      "src": "img_biradial_crowe_2026-11-15/packet/crowe_panel_hero.png",
+      "exists": true
+    },
+    {
+      "src": "img_biradial_crowe_2026-11-15/packet/crowe_panel_turntable.gif",
+      "exists": true
+    },
+    {
+      "src": "img_biradial_crowe_2026-11-15/packet/crowe_x_hero.png",
+      "exists": true
+    },
+    {
+      "src": "img_biradial_crowe_2026-11-15/packet/crowe_x_turntable.gif",
+      "exists": true
+    },
+    {
+      "src": "img_biradial_crowe_2026-11-15/packet/es_spiral_hero.png",
+      "exists": true
+    },
+    {
+      "src": "img_biradial_crowe_2026-11-15/packet/es_spiral_turntable.gif",
+      "exists": true
+    },
+    {
+      "src": "img_biradial_crowe_2026-11-15/packet/ext_throat_hero.png",
+      "exists": true
+    },
+    {
+      "src": "img_biradial_crowe_2026-11-15/packet/ext_throat_turntable.gif",
+      "exists": true
+    },
+    {
+      "src": "img_biradial_crowe_2026-11-15/packet/front_biradial.png",
+      "exists": true
+    },
+    {
+      "src": "img_biradial_crowe_2026-11-15/packet/front_crowe_panel.png",
+      "exists": true
+    },
+    {
+      "src": "img_biradial_crowe_2026-11-15/packet/front_crowe_x.png",
+      "exists": true
+    },
+    {
+      "src": "img_biradial_crowe_2026-11-15/packet/front_es_spiral.png",
+      "exists": true
+    },
+    {
+      "src": "img_biradial_crowe_2026-11-15/packet/front_ext_throat.png",
+      "exists": true
+    },
+    {
+      "src": "img_biradial_crowe_2026-11-15/packet/front_rosse_rect.png",
+      "exists": true
+    },
+    {
+      "src": "img_biradial_crowe_2026-11-15/packet/rosse_rect_hero.png",
+      "exists": true
+    },
+    {
+      "src": "img_biradial_crowe_2026-11-15/packet/rosse_rect_turntable.gif",
+      "exists": true
+    },
+    {
+      "src": "img_biradial_crowe_2026-11-15/packet/sections_biradial.png",
+      "exists": true
+    },
+    {
+      "src": "img_biradial_crowe_2026-11-15/packet/sections_crowe_panel.png",
+      "exists": true
+    },
+    {
+      "src": "img_biradial_crowe_2026-11-15/packet/sections_crowe_x.png",
+      "exists": true
+    },
+    {
+      "src": "img_biradial_crowe_2026-11-15/packet/sections_es_spiral.png",
+      "exists": true
+    },
+    {
+      "src": "img_biradial_crowe_2026-11-15/packet/sections_ext_throat.png",
+      "exists": true
+    },
+    {
+      "src": "img_biradial_crowe_2026-11-15/packet/sections_rosse_rect.png",
+      "exists": true
+    }
+  ],
+  "packet_missing_image_count": 0,
+  "limitations": [
+    "Raw artifact copies are from historical executions, not rerun against current dirty tree.",
+    "Rect and corrected section audits have different implementation digests; retain both.",
+    "Synthetic BoTorch data are not acoustic observations and do not satisfy the >=100 matched-solves production gate.",
+    "Original vendor images are not copied into this evidence bundle.",
+    "Current six home cells are not automatically covered by native rf__* audits."
+  ]
+}

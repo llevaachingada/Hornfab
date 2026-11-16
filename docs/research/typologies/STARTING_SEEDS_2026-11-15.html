@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Home horn decision packet - 2026-11-15</title>
+<style>
+  :root{
+    --ink:#20252b; --muted:#5b6670; --line:#d9dee4; --bg:#f6f7f9; --card:#ffffff;
+    --accent:#1f6f8b; --accent-soft:#e8f2f6; --warn:#a15c00; --warn-soft:#fff4df;
+    --bad:#9b2c2c; --bad-soft:#fdecec; --ok:#216e3a; --ok-soft:#e8f5ec;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+  header{background:#fff;border-bottom:1px solid var(--line);padding:2.2rem 1.2rem 1.4rem}
+  .wrap{max-width:1320px;margin:0 auto;padding:0 1.2rem}
+  h1{font-size:2rem;line-height:1.15;margin:0 0 .4rem}
+  h2{font-size:1.45rem;margin:0 0 .7rem;padding-top:.4rem}
+  h3{font-size:1.1rem;margin:1.2rem 0 .4rem}
+  h4{font-size:1rem;margin:.9rem 0 .3rem}
+  p{margin:.45rem 0 .8rem}
+  .sub{color:var(--muted);max-width:1000px}
+  .status{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1rem}
+  .badge{display:inline-block;border-radius:999px;padding:.25rem .6rem;font-size:.78rem;font-weight:650;letter-spacing:.01em}
+  .badge-pause{background:var(--warn-soft);color:var(--warn);border:1px solid #f0d29b}
+  .badge-top{background:var(--bad-soft);color:var(--bad);border:1px solid #efc2c2}
+  .badge-ok{background:var(--ok-soft);color:var(--ok);border:1px solid #bfe3ca}
+  .badge-info{background:var(--accent-soft);color:var(--accent);border:1px solid #bcd9e3}
+  nav{position:sticky;top:0;z-index:50;background:#fffffff2;backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex;gap:.35rem;overflow:auto;padding:.55rem 1.2rem}
+  nav a{padding:.35rem .6rem;border-radius:6px;color:var(--muted);font-size:.86rem;white-space:nowrap}
+  nav a:hover{background:var(--accent-soft);color:var(--accent);text-decoration:none}
+  main{padding:1.4rem 0 3rem}
+  section{margin:1.6rem 0 2.2rem}
+  .grid{display:grid;gap:1rem}
+  .grid-2{grid-template-columns:repeat(auto-fit,minmax(420px,1fr))}
+  .grid-3{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:1rem}
+  .card h3{margin-top:0}
+  .seed-card{display:flex;flex-direction:column;gap:.6rem}
+  .seed-card img{width:100%;border-radius:7px;background:#fff;border:1px solid #eef1f4}
+  .seed-card .pair{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+  .seed-card .pair img{height:230px;object-fit:contain}
+  .seed-card .sections img{height:auto}
+  .seed-meta{font-size:.84rem;color:var(--muted)}
+  figure{margin:.4rem 0 .8rem}
+  figcaption{font-size:.82rem;color:var(--muted);margin-top:.3rem}
+  table{width:100%;border-collapse:collapse;font-size:.9rem;margin:.5rem 0 1rem;background:#fff}
+  th,td{border:1px solid var(--line);padding:.45rem .55rem;vertical-align:top;text-align:left}
+  th{background:#f0f3f6;font-weight:650}
+  tr:nth-child(even) td{background:#fbfcfd}
+  code{background:#eef1f4;padding:.1rem .3rem;border-radius:4px;font-size:.88em}
+  .callout{border-left:4px solid var(--accent);background:var(--accent-soft);padding:.8rem 1rem;border-radius:0 8px 8px 0;margin:.8rem 0}
+  .callout.warn{border-left-color:var(--warn);background:var(--warn-soft)}
+  .callout.bad{border-left-color:var(--bad);background:var(--bad-soft)}
+  .callout.ok{border-left-color:var(--ok);background:var(--ok-soft)}
+  .small{font-size:.86rem;color:var(--muted)}
+  .tag{display:inline-block;font-size:.72rem;font-weight:650;border-radius:4px;padding:.1rem .35rem;margin-right:.25rem;border:1px solid var(--line);background:#f4f6f8;color:var(--muted)}
+  .tag.acoustic{background:var(--ok-soft);color:var(--ok);border-color:#bfe3ca}
+  .tag.shape{background:var(--accent-soft);color:var(--accent);border-color:#bcd9e3}
+  .tag.fixed{background:#f1f3f5;color:#555;border-color:#d9dee4}
+  .tag.risk{background:var(--bad-soft);color:var(--bad);border-color:#efc2c2}
+  .cols{columns:2 360px;column-gap:1.4rem}
+  .cols p,.cols li{break-inside:avoid}
+  ul,ol{margin:.4rem 0 .8rem 1.1rem;padding:0}
+  li{margin:.2rem 0}
+  .decision{display:grid;gap:.8rem;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+  .decision .card{border-top:4px solid var(--accent)}
+  .decision .card.d{border-top-color:var(--warn)}
+  .decision .card.c{border-top-color:var(--ok)}
+  .decision .card.b{border-top-color:var(--bad)}
+  .checklist label{display:block;margin:.35rem 0;padding:.35rem .5rem;background:#fff;border:1px solid var(--line);border-radius:6px}
+  .checklist input{margin-right:.45rem}
+  footer{color:var(--muted);font-size:.86rem;border-top:1px solid var(--line);padding:1.5rem 0}
+  @media print{nav{display:none} body{background:#fff} .card{break-inside:avoid}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="status">
+      <span class="badge badge-pause">PAUSED: no new solves</span>
+      <span class="badge badge-top">TOP PRIORITY: brief / DI-slope</span>
+      <span class="badge badge-info">6 seeds, sections, parameters, issues</span>
+    </div>
+    <h1>Home horn decision packet</h1>
+    <p class="sub">2026-11-15. What we are trying to build, what the six starting points look like, what the parameters do, what the outside research says, what is broken, and what we must decide before more GPU time. This page replaces the earlier short gallery. The renders are shape studies, not sound predictions; the measured/scored evidence is labelled separately.</p>
+    <p class="small">Machine-readable supporting docs: <a href="STARTING_SEEDS_PLAIN_2026-11-15.md">plain-language brief</a>, <a href="HORN_WHITEPAPERS_2026-11-15.md">white-paper memo</a>, <a href="BIRADIAL_CROWE_STUDY_2026-11-15.md">cell handoff</a>, <a href="SCORING_NON_CD_SOURCES_2026-11-15.md">scoring sources</a>.</p>
+  </div>
+</header>
+
+<nav><div class="wrap">
+  <a href="#summary">Summary</a>
+  <a href="#seeds">Six seeds</a>
+  <a href="#sections">Sections</a>
+  <a href="#params">Parameters</a>
+  <a href="#issues">Issues log</a>
+  <a href="#research">Research</a>
+  <a href="#options">Options</a>
+  <a href="#decision">Decision</a>
+  <a href="#next">Next steps</a>
+</div></nav>
+
+<main class="wrap">
+
+<section id="summary">
+  <h2>1. Executive summary</h2>
+  <div class="grid grid-2">
+    <div class="card">
+      <h3>What we are deciding</h3>
+      <p>Which horn family gets the next GPU search night, and under which scoring brief. The owner wants a Crowe ES-450-style home horn: landscape, X/bow-tie creases, thick rolled lip, about 1.8:1, depth about 0.45 x width. The room/box allows 600 W x 480 H x 480 D mm, and the crossover is 700 Hz with a Faital HF1440 1.4-inch driver.</p>
+      <p><strong>Current status:</strong> new solves are paused. The night-E runner and the running Crowe-section job were stopped at ~62/96 rows. The GPU was cleaned. We are not queueing night F until the brief and the geometry law are settled.</p>
+    </div>
+    <div class="card">
+      <h3>The three blockers</h3>
+      <ol>
+        <li><strong>Scoring brief.</strong> The v7 objective has a fixed flat-DI target and a fixed-round diagonal reference. The listening literature does not support a flat-DI target as a universal goal; the “Harman 1–3 dB/octave” claim did not survive a source check. We need a deadband or a defensible target, and a decision on <code>diag</code>.</li>
+        <li><strong>Geometry law.</strong> The current laws have no true under-surface lip return and no waist term. The search can make a clean Bi-Radial, a clean rounded rectangle, or an X-on-a-CD-throat, but not Crowe’s thick bead/waist. The owner’s instinct that the curves/parameters are not right is correct.</li>
+        <li><strong>Construction defect.</strong> The Crowe-section family has a 153–176° fold with inverted triangles at the outer side-wall/lip junction. The inner flare is smooth, but the night-E scores are provisional.</li>
+      </ol>
+    </div>
+  </div>
+  <div class="callout warn">
+    <strong>What we need from you:</strong> look at the six 3D seeds and the sections; say whether the priority is the Crowe look or the best chance of a good-sounding 700 Hz horn; approve the brief direction (deadband vs target and how to treat <code>diag</code>); and approve the lip/waist geometry work (and the Crowe-section junction rebuild) before any new solves.
+  </div>
+</section>
+
+<section id="seeds">
+  <h2>2. The six starting points</h2>
+  <p class="small">Each card shows a shaded 3/4 hero with ground/shadow, a flat front view for the outline, a 360-degree turntable, and the horizontal/vertical sections. Dimensions are measured from the meshes. “No solves” means there is no acoustic score yet for that cell.</p>
+  <div class="grid grid-2">
+
+    <article class="card seed-card">
+      <div>
+        <span class="badge badge-ok">sound reference</span>
+        <span class="badge badge-info">CD family</span>
+      </div>
+      <h3>Ext-throat constant-directivity</h3>
+      <div class="seed-meta">528 x 366 x 370 mm · current best-scoring family · many stored solves · not a Crowe look</div>
+      <div class="pair">
+        <figure><img src="img_biradial_crowe_2026-11-15/packet/ext_throat_hero.png" alt="Ext-throat shaded hero"><figcaption>Shaded 3/4 with ground and shadow.</figcaption></figure>
+        <figure><img src="img_biradial_crowe_2026-11-15/packet/front_ext_throat.png" alt="Ext-throat front"><figcaption>Front outline.</figcaption></figure>
+      </div>
+      <figure><img src="img_biradial_crowe_2026-11-15/packet/ext_throat_turntable.gif" alt="Ext-throat turntable"><figcaption>360° turntable.</figcaption></figure>
+      <figure><img src="img_biradial_crowe_2026-11-15/packet/sections_ext_throat.png" alt="Ext-throat sections"><figcaption>H/V sections through the middle; the two lines are the inner and outer wall.</figcaption></figure>
+      <p><strong>What it is:</strong> a smooth constant-directivity waveguide. It is the sound-first baseline: the family that has the most stored data and the best score so far. It is deeper than the others (370 mm), with a tall narrow face.</p>
+      <p><strong>What it is not:</strong> a Crowe shape. No X, no waist, no thick bead. It is the “known-good” reference, not the look candidate.</p>
+      <p><strong>Sound evidence:</strong> base J around 2.6, smooth J around 2.8 in the family rescore. It is the comparison target for any new family.</p>
+    </article>
+
+    <article class="card seed-card">
+      <div>
+        <span class="badge badge-ok">safest sound bet</span>
+        <span class="badge badge-info">CD family</span>
+      </div>
+      <h3>R-OSSE rounded rectangle</h3>
+      <div class="seed-meta">560 x 360 x 186 mm · 64/64 box samples valid · no solves yet · no X/waist</div>
+      <div class="pair">
+        <figure><img src="img_biradial_crowe_2026-11-15/packet/rosse_rect_hero.png" alt="R-OSSE rect shaded hero"><figcaption>Shaded 3/4 with ground and shadow.</figcaption></figure>
+        <figure><img src="img_biradial_crowe_2026-11-15/packet/front_rosse_rect.png" alt="R-OSSE rect front"><figcaption>Front outline.</figcaption></figure>
+      </div>
+      <figure><img src="img_biradial_crowe_2026-11-15/packet/rosse_rect_turntable.gif" alt="R-OSSE rect turntable"><figcaption>360° turntable.</figcaption></figure>
+      <figure><img src="img_biradial_crowe_2026-11-15/packet/sections_rosse_rect.png" alt="R-OSSE rect sections"><figcaption>H/V sections through the middle.</figcaption></figure>
+      <p><strong>What it is:</strong> a modern ATH R-OSSE profile evaluated per azimuth, with a rounded-rectangle mouth. It is the most acoustically defensible shape for a 700 Hz home crossover: smooth CD wall, landscape mouth, published ATH evidence for the family.</p>
+      <p><strong>What it is not:</strong> a Crowe X/waist. The seed is shallow (186 mm), and the rim can scallop at extreme roll/corner settings; a mid-roll/mid-exponent seed and a deeper start are the safe region.</p>
+      <p><strong>Sound evidence:</strong> no solves yet. Preflight 64/64 valid. This is the sound-first path if the look is allowed to be a clean rounded rectangle.</p>
+    </article>
+
+    <article class="card seed-card">
+      <div>
+        <span class="badge badge-top">look candidate</span>
+        <span class="badge badge-pause">thin lip</span>
+      </div>
+      <h3>Crowe-X on a CD throat</h3>
+      <div class="seed-meta">588 x 398 x 244 mm · 58/64 box samples valid (6 over 600 mm) · no solves yet</div>
+      <div class="pair">
+        <figure><img src="img_biradial_crowe_2026-11-15/packet/crowe_x_hero.png" alt="Crowe-X shaded hero"><figcaption>Shaded 3/4 with ground and shadow.</figcaption></figure>
+        <figure><img src="img_biradial_crowe_2026-11-15/packet/front_crowe_x.png" alt="Crowe-X front"><figcaption>Front outline: X/bow-tie.</figcaption></figure>
+      </div>
+      <figure><img src="img_biradial_crowe_2026-11-15/packet/crowe_x_turntable.gif" alt="Crowe-X turntable"><figcaption>360° turntable.</figcaption></figure>
+      <figure><img src="img_biradial_crowe_2026-11-15/packet/sections_crowe_x.png" alt="Crowe-X sections"><figcaption>H/V sections; the mouth edge is a thin flange, not a return.</figcaption></figure>
+      <p><strong>What it is:</strong> the Crowe X/bow-tie crease language applied to a constant-directivity OSSE throat. The front view is the closest of the set to Crowe’s crease pattern; the CD throat is the sound-friendly part.</p>
+      <p><strong>What it is not:</strong> a true Crowe lip or waist. The lip is a thin flange, the creases are soft, and 5 of 10 sampled box extremes exceed the 600 mm width. The creases need a diagonal-polar check.</p>
+      <p><strong>Sound evidence:</strong> none yet. The CD throat is a good starting point; the crease/pucker is an unproven acoustic risk. It is the look-first experiment.</p>
+    </article>
+
+    <article class="card seed-card">
+      <div>
+        <span class="badge badge-top">most faithful construction</span>
+        <span class="badge badge-pause">mesh fold - provisional</span>
+      </div>
+      <h3>Crowe ES-600 sections</h3>
+      <div class="seed-meta">560 x 280 x 273 mm · 62/64 preflight · 96 solves for seed 1234, seed 5678 stopped · best 579.7 x 292.9 x 262.1 mm</div>
+      <div class="pair">
+        <figure><img src="img_biradial_crowe_2026-11-15/packet/crowe_panel_hero.png" alt="Crowe sections shaded hero"><figcaption>Shaded 3/4 with ground and shadow.</figcaption></figure>
+        <figure><img src="img_biradial_crowe_2026-11-15/packet/front_crowe_panel.png" alt="Crowe sections front"><figcaption>Front outline: the X/panel construction.</figcaption></figure>
+      </div>
+      <figure><img src="img_biradial_crowe_2026-11-15/packet/crowe_panel_turntable.gif" alt="Crowe sections turntable"><figcaption>360° turntable.</figcaption></figure>
+      <figure><img src="img_biradial_crowe_2026-11-15/packet/sections_crowe_panel.png" alt="Crowe sections sections"><figcaption>H/V sections; note the side-wall junction where the fold occurs.</figcaption></figure>
+      <p><strong>What it is:</strong> the digitized Crowe ES-600 H/V section construction, scaled into the home box, with crown/junction/depth searched. It is the closest to Crowe’s actual construction and already has data.</p>
+      <p><strong>What it is not:</strong> defect-free yet. Objective mesh check found a 153–176° fold with inverted triangles at the outer side-wall/lip junction (inner flare smooth). The current scores are provisional; the junction must be rebuilt/filleted before print or final ranking.</p>
+      <p><strong>Sound evidence:</strong> best smooth-brief J 6.84 vs stored base 16.92; residual is dominated by <code>diag</code> 2.94 (without it, about 3.9). This is evidence, not a listening verdict; the diagonal question is unresolved.</p>
+    </article>
+
+    <article class="card seed-card">
+      <div>
+        <span class="badge badge-top">look candidate</span>
+        <span class="badge badge-pause">thin roll</span>
+      </div>
+      <h3>ES exponential spiral</h3>
+      <div class="seed-meta">542 x 299 x 242 mm · 62/64 preflight · 9 corners mesh/fit · no solves yet</div>
+      <div class="pair">
+        <figure><img src="img_biradial_crowe_2026-11-15/packet/es_spiral_hero.png" alt="ES spiral shaded hero"><figcaption>Shaded 3/4 with ground and shadow.</figcaption></figure>
+        <figure><img src="img_biradial_crowe_2026-11-15/packet/front_es_spiral.png" alt="ES spiral front"><figcaption>Front outline.</figcaption></figure>
+      </div>
+      <figure><img src="img_biradial_crowe_2026-11-15/packet/es_spiral_turntable.gif" alt="ES spiral turntable"><figcaption>360° turntable.</figcaption></figure>
+      <figure><img src="img_biradial_crowe_2026-11-15/packet/sections_es_spiral.png" alt="ES spiral sections"><figcaption>H/V sections; the mouth edge returns as a thin hook, not a bead.</figcaption></figure>
+      <p><strong>What it is:</strong> a log-spiral / exponential-spiral analogue of Crowe’s ES flare, with every shape knob unfrozen. It has the correct overall proportions (about 1.8:1, depth about 0.45 x width) and a smooth continuous flare.</p>
+      <p><strong>What it is not:</strong> a thick bead or a constant-directivity horn. The wall leaves the throat axially and keeps turning, so the beam narrows with frequency by design. The roll is a thin hook in the current render; high pucker adds rim ripples.</p>
+      <p><strong>Sound evidence:</strong> none yet. Measured Le Cléac’h narrowing is about 2.6 dB/octave; Crowe’s ES is about 4.1 dB/octave (his own data). It is the faithful-flare experiment, to be scored on the smooth brief.</p>
+    </article>
+
+    <article class="card seed-card">
+      <div>
+        <span class="badge badge-info">classic alternative</span>
+        <span class="badge badge-pause">not a Crowe look</span>
+      </div>
+      <h3>Keele Bi-Radial</h3>
+      <div class="seed-meta">560 x 350 x 258 mm · 64/64 box samples valid after the throat fix · no solves yet</div>
+      <div class="pair">
+        <figure><img src="img_biradial_crowe_2026-11-15/packet/biradial_hero.png" alt="Bi-Radial shaded hero"><figcaption>Shaded 3/4 with ground and shadow.</figcaption></figure>
+        <figure><img src="img_biradial_crowe_2026-11-15/packet/front_biradial.png" alt="Bi-Radial front"><figcaption>Front outline.</figcaption></figure>
+      </div>
+      <figure><img src="img_biradial_crowe_2026-11-15/packet/biradial_turntable.gif" alt="Bi-Radial turntable"><figcaption>360° turntable.</figcaption></figure>
+      <figure><img src="img_biradial_crowe_2026-11-15/packet/sections_biradial.png" alt="Bi-Radial sections"><figcaption>H/V sections; the law has no lip return and no waist term.</figcaption></figure>
+      <p><strong>What it is:</strong> the classic Keele/JBL two-plane Bi-Radial, now with a valid 25 mm round throat blend. It is a clean, smooth classic horn with a proven H-plane CD idea.</p>
+      <p><strong>What it is not:</strong> a Crowe look. The law has no waist and no lip return; the V pattern cannot hold 50° at 700 Hz in a 480 mm height (physics). It is the classic alternative, not the primary.</p>
+      <p><strong>Sound evidence:</strong> none yet for this cell. The classic Bi-Radial H-plane is well supported; the V-plane is deliberately not CD, and the real JBL part uses a high-aspect gap slot we do not want to copy.</p>
+    </article>
+
+  </div>
+</section>
+
+<section id="sections">
+  <h2>3. How to read the sections</h2>
+  <div class="grid grid-2">
+    <div class="card">
+      <h3>Horizontal section (cut through the middle)</h3>
+      <p>This is the wall profile looking down from above, through the horn’s centre plane. The horizontal axis is the distance across the horn; the vertical axis is depth from the driver face. The two close lines are the inner and outer wall (3 mm wall thickness); where they separate at the mouth, you are seeing the lip/termination.</p>
+      <p>What to look for: does the wall leave the throat smoothly, or is there a kink? Does it flare continuously, or turn into a cone? At the mouth, does it end at a sharp edge, a rounded edge, or return under itself? The return is the “lip” question.</p>
+    </div>
+    <div class="card">
+      <h3>Vertical section (cut through the middle)</h3>
+      <p>This is the same cut in the vertical plane. It shows the mouth height, the vertical flare, and the top/bottom lip. A large vertical mouth is what buys low-frequency vertical pattern control; the 480 mm box height is the hard limit.</p>
+      <p>What to look for: the vertical mouth height and depth, the smoothness of the top/bottom wall, and whether the lip returns. The Bi-Radial and R-OSSE rectangle end at a clean edge; the Crowe-X/ES end in a thin flange or hook; the Crowe sections have a side-wall junction fold.</p>
+    </div>
+  </div>
+  <div class="callout">
+    <strong>What the sections do not show:</strong> sound. They show the shape that the BEM solver will see. A smooth section is necessary but not sufficient: the mouth size, the coverage angle, the throat loading, and the diagonal pattern all matter. The issues log below separates geometry facts from acoustic evidence.
+  </div>
+</section>
+
+<section id="params">
+  <h2>4. Parameters: what the search is allowed to change</h2>
+  <p>The search does not know what a “lip” or a “waist” is. It samples numbers inside the ranges below and asks the scoring brief to make the score smaller. Some knobs change the sound; some only change the drawing; some are fixed because the law cannot use them or because they are structural. The tables say which is which.</p>
+
+  <h3>Keele Bi-Radial</h3>
+  <table>
+    <thead><tr><th>Knob</th><th>Range</th><th>Geometry effect</th><th>Sound / score effect</th><th>Type</th></tr></thead>
+    <tbody>
+      <tr><td><code>L_mm</code></td><td>220–320</td><td>axial depth</td><td>gradual flare and loading; closure limits how deep the mouth can be for a given angle</td><td><span class="tag acoustic">acoustic</span></td></tr>
+      <tr><td><code>h_a_deg</code></td><td>32–37</td><td>horizontal initial wall angle</td><td>HF horizontal coverage (about a/0.9); higher = wider</td><td><span class="tag acoustic">acoustic</span></td></tr>
+      <tr><td><code>v_a_deg</code></td><td>18–24</td><td>vertical initial wall angle</td><td>HF vertical coverage; higher = wider</td><td><span class="tag acoustic">acoustic</span></td></tr>
+      <tr><td><code>h_rm_mm</code></td><td>260–292</td><td>horizontal mouth half-width</td><td>mouth width and LF H pattern control</td><td><span class="tag acoustic">acoustic</span></td></tr>
+      <tr><td><code>v_rm_mm</code></td><td>162–230</td><td>vertical mouth half-height</td><td>mouth height and LF V control</td><td><span class="tag acoustic">acoustic</span></td></tr>
+      <tr><td><code>h_n</code>, <code>v_n</code></td><td>3–7</td><td>flare exponent</td><td>where the flare happens along the wall; midband/HF beam and loading</td><td><span class="tag acoustic">acoustic</span></td></tr>
+      <tr><td><code>mouth_exponent</code></td><td>2.2–5</td><td>corner squareness</td><td>visual; can change the diagonal</td><td><span class="tag shape">shape</span></td></tr>
+      <tr><td>throat blends</td><td>25 fixed</td><td>round-to-contour transition</td><td>acoustically important; fixed because the fix is correct</td><td><span class="tag fixed">fixed</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>R-OSSE rounded rectangle</h3>
+  <table>
+    <thead><tr><th>Knob</th><th>Range</th><th>Geometry effect</th><th>Sound / score effect</th><th>Type</th></tr></thead>
+    <tbody>
+      <tr><td><code>g_width_mm</code></td><td>480–590</td><td>mouth width</td><td>LF H pattern control</td><td><span class="tag acoustic">acoustic</span></td></tr>
+      <tr><td><code>g_height_mm</code></td><td>280–420</td><td>mouth height</td><td>LF V pattern control</td><td><span class="tag acoustic">acoustic</span></td></tr>
+      <tr><td><code>g_rect_exponent</code></td><td>2.5–8</td><td>corner squareness</td><td>visual; sharper corner changes the diagonal</td><td><span class="tag shape">shape</span></td></tr>
+      <tr><td><code>g_a_h_deg</code></td><td>32–46</td><td>H coverage half-angle</td><td>HF H beamwidth</td><td><span class="tag acoustic">acoustic</span></td></tr>
+      <tr><td><code>g_a_v_deg</code></td><td>18–30</td><td>V coverage half-angle</td><td>HF V beamwidth</td><td><span class="tag acoustic">acoustic</span></td></tr>
+      <tr><td><code>g_k</code></td><td>0.8–3</td><td>throat expansion</td><td>ATH: sets DI slope and throat loading</td><td><span class="tag acoustic">acoustic</span></td></tr>
+      <tr><td><code>g_r</code></td><td>0.25–0.6</td><td>rollback radius</td><td>mouth termination/diffraction</td><td><span class="tag acoustic">acoustic</span></td></tr>
+      <tr><td><code>g_b</code></td><td>0–0.4</td><td>roll bend/curvature decay</td><td>how fast the roll develops</td><td><span class="tag shape">shape</span></td></tr>
+      <tr><td><code>g_tmax</code></td><td>0.85–1</td><td>how far the roll runs</td><td>end of the termination</td><td><span class="tag acoustic">acoustic</span></td></tr>
+      <tr><td><code>g_a_diag_deg</code></td><td>0 fixed</td><td>diagonal angle</td><td>must stay 0: nonzero fans creases out of the throat</td><td><span class="tag fixed">fixed</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Crowe-X on a CD throat</h3>
+  <table>
+    <thead><tr><th>Knob</th><th>Range</th><th>Geometry effect</th><th>Sound / score effect</th><th>Type</th></tr></thead>
+    <tbody>
+      <tr><td><code>g_a_h_deg</code></td><td>33–40</td><td>H coverage half-angle</td><td>HF H beamwidth</td><td><span class="tag acoustic">acoustic</span></td></tr>
+      <tr><td><code>g_a_v_deg</code></td><td>20–28</td><td>V coverage half-angle</td><td>HF V beamwidth</td><td><span class="tag acoustic">acoustic</span></td></tr>
+      <tr><td><code>g_L_mm</code></td><td>200–260</td><td>depth</td><td>gradual flare and roll length</td><td><span class="tag acoustic">acoustic</span></td></tr>
+      <tr><td><code>g_s</code></td><td>0.2–0.45</td><td>OSSE termination flare</td><td>strong outward curve near the mouth; too high overshoots width</td><td><span class="tag acoustic">acoustic</span></td></tr>
+      <tr><td><code>g_n</code></td><td>1.8–3.2</td><td>termination exponent</td><td>high = flat plate; low = bowl</td><td><span class="tag acoustic">acoustic</span></td></tr>
+      <tr><td><code>g_r_lip_mm</code></td><td>8–30</td><td>lip radius</td><td>thicker roll; too high overshoots width</td><td><span class="tag acoustic">acoustic</span></td></tr>
+      <tr><td><code>g_wrap_deg</code></td><td>80–160</td><td>how far the lip curls</td><td>more wrap; current render still a flange, not a bead</td><td><span class="tag shape">shape</span><span class="tag risk">risk</span></td></tr>
+      <tr><td><code>g_sf_ab</code></td><td>0.7–0.9</td><td>superformula stretch</td><td>lower = wider mouth</td><td><span class="tag shape">shape</span></td></tr>
+      <tr><td><code>g_sf_amt</code></td><td>0.15–0.38</td><td>X/crease strength</td><td>stronger creases/waist; can over-pinch and ripple the rim</td><td><span class="tag shape">shape</span><span class="tag risk">risk</span></td></tr>
+      <tr><td><code>g_sf_m</code>, <code>g_sf_n1</code>, <code>g_sf_n2</code>, <code>g_sf_start</code></td><td>4, 1.8, 7, 0.25 fixed</td><td>four corners, sharpness, edge straightness, X start</td><td>the Crowe-like crease language; fixed to keep the look</td><td><span class="tag fixed">fixed</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>ES exponential spiral</h3>
+  <table>
+    <thead><tr><th>Knob</th><th>Range</th><th>Geometry effect</th><th>Sound / score effect</th><th>Type</th></tr></thead>
+    <tbody>
+      <tr><td><code>g_width_mm</code></td><td>480–590</td><td>mouth width</td><td>LF H control</td><td><span class="tag acoustic">acoustic</span></td></tr>
+      <tr><td><code>g_height_mm</code></td><td>260–420</td><td>mouth height</td><td>LF V control</td><td><span class="tag acoustic">acoustic</span></td></tr>
+      <tr><td><code>g_depth_mm</code></td><td>200–380</td><td>depth</td><td>more spiral turns/roll</td><td><span class="tag acoustic">acoustic</span></td></tr>
+      <tr><td><code>g_depth_h_ratio</code></td><td>0.55–1.0</td><td>H/V depth split</td><td>top/bottom lips forward of sides; possible asymmetry</td><td><span class="tag shape">shape</span></td></tr>
+      <tr><td><code>g_decay</code></td><td>0.4–1.0</td><td>log-spiral decay (flare rate)</td><td>faster outward growth per turn; changes flare and roll</td><td><span class="tag acoustic">acoustic</span></td></tr>
+      <tr><td><code>g_rect_exponent</code></td><td>4–14</td><td>corner squareness</td><td>visual and diagonal</td><td><span class="tag shape">shape</span></td></tr>
+      <tr><td><code>g_rect_turn_deg</code></td><td>45–85</td><td>round-to-rectangle start</td><td>shape; too early can look lumpy</td><td><span class="tag shape">shape</span></td></tr>
+      <tr><td><code>g_terminal_deg</code></td><td>200–275</td><td>how far the wall wraps</td><td>more roll; current render is a thin hook</td><td><span class="tag shape">shape</span><span class="tag risk">risk</span></td></tr>
+      <tr><td><code>g_pucker_h_mm</code>, <code>g_pucker_v_mm</code></td><td>0–18, 0–24</td><td>local mouth relief/creases</td><td>more X/pucker; high values add rim ripples</td><td><span class="tag shape">shape</span><span class="tag risk">risk</span></td></tr>
+      <tr><td><code>g_throat_turn_deg</code>, <code>g_pucker_start_deg</code></td><td>25, 55 fixed</td><td>throat turn, pucker start</td><td>not searched</td><td><span class="tag fixed">fixed</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Crowe ES-600 sections</h3>
+  <table>
+    <thead><tr><th>Knob</th><th>Range</th><th>Geometry effect</th><th>Sound / score effect</th><th>Type</th></tr></thead>
+    <tbody>
+      <tr><td><code>g_width_mm</code></td><td>480–590</td><td>mouth width</td><td>LF H control</td><td><span class="tag acoustic">acoustic</span></td></tr>
+      <tr><td><code>g_height_mm</code></td><td>220–420</td><td>mouth height</td><td>LF V control</td><td><span class="tag acoustic">acoustic</span></td></tr>
+      <tr><td><code>g_depth_mm</code></td><td>170–300</td><td>depth</td><td>flare rate; swept-H construction needs depth &lt;= ~0.57 x width</td><td><span class="tag acoustic">acoustic</span></td></tr>
+      <tr><td><code>g_h_depth_scale</code></td><td>0.9–1.1</td><td>H/V depth ratio</td><td>top/bottom vs side depth; shape/asymmetry</td><td><span class="tag shape">shape</span></td></tr>
+      <tr><td><code>g_crown_mm</code></td><td>10–40</td><td>top/bottom panel crown</td><td>more curved panels; best night-E design went to the top of the range</td><td><span class="tag shape">shape</span></td></tr>
+      <tr><td><code>g_junction_power</code></td><td>16–48</td><td>corner junction sharpness</td><td>shape; can create hard corners/folds</td><td><span class="tag shape">shape</span><span class="tag risk">risk</span></td></tr>
+      <tr><td>section profiles</td><td>fixed</td><td>digitized Crowe H/V meridians</td><td>the actual Crowe construction; not searched</td><td><span class="tag fixed">fixed</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <strong>How to think about a search range:</strong> a narrow range around a good seed is an exploitation run; a wide range is an exploration run. The search starts at the seed with a step of about 20% of each range and tries 96 candidates. If a range includes geometry the law cannot build, the candidate is refused or penalized; if a knob only changes the drawing, the search may still move it because the score has shape proxies. The box checks above are there to keep the refusal fraction low; the brief is there to tell the search what “good” means. Both matter as much as the optimizer.
+  </div>
+</section>
+
+<section id="issues">
+  <h2>5. Issues log</h2>
+  <p>Severity: <span class="tag risk">critical</span> blocks the next solve; <span class="tag shape">high</span> changes the decision; <span class="tag fixed">medium</span> needs a fix before print/final. Status reflects 2026-11-15 17:15.</p>
+  <table>
+    <thead><tr><th>ID</th><th>Severity</th><th>Issue</th><th>Evidence</th><th>Impact</th><th>Status / next</th></tr></thead>
+    <tbody>
+      <tr><td>I1</td><td><span class="tag risk">critical</span></td><td>Brief/DI-slope target is not supported</td><td>No primary/credible secondary source for “Harman 1–3 dB/oct”; Olive 2004 has no DI-slope term; CTA-2034 12/44/44 is the PIR average. Measured narrowing: Le Cléac’h ~2.6 dB/oct, Crowe ~4.1 dB/oct.</td><td>The search is optimizing a flat-DI assumption that penalizes smooth narrowing horns by 8–9 normalized units.</td><td><strong>TOP PRIORITY.</strong> Owner paused new solves. Decide target vs deadband and <code>diag</code> before night F.</td></tr>
+      <tr><td>I2</td><td><span class="tag shape">high</span></td><td><code>diag</code> uses a fixed round reference (65° for 80×50)</td><td><code>scalar_v4._diag_term</code>: <code>t_ref = 0.5*(coverage_h + coverage_v)</code>; a rectangular/creased mouth is penalized for being rectangular.</td><td>The Crowe-section best design carries <code>diag</code> 2.94 of 6.84; removing it gives ~3.9, close to CD families. It may be deciding the winner for the wrong reason.</td><td>Report separately; decide weight/reference after diagonal polars exist. Smooth brief’s <code>cov_narrow_ratio: 1</code> already halves the side weight.</td></tr>
+      <tr><td>I3</td><td><span class="tag shape">high</span></td><td>K-law arithmetic was wrong in the earlier notes</td><td>Correct rule: <code>W = 25,000/(0.9 B F)</code>. At 700 Hz: 80° H = 496 mm; 50° V = 794 mm. 600 mm H holds 80° to ~579 Hz; 480 mm V holds 50° only to ~1157 Hz (~83° at 700 Hz).</td><td>The vertical limit is physics, not a cell bug. It explains why 50° V at 700 Hz cannot be met in the 480 mm box.</td><td>Corrected in the research notes and this packet. Use the corrected numbers in all future briefs/reports.</td></tr>
+      <tr><td>I4</td><td><span class="tag risk">critical</span></td><td>No true under-surface lip return</td><td>OSSE/OSSE lip curls outward/forward; ES log-spiral returns as a thin hook; Bi-Radial law has no lip. Renders and sections show a thin flange/hook, not Crowe’s bead.</td><td>The current cells cannot make the thick rolled lip the owner wants. More search on the same lip knobs will not produce it.</td><td>Needs a new lip surface or rollback law. Decide whether the bead is non-negotiable; if yes, do this before more GPU.</td></tr>
+      <tr><td>I5</td><td><span class="tag shape">medium</span></td><td>No waist term</td><td>Current mouth outlines are convex superellipses/rounded rectangles. Crowe’s waist comes from his separate lens-shaped panels; ATH’s morph target is convex. No acoustic source for a waist.</td><td>The look will remain convex; the waist is visual, not an acoustic requirement.</td><td>Decide whether the waist is wanted; if yes, add a panel/outline or superformula radius morph. Do not use <code>a_diag</code> for this.</td></tr>
+      <tr><td>I6</td><td><span class="tag risk">critical</span></td><td>Crowe-section outer-body/lip fold</td><td>Objective dihedral check: seed max 176.5°, best design 153.2°, 18 edges &gt;140°; inverted triangles at the side-wall/lip junction. Inner flare smooth in the section plot; other cells have no edge &gt;150°.</td><td>The current night-E scores are on a defective outer-body junction; the fold is a print/visual defect and may affect outer-shell scattering.</td><td>Rebuild the junction with consistent winding and a fillet before print/final ranking. No more section runs until fixed.</td></tr>
+      <tr><td>I7</td><td><span class="tag shape">high</span></td><td>BEM fidelity and missing loading/level</td><td>Screen mesh 6 EPW (~10% frequency error); verification should use 8–12. Current “verify” refines the frequency grid, not the spatial mesh. Uniform-velocity cap is not valid for level/loading above ~5.6 kHz (1.4-inch driver).</td><td>Finalists may look better than they are; loading/absolute level are not first-class.</td><td>Add a spatial mesh convergence check and a lumped-driver/loading gate before final ranking. Screen at 6 EPW is fine for search.</td></tr>
+      <tr><td>I8</td><td><span class="tag shape">medium</span></td><td>270° wrap and 180° cavity claims are unverified</td><td>No measured or BEM comparison of 90/130/180/270°. Geddes’ grounded rule is radius ≥ λ/4 (35 mm → ~2.46 kHz; 50 mm → ~1.72 kHz; 86 mm → ~1 kHz).</td><td>The exact wrap angle is not proven; a 90–130° roll already terminates the profile. 270° is visually distinctive, not demonstrated better.</td><td>Do not spend envelope depth chasing 270° on acoustic grounds. Keep 130–180° if the generator caps at 200°.</td></tr>
+      <tr><td>I9</td><td><span class="tag shape">medium</span></td><td>No independent Crowe polars/DI</td><td>All ES data is the designer’s own; no third-party balloon. His ES-600 report shows narrowing and a 1 kHz resonance requiring a passive network.</td><td>The “Crowe sound” is not independently characterized; the narrowing and resonance are real risks.</td><td>Measure a prototype; do not treat vendor polars as ground truth.</td></tr>
+      <tr><td>I10</td><td><span class="tag fixed">medium</span></td><td>No measured diagonal polars for creased mouths</td><td>The <code>diag</code> term is a proxy; the crease/pucker modes are unmeasured. ATH says the rectangle morph adds a shifted diagonal.</td><td>We cannot yet tell a real diagonal lobe from a rectangular-mouth artifact.</td><td>After the law fix, run a diagonal-polar check on the best Crowe-X/ES/Crowe-section candidates.</td></tr>
+      <tr><td>I11</td><td><span class="tag fixed">medium</span></td><td>Printed-waveguide measurement artifacts</td><td>JASA 2025 sand-layer paper: 1–4 kHz secondary transmission paths in printed waveguides; sand layer fixes the measurement.</td><td>A printed prototype may measure worse than the BEM for non-acoustic reasons.</td><td>Plan a sand-layer / damping comparison in the prototype measurement.</td></tr>
+      <tr><td>I12</td><td><span class="tag acoustic">resolved</span></td><td>GUI typology exposure for the new home cells</td><td>8 stock-loadable cells are in <code>examples/catalog.yaml</code>; the 3 bridge cells are in <code>examples/catalog.gui.yaml</code> and now preview in the GUI sandbox through <code>tools/geometry/gui_preview.py</code> (fresh process, one bridge installed). The parameter catalog includes them as <code>gui-only</code>, so slider tooltips work.</td><td>All home cells are visible; the three bridge cells show a <code>preview only</code> pill. Launch stays disabled because the stock campaign cannot load their custom rows kinds.</td><td>Live GUI verified at <code>http://127.0.0.1:8765/#/typologies</code>; 186 GUI/parameter tests pass; <code>gen_param_catalog.py --check</code> passes. Run bridge cells via their own CLI.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="research">
+  <h2>6. What the outside research says</h2>
+  <p>Full annotated bibliography and confidence labels: <a href="HORN_WHITEPAPERS_2026-11-15.md">HORN_WHITEPAPERS_2026-11-15.md</a>. The short version:</p>
+  <div class="cols">
+    <p><strong>Coverage and mouth size.</strong> Keele’s CD horn uses an exponential throat, a conical midsection whose included angle sets the HF beamwidth, and a bell that fixes midrange narrowing. The Bi-Radial adds independent H/V wall pairs and the mouth rule. The corrected rule is <code>W = 25,000/(0.9 B F)</code>; at 700 Hz, 80° H = 496 mm, 50° V = 794 mm. The 600 mm H mouth is enough; the 480 mm V mouth is not, so the vertical will be wider than target at the crossover. [US4071112; US4308932A; JBL 2380A data]</p>
+    <p><strong>Mouth termination.</strong> Geddes’ verified rule: a radius of at least a quarter wavelength removes most edge diffraction — 35 mm is clean above ~2.46 kHz, 50 mm above ~1.72 kHz, 86 mm above ~1 kHz. A 40–50 mm lip is a rational hi-fi choice. The 270° wrap is a Crowe claim; no independent measured/BEM comparison of wrap angles was found. A 90–130° roll already terminates the profile. [Geddes, Loudspeaker System Design Philosophy; ATH TwinRay roundover study]</p>
+    <p><strong>Waist and X creases.</strong> The waisted/bow-tie outline has no acoustic source; ATH’s morph target is a convex rounded rectangle. Corner creases are curvature discontinuities (HOM/diffraction risk per Geddes) and partly a morph consequence (ATH says the morph adds a shifted diagonal). Treat them as visual until diagonal polars exist. [Geddes; ATH Tritonia]</p>
+    <p><strong>Narrowing.</strong> Le Cléac’h FEA shows DI rising from ~4 dB at 1.4 kHz to ~12 dB at 12 kHz (~2.6 dB/octave), smooth off-axis and clean decay. Crowe’s own ES-600 report shows stronger narrowing (45° down 4–10 dB above 2 kHz) and a 1 kHz resonance needing a passive network. A smooth 2–3 dB/octave rise is acceptable if monotonic, continuous at the 700 Hz crossover, with a coverage floor and no in-band resonance. [Sheerin; Fourcade; Crowe]</p>
+    <p><strong>Scoring.</strong> No primary/credible secondary source was found for a “Harman preferred 1–3 dB/octave” DI slope. Olive’s 2004 model uses NBD_ON, NBD_PIR, LFX and SM_PIR; no DI-slope term. CTA-2034’s 12/44/44 is the PIR synthesis average, not a preference weighting. The v7 flat-DI target and fixed-round <code>diag</code> reference are not supported for a smoothly narrowing or rectangular/creased horn. [Olive 2004; Toole/Olive; CTA-2034; source check]</p>
+    <p><strong>Analysis.</strong> 6 EPW is a screening mesh (~10% frequency error); verification should use 8–12 with a convergence check. Use balloon DI and full polars, not cuts-only; extract <code>Re Z</code> and absolute level; couple a lumped driver for loading. On-axis-only optimization can create deep off-axis minima. [Kolbrek; Boundary Lab solver report; COMSOL; AKABAK]</p>
+    <p><strong>Optimization.</strong> CMA-ES is a solid baseline; TuRBO/GP-BO is competitive and more sample-efficient. Keep 2–3 objectives, treat refusals as constraints, verify the top finalists on the dense grid. [Hansen; TuRBO; Smolen &amp; Halley 2021]</p>
+    <p><strong>Measurement.</strong> A printed waveguide can show 1–4 kHz artifacts from secondary transmission paths; a sand layer fixes the measurement. Baffle-edge diffraction and mic-boom reflections corrupt wide-angle data. The driver exit limits HF directivity (~8–9 kHz on a 1.4-inch driver). [JASA 2025; MTG waveguide shootout]</p>
+  </div>
+  <div class="callout warn">
+    <strong>Do not cite the “Harman 1–3 dB/octave” claim as fact.</strong> It did not survive this source check. Treat a smooth 2–3 dB/octave rise as acceptable under the conditions above, not as a published target.
+  </div>
+</section>
+
+<section id="options">
+  <h2>7. Options for the next solve night</h2>
+  <p><strong>Immediate:</strong> no new solves until the brief and the geometry law are settled. The options below are for after that gate. GPU costs are approximate. Night E was stopped at 17:15; no new solves are running.</p>
+  <div class="decision">
+    <div class="card d">
+      <h3>D. Fix the law first (recommended now)</h3>
+      <p><span class="tag fixed">0 GPU h now</span></p>
+      <p>Add a real under-surface lip return; decide whether the waist is wanted; rebuild the Crowe-section side-wall/lip junction; settle the brief/deadband and <code>diag</code>; rerender/preflight. Then choose a search option.</p>
+      <p><strong>Buys:</strong> a shape that can actually look like Crowe; avoids more data on a known-limited law. <strong>Risk:</strong> no new acoustic data today; code/test time.</p>
+    </div>
+    <div class="card">
+      <h3>A. Balanced</h3>
+      <p><span class="tag acoustic">~3–4 GPU h</span></p>
+      <p>One look candidate of your choice (Crowe-X <em>or</em> ES spiral) + R-OSSE rounded rectangle, all on the smooth brief; the Crowe sections have partial data but are stopped/provisional; cut the Bi-Radial.</p>
+      <p><strong>Buys:</strong> one look-first and one sound-first candidate. <strong>Risk:</strong> the look cell still has the law’s lip limitation; R-OSSE may be judged too plain.</p>
+    </div>
+    <div class="card b">
+      <h3>B. Look-first</h3>
+      <p><span class="tag shape">~4–5 GPU h</span></p>
+      <p>Crowe-X + ES spiral, smooth brief; cut the Bi-Radial and R-OSSE rectangle.</p>
+      <p><strong>Buys:</strong> maximum look exploration. <strong>Risk:</strong> no sound-first fallback; ES roll is thin; Crowe-X lip is a flange.</p>
+    </div>
+    <div class="card c">
+      <h3>C. Sound-first</h3>
+      <p><span class="tag ok">~2–3 GPU h</span></p>
+      <p>R-OSSE rounded rectangle (1–2 seeds) + keep the ext-throat data; Crowe sections provisional; no new look cells.</p>
+      <p><strong>Buys:</strong> the best chance of a good-sounding 700 Hz horn in this box. <strong>Risk:</strong> may not satisfy the Crowe look.</p>
+    </div>
+  </div>
+  <div class="callout">
+    <strong>Recommendation:</strong> D now, then A if the owner wants both look and sound explored; C if sound is the priority; B only after a real lip return exists. The owner’s own instruction to pause and investigate is the right call: the current law cannot produce the bead, and the brief is not yet defensible.
+  </div>
+</section>
+
+<section id="decision">
+  <h2>8. Decision checklist</h2>
+  <div class="grid grid-2">
+    <div class="card checklist">
+      <h3>What we need from you</h3>
+      <label><input type="checkbox"> Look at the six seeds and the H/V sections. Say whether the Crowe look or the best sound is the priority.</label>
+      <label><input type="checkbox"> Approve the brief direction: a 0–10 dB/decade deadband (recommended) or a point target (e.g. 6.6–8.6 dB/decade); and how to treat <code>diag</code> (report separately vs weight 0.3–0.5).</label>
+      <label><input type="checkbox"> Approve a real under-surface lip return; decide whether the waist is required.</label>
+      <label><input type="checkbox"> Approve rebuilding the Crowe-section side-wall/lip junction before any more section runs.</label>
+      <label><input type="checkbox"> Approve one brief for all families (smooth) with offline base-brief + <code>hifi_rescore</code> comparison, or choose a split.</label>
+    </div>
+    <div class="card">
+      <h3>What we will not do until then</h3>
+      <ul>
+        <li>No new GPU solves, no night F, no BoTorch registration.</li>
+        <li>No more Crowe-section runs on the current folded mesh.</li>
+        <li>No claim that a 270° wrap is acoustically better; no waist-as-acoustic-requirement claim.</li>
+        <li>No final ranking on <code>diag</code> until we have diagonal polars.</li>
+        <li>No print from a mesh with a &gt;150° fold.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="next">
+  <h2>9. What happens next</h2>
+  <ol>
+    <li><strong>Owner reviews this packet</strong> and chooses the priority (look vs sound) and the brief direction.</li>
+    <li><strong>Brief:</strong> implement/confirm the deadband or target and the <code>diag</code> treatment; rerun the offline rescores so the comparison is apples-to-apples.</li>
+    <li><strong>Geometry law:</strong> add a real lip return; decide on the waist; rebuild the Crowe-section junction with consistent winding and a fillet; rerender and preflight every cell.</li>
+    <li><strong>Owner look gate:</strong> approve the new seeds from the 3D renders and sections before any GPU.</li>
+    <li><strong>Night F:</strong> run the approved cells; verify the top finalists on the dense grid; report screen→verify correlation.</li>
+    <li><strong>Prototype:</strong> print/measure one; check loading, polars, diagonal, and the printed-waveguide secondary-path artifact; then decide the final horn.</li>
+  </ol>
+</section>
+
+<section id="appendix">
+  <h2>10. Files, sources and glossary</h2>
+  <div class="grid grid-2">
+    <div class="card">
+      <h3>Key files (repo-relative)</h3>
+      <ul>
+        <li><code>docs/research/typologies/STARTING_SEEDS_2026-11-15.html</code> - this packet</li>
+        <li><code>docs/research/typologies/STARTING_SEEDS_PLAIN_2026-11-15.md</code> - plain-language brief + parameter tables</li>
+        <li><code>docs/research/typologies/HORN_WHITEPAPERS_2026-11-15.md</code> - annotated bibliography</li>
+        <li><code>docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md</code> - cell handoff + corrections</li>
+        <li><code>docs/ISSUES.md</code>, <code>NOTES_FOR_SENIOR.md</code>, <code>docs/CONTINUITY.md</code> - top-priority pause + issues</li>
+        <li><code>examples/typologies/home_landscape_2026-11-15/</code> - the six cell configs</li>
+        <li><code>examples/briefs/home_landscape_2026-11-15/</code> - base and smooth briefs</li>
+        <li><code>docs/research/typologies/img_biradial_crowe_2026-11-15/packet/</code> - all packet images</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Glossary</h3>
+      <p><strong>CD:</strong> constant directivity; the horn tries to hold the same coverage at all frequencies.</p>
+      <p><strong>DI:</strong> directivity index; how much louder the on-axis direction is than the average of all directions. A rising DI means the beam is narrowing.</p>
+      <p><strong>Flare:</strong> how the wall opens from throat to mouth.</p>
+      <p><strong>Loading:</strong> the acoustic impedance the horn presents to the driver; more loading = the driver works against a stiffer air column at low frequencies.</p>
+      <p><strong>Lip / termination:</strong> what happens at the mouth edge; a rounded or rolled lip reduces edge diffraction and mouth reflection.</p>
+      <p><strong>Throat:</strong> the small end at the driver; the blend from the driver exit to the horn contour must be smooth and round.</p>
+      <p><strong>Waist:</strong> a concave/bow-tie mouth outline; a visual consequence of Crowe’s panel construction, not an acoustic requirement.</p>
+      <p><strong>X creases:</strong> diagonal ridges from the throat to the mouth corners; a Crowe visual signature and a potential diagonal-polar risk.</p>
+    </div>
+  </div>
+  <div class="card" style="margin-top:1rem">
+    <h3>Primary sources used</h3>
+    <p class="small">Keele US4071112 (EV CD horn); Keele US4308932A (JBL Bi-Radial); Keele AES 1038 and AES 933; JBL 2380A data; Geddes OS waveguide papers, US7068805 and “Loudspeaker System Design Philosophy”; ATH/Batík OS-SE, R-OSSE rev7, Tritonia, TwinRay roundover study, EXAR story; Fourcade 2015; Le Cléac’h ETF 2010; Sheerin Le Cléac’h vs conical FEA; Joseph Crowe ES-600 page and HF1460 measurement report; Kolbrek horn theory and BEM notes; COMSOL horn optimization; Smolen &amp; Halley JAES 2021; Sridhar et al. JAES 2019; TuRBO; Hansen CMA-ES tutorial; JASA 2025 sand-layer paper; Olive 2004; Toole/Olive; CTA-2034. Full URLs and confidence labels are in <a href="HORN_WHITEPAPERS_2026-11-15.md">HORN_WHITEPAPERS_2026-11-15.md</a>.</p>
+  </div>
+</section>
+
+</main>
+
+<footer><div class="wrap">
+  Decision packet generated 2026-11-15. No new solves are running. The renders are shape studies; the scores are BEM/objective evidence, not listening tests. Crowe reference photos are copyrighted and are kept in <code>scratch/</code>, not in this page.
+</div></footer>
+
+</body>
+</html>

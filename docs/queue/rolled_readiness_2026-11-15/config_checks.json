@@ -1,0 +1,132 @@
+[
+  {
+    "cell": "hl__ath_core_petal_hvlaw_v7",
+    "exit_code": 0,
+    "output": "hl__ath_core_petal_hvlaw_v7 config/seed loaded; 11 active dimensions; admission held"
+  },
+  {
+    "cell": "hl__biradial_es_style_v7",
+    "exit_code": 0,
+    "output": "hl__biradial_es_style_v7 config/seed loaded; 8 active dimensions; admission held"
+  },
+  {
+    "cell": "hl__crowe_es_biradial_rr_v7",
+    "exit_code": 0,
+    "output": "hl__crowe_es_biradial_rr_v7 config/seed loaded; 6 active dimensions; admission held"
+  },
+  {
+    "cell": "hl__crowe_panel_home_v7",
+    "exit_code": 0,
+    "output": "hl__crowe_panel_home_v7 config/seed loaded; 6 active dimensions; admission held"
+  },
+  {
+    "cell": "hl__crowe_x_osse_cd_v7",
+    "exit_code": 0,
+    "output": "hl__crowe_x_osse_cd_v7 config/seed loaded; 9 active dimensions; admission held"
+  },
+  {
+    "cell": "hl__es_style_rollback_v7",
+    "exit_code": 0,
+    "output": "hl__es_style_rollback_v7 config/seed loaded; 5 active dimensions; admission held"
+  },
+  {
+    "cell": "hl__ext_throat_hvlaw_v7",
+    "exit_code": 0,
+    "output": "hl__ext_throat_hvlaw_v7 config/seed loaded; 8 active dimensions; admission held"
+  },
+  {
+    "cell": "hl__lecleach_iwata_ar_landscape_v7",
+    "exit_code": 0,
+    "output": "hl__lecleach_iwata_ar_landscape_v7 config/seed loaded; 4 active dimensions; admission held"
+  },
+  {
+    "cell": "hl__osse_rrect_morph_v7",
+    "exit_code": 0,
+    "output": "hl__osse_rrect_morph_v7 config/seed loaded; 14 active dimensions; admission held"
+  },
+  {
+    "cell": "hl__rolled_es_spiral_v7",
+    "exit_code": 0,
+    "output": "hl__rolled_es_spiral_v7 config/seed loaded; 10 active dimensions; admission held"
+  },
+  {
+    "cell": "hl__rosse_rect_cd_v7",
+    "exit_code": 0,
+    "output": "hl__rosse_rect_cd_v7 config/seed loaded; 9 active dimensions; admission held"
+  },
+  {
+    "cell": "rf__rect_axial_v7",
+    "exit_code": 0,
+    "output": "rf__rect_axial_v7 config/seed loaded; 5 active dimensions; admission held"
+  },
+  {
+    "cell": "rf__rect_control_v7",
+    "exit_code": 0,
+    "output": "rf__rect_control_v7 config/seed loaded; 3 active dimensions; admission held"
+  },
+  {
+    "cell": "rf__rect_radial_strong_v7",
+    "exit_code": 0,
+    "output": "rf__rect_radial_strong_v7 config/seed loaded; 5 active dimensions; admission held"
+  },
+  {
+    "cell": "rf__rect_radial_v7",
+    "exit_code": 0,
+    "output": "rf__rect_radial_v7 config/seed loaded; 5 active dimensions; admission held"
+  },
+  {
+    "cell": "rf__section_axial_v7",
+    "exit_code": 0,
+    "output": "rf__section_axial_v7 config/seed loaded; 5 active dimensions; admission held"
+  },
+  {
+    "cell": "rf__section_control_v7",
+    "exit_code": 0,
+    "output": "rf__section_control_v7 config/seed loaded; 3 active dimensions; admission held"
+  },
+  {
+    "cell": "rf__section_radial_strong_v7",
+    "exit_code": 0,
+    "output": "rf__section_radial_strong_v7 config/seed loaded; 5 active dimensions; admission held"
+  },
+  {
+    "cell": "rf__section_radial_v7",
+    "exit_code": 0,
+    "output": "rf__section_radial_v7 config/seed loaded; 5 active dimensions; admission held"
+  },
+  {
+    "cell": "rr__crowe_panel_es600_v7",
+    "exit_code": 0,
+    "output": "rr__crowe_panel_es600_v7 config/seed loaded; 3 active dimensions; admission held"
+  },
+  {
+    "cell": "rr__pucker_hv_moderate_v7",
+    "exit_code": 0,
+    "output": "rr__pucker_hv_moderate_v7 config/seed loaded; 3 active dimensions; admission held"
+  },
+  {
+    "cell": "rr__pucker_hv_strong_v7",
+    "exit_code": 0,
+    "output": "rr__pucker_hv_strong_v7 config/seed loaded; 3 active dimensions; admission held"
+  },
+  {
+    "cell": "rr__reference_v7",
+    "exit_code": 0,
+    "output": "rr__reference_v7 config/seed loaded; 3 active dimensions; admission held"
+  },
+  {
+    "cell": "sp__control_v7",
+    "exit_code": 0,
+    "output": "sp__control_v7 config/seed loaded; 3 active dimensions; admission held"
+  },
+  {
+    "cell": "sp__moderate_v7",
+    "exit_code": 0,
+    "output": "sp__moderate_v7 config/seed loaded; 5 active dimensions; admission held"
+  },
+  {
+    "cell": "sp__strong_v7",
+    "exit_code": 0,
+    "output": "sp__strong_v7 config/seed loaded; 5 active dimensions; admission held"
+  }
+]

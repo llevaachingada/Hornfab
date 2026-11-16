@@ -1,0 +1,37 @@
+# GUI-only typology entries (not a campaign catalog).
+#
+# ``examples/catalog.yaml`` is the stock CLI's family allowlist: every entry there must be
+# materializable by the normal seed gate. The 2026-11-15 home-landscape bridge cells use
+# process-local custom rows types (rosse_rect, rolled_rect_pucker, crowe_panel) that only load
+# after their own CLI installs the bridge:
+#   tools/geometry/rosse_rect_cli.py
+#   tools/geometry/rolled_rect_cli.py
+#   tools/geometry/crowe_panel_cli.py
+# Putting them in examples/catalog.yaml would make ``--families all`` route them to a stock
+# search that cannot load them. This supplement is read by the GUI typology view only, so the
+# cells stay visible there without altering search. The GUI sandbox previews them through
+# ``tools/geometry/gui_preview.py`` (a fresh process with exactly one bridge installed); the
+# seed gate still marks them launch-disabled because the stock campaign path cannot load them.
+#
+# Fields match examples/catalog.yaml. Do not add these names to examples/catalog.yaml.
+entries:
+  - name: hl__rosse_rect_cd_v7
+    gui_only: true
+    config: typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml
+    group: home
+    symmetry: hv
+    description: HOME rolled rectangular mouth on ATH R-OSSE per azimuth; bridge cell; GUI preview works, run via tools/geometry/rosse_rect_cli.py
+
+  - name: hl__rolled_es_spiral_v7
+    gui_only: true
+    config: typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml
+    group: home
+    symmetry: hv
+    description: HOME Crowe ES-style exponential-spiral rolled rectangle (narrowing, non-CD by design); bridge cell; GUI preview works, run via rolled_rect_cli.py
+
+  - name: hl__crowe_panel_home_v7
+    gui_only: true
+    config: typologies/home_landscape_2026-11-15/hl__crowe_panel_home_v7.yaml
+    group: home
+    symmetry: hv
+    description: HOME Crowe ES-600 digitized-section family scaled to the home envelope; bridge cell; GUI preview works, run via crowe_panel_cli.py

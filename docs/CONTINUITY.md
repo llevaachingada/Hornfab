@@ -1,5 +1,109 @@
 # CONTINUITY
 
+## 2026-11-15 (19:00 local) - GUI BRIDGE CELLS VIEWABLE; HOME-LANDSCAPE PACKET; COMMIT/PUSH
+
+- GUI typology exposure is complete: the 8 stock-loadable home cells are in `examples/catalog.yaml`; the 3 bridge
+  cells (`hl__rosse_rect_cd_v7`, `hl__rolled_es_spiral_v7`, `hl__crowe_panel_home_v7`) are in
+  `examples/catalog.gui.yaml` and now preview in the GUI sandbox through `tools/geometry/gui_preview.py` (fresh
+  process, one bridge installed; 2D/3D, sections, sliders, tooltips). They remain launch-disabled for the stock
+  campaign and show a `preview only` pill; run them via their own CLI. Live GUI: `http://127.0.0.1:8765/#/typologies`.
+- The home-horn decision packet `docs/research/typologies/STARTING_SEEDS_2026-11-15.html` now has shaded 3D heroes,
+  front views, 360 turntables, horizontal/vertical sections, per-cell parameter tables, issues log I1-I12, research
+  summary and options. It is supported by `STARTING_SEEDS_PLAIN_2026-11-15.md`,
+  `HORN_WHITEPAPERS_2026-11-15.md`, `BIRADIAL_CROWE_STUDY_2026-11-15.md`, `BIRADIAL_CROWE_SOURCES_2026-11-15.md`
+  and `SCORING_NON_CD_SOURCES_2026-11-15.md`.
+- Night E remains stopped (runner 11172/controller 36556 killed; seed 5678 stopped at ~62/96; GPU cleaned). No new
+  solves, no night F. The brief/DI-slope + lip/waist geometry decision remains the top owner gate.
+- Both night-E Crowe runs were rescored under the smooth brief: seed 1234 best 6.84 vs base 16.92; partial seed 5678
+  best 6.83 vs base 17.06. The Crowe-section outer-body/lip fold is still a real defect; scores provisional.
+- Verification: 186 GUI/parameter tests passed; `tools/gen_param_catalog.py --check` passed; compileall clean for the
+  GUI bridge helper/data/catalog/test. This commit also preserves the concurrent rolled-family senior-audit
+  documentation/evidence pass (no generator/solve changes) and leaves its source/config/run history untouched.
+
+## 2026-11-15 — Rolled-family senior audit; spiral diagnostics and guarded queue
+
+- Read `docs/research/typologies/audit_2026-11-15/HANDOFF.md` then `READINESS.md` in that directory.
+- Owner subsequently allowed a few isolated acoustic diagnostics; full searches remain held on unresolved families. No Bayesian work on new typologies. Two real uncached spiral seed evaluations completed, EPW6/8, same design,4500/5277DOFs,J29.915059/29.913599. Not established convergence; GPU workers cleaned afterward.
+- New queue draft `docs/queue/rolled_readiness_2026-11-15/pilot_HELD.yaml`: two guarded spiral RNGseeds1234/5678,30 valid-target evaluations each. No controller launched; admission is false.26 frozen horn/brief config copies load; other families excluded pending gates. Retry/validation cost must be reconciled before campaign release. Preserve old D/E history; do not resume its unused BO/long-run tail.
+- Research corrected source/construction/objective claims: HF1440 combined exit does not establish2deg cone; Hypex mislabeled Crowe variant; distd is DI std, not detrended smoothness; actual Gaussian DI target13.079574dB; raw Crowe normal angle is not proof of inverted winding. Primary sources,600-row domains,17-run histories,32 exact offline score replays, original-mesh witnesses and bounded implementation prompts saved.
+- Verification:61 native CPU tests plus9 wrapper checks and5 generic strict-resume tests; dedicated spiral real-evaluator/CPU-mesh/synthetic-backend resume preserved5 cached rows and added4, all9 full surfaces replayed. Synthetic responses are clearly segregated. Original generators/briefs/configs and concurrent dirty work preserved. No commits.
+
+
+## 2026-11-15 — Rolled-family senior audit; spiral diagnostics and guarded queue
+
+- Read `docs/research/typologies/audit_2026-11-15/HANDOFF.md` then `READINESS.md` in that directory.
+- Owner subsequently allowed a few isolated acoustic diagnostics; full searches remain held on unresolved families. No Bayesian work on new typologies. Two real uncached spiral seed evaluations completed, EPW6/8, same design,4500/5277DOFs,J29.915059/29.913599. Not established convergence; GPU workers cleaned afterward.
+- New queue draft `docs/queue/rolled_readiness_2026-11-15/pilot_HELD.yaml`: two guarded spiral RNGseeds1234/5678,30 valid-target evaluations each. No controller launched; admission is false.26 frozen horn/brief config copies load; other families excluded pending gates. Retry/validation cost must be reconciled before campaign release. Preserve old D/E history; do not resume its unused BO/long-run tail.
+- Research corrected source/construction/objective claims: HF1440 combined exit does not establish2deg cone; Hypex mislabeled Crowe variant; distd is DI std, not detrended smoothness; actual Gaussian DI target13.079574dB; raw Crowe normal angle is not proof of inverted winding. Primary sources,600-row domains,17-run histories,32 exact offline score replays, original-mesh witnesses and bounded implementation prompts saved.
+- Verification:61 native CPU tests plus9 wrapper checks and5 generic strict-resume tests; dedicated spiral real-evaluator/CPU-mesh/synthetic-backend resume preserved5 cached rows and added4, all9 full surfaces replayed. Synthetic responses are clearly segregated. Original generators/briefs/configs and concurrent dirty work preserved. No commits.
+
+
+## 2026-11-15 (17:15 local) - OWNER PAUSED NEW SOLVES; BRIEF/DI-SLOPE INVESTIGATION IS TOP PRIORITY
+
+- **Owner decision (17:15): pause the current Crowe-section run and do not run any new solves until the
+  brief/DI-slope scoring question is investigated and settled.** The night-E runner (pid 11172) and its controller
+  (36556) were stopped; `e_crowe_home_s5678` stopped at ~62/96 rows; `gpu-clean` run; no Julia hosts left.
+- Why: the Crowe-section construction is not doing anything interesting in the current parameterisation (owner), and
+  the curves/law do not have the right degrees of freedom. Objective mesh check confirmed a 153-176 deg fold with
+  inverted triangles at the outer side-wall/lip junction (inner flare smooth); the other cells have no edge >150 deg.
+  The current laws also have **no true lip return** and **no waist term** (see the white-paper research).
+- Research to settle before new solves: the v7 fixed DI target (`di_slope_target 0`) and the `diag` fixed-round
+  reference are not supported by the listening literature; no source for the "Harman 1-3 dB/oct" claim; measured
+  narrowing is ~2.6 dB/oct (Le Cleac'h) and ~4.1 dB/oct (Crowe, author data); K-law correction A=0.9B gives 496/794
+  mm at 700 Hz (480 mm V holds 50 deg only to ~1157 Hz). Full sources: `HORN_WHITEPAPERS_2026-11-15.md`,
+  `STARTING_SEEDS_PLAIN_2026-11-15.md`.
+- GUI typology exposure fixed: the 8 stock-loadable home cells are in `examples/catalog.yaml`; the 3 bridge cells
+  (`hl__rosse_rect_cd_v7`, `hl__rolled_es_spiral_v7`, `hl__crowe_panel_home_v7`) are in
+  `examples/catalog.gui.yaml` and are now previewable in the GUI sandbox through
+  `tools/geometry/gui_preview.py` (fresh process, one bridge installed; 2D/3D sections and sliders). They remain
+  launch-disabled (stock campaign cannot load the custom rows kind) and show a `preview only` pill. Live GUI
+  restarted; `/api/typologies` returns 56 and the bridge preview API returns `available=True`. The generated parameter
+  catalog now includes the 3 GUI-only cells (`source_status: gui-only`, `preview_only: true`), so the sandbox has
+  knob docs/tooltips and no "not in the parameter catalog" warning; `gen_param_catalog.py --check` passes. New test
+  `tests/test_gui_bridge_preview.py`: 7 passed; the GUI/param subset (fixer's 179 + new 7) = 186 passed. The live
+  GUI is running detached at `http://127.0.0.1:8765/#/typologies` (home group); the three bridge cells open in the
+  sandbox with 2D/3D previews.
+- The six 360-degree seed turntables and the plain-language decision brief are in the research folder; owner judges
+  the look, not a model ranking. Do not queue night F until the brief and the lip/waist law are decided.
+
+## 2026-11-15 (16:45 local) - BIRADIAL FIX MERGED; FOUR CELLS RENDERED; SCORING RESEARCH
+
+- Merged `fix/biradial-throat-blend` (7124902) in the no-study window; 30 CI-filtered design/mesh tests pass.
+  Biradial refusal cause found: US4308932A needs `rm >= r0 + tan(a) L`; all 32/64 refusals were
+  `cone_does_not_close`. New closure-coupled box (L 220-320, h_a 32-37, v_a 18-24, h_rm 260-292,
+  v_rm 162-230) is **64/64** meshed, envelope-fitting, round throat; seed 560 x 350 x 258.
+- Rendered all four cells (box corners + 360-degree turntables). Defect-only visual QA: ES spiral roll is a
+  thin hook and high pucker adds rim ripples; R-OSSE rect rim scallops at extreme roll/exponent corners;
+  Crowe-X lip is a thin flange, not an under-surface return, and 5/10 box extremes are over 600 mm;
+  biradial law has no waist/lip term. Crowe likeness is for the owner to judge from the 3D renders, not a
+  model ranking. Sheets/GIFs in `docs/research/typologies/img_biradial_crowe_2026-11-15/`.
+- Scoring research: no source found for "Harman 1-3 dB/oct DI slope"; Olive 2004 has no slope term; CTA-2034
+  12/44/44 is the PIR average. `diag` uses a fixed round reference and structurally penalises rectangular
+  mouths. Owner decision pending on base vs smooth brief and night F scope.
+- Night E: TuRBO rerun done; Crowe home seed 1234 done (smooth rescore best J 6.84 vs base 16.92), seed 5678 stopped at 62/62 valid rows (smooth 6.83 vs base 17.06)
+  running. Objective mesh check found a 153-176 deg fold at the Crowe-section side-wall/lip junction (inner flare
+  smooth; outer-body defect) - scores provisional until the junction is rebuilt. No night F written. Full detail:
+  `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` s8.
+
+## 2026-11-15 (15:50 local) - BIRADIAL / CROWE / ROLLED-MOUTH STUDY; HANDOFF (owner stopped the session here)
+
+- Full handoff: `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` (+ `BIRADIAL_CROWE_SOURCES_2026-11-15.md`,
+  `SCORING_NON_CD_SOURCES_2026-11-15.md`, renders `img_biradial_crowe_2026-11-15/`). Nothing below is committed.
+- Found: the rolled-rect / pucker / section / Crowe-replica cells froze mouth W/H and 9-13 knobs (CMA re-scored the
+  drawings); the rolled-rect log spiral has no constant-angle throat section and one shared H/V contour, so its knobs
+  cannot set coverage; its roll is ~30 % of mouth radius by construction; Crowe-X "chunky bar" = 30-50 mm lips
+  wrapped 130-160 deg; biradial throat kink (law starts at 36-38 deg at the 2-deg exit) -> domed source refusals;
+  3 of 9 v7 terms assume constant directivity.
+- Fair rescore (offline, all stored rows, smooth-directivity brief variant): Crowe ES sections 22.5 -> 10.5, Le Cleach
+  19.4 -> 6.9, rolled-rect 27-29 -> 14-16; CD OSSE stays 2.3-2.8 and still leads; residual is mostly `diag`.
+- Built (CPU-checked, unsolved): `hl__rosse_rect_cd_v7` (ATH R-OSSE per azimuth, new `tools/geometry/rosse_rect.py` +
+  `rosse_rect_cli.py`; 64/64 box valid), `hl__crowe_x_osse_cd_v7` (58/64), `hl__rolled_es_spiral_v7` (62/64),
+  rewritten `hl__biradial_es_style_v7` (needs the fix; 32/64 refused, cause open), brief
+  `room_landscape_80x50_700_hf1440_v7_smooth.yaml`. Biradial throat-blend fix + 2 tests in worktree
+  `../biradial-wt` branch `fix/biradial-throat-blend` (uncommitted; merge only while no BoTorch study runs).
+- Compute: night E running (TuRBO rerun, home-sized Crowe x2, CMA data, verify, BO round 2 on ext-throat only).
+  No night F yet. BoTorch stays on families with >= 100 solves.
+
 ## 2026-11-15 (14:25 local) - BO NIGHT B WAS EMPTY (ENCODER BUG, FIXED); NIGHTS D + E QUEUED; BO DATA GATE
 
 - **Night B never solved.** `bo/data.py` refused every row with `morph_target != 1`; the landscape task has the morph off

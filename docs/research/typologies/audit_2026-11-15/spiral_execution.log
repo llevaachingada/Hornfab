@@ -1,0 +1,140 @@
+{
+  "dimensions": 10,
+  "winner_surface_hash": "aad72a09ce28d3ce7d3731eb45e3104aff73510ca3c04b832cd7b52dbbeddaaa",
+  "strict": {
+    "attempts": 7,
+    "backend_calls": 7,
+    "cached_refusals": 0,
+    "caps": {
+      "budget": 6,
+      "deadline_s": null,
+      "draws": 24,
+      "max_attempts": 24
+    },
+    "code": "hornlab_search.search.cma/strict/1",
+    "draws": 7,
+    "extensions": [],
+    "generation": 1,
+    "last_generation": {
+      "design_hashes": [
+        "ea9bc088ac6b",
+        "140982d2c913",
+        "270d225d8545",
+        "dd11eec983fc"
+      ],
+      "generation": 0,
+      "originals": [
+        [
+          0.5152399175674471,
+          0.17559913634855095,
+          0.21833957073216045,
+          0.07125174511749521,
+          0.3828927644617534,
+          0.1538974906053986,
+          0.7726402125664193,
+          0.5036579662964238,
+          0.9940755699452194,
+          0.6066920172910736
+        ],
+        [
+          0.7300071449439636,
+          0.4872790853059267,
+          0.40177784339138667,
+          0.06050702784893319,
+          0.26651652384888747,
+          0.33375701686198644,
+          0.8810931150709989,
+          0.5578204118750081,
+          0.9024244587638642,
+          0.25424133052728337
+        ],
+        [
+          0.4594707350741635,
+          0.15769436409011806,
+          0.24979577324986993,
+          0.3544394425205337,
+          0.5969689168283039,
+          0.23946992983639803,
+          0.9351148704097874,
+          0.13658183526878603,
+          0.8967101603999145,
+          0.7754397320877263
+        ],
+        [
+          0.4204319543600016,
+          0.3563767570501806,
+          0.4206289208572771,
+          0.4529407889638337,
+          0.5060802465740167,
+          0.30891440789829344,
+          0.8249433390425901,
+          0.4354387792751588,
+          0.9866484669839941,
+          0.9996678863474086
+        ]
+      ],
+      "replacements": [
+        [
+          [
+            0.5152399175674471,
+            0.17559913634855095,
+            0.21833957073216045,
+            0.07125174511749521,
+            0.3828927644617534,
+            0.1538974906053986,
+            0.7726402125664193,
+            0.5036579662964238,
+            0.9940755699452194,
+            0.6066920172910736
+          ]
+        ],
+        [],
+        [],
+        []
+      ]
+    },
+    "protocol": "strict-cma-v1",
+    "refusals": 1,
+    "replacements": 1,
+    "retries": 1,
+    "scored": 6,
+    "seed": {
+      "cached": false,
+      "category": "complete_score",
+      "design_hash": "2aa7e67a9aa0",
+      "eligible": true,
+      "kind": "",
+      "objective": 10.0
+    },
+    "slot": 0,
+    "stop_reason": "budget",
+    "told": 4,
+    "unknown_attempts": 0,
+    "valid": 6
+  },
+  "tells": 1,
+  "guards": {
+    "digest": "rolled_rect: implementation digest or schema differs from persisted recipe",
+    "driver": "rolled_rect: driver differs from persisted recipe"
+  }
+}
+.....                                                                    [100%]
+5 passed, 14 deselected in 5.38s
+ConfigError: spiral_qd.yaml: search.infeasible_penalty: resample_strict is only supported with search.algorithm: cma (got 'cma_me')
+usage: hornlab-search [-h]
+                      {doctor,version,selftest,run,search,verify,report,pin-plan,narrow,dataset,compare,export-step,surrogate,families,campaign,gpu-clean,ab-bl,gui,study}
+                      ...
+hornlab-search: error: argument cmd: invalid choice: 'verify-night' (choose from doctor, version, selftest, run, search, verify, report, pin-plan, narrow, dataset, compare, export-step, surrogate, families, campaign, gpu-clean, ab-bl, gui, study)
+usage: verify_rolled_rect_night.py [-h] --night NIGHT --jobs JOBS [--top TOP]
+                                   [--nights-dir NIGHTS_DIR] [--dry-run]
+
+Verify rolled-rectangle night results with their required opt-in geometry
+adapter.
+
+options:
+  -h, --help            show this help message and exit
+  --night NIGHT
+  --jobs JOBS           comma-separated job IDs
+  --top TOP
+  --nights-dir NIGHTS_DIR
+  --dry-run

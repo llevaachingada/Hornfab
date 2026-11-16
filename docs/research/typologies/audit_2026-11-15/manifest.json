@@ -1,0 +1,479 @@
+{
+  "files": [
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/build_review_artifacts.py",
+      "bytes": 11074,
+      "sha256": "34479e64a4dbcc9f0fb137a7e172e4a2f00189590276edc021cc422ad92accac"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/DOMAINS_AND_PATHS.md",
+      "bytes": 12121,
+      "sha256": "94976e92ea8dc806a8cd15e9d158fd45936fa0edbf77995a374c82db725df5b4"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/domains_current.csv",
+      "bytes": 177552,
+      "sha256": "2f818119e9fce381501748c57069798e0d1a01249601a6f5572ec67accb6c7fd"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/domains_current.json",
+      "bytes": 505096,
+      "sha256": "0d1982f4a1963b808dd9e12201e3484496e4304ecfd518acd19f97c03853d1c2"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/domains_extract.py",
+      "bytes": 14677,
+      "sha256": "b708c8ef4d5ed939dc9ea5b4f884abc193ff0e25dcc84e499c7f78fdde46750b"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/domains_proposed.json",
+      "bytes": 544392,
+      "sha256": "ecfb983260a13984903b1db3f845b26b592b15c7bf4788a355f2726d28c8d419"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/domains_semantics.md",
+      "bytes": 8782,
+      "sha256": "f919f3d888db5daee53c24510dc1f21ae0eaf942e896a1230b2eed13f9f25827"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/domains_tests.log",
+      "bytes": 115,
+      "sha256": "0392d6301b977ac74135280f03ffac7612230cb7a87fc711053461c6aaf4fc24"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/DRIVER_SOURCE.md",
+      "bytes": 1501,
+      "sha256": "05f0b9339972f441e60414730cd2da58fdc3f3366599a1081f9f7e0568f65d7d"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/finalize_audit.py",
+      "bytes": 8629,
+      "sha256": "1ecf5b908c3b829fbd0d79d9f3a41812b472a35040530971f52c6e09d5ed80b0"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/final_snapshot.json",
+      "bytes": 2154,
+      "sha256": "104a5635fe5e89fffac2f0aea130aec0a04d3b5d17161e81ed4dbd7a1fb9e661"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/GEOMETRY_CAPABILITY.md",
+      "bytes": 8720,
+      "sha256": "3114ab93da5d5649902198799a9dba81028763e374ab303fff7af46b30c5bbe8"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/geometry_controls.json",
+      "bytes": 56620,
+      "sha256": "052711dfb0ec078cc992e48eab8fef666d8a81e7915131d5e8b0280b33371a1c"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/geometry_controls.py",
+      "bytes": 7534,
+      "sha256": "011eb02883b84468b1168ff44bcc3f7dbc5c763e5bd05b6d6afc29de25b0c8cc"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/gui_api_snapshot.json",
+      "bytes": 1577897,
+      "sha256": "7494f3e4e8522f35157ab56a096e7d98612e943e4360d2bfccbed458d285e67b"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/HANDOFF.md",
+      "bytes": 6121,
+      "sha256": "89c18e6d54ed9fd8e082d5fce9169f56b7faa8c0969710ecf79b84cb86f9fe72"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/IMPLEMENTATION_SLICES.md",
+      "bytes": 16456,
+      "sha256": "927162216b71faef959b2f950d8372e43d2a2993141dc2efdb1ff90f45496404"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/mesh_topology.csv",
+      "bytes": 2291,
+      "sha256": "5d1f434b5703ae8b12902e5b0db8dbc5b58fb3e5b19c6a75fe18edebed5d554b"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/mesh_topology.json",
+      "bytes": 99250,
+      "sha256": "6f2176be88ecdbe2d304749da9173f91e53209563694f48766d1fca7ecdb8f00"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/mesh_topology.log",
+      "bytes": 964,
+      "sha256": "972f4567f2e9abda924e00ef46819e22187327abae8372441c3234196612b308"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/mesh_topology.py",
+      "bytes": 6896,
+      "sha256": "9d945e4cf802a73fda77f6e6ed767d47d691993cd2afb443c8a168c557a6961c"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/mesh_witness_crowe_seed.png",
+      "bytes": 451750,
+      "sha256": "a288e67bb42494e99171f210b26d6f33f9716ead3e436fc00fcce2086f9c34a1"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/mesh_witness_crowe_winner.png",
+      "bytes": 455529,
+      "sha256": "62788b608b8d689107fee233f18634b12cfa31b354aa4ed5bfc6f47505bba991"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/native_path_junit_counts.txt",
+      "bytes": 169,
+      "sha256": "43218d1ae5fce83d0d2dd771fb9bdbe4a7d9db51ffc306efca9f4e7b32886c10"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/native_path_tests.log",
+      "bytes": 81,
+      "sha256": "684d4fbae388dd5cc9634003a0146ad118ad12244ffd69d34a2e4f29f8d33de5"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/objective_ablation.json",
+      "bytes": 416829,
+      "sha256": "bd8b7d24a75d6717bef672930ffa472f212ed1d6798c19bedc4e8bb3a94c5497"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/objective_audit.py",
+      "bytes": 9609,
+      "sha256": "6f7b0a0b3281825fee961218f5c9bd2c8a57f3635bd33271f0b0bd2e9eebde15"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/objective_curves.png",
+      "bytes": 308345,
+      "sha256": "dcf6d34fd2bfad65869a63d0c6e1ae2fac1e5fa2e1a6ace0e699b5e9ca7c3c6b"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/OBJECTIVE_OFFLINE.md",
+      "bytes": 4313,
+      "sha256": "b5377236344d92d8b6c2e084e94543e3b943498a99dd743208167fec73e73687"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/PARAMETER_DOMAINS.md",
+      "bytes": 131690,
+      "sha256": "32b9d2908843feb2673ca817c6f4ef6fb8130ea7268f061fa9939f5ce43b7fcf"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/PRIMARY_GEOMETRY.md",
+      "bytes": 13303,
+      "sha256": "91a45a1663f943a9a1541b1f6d8d7c8df22e83cc4d68539efff7ee04c9d0ffda"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/PRIMARY_OBJECTIVE_SOURCES.md",
+      "bytes": 10775,
+      "sha256": "dc4b378392114f802e5f2fe139dcf49225dda942f325f4f6621804177bd8a6eb"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/QUEUE_REVIEW.json",
+      "bytes": 611,
+      "sha256": "4c193d3f47c2749968ee313639e91841e4c465470ba37f9cc3d9d036b84bc90e"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/READINESS.md",
+      "bytes": 16157,
+      "sha256": "77aa44b3adedcddb8b03d98019d2189a131abfe85105c54efb4b70cb29e3a7ec"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/RUNS_AND_QUEUE.md",
+      "bytes": 10800,
+      "sha256": "2f15fc783eccd03ab23fd9bd7987b88a7930081fdb9e2f8766445b0323a550ca"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/runs_current.csv",
+      "bytes": 9165,
+      "sha256": "e334170d7fec8a400b3dd270f5544fdbed6fb2b67485c889ac66ac6644223884"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/runs_current.json",
+      "bytes": 46138,
+      "sha256": "c2201452d54e27d78d95fad2b480f92ff2daa538a8de2e5239292b0df695252b"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/runs_inventory.py",
+      "bytes": 3354,
+      "sha256": "a07219eb62095045f9863c291d1a3e8755401ac8bc7d206cc525a08852001a59"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/runs_inventory_output.txt",
+      "bytes": 3081,
+      "sha256": "3d6f16a39424f977e7ad122b1f172c317ac9a0a43a0abafdda8c75ccf4359020"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/SPIRAL_ACOUSTICS.json",
+      "bytes": 12284,
+      "sha256": "46345d3ee677af9a14d8e6ea6f41f45c4e06253925eab3644f19a454b7b8bd9b"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/SPIRAL_ACOUSTICS.md",
+      "bytes": 1275,
+      "sha256": "b4a4cad9a157235466b4625bb26e21fdf7bc0c0a06635b1ea4562e3a745e7ebe"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/spiral_acoustic_epw6.log",
+      "bytes": 594,
+      "sha256": "638bfbff2e0cb40af76da21811cae049818d2f4d87983a4e300ef2f2e741929c"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/spiral_acoustic_epw6_memwatch.json",
+      "bytes": 1535,
+      "sha256": "0115b962db736d5d93e8db0c07c869400470e1945227e5c2a751029478b2dede"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/spiral_acoustic_epw8.log",
+      "bytes": 594,
+      "sha256": "bcb46da9c6698c6c5f0af35427a9d422e91c041a98a0d8001518ffe9bdd42230"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/spiral_acoustic_epw8_baseline.txt",
+      "bytes": 10,
+      "sha256": "af665d8f05386ceb277b3947c8c0a08da7d1299111b76d024268b0907ce614ea"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/spiral_acoustic_epw8_memwatch.json",
+      "bytes": 1490,
+      "sha256": "efcc6a0597c4e1af9266f95fe163be6943dcefc7b4db89e78489c1c48a4994a5"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/spiral_execution.json",
+      "bytes": 7168,
+      "sha256": "472fc5c9fccf5a048f5bc30a757b49a65b5b67ec49538abc8b965af5e6518e86"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/spiral_execution.log",
+      "bytes": 4219,
+      "sha256": "ccf1b2cb60475429c5953d54d26ba1102d433ca465b99bba56176e8c20bf24f8"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/SPIRAL_EXECUTION.md",
+      "bytes": 9586,
+      "sha256": "ac3e7ae78bd7d013516ca2f5a4844c78fc68b44667cf920a0d13f741c27b0342"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/spiral_execution.py",
+      "bytes": 6023,
+      "sha256": "9d94a6bbf644e350f929f5ec681d52f42285f149d39003c0b66a84a8e488e0c5"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/spiral_fine_mesh.log",
+      "bytes": 225,
+      "sha256": "e3622f7e8c8231ddc1b992a591db5356cdb4d876833a5b2585711b3ab0ed8e50"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/spiral_preflight64.json",
+      "bytes": 3428,
+      "sha256": "80dc92a2d2c68689d970ed331bd9a25b03235b5c29c37839cd4d7d5ad2736f29"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/spiral_resume.json",
+      "bytes": 41046,
+      "sha256": "f0e8ceae0a30a0b33774f88880ef386357045769e4234215da7b2e74de3ce1c1"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/spiral_resume.log",
+      "bytes": 1114,
+      "sha256": "9157797e7532c8f92ef0531a729781fd6f2f839f27061c2868375f1391c9a13b"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/spiral_resume.py",
+      "bytes": 5952,
+      "sha256": "e654ce762778c06a50c6388146db967f8ba246393b593d66bbab05710eb3412f"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/spiral_seed_mesh.log",
+      "bytes": 237,
+      "sha256": "7a9fc2caecd9463ef9fc8a242eb5c980db12b59387800a3f89c56e2b32d9e8fd"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/wrap_packet.py",
+      "bytes": 5459,
+      "sha256": "f3f0974d40c351b4c8658b3c7c004563d3e2d6185a3771cdd023b7d0fcc3dde1"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/spiral_renders/spiral_a.png",
+      "bytes": 145816,
+      "sha256": "31ce2b5ac34c88537484dd7cc5ec5b33233b3e0480c6b98ffe74ad770664dc41"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/spiral_renders/spiral_b.png",
+      "bytes": 97611,
+      "sha256": "bf8c527e68d7bcfad460e704134a40d428d35a2bc92881da7deed9f70563cd3a"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/spiral_renders/spiral_c.png",
+      "bytes": 148863,
+      "sha256": "7e4c0ac79b0eaf6752122154794fc2bac8bbcb60dc3a092d34eb6052dea5ce08"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/spiral_renders/spiral_u.png",
+      "bytes": 100806,
+      "sha256": "3f8c8d53f5debe63e40a8c0649db1c3272c286f67a5ed2cef81cf03e10b95be9"
+    },
+    {
+      "path": "docs/research/typologies/audit_2026-11-15/spiral_renders/targets.json",
+      "bytes": 325,
+      "sha256": "564e20b3d3f7bb6558c09ba5e89b4a4ffcab5498b52da7730bc0ba7e1eabbaa6"
+    },
+    {
+      "path": "docs/queue/rolled_readiness_2026-11-15/admission.json",
+      "bytes": 37387,
+      "sha256": "ceda1d43e79d51b76e7d02c940cb8e2418c50dcebc7c59eacccba4581208ea71"
+    },
+    {
+      "path": "docs/queue/rolled_readiness_2026-11-15/config_checks.json",
+      "bytes": 4346,
+      "sha256": "5f06019d98e9f04bc0aca52152b9ba580dd07b1c6e74ed50b7c7351b25e9bfd5"
+    },
+    {
+      "path": "docs/queue/rolled_readiness_2026-11-15/dry_run.log",
+      "bytes": 421,
+      "sha256": "c32fa0b32cb556685f3f5644772a2d3416ff7e366b79be42d68879da14ba507a"
+    },
+    {
+      "path": "docs/queue/rolled_readiness_2026-11-15/pilot_HELD.yaml",
+      "bytes": 503,
+      "sha256": "ac10169dc22dd829d43ee2e4156d61c0b4f8c792f8339348b05e3340ca097fa5"
+    },
+    {
+      "path": "docs/queue/rolled_readiness_2026-11-15/README.md",
+      "bytes": 2819,
+      "sha256": "648008877bf1181e2a70cc9042c1ab8764b5ff0af83081fdcb050ed7518a9a07"
+    },
+    {
+      "path": "docs/queue/rolled_readiness_2026-11-15/reviewed_job.py",
+      "bytes": 1864,
+      "sha256": "34c9be3f9b1e472c2972abd34cdbd72aa9f48593e7df91de55e77d5bec21335f"
+    },
+    {
+      "path": "docs/queue/rolled_readiness_2026-11-15/briefs/7d7d2d0cf048.yaml",
+      "bytes": 2654,
+      "sha256": "7d7d2d0cf0480d41f81e1b4970d17e05a4da66bb94dc0ce496d6726185910fe9"
+    },
+    {
+      "path": "docs/queue/rolled_readiness_2026-11-15/configs/hl__ath_core_petal_hvlaw_v7.yaml",
+      "bytes": 3090,
+      "sha256": "1da82b1453084360c155b1dcdd90f7672d0b0d92e96301fc4118526dad75dc3c"
+    },
+    {
+      "path": "docs/queue/rolled_readiness_2026-11-15/configs/hl__biradial_es_style_v7.yaml",
+      "bytes": 1773,
+      "sha256": "7afaf841100196e1eeaf43493fe95dc45e2c440f7268b62840dba90b93fb3a2a"
+    },
+    {
+      "path": "docs/queue/rolled_readiness_2026-11-15/configs/hl__crowe_es_biradial_rr_v7.yaml",
+      "bytes": 1429,
+      "sha256": "8511d3805db7e13a8f316e5572e6c85a985fadd57ed308efbc76a43716d5fe02"
+    },
+    {
+      "path": "docs/queue/rolled_readiness_2026-11-15/configs/hl__crowe_panel_home_v7.yaml",
+      "bytes": 1565,
+      "sha256": "297b4fa6ab8df0690692179fd16f108df08689201f2ba9454ae294facea9db05"
+    },
+    {
+      "path": "docs/queue/rolled_readiness_2026-11-15/configs/hl__crowe_x_osse_cd_v7.yaml",
+      "bytes": 1932,
+      "sha256": "90fd8f89b51f2b20aa18f0ae36e0fd6bc7ab7cedd2ed1a9adf78dd83766ecfa1"
+    },
+    {
+      "path": "docs/queue/rolled_readiness_2026-11-15/configs/hl__es_style_rollback_v7.yaml",
+      "bytes": 1265,
+      "sha256": "09ad6f783c748b4c446d43a85902493cc43709f632931e2c0d8c148dc2033217"
+    },
+    {
+      "path": "docs/queue/rolled_readiness_2026-11-15/configs/hl__ext_throat_hvlaw_v7.yaml",
+      "bytes": 3814,
+      "sha256": "00aa0546e0bb357f4ae49ed53976385caa691555b6a2fa39db027e54a576027d"
+    },
+    {
+      "path": "docs/queue/rolled_readiness_2026-11-15/configs/hl__lecleach_iwata_ar_landscape_v7.yaml",
+      "bytes": 1278,
+      "sha256": "79e433ccba665c922e907d25e82c0fdf191d7aeb1517e240cc75a1007e849eab"
+    },
+    {
+      "path": "docs/queue/rolled_readiness_2026-11-15/configs/hl__osse_rrect_morph_v7.yaml",
+      "bytes": 3018,
+      "sha256": "c816392f258a149c90f06833db9dd96cc44eb5715da6e4e5ffa5b4330c0dd4c2"
+    },
+    {
+      "path": "docs/queue/rolled_readiness_2026-11-15/configs/hl__rolled_es_spiral_v7.yaml",
+      "bytes": 2012,
+      "sha256": "14617bc7f55bc43e0956fc89eeedeba87211dd8b6b4b56f14f00d5c3e815e386"
+    },
+    {
+      "path": "docs/queue/rolled_readiness_2026-11-15/configs/hl__rosse_rect_cd_v7.yaml",
+      "bytes": 1765,
+      "sha256": "d5d3b30f38ae11a95996724beaebcadcd9c3846440ddea7c77ffc08bcad41b26"
+    },
+    {
+      "path": "docs/queue/rolled_readiness_2026-11-15/configs/rf__rect_axial_v7.yaml",
+      "bytes": 2335,
+      "sha256": "2524368570657ee3ff3fa5a016facea0ae53c77dbd14189d2999a5e867e1b85d"
+    },
+    {
+      "path": "docs/queue/rolled_readiness_2026-11-15/configs/rf__rect_control_v7.yaml",
+      "bytes": 2376,
+      "sha256": "57f6de7415d9e0f44a97f0f1e584e09fdb45c431cd379a84d9b6b9052f628976"
+    },
+    {
+      "path": "docs/queue/rolled_readiness_2026-11-15/configs/rf__rect_radial_strong_v7.yaml",
+      "bytes": 2351,
+      "sha256": "f2cbcaec82b9d4e2729d4c40df24b5d251c72238ce6956151343b1f903bacdd7"
+    },
+    {
+      "path": "docs/queue/rolled_readiness_2026-11-15/configs/rf__rect_radial_v7.yaml",
+      "bytes": 2336,
+      "sha256": "4d014270446a0266c5bd642583ce1ecb9df3d15b01612804b1010853cf811c36"
+    },
+    {
+      "path": "docs/queue/rolled_readiness_2026-11-15/configs/rf__section_axial_v7.yaml",
+      "bytes": 2167,
+      "sha256": "af200e770fb9f497433078870642aa181734c8a8b85110f0d7e70b28bc197128"
+    },
+    {
+      "path": "docs/queue/rolled_readiness_2026-11-15/configs/rf__section_control_v7.yaml",
+      "bytes": 2208,
+      "sha256": "c2fc41176429bf04f2a1b74d043880a19aad9859a570b24cfb9d1e660994d3d1"
+    },
+    {
+      "path": "docs/queue/rolled_readiness_2026-11-15/configs/rf__section_radial_strong_v7.yaml",
+      "bytes": 2183,
+      "sha256": "8cfd381caf9253a987f35252abfd2196dcb1f4eb2627bd96be89d5b46fcfcd1f"
+    },
+    {
+      "path": "docs/queue/rolled_readiness_2026-11-15/configs/rf__section_radial_v7.yaml",
+      "bytes": 2168,
+      "sha256": "d2b87baa0a0ee2edb25b276bf3786ec8953a62440579187ce43ea6bf502d1d57"
+    },
+    {
+      "path": "docs/queue/rolled_readiness_2026-11-15/configs/rr__crowe_panel_es600_v7.yaml",
+      "bytes": 1602,
+      "sha256": "90b308082a2308903aefce8787756e49de01d06ad60add8fd6d7b5abbd3091ed"
+    },
+    {
+      "path": "docs/queue/rolled_readiness_2026-11-15/configs/rr__pucker_hv_moderate_v7.yaml",
+      "bytes": 2009,
+      "sha256": "e4924215c6b28eefd3afe018db77c01ecd5910219dc5488685b6cf4e8238cb30"
+    },
+    {
+      "path": "docs/queue/rolled_readiness_2026-11-15/configs/rr__pucker_hv_strong_v7.yaml",
+      "bytes": 2004,
+      "sha256": "343185bdd2cec8288abb5af3a05594ce98581722cb39f1bc0dd55062889d5319"
+    },
+    {
+      "path": "docs/queue/rolled_readiness_2026-11-15/configs/rr__reference_v7.yaml",
+      "bytes": 1987,
+      "sha256": "17a8525dd008da7de4d4df94f473541200734a04e175a4680debe6ec4c8b4514"
+    },
+    {
+      "path": "docs/queue/rolled_readiness_2026-11-15/configs/sp__control_v7.yaml",
+      "bytes": 1951,
+      "sha256": "ea41513f9bb8156d78997d2fe0f76b4b1962769bb3ae18d3a33d1d4ef6e86fd5"
+    },
+    {
+      "path": "docs/queue/rolled_readiness_2026-11-15/configs/sp__moderate_v7.yaml",
+      "bytes": 1915,
+      "sha256": "66d5e63398f83e28a339e917c2c9aebef91623558305cc0e44509003cf3882b9"
+    },
+    {
+      "path": "docs/queue/rolled_readiness_2026-11-15/configs/sp__strong_v7.yaml",
+      "bytes": 1913,
+      "sha256": "2543405c30e0d3122f055901e2ac060b27ebe1e1fdf245336b1f2c55d54470b0"
+    }
+  ]
+}

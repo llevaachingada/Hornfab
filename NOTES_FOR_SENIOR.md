@@ -915,3 +915,64 @@ a quiet measurement. No tolerance/test skip was changed. A quiet-host rerun or
 separate measured performance investigation remains required before calling the
 entire suite green. Sources: scratch/2026-11-14_bayes/release.log and
 release_rerun.log; full report docs/evidence/BAYESIAN_STUDY_INTEGRATION_2026-11-14.md.
+
+## 2026-11-15 - TOP PRIORITY: settle the brief/DI-slope objective and the lip/waist geometry before any new solves
+
+What I was doing: continuing night E and preparing night F for the Crowe-style home horn (biradial,
+ES spiral, R-OSSE rectangle, Crowe-X, Crowe sections).
+
+What happened (owner, 17:15): pause the current Crowe-section run; do not run any new solves until the
+brief/DI-slope scoring question is investigated and settled. The current parameterisation is not doing
+anything interesting and the curves/parameters are not right. The night-E runner (11172) and controller
+(36556) were stopped; e_crowe_home_s5678 stopped at ~62/96; gpu-clean run.
+
+Evidence gathered before the pause:
+- External research (three lanes; docs/research/typologies/HORN_WHITEPAPERS_2026-11-15.md): no primary or
+  credible secondary source for "Harman prefers 1-3 dB/oct DI slope"; Olive 2004 has no DI-slope term;
+  measured narrowing is ~2.6 dB/oct (Le Cleac'h FEA) and ~4.1 dB/oct (Crowe ES author data). A smooth
+  2-3 dB/oct rise is acceptable only if monotonic, continuous at the XO, with a coverage floor and no
+  in-band resonance. The v7 fixed DI target and the `diag` fixed-round reference are not supported for
+  rectangular/creased mouths.
+- K-law correction: denominator is the throat angle A = 0.9 B, not coverage B. At 700 Hz, 80 deg H needs
+  496 mm (not 446) and 50 deg V needs 794 mm (not 714). The 480 mm V height holds 50 deg only to ~1157 Hz
+  (at 700 Hz it supports ~83 deg). This is a physical limit, not a cell bug.
+- Mouth termination: Geddes' verified rule is radius >= lambda/4 (35 mm -> ~2.46 kHz, 50 mm -> ~1.72 kHz,
+  86 mm -> ~1 kHz). The 270-deg wrap superiority and the 180-deg cavity-resonance claim are unverified.
+- Geometry gap: the current laws have no true under-surface lip return and no waist term. The Crowe-section
+  construction also has a 153-176 deg outer-body/lip fold with inverted triangles (inner flare smooth;
+  other cells have no edge >150 deg). The Crowe-section night-E scores are provisional.
+
+What I tried: stopped the run/queue cleanly; rendered six 360-degree seed turntables; wrote the plain-language
+decision brief and the white-paper memo; corrected the K-law and lip claims in the research notes.
+
+What I need decided (before any new solves):
+1. The objective/brief: DI-slope target (0 vs 5-6.6-8.6 dB/dec vs a 0-10 dB/dec deadband), `diag` weight/
+   reference, and whether one brief ranks all families.
+2. The geometry law: add a real under-surface lip return (and optionally a waist/panel outline) before more
+   Crowe-X/ES/Crowe-section GPU; rebuild the Crowe-section side-wall/lip junction with consistent winding.
+3. Whether to resume night E's remaining ext-throat/OSSE CMA/BO jobs under the base brief, or leave the GPU
+   idle until 1-2 are settled.
+No code/tolerance/test was changed for this block.
+
+
+## 2026-11-15 - Owner-requested Crowe / ATH evidence preservation; no implementation
+
+Read `docs/research/typologies/ROLLED_FAMILY_EVIDENCE_HANDOFF_2026-11-15.md` before further
+family/typology, bound, master-generator, brief or optimizer work. It preserves the primary
+research, axial/radial pucker correction, approximate Crowe section reconstruction limits,
+prior integration/NaN mistakes, and qualifications to the current six-seed packet. It links
+11 saved historical artifacts plus a file-hash manifest under
+`docs/research/typologies/evidence_rolled_family_handoff_2026-11-15/`.
+
+Important new source check: Keele's A is included throat angle, B full beamwidth; A=.9B and
+slope tan(A/2). The packet's accompanying plain brief contains conflicting half-angle wording.
+The sizing relation is empirical; do not promote it into a universal hard limit. Also audit
+"shape-only" labels, blanket EPW-error/source-cutoff assertions, and return/body vocabulary.
+
+Readiness remains **not established**. Saved geometry/worker/GP evidence is not acoustic design
+acceptance. Preserve the owner's 17:15 no-new-solves hold and the old three designs. This pass
+changed only evidence/docs; no code, bounds, briefs, queues, processes or solves were changed.
+
+## 2026-11-15 — Rolled/ATH/Crowe audit completion and remaining admission gates
+
+Read `docs/research/typologies/audit_2026-11-15/HANDOFF.md`. Critical new source finding: FaitalPRO HF1440 specifies35.8mm combined exit, not a2deg cone; preserve18mm/2deg as historical model assumptions.32 stored scores replay exactly. Crowe raw fold angles reproduce but original indexed winding is consistent. Source/body/physical control and objective decisions remain senior work. Priority spiral execution, actual CPU mesh/resume and two real spatial-resolution seed diagnostics now have evidence;26 frozen configs load. Guarded queue is held, no BO and no launch. Budget30 valid targets does not hard-cap retries/verification; finish accounting before release. No original source/brief/domain changes or commits in this audit.

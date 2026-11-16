@@ -1,0 +1,8 @@
+{
+ "spiral": {
+  "label": "spiral",
+  "mesh": "scratch\\2026-11-15_readiness\\spiral_acoustics\\epw6\\runs\\20261115T231838Z-screen-f9de68\\designs\\2aa7e67a9aa0\\mesh.msh",
+  "run_dir": "scratch\\2026-11-15_readiness\\spiral_acoustics\\epw6\\runs\\20261115T231838Z-screen-f9de68",
+  "design_hash": "2aa7e67a9aa0"
+ }
+}

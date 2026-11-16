@@ -2737,6 +2737,2879 @@ Domains covered: `generators`, `rows`, `native`
 - **Doc:** —
 - **Flags:** deferred
 
+## Group: home
+
+### hl__ath_core_petal_hvlaw_v7 — OSSE / native
+
+- **Group:** home
+- **Symmetry:** hv
+- **Config:** `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml`
+- **Brief:** `examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml`
+- **Source status:** catalog
+- **Description:** HOME landscape ATH CORE-style OSSE, cosine H/V wall-angle law plus gentle superformula petals; no mouth morph
+
+#### `L_mm` — OSSE main-section length (mm)
+
+- **Summary:** Length of the main OSSE section; extension and slot may add to the total.
+- **Detail:** The mesher requires it positive. In the total-length mode the section is carved differently, so the same value can mean a different total span.
+- **Formula:** `z_main in [0, L]`
+- **Physical effect:** Sets the depth of the flared OSSE body.
+- **Context:** `native:osse`
+- **Default:** 250.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `seed_params.L_mm`)
+- **Search bounds:** 160.0 .. 340.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `bounds.L_mm`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.L_mm`)
+- **Code:** `hornlab_mesher.profile_formulas.calculate_osse`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 1b. OSSE parameters
+- **Flags:** overloaded
+
+#### `a0_deg` — Throat half-angle (deg)
+
+- **Summary:** Wall half-angle at the throat, passed to the OSSE, R-OSSE and ICW meridian.
+- **Detail:** OSSE carries it in the 2 k r0 z tan(a0) term of the base radius, and R-OSSE carries the same term in its throat-radius curve. ICW uses it as the initial tangent angle theta0 of the curvature integral. It should match the driver exit angle when the wall is meant to continue the driver.
+- **Formula:** `OSSE/R-OSSE: c2 = 2 k r0 tan(a0); ICW: theta(0) = theta0`
+- **Physical effect:** Sets the initial expansion slope at the driver exit.
+- **Context:** `native`
+- **Default:** 1.9863 (source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `seed_params.a0_deg`)
+- **Search bounds:** 1.0 .. 3.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `bounds.a0_deg`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.a0_deg`)
+- **Code:** `hornlab_mesher.profile_formulas.calculate_osse`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 1b. OSSE parameters
+- **Flags:** —
+
+#### `a_deg` — Native coverage half-angle (deg)
+
+- **Summary:** OSSE/R-OSSE coverage half-angle in the mesher's own convention.
+- **Detail:** The mesher measures the angle as a half-angle from the axis. The target block in a config measures the total included angle, which is the value the objective scores. Read the block before comparing the two.
+- **Formula:** `OSSE: base(z) carries tan(a); R-OSSE: c3 = tan(a)^2`
+- **Physical effect:** Sets how wide the wall opens relative to the axis.
+- **Context:** `native`
+- **Default:** 24.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `seed_params.a_deg`)
+- **Search bounds:** 12.0 .. 36.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `bounds.a_deg`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.a_deg`)
+- **Code:** `hornlab_mesher.profile_formulas.calculate_osse`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 1b. OSSE parameters
+- **Flags:** overloaded
+
+#### `aspect_ratio` — Cross-section aspect ratio
+
+- **Summary:** Width-to-height scaling of the cross-section relative to the meridian radius.
+- **Detail:** The mesher scales the horizontal and vertical half-widths of the outline by this ratio. A value of one gives a circular section; larger values widen it. It does not change either meridian and is not a coverage angle.
+- **Formula:** `b = a * aspect_ratio in the ellipse/superellipse station`
+- **Physical effect:** Widens or narrows the cross-section without changing the wall profiles.
+- **Context:** `native`
+- **Default:** 1.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `seed_params.aspect_ratio`)
+- **Search bounds:** 1.0 .. 1.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `bounds.aspect_ratio`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=cross_section (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.aspect_ratio`)
+- **Code:** `hornlab_search.design.families.FAMILY_KEYS`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ## 7. Geometric / cross-section model (all formulas)
+- **Flags:** —
+
+#### `az_a_cos_amp` — Per-direction cos-power amplitude (deg)
+
+- **Summary:** Adds amp * |cos p|^pow to the wall angle.
+- **Detail:** A negative value trims the angle near the horizontal axis only, more sharply as the power grows (CORE: -15 at power 10).
+- **Formula:** `a(p) += az_a_cos_amp * |cos p|^az_a_cos_pow`
+- **Physical effect:** Trims or widens the horizontal coverage locally.
+- **Context:** `native`
+- **Default:** 14.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `seed_params.az_a_cos_amp`)
+- **Search bounds:** 0.0 .. 25.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `bounds.az_a_cos_amp`)
+- **Hard limits:** lo=-60.0, hi=60.0, kind=float, section=azlaw (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.az_a_cos_amp`)
+- **Code:** `hornlab_search.design.families.azlaw_expressions`
+- **Doc:** `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md` § ## 5b. Per-direction law (the exact CORE construction)
+- **Flags:** —
+
+#### `az_a_cos_pow` — Per-direction cos power
+
+- **Summary:** Exponent of the |cos p| term on the wall angle.
+- **Detail:** Higher powers confine the term to a narrow sector around the horizontal axis. CORE uses 10.
+- **Formula:** `|cos p|^az_a_cos_pow`
+- **Physical effect:** How narrow the trimmed sector is.
+- **Context:** `native`
+- **Default:** 2.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `seed_params.az_a_cos_pow`)
+- **Search bounds:** 1.0 .. 6.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `bounds.az_a_cos_pow`)
+- **Hard limits:** lo=0.5, hi=40.0, kind=float, section=azlaw (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.az_a_cos_pow`)
+- **Code:** `hornlab_search.design.families.azlaw_expressions`
+- **Doc:** `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md` § ## 5b. Per-direction law (the exact CORE construction)
+- **Flags:** —
+
+#### `az_a_sf_amp` — Per-direction superformula amplitude (deg)
+
+- **Summary:** Adds a superformula-shaped term to the wall angle, so the coverage differs in every direction.
+- **Detail:** With a nonzero value the wall angle becomes a(p) = a_deg + amp * SF(p) + the cos term; a_deg is then the BASE the terms add to (Ath CORE: a_deg 5, amp 35). Diagonals that open wider than H and V fold the walls into Ath's creases.
+- **Formula:** `a(p) = a_deg + az_a_sf_amp * SF(p) + az_a_cos_amp * |cos p|^az_a_cos_pow`
+- **Physical effect:** How strongly the wall angle follows the superformula lobes.
+- **Context:** `native`
+- **Default:** 3.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `seed_params.az_a_sf_amp`)
+- **Search bounds:** 0.0 .. 8.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `bounds.az_a_sf_amp`)
+- **Hard limits:** lo=-60.0, hi=60.0, kind=float, section=azlaw (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.az_a_sf_amp`)
+- **Code:** `hornlab_search.design.families.azlaw_expressions`
+- **Doc:** `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md` § ## 5b. Per-direction law (the exact CORE construction)
+- **Flags:** —
+
+#### `az_n_cos2_amp` — Per-direction termination n
+
+- **Summary:** Adds amp * cos^2 p to the OSSE termination shape n.
+- **Detail:** The mouth termination becomes different in H and V (CORE: n 6 + 1.5 cos^2 p, i.e. 7.5 H / 6.0 V).
+- **Formula:** `n(p) = n + az_n_cos2_amp * cos^2 p`
+- **Physical effect:** Changes the mouth roll-off shape between H and V.
+- **Context:** `native`
+- **Default:** 0.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `seed_params.az_n_cos2_amp`)
+- **Search bounds:** 0.0 .. 0.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `bounds.az_n_cos2_amp`)
+- **Hard limits:** lo=-10.0, hi=10.0, kind=float, section=azlaw (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.az_n_cos2_amp`)
+- **Code:** `hornlab_search.design.families.azlaw_expressions`
+- **Doc:** `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md` § ## 5b. Per-direction law (the exact CORE construction)
+- **Flags:** —
+
+#### `az_s_cos2_amp` — Per-direction termination s
+
+- **Summary:** Adds amp * cos^2 p to the OSSE termination strength s.
+- **Detail:** The mouth termination strength becomes different in H and V (CORE: s 0.6 + 0.23 cos^2 p, i.e. 0.83 H / 0.60 V).
+- **Formula:** `s(p) = s + az_s_cos2_amp * cos^2 p`
+- **Physical effect:** Changes how strongly the mouth flares out between H and V.
+- **Context:** `native`
+- **Default:** 0.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `seed_params.az_s_cos2_amp`)
+- **Search bounds:** -0.25 .. 0.5 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `bounds.az_s_cos2_amp`)
+- **Hard limits:** lo=-1.0, hi=1.0, kind=float, section=azlaw (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.az_s_cos2_amp`)
+- **Code:** `hornlab_search.design.families.azlaw_expressions`
+- **Doc:** `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md` § ## 5b. Per-direction law (the exact CORE construction)
+- **Flags:** —
+
+#### `az_sf_a` — Superformula a
+
+- **Summary:** Scale of the cosine part of the superformula term.
+- **Detail:** Values below 1 strengthen the horizontal side of the term. CORE uses 1.
+- **Formula:** `|cos(m p/4)/a|^n2`
+- **Physical effect:** Balances the horizontal side of the pattern.
+- **Context:** `native`
+- **Default:** 1.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `seed_params.az_sf_a`)
+- **Search bounds:** 1.0 .. 1.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `bounds.az_sf_a`)
+- **Hard limits:** lo=0.05, hi=5.0, kind=float, section=azlaw (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.az_sf_a`)
+- **Code:** `hornlab_search.design.families.azlaw_expressions`
+- **Doc:** `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md` § ## 5b. Per-direction law (the exact CORE construction)
+- **Flags:** —
+
+#### `az_sf_b` — Superformula b
+
+- **Summary:** Scale of the sine part of the superformula term.
+- **Detail:** Values below 1 lower the term toward the vertical axis, narrowing V against H. CORE uses 0.618.
+- **Formula:** `|sin(m p/4)/b|^n3`
+- **Physical effect:** Balances the vertical side of the pattern.
+- **Context:** `native`
+- **Default:** 0.8569 (source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `seed_params.az_sf_b`)
+- **Search bounds:** 0.8569 .. 0.8569 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `bounds.az_sf_b`)
+- **Hard limits:** lo=0.05, hi=5.0, kind=float, section=azlaw (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.az_sf_b`)
+- **Code:** `hornlab_search.design.families.azlaw_expressions`
+- **Doc:** `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md` § ## 5b. Per-direction law (the exact CORE construction)
+- **Flags:** —
+
+#### `az_sf_m` — Superformula lobes
+
+- **Summary:** Number of lobes of the superformula term (a multiple of 4).
+- **Detail:** m/4 sets the angular frequency of the cos and sin terms; 4 gives one lobe per quadrant (CORE). Only multiples of 4 keep the quarter-model mirror symmetry, so others are refused.
+- **Formula:** `SF(p) = (|cos(m p/4)/a|^n2 + |sin(m p/4)/b|^n3)^(-1/n1)`
+- **Physical effect:** How many times the coverage pattern repeats around the horn.
+- **Context:** `native`
+- **Default:** 4.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `seed_params.az_sf_m`)
+- **Search bounds:** 4.0 .. 4.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `bounds.az_sf_m`)
+- **Hard limits:** lo=4.0, hi=12.0, kind=float, section=azlaw (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.az_sf_m`)
+- **Code:** `hornlab_search.design.families.azlaw_expressions`
+- **Doc:** `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md` § ## 5b. Per-direction law (the exact CORE construction)
+- **Flags:** —
+
+#### `az_sf_n1` — Superformula n1
+
+- **Summary:** Overall sharpness of the superformula term.
+- **Detail:** Large n1 flattens the lobes toward a constant; small n1 makes them pointed. CORE uses 12.
+- **Formula:** `SF(p) = (...)^(-1/n1)`
+- **Physical effect:** Pointed versus rounded per-direction pattern.
+- **Context:** `native`
+- **Default:** 7.4958 (source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `seed_params.az_sf_n1`)
+- **Search bounds:** 7.4958 .. 7.4958 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `bounds.az_sf_n1`)
+- **Hard limits:** lo=0.1, hi=40.0, kind=float, section=azlaw (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.az_sf_n1`)
+- **Code:** `hornlab_search.design.families.azlaw_expressions`
+- **Doc:** `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md` § ## 5b. Per-direction law (the exact CORE construction)
+- **Flags:** —
+
+#### `az_sf_n2` — Superformula n2
+
+- **Summary:** Exponent on the cosine part of the superformula term.
+- **Detail:** With n3 it sets how sharply the term changes between the axis and the diagonal. CORE uses 15.
+- **Formula:** `|cos(m p/4)/a|^n2`
+- **Physical effect:** Sharpness near the horizontal axis.
+- **Context:** `native`
+- **Default:** 12.4449 (source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `seed_params.az_sf_n2`)
+- **Search bounds:** 12.4449 .. 12.4449 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `bounds.az_sf_n2`)
+- **Hard limits:** lo=0.1, hi=40.0, kind=float, section=azlaw (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.az_sf_n2`)
+- **Code:** `hornlab_search.design.families.azlaw_expressions`
+- **Doc:** `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md` § ## 5b. Per-direction law (the exact CORE construction)
+- **Flags:** —
+
+#### `az_sf_n3` — Superformula n3
+
+- **Summary:** Exponent on the sine part of the superformula term.
+- **Detail:** With n2 it sets how sharply the term changes toward the vertical axis. CORE uses 16.
+- **Formula:** `|sin(m p/4)/b|^n3`
+- **Physical effect:** Sharpness near the vertical axis.
+- **Context:** `native`
+- **Default:** 13.4442 (source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `seed_params.az_sf_n3`)
+- **Search bounds:** 13.4442 .. 13.4442 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `bounds.az_sf_n3`)
+- **Hard limits:** lo=0.1, hi=40.0, kind=float, section=azlaw (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.az_sf_n3`)
+- **Code:** `hornlab_search.design.families.azlaw_expressions`
+- **Doc:** `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md` § ## 5b. Per-direction law (the exact CORE construction)
+- **Flags:** —
+
+#### `exponent` — Native cross-section exponent
+
+- **Summary:** Superellipse exponent of the outline; the documented default is disputed.
+- **Detail:** The research basis states a default of 2.0 (a plain ellipse); the shipped generator default for the same idea is 4.0 (registry.DEFAULT_KNOBS). This entry records both claims and does not choose between them. It is not the generator's mouth_exponent key, although the two describe the same idea.
+- **Formula:** `( |cos(phi)/a|^e + |sin(phi)/b|^e )^(-1/e)`
+- **Physical effect:** Squares off or rounds the cross-section outline.
+- **Context:** `native`
+- **Default:** 2.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `seed_params.exponent`)
+- **Search bounds:** 2.0 .. 2.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `bounds.exponent`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=cross_section (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.exponent`)
+- **Code:** `hornlab_search.design.families.FAMILY_KEYS`
+- **Doc:** `docs/plan/12_RESEARCH_BASIS.md` § ## 4. The geometry we would have written already exists
+- **Flags:** doc_mismatch, overloaded
+
+#### `k` — OS-SE shape factor
+
+- **Summary:** Blends the OS-SE base radius between its radius term and its tangent term.
+- **Detail:** The base radius carries (k r0) and r0(1-k) terms plus the tangent-driven z term, so k reshapes the wall between the throat and the far-field angle. R-OSSE reuses it in its throat-radius curve. It is dimensionless and is not a termination control.
+- **Formula:** `base(z) = sqrt((k r0)^2 + 2 k r0 z tan(a0) + z^2 tan(a)^2) + r0(1-k)`
+- **Physical effect:** Reshapes the wall between the throat and the far-field angle.
+- **Context:** `native`
+- **Default:** 1.2163 (source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `seed_params.k`)
+- **Search bounds:** 0.3 .. 3.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `bounds.k`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.k`)
+- **Code:** `hornlab_mesher.profile_formulas.calculate_osse`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 1b. OSSE parameters
+- **Flags:** —
+
+#### `morph_allow_shrinkage` — Allow morph shrinkage
+
+- **Summary:** 0/1 flag that lets a morph target be smaller than the current mouth extent.
+- **Detail:** Without the flag the mesher refuses a target that would shrink the outline. With it the morph may pull the section inward. Ath calls the same control Morph.AllowShrinkage.
+- **Formula:** not stated
+- **Physical effect:** Allows or refuses a mouth outline that narrows toward the target.
+- **Context:** `native`
+- **Default:** 0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `seed_params.morph_allow_shrinkage`)
+- **Search bounds:** 0 .. 0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `bounds.morph_allow_shrinkage`)
+- **Hard limits:** lo=—, hi=—, kind=int, section=morph (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.morph_allow_shrinkage`)
+- **Code:** `hornlab_mesher.profile_morph._resolve_morph_half_dimensions`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 6a. Cross-section morphing (ALL formula families)
+- **Flags:** —
+
+#### `morph_corner_mm` — Morph corner radius (mm)
+
+- **Summary:** Corner radius of a rounded-rectangle morph target.
+- **Detail:** The radius is clamped against the target half-dimensions at run time. It is used only for a rounded-rectangle target. Ath calls the same control Morph.CornerRadius.
+- **Formula:** not stated
+- **Physical effect:** Rounds the corners of a rectangular morphed mouth.
+- **Context:** `native`
+- **Default:** 15.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `seed_params.morph_corner_mm`)
+- **Search bounds:** 15.0 .. 15.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `bounds.morph_corner_mm`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=morph (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.morph_corner_mm`)
+- **Code:** `hornlab_mesher.profile_morph._resolve_morph_half_dimensions`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 6a. Cross-section morphing (ALL formula families)
+- **Flags:** —
+
+#### `morph_exponent` — Morph superellipse exponent
+
+- **Summary:** Superellipse exponent of a morph target 3 outline.
+- **Detail:** The mesher reads this only when morph_target is 3, then clamps it into the superellipse range before building the target outline. Ath's guide documents only targets 0-2; target 3 is a mesher extension.
+- **Formula:** not stated
+- **Physical effect:** Squares off or rounds a superellipse morphed mouth.
+- **Context:** `native`
+- **Default:** 4.5 (source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `seed_params.morph_exponent`)
+- **Search bounds:** 4.5 .. 4.5 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `bounds.morph_exponent`)
+- **Hard limits:** lo=2.0, hi=16.0, kind=float, section=morph (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.morph_exponent`)
+- **Code:** `hornlab_mesher.profile_morph._morph_target_radius_at_angle`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 6a. Cross-section morphing (ALL formula families)
+- **Flags:** —
+
+#### `morph_fixed` — Morph fixed part
+
+- **Summary:** Axial fraction where the morph begins; zero starts at the throat.
+- **Detail:** The fixed part holds the base section before the morph factor becomes nonzero. The remaining axial fraction is remapped before the rate power is applied. Ath calls the same control Morph.FixedPart.
+- **Formula:** `factor = 0 for t <= morph_fixed`
+- **Physical effect:** Delays the start of the outline change along the horn.
+- **Context:** `native`
+- **Default:** 0.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `seed_params.morph_fixed`)
+- **Search bounds:** 0.0 .. 0.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `bounds.morph_fixed`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=morph (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.morph_fixed`)
+- **Code:** `hornlab_mesher.profile_morph._morph_factor`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 6a. Cross-section morphing (ALL formula families)
+- **Flags:** —
+
+#### `morph_height_mm` — Morph target height (mm)
+
+- **Summary:** Full target height of a rectangular or superellipse morph at the mouth.
+- **Detail:** A zero height lets the mesher infer the target height from the mouth extent. The value is a full height, not a half-height. Ath calls the same control Morph.TargetHeight.
+- **Formula:** not stated
+- **Physical effect:** Sets how tall the morphed mouth outline becomes.
+- **Context:** `native`
+- **Default:** 400.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `seed_params.morph_height_mm`)
+- **Search bounds:** 400.0 .. 400.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `bounds.morph_height_mm`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=morph (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.morph_height_mm`)
+- **Code:** `hornlab_mesher.profile_morph._morph_factor`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 6a. Cross-section morphing (ALL formula families)
+- **Flags:** —
+
+#### `morph_rate` — Morph rate
+
+- **Summary:** Power-law rate of the morph blend from the fixed part to the mouth.
+- **Detail:** The factor is the remapped axial fraction raised to this power, so larger values delay the morph until nearer the mouth. It only matters when a morph target is active. Ath calls the same control Morph.Rate.
+- **Formula:** `factor = clamp((t - morph_fixed)/(1 - morph_fixed), 0, 1)^morph_rate`
+- **Physical effect:** Moves how quickly the outline changes along the horn.
+- **Context:** `native`
+- **Default:** 3.46 (source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `seed_params.morph_rate`)
+- **Search bounds:** 3.46 .. 3.46 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `bounds.morph_rate`)
+- **Hard limits:** lo=0.0, hi=—, kind=float, section=morph (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.morph_rate`)
+- **Code:** `hornlab_mesher.profile_morph._morph_factor`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 6a. Cross-section morphing (ALL formula families)
+- **Flags:** —
+
+#### `morph_target` — Morph target shape
+
+- **Summary:** Cross-section shape the mouth morphs toward: off, rectangle, circle or superellipse.
+- **Detail:** families.py names the off, rectangle, circle and superellipse codes; the superellipse target reads morph_exponent. The morph factor begins at morph_fixed and follows the rate power toward the mouth. Ath's own vocabulary calls this control Morph.TargetShape.
+- **Formula:** `r(t, phi) = r_base(t, phi) + factor * (r_target(phi) - r_mouth_base(phi))`
+- **Physical effect:** Blends the round section into a target outline toward the mouth.
+- **Context:** `native`
+- **Default:** 0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `seed_params.morph_target`)
+- **Search bounds:** 0 .. 0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `bounds.morph_target`)
+- **Hard limits:** lo=0, hi=3, kind=int, section=morph (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.morph_target`)
+- **Code:** `hornlab_mesher.profile_morph._morph_target_shape`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 6a. Cross-section morphing (ALL formula families)
+- **Flags:** —
+
+#### `morph_width_mm` — Morph target width (mm)
+
+- **Summary:** Full target width of a rectangular or superellipse morph at the mouth.
+- **Detail:** A zero width lets the mesher infer the target width from the mouth extent. The value is a full width, not a half-width. Ath calls the same control Morph.TargetWidth.
+- **Formula:** not stated
+- **Physical effect:** Sets how wide the morphed mouth outline becomes.
+- **Context:** `native`
+- **Default:** 540.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `seed_params.morph_width_mm`)
+- **Search bounds:** 540.0 .. 540.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `bounds.morph_width_mm`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=morph (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.morph_width_mm`)
+- **Code:** `hornlab_mesher.profile_morph._morph_factor`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 6a. Cross-section morphing (ALL formula families)
+- **Flags:** —
+
+#### `n` — OSSE termination exponent
+
+- **Summary:** Superellipse exponent of the OSSE termination term.
+- **Detail:** It is read only while the termination amplitude is nonzero. The biradial generator meaning of n is not asserted in this context.
+- **Formula:** `term = (s L/q)(1 - (1 - z_norm^n)^(1/n))`
+- **Physical effect:** Sharpens or softens the OSSE mouth roll.
+- **Context:** `native`
+- **Default:** 6.9046 (source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `seed_params.n`)
+- **Search bounds:** 2.0 .. 10.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `bounds.n`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.n`)
+- **Code:** `hornlab_mesher.profile_formulas.calculate_osse`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 1b. OSSE parameters
+- **Flags:** overloaded
+
+#### `q` — OSSE termination saturation
+
+- **Summary:** Superellipse saturation of the OSSE termination; positive while s is nonzero.
+- **Detail:** It sets how quickly the termination term saturates with axial station. The mesher requires it positive whenever the termination amplitude s is nonzero.
+- **Formula:** `z_norm = q z/L; term = (s L/q)(1 - (1 - z_norm^n)^(1/n))`
+- **Physical effect:** Changes how abruptly the terminated outline reaches its corner.
+- **Context:** `native:osse`
+- **Default:** 0.9869 (source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `seed_params.q`)
+- **Search bounds:** 0.9 .. 1.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `bounds.q`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.q`)
+- **Code:** `hornlab_mesher.profile_formulas.calculate_osse`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 1b. OSSE parameters
+- **Flags:** overloaded
+
+#### `r0_mm` — Throat radius (mm)
+
+- **Summary:** Throat radius every native family starts its meridian from.
+- **Detail:** OSSE and R-OSSE use it as the base radius of the wall law, ICW uses it as the throat integration constant, and a FREEFORM meridian starts at its own first anchor radius. It is shared by the H and V planes unless a per-azimuth expression is used. The mesher rejects a non-positive value.
+- **Formula:** `OSSE: base(z) starts at k r0 + r0(1-k); ICW: r(s) = r0 + S integral sin(theta)`
+- **Physical effect:** Sets the throat area and the driver exit the wall must match.
+- **Context:** `native`
+- **Default:** 18.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `seed_params.r0_mm`)
+- **Search bounds:** 18.0 .. 18.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `bounds.r0_mm`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.r0_mm`)
+- **Code:** `hornlab_mesher.profile_formulas.calculate_osse`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 1b. OSSE parameters
+- **Flags:** —
+
+#### `s` — Termination amplitude
+
+- **Summary:** OSSE superellipse termination amplitude; zero leaves the plain OS wall.
+- **Detail:** A nonzero amplitude turns on the superellipse termination and makes n and q active. A zero value leaves the plain OS wall. R-OSSE has no s; its rollback comes from the blended curves and tmax, not from this key.
+- **Formula:** `term is added to base only while s != 0`
+- **Physical effect:** Rolls the OSSE mouth toward a superellipse outline.
+- **Context:** `native`
+- **Default:** 0.7503 (source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `seed_params.s`)
+- **Search bounds:** 0.2 .. 1.2 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `bounds.s`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.s`)
+- **Code:** `hornlab_mesher.profile_formulas.calculate_osse`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 1b. OSSE parameters
+- **Flags:** —
+
+#### `s1` — Throat stretch coefficient 1 (mm/deg)
+
+- **Summary:** Strength of the OSSE/R-OSSE nonlinear throat-stretch mapping.
+- **Detail:** The mesher maps the main-section axial coordinate through x + s1 * degrees(atan(s2 x)), so s1 multiplies an angle and is not dimensionless. It is active only with a nonzero s2. The coefficients must be plain finite numbers, and various rotation/slot combinations are refused.
+- **Formula:** `x_stretched = x + s1 * degrees(atan(s2 * x))`
+- **Physical effect:** Redistributes axial stations toward or away from the throat.
+- **Context:** `native`
+- **Default:** 1.1799 (source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `seed_params.s1`)
+- **Search bounds:** 1.1799 .. 1.1799 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `bounds.s1`)
+- **Hard limits:** lo=0.0, hi=10.0, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.s1`)
+- **Code:** `hornlab_mesher.throat_stretch.stretch_coefficients`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 6f. Throat stretch (OSSE, R-OSSE)
+- **Flags:** —
+
+#### `s2` — Throat stretch coefficient 2 (1/mm)
+
+- **Summary:** Inverse-length scale inside the throat-stretch arctangent.
+- **Detail:** s2 sets how quickly the arctangent saturates with axial distance, so its unit is inverse length. It is active only together with a nonzero s1. The mesher refuses a slot combined with throat stretch and refuses per-azimuth forms of either coefficient.
+- **Formula:** `x_stretched = x + s1 * degrees(atan(s2 * x))`
+- **Physical effect:** Moves where the stretched region becomes nearly linear again.
+- **Context:** `native`
+- **Default:** 0.0286 (source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `seed_params.s2`)
+- **Search bounds:** 0.0286 .. 0.0286 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ath_core_petal_hvlaw_v7.yaml` `bounds.s2`)
+- **Hard limits:** lo=0.0, hi=10.0, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.s2`)
+- **Code:** `hornlab_mesher.throat_stretch.stretch_coefficients`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 6f. Throat stretch (OSSE, R-OSSE)
+- **Flags:** —
+
+### hl__biradial_es_style_v7 — FREEFORM / generator
+
+- **Group:** home
+- **Symmetry:** hv
+- **Config:** `examples/typologies/home_landscape_2026-11-15/hl__biradial_es_style_v7.yaml`
+- **Brief:** `examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml`
+- **Source status:** catalog
+- **Description:** HOME landscape Keele Bi-Radial (US4308932A) with a 25 mm OS throat blend and an ES-450-style squarish landscape mouth
+
+#### `L_mm` — Depth (mm)
+
+- **Summary:** Axial depth shared by both meridians, throat to mouth.
+- **Detail:** The generator builds both meridians to one z span, so L_mm is shared rather than a per-plane length. It is the fixed-length dimension for conical, exponential, hypex and OSSE; length-derived types may only be shortened to it. The brief envelope still bounds the final depth.
+- **Formula:** `z = s L, with s the normalised axial fraction`
+- **Physical effect:** Moves the mouth plane in or out along the horn axis.
+- **Context:** `generator`
+- **Default:** 255.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__biradial_es_style_v7.yaml` `seed_params.L_mm`)
+- **Search bounds:** 220.0 .. 320.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__biradial_es_style_v7.yaml` `bounds.L_mm`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.ICW.L_mm`)
+- **Code:** `hornlab_search.design.generators.registry.materialize`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ## 4. FREEFORM
+- **Flags:** —
+
+#### `h_a_deg` — H-plane bi-radial initial wall half-angle (deg)
+
+- **Summary:** Plain initial-wall half-angle of the Keele/JBL power-series contour.
+- **Detail:** The bi-radial contour starts at this wall angle and bends toward the mouth radius through a power-series term. This type sets its own default because the OSSE default would turn a one-inch-scale contour inward at these depths.
+- **Formula:** `r(z) = r0 + tan(a) z + c z^n`
+- **Physical effect:** Sets the straight-cone slope the power-series term bends away from.
+- **Context:** `generator:biradial`
+- **Default:** 36.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__biradial_es_style_v7.yaml` `seed_params.h_a_deg`)
+- **Search bounds:** 32.0 .. 37.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__biradial_es_style_v7.yaml` `bounds.h_a_deg`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.a_deg`)
+- **Code:** `hornlab_search.design.generators.registry.build_meridian`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 1b. OSSE parameters
+- **Flags:** overloaded
+
+#### `h_n` — H-plane bi-radial flare exponent
+
+- **Summary:** Power-series flare exponent of the Keele/JBL bi-radial wall contour.
+- **Detail:** The exponent n bends the straight initial cone toward the requested mouth radius. The patent's claim 14 gives its legal range and the paper prefers larger values at larger coverage.
+- **Formula:** `r(z) = r0 + tan(a) z + c z^n`
+- **Physical effect:** Concentrates curvature near the mouth at larger values.
+- **Context:** `generator:biradial`
+- **Default:** 5.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__biradial_es_style_v7.yaml` `seed_params.h_n`)
+- **Search bounds:** 3.0 .. 7.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__biradial_es_style_v7.yaml` `bounds.h_n`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.n`)
+- **Code:** `hornlab_search.design.generators.registry._osse`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 1b. OSSE parameters
+- **Flags:** overloaded
+
+#### `h_rm_mm` — H-plane mouth radius (mm)
+
+- **Summary:** Per-plane target mouth radius for conical, exponential and hypex walls.
+- **Detail:** For the fixed-size classical walls this is the radius the meridian must reach at its end; the flare is solved from the throat radius to it. It is per meridian: the H and V planes carry their own value. The QTW arc rule derives its mouth radius instead of taking this knob.
+- **Formula:** `conical: r(z) = r0 + z tan(alpha); exponential: r = r0 exp(m z)`
+- **Physical effect:** Sets the mouth area and therefore the low-frequency loading for these walls.
+- **Context:** `generator`
+- **Default:** 280.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__biradial_es_style_v7.yaml` `seed_params.h_rm_mm`)
+- **Search bounds:** 260.0 .. 292.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__biradial_es_style_v7.yaml` `bounds.h_rm_mm`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.registry.build_meridian`
+- **Doc:** `docs/plan/12_RESEARCH_BASIS.md` § ### 16.1 The typology map, dated and sourced
+- **Flags:** —
+
+#### `h_throat_blend_mm` — H-plane throat blend length (mm)
+
+- **Summary:** Length over which an OS throat is blended into a classical wall; zero skips it.
+- **Detail:** A nonzero length replaces the start of the classical meridian with an OS throat that starts at the driver exit angle. A smoothstep blend lands exactly on the classical radius and angle at the end of the blend. The default zero path leaves the parent bit-for-bit unchanged.
+- **Formula:** `r(z) = (1 - w) r_OS(z) + w r_classical(z), w = 3t^2 - 2t^3, t = z / L_b`
+- **Physical effect:** Trades a short OS throat transition against the parent's own throat shape.
+- **Context:** `generator`
+- **Default:** 25.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__biradial_es_style_v7.yaml` `seed_params.h_throat_blend_mm`)
+- **Search bounds:** 25.0 .. 25.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__biradial_es_style_v7.yaml` `bounds.h_throat_blend_mm`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.profiles.throat_blend`
+- **Doc:** `docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md` § ### 2.2 `throat_blend_mm` (G3)
+- **Flags:** —
+
+#### `max_wall_deg` — Generator wall-angle cap (deg)
+
+- **Summary:** Upper bound applied to every selected anchor's wall angle.
+- **Detail:** The materializer clamps anchor angles into this cap after selecting and perturbing them. The same block key also supplies the default stop for a spherical-salmon march.
+- **Formula:** not stated
+- **Physical effect:** Caps how vertical the wall may become.
+- **Context:** `generator`
+- **Default:** 80.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__biradial_es_style_v7.yaml` `generator.max_wall_deg`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.registry.materialize`
+- **Doc:** `docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md` § ### 2.3 `spherical_salmon` (G4)
+- **Flags:** overloaded
+
+#### `mouth` — Mouth cross-section
+
+- **Summary:** Mouth cross-section family: ellipse, superellipse or rounded rectangle.
+- **Detail:** The generator emits two cross-section stations: a circular throat and the selected mouth shape. Superellipse and rounded-rectangle mouths read the mouth exponent and corner-radius knobs respectively.
+- **Formula:** not stated
+- **Physical effect:** Changes the mouth outline without changing the meridians.
+- **Context:** `generator`
+- **Default:** superellipse (source: `examples/typologies/home_landscape_2026-11-15/hl__biradial_es_style_v7.yaml` `generator.mouth`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.registry.materialize`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 4d. Cross-section stations (crossSections)
+- **Flags:** —
+
+#### `mouth_exponent` — Mouth superellipse exponent
+
+- **Summary:** Superellipse exponent of a superellipse mouth cross-section.
+- **Detail:** Used only when the mouth is a superellipse. The generator clamps the value into the mesher's legal superellipse range before it emits the station. It is not the cross-section exponent of the native FREEFORM family.
+- **Formula:** not stated
+- **Physical effect:** Squares off or rounds the mouth outline.
+- **Context:** `generator`
+- **Default:** 3.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__biradial_es_style_v7.yaml` `seed_params.mouth_exponent`)
+- **Search bounds:** 2.2 .. 5.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__biradial_es_style_v7.yaml` `bounds.mouth_exponent`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.registry.materialize`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 4d. Cross-section stations (crossSections)
+- **Flags:** —
+
+#### `n_anchors` — Anchor count
+
+- **Summary:** Number of [z, r, wall-angle] anchors selected per meridian.
+- **Detail:** The generator reduces the dense march to this many anchors before the mesher sees it. Both endpoints are always kept and interior anchors are placed by equal arc length in the normalised z/angle plane, so curved regions get more anchors.
+- **Formula:** not stated
+- **Physical effect:** Raises mesh fidelity at the cost of more control points.
+- **Context:** `generator`
+- **Default:** 16 (source: `examples/typologies/home_landscape_2026-11-15/hl__biradial_es_style_v7.yaml` `generator.n_anchors`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.profiles.select_anchors`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 4b. Profile representation
+- **Flags:** —
+
+#### `v_a_deg` — V-plane bi-radial initial wall half-angle (deg)
+
+- **Summary:** Plain initial-wall half-angle of the Keele/JBL power-series contour.
+- **Detail:** The bi-radial contour starts at this wall angle and bends toward the mouth radius through a power-series term. This type sets its own default because the OSSE default would turn a one-inch-scale contour inward at these depths.
+- **Formula:** `r(z) = r0 + tan(a) z + c z^n`
+- **Physical effect:** Sets the straight-cone slope the power-series term bends away from.
+- **Context:** `generator:biradial`
+- **Default:** 22.5 (source: `examples/typologies/home_landscape_2026-11-15/hl__biradial_es_style_v7.yaml` `seed_params.v_a_deg`)
+- **Search bounds:** 18.0 .. 24.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__biradial_es_style_v7.yaml` `bounds.v_a_deg`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.a_deg`)
+- **Code:** `hornlab_search.design.generators.registry.build_meridian`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 1b. OSSE parameters
+- **Flags:** overloaded
+
+#### `v_n` — V-plane bi-radial flare exponent
+
+- **Summary:** Power-series flare exponent of the Keele/JBL bi-radial wall contour.
+- **Detail:** The exponent n bends the straight initial cone toward the requested mouth radius. The patent's claim 14 gives its legal range and the paper prefers larger values at larger coverage.
+- **Formula:** `r(z) = r0 + tan(a) z + c z^n`
+- **Physical effect:** Concentrates curvature near the mouth at larger values.
+- **Context:** `generator:biradial`
+- **Default:** 5.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__biradial_es_style_v7.yaml` `seed_params.v_n`)
+- **Search bounds:** 3.0 .. 7.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__biradial_es_style_v7.yaml` `bounds.v_n`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.n`)
+- **Code:** `hornlab_search.design.generators.registry._osse`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 1b. OSSE parameters
+- **Flags:** overloaded
+
+#### `v_rm_mm` — V-plane mouth radius (mm)
+
+- **Summary:** Per-plane target mouth radius for conical, exponential and hypex walls.
+- **Detail:** For the fixed-size classical walls this is the radius the meridian must reach at its end; the flare is solved from the throat radius to it. It is per meridian: the H and V planes carry their own value. The QTW arc rule derives its mouth radius instead of taking this knob.
+- **Formula:** `conical: r(z) = r0 + z tan(alpha); exponential: r = r0 exp(m z)`
+- **Physical effect:** Sets the mouth area and therefore the low-frequency loading for these walls.
+- **Context:** `generator`
+- **Default:** 175.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__biradial_es_style_v7.yaml` `seed_params.v_rm_mm`)
+- **Search bounds:** 162.0 .. 230.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__biradial_es_style_v7.yaml` `bounds.v_rm_mm`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.registry.build_meridian`
+- **Doc:** `docs/plan/12_RESEARCH_BASIS.md` § ### 16.1 The typology map, dated and sourced
+- **Flags:** —
+
+#### `v_throat_blend_mm` — V-plane throat blend length (mm)
+
+- **Summary:** Length over which an OS throat is blended into a classical wall; zero skips it.
+- **Detail:** A nonzero length replaces the start of the classical meridian with an OS throat that starts at the driver exit angle. A smoothstep blend lands exactly on the classical radius and angle at the end of the blend. The default zero path leaves the parent bit-for-bit unchanged.
+- **Formula:** `r(z) = (1 - w) r_OS(z) + w r_classical(z), w = 3t^2 - 2t^3, t = z / L_b`
+- **Physical effect:** Trades a short OS throat transition against the parent's own throat shape.
+- **Context:** `generator`
+- **Default:** 25.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__biradial_es_style_v7.yaml` `seed_params.v_throat_blend_mm`)
+- **Search bounds:** 25.0 .. 25.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__biradial_es_style_v7.yaml` `bounds.v_throat_blend_mm`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.profiles.throat_blend`
+- **Doc:** `docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md` § ### 2.2 `throat_blend_mm` (G3)
+- **Flags:** —
+
+### hl__crowe_es_biradial_rr_v7 — FREEFORM / generator
+
+- **Group:** home
+- **Symmetry:** hv
+- **Config:** `examples/typologies/home_landscape_2026-11-15/hl__crowe_es_biradial_rr_v7.yaml`
+- **Brief:** `examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml`
+- **Source status:** catalog
+- **Description:** HOME landscape Crowe ES-style biradial, round throat to a 2:1 rounded-rectangle mouth with independent H/V hypex walls
+
+#### `L_mm` — Depth (mm)
+
+- **Summary:** Axial depth shared by both meridians, throat to mouth.
+- **Detail:** The generator builds both meridians to one z span, so L_mm is shared rather than a per-plane length. It is the fixed-length dimension for conical, exponential, hypex and OSSE; length-derived types may only be shortened to it. The brief envelope still bounds the final depth.
+- **Formula:** `z = s L, with s the normalised axial fraction`
+- **Physical effect:** Moves the mouth plane in or out along the horn axis.
+- **Context:** `generator`
+- **Default:** 200.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_es_biradial_rr_v7.yaml` `seed_params.L_mm`)
+- **Search bounds:** 170.0 .. 260.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_es_biradial_rr_v7.yaml` `bounds.L_mm`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.ICW.L_mm`)
+- **Code:** `hornlab_search.design.generators.registry.materialize`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ## 4. FREEFORM
+- **Flags:** —
+
+#### `h_T` — H-plane hypex T factor
+
+- **Summary:** Selects the hyperbolic-exponential member between catenoidal and exponential.
+- **Detail:** Hypex reads T directly in its cosh/sinh wall law. The mesher-side T is a shape factor only; the generator solves the flare constant so the wall reaches the requested mouth radius.
+- **Formula:** `r = r0 (cosh(m z) + T sinh(m z))`
+- **Physical effect:** Changes how quickly the wall leaves the throat for a fixed mouth.
+- **Context:** `generator`
+- **Default:** 1.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_es_biradial_rr_v7.yaml` `seed_params.h_T`)
+- **Search bounds:** 0.6 .. 1.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_es_biradial_rr_v7.yaml` `bounds.h_T`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.profiles.hypex`
+- **Doc:** `docs/plan/12_RESEARCH_BASIS.md` § ### 13.3 Salmon lineage corrections + the X reading
+- **Flags:** overloaded
+
+#### `h_rm_mm` — H-plane mouth radius (mm)
+
+- **Summary:** Per-plane target mouth radius for conical, exponential and hypex walls.
+- **Detail:** For the fixed-size classical walls this is the radius the meridian must reach at its end; the flare is solved from the throat radius to it. It is per meridian: the H and V planes carry their own value. The QTW arc rule derives its mouth radius instead of taking this knob.
+- **Formula:** `conical: r(z) = r0 + z tan(alpha); exponential: r = r0 exp(m z)`
+- **Physical effect:** Sets the mouth area and therefore the low-frequency loading for these walls.
+- **Context:** `generator`
+- **Default:** 250.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_es_biradial_rr_v7.yaml` `seed_params.h_rm_mm`)
+- **Search bounds:** 215.0 .. 290.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_es_biradial_rr_v7.yaml` `bounds.h_rm_mm`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.registry.build_meridian`
+- **Doc:** `docs/plan/12_RESEARCH_BASIS.md` § ### 16.1 The typology map, dated and sourced
+- **Flags:** —
+
+#### `max_wall_deg` — Generator wall-angle cap (deg)
+
+- **Summary:** Upper bound applied to every selected anchor's wall angle.
+- **Detail:** The materializer clamps anchor angles into this cap after selecting and perturbing them. The same block key also supplies the default stop for a spherical-salmon march.
+- **Formula:** not stated
+- **Physical effect:** Caps how vertical the wall may become.
+- **Context:** `generator`
+- **Default:** 85.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_es_biradial_rr_v7.yaml` `generator.max_wall_deg`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.registry.materialize`
+- **Doc:** `docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md` § ### 2.3 `spherical_salmon` (G4)
+- **Flags:** overloaded
+
+#### `mouth` — Mouth cross-section
+
+- **Summary:** Mouth cross-section family: ellipse, superellipse or rounded rectangle.
+- **Detail:** The generator emits two cross-section stations: a circular throat and the selected mouth shape. Superellipse and rounded-rectangle mouths read the mouth exponent and corner-radius knobs respectively.
+- **Formula:** not stated
+- **Physical effect:** Changes the mouth outline without changing the meridians.
+- **Context:** `generator`
+- **Default:** rounded_rectangle (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_es_biradial_rr_v7.yaml` `generator.mouth`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.registry.materialize`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 4d. Cross-section stations (crossSections)
+- **Flags:** —
+
+#### `mouth_corner_mm` — Mouth corner radius (mm)
+
+- **Summary:** Corner radius of a rounded-rectangle mouth cross-section.
+- **Detail:** Used only when the mouth is a rounded rectangle. The generator keeps the radius positive before emitting the station. The meridians are unaffected; only the mouth outline changes.
+- **Formula:** not stated
+- **Physical effect:** Rounds the corners of a rectangular mouth.
+- **Context:** `generator`
+- **Default:** 40.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_es_biradial_rr_v7.yaml` `seed_params.mouth_corner_mm`)
+- **Search bounds:** 20.0 .. 80.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_es_biradial_rr_v7.yaml` `bounds.mouth_corner_mm`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.registry.materialize`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 4d. Cross-section stations (crossSections)
+- **Flags:** —
+
+#### `n_anchors` — Anchor count
+
+- **Summary:** Number of [z, r, wall-angle] anchors selected per meridian.
+- **Detail:** The generator reduces the dense march to this many anchors before the mesher sees it. Both endpoints are always kept and interior anchors are placed by equal arc length in the normalised z/angle plane, so curved regions get more anchors.
+- **Formula:** not stated
+- **Physical effect:** Raises mesh fidelity at the cost of more control points.
+- **Context:** `generator`
+- **Default:** 20 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_es_biradial_rr_v7.yaml` `generator.n_anchors`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.profiles.select_anchors`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 4b. Profile representation
+- **Flags:** —
+
+#### `v_T` — V-plane hypex T factor
+
+- **Summary:** Selects the hyperbolic-exponential member between catenoidal and exponential.
+- **Detail:** Hypex reads T directly in its cosh/sinh wall law. The mesher-side T is a shape factor only; the generator solves the flare constant so the wall reaches the requested mouth radius.
+- **Formula:** `r = r0 (cosh(m z) + T sinh(m z))`
+- **Physical effect:** Changes how quickly the wall leaves the throat for a fixed mouth.
+- **Context:** `generator`
+- **Default:** 1.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_es_biradial_rr_v7.yaml` `seed_params.v_T`)
+- **Search bounds:** 0.6 .. 1.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_es_biradial_rr_v7.yaml` `bounds.v_T`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.profiles.hypex`
+- **Doc:** `docs/plan/12_RESEARCH_BASIS.md` § ### 13.3 Salmon lineage corrections + the X reading
+- **Flags:** overloaded
+
+#### `v_rm_mm` — V-plane mouth radius (mm)
+
+- **Summary:** Per-plane target mouth radius for conical, exponential and hypex walls.
+- **Detail:** For the fixed-size classical walls this is the radius the meridian must reach at its end; the flare is solved from the throat radius to it. It is per meridian: the H and V planes carry their own value. The QTW arc rule derives its mouth radius instead of taking this knob.
+- **Formula:** `conical: r(z) = r0 + z tan(alpha); exponential: r = r0 exp(m z)`
+- **Physical effect:** Sets the mouth area and therefore the low-frequency loading for these walls.
+- **Context:** `generator`
+- **Default:** 125.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_es_biradial_rr_v7.yaml` `seed_params.v_rm_mm`)
+- **Search bounds:** 105.0 .. 160.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_es_biradial_rr_v7.yaml` `bounds.v_rm_mm`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.registry.build_meridian`
+- **Doc:** `docs/plan/12_RESEARCH_BASIS.md` § ### 16.1 The typology map, dated and sourced
+- **Flags:** —
+
+#### `wall_thickness_mm` — Shell thickness (mm)
+
+- **Summary:** Freestanding outer-shell thickness the mesher offsets from the wall.
+- **Detail:** The generated horn is a printed shell, so the mesher builds an outer surface offset from the wall. The generator validates a practical range because a highly curved throat or mouth cannot take the mesher's default shell. It is a mechanical thickness, not an acoustic dimension.
+- **Formula:** not stated
+- **Physical effect:** Changes the printed wall thickness, not the acoustic inner surface.
+- **Context:** `generator`
+- **Default:** 4.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_es_biradial_rr_v7.yaml` `generator.wall_thickness_mm`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** lo=0.0, hi=—, kind=float, section=mesh (`hornlab_search/design/families.py` `FAMILY_KEYS.FREEFORM.wall_thickness_mm`)
+- **Code:** `hornlab_search.design.generators.registry.materialize`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ## 7. Geometric / cross-section model (all formulas)
+- **Flags:** —
+
+### hl__crowe_panel_home_v7 — FREEFORM / rows
+
+- **Group:** home
+- **Symmetry:** hv
+- **Config:** `examples/typologies/home_landscape_2026-11-15/hl__crowe_panel_home_v7.yaml`
+- **Brief:** `examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml`
+- **Source status:** gui-only
+- **Description:** HOME Crowe ES-600 digitized-section family scaled to the home envelope; bridge cell; GUI preview works, run via crowe_panel_cli.py
+
+#### `g_crown_mm` — Crown rise (rows) (mm)
+
+- **Summary:** Crown rise of the Crowe section surface between its profiles.
+- **Detail:** The section construction crowns the swept surface by this amount so the digitised top and bottom sections meet smoothly. It is a surface relief, not the mouth radius.
+- **Formula:** not stated
+- **Physical effect:** Bows the Crowe section surface outward.
+- **Context:** `rows`
+- **Default:** 26.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_panel_home_v7.yaml` `seed_params.g_crown_mm`)
+- **Search bounds:** 10.0 .. 40.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_panel_home_v7.yaml` `bounds.g_crown_mm`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_depth_mm` — Depth (rows) (mm)
+
+- **Summary:** Axial depth of a rolled-family rows construction.
+- **Detail:** Depth scales the section spacing or spiral advance. The Crowe section construction additionally requires depth below about 0.57 times the mouth width; the generator refuses a section the sweep cannot build.
+- **Formula:** not stated
+- **Physical effect:** Moves the mouth plane along the axis and changes the flare rate.
+- **Context:** `rows`
+- **Default:** 270.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_panel_home_v7.yaml` `seed_params.g_depth_mm`)
+- **Search bounds:** 170.0 .. 300.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_panel_home_v7.yaml` `bounds.g_depth_mm`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_h_depth_scale` — H/V depth ratio (rows)
+
+- **Summary:** Horizontal-to-vertical depth ratio of the Crowe section construction.
+- **Detail:** The top/bottom and side profiles can be scaled in depth independently. The swept-H construction needs a shallow-enough section; the generator refuses one the sweep cannot build.
+- **Formula:** not stated
+- **Physical effect:** Moves the side walls forward or back relative to the top and bottom.
+- **Context:** `rows`
+- **Default:** 1.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_panel_home_v7.yaml` `seed_params.g_h_depth_scale`)
+- **Search bounds:** 0.9 .. 1.1 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_panel_home_v7.yaml` `bounds.g_h_depth_scale`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_height_mm` — Mouth height (rows) (mm)
+
+- **Summary:** Full mouth height target of a rolled-family rows construction.
+- **Detail:** The vertical partner of the explicit mouth width. The rolled and section kinds scale their meridians to this full height; a landscape cell keeps the width above the height by construction.
+- **Formula:** not stated
+- **Physical effect:** Moves the vertical mouth edge; the flare follows the construction.
+- **Context:** `rows`
+- **Default:** 280.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_panel_home_v7.yaml` `seed_params.g_height_mm`)
+- **Search bounds:** 220.0 .. 420.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_panel_home_v7.yaml` `bounds.g_height_mm`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_junction_power` — Corner junction exponent (rows)
+
+- **Summary:** Exponent of the Crowe section's corner junction blend.
+- **Detail:** The H and V profile junctions meet through a smooth power blend. A higher exponent keeps the junction tighter to the corner; the search range lets the BEM judge the crease.
+- **Formula:** not stated
+- **Physical effect:** Sharpens or softens the section's corner junction.
+- **Context:** `rows`
+- **Default:** 32.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_panel_home_v7.yaml` `seed_params.g_junction_power`)
+- **Search bounds:** 16.0 .. 48.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_panel_home_v7.yaml` `bounds.g_junction_power`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_throat_blend_mm` — Throat blend length (rows) (mm)
+
+- **Summary:** Length of the Crowe section's blend from the round driver exit.
+- **Detail:** The digitised section starts at a round 18 mm coupling plane and blends into the section contour over this length. The shipped home cell fixes it at 20 mm, under the generator's 20 percent-of-depth rule.
+- **Formula:** not stated
+- **Physical effect:** Changes the length of the round-to-section throat transition.
+- **Context:** `rows`
+- **Default:** 20.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_panel_home_v7.yaml` `seed_params.g_throat_blend_mm`)
+- **Search bounds:** 20.0 .. 20.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_panel_home_v7.yaml` `bounds.g_throat_blend_mm`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_width_mm` — Mouth width (rows) (mm)
+
+- **Summary:** Full mouth width target of a rolled-family rows construction.
+- **Detail:** The rolled-rectangle and R-OSSE-rectangle kinds build the mouth from this explicit full width and the matching height, not from a K-law. The generator measures the built surface against the brief envelope.
+- **Formula:** not stated
+- **Physical effect:** Moves the horizontal mouth edge; the flare follows the construction.
+- **Context:** `rows`
+- **Default:** 560.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_panel_home_v7.yaml` `seed_params.g_width_mm`)
+- **Search bounds:** 480.0 .. 590.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_panel_home_v7.yaml` `bounds.g_width_mm`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `n_phi` — Azimuth row count
+
+- **Summary:** Number of azimuth rows in the rows/grid model.
+- **Detail:** The row count sets the angular sampling of the point grid. The quarter model, half model and full ring each have their own minimum and parity rules in the generator. It is a count, not a length.
+- **Formula:** not stated
+- **Physical effect:** Raises angular fidelity at the cost of more grid rows.
+- **Context:** `rows`
+- **Default:** 49 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_panel_home_v7.yaml` `generator.n_phi`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_check_spec`
+- **Doc:** `docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md` § ### 2.4 organic/elliptical + X-shape (WP9b)
+- **Flags:** —
+
+#### `n_s` — Axial station count
+
+- **Summary:** Number of axial stations along each row.
+- **Detail:** Each row is sampled at equal axial (or equal-arc, for the rows march) fractions. This count sets the longitudinal resolution. It is a count, not a length.
+- **Formula:** not stated
+- **Physical effect:** Raises longitudinal fidelity at the cost of more points.
+- **Context:** `rows`
+- **Default:** 96 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_panel_home_v7.yaml` `generator.n_s`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_check_spec`
+- **Doc:** `docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md` § ### 2.4 organic/elliptical + X-shape (WP9b)
+- **Flags:** —
+
+#### `span` — Row span
+
+- **Summary:** How much of the azimuth circle the rows model covers.
+- **Detail:** The legal spans are the ones the generator handles, and their names are read from the generator's own span constant rather than retyped here. A kind can force a span: an odd-cosine asymmetry forces the full ring and a b-term forces the half model.
+- **Formula:** not stated
+- **Physical effect:** Chooses whether the mesh uses mirror planes or a seam-free full ring.
+- **Context:** `rows`
+- **Default:** quarter (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_panel_home_v7.yaml` `generator.span`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** lo=—, hi=—, kind=str, section=— (`hornlab_search/design/generators/grid.py` `ROWS_SPANS`)
+- **Code:** `hornlab_search.design.generators.grid._rows_span_requested`
+- **Doc:** `docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md` § ### 2.5 Up/down-asymmetric saddle
+- **Flags:** —
+
+#### `wall_thickness_mm` — Shell thickness (mm)
+
+- **Summary:** Outer-shell thickness of a freestanding rows model.
+- **Detail:** The point-grid route builds an explicit outer shell offset from each row's own profile. This is the printed shell thickness, not an acoustic dimension. The generator also uses it in its self-approach guard.
+- **Formula:** not stated
+- **Physical effect:** Changes the printed wall thickness, not the acoustic inner surface.
+- **Context:** `rows`
+- **Default:** 3.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_panel_home_v7.yaml` `generator.wall_thickness_mm`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_check_spec`
+- **Doc:** `docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md` § ### 2.4 organic/elliptical + X-shape (WP9b)
+- **Flags:** —
+
+### hl__crowe_x_osse_cd_v7 — FREEFORM / rows
+
+- **Group:** home
+- **Symmetry:** hv
+- **Config:** `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml`
+- **Brief:** `examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml`
+- **Source status:** catalog
+- **Description:** HOME Crowe ES-style X (bow-tie creases plus curled lip) on a CD OSSE throat; labelled hypothesis shape (rows osse_rollback)
+
+#### `g_L_mm` — Depth (rows) (mm)
+
+- **Summary:** Shared axial depth of both meridians used by the GRID radius field.
+- **Detail:** The grid interpolates the horizontal and vertical meridians onto one common z grid, so the depth is shared rather than a per-plane length. It is not the march length of a rows kind; those derive depth from their stop. The brief envelope still bounds the final design.
+- **Formula:** `z = s L, with s the normalised axial fraction`
+- **Physical effect:** Moves the mouth plane in or out along the horn axis.
+- **Context:** `rows`
+- **Default:** 240.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `seed_params.g_L_mm`)
+- **Search bounds:** 200.0 .. 260.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `bounds.g_L_mm`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._meridians`
+- **Doc:** `docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md` § ### 2.4 organic/elliptical + X-shape (WP9b)
+- **Flags:** —
+
+#### `g_a_h_deg` — Horizontal coverage half-angle (rows) (deg)
+
+- **Summary:** Horizontal coverage half-angle of a per-azimuth OSSE rows kind.
+- **Detail:** The OSSE wall angle is blended per azimuth from the horizontal and vertical values. This is the horizontal endpoint; it sets the high-frequency horizontal beamwidth in the constant-directivity throat.
+- **Formula:** `a(phi) = a_h cos^2(phi) + a_v sin^2(phi)`
+- **Physical effect:** Widens or narrows the horizontal beam and the horizontal mouth.
+- **Context:** `rows`
+- **Default:** 38.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `seed_params.g_a_h_deg`)
+- **Search bounds:** 33.0 .. 40.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `bounds.g_a_h_deg`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_a_v_deg` — Vertical coverage half-angle (rows) (deg)
+
+- **Summary:** Vertical coverage half-angle of a per-azimuth OSSE rows kind.
+- **Detail:** The vertical endpoint of the same per-azimuth wall-angle blend. It sets the vertical high-frequency beamwidth and works together with the horizontal value; the mouth follows the walls.
+- **Formula:** `a(phi) = a_h cos^2(phi) + a_v sin^2(phi)`
+- **Physical effect:** Widens or narrows the vertical beam and the vertical mouth.
+- **Context:** `rows`
+- **Default:** 24.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `seed_params.g_a_v_deg`)
+- **Search bounds:** 20.0 .. 28.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `bounds.g_a_v_deg`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_k` — Throat expansion (rows)
+
+- **Summary:** OS throat-expansion exponent in the OSSE and R-OSSE rows kinds.
+- **Detail:** The OS profile's throat term sets how quickly the wall leaves the driver exit. The study used it to tune loading near the 700 Hz crossover, with the CD throat setting high-frequency coverage.
+- **Formula:** not stated
+- **Physical effect:** Changes throat loading and how abruptly the flare starts.
+- **Context:** `rows`
+- **Default:** 1.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `seed_params.g_k`)
+- **Search bounds:** 1.0 .. 1.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `bounds.g_k`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_n` — Termination exponent (rows)
+
+- **Summary:** OSSE termination exponent; controls where the mouth flare is packed.
+- **Detail:** A high exponent packs the flare into the last part of the wall (a flat 'plate' side view); a lower exponent spreads it into a bowl. The Crowe-X study searches this to let the BEM judge the rim shape.
+- **Formula:** not stated
+- **Physical effect:** Moves the mouth flare earlier or later along the wall.
+- **Context:** `rows`
+- **Default:** 2.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `seed_params.g_n`)
+- **Search bounds:** 1.8 .. 3.2 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `bounds.g_n`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_q` — OSSE shape exponent (rows)
+
+- **Summary:** OSSE profile shape exponent near the mouth.
+- **Detail:** A dimensionless OSSE shape constant close to one. It shapes the transition toward the mouth termination and is pinned in the shipped home cells rather than searched.
+- **Formula:** not stated
+- **Physical effect:** Subtly rounds or tightens the mouth-side profile.
+- **Context:** `rows`
+- **Default:** 0.996 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `seed_params.g_q`)
+- **Search bounds:** 0.996 .. 0.996 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `bounds.g_q`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_r_lip_mm` — Torus lip radius (rows) (mm)
+
+- **Summary:** Tangent-continuous circular lip radius on the rollback rows; zero leaves the wall.
+- **Detail:** The lip continues the terminal wall tangent with a circular arc that curls back for half a turn. It is an [inferred] geometric analogue, not a published lip construction. A zero value is byte-identical to the plain march.
+- **Formula:** `circular arc tangent at the joint, wrap = half a turn`
+- **Physical effect:** Adds a rolled-back lip at the mouth.
+- **Context:** `rows`
+- **Default:** 25.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `seed_params.g_r_lip_mm`)
+- **Search bounds:** 8.0 .. 30.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `bounds.g_r_lip_mm`)
+- **Hard limits:** lo=—, hi=100.0, kind=—, section=— (`hornlab_search/design/generators/grid.py` `ROWS_MAX_R_LIP_MM`)
+- **Code:** `hornlab_search.design.generators.grid.append_tangent_lip`
+- **Doc:** `docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md` § ### 2.3 Ferguson / toroidal roll
+- **Flags:** —
+
+#### `g_s` — Termination fraction (rows)
+
+- **Summary:** Fraction of the mouth radius carried by the OSSE termination.
+- **Detail:** Together with the termination exponent, this sets how much of the mouth flare belongs to the rollback section. Keeping it moderate holds the width inside the home envelope.
+- **Formula:** not stated
+- **Physical effect:** Changes the size and abruptness of the mouth rollback.
+- **Context:** `rows`
+- **Default:** 0.35 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `seed_params.g_s`)
+- **Search bounds:** 0.2 .. 0.45 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `bounds.g_s`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_sf_ab` — Superformula a/b ratio (rows)
+
+- **Summary:** Anisotropy ratio of the two Gielis superformula radii.
+- **Detail:** The a/b ratio stretches the superformula lobes along one azimuth. It is searched in the Crowe-X cell to tune how far the X reaches toward the mouth corners.
+- **Formula:** not stated
+- **Physical effect:** Stretches the X lobes horizontally versus vertically.
+- **Context:** `rows`
+- **Default:** 0.8 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `seed_params.g_sf_ab`)
+- **Search bounds:** 0.7 .. 0.9 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `bounds.g_sf_ab`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_sf_amt` — X-crease amplitude (rows)
+
+- **Summary:** Amplitude of the superformula X modulation on the wall.
+- **Detail:** Blends the superformula shape into the radius after the start fraction. Zero is a plain OSSE wall; larger values deepen the diagonal creases toward the four corners.
+- **Formula:** not stated
+- **Physical effect:** Deepens or removes the diagonal X creases.
+- **Context:** `rows`
+- **Default:** 0.3 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `seed_params.g_sf_amt`)
+- **Search bounds:** 0.15 .. 0.38 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `bounds.g_sf_amt`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_sf_m` — Superformula symmetry (rows)
+
+- **Summary:** Gielis superformula symmetry order of the X-shaped mouth term.
+- **Detail:** The Gielis m term sets the rotational symmetry of the superformula modulation. The Crowe-X cell fixes it at four, which gives the bow-tie crease pattern.
+- **Formula:** not stated
+- **Physical effect:** Sets the number of superformula lobes around the mouth.
+- **Context:** `rows`
+- **Default:** 4 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `seed_params.g_sf_m`)
+- **Search bounds:** 4 .. 4 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `bounds.g_sf_m`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_sf_n1` — Superformula exponent n1 (rows)
+
+- **Summary:** First Gielis superformula exponent of the X mouth term.
+- **Detail:** The n1 exponent bends the superformula between its radial and angular terms. It shapes the X outline together with n2 and the a/b ratio.
+- **Formula:** not stated
+- **Physical effect:** Changes the curvature of the X lobes.
+- **Context:** `rows`
+- **Default:** 1.8 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `seed_params.g_sf_n1`)
+- **Search bounds:** 1.8 .. 1.8 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `bounds.g_sf_n1`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_sf_n2` — Superformula exponent n2 (rows)
+
+- **Summary:** Second Gielis superformula exponent of the X mouth term.
+- **Detail:** The n2 partner of n1. A high value straightens the lobe edges; the Crowe-X cell fixes it to keep the X lobes crisp.
+- **Formula:** not stated
+- **Physical effect:** Straightens or softens the X lobe edges.
+- **Context:** `rows`
+- **Default:** 7.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `seed_params.g_sf_n2`)
+- **Search bounds:** 7.0 .. 7.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `bounds.g_sf_n2`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_sf_start` — X ramp start (rows)
+
+- **Summary:** Normalised wall fraction where the X modulation starts.
+- **Detail:** The X term ramps in after this fraction of the wall, so the throat stays clean. The shipped cell fixes it at one quarter of the wall.
+- **Formula:** not stated
+- **Physical effect:** Moves where the diagonal creases begin along the horn.
+- **Context:** `rows`
+- **Default:** 0.25 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `seed_params.g_sf_start`)
+- **Search bounds:** 0.25 .. 0.25 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `bounds.g_sf_start`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_wrap_deg` — Lip wrap angle (rows) (deg)
+
+- **Summary:** How far the curled mouth lip wraps around.
+- **Detail:** The tangent-continuous lip is followed through this angle. Larger wraps make the thick rolled bead seen on the Crowe-style rim; the search bounds keep the lip inside the home envelope.
+- **Formula:** not stated
+- **Physical effect:** Changes the thickness and depth of the rolled mouth lip.
+- **Context:** `rows`
+- **Default:** 130.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `seed_params.g_wrap_deg`)
+- **Search bounds:** 80.0 .. 160.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `bounds.g_wrap_deg`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `n_phi` — Azimuth row count
+
+- **Summary:** Number of azimuth rows in the rows/grid model.
+- **Detail:** The row count sets the angular sampling of the point grid. The quarter model, half model and full ring each have their own minimum and parity rules in the generator. It is a count, not a length.
+- **Formula:** not stated
+- **Physical effect:** Raises angular fidelity at the cost of more grid rows.
+- **Context:** `rows`
+- **Default:** 25 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `generator.n_phi`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_check_spec`
+- **Doc:** `docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md` § ### 2.4 organic/elliptical + X-shape (WP9b)
+- **Flags:** —
+
+#### `n_s` — Axial station count
+
+- **Summary:** Number of axial stations along each row.
+- **Detail:** Each row is sampled at equal axial (or equal-arc, for the rows march) fractions. This count sets the longitudinal resolution. It is a count, not a length.
+- **Formula:** not stated
+- **Physical effect:** Raises longitudinal fidelity at the cost of more points.
+- **Context:** `rows`
+- **Default:** 40 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `generator.n_s`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_check_spec`
+- **Doc:** `docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md` § ### 2.4 organic/elliptical + X-shape (WP9b)
+- **Flags:** —
+
+#### `span` — Row span
+
+- **Summary:** How much of the azimuth circle the rows model covers.
+- **Detail:** The legal spans are the ones the generator handles, and their names are read from the generator's own span constant rather than retyped here. A kind can force a span: an odd-cosine asymmetry forces the full ring and a b-term forces the half model.
+- **Formula:** not stated
+- **Physical effect:** Chooses whether the mesh uses mirror planes or a seam-free full ring.
+- **Context:** `rows`
+- **Default:** quarter (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `generator.span`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** lo=—, hi=—, kind=str, section=— (`hornlab_search/design/generators/grid.py` `ROWS_SPANS`)
+- **Code:** `hornlab_search.design.generators.grid._rows_span_requested`
+- **Doc:** `docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md` § ### 2.5 Up/down-asymmetric saddle
+- **Flags:** —
+
+#### `wall_thickness_mm` — Shell thickness (mm)
+
+- **Summary:** Outer-shell thickness of a freestanding rows model.
+- **Detail:** The point-grid route builds an explicit outer shell offset from each row's own profile. This is the printed shell thickness, not an acoustic dimension. The generator also uses it in its self-approach guard.
+- **Formula:** not stated
+- **Physical effect:** Changes the printed wall thickness, not the acoustic inner surface.
+- **Context:** `rows`
+- **Default:** 3.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml` `generator.wall_thickness_mm`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_check_spec`
+- **Doc:** `docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md` § ### 2.4 organic/elliptical + X-shape (WP9b)
+- **Flags:** —
+
+### hl__es_style_rollback_v7 — FREEFORM / rows
+
+- **Group:** home
+- **Symmetry:** hv
+- **Config:** `examples/typologies/home_landscape_2026-11-15/hl__es_style_rollback_v7.yaml`
+- **Brief:** `examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml`
+- **Source status:** catalog
+- **Description:** HOME landscape Crowe ES-style exponential rollback on the verified Iwata AR rows; deep rollback, roughly 2:1 mouth
+
+#### `g_T` — Rows family factor (rows)
+
+- **Summary:** Salmon family T on the Salmon rows; Fourcade area-law T on the Le Cleac'h rows.
+- **Detail:** The two row families share the spelling but not the equation. The Salmon rows use it in the family area law; the verified Le Cleac'h rows use it in the Fourcade wavefront-area law.
+- **Formula:** `Salmon family law; Fourcade eq. 42`
+- **Physical effect:** Selects the family member and its expansion profile.
+- **Context:** `rows`
+- **Default:** 0.6 (source: `examples/typologies/home_landscape_2026-11-15/hl__es_style_rollback_v7.yaml` `seed_params.g_T`)
+- **Search bounds:** 0.5 .. 0.9 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__es_style_rollback_v7.yaml` `bounds.g_T`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_shape_knobs`
+- **Doc:** `docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md` § ### 2.4 organic/elliptical + X-shape (WP9b)
+- **Flags:** overloaded
+
+#### `g_ar_m` — Iwata mouth aspect ratio (rows)
+
+- **Summary:** Mouth aspect ratio of the iwata_ar stretch on the verified march.
+- **Detail:** The iwata_ar kind applies an area-preserving aspect-ratio evolution to the verified Le Cleac'h march, with T pinned by its config. It is our reconstruction of the principle, never the Iwata product.
+- **Formula:** `AR evolution with ar_m at the mouth`
+- **Physical effect:** Makes the mouth wider than tall (or the reverse).
+- **Context:** `rows`
+- **Default:** 2.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__es_style_rollback_v7.yaml` `seed_params.g_ar_m`)
+- **Search bounds:** 1.6 .. 2.4 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__es_style_rollback_v7.yaml` `bounds.g_ar_m`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_iwata_ar_knobs`
+- **Doc:** `docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md` § ### 2.2 Iwata / quasi-Iwata / "FH-N2"
+- **Flags:** —
+
+#### `g_ar_p` — Iwata AR exponent (rows)
+
+- **Summary:** Exponent of the iwata_ar aspect-ratio evolution.
+- **Detail:** Shapes how quickly the aspect-ratio stretch develops along the normalized arc. The construction is our reconstruction, not a published Iwata recipe.
+- **Formula:** `AR(l) = 1 + (ar_m - 1) (l / L0)^ar_p`
+- **Physical effect:** Moves the aspect-ratio change toward the throat or the mouth.
+- **Context:** `rows`
+- **Default:** 1.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__es_style_rollback_v7.yaml` `seed_params.g_ar_p`)
+- **Search bounds:** 0.5 .. 2.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__es_style_rollback_v7.yaml` `bounds.g_ar_p`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_iwata_ar_knobs`
+- **Doc:** `docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md` § ### 2.2 Iwata / quasi-Iwata / "FH-N2"
+- **Flags:** —
+
+#### `g_fc_hz` — Axisymmetric rows cutoff (rows) (Hz)
+
+- **Summary:** Single cutoff of an axisymmetric Le Cleac'h rows march.
+- **Detail:** The verified Fourcade march has no per-azimuth split, so fc_hz is the only cutoff. The iwata and AR stretch keep this axisymmetric base.
+- **Formula:** `m = 4 pi fc / c`
+- **Physical effect:** Sets the rollback size and loading corner.
+- **Context:** `rows`
+- **Default:** 520.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__es_style_rollback_v7.yaml` `seed_params.g_fc_hz`)
+- **Search bounds:** 450.0 .. 700.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__es_style_rollback_v7.yaml` `bounds.g_fc_hz`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_lecleach_knobs`
+- **Doc:** `docs/research/typologies/JMLC_LECLEACH_RESEARCH_2026-10-25.md` § ## 2. Construction comparison
+- **Flags:** overloaded
+
+#### `g_stop_deg` — Rows march stop (rows) (deg)
+
+- **Summary:** Wall-angle stop of the per-azimuth rows march; the legal window depends on the kind.
+- **Detail:** The verified Le Cleac'h rows use the published stop window and allow rollback past vertical. The Salmon rows stop below or above the cap-area asymptote, and modulated Salmon rows keep the plan's rollback window. A per-typology note narrows this.
+- **Formula:** `march stops when phi >= stop_deg`
+- **Physical effect:** Chooses how far around the rollback each row is followed.
+- **Context:** `rows`
+- **Default:** 230.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__es_style_rollback_v7.yaml` `seed_params.g_stop_deg`)
+- **Search bounds:** 170.0 .. 240.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__es_style_rollback_v7.yaml` `bounds.g_stop_deg`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_shape_knobs`
+- **Doc:** `docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md` § ### 2.4 organic/elliptical + X-shape (WP9b)
+- **Flags:** overloaded
+
+#### `n_phi` — Azimuth row count
+
+- **Summary:** Number of azimuth rows in the rows/grid model.
+- **Detail:** The row count sets the angular sampling of the point grid. The quarter model, half model and full ring each have their own minimum and parity rules in the generator. It is a count, not a length.
+- **Formula:** not stated
+- **Physical effect:** Raises angular fidelity at the cost of more grid rows.
+- **Context:** `rows`
+- **Default:** 15 (source: `examples/typologies/home_landscape_2026-11-15/hl__es_style_rollback_v7.yaml` `generator.n_phi`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_check_spec`
+- **Doc:** `docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md` § ### 2.4 organic/elliptical + X-shape (WP9b)
+- **Flags:** —
+
+#### `n_s` — Axial station count
+
+- **Summary:** Number of axial stations along each row.
+- **Detail:** Each row is sampled at equal axial (or equal-arc, for the rows march) fractions. This count sets the longitudinal resolution. It is a count, not a length.
+- **Formula:** not stated
+- **Physical effect:** Raises longitudinal fidelity at the cost of more points.
+- **Context:** `rows`
+- **Default:** 32 (source: `examples/typologies/home_landscape_2026-11-15/hl__es_style_rollback_v7.yaml` `generator.n_s`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_check_spec`
+- **Doc:** `docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md` § ### 2.4 organic/elliptical + X-shape (WP9b)
+- **Flags:** —
+
+#### `span` — Row span
+
+- **Summary:** How much of the azimuth circle the rows model covers.
+- **Detail:** The legal spans are the ones the generator handles, and their names are read from the generator's own span constant rather than retyped here. A kind can force a span: an odd-cosine asymmetry forces the full ring and a b-term forces the half model.
+- **Formula:** not stated
+- **Physical effect:** Chooses whether the mesh uses mirror planes or a seam-free full ring.
+- **Context:** `rows`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** lo=—, hi=—, kind=str, section=— (`hornlab_search/design/generators/grid.py` `ROWS_SPANS`)
+- **Code:** `hornlab_search.design.generators.grid._rows_span_requested`
+- **Doc:** `docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md` § ### 2.5 Up/down-asymmetric saddle
+- **Flags:** —
+
+#### `wall_thickness_mm` — Shell thickness (mm)
+
+- **Summary:** Outer-shell thickness of a freestanding rows model.
+- **Detail:** The point-grid route builds an explicit outer shell offset from each row's own profile. This is the printed shell thickness, not an acoustic dimension. The generator also uses it in its self-approach guard.
+- **Formula:** not stated
+- **Physical effect:** Changes the printed wall thickness, not the acoustic inner surface.
+- **Context:** `rows`
+- **Default:** 3.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__es_style_rollback_v7.yaml` `generator.wall_thickness_mm`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_check_spec`
+- **Doc:** `docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md` § ### 2.4 organic/elliptical + X-shape (WP9b)
+- **Flags:** —
+
+### hl__ext_throat_hvlaw_v7 — OSSE / native
+
+- **Group:** home
+- **Symmetry:** hv
+- **Config:** `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml`
+- **Brief:** `examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml`
+- **Source status:** catalog
+- **Description:** HOME landscape OSSE + extended throat with a per-direction cosine wall-angle law; the BoTorch home task (8 searchable knobs)
+
+#### `L_mm` — OSSE main-section length (mm)
+
+- **Summary:** Length of the main OSSE section; extension and slot may add to the total.
+- **Detail:** The mesher requires it positive. In the total-length mode the section is carved differently, so the same value can mean a different total span.
+- **Formula:** `z_main in [0, L]`
+- **Physical effect:** Sets the depth of the flared OSSE body.
+- **Context:** `native:osse`
+- **Default:** 250.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `seed_params.L_mm`)
+- **Search bounds:** 180.0 .. 330.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `bounds.L_mm`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.L_mm`)
+- **Code:** `hornlab_mesher.profile_formulas.calculate_osse`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 1b. OSSE parameters
+- **Flags:** overloaded
+
+#### `a0_deg` — Throat half-angle (deg)
+
+- **Summary:** Wall half-angle at the throat, passed to the OSSE, R-OSSE and ICW meridian.
+- **Detail:** OSSE carries it in the 2 k r0 z tan(a0) term of the base radius, and R-OSSE carries the same term in its throat-radius curve. ICW uses it as the initial tangent angle theta0 of the curvature integral. It should match the driver exit angle when the wall is meant to continue the driver.
+- **Formula:** `OSSE/R-OSSE: c2 = 2 k r0 tan(a0); ICW: theta(0) = theta0`
+- **Physical effect:** Sets the initial expansion slope at the driver exit.
+- **Context:** `native`
+- **Default:** 4.5 (source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `seed_params.a0_deg`)
+- **Search bounds:** 4.5 .. 4.5 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `bounds.a0_deg`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.a0_deg`)
+- **Code:** `hornlab_mesher.profile_formulas.calculate_osse`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 1b. OSSE parameters
+- **Flags:** —
+
+#### `a_deg` — Native coverage half-angle (deg)
+
+- **Summary:** OSSE/R-OSSE coverage half-angle in the mesher's own convention.
+- **Detail:** The mesher measures the angle as a half-angle from the axis. The target block in a config measures the total included angle, which is the value the objective scores. Read the block before comparing the two.
+- **Formula:** `OSSE: base(z) carries tan(a); R-OSSE: c3 = tan(a)^2`
+- **Physical effect:** Sets how wide the wall opens relative to the axis.
+- **Context:** `native`
+- **Default:** 24.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `seed_params.a_deg`)
+- **Search bounds:** 15.0 .. 40.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `bounds.a_deg`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.a_deg`)
+- **Code:** `hornlab_mesher.profile_formulas.calculate_osse`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 1b. OSSE parameters
+- **Flags:** overloaded
+
+#### `aspect_ratio` — Cross-section aspect ratio
+
+- **Summary:** Width-to-height scaling of the cross-section relative to the meridian radius.
+- **Detail:** The mesher scales the horizontal and vertical half-widths of the outline by this ratio. A value of one gives a circular section; larger values widen it. It does not change either meridian and is not a coverage angle.
+- **Formula:** `b = a * aspect_ratio in the ellipse/superellipse station`
+- **Physical effect:** Widens or narrows the cross-section without changing the wall profiles.
+- **Context:** `native`
+- **Default:** 1.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `seed_params.aspect_ratio`)
+- **Search bounds:** 1.0 .. 1.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `bounds.aspect_ratio`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=cross_section (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.aspect_ratio`)
+- **Code:** `hornlab_search.design.families.FAMILY_KEYS`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ## 7. Geometric / cross-section model (all formulas)
+- **Flags:** —
+
+#### `az_a_cos_amp` — Per-direction cos-power amplitude (deg)
+
+- **Summary:** Adds amp * |cos p|^pow to the wall angle.
+- **Detail:** A negative value trims the angle near the horizontal axis only, more sharply as the power grows (CORE: -15 at power 10).
+- **Formula:** `a(p) += az_a_cos_amp * |cos p|^az_a_cos_pow`
+- **Physical effect:** Trims or widens the horizontal coverage locally.
+- **Context:** `native`
+- **Default:** 14.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `seed_params.az_a_cos_amp`)
+- **Search bounds:** 0.0 .. 25.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `bounds.az_a_cos_amp`)
+- **Hard limits:** lo=-60.0, hi=60.0, kind=float, section=azlaw (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.az_a_cos_amp`)
+- **Code:** `hornlab_search.design.families.azlaw_expressions`
+- **Doc:** `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md` § ## 5b. Per-direction law (the exact CORE construction)
+- **Flags:** —
+
+#### `az_a_cos_pow` — Per-direction cos power
+
+- **Summary:** Exponent of the |cos p| term on the wall angle.
+- **Detail:** Higher powers confine the term to a narrow sector around the horizontal axis. CORE uses 10.
+- **Formula:** `|cos p|^az_a_cos_pow`
+- **Physical effect:** How narrow the trimmed sector is.
+- **Context:** `native`
+- **Default:** 2.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `seed_params.az_a_cos_pow`)
+- **Search bounds:** 1.0 .. 6.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `bounds.az_a_cos_pow`)
+- **Hard limits:** lo=0.5, hi=40.0, kind=float, section=azlaw (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.az_a_cos_pow`)
+- **Code:** `hornlab_search.design.families.azlaw_expressions`
+- **Doc:** `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md` § ## 5b. Per-direction law (the exact CORE construction)
+- **Flags:** —
+
+#### `az_a_sf_amp` — Per-direction superformula amplitude (deg)
+
+- **Summary:** Adds a superformula-shaped term to the wall angle, so the coverage differs in every direction.
+- **Detail:** With a nonzero value the wall angle becomes a(p) = a_deg + amp * SF(p) + the cos term; a_deg is then the BASE the terms add to (Ath CORE: a_deg 5, amp 35). Diagonals that open wider than H and V fold the walls into Ath's creases.
+- **Formula:** `a(p) = a_deg + az_a_sf_amp * SF(p) + az_a_cos_amp * |cos p|^az_a_cos_pow`
+- **Physical effect:** How strongly the wall angle follows the superformula lobes.
+- **Context:** `native`
+- **Default:** 0.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `seed_params.az_a_sf_amp`)
+- **Search bounds:** 0.0 .. 0.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `bounds.az_a_sf_amp`)
+- **Hard limits:** lo=-60.0, hi=60.0, kind=float, section=azlaw (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.az_a_sf_amp`)
+- **Code:** `hornlab_search.design.families.azlaw_expressions`
+- **Doc:** `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md` § ## 5b. Per-direction law (the exact CORE construction)
+- **Flags:** —
+
+#### `az_n_cos2_amp` — Per-direction termination n
+
+- **Summary:** Adds amp * cos^2 p to the OSSE termination shape n.
+- **Detail:** The mouth termination becomes different in H and V (CORE: n 6 + 1.5 cos^2 p, i.e. 7.5 H / 6.0 V).
+- **Formula:** `n(p) = n + az_n_cos2_amp * cos^2 p`
+- **Physical effect:** Changes the mouth roll-off shape between H and V.
+- **Context:** `native`
+- **Default:** 0.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `seed_params.az_n_cos2_amp`)
+- **Search bounds:** 0.0 .. 0.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `bounds.az_n_cos2_amp`)
+- **Hard limits:** lo=-10.0, hi=10.0, kind=float, section=azlaw (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.az_n_cos2_amp`)
+- **Code:** `hornlab_search.design.families.azlaw_expressions`
+- **Doc:** `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md` § ## 5b. Per-direction law (the exact CORE construction)
+- **Flags:** —
+
+#### `az_s_cos2_amp` — Per-direction termination s
+
+- **Summary:** Adds amp * cos^2 p to the OSSE termination strength s.
+- **Detail:** The mouth termination strength becomes different in H and V (CORE: s 0.6 + 0.23 cos^2 p, i.e. 0.83 H / 0.60 V).
+- **Formula:** `s(p) = s + az_s_cos2_amp * cos^2 p`
+- **Physical effect:** Changes how strongly the mouth flares out between H and V.
+- **Context:** `native`
+- **Default:** 0.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `seed_params.az_s_cos2_amp`)
+- **Search bounds:** -0.25 .. 0.5 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `bounds.az_s_cos2_amp`)
+- **Hard limits:** lo=-1.0, hi=1.0, kind=float, section=azlaw (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.az_s_cos2_amp`)
+- **Code:** `hornlab_search.design.families.azlaw_expressions`
+- **Doc:** `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md` § ## 5b. Per-direction law (the exact CORE construction)
+- **Flags:** —
+
+#### `az_sf_a` — Superformula a
+
+- **Summary:** Scale of the cosine part of the superformula term.
+- **Detail:** Values below 1 strengthen the horizontal side of the term. CORE uses 1.
+- **Formula:** `|cos(m p/4)/a|^n2`
+- **Physical effect:** Balances the horizontal side of the pattern.
+- **Context:** `native`
+- **Default:** 1.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `seed_params.az_sf_a`)
+- **Search bounds:** 1.0 .. 1.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `bounds.az_sf_a`)
+- **Hard limits:** lo=0.05, hi=5.0, kind=float, section=azlaw (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.az_sf_a`)
+- **Code:** `hornlab_search.design.families.azlaw_expressions`
+- **Doc:** `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md` § ## 5b. Per-direction law (the exact CORE construction)
+- **Flags:** —
+
+#### `az_sf_b` — Superformula b
+
+- **Summary:** Scale of the sine part of the superformula term.
+- **Detail:** Values below 1 lower the term toward the vertical axis, narrowing V against H. CORE uses 0.618.
+- **Formula:** `|sin(m p/4)/b|^n3`
+- **Physical effect:** Balances the vertical side of the pattern.
+- **Context:** `native`
+- **Default:** 0.8569 (source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `seed_params.az_sf_b`)
+- **Search bounds:** 0.8569 .. 0.8569 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `bounds.az_sf_b`)
+- **Hard limits:** lo=0.05, hi=5.0, kind=float, section=azlaw (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.az_sf_b`)
+- **Code:** `hornlab_search.design.families.azlaw_expressions`
+- **Doc:** `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md` § ## 5b. Per-direction law (the exact CORE construction)
+- **Flags:** —
+
+#### `az_sf_m` — Superformula lobes
+
+- **Summary:** Number of lobes of the superformula term (a multiple of 4).
+- **Detail:** m/4 sets the angular frequency of the cos and sin terms; 4 gives one lobe per quadrant (CORE). Only multiples of 4 keep the quarter-model mirror symmetry, so others are refused.
+- **Formula:** `SF(p) = (|cos(m p/4)/a|^n2 + |sin(m p/4)/b|^n3)^(-1/n1)`
+- **Physical effect:** How many times the coverage pattern repeats around the horn.
+- **Context:** `native`
+- **Default:** 4.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `seed_params.az_sf_m`)
+- **Search bounds:** 4.0 .. 4.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `bounds.az_sf_m`)
+- **Hard limits:** lo=4.0, hi=12.0, kind=float, section=azlaw (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.az_sf_m`)
+- **Code:** `hornlab_search.design.families.azlaw_expressions`
+- **Doc:** `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md` § ## 5b. Per-direction law (the exact CORE construction)
+- **Flags:** —
+
+#### `az_sf_n1` — Superformula n1
+
+- **Summary:** Overall sharpness of the superformula term.
+- **Detail:** Large n1 flattens the lobes toward a constant; small n1 makes them pointed. CORE uses 12.
+- **Formula:** `SF(p) = (...)^(-1/n1)`
+- **Physical effect:** Pointed versus rounded per-direction pattern.
+- **Context:** `native`
+- **Default:** 7.4958 (source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `seed_params.az_sf_n1`)
+- **Search bounds:** 7.4958 .. 7.4958 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `bounds.az_sf_n1`)
+- **Hard limits:** lo=0.1, hi=40.0, kind=float, section=azlaw (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.az_sf_n1`)
+- **Code:** `hornlab_search.design.families.azlaw_expressions`
+- **Doc:** `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md` § ## 5b. Per-direction law (the exact CORE construction)
+- **Flags:** —
+
+#### `az_sf_n2` — Superformula n2
+
+- **Summary:** Exponent on the cosine part of the superformula term.
+- **Detail:** With n3 it sets how sharply the term changes between the axis and the diagonal. CORE uses 15.
+- **Formula:** `|cos(m p/4)/a|^n2`
+- **Physical effect:** Sharpness near the horizontal axis.
+- **Context:** `native`
+- **Default:** 12.4449 (source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `seed_params.az_sf_n2`)
+- **Search bounds:** 12.4449 .. 12.4449 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `bounds.az_sf_n2`)
+- **Hard limits:** lo=0.1, hi=40.0, kind=float, section=azlaw (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.az_sf_n2`)
+- **Code:** `hornlab_search.design.families.azlaw_expressions`
+- **Doc:** `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md` § ## 5b. Per-direction law (the exact CORE construction)
+- **Flags:** —
+
+#### `az_sf_n3` — Superformula n3
+
+- **Summary:** Exponent on the sine part of the superformula term.
+- **Detail:** With n2 it sets how sharply the term changes toward the vertical axis. CORE uses 16.
+- **Formula:** `|sin(m p/4)/b|^n3`
+- **Physical effect:** Sharpness near the vertical axis.
+- **Context:** `native`
+- **Default:** 13.4442 (source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `seed_params.az_sf_n3`)
+- **Search bounds:** 13.4442 .. 13.4442 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `bounds.az_sf_n3`)
+- **Hard limits:** lo=0.1, hi=40.0, kind=float, section=azlaw (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.az_sf_n3`)
+- **Code:** `hornlab_search.design.families.azlaw_expressions`
+- **Doc:** `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md` § ## 5b. Per-direction law (the exact CORE construction)
+- **Flags:** —
+
+#### `exponent` — Native cross-section exponent
+
+- **Summary:** Superellipse exponent of the outline; the documented default is disputed.
+- **Detail:** The research basis states a default of 2.0 (a plain ellipse); the shipped generator default for the same idea is 4.0 (registry.DEFAULT_KNOBS). This entry records both claims and does not choose between them. It is not the generator's mouth_exponent key, although the two describe the same idea.
+- **Formula:** `( |cos(phi)/a|^e + |sin(phi)/b|^e )^(-1/e)`
+- **Physical effect:** Squares off or rounds the cross-section outline.
+- **Context:** `native`
+- **Default:** 2.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `seed_params.exponent`)
+- **Search bounds:** 2.0 .. 2.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `bounds.exponent`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=cross_section (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.exponent`)
+- **Code:** `hornlab_search.design.families.FAMILY_KEYS`
+- **Doc:** `docs/plan/12_RESEARCH_BASIS.md` § ## 4. The geometry we would have written already exists
+- **Flags:** doc_mismatch, overloaded
+
+#### `k` — OS-SE shape factor
+
+- **Summary:** Blends the OS-SE base radius between its radius term and its tangent term.
+- **Detail:** The base radius carries (k r0) and r0(1-k) terms plus the tangent-driven z term, so k reshapes the wall between the throat and the far-field angle. R-OSSE reuses it in its throat-radius curve. It is dimensionless and is not a termination control.
+- **Formula:** `base(z) = sqrt((k r0)^2 + 2 k r0 z tan(a0) + z^2 tan(a)^2) + r0(1-k)`
+- **Physical effect:** Reshapes the wall between the throat and the far-field angle.
+- **Context:** `native`
+- **Default:** 1.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `seed_params.k`)
+- **Search bounds:** 1.0 .. 1.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `bounds.k`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.k`)
+- **Code:** `hornlab_mesher.profile_formulas.calculate_osse`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 1b. OSSE parameters
+- **Flags:** —
+
+#### `morph_allow_shrinkage` — Allow morph shrinkage
+
+- **Summary:** 0/1 flag that lets a morph target be smaller than the current mouth extent.
+- **Detail:** Without the flag the mesher refuses a target that would shrink the outline. With it the morph may pull the section inward. Ath calls the same control Morph.AllowShrinkage.
+- **Formula:** not stated
+- **Physical effect:** Allows or refuses a mouth outline that narrows toward the target.
+- **Context:** `native`
+- **Default:** 0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `seed_params.morph_allow_shrinkage`)
+- **Search bounds:** 0 .. 0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `bounds.morph_allow_shrinkage`)
+- **Hard limits:** lo=—, hi=—, kind=int, section=morph (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.morph_allow_shrinkage`)
+- **Code:** `hornlab_mesher.profile_morph._resolve_morph_half_dimensions`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 6a. Cross-section morphing (ALL formula families)
+- **Flags:** —
+
+#### `morph_corner_mm` — Morph corner radius (mm)
+
+- **Summary:** Corner radius of a rounded-rectangle morph target.
+- **Detail:** The radius is clamped against the target half-dimensions at run time. It is used only for a rounded-rectangle target. Ath calls the same control Morph.CornerRadius.
+- **Formula:** not stated
+- **Physical effect:** Rounds the corners of a rectangular morphed mouth.
+- **Context:** `native`
+- **Default:** 35.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `seed_params.morph_corner_mm`)
+- **Search bounds:** 35.0 .. 35.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `bounds.morph_corner_mm`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=morph (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.morph_corner_mm`)
+- **Code:** `hornlab_mesher.profile_morph._resolve_morph_half_dimensions`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 6a. Cross-section morphing (ALL formula families)
+- **Flags:** —
+
+#### `morph_exponent` — Morph superellipse exponent
+
+- **Summary:** Superellipse exponent of a morph target 3 outline.
+- **Detail:** The mesher reads this only when morph_target is 3, then clamps it into the superellipse range before building the target outline. Ath's guide documents only targets 0-2; target 3 is a mesher extension.
+- **Formula:** not stated
+- **Physical effect:** Squares off or rounds a superellipse morphed mouth.
+- **Context:** `native`
+- **Default:** 4.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `seed_params.morph_exponent`)
+- **Search bounds:** 4.0 .. 4.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `bounds.morph_exponent`)
+- **Hard limits:** lo=2.0, hi=16.0, kind=float, section=morph (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.morph_exponent`)
+- **Code:** `hornlab_mesher.profile_morph._morph_target_radius_at_angle`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 6a. Cross-section morphing (ALL formula families)
+- **Flags:** —
+
+#### `morph_fixed` — Morph fixed part
+
+- **Summary:** Axial fraction where the morph begins; zero starts at the throat.
+- **Detail:** The fixed part holds the base section before the morph factor becomes nonzero. The remaining axial fraction is remapped before the rate power is applied. Ath calls the same control Morph.FixedPart.
+- **Formula:** `factor = 0 for t <= morph_fixed`
+- **Physical effect:** Delays the start of the outline change along the horn.
+- **Context:** `native`
+- **Default:** 0.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `seed_params.morph_fixed`)
+- **Search bounds:** 0.0 .. 0.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `bounds.morph_fixed`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=morph (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.morph_fixed`)
+- **Code:** `hornlab_mesher.profile_morph._morph_factor`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 6a. Cross-section morphing (ALL formula families)
+- **Flags:** —
+
+#### `morph_height_mm` — Morph target height (mm)
+
+- **Summary:** Full target height of a rectangular or superellipse morph at the mouth.
+- **Detail:** A zero height lets the mesher infer the target height from the mouth extent. The value is a full height, not a half-height. Ath calls the same control Morph.TargetHeight.
+- **Formula:** not stated
+- **Physical effect:** Sets how tall the morphed mouth outline becomes.
+- **Context:** `native`
+- **Default:** 660.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `seed_params.morph_height_mm`)
+- **Search bounds:** 660.0 .. 660.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `bounds.morph_height_mm`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=morph (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.morph_height_mm`)
+- **Code:** `hornlab_mesher.profile_morph._morph_factor`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 6a. Cross-section morphing (ALL formula families)
+- **Flags:** —
+
+#### `morph_rate` — Morph rate
+
+- **Summary:** Power-law rate of the morph blend from the fixed part to the mouth.
+- **Detail:** The factor is the remapped axial fraction raised to this power, so larger values delay the morph until nearer the mouth. It only matters when a morph target is active. Ath calls the same control Morph.Rate.
+- **Formula:** `factor = clamp((t - morph_fixed)/(1 - morph_fixed), 0, 1)^morph_rate`
+- **Physical effect:** Moves how quickly the outline changes along the horn.
+- **Context:** `native`
+- **Default:** 4.1236 (source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `seed_params.morph_rate`)
+- **Search bounds:** 4.1236 .. 4.1236 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `bounds.morph_rate`)
+- **Hard limits:** lo=0.0, hi=—, kind=float, section=morph (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.morph_rate`)
+- **Code:** `hornlab_mesher.profile_morph._morph_factor`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 6a. Cross-section morphing (ALL formula families)
+- **Flags:** —
+
+#### `morph_target` — Morph target shape
+
+- **Summary:** Cross-section shape the mouth morphs toward: off, rectangle, circle or superellipse.
+- **Detail:** families.py names the off, rectangle, circle and superellipse codes; the superellipse target reads morph_exponent. The morph factor begins at morph_fixed and follows the rate power toward the mouth. Ath's own vocabulary calls this control Morph.TargetShape.
+- **Formula:** `r(t, phi) = r_base(t, phi) + factor * (r_target(phi) - r_mouth_base(phi))`
+- **Physical effect:** Blends the round section into a target outline toward the mouth.
+- **Context:** `native`
+- **Default:** 0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `seed_params.morph_target`)
+- **Search bounds:** 0 .. 0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `bounds.morph_target`)
+- **Hard limits:** lo=0, hi=3, kind=int, section=morph (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.morph_target`)
+- **Code:** `hornlab_mesher.profile_morph._morph_target_shape`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 6a. Cross-section morphing (ALL formula families)
+- **Flags:** —
+
+#### `morph_width_mm` — Morph target width (mm)
+
+- **Summary:** Full target width of a rectangular or superellipse morph at the mouth.
+- **Detail:** A zero width lets the mesher infer the target width from the mouth extent. The value is a full width, not a half-width. Ath calls the same control Morph.TargetWidth.
+- **Formula:** not stated
+- **Physical effect:** Sets how wide the morphed mouth outline becomes.
+- **Context:** `native`
+- **Default:** 500.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `seed_params.morph_width_mm`)
+- **Search bounds:** 500.0 .. 500.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `bounds.morph_width_mm`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=morph (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.morph_width_mm`)
+- **Code:** `hornlab_mesher.profile_morph._morph_factor`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 6a. Cross-section morphing (ALL formula families)
+- **Flags:** —
+
+#### `n` — OSSE termination exponent
+
+- **Summary:** Superellipse exponent of the OSSE termination term.
+- **Detail:** It is read only while the termination amplitude is nonzero. The biradial generator meaning of n is not asserted in this context.
+- **Formula:** `term = (s L/q)(1 - (1 - z_norm^n)^(1/n))`
+- **Physical effect:** Sharpens or softens the OSSE mouth roll.
+- **Context:** `native`
+- **Default:** 6.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `seed_params.n`)
+- **Search bounds:** 6.0 .. 6.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `bounds.n`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.n`)
+- **Code:** `hornlab_mesher.profile_formulas.calculate_osse`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 1b. OSSE parameters
+- **Flags:** overloaded
+
+#### `q` — OSSE termination saturation
+
+- **Summary:** Superellipse saturation of the OSSE termination; positive while s is nonzero.
+- **Detail:** It sets how quickly the termination term saturates with axial station. The mesher requires it positive whenever the termination amplitude s is nonzero.
+- **Formula:** `z_norm = q z/L; term = (s L/q)(1 - (1 - z_norm^n)^(1/n))`
+- **Physical effect:** Changes how abruptly the terminated outline reaches its corner.
+- **Context:** `native:osse`
+- **Default:** 0.996 (source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `seed_params.q`)
+- **Search bounds:** 0.996 .. 0.996 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `bounds.q`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.q`)
+- **Code:** `hornlab_mesher.profile_formulas.calculate_osse`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 1b. OSSE parameters
+- **Flags:** overloaded
+
+#### `r0_mm` — Throat radius (mm)
+
+- **Summary:** Throat radius every native family starts its meridian from.
+- **Detail:** OSSE and R-OSSE use it as the base radius of the wall law, ICW uses it as the throat integration constant, and a FREEFORM meridian starts at its own first anchor radius. It is shared by the H and V planes unless a per-azimuth expression is used. The mesher rejects a non-positive value.
+- **Formula:** `OSSE: base(z) starts at k r0 + r0(1-k); ICW: r(s) = r0 + S integral sin(theta)`
+- **Physical effect:** Sets the throat area and the driver exit the wall must match.
+- **Context:** `native`
+- **Default:** 27.0507 (source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `seed_params.r0_mm`)
+- **Search bounds:** 27.0507 .. 27.0507 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `bounds.r0_mm`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.r0_mm`)
+- **Code:** `hornlab_mesher.profile_formulas.calculate_osse`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 1b. OSSE parameters
+- **Flags:** —
+
+#### `s` — Termination amplitude
+
+- **Summary:** OSSE superellipse termination amplitude; zero leaves the plain OS wall.
+- **Detail:** A nonzero amplitude turns on the superellipse termination and makes n and q active. A zero value leaves the plain OS wall. R-OSSE has no s; its rollback comes from the blended curves and tmax, not from this key.
+- **Formula:** `term is added to base only while s != 0`
+- **Physical effect:** Rolls the OSSE mouth toward a superellipse outline.
+- **Context:** `native`
+- **Default:** 0.55 (source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `seed_params.s`)
+- **Search bounds:** 0.3 .. 0.9 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `bounds.s`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.s`)
+- **Code:** `hornlab_mesher.profile_formulas.calculate_osse`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 1b. OSSE parameters
+- **Flags:** —
+
+#### `slot_length_mm` — Slot length (mm)
+
+- **Summary:** Straight cylindrical section at the throat radius between extension and main horn.
+- **Detail:** The slot holds the radius constant over this axial length. OSSE refuses a slot combined with throat stretch, so s1/s2 and a nonzero slot are alternatives there. A zero length disables the slot.
+- **Formula:** `r = r0_main over [ext_len, ext_len + slot_len]`
+- **Physical effect:** Adds a cylindrical throat spacer before the flared section.
+- **Context:** `native`
+- **Default:** 0.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `seed_params.slot_length_mm`)
+- **Search bounds:** 0.0 .. 0.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `bounds.slot_length_mm`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.slot_length_mm`)
+- **Code:** `hornlab_mesher.profile_formulas.calculate_osse`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 6e. Throat extensions and slots (OSSE, R-OSSE)
+- **Flags:** —
+
+#### `throat_ext_angle_deg` — Throat extension angle (deg)
+
+- **Summary:** Taper angle of the prepended throat extension, measured from the axis.
+- **Detail:** The extension radius falls back from the main throat radius by the extension length times this angle's tangent. The mesher refuses a taper that would drive the start radius negative. A zero angle makes the extension cylindrical.
+- **Formula:** `r0_throat = r0 - ext_len tan(throat_ext_angle)`
+- **Physical effect:** Sets how much the adapter tube narrows or widens ahead of the horn.
+- **Context:** `native`
+- **Default:** 4.5 (source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `seed_params.throat_ext_angle_deg`)
+- **Search bounds:** 1.5 .. 6.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `bounds.throat_ext_angle_deg`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.throat_ext_angle_deg`)
+- **Code:** `hornlab_mesher.profile_formulas.calculate_osse`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 6e. Throat extensions and slots (OSSE, R-OSSE)
+- **Flags:** —
+
+#### `throat_ext_length_mm` — Throat extension length (mm)
+
+- **Summary:** Length of the tapered tube prepended before the main OSSE/R-OSSE meridian.
+- **Detail:** The extension tapers back from the main throat radius, then the optional slot and the main meridian follow. A zero length leaves the main meridian starting at the throat. It is a prefix of the composite meridian, not part of the OS wall law itself.
+- **Formula:** `r = r0_throat + z tan(throat_ext_angle), r0_throat = r0 - ext_len tan(angle)`
+- **Physical effect:** Adds a short driver-adapter tube ahead of the horn.
+- **Context:** `native`
+- **Default:** 115.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `seed_params.throat_ext_length_mm`)
+- **Search bounds:** 60.0 .. 220.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `bounds.throat_ext_length_mm`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.throat_ext_length_mm`)
+- **Code:** `hornlab_mesher.profile_formulas.calculate_osse`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 6e. Throat extensions and slots (OSSE, R-OSSE)
+- **Flags:** —
+
+#### `wall_thickness_mm` — Native shell thickness (mm)
+
+- **Summary:** Mesh-section shell thickness for the native families.
+- **Detail:** This is the mesher's offset distance, not the generator's generated shell knob, although both are printed-wall thicknesses. The mesher validates curvature against it.
+- **Formula:** not stated
+- **Physical effect:** Changes the printed wall thickness only.
+- **Context:** `native`
+- **Default:** 5.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `seed_params.wall_thickness_mm`)
+- **Search bounds:** 5.0 .. 5.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml` `bounds.wall_thickness_mm`)
+- **Hard limits:** lo=0.0, hi=—, kind=float, section=mesh (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.wall_thickness_mm`)
+- **Code:** `hornlab_search.design.families.FAMILY_KEYS`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ## 7. Geometric / cross-section model (all formulas)
+- **Flags:** —
+
+### hl__lecleach_iwata_ar_landscape_v7 — FREEFORM / rows
+
+- **Group:** home
+- **Symmetry:** hv
+- **Config:** `examples/typologies/home_landscape_2026-11-15/hl__lecleach_iwata_ar_landscape_v7.yaml`
+- **Brief:** `examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml`
+- **Source status:** catalog
+- **Description:** HOME landscape verified Le Cleac'h / Iwata aspect-ratio rows march from a round throat to a landscape mouth (4 knobs)
+
+#### `g_T` — Rows family factor (rows)
+
+- **Summary:** Salmon family T on the Salmon rows; Fourcade area-law T on the Le Cleac'h rows.
+- **Detail:** The two row families share the spelling but not the equation. The Salmon rows use it in the family area law; the verified Le Cleac'h rows use it in the Fourcade wavefront-area law.
+- **Formula:** `Salmon family law; Fourcade eq. 42`
+- **Physical effect:** Selects the family member and its expansion profile.
+- **Context:** `rows`
+- **Default:** 0.5 (source: `examples/typologies/home_landscape_2026-11-15/hl__lecleach_iwata_ar_landscape_v7.yaml` `seed_params.g_T`)
+- **Search bounds:** 0.5 .. 0.5 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__lecleach_iwata_ar_landscape_v7.yaml` `bounds.g_T`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_shape_knobs`
+- **Doc:** `docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md` § ### 2.4 organic/elliptical + X-shape (WP9b)
+- **Flags:** overloaded
+
+#### `g_ar_m` — Iwata mouth aspect ratio (rows)
+
+- **Summary:** Mouth aspect ratio of the iwata_ar stretch on the verified march.
+- **Detail:** The iwata_ar kind applies an area-preserving aspect-ratio evolution to the verified Le Cleac'h march, with T pinned by its config. It is our reconstruction of the principle, never the Iwata product.
+- **Formula:** `AR evolution with ar_m at the mouth`
+- **Physical effect:** Makes the mouth wider than tall (or the reverse).
+- **Context:** `rows`
+- **Default:** 1.5 (source: `examples/typologies/home_landscape_2026-11-15/hl__lecleach_iwata_ar_landscape_v7.yaml` `seed_params.g_ar_m`)
+- **Search bounds:** 1.2 .. 2.4 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__lecleach_iwata_ar_landscape_v7.yaml` `bounds.g_ar_m`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_iwata_ar_knobs`
+- **Doc:** `docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md` § ### 2.2 Iwata / quasi-Iwata / "FH-N2"
+- **Flags:** —
+
+#### `g_ar_p` — Iwata AR exponent (rows)
+
+- **Summary:** Exponent of the iwata_ar aspect-ratio evolution.
+- **Detail:** Shapes how quickly the aspect-ratio stretch develops along the normalized arc. The construction is our reconstruction, not a published Iwata recipe.
+- **Formula:** `AR(l) = 1 + (ar_m - 1) (l / L0)^ar_p`
+- **Physical effect:** Moves the aspect-ratio change toward the throat or the mouth.
+- **Context:** `rows`
+- **Default:** 1.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__lecleach_iwata_ar_landscape_v7.yaml` `seed_params.g_ar_p`)
+- **Search bounds:** 0.5 .. 2.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__lecleach_iwata_ar_landscape_v7.yaml` `bounds.g_ar_p`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_iwata_ar_knobs`
+- **Doc:** `docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md` § ### 2.2 Iwata / quasi-Iwata / "FH-N2"
+- **Flags:** —
+
+#### `g_fc_hz` — Axisymmetric rows cutoff (rows) (Hz)
+
+- **Summary:** Single cutoff of an axisymmetric Le Cleac'h rows march.
+- **Detail:** The verified Fourcade march has no per-azimuth split, so fc_hz is the only cutoff. The iwata and AR stretch keep this axisymmetric base.
+- **Formula:** `m = 4 pi fc / c`
+- **Physical effect:** Sets the rollback size and loading corner.
+- **Context:** `rows`
+- **Default:** 550.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__lecleach_iwata_ar_landscape_v7.yaml` `seed_params.g_fc_hz`)
+- **Search bounds:** 450.0 .. 900.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__lecleach_iwata_ar_landscape_v7.yaml` `bounds.g_fc_hz`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_lecleach_knobs`
+- **Doc:** `docs/research/typologies/JMLC_LECLEACH_RESEARCH_2026-10-25.md` § ## 2. Construction comparison
+- **Flags:** overloaded
+
+#### `g_stop_deg` — Rows march stop (rows) (deg)
+
+- **Summary:** Wall-angle stop of the per-azimuth rows march; the legal window depends on the kind.
+- **Detail:** The verified Le Cleac'h rows use the published stop window and allow rollback past vertical. The Salmon rows stop below or above the cap-area asymptote, and modulated Salmon rows keep the plan's rollback window. A per-typology note narrows this.
+- **Formula:** `march stops when phi >= stop_deg`
+- **Physical effect:** Chooses how far around the rollback each row is followed.
+- **Context:** `rows`
+- **Default:** 180.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__lecleach_iwata_ar_landscape_v7.yaml` `seed_params.g_stop_deg`)
+- **Search bounds:** 110.0 .. 200.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__lecleach_iwata_ar_landscape_v7.yaml` `bounds.g_stop_deg`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_shape_knobs`
+- **Doc:** `docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md` § ### 2.4 organic/elliptical + X-shape (WP9b)
+- **Flags:** overloaded
+
+#### `n_phi` — Azimuth row count
+
+- **Summary:** Number of azimuth rows in the rows/grid model.
+- **Detail:** The row count sets the angular sampling of the point grid. The quarter model, half model and full ring each have their own minimum and parity rules in the generator. It is a count, not a length.
+- **Formula:** not stated
+- **Physical effect:** Raises angular fidelity at the cost of more grid rows.
+- **Context:** `rows`
+- **Default:** 15 (source: `examples/typologies/home_landscape_2026-11-15/hl__lecleach_iwata_ar_landscape_v7.yaml` `generator.n_phi`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_check_spec`
+- **Doc:** `docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md` § ### 2.4 organic/elliptical + X-shape (WP9b)
+- **Flags:** —
+
+#### `n_s` — Axial station count
+
+- **Summary:** Number of axial stations along each row.
+- **Detail:** Each row is sampled at equal axial (or equal-arc, for the rows march) fractions. This count sets the longitudinal resolution. It is a count, not a length.
+- **Formula:** not stated
+- **Physical effect:** Raises longitudinal fidelity at the cost of more points.
+- **Context:** `rows`
+- **Default:** 32 (source: `examples/typologies/home_landscape_2026-11-15/hl__lecleach_iwata_ar_landscape_v7.yaml` `generator.n_s`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_check_spec`
+- **Doc:** `docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md` § ### 2.4 organic/elliptical + X-shape (WP9b)
+- **Flags:** —
+
+#### `span` — Row span
+
+- **Summary:** How much of the azimuth circle the rows model covers.
+- **Detail:** The legal spans are the ones the generator handles, and their names are read from the generator's own span constant rather than retyped here. A kind can force a span: an odd-cosine asymmetry forces the full ring and a b-term forces the half model.
+- **Formula:** not stated
+- **Physical effect:** Chooses whether the mesh uses mirror planes or a seam-free full ring.
+- **Context:** `rows`
+- **Default:** — (source: —)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** lo=—, hi=—, kind=str, section=— (`hornlab_search/design/generators/grid.py` `ROWS_SPANS`)
+- **Code:** `hornlab_search.design.generators.grid._rows_span_requested`
+- **Doc:** `docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md` § ### 2.5 Up/down-asymmetric saddle
+- **Flags:** —
+
+#### `wall_thickness_mm` — Shell thickness (mm)
+
+- **Summary:** Outer-shell thickness of a freestanding rows model.
+- **Detail:** The point-grid route builds an explicit outer shell offset from each row's own profile. This is the printed shell thickness, not an acoustic dimension. The generator also uses it in its self-approach guard.
+- **Formula:** not stated
+- **Physical effect:** Changes the printed wall thickness, not the acoustic inner surface.
+- **Context:** `rows`
+- **Default:** 3.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__lecleach_iwata_ar_landscape_v7.yaml` `generator.wall_thickness_mm`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_check_spec`
+- **Doc:** `docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md` § ### 2.4 organic/elliptical + X-shape (WP9b)
+- **Flags:** —
+
+### hl__osse_rrect_morph_v7 — OSSE / native
+
+- **Group:** home
+- **Symmetry:** hv
+- **Config:** `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml`
+- **Brief:** `examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml`
+- **Source status:** catalog
+- **Description:** HOME landscape ATH-style smooth OSSE morphed to a rounded-rectangle superellipse mouth, landscape by construction
+
+#### `L_mm` — OSSE main-section length (mm)
+
+- **Summary:** Length of the main OSSE section; extension and slot may add to the total.
+- **Detail:** The mesher requires it positive. In the total-length mode the section is carved differently, so the same value can mean a different total span.
+- **Formula:** `z_main in [0, L]`
+- **Physical effect:** Sets the depth of the flared OSSE body.
+- **Context:** `native:osse`
+- **Default:** 250.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `seed_params.L_mm`)
+- **Search bounds:** 160.0 .. 340.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `bounds.L_mm`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.L_mm`)
+- **Code:** `hornlab_mesher.profile_formulas.calculate_osse`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 1b. OSSE parameters
+- **Flags:** overloaded
+
+#### `a0_deg` — Throat half-angle (deg)
+
+- **Summary:** Wall half-angle at the throat, passed to the OSSE, R-OSSE and ICW meridian.
+- **Detail:** OSSE carries it in the 2 k r0 z tan(a0) term of the base radius, and R-OSSE carries the same term in its throat-radius curve. ICW uses it as the initial tangent angle theta0 of the curvature integral. It should match the driver exit angle when the wall is meant to continue the driver.
+- **Formula:** `OSSE/R-OSSE: c2 = 2 k r0 tan(a0); ICW: theta(0) = theta0`
+- **Physical effect:** Sets the initial expansion slope at the driver exit.
+- **Context:** `native`
+- **Default:** 1.9863 (source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `seed_params.a0_deg`)
+- **Search bounds:** 1.0 .. 3.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `bounds.a0_deg`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.a0_deg`)
+- **Code:** `hornlab_mesher.profile_formulas.calculate_osse`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 1b. OSSE parameters
+- **Flags:** —
+
+#### `a_deg` — Native coverage half-angle (deg)
+
+- **Summary:** OSSE/R-OSSE coverage half-angle in the mesher's own convention.
+- **Detail:** The mesher measures the angle as a half-angle from the axis. The target block in a config measures the total included angle, which is the value the objective scores. Read the block before comparing the two.
+- **Formula:** `OSSE: base(z) carries tan(a); R-OSSE: c3 = tan(a)^2`
+- **Physical effect:** Sets how wide the wall opens relative to the axis.
+- **Context:** `native`
+- **Default:** 30.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `seed_params.a_deg`)
+- **Search bounds:** 20.0 .. 40.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `bounds.a_deg`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.a_deg`)
+- **Code:** `hornlab_mesher.profile_formulas.calculate_osse`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 1b. OSSE parameters
+- **Flags:** overloaded
+
+#### `aspect_ratio` — Cross-section aspect ratio
+
+- **Summary:** Width-to-height scaling of the cross-section relative to the meridian radius.
+- **Detail:** The mesher scales the horizontal and vertical half-widths of the outline by this ratio. A value of one gives a circular section; larger values widen it. It does not change either meridian and is not a coverage angle.
+- **Formula:** `b = a * aspect_ratio in the ellipse/superellipse station`
+- **Physical effect:** Widens or narrows the cross-section without changing the wall profiles.
+- **Context:** `native`
+- **Default:** 1.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `seed_params.aspect_ratio`)
+- **Search bounds:** 1.0 .. 1.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `bounds.aspect_ratio`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=cross_section (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.aspect_ratio`)
+- **Code:** `hornlab_search.design.families.FAMILY_KEYS`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ## 7. Geometric / cross-section model (all formulas)
+- **Flags:** —
+
+#### `az_a_cos_amp` — Per-direction cos-power amplitude (deg)
+
+- **Summary:** Adds amp * |cos p|^pow to the wall angle.
+- **Detail:** A negative value trims the angle near the horizontal axis only, more sharply as the power grows (CORE: -15 at power 10).
+- **Formula:** `a(p) += az_a_cos_amp * |cos p|^az_a_cos_pow`
+- **Physical effect:** Trims or widens the horizontal coverage locally.
+- **Context:** `native`
+- **Default:** 8.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `seed_params.az_a_cos_amp`)
+- **Search bounds:** 0.0 .. 15.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `bounds.az_a_cos_amp`)
+- **Hard limits:** lo=-60.0, hi=60.0, kind=float, section=azlaw (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.az_a_cos_amp`)
+- **Code:** `hornlab_search.design.families.azlaw_expressions`
+- **Doc:** `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md` § ## 5b. Per-direction law (the exact CORE construction)
+- **Flags:** —
+
+#### `az_a_cos_pow` — Per-direction cos power
+
+- **Summary:** Exponent of the |cos p| term on the wall angle.
+- **Detail:** Higher powers confine the term to a narrow sector around the horizontal axis. CORE uses 10.
+- **Formula:** `|cos p|^az_a_cos_pow`
+- **Physical effect:** How narrow the trimmed sector is.
+- **Context:** `native`
+- **Default:** 2.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `seed_params.az_a_cos_pow`)
+- **Search bounds:** 1.0 .. 6.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `bounds.az_a_cos_pow`)
+- **Hard limits:** lo=0.5, hi=40.0, kind=float, section=azlaw (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.az_a_cos_pow`)
+- **Code:** `hornlab_search.design.families.azlaw_expressions`
+- **Doc:** `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md` § ## 5b. Per-direction law (the exact CORE construction)
+- **Flags:** —
+
+#### `az_a_sf_amp` — Per-direction superformula amplitude (deg)
+
+- **Summary:** Adds a superformula-shaped term to the wall angle, so the coverage differs in every direction.
+- **Detail:** With a nonzero value the wall angle becomes a(p) = a_deg + amp * SF(p) + the cos term; a_deg is then the BASE the terms add to (Ath CORE: a_deg 5, amp 35). Diagonals that open wider than H and V fold the walls into Ath's creases.
+- **Formula:** `a(p) = a_deg + az_a_sf_amp * SF(p) + az_a_cos_amp * |cos p|^az_a_cos_pow`
+- **Physical effect:** How strongly the wall angle follows the superformula lobes.
+- **Context:** `native`
+- **Default:** 0.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `seed_params.az_a_sf_amp`)
+- **Search bounds:** 0.0 .. 0.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `bounds.az_a_sf_amp`)
+- **Hard limits:** lo=-60.0, hi=60.0, kind=float, section=azlaw (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.az_a_sf_amp`)
+- **Code:** `hornlab_search.design.families.azlaw_expressions`
+- **Doc:** `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md` § ## 5b. Per-direction law (the exact CORE construction)
+- **Flags:** —
+
+#### `az_n_cos2_amp` — Per-direction termination n
+
+- **Summary:** Adds amp * cos^2 p to the OSSE termination shape n.
+- **Detail:** The mouth termination becomes different in H and V (CORE: n 6 + 1.5 cos^2 p, i.e. 7.5 H / 6.0 V).
+- **Formula:** `n(p) = n + az_n_cos2_amp * cos^2 p`
+- **Physical effect:** Changes the mouth roll-off shape between H and V.
+- **Context:** `native`
+- **Default:** 0.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `seed_params.az_n_cos2_amp`)
+- **Search bounds:** 0.0 .. 0.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `bounds.az_n_cos2_amp`)
+- **Hard limits:** lo=-10.0, hi=10.0, kind=float, section=azlaw (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.az_n_cos2_amp`)
+- **Code:** `hornlab_search.design.families.azlaw_expressions`
+- **Doc:** `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md` § ## 5b. Per-direction law (the exact CORE construction)
+- **Flags:** —
+
+#### `az_s_cos2_amp` — Per-direction termination s
+
+- **Summary:** Adds amp * cos^2 p to the OSSE termination strength s.
+- **Detail:** The mouth termination strength becomes different in H and V (CORE: s 0.6 + 0.23 cos^2 p, i.e. 0.83 H / 0.60 V).
+- **Formula:** `s(p) = s + az_s_cos2_amp * cos^2 p`
+- **Physical effect:** Changes how strongly the mouth flares out between H and V.
+- **Context:** `native`
+- **Default:** 0.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `seed_params.az_s_cos2_amp`)
+- **Search bounds:** -0.25 .. 0.5 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `bounds.az_s_cos2_amp`)
+- **Hard limits:** lo=-1.0, hi=1.0, kind=float, section=azlaw (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.az_s_cos2_amp`)
+- **Code:** `hornlab_search.design.families.azlaw_expressions`
+- **Doc:** `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md` § ## 5b. Per-direction law (the exact CORE construction)
+- **Flags:** —
+
+#### `az_sf_a` — Superformula a
+
+- **Summary:** Scale of the cosine part of the superformula term.
+- **Detail:** Values below 1 strengthen the horizontal side of the term. CORE uses 1.
+- **Formula:** `|cos(m p/4)/a|^n2`
+- **Physical effect:** Balances the horizontal side of the pattern.
+- **Context:** `native`
+- **Default:** 1.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `seed_params.az_sf_a`)
+- **Search bounds:** 1.0 .. 1.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `bounds.az_sf_a`)
+- **Hard limits:** lo=0.05, hi=5.0, kind=float, section=azlaw (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.az_sf_a`)
+- **Code:** `hornlab_search.design.families.azlaw_expressions`
+- **Doc:** `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md` § ## 5b. Per-direction law (the exact CORE construction)
+- **Flags:** —
+
+#### `az_sf_b` — Superformula b
+
+- **Summary:** Scale of the sine part of the superformula term.
+- **Detail:** Values below 1 lower the term toward the vertical axis, narrowing V against H. CORE uses 0.618.
+- **Formula:** `|sin(m p/4)/b|^n3`
+- **Physical effect:** Balances the vertical side of the pattern.
+- **Context:** `native`
+- **Default:** 0.8569 (source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `seed_params.az_sf_b`)
+- **Search bounds:** 0.8569 .. 0.8569 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `bounds.az_sf_b`)
+- **Hard limits:** lo=0.05, hi=5.0, kind=float, section=azlaw (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.az_sf_b`)
+- **Code:** `hornlab_search.design.families.azlaw_expressions`
+- **Doc:** `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md` § ## 5b. Per-direction law (the exact CORE construction)
+- **Flags:** —
+
+#### `az_sf_m` — Superformula lobes
+
+- **Summary:** Number of lobes of the superformula term (a multiple of 4).
+- **Detail:** m/4 sets the angular frequency of the cos and sin terms; 4 gives one lobe per quadrant (CORE). Only multiples of 4 keep the quarter-model mirror symmetry, so others are refused.
+- **Formula:** `SF(p) = (|cos(m p/4)/a|^n2 + |sin(m p/4)/b|^n3)^(-1/n1)`
+- **Physical effect:** How many times the coverage pattern repeats around the horn.
+- **Context:** `native`
+- **Default:** 4.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `seed_params.az_sf_m`)
+- **Search bounds:** 4.0 .. 4.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `bounds.az_sf_m`)
+- **Hard limits:** lo=4.0, hi=12.0, kind=float, section=azlaw (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.az_sf_m`)
+- **Code:** `hornlab_search.design.families.azlaw_expressions`
+- **Doc:** `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md` § ## 5b. Per-direction law (the exact CORE construction)
+- **Flags:** —
+
+#### `az_sf_n1` — Superformula n1
+
+- **Summary:** Overall sharpness of the superformula term.
+- **Detail:** Large n1 flattens the lobes toward a constant; small n1 makes them pointed. CORE uses 12.
+- **Formula:** `SF(p) = (...)^(-1/n1)`
+- **Physical effect:** Pointed versus rounded per-direction pattern.
+- **Context:** `native`
+- **Default:** 7.4958 (source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `seed_params.az_sf_n1`)
+- **Search bounds:** 7.4958 .. 7.4958 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `bounds.az_sf_n1`)
+- **Hard limits:** lo=0.1, hi=40.0, kind=float, section=azlaw (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.az_sf_n1`)
+- **Code:** `hornlab_search.design.families.azlaw_expressions`
+- **Doc:** `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md` § ## 5b. Per-direction law (the exact CORE construction)
+- **Flags:** —
+
+#### `az_sf_n2` — Superformula n2
+
+- **Summary:** Exponent on the cosine part of the superformula term.
+- **Detail:** With n3 it sets how sharply the term changes between the axis and the diagonal. CORE uses 15.
+- **Formula:** `|cos(m p/4)/a|^n2`
+- **Physical effect:** Sharpness near the horizontal axis.
+- **Context:** `native`
+- **Default:** 12.4449 (source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `seed_params.az_sf_n2`)
+- **Search bounds:** 12.4449 .. 12.4449 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `bounds.az_sf_n2`)
+- **Hard limits:** lo=0.1, hi=40.0, kind=float, section=azlaw (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.az_sf_n2`)
+- **Code:** `hornlab_search.design.families.azlaw_expressions`
+- **Doc:** `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md` § ## 5b. Per-direction law (the exact CORE construction)
+- **Flags:** —
+
+#### `az_sf_n3` — Superformula n3
+
+- **Summary:** Exponent on the sine part of the superformula term.
+- **Detail:** With n2 it sets how sharply the term changes toward the vertical axis. CORE uses 16.
+- **Formula:** `|sin(m p/4)/b|^n3`
+- **Physical effect:** Sharpness near the vertical axis.
+- **Context:** `native`
+- **Default:** 13.4442 (source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `seed_params.az_sf_n3`)
+- **Search bounds:** 13.4442 .. 13.4442 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `bounds.az_sf_n3`)
+- **Hard limits:** lo=0.1, hi=40.0, kind=float, section=azlaw (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.az_sf_n3`)
+- **Code:** `hornlab_search.design.families.azlaw_expressions`
+- **Doc:** `docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md` § ## 5b. Per-direction law (the exact CORE construction)
+- **Flags:** —
+
+#### `exponent` — Native cross-section exponent
+
+- **Summary:** Superellipse exponent of the outline; the documented default is disputed.
+- **Detail:** The research basis states a default of 2.0 (a plain ellipse); the shipped generator default for the same idea is 4.0 (registry.DEFAULT_KNOBS). This entry records both claims and does not choose between them. It is not the generator's mouth_exponent key, although the two describe the same idea.
+- **Formula:** `( |cos(phi)/a|^e + |sin(phi)/b|^e )^(-1/e)`
+- **Physical effect:** Squares off or rounds the cross-section outline.
+- **Context:** `native`
+- **Default:** 2.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `seed_params.exponent`)
+- **Search bounds:** 2.0 .. 2.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `bounds.exponent`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=cross_section (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.exponent`)
+- **Code:** `hornlab_search.design.families.FAMILY_KEYS`
+- **Doc:** `docs/plan/12_RESEARCH_BASIS.md` § ## 4. The geometry we would have written already exists
+- **Flags:** doc_mismatch, overloaded
+
+#### `k` — OS-SE shape factor
+
+- **Summary:** Blends the OS-SE base radius between its radius term and its tangent term.
+- **Detail:** The base radius carries (k r0) and r0(1-k) terms plus the tangent-driven z term, so k reshapes the wall between the throat and the far-field angle. R-OSSE reuses it in its throat-radius curve. It is dimensionless and is not a termination control.
+- **Formula:** `base(z) = sqrt((k r0)^2 + 2 k r0 z tan(a0) + z^2 tan(a)^2) + r0(1-k)`
+- **Physical effect:** Reshapes the wall between the throat and the far-field angle.
+- **Context:** `native`
+- **Default:** 1.2163 (source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `seed_params.k`)
+- **Search bounds:** 0.3 .. 3.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `bounds.k`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.k`)
+- **Code:** `hornlab_mesher.profile_formulas.calculate_osse`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 1b. OSSE parameters
+- **Flags:** —
+
+#### `morph_allow_shrinkage` — Allow morph shrinkage
+
+- **Summary:** 0/1 flag that lets a morph target be smaller than the current mouth extent.
+- **Detail:** Without the flag the mesher refuses a target that would shrink the outline. With it the morph may pull the section inward. Ath calls the same control Morph.AllowShrinkage.
+- **Formula:** not stated
+- **Physical effect:** Allows or refuses a mouth outline that narrows toward the target.
+- **Context:** `native`
+- **Default:** 1 (source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `seed_params.morph_allow_shrinkage`)
+- **Search bounds:** 1 .. 1 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `bounds.morph_allow_shrinkage`)
+- **Hard limits:** lo=—, hi=—, kind=int, section=morph (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.morph_allow_shrinkage`)
+- **Code:** `hornlab_mesher.profile_morph._resolve_morph_half_dimensions`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 6a. Cross-section morphing (ALL formula families)
+- **Flags:** —
+
+#### `morph_corner_mm` — Morph corner radius (mm)
+
+- **Summary:** Corner radius of a rounded-rectangle morph target.
+- **Detail:** The radius is clamped against the target half-dimensions at run time. It is used only for a rounded-rectangle target. Ath calls the same control Morph.CornerRadius.
+- **Formula:** not stated
+- **Physical effect:** Rounds the corners of a rectangular morphed mouth.
+- **Context:** `native`
+- **Default:** 60.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `seed_params.morph_corner_mm`)
+- **Search bounds:** 30.0 .. 100.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `bounds.morph_corner_mm`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=morph (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.morph_corner_mm`)
+- **Code:** `hornlab_mesher.profile_morph._resolve_morph_half_dimensions`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 6a. Cross-section morphing (ALL formula families)
+- **Flags:** —
+
+#### `morph_exponent` — Morph superellipse exponent
+
+- **Summary:** Superellipse exponent of a morph target 3 outline.
+- **Detail:** The mesher reads this only when morph_target is 3, then clamps it into the superellipse range before building the target outline. Ath's guide documents only targets 0-2; target 3 is a mesher extension.
+- **Formula:** not stated
+- **Physical effect:** Squares off or rounds a superellipse morphed mouth.
+- **Context:** `native`
+- **Default:** 4.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `seed_params.morph_exponent`)
+- **Search bounds:** 4.0 .. 4.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `bounds.morph_exponent`)
+- **Hard limits:** lo=2.0, hi=16.0, kind=float, section=morph (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.morph_exponent`)
+- **Code:** `hornlab_mesher.profile_morph._morph_target_radius_at_angle`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 6a. Cross-section morphing (ALL formula families)
+- **Flags:** —
+
+#### `morph_fixed` — Morph fixed part
+
+- **Summary:** Axial fraction where the morph begins; zero starts at the throat.
+- **Detail:** The fixed part holds the base section before the morph factor becomes nonzero. The remaining axial fraction is remapped before the rate power is applied. Ath calls the same control Morph.FixedPart.
+- **Formula:** `factor = 0 for t <= morph_fixed`
+- **Physical effect:** Delays the start of the outline change along the horn.
+- **Context:** `native`
+- **Default:** 0.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `seed_params.morph_fixed`)
+- **Search bounds:** 0.0 .. 0.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `bounds.morph_fixed`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=morph (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.morph_fixed`)
+- **Code:** `hornlab_mesher.profile_morph._morph_factor`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 6a. Cross-section morphing (ALL formula families)
+- **Flags:** —
+
+#### `morph_height_mm` — Morph target height (mm)
+
+- **Summary:** Full target height of a rectangular or superellipse morph at the mouth.
+- **Detail:** A zero height lets the mesher infer the target height from the mouth extent. The value is a full height, not a half-height. Ath calls the same control Morph.TargetHeight.
+- **Formula:** not stated
+- **Physical effect:** Sets how tall the morphed mouth outline becomes.
+- **Context:** `native`
+- **Default:** 380.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `seed_params.morph_height_mm`)
+- **Search bounds:** 320.0 .. 460.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `bounds.morph_height_mm`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=morph (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.morph_height_mm`)
+- **Code:** `hornlab_mesher.profile_morph._morph_factor`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 6a. Cross-section morphing (ALL formula families)
+- **Flags:** —
+
+#### `morph_rate` — Morph rate
+
+- **Summary:** Power-law rate of the morph blend from the fixed part to the mouth.
+- **Detail:** The factor is the remapped axial fraction raised to this power, so larger values delay the morph until nearer the mouth. It only matters when a morph target is active. Ath calls the same control Morph.Rate.
+- **Formula:** `factor = clamp((t - morph_fixed)/(1 - morph_fixed), 0, 1)^morph_rate`
+- **Physical effect:** Moves how quickly the outline changes along the horn.
+- **Context:** `native`
+- **Default:** 3.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `seed_params.morph_rate`)
+- **Search bounds:** 1.0 .. 6.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `bounds.morph_rate`)
+- **Hard limits:** lo=0.0, hi=—, kind=float, section=morph (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.morph_rate`)
+- **Code:** `hornlab_mesher.profile_morph._morph_factor`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 6a. Cross-section morphing (ALL formula families)
+- **Flags:** —
+
+#### `morph_target` — Morph target shape
+
+- **Summary:** Cross-section shape the mouth morphs toward: off, rectangle, circle or superellipse.
+- **Detail:** families.py names the off, rectangle, circle and superellipse codes; the superellipse target reads morph_exponent. The morph factor begins at morph_fixed and follows the rate power toward the mouth. Ath's own vocabulary calls this control Morph.TargetShape.
+- **Formula:** `r(t, phi) = r_base(t, phi) + factor * (r_target(phi) - r_mouth_base(phi))`
+- **Physical effect:** Blends the round section into a target outline toward the mouth.
+- **Context:** `native`
+- **Default:** 1 (source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `seed_params.morph_target`)
+- **Search bounds:** 1 .. 1 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `bounds.morph_target`)
+- **Hard limits:** lo=0, hi=3, kind=int, section=morph (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.morph_target`)
+- **Code:** `hornlab_mesher.profile_morph._morph_target_shape`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 6a. Cross-section morphing (ALL formula families)
+- **Flags:** —
+
+#### `morph_width_mm` — Morph target width (mm)
+
+- **Summary:** Full target width of a rectangular or superellipse morph at the mouth.
+- **Detail:** A zero width lets the mesher infer the target width from the mouth extent. The value is a full width, not a half-width. Ath calls the same control Morph.TargetWidth.
+- **Formula:** not stated
+- **Physical effect:** Sets how wide the morphed mouth outline becomes.
+- **Context:** `native`
+- **Default:** 540.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `seed_params.morph_width_mm`)
+- **Search bounds:** 480.0 .. 600.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `bounds.morph_width_mm`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=morph (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.morph_width_mm`)
+- **Code:** `hornlab_mesher.profile_morph._morph_factor`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 6a. Cross-section morphing (ALL formula families)
+- **Flags:** —
+
+#### `n` — OSSE termination exponent
+
+- **Summary:** Superellipse exponent of the OSSE termination term.
+- **Detail:** It is read only while the termination amplitude is nonzero. The biradial generator meaning of n is not asserted in this context.
+- **Formula:** `term = (s L/q)(1 - (1 - z_norm^n)^(1/n))`
+- **Physical effect:** Sharpens or softens the OSSE mouth roll.
+- **Context:** `native`
+- **Default:** 6.9046 (source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `seed_params.n`)
+- **Search bounds:** 2.0 .. 10.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `bounds.n`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.n`)
+- **Code:** `hornlab_mesher.profile_formulas.calculate_osse`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 1b. OSSE parameters
+- **Flags:** overloaded
+
+#### `q` — OSSE termination saturation
+
+- **Summary:** Superellipse saturation of the OSSE termination; positive while s is nonzero.
+- **Detail:** It sets how quickly the termination term saturates with axial station. The mesher requires it positive whenever the termination amplitude s is nonzero.
+- **Formula:** `z_norm = q z/L; term = (s L/q)(1 - (1 - z_norm^n)^(1/n))`
+- **Physical effect:** Changes how abruptly the terminated outline reaches its corner.
+- **Context:** `native:osse`
+- **Default:** 0.9869 (source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `seed_params.q`)
+- **Search bounds:** 0.9 .. 1.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `bounds.q`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.q`)
+- **Code:** `hornlab_mesher.profile_formulas.calculate_osse`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 1b. OSSE parameters
+- **Flags:** overloaded
+
+#### `r0_mm` — Throat radius (mm)
+
+- **Summary:** Throat radius every native family starts its meridian from.
+- **Detail:** OSSE and R-OSSE use it as the base radius of the wall law, ICW uses it as the throat integration constant, and a FREEFORM meridian starts at its own first anchor radius. It is shared by the H and V planes unless a per-azimuth expression is used. The mesher rejects a non-positive value.
+- **Formula:** `OSSE: base(z) starts at k r0 + r0(1-k); ICW: r(s) = r0 + S integral sin(theta)`
+- **Physical effect:** Sets the throat area and the driver exit the wall must match.
+- **Context:** `native`
+- **Default:** 18.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `seed_params.r0_mm`)
+- **Search bounds:** 18.0 .. 18.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `bounds.r0_mm`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.r0_mm`)
+- **Code:** `hornlab_mesher.profile_formulas.calculate_osse`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 1b. OSSE parameters
+- **Flags:** —
+
+#### `s` — Termination amplitude
+
+- **Summary:** OSSE superellipse termination amplitude; zero leaves the plain OS wall.
+- **Detail:** A nonzero amplitude turns on the superellipse termination and makes n and q active. A zero value leaves the plain OS wall. R-OSSE has no s; its rollback comes from the blended curves and tmax, not from this key.
+- **Formula:** `term is added to base only while s != 0`
+- **Physical effect:** Rolls the OSSE mouth toward a superellipse outline.
+- **Context:** `native`
+- **Default:** 0.7503 (source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `seed_params.s`)
+- **Search bounds:** 0.2 .. 1.2 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `bounds.s`)
+- **Hard limits:** lo=—, hi=—, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.s`)
+- **Code:** `hornlab_mesher.profile_formulas.calculate_osse`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 1b. OSSE parameters
+- **Flags:** —
+
+#### `s1` — Throat stretch coefficient 1 (mm/deg)
+
+- **Summary:** Strength of the OSSE/R-OSSE nonlinear throat-stretch mapping.
+- **Detail:** The mesher maps the main-section axial coordinate through x + s1 * degrees(atan(s2 x)), so s1 multiplies an angle and is not dimensionless. It is active only with a nonzero s2. The coefficients must be plain finite numbers, and various rotation/slot combinations are refused.
+- **Formula:** `x_stretched = x + s1 * degrees(atan(s2 * x))`
+- **Physical effect:** Redistributes axial stations toward or away from the throat.
+- **Context:** `native`
+- **Default:** 1.1799 (source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `seed_params.s1`)
+- **Search bounds:** 1.1799 .. 1.1799 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `bounds.s1`)
+- **Hard limits:** lo=0.0, hi=10.0, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.s1`)
+- **Code:** `hornlab_mesher.throat_stretch.stretch_coefficients`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 6f. Throat stretch (OSSE, R-OSSE)
+- **Flags:** —
+
+#### `s2` — Throat stretch coefficient 2 (1/mm)
+
+- **Summary:** Inverse-length scale inside the throat-stretch arctangent.
+- **Detail:** s2 sets how quickly the arctangent saturates with axial distance, so its unit is inverse length. It is active only together with a nonzero s1. The mesher refuses a slot combined with throat stretch and refuses per-azimuth forms of either coefficient.
+- **Formula:** `x_stretched = x + s1 * degrees(atan(s2 * x))`
+- **Physical effect:** Moves where the stretched region becomes nearly linear again.
+- **Context:** `native`
+- **Default:** 0.0286 (source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `seed_params.s2`)
+- **Search bounds:** 0.0286 .. 0.0286 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_morph_v7.yaml` `bounds.s2`)
+- **Hard limits:** lo=0.0, hi=10.0, kind=float, section=profile (`hornlab_search/design/families.py` `FAMILY_KEYS.OSSE.s2`)
+- **Code:** `hornlab_mesher.throat_stretch.stretch_coefficients`
+- **Doc:** `docs/research/typologies/MESHER_TYPOLOGIES.md` § ### 6f. Throat stretch (OSSE, R-OSSE)
+- **Flags:** —
+
+### hl__rolled_es_spiral_v7 — FREEFORM / rows
+
+- **Group:** home
+- **Symmetry:** hv
+- **Config:** `examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml`
+- **Brief:** `examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml`
+- **Source status:** gui-only
+- **Description:** HOME Crowe ES-style exponential-spiral rolled rectangle (narrowing, non-CD by design); bridge cell; GUI preview works, run via rolled_rect_cli.py
+
+#### `g_decay` — Spiral decay (rows)
+
+- **Summary:** Exponential-spiral decay rate of the rolled-rectangle kind.
+- **Detail:** The log-spiral construction advances with this decay. It is the analogue of Crowe's exponential ES flare: a lower value keeps the wall turning more gradually.
+- **Formula:** not stated
+- **Physical effect:** Changes how fast the rolled wall narrows with depth.
+- **Context:** `rows`
+- **Default:** 0.7 (source: `examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml` `seed_params.g_decay`)
+- **Search bounds:** 0.4 .. 1.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml` `bounds.g_decay`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_depth_h_ratio` — Horizontal depth fraction (rows)
+
+- **Summary:** Share of the rolled-rectangle depth assigned to the horizontal walls.
+- **Detail:** The top and bottom lips can sit forward of the side walls. This fraction splits the depth between the two; the study used it to match the Crowe ES mouth's forward top and bottom.
+- **Formula:** not stated
+- **Physical effect:** Moves the top and bottom lips relative to the sides.
+- **Context:** `rows`
+- **Default:** 0.68 (source: `examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml` `seed_params.g_depth_h_ratio`)
+- **Search bounds:** 0.55 .. 1.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml` `bounds.g_depth_h_ratio`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_depth_mm` — Depth (rows) (mm)
+
+- **Summary:** Axial depth of a rolled-family rows construction.
+- **Detail:** Depth scales the section spacing or spiral advance. The Crowe section construction additionally requires depth below about 0.57 times the mouth width; the generator refuses a section the sweep cannot build.
+- **Formula:** not stated
+- **Physical effect:** Moves the mouth plane along the axis and changes the flare rate.
+- **Context:** `rows`
+- **Default:** 238.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml` `seed_params.g_depth_mm`)
+- **Search bounds:** 200.0 .. 380.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml` `bounds.g_depth_mm`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_height_mm` — Mouth height (rows) (mm)
+
+- **Summary:** Full mouth height target of a rolled-family rows construction.
+- **Detail:** The vertical partner of the explicit mouth width. The rolled and section kinds scale their meridians to this full height; a landscape cell keeps the width above the height by construction.
+- **Formula:** not stated
+- **Physical effect:** Moves the vertical mouth edge; the flare follows the construction.
+- **Context:** `rows`
+- **Default:** 299.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml` `seed_params.g_height_mm`)
+- **Search bounds:** 260.0 .. 420.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml` `bounds.g_height_mm`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_pucker_h_mm` — Horizontal pucker (rows) (mm)
+
+- **Summary:** Horizontal-plane inward pucker of the rolled-rectangle rim.
+- **Detail:** The pucker relief pulls the mouth rim inward in the horizontal plane after the start angle. It is a local rim-shape relief, not a global horn radius.
+- **Formula:** not stated
+- **Physical effect:** Ripples the horizontal rim inward.
+- **Context:** `rows`
+- **Default:** 6.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml` `seed_params.g_pucker_h_mm`)
+- **Search bounds:** 0.0 .. 18.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml` `bounds.g_pucker_h_mm`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_pucker_start_deg` — Pucker start angle (rows) (deg)
+
+- **Summary:** Roll turn where the rolled-rectangle rim pucker starts.
+- **Detail:** The relief is zero before this roll angle and ramps in after it. The home cell pins it so the pucker starts near the rim, not on the throat.
+- **Formula:** not stated
+- **Physical effect:** Moves the pucker onset along the rolled wall.
+- **Context:** `rows`
+- **Default:** 55.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml` `seed_params.g_pucker_start_deg`)
+- **Search bounds:** 55.0 .. 55.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml` `bounds.g_pucker_start_deg`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_pucker_v_mm` — Vertical pucker (rows) (mm)
+
+- **Summary:** Vertical-plane inward pucker of the rolled-rectangle rim.
+- **Detail:** The vertical partner of the rim pucker. Both amplitudes are searched so the BEM can judge whether the local rim relief helps or hurts.
+- **Formula:** not stated
+- **Physical effect:** Ripples the vertical rim inward.
+- **Context:** `rows`
+- **Default:** 8.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml` `seed_params.g_pucker_v_mm`)
+- **Search bounds:** 0.0 .. 24.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml` `bounds.g_pucker_v_mm`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_rect_exponent` — Rectangle corner exponent (rows)
+
+- **Summary:** Superellipse corner exponent of the rectangular mouth.
+- **Detail:** The mouth outline blends a circle and a rectangle with this exponent. Higher values square the corners; lower values keep a rounder superellipse.
+- **Formula:** not stated
+- **Physical effect:** Squares off or rounds the mouth corners.
+- **Context:** `rows`
+- **Default:** 12.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml` `seed_params.g_rect_exponent`)
+- **Search bounds:** 4.0 .. 14.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml` `bounds.g_rect_exponent`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_rect_turn_deg` — Rectangle transition angle (rows) (deg)
+
+- **Summary:** Roll turn where the rolled-rectangle cross-section becomes rectangular.
+- **Detail:** The wall starts from a round throat and transitions to the rectangle at this turn. It is independent of the throat turn and must stay above it.
+- **Formula:** not stated
+- **Physical effect:** Changes where the round throat becomes a rectangular mouth.
+- **Context:** `rows`
+- **Default:** 65.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml` `seed_params.g_rect_turn_deg`)
+- **Search bounds:** 45.0 .. 85.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml` `bounds.g_rect_turn_deg`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_terminal_deg` — Terminal roll angle (rows) (deg)
+
+- **Summary:** Final roll turn of the rolled-rectangle mouth.
+- **Detail:** The rolled wall is followed to this angle before the mouth is cut. A larger terminal angle wraps the lip further around the horn.
+- **Formula:** not stated
+- **Physical effect:** Rolls the mouth lip further back or stops it earlier.
+- **Context:** `rows`
+- **Default:** 270.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml` `seed_params.g_terminal_deg`)
+- **Search bounds:** 200.0 .. 275.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml` `bounds.g_terminal_deg`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_throat_turn_deg` — Throat turn angle (rows) (deg)
+
+- **Summary:** Roll turn used by the round throat blend of the rolled rectangle.
+- **Detail:** The throat section is blended from a round driver exit over this turn. The generator fixes it in the shipped cell so the coupling plane stays round.
+- **Formula:** not stated
+- **Physical effect:** Changes the length of the round-to-rolled throat transition.
+- **Context:** `rows`
+- **Default:** 25.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml` `seed_params.g_throat_turn_deg`)
+- **Search bounds:** 25.0 .. 25.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml` `bounds.g_throat_turn_deg`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_width_mm` — Mouth width (rows) (mm)
+
+- **Summary:** Full mouth width target of a rolled-family rows construction.
+- **Detail:** The rolled-rectangle and R-OSSE-rectangle kinds build the mouth from this explicit full width and the matching height, not from a K-law. The generator measures the built surface against the brief envelope.
+- **Formula:** not stated
+- **Physical effect:** Moves the horizontal mouth edge; the flare follows the construction.
+- **Context:** `rows`
+- **Default:** 542.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml` `seed_params.g_width_mm`)
+- **Search bounds:** 480.0 .. 590.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml` `bounds.g_width_mm`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `n_phi` — Azimuth row count
+
+- **Summary:** Number of azimuth rows in the rows/grid model.
+- **Detail:** The row count sets the angular sampling of the point grid. The quarter model, half model and full ring each have their own minimum and parity rules in the generator. It is a count, not a length.
+- **Formula:** not stated
+- **Physical effect:** Raises angular fidelity at the cost of more grid rows.
+- **Context:** `rows`
+- **Default:** 49 (source: `examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml` `generator.n_phi`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_check_spec`
+- **Doc:** `docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md` § ### 2.4 organic/elliptical + X-shape (WP9b)
+- **Flags:** —
+
+#### `n_s` — Axial station count
+
+- **Summary:** Number of axial stations along each row.
+- **Detail:** Each row is sampled at equal axial (or equal-arc, for the rows march) fractions. This count sets the longitudinal resolution. It is a count, not a length.
+- **Formula:** not stated
+- **Physical effect:** Raises longitudinal fidelity at the cost of more points.
+- **Context:** `rows`
+- **Default:** 96 (source: `examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml` `generator.n_s`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_check_spec`
+- **Doc:** `docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md` § ### 2.4 organic/elliptical + X-shape (WP9b)
+- **Flags:** —
+
+#### `span` — Row span
+
+- **Summary:** How much of the azimuth circle the rows model covers.
+- **Detail:** The legal spans are the ones the generator handles, and their names are read from the generator's own span constant rather than retyped here. A kind can force a span: an odd-cosine asymmetry forces the full ring and a b-term forces the half model.
+- **Formula:** not stated
+- **Physical effect:** Chooses whether the mesh uses mirror planes or a seam-free full ring.
+- **Context:** `rows`
+- **Default:** quarter (source: `examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml` `generator.span`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** lo=—, hi=—, kind=str, section=— (`hornlab_search/design/generators/grid.py` `ROWS_SPANS`)
+- **Code:** `hornlab_search.design.generators.grid._rows_span_requested`
+- **Doc:** `docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md` § ### 2.5 Up/down-asymmetric saddle
+- **Flags:** —
+
+#### `wall_thickness_mm` — Shell thickness (mm)
+
+- **Summary:** Outer-shell thickness of a freestanding rows model.
+- **Detail:** The point-grid route builds an explicit outer shell offset from each row's own profile. This is the printed shell thickness, not an acoustic dimension. The generator also uses it in its self-approach guard.
+- **Formula:** not stated
+- **Physical effect:** Changes the printed wall thickness, not the acoustic inner surface.
+- **Context:** `rows`
+- **Default:** 3.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml` `generator.wall_thickness_mm`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_check_spec`
+- **Doc:** `docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md` § ### 2.4 organic/elliptical + X-shape (WP9b)
+- **Flags:** —
+
+### hl__rosse_rect_cd_v7 — FREEFORM / rows
+
+- **Group:** home
+- **Symmetry:** hv
+- **Config:** `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml`
+- **Brief:** `examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml`
+- **Source status:** gui-only
+- **Description:** HOME rolled rectangular mouth on ATH R-OSSE per azimuth; bridge cell; GUI preview works, run via tools/geometry/rosse_rect_cli.py
+
+#### `g_a_diag_deg` — Diagonal coverage half-angle (rows) (deg)
+
+- **Summary:** Diagonal wall-angle term of the per-azimuth R-OSSE rows kind.
+- **Detail:** Adds a diagonal angle contribution around the azimuth. The study found that a positive value fans creases out of the throat, so the shipped R-OSSE cell pins it at zero.
+- **Formula:** not stated
+- **Physical effect:** Raises or lowers the diagonal wall angle; positive values crease the throat.
+- **Context:** `rows`
+- **Default:** 0.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `seed_params.g_a_diag_deg`)
+- **Search bounds:** 0.0 .. 0.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `bounds.g_a_diag_deg`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_a_h_deg` — Horizontal coverage half-angle (rows) (deg)
+
+- **Summary:** Horizontal coverage half-angle of a per-azimuth OSSE rows kind.
+- **Detail:** The OSSE wall angle is blended per azimuth from the horizontal and vertical values. This is the horizontal endpoint; it sets the high-frequency horizontal beamwidth in the constant-directivity throat.
+- **Formula:** `a(phi) = a_h cos^2(phi) + a_v sin^2(phi)`
+- **Physical effect:** Widens or narrows the horizontal beam and the horizontal mouth.
+- **Context:** `rows`
+- **Default:** 40.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `seed_params.g_a_h_deg`)
+- **Search bounds:** 32.0 .. 46.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `bounds.g_a_h_deg`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_a_v_deg` — Vertical coverage half-angle (rows) (deg)
+
+- **Summary:** Vertical coverage half-angle of a per-azimuth OSSE rows kind.
+- **Detail:** The vertical endpoint of the same per-azimuth wall-angle blend. It sets the vertical high-frequency beamwidth and works together with the horizontal value; the mouth follows the walls.
+- **Formula:** `a(phi) = a_h cos^2(phi) + a_v sin^2(phi)`
+- **Physical effect:** Widens or narrows the vertical beam and the vertical mouth.
+- **Context:** `rows`
+- **Default:** 25.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `seed_params.g_a_v_deg`)
+- **Search bounds:** 18.0 .. 30.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `bounds.g_a_v_deg`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_b` — Rollback bend (rows)
+
+- **Summary:** Dimensionless R-OSSE bend term of the rolled mouth.
+- **Detail:** The bend term changes how the R-OSSE roll distributes curvature between the wall and the mouth rim. It is an R-OSSE profile knob, not a physical length.
+- **Formula:** not stated
+- **Physical effect:** Moves curvature between the flare and the rolled rim.
+- **Context:** `rows`
+- **Default:** 0.2 (source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `seed_params.g_b`)
+- **Search bounds:** 0.0 .. 0.4 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `bounds.g_b`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_height_mm` — Mouth height (rows) (mm)
+
+- **Summary:** Full mouth height target of a rolled-family rows construction.
+- **Detail:** The vertical partner of the explicit mouth width. The rolled and section kinds scale their meridians to this full height; a landscape cell keeps the width above the height by construction.
+- **Formula:** not stated
+- **Physical effect:** Moves the vertical mouth edge; the flare follows the construction.
+- **Context:** `rows`
+- **Default:** 360.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `seed_params.g_height_mm`)
+- **Search bounds:** 280.0 .. 420.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `bounds.g_height_mm`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_k` — Throat expansion (rows)
+
+- **Summary:** OS throat-expansion exponent in the OSSE and R-OSSE rows kinds.
+- **Detail:** The OS profile's throat term sets how quickly the wall leaves the driver exit. The study used it to tune loading near the 700 Hz crossover, with the CD throat setting high-frequency coverage.
+- **Formula:** not stated
+- **Physical effect:** Changes throat loading and how abruptly the flare starts.
+- **Context:** `rows`
+- **Default:** 1.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `seed_params.g_k`)
+- **Search bounds:** 0.8 .. 3.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `bounds.g_k`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_m` — R-OSSE shape exponent (rows)
+
+- **Summary:** Shape exponent of the R-OSSE meridian.
+- **Detail:** The R-OSSE exponent controls the profile family between the throat and the mouth. The home cell fixes it at the ATH-typical value rather than searching it.
+- **Formula:** not stated
+- **Physical effect:** Rounds or straightens the meridian between throat and roll.
+- **Context:** `rows`
+- **Default:** 0.85 (source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `seed_params.g_m`)
+- **Search bounds:** 0.85 .. 0.85 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `bounds.g_m`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_q` — OSSE shape exponent (rows)
+
+- **Summary:** OSSE profile shape exponent near the mouth.
+- **Detail:** A dimensionless OSSE shape constant close to one. It shapes the transition toward the mouth termination and is pinned in the shipped home cells rather than searched.
+- **Formula:** not stated
+- **Physical effect:** Subtly rounds or tightens the mouth-side profile.
+- **Context:** `rows`
+- **Default:** 3.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `seed_params.g_q`)
+- **Search bounds:** 3.0 .. 3.0 (search=false, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `bounds.g_q`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_r` — Rollback radius (rows) (mm)
+
+- **Summary:** R-OSSE rollback radius of the rolled mouth.
+- **Detail:** The R-OSSE meridian bends the wall through this radius before the mouth. It sets how tight the roll reads and how much the mouth termination turns away from the axis.
+- **Formula:** not stated
+- **Physical effect:** Tightens or loosens the rolled mouth termination.
+- **Context:** `rows`
+- **Default:** 0.4 (source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `seed_params.g_r`)
+- **Search bounds:** 0.25 .. 0.6 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `bounds.g_r`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_rect_exponent` — Rectangle corner exponent (rows)
+
+- **Summary:** Superellipse corner exponent of the rectangular mouth.
+- **Detail:** The mouth outline blends a circle and a rectangle with this exponent. Higher values square the corners; lower values keep a rounder superellipse.
+- **Formula:** not stated
+- **Physical effect:** Squares off or rounds the mouth corners.
+- **Context:** `rows`
+- **Default:** 4.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `seed_params.g_rect_exponent`)
+- **Search bounds:** 2.5 .. 8.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `bounds.g_rect_exponent`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_tmax` — Rollback extent (rows)
+
+- **Summary:** Normalised extent of the R-OSSE rollback.
+- **Detail:** A dimensionless fraction selecting how far the rollback parameter runs. A value near one is a full natural roll; lower values stop earlier.
+- **Formula:** not stated
+- **Physical effect:** Chooses how far the mouth rolls back.
+- **Context:** `rows`
+- **Default:** 1.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `seed_params.g_tmax`)
+- **Search bounds:** 0.85 .. 1.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `bounds.g_tmax`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `g_width_mm` — Mouth width (rows) (mm)
+
+- **Summary:** Full mouth width target of a rolled-family rows construction.
+- **Detail:** The rolled-rectangle and R-OSSE-rectangle kinds build the mouth from this explicit full width and the matching height, not from a K-law. The generator measures the built surface against the brief envelope.
+- **Formula:** not stated
+- **Physical effect:** Moves the horizontal mouth edge; the flare follows the construction.
+- **Context:** `rows`
+- **Default:** 560.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `seed_params.g_width_mm`)
+- **Search bounds:** 480.0 .. 590.0 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `bounds.g_width_mm`)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid.rows_grid_points`
+- **Doc:** `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md` § ## 4. What was built
+- **Flags:** —
+
+#### `n_phi` — Azimuth row count
+
+- **Summary:** Number of azimuth rows in the rows/grid model.
+- **Detail:** The row count sets the angular sampling of the point grid. The quarter model, half model and full ring each have their own minimum and parity rules in the generator. It is a count, not a length.
+- **Formula:** not stated
+- **Physical effect:** Raises angular fidelity at the cost of more grid rows.
+- **Context:** `rows`
+- **Default:** 25 (source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `generator.n_phi`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_check_spec`
+- **Doc:** `docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md` § ### 2.4 organic/elliptical + X-shape (WP9b)
+- **Flags:** —
+
+#### `n_s` — Axial station count
+
+- **Summary:** Number of axial stations along each row.
+- **Detail:** Each row is sampled at equal axial (or equal-arc, for the rows march) fractions. This count sets the longitudinal resolution. It is a count, not a length.
+- **Formula:** not stated
+- **Physical effect:** Raises longitudinal fidelity at the cost of more points.
+- **Context:** `rows`
+- **Default:** 48 (source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `generator.n_s`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_check_spec`
+- **Doc:** `docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md` § ### 2.4 organic/elliptical + X-shape (WP9b)
+- **Flags:** —
+
+#### `span` — Row span
+
+- **Summary:** How much of the azimuth circle the rows model covers.
+- **Detail:** The legal spans are the ones the generator handles, and their names are read from the generator's own span constant rather than retyped here. A kind can force a span: an odd-cosine asymmetry forces the full ring and a b-term forces the half model.
+- **Formula:** not stated
+- **Physical effect:** Chooses whether the mesh uses mirror planes or a seam-free full ring.
+- **Context:** `rows`
+- **Default:** quarter (source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `generator.span`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** lo=—, hi=—, kind=str, section=— (`hornlab_search/design/generators/grid.py` `ROWS_SPANS`)
+- **Code:** `hornlab_search.design.generators.grid._rows_span_requested`
+- **Doc:** `docs/research/typologies/JMLC_FAMILY_VARIANTS_RESEARCH_2026-10-25.md` § ### 2.5 Up/down-asymmetric saddle
+- **Flags:** —
+
+#### `wall_thickness_mm` — Shell thickness (mm)
+
+- **Summary:** Outer-shell thickness of a freestanding rows model.
+- **Detail:** The point-grid route builds an explicit outer shell offset from each row's own profile. This is the printed shell thickness, not an acoustic dimension. The generator also uses it in its self-approach guard.
+- **Formula:** not stated
+- **Physical effect:** Changes the printed wall thickness, not the acoustic inner surface.
+- **Context:** `rows`
+- **Default:** 3.0 (source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `generator.wall_thickness_mm`)
+- **Search bounds:** none (this is a block value, not a searched knob)
+- **Hard limits:** none (not a mesher family key)
+- **Code:** `hornlab_search.design.generators.grid._rows_check_spec`
+- **Doc:** `docs/research/typologies/WP9_WP9B_GROUNDING_2026-10-25.md` § ### 2.4 organic/elliptical + X-shape (WP9b)
+- **Flags:** —
+
 ## Group: hybrid
 
 ### blend_conical_exponential — FREEFORM / generator

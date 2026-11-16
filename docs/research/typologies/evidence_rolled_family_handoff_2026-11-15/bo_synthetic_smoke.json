@@ -1,0 +1,96 @@
+{
+  "status": "ok",
+  "data": "synthetic only; no acoustic measurement or inference",
+  "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\rolled_family_2026-11-15\\rf__section_radial_v7.yaml",
+  "versions": {
+    "engine": "botorch",
+    "torch": "2.14.1+cpu",
+    "botorch": "0.18.1",
+    "gpytorch": "1.15.2",
+    "linear_operator": "0.6.1",
+    "available": true
+  },
+  "torch_threads": 1,
+  "gpu_or_bem_calls": 0,
+  "active_keys": [
+    "g_crown_mm",
+    "g_depth_mm",
+    "g_h_depth_scale",
+    "g_inward_h_mm",
+    "g_inward_v_mm"
+  ],
+  "training_n": 16,
+  "pool_count": 8,
+  "synthetic_objective": "sum((unit_vector - [0.2,0.35,0.5,0.65,0.8])**2)",
+  "selection_reason": "acquisition",
+  "acquisition": {
+    "value": -1.3747690810041107,
+    "units": "log qLogNEI acquisition score (ranking diagnostic only; not predicted J, not a probability of success)",
+    "acq_seed": 0,
+    "chunk_size": 64,
+    "chunks": 1,
+    "n_candidates": 8,
+    "nonfinite_count": 0
+  },
+  "predicted": {
+    "j_mean": -0.033450270909414326,
+    "j_lower": -0.20749792661288335,
+    "j_upper": 0.1405973847940547,
+    "y_mean": 0.033450270909414326,
+    "y_sd": 0.08879982433850461,
+    "flags": [
+      "nonphysical_predicted_J_negative"
+    ],
+    "nonphysical": true,
+    "interval_label": "model credible interval: marginal mu +/- 1.96*sigma from the latent posterior (observation_noise=False); not a physical tolerance or frequentist confidence interval",
+    "observation_noise": false
+  },
+  "candidate_id": "pool-977-00001-cea7ed93",
+  "active_vector": [
+    0.11724040191620588,
+    0.02208590041846037,
+    0.3285039318725467,
+    0.6792920986190438,
+    0.6118419775739312
+  ],
+  "design_hash": "be71ed8f1a08",
+  "geometry_hash": "cea7ed9388818d155318",
+  "cold_replay": {
+    "x": [
+      0.11724040192499974,
+      0.022085900412498916,
+      0.32850393000000117,
+      0.6792920986166666,
+      0.611841977575
+    ],
+    "design_hash": "be71ed8f1a08",
+    "geometry_hash": "cea7ed9388818d155318",
+    "envelope_ok": true,
+    "throat_ok": true
+  },
+  "pool_counts": {
+    "generated": 8,
+    "schema_rejected": 0,
+    "envelope_rejected": 0,
+    "throat_rejected": 0,
+    "geometry_rejected": 0,
+    "geometry_duplicate": 0,
+    "near_duplicate": 0,
+    "known_duplicate": 0,
+    "unique": 8,
+    "novel": 8
+  },
+  "training_pool_counts": {
+    "generated": 16,
+    "schema_rejected": 0,
+    "envelope_rejected": 0,
+    "throat_rejected": 0,
+    "geometry_rejected": 0,
+    "geometry_duplicate": 0,
+    "near_duplicate": 0,
+    "known_duplicate": 0,
+    "unique": 16,
+    "novel": 16
+  },
+  "elapsed_s": 11.219
+}

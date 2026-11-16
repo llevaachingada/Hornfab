@@ -1,0 +1,119 @@
+name: rf__rect_radial_v7
+family: FREEFORM
+brief_file: C:\Users\hunte\Hrns\hornlab-search\docs\queue\rolled_readiness_2026-11-15\briefs\7d7d2d0cf048.yaml
+generator:
+  name: grid
+  rows:
+    type: rolled_family_rect_v1
+    mode: radial
+  seed_policy: explicit
+  span: quarter
+  n_phi: 65
+  n_s: 128
+  wall_thickness_mm: 3.0
+seed_params:
+  g_width_mm: 542.0
+  g_height_mm: 299.0
+  g_depth_mm: 238.0
+  g_depth_h_ratio: 0.68
+  g_decay: 0.7
+  g_rect_exponent: 12.0
+  g_rect_turn_deg: 65.0
+  g_throat_turn_deg: 25.0
+  g_terminal_deg: 270.0
+  g_inward_h_mm: 3.0
+  g_inward_v_mm: 4.0
+  g_axial_h_mm: 0.0
+  g_axial_v_mm: 0.0
+  g_relief_start_s: 0.5
+  g_relief_peak_s: 0.8
+  g_relief_end_s: 0.96
+bounds:
+  g_width_mm:
+    lo: 542.0
+    hi: 542.0
+    search: false
+  g_height_mm:
+    lo: 299.0
+    hi: 299.0
+    search: false
+  g_depth_mm:
+    lo: 230.0
+    hi: 246.0
+  g_depth_h_ratio:
+    lo: 0.68
+    hi: 0.68
+    search: false
+  g_decay:
+    lo: 0.65
+    hi: 0.75
+  g_rect_exponent:
+    lo: 10.0
+    hi: 14.0
+  g_rect_turn_deg:
+    lo: 65.0
+    hi: 65.0
+    search: false
+  g_throat_turn_deg:
+    lo: 25.0
+    hi: 25.0
+    search: false
+  g_terminal_deg:
+    lo: 270.0
+    hi: 270.0
+    search: false
+  g_inward_h_mm:
+    lo: 0.0
+    hi: 6.0
+  g_inward_v_mm:
+    lo: 0.0
+    hi: 8.0
+  g_axial_h_mm:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  g_axial_v_mm:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  g_relief_start_s:
+    lo: 0.5
+    hi: 0.5
+    search: false
+  g_relief_peak_s:
+    lo: 0.8
+    hi: 0.8
+    search: false
+  g_relief_end_s:
+    lo: 0.96
+    hi: 0.96
+    search: false
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 6000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+  rear_res_factor: 1.5
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.15
+  seed: 1234
+  budget: 30
+  popsize: 8
+  tolfun: 0.001
+  infeasible_penalty: flat
+  max_attempts: 45
+description: Canonical rect rolled family, radial; original hybrid, explicit radial
+  inward and signed axial semantics, all-optimizer native dispatch

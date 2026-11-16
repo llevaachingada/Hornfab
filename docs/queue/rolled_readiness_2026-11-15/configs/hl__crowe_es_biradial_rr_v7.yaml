@@ -1,0 +1,69 @@
+name: hl__crowe_es_biradial_rr_v7
+family: FREEFORM
+brief_file: C:\Users\hunte\Hrns\hornlab-search\docs\queue\rolled_readiness_2026-11-15\briefs\7d7d2d0cf048.yaml
+generator:
+  name: typology
+  seed_policy: explicit
+  profile_h:
+    type: hypex
+  profile_v:
+    type: hypex
+  n_anchors: 20
+  max_wall_deg: 85.0
+  mouth: rounded_rectangle
+  wall_thickness_mm: 4.0
+seed_params:
+  L_mm: 200.0
+  h_rm_mm: 250.0
+  v_rm_mm: 125.0
+  h_T: 1.0
+  v_T: 1.0
+  mouth_corner_mm: 40.0
+bounds:
+  L_mm:
+    lo: 170.0
+    hi: 260.0
+  h_rm_mm:
+    lo: 215.0
+    hi: 290.0
+  v_rm_mm:
+    lo: 105.0
+    hi: 160.0
+  h_T:
+    lo: 0.6
+    hi: 1.0
+  v_T:
+    lo: 0.6
+    hi: 1.0
+  mouth_corner_mm:
+    lo: 20.0
+    hi: 80.0
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+  rear_res_factor: 1.5
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.2
+  seed: 1234
+  budget: 30
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+  max_attempts: 45
+description: 'HOME LANDSCAPE Crowe ES-style Bi-Radial: round throat -> 2:1 rounded-rectangle
+  mouth, independent H/V hypex/exponential walls, diagonal corner creases'

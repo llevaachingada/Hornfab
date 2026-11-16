@@ -1,0 +1,33 @@
+ M NOTES_FOR_SENIOR.md
+ M docs/CODE_MAP.md
+ M docs/CONTINUITY.md
+ M docs/INDEX.md
+ M docs/ISSUES.md
+ M docs/queue/HOME_LANDSCAPE_PLAN_2026-11-15.md
+ M docs/reference/PARAMETERS.md
+ M docs/reference/TYPOLOGIES.md
+ M examples/catalog.yaml
+ M examples/typologies/home_landscape_2026-11-15/hl__biradial_es_style_v7.yaml
+ M hornlab_search/design/params/knobs_rows.py
+ M hornlab_search/gui/data.py
+ M hornlab_search/gui/static/app.js
+ M hornlab_search/gui/static/param-catalog.v1.json
+?? docs/research/typologies/BIRADIAL_CROWE_SOURCES_2026-11-15.md
+?? docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md
+?? docs/research/typologies/HORN_WHITEPAPERS_2026-11-15.md
+?? docs/research/typologies/ROLLED_FAMILY_EVIDENCE_HANDOFF_2026-11-15.md
+?? docs/research/typologies/SCORING_NON_CD_SOURCES_2026-11-15.md
+?? docs/research/typologies/STARTING_SEEDS_2026-11-15.html
+?? docs/research/typologies/STARTING_SEEDS_PLAIN_2026-11-15.md
+?? docs/research/typologies/evidence_rolled_family_handoff_2026-11-15/
+?? docs/research/typologies/img_biradial_crowe_2026-11-15/
+?? examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml
+?? examples/catalog.gui.yaml
+?? examples/typologies/home_landscape_2026-11-15/hl__crowe_es_biradial_rr_v7.yaml
+?? examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml
+?? examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml
+?? examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml
+?? tests/test_gui_bridge_preview.py
+?? tools/geometry/gui_preview.py
+?? tools/geometry/rosse_rect.py
+?? tools/geometry/rosse_rect_cli.py

@@ -76,3 +76,6 @@ to every typology. It is the research discipline those gates imply, not new poli
   that name; record the attempt + stop that line (R9). Our OWN hypothesis shapes may still run as labeled
   experiments (the x_shape/T5 precedent: "no published geometry; ours [inferred]"), with the attribution left
   as an open item. Two unresolved source conflicts → NOTES_FOR_SENIOR.md + stop that line (the rule-8 pattern).
+## Saved Crowe / ATH / rolled-family audit (2026-11-15)
+
+For these families, start with `docs/research/typologies/audit_2026-11-15/HANDOFF.md` and `READINESS.md`; source tables, exact domains, equation checks, original-mesh witnesses and objective ablations are already saved. Avoid repeating the full research pass. Key distinctions: axial relief vs radial morph; original spiral/hybrid vs proprietary Crowe CAD; R-OSSE nominal angle vs actual tangent; configured driver interface vs manufacturer combined exit. A rendered return, indexed winding, successful mesh, full-rank geometry Jacobian or low J is a separate claim from useful converged acoustics. Wrapper source bytes are pinned; use the existing direct spiral verify-night helper instead of casually patching a wrapper. The current owner authorizes a few isolated diagnostics, not a full unresolved search; no BO on new typologies.

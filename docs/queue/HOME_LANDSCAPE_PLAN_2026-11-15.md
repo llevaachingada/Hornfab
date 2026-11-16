@@ -102,3 +102,9 @@ sections and searches size inside the envelope (depth <= 0.57 x width is a hard 
 
 Next after E: register `hl__osse_rrect_morph_v7` as a BO task (code change, only while no study is queued), fix the
 biradial throat, then pick the home horn on verify J + `hifi_rescore.py --verify`.
+
+**STOPPED 2026-11-15 17:15 (owner):** night E's runner and the current Crowe-section run were stopped; no new solves
+until the brief/DI-slope scoring question and the lip/waist geometry law are settled. Evidence and options:
+`docs/research/typologies/HORN_WHITEPAPERS_2026-11-15.md` and `STARTING_SEEDS_PLAIN_2026-11-15.md`; top-priority
+block in `docs/ISSUES.md` and `NOTES_FOR_SENIOR.md`. The Crowe-section outer-body/lip fold must also be fixed before
+more Crowe data.

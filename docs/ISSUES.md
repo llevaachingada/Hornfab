@@ -1,5 +1,72 @@
 # ISSUES
 
+Local-only, 2026-11-15 19:00 (**GUI bridge cells viewable; home-horn packet; commit/push**):
+- Resolved: all home-landscape cells appear in the GUI. The 8 stock cells are in `examples/catalog.yaml`; the 3
+  bridge cells are in `examples/catalog.gui.yaml` and preview through `tools/geometry/gui_preview.py`. The sandbox
+  renders 2D sections, 3D shape, sliders and tooltips; launch stays preview-only because the stock campaign cannot
+  load their custom rows kinds. Live GUI verified; 186 GUI/parameter tests pass; `gen_param_catalog.py --check`
+  passes.
+- Open (owner-gated): brief/DI-slope decision, lip/waist geometry law, Crowe-section junction rebuild, night F.
+  Night E remains stopped; no new solves.
+- This commit also preserves the concurrent rolled-family documentation/evidence audit. No generator or solve
+  behavior changed by that pass; preserve its source/config/run history.
+
+Local-only2026-11-15 (**rolled readiness audit; no GitHub issue state changed**):
+- Complete current pickup: `docs/research/typologies/audit_2026-11-15/HANDOFF.md` and `READINESS.md`.
+- Two isolated spiral acoustic diagnostics completed under updated owner permission; no full searches or Bayesian jobs. New guarded30x2 spiral draft and26 load-checked frozen configs: `docs/queue/rolled_readiness_2026-11-15/README.md`. Source/objective/body/cost gates remain; admission held. Preserve all old D/E records and original designs.
+
+
+Local-only2026-11-15 (**rolled readiness audit; no GitHub issue state changed**):
+- Complete current pickup: `docs/research/typologies/audit_2026-11-15/HANDOFF.md` and `READINESS.md`.
+- Two isolated spiral acoustic diagnostics completed under updated owner permission; no full searches or Bayesian jobs. New guarded30x2 spiral draft and26 load-checked frozen configs: `docs/queue/rolled_readiness_2026-11-15/README.md`. Source/objective/body/cost gates remain; admission held. Preserve all old D/E records and original designs.
+
+
+**TOP PRIORITY (owner, 2026-11-15 17:15): brief / DI-slope scoring investigation before any new solves.**
+- Night E paused: runner (11172) and controller (36556) stopped; `e_crowe_home_s5678` stopped at ~62/96 (62/62 valid rows rescore: smooth 6.83 vs base 17.06); GPU cleaned.
+- The v7 fixed DI target (`di_slope_target 0`) and `diag` fixed-round reference are not supported by the listening
+  literature; there is no primary source for the "Harman 1-3 dB/oct" claim. Settle the objective/brief before
+  queueing anything. Sources: `docs/research/typologies/HORN_WHITEPAPERS_2026-11-15.md`,
+  `STARTING_SEEDS_PLAIN_2026-11-15.md`, `SCORING_NON_CD_SOURCES_2026-11-15.md`.
+- Geometry law gap: current cells have no true under-surface lip return and no waist term; the Crowe-section mesh
+  also has a 153-176 deg outer-body/lip fold with inverted triangles. Fix/decide before more GPU.
+- GUI typology exposure (resolved 2026-11-15): 8 stock-loadable home cells in `examples/catalog.yaml`; the 3 bridge
+  cells in `examples/catalog.gui.yaml`; the sandbox preview now runs them through `tools/geometry/gui_preview.py`
+  in a fresh process (2D/3D, sliders, sections). Launch stays disabled for the bridge cells because the stock
+  campaign path cannot materialize their custom rows kinds; the GUI shows a `preview only` pill. Live GUI restarted
+  and verified: 56 typologies, all 6 audited cells present, bridge previews `available=True`. The generated parameter
+  catalog now includes the 3 GUI-only cells (`source_status: gui-only`, `preview_only: true`) so the sandbox has
+  knob docs/tooltips; `tools/gen_param_catalog.py --check` passes. Tests: `tests/test_gui_bridge_preview.py`
+  (7 passed) plus the 179 GUI/param tests = 186 passed. Do not queue night F or new Crowe/Crowe-X/ES solves until
+  the owner signs off on the brief and the geometry law.
+- Commit scope when requested: include `examples/catalog.gui.yaml`, `tools/geometry/gui_preview.py`, the two
+  `rosse_rect` bridge files, the 5 new home cell configs, `hl__crowe_es_biradial_rr_v7.yaml` (it is listed in
+  `examples/catalog.yaml` and currently untracked), the decision-packet docs/images, and the GUI/param/test changes.
+  Do not include `scratch/` or other sessions' WIP (the rolled-family handoff/evidence folders).
+
+Local-only, 2026-11-15 16:45 (**biradial fix merged; four cells rendered; scoring research; owner decisions open**):
+- Resolved: biradial throat-blend fix merged (7124902); biradial refusal cause = US4308932A cone closure
+  (`rm >= r0 + tan(a) L`), new box 64/64 valid; ES-spiral `resample_strict` + `budget_counts: valid` set;
+  four cells rendered and visually reviewed (sheets in `docs/research/typologies/img_biradial_crowe_2026-11-15/`).
+- Open: owner decision on base vs smooth brief for night F; whether to run the biradial at all (no waist/lip law);
+  whether to invest in a lip/wrap or waist term before more Crowe-X/ES GPU time; `diag` fixed-round reference
+  structurally penalises rectangular mouths; no primary source for the "Harman 1-3 dB/oct DI slope" claim;
+  night F not written; OSSE rounded-rect BoTorch registration waits for >=100 rows. Full detail:
+  docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md s8.
+- Night E running: Crowe home seed 1234 done, smooth rescore best J 6.84 vs base 16.92; seed 5678 running.
+  Objective mesh check: Crowe-section outer-body/lip junction has a 153-176 deg fold with inverted triangles
+  (inner flare smooth); scores provisional, fix the junction before print/final ranking.
+- External research (2026-11-15): `HORN_WHITEPAPERS_2026-11-15.md` (annotated bibliography, BEM/metrics/
+  optimization checklist, corrections) and `STARTING_SEEDS_PLAIN_2026-11-15.md` (six 360-degree turntables,
+  plain-language decision brief). K-law correction: A=0.9B -> 496/794 mm at 700 Hz; 480 mm V holds 50 deg only
+  to ~1157 Hz. 270-degree wrap and waist/bow-tie claims remain unverified/visual.
+
+Local-only, 2026-11-15 15:50 (**biradial / Crowe / rolled-mouth study handoff; no GitHub issue state changed**):
+- Open: merge biradial throat-blend fix (worktree `fix/biradial-throat-blend`); biradial box 32/64 refused (cause
+  unknown); ES-spiral cell needs resample_strict; render/owner look review of the new cells; scoring decision
+  (base vs smooth brief; is `diag` fair for creased rectangular mouths); verify DI-slope literature numbers;
+  night F not written. Handoff: docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md.
+
+
 Local-only, 2026-11-15 14:25 (**BO cohort encoder fix, BO data gate, nights D/E; no GitHub issue open**):
 - Fixed: `bo/data.py` refused `morph_target = 0` rows, so night B trained on 0 rows and never solved.
 - New gate: `prepare_study.py --min-rows` (default 100); BoTorch only on typologies with existing data.

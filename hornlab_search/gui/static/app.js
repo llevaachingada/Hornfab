@@ -8912,6 +8912,7 @@ const TYP_GROUP = {
   hybrid: ["Hybrids", "Combinations: a different profile in each plane (H/V), a convex blend of two profiles, or small monotone perturbations of a classical wall."],
   magnus: ["Magnus mesher families", "OSSE, R-OSSE, ICW and FREEFORM as Magnus's mesher defines them."],
   legacy: ["Utility / legacy", "Test and adapter configs, not meant for typology comparison."],
+  home: ["Home landscape (2026-11-15)", "The landscape 80 H x 50 V / 700 Hz home-horn cells. Bridge cells (rolled rectangle, R-OSSE rectangle, Crowe sections) need their own CLI entry point, so they are listed disabled here."],
 };
 
 /** Morph status pill: "Morph searched" when the config searches Ath Morph knobs, "Morph" when it
@@ -8981,7 +8982,11 @@ function typCard(t, briefs) {
       ? `<a class="pill good" href="#/launch?brief=${encodeURIComponent(b.name)}&families=${encodeURIComponent(t.name)}&tier=screen" title="Screen ${esc(t.name)} on ${esc(b.name)}">▶ ${esc(b.name)}</a>`
       : `<span class="pill" title="${esc(c.reason || "disabled")}" style="opacity:0.55">${esc(b.name)}</span>`;
   }).join(" ");
+  const fitCount = briefs.filter(b => ((t.compat || {})[b.name] || { ok: true }).ok && !t.disabled).length;
   const hasProf = (t.results || []).some(r => r.profile);
+  const previewOnly = t.preview_only
+    ? ` <span class="pill" style="font-size:0.66rem" title="bridge geometry: the sandbox preview runs through the cell's own CLI; a search must be launched there, not by the stock campaign path">preview only</span>`
+    : "";
   // The whole card opens the typology's shape sandbox (owner ask 2). The affordance is an
   // honest small link (works without the click handler, keeps its own href); the card itself
   // is focusable + keyboard-activatable, and every existing link/button inside still wins.
@@ -8990,14 +8995,14 @@ function typCard(t, briefs) {
     <div class="typ-head">
       <div><div class="typ-name">${typologyTipHtml(t)}</div>
         <a class="typ-open" href="#/typology/${esc(t.name)}" title="open the shape sandbox for this typology">open sandbox →</a>
-        <div class="muted typ-meta">${esc(t.symmetry === "axisymmetric" ? "axisymmetric" : "H/V (different planes)")} · ${t.n_knobs} shape parameters · screen ${t.budget.screen} / compare 2 × ${t.budget.compare} evals${morphPill(t)}</div></div>
-      ${hasProf ? `<svg class="typ-prof" data-name="${esc(t.name)}" aria-label="best design cross-section"></svg>` : `<div class="typ-prof empty muted">no solved design yet</div>`}
+        <div class="muted typ-meta">${esc(t.symmetry === "axisymmetric" ? "axisymmetric" : "H/V (different planes)")} · ${t.n_knobs} shape parameters · screen ${t.budget.screen} / compare 2 × ${t.budget.compare} evals${morphPill(t)}${previewOnly}</div></div>
+      ${hasProf ? `<svg class="typ-prof" data-name="${esc(t.name)}" aria-label="best design cross-section"></svg>` : `<div class="typ-prof empty muted">${t.preview_only ? "no solved design yet - open the sandbox for the live seed preview" : "no solved design yet"}</div>`}
     </div>
     <p class="typ-desc">${esc(t.description || "")}</p>
     ${typologyChipsHtml(t.name)}
     ${res ? `<div class="tbl-wrap"><table class="compact"><thead><tr><th>Brief</th><th>Tier</th><th class="r">Rank</th><th class="r">Score</th><th class="r">W×H×D mm</th></tr></thead><tbody>${res}</tbody></table></div>`
           : `<p class="muted" style="margin:0">Not run in any campaign yet.</p>`}
-    <details class="typ-fits-wrap"><summary class="muted">Screen on a brief <span class="mono">(${briefs.filter(b => ((t.compat || {})[b.name] || { ok: true }).ok && !t.disabled).length} of ${briefs.length} fit)</span></summary>
-      <div class="typ-fits">${fits}</div></details>
+    <details class="typ-fits-wrap"><summary class="muted">${t.preview_only ? "Preview / launch" : "Screen on a brief"} <span class="mono">${t.preview_only ? "preview only - launch via its own CLI" : `(${fitCount} of ${briefs.length} fit)`}</span></summary>
+      <div class="typ-fits">${t.preview_only ? `<p class="muted" style="margin:0">This bridge cell is previewable in the sandbox; its search must be launched through its own geometry CLI (see the description).</p>` : fits}</div></details>
   </article>`;
 }

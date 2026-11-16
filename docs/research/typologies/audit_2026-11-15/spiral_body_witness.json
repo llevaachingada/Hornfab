@@ -1,0 +1,1732 @@
+{
+  "method": "Spiral body witness: role/topology, nonadjacent triangle intersections+clearance, fixed-z aperture.\n\nSenior admission pass 2026-11-15, priority cell hl__rolled_es_spiral_v7. Read-only on evidence:\nloads the exact BEM meshes saved by real solves (seed EPW6 + three single-design extreme\ndiagnostics) and adds ONLY the checks the prior audit explicitly did not perform\n(nonadjacent-surface intersection/clearance, true fixed-z aperture areas/derivatives).\n\nMethod labels (no reorientation, no welding, raw index connectivity):\n- adjacency      : two triangles are adjacent iff they share >=1 vertex index (conservative:\n                   topologically separate but numerically coincident samples are NEVER adjacent).\n- intersection   : exact triangle-triangle test via plane-line interval transversal\n                   (coplanar/touch cases reported separately, epsilon 1e-12 m).\n- clearance      : sampled point-to-triangle distances (vertices + centroid) among pruned\n                   candidate pairs; sampled min is an UPPER... no: sampled min >= true min, i.e.\n                   true clearance <= sampled value; reported as a resolution-bounded witness.\n- section        : plane z = const chords from triangle-plane intersection, assembled into\n                   loops by exact endpoint match; aperture = loop classification by area per\n                   station; NONplanar-ring xy projection area is never reported as aperture.\n\nSynthetic fixtures verify the intersection predicate before real meshes are processed.\n",
+  "meshes": {
+    "seed_epw6": {
+      "path": "C:/Users/hunte/Hrns/hornlab-search/scratch/2026-11-15_readiness/spiral_acoustics/epw6/runs/20261115T231838Z-screen-f9de68/designs/2aa7e67a9aa0/mesh.msh",
+      "sha256": "4f6d7f41bad77a11233b2b9f82091f91c45170f391c068845a3ff542d8e897a0",
+      "topology": {
+        "triangles": 8727,
+        "degenerate": 0,
+        "max_shared_edge_normal_angle_deg": 118.583,
+        "duplicate_index_faces": 0,
+        "duplicate_coordinate_points": 0,
+        "tag_counts": {
+          "body(1)": 8669,
+          "source_cap(2)": 58
+        },
+        "physical_names_2d": {
+          "1": "SD1G0",
+          "2": "SD1D1001"
+        }
+      },
+      "intersections_clearance_body": {
+        "welded_nearcoincident_vertex_pairs": 0,
+        "candidate_nonadjacent_pairs": 79542,
+        "crossings": 0,
+        "crossing_examples": [],
+        "touch_pairs": 0,
+        "sampled_min_clearance_m": 0.000733206,
+        "sampled_pairs_under_0p2mm": 0,
+        "pairs_checked_for_clearance": 79542,
+        "prune_radius_m": 0.009458,
+        "body_vs_source_cap_contact": {
+          "sampled_min_clearance_m": 0.0,
+          "pairs_checked": 1800,
+          "pairs_under_0p2mm": 62,
+          "note": "the cap rim ring is a designed junction with the body throat ring; near-zero distances there are the junction itself"
+        }
+      },
+      "sections": {
+        "area_semantics": "quarter-model loop areas from symmetry-closed contours; full-body area = 4x quarter for x/y symmetric sections",
+        "n_stations": 41,
+        "aperture_at_cap_plane_ref_m2": 0.001017876,
+        "aperture_first_station_quarter_m2": 0.000252085,
+        "aperture_last_station_quarter_m2": 0.005986453,
+        "aperture_first_station_full_m2": 0.00100834,
+        "aperture_last_station_full_m2": 0.023945812,
+        "mouth_outer_loop_quarter_m2": null,
+        "aperture_area_min_quarter_m2": 0.000250721,
+        "aperture_area_max_quarter_m2": 0.005986453,
+        "stations": [
+          {
+            "z_m": -0.002,
+            "n_loops": 1,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000331776
+            ]
+          },
+          {
+            "z_m": 0.004004,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000346146,
+              0.000252085
+            ]
+          },
+          {
+            "z_m": 0.010007,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000336187,
+              0.000250721
+            ]
+          },
+          "...",
+          {
+            "z_m": 0.226135,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.232138,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.238142,
+            "n_loops": 0,
+            "open_chains": 1,
+            "quarter_areas_m2": []
+          }
+        ],
+        "full_series": [
+          {
+            "z_m": -0.002,
+            "n_loops": 1,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000331776
+            ]
+          },
+          {
+            "z_m": 0.004004,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000346146,
+              0.000252085
+            ]
+          },
+          {
+            "z_m": 0.010007,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000336187,
+              0.000250721
+            ]
+          },
+          {
+            "z_m": 0.016011,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000319769,
+              0.000259842
+            ]
+          },
+          {
+            "z_m": 0.022014,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000326261,
+              0.000277346
+            ]
+          },
+          {
+            "z_m": 0.028018,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000353175,
+              0.000290861
+            ]
+          },
+          {
+            "z_m": 0.034021,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.00039462,
+              0.00030031
+            ]
+          },
+          {
+            "z_m": 0.040025,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000440886,
+              0.000350883
+            ]
+          },
+          {
+            "z_m": 0.046028,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000482243,
+              0.00035241
+            ]
+          },
+          {
+            "z_m": 0.052032,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000487869,
+              0.000367116
+            ]
+          },
+          {
+            "z_m": 0.058035,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000493438,
+              0.000421733
+            ]
+          },
+          {
+            "z_m": 0.064039,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000524806,
+              0.000481403
+            ]
+          },
+          {
+            "z_m": 0.070042,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000581644,
+              0.000505373
+            ]
+          },
+          {
+            "z_m": 0.076046,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000659521,
+              0.000531111
+            ]
+          },
+          {
+            "z_m": 0.08205,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000745961,
+              0.000566253
+            ]
+          },
+          {
+            "z_m": 0.088053,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.00084355,
+              0.000627014
+            ]
+          },
+          {
+            "z_m": 0.094057,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000931542,
+              0.00072122
+            ]
+          },
+          {
+            "z_m": 0.10006,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.00101549,
+              0.000826555
+            ]
+          },
+          {
+            "z_m": 0.106064,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.001132483,
+              0.000962448
+            ]
+          },
+          {
+            "z_m": 0.112067,
+            "n_loops": 2,
+            "open_chains": 1,
+            "quarter_areas_m2": [
+              0.0012893,
+              0.001116035
+            ]
+          },
+          {
+            "z_m": 0.118071,
+            "n_loops": 2,
+            "open_chains": 2,
+            "quarter_areas_m2": [
+              0.001510768,
+              0.001227056
+            ]
+          },
+          {
+            "z_m": 0.124074,
+            "n_loops": 2,
+            "open_chains": 2,
+            "quarter_areas_m2": [
+              0.001732106,
+              0.001474629
+            ]
+          },
+          {
+            "z_m": 0.130078,
+            "n_loops": 2,
+            "open_chains": 2,
+            "quarter_areas_m2": [
+              0.001984263,
+              0.001678091
+            ]
+          },
+          {
+            "z_m": 0.136081,
+            "n_loops": 2,
+            "open_chains": 2,
+            "quarter_areas_m2": [
+              0.002460128,
+              0.00220327
+            ]
+          },
+          {
+            "z_m": 0.142085,
+            "n_loops": 2,
+            "open_chains": 2,
+            "quarter_areas_m2": [
+              0.003306294,
+              0.002731019
+            ]
+          },
+          {
+            "z_m": 0.148089,
+            "n_loops": 2,
+            "open_chains": 2,
+            "quarter_areas_m2": [
+              0.004335415,
+              0.003594076
+            ]
+          },
+          {
+            "z_m": 0.154092,
+            "n_loops": 2,
+            "open_chains": 2,
+            "quarter_areas_m2": [
+              0.00549215,
+              0.004729166
+            ]
+          },
+          {
+            "z_m": 0.160096,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.009109219,
+              0.005986453
+            ]
+          },
+          {
+            "z_m": 0.166099,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.172103,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.178106,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.18411,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.190113,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.196117,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.20212,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.208124,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.214127,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.220131,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.226135,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.232138,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.238142,
+            "n_loops": 0,
+            "open_chains": 1,
+            "quarter_areas_m2": []
+          }
+        ],
+        "monotone_decreasing_to_throat": false,
+        "dA_dz_min_quarter_m2_per_m": -0.00022722,
+        "dA_dz_max_quarter_m2_per_m": 0.209408228
+      }
+    },
+    "terminal_low": {
+      "path": "C:/Users/hunte/Hrns/hornlab-search/scratch/2026-11-15_readiness/spiral_capability/terminal_low/runs/20261115T233702Z-screen-a405ab/designs/eebccb4bfc13/mesh.msh",
+      "sha256": "f545323f9d3725aaa13c5f659a3af1539d1d4574f55b5dd779e072ece09b9045",
+      "topology": {
+        "triangles": 6520,
+        "degenerate": 0,
+        "max_shared_edge_normal_angle_deg": 98.891,
+        "duplicate_index_faces": 0,
+        "duplicate_coordinate_points": 0,
+        "tag_counts": {
+          "body(1)": 6462,
+          "source_cap(2)": 58
+        },
+        "physical_names_2d": {
+          "1": "SD1G0",
+          "2": "SD1D1001"
+        }
+      },
+      "intersections_clearance_body": {
+        "welded_nearcoincident_vertex_pairs": 0,
+        "candidate_nonadjacent_pairs": 40321,
+        "crossings": 0,
+        "crossing_examples": [],
+        "touch_pairs": 3,
+        "sampled_min_clearance_m": 0.000744801,
+        "sampled_pairs_under_0p2mm": 0,
+        "pairs_checked_for_clearance": 40321,
+        "prune_radius_m": 0.00918,
+        "body_vs_source_cap_contact": {
+          "sampled_min_clearance_m": 0.0,
+          "pairs_checked": 1760,
+          "pairs_under_0p2mm": 62,
+          "note": "the cap rim ring is a designed junction with the body throat ring; near-zero distances there are the junction itself"
+        }
+      },
+      "sections": {
+        "area_semantics": "quarter-model loop areas from symmetry-closed contours; full-body area = 4x quarter for x/y symmetric sections",
+        "n_stations": 41,
+        "aperture_at_cap_plane_ref_m2": 0.001017876,
+        "aperture_first_station_quarter_m2": 0.000251589,
+        "aperture_last_station_quarter_m2": 0.006024154,
+        "aperture_first_station_full_m2": 0.001006356,
+        "aperture_last_station_full_m2": 0.024096616,
+        "mouth_outer_loop_quarter_m2": null,
+        "aperture_area_min_quarter_m2": 0.000249585,
+        "aperture_area_max_quarter_m2": 0.006024154,
+        "stations": [
+          {
+            "z_m": -0.002,
+            "n_loops": 1,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000331583
+            ]
+          },
+          {
+            "z_m": 0.004005,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000345223,
+              0.000251589
+            ]
+          },
+          {
+            "z_m": 0.010009,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000330951,
+              0.000249585
+            ]
+          },
+          "...",
+          {
+            "z_m": 0.226172,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.232176,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.238181,
+            "n_loops": 0,
+            "open_chains": 1,
+            "quarter_areas_m2": []
+          }
+        ],
+        "full_series": [
+          {
+            "z_m": -0.002,
+            "n_loops": 1,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000331583
+            ]
+          },
+          {
+            "z_m": 0.004005,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000345223,
+              0.000251589
+            ]
+          },
+          {
+            "z_m": 0.010009,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000330951,
+              0.000249585
+            ]
+          },
+          {
+            "z_m": 0.016014,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000327502,
+              0.000260035
+            ]
+          },
+          {
+            "z_m": 0.022018,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000323499,
+              0.00028136
+            ]
+          },
+          {
+            "z_m": 0.028023,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000357795,
+              0.000292193
+            ]
+          },
+          {
+            "z_m": 0.034027,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000399475,
+              0.00029887
+            ]
+          },
+          {
+            "z_m": 0.040032,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000449807,
+              0.000351572
+            ]
+          },
+          {
+            "z_m": 0.046036,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000471814,
+              0.000349913
+            ]
+          },
+          {
+            "z_m": 0.052041,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.00048393,
+              0.000370378
+            ]
+          },
+          {
+            "z_m": 0.058045,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000501546,
+              0.000427814
+            ]
+          },
+          {
+            "z_m": 0.06405,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.00053344,
+              0.000474674
+            ]
+          },
+          {
+            "z_m": 0.070054,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000591479,
+              0.000495341
+            ]
+          },
+          {
+            "z_m": 0.076059,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000678493,
+              0.000532713
+            ]
+          },
+          {
+            "z_m": 0.082063,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000767536,
+              0.000565283
+            ]
+          },
+          {
+            "z_m": 0.088068,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000838808,
+              0.00065109
+            ]
+          },
+          {
+            "z_m": 0.094072,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000901622,
+              0.000746078
+            ]
+          },
+          {
+            "z_m": 0.100077,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000983221,
+              0.000862938
+            ]
+          },
+          {
+            "z_m": 0.106081,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.001055557,
+              0.000987214
+            ]
+          },
+          {
+            "z_m": 0.112086,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.001242918,
+              0.001098278
+            ]
+          },
+          {
+            "z_m": 0.11809,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.00145482,
+              0.001226148
+            ]
+          },
+          {
+            "z_m": 0.124095,
+            "n_loops": 2,
+            "open_chains": 2,
+            "quarter_areas_m2": [
+              0.001786608,
+              0.001397643
+            ]
+          },
+          {
+            "z_m": 0.1301,
+            "n_loops": 2,
+            "open_chains": 2,
+            "quarter_areas_m2": [
+              0.001927339,
+              0.00177061
+            ]
+          },
+          {
+            "z_m": 0.136104,
+            "n_loops": 2,
+            "open_chains": 2,
+            "quarter_areas_m2": [
+              0.002521699,
+              0.00211549
+            ]
+          },
+          {
+            "z_m": 0.142109,
+            "n_loops": 2,
+            "open_chains": 2,
+            "quarter_areas_m2": [
+              0.00340415,
+              0.002856876
+            ]
+          },
+          {
+            "z_m": 0.148113,
+            "n_loops": 2,
+            "open_chains": 2,
+            "quarter_areas_m2": [
+              0.00445535,
+              0.003613894
+            ]
+          },
+          {
+            "z_m": 0.154118,
+            "n_loops": 2,
+            "open_chains": 2,
+            "quarter_areas_m2": [
+              0.005510851,
+              0.004800724
+            ]
+          },
+          {
+            "z_m": 0.160122,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.008142403,
+              0.006024154
+            ]
+          },
+          {
+            "z_m": 0.166127,
+            "n_loops": 0,
+            "open_chains": 1,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.172131,
+            "n_loops": 0,
+            "open_chains": 1,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.178136,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.18414,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.190145,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.196149,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.202154,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.208158,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.214163,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.220167,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.226172,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.232176,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.238181,
+            "n_loops": 0,
+            "open_chains": 1,
+            "quarter_areas_m2": []
+          }
+        ],
+        "monotone_decreasing_to_throat": false,
+        "dA_dz_min_quarter_m2_per_m": -0.000333777,
+        "dA_dz_max_quarter_m2_per_m": 0.203769154
+      }
+    },
+    "pucker_max": {
+      "path": "C:/Users/hunte/Hrns/hornlab-search/scratch/2026-11-15_readiness/spiral_capability/pucker_max/runs/20261115T233817Z-screen-6a7676/designs/917bbbf7fd5f/mesh.msh",
+      "sha256": "a3af371cfd1bb55bd70d95d1234b3bd19d3d83db5629482753550278430f0513",
+      "topology": {
+        "triangles": 8619,
+        "degenerate": 0,
+        "max_shared_edge_normal_angle_deg": 122.159,
+        "duplicate_index_faces": 0,
+        "duplicate_coordinate_points": 0,
+        "tag_counts": {
+          "body(1)": 8563,
+          "source_cap(2)": 56
+        },
+        "physical_names_2d": {
+          "1": "SD1G0",
+          "2": "SD1D1001"
+        }
+      },
+      "intersections_clearance_body": {
+        "welded_nearcoincident_vertex_pairs": 0,
+        "candidate_nonadjacent_pairs": 89168,
+        "crossings": 0,
+        "crossing_examples": [],
+        "touch_pairs": 0,
+        "sampled_min_clearance_m": 0.000733586,
+        "sampled_pairs_under_0p2mm": 0,
+        "pairs_checked_for_clearance": 89168,
+        "prune_radius_m": 0.010018,
+        "body_vs_source_cap_contact": {
+          "sampled_min_clearance_m": 0.0,
+          "pairs_checked": 1723,
+          "pairs_under_0p2mm": 59,
+          "note": "the cap rim ring is a designed junction with the body throat ring; near-zero distances there are the junction itself"
+        }
+      },
+      "sections": {
+        "area_semantics": "quarter-model loop areas from symmetry-closed contours; full-body area = 4x quarter for x/y symmetric sections",
+        "n_stations": 41,
+        "aperture_at_cap_plane_ref_m2": 0.001017876,
+        "aperture_first_station_quarter_m2": 0.000249771,
+        "aperture_last_station_quarter_m2": 0.006497399,
+        "aperture_first_station_full_m2": 0.000999084,
+        "aperture_last_station_full_m2": 0.025989596,
+        "mouth_outer_loop_quarter_m2": null,
+        "aperture_area_min_quarter_m2": 0.000249771,
+        "aperture_area_max_quarter_m2": 0.006497399,
+        "stations": [
+          {
+            "z_m": -0.002,
+            "n_loops": 1,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000331898
+            ]
+          },
+          {
+            "z_m": 0.004085,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000346503,
+              0.000249771
+            ]
+          },
+          {
+            "z_m": 0.01017,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000336702,
+              0.000256574
+            ]
+          },
+          "...",
+          {
+            "z_m": 0.229234,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.235319,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.241404,
+            "n_loops": 0,
+            "open_chains": 1,
+            "quarter_areas_m2": []
+          }
+        ],
+        "full_series": [
+          {
+            "z_m": -0.002,
+            "n_loops": 1,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000331898
+            ]
+          },
+          {
+            "z_m": 0.004085,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000346503,
+              0.000249771
+            ]
+          },
+          {
+            "z_m": 0.01017,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000336702,
+              0.000256574
+            ]
+          },
+          {
+            "z_m": 0.016255,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000323241,
+              0.000259432
+            ]
+          },
+          {
+            "z_m": 0.02234,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000327668,
+              0.000283234
+            ]
+          },
+          {
+            "z_m": 0.028426,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.00035241,
+              0.000288191
+            ]
+          },
+          {
+            "z_m": 0.034511,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000394886,
+              0.000307363
+            ]
+          },
+          {
+            "z_m": 0.040596,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000440125,
+              0.000347316
+            ]
+          },
+          {
+            "z_m": 0.046681,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000487199,
+              0.000343298
+            ]
+          },
+          {
+            "z_m": 0.052766,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000482353,
+              0.000377971
+            ]
+          },
+          {
+            "z_m": 0.058851,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000516611,
+              0.000438103
+            ]
+          },
+          {
+            "z_m": 0.064936,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000535199,
+              0.000477478
+            ]
+          },
+          {
+            "z_m": 0.071021,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000569609,
+              0.000503523
+            ]
+          },
+          {
+            "z_m": 0.077106,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000663279,
+              0.000528582
+            ]
+          },
+          {
+            "z_m": 0.083191,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000744569,
+              0.000581877
+            ]
+          },
+          {
+            "z_m": 0.089277,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000855222,
+              0.000661736
+            ]
+          },
+          {
+            "z_m": 0.095362,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.0009634,
+              0.000778962
+            ]
+          },
+          {
+            "z_m": 0.101447,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.001058792,
+              0.000875362
+            ]
+          },
+          {
+            "z_m": 0.107532,
+            "n_loops": 3,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.001182852,
+              0.001005327,
+              0.000514888
+            ]
+          },
+          {
+            "z_m": 0.113617,
+            "n_loops": 3,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.001360263,
+              0.001102027,
+              0.00061816
+            ]
+          },
+          {
+            "z_m": 0.119702,
+            "n_loops": 3,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.001581118,
+              0.001268584,
+              0.000701272
+            ]
+          },
+          {
+            "z_m": 0.125787,
+            "n_loops": 2,
+            "open_chains": 2,
+            "quarter_areas_m2": [
+              0.001755971,
+              0.001569242
+            ]
+          },
+          {
+            "z_m": 0.131872,
+            "n_loops": 2,
+            "open_chains": 2,
+            "quarter_areas_m2": [
+              0.002189651,
+              0.001914019
+            ]
+          },
+          {
+            "z_m": 0.137957,
+            "n_loops": 2,
+            "open_chains": 2,
+            "quarter_areas_m2": [
+              0.002673004,
+              0.002371001
+            ]
+          },
+          {
+            "z_m": 0.144042,
+            "n_loops": 2,
+            "open_chains": 2,
+            "quarter_areas_m2": [
+              0.003744877,
+              0.003083159
+            ]
+          },
+          {
+            "z_m": 0.150128,
+            "n_loops": 2,
+            "open_chains": 2,
+            "quarter_areas_m2": [
+              0.004592415,
+              0.003983089
+            ]
+          },
+          {
+            "z_m": 0.156213,
+            "n_loops": 2,
+            "open_chains": 2,
+            "quarter_areas_m2": [
+              0.006096835,
+              0.005075061
+            ]
+          },
+          {
+            "z_m": 0.162298,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.009456557,
+              0.006497399
+            ]
+          },
+          {
+            "z_m": 0.168383,
+            "n_loops": 0,
+            "open_chains": 1,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.174468,
+            "n_loops": 0,
+            "open_chains": 1,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.180553,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.186638,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.192723,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.198808,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.204893,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.210979,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.217064,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.223149,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.229234,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.235319,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.241404,
+            "n_loops": 0,
+            "open_chains": 1,
+            "quarter_areas_m2": []
+          }
+        ],
+        "monotone_decreasing_to_throat": false,
+        "dA_dz_min_quarter_m2_per_m": -0.000660312,
+        "dA_dz_max_quarter_m2_per_m": 0.233744947
+      }
+    },
+    "depth_high": {
+      "path": "C:/Users/hunte/Hrns/hornlab-search/scratch/2026-11-15_readiness/spiral_capability/depth_high/runs/20261115T233934Z-screen-9431fc/designs/9f9d46dbf404/mesh.msh",
+      "sha256": "8d1bdec5513e2414c2c5edf996d3cb084cb24d10570907863fe1ef5fcca06c2a",
+      "topology": {
+        "triangles": 9572,
+        "degenerate": 0,
+        "max_shared_edge_normal_angle_deg": 120.646,
+        "duplicate_index_faces": 0,
+        "duplicate_coordinate_points": 0,
+        "tag_counts": {
+          "body(1)": 9516,
+          "source_cap(2)": 56
+        },
+        "physical_names_2d": {
+          "1": "SD1G0",
+          "2": "SD1D1001"
+        }
+      },
+      "intersections_clearance_body": {
+        "welded_nearcoincident_vertex_pairs": 0,
+        "candidate_nonadjacent_pairs": 65540,
+        "crossings": 0,
+        "crossing_examples": [],
+        "touch_pairs": 3,
+        "sampled_min_clearance_m": 0.000742388,
+        "sampled_pairs_under_0p2mm": 0,
+        "pairs_checked_for_clearance": 65540,
+        "prune_radius_m": 0.009577,
+        "body_vs_source_cap_contact": {
+          "sampled_min_clearance_m": 0.0,
+          "pairs_checked": 1667,
+          "pairs_under_0p2mm": 59,
+          "note": "the cap rim ring is a designed junction with the body throat ring; near-zero distances there are the junction itself"
+        }
+      },
+      "sections": {
+        "area_semantics": "quarter-model loop areas from symmetry-closed contours; full-body area = 4x quarter for x/y symmetric sections",
+        "n_stations": 41,
+        "aperture_at_cap_plane_ref_m2": 0.001017876,
+        "aperture_first_station_quarter_m2": 0.000255868,
+        "aperture_last_station_quarter_m2": 0.034917499,
+        "aperture_first_station_full_m2": 0.001023472,
+        "aperture_last_station_full_m2": 0.139669996,
+        "mouth_outer_loop_quarter_m2": null,
+        "aperture_area_min_quarter_m2": 0.000255868,
+        "aperture_area_max_quarter_m2": 0.034917499,
+        "stations": [
+          {
+            "z_m": -0.002,
+            "n_loops": 1,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000331968
+            ]
+          },
+          {
+            "z_m": 0.007553,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000285887,
+              0.000255868
+            ]
+          },
+          {
+            "z_m": 0.017106,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000336478,
+              0.000257739
+            ]
+          },
+          "...",
+          {
+            "z_m": 0.361023,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.370576,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.38013,
+            "n_loops": 0,
+            "open_chains": 1,
+            "quarter_areas_m2": []
+          }
+        ],
+        "full_series": [
+          {
+            "z_m": -0.002,
+            "n_loops": 1,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000331968
+            ]
+          },
+          {
+            "z_m": 0.007553,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000285887,
+              0.000255868
+            ]
+          },
+          {
+            "z_m": 0.017106,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000336478,
+              0.000257739
+            ]
+          },
+          {
+            "z_m": 0.02666,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000365969,
+              0.000280746
+            ]
+          },
+          {
+            "z_m": 0.036213,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000339652,
+              0.00028253
+            ]
+          },
+          {
+            "z_m": 0.045766,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000401831,
+              0.000310604
+            ]
+          },
+          {
+            "z_m": 0.055319,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000432677,
+              0.00035045
+            ]
+          },
+          {
+            "z_m": 0.064873,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000408831,
+              0.000370669
+            ]
+          },
+          {
+            "z_m": 0.074426,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000494179,
+              0.000393198
+            ]
+          },
+          {
+            "z_m": 0.083979,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000535743,
+              0.000426469
+            ]
+          },
+          {
+            "z_m": 0.093532,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000511991,
+              0.000469216
+            ]
+          },
+          {
+            "z_m": 0.103086,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000617271,
+              0.00051172
+            ]
+          },
+          {
+            "z_m": 0.112639,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000658764,
+              0.000531258
+            ]
+          },
+          {
+            "z_m": 0.122192,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000654427,
+              0.000561216
+            ]
+          },
+          {
+            "z_m": 0.131745,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000783618,
+              0.000623065
+            ]
+          },
+          {
+            "z_m": 0.141299,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000807478,
+              0.000716401
+            ]
+          },
+          {
+            "z_m": 0.150852,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.000865778,
+              0.000730785
+            ]
+          },
+          {
+            "z_m": 0.160405,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.001052841,
+              0.000842971
+            ]
+          },
+          {
+            "z_m": 0.169958,
+            "n_loops": 2,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.001081961,
+              0.000964524
+            ]
+          },
+          {
+            "z_m": 0.179512,
+            "n_loops": 2,
+            "open_chains": 2,
+            "quarter_areas_m2": [
+              0.001283193,
+              0.001036177
+            ]
+          },
+          {
+            "z_m": 0.189065,
+            "n_loops": 2,
+            "open_chains": 2,
+            "quarter_areas_m2": [
+              0.001440695,
+              0.001304594
+            ]
+          },
+          {
+            "z_m": 0.198618,
+            "n_loops": 2,
+            "open_chains": 2,
+            "quarter_areas_m2": [
+              0.001732048,
+              0.001449345
+            ]
+          },
+          {
+            "z_m": 0.208171,
+            "n_loops": 2,
+            "open_chains": 2,
+            "quarter_areas_m2": [
+              0.001958251,
+              0.001659811
+            ]
+          },
+          {
+            "z_m": 0.217725,
+            "n_loops": 2,
+            "open_chains": 2,
+            "quarter_areas_m2": [
+              0.002447229,
+              0.002253321
+            ]
+          },
+          {
+            "z_m": 0.227278,
+            "n_loops": 2,
+            "open_chains": 2,
+            "quarter_areas_m2": [
+              0.003219283,
+              0.002816728
+            ]
+          },
+          {
+            "z_m": 0.236831,
+            "n_loops": 2,
+            "open_chains": 2,
+            "quarter_areas_m2": [
+              0.004099409,
+              0.003743284
+            ]
+          },
+          {
+            "z_m": 0.246384,
+            "n_loops": 2,
+            "open_chains": 2,
+            "quarter_areas_m2": [
+              0.005185716,
+              0.004848153
+            ]
+          },
+          {
+            "z_m": 0.255938,
+            "n_loops": 4,
+            "open_chains": 0,
+            "quarter_areas_m2": [
+              0.036370868,
+              0.034917499,
+              0.006931935,
+              0.006136768
+            ]
+          },
+          {
+            "z_m": 0.265491,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.275044,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.284597,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.294151,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.303704,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.313257,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.32281,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.332363,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.341917,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.35147,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.361023,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.370576,
+            "n_loops": 0,
+            "open_chains": 2,
+            "quarter_areas_m2": []
+          },
+          {
+            "z_m": 0.38013,
+            "n_loops": 0,
+            "open_chains": 1,
+            "quarter_areas_m2": []
+          }
+        ],
+        "monotone_decreasing_to_throat": true,
+        "dA_dz_min_quarter_m2_per_m": 0.000186748,
+        "dA_dz_max_quarter_m2_per_m": 3.147304375
+      }
+    }
+  },
+  "fixtures": {
+    "known_crossing": "cross",
+    "sharp_fold_shared_edge_adjacent": "excluded_by_adjacency_by_construction",
+    "sharp_fold_duplicated_index": "touch",
+    "parallel_sheets_3mm": null
+  }
+}

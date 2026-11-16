@@ -1,0 +1,232 @@
+{
+  "purpose": "Isolated single-design diagnostics testing whether hl__rolled_es_spiral_v7 searched controls produce acoustic effects beyond same-design mesh noise; capability-domain gate evidence for the 2026-11-15 admission pass.",
+  "authorization": "Owner authorized a few isolated diagnostic solves; no search campaign was run; no Bayesian jobs.",
+  "identity": {
+    "cell": "hl__rolled_es_spiral_v7",
+    "base_config": "examples/typologies/home_landscape_2026-11-15/hl__rolled_es_spiral_v7.yaml",
+    "brief_bytes_sha256": "7d7d2d0cf0480d41f81e1b4970d17e05a4da66bb94dc0ce496d6726185910fe9",
+    "mesh_policy": "epw 6.0, quadrants 1, dof_cap_screen 10000, balloon 512, 73 angles, 18 freqs, beat_cuda, cuda_fused true",
+    "seed_row_reference": "scratch\\2026-11-15_readiness\\spiral_acoustics\\epw6\\runs\\20261115T231838Z-screen-f9de68",
+    "seed_design_hash": "2aa7e67a9aa0",
+    "seed_objective_epw6": 29.91505906316175,
+    "mode": "run --mode screen (single seed design per variant); fresh cache/runs/dataset per variant; fresh GPU host per variant; hosts cleared after each"
+  },
+  "rows": [
+    {
+      "label": "terminal_low",
+      "changed": {
+        "g_terminal_deg": "270.0 -> 200.0 (box low)"
+      },
+      "config_copy": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\2026-11-15_readiness\\spiral_capability\\terminal_low\\terminal_low.yaml",
+      "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\2026-11-15_readiness\\spiral_capability\\terminal_low\\runs\\20261115T233702Z-screen-a405ab",
+      "design_hash": "eebccb4bfc13",
+      "mesh_hash": "0a83385780b0",
+      "solve_hash": "94eb7eb4369d",
+      "objective": 29.80391048301667,
+      "terms": {
+        "cov": 5.761517277969674,
+        "rip": 0.04144333780691364,
+        "di": 4.98586536640636,
+        "dislope": 11.176652281857503,
+        "flat": 0.8340067525074969,
+        "load": 0.577671141539035,
+        "distd": 1.454816053596168,
+        "diag": 8.802130819203315,
+        "flat_cv": 0.8043246116664861,
+        "lfp20_hz": 493.3407159355272,
+        "lfp50_hz": 533.775038762897,
+        "rez_min_from_fx": 0.9755743280121321,
+        "f11_hz": 5600.0,
+        "loaded_hi_hz": 5600.0
+      },
+      "dofs": 3384,
+      "backend": "beat_cuda",
+      "wall_s": 59.354,
+      "memwatch": {
+        "vram_baseline_mib": 1143,
+        "peak_vram_mib": 1411,
+        "host_dedicated_peak_mib": 234,
+        "host_shared_peak_mib": 80,
+        "spilled": false
+      }
+    },
+    {
+      "label": "pucker_max",
+      "changed": {
+        "g_pucker_h_mm": "6.0 -> 18.0 (box high)",
+        "g_pucker_v_mm": "8.0 -> 24.0 (box high)"
+      },
+      "config_copy": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\2026-11-15_readiness\\spiral_capability\\pucker_max\\pucker_max.yaml",
+      "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\2026-11-15_readiness\\spiral_capability\\pucker_max\\runs\\20261115T233817Z-screen-6a7676",
+      "design_hash": "917bbbf7fd5f",
+      "mesh_hash": "0a83385780b0",
+      "solve_hash": "94eb7eb4369d",
+      "objective": 28.843675245146894,
+      "terms": {
+        "cov": 5.648944844640339,
+        "rip": 0.03766272427137941,
+        "di": 4.92868359508478,
+        "dislope": 10.950972345228713,
+        "flat": 0.7503104690797038,
+        "load": 0.5814919050560428,
+        "distd": 1.4309107254320683,
+        "diag": 8.369188872875778,
+        "flat_cv": 0.686198877293322,
+        "lfp20_hz": 493.73283356620425,
+        "lfp50_hz": 533.6106270622099,
+        "rez_min_from_fx": 0.9639030293274369,
+        "f11_hz": 5600.0,
+        "loaded_hi_hz": 5600.0
+      },
+      "dofs": 4444,
+      "backend": "beat_cuda",
+      "wall_s": 67.532,
+      "memwatch": {
+        "vram_baseline_mib": 1058,
+        "peak_vram_mib": 1443,
+        "host_dedicated_peak_mib": 284,
+        "host_shared_peak_mib": 80,
+        "spilled": false
+      }
+    },
+    {
+      "label": "depth_high",
+      "changed": {
+        "g_depth_mm": "238.0 -> 380.0 (box high)"
+      },
+      "config_copy": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\2026-11-15_readiness\\spiral_capability\\depth_high\\depth_high.yaml",
+      "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\2026-11-15_readiness\\spiral_capability\\depth_high\\runs\\20261115T233934Z-screen-9431fc",
+      "design_hash": "9f9d46dbf404",
+      "mesh_hash": "0a83385780b0",
+      "solve_hash": "94eb7eb4369d",
+      "objective": 33.38993950403875,
+      "terms": {
+        "cov": 6.818362968185327,
+        "rip": 0.07306773038427222,
+        "di": 4.809663246735519,
+        "dislope": 15.255739842437944,
+        "flat": 0.46631863376442567,
+        "load": 0.0,
+        "distd": 1.6809519591337345,
+        "diag": 8.214571867417717,
+        "flat_cv": 0.511662825143757,
+        "lfp20_hz": 331.4775644023545,
+        "lfp50_hz": 363.5242061463617,
+        "rez_min_from_fx": 0.6376161139389667,
+        "f11_hz": 5600.0,
+        "loaded_hi_hz": 5600.0
+      },
+      "dofs": 4958,
+      "backend": "beat_cuda",
+      "wall_s": 70.627,
+      "memwatch": {
+        "vram_baseline_mib": 1087,
+        "peak_vram_mib": 1624,
+        "host_dedicated_peak_mib": 362,
+        "host_shared_peak_mib": 80,
+        "spilled": false
+      }
+    }
+  ],
+  "comparisons": [
+    {
+      "label": "terminal_low",
+      "delta_J_vs_seed_epw6": -0.111149,
+      "delta_terms": {
+        "cov": -0.07567,
+        "rip": 6.6e-05,
+        "di": 0.009628,
+        "dislope": -0.136597,
+        "flat": 0.06542,
+        "load": -0.017126,
+        "distd": -0.000854,
+        "diag": -0.001168,
+        "flat_cv": 0.084175,
+        "lfp20_hz": -1.760031,
+        "lfp50_hz": 0.367081,
+        "rez_min_from_fx": 0.004939,
+        "f11_hz": 0.0,
+        "loaded_hi_hz": 0.0
+      },
+      "mesh_noise_reference": {
+        "same-design epw6->epw8 delta_J": -0.0014603311808869535,
+        "max_abs_delta": {
+          "bw_h_deg": 0.1238155191691277,
+          "bw_v_deg": 0.06135474266734775,
+          "di_db": 0.008152165962364677,
+          "z_real": 0.006825594342843688
+        },
+        "note": "two-mesh same-design sensitivity, not convergence"
+      },
+      "ratio_vs_same_design_mesh_noise": 76.1
+    },
+    {
+      "label": "pucker_max",
+      "delta_J_vs_seed_epw6": -1.071384,
+      "delta_terms": {
+        "cov": -0.188243,
+        "rip": -0.003714,
+        "di": -0.047554,
+        "dislope": -0.362277,
+        "flat": -0.018276,
+        "load": -0.013305,
+        "distd": -0.02476,
+        "diag": -0.43411,
+        "flat_cv": -0.033951,
+        "lfp20_hz": -1.367914,
+        "lfp50_hz": 0.20267,
+        "rez_min_from_fx": -0.006732,
+        "f11_hz": 0.0,
+        "loaded_hi_hz": 0.0
+      },
+      "mesh_noise_reference": {
+        "same-design epw6->epw8 delta_J": -0.0014603311808869535,
+        "max_abs_delta": {
+          "bw_h_deg": 0.1238155191691277,
+          "bw_v_deg": 0.06135474266734775,
+          "di_db": 0.008152165962364677,
+          "z_real": 0.006825594342843688
+        },
+        "note": "two-mesh same-design sensitivity, not convergence"
+      },
+      "ratio_vs_same_design_mesh_noise": 733.7
+    },
+    {
+      "label": "depth_high",
+      "delta_J_vs_seed_epw6": 3.47488,
+      "delta_terms": {
+        "cov": 0.981176,
+        "rip": 0.031691,
+        "di": -0.166574,
+        "dislope": 3.942491,
+        "flat": -0.302268,
+        "load": -0.594797,
+        "distd": 0.225282,
+        "diag": -0.588727,
+        "flat_cv": -0.208487,
+        "lfp20_hz": -163.623183,
+        "lfp50_hz": -169.883751,
+        "rez_min_from_fx": -0.333019,
+        "f11_hz": 0.0,
+        "loaded_hi_hz": 0.0
+      },
+      "mesh_noise_reference": {
+        "same-design epw6->epw8 delta_J": -0.0014603311808869535,
+        "max_abs_delta": {
+          "bw_h_deg": 0.1238155191691277,
+          "bw_v_deg": 0.06135474266734775,
+          "di_db": 0.008152165962364677,
+          "z_real": 0.006825594342843688
+        },
+        "note": "two-mesh same-design sensitivity, not convergence"
+      },
+      "ratio_vs_same_design_mesh_noise": 2379.5
+    }
+  ],
+  "limitations": [
+    "Four design points at one mesh policy; sensitivity evidence, not a landscape or convergence proof.",
+    "Mesh hash changes across designs by construction; mesh POLICY identity is fixed (same brief bytes, source config family, solve spec).",
+    "Two-mesh same-design noise (delta_J -0.00146) is the noise reference, established in SPIRAL_ACOUSTICS.json.",
+    "J is a penalty-style sum; smaller is better. Score semantics per brief 7d7d2d0cf048 (v7)."
+  ]
+}

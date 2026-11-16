@@ -1054,3 +1054,32 @@ Full report: `docs/research/MATRIX_FREE_GPU_GMRES_FMM_2026-10-29.md` (owner-auth
 **Sources (as supplied for this pass; full URLs/DOIs in the report).** S1 bempp-cl (MIT; FMM/OSRC; Exafmm; CPU FMM); S3 Exafmm-t (BSD-3; CPU OpenMP; low-frequency; dormant 2021); S5 Gumerov & Duraiswami 2009 JASA, https://doi.org/10.1121/1.3021297 (broadband FMM-BEM kD 0.0001-500); S6 Gumerov & Duraiswami 2017 JASA, https://doi.org/10.1121/1.4987467 (GPU/CPU FMM-BEM); S7 Vater, Betcke, Dilba 2017 arXiv, https://arxiv.org/abs/1711.01897 (GPU H-matrix assembly 5.5x); S11 Sushnikova et al. 2023 SIAM MMS, https://doi.org/10.1137/22m1514040 (FMM-LU; not highly oscillatory); S13 Antoine & Darbas 2007 M2AN, https://doi.org/10.1051/m2an:2007009 (OSRC); S14 Fierro-Piccardo & Jerez-Hanckes 2020 JCP, https://doi.org/10.1016/j.jcp.2020.109355 (Calderon); S17 Chen, Schafer, Desbrun 2025 ACM TOG, https://doi.org/10.1145/3731196 (sparse inverse-LU; author claim); S20 Dong, Shen, Gao 2020 JASA, https://doi.org/10.1121/10.0001037 (multimodal horn optimization); S22 Dong, Doc, Felix 2024 JASA, https://doi.org/10.1121/10.0025389 (axisymmetric horn/enclosure); S26 Hipperson, Hargreaves, Cox 2026 arXiv, https://doi.org/10.48550/arxiv.2604.21431 (JAX-BEM); S28 PVFMM, https://doi.org/10.4208/cicp.020215.150515sw (GPU FMM; high-k GPU maturity unverified); S29 FMM3D, https://github.com/flatironinstitute/FMM3D (Apache-2.0; hfmm3d; CPU); S30 NiHu, https://github.com/Q-Minh/nihu (GPL-3; BM+FMM reference; CPU; 2023); S31 H2Lib, https://github.com/H2Lib/H2Lib (LGPL-3; H2; CPU; high-k ranks).
 
 **Not verified.** No independent 5-20k Burton-Miller GPU benchmark; FMM constants at kD ~ 100-235 unverified; bempp-cl FMM defaults are low-frequency-oriented; the GMRES study is CPU/Metal; several papers read at abstract level; no solver run in this research.
+
+
+---
+
+## Owner-requested evidence addendum: Crowe / ATH / rolled families (2026-11-15)
+
+Documentation-only addition at the owner's request; earlier research/contracts are unchanged.
+Before changing these typologies, their generator/parameter mapping, bounds or objectives, read
+[ROLLED_FAMILY_EVIDENCE_HANDOFF_2026-11-15.md](../research/typologies/ROLLED_FAMILY_EVIDENCE_HANDOFF_2026-11-15.md)
+and its linked primary sources and saved execution manifest. Read it alongside the current
+[six-seed packet](../research/typologies/STARTING_SEEDS_2026-11-15.html), not as approval of that packet.
+
+- **[verified source convention]** Keele US4308932A uses included throat angle A, full beamwidth B,
+  A approximately .9B and slope tan(A/2). The plain decision brief's half-coverage wording conflicts
+  with this. Its mouth-size relation is empirical, not a universal physical impossibility theorem.
+- **[corrected construction claim]** Archived axial relief changes z; ATH's OS-SE morph changes
+  radius at fixed z. The native inward-radial hybrid is our own law, not a Tritonia replica.
+  Separate H/V Crowe drawing cuts do not uniquely determine intermediate surfaces or exterior body.
+- **[historical execution evidence]** Saved sampled feasibility, cold replay and synthetic GP
+  checks support software paths at their recorded hashes. They do not establish useful acoustic
+  degrees of freedom, continuous-domain robustness, converged solves, or BO cohort eligibility.
+- **[open]** Geometry/body/lip defects, parameter capability/coupling, DI/diagonal scoring,
+  source/loading assumptions and spatial/angular convergence still need a source-grounded audit.
+  Keep the original studies. The latest recorded owner hold pauses new solves until the
+  brief/DI-slope question is investigated and settled; refresh authority on pickup.
+
+The handoff includes an explicit correction ledger so earlier mistakes and newer unverified
+claims are not carried forward as facts. Do not call these families optimization-ready on the
+strength of a render, successful mesh, full-rank vertex Jacobian, or working optimizer adapter.

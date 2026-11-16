@@ -12,6 +12,8 @@ import json
 import math
 import os
 import re
+import subprocess
+import sys
 import time
 from collections import Counter
 from dataclasses import dataclass, field
@@ -1908,6 +1910,22 @@ def catalog(root: Path) -> list[dict]:
     return [clean(e) for e in raw.get("entries", []) if isinstance(e, dict)]
 
 
+def _gui_catalog(root: Path) -> list[dict]:
+    """Typology entries the GUI may list even though the stock CLI cannot run them.
+
+    ``examples/catalog.yaml`` stays the stock runnable allowlist (``--families all`` walks
+    it), so a custom rows kind that needs a process-local bridge CLI must not enter it.
+    ``examples/catalog.gui.yaml`` is the optional visible-only supplement; the seed gate in
+    ``list_configs`` still marks such a config ``disabled``, and the typology card renders it
+    without launch links. Absent supplement means no extra rows (legacy checkouts unchanged).
+    """
+    try:
+        raw = _yaml_load((root / "examples" / "catalog.gui.yaml").read_text(encoding="utf-8-sig")) or {}
+    except (OSError, yaml.YAMLError):
+        return []
+    return [clean(e) for e in raw.get("entries", []) if isinstance(e, dict)]
+
+
 def _config_seed_materializes(p: Path) -> bool:
     """True when the config's own seed materializes (the honest runnable gate).
 
@@ -2301,7 +2319,14 @@ def typologies(root: Path, runs: Path, snap: _Snapshot | None = None) -> list[di
     from hornlab_search.search.campaign import budget_for_tier, is_compatible
     snap = snap if snap is not None else _snapshot(runs, root)
     briefs = snap.briefs()
-    cfgs = {c["catalog_name"]: c for c in list_configs(root) if c.get("catalog_name")}
+    configs = list_configs(root)
+    cfgs = {c["catalog_name"]: c for c in configs if c.get("catalog_name")}
+    # GUI-only bridge cells are not catalogued (the stock CLI cannot load them), so resolve
+    # their config row by its own name; the catalog name still wins when both exist.
+    cfgs_uncatalogued = {c["name"]: c for c in configs if not c.get("catalog_name")}
+    entries = catalog(root)
+    known = {e.get("name") for e in entries}
+    entries += [e for e in _gui_catalog(root) if e.get("name") not in known]
     # per family: its result in the newest campaign of each scored tier per brief THAT CONTAINS IT
     # (a later campaign that re-ran only some families must not hide the others' last result)
     results: dict[str, list[dict]] = {}
@@ -2338,8 +2363,8 @@ def typologies(root: Path, runs: Path, snap: _Snapshot | None = None) -> list[di
     for v in results.values():
         v.sort(key=lambda r: (r["brief"], -TIER_RANK[r["tier"]]))
     out = []
-    for e in catalog(root):
-        cfg = cfgs.get(e.get("name"), {})
+    for e in entries:
+        cfg = cfgs.get(e.get("name")) or cfgs_uncatalogued.get(e.get("name"), {})
         k = int(cfg.get("n_knobs") or 0)
         compat = {}
         for b in briefs:
@@ -2349,6 +2374,7 @@ def typologies(root: Path, runs: Path, snap: _Snapshot | None = None) -> list[di
             "name": e.get("name"), "group": e.get("group"), "symmetry": e.get("symmetry"),
             "description": e.get("description"), "config": cfg.get("path"), "n_knobs": k,
             "disabled": bool(cfg.get("disabled")),
+            "preview_only": str((((cfg.get("generator_block") or {}).get("rows")) or {}).get("type") or "") in _BRIDGE_ROWS,
             "morph_capable": bool(cfg.get("morph_capable")),
             "morph_searched": bool(cfg.get("morph_searched")),
             "budget": {"screen": budget_for_tier("screen", k), "compare": budget_for_tier("compare", k)},
@@ -3181,6 +3207,58 @@ def _measured_envelope(dims: dict | None, brief: dict | None) -> dict:
             "source": "measured from the preview geometry"}
 
 
+#: Opt-in bridge rows kinds -> the CLI that installs their process-local adapter. These cells
+#: are previewable in the GUI through ``tools/geometry/gui_preview.py`` in a subprocess; the
+#: stock ``grid`` module in this server is never mutated, so one preview cannot affect another.
+_BRIDGE_ROWS = {
+    "rosse_rect": "rosse_rect_cli",
+    "rolled_rect": "rolled_rect_cli",
+    "rolled_rect_pucker": "rolled_rect_cli",
+    "crowe_panel": "crowe_panel_cli",
+}
+_BRIDGE_PREVIEW_HELPER = Path(__file__).resolve().parents[2] / "tools" / "geometry" / "gui_preview.py"
+
+
+def _bridge_preview(root: Path, config_name: str, rows_type: str, brief, knobs, detail: str) -> dict:
+    """Run one bridge preview in a fresh process and return its JSON payload."""
+    cli = _BRIDGE_ROWS[rows_type]
+    cmd = [sys.executable, str(_BRIDGE_PREVIEW_HELPER), "--cli", cli,
+           "--config", str(config_name), "--root", str(root), "--detail", detail]
+    if brief not in (None, ""):
+        cmd += ["--brief", str(brief)]
+    if knobs not in (None, ""):
+        cmd += ["--knobs", str(knobs)]
+    try:
+        proc = subprocess.run(cmd, cwd=str(root), capture_output=True, text=True, timeout=180)
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return {"available": False, "reason": f"bridge preview could not run: {exc}",
+                "notes": [f"bridge preview could not run: {exc}"],
+                "section": {"h": {"inner": [], "outer": []}, "v": {"inner": [], "outer": []}},
+                "mouth": {"inner": [], "outer": []},
+                "envelope": {"available": False, "reason": "bridge preview could not run"},
+                "shape3d": {"available": False, "reason": "bridge preview could not run"},
+                "slow": True, "timings_ms": {}}
+    if proc.returncode != 0:
+        tail = (proc.stderr or proc.stdout or "").strip().splitlines()[-8:]
+        reason = "bridge preview failed: " + (" | ".join(tail) or f"exit {proc.returncode}")
+        return {"available": False, "reason": reason, "notes": [reason],
+                "section": {"h": {"inner": [], "outer": []}, "v": {"inner": [], "outer": []}},
+                "mouth": {"inner": [], "outer": []},
+                "envelope": {"available": False, "reason": reason},
+                "shape3d": {"available": False, "reason": reason},
+                "slow": True, "timings_ms": {}}
+    try:
+        return json.loads(proc.stdout)
+    except json.JSONDecodeError as exc:
+        reason = f"bridge preview returned invalid JSON: {exc}"
+        return {"available": False, "reason": reason, "notes": [reason],
+                "section": {"h": {"inner": [], "outer": []}, "v": {"inner": [], "outer": []}},
+                "mouth": {"inner": [], "outer": []},
+                "envelope": {"available": False, "reason": reason},
+                "shape3d": {"available": False, "reason": reason},
+                "slow": True, "timings_ms": {}}
+
+
 def preview_shape(root: Path, config_name: str, q: dict) -> dict:
     """On-demand 2D/3D preview geometry for one typology config (sandbox backend).
 
@@ -3211,10 +3289,12 @@ def preview_shape(root: Path, config_name: str, q: dict) -> dict:
     if detail not in ("2d", "3d"):
         raise ValueError("detail must be '2d' or '3d'")
     brief_p = None
+    brief_arg = None
     brief_q = q.get("brief")
     if brief_q:
         brief_name_raw = brief_q[0] if isinstance(brief_q, (list, tuple)) else brief_q
-        brief_p = _preview_brief_path(root, str(brief_name_raw))
+        brief_arg = str(brief_name_raw)
+        brief_p = _preview_brief_path(root, brief_arg)
 
     try:
         cfg = load_config(cfg_path, brief=brief_p)
@@ -3263,6 +3343,13 @@ def preview_shape(root: Path, config_name: str, q: dict) -> dict:
             envelope=envelope or {"available": False, "reason": reason},
             shape3d={"available": False, "reason": reason},
             slow=slow, timings=timings, notes=notes + [reason])
+
+    # (1a) opt-in bridge rows kinds: run the normal preview in a fresh process with exactly one
+    # bridge adapter installed. The server's own grid module is never mutated; the helper sets
+    # HORNLAB_GUI_BRIDGE_PREVIEW=1 so it does not recurse here.
+    rows_type = str(((gen.get("rows") if isinstance(gen, dict) else {}) or {}).get("type") or "")
+    if rows_type in _BRIDGE_ROWS and os.environ.get("HORNLAB_GUI_BRIDGE_PREVIEW") != "1":
+        return _bridge_preview(root, config_name, rows_type, brief_arg, knob_text, detail)
 
     # (1b) cone mid horn + axe head (tools/cad/plughorn.py): the CAD tool's own sections and solid.
     if gen and gen.get("name") == "plughorn":

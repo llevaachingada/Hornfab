@@ -49,3 +49,13 @@ including fixed keys. Cold replay rematerializes and requires an exact recipe ha
 Canonical geometry identity is distinct from recipe identity, so geometry-identical inactive
 settings cannot masquerade as independent BO samples. Historical axial results cannot train a
 radial task unless exact surface, recipe, score and complete provenance checks establish identity.
+
+
+## Follow-up evidence and readiness warning (owner request, 2026-11-15)
+
+Before reusing the ranges or calling this family optimization-ready, read
+[the consolidated evidence/correction ledger](ROLLED_FAMILY_EVIDENCE_HANDOFF_2026-11-15.md).
+It preserves the historical audit artifacts and separates functioning geometry/optimizer
+plumbing from unresolved physical design capability, scoring, body/lip, coupling and convergence
+questions. It also records qualifications to the newer six-seed packet. The latest recorded
+owner hold pauses new solves; the original studies and their source/recipe identities stay intact.

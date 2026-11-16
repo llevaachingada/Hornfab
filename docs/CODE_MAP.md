@@ -14,6 +14,16 @@ examples/prototypes/rolled_rect_2026-11-15/crowe_section_reference.yaml; recipe 
 Width, height and depth scale the digitized sections independently; the swept-H construction needs
 depth <= 0.57 x width (0.66 x at h_depth_scale 1.1). Home-sized searchable cell:
 `examples/typologies/home_landscape_2026-11-15/hl__crowe_panel_home_v7.yaml` (search and verify via crowe_panel_cli.py).
+Rectangular R-OSSE rolled mouth (2026-11-15): `tools/geometry/rosse_rect.py` evaluates Magnus's R-OSSE
+(`hornlab_mesher.profile_formulas.profile_points`) once per azimuth with a superellipse mouth R(p) and H/V coverage a(p);
+`rosse_rect_cli.py` rebinds the rolled_rect bridge (search / verify / shape-check / preflight / verify-night). Cell
+`hl__rosse_rect_cd_v7`. Study: `docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md`.
+GUI bridge preview (2026-11-15): `tools/geometry/gui_preview.py` installs exactly one bridge in a fresh process and
+calls the normal GUI preview; `hornlab_search/gui/data.py::_bridge_preview` routes the three bridge rows kinds
+(`rosse_rect`, `rolled_rect_pucker`, `crowe_panel`). The 8 stock-loadable home cells are in
+`examples/catalog.yaml`; the 3 bridge cells are preview-only entries in `examples/catalog.gui.yaml` (launch stays
+disabled because the stock campaign cannot materialize the custom rows kind). Test:
+`tests/test_gui_bridge_preview.py`.
 
 
 Rolled-rectangle experiment (2026-11-15): `tools/geometry/rolled_rect.py` defines the original
@@ -189,3 +199,7 @@ bempp_cpu) → `metrics` (beamwidth, ripple, DI, impedance) → `objective` (sca
 | `tools/analysis/acoustic_v2_report.py` | Rev2 zero-BEM v2 analysis of a night's stored responses; matched arm vs control vs fidelity noise floor; RESULTS.json + DECISION.md. |
 
 - `tools/analysis/mesh_fidelity.py`: read-only per-physical-tag edge stats and `mesh_fidelity_status` (plan A4, 2026-11-13).
+
+## Rolled readiness audit tooling (2026-11-15)
+
+`docs/research/typologies/audit_2026-11-15/` contains reproducible source-equation, domain, mesh topology, offline objective, spiral mock/resume and evidence-packaging scripts. They are research tooling, not production generators. `docs/queue/rolled_readiness_2026-11-15/reviewed_job.py` is an additive fail-closed queue gate;26 frozen configs and matching entry points are recorded in admission.json. See that packet's README before use; no full-search admission granted.
