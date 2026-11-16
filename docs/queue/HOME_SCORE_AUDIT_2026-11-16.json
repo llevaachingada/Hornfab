@@ -1,0 +1,6252 @@
+{
+  "jobs": [
+    {
+      "acoustic_review": "manual_review_required_not_certified",
+      "argv": [
+        ".venv/Scripts/hornlab-search.exe",
+        "search",
+        "--config",
+        "examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_fold_warm_v7.yaml",
+        "--mode",
+        "screen",
+        "--budget",
+        "120",
+        "--cma-seed",
+        "9012"
+      ],
+      "bounds": {
+        "L_mm": {
+          "hi": 271.912,
+          "lo": 228.712
+        },
+        "a0_deg": {
+          "hi": 2.4866,
+          "lo": 2.0066
+        },
+        "a_deg": {
+          "hi": 40.0,
+          "lo": 36.3038
+        },
+        "aspect_ratio": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "az_a_cos_amp": {
+          "hi": 11.73355,
+          "lo": 8.13355
+        },
+        "az_a_cos_pow": {
+          "hi": 2.43779,
+          "lo": 1.23779
+        },
+        "az_a_sf_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_fold_h_deg": {
+          "hi": 0.0,
+          "lo": -15.0
+        },
+        "az_fold_h_width_deg": {
+          "hi": 40.0,
+          "lo": 8.0
+        },
+        "az_fold_v_deg": {
+          "hi": 10.0,
+          "lo": -25.0
+        },
+        "az_fold_v_width_deg": {
+          "hi": 40.0,
+          "lo": 8.0
+        },
+        "az_n_cos2_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_s_cos2_amp": {
+          "hi": -0.122676,
+          "lo": -0.25
+        },
+        "az_sf_a": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "az_sf_b": {
+          "hi": 0.8569,
+          "lo": 0.8569,
+          "search": false
+        },
+        "az_sf_m": {
+          "hi": 4.0,
+          "lo": 4.0,
+          "search": false
+        },
+        "az_sf_n1": {
+          "hi": 7.4958,
+          "lo": 7.4958,
+          "search": false
+        },
+        "az_sf_n2": {
+          "hi": 12.4449,
+          "lo": 12.4449,
+          "search": false
+        },
+        "az_sf_n3": {
+          "hi": 13.4442,
+          "lo": 13.4442,
+          "search": false
+        },
+        "exponent": {
+          "hi": 2.0,
+          "lo": 2.0,
+          "search": false
+        },
+        "k": {
+          "hi": 2.81254,
+          "lo": 2.16454
+        },
+        "morph_allow_shrinkage": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_corner_mm": {
+          "hi": 46.3363,
+          "lo": 30.0
+        },
+        "morph_exponent": {
+          "hi": 4.0,
+          "lo": 4.0,
+          "search": false
+        },
+        "morph_fixed": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "morph_height_mm": {
+          "hi": 412.427,
+          "lo": 378.827
+        },
+        "morph_rate": {
+          "hi": 4.34408,
+          "lo": 3.14408
+        },
+        "morph_target": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_width_mm": {
+          "hi": 588.329,
+          "lo": 559.529
+        },
+        "n": {
+          "hi": 6.56958,
+          "lo": 4.64958
+        },
+        "q": {
+          "hi": 0.974949,
+          "lo": 0.950949
+        },
+        "r0_mm": {
+          "hi": 18.0,
+          "lo": 18.0,
+          "search": false
+        },
+        "s": {
+          "hi": 1.009626,
+          "lo": 0.769626
+        },
+        "s1": {
+          "hi": 1.1799,
+          "lo": 1.1799,
+          "search": false
+        },
+        "s2": {
+          "hi": 0.0286,
+          "lo": 0.0286,
+          "search": false
+        }
+      },
+      "bounds_fingerprint_sha256": "0e9b0d0a54abec10a6a63fbf2c836a8d20f785c065e08e72e1ab3d46e05f58eb",
+      "brief": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7.yaml",
+      "brief_sha256": "7d7d2d0cf0480d41f81e1b4970d17e05a4da66bb94dc0ce496d6726185910fe9",
+      "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\home_landscape_2026-11-15\\hl__osse_rrect_fold_warm_v7.yaml",
+      "config_sha256": "09688f4a9c3741a7d92a88b688cd1a2d48146123f7b4647575746596c062396a",
+      "directivity_tags": {
+        "brief": null,
+        "config": null,
+        "status": "untagged_or_unrecognized"
+      },
+      "family": "OSSE",
+      "fidelity": {
+        "budget_profile": null,
+        "grid": {
+          "screen_extra_hz": [
+            250.0,
+            315.0,
+            400.0,
+            2573.0,
+            3311.0,
+            4260.0
+          ],
+          "verify_points_per_octave": 6.0
+        },
+        "mesh": {
+          "dof_cap_final": 24000,
+          "dof_cap_screen": 24000,
+          "dof_cap_verify": 24000,
+          "dof_per_triangle": 0.51,
+          "epw": 6.0,
+          "quadrants": "1",
+          "rear_res_factor": 1.5
+        },
+        "mode": "screen",
+        "solve": {
+          "angle_count": 73,
+          "backend": "beat_cuda",
+          "balloon": true,
+          "balloon_points_screen": 512,
+          "balloon_points_verify": 1024,
+          "cuda_fused": true,
+          "distance_m": 10.0,
+          "gmres_tol": 1e-05,
+          "timeout_s": 900
+        }
+      },
+      "fidelity_fingerprint_sha256": "9975b8c7da98b904375a92530beff9741ad63570c00a31cbbbe65960f1a83de9",
+      "id": "d_warm_s9012",
+      "score": {
+        "objective": {
+          "bw8k_floor": 0.75,
+          "cov_below_f0": "mask",
+          "cov_narrow_ratio": 2.0,
+          "cov_v_weight": 0.5,
+          "diag_reference": "round",
+          "flat_band": "scored",
+          "lfp_crossover_ratio": 1.6,
+          "lfp_re_z": 0.2,
+          "loaded_re_z": 0.5,
+          "tolerances": {
+            "cov": 3.0,
+            "di": 0.4,
+            "diag": 2.0,
+            "dislope": 9.0,
+            "distd": 2.0,
+            "flat": 1.5,
+            "flat_cv": 1.5,
+            "load": 0.3,
+            "rip": 1.0
+          },
+          "version": 7
+        },
+        "objective_version": 7,
+        "target": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "coverage_h_deg": 80.0,
+          "coverage_v_deg": 50.0,
+          "di_slope_target": 0.0,
+          "di_target_db": null,
+          "driver_exit_radius_mm": 18.0,
+          "f0_hz": 700.0,
+          "f0_v_hz": 700.0,
+          "freq_weights": {
+            "band_hz": [
+              [
+                2500.0,
+                5500.0,
+                2.0
+              ]
+            ]
+          },
+          "loaded_hi_hz": 5600.0,
+          "z_min": 0.5
+        },
+        "weights": {
+          "cov": 1.0,
+          "di": 0.3,
+          "diag": 1.0,
+          "dislope": 1.0,
+          "distd": 0.5,
+          "flat": 0.5,
+          "flat_cv": 1.0,
+          "load": 1.0,
+          "rip": 1.0
+        }
+      },
+      "score_fingerprint_sha256": "748fd111fab59b05017be2d3547caaeb1de8037a8a9296130a19895ff1188d95",
+      "status": "resolved",
+      "task": null
+    },
+    {
+      "acoustic_review": "manual_review_required_not_certified",
+      "argv": [
+        ".venv/Scripts/hornlab-search.exe",
+        "search",
+        "--config",
+        "examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_fold_warm_v7.yaml",
+        "--mode",
+        "screen",
+        "--budget",
+        "120",
+        "--cma-seed",
+        "3456"
+      ],
+      "bounds": {
+        "L_mm": {
+          "hi": 271.912,
+          "lo": 228.712
+        },
+        "a0_deg": {
+          "hi": 2.4866,
+          "lo": 2.0066
+        },
+        "a_deg": {
+          "hi": 40.0,
+          "lo": 36.3038
+        },
+        "aspect_ratio": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "az_a_cos_amp": {
+          "hi": 11.73355,
+          "lo": 8.13355
+        },
+        "az_a_cos_pow": {
+          "hi": 2.43779,
+          "lo": 1.23779
+        },
+        "az_a_sf_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_fold_h_deg": {
+          "hi": 0.0,
+          "lo": -15.0
+        },
+        "az_fold_h_width_deg": {
+          "hi": 40.0,
+          "lo": 8.0
+        },
+        "az_fold_v_deg": {
+          "hi": 10.0,
+          "lo": -25.0
+        },
+        "az_fold_v_width_deg": {
+          "hi": 40.0,
+          "lo": 8.0
+        },
+        "az_n_cos2_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_s_cos2_amp": {
+          "hi": -0.122676,
+          "lo": -0.25
+        },
+        "az_sf_a": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "az_sf_b": {
+          "hi": 0.8569,
+          "lo": 0.8569,
+          "search": false
+        },
+        "az_sf_m": {
+          "hi": 4.0,
+          "lo": 4.0,
+          "search": false
+        },
+        "az_sf_n1": {
+          "hi": 7.4958,
+          "lo": 7.4958,
+          "search": false
+        },
+        "az_sf_n2": {
+          "hi": 12.4449,
+          "lo": 12.4449,
+          "search": false
+        },
+        "az_sf_n3": {
+          "hi": 13.4442,
+          "lo": 13.4442,
+          "search": false
+        },
+        "exponent": {
+          "hi": 2.0,
+          "lo": 2.0,
+          "search": false
+        },
+        "k": {
+          "hi": 2.81254,
+          "lo": 2.16454
+        },
+        "morph_allow_shrinkage": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_corner_mm": {
+          "hi": 46.3363,
+          "lo": 30.0
+        },
+        "morph_exponent": {
+          "hi": 4.0,
+          "lo": 4.0,
+          "search": false
+        },
+        "morph_fixed": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "morph_height_mm": {
+          "hi": 412.427,
+          "lo": 378.827
+        },
+        "morph_rate": {
+          "hi": 4.34408,
+          "lo": 3.14408
+        },
+        "morph_target": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_width_mm": {
+          "hi": 588.329,
+          "lo": 559.529
+        },
+        "n": {
+          "hi": 6.56958,
+          "lo": 4.64958
+        },
+        "q": {
+          "hi": 0.974949,
+          "lo": 0.950949
+        },
+        "r0_mm": {
+          "hi": 18.0,
+          "lo": 18.0,
+          "search": false
+        },
+        "s": {
+          "hi": 1.009626,
+          "lo": 0.769626
+        },
+        "s1": {
+          "hi": 1.1799,
+          "lo": 1.1799,
+          "search": false
+        },
+        "s2": {
+          "hi": 0.0286,
+          "lo": 0.0286,
+          "search": false
+        }
+      },
+      "bounds_fingerprint_sha256": "0e9b0d0a54abec10a6a63fbf2c836a8d20f785c065e08e72e1ab3d46e05f58eb",
+      "brief": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7.yaml",
+      "brief_sha256": "7d7d2d0cf0480d41f81e1b4970d17e05a4da66bb94dc0ce496d6726185910fe9",
+      "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\home_landscape_2026-11-15\\hl__osse_rrect_fold_warm_v7.yaml",
+      "config_sha256": "09688f4a9c3741a7d92a88b688cd1a2d48146123f7b4647575746596c062396a",
+      "directivity_tags": {
+        "brief": null,
+        "config": null,
+        "status": "untagged_or_unrecognized"
+      },
+      "family": "OSSE",
+      "fidelity": {
+        "budget_profile": null,
+        "grid": {
+          "screen_extra_hz": [
+            250.0,
+            315.0,
+            400.0,
+            2573.0,
+            3311.0,
+            4260.0
+          ],
+          "verify_points_per_octave": 6.0
+        },
+        "mesh": {
+          "dof_cap_final": 24000,
+          "dof_cap_screen": 24000,
+          "dof_cap_verify": 24000,
+          "dof_per_triangle": 0.51,
+          "epw": 6.0,
+          "quadrants": "1",
+          "rear_res_factor": 1.5
+        },
+        "mode": "screen",
+        "solve": {
+          "angle_count": 73,
+          "backend": "beat_cuda",
+          "balloon": true,
+          "balloon_points_screen": 512,
+          "balloon_points_verify": 1024,
+          "cuda_fused": true,
+          "distance_m": 10.0,
+          "gmres_tol": 1e-05,
+          "timeout_s": 900
+        }
+      },
+      "fidelity_fingerprint_sha256": "9975b8c7da98b904375a92530beff9741ad63570c00a31cbbbe65960f1a83de9",
+      "id": "d_warm_s3456",
+      "score": {
+        "objective": {
+          "bw8k_floor": 0.75,
+          "cov_below_f0": "mask",
+          "cov_narrow_ratio": 2.0,
+          "cov_v_weight": 0.5,
+          "diag_reference": "round",
+          "flat_band": "scored",
+          "lfp_crossover_ratio": 1.6,
+          "lfp_re_z": 0.2,
+          "loaded_re_z": 0.5,
+          "tolerances": {
+            "cov": 3.0,
+            "di": 0.4,
+            "diag": 2.0,
+            "dislope": 9.0,
+            "distd": 2.0,
+            "flat": 1.5,
+            "flat_cv": 1.5,
+            "load": 0.3,
+            "rip": 1.0
+          },
+          "version": 7
+        },
+        "objective_version": 7,
+        "target": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "coverage_h_deg": 80.0,
+          "coverage_v_deg": 50.0,
+          "di_slope_target": 0.0,
+          "di_target_db": null,
+          "driver_exit_radius_mm": 18.0,
+          "f0_hz": 700.0,
+          "f0_v_hz": 700.0,
+          "freq_weights": {
+            "band_hz": [
+              [
+                2500.0,
+                5500.0,
+                2.0
+              ]
+            ]
+          },
+          "loaded_hi_hz": 5600.0,
+          "z_min": 0.5
+        },
+        "weights": {
+          "cov": 1.0,
+          "di": 0.3,
+          "diag": 1.0,
+          "dislope": 1.0,
+          "distd": 0.5,
+          "flat": 0.5,
+          "flat_cv": 1.0,
+          "load": 1.0,
+          "rip": 1.0
+        }
+      },
+      "score_fingerprint_sha256": "748fd111fab59b05017be2d3547caaeb1de8037a8a9296130a19895ff1188d95",
+      "status": "resolved",
+      "task": null
+    },
+    {
+      "acoustic_review": "manual_review_required_not_certified",
+      "argv": [
+        ".venv/Scripts/python.exe",
+        "-m",
+        "tools.analysis.study_cohort",
+        "--config",
+        "examples/typologies/home_landscape_2026-11-15/hl__ath_tritonia_landscape_v8.yaml",
+        "--dataset",
+        "dataset",
+        "--out",
+        "runs/home_day_2026-11-16/cohort_trit"
+      ],
+      "bounds": {
+        "L_mm": {
+          "hi": 400.0,
+          "lo": 140.0
+        },
+        "a0_deg": {
+          "hi": 11.0,
+          "lo": 5.0
+        },
+        "a_deg": {
+          "hi": 56.0,
+          "lo": 44.0
+        },
+        "aspect_ratio": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "az_a_cos2p_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_a_cos2p_pow": {
+          "hi": 5.0,
+          "lo": 5.0,
+          "search": false
+        },
+        "az_a_cos_amp": {
+          "hi": -13.5,
+          "lo": -22.0
+        },
+        "az_a_cos_pow": {
+          "hi": 2.0,
+          "lo": 2.0,
+          "search": false
+        },
+        "az_fold_h_deg": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_fold_h_width_deg": {
+          "hi": 20.0,
+          "lo": 20.0,
+          "search": false
+        },
+        "az_fold_v_deg": {
+          "hi": -27.5,
+          "lo": -31.0
+        },
+        "az_fold_v_width_deg": {
+          "hi": 25.5,
+          "lo": 21.5
+        },
+        "az_n_cos2_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_s_cos2_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "exponent": {
+          "hi": 2.0,
+          "lo": 2.0,
+          "search": false
+        },
+        "k": {
+          "hi": 1.3,
+          "lo": 0.9
+        },
+        "morph_allow_shrinkage": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_corner_mm": {
+          "hi": 30.0,
+          "lo": 10.0
+        },
+        "morph_exponent": {
+          "hi": 4.0,
+          "lo": 4.0,
+          "search": false
+        },
+        "morph_fixed": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "morph_height_mm": {
+          "hi": 480.0,
+          "lo": 250.0
+        },
+        "morph_rate": {
+          "hi": 2.1,
+          "lo": 0.6
+        },
+        "morph_target": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_width_mm": {
+          "hi": 590.0,
+          "lo": 330.0
+        },
+        "n": {
+          "hi": 7.5,
+          "lo": 4.0
+        },
+        "q": {
+          "hi": 0.995,
+          "lo": 0.97
+        },
+        "r0_mm": {
+          "hi": 18.0,
+          "lo": 18.0,
+          "search": false
+        },
+        "s": {
+          "hi": 1.04,
+          "lo": 0.92
+        },
+        "s1": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "s2": {
+          "hi": 0.015,
+          "lo": 0.015,
+          "search": false
+        }
+      },
+      "bounds_fingerprint_sha256": "f08992c61472e023765738f7072a2e7c74354206fceba3b3e402a12256a10c3b",
+      "brief": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7.yaml",
+      "brief_sha256": "7d7d2d0cf0480d41f81e1b4970d17e05a4da66bb94dc0ce496d6726185910fe9",
+      "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\home_landscape_2026-11-15\\hl__ath_tritonia_landscape_v8.yaml",
+      "config_sha256": "11b5b733f09fa40809cbb544e844c8aae4dfba5d65ae4385eb64d7575b4d24d8",
+      "directivity_tags": {
+        "brief": null,
+        "config": null,
+        "status": "untagged_or_unrecognized"
+      },
+      "family": "OSSE",
+      "fidelity": {
+        "budget_profile": null,
+        "grid": {
+          "screen_extra_hz": [
+            250.0,
+            315.0,
+            400.0,
+            2573.0,
+            3311.0,
+            4260.0
+          ],
+          "verify_points_per_octave": 6.0
+        },
+        "mesh": {
+          "dof_cap_final": 24000,
+          "dof_cap_screen": 24000,
+          "dof_cap_verify": 24000,
+          "dof_per_triangle": 0.51,
+          "epw": 6.0,
+          "quadrants": "1"
+        },
+        "mode": null,
+        "solve": {
+          "angle_count": 73,
+          "backend": "beat_cuda",
+          "balloon": true,
+          "balloon_points_screen": 512,
+          "balloon_points_verify": 1024,
+          "cuda_fused": true,
+          "distance_m": 10.0,
+          "gmres_tol": 1e-05,
+          "timeout_s": 900
+        }
+      },
+      "fidelity_fingerprint_sha256": "c48879e46ceacc9e28b5b062c97b151cf04af348ad5fffbe6604fd5dced3f78e",
+      "id": "d_cohort_trit",
+      "score": {
+        "objective": {
+          "bw8k_floor": 0.75,
+          "cov_below_f0": "mask",
+          "cov_narrow_ratio": 2.0,
+          "cov_v_weight": 0.5,
+          "diag_reference": "round",
+          "flat_band": "scored",
+          "lfp_crossover_ratio": 1.6,
+          "lfp_re_z": 0.2,
+          "loaded_re_z": 0.5,
+          "tolerances": {
+            "cov": 3.0,
+            "di": 0.4,
+            "diag": 2.0,
+            "dislope": 9.0,
+            "distd": 2.0,
+            "flat": 1.5,
+            "flat_cv": 1.5,
+            "load": 0.3,
+            "rip": 1.0
+          },
+          "version": 7
+        },
+        "objective_version": 7,
+        "target": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "coverage_h_deg": 80.0,
+          "coverage_v_deg": 50.0,
+          "di_slope_target": 0.0,
+          "di_target_db": null,
+          "driver_exit_radius_mm": 18.0,
+          "f0_hz": 700.0,
+          "f0_v_hz": 700.0,
+          "freq_weights": {
+            "band_hz": [
+              [
+                2500.0,
+                5500.0,
+                2.0
+              ]
+            ]
+          },
+          "loaded_hi_hz": 5600.0,
+          "z_min": 0.5
+        },
+        "weights": {
+          "cov": 1.0,
+          "di": 0.3,
+          "diag": 1.0,
+          "dislope": 1.0,
+          "distd": 0.5,
+          "flat": 0.5,
+          "flat_cv": 1.0,
+          "load": 1.0,
+          "rip": 1.0
+        }
+      },
+      "score_fingerprint_sha256": "748fd111fab59b05017be2d3547caaeb1de8037a8a9296130a19895ff1188d95",
+      "status": "resolved",
+      "task": null
+    },
+    {
+      "acoustic_review": "manual_review_required_not_certified",
+      "argv": [
+        "C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe",
+        "tools/bo_compare/prepare_study.py",
+        "--root",
+        "runs/home_day_2026-11-16/turbo_trit_s85001",
+        "--cohort",
+        "runs/home_day_2026-11-16/cohort_trit",
+        "--config",
+        "examples/typologies/home_landscape_2026-11-15/hl__ath_tritonia_landscape_v8.yaml",
+        "--policy",
+        "turbo",
+        "--budget-profile",
+        "comparison-60",
+        "--min-rows",
+        "100",
+        "--seed",
+        "85001",
+        "--deadline-hours",
+        "6",
+        "--label",
+        "d_turbo_trit"
+      ],
+      "bounds": {
+        "L_mm": {
+          "hi": 400.0,
+          "lo": 140.0
+        },
+        "a0_deg": {
+          "hi": 11.0,
+          "lo": 5.0
+        },
+        "a_deg": {
+          "hi": 56.0,
+          "lo": 44.0
+        },
+        "aspect_ratio": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "az_a_cos2p_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_a_cos2p_pow": {
+          "hi": 5.0,
+          "lo": 5.0,
+          "search": false
+        },
+        "az_a_cos_amp": {
+          "hi": -13.5,
+          "lo": -22.0
+        },
+        "az_a_cos_pow": {
+          "hi": 2.0,
+          "lo": 2.0,
+          "search": false
+        },
+        "az_fold_h_deg": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_fold_h_width_deg": {
+          "hi": 20.0,
+          "lo": 20.0,
+          "search": false
+        },
+        "az_fold_v_deg": {
+          "hi": -27.5,
+          "lo": -31.0
+        },
+        "az_fold_v_width_deg": {
+          "hi": 25.5,
+          "lo": 21.5
+        },
+        "az_n_cos2_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_s_cos2_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "exponent": {
+          "hi": 2.0,
+          "lo": 2.0,
+          "search": false
+        },
+        "k": {
+          "hi": 1.3,
+          "lo": 0.9
+        },
+        "morph_allow_shrinkage": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_corner_mm": {
+          "hi": 30.0,
+          "lo": 10.0
+        },
+        "morph_exponent": {
+          "hi": 4.0,
+          "lo": 4.0,
+          "search": false
+        },
+        "morph_fixed": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "morph_height_mm": {
+          "hi": 480.0,
+          "lo": 250.0
+        },
+        "morph_rate": {
+          "hi": 2.1,
+          "lo": 0.6
+        },
+        "morph_target": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_width_mm": {
+          "hi": 590.0,
+          "lo": 330.0
+        },
+        "n": {
+          "hi": 7.5,
+          "lo": 4.0
+        },
+        "q": {
+          "hi": 0.995,
+          "lo": 0.97
+        },
+        "r0_mm": {
+          "hi": 18.0,
+          "lo": 18.0,
+          "search": false
+        },
+        "s": {
+          "hi": 1.04,
+          "lo": 0.92
+        },
+        "s1": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "s2": {
+          "hi": 0.015,
+          "lo": 0.015,
+          "search": false
+        }
+      },
+      "bounds_fingerprint_sha256": "f08992c61472e023765738f7072a2e7c74354206fceba3b3e402a12256a10c3b",
+      "brief": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7.yaml",
+      "brief_sha256": "7d7d2d0cf0480d41f81e1b4970d17e05a4da66bb94dc0ce496d6726185910fe9",
+      "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\home_landscape_2026-11-15\\hl__ath_tritonia_landscape_v8.yaml",
+      "config_sha256": "11b5b733f09fa40809cbb544e844c8aae4dfba5d65ae4385eb64d7575b4d24d8",
+      "directivity_tags": {
+        "brief": null,
+        "config": null,
+        "status": "untagged_or_unrecognized"
+      },
+      "family": "OSSE",
+      "fidelity": {
+        "budget_profile": "comparison-60",
+        "grid": {
+          "screen_extra_hz": [
+            250.0,
+            315.0,
+            400.0,
+            2573.0,
+            3311.0,
+            4260.0
+          ],
+          "verify_points_per_octave": 6.0
+        },
+        "mesh": {
+          "dof_cap_final": 24000,
+          "dof_cap_screen": 24000,
+          "dof_cap_verify": 24000,
+          "dof_per_triangle": 0.51,
+          "epw": 6.0,
+          "quadrants": "1"
+        },
+        "mode": null,
+        "solve": {
+          "angle_count": 73,
+          "backend": "beat_cuda",
+          "balloon": true,
+          "balloon_points_screen": 512,
+          "balloon_points_verify": 1024,
+          "cuda_fused": true,
+          "distance_m": 10.0,
+          "gmres_tol": 1e-05,
+          "timeout_s": 900
+        }
+      },
+      "fidelity_fingerprint_sha256": "f71dabf1fe999425044684b8431eaa07aad5ac4962d6b353802bed054e0b81f1",
+      "id": "prep_d_turbo_trit",
+      "score": {
+        "objective": {
+          "bw8k_floor": 0.75,
+          "cov_below_f0": "mask",
+          "cov_narrow_ratio": 2.0,
+          "cov_v_weight": 0.5,
+          "diag_reference": "round",
+          "flat_band": "scored",
+          "lfp_crossover_ratio": 1.6,
+          "lfp_re_z": 0.2,
+          "loaded_re_z": 0.5,
+          "tolerances": {
+            "cov": 3.0,
+            "di": 0.4,
+            "diag": 2.0,
+            "dislope": 9.0,
+            "distd": 2.0,
+            "flat": 1.5,
+            "flat_cv": 1.5,
+            "load": 0.3,
+            "rip": 1.0
+          },
+          "version": 7
+        },
+        "objective_version": 7,
+        "target": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "coverage_h_deg": 80.0,
+          "coverage_v_deg": 50.0,
+          "di_slope_target": 0.0,
+          "di_target_db": null,
+          "driver_exit_radius_mm": 18.0,
+          "f0_hz": 700.0,
+          "f0_v_hz": 700.0,
+          "freq_weights": {
+            "band_hz": [
+              [
+                2500.0,
+                5500.0,
+                2.0
+              ]
+            ]
+          },
+          "loaded_hi_hz": 5600.0,
+          "z_min": 0.5
+        },
+        "weights": {
+          "cov": 1.0,
+          "di": 0.3,
+          "diag": 1.0,
+          "dislope": 1.0,
+          "distd": 0.5,
+          "flat": 0.5,
+          "flat_cv": 1.0,
+          "load": 1.0,
+          "rip": 1.0
+        }
+      },
+      "score_fingerprint_sha256": "748fd111fab59b05017be2d3547caaeb1de8037a8a9296130a19895ff1188d95",
+      "status": "resolved",
+      "task": null
+    },
+    {
+      "argv": [
+        "C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe",
+        "-m",
+        "hornlab_search.studies.cli",
+        "run",
+        "--root",
+        "runs/home_day_2026-11-16/turbo_trit_s85001",
+        "--package",
+        "package.json",
+        "--execute",
+        "--project-root",
+        "C:/Users/hunte/Hrns/hornlab-search"
+      ],
+      "id": "d_turbo_trit",
+      "reason": "No explicit --config or --task; review package, source job, or verification inputs.",
+      "status": "indirect_or_non_scoring"
+    },
+    {
+      "acoustic_review": "manual_review_required_not_certified",
+      "argv": [
+        ".venv/Scripts/python.exe",
+        "tools/geometry/rosse_rect_cli.py",
+        "search",
+        "--config",
+        "examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml",
+        "--mode",
+        "screen",
+        "--budget",
+        "96",
+        "--cma-seed",
+        "1234"
+      ],
+      "bounds": {
+        "g_a_diag_deg": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "g_a_h_deg": {
+          "hi": 46.0,
+          "lo": 32.0
+        },
+        "g_a_v_deg": {
+          "hi": 30.0,
+          "lo": 12.0
+        },
+        "g_b": {
+          "hi": 0.4,
+          "lo": 0.0
+        },
+        "g_height_mm": {
+          "hi": 420.0,
+          "lo": 280.0
+        },
+        "g_k": {
+          "hi": 3.0,
+          "lo": 0.5
+        },
+        "g_m": {
+          "hi": 0.85,
+          "lo": 0.85,
+          "search": false
+        },
+        "g_q": {
+          "hi": 3.0,
+          "lo": 3.0,
+          "search": false
+        },
+        "g_r": {
+          "hi": 0.6,
+          "lo": 0.1
+        },
+        "g_rect_exponent": {
+          "hi": 8.0,
+          "lo": 2.5
+        },
+        "g_tmax": {
+          "hi": 1.0,
+          "lo": 0.85
+        },
+        "g_width_mm": {
+          "hi": 590.0,
+          "lo": 480.0
+        }
+      },
+      "bounds_fingerprint_sha256": "6fb217881850190c273e090bf14857f54a1ac6071ac8873b416b0600355d2c43",
+      "brief": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7.yaml",
+      "brief_sha256": "7d7d2d0cf0480d41f81e1b4970d17e05a4da66bb94dc0ce496d6726185910fe9",
+      "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\home_landscape_2026-11-15\\hl__rosse_rect_cd_v7.yaml",
+      "config_sha256": "d7da7a9e33e2dcf709c99287e83f0ec1db55694037bbcdec4684020f9d3f4b04",
+      "directivity_tags": {
+        "brief": null,
+        "config": null,
+        "status": "untagged_or_unrecognized"
+      },
+      "family": "FREEFORM",
+      "fidelity": {
+        "budget_profile": null,
+        "grid": {
+          "screen_extra_hz": [
+            250.0,
+            315.0,
+            400.0,
+            2573.0,
+            3311.0,
+            4260.0
+          ],
+          "verify_points_per_octave": 6.0
+        },
+        "mesh": {
+          "dof_cap_final": 24000,
+          "dof_cap_screen": 24000,
+          "dof_cap_verify": 24000,
+          "dof_per_triangle": 0.51,
+          "epw": 6.0,
+          "quadrants": "1"
+        },
+        "mode": "screen",
+        "solve": {
+          "angle_count": 73,
+          "backend": "beat_cuda",
+          "balloon": true,
+          "balloon_points_screen": 512,
+          "balloon_points_verify": 1024,
+          "cuda_fused": true,
+          "distance_m": 10.0,
+          "gmres_tol": 1e-05,
+          "timeout_s": 900
+        }
+      },
+      "fidelity_fingerprint_sha256": "0adc7233cd867f2fae269fdd8dc0590e80113c43ff0078e7c06bb0a21cb8c1f2",
+      "id": "d_rosse_s1234",
+      "score": {
+        "objective": {
+          "bw8k_floor": 0.75,
+          "cov_below_f0": "mask",
+          "cov_narrow_ratio": 2.0,
+          "cov_v_weight": 0.5,
+          "diag_reference": "round",
+          "flat_band": "scored",
+          "lfp_crossover_ratio": 1.6,
+          "lfp_re_z": 0.2,
+          "loaded_re_z": 0.5,
+          "tolerances": {
+            "cov": 3.0,
+            "di": 0.4,
+            "diag": 2.0,
+            "dislope": 9.0,
+            "distd": 2.0,
+            "flat": 1.5,
+            "flat_cv": 1.5,
+            "load": 0.3,
+            "rip": 1.0
+          },
+          "version": 7
+        },
+        "objective_version": 7,
+        "target": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "coverage_h_deg": 80.0,
+          "coverage_v_deg": 50.0,
+          "di_slope_target": 0.0,
+          "di_target_db": null,
+          "driver_exit_radius_mm": 18.0,
+          "f0_hz": 700.0,
+          "f0_v_hz": 700.0,
+          "freq_weights": {
+            "band_hz": [
+              [
+                2500.0,
+                5500.0,
+                2.0
+              ]
+            ]
+          },
+          "loaded_hi_hz": 5600.0,
+          "z_min": 0.5
+        },
+        "weights": {
+          "cov": 1.0,
+          "di": 0.3,
+          "diag": 1.0,
+          "dislope": 1.0,
+          "distd": 0.5,
+          "flat": 0.5,
+          "flat_cv": 1.0,
+          "load": 1.0,
+          "rip": 1.0
+        }
+      },
+      "score_fingerprint_sha256": "748fd111fab59b05017be2d3547caaeb1de8037a8a9296130a19895ff1188d95",
+      "status": "resolved",
+      "task": null
+    },
+    {
+      "acoustic_review": "manual_review_required_not_certified",
+      "argv": [
+        ".venv/Scripts/python.exe",
+        "tools/geometry/rosse_rect_cli.py",
+        "search",
+        "--config",
+        "examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml",
+        "--mode",
+        "screen",
+        "--budget",
+        "96",
+        "--cma-seed",
+        "5678"
+      ],
+      "bounds": {
+        "g_a_diag_deg": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "g_a_h_deg": {
+          "hi": 46.0,
+          "lo": 32.0
+        },
+        "g_a_v_deg": {
+          "hi": 30.0,
+          "lo": 12.0
+        },
+        "g_b": {
+          "hi": 0.4,
+          "lo": 0.0
+        },
+        "g_height_mm": {
+          "hi": 420.0,
+          "lo": 280.0
+        },
+        "g_k": {
+          "hi": 3.0,
+          "lo": 0.5
+        },
+        "g_m": {
+          "hi": 0.85,
+          "lo": 0.85,
+          "search": false
+        },
+        "g_q": {
+          "hi": 3.0,
+          "lo": 3.0,
+          "search": false
+        },
+        "g_r": {
+          "hi": 0.6,
+          "lo": 0.1
+        },
+        "g_rect_exponent": {
+          "hi": 8.0,
+          "lo": 2.5
+        },
+        "g_tmax": {
+          "hi": 1.0,
+          "lo": 0.85
+        },
+        "g_width_mm": {
+          "hi": 590.0,
+          "lo": 480.0
+        }
+      },
+      "bounds_fingerprint_sha256": "6fb217881850190c273e090bf14857f54a1ac6071ac8873b416b0600355d2c43",
+      "brief": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7.yaml",
+      "brief_sha256": "7d7d2d0cf0480d41f81e1b4970d17e05a4da66bb94dc0ce496d6726185910fe9",
+      "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\home_landscape_2026-11-15\\hl__rosse_rect_cd_v7.yaml",
+      "config_sha256": "d7da7a9e33e2dcf709c99287e83f0ec1db55694037bbcdec4684020f9d3f4b04",
+      "directivity_tags": {
+        "brief": null,
+        "config": null,
+        "status": "untagged_or_unrecognized"
+      },
+      "family": "FREEFORM",
+      "fidelity": {
+        "budget_profile": null,
+        "grid": {
+          "screen_extra_hz": [
+            250.0,
+            315.0,
+            400.0,
+            2573.0,
+            3311.0,
+            4260.0
+          ],
+          "verify_points_per_octave": 6.0
+        },
+        "mesh": {
+          "dof_cap_final": 24000,
+          "dof_cap_screen": 24000,
+          "dof_cap_verify": 24000,
+          "dof_per_triangle": 0.51,
+          "epw": 6.0,
+          "quadrants": "1"
+        },
+        "mode": "screen",
+        "solve": {
+          "angle_count": 73,
+          "backend": "beat_cuda",
+          "balloon": true,
+          "balloon_points_screen": 512,
+          "balloon_points_verify": 1024,
+          "cuda_fused": true,
+          "distance_m": 10.0,
+          "gmres_tol": 1e-05,
+          "timeout_s": 900
+        }
+      },
+      "fidelity_fingerprint_sha256": "0adc7233cd867f2fae269fdd8dc0590e80113c43ff0078e7c06bb0a21cb8c1f2",
+      "id": "d_rosse_s5678",
+      "score": {
+        "objective": {
+          "bw8k_floor": 0.75,
+          "cov_below_f0": "mask",
+          "cov_narrow_ratio": 2.0,
+          "cov_v_weight": 0.5,
+          "diag_reference": "round",
+          "flat_band": "scored",
+          "lfp_crossover_ratio": 1.6,
+          "lfp_re_z": 0.2,
+          "loaded_re_z": 0.5,
+          "tolerances": {
+            "cov": 3.0,
+            "di": 0.4,
+            "diag": 2.0,
+            "dislope": 9.0,
+            "distd": 2.0,
+            "flat": 1.5,
+            "flat_cv": 1.5,
+            "load": 0.3,
+            "rip": 1.0
+          },
+          "version": 7
+        },
+        "objective_version": 7,
+        "target": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "coverage_h_deg": 80.0,
+          "coverage_v_deg": 50.0,
+          "di_slope_target": 0.0,
+          "di_target_db": null,
+          "driver_exit_radius_mm": 18.0,
+          "f0_hz": 700.0,
+          "f0_v_hz": 700.0,
+          "freq_weights": {
+            "band_hz": [
+              [
+                2500.0,
+                5500.0,
+                2.0
+              ]
+            ]
+          },
+          "loaded_hi_hz": 5600.0,
+          "z_min": 0.5
+        },
+        "weights": {
+          "cov": 1.0,
+          "di": 0.3,
+          "diag": 1.0,
+          "dislope": 1.0,
+          "distd": 0.5,
+          "flat": 0.5,
+          "flat_cv": 1.0,
+          "load": 1.0,
+          "rip": 1.0
+        }
+      },
+      "score_fingerprint_sha256": "748fd111fab59b05017be2d3547caaeb1de8037a8a9296130a19895ff1188d95",
+      "status": "resolved",
+      "task": null
+    },
+    {
+      "acoustic_review": "manual_review_required_not_certified",
+      "argv": [
+        "C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe",
+        "tools/night_queue/run_bo_arm.py",
+        "--root",
+        "runs/home_day_2026-11-16/turbo_warm_80x2",
+        "--cohort",
+        "runs/home_day_2026-11-16/cohort_warm_80x2",
+        "--config",
+        "examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_fold_warm_v7.yaml",
+        "--refresh-cohort",
+        "--policy",
+        "turbo",
+        "--seed",
+        "85002",
+        "--budget-profile",
+        "comparison-80x2"
+      ],
+      "bounds": {
+        "L_mm": {
+          "hi": 271.912,
+          "lo": 228.712
+        },
+        "a0_deg": {
+          "hi": 2.4866,
+          "lo": 2.0066
+        },
+        "a_deg": {
+          "hi": 40.0,
+          "lo": 36.3038
+        },
+        "aspect_ratio": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "az_a_cos_amp": {
+          "hi": 11.73355,
+          "lo": 8.13355
+        },
+        "az_a_cos_pow": {
+          "hi": 2.43779,
+          "lo": 1.23779
+        },
+        "az_a_sf_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_fold_h_deg": {
+          "hi": 0.0,
+          "lo": -15.0
+        },
+        "az_fold_h_width_deg": {
+          "hi": 40.0,
+          "lo": 8.0
+        },
+        "az_fold_v_deg": {
+          "hi": 10.0,
+          "lo": -25.0
+        },
+        "az_fold_v_width_deg": {
+          "hi": 40.0,
+          "lo": 8.0
+        },
+        "az_n_cos2_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_s_cos2_amp": {
+          "hi": -0.122676,
+          "lo": -0.25
+        },
+        "az_sf_a": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "az_sf_b": {
+          "hi": 0.8569,
+          "lo": 0.8569,
+          "search": false
+        },
+        "az_sf_m": {
+          "hi": 4.0,
+          "lo": 4.0,
+          "search": false
+        },
+        "az_sf_n1": {
+          "hi": 7.4958,
+          "lo": 7.4958,
+          "search": false
+        },
+        "az_sf_n2": {
+          "hi": 12.4449,
+          "lo": 12.4449,
+          "search": false
+        },
+        "az_sf_n3": {
+          "hi": 13.4442,
+          "lo": 13.4442,
+          "search": false
+        },
+        "exponent": {
+          "hi": 2.0,
+          "lo": 2.0,
+          "search": false
+        },
+        "k": {
+          "hi": 2.81254,
+          "lo": 2.16454
+        },
+        "morph_allow_shrinkage": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_corner_mm": {
+          "hi": 46.3363,
+          "lo": 30.0
+        },
+        "morph_exponent": {
+          "hi": 4.0,
+          "lo": 4.0,
+          "search": false
+        },
+        "morph_fixed": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "morph_height_mm": {
+          "hi": 412.427,
+          "lo": 378.827
+        },
+        "morph_rate": {
+          "hi": 4.34408,
+          "lo": 3.14408
+        },
+        "morph_target": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_width_mm": {
+          "hi": 588.329,
+          "lo": 559.529
+        },
+        "n": {
+          "hi": 6.56958,
+          "lo": 4.64958
+        },
+        "q": {
+          "hi": 0.974949,
+          "lo": 0.950949
+        },
+        "r0_mm": {
+          "hi": 18.0,
+          "lo": 18.0,
+          "search": false
+        },
+        "s": {
+          "hi": 1.009626,
+          "lo": 0.769626
+        },
+        "s1": {
+          "hi": 1.1799,
+          "lo": 1.1799,
+          "search": false
+        },
+        "s2": {
+          "hi": 0.0286,
+          "lo": 0.0286,
+          "search": false
+        }
+      },
+      "bounds_fingerprint_sha256": "0e9b0d0a54abec10a6a63fbf2c836a8d20f785c065e08e72e1ab3d46e05f58eb",
+      "brief": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7.yaml",
+      "brief_sha256": "7d7d2d0cf0480d41f81e1b4970d17e05a4da66bb94dc0ce496d6726185910fe9",
+      "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\home_landscape_2026-11-15\\hl__osse_rrect_fold_warm_v7.yaml",
+      "config_sha256": "09688f4a9c3741a7d92a88b688cd1a2d48146123f7b4647575746596c062396a",
+      "directivity_tags": {
+        "brief": null,
+        "config": null,
+        "status": "untagged_or_unrecognized"
+      },
+      "family": "OSSE",
+      "fidelity": {
+        "budget_profile": "comparison-80x2",
+        "grid": {
+          "screen_extra_hz": [
+            250.0,
+            315.0,
+            400.0,
+            2573.0,
+            3311.0,
+            4260.0
+          ],
+          "verify_points_per_octave": 6.0
+        },
+        "mesh": {
+          "dof_cap_final": 24000,
+          "dof_cap_screen": 24000,
+          "dof_cap_verify": 24000,
+          "dof_per_triangle": 0.51,
+          "epw": 6.0,
+          "quadrants": "1",
+          "rear_res_factor": 1.5
+        },
+        "mode": null,
+        "solve": {
+          "angle_count": 73,
+          "backend": "beat_cuda",
+          "balloon": true,
+          "balloon_points_screen": 512,
+          "balloon_points_verify": 1024,
+          "cuda_fused": true,
+          "distance_m": 10.0,
+          "gmres_tol": 1e-05,
+          "timeout_s": 900
+        }
+      },
+      "fidelity_fingerprint_sha256": "042f58410b298b160a4d9fe602639af9f0cc20960512fd52f1cab486f8feff1d",
+      "id": "d_turbo_warm",
+      "score": {
+        "objective": {
+          "bw8k_floor": 0.75,
+          "cov_below_f0": "mask",
+          "cov_narrow_ratio": 2.0,
+          "cov_v_weight": 0.5,
+          "diag_reference": "round",
+          "flat_band": "scored",
+          "lfp_crossover_ratio": 1.6,
+          "lfp_re_z": 0.2,
+          "loaded_re_z": 0.5,
+          "tolerances": {
+            "cov": 3.0,
+            "di": 0.4,
+            "diag": 2.0,
+            "dislope": 9.0,
+            "distd": 2.0,
+            "flat": 1.5,
+            "flat_cv": 1.5,
+            "load": 0.3,
+            "rip": 1.0
+          },
+          "version": 7
+        },
+        "objective_version": 7,
+        "target": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "coverage_h_deg": 80.0,
+          "coverage_v_deg": 50.0,
+          "di_slope_target": 0.0,
+          "di_target_db": null,
+          "driver_exit_radius_mm": 18.0,
+          "f0_hz": 700.0,
+          "f0_v_hz": 700.0,
+          "freq_weights": {
+            "band_hz": [
+              [
+                2500.0,
+                5500.0,
+                2.0
+              ]
+            ]
+          },
+          "loaded_hi_hz": 5600.0,
+          "z_min": 0.5
+        },
+        "weights": {
+          "cov": 1.0,
+          "di": 0.3,
+          "diag": 1.0,
+          "dislope": 1.0,
+          "distd": 0.5,
+          "flat": 0.5,
+          "flat_cv": 1.0,
+          "load": 1.0,
+          "rip": 1.0
+        }
+      },
+      "score_fingerprint_sha256": "748fd111fab59b05017be2d3547caaeb1de8037a8a9296130a19895ff1188d95",
+      "status": "resolved",
+      "task": null
+    },
+    {
+      "acoustic_review": "manual_review_required_not_certified",
+      "argv": [
+        ".venv/Scripts/hornlab-search.exe",
+        "search",
+        "--config",
+        "examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml",
+        "--mode",
+        "screen",
+        "--budget",
+        "96",
+        "--cma-seed",
+        "1234"
+      ],
+      "bounds": {
+        "g_L_mm": {
+          "hi": 285.0,
+          "lo": 200.0
+        },
+        "g_a_h_deg": {
+          "hi": 40.0,
+          "lo": 33.0
+        },
+        "g_a_v_deg": {
+          "hi": 28.0,
+          "lo": 20.0
+        },
+        "g_k": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "g_n": {
+          "hi": 3.2,
+          "lo": 1.8
+        },
+        "g_q": {
+          "hi": 0.996,
+          "lo": 0.996,
+          "search": false
+        },
+        "g_r_lip_mm": {
+          "hi": 30.0,
+          "lo": 8.0
+        },
+        "g_s": {
+          "hi": 0.45,
+          "lo": 0.2
+        },
+        "g_sf_ab": {
+          "hi": 0.9,
+          "lo": 0.7
+        },
+        "g_sf_amt": {
+          "hi": 0.38,
+          "lo": 0.15
+        },
+        "g_sf_m": {
+          "hi": 4,
+          "lo": 4,
+          "search": false
+        },
+        "g_sf_n1": {
+          "hi": 1.8,
+          "lo": 1.8,
+          "search": false
+        },
+        "g_sf_n2": {
+          "hi": 7.0,
+          "lo": 7.0,
+          "search": false
+        },
+        "g_sf_start": {
+          "hi": 0.25,
+          "lo": 0.25,
+          "search": false
+        },
+        "g_wrap_deg": {
+          "hi": 160.0,
+          "lo": 80.0
+        }
+      },
+      "bounds_fingerprint_sha256": "7aff9b5254aef0e644bbf576d7accb642e7b515c1769cb1519e16cab9f0014ba",
+      "brief": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7.yaml",
+      "brief_sha256": "7d7d2d0cf0480d41f81e1b4970d17e05a4da66bb94dc0ce496d6726185910fe9",
+      "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\home_landscape_2026-11-15\\hl__crowe_x_osse_cd_v7.yaml",
+      "config_sha256": "4e7f80cb26e917ed099d61ddac725c128bf79342e7babfb8d58d20aab830f76d",
+      "directivity_tags": {
+        "brief": null,
+        "config": null,
+        "status": "untagged_or_unrecognized"
+      },
+      "family": "FREEFORM",
+      "fidelity": {
+        "budget_profile": null,
+        "grid": {
+          "screen_extra_hz": [
+            250.0,
+            315.0,
+            400.0,
+            2573.0,
+            3311.0,
+            4260.0
+          ],
+          "verify_points_per_octave": 6.0
+        },
+        "mesh": {
+          "dof_cap_final": 24000,
+          "dof_cap_screen": 24000,
+          "dof_cap_verify": 24000,
+          "dof_per_triangle": 0.51,
+          "epw": 6.0,
+          "quadrants": "1"
+        },
+        "mode": "screen",
+        "solve": {
+          "angle_count": 73,
+          "backend": "beat_cuda",
+          "balloon": true,
+          "balloon_points_screen": 512,
+          "balloon_points_verify": 1024,
+          "cuda_fused": true,
+          "distance_m": 10.0,
+          "gmres_tol": 1e-05,
+          "timeout_s": 900
+        }
+      },
+      "fidelity_fingerprint_sha256": "0adc7233cd867f2fae269fdd8dc0590e80113c43ff0078e7c06bb0a21cb8c1f2",
+      "id": "d_crowex_s1234",
+      "score": {
+        "objective": {
+          "bw8k_floor": 0.75,
+          "cov_below_f0": "mask",
+          "cov_narrow_ratio": 2.0,
+          "cov_v_weight": 0.5,
+          "diag_reference": "round",
+          "flat_band": "scored",
+          "lfp_crossover_ratio": 1.6,
+          "lfp_re_z": 0.2,
+          "loaded_re_z": 0.5,
+          "tolerances": {
+            "cov": 3.0,
+            "di": 0.4,
+            "diag": 2.0,
+            "dislope": 9.0,
+            "distd": 2.0,
+            "flat": 1.5,
+            "flat_cv": 1.5,
+            "load": 0.3,
+            "rip": 1.0
+          },
+          "version": 7
+        },
+        "objective_version": 7,
+        "target": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "coverage_h_deg": 80.0,
+          "coverage_v_deg": 50.0,
+          "di_slope_target": 0.0,
+          "di_target_db": null,
+          "driver_exit_radius_mm": 18.0,
+          "f0_hz": 700.0,
+          "f0_v_hz": 700.0,
+          "freq_weights": {
+            "band_hz": [
+              [
+                2500.0,
+                5500.0,
+                2.0
+              ]
+            ]
+          },
+          "loaded_hi_hz": 5600.0,
+          "z_min": 0.5
+        },
+        "weights": {
+          "cov": 1.0,
+          "di": 0.3,
+          "diag": 1.0,
+          "dislope": 1.0,
+          "distd": 0.5,
+          "flat": 0.5,
+          "flat_cv": 1.0,
+          "load": 1.0,
+          "rip": 1.0
+        }
+      },
+      "score_fingerprint_sha256": "748fd111fab59b05017be2d3547caaeb1de8037a8a9296130a19895ff1188d95",
+      "status": "resolved",
+      "task": null
+    },
+    {
+      "acoustic_review": "manual_review_required_not_certified",
+      "argv": [
+        ".venv/Scripts/hornlab-search.exe",
+        "search",
+        "--config",
+        "examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_fold_warm_v7.yaml",
+        "--mode",
+        "screen",
+        "--budget",
+        "60",
+        "--cma-seed",
+        "85012"
+      ],
+      "bounds": {
+        "L_mm": {
+          "hi": 271.912,
+          "lo": 228.712
+        },
+        "a0_deg": {
+          "hi": 2.4866,
+          "lo": 2.0066
+        },
+        "a_deg": {
+          "hi": 40.0,
+          "lo": 36.3038
+        },
+        "aspect_ratio": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "az_a_cos_amp": {
+          "hi": 11.73355,
+          "lo": 8.13355
+        },
+        "az_a_cos_pow": {
+          "hi": 2.43779,
+          "lo": 1.23779
+        },
+        "az_a_sf_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_fold_h_deg": {
+          "hi": 0.0,
+          "lo": -15.0
+        },
+        "az_fold_h_width_deg": {
+          "hi": 40.0,
+          "lo": 8.0
+        },
+        "az_fold_v_deg": {
+          "hi": 10.0,
+          "lo": -25.0
+        },
+        "az_fold_v_width_deg": {
+          "hi": 40.0,
+          "lo": 8.0
+        },
+        "az_n_cos2_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_s_cos2_amp": {
+          "hi": -0.122676,
+          "lo": -0.25
+        },
+        "az_sf_a": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "az_sf_b": {
+          "hi": 0.8569,
+          "lo": 0.8569,
+          "search": false
+        },
+        "az_sf_m": {
+          "hi": 4.0,
+          "lo": 4.0,
+          "search": false
+        },
+        "az_sf_n1": {
+          "hi": 7.4958,
+          "lo": 7.4958,
+          "search": false
+        },
+        "az_sf_n2": {
+          "hi": 12.4449,
+          "lo": 12.4449,
+          "search": false
+        },
+        "az_sf_n3": {
+          "hi": 13.4442,
+          "lo": 13.4442,
+          "search": false
+        },
+        "exponent": {
+          "hi": 2.0,
+          "lo": 2.0,
+          "search": false
+        },
+        "k": {
+          "hi": 2.81254,
+          "lo": 2.16454
+        },
+        "morph_allow_shrinkage": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_corner_mm": {
+          "hi": 46.3363,
+          "lo": 30.0
+        },
+        "morph_exponent": {
+          "hi": 4.0,
+          "lo": 4.0,
+          "search": false
+        },
+        "morph_fixed": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "morph_height_mm": {
+          "hi": 412.427,
+          "lo": 378.827
+        },
+        "morph_rate": {
+          "hi": 4.34408,
+          "lo": 3.14408
+        },
+        "morph_target": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_width_mm": {
+          "hi": 588.329,
+          "lo": 559.529
+        },
+        "n": {
+          "hi": 6.56958,
+          "lo": 4.64958
+        },
+        "q": {
+          "hi": 0.974949,
+          "lo": 0.950949
+        },
+        "r0_mm": {
+          "hi": 18.0,
+          "lo": 18.0,
+          "search": false
+        },
+        "s": {
+          "hi": 1.009626,
+          "lo": 0.769626
+        },
+        "s1": {
+          "hi": 1.1799,
+          "lo": 1.1799,
+          "search": false
+        },
+        "s2": {
+          "hi": 0.0286,
+          "lo": 0.0286,
+          "search": false
+        }
+      },
+      "bounds_fingerprint_sha256": "0e9b0d0a54abec10a6a63fbf2c836a8d20f785c065e08e72e1ab3d46e05f58eb",
+      "brief": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7.yaml",
+      "brief_sha256": "7d7d2d0cf0480d41f81e1b4970d17e05a4da66bb94dc0ce496d6726185910fe9",
+      "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\home_landscape_2026-11-15\\hl__osse_rrect_fold_warm_v7.yaml",
+      "config_sha256": "09688f4a9c3741a7d92a88b688cd1a2d48146123f7b4647575746596c062396a",
+      "directivity_tags": {
+        "brief": null,
+        "config": null,
+        "status": "untagged_or_unrecognized"
+      },
+      "family": "OSSE",
+      "fidelity": {
+        "budget_profile": null,
+        "grid": {
+          "screen_extra_hz": [
+            250.0,
+            315.0,
+            400.0,
+            2573.0,
+            3311.0,
+            4260.0
+          ],
+          "verify_points_per_octave": 6.0
+        },
+        "mesh": {
+          "dof_cap_final": 24000,
+          "dof_cap_screen": 24000,
+          "dof_cap_verify": 24000,
+          "dof_per_triangle": 0.51,
+          "epw": 6.0,
+          "quadrants": "1",
+          "rear_res_factor": 1.5
+        },
+        "mode": "screen",
+        "solve": {
+          "angle_count": 73,
+          "backend": "beat_cuda",
+          "balloon": true,
+          "balloon_points_screen": 512,
+          "balloon_points_verify": 1024,
+          "cuda_fused": true,
+          "distance_m": 10.0,
+          "gmres_tol": 1e-05,
+          "timeout_s": 900
+        }
+      },
+      "fidelity_fingerprint_sha256": "9975b8c7da98b904375a92530beff9741ad63570c00a31cbbbe65960f1a83de9",
+      "id": "d_warm_cohort_topup",
+      "score": {
+        "objective": {
+          "bw8k_floor": 0.75,
+          "cov_below_f0": "mask",
+          "cov_narrow_ratio": 2.0,
+          "cov_v_weight": 0.5,
+          "diag_reference": "round",
+          "flat_band": "scored",
+          "lfp_crossover_ratio": 1.6,
+          "lfp_re_z": 0.2,
+          "loaded_re_z": 0.5,
+          "tolerances": {
+            "cov": 3.0,
+            "di": 0.4,
+            "diag": 2.0,
+            "dislope": 9.0,
+            "distd": 2.0,
+            "flat": 1.5,
+            "flat_cv": 1.5,
+            "load": 0.3,
+            "rip": 1.0
+          },
+          "version": 7
+        },
+        "objective_version": 7,
+        "target": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "coverage_h_deg": 80.0,
+          "coverage_v_deg": 50.0,
+          "di_slope_target": 0.0,
+          "di_target_db": null,
+          "driver_exit_radius_mm": 18.0,
+          "f0_hz": 700.0,
+          "f0_v_hz": 700.0,
+          "freq_weights": {
+            "band_hz": [
+              [
+                2500.0,
+                5500.0,
+                2.0
+              ]
+            ]
+          },
+          "loaded_hi_hz": 5600.0,
+          "z_min": 0.5
+        },
+        "weights": {
+          "cov": 1.0,
+          "di": 0.3,
+          "diag": 1.0,
+          "dislope": 1.0,
+          "distd": 0.5,
+          "flat": 0.5,
+          "flat_cv": 1.0,
+          "load": 1.0,
+          "rip": 1.0
+        }
+      },
+      "score_fingerprint_sha256": "748fd111fab59b05017be2d3547caaeb1de8037a8a9296130a19895ff1188d95",
+      "status": "resolved",
+      "task": null
+    },
+    {
+      "acoustic_review": "manual_review_required_not_certified",
+      "argv": [
+        "C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe",
+        "tools/night_queue/run_bo_arm.py",
+        "--root",
+        "runs/home_day_2026-11-16/turbo_warm_retry_80x2",
+        "--cohort",
+        "runs/home_day_2026-11-16/cohort_warm_retry_80x2",
+        "--config",
+        "examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_fold_warm_v7.yaml",
+        "--refresh-cohort",
+        "--policy",
+        "turbo",
+        "--seed",
+        "85012",
+        "--budget-profile",
+        "comparison-80x2"
+      ],
+      "bounds": {
+        "L_mm": {
+          "hi": 271.912,
+          "lo": 228.712
+        },
+        "a0_deg": {
+          "hi": 2.4866,
+          "lo": 2.0066
+        },
+        "a_deg": {
+          "hi": 40.0,
+          "lo": 36.3038
+        },
+        "aspect_ratio": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "az_a_cos_amp": {
+          "hi": 11.73355,
+          "lo": 8.13355
+        },
+        "az_a_cos_pow": {
+          "hi": 2.43779,
+          "lo": 1.23779
+        },
+        "az_a_sf_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_fold_h_deg": {
+          "hi": 0.0,
+          "lo": -15.0
+        },
+        "az_fold_h_width_deg": {
+          "hi": 40.0,
+          "lo": 8.0
+        },
+        "az_fold_v_deg": {
+          "hi": 10.0,
+          "lo": -25.0
+        },
+        "az_fold_v_width_deg": {
+          "hi": 40.0,
+          "lo": 8.0
+        },
+        "az_n_cos2_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_s_cos2_amp": {
+          "hi": -0.122676,
+          "lo": -0.25
+        },
+        "az_sf_a": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "az_sf_b": {
+          "hi": 0.8569,
+          "lo": 0.8569,
+          "search": false
+        },
+        "az_sf_m": {
+          "hi": 4.0,
+          "lo": 4.0,
+          "search": false
+        },
+        "az_sf_n1": {
+          "hi": 7.4958,
+          "lo": 7.4958,
+          "search": false
+        },
+        "az_sf_n2": {
+          "hi": 12.4449,
+          "lo": 12.4449,
+          "search": false
+        },
+        "az_sf_n3": {
+          "hi": 13.4442,
+          "lo": 13.4442,
+          "search": false
+        },
+        "exponent": {
+          "hi": 2.0,
+          "lo": 2.0,
+          "search": false
+        },
+        "k": {
+          "hi": 2.81254,
+          "lo": 2.16454
+        },
+        "morph_allow_shrinkage": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_corner_mm": {
+          "hi": 46.3363,
+          "lo": 30.0
+        },
+        "morph_exponent": {
+          "hi": 4.0,
+          "lo": 4.0,
+          "search": false
+        },
+        "morph_fixed": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "morph_height_mm": {
+          "hi": 412.427,
+          "lo": 378.827
+        },
+        "morph_rate": {
+          "hi": 4.34408,
+          "lo": 3.14408
+        },
+        "morph_target": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_width_mm": {
+          "hi": 588.329,
+          "lo": 559.529
+        },
+        "n": {
+          "hi": 6.56958,
+          "lo": 4.64958
+        },
+        "q": {
+          "hi": 0.974949,
+          "lo": 0.950949
+        },
+        "r0_mm": {
+          "hi": 18.0,
+          "lo": 18.0,
+          "search": false
+        },
+        "s": {
+          "hi": 1.009626,
+          "lo": 0.769626
+        },
+        "s1": {
+          "hi": 1.1799,
+          "lo": 1.1799,
+          "search": false
+        },
+        "s2": {
+          "hi": 0.0286,
+          "lo": 0.0286,
+          "search": false
+        }
+      },
+      "bounds_fingerprint_sha256": "0e9b0d0a54abec10a6a63fbf2c836a8d20f785c065e08e72e1ab3d46e05f58eb",
+      "brief": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7.yaml",
+      "brief_sha256": "7d7d2d0cf0480d41f81e1b4970d17e05a4da66bb94dc0ce496d6726185910fe9",
+      "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\home_landscape_2026-11-15\\hl__osse_rrect_fold_warm_v7.yaml",
+      "config_sha256": "09688f4a9c3741a7d92a88b688cd1a2d48146123f7b4647575746596c062396a",
+      "directivity_tags": {
+        "brief": null,
+        "config": null,
+        "status": "untagged_or_unrecognized"
+      },
+      "family": "OSSE",
+      "fidelity": {
+        "budget_profile": "comparison-80x2",
+        "grid": {
+          "screen_extra_hz": [
+            250.0,
+            315.0,
+            400.0,
+            2573.0,
+            3311.0,
+            4260.0
+          ],
+          "verify_points_per_octave": 6.0
+        },
+        "mesh": {
+          "dof_cap_final": 24000,
+          "dof_cap_screen": 24000,
+          "dof_cap_verify": 24000,
+          "dof_per_triangle": 0.51,
+          "epw": 6.0,
+          "quadrants": "1",
+          "rear_res_factor": 1.5
+        },
+        "mode": null,
+        "solve": {
+          "angle_count": 73,
+          "backend": "beat_cuda",
+          "balloon": true,
+          "balloon_points_screen": 512,
+          "balloon_points_verify": 1024,
+          "cuda_fused": true,
+          "distance_m": 10.0,
+          "gmres_tol": 1e-05,
+          "timeout_s": 900
+        }
+      },
+      "fidelity_fingerprint_sha256": "042f58410b298b160a4d9fe602639af9f0cc20960512fd52f1cab486f8feff1d",
+      "id": "d_turbo_warm_retry",
+      "score": {
+        "objective": {
+          "bw8k_floor": 0.75,
+          "cov_below_f0": "mask",
+          "cov_narrow_ratio": 2.0,
+          "cov_v_weight": 0.5,
+          "diag_reference": "round",
+          "flat_band": "scored",
+          "lfp_crossover_ratio": 1.6,
+          "lfp_re_z": 0.2,
+          "loaded_re_z": 0.5,
+          "tolerances": {
+            "cov": 3.0,
+            "di": 0.4,
+            "diag": 2.0,
+            "dislope": 9.0,
+            "distd": 2.0,
+            "flat": 1.5,
+            "flat_cv": 1.5,
+            "load": 0.3,
+            "rip": 1.0
+          },
+          "version": 7
+        },
+        "objective_version": 7,
+        "target": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "coverage_h_deg": 80.0,
+          "coverage_v_deg": 50.0,
+          "di_slope_target": 0.0,
+          "di_target_db": null,
+          "driver_exit_radius_mm": 18.0,
+          "f0_hz": 700.0,
+          "f0_v_hz": 700.0,
+          "freq_weights": {
+            "band_hz": [
+              [
+                2500.0,
+                5500.0,
+                2.0
+              ]
+            ]
+          },
+          "loaded_hi_hz": 5600.0,
+          "z_min": 0.5
+        },
+        "weights": {
+          "cov": 1.0,
+          "di": 0.3,
+          "diag": 1.0,
+          "dislope": 1.0,
+          "distd": 0.5,
+          "flat": 0.5,
+          "flat_cv": 1.0,
+          "load": 1.0,
+          "rip": 1.0
+        }
+      },
+      "score_fingerprint_sha256": "748fd111fab59b05017be2d3547caaeb1de8037a8a9296130a19895ff1188d95",
+      "status": "resolved",
+      "task": null
+    },
+    {
+      "acoustic_review": "manual_review_required_not_certified",
+      "argv": [
+        ".venv/Scripts/hornlab-search.exe",
+        "search",
+        "--config",
+        "examples/typologies/home_landscape_2026-11-15/hl__ath_twinray380_landscape_v8.yaml",
+        "--mode",
+        "screen",
+        "--budget",
+        "96",
+        "--cma-seed",
+        "9012"
+      ],
+      "bounds": {
+        "L_mm": {
+          "hi": 400.0,
+          "lo": 160.0
+        },
+        "a0_deg": {
+          "hi": 5.0,
+          "lo": 1.0
+        },
+        "a_deg": {
+          "hi": 52.0,
+          "lo": 38.0
+        },
+        "aspect_ratio": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "az_a_cos2p_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_a_cos2p_pow": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "az_fold_h_deg": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_fold_h_width_deg": {
+          "hi": 20.0,
+          "lo": 20.0,
+          "search": false
+        },
+        "az_fold_v_deg": {
+          "hi": -6.0,
+          "lo": -11.0
+        },
+        "az_fold_v_width_deg": {
+          "hi": 24.0,
+          "lo": 18.0
+        },
+        "az_s_cos2_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "exponent": {
+          "hi": 2.0,
+          "lo": 2.0,
+          "search": false
+        },
+        "k": {
+          "hi": 1.6,
+          "lo": 0.6
+        },
+        "morph_allow_shrinkage": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_corner_mm": {
+          "hi": 60.0,
+          "lo": 8.0
+        },
+        "morph_exponent": {
+          "hi": 4.0,
+          "lo": 4.0,
+          "search": false
+        },
+        "morph_fixed": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "morph_height_mm": {
+          "hi": 480.0,
+          "lo": 200.0
+        },
+        "morph_rate": {
+          "hi": 3.5,
+          "lo": 1.2
+        },
+        "morph_target": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_width_mm": {
+          "hi": 590.0,
+          "lo": 300.0
+        },
+        "n": {
+          "hi": 9.0,
+          "lo": 5.0
+        },
+        "q": {
+          "hi": 1.0,
+          "lo": 0.98
+        },
+        "r0_mm": {
+          "hi": 18.0,
+          "lo": 18.0,
+          "search": false
+        },
+        "s": {
+          "hi": 1.0,
+          "lo": 0.6
+        },
+        "s1": {
+          "hi": 1.14,
+          "lo": 1.14,
+          "search": false
+        },
+        "s2": {
+          "hi": 0.025,
+          "lo": 0.025,
+          "search": false
+        }
+      },
+      "bounds_fingerprint_sha256": "a5e2177eb83fbe9b914decf008424982a9e22e24d56f6f4f5c3bda98caf567a3",
+      "brief": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7.yaml",
+      "brief_sha256": "7d7d2d0cf0480d41f81e1b4970d17e05a4da66bb94dc0ce496d6726185910fe9",
+      "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\home_landscape_2026-11-15\\hl__ath_twinray380_landscape_v8.yaml",
+      "config_sha256": "ffb297a3b49c617137902fbe0d3f6ff50cc5d0242a4e09ee4dd8936c5dc9a652",
+      "directivity_tags": {
+        "brief": null,
+        "config": null,
+        "status": "untagged_or_unrecognized"
+      },
+      "family": "OSSE",
+      "fidelity": {
+        "budget_profile": null,
+        "grid": {
+          "screen_extra_hz": [
+            250.0,
+            315.0,
+            400.0,
+            2573.0,
+            3311.0,
+            4260.0
+          ],
+          "verify_points_per_octave": 6.0
+        },
+        "mesh": {
+          "dof_cap_final": 24000,
+          "dof_cap_screen": 24000,
+          "dof_cap_verify": 24000,
+          "dof_per_triangle": 0.51,
+          "epw": 6.0,
+          "quadrants": "1"
+        },
+        "mode": "screen",
+        "solve": {
+          "angle_count": 73,
+          "backend": "beat_cuda",
+          "balloon": true,
+          "balloon_points_screen": 512,
+          "balloon_points_verify": 1024,
+          "cuda_fused": true,
+          "distance_m": 10.0,
+          "gmres_tol": 1e-05,
+          "timeout_s": 900
+        }
+      },
+      "fidelity_fingerprint_sha256": "0adc7233cd867f2fae269fdd8dc0590e80113c43ff0078e7c06bb0a21cb8c1f2",
+      "id": "d_twin_s9012",
+      "score": {
+        "objective": {
+          "bw8k_floor": 0.75,
+          "cov_below_f0": "mask",
+          "cov_narrow_ratio": 2.0,
+          "cov_v_weight": 0.5,
+          "diag_reference": "round",
+          "flat_band": "scored",
+          "lfp_crossover_ratio": 1.6,
+          "lfp_re_z": 0.2,
+          "loaded_re_z": 0.5,
+          "tolerances": {
+            "cov": 3.0,
+            "di": 0.4,
+            "diag": 2.0,
+            "dislope": 9.0,
+            "distd": 2.0,
+            "flat": 1.5,
+            "flat_cv": 1.5,
+            "load": 0.3,
+            "rip": 1.0
+          },
+          "version": 7
+        },
+        "objective_version": 7,
+        "target": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "coverage_h_deg": 80.0,
+          "coverage_v_deg": 50.0,
+          "di_slope_target": 0.0,
+          "di_target_db": null,
+          "driver_exit_radius_mm": 18.0,
+          "f0_hz": 700.0,
+          "f0_v_hz": 700.0,
+          "freq_weights": {
+            "band_hz": [
+              [
+                2500.0,
+                5500.0,
+                2.0
+              ]
+            ]
+          },
+          "loaded_hi_hz": 5600.0,
+          "z_min": 0.5
+        },
+        "weights": {
+          "cov": 1.0,
+          "di": 0.3,
+          "diag": 1.0,
+          "dislope": 1.0,
+          "distd": 0.5,
+          "flat": 0.5,
+          "flat_cv": 1.0,
+          "load": 1.0,
+          "rip": 1.0
+        }
+      },
+      "score_fingerprint_sha256": "748fd111fab59b05017be2d3547caaeb1de8037a8a9296130a19895ff1188d95",
+      "status": "resolved",
+      "task": null
+    },
+    {
+      "acoustic_review": "manual_review_required_not_certified",
+      "argv": [
+        "C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe",
+        "tools/night_queue/run_bo_arm.py",
+        "--root",
+        "runs/home_day_2026-11-16/turbo_twin_80x2",
+        "--cohort",
+        "runs/home_day_2026-11-16/cohort_twin_80x2",
+        "--config",
+        "examples/typologies/home_landscape_2026-11-15/hl__ath_twinray380_landscape_v8.yaml",
+        "--refresh-cohort",
+        "--policy",
+        "turbo",
+        "--seed",
+        "85003",
+        "--budget-profile",
+        "comparison-80x2"
+      ],
+      "bounds": {
+        "L_mm": {
+          "hi": 400.0,
+          "lo": 160.0
+        },
+        "a0_deg": {
+          "hi": 5.0,
+          "lo": 1.0
+        },
+        "a_deg": {
+          "hi": 52.0,
+          "lo": 38.0
+        },
+        "aspect_ratio": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "az_a_cos2p_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_a_cos2p_pow": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "az_fold_h_deg": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_fold_h_width_deg": {
+          "hi": 20.0,
+          "lo": 20.0,
+          "search": false
+        },
+        "az_fold_v_deg": {
+          "hi": -6.0,
+          "lo": -11.0
+        },
+        "az_fold_v_width_deg": {
+          "hi": 24.0,
+          "lo": 18.0
+        },
+        "az_s_cos2_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "exponent": {
+          "hi": 2.0,
+          "lo": 2.0,
+          "search": false
+        },
+        "k": {
+          "hi": 1.6,
+          "lo": 0.6
+        },
+        "morph_allow_shrinkage": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_corner_mm": {
+          "hi": 60.0,
+          "lo": 8.0
+        },
+        "morph_exponent": {
+          "hi": 4.0,
+          "lo": 4.0,
+          "search": false
+        },
+        "morph_fixed": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "morph_height_mm": {
+          "hi": 480.0,
+          "lo": 200.0
+        },
+        "morph_rate": {
+          "hi": 3.5,
+          "lo": 1.2
+        },
+        "morph_target": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_width_mm": {
+          "hi": 590.0,
+          "lo": 300.0
+        },
+        "n": {
+          "hi": 9.0,
+          "lo": 5.0
+        },
+        "q": {
+          "hi": 1.0,
+          "lo": 0.98
+        },
+        "r0_mm": {
+          "hi": 18.0,
+          "lo": 18.0,
+          "search": false
+        },
+        "s": {
+          "hi": 1.0,
+          "lo": 0.6
+        },
+        "s1": {
+          "hi": 1.14,
+          "lo": 1.14,
+          "search": false
+        },
+        "s2": {
+          "hi": 0.025,
+          "lo": 0.025,
+          "search": false
+        }
+      },
+      "bounds_fingerprint_sha256": "a5e2177eb83fbe9b914decf008424982a9e22e24d56f6f4f5c3bda98caf567a3",
+      "brief": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7.yaml",
+      "brief_sha256": "7d7d2d0cf0480d41f81e1b4970d17e05a4da66bb94dc0ce496d6726185910fe9",
+      "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\home_landscape_2026-11-15\\hl__ath_twinray380_landscape_v8.yaml",
+      "config_sha256": "ffb297a3b49c617137902fbe0d3f6ff50cc5d0242a4e09ee4dd8936c5dc9a652",
+      "directivity_tags": {
+        "brief": null,
+        "config": null,
+        "status": "untagged_or_unrecognized"
+      },
+      "family": "OSSE",
+      "fidelity": {
+        "budget_profile": "comparison-80x2",
+        "grid": {
+          "screen_extra_hz": [
+            250.0,
+            315.0,
+            400.0,
+            2573.0,
+            3311.0,
+            4260.0
+          ],
+          "verify_points_per_octave": 6.0
+        },
+        "mesh": {
+          "dof_cap_final": 24000,
+          "dof_cap_screen": 24000,
+          "dof_cap_verify": 24000,
+          "dof_per_triangle": 0.51,
+          "epw": 6.0,
+          "quadrants": "1"
+        },
+        "mode": null,
+        "solve": {
+          "angle_count": 73,
+          "backend": "beat_cuda",
+          "balloon": true,
+          "balloon_points_screen": 512,
+          "balloon_points_verify": 1024,
+          "cuda_fused": true,
+          "distance_m": 10.0,
+          "gmres_tol": 1e-05,
+          "timeout_s": 900
+        }
+      },
+      "fidelity_fingerprint_sha256": "4fad03e8da3ab6b4a62df3fe0bd4d66f25612e1e9eb9560a464cb4f7fe9ded2c",
+      "id": "d_turbo_twin",
+      "score": {
+        "objective": {
+          "bw8k_floor": 0.75,
+          "cov_below_f0": "mask",
+          "cov_narrow_ratio": 2.0,
+          "cov_v_weight": 0.5,
+          "diag_reference": "round",
+          "flat_band": "scored",
+          "lfp_crossover_ratio": 1.6,
+          "lfp_re_z": 0.2,
+          "loaded_re_z": 0.5,
+          "tolerances": {
+            "cov": 3.0,
+            "di": 0.4,
+            "diag": 2.0,
+            "dislope": 9.0,
+            "distd": 2.0,
+            "flat": 1.5,
+            "flat_cv": 1.5,
+            "load": 0.3,
+            "rip": 1.0
+          },
+          "version": 7
+        },
+        "objective_version": 7,
+        "target": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "coverage_h_deg": 80.0,
+          "coverage_v_deg": 50.0,
+          "di_slope_target": 0.0,
+          "di_target_db": null,
+          "driver_exit_radius_mm": 18.0,
+          "f0_hz": 700.0,
+          "f0_v_hz": 700.0,
+          "freq_weights": {
+            "band_hz": [
+              [
+                2500.0,
+                5500.0,
+                2.0
+              ]
+            ]
+          },
+          "loaded_hi_hz": 5600.0,
+          "z_min": 0.5
+        },
+        "weights": {
+          "cov": 1.0,
+          "di": 0.3,
+          "diag": 1.0,
+          "dislope": 1.0,
+          "distd": 0.5,
+          "flat": 0.5,
+          "flat_cv": 1.0,
+          "load": 1.0,
+          "rip": 1.0
+        }
+      },
+      "score_fingerprint_sha256": "748fd111fab59b05017be2d3547caaeb1de8037a8a9296130a19895ff1188d95",
+      "status": "resolved",
+      "task": null
+    },
+    {
+      "acoustic_review": "manual_review_required_not_certified",
+      "argv": [
+        ".venv/Scripts/hornlab-search.exe",
+        "search",
+        "--config",
+        "examples/typologies/home_landscape_2026-11-15/hl__biradial_es_style_smooth_v7.yaml",
+        "--mode",
+        "screen",
+        "--budget",
+        "96",
+        "--cma-seed",
+        "5678"
+      ],
+      "bounds": {
+        "L_mm": {
+          "hi": 320.0,
+          "lo": 220.0
+        },
+        "h_a_deg": {
+          "hi": 37.0,
+          "lo": 32.0
+        },
+        "h_n": {
+          "hi": 7.0,
+          "lo": 3.0
+        },
+        "h_rm_mm": {
+          "hi": 292.0,
+          "lo": 260.0
+        },
+        "h_throat_blend_mm": {
+          "hi": 25.0,
+          "lo": 25.0,
+          "search": false
+        },
+        "mouth_exponent": {
+          "hi": 5.0,
+          "lo": 2.2
+        },
+        "v_a_deg": {
+          "hi": 24.0,
+          "lo": 18.0
+        },
+        "v_n": {
+          "hi": 7.0,
+          "lo": 3.0
+        },
+        "v_rm_mm": {
+          "hi": 230.0,
+          "lo": 162.0
+        },
+        "v_throat_blend_mm": {
+          "hi": 25.0,
+          "lo": 25.0,
+          "search": false
+        }
+      },
+      "bounds_fingerprint_sha256": "667831bbd5df837a76c0baff05c2f722aabf30a2b8e1254b81ee436c30c1a10d",
+      "brief": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7_smooth.yaml",
+      "brief_sha256": "e58b595e5fcf14965e6beff31fde7b75d0cac1ec98cfbe36e6f3abc6cd6bdbd8",
+      "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\home_landscape_2026-11-15\\hl__biradial_es_style_smooth_v7.yaml",
+      "config_sha256": "1f4c3ac9c06608d4eb7ee2a9443e0fd2fecdda34c96fd636f51bd9e5c68200d4",
+      "directivity_tags": {
+        "brief": null,
+        "config": null,
+        "status": "untagged_or_unrecognized"
+      },
+      "family": "FREEFORM",
+      "fidelity": {
+        "budget_profile": null,
+        "grid": {
+          "screen_extra_hz": [
+            250.0,
+            315.0,
+            400.0,
+            2573.0,
+            3311.0,
+            4260.0
+          ],
+          "verify_points_per_octave": 6.0
+        },
+        "mesh": {
+          "dof_cap_final": 24000,
+          "dof_cap_screen": 24000,
+          "dof_cap_verify": 24000,
+          "dof_per_triangle": 0.51,
+          "epw": 6.0,
+          "quadrants": "1",
+          "rear_res_factor": 1.5
+        },
+        "mode": "screen",
+        "solve": {
+          "angle_count": 73,
+          "backend": "beat_cuda",
+          "balloon": true,
+          "balloon_points_screen": 512,
+          "balloon_points_verify": 1024,
+          "cuda_fused": true,
+          "distance_m": 10.0,
+          "gmres_tol": 1e-05,
+          "timeout_s": 900
+        }
+      },
+      "fidelity_fingerprint_sha256": "9975b8c7da98b904375a92530beff9741ad63570c00a31cbbbe65960f1a83de9",
+      "id": "d_birad_sm_s5678",
+      "score": {
+        "objective": {
+          "bw8k_floor": 0.75,
+          "cov_below_f0": "mask",
+          "cov_narrow_ratio": 1.0,
+          "cov_v_weight": 0.5,
+          "diag_reference": "round",
+          "flat_band": "scored",
+          "lfp_crossover_ratio": 1.6,
+          "lfp_re_z": 0.2,
+          "loaded_re_z": 0.5,
+          "tolerances": {
+            "cov": 8.0,
+            "di": 0.4,
+            "diag": 2.0,
+            "dislope": 9.0,
+            "distd": 2.0,
+            "flat": 1.5,
+            "flat_cv": 1.5,
+            "load": 0.3,
+            "rip": 1.0
+          },
+          "version": 7
+        },
+        "objective_version": 7,
+        "target": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "coverage_h_deg": 80.0,
+          "coverage_v_deg": 50.0,
+          "di_slope_target": 5.0,
+          "di_target_db": null,
+          "driver_exit_radius_mm": 18.0,
+          "f0_hz": 700.0,
+          "f0_v_hz": 700.0,
+          "freq_weights": {
+            "band_hz": [
+              [
+                2500.0,
+                5500.0,
+                2.0
+              ]
+            ]
+          },
+          "loaded_hi_hz": 5600.0,
+          "z_min": 0.5
+        },
+        "weights": {
+          "cov": 1.0,
+          "di": 0.0,
+          "diag": 1.0,
+          "dislope": 1.0,
+          "distd": 1.0,
+          "flat": 0.5,
+          "flat_cv": 1.0,
+          "load": 1.0,
+          "rip": 1.0
+        }
+      },
+      "score_fingerprint_sha256": "56fb0540b5a76429139126b7d8872dec35c3ec838d347dc0ad0f3ba3e0b3127a",
+      "status": "resolved",
+      "task": null
+    },
+    {
+      "argv": [
+        ".venv/Scripts/python.exe",
+        "tools/night_queue/verify_night_jobs.py",
+        "--night",
+        "home_day_2026-11-16",
+        "--top",
+        "2",
+        "--jobs",
+        "d_warm_s9012,d_warm_s3456,d_crowex_s1234,d_twin_s9012,d_birad_sm_s5678"
+      ],
+      "id": "v_day_top2",
+      "reason": "No explicit --config or --task; review package, source job, or verification inputs.",
+      "status": "indirect_or_non_scoring"
+    },
+    {
+      "argv": [
+        ".venv/Scripts/python.exe",
+        "tools/geometry/rosse_rect_cli.py",
+        "verify-night",
+        "--night",
+        "home_day_2026-11-16",
+        "--top",
+        "2",
+        "--jobs",
+        "d_rosse_s1234,d_rosse_s5678"
+      ],
+      "id": "v_day_rosse_top2",
+      "reason": "No explicit --config or --task; review package, source job, or verification inputs.",
+      "status": "indirect_or_non_scoring"
+    },
+    {
+      "acoustic_review": "manual_review_required_not_certified",
+      "argv": [
+        ".venv/Scripts/hornlab-search.exe",
+        "search",
+        "--config",
+        "examples/typologies/home_landscape_2026-11-15/hl__ath_tritonia_landscape_v9.yaml",
+        "--mode",
+        "screen",
+        "--budget",
+        "120",
+        "--cma-seed",
+        "89001"
+      ],
+      "bounds": {
+        "L_mm": {
+          "hi": 400.0,
+          "lo": 140.0
+        },
+        "a0_deg": {
+          "hi": 11.0,
+          "lo": 5.0
+        },
+        "a_deg": {
+          "hi": 56.0,
+          "lo": 44.0
+        },
+        "aspect_ratio": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "az_a_cos2p_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_a_cos2p_pow": {
+          "hi": 5.0,
+          "lo": 5.0,
+          "search": false
+        },
+        "az_a_cos_amp": {
+          "hi": -13.5,
+          "lo": -18.0
+        },
+        "az_a_cos_pow": {
+          "hi": 2.0,
+          "lo": 2.0,
+          "search": false
+        },
+        "az_fold_h_deg": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_fold_h_width_deg": {
+          "hi": 20.0,
+          "lo": 20.0,
+          "search": false
+        },
+        "az_fold_v_deg": {
+          "hi": -27.5,
+          "lo": -31.0
+        },
+        "az_fold_v_width_deg": {
+          "hi": 25.5,
+          "lo": 21.5
+        },
+        "az_n_cos2_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_s_cos2_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "exponent": {
+          "hi": 2.0,
+          "lo": 2.0,
+          "search": false
+        },
+        "k": {
+          "hi": 1.3,
+          "lo": 0.9
+        },
+        "morph_allow_shrinkage": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_corner_mm": {
+          "hi": 30.0,
+          "lo": 10.0
+        },
+        "morph_exponent": {
+          "hi": 4.0,
+          "lo": 4.0,
+          "search": false
+        },
+        "morph_fixed": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "morph_height_mm": {
+          "hi": 480.0,
+          "lo": 250.0
+        },
+        "morph_rate": {
+          "hi": 2.1,
+          "lo": 1.0
+        },
+        "morph_target": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_width_mm": {
+          "hi": 590.0,
+          "lo": 330.0
+        },
+        "n": {
+          "hi": 7.5,
+          "lo": 4.0
+        },
+        "q": {
+          "hi": 0.995,
+          "lo": 0.97
+        },
+        "r0_mm": {
+          "hi": 18.0,
+          "lo": 18.0,
+          "search": false
+        },
+        "s": {
+          "hi": 1.04,
+          "lo": 0.92
+        },
+        "s1": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "s2": {
+          "hi": 0.015,
+          "lo": 0.015,
+          "search": false
+        }
+      },
+      "bounds_fingerprint_sha256": "b81d0f3b010e68151c5e027583ef036b61f6c22e0509de1c9225f6d8cc2745bd",
+      "brief": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7.yaml",
+      "brief_sha256": "7d7d2d0cf0480d41f81e1b4970d17e05a4da66bb94dc0ce496d6726185910fe9",
+      "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\home_landscape_2026-11-15\\hl__ath_tritonia_landscape_v9.yaml",
+      "config_sha256": "07dc033449203c9ccb5e8423e8d5cc1b8ef96a864bb3743f07d4d08b22e9348c",
+      "directivity_tags": {
+        "brief": null,
+        "config": null,
+        "status": "untagged_or_unrecognized"
+      },
+      "family": "OSSE",
+      "fidelity": {
+        "budget_profile": null,
+        "grid": {
+          "screen_extra_hz": [
+            250.0,
+            315.0,
+            400.0,
+            2573.0,
+            3311.0,
+            4260.0
+          ],
+          "verify_points_per_octave": 6.0
+        },
+        "mesh": {
+          "dof_cap_final": 24000,
+          "dof_cap_screen": 24000,
+          "dof_cap_verify": 24000,
+          "dof_per_triangle": 0.51,
+          "epw": 6.0,
+          "quadrants": "1"
+        },
+        "mode": "screen",
+        "solve": {
+          "angle_count": 73,
+          "backend": "beat_cuda",
+          "balloon": true,
+          "balloon_points_screen": 512,
+          "balloon_points_verify": 1024,
+          "cuda_fused": true,
+          "distance_m": 10.0,
+          "gmres_tol": 1e-05,
+          "timeout_s": 900
+        }
+      },
+      "fidelity_fingerprint_sha256": "0adc7233cd867f2fae269fdd8dc0590e80113c43ff0078e7c06bb0a21cb8c1f2",
+      "id": "ext_v9_cma_s89001",
+      "score": {
+        "objective": {
+          "bw8k_floor": 0.75,
+          "cov_below_f0": "mask",
+          "cov_narrow_ratio": 2.0,
+          "cov_v_weight": 0.5,
+          "diag_reference": "round",
+          "flat_band": "scored",
+          "lfp_crossover_ratio": 1.6,
+          "lfp_re_z": 0.2,
+          "loaded_re_z": 0.5,
+          "tolerances": {
+            "cov": 3.0,
+            "di": 0.4,
+            "diag": 2.0,
+            "dislope": 9.0,
+            "distd": 2.0,
+            "flat": 1.5,
+            "flat_cv": 1.5,
+            "load": 0.3,
+            "rip": 1.0
+          },
+          "version": 7
+        },
+        "objective_version": 7,
+        "target": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "coverage_h_deg": 80.0,
+          "coverage_v_deg": 50.0,
+          "di_slope_target": 0.0,
+          "di_target_db": null,
+          "driver_exit_radius_mm": 18.0,
+          "f0_hz": 700.0,
+          "f0_v_hz": 700.0,
+          "freq_weights": {
+            "band_hz": [
+              [
+                2500.0,
+                5500.0,
+                2.0
+              ]
+            ]
+          },
+          "loaded_hi_hz": 5600.0,
+          "z_min": 0.5
+        },
+        "weights": {
+          "cov": 1.0,
+          "di": 0.3,
+          "diag": 1.0,
+          "dislope": 1.0,
+          "distd": 0.5,
+          "flat": 0.5,
+          "flat_cv": 1.0,
+          "load": 1.0,
+          "rip": 1.0
+        }
+      },
+      "score_fingerprint_sha256": "748fd111fab59b05017be2d3547caaeb1de8037a8a9296130a19895ff1188d95",
+      "status": "resolved",
+      "task": null
+    },
+    {
+      "acoustic_review": "manual_review_required_not_certified",
+      "argv": [
+        ".venv/Scripts/hornlab-search.exe",
+        "search",
+        "--config",
+        "examples/typologies/home_landscape_2026-11-15/hl__ath_tritonia_landscape_v9.yaml",
+        "--mode",
+        "screen",
+        "--budget",
+        "120",
+        "--cma-seed",
+        "89002"
+      ],
+      "bounds": {
+        "L_mm": {
+          "hi": 400.0,
+          "lo": 140.0
+        },
+        "a0_deg": {
+          "hi": 11.0,
+          "lo": 5.0
+        },
+        "a_deg": {
+          "hi": 56.0,
+          "lo": 44.0
+        },
+        "aspect_ratio": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "az_a_cos2p_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_a_cos2p_pow": {
+          "hi": 5.0,
+          "lo": 5.0,
+          "search": false
+        },
+        "az_a_cos_amp": {
+          "hi": -13.5,
+          "lo": -18.0
+        },
+        "az_a_cos_pow": {
+          "hi": 2.0,
+          "lo": 2.0,
+          "search": false
+        },
+        "az_fold_h_deg": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_fold_h_width_deg": {
+          "hi": 20.0,
+          "lo": 20.0,
+          "search": false
+        },
+        "az_fold_v_deg": {
+          "hi": -27.5,
+          "lo": -31.0
+        },
+        "az_fold_v_width_deg": {
+          "hi": 25.5,
+          "lo": 21.5
+        },
+        "az_n_cos2_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_s_cos2_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "exponent": {
+          "hi": 2.0,
+          "lo": 2.0,
+          "search": false
+        },
+        "k": {
+          "hi": 1.3,
+          "lo": 0.9
+        },
+        "morph_allow_shrinkage": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_corner_mm": {
+          "hi": 30.0,
+          "lo": 10.0
+        },
+        "morph_exponent": {
+          "hi": 4.0,
+          "lo": 4.0,
+          "search": false
+        },
+        "morph_fixed": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "morph_height_mm": {
+          "hi": 480.0,
+          "lo": 250.0
+        },
+        "morph_rate": {
+          "hi": 2.1,
+          "lo": 1.0
+        },
+        "morph_target": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_width_mm": {
+          "hi": 590.0,
+          "lo": 330.0
+        },
+        "n": {
+          "hi": 7.5,
+          "lo": 4.0
+        },
+        "q": {
+          "hi": 0.995,
+          "lo": 0.97
+        },
+        "r0_mm": {
+          "hi": 18.0,
+          "lo": 18.0,
+          "search": false
+        },
+        "s": {
+          "hi": 1.04,
+          "lo": 0.92
+        },
+        "s1": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "s2": {
+          "hi": 0.015,
+          "lo": 0.015,
+          "search": false
+        }
+      },
+      "bounds_fingerprint_sha256": "b81d0f3b010e68151c5e027583ef036b61f6c22e0509de1c9225f6d8cc2745bd",
+      "brief": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7.yaml",
+      "brief_sha256": "7d7d2d0cf0480d41f81e1b4970d17e05a4da66bb94dc0ce496d6726185910fe9",
+      "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\home_landscape_2026-11-15\\hl__ath_tritonia_landscape_v9.yaml",
+      "config_sha256": "07dc033449203c9ccb5e8423e8d5cc1b8ef96a864bb3743f07d4d08b22e9348c",
+      "directivity_tags": {
+        "brief": null,
+        "config": null,
+        "status": "untagged_or_unrecognized"
+      },
+      "family": "OSSE",
+      "fidelity": {
+        "budget_profile": null,
+        "grid": {
+          "screen_extra_hz": [
+            250.0,
+            315.0,
+            400.0,
+            2573.0,
+            3311.0,
+            4260.0
+          ],
+          "verify_points_per_octave": 6.0
+        },
+        "mesh": {
+          "dof_cap_final": 24000,
+          "dof_cap_screen": 24000,
+          "dof_cap_verify": 24000,
+          "dof_per_triangle": 0.51,
+          "epw": 6.0,
+          "quadrants": "1"
+        },
+        "mode": "screen",
+        "solve": {
+          "angle_count": 73,
+          "backend": "beat_cuda",
+          "balloon": true,
+          "balloon_points_screen": 512,
+          "balloon_points_verify": 1024,
+          "cuda_fused": true,
+          "distance_m": 10.0,
+          "gmres_tol": 1e-05,
+          "timeout_s": 900
+        }
+      },
+      "fidelity_fingerprint_sha256": "0adc7233cd867f2fae269fdd8dc0590e80113c43ff0078e7c06bb0a21cb8c1f2",
+      "id": "ext_v9_cma_s89002",
+      "score": {
+        "objective": {
+          "bw8k_floor": 0.75,
+          "cov_below_f0": "mask",
+          "cov_narrow_ratio": 2.0,
+          "cov_v_weight": 0.5,
+          "diag_reference": "round",
+          "flat_band": "scored",
+          "lfp_crossover_ratio": 1.6,
+          "lfp_re_z": 0.2,
+          "loaded_re_z": 0.5,
+          "tolerances": {
+            "cov": 3.0,
+            "di": 0.4,
+            "diag": 2.0,
+            "dislope": 9.0,
+            "distd": 2.0,
+            "flat": 1.5,
+            "flat_cv": 1.5,
+            "load": 0.3,
+            "rip": 1.0
+          },
+          "version": 7
+        },
+        "objective_version": 7,
+        "target": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "coverage_h_deg": 80.0,
+          "coverage_v_deg": 50.0,
+          "di_slope_target": 0.0,
+          "di_target_db": null,
+          "driver_exit_radius_mm": 18.0,
+          "f0_hz": 700.0,
+          "f0_v_hz": 700.0,
+          "freq_weights": {
+            "band_hz": [
+              [
+                2500.0,
+                5500.0,
+                2.0
+              ]
+            ]
+          },
+          "loaded_hi_hz": 5600.0,
+          "z_min": 0.5
+        },
+        "weights": {
+          "cov": 1.0,
+          "di": 0.3,
+          "diag": 1.0,
+          "dislope": 1.0,
+          "distd": 0.5,
+          "flat": 0.5,
+          "flat_cv": 1.0,
+          "load": 1.0,
+          "rip": 1.0
+        }
+      },
+      "score_fingerprint_sha256": "748fd111fab59b05017be2d3547caaeb1de8037a8a9296130a19895ff1188d95",
+      "status": "resolved",
+      "task": null
+    },
+    {
+      "acoustic_review": "manual_review_required_not_certified",
+      "argv": [
+        "C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe",
+        "tools/night_queue/run_bo_arm.py",
+        "--root",
+        "runs/home_extension_2026-11-16/ext_v9_turbo_first",
+        "--cohort",
+        "runs/home_extension_2026-11-16/cohort_turbo_first",
+        "--config",
+        "examples/typologies/home_landscape_2026-11-15/hl__ath_tritonia_landscape_v9.yaml",
+        "--refresh-cohort",
+        "--policy",
+        "turbo",
+        "--seed",
+        "89011"
+      ],
+      "bounds": {
+        "L_mm": {
+          "hi": 400.0,
+          "lo": 140.0
+        },
+        "a0_deg": {
+          "hi": 11.0,
+          "lo": 5.0
+        },
+        "a_deg": {
+          "hi": 56.0,
+          "lo": 44.0
+        },
+        "aspect_ratio": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "az_a_cos2p_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_a_cos2p_pow": {
+          "hi": 5.0,
+          "lo": 5.0,
+          "search": false
+        },
+        "az_a_cos_amp": {
+          "hi": -13.5,
+          "lo": -18.0
+        },
+        "az_a_cos_pow": {
+          "hi": 2.0,
+          "lo": 2.0,
+          "search": false
+        },
+        "az_fold_h_deg": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_fold_h_width_deg": {
+          "hi": 20.0,
+          "lo": 20.0,
+          "search": false
+        },
+        "az_fold_v_deg": {
+          "hi": -27.5,
+          "lo": -31.0
+        },
+        "az_fold_v_width_deg": {
+          "hi": 25.5,
+          "lo": 21.5
+        },
+        "az_n_cos2_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_s_cos2_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "exponent": {
+          "hi": 2.0,
+          "lo": 2.0,
+          "search": false
+        },
+        "k": {
+          "hi": 1.3,
+          "lo": 0.9
+        },
+        "morph_allow_shrinkage": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_corner_mm": {
+          "hi": 30.0,
+          "lo": 10.0
+        },
+        "morph_exponent": {
+          "hi": 4.0,
+          "lo": 4.0,
+          "search": false
+        },
+        "morph_fixed": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "morph_height_mm": {
+          "hi": 480.0,
+          "lo": 250.0
+        },
+        "morph_rate": {
+          "hi": 2.1,
+          "lo": 1.0
+        },
+        "morph_target": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_width_mm": {
+          "hi": 590.0,
+          "lo": 330.0
+        },
+        "n": {
+          "hi": 7.5,
+          "lo": 4.0
+        },
+        "q": {
+          "hi": 0.995,
+          "lo": 0.97
+        },
+        "r0_mm": {
+          "hi": 18.0,
+          "lo": 18.0,
+          "search": false
+        },
+        "s": {
+          "hi": 1.04,
+          "lo": 0.92
+        },
+        "s1": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "s2": {
+          "hi": 0.015,
+          "lo": 0.015,
+          "search": false
+        }
+      },
+      "bounds_fingerprint_sha256": "b81d0f3b010e68151c5e027583ef036b61f6c22e0509de1c9225f6d8cc2745bd",
+      "brief": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7.yaml",
+      "brief_sha256": "7d7d2d0cf0480d41f81e1b4970d17e05a4da66bb94dc0ce496d6726185910fe9",
+      "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\home_landscape_2026-11-15\\hl__ath_tritonia_landscape_v9.yaml",
+      "config_sha256": "07dc033449203c9ccb5e8423e8d5cc1b8ef96a864bb3743f07d4d08b22e9348c",
+      "directivity_tags": {
+        "brief": null,
+        "config": null,
+        "status": "untagged_or_unrecognized"
+      },
+      "family": "OSSE",
+      "fidelity": {
+        "budget_profile": null,
+        "grid": {
+          "screen_extra_hz": [
+            250.0,
+            315.0,
+            400.0,
+            2573.0,
+            3311.0,
+            4260.0
+          ],
+          "verify_points_per_octave": 6.0
+        },
+        "mesh": {
+          "dof_cap_final": 24000,
+          "dof_cap_screen": 24000,
+          "dof_cap_verify": 24000,
+          "dof_per_triangle": 0.51,
+          "epw": 6.0,
+          "quadrants": "1"
+        },
+        "mode": null,
+        "solve": {
+          "angle_count": 73,
+          "backend": "beat_cuda",
+          "balloon": true,
+          "balloon_points_screen": 512,
+          "balloon_points_verify": 1024,
+          "cuda_fused": true,
+          "distance_m": 10.0,
+          "gmres_tol": 1e-05,
+          "timeout_s": 900
+        }
+      },
+      "fidelity_fingerprint_sha256": "c48879e46ceacc9e28b5b062c97b151cf04af348ad5fffbe6604fd5dced3f78e",
+      "id": "ext_v9_turbo_first",
+      "score": {
+        "objective": {
+          "bw8k_floor": 0.75,
+          "cov_below_f0": "mask",
+          "cov_narrow_ratio": 2.0,
+          "cov_v_weight": 0.5,
+          "diag_reference": "round",
+          "flat_band": "scored",
+          "lfp_crossover_ratio": 1.6,
+          "lfp_re_z": 0.2,
+          "loaded_re_z": 0.5,
+          "tolerances": {
+            "cov": 3.0,
+            "di": 0.4,
+            "diag": 2.0,
+            "dislope": 9.0,
+            "distd": 2.0,
+            "flat": 1.5,
+            "flat_cv": 1.5,
+            "load": 0.3,
+            "rip": 1.0
+          },
+          "version": 7
+        },
+        "objective_version": 7,
+        "target": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "coverage_h_deg": 80.0,
+          "coverage_v_deg": 50.0,
+          "di_slope_target": 0.0,
+          "di_target_db": null,
+          "driver_exit_radius_mm": 18.0,
+          "f0_hz": 700.0,
+          "f0_v_hz": 700.0,
+          "freq_weights": {
+            "band_hz": [
+              [
+                2500.0,
+                5500.0,
+                2.0
+              ]
+            ]
+          },
+          "loaded_hi_hz": 5600.0,
+          "z_min": 0.5
+        },
+        "weights": {
+          "cov": 1.0,
+          "di": 0.3,
+          "diag": 1.0,
+          "dislope": 1.0,
+          "distd": 0.5,
+          "flat": 0.5,
+          "flat_cv": 1.0,
+          "load": 1.0,
+          "rip": 1.0
+        }
+      },
+      "score_fingerprint_sha256": "748fd111fab59b05017be2d3547caaeb1de8037a8a9296130a19895ff1188d95",
+      "status": "resolved",
+      "task": null
+    },
+    {
+      "acoustic_review": "manual_review_required_not_certified",
+      "argv": [
+        ".venv/Scripts/python.exe",
+        "tools/night_queue/refine_study_cma.py",
+        "--study-root",
+        "runs/home_extension_2026-11-16/ext_v9_turbo_first",
+        "--config",
+        "examples/typologies/home_landscape_2026-11-15/hl__ath_tritonia_landscape_v9.yaml",
+        "--seed",
+        "89003",
+        "--budget",
+        "80",
+        "--out-config",
+        "scratch/home_extension_2026-11-16/refine_v9.yaml"
+      ],
+      "bounds": {
+        "L_mm": {
+          "hi": 400.0,
+          "lo": 140.0
+        },
+        "a0_deg": {
+          "hi": 11.0,
+          "lo": 5.0
+        },
+        "a_deg": {
+          "hi": 56.0,
+          "lo": 44.0
+        },
+        "aspect_ratio": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "az_a_cos2p_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_a_cos2p_pow": {
+          "hi": 5.0,
+          "lo": 5.0,
+          "search": false
+        },
+        "az_a_cos_amp": {
+          "hi": -13.5,
+          "lo": -18.0
+        },
+        "az_a_cos_pow": {
+          "hi": 2.0,
+          "lo": 2.0,
+          "search": false
+        },
+        "az_fold_h_deg": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_fold_h_width_deg": {
+          "hi": 20.0,
+          "lo": 20.0,
+          "search": false
+        },
+        "az_fold_v_deg": {
+          "hi": -27.5,
+          "lo": -31.0
+        },
+        "az_fold_v_width_deg": {
+          "hi": 25.5,
+          "lo": 21.5
+        },
+        "az_n_cos2_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_s_cos2_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "exponent": {
+          "hi": 2.0,
+          "lo": 2.0,
+          "search": false
+        },
+        "k": {
+          "hi": 1.3,
+          "lo": 0.9
+        },
+        "morph_allow_shrinkage": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_corner_mm": {
+          "hi": 30.0,
+          "lo": 10.0
+        },
+        "morph_exponent": {
+          "hi": 4.0,
+          "lo": 4.0,
+          "search": false
+        },
+        "morph_fixed": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "morph_height_mm": {
+          "hi": 480.0,
+          "lo": 250.0
+        },
+        "morph_rate": {
+          "hi": 2.1,
+          "lo": 1.0
+        },
+        "morph_target": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_width_mm": {
+          "hi": 590.0,
+          "lo": 330.0
+        },
+        "n": {
+          "hi": 7.5,
+          "lo": 4.0
+        },
+        "q": {
+          "hi": 0.995,
+          "lo": 0.97
+        },
+        "r0_mm": {
+          "hi": 18.0,
+          "lo": 18.0,
+          "search": false
+        },
+        "s": {
+          "hi": 1.04,
+          "lo": 0.92
+        },
+        "s1": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "s2": {
+          "hi": 0.015,
+          "lo": 0.015,
+          "search": false
+        }
+      },
+      "bounds_fingerprint_sha256": "b81d0f3b010e68151c5e027583ef036b61f6c22e0509de1c9225f6d8cc2745bd",
+      "brief": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7.yaml",
+      "brief_sha256": "7d7d2d0cf0480d41f81e1b4970d17e05a4da66bb94dc0ce496d6726185910fe9",
+      "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\home_landscape_2026-11-15\\hl__ath_tritonia_landscape_v9.yaml",
+      "config_sha256": "07dc033449203c9ccb5e8423e8d5cc1b8ef96a864bb3743f07d4d08b22e9348c",
+      "directivity_tags": {
+        "brief": null,
+        "config": null,
+        "status": "untagged_or_unrecognized"
+      },
+      "family": "OSSE",
+      "fidelity": {
+        "budget_profile": null,
+        "grid": {
+          "screen_extra_hz": [
+            250.0,
+            315.0,
+            400.0,
+            2573.0,
+            3311.0,
+            4260.0
+          ],
+          "verify_points_per_octave": 6.0
+        },
+        "mesh": {
+          "dof_cap_final": 24000,
+          "dof_cap_screen": 24000,
+          "dof_cap_verify": 24000,
+          "dof_per_triangle": 0.51,
+          "epw": 6.0,
+          "quadrants": "1"
+        },
+        "mode": null,
+        "solve": {
+          "angle_count": 73,
+          "backend": "beat_cuda",
+          "balloon": true,
+          "balloon_points_screen": 512,
+          "balloon_points_verify": 1024,
+          "cuda_fused": true,
+          "distance_m": 10.0,
+          "gmres_tol": 1e-05,
+          "timeout_s": 900
+        }
+      },
+      "fidelity_fingerprint_sha256": "c48879e46ceacc9e28b5b062c97b151cf04af348ad5fffbe6604fd5dced3f78e",
+      "id": "ext_v9_refine_cma",
+      "score": {
+        "objective": {
+          "bw8k_floor": 0.75,
+          "cov_below_f0": "mask",
+          "cov_narrow_ratio": 2.0,
+          "cov_v_weight": 0.5,
+          "diag_reference": "round",
+          "flat_band": "scored",
+          "lfp_crossover_ratio": 1.6,
+          "lfp_re_z": 0.2,
+          "loaded_re_z": 0.5,
+          "tolerances": {
+            "cov": 3.0,
+            "di": 0.4,
+            "diag": 2.0,
+            "dislope": 9.0,
+            "distd": 2.0,
+            "flat": 1.5,
+            "flat_cv": 1.5,
+            "load": 0.3,
+            "rip": 1.0
+          },
+          "version": 7
+        },
+        "objective_version": 7,
+        "target": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "coverage_h_deg": 80.0,
+          "coverage_v_deg": 50.0,
+          "di_slope_target": 0.0,
+          "di_target_db": null,
+          "driver_exit_radius_mm": 18.0,
+          "f0_hz": 700.0,
+          "f0_v_hz": 700.0,
+          "freq_weights": {
+            "band_hz": [
+              [
+                2500.0,
+                5500.0,
+                2.0
+              ]
+            ]
+          },
+          "loaded_hi_hz": 5600.0,
+          "z_min": 0.5
+        },
+        "weights": {
+          "cov": 1.0,
+          "di": 0.3,
+          "diag": 1.0,
+          "dislope": 1.0,
+          "distd": 0.5,
+          "flat": 0.5,
+          "flat_cv": 1.0,
+          "load": 1.0,
+          "rip": 1.0
+        }
+      },
+      "score_fingerprint_sha256": "748fd111fab59b05017be2d3547caaeb1de8037a8a9296130a19895ff1188d95",
+      "status": "resolved",
+      "task": null
+    },
+    {
+      "acoustic_review": "manual_review_required_not_certified",
+      "argv": [
+        "C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe",
+        "tools/night_queue/run_bo_arm.py",
+        "--root",
+        "runs/home_extension_2026-11-16/ext_v9_turbo_followup",
+        "--cohort",
+        "runs/home_extension_2026-11-16/cohort_turbo_followup",
+        "--config",
+        "examples/typologies/home_landscape_2026-11-15/hl__ath_tritonia_landscape_v9.yaml",
+        "--refresh-cohort",
+        "--policy",
+        "turbo",
+        "--seed",
+        "89012"
+      ],
+      "bounds": {
+        "L_mm": {
+          "hi": 400.0,
+          "lo": 140.0
+        },
+        "a0_deg": {
+          "hi": 11.0,
+          "lo": 5.0
+        },
+        "a_deg": {
+          "hi": 56.0,
+          "lo": 44.0
+        },
+        "aspect_ratio": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "az_a_cos2p_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_a_cos2p_pow": {
+          "hi": 5.0,
+          "lo": 5.0,
+          "search": false
+        },
+        "az_a_cos_amp": {
+          "hi": -13.5,
+          "lo": -18.0
+        },
+        "az_a_cos_pow": {
+          "hi": 2.0,
+          "lo": 2.0,
+          "search": false
+        },
+        "az_fold_h_deg": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_fold_h_width_deg": {
+          "hi": 20.0,
+          "lo": 20.0,
+          "search": false
+        },
+        "az_fold_v_deg": {
+          "hi": -27.5,
+          "lo": -31.0
+        },
+        "az_fold_v_width_deg": {
+          "hi": 25.5,
+          "lo": 21.5
+        },
+        "az_n_cos2_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_s_cos2_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "exponent": {
+          "hi": 2.0,
+          "lo": 2.0,
+          "search": false
+        },
+        "k": {
+          "hi": 1.3,
+          "lo": 0.9
+        },
+        "morph_allow_shrinkage": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_corner_mm": {
+          "hi": 30.0,
+          "lo": 10.0
+        },
+        "morph_exponent": {
+          "hi": 4.0,
+          "lo": 4.0,
+          "search": false
+        },
+        "morph_fixed": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "morph_height_mm": {
+          "hi": 480.0,
+          "lo": 250.0
+        },
+        "morph_rate": {
+          "hi": 2.1,
+          "lo": 1.0
+        },
+        "morph_target": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_width_mm": {
+          "hi": 590.0,
+          "lo": 330.0
+        },
+        "n": {
+          "hi": 7.5,
+          "lo": 4.0
+        },
+        "q": {
+          "hi": 0.995,
+          "lo": 0.97
+        },
+        "r0_mm": {
+          "hi": 18.0,
+          "lo": 18.0,
+          "search": false
+        },
+        "s": {
+          "hi": 1.04,
+          "lo": 0.92
+        },
+        "s1": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "s2": {
+          "hi": 0.015,
+          "lo": 0.015,
+          "search": false
+        }
+      },
+      "bounds_fingerprint_sha256": "b81d0f3b010e68151c5e027583ef036b61f6c22e0509de1c9225f6d8cc2745bd",
+      "brief": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7.yaml",
+      "brief_sha256": "7d7d2d0cf0480d41f81e1b4970d17e05a4da66bb94dc0ce496d6726185910fe9",
+      "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\home_landscape_2026-11-15\\hl__ath_tritonia_landscape_v9.yaml",
+      "config_sha256": "07dc033449203c9ccb5e8423e8d5cc1b8ef96a864bb3743f07d4d08b22e9348c",
+      "directivity_tags": {
+        "brief": null,
+        "config": null,
+        "status": "untagged_or_unrecognized"
+      },
+      "family": "OSSE",
+      "fidelity": {
+        "budget_profile": null,
+        "grid": {
+          "screen_extra_hz": [
+            250.0,
+            315.0,
+            400.0,
+            2573.0,
+            3311.0,
+            4260.0
+          ],
+          "verify_points_per_octave": 6.0
+        },
+        "mesh": {
+          "dof_cap_final": 24000,
+          "dof_cap_screen": 24000,
+          "dof_cap_verify": 24000,
+          "dof_per_triangle": 0.51,
+          "epw": 6.0,
+          "quadrants": "1"
+        },
+        "mode": null,
+        "solve": {
+          "angle_count": 73,
+          "backend": "beat_cuda",
+          "balloon": true,
+          "balloon_points_screen": 512,
+          "balloon_points_verify": 1024,
+          "cuda_fused": true,
+          "distance_m": 10.0,
+          "gmres_tol": 1e-05,
+          "timeout_s": 900
+        }
+      },
+      "fidelity_fingerprint_sha256": "c48879e46ceacc9e28b5b062c97b151cf04af348ad5fffbe6604fd5dced3f78e",
+      "id": "ext_v9_turbo_followup",
+      "score": {
+        "objective": {
+          "bw8k_floor": 0.75,
+          "cov_below_f0": "mask",
+          "cov_narrow_ratio": 2.0,
+          "cov_v_weight": 0.5,
+          "diag_reference": "round",
+          "flat_band": "scored",
+          "lfp_crossover_ratio": 1.6,
+          "lfp_re_z": 0.2,
+          "loaded_re_z": 0.5,
+          "tolerances": {
+            "cov": 3.0,
+            "di": 0.4,
+            "diag": 2.0,
+            "dislope": 9.0,
+            "distd": 2.0,
+            "flat": 1.5,
+            "flat_cv": 1.5,
+            "load": 0.3,
+            "rip": 1.0
+          },
+          "version": 7
+        },
+        "objective_version": 7,
+        "target": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "coverage_h_deg": 80.0,
+          "coverage_v_deg": 50.0,
+          "di_slope_target": 0.0,
+          "di_target_db": null,
+          "driver_exit_radius_mm": 18.0,
+          "f0_hz": 700.0,
+          "f0_v_hz": 700.0,
+          "freq_weights": {
+            "band_hz": [
+              [
+                2500.0,
+                5500.0,
+                2.0
+              ]
+            ]
+          },
+          "loaded_hi_hz": 5600.0,
+          "z_min": 0.5
+        },
+        "weights": {
+          "cov": 1.0,
+          "di": 0.3,
+          "diag": 1.0,
+          "dislope": 1.0,
+          "distd": 0.5,
+          "flat": 0.5,
+          "flat_cv": 1.0,
+          "load": 1.0,
+          "rip": 1.0
+        }
+      },
+      "score_fingerprint_sha256": "748fd111fab59b05017be2d3547caaeb1de8037a8a9296130a19895ff1188d95",
+      "status": "resolved",
+      "task": null
+    },
+    {
+      "acoustic_review": "manual_review_required_not_certified",
+      "argv": [
+        "C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe",
+        "tools/night_queue/run_bo_arm.py",
+        "--root",
+        "runs/home_extension_2026-11-16/ext_v9_scalar",
+        "--cohort",
+        "runs/home_extension_2026-11-16/cohort_scalar",
+        "--config",
+        "examples/typologies/home_landscape_2026-11-15/hl__ath_tritonia_landscape_v9.yaml",
+        "--refresh-cohort",
+        "--policy",
+        "scalar",
+        "--seed",
+        "89013"
+      ],
+      "bounds": {
+        "L_mm": {
+          "hi": 400.0,
+          "lo": 140.0
+        },
+        "a0_deg": {
+          "hi": 11.0,
+          "lo": 5.0
+        },
+        "a_deg": {
+          "hi": 56.0,
+          "lo": 44.0
+        },
+        "aspect_ratio": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "az_a_cos2p_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_a_cos2p_pow": {
+          "hi": 5.0,
+          "lo": 5.0,
+          "search": false
+        },
+        "az_a_cos_amp": {
+          "hi": -13.5,
+          "lo": -18.0
+        },
+        "az_a_cos_pow": {
+          "hi": 2.0,
+          "lo": 2.0,
+          "search": false
+        },
+        "az_fold_h_deg": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_fold_h_width_deg": {
+          "hi": 20.0,
+          "lo": 20.0,
+          "search": false
+        },
+        "az_fold_v_deg": {
+          "hi": -27.5,
+          "lo": -31.0
+        },
+        "az_fold_v_width_deg": {
+          "hi": 25.5,
+          "lo": 21.5
+        },
+        "az_n_cos2_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_s_cos2_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "exponent": {
+          "hi": 2.0,
+          "lo": 2.0,
+          "search": false
+        },
+        "k": {
+          "hi": 1.3,
+          "lo": 0.9
+        },
+        "morph_allow_shrinkage": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_corner_mm": {
+          "hi": 30.0,
+          "lo": 10.0
+        },
+        "morph_exponent": {
+          "hi": 4.0,
+          "lo": 4.0,
+          "search": false
+        },
+        "morph_fixed": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "morph_height_mm": {
+          "hi": 480.0,
+          "lo": 250.0
+        },
+        "morph_rate": {
+          "hi": 2.1,
+          "lo": 1.0
+        },
+        "morph_target": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_width_mm": {
+          "hi": 590.0,
+          "lo": 330.0
+        },
+        "n": {
+          "hi": 7.5,
+          "lo": 4.0
+        },
+        "q": {
+          "hi": 0.995,
+          "lo": 0.97
+        },
+        "r0_mm": {
+          "hi": 18.0,
+          "lo": 18.0,
+          "search": false
+        },
+        "s": {
+          "hi": 1.04,
+          "lo": 0.92
+        },
+        "s1": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "s2": {
+          "hi": 0.015,
+          "lo": 0.015,
+          "search": false
+        }
+      },
+      "bounds_fingerprint_sha256": "b81d0f3b010e68151c5e027583ef036b61f6c22e0509de1c9225f6d8cc2745bd",
+      "brief": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7.yaml",
+      "brief_sha256": "7d7d2d0cf0480d41f81e1b4970d17e05a4da66bb94dc0ce496d6726185910fe9",
+      "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\home_landscape_2026-11-15\\hl__ath_tritonia_landscape_v9.yaml",
+      "config_sha256": "07dc033449203c9ccb5e8423e8d5cc1b8ef96a864bb3743f07d4d08b22e9348c",
+      "directivity_tags": {
+        "brief": null,
+        "config": null,
+        "status": "untagged_or_unrecognized"
+      },
+      "family": "OSSE",
+      "fidelity": {
+        "budget_profile": null,
+        "grid": {
+          "screen_extra_hz": [
+            250.0,
+            315.0,
+            400.0,
+            2573.0,
+            3311.0,
+            4260.0
+          ],
+          "verify_points_per_octave": 6.0
+        },
+        "mesh": {
+          "dof_cap_final": 24000,
+          "dof_cap_screen": 24000,
+          "dof_cap_verify": 24000,
+          "dof_per_triangle": 0.51,
+          "epw": 6.0,
+          "quadrants": "1"
+        },
+        "mode": null,
+        "solve": {
+          "angle_count": 73,
+          "backend": "beat_cuda",
+          "balloon": true,
+          "balloon_points_screen": 512,
+          "balloon_points_verify": 1024,
+          "cuda_fused": true,
+          "distance_m": 10.0,
+          "gmres_tol": 1e-05,
+          "timeout_s": 900
+        }
+      },
+      "fidelity_fingerprint_sha256": "c48879e46ceacc9e28b5b062c97b151cf04af348ad5fffbe6604fd5dced3f78e",
+      "id": "ext_v9_scalar",
+      "score": {
+        "objective": {
+          "bw8k_floor": 0.75,
+          "cov_below_f0": "mask",
+          "cov_narrow_ratio": 2.0,
+          "cov_v_weight": 0.5,
+          "diag_reference": "round",
+          "flat_band": "scored",
+          "lfp_crossover_ratio": 1.6,
+          "lfp_re_z": 0.2,
+          "loaded_re_z": 0.5,
+          "tolerances": {
+            "cov": 3.0,
+            "di": 0.4,
+            "diag": 2.0,
+            "dislope": 9.0,
+            "distd": 2.0,
+            "flat": 1.5,
+            "flat_cv": 1.5,
+            "load": 0.3,
+            "rip": 1.0
+          },
+          "version": 7
+        },
+        "objective_version": 7,
+        "target": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "coverage_h_deg": 80.0,
+          "coverage_v_deg": 50.0,
+          "di_slope_target": 0.0,
+          "di_target_db": null,
+          "driver_exit_radius_mm": 18.0,
+          "f0_hz": 700.0,
+          "f0_v_hz": 700.0,
+          "freq_weights": {
+            "band_hz": [
+              [
+                2500.0,
+                5500.0,
+                2.0
+              ]
+            ]
+          },
+          "loaded_hi_hz": 5600.0,
+          "z_min": 0.5
+        },
+        "weights": {
+          "cov": 1.0,
+          "di": 0.3,
+          "diag": 1.0,
+          "dislope": 1.0,
+          "distd": 0.5,
+          "flat": 0.5,
+          "flat_cv": 1.0,
+          "load": 1.0,
+          "rip": 1.0
+        }
+      },
+      "score_fingerprint_sha256": "748fd111fab59b05017be2d3547caaeb1de8037a8a9296130a19895ff1188d95",
+      "status": "resolved",
+      "task": null
+    },
+    {
+      "acoustic_review": "manual_review_required_not_certified",
+      "argv": [
+        "C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe",
+        "tools/night_queue/run_bo_arm.py",
+        "--root",
+        "runs/home_extension_2026-11-16/ext_ath_turbo_s86001",
+        "--cohort",
+        "runs/bo_multityp_2026-11-16/ath_core_14in/cohort",
+        "--task",
+        "p80x60__ath_core_14in_home700_v7",
+        "--policy",
+        "turbo",
+        "--seed",
+        "86001",
+        "--scores-sha256",
+        "7408357ccf36f07608afb167e6d99eba892573574077235fd0c00ad90ffef4eb",
+        "--catalog-sha256",
+        "61456aec2b81efc4cebb54f5c4d90c71ac11176f536925fcb1dc02c7825a5333"
+      ],
+      "bounds": {
+        "L_mm": {
+          "hi": 650.0,
+          "lo": 140.0
+        },
+        "a0_deg": {
+          "hi": 3.0,
+          "lo": 1.0
+        },
+        "a_deg": {
+          "hi": 80.0,
+          "lo": 10.0
+        },
+        "aspect_ratio": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "exponent": {
+          "hi": 2.0,
+          "lo": 2.0,
+          "search": false
+        },
+        "k": {
+          "hi": 5.0,
+          "lo": 0.3
+        },
+        "morph_allow_shrinkage": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_corner_mm": {
+          "hi": 80.0,
+          "lo": 0.0
+        },
+        "morph_exponent": {
+          "hi": 10.0,
+          "lo": 2.0
+        },
+        "morph_fixed": {
+          "hi": 0.6,
+          "lo": 0.0
+        },
+        "morph_height_mm": {
+          "hi": 770.0,
+          "lo": 540.0
+        },
+        "morph_rate": {
+          "hi": 8.0,
+          "lo": 0.5
+        },
+        "morph_target": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_width_mm": {
+          "hi": 590.0,
+          "lo": 410.0
+        },
+        "n": {
+          "hi": 10.0,
+          "lo": 1.0
+        },
+        "q": {
+          "hi": 1.0,
+          "lo": 0.9
+        },
+        "r0_mm": {
+          "hi": 18.0,
+          "lo": 18.0,
+          "search": false
+        },
+        "s": {
+          "hi": 1.5,
+          "lo": 0.0
+        },
+        "s1": {
+          "hi": 1.3,
+          "lo": 1.0
+        },
+        "s2": {
+          "hi": 0.035,
+          "lo": 0.015
+        }
+      },
+      "bounds_fingerprint_sha256": "5ba9245b36c5a7dde7bf1da1dc22828db8ad8d53ce25953659df4a31c30a0bbf",
+      "brief": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\briefs\\print_80x60_2026-11-13\\room_80x60_700_hf1440_v7.yaml",
+      "brief_sha256": "5ef075a14dd0ca6827d0a5160640b6cdd3a029e1df892c7489949340196a8712",
+      "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\print_80x60_2026-11-13\\p80x60__ath_core_14in_700_v7.yaml",
+      "config_sha256": "ce24bc4dfa8599a328ff2363dde72f6a0657f9afded19e7672fb19938fa8e0dc",
+      "directivity_tags": {
+        "brief": null,
+        "config": null,
+        "status": "untagged_or_unrecognized"
+      },
+      "family": "OSSE",
+      "fidelity": {
+        "budget_profile": null,
+        "grid": {
+          "screen_extra_hz": [
+            250.0,
+            315.0,
+            400.0,
+            2573.0,
+            3311.0,
+            4260.0
+          ],
+          "verify_points_per_octave": 6.0
+        },
+        "mesh": {
+          "dof_cap_final": 24000,
+          "dof_cap_screen": 24000,
+          "dof_cap_verify": 24000,
+          "dof_per_triangle": 0.51,
+          "epw": 6.0,
+          "quadrants": "1"
+        },
+        "mode": null,
+        "solve": {
+          "angle_count": 73,
+          "backend": "beat_cuda",
+          "balloon": true,
+          "balloon_points_screen": 512,
+          "balloon_points_verify": 1024,
+          "cuda_fused": true,
+          "distance_m": 10.0,
+          "gmres_tol": 1e-05,
+          "timeout_s": 900
+        }
+      },
+      "fidelity_fingerprint_sha256": "c48879e46ceacc9e28b5b062c97b151cf04af348ad5fffbe6604fd5dced3f78e",
+      "id": "ext_ath_turbo_s86001",
+      "score": {
+        "objective": {
+          "bw8k_floor": 0.75,
+          "cov_below_f0": "mask",
+          "cov_narrow_ratio": 2.0,
+          "diag_reference": "round",
+          "lfp_crossover_ratio": 1.6,
+          "lfp_re_z": 0.2,
+          "loaded_re_z": 0.5,
+          "tolerances": {
+            "cov": 4.0,
+            "di": 0.4,
+            "diag": 2.0,
+            "dislope": 9.0,
+            "distd": 2.0,
+            "flat": 1.5,
+            "flat_cv": 1.5,
+            "load": 0.3,
+            "rip": 1.0
+          },
+          "version": 7
+        },
+        "objective_version": 7,
+        "target": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "coverage_h_deg": 80.0,
+          "coverage_v_deg": 60.0,
+          "di_slope_target": 0.0,
+          "di_target_db": null,
+          "driver_exit_radius_mm": 18.0,
+          "f0_hz": 700.0,
+          "f0_v_hz": 700.0,
+          "freq_weights": {
+            "band_hz": [
+              [
+                2500.0,
+                5500.0,
+                2.0
+              ]
+            ]
+          },
+          "loaded_hi_hz": 5600.0,
+          "z_min": 0.5
+        },
+        "weights": {
+          "cov": 0.6,
+          "di": 0.3,
+          "diag": 1.0,
+          "dislope": 1.0,
+          "distd": 0.5,
+          "flat": 0.5,
+          "flat_cv": 1.0,
+          "load": 1.0,
+          "rip": 1.0
+        }
+      },
+      "score_fingerprint_sha256": "994d479c1fa0d34aea8d4ae26268ea19c46a1a249a080f43e83394b080c674ad",
+      "status": "resolved",
+      "task": "p80x60__ath_core_14in_home700_v7"
+    },
+    {
+      "acoustic_review": "manual_review_required_not_certified",
+      "argv": [
+        "C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe",
+        "tools/night_queue/run_bo_arm.py",
+        "--root",
+        "runs/home_extension_2026-11-16/ext_ath_scalar_s86001",
+        "--cohort",
+        "runs/bo_multityp_2026-11-16/ath_core_14in/cohort",
+        "--task",
+        "p80x60__ath_core_14in_home700_v7",
+        "--policy",
+        "scalar",
+        "--seed",
+        "86001",
+        "--scores-sha256",
+        "7408357ccf36f07608afb167e6d99eba892573574077235fd0c00ad90ffef4eb",
+        "--catalog-sha256",
+        "61456aec2b81efc4cebb54f5c4d90c71ac11176f536925fcb1dc02c7825a5333"
+      ],
+      "bounds": {
+        "L_mm": {
+          "hi": 650.0,
+          "lo": 140.0
+        },
+        "a0_deg": {
+          "hi": 3.0,
+          "lo": 1.0
+        },
+        "a_deg": {
+          "hi": 80.0,
+          "lo": 10.0
+        },
+        "aspect_ratio": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "exponent": {
+          "hi": 2.0,
+          "lo": 2.0,
+          "search": false
+        },
+        "k": {
+          "hi": 5.0,
+          "lo": 0.3
+        },
+        "morph_allow_shrinkage": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_corner_mm": {
+          "hi": 80.0,
+          "lo": 0.0
+        },
+        "morph_exponent": {
+          "hi": 10.0,
+          "lo": 2.0
+        },
+        "morph_fixed": {
+          "hi": 0.6,
+          "lo": 0.0
+        },
+        "morph_height_mm": {
+          "hi": 770.0,
+          "lo": 540.0
+        },
+        "morph_rate": {
+          "hi": 8.0,
+          "lo": 0.5
+        },
+        "morph_target": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_width_mm": {
+          "hi": 590.0,
+          "lo": 410.0
+        },
+        "n": {
+          "hi": 10.0,
+          "lo": 1.0
+        },
+        "q": {
+          "hi": 1.0,
+          "lo": 0.9
+        },
+        "r0_mm": {
+          "hi": 18.0,
+          "lo": 18.0,
+          "search": false
+        },
+        "s": {
+          "hi": 1.5,
+          "lo": 0.0
+        },
+        "s1": {
+          "hi": 1.3,
+          "lo": 1.0
+        },
+        "s2": {
+          "hi": 0.035,
+          "lo": 0.015
+        }
+      },
+      "bounds_fingerprint_sha256": "5ba9245b36c5a7dde7bf1da1dc22828db8ad8d53ce25953659df4a31c30a0bbf",
+      "brief": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\briefs\\print_80x60_2026-11-13\\room_80x60_700_hf1440_v7.yaml",
+      "brief_sha256": "5ef075a14dd0ca6827d0a5160640b6cdd3a029e1df892c7489949340196a8712",
+      "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\print_80x60_2026-11-13\\p80x60__ath_core_14in_700_v7.yaml",
+      "config_sha256": "ce24bc4dfa8599a328ff2363dde72f6a0657f9afded19e7672fb19938fa8e0dc",
+      "directivity_tags": {
+        "brief": null,
+        "config": null,
+        "status": "untagged_or_unrecognized"
+      },
+      "family": "OSSE",
+      "fidelity": {
+        "budget_profile": null,
+        "grid": {
+          "screen_extra_hz": [
+            250.0,
+            315.0,
+            400.0,
+            2573.0,
+            3311.0,
+            4260.0
+          ],
+          "verify_points_per_octave": 6.0
+        },
+        "mesh": {
+          "dof_cap_final": 24000,
+          "dof_cap_screen": 24000,
+          "dof_cap_verify": 24000,
+          "dof_per_triangle": 0.51,
+          "epw": 6.0,
+          "quadrants": "1"
+        },
+        "mode": null,
+        "solve": {
+          "angle_count": 73,
+          "backend": "beat_cuda",
+          "balloon": true,
+          "balloon_points_screen": 512,
+          "balloon_points_verify": 1024,
+          "cuda_fused": true,
+          "distance_m": 10.0,
+          "gmres_tol": 1e-05,
+          "timeout_s": 900
+        }
+      },
+      "fidelity_fingerprint_sha256": "c48879e46ceacc9e28b5b062c97b151cf04af348ad5fffbe6604fd5dced3f78e",
+      "id": "ext_ath_scalar_s86001",
+      "score": {
+        "objective": {
+          "bw8k_floor": 0.75,
+          "cov_below_f0": "mask",
+          "cov_narrow_ratio": 2.0,
+          "diag_reference": "round",
+          "lfp_crossover_ratio": 1.6,
+          "lfp_re_z": 0.2,
+          "loaded_re_z": 0.5,
+          "tolerances": {
+            "cov": 4.0,
+            "di": 0.4,
+            "diag": 2.0,
+            "dislope": 9.0,
+            "distd": 2.0,
+            "flat": 1.5,
+            "flat_cv": 1.5,
+            "load": 0.3,
+            "rip": 1.0
+          },
+          "version": 7
+        },
+        "objective_version": 7,
+        "target": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "coverage_h_deg": 80.0,
+          "coverage_v_deg": 60.0,
+          "di_slope_target": 0.0,
+          "di_target_db": null,
+          "driver_exit_radius_mm": 18.0,
+          "f0_hz": 700.0,
+          "f0_v_hz": 700.0,
+          "freq_weights": {
+            "band_hz": [
+              [
+                2500.0,
+                5500.0,
+                2.0
+              ]
+            ]
+          },
+          "loaded_hi_hz": 5600.0,
+          "z_min": 0.5
+        },
+        "weights": {
+          "cov": 0.6,
+          "di": 0.3,
+          "diag": 1.0,
+          "dislope": 1.0,
+          "distd": 0.5,
+          "flat": 0.5,
+          "flat_cv": 1.0,
+          "load": 1.0,
+          "rip": 1.0
+        }
+      },
+      "score_fingerprint_sha256": "994d479c1fa0d34aea8d4ae26268ea19c46a1a249a080f43e83394b080c674ad",
+      "status": "resolved",
+      "task": "p80x60__ath_core_14in_home700_v7"
+    },
+    {
+      "acoustic_review": "manual_review_required_not_certified",
+      "argv": [
+        "C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe",
+        "tools/night_queue/run_bo_arm.py",
+        "--root",
+        "runs/home_extension_2026-11-16/ext_core_turbo_s87001",
+        "--cohort",
+        "runs/bo_multityp_2026-11-16/ext_throat_corelaw/cohort",
+        "--task",
+        "p80x60__ext_throat_corelaw_v7",
+        "--policy",
+        "turbo",
+        "--seed",
+        "87001",
+        "--scores-sha256",
+        "2e0a7d2c151bf05eb86b5d187c6c21d1c93ed5897037256058a68e1cd31f42cd",
+        "--catalog-sha256",
+        "14a548bd390dfb576f4776a57dda44c769f7c265e2022e82a97415df752eaf88"
+      ],
+      "bounds": {
+        "L_mm": {
+          "hi": 320.0,
+          "lo": 200.0
+        },
+        "a0_deg": {
+          "hi": 3.1882,
+          "lo": 3.1882,
+          "search": false
+        },
+        "a_deg": {
+          "hi": 55.0,
+          "lo": 15.0
+        },
+        "aspect_ratio": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "az_a_cos_amp": {
+          "hi": 7.65,
+          "lo": -29.05
+        },
+        "az_a_cos_pow": {
+          "hi": 3.9648,
+          "lo": 3.9648,
+          "search": false
+        },
+        "az_a_sf_amp": {
+          "hi": 35.42,
+          "lo": -10.0
+        },
+        "az_n_cos2_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_s_cos2_amp": {
+          "hi": 0.5,
+          "lo": -0.255
+        },
+        "az_sf_a": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "az_sf_b": {
+          "hi": 0.8569,
+          "lo": 0.8569,
+          "search": false
+        },
+        "az_sf_m": {
+          "hi": 4.0,
+          "lo": 4.0,
+          "search": false
+        },
+        "az_sf_n1": {
+          "hi": 7.4958,
+          "lo": 7.4958,
+          "search": false
+        },
+        "az_sf_n2": {
+          "hi": 12.4449,
+          "lo": 12.4449,
+          "search": false
+        },
+        "az_sf_n3": {
+          "hi": 13.4442,
+          "lo": 13.4442,
+          "search": false
+        },
+        "exponent": {
+          "hi": 2.0,
+          "lo": 2.0,
+          "search": false
+        },
+        "k": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "morph_allow_shrinkage": {
+          "hi": 0,
+          "lo": 0,
+          "search": false
+        },
+        "morph_corner_mm": {
+          "hi": 35.0,
+          "lo": 35.0,
+          "search": false
+        },
+        "morph_exponent": {
+          "hi": 4.0,
+          "lo": 4.0,
+          "search": false
+        },
+        "morph_fixed": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "morph_height_mm": {
+          "hi": 660.0,
+          "lo": 660.0,
+          "search": false
+        },
+        "morph_rate": {
+          "hi": 6.0,
+          "lo": 0.5
+        },
+        "morph_target": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_width_mm": {
+          "hi": 500.0,
+          "lo": 500.0,
+          "search": false
+        },
+        "n": {
+          "hi": 6.0,
+          "lo": 6.0,
+          "search": false
+        },
+        "q": {
+          "hi": 0.996,
+          "lo": 0.996,
+          "search": false
+        },
+        "r0_mm": {
+          "hi": 27.4145,
+          "lo": 27.4145,
+          "search": false
+        },
+        "s": {
+          "hi": 0.9,
+          "lo": 0.3
+        },
+        "slot_length_mm": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "throat_ext_angle_deg": {
+          "hi": 5.0,
+          "lo": 1.5
+        },
+        "throat_ext_length_mm": {
+          "hi": 220.0,
+          "lo": 80.0
+        },
+        "wall_thickness_mm": {
+          "hi": 5.0,
+          "lo": 5.0,
+          "search": false
+        }
+      },
+      "bounds_fingerprint_sha256": "23c27af4dda2c2cdbe408db38af6f166fb45748488533281ceeda406bd319498",
+      "brief": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\briefs\\print_80x60_2026-11-13\\room_80x60_700_hf1440_v7.yaml",
+      "brief_sha256": "5ef075a14dd0ca6827d0a5160640b6cdd3a029e1df892c7489949340196a8712",
+      "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\suggest_ab_2026-11-14\\p80x60__ext_throat_corelaw_v7.yaml",
+      "config_sha256": "2b8777766e17006a3d9c5816bfa0a159d597edf9dd678c7772054a2a0a77678e",
+      "directivity_tags": {
+        "brief": null,
+        "config": null,
+        "status": "untagged_or_unrecognized"
+      },
+      "family": "OSSE",
+      "fidelity": {
+        "budget_profile": null,
+        "grid": {
+          "screen_extra_hz": [
+            250.0,
+            315.0,
+            400.0,
+            2573.0,
+            3311.0,
+            4260.0
+          ],
+          "verify_points_per_octave": 6.0
+        },
+        "mesh": {
+          "dof_cap_final": 24000,
+          "dof_cap_screen": 24000,
+          "dof_cap_verify": 24000,
+          "dof_per_triangle": 0.51,
+          "epw": 6.0,
+          "quadrants": "1"
+        },
+        "mode": null,
+        "solve": {
+          "angle_count": 73,
+          "backend": "beat_cuda",
+          "balloon": true,
+          "balloon_points_screen": 512,
+          "balloon_points_verify": 1024,
+          "cuda_fused": true,
+          "distance_m": 10.0,
+          "gmres_tol": 1e-05,
+          "timeout_s": 900
+        }
+      },
+      "fidelity_fingerprint_sha256": "c48879e46ceacc9e28b5b062c97b151cf04af348ad5fffbe6604fd5dced3f78e",
+      "id": "ext_core_turbo_s87001",
+      "score": {
+        "objective": {
+          "bw8k_floor": 0.75,
+          "cov_below_f0": "mask",
+          "cov_narrow_ratio": 2.0,
+          "diag_reference": "round",
+          "lfp_crossover_ratio": 1.6,
+          "lfp_re_z": 0.2,
+          "loaded_re_z": 0.5,
+          "tolerances": {
+            "cov": 4.0,
+            "di": 0.4,
+            "diag": 2.0,
+            "dislope": 9.0,
+            "distd": 2.0,
+            "flat": 1.5,
+            "flat_cv": 1.5,
+            "load": 0.3,
+            "rip": 1.0
+          },
+          "version": 7
+        },
+        "objective_version": 7,
+        "target": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "coverage_h_deg": 80.0,
+          "coverage_v_deg": 60.0,
+          "di_slope_target": 0.0,
+          "di_target_db": null,
+          "driver_exit_radius_mm": 18.0,
+          "f0_hz": 700.0,
+          "f0_v_hz": 700.0,
+          "freq_weights": {
+            "band_hz": [
+              [
+                2500.0,
+                5500.0,
+                2.0
+              ]
+            ]
+          },
+          "loaded_hi_hz": 5600.0,
+          "z_min": 0.5
+        },
+        "weights": {
+          "cov": 0.6,
+          "di": 0.3,
+          "diag": 1.0,
+          "dislope": 1.0,
+          "distd": 0.5,
+          "flat": 0.5,
+          "flat_cv": 1.0,
+          "load": 1.0,
+          "rip": 1.0
+        }
+      },
+      "score_fingerprint_sha256": "994d479c1fa0d34aea8d4ae26268ea19c46a1a249a080f43e83394b080c674ad",
+      "status": "resolved",
+      "task": "p80x60__ext_throat_corelaw_v7"
+    },
+    {
+      "acoustic_review": "manual_review_required_not_certified",
+      "argv": [
+        "C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe",
+        "tools/night_queue/run_bo_arm.py",
+        "--root",
+        "runs/home_extension_2026-11-16/ext_core_scalar_s87001",
+        "--cohort",
+        "runs/bo_multityp_2026-11-16/ext_throat_corelaw/cohort",
+        "--task",
+        "p80x60__ext_throat_corelaw_v7",
+        "--policy",
+        "scalar",
+        "--seed",
+        "87001",
+        "--scores-sha256",
+        "2e0a7d2c151bf05eb86b5d187c6c21d1c93ed5897037256058a68e1cd31f42cd",
+        "--catalog-sha256",
+        "14a548bd390dfb576f4776a57dda44c769f7c265e2022e82a97415df752eaf88"
+      ],
+      "bounds": {
+        "L_mm": {
+          "hi": 320.0,
+          "lo": 200.0
+        },
+        "a0_deg": {
+          "hi": 3.1882,
+          "lo": 3.1882,
+          "search": false
+        },
+        "a_deg": {
+          "hi": 55.0,
+          "lo": 15.0
+        },
+        "aspect_ratio": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "az_a_cos_amp": {
+          "hi": 7.65,
+          "lo": -29.05
+        },
+        "az_a_cos_pow": {
+          "hi": 3.9648,
+          "lo": 3.9648,
+          "search": false
+        },
+        "az_a_sf_amp": {
+          "hi": 35.42,
+          "lo": -10.0
+        },
+        "az_n_cos2_amp": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "az_s_cos2_amp": {
+          "hi": 0.5,
+          "lo": -0.255
+        },
+        "az_sf_a": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "az_sf_b": {
+          "hi": 0.8569,
+          "lo": 0.8569,
+          "search": false
+        },
+        "az_sf_m": {
+          "hi": 4.0,
+          "lo": 4.0,
+          "search": false
+        },
+        "az_sf_n1": {
+          "hi": 7.4958,
+          "lo": 7.4958,
+          "search": false
+        },
+        "az_sf_n2": {
+          "hi": 12.4449,
+          "lo": 12.4449,
+          "search": false
+        },
+        "az_sf_n3": {
+          "hi": 13.4442,
+          "lo": 13.4442,
+          "search": false
+        },
+        "exponent": {
+          "hi": 2.0,
+          "lo": 2.0,
+          "search": false
+        },
+        "k": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "morph_allow_shrinkage": {
+          "hi": 0,
+          "lo": 0,
+          "search": false
+        },
+        "morph_corner_mm": {
+          "hi": 35.0,
+          "lo": 35.0,
+          "search": false
+        },
+        "morph_exponent": {
+          "hi": 4.0,
+          "lo": 4.0,
+          "search": false
+        },
+        "morph_fixed": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "morph_height_mm": {
+          "hi": 660.0,
+          "lo": 660.0,
+          "search": false
+        },
+        "morph_rate": {
+          "hi": 6.0,
+          "lo": 0.5
+        },
+        "morph_target": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_width_mm": {
+          "hi": 500.0,
+          "lo": 500.0,
+          "search": false
+        },
+        "n": {
+          "hi": 6.0,
+          "lo": 6.0,
+          "search": false
+        },
+        "q": {
+          "hi": 0.996,
+          "lo": 0.996,
+          "search": false
+        },
+        "r0_mm": {
+          "hi": 27.4145,
+          "lo": 27.4145,
+          "search": false
+        },
+        "s": {
+          "hi": 0.9,
+          "lo": 0.3
+        },
+        "slot_length_mm": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "search": false
+        },
+        "throat_ext_angle_deg": {
+          "hi": 5.0,
+          "lo": 1.5
+        },
+        "throat_ext_length_mm": {
+          "hi": 220.0,
+          "lo": 80.0
+        },
+        "wall_thickness_mm": {
+          "hi": 5.0,
+          "lo": 5.0,
+          "search": false
+        }
+      },
+      "bounds_fingerprint_sha256": "23c27af4dda2c2cdbe408db38af6f166fb45748488533281ceeda406bd319498",
+      "brief": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\briefs\\print_80x60_2026-11-13\\room_80x60_700_hf1440_v7.yaml",
+      "brief_sha256": "5ef075a14dd0ca6827d0a5160640b6cdd3a029e1df892c7489949340196a8712",
+      "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\suggest_ab_2026-11-14\\p80x60__ext_throat_corelaw_v7.yaml",
+      "config_sha256": "2b8777766e17006a3d9c5816bfa0a159d597edf9dd678c7772054a2a0a77678e",
+      "directivity_tags": {
+        "brief": null,
+        "config": null,
+        "status": "untagged_or_unrecognized"
+      },
+      "family": "OSSE",
+      "fidelity": {
+        "budget_profile": null,
+        "grid": {
+          "screen_extra_hz": [
+            250.0,
+            315.0,
+            400.0,
+            2573.0,
+            3311.0,
+            4260.0
+          ],
+          "verify_points_per_octave": 6.0
+        },
+        "mesh": {
+          "dof_cap_final": 24000,
+          "dof_cap_screen": 24000,
+          "dof_cap_verify": 24000,
+          "dof_per_triangle": 0.51,
+          "epw": 6.0,
+          "quadrants": "1"
+        },
+        "mode": null,
+        "solve": {
+          "angle_count": 73,
+          "backend": "beat_cuda",
+          "balloon": true,
+          "balloon_points_screen": 512,
+          "balloon_points_verify": 1024,
+          "cuda_fused": true,
+          "distance_m": 10.0,
+          "gmres_tol": 1e-05,
+          "timeout_s": 900
+        }
+      },
+      "fidelity_fingerprint_sha256": "c48879e46ceacc9e28b5b062c97b151cf04af348ad5fffbe6604fd5dced3f78e",
+      "id": "ext_core_scalar_s87001",
+      "score": {
+        "objective": {
+          "bw8k_floor": 0.75,
+          "cov_below_f0": "mask",
+          "cov_narrow_ratio": 2.0,
+          "diag_reference": "round",
+          "lfp_crossover_ratio": 1.6,
+          "lfp_re_z": 0.2,
+          "loaded_re_z": 0.5,
+          "tolerances": {
+            "cov": 4.0,
+            "di": 0.4,
+            "diag": 2.0,
+            "dislope": 9.0,
+            "distd": 2.0,
+            "flat": 1.5,
+            "flat_cv": 1.5,
+            "load": 0.3,
+            "rip": 1.0
+          },
+          "version": 7
+        },
+        "objective_version": 7,
+        "target": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "coverage_h_deg": 80.0,
+          "coverage_v_deg": 60.0,
+          "di_slope_target": 0.0,
+          "di_target_db": null,
+          "driver_exit_radius_mm": 18.0,
+          "f0_hz": 700.0,
+          "f0_v_hz": 700.0,
+          "freq_weights": {
+            "band_hz": [
+              [
+                2500.0,
+                5500.0,
+                2.0
+              ]
+            ]
+          },
+          "loaded_hi_hz": 5600.0,
+          "z_min": 0.5
+        },
+        "weights": {
+          "cov": 0.6,
+          "di": 0.3,
+          "diag": 1.0,
+          "dislope": 1.0,
+          "distd": 0.5,
+          "flat": 0.5,
+          "flat_cv": 1.0,
+          "load": 1.0,
+          "rip": 1.0
+        }
+      },
+      "score_fingerprint_sha256": "994d479c1fa0d34aea8d4ae26268ea19c46a1a249a080f43e83394b080c674ad",
+      "status": "resolved",
+      "task": "p80x60__ext_throat_corelaw_v7"
+    },
+    {
+      "acoustic_review": "manual_review_required_not_certified",
+      "argv": [
+        "C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe",
+        "tools/night_queue/run_bo_arm.py",
+        "--root",
+        "runs/home_extension_2026-11-16/ext_ath_turbo_s86002",
+        "--cohort",
+        "runs/bo_multityp_2026-11-16/ath_core_14in/cohort",
+        "--task",
+        "p80x60__ath_core_14in_home700_v7",
+        "--policy",
+        "turbo",
+        "--seed",
+        "86002",
+        "--scores-sha256",
+        "7408357ccf36f07608afb167e6d99eba892573574077235fd0c00ad90ffef4eb",
+        "--catalog-sha256",
+        "61456aec2b81efc4cebb54f5c4d90c71ac11176f536925fcb1dc02c7825a5333"
+      ],
+      "bounds": {
+        "L_mm": {
+          "hi": 650.0,
+          "lo": 140.0
+        },
+        "a0_deg": {
+          "hi": 3.0,
+          "lo": 1.0
+        },
+        "a_deg": {
+          "hi": 80.0,
+          "lo": 10.0
+        },
+        "aspect_ratio": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "exponent": {
+          "hi": 2.0,
+          "lo": 2.0,
+          "search": false
+        },
+        "k": {
+          "hi": 5.0,
+          "lo": 0.3
+        },
+        "morph_allow_shrinkage": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_corner_mm": {
+          "hi": 80.0,
+          "lo": 0.0
+        },
+        "morph_exponent": {
+          "hi": 10.0,
+          "lo": 2.0
+        },
+        "morph_fixed": {
+          "hi": 0.6,
+          "lo": 0.0
+        },
+        "morph_height_mm": {
+          "hi": 770.0,
+          "lo": 540.0
+        },
+        "morph_rate": {
+          "hi": 8.0,
+          "lo": 0.5
+        },
+        "morph_target": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_width_mm": {
+          "hi": 590.0,
+          "lo": 410.0
+        },
+        "n": {
+          "hi": 10.0,
+          "lo": 1.0
+        },
+        "q": {
+          "hi": 1.0,
+          "lo": 0.9
+        },
+        "r0_mm": {
+          "hi": 18.0,
+          "lo": 18.0,
+          "search": false
+        },
+        "s": {
+          "hi": 1.5,
+          "lo": 0.0
+        },
+        "s1": {
+          "hi": 1.3,
+          "lo": 1.0
+        },
+        "s2": {
+          "hi": 0.035,
+          "lo": 0.015
+        }
+      },
+      "bounds_fingerprint_sha256": "5ba9245b36c5a7dde7bf1da1dc22828db8ad8d53ce25953659df4a31c30a0bbf",
+      "brief": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\briefs\\print_80x60_2026-11-13\\room_80x60_700_hf1440_v7.yaml",
+      "brief_sha256": "5ef075a14dd0ca6827d0a5160640b6cdd3a029e1df892c7489949340196a8712",
+      "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\print_80x60_2026-11-13\\p80x60__ath_core_14in_700_v7.yaml",
+      "config_sha256": "ce24bc4dfa8599a328ff2363dde72f6a0657f9afded19e7672fb19938fa8e0dc",
+      "directivity_tags": {
+        "brief": null,
+        "config": null,
+        "status": "untagged_or_unrecognized"
+      },
+      "family": "OSSE",
+      "fidelity": {
+        "budget_profile": null,
+        "grid": {
+          "screen_extra_hz": [
+            250.0,
+            315.0,
+            400.0,
+            2573.0,
+            3311.0,
+            4260.0
+          ],
+          "verify_points_per_octave": 6.0
+        },
+        "mesh": {
+          "dof_cap_final": 24000,
+          "dof_cap_screen": 24000,
+          "dof_cap_verify": 24000,
+          "dof_per_triangle": 0.51,
+          "epw": 6.0,
+          "quadrants": "1"
+        },
+        "mode": null,
+        "solve": {
+          "angle_count": 73,
+          "backend": "beat_cuda",
+          "balloon": true,
+          "balloon_points_screen": 512,
+          "balloon_points_verify": 1024,
+          "cuda_fused": true,
+          "distance_m": 10.0,
+          "gmres_tol": 1e-05,
+          "timeout_s": 900
+        }
+      },
+      "fidelity_fingerprint_sha256": "c48879e46ceacc9e28b5b062c97b151cf04af348ad5fffbe6604fd5dced3f78e",
+      "id": "ext_ath_turbo_s86002",
+      "score": {
+        "objective": {
+          "bw8k_floor": 0.75,
+          "cov_below_f0": "mask",
+          "cov_narrow_ratio": 2.0,
+          "diag_reference": "round",
+          "lfp_crossover_ratio": 1.6,
+          "lfp_re_z": 0.2,
+          "loaded_re_z": 0.5,
+          "tolerances": {
+            "cov": 4.0,
+            "di": 0.4,
+            "diag": 2.0,
+            "dislope": 9.0,
+            "distd": 2.0,
+            "flat": 1.5,
+            "flat_cv": 1.5,
+            "load": 0.3,
+            "rip": 1.0
+          },
+          "version": 7
+        },
+        "objective_version": 7,
+        "target": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "coverage_h_deg": 80.0,
+          "coverage_v_deg": 60.0,
+          "di_slope_target": 0.0,
+          "di_target_db": null,
+          "driver_exit_radius_mm": 18.0,
+          "f0_hz": 700.0,
+          "f0_v_hz": 700.0,
+          "freq_weights": {
+            "band_hz": [
+              [
+                2500.0,
+                5500.0,
+                2.0
+              ]
+            ]
+          },
+          "loaded_hi_hz": 5600.0,
+          "z_min": 0.5
+        },
+        "weights": {
+          "cov": 0.6,
+          "di": 0.3,
+          "diag": 1.0,
+          "dislope": 1.0,
+          "distd": 0.5,
+          "flat": 0.5,
+          "flat_cv": 1.0,
+          "load": 1.0,
+          "rip": 1.0
+        }
+      },
+      "score_fingerprint_sha256": "994d479c1fa0d34aea8d4ae26268ea19c46a1a249a080f43e83394b080c674ad",
+      "status": "resolved",
+      "task": "p80x60__ath_core_14in_home700_v7"
+    },
+    {
+      "acoustic_review": "manual_review_required_not_certified",
+      "argv": [
+        "C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe",
+        "tools/night_queue/run_bo_arm.py",
+        "--root",
+        "runs/home_extension_2026-11-16/ext_ath_scalar_s86002",
+        "--cohort",
+        "runs/bo_multityp_2026-11-16/ath_core_14in/cohort",
+        "--task",
+        "p80x60__ath_core_14in_home700_v7",
+        "--policy",
+        "scalar",
+        "--seed",
+        "86002",
+        "--scores-sha256",
+        "7408357ccf36f07608afb167e6d99eba892573574077235fd0c00ad90ffef4eb",
+        "--catalog-sha256",
+        "61456aec2b81efc4cebb54f5c4d90c71ac11176f536925fcb1dc02c7825a5333"
+      ],
+      "bounds": {
+        "L_mm": {
+          "hi": 650.0,
+          "lo": 140.0
+        },
+        "a0_deg": {
+          "hi": 3.0,
+          "lo": 1.0
+        },
+        "a_deg": {
+          "hi": 80.0,
+          "lo": 10.0
+        },
+        "aspect_ratio": {
+          "hi": 1.0,
+          "lo": 1.0,
+          "search": false
+        },
+        "exponent": {
+          "hi": 2.0,
+          "lo": 2.0,
+          "search": false
+        },
+        "k": {
+          "hi": 5.0,
+          "lo": 0.3
+        },
+        "morph_allow_shrinkage": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_corner_mm": {
+          "hi": 80.0,
+          "lo": 0.0
+        },
+        "morph_exponent": {
+          "hi": 10.0,
+          "lo": 2.0
+        },
+        "morph_fixed": {
+          "hi": 0.6,
+          "lo": 0.0
+        },
+        "morph_height_mm": {
+          "hi": 770.0,
+          "lo": 540.0
+        },
+        "morph_rate": {
+          "hi": 8.0,
+          "lo": 0.5
+        },
+        "morph_target": {
+          "hi": 1,
+          "lo": 1,
+          "search": false
+        },
+        "morph_width_mm": {
+          "hi": 590.0,
+          "lo": 410.0
+        },
+        "n": {
+          "hi": 10.0,
+          "lo": 1.0
+        },
+        "q": {
+          "hi": 1.0,
+          "lo": 0.9
+        },
+        "r0_mm": {
+          "hi": 18.0,
+          "lo": 18.0,
+          "search": false
+        },
+        "s": {
+          "hi": 1.5,
+          "lo": 0.0
+        },
+        "s1": {
+          "hi": 1.3,
+          "lo": 1.0
+        },
+        "s2": {
+          "hi": 0.035,
+          "lo": 0.015
+        }
+      },
+      "bounds_fingerprint_sha256": "5ba9245b36c5a7dde7bf1da1dc22828db8ad8d53ce25953659df4a31c30a0bbf",
+      "brief": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\briefs\\print_80x60_2026-11-13\\room_80x60_700_hf1440_v7.yaml",
+      "brief_sha256": "5ef075a14dd0ca6827d0a5160640b6cdd3a029e1df892c7489949340196a8712",
+      "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\print_80x60_2026-11-13\\p80x60__ath_core_14in_700_v7.yaml",
+      "config_sha256": "ce24bc4dfa8599a328ff2363dde72f6a0657f9afded19e7672fb19938fa8e0dc",
+      "directivity_tags": {
+        "brief": null,
+        "config": null,
+        "status": "untagged_or_unrecognized"
+      },
+      "family": "OSSE",
+      "fidelity": {
+        "budget_profile": null,
+        "grid": {
+          "screen_extra_hz": [
+            250.0,
+            315.0,
+            400.0,
+            2573.0,
+            3311.0,
+            4260.0
+          ],
+          "verify_points_per_octave": 6.0
+        },
+        "mesh": {
+          "dof_cap_final": 24000,
+          "dof_cap_screen": 24000,
+          "dof_cap_verify": 24000,
+          "dof_per_triangle": 0.51,
+          "epw": 6.0,
+          "quadrants": "1"
+        },
+        "mode": null,
+        "solve": {
+          "angle_count": 73,
+          "backend": "beat_cuda",
+          "balloon": true,
+          "balloon_points_screen": 512,
+          "balloon_points_verify": 1024,
+          "cuda_fused": true,
+          "distance_m": 10.0,
+          "gmres_tol": 1e-05,
+          "timeout_s": 900
+        }
+      },
+      "fidelity_fingerprint_sha256": "c48879e46ceacc9e28b5b062c97b151cf04af348ad5fffbe6604fd5dced3f78e",
+      "id": "ext_ath_scalar_s86002",
+      "score": {
+        "objective": {
+          "bw8k_floor": 0.75,
+          "cov_below_f0": "mask",
+          "cov_narrow_ratio": 2.0,
+          "diag_reference": "round",
+          "lfp_crossover_ratio": 1.6,
+          "lfp_re_z": 0.2,
+          "loaded_re_z": 0.5,
+          "tolerances": {
+            "cov": 4.0,
+            "di": 0.4,
+            "diag": 2.0,
+            "dislope": 9.0,
+            "distd": 2.0,
+            "flat": 1.5,
+            "flat_cv": 1.5,
+            "load": 0.3,
+            "rip": 1.0
+          },
+          "version": 7
+        },
+        "objective_version": 7,
+        "target": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "coverage_h_deg": 80.0,
+          "coverage_v_deg": 60.0,
+          "di_slope_target": 0.0,
+          "di_target_db": null,
+          "driver_exit_radius_mm": 18.0,
+          "f0_hz": 700.0,
+          "f0_v_hz": 700.0,
+          "freq_weights": {
+            "band_hz": [
+              [
+                2500.0,
+                5500.0,
+                2.0
+              ]
+            ]
+          },
+          "loaded_hi_hz": 5600.0,
+          "z_min": 0.5
+        },
+        "weights": {
+          "cov": 0.6,
+          "di": 0.3,
+          "diag": 1.0,
+          "dislope": 1.0,
+          "distd": 0.5,
+          "flat": 0.5,
+          "flat_cv": 1.0,
+          "load": 1.0,
+          "rip": 1.0
+        }
+      },
+      "score_fingerprint_sha256": "994d479c1fa0d34aea8d4ae26268ea19c46a1a249a080f43e83394b080c674ad",
+      "status": "resolved",
+      "task": "p80x60__ath_core_14in_home700_v7"
+    }
+  ],
+  "limitations": "Fingerprints are audit-specific, not result identities. Untagged is not proof of mismatch; no acoustic certification. Indirect jobs require execution artifact review.",
+  "queue": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\nights\\home_day_2026-11-16.yaml",
+  "queue_sha256": "260a87214f03290b75a8c9c1356f1647afd7ff03fcc4b60fe5680402a76dc304"
+}

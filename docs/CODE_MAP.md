@@ -22,6 +22,14 @@ examples/prototypes/rolled_rect_2026-11-15/crowe_section_reference.yaml; recipe 
 Width, height and depth scale the digitized sections independently; the swept-H construction needs
 depth <= 0.57 x width (0.66 x at h_depth_scale 1.1). Home-sized searchable cell:
 `examples/typologies/home_landscape_2026-11-15/hl__crowe_panel_home_v7.yaml` (search and verify via crowe_panel_cli.py).
+Elliptical Klangfilm horn (2026-11-16): `tools/geometry/klangfilm_ellipse.py` ports Ahlswede's `draw_klangfilm` VBA
+(spherical-wave Klangfilm profile + area-matched ellipsoid wavefront cap; 0.001 mm parity with the workbook) plus two
+owner knobs (`bend_radius_mm` front arc, `throat_ellipse`); `klangfilm_ellipse_cli.py` rebinds the rolled_rect bridge
+(search / verify / shape-check / preflight / verify-night). Cell `hl__klangfilm_ellipse_smooth_v7`.
+Analysis/queue tools (2026-11-16, concurrent session): `tools/analysis/optimizer_switch.py` (advisory per-run optimizer
+decision report), `tools/analysis/queue_score_audit.py` (read-only inventory of a queue's scoring contracts),
+`tools/night_queue/run_matched_home.py` (frozen-cohort matched BO/CMA home comparison: prepare once, run arms).
+
 Rectangular R-OSSE rolled mouth (2026-11-15): `tools/geometry/rosse_rect.py` evaluates Magnus's R-OSSE
 (`hornlab_mesher.profile_formulas.profile_points`) once per azimuth with a superellipse mouth R(p) and H/V coverage a(p);
 `rosse_rect_cli.py` rebinds the rolled_rect bridge (search / verify / shape-check / preflight / verify-night). Cell

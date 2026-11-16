@@ -1,5 +1,31 @@
 # CONTINUITY
 
+## 2026-11-16 (14:35) - Klangfilm elliptical horn cell (Ahlswede calculator port); day-queue TuRBO beats CMA; commit to main
+
+- **Klangfilm elliptical horn** (owner-supplied `Klangfilm_Elliptical_Horn_Calculator_diy_v10.xlsm`): the VBA macro
+  `draw_klangfilm` (Dr. Bernd Ahlswede 2018; Kolbrek 2007; non-commercial) was extracted and ported line by line to
+  `tools/geometry/klangfilm_ellipse.py`; parity with the workbook's stored macro output is 0.001 mm at all 9 stations.
+  Knobs: `fc_hz` (r0 = c/(pi fc): size + curl radius), `stretch` (H/V aspect at the widest point), `end_frac`
+  (h_end/r0: rollback depth) from the calculator; `bend_radius_mm` (front arc seen from above, per-row rigid shift -
+  the per-point version folded the lip and the mesher refused it) and `throat_ellipse` (round exit -> ellipse sooner)
+  added on owner request and labelled ours. Entry point `tools/geometry/klangfilm_ellipse_cli.py` (rolled-rect bridge,
+  no grid.py edit); cell `hl__klangfilm_ellipse_smooth_v7` (smooth brief). Seed 5,832 DOF, 548 x 244 mm, depth 265,
+  round exit, fits; preflight 14/16. **Not queued, not owner-approved:** owner says the look still differs from the
+  reference (Klangfilm is inherently short/squat; reference 4.png is long/slender - likely Le Cleac'h/JMLC or the
+  diyAudio bent variants, which have no published equations). No unit tests yet. Hand-off:
+  `docs/research/typologies/KLANGFILM_ELLIPSE_HANDOFF_2026-11-16.md`; sweep sheet `docs/queue/klangfilm_param_sheet_hires.png`.
+- **Le Cleac'h saddle** (agent worktree `worktree-agent-a4731ed7e21e33eee`, commit 22829bc, NOT merged): per-plane
+  rollback + saddle rim + enclosed bell; renders `docs/queue/lecleach_saddle_v3_*.png`, `..._FULL_*.png`. Owner: still
+  not the reference look (throat too short).
+- **Day queue `home_day_2026-11-16`** (TuRBO > CMA): OSSE fold warm start CMA stuck at 3.762 (no gain x2) -> TuRBO
+  screen 3.33 / verify 3.80; Tritonia v8 CMA 5.69 -> TuRBO screen 4.63 / verify 5.48. R-OSSE / Crowe-X CMA re-runs
+  stopped by the watchdog (no gain / bound-pins g_tmax hi, s lo). TwinRay TuRBO running at commit time.
+- Committed this session's remaining local files plus the concurrent session's uncommitted
+  `tools/analysis/optimizer_switch.py`, `tools/analysis/queue_score_audit.py`, `tools/night_queue/run_matched_home.py`
+  (+ tests, docs `HOME_OPTIMIZER_COMPARISON/HOME_SCORE_AUDIT/MATCHED_HOME_PROTOCOL_2026-11-16`). `.claude/worktrees/`
+  is not committed. Merged origin/main (docs-only) before pushing to main.
+
+
 ## 2026-11-16 (10:26) - Warm BO admission top-up and runner exit reporting
 
 - Fresh warm cohort had 90 eligible rows: strict gate refused without solves. Added bounded 60-valid CMA data top-up and fresh 80+2 BO retry after Crowe-X; live 28-job dry-run passes.

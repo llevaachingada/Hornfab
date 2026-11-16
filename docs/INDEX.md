@@ -34,7 +34,10 @@ the 0.60 seed) and the section pucker's vertical strength collapses to 0.37–3.
 [five-angle seed gallery](renders/2026-11-15-rolled-rect/index.html).
 
 
-[BO GUI cloud handoff 2026-11-16](research/BO_GUI_CLOUD_HANDOFF_2026-11-16.md): authoritative remaining scope (merge sab-home, BoTorch diagnostics LOO/slices/HV, Bayes nav + Live tab) and token rules for the cloud session; with [handoff](research/BO_GUI_HANDOFF_2026-11-16.md) and [plan](research/BO_GUI_IMPLEMENTATION_PLAN_2026-11-16.md).
+[Klangfilm elliptical horn hand-off 2026-11-16](research/typologies/KLANGFILM_ELLIPSE_HANDOFF_2026-11-16.md): port of Ahlswede's Klangfilm elliptical calculator (formulas, knobs, sources, why built this way, open mismatch with the owner's reference); sweep sheet `queue/klangfilm_param_sheet_hires.png`.
+[Home optimizer comparison 2026-11-16](queue/HOME_OPTIMIZER_COMPARISON_2026-11-16.md) / [score audit](queue/HOME_SCORE_AUDIT_2026-11-16.md) / [matched home protocol](queue/MATCHED_HOME_PROTOCOL_2026-11-16.md): concurrent-session BO vs CMA switching review, read-only queue scoring audit, frozen-cohort matched comparison protocol.
+
+[BO GUI cloud handoff 2026-11-16](research/BO_GUI_CLOUD_HANDOFF_2026-11-16.md): historical implementation handoff; diagnostics, Bayes navigation and Live tab have since landed on the local feature branch. For current status and remaining work, see [CONTINUITY](CONTINUITY.md) and [ISSUES](ISSUES.md); the original [handoff](research/BO_GUI_HANDOFF_2026-11-16.md) and [plan](research/BO_GUI_IMPLEMENTATION_PLAN_2026-11-16.md) retain their context.
 
 [BO GUI design and implementation plan 2026-11-15](research/BO_GUI_DESIGN_2026-11-15.md): the
 read-only BO analysis layer (convergence, calibration, sensitivity, Pareto, trust region, method
@@ -78,7 +81,7 @@ Keep this file current: a new doc gets a line here in the same commit.
 | [IMPLEMENTATION_PLAN_2026-10-27.md](IMPLEMENTATION_PLAN_2026-10-27.md) | After the smoke night: fix v3 record rejection, reseed gcurve cell, objective v4 normalisation (owner tolerances), diagonal balloons, then seeds/compare/polish on v4; fluted-wall (Solana) idea. NEXT_DEV_PRIORITIES P10. |
 | [IMPLEMENTATION_PLAN_2026-11-12_DAY.md](IMPLEMENTATION_PLAN_2026-11-12_DAY.md) | **Day plan (2026-11-12) while the two-lane queue runs:** groups A analysis toolkit (convergence, seed variance, sensitivity, links, walls, A/B, lane parity), B search features (warm start, linked knobs, auto-narrow, valid-only budget, round-throat flag), C calibration harness, D night/data ops, E GUI, F docs. Orchestrator-ready, decisions encoded. |
 | [OPENCODE_HANDOFF_2026-11-12.md](OPENCODE_HANDOFF_2026-11-12.md) | **Executable night handoff (2026-11-12)** for an OpenCode orchestrator with parallel workers: setup, GPU night jobs, CPU second lane (L1, decisions encoded), GUI versions/gates (L2), offline scoring truth (L3), hygiene (L4), hourly check-ins with GPU<->CPU failover, merge sequence, morning report. |
-| [SENIOR_PLAN_2026-11-12.md](SENIOR_PLAN_2026-11-12.md) | **Current plan (2026-11-12):** integration of PR #19/#22 (Collin)/#23 + hardened branch, objective v5->v7 renumber, then hygiene, scoring truth (loading objectives, offline re-score, driver check), solve speed (measure #23 opt-ins), GUI (versions, gates, elites), and the GPU night queue. NEXT_DEV_PRIORITIES P14. |
+| [SENIOR_PLAN_2026-11-12.md](SENIOR_PLAN_2026-11-12.md) | **Historical plan (2026-11-12):** integration, hygiene, scoring truth, solve speed, GUI and the GPU night queue; see NEXT_DEV_PRIORITIES P14 for its recorded status. |
 | [NEXT_DEV_PRIORITIES.md](NEXT_DEV_PRIORITIES.md) | Post-beta priorities: P1 fused CUDA assembly (DONE, M2), P2 12 kHz pass (DONE), P3 Metal backend, P4 grid-density ideas, P5 build-decision easy wins, P6 superformula campaign + GSA-vs-CMA-ES bake-off (proposals, owner-gated). |
 | [HANDOFF_BETA.md](HANDOFF_BETA.md) | Current agent handoff: beta-readiness pass, items Aâ€“G, stop conditions. |
 | [archive/HANDOFF_COLLABORATOR_2026-10-23.md](archive/HANDOFF_COLLABORATOR_2026-10-23.md) | **Archived 2026-10-30**, superseded by [HANDOFF_COLLABORATOR_2026-10-27.md](HANDOFF_COLLABORATOR_2026-10-27.md). For the collaborator pulling `main` on 2026-10-23: setup, what runs on the GPU box, files the owner edits tonight, rules, open questions. |
@@ -86,7 +89,6 @@ Keep this file current: a new doc gets a line here in the same commit.
 | [BETA_QUICKSTART.md](BETA_QUICKSTART.md) | First loop for beta testers: brief â†’ campaign â†’ report â†’ STEP. |
 | [BETA_SESSION_PLAN.md](BETA_SESSION_PLAN.md) | Beta session agenda, GPU etiquette, known limits, what not to try. |
 | [GUI_PLAN.md](GUI_PLAN.md) | Local web GUI: goals, constraints, views, API, prior art (waveguide-generator, Boundary Lab). |
-| [BETA_SESSION_PLAN.md](BETA_SESSION_PLAN.md) | Beta-day agenda (if present; written by the beta pass). |
 | [throughput/RUNBOOK.md](throughput/RUNBOOK.md) | **Throughput packet (2026-11-04), owner checklist:** pull, offline tests, then GPU steps in order (hygiene, baseline matrix, WP2 prefetch on/off, WP4 curvature study, WP5 batching, WP3 CPU+GPU pilot), what each output file means, pass/fail gates. Everything opt-in. |
 | [throughput/WP1_FUSED_IDENTITY_CACHE_PATCH.md](throughput/WP1_FUSED_IDENTITY_CACHE_PATCH.md) | WP1 solver-fork proposal (skip the unused GPU identity cache on fused CUDA): Julia guard, verification checklist, A/B commands, rollback. **Unverified against source lines**; not applied. |
 | [throughput/SOLVER_SPEED_IMPLEMENTATION_PLAN_2026-11-13.md](throughput/SOLVER_SPEED_IMPLEMENTATION_PLAN_2026-11-13.md) | **Start here for solver speed (2026-11-13):** merges the two handoffs below into Wave A (offline, two parallel orchestrators, file-locked: cache provenance, seam fix, fork identity-cache patch, mesh fidelity report, feasibility preflight, replay honesty), Wave B (serial GPU A/Bs) and Wave C (gated follow-ons); deferred list. |
@@ -254,12 +256,11 @@ Keep this file current: a new doc gets a line here in the same commit.
 | [evidence/SOLVER_VERIFY_2026-10-22.md](evidence/SOLVER_VERIFY_2026-10-22.md) | GPU tests, analytic sphere, GPU vs CPU cross-check. |
 | [evidence/TYPOLOGY_VERIFY.md](evidence/TYPOLOGY_VERIFY.md) | Typology ladder V1â€“V5. |
 | [evidence/TYPOLOGY_SCREEN_2026-10-22.md](evidence/TYPOLOGY_SCREEN_2026-10-22.md) | First fair screen campaigns + reading. Raw: `evidence/campaigns/`. |
-| [evidence/BETA_READINESS.md](evidence/BETA_READINESS.md) | Beta pass audits (if present). |
+| [evidence/BETA_READINESS.md](evidence/BETA_READINESS.md) | Beta readiness pass: SHAs/upstream, data integrity, physics audit (C2 epw 6 vs 8). |
 | `evidence/TYPOLOGY_COMPARE_2026-10-23.md` | Compare tier (2 seeds): rankings that stand, bound-limited families, bound proposals. |
 | [evidence/HANDOFF_6b.md](evidence/HANDOFF_6b.md), [evidence/BL_LEARNINGS_GPU.md](evidence/BL_LEARNINGS_GPU.md), [evidence/EARLY_REJECTION_REPLAY.md](evidence/EARLY_REJECTION_REPLAY.md) | FREEFORM sculpt tests; PR #15 GPU plan; early-rejection replay. |
 | [evidence/CP-8a.md](evidence/CP-8a.md) â€¦ [CP-8d.md](evidence/CP-8d.md), `CP-8c_*.md` | CP-8 checkpoint outputs (dataset campaign, surrogate gates). |
 | `evidence/runs/` + `manifest.sha256` | Summary layers of GPU runs (logs, not raw data). |
-| `evidence/BETA_READINESS.md` | Beta readiness pass: SHAs/upstream, data integrity, physics audit (C2 epw 6 vs 8). |
 | [evidence/OBJECTIVE_V2_RESCORE.md](evidence/OBJECTIVE_V2_RESCORE.md) | WP1 re-score: v1 vs v2 objective over 18,059 stored records; Spearman rho 0.989; both compare-tier claims survive; v1 drift 0. Per-record CSV local (regenerate with tools/rescore). |
 | [evidence/HF12K_VERIFY_2026-10-23.md](evidence/HF12K_VERIFY_2026-10-23.md) | P2 12 kHz finalist verify pass: epw check at 12 kHz, beamwidth/DI to 12 kHz, VRAM; cross-mode caveat. |
 | [evidence/CP-8d_retrain_2026-10-23.md](evidence/CP-8d_retrain_2026-10-23.md) | Surrogate retrain after the OSSE top-up: every gate vs threshold, held-out 463 < 500; model not used. |
@@ -267,28 +268,23 @@ Keep this file current: a new doc gets a line here in the same commit.
 | [evidence/FUSED_CUDA_2026-10-24.md](evidence/FUSED_CUDA_2026-10-24.md) | WP15 fused CUDA Burton-Miller (M2): analytic/cross-check/A-B ladders, flag-off determinism finding (1e-4 dB floor), VRAM ceiling â†’ 12,000-dof caps; 12 kHz verify DONE on the flag. |
 | [evidence/MEASUREMENT_PACK_2026-10-24.md](evidence/MEASUREMENT_PACK_2026-10-24.md) | M3 WP5/WP7/WP8 calibration on existing stored designs (17 GPU jobs, verbatim logs): distance 2/10/50 m from ONE traced solve, balloon 512â†’1035â†’2592, source_motion axial; WP7 rear_res_factor proposals 1.5/2.0 (owner-gated); WP8 band-split FAILS the CP-7f gate â†’ no proposal; f11 = 7,914 Hz caveat printed at every 12 kHz number. |
 
-## Elsewhere in the repo
-`../README.md` (install, commands, known limits) Â· `../TOOLCHAIN.md` (pinned SHAs, measured machine numbers) Â·
-`../CONTRIBUTING.md` Â· `../NOTES_FOR_SENIOR.md` (append-only rulings and questions) Â· `../examples/catalog.yaml`.
-
-- `docs/data/campaign_v4_2026-10-27/` - analysis tables (cells_summary.csv, evals.csv, best_designs.json, README) from the v4 screen nights, for the collaborator.
 | [evidence/BENCH_FULLRANGE_THREADS_2026-11-03.md](evidence/BENCH_FULLRANGE_THREADS_2026-11-03.md) | **Full frequency range and thread count.** The 41-point 120-12k band on the production mesh: CUDA 41/41 completed at 38.5 s/frequency (1,577 s total, 7,924 MiB), CPU ~18.2 s/frequency (stopped at 16 points), parity 3.0e-04 dB. The actual 12-point screen grid on the winner mesh: CUDA 25.7 s vs CPU 103.0 s (4.0x). Julia threads 1/8/24: no gain (0.88/0.96 speedup) - GPU-bound. |
 | [evidence/BENCH_40_DESIGNS_2026-11-03.md](evidence/BENCH_40_DESIGNS_2026-11-03.md) | **40 stored designs, one identical 1 kHz solve each, CUDA vs CPU** (30 single-source + 10 multi-entry, 96-8,530 dofs, 358.6 s). CUDA cold start 26.5 s vs CPU 2.5 s; CPU faster at <1k dofs and at 8.4-8.5k dofs (CUDA cliff: 5.8 s at 6.9k -> 41.6 s at 8.5k); CUDA 1.5-4x faster in between; SPL parity 3.6e-05 dB. Script `tools/bench/cuda_cpu_40designs.py`. |
-| [evidence/BENCH_CPU_VS_CUDA_2026-11-03.md](evidence/BENCH_CPU_VS_CUDA_2026-11-03.md) | **CPU vs CUDA for the MEH solve, and 16 kHz on CPU.** CPU does multi-tag solves; on the production 8,044-dof mesh CPU is **6.4x faster** than the 8 GB card (5.86 vs 37.2 s/frequency, SPL agree to 5.0e-4 dB); the 16 kHz mesh (25,171 dofs) solves on CPU in 100.7 s but needs ~47 GiB of CUDA storage, so the card cannot hold it. Script `tools/bench/cpu_vs_cuda_meh.py`, 372 s total. |
+| [evidence/BENCH_CPU_VS_CUDA_2026-11-03.md](evidence/BENCH_CPU_VS_CUDA_2026-11-03.md) | **Historical MEH benchmark; speed conclusion superseded.** The later [benchmark audit](evidence/BENCH_AUDIT_2026-11-03.md) identified CUDA shared-memory spill and tested the fused path. The original also records a 16 kHz CPU solve. |
 | [evidence/meh_2026-11-01/README.md](evidence/meh_2026-11-01/README.md) | **The two verified MEH screen winners as machine-readable JSON** (CAD recipe, objective terms, NetworkSolution, layout, tags, SHAs): T2 `ed11d2cd3acc` screen J 9.530 -> verify 11.894, T1 `704051ae928c` 13.228 -> 14.512. Starting points for the next search, with the caveats that make them usable. |
-
 | [evidence/MEH_M8_2026-10-31.md](evidence/MEH_M8_2026-10-31.md) | **MEH M8, complete as far as this box allows.** Fork validated CPU+CUDA (three test defects fixed), pin bumped to 1efdc6f with owner approval, single-tag parity 1.1e-5 / 5.9e-5 dB vs the 0.039 dB floor; readiness links 1/2/5/6 PASS, link 4 FAIL (6.58 s inner optimiser vs a 2 s gate), link 3 PARTIAL (passive-mid notch 1200-1300 Hz = +18.7..28.6 % of 1D); both screens and verify arms (T2 9.53 -> 11.89, T1 13.23 -> 14.51); blocks: CAD refuses a full model, Boundary Lab absent, and the contracted 120-12k band has no legal operating point on 8 GB. |
 
-# Docs index
+## Elsewhere in the repo
 
-Start here. Code map: [`CODE_MAP.md`](CODE_MAP.md). Rules for agents: [`../CLAUDE.md`](../CLAUDE.md), [`../AGENTS.md`](../AGENTS.md).
-Keep this file current: a new doc gets a line here in the same commit.
+`../README.md` (install, commands, known limits), `../TOOLCHAIN.md` (pinned SHAs and measurements), `../CONTRIBUTING.md`, `../NOTES_FOR_SENIOR.md` (append-only rulings and questions), and `../examples/catalog.yaml`.
+
+- `docs/data/campaign_v4_2026-10-27/` contains analysis tables from the v4 screen nights.
 
 ## Rolled-family readiness pickup (2026-11-15)
 
 - [Senior findings and readiness matrix](research/typologies/audit_2026-11-15/READINESS.md)
 - [Next senior handoff](research/typologies/audit_2026-11-15/HANDOFF.md)
 - [Exact domains and coupled constraints](research/typologies/audit_2026-11-15/PARAMETER_DOMAINS.md)
-- [Held queue and26 prepared horn files](queue/rolled_readiness_2026-11-15/README.md)
+- [Held queue and 26 prepared horn files](queue/rolled_readiness_2026-11-15/README.md)
 
 

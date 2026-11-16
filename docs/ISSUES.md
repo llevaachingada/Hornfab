@@ -1,5 +1,19 @@
 # ISSUES
 
+## 2026-11-16 (14:35) - Klangfilm cell unapproved; Le Cleac'h saddle worktree-only; TuRBO results
+
+- OPEN (owner): Klangfilm elliptical cell `hl__klangfilm_ellipse_smooth_v7` - look does not match reference 4.png
+  (proportions). Decide: Klangfilm vs Le Cleac'h base for the three owner features (elliptical throat, rollback depth,
+  front-arc radius); or implement the diyAudio bent variants (no equations published). Add unit tests before queuing.
+  See docs/research/typologies/KLANGFILM_ELLIPSE_HANDOFF_2026-11-16.md.
+- OPEN: Le Cleac'h saddle (worktree-agent-a4731ed7e21e33eee @ 22829bc) not merged; throat too short vs reference.
+- OPEN: scoring agent branch worktree-agent-a527a7d28dc77734a @ 5af0048 - penalty (oa_excess_tol) and auto-widen were
+  NOT integrated (concurrent review judged them unsafe/unvalidated); base-vs-hifi re-rank was not delivered.
+- RESULT: TuRBO beats CMA on converged home cells (warm 3.762 -> 3.33 screen / 3.80 verify; Tritonia v8 5.69 -> 4.63 /
+  5.48). Screen->verify gap 10-18 %: rank finalists on verify.
+- OPEN: watchdog bound-pins today - R-OSSE `g_tmax` hi (0.85-1.0, generator max 1.0), TwinRay v8 `s` lo (0.6).
+
+
 ## 2026-11-16 (10:26) - Warm BO admission top-up and runner exit reporting
 
 - Fresh warm cohort had 90 eligible rows: strict gate refused without solves. Added bounded 60-valid CMA data top-up and fresh 80+2 BO retry after Crowe-X; live 28-job dry-run passes.
