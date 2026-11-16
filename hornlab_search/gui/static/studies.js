@@ -290,7 +290,9 @@ function solveVerifyLink(runId) {
 function renderSolves(data, phase, study) {
   const solves = data?.solves && typeof data.solves === "object" ? data.solves : null;
   if (!solves) return "";
-  const rows = Array.isArray(solves.rows) ? solves.rows.slice(0, 50) : [];
+  // A bounded preview may append a "... N more items not shown" string; only real rows render.
+  const rows = Array.isArray(solves.rows)
+    ? solves.rows.filter(row => row && typeof row === "object").slice(0, 50) : [];
   const job = solves.job && typeof solves.job === "object" ? solves.job : null;
   const counts = `<p><span class="pill">${fmtNum(solves.n_total, 0)} observations</span> <span class="pill">${fmtNum(solves.n_measured, 0)} measured</span>${solves.n_refused != null ? ` <span class="pill warn">${fmtNum(solves.n_refused, 0)} refused</span>` : ""}</p>`;
   const heading = `<h3>Solves</h3><p class="muted">The study's own observations. "Solve in 3D" re-solves one measured design through the verified pipeline and opens its run views; it is one GPU solve.</p>`;
