@@ -321,6 +321,14 @@ Local-only, added 2026-11-15 (02:0x local) (**BO GUI slices 1-6; no GitHub issue
   missing state rather than computing coverage/ripple from J).
 - Open: partial-dependence curves are optional; the lengthscale sensitivity bar is the first pass.
 
+Local-only, added 2026-11-15 (09:3x local) (**report deeper analysis; docs only**):
+- Open: the study journal does not log adaptive-pick predictions (needed for calibration without a replay).
+
+Local-only, added 2026-11-15 (09:xx local) (**BoTorch vs CMA collaborator report, docs only; no GitHub issue state changed**):
+- Done: `docs/status/2026-11-15-bo-vs-cma/` (README + index.html + data.json). BoTorch wins the matched home-task test.
+- Open: cold-start BoTorch vs CMA comparison (this test was a warm start from a converged CMA optimum).
+- Open: TuRBO/Pareto modes (branch feat/bo-turbo-pareto) and the night re-order branch are not on main yet.
+
 Local-only, added 2026-11-14 (15:3x local) (**project atlas tool + snapshot; no GitHub issue state changed**):
 - Done: `tools/atlas/` whole-project report; snapshot at `docs/atlas/` (GitHub Pages).
 - Open: atlas verdict thresholds (`RULES` in build_atlas.py) are first-pass heuristics; tune after owner review.

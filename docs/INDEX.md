@@ -72,6 +72,7 @@ Keep this file current: a new doc gets a line here in the same commit.
 |---|---|
 | [CONTINUITY.md](CONTINUITY.md) | Status block + dated log, newest first. The source of truth for "where are we". |
 | [atlas/index.html](atlas/index.html) | Project atlas (live: llevaachingada.github.io/Hornfab/atlas/): every run to date as one visual report: cumulative solves, solver speed, refusals, optimiser convergence, decision map, per-brief leaderboards with verdicts, design-space clouds, fidelity, horn gallery, next steps. Regenerate with `tools/atlas/build_atlas.py`. |
+| [status/2026-11-15-bo-vs-cma/README.md](status/2026-11-15-bo-vs-cma/README.md) | BoTorch vs CMA-ES matched test on the home horn (15 Nov): verdict, convergence, screen-vs-verify, per-arm table, the design BoTorch found; interactive `index.html` + `data.json` (GitHub Pages). |
 | [status/2026-11-14/README.md](status/2026-11-14/README.md) | Collaborator status brief (14 Nov): 12 Nov day report, 12-14 Nov changes, CMA-ES/CMA-ME/fidelity charts, pull steps, open issues; `index.html` beside it is the interactive version. |
 | [ISSUES.md](ISSUES.md) | Open issues and the TO-DO list (next-round priorities at the top). |
 | [history/CONTINUITY_2026-10-12_2026-10-22.md](history/CONTINUITY_2026-10-12_2026-10-22.md) | Diary archive: CONTINUITY entries 2026-10-12 to 2026-10-22, rotated verbatim (newest first) on 2026-10-30. |
