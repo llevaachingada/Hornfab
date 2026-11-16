@@ -1,5 +1,7 @@
 # Docs index
 
+[BO GUI cloud handoff 2026-11-16](research/BO_GUI_CLOUD_HANDOFF_2026-11-16.md): authoritative remaining scope (merge sab-home, BoTorch diagnostics LOO/slices/HV, Bayes nav + Live tab) and token rules for the cloud session; with [handoff](research/BO_GUI_HANDOFF_2026-11-16.md) and [plan](research/BO_GUI_IMPLEMENTATION_PLAN_2026-11-16.md).
+
 [BO GUI design and implementation plan 2026-11-15](research/BO_GUI_DESIGN_2026-11-15.md): the
 read-only BO analysis layer (convergence, calibration, sensitivity, Pareto, trust region, method
 board), the study-root index, the backend instrumentation, the slices and their evidence.

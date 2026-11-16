@@ -3,6 +3,8 @@
 Mirror of the GitHub issues at https://github.com/llevaachingada/Hornfab/issues. ID, title, status, owner, plan reference.
 Updated in the same commit as `docs/CONTINUITY.md` on every push. Last synced 2026-11-14 (**owner decisions executed: cohort gap closing (+50 resume at 38e5b1f), caps 12k→24k on the four live configs, batch-12 approved for heavy verify/final-style runs; plus the scalar-Bayes and CI work; no GitHub issue state changed**).
 
+Local-only, added 2026-11-15 (20:3x local): BO GUI cloud handoff written; no GitHub issue state changed.
+
 Local-only, added 2026-11-15 (02:0x local) (**BO GUI slices 1-6; no GitHub issue state changed**):
 - Done: read-only BO view models + study-root index + study chart panels + compare-methods board
   + per-proposal prediction/trust-region/hyperparameter persistence (worktree `feat/bo-gui`).

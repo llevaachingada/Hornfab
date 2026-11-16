@@ -1,5 +1,11 @@
 # CONTINUITY
 
+## 2026-11-15 (20:3x local) - BO GUI cloud handoff
+
+- Added `docs/research/BO_GUI_CLOUD_HANDOFF_2026-11-16.md` (remaining scope: merge sab-home, BoTorch
+  diagnostics artifact with LOO/slices/HV, Bayes nav + Live tab), plus the 11-16 handoff and the
+  implementation plan. Docs only; merge gate unchanged (no merge while studies run).
+
 ## 2026-11-15 (02:0x local) - BO GUI SLICES 1-6 IN THE `feat/bo-gui` WORKTREE (NOT MERGED)
 
 - Built the read-only BO analysis layer from the 15 Nov handoff: `gui/data_bo.py` (convergence,
