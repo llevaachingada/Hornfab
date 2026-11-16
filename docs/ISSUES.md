@@ -3,7 +3,7 @@
 ## 2026-11-16 (15:00) - Watchdog continuations queued; envelope 700 mm decision
 
 - DONE: watchdog-stopped runs continued (resume or widened + reseeded), queue `home_day2_2026-11-16`.
-- OPEN (owner): envelope 600 -> 700 mm. brief_hash includes the envelope, so editing the landscape briefs in place splits
+- DECIDED (owner 14:48): KEEP the 600 mm envelope (no brief change; BO cohorts stay intact). Former question: brief_hash includes the envelope, so editing the landscape briefs in place splits
   every BO cohort (warm start, Tritonia, TwinRay). Options: (a) new `_w700` brief variants only for envelope-limited
   families (Crowe sections, Crowe-X, Klangfilm); (b) edit in place and rebuild cohorts; (c) exclude the envelope from
   brief_hash (scoring-identity code change).

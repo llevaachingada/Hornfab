@@ -12,7 +12,7 @@
   overnight stops are superseded by the v8/v9 cells + TuRBO.
 - Queue handover: the live runner (started 08:03) predates the code, so `home_day_2026-11-16` gets a STOP after its
   current job and `home_day2_2026-11-16` (the 22 pending jobs, same order) runs on a chained controller (-WaitPid).
-- Envelope: owner allows 700 mm. NOT applied yet: brief_hash covers the envelope, so editing the shared brief would
+- Envelope: owner decided (14:48) to KEEP 600 mm. Context: brief_hash covers the envelope, so editing the shared brief would
   split every landscape BO cohort. Decision pending (see ISSUES).
 
 
