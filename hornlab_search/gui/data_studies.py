@@ -23,8 +23,8 @@ _ARTIFACT_STATUSES = frozenset(STATES) | {"available", "unavailable"}
 _PROGRESS_KEYS = ("proposed", "started", "solved", "cached", "refused", "infeasible",
                   "infrastructure_failed", "verified", "unknown")
 _EXECUTE_ACTION_KINDS = frozenset({
-    "save_draft", "select_evidence", "analyze", "propose", "package", "launch",
-    "cancel", "decision", "revise", "save_seeds", "create_child",
+    "save_draft", "select_evidence", "analyze", "propose", "diagnose", "package", "launch",
+    "cancel", "decision", "revise", "save_seeds", "create_child", "queue_study",
 })
 
 # Frozen fallback selector labels. The ``mode`` is the backend proposal-policy value; the
@@ -114,7 +114,8 @@ def study_summaries(studies, *, limit=50):
     """Return an explicit small allow-list of summary fields, never artifact contents."""
     if isinstance(limit, bool) or not isinstance(limit, int) or not 1 <= limit <= MAX_ITEMS:
         raise ValueError("invalid list limit")
-    allowed = ("study_id", "id", "name", "question", "revision", "spec_revision", "status", "readiness")
+    allowed = ("study_id", "id", "name", "question", "revision", "spec_revision", "status",
+               "readiness", "root", "root_label")
     result = []
     for study in studies:
         if len(result) >= limit:
@@ -125,12 +126,14 @@ def study_summaries(studies, *, limit=50):
     return result
 
 
-def workflow_panel(service, study, phase, artifact=None, *, root, launcher_available=False):
+def workflow_panel(service, study, phase, artifact=None, *, root, runs_root=None,
+                   launcher_available=False):
     """Add registry-backed next steps without equating predictions with measurements."""
     import importlib.util
     from hornlab_search.studies.package import verify_package
     sid, revision = study["id"], study["revision"]
-    kinds = ("snapshot", "training_manifest", "analysis", "model", "pool", "proposal", "package", "results", "verification")
+    kinds = ("snapshot", "training_manifest", "analysis", "model", "pool", "proposal", "package",
+             "results", "verification", "pareto_metrics", "seed_pack")
     metadata = {kind: service.get_artifact_metadata(sid, kind) for kind in kinds}
     def read(kind):
         if metadata[kind].get("status") != "available":
@@ -154,34 +157,84 @@ def workflow_panel(service, study, phase, artifact=None, *, root, launcher_avail
     sufficient = manifest.get("status") == "ok" and int(manifest.get("n", 0)) >= int(manifest.get("n_min", 16))
     jobs = service.list_cpu_jobs(sid, limit=10)
     active = next((job for job in jobs if job["status"] in ("queued", "running", "unknown")), None)
-    scalar_ready = engine and sufficient
     policy = study.get("spec", {}).get("policy") or {}
     current_policy = policy.get("proposal_policy") or policy.get("mode") or "scalar"
-    reason = ("BoTorch engine is unavailable in the GUI interpreter." if not engine else
-              "Build a compatible training cohort with enough eligible unique observations." if not sufficient else
-              "Scalar score model is available; proposal still requires geometry validation.")
-    policies = [dict(card, status="ready" if card["mode"] == "scalar" and scalar_ready else "unavailable",
-                     reason=reason if card["mode"] == "scalar" else "This first production workflow supports scalar policy only.")
-                for card in POLICY_FALLBACKS]
-    data = dict((artifact or {}).get("data") or {})
+    try:
+        from hornlab_search.bo.policy import PROPOSAL_POLICIES
+        supported = set(PROPOSAL_POLICIES)
+    except Exception:  # noqa: BLE001 - an older engine is an honest capability gap
+        supported = {"scalar"}
+    try:
+        from hornlab_search.studies.builders import PARETO_METRICS_KIND  # noqa: F401
+        pareto_production = True
+    except Exception:  # noqa: BLE001
+        pareto_production = False
+    data_ready_reason = ("BoTorch engine is unavailable in the GUI interpreter." if not engine else
+                         "Build a compatible training cohort with enough eligible unique observations."
+                         if not sufficient else None)
+    seed_ready = metadata["seed_pack"].get("status") == "available"
+    pool_ready = metadata["pool"].get("status") == "available"
+
+    def policy_status(mode):
+        if mode in ("scalar", "turbo", "pareto"):
+            if not engine:
+                return "capability_missing", data_ready_reason
+            if not sufficient:
+                return "no_data", data_ready_reason
+            if mode not in supported:
+                return "capability_missing", f"The installed engine does not expose {mode}."
+            if mode == "turbo":
+                return "ready", "Trust region is available; it starts around the best measured design."
+            if mode == "pareto":
+                if not pareto_production and metadata["pareto_metrics"].get("status") != "available":
+                    return ("unavailable",
+                            "Pareto needs complete coverage/ripple metric observations; this "
+                            "engine cannot freeze them from the training rows.")
+                return "ready", "Coverage/ripple rows are frozen from the training data when you propose."
+            return "ready", "Scalar score model is available; proposal still requires geometry validation."
+        if mode == "cma_seed":
+            return (("ready", "An explicit CMA archive seed pack is recorded.") if seed_ready else
+                    ("unavailable", "Save a CMA archive seed pack first."))
+        if mode == "exploration":
+            return (("ready", "A legal candidate pool is recorded.") if pool_ready else
+                    ("unavailable", "Build a candidate pool first."))
+        return "unknown", "Unknown proposal policy."
+
+    policies = []
+    for card in POLICY_FALLBACKS:
+        status, why = policy_status(card["mode"])
+        policies.append(dict(card, status=status, reason=why))
+    selected_status = next((card["status"] for card in policies if card["mode"] == current_policy), "unknown")
+    selected_ready = selected_status == "ready"
+    readiness_reason = next((card["reason"] for card in policies if card["mode"] == current_policy),
+                            data_ready_reason or "Policy capabilities are not available.")
+    data: dict[str, Any] = dict((artifact or {}).get("data") or {})
     data.update({"current_policy": current_policy, "policies": policies,
                  "readiness": {"engine_available": engine, "eligible_rows": manifest.get("n"),
-                               "minimum_rows": manifest.get("n_min"), "reason": reason},
+                               "minimum_rows": manifest.get("n_min"), "reason": readiness_reason},
                  "artifacts": [{"kind": k, "sha256": m["sha256"]} for k, m in metadata.items() if m.get("status") == "available"],
                  "actions": []})
     action = lambda kind, label, enabled, **extra: {"kind": kind, "label": label, "enabled": enabled, **extra}
     if phase in ("overview", "data", "explain"):
         data["actions"].append(action("analyze", "Build snapshot and analyze compatible data", active is None,
                                       payload={"package_hash": None}))
+    if phase == "explain" and manifest.get("n"):
+        data["actions"].append(action("diagnose", "Compute model diagnostics (LOO + slices)", active is None,
+                                      payload={"package_hash": None}))
     if phase == "propose":
-        data["actions"].append(action("propose", "Generate scalar proposal", scalar_ready and current_policy == "scalar" and active is None,
+        data["actions"].append(action("propose", f"Generate {current_policy} proposal",
+                                      selected_ready and active is None,
                                       payload={"package_hash": None}))
         if proposal.get("candidate"):
             data["candidates"] = [{"id": proposal["candidate"].get("candidate_id"),
                                    "j": proposal.get("predicted"), "params": proposal["candidate"].get("params"),
-                                   "selection_reason": proposal.get("selection_reason"), "measured": False}]
+                                   "selection_reason": proposal.get("selection_reason"),
+                                   "acquisition": proposal.get("acquisition"),
+                                   "trust_region": proposal.get("trust_region"), "measured": False}]
     if phase in ("propose", "execute"):
-        data["actions"].append(action("package", "Prepare immutable solve package", not package and proposal.get("status") == "ok" and current_policy == "scalar" and active is None))
+        data["actions"].append(action("package", "Prepare immutable solve package",
+                                      not package and proposal.get("status") == "ok"
+                                      and selected_ready and active is None))
     if phase == "decide":
         verification = read("verification")
         selection = verification.get("selection") or {}
@@ -193,6 +246,8 @@ def workflow_panel(service, study, phase, artifact=None, *, root, launcher_avail
             allowed_outcomes=["inconclusive", "accept", "reject"] if has_verification else ["inconclusive"],
             reason=("Review the measured verification evidence before accepting or rejecting the study."
                     if has_verification else "Verification evidence is missing or partial. Record an inconclusive decision with a rationale, or complete verification first.")))
+        data["actions"].append(action("create_child", "Create a child study from this study", True,
+                                      payload={"question": None}))
     if package:
         try:
             package = verify_package({"package_id": metadata["package"]["sha256"], **package})
@@ -225,12 +280,24 @@ def workflow_panel(service, study, phase, artifact=None, *, root, launcher_avail
                     launcher_available and capability.get("status") == "ok" and not launched, package_hash=package["package_id"], package_revision=revision))
                 data["actions"].append(action("cancel", "Stop after current candidate", launched and bool(package_row["active"]),
                     package_id=package["package_id"], package_status="running"))
+                data["actions"].append(action("queue_study", "Write night-queue file for this study",
+                    phase in ("execute", "decide"), package_hash=package["package_id"],
+                    package_revision=revision, lane=package.get("lane") or "gpu"))
         except (ValueError, ImportError) as exc:
             data["execution_capability"] = {"status": "unavailable", "reason": str(exc)}
     if active:
         data["job"] = {"id": active["id"], "status": active["status"], "fields": active.get("fields")}
         data["actions"].append(action("cancel", "Cancel analysis job", True, job_id=active["id"], job_status=active["status"]))
-    data, _ = bounded_preview(data)
+    try:
+        from .data_bo import bo_views
+        data["bo"] = bo_views(service, study, phase=phase, runs_root=runs_root, root=root)
+    except Exception as exc:  # noqa: BLE001 - a BO view must never break the study panel
+        data["bo"] = {"status": "failed", "reason": f"{type(exc).__name__}: {exc}"}
+    preview, _ = bounded_preview(data)
+    if isinstance(preview, dict):
+        data = preview
+    else:
+        data = {}
     # Preserve missing/unknown evidence status independently of safe preparation actions.
     state = (artifact or {}).get("status", "missing")
     reasons = list((artifact or {}).get("reasons") or [])
@@ -266,8 +333,8 @@ def workflow_panel(service, study, phase, artifact=None, *, root, launcher_avail
             state = "ready"
             reasons = [r for r in reasons if r != "Artifact semantics and dependencies are not yet validated."]
             reasons.insert(0, "Advisory proposal and current-revision artifact dependencies validated. Predicted scores remain unmeasured.")
-    if current_policy != "scalar":
-        reasons.insert(0, f"Current policy is {current_policy}; this production workflow supports scalar only. Select scalar to continue.")
+    if not selected_ready:
+        reasons.insert(0, f"Current policy {current_policy} is not ready: {readiness_reason}")
     return build_study_view(study, phase, {"status": state, "validated": state == "ready", "revision": revision,
         "data": data, "provenance": {**((artifact or {}).get("provenance") or {}), "spec_hash": study["spec_hash"]},
         "reasons": reasons}).to_dict()

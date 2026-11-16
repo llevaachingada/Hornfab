@@ -1,5 +1,13 @@
 # Code map
 
+BO model diagnostics (2026-11-16): `bo/diagnostics.py` + `studies/cli.py diagnose` write the `diagnostics` artifact (`study-model-diagnostics-v1`: BoTorch LOO, 1-D slices, Pareto front/HV trace); `gui/data_bo.py` reads it for the calibration, sensitivity and Pareto views; `diagnose` is a CPU job kind in `gui/study_jobs.py`. Nav is the `#/bayes/*` group.
+
+BO study GUI (2026-11-15): `gui/data_bo.py` builds the bounded convergence, calibration,
+sensitivity, trust-region, Pareto, design-space and method-board view models from study artifacts
+and run rows; `gui/study_index.py` discovers/routes study registries (night arms plus
+`runs/studies`); `gui/static/study_charts.js` renders them through `charts.js`;
+`gui/static/compare_methods.js` renders `tools/analysis/specs/bo_*.yaml`; `gui/study_queue.py` writes a night file (never launches) and `gui/study_child.py` clones a parent spec with a child policy. Design and evidence:
+[BO GUI design](research/BO_GUI_DESIGN_2026-11-15.md).
 Section-reference relief extension: `tools/geometry/section_pucker.py` deforms only axial
 mouth development and preserves the frozen parent geometry at zero amplitudes;
 `section_pucker_cli.py` supplies independent versioned replay/meshing/search dispatch.

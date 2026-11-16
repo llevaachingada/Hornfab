@@ -1204,11 +1204,14 @@ def build_proposal(service, study_id, *, root, policy=None, seed=None, idempoten
         "protocol": PROTOCOL,
         "selection_reason": getattr(outcome, "selection_reason", None),
         "counts": (outcome.counts if outcome is not None else {}),
-        "model_state_persisted": False,
+        "hyperparameters": (getattr(outcome, "model_hyperparameters", None)
+                            if outcome is not None else None),
+        "model_state_persisted": bool(outcome is not None
+                                      and getattr(outcome, "model_hyperparameters", None)),
         "no_backend_calls": True,
         "limitations": [
-            "Model hyperparameters/state are not serialised as a pickled object; only the "
-            "manifest identity is published. Future adaptive refits use the manifest hashes.",
+            "Hyperparameters are published as JSON for diagnostics; no pickled model object is "
+            "serialised. Future adaptive refits use the manifest hashes.",
         ],
     }
     deps_model = {"snapshot": snapshot_meta["sha256"], "training": training_meta["sha256"],

@@ -1,5 +1,9 @@
 # BoTorch in the GUI: implementation plan (orchestrator-ready)
 
+> **Scope note (2026-11-15, later):** most WPs below already exist on `feat/bo-gui` (see
+> `BO_GUI_DESIGN_2026-11-15.md` §10). The remaining work is `BO_GUI_CLOUD_HANDOFF_2026-11-16.md`.
+> Keep this file for the diagnostics artifact spec (§1.1) and the BoTorch API notes (§0).
+
 **Written:** 2026-11-15 (senior review of `BO_GUI_HANDOFF_2026-11-16.md`).
 **Audience:** an orchestrator agent that dispatches parallel implementation agents. Each work
 package (WP) below is self-contained: files it owns, what it builds, its contract, and its single

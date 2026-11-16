@@ -129,7 +129,7 @@ def test_existing_unsupported_policy_is_disclosed(tmp_path):
     study = service.create_study({"protocol": "bo-study-v1.1", "policy": {"proposal_policy": "pareto"}}, "create")
     panel = App(tmp_path, study_service=service).get(f"/api/studies/{study['id']}/propose", {})
     assert panel["data"]["current_policy"] == "pareto"
-    assert any("Current policy is pareto" in reason for reason in panel["reasons"])
+    assert any("Current policy pareto" in reason for reason in panel["reasons"])
     assert next(a for a in panel["data"]["actions"] if a["kind"] == "propose")["enabled"] is False
 
 

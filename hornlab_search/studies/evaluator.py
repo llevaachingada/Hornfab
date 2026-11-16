@@ -225,6 +225,9 @@ class PipelineStudyEvaluator:
             "x": raw.get("x", vector),
             "vector": vector,
             "predicted": raw.get("predicted"),
+            "selection_reason": raw.get("selection_reason"),
+            "acquisition": raw.get("acquisition"),
+            "trust_region": raw.get("trust_region"),
             "status": raw.get("status") or POOL_STATUS_NOTE,
             "checks": dict(raw.get("checks") or {}),
             "descriptors": dict(raw.get("descriptors") or {}),
@@ -257,7 +260,18 @@ class PipelineStudyEvaluator:
             self.adopt_trust_region(getattr(outcome, "trust_region", None))
         if outcome.status != "ok" or outcome.proposal is None:
             return None
-        return outcome.proposal
+        if not isinstance(outcome.proposal, dict):
+            return outcome.proposal
+        proposal = dict(outcome.proposal)
+        # Persist the model's own statement with the candidate.  Without this the run
+        # results only carry the initial proposal's prediction, so calibration and the
+        # trust-region history cannot be reconstructed after the fact.
+        proposal["predicted"] = outcome.predicted
+        proposal["selection_reason"] = outcome.selection_reason
+        proposal["acquisition"] = outcome.acquisition
+        if outcome.trust_region is not None:
+            proposal["trust_region"] = outcome.trust_region
+        return proposal
 
     def _propose_screen(self, state):
         budget = self._budget()

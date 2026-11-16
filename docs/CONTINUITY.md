@@ -1,5 +1,25 @@
 # CONTINUITY
 
+## 2026-11-16 (latest) - BO GUI cloud pass on `feat/bo-gui`: sab-home merged, BoTorch diagnostics, Bayes nav + Live tab; no solves
+
+- Cloud session (offline, no GPU, no `runs/`, no merge to main). `feat/bo-gui` merged
+  `origin/feat/sab-home-2026-11-14`; only docs conflicted (union; CONTINUITY kept the correctly encoded side).
+- New `hornlab_search/bo/diagnostics.py` + `studies/cli.py diagnose`: artifact kind `diagnostics`, schema
+  `study-model-diagnostics-v1` (BoTorch 0.18.1 `efficient_loo_cv` LOO, 25-point 1-D slices through the incumbent,
+  Pareto `front_ids` + `hv_trace`). It refits from the stored training set, so it works for old studies.
+- GUI: `sensitivity_view` adds slices, `calibration_view` adds a "LOO on training data" half, `pareto_view` adds
+  diagnostics front/HV when present (else `available:false, can_compute`). `diagnose` is a CPU job kind
+  (`study_jobs.py`, `server.py`, `service.reserve_cpu_job`) shown as an Explain-phase action.
+  `study_charts.js` draws slice small-multiples and the LOO scatter.
+- Nav: top-level **Bayes** group (`#/bayes/studies`, `#/bayes/board`); old `#/analysis/studies*` and
+  `#/analysis/compare-methods` redirect. Study page gets a **Live** tab (KPI strip, convergence, current pick, 10 s poll while running).
+- Tests (cloud): `tests/test_bo_diagnostics.py` (4), 3 new cases in `test_gui_bo_views.py`, `gui_study_lifecycle.mjs` ok.
+  Environment-only/stale failures, not from this work: `test_gui_bridge_preview` (6, needs `hornlab_mesher`),
+  `test_study_production::...current` (mesher pin), `test_gui_brief_authoring::test_balloon_entry_point_already_wired`
+  (route regex changed on the sab-home branch).
+- **Not verified:** `diagnose` against a real study (no data in the cloud box); no screenshots. Do the visual pass locally.
+- **Next (owner, local):** after solves finish, run `diagnose` on the fixture studies, start the GUI and look; merge into the GUI checkout branch.
+
 ## 2026-11-15 (later) - Section pucker folded into canonical family; square-X cell added
 
 - Verification: legacy `sp__strong_v7` is the canonical section family with axial pucker
@@ -53,7 +73,8 @@
   (`rf__rect_radial_wide_v7` screen 25 @ seed 1234, started 19:59:43) which was already dead; the
   runner took the lock over per policy. That CMA run `20261116T005943Z-screen-20db0d` stopped ~20:01
   with partial records and is NOT ours to resume; whoever owns the radial-wide cell must decide.
-## 2026-11-15 (latest) - Full-circle globe view from the stored balloon; no new solves
+
+## 2026-11-15 - Full-circle globe view from the stored balloon; no new solves
 
 - The `Directivity (isobars)` view now has three modes: `Rectangular | Globe | Full globe`.
   `Globe` is unchanged (the ±90° H/V cuts wrapped into a half-circle). `Full globe` re-samples the
@@ -390,6 +411,51 @@
   `docs/INDEX.md`, `docs/CODE_MAP.md`, `AGENTS.md` OpenCode skill list, fixer grant in
   `.opencode/oh-my-opencode-slim.json`. `run_campaign_night.py --dry-run` deliberately unchanged for now
   (manual gate first). No solve/config change; no GPU time.
+
+## 2026-11-15 (20:3x local) - BO GUI cloud handoff
+
+- Added `docs/research/BO_GUI_CLOUD_HANDOFF_2026-11-16.md` (remaining scope: merge sab-home, BoTorch
+  diagnostics artifact with LOO/slices/HV, Bayes nav + Live tab), plus the 11-16 handoff and the
+  implementation plan. Docs only; merge gate unchanged (no merge while studies run).
+
+## 2026-11-15 (02:0x local) - BO GUI SLICES 1-6 IN THE `feat/bo-gui` WORKTREE (NOT MERGED)
+
+- Built the read-only BO analysis layer from the 15 Nov handoff: `gui/data_bo.py` (convergence,
+  calibration, sensitivity, trust-region, Pareto, design-space, method-board view models),
+  `gui/study_index.py` (bounded discovery and routing of night-arm study registries plus
+  `runs/studies`), and `workflow_panel`/server wiring. The study page now renders the BO panels
+  and deep links; `#/analysis/compare-methods` renders a declarative comparison spec.
+  Slice 6 adds `gui/study_queue.py` (writes a new night file, never launches a runner) and
+  `gui/study_child.py` (clone a parent spec with a child policy).
+- Added `tools/analysis/specs/bo_method_board_2026-11-15.yaml` (BO-vs-CMA rules and arms) and
+  `docs/research/BO_GUI_DESIGN_2026-11-15.md` (design + slice plan) with screenshots in
+  `docs/evidence/bo_gui_2026-11-15/`.
+- Backend instrumentation (pin-affecting, on the same branch): `bo/policy.py` now carries
+  `model_hyperparameters`; `studies/builders.py` records them in the model manifest;
+  `studies/evaluator.py` persists each proposal's `predicted`, `selection_reason`, `acquisition`
+  and turbo `trust_region` on the candidate. Old runs stay honest (`partial`/`missing`).
+- Tests (offline, no solver): `test_gui_bo_views.py`, `test_gui_bo_module.py`,
+  `test_gui_study_index.py`, `test_gui_study_queue.py`, `test_study_gui_instrumentation.py`, plus the existing study/GUI
+  suites and the updated adapter/contract assertions. `compileall` clean.
+- **Merge gate (do not forget):** worktree `C:\Users\hunte\Hrns\bogui-wt`, branch `feat/bo-gui`,
+  based on `feat/bo-turbo-pareto` (`e25da03`) + `feat/sab-home-2026-11-14`. Do not merge while
+  `bo_vs_cma_2026-11-15` or `sab_home_gpu_rest_2026-11-15` is queued/running, and not while any
+  study is queued or running (`runs/nights/queue_*.log`, `tools/night_status.py`).
+  **Before merge:** the tree is committed and pushed as `origin/feat/bo-gui`
+  (`ef6a38a` + merge `56a3eb8`); confirm no runner and no live
+  Julia host; merge `feat/bo-turbo-pareto` first if the target does not already contain it, then
+  merge `feat/bo-gui` (it already contains turbo + the 15 Nov docs); resolve `CONTINUITY`,
+  `ISSUES`, `INDEX` and `CODE_MAP` in the merge commit; run `compileall` and the offline
+  GUI/study suite. **After merge:** new packages must pass preflight; old packages keep their
+  original pinned hashes; verify the `production_inputs_unavailable` line was only the
+  worktree/canonical pin mismatch. Excluding `gui/**` from `EXECUTION_CODE_FILES` remains an
+  owner decision.
+- **Owner decision 2026-11-15:** keep the work on `origin/feat/bo-gui` only; do **not** open or
+  merge a main PR until the nights finish. The branch is 21 commits ahead of `origin/main` because
+  it contains the in-flight `feat/sab-home-2026-11-14` integration (turbo, v7 flat band, landscape
+  configs), not GUI-only changes.
+- Deferred (handoff-optional slice 7): partial-dependence curves and per-study dataset row
+  identity. The lengthscale sensitivity bar is the first-pass sensitivity view.
 
 ## 2026-11-14 (22:5x local) - SUGGESTION A/B NIGHT, HI-FI SCORE PROBE, BO-VS-CMA PREP; NIGHT RE-ORDERED
 
@@ -4169,9 +4235,9 @@ is unearned above ~1 kHz. **Plan only, nothing implemented.** New doc
 (it blocks every cone_plughorn directivity claim).
 
 - **The finding.** The cone face (tag 2) is driven as a rigid axial piston at all frequencies. A 10-inch paper
-  cone is pistonic only to its first break-up, ~0.7â€“1.5 kHz [consensus; must be measured]; the band is
-  220 Hzâ€“4 kHz. Since `p(Î¸) âˆ âˆ« v(r)Jâ‚€(k r sinÎ¸) r dr`, sign changes in `v(r)` must produce lobes/nulls a
-  uniform piston cannot. So 1â€“4 kHz pattern/DI is geometry-only today. The BEM geometry is fine; the boundary
+  cone is pistonic only to its first break-up, ~0.7–1.5 kHz [consensus; must be measured]; the band is
+  220 Hz–4 kHz. Since `p(θ) âˆ ∫ v(r)J₀(k r sinθ) r dr`, sign changes in `v(r)` must produce lobes/nulls a
+  uniform piston cannot. So 1–4 kHz pattern/DI is geometry-only today. The BEM geometry is fine; the boundary
   condition on the cone is the assumption.
 - **Code audit recorded in the plan** (all verified this pass): beat `SolveConfig.source_tag` asserts exactly
   ONE source tag (`((tag, _),) = velocity_sources.items()`); `source_profile_alpha` is a per-face J0 factor,
@@ -5389,12 +5455,12 @@ Owner delegated the open decisions in the 2026-10-28 chat. These are recorded as
 - **Plan:** `docs/GUI_CONTRAST_PLAN.md` â€” six independently committable phases (1 tokens/type tiers â†’ 2 theme-boot fixes + `?theme=` deterministic-capture override â†’ 6 semantics/over-budget flag/test widening â†’ 3 chart-contrast pass â†’ 4 `wallSection` redesign (three-pass z-order, real wall fill, throat marker, readable axes) â†’ 5 3D light-gray horn (`#dfe4e8` MeshStandardMaterial) + hemi/key/fill/rim rig + optional shadow-mapping toggle; â‰ˆ 3.75 agent-days). Per phase: measured acceptance criteria, implementation notes with file:line + do-not-touch lists, rollback notes; plus a 10-item risk register, edge cases, the verification recipe (`?theme=light|dark` headless-Edge captures + pixel sampling, `pytest tests/test_gui.py -q`, node --check + `evolution.js` added to the parametrization), and a WCAG acceptance table. Constraints honored: no new runtime deps, no build step, Three.js stays r160 via the pinned import map, the 2D SVG fallback stays functional, zero changes to server.py/jobs.py/data.py.
 - **Process:** designer authored the plan from the screenshot evidence, then hardened it (added acceptance/rollback/risk/edge-cases; fixed a latent v1 bug â€” light-theme 3D canvas `#ffffff` would have scored â‰ˆ1.2:1 against the pale horn, replaced with `#e9edf0`). Oracle independently re-verified ~40 file:line anchors and recomputed every WCAG ratio by hand: verdict COMMIT-READY after 5 MUST fixes (self-failing `--band` alphas, a phantom "conditional localStorage write", restore-after-async-route, missing shadow `normalBias`, a self-contradictory even-odd fallback rule) + 11 SHOULD + 7 NICE â€” all applied.
 - **Status:** implementation underway on owner approval (docs/research WP15 steps 8-12 runs concurrently in a disjoint code surface; pushes sequenced).
-- **Phase 1 landed (this commit):** token/type tiers in `app.css` â€” new `--label` (#46535e/#b3bfc6, 11 label-tier selectors moved off `--muted`, 0.66rem floor), `--rule` #a9b4bb/#40505b (1.36:1 â†’ ~2.1), `--band` rgba .32/.30 (was .08/.09), `--on-accent` (#fff dark #0e1418 â€” dark primary button 2.07:1 â†’ 9.0), `--accent-strong` hover replacing `opacity:.88`, `--warn-soft`/`--bad-soft` tokens replacing the rgba(168,102,27,â€¦) orphans in `.alert.warn`/`.alert.error`/`.gpu-busy-note`/`button.danger:hover`, plus the Phase 6 CSS one-liner `.progress-bar.bad`. Both dark blocks (prefers-color-scheme + `[data-theme=dark]`) kept character-identical; braces balanced 284/284. Evidence: `pytest tests/test_gui.py -q` 30/30 (baseline 30/30 before any edit).
-- **Phase 2 landed (this commit):** theme boot + capture correctness â€” boot order now `?theme=light|dark` URL override â†’ stored pref (try/catch) â†’ OS prefers-color-scheme fallback; the toggle flips from the *effective* theme (first-click no-op fixed) and always writes `data-theme` + localStorage; `route()` returns the view promise; theme-change observers snapshot scroll + filter inputs, `await route()`, restore with one rAF retry (async views render after the route returns); the `matchMedia` handler is skipped when `data-theme` is pinned; every localStorage access wrapped in try/catch. Evidence: joint pixel check â€” `?theme=light#/home` header bg `244,246,247` (`--bg` light) and `?theme=dark#/home` header `14,20,24` (`--bg` dark): the override deterministically renders both themes; `pytest tests/test_gui.py -q` 30/30. Manual click-path checks (first-click switch, per-view recolor, scroll/filter restore) left for the owner's next GUI session.
-- **Phase 3 landed (this commit):** chart-graphics contrast â€” isobar contours now two-pass (dark `#10181d` halo @0.55 under white 0.98/0.8 cores; widths 3.4/1.8 for âˆ’6 dB, 2.6/1.1 for âˆ’3 dB; halo composite â‰ˆ3.7:1 over #FFDF00, white core â‰ˆ5:1); isobar gridlines kept theme-independent `#808080` @0.7, width 1.0; `chart()` dots r 2.0 @0.8, hlines 1.5; seed strokes 1.7 everywhere (doc-named sites + DI/on-axis siblings app.js 1048/1063); convergence eval-dot opacity 0.3 â†’ 0.8 (was near-invisible â€” audit finding); target/reference hlines `--muted` â†’ `--label` (7 call sites) + matching HTML legend swatches (target/targetÂ·H+V/DI); "show the starting design" checkbox label inked (interactive control, not annotation). Evidence: `pytest tests/test_gui.py -q` 30/30.
-- **Phase 4 landed (this commit, with phase 5):** `wallSection` redesign (charts.js:229-317) â€” three-pass z-order (grid â†’ all fills â†’ ALL strokes, dashed start drawn LAST: amber outline readable along the FULL perimeter in both themes, 44/44 + 46/46 sampled slices); real even-odd wall-band fill 0.30/0.32 â€” measured composites EXACTLY on spec (light `rgb(182,211,215)` over #ffffff, dark `rgb(42,79,87)` over #151d23); bore stays plot background BY DESIGN per the doc's fill spec (band â‰  bg â‰¥1.6:1; the R1 fallback trigger bandâ‰¡bore did NOT fire); strokes best 2.25/2.0 (V dashed 6-4), start dashed 2.0, compact 1.6 with dash suppression <260px; margins 46/34 + pad 1.02; plain-word plane labels ("horizontal plane â†’" / "â† vertical plane" / "depth z (mm)") at mid-height; throat landmark dots r2.5/1.5 on BOTH mirrored halves at min-z-with-|r|>0; caption extended with the band/bore/amber/dot sentence (`app.js:960`). Pixel evidence: batched observer scanline pass, both themes.
-- **Phase 5 landed (this commit, with phase 4):** 3D form/lighting â€” `MeshStandardMaterial` 0xdfe4e8 (roughness .55, metalness .05, DoubleSide, opaque, polygonOffset so the wire wins the depth test) replaces the translucent teal phong; **wireframe overlay RETAINED at the owner's request, light-toned**: `LineSegments(WireframeGeometry(geo))`, `LineBasicMaterial` 0xf4f7f9 @ 0.28, always on (not shadow-gated), disposed in `_dispose3d` (the original black-wireframe removal is superseded); 4-light rig (hemi .45 / key 1.15 / fill .35 / rim .85 at center+dirÃ—maxDim); themed canvas token `--viz-canvas` (#e9edf0 light / #1d272e dark, all three blocks) with `--surface` fallback; toggleable shadow rig (PCFSoft 1024Â², ortho Â±0.8Ã—maxDim, `normalBias` 0.01Ã—maxDim + bias 0 â€” the MUST fix, ShadowMaterial ground 0.22 at y=minâˆ’0.02Ã—maxDim) behind the persisted `v3d-shadows` checkbox (default on); `init3d(..., seedProfile?, shadows?)` â€” the orphaned `seedCol` is finally used: seed dashed drawn UNDER best solid in the SVG fallback (which also merges the seed extent) + empty-mesh guard routes there. Pixel evidence (batched observer, both themes): canvas tokens EXACT, horn neutral grey (lit 184,188,191 / shadow 80,85,89 â€” not teal), full silhouette traceable on both flanks, wireframe clearly visible and NOT overwhelming, no z-fight/clipping artifacts. Known minor: contact shadow detected in dark, not in light â€” headless SwiftShader proxy; owner to eyeball live (real GPU).
-- **Phase 6 landed (this commit â€” all six phases implemented):** semantics/state redundancy â€” over-budget flagged at all three budget readouts (home GPU card, status running card, run-detail KPI strip): value class `.bad` (`.warn` at â‰¥90 %) + literal "over budget" text next to the number (the real 151/150 run now flags); campaign family rows gain text redundancy beside the rank borders: `+X %` (next rank worse by X %) or `leader` when clearly ahead, `within noise` when not separated; timeline dots gain shape+color redundancy (`.tl-dot.skip` transparent + 2px `--muted` border, `.tl-dot.failed` square + `--bad`); `evolution.js` added to the node --check parametrize (5 static files gated). Evidence: `tests/test_gui.py` 31/31; full offline suite (`-m "not slow and not gpu and not crosscheck"`): exactly 1 failure â€” `test_mesh_pin` (installed hornlab-beat-bem `fa99ee594087` != pinned `38544d214ba2`): that is the concurrently-running WP15 fork lane's mid-flight install state (fused-cuda fork @ fa99ee5 per the M1 note above), NOT GUI work â€” this plan's diff touches zero Python/solver code outside the test_gui.py parametrize widening. GUI plan complete: phases 1-6 implemented, each phase pixel-verified in both themes; remaining manual item = owner's click-path check of the theme toggle + scroll/filter restore.
+- **Phase 1 landed (this commit):** token/type tiers in `app.css` — new `--label` (#46535e/#b3bfc6, 11 label-tier selectors moved off `--muted`, 0.66rem floor), `--rule` #a9b4bb/#40505b (1.36:1 → ~2.1), `--band` rgba .32/.30 (was .08/.09), `--on-accent` (#fff dark #0e1418 — dark primary button 2.07:1 → 9.0), `--accent-strong` hover replacing `opacity:.88`, `--warn-soft`/`--bad-soft` tokens replacing the rgba(168,102,27,…) orphans in `.alert.warn`/`.alert.error`/`.gpu-busy-note`/`button.danger:hover`, plus the Phase 6 CSS one-liner `.progress-bar.bad`. Both dark blocks (prefers-color-scheme + `[data-theme=dark]`) kept character-identical; braces balanced 284/284. Evidence: `pytest tests/test_gui.py -q` 30/30 (baseline 30/30 before any edit).
+- **Phase 2 landed (this commit):** theme boot + capture correctness — boot order now `?theme=light|dark` URL override → stored pref (try/catch) → OS prefers-color-scheme fallback; the toggle flips from the *effective* theme (first-click no-op fixed) and always writes `data-theme` + localStorage; `route()` returns the view promise; theme-change observers snapshot scroll + filter inputs, `await route()`, restore with one rAF retry (async views render after the route returns); the `matchMedia` handler is skipped when `data-theme` is pinned; every localStorage access wrapped in try/catch. Evidence: joint pixel check — `?theme=light#/home` header bg `244,246,247` (`--bg` light) and `?theme=dark#/home` header `14,20,24` (`--bg` dark): the override deterministically renders both themes; `pytest tests/test_gui.py -q` 30/30. Manual click-path checks (first-click switch, per-view recolor, scroll/filter restore) left for the owner's next GUI session.
+- **Phase 3 landed (this commit):** chart-graphics contrast — isobar contours now two-pass (dark `#10181d` halo @0.55 under white 0.98/0.8 cores; widths 3.4/1.8 for −6 dB, 2.6/1.1 for −3 dB; halo composite ≈3.7:1 over #FFDF00, white core ≈5:1); isobar gridlines kept theme-independent `#808080` @0.7, width 1.0; `chart()` dots r 2.0 @0.8, hlines 1.5; seed strokes 1.7 everywhere (doc-named sites + DI/on-axis siblings app.js 1048/1063); convergence eval-dot opacity 0.3 → 0.8 (was near-invisible — audit finding); target/reference hlines `--muted` → `--label` (7 call sites) + matching HTML legend swatches (target/target·H+V/DI); "show the starting design" checkbox label inked (interactive control, not annotation). Evidence: `pytest tests/test_gui.py -q` 30/30.
+- **Phase 4 landed (this commit, with phase 5):** `wallSection` redesign (charts.js:229-317) — three-pass z-order (grid → all fills → ALL strokes, dashed start drawn LAST: amber outline readable along the FULL perimeter in both themes, 44/44 + 46/46 sampled slices); real even-odd wall-band fill 0.30/0.32 — measured composites EXACTLY on spec (light `rgb(182,211,215)` over #ffffff, dark `rgb(42,79,87)` over #151d23); bore stays plot background BY DESIGN per the doc's fill spec (band ≠ bg ≥1.6:1; the R1 fallback trigger band≡bore did NOT fire); strokes best 2.25/2.0 (V dashed 6-4), start dashed 2.0, compact 1.6 with dash suppression <260px; margins 46/34 + pad 1.02; plain-word plane labels ("horizontal plane →" / "â† vertical plane" / "depth z (mm)") at mid-height; throat landmark dots r2.5/1.5 on BOTH mirrored halves at min-z-with-|r|>0; caption extended with the band/bore/amber/dot sentence (`app.js:960`). Pixel evidence: batched observer scanline pass, both themes.
+- **Phase 5 landed (this commit, with phase 4):** 3D form/lighting — `MeshStandardMaterial` 0xdfe4e8 (roughness .55, metalness .05, DoubleSide, opaque, polygonOffset so the wire wins the depth test) replaces the translucent teal phong; **wireframe overlay RETAINED at the owner's request, light-toned**: `LineSegments(WireframeGeometry(geo))`, `LineBasicMaterial` 0xf4f7f9 @ 0.28, always on (not shadow-gated), disposed in `_dispose3d` (the original black-wireframe removal is superseded); 4-light rig (hemi .45 / key 1.15 / fill .35 / rim .85 at center+dir×maxDim); themed canvas token `--viz-canvas` (#e9edf0 light / #1d272e dark, all three blocks) with `--surface` fallback; toggleable shadow rig (PCFSoft 1024², ortho ±0.8×maxDim, `normalBias` 0.01×maxDim + bias 0 — the MUST fix, ShadowMaterial ground 0.22 at y=min−0.02×maxDim) behind the persisted `v3d-shadows` checkbox (default on); `init3d(..., seedProfile?, shadows?)` — the orphaned `seedCol` is finally used: seed dashed drawn UNDER best solid in the SVG fallback (which also merges the seed extent) + empty-mesh guard routes there. Pixel evidence (batched observer, both themes): canvas tokens EXACT, horn neutral grey (lit 184,188,191 / shadow 80,85,89 — not teal), full silhouette traceable on both flanks, wireframe clearly visible and NOT overwhelming, no z-fight/clipping artifacts. Known minor: contact shadow detected in dark, not in light — headless SwiftShader proxy; owner to eyeball live (real GPU).
+- **Phase 6 landed (this commit — all six phases implemented):** semantics/state redundancy — over-budget flagged at all three budget readouts (home GPU card, status running card, run-detail KPI strip): value class `.bad` (`.warn` at ≥90 %) + literal "over budget" text next to the number (the real 151/150 run now flags); campaign family rows gain text redundancy beside the rank borders: `+X %` (next rank worse by X %) or `leader` when clearly ahead, `within noise` when not separated; timeline dots gain shape+color redundancy (`.tl-dot.skip` transparent + 2px `--muted` border, `.tl-dot.failed` square + `--bad`); `evolution.js` added to the node --check parametrize (5 static files gated). Evidence: `tests/test_gui.py` 31/31; full offline suite (`-m "not slow and not gpu and not crosscheck"`): exactly 1 failure — `test_mesh_pin` (installed hornlab-beat-bem `fa99ee594087` != pinned `38544d214ba2`): that is the concurrently-running WP15 fork lane's mid-flight install state (fused-cuda fork @ fa99ee5 per the M1 note above), NOT GUI work — this plan's diff touches zero Python/solver code outside the test_gui.py parametrize widening. GUI plan complete: phases 1-6 implemented, each phase pixel-verified in both themes; remaining manual item = owner's click-path check of the theme toggle + scroll/filter restore.
 
 ## 2026-10-24 (local, evening) - M1 LANDED: objective v2 + re-score; driver fairness; graded infeasibility; HF grid weights; fused-CUDA plumbing; Oracle GO
 
@@ -5977,7 +6043,3 @@ PASS  round-trip        reserved for task 04
 - **Next (next agent):** The implementation plan's NON-OWNER-GATED work is COMPLETE as of M6/WP12: the machine carries the brief-agnostic shape surface (classical + splice/throat-blend/salmon + GRID + organic rows + rollback lecleach/iwata_ar/toroidal + saddle halves) + restarts schedules + the QD-atlas contract + the CADâ†’STEP multicell category + the enclosure-mounting route (measured: dofs +199 %/+107 %, both under the unchanged caps) + the WP16 source plug + WP17 fused-CUDA near correction (stage 1) on the hosted fork's pinned stack (`760a1ec`; installed == pinned â€” the mesh-pin tripwire is green). **Everything remaining needs the owner: [a] the brief-design consultation (deferred) â€” 2â€“4 real briefs turn the machinery from "calibrated" into "aimed"; [b] resume-or-park the deferred WP14 multicell PHYSICS (the fixture's mouth-topology defect + the full resume recipe live in `docs/ISSUES.md`'s deferred-WP14 block; WP17 stage 1 is ready for it); [c] P6a superformula campaign + P6b GSA-vs-CMA-ES bake-off (owner-gated); [d] the small parked proposals (W7 balloon density, the M3/5 calibration proposals); [e] WP17 stage 2 (fused + per-image symmetry near caches) only when symmetric-drive multicells need the GPU. WP13 axisymmetric backend = OWNER-DEFERRED ("don't know how necessary that is" 2026-10-25).** Nothing else runs without the owner.
 - **Open owner decisions:** v2 objective as brief DEFAULT (today opt-in); bound proposals (`docs/evidence/TYPOLOGY_COMPARE_2026-10-23.md`); mesher bump (post-beta); surrogate OSSE top-up; GUI contrast owner click-path check remains; **P6a/P6b + W7 + the brief-design consultation + resume-or-park the deferred WP14 multicell physics (all owner-gated â€” see Next). RESOLVED 2026-10-25: fork hosting + pin (hosted fork; `760a1ec` pinned; installed == pinned â€” tripwire green); WP13 = OWNER-DEFERRED.**
 - **Blockers:** none (owner gate on the pin hosting only).
-
-
-
-

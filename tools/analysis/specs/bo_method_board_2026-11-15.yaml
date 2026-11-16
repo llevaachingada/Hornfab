@@ -1,0 +1,60 @@
+# BO-vs-CMA matched comparison board (GUI: #/analysis/compare-methods).
+#
+# The rules are copied from docs/queue/BO_VS_CMA_PLAN_2026-11-15.md and are fixed before
+# the run.  The GUI reads only recorded rows: a missing arm is shown as incomplete, never
+# as a guess.  Screen J is reported but does not decide.
+#
+# Study arms are discovered from their own registry (one study per root).  CMA arms are
+# resolved from the night's summary.jsonl by job id, so a finished run needs no edit here.
+name: BO vs CMA — matched warm-start, 2026-11-15
+runs_root: runs
+objective_version: 7
+target_j: 3.2325                 # the prior CMA best; screens-to-target is measured against it
+incumbent:
+  j: 3.2325
+  label: prior CMA best on the same task (run 18985d)
+comparisons:
+  - id: bo-vs-cma
+    a: bo
+    b: cma
+    rule: verify_median_gap_exceeds_spread
+arms:
+  - id: bo_s31001
+    label: BO scalar seed 31001
+    method: bo
+    policy: scalar
+    study_root: runs/bo_vs_cma_2026-11-15/bo_s31001
+    budget_profile: comparison-60
+  - id: bo_s31002
+    label: BO scalar seed 31002
+    method: bo
+    policy: scalar
+    study_root: runs/bo_vs_cma_2026-11-15/bo_s31002
+    budget_profile: comparison-60
+  - id: bo_s31003
+    label: BO scalar seed 31003
+    method: bo
+    policy: scalar
+    study_root: runs/bo_vs_cma_2026-11-15/bo_s31003
+    budget_profile: comparison-60
+  - id: cma_s3101
+    label: CMA seed 3101
+    method: cma
+    policy: cma
+    night: bo_vs_cma_2026-11-15
+    job: cma_s3101
+    budget_profile: "60"
+  - id: cma_s3102
+    label: CMA seed 3102
+    method: cma
+    policy: cma
+    night: bo_vs_cma_2026-11-15
+    job: cma_s3102
+    budget_profile: "60"
+  - id: cma_s3103
+    label: CMA seed 3103
+    method: cma
+    policy: cma
+    night: bo_vs_cma_2026-11-15
+    job: cma_s3103
+    budget_profile: "60"

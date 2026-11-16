@@ -369,7 +369,7 @@ class StudyService:
         return result
 
     def reserve_cpu_job(self, study_id, expected_revision, idempotency_key, request_hash, kind, package_hash=None):
-        if kind not in {'analyze', 'propose'} or not isinstance(request_hash, str) or not request_hash:
+        if kind not in {'analyze', 'propose', 'diagnose'} or not isinstance(request_hash, str) or not request_hash:
             raise StudyError('CPU job requires analyze/propose kind and request hash')
         payload = {'expected_revision': expected_revision, 'request_hash': request_hash, 'kind': kind, 'package_hash': package_hash}
         def action(conn):

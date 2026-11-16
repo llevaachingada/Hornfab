@@ -106,7 +106,9 @@ def test_verify_routes_keep_their_query_string():
     Without this the compare view never receives a/b and its table cannot be rendered (or audited).
     """
     src = APP_JS.read_text(encoding="utf-8")
-    assert src.count("query: true") == 2, "both verify routes are query-aware"
+    assert src.count("query: true") >= 2, "both verify routes are query-aware"
+    assert "#\\/run\\/([^\\/?#]+)\\/verify\\/compare" in src
+    assert "#\\/run\\/([^\\/?#]+)\\/verify" in src
     assert "(query ? hash : path).match(re)" in src
 
 

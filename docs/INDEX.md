@@ -27,6 +27,14 @@ Verification: legacy `sp__strong_v7` is the canonical section family at axial 7/
 [five-angle seed gallery](renders/2026-11-15-rolled-rect/index.html).
 
 
+[BO GUI cloud handoff 2026-11-16](research/BO_GUI_CLOUD_HANDOFF_2026-11-16.md): authoritative remaining scope (merge sab-home, BoTorch diagnostics LOO/slices/HV, Bayes nav + Live tab) and token rules for the cloud session; with [handoff](research/BO_GUI_HANDOFF_2026-11-16.md) and [plan](research/BO_GUI_IMPLEMENTATION_PLAN_2026-11-16.md).
+
+[BO GUI design and implementation plan 2026-11-15](research/BO_GUI_DESIGN_2026-11-15.md): the
+read-only BO analysis layer (convergence, calibration, sensitivity, Pareto, trust region, method
+board), the study-root index, the backend instrumentation, the slices and their evidence.
+[BO GUI evidence 2026-11-15](evidence/bo_gui_2026-11-15/README.md): desktop/phone light/dark
+screenshots of the execute, explain and compare-methods pages on the real bo_s31001 arm.
+
 [GUI / data-viz UX pass 2026-11-14](GUI_UX_PASS_2026-11-14.md): decision-first analysis report,
 verdict-first run page, Boundary Lab isobars + Globe view, New run entry, shared viz kit and its rules.
 A **Full globe** mode (the stored balloon re-sliced around a closed 360° H/V circle, no new solves)

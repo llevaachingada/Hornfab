@@ -54,6 +54,7 @@ _COMMANDS = {
     'reconcile': ({'--study'}, {'--root', '--project-root'}),
     'decide': ({'--study', '--payload'}, {'--root', '--key'}),
     'export': ({'--study', '--out'}, {'--root'}),
+    'diagnose': ({'--study'}, {'--root', '--key', '--expected-revision', '--seed', '--policy', '--out'}),
 }
 
 _BOOLEAN_FLAGS = {'--dry-run', '--execute'}
@@ -406,6 +407,20 @@ def _dispatch(command, values):
         return {'path': str(out), 'study_id': values['--study'],
                 'revision': record['study']['revision'],
                 'parent_id': record['parent_id'], 'children': record['children']}
+
+    if command == 'diagnose':
+        from hornlab_search.bo.diagnostics import KIND, diagnose_study
+        seed = values.get('--seed')
+        if seed is not None and not seed.lstrip('-').isdigit():
+            raise UsageError('--seed must be an integer')
+        result = diagnose_study(service, values['--study'], root=root,
+                                seed=None if seed is None else int(seed), policy=values.get('--policy'))
+        if values.get('--out'):
+            out = _contained(root, values['--out'], '--out')
+            data = json.loads((service.store.artifacts / result['artifact']['sha256']).read_text('utf-8'))
+            _write_json(out, data)
+            result['path'] = str(out)
+        return result
 
     raise UsageError(f'unsupported command {command!r}')
 
