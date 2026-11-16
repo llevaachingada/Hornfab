@@ -1,21 +1,38 @@
-"""Registry-backed CPU study job bridge, independent of GUI JobManager/GPU lanes.
+"""Registry-backed study job bridges, independent of the GUI JobManager.
 
 The injected registry owns atomic revision/idempotency reservation and CAS state
 transitions. No registry or subprocess is created here. Integrators must enforce
 HTTP origin/hostname/JSON restrictions before calling this Python seam.
+
+``StudySolveDesignJobs`` (bottom of this module) is the one GPU job: it re-solves a single study
+design through the ordinary CLI ``verify`` body and keeps its own durable ledger next to the study
+registry, because the frozen studies registry only reserves analyze/propose/diagnose CPU jobs.
 """
 from __future__ import annotations
 
+import datetime
 import hashlib
 import json
+import math
+import os
 import re
+import threading
+import uuid
 from dataclasses import dataclass
-from pathlib import PurePosixPath, PureWindowsPath
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Protocol
 
 _ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$")
 _HASH = re.compile(r"^[0-9a-f]{64}$")
 KINDS = frozenset({"analyze", "propose", "diagnose"})
+#: ``solve_design`` is deliberately NOT in :data:`KINDS`: the frozen studies registry only
+#: reserves analyze/propose/diagnose CPU jobs.  This GPU job keeps its own durable ledger next
+#: to the study registry instead (see :class:`StudySolveDesignJobs`).
+SOLVE_DESIGN_KIND = "solve_design"
+_DESIGN_HASH = re.compile(r"^[0-9a-f]{6,64}$")
+#: ``hornlab_search.gui.data.RUN_ID`` -- a run folder this GUI can resolve and link.
+_RUN_ID = re.compile(r"^[0-9]{8}T[0-9]{6}Z-[a-z]+-[0-9a-f]{6}$")
+SOLVE_LEDGER_NAME = "study_solve_designs.json"
 
 
 @dataclass
@@ -320,3 +337,496 @@ class StudyRunBridge:
         result = self.canceller(payload["package_id"])
         return result if isinstance(result, dict) else {"package_id": payload["package_id"],
                                                        "cancelled": True}
+
+# --------------------------------------------------------------------------- study design verify
+#
+# A Bayesian study has no ``runs/<ts>-screen-*`` folder of its own, so its page cannot show the
+# ordinary run views (curves + 3D).  ``solve_design`` closes that gap without touching the study
+# code pins or ``hornlab_search/studies/**``: it re-solves ONE measured design through the ordinary
+# CLI ``verify`` body into a real standalone verify run, holds the same GPU lane the search uses,
+# and records ``(study_id, design_hash) -> run_id`` in a small ledger beside the study registry.
+
+
+def solve_ledger_path(store_root) -> Path:
+    return Path(store_root) / SOLVE_LEDGER_NAME
+
+
+def _empty_ledger() -> dict:
+    return {"version": 1, "solves": {}, "jobs": {}, "keys": {}}
+
+
+def _solve_key(study_id: str, design_hash: str) -> str:
+    return f"{study_id}/{design_hash}"
+
+
+def read_solve_ledger(store_root) -> dict:
+    """Best-effort read of the solve ledger; a missing/corrupt file is an empty ledger."""
+    try:
+        raw = json.loads(solve_ledger_path(store_root).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return _empty_ledger()
+    if not isinstance(raw, dict):
+        return _empty_ledger()
+    out = _empty_ledger()
+    for name in ("solves", "jobs", "keys"):
+        value = raw.get(name)
+        if isinstance(value, dict):
+            out[name] = {str(k): v for k, v in value.items()
+                         if isinstance(v, dict) or name == "keys"}
+    return out
+
+
+_LEDGER_LOCKS: dict[str, threading.Lock] = {}
+_LEDGER_LOCKS_GUARD = threading.Lock()
+
+
+def _ledger_lock(path: Path) -> threading.Lock:
+    key = str(Path(path).resolve())
+    with _LEDGER_LOCKS_GUARD:
+        lock = _LEDGER_LOCKS.get(key)
+        if lock is None:
+            lock = _LEDGER_LOCKS[key] = threading.Lock()
+        return lock
+
+
+def _write_solve_ledger(store_root, ledger: dict) -> None:
+    path = solve_ledger_path(store_root)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_text(json.dumps(ledger, sort_keys=True, indent=1), encoding="utf-8")
+    os.replace(tmp, path)
+
+
+def _update_solve_ledger(store_root, mutate) -> dict:
+    """Atomic read-modify-write of the ledger; one writer per store root in this process."""
+    with _ledger_lock(solve_ledger_path(store_root)):
+        ledger = read_solve_ledger(store_root)
+        mutate(ledger)
+        _write_solve_ledger(store_root, ledger)
+        return ledger
+
+
+def _utc_now() -> str:
+    return datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _pid_alive(pid: int) -> bool:
+    from hornlab_search.search.gpulock import _pid_alive as alive
+    return alive(int(pid))
+
+
+def _gpu_busy(runs_root) -> str | None:
+    from hornlab_search.search.gpulock import _lock_path, _read_lock
+    lock = _read_lock(_lock_path(Path(runs_root)))
+    if lock and lock.get("pid"):
+        try:
+            pid = int(lock["pid"])
+        except (TypeError, ValueError):
+            return None
+        if pid > 0 and _pid_alive(pid):
+            return (f'GPU busy: {lock.get("user", "?")} running "{lock.get("command", "?")}" '
+                    f'(pid {pid}) since {lock.get("start_time", "?")}')
+    return None
+
+
+def _active_solve_job(ledger: dict, study_id: str) -> dict | None:
+    for job in (ledger.get("jobs") or {}).values():
+        if (isinstance(job, dict) and job.get("study_id") == study_id
+                and job.get("status") in ("queued", "running")):
+            return job
+    return None
+
+
+def new_verify_run_dir(runs_root, design_hash: str, *, now=None) -> Path:
+    """Create ``<runs>/<utc-ts>-studyverify-<hash6>`` (a real GUI run id).
+
+    The GUI's ``RUN_ID`` is ``<stamp>-<lowercase mode>-<6 hex>``; a study/design pair cannot fit
+    two extra dash-separated segments while still being listed/resolvable by ``/api/runs`` and
+    ``#/run/<id>``.  The study id, design hash and policy are therefore recorded in ``run.json``
+    provenance, and the id itself names the mode and the design-hash prefix.
+    """
+    if not isinstance(design_hash, str) or not _DESIGN_HASH.fullmatch(design_hash):
+        raise StudyJobError("invalid_input", "invalid design hash", 400)
+    stamp = (now or datetime.datetime.now(datetime.timezone.utc)).strftime("%Y%m%dT%H%M%SZ")
+    name = f"{stamp}-studyverify-{design_hash[:6]}"
+    if not _RUN_ID.fullmatch(name):
+        raise StudyJobError("invalid_input", "derived verify run id is invalid", 400)
+    folder = Path(runs_root) / name
+    folder.mkdir(parents=True, exist_ok=False)
+    return folder
+
+
+def prepare_verify_run(run_dir, cfg, *, study_id: str, design_hash: str, family: str,
+                       params: dict, objective: float, policy: str | None = None,
+                       study: dict | None = None) -> dict:
+    """Write the real run dir the ordinary ``verify`` body reads.
+
+    ``config.yaml`` is the study's own config snapshot (the same writer the CLI runs use);
+    ``run.json`` marks this as a standalone verify run (``mode: verify`` and NO ``verify_of``),
+    so the GUI reads ``designs/<hash>`` and the 3D route renders it; ``search.ndjson`` seeds the
+    one ok row the verify body selects by hash.
+    """
+    from hornlab_search.search import rundir
+    from hornlab_search.search.evaluate import collect_lib_shas
+
+    run_dir = Path(run_dir)
+    run_dir.mkdir(parents=True, exist_ok=True)
+    rundir.write_config_snapshot(run_dir, cfg)
+    seed = {
+        "ok": True,
+        "design_hash": str(design_hash),
+        "family": str(family),
+        "params": dict(params),
+        "objective": float(objective),
+        "mode": "screen",
+        "created_utc": rundir.utc_now(),
+    }
+    (run_dir / "search.ndjson").write_text(
+        json.dumps(seed, sort_keys=True, separators=(",", ":")) + "\n", encoding="utf-8")
+    provenance = {
+        "source": "gui.study_solve_design",
+        "study_id": str(study_id),
+        "design_hash": str(design_hash),
+        "policy": policy,
+        "study_name": (study or {}).get("name") or (study or {}).get("question"),
+    }
+    meta = {
+        "run_id": run_dir.name,
+        "config_name": getattr(cfg, "name", None),
+        "family": str(family),
+        "mode": "verify",
+        "config": cfg.raw,
+        "config_sha": rundir.config_sha(cfg.raw),
+        "backend": cfg.solve.backend,
+        "lib_shas": collect_lib_shas(),
+        "toolchain": rundir.toolchain_snapshot(),
+        "command": f"study solve_design {study_id} {design_hash}",
+        "study_provenance": provenance,
+        "status": "running",
+        "started_utc": rundir.utc_now(),
+    }
+    rundir.write_json_atomic(run_dir / "run.json", meta)
+    return {"run_dir": run_dir, "run_id": run_dir.name, "run_json": meta}
+
+
+def _verify_env() -> dict:
+    """The child owns the GPU lock itself (one CUDA solve at a time); a held lane is fatal."""
+    env = {**os.environ, "HORNLAB_GPU_LOCK": "refuse", "PYTHONUNBUFFERED": "1"}
+    # Never let the child inherit a lock-owner claim from the GUI process: the verify body must
+    # acquire the lane for itself rather than silently proceeding unlocked.
+    env.pop("HORNLAB_GPU_LOCK_OWNER", None)
+    return env
+
+
+class StudySolveDesignJobs:
+    """One-design GPU verify job for the study page (``solve_design`` action).
+
+    Reservation, idempotency and the (study, design) -> run mapping are file-backed in the study
+    store directory because the frozen studies registry only reserves analyze/propose/diagnose
+    CPU jobs.  Every failure is recorded on the job (status + reason); a run dir is only advertised
+    as finished after the verify body left the design directory behind.
+    """
+
+    def __init__(self, service, *, runs_root, root=None, gpu_busy=None, runner=None,
+                 synchronous: bool = False):
+        self.service = service
+        self.runs_root = Path(runs_root)
+        self.root = Path(root) if root is not None else self.runs_root.parent
+        self.store_root = Path(service.store.root)
+        self._gpu_busy = gpu_busy or (lambda: _gpu_busy(self.runs_root))
+        self._runner = runner or self._subprocess_runner
+        self.synchronous = bool(synchronous)
+        self._reconcile()
+
+    # ---- durable ledger helpers
+    def _ledger(self) -> dict:
+        return read_solve_ledger(self.store_root)
+
+    def _update(self, mutate) -> dict:
+        return _update_solve_ledger(self.store_root, mutate)
+
+    def _patch_job(self, job_id: str, **fields) -> None:
+        def mutate(ledger):
+            job = (ledger.get("jobs") or {}).get(job_id)
+            if isinstance(job, dict):
+                job.update(fields)
+        self._update(mutate)
+
+    def _reconcile(self) -> None:
+        """A job whose owning GUI process is gone is interrupted, never left 'running'."""
+        now, changed = _utc_now(), [False]
+
+        def mutate(ledger):
+            for job in (ledger.get("jobs") or {}).values():
+                if not isinstance(job, dict) or job.get("status") not in ("queued", "running"):
+                    continue
+                pid = job.get("pid")
+                if isinstance(pid, int) and pid != os.getpid() and not _pid_alive(pid):
+                    job.update(status="interrupted", finished_utc=now,
+                               reason="the GUI process ended before this solve finished")
+                    changed[0] = True
+        if any(isinstance(j, dict) and j.get("status") in ("queued", "running")
+               for j in (self._ledger().get("jobs") or {}).values()):
+            self._update(mutate)
+
+    def view(self, job: dict) -> dict:
+        out = {key: job.get(key) for key in
+               ("study_id", "design_hash", "status", "reason", "run_id",
+                "started_utc", "finished_utc") if job.get(key) is not None}
+        job_id = job.get("job_id")
+        if job_id is not None:
+            out["id"] = job_id
+            out["job_id"] = job_id
+        return out
+
+    # ---- request path
+    def submit(self, study_id, payload) -> dict:
+        _id(study_id, "study id")
+        if not isinstance(payload, dict):
+            raise StudyJobError("invalid_input", "invalid request", 400)
+        _require_key(payload)
+        if set(payload) != {"kind", "expected_revision", "idempotency_key", "design_hash"}:
+            raise StudyJobError("invalid_input", "invalid request fields", 400)
+        if payload.get("kind") != SOLVE_DESIGN_KIND:
+            raise StudyJobError("invalid_input", "invalid kind", 400)
+        design_hash = payload.get("design_hash")
+        if not isinstance(design_hash, str) or not _DESIGN_HASH.fullmatch(design_hash):
+            raise StudyJobError("invalid_input", "invalid design hash", 400)
+        key = _id(payload["idempotency_key"], "idempotency key")
+        try:
+            study = self.service.get_study(study_id)
+        except Exception as exc:  # noqa: BLE001 - missing study is a typed refusal
+            raise StudyJobError("not_found", str(exc), 404) from exc
+        revision = payload.get("expected_revision")
+        if isinstance(revision, bool) or not isinstance(revision, int):
+            raise StudyJobError("invalid_input", "invalid revision", 400)
+        if revision != study.get("revision"):
+            raise StudyJobError("conflict", "stale study revision", 409)
+        ledger = self._ledger()
+        replay = (ledger.get("keys") or {}).get(f"{study_id}:{key}")
+        if replay is not None:
+            existing = (ledger.get("jobs") or {}).get(str(replay))
+            if isinstance(existing, dict):
+                return self.view(existing)
+            raise StudyJobError("conflict", "idempotency key has no job", 409)
+        active = _active_solve_job(ledger, study_id)
+        if active is not None:
+            raise StudyJobError(
+                "conflict", f"a study solve is already active for design "
+                            f"{active.get('design_hash')}", 409)
+        design = self._design_observation(study_id, design_hash)
+        config_path, brief = self._config_paths(study_id, study)
+        cfg = self._load_config(config_path, brief)
+        busy = self._gpu_busy()
+        if busy:
+            self._record_failed(study_id, design_hash, key, str(busy))
+            raise StudyJobError("unavailable", str(busy), 422)
+        # Mirror the study evaluator: ``_design`` prefers the task config's family over any
+        # candidate field, so the re-solve builds the same Design the study measured.
+        family = getattr(cfg, "family", None) or design.get("family") or "OSSE"
+        design = {**design, "family": family}
+        job_id = uuid.uuid4().hex
+        now = _utc_now()
+        record = {"job_id": job_id, "study_id": study_id, "design_hash": design_hash,
+                  "status": "queued", "reason": None, "run_id": None,
+                  "idempotency_key": key, "pid": os.getpid(),
+                  "started_utc": now, "finished_utc": None}
+
+        def reserve(ledger_):
+            ledger_["jobs"][job_id] = record
+            ledger_["keys"][f"{study_id}:{key}"] = job_id
+        self._update(reserve)
+        policy = (study.get("spec") or {}).get("policy") or {}
+        policy_name = ((policy.get("proposal_policy") or policy.get("mode"))
+                       if isinstance(policy, dict) else None)
+        if self.synchronous:
+            self._execute(study_id, job_id, design_hash, design, cfg, policy_name, study)
+        else:
+            threading.Thread(target=self._execute, daemon=True,
+                             args=(study_id, job_id, design_hash, design, cfg,
+                                   policy_name, study)).start()
+        return self.view((self._ledger().get("jobs") or {}).get(job_id) or record)
+
+    def _record_failed(self, study_id, design_hash, key, reason) -> str:
+        job_id = uuid.uuid4().hex
+        now = _utc_now()
+        record = {"job_id": job_id, "study_id": study_id, "design_hash": design_hash,
+                  "status": "failed", "reason": reason, "run_id": None,
+                  "idempotency_key": key, "pid": os.getpid(),
+                  "started_utc": now, "finished_utc": now}
+
+        def mutate(ledger):
+            ledger["jobs"][job_id] = record
+            ledger["keys"][f"{study_id}:{key}"] = job_id
+        self._update(mutate)
+        return job_id
+
+    # ---- worker
+    def _execute(self, study_id, job_id, design_hash, design, cfg, policy, study) -> None:
+        from hornlab_search.search import rundir
+        from hornlab_search.search.evaluate import read_ndjson
+
+        self._patch_job(job_id, status="running", started_utc=_utc_now())
+        run_dir = None
+        try:
+            run_dir = new_verify_run_dir(self.runs_root, design_hash)
+            prepare_verify_run(run_dir, cfg, study_id=study_id, design_hash=design_hash,
+                               family=design["family"], params=design["params"],
+                               objective=design["objective"], policy=policy, study=study)
+            self._patch_job(job_id, run_id=run_dir.name, run_dir=str(run_dir))
+            rc = self._runner(run_dir, design_hash, _verify_env())
+            metrics = run_dir / "designs" / design_hash / "metrics.json"
+            if rc != 0:
+                raise StudyJobError("failed", f"verify exited {rc}", 422)
+            if not metrics.is_file():
+                raise StudyJobError(
+                    "failed", "verify finished without its design directory", 422)
+            rows = [row for row in read_ndjson(run_dir / "search.ndjson")
+                    if row.get("ok") is True and row.get("design_hash") == design_hash
+                    and isinstance(row.get("objective"), (int, float))]
+            best = min(rows, key=lambda row: float(row["objective"])) if rows else None
+            rundir.update_run_json(
+                run_dir, status="finished", finished_utc=rundir.utc_now(),
+                stop_reason="solve_design: 1 design, 0 failed",
+                best=None if best is None else {
+                    "design_hash": best.get("design_hash"),
+                    "objective": float(best["objective"]), "eval_no": 0})
+            now = _utc_now()
+
+            def record(ledger):
+                ledger["solves"][_solve_key(study_id, design_hash)] = {
+                    "run_id": run_dir.name, "study_id": study_id,
+                    "design_hash": design_hash, "recorded_utc": now}
+            self._update(record)
+            self._patch_job(job_id, status="complete", reason=None, finished_utc=now)
+        except Exception as exc:  # noqa: BLE001 - the job carries the reason, never a crash
+            if run_dir is not None:
+                try:
+                    rundir.update_run_json(
+                        run_dir, status="failed", finished_utc=rundir.utc_now(),
+                        stop_reason=f"solve_design failed: {exc}")
+                except Exception:  # noqa: BLE001 - diagnostics only
+                    pass
+            self._patch_job(job_id, status="failed",
+                            reason=f"{type(exc).__name__}: {exc}", finished_utc=_utc_now())
+
+    # ---- resolution
+    def _read_artifact(self, study_id, kind):
+        meta = self.service.get_artifact_metadata(study_id, kind)
+        if meta.get("status") != "available":
+            raise StudyJobError("capability_missing", f"{kind} artifact is not available", 503)
+        try:
+            raw = self.service.store.read_artifact(meta["sha256"])
+        except Exception as exc:  # noqa: BLE001
+            raise StudyJobError("unavailable", f"{kind} artifact is unreadable: {exc}", 422) from exc
+        try:
+            return json.loads(raw)
+        except (UnicodeDecodeError, ValueError) as exc:
+            raise StudyJobError("unavailable", f"{kind} artifact is not JSON", 422) from exc
+
+    def _design_observation(self, study_id, design_hash) -> dict:
+        results = self._read_artifact(study_id, "results")
+        observations = results.get("observations") if isinstance(results, dict) else None
+        if not isinstance(observations, list) or not observations:
+            raise StudyJobError("unavailable", "the study has no results observations yet", 422)
+        matches = []
+        for row in observations:
+            if not isinstance(row, dict):
+                continue
+            candidate = row.get("candidate") if isinstance(row.get("candidate"), dict) else {}
+            result = row.get("result") if isinstance(row.get("result"), dict) else {}
+            identity = candidate.get("design_hash") or result.get("design_hash")
+            if identity == design_hash:
+                matches.append((candidate, result))
+        if not matches:
+            raise StudyJobError(
+                "unavailable", f"design {design_hash} is not an observation of this study", 422)
+        chosen = None
+        for candidate, result in matches:
+            if result.get("physical_measurement") is not True:
+                continue
+            value = result.get("observed_j")
+            if isinstance(value, bool) or not isinstance(value, (int, float)) \
+                    or not math.isfinite(float(value)):
+                continue
+            if result.get("kind") == "screen":
+                chosen = (candidate, result)
+                break
+            if chosen is None:
+                chosen = (candidate, result)
+        if chosen is None:
+            raise StudyJobError(
+                "unavailable", f"design {design_hash} has no complete physical measurement", 422)
+        candidate, result = chosen
+        params = result.get("params") if isinstance(result.get("params"), dict) else candidate.get("params")
+        if not isinstance(params, dict) or not params:
+            raise StudyJobError("unavailable", "the design has no recorded parameters", 422)
+        return {"family": candidate.get("family") or result.get("family"),
+                "params": dict(params),
+                "objective": float(result["observed_j"]),
+                "candidate": candidate, "result": result}
+
+    def _config_paths(self, study_id, study) -> tuple[Path, Path | None]:
+        """Study config from the frozen snapshot, then the package/spec ``task`` block."""
+        task = {}
+        try:
+            snapshot = self._read_artifact(study_id, "snapshot")
+            if isinstance(snapshot, dict) and isinstance(snapshot.get("task"), dict):
+                task = dict(snapshot["task"])
+        except StudyJobError:
+            task = {}
+        if not task.get("config"):
+            try:
+                package = self._read_artifact(study_id, "package")
+                spec = package.get("spec") if isinstance(package, dict) else None
+                if isinstance(spec, dict) and isinstance(spec.get("task"), dict):
+                    task = {**spec["task"], **task}
+            except StudyJobError:
+                pass
+        if not task.get("config"):
+            spec = study.get("spec") if isinstance(study.get("spec"), dict) else {}
+            if isinstance(spec.get("task"), dict):
+                task = {**spec["task"], **task}
+        raw = task.get("config")
+        if not isinstance(raw, str) or not raw:
+            raise StudyJobError("capability_missing", "the study has no recorded task config", 503)
+        config = Path(raw)
+        if not config.is_absolute():
+            config = self.root / config
+        config = config.resolve()
+        if not config.is_file():
+            raise StudyJobError("capability_missing", f"study config not found: {config}", 503)
+        brief = None
+        raw_brief = task.get("brief")
+        if isinstance(raw_brief, str) and raw_brief:
+            candidate = Path(raw_brief)
+            if not candidate.is_absolute():
+                candidate = self.root / candidate
+            candidate = candidate.resolve()
+            if candidate.is_file():
+                brief = candidate
+        return config, brief
+
+    def _load_config(self, config_path, brief):
+        from hornlab_search.config import load_config
+        try:
+            return load_config(config_path, brief=brief)
+        except Exception as exc:  # noqa: BLE001 - a broken config is a typed refusal
+            raise StudyJobError(
+                "unavailable", f"study config could not be loaded: {exc}", 422) from exc
+
+    def _subprocess_runner(self, run_dir, design_hash, env) -> int:
+        """Run the ordinary CLI verify body in the study interpreter (never a second solver)."""
+        import subprocess
+        from hornlab_search.studies.production import study_interpreter
+        argv = [str(study_interpreter(self.root)), "-m", "hornlab_search.cli", "verify",
+                "--run", str(run_dir), "--verify-dir", str(run_dir),
+                "--designs", design_hash,
+                "--runs-dir", str(self.runs_root),
+                "--dataset-dir", str(self.root / "dataset"),
+                "--cache-dir", str(self.root / "cache")]
+        with (run_dir / "worker.log").open("ab") as output:
+            process = subprocess.Popen(
+                argv, cwd=str(self.root), stdout=output, stderr=subprocess.STDOUT, env=env,
+                creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+            return process.wait()

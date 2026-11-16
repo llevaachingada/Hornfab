@@ -52,6 +52,7 @@ function element(dataset, group = null) {
     closest(selector) {
       if (selector.includes("data-study-artifact") && dataset.studyArtifact != null) return this;
       if (selector.includes("data-study-policy") && dataset.studyPolicy != null) return this;
+      if (selector.includes("data-study-solve") && dataset.studySolve != null) return this;
       if (selector.includes("data-study-action") && dataset.studyAction != null) return this;
       if (selector.includes("data-study-select") && dataset.studySelect != null) return this;
       if (selector.includes("data-study-action-group")) return group;
@@ -295,10 +296,11 @@ const executePanel = {...ready, phase:"execute", data:{lane:"cpu", actions:[{kin
   const studyRouteAt = appSrc.indexOf("#\\/analysis\\/study\\/");
   const genericRouteAt = appSrc.indexOf("#\\/analysis\\/([^\\/?#]+)$");
   assert.ok(studyRouteAt > 0 && genericRouteAt > 0 && studyRouteAt < genericRouteAt, "study routes precede the generic analysis route");
-  for (const fragment of ['package:"package"', 'launch:"launch"', 'cancel:"cancel"', 'decision:"decision"', 'revise:"revise"', 'analyze:"jobs"', 'propose:"jobs"']) {
+  for (const fragment of ['package:"package"', 'launch:"launch"', 'cancel:"cancel"', 'decision:"decision"', 'revise:"revise"', 'analyze:"jobs"', 'propose:"jobs"', 'solve_design:"jobs"']) {
     assert.ok(appSrc.includes(fragment), fragment);
   }
   assert.ok(appSrc.includes('kind === "analyze" || kind === "propose"'), "analyze/propose keep the jobs payload");
+  assert.ok(appSrc.includes('kind === "solve_design"'), "solve_design posts its kind onto /jobs");
   assert.ok(appSrc.includes('/api/studies/${encodeURIComponent(id)}/artifacts/${encodeURIComponent(artifact)}'), "artifact path is bounded by id encoding");
 }
 
@@ -342,6 +344,76 @@ const executePanel = {...ready, phase:"execute", data:{lane:"cpu", actions:[{kin
   assert.equal(globalThis.location.hash, "#/bayes/study/plainlive/overview", "package-less live route lands on Overview");
   assert.equal(plainRoot.innerHTML, "", "package-less live route does not paint");
   disposePlain();
+}
+
+// ── 14. study solves table: counts, 3D links, per-row solve action + disabled reasons ────────
+{
+  const runId = "20261116T120000Z-studyverify-abcdef";
+  const panel = m.renderStudyPanel({id:"study1", revision:1}, {phase:"execute", status:"ready", revision:1, data:{
+    solves: {
+      rows: [
+        {design_hash:"aaaa1111", kind:"screen", j:2.5, physical:true, outcome:"success", verify_run_id:runId},
+        {design_hash:"bbbb2222", kind:"screen", j:null, physical:false, outcome:"cheap_refusal", verify_run_id:null},
+      ],
+      n_total: 4, n_measured: 1, n_refused: 1, truncated: true,
+    },
+  }});
+  assert.ok(panel.includes("<h3>Solves</h3>"), "solves heading renders above artifacts");
+  assert.ok(panel.includes("4 observations") && panel.includes("1 measured") && panel.includes("1 refused"));
+  assert.ok(panel.includes(`href="#/run/${runId}/3d"`), "a verified design links to its 3D view");
+  assert.ok(panel.includes(`href="#/run/${runId}/verify"`), "the verify table stays reachable");
+  assert.ok(panel.includes('data-study-solve="aaaa1111">Solve in 3D</button>'), "measured row offers the action");
+  assert.ok(panel.includes('data-study-solve="bbbb2222" disabled'), "non-physical row is disabled");
+  assert.ok(panel.includes("Showing the first 2 solves by J"), "truncation is explicit");
+
+  const busy = m.renderStudyPanel({id:"study1", revision:1}, {phase:"decide", status:"ready", revision:1, data:{
+    solves: {rows:[{design_hash:"aaaa1111", kind:"screen", j:2.5, physical:true, outcome:"success"}],
+             n_total:1, n_measured:1, n_refused:0, truncated:false,
+             job:{id:"j1", design_hash:"cccc3333", status:"running"}},
+  }});
+  assert.ok(busy.includes('data-study-solve="aaaa1111" disabled'), "an active solve disables every row");
+  assert.ok(busy.includes("Solve running for") && busy.includes("cccc3333"));
+
+  const absent = m.renderStudyPanel({id:"study1", revision:1}, {phase:"execute", status:"ready", revision:1, data:{}});
+  assert.ok(!absent.includes("<h3>Solves</h3>"), "no solves data leaves the panel untouched");
+}
+
+// ── 15. clicking "Solve in 3D" dispatches one solve_design with one idempotency key ──────────
+{
+  const root = makeRoot();
+  const calls = [], pending = deferred();
+  const panel = {...ready, phase:"execute", data:{
+    solves: {rows:[{design_hash:"aaaa1111", kind:"screen", j:2.5, physical:true, outcome:"success"}],
+             n_total:1, n_measured:1, n_refused:0, truncated:false},
+  }};
+  const api = {getStudy:async () => study, getPanel:async () => panel, action:(...args) => { calls.push(args); return pending.promise; }};
+  const dispose = m.mountStudy(root, {studyId:"study1", phase:"execute", api, pollMs:0});
+  await tick();
+  const button = element({studySolve:"aaaa1111"});
+  const first = root.click({target:button});
+  await tick();
+  await root.click({target:button});
+  assert.equal(calls.length, 1, "a double click dispatches one solve");
+  assert.equal(calls[0][1], "solve_design");
+  assert.equal(calls[0][2].design_hash, "aaaa1111");
+  assert.equal(calls[0][2].expected_revision, 1);
+  assert.ok(calls[0][2].idempotency_key);
+  pending.resolve({status:"running"}); await first; await tick();
+  dispose();
+
+  const blockedRoot = makeRoot();
+  const blockedCalls = [];
+  const blockedPanel = {...ready, phase:"execute", data:{
+    solves: {rows:[{design_hash:"bbbb2222", kind:"screen", j:null, physical:false, outcome:"cheap_refusal"}],
+             n_total:1, n_measured:0, n_refused:1, truncated:false},
+  }};
+  const blockedApi = {getStudy:async () => study, getPanel:async () => blockedPanel, action:async (...args) => { blockedCalls.push(args); return {}; }};
+  const disposeBlocked = m.mountStudy(blockedRoot, {studyId:"study1", phase:"execute", api:blockedApi, pollMs:0});
+  await tick();
+  await blockedRoot.click({target:element({studySolve:"bbbb2222"})}); await tick();
+  assert.equal(blockedCalls.length, 0, "a non-physical design never starts a GPU solve");
+  assert.ok(blockedRoot.innerHTML.includes("no physical measurement"));
+  disposeBlocked();
 }
 
 console.log("study lifecycle ok");

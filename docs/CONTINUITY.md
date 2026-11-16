@@ -1,5 +1,36 @@
 # CONTINUITY
 
+## 2026-11-16 (23:25) - A study lists its solves and renders any measured design in 3D on demand
+
+- Owner decision: a Bayesian study is inspectable like a run - the same solve list and the same
+  best-solve plots - while its Bayesian identity (policy, engine, model/diagnostics) stays separate.
+  Mechanism: an **on-demand verify job** per design. No change to `studies/**`, no code-pin change.
+- `data.solves` (execute + decide phases): one row per observed attempt with an identity - design
+  hash, kind, J, physical, outcome, physical coverage/ripple, params/descriptors - 50 max, J
+  ascending, with `n_total`/`n_measured`/`n_refused`/`truncated`. Coverage/ripple come only from a
+  physical source (normalized terms are never shown as degrees/dB); a `verify_run_id` comes only from
+  the solve ledger and only while that run folder still exists.
+- `solve_design` job (`gui/study_jobs.py`, GPU): writes a real standalone verify run
+  `runs/<utc-ts>-studyverify-<hash6>` (config snapshot, `run.json` with `study_provenance`, one seed
+  row), then runs the existing `verify --run <dir> --verify-dir <dir> --designs <hash>` body, so
+  `designs/<hash>/{metrics.json,response.npz,mesh.msh,design.json}` exist and `#/run/<id>/3d` renders
+  the design unchanged. The child owns the GPU lock (`HORNLAB_GPU_LOCK=refuse`, one CUDA solve at a
+  time) and refuses - with a job reason and no run dir - when the lane is held, the design is
+  unknown/unmeasured, or the study has no results or recorded config. `(study, design) -> run_id` is a
+  small ledger beside the registry: no new artifact kind, no `studies/**` edit.
+- Study page: a **Solves** table (Design -> `#/run/<id>/3d` once solved, plus a verify link; Kind, J,
+  Physical, Outcome) with a per-row **Solve in 3D** and an explicit reason when disabled.
+- Tests (19 new): `tests/test_gui_study_solves_view.py` (J order + missing-J last, bounded/truncated,
+  physical-only units, missing artifact invents nothing, ledger link only while the run exists, active
+  job) and `tests/test_gui_study_solve_design_job.py` (real standalone run dir, GPU-held refusal,
+  unknown design, no results, unmeasured design, no recorded config, ledger link, duplicate submit
+  reuses one run, server routing, panel exposure, a failed verify never advertises a finished run);
+  `tests/gui_study_lifecycle.mjs` cases 14-15. 47 tests green.
+- Built in the `studyview-wt` worktree (`feat/study-verify-view`) because a study night was live and
+  `gui/**` is inside `EXECUTION_CODE_FILES`; merged here while the night was in a search step.
+- **Not exercised yet:** a real GPU verify click and the resulting 3D render (the lane was busy);
+  per-design curve persistence (so old designs stay viewable without a re-solve) is not done.
+
 ## 2026-11-16 (23:10) - The Runs page was still blind to BoTorch studies; it lists them now
 
 - Follow-up to the entry below: after Status/Home/sidebar carried the night, **Runs** (`#/runs`) still

@@ -1,5 +1,34 @@
 # ISSUES
 
+Local-only, 2026-11-16 (23:25) (**study solves table + on-demand 3D for a study design**):
+- A study page now lists its own solves (`data.solves`, execute + decide) and each measured design has
+  a **Solve in 3D** action. It writes a real standalone verify run
+  `runs/<utc-ts>-studyverify-<hash6>` (config snapshot + `run.json.study_provenance` + the study's
+  design), runs the existing `verify` body for that one hash, and `#/run/<id>/3d` renders it. One CUDA
+  solve per click; the child takes the GPU lock and refuses when the lane is held.
+- **Open:** the real GPU click-through and the 3D render were not exercised (the lane was busy with the
+  night). Verify on a finished study once the GPU is free.
+- **Open:** old study designs still need a fresh solve to be viewable; persisting curves/balloon per
+  solved design (worker change, pin change) remains the follow-up if every design must be viewable
+  without a re-solve.
+- **Open:** `data.solves` coverage/ripple stay blank unless the observation carries a physical
+  pareto/objective block; the normalized terms are deliberately never rendered as degrees/dB.
+
+Local-only, 2026-11-16 (23:05) (**a night-file reload killed a running study; the registry still says running**):
+- `a_turbo_ath14` (`studies.cli run --execute`, study `4f1e4851...`, package prepared 22:32:30) started
+  22:32:30 and the runner's queue log has **no END line** for it: at 22:43:35 the runner reloaded
+  `runs/nights/home18_a_2026-11-16.yaml` (edited while running) and started `a_lecleach_sm_s1234`
+  instead. The package row is still `status=running, active=1` and `progress` is frozen at
+  `proposed 2 / solved 2 / of 60`, so the study's Live tab will keep polling and reporting a dead run
+  until it is reconciled. No solve was lost that mattered (2 of 60 calls), but the state is wrong.
+- Cause: editing a night YAML while `run_campaign_night.py` is running reloads the plan and moves on
+  without writing an END for the in-flight step, and the study package is never marked stopped.
+- **Open:** reconcile an orphaned package run (worker gone + no open queue step for the study) to
+  `unknown`/`stopped` so the Live tab and `run_status` stop claiming "running". Do not guess from age
+  alone: a study can legitimately pause between solves.
+- **Open (owner):** edit night files between jobs, not during one, or accept that the current job is
+  killed. Two reloads today (`22:25:54`, `22:32:30`) each cut a different step.
+
 Local-only, 2026-11-16 (23:00) (**a running BoTorch study was invisible in the shell**):
 - Live night `home18_a_2026-11-16` ran `prep_a_turbo_ath14` then `a_turbo_ath14`
   (`studies.cli run --execute`, started 22:32:30) while Home said "GPU Idle", the lane panel said

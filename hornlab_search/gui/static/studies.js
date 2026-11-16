@@ -18,7 +18,7 @@ const STATES = {
   fit_failed: "Model fitting failed. Review diagnostics or use the labeled exploration fallback.",
   busy: "The requested lane is busy. Review the actual queue status.",
 };
-const ACTIONS = new Set(["save_draft", "select_evidence", "analyze", "propose", "diagnose", "package", "launch", "cancel", "decision", "revise", "save_seeds", "create_child", "queue_study"]);
+const ACTIONS = new Set(["save_draft", "select_evidence", "analyze", "propose", "diagnose", "package", "launch", "cancel", "decision", "revise", "save_seeds", "create_child", "queue_study", "solve_design"]);
 const MUTATING_READY = new Set(["select_evidence", "analyze", "propose", "diagnose", "package", "launch", "decision", "save_seeds", "create_child"]);
 const ID = /^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/;
 // RegExp.test coerces its argument, so ID.test(undefined) is true ("undefined"); identity
@@ -274,6 +274,43 @@ function renderExecute(data) {
   const measuredProgress = data?.run_status || counts ? `<section aria-label="Measured study progress"><h3>Study execution</h3><p>Status: ${esc(data?.run_status?.cancelled ? "cancellation requested" : data?.run_status?.status || "not launched")}</p>${counts ? `<table><thead><tr><th>Screen solve calls</th><th>Verify solve calls</th><th>Total solve calls</th></tr></thead><tbody><tr><td>${esc(counts.screen_calls ?? 0)}</td><td>${esc(counts.verify_calls ?? 0)}</td><td>${esc(counts.total_calls ?? 0)}</td></tr></tbody></table><p class="muted">Counts are persisted backend calls. Cache hits and cheap refusals consume no solve calls.</p>` : ""}${renderProgress(data?.progress)}</section>` : "";
   if (![packageHash, packageRevision, lane, deadline, budget, stop, verification, job, data?.progress].some(v => v != null)) return "";
   return `${measuredProgress}<section aria-label="Execution package"><h3>Run package</h3>${packageHash ? `<p>Package hash: <span class="mono">${esc(safeText(packageHash, 128))}</span>${packageRevision != null ? ` · revision ${esc(packageRevision)}` : ""}</p>` : ""}${lane != null || deadline != null ? `<p>${lane != null ? `Lane: ${esc(safeText(lane, 64))}` : ""}${lane != null && deadline != null ? " · " : ""}${deadline != null ? `Deadline: ${display(deadline)}` : ""}</p>` : ""}${budget != null ? `<h4>Budget</h4>${display(budget)}` : ""}${stop != null ? `<h4>Stop and recovery</h4>${display(stop)}` : ""}${renderVerification(verification)}${!measuredProgress ? renderProgress(data?.progress) : ""}${job ? `<h4>Job status</h4><p>${job.id ? `Job ${esc(safeText(job.id, 128))} · ` : ""}${esc(safeText(job.status || "unknown", 64))}</p>` : ""}</section>`;
+}
+
+// A study has no `runs/<ts>-screen-*` folder; the results artifact's observations are its solve
+// list.  A measured design can be re-solved into a real standalone verify run by the `solve_design`
+// GPU action, and that run's 3D route already renders `designs/<hash>`.
+function solve3dLink(runId) {
+  return isId(runId) ? `#/run/${encodeURIComponent(runId)}/3d` : null;
+}
+
+function solveVerifyLink(runId) {
+  return isId(runId) ? `#/run/${encodeURIComponent(runId)}/verify` : null;
+}
+
+function renderSolves(data, phase, study) {
+  const solves = data?.solves && typeof data.solves === "object" ? data.solves : null;
+  if (!solves) return "";
+  // A bounded preview may append a "... N more items not shown" string; only real rows render.
+  const rows = Array.isArray(solves.rows)
+    ? solves.rows.filter(row => row && typeof row === "object").slice(0, 50) : [];
+  const job = solves.job && typeof solves.job === "object" ? solves.job : null;
+  const counts = `<p><span class="pill">${fmtNum(solves.n_total, 0)} observations</span> <span class="pill">${fmtNum(solves.n_measured, 0)} measured</span>${solves.n_refused != null ? ` <span class="pill warn">${fmtNum(solves.n_refused, 0)} refused</span>` : ""}</p>`;
+  const heading = `<h3>Solves</h3><p class="muted">The study's own observations. "Solve in 3D" re-solves one measured design through the verified pipeline and opens its run views; it is one GPU solve.</p>`;
+  if (!rows.length) {
+    return `<section aria-label="Solves">${heading}${counts}<p class="muted">${esc(solves.reason || "No solves are listed yet.")}</p></section>`;
+  }
+  const body = rows.map((row, index) => {
+    const hash = typeof row?.design_hash === "string" ? row.design_hash : "";
+    const runLink = solve3dLink(row?.verify_run_id);
+    const design = !hash ? "—" : runLink ? `<a class="mono" href="${esc(runLink)}">${esc(hash)}</a>` : `<span class="mono">${esc(hash)}</span>`;
+    const physical = row?.physical === true;
+    const disabled = !physical || !!job;
+    const reason = !physical ? "This design has no physical measurement." : job ? `A solve is already active for ${job.design_hash || "another design"}.` : "";
+    const action = hash ? `<button type="button" data-study-solve="${esc(hash)}"${disabled ? " disabled" : ""}${reason ? ` title="${esc(reason)}"` : ""}>Solve in 3D</button>` : "";
+    const verify = solveVerifyLink(row?.verify_run_id);
+    return `<tr data-study-solve-row="${index}"><td>${design}</td><td>${esc(row?.kind || "—")}</td><td class="r mono">${fmtNum(row?.j)}</td><td>${physical ? '<span class="pill good">measured</span>' : '<span class="pill warn">not physical</span>'}</td><td>${esc(row?.outcome || "—")}</td><td>${action}${verify ? ` <a href="${esc(verify)}">verify</a>` : ""}</td></tr>`;
+  }).join("");
+  return `<section aria-label="Solves">${heading}${counts}${job ? `<p class="muted">Solve running for <span class="mono">${esc(job.design_hash || "?")}</span> (${esc(job.status || "running")}).</p>` : ""}<div class="tbl-scroll"><table><thead><tr><th>Design</th><th>Kind</th><th class="r">J</th><th>Physical</th><th>Outcome</th><th>Action</th></tr></thead><tbody>${body}</tbody></table></div>${solves.truncated ? `<p class="muted">Showing the first ${fmtNum(rows.length, 0)} solves by J; the results artifact holds ${fmtNum(solves.n_total, 0)} observations.</p>` : ""}</section>`;
 }
 
 const fmtNum = (value, digits = 3) => {
@@ -586,7 +623,7 @@ export function renderStudyPanel(study, panel, selected = null, notice = "", sta
   const status = stale ? "stale" : (panel.status || "unknown");
   const data = panel.data && typeof panel.data === "object" ? panel.data : {};
   const actions = Array.isArray(data.actions) ? data.actions.map((action, index) => ({action, index})).filter(x => x.action && ACTIONS.has(x.action.kind)) : [];
-  const visibleData = Object.fromEntries(Object.entries(data).filter(([k]) => !["actions", "selected_horn", "policies", "candidates", "package", "budget", "lane", "deadline", "stop_recovery", "stop_rules", "verification", "verification_policy", "progress", "job", "job_id", "job_status", "package_hash", "package_revision", "package_present", "artifacts", "bo"].includes(k)));
+  const visibleData = Object.fromEntries(Object.entries(data).filter(([k]) => !["actions", "selected_horn", "policies", "candidates", "package", "budget", "lane", "deadline", "stop_recovery", "stop_rules", "verification", "verification_policy", "progress", "job", "job_id", "job_status", "package_hash", "package_revision", "package_present", "artifacts", "bo", "solves"].includes(k)));
   const activePanel = {...panel, status};
   const renderState = {busy:state?.busy === true, artifact:state?.artifact || null};
   const isLive = phase === LIVE_PHASE;
@@ -604,11 +641,12 @@ export function renderStudyPanel(study, panel, selected = null, notice = "", sta
   const policyHtml = renderPolicySelector(study, activePanel, data, renderState);
   const candidateHtml = phase === "propose" ? candidateTable(data) : "";
   const executeHtml = phase === "execute" ? renderExecute(data) : "";
+  const solvesHtml = phase === "execute" || phase === "decide" ? renderSolves(data, phase, study) : "";
   const boHtml = renderBo(phase, data, study, study.root || null);
   const artifactHtml = phase === "decide" ? renderArtifacts(data, renderState) : "";
   const bodyHtml = isLive
     ? renderLive(data, selected)
-    : `${candidateHtml}${executeHtml}${boHtml}${policyHtml}${["propose", "execute"].includes(phase) ? `<details><summary>${phase === "propose" ? "Proposal" : "Execution"} details and diagnostics</summary>${display(visibleData)}</details>` : display(visibleData)}`;
+    : `${candidateHtml}${executeHtml}${solvesHtml}${boHtml}${policyHtml}${["propose", "execute"].includes(phase) ? `<details><summary>${phase === "propose" ? "Proposal" : "Execution"} details and diagnostics</summary>${display(visibleData)}</details>` : display(visibleData)}`;
   return `<section class="study-workspace" aria-label="Study workspace"><header><p><a href="#/bayes/studies">Bayes</a> / Studies</p><h1>${esc(study.name || study.question || study.spec?.question || "Study")}</h1><p>Revision ${esc(study.revision)} · ${esc(study.status || "unknown")} · ${esc(study.protocol || "bo-study-v1.1")}${study.root_label ? ` · ${esc(study.root_label)}` : ""}</p><nav aria-label="Study phases">${tabs}</nav></header>
   ${notice ? `<p role="alert">${esc(notice)}</p>` : ""}
   <p role="status"><strong>${esc(label(status))}</strong>${STATES[status] ? `: ${esc(STATES[status])}` : ""}</p>
@@ -694,6 +732,34 @@ export function mountStudy(root, {studyId, phase = "overview", api, pollMs = 500
       notice = "Artifact could not be loaded."; onError(error); draw();
     }
   }
+  async function solveDesign(designHash, target) {
+    // One GPU verify solve for one measured study design.  Server-side validation is the source
+    // of truth; this guard keeps a double click from dispatching twice.
+    if (disposed || busy || !study || !panel) return;
+    if (typeof designHash !== "string" || !/^[0-9a-f]{6,64}$/.test(designHash)) return;
+    const rows = Array.isArray(panel.data?.solves?.rows) ? panel.data.solves.rows : [];
+    const row = rows.find(item => item && item.design_hash === designHash);
+    if (!row || row.physical !== true) { notice = "This design has no physical measurement."; draw(); return; }
+    if (panel.data?.solves?.job) { notice = "A solve is already active."; draw(); return; }
+    if (typeof api.action !== "function") return;
+    const payload = {design_hash: designHash, expected_revision: study.revision};
+    const fingerprint = JSON.stringify(["solve_design", designHash, study.revision]);
+    if (!pendingKey || pendingKey.fingerprint !== fingerprint) pendingKey = {fingerprint, key: makeKey()};
+    payload.idempotency_key = pendingKey.key;
+    busy = true; if (target) target.disabled = true; draw();
+    const token = generation;
+    try {
+      await api.action(studyId, "solve_design", payload, {root: rootRef, signal: controller?.signal});
+      if (disposed || token !== generation) return;
+      pendingKey = null;
+      notice = "Solve queued. Its 3D view opens when the verify run finishes.";
+      await refresh();
+    } catch (error) {
+      if (disposed || error?.name === "AbortError") return;
+      notice = actionFailure(error); onError(error); await refresh();
+    } finally { busy = false; draw(); }
+  }
+
   async function changePolicy(mode, target) {
     if (!POLICY_MODES.has(mode) || busy || !study || !panel) return;
     if (panel.revision !== study.revision || panel.status !== "ready") return;
@@ -718,6 +784,11 @@ export function mountStudy(root, {studyId, phase = "overview", api, pollMs = 500
   }
   async function click(event) {
     if (disposed) return;
+    const solveTarget = event.target?.closest?.("[data-study-solve]");
+    if (solveTarget?.dataset?.studySolve != null && root.contains(solveTarget)) {
+      await solveDesign(solveTarget.dataset.studySolve, solveTarget);
+      return;
+    }
     const artifactTarget = event.target?.closest?.("[data-study-artifact]");
     if (artifactTarget?.dataset?.studyArtifact != null && root.contains(artifactTarget)) { await loadArtifact(artifactTarget.dataset.studyArtifact); return; }
     const policyTarget = event.target?.closest?.("[data-study-policy]");
