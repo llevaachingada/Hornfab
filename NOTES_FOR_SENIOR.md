@@ -1039,3 +1039,34 @@ ledger + accounting; `full_search_released` stays false — verified fail-closed
 exits 1 with HELD). Do NOT link scratch diagnostic caches into the default cache (namespace
 p2-b4bfdad98ff1 would hand the seed a free budget row). No commits, no original recipe edits, no
 Bayesian jobs; GPU hosts cleared after each of the 3 diagnostics (VRAM back to desktop baseline).
+
+## 2026-11-16 - Section pucker / square X 25x2 pilot; parameter learnings (owner correction)
+
+- Owner correction accepted: the first `rf__section_axial_strong_v7` carried the visual-study box
+  (fixed 417x203 mouth, depth 194-202, `h_depth_scale` 0.99-1.01, crown 18-22, junction fixed 32).
+  Those are not acoustic optimization levers. The latest `hl__crowe_panel_home_v7` best sat at
+  width 579.7, height 292.9, depth 262.1, `h_depth_scale` 1.098, crown 39.7, junction 24.4 (J 16.92),
+  so the old box could not reach the useful region.
+- The pucker is a parameter of the section family, not a typology. `sp__strong_v7` is geometrically
+  identical to the canonical section family at axial 7/9 (max point diff 9.6e-7). The legacy `sp__*`
+  GUI entries are removed; `rf__section_axial_strong_v7` is the visual reference and
+  `rf__section_axial_home_v7` is the optimization cell.
+- 25x2 pilot, seeds 1234/5678, same home brief:
+  - `rf__section_axial_home_v7`: best 17.3982 / 17.3970 (seed 17.9511). Best width 593-599, junction
+    16.0-16.1 (lower bound), crown 33-36, axial H 6.8-8.4, axial V **0.37-3.35** (collapses).
+    The vertical pucker is not a useful search dimension; width, junction and crown are.
+  - `hl__crowe_x_square_v7`: best 8.8171 / 8.2046 (seed 9.2356). `sf_amt` **0.42-0.47**, a_h/a_v
+    33-34, L 222-225, s 0.28-0.32, n 2.06-2.11, lip 22-27, wrap 113-121. It is 9.2 J better than
+    the section pucker and is the closer reference look. It had 12/8 `invalid_envelope` refusals.
+- Next steps:
+  1. Cut `rf__section_axial_home_v8`: fix `g_axial_v_mm` at 0, keep `g_axial_h_mm` 0-12 optional,
+     widen junction lower bound to 12, keep width at the 600 envelope or change the envelope first.
+  2. Cut a square-X v8 with the same envelope coupling and `sf_amt` seed 0.45; 60-96 evaluations.
+  3. Decide whether the square X (better J, square look) replaces the 80x50 landscape target or
+     remains a look-first probe. Do not rank 25-eval pilots as converged.
+  4. GUI restart/hard-refresh after pulling; parameter catalog and section-pucker bridge changed.
+- Evidence: `docs/research/typologies/SPIRAL_PUCKER_VS_RADIAL_RIDGE_2026-11-15.md`,
+  `docs/renders/2026-11-15-25x2/README.md` + `best_designs.png`,
+  `docs/renders/2026-11-15-pucker/strong_a_vs_canonical.png`.
+- No running GPU job was interrupted. `bo_cov_pilot_2026-11-16` finished at 01:47:41Z before the queue
+  started; the four runs completed and the GPU was cleaned after each.

@@ -1,5 +1,27 @@
 # CONTINUITY
 
+## 2026-11-16 (pilot) - 25 x 2 section home pucker vs square X; square X wins J
+
+- GPU was free after `bo_cov_pilot_2026-11-16` finished; no running job was interrupted.
+  Four screen searches, 25 evaluations each, seeds 1234/5678, same home brief.
+- Results: `rf__section_axial_home_v7` best **17.3982 / 17.3970** (seed 17.9511);
+  `hl__crowe_x_square_v7` best **8.8171 / 8.2046** (seed 9.2356). Square X is 9.2 J better
+  as well as the closer reference look.
+- Section home: width 593-599 (near the 600 envelope), junction 16.0-16.1 (lower bound),
+  crown 33-36, axial H 6.8-8.4, axial V **0.37-3.35** (the vertical pucker collapses). The
+  useful dimensions are mouth width, junction and crown; the axial pucker is secondary.
+- Square X: `sf_amt` **0.42-0.47** (below the 0.60 visual seed), a_h/a_v 33-34, L 222-225,
+  s 0.28-0.32, n 2.06-2.11, lip 22-27, wrap 113-121. It had 12/8 invalid_envelope refusals;
+  the width/height box can exceed 600 x 480.
+- Runs: `runs/20261116T015510Z-screen-e75ec8`, `...0d29d7`, `...3943f0`, `...87354c`.
+  Evidence: `docs/renders/2026-11-15-25x2/README.md` + `best_designs.png`.
+- 25 evals is a coarse pilot for 8 active dimensions; a real comparison needs 60-96 per arm.
+- **Next:** cut `rf__section_axial_home_v8` with `g_axial_v_mm` fixed at 0, `g_axial_h_mm`
+  0-12 optional, junction lower bound 12; cut a square-X v8 with `sf_amt` seed 0.45 and tighter
+  envelope coupling; 60-96 evaluations. Decide whether the square X (better J, square look)
+  replaces the 80x50 landscape target or stays a look-first probe. GUI restart/hard-refresh after
+  pulling.
+
 ## 2026-11-16 (latest) - BO GUI cloud pass on `feat/bo-gui`: sab-home merged, BoTorch diagnostics, Bayes nav + Live tab; no solves
 
 - Cloud session (offline, no GPU, no `runs/`, no merge to main). `feat/bo-gui` merged

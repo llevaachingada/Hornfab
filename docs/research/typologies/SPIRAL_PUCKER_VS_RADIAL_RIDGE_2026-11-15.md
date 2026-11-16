@@ -192,6 +192,55 @@ The corrected optimization cell is **`rf__section_axial_home_v7`**:
 The fixed 417 × 203 `rf__section_axial_strong_v7` is retained as the exact `strong_a.png`
 visual reference. It is not the optimization cell. GUI descriptions now say so.
 
+## 25 × 2 pilot results — section home pucker vs square X
+
+Four screen runs, **25 evaluations each**, seeds **1234** and **5678**, same brief and
+screen mesh policy. No cached rows were counted except one square-X cache hit in the second
+run. Run dirs:
+
+| Cell | Seed | Best J | Seed J | Eval | Run |
+|---|---:|---:|---:|---:|---|
+| `rf__section_axial_home_v7` | 1234 | **17.3982** | 17.9511 | 21 | `runs/20261116T015510Z-screen-e75ec8` |
+| `rf__section_axial_home_v7` | 5678 | **17.3970** | 17.9511 | 24 | `runs/20261116T020629Z-screen-0d29d7` |
+| `hl__crowe_x_square_v7` | 1234 | **8.8171** | 9.2356 | 20 | `runs/20261116T021728Z-screen-3943f0` |
+| `hl__crowe_x_square_v7` | 5678 | **8.2046** | 9.2356 | 16 | `runs/20261116T022328Z-screen-87354c` |
+
+Best parameter sets:
+
+- **Section home, 1234:** width 593.3, height 275.2, depth 238.1, `h_depth_scale` 1.098,
+  crown 33.3, junction 16.1, axial H 8.36, axial V 3.35.
+- **Section home, 5678:** width 599.2, height 278.7, depth 270.0, `h_depth_scale` 1.043,
+  crown 36.2, junction 16.0, axial H 6.78, axial V 0.37.
+- **Square X, 1234:** `a_h/a_v` 33.78 / 34.49, L 221.9, s 0.281, n 2.065, lip 22.2,
+  wrap 121.2, `sf_amt` 0.418.
+- **Square X, 5678:** `a_h/a_v` 34.27 / 32.92, L 225.0, s 0.319, n 2.113, lip 27.3,
+  wrap 113.5, `sf_amt` 0.468.
+
+What the search actually did:
+
+- **Section home:** width went to the upper envelope (593–599 of 600), junction to its
+  lower bound (16.0–16.1), crown to 33–36, and the **vertical axial pucker collapsed to
+  0.37–3.35 mm**. The horizontal pucker stayed at 6.8–8.4 mm. The pucker is real but weak;
+  the useful dimensions are mouth width, junction and crown. The two seeds converged to
+  nearly the same best J (17.398 / 17.397), so this is a stable local result, not a lucky
+  draw.
+- **Square X:** `sf_amt` settled at **0.42–0.47**, below the 0.60 seed — the optimizer
+  wants a *gentler* X than the visual seed. `a_h/a_v` stayed near 33–34°, L near 222–225,
+  s 0.28–0.32, n 2.06–2.11, lip 22–27, wrap 113–121. The square-X family is **9.2 J
+  better** than the section pucker under the same brief (8.2–8.8 vs 17.4). That is a
+  family-level difference, not a tuning difference: the OSSE CD throat/termination is
+  acoustically stronger than the digitized section flare.
+- **Refusals:** the section home box produced **0 failures** in both runs. The square-X
+  box produced **12 invalid_envelope** in seed 1234 and **8** in seed 5678; its width/
+  height bounds can exceed the 600 × 480 envelope. A real search should tighten the
+  square-X envelope coupling before a larger budget.
+
+Honest caveat: 25 evaluations is a coarse pilot for 8 active dimensions, and the section
+home seeds start at a strong prior. These numbers show direction and parameter behaviour,
+not convergence. A real comparison needs 60–96 evaluations per arm.
+
+The best-design sheet is `docs/renders/2026-11-15-25x2/best_designs.png`.
+
 ## Optimization evidence and recommendation
 
 Stored v7 rescore under the same brief (not a cross-version ranking):

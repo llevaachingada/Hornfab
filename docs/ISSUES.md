@@ -1,5 +1,25 @@
 # ISSUES
 
+Local-only, 2026-11-16 (**section-pucker / square-X 25x2 pilot; no active GPU job was interrupted**):
+- The old `rf__section_axial_strong_v7` box was a visual-study box (fixed 417x203, depth 194-202,
+  `h_depth_scale` 0.99-1.01, crown 18-22, fixed junction 32). It is now labelled visual reference only.
+  The optimization cell is `rf__section_axial_home_v7` (width 480-600, height 220-420, depth 170-300,
+  `h_depth_scale` 0.9-1.1, crown 10-40, junction 16-48, axial pucker 0-12/0-14; 8 active keys).
+- 25x2 pilot (seeds 1234/5678): section home best **17.3982 / 17.3970**; square X best **8.8171 / 8.2046**.
+  Square X is 9.2 J better and closer to the reference look.
+- **Open, next:** create `rf__section_axial_home_v8` with `g_axial_v_mm` fixed at 0 (the pilot drove it to
+  0.37-3.35 mm), `g_axial_h_mm` 0-12 optional, and junction bounds 12-48 (pilot pinned 16.0-16.1). Width
+  is at the 600 mm envelope; if more headroom is wanted, the envelope must change, not the generator.
+- **Open, next:** square X had 12/8 `invalid_envelope` refusals in 25 draws. Tighten the a_h/a_v/L/lip/wrap
+  coupling or add a preflight filter before a larger run. Pilot best `sf_amt` is 0.42-0.47, below the 0.60
+  visual seed; update the seed when the next cell is cut.
+- **Open, decision:** square X is the better acoustic path but is a look-first square mouth (50 deg vertical
+  at 700 Hz does not fit); decide whether to promote it or keep the 80x50 landscape target.
+- 25 evaluations is a coarse pilot for 8 dimensions. A real comparison needs 60-96 per arm.
+- GUI: restart/hard-refresh after pulling; the parameter catalog and the section-pucker bridge preview changed.
+  The home optimization cell, the square-X cell and the strong visual reference are in group `home`.
+- No solve was merged into any older campaign; `bo_cov_pilot_2026-11-16` finished at 01:47:41Z before the queue ran.
+
 Local-only, 2026-11-16 (latest, **BO GUI cloud pass on `feat/bo-gui`; no solves**):
 - `feat/bo-gui` is pushed but deliberately unmerged (merge gate: no study running). It adds `diagnose` (BoTorch LOO/slices/HV),
   the Bayes nav group and the study Live tab. `diagnose` is untested against a real study; run it locally on the fixture

@@ -3967,7 +3967,7 @@ Domains covered: `generators`, `rows`, `native`
 - **Config:** `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml`
 - **Brief:** `examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml`
 - **Source status:** gui-only
-- **Description:** Near-square Crowe-X-inspired probe: four concave panels, diagonal ridge, 479x479 mouth; the reference-image X family. Look-first; a square mouth will not hold 50 deg vertical at 700 Hz. Seed sf_amt 0.60, sf_start 0.12, a_h/a_v 34/34, L 220, lip 24, wrap 120.
+- **Description:** Near-square Crowe-X-inspired probe: four concave panels, diagonal ridge, 479x479 mouth. Searches the acoustic levers: a_h/a_v (coverage), L (loading), s/n (termination), lip/wrap (mouth termination) and sf_amt (X strength); the visual X constants sf_n1/sf_n2/sf_ab/sf_start are fixed. Pilot best sf_amt 0.42-0.47, below the 0.60 visual seed. A square mouth will not hold 50 deg vertical at 700 Hz; 25-eval pilot, 8-12 envelope refusals.
 
 #### `g_L_mm` — Depth (rows) (mm)
 
