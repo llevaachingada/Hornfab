@@ -5844,8 +5844,9 @@ async function viewRunDetail(id) {
           <div class="seg-toggle" role="group" aria-label="Directivity view">
             <button type="button" data-isoview="rect" aria-pressed="true">Rectangular</button>
             <button type="button" data-isoview="globe" aria-pressed="false">Globe</button>
+            <button type="button" data-isoview="globe360" aria-pressed="false">Full globe</button>
           </div></div>
-        <div class="cap">Level relative to on-axis at 2 m, in 3 dB colour bands (thin lines every 3 dB; the heavier line is the −6 dB beamwidth edge). A good design keeps its −6 dB edge on the coverage-target guides. Hover for values. Interpolated between the ${((d.best || {}).freqs || []).length} solved frequencies (screen fidelity), ticked below the frequency axis. Globe view: the same data wrapped into a half-circle (front at the bottom, frequency rising outward from the centre). Axis spans the brief band; the colour map is drawn only across the solved frequencies.</div>
+        <div class="cap">Level relative to on-axis at 2 m, in 3 dB colour bands (thin lines every 3 dB; the heavier line is the −6 dB beamwidth edge). A good design keeps its −6 dB edge on the coverage-target guides. Hover for values. Interpolated between the ${((d.best || {}).freqs || []).length} solved frequencies (screen fidelity), ticked below the frequency axis. Globe view: the cut data wrapped into a half-circle (front at the bottom, frequency rising outward from the centre). Full globe: the stored balloon sampled right around the circle (front at the bottom, ±180° at the top) — no extra solves, just a different slice of the same data. Axis spans the brief band; the colour map is drawn only across the solved frequencies.</div>
         <div id="polar-legend"></div>
         <div class="maps iso-maps" id="polar-maps"></div>
       </div>
@@ -6072,20 +6073,32 @@ async function viewRunDetail(id) {
     if (legEl) legEl.innerHTML = "" && isobarLegendHtml({ target: !!(t.coverage_h_deg || t.coverage_v_deg), f0: !!f0Finite, over: anyOver });
     const plots = [["Best design · horizontal", B.polar_h, B], ["Best design · vertical", B.polar_v, B]];
     if (withStart) plots.push(["Starting design · horizontal", S.polar_h, S], ["Starting design · vertical", S.polar_v, S]);
-    // view: rectangular map (frequency x angle) or globe (angle around, frequency out); remembered
+    // view: rectangular map (frequency x angle), half globe (cut data) or full globe (balloon data)
     let view = "rect";
-    try { view = localStorage.getItem("hl.isoView") === "globe" ? "globe" : "rect"; } catch (_) { /* storage blocked */ }
+    try { const v = localStorage.getItem("hl.isoView"); view = (v === "globe" || v === "globe360") ? v : "rect"; } catch (_) { /* storage blocked */ }
     document.querySelectorAll("[data-isoview]").forEach(b => {
       b.setAttribute("aria-pressed", String(b.dataset.isoview === view));
       b.onclick = () => { try { localStorage.setItem("hl.isoView", b.dataset.isoview); } catch (_) { /* ignore */ } drawIsobars(); };
     });
-    mapsEl.classList.toggle("iso-globes", view === "globe");
+    mapsEl.classList.toggle("iso-globes", view !== "rect");
     for (const [lbl, rows, D2] of plots) {
+      const vert = /vertical/.test(lbl);
+      if (view === "globe360") {
+        // full circle needs the stored balloon; older runs without one simply skip this view
+        const r360 = vert ? D2.polar_v360 : D2.polar_h360;
+        if (!r360 || !D2.angles360) continue;
+        const sv = document.createElementNS(NS, "svg"); sv.setAttribute("class", "polar");
+        sv.setAttribute("role", "img"); sv.setAttribute("aria-label", lbl + " full globe plot");
+        mapsEl.appendChild(sv);
+        const tgt = vert ? t.coverage_v_deg : t.coverage_h_deg;
+        requestAnimationFrame(() => globePlot(sv, r360, D2.angles360, D2.freqs || F, { title: lbl, H: 360, f0: f0Finite, target: tgt }));
+        continue;
+      }
       if (!rows) continue;
       const sv = document.createElementNS(NS, "svg"); sv.setAttribute("class", "polar");
       sv.setAttribute("role", "img"); sv.setAttribute("aria-label", lbl + (view === "globe" ? " globe plot" : " isobar plot"));
       mapsEl.appendChild(sv);
-      const tgt = /vertical/.test(lbl) ? t.coverage_v_deg : t.coverage_h_deg;
+      const tgt = vert ? t.coverage_v_deg : t.coverage_h_deg;
       if (view === "globe") {
         requestAnimationFrame(() => globePlot(sv, rows, D2.angles || [], D2.freqs || F, { title: lbl, H: 320, f0: f0Finite, target: tgt }));
       } else {

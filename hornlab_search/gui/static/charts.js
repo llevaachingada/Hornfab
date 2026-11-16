@@ -963,7 +963,8 @@ export function isobarMap(svg, rows, angles, freqs, { H = 300, title = "", angle
  *  the circle (0° = front, pointing down; +90° to the right; ±180° = back at the top), log frequency
  *  along the radius (lowest solved frequency at the centre, highest at the rim), level as the same
  *  3 dB isobar bands. Data spanning ±90° draws as the front half-globe; wider data fills more of
- *  the circle. Same lines as the rectangular map: −6 dB edge, coverage-target rays, f0 ring.
+ *  the circle, and a closed ±180° span (the stored balloon re-sliced) draws the full circle. Same
+ *  lines as the rectangular map: −6 dB edge, coverage-target rays, f0 ring.
  *  Options: title, H (max height), target (full coverage angle, deg), f0 (Hz), legend (slim scale).
  */
 export function globePlot(svg, rows, angles, freqs, { H = 360, title = "", target, f0, legend = true } = {}) {
@@ -975,6 +976,7 @@ export function globePlot(svg, rows, angles, freqs, { H = 360, title = "", targe
   const lf = freqs.map(Number).map(Math.log10), lf0 = lf[0], lf1 = lf[lf.length - 1];
   if (!(isFinite(lf0) && isFinite(lf1) && lf1 > lf0 && a1 > a0)) return;
   const half = a0 >= -90 - 1e-6 && a1 <= 90 + 1e-6;           // front hemisphere only
+  const full = (a1 - a0) >= 359.5;                              // closed 360° great circle
   const top = (title ? 20 : 6), labPad = 18;                     // rim labels need room
   const sideR = (W - (legend ? 48 : 8) - 2 * labPad) / 2;
   const R = Math.max(60, Math.min(sideR, half ? H - top - 2 * labPad : (H - top - 2 * labPad) / 2));
@@ -1022,40 +1024,60 @@ export function globePlot(svg, rows, angles, freqs, { H = 360, title = "", targe
   el("image", { href: cv.toDataURL(), x: bx0, y: by0, width: bw, height: bh, preserveAspectRatio: "none" }, svg);
   const g = el("g", {}, svg);
 
-  // frequency rings (faint) at the 1-2-5 ticks, labelled along the +90° edge
+  // frequency rings (faint) at the 1-2-5 ticks, labelled along the +90° edge (half) or a
+  // steady upper-left spoke (full, so labels clear the front lobe)
   for (const t of logTicks(Math.pow(10, lf0), Math.pow(10, lf1))) {
     const r = rOf(t);
     if (!(r > 2 && r < R - 2)) continue;
-    const [sx0, sy0] = dir(a0), [sx1, sy1] = dir(a1);
-    const large = (a1 - a0) > 180 ? 1 : 0;
-    el("path", { d: `M${(cx + r * sx0).toFixed(1)},${(cy + r * sy0).toFixed(1)}A${r.toFixed(1)},${r.toFixed(1)} 0 ${large} 0 ${(cx + r * sx1).toFixed(1)},${(cy + r * sy1).toFixed(1)}`,
-      fill: "none", stroke: "#ffffff", "stroke-opacity": 0.28, "stroke-width": 0.6 }, g);
-    if (half) el("text", { x: cx + r, y: cy - 4, "text-anchor": "middle", style: `fill:${muted};font-size:9px` }, svg).textContent = fmtLogTick(t);
+    if (full) {
+      el("circle", { cx, cy, r: r.toFixed(1), fill: "none", stroke: "#ffffff", "stroke-opacity": 0.28, "stroke-width": 0.6 }, g);
+      const [lx, ly] = dir(-135);
+      el("text", { x: (cx + r * lx - 3).toFixed(1), y: (cy + r * ly - 3).toFixed(1), "text-anchor": "end",
+        style: `fill:${muted};font-size:9px` }, svg).textContent = fmtLogTick(t);
+    } else {
+      const [sx0, sy0] = dir(a0), [sx1, sy1] = dir(a1);
+      const large = (a1 - a0) > 180 ? 1 : 0;
+      el("path", { d: `M${(cx + r * sx0).toFixed(1)},${(cy + r * sy0).toFixed(1)}A${r.toFixed(1)},${r.toFixed(1)} 0 ${large} 0 ${(cx + r * sx1).toFixed(1)},${(cy + r * sy1).toFixed(1)}`,
+        fill: "none", stroke: "#ffffff", "stroke-opacity": 0.28, "stroke-width": 0.6 }, g);
+      if (half) el("text", { x: cx + r, y: cy - 4, "text-anchor": "middle", style: `fill:${muted};font-size:9px` }, svg).textContent = fmtLogTick(t);
+    }
   }
   if (half) el("text", { x: cx, y: cy - 4, "text-anchor": "middle", style: `fill:${muted};font-size:9px` }, svg).textContent = fmtLogTick(Math.pow(10, lf0));
   // spokes every 30° (faint) with rim labels
   for (let a = Math.ceil(a0 / 30) * 30; a <= a1 + 1e-6; a += 30) {
     const [sx, sy] = dir(a);
-    if (a !== a0 && a !== a1) el("line", { x1: cx, y1: cy, x2: cx + R * sx, y2: cy + R * sy, stroke: "#ffffff", "stroke-opacity": 0.22, "stroke-width": 0.6 }, g);
+    const topSpoke = full && Math.abs(a - 180) < 1e-6;          // ±180° share one top label
+    if (topSpoke || (a !== a0 && a !== a1)) el("line", { x1: cx, y1: cy, x2: cx + R * sx, y2: cy + R * sy, stroke: "#ffffff", "stroke-opacity": 0.22, "stroke-width": 0.6 }, g);
+    if (full && Math.abs(a + 180) < 1e-6) continue;             // no duplicate label at the top
     const lx = cx + (R + 10) * sx, ly = cy + (R + 10) * sy + 3;
+    const txt = topSpoke ? "±180°" : (a > 0 ? "+" : a < 0 ? "−" : "") + Math.abs(a) + "°";
     el("text", { x: lx, y: ly, "text-anchor": Math.abs(sx) < 0.2 ? "middle" : sx > 0 ? "start" : "end",
-      style: `fill:${muted};font-size:9.5px` }, svg).textContent = (a > 0 ? "+" : a < 0 ? "−" : "") + Math.abs(a) + "°";
+      style: `fill:${muted};font-size:9.5px` }, svg).textContent = txt;
   }
   // rim and (half-globe) diameter
-  const [rx0, ry0] = dir(a0), [rx1, ry1] = dir(a1);
-  el("path", { d: half
-      ? `M${cx - R},${cy}A${R},${R} 0 0 0 ${cx + R},${cy}Z`
-      : `M${(cx + R * rx0).toFixed(1)},${(cy + R * ry0).toFixed(1)}A${R},${R} 0 ${(a1 - a0) > 180 ? 1 : 0} 0 ${(cx + R * rx1).toFixed(1)},${(cy + R * ry1).toFixed(1)}`,
-    fill: "none", stroke: rule, "stroke-width": 0.75 }, svg);
+  if (full) {
+    el("circle", { cx, cy, r: R, fill: "none", stroke: rule, "stroke-width": 0.75 }, svg);
+  } else {
+    const [rx0, ry0] = dir(a0), [rx1, ry1] = dir(a1);
+    el("path", { d: half
+        ? `M${cx - R},${cy}A${R},${R} 0 0 0 ${cx + R},${cy}Z`
+        : `M${(cx + R * rx0).toFixed(1)},${(cy + R * ry0).toFixed(1)}A${R},${R} 0 ${(a1 - a0) > 180 ? 1 : 0} 0 ${(cx + R * rx1).toFixed(1)},${(cy + R * ry1).toFixed(1)}`,
+      fill: "none", stroke: rule, "stroke-width": 0.75 }, svg);
+  }
 
   // −6 dB edge, over-range outline, f0 ring, target rays
   const sxC = bw / cw, syC = bh / chh;
   _isoContours(svg, vals, cw, chh, vmax, bx0, by0, sxC, syC);
   const f0n = Number(f0);
   if (isFinite(f0n) && f0n > 0 && Math.log10(f0n) > lf0 && Math.log10(f0n) < lf1) {
-    const r = rOf(f0n), [sx0, sy0] = dir(a0), [sx1, sy1] = dir(a1);
-    el("path", { d: `M${(cx + r * sx0).toFixed(1)},${(cy + r * sy0).toFixed(1)}A${r.toFixed(1)},${r.toFixed(1)} 0 ${(a1 - a0) > 180 ? 1 : 0} 0 ${(cx + r * sx1).toFixed(1)},${(cy + r * sy1).toFixed(1)}`,
-      fill: "none", stroke: "#ffffff", "stroke-opacity": 0.8, "stroke-width": 0.8, "stroke-dasharray": "2 2" }, svg);
+    const r = rOf(f0n);
+    if (full) {
+      el("circle", { cx, cy, r: r.toFixed(1), fill: "none", stroke: "#ffffff", "stroke-opacity": 0.8, "stroke-width": 0.8, "stroke-dasharray": "2 2" }, svg);
+    } else {
+      const [sx0, sy0] = dir(a0), [sx1, sy1] = dir(a1);
+      el("path", { d: `M${(cx + r * sx0).toFixed(1)},${(cy + r * sy0).toFixed(1)}A${r.toFixed(1)},${r.toFixed(1)} 0 ${(a1 - a0) > 180 ? 1 : 0} 0 ${(cx + r * sx1).toFixed(1)},${(cy + r * sy1).toFixed(1)}`,
+        fill: "none", stroke: "#ffffff", "stroke-opacity": 0.8, "stroke-width": 0.8, "stroke-dasharray": "2 2" }, svg);
+    }
   }
   const tg = Number(target);
   if (isFinite(tg) && tg > 0) {

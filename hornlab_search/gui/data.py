@@ -316,6 +316,76 @@ def _norm_polar(spl: np.ndarray) -> np.ndarray:
     return np.maximum(spl - spl[:, c:c + 1], -40.0)
 
 
+def _balloon_great_circle(row: np.ndarray, n_theta: int, n_phi: int, plane: str,
+                          n_ang: int = 145) -> np.ndarray:
+    """Sample one balloon row along a full 360° great circle in the H or V plane.
+
+    The stored balloon is theta-major (index = i*n_phi + j), theta 0..180 from +Z and phi
+    0..360 from +X toward +Y. The cuts stop at ±90°; the balloon already holds the −X/−Y half,
+    so a full circle is free. Angle a maps to direction (sin a, 0, cos a) for "h" or
+    (0, sin a, cos a) for "v": 0° at +Z, +90° at +X/+Y, ±180° at −Z.
+    """
+    r = np.asarray(row, dtype=float).ravel()
+    if r.size != n_theta * n_phi:
+        raise ValueError(f"balloon row {r.size} != {n_theta}x{n_phi}")
+    r = np.where(np.isfinite(r), r, -40.0)
+    a = np.linspace(-180.0, 180.0, int(n_ang))
+    th = np.abs(a)
+    sin_a = np.sin(np.radians(a))
+    if plane == "h":
+        phi = np.where(sin_a >= 0.0, 0.0, 180.0)
+    elif plane == "v":
+        phi = np.where(sin_a >= 0.0, 90.0, 270.0)
+    else:
+        raise ValueError(f"unknown plane {plane!r}; must be 'h' or 'v'")
+    it = np.clip(th / 180.0, 0.0, 1.0) * (n_theta - 1)
+    i0 = np.floor(it).astype(int)
+    i1 = np.minimum(n_theta - 1, i0 + 1)
+    wi = it - i0
+    jf = (phi % 360.0) / 360.0 * n_phi
+    j0i = np.floor(jf).astype(int)
+    j0 = j0i % n_phi
+    j1 = (j0 + 1) % n_phi
+    wj = jf - j0i
+    g = lambda ii, jj: r[ii * n_phi + jj]
+    top = g(i0, j0) * (1 - wj) + g(i0, j1) * wj
+    bot = g(i1, j0) * (1 - wj) + g(i1, j1) * wj
+    return top * (1 - wi) + bot * wi
+
+
+#: Number of azimuth samples on a full-circle globe slice (half the 2.5° cut step).
+_GLOBE360_ANGLES = 145
+
+
+def _balloon_full_circles(z) -> dict:
+    """Full 360° H and V plane slices from a stored balloon, or {} when it is absent.
+
+    Normalised to the on-axis pole row like ``_norm_polar`` and clipped at −40 dB. Read-only:
+    nothing here is solved; this only re-projects the balloon the search already wrote.
+    """
+    if "spl_balloon_db" not in z.files:
+        return {}
+    try:
+        meta = json.loads(str(z["meta"])) if "meta" in z.files else {}
+    except (ValueError, TypeError):
+        meta = {}
+    grid = meta.get("balloon_grid")
+    bal = np.asarray(z["spl_balloon_db"], dtype=float)
+    if not (isinstance(grid, list) and len(grid) == 2
+            and all(isinstance(v, int) and not isinstance(v, bool) and v > 0 for v in grid)):
+        return {}
+    n_t, n_p = int(grid[0]), int(grid[1])
+    if bal.ndim != 2 or bal.shape[1] != n_t * n_p or bal.shape[0] < 1:
+        return {}
+    ref = bal[:, 0:n_p].mean(axis=1)
+    rel = np.maximum(bal - ref[:, None], -40.0)
+    return {
+        "angles360": _rnd(np.linspace(-180.0, 180.0, _GLOBE360_ANGLES), 1),
+        "polar_h360": [_rnd(_balloon_great_circle(r, n_t, n_p, "h", _GLOBE360_ANGLES), 2) for r in rel],
+        "polar_v360": [_rnd(_balloon_great_circle(r, n_t, n_p, "v", _GLOBE360_ANGLES), 2) for r in rel],
+    }
+
+
 def mesh_nodes_tris(msh: Path) -> tuple[np.ndarray, np.ndarray] | None:
     """Nodes (m) and triangles (0-based) from a gmsh 2.2 ASCII file, as the mesher writes it."""
     try:
@@ -455,6 +525,7 @@ def design_curves(run_dir: Path, h: str, tier: str = "screen") -> dict | None:
             out["angles"] = _rnd(z["h_angles_deg"], 1)
             out["polar_h"] = [_rnd(r, 2) for r in _norm_polar(np.asarray(z["spl_h_db"], float))]
             out["polar_v"] = [_rnd(r, 2) for r in _norm_polar(np.asarray(z["spl_v_db"], float))]
+            out.update(_balloon_full_circles(z))          # full 360° H/V slices (Globe · full)
             if "z_throat" in z.files:
                 zt = np.asarray(z["z_throat"], dtype=complex)
                 out["z_re"], out["z_im"] = _rnd(zt.real, 3), _rnd(zt.imag, 3)   # exp(-i w t): mass-like < 0
@@ -3376,13 +3447,27 @@ def preview_shape(root: Path, config_name: str, q: dict) -> dict:
             # (2) GRID/ROWS: the config's own march arrays. NO grid block into the preview.
             gspec = gen
             wall_mm = float(gspec.get("wall_thickness_mm", 3.0))
-            inner, meta = grid_gen.grid_points(gspec, effective, cfg.brief)
-            half = bool(meta.get("half_model", False))
-            half_xz = str(meta.get("row_span") or meta.get("span") or "") == "half_xz"
-            closed_phi = ((not bool(meta.get("quarter", True))) and not half
-                          and not half_xz)
-            outer = grid_gen.grid_outer_points(inner, wall_mm, half=half,
-                                               half_xz=half_xz, full=closed_phi, check=False)
+            from hornlab_search.design.generators import rolled_family
+            if is_rows and rolled_family.is_family_spec(gspec):
+                # The canonical rolled family owns both sheets (radial/axial relief,
+                # source/return guards); the generic rows march rejects its mode key.
+                block = (rolled_family.design_params(gspec, effective, cfg.brief)["grid"]
+                         if "implementation_sha256" not in gspec["rows"]
+                         else {**gspec, "knobs": effective})
+                resolved = rolled_family.resolve_grid(block, cfg.brief)
+                inner = resolved["inner_points"]
+                outer = resolved["outer_points"]
+                meta = resolved["meta"]
+                half = half_xz = False
+                closed_phi = False
+            else:
+                inner, meta = grid_gen.grid_points(gspec, effective, cfg.brief)
+                half = bool(meta.get("half_model", False))
+                half_xz = str(meta.get("row_span") or meta.get("span") or "") == "half_xz"
+                closed_phi = ((not bool(meta.get("quarter", True))) and not half
+                              and not half_xz)
+                outer = grid_gen.grid_outer_points(inner, wall_mm, half=half,
+                                                   half_xz=half_xz, full=closed_phi, check=False)
             try:
                 grid_gen.check_self_approach(inner, outer, wall_mm)
             except registry.GeneratorError as exc:
