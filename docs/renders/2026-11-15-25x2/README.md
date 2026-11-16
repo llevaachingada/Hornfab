@@ -27,5 +27,6 @@ Interpretation:
   the 600 × 480 envelope; tighten the width/height coupling before a larger search.
 - 25 evaluations is a pilot for 8 active dimensions. A real comparison needs 60–96 per arm.
 
-The queue script is `runs/2026-11-15_25x2/run_25x2.ps1`; logs are in
-`runs/2026-11-15_25x2/`. No new solve was merged into any older campaign.
+The durable queue script is `docs/queue/radial_25x2_2026-11-15.ps1` (same as the local
+`runs/2026-11-15_25x2/run_25x2.ps1`). Logs are in `runs/2026-11-15_25x2/`. No new solve was
+merged into any older campaign.
