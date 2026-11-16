@@ -887,7 +887,8 @@ def test_s1a_views_are_wired():
     assert "[badgeRows, mixedBanner, mountingRankWarnHtml(mixed), diNote]" in src
     # task 4: seed card right after the restart schedule, fed d.feasibility; since the 2026-11-14
     # UX pass both sit in the collapsed "Run setup & controls" block below the response charts
-    assert "${restartScheduleHtml(d, id)}\n\n      ${seedDerivationHtml(d.feasibility, d.objective)}" in src
+    # Fix D (2026-11-16): seed_policy added as third arg so the card hides on explicit seeds
+    assert "${restartScheduleHtml(d, id)}\n\n      ${seedDerivationHtml(d.feasibility, d.objective, d.seed_policy)}" in src
     assert src.index('id="run-setup"') < src.index("${restartScheduleHtml(d, id)}")
 
 

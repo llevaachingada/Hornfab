@@ -222,6 +222,32 @@ ROWS_LECLEACH_STOP_RANGE = (90.0, 240.0)
 ROWS_LECLEACH_CONSTRUCTION_LABEL = (
     "Fourcade 2015 Le Cleac'h exact construction (eqs 10-27, 42-43), verified against "
     "fig. 7 (R9-J); docs/research/typologies/JMLC_LECLEACH_RESEARCH_2026-10-25.md")
+#: 2026-11-16 (item 13 fix): the published H/V realization for the lecleach fc pair.
+#: The round core march (fc_core = sqrt(fc_h fc_v)) is "always the base ... to determine the
+#: construction wave front surface areas" (sphericalhorns.net, 2020-12-21, "JMLC inspired
+#: horn calculator"); the per-plane expansions (PETF/hvdiff) set the section semi-axes;
+#: each section is the ellipse through the axes, area-corrected to the core law
+#: (sphericalhorns.net, 2019-08-05, "Ellipsoidal wave fronts in horns", eqs 10-12:
+#: pi a b = pi r_m^2, smooth stretch from the round throat). The realization details
+#: (geometric-mean core, closed-form lambda instead of the article's Newton step, the
+#: per-plane rollback from the cos(2k phi) stop law) are ours:
+#: docs/research/typologies/LECLEACH_HV_ELLIPSOID_2026-11-16.md.
+ROWS_HV_SECTION_LABEL = (
+    "published ellipsoidal-wavefront H/V construction (round core + per-plane expansions; "
+    "realized as ellipse sections between the plane meridian axes, area-corrected); "
+    "docs/research/typologies/LECLEACH_HV_ELLIPSOID_2026-11-16.md")
+#: The per-azimuth INDEPENDENT-march reading of the fc pair ("one complete march per phi")
+#: produced the rejected lobed bodies (run 20261116T040651Z-screen-e53ae9): it lofts
+#: differently-shaped horns point by point, so the rim is non-elliptical and non-planar.
+#: It is refused in favour of ROWS_HV_SECTION_LABEL.
+ROWS_HV_PER_AZIMUTH_REFUSAL = (
+    "refused: an independent Le Cleach march per azimuth lofts differently-shaped horns "
+    "point by point (rim non-elliptical/non-planar -> the rejected lobed bodies, run "
+    "20261116T040651Z-screen-e53ae9); use the ellipsoidal-wavefront pair construction")
+#: Published knob territory for the fc pair ratio (the 920x330 asymmetric-JMLC datasheet
+#: = 567/203 = 2.8; practitioner range 1.5-3.0, JMLC_FAMILY_VARIANTS_2026-10-25.md
+#: section 2.1(c)) + a safety margin.
+ROWS_HV_FC_RATIO_MAX = 4.0
 #: ``lecleach_mod`` = the verified Fourcade meridian with a per-azimuth harmonic
 #: stop/cutoff law.  NO published per-azimuth JMLC math exists; every variant is a
 #: LABELED RECONSTRUCTION (lib-2 sections 2.1/2.5, 3).
@@ -328,6 +354,17 @@ def _knob_map(knobs: dict) -> dict:
     out: dict = {}
     for key, value in knobs.items():
         k = str(key)
+        # 2026-11-16: searchable scalar alias for the first stop harmonic (CMA cannot search a list).
+        # g_stop_a2 = a2 of the LIST contract: the sides (phi = 0) roll back a2 * stop_deg deeper than
+        # the top/bottom - a different rollback per plane (JMLC-style asymmetric lip).
+        if k == "g_stop_a2":
+            try:
+                number = float(value)
+            except (TypeError, ValueError):
+                raise registry.GeneratorError(f"knob 'g_stop_a2' must be a number, got {value!r}") from None
+            if "g_stop_cos2k" not in knobs and number != 0.0:
+                out["g_stop_cos2k"] = [number]
+            continue
         if k in ROWS_TASK_HARMONIC_LIST_KEYS:
             if not isinstance(value, (list, tuple)):
                 raise registry.GeneratorError(
@@ -1081,9 +1118,19 @@ def _rows_lecleach_knobs(knobs: dict, prefix: str = "g") -> dict:
             f"lecleach rows: stop_deg must be in [{lo:g}, {hi:g}], got {stop}")
     fc_h_hz = float(knobs[f"{prefix}_fc_h_hz"]) if has_h else None
     fc_v_hz = float(knobs[f"{prefix}_fc_v_hz"]) if has_v else None
-    if fc_h_hz is not None and (fc_h_hz <= 0.0 or fc_v_hz is None or fc_v_hz <= 0.0):
-        raise registry.GeneratorError(
-            f"lecleach rows: fc_h_hz / fc_v_hz must be > 0, got {fc_h_hz} / {fc_v_hz}")
+    if fc_h_hz is not None:
+        assert fc_v_hz is not None
+        if fc_h_hz <= 0.0 or fc_v_hz <= 0.0:
+            raise registry.GeneratorError(
+                f"lecleach rows: fc_h_hz / fc_v_hz must be > 0, got {fc_h_hz} / {fc_v_hz}")
+        ratio_max = ROWS_HV_FC_RATIO_MAX
+        if fc_h_hz > fc_v_hz * ratio_max or fc_v_hz > fc_h_hz * ratio_max:
+            raise registry.GeneratorError(
+                "lecleach rows: the fc pair ratio max/min must be in [1, "
+                f"{ratio_max:g}] (the published asymmetric-JMLC product territory is a "
+                "ratio of 1.5-3.0 (920x330 datasheet = 567/203 = 2.8; "
+                "JMLC_FAMILY_VARIANTS_2026-10-25.md section 2.1(c)) + a safety margin), "
+                f"got fc_h_hz {fc_h_hz} / fc_v_hz {fc_v_hz}")
     return {"fc_hz": fc, "T": T, "stop_deg": stop,
             "fc_h_hz": fc_h_hz, "fc_v_hz": fc_v_hz,
             "r_lip_mm": _rows_lip_mm(knobs, prefix)}
@@ -1252,6 +1299,133 @@ def rows_fc_law(phi, fc_h_hz: float, fc_v_hz: float | None):
         c, s = np.cos(p), np.sin(p)
         out = 1.0 / (c * c / float(fc_h_hz) + s * s / float(fc_v_hz))
     return float(out) if np.ndim(phi) == 0 else out
+
+
+def _rows_lecleach_hv_marches(lk: dict, harm: dict, phis: np.ndarray, r0: float,
+                              a0: float, n_s: int, lo: float, hi: float) -> list[dict]:
+    """Per-azimuth rows for the ``lecleach`` fc/stop pair (published ellipsoidal construction).
+
+    The 2026-11-16 rejected bodies (run ``20261116T040651Z-screen-e53ae9``) came from the
+    old reading of the pair: one COMPLETE Fourcade march per azimuth at ``fc(phi)`` /
+    ``stop(phi)``, lofted point by point. Rows of different total length (fc 450 vs 800
+    spans ~2.3x) and different roll depth never form one horn: the rim is non-elliptical
+    (up to 11% of the mouth radius off the ellipse through the H/V endpoints at the
+    rejected run's own seed, 183% at a box corner) and axially non-planar (155-319 mm).
+
+    The published construction instead keeps ONE horn (sphericalhorns.net 2019-08-05
+    "Ellipsoidal wave fronts in horns" eqs 10-12; 2020-12-21 "JMLC inspired horn
+    calculator"):
+
+    1. The round CORE march at ``fc_core = sqrt(fc_h fc_v)`` (the choice that tracks
+       ``r_h x r_v == r_m^2`` to first order under the published ``W x fc`` invariant)
+       and at the DEEPEST per-plane stop (the wavefront chain must reach every plane's
+       expansion) provides the SHARED arc-fraction stations ``x(s)`` - the axial curl, so
+       the lip is the same smooth continuous rollback on every azimuth.
+    2. The PLANE marches (the verified march at ``fc_h`` / ``stop(0)`` and ``fc_v`` /
+       ``stop(90)``) provide the section semi-axes verbatim: the H and V plane meridians
+       ARE their own verified Fourcade marches - the H/V difference comes from the
+       expansions themselves, never from a mouth stretch. An extra area-correcting
+       factor ``lambda = r_m / sqrt(r_h r_v)`` (a naive reading of the 2019 eqs) was
+       tried and REJECTED on measured evidence: across marches of different arc length
+       it recedes near the lip and re-introduces a small bulge (the 2026-11-16 unit
+       tests caught it); the plane-march axes stay monotone and convex by construction,
+       and the section-area deviation from the core law is reported instead.
+    3. Every intermediate section is the ellipse through the axes ``(r_h(s), r_v(s))``
+       at the shared station ``s`` (the 2019 article's b = r_m / f_s, a = r_m^2 / b
+       scheme, stated between the two plane expansions). All marches share the throat
+       ``(r0, theta0)``, so ``s = 0`` is a circle of radius ``r0`` on every azimuth.
+
+    The per-plane rollback difference is the ``stop`` knob + the ``cos(2k phi)`` stop
+    harmonic (the ``g_stop_cos2k``/``g_stop_a2`` LIST contract, gated per plane by
+    ``ROWS_LECLEACH_STOP_RANGE`` via :func:`rows_task_stop`).  Rows carry
+    ``resample: False`` (pre-sampled at the shared stations, like ``iwata_ar``).
+
+    Returns the row dicts in the :func:`_rows_marches` contract (``fc_hz``/``stop_deg``
+    report the per-azimuth law values; the axes come from the plane marches, which is
+    stated in ``meta``).  With ``fc_h == fc_v`` and no harmonic the construction
+    degenerates to the plain axisymmetric lecleach rows (``r_h == r_v == r_m``).
+    """
+    fc_h = float(lk["fc_h_hz"])
+    fc_v = float(lk["fc_v_hz"])
+    fc_core = float(math.sqrt(fc_h * fc_v))
+    phi_rad = np.asarray(phis, dtype=float)
+    fc_law_report = np.atleast_1d(rows_fc_law(phi_rad, fc_h, fc_v))
+    # The pair path builds its geometry from EXACTLY the two plane stops: gate those
+    # (rows_task_stop raises outside [90, 240]) and leave the interior law values as
+    # REPORTS - interior azimuths are ellipse interpolations between the axes and run
+    # no march of their own, so per-phi stop refusals would price nothing geometric.
+    stop0 = float(lk["stop_deg"])
+    stop_h = rows_task_stop(stop0, harm, 0.0, lo=lo, hi=hi)
+    stop_v = rows_task_stop(stop0, harm, 0.5 * math.pi, lo=lo, hi=hi)
+    # Shared stations: the core march resampled by its own arc length, plus the two
+    # plane marches on the same arc-fraction grid (each by its own length).  The torus
+    # lip (g_r_lip_mm, lib-2 2.3) is appended to all THREE marches before resampling:
+    # the plane meridians carry the lip tube, the core carries the axial stations into
+    # the lip zone, so the rim ring is the ellipse-tube roll: the lip is continuous all
+    # the way round (r_lip = 0 returns the marches untouched, byte-identical default).
+    r_lip = float(lk["r_lip_mm"])
+    _xs, _ys, _phi_deg, march_meta = profiles_mod.lecleach_exact(
+        r0, fc_core, lk["T"], a0, max(stop_h, stop_v), dl_mm=1.0)
+    core_x, _core_y, _L0 = _resample_arc(*_append_lip_torus(_xs, _ys, r_lip), n_s)
+    xh, r_h, _L0h = _resample_arc(*_append_lip_torus(
+        *profiles_mod.lecleach_exact(
+            r0, fc_h, lk["T"], a0, stop_h, dl_mm=1.0)[:2], r_lip), n_s)
+    xv, r_v, _L0v = _resample_arc(*_append_lip_torus(
+        *profiles_mod.lecleach_exact(
+            r0, fc_v, lk["T"], a0, stop_v, dl_mm=1.0)[:2], r_lip), n_s)
+    if np.any(r_h <= 0.0) or np.any(r_v <= 0.0):
+        raise registry.GeneratorError(
+            "lecleach hv rows: a plane march radius is not strictly positive")
+    if core_x.size != n_s + 1 or r_h.size != n_s + 1 or r_v.size != n_s + 1:
+        raise registry.GeneratorError(
+            "lecleach hv rows: resampled stations lost the n_s + 1 contract")
+    a_ax, b_ax = r_h, r_v
+    area_ratio = float(r_h[-1] * r_v[-1])
+    core_note = [
+        "fc_core_hz", float(fc_core),
+        "plane_stop_h_deg", float(stop_h),
+        "plane_stop_v_deg", float(stop_v),
+        "section_law", ("ellipse through the plane-meridian axes (a = r_h(s), b = "
+                        "r_v(s), each its own verified march) at the core march's "
+                        "shared arc-fraction stations; core stop = the deepest "
+                        "per-plane stop so the curl reaches every plane"),
+        "fc_law_report", ("rows fc_hz values are the 1/fc(phi) law REPORT (the axes "
+                          "come from the plane marches at fc_h / fc_v)"),
+        "area_note", (f"pi a b tracks the core wavefront area pi r_m^2 to a few percent "
+                      f"(mouth r_h r_v = {area_ratio:.1f} mm^2 vs the core's own law; "
+                      "report-only; the exact plane meridians were chosen over an "
+                      "area-correcting lambda, which recedes near the lip)"),
+    ]
+    rows: list[dict] = []
+    for phi in phi_rad:
+        # Interior law values are REPORTS (no march stops at this azimuth); the
+        # geometry is the ellipse between the two plane axes at the shared station.
+        stop_report = stop0 * float(rows_stop_multiplier(
+            float(phi), harm["stop_cos2k"], harm["stop_sin2k1"]))
+        c, s = math.cos(float(phi)), math.sin(float(phi))
+        denom = (b_ax * c) ** 2 + (a_ax * s) ** 2
+        if np.any(denom <= 0.0):
+            raise registry.GeneratorError("lecleach hv rows: zero ellipse radius")
+        radius = (a_ax * b_ax) / np.sqrt(denom)
+        stop_actual = (stop_h if abs(float(phi)) <= 1e-9
+                       else stop_v if abs(abs(float(phi)) - 0.5 * math.pi) <= 1e-9
+                       else float(stop_report))
+        i_report = len(rows) if fc_law_report.size == len(phi_rad) else 0
+        rows.append({
+            "phi": float(phi),
+            "phi_deg": float(np.degrees(phi)),
+            "fc_hz": float(fc_law_report[i_report]),
+            "stop_deg": float(stop_report),
+            "stop_actual_deg": float(stop_actual),
+            "x": core_x,
+            "y": np.asarray(radius, dtype=float),
+            "resample": False,
+            "march": march_meta,
+        })
+    hv_meta = dict(zip(core_note[0::2], core_note[1::2]))
+    for row in rows:
+        row["hv_meta"] = hv_meta
+    return rows
 
 
 def lecleach_ar_profile(x, y, AR_m: float, p: float,
@@ -2003,6 +2177,12 @@ def _rows_marches(spec: dict, knobs: dict, brief: dict, prefix: str = "g") -> li
         lk = _rows_lecleach_knobs(knob_map, prefix)
         harm = rows_task_harmonics(knob_map, prefix, half=harm_half)
         lo, hi = ROWS_LECLEACH_STOP_RANGE
+        if lk["fc_v_hz"] is not None:
+            # 2026-11-16 (item 13): the published ellipsoidal-wavefront pair construction.
+            # A complete independent march per azimuth lofts differently-shaped horns
+            # point by point (the rejected lobed bodies) and is not built.
+            return _rows_lecleach_hv_marches(
+                lk, harm, phis, r0, a0, _spec_int(spec, "n_s", 32, 8), lo, hi)
         out = []
         for phi in phis:
             fc = (lk["fc_hz"] if lk["fc_v_hz"] is None
@@ -2346,7 +2526,9 @@ def rows_per_azimuth(base_spec_with_rows: dict, knobs: dict, brief: dict,
             "L0_mm": float(march0["L0_mm"]),
             "row_fc_hz": [float(m["fc_hz"]) for m in marches],
             "row_stop_deg": [float(m["stop_deg"]) for m in marches],
-            "row_stop_actual_deg": [float(m["march"]["stop_deg"]) for m in marches],
+            "row_stop_actual_deg": [float(m.get("stop_actual_deg",
+                                                 m["march"]["stop_deg"]))
+                                     for m in marches],
             "sign_conventions": sign_conventions,
         }
         if task_harm["active"]:
@@ -2354,6 +2536,12 @@ def rows_per_azimuth(base_spec_with_rows: dict, knobs: dict, brief: dict,
                 "reconstruction_label": ROWS_MOD_RECONSTRUCTION_LABEL,
                 "harmonic_law": ("stop(phi) = stop0 (1 + sum a_2k cos(2k phi) + "
                                  "sum b_(2k+1) sin((2k+1) phi)), phi from horizontal"),
+            })
+        if lk["fc_v_hz"] is not None:
+            meta.update({
+                "base_construction_label": ROWS_LECLEACH_CONSTRUCTION_LABEL,
+                "construction_label": ROWS_HV_SECTION_LABEL,
+                **dict(marches[0]["hv_meta"]),
             })
     elif kind == "lecleach_mod":
         assert mod is not None
@@ -2586,9 +2774,11 @@ def rows_per_azimuth(base_spec_with_rows: dict, knobs: dict, brief: dict,
     # lib-2 section 4.3 datasheet invariant: the mouth W/H ratio tracks the cutoff ratio,
     # W fc_h ~= H fc_v (~1.87e5 mm Hz at 2", ~1.88-1.90e5 at 1").  Report-only; the test
     # checks it at 2 % when the H/V split is actually defined.
-    if kind == "lecleach_mod" and meta.get("fc_v_hz") is not None:
+    if kind in ("lecleach", "lecleach_mod") and meta.get("fc_v_hz") is not None:
+        # lecleach_mod spells the H cutoff as fc_hz; the lecleach pair path has fc_h_hz.
+        fc_w = meta["fc_hz"] if kind == "lecleach_mod" else meta["fc_h_hz"]
         meta["mouth_fc_product_mm_hz"] = {
-            "width_x_fc_h": float(2.0 * r_h * meta["fc_hz"]),
+            "width_x_fc_h": float(2.0 * r_h * fc_w),
             "height_x_fc_v": float(2.0 * r_v * meta["fc_v_hz"]),
         }
     elif kind == "salmon_elliptical":

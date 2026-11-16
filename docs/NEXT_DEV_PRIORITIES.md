@@ -1,5 +1,16 @@
 # Next development round: priorities (after the beta)
 
+> **Integration status, 2026-11-16:** The BO GUI has already been merged into
+> `feat/sab-home-2026-11-14` (including `5b78c6c`); it has not been integrated
+> into GitHub `main`. The P16 instructions below are historical and must not be
+> followed as a fresh merge recipe. The canonical checkout has uncommitted work,
+> and `home_day_2026-11-16` was running `d_rosse_s1234` when checked. Preserve
+> the running queue and its execution pins. Once the queue and other writers are
+> finished, audit and preserve the dirty files and unique worktree commits,
+> reconcile the feature branch with current `origin/main`, resolve the three
+> documentation conflicts, run the applicable validation, and only then publish.
+> The real GPU study-design verify click remains untested; see `ISSUES.md`.
+
 Written 2026-10-22 22:35 EDT by the local orchestrator, at the user's request. **Read this before planning any work
 after the beta session.** Items are in priority order. Background: `docs/HIGH_FREQUENCY_OPTIONS.md` (2026-10-13),
 `docs/CLOUD_GPU_REPORT.md`, `TOOLCHAIN.md` M2/M3.

@@ -1083,12 +1083,72 @@ def _check_ab(cfg, other, path: str, report: dict, space, from_runs, top_k: int)
             path))
 
 
+_VALID_DIRECTIVITIES = frozenset(("cd", "narrowing"))
+
+
+def _load_brief_raw(cfg, config_path: str) -> dict | None:
+    """Load the raw brief YAML for a config, or None when it cannot be read.
+
+    The brief is either embedded (``cfg.raw["brief"]`` dict) or referenced by
+    ``brief_file:``. Path resolution follows the same rules as ``load_config``.
+    """
+    raw = getattr(cfg, "raw", None) or {}
+    embedded = raw.get("brief")
+    if isinstance(embedded, dict):
+        return embedded
+    brief_file = raw.get("brief_file")
+    if not brief_file:
+        return None
+    config_dir = Path(config_path).parent
+    for base in (config_dir, REPO):
+        candidate = base / brief_file
+        try:
+            if candidate.exists():
+                return yaml.safe_load(candidate.read_text(encoding="utf-8")) or {}
+        except Exception:  # noqa: BLE001 - unreadable brief = no check
+            pass
+    return None
+
+
+def _check_directivity(cfg, path: str, report: dict) -> None:
+    """Item 8 (2026-11-16): HARD when the typology and brief disagree on directivity tag.
+
+    Both the typology YAML and the brief YAML carry an optional ``directivity: cd | narrowing``
+    top-level key. When BOTH are tagged and the tags differ, the pairing is wrong (a CD-only
+    brief on a narrowing typology, or vice versa) and the run must be refused.
+    """
+    raw = getattr(cfg, "raw", None) or {}
+    cfg_dir = raw.get("directivity")
+    if cfg_dir is None:
+        return
+    cfg_dir = str(cfg_dir).strip()
+    if cfg_dir not in _VALID_DIRECTIVITIES:
+        return  # unknown tag - not our problem here
+    brief_raw = _load_brief_raw(cfg, path)
+    if not isinstance(brief_raw, dict):
+        return
+    brief_dir = brief_raw.get("directivity")
+    if brief_dir is None:
+        return
+    brief_dir = str(brief_dir).strip()
+    if brief_dir not in _VALID_DIRECTIVITIES:
+        return
+    if cfg_dir != brief_dir:
+        report["findings"].append(_finding(
+            "HARD", "directivity_mismatch",
+            f"directivity mismatch: typology says {cfg_dir!r} but brief says {brief_dir!r}; "
+            f"a narrowing typology must not run with a CD brief and vice versa "
+            f"(item 8, 2026-11-16)",
+            path))
+
+
 # ------------------------------------------------------------------ reporting
 
 def _analyze(cfg, path: str, args, other, prior_bests) -> dict:
     report = _new_report(cfg, path)
     report["searched_keys"] = sorted(_searched_bounds(cfg))
     _check_seed(cfg, path, report)
+    _check_directivity(cfg, path, report)
     try:
         space = DesignSpace.from_config(cfg)
     except Exception as exc:  # noqa: BLE001 - a broken box is a hard config fault

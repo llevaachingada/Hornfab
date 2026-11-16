@@ -214,3 +214,9 @@ bempp_cpu) â†’ `metrics` (beamwidth, ripple, DI, impedance) â†’ `objec
 
 `docs/research/typologies/audit_2026-11-15/` contains reproducible source-equation, domain, mesh topology, offline objective, spiral mock/resume and evidence-packaging scripts. They are research tooling, not production generators. `docs/queue/rolled_readiness_2026-11-15/reviewed_job.py` is an additive fail-closed queue gate;26 frozen configs and matching entry points are recorded in admission.json. See that packet's README before use; no full-search admission granted.
 
+
+## Reviewed night continuation (2026-11-16)
+
+- `tools/night_queue/run_bo_arm.py`: strict cohort/preparation checks and sequential study execution, runtime deadlines.
+- `tools/night_queue/refine_study_cma.py`: bounded local CMA from measured BO screen results, immutable input config.
+- `hornlab_search/studies/package.py`: additive `comparison-80x2` budget.

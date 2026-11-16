@@ -2516,8 +2516,12 @@ function seedKlawHtml(feas) {
  *  under `feasibility`). Rendered when feasibility.derivation is a non-empty array OR a K-law
  *  summary is present; every sub-key may be absent (never crashes, "–" for missing numbers), and a
  *  missing feasibility block renders literally nothing. `objective` (optional) selects the honest
- *  below-f0 suffix; omitting it keeps the original "(masked under v3)" string. Pure; HTML or "". */
-function seedDerivationHtml(feas, objective) {
+ *  below-f0 suffix; omitting it keeps the original "(masked under v3)" string.
+ *  `seed_policy` (optional, Fix D 2026-11-16): when "explicit" the entire card is hidden — the
+ *  seed was set directly and brief-driven derivation was skipped. Pure; HTML or "". */
+function seedDerivationHtml(feas, objective, seed_policy) {
+  // Fix D: hide card when seed_policy is "explicit" (brief derivation was skipped).
+  if (seed_policy === "explicit") return "";
   if (!feas || typeof feas !== "object") return "";
   const rows = (Array.isArray(feas.derivation) ? feas.derivation : []).filter(r => r && typeof r === "object");
   const klaw = seedKlawHtml(feas);
@@ -2535,11 +2539,16 @@ function seedDerivationHtml(feas, objective) {
     groups.push(`screen: ${count(feas.screen_freqs_below_f0, feas.screen_freqs_total)} solved freqs below f0`);
   if (feas.verify_freqs_below_f0 != null || feas.verify_freqs_total != null)
     groups.push(`verify: ${count(feas.verify_freqs_below_f0, feas.verify_freqs_total)}`);
-  let suffix = "(masked under v3)";
+  // Fix D: use the actual objective version number instead of always showing "v3".
+  // For the mask case, v3 is the floor (it introduced masking); v7+ uses its own version.
+  const ver = (objective && typeof objective === "object" && Number(objective.version) > 0)
+    ? Number(objective.version) : 3;
+  let suffix = `(masked under v${ver})`;
   if (objective && typeof objective === "object") {
-    if (Number(objective.version) === 3 || objective.cov_below_f0 === "mask")
-      suffix = "(masked under v3: cov + dislope score only f ≥ f0)";
-    else if (objective.cov_below_f0 === "one_sided")
+    if (objective.cov_below_f0 === "mask" || (!objective.cov_below_f0 && ver <= 5)) {
+      const maskVer = Math.max(3, ver);   // v1/v2+mask still labelled "v3" (historical); v7→"v7"
+      suffix = `(masked under v${maskVer}: cov + dislope score only f ≥ f0)`;
+    } else if (objective.cov_below_f0 === "one_sided")
       suffix = "(one_sided: below f0 a wider pattern is forgiven, a narrower one still scores)";
   }
   const counts = groups.length
@@ -6099,7 +6108,7 @@ async function viewRunDetail(id) {
         <div class="stack" style="gap:16px;margin-top:12px">
       ${restartScheduleHtml(d, id)}
 
-      ${seedDerivationHtml(d.feasibility, d.objective)}
+      ${seedDerivationHtml(d.feasibility, d.objective, d.seed_policy)}
 
       ${isVerify ? "" : continueRunCardHtml(d, sum)}
         </div>
@@ -6888,7 +6897,7 @@ async function viewRunDetail(id) {
   }
 
   // P9 (catalog hover docs): the seed-derivation call site is seedDerivationHtml(d.feasibility,
-  // d.objective) with no config-name argument, so the card's knob cells identify themselves via
+  // d.objective, d.seed_policy) — Fix D added seed_policy; the card's knob cells identify themselves via
   // data-seedknob and this pass attaches the catalog-grounded tooltip using sum.name. Missing docs
   // keep the raw cell.
   for (const td of ROOT.querySelectorAll(".seed-derivation-card td[data-seedknob]"))

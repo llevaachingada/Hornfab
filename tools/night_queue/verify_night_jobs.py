@@ -59,7 +59,9 @@ def plan(rows: dict[str, dict], jobs: list[str], top: int, top_for: dict[str, in
         if row is None:
             skipped.append((job, "not in summary.jsonl (not run yet, or a different night)"))
             continue
-        if row.get("exit_code") != 0:
+        # 2026-11-16: a search the night runner's watchdog stopped (status 'watchdog', exit 75) has
+        # valid rows - a stalled run is usually a converged one - so its finalists are verified too.
+        if row.get("exit_code") != 0 and row.get("status") != "watchdog":
             skipped.append((job, f"exit_code {row.get('exit_code')!r}"))
             continue
         run_dir = row.get("run_dir")

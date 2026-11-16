@@ -11,38 +11,113 @@
 #  - the 'chunky bar' rim is the lip: r_lip >= 30 with wrap >= 140 (old seeds) is a thick bar and overshoots W;
 #    lip 8-30 mm / wrap 80-160 deg are searched so the BEM decides whether a big roll pays.
 # Fixed for the look: sf_m 4, sf_n1 1.8 (between round and star), sf_n2 7 (straight edges), sf_start 0.25, k 1, q 0.996.
+# 2026-11-16 08:xx: watchdog bound-pins widened {'g_L_mm': (200.0, 320.0)}; seed = best of runs/20261116T074832Z-screen-620f81 (J 5.344). Name kept so the BO cohort stays one task.
 name: hl__crowe_x_osse_cd_v7
 family: FREEFORM
 brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
 generator:
   name: grid
-  rows: {type: osse_rollback}
+  rows:
+    type: osse_rollback
   n_phi: 25
   n_s: 40
   wall_thickness_mm: 3.0
   seed_policy: explicit
   span: quarter
-seed_params: {g_a_h_deg: 38.0, g_a_v_deg: 24.0, g_k: 1.0, g_L_mm: 240.0, g_s: 0.35, g_n: 2.0, g_q: 0.996, g_r_lip_mm: 25.0,
-  g_wrap_deg: 130.0, g_sf_m: 4, g_sf_n1: 1.8, g_sf_n2: 7.0, g_sf_ab: 0.8, g_sf_amt: 0.3, g_sf_start: 0.25}
+seed_params:
+  g_a_h_deg: 36.388866
+  g_a_v_deg: 22.707717
+  g_k: 1.0
+  g_L_mm: 259.603653
+  g_s: 0.389835
+  g_n: 2.143998
+  g_q: 0.996
+  g_r_lip_mm: 18.284822
+  g_wrap_deg: 86.087609
+  g_sf_m: 4
+  g_sf_n1: 1.8
+  g_sf_n2: 7.0
+  g_sf_ab: 0.847983
+  g_sf_amt: 0.239269
+  g_sf_start: 0.25
 bounds:
-  g_a_h_deg: {lo: 33.0, hi: 40.0}
-  g_a_v_deg: {lo: 20.0, hi: 28.0}
-  g_k: {lo: 1.0, hi: 1.0, search: false}
-  g_L_mm: {lo: 200.0, hi: 260.0}
-  g_s: {lo: 0.2, hi: 0.45}
-  g_n: {lo: 1.8, hi: 3.2}
-  g_q: {lo: 0.996, hi: 0.996, search: false}
-  g_r_lip_mm: {lo: 8.0, hi: 30.0}
-  g_wrap_deg: {lo: 80.0, hi: 160.0}
-  g_sf_m: {lo: 4, hi: 4, search: false}
-  g_sf_n1: {lo: 1.8, hi: 1.8, search: false}
-  g_sf_n2: {lo: 7.0, hi: 7.0, search: false}
-  g_sf_ab: {lo: 0.7, hi: 0.9}
-  g_sf_amt: {lo: 0.15, hi: 0.38}
-  g_sf_start: {lo: 0.25, hi: 0.25, search: false}
-mesh: {epw: 6.0, quadrants: '1', dof_cap_screen: 24000, dof_cap_verify: 24000, dof_cap_final: 24000, dof_per_triangle: 0.51}
-solve: {backend: beat_cuda, distance_m: 10.0, angle_count: 73, balloon: true, balloon_points_screen: 512, balloon_points_verify: 1024,
-  gmres_tol: 1.0e-05, timeout_s: 900, cuda_fused: true}
-search: {algorithm: cma, sigma0: 0.2, seed: 1234, budget: 96, popsize: null, tolfun: 0.001, infeasible_penalty: graded}
-description: 'HOME: Crowe ES-style X (bow-tie creases, rolled lip) on a constant-directivity OSSE throat; labelled hypothesis
-  shape, not Crowe geometry'
+  g_a_h_deg:
+    lo: 33.0
+    hi: 40.0
+  g_a_v_deg:
+    lo: 20.0
+    hi: 28.0
+  g_k:
+    lo: 1.0
+    hi: 1.0
+    search: false
+  g_L_mm:
+    lo: 200.0
+    hi: 285.0
+  g_s:
+    lo: 0.2
+    hi: 0.45
+  g_n:
+    lo: 1.8
+    hi: 3.2
+  g_q:
+    lo: 0.996
+    hi: 0.996
+    search: false
+  g_r_lip_mm:
+    lo: 8.0
+    hi: 30.0
+  g_wrap_deg:
+    lo: 80.0
+    hi: 160.0
+  g_sf_m:
+    lo: 4
+    hi: 4
+    search: false
+  g_sf_n1:
+    lo: 1.8
+    hi: 1.8
+    search: false
+  g_sf_n2:
+    lo: 7.0
+    hi: 7.0
+    search: false
+  g_sf_ab:
+    lo: 0.7
+    hi: 0.9
+  g_sf_amt:
+    lo: 0.15
+    hi: 0.38
+  g_sf_start:
+    lo: 0.25
+    hi: 0.25
+    search: false
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.2
+  seed: 1234
+  budget: 96
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+  budget_counts: valid
+  max_attempts: 220
+description: 'HOME: Crowe ES-style X (bow-tie creases, rolled lip) on a constant-directivity OSSE throat; labelled hypothesis shape, not Crowe
+  geometry'

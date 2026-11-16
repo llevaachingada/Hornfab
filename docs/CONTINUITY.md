@@ -1,5 +1,57 @@
 # CONTINUITY
 
+## 2026-11-16 (day) - Reviewed CMA/BO continuation and 80+2 verification budget
+
+- Owner requested useful queue work through tomorrow morning, recent-run bound/convergence
+  review, CMA data-building followed by BO and return to CMA, and two rather than six
+  verifications per 80 screens. See docs/queue/HOME_CONTINUATION_2026-11-16.md and
+  docs/queue/TRITONIA_V9_CMA_AUDIT_2026-11-16.md for evidence, sequence and limits.
+- Additive comparison-80x2 profile; no historical package/profile rewritten. Future BO
+  preparation happens at runtime with strict >=100 usable row admission; failed prep
+  prevents execution. Live day queue extension uses the existing detached controller.
+- Tritonia v9 preserves fold/hygiene, modestly reopens historical bounds, uses two
+  120-valid / 260-attempt CMA seeds, and passes 24/24 sampled CPU mesh checks. sigma .18
+  clears the history-aware expected-hit floor (5.68); seed-optimum warning remains.
+- Selective agent integration: GUI seed-policy display + tagged offline brief guard.
+  Unsafe new penalty, incomplete command guard and unvalidated auto-widen were excluded.
+  Rejected OSSE v8 winner falls from base #1 to DSP #12 in offline screen rescore;
+  seed becomes DSP #3. This is not a verification result or proof of the new penalty.
+- Le Cleac'h saddle remains worktree-only/unapproved; abandoned night-B entries are not
+  pending. Original designs, held rolled families, datasets and running jobs preserved.
+- Focused offline runner/geometry suite 82 passed; profile/prepare suite 21 passed;
+  tagged preflight suite 17 passed; GUI/authoring/profile/prepare targeted suite 59 passed.
+  No concurrent GPU solves or solver tests launched. Detailed wrapper checks in plan.
+
+## 2026-11-16 (05:00) - Tritonia night cell stopped; kit-era law anchored in v8 cells
+
+- Owner verdict on `hl__ath_tritonia_landscape_v7` mid-run (`20261116T041232Z-screen-b5380a`):
+  "totally wrong geometry - the mouth ridges are wrong; polar wrong; seed looks like a square
+  horn; parameters maxed out." Evidence confirmed: the v7 seed was the MILD 2025 web law
+  (at-horns.eu Tritonia.txt: H/V swing ~2 deg) through a faithful morph, and every fold-carrying
+  knob was searched wide (cos2p amp up to +10 = inverted fold, corner down to 0, morph_fixed to 0.4,
+  fold_h to 0): CMA walked into a smooth pillow bowl, no boat folds. s1/s2/morph_fixed boxes had
+  the seed exactly on their lo bound; a0 maxed at hi, k at lo, L pegged at hi. The inline
+  `target.coverage_v_deg: 60` disagreed with the brief it loads (80x50).
+- Isolation (offline meshes, no code change): morph OFF retains the pinch; morph ON (explicit W/H
+  and auto W/H) both flatten the mild-law pinch into a bowl/pyramid. The fold look therefore comes
+  from the STRENGTH of the per-azimuth law, not from a mesher bug: the fork's morph matches the
+  ATH law in ATH_CORE_TWINRAY_MORPH_2026-10-25.md exactly.
+- Fix without changing any package: the kit-era Tritonia law was already in this repo's parity test
+  (fork test 260308tritonia: a = 49.5128 - 14.8405cos^2 p - 29.2180 sin^8 p; H 34.7 / V 20.3 /
+  diag 40.3 deg; a0 8.0307, k 1.091, n 6.0455, q 0.98349, s 0.9859, morph rate 1.6002, corner 18).
+  New configs anchor it: `hl__ath_tritonia_landscape_v8.yaml` (law reproduced to 7e-15 deg by the
+  az knobs: az_a_cos_amp -14.8405/pow 2 + az_fold_v -29.218/width 23.508 deg; fold_h and cos2p
+  pinned off; s1/s2 pinned; inline target 50 V; seed r0 18 / L 280 / W 430 x H 372) and
+  `hl__ath_twinray380_landscape_v8.yaml` (TwinRay T3 law kept; hygiene: corner >= 8, morph_fixed
+  pinned 0, fold_h/cos2p off, s1/s2 pinned, target 50 V). Seed mesh (CPU) renders the meridian
+  fold + shifted diagonals that the v7 seed lacked; polar evidence lands with the queued runs.
+- Night queue `home18_a_2026-11-16`: the running `a_tritonia_s1234` was stopped (recorded, GPU
+  post-hygiene clean); `a_osse_fold_warm_s1234`, `a_twinray_s1234/s5678`, `a_tritonia_s5678`
+  commented out of the live file (owner: "skip them, fix, put them back"). Requeued as
+  `a_tritonia2_s1234`, `a_twinray2_s1234`, `a_tritonia2_s5678`, `a_twinray2_s5678` on the v8
+  configs, verify group v1_stock_top2 updated to the new ids. Evidence images in
+  %TEMP%/opencode/tritonia_evidence (seed/best polars, sections, morph isolation renders).
+
 ## 2026-11-16 (23:25) - A study lists its solves and renders any measured design in 3D on demand
 
 - Owner decision: a Bayesian study is inspectable like a run - the same solve list and the same

@@ -23,8 +23,15 @@ Tools (all in the repo): `tools/run_campaign_night.py` (one night file, strictly
 4. **During a live night: no pytest solver tests, no GPU work, and no `hornlab-search run --dry-run`** (it calls
    `worker.install_handlers()` before the dry-run branch). Mesh checks: `tools/shape_check.py` (CPU, safe).
    Offline unit tests that never touch the worker (grid/rows/catalog/night-runner) are fine.
-5. **A running night file is read once.** Appending jobs to it does nothing. Put new jobs in a NEW night file and
-   restart the controller (below), or edit a night file that has not started yet.
+5. **The running night file is LIVE (2026-11-16).** `run_campaign_night.py` re-reads `runs/nights/<night>.yaml`
+   before every job: reorder, insert, remove or change jobs that have not started and the next job follows the
+   file. The running job is never interrupted. A finished job id never re-runs (re-run = new id). A broken edit is
+   logged `RELOAD FAILED` and the last good plan continues; `night`/`lane` cannot change. Pause: create
+   `runs/nights/<night>/PAUSE` (or top-level `pause: true`) - the runner holds before the next job, keeps re-reading,
+   resumes when it is removed. Stop cleanly after the current job: `STOP` file or `stop: true`. Current order:
+   `runs/nights/<night>/queue_state.json`; events in `runs/overnight/queue_<night>.log`. Edit the copy in
+   `runs/nights/`, not `docs/queue/`. `--no-live` restores read-once. A night that has not started yet is read when
+   `queue.ps1` reaches it, so later nights in a chain are editable too.
 6. **Do not edit a brief/config a queued or running night uses.** Copy it (e.g. `..._deep_v4.yaml`) instead.
 
 ## Launch

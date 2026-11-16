@@ -118,9 +118,29 @@ _AZLAW = {
     "az_a_cos_pow": _f(0.5, 40.0, "|cos p| exponent of that term", section="azlaw"),
     "az_n_cos2_amp": _f(-10.0, 10.0, "cos^2 p term on the termination n", section="azlaw"),
     "az_s_cos2_amp": _f(-1.0, 1.0, "cos^2 p term on the termination s", section="azlaw"),
+    # MERIDIAN FOLD (2026-11-16): a narrow notch in a(p) centred on one axis. Along that meridian the
+    # wall opens more slowly than its neighbours, so the surface folds inward from throat to mouth and
+    # the lip dips at the centre (Ath Tritonia: -16*sin(p)^12 on the vertical axis). Depth is the
+    # wall-angle change ON the axis (negative = inward fold); width is the angular half-width at half
+    # depth, converted to the Ath exponent m = ln 0.5 / ln cos(width) (Tritonia ^12 -> 19.3 deg).
+    "az_fold_v_deg": _f(-40.0, 40.0, "meridian fold on the vertical axis: a change at p = 90 deg", section="azlaw"),
+    "az_fold_v_width_deg": _f(3.0, 60.0, "vertical fold half-width at half depth, deg", section="azlaw"),
+    "az_fold_h_deg": _f(-40.0, 40.0, "meridian fold on the horizontal axis: a change at p = 0", section="azlaw"),
+    "az_fold_h_width_deg": _f(3.0, 60.0, "horizontal fold half-width at half depth, deg", section="azlaw"),
+    # Ath Tritonia's H-vs-V tilt with neutral diagonals: amp * sign(cos 2p)|cos 2p|^pow (-7, pow 5).
+    "az_a_cos2p_amp": _f(-30.0, 30.0, "sign-preserving cos(2p)^pow term on a, deg", section="azlaw"),
+    "az_a_cos2p_pow": _f(1.0, 15.0, "exponent of the cos(2p) term", section="azlaw"),
 }
 AZLAW_DEFAULTS = {"az_sf_m": 4.0, "az_sf_n1": 2.0, "az_sf_n2": 2.0, "az_sf_n3": 2.0,
-                  "az_sf_a": 1.0, "az_sf_b": 1.0, "az_a_cos_pow": 2.0}
+                  "az_sf_a": 1.0, "az_sf_b": 1.0, "az_a_cos_pow": 2.0,
+                  "az_fold_v_width_deg": 20.0, "az_fold_h_width_deg": 20.0, "az_a_cos2p_pow": 1.0}
+
+
+def fold_exponent(width_deg: float) -> float:
+    """Ath exponent m whose |cos d|^m falls to 0.5 at d = width (half-width at half depth)."""
+    from math import cos, log, radians
+    w = min(max(float(width_deg), 1.0), 89.0)
+    return log(0.5) / log(cos(radians(w)))
 
 
 def _num(v: float) -> str:
@@ -135,8 +155,11 @@ def azlaw_expressions(params: dict) -> dict:
     amp_cos = float(g.get("az_a_cos_amp", 0.0))
     amp_n = float(g.get("az_n_cos2_amp", 0.0))
     amp_s = float(g.get("az_s_cos2_amp", 0.0))
+    fold_v = float(g.get("az_fold_v_deg", 0.0))
+    fold_h = float(g.get("az_fold_h_deg", 0.0))
+    amp_c2 = float(g.get("az_a_cos2p_amp", 0.0))
     out: dict = {}
-    if amp_sf or amp_cos:
+    if amp_sf or amp_cos or fold_v or fold_h or amp_c2:
         terms = [_num(params.get("a_deg", 60.0))]
         if amp_sf:
             m4 = _num(float(g["az_sf_m"]) / 4.0)
@@ -146,6 +169,13 @@ def azlaw_expressions(params: dict) -> dict:
             terms.append(f"{_num(amp_sf)}*{sf}")
         if amp_cos:
             terms.append(f"{_num(amp_cos)}*abs(cos(p))**{_num(g['az_a_cos_pow'])}")
+        if amp_c2:
+            pw = float(g["az_a_cos2p_pow"])
+            terms.append(f"{_num(amp_c2)}*cos(2*p)*abs(cos(2*p))**{_num(pw - 1.0)}")
+        if fold_v:
+            terms.append(f"{_num(fold_v)}*abs(sin(p))**{_num(fold_exponent(g['az_fold_v_width_deg']))}")
+        if fold_h:
+            terms.append(f"{_num(fold_h)}*abs(cos(p))**{_num(fold_exponent(g['az_fold_h_width_deg']))}")
         out["a_deg"] = " + ".join(terms)
     if amp_n:
         out["n"] = f"{_num(params.get('n', 4.0))} + {_num(amp_n)}*cos(p)**2"
@@ -166,6 +196,13 @@ def azlaw_values(params: dict, p_rad: float) -> dict:
         a += float(g["az_a_sf_amp"]) * base ** (-1.0 / float(g["az_sf_n1"]))
     if float(g.get("az_a_cos_amp", 0.0)):
         a += float(g["az_a_cos_amp"]) * abs(cos(p_rad)) ** float(g["az_a_cos_pow"])
+    if float(g.get("az_a_cos2p_amp", 0.0)):
+        c2 = cos(2.0 * p_rad)
+        a += float(g["az_a_cos2p_amp"]) * c2 * abs(c2) ** (float(g["az_a_cos2p_pow"]) - 1.0)
+    if float(g.get("az_fold_v_deg", 0.0)):
+        a += float(g["az_fold_v_deg"]) * abs(sin(p_rad)) ** fold_exponent(g["az_fold_v_width_deg"])
+    if float(g.get("az_fold_h_deg", 0.0)):
+        a += float(g["az_fold_h_deg"]) * abs(cos(p_rad)) ** fold_exponent(g["az_fold_h_width_deg"])
     n = float(params.get("n", 4.0)) + float(g.get("az_n_cos2_amp", 0.0)) * cos(p_rad) ** 2
     s = float(params.get("s", 0.0)) + float(g.get("az_s_cos2_amp", 0.0)) * cos(p_rad) ** 2
     return {"a_deg": a, "n": n, "s": s}

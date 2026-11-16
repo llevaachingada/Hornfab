@@ -1,5 +1,27 @@
 # ISSUES
 
+## 2026-11-16 (day) - Reviewed CMA/BO continuation and 80+2 verification budget
+
+- Owner requested useful queue work through tomorrow morning, recent-run bound/convergence
+  review, CMA data-building followed by BO and return to CMA, and two rather than six
+  verifications per 80 screens. See docs/queue/HOME_CONTINUATION_2026-11-16.md and
+  docs/queue/TRITONIA_V9_CMA_AUDIT_2026-11-16.md for evidence, sequence and limits.
+- Additive comparison-80x2 profile; no historical package/profile rewritten. Future BO
+  preparation happens at runtime with strict >=100 usable row admission; failed prep
+  prevents execution. Live day queue extension uses the existing detached controller.
+- Tritonia v9 preserves fold/hygiene, modestly reopens historical bounds, uses two
+  120-valid / 260-attempt CMA seeds, and passes 24/24 sampled CPU mesh checks. sigma .18
+  clears the history-aware expected-hit floor (5.68); seed-optimum warning remains.
+- Selective agent integration: GUI seed-policy display + tagged offline brief guard.
+  Unsafe new penalty, incomplete command guard and unvalidated auto-widen were excluded.
+  Rejected OSSE v8 winner falls from base #1 to DSP #12 in offline screen rescore;
+  seed becomes DSP #3. This is not a verification result or proof of the new penalty.
+- Le Cleac'h saddle remains worktree-only/unapproved; abandoned night-B entries are not
+  pending. Original designs, held rolled families, datasets and running jobs preserved.
+- Focused offline runner/geometry suite 82 passed; profile/prepare suite 21 passed;
+  tagged preflight suite 17 passed; GUI/authoring/profile/prepare targeted suite 59 passed.
+  No concurrent GPU solves or solver tests launched. Detailed wrapper checks in plan.
+
 Local-only, 2026-11-16 (23:25) (**study solves table + on-demand 3D for a study design**):
 - A study page now lists its own solves (`data.solves`, execute + decide) and each measured design has
   a **Solve in 3D** action. It writes a real standalone verify run

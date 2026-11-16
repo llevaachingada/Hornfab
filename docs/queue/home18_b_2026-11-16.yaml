@@ -1,0 +1,94 @@
+# HOME 18 h QUEUE night B (relaunched 2026-11-15 ~22:50), chained behind home18_a_2026-11-16. Second seeds; ATH fold jobs/TuRBO added live.
+night: home18_b_2026-11-16
+lane: gpu
+jobs:
+  # ---- TuRBO on the ATH fold cells, trained on night A's CMA rows (>=100 gate enforced) ----
+  - {id: b_cohort_tritonia, kind: command, timeout_s: 1800,
+     argv: [.venv/Scripts/python.exe, -m, tools.analysis.study_cohort, --config, examples/typologies/home_landscape_2026-11-15/hl__ath_tritonia_landscape_v8.yaml,
+            --dataset, dataset, --out, runs/home18_b_2026-11-16/cohort_tritonia]}
+  - {id: prep_b_turbo_tritonia, kind: command, timeout_s: 3600,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, tools/bo_compare/prepare_study.py, --root, runs/home18_b_2026-11-16/turbo_tritonia_s84001, --cohort, runs/home18_b_2026-11-16/cohort_tritonia,
+            --config, examples/typologies/home_landscape_2026-11-15/hl__ath_tritonia_landscape_v8.yaml, --policy, turbo, --budget-profile, comparison-60, --min-rows, "100",
+            --seed, "84001", --deadline-hours, "6", --label, b_turbo_tritonia]}
+  - {id: b_turbo_tritonia, kind: command, timeout_s: 14400,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, -m, hornlab_search.studies.cli, run, --root, runs/home18_b_2026-11-16/turbo_tritonia_s84001, --package, package.json,
+            --execute, --project-root, C:/Users/hunte/Hrns/hornlab-search]}
+  # ---- TuRBO #2 pass on Tritonia (owner 2026-11-16 ~05:40): staged AFTER b_turbo_tritonia so its
+  # ---- cohort pools the v8 CMA rows + the first turbo's own rows (they publish to the shared
+  # ---- dataset store). TuRBO centres at the best measured training design, so the second arm
+  # ---- starts at the best of everything found so far, not just the CMA best.
+  - {id: b_cohort_tritonia2, kind: command, timeout_s: 1800,
+     argv: [.venv/Scripts/python.exe, -m, tools.analysis.study_cohort, --config, examples/typologies/home_landscape_2026-11-15/hl__ath_tritonia_landscape_v8.yaml,
+            --dataset, dataset, --out, runs/home18_b_2026-11-16/cohort_tritonia2]}
+  - {id: prep_b_turbo_tritonia2, kind: command, timeout_s: 3600,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, tools/bo_compare/prepare_study.py, --root, runs/home18_b_2026-11-16/turbo_tritonia2_s84004, --cohort, runs/home18_b_2026-11-16/cohort_tritonia2,
+            --config, examples/typologies/home_landscape_2026-11-15/hl__ath_tritonia_landscape_v8.yaml, --policy, turbo, --budget-profile, comparison-60, --min-rows, "100",
+            --seed, "84004", --deadline-hours, "3", --label, b_turbo_tritonia2]}
+  - {id: b_turbo_tritonia2, kind: command, timeout_s: 12600,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, -m, hornlab_search.studies.cli, run, --root, runs/home18_b_2026-11-16/turbo_tritonia2_s84004, --package, package.json,
+            --execute, --project-root, C:/Users/hunte/Hrns/hornlab-search]}
+  - {id: b_cohort_twinray, kind: command, timeout_s: 1800,
+     argv: [.venv/Scripts/python.exe, -m, tools.analysis.study_cohort, --config, examples/typologies/home_landscape_2026-11-15/hl__ath_twinray380_landscape_v8.yaml,
+            --dataset, dataset, --out, runs/home18_b_2026-11-16/cohort_twinray]}
+  - {id: prep_b_turbo_twinray, kind: command, timeout_s: 3600,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, tools/bo_compare/prepare_study.py, --root, runs/home18_b_2026-11-16/turbo_twinray_s84002, --cohort, runs/home18_b_2026-11-16/cohort_twinray,
+            --config, examples/typologies/home_landscape_2026-11-15/hl__ath_twinray380_landscape_v8.yaml, --policy, turbo, --budget-profile, comparison-60, --min-rows, "100",
+            --seed, "84002", --deadline-hours, "6", --label, b_turbo_twinray]}
+  - {id: b_turbo_twinray, kind: command, timeout_s: 14400,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, -m, hornlab_search.studies.cli, run, --root, runs/home18_b_2026-11-16/turbo_twinray_s84002, --package, package.json,
+            --execute, --project-root, C:/Users/hunte/Hrns/hornlab-search]}
+  # ---- TuRBO #3 (owner 2026-11-16 ~05:30): the home-brief leader family, most rows on the brief
+  # ---- (~160 ext_throat rows; best J 3.10). Gate >=100 enforced; deadline tightened to 4 h.
+  - {id: b_cohort_extthroat, kind: command, timeout_s: 1800,
+     argv: [.venv/Scripts/python.exe, -m, tools.analysis.study_cohort, --config, examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml,
+            --dataset, dataset, --out, runs/home18_b_2026-11-16/cohort_extthroat]}
+  - {id: prep_b_turbo_extthroat, kind: command, timeout_s: 3600,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, tools/bo_compare/prepare_study.py, --root, runs/home18_b_2026-11-16/turbo_extthroat_s84003, --cohort, runs/home18_b_2026-11-16/cohort_extthroat,
+            --config, examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml, --policy, turbo, --budget-profile, comparison-60, --min-rows, "100",
+            --seed, "84003", --deadline-hours, "4", --label, b_turbo_extthroat]}
+  - {id: b_turbo_extthroat, kind: command, timeout_s: 14400,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, -m, hornlab_search.studies.cli, run, --root, runs/home18_b_2026-11-16/turbo_extthroat_s84003, --package, package.json,
+            --execute, --project-root, C:/Users/hunte/Hrns/hornlab-search]}
+  # ---- SCALAR-BO global arms (owner 2026-11-16 ~06:05): the complement to the trust-region arms.
+  # ---- Global GP on J models the WHOLE box, so it can find a second basin a trust region shrinks
+  # ---- away from. Staged last in the Bayesian block with fresh cohorts so each trains on the
+  # ---- fullest data at its start (CMA rows + any turbo rows). Not budget-matched to the turbo
+  # ---- arms: read as basin-discovery evidence, not the matched BO-vs-turbo verdict.
+  - {id: b_cohort_scalar_extthroat, kind: command, timeout_s: 1800,
+     argv: [.venv/Scripts/python.exe, -m, tools.analysis.study_cohort, --config, examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml,
+            --dataset, dataset, --out, runs/home18_b_2026-11-16/cohort_scalar_extthroat]}
+  - {id: prep_b_scalar_extthroat, kind: command, timeout_s: 3600,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, tools/bo_compare/prepare_study.py, --root, runs/home18_b_2026-11-16/scalar_extthroat_s84005, --cohort, runs/home18_b_2026-11-16/cohort_scalar_extthroat,
+            --config, examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.yaml, --policy, scalar, --budget-profile, comparison-25x2, --min-rows, "100",
+            --seed, "84005", --deadline-hours, "2", --label, b_scalar_extthroat]}
+  - {id: b_scalar_extthroat, kind: command, timeout_s: 9000,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, -m, hornlab_search.studies.cli, run, --root, runs/home18_b_2026-11-16/scalar_extthroat_s84005, --package, package.json,
+            --execute, --project-root, C:/Users/hunte/Hrns/hornlab-search]}
+  - {id: b_cohort_scalar_tritonia, kind: command, timeout_s: 1800,
+     argv: [.venv/Scripts/python.exe, -m, tools.analysis.study_cohort, --config, examples/typologies/home_landscape_2026-11-15/hl__ath_tritonia_landscape_v8.yaml,
+            --dataset, dataset, --out, runs/home18_b_2026-11-16/cohort_scalar_tritonia]}
+  - {id: prep_b_scalar_tritonia, kind: command, timeout_s: 3600,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, tools/bo_compare/prepare_study.py, --root, runs/home18_b_2026-11-16/scalar_tritonia_s84006, --cohort, runs/home18_b_2026-11-16/cohort_scalar_tritonia,
+            --config, examples/typologies/home_landscape_2026-11-15/hl__ath_tritonia_landscape_v8.yaml, --policy, scalar, --budget-profile, comparison-25x2, --min-rows, "100",
+            --seed, "84006", --deadline-hours, "2", --label, b_scalar_tritonia]}
+  - {id: b_scalar_tritonia, kind: command, timeout_s: 9000,
+     argv: [C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe, -m, hornlab_search.studies.cli, run, --root, runs/home18_b_2026-11-16/scalar_tritonia_s84006, --package, package.json,
+            --execute, --project-root, C:/Users/hunte/Hrns/hornlab-search]}
+  - {id: b_osse_fold_warm_s5678, kind: command, timeout_s: 9000,
+     argv: [.venv/Scripts/hornlab-search.exe, search, --config, examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_fold_warm_v7.yaml,
+            --mode, screen, --budget, "96", --cma-seed, "5678"]}
+  - {id: b_biradial_s9012, kind: command, timeout_s: 9000,
+     argv: [.venv/Scripts/hornlab-search.exe, search, --config, examples/typologies/home_landscape_2026-11-15/hl__biradial_es_style_v7.yaml,
+            --mode, screen, --budget, "96", --cma-seed, "9012"]}
+  - {id: b_rosse_cd_s9012, kind: command, timeout_s: 7200,
+     argv: [.venv/Scripts/python.exe, tools/geometry/rosse_rect_cli.py, search, --config, examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml,
+            --mode, screen, --budget, "96", --cma-seed, "9012"]}
+  - {id: b_crowex_cd_s9012, kind: command, timeout_s: 9000,
+     argv: [.venv/Scripts/hornlab-search.exe, search, --config, examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml,
+            --mode, screen, --budget, "96", --cma-seed, "9012"]}
+  - {id: v2_stock_top2, kind: command, timeout_s: 10800,
+     argv: [.venv/Scripts/python.exe, tools/night_queue/verify_night_jobs.py, --night, home18_b_2026-11-16, --top, "2",
+            --jobs, "b_osse_fold_warm_s5678,b_biradial_s9012,b_crowex_cd_s9012"]}
+  - {id: v2_rosse_top2, kind: command, timeout_s: 10800,
+     argv: [.venv/Scripts/python.exe, tools/geometry/rosse_rect_cli.py, verify-night, --night, home18_b_2026-11-16, --top, "2",
+            --jobs, "b_rosse_cd_s9012"]}

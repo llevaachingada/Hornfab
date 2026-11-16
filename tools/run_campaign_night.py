@@ -81,6 +81,158 @@ STATUS_OK = "ok"
 STATUS_BLOCKED = "blocked"
 STATUS_FAILED = "failed"
 STATUS_TIMEOUT = "timeout"
+STATUS_WATCHDOG = "watchdog"
+
+# ------------------------------------------------------------------ search watchdog (2026-11-16)
+#
+# Owner rule: a search that is not going anywhere must not hold the GPU. While a search job runs,
+# the runner reads its live ``search.ndjson`` and stops the job (moving on to the next one) when
+#   * refusals: once ``min_attempts`` attempts exist, more than ``refusal_max`` of the last
+#     ``refusal_window`` attempts are refusals/failures (``objective >= 900`` or not ok);
+#   * no gain at all: after ``no_gain_valid`` valid evals the best is still eval 0 (the seed);
+#   * stalled: the best J has not improved by more than ``min_rel_improve`` (relative) over the
+#     last ``stall_valid`` valid evals.
+# Night YAML: top-level ``watchdog:`` mapping overrides these defaults for every search job;
+# a job's own ``watchdog:`` mapping overrides the night's; ``watchdog: false`` turns it off.
+# Applies to jobs whose argv runs a ``search`` (stock CLI or a geometry bridge); verify, cohort
+# and BoTorch study jobs are never watched. A stopped job is recorded ``status: watchdog``.
+WATCHDOG_DEFAULTS: dict[str, float] = {
+    "min_attempts": 25,
+    "refusal_window": 30,
+    "refusal_max": 0.30,
+    "no_gain_valid": 30,
+    "stall_valid": 40,
+    "min_rel_improve": 0.005,
+}
+WATCHDOG_POLL_S = 30.0
+WATCHDOG_EXIT = 75
+
+
+def _resolve_watchdog(night_value, job_value, where: str):
+    """Merge defaults <- night <- job. Returns a sorted tuple of items, or None when off."""
+    merged = dict(WATCHDOG_DEFAULTS)
+    for value, label in ((night_value, "night"), (job_value, "job")):
+        if value is None or value is True:
+            continue
+        if value is False:
+            return None
+        if not isinstance(value, dict):
+            raise ValueError(f"{where}: {label} watchdog must be a mapping, true or false")
+        for key, item in value.items():
+            if key not in WATCHDOG_DEFAULTS:
+                raise ValueError(f"{where}: unknown watchdog key {key!r} "
+                                 f"(known: {', '.join(WATCHDOG_DEFAULTS)})")
+            if isinstance(item, bool) or not isinstance(item, (int, float)) or item < 0:
+                raise ValueError(f"{where}: watchdog {key} must be a number >= 0")
+            merged[key] = float(item)
+    return tuple(sorted(merged.items()))
+
+
+def _is_search_argv(argv) -> bool:
+    parts = [Path(str(a)).name.lower() for a in argv]
+    return "search" in parts and "verify-night" not in parts
+
+
+def _find_knob(d, key):
+    if isinstance(d, dict):
+        if key in d and isinstance(d[key], (int, float)) and not isinstance(d[key], bool):
+            return d[key]
+        for v in d.values():
+            got = _find_knob(v, key)
+            if got is not None:
+                return got
+    return None
+
+
+def _run_bounds(run_dir: Path) -> dict:
+    """Searched bounds {key: (lo, hi)} from a run dir's config.yaml (empty on any problem)."""
+    try:
+        raw = yaml.safe_load((Path(run_dir) / "config.yaml").read_text(encoding="utf-8")) or {}
+        return {k: (float(b["lo"]), float(b["hi"])) for k, b in (raw.get("bounds") or {}).items()
+                if isinstance(b, dict) and b.get("search", True) and float(b["lo"]) != float(b["hi"])}
+    except Exception:  # noqa: BLE001 - the watchdog must never crash the night
+        return {}
+
+
+def watchdog_verdict(records: list[dict], cfg: dict, bounds: dict | None = None) -> str | None:
+    """Pure decision on a search's rows so far; returns a reason string to stop, else None."""
+    def bad(r):
+        obj = r.get("objective")
+        return (not r.get("ok")) or not isinstance(obj, (int, float)) or obj >= 900
+    attempts = len(records)
+    if attempts >= cfg["min_attempts"]:
+        window = records[-int(cfg["refusal_window"]):] if cfg["refusal_window"] else records
+        if window:
+            frac = sum(1 for r in window if bad(r)) / len(window)
+            if frac > cfg["refusal_max"]:
+                return (f"refusal rate {frac:.0%} over the last {len(window)} attempts "
+                        f"> {cfg['refusal_max']:.0%}")
+    valid = [r for r in records if not bad(r)]
+    if not valid:
+        return None
+    if cfg["no_gain_valid"] and len(valid) >= cfg["no_gain_valid"]:
+        best = min(valid, key=lambda r: r["objective"])
+        first = valid[0]
+        if first.get("n", 0) == 0 and best["objective"] >= first["objective"]:
+            return f"no gain: after {len(valid)} valid evals the best is still the seed (J {first['objective']:.4g})"
+    # bound pinning (owner 2026-11-16): the box, not the physics, is limiting the search
+    if bounds and len(valid) >= cfg.get("pin_min_valid", 30):
+        top = sorted(valid, key=lambda r: r["objective"])[:6]
+        for key, (lo, hi) in bounds.items():
+            vals = [_find_knob(r.get("params") or {}, key) for r in top]
+            vals = [v for v in vals if isinstance(v, (int, float))]
+            if len(vals) < 4 or hi <= lo:
+                continue
+            frac = cfg.get("pin_frac", 0.03)
+            n_lo = sum(1 for v in vals if (v - lo) / (hi - lo) <= frac)
+            n_hi = sum(1 for v in vals if (hi - v) / (hi - lo) <= frac)
+            need = cfg.get("pin_count", 3)
+            if n_lo >= need or n_hi >= need:
+                side = "low" if n_lo >= need else "high"
+                return (f"bound-pinned: {max(n_lo, n_hi)}/{len(vals)} of the top 6 sit at the {side} limit of "
+                        f"{key} [{lo:g}, {hi:g}] - widen the box and requeue")
+    stall = int(cfg["stall_valid"])
+    if stall and len(valid) > stall:
+        before = min(r["objective"] for r in valid[:-stall])
+        now = min(r["objective"] for r in valid)
+        if now > before * (1.0 - cfg["min_rel_improve"]):
+            return (f"stalled: best J {now:.4g} improved < {cfg['min_rel_improve']:.1%} "
+                    f"over the last {stall} valid evals")
+    return None
+
+
+def _find_new_run_dir(runs_root: Path, since_epoch: float) -> Path | None:
+    """The run dir a search job created: newest ``runs/<ts>-<mode>-<id>`` holding a
+    ``search.ndjson``, created after the job started (one job per lane at a time)."""
+    best: tuple[float, Path] | None = None
+    try:
+        for child in Path(runs_root).iterdir():
+            if not child.is_dir() or not child.name[:1].isdigit() or "-" not in child.name:
+                continue
+            nd = child / "search.ndjson"
+            try:
+                ctime = child.stat().st_ctime
+            except OSError:
+                continue
+            if ctime >= since_epoch and nd.is_file() and (best is None or ctime > best[0]):
+                best = (ctime, child)
+    except OSError:
+        return None
+    return None if best is None else best[1]
+
+
+def _read_ndjson(path: Path) -> list[dict]:
+    out: list[dict] = []
+    try:
+        with open(path, encoding="utf-8") as handle:
+            for line in handle:
+                try:
+                    out.append(json.loads(line))
+                except ValueError:
+                    pass                      # a half-written last line
+    except OSError:
+        pass
+    return out
 
 #: Lanes this runner understands. ``gpu`` is the historical single-lane behaviour.
 LANES = ("gpu", "cpu")
@@ -125,6 +277,8 @@ class Job:
     cache_dir: str | None = None
     dataset_dir: str | None = None
     env: dict[str, str] = field(default_factory=dict)
+    #: Resolved search watchdog (``None`` = off). See ``watchdog_verdict``.
+    watchdog: tuple[tuple[str, float], ...] | None = None
 
 
 @dataclass(frozen=True)
@@ -133,6 +287,11 @@ class NightPlan:
     jobs: tuple[Job, ...]
     path: Path
     lane: str = "gpu"
+    #: Live-queue control keys (top level of the night YAML, re-read before every job):
+    #: ``pause: true`` holds before the next job; ``stop: true`` ends the night after the
+    #: current job. Equivalent to the ``PAUSE`` / ``STOP`` files in the night directory.
+    pause: bool = False
+    stop: bool = False
 
 
 @dataclass
@@ -267,6 +426,8 @@ def classify_status(exit_code: int, timed_out: bool, log_text: str | None) -> st
     text = log_text or ""
     if timed_out:
         return STATUS_TIMEOUT
+    if exit_code == WATCHDOG_EXIT and "=== WATCHDOG" in text:
+        return STATUS_WATCHDOG
     if GPU_BUSY_MARKER in text and exit_code != 0:
         return STATUS_BLOCKED
     if exit_code == 0:
@@ -415,6 +576,14 @@ def load_night(path: Path | str, *, repo_root: Path | str | None = None,
     specs = raw.get("jobs")
     if not isinstance(specs, list) or not specs:
         raise ValueError(f"{path}: 'jobs' must be a non-empty list")
+    flags = {}
+    for key in ("pause", "stop"):
+        value = raw.get(key, False)
+        if value is None:
+            value = False
+        if not isinstance(value, bool):
+            raise ValueError(f"{path}: top-level {key!r} must be true or false, got {value!r}")
+        flags[key] = value
 
     jobs: list[Job] = []
     seen: set[str] = set()
@@ -453,7 +622,17 @@ def load_night(path: Path | str, *, repo_root: Path | str | None = None,
                 timeout_s=timeout, env=job_env))
         else:
             raise ValueError(f"job {job_id!r}: kind must be 'search' or 'command', got {kind!r}")
-    return NightPlan(night=night, jobs=tuple(jobs), path=path, lane=lane)
+    import dataclasses
+    night_wd = raw.get("watchdog")
+    watched: list[Job] = []
+    for job, spec in zip(jobs, specs):
+        job_wd = spec.get("watchdog")
+        if job.kind == "search" or _is_search_argv(job.argv) or isinstance(job_wd, dict) or job_wd is True:
+            wd = _resolve_watchdog(night_wd, job_wd, f"{path}: job {job.id!r}")
+        else:
+            wd = None
+        watched.append(dataclasses.replace(job, watchdog=wd))
+    return NightPlan(night=night, jobs=tuple(watched), path=path, lane=lane, **flags)
 
 
 # ------------------------------------------------------------------ admission gate
@@ -702,6 +881,7 @@ class NightRunner:
         self.vram_poll_s = float(vram_poll_s)
         self.last_peak_mb: float | None = None
         self._last_baseline_mb: float | None = None
+        self.watchdog_poll_s = WATCHDOG_POLL_S
 
     # -- hygiene -------------------------------------------------------
 
@@ -828,6 +1008,11 @@ class NightRunner:
         pump_thread.start()
         deadline = time.monotonic() + float(job.timeout_s)
         timed_out = False
+        wd_cfg = dict(job.watchdog) if job.watchdog else None
+        wd_start = time.time() - 5.0
+        wd_next = time.monotonic() + self.watchdog_poll_s
+        wd_run: Path | None = None
+        wd_reason: str | None = None
 
         with open(log_path, "a", encoding="utf-8", errors="replace") as log:
             def emit(line: str) -> None:
@@ -852,6 +1037,22 @@ class NightRunner:
                     break
                 if proc.poll() is not None:
                     break
+                if wd_cfg is not None and time.monotonic() >= wd_next:
+                    wd_next = time.monotonic() + self.watchdog_poll_s
+                    if wd_run is None:
+                        wd_run = _find_new_run_dir(self.runs_root, wd_start)
+                    if wd_run is not None:
+                        wd_reason = watchdog_verdict(_read_ndjson(wd_run / "search.ndjson"), wd_cfg, _run_bounds(wd_run))
+                    if wd_reason:
+                        log.write(f"\n=== WATCHDOG {wd_reason}; stopping job {job.id} (pid {proc.pid})\n"
+                                  f"search ABORTED: watchdog (partial results in {wd_run})\n")
+                        log.flush()
+                        _kill_tree(proc)
+                        try:
+                            proc.wait(timeout=60)
+                        except subprocess.TimeoutExpired:
+                            proc.kill()
+                        break
                 if time.monotonic() >= deadline:
                     timed_out = True
                     log.write(
@@ -880,6 +1081,9 @@ class NightRunner:
         if timed_out:
             _append(log_path, f"=== job {job.id} timed out\n")
             return 124, True
+        if wd_reason:
+            _append(log_path, f"=== job {job.id} stopped by watchdog {_utc_now()} exit={WATCHDOG_EXIT}\n")
+            return WATCHDOG_EXIT, False
         rc = proc.poll()
         code = 0 if rc is None else int(rc)
         _append(log_path, f"=== job {job.id} end {_utc_now()} exit={code}\n")
@@ -993,11 +1197,71 @@ def night_lane_lock(plan: NightPlan, runs_root: Path | str | None = None):
         yield holder
 
 
+# ------------------------------------------------------------------ live queue (2026-11-16)
+#
+# The night file is RE-READ before every job, so an agent (or the owner) can edit the running
+# queue: reorder, insert, remove or change jobs that have not started. Rules:
+#   * a job id that already ran in this night (this process) is never run again - give a re-run a
+#     NEW id;
+#   * the job that is running is never interrupted by an edit; the edit applies from the next job;
+#   * an unreadable / invalid edit (half-saved file, YAML typo, duplicate id) is logged as
+#     ``RELOAD FAILED`` and the LAST GOOD plan's remaining jobs continue - a typo never kills a night;
+#   * the ``night`` name and ``lane`` cannot change mid-night (refused like an invalid edit);
+#   * with an admission packet, a reloaded job id outside ``allowed_job_ids`` is skipped and logged.
+# Control: create ``runs/nights/<night>/PAUSE`` (or set top-level ``pause: true``) to hold before
+# the next job - the runner polls, re-reads the file while paused, and resumes when it is removed;
+# create ``STOP`` (or ``stop: true``) to end the night cleanly after the current job.
+# ``queue_state.json`` in the night directory shows done / running / next after every change.
+
+CONTROL_POLL_S = 20.0
+PAUSE_FILE = "PAUSE"
+STOP_FILE = "STOP"
+
+
+def _reload_plan(current: NightPlan, *, repo_root: Path, queue_log: Path,
+                 last_error: list) -> NightPlan:
+    """Re-read ``current.path``; on any problem keep ``current`` and log once per distinct error."""
+    try:
+        fresh = load_night(current.path, repo_root=repo_root)
+        if fresh.night != current.night:
+            raise ValueError(f"night name changed {current.night!r} -> {fresh.night!r}")
+        if fresh.lane != current.lane:
+            raise ValueError(f"lane changed {current.lane!r} -> {fresh.lane!r}")
+    except ValueError as exc:
+        message = str(exc)
+        if not last_error or last_error[0] != message:
+            write_queue_line(queue_log, f"RELOAD FAILED (keeping previous plan): {message}")
+            last_error[:] = [message]
+        return current
+    if last_error:
+        write_queue_line(queue_log, "RELOAD OK (night file valid again)")
+        last_error.clear()
+    old_ids = [job.id for job in current.jobs]
+    new_ids = [job.id for job in fresh.jobs]
+    if old_ids != new_ids or fresh.jobs != current.jobs:
+        write_queue_line(queue_log, f"RELOAD night file changed; order now: {', '.join(new_ids)}")
+    return fresh
+
+
+def _write_queue_state(night_dir: Path, plan: NightPlan, done: list[str], running: str | None,
+                       state: str) -> None:
+    pending = [job.id for job in plan.jobs if job.id not in done and job.id != running]
+    payload = {"night": plan.night, "night_file": str(plan.path), "state": state,
+               "updated": _utc_now(), "done": list(done), "running": running,
+               "pending": pending}
+    tmp = night_dir / "queue_state.json.tmp"
+    tmp.write_text(json.dumps(payload, indent=1), encoding="utf-8")
+    os.replace(tmp, night_dir / "queue_state.json")
+
+
 def run_night(plan: NightPlan, *, dry_run: bool = False, only: str | None = None,
               repo_root: Path | str | None = None,
               runs_root: Path | str | None = None,
               runner=None,
-              retry_wait_s: float | None = None) -> list[JobResult]:
+              retry_wait_s: float | None = None,
+              live: bool = True,
+              admission: dict | None = None,
+              control_poll_s: float | None = None) -> list[JobResult]:
     """Run (or, with ``dry_run``, print) the night's jobs in order.
 
     ``runner`` is the injection seam for tests: an object with
@@ -1048,15 +1312,59 @@ def run_night(plan: NightPlan, *, dry_run: bool = False, only: str | None = None
     # same lines tools/overnight/queue_*.ps1 write, so the night shows up there without extra wiring.
     queue_log = night_dir.parent.parent / "overnight" / f"queue_{plan.night}.log"
     results: list[JobResult] = []
+    # --only runs one fixed job; everything else is a live queue (see the block comment above).
+    live = bool(live) and only is None
+    poll = float(CONTROL_POLL_S if control_poll_s is None else control_poll_s)
+    allowed = set(admission.get("allowed_job_ids") or ()) if admission else None
+    current = plan
+    done: list[str] = []
+    skipped: set[str] = set()
+    reload_error: list = []
+
+    def next_job() -> Job | None:
+        for candidate in (current.jobs if live else jobs):
+            if candidate.id in done or candidate.id in skipped:
+                continue
+            if allowed is not None and candidate.id not in allowed:
+                skipped.add(candidate.id)
+                write_queue_line(queue_log, f"SKIP {candidate.id} (not in admission allowed_job_ids)")
+                continue
+            return candidate
+        return None
+
     with night_lane_lock(plan, runs_root=runs_root):
-        for job in jobs:
+        while True:
+            if live:
+                current = _reload_plan(current, repo_root=root, queue_log=queue_log,
+                                       last_error=reload_error)
+                paused_logged = False
+                while ((night_dir / PAUSE_FILE).exists() or current.pause) and not (
+                        (night_dir / STOP_FILE).exists() or current.stop):
+                    if not paused_logged:
+                        write_queue_line(queue_log, "PAUSED (remove PAUSE file / set pause: false to resume)")
+                        _write_queue_state(night_dir, current, done, None, "paused")
+                        paused_logged = True
+                    time.sleep(poll)
+                    current = _reload_plan(current, repo_root=root, queue_log=queue_log,
+                                           last_error=reload_error)
+                if paused_logged:
+                    write_queue_line(queue_log, "RESUMED")
+                if (night_dir / STOP_FILE).exists() or current.stop:
+                    write_queue_line(queue_log, "STOP requested; ending night before the next job")
+                    _write_queue_state(night_dir, current, done, None, "stopped")
+                    break
+            job = next_job()
+            if job is None:
+                break
+            if live:
+                _write_queue_state(night_dir, current, done, job.id, "running")
             write_queue_line(queue_log, f"START {job.id} : {' '.join(job.argv)}")
             attempts = 0
             while True:
                 attempts += 1
                 if attempts > 2:
                     break                       # retried exactly once, never twice
-                result = _run_one(plan, job, night_dir=night_dir, runner=runner,
+                result = _run_one(current, job, night_dir=night_dir, runner=runner,
                                   repo_root=root, attempts=attempts)
                 with open(summary_path, "a", encoding="utf-8") as handle:
                     handle.write(json.dumps(result.to_dict(), ensure_ascii=False) + "\n")
@@ -1075,7 +1383,12 @@ def run_night(plan: NightPlan, *, dry_run: bool = False, only: str | None = None
                       f"best_J={_fmt(result.best_J)} status={result.status} "
                       f"note={result.note}")
                 break
-    write_summary_md(night_dir / "SUMMARY.md", plan, results)
+            done.append(job.id)
+            if live:
+                _write_queue_state(night_dir, current, done, None, "between_jobs")
+    if live and not ((night_dir / STOP_FILE).exists() or current.stop):
+        _write_queue_state(night_dir, current, done, None, "done")
+    write_summary_md(night_dir / "SUMMARY.md", current, results)
     write_queue_line(queue_log, "QUEUE DONE")
     return results
 
@@ -1135,6 +1448,9 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
     parser.add_argument("--admission", metavar="JSON", default=None,
                         help="admission packet JSON (policy gate: night + allowed_job_ids); "
                              "loaded before any job runs, dry-run included")
+    parser.add_argument("--no-live", action="store_true",
+                        help="read the night file once (old behaviour); default re-reads it "
+                             "before every job and honours PAUSE/STOP files")
     return parser.parse_args(argv)
 
 
@@ -1155,7 +1471,9 @@ def main(argv: list[str] | None = None) -> int:
         print(f"admission accepted for night {plan.night}: "
               f"{len(admission['allowed_job_ids'])} job(s) allowed")
     try:
-        results = run_night(plan, dry_run=args.dry_run, only=args.only)
+        results = run_night(plan, dry_run=args.dry_run, only=args.only,
+                            live=not args.no_live,
+                            admission=admission if args.admission is not None else None)
     except ValueError as exc:
         print(f"night runner: {exc}", file=sys.stderr)
         return 2

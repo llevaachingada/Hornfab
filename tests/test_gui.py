@@ -232,6 +232,65 @@ def test_launch_log_and_cancel(repo, monkeypatch):
     assert job.status == "cancelled" and job.proc.poll() is not None
 
 
+def _bridge_repo(repo, *, tool: bool = True) -> Path:
+    """Give the fixture's run a bridge rows config (and, by default, the CLI that installs it)."""
+    path = repo / "tools" / "geometry" / "rolled_rect_cli.py"
+    if tool:
+        path.parent.mkdir(parents=True)
+        path.write_text("print('bridge', flush=True)\n", encoding="utf-8")
+    (repo / "runs" / RID / "config.yaml").write_text(yaml.safe_dump({
+        "name": "hl__rolled_es_spiral_v7", "family": "FREEFORM",
+        "generator": {"name": "grid", "rows": {"type": "rolled_rect_pucker"}}}))
+    return path
+
+
+def test_bridge_rows_job_spawns_its_geometry_cli(repo, monkeypatch):
+    """A job whose config uses a process-local rows kind must run through tools/geometry/<cli>.py.
+
+    The stock entry point has no rows adapter, so a resume aborted at the seed gate with
+    ``unknown rows type 'rolled_rect_pucker'`` before evaluation 0 (2026-11-15, the rolled_rect
+    "Continue this run" failure). Covers the three GUI paths that load such a config: resume,
+    fresh launch from its config, and verify of its run."""
+    tool = _bridge_repo(repo)
+    jm = J.JobManager(repo, repo / "runs")
+    for kind, a in [("search", {"resume": RID, "budget": 5}),
+                    ("search", {"config": f"runs/{RID}/config.yaml", "budget": 5}),
+                    ("verify", {"run": RID, "top": 1})]:
+        argv, _ = jm.build_argv(kind, a)
+        assert jm._bridge_entry(argv) == "tools/geometry/rolled_rect_cli.py", (kind, argv)
+
+    seen = {}
+
+    class _Proc:
+        pid = 4242
+        def wait(self, timeout=None): return 0
+        def poll(self): return 0
+
+    def _spawn(cmd, **kw):
+        seen["cmd"] = cmd
+        return _Proc()
+
+    monkeypatch.setattr(J.subprocess, "Popen", _spawn)
+    job = jm.launch("search", {"resume": RID, "budget": 5})
+    assert job.entry == "tools/geometry/rolled_rect_cli.py"
+    assert seen["cmd"][:2] == [J.sys.executable, str(tool)]
+    assert seen["cmd"][2:] == job.argv                     # argv is forwarded unchanged
+    assert job.view()["command"].startswith("python tools/geometry/rolled_rect_cli.py search")
+
+
+def test_stock_jobs_keep_the_cli_boot(repo):
+    """Only a config that needs a rows adapter changes the entry point; everything else is unchanged."""
+    _bridge_repo(repo, tool=False)                          # the config, but no adapter CLI on disk
+    jm = J.JobManager(repo, repo / "runs")
+    argv, _ = jm.build_argv("search", {"resume": RID})
+    assert jm._bridge_entry(argv) is None                   # missing tool: stock CLI reports its own error
+    assert jm._bridge_entry(["gpu-clean"]) is None          # no config at all
+    assert J.Job("j", "search", ["search"], repo / "x.log", True).view()["command"] == "hornlab-search search"
+
+    (repo / "runs" / RID / "config.yaml").write_text("name: [unclosed\n", encoding="utf-8")
+    assert jm._bridge_entry(argv) is None                   # unreadable config never breaks the launcher
+
+
 # ------------------------------------------------------------------ server
 
 
@@ -530,3 +589,32 @@ def test_step_files_listed_and_served_only_by_strict_name(server, repo):
         assert r.status == 200 and r.read() == b"ISO-10303-21;" and "attachment" in r.headers["Content-Disposition"]
     assert _req(server + f"/runs/{RID}/step/notes.txt")[0] == 404
     assert _req(server + f"/runs/{RID}/step/..%2F..%2Fconfig.yaml")[0] == 404
+
+
+# Fix D (2026-11-16): seed_policy passthrough from config's generator block
+
+
+def test_seed_policy_absent_when_generator_has_no_policy(repo):
+    """When config has no generator.seed_policy, run_detail returns no seed_policy key."""
+    d = D.run_detail(repo / "runs", RID)
+    assert "seed_policy" not in d
+
+
+def test_seed_policy_explicit_is_passed_through(repo):
+    """When generator.seed_policy = 'explicit', run_detail includes seed_policy='explicit'."""
+    cfg_path = repo / "runs" / RID / "config.yaml"
+    cfg = yaml.safe_load(cfg_path.read_text())
+    cfg["generator"] = {"name": "grid", "seed_policy": "explicit"}
+    cfg_path.write_text(yaml.safe_dump(cfg))
+    d = D.run_detail(repo / "runs", RID)
+    assert d["seed_policy"] == "explicit"
+
+
+def test_seed_policy_derive_is_passed_through(repo):
+    """When generator.seed_policy = 'derive', run_detail includes seed_policy='derive'."""
+    cfg_path = repo / "runs" / RID / "config.yaml"
+    cfg = yaml.safe_load(cfg_path.read_text())
+    cfg["generator"] = {"name": "grid", "seed_policy": "derive"}
+    cfg_path.write_text(yaml.safe_dump(cfg))
+    d = D.run_detail(repo / "runs", RID)
+    assert d["seed_policy"] == "derive"

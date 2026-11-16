@@ -1,0 +1,184 @@
+# Queue 2026-11-16 (18 h home queue, docs/queue/HOME_18H_PLAN_2026-11-16.md). Copy of hl__ath_core_petal_hvlaw_v7.yaml; the v7 file is unchanged
+# (BO cohorts and running history key on it). Only the bounds/seed listed below differ. Evidence for every bound change:
+# top-10 of all prior valid uncached rows pinned at the old edge (same plan doc, section 'bound audit').
+# a_deg 12-36 -> 12-44 (median frac 0.89, best 35.0); az_a_cos_pow 1-6 -> 0.5-6 (median 0.05); n 2-10 -> 2-12 (touch).
+# Seed = family best (J 5.322, runs/20261115T152510Z-screen-a504f6).
+name: hl__ath_core_petal_hvlaw_v8
+family: OSSE
+brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
+seed_params:
+  r0_mm: 18.0
+  a0_deg: 1.80335
+  L_mm: 215.524
+  a_deg: 34.9919
+  n: 8.57071
+  s: 0.461287
+  q: 0.998891
+  k: 1.57534
+  exponent: 2.0
+  aspect_ratio: 1.0
+  s1: 1.1799
+  s2: 0.0286
+  morph_target: 0
+  morph_width_mm: 540.0
+  morph_height_mm: 400.0
+  morph_corner_mm: 15.0
+  morph_exponent: 4.5
+  morph_rate: 3.46
+  morph_fixed: 0.0
+  morph_allow_shrinkage: 0
+  az_sf_m: 4.0
+  az_sf_n1: 7.4958
+  az_sf_n2: 12.4449
+  az_sf_n3: 13.4442
+  az_sf_a: 1.0
+  az_sf_b: 0.8569
+  az_a_cos_pow: 1.03451
+  az_n_cos2_amp: 0.0
+  az_a_sf_amp: 2.57365
+  az_a_cos_amp: 9.30374
+  az_s_cos2_amp: 0.0528914
+bounds:
+  r0_mm:
+    lo: 18.0
+    hi: 18.0
+    search: false
+  a0_deg:
+    lo: 1.0
+    hi: 3.0
+  L_mm:
+    lo: 160.0
+    hi: 340.0
+  a_deg:
+    lo: 12.0
+    hi: 44.0
+  n:
+    lo: 2.0
+    hi: 12.0
+  s:
+    lo: 0.2
+    hi: 1.2
+  q:
+    lo: 0.9
+    hi: 1.0
+  k:
+    lo: 0.3
+    hi: 3.0
+  exponent:
+    lo: 2.0
+    hi: 2.0
+    search: false
+  aspect_ratio:
+    lo: 1.0
+    hi: 1.0
+    search: false
+  s1:
+    lo: 1.1799
+    hi: 1.1799
+    search: false
+  s2:
+    lo: 0.0286
+    hi: 0.0286
+    search: false
+  morph_target:
+    lo: 0
+    hi: 0
+    search: false
+  morph_width_mm:
+    lo: 540.0
+    hi: 540.0
+    search: false
+  morph_height_mm:
+    lo: 400.0
+    hi: 400.0
+    search: false
+  morph_corner_mm:
+    lo: 15.0
+    hi: 15.0
+    search: false
+  morph_exponent:
+    lo: 4.5
+    hi: 4.5
+    search: false
+  morph_rate:
+    lo: 3.46
+    hi: 3.46
+    search: false
+  morph_fixed:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  morph_allow_shrinkage:
+    lo: 0
+    hi: 0
+    search: false
+  az_sf_m:
+    lo: 4.0
+    hi: 4.0
+    search: false
+  az_sf_n1:
+    lo: 7.4958
+    hi: 7.4958
+    search: false
+  az_sf_n2:
+    lo: 12.4449
+    hi: 12.4449
+    search: false
+  az_sf_n3:
+    lo: 13.4442
+    hi: 13.4442
+    search: false
+  az_sf_a:
+    lo: 1.0
+    hi: 1.0
+    search: false
+  az_sf_b:
+    lo: 0.8569
+    hi: 0.8569
+    search: false
+  az_a_cos_pow:
+    lo: 0.5
+    hi: 6.0
+  az_n_cos2_amp:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  az_a_sf_amp:
+    lo: 0.0
+    hi: 8.0
+  az_a_cos_amp:
+    lo: 0.0
+    hi: 25.0
+  az_s_cos2_amp:
+    lo: -0.25
+    hi: 0.5
+description: 'HOME LANDSCAPE: ATH CORE-style OSSE, gentle petal creases (amp 0-8 deg) + H/V cosine wall law, mouth follows walls | v8: wall angle
+  / cos-pow / n re-opened'
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+  rear_res_factor: 1.5
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.2
+  seed: 1234
+  budget: 80
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+  budget_counts: valid
+  max_attempts: 180

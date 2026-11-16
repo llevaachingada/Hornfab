@@ -1,0 +1,60 @@
+# HOME 18 h QUEUE night A (relaunched 2026-11-15 ~22:50, owner direction). Plan: docs/queue/HOME_18H_PLAN_2026-11-16.md.
+# Brief per family TYPE: constant-directivity families (Keele bi-radial, ATH R-OSSE, Crowe-X on a CD throat, ATH OSSE)
+# on room_landscape_80x50_700_hf1440_v7; families that narrow by design (Le Cleac'h, ES rollback, digitized Crowe ES
+# sections) on room_landscape_80x50_700_hf1440_v7_smooth (repo study 2026-11-15 s3/s8.3). J is not comparable across
+# the two briefs. ATH OSSE cells with the azimuth fold law are inserted at the FRONT live once that code lands.
+# Watchdog: runner defaults (refusals >30 % of last 30, seed still best after 30 valid, <0.5 % gain over 40 valid).
+night: home18_a_2026-11-16
+lane: gpu
+jobs:
+  # ---- narrowing families on the smooth brief (cheap: 7-15 s/eval) ----
+  # ---- ATH OSSE + MERIDIAN FOLD (inserted ~22:55, owner): published Tritonia / TwinRay-380 seeds + warm start ----
+  # ---- ATH OSSE + MERIDIAN FOLD (inserted ~22:55, owner): published Tritonia / TwinRay-380 seeds + warm start ----
+  - {id: a_tritonia_s1234, kind: command, timeout_s: 9000,
+     argv: [.venv/Scripts/hornlab-search.exe, search, --config, examples/typologies/home_landscape_2026-11-15/hl__ath_tritonia_landscape_v7.yaml,
+            --mode, screen, --budget, "120", --cma-seed, "1234"]}
+  - {id: a_osse_fold_warm_s1234, kind: command, timeout_s: 9000,
+     argv: [.venv/Scripts/hornlab-search.exe, search, --config, examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_fold_warm_v7.yaml,
+            --mode, screen, --budget, "96", --cma-seed, "1234"]}
+  - {id: a_twinray_s1234, kind: command, timeout_s: 9000,
+     argv: [.venv/Scripts/hornlab-search.exe, search, --config, examples/typologies/home_landscape_2026-11-15/hl__ath_twinray380_landscape_v7.yaml,
+            --mode, screen, --budget, "120", --cma-seed, "1234"]}
+  - {id: a_tritonia_s5678, kind: command, timeout_s: 9000,
+     argv: [.venv/Scripts/hornlab-search.exe, search, --config, examples/typologies/home_landscape_2026-11-15/hl__ath_tritonia_landscape_v7.yaml,
+            --mode, screen, --budget, "120", --cma-seed, "5678"]}
+  - {id: a_twinray_s5678, kind: command, timeout_s: 9000,
+     argv: [.venv/Scripts/hornlab-search.exe, search, --config, examples/typologies/home_landscape_2026-11-15/hl__ath_twinray380_landscape_v7.yaml,
+            --mode, screen, --budget, "120", --cma-seed, "5678"]}
+  - {id: a_section_sm_s1234, kind: command, timeout_s: 9000,
+     argv: [.venv/Scripts/hornlab-search.exe, search, --config, examples/typologies/rolled_family_2026-11-15/rf__section_axial_home_smooth_v8.yaml,
+            --mode, screen, --budget, "80", --cma-seed, "1234"]}
+  # ---- CD families on the base brief ----
+  - {id: a_biradial_s1234, kind: command, timeout_s: 9000,
+     argv: [.venv/Scripts/hornlab-search.exe, search, --config, examples/typologies/home_landscape_2026-11-15/hl__biradial_es_style_v7.yaml,
+            --mode, screen, --budget, "96", --cma-seed, "1234"]}
+  - {id: a_rosse_cd_s1234, kind: command, timeout_s: 7200,
+     argv: [.venv/Scripts/python.exe, tools/geometry/rosse_rect_cli.py, search, --config, examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml,
+            --mode, screen, --budget, "96", --cma-seed, "1234"]}
+  - {id: a_crowex_cd_s1234, kind: command, timeout_s: 9000,
+     argv: [.venv/Scripts/hornlab-search.exe, search, --config, examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml,
+            --mode, screen, --budget, "96", --cma-seed, "1234"]}
+  - {id: a_biradial_s5678, kind: command, timeout_s: 9000,
+     argv: [.venv/Scripts/hornlab-search.exe, search, --config, examples/typologies/home_landscape_2026-11-15/hl__biradial_es_style_v7.yaml,
+            --mode, screen, --budget, "96", --cma-seed, "5678"]}
+  - {id: a_rosse_cd_s5678, kind: command, timeout_s: 7200,
+     argv: [.venv/Scripts/python.exe, tools/geometry/rosse_rect_cli.py, search, --config, examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml,
+            --mode, screen, --budget, "96", --cma-seed, "5678"]}
+  - {id: a_crowex_cd_s5678, kind: command, timeout_s: 9000,
+     argv: [.venv/Scripts/hornlab-search.exe, search, --config, examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml,
+            --mode, screen, --budget, "96", --cma-seed, "5678"]}
+  # ---- A/B: bi-radial on the smooth brief (owner: is this ES-mouth variant really CD?) ----
+  - {id: a_biradial_sm_s1234, kind: command, timeout_s: 9000,
+     argv: [.venv/Scripts/hornlab-search.exe, search, --config, examples/typologies/home_landscape_2026-11-15/hl__biradial_es_style_smooth_v7.yaml,
+            --mode, screen, --budget, "96", --cma-seed, "1234"]}
+  # ---- VERIFY GROUP 1 ----
+  - {id: v1_stock_top2, kind: command, timeout_s: 10800,
+     argv: [.venv/Scripts/python.exe, tools/night_queue/verify_night_jobs.py, --night, home18_a_2026-11-16, --top, "2",
+            --jobs, "a_tritonia_s1234,a_osse_fold_warm_s1234,a_twinray_s1234,a_tritonia_s5678,a_twinray_s5678,a_section_sm_s1234,a_biradial_s1234,a_crowex_cd_s1234,a_biradial_s5678,a_crowex_cd_s5678,a_biradial_sm_s1234"]}
+  - {id: v1_rosse_top2, kind: command, timeout_s: 10800,
+     argv: [.venv/Scripts/python.exe, tools/geometry/rosse_rect_cli.py, verify-night, --night, home18_a_2026-11-16, --top, "2",
+            --jobs, "a_rosse_cd_s1234,a_rosse_cd_s5678"]}

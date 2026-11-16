@@ -1,0 +1,99 @@
+# Le Cleac'h (Fourcade verified march, rows type `lecleach`) H/V PAIR, REPAIRED 2026-11-16 (item 13):
+# the old per-azimuth reading built ONE COMPLETE march per azimuth at fc(phi)/stop(phi) and lofted
+# them point by point -> rows of ~2.3x different length never form one horn (rim non-elliptical by
+# 11% at the seed / 183% at a box corner, axially non-planar by 155-319 mm) = the rejected lobed,
+# bulbous body (run 20261116T040651Z-screen-e53ae9).
+# The published construction now implemented (grid.py _rows_lecleach_hv_marches):
+#   ONE round core march at fc_core = sqrt(fc_h*fc_v) gives the shared wavefront stations x(s)
+#   (including the rollback curl -> the lip is the same smooth continuous rollback on every
+#   azimuth); the plane marches at fc_h (phi=0) and fc_v (phi=90) give the section semi-axes;
+#   each section is the ellipse through the axes, area-corrected (pi a b = pi r_m^2). H/V comes
+#   from the expansions themselves, not from a mouth stretch. Sources (author primaries):
+#   sphericalhorns.net 2020-12-21 "JMLC inspired horn calculator" (round base = wavefront areas;
+#   per-plane PETF/hvdiff differing) and 2019-08-05 "Ellipsoidal wave fronts in horns" (eqs 10-12
+#   area preservation). Dossier: docs/research/typologies/LECLEACH_HV_ELLIPSOID_2026-11-16.md.
+# Owner references (docs/queue/lecleach_refs_2026-11-16): 4.png target look - long slim round
+# throat, large rollback lip curling past 180 deg, horizontal flare much bigger than the vertical,
+# lip continuous all the way round. jmlc_300_rnd / jmlc_HVDiff_2/3 archived next to it.
+# Seed from the references: fc_h 450 / fc_v 800 (W*fc_h = H*fc_v invariant, ratio 1.78), T 0.6,
+# stop 200 (deep rollback past 180), stop_cos2k 0.15 (a2 = different rollback depth per plane,
+# 2nd owner reference: 230 deg at the H plane / 170 deg at the V plane). Narrowing family ->
+# smooth brief. fc_v box 450-1150 (ratio cap 4.0 = g code gate; the published asymmetric-JMLC
+# product territory is a ratio of 1.5-3.0 (920x330 datasheet = 567/203 = 2.8); the old 1400
+# corner = 4.67 exceeded it and fed the 183% bulge corner).
+# 2026-11-16 (item 13): the per-plane stop gate only prices the two PLANE stops now
+# (interior azimuths are ellipse interpolations, not marches). Joint (stop, a2) box tightened
+# so ~90% of uniform samples clear the plane gate. 2026-11-16 OWNER DECISIONS (render pack
+# scratch\r_grid\grid_sheet.png + r_photo2\approval_pack.png, 12-option grid):
+#   seed = option 12 (fc_h 340 / fc_v 520, T 1.0, stop 215, a2 +0.05 -> 553x364x242 mm, duct
+#   included angle 16.0 deg, L0 394 mm, depth ~0.44 of width, closest render to the photos in
+#   the T range); lip g_r_lip_mm PINNED 0 (the fat rolled look comes from the deep stop; the
+#   torus lip only meshes at shallow stops - measured on old and new path, 2t+2 clearance);
+#   T box widened to 0.4-1.0 for the seed; boxes fc_h 300-750 / fc_v 450-1000 (ratio cap 4.0
+#   code gate; published asymmetric territory ratio 1.5-3.0).
+name: hl__lecleach_hv_landscape_smooth_v7
+family: FREEFORM
+brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml
+generator:
+  name: grid
+  rows:
+    type: lecleach
+  n_phi: 15
+  n_s: 32
+  seed_policy: explicit
+  wall_thickness_mm: 3.0
+seed_params:
+  g_fc_hz: 340.0
+  g_fc_h_hz: 340.0
+  g_fc_v_hz: 520.0
+  g_T: 1.0
+  g_stop_deg: 215.0
+  g_r_lip_mm: 0.0
+  g_stop_a2: 0.05
+bounds:
+  g_fc_h_hz:
+    lo: 300.0
+    hi: 750.0
+  g_fc_v_hz:
+    lo: 450.0
+    hi: 1000.0
+  g_T:
+    lo: 0.4
+    hi: 1.0
+  g_stop_deg:
+    lo: 165.0
+    hi: 230.0
+  g_r_lip_mm:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  g_stop_a2:
+    lo: -0.10
+    hi: 0.15
+description: 'HOME LANDSCAPE Le Cleach H/V pair (published ellipsoidal-wavefront construction; owner-picked seed 12 2026-11-16): H/V differ from the expansion itself, lip a smooth continuous rollback. Smooth brief.'
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+  rear_res_factor: 1.5
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.2
+  seed: 1234
+  budget: 80
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded

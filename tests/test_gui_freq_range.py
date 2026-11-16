@@ -199,7 +199,7 @@ def test_frequency_charts_and_floor_marker_are_wired():
     marker = 'vlines: f0Finite ? [{ x: f0Finite, color: css("--warn"), dash: true, label: "f0 " + fmtHz(f0Finite) }] : [],'
     assert src.count(marker) == 2
     assert "isobarMap(sv, rows, D2.angles || [], D2.freqs || F, { title: lbl, H: 300, xlim, f0: f0Finite, target: tgt })" in src
-    assert "${seedDerivationHtml(d.feasibility, d.objective)}" in src
+    assert "${seedDerivationHtml(d.feasibility, d.objective, d.seed_policy)}" in src   # Fix D
     # charts.js: span-derived default ticks, marker lines, and a per-instance clip path
     assert "if (xlog && !xticks) xticks = logTicks(xlim[0], xlim[1]);" in charts_src
     assert "vlines = []" in charts_src

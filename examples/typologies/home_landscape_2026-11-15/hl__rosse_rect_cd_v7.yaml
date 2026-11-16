@@ -9,35 +9,98 @@
 #   r, b, tmax    -> R-OSSE rollback radius, bend and how far the roll runs (mouth termination / diffraction)
 # Fixed: m 0.85, q 3 (ATH-typical), a_diag 0 (the diagonal term fans creases out of the throat; the Crowe X lives in
 # hl__crowe_x_osse_cd_v7). Depth is not a knob: it follows from coverage and mouth size (seed 186 mm).
+# 2026-11-16 08:xx: watchdog bound-pins widened {'g_r': (0.1, 0.6), 'g_k': (0.5, 3.0), 'g_a_v_deg': (12.0, 30.0)}; seed = best of runs/20261116T093400Z-screen-56681d (J 4.892). Name kept so the BO cohort stays one task.
 name: hl__rosse_rect_cd_v7
 family: FREEFORM
 brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
 generator:
   name: grid
-  rows: {type: rosse_rect}
+  rows:
+    type: rosse_rect
   n_phi: 25
   n_s: 48
   wall_thickness_mm: 3.0
   seed_policy: explicit
   span: quarter
-seed_params: {g_width_mm: 560.0, g_height_mm: 360.0, g_rect_exponent: 4.0, g_a_h_deg: 40.0, g_a_v_deg: 25.0, g_a_diag_deg: 0.0,
-  g_k: 1.0, g_r: 0.4, g_m: 0.85, g_b: 0.2, g_q: 3.0, g_tmax: 1.0}
+seed_params:
+  g_width_mm: 560.968198
+  g_height_mm: 410.778704
+  g_rect_exponent: 5.381518
+  g_a_h_deg: 35.667049
+  g_a_v_deg: 19.192696
+  g_a_diag_deg: 0.0
+  g_k: 0.967541
+  g_r: 0.376617
+  g_m: 0.85
+  g_b: 0.04501
+  g_q: 3.0
+  g_tmax: 0.998015
 bounds:
-  g_width_mm: {lo: 480.0, hi: 590.0}
-  g_height_mm: {lo: 280.0, hi: 420.0}
-  g_rect_exponent: {lo: 2.5, hi: 8.0}
-  g_a_h_deg: {lo: 32.0, hi: 46.0}
-  g_a_v_deg: {lo: 18.0, hi: 30.0}
-  g_a_diag_deg: {lo: 0.0, hi: 0.0, search: false}
-  g_k: {lo: 0.8, hi: 3.0}
-  g_r: {lo: 0.25, hi: 0.6}
-  g_m: {lo: 0.85, hi: 0.85, search: false}
-  g_b: {lo: 0.0, hi: 0.4}
-  g_q: {lo: 3.0, hi: 3.0, search: false}
-  g_tmax: {lo: 0.85, hi: 1.0}
-mesh: {epw: 6.0, quadrants: '1', dof_cap_screen: 24000, dof_cap_verify: 24000, dof_cap_final: 24000, dof_per_triangle: 0.51}
-solve: {backend: beat_cuda, distance_m: 10.0, angle_count: 73, balloon: true, balloon_points_screen: 512, balloon_points_verify: 1024,
-  gmres_tol: 1.0e-05, timeout_s: 900, cuda_fused: true}
-search: {algorithm: cma, sigma0: 0.2, seed: 1234, budget: 96, popsize: null, tolfun: 0.001, infeasible_penalty: graded}
-description: 'HOME: rolled rectangular mouth on ATH R-OSSE (per-azimuth, via hornlab_mesher), H/V coverage, mouth W x H, throat
-  k and rollback searched; replaces the log-spiral rolled_rect knobs'
+  g_width_mm:
+    lo: 480.0
+    hi: 590.0
+  g_height_mm:
+    lo: 280.0
+    hi: 420.0
+  g_rect_exponent:
+    lo: 2.5
+    hi: 8.0
+  g_a_h_deg:
+    lo: 32.0
+    hi: 46.0
+  g_a_v_deg:
+    lo: 12.0
+    hi: 30.0
+  g_a_diag_deg:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  g_k:
+    lo: 0.5
+    hi: 3.0
+  g_r:
+    lo: 0.1
+    hi: 0.6
+  g_m:
+    lo: 0.85
+    hi: 0.85
+    search: false
+  g_b:
+    lo: 0.0
+    hi: 0.4
+  g_q:
+    lo: 3.0
+    hi: 3.0
+    search: false
+  g_tmax:
+    lo: 0.85
+    hi: 1.0
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.2
+  seed: 1234
+  budget: 96
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+  budget_counts: valid
+  max_attempts: 220
+description: 'HOME: rolled rectangular mouth on ATH R-OSSE (per-azimuth, via hornlab_mesher), H/V coverage, mouth W x H, throat k and rollback
+  searched; replaces the log-spiral rolled_rect knobs'

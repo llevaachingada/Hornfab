@@ -1,0 +1,192 @@
+# ATH OSSE (Batik) on the HOME LANDSCAPE brief - TwinRay-380, v8 bound hygiene. 2026-11-16.
+# WHY v8: same audit as the Tritonia cell (its stop mid-run 2026-11-16 ~04:35Z). This cell keeps the
+# TwinRay-380 seed law (T3: fold -8 at 20 deg, no cos(2p) tilt, no azimuth s/n terms) but fixes the
+# degenerate/destructive boxes found in the stopped run: morph_corner searched down to 0 (the
+# corner-balloon walk), morph_fixed searched 0-0.4 (snaps mid-horn and hides the fold region),
+# fold_h seeded -0.5 to keep a term live that the topology does not want, and the s1/s2 boxes whose
+# lower bound equals the seed (pinned). Inline target fixed 60 V -> 50 V to match the brief it loads.
+# A law-anchored TwinRay pass (like the Tritonia v8) needs its own published-reference pass and is
+# NOT part of this edit.
+# 2026-11-16 08:xx: watchdog bound-pins widened none; seed = best of runs/20261116T052759Z-screen-44001e (J 5.517). Name kept so the BO cohort stays one task.
+bounds:
+  L_mm:
+    lo: 160.0
+    hi: 400.0
+  a0_deg:
+    lo: 1.0
+    hi: 5.0
+  a_deg:
+    lo: 38.0
+    hi: 52.0
+  aspect_ratio:
+    hi: 1.0
+    lo: 1.0
+    search: false
+  exponent:
+    hi: 2.0
+    lo: 2.0
+    search: false
+  k:
+    lo: 0.6
+    hi: 1.6
+  az_fold_v_deg:
+    lo: -11.0
+    hi: -6.0
+  az_fold_v_width_deg:
+    lo: 18.0
+    hi: 24.0
+  az_fold_h_deg:
+    hi: 0.0
+    lo: 0.0
+    search: false
+  az_fold_h_width_deg:
+    hi: 20.0
+    lo: 20.0
+    search: false
+  az_a_cos2p_amp:
+    hi: 0.0
+    lo: 0.0
+    search: false
+  az_a_cos2p_pow:
+    hi: 1.0
+    lo: 1.0
+    search: false
+  az_s_cos2_amp:
+    hi: 0.0
+    lo: 0.0
+    search: false
+  morph_allow_shrinkage:
+    hi: 1
+    lo: 1
+    search: false
+  morph_corner_mm:
+    lo: 8.0
+    hi: 60.0
+  morph_exponent:
+    hi: 4.0
+    lo: 4.0
+    search: false
+  morph_fixed:
+    hi: 0.0
+    lo: 0.0
+    search: false
+  morph_height_mm:
+    lo: 200.0
+    hi: 480.0
+  morph_rate:
+    lo: 1.2
+    hi: 3.5
+  morph_target:
+    hi: 1
+    lo: 1
+    search: false
+  morph_width_mm:
+    lo: 300.0
+    hi: 590.0
+  n:
+    lo: 5.0
+    hi: 9.0
+  q:
+    lo: 0.98
+    hi: 1.0
+  r0_mm:
+    hi: 18.0
+    lo: 18.0
+    search: false
+  s:
+    lo: 0.6
+    hi: 1.0
+  s1:
+    hi: 1.14
+    lo: 1.14
+    search: false
+  s2:
+    hi: 0.025
+    lo: 0.025
+    search: false
+brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
+description: 'HOME LANDSCAPE 80Hx50V ATH OSSE + landscape rounded-rect morph, 1.4in; seed: TwinRay 36-10-380 (Batik; 380 x 303 mouth, 192 mm deep,
+  580 Hz) - seed T3. v8 hygiene: corner >= 8, morph_fixed pinned 0, fold_h/cos2p off, s1/s2 pinned, inline target 50 V. Supersedes the stopped
+  v7.'
+family: OSSE
+mesh:
+  dof_cap_final: 24000
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_per_triangle: 0.51
+  epw: 6.0
+  quadrants: '1'
+name: hl__ath_twinray380_landscape_v8
+search:
+  algorithm: cma
+  budget: 120
+  infeasible_penalty: graded
+  popsize: null
+  seed: 1234
+  sigma0: 0.2
+  tolfun: 0.001
+  budget_counts: valid
+  max_attempts: 260
+seed_params:
+  L_mm: 211.498688
+  a0_deg: 2.120982
+  a_deg: 47.285174
+  aspect_ratio: 1.0
+  exponent: 2.0
+  k: 0.807591
+  az_fold_v_deg: -6.127052
+  az_fold_v_width_deg: 20.767571
+  az_fold_h_deg: 0.0
+  az_fold_h_width_deg: 20.0
+  az_a_cos2p_amp: 0.0
+  az_a_cos2p_pow: 1.0
+  az_s_cos2_amp: 0.0
+  morph_allow_shrinkage: 1
+  morph_corner_mm: 15.987263
+  morph_exponent: 4.0
+  morph_fixed: 0.0
+  morph_height_mm: 428.096729
+  morph_rate: 2.201715
+  morph_target: 1
+  morph_width_mm: 530.204685
+  n: 7.387973
+  q: 0.994481
+  r0_mm: 18.0
+  s: 0.771208
+  s1: 1.14
+  s2: 0.025
+solve:
+  angle_count: 73
+  backend: beat_cuda
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  cuda_fused: true
+  distance_m: 10.0
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+target:
+  band_hi_hz: 8000.0
+  band_lo_hz: 350.0
+  coverage_h_deg: 80.0
+  coverage_v_deg: 50.0
+  di_slope_target: 0.0
+  di_target_db: null
+  f0_hz: 700.0
+  freq_weights:
+    band_hz:
+    - - 2500.0
+      - 5500.0
+      - 2.0
+  loaded_hi_hz: 5600.0
+  z_min: 0.5
+weights:
+  cov: 1.0
+  di: 0.3
+  diag: 0.5
+  dislope: 0.5
+  distd: 0.5
+  flat: 0.5
+  flat_cv: 0.5
+  load: 1.0
+  rip: 1.0

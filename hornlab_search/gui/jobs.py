@@ -20,6 +20,8 @@ import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
 
+import yaml
+
 from . import data as D
 
 GPU_KINDS = {"run", "search", "campaign", "verify"}    # campaign dry-run tier is not a GPU job
@@ -67,10 +69,16 @@ class Job:
     status: str = "running"
     returncode: int | None = None
     proc: subprocess.Popen | None = None
+    #: Repo-relative geometry CLI that installs a process-local rows adapter for this job's config
+    #: (``tools/geometry/rolled_rect_cli.py`` and friends). ``None`` = the stock ``hornlab-search``
+    #: entry point. See ``JobManager._bridge_entry``.
+    entry: str | None = None
 
     def view(self, tail: int = 40) -> dict:
+        prefix = f"python {self.entry}" if self.entry else "hornlab-search"
         return {"id": self.id, "kind": self.kind, "argv": self.argv, "gpu": self.gpu,
-                "command": "hornlab-search " + " ".join(_quote(a) for a in self.argv),
+                "command": prefix + " " + " ".join(_quote(a) for a in self.argv),
+                "entry": self.entry,
                 "status": self.status, "returncode": self.returncode,
                 "started": self.started, "ended": self.ended, "log_tail": D.tail_text(self.log, tail)}
 
@@ -108,7 +116,7 @@ class JobManager:
                 status = "cancelled (GUI restarted before start)"
             job = Job(jid, m.get("kind", "?"), list(m.get("argv") or []), log, bool(m.get("gpu")),
                       started=m.get("started") or "", ended=m.get("ended"), status=status,
-                      returncode=m.get("returncode"))
+                      returncode=m.get("returncode"), entry=m.get("entry"))
             self.jobs[jid] = job
 
     # ------------------------------------------------------------------ validation
@@ -125,6 +133,53 @@ class JobManager:
         if not isinstance(rid, str) or not D.RUN_ID.match(rid) or not (self.runs / rid).is_dir():
             raise JobError(f"unknown run: {rid!r}")
         return str(self.runs / rid)
+
+    def _job_config(self, argv: list[str]) -> Path | None:
+        """The config file a job will load, without running the CLI.
+
+        ``--config <p>`` is repo-relative (``_repo_file``), while ``--resume`` / ``--run`` name an
+        absolute run directory whose own ``config.yaml`` the CLI reuses. Absent all three (campaign,
+        gpu-clean, ...) there is no single config to inspect.
+        """
+        for flag in ("--config", "--resume", "--run"):
+            if flag not in argv:
+                continue
+            i = argv.index(flag)
+            if i + 1 >= len(argv):
+                return None
+            p = Path(argv[i + 1])
+            return self.root / p if flag == "--config" else p / "config.yaml"
+        return None
+
+    def _bridge_entry(self, argv: list[str]) -> str | None:
+        """The repo-relative geometry CLI this job must run through, or ``None`` for the stock CLI.
+
+        A few rows kinds (``rolled_rect_pucker`` and friends) are installed by a process-local
+        adapter in ``tools/geometry/<cli>.py``; the script patches ``design.generators.grid`` and
+        then forwards argv to the ordinary CLI. The stock entry point has no such adapter, so a
+        search/run/verify of such a config aborts at the seed gate with
+        ``GeometryInvalidError: ... unknown rows type`` -- which is exactly what made the
+        rolled_rect "Continue this run" button fail before evaluation 0. The kinds come from
+        ``data._BRIDGE_ROWS`` so the sandbox preview and the launcher cannot drift apart.
+
+        Any read/parse/lookup failure returns ``None``: the job then starts the stock CLI, which
+        reports its own error into the job log instead of the launcher raising inside the GPU pump.
+        """
+        cfg = self._job_config(argv)
+        if cfg is None:
+            return None
+        try:
+            raw = D._yaml_load(cfg.read_text(encoding="utf-8-sig")) or {}
+        except (OSError, UnicodeDecodeError, yaml.YAMLError):
+            return None
+        gen = raw.get("generator") if isinstance(raw, dict) else None
+        rows = gen.get("rows") if isinstance(gen, dict) else None
+        kind = rows.get("type") if isinstance(rows, dict) else None
+        cli = D._BRIDGE_ROWS.get(str(kind)) if kind else None
+        if not cli:
+            return None
+        rel = Path("tools") / "geometry" / f"{cli}.py"
+        return rel.as_posix() if (self.root / rel).is_file() else None
 
     @staticmethod
     def _design_hashes(raw) -> list[str]:
@@ -342,7 +397,15 @@ class JobManager:
     def _new_job(self, kind: str, argv: list[str], gpu: bool, status: str = "running") -> Job:
         self.dir.mkdir(parents=True, exist_ok=True)
         jid = _dt.datetime.now().strftime("%Y%m%dT%H%M%S") + "-" + uuid.uuid4().hex[:6]
-        return Job(jid, kind, argv, self.dir / f"{jid}.log", gpu, status=status, proc=None)
+        return Job(jid, kind, argv, self.dir / f"{jid}.log", gpu, status=status,
+                   entry=self._bridge_entry(argv))
+
+    def _boot(self, job: Job) -> list[str]:
+        """Interpreter + entry point for one job: its bridge geometry CLI when the config needs a
+        process-local rows adapter, else the stock CLI boot string."""
+        if job.entry:
+            return [sys.executable, str(self.root / job.entry)]
+        return [sys.executable, "-c", CLI_BOOT]
 
     def _start_locked(self, job: Job) -> None:
         """Spawn one job (the caller holds ``_lock``). A Popen failure is recorded, never raised: the
@@ -357,7 +420,7 @@ class JobManager:
                 kw["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
             else:
                 kw["start_new_session"] = True
-            proc = subprocess.Popen([sys.executable, "-c", CLI_BOOT, *job.argv], **kw)
+            proc = subprocess.Popen([*self._boot(job), *job.argv], **kw)
         except (OSError, subprocess.SubprocessError):
             if fh is not None:
                 try:

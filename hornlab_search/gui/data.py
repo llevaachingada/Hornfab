@@ -940,6 +940,11 @@ def run_detail(runs: Path, run_id: str, root: Path | None = None) -> dict:
     feasibility = cfg.get("feasibility")
     if isinstance(feasibility, dict) and feasibility:
         out["feasibility"] = clean(feasibility)
+    # Fix D (2026-11-16): seed_policy from the generator block so the GUI can hide the
+    # derivation card when the seed was set explicitly (brief-driven derivation was skipped).
+    seed_policy = (cfg.get("generator") or {}).get("seed_policy")
+    if isinstance(seed_policy, str) and seed_policy:
+        out["seed_policy"] = seed_policy
     # The active objective block rides in the same committed config.yaml. Additive passthrough
     # only: an absent block stays absent here too (no shape invention); the run-detail seed card
     # uses it to name the below-f0 scoring rule honestly.

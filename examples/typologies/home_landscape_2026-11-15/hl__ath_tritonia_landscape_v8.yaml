@@ -1,0 +1,218 @@
+# ATH OSSE on the HOME LANDSCAPE brief, anchored to the published Tritonia kit-era law. 2026-11-16.
+# WHY v8 (the v7 cell was stopped mid-run ~04:35Z, owner: "totally wrong geometry / wrong ridge bounds"):
+#   v7 seeded the milder 2025 web law (at-horns.eu/ext/Tritonia.txt: 48.5 - 7cos(2p)^5 - 16sin(p)^12,
+#   H 41.5 / V 39.5 deg - only ~2 deg H-V swing) AND let CMA search the fold + morph open
+#   (cos2p amp up to +10 i.e. the inverted fold, corner down to 0, morph_fixed to 0.4): the run
+#   produced a smooth symmetric pillow bowl without the Tritonia boat folds (evidence in
+#   docs/CONTINUITY 2026-11-16 and the stopped run 20261116T041232Z-screen-b5380a).
+# WHAT v8 anchors (source table in docs/research/typologies/ATH_PUBLISHED_SEEDS_80x60_2026-11-16.md,
+#   numbers from this repo's parity test: forks/hornlab-waveguide-mesher/tests/test_ath_reference_parity.py,
+#   the 260308tritonia kit-era reference):
+#   a = 49.5128 - 14.8405*cos(p)^2 - 29.2180*sin(p)^8  ->  H 34.7 / V 20.3 / diag 40.3 deg
+#   (14.4 deg H-V swing, sharp meridian fold), a0 8.0307, k 1.0910, n 6.0455, q 0.98349, s 0.9859,
+#   morph Rate 1.6002, CornerRadius 18, rounded-rect target, no throat stretch (no s1/s2 law).
+# The az knobs carry the law exactly: az_a_cos_amp/az_a_cos_pow (|cos p|^2 term) and
+#   az_fold_v_deg/az_fold_v_width_deg (|sin p|^m, half depth 23.508 deg = m 8). Fold_h and the
+#   cos(2p) tilt are pinned off - the kit law folds only the vertical meridian. s1/s2 pinned
+#   (no stretch). Bounds keep the law shape within +-~1.2 deg of the published values and leave
+#   coverage/size to a_deg, a0, L, morph W/H/rate/corner. The inline target is 80 H x 50 V to match
+#   the brief (the v7 inline value said 60 V and was silently overridden - fixed here).
+# Offline seed mesh (CPU) renders the meridian fold + shifted diagonals; polar verification happens
+#   in the queued search runs (a_tritonia2_*).
+# 2026-11-16 08:xx: watchdog bound-pins widened {'morph_rate': (0.6, 2.1), 'az_a_cos_amp': (-22.0, -13.5)}; seed = best of runs/20261116T044917Z-screen-12eb61 (J 5.692). Name kept so the BO cohort stays one task.
+bounds:
+  L_mm:
+    lo: 140.0
+    hi: 400.0
+  a0_deg:
+    lo: 5.0
+    hi: 11.0
+  a_deg:
+    lo: 44.0
+    hi: 56.0
+  aspect_ratio:
+    hi: 1.0
+    lo: 1.0
+    search: false
+  exponent:
+    hi: 2.0
+    lo: 2.0
+    search: false
+  k:
+    lo: 0.9
+    hi: 1.3
+  az_a_cos_amp:
+    lo: -22.0
+    hi: -13.5
+  az_a_cos_pow:
+    hi: 2.0
+    lo: 2.0
+    search: false
+  az_fold_v_deg:
+    lo: -31.0
+    hi: -27.5
+  az_fold_v_width_deg:
+    lo: 21.5
+    hi: 25.5
+  az_fold_h_deg:
+    hi: 0.0
+    lo: 0.0
+    search: false
+  az_fold_h_width_deg:
+    hi: 20.0
+    lo: 20.0
+    search: false
+  az_a_cos2p_amp:
+    hi: 0.0
+    lo: 0.0
+    search: false
+  az_a_cos2p_pow:
+    hi: 5.0
+    lo: 5.0
+    search: false
+  az_s_cos2_amp:
+    hi: 0.0
+    lo: 0.0
+    search: false
+  az_n_cos2_amp:
+    hi: 0.0
+    lo: 0.0
+    search: false
+  morph_allow_shrinkage:
+    hi: 1
+    lo: 1
+    search: false
+  morph_corner_mm:
+    lo: 10.0
+    hi: 30.0
+  morph_exponent:
+    hi: 4.0
+    lo: 4.0
+    search: false
+  morph_fixed:
+    hi: 0.0
+    lo: 0.0
+    search: false
+  morph_height_mm:
+    lo: 250.0
+    hi: 480.0
+  morph_rate:
+    lo: 0.6
+    hi: 2.1
+  morph_target:
+    hi: 1
+    lo: 1
+    search: false
+  morph_width_mm:
+    lo: 330.0
+    hi: 590.0
+  n:
+    lo: 4.0
+    hi: 7.5
+  q:
+    lo: 0.97
+    hi: 0.995
+  r0_mm:
+    hi: 18.0
+    lo: 18.0
+    search: false
+  s:
+    lo: 0.92
+    hi: 1.04
+  s1:
+    hi: 1.0
+    lo: 1.0
+    search: false
+  s2:
+    hi: 0.015
+    lo: 0.015
+    search: false
+brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
+description: HOME LANDSCAPE 80Hx50V ATH OSSE, Tritonia kit-era law anchored (49.5128 - 14.8405cos^2 - 29.2180sin^8; H/V/diag 34.7/20.3/40.3 deg),
+  morph rate ~1.6 corner ~18; seed = kit reference at 1.4in-exit scale (r0 18, L 280, W/H 430/372). Supersedes the stopped v7 (mild web law +
+  open morph search -> smooth bowl, no boat folds).
+family: OSSE
+mesh:
+  dof_cap_final: 24000
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_per_triangle: 0.51
+  epw: 6.0
+  quadrants: '1'
+name: hl__ath_tritonia_landscape_v8
+search:
+  algorithm: cma
+  budget: 120
+  infeasible_penalty: graded
+  popsize: null
+  seed: 1234
+  sigma0: 0.2
+  tolfun: 0.001
+  budget_counts: valid
+  max_attempts: 260
+seed_params:
+  L_mm: 218.088262
+  a0_deg: 9.663561
+  a_deg: 48.887334
+  aspect_ratio: 1.0
+  exponent: 2.0
+  k: 1.177418
+  az_a_cos_amp: -14.645733
+  az_a_cos_pow: 2.0
+  az_fold_v_deg: -28.789806
+  az_fold_v_width_deg: 22.997014
+  az_fold_h_deg: 0.0
+  az_fold_h_width_deg: 20.0
+  az_a_cos2p_amp: 0.0
+  az_a_cos2p_pow: 5.0
+  az_s_cos2_amp: 0.0
+  az_n_cos2_amp: 0.0
+  morph_allow_shrinkage: 1
+  morph_corner_mm: 24.485256
+  morph_exponent: 4.0
+  morph_fixed: 0.0
+  morph_height_mm: 471.476891
+  morph_rate: 1.380681
+  morph_target: 1
+  morph_width_mm: 584.425399
+  n: 6.057854
+  q: 0.974736
+  r0_mm: 18.0
+  s: 0.955564
+  s1: 1.0
+  s2: 0.015
+solve:
+  angle_count: 73
+  backend: beat_cuda
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  cuda_fused: true
+  distance_m: 10.0
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+target:
+  band_hi_hz: 8000.0
+  band_lo_hz: 350.0
+  coverage_h_deg: 80.0
+  coverage_v_deg: 50.0
+  di_slope_target: 0.0
+  di_target_db: null
+  f0_hz: 700.0
+  freq_weights:
+    band_hz:
+    - - 2500.0
+      - 5500.0
+      - 2.0
+  loaded_hi_hz: 5600.0
+  z_min: 0.5
+weights:
+  cov: 1.0
+  di: 0.3
+  diag: 0.5
+  dislope: 0.5
+  distd: 0.5
+  flat: 0.5
+  flat_cv: 0.5
+  load: 1.0
+  rip: 1.0

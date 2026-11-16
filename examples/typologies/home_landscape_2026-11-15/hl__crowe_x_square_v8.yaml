@@ -1,0 +1,117 @@
+# Queue 2026-11-16 (18 h home queue, docs/queue/HOME_18H_PLAN_2026-11-16.md). Copy of hl__crowe_x_square_v7.yaml; the v7 file is unchanged
+# (BO cohorts and running history key on it). Only the bounds/seed listed below differ. Evidence for every bound change:
+# top-10 of all prior valid uncached rows pinned at the old edge (same plan doc, section 'bound audit').
+# The v7 box held a_v 32-36 deg, i.e. a ~70 deg vertical HF beam against a 50 deg target; cov was its 2nd-largest term.
+# a_h 32-36 -> 32-42, a_v 32-36 -> 22-36 (CMA decides square vs landscape), g_sf_amt 0.4-0.8 -> 0.2-0.8 (top10 median
+# frac 0.22, best 0.47; CONTINUITY 2026-11-16 next-step), g_L_mm 210-240 -> 200-240 and wrap 90-150 -> 80-150 to give the
+# optimizer a way out of the 600x480 envelope (8-12/25 invalid_envelope). Seed = family best (J 8.205).
+name: hl__crowe_x_square_v8
+family: FREEFORM
+brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
+generator:
+  name: grid
+  rows:
+    type: osse_rollback
+  n_phi: 33
+  n_s: 56
+  wall_thickness_mm: 3.0
+  seed_policy: explicit
+  span: quarter
+seed_params:
+  g_a_h_deg: 34.2743
+  g_a_v_deg: 32.924
+  g_k: 1.0
+  g_L_mm: 225.03
+  g_s: 0.318979
+  g_n: 2.11273
+  g_q: 0.996
+  g_r_lip_mm: 27.2707
+  g_wrap_deg: 113.545
+  g_sf_m: 4
+  g_sf_n1: 1.5
+  g_sf_n2: 6.0
+  g_sf_ab: 1.0
+  g_sf_amt: 0.4676
+  g_sf_start: 0.12
+bounds:
+  g_a_h_deg:
+    lo: 32.0
+    hi: 42.0
+  g_a_v_deg:
+    lo: 22.0
+    hi: 36.0
+  g_k:
+    lo: 1.0
+    hi: 1.0
+    search: false
+  g_L_mm:
+    lo: 200.0
+    hi: 240.0
+  g_s:
+    lo: 0.25
+    hi: 0.4
+  g_n:
+    lo: 1.8
+    hi: 2.4
+  g_q:
+    lo: 0.996
+    hi: 0.996
+    search: false
+  g_r_lip_mm:
+    lo: 18.0
+    hi: 30.0
+  g_wrap_deg:
+    lo: 80.0
+    hi: 150.0
+  g_sf_m:
+    lo: 4
+    hi: 4
+    search: false
+  g_sf_n1:
+    lo: 1.5
+    hi: 1.5
+    search: false
+  g_sf_n2:
+    lo: 6.0
+    hi: 6.0
+    search: false
+  g_sf_ab:
+    lo: 1.0
+    hi: 1.0
+    search: false
+  g_sf_amt:
+    lo: 0.2
+    hi: 0.8
+  g_sf_start:
+    lo: 0.12
+    hi: 0.12
+    search: false
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.25
+  seed: 1234
+  budget: 80
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+  budget_counts: valid
+  max_attempts: 180
+description: 'Near-square Crowe-X-inspired probe: four concave panels, diagonal ridge, 479x479 mouth; look-first, not Crowe geometry | v8: coverage
+  box opened toward 80x50, sf_amt floor 0.2'
