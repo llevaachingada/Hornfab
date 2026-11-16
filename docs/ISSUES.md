@@ -11,6 +11,10 @@ Local-only, 2026-11-16 (23:00) (**a running BoTorch study was invisible in the s
 - **Open:** the Live convergence chart is "results artifact is missing" until the run writes its
   results artifact; the KPI strip already advances from the attempt journal. Reading convergence
   from the attempt journal during a run is the next step.
+- Runs page (`#/runs`): it now fetches `/api/status` + `/api/studies` beside `/api/runs` and shows the
+  running night card plus a "BoTorch studies" table for the studies running right now (links to Live).
+  Before this, `/api/runs` alone could never show a study: a study is a registry + package, not a
+  `runs/<ts>-screen-*` folder. Completed studies stay on Bayes -> Studies.
 - **Open:** the GPU lane lock card shows "stale" between solves (the lock's pid is the per-solve
   worker, not the study runner), and `tools/night_status.py` reports superseded steps as running.
 - **Open (owner, unchanged):** this night was launched by the owner's `home18_a/b` plan while the

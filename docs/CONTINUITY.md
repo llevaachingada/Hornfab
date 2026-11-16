@@ -1,5 +1,23 @@
 # CONTINUITY
 
+## 2026-11-16 (23:10) - The Runs page was still blind to BoTorch studies; it lists them now
+
+- Follow-up to the entry below: after Status/Home/sidebar carried the night, **Runs** (`#/runs`) still
+  showed only `<ts>-screen-*` folders, so a running BoTorch study - the thing being asked about - was
+  absent from the page people open to see what is running.
+- `viewRunsList` now fetches `/api/status` and `/api/studies` in parallel with `/api/runs` (both
+  optional, an older server 404s harmlessly) and renders, above the filters:
+  a **"Running now - night <name>"** card (same one as Status/Home) and a **"BoTorch studies"** table
+  listing the studies the night is working on *right now* - name, registry root, revision, a `running`
+  pill and a link to the study's Live tab - plus one line saying a study is a registry + package, not a
+  run folder, and that completed studies stay on Bayes -> Studies.
+- "Running" is not inferred: the row appears only when the study id is in an annotated open queue step
+  (`open_step.study_id`, resolved server-side from the step's `--root`). With no study running the card
+  says "No study is running right now." and the runs table is otherwise untouched.
+- Verified in the browser against the live night: `#/runs` shows the night card (`a_turbo_ath14`,
+  study run (BoTorch), 11.1m elapsed) and the BoTorch studies table with the running study, above the
+  normal 537-run table. `node --check` clean; `gui_study_lifecycle.mjs` still ok.
+
 ## 2026-11-16 (23:00) - A running BoTorch study was invisible in the shell; it is not any more
 
 - Observed live: night `home18_a_2026-11-16` (runner started 22:09) ran `prep_a_turbo_ath14`

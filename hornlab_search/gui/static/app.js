@@ -1883,14 +1883,56 @@ async function viewCampaignDetail(id) {
 async function viewRunsList() {
   const ROOT = currentRoot();     // this view's own container (see route())
   skel();
-  let runs;
-  try { runs = await api("/api/runs"); }
+  let runs, status, studies;
+  try {
+    // The night's open step and its studied arm belong on this page too: a BoTorch study is not a
+    // `<ts>-screen-*` run folder, so a Runs page built from /api/runs alone showed nothing at all
+    // while a study was solving. Both side calls are optional (an older server 404s).
+    [runs, status, studies] = await Promise.all([
+      api("/api/runs"),
+      api("/api/status").catch(() => null),
+      api("/api/studies").catch(() => null),
+    ]);
+  }
   catch (e) { ROOT.innerHTML = errBanner(e.message); return; }
   if (ROOT !== currentRoot()) return;   // the user navigated away while this loaded
-  renderRunsList(runs);
+  renderRunsList(runs, status, studies);
 }
 
-function renderRunsList(allRuns) {
+/** Study ids the night is working on right now (from the annotated open queue steps). */
+function openStepStudyIds(status) {
+  const ids = new Set();
+  const queues = (status && Array.isArray(status.queues) && status.queues.length)
+    ? status.queues
+    : (status && status.queue_log ? [status.queue_log] : []);
+  for (const q of queues) {
+    const step = q && q.open_step;
+    if (step && step.study_id) ids.add(step.study_id);
+  }
+  return ids;
+}
+
+/** The BoTorch studies this page must not hide: the ones running now, plus a pointer to the rest. */
+function studiesOnNightHtml(studies, status) {
+  const list = studies && Array.isArray(studies.studies) ? studies.studies : [];
+  const runningIds = openStepStudyIds(status);
+  const running = list.filter(s => s && runningIds.has(s.id));
+  const rows = running.map(s => `<tr>
+      <td><a href="#/bayes/study/${encodeURIComponent(s.id)}/live">${esc(s.name || s.question || s.id)}</a></td>
+      <td class="mono">${esc(s.root_label || "")}</td>
+      <td class="r">${esc(String(s.revision ?? ""))}</td>
+      <td>${pill("running", "good")}</td>
+    </tr>`).join("");
+  const total = list.length;
+  const pointer = `<p class="muted" style="font-size:0.82rem;margin:6px 0 0">A BoTorch study is its own entity (registry + package), not a <code>runs/&lt;ts&gt;-screen-*</code> folder, so completed studies stay on <a href="#/bayes/studies">Bayes → Studies</a>${total ? ` (${total} recorded)` : ""}.</p>`;
+  return `<div class="card" style="min-width:0">
+    <div class="eyebrow" style="margin-bottom:10px">BoTorch studies</div>
+    ${rows ? `<div class="tbl-wrap"><table><thead><tr><th>Study</th><th>Registry root</th><th class="r">Rev</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<p class="muted">No study is running right now.</p>`}
+    ${pointer}
+  </div>`;
+}
+
+function renderRunsList(allRuns, status = null, studies = null) {
   // Collect unique briefs and families for filter dropdowns
   const briefs = [...new Set(allRuns.map(r => r.brief).filter(Boolean))].sort();
   const families = [...new Set(allRuns.map(r => r.family).filter(Boolean))].sort();
@@ -1903,6 +1945,8 @@ function renderRunsList(allRuns) {
         <p class="muted" style="font-size:0.85rem">Every search and verification. ${allRuns.length} total. Screen runs are fast first-pass searches; verify runs re-solve the best designs at higher resolution.</p>
         <div id="runs-version-banner"></div>
       </div>
+      ${nightRunningCardHtml(status)}
+      ${studiesOnNightHtml(studies, status)}
       <div class="filter-bar">
         <input id="run-filter" type="search" placeholder="Filter by name / family / brief…" aria-label="filter runs">
         <select id="run-filter-brief" aria-label="filter by brief">
