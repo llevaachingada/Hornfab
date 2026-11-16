@@ -1,5 +1,37 @@
 # CONTINUITY
 
+## 2026-11-16 (23:00) - A running BoTorch study was invisible in the shell; it is not any more
+
+- Observed live: night `home18_a_2026-11-16` (runner started 22:09) ran `prep_a_turbo_ath14`
+  (bayes-venv `prepare_study.py`, 22:25:54 -> 22:32:30, exit 0) and then `a_turbo_ath14`
+  (`studies.cli run --execute`, started 22:32:30). A BoTorch study was executing while Home said
+  **GPU Idle**, the lane panel said "not running - stale lock left by c1_core_law_wide_s2402", and
+  the nav pill said "stopped search - no resumable run folder". Each line was true about *locks*;
+  together they read as "nothing is running".
+- Cause: every running surface keys off a lane lock or a `runs/<ts>-screen-*` folder. A study prep
+  or run takes the GPU lock only **per solve**, so between solves it holds nothing, and a study is
+  not a run folder. `/api/status` already shipped `queues[].open_step`; nothing rendered it as a
+  headline and nothing linked it to the study.
+- Fix: (a) Status and Home get a **"Running now - night <name>"** card naming the open step, its
+  kind (BoTorch prep / BoTorch run / search / verify / diagnostics), elapsed time and the study it
+  belongs to, with **Open the study live view**; (b) the sidebar gets one `NIGHT <step> - <kind>`
+  line under the lane chips, so every page shows it; (c) the queue timeline marks only the **last**
+  unclosed START as "running" - an earlier step with no END reads "no END line" (today
+  `a_ext_v8_s1234` was shown as running for 30+ min after the runner reloaded the night file and
+  moved on); (d) `server.py::_annotate_night_studies` resolves the step's `--root` to the study id
+  and label, reading **that one registry** (a `list_studies` walk over all 17 roots pushed the
+  Status first paint past 4 s; one root lookup is ~1 s cold).
+- Verified in the browser against the live night: Status/Home show `a_turbo_ath14 (study run
+  (BoTorch))`, "7.6m elapsed", the study label, and the link opens the study's Live tab with the KPI
+  strip live ("Screens used / total 2 / 60", verify 0/6, refusals 0) while the run is in flight.
+  `pytest tests/test_gui_shell_ux.py tests/test_gui_brief_authoring.py tests/test_gui_studies_module.py
+  tests/test_gui_study_adapters.py tests/test_gui_study_lifecycle.py tests/test_tools_night_status.py`
+  -> 46 passed; `gui_study_lifecycle.mjs` ok.
+- Still open: the Live convergence chart says "results artifact is missing" until the run writes
+  results (the KPI strip already advances from the attempt journal); `tools/night_status.py` still
+  lists superseded steps as "running job"; the GPU lock card reads "stale" between solves because
+  the lock's pid is the per-solve worker.
+
 ## 2026-11-16 (late) - `feat/bo-gui` MERGED into the GUI branch; `diagnose` proven on real studies (one real bug); Bayes deep links fixed
 
 - **Merge gate (STEP 0)** at 20:54: `tools/night_status.py` -> no `hornlab-search search` process, both lane

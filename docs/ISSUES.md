@@ -1,5 +1,22 @@
 # ISSUES
 
+Local-only, 2026-11-16 (23:00) (**a running BoTorch study was invisible in the shell**):
+- Live night `home18_a_2026-11-16` ran `prep_a_turbo_ath14` then `a_turbo_ath14`
+  (`studies.cli run --execute`, started 22:32:30) while Home said "GPU Idle", the lane panel said
+  "not running", and the nav pill said "stopped search". Fixed: Status + Home carry a "Running now -
+  night <name>" card with the step, kind, elapsed and a link to the study's Live tab; the sidebar
+  carries a `NIGHT <step> - <kind>` line; and only the LAST unclosed queue START is labelled
+  "running" (an abandoned step now reads "no END line"). `server.py` resolves the step's `--root`
+  to a study id from that registry alone (walking all roots made the Status first paint >4 s).
+- **Open:** the Live convergence chart is "results artifact is missing" until the run writes its
+  results artifact; the KPI strip already advances from the attempt journal. Reading convergence
+  from the attempt journal during a run is the next step.
+- **Open:** the GPU lane lock card shows "stale" between solves (the lock's pid is the per-solve
+  worker, not the study runner), and `tools/night_status.py` reports superseded steps as running.
+- **Open (owner, unchanged):** this night was launched by the owner's `home18_a/b` plan while the
+  bo_multityp arms remain staged; `bo_multityp_2026-11-16` arm 1 would still restart
+  `bo_cov_s71001` from zero.
+
 Local-only, 2026-11-16 late (**`feat/bo-gui` merged locally; `diagnose` proven on real studies**):
 - Merged `origin/feat/bo-gui` (`b0f669d`) into `feat/sab-home-2026-11-14` (`5b78c6c`). **Not merged to
   `main`** - owner gate unchanged. The branch now contains the diagnostics artifact, the Bayes nav group

@@ -68,6 +68,40 @@ class App:
                 extra_roots=self._extra_study_roots)
         return self._study_index_obj
 
+    def _annotate_night_studies(self, payload):
+        """Name the study a running queue step prepares or runs, so Status can link to it.
+
+        A night step carries its study root in ``--root``; the study index already knows that
+        root's label. Only open steps are resolved, and only when one exists, so an idle poll
+        pays nothing. Any failure leaves the payload untouched: status must never fail here.
+        """
+        import re
+
+        if not isinstance(payload, dict):
+            return payload
+        queues = payload.get("queues")
+        if not isinstance(queues, list):
+            return payload
+        steps = [q["open_step"] for q in queues
+                 if isinstance(q, dict) and isinstance(q.get("open_step"), dict)]
+        if not steps:
+            return payload
+        for step in steps:
+            match = re.search(r"--root[=\s]+\"?([^\s\"]+)", str(step.get("command") or ""))
+            if not match:
+                continue
+            label = match.group(1).replace("\\", "/").strip("/")
+            # One registry, not the whole index: a night step names its own study root, and
+            # opening every registered root on a 10 s poll made the Status page crawl.
+            try:
+                _root_id, service = self._study_index().service_for_path(self.root / label)
+                study = service.list_studies(limit=1)[0]
+            except Exception:  # noqa: BLE001 - unknown/broken root: leave the step unlinked
+                continue
+            step["study_id"] = study.get("id")
+            step["study_label"] = study.get("name") or study.get("question") or study.get("id")
+        return payload
+
     def _study_run_bridge(self, service=None):
         service = service or self._studies()
         root = service.store.root.resolve()
@@ -163,7 +197,7 @@ class App:
         parts = [unquote(p) for p in path.strip("/").split("/")[1:]]      # drop "api"
         head = parts[0] if parts else ""
         if head == "status":
-            return D.status(self.root, self.runs)
+            return self._annotate_night_studies(D.status(self.root, self.runs))
         if head == "lanes":
             return D.lane_status(self.runs)
         if head == "studies":

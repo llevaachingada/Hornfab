@@ -663,6 +663,7 @@ async function viewHome() {
     ${guideHtml}
     <div class="home-lane-cards">${gpuCard}${cpuCard}</div>
     <div id="home-lanes"></div>
+    ${nightRunningCardHtml(statusData)}
     <div id="home-leaders">${bestBriefHtml}</div>
     ${queuesBlockHtml(statusData)}
     ${quickLinks}
@@ -764,6 +765,7 @@ function renderStatus(data, jobs = []) {
           <div class="sub" id="st-disk-sub">${disk.total_gb != null ? disk.total_gb.toFixed(0) + " GB total · " + (100 - disk.free_gb / disk.total_gb * 100).toFixed(0) + "% used" : ""}</div>
         </div>
       </div>
+      <div id="st-night">${nightRunningCardHtml(data)}</div>
       <div id="st-current-card">${currentRunCard(cur, aff)}</div>
       <div id="st-cpu-current-card">${cpuRunningCardHtml(data)}</div>
       <div class="btn-row">
@@ -1208,11 +1210,33 @@ function renderNavPill() {
   const holder = ensureNavRunCtl();
   if (!holder) return;
   const pill = toolbarPillFor(_pillJobs, _pillStatus ? _pillStatus.gpu_lock : null, _pillRuns);
-  const sig = JSON.stringify(pill) + laneChipsHtml(_pillLanes);
+  const night = nightChipHtml(_pillStatus);
+  const sig = JSON.stringify(pill) + laneChipsHtml(_pillLanes) + night;
   if (sig === _pillSig && holder.firstElementChild) return;   // unchanged: keep the wired DOM (an armed click survives the poll)
   _pillSig = sig;
-  holder.innerHTML = toolbarPillHtml(pill) + laneChipsHtml(_pillLanes);
+  holder.innerHTML = toolbarPillHtml(pill) + laneChipsHtml(_pillLanes) + night;
   wireToolbarPill(pill, holder);
+}
+
+/** Short form of the step kind, for the 218 px sidebar line. */
+function nightStepShortKind(command) {
+  const kind = nightStepKind(command);
+  if (kind.startsWith("study run")) return "BoTorch run";
+  if (kind.startsWith("study prep")) return "BoTorch prep";
+  if (kind.startsWith("study diag")) return "BoTorch diag";
+  return kind;
+}
+
+/** The night's open step, one line under the lane chips. The pill above only knows about a GPU
+ *  lock, so a night preparing or running a study (lock-free, CPU-side) used to read as "no run in
+ *  progress" everywhere in the shell. */
+function nightChipHtml(status) {
+  const found = openNightStep(status);
+  if (!found) return "";
+  const step = found.step;
+  const night = String(found.queue.name || "").replace(/^queue_/, "").replace(/\.log$/, "");
+  const text = `▶ NIGHT ${step.name || "step"} · ${nightStepShortKind(step.command)}`;
+  return `<span class="mono" style="font-size:0.64rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;max-width:100%;padding:0 16px 6px" title="Night ${esc(night)}, started ${esc(step.started || "")}${step.study_label ? ` - study ${esc(step.study_label)}` : ""}">${esc(text)}</span>`;
 }
 
 /** Pure: one compact line per solve lane (GPU, CPU) for the sidebar, from /api/lanes, so the
@@ -1418,21 +1442,72 @@ function cpuLaneCardHtml(data) {
 
 function queueTimelineHtml(steps) {
   const shown = steps.slice(-15);
+  // Only the LAST START without an END is the job running right now. An earlier step that never
+  // wrote an END was abandoned (the night file was reloaded / the runner moved on), so calling it
+  // "running" after its successor started was a lie the Status page told for hours.
+  let openAt = -1;
+  shown.forEach((s, i) => { if (s.started && !s.ended && !s.skipped) openAt = i; });
   return `<div class="timeline" style="margin-bottom:8px">
-    ${shown.map(s => {
-      const dot = s.skipped ? "skip" : s.exit == null ? "run" : s.exit === 0 ? "done" : "failed";
+    ${shown.map((s, i) => {
+      const isOpen = i === openAt;
+      const dot = s.skipped ? "skip" : s.exit == null ? (isOpen ? "run" : "skip") : s.exit === 0 ? "done" : "failed";
       let dur = "";
       if (s.started && s.ended) {
         dur = fmtDur(new Date(s.ended) - new Date(s.started));
       } else if (s.skipped) { dur = "skipped"; }
-      else if (s.started) { dur = fmtDur(Date.now() - new Date(s.started)) + " running"; }
+      else if (s.started && isOpen) { dur = fmtDur(Date.now() - new Date(s.started)) + " running"; }
+      else if (s.started) { dur = "no END line"; }
       const exitNote = s.exit != null && s.exit !== 0 ? ` <span class="tl-exit-bad">exit ${s.exit}</span>` : "";
       return `<div class="tl-row">
-        <div class="tl-dot ${dot}" title="${dot}"></div>
+        <div class="tl-dot ${dot}" title="${isOpen ? "running" : dot}"></div>
         <span class="tl-name">${esc(s.name)}</span>
         <span class="tl-time">${esc(dur)}${exitNote}</span>
       </div>`;
     }).join("")}
+  </div>`;
+}
+
+/** The night's currently open queue step, if any. A night can be working without holding either
+ *  lane lock (a study prep/run is CPU-only; only the solver takes the GPU lane), so the lane cards
+ *  read "Free" while it runs — this is what names it. */
+function openNightStep(data) {
+  const queues = (data && Array.isArray(data.queues) && data.queues.length)
+    ? data.queues
+    : (data && data.queue_log ? [data.queue_log] : []);
+  for (const q of queues) {
+    const step = q && q.open_step;
+    if (step && step.started) return { queue: q, step };
+  }
+  return null;
+}
+
+function nightStepKind(command) {
+  const cmd = String(command || "");
+  if (/studies\.cli\s+diagnose/.test(cmd)) return "study diagnostics";
+  if (/studies\.cli\s+run/.test(cmd)) return "study run (BoTorch)";
+  if (/prepare_study\.py/.test(cmd)) return "study prep (BoTorch)";
+  if (/ search --/.test(cmd)) return "search";
+  if (/verify/.test(cmd)) return "verify";
+  return "job";
+}
+
+/** "Running now" card for the night's open step. Links the study when the step names one, so a
+ *  BoTorch study is one click from the page that shows its progress. */
+function nightRunningCardHtml(data) {
+  const found = openNightStep(data);
+  if (!found) return "";
+  const night = String(found.queue.name || "").replace(/^queue_/, "").replace(/\.log$/, "");
+  const step = found.step;
+  const kind = nightStepKind(step.command);
+  const elapsed = step.started ? fmtDur(Date.now() - new Date(step.started).getTime()) : "";
+  const target = step.study_id
+    ? `<a class="btn" href="#/bayes/study/${encodeURIComponent(step.study_id)}/live">Open the study live view →</a>`
+    : `<a class="btn" href="#/bayes/studies">Open studies →</a>`;
+  return `<div class="card running-card" id="st-night-card" style="margin-top:-4px">
+    <div class="eyebrow" style="margin-bottom:6px">Running now — night ${esc(night)}</div>
+    <div style="font-weight:500">${esc(step.name || "step")} <span class="muted">(${esc(kind)})</span></div>
+    <p class="muted" style="font-size:0.82rem;margin:6px 0 0">Started ${esc(step.started)}${elapsed ? ` · ${esc(elapsed)} elapsed` : ""}${step.study_label ? ` · study ${esc(step.study_label)}` : ""}. The lane cards above track the solver lanes: a study prep or run does not hold either lock.</p>
+    <div class="btn-row" style="margin-top:8px">${target}<a class="btn" href="#/status">Status</a></div>
   </div>`;
 }
 
@@ -1446,6 +1521,10 @@ function updateStatusInPlace(data, jobs = []) {
 
   const sc = document.getElementById("st-cpu");
   if (sc) sc.innerHTML = cpuLaneCardHtml(data);
+
+  // the night's open step: appears/vanishes on the poll, so a prep or study run is never invisible
+  const sn = document.getElementById("st-night");
+  if (sn) sn.innerHTML = nightRunningCardHtml(data);
 
   // the current-run card goes live on the poll: progress numbers refresh, the card appears when a
   // run starts, and the stop affordance always reflects the last poll's jobs/lock state
