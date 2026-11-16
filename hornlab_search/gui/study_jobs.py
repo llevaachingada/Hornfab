@@ -621,7 +621,9 @@ class StudySolveDesignJobs:
         if busy:
             self._record_failed(study_id, design_hash, key, str(busy))
             raise StudyJobError("unavailable", str(busy), 422)
-        family = design.get("family") or getattr(cfg, "family", None) or "OSSE"
+        # Mirror the study evaluator: ``_design`` prefers the task config's family over any
+        # candidate field, so the re-solve builds the same Design the study measured.
+        family = getattr(cfg, "family", None) or design.get("family") or "OSSE"
         design = {**design, "family": family}
         job_id = uuid.uuid4().hex
         now = _utc_now()
