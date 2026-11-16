@@ -1025,16 +1025,27 @@ class NightRunner:
                     sys.stdout.write(line.encode("ascii", "replace").decode("ascii"))
                     sys.stdout.flush()
 
+            output_closed = False
             while True:
-                try:
-                    line = lines.get(timeout=0.2)
-                except queue.Empty:
+                if output_closed:
+                    # Pipe EOF can precede process exit. Wait in short, deadline-bounded
+                    # intervals so a child that closes stdout cannot look successful while
+                    # it is still running or escape the watchdog/timeout.
+                    remaining = max(0.0, deadline - time.monotonic())
+                    try:
+                        proc.wait(timeout=min(0.2, remaining))
+                    except subprocess.TimeoutExpired:
+                        pass
                     line = ""
+                else:
+                    try:
+                        line = lines.get(timeout=0.2)
+                    except queue.Empty:
+                        line = ""
                 if line:
                     emit(line)
-                    continue
                 if line is None:
-                    break
+                    output_closed = True
                 if proc.poll() is not None:
                     break
                 if wd_cfg is not None and time.monotonic() >= wd_next:
@@ -1085,7 +1096,8 @@ class NightRunner:
             _append(log_path, f"=== job {job.id} stopped by watchdog {_utc_now()} exit={WATCHDOG_EXIT}\n")
             return WATCHDOG_EXIT, False
         rc = proc.poll()
-        code = 0 if rc is None else int(rc)
+        # Never turn an unresolved process into a reported success.
+        code = 1 if rc is None else int(rc)
         _append(log_path, f"=== job {job.id} end {_utc_now()} exit={code}\n")
         return code, False
 

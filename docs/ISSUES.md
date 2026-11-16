@@ -1,5 +1,11 @@
 # ISSUES
 
+## 2026-11-16 (10:26) - Warm BO admission top-up and runner exit reporting
+
+- Fresh warm cohort had 90 eligible rows: strict gate refused without solves. Added bounded 60-valid CMA data top-up and fresh 80+2 BO retry after Crowe-X; live 28-job dry-run passes.
+- Fixed EOF/child-exit reporting race in source; 20 focused runner tests pass. Active process retains old reporting, so its exit 0 for the 90-row refusal is not BO success.
+- See docs/queue/HOME_CONTINUATION_2026-11-16.md.
+
 ## 2026-11-16 (day) - Reviewed CMA/BO continuation and 80+2 verification budget
 
 - Owner requested useful queue work through tomorrow morning, recent-run bound/convergence

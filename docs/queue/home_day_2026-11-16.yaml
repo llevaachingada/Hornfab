@@ -1,4 +1,4 @@
-# Live day queue extended through 2026-11-17 morning. See docs/queue/HOME_CONTINUATION_2026-11-16.md
+# Live continuation: see docs/queue/HOME_CONTINUATION_2026-11-16.md
 night: home_day_2026-11-16
 lane: gpu
 jobs:
@@ -147,6 +147,40 @@ jobs:
   - '96'
   - --cma-seed
   - '1234'
+- id: d_warm_cohort_topup
+  kind: command
+  timeout_s: 5400
+  watchdog: false
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_fold_warm_v7.yaml
+  - --mode
+  - screen
+  - --budget
+  - '60'
+  - --cma-seed
+  - '85012'
+- id: d_turbo_warm_retry
+  kind: command
+  timeout_s: 25200
+  argv:
+  - C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe
+  - tools/night_queue/run_bo_arm.py
+  - --root
+  - runs/home_day_2026-11-16/turbo_warm_retry_80x2
+  - --cohort
+  - runs/home_day_2026-11-16/cohort_warm_retry_80x2
+  - --config
+  - examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_fold_warm_v7.yaml
+  - --refresh-cohort
+  - --policy
+  - turbo
+  - --seed
+  - '85012'
+  - --budget-profile
+  - comparison-80x2
 - id: d_twin_s9012
   kind: command
   timeout_s: 9000

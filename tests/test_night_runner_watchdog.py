@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import sys
+import io
+import subprocess
 import textwrap
 import time
 from pathlib import Path
@@ -11,6 +13,51 @@ import pytest
 import tools.run_campaign_night as night
 
 CFG = dict(night.WATCHDOG_DEFAULTS)
+
+
+def test_stdout_eof_does_not_report_success_before_exit(tmp_path, monkeypatch):
+    class DelayedFailure:
+        pid = 123
+        stdout = io.StringIO("")
+        returncode = None
+
+        def poll(self):
+            return self.returncode
+
+        def wait(self, timeout=None):
+            self.returncode = 7
+            return 7
+
+    monkeypatch.setattr(night.subprocess, "Popen", lambda *args, **kwargs: DelayedFailure())
+    job = night.Job(id="eof", kind="command", argv=("fake",), timeout_s=5)
+    runner = night.NightRunner(repo_root=tmp_path, runs_root=tmp_path, lane="cpu")
+    log = tmp_path / "eof.log"
+    assert runner.run(job, log) == (7, False)
+    assert "exit=7" in log.read_text(encoding="utf-8")
+
+
+def test_stdout_eof_still_obeys_deadline(tmp_path, monkeypatch):
+    class NeverExits:
+        pid = 123
+        stdout = io.StringIO("")
+        returncode = None
+
+        def poll(self):
+            return self.returncode
+
+        def wait(self, timeout=None):
+            if self.returncode is not None:
+                return self.returncode
+            raise subprocess.TimeoutExpired("fake", timeout)
+
+        def kill(self):
+            self.returncode = -1
+
+    monkeypatch.setattr(night.subprocess, "Popen", lambda *args, **kwargs: NeverExits())
+    monkeypatch.setattr(night, "_kill_tree", lambda proc: proc.kill())
+    job = night.Job(id="eof_timeout", kind="command", argv=("fake",), timeout_s=0.05)
+    runner = night.NightRunner(repo_root=tmp_path, runs_root=tmp_path, lane="cpu")
+    assert runner.run(job, tmp_path / "timeout.log") == (124, True)
 
 
 def ok(n, j):

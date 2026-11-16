@@ -47,6 +47,16 @@ oldest-256 selection. Seven-hour outer BO timeouts contain the six-hour internal
 Remaining warm/TwinRay day arms now use the same fail-fast 80+2 wrapper, replacing their
 separate cohort/prep/run steps. Completed Tritonia's 60+6 record remains unchanged.
 
+Live 10:25 update: the warm cohort gate found only **90** eligible rows and refused BO
+without solving. A new seed-85012, 60-valid CMA top-up (existing unchanged warm config,
+200-attempt config cap, 90-minute timeout, watchdog explicitly off for data-building)
+and fresh-cohort 80+2 retry are inserted after Crowe-X. This is GP data acquisition,
+not a claim that same-box CMA will improve the converged seed. The combined live plan
+now has **28 jobs** including completed steps. The active runner raced output EOF and
+logged that refused arm as exit 0: the physical refusal is authoritative. Source now
+waits for the actual child exit with timeout/watchdog intact; 20 focused offline tests
+passed, but this already-running process retains its old reporting code.
+
 The local refinement snapshots completed BO screen results and up to five matching CMA
 runs, retaining provenance and selecting the best measured design as both seed and mean.
 It tries sigma 0.10, 0.075 and 0.05 against the history-aware expected-hit check; persistent
@@ -57,7 +67,7 @@ CPU Tritonia preparation reached 110 usable rows but sandbox hard-link permissio
 completion; the previous live v8 study independently demonstrates the underlying pipeline.
 
 Allow roughly 15-20 hours for the extension plus the remaining day jobs: provisioned
-to carry useful work into November 17 morning, approximately 06:00-11:00 Eastern under
+to carry useful work into November 17 morning, approximately 07:00-13:00 Eastern under
 the observed costs. Model fitting grows with cohort size; this is not a guaranteed finish.
 
 The v9 cohort-building CMA jobs deliberately disable the runner's convergence/pin
@@ -91,7 +101,7 @@ Committed report: [HOME_OSSE_HIFI_RERANK_2026-11-16.md](../evidence/HOME_OSSE_HI
 - 17 offline preflight tests passed. Targeted GUI/brief/range/tip/budget/preparation rerun:
   59 tests passed, including the previously timing-sensitive cancellation test.
 - No solver tests or concurrent GPU solves were launched by this maintenance pass.
-- Combined live day manifest dry-run passes (26 jobs including completed steps).
+- Combined live day manifest dry-run passes (28 jobs including completed steps).
   BO wrapper and refinement tests cover fail-fast setup and immutable source handling.
 - The live process does not import source changes made after startup. Future child
   study preparations use current code; their immutable packages are made at execution,
