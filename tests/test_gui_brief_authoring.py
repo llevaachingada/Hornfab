@@ -274,7 +274,8 @@ def test_balloon_entry_point_already_wired():
     3D page links it, and the route is registered — so no second entry point was built."""
     src = APPJS.read_text(encoding="utf-8")
     assert "import { viewBalloon } from \"./balloon.js\";" in src
-    assert re.search(r"re: /\^#\\/run\\/\(\.\+\)\\/balloon\$/", src)          # route registered
+    # route registered (the balloon route carries an optional ?query suffix; app.js:188)
+    assert re.search(re.escape(r"re: /^#\/run\/(.+)\/balloon(?:\?(.*))?$/"), src)
     assert 'class="run-tab-link" href="#/run/${esc(id)}/balloon"' in src        # run-detail view tab
     assert src.count('href="#/run/${esc(id)}/balloon"') >= 2                     # + the 3D view page
     assert "◉ Balloon 3D" in src

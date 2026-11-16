@@ -209,7 +209,10 @@ def workflow_panel(service, study, phase, artifact=None, *, root, runs_root=None
     readiness_reason = next((card["reason"] for card in policies if card["mode"] == current_policy),
                             data_ready_reason or "Policy capabilities are not available.")
     data: dict[str, Any] = dict((artifact or {}).get("data") or {})
+    # Presence of a prepared run package, for every phase. The client uses it to decide the
+    # Live tab; it must not have to visit the execute panel first to learn that it exists.
     data.update({"current_policy": current_policy, "policies": policies,
+                 "package_present": bool(package),
                  "readiness": {"engine_available": engine, "eligible_rows": manifest.get("n"),
                                "minimum_rows": manifest.get("n_min"), "reason": readiness_reason},
                  "artifacts": [{"kind": k, "sha256": m["sha256"]} for k, m in metadata.items() if m.get("status") == "available"],

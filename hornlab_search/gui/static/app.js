@@ -176,8 +176,21 @@ const comparisonApi = {
   board: (name, {signal}) => studyRequest(`/api/comparisons/${encodeURIComponent(name)}`, {signal}),
 };
 
+// Study links carry an optional phase segment; a legacy or hand-typed link without one lands on
+// Overview, and an old `?phase=` keeps working. Ids are opaque [A-Za-z0-9_-] tokens.
+const STUDY_LINK_PHASES = new Set(["live", "overview", "data", "explain", "propose", "execute", "decide"]);
+function studyLinkHash(id, phase, query) {
+  const params = new URLSearchParams(query || "");
+  const wanted = phase || params.get("phase");
+  params.delete("phase");
+  const known = wanted && STUDY_LINK_PHASES.has(wanted) ? wanted : "overview";
+  const rest = params.toString();
+  return `#/bayes/study/${id}/${known}${rest ? `?${rest}` : ""}`;
+}
+
 const ROUTES = [
   { re: /^#\/$|^#\/home$/,              fn: () => viewHome() },
+
   { re: /^#\/status$/,                  fn: () => viewStatus() },
   { re: /^#\/campaigns$/,               fn: () => viewCampaignsList() },
   { re: /^#\/campaign\/(.+)$/,          fn: m => viewCampaignDetail(m[1]) },
@@ -192,8 +205,12 @@ const ROUTES = [
   { re: /^#\/run\/(.+)$/,               fn: m => viewRunDetail(m[1]) },
   // Bayes group (B-studies + method board). Old analysis routes redirect, keeping any suffix or query.
   { re: /^#\/analysis\/studies((?:\/[^?#]*)?(?:\?.*)?)$/, query: true, fn: m => { location.hash = "#/bayes/studies" + m[1]; } },
-  { re: /^#\/analysis\/compare-methods(?:\?.*)?$/,      query: true, fn: () => { location.hash = "#/bayes/board"; } },
-  { re: /^#\/analysis\/study\/(.+)$/,                  query: true, fn: m => { location.hash = "#/bayes/study/" + m[1]; } },
+  { re: /^#\/analysis\/compare-methods(\?.*)?$/,      query: true, fn: m => { location.hash = "#/bayes/board" + (m[1] || ""); } },
+  { re: /^#\/analysis\/study\/([^\/?#]+)(?:\/([^\/?#]+))?(?:\?(.*))?$/, query: true,
+    fn: m => { location.hash = studyLinkHash(m[1], m[2], m[3]); } },
+  // A bare study link ("#/bayes/study/<id>" from an old bookmark or a hand-typed URL) opens Overview.
+  { re: /^#\/bayes\/study\/([^\/?#]+)(?:\?(.*))?$/, query: true,
+    fn: m => { location.hash = studyLinkHash(m[1], null, m[2]); } },
   { re: /^#\/bayes\/studies$/,       fn: () => { disposeStudy = mountStudyList(ROOT, {api:studyApi, onCreated: s => { location.hash = `#/bayes/study/${encodeURIComponent(s.id)}/overview${s.root ? `?root=${encodeURIComponent(s.root)}` : ""}`; }}); } },
   { re: /^#\/bayes\/study\/([^\/?#]+)\/(live|overview|data|explain|propose|execute|decide)(?:\?(.*))?$/, query: true, fn: m => { const root = new URLSearchParams(m[3] || "").get("root"); const phase = m[2]; disposeStudy = mountStudy(ROOT, {studyId:decodeURIComponent(m[1]), phase, api:studyApi, rootId:root, drawCharts:drawStudyCharts, pollMs: phase === "live" ? 10000 : 5000, onError:error => console.error("study panel", error)}); } },
   { re: /^#\/bayes\/board$/,         fn: () => { disposeStudy = mountCompareMethods(ROOT, {api:comparisonApi}); } },

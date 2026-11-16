@@ -74,3 +74,40 @@ def test_loo_truncation_flag(monkeypatch):
     ts = _ts(12)
     out = D.build_diagnostics(fit_model(ts, seed=0), ts, "scalar")
     assert out["loo"]["truncated"] and len(out["loo"]["rows"]) == 5 and out["loo"]["n"] == 12
+
+
+def test_pareto_hv_trace_monotone_on_large_realistic_front():
+    """Regression: real 136-row Pareto study produced an hv_trace that decreased by ~1e-15.
+
+    Reproduces the observed shape (many rows, duplicated/re-measured pairs, late adaptive rows
+    beyond a reference frozen on the first 100 rows).  BoTorch's box decomposition sums are
+    order-sensitive, so the prefix hypervolume used to jitter by a few ulps when a dominated row
+    joined the prefix: the trace then recorded decreases and noise-level "increases".
+    """
+    from hornlab_search.bo.pareto import frozen_reference
+    import torch
+    from botorch.utils.multi_objective.hypervolume import Hypervolume
+
+    rng = np.random.default_rng(7)
+    n = 136
+    t = rng.random(n)
+    coverage = 6.0 + 50.0 * t + rng.normal(0.0, 0.8, n)
+    ripple = 2.0 - 1.6 * t + rng.normal(0.0, 0.06, n)
+    coverage[[40, 41]] = coverage[39]
+    ripple[[40, 41]] = ripple[39]
+    coverage[110:] += 15.0
+    errors = np.column_stack([np.clip(coverage, 0.05, None), np.clip(ripple, 0.02, None)])
+    reference = frozen_reference(errors[:100])
+    pt = SimpleNamespace(errors=errors, reference=reference,
+                         ids=tuple(f"g{i}" for i in range(n)))
+
+    block = D._pareto_block({"training": pt})
+    assert block["front_ids"] and len(block["front_ids"]) < n
+    hv = [row["hv"] for row in block["hv_trace"]]
+    assert len(hv) > 10 and hv[-1] > 0
+    assert all(b >= a for a, b in zip(hv, hv[1:])), "hv_trace must be non-decreasing"
+    ref = torch.tensor(reference["ref_point"], dtype=torch.float64)
+    Y = torch.as_tensor(-errors, dtype=torch.float64)
+    inside = (Y > ref).all(dim=-1)
+    full = float(Hypervolume(ref_point=ref).compute(Y[inside]))
+    assert abs(hv[-1] - full) <= 1e-9 * max(1.0, abs(full))

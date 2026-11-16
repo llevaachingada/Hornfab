@@ -163,6 +163,8 @@ export function fixedRange(spec, data) {
  *              with right-edge text label); y= horizontal, x= vertical
  *   markers:   true — draw r=2 circles at every finite data point (C7)
  *   unscored:  [{x0, x1, label}] — grey-hatch regions outside the scored band (C10)
+ *   area:      [{top:[[x,y],...], bottom:[[x,y],...], color, opacity}] — filled band between two
+ *              edges (e.g. a ±2σ envelope), clipped and drawn under every line; order-independent
  *   ariaLabel: string — aria-label for the SVG element
  */
 /** Pixel width an SVG will be drawn at (so text and strokes render 1:1, never scaled up). */
@@ -187,7 +189,7 @@ const _chartRO = (typeof ResizeObserver !== "undefined") ? new ResizeObserver(en
 
 export function chart(svg, opts) {
   let { W = 460, H = 240, xlog = false, ylog = false, xlim, ylim,
-    xticks, yticks, xlabel, ylabel, band, hlines = [], vlines = [], series, fill,
+    xticks, yticks, xlabel, ylabel, band, hlines = [], vlines = [], series, fill, area = [],
     yMinor, refLines = [], markers = false, unscored = [], ariaLabel, square = false } = opts;
   svg.innerHTML = "";
   W = measuredWidth(svg, W);
@@ -241,6 +243,24 @@ export function chart(svg, opts) {
     el("rect", { x: m.l, width: W - m.l - m.r, y: Math.min(fy0, fy1), height: Math.max(0, Math.abs(fy0 - fy1)), fill: f.color, opacity: f.opacity ?? 0.12 }, plot);
   }
   if (band) el("rect", { x: X(band[0]), y: m.t, width: Math.max(0, X(band[1]) - X(band[0])), height: H - m.t - m.b, fill: css("--band") }, plot);
+  // Area mark: a filled band between two edges (a ±2σ envelope, a credible interval) inside the
+  // same clip group as the series, so it can never bleed into the margins.  It paints above the
+  // background band/fill rects and below every line, so the mean, marker lines and labels stay on
+  // top.  Rows whose coordinate is not a finite number are dropped, never coerced.
+  for (const a of area) {
+    if (!a || !a.color) continue;
+    const clamped = side => (Array.isArray(side) ? side : [])
+      .filter(p => Array.isArray(p) && typeof p[0] === "number" && Number.isFinite(p[0])
+        && typeof p[1] === "number" && Number.isFinite(p[1]))
+      .map(p => [p[0], Y(Math.min(Math.max(p[1], y0raw), y1raw))])
+      .filter(p => p[1] != null);        // a log-y domain can still reject a clamped value
+    const top = clamped(a.top);
+    const bottom = clamped(a.bottom).reverse();
+    if (top.length < 2 || bottom.length < 2) continue;
+    const d = [...top, ...bottom]
+      .map((p, i) => `${i ? "L" : "M"}${X(p[0]).toFixed(1)},${p[1].toFixed(1)}`).join("") + "Z";
+    el("path", { d, fill: a.color, opacity: a.opacity ?? 0.14 }, plot);
+  }
   const g = el("g", { class: "grid" }, svg);
   // C1: minor y gridlines (lighter, unlabelled)
   for (const t of (yMinor || [])) {

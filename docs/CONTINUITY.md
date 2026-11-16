@@ -1,5 +1,66 @@
 # CONTINUITY
 
+## 2026-11-16 (late) - `feat/bo-gui` MERGED into the GUI branch; `diagnose` proven on real studies (one real bug); Bayes deep links fixed
+
+- **Merge gate (STEP 0)** at 20:54: `tools/night_status.py` -> no `hornlab-search search` process, both lane
+  locks free, no Julia host; the 20:08 `bo_cov_pilot` queue log ends "queue done". `feat/bo-gui`
+  (`b0f669d`, which already contains its own `4808863` merge of sab-home) merged into
+  `feat/sab-home-2026-11-14` as **`5b78c6c`**. **Not merged to `main`** - the owner gate is unchanged.
+  A separate session started the 25x2 CMA screens at 21:06 and committed `ad1a5e0`/`ab2d807` on top of
+  the merge; that work is theirs and was left alone.
+- **Conflicts (4).** `CONTINUITY`: union, newest first (cloud entry -> 20:08 pilot -> section-pucker ->
+  globe; the globe heading lost its "(latest)"). `BO_GUI_IMPLEMENTATION_PLAN_2026-11-16.md`: add/add, kept
+  the cloud scope note (HEAD side was empty). `gui/data_studies.py`, `gui/static/studies.js`,
+  `tests/test_gui_study_adapters.py`: kept the **local** turbo card (`scalar, trust region`, requires
+  `training_set`+`pool`) - the cloud's `good_basin` requirement has no backend counterpart
+  (`bo/policy.py` labels turbo "scalar Bayesian, trust region"; `propose_turbo` takes a pool).
+- **Mojibake:** merged CONTINUITY carries the correctly encoded side (547 `â€` / 65 `Ã` / 185 `Â`
+  sequences = origin/feat/bo-gui's count, down from HEAD's 568/69/188). Every heading on both parents is
+  present exactly once; the 35 duplicate headings are pre-existing legacy text.
+- **Suite (the STEP-2 selection, 69 files):** `pytest tests/test_gui_* tests/test_study* tests/test_studies_*
+  tests/test_bo_diagnostics.py` -> **601 passed, 1 skipped** (the skip is `test_bo_diagnostics` in `.venv`,
+  which has no botorch; it passes 5/5 under the bayes-venv). `compileall` exit 0;
+  `node tests/gui_study_lifecycle.mjs ...` -> "study lifecycle ok". The two cloud-only failures pass
+  locally as predicted: `test_gui_bridge_preview` (6) and
+  `test_study_production::test_execution_requires_current_measured_cohort_dependencies` (4 params). The
+  single pre-fix failure was the stale balloon test: `app.js:188` is
+  `/^#\/run\/(.+)\/balloon(?:\?(.*))?$/`; the test now matches that literal with `re.escape`.
+- **`diagnose` on real studies** (`oc-wt/bo-study/bayes-venv`): scalar `bo_s31001` (n=185, d=6) 41,895 B,
+  185/185 LOO rows, 6 slices x 25; Pareto `pareto_s63001` (n=136, d=8) 112,868 B, 136/136, 8 slices x 25,
+  6 front ids, `hv_trace` 13.6729 -> 19.7767 non-decreasing. Both attach in the registry (kind
+  `diagnostics`, schema `study-model-diagnostics-v1`) and re-run idempotent.
+- **Real bug found on real data (fixed):** prefix hypervolume *decreased* by 3.5e-15 eight times - BoTorch's
+  box decomposition sums in an order that depends on the prefix size. `_pareto_block` now clamps at the
+  running maximum and coalesces sub-tolerance steps (`HV_REL_TOL = 1e-12`); regression test
+  `test_pareto_hv_trace_monotone_on_large_realistic_front` (136 rows, repeated measurements, strict
+  `b >= a`) reproduces the old failure. Synthetic n=12 x d=2 could never have caught it.
+- **GUI, real payloads (server restarted):** the Explain "Compute model diagnostics" button ran the CPU
+  job end to end on `bo_cov_s71001` (231 rows, d=9): job `2151ab26...` -> artifact `c9fdd6b5...` (58,236 B),
+  LOO scatter with ±2σ whiskers + y=x guide + chips n 231 / ±2σ coverage 92.6 % / rank rho 0.973 /
+  RMSE 1.372, and 10 slice small-multiples. Before the job both places say "not computed yet" / "missing".
+- **Fixed in the GUI:** (a) `#/analysis/study/<id>` redirected to `#/bayes/study/<id>`, which matched no
+  route and printed "Unknown view"; it now lands on `/overview` via `studyLinkHash()`, honours `?phase=`,
+  preserves other query keys, and a bare `#/bayes/study/<id>` is accepted too. (b) the Live tab decides
+  from a server-side `package_present` flag in the panel payload (every phase), so it appears on first
+  load instead of after visiting Execute; a package-less study at `/live` still falls back to `/overview`.
+  (c) `compare_methods.js` breadcrumb `#/analysis` -> `#/bayes/studies`.
+- **Pareto card uses the diagnostics** when present: front size ("6 designs across the 136 training rows"),
+  a step-after prefix-hypervolume chart (`hv_trace`), and a "model front" pill on matching rows - matched on
+  `observation_id` because `front_ids` are training-row ids, not the shorter `design_hash`. Absent/unusable
+  diagnostics leave the card byte-identical.
+- **Chart/shell polish (both themes, 1440 + 500):** one knob-name caption per slice (it printed twice), a
+  filled ±2σ band via a new `chart({area})` option (was two dashed lines and no fill), LOO whiskers thinned
+  to a readable envelope with all 231 rows kept, the Live KPI strip's short row no longer shows a `--rule`
+  slab, and the 500 px nav wraps instead of clipping (the BAYES items were unreachable).
+- **Re-prepare:** `tools/bo_compare/preflight_arms.py --budget-profile comparison-25x0 --min-rows 100` is
+  exit 0 for all four staged arms with `execution_pins_match: true` (cov 231/d9, ath14 219/d14, corelaw
+  206/d9, hvlaw 136/d8). Nothing was reprepared on purpose: the three unlaunched arms have no package yet
+  (their own prep job creates it at launch, so it carries the then-current pins and a fresh 6 h deadline),
+  and every existing package belongs to a finished study. `gui/**` is still inside
+  `EXECUTION_CODE_FILES`, so any prepared package is refused after a GUI edit - unchanged owner decision.
+- Not done: `main` merge/PR (owner), the legacy `#/analysis` "Analysis reports" link on the studies list,
+  and the `night_status` phantom-running-job noise - all recorded in `docs/ISSUES.md`.
+
 ## 2026-11-16 (pilot) - 25 x 2 section home pucker vs square X; square X wins J
 
 - GPU was free after `bo_cov_pilot_2026-11-16` finished; no running job was interrupted.

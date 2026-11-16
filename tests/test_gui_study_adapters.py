@@ -8,6 +8,7 @@ from hornlab_search.gui.data_studies import (
     execute_view,
     policy_cards,
     study_summaries,
+    workflow_panel,
 )
 from hornlab_search.gui.study_jobs import StudyCpuJobs, StudyJobError, contained_path
 
@@ -227,3 +228,27 @@ def test_artifact_panel_is_metadata_only_and_refuses_unbounded_data():
         artifact_panel({"data": {"value": float("inf")}})
     with pytest.raises(ValueError):
         artifact_panel({"kind": "../escape"})
+
+
+def test_workflow_panel_reports_package_presence_on_every_phase(tmp_path):
+    """The Live tab depends on a package that exists before the execute panel is visited.
+
+    ``package_present`` must ride on the normal panel payload for every phase, so the first
+    fetch is enough; a study with no package must report it falsy (no Live tab).
+    """
+    from test_studies_package_b2 import make_package, seed_study
+
+    service, sid, _ = seed_study(tmp_path)
+    study = service.get_study(sid)
+
+    absent = workflow_panel(service, study, "overview", None, root=tmp_path)
+    assert absent["data"]["package_present"] is False
+
+    make_package(service, sid)
+    artifact = {"status": "partial", "revision": study["revision"], "data": {},
+                "provenance": {}}
+    for phase in ("overview", "data", "explain", "propose", "execute", "decide"):
+        panel = workflow_panel(service, study, phase, artifact, root=tmp_path)
+        assert panel["data"]["package_present"] is True, phase
+    # The live view is the execute panel under a different route phase, so "live" maps to
+    # "execute"; the flag above is what the client trusts on first load.

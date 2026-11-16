@@ -302,4 +302,46 @@ const executePanel = {...ready, phase:"execute", data:{lane:"cpu", actions:[{kin
   assert.ok(appSrc.includes('/api/studies/${encodeURIComponent(id)}/artifacts/${encodeURIComponent(artifact)}'), "artifact path is bounded by id encoding");
 }
 
+// ── 12. Live tab follows the server package flag on first load; no package -> no Live tab ──
+{
+  assert.equal(m.hasPackageData({package_present:true}), true, "server flag is package evidence");
+  assert.equal(m.hasPackageData({package_present:false}), false, "false flag is not package evidence");
+  assert.equal(m.hasPackageData({}), false);
+
+  const overview = data => ({...ready, phase:"overview", data});
+  const packaged = m.renderStudyPanel({id:"pkgstudy", revision:1}, overview({package_present:true}));
+  assert.ok(packaged.includes("#/bayes/study/pkgstudy/live"), "package_present shows the Live tab on first load");
+  const plain = m.renderStudyPanel({id:"plainstudy", revision:1}, overview({}));
+  assert.ok(!plain.includes("#/bayes/study/plainstudy/live"), "no package -> no Live tab");
+}
+
+// ── 13. a direct live route uses the first panel's flag; package-less falls back to Overview ──
+{
+  globalThis.location = {hash:""};
+  const liveRoot = makeRoot();
+  const liveApi = {
+    getStudy:async () => ({...study, id:"livestudy"}),
+    getPanel:async () => ({...ready, phase:"execute", data:{package_present:true}}),
+    action:async () => ({}),
+  };
+  const disposeLive = m.mountStudy(liveRoot, {studyId:"livestudy", phase:"live", api:liveApi, pollMs:0});
+  await tick();
+  assert.equal(globalThis.location.hash, "", "first live load of a packaged study does not redirect");
+  assert.ok(liveRoot.innerHTML.includes("Live KPIs"), "live view paints from the first fetch");
+  disposeLive();
+
+  globalThis.location = {hash:""};
+  const plainRoot = makeRoot();
+  const plainApi = {
+    getStudy:async () => ({...study, id:"plainlive"}),
+    getPanel:async () => ({...ready, phase:"execute", data:{}}),
+    action:async () => ({}),
+  };
+  const disposePlain = m.mountStudy(plainRoot, {studyId:"plainlive", phase:"live", api:plainApi, pollMs:0});
+  await tick();
+  assert.equal(globalThis.location.hash, "#/bayes/study/plainlive/overview", "package-less live route lands on Overview");
+  assert.equal(plainRoot.innerHTML, "", "package-less live route does not paint");
+  disposePlain();
+}
+
 console.log("study lifecycle ok");

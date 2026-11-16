@@ -20,6 +20,11 @@ LOO_ROW_CAP = 400
 MAX_BYTES = 128 * 1024
 LOO_METHOD = "efficient_loo_cv (no refit)"
 BOUND_REL_TOL = 0.01
+# Prefix hypervolume is mathematically non-decreasing, but BoTorch's box decomposition sums
+# boxes in an order that depends on how many points the prefix holds, so a dominated point can
+# move the float result by a few ulps.  Clamp to the running maximum and coalesce sub-tolerance
+# steps so the trace stays monotone and does not record noise-level "changes".
+HV_REL_TOL = 1e-12
 
 
 def _f(x):
@@ -137,13 +142,16 @@ def _pareto_block(pareto):
     for s in range(len(ids)):
         sel = inside[:s + 1]
         v = float(hv.compute(Y[:s + 1][sel])) if bool(sel.any()) else 0.0
-        if v != last or s == len(ids) - 1:
+        if last is not None and v < last:                 # prefix HV cannot shrink; float jitter can
+            v = last
+        if last is None or v > last * (1.0 + HV_REL_TOL) or s == len(ids) - 1:
             trace.append({"seq": s + 1, "hv": _f(v)})
-            last = v
+        last = v
     return {"objectives": ["coverage_err_deg", "ripple_db"], "ref_point": _fl(ref),
             "front_ids": [ids[i] for i in range(len(ids)) if bool(front[i])],
             "hv_trace": trace, "hv_trace_note": "seq is the training-row order; rows beyond the "
-            "frozen reference add no hypervolume"}
+            "frozen reference add no hypervolume; the running value is clamped at its maximum so "
+            "box-decomposition round-off cannot make the trace decrease"}
 
 
 def build_diagnostics(fit, training_set, policy, pareto=None, *, study_id=None, revision=None,

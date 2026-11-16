@@ -80,10 +80,11 @@ export function studyRoute(id, phase = "overview", rootId = null) {
   return `#/bayes/study/${encodeURIComponent(id)}/${phase}${query}`;
 }
 
-// True when a panel carries run-package evidence (package hash/revision, job or package object).
+// True when a panel carries run-package evidence (server package flag, hash/revision, job or package object).
+// ``package_present`` is authoritative on the first fetch, before the execute panel was ever visited.
 export function hasPackageData(data) {
   if (!data || typeof data !== "object") return false;
-  return data.package_hash != null || data.package_revision != null
+  return data.package_present === true || data.package_hash != null || data.package_revision != null
     || (data.package !== null && typeof data.package === "object")
     || (data.job !== null && typeof data.job === "object") || data.job_id != null;
 }
@@ -351,13 +352,30 @@ function renderLoo(loo) {
   return `<h4>LOO on training data</h4>${chartBlock("calibration_loo", "Leave-one-out predicted J against observed J with whiskers")}${chips}<p class="muted">${esc(loo.method || "Leave-one-out from the fitted model; no refit per row.")}</p>`;
 }
 
+// Knob keys arrive as identifiers (throat_ext_angle_deg, az_a_cos_amp).  A slice caption reads
+// like a knob name: words instead of underscores, with a trailing unit in brackets.  The unit is
+// carried by the key suffix because the study space has no separate unit field.
+const KNOB_UNITS = new Set(["mm", "cm", "m", "deg", "hz", "khz", "db", "ms"]);
+function knobName(key) {
+  const words = String(key ?? "").replace(/_+/g, " ").trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return "knob";
+  let unit = "";
+  if (words.length > 1 && KNOB_UNITS.has(words[words.length - 1].toLowerCase())) unit = words.pop();
+  const body = words.join(" ");
+  return unit ? `${body} (${unit})` : body;
+}
+
 function renderSlices(view) {
   const slices = Array.isArray(view.slices) ? view.slices : [];
   if (!slices.length) {
     return view.diagnostics?.can_compute ? `<p class="muted">1-D model slices: not computed yet. Use “Compute model diagnostics” in the actions above.</p>` : "";
   }
-  const cells = slices.map(item => `<figure class="study-chart"><svg data-study-slice="${esc(item.key)}" role="img" aria-label="${esc(`Model J along ${item.key}`)}"></svg><figcaption class="muted mono">${esc(item.key)}</figcaption></figure>`).join("");
-  return `<h4>Model slices through the incumbent</h4><div class="bo-slices">${cells}</div><p class="muted">Line is the model mean, dashed lines are ±2σ, the vertical tick is the incumbent.</p>`;
+  // One name per small multiple: the figure caption.  The chart itself draws no second axis label.
+  const cells = slices.map(item => {
+    const name = knobName(item.key);
+    return `<figure class="study-chart"><svg data-study-slice="${esc(item.key)}" role="img" aria-label="${esc(`Model J along ${name}; the shaded band is ±2σ around the model mean and the tick marks the incumbent`)}"></svg><figcaption class="bo-slice-label">${esc(name)}</figcaption></figure>`;
+  }).join("");
+  return `<h4>Model slices through the incumbent</h4><div class="bo-slices">${cells}</div><p class="muted">Line is the model mean, the shaded band is ±2σ, the vertical tick is the incumbent.</p>`;
 }
 
 function renderSensitivity(view) {
@@ -388,19 +406,64 @@ function renderTrustRegion(view) {
     `${chartBlock("trust_region", "Trust-region length over proposals, with the collapse floor and maximum")}${latest}${counters}${bars ? `<div class="bo-bars">${bars}</div>` : ""}<p class="muted">A collapsed box means the local search has converged. Unspent budget stays visible.</p>`);
 }
 
+// The diagnostics artifact's pareto block lists its front by training-row id.  A Pareto row
+// carries that id as ``observation_id``; ``design_hash`` is a shorter, independent id in the
+// shipped payload, so matching only on it would mark nothing.  Match either identity, exactly,
+// and never fabricate a member.
+function paretoFrontIds(diag) {
+  const ids = Array.isArray(diag?.front_ids) ? diag.front_ids.filter(id => typeof id === "string" && id) : [];
+  return ids.length ? new Set(ids) : null;
+}
+const onDiagnosticsFront = (point, front) => !!front
+  && [point?.observation_id, point?.design_hash].some(id => typeof id === "string" && id && front.has(id));
+
+// ``hv_trace`` is [[training_row, prefix_hypervolume], ...]; a bounded-panel marker can sit in the
+// list, so every row is type-checked (null or a string is rejected, never coerced to 0).  Two
+// readable rows are the minimum for a line.
+function diagnosticsHvTrace(diag) {
+  const rows = (Array.isArray(diag?.hv_trace) ? diag.hv_trace : [])
+    .filter(row => Array.isArray(row)
+      && typeof row[0] === "number" && Number.isFinite(row[0])
+      && typeof row[1] === "number" && Number.isFinite(row[1]))
+    .map(row => [row[0], row[1]]);
+  return rows.length >= 2 ? rows : [];
+}
+
+/** Model-diagnostics half of the Pareto card: front size, then the hypervolume trace. */
+function renderParetoDiagnostics(diag, front, trace) {
+  if (!diag || diag.available !== true) return "";
+  const nFront = front ? front.size : null;
+  const rowsSeen = trace.length ? trace[trace.length - 1][0] : null;
+  const summary = nFront == null ? "" :
+    `<p><span class="pill">model diagnostics front</span> ${esc(fmtNum(nFront, 0))} design${nFront === 1 ? "" : "s"}${rowsSeen == null ? "" : ` across the ${esc(fmtNum(rowsSeen, 0))} training rows the diagnostics job used`}. <span class="muted">The table below is the measured nondominated set, a separate front.</span></p>`;
+  const hv = trace.length
+    ? `${chartBlock("pareto_hv", "Prefix hypervolume of the diagnostics training rows against training-row order")}<p class="muted">Bottom axis: training-row order (k). Up axis: hypervolume of the first k rows. The value only moves up on a row that adds hypervolume, so a flat stretch means that row added none.</p>`
+    : "";
+  return `${summary}${hv}`;
+}
+
 function renderPareto(view, study, phase, rootId) {
   if (!view) return "";
   const reference = view.reference || {};
   const limits = reference.limits || [];
   const points = (Array.isArray(view.points) ? view.points : []).filter(point => point.nondominated);
+  // Absent or unavailable diagnostics must leave every string below exactly as it was.
+  const diag = view.diagnostics && typeof view.diagnostics === "object" ? view.diagnostics : null;
+  const diagnosticsOn = diag?.available === true;
+  const front = diagnosticsOn ? paretoFrontIds(diag) : null;
+  const trace = diagnosticsOn ? diagnosticsHvTrace(diag) : [];
   const rows = points.slice(0, 50).map(point => {
     const link = studyDesignLink(view.run_id || view.run?.run_id || "", point.design_hash, study.id, phase, rootId || study.root);
     const design = point.design_hash ? (link ? `<a class="mono" href="${esc(link)}">${esc(point.design_hash)}</a>` : `<span class="mono">${esc(point.design_hash)}</span>`) : "—";
-    return `<tr><td>${design}</td><td class="r mono">${fmtNum(point.coverage_deg, 3)}</td><td class="r mono">${fmtNum(point.ripple_db, 3)}</td><td class="r mono">${fmtNum(point.j)}</td><td>${point.finalist ? '<span class="pill good">finalist</span>' : ""}</td></tr>`;
+    // The marker sits beside the row's own identity, so it stays visible when the table scrolls
+    // sideways on a phone and never needs a column of its own.
+    const onFront = onDiagnosticsFront(point, front) ? ' <span class="pill">model front</span>' : "";
+    return `<tr><td>${design}${onFront}</td><td class="r mono">${fmtNum(point.coverage_deg, 3)}</td><td class="r mono">${fmtNum(point.ripple_db, 3)}</td><td class="r mono">${fmtNum(point.j)}</td><td>${point.finalist ? '<span class="pill good">finalist</span>' : ""}</td></tr>`;
   }).join("");
   const metrics = `<p>${view.hypervolume != null ? `<span class="pill">hypervolume ${fmtNum(view.hypervolume, 4)}</span>` : ""} ${limits.length === 2 ? `<span class="pill">reference ${fmtNum(limits[0])} deg × ${fmtNum(limits[1])} dB</span>` : ""} ${view.n_complete != null ? `<span class="pill">complete ${fmtNum(view.n_complete, 0)}</span>` : ""}${view.n_excluded ? ` <span class="pill warn">excluded ${fmtNum(view.n_excluded, 0)}</span>` : ""}</p>`;
+  const diagnostics = diagnosticsOn ? renderParetoDiagnostics(diag, front, trace) : "";
   return boPanel("pareto", "Coverage × ripple frontier", view,
-    `${chartBlock("pareto", "Measured coverage error against ripple error; nondominated and finalist points highlighted")}${metrics}${rows ? `<div class="tbl-scroll"><table><thead><tr><th>Design</th><th class="r">Coverage error (deg)</th><th class="r">Ripple error (dB)</th><th class="r">J</th><th>Verify</th></tr></thead><tbody>${rows}</tbody></table></div><p class="bo-scroll-hint">Scroll horizontally for all columns →</p>` : ""}<p class="muted">Coverage is plain physical coverage error (owner decision 2026-11-15); J is shown beside it. Training uses frontier/crowding; rows beyond the frozen reference still train but add no hypervolume.</p>`);
+    `${chartBlock("pareto", "Measured coverage error against ripple error; nondominated and finalist points highlighted")}${metrics}${diagnostics}${rows ? `<div class="tbl-scroll"><table><thead><tr><th>Design</th><th class="r">Coverage error (deg)</th><th class="r">Ripple error (dB)</th><th class="r">J</th><th>Verify</th></tr></thead><tbody>${rows}</tbody></table></div><p class="bo-scroll-hint">Scroll horizontally for all columns →</p>` : ""}<p class="muted">Coverage is plain physical coverage error (owner decision 2026-11-15); J is shown beside it. Training uses frontier/crowding; rows beyond the frozen reference still train but add no hypervolume.</p>`);
 }
 
 function renderDesignSpace(view) {
@@ -523,7 +586,7 @@ export function renderStudyPanel(study, panel, selected = null, notice = "", sta
   const status = stale ? "stale" : (panel.status || "unknown");
   const data = panel.data && typeof panel.data === "object" ? panel.data : {};
   const actions = Array.isArray(data.actions) ? data.actions.map((action, index) => ({action, index})).filter(x => x.action && ACTIONS.has(x.action.kind)) : [];
-  const visibleData = Object.fromEntries(Object.entries(data).filter(([k]) => !["actions", "selected_horn", "policies", "candidates", "package", "budget", "lane", "deadline", "stop_recovery", "stop_rules", "verification", "verification_policy", "progress", "job", "job_id", "job_status", "package_hash", "package_revision", "artifacts", "bo"].includes(k)));
+  const visibleData = Object.fromEntries(Object.entries(data).filter(([k]) => !["actions", "selected_horn", "policies", "candidates", "package", "budget", "lane", "deadline", "stop_recovery", "stop_rules", "verification", "verification_policy", "progress", "job", "job_id", "job_status", "package_hash", "package_revision", "package_present", "artifacts", "bo"].includes(k)));
   const activePanel = {...panel, status};
   const renderState = {busy:state?.busy === true, artifact:state?.artifact || null};
   const isLive = phase === LIVE_PHASE;

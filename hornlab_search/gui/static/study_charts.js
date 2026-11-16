@@ -2,7 +2,6 @@
 // no score math and no fetch here.  The page passes the panel's `data.bo` object.
 import { chart, catColor, fmt, niceTicks } from "./charts.js";
 
-const SVG = "http://www.w3.org/2000/svg";
 const RUN_ID = /^study-[0-9a-f]{16}$/;
 const HASH = /^[0-9a-f]{6,64}$/;
 
@@ -228,6 +227,57 @@ function drawPareto(svg, view) {
   });
 }
 
+/** Pure helper: readable [[training_row, prefix_hypervolume], ...] rows, or [] when unusable.
+ *  A bounded-panel marker string can sit in the list, so every row is type-checked (a null or a
+ *  string is rejected, never coerced to 0). */
+export function hvTracePoints(trace) {
+  const rows = (Array.isArray(trace) ? trace : [])
+    .filter(row => Array.isArray(row)
+      && typeof row[0] === "number" && Number.isFinite(row[0])
+      && typeof row[1] === "number" && Number.isFinite(row[1]))
+    .map(row => [row[0], row[1]]);
+  return rows.length >= 2 ? rows : [];
+}
+
+/** Pure helper: axis limits for the diagnostics hypervolume trace (row order from 0). */
+export function hvTraceLimits(trace) {
+  const rows = hvTracePoints(trace);
+  if (!rows.length) return null;
+  const ys = rows.map(row => row[1]);
+  const ylim = padRange(Math.min(...ys), Math.max(...ys), 0.12, 0.05);
+  if (!ylim) return null;
+  return { xlim: [0, Math.max(2, Math.max(...rows.map(row => row[0])))], ylim };
+}
+
+/** Step-after expansion of the trace: the value holds until a row raises it.  Derived from the
+ *  recorded rows only, so a flat run stays visibly flat instead of sloping. */
+function stepPoints(trace) {
+  const out = [[trace[0][0], trace[0][1]]];
+  for (let i = 1; i < trace.length; i += 1) {
+    out.push([trace[i][0], trace[i - 1][1]], [trace[i][0], trace[i][1]]);
+  }
+  return out;
+}
+
+function drawParetoHv(svg, diag) {
+  if (!svg || !diag || diag.available !== true) return;
+  const trace = hvTracePoints(diag.hv_trace);
+  const limits = hvTraceLimits(trace);
+  if (!limits) return;
+  const accent = color("--accent", "#2a78d6");
+  chart(svg, {
+    W: 520, H: 220, xlim: limits.xlim, ylim: limits.ylim,
+    xticks: niceTicks(limits.xlim[0], limits.xlim[1], 5),
+    yticks: niceTicks(limits.ylim[0], limits.ylim[1], 4),
+    xlabel: "training rows (row order)", ylabel: "prefix hypervolume",
+    series: [
+      { pts: stepPoints(trace), color: accent, w: 2 },
+      { pts: trace, dots: true, r: 2.4, color: accent, opacity: 0.95 },
+    ],
+    ariaLabel: "Prefix hypervolume of the model diagnostics training rows against training-row order; the value only rises when a row adds hypervolume",
+  });
+}
+
 function drawTrustRegion(svg, view) {
   if (!svg || !view || !["ready", "partial"].includes(view.status)) return;
   const points = trustRegionPoints(view);
@@ -296,14 +346,18 @@ function drawLoo(svg, loo) {
   const accent = color("--accent", "#2a78d6");
   const label = color("--label", "#667");
   const series = [{ pts: [[limits.lim[0], limits.lim[0]], [limits.lim[1], limits.lim[1]]], color: label, w: 1, dash: true, opacity: 0.7 }];
-  // whiskers run along x (the model's +/-2 sd) at the observed y
+  // Whiskers run along x (the model's +/-2 sd) at the observed y.  With ~200 training rows
+  // stacked on a handful of measured J values, full-strength strokes fuse into a solid block:
+  // keep every row but let the ensemble read as a light envelope, so the dots and the y=x guide
+  // stay the foreground.
   const whiskers = rows.filter(r => finite(r.j_sd) && r.j_sd > 0)
-    .map(r => ({ pts: [[r.j_mean - 2 * r.j_sd, r.j_obs], [r.j_mean + 2 * r.j_sd, r.j_obs]], color: accent, w: 1, opacity: 0.45 }));
+    .map(r => ({ pts: [[r.j_mean - 2 * r.j_sd, r.j_obs], [r.j_mean + 2 * r.j_sd, r.j_obs]], color: accent, w: 1, opacity: 0.16 }));
   chart(svg, {
     W: 460, H: 260, xlim: limits.lim, ylim: limits.lim,
     xticks: niceTicks(limits.lim[0], limits.lim[1], 5), yticks: niceTicks(limits.lim[0], limits.lim[1], 5),
     xlabel: "LOO predicted J (+/-2 sd)", ylabel: "observed J (training)",
-    series: [series[0], ...whiskers, { pts: rows.map(r => [r.j_mean, r.j_obs]), dots: true, r: 3, color: accent }],
+    series: [series[0], ...whiskers,
+      { pts: rows.map(r => [r.j_mean, r.j_obs]), dots: true, r: 2.6, color: accent, opacity: 0.9 }],
     ariaLabel: "Leave-one-out predicted J with two standard deviation whiskers against observed J, with the y equals x guide",
   });
 }
@@ -331,14 +385,21 @@ function drawSlice(svg, slice) {
   const chartOpts = {
     W: 300, H: 170, xlim: limits.xlim, ylim: limits.ylim,
     xticks: niceTicks(limits.xlim[0], limits.xlim[1], 4), yticks: niceTicks(limits.ylim[0], limits.ylim[1], 4),
-    xlabel: slice.key, ylabel: "J",
+    ylabel: "J",
+    // The ±2σ envelope is an area mark, so chart() draws it under the mean and repaints it with
+    // every resize redraw.  Its name lives in the figure caption, which also carries the SVG's
+    // aria-label, so the plot prints no axis label for it.
+    area: [{
+      top: pairs.map(p => [p[0], p[1] + 2 * sd(p)]),
+      bottom: pairs.map(p => [p[0], p[1] - 2 * sd(p)]),
+      color: accent, opacity: 0.14,
+    }],
     series: [
       { pts: pairs.map(p => [p[0], p[1] + 2 * sd(p)]), color: accent, w: 1, dash: true, opacity: 0.5 },
       { pts: pairs.map(p => [p[0], p[1] - 2 * sd(p)]), color: accent, w: 1, dash: true, opacity: 0.5 },
       { pts: pairs.map(p => [p[0], p[1]]), color: accent, w: 2 },
     ],
     vlines: finite(slice.anchor_x) ? [{ x: slice.anchor_x, color: label, dash: true }] : [],
-    ariaLabel: `Model J along ${slice.key} with plus and minus two standard deviations; the tick marks the incumbent`,
   };
   chart(svg, chartOpts);
 }
@@ -361,6 +422,8 @@ export function drawStudyCharts(root, panel) {
   });
   const pareto = find("pareto");
   if (pareto) drawPareto(pareto, bo.pareto);
+  const paretoHv = find("pareto_hv");
+  if (paretoHv) drawParetoHv(paretoHv, bo.pareto?.diagnostics);
   const trust = find("trust_region");
   if (trust) drawTrustRegion(trust, bo.trust_region);
   const space = find("design_space");

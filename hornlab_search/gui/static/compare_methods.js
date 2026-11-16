@@ -67,7 +67,7 @@ export function mountCompareMethods(root, {api, onError = () => {}}) {
   const draw = () => {
     if (disposed) return;
     root.innerHTML = `<section class="study-workspace" aria-label="Compare methods">
-      <header><p><a href="#/analysis">Analysis</a> / Compare methods</p><h1>Compare methods</h1>
+      <header><p><a href="#/bayes/studies">Bayes</a> / Compare methods</p><h1>Compare methods</h1>
       <p class="muted">Pre-declared rules over matched arms; every number comes from a recorded run.</p></header>
       ${notice ? `<p role="alert">${esc(notice)}</p>` : ""}
       ${list.length ? `<p>${renderComparisonList(list, selected)}</p>` : ""}

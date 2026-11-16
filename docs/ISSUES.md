@@ -1,5 +1,38 @@
 # ISSUES
 
+Local-only, 2026-11-16 late (**`feat/bo-gui` merged locally; `diagnose` proven on real studies**):
+- Merged `origin/feat/bo-gui` (`b0f669d`) into `feat/sab-home-2026-11-14` (`5b78c6c`). **Not merged to
+  `main`** - owner gate unchanged. The branch now contains the diagnostics artifact, the Bayes nav group
+  and the study Live tab.
+- `diagnose` verified against real studies with the bayes-venv: scalar n=185/d=6 41.9 kB, Pareto n=136/d=8
+  112.9 kB; `loo.rows` == training rows, 25 points per active knob, 6 front ids, `hv_trace` non-decreasing.
+  **Real bug fixed:** prefix hypervolume jittered *down* by 3.5e-15 (BoTorch box-decomposition order);
+  clamped at the running maximum with `HV_REL_TOL=1e-12` plus a regression test that reproduces it.
+- Fixed: dead `#/analysis/study/<id>` deep link ("Unknown view" - now `/overview`, `?phase=` honoured),
+  Live tab first-load detection (`package_present` in the panel payload), `compare_methods.js` breadcrumb,
+  and the stale balloon-route test.
+- **Open (owner):** `bo_multityp_2026-11-16` still contains arm 1 (`bo_cov_s71001`), which already ran the
+  20:08 pilot. Launching that night would re-run `prep_cov` and restart the study from zero observations,
+  discarding its 25 solved designs. Drop or re-point arm 1 before the night runs.
+- **Open (owner):** all prepared packages now fail the execution-code pin check because `gui/**` is inside
+  `EXECUTION_CODE_FILES` and the GUI/study code changed. Finished studies cannot be resumed (expected); the
+  three staged arms have no package and preflight clean, so their own prep job will bake current pins.
+  Excluding `gui/**` from `EXECUTION_CODE_FILES` remains the owner's call.
+- **Open (small UI):** the studies list header still links "Analysis reports" to the legacy CMA-era
+  `#/analysis`; `#/analysis/studies` and `#/analysis/compare-methods` redirect correctly. No other stale
+  `#/analysis/...` link exists in the static JS.
+- **Open (tool):** `tools/night_status.py` prints "running job <id>" for abandoned nights whose queue log
+  ends "finished <night> (exit 1); queue done" (`QUEUE_LOG_FRESH_S` is 24 h and the END pattern matches a
+  job id, not the night). The authoritative "Running now (search processes)" line is correct; the stale
+  lines only make the STEP-0 gate noisy. Evidence: `runs/nights/queue_home_e_2026-11-15.log` tail.
+- **Open (latent, diagnostics lane):** `_slices` iterates `X.shape[1]` instead of `len(active_keys)` (a
+  training matrix with unprojected inactive columns would emit `x{k}` slices); Pareto per-objective LOO
+  uses the `select_subset` fit (cap 256), so a study above the cap can show fewer per-objective rows than
+  training rows; `payload["size_bytes"]` undercounts the file by ~20 B. None triggered on today's studies.
+- **Doc debt:** CONTINUITY still carries 547 `â€` / 65 `Ã` / 185 `Â` legacy mojibake sequences in pre-11-15
+  entries (the merge kept the correctly encoded side and added none). Not repaired wholesale - it would
+  rewrite ~800 lines of history for no functional gain.
+
 Local-only, 2026-11-16 (**section-pucker / square-X 25x2 pilot; no active GPU job was interrupted**):
 - The old `rf__section_axial_strong_v7` box was a visual-study box (fixed 417x203, depth 194-202,
   `h_depth_scale` 0.99-1.01, crown 18-22, fixed junction 32). It is now labelled visual reference only.
