@@ -161,3 +161,32 @@ def test_bound_pinning_stops():
             for i in range(40)]
     assert "bound-pinned" in night.watchdog_verdict(rows, CFG, {"g_fc_hz": (450.0, 900.0)})
     assert night.watchdog_verdict(rows, CFG, {"g_fc_hz": (300.0, 900.0)}) is None
+
+
+def test_pin_ignore_skips_hard_limit_knobs():
+    rows = [{"n": i, "ok": True, "objective": 10 - i * 0.1, "params": {"g_tmax": 1.0}} for i in range(40)]
+    assert "bound-pinned" in night.watchdog_verdict(rows, CFG, {"g_tmax": (0.85, 1.0)})
+    cfg = dict(night._resolve_watchdog(None, {"pin_ignore": ["g_tmax"]}, "x"))
+    assert night.watchdog_verdict(rows, cfg, {"g_tmax": (0.85, 1.0)}) is None
+    with pytest.raises(ValueError):
+        night._resolve_watchdog(None, {"pin_ignore": "g_tmax"}, "x")
+
+
+def test_resumed_run_judges_only_new_rows(tmp_path):
+    runs = tmp_path / "runs"; run = runs / "20990101T000000Z-screen-old001"; run.mkdir(parents=True)
+    old = [{"n": i, "ok": True, "objective": 3.0} for i in range(60)]          # converged: would trip no-gain/stall
+    (run / "search.ndjson").write_text("".join(__import__("json").dumps(r) + "\n" for r in old), encoding="utf-8")
+    script = tmp_path / "resume_search.py"
+    nd = str(run / "search.ndjson")
+    lines = ["import json, time",
+             f"with open({nd!r}, 'a') as f:",
+             "    for i in range(60, 75):",
+             "        f.write(json.dumps({'n': i, 'ok': True, 'objective': 3.0 - (i - 59) * 0.01}) + chr(10)); f.flush()",
+             "        time.sleep(0.02)"]
+    script.write_text(chr(10).join(lines) + chr(10), encoding="utf-8")
+    job = night.Job(id="res", kind="command", argv=(sys.executable, str(script), "search", "--resume", str(run)),
+                    timeout_s=60, watchdog=tuple(sorted(CFG.items())))
+    runner = night.NightRunner(repo_root=tmp_path, runs_root=runs, lane="cpu")
+    runner.watchdog_poll_s = 0.2
+    code, timed_out = runner.run(job, tmp_path / "res.log")
+    assert (code, timed_out) == (0, False)                                   # old converged rows ignored

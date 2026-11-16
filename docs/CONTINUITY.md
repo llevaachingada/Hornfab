@@ -1,5 +1,21 @@
 # CONTINUITY
 
+## 2026-11-16 (15:00) - Every watchdog-stopped run continued; watchdog: resume-aware + pin_ignore
+
+- Runner (`tools/run_campaign_night.py`): a job with `--resume DIR` is watched on that DIR and judged only on the rows
+  it adds (a converged history no longer re-trips no-gain/stall); new watchdog key `pin_ignore: [knob, ...]` skips
+  bound-pin checks for knobs at a HARD limit. Tests: 2 new in `tests/test_night_runner_watchdog.py`; runner suites green.
+- Continuations (same config + brief -> same cohort; only the CMA seed differed from the files): resume +60 for
+  warm s9012/s3456, R-OSSE s1234/s5678 (pin_ignore g_tmax = generator max 1.0), Crowe-X s1234 (refusal_max 0.5),
+  biradial s9012, Crowe sections smooth (pin_ignore g_width_mm = 600 mm envelope); TwinRay v8 `s` lo 0.6 -> 0.35,
+  reseeded from its best (5.179), new CMA s9012 (pin_ignore morph_corner_mm = hygiene floor). Tritonia2/TwinRay2
+  overnight stops are superseded by the v8/v9 cells + TuRBO.
+- Queue handover: the live runner (started 08:03) predates the code, so `home_day_2026-11-16` gets a STOP after its
+  current job and `home_day2_2026-11-16` (the 22 pending jobs, same order) runs on a chained controller (-WaitPid).
+- Envelope: owner allows 700 mm. NOT applied yet: brief_hash covers the envelope, so editing the shared brief would
+  split every landscape BO cohort. Decision pending (see ISSUES).
+
+
 ## 2026-11-16 (14:35) - Klangfilm elliptical horn cell (Ahlswede calculator port); day-queue TuRBO beats CMA; commit to main
 
 - **Klangfilm elliptical horn** (owner-supplied `Klangfilm_Elliptical_Horn_Calculator_diy_v10.xlsm`): the VBA macro

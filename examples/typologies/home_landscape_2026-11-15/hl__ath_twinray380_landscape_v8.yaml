@@ -8,6 +8,7 @@
 # A law-anchored TwinRay pass (like the Tritonia v8) needs its own published-reference pass and is
 # NOT part of this edit.
 # 2026-11-16 08:xx: watchdog bound-pins widened none; seed = best of runs/20261116T052759Z-screen-44001e (J 5.517). Name kept so the BO cohort stays one task.
+# 2026-11-16 14:5x: watchdog bound-pin s at lo 0.6 (run 96f899) -> s lo 0.35; seed = that run's best (J 5.179). Name kept (one cohort).
 bounds:
   L_mm:
     lo: 160.0
@@ -94,7 +95,7 @@ bounds:
     lo: 18.0
     search: false
   s:
-    lo: 0.6
+    lo: 0.35
     hi: 1.0
   s1:
     hi: 1.14
@@ -128,31 +129,31 @@ search:
   budget_counts: valid
   max_attempts: 260
 seed_params:
-  L_mm: 211.498688
-  a0_deg: 2.120982
-  a_deg: 47.285174
+  L_mm: 203.39097
+  a0_deg: 1.135537
+  a_deg: 43.790481
   aspect_ratio: 1.0
   exponent: 2.0
-  k: 0.807591
-  az_fold_v_deg: -6.127052
-  az_fold_v_width_deg: 20.767571
+  k: 1.155848
+  az_fold_v_deg: -8.118305
+  az_fold_v_width_deg: 22.719705
   az_fold_h_deg: 0.0
   az_fold_h_width_deg: 20.0
   az_a_cos2p_amp: 0.0
   az_a_cos2p_pow: 1.0
   az_s_cos2_amp: 0.0
   morph_allow_shrinkage: 1
-  morph_corner_mm: 15.987263
+  morph_corner_mm: 35.051374
   morph_exponent: 4.0
   morph_fixed: 0.0
-  morph_height_mm: 428.096729
-  morph_rate: 2.201715
+  morph_height_mm: 356.957774
+  morph_rate: 1.397715
   morph_target: 1
-  morph_width_mm: 530.204685
-  n: 7.387973
-  q: 0.994481
+  morph_width_mm: 584.137795
+  n: 8.164281
+  q: 0.991902
   r0_mm: 18.0
-  s: 0.771208
+  s: 0.624227
   s1: 1.14
   s2: 0.025
 solve:

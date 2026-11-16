@@ -119,6 +119,13 @@ def _resolve_watchdog(night_value, job_value, where: str):
         if not isinstance(value, dict):
             raise ValueError(f"{where}: {label} watchdog must be a mapping, true or false")
         for key, item in value.items():
+            if key == "pin_ignore":
+                # knobs pinned at a HARD limit (generator maximum, envelope, deliberate hygiene floor):
+                # the box cannot be widened, so a pin there is not a reason to stop (2026-11-16).
+                if not isinstance(item, (list, tuple)) or not all(isinstance(k, str) for k in item):
+                    raise ValueError(f"{where}: watchdog pin_ignore must be a list of knob names")
+                merged["pin_ignore"] = tuple(sorted(set(merged.get("pin_ignore", ())) | set(item)))
+                continue
             if key not in WATCHDOG_DEFAULTS:
                 raise ValueError(f"{where}: unknown watchdog key {key!r} "
                                  f"(known: {', '.join(WATCHDOG_DEFAULTS)})")
@@ -178,7 +185,10 @@ def watchdog_verdict(records: list[dict], cfg: dict, bounds: dict | None = None)
     # bound pinning (owner 2026-11-16): the box, not the physics, is limiting the search
     if bounds and len(valid) >= cfg.get("pin_min_valid", 30):
         top = sorted(valid, key=lambda r: r["objective"])[:6]
+        ignore = set(cfg.get("pin_ignore", ()) or ())
         for key, (lo, hi) in bounds.items():
+            if key in ignore:
+                continue
             vals = [_find_knob(r.get("params") or {}, key) for r in top]
             vals = [v for v in vals if isinstance(v, (int, float))]
             if len(vals) < 4 or hi <= lo:
@@ -1013,6 +1023,16 @@ class NightRunner:
         wd_next = time.monotonic() + self.watchdog_poll_s
         wd_run: Path | None = None
         wd_reason: str | None = None
+        wd_base = 0
+        argv_s = [str(a) for a in job.argv]
+        if wd_cfg is not None and "--resume" in argv_s:
+            i = argv_s.index("--resume")
+            if i + 1 < len(argv_s):
+                cand = Path(argv_s[i + 1])
+                if not cand.is_absolute():
+                    cand = self.repo_root / cand
+                wd_run = cand
+                wd_base = len(_read_ndjson(cand / "search.ndjson"))   # judge only this job's new rows
 
         with open(log_path, "a", encoding="utf-8", errors="replace") as log:
             def emit(line: str) -> None:
@@ -1053,7 +1073,7 @@ class NightRunner:
                     if wd_run is None:
                         wd_run = _find_new_run_dir(self.runs_root, wd_start)
                     if wd_run is not None:
-                        wd_reason = watchdog_verdict(_read_ndjson(wd_run / "search.ndjson"), wd_cfg, _run_bounds(wd_run))
+                        wd_reason = watchdog_verdict(_read_ndjson(wd_run / "search.ndjson")[wd_base:], wd_cfg, _run_bounds(wd_run))
                     if wd_reason:
                         log.write(f"\n=== WATCHDOG {wd_reason}; stopping job {job.id} (pid {proc.pid})\n"
                                   f"search ABORTED: watchdog (partial results in {wd_run})\n")
