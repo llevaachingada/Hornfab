@@ -357,3 +357,41 @@ reviewed by a high-thinking pass. Stage 4.4 needs the typology-research protocol
 | Oversize exploration | Owner approves a versioned exploratory brief; T4 shows the refusals are real; re-optimise at the HF1440 throat |
 | Frequency staging | A better abandon rule shown on stored data first |
 | Constrained freeform / adjoint | An adjoint exists for the solver fork (ADR D8) |
+
+---
+
+## 10. Implementation status (2026-11-17, senior pass + two Sonnet helper lanes)
+
+All on branch `ccr-260b4b76-fi6b8j` (PR #67). Every item is opt-in or additive; no stored row,
+identity or production default changed. "Needs Windows" = needs `runs/`, the GPU, or both.
+
+| WP | Status | Where | Needs Windows / owner |
+|---|---|---|---|
+| 0.1 refusal taxonomy | **done** | `search/evaluate.py` | real-run reclassification report |
+| 0.2 generator links | **done** | `search/links.py`, `design/generated.py` | none |
+| 0.3 cohort by identity | **done** (helper) | `bo/cohort.py` | none |
+| 0.4 parity replay + v9 | **done** | `objective/replay.py` | parity check on stored v9 rows |
+| 0.5 GRID extent | **done**: 3/3 → 1/64 false refusals, 0 misses | `design/generators/grid.py`, `.t4/` | none (no home lane uses the route) |
+| 0.6 restart idempotency | **done** (helper) | `tools/run_campaign_night.py` | none |
+| 0.7 watchdog truth | **done** (helper); pin_* exposure open | same | replay of 38 stops |
+| 0.8 doc truths + E-012 guard | **done** (helper) | `queue.ps1`, `docs/reference/`, `design/families.py` | none |
+| 0.9 recipe metadata | **partly**: termination/wall/source-cap block (helper); digests wait for owner | `design/recipe_meta.py` | provenance rule (owner) |
+| 1.1 constancy term | **done** (mechanism, off by default) | `objective/scalar_v9.py` | C2 decides use |
+| 1.2 dense-grid identity | **done** | `metrics/dense_grid.py` | none |
+| 1.3 home brief | open | - | C1-C3 |
+| 1.4/1.5 rescore + floor | **tool done** | `tools/analysis/rescore_identity.py` | run on `runs/` |
+| 2.1 fidelity tiers | helper lane in progress | - | - |
+| 2.2 B1 | open | - | 20 solves (C6) |
+| 3.1/3.2 record module | **done** | `geometry/record.py` | module ownership |
+| 3.3/3.4 shadow gate + history records | **tool done** | `tools/analysis/record_shadow.py` | run on `runs/` |
+| 4.1 U3 CPU stage | **done** on a biradial seed (8/8 mesh; 3/7 reach ≥ 5 mm) | `geometry/edits.py` | best stored designs |
+| 4.2/4.3 | **runnable**: record body, job writer, predeclared rules | `record_body.py`, `u3_jobs.py`, `u3_authority.py` | 2 + 12-16 solves (C6) |
+| 5.2 categoricals | **warning done**; 5 shipped configs flagged | `config.py` | split configs (owner) |
+| 6.1 BoTorch on rescored history | open: `offline_scores` is ATH/v4-specific | `tools/analysis/offline_scores.py` | after 1.3 |
+| 7.1 protected lanes | **done**; list `status: proposed` | `examples/protected_lanes.yaml`, runner | C5 |
+| Driver | **done** | `tools/analysis/senior_plan_evidence.py` | one command on Windows |
+
+Environment note: the container lacked `libGLU`, so gmsh could not load; installing it made the
+real mesher tests runnable here. Pre-existing failures confirmed at `1d6ebc8`, not caused by this
+work: `test_grid_self_approach_classifies_invalid_geometry_and_is_memoized` and two
+`test_gui_preview_shape` tests.

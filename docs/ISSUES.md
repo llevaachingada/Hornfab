@@ -1,5 +1,9 @@
 # ISSUES
 
+## 2026-11-17 - Plan status table
+
+- DONE: plan §10 status table. OPEN: WP 6.1 (extend offline_scores beyond ATH/v4).
+
 ## 2026-11-17 - WP 4.2/4.3 analysis ready
 
 - DONE: rule implementation. OPEN: needs the solves (owner C6).

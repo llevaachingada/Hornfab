@@ -1,5 +1,10 @@
 # CONTINUITY
 
+## 2026-11-17 (senior pass) - Plan §10 implementation-status table added
+
+- `ARCHITECTURE_AND_STAGED_PLAN_2026-11-17.md` §10 lists every WP's status, file and what still needs
+  the Windows machine or an owner decision.
+
 ## 2026-11-17 (senior pass, code) - WP 4.2/4.3 decision rules coded before any solve
 
 - New `tools/analysis/u3_authority.py`: the equivalence rule (1 deg per band, both planes, bands
