@@ -223,6 +223,10 @@ def resolve_ath_spec(config_path: str | Path | None = None,
             "band_hi_hz": target.get("band_hi_hz"),
             "f0_hz": target.get("f0_hz"),
             "freq_weights": target.get("freq_weights"),
+            # v9 (2026-11-17, amended RFC): the coverage profile is scoring identity. Passthrough
+            # pop-when-absent, so legacy spec dicts stay byte-identical.
+            **({"coverage_profile": dict(target["coverage_profile"])}
+               if isinstance(target.get("coverage_profile"), dict) else {}),
         },
         "weights": dict(weights),
         "tolerances": objective.get("tolerances") if isinstance(objective.get("tolerances"), dict)
@@ -311,6 +315,16 @@ def _record_matches_ath(record: dict, spec: dict) -> tuple[bool, str | None]:
             continue
         if target.get(key) != expected.get(key):
             return False, f"target_{key}_mismatch"
+    # v9 profile identity (2026-11-17): symmetric and strict. A spec with a profile never pools
+    # with a profile-less record and vice versa, so a profile-only brief difference can never
+    # pass the cohort gate silently.
+    expected_profile = expected.get("coverage_profile")
+    record_profile = target.get("coverage_profile")
+    if (expected_profile is None) != (record_profile is None):
+        return False, "target_coverage_profile_mismatch"
+    if expected_profile is not None \
+            and json.dumps(expected_profile, sort_keys=True) != json.dumps(record_profile, sort_keys=True):
+        return False, "target_coverage_profile_mismatch"
     return True, None
 
 

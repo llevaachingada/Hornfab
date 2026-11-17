@@ -1,5 +1,43 @@
 # CONTINUITY
 
+## 2026-11-16 (22:30 local) - v9 implemented per amended RFC (schema + objective + dispatch + identity + display); GUI corridor lane in flight
+
+- Target schema (`targets/spec.py` + NEW `targets/profile.py`): `target.coverage_profile {mode: corridor|target,
+  interpolation: log_frequency, h: [...], v: [...]}` — corridor requires strict `min < max` per anchor (refusal names
+  plane+index) with preferred inside [min,max]; target mode allows a single anchor (= legacy per-anchor constant
+  target; G11); every anchor below its plane's f0 is REFUSED naming `target.coverage_profile.<plane>[i].hz` + f0;
+  anchors round-trip via asdict (tuple anchors accepted on re-parse); no-profile Targets are byte-identical.
+- NEW `objective/scalar_v9.py` (objective v9, amended RFC 2026-11-17): weighted
+  `cov_profile, rip, flat, load, dislope, di_roughness, flat_cv` (+ optional `hf_floor` with its own
+  weight/tolerance), `diag`/`distd` computed but UNWEIGHTED (owner-locked); `V9Params.from_block` REFUSES
+  `objective.bw8k_floor` naming both keys (the profile `min_deg` is the narrow-side HF constraint) and validates the
+  optional `hf_floor` block; `cov_narrow_ratio` defaults 1.0; below-onset follows `cov_below_f0` (mask/one_sided,
+  narrow-only cost vs the profile's lower bound); `rip` uses per-frequency envelope widths; `di_roughness =
+  std(DI - fitted line)` over the score band (G-fixture: straight +5 dB/dec -> roughness ~1.7e-15, legacy distd > 0);
+  v6/v7 semantics untouched; di_roughness <2 finite pairs -> 0.0 (RFC §5.1's "3 samples" superseded by the lane
+  decision, documented).
+- Registered: `objective/versions.py` + `search/evaluate.py` (_score_v9 + params resolution) — the owner-approved
+  registration; gate status at this commit: G11 v7-equivalence EXACT (stub-verified Δ = 0.0 and in-repo), G12
+  refusal + hf_floor terms, di_roughness/jagged fixtures, config v9 requirement (`objective.version 9 requires
+  target.coverage_profile`), old-J identity replay exact (test_obj_replay) — 217-test consolidated wave green.
+  `config.py` v9 briefs must carry the profile; K-law feasibility preflight uses each plane's FIRST-ANCHOR
+  preferred_deg (unchanged without a profile). G13 (GUI-chart==scorer equality) lands with the in-flight GUI
+  corridor lane; a G13 failure reverts the dispatch line before merge (recorded here).
+- Identity + display (P0 follow-through): `tools/analysis/catalog.py` `_target_block`/`_target_identity` carry
+  `coverage_profile` pop-when-absent (legacy `target_hash` byte-identical; two briefs differing only in profile can
+  never collide); `tools/analysis/cohorts.py` spec/record profile gate is symmetric + strict
+  (`target_coverage_profile_mismatch`); dataset records serialise tuple anchors to JSON lists automatically;
+  `targets/scoring_view.py` gained the v9 `score_window` profile onsets (max(anchor1, plane f0); v9 narrow-ratio
+  default 1.0), the `build_scoring_view["profile"]` block (shared 32-point log grid, per-plane arrays None below
+  each plane's onset, min/max None in target mode) and the v9 `di_summary` truth (level-less, like v6).
+- Lane-collision reconciliations this wave: stale `score/di_summary/build(..., 9) is None` expectations updated to
+  the registered-v9 truth (`10` as the unsupported sample); cohort fixtures' brief-name mismatch fixed; evaluate.py
+  integration done with edit-tool only after a PowerShell round-trip corrupted encoding (restored from HEAD, redone
+  cleanly — recorded as a workflow reminder: never rewrite repo py via PowerShell string round-trips).
+- Tests at commit: tests/test_target_profile.py (schema lane) + GUI corridor/G13 lane still in flight; the
+  consolidated 217-test run covers v9 behaviour, config gates, v7 parity, identity truth and old-J replay. Full
+  filtered suite runs at the final consolidation commit.
+
 ## 2026-11-17 - Klangfilm HV Stage A acoustic A/B: no useful authority; Phase B warranted
 
 - Three BEM arms solved from a pinned HEAD snapshot (the live tree was temporarily inconsistent while

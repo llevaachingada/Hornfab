@@ -17,7 +17,10 @@ from __future__ import annotations
 #: 7 = v4 plus the combined loading-frequency penalty, constant-velocity flatness, the 8 kHz
 #: one-sided floor and signed V coverage (2026-10-29, ``objective/scalar_v7.py``; written as "5" on
 #: feat/hardened-plan-2026-10-29, renumbered 2026-11-12 - see tools/data/renumber_objective_v5_to_v7.py).
-SUPPORTED_OBJECTIVE_VERSIONS: tuple[int, ...] = (1, 2, 3, 4, 5, 6, 7)
+#: 9 = the non-CD profile objective: frequency-dependent H/V coverage corridors, per-frequency
+#: envelope ripple, detrended DI roughness and an optional explicit HF floor (2026-11-17,
+#: ``objective/scalar_v9.py``; registered only after the amended RFC gates G0-G13 pass).
+SUPPORTED_OBJECTIVE_VERSIONS: tuple[int, ...] = (1, 2, 3, 4, 5, 6, 7, 9)
 
 
 def is_supported_objective_version(value: object) -> bool:

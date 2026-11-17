@@ -256,6 +256,7 @@ def load_brief(path) -> dict:
         raise ConfigError(f"{where}: driver.throat_angle_policy must be 'pin' or 'free', got {pol!r}")
     if "objective" in raw and raw["objective"] is not None:
         _validate_objective_block(raw["objective"], where)
+        _require_v9_coverage_profile(raw["objective"], raw.get("target"), where)
     if "grid" in raw and raw["grid"] is not None:
         _validate_grid_block(raw["grid"], where)
     if "mounting" in raw and raw["mounting"] is not None:
@@ -332,13 +333,17 @@ def _validate_objective_block(block, where: str) -> dict:
     v6 = loading_smooth for Le Cléac'h / rollback - see objective/scalar_v6.py;
     v7 = the 2026-10-29 loading/flat_cv/8 kHz-floor/signed-V objective ("v5" on the hardened branch),
     whose block adds ``loaded_re_z`` / ``lfp_re_z`` / ``lfp_crossover_ratio`` / ``bw8k_floor`` -
-    see objective/scalar_v7.py). Default 1.
+    see objective/scalar_v7.py;
+    v9 = the non-CD profile objective (cov_profile / di_roughness / optional hf_floor), which
+    REFUSES ``bw8k_floor`` and requires ``target.coverage_profile`` - see objective/scalar_v9.py).
+    Default 1.
     Unknown keys are refused so a YAML typo is never silent."""
     if not isinstance(block, dict):
         raise ConfigError(f"{where}: objective must be a mapping")
     v = block.get("version", 1)
-    if isinstance(v, bool) or not isinstance(v, int) or v not in (1, 2, 3, 4, 5, 6, 7):
-        raise ConfigError(f"{where}: objective.version must be 1, 2, 3, 4, 5, 6 or 7, got {v!r}")
+    if isinstance(v, bool) or not isinstance(v, int) or v not in (1, 2, 3, 4, 5, 6, 7, 9):
+        raise ConfigError(f"{where}: objective.version must be 1, 2, 3, 4, 5, 6 or 7 "
+                          f"(or 9 for the non-CD profile objective), got {v!r}")
     if v == 4:
         from .objective.scalar_v4 import V4Params
         try:
@@ -363,10 +368,37 @@ def _validate_objective_block(block, where: str) -> dict:
             return V7Params.from_block(block).to_block()
         except ValueError as e:
             raise ConfigError(f"{where}: {e}") from None
+    if v == 9:
+        from .objective.scalar_v9 import V9Params
+        try:
+            return V9Params.from_block(block).to_block()
+        except ValueError as e:
+            raise ConfigError(f"{where}: {e}") from None
     unknown = set(block) - {"version"}
     if unknown:
         raise ConfigError(f"{where}: objective unknown key(s) {sorted(unknown)} (allowed: version)")
     return {"version": int(v)}
+
+
+def _target_has_coverage_profile(target) -> bool:
+    """True when the raw target block carries a coverage profile in either accepted form."""
+    if not isinstance(target, dict):
+        return False
+    profile = target.get("coverage_profile")
+    if isinstance(profile, dict) and profile:
+        return True
+    # Defensive: a caller may pass the flattened Target field names directly.
+    return (target.get("coverage_profile_h") is not None
+            or target.get("coverage_profile_v") is not None)
+
+
+def _require_v9_coverage_profile(objective, target, where: str) -> None:
+    """v9 is profile-driven: refuse a version-9 block with no ``target.coverage_profile``."""
+    if not isinstance(objective, dict) or objective.get("version") != 9:
+        return
+    if not _target_has_coverage_profile(target):
+        raise ConfigError(f"{where}: objective.version 9 requires target.coverage_profile "
+                          f"(corridor or target mode); absent")
 
 
 GRID_KEYS = ("verify_points_per_octave", "screen_extra_hz")
@@ -1511,6 +1543,8 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
                               f"policy: set search.budget_counts: valid or an explicit "
                               f"search.max_attempts draw cap")
     objective_version = int((raw.get("objective") or {}).get("version", 1))
+    # v9 is profile-driven: the target block (brief or embedded) must carry coverage_profile.
+    _require_v9_coverage_profile(raw.get("objective"), raw.get("target"), where)
     objective_params = None
     if objective_version == 4:
         # Penalty-ordering invariant (plan 3d.2 / 3f): a valid design with every term unmeasurable
@@ -1554,6 +1588,17 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
         if worst > 0.5 * PENALTY_INVALID:
             raise ConfigError(
                 f"{where}: objective v7 tolerances/weights let an all-unmeasurable valid design score "
+                f"J = {worst:.0f}, above half the refusal penalty ({PENALTY_INVALID:g}); raise the "
+                f"tolerances or lower the weights so refused designs always rank below valid ones")
+    elif objective_version == 9:
+        # Same penalty-ordering invariant, on the v9 term set (hf_floor only when declared).
+        from .objective.scalar_v9 import V9Params, worst_valid_v9_j
+        from .objective.terms import PENALTY_INVALID
+        objective_params = _validate_objective_block(raw["objective"], where)
+        worst = worst_valid_v9_j(V9Params.from_block(objective_params), raw.get("weights"))
+        if worst > 0.5 * PENALTY_INVALID:
+            raise ConfigError(
+                f"{where}: objective v9 tolerances/weights let an all-unmeasurable valid design score "
                 f"J = {worst:.0f}, above half the refusal penalty ({PENALTY_INVALID:g}); raise the "
                 f"tolerances or lower the weights so refused designs always rank below valid ones")
 
@@ -1757,6 +1802,33 @@ def _keele_required_mouth_mm(f0_hz: float, coverage_deg: float) -> float:
     return _KEELE_MM_DEG_HZ / (float(f0_hz) * float(coverage_deg))
 
 
+def _first_profile_preferred_deg(target: dict, plane: str) -> float | None:
+    """The plane's FIRST ANCHOR ``preferred_deg`` from a raw target block, or None.
+
+    Amendment section D: v9 feasibility uses the owner-declared onset anchor's preferred angle,
+    not the scalar ``coverage_*_deg``. Handles both the YAML ``coverage_profile`` mapping and
+    the flattened ``coverage_profile_h`` / ``coverage_profile_v`` attribute names.
+    """
+    profile = target.get("coverage_profile") if isinstance(target, dict) else None
+    if isinstance(profile, dict):
+        anchors = profile.get(plane)
+        if isinstance(anchors, (list, tuple)) and anchors:
+            first = anchors[0]
+            if isinstance(first, dict):
+                value = first.get("preferred_deg")
+                try:
+                    return float(value)
+                except (TypeError, ValueError):
+                    return None
+    flat = target.get(f"coverage_profile_{plane}") if isinstance(target, dict) else None
+    if isinstance(flat, (list, tuple)) and flat:
+        try:
+            return float(flat[0][1])
+        except (TypeError, ValueError, IndexError):
+            return None
+    return None
+
+
 def _clamp_to_bounds(key: str, value: float, bounds: dict) -> tuple[float, bool]:
     """Clamp ``value`` into the key's EXISTING bounds (never widen). (value, clamped)"""
     b = bounds.get(key)
@@ -1942,8 +2014,12 @@ def _brief_preflight_and_derive(raw: dict, brief_d: dict | None, where: str) -> 
     env_w = float(env.get("max_mouth_w_mm", 0.0))
     env_h = float(env.get("max_mouth_h_mm", 0.0))
     band_hi = float(t["band_hi_hz"])
-    req_w = _keele_required_mouth_mm(f0, cov_h)
-    req_h = _keele_required_mouth_mm(f0, cov_v)
+    # Amendment section D: a coverage profile's first anchor IS the owner-declared onset, so the
+    # required-mouth K-law check uses its preferred angle. Without a profile this is byte-identical.
+    first_h = _first_profile_preferred_deg(t, "h")
+    first_v = _first_profile_preferred_deg(t, "v")
+    req_w = _keele_required_mouth_mm(f0, first_h if first_h is not None else cov_h)
+    req_h = _keele_required_mouth_mm(f0, first_v if first_v is not None else cov_v)
     feas = {
         "rule": "d = KEELE_K / (f0 * coverage) mm (KEELE_K = 25,400 m-deg-Hz)",
         "f0_hz": f0,

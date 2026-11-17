@@ -54,6 +54,7 @@ from ..objective.scalar_v2 import objective_v2, objective_v3
 from ..objective.scalar_v4 import V4Params, objective_v4
 from ..objective.scalar_v6 import V6Params, objective_v6
 from ..objective.scalar_v7 import V7Params, objective_v7
+from ..objective.scalar_v9 import V9Params, objective_v9
 from ..objective.versions import SUPPORTED_OBJECTIVE_VERSIONS
 from ..solve import cache as solve_cache
 from ..solve.base import stack_responses, theta_deg_from_dirs
@@ -246,6 +247,8 @@ def make_context(cfg, store=None, *, cache_dir=None, lib_shas=None,
         ctx.objective_params = V6Params.from_block(block)
     elif ctx.objective_version == 7:
         ctx.objective_params = V7Params.from_block(block)
+    elif ctx.objective_version == 9:
+        ctx.objective_params = V9Params.from_block(block)
     else:
         ctx.objective_params = V4Params.from_block(block)
     ctx.provenance = record_provenance(cfg)
@@ -1102,6 +1105,18 @@ def _score_v7(metrics, resp, target, weights, params):
     return objective_v7(metrics, resp, True, target, weights, params)
 
 
+def _score_v9(metrics, resp, target, weights, params):
+    """Objective v9 (2026-11-17, amended non-CD profile RFC): corridor/target coverage profile,
+    detrended ``di_roughness``, optional explicit ``hf_floor``; ``diag``/``distd`` reported
+    unweighted. The config layer requires ``target.coverage_profile`` on every v9 brief."""
+    if params is None:
+        raise ValueError("objective_version 9 needs the brief's objective block (tolerances); the "
+                         "evaluation context carries none")
+    if not isinstance(params, V9Params):
+        params = V9Params.from_block(params)
+    return objective_v9(metrics, resp, True, target, weights, params)
+
+
 _OBJECTIVE_SCORERS = {
     1: lambda metrics, resp, target, weights, params: objective(metrics, True, target, weights),
     2: lambda metrics, resp, target, weights, params: objective_v2(metrics, resp, True, target, weights),
@@ -1110,6 +1125,7 @@ _OBJECTIVE_SCORERS = {
     5: _score_v5,
     6: _score_v6,
     7: _score_v7,
+    9: _score_v9,
 }
 if tuple(sorted(_OBJECTIVE_SCORERS)) != SUPPORTED_OBJECTIVE_VERSIONS:
     raise RuntimeError(

@@ -367,7 +367,8 @@ def test_di_summary_malformed_or_unsupported_returns_none():
     assert SV.di_summary({}, {}, 7) is None
     assert SV.di_summary(dict(TARGET, coverage_h_deg=None), {}, 7) is None
     assert SV.di_summary(TARGET, {}, 0) is None
-    assert SV.di_summary(TARGET, {}, 9) is None
+    assert SV.di_summary(TARGET, {}, 9) is not None   # v9 registered 2026-11-17: level-less truth
+    assert SV.di_summary(TARGET, {}, 10) is None
     assert SV.di_summary(TARGET, {}, None) is None
 
 
@@ -526,7 +527,8 @@ def test_build_scoring_view_forwards_v6_design_sources():
 
 def test_build_scoring_view_is_none_for_an_unsupported_version():
     assert SV.build_scoring_view(TARGET, OBJ_V7, W_V7, 0) is None
-    assert SV.build_scoring_view(TARGET, OBJ_V7, W_V7, 9) is None
+    assert SV.build_scoring_view(TARGET, OBJ_V7, W_V7, 9) is not None   # 9 registered 2026-11-17
+    assert SV.build_scoring_view(TARGET, OBJ_V7, W_V7, 10) is None
     assert SV.build_scoring_view(TARGET, OBJ_V7, W_V7, None) is None
     assert SV.build_scoring_view(TARGET, OBJ_V7, W_V7, True) is None
 
@@ -566,7 +568,8 @@ def test_score_window_malformed_target_or_version_returns_none():
     assert SV.score_window(dict(TARGET, band_hi_hz=350.0), {}, 7) is None  # not > band_lo
     assert SV.score_window(dict(TARGET, coverage_v_deg=0.0), {}, 7) is None
     assert SV.score_window(TARGET, {}, 0) is None
-    assert SV.score_window(TARGET, {}, 9) is None
+    assert SV.score_window(TARGET, {}, 9) is not None   # 9 registered 2026-11-17
+    assert SV.score_window(TARGET, {}, 10) is None
     assert SV.score_window(TARGET, {}, None) is None
     assert SV.score_window(TARGET, {}, True) is None
     assert SV.score_window(TARGET, {}, 7.5) is None

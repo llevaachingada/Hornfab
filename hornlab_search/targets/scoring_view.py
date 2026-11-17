@@ -52,7 +52,7 @@ __all__ = [
 ]
 
 #: Objective versions whose scoring windows this view can reconstruct.
-_SUPPORTED_VERSIONS = (1, 2, 3, 4, 5, 6, 7, 8)
+_SUPPORTED_VERSIONS = (1, 2, 3, 4, 5, 6, 7, 8, 9)
 
 #: The v7 scorer's 8 kHz floor sampling cap (``scalar_v7.BW8K_HZ``), restated as a read-only constant.
 _BW8K_HZ = 8000.0
@@ -282,16 +282,116 @@ def score_window(raw_target: dict, raw_objective: dict | None, version: int,
             out["pattern_beta"] = float(beta)
             return out
 
-        # v4 / v5 / v7 / v8
+        # v4 / v5 / v7 / v8 / v9
         h_lo = band_lo if f0 is None else f0
         v_lo = h_lo if f0_v is None else f0_v
         out["below_mode"] = _below_mode(obj)
-        out["narrow_ratio"] = _narrow_ratio(obj)
+        # v9's cov_narrow_ratio DEFAULT is 1.0 (amended RFC); scalar targets keep no special
+        # narrow-side prior in v9 either way — the brief's explicit key always wins.
+        out["narrow_ratio"] = _narrow_ratio(obj, default=1.0 if v == 9 else 2.0)
         out["h_lo_hz"] = h_lo
         out["v_lo_hz"] = v_lo
+        if v == 9:
+            profile_view = _profile_view(raw_target)
+            if profile_view is not None:
+                # Per-plane effective onset = max(first_anchor_hz, plane f0) (amendment §D).
+                out["h_lo_hz"] = profile_view["onset_h_hz"] if profile_view["onset_h_hz"] else out["h_lo_hz"]
+                out["v_lo_hz"] = profile_view["onset_v_hz"] if profile_view["onset_v_hz"] else out["v_lo_hz"]
         return out
     except Exception:  # noqa: BLE001 - a display helper must never crash the caller
         return None
+
+
+def _profile_view(raw_target) -> dict | None:
+    """The v9 coverage-profile display block for one raw target dict, or ``None``.
+
+    Emitted keys (pop-when-unbuildable; a v7 target has no ``profile`` key at all)::
+
+        {"mode", "interpolation", "onset_h_hz", "onset_v_hz",
+         "freqs_hz", "h_pref", "h_min", "h_max", "v_pref", "v_min", "v_max"}
+
+    ``freqs_hz`` is a 32-point log grid from the lower per-plane onset to ``band_hi``
+    (single point when the onset already sits at the band top). Per-plane arrays carry
+    ``None`` below THAT plane's own onset (unscored there) and evaluate
+    ``targets.profile.profile_value`` above it; ``min``/``max`` are ``None`` everywhere in
+    ``target`` mode. Malformed input or a missing ``targets.profile`` module returns ``None``
+    — the config layer refuses invalid profiles at load, so this helper stays display-only."""
+    try:
+        raw = _as_mapping(raw_target)
+        target = _target_view(raw)
+        if target is None:
+            return None
+        profile_raw = _as_mapping(raw.get("coverage_profile"))
+        if not profile_raw or profile_raw.get("mode") is None:
+            return None
+        from hornlab_search.targets import profile as _profile  # lazy: parallel-lane module
+
+        mode = str(profile_raw.get("mode"))
+        interpolation = str(profile_raw.get("interpolation") or "log_frequency")
+        f0 = target["f0_hz"]
+        f0_v = target["f0_v_hz"] if target["f0_v_hz"] is not None else f0
+        band_lo = target["band_lo_hz"]
+        band_hi = target["band_hi_hz"]
+
+        anchors_h = _profile.parse_profile(
+            profile_raw.get("h") if isinstance(profile_raw.get("h"), (list, tuple)) else [],
+            "h", f0)
+        anchors_v = _profile.parse_profile(
+            profile_raw.get("v") if isinstance(profile_raw.get("v"), (list, tuple)) else [],
+            "v", f0_v)
+        onset_h = _profile.profile_onset_hz(anchors_h, f0)
+        onset_v = _profile.profile_onset_hz(anchors_v, f0_v)
+
+        lo = min(onset_h, onset_v)
+        lo = band_lo if lo < band_lo else lo
+        if lo >= band_hi:
+            freqs = [float(band_hi)]
+        else:
+            steps = 32
+            lo_l, hi_l = (0.0 if lo <= 0 else _log10c(lo)), _log10c(band_hi)
+            freqs = [10.0 ** (lo_l + (hi_l - lo_l) * i / (steps - 1)) for i in range(steps)]
+            freqs[0], freqs[-1] = float(lo), float(band_hi)
+        # Emit and evaluate the SAME rounded grid, so a consumer interpolating from
+        # ``freqs_hz`` reproduces the plotted profile arrays exactly.
+        freqs = [round(f, 6) for f in freqs]
+
+        def _plane(anchors, onset):
+            pref, mn, mx = [], [], []
+            for f in freqs:
+                if f + 1e-9 < onset:
+                    pref.append(None); mn.append(None); mx.append(None)
+                    continue
+                p, lo_v, hi_v = _profile.profile_value(anchors, float(f))
+                pref.append(float(p))
+                mn.append(None if lo_v is None else float(lo_v))
+                mx.append(None if hi_v is None else float(hi_v))
+            return pref, mn, mx
+
+        h_pref, h_min, h_max = _plane(anchors_h, onset_h)
+        v_pref, v_min, v_max = _plane(anchors_v, onset_v)
+        return {
+            "mode": mode,
+            "interpolation": interpolation,
+            "onset_h_hz": float(onset_h),
+            "onset_v_hz": float(onset_v),
+            "freqs_hz": freqs,
+            "h_pref": h_pref, "h_min": h_min, "h_max": h_max,
+            "v_pref": v_pref, "v_min": v_min, "v_max": v_max,
+        }
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _log10c(value: float) -> float:
+    return float(np.log10(float(value))) if _np_isfinite(value) and value > 0 else 0.0
+
+
+def _np_isfinite(value) -> bool:
+    try:
+        import math
+        return math.isfinite(value)
+    except (TypeError, ValueError):
+        return False
 
 
 def di_summary(raw_target: dict, weights: dict | None, version: int) -> dict | None:
@@ -301,9 +401,10 @@ def di_summary(raw_target: dict, weights: dict | None, version: int) -> dict | N
     "slope_scored", "anchor_hz"}``:
 
     * ``level_source`` is ``"explicit"`` when ``target.di_target_db`` is set, else ``"cuts"``
-      (v1) or ``"gaussian"`` (v2+) using ``hornlab_search.metrics.di``. v6 scores no DI level at
-      all, so it returns ``level_db = level_source = None``.
-    * ``level_scored`` is true iff the ``di`` weight is non-zero and the version is not 6.
+      (v1) or ``"gaussian"`` (v2+), using ``hornlab_search.metrics.di``. v6 and v9 (amended RFC
+      2026-11-17) score no DI level at all, so they return ``level_db = level_source = None``.
+    * ``level_scored`` is true iff the ``di`` weight is non-zero and the version is neither 6
+      nor 9.
     * ``slope_db_per_dec`` is ``target.di_slope_target`` (0.0 when absent).
     * ``slope_scored`` reads ``di_rise`` on v6 and ``dislope`` everywhere else.
     * ``anchor_hz`` is ``target.f0_hz`` (falling back to ``band_lo_hz``).
@@ -324,7 +425,9 @@ def di_summary(raw_target: dict, weights: dict | None, version: int) -> dict | N
         v_deg = target["v_deg"]
         explicit = target["di_target_db"]
 
-        if v == 6:
+        if v in (6, 9):
+            # v6 and v9 (amended RFC 2026-11-17) score no DI level at all: v9's level truth is
+            # the declared per-plane profile, and only the slope/slope-residual terms are scored.
             level_db = None
             level_source = None
         elif explicit is not None:
@@ -337,7 +440,7 @@ def di_summary(raw_target: dict, weights: dict | None, version: int) -> dict | N
             level_db = float(target_di_gaussian_db(h_deg, v_deg))
             level_source = "gaussian"
 
-        level_scored = v != 6 and _weight(weights, "di") != 0.0
+        level_scored = v not in (6, 9) and _weight(weights, "di") != 0.0
         if v == 6:
             slope_scored = _weight(weights, "di_rise") != 0.0
         else:
@@ -475,6 +578,13 @@ def build_scoring_view(raw_target, raw_objective, weights, version: int, *,
           "bw8k_floor": bw8k_floor(...) | None,
           "diag": diag_summary(...) | None,
           "notes": {...},                         # three fixed display caveats
+          "profile": {...},                       # v9 only (amendment 2026-11-17):
+                                                  # mode/interpolation/onsets + the shared
+                                                  # 32-point log grid with per-plane
+                                                  # pref/min/max arrays (None below each
+                                                  # plane's own onset; min/max None in
+                                                  # target mode). Pop-when-unbuildable —
+                                                  # pre-v9 targets carry no key at all.
         }
 
     ``di_db`` is accepted for API symmetry; the measured slope is exposed by
@@ -486,7 +596,7 @@ def build_scoring_view(raw_target, raw_objective, weights, version: int, *,
         v = _as_version(version)
         if v is None:
             return None
-        return {
+        out = {
             "objective_version": v,
             "coverage": score_window(
                 raw_target, raw_objective, v,
@@ -499,5 +609,11 @@ def build_scoring_view(raw_target, raw_objective, weights, version: int, *,
             "diag": diag_summary(raw_target, weights),
             "notes": dict(_NOTES),
         }
+        # v9 (2026-11-17 amendment): the coverage-profile display block. Pop-when-unbuildable:
+        # a pre-v9 target carries no "profile" key at all, so existing payloads stay identical.
+        profile_block = _profile_view(raw_target)
+        if profile_block is not None and v == 9:
+            out["profile"] = profile_block
+        return out
     except Exception:  # noqa: BLE001
         return None

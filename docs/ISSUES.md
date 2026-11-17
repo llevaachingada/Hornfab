@@ -1,5 +1,17 @@
 # ISSUES
 
+## 2026-11-16 (22:30) - v9 implemented under the amended gates; GUI corridor lane in flight
+
+- DONE: Target schema + `targets/profile.py` (corridor/target validation, anchor-below-f0 refusal); objective v9
+  (cov_profile, envelope rip, di_roughness, optional hf_floor, diag/distd unweighted); `bw8k_floor` refusal; dispatch
+  + config v9 requirement + K-law feasibility via first-anchor preferred; catalog/cohorts/dataset profile identity
+  keys; scoring_view v9 profile emission + level-less DI truth; G11/G12 + fixture gates green; old-J replay exact.
+- OPEN (in flight): GUI corridor display lane (charts.js/app.js payload rendering + G13 chart==scorer equality) —
+  a G13 failure reverts the v9 dispatch line before the final consolidation commit; schema-lane test file
+  (`tests/test_target_profile.py`) lands with that lane's completion.
+- OPEN (final gates at consolidation): full filtered suite; G0-G13 evidence summary into CONTINUITY.
+- OPEN (owner, from evidence, unchanged): smooth-brief re-baselining decision for non-CD night-queue cells.
+
 ## 2026-11-17 - Klangfilm HV Stage A measured: no useful acoustic authority
 
 - DONE: controlled A/B (A0 / A1 H-only / A2 V-only) with identical solver, source and frequency grid;

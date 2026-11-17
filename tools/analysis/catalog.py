@@ -394,7 +394,7 @@ def _generator_provenance(meta: dict) -> dict:
 
 def _target_block(meta: dict) -> dict:
     target = _dict_or_empty(meta.get("target"))
-    return {
+    block = {
         "coverage_h_deg": _num_or_none(target.get("coverage_h_deg")),
         "coverage_v_deg": _num_or_none(target.get("coverage_v_deg")),
         "coverage_v_up_deg": _num_or_none(target.get("coverage_v_up_deg")),
@@ -410,14 +410,29 @@ def _target_block(meta: dict) -> dict:
         "freq_weights": target.get("freq_weights"),
         "raw_keys": sorted(str(k) for k in target),
     }
+    # v9 (2026-11-17, amended RFC): the coverage profile is part of the scoring identity.
+    # Display passthrough pop-when-absent so legacy blocks stay byte-identical.
+    profile = target.get("coverage_profile")
+    if isinstance(profile, dict):
+        block["coverage_profile"] = dict(profile)
+        block["raw_keys"] = sorted(set(block["raw_keys"]) | {"coverage_profile"})
+    return block
 
 
 def _target_identity(target: dict) -> dict:
-    """Semantic scoring target identity; ``raw_keys`` is provenance, not scoring."""
-    return {k: target.get(k) for k in (
+    """Semantic scoring target identity; ``raw_keys`` is provenance, not scoring.
+
+    The v9 coverage profile (2026-11-17 amendment) enters only when present — a
+    profile-less brief keeps the exact legacy identity dict and therefore the exact
+    legacy ``target_hash``, so two briefs differing only in profile can never collide."""
+    identity = {k: target.get(k) for k in (
         "coverage_h_deg", "coverage_v_deg", "coverage_v_up_deg", "coverage_v_down_deg",
         "band_lo_hz", "band_hi_hz", "f0_hz", "f0_v_hz", "di_target_db",
         "di_slope_target", "z_min", "freq_weights")}
+    profile = target.get("coverage_profile")
+    if isinstance(profile, dict):
+        identity["coverage_profile"] = dict(profile)
+    return identity
 
 
 def _mesh_block(meta: dict) -> dict:
