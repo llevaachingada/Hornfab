@@ -1,5 +1,29 @@
 # CONTINUITY
 
+## 2026-11-17 02:0x - Overnight queue `cd_rrect_2026-11-17` launched (owner-directed ~12 h GPU)
+
+- Owner brief: CMA ("COA") arms with >=100 solves first, then two BoTorch TuRBO arms at 80-100 solves
+  (budget profile `comparison-80x2`), plus continuing queue solves that were not done previously;
+  targets = recent high scorers with room to improve, boxes widened where the data showed edges
+  binding. Plan + evidence in the night header `runs/nights/cd_rrect_2026-11-17.yaml`.
+- Findings at planning: the other lane's `b3_soft` Phase B search DIED mid-run at 01:55 (parent console
+  gone; 11 rows; stale dead lock) - folded into the night as job 1, a `--resume` for its remaining 89
+  valid solves (rows growing again after launch). The rrect CD family had only ~51 dataset rows under
+  its config name (below the owner's 100-row TuRBO gate) and its r50 box had near-binding edges
+  (best height 442.5 vs 450 high). The staged tritonia TuRBO arms (ext_v9_turbo_first/_followup)
+  never ran (exit 3, GPU busy).
+- New config `hl__rosse_rect_cd_v7_r100w.yaml`: r50 best 02283e214be8 (J 3.48913) as seed, every bound
+  widened around the winning region (width 520-600, height 400-460, rect 4.2-7.5, a_h 34-42, a_v
+  14-22, k 1.6-3.0, r 0.20-0.40, tmax 0.9-1.0, g_b 0-0.09), budget 110 valid, sigma0 0.12 (preflight:
+  expected in-basin hits 6.69 >= 3; no_headroom WARN expected for a continuation), resample_strict +
+  retry_same_then_stop so ~9% corner refusals are replaced. Shape-check: mouth 578 x 441, depth 459.
+- Queue order: b3 resume -> c_rrect_100w (110 valid CMA) -> TuRBO arm 1 rrect80 (cohort built from
+  those rows) -> TuRBO arm 2 trit80 -> fold_warm resumes (ab4fb9 +23, c221aa +39, to 100 total each)
+  -> two cheap Klangfilm continuations (S4/E2 fresh runs, same seeds; old candidates replay as cache
+  hits that do not consume budget). Controller 49896 detached (parent WmiPrvSE), started 01:58:59,
+  cutoff 14:30. Measured-rate budget ~6.5-8.5 h of the 12 h allowance; the file is LIVE-editable to
+  append a third TuRBO arm (ath_core_14in, 219 rows) while it runs.
+
 ## 2026-11-17 - Fable architecture: contract v2 passes all six lanes; the layered backbone fails U1
 
 - **N1b, contract v2 (65 stations x 61 azimuths):** all six contract lanes pass Test 2 on the

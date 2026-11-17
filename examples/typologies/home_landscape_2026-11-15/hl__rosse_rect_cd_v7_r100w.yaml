@@ -1,0 +1,107 @@
+﻿# ROSSE-RECT CD 110-VALID WIDE CONTINUATION (2026-11-17, owner-directed).
+# Continues the rosse_rect CD thread: r50_refine finished at J 3.48913 (02283e214be8, 51/50
+# valid) with several box edges still near their limits (best height 442.5 vs 450 high, width
+# 588 vs 600 high in the paused 120-run). This config keeps the same brief/scoring/generator and
+# the r50 best as seed, and WIDENS every searched bound around the winning region (owner: the
+# parameters need to be wide and changed; there is room for improvement).
+# Budget 110 valid so the TuRBO cohort built from this config's dataset rows clears the
+# owner's 100-row minimum (study_cohort filters by exact config name).
+# J comparable only within room_landscape_80x50_700_hf1440_rosse_rect_v7.
+name: hl__rosse_rect_cd_v7_r100w
+family: FREEFORM
+brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_rosse_rect_v7.yaml
+generator:
+  name: grid
+  rows:
+    type: rosse_rect
+  n_phi: 25
+  n_s: 48
+  wall_thickness_mm: 3.0
+  seed_policy: explicit
+  span: quarter
+seed_params:
+  g_width_mm: 580.123709965
+  g_height_mm: 442.5177777511
+  g_rect_exponent: 6.7089536197
+  g_a_h_deg: 38.2180687121
+  g_a_v_deg: 17.5209844272
+  g_a_diag_deg: 0.0
+  g_k: 2.5345776887
+  g_r: 0.2869215742
+  g_m: 0.85
+  g_b: 0.0142855609
+  g_q: 3.0
+  g_tmax: 0.9676812069
+bounds:
+  g_width_mm:
+    lo: 520.0
+    hi: 600.0
+  g_height_mm:
+    lo: 400.0
+    hi: 460.0
+  g_rect_exponent:
+    lo: 4.2
+    hi: 7.5
+  g_a_h_deg:
+    lo: 34.0
+    hi: 42.0
+  g_a_v_deg:
+    lo: 14.0
+    hi: 22.0
+  g_a_diag_deg:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  g_k:
+    lo: 1.6
+    hi: 3.0
+  g_r:
+    lo: 0.2
+    hi: 0.4
+  g_m:
+    lo: 0.85
+    hi: 0.85
+    search: false
+  g_b:
+    lo: 0.0
+    hi: 0.09
+  g_q:
+    lo: 3.0
+    hi: 3.0
+    search: false
+  g_tmax:
+    lo: 0.9
+    hi: 1.0
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.12
+  seed: 5679
+  budget: 110
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: resample_strict
+  error_policy: retry_same_then_stop
+  budget_counts: valid
+  max_attempts: 260
+description: 'ROSSE-RECT CD r100w: r50 best 02283e214be8 (J 3.48913) as seed, bounds
+  WIDENED around the winning region on every dim the r50 box had edged (height 400-460,
+  width 520-600, k to 3.0, rect to 7.5, g_b to 0.09); 110 valid evals so this config
+  alone clears the 100-row TuRBO cohort gate it feeds'
+
