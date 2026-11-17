@@ -6371,11 +6371,36 @@ async function viewRunDetail(id) {
     if (!mapsEl) return;
     mapsEl.innerHTML = "";
     const withStart = showStart() && S.polar_h;
+    const profile = sv && sv.profile ? sv.profile : null;
+    // v9 corridor edge spirals from the SAME per-plane arrays, converted to half-angles (/2)
+    // exactly like the scored ±half target. Null (below-onset) samples are dropped.
+    const corridorEdgeCurvesFor = plane => {
+      if (!profile || !Array.isArray(profile.freqs_hz)) return null;
+      const k = plane === "v" ? "v" : "h";
+      const halfCurve = arr => {
+        if (!Array.isArray(arr)) return null;
+        const out = [];
+        profile.freqs_hz.forEach((f, i) => {
+          const v = arr[i];
+          if (v == null || !isFinite(v)) return;
+          out.push([f, v / 2]);
+        });
+        return out.length >= 2 ? out : null;
+      };
+      const out = {
+        pref_plus: halfCurve(profile[k + "_pref"]),
+        pref_minus: halfCurve(profile[k + "_pref"]),   // same centre magnitudes; charts negates
+        min_plus: halfCurve(profile[k + "_min"]),
+        max_plus: halfCurve(profile[k + "_max"]),
+      };
+      return (out.pref_plus || out.min_plus || out.max_plus) ? out : null;
+    };
     // one shared scale + line key above the small multiples, instead of a colour bar on every map
     const legEl = document.getElementById("polar-legend");
     const anyOver = [B.polar_h, B.polar_v, withStart ? S.polar_h : null, withStart ? S.polar_v : null]
       .some(r => Array.isArray(r) && r.some(row => Array.isArray(row) && row.some(v => v != null && v > 1)));
-    if (legEl) legEl.innerHTML = "" && isobarLegendHtml({ target: !!(t.coverage_h_deg || t.coverage_v_deg), f0: !!f0Finite, over: anyOver, below: wideBelow, floor: !!svFloor, illustrative: false });
+    if (legEl) legEl.innerHTML = "" && isobarLegendHtml({ target: !!(t.coverage_h_deg || t.coverage_v_deg), f0: !!f0Finite, over: anyOver, below: wideBelow, floor: !!svFloor, illustrative: false,
+      corridor: !!profile, preferred: !!profile });
     // Truthful isobar caption (additive; absent payload = byte-identical old caption).
     const capPolar = document.getElementById("cap-polar");
     if (sv && capPolar && !capPolar.dataset.scoringNote) {
@@ -6397,6 +6422,7 @@ async function viewRunDetail(id) {
       // Scored-coverage onset per plane + the v7 floor rays (both optional, both default-off).
       const tgtLoHz = scoreLoFor(vert ? "v" : "h");
       const floorRays = svFloor ? { h_deg: svFloor.floor_h_deg, v_deg: svFloor.floor_v_deg } : null;
+      const corridorEdgeCurves = corridorEdgeCurvesFor(vert ? "v" : "h");
       if (view === "globe360") {
         // full circle needs the stored balloon; older runs without one simply skip this view
         const r360 = vert ? D2.polar_v360 : D2.polar_h360;
@@ -6405,7 +6431,7 @@ async function viewRunDetail(id) {
         svgEl.setAttribute("role", "img"); svgEl.setAttribute("aria-label", lbl + " full globe plot");
         mapsEl.appendChild(svgEl);
         const tgt = vert ? t.coverage_v_deg : t.coverage_h_deg;
-        requestAnimationFrame(() => globePlot(svgEl, r360, D2.angles360, D2.freqs || F, { title: lbl, H: 360, f0: f0Finite, target: tgt, targetLoHz: tgtLoHz, belowMode: wideBelow, illustrativeCurve: null, floorRays: floorRays }));
+        requestAnimationFrame(() => globePlot(svgEl, r360, D2.angles360, D2.freqs || F, { title: lbl, H: 360, f0: f0Finite, target: tgt, targetLoHz: tgtLoHz, belowMode: wideBelow, illustrativeCurve: null, floorRays: floorRays, corridorEdgeCurves }));
         continue;
       }
       if (!rows) continue;
@@ -6414,7 +6440,10 @@ async function viewRunDetail(id) {
       mapsEl.appendChild(svgEl);
       const tgt = vert ? t.coverage_v_deg : t.coverage_h_deg;
       if (view === "globe") {
-        requestAnimationFrame(() => globePlot(svgEl, rows, D2.angles || [], D2.freqs || F, { title: lbl, H: 320, f0: f0Finite, target: tgt, targetLoHz: tgtLoHz, belowMode: wideBelow, illustrativeCurve: null, floorRays: floorRays }));
+        requestAnimationFrame(() => globePlot(svgEl, rows, D2.angles || [], D2.freqs || F, { title: lbl, H: 320, f0: f0Finite, target: tgt, targetLoHz: tgtLoHz, belowMode: wideBelow, illustrativeCurve: null, floorRays: floorRays, corridorEdgeCurves }));
+      } else if (corridorEdgeCurves) {
+        // v9 profile run: add the scored corridor spirals; the legacy call below stays byte-identical.
+        requestAnimationFrame(() => isobarMap(svgEl, rows, D2.angles || [], D2.freqs || F, { title: lbl, H: 300, xlim, f0: f0Finite, target: tgt, targetLoHz: tgtLoHz, belowMode: wideBelow, illustrativeCurve: null, floorRays: floorRays, corridorEdgeCurves }));
       } else {
         requestAnimationFrame(() => isobarMap(svgEl, rows, D2.angles || [], D2.freqs || F, { title: lbl, H: 300, xlim, f0: f0Finite, target: tgt, targetLoHz: tgtLoHz, belowMode: wideBelow, illustrativeCurve: null, floorRays: floorRays }));
       }
@@ -6434,12 +6463,16 @@ async function viewRunDetail(id) {
       }
       const parts = ["Total angle between the −6 dB points."];
       if (plane === "h") parts.push("Panel: the brief band. Dashed marker: the scoring floor f0.");
-      if (tgtDeg != null) {
+      const profileCaption = sv && sv.profile;
+      if (profileCaption) {
+        // v9: the corridor IS the scored region; the ±10 % guide is not drawn at all.
+        parts.push("Shaded: the scored corridor (min..max). Dotted: preferred line (not penalized inside the corridor).");
+      } else if (tgtDeg != null) {
         parts.push("Dotted line: scored coverage target (constant; drawn only where cov scores). Shaded ±10%: visual guide, NOT the scoring tolerance.");
-        if (scoreLo != null) {
-          if (wideBelow === "one_sided") parts.push("wide free below f0 (one-sided).");
-          else if (wideBelow === "mask") parts.push("Below f0: masked (unscored).");
-        }
+      }
+      if (tgtDeg != null && scoreLo != null) {
+        if (wideBelow === "one_sided") parts.push("wide free below f0 (one-sided).");
+        else if (wideBelow === "mask") parts.push("Below f0: masked (unscored).");
       }
       const ratio = svCov ? svCov.narrow_ratio : null;
       if (ratio != null && ratio !== 1) parts.push(`Narrow side ×${ratio}.`);
@@ -6451,13 +6484,59 @@ async function viewRunDetail(id) {
       const svg = document.getElementById(svgId);
       if (!svg) return;
       const dataSets = [...(B[key] || []), ...(S[key] || [])].filter(v => v != null);
-      if (!dataSets.length && !tgtDeg) return;
+      const profile = sv && sv.profile ? sv.profile : null;
+      if (!dataSets.length && !tgtDeg && !profile) return;
       // Scored-range truth: the target + its ±10% guide only where cov actually scores.
       const scoreLo = scoreLoFor(plane);
       const floorDeg = svFloor ? (plane === "v" ? svFloor.floor_v_deg : svFloor.floor_h_deg) : null;
       const refLines = [], area = [];
-      let fill = [];
-      if (tgtDeg != null) {
+      let fill = [], corridorBand = null;
+      const profileVals = [];
+      if (profile && Array.isArray(profile.freqs_hz)
+          && Array.isArray(profile[plane === "v" ? "v_pref" : "h_pref"])) {
+        // v9 corridor display: geometry is the scorer's OWN arrays on the shared 32-point grid.
+        // Null entries below this plane's onset are skipped entirely, so band and edges span the
+        // scored onset..band_hi range exactly as the scorer does.
+        const pFreqs = profile.freqs_hz;
+        const pPref = profile[plane === "v" ? "v_pref" : "h_pref"];
+        const pMin = profile[plane === "v" ? "v_min" : "h_min"];
+        const pMax = profile[plane === "v" ? "v_max" : "h_max"];
+        const top = [], bottom = [];
+        const pushRef = (arr, refLabel, extra) => {
+          if (!Array.isArray(arr)) return;
+          const pts = [];
+          pFreqs.forEach((f, i) => {
+            const v = arr[i];
+            if (v == null || !isFinite(v)) return;
+            pts.push([f, v]);
+            profileVals.push(v);
+          });
+          if (pts.length >= 2) refLines.push({ pts, label: refLabel, ...extra });
+        };
+        pFreqs.forEach((f, i) => {
+          const mn = pMin ? pMin[i] : null;
+          const mx = pMax ? pMax[i] : null;
+          const pf = pPref ? pPref[i] : null;
+          const topV = (mx != null && isFinite(mx)) ? mx : pf;   // target mode: max is null
+          if (mn == null || !isFinite(mn) || topV == null || !isFinite(topV)) return;   // unscored
+          top.push([f, topV]);
+          bottom.push([f, mn]);
+        });
+        if (top.length >= 2) corridorBand = { top, bottom, color: css("--best"), opacity: 0.10 };
+        pushRef(pMax, "corridor max", { dash: "4 3" });     // scored upper edge
+        pushRef(pMin, "corridor min", { dash: "4 3" });     // scored lower edge
+        pushRef(pPref, "preferred — not penalized inside corridor", { style: "preferred" });
+        // Explicit v9 HF floor: its own weighted term, always labelled with its weight.
+        const hf = d.objective && d.objective.hf_floor ? d.objective.hf_floor : null;
+        if (hf) {
+          const fdv = plane === "v" ? Number(hf.v_deg) : Number(hf.h_deg);
+          if (isFinite(fdv)) {
+            refLines.push({ y: fdv, label: `hf floor ${fdv}° (w ${hf.weight})` });
+            profileVals.push(fdv);
+          }
+        }
+      } else if (tgtDeg != null) {
+        // Legacy (non-profile) path: unchanged scored-range target + the ±10 % visual guide.
         const poly = scoredTargetRef(scoreLo, tgtDeg, label + " " + tgtDeg + "°");
         if (poly) {
           refLines.push(poly);
@@ -6476,8 +6555,8 @@ async function viewRunDetail(id) {
           refLines.push({ y: tgtDeg, label: label + " " + tgtDeg + "°" });
         }
       }
-      if (floorDeg != null) refLines.push({ y: floorDeg, label: "8k floor " + floorDeg + "°" });
-      const allVals = [...dataSets, tgtDeg, floorDeg].filter(v => v != null);
+      if (floorDeg != null && !profile) refLines.push({ y: floorDeg, label: "8k floor " + floorDeg + "°" });
+      const allVals = [...dataSets, tgtDeg, floorDeg, ...profileVals].filter(v => v != null);
       const spec = { ...AXES.beamwidth };
       const range = fixedRange(spec, allVals);
       const ticks = bwTicks(range.lo, range.hi, spec.major);
@@ -6487,7 +6566,7 @@ async function viewRunDetail(id) {
         ...(B[key] ? [{ pts: F.map((f, i) => [f, B[key][i] ?? null]), color: css("--best"), w: 2.2 }] : []),
       ];
       chart(svg, {
-        xlog: true, xlim, ylim: [range.lo, range.hi], fill, area,
+        xlog: true, xlim, ylim: [range.lo, range.hi], fill, area, corridorBand,
         yticks: ticks, yMinor: yMinorBw, xlabel: "Hz", ylabel: "deg", band, refLines,
         vlines: f0Finite ? [{ x: f0Finite, color: css("--warn"), dash: true, label: "f0 " + fmtHz(f0Finite) }] : [],
         series: seriesList, markers: true, unscored,
@@ -7865,7 +7944,7 @@ async function showBriefDetail(b, allBriefs, opts = {}) {
               <div class="hint">Leave blank to derive from coverage angles</div></div>
             <label for="brf-dislope">${tip("dislope", "DI slope target")}</label>
             <div><input id="brf-dislope" type="number" step="0.01" value="${tgt.di_slope_target ?? 0}">
-              <div class="hint">0 = constant DI (dB/decade). This is a DI-shape target ONLY — H/V coverage targets stay constant. The scored low-frequency behaviour comes from cov_below_f0 (mask / one-sided) and v6 cov_pat, not from this slope.</div></div>
+              <div class="hint">0 = constant DI (dB/decade). This is a DI-shape target ONLY — H/V coverage targets stay constant. The scored low-frequency behaviour comes from cov_below_f0 (mask / one-sided) and v6 cov_pat, not from this slope. v9 briefs use target.coverage_profile (corridor or target mode) for the H/V envelope; the DI slope target stays a separate slope-only term.</div></div>
             <label for="brf-zmin">${tip("load", "Loading threshold")} z_min</label>
             <div><input id="brf-zmin" type="number" step="0.05" min="0" max="1" value="${tgt.z_min ?? 0}">
               <div class="hint">Lowest scored frequency loading threshold — the throat-impedance floor the load term scores below (classical briefs use 0.7, default 0)</div></div>

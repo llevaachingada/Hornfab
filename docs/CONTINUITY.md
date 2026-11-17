@@ -1,5 +1,22 @@
 # CONTINUITY
 
+## 2026-11-16 (23:15 local) - v9 G13 GUI corridor + schema-lane completion landed
+
+- G13 GUI corridor display: `charts.js` adds `corridorBand`, the preferred ref-line dash, the
+  corridor/preferred legend keys and the isobar/globe min-max edges; `app.js` feeds the BW,
+  isobar and globe views from `scoring_view.profile`, dropping below-onset nulls. The node test
+  `tests/test_gui_corridor_v9.py` compares the drawn SVG geometry to the real `_profile_view`
+  payload exactly, including a late-H-onset case and the legacy-v7 no-corridor path.
+- Schema-lane completion: `targets/profile.py` refuses an anchor below its plane's scoring floor;
+  `targets/spec.py` requires >=2 anchors for corridor mode (target mode keeps the one-anchor
+  constant profile); `tests/test_target_profile.py` pins both, the byte-identical no-profile
+  Target and the asdict round-trip.
+- Verified: 132 focused v9/GUI tests green (corridor, target-profile, scoring-view profiles,
+  objective v9, scoring view, chart standards, report, globe, target curves, brief authoring);
+  both JS files pass `node --check`; the v9 dispatch import is clean.
+- OPEN (consolidation): full filtered suite and the G0-G13 evidence summary; owner smooth-brief
+  re-baselining decision. No GPU/solve/queue change.
+
 ## 2026-11-16 (22:30 local) - v9 implemented per amended RFC (schema + objective + dispatch + identity + display); GUI corridor lane in flight
 
 - Target schema (`targets/spec.py` + NEW `targets/profile.py`): `target.coverage_profile {mode: corridor|target,

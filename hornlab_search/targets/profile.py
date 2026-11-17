@@ -63,6 +63,11 @@ def _row_tuple(row, plane: str, index: int, f0) -> tuple:
     hz = _num(hz, f"{where}.hz")
     if hz <= 0.0:
         raise ValueError(f"{where}.hz must be > 0, got {hz!r}")
+    if f0 is not None and hz + 1e-9 < float(f0):
+        # Amendment section D: an anchor below the plane's scoring floor can never be scored,
+        # so accepting it would promise a corridor segment the scorer does not apply.
+        raise ValueError(
+            f"{where}.hz {hz:g} Hz is below the plane's scoring floor f0 = {float(f0):g} Hz")
     pref = _num(pref, f"{where}.preferred_deg")
     if pref <= 0.0:
         raise ValueError(f"{where}.preferred_deg must be > 0, got {pref!r}")

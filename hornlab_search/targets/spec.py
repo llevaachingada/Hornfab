@@ -143,6 +143,12 @@ def _parse_coverage_profile(profile, kw: dict) -> dict:
     except ValueError as exc:
         raise ValueError(f"Target.from_dict: {exc}") from None
     for plane, anchors in (("h", anchors_h), ("v", anchors_v)):
+        if mode == "corridor" and len(anchors) < 2:
+            # Amendment §B: a one-anchor corridor is a degenerate corridor (it would clamp a
+            # constant window across the band); the constant-profile path is 'target' mode.
+            raise ValueError(
+                f"Target.from_dict: target.coverage_profile.mode 'corridor' requires at least "
+                f"two {plane} anchors (got {len(anchors)}); use mode 'target' for constant profiles")
         for row in anchors:
             if mode == "corridor":
                 if row[2] is None or row[3] is None:

@@ -1,5 +1,14 @@
 # ISSUES
 
+## 2026-11-16 (23:15) - v9 G13 GUI corridor + schema lane landed; consolidation gates open
+
+- DONE: G13 chart==scorer corridor display (charts.js/app.js + `tests/test_gui_corridor_v9.py`)
+  and schema-lane refusals (below-f0 anchor, >=2 corridor anchors) with
+  `tests/test_target_profile.py`; 132 focused v9/GUI tests green, both JS files syntax-checked.
+- OPEN (consolidation): full filtered suite; G0-G13 evidence summary into CONTINUITY; owner
+  smooth-brief re-baselining decision.
+- The v9 dispatch line remains registered; G13 did not fail.
+
 ## 2026-11-16 (22:30) - v9 implemented under the amended gates; GUI corridor lane in flight
 
 - DONE: Target schema + `targets/profile.py` (corridor/target validation, anchor-below-f0 refusal); objective v9

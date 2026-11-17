@@ -166,6 +166,9 @@ export function fixedRange(spec, data) {
  *   unscored:  [{x0, x1, label}] — grey-hatch regions outside the scored band (C10)
  *   area:      [{top:[[x,y],...], bottom:[[x,y],...], color, opacity}] — filled band between two
  *              edges (e.g. a ±2σ envelope), clipped and drawn under every line; order-independent
+ *   corridorBand: {top:[[x,y],...], bottom:[[x,y],...], color?, opacity?} — the v9 scored-corridor
+ *              band. Same area-pipeline semantics (filled, clipped, under every line), but a
+ *              SEPARATE option so a caller opts in explicitly. Default colour --best, opacity 0.10.
  *   ariaLabel: string — aria-label for the SVG element
  */
 /** Pixel width an SVG will be drawn at (so text and strokes render 1:1, never scaled up). */
@@ -191,7 +194,8 @@ const _chartRO = (typeof ResizeObserver !== "undefined") ? new ResizeObserver(en
 export function chart(svg, opts) {
   let { W = 460, H = 240, xlog = false, ylog = false, xlim, ylim,
     xticks, yticks, xlabel, ylabel, band, hlines = [], vlines = [], series, fill, area = [],
-    yMinor, refLines = [], markers = false, unscored = [], ariaLabel, square = false } = opts;
+    yMinor, refLines = [], markers = false, unscored = [], corridorBand = null,
+    ariaLabel, square = false } = opts;
   svg.innerHTML = "";
   W = measuredWidth(svg, W);
   const m = { l: 44, r: 12, t: ylabel ? 20 : 10, b: 32 };   // unit label sits above the plot, clear of the top tick
@@ -261,6 +265,24 @@ export function chart(svg, opts) {
     const d = [...top, ...bottom]
       .map((p, i) => `${i ? "L" : "M"}${X(p[0]).toFixed(1)},${p[1].toFixed(1)}`).join("") + "Z";
     el("path", { d, fill: a.color, opacity: a.opacity ?? 0.14 }, plot);
+  }
+  // v9 scored-corridor band: a filled band between the scorer's min/max edges.  Same clamped,
+  // clipped area semantics, but a separate option (the caller decides when a corridor exists);
+  // default is the best-design colour at 0.10, deliberately distinct from the legacy ±10 % guide.
+  if (corridorBand && Array.isArray(corridorBand.top) && Array.isArray(corridorBand.bottom)) {
+    const cbSide = side => (Array.isArray(side) ? side : [])
+      .filter(p => Array.isArray(p) && typeof p[0] === "number" && Number.isFinite(p[0])
+        && typeof p[1] === "number" && Number.isFinite(p[1]))
+      .map(p => [p[0], Y(Math.min(Math.max(p[1], y0raw), y1raw))])
+      .filter(p => p[1] != null);
+    const cbTop = cbSide(corridorBand.top);
+    const cbBottom = cbSide(corridorBand.bottom).reverse();
+    if (cbTop.length >= 2 && cbBottom.length >= 2) {
+      const d = [...cbTop, ...cbBottom]
+        .map((p, i) => `${i ? "L" : "M"}${X(p[0]).toFixed(1)},${p[1].toFixed(1)}`).join("") + "Z";
+      el("path", { d, class: "corridor-band", fill: corridorBand.color || css("--best"),
+        opacity: corridorBand.opacity ?? 0.10 }, plot);
+    }
   }
   const g = el("g", { class: "grid" }, svg);
   // C1: minor y gridlines (lighter, unlabelled)
@@ -336,8 +358,14 @@ export function chart(svg, opts) {
         .filter(Boolean);
       if (pts.length < 2) continue;
       const d = pts.map((p, i) => `${i ? "L" : "M"}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join("");
+      // A polyline's dash: style "preferred" is the v9 non-penalized dotted centreline ("1 2");
+      // a string dash is used verbatim (corridor edges are "4 3"); `dash: true` keeps the old
+      // long-dash "5 4" and the default stays the neutral dotted "1 3".
+      const rlDash = rl.style === "preferred" ? "1 2"
+        : typeof rl.dash === "string" ? rl.dash
+        : rl.dash ? "5 4" : "1 3";
       el("path", { d, class: "ref-pts", fill: "none", stroke: css("--label"), "stroke-width": 1,
-        "stroke-dasharray": rl.dash ? "5 4" : "1 3" }, plot);
+        "stroke-dasharray": rlDash }, plot);
       if (rl.label) {
         const [lastX, lastY] = pts[pts.length - 1];
         const estW = String(rl.label).length * 5 + 6;         // rough text width, px
@@ -827,7 +855,8 @@ function _isoContours(parent, vals, cw, chh, vmax, ox, oy, sx, sy) {
 
 /** Shared legend for a set of isobar maps (HTML string): the band scale once, plus the line keys.
  *  Use with isobarMap(..., { legend: false }) so small multiples do not each repeat a colour bar. */
-export function isobarLegendHtml({ target = false, f0 = false, over = false, below = false, floor = false, illustrative = false } = {}) {
+export function isobarLegendHtml({ target = false, f0 = false, over = false, below = false, floor = false,
+    illustrative = false, corridor = false, preferred = false } = {}) {
   const sw = ISOBAR_COLORS.slice().reverse();          // loud → quiet, left → right
   const ticks = [];
   for (let L = ISOBAR_MAX; L >= ISOBAR_MIN; L -= 6) ticks.push(L);
@@ -840,6 +869,8 @@ export function isobarLegendHtml({ target = false, f0 = false, over = false, bel
     below === "one_sided" ? `<span class="iso-key"><svg width="22" height="10" aria-hidden="true"><rect x="1" y="1" width="20" height="8" fill="currentColor" fill-opacity="0.10" stroke="none"/></svg>wide free below f0 (one-sided)</span>` : "",
     floor ? `<span class="iso-key"><svg width="22" height="8" aria-hidden="true"><line x1="0" x2="22" y1="4" y2="4" stroke="currentColor" stroke-width="0.8" stroke-dasharray="2 3" opacity="0.6"/></svg>8 kHz floor (narrow-only)</span>` : "",
     illustrative ? `<span class="iso-key"><svg width="22" height="8" aria-hidden="true"><line x1="0" x2="22" y1="4" y2="4" stroke="currentColor" stroke-width="1" stroke-dasharray="2 3"/></svg>hypothetical corridor — NOT scored</span>` : "",
+    corridor ? `<span class="iso-key"><svg width="22" height="8" aria-hidden="true"><line x1="0" x2="22" y1="4" y2="4" stroke="currentColor" stroke-width="1" stroke-dasharray="4 3"/></svg>coverage profile corridor — scored (min/max edges)</span>` : "",
+    preferred ? `<span class="iso-key"><svg width="22" height="8" aria-hidden="true"><line x1="0" x2="22" y1="4" y2="4" stroke="currentColor" stroke-width="1" stroke-dasharray="1 2"/></svg>preferred line — not penalized inside the corridor</span>` : "",
     over ? `<span class="iso-key"><i class="iso-over" style="background:${OVER_RANGE_COLOR}"></i>off-axis lobe &gt; +1 dB</span>` : "",
   ].filter(Boolean).join("");
   return `<div class="iso-legend"><div class="iso-scale-wrap"><span class="iso-unit">dB re on-axis</span>${bar}${lab}</div><div class="iso-keys">${keys}</div></div>`;
@@ -853,9 +884,13 @@ export function isobarLegendHtml({ target = false, f0 = false, over = false, bel
  *    targetLoHz        scored-coverage guides start here (Hz); drawn only to the right edge
  *    belowMode         "mask" (nothing below) | "one_sided" (translucent free-widening region below)
  *    illustrativeCurve [[f,deg],...] symmetric dashed display-only corridor (±deg/2), never a target
- *    floorRays         {h_deg,v_deg} — lighter dashed H pair at ±h/2 (angle axis only) + "8k floor" */
+ *    floorRays         {h_deg,v_deg} — lighter dashed H pair at ±h/2 (angle axis only) + "8k floor"
+ *    corridorEdgeCurves {pref_plus,pref_minus,min_plus,max_plus}: v9 scored corridor.  Half-angles
+ *                      (already /2).  pref_plus plots at +v and pref_minus at −v as dotted "1 2"
+ *                      (non-penalized centre); min_plus / max_plus are mirrored to ±v and drawn
+ *                      dashed "4 3" (the scored constraints).  Legend-only labels. */
 export function isobarMap(svg, rows, angles, freqs, { H = 300, title = "", angleTicks = null, xlim, f0, target, legend = true,
-    targetLoHz, belowMode, illustrativeCurve, floorRays } = {}) {
+    targetLoHz, belowMode, illustrativeCurve, floorRays, corridorEdgeCurves } = {}) {
   svg.innerHTML = "";
   if (!rows || !rows.length || !angles || !angles.length || !freqs || freqs.length < 2) return;
   const W = measuredWidth(svg, 520);
@@ -974,6 +1009,31 @@ export function isobarMap(svg, rows, angles, freqs, { H = 300, title = "", angle
       }
     }
   }
+  // v9 scored corridor: min/max edges dashed "4 3" (scored constraints), preferred centre dotted
+  // "1 2" (not penalized).  Values are half-angles; pref_plus/pref_minus carry the two sides and
+  // min_plus/max_plus are mirrored to both sides.  Labelled only through isobarLegendHtml().
+  if (corridorEdgeCurves && typeof corridorEdgeCurves === "object") {
+    const prefStroke = css("--best") || "#2a78d6";
+    const edgeStroke = css("--label") || "#5a6873";
+    const drawCorridor = (pts, sgn, cls, stroke, dash) => {
+      if (!Array.isArray(pts)) return;
+      const segs = [];
+      for (const p of pts) {
+        if (!Array.isArray(p) || !isFinite(p[0]) || !isFinite(p[1]) || !(p[0] > 0)) continue;
+        const yy = Y(sgn * p[1]);
+        if (yy == null) continue;
+        segs.push(`${segs.length ? "L" : "M"}${X(p[0]).toFixed(1)},${yy.toFixed(1)}`);
+      }
+      if (segs.length >= 2) el("path", { d: segs.join(""), class: cls, fill: "none",
+        stroke, "stroke-width": 1, "stroke-dasharray": dash }, clipped);
+    };
+    drawCorridor(corridorEdgeCurves.pref_plus, 1, "iso-corridor-pref", prefStroke, "1 2");
+    drawCorridor(corridorEdgeCurves.pref_minus, -1, "iso-corridor-pref", prefStroke, "1 2");
+    for (const sgn of [1, -1]) {
+      drawCorridor(corridorEdgeCurves.min_plus, sgn, "iso-corridor-min", edgeStroke, "4 3");
+      drawCorridor(corridorEdgeCurves.max_plus, sgn, "iso-corridor-max", edgeStroke, "4 3");
+    }
+  }
   // 8 kHz floor: lighter dashed H pair at ±h/2 (angle axis only), labelled in the right margin
   if (floorRays && isFinite(Number(floorRays.h_deg))) {
     const hh = Number(floorRays.h_deg), fStroke = css("--muted") || "#8aa";
@@ -1078,9 +1138,11 @@ export function isobarMap(svg, rows, angles, freqs, { H = 300, title = "", angle
  *    targetLoHz        target rays only for radius rOf(targetLoHz)..R
  *    belowMode         "mask" | "one_sided" (translucent free-widening annular sector below onset)
  *    illustrativeCurve [[f,deg],...] display-only dashed spiral (±deg/2), never a scored target
- *    floorRays         {h_deg,v_deg} — lighter dashed ray pair at ±deg/2 */
+ *    floorRays         {h_deg,v_deg} — lighter dashed ray pair at ±deg/2
+ *    corridorEdgeCurves same contract as isobarMap, drawn with the spiral mapping: pref_plus /
+ *                      pref_minus dotted "1 2", min_plus / max_plus mirrored dashed "4 3". */
 export function globePlot(svg, rows, angles, freqs, { H = 360, title = "", target, f0, legend = true,
-    targetLoHz, belowMode, illustrativeCurve, floorRays } = {}) {
+    targetLoHz, belowMode, illustrativeCurve, floorRays, corridorEdgeCurves } = {}) {
   svg.innerHTML = "";
   if (!rows || !rows.length || !angles || angles.length < 2 || !freqs || freqs.length < 2) return;
   const W = measuredWidth(svg, 420);
@@ -1243,6 +1305,31 @@ export function globePlot(svg, rows, angles, freqs, { H = 360, title = "", targe
         if (segs.length >= 2) el("path", { d: segs.join(""), class: "globe-illustrative", fill: "none",
           stroke: illStroke, "stroke-width": 1, "stroke-dasharray": "2 3" }, svg);
       }
+    }
+  }
+  // v9 scored corridor spirals: same mapping as illustrativeCurve (rOf(f), direction ±half-angle),
+  // but min/max are the scored edges (dashed "4 3") and preferred is the non-penalized centre.
+  if (corridorEdgeCurves && typeof corridorEdgeCurves === "object") {
+    const prefStroke = css("--best") || "#2a78d6";
+    const edgeStroke = css("--label") || "#5a6873";
+    const drawCorridor = (pts, sgn, cls, stroke, dash) => {
+      if (!Array.isArray(pts)) return;
+      const segs = [];
+      for (const p of pts) {
+        if (!Array.isArray(p) || !isFinite(p[0]) || !isFinite(p[1]) || !(p[0] > 0)) continue;
+        const r = rOf(p[0]);
+        if (!(r >= -1e-6 && r <= R + 1e-6)) continue;
+        const [dx, dy] = dir(sgn * p[1]);
+        segs.push(`${segs.length ? "L" : "M"}${(cx + r * dx).toFixed(1)},${(cy + r * dy).toFixed(1)}`);
+      }
+      if (segs.length >= 2) el("path", { d: segs.join(""), class: cls, fill: "none",
+        stroke, "stroke-width": 1, "stroke-dasharray": dash }, svg);
+    };
+    drawCorridor(corridorEdgeCurves.pref_plus, 1, "globe-corridor-pref", prefStroke, "1 2");
+    drawCorridor(corridorEdgeCurves.pref_minus, -1, "globe-corridor-pref", prefStroke, "1 2");
+    for (const sgn of [1, -1]) {
+      drawCorridor(corridorEdgeCurves.min_plus, sgn, "globe-corridor-min", edgeStroke, "4 3");
+      drawCorridor(corridorEdgeCurves.max_plus, sgn, "globe-corridor-max", edgeStroke, "4 3");
     }
   }
   // 8 kHz floor: lighter dashed ray pair (angle axis), keyed in the legend below the colour bar
