@@ -1,5 +1,12 @@
 # ISSUES
 
+## 2026-11-17 - Stage-0 WP 0.3 / 0.6 / 0.7 implemented (offline)
+
+- DONE: night-runner restart idempotency (0.6); watchdog stop `best_J` + per-kind outcome counts (0.7);
+  cohort gate by objective identity instead of hard v4 (0.3). Offline tests added.
+- OPEN: expose/document watchdog `pin_min_valid` / `pin_frac` / `pin_count` (rest of 0.7); replay of
+  the 38 historical stops is not run (historical records are never rewritten).
+
 ## 2026-11-17 - Lane review of the Fable corpus delivered; decisions reserved to the senior reviewer and owner
 
 - DONE (lane agent, lower-cost): full-corpus review handed to the senior reviewer
