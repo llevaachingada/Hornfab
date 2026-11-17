@@ -1,0 +1,67 @@
+# HOME LANDSCAPE hifi brief (2026-11-16, H12). Extends room_landscape_80x50_700_hf1440_v7 with
+# the oa_excess_tol opt-in: a one-sided penalty for any H or V angle within ±coverage/2 where
+# SPL exceeds on-axis by more than 0.5 dB over scored in-band frequencies. This addresses the H12
+# finding that rip's quartic absorbs on-axis dip humps while the off-axis SPL rises unchecked.
+# All other brief/objective parameters are identical to the base v7 brief.
+name: room_landscape_80x50_700_hf1440_v7_hifi
+description: (objective v7 + oa_excess) HOME living-room horn, LANDSCAPE 80H x 50V, off-axis-excess penalised, vertical half-weighted, no K-law mouth, 700 Hz XO, HF1440 1.4-inch
+driver:
+  exit_radius_mm: 18.0
+  exit_angle_deg: 2.0
+envelope:
+  max_mouth_w_mm: 600.0
+  max_mouth_h_mm: 480.0
+  max_depth_mm: 480.0
+symmetry: hv
+source:
+  cap: auto
+target:
+  coverage_h_deg: 80.0
+  coverage_v_deg: 50.0
+  band_lo_hz: 350.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.5
+  f0_hz: 700.0
+  f0_v_hz: 700.0
+  loaded_hi_hz: 5600.0
+  freq_weights:
+    band_hz:
+      - [2500.0, 5500.0, 2.0]
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 1.0
+  flat: 0.5
+  load: 1.0
+  distd: 0.5
+  diag: 1.0
+  flat_cv: 1.0
+grid:
+  verify_points_per_octave: 6
+  screen_extra_hz: [250, 315, 400, 2573, 3311, 4260]
+objective:
+  version: 7
+  flat_band: scored
+  cov_v_weight: 0.5
+  # H12 opt-in: mean per-angle dB excess above on-axis + 0.5 dB, within coverage window and
+  # scored band. Tolerance 0.5 dB matches the threshold so a 1 dB mean excess scores as 2.0.
+  oa_excess_tol: 0.5
+  tolerances:
+    cov: 3.0
+    rip: 1.0
+    di: 0.4
+    dislope: 9.0
+    flat: 1.5
+    load: 0.3
+    distd: 2.0
+    diag: 2.0
+    flat_cv: 1.5
+  cov_narrow_ratio: 2.0
+  cov_below_f0: mask
+  loaded_re_z: 0.5
+  lfp_re_z: 0.2
+  lfp_crossover_ratio: 1.6
+  bw8k_floor: 0.75
