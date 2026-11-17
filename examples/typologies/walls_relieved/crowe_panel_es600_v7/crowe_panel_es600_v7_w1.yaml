@@ -1,6 +1,6 @@
 name: rr__crowe_panel_es600_v7_w1
 family: FREEFORM
-brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
+brief_file: ../../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
 generator:
   name: grid
   rows:

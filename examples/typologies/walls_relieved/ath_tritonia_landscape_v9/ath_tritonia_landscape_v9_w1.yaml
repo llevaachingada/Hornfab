@@ -105,7 +105,7 @@ bounds:
     hi: 0.015
     lo: 0.015
     search: false
-brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
+brief_file: ../../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
 description: ATH Tritonia kit-era anchored fold; modest bounds expansion based on
   2026-11-16 v8 runs. See docs/queue/TRITONIA_V9_CMA_AUDIT_2026-11-16.md.
 family: OSSE

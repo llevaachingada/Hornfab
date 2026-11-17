@@ -1,6 +1,6 @@
 name: sab__lecleach_fc540_w1
 family: FREEFORM
-brief_file: ../../briefs/lecleach_rollback_1in_v6.yaml
+brief_file: ../../../briefs/lecleach_rollback_1in_v6.yaml
 generator:
   name: grid
   rows:
