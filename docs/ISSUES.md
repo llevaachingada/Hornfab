@@ -1,5 +1,15 @@
 # ISSUES
 
+## 2026-11-17 - E1 follow-up: full-J response modelling gives no advantage
+
+- DONE (A3): E1 repeated with parity-exact full J. Median lane reveals - score 18.5, curve head 24.0,
+  nine-term head 18.25, actual history 87.25, random 55.25 - so Part A, B and C all fail and E1's
+  failure criterion is fully met. The earlier proxy-level success is the proxy: the same selector
+  needs 10.0 reveals on cov+DI vs 24.0 on full J. Error sits in `diag`, `dislope`, `cov`, `load`.
+  Report `E1_FOLLOWUP_WHOLE_SURFACE.md`.
+- OPEN (blocked on data): pool-vs-real-absence cannot be separated without a fresh unlocked pool
+  (B4/B6 solves, owner approval). The whole-surface descriptor arm needs more than 10 designs/lane.
+
 ## 2026-11-17 - sigma0/bound-width coupling: measured failure mode + institutionalized guidance
 
 - FOUND (measured, `docs/evidence/SIGMA0_ANALYSIS_2026-11-17.md`): sigma0 ≥ 0.25 with >8 free keys

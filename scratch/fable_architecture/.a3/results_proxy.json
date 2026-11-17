@@ -1,0 +1,199 @@
+{
+ "lanes": {
+  "hl__ath_tritonia_landscape_v8": {
+   "n": 112,
+   "hit_n": 2,
+   "hit_n_dec": 12,
+   "median": {
+    "score": 13.5,
+    "score_desc": 15.0,
+    "resp_curve": 16.0,
+    "actual": 31.5,
+    "random": 40.0
+   },
+   "median_dec": {
+    "score": 8.0,
+    "score_desc": 8.0,
+    "resp_curve": 8.0,
+    "actual": 8.0,
+    "random": 8.0
+   }
+  },
+  "hl__ath_tritonia_landscape_v9": {
+   "n": 120,
+   "hit_n": 9,
+   "hit_n_dec": 12,
+   "median": {
+    "score": 8.5,
+    "score_desc": 9.0,
+    "resp_curve": 8.5,
+    "actual": 28.5,
+    "random": 8.5
+   },
+   "median_dec": {
+    "score": 8.0,
+    "score_desc": 8.0,
+    "resp_curve": 8.0,
+    "actual": 8.0,
+    "random": 8.0
+   }
+  },
+  "hl__ath_twinray380_landscape_v8": {
+   "n": 161,
+   "hit_n": 3,
+   "hit_n_dec": 17,
+   "median": {
+    "score": 20.5,
+    "score_desc": 18.5,
+    "resp_curve": 21.5,
+    "actual": 116.5,
+    "random": 33.5
+   },
+   "median_dec": {
+    "score": 8.0,
+    "score_desc": 8.0,
+    "resp_curve": 8.0,
+    "actual": 8.0,
+    "random": 8.0
+   }
+  },
+  "hl__biradial_es_style_v7": {
+   "n": 309,
+   "hit_n": 45,
+   "hit_n_dec": 31,
+   "median": {
+    "score": 8.0,
+    "score_desc": 8.0,
+    "resp_curve": 8.0,
+    "actual": 8.0,
+    "random": 8.0
+   },
+   "median_dec": {
+    "score": 8.0,
+    "score_desc": 8.0,
+    "resp_curve": 8.0,
+    "actual": 8.0,
+    "random": 8.0
+   }
+  },
+  "hl__crowe_panel_home_v7": {
+   "n": 158,
+   "hit_n": 10,
+   "hit_n_dec": 16,
+   "median": {
+    "score": 10.5,
+    "score_desc": 10.0,
+    "resp_curve": 11.5,
+    "actual": 31.0,
+    "random": 16.5
+   },
+   "median_dec": {
+    "score": 9.0,
+    "score_desc": 9.0,
+    "resp_curve": 10.0,
+    "actual": 22.0,
+    "random": 10.0
+   }
+  },
+  "hl__crowe_x_osse_cd_v7": {
+   "n": 202,
+   "hit_n": 19,
+   "hit_n_dec": 21,
+   "median": {
+    "score": 8.5,
+    "score_desc": 8.5,
+    "resp_curve": 8.5,
+    "actual": 9.0,
+    "random": 10.5
+   },
+   "median_dec": {
+    "score": 8.5,
+    "score_desc": 8.5,
+    "resp_curve": 8.5,
+    "actual": 9.0,
+    "random": 9.0
+   }
+  },
+  "hl__ext_throat_hvlaw_v7": {
+   "n": 137,
+   "hit_n": 1,
+   "hit_n_dec": 14,
+   "median": {
+    "score": 29.5,
+    "score_desc": 20.0,
+    "resp_curve": 22.5,
+    "actual": 38.5,
+    "random": 58.0
+   },
+   "median_dec": {
+    "score": 8.0,
+    "score_desc": 8.0,
+    "resp_curve": 8.0,
+    "actual": 8.0,
+    "random": 8.0
+   }
+  },
+  "hl__osse_rrect_fold_warm_v7": {
+   "n": 248,
+   "hit_n": 23,
+   "hit_n_dec": 25,
+   "median": {
+    "score": 8.0,
+    "score_desc": 8.0,
+    "resp_curve": 8.0,
+    "actual": 8.0,
+    "random": 8.0
+   },
+   "median_dec": {
+    "score": 8.0,
+    "score_desc": 8.0,
+    "resp_curve": 8.0,
+    "actual": 8.0,
+    "random": 8.0
+   }
+  },
+  "hl__rosse_rect_cd_v7": {
+   "n": 254,
+   "hit_n": 21,
+   "hit_n_dec": 26,
+   "median": {
+    "score": 8.0,
+    "score_desc": 8.0,
+    "resp_curve": 8.0,
+    "actual": 8.0,
+    "random": 8.0
+   },
+   "median_dec": {
+    "score": 8.0,
+    "score_desc": 8.0,
+    "resp_curve": 8.0,
+    "actual": 8.0,
+    "random": 8.0
+   }
+  },
+  "rr__crowe_panel_es600_v7": {
+   "n": 160,
+   "hit_n": 5,
+   "hit_n_dec": 16,
+   "median": {
+    "score": 14.0,
+    "score_desc": 18.0,
+    "resp_curve": 16.5,
+    "actual": 122.0,
+    "random": 18.5
+   },
+   "median_dec": {
+    "score": 8.0,
+    "score_desc": 8.0,
+    "resp_curve": 8.0,
+    "actual": 8.0,
+    "random": 8.0
+   }
+  }
+ },
+ "meta": {
+  "starts": 10,
+  "batch": 8,
+  "truth": "coverage+DI proxy"
+ }
+}

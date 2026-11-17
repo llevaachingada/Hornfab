@@ -1,0 +1,122 @@
+{
+ "hl__ath_tritonia_landscape_v8": {
+  "n": 112,
+  "cov_weighted_rmse": 1.0898606949013863,
+  "di_weighted_rmse": 0.10042972106576598,
+  "proxy_rmse": 1.1721933796362813,
+  "proxy_rho": 0.9472890697929436,
+  "unmodelled_J_mean": 10.381464104779607,
+  "J_mean": 14.133565913701684,
+  "unmodelled_share": 0.7345254671162195,
+  "curve_cov_share": 0.2113407905674213,
+  "curve_di_share": 0.05413374231635937
+ },
+ "hl__ath_tritonia_landscape_v9": {
+  "n": 120,
+  "cov_weighted_rmse": 0.48133881736904954,
+  "di_weighted_rmse": 0.05052739534102114,
+  "proxy_rmse": 0.522234679130772,
+  "proxy_rho": 0.9607194944093339,
+  "unmodelled_J_mean": 5.328524221029924,
+  "J_mean": 7.224790339962955,
+  "unmodelled_share": 0.7375334051641484,
+  "curve_cov_share": 0.18577223294646605,
+  "curve_di_share": 0.07669436188938546
+ },
+ "hl__ath_twinray380_landscape_v8": {
+  "n": 161,
+  "cov_weighted_rmse": 0.7608495353872191,
+  "di_weighted_rmse": 0.08041138337558755,
+  "proxy_rmse": 0.8076117445872882,
+  "proxy_rho": 0.8401691110028562,
+  "unmodelled_J_mean": 6.342407374994755,
+  "J_mean": 9.318405291410553,
+  "unmodelled_share": 0.6806322730822848,
+  "curve_cov_share": 0.2475129320949058,
+  "curve_di_share": 0.07185479482280963
+ },
+ "hl__biradial_es_style_v7": {
+  "n": 309,
+  "cov_weighted_rmse": 0.23748491194381097,
+  "di_weighted_rmse": 0.02336069983021226,
+  "proxy_rmse": 0.24962956119449967,
+  "proxy_rho": 0.7782400536238816,
+  "unmodelled_J_mean": 5.9560700457905025,
+  "J_mean": 7.451187857783846,
+  "unmodelled_share": 0.7993450385992515,
+  "curve_cov_share": 0.11733551859353027,
+  "curve_di_share": 0.08331944280721822
+ },
+ "hl__crowe_panel_home_v7": {
+  "n": 158,
+  "cov_weighted_rmse": 0.16615794800569492,
+  "di_weighted_rmse": 0.02471973867350736,
+  "proxy_rmse": 0.17487416820371313,
+  "proxy_rho": 0.7812342884440507,
+  "unmodelled_J_mean": 12.992811877483923,
+  "J_mean": 17.939241398782755,
+  "unmodelled_share": 0.7242676314264623,
+  "curve_cov_share": 0.1990527614414924,
+  "curve_di_share": 0.076679607132045
+ },
+ "hl__crowe_x_osse_cd_v7": {
+  "n": 202,
+  "cov_weighted_rmse": 0.1403301027610255,
+  "di_weighted_rmse": 0.02972870413709014,
+  "proxy_rmse": 0.13748097183119634,
+  "proxy_rho": 0.8088576900770676,
+  "unmodelled_J_mean": 5.007668406293001,
+  "J_mean": 6.321857544315948,
+  "unmodelled_share": 0.7921197798573381,
+  "curve_cov_share": 0.10969448396613941,
+  "curve_di_share": 0.09818573617652272
+ },
+ "hl__ext_throat_hvlaw_v7": {
+  "n": 137,
+  "cov_weighted_rmse": 1.1007853654838844,
+  "di_weighted_rmse": 0.10205009542450312,
+  "proxy_rmse": 1.168767072365778,
+  "proxy_rho": 0.8486648130674064,
+  "unmodelled_J_mean": 5.914903329934572,
+  "J_mean": 8.948642682263472,
+  "unmodelled_share": 0.660983295450842,
+  "curve_cov_share": 0.24484989362173445,
+  "curve_di_share": 0.0941668109274235
+ },
+ "hl__osse_rrect_fold_warm_v7": {
+  "n": 248,
+  "cov_weighted_rmse": 0.17225312407188878,
+  "di_weighted_rmse": 0.02903715780556147,
+  "proxy_rmse": 0.17537527658369495,
+  "proxy_rho": 0.9311362711941962,
+  "unmodelled_J_mean": 2.5043749958465873,
+  "J_mean": 4.683756271323804,
+  "unmodelled_share": 0.5346937053876114,
+  "curve_cov_share": 0.36263495282150643,
+  "curve_di_share": 0.10267134179088232
+ },
+ "hl__rosse_rect_cd_v7": {
+  "n": 254,
+  "cov_weighted_rmse": 0.26816423897588054,
+  "di_weighted_rmse": 0.052022465965145266,
+  "proxy_rmse": 0.30661973973950274,
+  "proxy_rho": 0.8826203049471271,
+  "unmodelled_J_mean": 5.279572716762962,
+  "J_mean": 6.621828678862409,
+  "unmodelled_share": 0.7972982951999238,
+  "curve_cov_share": 0.10338212442932797,
+  "curve_di_share": 0.09931958037074821
+ },
+ "rr__crowe_panel_es600_v7": {
+  "n": 160,
+  "cov_weighted_rmse": 0.035563300988473004,
+  "di_weighted_rmse": 0.0022932712637628275,
+  "proxy_rmse": 0.03521594545402929,
+  "proxy_rho": 0.4763258089905866,
+  "unmodelled_J_mean": 15.784557214732171,
+  "J_mean": 22.92711516074403,
+  "unmodelled_share": 0.6884667828492702,
+  "curve_cov_share": 0.23208833688279054,
+  "curve_di_share": 0.07944488026793922
+ }
+}

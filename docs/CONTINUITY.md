@@ -1,5 +1,20 @@
 # CONTINUITY
 
+## 2026-11-17 03:0x - E1 follow-up at full J: response modelling still gives no advantage; the proxy was the illusion
+
+- A3 repeats E1 with parity-exact full J (10 lanes x 10 starts, E1's protocol unchanged; parity gate
+  0.0 J and 0.0 term on 2,595 CD rows; E1 reproduced exactly under its own proxy truth). Full-J median
+  reveals: score 18.5, score-on-descriptors 18.25, E1 curve head 24.0, nine-term head 18.25, actual
+  history 87.25, random 55.25. Part A, Part B and Part C all fail their lines, so E1's composite
+  failure criterion is now fully met - it was not under the proxy truth.
+- The proxy objective is the identified cause of the earlier proxy-level picture: the same curve
+  selector needs 10.0 reveals on cov+DI versus 24.0 on full J, the proxy-best design is outside the
+  full-J top decile in 4 of 10 lanes, and cov+DI is only 28.5 % of mean J.
+- Error shares of the full-J term head: `diag` 0.287, `dislope` 0.228, `cov` 0.211, `load` 0.105,
+  `flat_cv` 0.061. Whole-surface descriptors built and versioned (A3-WS-v1, 404 numbers, 60 records)
+  but the arm is under-powered at 10 designs/lane; pool vs real absence cannot be separated without
+  new solves. Report `scratch/fable_architecture/E1_FOLLOWUP_WHOLE_SURFACE.md`.
+
 ## 2026-11-17 (latest) - sigma0/bound-width failure mode measured; guidance into skill + AGENTS.md; no solver code changed
 
 - **What happened:** the Klangfilm b3_soft search (`20261117T070714Z-screen-2dabac`) burned 45 GPU
