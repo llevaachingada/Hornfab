@@ -144,26 +144,33 @@ def native_points(design, cfg, *, res_mm: float = 10.0):
     if params.get("meh") or params.get("mid_ports"):
         raise RecordRefusal(R_PORTS, "multi-entry / ported walls are not a single sheet")
     if "grid" in params:
-        from ..design.generators import grid, rolled_family
+        # Same resolution as mesh/build.py::_build_grid_mesh, so the record is what gets meshed.
+        from ..design.generators import grid
+        from ..design.generators import (klangfilm_lame_family, klangfilm_lame_hv_core_family,
+                                         klangfilm_lame_hv_family, lecleach_swept_hv,
+                                         record_body, rolled_family)
         b = params["grid"]
-        t = float(b.get("wall_thickness_mm") or 0.0)
-        if rolled_family.is_family_spec(b):
-            g = rolled_family.resolve_grid(b, cfg.brief)
-            return (np.asarray(g["inner_points"], float), np.asarray(g["outer_points"], float),
-                    "rolled", t)
-        rows = b.get("rows") or {}
-        try:
-            from tools.geometry import klangfilm_lame
-        except Exception:  # noqa: BLE001 - tools/ is optional outside the repo checkout
-            klangfilm_lame = None
-        if klangfilm_lame is not None and rows.get("schema") == klangfilm_lame.SCHEMA:
-            shape = {k: b["knobs"]["g_" + k] for k in
-                     klangfilm_lame.SHAPE_KEYS - {"n_phi", "n_s", "wall_thickness_mm"}}
-            shape.update({k: b[k] for k in ("n_phi", "n_s", "wall_thickness_mm")})
-            inner, _ = klangfilm_lame.make_grid(shape, cfg.brief)
-            return inner, grid.grid_outer_points(inner, t), "klangfilm", t
-        inner, _ = grid.grid_points(b, b.get("knobs", {}), cfg.brief)
-        return np.asarray(inner, float), grid.grid_outer_points(inner, t), "grid", t
+        brief = getattr(cfg, "brief", None) or {}
+        t = float(b.get("wall_thickness_mm", 3.0))
+        for family in (rolled_family, klangfilm_lame_family, klangfilm_lame_hv_family,
+                       klangfilm_lame_hv_core_family, lecleach_swept_hv, record_body):
+            if family.is_family_spec(b):
+                g = family.resolve_grid(b, brief)
+                outer = g.get("outer_points")
+                return (np.asarray(g["inner_points"], float),
+                        None if outer is None else np.asarray(outer, float),
+                        family.__name__.rsplit(".", 1)[-1], float(g.get("wall_thickness_mm", t)))
+        knobs = b.get("knobs") or {}
+        if "rows" in b:
+            spec = {k: v for k, v in b.items() if k != "knobs"}
+            inner, _ = grid.rows_grid_points(spec, knobs, brief)
+            route = "grid_rows"
+        else:
+            spec = {k: b[k] for k in grid.GRID_SPEC_KEYS if k in b}
+            inner, _ = grid.grid_points(spec, knobs, brief)
+            route = "grid"
+        inner = np.asarray(inner, float)
+        return inner, grid.grid_outer_points(inner, t), route, t
     from hornlab_mesher.config_builder import resolve_geometry
     msp = mesh_spec("screen", cfg)
     mcfg = families.to_mesher_config(design, msp, {"throat": res_mm, "mouth": res_mm, "rear": res_mm},

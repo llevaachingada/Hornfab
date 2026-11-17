@@ -1,0 +1,984 @@
+{
+ "config": "examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_fold_warm_v7.yaml",
+ "name": "hl__osse_rrect_fold_warm_v7",
+ "family": "OSSE",
+ "generator": false,
+ "keys": [
+  "L_mm",
+  "a0_deg",
+  "a_deg",
+  "az_a_cos_amp",
+  "az_a_cos_pow",
+  "az_fold_h_deg",
+  "az_fold_h_width_deg",
+  "az_fold_v_deg",
+  "az_fold_v_width_deg",
+  "az_s_cos2_amp",
+  "k",
+  "morph_corner_mm",
+  "morph_height_mm",
+  "morph_rate",
+  "morph_width_mm",
+  "n",
+  "q",
+  "s"
+ ],
+ "geometry": {
+  "keys": [
+   "L_mm",
+   "a0_deg",
+   "a_deg",
+   "az_a_cos_amp",
+   "az_a_cos_pow",
+   "az_fold_h_deg",
+   "az_fold_h_width_deg",
+   "az_fold_v_deg",
+   "az_fold_v_width_deg",
+   "az_s_cos2_amp",
+   "k",
+   "morph_corner_mm",
+   "morph_height_mm",
+   "morph_rate",
+   "morph_width_mm",
+   "n",
+   "q",
+   "s"
+  ],
+  "n_points": 7,
+  "legal_points": 7,
+  "refused_points": [],
+  "record_points": 3965,
+  "effective_dimension": {
+   "median": 12.0,
+   "min": 12,
+   "max": 13,
+   "searched": 18
+  },
+  "knobs": {
+   "L_mm": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 22.988772047656468,
+    "max_rms_mm_per_range": 23.568644353368583,
+    "median_max_disp_mm_per_range": 44.73862839812877,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": 0.0,
+     "mouth_height_mm": 0.0,
+     "depth_mm": 44.73862839812877,
+     "h_wall_angle_mouth_deg": -3.9298783424975134,
+     "v_wall_angle_mouth_deg": -3.8067226955732245,
+     "diag_wall_angle_mouth_deg": -4.413198207515736,
+     "mouth_aspect": 0.0,
+     "mouth_area_mm2": 0.0,
+     "h_halfwidth_mid_mm": 4.929756219763344,
+     "v_halfwidth_mid_mm": 7.065934207523832
+    },
+    "failed_points": 0
+   },
+   "a0_deg": {
+    "label": "weak",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 0.21530940839487056,
+    "max_rms_mm_per_range": 0.23866745074127146,
+    "median_max_disp_mm_per_range": 0.3863026594880068,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": 0.0,
+     "mouth_height_mm": 0.0,
+     "depth_mm": 0.0,
+     "h_wall_angle_mouth_deg": -0.034658999824799225,
+     "v_wall_angle_mouth_deg": -0.07392434826058995,
+     "diag_wall_angle_mouth_deg": -0.036004674732836826,
+     "mouth_aspect": 0.0,
+     "mouth_area_mm2": 0.0,
+     "h_halfwidth_mid_mm": 0.23628723374642369,
+     "v_halfwidth_mid_mm": 0.34506719977720446
+    },
+    "failed_points": 0
+   },
+   "a_deg": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 5.775632985244552,
+    "max_rms_mm_per_range": 6.595649198203959,
+    "median_max_disp_mm_per_range": 10.156481664348046,
+    "coupled_with": [
+     {
+      "knob": "k",
+      "median_abs_cos": 0.9822439969512144,
+      "frac_points_coupled": 1.0
+     }
+    ],
+    "descriptor_per_range": {
+     "mouth_width_mm": 0.0,
+     "mouth_height_mm": 0.0,
+     "depth_mm": 0.0,
+     "h_wall_angle_mouth_deg": -1.659767714735237,
+     "v_wall_angle_mouth_deg": -2.079177820802867,
+     "diag_wall_angle_mouth_deg": -1.9936142225102298,
+     "mouth_aspect": 0.0,
+     "mouth_area_mm2": 0.0,
+     "h_halfwidth_mid_mm": 6.4759432947266,
+     "v_halfwidth_mid_mm": 6.194046024102912
+    },
+    "failed_points": 0
+   },
+   "az_a_cos_amp": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 3.290324827354427,
+    "max_rms_mm_per_range": 4.616984421229772,
+    "median_max_disp_mm_per_range": 8.447386531225181,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": 0.0,
+     "mouth_height_mm": 0.0,
+     "depth_mm": 0.0,
+     "h_wall_angle_mouth_deg": -1.616568712137578,
+     "v_wall_angle_mouth_deg": 0.0,
+     "diag_wall_angle_mouth_deg": -1.062340111177206,
+     "mouth_aspect": 0.0,
+     "mouth_area_mm2": 0.0,
+     "h_halfwidth_mid_mm": 6.307395357777778,
+     "v_halfwidth_mid_mm": 0.0
+    },
+    "failed_points": 0
+   },
+   "az_a_cos_pow": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 2.9247938949590235,
+    "max_rms_mm_per_range": 3.639444520629481,
+    "median_max_disp_mm_per_range": 7.644793654234302,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": 0.0,
+     "mouth_height_mm": 0.0,
+     "depth_mm": 0.0,
+     "h_wall_angle_mouth_deg": 0.0,
+     "v_wall_angle_mouth_deg": 0.0,
+     "diag_wall_angle_mouth_deg": 1.2026535349047405,
+     "mouth_aspect": 0.0,
+     "mouth_area_mm2": 0.0,
+     "h_halfwidth_mid_mm": 0.0,
+     "v_halfwidth_mid_mm": 0.0
+    },
+    "failed_points": 0
+   },
+   "az_fold_h_deg": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 8.931548004044167,
+    "max_rms_mm_per_range": 16.744158004482742,
+    "median_max_disp_mm_per_range": 34.81999820609787,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": 0.0,
+     "mouth_height_mm": 0.0,
+     "depth_mm": 0.0,
+     "h_wall_angle_mouth_deg": -6.73655418223617,
+     "v_wall_angle_mouth_deg": 0.0,
+     "diag_wall_angle_mouth_deg": -0.9285534502033946,
+     "mouth_aspect": 0.0,
+     "mouth_area_mm2": 0.0,
+     "h_halfwidth_mid_mm": 26.281202100303577,
+     "v_halfwidth_mid_mm": 0.0
+    },
+    "failed_points": 0
+   },
+   "az_fold_h_width_deg": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 6.245916173658126,
+    "max_rms_mm_per_range": 13.592613805706641,
+    "median_max_disp_mm_per_range": 18.920049720764816,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": 0.0,
+     "mouth_height_mm": 0.0,
+     "depth_mm": 0.0,
+     "h_wall_angle_mouth_deg": 0.0,
+     "v_wall_angle_mouth_deg": 0.0,
+     "diag_wall_angle_mouth_deg": 0.769847058581518,
+     "mouth_aspect": 0.0,
+     "mouth_area_mm2": 0.0,
+     "h_halfwidth_mid_mm": 0.0,
+     "v_halfwidth_mid_mm": 0.0
+    },
+    "failed_points": 0
+   },
+   "az_fold_v_deg": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 23.027989559897097,
+    "max_rms_mm_per_range": 30.837656413977957,
+    "median_max_disp_mm_per_range": 79.27907358296773,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": 0.0,
+     "mouth_height_mm": 0.0,
+     "depth_mm": 0.0,
+     "h_wall_angle_mouth_deg": 0.0,
+     "v_wall_angle_mouth_deg": -19.558903418383604,
+     "diag_wall_angle_mouth_deg": -0.5972794921166974,
+     "mouth_aspect": 0.0,
+     "mouth_area_mm2": 0.0,
+     "h_halfwidth_mid_mm": 0.0,
+     "v_halfwidth_mid_mm": 58.65775760704283
+    },
+    "failed_points": 0
+   },
+   "az_fold_v_width_deg": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 8.659654478299883,
+    "max_rms_mm_per_range": 25.255919808298362,
+    "median_max_disp_mm_per_range": 27.69065845907418,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": 0.0,
+     "mouth_height_mm": 0.0,
+     "depth_mm": 0.0,
+     "h_wall_angle_mouth_deg": 0.0,
+     "v_wall_angle_mouth_deg": 0.0,
+     "diag_wall_angle_mouth_deg": 0.4536511429368058,
+     "mouth_aspect": 0.0,
+     "mouth_area_mm2": 0.0,
+     "h_halfwidth_mid_mm": 0.0,
+     "v_halfwidth_mid_mm": 0.0
+    },
+    "failed_points": 0
+   },
+   "az_s_cos2_amp": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 0.4235570411999352,
+    "max_rms_mm_per_range": 0.5224425531928453,
+    "median_max_disp_mm_per_range": 1.4796623448049135,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": 0.0,
+     "mouth_height_mm": 0.0,
+     "depth_mm": 0.0,
+     "h_wall_angle_mouth_deg": 1.120319615539955,
+     "v_wall_angle_mouth_deg": 0.0,
+     "diag_wall_angle_mouth_deg": 0.6501761512925691,
+     "mouth_aspect": 0.0,
+     "mouth_area_mm2": 0.0,
+     "h_halfwidth_mid_mm": -0.23150349213238977,
+     "v_halfwidth_mid_mm": 0.0
+    },
+    "failed_points": 0
+   },
+   "k": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 3.1444625945336964,
+    "max_rms_mm_per_range": 3.3718904867392934,
+    "median_max_disp_mm_per_range": 5.266563394502912,
+    "coupled_with": [
+     {
+      "knob": "a_deg",
+      "median_abs_cos": 0.9822439969512144,
+      "frac_points_coupled": 1.0
+     }
+    ],
+    "descriptor_per_range": {
+     "mouth_width_mm": 0.0,
+     "mouth_height_mm": 0.0,
+     "depth_mm": 0.0,
+     "h_wall_angle_mouth_deg": 0.71779735765638,
+     "v_wall_angle_mouth_deg": 0.9440338202363554,
+     "diag_wall_angle_mouth_deg": 0.8097204932244751,
+     "mouth_aspect": 0.0,
+     "mouth_area_mm2": 0.0,
+     "h_halfwidth_mid_mm": -3.7938853104819223,
+     "v_halfwidth_mid_mm": -3.9315044113596507
+    },
+    "failed_points": 0
+   },
+   "morph_corner_mm": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 0.9702316153364609,
+    "max_rms_mm_per_range": 1.207631939161962,
+    "median_max_disp_mm_per_range": 6.8444133661854245,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": 0.0,
+     "mouth_height_mm": 1.4210854715201992e-12,
+     "depth_mm": 0.0,
+     "h_wall_angle_mouth_deg": 0.0,
+     "v_wall_angle_mouth_deg": 0.0,
+     "diag_wall_angle_mouth_deg": 0.003130334553347322,
+     "mouth_aspect": 0.0,
+     "mouth_area_mm2": -1011.9498726409793,
+     "h_halfwidth_mid_mm": 0.0,
+     "v_halfwidth_mid_mm": 0.0
+    },
+    "failed_points": 0
+   },
+   "morph_height_mm": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 7.992133913433775,
+    "max_rms_mm_per_range": 8.375524346087243,
+    "median_max_disp_mm_per_range": 26.386905005315086,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": 0.0,
+     "mouth_height_mm": 33.5999999999984,
+     "depth_mm": 0.0,
+     "h_wall_angle_mouth_deg": 0.0,
+     "v_wall_angle_mouth_deg": 2.023349831708644,
+     "diag_wall_angle_mouth_deg": 2.1907348233916917,
+     "mouth_aspect": -0.12218420606108216,
+     "mouth_area_mm2": 19110.591605611244,
+     "h_halfwidth_mid_mm": 0.0,
+     "v_halfwidth_mid_mm": 3.5206949799750444
+    },
+    "failed_points": 0
+   },
+   "morph_rate": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 2.133898164453794,
+    "max_rms_mm_per_range": 2.812578400193207,
+    "median_max_disp_mm_per_range": 6.630603881318444,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": 0.0,
+     "mouth_height_mm": 0.0,
+     "depth_mm": 0.0,
+     "h_wall_angle_mouth_deg": 0.8967803915748355,
+     "v_wall_angle_mouth_deg": -1.4901736628733162,
+     "diag_wall_angle_mouth_deg": 0.17231475579251293,
+     "mouth_aspect": 0.0,
+     "mouth_area_mm2": 0.0,
+     "h_halfwidth_mid_mm": -1.2103048063483601,
+     "v_halfwidth_mid_mm": 0.9388481462877953
+    },
+    "failed_points": 0
+   },
+   "morph_width_mm": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 5.09795015039185,
+    "max_rms_mm_per_range": 5.189220564642054,
+    "median_max_disp_mm_per_range": 16.544809642041457,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": 28.800000000001067,
+     "mouth_height_mm": 0.0,
+     "depth_mm": 0.0,
+     "h_wall_angle_mouth_deg": 1.2118564257669104,
+     "v_wall_angle_mouth_deg": 0.0,
+     "diag_wall_angle_mouth_deg": -0.002759527508189305,
+     "mouth_aspect": 0.07296376265368835,
+     "mouth_area_mm2": 11397.074781858833,
+     "h_halfwidth_mid_mm": 4.641467736825432,
+     "v_halfwidth_mid_mm": 0.0
+    },
+    "failed_points": 0
+   },
+   "n": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 0.7429226542095155,
+    "max_rms_mm_per_range": 1.1750965997877922,
+    "median_max_disp_mm_per_range": 1.7446716884726028,
+    "coupled_with": [
+     {
+      "knob": "q",
+      "median_abs_cos": 0.9677018500994476,
+      "frac_points_coupled": 1.0
+     },
+     {
+      "knob": "s",
+      "median_abs_cos": 0.9898916497527439,
+      "frac_points_coupled": 1.0
+     }
+    ],
+    "descriptor_per_range": {
+     "mouth_width_mm": 0.0,
+     "mouth_height_mm": 0.0,
+     "depth_mm": 0.0,
+     "h_wall_angle_mouth_deg": -0.8486793677395347,
+     "v_wall_angle_mouth_deg": -1.5322450555803615,
+     "diag_wall_angle_mouth_deg": -1.1611203181804075,
+     "mouth_aspect": 0.0,
+     "mouth_area_mm2": 0.0,
+     "h_halfwidth_mid_mm": 0.3400561363086752,
+     "v_halfwidth_mid_mm": 0.43251644539488115
+    },
+    "failed_points": 0
+   },
+   "q": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 2.009559836049119,
+    "max_rms_mm_per_range": 2.5732254448006686,
+    "median_max_disp_mm_per_range": 5.5868139279869515,
+    "coupled_with": [
+     {
+      "knob": "n",
+      "median_abs_cos": 0.9677018500994476,
+      "frac_points_coupled": 1.0
+     },
+     {
+      "knob": "s",
+      "median_abs_cos": 0.9861687467237925,
+      "frac_points_coupled": 1.0
+     }
+    ],
+    "descriptor_per_range": {
+     "mouth_width_mm": 0.0,
+     "mouth_height_mm": 0.0,
+     "depth_mm": 0.0,
+     "h_wall_angle_mouth_deg": 3.459830881019953,
+     "v_wall_angle_mouth_deg": 7.893881630452519,
+     "diag_wall_angle_mouth_deg": 4.640892246314361,
+     "mouth_aspect": 0.0,
+     "mouth_area_mm2": 0.0,
+     "h_halfwidth_mid_mm": -0.3284105413953852,
+     "v_halfwidth_mid_mm": -0.17487858739571022
+    },
+    "failed_points": 0
+   },
+   "s": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 1.416075906976479,
+    "max_rms_mm_per_range": 1.8148719821545876,
+    "median_max_disp_mm_per_range": 3.3516393634188915,
+    "coupled_with": [
+     {
+      "knob": "n",
+      "median_abs_cos": 0.9898916497527439,
+      "frac_points_coupled": 1.0
+     },
+     {
+      "knob": "q",
+      "median_abs_cos": 0.9861687467237925,
+      "frac_points_coupled": 1.0
+     }
+    ],
+    "descriptor_per_range": {
+     "mouth_width_mm": 0.0,
+     "mouth_height_mm": 0.0,
+     "depth_mm": 0.0,
+     "h_wall_angle_mouth_deg": 2.111754400052133,
+     "v_wall_angle_mouth_deg": 3.3664316469668134,
+     "diag_wall_angle_mouth_deg": 2.4529314732415464,
+     "mouth_aspect": 0.0,
+     "mouth_area_mm2": 0.0,
+     "h_halfwidth_mid_mm": -0.4363738846837602,
+     "v_halfwidth_mid_mm": -0.40116706956645454
+    },
+    "failed_points": 0
+   }
+  },
+  "links": [
+   {
+    "follower": "a_deg",
+    "from": "k",
+    "scale": -10.29330988644193,
+    "offset": 65.34030674157415,
+    "median_abs_cos": 0.9822439969512167,
+    "note": "geometric redundancy at the sampled points; confirm with data links (tools/analysis/links.py) before applying"
+   },
+   {
+    "follower": "n",
+    "from": "q",
+    "scale": -27.97404807928285,
+    "offset": 32.695845840443575,
+    "median_abs_cos": 0.9677018500994462,
+    "note": "geometric redundancy at the sampled points; confirm with data links (tools/analysis/links.py) before applying"
+   },
+   {
+    "follower": "n",
+    "from": "s",
+    "scale": -4.2458400706679,
+    "offset": 10.031360466838851,
+    "median_abs_cos": 0.9898916497527426,
+    "note": "geometric redundancy at the sampled points; confirm with data links (tools/analysis/links.py) before applying"
+   },
+   {
+    "follower": "q",
+    "from": "s",
+    "scale": 0.14335215071014032,
+    "offset": 0.8186333550718957,
+    "median_abs_cos": 0.9861687467237946,
+    "note": "geometric redundancy at the sampled points; confirm with data links (tools/analysis/links.py) before applying"
+   }
+  ],
+  "feasible_from_seed": {
+   "L_mm": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   },
+   "a0_deg": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   },
+   "a_deg": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   },
+   "az_a_cos_amp": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   },
+   "az_a_cos_pow": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   },
+   "az_fold_h_deg": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   },
+   "az_fold_h_width_deg": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   },
+   "az_fold_v_deg": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   },
+   "az_fold_v_width_deg": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   },
+   "az_s_cos2_amp": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   },
+   "k": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   },
+   "morph_corner_mm": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   },
+   "morph_height_mm": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   },
+   "morph_rate": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   },
+   "morph_width_mm": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   },
+   "n": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   },
+   "q": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   },
+   "s": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   }
+  }
+ },
+ "box": {
+  "n": 64,
+  "counts": {
+   "ok": 64,
+   "outside": 0,
+   "refused": 0
+  },
+  "ok_frac": 1.0,
+  "per_knob": {
+   "L_mm": {
+    "bad_rate_by_slice": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "a0_deg": {
+    "bad_rate_by_slice": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "a_deg": {
+    "bad_rate_by_slice": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "az_a_cos_amp": {
+    "bad_rate_by_slice": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "az_a_cos_pow": {
+    "bad_rate_by_slice": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "az_fold_h_deg": {
+    "bad_rate_by_slice": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "az_fold_h_width_deg": {
+    "bad_rate_by_slice": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "az_fold_v_deg": {
+    "bad_rate_by_slice": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "az_fold_v_width_deg": {
+    "bad_rate_by_slice": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "az_s_cos2_amp": {
+    "bad_rate_by_slice": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "k": {
+    "bad_rate_by_slice": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "morph_corner_mm": {
+    "bad_rate_by_slice": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "morph_height_mm": {
+    "bad_rate_by_slice": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "morph_rate": {
+    "bad_rate_by_slice": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "morph_width_mm": {
+    "bad_rate_by_slice": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "n": {
+    "bad_rate_by_slice": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "q": {
+    "bad_rate_by_slice": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "s": {
+    "bad_rate_by_slice": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   }
+  }
+ },
+ "sigma": {
+  "0.05": {
+   "bad_rate": 0.0,
+   "refused": 0,
+   "outside": 0,
+   "n": 32
+  },
+  "0.10": {
+   "bad_rate": 0.0,
+   "refused": 0,
+   "outside": 0,
+   "n": 32
+  },
+  "0.15": {
+   "bad_rate": 0.0,
+   "refused": 0,
+   "outside": 0,
+   "n": 32
+  },
+  "0.20": {
+   "bad_rate": 0.0,
+   "refused": 0,
+   "outside": 0,
+   "n": 32
+  },
+  "0.25": {
+   "bad_rate": 0.0,
+   "refused": 0,
+   "outside": 0,
+   "n": 32
+  }
+ },
+ "margin_model": {
+  "available": true,
+  "n_legal": 65,
+  "intercept_mm": 40.470999999978076,
+  "gradient": {
+   "L_mm": {
+    "mm_per_range": -1.0476254792430818e-11,
+    "mm_per_knob_unit": -2.4250589797293565e-13
+   },
+   "a0_deg": {
+    "mm_per_range": -5.127970913115302e-12,
+    "mm_per_knob_unit": -1.0683272735656878e-11
+   },
+   "a_deg": {
+    "mm_per_range": -5.443902783881473e-12,
+    "mm_per_knob_unit": -1.4728377208704825e-12
+   },
+   "az_a_cos_amp": {
+    "mm_per_range": -8.168825142939488e-12,
+    "mm_per_knob_unit": -2.2691180952609692e-12
+   },
+   "az_a_cos_pow": {
+    "mm_per_range": 1.0160238661294999e-11,
+    "mm_per_knob_unit": 8.466865551079165e-12
+   },
+   "az_fold_h_deg": {
+    "mm_per_range": -1.2119547323823424e-12,
+    "mm_per_knob_unit": -8.079698215882282e-14
+   },
+   "az_fold_h_width_deg": {
+    "mm_per_range": 4.31485917646874e-12,
+    "mm_per_knob_unit": 1.3483934926464814e-13
+   },
+   "az_fold_v_deg": {
+    "mm_per_range": 1.1073186665723181e-11,
+    "mm_per_knob_unit": 3.163767618778052e-13
+   },
+   "az_fold_v_width_deg": {
+    "mm_per_range": -1.7610269680326516e-11,
+    "mm_per_knob_unit": -5.503209275102036e-13
+   },
+   "az_s_cos2_amp": {
+    "mm_per_range": 1.6270026022184507e-11,
+    "mm_per_knob_unit": 1.2778443987138722e-10
+   },
+   "k": {
+    "mm_per_range": 6.889731166736689e-12,
+    "mm_per_knob_unit": 1.0632301183235637e-11
+   },
+   "morph_corner_mm": {
+    "mm_per_range": 3.3368727944852404e-11,
+    "mm_per_knob_unit": 2.0426123384641812e-12
+   },
+   "morph_height_mm": {
+    "mm_per_range": -1.2999791378680141e-11,
+    "mm_per_knob_unit": -3.868985529369087e-13
+   },
+   "morph_rate": {
+    "mm_per_range": 2.8091967542893175e-12,
+    "mm_per_knob_unit": 2.3409972952410985e-12
+   },
+   "morph_width_mm": {
+    "mm_per_range": -28.799999999997993,
+    "mm_per_knob_unit": -0.9999999999999319
+   },
+   "n": {
+    "mm_per_range": -1.836671515818662e-11,
+    "mm_per_knob_unit": -9.565997478222198e-12
+   },
+   "q": {
+    "mm_per_range": 7.325789047046104e-12,
+    "mm_per_knob_unit": 3.0524121029358877e-10
+   },
+   "s": {
+    "mm_per_range": 2.5435235617309505e-11,
+    "mm_per_knob_unit": 1.0598014840545633e-10
+   }
+  },
+  "r2": 1.0,
+  "sign_agreement": 1.0,
+  "binding_axis_counts": {
+   "width_mm": 65
+  },
+  "inside_frac": 1.0,
+  "constraint": "sum_k g_k * x_k >= -intercept (x in unit coordinates)"
+ },
+ "data": {},
+ "recommendations": [
+  {
+   "knob": "a0_deg",
+   "action": "fix_or_widen",
+   "why": "whole range moves the surface <= 0.39 mm (below the ~1 mm mesher fit): CMA spends a dimension on mesh noise",
+   "evidence": {
+    "median_max_disp_mm_per_range": 0.3863026594880068
+   }
+  },
+  {
+   "knob": "a_deg",
+   "action": "link",
+   "why": "surface direction parallel to k (|cos| 0.982)",
+   "proposal": {
+    "from": "k",
+    "scale": -10.29330988644193,
+    "offset": 65.34030674157415
+   }
+  },
+  {
+   "knob": "n",
+   "action": "link",
+   "why": "surface direction parallel to q (|cos| 0.968)",
+   "proposal": {
+    "from": "q",
+    "scale": -27.97404807928285,
+    "offset": 32.695845840443575
+   }
+  },
+  {
+   "knob": "n",
+   "action": "link",
+   "why": "surface direction parallel to s (|cos| 0.990)",
+   "proposal": {
+    "from": "s",
+    "scale": -4.2458400706679,
+    "offset": 10.031360466838851
+   }
+  },
+  {
+   "knob": "q",
+   "action": "link",
+   "why": "surface direction parallel to s (|cos| 0.986)",
+   "proposal": {
+    "from": "s",
+    "scale": 0.14335215071014032,
+    "offset": 0.8186333550718957
+   }
+  },
+  {
+   "knob": "*",
+   "action": "sigma0",
+   "why": "predicted bad-candidate rate <= 15% from the seed",
+   "proposal": {
+    "max_safe_sigma0": 0.25
+   },
+   "evidence": {
+    "0.05": 0.0,
+    "0.10": 0.0,
+    "0.15": 0.0,
+    "0.20": 0.0,
+    "0.25": 0.0
+   }
+  }
+ ]
+}

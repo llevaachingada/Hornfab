@@ -1,0 +1,644 @@
+{
+ "config": "examples/typologies/klangfilm_hv_2026-11-16/configs/b3_soft.yaml",
+ "name": "klangfilm_hv_core__b3_soft",
+ "family": "FREEFORM",
+ "generator": true,
+ "keys": [
+  "g_beak_diagonal_mm",
+  "g_beak_h_setback_mm",
+  "g_beak_start_frac",
+  "g_beak_v_projection_mm",
+  "g_core_length_mm",
+  "g_lame_end_frac",
+  "g_lame_p_mouth",
+  "g_lame_start_frac",
+  "g_theta_h0_deg",
+  "g_theta_h1_deg",
+  "g_theta_v0_deg",
+  "g_theta_v1_deg"
+ ],
+ "geometry": {
+  "keys": [
+   "g_beak_diagonal_mm",
+   "g_beak_h_setback_mm",
+   "g_beak_start_frac",
+   "g_beak_v_projection_mm",
+   "g_core_length_mm",
+   "g_lame_end_frac",
+   "g_lame_p_mouth",
+   "g_lame_start_frac",
+   "g_theta_h0_deg",
+   "g_theta_h1_deg",
+   "g_theta_v0_deg",
+   "g_theta_v1_deg"
+  ],
+  "n_points": 7,
+  "legal_points": 6,
+  "refused_points": [
+   {
+    "x": [
+     0.19601828511804342,
+     0.816515794955194,
+     0.90860958956182,
+     0.00381642859429121,
+     0.43473335541784763,
+     0.08400599472224712,
+     0.07910401187837124,
+     0.5456685246899724,
+     0.6320197274908423,
+     0.25486451014876366,
+     0.8255378929898143,
+     0.6304148053750396
+    ],
+    "reason": "base point is not a legal record: generator: GeneratorError: canonical K-core geometry: beak setback folds the lip back faster than the core advances (reduce be"
+   }
+  ],
+  "record_points": 3965,
+  "effective_dimension": {
+   "median": 12.0,
+   "min": 12,
+   "max": 12,
+   "searched": 12
+  },
+  "knobs": {
+   "g_beak_diagonal_mm": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 2.8738374926957695,
+    "max_rms_mm_per_range": 3.0005316745941584,
+    "median_max_disp_mm_per_range": 9.999999999999423,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": 0.0,
+     "mouth_height_mm": 0.0,
+     "depth_mm": 0.0,
+     "h_wall_angle_mouth_deg": 0.0,
+     "v_wall_angle_mouth_deg": 0.0,
+     "diag_wall_angle_mouth_deg": -12.674283695080913,
+     "mouth_aspect": 0.0,
+     "mouth_area_mm2": 0.0,
+     "h_halfwidth_mid_mm": 0.0,
+     "v_halfwidth_mid_mm": 0.0
+    },
+    "failed_points": 0
+   },
+   "g_beak_h_setback_mm": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 2.408365020946377,
+    "max_rms_mm_per_range": 2.776442156943847,
+    "median_max_disp_mm_per_range": 9.999999999999433,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": 0.0,
+     "mouth_height_mm": 0.0,
+     "depth_mm": 0.0,
+     "h_wall_angle_mouth_deg": 15.949572438854343,
+     "v_wall_angle_mouth_deg": 0.0,
+     "diag_wall_angle_mouth_deg": 6.3372505685330225,
+     "mouth_aspect": 0.0,
+     "mouth_area_mm2": 0.0,
+     "h_halfwidth_mid_mm": -1.6661282214685427,
+     "v_halfwidth_mid_mm": 0.0
+    },
+    "failed_points": 0
+   },
+   "g_beak_start_frac": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 0.6371867745043285,
+    "max_rms_mm_per_range": 1.3008683367952094,
+    "median_max_disp_mm_per_range": 6.577751365476971,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": 0.0,
+     "mouth_height_mm": 0.0,
+     "depth_mm": 0.0,
+     "h_wall_angle_mouth_deg": 6.925390164687958,
+     "v_wall_angle_mouth_deg": -2.896172303824772,
+     "diag_wall_angle_mouth_deg": -0.2910186637822496,
+     "mouth_aspect": 0.0,
+     "mouth_area_mm2": 0.0,
+     "h_halfwidth_mid_mm": 0.06921461604338926,
+     "v_halfwidth_mid_mm": 0.004663178353681016
+    },
+    "failed_points": 0
+   },
+   "g_beak_v_projection_mm": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 1.5704696329068486,
+    "max_rms_mm_per_range": 1.6447249364063945,
+    "median_max_disp_mm_per_range": 5.000000000001132,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": 0.0,
+     "mouth_height_mm": 0.0,
+     "depth_mm": 5.000000000000422,
+     "h_wall_angle_mouth_deg": 0.0,
+     "v_wall_angle_mouth_deg": -5.0014975261995565,
+     "diag_wall_angle_mouth_deg": -3.168638875159499,
+     "mouth_aspect": 0.0,
+     "mouth_area_mm2": 0.0,
+     "h_halfwidth_mid_mm": 0.0,
+     "v_halfwidth_mid_mm": 0.7672986480288086
+    },
+    "failed_points": 0
+   },
+   "g_core_length_mm": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 132.03230333420964,
+    "max_rms_mm_per_range": 136.8357428383477,
+    "median_max_disp_mm_per_range": 242.95883372180526,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": 263.5839437117793,
+     "mouth_height_mm": 133.98084476781509,
+     "depth_mm": 203.9999999999996,
+     "h_wall_angle_mouth_deg": -3.0185227501271488,
+     "v_wall_angle_mouth_deg": 1.1854797975379132,
+     "diag_wall_angle_mouth_deg": -0.4720831611163766,
+     "mouth_aspect": 0.06551588177410855,
+     "mouth_area_mm2": 112700.01770251228,
+     "h_halfwidth_mid_mm": 39.00407926881076,
+     "v_halfwidth_mid_mm": 20.093412768646672
+    },
+    "failed_points": 0
+   },
+   "g_lame_end_frac": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 0.9122392653338587,
+    "max_rms_mm_per_range": 1.1214096286330013,
+    "median_max_disp_mm_per_range": 3.202025841545786,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": 0.0,
+     "mouth_height_mm": 0.0,
+     "depth_mm": 0.0,
+     "h_wall_angle_mouth_deg": 0.0,
+     "v_wall_angle_mouth_deg": 0.0,
+     "diag_wall_angle_mouth_deg": 0.002728693131182067,
+     "mouth_aspect": 0.0,
+     "mouth_area_mm2": 0.0,
+     "h_halfwidth_mid_mm": 5.329070518200748e-13,
+     "v_halfwidth_mid_mm": -8.881784197001245e-14
+    },
+    "failed_points": 0
+   },
+   "g_lame_p_mouth": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 8.055267357719995,
+    "max_rms_mm_per_range": 10.51606598412664,
+    "median_max_disp_mm_per_range": 30.392135589202717,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": 0.0,
+     "mouth_height_mm": -7.105427357600996e-13,
+     "depth_mm": 0.0,
+     "h_wall_angle_mouth_deg": 0.0,
+     "v_wall_angle_mouth_deg": 5.329070518200746e-13,
+     "diag_wall_angle_mouth_deg": 1.3240056526035093,
+     "mouth_aspect": 0.0,
+     "mouth_area_mm2": 14094.799999602752,
+     "h_halfwidth_mid_mm": -3.552713678800498e-13,
+     "v_halfwidth_mid_mm": 0.0
+    },
+    "failed_points": 0
+   },
+   "g_lame_start_frac": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 0.3457626384221185,
+    "max_rms_mm_per_range": 0.4311393622146133,
+    "median_max_disp_mm_per_range": 1.2294428181988395,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": 0.0,
+     "mouth_height_mm": 0.0,
+     "depth_mm": 0.0,
+     "h_wall_angle_mouth_deg": 0.0,
+     "v_wall_angle_mouth_deg": 0.0,
+     "diag_wall_angle_mouth_deg": -0.00010904410201462146,
+     "mouth_aspect": 0.0,
+     "mouth_area_mm2": 0.0,
+     "h_halfwidth_mid_mm": 3.552713678800498e-13,
+     "v_halfwidth_mid_mm": -1.776356839400249e-13
+    },
+    "failed_points": 0
+   },
+   "g_theta_h0_deg": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 5.891225626055343,
+    "max_rms_mm_per_range": 6.481761249857848,
+    "median_max_disp_mm_per_range": 15.019235388973925,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": 30.03847077794785,
+     "mouth_height_mm": 0.0,
+     "depth_mm": 0.0,
+     "h_wall_angle_mouth_deg": 0.017462008095758805,
+     "v_wall_angle_mouth_deg": 0.0,
+     "diag_wall_angle_mouth_deg": -0.17450905312457188,
+     "mouth_aspect": 0.11448132051977411,
+     "mouth_area_mm2": 7038.2911910371995,
+     "h_halfwidth_mid_mm": 12.467264555614566,
+     "v_halfwidth_mid_mm": 0.0
+    },
+    "failed_points": 0
+   },
+   "g_theta_h1_deg": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 37.42948070426486,
+    "max_rms_mm_per_range": 47.27110378870115,
+    "median_max_disp_mm_per_range": 144.19097876995636,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": 288.3819575399127,
+     "mouth_height_mm": 0.0,
+     "depth_mm": 0.0,
+     "h_wall_angle_mouth_deg": 22.516300192932604,
+     "v_wall_angle_mouth_deg": 0.0,
+     "diag_wall_angle_mouth_deg": 2.0045487950131484,
+     "mouth_aspect": 1.100922734680256,
+     "mouth_area_mm2": 66394.02485849871,
+     "h_halfwidth_mid_mm": 48.57970168795212,
+     "v_halfwidth_mid_mm": 0.0
+    },
+    "failed_points": 0
+   },
+   "g_theta_v0_deg": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 7.547194342821694,
+    "max_rms_mm_per_range": 9.503900013052107,
+    "median_max_disp_mm_per_range": 14.138146705098109,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": 0.0,
+     "mouth_height_mm": 22.795665829893586,
+     "depth_mm": 0.0,
+     "h_wall_angle_mouth_deg": 0.0,
+     "v_wall_angle_mouth_deg": -0.0057125033528393435,
+     "diag_wall_angle_mouth_deg": 0.2980593044237701,
+     "mouth_aspect": -0.172615601168649,
+     "mouth_area_mm2": 10440.547059605877,
+     "h_halfwidth_mid_mm": 0.0,
+     "v_halfwidth_mid_mm": 9.730104664428731
+    },
+    "failed_points": 0
+   },
+   "g_theta_v1_deg": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 30.10119387811696,
+    "max_rms_mm_per_range": 35.780030779579484,
+    "median_max_disp_mm_per_range": 81.395376811351,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": 0.0,
+     "mouth_height_mm": 134.25197553572434,
+     "depth_mm": 0.0,
+     "h_wall_angle_mouth_deg": 0.0,
+     "v_wall_angle_mouth_deg": 17.370787574910903,
+     "diag_wall_angle_mouth_deg": 19.354931617617584,
+     "mouth_aspect": -0.992695055471801,
+     "mouth_area_mm2": 60094.38838066289,
+     "h_halfwidth_mid_mm": 0.0,
+     "v_halfwidth_mid_mm": 15.721554353401498
+    },
+    "failed_points": 0
+   }
+  },
+  "links": [],
+  "feasible_from_seed": {
+   "g_beak_diagonal_mm": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   },
+   "g_beak_h_setback_mm": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   },
+   "g_beak_start_frac": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   },
+   "g_beak_v_projection_mm": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   },
+   "g_core_length_mm": {
+    "lo_frac": 1.0,
+    "hi_frac": 0.921875,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 0.9609375
+   },
+   "g_lame_end_frac": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   },
+   "g_lame_p_mouth": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   },
+   "g_lame_start_frac": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   },
+   "g_theta_h0_deg": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   },
+   "g_theta_h1_deg": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   },
+   "g_theta_v0_deg": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   },
+   "g_theta_v1_deg": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   }
+  }
+ },
+ "box": {
+  "n": 64,
+  "counts": {
+   "ok": 54,
+   "outside": 0,
+   "refused": 10
+  },
+  "ok_frac": 0.84375,
+  "per_knob": {
+   "g_beak_diagonal_mm": {
+    "bad_rate_by_slice": [
+     0.07692307692307693,
+     0.23076923076923078,
+     0.08333333333333333,
+     0.07692307692307693,
+     0.3076923076923077
+    ]
+   },
+   "g_beak_h_setback_mm": {
+    "bad_rate_by_slice": [
+     0.15384615384615385,
+     0.08333333333333333,
+     0.23076923076923078,
+     0.07692307692307693,
+     0.23076923076923078
+    ]
+   },
+   "g_beak_start_frac": {
+    "bad_rate_by_slice": [
+     0.07692307692307693,
+     0.08333333333333333,
+     0.0,
+     0.25,
+     0.38461538461538464
+    ]
+   },
+   "g_beak_v_projection_mm": {
+    "bad_rate_by_slice": [
+     0.15384615384615385,
+     0.25,
+     0.07142857142857142,
+     0.16666666666666666,
+     0.15384615384615385
+    ]
+   },
+   "g_core_length_mm": {
+    "bad_rate_by_slice": [
+     0.08333333333333333,
+     0.15384615384615385,
+     0.14285714285714285,
+     0.08333333333333333,
+     0.3076923076923077
+    ]
+   },
+   "g_lame_end_frac": {
+    "bad_rate_by_slice": [
+     0.15384615384615385,
+     0.3333333333333333,
+     0.15384615384615385,
+     0.07692307692307693,
+     0.07692307692307693
+    ]
+   },
+   "g_lame_p_mouth": {
+    "bad_rate_by_slice": [
+     0.15384615384615385,
+     0.0,
+     0.23076923076923078,
+     0.2857142857142857,
+     0.08333333333333333
+    ]
+   },
+   "g_lame_start_frac": {
+    "bad_rate_by_slice": [
+     0.08333333333333333,
+     0.21428571428571427,
+     0.08333333333333333,
+     0.23076923076923078,
+     0.15384615384615385
+    ]
+   },
+   "g_theta_h0_deg": {
+    "bad_rate_by_slice": [
+     0.25,
+     0.14285714285714285,
+     0.08333333333333333,
+     0.2857142857142857,
+     0.0
+    ]
+   },
+   "g_theta_h1_deg": {
+    "bad_rate_by_slice": [
+     0.0,
+     0.07692307692307693,
+     0.15384615384615385,
+     0.0,
+     0.5384615384615384
+    ],
+    "lower_hi_to_unit": 0.8
+   },
+   "g_theta_v0_deg": {
+    "bad_rate_by_slice": [
+     0.15384615384615385,
+     0.15384615384615385,
+     0.16666666666666666,
+     0.07692307692307693,
+     0.23076923076923078
+    ]
+   },
+   "g_theta_v1_deg": {
+    "bad_rate_by_slice": [
+     0.07692307692307693,
+     0.25,
+     0.07692307692307693,
+     0.3076923076923077,
+     0.07692307692307693
+    ]
+   }
+  }
+ },
+ "sigma": {
+  "0.05": {
+   "bad_rate": 0.0,
+   "refused": 0,
+   "outside": 0,
+   "n": 32
+  },
+  "0.10": {
+   "bad_rate": 0.0,
+   "refused": 0,
+   "outside": 0,
+   "n": 32
+  },
+  "0.15": {
+   "bad_rate": 0.0625,
+   "refused": 1,
+   "outside": 1,
+   "n": 32
+  },
+  "0.20": {
+   "bad_rate": 0.0625,
+   "refused": 2,
+   "outside": 0,
+   "n": 32
+  },
+  "0.25": {
+   "bad_rate": 0.21875,
+   "refused": 7,
+   "outside": 0,
+   "n": 32
+  }
+ },
+ "margin_model": {
+  "available": true,
+  "n_legal": 55,
+  "intercept_mm": 273.45113137640254,
+  "gradient": {
+   "g_beak_diagonal_mm": {
+    "mm_per_range": -8.295105037515828,
+    "mm_per_knob_unit": -0.8295105037515829
+   },
+   "g_beak_h_setback_mm": {
+    "mm_per_range": -6.769236812628469,
+    "mm_per_knob_unit": -0.6769236812628469
+   },
+   "g_beak_start_frac": {
+    "mm_per_range": 3.2392307726938037,
+    "mm_per_knob_unit": 23.137362662098596
+   },
+   "g_beak_v_projection_mm": {
+    "mm_per_range": -12.542368340873004,
+    "mm_per_knob_unit": -2.508473668174601
+   },
+   "g_core_length_mm": {
+    "mm_per_range": -213.0193008458092,
+    "mm_per_knob_unit": -1.0442122590480842
+   },
+   "g_lame_end_frac": {
+    "mm_per_range": -3.3175834541372646,
+    "mm_per_knob_unit": -10.207949089653123
+   },
+   "g_lame_p_mouth": {
+    "mm_per_range": -7.638850357183295,
+    "mm_per_knob_unit": -4.24380575399072
+   },
+   "g_lame_start_frac": {
+    "mm_per_range": 6.286537676028543,
+    "mm_per_knob_unit": 52.38781396690453
+   },
+   "g_theta_h0_deg": {
+    "mm_per_range": -8.857018662276731,
+    "mm_per_knob_unit": -2.108813967208746
+   },
+   "g_theta_h1_deg": {
+    "mm_per_range": -71.62056744251221,
+    "mm_per_knob_unit": -3.0476837209579664
+   },
+   "g_theta_v0_deg": {
+    "mm_per_range": 3.715301965135212,
+    "mm_per_knob_unit": 1.03202832364867
+   },
+   "g_theta_v1_deg": {
+    "mm_per_range": 10.633631715360414,
+    "mm_per_knob_unit": 0.5842654788659568
+   }
+  },
+  "r2": 0.9315480045366346,
+  "sign_agreement": 1.0,
+  "binding_axis_counts": {
+   "height_mm": 2,
+   "width_mm": 18,
+   "depth_mm": 35
+  },
+  "inside_frac": 1.0,
+  "constraint": "sum_k g_k * x_k >= -intercept (x in unit coordinates)"
+ },
+ "data": {},
+ "recommendations": [
+  {
+   "knob": "g_theta_h1_deg",
+   "action": "rebound",
+   "why": "edge slice mostly refused/outside while the middle is not",
+   "proposal": {
+    "lower_hi_to_unit": 0.8
+   },
+   "evidence": {
+    "bad_rate_by_slice": [
+     0.0,
+     0.07692307692307693,
+     0.15384615384615385,
+     0.0,
+     0.5384615384615384
+    ]
+   }
+  },
+  {
+   "knob": "*",
+   "action": "sigma0",
+   "why": "predicted bad-candidate rate <= 15% from the seed",
+   "proposal": {
+    "max_safe_sigma0": 0.2
+   },
+   "evidence": {
+    "0.05": 0.0,
+    "0.10": 0.0,
+    "0.15": 0.0625,
+    "0.20": 0.0625,
+    "0.25": 0.21875
+   }
+  }
+ ]
+}
