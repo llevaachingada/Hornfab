@@ -1,5 +1,17 @@
 # ISSUES
 
+## 2026-11-17 - Pre-approval checks: 14/14 shape-clean, Crowe has no headroom, history unusable
+
+- DONE: shape_check on all 14 changed proposals (14/14 pass: meshes, dof cap, envelope, round
+  coupling). Economics: seed-in-box yes everywhere.
+- OPEN (owner): `hl__crowe_x_osse_cd_v7` proposal is `no_headroom` (seed == prior best) and has no
+  tested sigma0 with bad rate <= 15 %; it needs a declared refinement (warm_start + reason) before a
+  night, or the lane is a re-test.
+- OPEN (senior): `search_preflight --from-runs` returns `history_unusable` ("objective version/brief
+  mismatch (run v7, this config v7)") on every lane with history, so expected in-basin hits cannot be
+  computed. Question in `NOTES_FOR_SENIOR.md` (run selection by name; brief comparison/rewritten
+  brief_file). Tool behaviour unchanged.
+
 ## 2026-11-17 - Stage-5 proposals: data rejects every run-backed geometric link
 
 - DONE: `data_agrees` attached to all 29 cards from `links.py` on the latest run; 20/20 run-backed

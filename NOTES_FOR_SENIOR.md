@@ -1101,3 +1101,27 @@ already written into `design.json["generator"]["recipe_meta"]` for generator des
 `search/evaluate.py` `_persist` (after `dj` is built): `dj["recipe_meta"] = recipe_metadata(ev.design, mounting=st.get("mounting"))`
 when `st.get("generator")` is falsy. Additive key only; `design_hash` is unaffected.
 
+## 2026-11-17 (local orchestrator) — QUESTION: which run is "the lane's latest run"?
+
+`space_card.py`/`links.py`/`search_preflight.py` all pick a lane's evidence run by the config
+`name:` alone. On this checkout a lane name is reused across briefs and study kinds, so the newest
+same-name run is not necessarily the run the lane's current config would produce. Two symptoms:
+
+1. `links.py` (used for the new `data_agrees`) may read a run under a different brief. All 20
+   run-backed links came back `false`, so no approval rests on a "true" verdict, but the scope of
+   the claim is "the newest run with this `name:`", not "this lane under this brief".
+2. `search_preflight.py --from-runs <that run>` returns `history_unusable` on almost every home
+   lane, e.g. verbatim:
+   `warm-start history is unusable: runs\20261115T150043Z-screen-d1ebf6: warm_start refuses
+   objective version/brief mismatch (run v7, this config v7; set search.warm_start.allow_cross_brief:
+   true to override)`.
+   The message prints both versions as v7, so the refusal is the brief comparison (or the proposal's
+   rewritten `brief_file` string). Consequence: the economy gate's "expected in-basin hits" cannot
+   be computed for any proposal, which is the number C6/B6 planning needs.
+
+Questions for the senior pass: (a) should the tools select runs by `(name, brief hash)` with a
+fallback and a printed warning; (b) is the brief comparison hashing the path as well as the bytes —
+if so, `space_propose`'s rewrite of `brief_file` to a repo-relative path is what breaks it; (c) if
+neither, the run's `run.json` brief must be compared directly and the tool message corrected.
+No code changed for this; recorded rather than improvised (rule 10).
+

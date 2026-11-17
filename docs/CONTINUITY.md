@@ -1,5 +1,19 @@
 # CONTINUITY
 
+## 2026-11-17 (local orchestrator, stage 5) - Pre-approval checks on the 14 changed proposals
+
+- `tools/shape_check.py` on all 14 changed `__space_v1` proposals: **14/14 mesh, under their screen
+  DOF cap, fit their brief envelope, round coupling matches the driver exit** (exit 0; log
+  `scratch/fable_architecture/.evidence/shape_check_proposals.log`).
+- `tools/search_preflight.py --from-runs <newest same-name run>`: exit 0 everywhere, seed in its own
+  box everywhere. **`hl__crowe_x_osse_cd_v7` is `no_headroom`** (seed hash equals the prior best), so
+  its bounds trim must be declared a refinement (warm_start + reason) or it re-tests the optimum.
+  **`history_unusable` on every lane with history** ("objective version/brief mismatch (run v7, this
+  config v7)"), so the expected in-basin hits cannot be computed - question appended to
+  `NOTES_FOR_SENIOR.md`, not improvised.
+- Same-name runs are not always the run under the lane's current brief; §1's link verdicts are
+  scoped to "newest same-name run" in `OWNER_DECISIONS_PACKET_2026-11-17.md` §9.
+
 ## 2026-11-17 (local orchestrator, stage 5) - Data agreement rejects every geometric link; 29 proposals
 
 - `space_card.recommend()` now carries `data_agrees` from `links.py` on each lane's latest run. Of 20

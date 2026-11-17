@@ -152,3 +152,38 @@ them, and to what?
    unchanged on this branch).
 6. **Sampling sensitivity of the rebound rule**: b3_soft's `g_theta_h1_deg` trim fires on a 64-point
    box but not on 96 points (top slice 47 % vs >50 %). Any rebound proposal should state its n.
+
+## 9. Pre-approval checks on the 14 changed proposals (shape-check + economy)
+
+**Shape check** (`tools/shape_check.py`, all 14 proposal YAMLs, exit 0, log
+`.evidence/shape_check_proposals.log`): every proposal meshes, is under its screen DOF cap, fits its
+brief envelope and couples round to the driver exit. Dofs/cap and mouth (W x H mm, depth mm):
+`atlas__ath_core` 3777/12000, 397x397, 359 · `atlas__core_law` 5179/12000, 552x399, 359 ·
+`hl__ath_core_petal_hvlaw_v7` 3085/24000, 545x360, 353 · `hl__ath_tritonia_landscape_v7`
+6774/24000, 480x380, 435 · `hl__crowe_x_osse_cd_v7` 4411/24000, 593x412, 263 ·
+`hl__ext_throat_hvlaw_v7` 3709/24000, 528x366, 370 ·
+`hl__lecleach_iwata_ar_landscape_smooth_v7` 1746/24000, 390x334, 239 ·
+`hl__osse_rrect_fold_warm_v7` and `_w1` 3828/24000, 568x399, 359 ·
+`rf__section_axial_home_v7` 3988/10000, 580x290, 274 · `p80x60__ath_core_14in_home700_v7`
+8007/12000, 500x660, 451 · `p80x60__ath_core14_corelaw_v7` 6568/24000, 541x628, 387 ·
+the two `sab__lecleach_*` 1135/5000, 286x286, 159.
+
+**Economy gate** (`tools/search_preflight.py --from-runs <newest same-name run>`, exit 0 on all 14):
+- **seed in its own box: yes on every proposal**; no searched key missing from the seed.
+- **`hl__crowe_x_osse_cd_v7`: `no_headroom`** — seed design hash `9b5428e6dec8` EQUALS the prior
+  best. The bounds trim does not move the seed, so the run would start at the converged optimum
+  (skill: a re-test unless it has a reason). Combined with "no tested sigma0 ≤ 15 % bad", the Crowe
+  proposal needs `search.warm_start` + a stated refinement reason before a night.
+- Every other lane: seed hash differs from the prior best (headroom by construction).
+- **`history_unusable` on every lane with a history** — the warm-start reader refuses the run
+  ("objective version/brief mismatch (run v7, this config v7)"), so the recommended sigma and the
+  **expected in-basin hits cannot be computed**. Cause and the run-selection question are recorded in
+  `NOTES_FOR_SENIOR.md` (2026-11-17 local orchestrator block). Do not read a missing hits number as
+  a good one.
+- `hl__osse_rrect_fold_warm_v7_w1`: no run exists, so no headroom check; its two links stay
+  `data_agrees: unknown`.
+
+**Caveat on §1's scope.** The `links.py` verdict was taken on the newest run that carries the same
+`name:` string. That file is not always the run under the lane's current brief (see the note in
+`NOTES_FOR_SENIOR.md`); the verdict "data disagrees" is therefore "under the newest same-name run",
+which is still a refusal of the link, not a confirmation of it.
