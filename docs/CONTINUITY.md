@@ -38,6 +38,20 @@
 - The an7 published result reproduces exactly on its own sample (0.55 / 0.43 / 0.30; 12/19, 9/19),
   which validates the pipeline; the replay differs only in sample, split map and lane order.
 
+## 2026-11-17 02:5x - CORRECTION: fat banked cohorts DO exist; atlas 300-solve TuRBO arms queued
+
+- Owner pushed back on the "max 231 banked rows" claim and was right: the 2026-10-13/30 campaigns have
+  722-1726 attempt runs (`atlas__ath_core` 1726 attempts/1438 valid; `atlas__hyb_osse_h_hypex_v` 1381/1102;
+  `atlas__core_law` 1001/567 run + 710 dataset rows/427 valid, best J 2.128). My claim had only counted the
+  recent `bo_multityp` cohorts.
+- Cohort probe (CPU): `atlas__core_law` refreshes to **418 exact-complete rows** in its dependency group
+  (old beat_bem pin 0850ef39, consistent within the group) - clears the 100-row gate comfortably.
+- Appended as final jobs 23-24: `t_atlas_corelaw_turbo300` and `t_atlas_athcore_turbo300`
+  (`exploration-300x4` = 300 screens + 4 verify, seeds 71011/71012) - TuRBO trained on the fattest
+  banked histories, per the owner's "how much can BO move the needle vs the best CMA solve there".
+  Readout rule fixed: needle = cohort-best J (2.128 for core_law) minus the arm's best after 300 calls.
+- Queue is 24 jobs; the runner drains the file; STOP file trims.
+
 ## 2026-11-17 02:3x - Night refresher (90 min) + backlog typologies appended to `cd_rrect_2026-11-17`
 
 - First pass burned jobs: all four main legs exited 1 while a foreign supervisor storm repeatedly
