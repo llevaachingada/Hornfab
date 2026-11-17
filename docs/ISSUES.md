@@ -1,5 +1,11 @@
 # ISSUES
 
+## 2026-11-16 (21:05) - Fairness table delivered; P1 v9 implementation begins under the amended gates
+
+- DONE: Crowe/Klangfilm matched re-score with exact identity replays (docs/evidence/CROWE_KLANGFILM_BRIEF_RESCORE_2026-11-17.md); RFC amended per owner review (mode split, floor refusal + explicit hf_floor, anchor-vs-f0 refusal, v6 untouched with future v10, corridor GUI spec; gates G0-G13).
+- OPEN (implementation, gated): v9 implementation — Target schema (`target.coverage_profile`, mode/interpolation validation, anchor-below-f0 refusal), `objective/scalar_v9.py` (cov_profile, per-frequency-envelope ripple, di_roughness, optional hf_floor, diag/distd reported unweighted), versions dispatch + config validator, catalog/cohort target-identity keys, scoring_view profile arrays + GUI corridor display (G13). Registration ONLY after G0-G13 pass with pasted output. v10 stays owner-gated and out of scope.
+- OPEN (owner, from evidence): the smooth brief is now proven the fair basis for Crowe-class non-CD horns (6.84 vs Klangfilm 8.92 on the same brief); decide whether night-queue non-CD cells re-baseline onto the smooth brief before the next ranking pass.
+
 ## 2026-11-16 - Klangfilm HV Phase A geometry done; acoustic gate open
 
 - DONE (CPU): H/V throat-core family, 71 focused tests, preflight + contact sheet, measured-lawful
