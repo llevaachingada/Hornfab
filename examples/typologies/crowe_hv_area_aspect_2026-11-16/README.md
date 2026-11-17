@@ -22,8 +22,10 @@ Fixed generator-block values, **not** search dimensions:
 - `throat_round_hold_mm` 0 (fixed expanding-circular A/B config for 20 mm)
 
 The earlier 15-40 mm circular-hold rule is **withdrawn**. The section is kept round near the throat
-by the timing law itself: `S_R(u)` is a normalized C2 smootherstep with an exact half point `u50`
-and zero first/second derivatives at both ends. `log R = log(W/H) S_R`,
+by the timing law itself: `S_R(u)` is a warped-quintic C2 step with an exact half point `u50`
+and zero first/second derivatives at both ends for every `u50`. (The earlier normalized
+`smootherstep(u/a)/smootherstep(1/a)` did not guarantee the mouth derivatives; see the evidence
+note's correction section.) `log R = log(W/H) S_R`,
 `p = 2 + (p_mouth-2) S_R`. `area_mid_bias` uses a C3 window that is exactly zero at both ends, so
 the source tangent and mouth area are preserved. `A = C(p) a b` and `R = a/b` hold exactly at every
 station. No X crease, returned lip or rim setback exists in v1.
@@ -58,7 +60,7 @@ acoustic result.
 ```
 
 At the seed and two other bounded parents, the normalized +-10 % box Jacobian has practical rank
-**4** with no weak variables and max pairwise |cosine| 0.63. This is a law-level descriptor
+**4** with no weak variables and max pairwise |cosine| 0.64. This is a law-level descriptor
 Jacobian, not a full vertex/mesh or acoustic Jacobian.
 
 ## Current measured facts (2026-11-16, CPU only)

@@ -27,14 +27,15 @@ Construction on ``u = z/L_forward`` in ``[0, 1]``:
 A(0) = pi r0^2,   A(1) = C(p_mouth) (W/2) (H/2)
 log A(u) = log A(0) + log(A(1)/A(0)) * [m0 u + (1 - m0) u^2] + area_mid_bias * B_A(u)
 m0 = (L * 2 tan(exit_angle) / r0) / log(A(1)/A(0)),   0 <= m0 <= 2
-S_R(u) = smootherstep(u/a) / smootherstep(1/a),  with a solved so S_R(u50) = 0.5
+S_R(u) = smootherstep(w(u)),  w = u / (u + q (1-u)),  q = u50 / (1-u50)
 log R(u) = log(W/H) * S_R(u)
 p(u) = 2 + (p_mouth - 2) * S_R(u)
 a = sqrt(A R / C(p)),   b = sqrt(A / (R C(p))),
 C(p) = 4 Gamma(1 + 1/p)^2 / Gamma(1 + 2/p)
 ```
 
-``S_R`` is monotone and C2: zero first and second derivatives at u=0 and u=1. The area law's
+``S_R`` is monotone and C2: zero first and second derivatives at u=0 and u=1 for every
+``u50``, exact half point ``S_R(u50)=0.5``, and no extra optimization dimension. The area law's
 initial slope equals the driver-exit tangent, so ``a'(0) = b'(0) = tan(exit_angle)`` while
 ``R'(0) = p'(0) = 0``. For a fixed positive throat hold, the gate is shifted to
 ``S_R((u-h)/(1-h))``; the section is exactly circular over the hold and remains C2 at its boundary.
@@ -47,12 +48,10 @@ from __future__ import annotations
 
 import hashlib
 import math
-from functools import lru_cache
 from pathlib import Path
 
 import numpy as np
 import scipy
-from scipy.optimize import brentq
 
 from ._lame_cap_v1 import flat_lame_area
 from .registry import GeneratorError
@@ -92,7 +91,6 @@ _BOUNDS = {
 _N_ANCHORS_MIN = 9
 _N_ANCHORS_MAX = 32          # also the mesher's crossSections maximum
 _DENSE = 2049
-_U50_LIMIT = 0.79           # half point of smootherstep(u/a) as a -> infinity is 2^(-1/3)
 DEFAULT_CUTS_MM = (0.0, 5.0, 10.0, 20.0, 40.0, 60.0, 100.0)
 
 
@@ -162,8 +160,8 @@ def _validate_shape(shape) -> None:
     for key, (lo, hi) in _BOUNDS.items():
         if not lo <= float(shape[key]) <= hi:
             raise GeneratorError(f"{key} must be in [{lo}, {hi}], got {shape[key]}")
-    if not 0.0 < float(shape["aspect_timing_u50"]) < _U50_LIMIT:
-        raise GeneratorError(f"aspect_timing_u50 must be in (0, {_U50_LIMIT})")
+    if not 0.0 < float(shape["aspect_timing_u50"]) < 1.0:
+        raise GeneratorError("aspect_timing_u50 must be in (0, 1)")
     hold = float(shape["throat_round_hold_mm"])
     if hold >= 0.5 * float(shape["L_forward_mm"]):
         raise GeneratorError("throat_round_hold_mm must be shorter than half of L_forward_mm")
@@ -180,22 +178,31 @@ def _smootherstep(x):
     return t * t * t * (10.0 + t * (-15.0 + 6.0 * t))
 
 
-@lru_cache(maxsize=128)
-def _smootherstep_scale(u50: float) -> float:
-    """Solve ``smootherstep(u50/a) / smootherstep(1/a) = 0.5`` for the timing scale a."""
-    if not 0.0 < u50 < _U50_LIMIT:
-        raise GeneratorError(f"aspect_timing_u50 must be in (0, {_U50_LIMIT}), got {u50}")
-
-    def f(a):
-        return float(_smootherstep(u50 / a) / _smootherstep(1.0 / a)) - 0.5
-
-    return float(brentq(f, 1e-4, 1e3, xtol=1e-14, rtol=1e-14))
-
-
 def _timing(u, u50: float):
-    """Normalized C2 timing law with exact half point u50 and zero end derivatives."""
-    a = _smootherstep_scale(float(u50))
-    return _smootherstep(np.asarray(u, dtype=float) / a) / _smootherstep(1.0 / a)
+    """Warped-quintic C2 timing law: S(0)=0, S(u50)=0.5, S(1)=1, S'=S''=0 at both ends.
+
+    ``q = u50/(1-u50)``, ``w = u/(u + q(1-u))``, ``S = smootherstep(w)``. The warp keeps the
+    single u50 timing coordinate while the outer quintic supplies the endpoint derivatives.
+    """
+    u = np.asarray(u, dtype=float)
+    q = float(u50) / (1.0 - float(u50))
+    w = u / (u + q * (1.0 - u))
+    return _smootherstep(w)
+
+
+def timing_derivatives(u, u50: float):
+    """Analytic ``(S, dS/du, d2S/du2)`` for the warped quintic; tests and diagnostics."""
+    u = np.asarray(u, dtype=float)
+    q = float(u50) / (1.0 - float(u50))
+    den = q + u * (1.0 - q)
+    w = u / den
+    wp = q / den ** 2
+    wpp = -2.0 * q * (1.0 - q) / den ** 3
+    s = _smootherstep(w)
+    ds = 30.0 * w * w * (1.0 - w) ** 2 * wp
+    d2s = (60.0 * w * (1.0 - w) * (1.0 - 2.0 * w) * wp ** 2
+           + 30.0 * w * w * (1.0 - w) ** 2 * wpp)
+    return s, ds, d2s
 
 
 def _aspect_gate(u, u50: float, hold_u: float):
@@ -271,7 +278,9 @@ def evaluate(shape, brief, u) -> dict:
         "delta_log_area": delta,
         "u50": u50,
         "hold_u": hold_u,
-        "smootherstep_scale": _smootherstep_scale(u50) if hold_u == 0.0 else None,
+        "warp_q": (float(u50) / (1.0 - float(u50)) if hold_u == 0.0
+                   else ((u50 - hold_u) / (1.0 - hold_u))
+                   / (1.0 - (u50 - hold_u) / (1.0 - hold_u))),
     }
 
 
@@ -427,8 +436,9 @@ def _throat_smoothness(shape, brief) -> dict:
         "gate_at_u50": round(float(law["aspect_gate"][-1]), 12),
         "fixed_throat_round_hold_mm": float(shape["throat_round_hold_mm"]),
         "hold_fraction": round(float(hold_u), 9),
-        "derived_smootherstep_scale": (None if hold_u > 0.0
-                                       else round(float(_smootherstep_scale(u50)), 9)),
+        "warp_q": round(float(
+            (u50 if hold_u == 0.0 else (u50 - hold_u) / (1.0 - hold_u))
+            / (1.0 - (u50 if hold_u == 0.0 else (u50 - hold_u) / (1.0 - hold_u)))), 9),
     }
 
 
@@ -466,7 +476,7 @@ def info(gen, knobs, brief) -> dict:
             "u50": u50,
             "u50_z_mm": round(float(u50 * float(shape["L_forward_mm"])), 4),
             "gate_at_u50": round(float(law["aspect_gate"][i50]), 12),
-            "derived_smootherstep_scale": law["smootherstep_scale"],
+            "warp_q": law["warp_q"],
             "fixed_round_hold_mm": float(shape["throat_round_hold_mm"]),
         },
         "forward": {

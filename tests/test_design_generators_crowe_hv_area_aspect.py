@@ -102,6 +102,26 @@ def test_aspect_timing_u50_is_the_half_development_point():
         assert law["p"][0] == pytest.approx(2.0 + 0.5 * (GEN["p_mouth"] - 2.0), abs=1e-9)
 
 
+def test_timing_law_has_zero_endpoint_first_and_second_derivatives():
+    ends = np.array([0.0, 1.0])
+    for u50 in (0.35, 0.50, 0.65):
+        s, ds, d2s = family.timing_derivatives(ends, u50)
+        assert s[0] == 0.0 and s[1] == 1.0
+        assert abs(ds[0]) < 1e-12 and abs(ds[1]) < 1e-12
+        assert abs(d2s[0]) < 1e-12 and abs(d2s[1]) < 1e-12
+        assert family._timing(np.array([u50]), u50)[0] == pytest.approx(0.5, abs=1e-12)
+        grid = family._timing(np.linspace(0.0, 1.0, 1001), u50)
+        assert np.all(np.diff(grid) > 0.0)
+    # fixed 20 mm hold: the shifted raw law keeps zero end derivatives, and the held physical
+    # half point is still the configured u50.
+    hold_u = 20.0 / 300.0
+    raw = (0.5 - hold_u) / (1.0 - hold_u)
+    s, ds, d2s = family.timing_derivatives(ends, raw)
+    assert abs(ds[0]) < 1e-12 and abs(ds[1]) < 1e-12
+    assert abs(d2s[0]) < 1e-12 and abs(d2s[1]) < 1e-12
+    assert family._aspect_gate(np.array([0.5]), 0.5, hold_u)[0] == pytest.approx(0.5, abs=1e-12)
+
+
 def test_owner_review_section_cuts_show_round_start_and_late_boxiness():
     rows = family.section_cuts(GEN, KNOBS, BRIEF)
     assert [row["z_mm"] for row in rows] == [0.0, 5.0, 10.0, 20.0, 40.0, 60.0, 100.0]

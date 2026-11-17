@@ -16,7 +16,7 @@ This note records the V2A implementation, its measured geometry, and what remain
 - **The 15-40 mm circular-hold rule is withdrawn.** The section is kept round near the throat by
   the timing law itself, not by a mandated corridor. A fixed 20 mm expanding-circular hold exists
   only as the T2 A/B.
-- **One timing coordinate:** `S_R(u)` is a normalized C2 smootherstep with an exact half point
+- **One timing coordinate:** `S_R(u)` is a warped-quintic C2 step with an exact half point
   `u50`, zero first/second derivatives at u=0 and u=1, and `log R = log(W/H) S_R`,
   `p = 2 + (p_mouth-2) S_R`.
 - **One area bias:** `area_mid_bias` (log-area, normalized -0.15..+0.15) uses a C3 compact window
@@ -28,7 +28,9 @@ This note records the V2A implementation, its measured geometry, and what remain
 A(0) = pi r0^2,   A(1) = C(p_mouth) (W/2) (H/2)
 log A(u) = log A(0) + log(A(1)/A(0)) [m0 u + (1-m0) u^2] + area_mid_bias B_A(u)
 m0 = (L 2 tan(exit_angle) / r0) / log(A(1)/A(0)),   0 <= m0 <= 2
-S_R(u) = smootherstep(u/a) / smootherstep(1/a),  a solved so S_R(u50) = 0.5
+q = u50 / (1 - u50)
+w(u) = u / (u + q (1-u))
+S_R(u) = smootherstep(w(u))
 log R(u) = log(W/H) S_R(u),   p(u) = 2 + (p_mouth-2) S_R(u)
 a = sqrt(A R / C(p)),   b = sqrt(A / (R C(p))),
 C(p) = 4 Gamma(1+1/p)^2 / Gamma(1+2/p)
@@ -38,6 +40,24 @@ At `u=0`: `a=b=r0`, `A=pi r0^2`, `R=1`, `p=2`, and `a'(0)=b'(0)=tan(exit_angle)`
 `S_R'(0)=p'(0)=0` and `B_A'(0)=0`. At `u=1`: `a=W/2`, `b=H/2`, `A=C(p_mouth)(W/2)(H/2)`,
 `R=W/H`, `p=p_mouth`. The identity `A=C(p)ab`, `R=a/b` holds at every station (relative error
 < 1e-13). `m0 > 2` is refused; it has no monotone member of this family.
+
+### Correction: endpoint derivatives of the timing law (2026-11-16)
+
+The first implementation used `S_R(u) = smootherstep(u/a) / smootherstep(1/a)`, solving `a` for
+`S_R(u50)=0.5`. That does **not** put the mouth argument at 1 unless `u50=0.5`: at `u50=0.65` the
+dimensionless first derivative at the mouth was about 1.087, not zero. The rolled-lip junction would
+then inherit an unintended aspect/section slope. The implementation now uses the warped quintic
+above. `timing_derivatives()` returns `(S, dS/du, d2S/du2)` analytically, and the tests check:
+
+| u50 | S(0), S(1) | S'(0), S'(1) | S''(0), S''(1) | S(u50) |
+|---|---|---|---|---|
+| 0.35 | 0, 1 | 0, 0 | 0, 0 | 0.5 |
+| 0.50 | 0, 1 | 0, 0 | 0, 0 | 0.5 |
+| 0.65 | 0, 1 | 0, 0 | 0, 0 | 0.5 |
+| 20 mm hold, raw 0.464286 | 0, 1 | 0, 0 | 0, 0 | 0.5 |
+
+The fixed 20 mm hold shifts the raw half point to `(u50-h)/(1-h)` and keeps the same zero endpoint
+derivatives; the physical half-development point remains `u50`.
 
 ## Measured section cuts, c0 (hold 0, u50 0.5, p 3.25)
 
@@ -66,8 +86,8 @@ first, and boxiness is late (p 2.024 at 40 mm, 2.26 at 100 mm).
 | 5 | 1.020816 | 1.000000 | 2.000000 | 0.000000 | yes |
 | 10 | 1.044573 | 1.000000 | 2.000000 | 0.000000 | yes |
 | 20 | 1.101673 | 1.000000 | 2.000000 | 0.000000 | yes |
-| 40 | 1.261268 | 1.000816 | 2.005053 | 0.004043 | no |
-| 60 | 1.500594 | 1.005774 | 2.035659 | 0.028527 | no |
+| 40 | 1.261268 | 1.000965 | 2.005971 | 0.004777 | no |
+| 60 | 1.500594 | 1.006573 | 2.040578 | 0.032463 | no |
 
 The hold is an *expanding circular* corridor (the section radius still follows the area law), not
 a constant-radius tube, and the gate is C2 at the 20 mm boundary. This is a controlled T2 A/B;
@@ -79,9 +99,9 @@ a constant-radius tube, and the gate is C2 at the 20 mm boundary. This is a cont
 
 | parent | singular values | practical rank | weak keys | max abs cosine |
 |---|---|---:|---|---:|
-| seed | 0.8405, 0.4850, 0.4203, 0.3323 | 4 | none | 0.6329 |
-| low quarter | 1.2002, 1.0157, 0.5748, 0.3443 | 4 | none | 0.5680 |
-| high three-quarter | 0.8995, 0.7848, 0.4945, 0.3226 | 4 | none | 0.6326 |
+| seed | 0.821817, 0.496182, 0.418236, 0.330589 | 4 | none | 0.610025 |
+| low quarter | 1.176394, 0.957112, 0.558297, 0.359409 | 4 | none | 0.565004 |
+| high three-quarter | 0.909247, 0.792746, 0.497523, 0.314488 | 4 | none | 0.639860 |
 
 This is a **law-level** Jacobian of area/aspect/p/wall-angle/curvature/mouth/timing descriptors,
 not the full vertex-displacement mesh Jacobian. It supports keeping four variables at this stage;

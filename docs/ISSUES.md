@@ -1,5 +1,16 @@
 # ISSUES
 
+## 2026-11-16 - V2A timing endpoint correction landed; external v9 import blocker
+
+- DONE (CPU geometry): warped-quintic timing law, analytic endpoint derivatives, tests at
+  u50 0.35/0.50/0.65 + 20 mm hold, regenerated cuts/T2/mesh evidence. No solve or queue change.
+- OPEN (external, not this change): the working tree's uncommitted objective v9 registration
+  (`objective/versions.py` includes 9) does not yet update the `search/evaluate.py` dispatch table,
+  so importing `search.evaluate` raises RuntimeError. The V2A config-load test is blocked only by
+  that concurrent partial change; it is not a V2A regression.
+- OPEN: the addendum's T0 screenshot audit, 40-80 mesh DOE, acoustic pilot and Phase 2 geometry
+  remain unauthorised/open.
+
 ## 2026-11-16 (21:05) - Fairness table delivered; P1 v9 implementation begins under the amended gates
 
 - DONE: Crowe/Klangfilm matched re-score with exact identity replays (docs/evidence/CROWE_KLANGFILM_BRIEF_RESCORE_2026-11-17.md); RFC amended per owner review (mode split, floor refusal + explicit hf_floor, anchor-vs-f0 refusal, v6 untouched with future v10, corridor GUI spec; gates G0-G13).

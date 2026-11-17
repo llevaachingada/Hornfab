@@ -1,5 +1,19 @@
 # CONTINUITY
 
+## 2026-11-16 - V2A timing-law endpoint correction (CPU geometry only)
+
+- The V2A timing law `smootherstep(u/a)/smootherstep(1/a)` did not guarantee zero first/second
+  derivatives at the mouth unless u50=0.5 (measured |dS/du| about 1.087 at u50=0.65). Replaced with
+  the warped quintic `q=u50/(1-u50)`, `w=u/(u+q(1-u))`, `S=smootherstep(w)`, which keeps the single
+  u50 coordinate and gives S(0)=0, S(u50)=0.5, S(1)=1, S'=S''=0 at both ends for every u50.
+- Added analytic `timing_derivatives()` and tests at u50=0.35/0.50/0.65 plus the fixed 20 mm hold
+  (raw half point 0.464286); endpoint S'/S'' are 0 within 1e-12.
+- Regenerated evidence: c0 cuts unchanged (u50=0.5); c2 40/60 mm values updated; T2 practical rank
+  remains 4 at three parents (max |cosine| 0.640); 8 kHz mesh unchanged at 8,318 tris, 0 bad open
+  edges, driven plane 36.000x36.000 mm. 18 V2A tests green (one config-load test is blocked only by
+  the concurrent uncommitted v9 objective registration, not by this change).
+- No solve, GPU, queue or objective change.
+
 ## 2026-11-16 (21:05 local) - Fairness re-score + RFC amendment delivered (P1 v9 enters gated implementation)
 
 - Deliverable 4/1 (owner-ordered matched re-score): `docs/evidence/CROWE_KLANGFILM_BRIEF_RESCORE_2026-11-17.md`
