@@ -1,5 +1,17 @@
 # ISSUES
 
+## 2026-11-17 - ROSSE-RECT b-term negative floor + GUI hover; owner run choice open
+
+- DONE: `g_b` GUI hover now explains the R-OSSE axial bow and sign convention; catalog regenerated
+  and verified from the running GUI. All 16 knobs on `hl__rosse_rect_cd_v7` have hover docs.
+- DONE: `tools/geometry/rosse_rect.py` accepts `b >= -0.10`; `tests/test_tools_rosse_rect_b.py`
+  pins the `-0.05` mesh and the `-0.11` refusal. Real-mesher check at `-0.01..-0.10` fits the
+  480 mm brief envelope (depth 422 -> 449 mm).
+- OPEN (owner choice): launch the prepared `hl__rosse_rect_cd_v7_r50_negb` (seed `38aeaee3413b`,
+  `b = -0.05..0.06`, preflight 55/64 valid) from the live 50-run best, or let the non-negative
+  50-run finish first. The live run `20261117T053153Z-screen-15f0e4` continues either way.
+- NOTE: no solver/objective/GPU code or running queue was changed by the GUI/doc/validator pass.
+
 ## 2026-11-17 - Orchestration P0/P1 landed; P2 model/concurrency pilot open
 
 - DONE (P0a): umbrella workspace can see the HornLab skills. `opencode debug skill` from `Hrns`

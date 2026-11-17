@@ -57,8 +57,14 @@ def validate_shape(shape):
         raise ValueError("k must be in [0.5,10]")
     if not 0.05 <= shape["r"] <= 2.0 or not 0.5 <= shape["m"] <= 0.99:
         raise ValueError("need r in [0.05,2] and m in [0.5,0.99]")
-    if not 0.0 <= shape["b"] <= 1.0 or not 1.0 <= shape["q"] <= 10.0:
-        raise ValueError("need b in [0,1] and q in [1,10]")
+    # R-OSSE's b term is an axial bow: positive b pulls the mouth/lip back (the usual
+    # rollback), negative b pushes it forward. The construction is finite for b < 0, and
+    # a real-mesher check at b = -0.01..-0.10 on the 570 x 419 home seed built cleanly
+    # (depth 422 -> 449 mm, still inside the 480 mm brief envelope). Keep a small tested
+    # negative floor here; the generator's own envelope check still refuses an over-deep
+    # or folded individual design.
+    if not -0.10 <= shape["b"] <= 1.0 or not 1.0 <= shape["q"] <= 10.0:
+        raise ValueError("need b in [-0.10,1] and q in [1,10]")
     if not 0.5 <= shape["tmax"] <= 1.0:
         raise ValueError("tmax must be in [0.5,1]")
     if shape["wall_thickness_mm"] <= 0:

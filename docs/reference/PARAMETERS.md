@@ -5705,10 +5705,10 @@ Domains covered: `generators`, `rows`, `native`
 
 #### `g_b` — Rollback bend (rows)
 
-- **Summary:** Dimensionless R-OSSE bend term of the rolled mouth.
-- **Detail:** The bend term changes how the R-OSSE roll distributes curvature between the wall and the mouth rim. It is an R-OSSE profile knob, not a physical length.
-- **Formula:** not stated
-- **Physical effect:** Moves curvature between the flare and the rolled rim.
+- **Summary:** Axial bow of the R-OSSE wall: positive pulls the mouth back (more rollback), negative pushes it forward.
+- **Detail:** It adds a t^2 axial offset along the meridian. Small negative values reduce the rollback; large values can fold the wall.
+- **Formula:** `x += b L (sqrt(r^2+(1-m)^2) - sqrt(r^2+m^2)) t^2`
+- **Physical effect:** Bows the wall and lip forward or backward along the horn axis.
 - **Context:** `rows`
 - **Default:** 0.04501 (source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `seed_params.g_b`)
 - **Search bounds:** 0.0 .. 0.4 (search=true, log=false; source: `examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml` `bounds.g_b`)

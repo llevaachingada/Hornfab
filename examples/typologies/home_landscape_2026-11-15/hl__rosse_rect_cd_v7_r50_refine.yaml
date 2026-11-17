@@ -1,0 +1,118 @@
+# ROSSE-RECT CD 50-VALID REFINEMENT (2026-11-17).
+# Started from the owner's paused 120-run report (C:\Users\hunte\Downloads\SSSS.pdf, run
+# 20261117T044541Z-screen-ffe3dc) and the run's own top-6 rows. The 120-run was stopped at 84
+# attempts / 79 valid; its best was J 3.7957 (design 7b79db514342, n=57), a 7% gain on the
+# 4.1163 start. This config keeps that best seed and that same brief/scoring, and changes ONLY
+# the search box to a data-derived refinement box for a 50-valid run.
+#
+# HOW THE BOX WAS SET (PDF p.3 "Shape parameters" + the run's top-6 rows, 2026-11-17):
+#   - width:  top-6 570.0-589.4, best 588.6-ish; PDF flags 6/6 at the 590 high limit -> the box was
+#             binding. New 560-600 (high relieved to the brief's 600 mm mouth envelope).
+#   - height: top-6 414.2-420.0; PDF flags 6/6 at the 420 high limit -> binding. New 405-450
+#             (high relieved toward the 480 mm envelope, kept near the basin to avoid a new geometry
+#             regime in 50 evals).
+#   - g_b:    best 0.0 and PDF flags 5/6 at the 0.0 low limit -> the low is physical (do not go
+#             negative); high tightened 0.400 -> 0.060 around the top-6 0.000-0.050.
+#   - g_k:    top-6 2.06-2.50 -> 1.80-2.80 (old 0.5-3.0; the high was not binding).
+#   - g_rect_exponent: top-6 5.09-6.25 -> 4.50-7.00 (old 2.5-8.0).
+#   - g_a_h_deg: top-6 36.30-38.61 -> 35.0-40.0 (old 32-46).
+#   - g_a_v_deg: top-6 15.99-19.50 -> 15.0-21.0 (old 12-30).
+#   - g_r:      top-6 0.243-0.316 -> 0.22-0.36 (old 0.1-0.6).
+#   - g_tmax:   top-6 0.938-0.973 -> 0.92-1.00 (old 0.85-1.0).
+#   Fixed: g_a_diag_deg 0.0, g_m 0.85, g_q 3.0 (research: a_diag > 0 fans creases out of the throat).
+# The seed 7b79db514342 is inside every new box. J is comparable only within this brief and this
+# run family; the brief is unchanged from the paused 120-run (objective v7, 80H x 50V, V scored
+# from 1 kHz, diag unweighted).
+name: hl__rosse_rect_cd_v7_r50_refine
+family: FREEFORM
+brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_rosse_rect_v7.yaml
+generator:
+  name: grid
+  rows:
+    type: rosse_rect
+  n_phi: 25
+  n_s: 48
+  wall_thickness_mm: 3.0
+  seed_policy: explicit
+  span: quarter
+seed_params:
+  g_width_mm: 570.0106756648
+  g_height_mm: 418.9439515532
+  g_rect_exponent: 6.18064457
+  g_a_h_deg: 36.9859895859
+  g_a_v_deg: 17.8035069811
+  g_a_diag_deg: 0.0
+  g_k: 2.4192833474
+  g_r: 0.3159812735
+  g_m: 0.85
+  g_b: 0.0000246312
+  g_q: 3.0
+  g_tmax: 0.9727936653
+bounds:
+  g_width_mm:
+    lo: 560.0
+    hi: 600.0
+  g_height_mm:
+    lo: 405.0
+    hi: 450.0
+  g_rect_exponent:
+    lo: 4.5
+    hi: 7.0
+  g_a_h_deg:
+    lo: 35.0
+    hi: 40.0
+  g_a_v_deg:
+    lo: 15.0
+    hi: 21.0
+  g_a_diag_deg:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  g_k:
+    lo: 1.8
+    hi: 2.8
+  g_r:
+    lo: 0.22
+    hi: 0.36
+  g_m:
+    lo: 0.85
+    hi: 0.85
+    search: false
+  g_b:
+    lo: 0.0
+    hi: 0.06
+  g_q:
+    lo: 3.0
+    hi: 3.0
+    search: false
+  g_tmax:
+    lo: 0.92
+    hi: 1.0
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.12
+  seed: 5678
+  budget: 50
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+  budget_counts: valid
+  max_attempts: 120
+description: 'ROSSE-RECT CD 50-valid refinement: paused 120-run best 3.7957 (7b79db514342) as seed, data-derived box around the top-6 (width/height high relieved, g_b high tightened), same brief/scoring'

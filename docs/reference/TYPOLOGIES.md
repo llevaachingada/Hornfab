@@ -824,7 +824,7 @@ Domains covered: `generators`, `rows`, `native`
 | `g_a_diag_deg` | Diagonal coverage half-angle (rows) | deg | 0.0 | 0.0 .. 0.0 | — | — | Diagonal wall-angle term of the per-azimuth R-OSSE rows kind. |
 | `g_a_h_deg` | Horizontal coverage half-angle (rows) | deg | 35.667049 | 32.0 .. 46.0 | — | — | Horizontal coverage half-angle of a per-azimuth OSSE rows kind. |
 | `g_a_v_deg` | Vertical coverage half-angle (rows) | deg | 19.192696 | 12.0 .. 30.0 | — | — | Vertical coverage half-angle of a per-azimuth OSSE rows kind. |
-| `g_b` | Rollback bend (rows) | — | 0.04501 | 0.0 .. 0.4 | — | — | Dimensionless R-OSSE bend term of the rolled mouth. |
+| `g_b` | Rollback bend (rows) | — | 0.04501 | 0.0 .. 0.4 | — | — | Axial bow of the R-OSSE wall: positive pulls the mouth back (more rollback), negative pushes it forward. |
 | `g_height_mm` | Mouth height (rows) | mm | 410.778704 | 280.0 .. 420.0 | — | — | Full mouth height target of a rolled-family rows construction. |
 | `g_k` | Throat expansion (rows) | — | 0.967541 | 0.5 .. 3.0 | — | — | OS throat-expansion exponent in the OSSE and R-OSSE rows kinds. |
 | `g_m` | R-OSSE shape exponent (rows) | — | 0.85 | 0.85 .. 0.85 | — | — | Shape exponent of the R-OSSE meridian. |

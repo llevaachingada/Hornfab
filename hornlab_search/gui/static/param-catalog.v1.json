@@ -20442,14 +20442,14 @@
             "file": "examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7.yaml",
             "key": "seed_params.g_b"
           },
-          "detail": "The bend term changes how the R-OSSE roll distributes curvature between the wall and the mouth rim. It is an R-OSSE profile knob, not a physical length.",
+          "detail": "It adds a t^2 axial offset along the meridian. Small negative values reduce the rollback; large values can fold the wall.",
           "doc_ref": [
             "docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md",
             "## 4. What was built"
           ],
           "documented": true,
           "flags": [],
-          "formula": null,
+          "formula": "x += b L (sqrt(r^2+(1-m)^2) - sqrt(r^2+m^2)) t^2",
           "hard": {
             "choices": null,
             "hi": null,
@@ -20461,7 +20461,7 @@
           },
           "knob": "g_b",
           "label": "Rollback bend (rows)",
-          "physical": "Moves curvature between the flare and the rolled rim.",
+          "physical": "Bows the wall and lip forward or backward along the horn axis.",
           "plane": null,
           "prefix": "g",
           "role": "rows",
@@ -20471,7 +20471,7 @@
             "log": false,
             "search": true
           },
-          "summary": "Dimensionless R-OSSE bend term of the rolled mouth.",
+          "summary": "Axial bow of the R-OSSE wall: positive pulls the mouth back (more rollback), negative pushes it forward.",
           "unit": null
         },
         {

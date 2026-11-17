@@ -1,0 +1,34 @@
+# ROSSE-RECT CD 120-valid solve run (2026-11-16).
+# One GPU job, strictly sequential; launched detached because the owner asked for a 120-solve run and
+# the previous 96-budget runs were stopped early by the generic watchdog (pin/stall at 30-76 evals).
+# This is a data-building continuation, so the generic watchdog is deliberately OFF for this job and
+# the budget is the stop condition. The runner still enforces the 3 h timeout and post-job hygiene.
+#
+# CONFIG: examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7_r120.yaml
+#   - parent recipe: hl__rosse_rect_cd_v7 (ATH R-OSSE per azimuth, rolled rectangular mouth)
+#   - seed: design 1f91c24b38d9 (best measured under the new brief; estimated J ~4.116)
+#   - brief: room_landscape_80x50_700_hf1440_rosse_rect_v7.yaml
+#       objective v7; 80H x 50V CD; V scored from 1 kHz; `diag` computed/reported but weight 0.
+#       Sources: BIRADIAL_CROWE_STUDY_2026-11-15.md sec. 8.3; SCORING_RANGE_PROPOSAL.md sec. 4.
+#   - CMA seed 5678 (the lineage that found the seed); sigma0 0.12 (preflight: 0.20 had 0.61
+#     expected in-basin hits of 120; 0.12 gives ~21 against the measured 0.272 top-k spread).
+#   - budget 120 non-cached evals (the seed counts), max_attempts 260.
+#
+# PRE-LAUNCH EVIDENCE (recorded in the run log / final report):
+#   - shape-check: 5160-ish dofs, mouth ~567 x 419 mm, depth ~? (runs the real mesher; see log)
+#   - preflight: seed in box; 1/64 uniform samples refused (invalid_geometry); valid fraction 0.984
+#   - GPU: no live lock, 0 BEAT hosts, baseline VRAM ~1.4 GB (doctor 11/11 PASS)
+#
+# READOUT: best J is NOT comparable with room_landscape_80x50_700_hf1440_v7 or its smooth variant;
+# rank within this brief, then re-solve finalists at verify. The GUI will show the run under
+# hl__rosse_rect_cd_v7_r120. Expected wall time ~1.2 h at ~31 s/eval plus refusals (3 h cap).
+night: rosse_r120_2026-11-16
+lane: gpu
+jobs:
+  - id: r120_rosse_s5678
+    kind: command
+    timeout_s: 10800
+    watchdog: false
+    argv: [.venv/Scripts/python.exe, tools/geometry/rosse_rect_cli.py, search,
+           --config, examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7_r120.yaml,
+           --mode, screen, --budget, "120", --cma-seed, "5678"]

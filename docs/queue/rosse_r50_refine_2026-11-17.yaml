@@ -1,0 +1,30 @@
+# ROSSE-RECT CD 50-valid refinement (2026-11-17).
+# Owner paused the 120-run and asked to restart from the best seed with the high/low bounds set from
+# the run report (SSSS.pdf) and its top-6 data, for 50 solves.
+#
+# PAUSED RUN: 20261117T044541Z-screen-ffe3dc (84 attempts / 79 valid; best J 3.7957, design
+# 7b79db514342, n=57). The PDF is the 55/120 report of the same run (best 3.81, 7% better).
+# NEW CONFIG: examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7_r50_refine.yaml
+#   - same brief/scoring: room_landscape_80x50_700_hf1440_rosse_rect_v7 (objective v7, 80H x 50V,
+#     V from 1 kHz, diag unweighted).
+#   - best seed 7b79db514342, inside every new bound.
+#   - data-derived box: width 560-600 (was 480-590; 6/6 top-6 at high), height 405-450 (was 280-420;
+#     6/6 at high), g_b 0.0-0.06 (best at 0; 5/6 at low), g_k 1.8-2.8, rect 4.5-7.0, a_h 35-40,
+#     a_v 15-21, r 0.22-0.36, tmax 0.92-1.0. Full derivation in the config header.
+#   - budget 50 valid, max_attempts 120, CMA seed 5678, sigma0 0.12.
+# PREFLIGHT: seed in box; history mean J 3.7957; expected in-basin hits 45.9; uniform box sample
+# 59/64 valid (5 invalid_geometry, 7.8%); shape check 5560 dofs, mouth 569 x 418, depth 419, fits.
+# The no-headroom warning is expected for a refinement from the prior best; the paused run was still
+# improving at n=57 (best), so 50 more evals are a local continuation, not a re-test.
+# GPU: previous search stopped; stale lock is dead and is taken over by the runner. Baseline ~1.5 GB.
+# J is comparable only within this brief/run family. The GUI lists this run separately.
+night: rosse_r50_refine_2026-11-17
+lane: gpu
+jobs:
+  - id: r50_refine_s5678
+    kind: command
+    timeout_s: 7200
+    watchdog: false
+    argv: [.venv/Scripts/python.exe, tools/geometry/rosse_rect_cli.py, search,
+           --config, examples/typologies/home_landscape_2026-11-15/hl__rosse_rect_cd_v7_r50_refine.yaml,
+           --mode, screen, --budget, "50", --cma-seed, "5678"]

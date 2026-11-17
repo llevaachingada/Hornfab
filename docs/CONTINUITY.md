@@ -1,5 +1,29 @@
 # CONTINUITY
 
+## 2026-11-17 - ROSSE-RECT: g_b hover clarified and negative floor enabled; 120-run paused, 50-run live
+
+- **GUI/doc:** the `g_b` hover on the `hl__rosse_rect_cd_v7` sandbox page now states the R-OSSE
+  axial-bow meaning and sign convention instead of the old "dimensionless bend" line. The catalog
+  was regenerated (`hornlab_search/gui/static/param-catalog.v1.json`,
+  `docs/reference/PARAMETERS.md`, `docs/reference/TYPOLOGIES.md`); all 16 knobs on that page keep
+  non-empty catalog hover docs. Verified from the running GUI at `/param-catalog.v1.json`.
+- **Geometry:** `tools/geometry/rosse_rect.py` now accepts `b >= -0.10` (was `>= 0.0`). The new
+  `tests/test_tools_rosse_rect_b.py` pins that `-0.05` meshes and bows the wall forward while
+  `-0.11` is refused. A CPU real-mesher shape check at `b = -0.01, -0.02, -0.05, -0.10` built
+  cleanly; axial span grew 422 -> 449 mm, still inside the 480 mm brief envelope.
+- **Runs:** the 120-valid run `20261117T044541Z-screen-ffe3dc` was paused at 84 attempts / 79 valid,
+  best **J 3.7957** (`7b79db514342`). The data-derived 50-valid run `rosse_r50_refine_2026-11-17`
+  is live (17+/50 at commit time), best **J 3.7262** (`38aeaee3413b`); its recent designs sit at
+  `b ~= 0.0002-0.0028`, i.e. the old `b >= 0` floor is binding. The prepared negative-b variant
+  `hl__rosse_rect_cd_v7_r50_negb` (seed `38aeaee3413b`, `b = -0.05..0.06`, preflight 55/64 valid,
+  expected in-basin hits 9.7) is committed but **not launched**; the owner's choice between
+  letting the 50-run finish and restarting it is open.
+- **Tests:** 40 catalog + b-term tests and 20 GUI param-tip/sandbox tests passed. This pass changed
+  no solver, objective, or GPU code; the live 50-run was not restarted by the GUI/doc commit.
+- The new brief `room_landscape_80x50_700_hf1440_rosse_rect_v7` (V scored from 1 kHz, `diag`
+  reported but unweighted) is a new score identity; its J is not comparable with the base or smooth
+  briefs.
+
 ## 2026-11-17 (04:05Z) - BoTorch round-2 READOUT: 3 arms complete (25 measured each); ath14 beat its cohort baseline
 
 - Night `bo_multityp_r2_2026-11-16` finished 2026-11-16T23:03 local (exit 0, 7/7 jobs, ~60 min,

@@ -1,0 +1,83 @@
+# ROSSE-RECT CD variant of room_landscape_80x50_700_hf1440_v7 (2026-11-16).
+# WHY THIS BRIEF EXISTS: the R-OSSE rounded-rectangle cell is a constant-directivity horn with a
+# rectangular mouth. Two findings from the 2026-11-15/16 research make the base landscape brief a
+# distorted objective FOR THIS HORN, without changing the horn's intent:
+#   1. VERTICAL ONSET. The base brief scores V from 700 Hz. A 480 mm-tall mouth cannot hold 50 deg V
+#      at 700 Hz: Keele's pattern rule (K = 25,400 m.deg.Hz; throat-angle correction A = 0.9 B) asks
+#      ~794 mm at 700 Hz and still ~508 mm at 1 kHz, and the stored-design study found no design in
+#      this envelope holding V below ~1 kHz. Scoring V from 1 kHz stops charging the horn for
+#      physics the envelope cannot deliver while H remains scored from the 700 Hz crossover.
+#      Sources: docs/research/typologies/BIRADIAL_CROWE_STUDY_2026-11-15.md sec. 8.3 (K-law correction);
+#      scratch/fable_architecture/SCORING_RANGE_PROPOSAL.md sec. 4 (V scored from 1 kHz; 480 mm mouth).
+#   2. DIAGONAL IS A DIAGNOSTIC, NOT A WINNER-DECIDER. v7's `diag` compares the 45/135 deg width with a
+#      fixed round reference (65 deg for 80x50). A rectangular mouth is penalised for being
+#      rectangular; a real lobe/null is the defect worth acting on. The research conclusion is to
+#      keep `diag` REPORTED and not let it decide the winner until measured diagonal polars exist.
+#      So weight 0.0 here: the term is still computed and stored in `terms`, just not in J.
+#      Source: BIRADIAL_CROWE_STUDY_2026-11-15.md sec. 8.3 (diag finding).
+# EVERYTHING ELSE IS THE BASE BRIEF: target 80H x 50V (owner's home range 60-90 H / 40-60 V), band
+# 350-8000 Hz, 600W x 480H x 480D envelope, HF1440 1.4-inch, CD intent (di_slope_target 0, cov
+# tol 3, narrow ratio 2), loading and flatness unchanged. Objective v7 is the production scorer;
+# v9 is the non-CD/range profile and is deliberately NOT used for this CD cell.
+# J IS NOT COMPARABLE with room_landscape_80x50_700_hf1440_v7 or its smooth variant: this file has a
+# different target identity (f0_v_hz) and a different weight vector (diag 0). Rank only within this
+# brief, or compare unweighted measured metrics across briefs.
+name: room_landscape_80x50_700_hf1440_rosse_rect_v7
+description: (objective v7) ROSSE-RECT CD home horn, 80H x 50V, V scored from 1 kHz, diag reported but unweighted, 700 Hz XO, HF1440 1.4-inch, 600W x 480H x 480D, band 350-8000 Hz
+driver:
+  exit_radius_mm: 18.0
+  exit_angle_deg: 2.0
+envelope:
+  max_mouth_w_mm: 600.0
+  max_mouth_h_mm: 480.0
+  max_depth_mm: 480.0
+symmetry: hv
+source:
+  cap: auto
+target:
+  coverage_h_deg: 80.0
+  coverage_v_deg: 50.0
+  band_lo_hz: 350.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.5
+  f0_hz: 700.0
+  f0_v_hz: 1000.0
+  loaded_hi_hz: 5600.0
+  freq_weights:
+    band_hz:
+      - [2500.0, 5500.0, 2.0]
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 1.0
+  flat: 0.5
+  load: 1.0
+  distd: 0.5
+  diag: 0.0
+  flat_cv: 1.0
+grid:
+  verify_points_per_octave: 6
+  screen_extra_hz: [250, 315, 400, 2573, 3311, 4260]
+objective:
+  version: 7
+  flat_band: scored
+  cov_v_weight: 0.5
+  tolerances:
+    cov: 3.0
+    rip: 1.0
+    di: 0.4
+    dislope: 9.0
+    flat: 1.5
+    load: 0.3
+    distd: 2.0
+    diag: 2.0
+    flat_cv: 1.5
+  cov_narrow_ratio: 2.0
+  cov_below_f0: mask
+  loaded_re_z: 0.5
+  lfp_re_z: 0.2
+  lfp_crossover_ratio: 1.6
+  bw8k_floor: 0.75

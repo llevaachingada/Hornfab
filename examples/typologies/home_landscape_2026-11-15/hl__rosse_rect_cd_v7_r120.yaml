@@ -1,0 +1,115 @@
+# ROSSE-RECT CD 120-VALID CONTINUATION (2026-11-16).
+# Entry point: tools/geometry/rosse_rect_cli.py (search | verify | shape-check | preflight | verify-night).
+# Parent recipe: hl__rosse_rect_cd_v7.yaml (same generator, widened boxes, ATH R-OSSE per azimuth,
+# rolled rectangular mouth). This copy differs only where the 2026-11-16 evidence says the run should:
+#   - seed = the best MEASURED design under the NEW brief, design 1f91c24b38d9, n=60 of run
+#     20261116T150941Z-screen-0e777a. Its stored (base-brief) J is 4.7684 but 0.5632 of that is the
+#     round-reference `diag` penalty this brief removes, so its estimated new J is ~4.116 (old J -
+#     diag - the V-onset cov reduction). That puts it ahead of the parent's old 4.5626 seed
+#     a301d2543a96 (~4.162) and of the still-older 4.8915 seed; the research-driven diag change is
+#     exactly what promotes this horn. The offline replay's DI/dislope terms are not parity-equal to
+#     the stored scorer, so eval 0 of the run is the authoritative new J; rank after that.
+#   - brief_file = room_landscape_80x50_700_hf1440_rosse_rect_v7.yaml: same 80H x 50V CD target, but V
+#     scored from 1 kHz (480 mm V mouth cannot hold 50 deg at 700 Hz) and `diag` reported but
+#     unweighted (round reference unfairly penalises a rectangular mouth; no measured diagonal polars
+#     yet). See that brief's header for the sources. J is NOT comparable with the base/smooth briefs.
+#   - search.seed = 5678, the CMA lineage that produced the seed design and the 4.5626 design;
+#     budget 120 valid evals;
+#     sigma0 lowered from 0.20 to 0.12 after tools/search_preflight.py on the 30-76-row history
+#     (expected in-basin hits at 0.20 were 0.61 of 120; a refinement run must sample inside the
+#     measured top-k spread). The night job disables the generic watchdog so the full 120 is attempted
+#     (the previous 96-budget runs were stopped by pin/stall at 30-76 evals; this is data-building).
+#   - Everything else (bounds, mesh, solve, infeasible policy) is the parent recipe unchanged.
+name: hl__rosse_rect_cd_v7_r120
+family: FREEFORM
+brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_rosse_rect_v7.yaml
+generator:
+  name: grid
+  rows:
+    type: rosse_rect
+  n_phi: 25
+  n_s: 48
+  wall_thickness_mm: 3.0
+  seed_policy: explicit
+  span: quarter
+seed_params:
+  g_width_mm: 567.4257466922
+  g_height_mm: 419.1175632291
+  g_rect_exponent: 4.9505259496
+  g_a_h_deg: 36.5655452905
+  g_a_v_deg: 19.0724278968
+  g_a_diag_deg: 0.0
+  g_k: 1.7043705113
+  g_r: 0.2891227195
+  g_m: 0.85
+  g_b: 0.02587284
+  g_q: 3.0
+  g_tmax: 0.9608465474
+bounds:
+  g_width_mm:
+    lo: 480.0
+    hi: 590.0
+  g_height_mm:
+    lo: 280.0
+    hi: 420.0
+  g_rect_exponent:
+    lo: 2.5
+    hi: 8.0
+  g_a_h_deg:
+    lo: 32.0
+    hi: 46.0
+  g_a_v_deg:
+    lo: 12.0
+    hi: 30.0
+  g_a_diag_deg:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  g_k:
+    lo: 0.5
+    hi: 3.0
+  g_r:
+    lo: 0.1
+    hi: 0.6
+  g_m:
+    lo: 0.85
+    hi: 0.85
+    search: false
+  g_b:
+    lo: 0.0
+    hi: 0.4
+  g_q:
+    lo: 3.0
+    hi: 3.0
+    search: false
+  g_tmax:
+    lo: 0.85
+    hi: 1.0
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.12
+  seed: 5678
+  budget: 120
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+  budget_counts: valid
+  max_attempts: 260
+description: 'ROSSE-RECT CD 120-valid continuation: best measured 4.5626 design as seed, V scored from 1 kHz, diag unweighted, widened k/r/a_v boxes; screen mode, full budget, new brief identity'

@@ -764,12 +764,12 @@ ROWS_KNOBS: dict[str, KnobDoc] = {
         "b",
         label="Rollback bend",
         unit=None,
-        summary="Dimensionless R-OSSE bend term of the rolled mouth.",
-        detail=("The bend term changes how the R-OSSE roll distributes curvature between "
-                "the wall and the mouth rim. It is an R-OSSE profile knob, not a physical "
-                "length."),
-        formula=None,
-        physical="Moves curvature between the flare and the rolled rim.",
+        summary=("Axial bow of the R-OSSE wall: positive pulls the mouth back "
+                 "(more rollback), negative pushes it forward."),
+        detail=("It adds a t^2 axial offset along the meridian. Small negative values "
+                "reduce the rollback; large values can fold the wall."),
+        formula="x += b L (sqrt(r^2+(1-m)^2) - sqrt(r^2+m^2)) t^2",
+        physical="Bows the wall and lip forward or backward along the horn axis.",
         code_ref=_G + "rows_grid_points",
         doc_ref=(_CROWE, "## 4. What was built"),
     ),
