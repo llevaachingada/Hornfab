@@ -3,9 +3,10 @@
 ## 2026-11-17 - Klangfilm Phase B: DI constancy gained, H coverage short
 
 - DONE: digest-bound family adapter, four configs (b1-b4), canonical mesh route, four BEM solves, report.
-- FINDING: B3 beats A0 on both policies (smooth 6.570 vs 8.438; CD 14.827 vs 14.208) and cuts `Var(DI)`
-  45 %, with clean lobes and better loading - but its H -6 dB beamwidth is 65.2 deg, below the 70 deg floor
-  of the pre-declared +-10 deg window. B2/B4 show that a bigger mouth does not widen H.
+- FINDING: B3 wins the smooth policy (6.570 vs 8.438) and cuts `Var(DI)` 45 %, with clean lobes and better
+  loading, but it LOSES the stricter CD policy (14.827 vs 14.208) because that policy weights absolute
+  coverage harder - and B3's H -6 dB beamwidth is 65.2 deg, below the 70 deg floor of the pre-declared
+  +-10 deg window. B2/B4 show that a bigger mouth does not widen H.
 - OPEN: returning-lip (section-normal spine) module, then re-run B3's rule set; the source-cap study stays
   separate.
 - LIMITATION: no constant-directivity claim. B3 is a DI-constancy result, not an 80x50 coverage result.

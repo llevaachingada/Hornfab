@@ -148,7 +148,9 @@ own run.)
   sit at ~62–64°, i.e. narrower than B3 at 473 mm. The lever is not the aperture size; the legacy horn's
   69.8° comes with its **rolled-back lip**, which the forward core does not have.
 * B3's score win is therefore a **DI-constancy** win, not a coverage win. It must not be reported as
-  meeting 80×50.
+  meeting 80×50. It also **loses** the CD policy (14.827 vs 14.208) while winning the smooth one: the CD
+  brief scores absolute coverage with a 3° tolerance plus a fixed DI target, which is exactly where B3 is
+  short. The two results are consistent, and they are the reason the gate is coverage-based, not score-based.
 
 ### 4.1 What Phase B does **not** have yet
 
