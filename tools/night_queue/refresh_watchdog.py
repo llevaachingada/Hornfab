@@ -210,14 +210,14 @@ def refresh(night: str, min_fresh_rows: int, max_repairs: int, dry: bool) -> dic
         # duplicate-thread guard: another run of this config solving right now -> do not double-run
         name = _config_name(config_arg) if config_arg else _config_name(str(rd / "config.yaml"))
         others = [d for d in _newest_run_dirs_for_config(name) if d.resolve() != rd.resolve()]
-        def _age_seconds(d: Path) -> float:
-            nd = d / "search.ndjson"
-            return (time.time() - nd.stat().st_mtime) if nd.exists() else 1.0e9
-
-        young = [d for d in others if _age_seconds(d) < 600 and _valid_rows(d) > 0]
-        if young:
-            deferrals.append(f"{label}: deferred - another thread of {name} is solving now "
-                             f"({young[0].name}, {round(_age_seconds(young[0]))} s)")
+        # defer when the thread is or will be complete elsewhere: another run of the same
+        # config already holds as many valid rows as this repair's remaining target
+        own_target = _argv_value(argv, "--budget")
+        remaining_target = int(float(own_target)) if own_target else 10 ** 9
+        complete_elsewhere = [d for d in others if _valid_rows(d) >= remaining_target]
+        if complete_elsewhere:
+            deferrals.append(f"{label}: deferred - {name} budget is covered by {complete_elsewhere[0].name} "
+                             f"({_valid_rows(complete_elsewhere[0])} valid >= {remaining_target})")
             state["notes"].append(f"{_utc()} {label}: foreign thread {young[0].name} active")
             continue
 
