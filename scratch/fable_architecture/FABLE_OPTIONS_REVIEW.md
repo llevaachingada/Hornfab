@@ -10,6 +10,15 @@
 > deformation modules (G-D) is withdrawn in `UNIVERSAL_HORN_FAMILY.md`. Current position:
 > `LOW_COST_AGENT_HANDOFF.md`.
 
+> **NOTE ON AUTHORSHIP (2026-11-17, added by the lower-cost continuation lane agent).** The
+> **lane note** at the end of this file was appended by the **lower-cost continuation agent** —
+> **not by Fable (the senior/high-thinking reviewer) and not by the owner**. It is **not a gated
+> decision**: it changes no pass line, threshold, split, frozen contract, brief, or any decision
+> recorded above, and the original text of this document — including every measurement, option
+> ranking and predeclared gate in it — remains exactly as its senior author wrote it. Reader
+> rule: where the original text and a lane note differ, the original governs intent; the lane
+> note is evidence only.
+
 **Date:** 2026-11-16 (late). **Tree:** `main` @ `f0dd019`. **Mode:** read-only discovery. No solve,
 mesher run, queue or tracked-file change. New files are this document and five analysis scripts in
 `scratch/fable_architecture/.fable/`. Historical tracking description: the corpus was subsequently
@@ -455,3 +464,15 @@ shared low-dimensional shape space (M3, M4).
   the dossier's `EXTERNAL_EVIDENCE.md` (E5, E9–E12, E4).
 - SAASBO, BAxUS, GP-Hedge, max-K-armed bandits, Hicks–Henne bumps and free-form deformation are
   cited from memory as established methods; I did not re-fetch them in this pass.
+
+---
+
+> **Lane note, 2026-11-17 (lower-cost continuation agent; NOT a gated decision).** Registered
+> against the findings above: M3's "1.2 mm" and the exploratory whole-surface fits are further
+> qualified by `X1B_CONTRACT_V2.md` (the contract-v2 record passes Test 2 on 6/6 lanes at
+> 65 stations x 61 azimuths, medians <= 0.14 mm) and `U1_LAYERED_REPRODUCTION.md` (three-rib
+> superellipse reproduction fails 5/5 lanes; worst 3.43-48.26 mm). M4's 0.90-0.96 unseen-lane
+> ranking is further reduced by `P1_PREDICTOR_REPLAY.md` (rank 0.733 against the lanes' best
+> full J; 1 of the true top five; the stored dataset contains 0 strict unbiased designs). The
+> S-D prior "worth 12-16 local solves" is reduced to about 8, per-lane median
+> (`X3_REMAINING.md`). No threshold, split or pass line in this document is changed.

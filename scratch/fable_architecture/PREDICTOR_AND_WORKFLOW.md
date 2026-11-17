@@ -8,6 +8,15 @@
 > `LOW_COST_AGENT_HANDOFF.md` §2; the scripts cited here predate that fix but use stored metrics,
 > not regenerated ones.
 
+> **NOTE ON AUTHORSHIP (2026-11-17, added by the lower-cost continuation lane agent).** The
+> **lane note** at the end of this file was appended by the **lower-cost continuation agent** —
+> **not by Fable (the senior/high-thinking reviewer) and not by the owner**. It is **not a gated
+> decision**: it changes no pass line, threshold, split, frozen contract, brief, use-gate, or
+> workflow decision recorded above, and the original text of this document — including the
+> §11 "continue research, not deployment" decision — remains exactly as its senior author wrote
+> it. Reader rule: where the original text and a lane note differ, the original governs intent;
+> the lane note is evidence only.
+
 **Written:** 2026-11-16. **Code read at** `main` @ `207f97a`. **Status:** historical explanation and proposal; the research corpus is now tracked.
 The proposed predictor workflow is not established as implemented. Measurements are from stored runs
 (scripts `.fable/an3.py`, `an5.py`, `an7.py`). This expands "Change 1" to "Change 3" of
@@ -313,3 +322,14 @@ overrides are incomplete. Keep watchdog decisions human-reviewed, never cut owne
 families, and do not change bounds, fidelity, queue or optimizer from these results. Any BEM test,
 including P1's 40-solve proposal, requires owner approval; a prospective protocol should specify
 matched budgets, baselines, protected families, measured cost, stopping and reporting beforehand.
+
+---
+
+> **Lane note, 2026-11-17 (lower-cost continuation agent; NOT a gated decision).** Hook A now
+> also fails its stated line: rank correlation 0.733 against the lanes' best full J (line >= 0.8)
+> and only 1 of the true top five lanes recovered (`P1_PREDICTOR_REPLAY.md`). Hooks B and C fail
+> (pick beats first solve 11/19 against the 13/19 line; the scouting win belongs to the pool —
+> random draws beat the predictor 10/12/10); the skip test fails at 8.9 % against < 2 %. The
+> unbiased-pool gate fired: 0 strict unbiased designs exist in any study lane, so a fair-pool
+> test is not runnable from stored data. The section-8 use-gates and the section-11 decision are
+> unchanged; this note only records that the stored record resolves them negatively.

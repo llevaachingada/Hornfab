@@ -1,5 +1,28 @@
 # CONTINUITY
 
+## 2026-11-17 04:1x - Lane review of the Fable corpus handed to the senior reviewer (not a senior decision)
+
+- The **lower-cost continuation lane agent** (not Fable, not the owner) reviewed all 54 documents in
+  `scratch/fable_architecture/` (spine read directly; four read-only digest lanes) plus its own
+  measured results, and wrote `LANE_REVIEW_FOR_FABLE_2026-11-17.md`,
+  `X1_ACCEPTANCE_TABLE.md` and `OWNER_DECISIONS_2026-11-17.md`. Per handoff §8 and the N4 rule the
+  generator decision is **reserved to the senior reviewer**; the review's decision set is
+  explicitly a recommendation for confirmation, and **nothing is a gated decision** — no pass line,
+  threshold, split, frozen contract or brief was changed, and **no code was implemented**.
+- Verdict registered: the unified backbone is falsified at its own predeclared gate (U1: 0/5 lanes
+  at <= 0.5 mm, 5/5 above 2 mm); the response-model spine is not supported at full J (E1 +
+  `E1_FOLLOWUP_WHOLE_SURFACE.md`); construct-then-correct is closed (E2); frequency staging
+  (0.124 %) and lane racing (0 %, protected-family violation) are not demonstrated; predictor hooks
+  A/B/C fail with 0 strict unbiased designs anywhere. The canonical record is validated (6/6 lanes
+  at 65 x 61; 55/55 in `X4_COMPLETION.md`) and ranges-plus-constancy scoring remains the
+  best-supported change.
+- The four senior-authored position documents (`FABLE_OPTIONS_REVIEW.md`, `ARCHITECTURE_SYNTHESIS.md`,
+  `PREDICTOR_AND_WORKFLOW.md`, `VALIDATION_EXPERIMENTS.md`) and the handoff §10 table now carry
+  authorship prefaces and evidence-only lane notes; `X1_ACCEPTANCE_TABLE.md` consolidates the X1
+  per-test verdict (pass line not met as written, because several exact metadata fields exist in no
+  stored recipe - a recipe-schema finding, proposed not decided). Owner menu with **options only**
+  (no C1-C4 recommendation, per the owner's instruction) is in `OWNER_DECISIONS_2026-11-17.md`.
+
 ## 2026-11-17 03:4x - X3 remaining parts: wavelength scaling lifts V but not H; prior worth ~8 solves
 
 - Scheme 3 (held-out engine), 1,715 designs / 35 lanes / 3 engines. `WL-1` (all 27 lengths times

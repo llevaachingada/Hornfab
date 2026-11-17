@@ -1,5 +1,26 @@
 # ISSUES
 
+## 2026-11-17 - Lane review of the Fable corpus delivered; decisions reserved to the senior reviewer and owner
+
+- DONE (lane agent, lower-cost): full-corpus review handed to the senior reviewer
+  (`LANE_REVIEW_FOR_FABLE_2026-11-17.md`); X1 acceptance verdict consolidated
+  (`X1_ACCEPTANCE_TABLE.md`); owner options menu packaged (`OWNER_DECISIONS_2026-11-17.md`,
+  options only, no C1-C4 recommendation). Authorship prefaces added to the four senior-authored
+  position documents and the handoff §10 table. No code implemented; no pass line changed; not a
+  gated decision.
+- OPEN (senior reviewer): confirm, amend, or overrule the lane review's decision set; write the
+  staged implementation plan (handoff §7); decide the generator direction. Registered for that
+  decision: U1 falsified the unified backbone at its own gate (0/5 lanes <= 0.5 mm);
+  construct-then-correct closed (E2); response-model spine unsupported at full J; predictor hooks
+  A/B/C fail; the canonical record is validated and the scoring proposal is the best-supported
+  change.
+- OPEN (owner): C1-C4 scoring decisions (options menu only), C5 protected-list confirmation, C6
+  section-B budget (B1 20, B2 12-16, B6 owner's choice; B3/B5 withdrawn; B4 optional); the two
+  no-solve proposals (provenance digest rule split kernel-vs-validator; envelope convention); the
+  stage-0 code-truth list (owner's lane).
+- OPEN (proposals, not queued): A12 (contract records for all ~3,414 designs + H-plane transfer
+  retest) and the predeclared U1-bis backbone falsification test - both CPU-only, neither run.
+
 ## 2026-11-17 - X3 remaining: wavelength scaling lifts V, H still short; prior worth ~8 solves
 
 - DONE (A7): scheme 3 over 1,715 designs. WL-1 lane H/V/DI .785/.880/.809, engine .336/.668/.515;

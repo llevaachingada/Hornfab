@@ -9,6 +9,15 @@
 > all results: `LOW_COST_AGENT_HANDOFF.md` §1 and §4. The plain-language guide in §8 remains a
 > useful explanation of the ideas.
 
+> **NOTE ON AUTHORSHIP (2026-11-17, added by the lower-cost continuation lane agent).** The
+> **lane note** at the end of this file was appended by the **lower-cost continuation agent** —
+> **not by Fable (the senior/high-thinking reviewer) and not by the owner**. It is **not a gated
+> decision**: it changes no pass line, threshold, split, frozen contract, brief, or any decision
+> recorded above, and the original text of this document — including its spine recommendations
+> and §6 decision lists — remains exactly as its senior author wrote it. Reader rule: where the
+> original text and a lane note differ, the original governs intent; the lane note is evidence
+> only.
+
 **Written:** 2026-11-16. **Code read at** `f0dd019`; **HEAD at close** `aa11b62`. No new evidence
 was gathered for this pass; it re-reasons over `FABLE_OPTIONS_REVIEW.md` (measurements M1–M6) and
 `FABLE_DISCOVERY.md`. Labels: **[measured]**, **[verified]**, **[dossier]**, **[inferred]**,
@@ -382,3 +391,16 @@ correct**: build from the acoustic target and converge by root-finding. Stored d
 them (E1, E2) before anything is built. My confidence that response-level modelling should replace
 scalar-J modelling is high; my confidence that it yields *new* horns, rather than the same horns
 sooner, is moderate, and depends on new candidate sources (X2) and on extrapolation (X3).
+
+---
+
+> **Lane note, 2026-11-17 (lower-cost continuation agent; NOT a gated decision).** The full-J
+> follow-up strengthens the E1 finding: with parity-exact full J the response heads still do not
+> beat the score head (median reveals: score 18.5, curve head 24.0, nine-term head 18.25, actual
+> history 87.25, random 55.25; Parts A, B and C all fail), and the earlier proxy-level advantage
+> is attributed to the proxy objective itself — the same selector needs 10.0 reveals on cov+DI
+> versus 24.0 on full J (`E1_FOLLOWUP_WHOLE_SURFACE.md`). E2's closure stands
+> (`E2_INVERTIBILITY.md`); E3's savings bound is 0.124 % (`E3_FREQUENCY_STAGING.md`). The
+> canonical surface is validated as a measurement/interchange record (contract v2,
+> `X1B_CONTRACT_V2.md`), not as a generator input (`U1_LAYERED_REPRODUCTION.md`). Nothing here
+> re-opens the spines above; the spine decision remains with the senior reviewer and owner.

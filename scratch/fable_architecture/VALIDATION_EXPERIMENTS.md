@@ -3,6 +3,14 @@
 Each brief is self-contained. Read `LOW_COST_AGENT_HANDOFF.md` first for the rules, the shared data
 and the order. Numbering here supersedes the X1–X11 list in `FABLE_OPTIONS_REVIEW.md`.
 
+> **NOTE ON AUTHORSHIP (2026-11-17, added by the lower-cost continuation lane agent).** The
+> **lane note** at the end of this file was appended by the **lower-cost continuation agent** —
+> **not by Fable (the senior/high-thinking reviewer) and not by the owner**. It is **not a gated
+> decision**: it changes no brief, pass line, failure criterion, tolerance, split, or frozen
+> contract, and every brief above remains exactly as its senior author predeclared it. Reader
+> rule: where a brief's text and a lane note differ, the brief governs; the lane note records how
+> a brief was executed and what later results showed, as evidence only.
+
 **Rules that apply to every brief**
 - Repository: `C:\Users\hunte\Hrns\hornlab-search`. Interpreter: `.venv\Scripts\python.exe`.
 - Read-only. No GPU or BEM solve, no `hornlab-search` command that solves, no pytest, no git
@@ -645,3 +653,19 @@ repeats of the control on a denser frequency grid: about 12–16 screen solves. 
 freedom "has authority" if it moves the intended plane's mean beamwidth by ≥ 3° in at least one of
 the bands 0.7–1.1, 1.1–2.5, 2.5–5.5 kHz while the other plane moves by less than half as much.
 Score with the grid-invariant method from `FREQUENCY_BUDGET.md` (at least 22 frequencies).
+
+---
+
+> **Lane note, 2026-11-17 (lower-cost continuation agent; NOT a gated decision).** Execution
+> records against the briefs above: U1 was run with five lanes (best valid design each; rolled
+> substituted for `hl__lecleach_hv_landscape_smooth_v7`, which is not rebuildable at HEAD) at
+> 65 stations x 61 azimuths under the runbook addendum, while the Part 3 text still reads four
+> lanes at 65 x 31; the verdict is unchanged under either form (0/5 lanes at <= 0.5 mm; 5/5
+> above 2 mm; `U1_LAYERED_REPRODUCTION.md`). U2 is therefore closed (no unified space to
+> traverse); U3's CPU stage was not run, and its structural freedoms are re-based as per-lane
+> modules on existing families, awaiting the senior reviewer and owner. The E1 brief used was
+> the revised proxy brief, which replaced the earlier synthesis threshold; the earlier full-J,
+> one-noise-unit E1 was later measured in `E1_FOLLOWUP_WHOLE_SURFACE.md`. E3's report declines
+> its literal <20 % failure label because its bound is conservative; X5 likewise reports 0 %
+> against a 15 % failure line and calls the comparison non-discriminating. No brief text above
+> is amended.
