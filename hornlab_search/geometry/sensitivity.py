@@ -380,42 +380,53 @@ def margin_model(space, cfg, *, n: int = 96, seed: int = 20261117) -> dict:
 
 
 def propose_links(jacs, keys, space) -> list:
-    """Geometric link proposals for consistently coupled pairs: in UNIT coordinates the surface
-    change of knob b equals ``s`` times that of knob a (least squares on the stacked columns), so
-    ``x_b - x_b0 = s * (x_a - x_a0)`` keeps the surface on one direction; converted to the
-    ``search.links`` form ``b = scale * a + offset`` in knob units at the seed."""
-    out = []
+    """Geometric link proposals for consistently coupled pairs.
+
+    For each pair whose surface columns are parallel (|cos| >= COUPLED_COS at >= ACTIVE_FRAC of
+    the points where both are active), fit ``col_follower ~ s * col_leader`` by least squares
+    over the stacked points; moving the leader by ``dx`` then reproduces the follower's surface
+    effect of ``s * dx``, so the follower is redundant. The follower is the knob with the SMALLER
+    median surface authority. Proposals are greedy by coupling strength and form no chains (one
+    level only, like ``search.links``). Converted to ``follower = scale * leader + offset`` in knob
+    units through the seed. Geometric redundancy is not acoustic equivalence: confirm against
+    data (``tools/analysis/links.py``) before applying."""
     x0 = seed_unit(space)
     bounds = space.bounds
+    auth = np.median(np.array([J.col_rms_mm for J in jacs]), axis=0)
+    cands = []
     for i in range(len(keys)):
         for j in range(i + 1, len(keys)):
-            num = den = 0.0
             cs = []
             for J in jacs:
                 a, b = J.surface[:, i], J.surface[:, j]
                 na, nb = np.linalg.norm(a), np.linalg.norm(b)
-                if na <= 0 or nb <= 0:
-                    continue
-                cs.append(abs(float(a @ b) / (na * nb)))
-                num += float(a @ b)
-                den += float(b @ b)
-            if not cs or np.mean(np.asarray(cs) >= COUPLED_COS) < ACTIVE_FRAC or den <= 0:
-                continue
-            # a ~ s_ab * b in surface space -> moving b by dx_b equals moving a by dx_b / s_ab.
-            s_ab = num / den
-            ka, kb = keys[i], keys[j]
-            ba, bb = bounds[ka], bounds[kb]
-            wa, wb = float(ba.hi - ba.lo), float(bb.hi - bb.lo)
-            # Dependent knob: the one with the smaller surface authority follows the larger.
-            scale_unit = s_ab                                   # dx_a(unit) per dx_b(unit)
-            scale = scale_unit * wa / wb                        # knob units: a = scale * b + off
-            a0 = float(ba.lo + x0[i] * wa)
-            b0 = float(bb.lo + x0[j] * wb)
-            out.append({"follower": ka, "from": kb, "scale": float(scale),
-                        "offset": float(a0 - scale * b0),
-                        "median_abs_cos": float(np.median(cs)),
-                        "note": "geometric redundancy at the sampled points; confirm with data "
-                                "links (tools/analysis/links.py) before applying"})
+                if na > 0 and nb > 0:
+                    cs.append(abs(float(a @ b) / (na * nb)))
+            if cs and np.mean(np.asarray(cs) >= COUPLED_COS) >= ACTIVE_FRAC:
+                f, l = (i, j) if auth[i] <= auth[j] else (j, i)
+                cands.append((float(np.median(cs)), f, l))
+    used_f, used_l, out = set(), set(), []
+    for c, f, l in sorted(cands, reverse=True):
+        if f in used_f or f in used_l or l in used_f:
+            continue
+        num = sum(float(J.surface[:, f] @ J.surface[:, l]) for J in jacs)
+        den = sum(float(J.surface[:, l] @ J.surface[:, l]) for J in jacs)
+        if den <= 0:
+            continue
+        s_unit = num / den                      # dx_f(unit) equivalent per dx_l(unit)
+        kf, kl = keys[f], keys[l]
+        wf = float(bounds[kf].hi - bounds[kf].lo)
+        wl = float(bounds[kl].hi - bounds[kl].lo)
+        scale = s_unit * wf / wl
+        f0 = float(bounds[kf].lo + x0[f] * wf)
+        l0 = float(bounds[kl].lo + x0[l] * wl)
+        used_f.add(f)
+        used_l.add(l)
+        out.append({"follower": kf, "from": kl, "scale": float(scale), "offset": float(f0 - scale * l0),
+                    "median_abs_cos": c,
+                    "authority_mm": {"follower": float(auth[f]), "leader": float(auth[l])},
+                    "note": "geometric redundancy at the sampled points; confirm with data links "
+                            "(tools/analysis/links.py) and acoustics before applying"})
     return out
 
 

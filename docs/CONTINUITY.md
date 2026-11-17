@@ -1,5 +1,28 @@
 # CONTINUITY
 
+## 2026-11-17 (senior pass, code) - Stage 5 core: geometric parameter-space identifiability, space cards, proposals
+
+- New `hornlab_search/geometry/sensitivity.py`: for any native or generator config, finite-difference
+  surface and shared-descriptor Jacobians in unit coordinates at Sobol points; knob labels
+  (`weak` = whole range moves no point > 1 mm, the mesher fit); coupling, effective dimension,
+  greedy chain-free link proposals (weaker knob follows); feasible steps from the seed; box
+  feasibility by slice; a linear envelope-margin constraint (WP 5.4); and the predicted
+  bad-candidate rate of the first CMA generations per sigma0 - all from records, no mesh/GPU.
+- `geometry/record.py` grid route now resolves exactly like `mesh/build.py` (Klangfilm H/V core,
+  rows recipes, explicit bodies).
+- New tools `space_card.py` (cards + `shared_map.md`) and `space_propose.py` (proposed
+  `__space_v1.yaml` + before/after + seed shift). Cards for five home lanes in
+  `scratch/fable_architecture/space_cards/`. Findings: ext-throat 58 % of the box outside the
+  envelope, predicted bad rate 6 % at sigma0 0.10 vs 34 % at 0.15, one linear constraint explains
+  it (R^2 0.89, width binds 65 %); fold-warm 18 searched / ~12 effective, `a0_deg` weak (0.39 mm),
+  OSSE n~s and k~a_deg parallel; Crowe top 20 % of g_L_mm and g_s mostly refused; b3_soft top
+  20 % of g_theta_h1_deg refused.
+- Merged WP 2.1 (helper): `finalist` tier resolves in config (2x screen DOF cap, 36 freqs, budget
+  profile `fidelity-ladder-10`); CLI/GUI/evaluate wiring open. Helper flagged: today's screen grid
+  is 12 points (18 only with `screen_extra_hz`), verify 25 (29+ only with
+  `verify_points_per_octave`) - the plan's "18/29" is brief-dependent.
+- Tests: `tests/test_geometry_sensitivity.py` 8 + geometry suites 27 passed; config tiers 78 passed.
+
 ## 2026-11-17 (senior pass) - Plan §10 implementation-status table added
 
 - `ARCHITECTURE_AND_STAGED_PLAN_2026-11-17.md` §10 lists every WP's status, file and what still needs

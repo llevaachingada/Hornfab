@@ -1,5 +1,15 @@
 # ISSUES
 
+## 2026-11-17 - Stage 5 core landed (parameter spaces)
+
+- DONE: sensitivity module, space cards, proposals. OPEN (orchestrator, local): cards for every
+  active lane; read each proposal's seed shift and before/after; owner approves config edits;
+  `--run` evidence from walls/links on each lane's latest run; constraint-aware CMA repair (the
+  margin model is not yet usable by search).
+- OPEN: WP 2.1 wiring (CLI `--mode finalist`, GUI modes, evaluate/runner dispatch).
+- OPEN: two legacy configs no longer load at HEAD (`hl__klangfilm_lame_curved_v1.yaml`,
+  `hl__rolled_es_spiral_v7.yaml`: unknown rows type) - pre-existing, found while carding.
+
 ## 2026-11-17 - Plan status table
 
 - DONE: plan §10 status table. OPEN: WP 6.1 (extend offline_scores beyond ATH/v4).
