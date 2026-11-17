@@ -1,5 +1,9 @@
 # ISSUES
 
+## 2026-11-17 - Evidence driver ready for the owner's machine
+
+- OPEN (owner, Windows): `.venv\\Scripts\\python.exe tools\\analysis\\senior_plan_evidence.py --runs-glob "runs\\2026111*" --u3-lane hl__biradial_es_style_v7 --u3-lane hl__ext_throat_hvlaw_v7 [--brief <v9 brief>]`.
+
 ## 2026-11-17 - Stage 5 WP 5.2 warning landed
 
 - OPEN (owner): split `ath_core.yaml` and the 4 `ath_like_rear*` study configs per `morph_target`.

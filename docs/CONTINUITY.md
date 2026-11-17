@@ -1,5 +1,13 @@
 # CONTINUITY
 
+## 2026-11-17 (senior pass, code) - One-command evidence driver for the Windows checkout
+
+- New `tools/analysis/senior_plan_evidence.py`: record shadow + rescore + floor + U3 CPU variants on
+  each named lane's best stored design, into `scratch/fable_architecture/.evidence/<utc>/`.
+  Smoke-tested on a synthetic biradial run (2 passed). Finding: the "vertical timing -> 480 mm"
+  variant fits the acoustic box but is 6 mm over a 480 mm brief in the build box (3 mm wall) - the
+  envelope-convention decision decides whether it is admissible; 460 mm passes both.
+
 ## 2026-11-17 (senior pass, code) - Stage 5 WP 5.2: categorical knobs in continuous boxes are flagged
 
 - `config.categorical_searched_keys` + a load-time WARNING when a native config searches

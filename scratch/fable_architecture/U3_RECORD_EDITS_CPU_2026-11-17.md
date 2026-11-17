@@ -27,3 +27,9 @@ Reading against the U3 CPU lines:
   outcomes for this host, not tuning targets; the line is not moved.
 - Next: repeat on the best stored biradial and ext-throat designs on the Windows checkout
   (`runs/` needed), then WP 4.2 (2-solve record-route equivalence) before any variant is solved.
+
+**Envelope convention, made concrete (added with the evidence driver):** the "vertical timing →
+480" variant puts the *inner* mouth at exactly 480 mm. Under the acoustic-box convention it fits;
+under the build-box convention (+2 × 3 mm wall) it is 6 mm over the 480 mm brief and fails the
+U2 envelope check. The owner's envelope decision (senior review §4.2) decides whether this
+variant is admissible. The 460 mm variant passes both.
