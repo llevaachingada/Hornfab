@@ -1,5 +1,19 @@
 # CONTINUITY
 
+## 2026-11-16 - Research library and acoustic-grounding skills integrated
+
+- Added `docs/knowledge/README.md`, source catalog/metadata, eight compact family cards,
+  claim/family templates and the supplied compilation preserved verbatim.
+- Root agent entrypoints route acoustic/geometry/scoring/optimization decisions through
+  family applicability checks. Keele sizing is not universal; intentionally non-CD horns
+  must not silently inherit CD targets. Existing historical research remains in place.
+- Claude/OpenCode/Codex skill entrypoints share one grounding workflow; existing
+  typology-research remains the detailed new-construction protocol.
+- Validation: 49 local links resolved; skill frontmatter, source YAML and OpenCode JSON
+  parsed; scoped whitespace check passed. No runtime skill activation or new source
+  verification claimed; no application code, solves or active jobs changed by this task.
+
+
 ## 2026-11-16 - CROWE-inspired forward area/aspect family implemented (CPU geometry only; no solve, nothing queued)
 
 - Owner supplied the V2 senior research and four throat rules (round for 15-40 mm; area expands

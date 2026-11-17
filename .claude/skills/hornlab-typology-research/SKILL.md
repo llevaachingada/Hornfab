@@ -27,6 +27,11 @@ to every typology. It is the research discipline those gates imply, not new poli
 
 ## 2. First: the repo already knows things (inventory before fetching)
 
+Start with `docs/knowledge/README.md` and the relevant family card. The companion
+`hornlab-acoustic-grounding` skill owns the short applicability check; this skill
+owns detailed grounding only for the new-construction/objective scope above.
+Reuse linked dossiers; library maintenance does not require a fresh research pass.
+
 - docs/research/typologies/MESHER_TYPOLOGIES.md + SEARCH_LAYER_GAPS.md; senior_pass 02 (typology catalogue +
   the s7 corrections-table pattern); senior_pass 04 (work packages — WP9b 9b.0–9b.5 is the exemplar family
   dossier); appendices A/B WITH their corrections headers; TYPOLOGY_PLAN.md; NOTES_FOR_SENIOR probe blocks

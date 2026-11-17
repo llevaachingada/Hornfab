@@ -1,0 +1,6 @@
+# Experimental morphs and reconstructions
+
+- **Principle:** Rolled mouths, superellipse or other section morphs, and guiding curves vary geometry to explore aperture transitions and radiation. Crowe-style, Klangfilm-inspired and other reconstructions must be identified by their actual construction and evidence.
+- **Useful objectives:** Compare complete shapes on relevant coverage, response, loading, physical envelope and source/mounting conditions; preserve a baseline and report separate measures.
+- **Limits / wrong assumptions:** Visual similarity is not proof of an original profile or acoustic equivalence. The documented Solana and SAWMOD phase-one models are single-source control reconstructions, not complete multiple-entry systems; some dimensions or mounting assumptions differ. Radial and axial relief are different mechanisms. No universal Keele/CD target applies.
+- **Sources:** [Rolled-family correction](../../research/typologies/ROLLED_FAMILY_MASTER_RESEARCH_2026-11-15.md), [Klangfilm handoff](../../research/typologies/KLANGFILM_ELLIPSE_HANDOFF_2026-11-16.md), [Solana reconstruction](../../research/typologies/SOLANA_WAVEGUIDE_2026-11-01.md), [SAWMOD control](../../research/typologies/SAWMOD_CONTROL_WAVEGUIDE_2026-11-01.md).

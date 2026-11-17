@@ -33,3 +33,6 @@ third_party/
 tools/cloud/.env.local
 tools/cloud/*.secret
 .env.local
+
+# Keep shared OpenCode skill grants reproducible.
+!.opencode/oh-my-opencode-slim.json

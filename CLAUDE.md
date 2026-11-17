@@ -1,5 +1,15 @@
 # CLAUDE.md — hornlab-search
 
+## Acoustic knowledge before decisions
+
+Before acoustic, geometry, scoring or optimization decisions, read
+[`docs/knowledge/README.md`](docs/knowledge/README.md) and the relevant family card;
+use `hornlab-acoustic-grounding`. Never generalize acoustic formulas, heuristics,
+design targets or assumptions across typologies without checking applicability.
+Keele mouth sizing is not a universal geometric limit; do not silently impose CD
+scoring on intentionally non-CD horns. For new construction/objective priorities,
+continue with `hornlab-typology-research`, reusing existing dossiers.
+
 ## Start here
 
 0. **Find anything:** `docs/INDEX.md` (every doc, what it is) and `docs/CODE_MAP.md` (every module and config

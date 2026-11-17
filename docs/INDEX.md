@@ -1,5 +1,13 @@
 # Docs index
 
+[Acoustic knowledge hub](knowledge/README.md) — canonical navigation and typology
+applicability rules; compact family cards, [source catalog](knowledge/SOURCES.md),
+[seed metadata](knowledge/sources.yaml), [Keele claim](knowledge/claims/KH-001_keele_mouth_heuristic.md),
+[claim](knowledge/templates/claim.md) / [family](knowledge/templates/typology.md) templates,
+and the preserved [supplied compilation](knowledge/imported/HornFab_Research_Knowledge_Base_2026-11-16.md).
+Existing research remains in place; imported recommendations are not implementation mandates.
+
+
 [CROWE-inspired H/V area/aspect v1 research (2026-11-16)](research/typologies/CROWE_HV_AREA_ASPECT_RESEARCH_V2_2026-11-16.md):
 senior research and the forward area/aspect construction; the document's Phase 1 is implemented as
 `crowe_hv_area_aspect_v1` (geometry-only, no solves). [Implementation evidence](evidence/CROWE_HV_AREA_ASPECT_V1_2026-11-16.md):

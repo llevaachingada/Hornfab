@@ -1,0 +1,27 @@
+{
+  "$schema": "https://unpkg.com/oh-my-opencode-slim@latest/oh-my-opencode-slim.schema.json",
+  "preset": "deepseek-flash-max",
+  "agents": {
+    "fixer": {
+      "skills": [
+        "hornlab-gpu-job",
+        "hornlab-night-queue",
+        "hornlab-evidence",
+        "hornlab-acoustic-grounding",
+        "hornlab-shape-check",
+        "hornlab-search-economy",
+        "hornlab-render",
+        "hornlab-typology-research"
+      ]
+    },
+    "designer": {
+      "skills": [
+        "hornlab-render",
+        "hornlab-evidence",
+        "hornlab-acoustic-grounding",
+        "hornlab-shape-check",
+        "hornlab-typology-research"
+      ]
+    }
+  }
+}

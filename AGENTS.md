@@ -1,5 +1,16 @@
 # AGENTS.md — hornlab-search
 
+## Acoustic knowledge before decisions
+
+Before acoustic, geometry, scoring or optimization decisions, read
+[`docs/knowledge/README.md`](docs/knowledge/README.md) and the relevant family card;
+use `hornlab-acoustic-grounding`. Never generalize acoustic formulas, heuristics,
+design targets or assumptions across typologies without checking applicability.
+Keele mouth sizing is not a universal geometric limit; do not silently impose CD
+scoring on intentionally non-CD horns. For new construction/objective priorities,
+continue with `hornlab-typology-research`, reusing existing dossiers.
+
+
 ## Owner amendment: one consolidated checkout (2026-11-12)
 
 The owner requested all local HornLab work be consolidated into local `main` at
@@ -230,7 +241,7 @@ and grants the HornLab skills to `fixer` and `designer`; it defines no presets o
 OpenCode loads):** `hornlab-gpu-job` (any GPU/solve job), `hornlab-night-queue` (unattended nights),
 `hornlab-evidence` (evidence docs), `hornlab-shape-check` (new configs, before GPU), `hornlab-search-economy`
 (before queueing a search: headroom, sigma/budget power, refusal budget, A/B attribution; backed by
-`tools/search_preflight.py`), `hornlab-render` (images), `hornlab-typology-research` (new typology/objective work).
+`tools/search_preflight.py`), `hornlab-render` (images), `hornlab-acoustic-grounding` (family applicability), `hornlab-typology-research` (new typology/objective work).
 The orchestrator has all skills; fixer and designer are granted the hornlab skills in
 `.opencode/oh-my-opencode-slim.json` so delegated lanes can load them.
 

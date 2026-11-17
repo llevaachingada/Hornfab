@@ -1,5 +1,14 @@
 # ISSUES
 
+## 2026-11-16 - Research library cleanup complete
+
+- DONE: knowledge navigation, family applicability references, supplied research/source
+  preservation and agent-skill routing for Claude, OpenCode and Codex.
+- LIMITATION: supplied verification labels are inherited, not independently reverified;
+  runtime skill activation was not exercised. No new acoustic/code validation implied.
+- Existing acoustic and implementation issues below remain unchanged.
+
+
 ## 2026-11-16 - CROWE-inspired area/aspect v1 geometry landed; acoustic gates open
 
 - DONE (CPU geometry): `crowe_hv_area_aspect_v1` + c0/c1 configs + section-cut tool + 18 focused

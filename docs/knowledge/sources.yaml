@@ -1,0 +1,13 @@
+# Minimal canonical-source example. Expand after verifying original author/URL/title/coverage.
+# Not a full authoritative bibliography; initial source metadata only.
+- id: SRC-KEELE-US4308932A
+  title: Bi-Radial Horn
+  authors_or_institution: D. B. Keele / JBL
+  year: 1982
+  type: patent
+  landing_url: https://patents.google.com/patent/US4308932A/en
+  full_text_url: https://patents.google.com/patent/US4308932A/en
+  access_status: public_patent_text_and_drawings
+  verified_on: 2026-11-16
+  what_source_actually_establishes: "Specified Bi-Radial construction and empirical sizing relationship under patent-defined angles."
+  what_it_does_not_establish: "A universal exact mouth-size feasibility law for unrelated horn geometries."
