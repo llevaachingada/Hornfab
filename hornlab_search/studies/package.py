@@ -53,6 +53,10 @@ BUDGET_PROFILES = {
     'comparison-80x2': {'screen_calls': 80, 'verify_calls': 2, 'total_calls': 82, 'attempts': 400},
     'comparison-100x2': {'screen_calls': 100, 'verify_calls': 2, 'total_calls': 102, 'attempts': 500},
     'exploration-300x4': {'screen_calls': 300, 'verify_calls': 4, 'total_calls': 304, 'attempts': 1500},
+    # WP 2.1 (fidelity ladder): B1 = ten designs at the screen cap plus the same ten at the finalist
+    # tier (2x screen DOF cap, >= 29 frequencies). The finalist solves are counted in ``verify_calls``;
+    # the runner's per-tier dispatch of those calls is the open wiring (see CONTINUITY).
+    'fidelity-ladder-10': {'screen_calls': 10, 'verify_calls': 10, 'total_calls': 20, 'attempts': 60},
 }
 
 

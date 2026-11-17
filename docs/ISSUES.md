@@ -1,5 +1,12 @@
 # ISSUES
 
+## 2026-11-17 - WP 2.1 finalist fidelity tier (config resolution done; CLI/evaluate wiring open)
+
+- DONE: `finalist` mode resolves in config (>= 29 freqs, 2x screen DOF cap, own mesh/solve identity),
+  budget profile `fidelity-ladder-10`, offline tests; screen/verify unchanged.
+- OPEN: expose `finalist` in CLI `--mode` and gui SEARCH_MODES; evaluate/runner dispatch (files owned
+  by other agents); WP 2.2 B1 (20 solves) and WP 2.3 floor not started.
+
 ## 2026-11-17 - Lane review of the Fable corpus delivered; decisions reserved to the senior reviewer and owner
 
 - DONE (lane agent, lower-cost): full-corpus review handed to the senior reviewer
