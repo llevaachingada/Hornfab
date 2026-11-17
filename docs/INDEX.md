@@ -8,6 +8,11 @@ and the preserved [supplied compilation](knowledge/imported/HornFab_Research_Kno
 Existing research remains in place; imported recommendations are not implementation mandates.
 
 
+[Klangfilm-Lame H/V throat audit and Phase A implementation (2026-11-16)](evidence/KLANGFILM_HV_THROAT_AUDIT.md):
+canonical-incumbent evidence, saved-recipe digest drift, the `Q'(0)=0` equal-tangent fault, the intrinsic
+rollback diagnosis, and the implemented CPU-validated `klangfilm_lame_hv_cd` family (Phase B deliberately
+gated). [Preflight + contact sheet](evidence/klangfilm_hv_2026-11-16/PREFLIGHT.md).
+
 [CROWE-inspired H/V area/aspect v1 research and V2A hardening (2026-11-16)](research/typologies/CROWE_HV_AREA_ASPECT_RESEARCH_V2_2026-11-16.md):
 senior research plus the [V2A throat-transition/parameter addendum](research/typologies/CROWE_V2A_THROAT_TRANSITION_ADDENDUM_2026-11-16.md),
 which supersedes it on throat transition and parameter count. The implementation is

@@ -1,5 +1,25 @@
 # CONTINUITY
 
+## 2026-11-16 - Klangfilm-Lame independent H/V throat core (Phase A) landed; Phase B gated
+
+- Gate 0 audit `docs/evidence/KLANGFILM_HV_THROAT_AUDIT.md`: the canonical incumbent is the 494.439 Hz
+  local record (not the 382.753 screenshot seed); legacy H/V throat chords 9.4631/9.4378 deg prove the
+  `Q'(0)=0` equal-tangent fault; one axial turn at z=183.962 mm with the mouth at z=-48.44 mm is intrinsic
+  rollback; the saved v1 recipe digest drift is runtime-version-bound (all sources unchanged).
+- New `tools/geometry/klangfilm_lame_hv.py` (schema `klangfilm-lame-hv-v1`) plus canonical
+  `klangfilm_lame_hv_family` (`rows.type: klangfilm_lame_hv_cd`, frozen `_klangfilm_lame_hv_v1.py`).
+  Zero blend is bit-identical to v1; independent H/V entrance tangents on the same 18 mm rim; refuses
+  constriction/non-monotone forward radius instead of clamping; digest covers parent kernel + cap math;
+  versioned `size_policy: enforce|report_only` (enforce stays the search default).
+- Seeds `examples/typologies/klangfilm_hv_2026-11-16/` (a0-a5 + `stage_a_search`), with preflight, contact
+  sheet and search-box lawfulness tools in `tools/geometry/`. Measured: a3/a4 refused (negative V gain),
+  a5 over envelope and report-only, Stage A 200/200 samples and 16/16 corners lawful.
+- Validation: 72 focused tests green (kernel/family/dispatch/legacy/dual), config/grid/mesh-dispatch
+  suites green, all 8 diagnostic configs behave as designed. No solve, no queue, no objective change.
+- NOT DONE: Phase B (monotonic CD core, shoulder/roll/beak, OS-SE comparator) is gated on a Phase A
+  acoustic A/B. No BEM/polar evidence, so no CD claim. Cached CD diagnostic `J_CD_cached=17.589`, and the
+  v7 smooth run is not a CD score.
+
 ## 2026-11-16 - V2A four-DOF parameter hardening (CPU geometry only; no solve, nothing queued)
 
 - Owner supplied the V2A addendum; moved to

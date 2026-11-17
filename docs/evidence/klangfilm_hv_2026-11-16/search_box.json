@@ -1,0 +1,72 @@
+{
+  "bounds": {
+    "g_h_mid_gain_mm": {
+      "hi": 20.0,
+      "lo": 0.0,
+      "search": true
+    },
+    "g_theta_h0_deg": {
+      "hi": 17.0,
+      "lo": 6.0,
+      "search": true
+    },
+    "g_theta_v0_deg": {
+      "hi": 13.0,
+      "lo": 3.0,
+      "search": true
+    },
+    "g_v_mid_gain_mm": {
+      "hi": 3.75,
+      "lo": 0.0,
+      "search": true
+    }
+  },
+  "config": "examples\\typologies\\klangfilm_hv_2026-11-16\\configs\\stage_a_search.yaml",
+  "config_sha256": "2ce424a682d5a6114cf2d9874cebcc0ffb147317d6ac28be3beba91863783e41",
+  "corners": {
+    "lawful": 16,
+    "refused": [],
+    "tested": 16
+  },
+  "empirical_monotonicity_wall": {
+    "g_h_mid_gain_mm": 21.623,
+    "g_theta_h0_deg": null,
+    "g_theta_v0_deg": 17.113,
+    "g_v_mid_gain_mm": 5.392
+  },
+  "failures": [],
+  "kernel_sha256": "cbb23cc02d9b5d135e1ec46b4d0f3fdac68f8120c313b1a8ffe8e360672bea02",
+  "lawful": 200,
+  "lawful_fraction": 1.0,
+  "range_in_lawful_samples": {
+    "depth_mm": [
+      233.66789622673818,
+      233.690106578107
+    ],
+    "height_mm": [
+      260.72995432503,
+      260.7397918285243
+    ],
+    "width_mm": [
+      541.2622439197504,
+      541.2826660811766
+    ]
+  },
+  "refusal_buckets": {},
+  "refused": 0,
+  "samples": 200,
+  "schema": "klangfilm-lame-hv-v1",
+  "scope": "CPU geometry lawfulness only. No meshing, BEM, queue admission, or acoustic claim.",
+  "seed_materialised": {
+    "core_mode": "hv_throat_phase_a",
+    "envelope_ok": true,
+    "implementation_sha256": "a032f66049882c87f130895df3e8039e69e4d11dd9bd66f5abcac41e4e6e61ea",
+    "shape": [
+      19,
+      65,
+      3
+    ],
+    "size_policy": "enforce"
+  },
+  "verdict": "LAWFUL"
+}

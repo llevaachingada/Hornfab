@@ -1,5 +1,17 @@
 # ISSUES
 
+## 2026-11-16 - Klangfilm HV Phase A geometry done; acoustic gate open
+
+- DONE (CPU): H/V throat-core family, 71 focused tests, preflight + contact sheet, measured-lawful
+  Stage A search box.
+- OPEN (owner): authorise the Phase A screen (A0 vs A1/A2, equal solver/source/grid, frozen CD policy).
+  No solve was launched; another lane's GPU job was live and untouched.
+- OPEN: Phase B monotonic core + beak/shoulder only if Phase A shows insufficient early H/V authority.
+- LIMITATION: negative mid gains are infeasible in this offset basis (monotonicity wall ~-0.04 mm), so
+  the handoff's -8/-14 mm seeds are refused by design and the Stage A box is positive-only.
+- LIMITATION: the v1 saved-recipe digest no longer reproduces (numpy/scipy version bound); regenerate
+  before replaying historical `klangfilm-lame-v1` recipes.
+
 ## 2026-11-16 - V2A four-DOF geometry landed; acoustic gates and T0 open
 
 - DONE (CPU geometry): four-DOF generator + c0-c3 configs + section/Jacobian tools + 17 focused

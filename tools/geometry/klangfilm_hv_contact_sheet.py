@@ -152,6 +152,35 @@ def _style_3d(ax, view: str) -> None:
 
 
 # ------------------------------------------------------------------ figures
+def _save_png(fig, out: Path) -> None:
+    """Save through an in-memory buffer, then write bytes.
+
+    PIL's direct ``Image.save(path)`` intermittently raised ``OSError: [Errno 22] Invalid argument``
+    for these large 3-D canvases on this Windows box (three different target files across runs, while
+    a minimal probe always succeeded). Buffering removes the file-open path from the backend entirely
+    and makes the written bytes identical run to run.
+    """
+    import io
+    import os
+    import time
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", dpi=150, facecolor=fig.get_facecolor())
+    out.parent.mkdir(parents=True, exist_ok=True)
+    # A fresh sibling name avoids opening a file another process (scanner/preview/dropped agent
+    # session) may still hold; os.replace then swaps it into place atomically.
+    tmp = out.with_name(f".{out.name}.{os.getpid()}.tmp")
+    tmp.write_bytes(buf.getvalue())
+    for attempt in range(6):
+        try:
+            os.replace(tmp, out)
+            return
+        except OSError:
+            if attempt == 5:
+                tmp.unlink(missing_ok=True)
+                raise
+            time.sleep(0.4)
+
+
 def contact_sheets(result: dict, accepted: list, rejected: list) -> dict:
     images = {}
     for view in VIEWS:
@@ -186,7 +215,7 @@ def contact_sheets(result: dict, accepted: list, rejected: list) -> dict:
         fig.text(0.5, 0.012, FOOTNOTE, ha="center", fontsize=10)
         fig.subplots_adjust(left=0.005, right=0.995, bottom=0.05, top=0.93, wspace=0.02, hspace=0.02)
         out = EVIDENCE / f"contact_sheet_{view}.png"
-        fig.savefig(out, dpi=150, facecolor=fig.get_facecolor())
+        _save_png(fig, out)
         plt.close(fig)
         images[out.name] = str(out.relative_to(ROOT))
     return images
@@ -223,7 +252,7 @@ def sections_hv(accepted: list) -> str:
     fig.text(0.5, 0.012, FOOTNOTE, ha="center", fontsize=10)
     fig.subplots_adjust(left=0.075, right=0.985, bottom=0.06, top=0.92, hspace=0.28)
     out = EVIDENCE / "sections_hv.png"
-    fig.savefig(out, dpi=150, facecolor=fig.get_facecolor())
+    _save_png(fig, out)
     plt.close(fig)
     return str(out.relative_to(ROOT))
 
@@ -232,10 +261,22 @@ def throat_zoom(accepted: list) -> str:
     profiles = {rec["seed"]: _profile(rec) for rec in accepted}
     fig, axes = plt.subplots(2, 2, figsize=(13.5, 11.0), facecolor=FACE)
 
-    # 0-20 mm axial zooms for H and V, 1 mm tick guidance.
-    for ax, comp, axis_name in ((axes[0, 0], "a", "H"), (axes[0, 1], "b", "V")):
+    # 0-20 mm axial zooms for H and V, 1 mm tick guidance. Both panels MUST share one radius
+    # range: a per-panel autoscale gives H and V different vertical mm scales and makes the two
+    # panels visually incomparable.
+    panels = ((axes[0, 0], "a", "H"), (axes[0, 1], "b", "V"))
+    y_lo, y_hi = np.inf, -np.inf
+    for _ax, comp, _axis_name in panels:
+        for rec in accepted:
+            tab = profiles[rec["seed"]]
+            turn = K.forward_slice(tab)
+            z = np.asarray(tab["z"][: turn + 1], dtype=float)
+            r = np.asarray(tab[comp][: turn + 1], dtype=float)
+            m = (z >= 0.0) & (z <= 20.0)
+            y_lo, y_hi = min(y_lo, float(r[m].min())), max(y_hi, float(r[m].max()))
+    pad = 0.06 * max(y_hi - y_lo, 1e-9)
+    for ax, comp, axis_name in panels:
         ax.set_facecolor(FACE)
-        rmin, rmax = np.inf, -np.inf
         for rec in accepted:
             tab = profiles[rec["seed"]]
             turn = K.forward_slice(tab)
@@ -246,9 +287,8 @@ def throat_zoom(accepted: list) -> str:
             ls = "--" if rec["seed"] == "a0" else "-"
             ax.plot(z[m], r[m], color=color, lw=2.2 if rec["seed"] == "a0" else 1.5, ls=ls,
                     label=rec["seed"])
-            rmin, rmax = min(rmin, float(r[m].min())), max(rmax, float(r[m].max()))
         ax.set_xlim(0.0, 20.0)
-        ax.set_ylim(rmin - 0.6, rmax + 0.6)
+        ax.set_ylim(y_lo - pad, y_hi + pad)
         ax.set_xticks(np.arange(0.0, 21.0, 1.0))
         ax.set_xticks(np.arange(0.0, 20.5, 0.5), minor=True)
         ax.tick_params(axis="x", labelsize=7, labelrotation=90)
@@ -282,7 +322,7 @@ def throat_zoom(accepted: list) -> str:
     fig.text(0.5, 0.012, FOOTNOTE, ha="center", fontsize=10)
     fig.subplots_adjust(left=0.075, right=0.985, bottom=0.06, top=0.92, wspace=0.24, hspace=0.30)
     out = EVIDENCE / "throat_zoom.png"
-    fig.savefig(out, dpi=150, facecolor=fig.get_facecolor())
+    _save_png(fig, out)
     plt.close(fig)
     return str(out.relative_to(ROOT))
 

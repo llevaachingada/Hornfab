@@ -65,7 +65,7 @@
     "examples\\typologies\\klangfilm_hv_2026-11-16\\configs\\a4b.yaml": "37ef5a9d730ae95b3a2ab54992ea8957ad7a189ed43bc0441624b62406cb58bd",
     "examples\\typologies\\klangfilm_hv_2026-11-16\\configs\\a5.yaml": "c80ee224d72e10920fbdab6893c422d3010348e5aa75668ed0994d19ff69ef43",
     "runs\\20261116T205942Z-screen-8b22b5\\designs\\786caa6b08d7\\metrics.json": "d1407c9a4ed7c66ec8c203861e935e6ce399753f382bf2c7fe741fac9d003d68",
-    "tools\\geometry\\klangfilm_hv_contact_sheet.py": "b4184ae139b1909def0fa6a7f9ca542355c98814a24d0916eb08c897a583a972",
+    "tools\\geometry\\klangfilm_hv_contact_sheet.py": "8d0e7ae7d38421cac7b2641e5211728d4ea63231aa90343ae1f9d1fe74dd0828",
     "tools\\geometry\\klangfilm_hv_preflight.py": "449d4b08451ba99e558fa05ef017e35cf5c7ef616bade679d1570b886836dee8",
     "tools\\geometry\\klangfilm_lame.py": "728615be2a9f4070010f4cd4df448fc0ed322eaf74830fe3368083f0cd6d087e",
     "tools\\geometry\\klangfilm_lame_hv.py": "cbb23cc02d9b5d135e1ec46b4d0f3fdac68f8120c313b1a8ffe8e360672bea02",

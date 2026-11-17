@@ -1,0 +1,97 @@
+# STAGE A SEARCH BOX (Phase A Klangfilm-Lame H/V throat core, schema klangfilm-lame-hv-v1).
+# Kernel: tools/geometry/klangfilm_lame_hv.py. Parent (read-only): tools/geometry/klangfilm_lame.py.
+#
+# Four searched dimensions only, per the 2026-11-16 handoff section 4/7 "Stage A":
+#   g_theta_h0_deg      6.0 .. 17.0   true H wall half-angle at the throat (not a beamwidth half-angle)
+#   g_theta_v0_deg      3.0 .. 13.0   true V wall half-angle, independent of H
+#   g_h_mid_gain_mm     0.0 .. 20.0   positive-only H mid spread at the join (measured wall)
+#   g_v_mid_gain_mm     0.0 .. 3.75   positive-only V mid spread at the join (measured wall)
+# Everything else is pinned: the canonical incumbent genes, cd_core_blend = 1.0, join 0.65.
+#
+# Why the gains are positive-only here: the handoff's first-pass ranges (-12..+35 H, -20..+15 V)
+# are NOT lawful in this parameterisation. The B2 basis ramps as t^3, so a negative mm gain locally
+# dominates the V wall slope: measured at the canonical incumbent (join 0.65) the feasible negative
+# V gain is about -0.04 mm before the forward V radius stops being non-decreasing, and the
+# handoff's -8 mm seed already drops the V semi-axis to 15.02 mm at z ~ 61.8 mm (below the 18 mm
+# throat). The kernel refuses both instead of clamping. The lawful Stage A box is therefore the
+# positive quadrant; the negative-V "tighter interior" idea belongs to the Phase B integrated-slope
+# core, where a lower-but-positive slope is monotone by construction.
+#
+# Positive upper bounds are measured too, not guessed: at join 0.65 the forward-radius monotonicity
+# wall is 20.5-21.5 mm for the H gain and 4.0-5.5 mm for the V gain (the V wall falls as theta_V
+# rises, because a tighter throat leaves less slope for the B2 term to eat). 20.0 / 3.75 keep a
+# margin, so the whole box is lawful (see SEARCH_BOX.md; 200/200 LHS samples accepted).
+# Lawfulness of this box is measured, not assumed:
+#   .venv\Scripts\python.exe tools/geometry/klangfilm_hv_search_box.py
+#
+# NOT queued. No solve, no objective change, no acoustic claim. Owner authorises any GPU run.
+name: klangfilm_hv__stage_a_search
+family: FREEFORM
+brief_file: ../../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml
+generator:
+  name: grid
+  rows:
+    type: klangfilm_lame_hv_cd
+  n_phi: 19
+  n_s: 64
+  wall_thickness_mm: 3.0
+  seed_policy: explicit
+  span: quarter
+seed_params:
+  g_fc_hz: 494.4393461867
+  g_aspect: 2.0759495982
+  g_lame_p: 5.0063549541
+  g_end_frac: 1.7953432921
+  g_rim_sweep_ratio: 0.004898754
+  g_morph_frac: 0.3
+  g_source_blend_ratio: 0.0
+  g_entry_half_angle_deg: 2.0
+  g_cd_core_blend: 1.0
+  g_theta_h0_deg: 10.0
+  g_theta_v0_deg: 5.0
+  g_h_mid_gain_mm: 6.0
+  g_v_mid_gain_mm: 3.0
+  g_core_join_fraction: 0.65
+bounds:
+  g_fc_hz: {lo: 494.4393461867, hi: 494.4393461867, search: false}
+  g_aspect: {lo: 2.0759495982, hi: 2.0759495982, search: false}
+  g_lame_p: {lo: 5.0063549541, hi: 5.0063549541, search: false}
+  g_end_frac: {lo: 1.7953432921, hi: 1.7953432921, search: false}
+  g_rim_sweep_ratio: {lo: 0.004898754, hi: 0.004898754, search: false}
+  g_morph_frac: {lo: 0.3, hi: 0.3, search: false}
+  g_source_blend_ratio: {lo: 0.0, hi: 0.0, search: false}
+  g_entry_half_angle_deg: {lo: 2.0, hi: 2.0, search: false}
+  g_cd_core_blend: {lo: 1.0, hi: 1.0, search: false}
+  g_theta_h0_deg: {lo: 6.0, hi: 17.0}
+  g_theta_v0_deg: {lo: 3.0, hi: 13.0}
+  g_h_mid_gain_mm: {lo: 0.0, hi: 20.0}
+  g_v_mid_gain_mm: {lo: 0.0, hi: 3.75}
+  g_core_join_fraction: {lo: 0.65, hi: 0.65, search: false}
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.25
+  seed: 1234
+  budget: 60
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+  budget_counts: valid
+  max_attempts: 150
+description: STAGE A search box Klangfilm-Lame H/V Phase A (4 physical knobs, blend fixed 1, join fixed 0.65), CPU-lawfulness checked; not queued

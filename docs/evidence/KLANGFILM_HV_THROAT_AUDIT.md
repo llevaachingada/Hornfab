@@ -25,6 +25,7 @@ folder. Where a screenshot value and a local record disagree, the local record w
 | No-constriction / no-non-monotone-forward-radius refusal (no clamping) | implemented and tested |
 | Canonical recipe adapter + registration (search/verify/preview/mesh) | implemented, digest-bound |
 | Versioned report-only size policy for the new family only | implemented (`size_policy: report_only`) |
+| Measured-lawful Stage A search box (4 knobs) | implemented + sampled (`SEARCH_BOX.md`, 200/200 + 16/16 corners) |
 | Lamé exponent progression, rim sweep, curved-cap area lock | **unchanged from v1** by design in Phase A |
 | Beak/lip, throat landing, monotonic Phase B CD core | **not implemented** (Phase B; see §8) |
 | New BEM solves / polars / measured CD | **none** (no GPU work; §8 gate) |
@@ -88,6 +89,13 @@ station table:
 So the metadata scalar `source_auto_angle_deg = 2.0` is an **assumption**, not an HF1440 fact and not a wall
 tangent. The published HF1440 datasheet gives a 35.8 mm nominal throat and no numeric exit angle; nothing
 here invents one.
+
+**Source-boundary honesty:** the Phase A module does not touch the driver source cap, its normals or its
+velocity field — the physical ring stays the same 18 mm circle, so the existing source boundary is
+unchanged and remains a simulation assumption. A biaxial wall tangent is therefore **not** represented in
+the source boundary; only the downstream wall is anisotropic. Bridging that (a locally varying-tangent
+source ring, or a short common-tangent landing) is an explicit Phase B control, not something this module
+pretends to do.
 
 ---
 
@@ -194,6 +202,37 @@ Notes that matter:
   `size_policy: report_only`, which records `meta.envelope_violations` and keeps
   `meta.envelope_ok = false`. `report_only` is refused for any searched knob, so it cannot be used to
   optimise past the manufacturing envelope; a real enlarged-envelope study needs a widened brief.
+* A5's extreme mouth (axial z spanning 72.7–103.8 mm at the last station) is **inherited**, not produced by
+  the H/V core: the same parent genes with `cd_core_blend = 0` give the identical 72.7–103.8 mm loop, and
+  `rim_sweep_ratio = 0` collapses it to one plane. It is the legacy 31 mm H-side rim sweep on a deep
+  rollback (`end_frac 1.20`). Recorded as a mesh-risk observation, not a Phase A defect.
+* Render integrity: an independent visual pass found the H and V throat-zoom panels had different vertical
+  mm scales (per-panel autoscale). Both panels now share one radius range, and the contact sheet writes
+  through a buffered, atomically replaced temp file after three intermittent `OSError: [Errno 22]` failures
+  on direct `PIL`/`pathlib` writes to that evidence folder. Geometry was sound in every accepted panel
+  (throat cells ≈12.6 mm², no NaN, no inverted cells under `lame_shell`'s oriented-cell test).
+
+### 7b. The searchable box (Stage A), measured rather than assumed
+
+`examples/typologies/klangfilm_hv_2026-11-16/configs/stage_a_search.yaml` searches exactly four physical
+knobs with the canonical genes, `cd_core_blend = 1.0` and the join pinned at 0.65:
+
+| knob | declared box | measured wall above the seed | why |
+|---|---|---|---|
+| `g_theta_h0_deg` | 6–17° | none up to the 25° kernel limit | opening H more only adds slope |
+| `g_theta_v0_deg` | 3–13° | **17.113°** | a very steep early V slope overshoots; the aspect gate then pulls `b` back, so the forward V radius stops being non-decreasing |
+| `g_h_mid_gain_mm` | 0–20 mm | **21.623 mm** | B2 slope budget |
+| `g_v_mid_gain_mm` | 0–3.75 mm | **5.392 mm** (at θ_V 5°; ≈4.0 mm at 13°) | same budget, and it tightens as θ_V rises |
+
+`tools/geometry/klangfilm_hv_search_box.py` validates the box through the canonical adapter and then
+materialises **200/200 Latin-hypercube samples and 16/16 box corners** with no refusal. The lawful samples
+span only W 541.26–541.28 mm, H 260.730–260.740 mm, D 233.668–233.690 mm: Stage A isolates the
+entrance/throat wall and does not move the mouth or the envelope. The handoff's first-guess negative gain
+ranges (`−12..+35`, `−20..+15`) are excluded by measurement, not taste: the negative V wall is ≈ −0.04 mm
+for monotonicity and ≈ −5.2 mm for throat constriction, and the specified −8 mm seed sits well past both.
+
+A box that is lawful is still not a box that is *acoustically* useful. Nothing here claims that any point
+in it improves CD; that is what the controlled screen in §8's gate is for.
 
 ---
 
@@ -239,12 +278,13 @@ geometry does not exist yet; drawing them would be fiction.
   tests/test_tools_klangfilm_lame.py tests/test_lame_sections.py -q -p no:cacheprovider
 ```
 
-Result: 71 passed, exit 0 (0 failed, 0 skipped). The new kernel tests cover: exact legacy parity, the pure
+Result: 72 passed, exit 0 (0 failed, 0 skipped). The new kernel tests cover: exact legacy parity, the pure
 `cd_hv_delta` C1/C2/linearity/out-of-interval-zero properties, per-axis independence, mid-gain interior
 locality, constriction refusal (including the `−4 mm` case), monotone forward branch + untouched rollback,
 Lamé `p` unchanged, `n_phi`/`n_s` convergence, determinism, validation refusals, and that the driver
 `exit_angle_deg` is **not** used as a wall tangent. The family tests cover recipe bind/replay, digest
-sensitivity to the parent kernel and the cap math, both dormancy guards, and the report-only size policy.
+sensitivity to the parent kernel and the cap math, both dormancy guards, the report-only size policy, and
+that the shipped Stage A box's seed plus all 2^4 extreme combinations materialise.
 
 Config-level end-to-end (`load_config → GeneratedSpace → grid.rows_grid_points → knobs_for` replay) verified
 for a0, a1 and a5.

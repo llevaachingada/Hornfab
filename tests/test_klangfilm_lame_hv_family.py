@@ -1,4 +1,7 @@
 ﻿import copy
+from pathlib import Path
+
+import yaml
 
 import numpy as np
 import pytest
@@ -111,3 +114,31 @@ def test_report_only_size_policy_records_instead_of_refusing():
         family.validate_search_config(spec, active, loose, BRIEF)
 
 
+
+
+def test_stage_a_search_box_is_lawful():
+    """The shipped searchable box must stay inside the kernel's geometric invariants."""
+    import itertools
+    root = Path(__file__).resolve().parents[1]
+    cfg_path = root / "examples/typologies/klangfilm_hv_2026-11-16/configs/stage_a_search.yaml"
+    raw = yaml.safe_load(cfg_path.read_text(encoding="utf-8"))
+    brief = yaml.safe_load((cfg_path.parent / raw["brief_file"]).resolve().read_text(encoding="utf-8"))
+    seed = {k: float(v) for k, v in raw["seed_params"].items()}
+    grid_keys = {k: float(raw["generator"][k]) for k in ("n_phi", "n_s", "wall_thickness_mm")}
+    searched = ("g_theta_h0_deg", "g_theta_v0_deg", "g_h_mid_gain_mm", "g_v_mid_gain_mm")
+    bounds = raw["bounds"]
+    # only the four physical Stage A knobs may be searched; blend and join stay pinned
+    searched_names = {k for k, b in bounds.items() if b.get("search", True)}
+    assert searched_names == set(searched)
+    assert bounds["g_cd_core_blend"]["search"] is False and bounds["g_cd_core_blend"]["lo"] == 1.0
+    # the canonical adapter must validate the box (fixed==seed, endpoints, dormancy)
+    from hornlab_search.config import load_config
+    from hornlab_search.design.generated import GeneratedSpace
+    GeneratedSpace.from_config(load_config(cfg_path))
+    # seed + all 2^4 extreme combinations must materialise
+    for combo in itertools.product(*[(float(bounds[k]["lo"]), float(bounds[k]["hi"])) for k in searched]):
+        shape = {k[2:]: float(v) for k, v in {**seed, **dict(zip(searched, combo))}.items()}
+        shape.update(grid_keys)
+        pts, meta = family.kernel.make_grid(shape, {"driver": brief["driver"]})
+        assert pts.shape[0] == int(grid_keys["n_phi"]) and np.isfinite(pts).all()
+        assert meta["core_mode"] == "hv_throat_phase_a"
