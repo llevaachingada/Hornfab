@@ -1070,3 +1070,25 @@ Bayesian jobs; GPU hosts cleared after each of the 3 diagnostics (VRAM back to d
   `docs/renders/2026-11-15-pucker/strong_a_vs_canonical.png`.
 - No running GPU job was interrupted. `bo_cov_pilot_2026-11-16` finished at 01:47:41Z before the queue
   started; the four runs completed and the GPU was cleaned after each.
+
+## 2026-11-17 (agent) - sigma0/bound-width coupling measured; guidance institutionalized, no code changed
+
+- Ask (owner): "make sure agents see this" — don't hardcode sigma0, put it where agents read.
+- What was measured: same 12-key config (`hl__...` klangfilm b3_soft, brief smooth) ran twice.
+  sigma0 0.25 + global generator bounds: 24/45 valid rows at the flat 1000 penalty, never improved
+  the seed, 45 GPU evals wasted (`20261117T070714Z-screen-2dabac`). sigma0 0.10 + seed-centered
+  ±30 % bounds: best J 6.401 → 2.819 (−56 %), 9 refusals (`20261117T071329Z-screen-e4f90d`).
+  Official backing: pycma docstring (sigma0 in optimizer units, no default), Hansen tutorial
+  1604.00772 σ semantics + §B.5 repair warning, Practical Hints x0 ± 2σ0 coverage and local-improve
+  σ0 ∈ [0.001,0.1]. Evidence with pasted run rows and the ~80-run retrospective table:
+  `docs/evidence/SIGMA0_ANALYSIS_2026-11-17.md`.
+- Where it now lives so agents see it: `hornlab-search-economy` SKILL.md check 3 (measured backing
+  paragraph + stage-based starting points + storm signature), one routing line in `AGENTS.md`
+  ("sigma0 rule (2026-11-17)"), ISSUES.md dated entry. `search/cma.py` deliberately untouched.
+- Filing gap to note: `docs/plan/12_RESEARCH_BASIS.md` is frozen (plan/**), so the research-basis
+  citation for the CMA-ES sources lives in the evidence doc, not in plan. If senior prefers the
+  citation mirrored into an owned doc, say where.
+- Possible policy follow-up (owner decision): make the preflight's sigma expectation a `--strict`
+  gate for night queues (warn today, fail under --strict/HORNLAB_GPU_LOCK=refuse nights).
+- No GPU job was interrupted when this entry was written (live b3 run `e4f90d` proceeded through
+  the commit; git mutations only).

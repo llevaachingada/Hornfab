@@ -1,5 +1,24 @@
 # ISSUES
 
+## 2026-11-17 - sigma0/bound-width coupling: measured failure mode + institutionalized guidance
+
+- FOUND (measured, `docs/evidence/SIGMA0_ANALYSIS_2026-11-17.md`): sigma0 ≥ 0.25 with >8 free keys
+  or global bounds produces refusal storms (25-48 % of evals at the flat 1000 penalty) and flat
+  traces. Controlled A/B tonight: same 12-key config, sigma0 0.25/global bounds = 24/45 refusals,
+  zero improvement, 45 wasted GPU evals; sigma0 0.10 + seed-centered ±30 % bounds = best J 6.401 →
+  2.819 (−56 %), 9 refusals.
+- FOUND (related): converged-incumbent seeds with small budgets go flat regardless of sigma0 (the
+  four corelaw cohort screens at J 3.233: flat 59-100/60-101). That is restart attribution, not
+  step size; `hornlab-search-economy` already covers it.
+- DONE (guidance, no hardcoding): sigma0 selection guidance added to the `hornlab-search-economy`
+  skill (check 3) and AGENTS.md routing; official CMA-ES sources (pycma docstring, Hansen tutorial
+  1604.00772, Practical Hints: x0 ± 2σ0 coverage, local-improvement σ0 ∈ [0.001, 0.1]) cited in the
+  evidence doc. `search/cma.py` untouched — sigma0 stays a config knob governed by preflight.
+- OPEN (owner): whether stage-based sigma0 starting points listed in the skill should be enforced
+  as a preflight `--strict` rule; `docs/plan/12_RESEARCH_BASIS.md` is frozen so the research-basis
+  citation lives in the evidence doc instead.
+- OPEN (engineering): none — no code changed.
+
 ## 2026-11-17 - Consolidation: 18 archive refs, docs + H12 landed, one pre-existing B8 failure
 
 - DONE: local refs preserved before cleanup: 18 archive tags, 5 verified bundles, and snapshots of

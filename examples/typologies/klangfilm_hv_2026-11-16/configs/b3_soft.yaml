@@ -20,9 +20,9 @@ generator:
 seed_params:
   g_aspect: 2.0759495982
   g_beak_diagonal_mm: 0.0
-  g_beak_h_setback_mm: 10.0
-  g_beak_start_frac: 0.9
-  g_beak_v_projection_mm: 5.0
+  g_beak_h_setback_mm: 2.0
+  g_beak_start_frac: 0.95
+  g_beak_v_projection_mm: 1.0
   g_cd_core_blend: 1.0
   g_core_length_mm: 340.0
   g_end_frac: 1.7953432921
@@ -41,26 +41,26 @@ seed_params:
   g_theta_v1_deg: 30.4
 bounds:
   g_aspect: {lo: 2.0759495982, hi: 2.0759495982, search: false}
-  g_beak_diagonal_mm: {lo: 0.0, hi: 0.0, search: false}
-  g_beak_h_setback_mm: {lo: 10.0, hi: 10.0, search: false}
-  g_beak_start_frac: {lo: 0.9, hi: 0.9, search: false}
-  g_beak_v_projection_mm: {lo: 5.0, hi: 5.0, search: false}
+  g_beak_diagonal_mm: {lo: -5.0, hi: 5.0, search: true}
+  g_beak_h_setback_mm: {lo: 0.0, hi: 10.0, search: true}
+  g_beak_start_frac: {lo: 0.85, hi: 0.99, search: true}
+  g_beak_v_projection_mm: {lo: 0.0, hi: 5.0, search: true}
   g_cd_core_blend: {lo: 1.0, hi: 1.0, search: false}
-  g_core_length_mm: {lo: 340.0, hi: 340.0, search: false}
+  g_core_length_mm: {lo: 238.0, hi: 442.0, search: true}
   g_end_frac: {lo: 1.7953432921, hi: 1.7953432921, search: false}
   g_entry_half_angle_deg: {lo: 2.0, hi: 2.0, search: false}
   g_fc_hz: {lo: 494.4393461867, hi: 494.4393461867, search: false}
-  g_lame_end_frac: {lo: 0.95, hi: 0.95, search: false}
+  g_lame_end_frac: {lo: 0.665, hi: 0.99, search: true}
   g_lame_p: {lo: 5.0063549541, hi: 5.0063549541, search: false}
-  g_lame_p_mouth: {lo: 3.0, hi: 3.0, search: false}
-  g_lame_start_frac: {lo: 0.2, hi: 0.2, search: false}
+  g_lame_p_mouth: {lo: 2.1, hi: 3.9, search: true}
+  g_lame_start_frac: {lo: 0.14, hi: 0.26, search: true}
   g_morph_frac: {lo: 0.3, hi: 0.3, search: false}
   g_rim_sweep_ratio: {lo: 0.004898754, hi: 0.004898754, search: false}
   g_source_blend_ratio: {lo: 0.0, hi: 0.0, search: false}
-  g_theta_h0_deg: {lo: 7.0, hi: 7.0, search: false}
-  g_theta_h1_deg: {lo: 52.1, hi: 52.1, search: false}
-  g_theta_v0_deg: {lo: 6.0, hi: 6.0, search: false}
-  g_theta_v1_deg: {lo: 30.4, hi: 30.4, search: false}
+  g_theta_h0_deg: {lo: 4.9, hi: 9.1, search: true}
+  g_theta_h1_deg: {lo: 36.5, hi: 60.0, search: true}
+  g_theta_v0_deg: {lo: 4.2, hi: 7.8, search: true}
+  g_theta_v1_deg: {lo: 21.3, hi: 39.5, search: true}
 
 mesh:
   epw: 6.0
@@ -81,12 +81,12 @@ solve:
   cuda_fused: true
 search:
   algorithm: cma
-  sigma0: 0.25
+  sigma0: 0.10
   seed: 1234
-  budget: 60
+  budget: 100
   popsize: null
   tolfun: 0.001
   infeasible_penalty: graded
   budget_counts: valid
-  max_attempts: 150
+  max_attempts: 250
 description: "GEOMETRY DIAGNOSTIC Klangfilm-Lame Phase B B3 soft"

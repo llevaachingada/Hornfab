@@ -1,5 +1,35 @@
 # CONTINUITY
 
+## 2026-11-17 (latest) - sigma0/bound-width failure mode measured; guidance into skill + AGENTS.md; no solver code changed
+
+- **What happened:** the Klangfilm b3_soft search (`20261117T070714Z-screen-2dabac`) burned 45 GPU
+  evals with ZERO improvement — sigma0 0.25 on global generator bounds over 12 free keys produced a
+  refusal storm (24/45 rows at the flat 1000 penalty) and a flat trace. Same config relaunched with
+  sigma0 0.10 + seed-centered ±30 % bounds (`20261117T071329Z-screen-e4f90d`) reached best J 2.819
+  vs seed 6.401 (−56 %) with 9 refusals. Controlled A/B, only sigma0 + bound width changed.
+- **Retrospective** (~80 runs ≥15 valid rows since 11-15, script `scratch/sigma_analysis.py`, table
+  `scratch/sigma_out2.txt`): refusal storms track sigma0 × free-keys × bound width (0.22–0.25 on
+  wide boxes: 25-48 % median refusal, flat tails 32-45; 0.20 on modest boxes: 1.2 % refusal),
+  while refinement at 0.12 near a live basin gains ~8 %. The four corelaw screens flat at J 3.233
+  (0.15, 59-100/60-101 evals) are converged-incumbent attribution, not step size.
+- **Official grounding** (explorer lane): pycma docstring — sigma0 is the per-coordinate std in
+  optimizer units, no default; Hansen tutorial 1604.00772 §1/§5 σ semantics, §B.5 repair warning;
+  Practical Hints — x0 ± 2σ0 coverage, local-improvement σ0 ∈ [0.001, 0.1] on [0,10]-scaled vars;
+  small-budget note: C stays ≈ I, so sigma0 decides basin sampling. Our `search/cma.py` runs a
+  unit box [0,1]^k, so sigma0 IS in per-knob normalized units.
+- **Institutionalized (no hardcoding, `search/cma.py` untouched):** measured section + storm
+  signature + stage-based starting points added to the `hornlab-search-economy` skill (check 3);
+  one `AGENTS.md` routing line requires the preflight sigma sweep before non-trivial queues;
+  dated entry in `docs/ISSUES.md`. CMA-ES source citations live in
+  `docs/evidence/SIGMA0_ANALYSIS_2026-11-17.md` (plan/** frozen, incl. 12_RESEARCH_BASIS).
+- **Also this pass:** `examples/typologies/klangfilm_hv_2026-11-16/configs/b3_soft.yaml` bounds
+  moved to seed-centered ±20-30 % windows with all 12 hv-core knobs searchable (parent knobs stay
+  pinned — the adapter hard-rejects them in hv_core mode; 5 relaunches caught that one inert key
+  at a time before `klangfilm_lame_hv_core_family.py` L41-42 was read). Live b3 run was NOT
+  interrupted by the commit.
+- **Status:** GPU lane live (b3_soft e4f90d, budget 100); CPU lane free; no queue started or
+  changed. Owner decision open: preflight `--strict` sigma gate for nights (NOTES_FOR_SENIOR).
+
 ## 2026-11-17 03:2x - Consolidation: preserved refs, docs + H12 landed, worktrees/branches collapsed
 
 - Preservation: 18 `archive/consolidation-2026-11-17/*` tags plus verified bundles in

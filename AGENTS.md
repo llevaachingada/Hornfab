@@ -288,6 +288,12 @@ The orchestrator has all skills; fixer and designer are granted the hornlab skil
 treat a dated handoff as current routing. Objective versions: 4 = tolerance-normalised, 5 = MEH,
 6 = loading_smooth (Le Cléac'h), 7 = hardened CD objective (written "5" on the old hardened branch;
 data relabelled). Never rank J across versions.
+
+**sigma0 rule (2026-11-17):** sigma0 and bound width are one measured decision — never ship sigma0
+≥ 0.25 with >8 free keys or global bounds; run `tools/search_preflight.py`'s sigma sweep before
+queueing non-trivial searches and pick sigma0 for ≈≥20 % expected in-basin hits. Evidence +
+stage-based starting points: `docs/evidence/SIGMA0_ANALYSIS_2026-11-17.md` and the
+`hornlab-search-economy` skill.
 ## GPU / Julia hygiene (measured 2026-10-12; applies to every agent)
 
 `hornlab_beat_bem` runs solves in a **persistent Julia host** (`HORNLAB_BEAT_PERSISTENT_HOST=1`, idle

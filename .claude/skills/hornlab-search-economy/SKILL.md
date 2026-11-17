@@ -50,6 +50,19 @@ changes.
    is below the policy floor, the budget cannot find the region. Fix the step, the budget, or the
    box — in that order. A measured spread far below `sigma0` with best-at-eval-0 is the signature
    of this failure.
+
+   **Measured backing (2026-11-17, `docs/evidence/SIGMA0_ANALYSIS_2026-11-17.md`).** sigma0 and
+   bound width are ONE decision, not two. Controlled A/B on the same 12-key config: sigma0 0.25 on
+   global generator bounds → 24/45 refusals, zero improvement, flat from eval 1; sigma0 0.10 on
+   seed-centered ±30 % bounds → best J −56 % by eval 102, 9 refusals. Retrospective over ~80 recent
+   runs: refusal storms track sigma0 × free-keys × bound width (sigma0 0.22–0.25 on wide boxes:
+   25–48 % median refusal with flat tails), while sigma0 0.20 on modest boxes is quiet (1.2 %
+   refusal) and refinement at 0.12 near a live basin gains 8 %. Starting points when the preflight
+   sweep is unavailable — greenfield on global bounds with <6 keys: 0.15–0.20; seed-centered
+   ±20–30 % bounds: 0.08–0.15; refinement at a converged incumbent: 0.05–0.12 and say so in the
+   night plan. Never ship sigma0 ≥ 0.25 with >8 free keys or global bounds. A flat trace with
+   ≥30 % refusals is the storm signature: stop the arm, sweep sigma0 with the preflight, relaunch —
+   do not let budget burn out in refusals.
 4. **Economy.** With `--samples N` the tool samples the box **uniformly** through the real
    generator/mesher and reports the valid fraction and refusal kinds *before* the queue. CMA
    concentrates near the seed, so read the uniform number as a bound — it over-represents the far
