@@ -218,6 +218,26 @@
   file; request in NOTES_FOR_SENIOR).
 - Tests: `tests/test_design_recipe_meta.py` (7). gmsh-dependent tests fail in this container
   (libGLU missing) as before; no GPU.
+## 2026-11-17 - WP 2.1: finalist fidelity tier resolves in config (offline, no solves)
+
+- Added mode `finalist` additively: `FREQ_GRIDS["finalist"]` = 36 points on 300-16,000 Hz (>= 29;
+  same band edges as verify, clipped to `band_hi_hz` like the others), `MODES` gains `finalist`,
+  `types.Mode` likewise. `MeshSettings.dof_cap("finalist")` = `mesh.dof_cap_finalist` when the YAML
+  sets it (new optional key), else `FINALIST_DOF_FACTOR` (2) x `dof_cap_screen`. `mesh_spec("finalist")`
+  and `solve_spec("finalist")` therefore carry their own max_triangles, f_max, freqs and mode, so the
+  finalist mesh and solve identities are distinct. Balloon density follows verify.
+- screen / verify / final specs, hashes and `config_sha` are unchanged (absent key leaves `raw`
+  untouched; `tests/test_config_fidelity_tiers.py` pins this). Budget profile `fidelity-ladder-10`
+  (10 screen + 10 finalist-tier solves counted as `verify_calls`, B1 shape) added to
+  `studies/package.py`; existing profiles unchanged.
+- Findings: frozen screen grid is 12 points (18 only with `screen_extra_hz`) and frozen verify is 25
+  (>= 29 only with `verify_points_per_octave`); the plan's 18/29 describe configured briefs, not the
+  frozen defaults. The pre-existing `final` mode (36 pts, `dof_cap_final`) is untouched and is NOT the
+  finalist tier (its cap equals screen in most examples).
+- OPEN wiring: CLI `--mode` choices (cli.py, gui/jobs.py SEARCH_MODES) still list screen/verify/final;
+  `evaluate.py`/runner dispatch of `finalist` (evaluate.py:1277 is verify-only, owned by another
+  agent); `cli.py:562` and mesh build already accept `mode="finalist"` via `dof_cap`. No example YAML
+  sets `dof_cap_finalist` (default 2x is used). B1 itself (WP 2.2) is not run.
 
 ## 2026-11-17 04:1x - Lane review of the Fable corpus handed to the senior reviewer (not a senior decision)
 

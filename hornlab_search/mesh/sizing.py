@@ -83,7 +83,7 @@ def dof_cap_for(mesh_spec, settings, mode: str | None = None) -> int:
     qf = _check_quadrants(mesh_spec.quadrants)
     slack = float(getattr(settings, "max_triangle_slack", 1.15))
     dpt = float(settings.dof_per_triangle)
-    for m in ("screen", "verify", "final"):
+    for m in ("screen", "verify", "final", "finalist"):
         cap = int(settings.dof_cap(m))
         if mesh_spec.max_triangles in (max_triangles_for(cap, mesh_spec.quadrants, dpt, slack),
                                        int(math.ceil(round(2 * cap * qf * slack, 6)))):

@@ -7,7 +7,7 @@ from typing import Literal, Protocol
 
 import numpy as np
 
-Mode = Literal["screen", "verify", "final"]
+Mode = Literal["screen", "verify", "final", "finalist"]
 Family = Literal["OSSE", "R-OSSE", "ICW", "FREEFORM"]
 
 

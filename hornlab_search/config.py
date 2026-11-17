@@ -28,9 +28,17 @@ FREQ_GRIDS: dict[str, tuple[float, float, int]] = {
     "screen": (500.0, 10_000.0, 12),
     "verify": (300.0, 16_000.0, 25),
     "final": (250.0, 20_000.0, 36),
+    # WP 2.1 (fidelity ladder, 2026-11-17): the FINALIST tier. >= 29 frequencies on the verify band,
+    # solved on a mesh at FINALIST_DOF_FACTOR x the screen DOF cap. It is a separate mode so the
+    # screen/verify/final specs, hashes and config_sha stay byte-identical.
+    "finalist": (300.0, 16_000.0, 36),
 }
 
-MODES = ("screen", "verify", "final")
+MODES = ("screen", "verify", "final", "finalist")
+
+# WP 2.1: default ratio of the finalist DOF cap to the screen DOF cap. A config overrides the whole
+# cap with ``mesh.dof_cap_finalist`` (absent = FINALIST_DOF_FACTOR x ``mesh.dof_cap_screen``).
+FINALIST_DOF_FACTOR = 2
 
 # WP11b: the search algorithms this config knows how to run. The CLI entry (``search.cma.search``)
 # dispatches on this value; anything else is refused at load time with a ``search.algorithm`` prefix.
@@ -65,8 +73,13 @@ class MeshSettings:
     band_split: dict | None = None     # WP8: {"edges_hz": [...]} -> one mesh per band (absent = today)
     curvature_npts: float = 0.0        # WP4 (throughput): Gmsh Mesh.MeshSizeFromCurvature for the CAD
                                        # route; 0 = off = today's meshes and hashes exactly
+    dof_cap_finalist: int = 0          # WP 2.1: 0 (absent) = FINALIST_DOF_FACTOR x dof_cap_screen
 
     def dof_cap(self, mode: str) -> int:
+        if mode == "finalist":
+            if int(self.dof_cap_finalist) > 0:
+                return int(self.dof_cap_finalist)
+            return int(FINALIST_DOF_FACTOR * int(self.dof_cap_screen))
         return int(getattr(self, f"dof_cap_{mode}"))
 
 
@@ -109,6 +122,7 @@ class SolveSettings:
     def balloon_points(self, mode: str) -> int:
         if not self.balloon:
             return 0
+        # WP 2.1: the finalist tier is a verify-class solve (verify balloon density).
         return int(self.balloon_points_screen if mode == "screen" else self.balloon_points_verify)
 
 
@@ -1382,7 +1396,7 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
         raw = _brief_preflight_and_derive(raw, brief_d, where)
 
     mesh = _build(MeshSettings, _require(raw, "mesh", where), f"{where}:mesh",
-                  optional=("max_triangle_slack", "rear_res_factor", "band_split", "curvature_npts"))
+                  optional=("max_triangle_slack", "rear_res_factor", "band_split", "curvature_npts", "dof_cap_finalist"))
     solve_section = dict(_require(raw, "solve", where))
     if solve_section.get("freq_grid") is not None:
         _validate_freq_grid(solve_section["freq_grid"], f"{where}:solve")
