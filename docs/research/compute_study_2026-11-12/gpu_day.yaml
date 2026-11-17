@@ -1,0 +1,158 @@
+# GPU night queue — 2026-11-13 (compute-allocation study 2026-11-12)
+# Budget: ~20 h of RTX 4060 8 GB (beat_cuda, dof_cap_screen 12000, cuda_fused on)
+# Throughput reference (tonight's N1 matrix):
+#   1k dofs fused-on: 131s/batch (~10 s/freq); 4k: 232s/batch; 8k: 503s/batch; fused-off at 8k: 318s
+#   fused-off prefetch-on 8k: OOM at 7731 MiB (exit=1) — keep fused ON, prefetch OFF for 8k searches
+# Timing estimates use 20 s/eval for OSSE atlas, 5 s/eval for lecleach (3-knob, low dofs)
+#
+# PREREQUISITES:
+#   - Copy proposed_configs/stageA_macro__crease_core_law_abs.yaml to repo (G8 job) — owner action
+#   - CPU second lane integration live before running G7-C* concurrently
+#
+night: gpu_2026-11-13
+jobs:
+
+  # --- Hygiene (always first) ---
+  - id: n0_hygiene
+    kind: command
+    timeout_s: 600
+    argv:
+      - .venv\Scripts\hornlab-search.exe
+      - gpu-clean
+
+  # --- N2 calibration (gating: must run before further atlas expansions) ---
+  # Band-split vs single mesh, 10 m vs 2 m, epw 6 vs 9, on 6 stored v4 finalists.
+  # Uses hornlab-search campaign --verify-top 5 or equivalent verify pipeline.
+  # Est: 3-4 h. Gates every later night — if screen ranking breaks, halt new searches.
+  - id: n2_calibration
+    kind: command
+    timeout_s: 14400
+    argv:
+      - .venv\Scripts\python.exe
+      - tools\evidence_bytecheck_m5.py
+      - --top
+      - '5'
+      - --runs-dir
+      - runs
+
+  # --- Resume atlas__core_law (highest value: still-improving, L_mm rho=-0.70) ---
+  # 347 valid evals at seed 1030; L_mm dominant (longer horns → lower J).
+  # +400 budget should fill 20+ new bins and confirm whether L_mm signal persists.
+  # Est: 400 × 20 s/eval = 8000 s = 2.2 h
+  - id: n3_core_law_resume
+    kind: search
+    config: examples/typologies/atlas_2026-10-30/atlas__core_law.yaml
+    resume: runs/20261030T170642Z-screen-fbab4f
+    budget: 400
+    mode: screen
+
+  # --- Multi-seed replicate: atlas__core_law seed 1031 ---
+  # Exact same geometry/bounds/frequencies as seed 1030 run; only seed differs.
+  # Purpose: establish seed variance on the most active v4 atlas cell.
+  # Requires: proposed_configs/atlas__core_law_seed1031.yaml copied to
+  #   examples/typologies/atlas_2026-10-30/atlas__core_law_seed1031.yaml
+  # Est: 300 × 20 s/eval = 6000 s = 1.7 h
+  - id: n4_core_law_seed1031
+    kind: search
+    config: examples/typologies/atlas_2026-10-30/atlas__core_law_seed1031.yaml
+    budget: 300
+    mode: screen
+
+  # --- Resume lecleach_rollback v6 (142 valid evals only; first v6 objective run) ---
+  # Run dir config already has v6 brief merged in; no --brief needed for resume.
+  # Sensitivity: 3-knob landscape, no bound walls, low dofs → fast.
+  # Est: 300 × 5.2 s/eval = 1560 s = 0.4 h
+  - id: n5_lecleach_v6_resume
+    kind: search
+    config: examples/typologies/lecleach_rollback.yaml
+    resume: runs/20261112T113047Z-screen-24053e
+    budget: 300
+    mode: screen
+
+  # --- Seed-1235 replicate: lecleach_rollback v6 ---
+  # Second CMA trajectory for variance. Config file uses absolute brief path.
+  # Requires: proposed_configs/lecleach_rollback_v6_seed1235.yaml accessible,
+  #   e.g. copied to examples/typologies/ — OR run as kind: command below.
+  # Est: 300 × 5.2 s/eval = 1560 s = 0.4 h
+  - id: n6_lecleach_v6_seed1235
+    kind: command
+    timeout_s: 3600
+    argv:
+      - .venv\Scripts\hornlab-search.exe
+      - search
+      - --config
+      - examples/typologies/lecleach_rollback.yaml
+      - --brief
+      - examples/briefs/lecleach_rollback_1in_v6.yaml
+      - --budget
+      - '300'
+      - --mode
+      - screen
+
+  # --- Resume atlas__osse_ext_throat (5/324 bins; first ext-throat atlas) ---
+  # Only 140 valid evals and 5 bins after tonight. L_mm dominant (rho=-0.87).
+  # 200 more evals at ~8.7 s/eval (small dofs, low VRAM 574 MiB peak).
+  # Est: 200 × 8.7 s = 1740 s = 0.5 h
+  - id: n7_ext_throat_resume
+    kind: search
+    config: examples/typologies/atlas_2026-10-30/atlas__osse_ext_throat.yaml
+    resume: runs/20261112T110126Z-screen-c414b1
+    budget: 200
+    mode: screen
+
+  # --- Staged A/B retry (n7 from 2026-11-12 failed in 2 s) ---
+  # ROOT CAUSE: stageA config brief_file "../../briefs/.." relative to source dir
+  #   examples/typologies/staged_ab_2026-10-31/ becomes invalid from the generated
+  #   config location runs/staged_ab.../configs/. Brief EXISTS; path resolution fails.
+  # FIX: use --stage-a with the abs-path version; copy stageA_macro__crease_core_law_abs.yaml
+  #   to examples/typologies/staged_ab_2026-10-31/ first (owner action).
+  # PERMANENT FIX: 3-line change in tools/run_staged_search.py (see proposed_configs file).
+  # Est: 400-eval chain (stageA 120 + stageB 160 + joint 120) ~20 s/eval = 8000 s = 2.2 h
+  - id: n8_staged_ab_retry
+    kind: command
+    timeout_s: 10800
+    argv:
+      - .venv\Scripts\python.exe
+      - tools\run_staged_search.py
+      - --stage-a
+      - examples\typologies\staged_ab_2026-10-31\stageA_macro__crease_core_law_abs.yaml
+      - --out
+      - runs\staged_ab_2026-11-13
+      - --both
+      - --budget-total
+      - '400'
+
+  # --- Narrow-bounds follow-up: native__ath_core_v4 ---
+  # Three bound walls identified: morph_fixed lo (8/19), morph_width_mm hi (8/19), q hi (7/19).
+  # Narrowed config: morph_fixed [0,0.1], morph_width_mm [390,456.55], q [0.97,1.0], seed 1235.
+  # Requires: proposed_configs/native__ath_core_v4_narrow.yaml accessible.
+  # Est: 200 × 20 s/eval = 4000 s = 1.1 h
+  - id: n9_ath_core_narrow
+    kind: command
+    timeout_s: 5400
+    argv:
+      - .venv\Scripts\hornlab-search.exe
+      - search
+      - --config
+      - examples/typologies/campaign_2026-10-26_v4/native__ath_core_v4_narrow.yaml
+      - --budget
+      - '200'
+      - --mode
+      - screen
+
+  # --- Resume atlas__ath_core (1326 rows; still-improving per inventory) ---
+  # Further coverage fill after tonight's N3 run (+400). Best J=2.0987, 31/324 bins.
+  # a_deg has highest sensitivity (rho=+0.26); no bound walls — search is free to explore.
+  # Est: 400 × 20 s/eval = 8000 s = 2.2 h
+  - id: n10_ath_core_resume
+    kind: search
+    config: examples/typologies/atlas_2026-10-30/atlas__ath_core.yaml
+    resume: runs/20261030T111108Z-screen-377bbe
+    budget: 400
+    mode: screen
+
+# Total estimated: 0.2 (hygiene) + 4 (N2 cal) + 2.2 + 1.7 + 0.4 + 0.4 + 0.5 + 2.2 + 1.1 + 2.2
+#   = ~14.9-16.9 h (calibration may run long; full 20 h with margin)
+# Skipped (do not schedule): any objective v5 (MEH — PAUSED per owner 2026-11-12)
+# Note: n6_lecleach_v6_seed1235 is kind: command because the config file is in study_2026-11-12/
+#   proposed_configs/ not in the repo. Copy to examples/ first to use kind: search.
