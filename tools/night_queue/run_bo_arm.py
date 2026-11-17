@@ -45,12 +45,24 @@ def main():
             "--seed", args.seed, "--label", Path(args.root).name, "--min-rows", "100",
             "--budget-profile", args.budget_profile, "--deadline-hours", "6"]
     prep.extend(["--task", args.task] if args.task else ["--config", args.config])
-    proc = subprocess.run(prep, cwd=REPO, text=True, stdout=subprocess.PIPE)
-    print(proc.stdout, end="", flush=True)
+    # Stream the child's stdout LINE BY LINE: a captured pipe deadlocks when a successful
+    # preparation prints its ~140 KB package JSON (the stdout buffer fills, the child blocks
+    # mid-write, and the parent waits for an exit that never comes - observed 2026-11-17 as a
+    # 20-minute zero-CPU hang on the first successful prep of the night).
+    proc = subprocess.Popen(prep, cwd=REPO, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    lines: list[str] = []
+    assert proc.stdout is not None
+    for line in proc.stdout:
+        lines.append(line)
+        sys.stdout.write(line)
+        sys.stdout.flush()
+    proc.stdout.close()
+    proc.wait()
     if proc.returncode:
         return proc.returncode
+    json_lines = [ln.strip() for ln in lines if ln.strip().startswith("{")]
     try:
-        result = json.loads(proc.stdout.strip().splitlines()[-1])
+        result = json.loads(json_lines[-1])
         if result["preflight"]["status"] != "ok" or any(x != "ok" for x in result["steps"].values()):
             raise ValueError("preparation or execution capability is not ok")
     except (ValueError, KeyError, IndexError, TypeError) as exc:
