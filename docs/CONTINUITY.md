@@ -1,5 +1,48 @@
 # CONTINUITY
 
+## 2026-11-17 07:1x - Lane review: gate false-PAUSE fixed; klame BO arms are unsupported point-grid designs
+
+- **Both lanes verified on the right queue.** GPU night `cd_rrect_2026-11-17` ran `t_trit80_rc2` under
+  `runs/.gpu.lock` (pid 41452, command `study 1ff9fb9cb6d04e358685213206425478`) with worker dir
+  `runs/lanes/gpu/workers`; CPU night `bo_cpu_2026-11-17` held `runs/.cpu.lane.lock` (pid 57892,
+  `night bo_cpu_2026-11-17`) with `runs/lanes/cpu/workers` and logged `cpu lane: GPU lock and VRAM
+  accounting skipped`. `package.json` carries `lane: gpu|cpu` and `studies/lanes.py` takes the matching
+  lock, so a CPU arm cannot take the GPU lock.
+- **BoTorch recording verified.** `turbo_trit80_rc2`: package `running`, `observation_seq=20` and
+  attempts 20 = observations 20 = `screen/search.ndjson` rows 20 = design dirs 20, with per-row
+  objectives (best J 4.9386). `launches: 0` is not a defect - it is the GUI-launch idempotency ledger
+  (`studies/service.py`); the night executes `studies.cli run --execute` directly.
+- **Gate false-PAUSE (root cause + fix).** `runs/nights/<night>/PAUSE` said `foreign GPU-lock holder`
+  from 06:42:33 while the lock was our own study; the runner honours PAUSE before every job
+  (`run_campaign_night.py:1373`), so all 37 jobs would have stalled after `t_trit80_rc2`. `gate()`
+  attributed holders by argv tokens, but a BO arm holds the lane as `study <study_id>`
+  (`studies/lanes.py`), sharing no token with `run_bo_arm.py --root ...`. Fix:
+  `_study_arm_holder_ours()` resolves that id through the running job's `--root` registry
+  (`<root>/studies.sqlite3`); `gate()` gained an injectable `root`. Regression
+  `tests/test_night_refresh_gate.py` (4 tests pass). Same file: `refresh()` referenced an undefined
+  `young` (a rename to `complete_elsewhere` left it behind), so the "budget covered by a sibling
+  thread" deferral would have raised `NameError` and silently killed a deep tick.
+- **klame BO root cause: unsupported geometry, not the pipe hang.** `t_klame_turbo100` (1238 s, exit 1),
+  `t_klame_scalar100` (1098 s, exit 1) and `t_klame_turbo_cpu` (1521 s, killed after review) all died
+  in `build_proposal` after `training rows: 200`. Direct probe: `status=pool_exhausted,
+  candidates=0`, counts `{'generated': 24, 'geometry_rejected': 24, ...}`; exception
+  `UnsupportedGeometryError: CAD/point-grid designs are unsupported by the canonical radial surface
+  sampler` (`bo/data.py:materialize_geometry`). The c200 config is `generator: {name: grid, rows:
+  {type: klangfilm_lame_v1}}`, so every Sobol candidate is rejected; the 18-20 min was the 513 x 3
+  candidate pool build at ~1-2 s each. The `1482304` stream fix is confirmed good (trit's ~140 KB prep
+  JSON packaged).
+- **Consequences.** No TuRBO/SCALAR arm can run on a klangfilm_lame (grid/point-grid) config, so the
+  backlog's hand-built `c200w` + its TuRBO/SCALAR pair stays unqueued until the BO sampler supports
+  CAD/point-grid; CMA `search` on the same config is unaffected (`c_klame_200`: 201 evals, best J
+  7.4458). Removed `t_klame_turbo100`, `t_klame_turbo100_rc1`, `t_klame_scalar100` from the GPU night
+  file (also stops the watcher re-appending `_rc1`: it needs the job spec present to repair) and the
+  dead arm from the CPU night file; `w_klangfilm_lame_curved_v1_200w1` is a CMA search job and stays.
+  `runs/` is untracked, so those edits are local state only.
+- **Open.** `gpu-clean --lane cpu` returns rc 3 while the GPU lane is live, so CPU jobs record
+  `status: blocked` and take one 120 s retry round trip (observed: RETRY `t_klame_turbo_cpu` -> rc 2 ->
+  `t_atlas_corelaw_turbo_cpu` start). The CPU lane should not be blocked by a GPU holder.
+  Review report (untracked): `runs/nights/refresh/lane_review_20261117T1205Z.md`.
+
 ## 2026-11-17 04:1x - Lane review of the Fable corpus handed to the senior reviewer (not a senior decision)
 
 - The **lower-cost continuation lane agent** (not Fable, not the owner) reviewed all 54 documents in
