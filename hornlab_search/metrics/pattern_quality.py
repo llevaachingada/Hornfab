@@ -10,7 +10,8 @@ already exist in :mod:`hornlab_search.metrics`:
   **boresight-connected** first-crossing width, censored-status convention and the canonical
   theta-trapezoid x sin(theta) x uniform-phi sphere quadrature / connected-lobe map.
 * ``metrics.di.di_from_balloon`` + ``metrics.di.sin_theta_weights`` - the canonical scoring-path
-  spherical DI with sin(theta) solid-angle weighting.
+  spherical DI with sin(theta) solid-angle weighting.  A balloon with no stored ``balloon_grid``
+  is a typed refusal: DI is never silently recomputed with equal-area weights.
 * The H12 off-axis excess threshold is read from ``objective.scalar_v7`` (single source), not
   duplicated.  No objective term, weight or default penalty is added here.
 
@@ -63,6 +64,14 @@ class BalloonUnavailableError(PatternQualityInputError):
 
 class BalloonTooSparseError(BalloonUnavailableError):
     """A balloon exists but is too sparse to support the requested spherical diagnostics."""
+
+
+class BalloonGridUnavailableError(BalloonUnavailableError):
+    """A stored balloon has no ``balloon_grid`` meta, so the weighting is not defined.
+
+    The canonical scoring path weights a structured theta-phi balloon by sin(theta).  Falling
+    back to equal-area weights would change the DI silently, so this is a typed refusal.
+    """
 
 
 def h12_offaxis_excess_threshold_db() -> float:
@@ -212,6 +221,10 @@ def connected_main_lobe(angles_deg, spl_db, drop_db: float = 6.0) -> dict:
     ``island_count`` is the number of disconnected above-threshold runs in the cut, with their
     interpolated angular extents.  ``n_threshold_transitions`` counts every crossing in the cut;
     ``n_reentries`` counts the islands (each is a re-entry above threshold).
+
+    ``censored_legacy_width_deg`` records the legacy main-lobe WIDTH (a censored cell's grid
+    extent), never a "lower bound": a bound is reported separately as ``lower_bound_deg`` /
+    ``upper_bound_deg`` with an explicit grid-edge status.
     """
     a, s, i0 = _validate_cut(angles_deg, spl_db)
     if not np.isfinite(s[i0]):
@@ -226,7 +239,7 @@ def connected_main_lobe(angles_deg, spl_db, drop_db: float = 6.0) -> dict:
             "upper_edge_status": "unmeasurable",
             "lower_bound_deg": None,
             "upper_bound_deg": None,
-            "censored_lower_bound_deg": None,
+            "censored_legacy_width_deg": None,
             "island_count": None,
             "island_extents_deg": [],
             "island_total_extent_deg": None,
@@ -267,7 +280,8 @@ def connected_main_lobe(angles_deg, spl_db, drop_db: float = 6.0) -> dict:
         "upper_edge_status": upper_status,
         "lower_bound_deg": lower_bound,
         "upper_bound_deg": upper_bound,
-        "censored_lower_bound_deg": float(base["width_deg"]) if censored else None,
+        # A censored connected width stores the grid-edge WIDTH, not a bound.  The key says so.
+        "censored_legacy_width_deg": float(base["width_deg"]) if censored else None,
         "island_count": int(len(islands)),
         "island_extents_deg": [float(v["extent_deg"]) for v in islands],
         "island_total_extent_deg": float(sum(v["extent_deg"] for v in islands)),
@@ -415,9 +429,10 @@ def _validate_balloon(spl_balloon_db, balloon_dirs, grid) -> tuple[np.ndarray, n
                                                                     np.ndarray, tuple[int, int] | None]:
     """Validate a full balloon and return ``(spl_2d, dirs, theta_deg, grid_or_None)``.
 
-    ``grid`` is ``[n_theta, n_phi]`` from ``Response.meta['balloon_grid']``; ``None`` means an
-    equal-area set (e.g. Fibonacci), which supports DI but not the structured lobe map.
-    A balloon with no theta=0 boresight sample is refused: every DI here is referenced to it.
+    ``grid`` is ``[n_theta, n_phi]`` from ``Response.meta['balloon_grid']``; ``None`` means the
+    weighting is undefined (e.g. an equal-area set), so DI and the structured lobe map refuse
+    rather than silently switching quadrature.  A balloon with no theta=0 boresight sample is
+    refused: every DI here is referenced to it.
     """
     b = np.asarray(spl_balloon_db, dtype=float)
     if b.ndim == 1:
@@ -461,15 +476,21 @@ def balloon_directivity(spl_balloon_db_row, balloon_dirs, *,
     """Spherical DI for ONE frequency from a stored balloon.
 
     Uses the canonical scoring-path weighting: ``di_from_balloon`` with
-    ``sin_theta_weights(theta)`` on a theta-phi grid, or equal weights for an equal-area set.
+    ``sin_theta_weights(theta)`` on a structured theta-phi grid.  A missing ``balloon_grid`` is
+    refused (:class:`BalloonGridUnavailableError`) rather than silently falling back to
+    equal-area weights, so a stored DI comparison can never change its weighting by accident.
     The axis reference defaults to the theta=0 balloon sample; callers replaying a stored response
     should pass the same on-axis cut level the scorer used.
 
     A dead pattern is ``status == "unmeasurable"`` with ``di_db = None``; an omnidirectional
     pattern correctly reads ``di_db == 0.0``.
     """
-    b, _d, theta, _grid = _validate_balloon(
+    b, _d, theta, grid_out = _validate_balloon(
         np.asarray(spl_balloon_db_row, dtype=float), balloon_dirs, grid)
+    if grid_out is None:
+        raise BalloonGridUnavailableError(
+            "no balloon_grid in response meta: the sin(theta) weighting of the stored response "
+            "is unknown, so DI is refused rather than recomputed with equal-area weights")
     row = b[0]
     if axis_db is None:
         axis = float(row[int(np.argmax(np.asarray(balloon_dirs, dtype=float)[:, 2]))])
@@ -484,15 +505,15 @@ def balloon_directivity(spl_balloon_db_row, balloon_dirs, *,
             "n_samples": int(row.size),
             "note": "non-finite on-axis reference or no finite balloon samples",
         }
-    weights = None if grid is None else sin_theta_weights(theta)
+    weights = sin_theta_weights(theta)
     di = di_from_balloon(row, axis, weights=weights)
     return {
         "status": "valid",
         "di_db": float(di),
-        "weighting": "equal_area" if weights is None else "sin_theta",
+        "weighting": "sin_theta",
         "axis_db": axis,
         "n_samples": int(row.size),
-        "note": "" if weights is not None else "no balloon_grid: equal-area weights used",
+        "note": "",
     }
 
 
@@ -505,7 +526,9 @@ def balloon_lobe_map(spl_balloon_db, balloon_dirs, grid) -> dict:
     """
     b, d, _theta, grid_out = _validate_balloon(spl_balloon_db, balloon_dirs, grid)
     if grid_out is None:
-        raise BalloonUnavailableError("a structured balloon_grid is required for a lobe map")
+        raise BalloonGridUnavailableError(
+            "no balloon_grid in response meta: a structured theta-phi grid is required for a "
+            "lobe map")
     n_t, n_p = grid_out
     lobes = balloon_lobes(b, grid_out)
     d_theta = 180.0 / float(n_t - 1) if n_t > 1 else None
@@ -530,55 +553,51 @@ def _balloon_block(freqs: np.ndarray, axis_levels: np.ndarray,
     """Per-frequency balloon results, or a typed refusal block."""
     try:
         b, dirs, _theta, grid_out = _validate_balloon(spl_balloon_db, balloon_dirs, grid)
+        if grid_out is None:
+            raise BalloonGridUnavailableError(
+                "no balloon_grid in response meta: stored DI would need an assumed weighting; "
+                "refusing rather than silently switching to equal-area weights")
         di_rows = [
             balloon_directivity(b[i], dirs, grid=grid_out,
                                 axis_db=float(axis_levels[i]))
             for i in range(b.shape[0])
         ]
-        lobe_block = None
-        if grid_out is not None:
-            lobe_block = balloon_lobe_map(b, dirs, grid_out)
-            # Diagonal coverage overlay (reuses metrics.diagonal's first-crossing definition).
-            from .diagonal import MAX_POLAR_DEG, diagonal_beamwidths_deg  # noqa: PLC0415
+        lobe_block = balloon_lobe_map(b, dirs, grid_out)
+        # Diagonal coverage overlay (reuses metrics.diagonal's first-crossing definition).
+        from .diagonal import MAX_POLAR_DEG, diagonal_beamwidths_deg  # noqa: PLC0415
 
-            # diagonal_beamwidths_deg reports a no-crossing ray as 2*MAX_POLAR_DEG; that is a
-            # censored lower bound, not a measured diagonal.  Do not present it as a number.
-            diag_saturated = 2.0 * float(MAX_POLAR_DEG)
+        # diagonal_beamwidths_deg reports a no-crossing ray as 2*MAX_POLAR_DEG; that is a
+        # censored lower bound, not a measured diagonal.  Do not present it as a number.
+        diag_saturated = 2.0 * float(MAX_POLAR_DEG)
 
-            def _diag_plane(value):
-                if not np.isfinite(value):
-                    return None, "unmeasurable"
-                if float(value) >= diag_saturated - 1e-9:
-                    return None, "censored"          # 2*MAX_POLAR_DEG is a lower bound
-                return float(value), "valid"
+        def _diag_plane(value):
+            if not np.isfinite(value):
+                return None, "unmeasurable"
+            if float(value) >= diag_saturated - 1e-9:
+                return None, "censored"          # 2*MAX_POLAR_DEG is a lower bound
+            return float(value), "valid"
 
-            diag_rows = []
-            for i in range(b.shape[0]):
-                bw45, bw135 = diagonal_beamwidths_deg(
-                    dirs, b[i], on_axis_db=float(axis_levels[i]))
-                v45, st45 = _diag_plane(bw45)
-                v135, st135 = _diag_plane(bw135)
-                if st45 == "valid" and st135 == "valid":
-                    overall = "valid"
-                elif st45 == "unmeasurable" and st135 == "unmeasurable":
-                    overall = "unmeasurable"
-                else:
-                    overall = "partial"
-                diag_rows.append({
-                    "diagonal_bw45_deg": v45,
-                    "diagonal_bw45_status": st45,
-                    "diagonal_bw135_deg": v135,
-                    "diagonal_bw135_status": st135,
-                    "status": overall,
-                    "censored_floor_deg": diag_saturated
-                    if (v45 is None or v135 is None) else None,
-                })
-        else:
-            diag_rows = [{
-                "diagonal_bw45_deg": None,
-                "diagonal_bw135_deg": None,
-                "status": "unavailable",
-            } for _ in range(b.shape[0])]
+        diag_rows = []
+        for i in range(b.shape[0]):
+            bw45, bw135 = diagonal_beamwidths_deg(
+                dirs, b[i], on_axis_db=float(axis_levels[i]))
+            v45, st45 = _diag_plane(bw45)
+            v135, st135 = _diag_plane(bw135)
+            if st45 == "valid" and st135 == "valid":
+                overall = "valid"
+            elif st45 == "unmeasurable" and st135 == "unmeasurable":
+                overall = "unmeasurable"
+            else:
+                overall = "partial"
+            diag_rows.append({
+                "diagonal_bw45_deg": v45,
+                "diagonal_bw45_status": st45,
+                "diagonal_bw135_deg": v135,
+                "diagonal_bw135_status": st135,
+                "status": overall,
+                "censored_floor_deg": diag_saturated
+                if (v45 is None or v135 is None) else None,
+            })
 
         per_freq = []
         for i in range(b.shape[0]):
@@ -606,12 +625,10 @@ def _balloon_block(freqs: np.ndarray, axis_levels: np.ndarray,
         meta = {
             "status": "valid",
             "weighting": di_rows[0]["weighting"] if di_rows else None,
-            "grid": None if grid_out is None else [int(grid_out[0]), int(grid_out[1])],
-            "resolution_deg": None if lobe_block is None else lobe_block["resolution_deg"],
-            "sampling_density_warning": (
-                None if lobe_block is None else lobe_block["sampling_density_warning"]),
-            "note": ("" if grid_out is not None else
-                     "no balloon_grid: DI is equal-area; 3-D lobe map and diagonal overlay are unavailable"),
+            "grid": [int(grid_out[0]), int(grid_out[1])],
+            "resolution_deg": lobe_block["resolution_deg"],
+            "sampling_density_warning": lobe_block["sampling_density_warning"],
+            "note": "",
         }
         return meta, per_freq
     except BalloonUnavailableError as exc:

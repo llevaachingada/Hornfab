@@ -1,5 +1,17 @@
 # ISSUES
 
+## 2026-11-17 (acoustic-truth lane) - WP1-WP3 hardened (independent review + reproduction)
+
+- DONE: static compliance review + fresh-input reproduction of commit f5db35e; all headline claims
+  reproduce on new inputs; 24 repairs (guard order, typed refusals, grid mesh evidence, committed
+  `--parity` mode, mesher-optional existing-mesh, candidate tests on committed YAMLs); tests
+  26+22+20 = 68 passed, 0 failed; published measured values unchanged.
+- OPEN (owner): unchanged from the WP0-WP3 entry below — production home brief (corridor vs point,
+  V onset, DI slope weight, dead band); v9 `preferred`-in-bounds semantics; WP6 pilot scheduling.
+- NOTE: v9 scenario J columns were captured against the uncommitted concurrent
+  `scalar_v9.py`/`evaluate.py`/`config.py` edits; re-run `brief_truth_replay.py scenarios` if that
+  lane commits changed v9 code.
+
 ## 2026-11-17 - Pre-approval checks: 14/14 shape-clean, Crowe has no headroom, history unusable
 
 - DONE: shape_check on all 14 changed proposals (14/14 pass: meshes, dof cap, envelope, round

@@ -266,7 +266,11 @@ def _source_hashes(paths) -> dict[str, str]:
     out: dict[str, str] = {}
     for p in sorted({Path(x) for x in paths}):
         if p.is_file():
-            out[str(p.relative_to(REPO_ROOT))] = _sha256(p)
+            try:
+                key = str(p.relative_to(REPO_ROOT))
+            except ValueError:                 # a caller-supplied temp run outside the repo
+                key = str(p)
+            out[key] = _sha256(p)
     return out
 
 
@@ -306,6 +310,47 @@ def _finite(x):
     except (TypeError, ValueError):
         return None
     return v if math.isfinite(v) else None
+
+
+def _config_for_response(path: Path):
+    """The ``config.yaml`` that a stored response belongs to, if any (read-only lookup)."""
+    for parent in (path.parent, path.parent.parent, path.parent.parent.parent):
+        cand = parent / "config.yaml"
+        if cand.is_file():
+            return cand
+    return None
+
+
+def _run_read_paths(run_dir: Path, design_hash: str) -> list[Path]:
+    """Every stored manifest/result this tool may read for one run-dir design.
+
+    Hashed BEFORE any of them is opened, so the zero-write guard genuinely covers the run.
+    """
+    paths = [run_dir / "best.json", run_dir / "run.json", run_dir / "config.yaml"]
+    ddir = _design_dir(run_dir, design_hash)
+    if ddir is not None:
+        for name in ("response.npz", "metrics.json", "design.json", "status.json",
+                     "mesh_meta.json", "mesh.msh"):
+            paths.append(ddir / name)
+    return [p for p in paths if p.is_file()]
+
+
+def _term_residuals(stored_terms: dict, result_terms: dict) -> dict[str, float]:
+    """Per-term identity residuals; refuses a vacuous pass when nothing is comparable.
+
+    A stored ``best.json`` with no ``terms`` block (or one whose keys do not overlap the replay
+    result) must fail loudly.  ``max(|residual|)`` over an empty set is 0.0, which would otherwise
+    look like an exact reproduction without comparing a single term.
+    """
+    compared = {
+        str(k): float(v) for k, v in stored_terms.items()
+        if k in result_terms and _finite(v) is not None and _finite(result_terms[k]) is not None
+    }
+    if not compared:
+        raise IdentityReplayError(
+            "stored best.json carries no comparable term (expected a non-empty `terms` block "
+            "overlapping the replay terms); refusing a vacuous identity pass")
+    return {k: float(result_terms[k]) - v for k, v in compared.items()}
 
 
 # ------------------------------------------------------------------ brief + design loading
@@ -389,24 +434,11 @@ def _default_designs() -> list[dict]:
 # ------------------------------------------------------------------ metrics / facts
 
 
-def _metrics_for_facts(resp, brief, *, points: int | None = None, base_metrics=None):
+def _metrics_for_facts(resp, brief):
     """Metrics on the scored grid, through the canonical production entry point."""
     from hornlab_search.search.evaluate import metrics_from_response
 
-    target = brief.target
-    scored = resp
-    if points is not None:
-        from hornlab_search.metrics.dense_grid import dense_response
-
-        scored = dense_response(resp, int(points), target.band_lo_hz, target.band_hi_hz)
-    metrics = metrics_from_response(scored, target)
-    if points is not None and base_metrics is not None:
-        # Same scalar carry-over as objective/scalar_v9._on_score_grid: the dense re-derive
-        # cannot know mouth/throat geometry, so keep those scalars for the loading term.
-        scalars = dict(getattr(base_metrics, "scalars", {}) or {})
-        scalars.update(getattr(metrics, "scalars", {}) or {})
-        metrics = dataclasses.replace(metrics, scalars=scalars)
-    return metrics
+    return metrics_from_response(resp, brief.target)
 
 
 def _bw8k_measured(metrics, target):
@@ -555,9 +587,8 @@ def _replay(run_dir: Path, design_hash: str, brief, *, config_path=None):
 
 
 def build_cell(resp, brief, result, *, label: str, design_hash: str, run_dir: Path,
-               source: str, grid: str = "solved", points=None,
-               stored_j=None) -> dict:
-    metrics = _metrics_for_facts(resp, brief, points=points)
+               source: str, grid: str = "solved", stored_j=None) -> dict:
+    metrics = _metrics_for_facts(resp, brief)
     facts = target_facts(metrics, brief)
     return {
         "label": label,
@@ -569,7 +600,7 @@ def build_cell(resp, brief, result, *, label: str, design_hash: str, run_dir: Pa
         "brief_hash": brief.brief_hash()[:16],
         "objective_version": int(brief.objective_version),
         "grid": grid,
-        "grid_points": points,
+        "grid_points": None,
         "status": result.status,
         "reasons": list(result.reasons),
         "J": _finite(result.j),
@@ -690,7 +721,8 @@ def identity(out: Path, designs: list[dict], prov: dict | None = None) -> dict:
     prov = prov or provenance()
     briefs = {"base": _load_brief(BASE_BRIEF), "smooth": _load_brief(SMOOTH_BRIEF)}
 
-    loaded, read_paths, identity_rows = {}, [], []
+    loaded, identity_rows = {}, []
+    planned, read_paths = [], []
     for design in designs:
         run_dir = (REPO_ROOT / design["run"]).resolve()
         h = design["design_hash"]
@@ -699,19 +731,30 @@ def identity(out: Path, designs: list[dict], prov: dict | None = None) -> dict:
             raise FileNotFoundError(f"identity: no stored response for {design['label']} "
                                     f"({run_dir} / {h})")
         read_paths.append(rp)
+        read_paths.extend(_run_read_paths(run_dir, h))
+        planned.append((design, run_dir, h, rp))
+
+    # Snapshot EVERY stored file before any response/best/config read.  A post-hoc hash cannot
+    # prove the read-only guard held during the run.
+    before = _source_hashes(read_paths)
+    for design, run_dir, h, rp in planned:
         resp = load_response(rp)
         if resp.spl_balloon_db is None or resp.balloon_dirs is None:
             raise IdentityReplayError(f"{design['label']}: stored response carries no balloon; "
                                       "balloon-derived DI is required")
         loaded[design["label"]] = (run_dir, h, resp, rp)
 
-    before = _source_hashes(read_paths)
-
     for design in designs:
         run_dir, h, resp, rp = loaded[design["label"]]
         best = _load_best(run_dir)
         stored_j = _finite(best.get("objective"))
+        if stored_j is None:
+            raise IdentityReplayError(f"{design['label']}: stored best.json carries no objective")
         stored_terms = dict(best.get("terms") or {})
+        if not stored_terms:
+            raise IdentityReplayError(
+                f"{design['label']}: stored best.json carries no `terms` block; identity would "
+                "pass vacuously without comparing a term")
         own = brief_from_config(run_dir / "config.yaml")
         result = _replay(run_dir, h, own, config_path=run_dir / "config.yaml")
         if result.status != "exact_complete" or result.j is None:
@@ -719,10 +762,8 @@ def identity(out: Path, designs: list[dict], prov: dict | None = None) -> dict:
                                       f"{result.status} ({result.reasons})")
         delta = float(result.j) - float(stored_j)
         rel = abs(delta) / max(abs(float(stored_j)), 1.0)
-        term_resid = {k: (float(result.terms[k]) - float(v))
-                      for k, v in stored_terms.items()
-                      if k in (result.terms or {}) and _finite(v) is not None}
-        max_term = max((abs(x) for x in term_resid.values()), default=0.0)
+        term_resid = _term_residuals(stored_terms, dict(result.terms or {}))
+        max_term = max(abs(x) for x in term_resid.values())
         ok = abs(delta) <= IDENTITY_REL_TOL * max(abs(float(stored_j)), 1.0) \
             and max_term <= IDENTITY_TERM_TOL
         print(f"[identity] {design['label']}: recomputed J = {float(result.j):.15f}  "
@@ -761,7 +802,6 @@ def identity(out: Path, designs: list[dict], prov: dict | None = None) -> dict:
                     f"{float(result.j):.6f} vs {expected:.6f} (> {NOV17_J_TOL:.0e}). "
                     "Stop and diagnose provenance.")
 
-    failed = {d["label"]: d.get("own_cell") for d in designs if d.get("own_cell")}
     for design in designs:
         own_cell = design.get("own_cell")
         if own_cell:
@@ -769,7 +809,6 @@ def identity(out: Path, designs: list[dict], prov: dict | None = None) -> dict:
             if abs(float(cell["J"]) - float(_finite(_load_best((REPO_ROOT / design["run"]).resolve())
                                                      .get("objective")))) > IDENTITY_REL_TOL:
                 raise IdentityReplayError(f"2x2 own cell {design['label']}/{own_cell} drifted")
-    _ = failed
     rank_within_brief(cells)
 
     print()
@@ -807,7 +846,7 @@ def identity(out: Path, designs: list[dict], prov: dict | None = None) -> dict:
 # ------------------------------------------------------------------ scenarios
 
 
-def _replay_response_file(path: Path, brief, *, resp=None):
+def _replay_response_file(path: Path, brief):
     """Score one bare ``response.npz`` through the canonical run-dir replay adapter.
 
     The stored response arrays carry ``meta['balloon_grid']``; replaying through the canonical
@@ -820,11 +859,7 @@ def _replay_response_file(path: Path, brief, *, resp=None):
 
     from hornlab_search.objective.replay import replay_run_dir
 
-    cfg = None
-    for parent in (path.parent, path.parent.parent, path.parent.parent.parent):
-        if (parent / "config.yaml").is_file():
-            cfg = parent / "config.yaml"
-            break
+    cfg = _config_for_response(path)
     with tempfile.TemporaryDirectory(prefix="btr_response_") as tmp:
         ddir = Path(tmp) / "designs" / path.parent.name
         ddir.mkdir(parents=True)
@@ -838,7 +873,9 @@ def scenarios(brief_paths, designs: list[dict], out: Path, prov: dict | None = N
 
     prov = prov or provenance()
     briefs = [_load_brief(p) for p in brief_paths]
-    cells, read_paths = [], []
+
+    # ---- hash every store BEFORE opening any response / best.json / metrics.json
+    prepared, read_paths, cells = [], [], []
     for design in designs:
         bare = design.get("response")
         if bare:
@@ -846,14 +883,12 @@ def scenarios(brief_paths, designs: list[dict], out: Path, prov: dict | None = N
             if not rp.is_file():
                 raise FileNotFoundError(f"scenarios: no response file at {rp}")
             read_paths.append(rp)
-            resp = load_response(rp)
-            run_dir = rp.parent
-            h = str(design.get("design_hash") or rp.parent.name)
-            for brief in briefs:
-                result = _replay_response_file(rp, brief, resp=resp)
-                cells.append(build_cell(resp, brief, result, label=design["label"],
-                                        design_hash=h, run_dir=run_dir,
-                                        source="v9-scenario-file", stored_j=None))
+            cfg = _config_for_response(rp)
+            if cfg is not None:
+                read_paths.append(cfg)
+            prepared.append({"kind": "bare", "design": design, "rp": rp,
+                             "run_dir": rp.parent,
+                             "design_hash": str(design.get("design_hash") or rp.parent.name)})
             continue
         run_dir = (REPO_ROOT / design["run"]).resolve()
         h = design["design_hash"]
@@ -861,7 +896,23 @@ def scenarios(brief_paths, designs: list[dict], out: Path, prov: dict | None = N
         if rp is None:
             raise FileNotFoundError(f"scenarios: no stored response for {design['label']}")
         read_paths.append(rp)
+        read_paths.extend(_run_read_paths(run_dir, h))
+        prepared.append({"kind": "run", "design": design, "rp": rp, "run_dir": run_dir,
+                         "design_hash": h})
+
+    before = _source_hashes(read_paths)
+
+    for item in prepared:
+        design, rp = item["design"], item["rp"]
+        run_dir, h = item["run_dir"], item["design_hash"]
         resp = load_response(rp)
+        if item["kind"] == "bare":
+            for brief in briefs:
+                result = _replay_response_file(rp, brief)
+                cells.append(build_cell(resp, brief, result, label=design["label"],
+                                        design_hash=h, run_dir=run_dir,
+                                        source="v9-scenario-file", stored_j=None))
+            continue
         stored_j = _finite(_load_best(run_dir).get("objective"))
         for brief in briefs:
             result = _replay(run_dir, h, brief, config_path=run_dir / "config.yaml")
@@ -869,7 +920,6 @@ def scenarios(brief_paths, designs: list[dict], out: Path, prov: dict | None = N
                                     run_dir=run_dir, source="v9-scenario",
                                     stored_j=stored_j))
 
-    before = _source_hashes(read_paths)
     rank_within_brief(cells)
     print("=" * 104)
     print("v9 OFFLINE / NOT-QUEUED SCENARIO MATRIX (stored responses unchanged)")
@@ -950,6 +1000,45 @@ def _config_for(side: Path):
     return None
 
 
+def _mesh_side_record(side: Path, design_hash: str) -> dict:
+    """Stored-manifest evidence that a pair really is the same mesh (no inherited claim).
+
+    ``mesh_hash`` is the SHA-256 of the mesh file the design's own ``mesh_meta.json`` points at.
+    ``n_dof`` comes from that manifest's ``result`` block and ``mesh_epw`` from the run's stored
+    ``run.json``; a missing value is the typed string ``"unavailable"``, never a fabricated number.
+    """
+    ddir = side / "designs" / design_hash
+    meta_path = ddir / "mesh_meta.json"
+    meta = _read_json(meta_path)
+    result = meta.get("result") if isinstance(meta.get("result"), dict) else {}
+    mesh_path = result.get("path")
+    mp = Path(str(mesh_path)) if mesh_path else (ddir / "mesh.msh")
+    if not mp.is_absolute():
+        mp = REPO_ROOT / mp
+    if not mp.is_file():
+        fallback = ddir / "mesh.msh"
+        mp = fallback if fallback.is_file() else mp
+
+    n_dof = result.get("n_dof")
+    run_dir = side.parent if side.name in ("screen", "verify") else side
+    run_meta = _read_json(run_dir / "run.json")
+    mesh_block = run_meta.get("mesh") if isinstance(run_meta.get("mesh"), dict) else {}
+    if not mesh_block and isinstance(run_meta.get("config"), dict):
+        cfg_mesh = run_meta["config"].get("mesh")
+        mesh_block = cfg_mesh if isinstance(cfg_mesh, dict) else {}
+    epw = mesh_block.get("epw")
+    return {
+        "mesh_meta": str(meta_path) if meta_path.is_file() else "unavailable",
+        "mesh_meta_key": meta.get("key") or "unavailable",
+        "mesh_path": str(mp) if mp.is_file() else "unavailable",
+        "mesh_hash": _sha256(mp) if mp.is_file() else "unavailable",
+        "n_dof": (int(n_dof) if isinstance(n_dof, (int, float))
+                  and not isinstance(n_dof, bool) else "unavailable"),
+        "mesh_epw": (float(epw) if isinstance(epw, (int, float))
+                     and not isinstance(epw, bool) else "unavailable"),
+    }
+
+
 def grid_stability(brief_path, runs, out: Path, points=(58, 116), top: int = 28,
                    prov: dict | None = None) -> dict:
     from hornlab_search.solve.cache import load_response
@@ -967,17 +1056,51 @@ def grid_stability(brief_path, runs, out: Path, points=(58, 116), top: int = 28,
 
     grids = ["solved"] + [f"dense_{int(n)}" for n in points]
     sides: dict[str, dict] = {}
-    read_paths, pair_rows = [], []
+    read_paths, skipped_pairs, planned = [], [], []
     for pair in pairs:
         run, h = pair["run"], pair["design_hash"]
+        available: dict[str, tuple[Path, Path]] = {}
+        missing: list[str] = []
         for side_name, side in (("screen", pair["screen"]), ("verify", pair["verify"])):
             rp = side / "designs" / h / "response.npz"
             if not rp.is_file():
+                missing.append(side_name)
                 continue
+            available[side_name] = (side, rp)
             read_paths.append(rp)
+            for name in ("metrics.json", "design.json", "status.json",
+                         "mesh_meta.json", "mesh.msh"):
+                p = side / "designs" / h / name
+                if p.is_file():
+                    read_paths.append(p)
+        read_paths.extend(_run_read_paths(run, h))
+        if missing:
+            # A pair with one absent response is a typed skip: it stays in the report and never
+            # aborts the command (previously the unconditional dict index raised KeyError).
+            skipped_pairs.append({
+                "run": run.name,
+                "design_hash": h,
+                "missing_response_sides": missing,
+                "note": ("typed skip: no response.npz on "
+                         f"{'/'.join(missing)}; this pair contributes no J and is not scored"),
+            })
+            continue
+        planned.append((pair, available))
+
+    # Snapshot EVERY read source before the first response/best/metrics read.
+    before = _source_hashes(read_paths)
+
+    pair_rows = []
+    for pair, available in planned:
+        run, h = pair["run"], pair["design_hash"]
+        for side_name in ("screen", "verify"):
+            side, rp = available[side_name]
             resp = load_response(rp)
             cfg = _config_for(side)
-            record = {"solved_freqs_hz": np.asarray(resp.freqs_hz, dtype=float).tolist()}
+            record = {
+                "solved_freqs_hz": np.asarray(resp.freqs_hz, dtype=float).tolist(),
+                "mesh": _mesh_side_record(side, h),
+            }
             for label in grids:
                 active = brief if label == "solved" else dense_briefs[int(label.split("_")[1])]
                 result = _replay(side, h, active, config_path=cfg)
@@ -995,8 +1118,6 @@ def grid_stability(brief_path, runs, out: Path, points=(58, 116), top: int = 28,
             "screen_freqs": len(sides[f"{run.name}/{h}/screen"]["solved_freqs_hz"]),
             "verify_freqs": len(sides[f"{run.name}/{h}/verify"]["solved_freqs_hz"]),
         })
-
-    before = _source_hashes(read_paths)
 
     # ---- per-grid screen-vs-verify statistics --------------------------------------------
     def _pairs_for(grid_label: str):
@@ -1082,8 +1203,11 @@ def grid_stability(brief_path, runs, out: Path, points=(58, 116), top: int = 28,
     print("=" * 104)
     print(f"FREQUENCY-GRID STABILITY under {brief.name} (v9)")
     print("=" * 104)
-    print(f"[pairs] {len(pairs)} same-mesh screen/verify pairs; solved freqs: screen "
+    print(f"[pairs] {len(pairs)} discovered, {len(planned)} scored, "
+          f"{len(skipped_pairs)} skipped; solved freqs: screen "
           f"{solved_n['screen']} samples, verify {solved_n['verify']} samples")
+    for skip in skipped_pairs:
+        print(f"[skip] {skip['run']}/{skip['design_hash']}: {skip['note']}")
     for label in grids:
         s = stats[label]
         print(f"[{label:<10}] n={s['n_pairs']} mean(screen-verify)="
@@ -1104,6 +1228,8 @@ def grid_stability(brief_path, runs, out: Path, points=(58, 116), top: int = 28,
                   "objective_version": brief.objective_version,
                   "brief_hash": brief.brief_hash()},
         "pairs": len(pairs),
+        "processed_pairs": len(planned),
+        "skipped_pairs": skipped_pairs,
         "grid_labels": grids,
         "dense_points": [int(n) for n in points],
         "solved_samples_per_side": solved_n,
@@ -1118,6 +1244,7 @@ def grid_stability(brief_path, runs, out: Path, points=(58, 116), top: int = 28,
         "pairs_detail": pair_rows,
         "sides": {k: {"J": {g: rec[g]["J"] for g in grids},
                       "status": {g: rec[g]["status"] for g in grids},
+                      "mesh": rec["mesh"],
                       "solved_freqs_hz": rec["solved_freqs_hz"]}
                   for k, rec in sides.items()},
         "source_guard": guard,
@@ -1127,7 +1254,10 @@ def grid_stability(brief_path, runs, out: Path, points=(58, 116), top: int = 28,
         {"run": k.rsplit("/", 2)[0], "design": k.rsplit("/", 2)[1],
          "side": k.rsplit("/", 1)[1],
          **{f"J_{g}": rec[g]["J"] for g in grids},
-         "n_solved": len(rec["solved_freqs_hz"])}
+         "n_solved": len(rec["solved_freqs_hz"]),
+         "mesh_hash": rec["mesh"]["mesh_hash"],
+         "n_dof": rec["mesh"]["n_dof"],
+         "mesh_epw": rec["mesh"]["mesh_epw"]}
         for k, rec in sides.items()])
     _write_csv(out / "grid_term_sensitivity.csv", [
         {"grid": g, "term": k, "mean_diff": v["mean"], "sd_diff": v["sd"], "n": v["n"]}
@@ -1163,6 +1293,8 @@ def _designs_from_args(args) -> list[dict]:
 
 
 def main(argv=None) -> int:
+    from hornlab_search.config import ConfigError
+
     ap = argparse.ArgumentParser(description="Brief-truth replay + frequency-fidelity lab (WP3)")
     sub = ap.add_subparsers(dest="cmd", required=True)
 
@@ -1193,15 +1325,20 @@ def main(argv=None) -> int:
     prov = provenance()          # before the guard: uses subprocess for the git snapshot
     guard = BackendGuard()
     rc = 0
-    with guard.active():
-        if args.cmd == "identity":
-            identity(out, _designs_from_args(args), prov)
-        elif args.cmd == "scenarios":
-            scenarios(args.briefs, _designs_from_args(args), out, prov)
-        elif args.cmd == "grid":
-            grid_stability(args.brief, args.runs, out, args.points, args.top, prov)
-        else:  # pragma: no cover - argparse enforces the choices
-            raise ScoreRuleError(f"unknown command {args.cmd!r}")
+    try:
+        with guard.active():
+            if args.cmd == "identity":
+                identity(out, _designs_from_args(args), prov)
+            elif args.cmd == "scenarios":
+                scenarios(args.briefs, _designs_from_args(args), out, prov)
+            elif args.cmd == "grid":
+                grid_stability(args.brief, args.runs, out, args.points, args.top, prov)
+            else:  # pragma: no cover - argparse enforces the choices
+                raise ScoreRuleError(f"unknown command {args.cmd!r}")
+    except ConfigError as exc:
+        # A bad brief is a typed input refusal, not an internal traceback.
+        print(f"{TOOL}: ConfigError: {exc}", file=sys.stderr)
+        return 2
     if guard.calls:
         print(f"ERROR: {guard.calls} forbidden backend call(s): {guard.names}", file=sys.stderr)
         rc = 3

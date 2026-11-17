@@ -1,8 +1,12 @@
 """WP2 report-only pattern-quality CLI over stored ``response.npz`` files.
 
-Zero BEM, zero GPU, zero solver: this tool only reads immutable response arrays.  It writes a
-machine-readable per-frequency JSON report and a wide CSV to ``--out`` (default
-``docs/evidence/pattern_quality_readonly/``) and prints a compact console summary.
+Zero BEM, zero GPU, zero solver: this tool only reads immutable response arrays.  It requires an
+explicit ``--out`` directory (never a default inside ``docs/evidence/``), writes a machine-readable
+per-frequency JSON report and a wide CSV there, and prints a compact console summary.
+
+``--parity`` instead compares the legacy outermost H/V widths and the balloon DI against the
+stored ``metrics.json`` of each design (180-degree sentinel cells excluded), prints the per-design
+max |delta| and comparable-cell count, and exits 2 if any delta exceeds 1e-9 deg / 1e-12 dB.
 
 Definitions (reused, never forked):
 
@@ -37,14 +41,21 @@ if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 
 from hornlab_search.metrics.pattern_quality import (  # noqa: E402
+    LEGACY_SENTINEL_DEG,
     METHOD_VERSION,
     PatternQualityInputError,
     pattern_quality_from_response,
 )
 from hornlab_search.solve.cache import load_response  # noqa: E402
 
+TOOL = "pattern_quality_report"
 SCHEMA = "pattern_quality.report.v1"
-DEFAULT_OUT = REPO / "docs" / "evidence" / "pattern_quality_readonly"
+
+#: Parity tolerances: the legacy width is the stored scalar once the sentinel is excluded; the
+#: spherical DI is the canonical scoring-path quadrature.  Anything above these floors is a real
+#: divergence, not print rounding.
+PARITY_ANGLE_TOL_DEG = 1.0e-9
+PARITY_DI_TOL_DB = 1.0e-12
 
 CSV_FIELDS = (
     "input_label", "input_path", "run_dir", "design_hash", "family", "freq_hz", "plane",
@@ -313,20 +324,113 @@ def _verbose_lines(record: dict) -> list[str]:
     return lines
 
 
+# --------------------------------------------------------------------------- parity
+
+
+def parity_comparison(report: dict, stored: dict) -> dict:
+    """Compare a report against the stored ``metrics.json`` arrays for one design.
+
+    Legacy outermost widths are compared cell-by-cell (H and V), excluding the stored
+    180.0-degree "no crossing" sentinel.  Spherical DI is compared against ``di_db``.  Any missing
+    or wrongly sized stored array is a typed refusal, never a silent skip.
+    """
+    rows = report["per_frequency"]
+    freqs = np.asarray([r["freq_hz"] for r in rows], dtype=float)
+    stored_freqs = np.asarray(stored.get("freqs_hz") or [], dtype=float)
+    if stored_freqs.size != freqs.size or not np.allclose(
+            stored_freqs, freqs, rtol=1.0e-12, atol=1.0e-9):
+        raise PatternQualityInputError(
+            f"stored metrics.json does not match the response grid "
+            f"({stored_freqs.size} vs {freqs.size} frequencies)")
+
+    legacy: list[float] = []
+    per_plane = {"H": 0, "V": 0}
+    for plane, key, plane_key in (("H", "bw_h_deg", "H"), ("V", "bw_v_deg", "V")):
+        arr = np.asarray(stored.get(key) or [], dtype=float)
+        if arr.size != freqs.size:
+            raise PatternQualityInputError(f"stored metrics.json {key} has {arr.size} cells, "
+                                           f"expected {freqs.size}")
+        for i, row in enumerate(rows):
+            stored_width = arr[i]
+            report_width = row[plane]["legacy"]["width_deg"]
+            if stored_width is None or not math.isfinite(float(stored_width)):
+                continue
+            if abs(float(stored_width) - float(LEGACY_SENTINEL_DEG)) <= 1.0e-12:
+                continue                    # the legacy no-crossing sentinel is not a measurement
+            if report_width is None:
+                continue
+            legacy.append(abs(float(report_width) - float(stored_width)))
+            per_plane[plane_key] += 1
+
+    di_cells: list[float] = []
+    di_arr = np.asarray(stored.get("di_db") or [], dtype=float)
+    if di_arr.size != freqs.size:
+        raise PatternQualityInputError(f"stored metrics.json di_db has {di_arr.size} cells, "
+                                       f"expected {freqs.size}")
+    for i, row in enumerate(rows):
+        stored_di = di_arr[i]
+        report_di = row["balloon"].get("di_db")
+        if stored_di is None or not math.isfinite(float(stored_di)) or report_di is None:
+            continue
+        di_cells.append(abs(float(report_di) - float(stored_di)))
+    if not di_cells:
+        raise PatternQualityInputError(
+            f"no comparable DI cell (balloon status {report['balloon']['status']}); parity "
+            "cannot be established")
+
+    legacy_max = None if not legacy else float(max(legacy))
+    di_max = None if not di_cells else float(max(di_cells))
+    failed = ((legacy_max is not None and legacy_max > PARITY_ANGLE_TOL_DEG)
+              or (di_max is not None and di_max > PARITY_DI_TOL_DB))
+    return {
+        "legacy_comparable_cells": int(len(legacy)),
+        "legacy_h_cells": int(per_plane["H"]),
+        "legacy_v_cells": int(per_plane["V"]),
+        "legacy_max_abs_delta_deg": legacy_max,
+        "di_comparable_cells": int(len(di_cells)),
+        "di_max_abs_delta_db": di_max,
+        "angle_tolerance_deg": PARITY_ANGLE_TOL_DEG,
+        "di_tolerance_db": PARITY_DI_TOL_DB,
+        "failed": bool(failed),
+    }
+
+
+def _print_parity(label: str, comp: dict) -> None:
+    legacy = ("n/a" if comp["legacy_max_abs_delta_deg"] is None
+              else f"{comp['legacy_max_abs_delta_deg']:.3e}")
+    di = ("n/a" if comp["di_max_abs_delta_db"] is None
+          else f"{comp['di_max_abs_delta_db']:.3e}")
+    print(f"{label} comparable legacy cells= {comp['legacy_comparable_cells']} "
+          f"max|report_legacy - stored_bw| = {legacy} deg")
+    print(f"{label} n={comp['di_comparable_cells']} "
+          f"max|diag_di - stored_metrics_di| = {di} dB")
+
+
 # --------------------------------------------------------------------------- main
 
 
+class _ToolArgumentParser(argparse.ArgumentParser):
+    """Argparse parser that prints a typed, tool-prefixed error instead of a bare traceback."""
+
+    def error(self, message):
+        print(f"{TOOL}: argument error: {message}", file=sys.stderr)
+        raise SystemExit(2)
+
+
 def main(argv=None) -> int:
-    ap = argparse.ArgumentParser(
+    ap = _ToolArgumentParser(
         description="Report-only WP2 pattern-quality diagnostics over stored response.npz files.")
     ap.add_argument("inputs", nargs="+",
                     help="run directories, design directories, or response.npz paths")
-    ap.add_argument("--out", default=str(DEFAULT_OUT),
-                    help=f"JSON/CSV output directory (default: {DEFAULT_OUT})")
+    ap.add_argument("--out", required=True,
+                    help="output dir for the report JSON/CSV; never runs/ (required)")
     ap.add_argument("--design-hash", default=None,
                     help="pick this design when a run directory contains more than one")
     ap.add_argument("--require-balloon", action="store_true",
                     help="exit 2 when an input's full balloon is missing/refused")
+    ap.add_argument("--parity", action="store_true",
+                    help="compare legacy H/V widths and balloon DI with the stored metrics.json; "
+                         "exit 2 if any delta exceeds 1e-9 deg / 1e-12 dB")
     ap.add_argument("--verbose", action="store_true", help="also print per-frequency rows")
     ns = ap.parse_args(argv)
 
@@ -334,26 +438,33 @@ def main(argv=None) -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     records: list[dict] = []
+    parity_rows: list[dict] = []
     refusals: list[str] = []
     balloon_refusals: list[str] = []
 
     for raw in ns.inputs:
         path = Path(raw)
+        comp = None
         try:
             response_path, run_dir, design_hash, family = resolve_response(path, ns.design_hash)
             coverage_h, coverage_v, config_name = _coverage_and_name(run_dir)
             resp = load_response(response_path)
             report = pattern_quality_from_response(
                 resp, coverage_h_deg=coverage_h, coverage_v_deg=coverage_v)
-        except PatternQualityInputError as exc:
-            refusals.append(f"{raw}: {type(exc).__name__}: {exc}")
-            continue
-        except Exception as exc:  # noqa: BLE001 - a corrupt file is a typed refusal, not a crash
+            if ns.parity:
+                comp = parity_comparison(
+                    report, _read_json(response_path.parent / "metrics.json"))
+        except (PatternQualityInputError, OSError, ValueError) as exc:
+            # Expected input/config problems are typed refusals.  Anything else re-raises so a
+            # tool bug fails loudly instead of looking like bad data.
             refusals.append(f"{raw}: {type(exc).__name__}: {exc}")
             continue
 
         label = str(config_name or (run_dir.name if run_dir is not None else response_path.parent.name))
         label = f"{label}:{design_hash}"
+        if ns.parity:
+            assert comp is not None
+            parity_rows.append({"input": raw, "label": label, "comparison": comp})
         record = {
             "input": {
                 "label": label,
@@ -388,6 +499,17 @@ def main(argv=None) -> int:
 
     for line in balloon_refusals:
         print(f"[balloon-refused] {line}", file=sys.stderr)
+
+    if ns.parity:
+        for row in parity_rows:
+            _print_parity(row["label"], row["comparison"])
+        failed = any(row["comparison"]["failed"] for row in parity_rows)
+        parity_path = out_dir / "parity_check.json"
+        parity_path.write_text(json.dumps(
+            {"schema": "pattern_quality.parity.v1", "rows": parity_rows},
+            indent=1, allow_nan=False, default=_json_default) + "\n", encoding="utf-8")
+        print(f"\nwrote {parity_path}")
+        return 2 if failed else 0
 
     payload = {
         "schema": SCHEMA,

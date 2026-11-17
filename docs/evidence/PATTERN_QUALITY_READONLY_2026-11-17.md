@@ -213,4 +213,52 @@ $env:OMP_NUM_THREADS="1"; $env:OPENBLAS_NUM_THREADS="1"; $env:MKL_NUM_THREADS="1
     runs\20261116T225543Z-screen-6acf41 `
     runs\20261116T153619Z-screen-c221aa `
     --out docs\evidence\pattern_quality_readonly
+
+# committed parity reproduction (exit 2 above 1e-9 deg / 1e-12 dB):
+.venv\Scripts\python.exe tools\analysis\pattern_quality_report.py --parity `
+    runs\20261115T205453Z-screen-32f7c4 `
+    runs\20261116T225543Z-screen-6acf41 `
+    runs\20261116T153619Z-screen-c221aa `
+    --out <out-dir>
 ```
+
+## 9. Hardening pass addendum (2026-11-17, second pass)
+
+After independent review, the following tool changes and provenance additions were made. Published
+numbers are unchanged.
+
+**Provenance / identity block** (per master plan §5; previously missing):
+`repo_HEAD` = `8b255f0` at capture, tools hardened at `f5db35e` (this addendum); `tool` =
+`pattern_quality_report.py` / `pattern_quality.v1`; `generated_utc` recorded in every JSON;
+units: degrees (widths, angles) and dB (levels, DI); labels — **[measured]**: the legacy width and
+balloon-DI parity deltas against the stored `metrics.json` (recomputed from the stored arrays
+through the canonical reused implementations); **[derived]**: connected width, islands, off-axis
+excess, flags, lobe map (deterministic recomputations over stored arrays, no acoustic solve);
+**[unavailable]**: every censored/no-crossing cell and any missing/too-sparse balloon (typed, never
+fabricated).
+
+**Tool changes**
+- Schema key renamed: `censored_lower_bound_deg` → **`censored_legacy_width_deg`** (it stored a
+  width, not a bound; old key was misleading).
+- A balloon without `balloon_grid` in the response meta is now a **typed refusal**
+  (`BalloonGridUnavailableError`); the silent equal-area fallback that could have produced a
+  plausible-looking dB-scale DI mismatch is gone.
+- `--out` is now **required** (the old default wrote into `docs/evidence/` — a read-only tool must
+  not silently rewrite committed evidence).
+- Unexpected exceptions are no longer labelled input refusals; only typed input errors are.
+- New **`--parity` mode**: compares legacy H/V widths and balloon DI against the stored
+  `metrics.json` (excluding 180°-sentinel cells), exits 2 above 1e-9 deg / 1e-12 dB. The published
+  parity numbers are now reproducible from committed code:
+  `max|report_legacy − stored_bw| = 0.000e+00 deg` (30/36/34 comparable cells) and
+  `max|diag_di − stored_metrics_di| = 8.882e-16 dB` (n=18) — exit 0.
+
+**Independent reproduction on fresh designs** (not the three above):
+`runs/20261116T193501Z-screen-f008ad/.../a49eaafbe6e2` (biradial smooth) and
+`runs/20261116T130335Z-screen-ab4fb9/.../738743cdbd47` (OSSE rrect fold-warm): legacy parity
+0.000e+00 deg (34 cells each), DI parity 0.000e+00 / 8.882e-16 dB (18 cells), explicit censored
+250 Hz rows. No-mutation proof: stored response/best hashes identical before/after all tool
+invocations; `git status --porcelain` unchanged.
+
+**Tests.** `tests/test_metrics_pattern_quality.py` is now **22 tests** (NaN injection moved to ±5°
+so flooring is actually exercised; vacuous same-array H/V equality removed; equal-area fallback
+replaced by a typed-refusal test; `--out`/parity/typed-error report tests added), 0 failed.

@@ -1,5 +1,41 @@
 # CONTINUITY
 
+## 2026-11-17 (acoustic-truth lane) — WP1–WP3 hardening pass (independent review + reproduction)
+
+- Two read-only lanes (static compliance review; independent fresh-input reproduction) audited the
+  WP0–WP3 commit `f5db35e`. Every headline claim reproduces on inputs the authors did not use:
+  2 new c1 corners (bias −0.0174/−0.0282 mm, p99 0.133/0.125 mm, rank 4, FABLE pass); parity on 2
+  fresh stored winners 0.000e+00° / 0.0/8.882e-16 dB; identity Δ exactly 0.0; v700 scenario J exact;
+  stored response/best hashes unchanged before/after; determinism diff = `meta.utc` only.
+- 24 repairs applied to the three tools + test files (no measured value changed, re-verified):
+  `brief_truth_replay` hash guard now snapshots **before** any read in all three subcommands (was
+  post-hoc in scenarios/grid → the guard could not fail), grid skips one-sided design dirs as typed
+  skipped pairs (was KeyError abort), identity raises on an empty term set (was vacuous pass), a
+  bad-v9 brief prints one typed `ConfigError` line and exits 2, `grid_stability.json` gains per-side
+  `mesh_hash`/`n_dof`/`mesh_epw` ("same-mesh" now evidenced from stored manifests);
+  `crowe_mesh_truth` stores full 64-hex config digests (+short aliases), exits 1 when any case is
+  refused, narrows the broad except so tool bugs fail loudly, reuses `geometry/record.py::
+  native_points`, divides one-sided Jacobian steps by the achieved step, and is mesher-optional in
+  `--existing-mesh` mode (CI-safe); `pattern_quality` refuses a balloon without `balloon_grid`
+  (`BalloonGridUnavailableError`, no silent equal-area DI) and renames the censored-width key to
+  `censored_legacy_width_deg`; the report CLI requires `--out` and gained a committed `--parity`
+  mode. Candidate-YAML tests now load the committed `docs/evidence/home_crowe_v9_offline_2026-11-17/`
+  copies, so the load proof runs in a clean checkout.
+- Tests **53 → 68** (26 + 22 + 20), 0 failed. Published measured numbers unchanged (identity Δ=0.0,
+  v700 J 9.96094006749582/11.398108088494078, c0 p99 0.12630539225424334 rank 4, parity
+  0.000e+00/8.882e-16).
+- Committed artifacts upgraded: `identity/` and `grid/` JSON/CSV regenerated inside
+  `docs/evidence/home_crowe_v9_offline_2026-11-17/` (previously gitignored-scratch only);
+  `pattern_quality_readonly` JSON/CSV regenerated + `parity_check.json` added; the three evidence
+  docs carry hardening addenda, including the WP3-vs-FABLE reconciliation (60 vs 58 pairs, screen−verify
+  sign convention, v7 vs v9 corridor, all-vs-top-28 rank) and the WP2 provenance/identity block.
+- Provenance caveat (owner-facing): the v9 scenario J numbers were captured while the working tree
+  carried uncommitted concurrent edits to `objective/scalar_v9.py`/`search/evaluate.py`/`config.py`;
+  `f5db35e`+this pass do not include them. If that lane commits changed v9 code, re-run
+  `brief_truth_replay.py scenarios` before relying on the v9 J columns.
+- Owner-gated decisions unchanged: WP5 production-brief choice (corridor vs point, V onset, slope
+  weight, dead band, `preferred`-in-bounds semantics); WP6 pilot scheduling.
+
 ## 2026-11-17 (local orchestrator, stage 5) - Pre-approval checks on the 14 changed proposals
 
 - `tools/shape_check.py` on all 14 changed `__space_v1` proposals: **14/14 mesh, under their screen

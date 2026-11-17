@@ -1,0 +1,50 @@
+{
+ "schema": "pattern_quality.parity.v1",
+ "rows": [
+  {
+   "input": "runs\\20261115T205453Z-screen-32f7c4",
+   "label": "hl__crowe_panel_home_v7:22365b569be9",
+   "comparison": {
+    "legacy_comparable_cells": 30,
+    "legacy_h_cells": 17,
+    "legacy_v_cells": 13,
+    "legacy_max_abs_delta_deg": 0.0,
+    "di_comparable_cells": 18,
+    "di_max_abs_delta_db": 8.881784197001252e-16,
+    "angle_tolerance_deg": 1e-09,
+    "di_tolerance_db": 1e-12,
+    "failed": false
+   }
+  },
+  {
+   "input": "runs\\20261116T225543Z-screen-6acf41",
+   "label": "hl__klangfilm_lame_curved_v1:491efb2132b8",
+   "comparison": {
+    "legacy_comparable_cells": 36,
+    "legacy_h_cells": 18,
+    "legacy_v_cells": 18,
+    "legacy_max_abs_delta_deg": 0.0,
+    "di_comparable_cells": 18,
+    "di_max_abs_delta_db": 8.881784197001252e-16,
+    "angle_tolerance_deg": 1e-09,
+    "di_tolerance_db": 1e-12,
+    "failed": false
+   }
+  },
+  {
+   "input": "runs\\20261116T153619Z-screen-c221aa",
+   "label": "hl__osse_rrect_fold_warm_v7:6d6dd332b282",
+   "comparison": {
+    "legacy_comparable_cells": 34,
+    "legacy_h_cells": 17,
+    "legacy_v_cells": 17,
+    "legacy_max_abs_delta_deg": 0.0,
+    "di_comparable_cells": 18,
+    "di_max_abs_delta_db": 8.881784197001252e-16,
+    "angle_tolerance_deg": 1e-09,
+    "di_tolerance_db": 1e-12,
+    "failed": false
+   }
+  }
+ ]
+}

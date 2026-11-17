@@ -61,7 +61,10 @@ threshold, censored statuses, canonical sin(theta) balloon DI — diagnostics on
 replay: exact same-brief identity, v9 offline corridor scenarios NOT-QUEUED in `scratch/home_v9_offline_2026-11-17/` with
 committed copies in `docs/evidence/home_crowe_v9_offline_2026-11-17/`, screen/verify frequency-grid stability; refuses
 cross-version pooled J and `bw8k_floor` under v9; evidence `docs/evidence/HOME_CROWE_V9_OFFLINE_CANDIDATES_2026-11-17.md`).
-Tests: `test_crowe_mesh_truth.py` (21), `test_metrics_pattern_quality.py` (18), `test_brief_truth_replay.py` (14).
+`brief_truth_replay` tests load the committed candidate YAMLs in `docs/evidence/home_crowe_v9_offline_2026-11-17/`
+(gitignored `scratch/` is only a fallback) so the load proof runs in a clean checkout; its identity/grid
+tests skip when the local `runs/` artifacts are absent.
+Tests: `test_crowe_mesh_truth.py` (26), `test_metrics_pattern_quality.py` (22), `test_brief_truth_replay.py` (20).
 
 Rectangular R-OSSE rolled mouth (2026-11-15): `tools/geometry/rosse_rect.py` evaluates Magnus's R-OSSE
 (`hornlab_mesher.profile_formulas.profile_points`) once per azimuth with a superellipse mouth R(p) and H/V coverage a(p);

@@ -1,0 +1,945 @@
+{
+  "cells": [
+    {
+      "J": 16.91817613526687,
+      "brief_hash": "71ce677156d1e9b5",
+      "brief_name": "room_landscape_80x50_700_hf1440_v7",
+      "brief_path": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7.yaml",
+      "design_hash": "22365b569be9",
+      "facts": {
+        "below_mode": "mask",
+        "bw8k": {
+          "bw_h_deg": 48.09627511190587,
+          "bw_v_deg": 35.17936926711795,
+          "hz": 8000.0
+        },
+        "bw8k_condition": "floor 60.00/37.50 deg at 8000 Hz vs measured 48.10/35.18 deg; raw penalty 1.470840 rides inside cov",
+        "bw8k_floor": {
+          "floor_h_deg": 60.0,
+          "floor_hz": 8000.0,
+          "floor_v_deg": 37.5,
+          "min_bw_h_deg": 48.09627511190587,
+          "min_bw_v_deg": 35.17936926711795,
+          "penalty_raw": 1.4708399320982835
+        },
+        "cov_narrow_ratio": 2.0,
+        "cov_v_weight": 0.5,
+        "di": {
+          "anchor_hz": 700.0,
+          "level_db": 13.079574383820045,
+          "level_scored": true,
+          "level_source": "gaussian",
+          "slope_db_per_dec": 0.0,
+          "slope_scored": true
+        },
+        "di_slope_target": 0.0,
+        "diag": {
+          "reference_deg": 65.0,
+          "scored": true
+        },
+        "diag_scored": true,
+        "distd_weighted": 0.5,
+        "flat_band": "scored",
+        "measured_di_slope_db_per_dec": 8.163095566628673,
+        "n_scored_cov_h": 13,
+        "n_scored_cov_v": 13,
+        "n_solved_in_band": 16,
+        "n_solved_total": 18,
+        "onset_h_hz": 700.0,
+        "onset_v_hz": 700.0,
+        "score_window": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "below_mode": "mask",
+          "coverage_v_down_deg": null,
+          "coverage_v_up_deg": null,
+          "f_pattern_hz": null,
+          "fc_hz": null,
+          "h_deg": 80.0,
+          "h_lo_hz": 700.0,
+          "narrow_ratio": 2.0,
+          "pattern_beta": null,
+          "v_deg": 50.0,
+          "v_lo_hz": 700.0
+        },
+        "solved_freqs_hz": [
+          250.0,
+          315.0,
+          400.0,
+          500.0,
+          643.33,
+          827.75,
+          1065.04,
+          1370.35,
+          1763.18,
+          2268.63,
+          2573.0,
+          2918.96,
+          3311.0,
+          3755.72,
+          4260.0,
+          4832.36,
+          6217.63,
+          8000.0
+        ],
+        "solved_freqs_in_band_hz": [
+          400.0,
+          500.0,
+          643.33,
+          827.75,
+          1065.04,
+          1370.35,
+          1763.18,
+          2268.63,
+          2573.0,
+          2918.96,
+          3311.0,
+          3755.72,
+          4260.0,
+          4832.36,
+          6217.63,
+          8000.0
+        ],
+        "target_profile_at_solved_hz": null
+      },
+      "grid": "solved",
+      "grid_points": null,
+      "label": "crowe_es600",
+      "metrics_recomputed": true,
+      "objective_version": 7,
+      "parity_delta": null,
+      "rank_in_brief": 1,
+      "reasons": [],
+      "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261115T205453Z-screen-32f7c4",
+      "score_id": "19bc58bc876c7bdb5537598273bc706865034aaabb96c5bc5838cb1150e06765",
+      "source": "nov17:base",
+      "status": "exact_complete",
+      "stored_J": 16.91817613526687,
+      "target_changed": true,
+      "terms": [
+        {
+          "contribution": 3.374750856289834,
+          "key": "cov",
+          "normalized": 3.374750856289834,
+          "raw": 10.124252568869501,
+          "tolerance": 3.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.06755433543911336,
+          "key": "rip",
+          "normalized": 0.06755433543911336,
+          "raw": 0.06755433543911336,
+          "tolerance": 1.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 1.290507345869635,
+          "key": "di",
+          "normalized": 4.301691152898783,
+          "raw": 1.7206764611595133,
+          "tolerance": 0.4,
+          "unweighted_raw": false,
+          "weight": 0.3
+        },
+        {
+          "contribution": 7.404014358879189,
+          "key": "dislope",
+          "normalized": 7.404014358879189,
+          "raw": 66.6361292299127,
+          "tolerance": 9.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.18686444101512534,
+          "key": "flat",
+          "normalized": 0.3737288820302507,
+          "raw": 0.560593323045376,
+          "tolerance": 1.5,
+          "unweighted_raw": false,
+          "weight": 0.5
+        },
+        {
+          "contribution": 0.0,
+          "key": "load",
+          "normalized": 0.0,
+          "raw": 0.0,
+          "tolerance": 0.3,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.5890901695704127,
+          "key": "distd",
+          "normalized": 1.1781803391408254,
+          "raw": 2.356360678281651,
+          "tolerance": 2.0,
+          "unweighted_raw": false,
+          "weight": 0.5
+        },
+        {
+          "contribution": 3.7105292571014514,
+          "key": "diag",
+          "normalized": 3.7105292571014514,
+          "raw": 7.421058514202903,
+          "tolerance": 2.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.29486537110210703,
+          "key": "flat_cv",
+          "normalized": 0.29486537110210703,
+          "raw": 0.4422980566531606,
+          "tolerance": 1.5,
+          "unweighted_raw": false,
+          "weight": 1.0
+        }
+      ]
+    },
+    {
+      "J": 6.836181526793635,
+      "brief_hash": "2411b8d13e65544c",
+      "brief_name": "room_landscape_80x50_700_hf1440_v7_smooth",
+      "brief_path": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7_smooth.yaml",
+      "design_hash": "22365b569be9",
+      "facts": {
+        "below_mode": "mask",
+        "bw8k": {
+          "bw_h_deg": 48.09627511190587,
+          "bw_v_deg": 35.17936926711795,
+          "hz": 8000.0
+        },
+        "bw8k_condition": "floor 60.00/37.50 deg at 8000 Hz vs measured 48.10/35.18 deg; raw penalty 1.470840 rides inside cov",
+        "bw8k_floor": {
+          "floor_h_deg": 60.0,
+          "floor_hz": 8000.0,
+          "floor_v_deg": 37.5,
+          "min_bw_h_deg": 48.09627511190587,
+          "min_bw_v_deg": 35.17936926711795,
+          "penalty_raw": 1.4708399320982835
+        },
+        "cov_narrow_ratio": 1.0,
+        "cov_v_weight": 0.5,
+        "di": {
+          "anchor_hz": 700.0,
+          "level_db": 13.079574383820045,
+          "level_scored": false,
+          "level_source": "gaussian",
+          "slope_db_per_dec": 5.0,
+          "slope_scored": true
+        },
+        "di_slope_target": 5.0,
+        "diag": {
+          "reference_deg": 65.0,
+          "scored": true
+        },
+        "diag_scored": true,
+        "distd_weighted": 1.0,
+        "flat_band": "scored",
+        "measured_di_slope_db_per_dec": 8.163095566628673,
+        "n_scored_cov_h": 13,
+        "n_scored_cov_v": 13,
+        "n_solved_in_band": 16,
+        "n_solved_total": 18,
+        "onset_h_hz": 700.0,
+        "onset_v_hz": 700.0,
+        "score_window": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "below_mode": "mask",
+          "coverage_v_down_deg": null,
+          "coverage_v_up_deg": null,
+          "f_pattern_hz": null,
+          "fc_hz": null,
+          "h_deg": 80.0,
+          "h_lo_hz": 700.0,
+          "narrow_ratio": 1.0,
+          "pattern_beta": null,
+          "v_deg": 50.0,
+          "v_lo_hz": 700.0
+        },
+        "solved_freqs_hz": [
+          250.0,
+          315.0,
+          400.0,
+          500.0,
+          643.33,
+          827.75,
+          1065.04,
+          1370.35,
+          1763.18,
+          2268.63,
+          2573.0,
+          2918.96,
+          3311.0,
+          3755.72,
+          4260.0,
+          4832.36,
+          6217.63,
+          8000.0
+        ],
+        "solved_freqs_in_band_hz": [
+          400.0,
+          500.0,
+          643.33,
+          827.75,
+          1065.04,
+          1370.35,
+          1763.18,
+          2268.63,
+          2573.0,
+          2918.96,
+          3311.0,
+          3755.72,
+          4260.0,
+          4832.36,
+          6217.63,
+          8000.0
+        ],
+        "target_profile_at_solved_hz": null
+      },
+      "grid": "solved",
+      "grid_points": null,
+      "label": "crowe_es600",
+      "metrics_recomputed": true,
+      "objective_version": 7,
+      "parity_delta": null,
+      "rank_in_brief": 1,
+      "reasons": [],
+      "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261115T205453Z-screen-32f7c4",
+      "score_id": "8b9afcda5dea1c2b3cf3e2134374ccafbb3ceda185e412936484c537bfb59cb9",
+      "source": "nov17:smooth",
+      "status": "exact_complete",
+      "stored_J": 16.91817613526687,
+      "target_changed": true,
+      "terms": [
+        {
+          "contribution": 1.0562838889425055,
+          "key": "cov",
+          "normalized": 1.0562838889425055,
+          "raw": 8.450271111540044,
+          "tolerance": 8.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.06755433543911336,
+          "key": "rip",
+          "normalized": 0.06755433543911336,
+          "raw": 0.06755433543911336,
+          "tolerance": 1.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.0,
+          "key": "di",
+          "normalized": 0.0,
+          "raw": 0.0,
+          "tolerance": 0.4,
+          "unweighted_raw": false,
+          "weight": 0.0
+        },
+        {
+          "contribution": 1.1116859515139963,
+          "key": "dislope",
+          "normalized": 1.1116859515139963,
+          "raw": 10.005173563625966,
+          "tolerance": 9.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.18686444101512534,
+          "key": "flat",
+          "normalized": 0.3737288820302507,
+          "raw": 0.560593323045376,
+          "tolerance": 1.5,
+          "unweighted_raw": false,
+          "weight": 0.5
+        },
+        {
+          "contribution": 0.0,
+          "key": "load",
+          "normalized": 0.0,
+          "raw": 0.0,
+          "tolerance": 0.3,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 1.1781803391408254,
+          "key": "distd",
+          "normalized": 1.1781803391408254,
+          "raw": 2.356360678281651,
+          "tolerance": 2.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 2.9407471996399623,
+          "key": "diag",
+          "normalized": 2.9407471996399623,
+          "raw": 5.881494399279925,
+          "tolerance": 2.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.29486537110210703,
+          "key": "flat_cv",
+          "normalized": 0.29486537110210703,
+          "raw": 0.4422980566531606,
+          "tolerance": 1.5,
+          "unweighted_raw": false,
+          "weight": 1.0
+        }
+      ]
+    },
+    {
+      "J": 22.782311890151984,
+      "brief_hash": "71ce677156d1e9b5",
+      "brief_name": "room_landscape_80x50_700_hf1440_v7",
+      "brief_path": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7.yaml",
+      "design_hash": "491efb2132b8",
+      "facts": {
+        "below_mode": "mask",
+        "bw8k": {
+          "bw_h_deg": 39.47950689800333,
+          "bw_v_deg": 33.85482929647661,
+          "hz": 8000.0
+        },
+        "bw8k_condition": "floor 60.00/37.50 deg at 8000 Hz vs measured 39.48/33.85 deg; raw penalty 4.343779 rides inside cov",
+        "bw8k_floor": {
+          "floor_h_deg": 60.0,
+          "floor_hz": 8000.0,
+          "floor_v_deg": 37.5,
+          "min_bw_h_deg": 39.47950689800333,
+          "min_bw_v_deg": 33.85482929647661,
+          "penalty_raw": 4.343779066069182
+        },
+        "cov_narrow_ratio": 2.0,
+        "cov_v_weight": 0.5,
+        "di": {
+          "anchor_hz": 700.0,
+          "level_db": 13.079574383820045,
+          "level_scored": true,
+          "level_source": "gaussian",
+          "slope_db_per_dec": 0.0,
+          "slope_scored": true
+        },
+        "di_slope_target": 0.0,
+        "diag": {
+          "reference_deg": 65.0,
+          "scored": true
+        },
+        "diag_scored": true,
+        "distd_weighted": 0.5,
+        "flat_band": "scored",
+        "measured_di_slope_db_per_dec": 9.567573280356504,
+        "n_scored_cov_h": 13,
+        "n_scored_cov_v": 13,
+        "n_solved_in_band": 16,
+        "n_solved_total": 18,
+        "onset_h_hz": 700.0,
+        "onset_v_hz": 700.0,
+        "score_window": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "below_mode": "mask",
+          "coverage_v_down_deg": null,
+          "coverage_v_up_deg": null,
+          "f_pattern_hz": null,
+          "fc_hz": null,
+          "h_deg": 80.0,
+          "h_lo_hz": 700.0,
+          "narrow_ratio": 2.0,
+          "pattern_beta": null,
+          "v_deg": 50.0,
+          "v_lo_hz": 700.0
+        },
+        "solved_freqs_hz": [
+          250.0,
+          315.0,
+          400.0,
+          500.0,
+          643.33,
+          827.75,
+          1065.04,
+          1370.35,
+          1763.18,
+          2268.63,
+          2573.0,
+          2918.96,
+          3311.0,
+          3755.72,
+          4260.0,
+          4832.36,
+          6217.63,
+          8000.0
+        ],
+        "solved_freqs_in_band_hz": [
+          400.0,
+          500.0,
+          643.33,
+          827.75,
+          1065.04,
+          1370.35,
+          1763.18,
+          2268.63,
+          2573.0,
+          2918.96,
+          3311.0,
+          3755.72,
+          4260.0,
+          4832.36,
+          6217.63,
+          8000.0
+        ],
+        "target_profile_at_solved_hz": null
+      },
+      "grid": "solved",
+      "grid_points": null,
+      "label": "klangfilm_lame",
+      "metrics_recomputed": true,
+      "objective_version": 7,
+      "parity_delta": null,
+      "rank_in_brief": 2,
+      "reasons": [],
+      "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261116T225543Z-screen-6acf41",
+      "score_id": "ef5603c9517c78ee5e57b9e4fdce79c722e3d72ea4c1f31b0fccb3521334821f",
+      "source": "nov17:base",
+      "status": "exact_complete",
+      "stored_J": 8.923616737684702,
+      "target_changed": true,
+      "terms": [
+        {
+          "contribution": 5.105361160893513,
+          "key": "cov",
+          "normalized": 5.105361160893513,
+          "raw": 15.31608348268054,
+          "tolerance": 3.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.026250369613561964,
+          "key": "rip",
+          "normalized": 0.026250369613561964,
+          "raw": 0.026250369613561964,
+          "tolerance": 1.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 1.2206304552051113,
+          "key": "di",
+          "normalized": 4.0687681840170375,
+          "raw": 1.627507273606815,
+          "tolerance": 0.4,
+          "unweighted_raw": false,
+          "weight": 0.3
+        },
+        {
+          "contribution": 10.170939830554635,
+          "key": "dislope",
+          "normalized": 10.170939830554635,
+          "raw": 91.53845847499171,
+          "tolerance": 9.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.0300224046897513,
+          "key": "flat",
+          "normalized": 0.0600448093795026,
+          "raw": 0.0900672140692539,
+          "tolerance": 1.5,
+          "unweighted_raw": false,
+          "weight": 0.5
+        },
+        {
+          "contribution": 0.0,
+          "key": "load",
+          "normalized": 0.0,
+          "raw": 0.0,
+          "tolerance": 0.3,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.6780441227986733,
+          "key": "distd",
+          "normalized": 1.3560882455973466,
+          "raw": 2.7121764911946933,
+          "tolerance": 2.0,
+          "unweighted_raw": false,
+          "weight": 0.5
+        },
+        {
+          "contribution": 5.534637533279096,
+          "key": "diag",
+          "normalized": 5.534637533279096,
+          "raw": 11.069275066558191,
+          "tolerance": 2.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.0164260131176427,
+          "key": "flat_cv",
+          "normalized": 0.0164260131176427,
+          "raw": 0.02463901967646405,
+          "tolerance": 1.5,
+          "unweighted_raw": false,
+          "weight": 1.0
+        }
+      ]
+    },
+    {
+      "J": 8.923616737684702,
+      "brief_hash": "2411b8d13e65544c",
+      "brief_name": "room_landscape_80x50_700_hf1440_v7_smooth",
+      "brief_path": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7_smooth.yaml",
+      "design_hash": "491efb2132b8",
+      "facts": {
+        "below_mode": "mask",
+        "bw8k": {
+          "bw_h_deg": 39.47950689800333,
+          "bw_v_deg": 33.85482929647661,
+          "hz": 8000.0
+        },
+        "bw8k_condition": "floor 60.00/37.50 deg at 8000 Hz vs measured 39.48/33.85 deg; raw penalty 4.343779 rides inside cov",
+        "bw8k_floor": {
+          "floor_h_deg": 60.0,
+          "floor_hz": 8000.0,
+          "floor_v_deg": 37.5,
+          "min_bw_h_deg": 39.47950689800333,
+          "min_bw_v_deg": 33.85482929647661,
+          "penalty_raw": 4.343779066069182
+        },
+        "cov_narrow_ratio": 1.0,
+        "cov_v_weight": 0.5,
+        "di": {
+          "anchor_hz": 700.0,
+          "level_db": 13.079574383820045,
+          "level_scored": false,
+          "level_source": "gaussian",
+          "slope_db_per_dec": 5.0,
+          "slope_scored": true
+        },
+        "di_slope_target": 5.0,
+        "diag": {
+          "reference_deg": 65.0,
+          "scored": true
+        },
+        "diag_scored": true,
+        "distd_weighted": 1.0,
+        "flat_band": "scored",
+        "measured_di_slope_db_per_dec": 9.567573280356504,
+        "n_scored_cov_h": 13,
+        "n_scored_cov_v": 13,
+        "n_solved_in_band": 16,
+        "n_solved_total": 18,
+        "onset_h_hz": 700.0,
+        "onset_v_hz": 700.0,
+        "score_window": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "below_mode": "mask",
+          "coverage_v_down_deg": null,
+          "coverage_v_up_deg": null,
+          "f_pattern_hz": null,
+          "fc_hz": null,
+          "h_deg": 80.0,
+          "h_lo_hz": 700.0,
+          "narrow_ratio": 1.0,
+          "pattern_beta": null,
+          "v_deg": 50.0,
+          "v_lo_hz": 700.0
+        },
+        "solved_freqs_hz": [
+          250.0,
+          315.0,
+          400.0,
+          500.0,
+          643.33,
+          827.75,
+          1065.04,
+          1370.35,
+          1763.18,
+          2268.63,
+          2573.0,
+          2918.96,
+          3311.0,
+          3755.72,
+          4260.0,
+          4832.36,
+          6217.63,
+          8000.0
+        ],
+        "solved_freqs_in_band_hz": [
+          400.0,
+          500.0,
+          643.33,
+          827.75,
+          1065.04,
+          1370.35,
+          1763.18,
+          2268.63,
+          2573.0,
+          2918.96,
+          3311.0,
+          3755.72,
+          4260.0,
+          4832.36,
+          6217.63,
+          8000.0
+        ],
+        "target_profile_at_solved_hz": null
+      },
+      "grid": "solved",
+      "grid_points": null,
+      "label": "klangfilm_lame",
+      "metrics_recomputed": true,
+      "objective_version": 7,
+      "parity_delta": null,
+      "rank_in_brief": 2,
+      "reasons": [],
+      "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261116T225543Z-screen-6acf41",
+      "score_id": "9b05b55ef3ebcedc3633ba5f2a857de138f466e0c77956f281ecfad965b7612f",
+      "source": "nov17:smooth",
+      "status": "exact_complete",
+      "stored_J": 8.923616737684702,
+      "target_changed": true,
+      "terms": [
+        {
+          "contribution": 1.4191200092508895,
+          "key": "cov",
+          "normalized": 1.4191200092508895,
+          "raw": 11.352960074007116,
+          "tolerance": 8.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.026250369613561964,
+          "key": "rip",
+          "normalized": 0.026250369613561964,
+          "raw": 0.026250369613561964,
+          "tolerance": 1.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.0,
+          "key": "di",
+          "normalized": 0.0,
+          "raw": 0.0,
+          "tolerance": 0.4,
+          "unweighted_raw": false,
+          "weight": 0.0
+        },
+        {
+          "contribution": 2.318080630158519,
+          "key": "dislope",
+          "normalized": 2.318080630158519,
+          "raw": 20.86272567142667,
+          "tolerance": 9.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.0300224046897513,
+          "key": "flat",
+          "normalized": 0.0600448093795026,
+          "raw": 0.0900672140692539,
+          "tolerance": 1.5,
+          "unweighted_raw": false,
+          "weight": 0.5
+        },
+        {
+          "contribution": 0.0,
+          "key": "load",
+          "normalized": 0.0,
+          "raw": 0.0,
+          "tolerance": 0.3,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 1.3560882455973466,
+          "key": "distd",
+          "normalized": 1.3560882455973466,
+          "raw": 2.7121764911946933,
+          "tolerance": 2.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 3.757629065256991,
+          "key": "diag",
+          "normalized": 3.757629065256991,
+          "raw": 7.515258130513982,
+          "tolerance": 2.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.0164260131176427,
+          "key": "flat_cv",
+          "normalized": 0.0164260131176427,
+          "raw": 0.02463901967646405,
+          "tolerance": 1.5,
+          "unweighted_raw": false,
+          "weight": 1.0
+        }
+      ]
+    }
+  ],
+  "identity": [
+    {
+      "delta": 0.0,
+      "design": "crowe_es600",
+      "design_hash": "22365b569be9",
+      "max_abs_term_delta": 0.0,
+      "metrics_recomputed": true,
+      "own_brief": "hl__crowe_panel_home_v7",
+      "passed": true,
+      "recomputed_J": 16.91817613526687,
+      "relative_delta": 0.0,
+      "response_sha256": "8d0bc7f5310717b0db1521844c6c042778592c904724963ce49f8ffd8aa5fe62",
+      "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261115T205453Z-screen-32f7c4",
+      "status": "exact_complete",
+      "stored_J": 16.91817613526687,
+      "term_deltas": {
+        "cov": 0.0,
+        "di": 0.0,
+        "di_estimated": 0.0,
+        "diag": 0.0,
+        "dislope": 0.0,
+        "distd": 0.0,
+        "f11_hz": 0.0,
+        "flat": 0.0,
+        "flat_cv": 0.0,
+        "lfp20_hz": 0.0,
+        "lfp50_hz": 0.0,
+        "load": 0.0,
+        "loaded_hi_hz": 0.0,
+        "n_in_band": 0.0,
+        "n_nan": 0.0,
+        "penalty": 0.0,
+        "rez_min_from_fx": 0.0,
+        "rip": 0.0,
+        "total": 0.0
+      }
+    },
+    {
+      "delta": 0.0,
+      "design": "klangfilm_lame",
+      "design_hash": "491efb2132b8",
+      "max_abs_term_delta": 0.0,
+      "metrics_recomputed": true,
+      "own_brief": "hl__klangfilm_lame_curved_v1",
+      "passed": true,
+      "recomputed_J": 8.923616737684702,
+      "relative_delta": 0.0,
+      "response_sha256": "0267dbf71bcce1699492a1310dcad1aeb9441464c5d37ff83b6fa8ff06ed7e37",
+      "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261116T225543Z-screen-6acf41",
+      "status": "exact_complete",
+      "stored_J": 8.923616737684702,
+      "term_deltas": {
+        "cov": 0.0,
+        "di": 0.0,
+        "di_estimated": 0.0,
+        "diag": 0.0,
+        "dislope": 0.0,
+        "distd": 0.0,
+        "f11_hz": 0.0,
+        "flat": 0.0,
+        "flat_cv": 0.0,
+        "lfp20_hz": 0.0,
+        "lfp50_hz": 0.0,
+        "load": 0.0,
+        "loaded_hi_hz": 0.0,
+        "n_in_band": 0.0,
+        "n_nan": 0.0,
+        "penalty": 0.0,
+        "rez_min_from_fx": 0.0,
+        "rip": 0.0,
+        "total": 0.0
+      }
+    }
+  ],
+  "identity_tolerance_relative": 1e-09,
+  "identity_tolerance_term": 1e-09,
+  "matrix": {
+    "crowe_es600": {
+      "base": {
+        "J": 16.91817613526687,
+        "status": "exact_complete"
+      },
+      "smooth": {
+        "J": 6.836181526793635,
+        "status": "exact_complete"
+      }
+    },
+    "klangfilm_lame": {
+      "base": {
+        "J": 22.782311890151984,
+        "status": "exact_complete"
+      },
+      "smooth": {
+        "J": 8.923616737684702,
+        "status": "exact_complete"
+      }
+    }
+  },
+  "provenance": {
+    "captured_utc": "2026-11-17T23:39:12Z",
+    "dirty_tree": [
+      " M hornlab_search/metrics/pattern_quality.py",
+      " M hornlab_search/objective/scalar_v9.py",
+      " M tests/test_brief_truth_replay.py",
+      " M tests/test_crowe_mesh_truth.py",
+      " M tests/test_metrics_pattern_quality.py",
+      " M tools/analysis/brief_truth_replay.py",
+      " M tools/analysis/crowe_mesh_truth.py",
+      " M tools/analysis/pattern_quality_report.py",
+      "?? .claude/worktrees/",
+      "?? examples/typologies/home_landscape_2026-11-15/hl__klangfilm_lame_curved_v1_c200w.yaml",
+      "?? tests/test_v9_polar_window.py"
+    ],
+    "labels": "[measured] stored BEM responses; [derived] recomputed metrics/scores; [proposed] v9 candidate briefs; [unavailable] anything not stored",
+    "repo_head": "750223e92a8e0cd11f8f88e9054186bb12632dc6",
+    "tool": "brief_truth_replay",
+    "tool_version": "1.0.0"
+  },
+  "reproduced_nov17": true,
+  "source_guard": {
+    "files": 16,
+    "sha256": {
+      "runs\\20261115T205453Z-screen-32f7c4\\best.json": "2a319a7903c2e8c03757149e0c9260e1e98b0cd711857f887507d9092a13ddea",
+      "runs\\20261115T205453Z-screen-32f7c4\\config.yaml": "b836d0483bb0687f60137eedd1076aca15fad3fb2e89ed6746a86e5e1e916bcd",
+      "runs\\20261115T205453Z-screen-32f7c4\\designs\\22365b569be9\\design.json": "5b46cad7103790954e35fe5c1c61148440c31ddab054cd834a09581a8e66582e",
+      "runs\\20261115T205453Z-screen-32f7c4\\designs\\22365b569be9\\mesh.msh": "6013adee0c2cd5f6f7e80cd2871c46035b977db864ad11cdcd205c44ee96cb47",
+      "runs\\20261115T205453Z-screen-32f7c4\\designs\\22365b569be9\\metrics.json": "0846902acaf78f8f79f7cbace9d010a3bc0e91f21546acebab9531f5996cd55c",
+      "runs\\20261115T205453Z-screen-32f7c4\\designs\\22365b569be9\\response.npz": "8d0bc7f5310717b0db1521844c6c042778592c904724963ce49f8ffd8aa5fe62",
+      "runs\\20261115T205453Z-screen-32f7c4\\designs\\22365b569be9\\status.json": "e5ca338c16d7ed77498c3b6f18b1c9e6dc6a10354094d781c7f10dcb9ab9a9fd",
+      "runs\\20261115T205453Z-screen-32f7c4\\run.json": "867ef1afde56c5de695dd04c51a78d1bd81552470170a4e2bac47c69f2a17619",
+      "runs\\20261116T225543Z-screen-6acf41\\best.json": "b87d97224b06b94c6123c35713c50167cefd1a11ae97c2ecbf3b14d726a0baee",
+      "runs\\20261116T225543Z-screen-6acf41\\config.yaml": "edbe29bcd503eef5358ea866f5355a72068d71e4a703514896e1da307021e33c",
+      "runs\\20261116T225543Z-screen-6acf41\\designs\\491efb2132b8\\design.json": "4caf892efffe8c67f43ee1506c6b828a681183be4ef0a3000118377e30531fbc",
+      "runs\\20261116T225543Z-screen-6acf41\\designs\\491efb2132b8\\mesh.msh": "c9ebd97f0123a4cc59147d966f54f4351da73c6189340dcba76c96d8260b2027",
+      "runs\\20261116T225543Z-screen-6acf41\\designs\\491efb2132b8\\metrics.json": "39f990497f388192eb3cf1dc427eafa1eb3a39760a3e4fc28d6de8afecdbba1d",
+      "runs\\20261116T225543Z-screen-6acf41\\designs\\491efb2132b8\\response.npz": "0267dbf71bcce1699492a1310dcad1aeb9441464c5d37ff83b6fa8ff06ed7e37",
+      "runs\\20261116T225543Z-screen-6acf41\\designs\\491efb2132b8\\status.json": "a794aeacef8c983be3e0c27defa343254cda6810751cdfba418d3269150a92a3",
+      "runs\\20261116T225543Z-screen-6acf41\\run.json": "d91981014a22c8664a5f3b2a3e80cf8589c294fa682ac7bbb7e39b0d0296df75"
+    },
+    "unchanged": true
+  }
+}

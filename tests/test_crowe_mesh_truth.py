@@ -9,6 +9,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import math
+import subprocess
 import sys
 from pathlib import Path
 
@@ -360,12 +361,129 @@ def test_real_c0_end_to_end_using_existing_mesh_matches_fixture(c0, tmp_path):
     assert rec["mesh"]["source_face"]["full_width_mm"] == pytest.approx(36.0, abs=1e-6)
     assert rec["mesh"]["terminal_z_delta_mm"] == pytest.approx(0.0, abs=1e-6)
     assert rec["mesh"]["symmetry"]["full_width_mm"] == pytest.approx(580.0, abs=1e-6)
-    assert rec["fable_v2_rule"]["pass"] is True
+    if rec["native_floor"].get("status") == "unmeasurable (mesher not installed)":
+        # Existing-mesh mode is deliberately mesher-optional: the native-floor-relative FABLE
+        # rule cannot be evaluated, but the measured surface truth above still is.
+        assert rec["fable_v2_rule"]["pass"] is None
+        assert rec["fable_v2_rule"]["threshold_mm"] is None
+    else:
+        assert rec["fable_v2_rule"]["pass"] is True
+        assert rec["native_floor"]["p99_mm"] > 0.0
     assert rec["deviation"]["p99_mm"] < 0.5
     assert rec["dense_diagnostic"]["max_mm"] < 0.5
+    # Azimuth matching is tolerance-based: every prescribed azimuth keeps a full column.
+    per_az = rec["dense_diagnostic"]["per_azimuth"]
+    assert [row["azimuth_deg"] for row in per_az] == [0.0, 22.5, 45.0, 67.5, 90.0]
+    assert all(row["n_samples"] == rec["dense_diagnostic"]["n_u"] for row in per_az)
     assert rec["mesh"]["topology"]["open_edges_off_symmetry_planes"] == 0
     # CSV/JSON writer is part of the CLI contract; exercise it offline.
     crt.write_outputs({"meta": {"tool": crt.TOOL}, "cases": [rec]}, tmp_path / "out.json")
     payload = json.loads((tmp_path / "out.json").read_text(encoding="utf-8"))
     assert payload["cases"][0]["status"] == "ok"
     assert (tmp_path / "out.csv").is_file()
+
+
+# ------------------------------------------------------------------ hashes / CLI refusal
+
+def test_config_sha_is_the_full_digest_with_a_short_presentation_form(c1):
+    cfg, _shape, _brief = c1
+    full = crt.config_sha(cfg.raw)
+    short = crt.config_sha_short(cfg.raw)
+    assert len(full) == 64 and all(ch in "0123456789abcdef" for ch in full)
+    assert len(short) == 12 and short == full[:12]
+    assert crt.config_sha(cfg.raw) == full
+
+
+def _single_case_manifest(tmp_path: Path, knobs: dict) -> Path:
+    path = tmp_path / "cases.json"
+    path.write_text(json.dumps({"cases": [{"name": "case", "knobs": knobs}]}), encoding="utf-8")
+    return path
+
+
+def _run_cli(*args: str) -> subprocess.CompletedProcess:
+    """Run the tool as the real CLI in a fresh process (no solve modules imported in-process)."""
+    return subprocess.run([sys.executable, str(_TOOL), *args], cwd=str(REPO),
+                          capture_output=True, text=True)
+
+
+def test_main_exits_zero_when_every_case_is_ok(c1, tmp_path):
+    cfg, _shape, _brief = c1
+    knobs = {k: float(v) for k, v in cfg.seed_params.items()}
+    manifest = _single_case_manifest(tmp_path, knobs)
+    out = tmp_path / "ok.json"
+    proc = _run_cli("--config", str(_BASE_CFG), "--samples", str(manifest),
+                    "--out", str(out), "--no-mesh")
+    assert proc.returncode == 0, proc.stderr
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    assert payload["cases"][0]["status"] == "law_only"
+
+
+def test_main_exits_nonzero_when_any_case_is_refused(c1, tmp_path):
+    cfg, _shape, _brief = c1
+    knobs = {k: float(v) for k, v in cfg.seed_params.items()}
+    knobs["height_v_active_mm"] = 999.0                    # outside the c1 box
+    manifest = _single_case_manifest(tmp_path, knobs)
+    out = tmp_path / "refused.json"
+    proc = _run_cli("--config", str(_BASE_CFG), "--samples", str(manifest),
+                    "--out", str(out), "--no-mesh")
+    assert proc.returncode == 1, "a refused case must not exit 0"
+    assert "FAIL:" in proc.stderr
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    assert payload["cases"][0]["status"] == "refused"
+    assert payload["cases"][0]["refusal"]["type"]
+
+
+# ------------------------------------------------------------------ mesher-optional / Jacobian
+
+def test_existing_mesh_mode_works_without_hornlab_mesher(c1, tmp_path, monkeypatch):
+    from types import SimpleNamespace
+    # Rank 4 requires the c1 box config with the c0 seed knobs (c0's own fixed-bound config is
+    # rank 0 by construction); the stored mesh is the c0 quarter fixture.
+    cfg, _shape, _brief = c1
+    monkeypatch.setattr(crt, "_mesher_available", lambda: False)
+    args = SimpleNamespace(no_mesh=False, existing_mesh=str(_FIXTURE), _mesh_root=tmp_path,
+                           _resolved_cases=[{"name": "c0"}])
+    case = {"name": "c0", "knobs": {k: float(v) for k, v in cfg.seed_params.items()}}
+    rec = crt.analyse_case(cfg, case, args, {"mesher": crt.mesher_pin()})
+    assert rec["status"] == "ok"
+    # Everything not native-floor dependent still works and is measured.
+    assert rec["mesh"]["topology"]["open_edges_off_symmetry_planes"] == 0
+    assert rec["mesh"]["n_triangles"] == 8318
+    assert rec["deviation"]["measurable"] is True
+    assert rec["rank"]["surface_displacement"]["practical_rank"] == 4
+    # Native floor + FABLE relative rule are a typed unmeasurable, never fabricated numbers.
+    assert rec["native_floor"]["status"] == "unmeasurable (mesher not installed)"
+    assert "p99_mm" not in rec["native_floor"]
+    assert rec["fable_v2_rule"]["status"] == "unmeasurable (mesher not installed)"
+    assert rec["fable_v2_rule"]["threshold_mm"] is None
+    assert rec["fable_v2_rule"]["native_floor_p99_mm"] is None
+    assert rec["fable_v2_rule"]["pass"] is None
+    assert rec["mesh"]["mesher"]["native_geometry_status"] == \
+        "unmeasurable (mesher not installed)"
+
+
+def test_near_bound_one_sided_jacobian_uses_the_achieved_step(c1):
+    cfg, shape, brief = c1
+    bounds = crt._bounds(cfg)
+    knobs = {k: float(v) for k, v in cfg.seed_params.items()}
+    key = "L_forward_mm"
+    lo, hi = float(bounds[key].lo), float(bounds[key].hi)
+    requested = 0.1
+    knobs[key] = hi - 0.02 * (hi - lo)          # near, but not on, the upper bound
+    out = crt.surface_displacement_rank(shape, brief, knobs, bounds, delta=requested)
+    step = out["scheme"][key]
+    assert step["scheme"] == "one_sided_inward"
+    assert step["on_bound"] is False
+    assert step["requested_normalized_step"] == pytest.approx(requested)
+    assert step["normalized_step"] == pytest.approx(0.02, abs=1e-12)
+    # The column magnitude is the displacement divided by the ACHIEVED step, not the requested one.
+    base = crt._surface_vector(shape, brief, crt.STATIONS_MM, crt.NORMALIZED_U, crt.AZIMUTHS_DEG)
+    p_in = crt._surface_vector({**shape, key: hi}, brief, crt.STATIONS_MM,
+                               crt.NORMALIZED_U, crt.AZIMUTHS_DEG)
+    expected_norm = float(np.linalg.norm((p_in - base) / 0.02))
+    assert out["column_norms_mm"][key] == pytest.approx(expected_norm, rel=1e-12)
+    # On-bound seeds keep the exact full-step behaviour.
+    on_bound = out["scheme"]["height_v_active_mm"]
+    assert on_bound["scheme"] == "one_sided_inward"
+    assert on_bound["on_bound"] is True
+    assert on_bound["normalized_step"] == pytest.approx(requested)

@@ -30,19 +30,32 @@ from hornlab_search.targets.spec import Target
 from tools.analysis import brief_truth_replay as BTR
 
 ROOT = Path(__file__).resolve().parents[1]
-CANDIDATES = sorted((ROOT / "scratch" / "home_v9_offline_2026-11-17").glob("*.yaml"))
+#: Committed evidence copies first (present in a clean checkout); the gitignored scratch lane is
+#: only a local fallback.  The candidate YAMLs themselves are committed under docs/evidence/.
+_COMMITTED_CANDIDATES = ROOT / "docs" / "evidence" / "home_crowe_v9_offline_2026-11-17"
+_SCRATCH_CANDIDATES = ROOT / "scratch" / "home_v9_offline_2026-11-17"
+_CANDIDATE_DIR = (_COMMITTED_CANDIDATES
+                  if sorted(_COMMITTED_CANDIDATES.glob("*.yaml")) else _SCRATCH_CANDIDATES)
+CANDIDATES = sorted(_CANDIDATE_DIR.glob("*.yaml"))
 
 LEGACY = ROOT / "runs" / "20261115T205453Z-screen-32f7c4"
 KLANG = ROOT / "runs" / "20261116T225543Z-screen-6acf41"
+C221 = ROOT / "runs" / "20261116T153619Z-screen-c221aa"
+C221_HASH = "6d6dd332b282"
 HAS_ARCHIVE = (LEGACY / "designs" / "22365b569be9" / "response.npz").is_file() and \
     (KLANG / "designs" / "491efb2132b8" / "response.npz").is_file()
+HAS_C221_PAIR = ((C221 / "designs" / C221_HASH / "response.npz").is_file()
+                 and (C221 / "verify" / "designs" / C221_HASH / "response.npz").is_file())
 
 needs_archive = pytest.mark.skipif(
     not HAS_ARCHIVE,
     reason="requires the local run archive (runs/ is not part of the repo checkout)")
+needs_c221 = pytest.mark.skipif(
+    not HAS_C221_PAIR,
+    reason="requires the local c221aa screen/verify pair (runs/ is local-only)")
 needs_candidates = pytest.mark.skipif(
     not CANDIDATES,
-    reason="candidate v9 YAMLs live under scratch/ (gitignored, local lane artifact)")
+    reason="no committed or scratch candidate v9 YAMLs found")
 
 
 def _sha(path: Path) -> str:
@@ -294,3 +307,104 @@ def test_objective_v9_is_the_only_dispatched_scorer_and_never_raises():
     assert j == PENALTY_FAILED
     assert terms["total"] == j and terms["penalty"] == j
     assert "cov_profile" in terms and "di_roughness" in terms
+
+
+# ------------------------------------------------------------------ hardening regressions
+
+def test_identity_term_residuals_refuse_a_vacuous_comparison():
+    with pytest.raises(BTR.IdentityReplayError, match="vacuous identity"):
+        BTR._term_residuals({}, {"cov": 1.0})
+    with pytest.raises(BTR.IdentityReplayError, match="vacuous identity"):
+        BTR._term_residuals({"cov": 1.0}, {"rip": 2.0})
+    assert BTR._term_residuals({"cov": 1.0, "rip": 2.0}, {"cov": 1.5, "rip": 2.0}) == {
+        "cov": 0.5, "rip": 0.0}
+
+
+@needs_archive
+def test_run_read_paths_hash_best_metrics_and_response():
+    paths = BTR._run_read_paths(LEGACY, "22365b569be9")
+    names = {p.name for p in paths}
+    assert {"best.json", "metrics.json", "response.npz", "config.yaml"} <= names
+
+
+@needs_archive
+@needs_candidates
+def test_source_guard_snapshots_before_any_response_or_best_read(tmp_path, monkeypatch):
+    events: list[str] = []
+    real_hash = BTR._source_hashes
+    real_best = BTR._load_best
+
+    def spy_hash(paths):
+        events.append("hash")
+        return real_hash(paths)
+
+    def spy_best(run_dir):
+        events.append("best")
+        return real_best(run_dir)
+
+    import hornlab_search.solve.cache as cache
+
+    real_load = cache.load_response
+
+    def spy_load(path):
+        events.append("load_response")
+        return real_load(path)
+
+    monkeypatch.setattr(BTR, "_source_hashes", spy_hash)
+    monkeypatch.setattr(BTR, "_load_best", spy_best)
+    monkeypatch.setattr(cache, "load_response", spy_load)
+
+    BTR.scenarios([CANDIDATES[0]], [dict(BTR.LEGACY_DESIGNS[0])], tmp_path)
+    assert events[0] == "hash", f"first filesystem action was {events[0]!r}, not the hash guard"
+    first_read = next(i for i, event in enumerate(events) if event != "hash")
+    assert all(event == "hash" for event in events[:first_read])
+    assert events.count("hash") >= 2          # pre-read snapshot + final unchanged check
+
+
+@needs_candidates
+def test_grid_skips_a_pair_whose_response_side_is_missing(tmp_path):
+    run = tmp_path / "synthetic-run"
+    (run / "designs" / "deadbeef").mkdir(parents=True)
+    (run / "verify" / "designs" / "deadbeef").mkdir(parents=True)
+    # Screen side exists (presence is all the discovery check reads); verify side is absent.
+    (run / "designs" / "deadbeef" / "response.npz").write_bytes(b"")
+
+    payload = BTR.grid_stability(CANDIDATES[0], [run], tmp_path / "out")
+    assert payload["pairs"] == 1
+    assert payload["processed_pairs"] == 0
+    assert payload["skipped_pairs"] == [{
+        "run": "synthetic-run",
+        "design_hash": "deadbeef",
+        "missing_response_sides": ["verify"],
+        "note": ("typed skip: no response.npz on verify; this pair contributes no J and is "
+                 "not scored"),
+    }]
+    assert payload["sides"] == {}
+
+
+@needs_candidates
+def test_bad_v9_brief_exits_2_with_one_typed_line(tmp_path, capsys):
+    text = CANDIDATES[0].read_text(encoding="utf-8")
+    bad = text.replace("  lfp_crossover_ratio: 1.6\n",
+                       "  lfp_crossover_ratio: 1.6\n  bw8k_floor: 0.75\n")
+    assert bad != text and "bw8k_floor" in bad
+    path = tmp_path / "bad_v9.yaml"
+    path.write_text(bad, encoding="utf-8")
+    rc = BTR.main(["scenarios", "--briefs", str(path), "--out", str(tmp_path / "out")])
+    lines = [ln for ln in capsys.readouterr().err.strip().splitlines() if ln.strip()]
+    assert rc == 2
+    assert len(lines) == 1, lines
+    assert "ConfigError" in lines[0]
+
+
+@needs_c221
+def test_grid_side_mesh_evidence_comes_from_stored_manifests():
+    screen = BTR._mesh_side_record(C221, C221_HASH)
+    verify = BTR._mesh_side_record(C221 / "verify", C221_HASH)
+    for rec in (screen, verify):
+        assert len(rec["mesh_hash"]) == 64
+        assert rec["mesh_epw"] == pytest.approx(6.0)
+        assert rec["n_dof"] == "unavailable" or isinstance(rec["n_dof"], int)
+        assert rec["mesh_meta_key"] != "unavailable"
+    # The verify manifest points at the same stored mesh, so "same-mesh" is evidenced now.
+    assert screen["mesh_hash"] == verify["mesh_hash"]

@@ -75,16 +75,20 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from hornlab_search.compare import mshio  # noqa: E402
-from hornlab_search.config import load_config, mesh_spec  # noqa: E402
+from hornlab_search.config import ConfigError, load_config, mesh_spec  # noqa: E402
 from hornlab_search.design import families  # noqa: E402
 from hornlab_search.design.generators import crowe_hv_area_aspect_v1 as family  # noqa: E402
+from hornlab_search.design.generators.registry import GeneratorError  # noqa: E402
 from hornlab_search.design.space import Bound  # noqa: E402
+from hornlab_search.geometry.record import RecordRefusal  # noqa: E402
 from hornlab_search.types import Design  # noqa: E402
 
 TOOL = "crowe_mesh_truth"
 SCHEMA_VERSION = 1
 
-#: Physical V2A section stations (mm).  Matches the generator's own V2A review set + 80 mm.
+#: Physical V2A section stations (mm): the generator's V2A review set with its 60 mm station
+#: replaced by 80 mm.  This is not the generator's set "plus" a station, and the two sets are not
+#: identical.
 STATIONS_MM = (0.0, 5.0, 10.0, 20.0, 40.0, 80.0, 100.0)
 #: Normalized forward stations u = z/L.
 NORMALIZED_U = (0.0, 0.2, 0.4, 0.6, 0.8, 1.0)
@@ -199,9 +203,11 @@ def mesher_pin() -> dict:
 
 
 def config_sha(raw: dict) -> str:
-    """Same canonicalisation as ``hornlab_search.search.rundir.config_sha`` (12 hex chars).
+    """Canonical full SHA-256 (64 hex chars) of a config block.
 
-    Reimplemented locally so this tool never imports the search package.
+    Uses the same canonicalisation as ``hornlab_search.search.rundir.config_sha`` but returns the
+    FULL digest; ``config_sha_short`` keeps the 12-char presentation form.  Reimplemented locally
+    so this tool never imports the search package.
     """
     def _jsonable(value):
         if isinstance(value, dict):
@@ -217,7 +223,12 @@ def config_sha(raw: dict) -> str:
         return value
 
     blob = json.dumps(_jsonable(raw), sort_keys=True, separators=(",", ":"))
-    return sha256_bytes(blob.encode())[:12]
+    return sha256_bytes(blob.encode())
+
+
+def config_sha_short(raw: dict) -> str:
+    """The 12-char display form of :func:`config_sha` (provenance label, not the identity)."""
+    return config_sha(raw)[:12]
 
 
 def canonical_sha256(value) -> str:
@@ -584,27 +595,38 @@ def mesh_section(triangles_xyz: np.ndarray, z_mm: float, *, quarter: bool = True
 # ------------------------------------------------------------------ native point grid
 
 
-def native_geometry(design: Design, cfg) -> dict:
-    """The pinned mesher's own native inner/outer point grid at ``NATIVE_RES_MM`` (mm)."""
-    from hornlab_mesher.config_builder import resolve_geometry
+def _mesher_available() -> bool:
+    """True when ``hornlab_mesher`` is importable.  Never raises."""
+    import importlib.util
 
-    msp = mesh_spec("screen", cfg)
-    mcfg = families.to_mesher_config(
-        design, msp, {"throat": NATIVE_RES_MM, "mouth": NATIVE_RES_MM, "rear": NATIVE_RES_MM},
-        Path("<crowe-mesh-truth-native>"), mounting=getattr(cfg, "mounting", None))
-    mcfg["mesh"].update({"throat_res_mm": NATIVE_RES_MM, "mouth_res_mm": NATIVE_RES_MM,
-                         "rear_res_mm": NATIVE_RES_MM, "allow_large_mesh": True})
-    rg = resolve_geometry(mcfg, allow_large_mesh=True)
-    geom = rg.geometry
-    outer = getattr(geom, "outer_points", None)
+    try:
+        return importlib.util.find_spec("hornlab_mesher") is not None
+    except (ImportError, ValueError):
+        return False
+
+
+def native_geometry(design: Design, cfg) -> dict:
+    """The pinned mesher's own native inner/outer point grid at ``NATIVE_RES_MM`` (mm).
+
+    Reuses ``geometry.record.native_points`` (the project's single public native-grid route)
+    instead of re-deriving the mesher config here.  ``record.native_points`` does not expose the
+    mesher's resolved ``surface_fit``/``topology_mode``; those are reported as unavailable rather
+    than guessed.
+    """
+    from hornlab_search.geometry.record import native_points
+
+    inner, outer, route, wall = native_points(design, cfg, res_mm=NATIVE_RES_MM)
+    inner = np.asarray(inner, dtype=float)
     return {
-        "inner_points_mm": np.asarray(geom.inner_points, dtype=float),
+        "inner_points_mm": inner,
         "outer_points_mm": None if outer is None else np.asarray(outer, dtype=float),
-        "surface_fit": str(getattr(geom, "surface_fit", "unknown")),
-        "topology_mode": str(getattr(geom, "topology_mode", "unknown")),
-        "mode": str(rg.mode),
-        "n_phi": int(np.asarray(geom.inner_points).shape[0]),
-        "n_s": int(np.asarray(geom.inner_points).shape[1]),
+        "surface_fit": "unavailable (record.native_points does not expose the resolved fit)",
+        "topology_mode": "unavailable (record.native_points does not expose the mesher mode)",
+        "mode": str(route),
+        "route": str(route),
+        "wall_thickness_mm": None if wall is None else float(wall),
+        "n_phi": int(inner.shape[0]),
+        "n_s": int(inner.shape[1]),
     }
 
 
@@ -650,16 +672,28 @@ def surface_displacement_rank(shape, brief, knobs, bounds, *, delta: float = 0.1
             steps[key] = {"scheme": "central", "plus": plus, "minus": minus,
                           "normalized_step": float(delta)}
         else:
-            # The seed sits on a bound: use an inward one-sided difference, never a clipped
-            # central difference that silently halves the denominator.
+            # A one-sided inward difference, never a clipped central difference.  Near (not on)
+            # a bound the requested delta is not the step actually achieved, so divide by the
+            # achieved inward step; an on-bound seed still achieves the full requested step and
+            # keeps its exact previous behaviour.
+            on_bound = value >= hi or value <= lo
             inward = minus if value >= hi else plus
             shape_in = {**shape, key: inward}
             p_in = analytic_samples(shape_in, brief, stations_mm, normalized_u,
                                     azimuths_deg)[0].reshape(-1)
             sign = -1.0 if value >= hi else 1.0
-            columns[key] = sign * (p_in - base) / float(delta)
+            if on_bound:
+                denom = float(delta)
+            else:
+                denom = abs(float(inward) - value) / (hi - lo)
+                if not math.isfinite(denom) or denom <= 0.0:
+                    raise ValueError(f"{key}: one-sided inward step is not positive "
+                                     f"(seed {value}, inward {inward}, bounds [{lo}, {hi}])")
+            columns[key] = sign * (p_in - base) / denom
             steps[key] = {"scheme": "one_sided_inward", "inward": inward,
-                          "normalized_step": float(delta)}
+                          "normalized_step": float(denom),
+                          "requested_normalized_step": float(delta),
+                          "on_bound": bool(on_bound)}
     matrix = np.column_stack([columns[k] for k in keys])
     scale = float(np.sqrt(np.mean(base.reshape(-1, 3) ** 2))) if base.size else 0.0
     relative = matrix / max(scale, 1e-12)
@@ -770,15 +804,20 @@ def _dense_diagnostic(shape: dict, brief: dict, inner_triangles: np.ndarray,
     out = {**_stats(d), "n_u": int(n_u), "n_azimuth": int(n_az),
            "azimuth_step_deg": 90.0 / (int(n_az) - 1),
            "max_at": {k: recs[i][k] for k in ("z_mm", "u", "azimuth_deg")}}
-    # Per-azimuth p99 exposes corner-localised error that a single aggregate hides.
-    out["per_azimuth"] = [
-        {"azimuth_deg": float(a),
-         "p99_mm": float(np.percentile(d[[j for j, r in enumerate(recs)
-                                          if r["azimuth_deg"] == a]], 99)),
-         "max_mm": float(np.max(d[[j for j, r in enumerate(recs)
-                                  if r["azimuth_deg"] == a]]))}
-        for a in (0.0, 22.5, 45.0, 67.5, 90.0)
-    ]
+    # Per-azimuth p99 exposes corner-localised error that a single aggregate hides.  Compare
+    # azimuths with a tolerance: the stored values pass through degrees(radians(...)), so exact
+    # float equality can silently select an empty slice.
+    sampled_az = np.asarray([r["azimuth_deg"] for r in recs], dtype=float)
+    per_azimuth = []
+    for a in (0.0, 22.5, 45.0, 67.5, 90.0):
+        sel = np.isclose(sampled_az, a, rtol=0.0, atol=1e-9)
+        per_azimuth.append({
+            "azimuth_deg": float(a),
+            "p99_mm": float(np.percentile(d[sel], 99)),
+            "max_mm": float(np.max(d[sel])),
+            "n_samples": int(sel.sum()),
+        })
+    out["per_azimuth"] = per_azimuth
     return out
 
 
@@ -869,7 +908,9 @@ def analyse_case(cfg, case: dict, args, provenance: dict) -> dict:
             "status": "ok",
             "seed_params": knobs,
             "config_sha256": config_sha(effective_raw),
+            "config_sha_short": config_sha_short(effective_raw),
             "base_config_sha256": config_sha(case_cfg.raw),
+            "base_config_sha_short": config_sha_short(case_cfg.raw),
             "bounds": {k: {"lo": float(v.lo), "hi": float(v.hi)} for k, v in bounds.items()},
             "analytic": {
                 "sections": [analytic_section(shape, brief, z)
@@ -934,25 +975,43 @@ def analyse_case(cfg, case: dict, args, provenance: dict) -> dict:
         inner_triangles = xyz_mm[tri[roles["inner_tri"]]]
         shell_triangles = xyz_mm[tri[roles["shell_tri"]]]
         topo = mesh_topology(xyz_mm, tri, _symmetry_axes(case_cfg.mesh.quadrants))
-        native = native_geometry(Design("FREEFORM", family.materialize(
-            case_cfg.generator, knobs, brief)), case_cfg)
-        native_tri = triangulate_grid(native["inner_points_mm"])
-        inner_nodes = np.unique(tri[roles["inner_tri"]])
-        floor = point_to_surface(xyz_mm[inner_nodes], native_tri, k=12)["distance_mm"]
-        floor_stats = {
-            "p50_mm": float(np.percentile(floor, 50)),
-            "p95_mm": float(np.percentile(floor, 95)),
-            "p99_mm": float(np.percentile(floor, 99)),
-            "max_mm": float(np.max(floor)),
-            "n_nodes": int(len(inner_nodes)),
-            "definition": ("distance from classified inner-wall mesh nodes to the pinned "
-                           "mesher's native point grid at 10 mm sample resolution"),
-        }
+        # The native floor needs hornlab_mesher.  --existing-mesh mode must still produce the
+        # topology / surface-truth / rank outputs on a machine without it; the floor and the
+        # FABLE relative rule are then a typed "unmeasurable", never fabricated numbers.
+        native = None
+        if _mesher_available():
+            native = native_geometry(Design("FREEFORM", family.materialize(
+                case_cfg.generator, knobs, brief)), case_cfg)
+            native_tri = triangulate_grid(native["inner_points_mm"])
+            inner_nodes = np.unique(tri[roles["inner_tri"]])
+            floor = point_to_surface(xyz_mm[inner_nodes], native_tri, k=12)["distance_mm"]
+            floor_stats = {
+                "p50_mm": float(np.percentile(floor, 50)),
+                "p95_mm": float(np.percentile(floor, 95)),
+                "p99_mm": float(np.percentile(floor, 99)),
+                "max_mm": float(np.max(floor)),
+                "n_nodes": int(len(inner_nodes)),
+                "definition": ("distance from classified inner-wall mesh nodes to the pinned "
+                               "mesher's native point grid at 10 mm sample resolution"),
+            }
+        else:
+            floor_stats = {
+                "status": "unmeasurable (mesher not installed)",
+                "reason": ("hornlab_mesher is not importable, so the native point grid and the "
+                           "native-floor p99 cannot be measured"),
+                "definition": ("distance from classified inner-wall mesh nodes to the pinned "
+                               "mesher's native point grid at 10 mm sample resolution"),
+            }
 
         dev = _deviation_stats(points, sample_records, inner_triangles, k=24)
         dense = _dense_diagnostic(shape, brief, inner_triangles)
-        threshold = fable_v2_threshold(floor_stats["p99_mm"])
-        rule_pass = bool(dev.get("p99_mm", math.inf) <= threshold) if dev.get("measurable") else None
+        if native is not None:
+            threshold = fable_v2_threshold(floor_stats["p99_mm"])
+            rule_pass = bool(dev.get("p99_mm", math.inf) <= threshold) \
+                if dev.get("measurable") else None
+        else:
+            threshold = None
+            rule_pass = None
 
         # ---- mesh sections at every requested station
         section_rows = []
@@ -1032,8 +1091,14 @@ def analyse_case(cfg, case: dict, args, provenance: dict) -> dict:
             "mesher": {
                 **provenance["mesher"],
                 "surface_fit_configured": str(mesher_cfg.get("surface_fit", "auto")),
-                "surface_fit_resolved_native": native["surface_fit"],
-                "native_grid_shape": [native["n_phi"], native["n_s"]],
+                "surface_fit_resolved_native": (
+                    native["surface_fit"] if native is not None
+                    else "unavailable (mesher not installed)"),
+                "native_grid_shape": (
+                    [native["n_phi"], native["n_s"]] if native is not None else "unavailable"),
+                "native_geometry_status": (
+                    "measured" if native is not None
+                    else "unmeasurable (mesher not installed)"),
                 "native_grid_res_mm": NATIVE_RES_MM,
                 "mesh_meta_key": meta.get("key") if meta else None,
             },
@@ -1042,17 +1107,34 @@ def analyse_case(cfg, case: dict, args, provenance: dict) -> dict:
         record["deviation"] = dev
         record["dense_diagnostic"] = dense
         record["native_floor"] = floor_stats
-        record["fable_v2_rule"] = {
-            "absolute_p99_mm": dev.get("p99_mm"),
-            "threshold_mm": threshold,
-            "threshold_rule": "max(1.0 mm, 1.25 * native_floor_p99)",
-            "native_floor_p99_mm": floor_stats["p99_mm"],
-            "pass": rule_pass,
-            "note": ("passing this relative rule is not permission to ignore a millimetre-scale "
-                     "wall deviation; both numbers are reported"),
-        }
+        if native is not None:
+            record["fable_v2_rule"] = {
+                "absolute_p99_mm": dev.get("p99_mm"),
+                "threshold_mm": threshold,
+                "threshold_rule": "max(1.0 mm, 1.25 * native_floor_p99)",
+                "native_floor_p99_mm": floor_stats["p99_mm"],
+                "pass": rule_pass,
+                "note": ("passing this relative rule is not permission to ignore a "
+                         "millimetre-scale wall deviation; both numbers are reported"),
+            }
+        else:
+            record["fable_v2_rule"] = {
+                "status": "unmeasurable (mesher not installed)",
+                "reason": ("hornlab_mesher is not importable, so the native floor p99 and the "
+                           "relative rule threshold cannot be measured"),
+                "absolute_p99_mm": dev.get("p99_mm"),
+                "threshold_mm": None,
+                "threshold_rule": "max(1.0 mm, 1.25 * native_floor_p99)",
+                "native_floor_p99_mm": None,
+                "pass": None,
+                "note": ("only the absolute p99 is measured here; no native floor or relative "
+                         "threshold is invented"),
+            }
         return record
-    except Exception as exc:                    # typed refusal, never silent omission
+    except (GeneratorError, ConfigError, RecordRefusal, ValueError, FileNotFoundError) as exc:
+        # Expected generator/config/mesher constraints become typed per-case refusals.  Anything
+        # else (KeyError, TypeError, mesh consistency errors, ...) re-raises so a tool bug fails
+        # loudly instead of disguising itself as an invalid design.
         record["status"] = "refused"
         record["refusal"] = {
             "type": type(exc).__name__,
@@ -1119,6 +1201,7 @@ def _csv_rows(cases: list[dict]) -> list[dict]:
             "status": c.get("status"),
             "design_hash": (c.get("provenance") or {}).get("design_hash", ""),
             "config_sha256": c.get("config_sha256", ""),
+            "config_sha_short": c.get("config_sha_short", ""),
             "refusal_type": (c.get("refusal") or {}).get("type", ""),
             "n_samples": dev.get("n", ""),
             "median_mm": dev.get("median_mm", ""),
@@ -1195,6 +1278,7 @@ def main(argv=None) -> int:
         "utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "config": str(args.config),
         "base_config_sha256": config_sha(cfg.raw),
+        "base_config_sha_short": config_sha_short(cfg.raw),
         "generator_implementation_sha256": family.implementation_digest(),
         "mesher": mesher_pin(),
         "git": git_snapshot(),
@@ -1232,6 +1316,12 @@ def main(argv=None) -> int:
     write_outputs(payload, Path(args.out))
     print(f"[{TOOL}] wrote {args.out} (+ {Path(args.out).with_suffix('.csv').name})",
           flush=True)
+    refused = [r for r in results if r.get("status") == "refused"]
+    if refused:
+        names = ", ".join(str(r.get("name")) for r in refused)
+        print(f"[{TOOL}] FAIL: {len(refused)} case(s) refused ({names}); exit 1",
+              file=sys.stderr, flush=True)
+        return 1
     return 0
 
 

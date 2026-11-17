@@ -350,3 +350,40 @@ uses the stored fixture, so the default offline test run never starts gmsh.
 | `docs/evidence/crowe_v2a_geometry_truth/surface_truth.json` | full results incl. per-case sections, provenance, hashes |
 | `docs/evidence/crowe_v2a_geometry_truth/surface_truth.csv` | per-case summary |
 | `docs/evidence/CROWE_V2A_SOLVER_SURFACE_TRUTH_2026-11-17.md` | this note |
+
+## 11. Hardening pass addendum (2026-11-17, second pass)
+
+Independent static review + fresh-input reproduction were run after the initial capture. Corrections
+and tool changes, in one place:
+
+- **Label correction.** The analytic `evaluate()` sections are a **[derived]** computed reference, not
+  a measurement; only the triangle-surface deviation statistics (and the stored mesh checks) are
+  **[measured]**. Earlier prose used `[measured]` for the law samples — read those as `[derived]`.
+- **Schema.** `config_sha256`/`base_config_sha256` now carry the full 64-hex digest (plus a
+  `config_sha_short`/`base_config_sha_short` alias; earlier values were 12-hex prefixes under a
+  256-bit field name). `surface_fit_resolved_native`/`native_grid_shape` are now typed
+  `"unavailable"`: `geometry.record.native_points` does not expose the mesher's resolved
+  surface-fit mode, and none is invented.
+- **Refusal semantics.** `main` exits **1** when any case is `refused` (previously it always exited 0,
+  so an all-refused run looked successful in automation). The broad `except Exception` that converted
+  any tool bug into a typed refusal is narrowed to expected generator/config/mesher errors;
+  unexpected exceptions now fail loudly.
+- **Reuse.** `native_geometry` now calls `hornlab_search/geometry/record.py::native_points` instead of
+  duplicating it; measured numbers are unchanged (c0 p99 0.12630539225424334, dense 0.126621, rank 4,
+  short shas `b3a74c02a5d3`/`581b3a83cc4c` re-verified identical).
+- **Jacobian steps.** One-sided differences divide by the actually-achieved inward step for samples
+  near (not on) a bound; on-bound seeds keep the full step.
+- **Rank scope (restated).** Mesh-surface rank 4 requires the **c1 four-DOF box** config with the case
+  knobs; the c0 config itself fixes every bound (`lo == hi`), giving rank 0 by construction. All rank
+  numbers in this note used the c1 box.
+- **Mesher-optional existing-mesh mode.** With `--existing-mesh`, native-floor-dependent outputs are
+  typed `"unmeasurable (mesher not installed)"` when `hornlab_mesher` is absent; topology/surface/rank
+  still run. The fixture regression test therefore stays offline-capable and CI-safe.
+- **Independent reproduction (fresh inputs, not the authors' 12 cases).** Two new c1-box corners:
+  `interior_low_h350` (H350/L250/bias0/u50.5) bias −0.0174 mm, p99 0.133 mm, rank 4, FABLE pass;
+  `corner_big_long_boxy` (H474/L340/bias−0.15/u50.65) bias −0.0282 mm, p99 0.125 mm, rank 4, FABLE
+  pass. Determinism: two `--existing-mesh` runs on the c0 fixture differ **only** in `meta.utc`.
+- **No-mutation proof.** Stored `response.npz`/`best.json` hashes identical before/after all tool
+  invocations; `git status --porcelain` unchanged.
+- **Tests.** `tests/test_crowe_mesh_truth.py` is now **26 tests** (added: full/short sha, CLI exit
+  code, mesher-absent existing-mesh, near-bound achieved-step, per-azimuth samples), 0 failed.

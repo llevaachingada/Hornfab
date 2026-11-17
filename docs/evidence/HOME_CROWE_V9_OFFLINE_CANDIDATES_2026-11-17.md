@@ -510,3 +510,65 @@ Owner review of the five `[proposed]` corridor scenarios (H preferred shape, V o
 then — only on approval — a **zero-solve** broader rescore of one existing run family under the
 chosen brief (`brief_truth_replay.py scenarios --runs <run>`), followed by a small GPU pilot
 (separate lane, one solve at a time) if the owner wants realised designs rather than stored ones.
+
+## 10. Hardening pass addendum (2026-11-17, second pass)
+
+Independent static review + fresh-input reproduction were run after the initial capture. Tool
+fixes, corrections and the committed-artifact upgrade, in one place:
+
+**Committed machine-readable artifacts.** `identity/` (`identity_replay.json`) and `grid/`
+(`grid_stability.json`, `grid_pairs.csv`, `grid_term_sensitivity.csv`) are now regenerated **inside
+this committed folder** with the hardened tool (previously they existed only under gitignored
+`scratch/`). All values identical to §5 (solved mean −0.16698, sd 0.20832/0.11185, Spearman
+0.9859/0.8927; dense_58 0.19268/0.11409 Spearman 0.9909/0.9584; dense_116 0.19025/0.11326
+0.9917/0.9589). `grid_stability.json` now records per-side **`mesh_hash`/`n_dof`/`mesh_epw`** from
+the stored manifests, so "same-mesh" is evidenced rather than inherited from FABLE. The candidate
+YAMLs the tests load are the committed copies in this folder (gitignored `scratch/` remains a
+fallback), so the five-candidate load proof runs in a clean checkout.
+
+**Corrections to claims above.**
+- The §2.3/§7 statement "every `response.npz` read … hashed before and after" was **true only for
+  the `identity` use when captured** — `scenarios`/`grid` snapshotted the hash set after their
+  scoring loops, so their guards could not detect a write during the run. Fixed: all three
+  subcommands now snapshot hashes **before** any response/best/metrics/mesh read (a guard-order test
+  asserts the first filesystem action is the snapshot), and best/metrics/mesh files are covered.
+  Regenerating `identity/` and `grid/` after the fix reproduces every published number exactly.
+- An identity term comparison could previously degrade to a vacuous pass if stored `best.json` had
+  no `terms` key; it now raises a typed `IdentityReplayError` instead.
+- A one-sided design directory (missing response.npz) in `grid` aborted with `KeyError`; it is now a
+  typed skipped pair (`processed_pairs`/`skipped_pairs` in the report).
+- A v9 brief carrying `objective.bw8k_floor` now prints **one typed `ConfigError` line and exits 2**
+  (previously an uncaught traceback, exit 1).
+
+**Reconciliation with the FABLE measured prior** (master plan §1.1: "58 pairs, mean shift ~+0.19,
+SD ~0.17, rank ~0.81"). These are **not contradictions**, but four differences that §5 above did
+not spell out:
+1. **Cohort:** this table uses 60 screen/verify pairs from the `study-*` runs present on this tree;
+   FABLE's prior used 58 pairs from its own cohort set. Overlapping but not identical cohorts.
+2. **Sign convention:** the per-grid means here are `screen − verify`, so −0.167 means the verify
+   (29-sample) J is **higher/worse** than screen by 0.167 on average under this brief; FABLE's
+   "+0.19 mean score shift" used its own convention and v7 weights. Read the magnitudes, not the signs,
+   across documents.
+3. **Objective version:** FABLE's numbers are v7; this table is the v9 corridor (dislope active).
+   Different objective ⇒ different scale; only magnitudes are comparable across versions, never J.
+4. **Rank definition:** Spearman **all-60** vs **top-28** here (0.9859 / 0.8927); FABLE's ~0.81 was
+   a top-28 rank under v7. The top-28 numbers are the comparable ones.
+
+**Provenance caveat (restated, now precise).** The v9 J numbers were captured while the working
+tree carried uncommitted concurrent edits to `hornlab_search/objective/scalar_v9.py`,
+`search/evaluate.py` and `config.py` (optional v9 `ripple_window`/`oa_excess_tol` + record-gate
+work, none exercised by these briefs). Commit `f5db35e` does **not** include those files; the v7
+identity replay is exact on the committed tree (re-verified post-hardening). If/when the other lane
+commits changed v9 code, re-run `scenarios` before relying on the v9 J columns.
+
+**Independent verification (fresh inputs).** Two new c1-box corners run through `crowe_mesh_truth`
+are reported in the WP1 addendum. For this tool: identity Δ exactly 0.000e+00 on both designs
+(post-fix rerun), v700 scenario J exactly 9.96094006749582 / 11.398108088494078 via the committed
+YAML, bad-v9 brief exits 2 with one typed line, stored response/best hashes unchanged before/after,
+`git status --porcelain` unchanged.
+
+**Tests.** `tests/test_brief_truth_replay.py` is now **20 tests** (added: guard-order, grid-skip,
+vacuous-terms refusal, bad-brief exit 2, stored mesh evidence; candidates load the committed
+copies). Suite totals across the three WP files: **26 + 22 + 20 = 68 passed, 0 failed**.
+Identity/grid tests still skip when `runs/` artifacts are absent (CI); the candidate-YAML load
+proof does not.

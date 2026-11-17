@@ -87,7 +87,8 @@ censored statuses and canonical sin(theta) DI over stored responses (Crowe/Klang
 18 synthetic fixtures; v1–v9 scoring untouched.
 
 [Home CROWE v9 offline candidates + brief-truth replay (2026-11-17)](evidence/HOME_CROWE_V9_OFFLINE_CANDIDATES_2026-11-17.md): WP3 —
-exact identity replay (Δ=0.0 for Crowe 16.918/6.836 and Klangfilm 22.782/8.924), five NOT-QUEUED v9
+exact identity replay (Δ=0.0 for Crowe 16.918 base-v7 and Klangfilm 8.924 smooth-v7; the 2×2
+cross-brief matrix 16.918/6.836 and 22.782/8.924 reproduced to 6 dp), five NOT-QUEUED v9
 corridor scenarios (dislope = 77 %/92 % of v9 J; corridor `preferred` unscored in-bounds; slope-0 collapses
 J to 2.17/0.94), and screen/verify grid stability (sd 0.208 → 0.19 interpolated, rank 0.99). Owner decision
 required before any production brief change.

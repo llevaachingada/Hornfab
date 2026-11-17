@@ -165,6 +165,9 @@ def test_no_crossing_is_censored_never_180_or_zero():
     assert connected["lower_edge_status"] == "censored"
     assert connected["upper_edge_status"] == "censored"
     assert connected["island_count"] == 0
+    # The censored cell stores a WIDTH (the grid extent), never a "lower bound".
+    assert connected["censored_legacy_width_deg"] == pytest.approx(180.0)
+    assert "censored_lower_bound_deg" not in connected
 
     # A dead (all non-finite) cut is unmeasurable, not a width.
     dead = legacy_outermost_width(a, np.full_like(a, np.nan))
@@ -205,17 +208,26 @@ def test_corrupted_angles_raise_typed_error():
         cut_pattern_quality(good[::-1], s[::-1])                                 # not ascending
 
 
-def test_nonfinite_offaxis_samples_are_floored_not_crashed():
+def test_nonfinite_near_lobe_samples_are_floored_not_crashed():
     a = _angles()
     s = _gaussian(a, 25.0)
-    s[5] = np.nan
-    s[-7] = np.nan
+    # Inject NaN where the pattern is at -0.24 dB (well above the -6.02 dB threshold), not at a
+    # 70 dB-down grid edge.  This actually exercises the -120 dB floor: each NaN becomes a hole
+    # in the above-threshold run, so the boresight-connected width stops at the hole while the
+    # legacy OUTERMOST crossings still reach the real +/-25 deg edges.
+    i_neg5 = int(np.flatnonzero(np.isclose(a, -5.0))[0])
+    i_pos5 = int(np.flatnonzero(np.isclose(a, 5.0))[0])
+    s[i_neg5] = np.nan
+    s[i_pos5] = np.nan
 
     report = cut_pattern_quality(a, s)
     assert report["legacy"]["status"] == "valid"
     assert report["legacy"]["width_deg"] == pytest.approx(50.0, abs=1e-6)
+    assert report["legacy"]["n_crossings"] == 6          # each floored NaN adds a pair
     assert report["connected"]["status"] == "valid"
-    assert report["connected"]["width_deg"] == pytest.approx(50.0, abs=1e-6)
+    assert report["connected"]["width_deg"] < 10.0       # first crossing is the +/-5 deg hole
+    assert report["connected"]["width_deg"] > 0.0
+    assert report["connected"]["n_threshold_transitions"] == 6
     assert report["off_axis"]["status"] == "valid"
     assert np.isfinite(report["off_axis"]["max_offaxis_db"])
 
@@ -233,18 +245,16 @@ def test_uniform_omni_has_zero_di():
     assert abs(out["di_db"]) < 1e-9
 
 
-def test_equal_area_vs_sin_theta_weighting_differs():
-    dirs, grid, theta_per_sample = _structured_balloon()
+def test_missing_balloon_grid_is_refused_not_silently_equal_area():
+    dirs, _grid, theta_per_sample = _structured_balloon()
     beam = -6.0206 * (theta_per_sample / 20.0) ** 2
 
-    on_grid = balloon_directivity(beam, dirs, grid=grid)
-    equal = balloon_directivity(beam, dirs, grid=None)   # naive equal weights
-
-    assert on_grid["weighting"] == "sin_theta"
-    assert equal["weighting"] == "equal_area"
-    # On a theta-phi grid the equal-weight average over-counts the polar (loud) region, so it
-    # reads a LOWER DI than the canonical sin(theta) quadrature.
-    assert on_grid["di_db"] > equal["di_db"] + 1.0
+    # A stored response without a balloon_grid must never switch quadrature silently: the same
+    # beam would read a very different DI with equal-area weights.
+    with pytest.raises(BalloonUnavailableError, match="no balloon_grid"):
+        balloon_directivity(beam, dirs, grid=None)
+    with pytest.raises(BalloonUnavailableError, match="no balloon_grid"):
+        balloon_lobe_map(beam[None, :], dirs, None)
 
 
 def test_balloon_requires_a_theta_zero_sample():
@@ -284,10 +294,7 @@ def test_quarter_domain_hv_symmetry_and_reflection():
     a = _angles()
     s = _gaussian(a, 25.0)
 
-    h = cut_pattern_quality(a, s)
-    v = cut_pattern_quality(a, s.copy())
-    assert h["connected"]["width_deg"] == pytest.approx(v["connected"]["width_deg"])
-    assert h["connected"]["lower_edge_deg"] == pytest.approx(-h["connected"]["upper_edge_deg"])
+    # (A same-array H/V comparison was vacuous and is deliberately gone.)
 
     # A tilted cut and its mirror image swap the signed edges exactly.
     tilted = s + 0.5 * a
@@ -365,3 +372,103 @@ def test_response_wrapper_balloon_valid():
         assert row["balloon"]["lobe_map"] is not None
         assert row["balloon"]["diagonal"]["status"] in (
             "valid", "partial", "censored", "unmeasurable")
+
+
+# --------------------------------------------------------------------------- parity report CLI
+
+import importlib.util
+import sys
+from pathlib import Path
+
+_ROOT = Path(__file__).resolve().parents[1]
+_REPORT_TOOL = _ROOT / "tools" / "analysis" / "pattern_quality_report.py"
+_RUN_CROWE = _ROOT / "runs" / "20261115T205453Z-screen-32f7c4" / "designs" / "22365b569be9"
+_RUN_KLANG = _ROOT / "runs" / "20261116T225543Z-screen-6acf41" / "designs" / "491efb2132b8"
+_RUN_OSSE = (_ROOT / "runs" / "20261116T153619Z-screen-c221aa" / "designs"
+             / "6d6dd332b282")
+_HAS_PARITY_RUNS = all((d / "response.npz").is_file() and (d / "metrics.json").is_file()
+                       for d in (_RUN_CROWE, _RUN_KLANG, _RUN_OSSE))
+
+
+def _report_tool():
+    spec = importlib.util.spec_from_file_location("pattern_quality_report_tool", _REPORT_TOOL)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_report_requires_an_explicit_out_and_prints_a_typed_error(capsys):
+    report = _report_tool()
+    with pytest.raises(SystemExit) as exc:
+        report.main(["some-input"])
+    assert exc.value.code == 2
+    err = capsys.readouterr().err
+    assert "pattern_quality_report: argument error" in err
+    assert "--out" in err
+
+
+def test_parity_comparison_excludes_sentinel_and_detects_a_di_delta():
+    report = _report_tool()
+    fabricated = {
+        "per_frequency": [
+            {"freq_hz": 100.0,
+             "H": {"legacy": {"width_deg": 10.0}},
+             "V": {"legacy": {"width_deg": 20.0}},
+             "balloon": {"di_db": 1.0}},
+            {"freq_hz": 200.0,
+             "H": {"legacy": {"width_deg": 11.0}},
+             "V": {"legacy": {"width_deg": 21.0}},
+             "balloon": {"di_db": 3.0}},
+        ],
+        "balloon": {"status": "valid"},
+    }
+    stored = {"freqs_hz": [100.0, 200.0],
+              "bw_h_deg": [10.0, 180.0],          # second H cell is the no-crossing sentinel
+              "bw_v_deg": [20.0, 180.0],
+              "di_db": [1.0, 2.0]}
+    comp = report.parity_comparison(fabricated, stored)
+    assert comp["legacy_comparable_cells"] == 2
+    assert comp["legacy_h_cells"] == 1 and comp["legacy_v_cells"] == 1
+    assert comp["legacy_max_abs_delta_deg"] == pytest.approx(0.0, abs=1e-15)
+    assert comp["di_comparable_cells"] == 2
+    assert comp["di_max_abs_delta_db"] == pytest.approx(1.0)
+    assert comp["failed"] is True
+
+
+@pytest.mark.skipif(not _HAS_PARITY_RUNS,
+                    reason="requires the local stored runs and metrics.json files")
+def test_parity_mode_reproduces_the_published_zero_and_8_882e_16(tmp_path, capsys):
+    report = _report_tool()
+    rc = report.main([str(_RUN_CROWE), str(_RUN_KLANG), str(_RUN_OSSE),
+                      "--out", str(tmp_path), "--parity"])
+    out = capsys.readouterr().out
+    assert rc == 0
+    legacy_lines = [ln for ln in out.splitlines() if "comparable legacy cells=" in ln]
+    di_lines = [ln for ln in out.splitlines() if "max|diag_di - stored_metrics_di|" in ln]
+    assert len(legacy_lines) == 3 and len(di_lines) == 3
+    assert all("0.000e+00 deg" in ln for ln in legacy_lines)
+    assert all("8.882e-16 dB" in ln for ln in di_lines)
+    assert (tmp_path / "parity_check.json").is_file()
+
+
+def test_report_refuses_typed_input_errors_but_reraises_tool_bugs(tmp_path, monkeypatch):
+    report = _report_tool()
+    design = tmp_path / "designs" / "abc123"
+    design.mkdir(parents=True)
+    (design / "response.npz").write_bytes(b"not-an-npz")
+
+    def typed(path):
+        raise PatternQualityInputError("corrupt stored response")
+
+    monkeypatch.setattr(report, "load_response", typed)
+    rc = report.main([str(design), "--out", str(tmp_path / "out")])
+    assert rc == 2
+
+    def bug(path):
+        raise RuntimeError("tool bug must surface")
+
+    monkeypatch.setattr(report, "load_response", bug)
+    with pytest.raises(RuntimeError, match="tool bug must surface"):
+        report.main([str(design), "--out", str(tmp_path / "out2")])
