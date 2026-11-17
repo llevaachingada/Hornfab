@@ -102,6 +102,31 @@
       "turns": 0,
       "w_mm": 472.5178611898337,
       "wavefront_model": "independent_hv_core"
+    },
+    {
+      "area_mouth_mm2": 130006.51447024512,
+      "area_throat_mm2": 1017.8760197630928,
+      "beak": {
+        "beak_diagonal_mm": 0.0,
+        "beak_h_setback_mm": 10.0,
+        "beak_start_frac": 0.9,
+        "beak_v_projection_mm": 5.0
+      },
+      "clearance_mm": 21.496662518155986,
+      "core_mm": 400.0,
+      "d_mm": 405.0,
+      "envelope_ok": true,
+      "grid_sha256": "798ee31d18a3db8cf12564d844241547262f5815a99351129dcdec19c6ef3a5c",
+      "h_mm": 261.6464701306724,
+      "kind": "monotone H/V core",
+      "p_mouth": 3.0,
+      "schema": "klangfilm-lame-hv-core-v1",
+      "seed": "b4",
+      "theta_h": "7.0 -> 53.0 deg",
+      "theta_v": "6.0 -> 25.0 deg",
+      "turns": 0,
+      "w_mm": 562.5128892793001,
+      "wavefront_model": "independent_hv_core"
     }
   ]
 }

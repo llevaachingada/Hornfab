@@ -120,10 +120,40 @@ where the parent's section has already shrunk, so this is not a peak-area compar
 
 12 focused tests pin the construction (`tests/test_tools_klangfilm_lame_hv_core.py`).
 
+### 4.2 Measured Phase B result (BEM, same solver/grid/source as Stage A)
+
+Four B seeds were meshed (3087–4153 dofs) and solved at the same 18 frequencies / 73-angle cuts /
+512-point balloon, replayed through the same two policies. A0 is the measured baseline above.
+
+| seed | W/H/D mm | BW_H (1.2–5.6k) | BW_V (1.2–5.6k) | Var(DI) | vs A0 | smooth J | CD J |
+|---|---|---|---|---|---|---|---|
+| A0 | 541/261/234 | 69.8° | 72.3° | 2.160 | — | 8.438 | 14.208 |
+| B1 | 480/240/380 | 62.8° | 42.2° | 2.369 | +9.7 % worse | 9.807 | 19.980 |
+| B2 | 595/233/420 | 62.2° | 42.5° | 4.268 | +97.6 % worse | 12.382 | 22.995 |
+| **B3** | 473/266/345 | **65.2°** | **47.3°** | **1.180** | **−45.4 %** | **6.570** | **14.827** |
+| B4 | 563/262/405 | 64.0° | 41.3° | 2.309 | +6.9 % worse | 9.431 | 19.626 |
+
+(CD J is from `AB_REPORT_B.json`; every row is an `exact_complete` replay with parity 0.0 on its
+own run.)
+
+**What this means**
+
+* The monotone core **does have authority** — unlike Stage A it moves beamwidth by 7–15° and can halve
+  the DI variance. B3 is the only seed that improves constancy (`Var(DI)` −45 %) and it also wins the
+  smooth score by 1.87 points, with `diag` 3.143 vs 4.143 and `distd` 0.939 vs 1.132.
+* **But the gate fails on absolute H coverage:** B3 lands at 65.2° against the 70° floor (±10° of 80°).
+  V is in range (47.3°), lobes are clean (0), and loading is *better* (`load` 0.0 vs 0.777 — the longer
+  core loads below the crossover).
+* **Widening the mouth does not widen H.** B2 (595 mm wide) and B4 (563 mm, the targeted follow-up) both
+  sit at ~62–64°, i.e. narrower than B3 at 473 mm. The lever is not the aperture size; the legacy horn's
+  69.8° comes with its **rolled-back lip**, which the forward core does not have.
+* B3's score win is therefore a **DI-constancy** win, not a coverage win. It must not be reported as
+  meeting 80×50.
+
 ### 4.1 What Phase B does **not** have yet
 
-* **No solve.** There is no BEM, polar, DI or loading result for any B seed, so nothing here may be
-  described as constant-directivity. B1–B3 are geometry hypotheses with comparable mouth sizes.
+* **Now measured** (2026-11-17, after this section was first written): B1–B4 were meshed and solved;
+  see §4.2 and [`AB_REPORT_B.md`](AB_REPORT_B.md). They still are **not** constant-directivity.
 * **No canonical family adapter.** `klangfilm_lame_hv_core` is a research kernel; registering it
   (digest-bound adapter + `size_policy: enforce|report_only`, as in Phase A) is a prerequisite for any
   queue/search use. Kernel-level code has no envelope check, so oversized exploration is already
@@ -138,20 +168,23 @@ where the parent's section has already shrunk, so this is not a peak-area compar
 
 1. **Do not optimize the Stage A box.** The pre-declared rule (≥3° intended-axis authority, <2° leak,
    no new lobes) failed by an order of magnitude, and both policies regress.
-2. **Promote Phase B to the next acoustic gate**, in this order:
-   a. register the digest-bound family adapter with `size_policy`;
-   b. mesh-validate B1–B3 (`lame_shell` offset + self-approach + a real gmsh build);
-   c. solve **A0 vs B1 vs B3** with the identical solver/grid/source used here, and score with the same
-      two policies through `brief_from_config`;
-   d. only if the H/V beamwidth is held near 80°/50° in 1.2–5.6 kHz **and** the DI variance falls, add
-      B2 (wide) and start a small search over `theta_*1`, `L_core`, `p_mouth`, then the beak.
-3. **Keep the returning-lip module and the source-cap study as separate, explicitly-gated items.** Both
-   change the geometry class, and neither is needed to test whether the monotone core holds pattern.
+2. **Phase B steps (a)–(d) are done**: the digest-bound adapter with `size_policy` is registered, B1–B4
+   are mesh-validated and solved under both policies. Outcome: **gate FAIL on H coverage, PASS on DI
+   constancy for B3**. Do not start a search yet.
+3. **Build the returning-lip (section-normal spine) module next.** The evidence points there and nowhere
+   else: B3 already shows the DI-constancy gain the handoff wants, the lobes are clean, and loading is
+   better than A0 — only the H width is short, and widening the mouth made it worse. The rolled lip is
+   the one structural difference left between A0 and every B seed.
+4. **Keep the source-cap study as a separate, explicitly-gated item.** It changes the geometry class and
+   is not needed to test whether the lip restores H coverage.
 
-**Decision rule for the next gate (fixed now):** Phase B is worth optimizing only if, at matched mouth
-size, the mean BW_H and BW_V in 1.2–5.6 kHz both land within ±10° of 80°/50° and `Var(DI)` over that band
-drops by at least 25 % versus A0, with no new −6 dB lobes and no worse `load`. Otherwise the problem is
-the terminator/source model, not the flare law.
+**Decision rule applied:** Phase B is worth optimizing only if, at matched mouth size, the mean BW_H and
+BW_V in 1.2–5.6 kHz both land within ±10° of 80°/50° and `Var(DI)` over that band drops by at least 25 %
+versus A0, with no new −6 dB lobes and no worse `load`.
+
+**Measured outcome:** B3 is the closest — V 47.3° ✔, lobes 0 ✔, `load` better ✔, `Var(DI)` −45.4 % ✔ —
+but H 65.2° ✘ (needs ≥70°). B1, B2, B4 fail coverage and constancy. **Verdict: FAIL, and the failure is
+the terminator, not the flare law.** Fix the lip before touching the optimizer.
 
 ## 6. Evidence index
 
@@ -162,4 +195,6 @@ the terminator/source model, not the flare law.
 | A/B plots | `ab_plots/bw_di_impedance.png`, `ab_plots/polar_cuts.png` |
 | Phase A audit (incumbent, fault, rollback, digest) | `docs/evidence/KLANGFILM_HV_THROAT_AUDIT.md` |
 | Phase A preflight / contact sheet | `PHASE_B_GEOMETRY.md` (B), `PREFLIGHT.md` + `SEARCH_BOX.md` (A) |
-| Phase B kernel / tests | `tools/geometry/klangfilm_lame_hv_core.py`, `tests/test_tools_klangfilm_lame_hv_core.py` |
+| Phase B kernel / adapter / tests | `tools/geometry/klangfilm_lame_hv_core.py`, `hornlab_search/design/generators/klangfilm_lame_hv_core_family.py`, `tests/test_tools_klangfilm_lame_hv_core.py`, `tests/test_klangfilm_lame_hv_core_family.py` |
+| Phase B acoustic report | `AB_REPORT_B.md`, `AB_REPORT_B.json`, `ab_plots_b/`, `ab_manifest_b.json` |
+| Phase B configs | `examples/typologies/klangfilm_hv_2026-11-16/configs/b{1,2,3,4}_*.yaml` |

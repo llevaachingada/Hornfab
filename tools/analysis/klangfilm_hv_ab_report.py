@@ -192,7 +192,14 @@ def _replay(arm: dict) -> dict:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--cached-only", action="store_true")
+    ap.add_argument("--manifest", default=None)
+    ap.add_argument("--stem", default="AB_REPORT", help="output basename: <stem>.md / <stem>.json")
+    ap.add_argument("--plots", default="ab_plots", help="plot subdirectory under the evidence folder")
     args = ap.parse_args(argv)
+    global MANIFEST, PLOTS
+    if args.manifest:
+        MANIFEST = _abs(args.manifest)
+    PLOTS = EVIDENCE / args.plots
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8")) if MANIFEST.is_file() else None
     arms = _arms(manifest, args.cached_only)
     if not arms:
@@ -262,10 +269,10 @@ def main(argv=None) -> int:
                            "cd": str(CD_POLICY_CONFIG.relative_to(ROOT))},
               "identity_gate": (manifest or {}).get("identity_gate"),
               "manifest": str(MANIFEST) if MANIFEST.is_file() else None}
-    (EVIDENCE / "ab_report.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n",
-                                             encoding="utf-8")
-    _write_md(report, arms)
-    print("wrote", EVIDENCE / "AB_REPORT.md", "and ab_plots/")
+    (EVIDENCE / f"{args.stem}.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n",
+                                                encoding="utf-8")
+    _write_md(report, arms, EVIDENCE / f"{args.stem}.md")
+    print("wrote", EVIDENCE / f"{args.stem}.md", "and", PLOTS.name + "/")
     for name in arms:
         print(f"  {name}: {report['arms'][name]['solve']}")
     return 0
@@ -334,8 +341,50 @@ def _plots(stats: dict, loaded: dict) -> None:
     plt.close(fig)
 
 
+def _verdict_b(report: dict) -> list[str]:
+    """Phase B gate, computed: mid-band coverage vs 80/50 deg, Var(DI) drop, lobes, load."""
+    arms = [a for a in report["arms"] if a != "a0"]
+    base = report["arms"].get("a0") or {}
+    mid = "1.2-5.6 kHz"
+    base_var = base.get("di_var_db2")
+    base_load = ((report["replay"].get("a0", {}) or {}).get("smooth", {}) or {}).get("terms", {}).get("load")
+    lines = ["## Decision (Phase B gate, computed from the table above)", "",
+             "Rule fixed before the solves: a Phase B seed is worth optimizing only if the mean "
+             "-6 dB beamwidth in 1.2-5.6 kHz lands within +-10 deg of 80 deg H / 50 deg V, `Var(DI)` "
+             "over that band drops by >= 25 % versus A0, no plane gains a second -6 dB lobe, and `load` "
+             "does not get worse.", ""]
+    for name in arms:
+        arm = report["arms"][name]
+        bands = report["bands"][name]
+        bh = bands[mid]["bw_h"]["mean"]
+        bv = bands[mid]["bw_v"]["mean"]
+        var = arm.get("di_var_db2")
+        terms = ((report["replay"].get(name, {}) or {}).get("smooth", {}) or {}).get("terms", {})
+        load = terms.get("load")
+        drop = None if (var is None or not base_var) else 1.0 - var / base_var
+        ok_bw = bh is not None and bv is not None and abs(bh - 80.0) <= 10.0 and abs(bv - 50.0) <= 10.0
+        ok_di = drop is not None and drop >= 0.25
+        ok_lobes = arm["multi_lobe_h_bins"] == 0 and arm["multi_lobe_v_bins"] == 0
+        ok_load = load is not None and base_load is not None and load <= base_load + 1e-9
+        lines.append(f"- **{name}**: BW {bh:.1f} H / {bv:.1f} V (target 80/50, within +-10: {ok_bw}); "
+                     f"Var(DI) {var:.3f} vs A0 {base_var:.3f} (drop {drop*100:.1f} %, >=25 %: {ok_di}); "
+                     f"multi-lobe bins {arm['multi_lobe_h_bins']}/{arm['multi_lobe_v_bins']} (ok: {ok_lobes}); "
+                     f"load {load:.3f} vs A0 {base_load:.3f} (ok: {ok_load}).")
+        lines.append(f"  - smooth J {terms.get('total')} ; CD J "
+                     f"{(((report['replay'].get(name, {}) or {}).get('cd', {}) or {}).get('j'))}")
+        verdict = all((ok_bw, ok_di, ok_lobes, ok_load))
+        lines.append(f"  - gate: **{'PASS' if verdict else 'FAIL'}**")
+    lines.append("")
+    lines += ["**No constant-directivity claim is made even on a pass**: the gate is a go/no-go for "
+              "spending optimization time, not evidence of an 80x50 pattern. The driver source cap is "
+              "still the existing assumption.", ""]
+    return lines
+
+
 def _verdict(report: dict) -> list[str]:
     """Decision text computed from the measured numbers, not written in advance."""
+    if set(report["authority"]) - {"a1", "a2"}:
+        return _verdict_b(report)
     auth = report["authority"]
     mid = "1.2-5.6 kHz"
     hi = "5.6-8 kHz"
@@ -389,7 +438,7 @@ def _verdict(report: dict) -> list[str]:
     return out
 
 
-def _write_md(report: dict, arms: dict) -> None:
+def _write_md(report: dict, arms: dict, path: Path) -> None:
     gate = report.get("identity_gate") or {}
     lines = ["# Klangfilm-Lame H/V Stage A - controlled acoustic A/B", "",
              "**Scope.** BEM runs sharing mesh policy, source cap, solver and frequency grid. The only "
@@ -465,7 +514,7 @@ def _write_md(report: dict, arms: dict) -> None:
               "- The driver source cap is the existing simulation assumption, unchanged by this comparison.",
               "- J is comparable only within one policy; the smooth brief is not a CD score.",
               "- A band row with 1 bin is a single frequency, not a band statistic.", ""]
-    (EVIDENCE / "AB_REPORT.md").write_text("\n".join(lines), encoding="utf-8")
+    path.write_text("\n".join(lines), encoding="utf-8")
 
 
 if __name__ == "__main__":

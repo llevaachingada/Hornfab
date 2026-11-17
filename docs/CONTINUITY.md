@@ -1,5 +1,20 @@
 # CONTINUITY
 
+## 2026-11-17 - Klangfilm Phase B registered and measured: DI gain, H coverage short
+
+- Canonical adapter `klangfilm_lame_hv_core_family` (+ frozen `_klangfilm_lame_hv_core_v1.py`, registered in
+  `generated.py`, `grid.py`, `mesh/build.py`, `gui/data.py`) with the versioned `size_policy` and
+  class-separation guards: `cd_core_blend` must be fixed, and knobs of the inactive class must be pinned.
+- B1-B4 materialise through the canonical route and mesh (3087-4153 dofs); solved on beat_cuda with the
+  Stage A solver/grid/source (18 frequencies, 73 angles, 512-point balloon, 19-21 s per solve).
+  Runs `20261117T062219Z-b72640` (b1), `062314Z-262183` (b2), `062347Z-4d3c1c` (b3), `062551Z-4ad99d` (b4).
+- Result: **B3 is the best Phase B seed** - smooth J 6.570 vs A0 8.438, CD J 14.827 vs 14.208, Var(DI) 1.180
+  vs 2.160 (-45.4 %), BW_V 47.3 deg (in range), zero multi-lobe bins, loading better (0.0 vs 0.777) - but
+  BW_H 65.2 deg against the 70 deg floor. Widening the mouth does not fix it (B2 62.2 deg at 595 mm, B4
+  64.0 deg at 563 mm), so the remaining structural difference is the **returning lip**.
+- Verdict: the Phase B gate FAILS on H coverage only; do not start a search yet. Evidence `AB_REPORT_B.md`,
+  `AB_REPORT_B.json`, `ab_plots_b/`, decision updated in `STAGE_A_VS_B_DECISION.md`.
+
 ## 2026-11-17 (later) - OpenCode Go preset active for HornLab; ping suite 8/8; availability and isolation verified
 
 - **Active preset is now `opencode-go-max`** (owner instruction: the `deepseek-flash-max` tiers on

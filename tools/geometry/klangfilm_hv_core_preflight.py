@@ -34,7 +34,7 @@ EVIDENCE = ROOT / "docs/evidence/klangfilm_hv_2026-11-16"
 A0_CONFIG = ROOT / "examples/typologies/klangfilm_hv_2026-11-16/configs/a0.yaml"
 BRIEF = {"driver": {"exit_radius_mm": 18.0, "exit_angle_deg": 2.0}}
 ENVELOPE = {"w": 600.0, "h": 480.0, "d": 480.0}
-COLORS = {"a0": "#111111", "b1": "#1f6f3f", "b2": "#8a4fbf", "b3": "#c2761d"}
+COLORS = {"a0": "#111111", "b1": "#1f6f3f", "b2": "#8a4fbf", "b3": "#c2761d", "b4": "#2f8fa8"}
 
 
 def _a0_shape():
@@ -72,7 +72,7 @@ def main() -> int:
         "clearance_mm": None,
         "grid_sha256": hashlib.sha256(np.asarray(a0_pts).tobytes()).hexdigest(),
     }]
-    for name in ("b1", "b2", "b3"):
+    for name in sorted(C.SEEDS):
         sh = C.seed_shape(name)
         pts, meta = C.make_grid(sh, BRIEF)
         d = C.diagnostics(sh, BRIEF)
@@ -127,10 +127,10 @@ def main() -> int:
     fig, axes = plt.subplots(1, 2, figsize=(13, 5.5), facecolor="white")
     axes[0].plot(z0, a0, "--", color=COLORS["a0"], lw=2, label="a0 H (v1)")
     axes[1].plot(z0, b0, "--", color=COLORS["a0"], lw=2, label="a0 V (v1)")
-    for name in ("b1", "b2", "b3"):
+    for name in sorted(C.SEEDS):
         sh = C.seed_shape(name)
         tab = C.core_table(sh, 18.0)
-        axes[0].plot(tab["z"], tab["a"], color=COLORS[name], lw=1.6, label=f"{name} H")
+        axes[0].plot(tab["z"], tab["a"], color=COLORS.get(name, "#777"), lw=1.6, label=f"{name} H")
         axes[1].plot(tab["z"], tab["b"], color=COLORS[name], lw=1.6, label=f"{name} V")
     for ax, title in ((axes[0], "H meridian"), (axes[1], "V meridian")):
         ax.set_title(title)
@@ -147,15 +147,15 @@ def main() -> int:
     # slope/area laws
     fig, axes = plt.subplots(1, 2, figsize=(13, 5), facecolor="white")
     from tools.geometry import lame_cap
-    for name in ("b1", "b2", "b3"):
+    for name in sorted(C.SEEDS):
         sh = C.seed_shape(name)
         tab = C.core_table(sh, 18.0)
-        axes[0].plot(tab["z"], np.degrees(tab["theta_h"]), color=COLORS[name], lw=1.6,
+        axes[0].plot(tab["z"], np.degrees(tab["theta_h"]), color=COLORS.get(name, "#777"), lw=1.6,
                      label=f"{name} H")
-        axes[0].plot(tab["z"], np.degrees(tab["theta_v"]), color=COLORS[name], lw=1.6, ls=":")
+        axes[0].plot(tab["z"], np.degrees(tab["theta_v"]), color=COLORS.get(name, "#777"), lw=1.6, ls=":")
         area = np.array([lame_cap.flat_lame_area(a, b, max(p, 2.0))
                          for a, b, p in zip(tab["a"], tab["b"], tab["p"])])
-        axes[1].plot(tab["z"], area, color=COLORS[name], lw=1.6, label=name)
+        axes[1].plot(tab["z"], area, color=COLORS.get(name, "#777"), lw=1.6, label=name)
     axes[0].set_title("wall angle law (solid H, dotted V)")
     axes[0].set_xlabel("axial z (mm)")
     axes[0].set_ylabel("wall half-angle (deg)")

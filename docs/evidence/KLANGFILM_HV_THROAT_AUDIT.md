@@ -5,9 +5,10 @@
 none of its files are touched here)
 
 **Status:** Gate 0 (evidence) complete. Gate 1 (Phase A geometry) **implemented, CPU-tested, preflighted**.
-Gate 2 (Phase B CD core) **not started — gated on the Phase A acoustic A/B, per the handoff**. **No BEM/GPU
-solve was run and no acoustic claim is made.** A GPU job from another lane was live during this work; it
-was not disturbed.
+Gate 2 (Phase B CD core) **implemented and measured after the Phase A A/B failed its gate**. Phase A
+itself was never solved; Phase B was solved later (three BEM arms + four B seeds) and is reported in
+`STAGE_A_VS_B_DECISION.md`. A GPU job from another lane was live during the early work; it was not
+disturbed. No constant-directivity claim is made for any stage.
 
 This file is the evidence record requested by the 2026-11-16 handoff (§9.1). The machine-readable companion
 is `docs/evidence/klangfilm_hv_2026-11-16/PREFLIGHT.md` / `preflight.json`, and the renders are in the same
@@ -27,7 +28,7 @@ folder. Where a screenshot value and a local record disagree, the local record w
 | Versioned report-only size policy for the new family only | implemented (`size_policy: report_only`) |
 | Measured-lawful Stage A search box (4 knobs) | implemented + sampled (`SEARCH_BOX.md`, 200/200 + 16/16 corners) |
 | Lamé exponent progression, rim sweep, curved-cap area lock | **unchanged from v1** by design in Phase A |
-| Beak/lip, throat landing, monotonic Phase B CD core | **not implemented** (Phase B; see §8) |
+| Monotone Phase B core + swept beak | **implemented + solved** (`klangfilm_lame_hv_core.py`, `AB_REPORT_B.md`); returning lip and throat landing still absent |
 | New BEM solves / polars / measured CD | **none** (no GPU work; §8 gate) |
 
 The old files `tools/geometry/klangfilm_lame.py`, `tools/geometry/lame_cap.py`,
@@ -261,42 +262,11 @@ also why lowering the smooth `J` is not evidence of success.
 `tan40°/tan25°`; that a raw 2° metadata scalar is a manufacturer exit angle; that any Phase A shape sounds
 better. No polars, no DI, no loading were measured for A1–A5.
 
-**Gate 2 (Phase B) remains conditional**, as the handoff requires: build the monotonic integrated-slope CD
-core (θᵢ(z) = θᵢ₀ + (θᵢ₁−θᵢ₀)Q(z/L_c), rᵢ = r0 + ∫tan θᵢ), a separate shoulder/rollback/beak terminator,
-and an OS-SE/R-OSSE comparator with the same Lamé/beak terminator — **only if** the Phase A acoustic A/B
-shows insufficient early H/V authority. The B1–B5 contact-sheet rows are not produced here because that
-geometry does not exist yet; drawing them would be fiction.
-
----
-
-## 9. Verification run for this change
-
-```powershell
-.venv\Scripts\python.exe -m pytest tests/test_tools_klangfilm_lame_hv.py `
-  tests/test_klangfilm_lame_hv_family.py tests/test_klangfilm_hv_dispatch.py `
-  tests/test_klangfilm_lame_family.py tests/test_dual_lame_dispatch.py `
-  tests/test_tools_klangfilm_lame.py tests/test_lame_sections.py -q -p no:cacheprovider
-```
-
-Result: 72 passed, exit 0 (0 failed, 0 skipped). The new kernel tests cover: exact legacy parity, the pure
-`cd_hv_delta` C1/C2/linearity/out-of-interval-zero properties, per-axis independence, mid-gain interior
-locality, constriction refusal (including the `−4 mm` case), monotone forward branch + untouched rollback,
-Lamé `p` unchanged, `n_phi`/`n_s` convergence, determinism, validation refusals, and that the driver
-`exit_angle_deg` is **not** used as a wall tangent. The family tests cover recipe bind/replay, digest
-sensitivity to the parent kernel and the cap math, both dormancy guards, the report-only size policy, and
-that the shipped Stage A box's seed plus all 2^4 extreme combinations materialise.
-
-Config-level end-to-end (`load_config → GeneratedSpace → grid.rows_grid_points → knobs_for` replay) verified
-for a0, a1 and a5.
-
----
-
-## 10. Sources
-
-Primary literature was taken from the handoff's citation list and is **not** restated as measured fact here:
-Keele (AES 1038, 1975); Kolbrek, *Horn Theory: An Introduction* (2008); Ahlswede/drba spherical-wave
-elliptical calculator and the 2019 Lamé rollback thread (DIY, non-commercial); Batík, *R-OSSE Acoustic
-Waveguide* (2022); Gu/You/Shen JASA 158:1962–1975 (2025); Udawalpola & Berggren (2007); COMSOL horn-shape
-optimisation model; Makarski & Behler AES 6097/6188; FaitalPRO HF1440 datasheet; BoTorch TuRBO and
-multi-objective docs. The H/V deformation basis, the report-only size policy and the CD diagnostic are
-**ours**, not published formulas, and still require BEM validation.
+**Gate 2 (Phase B) is no longer conditional.** The Stage A A/B failed its pre-declared rule, so the
+monotone core was built and solved: `tools/geometry/klangfilm_lame_hv_core.py` (theta_i(z) slope law,
+shared-z Lamé stations, independent p(z), late swept beak) plus the digest-bound family adapter and
+four B seeds. Measured: **B3 improves DI constancy (Var(DI) -45 %) and the smooth score (6.57 vs
+8.438)** but lands at 65.2 deg H against a 70 deg floor, and widening the mouth does not fix it
+(B2 62.2 deg at 595 mm, B4 64.0 deg at 563 mm). The remaining gap is the **returning lip**, which
+this core deliberately does not fake. Full numbers, hashes and the fixed next-gate rule:
+`docs/evidence/klangfilm_hv_2026-11-16/STAGE_A_VS_B_DECISION.md`.

@@ -296,6 +296,11 @@ SEEDS = {
                theta_v1_deg=30.4, core_length_mm=340.0, lame_p_mouth=3.0,
                lame_start_frac=0.20, lame_end_frac=0.95, beak_h_setback_mm=10.0,
                beak_v_projection_mm=5.0, beak_diagonal_mm=0.0, beak_start_frac=0.90),
+    # b4: B3 widened to A0's mouth class (563 x 262 x 405) — the targeted H-widening follow-up
+    "b4": dict(cd_core_blend=1.0, theta_h0_deg=7.0, theta_v0_deg=6.0, theta_h1_deg=53.0,
+               theta_v1_deg=25.0, core_length_mm=400.0, lame_p_mouth=3.0,
+               lame_start_frac=0.20, lame_end_frac=0.95, beak_h_setback_mm=10.0,
+               beak_v_projection_mm=5.0, beak_diagonal_mm=0.0, beak_start_frac=0.90),
 }
 
 

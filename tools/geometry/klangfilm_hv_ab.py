@@ -224,7 +224,22 @@ def main(argv=None) -> int:
     ap.add_argument("--wait-minutes", type=float, default=0.0,
                     help="poll until the GPU lock is free (or the deadline) before executing")
     ap.add_argument("--timeout-s", type=int, default=1800, help="per-arm wall timeout")
+    ap.add_argument("--arms", nargs="+", default=None, metavar="NAME=PATH",
+                    help="override the arm set, e.g. b1=examples/.../b1_balanced.yaml")
+    ap.add_argument("--baseline", default=None, metavar="NAME=RUN:DESIGN:CONFIG",
+                    help="reuse an already-solved baseline arm instead of re-solving A0")
+    ap.add_argument("--manifest", default=None, help="override the manifest path")
     args = ap.parse_args(argv)
+    global ARMS, MANIFEST
+    if args.arms:
+        ARMS = {item.split("=", 1)[0]: (ROOT / item.split("=", 1)[1]) for item in args.arms}
+    if args.manifest:
+        MANIFEST = Path(args.manifest)
+    baseline = None
+    if args.baseline:
+        name, spec = args.baseline.split("=", 1)
+        run, design, cfg = spec.split(":")
+        baseline = (name, (ROOT / run).resolve(), design, (ROOT / cfg).resolve())
     if not args.execute:
         args.check = True
 
@@ -264,7 +279,15 @@ def main(argv=None) -> int:
     manifest = {"created_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
                 "identity_gate": gate, "gpu_state_at_start": state, "arms": {}}
     planned = list(ARMS.items())
-    if not gate["reuse_a0"]:
+    if baseline is not None:
+        name, run_dir, design, cfg_path = baseline
+        manifest["arms"][name] = {
+            "arm": name, "reused": True, "reused_from": "explicit --baseline",
+            "config": str(cfg_path), "run_dir": str(run_dir), "design_hash": design,
+            "objective": json.loads((run_dir / "best.json").read_text(encoding="utf-8"))["objective"],
+        }
+        print(f"baseline {name} reused from {run_dir.name} / {design}")
+    elif not gate["reuse_a0"]:
         planned.insert(0, ("a0", A0_CONFIG))
     else:
         manifest["arms"]["a0"] = {
@@ -282,8 +305,7 @@ def main(argv=None) -> int:
         if not result.get("ok"):
             manifest["stopped_on"] = name
             break
-        (EVIDENCE / "ab_manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n",
-                                                  encoding="utf-8")
+        MANIFEST.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     EVIDENCE.mkdir(parents=True, exist_ok=True)
     MANIFEST.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(f"wrote {MANIFEST}")
