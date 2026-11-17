@@ -64,7 +64,7 @@ def test_manifest_census_groups_and_provenance(tmp_path):
     for name, sha in before.items():
         assert shards[name]["sha256"] == sha
 
-    assert set(doc["objective_versions"]) == {str(i) for i in range(1, 8)}
+    assert set(doc["objective_versions"]) == {str(i) for i in (1, 2, 3, 4, 5, 6, 7)} | {"9"}
     assert doc["relabel_note"] == RELABEL_NOTE
     # read-only over the shards
     assert {p.name: hashlib.sha256(p.read_bytes()).hexdigest()

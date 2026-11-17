@@ -1,5 +1,12 @@
 # ISSUES
 
+## 2026-11-16 (23:20) - v9 CLOSED: all gates G0-G13 green; production default unchanged
+
+- DONE: full v9 implementation + registration (opt-in only) — schema (`targets/profile.py` + spec fields), `objective/scalar_v9.py`, dispatch (`9: _score_v9`), config requirements + first-anchor feasibility, catalog/cohorts/dataset identity, scoring_view profile display truth, GUI corridor display (G13 chart==scorer exact), schema test file, anchor-below-f0 + corridor>=2 rule fixes, 260-test wave + full filtered suite green.
+- RESIDUAL (other lanes / known): b8 static check (pre-existing, `study_jobs.py:829`, BO-GUI lane's module); klangfilm tool tests green standalone / xdist-load-sensitive. Both documented; neither belongs to this wave.
+- OPEN (owner): smooth-brief re-baselining for non-CD night-queue cells before the next ranking pass (fairness table: Crowe 6.84 vs Klangfilm 8.92 on the same brief).
+- OPEN (owner, v10): loading-oriented profile-aware objective stays gated per the amended RFC (v6 untouched).
+
 ## 2026-11-17 - Klangfilm Phase B core built; acoustic gate open
 
 - DONE (CPU geometry): monotone H/V slope core + independent Lamé exponent + swept beak, exact legacy

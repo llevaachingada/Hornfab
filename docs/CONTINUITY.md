@@ -1,5 +1,31 @@
 # CONTINUITY
 
+## 2026-11-16 (23:20 local) - v9 FINAL: G13 corridor display green, full filtered suite green, consolidation commit
+
+- Final gates: **G0-G13 all pass**. G13 (GUI chart==scorer equality) — `tests/test_gui_corridor_v9.py`
+  (corridor band polylines/isobar curves asserted EQUAL to the scorer arrays at every grid index, nulls
+  below onset produce no geometry, legacy-v7 regression intact); consolidated wave 260 tests; full filtered
+  suite `-m "not slow and not gpu and not crosscheck" -n 6` green except the two documented pre-existing
+  items (b8 static check - another lane's `study_jobs.py:829 subprocess.Popen` from 2026-11-15; klangfilm
+  tool tests green standalone, red only under xdist load). Two test-truth updates came out of
+  registration: `test_objective_v8` now pins SUPPORTED == (1..7, 9) with v8 still importable-only;
+  `test_dataset_manifest` includes the registered-and-empty "9" legend bucket.
+- Lane-provider notes: two background subagents died on provider "Insufficient Balance" errors AFTER
+  completing their file work (GUI corridor lane) or mid-lane (schema lane, module landed / tests missing);
+  both were reconciled by the integrator directly (schema test file `tests/test_target_profile.py`
+  rewritten; the amendment-section-D anchor-below-plane-f0 REFUSAL was found unimplemented and added in
+  `targets/profile.py::_row_tuple` + the corridor >=2-anchor rule in `targets/spec.py`). Workflow
+  reminder recorded: a PowerShell string round-trip on evaluate.py corrupted encoding and was restored
+  from HEAD; edit-tool only for repo files.
+- v9 status: REGISTERED (`objective/versions.py` + `search/evaluate.py::9: _score_v9`), opt-in via
+  `objective.version: 9` + required `target.coverage_profile`; production default unchanged; historical
+  J untouched (exact replay green). No GPU, no queue, no run mutation anywhere in this wave.
+- Residual OPEN (ISSUES): smooth-brief re-baselines decision per the fairness table; BO-GUI lane's
+  uncommitted work in the shared tree (bo/*, gui data_bo/server/app.css/studies/study_charts app.js
+  regions) left to its own session — app.js carries BOTH that lane's uncommitted view regions and the
+  corridor display (their view tests green against the current tree; disclosed mixed-authorship in this
+  commit).
+
 ## 2026-11-17 - Klangfilm Phase B monotone H/V core (geometry only) + Stage A/B decision report
 
 - Stage A verdict recorded in `docs/evidence/klangfilm_hv_2026-11-16/STAGE_A_VS_B_DECISION.md`: the
