@@ -1,0 +1,320 @@
+{
+ "cma_run_algorithms": {
+  "cma": 664,
+  "cma_me": 28
+ },
+ "arms": [
+  {
+   "arm": "bo_multityp_2026-11-16/bo_ath14_s71002",
+   "lane": "p80x60__ath_core_14in_home700_v7",
+   "observations": 25,
+   "screen_attempts": 30,
+   "recorded_acquisition": 22,
+   "recorded_exploration": 7,
+   "unrecorded": 1,
+   "pool_candidates": 1955,
+   "selection_counts": {
+    "None": 1,
+    "acquisition": 22,
+    "exploration": 7
+   }
+  },
+  {
+   "arm": "bo_multityp_2026-11-16/bo_corelaw_s71003",
+   "lane": "p80x60__ext_throat_corelaw_v7",
+   "observations": 25,
+   "screen_attempts": 26,
+   "recorded_acquisition": 19,
+   "recorded_exploration": 6,
+   "unrecorded": 1,
+   "pool_candidates": 1485,
+   "selection_counts": {
+    "None": 1,
+    "acquisition": 19,
+    "exploration": 6
+   }
+  },
+  {
+   "arm": "bo_multityp_2026-11-16/bo_cov_s71001",
+   "lane": "p80x60__ext_throat_hvlaw_cov_v7",
+   "observations": 25,
+   "screen_attempts": 26,
+   "recorded_acquisition": 0,
+   "recorded_exploration": 0,
+   "unrecorded": 32,
+   "pool_candidates": 3665,
+   "selection_counts": {
+    "None": 32
+   }
+  },
+  {
+   "arm": "bo_multityp_2026-11-16/bo_hvlaw_s71004",
+   "lane": "hl__ext_throat_hvlaw_v7",
+   "observations": 25,
+   "screen_attempts": 25,
+   "recorded_acquisition": 18,
+   "recorded_exploration": 6,
+   "unrecorded": 1,
+   "pool_candidates": 1806,
+   "selection_counts": {
+    "None": 1,
+    "acquisition": 18,
+    "exploration": 6
+   }
+  },
+  {
+   "arm": "bo_vs_cma_2026-11-15/bo_s31001",
+   "lane": "p80x60__osse_ext_throat_home700_v7_seed5678",
+   "observations": 60,
+   "screen_attempts": 60,
+   "recorded_acquisition": 0,
+   "recorded_exploration": 0,
+   "unrecorded": 66,
+   "pool_candidates": 1707,
+   "selection_counts": {
+    "None": 66
+   }
+  },
+  {
+   "arm": "bo_vs_cma_2026-11-15/bo_s31002",
+   "lane": "p80x60__osse_ext_throat_home700_v7_seed5678",
+   "observations": 60,
+   "screen_attempts": 60,
+   "recorded_acquisition": 0,
+   "recorded_exploration": 0,
+   "unrecorded": 66,
+   "pool_candidates": 1711,
+   "selection_counts": {
+    "None": 66
+   }
+  },
+  {
+   "arm": "bo_vs_cma_2026-11-15/bo_s31003",
+   "lane": "p80x60__osse_ext_throat_home700_v7_seed5678",
+   "observations": 60,
+   "screen_attempts": 63,
+   "recorded_acquisition": 0,
+   "recorded_exploration": 0,
+   "unrecorded": 69,
+   "pool_candidates": 1724,
+   "selection_counts": {
+    "None": 69
+   }
+  },
+  {
+   "arm": "home18_a_2026-11-16/turbo_ath14_s83001",
+   "lane": "p80x60__ath_core_14in_home700_v7",
+   "observations": 2,
+   "screen_attempts": 2,
+   "recorded_acquisition": 1,
+   "recorded_exploration": 0,
+   "unrecorded": 1,
+   "pool_candidates": 514,
+   "selection_counts": {
+    "None": 1,
+    "trust_region_acquisition": 1
+   }
+  },
+  {
+   "arm": "home_day_2026-11-16/turbo_trit_s85001",
+   "lane": "hl__ath_tritonia_landscape_v8",
+   "observations": 58,
+   "screen_attempts": 60,
+   "recorded_acquisition": 59,
+   "recorded_exploration": 0,
+   "unrecorded": 7,
+   "pool_candidates": 516,
+   "selection_counts": {
+    "None": 7,
+    "trust_region_acquisition": 59
+   }
+  },
+  {
+   "arm": "home_day_2026-11-16/turbo_twin_80x2",
+   "lane": "hl__ath_twinray380_landscape_v8",
+   "observations": 80,
+   "screen_attempts": 80,
+   "recorded_acquisition": 79,
+   "recorded_exploration": 0,
+   "unrecorded": 3,
+   "pool_candidates": 516,
+   "selection_counts": {
+    "None": 3,
+    "trust_region_acquisition": 79
+   }
+  },
+  {
+   "arm": "home_day_2026-11-16/turbo_warm_retry_80x2",
+   "lane": "hl__osse_rrect_fold_warm_v7",
+   "observations": 80,
+   "screen_attempts": 80,
+   "recorded_acquisition": 79,
+   "recorded_exploration": 0,
+   "unrecorded": 3,
+   "pool_candidates": 512,
+   "selection_counts": {
+    "None": 3,
+    "trust_region_acquisition": 79
+   }
+  },
+  {
+   "arm": "home_landscape_d_2026-11-15/pareto_s63001",
+   "lane": "hl__ext_throat_hvlaw_v7",
+   "observations": 58,
+   "screen_attempts": 60,
+   "recorded_acquisition": 0,
+   "recorded_exploration": 0,
+   "unrecorded": 66,
+   "pool_candidates": null,
+   "selection_counts": {
+    "None": 66
+   }
+  },
+  {
+   "arm": "home_landscape_d_2026-11-15/scalar_s61001",
+   "lane": "hl__ext_throat_hvlaw_v7",
+   "observations": 60,
+   "screen_attempts": 60,
+   "recorded_acquisition": 0,
+   "recorded_exploration": 0,
+   "unrecorded": 66,
+   "pool_candidates": 1833,
+   "selection_counts": {
+    "None": 66
+   }
+  },
+  {
+   "arm": "home_landscape_d_2026-11-15/turbo_s62001",
+   "lane": "hl__ext_throat_hvlaw_v7",
+   "observations": 16,
+   "screen_attempts": 22,
+   "recorded_acquisition": 0,
+   "recorded_exploration": 0,
+   "unrecorded": 22,
+   "pool_candidates": 341,
+   "selection_counts": {
+    "None": 22
+   }
+  },
+  {
+   "arm": "home_landscape_d_2026-11-15/turbo_s62001_rerun",
+   "lane": "hl__ext_throat_hvlaw_v7",
+   "observations": 60,
+   "screen_attempts": 61,
+   "recorded_acquisition": 0,
+   "recorded_exploration": 0,
+   "unrecorded": 67,
+   "pool_candidates": 341,
+   "selection_counts": {
+    "None": 67
+   }
+  }
+ ],
+ "lanes": {
+  "p80x60__ath_core_14in_home700_v7": {
+   "observations": 27,
+   "recorded_exploration": 7,
+   "recorded_acquisition": 23,
+   "unrecorded": 2,
+   "arms": [
+    "bo_multityp_2026-11-16/bo_ath14_s71002",
+    "home18_a_2026-11-16/turbo_ath14_s83001"
+   ],
+   "strict_unbiased": 0,
+   "upper_bound_model_free": 9
+  },
+  "p80x60__ext_throat_corelaw_v7": {
+   "observations": 25,
+   "recorded_exploration": 6,
+   "recorded_acquisition": 19,
+   "unrecorded": 1,
+   "arms": [
+    "bo_multityp_2026-11-16/bo_corelaw_s71003"
+   ],
+   "strict_unbiased": 0,
+   "upper_bound_model_free": 7
+  },
+  "p80x60__ext_throat_hvlaw_cov_v7": {
+   "observations": 25,
+   "recorded_exploration": 0,
+   "recorded_acquisition": 0,
+   "unrecorded": 32,
+   "arms": [
+    "bo_multityp_2026-11-16/bo_cov_s71001"
+   ],
+   "strict_unbiased": 0,
+   "upper_bound_model_free": 8
+  },
+  "hl__ext_throat_hvlaw_v7": {
+   "observations": 219,
+   "recorded_exploration": 6,
+   "recorded_acquisition": 18,
+   "unrecorded": 222,
+   "arms": [
+    "bo_multityp_2026-11-16/bo_hvlaw_s71004",
+    "home_landscape_d_2026-11-15/pareto_s63001",
+    "home_landscape_d_2026-11-15/scalar_s61001",
+    "home_landscape_d_2026-11-15/turbo_s62001",
+    "home_landscape_d_2026-11-15/turbo_s62001_rerun"
+   ],
+   "strict_unbiased": 0,
+   "upper_bound_model_free": 64
+  },
+  "p80x60__osse_ext_throat_home700_v7_seed5678": {
+   "observations": 180,
+   "recorded_exploration": 0,
+   "recorded_acquisition": 0,
+   "unrecorded": 201,
+   "arms": [
+    "bo_vs_cma_2026-11-15/bo_s31001",
+    "bo_vs_cma_2026-11-15/bo_s31002",
+    "bo_vs_cma_2026-11-15/bo_s31003"
+   ],
+   "strict_unbiased": 0,
+   "upper_bound_model_free": 52
+  },
+  "hl__ath_tritonia_landscape_v8": {
+   "observations": 58,
+   "recorded_exploration": 0,
+   "recorded_acquisition": 59,
+   "unrecorded": 7,
+   "arms": [
+    "home_day_2026-11-16/turbo_trit_s85001"
+   ],
+   "strict_unbiased": 0,
+   "upper_bound_model_free": 2
+  },
+  "hl__ath_twinray380_landscape_v8": {
+   "observations": 80,
+   "recorded_exploration": 0,
+   "recorded_acquisition": 79,
+   "unrecorded": 3,
+   "arms": [
+    "home_day_2026-11-16/turbo_twin_80x2"
+   ],
+   "strict_unbiased": 0,
+   "upper_bound_model_free": 1
+  },
+  "hl__osse_rrect_fold_warm_v7": {
+   "observations": 80,
+   "recorded_exploration": 0,
+   "recorded_acquisition": 79,
+   "unrecorded": 3,
+   "arms": [
+    "home_day_2026-11-16/turbo_warm_retry_80x2"
+   ],
+   "strict_unbiased": 0,
+   "upper_bound_model_free": 1
+  }
+ },
+ "lanes_with_fewer_than_30_unbiased": {
+  "p80x60__ath_core_14in_home700_v7": 9,
+  "p80x60__ext_throat_corelaw_v7": 7,
+  "p80x60__ext_throat_hvlaw_cov_v7": 8,
+  "hl__ath_tritonia_landscape_v8": 2,
+  "hl__ath_twinray380_landscape_v8": 1,
+  "hl__osse_rrect_fold_warm_v7": 1
+ },
+ "stop_condition_fired": true,
+ "strict_unbiased_total": 0
+}

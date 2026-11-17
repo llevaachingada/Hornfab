@@ -1,5 +1,21 @@
 # CONTINUITY
 
+## 2026-11-17 02:4x - P1 predictor replay: no unbiased pool exists; hooks A, B and the skip test fail
+
+- Strict unbiased designs (solved but not rule-selected): **0 of 8 study lanes**; every solved row in
+  the BoTorch studies is a CMA/BoTorch acquisition pick. Six of eight lanes stay under 30 even on the
+  cadence-derived upper bound, so the P1 fair-pool replay was **not run** and no optimizer-visited
+  substitute is reported as a finding. Report `scratch/fable_architecture/P1_PREDICTOR_REPLAY.md`.
+- Biased replay (19 lanes, sibling + engine holdout, all valid rows, stored full J): **A** lane order
+  rank correlation vs the lanes' best full J is 0.733 (line >= 0.8, only 1 of 5 true top-five lanes
+  recovered); the cov+DI comparator gives 0.944 but is diagnostic only. **B** the predictor's single
+  pick beats the first solve in 11/19 (line 13/19) and equals one random stored design (11/19).
+  **C** predictor top 8/16/32 beat the first rows 14/16/13, but random draws from the same pool beat
+  them 18/17/14 and beat the predictor 10/12/10 - the pool, not the predictor. Skip test: 8.9 % of
+  skipped designs are in the lane's true top 10 % (line < 2 %).
+- The an7 published result reproduces exactly on its own sample (0.55 / 0.43 / 0.30; 12/19, 9/19),
+  which validates the pipeline; the replay differs only in sample, split map and lane order.
+
 ## 2026-11-17 02:3x - Night refresher (90 min) + backlog typologies appended to `cd_rrect_2026-11-17`
 
 - First pass burned jobs: all four main legs exited 1 while a foreign supervisor storm repeatedly

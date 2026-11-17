@@ -1,5 +1,14 @@
 # ISSUES
 
+## 2026-11-17 - Fable: P1 predictor replay finishes; no unbiased pool in stored data
+
+- DONE (A10): unbiased-pool gate fired - 0 strict unbiased designs in 8 study lanes, 6 of 8 under 30
+  even on the cadence upper bound; fair-pool replay not run. Biased replay: hook A 0.733 vs the 0.8
+  line, hook B 11/19 vs 13/19, skip test 8.9 % vs < 2 %; hook C's wins are the pool's, not the
+  predictor's. an7 reproduced exactly. `P1_PREDICTOR_REPLAY.md`.
+- OPEN (blocked on data): a fair predictor evaluation needs an even, >= 30-per-lane pool of solved
+  designs that were not optimizer-selected. None exists; producing one needs owner-approved solves.
+
 ## 2026-11-17 - Fable: layered backbone fails U1; generator decision open
 
 - DONE: N1b contract v2 - six lanes pass Test 2 at 65x61 on the native-floor rule; 72 Klangfilm
