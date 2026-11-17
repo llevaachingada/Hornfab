@@ -1,0 +1,84 @@
+# [proposed] OFFLINE / NOT-QUEUED v9 corridor candidate — WP3 (2026-11-17).
+# NOT an adopted production target, NOT converted into any default. No run used this brief.
+#
+# H corridor: preferred 90 deg at the 700 Hz onset, tapering to 70 deg at 8 kHz (log-frequency
+#   linear), with the owner's 60-90 deg allowance kept on both sides. This is a *scenario* for
+#   the owner's 70-90 "preferred" interest range, not a measured horn and not a decision.
+# V corridor: constant 50 deg preferred with a 40-60 deg allowance, onset 700 Hz (this file).
+# Descriptive nominal: 80 H x 50 V (target.coverage_h_deg / coverage_v_deg). The SCORED corridor
+#   above may differ from that nominal; the nominal is carried only for the K-law feasibility
+#   preflight, the diagonal reference and provenance.
+# The same physical source (FaitalPRO HF1440, 18 mm exit radius) and the same 600x480x480 mm
+# envelope as the home v7 brief; band 350-8000 Hz; f0(H) = 700 Hz.
+# Objective schema: IMPLEMENTED v9 (targets/profile.py + objective/scalar_v9.py):
+#   coverage_profile.mode corridor, interpolation log_frequency, per-anchor
+#   (hz, preferred_deg, min_deg, max_deg). The 2026-11-16 RFC's early "frequency_envelope" example
+#   is historical proposal syntax and is NOT accepted here.
+# objective.bw8k_floor is REFUSED under v9; no floor is declared. The corridor min_deg is the
+#   narrow-side HF constraint. The optional explicit hf_floor mapping is unused here.
+name: home_v9_corridor_h90_70_v700
+description: (objective v9, [proposed] offline) HOME landscape corridor scenario 90->70 H / 50 V, V onset 700 Hz, HF1440 1.4-inch, 600W x 480H x 480D, band 350-8000 Hz
+driver:
+  exit_radius_mm: 18.0
+  exit_angle_deg: 2.0
+envelope:
+  max_mouth_w_mm: 600.0
+  max_mouth_h_mm: 480.0
+  max_depth_mm: 480.0
+symmetry: hv
+source:
+  cap: auto
+target:
+  # descriptive nominal only; the scored shape is target.coverage_profile
+  coverage_h_deg: 80.0
+  coverage_v_deg: 50.0
+  band_lo_hz: 350.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.5
+  f0_hz: 700.0
+  f0_v_hz: 700.0
+  loaded_hi_hz: 5600.0
+  freq_weights:
+    band_hz:
+      - [2500.0, 5500.0, 2.0]
+  coverage_profile:
+    mode: corridor
+    interpolation: log_frequency
+    h:
+      - {hz: 700.0, preferred_deg: 90.0, min_deg: 60.0, max_deg: 90.0}
+      - {hz: 8000.0, preferred_deg: 70.0, min_deg: 60.0, max_deg: 90.0}
+    v:
+      - {hz: 700.0, preferred_deg: 50.0, min_deg: 40.0, max_deg: 60.0}
+      - {hz: 8000.0, preferred_deg: 50.0, min_deg: 40.0, max_deg: 60.0}
+weights:
+  cov_profile: 1.0
+  rip: 1.0
+  flat: 0.5
+  load: 1.0
+  dislope: 1.0
+  di_roughness: 1.0
+  flat_cv: 1.0
+  diag: 0.0     # owner-locked raw diagnostic under v9
+  distd: 0.0    # owner-locked raw diagnostic under v9
+grid:
+  verify_points_per_octave: 6
+  screen_extra_hz: [250, 315, 400, 2573, 3311, 4260]
+objective:
+  version: 9
+  flat_band: scored
+  cov_v_weight: 0.5
+  cov_narrow_ratio: 2.0
+  cov_below_f0: mask
+  tolerances:
+    cov_profile: 3.0
+    rip: 1.0
+    flat: 1.5
+    load: 0.3
+    dislope: 9.0
+    di_roughness: 0.5
+    flat_cv: 1.5
+  loaded_re_z: 0.5
+  lfp_re_z: 0.2
+  lfp_crossover_ratio: 1.6

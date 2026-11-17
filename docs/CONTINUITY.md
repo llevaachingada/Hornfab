@@ -1,5 +1,47 @@
 # CONTINUITY
 
+## 2026-11-17 — Acoustic-truth master plan: WP0–WP3 implemented (CPU/read-only, no GPU)
+
+- Owner master plan saved at `docs/research/HORNFAB_ACOUSTIC_TRUTH_MASTER_PLAN_2026-11-17.md` (+ INDEX /
+  knowledge-hub links). WP4 optional (not done); WP5/WP6 owner-gated. No GPU job started, queued or
+  touched; the live GPU search (`runs/20261115T020650Z-screen-22931c` → hifi queue handover) was only
+  observed, never interrupted.
+- **WP1** `tools/analysis/crowe_mesh_truth.py` (no-solve CPU tool): 12-case CROWE V2A law vs actual BEM
+  inner wall. Worst prescribed p99 **0.1286 mm** (`area_bias_low`; dense 97×73 scan max 0.2195 mm,
+  `u50_low`), signed bias −0.019…−0.027 mm (mesh slightly inside law), native floor p99 0.0142–0.0243 mm,
+  FABLE v2 relative rule 12/12 pass — the absolute p99, not the flag, is the result. Resolution study on
+  c0: epw 6/9/12 → p99 0.126/0.080/0.071 mm, so the residual is mesh discretisation/surface fit, not a law
+  defect; no mesher change needed for V2A. Mesh-surface rank 4/4, max pairwise |cos| 0.19 (L > H >
+  area bias ≈ u50), topology clean (0 bad open/nonmanifold edges, source tag `SD1D1001`, 36×36 mm section,
+  shell stand-off median 3.00 mm). 21 offline tests incl. a stored c0 quarter-mesh fixture
+  (`tests/fixtures/crowe_v2a/c0_quarter_screen_8k`, force-added past the `*.msh` ignore like the dual-Lamé
+  meshes). Evidence: `docs/evidence/CROWE_V2A_SOLVER_SURFACE_TRUTH_2026-11-17.md` +
+  `docs/evidence/crowe_v2a_geometry_truth/`.
+- **WP2** `hornlab_search/metrics/pattern_quality.py` + `tools/analysis/pattern_quality_report.py`
+  (report-only; no objective/metric file touched): legacy outermost vs boresight-connected −6 dB width,
+  disconnected islands, off-axis excess at the existing v7 H12 threshold, censored statuses, canonical
+  sin(theta) balloon DI. 18 fixtures (legacy-vs-connected distinction, censored, omni DI=0, weighting
+  difference…). On 3 stored winners legacy/DI parity: 0.000e+00 deg / 8.882e-16 dB. Evidence:
+  `docs/evidence/PATTERN_QUALITY_READONLY_2026-11-17.md` + `docs/evidence/pattern_quality_readonly/`.
+- **WP3** `tools/analysis/brief_truth_replay.py` (read-only): legacy identity replay exact — Crowe
+  ES-600 16.918/6.836 and Klangfilm 22.782/8.924 reproduced to 6 dp, Δ=+0.000e+00; five NOT-QUEUED v9
+  corridor candidates (`scratch/home_v9_offline_2026-11-17/`, committed copies in
+  `docs/evidence/home_crowe_v9_offline_2026-11-17/`): dislope is 77 %/92 % of v9 J at 0 target, slope-0
+  collapses J to 2.1727/0.9404, corridor `preferred` is not scored inside bounds (h80flat ≡ h90_70);
+  grid stability on 60 same-mesh screen/verify pairs: 18-vs-29 sd 0.208 (top-28 0.112), rank
+  0.986/0.893; interpolated 58/116 sd 0.193/0.190, rank 0.991/0.958; interpolation removes grid noise,
+  not acoustic resolution. 14 tests incl. cross-version pooling refusal + v9 `bw8k_floor` refusal.
+  Evidence: `docs/evidence/HOME_CROWE_V9_OFFLINE_CANDIDATES_2026-11-17.md`.
+- OPEN (owner): WP5 production-brief decision (corridor vs point, V onset, DI slope weight, dead band);
+  WP6 pilot scheduling is a separate authorization. OPEN (semantics): v9 corridor `preferred_deg` is
+  unscored inside `[min,max]` — decide whether preferred should contribute in-bounds.
+
+## 2026-11-17 13:58 ET — owner-directed queue priority
+
+- Owner directed stopping the non-improving `cont_p80_athcore_corelaw_200` to advance the home-hi-fi jobs. The exact search process tree was stopped; existing run rows in `runs/20261115T020650Z-screen-22931c` were preserved. Runner recorded exit 1, performed lane cleanup, and live-reloaded the queue.
+- At 13:58 ET `hifi_verify_rosse_r50_20261117` started; six hi-fi verification jobs then four 15-evaluation home-range pilots are first in the live `runs/nights/cd_rrect_2026-11-17.yaml`. The current job and subsequent results must be checked in the live queue log; start is not completion.
+
+
 ## 2026-11-17 (senior pass) - Orchestrator handoff + first parameter-space proposals
 
 - `scratch/fable_architecture/ORCHESTRATOR_HANDOFF_2026-11-17.md`: rules, inventory, first-session

@@ -50,6 +50,18 @@ owner knobs (`bend_radius_mm` front arc, `throat_ellipse`); `klangfilm_ellipse_c
 Analysis/queue tools (2026-11-16, concurrent session): `tools/analysis/optimizer_switch.py` (advisory per-run optimizer
 decision report), `tools/analysis/queue_score_audit.py` (read-only inventory of a queue's scoring contracts),
 `tools/night_queue/run_matched_home.py` (frozen-cohort matched BO/CMA home comparison: prepare once, run arms).
+Acoustic-truth analyzers (2026-11-17, owner master plan `docs/research/HORNFAB_ACOUSTIC_TRUTH_MASTER_PLAN_2026-11-17.md`,
+WP1–WP3, all CPU/read-only, zero solver calls): `tools/analysis/crowe_mesh_truth.py` (CROWE V2A law vs actual BEM
+inner wall — analytic sections vs projected triangle distances, per-case p99/RMS/bias, FABLE v2 relative rule,
+source/tag/topology/shell checks, mesh-surface 4-knob rank; evidence `docs/evidence/CROWE_V2A_SOLVER_SURFACE_TRUTH_2026-11-17.md`),
+`hornlab_search/metrics/pattern_quality.py` + `tools/analysis/pattern_quality_report.py` (report-only pattern quality over
+stored `response.npz`: legacy vs boresight-connected −6 dB width, disconnected islands, off-axis excess at the v7 H12
+threshold, censored statuses, canonical sin(theta) balloon DI — diagnostics only, never weighted; evidence
+`docs/evidence/PATTERN_QUALITY_READONLY_2026-11-17.md`), `tools/analysis/brief_truth_replay.py` (read-only brief-truth
+replay: exact same-brief identity, v9 offline corridor scenarios NOT-QUEUED in `scratch/home_v9_offline_2026-11-17/` with
+committed copies in `docs/evidence/home_crowe_v9_offline_2026-11-17/`, screen/verify frequency-grid stability; refuses
+cross-version pooled J and `bw8k_floor` under v9; evidence `docs/evidence/HOME_CROWE_V9_OFFLINE_CANDIDATES_2026-11-17.md`).
+Tests: `test_crowe_mesh_truth.py` (21), `test_metrics_pattern_quality.py` (18), `test_brief_truth_replay.py` (14).
 
 Rectangular R-OSSE rolled mouth (2026-11-15): `tools/geometry/rosse_rect.py` evaluates Magnus's R-OSSE
 (`hornlab_mesher.profile_formulas.profile_points`) once per azimuth with a superellipse mouth R(p) and H/V coverage a(p);

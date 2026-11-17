@@ -1,5 +1,19 @@
 # ISSUES
 
+## 2026-11-17 - Acoustic-truth master plan WP0-WP3 landed
+
+- DONE: master plan `docs/research/HORNFAB_ACOUSTIC_TRUTH_MASTER_PLAN_2026-11-17.md` + index links;
+  WP1 mesh truth (12 cases, prescribed p99 ≤ 0.1286 mm vs native floor 0.014–0.024 mm, FABLE v2 12/12,
+  mesh-surface rank 4); WP2 report-only pattern quality (18 fixtures, 3 stored winners, legacy/DI parity
+  0.0/9e-16); WP3 brief-truth replay (identity Δ=0.0, five NOT-QUEUED v9 corridor candidates, grid sd
+  0.208→0.19 interpolated).
+- OPEN (owner): approve a production home brief (v9 corridor vs point, V onset 700/1000/1250, DI slope
+  weight, dead band) per `docs/evidence/HOME_CROWE_V9_OFFLINE_CANDIDATES_2026-11-17.md`; WP6 pilot
+  authorization is separate and requires GPU scheduling approval.
+- OPEN (scoring semantics): v9 corridor `preferred_deg` contributes nothing inside `[min,max]` — decide
+  whether preferred should score in-bounds.
+- OPEN (optional): WP4 provenance/envelope report (master plan §WP4) not done.
+
 ## 2026-11-17 - Handoff to the local orchestrator
 
 - OPEN (orchestrator): follow `ORCHESTRATOR_HANDOFF_2026-11-17.md` §2-§4.

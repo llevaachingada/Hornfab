@@ -59,6 +59,28 @@ objective changes). The earlier V1 evidence note is retained with a supersession
 
 [HF1440 12-seed supplied gallery and verification](research/typologies/hf1440_diverse_2026-11-16/RESULTS.md): distinct existing-code J seeds and K preview shapes, compatibility and CPU preflight results.
 
+[Master plan: HornFab acoustic truth, typology and optimization (2026-11-17)](research/HORNFAB_ACOUSTIC_TRUTH_MASTER_PLAN_2026-11-17.md):
+owner-supplied prioritized proposal — WP1 actual-BEM-wall geometry truth, WP2 report-only pattern-quality
+diagnostics, WP3 objective/brief-truth replay and frequency fidelity; WP4 provenance optional; WP5/WP6
+owner-gated. It does not authorize new GPU solves or a production objective change.
+
+[Solver-surface truth, CROWE V2A (2026-11-17)](evidence/CROWE_V2A_SOLVER_SURFACE_TRUTH_2026-11-17.md): WP1 —
+measured analytic-law vs actual-BEM-inner-wall comparison on 12 admitted cases: worst prescribed p99
+0.1286 mm (dense max 0.2195 mm), signed bias −0.019…−0.027 mm, native floor p99 0.0142–0.0243 mm,
+FABLE v2 12/12 pass; epw 6/9/12 resolution study shows the residual is mesh discretisation/fit, not the
+law; mesh-surface rank 4/4, max |cos| 0.19; topology clean. No mesher change needed for V2A.
+
+[Pattern-quality diagnostics, report-only (2026-11-17)](evidence/PATTERN_QUALITY_READONLY_2026-11-17.md): WP2 —
+legacy vs boresight-connected −6 dB width, disconnected islands, off-axis excess (v7 H12 threshold),
+censored statuses and canonical sin(theta) DI over stored responses (Crowe/Klangfilm/OSSE winners);
+18 synthetic fixtures; v1–v9 scoring untouched.
+
+[Home CROWE v9 offline candidates + brief-truth replay (2026-11-17)](evidence/HOME_CROWE_V9_OFFLINE_CANDIDATES_2026-11-17.md): WP3 —
+exact identity replay (Δ=0.0 for Crowe 16.918/6.836 and Klangfilm 22.782/8.924), five NOT-QUEUED v9
+corridor scenarios (dislope = 77 %/92 % of v9 J; corridor `preferred` unscored in-bounds; slope-0 collapses
+J to 2.17/0.94), and screen/verify grid stability (sd 0.208 → 0.19 interpolated, rank 0.99). Owner decision
+required before any production brief change.
+
 [Dual Lamé geometry integration research and gate](research/typologies/DUAL_LAME_INTEGRATION_2026-11-16.md): distinct parent constructions, source and identity findings, and validation limits.
 
 [Home CMA/BO continuation through 2026-11-17 morning](queue/HOME_CONTINUATION_2026-11-16.md): recent-run audit, 80+2 profile, live extension, exclusions and validation.
