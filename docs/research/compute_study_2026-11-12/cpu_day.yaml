@@ -1,0 +1,103 @@
+# CPU lane queue — 2026-11-13 (compute-allocation study 2026-11-12)
+# Lane: beat_cpu (Julia BEM, 12 threads), separate cache_cpu / dataset_cpu directories
+# Runs in PARALLEL with gpu_day.yaml while GPU searches are active (Option B, shared runs/)
+#
+# INTEGRATION STATUS: CPU second lane is DECIDED (SENIOR_PLAN 2026-11-12 §3) but NOT YET
+#   integrated in tools/run_campaign_night.py. The lane fields below (lane, backend, cache_dir,
+#   dataset_dir) are the PROPOSED extension to the runner format; they have no effect until
+#   lane support is merged. See docs/research/CPU_SECOND_LANE_HARDENING_2026-10-28.md §4 Option B
+#   and §6 for the required hygiene changes:
+#     - Remove taskkill /IM julia.exe from runner (kills CPU lane workers)
+#     - Add .cpu.lane.lock to prevent two CPU searches running at once
+#     - solve.julia_threads: 12 must be excluded from solve hash
+#     - Lane identity by BEAT worker dir (separate beat_cpu provisioning)
+#
+# TIMING REFERENCE:
+#   CPU vs CUDA at 2.4k dofs: 1.8x per freq (E5, BENCH_CPU_VS_CUDA_2026-11-03.md / TOOLCHAIN M4)
+#   CPU vs CUDA at 5.1k: 2.3x; at 8.9k: 1.3x
+#   CPU excels at: single verify re-solves (no VRAM, no fused overhead), <1.5k dof screens
+#   GPU idle fraction in a search night: 43% (CAMPAIGN_SMOKE_2026-10-27 §8) — CPU fills this gap
+#
+# NOTE: Until lane integration is live, run these jobs manually in a second terminal with:
+#   set HORNLAB_BEAT_BACKEND=beat_cpu
+#   set HORNLAB_CACHE_DIR=cache_cpu
+#   set HORNLAB_DATASET_DIR=dataset_cpu
+#   .venv\Scripts\hornlab-search.exe search/verify ...
+#
+night: cpu_2026-11-13
+lane: cpu
+backend: beat_cpu
+cache_dir: cache_cpu
+dataset_dir: dataset_cpu
+jobs:
+
+  # --- C1: Verify top-10 elites from atlas__ath_core (beat_cpu re-solve) ---
+  # Verifies the 10 lowest-J elites at higher frequency density (verify mode).
+  # CPU is ideal: single designs, no VRAM pressure, 12-thread BEM parallelism.
+  # Mesh size: native_ath_core brief, dof_cap_verify 12000 (actual likely 2-5k at 2in throat)
+  # Est: 10 designs × ~180 s/design (12 freq × 15 s/freq at 2k dofs CPU) = 1800 s = 0.5 h
+  # Parallelizes with GPU search (no GPU resource conflict).
+  - id: c1_verify_ath_core_top10
+    kind: search
+    config: examples/typologies/atlas_2026-10-30/atlas__ath_core.yaml
+    resume: runs/20261030T111108Z-screen-377bbe
+    budget: 10
+    mode: verify
+
+  # --- C2: Verify top-10 elites from atlas__core_law (beat_cpu re-solve) ---
+  # Same rationale as C1 but for the still-improving cell (best coverage-law atlas).
+  # 347 valid evals; best J=2.2953. Verification confirms screen-mode ranking is stable.
+  # Est: 10 × 180 s = 1800 s = 0.5 h
+  - id: c2_verify_core_law_top10
+    kind: search
+    config: examples/typologies/atlas_2026-10-30/atlas__core_law.yaml
+    resume: runs/20261030T170642Z-screen-fbab4f
+    budget: 10
+    mode: verify
+
+  # --- C3: beat_cpu vs beat_cuda cross-check (E8 from CPU_SECOND_LANE doc) ---
+  # E8 states: "A beat_cpu vs beat_cuda dB A/B is NOT recorded in the docs."
+  # This job measures it. Run 5 elites from atlas__ath_core with both backends and compare.
+  # Uses tools/bench/cuda_cpu_40designs.py or equivalent; outputs a dB difference table.
+  # Required before any conclusion about CPU-lane J values being comparable to GPU-lane J.
+  # Est: 5 designs × 2 backends × ~90 s = 900 s = 0.25 h
+  - id: c3_cpu_cuda_crosscheck
+    kind: command
+    timeout_s: 3600
+    argv:
+      - .venv\Scripts\python.exe
+      - tools\bench\cuda_cpu_40designs.py
+      - --run-dir
+      - runs/20261030T111108Z-screen-377bbe
+      - --n-designs
+      - '5'
+      - --backends
+      - cuda
+      - cpu
+
+  # --- C4: lecleach_rollback v6 small-mesh screen (CPU lane, parallelizes with GPU) ---
+  # lecleach has dof_cap_screen 5000, actual screen dofs ~1000-2500.
+  # At 2k dofs CPU is 1.8x slower than GPU but runs in parallel (zero GPU cost).
+  # Adds another seed for variance data while GPU runs the atlas extension jobs.
+  # This is a NEW search (seed 1234 is GPU side, use 1236 here for CPU lane).
+  # Est: 200 × 7 s/eval (CPU at 1.5k dofs) = 1400 s = 0.4 h
+  - id: c4_lecleach_v6_cpu_seed1236
+    kind: command
+    timeout_s: 3600
+    argv:
+      - .venv\Scripts\hornlab-search.exe
+      - search
+      - --config
+      - examples/typologies/lecleach_rollback.yaml
+      - --brief
+      - examples/briefs/lecleach_rollback_1in_v6.yaml
+      - --budget
+      - '200'
+      - --mode
+      - screen
+
+# Total CPU lane estimated: 0.5 + 0.5 + 0.25 + 0.4 = 1.65 h active work
+# When running in parallel with GPU the net time cost is zero (CPU is idle otherwise).
+# DO NOT USE CPU lane for: v7 (hardened CD — 0 gate-passing designs per HARDENED_D evidence),
+#   meshes above ~1.5k dofs new searches (CPU 2-3x slower; use GPU unless above VRAM ceiling),
+#   any objective v5 (MEH — PAUSED).

@@ -1,0 +1,75 @@
+# MULTI-SEED REPLICATE of examples/typologies/lecleach_rollback.yaml, v6 objective.
+# ONLY search.seed changed from 1234 to 1235. Run WITH --brief to inject v6 objective:
+#   hornlab-search search --config <this_file> --brief examples/briefs/lecleach_rollback_1in_v6.yaml
+#   --budget 300 --mode screen
+# PURPOSE: seed variance for the v6 (loading_smooth) objective; lecleach_rollback with seed 1234
+#   ran 142 valid evals tonight (best J=1.5357) and was not still-improving. A second seed
+#   establishes whether the landscape has a unique basin or multiple competitive modes.
+# USE: reference from gpu_day.yaml with brief: override.
+name: lecleach_rollback_v6_seed1235
+family: FREEFORM
+brief_file: ../briefs/lecleach_rollback_1in_v6.yaml
+generator:
+  name: grid
+  rows:
+    type: lecleach
+  n_phi: 15
+  n_s: 32
+  wall_thickness_mm: 3.0
+seed_params:
+  g_fc_hz: 800.0
+  g_T: 0.8
+  g_stop_deg: 170.0
+bounds:
+  g_fc_hz:
+    lo: 600.0
+    hi: 1200.0
+  g_T:
+    lo: 0.3
+    hi: 1.0
+  g_stop_deg:
+    lo: 120.0
+    hi: 240.0
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 5.0
+  z_min: 0.7
+  f0_hz: 1200.0
+weights:
+  load_near: 1.0
+  z_smooth: 0.8
+  flat: 0.5
+  rip: 0.8
+  cov_pat: 0.3
+  di_rise: 0.4
+  distd: 0.3
+  diag: 0.0
+mesh:
+  epw: 8.0
+  quadrants: '1'
+  dof_cap_screen: 5000
+  dof_cap_verify: 7000
+  dof_cap_final: 8900
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+search:
+  algorithm: cma
+  sigma0: 0.25
+  seed: 1235
+  budget: 300
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+description: Le Cleac'h rollback v6 seed-1235 replicate; v6 brief injected via --brief flag

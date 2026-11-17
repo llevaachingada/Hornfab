@@ -1,0 +1,99 @@
+
+### 20261030T111108Z-screen-377bbe — atlas__ath_core (CMA-ME, v4, 1301 evals)
+  n_valid=1141, still_improving=False
+  Top knob sensitivities (Spearman |rho|, negative=lower J at higher value):
+    a_deg                                rho=+0.264
+    morph_rate                           rho=+0.176
+    morph_exponent                       rho=-0.127
+    k                                    rho=-0.119
+    morph_fixed                          rho=+0.117
+    L_mm                                 rho=+0.105
+    morph_height_mm                      rho=+0.082
+    s                                    rho=+0.074
+  No knobs consistently hitting bounds in top decile.
+
+### 20261030T064105Z-screen-1206a5 — atlas__hyb_osse_h_hypex_v (CMA-ME, v4, 981 evals)
+  n_valid=1102, still_improving=False
+  Top knob sensitivities (Spearman |rho|, negative=lower J at higher value):
+  No knobs consistently hitting bounds in top decile.
+
+### 20261030T170642Z-screen-fbab4f — atlas__core_law (CMA-ME, v4, 647 evals)
+  n_valid=347, still_improving=True
+  Top knob sensitivities (Spearman |rho|, negative=lower J at higher value):
+    L_mm                                 rho=-0.704
+    a_deg                                rho=-0.222
+    k                                    rho=+0.155
+    s                                    rho=+0.142
+    morph_rate                           rho=+0.124
+    az_sf_n1                             rho=-0.109
+    az_sf_n2                             rho=-0.109
+    morph_fixed                          rho=-0.103
+  No knobs consistently hitting bounds in top decile.
+
+### 20261112T110126Z-screen-c414b1 — atlas__osse_ext_throat (CMA-ME, v5, 201 evals)
+  n_valid=140, still_improving=False
+  Top knob sensitivities (Spearman |rho|, negative=lower J at higher value):
+    L_mm                                 rho=-0.874
+    r0_mm                                rho=-0.193
+    throat_ext_length_mm                 rho=-0.179
+    morph_rate                           rho=-0.115
+    a_deg                                rho=+0.090
+    s                                    rho=+0.090
+    a0_deg                               rho=-0.070
+    throat_ext_angle_deg                 rho=-0.070
+  No knobs consistently hitting bounds in top decile.
+
+### 20261112T113047Z-screen-24053e — lecleach_rollback v6 (CMA, v6, 150 evals)
+  n_valid=142, still_improving=False
+  Top knob sensitivities (Spearman |rho|, negative=lower J at higher value):
+  No knobs consistently hitting bounds in top decile.
+
+### 20261027T070736Z-screen-d37d64 — native__ath_core_v4 (CMA, v4, 192 evals)
+  n_valid=192, still_improving=True
+  Top knob sensitivities (Spearman |rho|, negative=lower J at higher value):
+    morph_corner_mm                      rho=-0.326
+    n                                    rho=-0.315
+    morph_rate                           rho=+0.296
+    k                                    rho=-0.272
+    morph_width_mm                       rho=-0.270
+    L_mm                                 rho=-0.216
+    s1                                   rho=+0.174
+    s2                                   rho=-0.151
+  Knobs hitting bounds in top decile:
+    morph_fixed                          lo (lo:8/19  hi:0/19)  range=[0.0,0.6]
+    morph_width_mm                       hi (lo:0/19  hi:8/19)  range=[238.2,456.55]
+    q                                    hi (lo:0/19  hi:7/19)  range=[0.9,1.0]
+
+### 20261027T052720Z-screen-e7f4f8 — crease__core_law_v4 (CMA, v4, 172 evals)
+  n_valid=172, still_improving=False
+  Top knob sensitivities (Spearman |rho|, negative=lower J at higher value):
+    n                                    rho=+0.385
+    a_deg                                rho=-0.356
+    s                                    rho=+0.306
+    az_a_cos_amp                         rho=-0.273
+    az_sf_n1                             rho=-0.239
+    az_a_cos_pow                         rho=+0.236
+    L_mm                                 rho=-0.221
+    k                                    rho=+0.192
+  Knobs hitting bounds in top decile:
+    k                                    lo (lo:7/17  hi:0/17)  range=[0.3,5.0]
+    morph_rate                           lo (lo:9/17  hi:0/17)  range=[0.5,8.0]
+
+### 20261027T062650Z-screen-36d858 — b1t__salmon_x_signed_v4 (CMA, v4, 172 evals)
+  n_valid=172, still_improving=False
+  Top knob sensitivities (Spearman |rho|, negative=lower J at higher value):
+  No knobs consistently hitting bounds in top decile.
+
+### 20261027T073751Z-screen-c7a1db — b2w__osse_baseline_v4 (CMA, v4, 127 evals)
+  n_valid=127, still_improving=True
+  Top knob sensitivities (Spearman |rho|, negative=lower J at higher value):
+    k                                    rho=+0.450
+    n                                    rho=+0.361
+    L_mm                                 rho=-0.297
+    a_deg                                rho=-0.241
+    q                                    rho=+0.230
+    a0_deg                               rho=+0.218
+    exponent                             rho=-0.046
+    s                                    rho=+0.023
+  Knobs hitting bounds in top decile:
+    k                                    lo (lo:6/12  hi:0/12)  range=[0.3,5.0]
