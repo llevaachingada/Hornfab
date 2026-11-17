@@ -1,0 +1,107 @@
+{
+  "brief": {
+    "driver": {
+      "exit_angle_deg": 2.0,
+      "exit_radius_mm": 18.0
+    }
+  },
+  "envelope_mm": {
+    "d": 480.0,
+    "h": 480.0,
+    "w": 600.0
+  },
+  "rows": [
+    {
+      "area_mouth_mm2": 48471.02029381568,
+      "area_throat_mm2": 1017.8760197630929,
+      "clearance_mm": null,
+      "core_mm": null,
+      "d_mm": 233.67867209041165,
+      "envelope_ok": true,
+      "grid_sha256": "7e80214c3b280209a7b99769de086f621796282f555b69efa6bd16436a97cbb6",
+      "h_mm": 260.7347272164977,
+      "kind": "legacy v1 (control)",
+      "p_mouth": 5.006,
+      "seed": "a0",
+      "theta_h": "9.46 deg (parent)",
+      "theta_v": "9.44 deg (parent)",
+      "turns": 1,
+      "w_mm": 541.2721522018749
+    },
+    {
+      "area_mouth_mm2": 106551.31671823752,
+      "area_throat_mm2": 1017.8760197630928,
+      "beak": {
+        "beak_diagonal_mm": 0.0,
+        "beak_h_setback_mm": 15.0,
+        "beak_start_frac": 0.85,
+        "beak_v_projection_mm": 0.0
+      },
+      "clearance_mm": 19.506804016332165,
+      "core_mm": 380.0,
+      "d_mm": 380.0,
+      "envelope_ok": true,
+      "grid_sha256": "416efc4b7ad0946c34eac836476ce7ba21c07fc284c11997e424bc895666c90d",
+      "h_mm": 239.665855674382,
+      "kind": "monotone H/V core",
+      "p_mouth": 4.0,
+      "schema": "klangfilm-lame-hv-core-v1",
+      "seed": "b1",
+      "theta_h": "8.0 -> 48.0 deg",
+      "theta_v": "5.0 -> 24.5 deg",
+      "turns": 0,
+      "w_mm": 479.5737771683856,
+      "wavefront_model": "independent_hv_core"
+    },
+    {
+      "area_mouth_mm2": 131118.07560654177,
+      "area_throat_mm2": 1017.8760197630928,
+      "beak": {
+        "beak_diagonal_mm": 0.0,
+        "beak_h_setback_mm": 25.0,
+        "beak_start_frac": 0.88,
+        "beak_v_projection_mm": 0.0
+      },
+      "clearance_mm": 19.490128106257544,
+      "core_mm": 420.0,
+      "d_mm": 420.0,
+      "envelope_ok": true,
+      "grid_sha256": "70cbde3d2638f6cd317412f05024cb67824ad60aecbb77f82df45cdaa0866048",
+      "h_mm": 232.828678889938,
+      "kind": "monotone H/V core",
+      "p_mouth": 4.8,
+      "schema": "klangfilm-lame-hv-core-v1",
+      "seed": "b2",
+      "theta_h": "12.0 -> 50.5 deg",
+      "theta_v": "4.0 -> 22.0 deg",
+      "turns": 0,
+      "w_mm": 594.9837437742522,
+      "wavefront_model": "independent_hv_core"
+    },
+    {
+      "area_mouth_mm2": 111077.0132776587,
+      "area_throat_mm2": 1017.8760197630928,
+      "beak": {
+        "beak_diagonal_mm": 0.0,
+        "beak_h_setback_mm": 10.0,
+        "beak_start_frac": 0.9,
+        "beak_v_projection_mm": 5.0
+      },
+      "clearance_mm": 19.57503880287534,
+      "core_mm": 340.0,
+      "d_mm": 345.0,
+      "envelope_ok": true,
+      "grid_sha256": "993aef1c5018d8636f8fda328229d147c633e50d9d6125f2b1f5711a8cc84a89",
+      "h_mm": 266.12655222027,
+      "kind": "monotone H/V core",
+      "p_mouth": 3.0,
+      "schema": "klangfilm-lame-hv-core-v1",
+      "seed": "b3",
+      "theta_h": "7.0 -> 52.1 deg",
+      "theta_v": "6.0 -> 30.4 deg",
+      "turns": 0,
+      "w_mm": 472.5178611898337,
+      "wavefront_model": "independent_hv_core"
+    }
+  ]
+}

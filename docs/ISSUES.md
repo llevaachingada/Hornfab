@@ -1,5 +1,16 @@
 # ISSUES
 
+## 2026-11-17 - Klangfilm Phase B core built; acoustic gate open
+
+- DONE (CPU geometry): monotone H/V slope core + independent Lamé exponent + swept beak, exact legacy
+  nesting, 12 focused tests, geometry preflight with two plots.
+- OPEN (owner): register the digest-bound family adapter (with `size_policy`), mesh-validate B1-B3, then
+  solve A0 vs B1/B3 with the identical solver/grid/source and both scoring policies.
+- LIMITATION: no returning lip (needs a section-normal spine parameterisation) and no BEM for Phase B;
+  the driver source cap remains the existing assumption.
+- DECISION RULE (fixed): Phase B is worth optimizing only if BW_H/BW_V in 1.2-5.6 kHz land within +-10 deg
+  of 80/50 and Var(DI) drops >= 25 % vs A0, with no new -6 dB lobes and load not worse.
+
 ## 2026-11-16 (23:15) - v9 G13 GUI corridor + schema lane landed; consolidation gates open
 
 - DONE: G13 chart==scorer corridor display (charts.js/app.js + `tests/test_gui_corridor_v9.py`)

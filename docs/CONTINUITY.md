@@ -1,5 +1,23 @@
 # CONTINUITY
 
+## 2026-11-17 - Klangfilm Phase B monotone H/V core (geometry only) + Stage A/B decision report
+
+- Stage A verdict recorded in `docs/evidence/klangfilm_hv_2026-11-16/STAGE_A_VS_B_DECISION.md`: the
+  throat-only arms moved the intended axis by <= 2.74 deg (and narrowed), leaked <= 0.71 deg, and
+  scored worse under both policies, so the pre-declared 3 deg rule failed and the box is not to be
+  optimized.
+- New `tools/geometry/klangfilm_lame_hv_core.py` (schema `klangfilm-lame-hv-core-v1`,
+  `rows.type: klangfilm_lame_hv_core`): `theta_i(z)` slope law, `r_i = r0 + int tan theta_i dz`,
+  shared-z planar Lamé stations with an independent `p(z)`, and a late C2 swept beak. `cd_core_blend = 0`
+  is bit-identical to v1; a fold or a lip that returns into the body is refused, not clamped.
+- Seeds B1-B3 reach mouths comparable to A0 (480x240, 595x233, 473x266 mm), all inside the envelope;
+  `tools/geometry/klangfilm_hv_core_preflight.py` writes `PHASE_B_GEOMETRY.md`, `phase_b_geometry.json`,
+  `phase_b_sections.png`, `phase_b_laws.png`. 12 focused tests in
+  `tests/test_tools_klangfilm_lame_hv_core.py`.
+- NOT DONE: no BEM/polar evidence for Phase B, no canonical family adapter, no returning lip (needs a
+  section-normal spine), source cap unchanged. The next gate and its decision rule are fixed in the
+  decision document.
+
 ## 2026-11-16 (23:15 local) - v9 G13 GUI corridor + schema-lane completion landed
 
 - G13 GUI corridor display: `charts.js` adds `corridorBand`, the preferred ref-line dash, the
