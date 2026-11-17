@@ -1,5 +1,28 @@
 # CONTINUITY
 
+## 2026-11-16 - CROWE-inspired forward area/aspect family implemented (CPU geometry only; no solve, nothing queued)
+
+- Owner supplied the V2 senior research and four throat rules (round for 15-40 mm; area expands
+  before boxiness; no ridges early; near-throat C1/C2). Moved the doc to
+  `docs/research/typologies/CROWE_HV_AREA_ASPECT_RESEARCH_V2_2026-11-16.md` with a landing note.
+- New versioned FREEFORM generator `crowe_hv_area_aspect_v1` (`design/generators/`): explicit
+  `log A(u)` with the driver-exit initial slope, and `log R(u)` / `p(u)` on a C2 gate after
+  `round_throat_mm`. Exact `A = C(p) ab` and `R = a/b`. H/V anchors + superellipse stations; no
+  returned lip, rim setback or X crease (Phase 2).
+- Owner rules are structural, not cosmetic: `a = b`, `R = 1`, `p = 2` exactly through the
+  `round_throat_mm` zone (seed 30 mm, proposed search 15-40 mm) while area reaches 1.17x at the
+  gate, 1.26x at 40 mm and 1.86x at 80 mm. Boxiness is only p 2.0007 at 40 mm / 2.07 at 80 mm.
+- Examples `c0_round30_480.yaml` (fixed geometry diagnostic) and `c1_frontier_bounds.yaml`
+  (8-knob proposed box; OWNER-GATED, not queued). Section-cut tool
+  `tools/geometry/crowe_hv_area_aspect_sections.py` produces the owner's 0/5/10/20/40/80 mm table.
+- Tests: 18 in `tests/test_design_generators_crowe_hv_area_aspect.py` green, including the exact
+  identities, 81 extreme perturbation combinations, cold-subprocess replay, config/search-box
+  validation and a real 8 kHz quarter mesh (8,447 tris, bad_open_edges 0, non-manifold 0,
+  source cap 36 mm round; `fits_exit(36) = True`).
+- Law-level preflight: 500/500 uniform random `c1` samples lawful; all 18 bound endpoints valid.
+  This is NOT the research document's 40-80 candidate mesh DOE, a BEM result, a CMA/BoTorch run,
+  or an acoustic claim. No GPU, queue, objective or historical family was changed.
+
 ## 2026-11-16 (20:10 local) - P0 non-CD scoring truth LANDED (additive, no J change) + P1 RFC + deliverable-1 table
 
 - Spec: owner-supplied source-reviewed handoff moved into the repo as

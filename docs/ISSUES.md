@@ -1,5 +1,16 @@
 # ISSUES
 
+## 2026-11-16 - CROWE-inspired area/aspect v1 geometry landed; acoustic gates open
+
+- DONE (CPU geometry): `crowe_hv_area_aspect_v1` + c0/c1 configs + section-cut tool + 18 focused
+  tests; no solve, no queue, no objective change.
+- OPEN (owner): decide whether to authorize the research document's 40-80 candidate mesh DOE or
+  the `c1_frontier_bounds` search box. The V2 document authorises no new solve.
+- OPEN: Phase 2 returned lip/roll, rim setback, X crease, `p_progress_start/rate` and the
+  throat-length source study; no knob is registered until implemented and tested.
+- OPEN: the 300 mm seed reaches 78/76 deg mouth wall angles. The frontier study must trade
+  mouth/depth/area before any acoustic claim; the research document's go/no-go gates still bind.
+
 ## 2026-11-16 (16:30) - Klangfilm-Lame validation open
 
 - OPEN (local): run shape-check/mesh on `hl__klangfilm_lame_curved_v1` (dof cap, symmetry, shell clearance, source tag 2); render vs reference.

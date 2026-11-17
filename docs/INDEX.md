@@ -1,5 +1,12 @@
 # Docs index
 
+[CROWE-inspired H/V area/aspect v1 research (2026-11-16)](research/typologies/CROWE_HV_AREA_ASPECT_RESEARCH_V2_2026-11-16.md):
+senior research and the forward area/aspect construction; the document's Phase 1 is implemented as
+`crowe_hv_area_aspect_v1` (geometry-only, no solves). [Implementation evidence](evidence/CROWE_HV_AREA_ASPECT_V1_2026-11-16.md):
+exact area/aspect identities, the owner's 0/5/10/20/40/80 mm section cuts, the 8 kHz quarter-mesh
+result, 500/500 lawful search-box samples, and the deferred Phase 2 items (roll, X crease, rim
+setback, throat-length study, objective changes).
+
 [HF1440 12-seed supplied gallery and verification](research/typologies/hf1440_diverse_2026-11-16/RESULTS.md): distinct existing-code J seeds and K preview shapes, compatibility and CPU preflight results.
 
 [Dual Lamé geometry integration research and gate](research/typologies/DUAL_LAME_INTEGRATION_2026-11-16.md): distinct parent constructions, source and identity findings, and validation limits.

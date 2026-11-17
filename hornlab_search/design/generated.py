@@ -55,7 +55,21 @@ def materialize(gen: dict, knobs: dict, brief: dict) -> dict:
         return plughorn_params(gen, knobs, brief)
     if str(gen.get("name", "")) == "meh":
         return meh_params(gen, knobs, brief)
+    from .generators import crowe_hv_area_aspect_v1
+    if str(gen.get("name", "")) == crowe_hv_area_aspect_v1.KIND:
+        return crowe_hv_area_aspect_v1.materialize(gen, knobs, brief)
     return registry.materialize(gen, knobs, brief)
+
+
+def generator_info(gen: dict, knobs: dict, brief: dict) -> dict:
+    """Report-only derived quantities for a generator block, never raising."""
+    from .generators import crowe_hv_area_aspect_v1
+    if str(gen.get("name", "")) == crowe_hv_area_aspect_v1.KIND:
+        try:
+            return crowe_hv_area_aspect_v1.info(gen, knobs, brief)
+        except Exception:  # noqa: BLE001 - report-only
+            return {}
+    return registry.info(gen, knobs, brief)
 
 
 def plughorn_params(gen: dict, knobs: dict, brief: dict) -> dict:
@@ -134,8 +148,10 @@ class GeneratedSpace:
         self.gen = dict(gen)
         self.brief = dict(brief)
         self.bounds = dict(bounds)
-        from .generators import rolled_family, klangfilm_lame_family, klangfilm_lame_hv_family, lecleach_swept_hv
-        for family in (rolled_family, klangfilm_lame_family, klangfilm_lame_hv_family, lecleach_swept_hv):
+        from .generators import (rolled_family, klangfilm_lame_family, klangfilm_lame_hv_family,
+                                lecleach_swept_hv, crowe_hv_area_aspect_v1)
+        for family in (rolled_family, klangfilm_lame_family, klangfilm_lame_hv_family,
+                       lecleach_swept_hv, crowe_hv_area_aspect_v1):
             if family.is_family_spec(self.gen):
                 family.validate_search_config(self.gen, seed_knobs, self.bounds, self.brief)
                 break
@@ -246,4 +262,4 @@ class GeneratedSpace:
             return None
         return {"name": self.gen.get("name", "typology"), "spec": copy.deepcopy(self.gen),
                 "knobs": knobs, "brief": self.brief.get("name"), "brief_hash": brief_hash(self.brief),
-                "derived": registry.info(self.gen, knobs, self.brief)}
+                "derived": generator_info(self.gen, knobs, self.brief)}
