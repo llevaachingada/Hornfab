@@ -1,5 +1,12 @@
 # ISSUES
 
+## 2026-11-17 - Klangfilm convergence check passed; Phase B verdict stands
+
+- DONE: epw-9 re-solves of A0 (16394 dofs) and B3 (6757 dofs); every gate-relevant quantity moves
+  <= 0.1 deg / 0.014 Var(DI) / 0.003 J. `AB_REPORT_CONV.md`, `ab_manifest_conv.json`.
+- OPEN (unchanged): returning-lip module next; source-cap study separate; no search started.
+- NOTE: `configs/b3_soft.yaml` was edited by another lane (budget/max_attempts) and is left uncommitted.
+
 ## 2026-11-17 - Klangfilm Phase B: DI constancy gained, H coverage short
 
 - DONE: digest-bound family adapter, four configs (b1-b4), canonical mesh route, four BEM solves, report.

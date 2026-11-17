@@ -1,0 +1,167 @@
+{
+  "arms": {
+    "a0": {
+      "arm": "a0",
+      "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\klangfilm_hv_2026-11-16\\configs\\a0.yaml",
+      "design_hash": "a01be912716b",
+      "objective": 8.43812590231321,
+      "reused": true,
+      "reused_from": "explicit --baseline",
+      "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261117T015442Z-screen-0afda0"
+    },
+    "a0epw9": {
+      "angle_count": 73,
+      "arm": "a0epw9",
+      "backend": null,
+      "balloon_grid": [
+        16,
+        32
+      ],
+      "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\klangfilm_hv_2026-11-16\\configs\\a0_epw9.yaml",
+      "config_sha256": "8df6954c834e1422b3379e2e390381c9a8a6297fb7426509a1a050ef75270318",
+      "design_hash": "a01be912716b",
+      "elapsed_s": 252.4,
+      "exit_code": 0,
+      "has_metrics": true,
+      "has_response": true,
+      "mesh_scale": 1.0,
+      "n_dof": "solver_log[i].native_diagnostics.p1_dof_count (fallback: mesh_info.n_vertices)",
+      "n_triangles": 32262,
+      "objective": 8.437406596645564,
+      "ok": true,
+      "quadrants": "1",
+      "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261117T063719Z-screen-47260f",
+      "run_dirs": [
+        "20261117T063719Z-screen-47260f"
+      ],
+      "solve_seconds": 239.98603610001737,
+      "stderr_tail": [],
+      "stdout_tail": [
+        "terms (raw): cov=1.127  rip=0.0472  di=0  dislope=0.9136  flat=0.3993  load=0.7752  penalty=0  total J=8.43741  n_nan=0  DI source=balloon",
+        "run OK: seed J=8.43741, 16394 dofs, solve 240.0 s; output C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261117T063719Z-screen-47260f"
+      ],
+      "terms": {
+        "cov": 1.1272064318096071,
+        "di": 0.0,
+        "di_estimated": 0.0,
+        "diag": 4.142104465546253,
+        "dislope": 0.9136390492483658,
+        "distd": 1.1317652012619703,
+        "f11_hz": 5600.0,
+        "flat": 0.39925286354706274,
+        "flat_cv": 0.10066519864394476,
+        "lfp20_hz": 514.0263850859596,
+        "lfp50_hz": 571.3955077106364,
+        "load": 0.7751979940818692,
+        "loaded_hi_hz": 5600.0,
+        "n_in_band": 13,
+        "n_nan": 0,
+        "penalty": 0.0,
+        "rez_min_from_fx": 0.7602182684333735,
+        "rip": 0.047201824280022134,
+        "total": 8.437406596645564
+      }
+    },
+    "b3epw9": {
+      "angle_count": 73,
+      "arm": "b3epw9",
+      "backend": null,
+      "balloon_grid": [
+        16,
+        32
+      ],
+      "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\klangfilm_hv_2026-11-16\\configs\\b3_epw9.yaml",
+      "config_sha256": "50f99a3a23b7c2cc9377f4e0b2edebe92b32470a3c878b5938b4eebe554bb23f",
+      "design_hash": "7a53202d1a5e",
+      "elapsed_s": 58.8,
+      "exit_code": 0,
+      "has_metrics": true,
+      "has_response": true,
+      "mesh_scale": 1.0,
+      "n_dof": "solver_log[i].native_diagnostics.p1_dof_count (fallback: mesh_info.n_vertices)",
+      "n_triangles": 13091,
+      "objective": 6.572710147570006,
+      "ok": true,
+      "quadrants": "1",
+      "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261117T064133Z-screen-6d2651",
+      "run_dirs": [
+        "20261117T064133Z-screen-6d2651"
+      ],
+      "solve_seconds": 48.92329619999509,
+      "stderr_tail": [],
+      "stdout_tail": [
+        "terms (raw): cov=1.144  rip=0.419  di=0  dislope=0.1821  flat=0.5228  load=0  penalty=0  total J=6.57271  n_nan=0  DI source=balloon",
+        "run OK: seed J=6.57271, 6757 dofs, solve 48.9 s; output C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261117T064133Z-screen-6d2651"
+      ],
+      "terms": {
+        "cov": 1.1435141477455233,
+        "di": 0.0,
+        "di_estimated": 0.0,
+        "diag": 3.1484752318679616,
+        "dislope": 0.1820813659154119,
+        "distd": 0.9373016659212354,
+        "f11_hz": 5600.0,
+        "flat": 0.5228412750376058,
+        "flat_cv": 0.48094392920016316,
+        "lfp20_hz": 348.7291713094425,
+        "lfp50_hz": 473.50823011195115,
+        "load": 0.0,
+        "loaded_hi_hz": 5600.0,
+        "n_in_band": 13,
+        "n_nan": 0,
+        "penalty": 0.0,
+        "rez_min_from_fx": 0.732337854439519,
+        "rip": 0.4189731694009074,
+        "total": 6.572710147570006
+      }
+    }
+  },
+  "created_utc": "2026-11-17T06:37:15Z",
+  "gpu_state_at_start": {
+    "held": false,
+    "holder": null,
+    "live": false,
+    "lock_path": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\.gpu.lock",
+    "nvidia_smi": "1604 MiB, 0 %"
+  },
+  "identity_gate": {
+    "a0_config": "examples\\typologies\\klangfilm_hv_2026-11-16\\configs\\a0.yaml",
+    "block_equal": {
+      "driver": true,
+      "envelope": true,
+      "grid": true,
+      "mesh": true,
+      "objective": true,
+      "solve": true,
+      "target": true,
+      "weights": true
+    },
+    "brief_paths": {
+      "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\home_landscape_2026-11-15\\hl__klangfilm_lame_curved_v1.yaml": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7_smooth.yaml",
+      "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\klangfilm_hv_2026-11-16\\configs\\a0.yaml": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7_smooth.yaml"
+    },
+    "cached_design": "786caa6b08d7",
+    "cached_run": "runs\\20261116T205942Z-screen-8b22b5",
+    "cached_status": "running",
+    "geometry_array_equal": true,
+    "grid_sha256": "7e80214c3b280209a7b99769de086f621796282f555b69efa6bd16436a97cbb6",
+    "hv_meta_core_mode": "legacy",
+    "lib_shas_cached": {
+      "hornlab_beat_bem": "38e5b1f8ca840ebf6351c54611a08fedb1a0750f",
+      "hornlab_bempp_bem": "8e6910602ece9abb2e9ce0db7a637f4bedf17f53",
+      "hornlab_mesher": "55da4f46d662d8dcd7a9f94a609eeea4009fcd62",
+      "hornlab_plots": "9e4a6d0dd2ccb6e735dd00233dccccb50d12ed44",
+      "hornlab_search": "0cd9543474dde441dce811c2f18c52dbee6ad905"
+    },
+    "lib_shas_equal": false,
+    "lib_shas_now": {
+      "hornlab_beat_bem": "38e5b1f8ca840ebf6351c54611a08fedb1a0750f",
+      "hornlab_bempp_bem": "8e6910602ece9abb2e9ce0db7a637f4bedf17f53",
+      "hornlab_mesher": "55da4f46d662d8dcd7a9f94a609eeea4009fcd62",
+      "hornlab_plots": "9e4a6d0dd2ccb6e735dd00233dccccb50d12ed44",
+      "hornlab_search": "7f7637e97fcdd7e1246032694a9e2ab0545f1733"
+    },
+    "reuse_a0": false,
+    "same_brief_path": true
+  }
+}

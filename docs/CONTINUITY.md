@@ -1,5 +1,16 @@
 # CONTINUITY
 
+## 2026-11-17 - Klangfilm comparison mesh-converged: the A0-B3 H gap is structural
+
+- Both reference horns were re-solved at `epw 9` (A0 16394 dofs, B3 6757 dofs, vs 7449 / 3087 at epw 6):
+  beamwidths move <= 0.1 deg, `Var(DI)` and J are stable, and in 5.6-8 kHz the H gap *widens* (A0 63.0 vs
+  B3 47.9 deg) rather than closing. Runs `20261117T063719Z-47260f` (A0@9) and `064133Z-6d2651` (B3@9).
+- Confirms the convergence gap the Stage A/B comparisons had not closed: B3's DI-variance gain (-45 %)
+  and smooth-J win (6.570 vs 8.438) are real, the missing H coverage (65.2 vs 69.7 deg) is the terminator,
+  and the pre-declared Phase B gate verdict (FAIL on H coverage) stands on converged numbers.
+- NOTE: another lane concurrently bumped `configs/b3_soft.yaml` (budget 100 / max_attempts 250); left
+  uncommitted and untouched by this work.
+
 ## 2026-11-17 - Klangfilm Phase B registered and measured: DI gain, H coverage short
 
 - Canonical adapter `klangfilm_lame_hv_core_family` (+ frozen `_klangfilm_lame_hv_core_v1.py`, registered in

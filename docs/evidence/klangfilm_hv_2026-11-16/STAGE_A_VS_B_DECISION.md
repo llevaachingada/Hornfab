@@ -136,6 +136,23 @@ Four B seeds were meshed (3087–4153 dofs) and solved at the same 18 frequencie
 (CD J is from `AB_REPORT_B.json`; every row is an `exact_complete` replay with parity 0.0 on its
 own run.)
 
+### 4.2.1 Mesh convergence of the comparison (added before any recommendation was finalised)
+
+Both reference horns were re-solved at `epw 9` (dofs more than double) to rule out a resolution artefact,
+since the B seeds carry ~2.4x fewer dofs than A0 (`a0_epw9.yaml`, `b3_epw9.yaml`):
+
+| solution | dofs | BW_H (1.2-5.6k) | BW_V | Var(DI) | smooth J | load |
+|---|---|---|---|---|---|---|
+| A0 epw 6 | 7449 | 69.8 | 72.3 | 2.160 | 8.438 | 0.777 |
+| A0 epw 9 | 16394 | 69.7 | 72.2 | 2.174 | 8.437 | 0.775 |
+| B3 epw 6 | 3087 | 65.2 | 47.3 | 1.180 | 6.570 | 0.000 |
+| B3 epw 9 | 6757 | 65.2 | 47.2 | 1.177 | 6.573 | 0.000 |
+
+Beamwidths move by <= 0.1 deg under a 2.2x dof increase on both horns, and in the 5.6-8 kHz band the gap
+widens* (A0 63.0 vs B3 47.9) rather than closing. The A0-B3 H difference is **structural, not numerical**;
+B3's DI-variance gain and smooth-score win are real. Evidence: `AB_REPORT_CONV.md`,
+`ab_manifest_conv.json`, runs `063719Z-47260f` (A0@9) and `064133Z-6d2651` (B3@9).
+
 **What this means**
 
 * The monotone core **does have authority** — unlike Stage A it moves beamwidth by 7–15° and can halve
