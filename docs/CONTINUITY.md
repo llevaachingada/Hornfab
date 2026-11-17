@@ -1,5 +1,15 @@
 # CONTINUITY
 
+## 2026-11-17 (senior pass, code) - Stage 1 WP 1.2: dense-grid score identity for objective v9
+
+- New `hornlab_search/metrics/dense_grid.py` (A4/N3 method packaged: PCHIP in log f, uniform
+  58/116/232 points inside the solved range, pressures dropped, no extrapolation). Objective v9
+  takes an opt-in `objective.score_grid: {kind: dense_log, points: N}`; when declared, metrics are
+  re-derived on the dense grid with the production DI rule (`metrics_from_response`) before
+  scoring; it rides `to_block`, so it is part of the score identity. Absent = unchanged. Replay
+  inherits it through the v9 dispatch. Plan: 58 points for v9, 116 with constancy (N3).
+- Tests: 7 new; scoring/replay/config suites 99 passed.
+
 ## 2026-11-17 (senior pass, code) - Stage 1 WP 1.1: opt-in constancy term in objective v9
 
 - `objective.constancy: {mode: strict|slope, weight, tolerance[, slope_max_deg_per_decade]}`,

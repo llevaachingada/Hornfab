@@ -83,7 +83,7 @@ _FLAT_BANDS = ("band", "scored")
 _HF_FLOOR_KEYS = {"hz", "h_deg", "v_deg", "weight", "tolerance"}
 _BLOCK_KEYS = {"version", "tolerances", "cov_narrow_ratio", "cov_below_f0", "cov_v_weight",
                "flat_band", "loaded_re_z", "lfp_re_z", "lfp_crossover_ratio", "hf_floor",
-               "constancy"}
+               "constancy", "score_grid"}
 _CONSTANCY_KEYS = {"mode", "weight", "tolerance", "slope_max_deg_per_decade"}
 _CONSTANCY_MODES = ("strict", "slope")
 _BW8K_REFUSAL = ("objective.bw8k_floor is invalid with v9; the coverage profile min_deg is "
@@ -109,6 +109,9 @@ class V9Params:
     #: default (J and score identity unchanged). A brief DECLARES it; it is never selected
     #: from a family name (owner lock, RFC amendment A).
     constancy: dict | None = None
+    #: Stage 1 WP 1.2: ``{kind: dense_log, points: 58|116|232}`` scores on a uniform dense log
+    #: grid PCHIP-interpolated from the solved frequencies (A4/N3). Absent = solved grid.
+    score_grid: dict | None = None
 
     def weighted_keys(self) -> tuple[str, ...]:
         """The weighted key set for THIS block (``hf_floor`` only when declared)."""
@@ -176,9 +179,13 @@ class V9Params:
         constancy = None
         if block.get("constancy") is not None:
             constancy = _validate_constancy(block["constancy"])
+        score_grid = None
+        if block.get("score_grid") is not None:
+            from ..metrics.dense_grid import validate_score_grid
+            score_grid = validate_score_grid(block["score_grid"])
         return cls(tolerances=clean, cov_narrow_ratio=float(ratio), cov_below_f0=str(below),
                    cov_v_weight=float(cov_v_weight), flat_band=str(flat_band),
-                   hf_floor=hf_floor, constancy=constancy, **constants)
+                   hf_floor=hf_floor, constancy=constancy, score_grid=score_grid, **constants)
 
     def to_block(self) -> dict:
         """The normalised mapping stored in the config; never emits ``bw8k_floor``."""
@@ -197,6 +204,8 @@ class V9Params:
             out["hf_floor"] = dict(self.hf_floor)
         if self.constancy is not None:
             out["constancy"] = dict(self.constancy)
+        if self.score_grid is not None:
+            out["score_grid"] = dict(self.score_grid)
         return out
 
 
@@ -327,10 +336,27 @@ def _v9_penalty(value: float = PENALTY_FAILED, *, n_in_band: int = 0) -> tuple[f
 def objective_v9(metrics, resp, ok, target: Target, weights: dict | None, params: V9Params):
     """Score one evaluation under objective v9. ``(J, terms)``; ``terms`` has ``V9_ALL_KEYS``."""
     try:
+        if ok and params is not None and params.score_grid is not None:
+            metrics, resp = _on_score_grid(metrics, resp, target, params)
         return _objective_v9(metrics, resp, ok, target, weights, params)
     except Exception:  # noqa: BLE001 - the contract says never raises
         log.exception("objective_v9() failed; returning the failure penalty")
         return _v9_penalty(PENALTY_FAILED)
+
+
+def _on_score_grid(metrics, resp, target: Target, params: V9Params):
+    """WP 1.2: re-derive metrics on the declared dense grid with the production DI rule.
+    Scalars the dense recompute cannot know (mouth/throat geometry) are carried over."""
+    if resp is None:
+        raise ValueError("objective.score_grid needs the Response (not only metrics)")
+    from ..metrics.dense_grid import dense_response
+    from ..search.evaluate import metrics_from_response   # lazy: evaluate imports objective
+    dense = dense_response(resp, params.score_grid["points"], target.band_lo_hz, target.band_hi_hz)
+    m = metrics_from_response(dense, target)
+    keep = dict(getattr(metrics, "scalars", {}) or {}) if metrics is not None else {}
+    keep.update(m.scalars or {})
+    import dataclasses as _dc
+    return _dc.replace(m, scalars=keep), dense
 
 
 # ------------------------------------------------------------------ profile access

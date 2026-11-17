@@ -1,5 +1,10 @@
 # ISSUES
 
+## 2026-11-17 - Stage 1 WP 1.2 done (dense-grid scoring)
+
+- DONE: opt-in v9 `score_grid`. OPEN: reproduce N3's 58-pair numbers with the packaged path on the
+  Windows machine (needs `runs/study-*`); WP 1.3-1.5 wait on owner C1-C3.
+
 ## 2026-11-17 - Stage 1 WP 1.1 done (constancy mechanism)
 
 - DONE: opt-in v9 constancy term (off by default). OPEN (owner C2): strict, slope-limited or none
