@@ -1,12 +1,14 @@
 # CONTINUITY
 
-## 2026-11-16 (21:10 local) - Fable discovery evidence dossier delivered (read-only; scratch-only)
+## 2026-11-16 (21:10 local) - Fable discovery evidence dossier delivered and tracked (read-only)
 
-- Delivered the v3 handoff's cheap-agent research pass as a 15-file evidence dossier in the
-  git-ignored `scratch/fable_architecture/` (INDEX, SOURCE_INDEX, EVIDENCE_LEDGER with 59 atomic
-  claims, OPEN_QUESTIONS, plus geometry/failure/size/objective/optimizer/external/watchdog/switch/
-  supervisor/unknowns reports). Tracked digest:
+- Delivered the v3 handoff's cheap-agent research pass as a 15-file evidence dossier, now tracked
+  at `docs/research/fable_architecture_2026-11-16/` (INDEX, SOURCE_INDEX, EVIDENCE_LEDGER with 59
+  atomic claims, OPEN_QUESTIONS, plus geometry/failure/size/objective/optimizer/external/watchdog/
+  switch/supervisor/unknowns reports). Short digest:
   `docs/research/FABLE_DISCOVERY_EVIDENCE_HANDOFF_2026-11-16.md`.
+- The git-ignored `scratch/fable_architecture/` copy remains the working copy; the tracked folder is
+  a verbatim mirror for GitHub review (README records provenance and reading order).
 - Snapshot of record `601be8c`; the tree advanced to `0750a30` during the pass and
   `git diff --stat 601be8c..0750a30` over every cited path is empty. The checkout is 12 commits
   ahead of the handoff's `origin/main = 2c0e2928`.

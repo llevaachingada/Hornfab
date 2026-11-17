@@ -2,9 +2,9 @@
 
 ## 2026-11-16 - Fable architecture evidence dossier delivered; decision items open
 
-- DONE (read-only): 15-file dossier in git-ignored `scratch/fable_architecture/`; tracked digest
-  `docs/research/FABLE_DISCOVERY_EVIDENCE_HANDOFF_2026-11-16.md`. Snapshot `601be8c`; citations
-  hold at `0750a30`. No code/solve/queue change.
+- DONE (read-only): 15-file dossier tracked at `docs/research/fable_architecture_2026-11-16/`;
+  tracked digest `docs/research/FABLE_DISCOVERY_EVIDENCE_HANDOFF_2026-11-16.md`. Snapshot
+  `601be8c`; citations hold at `0750a30`. No code/solve/queue change.
 - OPEN (cheap, zero-GPU; would change architecture): (a) generic-GRID pre-mesh extent vs actual
   meshed bbox false-refusal count; (b) screen-vs-verify rank correlation (top quartile); (c)
   held-out GP ranking at 100-231 rows; (d) refusal-margin classifier (AUC) to decide feasibility

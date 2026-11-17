@@ -1,0 +1,52 @@
+# Fable architecture evidence dossier (2026-11-16)
+
+This folder is the **full 15-file read-only evidence dossier** prepared for a later Fable
+discovery/decision pass, mirrored verbatim from the local git-ignored working copy
+(`scratch/fable_architecture/`). Internal references to `scratch/fable_architecture/…` in these
+files refer to that working copy; the file names here are identical.
+
+- **Snapshot of record:** `main` @ `601be8ceeb48f1750bb4f3f6c1fdc682967c8b94`, observed
+  2026-11-16T20:43:51-05:00.
+- **Drift check:** the tree later advanced to `0750a30`; `git diff --stat 601be8c..0750a30` over
+  every cited path is empty, so the dossier's `path:line` citations remain valid. Re-read the tree
+  before acting; this is timestamped evidence, not a permanent API.
+- **Handoff context:** the v3 package named `origin/main = 2c0e2928…`. The local checkout is 12
+  commits ahead of that commit, so the package's "current" file/line claims were re-checked against
+  the local snapshot.
+- **Tracked digest:** [`FABLE_DISCOVERY_EVIDENCE_HANDOFF_2026-11-16.md`](../FABLE_DISCOVERY_EVIDENCE_HANDOFF_2026-11-16.md)
+  is the short, scannable version committed first (`3ad8b1d`).
+
+## Reading order
+
+1. [`INDEX.md`](INDEX.md) — read first: question, snapshot, top findings, contradictions, six
+   unranked routes, v3 supervisor section.
+2. [`SOURCE_INDEX.md`](SOURCE_INDEX.md) — paths, SHAs, hashes, run artifacts, method, non-mutation
+   statement.
+3. [`EVIDENCE_LEDGER.md`](EVIDENCE_LEDGER.md) — 59 atomic status-labelled claims.
+4. [`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md) — 10 architecture-changing questions, cheap tests,
+   original-thought questions.
+5. Domain reports: [`GEOMETRY_AND_PARAMETER_MAP.md`](GEOMETRY_AND_PARAMETER_MAP.md),
+   [`FAILURE_AND_BOUNDARY_AUDIT.md`](FAILURE_AND_BOUNDARY_AUDIT.md),
+   [`SIZE_FEASIBILITY_EVIDENCE.md`](SIZE_FEASIBILITY_EVIDENCE.md),
+   [`OPTIMIZATION_AND_BRIEF_AUDIT.md`](OPTIMIZATION_AND_BRIEF_AUDIT.md),
+   [`OPTIMIZER_AND_SWITCH_SECTION.md`](OPTIMIZER_AND_SWITCH_SECTION.md),
+   [`EXTERNAL_EVIDENCE.md`](EXTERNAL_EVIDENCE.md).
+6. Search-supervision pass: [`SEARCH_CONTROL_MAP.md`](SEARCH_CONTROL_MAP.md),
+   [`WATCHDOG_REPLAY.md`](WATCHDOG_REPLAY.md),
+   [`SWITCH_ADMISSION_MATRIX.md`](SWITCH_ADMISSION_MATRIX.md),
+   [`SUPERVISOR_OPTIONS.md`](SUPERVISOR_OPTIONS.md),
+   [`ADAPTIVE_UNKNOWNS.md`](ADAPTIVE_UNKNOWNS.md).
+
+## How the evidence was produced (and what it does not claim)
+
+- Source was read at the snapshot; two NDJSON aggregations over extant `runs/` artifacts and one
+  import of the pure `watchdog_verdict` function were the only executions. Historical report
+  numbers are labelled as records, not fresh measurements.
+- **No GPU/BEM solve, mesher run, pytest, queue edit, threshold change, process signal, lock or git
+  mutation** was performed by the research pass. A concurrent lane's work was observed and
+  preserved.
+- Read-only parser/replay helpers and intermediate JSON lived in the working copy's
+  `scratch/fable_architecture/.tmp/` and are not committed here; the procedures and every cited
+  path are described in the reports so the checks can be reproduced.
+- Nothing here is an architecture decision or an implementation authorization. The deliverable is
+  evidence for a later decision-maker, who may reject any or all of the candidate routes.

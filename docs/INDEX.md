@@ -13,8 +13,9 @@ read-only dossier prepared for a later discovery/decision pass - refusal-taxonom
 envelope-vs-GPU boundary, the conservative generic-GRID extent estimate (realised effect
 unmeasured), construction-vs-name diversity, v7's point target inside the owner's 60-90/40-60
 range, the in-flight v9 corridor objective, optimizer/cohort reality, and the watchdog replay.
-The full 15-file evidence dossier stays in the git-ignored `scratch/fable_architecture/`.
-No code, solve or queue change.
+The full 15-file evidence dossier is tracked in
+[research/fable_architecture_2026-11-16/](research/fable_architecture_2026-11-16/INDEX.md)
+(working copy in the git-ignored `scratch/fable_architecture/`). No code, solve or queue change.
 
 
 [Klangfilm-Lame H/V throat audit and Phase A implementation (2026-11-16)](evidence/KLANGFILM_HV_THROAT_AUDIT.md):
