@@ -1,5 +1,21 @@
 # ISSUES
 
+## 2026-11-17 - Consolidation: 18 archive refs, docs + H12 landed, one pre-existing B8 failure
+
+- DONE: local refs preserved before cleanup: 18 archive tags, 5 verified bundles, and snapshots of
+  dirty/untracked plus ignored worktree evidence. Worktrees 13 -> 2; local branches 29 -> 4.
+- DONE: 17 additive docs from the 2026-11-14 handoff integrated (`caa37d0`; no mass rename sweep).
+- DONE: H12 opt-in `oa_excess_tol` + `oa_excess_raw` and its hifi brief integrated (`0a451db`);
+  default off and `config_sha` preserved; objective/config/target tests 135 passed.
+- OPEN (owner): Fix D Keele `0.9` factor; A527 night-runner directivity guard while preserving
+  `pin_ignore`; sab-home `rim_sweep_ratio` floor; A473 v3 configs; outer `.git` quarantine;
+  HF staging verification.
+- OPEN (engineering): B8 `test_study_modules_have_no_host_cleanup_or_process_kill_paths` fails on
+  `subprocess.Popen` in `gui/study_jobs.py` (introduced `b019623`). Pre-existing, not caused by
+  consolidation, and not weakened; it needs a design decision.
+- NOTE: H12's `oa_excess_raw` is a diagnostic key; `oa_excess_tol` is emitted only when opted in.
+- NOTE: `configs/b3_soft.yaml` is another lane's uncommitted edit and was left untouched.
+
 ## 2026-11-17 - Fable: P1 predictor replay finishes; no unbiased pool in stored data
 
 - DONE (A10): unbiased-pool gate fired - 0 strict unbiased designs in 8 study lanes, 6 of 8 under 30

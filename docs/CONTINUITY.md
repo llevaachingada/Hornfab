@@ -1,5 +1,27 @@
 # CONTINUITY
 
+## 2026-11-17 03:2x - Consolidation: preserved refs, docs + H12 landed, worktrees/branches collapsed
+
+- Preservation: 18 `archive/consolidation-2026-11-17/*` tags plus verified bundles in
+  `scratch/consolidation_2026-11-17/` (all-refs, both agent branches, a pre-concurrent snapshot, and
+  the outer `495e58f` commit); dirty/untracked files and ignored mild render/seed evidence snapshotted.
+- Landed: 17 additive docs from the 2026-11-14 handoff (`caa37d0`); H12 opt-in off-axis excess
+  (`oa_excess_tol` / `oa_excess_raw`, default off, config_sha preserved) plus its hifi brief
+  (`0a451db`). GUI `seed_policy` and the Le Cleac'h saddle code were already on main.
+- Cleanup: worktrees 13 -> 2 (main + the live `agent-a527` owner worktree); local branches 29 -> 4
+  (`main`, `feat/sab-home-2026-11-14`, `agent-a473`, `agent-a527`). 25 branches were deleted only
+  after archive-tag/SHA checks; empty top-level leftovers removed.
+- Tests: H12 objective/config/target suites 135 passed. The full offline suite has one pre-existing
+  failure, `test_b8_lanes_bounded_gui.py::test_study_modules_have_no_host_cleanup_or_process_kill_paths`
+  (`subprocess.Popen` in `gui/study_jobs.py` since `b019623`), and 22 optional-engine skips; the test
+  was not weakened.
+- Open (owner): Fix D `0.9` mouth factor; A527 night-runner directivity guard while keeping
+  `pin_ignore`; sab-home `rim_sweep_ratio` floor (existing seedV5 uses `-0.18`); A473 v3 configs
+  (2/3 fail main's 240 deg stop gate); outer `Hrns/.git` 13.4 GB quarantine; `.hf_stage_hunter*`
+  25.3 GB remote verification.
+- This push adds this entry plus ISSUES/INDEX/CODE_MAP updates. `configs/b3_soft.yaml` remains
+  another lane's uncommitted edit and was not staged.
+
 ## 2026-11-17 02:4x - P1 predictor replay: no unbiased pool exists; hooks A, B and the skip test fail
 
 - Strict unbiased designs (solved but not rule-selected): **0 of 8 study lanes**; every solved row in
