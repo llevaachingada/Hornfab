@@ -1,5 +1,17 @@
 # ISSUES
 
+## 2026-11-17 - Klangfilm HV Stage A measured: no useful acoustic authority
+
+- DONE: controlled A/B (A0 / A1 H-only / A2 V-only) with identical solver, source and frequency grid;
+  evidence in `docs/evidence/klangfilm_hv_2026-11-16/AB_REPORT.md`, `ab_report.json`, `ab_plots/`.
+- FINDING: throat-only H/V offsets move the -6 dB pattern by <= 2.74 deg and worsen both scoring
+  policies (smooth +0.256/+0.129, CD +0.340/+0.127). The pattern is set by the mouth and rollback,
+  not by the entrance tangent.
+- OPEN: Phase B monotonic integrated-slope core plus independent beak/rollback, then its own BEM gate.
+- NOTE: the arm runs used a pinned HEAD snapshot because the working tree was briefly inconsistent
+  (objective v9 dispatch table mid-edit); no other lane's files were modified.
+- LIMITATION: the driver source cap is still the existing model assumption; no 80x50 CD claim.
+
 ## 2026-11-16 - BoTorch GUI source-audit handoff: core implemented; P3 + browser acceptance open
 
 - DONE (per `docs/research/BO_GUI_SOURCE_AUDIT_HANDOFF_2026-11-16.md`; CONTINUITY same date): P0

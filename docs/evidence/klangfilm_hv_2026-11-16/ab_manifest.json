@@ -1,0 +1,211 @@
+{
+  "arms": {
+    "a0": {
+      "angle_count": 73,
+      "arm": "a0",
+      "backend": null,
+      "balloon_grid": [
+        16,
+        32
+      ],
+      "config": "C:\\Users\\hunte\\AppData\\Local\\Temp\\opencode\\hv_ab_snap\\examples\\typologies\\klangfilm_hv_2026-11-16\\configs\\a0.yaml",
+      "config_sha256": "670aa89515987e8dbf2b0bd6cd8a94ac4bc06a9da5f358769c7017d82601352b",
+      "design_hash": "a01be912716b",
+      "elapsed_s": 78.0,
+      "exit_code": 0,
+      "has_metrics": true,
+      "has_response": true,
+      "mesh_scale": 1.0,
+      "n_dof": "solver_log[i].native_diagnostics.p1_dof_count (fallback: mesh_info.n_vertices)",
+      "n_triangles": 14542,
+      "objective": 8.43812590231321,
+      "ok": true,
+      "quadrants": "1",
+      "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261117T015442Z-screen-0afda0",
+      "run_dirs": [
+        "20261117T015442Z-screen-0afda0"
+      ],
+      "solve_seconds": 52.83645419997629,
+      "stderr_tail": [],
+      "stdout_tail": [
+        "terms (raw): cov=1.125  rip=0.04724  di=0  dislope=0.9151  flat=0.3933  load=0.7774  penalty=0  total J=8.43813  n_nan=0  DI source=balloon",
+        "run OK: seed J=8.43813, 7449 dofs, solve 52.8 s; output C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261117T015442Z-screen-0afda0"
+      ],
+      "terms": {
+        "cov": 1.1246500601543548,
+        "di": 0.0,
+        "di_estimated": 0.0,
+        "diag": 4.142577267126948,
+        "dislope": 0.9150926909154159,
+        "distd": 1.1315751531903604,
+        "f11_hz": 5600.0,
+        "flat": 0.3933165692593687,
+        "flat_cv": 0.10290888019173401,
+        "lfp20_hz": 514.2645835088722,
+        "lfp50_hz": 571.8910781557869,
+        "load": 0.7774259477131893,
+        "loaded_hi_hz": 5600.0,
+        "n_in_band": 13,
+        "n_nan": 0,
+        "penalty": 0.0,
+        "rez_min_from_fx": 0.7620557964045518,
+        "rip": 0.047237618391523184,
+        "total": 8.43812590231321
+      }
+    },
+    "a1": {
+      "angle_count": 73,
+      "arm": "a1",
+      "backend": null,
+      "balloon_grid": [
+        16,
+        32
+      ],
+      "config": "C:\\Users\\hunte\\AppData\\Local\\Temp\\opencode\\hv_ab_snap\\examples\\typologies\\klangfilm_hv_2026-11-16\\configs\\a1_h_only_single_axis.yaml",
+      "config_sha256": "09218270259376bc0a0b91be19f8c6e163368786cf98ac9c704ef8ab9c3e44d6",
+      "design_hash": "e40b381aa08a",
+      "elapsed_s": 58.1,
+      "exit_code": 0,
+      "has_metrics": true,
+      "has_response": true,
+      "mesh_scale": 1.0,
+      "n_dof": "solver_log[i].native_diagnostics.p1_dof_count (fallback: mesh_info.n_vertices)",
+      "n_triangles": 14514,
+      "objective": 8.693989108803722,
+      "ok": true,
+      "quadrants": "1",
+      "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261117T015600Z-screen-de1861",
+      "run_dirs": [
+        "20261117T015600Z-screen-de1861"
+      ],
+      "solve_seconds": 48.657305100001395,
+      "stderr_tail": [],
+      "stdout_tail": [
+        "terms (raw): cov=1.166  rip=0.04348  di=0  dislope=1.085  flat=0.3327  load=0.7698  penalty=0  total J=8.69399  n_nan=0  DI source=balloon",
+        "run OK: seed J=8.69399, 7435 dofs, solve 48.7 s; output C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261117T015600Z-screen-de1861"
+      ],
+      "terms": {
+        "cov": 1.1658554186723828,
+        "di": 0.0,
+        "di_estimated": 0.0,
+        "diag": 4.207171245635234,
+        "dislope": 1.0846695082451334,
+        "distd": 1.1615910759413277,
+        "f11_hz": 5600.0,
+        "flat": 0.33268924078490186,
+        "flat_cv": 0.09509219046445712,
+        "lfp20_hz": 513.4476463883601,
+        "lfp50_hz": 569.6856901308605,
+        "load": 0.7697805430532916,
+        "loaded_hi_hz": 5600.0,
+        "n_in_band": 13,
+        "n_nan": 0,
+        "penalty": 0.0,
+        "rez_min_from_fx": 0.7429883140333616,
+        "rip": 0.043484506399444026,
+        "total": 8.693989108803722
+      }
+    },
+    "a2": {
+      "angle_count": 73,
+      "arm": "a2",
+      "backend": null,
+      "balloon_grid": [
+        16,
+        32
+      ],
+      "config": "C:\\Users\\hunte\\AppData\\Local\\Temp\\opencode\\hv_ab_snap\\examples\\typologies\\klangfilm_hv_2026-11-16\\configs\\a2_v_only_single_axis.yaml",
+      "config_sha256": "7070ce7584157b7356376b6dc35df5253909fc68e22ba763e1f98b1143b8981c",
+      "design_hash": "b6a2c90ee34d",
+      "elapsed_s": 59.6,
+      "exit_code": 0,
+      "has_metrics": true,
+      "has_response": true,
+      "mesh_scale": 1.0,
+      "n_dof": "solver_log[i].native_diagnostics.p1_dof_count (fallback: mesh_info.n_vertices)",
+      "n_triangles": 14572,
+      "objective": 8.566905640298252,
+      "ok": true,
+      "quadrants": "1",
+      "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261117T015658Z-screen-7ffaad",
+      "run_dirs": [
+        "20261117T015658Z-screen-7ffaad"
+      ],
+      "solve_seconds": 49.915729200001806,
+      "stderr_tail": [],
+      "stdout_tail": [
+        "terms (raw): cov=1.13  rip=0.0457  di=0  dislope=0.9757  flat=0.3855  load=0.787  penalty=0  total J=8.56691  n_nan=0  DI source=balloon",
+        "run OK: seed J=8.56691, 7464 dofs, solve 49.9 s; output C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261117T015658Z-screen-7ffaad"
+      ],
+      "terms": {
+        "cov": 1.1295303501417289,
+        "di": 0.0,
+        "di_estimated": 0.0,
+        "diag": 4.162673947009842,
+        "dislope": 0.975738011192642,
+        "distd": 1.141897612829692,
+        "f11_hz": 5600.0,
+        "flat": 0.3854590365871144,
+        "flat_cv": 0.1316657919097255,
+        "lfp20_hz": 515.2859214974551,
+        "lfp50_hz": 574.7621342598248,
+        "load": 0.7869671972027519,
+        "loaded_hi_hz": 5600.0,
+        "n_in_band": 13,
+        "n_nan": 0,
+        "penalty": 0.0,
+        "rez_min_from_fx": 0.7839972530018301,
+        "rip": 0.04570321171831259,
+        "total": 8.566905640298252
+      }
+    }
+  },
+  "created_utc": "2026-11-17T01:54:37Z",
+  "gpu_state_at_start": {
+    "held": false,
+    "holder": null,
+    "live": false,
+    "lock_path": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\.gpu.lock",
+    "nvidia_smi": "1300 MiB, 25 %"
+  },
+  "identity_gate": {
+    "a0_config": "examples\\typologies\\klangfilm_hv_2026-11-16\\configs\\a0.yaml",
+    "block_equal": {
+      "driver": true,
+      "envelope": true,
+      "grid": true,
+      "mesh": true,
+      "objective": true,
+      "solve": true,
+      "target": true,
+      "weights": true
+    },
+    "brief_paths": {
+      "C:\\Users\\hunte\\AppData\\Local\\Temp\\opencode\\hv_ab_snap\\examples\\typologies\\home_landscape_2026-11-15\\hl__klangfilm_lame_curved_v1.yaml": "C:\\Users\\hunte\\AppData\\Local\\Temp\\opencode\\hv_ab_snap\\examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7_smooth.yaml",
+      "C:\\Users\\hunte\\AppData\\Local\\Temp\\opencode\\hv_ab_snap\\examples\\typologies\\klangfilm_hv_2026-11-16\\configs\\a0.yaml": "C:\\Users\\hunte\\AppData\\Local\\Temp\\opencode\\hv_ab_snap\\examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7_smooth.yaml"
+    },
+    "cached_design": "786caa6b08d7",
+    "cached_run": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261116T205942Z-screen-8b22b5",
+    "cached_status": "running",
+    "geometry_array_equal": true,
+    "grid_sha256": "7e80214c3b280209a7b99769de086f621796282f555b69efa6bd16436a97cbb6",
+    "hv_meta_core_mode": "legacy",
+    "lib_shas_cached": {
+      "hornlab_beat_bem": "38e5b1f8ca840ebf6351c54611a08fedb1a0750f",
+      "hornlab_bempp_bem": "8e6910602ece9abb2e9ce0db7a637f4bedf17f53",
+      "hornlab_mesher": "55da4f46d662d8dcd7a9f94a609eeea4009fcd62",
+      "hornlab_plots": "9e4a6d0dd2ccb6e735dd00233dccccb50d12ed44",
+      "hornlab_search": "0cd9543474dde441dce811c2f18c52dbee6ad905"
+    },
+    "lib_shas_equal": false,
+    "lib_shas_now": {
+      "hornlab_beat_bem": "38e5b1f8ca840ebf6351c54611a08fedb1a0750f",
+      "hornlab_bempp_bem": "8e6910602ece9abb2e9ce0db7a637f4bedf17f53",
+      "hornlab_mesher": "55da4f46d662d8dcd7a9f94a609eeea4009fcd62",
+      "hornlab_plots": "9e4a6d0dd2ccb6e735dd00233dccccb50d12ed44",
+      "hornlab_search": "unknown"
+    },
+    "reuse_a0": false,
+    "same_brief_path": true
+  }
+}

@@ -23,7 +23,7 @@ v3 handoff source documents (`00_START_HERE` … `11_ACCEPTANCE_AND_EXPERIMENT_P
 [Klangfilm-Lame H/V throat audit and Phase A implementation (2026-11-16)](evidence/KLANGFILM_HV_THROAT_AUDIT.md):
 canonical-incumbent evidence, saved-recipe digest drift, the `Q'(0)=0` equal-tangent fault, the intrinsic
 rollback diagnosis, and the implemented CPU-validated `klangfilm_lame_hv_cd` family (Phase B deliberately
-gated). [Preflight + contact sheet](evidence/klangfilm_hv_2026-11-16/PREFLIGHT.md).
+gated). [Preflight + contact sheet](evidence/klangfilm_hv_2026-11-16/PREFLIGHT.md); [Stage A acoustic A/B](evidence/klangfilm_hv_2026-11-16/AB_REPORT.md).
 
 [CROWE-inspired H/V area/aspect v1 research and V2A hardening (2026-11-16)](research/typologies/CROWE_HV_AREA_ASPECT_RESEARCH_V2_2026-11-16.md):
 senior research plus the [V2A throat-transition/parameter addendum](research/typologies/CROWE_V2A_THROAT_TRANSITION_ADDENDUM_2026-11-16.md),

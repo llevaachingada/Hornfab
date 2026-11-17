@@ -1,5 +1,23 @@
 # CONTINUITY
 
+## 2026-11-17 - Klangfilm HV Stage A acoustic A/B: no useful authority; Phase B warranted
+
+- Three BEM arms solved from a pinned HEAD snapshot (the live tree was temporarily inconsistent while
+  another lane wired objective v9): A0 incumbent `20261117T015442Z-screen-0afda0` / `a01be912716b`,
+  A1 H-only (theta_H 14) `20261117T015600Z-screen-de1861` / `e40b381aa08a`, A2 V-only (theta_V 5)
+  `20261117T015658Z-screen-7ffaad` / `b6a2c90ee34d`; identical mesh/solve/grid, 7435-7464 dofs,
+  18 frequencies, 73-angle cuts + 512-point balloon, 49-53 s per solve.
+- Method gate: replay reproduces the stored J exactly (parity 0.0) only through `brief_from_config`;
+  reading the brief YAML directly loses the resolved target (`driver_exit_radius_mm`,
+  `diag_reference`) and gives 7.13 vs 8.44. Recorded in the tool so it cannot regress silently.
+- Result: largest intended-axis mean -6 dB beamwidth change is 2.74 deg (A1 H, 5.6-8 kHz, a narrowing),
+  0.38 deg in 1.2-5.6 kHz, and 0.00 deg for A2 V; cross-axis leak <= 0.71 deg; no new -6 dB lobes;
+  cut-limit saturation unchanged. J is worse under both policies (smooth 8.438 -> 8.694 / 8.567;
+  CD 14.208 -> 14.548 / 14.335).
+- Pre-declared 3 deg rule: Stage A has no useful acoustic authority, so the 4-knob box must not be
+  optimized and Phase B (monotonic integrated-slope core) is warranted. Report
+  `docs/evidence/klangfilm_hv_2026-11-16/AB_REPORT.md` + `ab_plots/` + `ab_manifest.json`.
+
 ## 2026-11-16 (22:05) - BoTorch GUI source-audit handoff implemented (P0+P1+P2 core; CPU only, no GPU, no queue change)
 
 - Handoff moved into the repo: `docs/research/BO_GUI_SOURCE_AUDIT_HANDOFF_2026-11-16.md` (source
