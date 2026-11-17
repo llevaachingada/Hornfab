@@ -22,6 +22,19 @@ shared files and preserve other agents' changes. Historical worktree paths in ol
 provenance, not current execution paths. Consolidation backups preserve original branches/files.
 
 
+## Precedence (which instruction wins)
+
+1. Dated **owner amendments in this file** override older plan or handoff text.
+2. `docs/plan/00_ORCHESTRATOR.md` and `docs/plan/01_CONTRACTS.md` remain binding contracts.
+   `01_CONTRACTS.md` is **frozen**.
+3. Historical material — the original Wave 0–3 build plan, the per-task file-ownership table, old
+   worktree/branch routing, and superseded handoffs — is **provenance, not current routing**.
+   Current routing is this file plus `docs/ACTIVE_STATE.md`, the newest `CONTINUITY.md` entry, the
+   newest `ISSUES.md` entry, and the current section of `docs/NEXT_DEV_PRIORITIES.md`.
+4. When two sources conflict, the newer dated owner amendment wins. Record the conflict in
+   `NOTES_FOR_SENIOR.md` instead of improvising a third rule.
+
+
 Base-level instructions for every agent working in this repo, whether dispatched by OpenCode,
 Claude Code, or a human. This file orients you. The numbered plan in `docs/plan/` commands you.
 
@@ -54,17 +67,28 @@ Interpreter: always `.venv\Scripts\python.exe` (absolute path in `TOOLCHAIN.md`)
 
 ---
 
-## Start here (reading order)
+## Start here (bounded reading)
 
-1. **`docs/CONTINUITY.md`** — which wave we are in, last checkpoint passed, next step, blockers,
-   measured numbers. (Does not exist until Wave 0/03 creates it.)
-2. **`docs/plan/01_CONTRACTS.md`** — completely, before any code. It is **frozen**.
-3. **Your own task file only**: `docs/plan/02`–`08`.
-4. **`TOOLCHAIN.md`** — interpreter paths, pinned SHAs, measured machine numbers.
-5. **`CONTRIBUTING.md`** — branch/commit/PR rules and the 8 hard rules.
+State lives in living logs that are far too large to read whole (`CONTINUITY.md` ~845 KB,
+`ISSUES.md` ~408 KB, `NOTES_FOR_SENIOR.md` ~125 KB). Read bounded, then search.
 
-Stuck: `docs/plan/10_TROUBLESHOOTING.md` symptom table, before improvising.
-Senior verifier additionally reads `docs/plan/09_CHECKPOINTS.md` and `12_RESEARCH_BASIS.md`.
+1. **`docs/ACTIVE_STATE.md`** — the current pointer (canonical checkout, active queue, how to
+   verify). Keep it current in the same commit as any queue or priority change.
+2. **`docs/CONTINUITY.md`** — **first 60–80 lines only** (the newest entry is at the top). Never
+   read this file in full.
+3. **`docs/ISSUES.md`** — **first 60–80 lines only**; then search by ID or subject for the rest.
+4. **`NOTES_FOR_SENIOR.md`** — **last 60 lines only** (append-only, newest at the end); search for
+   older unresolved blocks.
+5. **`docs/plan/01_CONTRACTS.md`** — the sections your task touches, completely. It is frozen.
+6. **Your own task file only** in `docs/plan/02`–`08`, when the task maps to the original build plan.
+7. **`TOOLCHAIN.md`** — interpreter paths, pinned SHAs, measured machine numbers.
+8. **`CONTRIBUTING.md`** — commit/PR rules.
+
+Never auto-read `docs/INDEX.md`, `docs/CODE_MAP.md`, `docs/research/**`, `scratch/**`, or the 40
+Fable reports. Any document over ~100 KB (or ~600 lines) is **grep-only**: search, then read the
+line range you need. Stuck: `docs/plan/10_TROUBLESHOOTING.md` symptom table, before improvising.
+Senior verifier additionally reads `docs/plan/09_CHECKPOINTS.md` and `12_RESEARCH_BASIS.md` when
+the pass requires it — not on every pass.
 
 ---
 
@@ -120,25 +144,25 @@ config/GPU/evidence work skips it (see also hornlab-gpu-job, hornlab-evidence).
 
 ---
 
-## Wave plan — and what "parallel" means here
+## Wave plan (historical) and the invariants that still bind
 
-```
-WAVE 0   02 env -> 03 scaffold                               serial, one agent     (CP-0, CP-1)
-WAVE 1   04 design+mesh | 05 solve | 06 metrics | 07 dataset  four agents, parallel (CP-2..CP-5)
-WAVE 2   08 pipeline                                          one agent             (CP-6, CP-7 entry)
-WAVE 3   09 checkpoints                                       senior, verify only   (CP-7 physics gate)
-```
+The original build sequence — Wave 0 (02 env → 03 scaffold), Wave 1 (04 design+mesh | 05 solve |
+06 metrics | 07 dataset), Wave 2 (08 pipeline), Wave 3 (09 checkpoints) — is preserved in
+`docs/plan/00_ORCHESTRATOR.md`. It is **historical routing**; do not dispatch from it today. Current
+work is whatever `docs/ACTIVE_STATE.md`, the newest `CONTINUITY.md` entry and the current
+`NEXT_DEV_PRIORITIES.md` section say.
 
-- A wave starts only after the previous wave's checkpoints pass with **pasted terminal output**.
-- Wave 1's four tasks have zero file overlap and zero import dependency; they meet in Wave 2
-  through the dataclasses in `01_CONTRACTS.md`. Dispatch them as parallel background agents.
-- **Parallelism means writing code in parallel, not solving in parallel. One GPU, one BEM solve
-  at a time.** No agent adds concurrent solves. `search/evaluate.py` stays a pure function so a
-  second GPU later is a one-line change.
-- Dispatch prompts come **verbatim** from `docs/plan/00_ORCHESTRATOR.md`. Do not paraphrase them;
-  they carry the hard rules.
-- An orchestrator reads `docs/plan/00_ORCHESTRATOR.md` first, always, and dispatches the rest
-  per the wave plan and file-ownership table there.
+Invariants that still bind every pass:
+
+- A checkpoint passes only with **pasted terminal output**; a summary is not a checkpoint.
+- **Parallelism means writing code in parallel, not solving in parallel. One GPU, one BEM solve at
+  a time.** No agent adds concurrent solves. `search/evaluate.py` stays a pure function so a second
+  GPU later is a one-line change.
+- Dispatch prompts keep the hard rules. Do not paraphrase them away.
+- Only the parent integrator performs git mutations; parallel writers get disjoint file ownership.
+- A slice starts only after the previous gate passes on current evidence.
+
+The checkpoint map below is the original gate list: historical reference, not a queue.
 
 ### Checkpoint map (from `docs/plan/09_CHECKPOINTS.md`)
 
@@ -158,9 +182,12 @@ the machinery does not run or the numbers are not honest.
 
 ---
 
-## File ownership (summary)
+## File ownership (original build plan — historical)
 
-Full table: `docs/plan/00_ORCHESTRATOR.md`. Create and edit only your own paths (by task):
+Full table: `docs/plan/00_ORCHESTRATOR.md`. The per-task split below describes the original build;
+for current work, ownership comes from the task or handoff you were given, and the same rule still
+binds: **create and edit only files you own**, and append needed changes to `NOTES_FOR_SENIOR.md`
+instead of touching another lane's files.
 
 - `TOOLCHAIN.md` → 02 · `pyproject.toml`, `.gitignore`, `README.md`, `types.py`, `constants.py`,
   `config.py`, `cli.py`, `tests/conftest.py`, `test_config.py`, `examples/*.yaml` → 03
@@ -182,6 +209,11 @@ A push that does not touch both is wrong.
 
 Branches: `task/<NN>-<slug>`, fixes `fix/<slug>`. Conventional commits with subpackage scope.
 PRs into `main` only, with complete unedited checkpoint output pasted in the body.
+
+Log-archival note (2026-11-17, under review): CONTINUITY and ISSUES are large append-only logs. A
+monthly archival pass (stable summary pointers plus machine-readable manifests, without rewriting
+existing entries) is proposed in `docs/AGENT_ORCHESTRATION_REVIEW_2026-11-16.md` §P3. Until the
+owner approves a replacement, the rule above stands unchanged.
 
 ---
 
@@ -237,18 +269,25 @@ and grants the HornLab skills to `fixer` and `designer`; it defines no presets o
 - **Background agents**: up to 3 concurrent on deepseek and 6 on ollama-cloud.
 - Even with 6 background agents, the same rule binds: **one GPU solve at a time.**
 
-**Skills (OpenCode reads `.claude/skills/` and `.opencode/skills/`; this file, not CLAUDE.md, is what
-OpenCode loads):** `hornlab-gpu-job` (any GPU/solve job), `hornlab-night-queue` (unattended nights),
-`hornlab-evidence` (evidence docs), `hornlab-shape-check` (new configs, before GPU), `hornlab-search-economy`
-(before queueing a search: headroom, sigma/budget power, refusal budget, A/B attribution; backed by
-`tools/search_preflight.py`), `hornlab-render` (images), `hornlab-acoustic-grounding` (family applicability), `hornlab-typology-research` (new typology/objective work).
+**Skills (OpenCode reads `.claude/skills/` and `.opencode/skills/`):** `hornlab-gpu-job` (any
+GPU/solve job), `hornlab-night-queue` (unattended nights), `hornlab-evidence` (evidence docs),
+`hornlab-shape-check` (new configs, before GPU), `hornlab-search-economy` (before queueing a
+search: headroom, sigma/budget power, refusal budget, A/B attribution; backed by
+`tools/search_preflight.py`), `hornlab-render` (images), `hornlab-acoustic-grounding` (family
+applicability), `hornlab-typology-research` (new typology/objective work).
+
+Discovery runs from the workspace **up toward the project root**, never down into a child checkout.
+Launch from `hornlab-search`; an umbrella session started in `Hrns` gets the same eight skills only
+because `Hrns/.opencode/opencode.jsonc` registers this repository's skill source. Verify with
+`opencode debug skill` (expect all eight `hornlab-*` IDs) — see
+`docs/AGENT_BOOTSTRAP_CONTAINER.md`.
 The orchestrator has all skills; fixer and designer are granted the hornlab skills in
 `.opencode/oh-my-opencode-slim.json` so delegated lanes can load them.
 
-**Current state (2026-11-12):** read `docs/SENIOR_PLAN_2026-11-12.md` and, for tonight, execute
-`docs/OPENCODE_HANDOFF_2026-11-12.md`. New MEH work is paused by the owner. Objective versions: 4 =
-tolerance-normalised, 5 = MEH, 6 = loading_smooth (Le Cléac'h), 7 = hardened CD objective (written "5" on the
-old hardened branch; data relabelled). Never rank J across versions.
+**Current state:** use `docs/ACTIVE_STATE.md` and verify it with `tools/night_status.py`; do not
+treat a dated handoff as current routing. Objective versions: 4 = tolerance-normalised, 5 = MEH,
+6 = loading_smooth (Le Cléac'h), 7 = hardened CD objective (written "5" on the old hardened branch;
+data relabelled). Never rank J across versions.
 ## GPU / Julia hygiene (measured 2026-10-12; applies to every agent)
 
 `hornlab_beat_bem` runs solves in a **persistent Julia host** (`HORNLAB_BEAT_PERSISTENT_HOST=1`, idle

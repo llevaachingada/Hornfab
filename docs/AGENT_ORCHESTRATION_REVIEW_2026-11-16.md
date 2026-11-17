@@ -569,3 +569,108 @@ group by s.directory;
 **Environment:** OpenCode + `oh-my-opencode-slim@3.0.7`; active preset `deepseek-flash-max`
 (selected by both `Hrns/.opencode` and `hornlab-search/.opencode`); 8 HornLab skills under
 `hornlab-search/.claude/skills`; 5 rbassist skills under `~/.config/opencode/skills`.
+
+---
+
+## 9. Senior review disposition (2026-11-17)
+
+A senior review of this document was performed at baseline `9a82228`. Its verdict: **approve P0 with
+corrections; approve project prompt isolation conditionally; replace the blanket delegation
+threshold, hard polling prohibition and premature concurrency/model changes with measured pilots.**
+This section records what that changed, what was applied, and what remains deferred. The original
+sections 1–8 above are left as written (provenance); where they conflict with this section, this
+section wins.
+
+### Corrections accepted
+
+| # | Correction | Consequence in this pass |
+|---|---|---|
+| 1 | A pointer `AGENTS.md` does not register nested skills | Verified live. `opencode debug skill` from `Hrns` listed **0 of 8** `hornlab-*` IDs. Fixed by registering the nested source in `Hrns/.opencode/opencode.jsonc`, not by the pointer alone. |
+| 2 | The rbassist destination path was guessed | Corrected: the only workspace with rbassist sessions is `C:/Users/hunte/Music/rbassist-merge-cloud-local` (1,143 sessions). `C:/Users/hunte/rbassist` is an unrelated 2025 repo with no `rbassist/desktop`. Prompts were moved to the verified workspace. |
+| 3 | "First 40 lines" is an orientation budget, not current state | Reading budget now says first **60–80** lines, then targeted search by subject/queue ID/date, then a bounded section. |
+| 4 | The `<=2 files / <=20 lines` delegation cutoff is unsound | Replaced with risk + independence + uncertainty. Explicit text: a short change can still touch a solver, an objective or a frozen contract. |
+| 5 | Do not ban `task_status` categorically | Prompt now bans *repeated no-change polling*, and explicitly permits terminal result retrieval (`result: true`) and failure diagnostics (`diagnostic: true`). |
+| 6 | `task_revive` is not a success metric | Prompt now says: avoid redundant cold starts; new children are correct for independent or adversarial work; a revival count is not a target. |
+| 7 | Token/cost inferences are not one-to-one | This document's earlier savings projections are targets, not measured causal estimates. No percentage speed-up is claimed. |
+| 8 | Agent concurrency is not GPU concurrency | No global concurrency change was made; one-GPU-lane enforcement stays with `HORNLAB_GPU_LOCK` and the existing rules. |
+| 9 | Model retiering needs task-based comparison | No model or variant was changed. §P2 below is a pilot protocol only. |
+| 10 | The repo's own instructions are stale and conflicting | `AGENTS.md` gained a precedence section, a bounded reading order, a historical-not-routing wave plan, a historical file-ownership heading, and a pointer to `docs/ACTIVE_STATE.md`. |
+
+Two further factual corrections to this document, found while implementing:
+
+- **The eight "dead" rbassist skill names are not dead.** All eight exist in the active rbassist
+  workspace (`rbassist-analysis`, `rbassist-embeddings`, `rbassist-gui`, `rbassist-health`,
+  `rbassist-rekordbox`, `rbassist-tagging`, `rbassist-testing`, `rbassist-design`). They were
+  invisible only because they are project-local, not global. No reference was removed.
+- **The installed OpenCode 1.17.10 takes `skills.paths` (object form)** and rejects the array form
+  shown in current upstream docs. The container registration uses the object form; this is recorded
+  in `docs/AGENT_BOOTSTRAP_CONTAINER.md` so it is not "modernised" into a parse error.
+
+### Applied (P0–P1)
+
+1. **P0a — canonical workspace + container fallback.** New `C:/Users/hunte/Hrns/AGENTS.md` (thin
+   umbrella contract) and `C:/Users/hunte/Hrns/.opencode/opencode.jsonc` (registers
+   `hornlab-search/.claude/skills`). Source-controlled explanation:
+   `docs/AGENT_BOOTSTRAP_CONTAINER.md`.
+   **Measured:** `opencode debug skill` from `Hrns` went from 18 skills / 0 `hornlab-*` to
+   26 skills / 8 of 8 `hornlab-*` — identical to the canonical checkout.
+2. **P0b — read budget and precedence in `AGENTS.md`.** Bounded reading order (60–80 lines of
+   CONTINUITY/ISSUES, tail of NOTES, grep-only over ~100 KB), explicit precedence (dated owner
+   amendments > contracts > historical plan), and the Wave 0–3 / file-ownership material marked
+   historical with its invariants preserved.
+3. **P1a — project prompt isolation.** Global
+   `~/.config/opencode/oh-my-opencode-slim/{orchestrator,fixer}_append.md` now contain only
+   project-neutral rules. The rbassist blocks moved to
+   `C:/Users/hunte/Music/rbassist-merge-cloud-local/.opencode/oh-my-opencode-slim/`.
+   **Important plugin behaviour:** the first matching append file **replaces** the global one; it
+   does not concatenate. The rbassist project append therefore carries a mirrored copy of the shared
+   dispatch/anti-loop blocks, marked as a mirror.
+   **Measured** with `opencode debug agent <name>`:
+   | Prompt | Shared block | PySide block |
+   |---|---|---|
+   | orchestrator @ hornlab-search | present | **absent** |
+   | orchestrator @ rbassist | present | present |
+   | fixer @ hornlab-search | present | **absent** |
+   | fixer @ rbassist | present | present |
+4. **P1b — dispatch discipline.** Direct work for single lookups/commands/bounded edits that need no
+   independent review; delegate on independence, research volume or high-risk verification;
+   max 3 concurrent writers and one writer per file cluster; child registry; same-session
+   continuation unless context is bloated; terminal result retrieval allowed; no nested fan-out by
+   default; parent owns git; tool-output and context caps.
+5. **P3 (partial) — hygiene.**
+   - `docs/ACTIVE_STATE.md` added as the small canonical pointer (queue, v9 status, verification
+     commands, bounded-read map).
+   - `docs/NEXT_DEV_PRIORITIES.md` gained a dated routing amendment and the P16 `bogui-wt` worktree
+     routing was corrected to the canonical checkout.
+   - The rbassist skill audit above replaced deletion.
+   - Backups of every edited user/project config and prompt are in
+     `~/.config/opencode/backups/2026-11-17-agent-scope/`.
+
+### Deferred, with reasons
+
+- **P2 model/variant pilot.** No model change was made. Protocol: after P0/P1 have run for a week,
+  compare on the same six representative tasks (small edit, GUI lookup, cross-module fix, acoustic
+  scoring review, queued GPU study status, independent audit): `flash/max` vs `flash/high`
+  orchestrator; `flash/high` vs `flash/medium` on mechanical fixer jobs; and available `oracle`
+  models against six historical numerical/physics pitfalls scored by independent solver/test
+  evidence. Record correctness first, then latency, cost, retries, tool calls and context size.
+  Keep high-risk designer reasoning at `high` unless proven equivalent.
+- **Concurrency 6→4.** Deferred pending measured throttling/contention. Writer caps now live in the
+  prompt, independent of solver locking.
+- **Global rbassist skills.** The five skills under `~/.config/opencode/skills/` duplicate the
+  rbassist project copies. Removing them was not authorized and could break another checkout; they
+  remain, and are now the only rbassist content visible to HornLab sessions (as skill *permissions*,
+  not as prompt directives).
+- **Living-log archival.** The monthly archival proposal is recorded in `AGENTS.md` as under review;
+  the existing push rule stands until the owner approves a replacement.
+- **Worktrees.** Documented as non-default provenance. Nothing was deleted or archived.
+
+### Open items for the owner
+
+1. Approve or reject the container fallback files (`Hrns/AGENTS.md`, `Hrns/.opencode/opencode.jsonc`)
+   as machine-local, non-versioned artifacts.
+2. Decide whether the duplicated global rbassist skills should be retired after one rbassist
+   session confirms the project copies suffice.
+3. Schedule the P2 pilot, and name the six representative tasks (or accept the list above).
+4. Decide the living-log archival policy when convenient; it affects the push rule, not the code.
+

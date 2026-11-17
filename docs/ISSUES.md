@@ -1,5 +1,27 @@
 # ISSUES
 
+## 2026-11-17 - Orchestration P0/P1 landed; P2 model/concurrency pilot open
+
+- DONE (P0a): umbrella workspace can see the HornLab skills. `opencode debug skill` from `Hrns`
+  measures 26 skills / 8 of 8 `hornlab-*` (was 18 / 0). Files: `Hrns/AGENTS.md`,
+  `Hrns/.opencode/opencode.jsonc`; explanation in `docs/AGENT_BOOTSTRAP_CONTAINER.md`.
+- DONE (P0b): `AGENTS.md` has an explicit precedence section and a bounded reading order; Wave 0-3
+  and the per-task file-ownership table are marked historical with invariants preserved.
+- DONE (P1a): global prompt appends are project-neutral; rbassist rules live in the active rbassist
+  workspace. Verified by effective-prompt inspection with `opencode debug agent`.
+- DONE (P1b): dispatch discipline rewritten to risk/independence, 3-writer cap, child registry,
+  bounded handoffs, terminal-result retrieval allowed, no repeated polling, no default nested
+  fan-out.
+- OPEN (owner): (1) accept the machine-local container fallback files as non-versioned artifacts;
+  (2) decide whether the duplicated global rbassist skills may be retired after one rbassist session
+  confirms the project copies suffice; (3) schedule the P2 pilot and confirm the six representative
+  tasks; (4) decide the living-log archival policy.
+- OPEN (P2, blocked on the above): compare `flash/max` vs `flash/high` orchestrator,
+  `flash/high` vs `flash/medium` mechanical fixer, and oracle models on six historical
+  numerical/physics pitfalls. No model was changed in this pass.
+- NOTE: the eight rbassist skill names flagged in the 2026-11-16 report are **not stale**; all eight
+  exist in `rbassist-merge-cloud-local`. The defect was global-only visibility.
+
 ## 2026-11-17 - Fable X1: inner-wall agreement fails on two or more lanes; U1 blocked
 
 - OPEN (research, before U1): the contract-minimum surface record (65 stations × 31 azimuths) does

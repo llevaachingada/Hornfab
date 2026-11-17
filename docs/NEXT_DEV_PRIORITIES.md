@@ -1,5 +1,10 @@
 # Next development round: priorities (after the beta)
 
+> **Routing amendment, 2026-11-17:** this document mixes historical worktree routing with current
+> priorities. Work happens in the canonical checkout `C:/Users/hunte/Hrns/hornlab-search` (owner
+> amendment 2026-11-12 in `AGENTS.md`). Worktree paths below are provenance; do not use them to
+> start new work and do not create new worktrees. Current state pointer: `docs/ACTIVE_STATE.md`.
+
 > **Integration status, 2026-11-16:** The BO GUI has already been merged into
 > `feat/sab-home-2026-11-14` (including `5b78c6c`); it has not been integrated
 > into GitHub `main`. The P16 instructions below are historical and must not be
@@ -17,8 +22,9 @@ after the beta session.** Items are in priority order. Background: `docs/HIGH_FR
 
 ## P16 (added 2026-11-15, TOP OF THE LIST). Merge the BO GUI after the current nights, then the optional slice 7
 
-**Worktree:** `C:\Users\hunte\Hrns\bogui-wt`, branch `feat/bo-gui`. Design and evidence:
-`docs/research/BO_GUI_DESIGN_2026-11-15.md`, `docs/evidence/bo_gui_2026-11-15/`.
+**Canonical checkout:** `C:\Users\hunte\Hrns\hornlab-search`. The historical `bogui-wt` worktree and
+`feat/bo-gui` branch named here are provenance only — do not create or edit that worktree. Design and
+evidence: `docs/research/BO_GUI_DESIGN_2026-11-15.md`, `docs/evidence/bo_gui_2026-11-15/`.
 
 - **DO NOT MERGE** while `bo_vs_cma_2026-11-15` or `sab_home_gpu_rest_2026-11-15` is queued/running.
   The GUI lives under `hornlab_search/gui/**`, which is inside `EXECUTION_CODE_FILES`; editing it

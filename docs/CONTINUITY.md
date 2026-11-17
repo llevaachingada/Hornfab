@@ -1,5 +1,51 @@
 # CONTINUITY
 
+## 2026-11-17 - Agent orchestration P0/P1 applied: container bootstrap, read budget, prompt isolation; P2 deferred
+
+- Senior review of `AGENT_ORCHESTRATION_REVIEW_2026-11-16.md` returned "approve P0 with
+  corrections; approve project prompt isolation conditionally; replace the blanket delegation
+  threshold, hard polling prohibition and premature concurrency/model changes with measured
+  pilots". Disposition and corrections are recorded in section 9 of that report.
+- **P0a, canonical workspace + container fallback (measured).** New machine-local
+  `C:/Users/hunte/Hrns/AGENTS.md` (thin umbrella contract) and
+  `C:/Users/hunte/Hrns/.opencode/opencode.jsonc` registering
+  `hornlab-search/.claude/skills`. `opencode debug skill` from `Hrns` went from **18 skills / 0
+  `hornlab-*`** to **26 skills / 8 of 8 `hornlab-*`**, identical to the canonical checkout. A
+  pointer `AGENTS.md` alone did not register nested skills; the explicit `skills.paths` entry does.
+  Installed OpenCode is 1.17.10, which takes the object form and rejects the array form shown in
+  current upstream docs.
+- **P0b, read budget and precedence (`AGENTS.md`).** Bounded reading order: `docs/ACTIVE_STATE.md`
+  pointer, then CONTINUITY/ISSUES first 60-80 lines, NOTES tail 60, grep-only over ~100 KB; never
+  auto-read INDEX/CODE_MAP/research/scratch or the 40 Fable reports. Added an explicit precedence
+  section (dated owner amendments > contracts > historical plan); marked the Wave 0-3 plan and the
+  per-task file-ownership table historical while keeping their invariants; replaced the stale
+  2026-11-12 "current state" paragraph with a pointer.
+- **P1a, prompt isolation (measured).** Global
+  `~/.config/opencode/oh-my-opencode-slim/{orchestrator,fixer}_append.md` now contain only
+  project-neutral rules. The rbassist blocks moved to the verified active workspace
+  `C:/Users/hunte/Music/rbassist-merge-cloud-local/.opencode/oh-my-opencode-slim/` (1,143 sessions;
+  `C:/Users/hunte/rbassist` is an unrelated 2025 repo). Plugin appends **replace** rather than
+  concatenate, so the rbassist files carry a marked mirror of the shared block. Verified with
+  `opencode debug agent`: hornlab orchestrator/fixer have the shared block and no PySide block;
+  rbassist orchestrator/fixer have both.
+- **P1b, dispatch discipline.** Direct work for single lookups/commands/bounded edits that need no
+  independent review; delegate on independence, research volume or high-risk verification; max 3
+  concurrent writers, one writer per file cluster; child registry; same-session continuation unless
+  context is bloated; terminal result retrieval via `task_status` kept; no repeated polling; no
+  nested fan-out by default; parent owns git; tool-output and context caps.
+- **P3 (partial).** Added `docs/ACTIVE_STATE.md` (<=60-line pointer: active GPU lane
+  `home18_a_2026-11-16` running `r120_rosse_s5678`, CPU lane free, `bo_multityp_r2_2026-11-16` 7/7,
+  v9 closed with default unchanged, verification commands). Added `docs/AGENT_BOOTSTRAP_CONTAINER.md`.
+  Fixed `NEXT_DEV_PRIORITIES.md` routing (dated amendment; P16 `bogui-wt` -> canonical checkout).
+  Audited the eight "missing" rbassist skills: **all eight exist project-locally** in the active
+  rbassist workspace, so no reference was removed.
+- **Not changed (deliberately).** No model or variant change; no global concurrency 6->4; no
+  worktree deletion; no global rbassist skill removal; the CONTINUITY+ISSUES push rule stands with
+  an archival note only. P2 pilot protocol is written into report section 9 and awaits the owner.
+- Backups of every edited user/project config and prompt:
+  `~/.config/opencode/backups/2026-11-17-agent-scope/`.
+- The running GPU lane was not touched; no solve, test or queue was started by this pass.
+
 ## 2026-11-17 - Fable X1 contract tests finished (N1): two or more lanes fail inner-wall agreement; U1 gated
 
 - Runbook N1 completed on 60 stored designs (10 per lane) at HEAD `01560e5`; the §0 replay parity
