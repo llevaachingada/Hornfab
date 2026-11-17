@@ -1,5 +1,11 @@
 # ISSUES
 
+## 2026-11-17 - Stage 3 WP 3.1/3.2 landed (record module)
+
+- DONE: `hornlab_search/geometry/record.py` + 11 offline tests.
+- OPEN: mesh-agreement test (contract T2) on the six contract lanes needs `runs/` + gmsh (Windows);
+  ownership assignment for `geometry/`; WP 3.3 shadow gate and WP 3.4 history records next.
+
 ## 2026-11-17 - Stage 0 WP 0.2 done (generator links)
 
 - DONE: `search.links` for generator-block configs (knob-space links). Unblocks coupling for the

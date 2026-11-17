@@ -1,5 +1,16 @@
 # CONTINUITY
 
+## 2026-11-17 (senior pass, code) - Stage 3 WP 3.1/3.2: canonical surface record module
+
+- New `hornlab_search/geometry/record.py`: the N1b/X4-validated contract-v2 sampler packaged
+  (65 arc-length stations x 61 azimuths, mm), generator routes without meshing (native via
+  `resolve_geometry`, grid, rolled, Klangfilm), record digest, contract §7 descriptors, signed
+  envelope margins (acoustic and build-box views), typed refusals (CAD, ports, zero meridian,
+  non-monotone azimuth). Read-only: no identity, solver or stored-row change.
+- `tests/test_geometry_record.py`: 11 passed (analytic elliptic cone: area, shape index pi/4,
+  wall angle; determinism/digest; refinement; rollback; refusals; real hypex seed without mesh).
+- Ownership of the new `geometry/` package needs orchestrator assignment (CLAUDE.md table).
+
 ## 2026-11-17 (senior pass, code) - Stage 0 WP 0.2: search.links now work with generator blocks
 
 - `GeneratedSpace.apply_knob_links` applies links in KNOB space before `materialize`;
