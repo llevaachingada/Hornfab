@@ -1458,3 +1458,4 @@ input:not([type=checkbox]):not([type=radio]):not([type=range]), select { min-hei
 .study-obs-chip { display:inline-block; margin-left:8px; padding:0 8px; border:1px solid var(--rule); border-radius:999px; font-size:0.72rem; line-height:1.7; white-space:nowrap; vertical-align:1px; }
 .study-obs-measured { color:var(--accent); border-color:var(--accent); }
 .study-obs-notlaunched, .study-obs-unknown { color:var(--muted); }
+.res-identity { font-size:0.72rem; letter-spacing:0.04em; color:var(--muted); margin:2px 0 4px; text-transform:uppercase; overflow-wrap:anywhere; }

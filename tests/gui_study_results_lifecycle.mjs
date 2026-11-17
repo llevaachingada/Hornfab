@@ -101,6 +101,9 @@ function detailApi() {
   await tick(8);
   assert.ok(root.innerHTML.includes("All horn candidates"), "the Horns table paints");
   assert.ok(root.innerHTML.includes("Inspect"), "each row offers an Inspect button");
+  assert.ok(root.innerHTML.includes("Coverage target"), "a CMA-style Coverage target tile paints");
+  assert.ok(root.innerHTML.includes("Best SCREEN J") && root.innerHTML.includes("Best VERIFIED J"), "screen/verified stay separate tiles");
+  assert.ok(root.innerHTML.includes("res-identity") && root.innerHTML.includes("STUDY RESULTS"), "a mono identity strip paints");
   await tick(10);
   assert.ok(api.calls.observation.length > 0, "default selection loads a detail payload");
   assert.ok(root.innerHTML.includes("Horn inspector"), "the inspector section paints");

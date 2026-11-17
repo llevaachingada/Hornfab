@@ -162,6 +162,15 @@
 - Readout plan stays as written in §5 of the plan (baseline = best cohort screen J; win condition =
   arm best beating the cohort baseline; per arm, never pooled). Screens are screen J — no verified
   finalist by design; GUI populates under Bayes → Studies as observations accumulate.
+- GUI restyle follow-up (same night, owner PDF comparison): the BO Results workspace now carries the
+  CMA-run header grammar — mono identity strip (`STUDY RESULTS · POLICY … · REVISION … · ROOT …`),
+  a KPI tile strip on the Horns tab (Coverage target / Scoring floor / Band / Best SCREEN J / Best
+  VERIFIED J / Selected horn W×H×D / Observations) and the added target/floor/band tiles on the
+  Overview tab, all fed only from recorded payloads (`bo.target_integrity` + observations; honest
+  "scoring target unavailable" when absent, never a guess). Beamwidth ref-line chips renamed to the
+  CMA vocabulary (`target H 80°`, `f0 700 Hz`). Implemented by the orchestrator (designer lane out
+  of balance all session); `tests/gui_study_results_lifecycle.mjs` extended to lock the strip;
+  both harnesses + `node --check` green.
 
 ## 2026-11-16 (23:20 local) - v9 FINAL: G13 corridor display green, full filtered suite green, consolidation commit
 

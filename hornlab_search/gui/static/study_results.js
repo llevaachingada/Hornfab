@@ -499,6 +499,7 @@ function renderShell(state) {
   return `<section class="study-workspace res-workspace" aria-label="Study results workspace">
   <header>
     <p><a href="#/bayes/studies">Bayes</a> / Studies / <span class="muted">Results</span></p>
+    ${identityStrip(state)}
     <h1>${esc(title)}</h1>
     <p class="muted res-meta">${esc(study.status || "unknown")}${policy ? ` · ${esc(label(policy))}` : ""} · revision ${esc(study.revision ?? "—")}${state.rootRef ? ` · <span class="mono">${esc(study.root_label || state.rootRef)}</span>` : ""}</p>
     <nav class="res-subtabs" role="tablist" aria-label="Results views">${tabs}</nav>
@@ -524,6 +525,51 @@ function emptyBlock(title, reason = "", detail = "") {
 
 function kpi(name, value, detail = "") {
   return `<div class="bo-kpi" role="listitem"><span class="bo-kpi-label">${esc(name)}</span><strong class="bo-kpi-value mono">${esc(value)}</strong>${detail ? `<span class="muted bo-kpi-detail">${esc(detail)}</span>` : ""}</div>`;
+}
+
+// ── CMA-run-style header data: target/floor/band from the recorded payload, never a guess ─────
+function headerTargetFields(state) {
+  const ti = state.dataPanel?.data?.bo?.target_integrity;
+  const raw = ti?.scoring_target_available === true && ti.target && typeof ti.target === "object" ? ti.target : null;
+  const detailTarget = state.detail?.acoustics?.target && typeof state.detail.acoustics.target === "object"
+    ? { coverage_h_deg: state.detail.acoustics.target.hDeg, coverage_v_deg: state.detail.acoustics.target.vDeg,
+        band_lo_hz: state.detail.acoustics.target.bandLo, band_hi_hz: state.detail.acoustics.target.bandHi,
+        f0_hz: state.detail.acoustics.target.f0Hz }
+    : null;
+  const t = raw || detailTarget;
+  return {
+    t,
+    unavailable: !t && ti && ti.scoring_target_available === false,
+    h: t ? num(t.coverage_h_deg) : null,
+    v: t ? num(t.coverage_v_deg) : null,
+    lo: t ? num(t.band_lo_hz) : null,
+    hi: t ? num(t.band_hi_hz) : null,
+    f0: t ? num(t.f0_hz) ?? num(t.f0_v_hz) : null,
+  };
+}
+
+function hornSizeText(dims) {
+  if (!dims || typeof dims !== "object") return null;
+  const w = num(dims.mouth_w_mm), h = num(dims.mouth_h_mm), d = num(dims.depth_mm);
+  if (w == null && h == null && d == null) return null;
+  return [w, h, d].map(v => v == null ? "—" : fmtNum(v, 0)).join(" × ");
+}
+
+function identityStrip(state) {
+  const study = state.study || {};
+  const policy = study.spec?.policy?.proposal_policy || study.spec?.policy?.mode;
+  const task = study.spec?.task?.name || (typeof study.spec?.task === "string" ? study.spec.task : null)
+    || state.dataPanel?.data?.bo?.data_summary?.task?.name || null;
+  const brief = study.spec?.brief?.name || (typeof study.spec?.brief === "string" ? study.spec.brief : null)
+    || state.dataPanel?.data?.bo?.target_integrity?.target_identity?.brief_name || null;
+  const bits = ["STUDY RESULTS",
+    policy ? `POLICY ${label(policy).toUpperCase()}` : null,
+    task ? `TASK ${String(task).toUpperCase()}` : null,
+    brief ? `BRIEF ${String(brief).toUpperCase()}` : null,
+    `REVISION ${String(study.revision ?? "—").toUpperCase()}`,
+    state.rootRef ? `ROOT ${String(study.root_label || state.rootRef)}` : null,
+  ].filter(Boolean);
+  return `<p class="res-identity mono" aria-label="Study identity">${bits.map(esc).join(" · ")}</p>`;
 }
 
 // ── Overview ───────────────────────────────────────────────────────────────────────
@@ -579,7 +625,15 @@ function renderOverview(state) {
         ? `${fmtNum(target.band_lo_hz, 0)}–${fmtNum(target.band_hi_hz, 0)} Hz` : null].filter(Boolean).join(" · ")
     : (targetIntegrity && targetIntegrity.scoring_target_available === false ? "scoring target unavailable" : null);
   const hasConvergence = conv && conv.status !== "not_applicable" && arms.some(arm => Array.isArray(arm?.points) && arm.points.length);
+  const ht = headerTargetFields(state);
   const kpis = [
+    kpi("Coverage target", ht.t ? [ht.h != null ? `H ${fmtNum(ht.h, 0)}°` : null, ht.v != null ? `V ${fmtNum(ht.v, 0)}°` : null].filter(Boolean).join(" · ") || "—"
+      : (ht.unavailable ? "scoring target unavailable" : "—"),
+      ht.t ? "the resolved target the scorer actually used" : "not a typology guess"),
+    kpi("Scoring floor", ht.f0 != null ? `F ≥ ${fmtNum(ht.f0, 0)} Hz` : "—",
+      ht.f0 == null && ht.t ? "no f0 recorded in the resolved target" : "scores below f0 are masked"),
+    kpi("Band", ht.lo != null || ht.hi != null ? `${ht.lo != null ? fmtNum(ht.lo, 0) : "?"}–${ht.hi != null ? fmtNum(ht.hi, 0) : "?"} Hz` : "—",
+      "scored band of the brief"),
     kpi("Best VERIFIED J", bestVerify == null ? "not yet verified" : fmtNum(bestVerify),
       bestVerify == null ? "No verify-tier measurement is recorded." : "verify tier — the comparison endpoint"),
     kpi("Best SCREEN J", bestScreen == null ? "not yet measured" : fmtNum(bestScreen),
@@ -625,6 +679,39 @@ function policyText(study) {
 // ── Horns: list, controls, table ────────────────────────────────────────────────────
 
 function renderHorns(state) {
+  return `<div class="bo-kpis res-kpi-strip" role="list" aria-label="Horn candidates KPIs">${hornsKpiStrip(state)}</div>${hornsBody(state)}`;
+}
+
+function hornsKpiStrip(state) {
+  const ht = headerTargetFields(state);
+  const scoped = state.crossScanDone && Array.isArray(state.crossRows) && state.crossRows.length ? state.crossRows : (state.rows || []);
+  const bestScreen = minFinite(scoped.map(row => row.j).filter(value => value != null));
+  const bestVerified = minFinite(scoped.map(row => row.hasVerify ? row.verifyJ : null).filter(value => value != null));
+  const sel = state.selection || {};
+  const selRow = state.rows.find(row => row.solveId === sel.solveId && row.tier === sel.tier)
+    || (state.crossRows || []).find(row => row.solveId === sel.solveId && row.tier === sel.tier) || null;
+  const selSize = hornSizeText(selRow?.dimensions) || hornSizeText(state.currentRow?.dimensions);
+  const measured = num(state.states?.measured);
+  const verifiedCount = scoped.filter(row => row.hasVerify || row.verified).length;
+  const scope = state.crossScanDone ? "full scan" : `first ${fmtNum(state.rows.length, 0)} of ${fmtNum(state.total, 0)} loaded`;
+  const extraStates = state.states && typeof state.states === "object"
+    ? Object.entries(state.states).filter(([key, value]) => num(value) > 0 && key !== "measured")
+      .map(([key, value]) => `${label(key)} ${fmtNum(value, 0)}`).join(" · ") : "";
+  return [
+    kpi("Coverage target", ht.t ? [ht.h != null ? `H ${fmtNum(ht.h, 0)}°` : null, ht.v != null ? `V ${fmtNum(ht.v, 0)}°` : null].filter(Boolean).join(" · ") || "—"
+      : (ht.unavailable ? "scoring target unavailable" : "—"),
+      ht.t ? "the resolved target the scorer actually used" : "not a typology guess"),
+    kpi("Scoring floor", ht.f0 != null ? `F ≥ ${fmtNum(ht.f0, 0)} Hz` : "—", "scores below f0 are masked"),
+    kpi("Band", ht.lo != null || ht.hi != null ? `${ht.lo != null ? fmtNum(ht.lo, 0) : "?"}–${ht.hi != null ? fmtNum(ht.hi, 0) : "?"} Hz` : "—", "scored band of the brief"),
+    kpi("Best SCREEN J", bestScreen == null ? "—" : fmtNum(bestScreen), `${scope}, screen tier`),
+    kpi("Best VERIFIED J", bestVerified == null ? "not yet verified" : fmtNum(bestVerified), "verify tier — comparison endpoint"),
+    kpi("Selected horn", selSize || "—", sel.solveId ? `solve ${String(sel.solveId).slice(0, 10)}… · ${sel.tier || "screen"}` : "click Inspect on a row"),
+    kpi("Observations", `${measured != null ? fmtNum(measured, 0) : "—"} measured${verifiedCount ? ` · ${fmtNum(verifiedCount, 0)} verified` : ""}`,
+      extraStates),
+  ].join("");
+}
+
+function hornsBody(state) {
   const stateCounts = state.states && typeof state.states === "object"
     ? Object.entries(state.states).filter(([, value]) => num(value) > 0)
       .map(([key, value]) => `<span class="pill ${key === "measured" ? "good" : key === "missing_artifact" || key === "stale" ? "warn" : ""}">${esc(label(key))} ${fmtNum(value, 0)}</span>`).join(" ")
@@ -1093,16 +1180,16 @@ function drawBw(svg, ac, target, { W = 520, H = 250, title = "" } = {}) {
     const end = Math.min(target.bandHi ?? xlim[1], xlim[1]);
     if (target.hDeg != null) {
       const lo = Math.max(target.loH ?? xlim[0], xlim[0]);
-      refLines.push({ pts: [[lo, target.hDeg], [end, target.hDeg]], label: `H target ${fmtNum(target.hDeg, 0)}°` });
+      refLines.push({ pts: [[lo, target.hDeg], [end, target.hDeg]], label: `target H ${fmtNum(target.hDeg, 0)}°` });
     }
     if (target.vDeg != null) {
       const lo = Math.max(target.loV ?? xlim[0], xlim[0]);
-      refLines.push({ pts: [[lo, target.vDeg], [end, target.vDeg]], label: `V target ${fmtNum(target.vDeg, 0)}°` });
+      refLines.push({ pts: [[lo, target.vDeg], [end, target.vDeg]], label: `target V ${fmtNum(target.vDeg, 0)}°` });
     }
   }
   const vlines = [];
   if (target?.f0 != null && target.f0 > xlim[0] && target.f0 < xlim[1]) {
-    vlines.push({ x: target.f0, dash: true, label: "f0 scoring floor" });
+    vlines.push({ x: target.f0, dash: true, label: `f0 ${target.f0 != null ? fmtNum(target.f0, 0) : ""} Hz` });
   }
   if (target?.floorHz != null && target.floorHz > xlim[0] && target.floorHz < xlim[1]) {
     vlines.push({ x: target.floorHz, dash: true, label: "8 kHz beamwidth floor" });
