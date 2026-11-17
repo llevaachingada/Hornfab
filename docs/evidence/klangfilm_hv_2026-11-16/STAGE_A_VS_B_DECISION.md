@@ -153,6 +153,18 @@ widens* (A0 63.0 vs B3 47.9) rather than closing. The A0-B3 H difference is **st
 B3's DI-variance gain and smooth-score win are real. Evidence: `AB_REPORT_CONV.md`,
 `ab_manifest_conv.json`, runs `063719Z-47260f` (A0@9) and `064133Z-6d2651` (B3@9).
 
+**Cross-run fairness.** Every run in this account (A0 baseline, B1-B4, both epw-9 re-solves) records the
+same pinned solver-library SHAs - `hornlab_beat_bem 38e5b1f8...`, `hornlab_bempp_bem 8e691060...`,
+`hornlab_mesher 55da4f46...`, `hornlab_plots 9e4a6d0d...` - verified identical across all seven runs.
+Only the `hornlab_search` repo SHA differs (the A0 baseline came from a pinned snapshot taken while
+another lane's objective-v9 dispatch was mid-edit; B1-B4 ran on the live tree afterwards). Geometry,
+meshing and solving are entirely in the pinned forks, so the comparison is fair; each arm's own stored
+J also replays at parity 0.0 under `brief_from_config`.
+
+**Estimate-quality note.** The `--dry-run` heuristic predicted ~19 h for the A0 epw-9 solve; the fused
+CUDA path measured 240 s (assembly 32k triangles + solve 16.4k dofs). Treat dry-run solve estimates as
+upper bounds, not plans.
+
 **What this means**
 
 * The monotone core **does have authority** — unlike Stage A it moves beamwidth by 7–15° and can halve
