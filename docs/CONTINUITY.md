@@ -1,5 +1,12 @@
 # CONTINUITY
 
+## 2026-11-17 (senior pass, code) - Shared-descriptor translation between families
+
+- New `hornlab_search/geometry/translate.py`: seed family B from family A's shared descriptors
+  (records only). Biradial seed -> fold-warm: width exact, depth 70 mm short (fold-warm's box cannot
+  reach it); -> ext-throat: one step then every larger step leaves the envelope (consistent with its
+  58 % outside box). Residuals are reported, never hidden. `tests/test_geometry_translate.py` 3 passed.
+
 ## 2026-11-17 (senior pass, code) - Stage 5 core: geometric parameter-space identifiability, space cards, proposals
 
 - New `hornlab_search/geometry/sensitivity.py`: for any native or generator config, finite-difference
