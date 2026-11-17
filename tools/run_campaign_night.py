@@ -289,6 +289,9 @@ class Job:
     env: dict[str, str] = field(default_factory=dict)
     #: Resolved search watchdog (``None`` = off). See ``watchdog_verdict``.
     watchdog: tuple[tuple[str, float], ...] | None = None
+    #: WP 7.1 (senior plan 2026-11-17): the job's config is on the protected-lanes list, so the
+    #: watchdog may only ADVISE (log) and never stops it (ADR D10, senior review SD-6).
+    protected: bool = False
 
 
 @dataclass(frozen=True)
@@ -647,7 +650,54 @@ def load_night(path: Path | str, *, repo_root: Path | str | None = None,
         else:
             wd = None
         watched.append(dataclasses.replace(job, watchdog=wd))
+    protected = load_protected_lanes(raw.get("protected_lanes"), path=path, repo_root=repo_root)
+    if protected:
+        watched = [dataclasses.replace(j, protected=True) if _job_lane(j) in protected else j
+                   for j in watched]
     return NightPlan(night=night, jobs=tuple(watched), path=path, lane=lane, **flags)
+
+
+#: Default protected-lanes file (WP 7.1). A night YAML may name another with
+#: ``protected_lanes: <path>`` or turn protection off with ``protected_lanes: false``.
+PROTECTED_LANES_DEFAULT = "examples/protected_lanes.yaml"
+
+
+def _job_lane(job: "Job") -> str | None:
+    """The lane name of a job: its config file stem (``hl__biradial_es_style_v7.yaml`` ->
+    ``hl__biradial_es_style_v7``)."""
+    return None if not job.config else Path(str(job.config)).stem
+
+
+def load_protected_lanes(value, *, path=None, repo_root=None) -> frozenset:
+    """The protected lane names. ``value``: None -> the default file if it exists; False ->
+    none; a string -> that file (missing = ValueError, a typo must not silently unprotect)."""
+    if value is False:
+        return frozenset()
+    root = _repo_path(repo_root)
+    if value is None:
+        f = root / PROTECTED_LANES_DEFAULT
+        if not f.is_file():
+            return frozenset()
+    elif isinstance(value, str):
+        f = Path(value)
+        if not f.is_absolute():
+            f = root / f
+        if not f.is_file():
+            raise ValueError(f"{path}: protected_lanes file {value!r} not found")
+    else:
+        raise ValueError(f"{path}: protected_lanes must be a path or false")
+    import yaml
+    data = yaml.safe_load(f.read_text(encoding="utf-8")) or {}
+    lanes = data.get("lanes") if isinstance(data, dict) else None
+    if not isinstance(lanes, list):
+        raise ValueError(f"{f}: protected lanes file needs a 'lanes' list")
+    names = []
+    for item in lanes:
+        name = item.get("lane") if isinstance(item, dict) else item
+        if not isinstance(name, str) or not name:
+            raise ValueError(f"{f}: every lanes entry needs a lane name")
+        names.append(name)
+    return frozenset(names)
 
 
 # ------------------------------------------------------------------ admission gate
@@ -1104,6 +1154,12 @@ class NightRunner:
                         wd_run = _find_new_run_dir(self.runs_root, wd_start)
                     if wd_run is not None:
                         wd_reason = watchdog_verdict(_read_ndjson(wd_run / "search.ndjson")[wd_base:], wd_cfg, _run_bounds(wd_run))
+                    if wd_reason and getattr(job, "protected", False):
+                        log.write(f"\n=== WATCHDOG ADVISORY (protected lane) {wd_reason}; "
+                                  f"NOT stopping job {job.id}; the owner decides\n")
+                        log.flush()
+                        wd_cfg = None                  # advise once; never kill a protected lane
+                        wd_reason = None
                     if wd_reason:
                         log.write(f"\n=== WATCHDOG {wd_reason}; stopping job {job.id} (pid {proc.pid})\n"
                                   f"search ABORTED: watchdog (partial results in {wd_run})\n")

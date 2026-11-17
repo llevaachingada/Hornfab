@@ -1,5 +1,16 @@
 # CONTINUITY
 
+## 2026-11-17 (senior pass, code) - Stage 7 WP 7.1: protected lanes as data; watchdog only advises on them
+
+- `examples/protected_lanes.yaml` (status: proposed, awaiting owner C5): the A11 lanes with
+  owner-request evidence; the 4 no-evidence lanes are NOT listed.
+- `tools/run_campaign_night.py`: jobs whose config stem is listed are `protected`; a watchdog
+  verdict on them writes `=== WATCHDOG ADVISORY (protected lane) ...` once and does NOT kill.
+  Night YAML `protected_lanes: <path>` picks another file; `protected_lanes: false` turns it off.
+- **Behaviour change once merged:** live nights read the default file automatically, so refusal
+  storms in protected lanes (e.g. a mis-sized sigma0) are logged, not stopped. Owner can opt out
+  per night. Tests: night-runner suites 86 passed.
+
 ## 2026-11-17 (senior pass, code) - Stage 1 WP 1.4/1.5: rescore and noise-floor tool
 
 - New `tools/analysis/rescore_identity.py`: `rescore` (history under one brief, per-lane bests,

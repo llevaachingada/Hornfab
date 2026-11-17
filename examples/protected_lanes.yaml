@@ -1,0 +1,37 @@
+# Protected lanes (senior plan WP 7.1, ADR D10). The night runner marks a job protected when its
+# config file stem is listed here; the watchdog then only ADVISES and never stops it. Queue edits
+# by people are unaffected. Source: scratch/fable_architecture/A11_PROTECTED_AND_LINEAGE.md (17
+# lanes with owner-request evidence). STATUS: proposed, awaiting owner confirmation (decision C5).
+# The 4 lanes with no request evidence (ext_throat_hvlaw v7/v8, osse_rrect_morph v7/v8,
+# sp__* pilot, rf__rect_radial_wide_v7) are deliberately NOT listed; the owner decides them.
+status: proposed
+lanes:
+  - {lane: hl__ath_core_petal_hvlaw_v7, evidence: "HOME_LANDSCAPE_PLAN_2026-11-15.md:5"}
+  - {lane: hl__es_style_rollback_v7, evidence: "home_landscape_c_2026-11-15.yaml:5"}
+  - {lane: hl__biradial_es_style_v7, evidence: "home_landscape_c_2026-11-15.yaml:5"}
+  - {lane: hl__biradial_es_style_smooth_v7, evidence: "home18_a_2026-11-16.yaml:68"}
+  - {lane: hl__lecleach_iwata_ar_landscape_v7, evidence: "HOME_LANDSCAPE_PLAN_2026-11-15.md:5"}
+  - {lane: hl__lecleach_iwata_ar_landscape_smooth_v7, evidence: "HOME_LANDSCAPE_PLAN_2026-11-15.md:5"}
+  - {lane: rr__reference_v7, evidence: "home_rolled_rect_2026-11-15.yaml:1"}
+  - {lane: rr__pucker_hv_moderate_v7, evidence: "home_rolled_rect_2026-11-15.yaml:1"}
+  - {lane: rr__pucker_hv_strong_v7, evidence: "home_rolled_rect_2026-11-15.yaml:1"}
+  - {lane: rr__crowe_panel_es600_v7, evidence: "home_rolled_rect_2026-11-15.yaml:1"}
+  - {lane: hl__crowe_panel_home_v7, evidence: "home_landscape_e_2026-11-15.yaml:8,21"}
+  - {lane: hl__rolled_es_spiral_v7, evidence: "family-level; hl__rolled_es_spiral_v7.yaml:1"}
+  - {lane: rf__section_axial_home_v7, evidence: "family-level; home_landscape_e_2026-11-15.yaml:8,21"}
+  - {lane: rf__section_axial_home_smooth_v8, evidence: "family-level; config header :4"}
+  - {lane: hl__crowe_x_square_v7, evidence: "family-level; HOME_LANDSCAPE_PLAN_2026-11-15.md:5"}
+  - {lane: hl__lecleach_hv_landscape_smooth_v7, evidence: "home18_b_2026-11-16.yaml:44-47"}
+  - {lane: hl__ath_tritonia_landscape_v7, evidence: "home18_a_2026-11-16.yaml:11"}
+  - {lane: hl__ath_tritonia_landscape_v8, evidence: "home18_a_2026-11-16.yaml:11"}
+  - {lane: hl__ath_tritonia_landscape_v9, evidence: "home18_a_2026-11-16.yaml:11"}
+  - {lane: hl__ath_twinray380_landscape_v8, evidence: "home18_a_2026-11-16.yaml:11"}
+  - {lane: hl__rosse_rect_cd_v7, evidence: "rosse_r120_2026-11-16.yaml:2"}
+  - {lane: hl__crowe_x_osse_cd_v7, evidence: "family-level; HOME_LANDSCAPE_PLAN_2026-11-15.md:5"}
+  - {lane: hl__osse_rrect_fold_warm_v7, evidence: "home18_a_2026-11-16.yaml:11"}
+  - {lane: hl__klangfilm_lame_curved_v1, evidence: "CONTINUITY.md:703 (owner calculator)"}
+  - {lane: hl__klangfilm_lame_curved_v1_c200, evidence: "Klangfilm family (seed variant)"}
+  - {lane: a0, evidence: "klangfilm_hv_2026-11-16 configs (session-note basis)"}
+  - {lane: a1_h_only_single_axis, evidence: "klangfilm_hv_2026-11-16 configs"}
+  - {lane: a2_v_only_single_axis, evidence: "klangfilm_hv_2026-11-16 configs"}
+  - {lane: b3_soft, evidence: "Klangfilm hv_core Phase B (owner-directed)"}

@@ -1,5 +1,11 @@
 # ISSUES
 
+## 2026-11-17 - Stage 7 WP 7.1 done (protected lanes)
+
+- DONE: protected-lane file + advisory-only watchdog for listed lanes.
+- OPEN (owner C5): confirm the list (`status: proposed`); decide the 4 no-evidence lanes; decide
+  whether hard refusal storms in protected lanes should still stop (today: advisory only).
+
 ## 2026-11-17 - Stage 1 WP 1.4/1.5 tool landed
 
 - DONE: rescore + floor tool. OPEN: run on Windows once the owner's C1-C3 brief exists (or on the

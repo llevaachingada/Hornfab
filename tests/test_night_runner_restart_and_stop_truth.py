@@ -109,3 +109,39 @@ def test_non_watchdog_record_has_no_new_keys(tmp_path):
     nd = _run(tmp_path, nf, HookRunner())
     rec = json.loads((nd / "summary.jsonl").read_text(encoding="utf-8").splitlines()[0])
     assert "outcome_counts" not in rec
+
+
+# ------------------------------------------------------------------ WP 7.1 protected lanes
+
+def test_protected_lanes_file_marks_jobs_and_false_turns_it_off(tmp_path):
+    import yaml as _yaml
+    from tools import run_campaign_night as rcn
+    (tmp_path / "examples").mkdir()
+    (tmp_path / "examples" / "protected_lanes.yaml").write_text(
+        _yaml.safe_dump({"lanes": [{"lane": "hl__keep_me_v7"}, "other_v1"]}))
+    assert rcn.load_protected_lanes(None, repo_root=tmp_path) == {"hl__keep_me_v7", "other_v1"}
+    assert rcn.load_protected_lanes(False, repo_root=tmp_path) == frozenset()
+    import pytest
+    with pytest.raises(ValueError, match="not found"):
+        rcn.load_protected_lanes("nope.yaml", repo_root=tmp_path)
+    job = rcn.Job(id="j", kind="search", argv=("x",), timeout_s=1.0,
+                  config="examples/typologies/hl__keep_me_v7.yaml")
+    assert rcn._job_lane(job) == "hl__keep_me_v7"
+
+
+def test_shipped_protected_list_parses_and_excludes_no_evidence_lanes():
+    from pathlib import Path
+    from tools import run_campaign_night as rcn
+    root = Path(__file__).resolve().parents[1]
+    lanes = rcn.load_protected_lanes(None, repo_root=root)
+    assert "hl__biradial_es_style_v7" in lanes and "hl__klangfilm_lame_curved_v1" in lanes
+    assert "hl__ext_throat_hvlaw_v7" not in lanes and "rf__rect_radial_wide_v7" not in lanes
+
+
+def test_watchdog_on_a_protected_job_only_advises():
+    import inspect
+    from tools import run_campaign_night as rcn
+    src = inspect.getsource(rcn)
+    assert "WATCHDOG ADVISORY (protected lane)" in src
+    i = src.index("WATCHDOG ADVISORY (protected lane)")
+    assert "wd_reason = None" in src[i:i + 400]         # no kill path follows the advisory
