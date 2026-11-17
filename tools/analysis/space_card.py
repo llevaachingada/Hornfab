@@ -51,7 +51,50 @@ def _data_evidence(run: Path | None) -> dict:
     return out
 
 
-def recommend(geo: dict, box: dict, sigma: dict, margin: dict) -> list[dict]:
+def _sign(x: float) -> int:
+    return (x > 0) - (x < 0)
+
+
+def _links_payload(data: dict | None) -> dict | None:
+    """The empirical ``links`` payload when the run was actually analysed, else None."""
+    if not isinstance(data, dict):
+        return None
+    payload = data.get("links")
+    if not isinstance(payload, dict) or not payload:
+        return None
+    if "error" in payload or "note" in payload:
+        return None
+    return payload
+
+
+def _data_agreement(link: dict, data: dict | None) -> bool | str:
+    """True/False when ``--run`` links evidence is available, "unknown" otherwise.
+
+    True: ``proposed_links`` has the same unordered pair {from, follower} with the same scale
+    sign (a reversed proposal is inverted first: ``sign(1 / proposal_scale)``).
+    False: links evidence is available but the pair is absent or its scale sign is opposite.
+    """
+    payload = _links_payload(data)
+    if payload is None:
+        return "unknown"
+    a, b = link["from"], link["follower"]
+    link_sign = _sign(link["scale"])
+    for p in payload.get("proposed_links") or []:
+        if not isinstance(p, dict) or p.get("scale") is None:
+            continue
+        pa, pb, scale = p.get("knob_a"), p.get("knob_b"), p["scale"]
+        if pa == a and pb == b:
+            if _sign(scale) == link_sign:
+                return True
+        elif pa == b and pb == a:
+            inverted = 1.0 / scale if scale else 0.0
+            if _sign(inverted) == link_sign:
+                return True
+    return False
+
+
+def recommend(geo: dict, box: dict, sigma: dict, margin: dict,
+              data: dict | None = None) -> list[dict]:
     recs = []
     for k, v in (geo.get("knobs") or {}).items():
         if v["label"] == "inactive":
@@ -68,9 +111,17 @@ def recommend(geo: dict, box: dict, sigma: dict, margin: dict) -> list[dict]:
                                 "(split the lane or link the condition)",
                          "evidence": {"active_frac": v["active_frac"]}})
     for link in geo.get("links") or []:
-        recs.append({"knob": link["follower"], "action": "link",
-                     "why": f"surface direction parallel to {link['from']} (|cos| {link['median_abs_cos']:.3f})",
-                     "proposal": {"from": link["from"], "scale": link["scale"], "offset": link["offset"]}})
+        agrees = _data_agreement(link, data)
+        why = (f"surface direction parallel to {link['from']} "
+               f"(|cos| {link['median_abs_cos']:.3f})")
+        rec = {"knob": link["follower"],
+               "action": "link" if agrees is not False else "link_rejected_by_data",
+               "why": why, "proposal": {"from": link["from"], "scale": link["scale"],
+                                        "offset": link["offset"]},
+               "data_agrees": agrees}
+        if agrees is False:
+            rec["why"] += "; rejected: the empirical links payload has no same-sign matching pair"
+        recs.append(rec)
     for k, v in (box.get("per_knob") or {}).items():
         for key in ("raise_lo_to_unit", "lower_hi_to_unit"):
             if key in v:
@@ -107,7 +158,7 @@ def card_for(config: Path, *, run: Path | None, points: int, box_n: int, sigma_n
             "generator": bool(getattr(cfg, "generator", None)), "keys": geo["keys"],
             "geometry": geo, "box": box, "sigma": sigma, "margin_model": margin,
             "data": _data_evidence(run)}
-    card["recommendations"] = recommend(geo, box, sigma, margin)
+    card["recommendations"] = recommend(geo, box, sigma, margin, card["data"])
     return card
 
 
@@ -134,7 +185,9 @@ def _md(card: dict) -> str:
                   f"inside {m['inside_frac']:.0%}, binding {m['binding_axis_counts']}"]
     L += ["", "## Recommendations (not applied)", ""]
     for r in card["recommendations"]:
-        L.append(f"- **{r['action']}** `{r['knob']}`: {r['why']}"
+        agree = (f"; data_agrees={str(r['data_agrees']).lower()}"
+                 if "data_agrees" in r else "")
+        L.append(f"- **{r['action']}** `{r['knob']}`: {r['why']}" + agree
                  + (f"; proposal `{json.dumps(r['proposal'], default=float)}`" if r.get("proposal") else ""))
     return "\n".join(L) + "\n"
 

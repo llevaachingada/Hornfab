@@ -617,6 +617,38 @@ def error_kind(error: str) -> str:
     return error.split(":", 1)[0] if error else ""
 
 
+def record_gate_margin(design, cfg) -> float | None:
+    """Worst signed brief-envelope margin (mm, positive = inside) of the PRE-MESH record.
+
+    Built from ``geometry.record`` without meshing (same route the mesher uses). ``None`` means
+    UNKNOWN and the gate ADMITS: the record could not be built (unsupported topology, geometry
+    error), the brief carries no ``envelope`` block, or no envelope axis has a limit.
+
+    Never raises: a record/geometry failure must not reach the search. Used by both the
+    ``search.record_gate: shadow`` row annotation and the ``resample`` pre-evaluation replacement.
+
+    Agreement (``shadow`` only) is about the PRE-MESH prediction: ``record_gate_agrees`` compares
+    this margin's sign with the deterministic refusal kinds ``KIND_INVALID_ENV`` / ``KIND_INVALID``.
+    Resource, solve and metrics failures are NOT record disagreements and never flip the flag.
+    """
+    try:
+        env_raw = (getattr(cfg, "brief", None) or {}).get("envelope") or {}
+        env = {k: float(v) for k, v in (
+            ("width_mm", env_raw.get("max_mouth_w_mm")),
+            ("height_mm", env_raw.get("max_mouth_h_mm")),
+            ("depth_mm", env_raw.get("max_depth_mm"))) if v is not None}
+        if not env:
+            return None
+        from ..geometry.record import envelope_margins, record_for_design
+        rec = record_for_design(design, cfg)
+        margins = envelope_margins(rec, env)
+        vals = [float(v) for v in margins.values() if v is not None]
+        return min(vals) if vals else None
+    except Exception:  # noqa: BLE001 - the gate is advisory: UNKNOWN = admit, never raise
+        log.debug("record gate: margin unavailable for this design", exc_info=True)
+        return None
+
+
 def evaluation_to_row(ev: Evaluation, mode: str, n: int, seconds: dict,
                       objective_version: int = 1, *, lane: str | None = None,
                       backend: str | None = None) -> dict:
@@ -980,6 +1012,16 @@ def evaluate(design: Design, space, cfg, mode: str, run_dir, store, backend, *,
     seconds = {"mesh": 0.0 if mesh is None else float(mesh.seconds),
                "solve": 0.0 if (outcome is None or st["from_disk"]) else float(outcome.seconds),
                "total": time.perf_counter() - t_start}
+    if str(getattr(cfg.search, "record_gate", "") or "") == "shadow":
+        # WP 3.3 (opt-in): annotate the row with the PRE-MESH record's worst envelope margin and
+        # whether the record's inside/outside prediction agrees with the deterministic refusal.
+        # Resource/solve/metric failures are NOT record disagreements: only KIND_INVALID_ENV and
+        # KIND_INVALID say the geometry itself was refused before/at meshing. A record that cannot
+        # be built is UNKNOWN (None) and is not counted as agreement either.
+        margin = record_gate_margin(design, cfg)
+        refused = error_kind(err) in (KIND_INVALID_ENV, KIND_INVALID)
+        st["record_margin_mm"] = margin
+        st["record_gate_agrees"] = None if margin is None else ((margin >= 0.0) == (not refused))
     try:
         with profiling.stage("persist"):
             _persist(ev, mode, sspec, design_dir, ctx, store, st, seconds)
@@ -1756,6 +1798,11 @@ def _persist(ev: Evaluation, mode: str, sspec, design_dir: Path, ctx: EvalContex
                             objective_version=ctx.objective_version,
                             lane=current_lane(),
                             backend=getattr(sspec, "backend", None))
+    if "record_margin_mm" in st:
+        # WP 3.3 shadow ONLY (set in ``evaluate``): the two additive row keys, appended last so
+        # every pre-existing key/value (and JSON key order) stays byte-identical when absent.
+        row["record_margin_mm"] = st["record_margin_mm"]
+        row["record_gate_agrees"] = st["record_gate_agrees"]
     if st.get("mounting"):
         # WP12 provenance echo. The row's ``key`` carries the SAME mounting suffix ``evaluate``
         # used for the run-known memo and the solve cache, so a resume reloads this row under the

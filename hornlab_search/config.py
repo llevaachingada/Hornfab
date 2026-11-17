@@ -150,6 +150,9 @@ class SearchSettings:
     error_policy: str = "legacy"       # F0: 'legacy' (default) | 'retry_same_then_stop'
                                        # (same-candidate infrastructure retry then resumable stop;
                                        # used by cma and, for infrastructure only, cma_me)
+    record_gate: str = ""              # WP 3.3 (2026-11-17): '' (default, today) | 'shadow'
+                                       # (record margin + agreement row keys) | 'resample'
+                                       # (outside-record candidates replaced before evaluation)
 
 
 @dataclass
@@ -1448,7 +1451,7 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
     search = _build(SearchSettings, _require(raw, "search", where), f"{where}:search",
                     optional=("popsize", "infeasible_penalty", "restarts", "qd", "pipeline_prefetch",
                               "budget_counts", "max_attempts", "links", "warm_start",
-                              "surrogate", "error_policy"))
+                              "surrogate", "error_policy", "record_gate"))
     if "popsize" not in raw["search"]:
         search.popsize = None
     if "budget_counts" not in raw["search"]:
@@ -1474,6 +1477,20 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
         raise ConfigError(f"{where}: search.infeasible_penalty: resample is not supported with "
                           f"search.algorithm: cma_me (ribs scheduler.tell needs one result per "
                           f"asked solution; refusals there keep today's seed-cell fallback)")
+    # WP 3.3 (2026-11-17): opt-in pre-mesh record gate. Absent/empty keeps today's behaviour
+    # byte-identically; 'shadow' only adds two ndjson row keys, 'resample' replaces a candidate
+    # whose surface record lies outside the brief envelope BEFORE ``run_one``.
+    gate = "" if search.record_gate is None else str(search.record_gate).strip()
+    if gate not in ("", "shadow", "resample"):
+        raise ConfigError(f"{where}: search.record_gate must be 'shadow' or 'resample' "
+                          f"(or empty/absent), got {search.record_gate!r}")
+    if gate == "resample" and search.algorithm != "cma":
+        # Mirror of the infeasible_penalty resample/cma_me precedent above: the ribs QD
+        # scheduler needs one result per asked solution, so pre-evaluation replacement is a
+        # plain-CMA behaviour only.
+        raise ConfigError(f"{where}: search.record_gate: resample is only supported with "
+                          f"search.algorithm: cma (got {search.algorithm!r})")
+    search.record_gate = gate
     search.budget_counts = _validate_budget_counts(search.budget_counts, f"{where}:search")
     search.max_attempts = _validate_max_attempts(search.max_attempts, f"{where}:search")
     if "links" not in raw["search"]:

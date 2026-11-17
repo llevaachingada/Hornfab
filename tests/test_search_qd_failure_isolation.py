@@ -281,7 +281,7 @@ def test_links_reduced_space_archives_the_evaluated_normalized_seed(smoke_cfg, t
     assert np.allclose(np.asarray(made[0].data()["solution"]), x_seed[None])
 
 
-def test_generated_space_seed_is_archived_and_links_are_refused(tmp_path, monkeypatch):
+def test_generated_space_seed_is_archived_and_links_reduce_the_space(tmp_path, monkeypatch):
     pytest.importorskip("ribs", reason="ribs not installed")
     cfg = load_config(EXAMPLES / "typologies" / "grid_ellipse.yaml")
     s = dataclasses.replace(cfg.search, algorithm="cma_me", qd=qd_block(bins_h=4, bins_v=4),
@@ -299,12 +299,31 @@ def test_generated_space_seed_is_archived_and_links_are_refused(tmp_path, monkey
     assert len(made) == 2
     assert np.allclose(np.asarray(made[0].data()["solution"]), x_seed[None])
 
-    # GeneratedSpace + links is refused (not silently applied to a generator block).
+    # WP 0.2 (2026-11-17): search.links works on a generator block in KNOB space, so the linked
+    # generated space has one fewer free key and its seed is a fixed point of the round trip.
     cfg2 = dataclasses.replace(cfg, search=dataclasses.replace(cfg.search))
     cfg2.search.links = {"L_mm": {"from": "h_rm_mm", "scale": 1.0, "offset": 0.0,
                                   "min": 50.0, "max": 400.0}}
-    with pytest.raises(ValueError, match="generator"):
-        run_qd(cfg2, tmp_path / "gl", 1)
+    linked = reduced_space(cfg2)
+    assert len(linked.keys()) == len(space.keys()) - 1
+    assert "L_mm" not in linked.keys() and "h_rm_mm" in linked.keys()
+    x_linked_seed = linked.normalize(linked.seed)
+    knobs = linked.knobs_from_unit(x_linked_seed)
+    assert knobs["h_rm_mm"] == pytest.approx(linked.seed_knobs["h_rm_mm"], abs=1e-9)
+    # L_mm at the (linked) seed is the value computed from its parent and survives the round trip.
+    assert knobs["L_mm"] == pytest.approx(linked.seed_knobs["L_mm"], abs=1e-9)
+    assert linked.seed_knobs["L_mm"] == pytest.approx(
+        1.0 * linked.seed_knobs["h_rm_mm"], abs=1e-9)
+
+    # The QD path accepts the linked generated space and archives the linked seed.
+    monkeypatch.setattr(qd_mod, "evaluate", fake_eval(cfg2))
+    made.clear()
+    run_qd(cfg2, tmp_path / "gl", 1)
+    a2 = archive_json(tmp_path / "gl")
+    assert len(a2["cells"]) == 1
+    assert len(made) == 2
+    assert a2["cells"][0]["design_hash"] == linked.seed.hash()
+    assert np.allclose(np.asarray(made[0].data()["solution"]), x_linked_seed[None])
 
 
 def test_failed_or_descriptorless_seed_is_not_archived(smoke_cfg, tmp_path, monkeypatch):

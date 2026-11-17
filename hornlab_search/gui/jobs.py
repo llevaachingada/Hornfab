@@ -26,7 +26,7 @@ from . import data as D
 
 GPU_KINDS = {"run", "search", "campaign", "verify"}    # campaign dry-run tier is not a GPU job
 TIERS = {"dry-run", "screen", "compare"}
-SEARCH_MODES = ("screen", "verify", "final")           # cli.py's `search --mode` choices
+SEARCH_MODES = ("screen", "verify", "final", "finalist")  # cli.py's `search --mode` choices
 RESTART_MODES = ("ipop", "bipop", "off")               # cli.py's `search --restarts-mode`
 BACKENDS = ("beat_cuda", "beat_metal", "beat_cpu", "bempp_cpu")  # cli.py `--backend`
 RESTARTS_MAX_CAP = 64                                  # mirrors config._validate_restarts
