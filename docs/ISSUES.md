@@ -1,5 +1,20 @@
 # ISSUES
 
+## 2026-11-16 - Agent-orchestration review filed; no issue closed (docs-only)
+
+- DONE: [`AGENT_ORCHESTRATION_REVIEW_2026-11-16.md`](AGENT_ORCHESTRATION_REVIEW_2026-11-16.md)
+  records the measured cause of slow agent sessions - prompt size from container-directory launches
+  and unbudgeted multi-hundred-KB document reads, not agent count - with the evidence queries, the
+  P0-P3 plan, and the risk/validation note for each item.
+- OPEN (owner/senior decision; 8 items in report section 7): container `Hrns/AGENTS.md`; the
+  reading-budget amendment to `AGENTS.md`; moving rbassist prompt blocks to rbassist project scope;
+  the dispatch rewrite (3-lane cap, <=2-file direct-work threshold); the preset retier and its one
+  cost increase (`oracle` off `glm-5.3-flash`); concurrency 6->4; the eight missing rbassist skill
+  names; and the worktree read-only list.
+- NOTE: no config, prompt, code, queue or GPU state was changed by this review. The existing
+  `deepseek-flash-max` shared preset and the one-project rule are treated as deliberate and are not
+  proposed for replacement.
+
 ## 2026-11-16 - Fable architecture corpus tracked (40 reports + replays); no issue closed (documentation-only)
 
 - DONE: `scratch/fable_architecture/` committed and pushed to `main` in two commits (`207f97a` plus

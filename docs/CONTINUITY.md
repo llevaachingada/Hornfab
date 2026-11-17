@@ -1,5 +1,36 @@
 # CONTINUITY
 
+## 2026-11-16 - Agent-orchestration review: sessions are slow because of prompt size, not agent count
+
+- Review filed at [`AGENT_ORCHESTRATION_REVIEW_2026-11-16.md`](AGENT_ORCHESTRATION_REVIEW_2026-11-16.md).
+  Docs-only: no code, config, prompt, queue or GPU change; **nothing applied**. Trigger was the
+  owner's report of agents running long, spawning too many subagents, and re-briefing them instead
+  of continuing them.
+- Measured from the local OpenCode telemetry DB (7 days, read-only): 58 root sessions and 191 child
+  sessions; 206 `task` calls against 40 `task_revive` in 30 days (~93 % cold starts); children
+  average 111k input tokens to re-onboard (fixer 122k, designer 143k; 21.2M total); weekly spend
+  $61.73 ($43.04 root, $18.69 child).
+- Root cause, ranked. (1) **53 of 58 root sessions, and 241 of the 244 steps with >600k-token
+  prompts, were launched from `C:/Users/hunte/Hrns`** - the container directory, which has no
+  `AGENTS.md` and no skill grants, so sessions explore the worktrees and forks blind. (2) The
+  documented reading order points at `docs/CONTINUITY.md` (844,727 B / 5,930 lines / 390 entries)
+  with no read budget, plus `ISSUES.md` 407,673 B and `NOTES_FOR_SENIOR.md` 125,130 B; 42.6 % of
+  the 16,887 measured steps ran above 200k prompt tokens, 11.3 % above 400k, max 832k. (3) A
+  standing 4-7 lane fan-out ("Lane A-G") rather than occasional parallelism. (4) rbassist-only
+  prompt blocks sit in the globally scoped `orchestrator_append.md` (~950 tokens on every Hornlab
+  turn), and `skills: ["*"]` resolves to rbassist skills because the eight HornLab skills live in
+  `hornlab-search/.claude/skills`.
+- Proposed and deliberately **not applied** (each with mechanism, risk and validation in the
+  report): container `Hrns/AGENTS.md` (P0-1); reading-budget amendment to `AGENTS.md` (P0-2);
+  rbassist prompt blocks moved to rbassist project scope (P1-1); dispatch rewrite with a 3-lane cap
+  and a <=2-file direct-work threshold (P1-2); preset retier - orchestrator `max`->`high`, `oracle`
+  off `glm-5.3-flash`, fixer->`medium` (P2-1); concurrency 6->4 (P2-2).
+- Decisions still needed before any of it is implemented are listed in section 7 of the report
+  (8 items, including the single cost increase: the `oracle` tier).
+- Method caveat: session wall-clock durations in the DB are **not** runtime (several root sessions
+  were reopened across days and read 294-491 h). The review measures step prompt size, not session
+  duration, and does not project a percentage speed-up.
+
 ## 2026-11-16 - Fable architecture corpus (40 reports + experiment replays) tracked on `main`; docs aligned
 
 - The full `scratch/fable_architecture/` working corpus is now tracked on `main` on owner
