@@ -1,0 +1,87 @@
+
+ hl__ext_throat_hvlaw_v7 selected 10
+64efc34b7396 OSSE (36, 176, 3) resampling_delta_mm 0.0 resolver_refine_max_mm 0.1115 resolver_deterministic True tag1_node_to_grid_upper_mm_median_p99 [2.007, 5.765]
+531e03fdb5bf OSSE (39, 177, 3) resampling_delta_mm 0.0 resolver_refine_max_mm 0.0679 resolver_deterministic True tag1_node_to_grid_upper_mm_median_p99 [2.042, 5.864]
+43eabb4113e6 OSSE (42, 169, 3) resampling_delta_mm 0.0 resolver_refine_max_mm 0.0936 resolver_deterministic True tag1_node_to_grid_upper_mm_median_p99 [1.689, 5.599]
+9108f5b0e1f1 OSSE (33, 171, 3) resampling_delta_mm 0.0 resolver_refine_max_mm 0.0714 resolver_deterministic True tag1_node_to_grid_upper_mm_median_p99 [1.798, 5.665]
+e8b25b5b5016 OSSE (43, 186, 3) resampling_delta_mm 0.0 resolver_refine_max_mm 0.1027 resolver_deterministic True tag1_node_to_grid_upper_mm_median_p99 [1.982, 5.785]
+e5c0a19b262c OSSE (39, 182, 3) resampling_delta_mm 0.0 resolver_refine_max_mm 0.0554 resolver_deterministic True tag1_node_to_grid_upper_mm_median_p99 [1.944, 5.732]
+75ff51c58278 OSSE (39, 175, 3) resampling_delta_mm 0.0 resolver_refine_max_mm 0.0917 resolver_deterministic True tag1_node_to_grid_upper_mm_median_p99 [2.027, 5.769]
+ab3fef48e380 OSSE (37, 181, 3) resampling_delta_mm 0.0 resolver_refine_max_mm 0.1037 resolver_deterministic True tag1_node_to_grid_upper_mm_median_p99 [1.815, 5.648]
+8b49f8ad73cc OSSE (35, 171, 3) resampling_delta_mm 0.0 resolver_refine_max_mm 0.065 resolver_deterministic True tag1_node_to_grid_upper_mm_median_p99 [1.899, 5.733]
+dacf41ec773b OSSE (36, 169, 3) resampling_delta_mm 0.0 resolver_refine_max_mm 0.1096 resolver_deterministic True tag1_node_to_grid_upper_mm_median_p99 [1.681, 5.554]
+
+ hl__ath_tritonia_landscape_v9 selected 10
+c535bbf5e771 OSSE (52, 162, 3) resampling_delta_mm 0.0 resolver_refine_max_mm 0.1289 resolver_deterministic True tag1_node_to_grid_upper_mm_median_p99 [2.525, 7.128]
+4e16c26f0799 OSSE (55, 155, 3) resampling_delta_mm 0.0 resolver_refine_max_mm 0.1409 resolver_deterministic True tag1_node_to_grid_upper_mm_median_p99 [2.525, 7.124]
+11a1763a653b OSSE (48, 163, 3) resampling_delta_mm 0.0 resolver_refine_max_mm 0.164 resolver_deterministic True tag1_node_to_grid_upper_mm_median_p99 [2.376, 7.013]
+90338f8832d6 OSSE (54, 151, 3) resampling_delta_mm 0.0 resolver_refine_max_mm 0.1659 resolver_deterministic True tag1_node_to_grid_upper_mm_median_p99 [2.334, 7.061]
+97cbdcdd86a7 OSSE (50, 164, 3) resampling_delta_mm 0.0 resolver_refine_max_mm 0.118 resolver_deterministic True tag1_node_to_grid_upper_mm_median_p99 [2.423, 7.03]
+ccbf70e0a622 OSSE (54, 157, 3) resampling_delta_mm 0.0 resolver_refine_max_mm 0.1499 resolver_deterministic True tag1_node_to_grid_upper_mm_median_p99 [2.56, 7.158]
+8805a83f7270 OSSE (50, 192, 3) resampling_delta_mm 0.0 resolver_refine_max_mm 0.1659 resolver_deterministic True tag1_node_to_grid_upper_mm_median_p99 [2.406, 7.044]
+05a1bffad6cc OSSE (52, 173, 3) resampling_delta_mm 0.0 resolver_refine_max_mm 0.1953 resolver_deterministic True tag1_node_to_grid_upper_mm_median_p99 [2.478, 7.137]
+f9255dd45f77 OSSE (52, 163, 3) resampling_delta_mm 0.0 resolver_refine_max_mm 0.1389 resolver_deterministic True tag1_node_to_grid_upper_mm_median_p99 [2.51, 7.106]
+9e4d7afd80fc OSSE (50, 152, 3) resampling_delta_mm 0.0 resolver_refine_max_mm 0.1978 resolver_deterministic True tag1_node_to_grid_upper_mm_median_p99 [2.46, 7.087]
+
+ hl__crowe_x_osse_cd_v7 selected 10
+7f4c515cedd0 grid (25, 41, 3) resampling_delta_mm 0.0 resolver_refine_max_mm fixed-recipe resolver_deterministic not retested resolver tag1_node_to_grid_upper_mm_median_p99 [2.593, 5.109]
+d6c86f488d7c grid (25, 41, 3) resampling_delta_mm 0.0 resolver_refine_max_mm fixed-recipe resolver_deterministic not retested resolver tag1_node_to_grid_upper_mm_median_p99 [2.558, 4.955]
+d79e4618ee8f grid (25, 41, 3) resampling_delta_mm 0.0 resolver_refine_max_mm fixed-recipe resolver_deterministic not retested resolver tag1_node_to_grid_upper_mm_median_p99 [2.206, 4.744]
+9f7b158c831d grid (25, 41, 3) resampling_delta_mm 0.0 resolver_refine_max_mm fixed-recipe resolver_deterministic not retested resolver tag1_node_to_grid_upper_mm_median_p99 [2.583, 4.906]
+7e22e804bc3e grid (25, 41, 3) resampling_delta_mm 0.0 resolver_refine_max_mm fixed-recipe resolver_deterministic not retested resolver tag1_node_to_grid_upper_mm_median_p99 [2.442, 4.739]
+b14d8cb61b15 grid (25, 41, 3) resampling_delta_mm 0.0 resolver_refine_max_mm fixed-recipe resolver_deterministic not retested resolver tag1_node_to_grid_upper_mm_median_p99 [2.586, 4.868]
+a8d5ad7fb365 grid (25, 41, 3) resampling_delta_mm 0.0 resolver_refine_max_mm fixed-recipe resolver_deterministic not retested resolver tag1_node_to_grid_upper_mm_median_p99 [2.414, 4.794]
+58e0f292d349 grid (25, 41, 3) resampling_delta_mm 0.0 resolver_refine_max_mm fixed-recipe resolver_deterministic not retested resolver tag1_node_to_grid_upper_mm_median_p99 [2.541, 4.846]
+e52435b09614 grid (25, 41, 3) resampling_delta_mm 0.0 resolver_refine_max_mm fixed-recipe resolver_deterministic not retested resolver tag1_node_to_grid_upper_mm_median_p99 [2.429, 4.602]
+98a610d17793 grid (25, 41, 3) resampling_delta_mm 0.0 resolver_refine_max_mm fixed-recipe resolver_deterministic not retested resolver tag1_node_to_grid_upper_mm_median_p99 [2.477, 4.748]
+
+ rf__section_axial_home_v7 selected 10
+d99b73012d8e rolled (49, 97, 3) resampling_delta_mm 0.0 resolver_refine_max_mm fixed-recipe resolver_deterministic not retested resolver tag1_node_to_grid_upper_mm_median_p99 [2.561, 148.91]
+6d23eca8f816 rolled (49, 97, 3) resampling_delta_mm 0.0 resolver_refine_max_mm fixed-recipe resolver_deterministic not retested resolver tag1_node_to_grid_upper_mm_median_p99 [3.348, 150.844]
+76f878093441 rolled (49, 97, 3) resampling_delta_mm 0.0 resolver_refine_max_mm fixed-recipe resolver_deterministic not retested resolver tag1_node_to_grid_upper_mm_median_p99 [2.524, 148.361]
+360ffe954f38 rolled (49, 97, 3) resampling_delta_mm 0.0 resolver_refine_max_mm fixed-recipe resolver_deterministic not retested resolver tag1_node_to_grid_upper_mm_median_p99 [2.891, 137.421]
+fb3d83637f1c rolled (49, 97, 3) resampling_delta_mm 0.0 resolver_refine_max_mm fixed-recipe resolver_deterministic not retested resolver tag1_node_to_grid_upper_mm_median_p99 [1.99, 141.179]
+650f87fa1a8b rolled (49, 97, 3) resampling_delta_mm 0.0 resolver_refine_max_mm fixed-recipe resolver_deterministic not retested resolver tag1_node_to_grid_upper_mm_median_p99 [3.269, 146.708]
+ca45f6c2289c rolled (49, 97, 3) resampling_delta_mm 0.0 resolver_refine_max_mm fixed-recipe resolver_deterministic not retested resolver tag1_node_to_grid_upper_mm_median_p99 [2.729, 131.069]
+1f2c025e1dff rolled (49, 97, 3) resampling_delta_mm 0.0 resolver_refine_max_mm fixed-recipe resolver_deterministic not retested resolver tag1_node_to_grid_upper_mm_median_p99 [2.04, 135.8]
+320c10cf1173 rolled (49, 97, 3) resampling_delta_mm 0.0 resolver_refine_max_mm fixed-recipe resolver_deterministic not retested resolver tag1_node_to_grid_upper_mm_median_p99 [2.777, 153.814]
+bc5133036598 rolled (49, 97, 3) resampling_delta_mm 0.0 resolver_refine_max_mm fixed-recipe resolver_deterministic not retested resolver tag1_node_to_grid_upper_mm_median_p99 [2.923, 145.977]
+
+ hl__klangfilm_lame_curved_v1 selected 10
+149aca76074e FAILED GeneratorError grid rows: unknown key(s) ['driver', 'implementation_sha256', 'schema']
+2cebaf370c68 FAILED GeneratorError grid rows: unknown key(s) ['driver', 'implementation_sha256', 'schema']
+e94b7d4a783d FAILED GeneratorError grid rows: unknown key(s) ['driver', 'implementation_sha256', 'schema']
+24b0332215a1 FAILED GeneratorError grid rows: unknown key(s) ['driver', 'implementation_sha256', 'schema']
+d8f091fd91dc FAILED GeneratorError grid rows: unknown key(s) ['driver', 'implementation_sha256', 'schema']
+4faa0e159d07 FAILED GeneratorError grid rows: unknown key(s) ['driver', 'implementation_sha256', 'schema']
+48603bd53e52 FAILED GeneratorError grid rows: unknown key(s) ['driver', 'implementation_sha256', 'schema']
+995169bc91ce FAILED GeneratorError grid rows: unknown key(s) ['driver', 'implementation_sha256', 'schema']
+e0579595952e FAILED GeneratorError grid rows: unknown key(s) ['driver', 'implementation_sha256', 'schema']
+b9ea3ad77e3f FAILED GeneratorError grid rows: unknown key(s) ['driver', 'implementation_sha256', 'schema']
+
+ hl__biradial_es_style_v7 selected 10
+7b0a1988625d FREEFORM (46, 155, 3) resampling_delta_mm 0.0 resolver_refine_max_mm 0.1005 resolver_deterministic True tag1_node_to_grid_upper_mm_median_p99 [1.366, 4.138]
+61f368f62761 FREEFORM (44, 169, 3) resampling_delta_mm 0.0 resolver_refine_max_mm 0.1103 resolver_deterministic True tag1_node_to_grid_upper_mm_median_p99 [1.328, 4.172]
+a5f929375535 FREEFORM (51, 187, 3) resampling_delta_mm 0.0 resolver_refine_max_mm 0.0946 resolver_deterministic True tag1_node_to_grid_upper_mm_median_p99 [1.371, 4.242]
+83d33cb3dd2f FREEFORM (43, 152, 3) resampling_delta_mm 0.0 resolver_refine_max_mm 0.0528 resolver_deterministic True tag1_node_to_grid_upper_mm_median_p99 [1.348, 4.129]
+cdcc7e8dd9bd FREEFORM (43, 140, 3) resampling_delta_mm 0.0 resolver_refine_max_mm 0.0518 resolver_deterministic True tag1_node_to_grid_upper_mm_median_p99 [1.379, 4.242]
+85b0a4f7b683 FREEFORM (42, 167, 3) resampling_delta_mm 0.0 resolver_refine_max_mm 0.1095 resolver_deterministic True tag1_node_to_grid_upper_mm_median_p99 [1.486, 4.252]
+c179623fa28d FREEFORM (45, 149, 3) resampling_delta_mm 0.0 resolver_refine_max_mm 0.0529 resolver_deterministic True tag1_node_to_grid_upper_mm_median_p99 [1.339, 4.13]
+8b531f92dffe FREEFORM (39, 144, 3) resampling_delta_mm 0.0 resolver_refine_max_mm 0.1093 resolver_deterministic True tag1_node_to_grid_upper_mm_median_p99 [1.328, 4.08]
+997986cf3726 FREEFORM (44, 167, 3) resampling_delta_mm 0.0 resolver_refine_max_mm 0.0735 resolver_deterministic True tag1_node_to_grid_upper_mm_median_p99 [1.341, 4.186]
+009818fb4119 FREEFORM (45, 172, 3) resampling_delta_mm 0.0 resolver_refine_max_mm 0.0546 resolver_deterministic True tag1_node_to_grid_upper_mm_median_p99 [1.38, 4.173]
+PCA 8 hl__ath_tritonia_landscape_v9 median_mm 1.5279 worst_mm 2.4166
+PCA 8 hl__biradial_es_style_v7 median_mm 1.3816 worst_mm 2.9889
+PCA 8 hl__crowe_x_osse_cd_v7 median_mm 1.6293 worst_mm 2.4723
+PCA 8 hl__ext_throat_hvlaw_v7 median_mm 2.1832 worst_mm 2.9524
+PCA 8 rf__section_axial_home_v7 median_mm 2.3431 worst_mm 3.817
+PCA 12 hl__ath_tritonia_landscape_v9 median_mm 0.8331 worst_mm 1.3548
+PCA 12 hl__biradial_es_style_v7 median_mm 0.6973 worst_mm 1.1808
+PCA 12 hl__crowe_x_osse_cd_v7 median_mm 0.7896 worst_mm 1.4773
+PCA 12 hl__ext_throat_hvlaw_v7 median_mm 1.1216 worst_mm 1.5809
+PCA 12 rf__section_axial_home_v7 median_mm 1.2519 worst_mm 1.8114
+PCA 16 hl__ath_tritonia_landscape_v9 median_mm 0.5292 worst_mm 0.7202
+PCA 16 hl__biradial_es_style_v7 median_mm 0.3279 worst_mm 0.7025
+PCA 16 hl__crowe_x_osse_cd_v7 median_mm 0.4805 worst_mm 0.767
+PCA 16 hl__ext_throat_hvlaw_v7 median_mm 0.7022 worst_mm 0.8141
+PCA 16 rf__section_axial_home_v7 median_mm 0.6399 worst_mm 0.8248

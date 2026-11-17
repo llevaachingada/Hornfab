@@ -16,8 +16,13 @@ range, the in-flight v9 corridor objective, optimizer/cohort reality, and the wa
 The full 15-file evidence dossier is tracked in
 [research/fable_architecture_2026-11-16/](research/fable_architecture_2026-11-16/INDEX.md), and the
 v3 handoff source documents (`00_START_HERE` … `11_ACCEPTANCE_AND_EXPERIMENT_PROTOCOL`, including
-`03_FABLE_DISCOVERY.md`) are co-located in the same folder (working copy in the git-ignored
-`scratch/fable_architecture/`). No code, solve or queue change.
+`03_FABLE_DISCOVERY.md`) are co-located in the same folder. The **expanded 40-report corpus** — the
+original 25 reports plus the E1-E3 / X1-X5 / S1 experiment briefs and results, the universal-family
+and predictor proposals, and the range-scoring / corridor-rerank / seed-spread replays — plus the
+`.fable/`/`.tmp/` harnesses and per-experiment reproduction directories is now tracked in-repo at
+[scratch/fable_architecture/](../scratch/fable_architecture/INDEX.md) — force-added past the
+`/scratch/` ignore (`207f97a` + follow-up; only `__pycache__` excluded). No code, solve or queue
+change.
 
 
 [Klangfilm-Lame H/V throat audit and Phase A implementation (2026-11-16)](evidence/KLANGFILM_HV_THROAT_AUDIT.md):

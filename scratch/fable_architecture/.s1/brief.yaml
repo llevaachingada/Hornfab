@@ -1,0 +1,57 @@
+target:
+  coverage_h_deg: 80.0
+  coverage_v_deg: 50.0
+  band_lo_hz: 350.0
+  band_hi_hz: 8000.0
+  f0_hz: 700.0
+  f0_v_hz: 1000.0
+  di_slope_target: 0.0
+  z_min: 0.5
+  loaded_hi_hz: 5600.0
+  freq_weights:
+    band_hz:
+    - - 2500.0
+      - 5500.0
+      - 2.0
+  coverage_profile:
+    mode: corridor
+    h:
+    - - 700
+      - 70
+      - 60
+      - 80
+    - - 8000
+      - 70
+      - 60
+      - 80
+    v:
+    - - 1000
+      - 50
+      - 40
+      - 60
+    - - 8000
+      - 50
+      - 40
+      - 60
+objective:
+  version: 9
+  flat_band: scored
+  cov_v_weight: 0.5
+  cov_narrow_ratio: 2.0
+  cov_below_f0: mask
+  tolerances:
+    cov_profile: 3.0
+    rip: 1.0
+    flat: 1.5
+    load: 0.3
+    dislope: 9.0
+    di_roughness: 0.5
+    flat_cv: 1.5
+weights:
+  cov_profile: 1.0
+  rip: 1.0
+  flat: 0.5
+  load: 1.0
+  dislope: 1.0
+  di_roughness: 1.0
+  flat_cv: 1.0

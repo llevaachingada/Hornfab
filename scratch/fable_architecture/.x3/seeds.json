@@ -1,0 +1,248 @@
+{
+  "hl__ext_throat_hvlaw": [
+    {
+      "a": "hl__ext_throat_hvlaw_v7",
+      "b": "hl__ext_throat_hvlaw_v8",
+      "seed_differences": [
+        "L_mm",
+        "a_deg",
+        "az_a_cos_amp",
+        "az_a_cos_pow",
+        "az_s_cos2_amp",
+        "s",
+        "throat_ext_angle_deg",
+        "throat_ext_length_mm"
+      ],
+      "generator_equal": true
+    }
+  ],
+  "hl__osse_rrect_morph": [
+    {
+      "a": "hl__osse_rrect_morph_v7",
+      "b": "hl__osse_rrect_morph_v8",
+      "seed_differences": [
+        "L_mm",
+        "a0_deg",
+        "a_deg",
+        "az_a_cos_amp",
+        "az_a_cos_pow",
+        "az_s_cos2_amp",
+        "k",
+        "morph_corner_mm",
+        "morph_height_mm",
+        "morph_rate",
+        "morph_width_mm",
+        "n",
+        "q",
+        "s"
+      ],
+      "generator_equal": true
+    }
+  ],
+  "hl__biradial_es_style": [
+    {
+      "a": "hl__biradial_es_style_smooth_v7",
+      "b": "hl__biradial_es_style_v7",
+      "seed_differences": [
+        "L_mm",
+        "h_a_deg",
+        "h_n",
+        "h_throat_blend_mm",
+        "mouth_exponent",
+        "v_a_deg",
+        "v_n",
+        "v_rm_mm",
+        "v_throat_blend_mm"
+      ],
+      "generator_equal": true
+    }
+  ],
+  "hl__lecleach_iwata_ar_landscape": [
+    {
+      "a": "hl__lecleach_iwata_ar_landscape_smooth_v7",
+      "b": "hl__lecleach_iwata_ar_landscape_v7",
+      "seed_differences": [],
+      "generator_equal": true
+    }
+  ],
+  "rr__reference_pucker": [
+    {
+      "a": "rr__pucker_hv_moderate_v7",
+      "b": "rr__pucker_hv_strong_v7",
+      "seed_differences": [
+        "g_pucker_h_mm",
+        "g_pucker_v_mm"
+      ],
+      "generator_equal": true
+    },
+    {
+      "a": "rr__pucker_hv_moderate_v7",
+      "b": "rr__reference_v7",
+      "seed_differences": [
+        "g_pucker_h_mm",
+        "g_pucker_v_mm"
+      ],
+      "generator_equal": true
+    },
+    {
+      "a": "rr__pucker_hv_strong_v7",
+      "b": "rr__reference_v7",
+      "seed_differences": [
+        "g_pucker_h_mm",
+        "g_pucker_v_mm"
+      ],
+      "generator_equal": true
+    }
+  ],
+  "sp__control_moderate_strong": [
+    {
+      "a": "sp__control_v7",
+      "b": "sp__moderate_v7",
+      "seed_differences": [
+        "g_pucker_h_mm",
+        "g_pucker_v_mm"
+      ],
+      "generator_equal": true
+    },
+    {
+      "a": "sp__control_v7",
+      "b": "sp__strong_v7",
+      "seed_differences": [
+        "g_pucker_h_mm",
+        "g_pucker_v_mm"
+      ],
+      "generator_equal": true
+    },
+    {
+      "a": "sp__moderate_v7",
+      "b": "sp__strong_v7",
+      "seed_differences": [
+        "g_pucker_h_mm",
+        "g_pucker_v_mm"
+      ],
+      "generator_equal": true
+    }
+  ],
+  "rf__section_axial_home": [
+    {
+      "a": "rf__section_axial_home_smooth_v8",
+      "b": "rf__section_axial_home_v7",
+      "seed_differences": [
+        "g_axial_h_mm",
+        "g_axial_v_mm",
+        "g_crown_mm",
+        "g_depth_mm",
+        "g_h_depth_scale",
+        "g_height_mm",
+        "g_junction_power",
+        "g_width_mm"
+      ],
+      "generator_equal": true
+    }
+  ],
+  "hl__ath_tritonia_landscape": [
+    {
+      "a": "hl__ath_tritonia_landscape_v7",
+      "b": "hl__ath_tritonia_landscape_v8",
+      "seed_differences": [
+        "L_mm",
+        "a0_deg",
+        "a_deg",
+        "az_a_cos2p_amp",
+        "az_a_cos_amp",
+        "az_a_cos_pow",
+        "az_fold_h_deg",
+        "az_fold_v_deg",
+        "az_fold_v_width_deg",
+        "az_n_cos2_amp",
+        "az_s_cos2_amp",
+        "k",
+        "morph_height_mm",
+        "morph_rate",
+        "morph_width_mm",
+        "n",
+        "q",
+        "s"
+      ],
+      "generator_equal": true
+    },
+    {
+      "a": "hl__ath_tritonia_landscape_v7",
+      "b": "hl__ath_tritonia_landscape_v9",
+      "seed_differences": [
+        "L_mm",
+        "a0_deg",
+        "a_deg",
+        "az_a_cos2p_amp",
+        "az_a_cos_amp",
+        "az_a_cos_pow",
+        "az_fold_h_deg",
+        "az_fold_v_deg",
+        "az_fold_v_width_deg",
+        "az_n_cos2_amp",
+        "az_s_cos2_amp",
+        "k",
+        "morph_corner_mm",
+        "morph_height_mm",
+        "morph_rate",
+        "morph_width_mm",
+        "n",
+        "q",
+        "s"
+      ],
+      "generator_equal": true
+    },
+    {
+      "a": "hl__ath_tritonia_landscape_v8",
+      "b": "hl__ath_tritonia_landscape_v9",
+      "seed_differences": [
+        "L_mm",
+        "a0_deg",
+        "a_deg",
+        "az_a_cos_amp",
+        "az_fold_v_deg",
+        "az_fold_v_width_deg",
+        "k",
+        "morph_corner_mm",
+        "morph_height_mm",
+        "morph_rate",
+        "morph_width_mm",
+        "n",
+        "q",
+        "s"
+      ],
+      "generator_equal": true
+    }
+  ],
+  "klangfilm_hv__axis_variants": [
+    {
+      "a": "klangfilm_hv__a0_exact_incumbent_control",
+      "b": "klangfilm_hv__a1_h_only_single_axis",
+      "seed_differences": [
+        "g_cd_core_blend",
+        "g_theta_h0_deg",
+        "g_theta_v0_deg"
+      ],
+      "generator_equal": true
+    },
+    {
+      "a": "klangfilm_hv__a0_exact_incumbent_control",
+      "b": "klangfilm_hv__a2_v_only_single_axis",
+      "seed_differences": [
+        "g_cd_core_blend",
+        "g_theta_h0_deg",
+        "g_theta_v0_deg"
+      ],
+      "generator_equal": true
+    },
+    {
+      "a": "klangfilm_hv__a1_h_only_single_axis",
+      "b": "klangfilm_hv__a2_v_only_single_axis",
+      "seed_differences": [
+        "g_theta_h0_deg",
+        "g_theta_v0_deg"
+      ],
+      "generator_equal": true
+    }
+  ]
+}

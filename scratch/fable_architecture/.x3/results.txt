@@ -1,0 +1,105 @@
+SIBLINGS {
+  "hl__ath_core_petal_hvlaw": [
+    "hl__ath_core_petal_hvlaw_v7"
+  ],
+  "hl__ath_tritonia_landscape": [
+    "hl__ath_tritonia_landscape_v7",
+    "hl__ath_tritonia_landscape_v8",
+    "hl__ath_tritonia_landscape_v9"
+  ],
+  "hl__ath_twinray380_landscape": [
+    "hl__ath_twinray380_landscape_v8"
+  ],
+  "hl__biradial_es_style": [
+    "hl__biradial_es_style_smooth_v7",
+    "hl__biradial_es_style_v7"
+  ],
+  "hl__crowe_panel_home": [
+    "hl__crowe_panel_home_v7"
+  ],
+  "hl__crowe_x_osse_cd": [
+    "hl__crowe_x_osse_cd_v7"
+  ],
+  "hl__crowe_x_square": [
+    "hl__crowe_x_square_v7"
+  ],
+  "hl__es_style_rollback": [
+    "hl__es_style_rollback_v7"
+  ],
+  "hl__ext_throat_hvlaw": [
+    "hl__ext_throat_hvlaw_v7",
+    "hl__ext_throat_hvlaw_v8"
+  ],
+  "hl__klangfilm_lame_curved": [
+    "hl__klangfilm_lame_curved_v1"
+  ],
+  "hl__lecleach_hv_landscape": [
+    "hl__lecleach_hv_landscape_smooth_v7"
+  ],
+  "hl__lecleach_iwata_ar_landscape": [
+    "hl__lecleach_iwata_ar_landscape_smooth_v7",
+    "hl__lecleach_iwata_ar_landscape_v7"
+  ],
+  "hl__osse_rrect_fold_warm": [
+    "hl__osse_rrect_fold_warm_v7"
+  ],
+  "hl__osse_rrect_morph": [
+    "hl__osse_rrect_morph_v7",
+    "hl__osse_rrect_morph_v8"
+  ],
+  "hl__rolled_es_spiral": [
+    "hl__rolled_es_spiral_v7"
+  ],
+  "hl__rosse_rect_cd": [
+    "hl__rosse_rect_cd_v7"
+  ],
+  "klangfilm_hv__axis_variants": [
+    "klangfilm_hv__a0_exact_incumbent_control",
+    "klangfilm_hv__a1_h_only_single_axis",
+    "klangfilm_hv__a2_v_only_single_axis"
+  ],
+  "rf__rect_radial_wide": [
+    "rf__rect_radial_wide_v7"
+  ],
+  "rf__section_axial_home": [
+    "rf__section_axial_home_smooth_v8",
+    "rf__section_axial_home_v7"
+  ],
+  "rr__crowe_panel_es600": [
+    "rr__crowe_panel_es600_v7"
+  ],
+  "rr__reference_pucker": [
+    "rr__pucker_hv_moderate_v7",
+    "rr__pucker_hv_strong_v7",
+    "rr__reference_v7"
+  ],
+  "sp__control_moderate_strong": [
+    "sp__control_v7",
+    "sp__moderate_v7",
+    "sp__strong_v7"
+  ]
+}
+engine Counter({np.str_('GRID'): 1038, np.str_('OSSE'): 537, np.str_('GEN-FF'): 140})
+RESULT size lane pooled 0.5578 0.7519 0.6168
+RANK size lane 29 0.4115694642010431
+RESULT size sibling pooled 0.4859 0.7346 0.5822
+RANK size sibling 29 0.4218778920648351
+RESULT size engine GEN-FF n 140 0.2878 0.4979 0.2706
+RESULT size engine GRID n 1038 0.1271 0.4387 0.2232
+RESULT size engine OSSE n 537 0.3457 0.7166 0.4933
+RESULT size engine pooled 0.1928 0.5138 0.3146
+C:\Users\hunte\Hrns\hornlab-search\scratch\fable_architecture\.x3\strict.py:30: ConstantInputWarning: An input array is constant; the correlation coefficient is not defined.
+  rank=[spearmanr(cov(Y[G==g]),cov(P[G==g])).statistic for g in set(G) if sum(G==g)>=30]
+RANK size engine 29 0.42257967917969375
+RESULT profile lane pooled 0.7515 0.8706 0.7755
+RANK profile lane 29 0.7610007873326918
+RESULT profile sibling pooled 0.696 0.8454 0.7201
+RANK profile sibling 29 0.7199545096666958
+RESULT profile engine GEN-FF n 140 0.5266 0.7152 0.4609
+RESULT profile engine GRID n 1038 0.1624 0.5056 0.2201
+RESULT profile engine OSSE n 537 0.3893 0.7034 0.4602
+RESULT profile engine pooled 0.2379 0.5648 0.3082
+RANK profile engine 29 0.48875863878925724
+RESIDUAL GEN-FF 0.3818 0.1216 0.1786
+RESIDUAL GRID 0.1657 0.2348 0.1641
+RESIDUAL OSSE -0.2923 -0.1978 -0.106

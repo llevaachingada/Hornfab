@@ -2,9 +2,12 @@
 
 This folder holds **both** the v3 handoff source documents and the full 15-file read-only evidence
 dossier prepared for a later Fable discovery/decision pass. The dossier was mirrored verbatim from
-the local git-ignored working copy (`scratch/fable_architecture/`); internal references to
+the local working copy (`scratch/fable_architecture/`); internal references to
 `scratch/fable_architecture/…` in those files refer to that working copy, and the file names here
-are identical.
+are identical. That working copy is **no longer git-ignored**: the expanded 25-report corpus and its
+`.fable/` + `.tmp/` harnesses were committed to `main` in `207f97a` (`__pycache__` excluded). Reach
+for it when you need the fuller reports; this folder remains the original 15-file dossier plus the
+handoff text as the curated reading set.
 
 ## Handoff source documents (v3 package)
 
@@ -73,7 +76,8 @@ Internal relative references between those documents remain valid inside this fo
   mutation** was performed by the research pass. A concurrent lane's work was observed and
   preserved.
 - Read-only parser/replay helpers and intermediate JSON lived in the working copy's
-  `scratch/fable_architecture/.tmp/` and are not committed here; the procedures and every cited
-  path are described in the reports so the checks can be reproduced.
+  `scratch/fable_architecture/.tmp/`; they are not mirrored into this folder, but that working copy
+  is now tracked on `main` (`207f97a`), so the harnesses and intermediate JSON are reproducible from
+  the repo. The procedures and every cited path are also described in the reports.
 - Nothing here is an architecture decision or an implementation authorization. The deliverable is
   evidence for a later decision-maker, who may reject any or all of the candidate routes.

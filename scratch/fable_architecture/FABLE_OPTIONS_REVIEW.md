@@ -1,5 +1,12 @@
 # FABLE_OPTIONS_REVIEW — expanded architectural options for Hornfab
 
+> **Results update, 2026-11-16 23:15.** Later experiments qualify three of the measurements here.
+> M3 ("8 modes, 1.2 mm") holds for two wall profiles only; on whole surfaces 8 modes give
+> 1.4–2.3 mm and 16 give 0.3–0.7 mm (X1). M4 (transfer) fails the strict held-out-engine pass
+> lines (X3). M6 (racing) shows no saving once seeded lanes are merged (X5). The preference for
+> deformation modules (G-D) is withdrawn in `UNIVERSAL_HORN_FAMILY.md`. Current position:
+> `LOW_COST_AGENT_HANDOFF.md`.
+
 **Date:** 2026-11-16 (late). **Tree:** `main` @ `f0dd019`. **Mode:** read-only discovery. No solve,
 mesher run, queue or tracked-file change. New files are this document and five analysis scripts in
 the git-ignored `scratch/fable_architecture/.fable/`.

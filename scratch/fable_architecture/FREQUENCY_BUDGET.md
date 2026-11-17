@@ -7,7 +7,16 @@
 - Stored verify responses carrying complex `p_h`/`p_v`: **58/58**.
 - Replay parity fix: the stored DI is the sin(theta)-weighted theta-phi balloon DI (`search/evaluate.metrics_from_response`), not `compute_metrics`' equal-weight DI. All regeneration below uses that rule.
 - Parity check on the stored grids: max |replay - stored J| = **0.000e+00** (screen), **0.000e+00** (verify).
-- Scoring grid: 58 log-spaced points, 350-8000 Hz. Interpolant: log-frequency PCHIP on SPL/balloon/z; rational pressure = Floater-Hormann barycentric rational interpolation (order 3) on `log10(f)` for complex `p_h`/`p_v`, with SPL rebuilt as `20 log10(|p|/20 uPa)` (exact at the stored nodes; verified 0.0 dB).
+- Scoring grid: 58 log-spaced points, 350-8000 Hz. Interpolant: log-frequency PCHIP 
+  on SPL/balloon/z; rational pressure = Floater-Hormann barycentric rational 
+  interpolation (order 3) on `log10(f)` for complex `p_h`/`p_v`, with SPL rebuilt as 
+  `20 log10(|p|/20 uPa)` (exact at the stored nodes; verified 0.0 dB).
+- **Subsampling-only view (separate pass).** Against a full 29 -> 58 same-interpolant 
+  baseline, PCHIP gives sd **0.588 / 0.545 / 0.305 / 0.198 / 0.133 / 0.104** and top-28 
+  Spearman **0.428 / 0.668 / 0.921 / 0.935 / 0.910 / 0.931** for 8 / 10 / 12 / 15 / 18 / 22 
+  points. That isolates the frequency count from the 29 -> 58 grid cost in the tables below; 
+  ~22 points reaches sd ~0.10. The rational-pressure interpolant is not usable at any of 
+  these counts.
 
 ## (a) Dense-grid comparison (screen 18 -> 58 vs verify 29 -> 58, PCHIP)
 

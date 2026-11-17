@@ -1,0 +1,10 @@
+149aca76074e shape (19, 65, 3) same_bytes True stored_schema klangfilm-lame-v1 saved_implementation e3a1f4a3182cd5405bc1a1fec469456c513a49da31d804bcae27f3a039909866
+2cebaf370c68 shape (19, 65, 3) same_bytes True stored_schema klangfilm-lame-v1 saved_implementation e3a1f4a3182cd5405bc1a1fec469456c513a49da31d804bcae27f3a039909866
+e94b7d4a783d shape (19, 65, 3) same_bytes True stored_schema klangfilm-lame-v1 saved_implementation e3a1f4a3182cd5405bc1a1fec469456c513a49da31d804bcae27f3a039909866
+24b0332215a1 shape (19, 65, 3) same_bytes True stored_schema klangfilm-lame-v1 saved_implementation e3a1f4a3182cd5405bc1a1fec469456c513a49da31d804bcae27f3a039909866
+d8f091fd91dc shape (19, 65, 3) same_bytes True stored_schema klangfilm-lame-v1 saved_implementation e3a1f4a3182cd5405bc1a1fec469456c513a49da31d804bcae27f3a039909866
+4faa0e159d07 shape (19, 65, 3) same_bytes True stored_schema klangfilm-lame-v1 saved_implementation e3a1f4a3182cd5405bc1a1fec469456c513a49da31d804bcae27f3a039909866
+48603bd53e52 shape (19, 65, 3) same_bytes True stored_schema klangfilm-lame-v1 saved_implementation e3a1f4a3182cd5405bc1a1fec469456c513a49da31d804bcae27f3a039909866
+995169bc91ce shape (19, 65, 3) same_bytes True stored_schema klangfilm-lame-v1 saved_implementation e3a1f4a3182cd5405bc1a1fec469456c513a49da31d804bcae27f3a039909866
+e0579595952e shape (19, 65, 3) same_bytes True stored_schema klangfilm-lame-v1 saved_implementation e3a1f4a3182cd5405bc1a1fec469456c513a49da31d804bcae27f3a039909866
+b9ea3ad77e3f shape (19, 65, 3) same_bytes True stored_schema klangfilm-lame-v1 saved_implementation e3a1f4a3182cd5405bc1a1fec469456c513a49da31d804bcae27f3a039909866

@@ -1,5 +1,11 @@
 # ARCHITECTURE_DECISION_RECORD — Hornfab discovery architecture
 
+> **Results update, 2026-11-16 23:15.** Decisions D1–D10 in §2 stand. The recommendation in §1 and
+> the open-decision table in §3 are overtaken: see `LOW_COST_AGENT_HANDOFF.md` §1, §4 and §5 for
+> the current position and experiment results, and `UNIVERSAL_HORN_FAMILY.md` for the generator
+> direction (layered backbone with pluggable specialist laws) that replaces "specialist engines plus
+> deformation modules".
+
 **Status:** leading hypothesis, not an authorized final architecture. **Written:** 2026-11-16.
 **Code read at:** `main` @ `f0dd019`. **HEAD when this record was closed:** `aa11b62`
 (= `origin/main`); the diff between the two was not reviewed. **Upstream reasoning:**

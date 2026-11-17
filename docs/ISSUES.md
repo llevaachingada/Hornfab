@@ -1,5 +1,23 @@
 # ISSUES
 
+## 2026-11-16 - Fable architecture corpus tracked (40 reports + replays); no issue closed (documentation-only)
+
+- DONE: `scratch/fable_architecture/` committed and pushed to `main` in two commits (`207f97a` plus
+  the follow-up). The corpus was previously only an untracked working copy under the ignored
+  `/scratch/`; the curated 15-file copy in `docs/research/fable_architecture_2026-11-16/` is
+  unchanged and still the entry point.
+- READOUT (stored-data, CPU only, no solves): E1 response-targeting gave no advantage over
+  score-targeting; E2 minimum-norm inverse fails its stated decision rule; X3 held-out-engine skill
+  < 0.6; X5 allocation comparison degenerate; S1 v7 vs v9-plus-constancy share 3 of the top 20 over
+  3,414 stored designs. Net: the predictor-first route is weakened; the scoring-range/brief
+  question is the live one.
+- OPEN (owner decision, not a defect): the corpus's candidate routes, `OPEN_QUESTIONS.md` and
+  `FABLE_RESEARCH_REQUESTS.md` remain unactioned — the commits authorise no implementation, config
+  or objective change.
+- NOTE: the subtree is ~42 MB with ~34 MB of binary evidence (`.e1/descriptors.pkl`,
+  `.fable/rows.pkl`, `.s1/records*.jsonl`, `.x3/extended.npz`). Removing it would need a history
+  rewrite, so decide deliberately if the "about the data, never the data itself" rule requires it.
+
 ## 2026-11-16 (23:30) - BoTorch round 2 LAUNCHED (ath14/corelaw/hvlaw, 25 screens each); readout open
 
 - LAUNCHED: night `bo_multityp_r2_2026-11-16` detached (controller pid 41600, 22:03:34), admission

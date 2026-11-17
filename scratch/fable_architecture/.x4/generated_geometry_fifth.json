@@ -1,0 +1,61 @@
+{
+  "hl__rosse_rect_cd_v7": {
+    "keys": [
+      "g_width_mm",
+      "g_height_mm",
+      "g_rect_exponent",
+      "g_a_h_deg",
+      "g_a_v_deg",
+      "g_k",
+      "g_r",
+      "g_b",
+      "g_tmax"
+    ],
+    "results": [
+      {
+        "hash": "a301d2543a96",
+        "error": "GeneratorError: unknown rows type 'rosse_rect' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])"
+      },
+      {
+        "hash": "6fbcb743a1d4",
+        "error": "GeneratorError: unknown rows type 'rosse_rect' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])"
+      },
+      {
+        "hash": "9d584d0e99ed",
+        "error": "GeneratorError: unknown rows type 'rosse_rect' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])"
+      },
+      {
+        "hash": "3d20c5d60d3d",
+        "error": "GeneratorError: unknown rows type 'rosse_rect' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])"
+      },
+      {
+        "hash": "68af1fbb003a",
+        "error": "GeneratorError: unknown rows type 'rosse_rect' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])"
+      },
+      {
+        "hash": "b7a6aca1d0a7",
+        "error": "GeneratorError: unknown rows type 'rosse_rect' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])"
+      },
+      {
+        "hash": "d5a6821ae0ff",
+        "error": "GeneratorError: unknown rows type 'rosse_rect' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])"
+      },
+      {
+        "hash": "f92e6c6eca73",
+        "error": "GeneratorError: unknown rows type 'rosse_rect' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])"
+      },
+      {
+        "hash": "5157e69d8aeb",
+        "error": "GeneratorError: unknown rows type 'rosse_rect' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])"
+      },
+      {
+        "hash": "54ecae318dd1",
+        "error": "GeneratorError: unknown rows type 'rosse_rect' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])"
+      },
+      {
+        "hash": "560560538705",
+        "error": "GeneratorError: unknown rows type 'rosse_rect' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])"
+      }
+    ]
+  }
+}

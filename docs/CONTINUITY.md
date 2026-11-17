@@ -1,5 +1,34 @@
 # CONTINUITY
 
+## 2026-11-16 - Fable architecture corpus (40 reports + experiment replays) tracked on `main`; docs aligned
+
+- The full `scratch/fable_architecture/` working corpus is now tracked on `main` on owner
+  instruction ("commit push all"), force-added past the repo's `/scratch/` ignore. Two commits: the
+  original 25 reports (`207f97a`), then the completed corpus — 40 top-level reports, the E1/E2/E3,
+  S1 and X1-X5 experiment briefs + result records, `UNIVERSAL_HORN_FAMILY.md`,
+  `PREDICTOR_AND_WORKFLOW.md`, `SCORING_RANGE_PROPOSAL.md`, `CORRIDOR_RERANK.md`, `SEED_SPREAD.md`,
+  the revised `ARCHITECTURE_SYNTHESIS.md` (plain-language §8) / `LOW_COST_AGENT_HANDOFF.md` /
+  `VALIDATION_EXPERIMENTS.md`, plus `fable_zero_gpu_checks.py`, the `.fable/` and `.tmp/` harnesses
+  and the `.e1`-`.e3` / `.s1` / `.x1`-`.x5` reproduction directories. Only `__pycache__/` excluded.
+- Everything in the experiment records was produced against HEAD `207f97a` on stored data, CPU only:
+  no solves, no meshes, no queue or config writes. Headline results are negative-to-mixed (E1
+  response-targeting no advantage, E2 minimum-norm inverse fails its rule, X3 held-out-engine skill
+  < 0.6, X5 allocation comparison degenerate) — they weaken the predictor-first route and leave the
+  brief/scoring-range question (S1) as the live one.
+- Docs aligned in the same commit: `docs/INDEX.md` (the Fable entry no longer calls the corpus
+  "git-ignored" and names the expanded set), `docs/research/fable_architecture_2026-11-16/README.md`
+  (tracking state + `.tmp/` reproducibility), and `scratch/fable_architecture/INDEX.md` (dated
+  provenance note, file map extended to all 40 reports, "Tracked digest"/"Safety" sections corrected
+  — the research pass's "read-only / ignored scratch" statements stay as written history).
+- Unchanged behaviour: no code, config, solve, queue or objective change. The corpus still carries
+  no recommendation and no implementation authorisation.
+- Size caveat: the subtree is ~42 MB, dominated by binary evidence (`.e1/descriptors.pkl` 8.8 MB,
+  `.fable/rows.pkl` 6.8 MB, `.s1/records*.jsonl` ~17 MB, `.x3/extended.npz` 2.4 MB). This is the
+  data-adjacent class the evidence rule normally excludes; it is in history now per "all", and
+  removing it later needs a history rewrite.
+- Caveat for future readers: the reports are timestamped evidence pinned to snapshot `601be8c`
+  (drift-checked to `0750a30`), not a description of the current tree.
+
 ## 2026-11-16 (23:30) - OWNER RELEASE + LAUNCH: BoTorch typology round 2 (ath14, corelaw, hvlaw; 25 screens each)
 
 - The owner released the 2026-11-15 17:15 solve hold for these three arms and asked for BoTorch runs

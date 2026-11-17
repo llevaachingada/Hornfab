@@ -1,0 +1,81 @@
+{
+  "hl__ext_throat_hvlaw_v7": {
+    "shape": [
+      33,
+      80,
+      3
+    ],
+    "roundtrip_max_mm": 0.0,
+    "searched_knobs_used": [
+      "a_deg",
+      "L_mm",
+      "s",
+      "throat_ext_length_mm",
+      "throat_ext_angle_deg",
+      "az_a_cos_pow",
+      "az_a_cos_amp",
+      "az_s_cos2_amp"
+    ],
+    "knob_errors": {},
+    "rank": 8,
+    "relative_unexplained_norm": {
+      "vertical_outer": 0.5837158853366744,
+      "vertical_inner": 0.6133284664407127,
+      "horizontal_outer": 0.5569992579045413,
+      "mouth_flare": 0.4919508057494374,
+      "diagonal_pull": 0.6332844938394673
+    },
+    "singular_values": [
+      2.2622698855168544,
+      1.291188970049662,
+      0.8320462181726415,
+      0.5870835164601744,
+      0.29582714215448486,
+      0.26208961062724073,
+      0.11567689583156139,
+      0.09171825318745135
+    ],
+    "normal_degenerate_points": 0
+  },
+  "hl__rosse_rect_cd_v7": {
+    "error": "GeneratorError(\"unknown rows type 'rosse_rect' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])\")"
+  },
+  "hl__biradial_es_style_v7": {
+    "shape": [
+      33,
+      80,
+      3
+    ],
+    "roundtrip_max_mm": 0.0,
+    "searched_knobs_used": [
+      "L_mm",
+      "h_a_deg",
+      "v_a_deg",
+      "h_rm_mm",
+      "v_rm_mm",
+      "h_n",
+      "v_n",
+      "mouth_exponent"
+    ],
+    "knob_errors": {},
+    "rank": 8,
+    "relative_unexplained_norm": {
+      "vertical_outer": 0.45123550800425727,
+      "vertical_inner": 0.48123700899858723,
+      "horizontal_outer": 0.47640722362816007,
+      "mouth_flare": 0.4880503468676522,
+      "diagonal_pull": 0.6010553574099214
+    },
+    "singular_values": [
+      1.6648243461731307,
+      1.4075208712089633,
+      1.2071707132192762,
+      0.8655987974248845,
+      0.7406016647975966,
+      0.5124468290305783,
+      0.39939406092322005,
+      0.26479103111211294
+    ],
+    "normal_degenerate_points": 0
+  }
+}

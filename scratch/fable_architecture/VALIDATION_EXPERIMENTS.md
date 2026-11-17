@@ -348,3 +348,300 @@ supports automating. Scripts in `.x5/`.
 **Optional BEM stage (owner approval required, do not run).** A prospective matched test: two
 nights with identical approved job lists, one in fixed order and one under the best policy, equal
 attempt budgets, results censored honestly.
+
+---
+
+# Part 2 — briefs E1–E3 (from `ARCHITECTURE_SYNTHESIS.md` §5) and S1
+
+These three decide between the two candidate architectures. The rules and shared data at the top
+of this file apply. S1 (range-plus-constancy scoring) is briefed in `SCORING_RANGE_PROPOSAL.md` §7.
+
+## E1 — Does modelling the response beat modelling the score?
+
+**Question.** If the next design to solve had been chosen by a model that predicts response curves
+and then applies the scoring, would good designs have been found in fewer solves than by a model of
+J, or by the order the optimizer actually used?
+
+**Decision it changes.** Whether response-model-centred discovery is the spine of the architecture
+(`ARCHITECTURE_SYNTHESIS.md` §3). This is the single most important experiment.
+
+**Sources.**
+- `scratch/fable_architecture/.fable/rows.pkl` and `.fable/desc.npz` (see shared data).
+- Scoring of a predicted response: v7 coverage is `mean((bw − target)²)/100` with the narrow side
+  doubled (`hornlab_search/objective/scalar_v7.py:410-513`); the full scorer needs a complete
+  response. Because the model predicts beamwidth and DI curves only, use the **coverage-plus-DI
+  part of J** as the objective for all selectors, computed identically from true curves when a
+  design is "revealed". State this limitation in the report.
+- Model recipe: `.fable/an3.py` (extra-trees from geometry numbers to curves).
+
+**Method.** This is a replay: nothing is solved. The "pool" is the set of designs already solved,
+and "solving" a design means revealing its stored result.
+- *Part A, within a lane.* For each lane with ≥ 100 valid rows: start from 8 randomly revealed
+  designs. Repeatedly pick one unrevealed design and reveal it, using each selector:
+  (a) **score model:** predict the objective directly from the lane's knobs; pick the lowest
+  prediction;
+  (b) **response model:** predict the beamwidth and DI curves from geometry numbers, compute the
+  objective from the predicted curves, pick the lowest;
+  (c) **actual order:** the order the optimizer really used;
+  (d) **random order**, as a floor.
+  Refit after every 8 reveals. Record how many reveals each selector needs to find a design within
+  0.1 of the lane's best objective. Repeat with 10 random starts.
+- *Part B, with help from other engines.* Same, but selector (b) may also train on all designs from
+  *other engine groups* from the start. This tests whether cross-engine data speeds up a new lane.
+- *Part C, cross-engine discovery.* Hold out one engine group entirely. Train (b) on the other two.
+  Rank the held-out group's designs by predicted objective. Report what fraction of the held-out
+  group's true best 10 % appear in the model's top 10 % and top 25 %.
+
+**Success metrics.**
+- Part A: selector (b) needs at most half the reveals of (a) and of (c), in the median lane.
+- Part B: adding other-engine data reduces reveals further, by at least 20 %.
+- Part C: at least 40 % of the true best decile is in the model's top 25 % for two of three engines
+  (random would give 25 %).
+
+**Counterexamples to look for.** Selector (c) looks slow only because the optimizer was also
+exploring; (b) wins only in lanes with a sibling lane in training (apply the sibling map and
+exclude siblings); (b) wins on coverage but the true J winner differs because of loading or ripple
+(report how often the coverage-plus-DI best is also in the top decile of full J).
+
+**Failure criteria.** Selector (b) is not clearly faster than (a) in Part A, and Part C is at
+chance. Then the response-model spine is unsupported and the alternative (E2) or the present
+per-lane approach stands.
+
+**Output.** `E1_RESPONSE_VS_SCORE.md`: table of median reveals per selector per lane, Parts B and C,
+the sibling-excluded versions, and a verdict against each metric. Scripts in `.e1/`.
+
+**Optional BEM stage (owner approval required, do not run).** A prospective night: 40 solves chosen
+by selector (b) from a freshly generated pool against 40 chosen by the usual optimizer, same lane
+and brief.
+
+## E2 — Is the response locally invertible?
+
+**Question.** Near a given horn, does a small change of shape produce a proportional, predictable
+change of response, well enough that a target response could be reached by a few corrective steps?
+
+**Decision it changes.** Whether "construct, then correct" (`ARCHITECTURE_SYNTHESIS.md` §4) is
+viable as the spine or as a proposer.
+
+**Sources.** `.fable/desc.npz` (shape numbers `X`, responses `Y`, lanes `G`); `.fable/an4.py`
+(shape modes); `.fable/an1.py` (response principal components).
+
+**Method (stage one, stored data only).**
+- Reduce shape to depth plus 8 shape modes and response to 6 principal components (fit both on all
+  designs; report the variance each keeps).
+- *Part A, local linearity.* For 300 randomly chosen designs, take the 40 nearest designs in shape
+  space, fit a linear map from shape change to response change, and report: fit quality on 10
+  held-out neighbours; the map's condition number; its singular values.
+- *Part B, controllability.* From those singular values, identify response directions that no
+  shape change moves (near-zero singular values). Describe them in plain terms, for example
+  "low-frequency vertical beamwidth at fixed mouth height".
+- *Part C, retrospective correction.* For 500 pairs of designs (i, j) that are neighbours in shape
+  space: use the local map at i to predict the shape change needed to turn i's response into j's;
+  compare with the true shape difference (relative error). Repeat for pairs two and four
+  neighbourhood-radii apart to see how far a step can be trusted.
+- *Part D, across engines.* Repeat Part A with neighbours restricted to a different engine group
+  from the centre design.
+
+**Success metrics.** Part A held-out fit R² ≥ 0.7 in the median neighbourhood; Part C relative
+error ≤ 30 % for adjacent pairs and ≤ 50 % at two radii; at least four response directions
+controllable.
+
+**Counterexamples to look for.** Neighbourhoods that are all siblings from one optimizer run (the
+map then describes that run, not the physics: require at least two lanes per neighbourhood where
+possible and report both ways); good fit only because size dominates (repeat with size regressed
+out); response directions that matter for the score but are uncontrollable.
+
+**Failure criteria.** Median R² below 0.4, or step predictions no better than assuming no change.
+Then correction by proportional steps is not viable and the alternative architecture is closed.
+
+**Output.** `E2_INVERTIBILITY.md`: the four parts with distributions, the list of uncontrollable
+directions, and a verdict. Scripts in `.e2/`.
+
+**Stage two (owner approval required, do not run).** Three target responses inside the reachable
+set, five corrective steps each, about 15 solves; success is reaching each target's coverage within
+3° in five steps.
+
+## E3 — Can a candidate be judged from a few frequencies?
+
+**Question.** Could hopeless candidates be abandoned after a few frequencies, and how much compute
+would that have saved without discarding good designs?
+
+**Decision it changes.** Whether the choice of frequencies becomes part of experiment selection
+under either architecture, and whether a staged solve interface is worth requesting.
+
+**Sources.**
+- Solver wrapper: `hornlab_search/solve/` (find where the frequency list is passed to the backend
+  and whether frequencies are solved in a loop; `solve/worker.py` and the backend adapter).
+- Measured per-frequency cost: `TOOLCHAIN.md`, lines about 105–132.
+- Rows and stored 18-frequency responses: `rows.pkl`; per-row `seconds` and `n_dof` in
+  `search.ndjson`.
+
+**Method.**
+- *Part A, code read.* Establish, with file and line references: is cost proportional to the number
+  of frequencies; can a solve be issued for a subset and later extended on the same mesh without
+  repeating work; what fixed overhead exists per call. If the answer is "not without solver
+  changes", say so; Part B is then an estimate of what such a change would be worth.
+- *Part B, replay.* For each lane, process designs in the order they were solved. For each design,
+  reveal frequencies in a fixed informative order (start with one near the crossover, one mid-band,
+  one high, one low; then the rest). After each reveal compute the best J the design could still
+  achieve: score the revealed frequencies as they are and assume a perfect result at the unrevealed
+  ones. Abandon when that bound is worse than the lane's best-so-far by more than a margin.
+  Use margins of 0.5, 1.0 and 2.0 J.
+- *Part C.* Report the fraction of frequency-solves saved; the number of designs wrongly abandoned
+  that were in the lane's final top 10 %; and the saving when the order of frequencies is chosen
+  per lane to maximize early separation.
+
+**Success metrics.** At least 40 % of frequency-solves saved at a margin that wrongly abandons no
+final top-decile design.
+
+**Counterexamples to look for.** Terms that are not sums over frequency (standard deviations,
+slopes, the loading crossing) cannot be bounded by "assume perfect elsewhere" in a simple way:
+handle each explicitly and state the bound used. Early in a run the best-so-far is poor, so little
+is abandoned (report savings by position in the run). Abandoned designs leave incomplete responses
+(count how many training rows would have been lost).
+
+**Failure criteria.** Less than 20 % saved at any safe margin, or Part A shows a large fixed cost
+per call that removes the benefit.
+
+**Output.** `E3_FREQUENCY_STAGING.md`: Part A findings with references, the savings table, the
+false-abandonment count, and a verdict. Scripts in `.e3/`.
+
+**Optional BEM stage.** None proposed; a staged solve would be a solver-interface change, which is
+an owner decision.
+
+---
+
+# Part 3 — briefs U1–U3 (layered backbone, from `UNIVERSAL_HORN_FAMILY.md` §6)
+
+These decide whether a layered generator with pluggable specialist laws is worth building. Read
+`UNIVERSAL_HORN_FAMILY.md` §1.2 and §2 first (20 minutes). The rules and shared data at the top of
+this file apply. **Vocabulary:** a horn is a sheet of points `P(s, φ)`; `s` runs 0–1 from throat to
+lip along the wall, the same stations at every azimuth `φ`. *Layers* along the horn: throat,
+expansion, H/V split, section, termination. A *specialist law* is an existing family's own
+mathematics used to fill one layer.
+
+## U1 — Can a layered form reproduce existing horns exactly?
+
+**Question.** If each existing law-based family is rewritten as "its own expansion law + its split
++ its section + its termination, on shared wall-length stations", is the resulting surface the same
+as the one Hornfab built and solved?
+
+**Decision it changes.** Whether a layered backbone can inherit historical designs and data, or is
+only one more family.
+
+**Depends on.** The X1 scratch samplers under `.x1/` (five of six routes materialize; Klangfilm
+does not, see X1 report).
+
+**Sources.**
+- Mesher families and their formulas: `docs/research/typologies/MESHER_TYPOLOGIES.md` §1 (OSSE),
+  §2 (R-OSSE), §3 (ICW curvature spline), §4 (FREEFORM), §6 (morph, azimuth-dependent parameters).
+- Existing near-backbones to study as models: `hornlab_search/design/generators/grid.py` (header
+  docstring: radius field), `crowe_hv_area_aspect_v1.py` (header: area/aspect/section),
+  `tools/geometry/klangfilm_lame_hv_core.py` (header: slope laws, section exponent, beak).
+- Shared-station lesson: `docs/research/typologies/LECLEACH_HV_ELLIPSOID_2026-11-16.md` §2–§3.
+- Best stored designs: `.fable/rows.pkl`; meshes at `runs/<run>/designs/<h>/mesh.msh`.
+
+**Method (CPU only, no mesh build needed).**
+1. Choose the best valid design from each of four lanes: `hl__ext_throat_hvlaw_v7` (OSSE with
+   azimuth law), `hl__biradial_es_style_v7` (two profiles, generated freeform),
+   `hl__rosse_rect_cd_v7` or `hl__crowe_x_osse_cd_v7` (rows / rollback), and one Le Cléac'h H/V
+   lane (`hl__lecleach_hv_landscape_smooth_v7`).
+2. For each, sample the family's own surface on 65 wall-length stations × 31 azimuths using the X1
+   sampler. This is the *target*.
+3. Write the same horn in layered form, in a scratch script: (a) principal ribs at 0°, 45°, 90°
+   taken from the family's own law; (b) wall angle `ψ(s)` along each rib computed from those ribs;
+   (c) the section between ribs described by one shape exponent per station plus one diagonal
+   term; (d) the lip as the continuation of `ψ` past the hand-over station. Rebuild the surface
+   from (b)–(d) only.
+4. Report whole-surface deviation between rebuilt and target (median, 95th percentile, worst, and
+   where the worst occurs: throat, body, corners, lip).
+5. Repeat step 3 replacing the family's own rib law with a generic one: `ψ(s)` as a monotone
+   spline with 4, 6 and 8 control values per rib. Report the same deviations. The gap between
+   steps 4 and 5 is what the specialist mathematics is worth.
+
+**Success metrics.** Step 4 worst deviation ≤ 0.5 mm for at least three of four lanes.
+
+**Counterexamples to look for.** Rounded-rectangle corners and morphs that one exponent plus one
+diagonal term cannot follow; lips where ribs have different lengths so that shared stations distort
+the roll; throat extensions where the driven plane is not at `s = 0`.
+
+**Failure criteria.** Two or more lanes above 2 mm in step 4 with the family's own ribs. Then the
+"sheet with three ribs and a section law" is too poor a carrier, and the section layer needs more
+than one exponent and one diagonal term (report how many azimuth terms are needed to reach 0.5 mm).
+
+**Output.** `U1_LAYERED_REPRODUCTION.md`; scripts in `.u1/`.
+
+**Optional BEM stage (owner approval required, do not run).** Solve the four rebuilt surfaces
+through the point-grid route and compare responses with the stored ones. Four screen solves.
+
+## U2 — Are the families islands or one continent?
+
+**Question.** Between two good horns from different families, are the in-between shapes valid and
+sensible, or is there a wall of bad shapes?
+
+**Decision it changes.** Whether one shared search space can replace lanes, or whether a lane-like
+outer choice must remain even inside a common generator.
+
+**Depends on.** U1 step 3 (layered descriptions of the endpoint horns).
+
+**Method.**
+1. *Paths (CPU).* Take three pairs of U1 horns from different lanes. For each pair, interpolate the
+   layered description in ten equal steps: wall angle along each rib, section exponent, diagonal
+   term, lip curvature and wrap, rib length. Rebuild each intermediate surface.
+2. *Validity (CPU).* For every intermediate: inside 600 × 480 × 480; throat ring unchanged; no
+   backward fold before the lip; minimum wall-to-wall gap above twice the wall thickness plus 2 mm;
+   width and height non-decreasing before the lip. Report which checks fail and where on the path.
+3. *Predicted behaviour (zero GPU, indicative only).* Predict beamwidth curves with the model in
+   `.fable/an3.py`, and mark each intermediate as inside or outside the training data by distance
+   (beyond the 95th percentile of within-data nearest-neighbour distance = outside).
+4. *Smoothness measure.* Along each path report the largest step-to-step change in predicted mean
+   H and V beamwidth and whether the sequence is monotone.
+
+**Success metrics.** At least two of three paths are geometrically valid at every step.
+
+**Counterexamples to look for.** Paths valid only because the endpoints are near-twins; predicted
+smoothness that merely reflects the model averaging (which is why the BEM stage matters).
+
+**Failure criteria.** Two of three paths have invalid stretches longer than two steps. Then
+families are separated by invalid geometry in this description, and either the description must
+change or lanes must stay.
+
+**Output.** `U2_PATHS.md` with one table per path and rendered section overlays; scripts in `.u2/`.
+
+**Optional BEM stage (owner approval required, do not run).** Solve the eleven shapes on each of
+two valid paths, 22 screen solves. This is the only real test of "one continent".
+
+## U3 — Do the new structural freedoms move the beam?
+
+**Question.** Do the freedoms that no current family exposes change the response enough to matter?
+
+**Decision it changes.** Whether the backbone's extra reach is acoustically real. Precedent: the
+Klangfilm Stage A test, where a geometrically real freedom moved the beam ≤ 2.74°
+(`docs/evidence/klangfilm_hv_2026-11-16/STAGE_A_VS_B_DECISION.md`).
+
+**Depends on.** U1 (layered description of the best stored design).
+
+**Method.**
+1. *Variants (CPU).* Starting from the layered description of the best design of
+   `hl__ext_throat_hvlaw_v7`, build single-change variants, each paired with the unchanged control:
+   (a) vertical flare timing: keep the vertical wall angle low for the first 60 % of the wall, then
+   open so the mouth height reaches 460–480 mm at unchanged depth (two strengths);
+   (b) termination split: larger lip radius on the sides with the top and bottom unchanged, and
+   the reverse (two variants);
+   (c) section steering: exponent rising from 2 to 3 early versus late (two variants);
+   (d) diagonal term pulling the 45° wall in by 10 mm at the mouth (one variant).
+2. *Checks (CPU).* All validity checks of U2; report mouth width, height, depth, minimum lip radius.
+3. *Indicative prediction (zero GPU).* As U2 step 3, with the inside/outside flag.
+
+**Success metrics for the CPU stage.** All variants valid; each changes the surface by at least
+5 mm RMS somewhere other than the last 5 % of the wall.
+
+**Failure criteria for the CPU stage.** Variant (a) cannot reach 460 mm height without violating a
+validity check. Then the "unused height" opportunity is geometric fiction in this envelope.
+
+**Output.** `U3_STRUCTURAL_FREEDOMS.md`; scripts in `.u3/`.
+
+**BEM stage (owner approval required, do not run).** Solve the control and the seven variants plus
+repeats of the control on a denser frequency grid: about 12–16 screen solves. Pre-declared rule: a
+freedom "has authority" if it moves the intended plane's mean beamwidth by ≥ 3° in at least one of
+the bands 0.7–1.1, 1.1–2.5, 2.5–5.5 kHz while the other plane moves by less than half as much.
+Score with the grid-invariant method from `FREQUENCY_BUDGET.md` (at least 22 frequencies).

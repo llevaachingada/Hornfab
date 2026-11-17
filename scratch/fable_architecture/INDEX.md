@@ -14,6 +14,20 @@ Nothing was modified except this ignored `scratch/fable_architecture/` folder.
 brief) is empty, so every citation remains valid. Local main is now **12 commits ahead** of
 `origin/main`. The snapshot of record stays `601be8c`; re-read the tree before acting.
 
+**Provenance update (2026-11-16, after the research pass closed):** this whole folder — the **40
+top-level reports** (the original 25 plus `UNIVERSAL_HORN_FAMILY.md`, `PREDICTOR_AND_WORKFLOW.md`,
+`SCORING_RANGE_PROPOSAL.md`, `CORRIDOR_RERANK.md`, `SEED_SPREAD.md`, `S1_RANGE_SCORING.md`, the
+`E1`/`E2`/`E2_LOCAL`/`E3` experiment records and `X1`-`X5`), `fable_zero_gpu_checks.py`, the
+`.fable/` analysis helpers (`an1`-`an7.py`, `load.py`, `rows.pkl`, `desc.npz`), the `.tmp/`
+recon/replay harness, and the per-experiment reproduction directories (`.e1`-`.e3`, `.s1`,
+`.x1`-`.x5`, with their scripts, JSON/JSONL outputs and NPZ geometry) — is now **tracked on
+`main`**, force-added past the repo's `/scratch/` ignore rule (only `__pycache__/` excluded). The
+first batch (the original 25 reports) landed in `207f97a`; the remainder and the revised reports
+land in the follow-up commit. The "ignored scratch folder / nothing modified outside it" statements
+above describe the research pass itself and stay historically accurate; they no longer describe the
+tree's tracking state. The committed copy is the working copy, byte-identical apart from the
+bytecode exclusion.
+
 **The question:** what representation of horn designs, design goals, feasibility constraints and
 search process will discover more acoustically excellent, diverse, feasible horns per unit of
 compute, while retaining the value of existing results?
@@ -234,17 +248,47 @@ verify rank stability, held-out GP ranking at 100–231 rows, and refusal-margin
 | `ADAPTIVE_UNKNOWNS.md` | seven decision-changing questions + falsifying tests |
 | `EVIDENCE_LEDGER.md` | 59 atomic status-labelled claims with counters and follow-ups |
 | `OPEN_QUESTIONS.md` | prioritized gaps: architecture-changing, cheap tests, original-thought questions |
+| `FABLE_DISCOVERY.md` | first Fable pass: broad discovery narrative |
+| `FABLE_OPTIONS_REVIEW.md` | ranked reading of the candidate routes |
+| `FABLE_RESEARCH_REQUESTS.md` | the exact research/experiment asks handed to the next pass |
+| `ARCHITECTURE_SYNTHESIS.md` | combined architecture case + the plain-language guide to each suggested change (§8) |
+| `ARCHITECTURE_DECISION_RECORD.md` | options, criteria and the record of what was decided (or deferred) |
+| `CANONICAL_SURFACE_CONTRACT.md` | what a canonical horn surface record must carry |
+| `UNIVERSAL_HORN_FAMILY.md` | what one parameterised universal family would be, could make, and whether to build it |
+| `PREDICTOR_AND_WORKFLOW.md` | what the response predictor is and how it would plug into the search |
+| `SCORING_RANGE_PROPOSAL.md` | acceptance ranges plus constancy as an objective alternative |
+| `S1_RANGE_SCORING.md` | S1 replay over all 3,414 stored attempts: v7 vs v9-plus-constancy top-20 overlap |
+| `CORRIDOR_RERANK.md` | corridor re-rank of 3,414 ok rows from 75 landscape runs / 35 configs |
+| `SEED_SPREAD.md` | seed-to-seed spread across the same 75 landscape runs |
+| `FREQUENCY_BUDGET.md` | where the solve budget goes by frequency and what re-allocation would buy |
+| `MESH_FIDELITY_PAIRS.md` | mesh-fidelity A/B pairs and what they can resolve |
+| `VALIDATION_EXPERIMENTS.md` | full experiment briefs (E1-E3, X1-X5, S1) with decision rules |
+| `LOW_COST_AGENT_HANDOFF.md` | handoff for a cheap agent picking the work up cold |
+| `E1_RESPONSE_VS_SCORE.md` | E1: response-curve vs score targets — no advantage; cross-engine recall failed for GEN-FF |
+| `E2_LOCAL_INVERTIBILITY.md` | E2 exploratory: stored-data local invertibility (superseded by the brief) |
+| `E2_INVERTIBILITY.md` | E2 brief run: minimum-norm inverse fails the stated decision rule |
+| `E3_FREQUENCY_STAGING.md` | E3: conservative partial replay of frequency staging |
+| `X1_ROUND_TRIP.md` | X1: partial surface round trip, 50/50 stored designs resolved (sampling not yet contract-compliant) |
+| `X2_AUTHORITY.md` | X2: module authority under held-out engines — not established |
+| `X3_TRANSFER.md` | X3: strict cross-engine transfer — partial, skill below 0.6 on held-out engine |
+| `X4_PARAMETER_SPACE.md` | X4: preliminary parameter-space checks (provisional) |
+| `X5_ALLOCATION.md` | X5: corrected allocation replay — policy comparison degenerate at the stated target |
+| `fable_zero_gpu_checks.py` | the zero-GPU reproduction checks named in the reports |
 
 ## Tracked digest
 
-The repository carries a condensed, tracked version of this dossier at
+The repository carries a condensed, tracked version of the original dossier at
 `docs/research/FABLE_DISCOVERY_EVIDENCE_HANDOFF_2026-11-16.md`, committed as `3ad8b1d` and pushed to
-`origin/main`. The 15 evidence files here remain the full record and stay git-ignored.
+`origin/main`; the curated 15-file copy and the v3 handoff text live in
+`docs/research/fable_architecture_2026-11-16/`. **This folder is no longer git-ignored** — the full
+corpus, harness and reproduction outputs are tracked on `main` (first batch `207f97a`, remainder in
+the follow-up commit), force-added past `/scratch/`; `__pycache__/` is the only exclusion.
 
 ## Safety / compliance
 
-No tracked file, config, cache, queue or process was modified; no GPU/BEM solve, mesher run,
-pytest, git mutation, process kill or lane lock occurred. `scratch/fable_architecture/` is
-git-ignored (`.gitignore:9`). Historical numbers are labelled as records; only the two NDJSON
-aggregations and the watchdog replay are reproductions. The concurrent lane's work was observed
-and preserved, never overwritten.
+No tracked file, config, cache, queue or process was modified by the research pass; no GPU/BEM
+solve, mesher run, pytest, process kill or lane lock occurred. Historical numbers are labelled as
+records; only the stored-data replays and the watchdog replay are reproductions. The concurrent
+lane's work was observed and preserved, never overwritten. **Tracking state changed after the pass
+closed:** `.gitignore:9` (`/scratch/`) still ignores the folder by default, but this subtree was
+force-added on owner instruction, so subsequent edits here now show up in `git status`.

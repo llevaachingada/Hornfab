@@ -13,7 +13,7 @@
 - Same-target, both-ok, both-response, band-covering candidate pairs: **327**
 - Candidate pairs scored (all candidates): **327**
 - Candidate pairs with J below 5 (either mesh): **2**
-- Pairs shown (stop at 30): **30**
+- Pairs shown (stop at 30): **30** — the 2 low-J pairs plus the 28 next-lowest-J pairs.
 - `runs/**/search.ndjson` multi-mesh design hashes: **0** (one response per design dir, so no run pair can be scored)
 - Study `screen` vs `verify` pairs with a different `mesh_hash`: **0** (same mesh in every study pair)
 
@@ -53,7 +53,7 @@
 | 30 | `da8ae6187c87` | `1d1e55a3e822` (894) | `eabfc73b6767` (1502) | 1.680 | 15.375 | 15.323 | -0.052 | -0.005 | -0.000 | -0.007 | +0.005 | -0.006 | -0.025 | -0.003 | -0.016 | -0.004 | 90x90 700-5500 |
 
 - **Standard deviation of dJ among designs with J below 5:** **0.109 J** (n=2; mean +0.085, min +0.008, max +0.162).
-- All pairs: mean dJ -0.102, sd 0.441, min -0.677, max +1.091.
+- Shown 30 pairs: mean dJ -0.102, sd 0.441, min -0.677, max +1.091.
 
 ## Decision reading
 

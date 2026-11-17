@@ -1,0 +1,68 @@
+_placeholder: candidate v9 coverage_profile awaiting the owner's choice; scratch only,
+  not a shipped brief
+name: placeholder_v9_v_onset_1250
+target:
+  coverage_h_deg: 80.0
+  coverage_v_deg: 50.0
+  band_lo_hz: 350.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.5
+  freq_weights:
+    band_hz:
+    - - 2500.0
+      - 5500.0
+      - 2.0
+  f0_hz: 700.0
+  f0_v_hz: 700.0
+  coverage_v_up_deg: null
+  coverage_v_down_deg: null
+  loaded_hi_hz: 5600.0
+  driver_exit_radius_mm: null
+  coverage_profile:
+    mode: corridor
+    interpolation: log_frequency
+    h:
+    - hz: 700
+      preferred_deg: 80
+      min_deg: 60
+      max_deg: 90
+    - hz: 8000
+      preferred_deg: 80
+      min_deg: 60
+      max_deg: 90
+    v:
+    - hz: 1250
+      preferred_deg: 50
+      min_deg: 40
+      max_deg: 60
+    - hz: 8000
+      preferred_deg: 50
+      min_deg: 40
+      max_deg: 60
+objective:
+  version: 9
+  tolerances:
+    cov_profile: 3.0
+    rip: 1.0
+    flat: 1.5
+    load: 0.3
+    dislope: 9.0
+    di_roughness: 1.0
+    flat_cv: 1.5
+  cov_narrow_ratio: 2.0
+  cov_below_f0: one_sided
+  cov_v_weight: 0.5
+  flat_band: scored
+  loaded_re_z: 0.5
+  lfp_re_z: 0.2
+  lfp_crossover_ratio: 1.6
+weights:
+  cov_profile: 1.0
+  rip: 1.0
+  flat: 0.5
+  load: 1.0
+  dislope: 1.0
+  di_roughness: 1.0
+  flat_cv: 1.0

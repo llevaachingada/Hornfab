@@ -1,0 +1,6 @@
+GEN-FF base train samples 28350 skills [0.4903 0.674  0.3413]
+GEN-FF augment train samples 116550 skills [0.5266 0.7001 0.3781]
+GRID base train samples 12186 skills [0.2569 0.5871 0.3538]
+GRID augment train samples 50098 skills [0.3131 0.631  0.5281]
+OSSE base train samples 21204 skills [0.4587 0.7552 0.5075]
+OSSE augment train samples 87172 skills [0.4814 0.7888 0.531 ]

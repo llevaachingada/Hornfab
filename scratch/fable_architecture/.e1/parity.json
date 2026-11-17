@@ -1,0 +1,802 @@
+[
+  {
+    "config": "hl__ath_core_petal_hvlaw_v7",
+    "run": "20261115T152510Z-screen-a504f6",
+    "hash": "c73a8ae29ccb",
+    "mode": "corrected",
+    "stored": 8.68305366643394,
+    "replayed": 8.68305366643394,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__ath_core_petal_hvlaw_v7",
+    "run": "20261115T152510Z-screen-a504f6",
+    "hash": "faa30fed62b1",
+    "mode": "corrected",
+    "stored": 14.436813391708215,
+    "replayed": 14.436813391708215,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__ath_core_petal_hvlaw_v7",
+    "run": "20261115T152510Z-screen-a504f6",
+    "hash": "9bfbb2f81432",
+    "mode": "corrected",
+    "stored": 7.234642486322955,
+    "replayed": 7.234642486322955,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__ath_tritonia_landscape_v7",
+    "run": "20261116T035652Z-screen-e30021",
+    "hash": "b2636b2d0821",
+    "mode": "corrected",
+    "stored": 32.76420061605191,
+    "replayed": 32.76420061605191,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__ath_tritonia_landscape_v7",
+    "run": "20261116T041232Z-screen-b5380a",
+    "hash": "a3c984eecdc0",
+    "mode": "corrected",
+    "stored": 41.12397758563022,
+    "replayed": 41.12397758563022,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__ath_tritonia_landscape_v7",
+    "run": "20261116T041232Z-screen-b5380a",
+    "hash": "ae7bcb1f46ab",
+    "mode": "corrected",
+    "stored": 12.732150218745815,
+    "replayed": 12.732150218745815,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__ath_tritonia_landscape_v8",
+    "run": "20261116T044917Z-screen-12eb61",
+    "hash": "1666a6323bea",
+    "mode": "corrected",
+    "stored": 26.903295570007646,
+    "replayed": 26.903295570007646,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__ath_tritonia_landscape_v8",
+    "run": "20261116T044917Z-screen-12eb61",
+    "hash": "8cde58d28d7f",
+    "mode": "corrected",
+    "stored": 5.9872215205815555,
+    "replayed": 5.9872215205815555,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__ath_tritonia_landscape_v8",
+    "run": "20261116T054705Z-screen-570bc6",
+    "hash": "03e6a1163066",
+    "mode": "corrected",
+    "stored": 6.82991621340301,
+    "replayed": 6.82991621340301,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__ath_tritonia_landscape_v9",
+    "run": "20261117T003115Z-screen-4f7cd5",
+    "hash": "c535bbf5e771",
+    "mode": "corrected",
+    "stored": 5.687294682088474,
+    "replayed": 5.687294682088474,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__ath_tritonia_landscape_v9",
+    "run": "20261117T003115Z-screen-4f7cd5",
+    "hash": "d1706b5234e9",
+    "mode": "corrected",
+    "stored": 5.708984494547209,
+    "replayed": 5.708984494547209,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__ath_tritonia_landscape_v9",
+    "run": "20261117T003115Z-screen-4f7cd5",
+    "hash": "fc21ccd3f471",
+    "mode": "corrected",
+    "stored": 6.198848116833273,
+    "replayed": 6.198848116833273,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__ath_twinray380_landscape_v8",
+    "run": "20261116T052759Z-screen-44001e",
+    "hash": "a575f55c809b",
+    "mode": "corrected",
+    "stored": 11.400377895361563,
+    "replayed": 11.400377895361563,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__ath_twinray380_landscape_v8",
+    "run": "20261116T173311Z-screen-96f899",
+    "hash": "cec8db5daa1e",
+    "mode": "corrected",
+    "stored": 5.51674224928782,
+    "replayed": 5.51674224928782,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__ath_twinray380_landscape_v8",
+    "run": "20261117T001240Z-screen-7b664f",
+    "hash": "2fd8de17664e",
+    "mode": "corrected",
+    "stored": 6.617294543375249,
+    "replayed": 6.617294543375249,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__biradial_es_style_v7",
+    "run": "20261116T061215Z-screen-058f0d",
+    "hash": "7b0a1988625d",
+    "mode": "corrected",
+    "stored": 7.775944783707265,
+    "replayed": 7.775944783707265,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__biradial_es_style_v7",
+    "run": "20261116T071520Z-screen-1c8608",
+    "hash": "84f27e1c4a41",
+    "mode": "corrected",
+    "stored": 6.806827726209276,
+    "replayed": 6.806827726209276,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__biradial_es_style_v7",
+    "run": "20261116T090751Z-screen-37b115",
+    "hash": "185d9a3ac830",
+    "mode": "corrected",
+    "stored": 6.91322196302926,
+    "replayed": 6.91322196302926,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__crowe_panel_home_v7",
+    "run": "20261115T205453Z-screen-32f7c4",
+    "hash": "963a04d249d3",
+    "mode": "corrected",
+    "stored": 17.9621784966637,
+    "replayed": 17.9621784966637,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__crowe_panel_home_v7",
+    "run": "20261115T205453Z-screen-32f7c4",
+    "hash": "4f7c8012e3c6",
+    "mode": "corrected",
+    "stored": 17.316825023475303,
+    "replayed": 17.316825023475303,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__crowe_panel_home_v7",
+    "run": "20261115T213849Z-screen-c35ad4",
+    "hash": "a5bd09533460",
+    "mode": "corrected",
+    "stored": 17.99099284588029,
+    "replayed": 17.99099284588029,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__crowe_x_osse_cd_v7",
+    "run": "20261116T065413Z-screen-a70423",
+    "hash": "7f4c515cedd0",
+    "mode": "corrected",
+    "stored": 6.063981935339571,
+    "replayed": 6.063981935339571,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__crowe_x_osse_cd_v7",
+    "run": "20261116T074832Z-screen-620f81",
+    "hash": "3cc37e942257",
+    "mode": "corrected",
+    "stored": 6.293470987113923,
+    "replayed": 6.293470987113923,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__crowe_x_osse_cd_v7",
+    "run": "20261116T152544Z-screen-5f7d93",
+    "hash": "301ec2b07577",
+    "mode": "corrected",
+    "stored": 6.146848876005573,
+    "replayed": 6.146848876005573,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__crowe_x_square_v7",
+    "run": "20261116T021728Z-screen-3943f0",
+    "hash": "2d05c4b6317f",
+    "mode": "corrected",
+    "stored": 9.235607924030127,
+    "replayed": 9.235607924030127,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__crowe_x_square_v7",
+    "run": "20261116T022328Z-screen-87354c",
+    "hash": "d1f3f9dbbc66",
+    "mode": "corrected",
+    "stored": 8.962688954793457,
+    "replayed": 8.962688954793457,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__crowe_x_square_v7",
+    "run": "20261116T022328Z-screen-87354c",
+    "hash": "b026264dd5d5",
+    "mode": "corrected",
+    "stored": 9.168794164321096,
+    "replayed": 9.168794164321096,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__es_style_rollback_v7",
+    "run": "20261115T161238Z-screen-1b1b6e",
+    "hash": "3907eeee1b19",
+    "mode": "corrected",
+    "stored": 23.00837870431142,
+    "replayed": 23.00837870431142,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__es_style_rollback_v7",
+    "run": "20261115T161238Z-screen-1b1b6e",
+    "hash": "84bb9ff8617f",
+    "mode": "corrected",
+    "stored": 21.695014086501303,
+    "replayed": 21.695014086501303,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__es_style_rollback_v7",
+    "run": "20261115T161238Z-screen-1b1b6e",
+    "hash": "0dfa0b0fad95",
+    "mode": "corrected",
+    "stored": 21.508081152728863,
+    "replayed": 21.508081152728863,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__ext_throat_hvlaw_v7",
+    "run": "20261115T143219Z-screen-d3a1bb",
+    "hash": "64efc34b7396",
+    "mode": "corrected",
+    "stored": 6.826798831557894,
+    "replayed": 6.826798831557894,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__ext_throat_hvlaw_v7",
+    "run": "20261115T150043Z-screen-d1ebf6",
+    "hash": "64efc34b7396",
+    "mode": "corrected",
+    "stored": 6.826798831557894,
+    "replayed": 6.826798831557894,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__ext_throat_hvlaw_v7",
+    "run": "20261115T150043Z-screen-d1ebf6",
+    "hash": "525f63058154",
+    "mode": "corrected",
+    "stored": 7.80612990158087,
+    "replayed": 7.80612990158087,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__ext_throat_hvlaw_v8",
+    "run": "20261116T025728Z-screen-cd60f7",
+    "hash": "9fcd21fc1904",
+    "mode": "corrected",
+    "stored": 3.1028085892200576,
+    "replayed": 3.1028085892200576,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__ext_throat_hvlaw_v8",
+    "run": "20261116T025728Z-screen-cd60f7",
+    "hash": "02bea58ed511",
+    "mode": "corrected",
+    "stored": 10.672409384496449,
+    "replayed": 10.672409384496449,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__ext_throat_hvlaw_v8",
+    "run": "20261116T025728Z-screen-cd60f7",
+    "hash": "0376506973c5",
+    "mode": "corrected",
+    "stored": 19.679349830488746,
+    "replayed": 19.679349830488746,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__lecleach_iwata_ar_landscape_v7",
+    "run": "20261115T162516Z-screen-e31b23",
+    "hash": "55432eb7479b",
+    "mode": "corrected",
+    "stored": 21.54098382848679,
+    "replayed": 21.54098382848679,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__lecleach_iwata_ar_landscape_v7",
+    "run": "20261115T162516Z-screen-e31b23",
+    "hash": "21649877b2ed",
+    "mode": "corrected",
+    "stored": 21.060283094845808,
+    "replayed": 21.060283094845808,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__lecleach_iwata_ar_landscape_v7",
+    "run": "20261115T162516Z-screen-e31b23",
+    "hash": "90c1c0bcf6cb",
+    "mode": "corrected",
+    "stored": 19.561984153108938,
+    "replayed": 19.561984153108938,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__osse_rrect_fold_warm_v7",
+    "run": "20261116T085415Z-screen-0a228d",
+    "hash": "7a9707801ad8",
+    "mode": "corrected",
+    "stored": 4.288509662991467,
+    "replayed": 4.288509662991467,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__osse_rrect_fold_warm_v7",
+    "run": "20261116T131710Z-screen-f1a263",
+    "hash": "c09356abfb15",
+    "mode": "corrected",
+    "stored": 4.519881944207661,
+    "replayed": 4.519881944207661,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__osse_rrect_fold_warm_v7",
+    "run": "20261116T153619Z-screen-c221aa",
+    "hash": "fab5b3c7f641",
+    "mode": "corrected",
+    "stored": 4.025470420398806,
+    "replayed": 4.025470420398806,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__osse_rrect_morph_v7",
+    "run": "20261115T154322Z-screen-07bea2",
+    "hash": "9992af67096b",
+    "mode": "corrected",
+    "stored": 8.274700460961073,
+    "replayed": 8.274700460961073,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__osse_rrect_morph_v7",
+    "run": "20261115T154322Z-screen-07bea2",
+    "hash": "7e29b5df13bc",
+    "mode": "corrected",
+    "stored": 6.253921293909699,
+    "replayed": 6.253921293909699,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__osse_rrect_morph_v7",
+    "run": "20261115T154322Z-screen-07bea2",
+    "hash": "dad52c0d0cc0",
+    "mode": "corrected",
+    "stored": 6.08840106091929,
+    "replayed": 6.08840106091929,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__osse_rrect_morph_v8",
+    "run": "20261116T030920Z-screen-5d1082",
+    "hash": "7de69ffa75e8",
+    "mode": "corrected",
+    "stored": 3.9917117077088364,
+    "replayed": 3.9917117077088364,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__osse_rrect_morph_v8",
+    "run": "20261116T030920Z-screen-5d1082",
+    "hash": "4df9b694157d",
+    "mode": "corrected",
+    "stored": 6.131075600594132,
+    "replayed": 6.131075600594132,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__osse_rrect_morph_v8",
+    "run": "20261116T030920Z-screen-5d1082",
+    "hash": "f0e7f7272745",
+    "mode": "corrected",
+    "stored": 6.372733012712831,
+    "replayed": 6.372733012712831,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__rolled_es_spiral_v7",
+    "run": "20261116T001222Z-screen-b25d61",
+    "hash": "2aa7e67a9aa0",
+    "mode": "corrected",
+    "stored": 29.915058022720153,
+    "replayed": 29.915058022720153,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__rolled_es_spiral_v7",
+    "run": "20261116T003142Z-screen-981f59",
+    "hash": "2aa7e67a9aa0",
+    "mode": "corrected",
+    "stored": 29.915058022720153,
+    "replayed": 29.915058022720153,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__rolled_es_spiral_v7",
+    "run": "20261116T003142Z-screen-981f59",
+    "hash": "456baa4d32de",
+    "mode": "corrected",
+    "stored": 20.928872929037933,
+    "replayed": 20.928872929037933,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__rosse_rect_cd_v7",
+    "run": "20261116T064438Z-screen-8defc1",
+    "hash": "4d86f55074ed",
+    "mode": "corrected",
+    "stored": 9.695226668557556,
+    "replayed": 9.695226668557556,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__rosse_rect_cd_v7",
+    "run": "20261116T145634Z-screen-e4c778",
+    "hash": "842d6d472c31",
+    "mode": "corrected",
+    "stored": 5.589610176483966,
+    "replayed": 5.589610176483966,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "hl__rosse_rect_cd_v7",
+    "run": "20261116T150941Z-screen-0e777a",
+    "hash": "1f91c24b38d9",
+    "mode": "corrected",
+    "stored": 4.768428455080179,
+    "replayed": 4.768428455080179,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "rf__rect_radial_wide_v7",
+    "run": "20261116T005943Z-screen-20db0d",
+    "hash": "6a604ec61185",
+    "mode": "corrected",
+    "stored": 33.34146324740297,
+    "replayed": 33.34146324740297,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "rf__rect_radial_wide_v7",
+    "run": "20261116T005943Z-screen-20db0d",
+    "hash": "a4614c3dfdc4",
+    "mode": "corrected",
+    "stored": 32.73792820123102,
+    "replayed": 32.73792820123102,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "rf__section_axial_home_v7",
+    "run": "20261116T015510Z-screen-e75ec8",
+    "hash": "d99b73012d8e",
+    "mode": "corrected",
+    "stored": 17.95109117004124,
+    "replayed": 17.95109117004124,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "rf__section_axial_home_v7",
+    "run": "20261116T020629Z-screen-0d29d7",
+    "hash": "d99b73012d8e",
+    "mode": "corrected",
+    "stored": 17.95109117004124,
+    "replayed": 17.95109117004124,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "rf__section_axial_home_v7",
+    "run": "20261116T020629Z-screen-0d29d7",
+    "hash": "3c559ed05b38",
+    "mode": "corrected",
+    "stored": 18.512163792106506,
+    "replayed": 18.512163792106506,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "rr__crowe_panel_es600_v7",
+    "run": "20261115T171150Z-screen-d66ffb",
+    "hash": "732de1c20994",
+    "mode": "corrected",
+    "stored": 23.085943064983923,
+    "replayed": 23.085943064983923,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "rr__crowe_panel_es600_v7",
+    "run": "20261115T194455Z-screen-bf9fc8",
+    "hash": "b161b53f457d",
+    "mode": "corrected",
+    "stored": 23.032807923629175,
+    "replayed": 23.032807923629175,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "rr__crowe_panel_es600_v7",
+    "run": "20261115T194455Z-screen-bf9fc8",
+    "hash": "fa79604d2a7b",
+    "mode": "corrected",
+    "stored": 22.822323900091014,
+    "replayed": 22.822323900091014,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "rr__pucker_hv_moderate_v7",
+    "run": "20261115T164910Z-screen-f94955",
+    "hash": "b019bc253cc7",
+    "mode": "corrected",
+    "stored": 29.447167275376867,
+    "replayed": 29.447167275376867,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "rr__pucker_hv_moderate_v7",
+    "run": "20261115T164910Z-screen-f94955",
+    "hash": "b00e38ac39b3",
+    "mode": "corrected",
+    "stored": 29.350765250442482,
+    "replayed": 29.350765250442482,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "rr__pucker_hv_moderate_v7",
+    "run": "20261115T164910Z-screen-f94955",
+    "hash": "fe6432344bc9",
+    "mode": "corrected",
+    "stored": 28.795962976719036,
+    "replayed": 28.795962976719036,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "rr__pucker_hv_strong_v7",
+    "run": "20261115T165937Z-screen-4d8a33",
+    "hash": "b833826c1585",
+    "mode": "corrected",
+    "stored": 28.50302163047591,
+    "replayed": 28.50302163047591,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "rr__pucker_hv_strong_v7",
+    "run": "20261115T165937Z-screen-4d8a33",
+    "hash": "a25fc0f70005",
+    "mode": "corrected",
+    "stored": 27.84098073622877,
+    "replayed": 27.84098073622877,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "rr__pucker_hv_strong_v7",
+    "run": "20261115T165937Z-screen-4d8a33",
+    "hash": "82b3bdc70783",
+    "mode": "corrected",
+    "stored": 27.750481083260095,
+    "replayed": 27.750481083260095,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "rr__reference_v7",
+    "run": "20261115T163824Z-screen-d4a7c4",
+    "hash": "b32777ab931a",
+    "mode": "corrected",
+    "stored": 30.362443405957578,
+    "replayed": 30.362443405957578,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "rr__reference_v7",
+    "run": "20261115T163824Z-screen-d4a7c4",
+    "hash": "459d947b84f1",
+    "mode": "corrected",
+    "stored": 30.347617921451246,
+    "replayed": 30.347617921451246,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "rr__reference_v7",
+    "run": "20261115T163824Z-screen-d4a7c4",
+    "hash": "dd23c8704459",
+    "mode": "corrected",
+    "stored": 29.422981398850794,
+    "replayed": 29.422981398850794,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "sp__control_v7",
+    "run": "20261115T180109Z-screen-0f2ab5",
+    "hash": "27914ae077f9",
+    "mode": "corrected",
+    "stored": 23.198020243632694,
+    "replayed": 23.198020243632694,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "sp__control_v7",
+    "run": "20261115T180109Z-screen-0f2ab5",
+    "hash": "23e57211fde6",
+    "mode": "corrected",
+    "stored": 23.173969855391487,
+    "replayed": 23.173969855391487,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "sp__control_v7",
+    "run": "20261115T180109Z-screen-0f2ab5",
+    "hash": "99ce1a12a7a5",
+    "mode": "corrected",
+    "stored": 23.133424025352532,
+    "replayed": 23.133424025352532,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "sp__moderate_v7",
+    "run": "20261115T181250Z-screen-1e22a5",
+    "hash": "56444e4ed0ec",
+    "mode": "corrected",
+    "stored": 23.649940998837984,
+    "replayed": 23.649940998837984,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "sp__moderate_v7",
+    "run": "20261115T181250Z-screen-1e22a5",
+    "hash": "f282550e4296",
+    "mode": "corrected",
+    "stored": 23.17633278114895,
+    "replayed": 23.17633278114895,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "sp__moderate_v7",
+    "run": "20261115T181250Z-screen-1e22a5",
+    "hash": "173b7a7f4abe",
+    "mode": "corrected",
+    "stored": 23.149613055456705,
+    "replayed": 23.149613055456705,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "sp__strong_v7",
+    "run": "20261115T182340Z-screen-35c541",
+    "hash": "6562d079d0af",
+    "mode": "corrected",
+    "stored": 24.46501970665871,
+    "replayed": 24.46501970665871,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "sp__strong_v7",
+    "run": "20261115T182340Z-screen-35c541",
+    "hash": "68c08f9792bd",
+    "mode": "corrected",
+    "stored": 24.161274551878435,
+    "replayed": 24.161274551878435,
+    "status": "scored",
+    "error": null
+  },
+  {
+    "config": "sp__strong_v7",
+    "run": "20261115T182340Z-screen-35c541",
+    "hash": "50a0a1c7c7d2",
+    "mode": "corrected",
+    "stored": 23.953921450499017,
+    "replayed": 23.953921450499017,
+    "status": "scored",
+    "error": null
+  }
+]

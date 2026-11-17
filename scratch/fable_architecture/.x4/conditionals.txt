@@ -1,0 +1,12 @@
+n_at_s0 rms 0.0 max 0.0
+q_at_s0 rms 0.0 max 0.0
+s1_when_s2zero rms 0.0 max 0.0
+s2_when_s1zero rms 0.0 max 0.0
+morph_width_target0 rms 0.0 max 0.0
+morph_rate_target0 rms 0.0 max 0.0
+morph_exponent_target1 rms 0.0 max 0.0
+morph_exponent_target3 rms 18.58929769895022 max 73.8442891178439
+n_at_spositive rms 1.0524818875685693 max 2.051843578961288
+q_at_spositive ERROR UnsupportedGeometryError geometry resolve failed: ConfigError: cannot fit the acoustic geometry to the requested mm resolution (throat 10 mm, mouth 10 mm): the axial chord is still 8.77x its limit; raise the throat/mouth resolution. Refinement stopped at the 2048-segment axial limit with a control grid of 43 x 2049 samples (corner-arc subdivision 1x).
+s1_when_s2positive rms 56.532701641186 max 80.61919136867289
+s2_when_s1positive rms 2.6785342491178445 max 6.30495551920197

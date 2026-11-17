@@ -1,0 +1,512 @@
+[
+  {
+    "run": "20261115T143219Z-screen-d3a1bb",
+    "config": "hl__ext_throat_hvlaw_v7",
+    "attempts": 100,
+    "trigger": 25,
+    "reason": "refusal rate 40% over the last 25 attempts > 30%",
+    "best_at_trigger": 6.590015300582919,
+    "final_best": 3.102805201974035,
+    "lost_rows": 75
+  },
+  {
+    "run": "20261115T150043Z-screen-d1ebf6",
+    "config": "hl__ext_throat_hvlaw_v7",
+    "attempts": 101,
+    "trigger": 26,
+    "reason": "refusal rate 31% over the last 26 attempts > 30%",
+    "best_at_trigger": 4.265778215473212,
+    "final_best": 3.9677663327889543,
+    "lost_rows": 75
+  },
+  {
+    "run": "20261115T152510Z-screen-a504f6",
+    "config": "hl__ath_core_petal_hvlaw_v7",
+    "attempts": 80,
+    "trigger": 25,
+    "reason": "refusal rate 56% over the last 25 attempts > 30%",
+    "best_at_trigger": 5.321843569389598,
+    "final_best": 5.321843569389598,
+    "lost_rows": 55
+  },
+  {
+    "run": "20261115T154322Z-screen-07bea2",
+    "config": "hl__osse_rrect_morph_v7",
+    "attempts": 80,
+    "trigger": 32,
+    "reason": "bound-pinned: 3/6 of the top 6 sit at the low limit of az_a_cos_pow [1, 6] - widen the box and requeue",
+    "best_at_trigger": 4.207534594523672,
+    "final_best": 3.9917940069570292,
+    "lost_rows": 48
+  },
+  {
+    "run": "20261115T161238Z-screen-1b1b6e",
+    "config": "hl__es_style_rollback_v7",
+    "attempts": 80,
+    "trigger": 68,
+    "reason": "bound-pinned: 3/6 of the top 6 sit at the low limit of g_ar_m [1.6, 2.4] - widen the box and requeue",
+    "best_at_trigger": 20.855068338323505,
+    "final_best": 20.855068338323505,
+    "lost_rows": 12
+  },
+  {
+    "run": "20261115T162331Z-screen-2ac841",
+    "config": "hl__biradial_es_style_v7",
+    "attempts": 19,
+    "trigger": null,
+    "reason": null,
+    "best_at_trigger": null,
+    "final_best": null,
+    "lost_rows": 0
+  },
+  {
+    "run": "20261115T162516Z-screen-e31b23",
+    "config": "hl__lecleach_iwata_ar_landscape_v7",
+    "attempts": 80,
+    "trigger": 58,
+    "reason": "bound-pinned: 3/6 of the top 6 sit at the low limit of g_ar_m [1.2, 2.4] - widen the box and requeue",
+    "best_at_trigger": 20.258140179349457,
+    "final_best": 19.418351124249778,
+    "lost_rows": 22
+  },
+  {
+    "run": "20261115T163824Z-screen-d4a7c4",
+    "config": "rr__reference_v7",
+    "attempts": 32,
+    "trigger": 32,
+    "reason": "bound-pinned: 3/6 of the top 6 sit at the high limit of g_decay [0.55, 0.85] - widen the box and requeue",
+    "best_at_trigger": 29.422981398850794,
+    "final_best": 29.422981398850794,
+    "lost_rows": 0
+  },
+  {
+    "run": "20261115T164910Z-screen-f94955",
+    "config": "rr__pucker_hv_moderate_v7",
+    "attempts": 32,
+    "trigger": 30,
+    "reason": "bound-pinned: 3/6 of the top 6 sit at the high limit of g_decay [0.55, 0.85] - widen the box and requeue",
+    "best_at_trigger": 28.43408839576063,
+    "final_best": 28.43408839576063,
+    "lost_rows": 2
+  },
+  {
+    "run": "20261115T165937Z-screen-4d8a33",
+    "config": "rr__pucker_hv_strong_v7",
+    "attempts": 32,
+    "trigger": null,
+    "reason": null,
+    "best_at_trigger": null,
+    "final_best": 27.40706454147391,
+    "lost_rows": 0
+  },
+  {
+    "run": "20261115T171150Z-screen-d66ffb",
+    "config": "rr__crowe_panel_es600_v7",
+    "attempts": 32,
+    "trigger": 30,
+    "reason": "bound-pinned: 3/6 of the top 6 sit at the high limit of g_h_depth_scale [0.97, 1.03] - widen the box and requeue",
+    "best_at_trigger": 22.756336837898132,
+    "final_best": 22.756336837898132,
+    "lost_rows": 2
+  },
+  {
+    "run": "20261115T180109Z-screen-0f2ab5",
+    "config": "sp__control_v7",
+    "attempts": 48,
+    "trigger": 30,
+    "reason": "bound-pinned: 3/6 of the top 6 sit at the high limit of g_h_depth_scale [0.98, 1.02] - widen the box and requeue",
+    "best_at_trigger": 22.830495036003384,
+    "final_best": 22.7651703799414,
+    "lost_rows": 18
+  },
+  {
+    "run": "20261115T181250Z-screen-1e22a5",
+    "config": "sp__moderate_v7",
+    "attempts": 48,
+    "trigger": 33,
+    "reason": "bound-pinned: 3/6 of the top 6 sit at the low limit of g_pucker_v_mm [0, 8] - widen the box and requeue",
+    "best_at_trigger": 23.00507992547503,
+    "final_best": 22.93819070712569,
+    "lost_rows": 15
+  },
+  {
+    "run": "20261115T182340Z-screen-35c541",
+    "config": "sp__strong_v7",
+    "attempts": 48,
+    "trigger": 33,
+    "reason": "bound-pinned: 3/6 of the top 6 sit at the low limit of g_pucker_v_mm [6, 12] - widen the box and requeue",
+    "best_at_trigger": 23.794442602493994,
+    "final_best": 23.794442602493994,
+    "lost_rows": 15
+  },
+  {
+    "run": "20261115T194455Z-screen-bf9fc8",
+    "config": "rr__crowe_panel_es600_v7",
+    "attempts": 128,
+    "trigger": 30,
+    "reason": "bound-pinned: 3/6 of the top 6 sit at the high limit of g_h_depth_scale [0.97, 1.03] - widen the box and requeue",
+    "best_at_trigger": 22.756336837898132,
+    "final_best": 22.54184876317923,
+    "lost_rows": 98
+  },
+  {
+    "run": "20261115T205453Z-screen-32f7c4",
+    "config": "hl__crowe_panel_home_v7",
+    "attempts": 96,
+    "trigger": 44,
+    "reason": "bound-pinned: 3/6 of the top 6 sit at the high limit of g_h_depth_scale [0.9, 1.1] - widen the box and requeue",
+    "best_at_trigger": 16.91817613526687,
+    "final_best": 16.91817613526687,
+    "lost_rows": 52
+  },
+  {
+    "run": "20261115T213849Z-screen-c35ad4",
+    "config": "hl__crowe_panel_home_v7",
+    "attempts": 62,
+    "trigger": null,
+    "reason": null,
+    "best_at_trigger": null,
+    "final_best": 17.061484816611564,
+    "lost_rows": 0
+  },
+  {
+    "run": "20261116T001222Z-screen-b25d61",
+    "config": "hl__rolled_es_spiral_v7",
+    "attempts": 30,
+    "trigger": null,
+    "reason": null,
+    "best_at_trigger": null,
+    "final_best": 17.70714265766956,
+    "lost_rows": 0
+  },
+  {
+    "run": "20261116T003142Z-screen-981f59",
+    "config": "hl__rolled_es_spiral_v7",
+    "attempts": 31,
+    "trigger": 30,
+    "reason": "bound-pinned: 4/6 of the top 6 sit at the high limit of g_terminal_deg [200, 275] - widen the box and requeue",
+    "best_at_trigger": 19.916592925827562,
+    "final_best": 19.916592925827562,
+    "lost_rows": 1
+  },
+  {
+    "run": "20261116T005943Z-screen-20db0d",
+    "config": "rf__rect_radial_wide_v7",
+    "attempts": 2,
+    "trigger": null,
+    "reason": null,
+    "best_at_trigger": null,
+    "final_best": 32.73792820123102,
+    "lost_rows": 0
+  },
+  {
+    "run": "20261116T015510Z-screen-e75ec8",
+    "config": "rf__section_axial_home_v7",
+    "attempts": 25,
+    "trigger": null,
+    "reason": null,
+    "best_at_trigger": null,
+    "final_best": 17.398201182315105,
+    "lost_rows": 0
+  },
+  {
+    "run": "20261116T020629Z-screen-0d29d7",
+    "config": "rf__section_axial_home_v7",
+    "attempts": 26,
+    "trigger": null,
+    "reason": null,
+    "best_at_trigger": null,
+    "final_best": 17.397036998386138,
+    "lost_rows": 0
+  },
+  {
+    "run": "20261116T021728Z-screen-3943f0",
+    "config": "hl__crowe_x_square_v7",
+    "attempts": 25,
+    "trigger": 25,
+    "reason": "refusal rate 48% over the last 25 attempts > 30%",
+    "best_at_trigger": 8.817113729302825,
+    "final_best": 8.817113729302825,
+    "lost_rows": 0
+  },
+  {
+    "run": "20261116T022328Z-screen-87354c",
+    "config": "hl__crowe_x_square_v7",
+    "attempts": 26,
+    "trigger": 25,
+    "reason": "refusal rate 32% over the last 25 attempts > 30%",
+    "best_at_trigger": 8.20457320768793,
+    "final_best": 8.20457320768793,
+    "lost_rows": 1
+  },
+  {
+    "run": "20261116T025728Z-screen-cd60f7",
+    "config": "hl__ext_throat_hvlaw_v8",
+    "attempts": 46,
+    "trigger": 25,
+    "reason": "refusal rate 48% over the last 25 attempts > 30%",
+    "best_at_trigger": 3.1028085892200576,
+    "final_best": 3.1028085892200576,
+    "lost_rows": 21
+  },
+  {
+    "run": "20261116T030920Z-screen-5d1082",
+    "config": "hl__osse_rrect_morph_v8",
+    "attempts": 40,
+    "trigger": null,
+    "reason": null,
+    "best_at_trigger": null,
+    "final_best": 3.9236412994041032,
+    "lost_rows": 0
+  },
+  {
+    "run": "20261116T035652Z-screen-e30021",
+    "config": "hl__ath_tritonia_landscape_v7",
+    "attempts": 2,
+    "trigger": null,
+    "reason": null,
+    "best_at_trigger": null,
+    "final_best": 32.76420061605191,
+    "lost_rows": 0
+  },
+  {
+    "run": "20261116T041232Z-screen-b5380a",
+    "config": "hl__ath_tritonia_landscape_v7",
+    "attempts": 19,
+    "trigger": null,
+    "reason": null,
+    "best_at_trigger": null,
+    "final_best": 11.17732920109542,
+    "lost_rows": 0
+  },
+  {
+    "run": "20261116T044917Z-screen-12eb61",
+    "config": "hl__ath_tritonia_landscape_v8",
+    "attempts": 74,
+    "trigger": 74,
+    "reason": "bound-pinned: 3/6 of the top 6 sit at the low limit of morph_rate [1.2, 2.1] - widen the box and requeue",
+    "best_at_trigger": 5.691901189403092,
+    "final_best": 5.691901189403092,
+    "lost_rows": 0
+  },
+  {
+    "run": "20261116T052759Z-screen-44001e",
+    "config": "hl__ath_twinray380_landscape_v8",
+    "attempts": 52,
+    "trigger": 36,
+    "reason": "bound-pinned: 3/6 of the top 6 sit at the high limit of az_fold_v_deg [-11, -6] - widen the box and requeue",
+    "best_at_trigger": 5.516751001610187,
+    "final_best": 5.516751001610187,
+    "lost_rows": 16
+  },
+  {
+    "run": "20261116T054705Z-screen-570bc6",
+    "config": "hl__ath_tritonia_landscape_v8",
+    "attempts": 39,
+    "trigger": 39,
+    "reason": "bound-pinned: 3/6 of the top 6 sit at the low limit of az_a_cos_amp [-16, -13.5] - widen the box and requeue",
+    "best_at_trigger": 6.6028628282614825,
+    "final_best": 6.6028628282614825,
+    "lost_rows": 0
+  },
+  {
+    "run": "20261116T060140Z-screen-679c6f",
+    "config": "hl__ath_twinray380_landscape_v8",
+    "attempts": 31,
+    "trigger": 31,
+    "reason": "bound-pinned: 4/6 of the top 6 sit at the low limit of morph_corner_mm [8, 60] - widen the box and requeue",
+    "best_at_trigger": 6.035152431491362,
+    "final_best": 6.035152431491362,
+    "lost_rows": 0
+  },
+  {
+    "run": "20261116T061215Z-screen-058f0d",
+    "config": "hl__biradial_es_style_v7",
+    "attempts": 96,
+    "trigger": null,
+    "reason": null,
+    "best_at_trigger": null,
+    "final_best": 6.558060036945962,
+    "lost_rows": 0
+  },
+  {
+    "run": "20261116T064438Z-screen-8defc1",
+    "config": "hl__rosse_rect_cd_v7",
+    "attempts": 30,
+    "trigger": 30,
+    "reason": "bound-pinned: 4/6 of the top 6 sit at the low limit of g_r [0.25, 0.6] - widen the box and requeue",
+    "best_at_trigger": 5.9764597706029035,
+    "final_best": 5.9764597706029035,
+    "lost_rows": 0
+  },
+  {
+    "run": "20261116T065413Z-screen-a70423",
+    "config": "hl__crowe_x_osse_cd_v7",
+    "attempts": 65,
+    "trigger": 64,
+    "reason": "stalled: best J 5.997 improved < 0.5% over the last 40 valid evals",
+    "best_at_trigger": 5.997275325745774,
+    "final_best": 5.997275325745774,
+    "lost_rows": 1
+  },
+  {
+    "run": "20261116T071520Z-screen-1c8608",
+    "config": "hl__biradial_es_style_v7",
+    "attempts": 71,
+    "trigger": 71,
+    "reason": "stalled: best J 6.482 improved < 0.5% over the last 40 valid evals",
+    "best_at_trigger": 6.482252764115206,
+    "final_best": 6.482252764115206,
+    "lost_rows": 0
+  },
+  {
+    "run": "20261116T073857Z-screen-7b9313",
+    "config": "hl__rosse_rect_cd_v7",
+    "attempts": 34,
+    "trigger": 33,
+    "reason": "bound-pinned: 3/6 of the top 6 sit at the low limit of g_k [0.8, 3] - widen the box and requeue",
+    "best_at_trigger": 5.811276064040042,
+    "final_best": 5.811276064040042,
+    "lost_rows": 1
+  },
+  {
+    "run": "20261116T074832Z-screen-620f81",
+    "config": "hl__crowe_x_osse_cd_v7",
+    "attempts": 78,
+    "trigger": 77,
+    "reason": "bound-pinned: 3/6 of the top 6 sit at the high limit of g_L_mm [200, 260] - widen the box and requeue",
+    "best_at_trigger": 5.3441625675651725,
+    "final_best": 5.3441625675651725,
+    "lost_rows": 1
+  },
+  {
+    "run": "20261116T085415Z-screen-0a228d",
+    "config": "hl__osse_rrect_fold_warm_v7",
+    "attempts": 31,
+    "trigger": 30,
+    "reason": "bound-pinned: 3/6 of the top 6 sit at the high limit of az_fold_v_deg [-25, 0] - widen the box and requeue",
+    "best_at_trigger": 3.7618985691139892,
+    "final_best": 3.7618985691139892,
+    "lost_rows": 1
+  },
+  {
+    "run": "20261116T090751Z-screen-37b115",
+    "config": "hl__biradial_es_style_v7",
+    "attempts": 142,
+    "trigger": 82,
+    "reason": "stalled: best J 6.643 improved < 0.5% over the last 40 valid evals",
+    "best_at_trigger": 6.642975316179126,
+    "final_best": 6.446802016621025,
+    "lost_rows": 60
+  },
+  {
+    "run": "20261116T093400Z-screen-56681d",
+    "config": "hl__rosse_rect_cd_v7",
+    "attempts": 55,
+    "trigger": 55,
+    "reason": "bound-pinned: 3/6 of the top 6 sit at the low limit of g_a_v_deg [18, 30] - widen the box and requeue",
+    "best_at_trigger": 4.891541281798778,
+    "final_best": 4.891541281798778,
+    "lost_rows": 0
+  },
+  {
+    "run": "20261116T095336Z-screen-7fc9b7",
+    "config": "hl__crowe_x_osse_cd_v7",
+    "attempts": 28,
+    "trigger": 28,
+    "reason": "refusal rate 32% over the last 28 attempts > 30%",
+    "best_at_trigger": 5.6911339378643095,
+    "final_best": 5.6911339378643095,
+    "lost_rows": 0
+  },
+  {
+    "run": "20261116T130335Z-screen-ab4fb9",
+    "config": "hl__osse_rrect_fold_warm_v7",
+    "attempts": 77,
+    "trigger": 30,
+    "reason": "no gain: after 30 valid evals the best is still the seed (J 3.762)",
+    "best_at_trigger": 3.7618608911411444,
+    "final_best": 3.6732664312779115,
+    "lost_rows": 47
+  },
+  {
+    "run": "20261116T131710Z-screen-f1a263",
+    "config": "hl__osse_rrect_fold_warm_v7",
+    "attempts": 79,
+    "trigger": 30,
+    "reason": "no gain: after 30 valid evals the best is still the seed (J 3.762)",
+    "best_at_trigger": 3.7618608911411444,
+    "final_best": 3.7618608911411444,
+    "lost_rows": 49
+  },
+  {
+    "run": "20261116T145634Z-screen-e4c778",
+    "config": "hl__rosse_rect_cd_v7",
+    "attempts": 76,
+    "trigger": 32,
+    "reason": "no gain: after 30 valid evals the best is still the seed (J 4.891)",
+    "best_at_trigger": 4.890773063595839,
+    "final_best": 4.660628399240937,
+    "lost_rows": 44
+  },
+  {
+    "run": "20261116T150941Z-screen-0e777a",
+    "config": "hl__rosse_rect_cd_v7",
+    "attempts": 61,
+    "trigger": 30,
+    "reason": "bound-pinned: 3/6 of the top 6 sit at the high limit of g_tmax [0.85, 1] - widen the box and requeue",
+    "best_at_trigger": 4.858501950226726,
+    "final_best": 4.56260039584145,
+    "lost_rows": 31
+  },
+  {
+    "run": "20261116T152544Z-screen-5f7d93",
+    "config": "hl__crowe_x_osse_cd_v7",
+    "attempts": 87,
+    "trigger": 41,
+    "reason": "refusal rate 33% over the last 30 attempts > 30%",
+    "best_at_trigger": 5.345396237349772,
+    "final_best": 5.345396237349772,
+    "lost_rows": 46
+  },
+  {
+    "run": "20261116T153619Z-screen-c221aa",
+    "config": "hl__osse_rrect_fold_warm_v7",
+    "attempts": 61,
+    "trigger": 43,
+    "reason": "bound-pinned: 3/6 of the top 6 sit at the low limit of az_fold_v_width_deg [8, 40] - widen the box and requeue",
+    "best_at_trigger": 3.6210089399969845,
+    "final_best": 3.6210089399969845,
+    "lost_rows": 18
+  },
+  {
+    "run": "20261116T173311Z-screen-96f899",
+    "config": "hl__ath_twinray380_landscape_v8",
+    "attempts": 53,
+    "trigger": 53,
+    "reason": "bound-pinned: 3/6 of the top 6 sit at the low limit of s [0.6, 1] - widen the box and requeue",
+    "best_at_trigger": 5.179381865873163,
+    "final_best": 5.179381865873163,
+    "lost_rows": 0
+  },
+  {
+    "run": "20261117T001240Z-screen-7b664f",
+    "config": "hl__ath_twinray380_landscape_v8",
+    "attempts": 30,
+    "trigger": 30,
+    "reason": "bound-pinned: 4/6 of the top 6 sit at the high limit of morph_width_mm [300, 590] - widen the box and requeue",
+    "best_at_trigger": 4.91446027530813,
+    "final_best": 4.91446027530813,
+    "lost_rows": 0
+  },
+  {
+    "run": "20261117T003115Z-screen-4f7cd5",
+    "config": "hl__ath_tritonia_landscape_v9",
+    "attempts": 133,
+    "trigger": 38,
+    "reason": "bound-pinned: 4/6 of the top 6 sit at the high limit of morph_corner_mm [10, 30] - widen the box and requeue",
+    "best_at_trigger": 5.317288227343884,
+    "final_best": 5.014783285579148,
+    "lost_rows": 95
+  }
+]

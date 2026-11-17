@@ -1,0 +1,58 @@
+{
+  "hl__crowe_panel_home_v7": {
+    "keys": [
+      "g_width_mm",
+      "g_height_mm",
+      "g_depth_mm",
+      "g_h_depth_scale",
+      "g_crown_mm",
+      "g_junction_power"
+    ],
+    "results": [
+      {
+        "hash": "22365b569be9",
+        "error": "GeneratorError: unknown rows type 'crowe_panel' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])"
+      },
+      {
+        "hash": "36559c1c96fd",
+        "error": "GeneratorError: unknown rows type 'crowe_panel' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])"
+      },
+      {
+        "hash": "594e7ec5a190",
+        "error": "GeneratorError: unknown rows type 'crowe_panel' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])"
+      },
+      {
+        "hash": "7d1949bf4db8",
+        "error": "GeneratorError: unknown rows type 'crowe_panel' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])"
+      },
+      {
+        "hash": "ac49d90b1830",
+        "error": "GeneratorError: unknown rows type 'crowe_panel' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])"
+      },
+      {
+        "hash": "1690964ad023",
+        "error": "GeneratorError: unknown rows type 'crowe_panel' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])"
+      },
+      {
+        "hash": "b09da9883014",
+        "error": "GeneratorError: unknown rows type 'crowe_panel' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])"
+      },
+      {
+        "hash": "ee9cbee0ef78",
+        "error": "GeneratorError: unknown rows type 'crowe_panel' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])"
+      },
+      {
+        "hash": "9e4155e7363c",
+        "error": "GeneratorError: unknown rows type 'crowe_panel' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])"
+      },
+      {
+        "hash": "bda2f370a412",
+        "error": "GeneratorError: unknown rows type 'crowe_panel' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])"
+      },
+      {
+        "hash": "1215156bd7f9",
+        "error": "GeneratorError: unknown rows type 'crowe_panel' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])"
+      }
+    ]
+  }
+}

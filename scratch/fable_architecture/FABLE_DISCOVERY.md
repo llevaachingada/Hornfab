@@ -1,5 +1,15 @@
 # FABLE_DISCOVERY — independent architectural review of Hornfab
 
+> **Results update, 2026-11-16 23:15.** Two corrections from requests R1–R4.
+> (1) The replay in §5.1 regenerated DI with the wrong rule. The "both on a dense grid: sd 0.12"
+> row is therefore unreliable; with the parity-exact harness the figure is sd 0.20 over all 58
+> pairs, and interpolating a 29-point response to 58 points *alone* shifts J by sd 0.61. Dense
+> interpolation does not make J grid-invariant; the terms need grid-independent definitions.
+> (2) The stored-versus-stored numbers (bias +0.19, sd 0.17 among the best pairs; same mesh for
+> screen and verify) stand. R1 found mesh refinement effects small but had only two pairs with
+> J < 5. R3 and S1 confirm that a corridor objective changes the top of the ranking. R4: seed
+> spread is about 57 % of the gap between neighbouring configs. See `LOW_COST_AGENT_HANDOFF.md` §4.
+
 **Date:** 2026-11-16 (evening). **Tree reviewed:** `main` @ `f0dd019` (dossier snapshot was `601be8c`;
 `origin/main` is now `37dd1f3`). **Mode:** read-only. No tracked file, queue, config or process was
 touched; no GPU/BEM solve or mesher run. The only new files are this document,
