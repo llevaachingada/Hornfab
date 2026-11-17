@@ -52,6 +52,7 @@ BUDGET_PROFILES = {
     'comparison-60': {'screen_calls': 60, 'verify_calls': 6, 'total_calls': 66, 'attempts': 300},
     'comparison-80x2': {'screen_calls': 80, 'verify_calls': 2, 'total_calls': 82, 'attempts': 400},
     'comparison-100x2': {'screen_calls': 100, 'verify_calls': 2, 'total_calls': 102, 'attempts': 500},
+    'exploration-300x4': {'screen_calls': 300, 'verify_calls': 4, 'total_calls': 304, 'attempts': 1500},
 }
 
 

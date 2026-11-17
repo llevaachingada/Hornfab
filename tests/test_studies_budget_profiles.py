@@ -61,6 +61,8 @@ def test_unknown_profile_is_refused(tmp_path):
                          'total_calls': 82, 'attempts': 400}),
     ('comparison-100x2', {'screen_calls': 100, 'verify_calls': 2,
                           'total_calls': 102, 'attempts': 500}),
+    ('exploration-300x4', {'screen_calls': 300, 'verify_calls': 4,
+                           'total_calls': 304, 'attempts': 1500}),
 ])
 def test_new_comparison_profiles_are_exact_and_verifiable(tmp_path, profile, caps):
     assert BUDGET_PROFILES[profile] == caps

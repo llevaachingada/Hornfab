@@ -172,22 +172,30 @@ def refresh(night: str, min_fresh_rows: int, max_repairs: int, dry: bool) -> dic
             pass
 
     actions, deferrals, inserts = [], [], []
+    seen = set()
     existing_ids = {j["id"] for j in jobs}
     for job_id, attempts in sorted(failures.items()):
-        base = job_id
-        n_fail = len(attempts)
+        base = job_id.split("_rc")[0]
+        if base in seen:
+            continue
+        seen.add(base)
+        family = [a for k, v in failures.items() if k == base or k.startswith(base + "_rc")
+                  for a in v]
+        # blocked attempts are lock-contention transients, not diagnosis-worthy
+        hard = [a for a in family if a.get("status") != "blocked"]
+        blocked = [a for a in family if a.get("status") == "blocked"]
+        n_fail = len(hard) if hard else (len(blocked) if len(blocked) < 4 else 0) or 1
         spec = by_id.get(base, [None])[0]
-        if spec is None and "_rc" in base:
-            base = base.split("_rc")[0]
-            spec = by_id.get(base, [None])[0]
         if spec is None:
             continue
-        # already re-queued? (a *_rc job of this base exists in the night file)
-        prior = [i for i in existing_ids if i.startswith(base + "_rc")]
+        # already re-queued? (a *_rc job of this base exists AND is not itself a fresh failure)
+        prior = [j for j in jobs if j["id"].startswith(base + "_rc") and j["id"] not in failures
+                 and j["id"] in existing_ids]
         if prior:
-            deferrals.append(f"{job_id}#: already re-queued as {', '.join(sorted(prior))}; no action")
+            deferrals.append(f"{base}: waiting on repair {prior[0]['id']} (failed? "
+                             f"{[f['exit_code'] for f in failures.get(prior[0]['id'], [])]})")
             continue
-        label = f"{job_id}#{n_fail}"
+        label = f"{base}#{n_fail}"
         if state["handled"].get(base, 0) >= max_repairs or n_fail > max_repairs + 1:
             state["notes"].append(f"{_utc()} {label}: {n_fail} failed attempts, manual diagnosis needed")
             deferrals.append(f"{label}: manual diagnosis needed ({n_fail} attempts)")
@@ -222,7 +230,7 @@ def refresh(night: str, min_fresh_rows: int, max_repairs: int, dry: bool) -> dic
             continue
 
         insert_idx = _insert_index(jobs, done)
-        rc = state["handled"].get(base, 0) + 1
+        rc = 1 + sum(1 for j in jobs if j["id"].startswith(base + "_rc"))
         if bridged:
             missing = None
             if not any(a == "--resume" for a in argv):
