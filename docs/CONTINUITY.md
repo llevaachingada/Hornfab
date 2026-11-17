@@ -1,5 +1,12 @@
 # CONTINUITY
 
+## 2026-11-17 (senior pass, code) - WP 4.2/4.3 decision rules coded before any solve
+
+- New `tools/analysis/u3_authority.py`: the equivalence rule (1 deg per band, both planes, bands
+  0.7-1.1 / 1.1-2.5 / 2.5-5.5 kHz; optional dJ vs floor) gates the variants; the authority rule is
+  U3's unchanged (>= 3 deg intended plane, other plane < half; steering/diagonal try both planes).
+  Written before any data exists, so the lines cannot drift after seeing results. 3 tests pass.
+
 ## 2026-11-17 (senior pass, code) - WP 4.2/4.3 made runnable: explicit record body + U3 job writer
 
 - New `design/generators/record_body.py`: `rows.type: canonical_record_v2` recipes carry the record

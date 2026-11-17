@@ -1,5 +1,9 @@
 # ISSUES
 
+## 2026-11-17 - WP 4.2/4.3 analysis ready
+
+- DONE: rule implementation. OPEN: needs the solves (owner C6).
+
 ## 2026-11-17 - WP 4.2/4.3 runnable (needs GPU + owner approval)
 
 - DONE: record body family + U3 job writer. OPEN (owner C6): approve ~2 + 12-16 solves; pick the host
