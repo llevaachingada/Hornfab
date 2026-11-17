@@ -383,6 +383,81 @@
   `evaluate.py`/runner dispatch of `finalist` (evaluate.py:1277 is verify-only, owned by another
   agent); `cli.py:562` and mesh build already accept `mode="finalist"` via `dof_cap`. No example YAML
   sets `dof_cap_finalist` (default 2x is used). B1 itself (WP 2.2) is not run.
+## 2026-11-17 07:4x - Queue addition: ten "best J still falling" continuations (+200 evals each), live-reloaded
+
+- Owner asked for the ten GUI "give this run more evaluations" candidates at **+200 solves each if not
+  already queued**. None were: no queued job resumed any of the ten run dirs (checked both live night
+  files for the dir ids), so all ten were added as `kind: command` resumes.
+- **8 on the GPU night** (`cd_rrect_2026-11-17`), inserted as jobs 15-22 - after the in-flight
+  `c_rrect_100w_rc2` repair, before the TuRBO pairs - so the newest owner instruction leads.
+  Valid rows before the addition / run dir: `p80x60__ath_core_14in_home700_v7` 171
+  (`20261114T015916Z-screen-db8e2f`), `p80x60__ath_core14_corelaw_v7` 89 (`...020650Z-screen-22931c`),
+  `p80x60__ext_throat_hvlaw_cov_v7` 113 (`...060011Z-screen-9e3528`),
+  `hl__lecleach_iwata_ar_landscape_v7` 80 (`...162516Z-screen-e31b23`), `hl__rolled_es_spiral_v7` 30
+  (`...001222Z-screen-b25d61`), `hl__biradial_es_style_v7` 142 (`...090751Z-screen-37b115`),
+  `hl__biradial_es_style_smooth_v7` 107 (`...193501Z-screen-f008ad`), `hl__rosse_rect_cd_v7_r50_refine`
+  51 (`20261117T053153Z-screen-15f0e4`).
+- **2 on the CPU night** (`bo_cpu_2026-11-17`), after atlas: `sab__lecleach_ctrl` 143
+  (`20261114T220720Z-screen-88d19c`) and `sab__lecleach_fc540` 142 (`20261114T223630Z-screen-86e077`),
+  keeping their original `--backend beat_cpu --cache-dir cache_cpu --dataset-dir dataset_cpu`. A search
+  job inside a cpu night inherits `HORNLAB_BEAT_WORKER_DIR=runs/lanes/cpu/workers`, so
+  `cli._solve_lock` returns a null lock and the GPU lock is not touched.
+- **Resume form is `--budget 200` = 200 NEW evals** (`cli.py:761` prints "budget N new evaluations";
+  `refresh_watchdog` converts its own repairs with total-minus-valid, which is the other convention).
+  No `--config` is passed, so each resume loads its run's own `config.yaml`; stored vs current
+  `config_sha` verified equal for all ten, so none will refuse. Bridge kinds use their own CLI -
+  `rolled_rect_cli.py` (spiral, `grid/rolled_rect_pucker`) and `rosse_rect_cli.py` (r50_refine,
+  `grid/rosse_rect`); the other six use the generic `hornlab-search.exe`.
+- Both files pass `--dry-run` with no MISSING paths: 45 GPU jobs / 3 CPU jobs, no duplicate ids. The
+  GPU runner re-reads the file before every job, so the block takes effect when `t_trit80_rc2`
+  (running, 29 observations) ends.
+- Wall clock of the addition: ~17 h GPU (2.8 / 3.6 / 2.8 / 0.4 / 2.1 / 1.2 / 1.0 / 2.3 h at each run's
+  measured s/eval) plus ~1.4 h CPU, on top of the three 300-solve crowns and 13 x 200 walls jobs
+  already pending. `queue.ps1`'s 14:30 cutoff only stops STARTING new nights, so this runner drains
+  into 2026-11-18 unless the owner trims (`STOP`) or re-orders.
+
+## 2026-11-17 07:1x - Lane review: gate false-PAUSE fixed; klame BO arms are unsupported point-grid designs
+
+- **Both lanes verified on the right queue.** GPU night `cd_rrect_2026-11-17` ran `t_trit80_rc2` under
+  `runs/.gpu.lock` (pid 41452, command `study 1ff9fb9cb6d04e358685213206425478`) with worker dir
+  `runs/lanes/gpu/workers`; CPU night `bo_cpu_2026-11-17` held `runs/.cpu.lane.lock` (pid 57892,
+  `night bo_cpu_2026-11-17`) with `runs/lanes/cpu/workers` and logged `cpu lane: GPU lock and VRAM
+  accounting skipped`. `package.json` carries `lane: gpu|cpu` and `studies/lanes.py` takes the matching
+  lock, so a CPU arm cannot take the GPU lock.
+- **BoTorch recording verified.** `turbo_trit80_rc2`: package `running`, `observation_seq=20` and
+  attempts 20 = observations 20 = `screen/search.ndjson` rows 20 = design dirs 20, with per-row
+  objectives (best J 4.9386). `launches: 0` is not a defect - it is the GUI-launch idempotency ledger
+  (`studies/service.py`); the night executes `studies.cli run --execute` directly.
+- **Gate false-PAUSE (root cause + fix).** `runs/nights/<night>/PAUSE` said `foreign GPU-lock holder`
+  from 06:42:33 while the lock was our own study; the runner honours PAUSE before every job
+  (`run_campaign_night.py:1373`), so all 37 jobs would have stalled after `t_trit80_rc2`. `gate()`
+  attributed holders by argv tokens, but a BO arm holds the lane as `study <study_id>`
+  (`studies/lanes.py`), sharing no token with `run_bo_arm.py --root ...`. Fix:
+  `_study_arm_holder_ours()` resolves that id through the running job's `--root` registry
+  (`<root>/studies.sqlite3`); `gate()` gained an injectable `root`. Regression
+  `tests/test_night_refresh_gate.py` (4 tests pass). Same file: `refresh()` referenced an undefined
+  `young` (a rename to `complete_elsewhere` left it behind), so the "budget covered by a sibling
+  thread" deferral would have raised `NameError` and silently killed a deep tick.
+- **klame BO root cause: unsupported geometry, not the pipe hang.** `t_klame_turbo100` (1238 s, exit 1),
+  `t_klame_scalar100` (1098 s, exit 1) and `t_klame_turbo_cpu` (1521 s, killed after review) all died
+  in `build_proposal` after `training rows: 200`. Direct probe: `status=pool_exhausted,
+  candidates=0`, counts `{'generated': 24, 'geometry_rejected': 24, ...}`; exception
+  `UnsupportedGeometryError: CAD/point-grid designs are unsupported by the canonical radial surface
+  sampler` (`bo/data.py:materialize_geometry`). The c200 config is `generator: {name: grid, rows:
+  {type: klangfilm_lame_v1}}`, so every Sobol candidate is rejected; the 18-20 min was the 513 x 3
+  candidate pool build at ~1-2 s each. The `1482304` stream fix is confirmed good (trit's ~140 KB prep
+  JSON packaged).
+- **Consequences.** No TuRBO/SCALAR arm can run on a klangfilm_lame (grid/point-grid) config, so the
+  backlog's hand-built `c200w` + its TuRBO/SCALAR pair stays unqueued until the BO sampler supports
+  CAD/point-grid; CMA `search` on the same config is unaffected (`c_klame_200`: 201 evals, best J
+  7.4458). Removed `t_klame_turbo100`, `t_klame_turbo100_rc1`, `t_klame_scalar100` from the GPU night
+  file (also stops the watcher re-appending `_rc1`: it needs the job spec present to repair) and the
+  dead arm from the CPU night file; `w_klangfilm_lame_curved_v1_200w1` is a CMA search job and stays.
+  `runs/` is untracked, so those edits are local state only.
+- **Open.** `gpu-clean --lane cpu` returns rc 3 while the GPU lane is live, so CPU jobs record
+  `status: blocked` and take one 120 s retry round trip (observed: RETRY `t_klame_turbo_cpu` -> rc 2 ->
+  `t_atlas_corelaw_turbo_cpu` start). The CPU lane should not be blocked by a GPU holder.
+  Review report (untracked): `runs/nights/refresh/lane_review_20261117T1205Z.md`.
 
 ## 2026-11-17 04:1x - Lane review of the Fable corpus handed to the senior reviewer (not a senior decision)
 

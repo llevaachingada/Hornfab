@@ -28,6 +28,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+import sqlite3
 import sys
 import time
 from datetime import datetime, timezone
@@ -226,7 +227,7 @@ def refresh(night: str, min_fresh_rows: int, max_repairs: int, dry: bool) -> dic
         if complete_elsewhere:
             deferrals.append(f"{label}: deferred - {name} budget is covered by {complete_elsewhere[0].name} "
                              f"({_valid_rows(complete_elsewhere[0])} valid >= {remaining_target})")
-            state["notes"].append(f"{_utc()} {label}: foreign thread {young[0].name} active")
+            state["notes"].append(f"{_utc()} {label}: foreign thread {complete_elsewhere[0].name} active")
             continue
 
         insert_idx = _insert_index(jobs, done)
@@ -323,11 +324,14 @@ def _insert_index(jobs: list, done: set) -> int:
     return len(jobs)
 
 
-def gate(night: str) -> dict:
+def gate(night: str, root: Path | str | None = None) -> dict:
     """Lane arbiter between deep ticks: pause our queue while a FOREIGN holder is solving, resume
-    when the lock is free or held by our own current job. Writes runs/nights/<night>/PAUSE."""
-    night_dir = ROOT / "runs/nights" / night
-    lock = ROOT / "runs/.gpu.lock"
+    when the lock is free or held by our own current job. Writes runs/nights/<night>/PAUSE.
+
+    ``root`` overrides the repository root (tests); the detached loop always uses ``ROOT``."""
+    base = Path(root) if root is not None else ROOT
+    night_dir = base / "runs/nights" / night
+    lock = base / "runs/.gpu.lock"
     pause = night_dir / "PAUSE"
     holder, alive, cmd = None, False, ""
     if lock.exists():
@@ -351,11 +355,13 @@ def gate(night: str) -> dict:
     if alive and running:
         plan = yaml.safe_load((night_dir.parent / f"{night}.yaml").read_text(encoding="utf-8"))
         spec = next((j for j in plan.get("jobs", []) if j.get("id") == running), None) or {}
-        tokens = [str(t) for t in ([] if spec.get("argv") is None else spec.get("argv"))]
+        tokens = [str(t) for t in (spec.get("argv") or [])]
         tokens += [str(spec.get("resume") or ""), str(spec.get("config") or "")]
         tokens = [t for t in tokens if t]
         ours = any(t and (t in cmd or t.split("/")[-1].split("\\")[-1].split(".")[-2:] and
                            pathlib_token(cmd, t)) for t in tokens)
+        if not ours and cmd.startswith("study "):
+            ours = _study_arm_holder_ours(cmd, spec, base)
     paused = pause.exists()
     if alive and not ours:
         if not paused:
@@ -371,7 +377,38 @@ def gate(night: str) -> dict:
 def pathlib_token(cmd: str, t: str) -> bool:
     base = t.replace("\\", "/").split("/")[-1]
     base = base.split(".")[0] if "." in base and not base[0].isdigit() else base
-    return base and base in cmd
+    return bool(base) and base in cmd
+
+
+def _study_arm_holder_ours(cmd: str, spec: dict, repo_root: Path | str = ROOT) -> bool:
+    """True when a ``study <study_id>`` lock holder is the BO arm the running job launched.
+
+    A BO arm's ``studies.cli run --execute`` takes the lane lock as ``study <study_id>``
+    (``hornlab_search/studies/lanes.py``), a command line that shares no token with the runner's
+    ``run_bo_arm.py --root ...`` argv. Without this the gate reads our own solve as a foreign
+    holder and writes ``PAUSE``; attribute it through the arm root's registry instead.
+    """
+    parts = cmd.split()
+    argv = [str(t) for t in (spec.get("argv") or [])]
+    if len(parts) < 2 or "--root" not in argv:
+        return False
+    sid = parts[1].strip()
+    arm_root = argv[argv.index("--root") + 1] if argv.index("--root") + 1 < len(argv) else ""
+    if not sid or not arm_root:
+        return False
+    db = Path(repo_root) / arm_root / "studies.sqlite3"
+    if not db.exists():
+        return False
+    try:
+        con = sqlite3.connect(f"file:{db.as_posix()}?mode=ro", uri=True)
+        try:
+            row = con.execute("select 1 from studies where id = ?", (sid,)).fetchone()
+        finally:
+            con.close()
+    except sqlite3.Error:
+        return False
+    return bool(row)
+
 
 
 def main(argv=None) -> int:
