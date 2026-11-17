@@ -1,5 +1,30 @@
 # CONTINUITY
 
+## 2026-11-17 02:3x - Night refresher (90 min) + backlog typologies appended to `cd_rrect_2026-11-17`
+
+- First pass burned jobs: all four main legs exited 1 while a foreign supervisor storm repeatedly
+  relaunched `b3_soft` (5+ orphan dirs, one healthy holder at a time) and raced the GPU lock; the
+  rrect TuRBO arm then failed on a correct guard (`no successful screen records`) because its CMA
+  sibling had died first. The gate loop (2-min cadence) pauses our night while a FOREIGN holder
+  solves and resumes when free; the deep repair tick (90 min) reads the night's summary ledger and
+  mechanically resumes: generic runs (`--resume` + missing budget), bridge runs (same argv/seed so
+  old candidates replay as free cache hits), depend-gated TuRBO re-arms (fresh `_rc` root/cohort only
+  once their config family holds >= 100 fresh rows), and defers duplicates/journal-only failures.
+  Tools: `tools/night_queue/refresh_watchdog.py` + `refresh_loop.ps1` (controller 43928 detached).
+- Repairs queued: `t_trit80_rc1` (tritonia cohort 120 rows), `c_rrect_100w_rc1` (bridge resume, 108
+  remaining of 110; 2 valid already banked), `t_rrect80_rc1` (after its CMA sibling). `b3_soft_resume`
+  is DEFERRED while the foreign b3 covers that thread (duplicate guard).
+- Lockdown audit: no queued config is super locked down (b3 17/21, rrect 9/12, tritonia 14/30, fold
+  18/35 searched; the k_lame seed cells are 5/8 with the fixed three being inert gates).
+- Backlog appended (insurance depth; cutoff 14:30 governs): Klangfilm smooth CMA-200
+  (`hl__klangfilm_lame_curved_v1_c200.yaml`: 6 genes, `g_morph_frac` exposed for the first time,
+  8.439 incumbent as seed, canonical `klangfilm_lame_v1` type so all 200 rows share one dependency
+  group; preflight 24/24 valid) then TuRBO-100 + SCALAR-100 on it; ath_core_14in (219 frozen rows)
+  and ext_throat_hvlaw (231 frozen rows) TuRBO-100 + SCALAR-100 each with hash-pinned cohorts.
+  New budget profile `comparison-100x2` (100 screen + 2 verify; additive key, tests extended).
+- The 12-h cutoff estimate is now overtaken by the backlog: the runner keeps going until the file
+  is exhausted or a STOP file is placed; trim with `runs/nights/cd_rrect_2026-11-17/STOP` any time.
+
 ## 2026-11-17 02:0x - Overnight queue `cd_rrect_2026-11-17` launched (owner-directed ~12 h GPU)
 
 - Owner brief: CMA ("COA") arms with >=100 solves first, then two BoTorch TuRBO arms at 80-100 solves
