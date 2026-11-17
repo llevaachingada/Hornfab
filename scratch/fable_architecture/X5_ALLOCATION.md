@@ -1,5 +1,11 @@
 # X5 — corrected historical allocation replay
 
+## Refresh at corpus HEAD `01560e5`
+
+The historical snapshot and results below were not rerun or extended at this refresh. The [validation brief](VALIDATION_EXPERIMENTS.md) requires a leakage-corrected replay and integrated watchdog policy; neither is established here, so the table cannot certify an automation policy or compare GPU time. Attempt counts include cached rows and do not measure physical solves, elapsed time or GPU cost. The first-observed-time release convention is an assumption about availability, not proof of when a candidate configuration could first have been proposed.
+
+The corpus, including the replay scripts, snapshot and output JSON, was committed in `01560e5`. The reproduction commands below **overwrite tracked output files**; use a separate safe copy or explicitly preserve and compare the current artifacts when independently reproducing them. No replay, queue, solver or configuration was changed in this refresh.
+
 **2026-11-16, HEAD `207f97a29e2f2f31a366da95e882f9b48761ab00`.** CPU-only inspection of the existing `rows.pkl` snapshot; no solves or changes to queues, configs or runs. This replay does **not** establish that lane racing saves attempts. The eventual-best arm was the only observed config available until CD attempt 202; it reached the eventual-best-plus-one-noise-unit target at attempt 55. Thus no time-respecting selector has another observed arm to choose before the target. The policy comparison is degenerate at the stated target, and the full corrected replay is incomplete for the reasons below.
 
 ## Lineage and data

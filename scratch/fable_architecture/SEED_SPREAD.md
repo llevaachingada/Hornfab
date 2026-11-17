@@ -1,5 +1,7 @@
 # SEED_SPREAD
 
+> **Context refresh at `01560e5`:** This is a retrospective spread across a small selected set of runs, not a controlled estimate of seed-only variance or a statistically established family ranking. The grouping deliberately omits `seed_params`, and the table shows differing starts in some groups; warm starts, trajectory dependence, watchdog censoring and unequal actual attempt costs can all affect the comparison. Matching the first N valid rows does not match attempted evaluations, physical solves or GPU time. The six configurations also have different N, so adjacent best-score gaps are descriptive rather than equal-budget head-to-head evidence. No new replay was run for this refresh.
+
 - Repo HEAD at run: `207f97a29e2f2f31a366da95e882f9b48761ab00`
 - Timestamp: `2026-11-16T22:59:37-0500`
 - Read-only against `runs/`; no solve, mesher, GPU, queue or config write.

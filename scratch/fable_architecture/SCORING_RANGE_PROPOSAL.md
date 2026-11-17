@@ -1,11 +1,13 @@
 # SCORING_RANGE_PROPOSAL — acceptance ranges plus constancy
 
-> **Results update, 2026-11-16 23:15.** Brief S1 (§7) has been run: `S1_RANGE_SCORING.md`. Across
-> all 3,414 stored designs, stored v7 and v9-plus-constancy share 3 of the top 20; the result holds
-> under ±5° range shifts and three vertical onsets (15–20 of 20 retained). R3 separately found the
-> vertical onset frequency barely changes the ranking, while moving to v9's corridor and term set
-> changes it a great deal. Open: separating the corridor's effect from v9's other term changes
-> (task A9 in `LOW_COST_AGENT_HANDOFF.md`), and the owner's choice of ranges and weights.
+> **Results update, checked at HEAD `01560e5`.** S1 (`S1_RANGE_SCORING.md`) scored 3,414 stored
+> attempts. Within each original-objective cohort, stored v7 and v9-plus-constancy shared 3 of the
+> top 20 observations; the cohorts were not pooled for that comparison. Across the combined
+> v9-plus-constancy sensitivity cases, 15–20 of the base top 20 remained. R3 used a different
+> corridor and a common v7 baseline and found 4/20 overlap; its three onset choices had the same
+> top-20 set. Neither study isolates the corridor effect from the changed term set. The v7
+> screen/verify spread is not a validated noise floor for this proposed score. Owner choices of
+> ranges and weights, same-term comparison (A9) and grid-independent scoring (A4) remain open.
 
 **Written:** 2026-11-16. **Code read at** `main` @ `207f97a`. **Status:** proposal for the owner;
 nothing is implemented or changed. The numbers in §4 are measured from stored runs with
@@ -175,5 +177,79 @@ designs and lanes rank best, and how different is that from v7?
 across the sensitivity cases and which do not.
 
 **Do not** tune ranges or weights to make a particular horn win, and do not recommend a winner.
-The frequency-sampling noise (about 0.17 J among the best designs) applies here too: differences
-smaller than that are not differences.
+The roughly 0.17 J screen/verify spread was measured for a different score. The noise floor of
+this proposed score is not established; small ranking differences require a separate fidelity study.
+
+## 8. Continuation: evidence, replay and decisions
+
+This section is a reading and execution guide for the next agent. The results above are retrospective
+observations, not a selected horn, an approved objective, or proof that a proposed scoring change
+will improve a future search. In particular, the statement in §3 about vertical performance is an
+observation of the sampled designs, not a physical impossibility claim for every geometry in the
+envelope. The §4 comparison is coverage-only and cannot establish an overall winner.
+
+### What the evidence does and does not distinguish
+
+- S1's 3/20 overlaps compare stored v7 with v9 plus constancy **within each original-objective
+  cohort**; its combined sensitivity table compares variants of that new scratch score. Its
+  ±5° and onset experiments do not establish robustness outside those tested choices. The
+  constancy term and corridor can both charge an out-of-range curve.
+- R3 applies a common v7 brief and a different placeholder corridor to all eligible observations.
+  Its 4/20 result and unchanged top-20 set across the three onsets describe that experiment. Both
+  R3 and S1 change several terms at once, including ripple semantics; neither measures the
+  independent effect of the corridor. Compare ranks, not numerical J across score identities.
+- R1 has only two low-J pairs and confounded solve conditions. Screen and verify share a mesh.
+  R2's 22-point result is relative to an interpolated baseline, not independently solved truth;
+  interpolation alone changed the score. Neither establishes the proposed score's noise floor,
+  mesh convergence, an accepted frequency budget, or the significance of a close rank gap.
+
+### Replay contract
+
+Use the same response and target identity, frequency support, row inclusion and tie rule for each
+paired comparison. Retain run plus design identity: repeated hashes across runs can carry distinct
+responses. Record exclusions and missing fields. Stored DI is the sin-theta-weighted balloon DI
+used by `search/evaluate.metrics_from_response`; plain `compute_metrics` regeneration is not
+parity-equivalent. For v7 start with `.tmp/fable_replay_harness.py`, which matched stored J on its
+116-row check. V9 is not dispatched by `objective/replay.py`: call the v9 scorer explicitly, as
+`.s1/replay.py` does. S1 corrected the DI-dependent contributions from stored DI and checked the
+adjustment on sampled rows; its three beamwidth checks are not a complete parity audit. Validate
+new harnesses against stored scores where applicable and independently check v9 component values.
+Record objective version, full profile, weights, frequency grid, DI provenance and script revision
+with every output. A new scoring rule requires a new identity; do not overwrite historical J.
+
+### Independent scratch work: A4 and A9
+
+**A4 — grid dependence.** Reproduce the R2 parity baseline first. In scratch, define each v7 and
+v9 frequency-dependent term as an explicitly normalized weighted integral over log frequency,
+including band boundaries and the existing weights; document how fits, extrema and non-integral
+terms are handled rather than assuming they integrate unchanged. Compare old and proposed
+per-term contributions on the same responses, then repeat the R2 point-count experiment with the
+same subsets and interpolant. Report bias, spread, rank effects and the count reaching the stated
+0.10 J SD criterion *against that interpolated reference*, separately by term and total. Check
+sensitivity to interpolation and band edges; flag any term that cannot be consistently redefined.
+This is a numerical stability experiment, not a physical convergence test or permission to change
+production scoring. See `FREQUENCY_BUDGET.md` for the precise historical baseline.
+
+**A9 — isolate point versus corridor.** Use the same eligible rows, stored responses and v9
+configuration in both arms; change only coverage mode and the necessary point/corridor parameters.
+Fix and document the ripple window explicitly if mode changes its semantics; if the scorer cannot
+hold it fixed, report a controlled scratch decomposition or disclose the residual confound rather
+than calling the comparison isolated. Do not add constancy in one arm only. Predeclare point target,
+corridor, onsets, frequency weighting and tie handling, and report per-term deltas, top-20 and
+top-100 overlaps, rank correlation, inclusion counts and exclusions. A second sensitivity case may
+show dependence on the chosen corridor but must remain separate from the primary comparison. See
+`CORRIDOR_RERANK.md` and S1 for the prior, differently configured comparisons.
+
+Both tasks are CPU-only, read-only with respect to source, configs, queues, examples and runs;
+write artifacts only in `scratch/fable_architecture/`, and preserve existing scripts and outputs.
+They can run independently. Neither authorizes solves or a production scoring amendment.
+
+### Owner decisions before an implementation brief
+
+Confirm H and V ranges and their frequency dependence; vertical onset and below-onset behavior;
+flat constancy versus permitted slope and its bound; whether corridor and constancy both penalize
+excursions; term weights, normalization and any dead bands; and whether the deliverable is one
+winner or a menu. The example values in §§3–5 and S1 are placeholders. Decide how diagonal
+coverage and ripple-window semantics express the listening intent. The implementation plan should
+identify the objective version and validation criteria only after these decisions and A4/A9; mesh
+and frequency fidelity for finalists require a separately approved matched study (handoff B1).

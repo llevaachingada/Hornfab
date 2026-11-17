@@ -1,5 +1,7 @@
 # Hornfab discovery architecture — evidence dossier (READ THIS FIRST)
 
+> **Current navigation and evidence:** start with `LOW_COST_AGENT_HANDOFF.md` and the individual result reports. The dossier below records a historical snapshot, not current repository state. At observed HEAD `01560e5`, v9 and `targets/profile.py` are tracked and version 9 is registered; the snapshot finding that v9 was unimportable is historical. Concurrent report edits may be present. The experimental corpus was committed in `207f97a` and `01560e5`; reproduction scripts may overwrite tracked artifacts.
+
 **Prepared:** 2026-11-16, read-only research pass. **Repo:** `C:\Users\hunte\Hrns\hornlab-search`
 (canonical checkout). **Snapshot of record:** `main` @
 `601be8ceeb48f1750bb4f3f6c1fdc682967c8b94`, observed 2026-11-16T20:43:51-05:00.
@@ -23,7 +25,7 @@ recon/replay harness, and the per-experiment reproduction directories (`.e1`-`.e
 `.x1`-`.x5`, with their scripts, JSON/JSONL outputs and NPZ geometry) — is now **tracked on
 `main`**, force-added past the repo's `/scratch/` ignore rule (only `__pycache__/` excluded). The
 first batch (the original 25 reports) landed in `207f97a`; the remainder and the revised reports
-land in the follow-up commit. The "ignored scratch folder / nothing modified outside it" statements
+landed in `01560e5`. The "ignored scratch folder / nothing modified outside it" statements
 above describe the research pass itself and stay historically accurate; they no longer describe the
 tree's tracking state. The committed copy is the working copy, byte-identical apart from the
 bytecode exclusion.
@@ -257,21 +259,22 @@ verify rank stability, held-out GP ranking at 100–231 rows, and refusal-margin
 | `UNIVERSAL_HORN_FAMILY.md` | what one parameterised universal family would be, could make, and whether to build it |
 | `PREDICTOR_AND_WORKFLOW.md` | what the response predictor is and how it would plug into the search |
 | `SCORING_RANGE_PROPOSAL.md` | acceptance ranges plus constancy as an objective alternative |
-| `S1_RANGE_SCORING.md` | S1 replay over all 3,414 stored attempts: v7 vs v9-plus-constancy top-20 overlap |
+| `S1_RANGE_SCORING.md` | S1 replay over all 3,414 stored attempts: within-cohort v7 vs v9-plus-constancy top-20 overlap |
 | `CORRIDOR_RERANK.md` | corridor re-rank of 3,414 ok rows from 75 landscape runs / 35 configs |
 | `SEED_SPREAD.md` | seed-to-seed spread across the same 75 landscape runs |
 | `FREQUENCY_BUDGET.md` | where the solve budget goes by frequency and what re-allocation would buy |
 | `MESH_FIDELITY_PAIRS.md` | mesh-fidelity A/B pairs and what they can resolve |
-| `VALIDATION_EXPERIMENTS.md` | full experiment briefs (E1-E3, X1-X5, S1) with decision rules |
+| `VALIDATION_EXPERIMENTS.md` | full experiment briefs (E1–E3, X1–X5, S1, U1–U3) with decision rules |
 | `LOW_COST_AGENT_HANDOFF.md` | handoff for a cheap agent picking the work up cold |
 | `E1_RESPONSE_VS_SCORE.md` | E1: response-curve vs score targets — no advantage; cross-engine recall failed for GEN-FF |
 | `E2_LOCAL_INVERTIBILITY.md` | E2 exploratory: stored-data local invertibility (superseded by the brief) |
 | `E2_INVERTIBILITY.md` | E2 brief run: minimum-norm inverse fails the stated decision rule |
 | `E3_FREQUENCY_STAGING.md` | E3: conservative partial replay of frequency staging |
-| `X1_ROUND_TRIP.md` | X1: partial surface round trip, 50/50 stored designs resolved (sampling not yet contract-compliant) |
+| `X1_ROUND_TRIP.md` | X1: partial surface round trip, 50/60 designs sampled; Klangfilm reconstruction and contract remain open |
+| `X1_CONTRACT_TESTS.md` | N1: six-lane contract tests (T1–T5) at the 65×31 record; two or more lanes fail inner-wall agreement, X1 failure condition met; U1 gated |
 | `X2_AUTHORITY.md` | X2: module authority under held-out engines — not established |
-| `X3_TRANSFER.md` | X3: strict cross-engine transfer — partial, skill below 0.6 on held-out engine |
-| `X4_PARAMETER_SPACE.md` | X4: preliminary parameter-space checks (provisional) |
+| `X3_TRANSFER.md` | X3: partial strict transfer; tested H-plane skill below 0.6 for each held-out engine, with later target and augmentation results |
+| `X4_PARAMETER_SPACE.md` | X4: five-lane exploratory parameter-space checks; sampler and classification gates remain open |
 | `X5_ALLOCATION.md` | X5: corrected allocation replay — policy comparison degenerate at the stated target |
 | `fable_zero_gpu_checks.py` | the zero-GPU reproduction checks named in the reports |
 
@@ -282,7 +285,7 @@ The repository carries a condensed, tracked version of the original dossier at
 `origin/main`; the curated 15-file copy and the v3 handoff text live in
 `docs/research/fable_architecture_2026-11-16/`. **This folder is no longer git-ignored** — the full
 corpus, harness and reproduction outputs are tracked on `main` (first batch `207f97a`, remainder in
-the follow-up commit), force-added past `/scratch/`; `__pycache__/` is the only exclusion.
+`01560e5`), force-added past `/scratch/`; `__pycache__/` is the only exclusion.
 
 ## Safety / compliance
 

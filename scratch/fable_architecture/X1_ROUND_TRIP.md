@@ -42,3 +42,8 @@ The following are in-sample PCA fits to all 50 experimental sampled grids, using
 The constrained area–aspect–section backbone fit is not implemented; independent per-station section fits would not satisfy its monotone law and termination constraints. Mesher fit error and an evidence-based tolerance revision are unknown. Consequently neither X1 success nor its two-engine failure condition has been evaluated. Continue by verifying historic Klangfilm recipe provenance, preserving exact throat and shell metadata, distinguishing inner and shell mesh surfaces, validating patch-distance minimization and full convergence checks, and fitting the actual constrained backbone.
 
 The provisional sibling map and seed comparisons are in `.e2/sibling_seeds.txt`; those groupings are not used in this route probe. They are naming-based, with exact seed equality checked but warm-start lineage not audited.
+
+
+## Later architecture reconciliation (2026-11-16)
+
+At review HEAD `01560e5`, the intervening commit `01560e5` consolidated the research corpus; it did not add a new X1 experiment or establish the canonical surface contract. `LOW_COST_AGENT_HANDOFF.md` A1 still calls for provenance verification, contract tests 1–5 and exact metadata recovery. The provisional legacy-kernel candidates above do not establish that the stored Klangfilm surfaces are unrecoverable: the compatible historical adapter and mesh correspondence remain unverified. The later architecture synthesis treats X1 as a prerequisite, not evidence that a common representation has passed. The PCA figures remain in-sample per-lane summaries, not held-out backbone fits.

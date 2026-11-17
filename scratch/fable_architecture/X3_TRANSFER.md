@@ -44,12 +44,12 @@ No robust benefit approximating 15 local solves is visible; differences are smal
 - Prior worth >= 15 solves: **not demonstrated**; explicit <5 failure not established.
 - Residual skill > .2: mixed by target and engine; **not established as a general cross-engine claim**.
 - The separate brief's failure criterion requiring both planes < .3 in two engines is **not met** by these tested inputs. The above success failures do not by themselves trigger that particular failure criterion.
-- Resistance, ripple, on-axis curves, augmentation with and without leakage control, whole-surface and frequency-scaled descriptors were not executed. The archive has no per-design identity: reconstructing and validating its exact selection against mesh descriptors is required before safely joining extra response curves or scaling copies. X1 whole-surface descriptors were not available in this run. Seed-parameter comparison for sibling map is not yet performed; groups below are conservative provisional name-based groups and could miss related constructions. The strict engine split does not depend on sibling group naming.
+- At the initial run, resistance, ripple, on-axis curves, augmentation and seed comparisons were outstanding. The later follow-up below joined and tested those response targets, performed training-only similarity augmentation, and checked first-observed seeds. Whole-surface and explicitly wavelength-multiplied descriptors remain untested. The sibling map remains provisional; the strict engine split does not depend on its naming.
 - Optional 20-solve prospective BEM test is a proposal requiring owner approval and was not run.
 
 ## Provisional sibling map
 
-The map below includes singleton groups. Versions and smooth twins are merged; `sp` and `rr` variants and Klangfilm axis variants are grouped conservatively. Verify seed parameters before treating the sibling results as definitive.
+The map below includes singleton groups. Versions and smooth twins are merged; `sp` and `rr` variants and Klangfilm axis variants are grouped conservatively. The later seed check below is partial; verify construction and lineage before treating sibling results as definitive.
 
 | Group | Lanes |
 |---|---|
@@ -129,3 +129,8 @@ Augmentation improved all three aggregated skills in this fixed retrospective te
 `.x3/seeds.json` records pairwise seed differences for the first observed config in each provisional group. The Le Cléac'h Iwata smooth/non-smooth pair has exactly matching `seed_params`; the other eight multi-lane groups have differences in 2–19 seed fields. These differences do **not** prove different constructions: versions may be reseeded and the named control/moderate/strong and reference/pucker variants intentionally differ. The recorded `grid` blocks compare equal within each group, but empty grid blocks compare equal too; a complete construction and all-run lineage check remains outstanding. For that reason the sibling map remains provisional. Raw check and scripts: `.x3/seeds.py`, `.x3/extended.py`, `.x3/augment.py`; outputs `.x3/seeds.json`, `.x3/extended.txt`, `.x3/augment.txt`.
 
 **Revised completion ledger:** A remains provisional on sibling identification and exact baseline parity; B lacks whole-surface inputs and an explicitly wavelength-multiplied representation; C now covers the requested targets for size and profile inputs; D remains as above; E has a controlled test but no forbidden leaky comparison; F remains exploratory and has no precise local solve-value estimate. No overall X3 pass or failure is claimed.
+
+
+## Later architecture reconciliation (2026-11-16)
+
+At review HEAD `01560e5`, the later `LOW_COST_AGENT_HANDOFF.md` table and A7 task still describe response targets and augmentation as unrun; the follow-up above records the completed retrospective tests and is the more specific evidence. They remain incomplete for whole-surface and explicitly wavelength-multiplied inputs, full sibling lineage and solve-value estimation. The paired augmentation gain does not overcome the failed held-out-engine H-plane success line, nor does it validate a universal transfer prior. The architecture decision record's suggested interpretation that a failed transfer test means sibling leakage is too strong: a weak representation, domain shift or model limitations are also possible, and this partial experiment has not established its overall failure criterion.

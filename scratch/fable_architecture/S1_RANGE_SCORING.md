@@ -1,5 +1,16 @@
 # S1 — range plus constancy replay
 
+> **Context refresh at repository HEAD `01560e5`.** The later master handoff and
+> `SCORING_RANGE_PROPOSAL.md` make range-plus-constancy the current *proposal*, not an approved
+> brief or implemented objective. The 3/20 v7 overlap below is a within-cohort comparison, not
+> a single comparison across all 3,414 attempts. R3 (`CORRIDOR_RERANK.md`) independently found
+> 4/20 under its different H 60–90° corridor and common v7 baseline; neither replay isolates the
+> corridor from all other v7-to-v9 changes. R2 (`FREQUENCY_BUDGET.md`) reports substantial
+> score-grid sensitivity, and R1 (`MESH_FIDELITY_PAIRS.md`) has only two low-J mesh pairs;
+> consequently neither a stable top rank nor a noise floor for this new score is established.
+> A same-term v9 point-versus-corridor comparison and grid-independent scoring remain open
+> (handoff A9 and A4). No new replay or solves were performed for this context refresh.
+
 **Status: completed for all 3,414 valid stored attempts**, subject to the limitations below. CPU only, no solves. HEAD at start `207f97a29e2f2f31a366da95e882f9b48761ab00`. Scratch brief `.s1/brief.yaml`; scorer `.s1/replay.py`; DI correction `.s1/correct_di.py`; table generator `.s1/report.py`.
 
 ## Findings

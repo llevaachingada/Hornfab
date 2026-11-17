@@ -36,3 +36,7 @@ If the owner approves stage two, propose the specified three targets with five c
 ## Sibling map and seed checks
 
 The complete naming-based lane grouping, including singleton lanes, is recorded in `.e2/sibling_seeds.txt`, generated from all valid-row run configs by `.e2/sibling_seeds.py`. It groups version and smooth twins and conservatively groups the sp, rr reference/pucker and Klangfilm axis variants. Exact nonempty `seed_params` dictionaries match for both biradial smooth twins and Le Cleach Iwata AR smooth twins. Other grouped pairs do not have exact nonempty seed matches. A different seed does not prove distinct construction or lack of lineage, and warm-start provenance and partially matching parameters were not checked. This map was not used as a holdout in the exploratory test.
+
+## Subsequent detailed test
+
+`E2_INVERTIBILITY.md` reports the later brief-specific radii and other-engine analyses. Its retrospective minimum-norm inverse triggered the brief's no-change failure criterion, with the same important limitation: recovering the historical geometry is not equivalent to finding any valid geometry with the target response. This exploratory report remains the record of the earlier method and should not be used as the detailed brief verdict.

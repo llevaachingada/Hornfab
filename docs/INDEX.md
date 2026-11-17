@@ -22,7 +22,10 @@ and predictor proposals, and the range-scoring / corridor-rerank / seed-spread r
 `.fable/`/`.tmp/` harnesses and per-experiment reproduction directories is now tracked in-repo at
 [scratch/fable_architecture/](../scratch/fable_architecture/INDEX.md) — force-added past the
 `/scratch/` ignore (`207f97a` + follow-up; only `__pycache__` excluded). No code, solve or queue
-change.
+change. The completion of X1 (N1 six-lane contract tests, 2026-11-17) is reported in
+[scratch/fable_architecture/X1_CONTRACT_TESTS.md](../scratch/fable_architecture/X1_CONTRACT_TESTS.md):
+determinism 60/60 and refinement 30/30 pass, but inner-wall mesh agreement fails rolled and Crowe
+and one Klangfilm design, meeting X1's failure condition and gating U1; N2–N5 were not run.
 
 
 [Klangfilm-Lame H/V throat audit and Phase A implementation (2026-11-16)](evidence/KLANGFILM_HV_THROAT_AUDIT.md):

@@ -7,7 +7,7 @@ mesh built, no solve run.
 > **Results update, 2026-11-16 23:15.** Written before I had read the other agents' result files.
 > Two statements below need qualifying. The "about 1 mm on two profiles" shape-mode figure does not
 > extend to whole surfaces (X1: 8 modes give 1.4–2.3 mm). The "transfer experiment" cited in §4.1
-> fails strict held-out-engine tests (X3), so the claim that one generator makes learned
+> misses the specified strict held-out-engine success lines for the tested inputs (X3 remains incomplete), so the claim that one generator makes learned
 > relationships reusable is an expectation, not a finding. Experiments U1–U3 are now briefed in
 > full in `VALIDATION_EXPERIMENTS.md` Part 3. Status of everything: `LOW_COST_AGENT_HANDOFF.md`.
 
@@ -40,12 +40,12 @@ Four things in that library change my earlier analysis:
    - The Klangfilm Phase B core builds the wall from independent H and V *slope laws*, with its own
      section exponent law and a swept "beak" at the mouth **[code]**.
    Each was written as one more family. Nobody has factored out what they share.
-2. **Additive tweaks to an existing horn were measured to have almost no authority.** The Klangfilm
+2. **The particular Klangfilm Stage A throat-angle tweaks did not meet the stated authority threshold.** The Klangfilm
    Stage A test changed the throat-region wall angle by 4–5° in one plane at a time. The beam moved
    by at most 2.74°, in the wrong direction, and scores got worse. The recorded conclusion: "the
    pattern is set by the mouth and the rollback, not by the entrance tangent, and no additive
    offset can change the flare law itself" **[measured, `STAGE_A_VS_B_DECISION.md`]**. That is
-   direct evidence against my earlier preference for deformation modules as the main route.
+   evidence about these tested adjustments, not a general test of other deformation modules; X2 remains inconclusive.
 3. **Joining independent per-plane constructions does not make one horn.** The first H/V
    Le Cléac'h attempt marched a complete horn at each azimuth and lofted them. The result was
    "lobed, bulbous": the rim up to 118 mm off the ellipse and 319 mm out of plane at a box corner.
@@ -408,7 +408,7 @@ sheets, so all are representable; cost notes say which symmetry they need.
 - **It ends the fragmentation.** The stored campaign spread 3,414 solves over 35 lanes, median
   about 50 each **[measured]**. One generator means one search space, one dataset, one model, and
   no lanes that are the same construction under different names.
-- **It makes learned relationships reusable by construction.** My transfer experiment needed
+- **It may make learned relationships easier to reuse, subject to validation.** My transfer experiment needed
   shape measurements as a translation layer between families. If every horn is described by the
   same layer parameters, "vertical split timing" means the same thing everywhere and a model's
   knowledge of it applies to every design.
@@ -636,3 +636,28 @@ possible today is every horn in section 3 that needs a decision no current famil
 vertical wall on its own schedule, a lip that differs round the mouth, an outline steered along
 the horn, a loading law combined with a coverage law, and continuous movement between a waveguide
 and a rolled horn.
+
+---
+
+## 8. Continuation guide: what must be proved before unification
+
+**Status at the 2026-11-16 handoff:** the layered backbone is an architectural hypothesis, not a working replacement or an established way to reuse historical responses. U1–U3 have not run. Read this section with `LOW_COST_AGENT_HANDOFF.md` and the detailed, predeclared procedures in `VALIDATION_EXPERIMENTS.md`; result reports take precedence over the optimistic comparative claims in §§4–7 above. In particular, exact specialist reproduction, shared searchability, response authority, and a single cross-family model remain unproven. E1 did not show an advantage for response modelling over a scalar model on its tested proxy; X3 did not establish reliable transfer. Do not implement a unified search or relabel approximations as historical families on this basis.
+
+### Architecture and evidence boundary
+
+The proposed object describes a single-duct inner wall on common wall-length stations. Throat/source, expansion law, H/V split, section between ribs, and termination are distinct responsibilities; a specialist law should retain its own mathematics and exact neutral settings, while generic laws offer new combinations. Wall length matters because depth alone can reverse through a rolled lip. Shared stations and a section law do not by themselves guarantee correct correspondence, preserved throat/source position, a valid outer shell, or a faithful reproduction of the original construction. A canonical sampled surface is the comparison and interchange layer; it is not itself a generator or proof that a new parameterization has inherited a solve.
+
+X1 materialized 50 of 60 sampled designs across five routes; the current generic Klangfilm adapter rejected all ten saved recipes. The legacy kernel produced repeatable *candidate* grids while bypassing digest verification, so neither recovery nor impossibility is established. Experimental 31 × 65 records omit required metadata and have unvalidated throat interpolation and arc correspondence. The physical wall tag includes more than the inner wall, so its reported patch distances are not inner-wall fit errors. Rolled bbox depth differs by roughly 3 mm with closure identity unresolved. In-sample PCA of those 50 grids is exploratory, not a held-out fit or a contract pass. X2 is likewise undetermined: all 144 two-plane surrogate variants were outside its distance diagnostic; diagonal and lip acoustic effects were unobservable. A geometric Jacobian residual is not evidence of response authority. Klangfilm Stage A is a caution about its tested additive adjustments, not a general verdict on structural freedoms.
+
+### Execution order and decision gates
+
+1. **Finish X1 first (A1).** Reconstruct each of the six routes from its stored `design.json` and run `config.yaml`; investigate historical Klangfilm adapter, driver and implementation digest before comparing to its stored mesh. Establish inner-wall versus exterior/closure identity, source plane, throat, termination, shell, mounting, symmetry and topology. Run all five `CANONICAL_SURFACE_CONTRACT.md` §8 tests, including simultaneous arc/azimuth refinement, validated patch distances, full envelope and exact metadata. Report per-lane pass/fail and tolerances, including unresolved routes; do not upgrade the existing sample files into accepted records by assertion.
+2. **U1 follows usable X1 targets.** Use the four named lanes and own-law reconstruction specified in the brief, then independently compare generic wall-angle splines with 4, 6 and 8 controls per rib. Record median, p95, worst and location on the whole surface. The predeclared pass is worst ≤ 0.5 mm in at least three of four lanes; two or more above 2 mm is the failure criterion, with the middle region explicitly inconclusive. Exact-looking principal ribs or a low average do not establish the worst-point gate, preserve metadata, or authorize reuse of an old acoustic response. A later four-surface solve confirmation is proposed separately and needs owner approval.
+3. **U2 depends on U1 endpoint descriptions.** Interpolate three distinct cross-family pairs in ten equal steps and report each validity check and overlay at every step. Two of three fully valid paths meet the *CPU geometry* success line; two paths with invalid stretches longer than two steps meet the failure line. Neither result proves acoustic continuity or that a single optimizer can traverse the space. Mark surrogate predictions outside the training-distance diagnostic and treat even inside predictions as indicative. The proposed two paths of eleven BEM solves each require owner approval.
+4. **U3 depends on the U1 best-design description.** Construct the seven individually paired variants in the brief: two vertical-timing strengths, two termination splits, two section-steering variants and one diagonal pull. Apply the U2 validity checks and report dimensions and minimum lip radius; the CPU success line additionally requires each variant to change the surface by at least 5 mm RMS somewhere outside the last 5% of the wall. This establishes geometric reach only. The proposed control, variants and repeats need owner-approved solves; the prespecified ≥3° intended-plane rule and cross-plane limit decide acoustic authority under that test, not across all horns.
+
+### Practical starting points and traps
+
+Start with `X1_ROUND_TRIP.md` and `.x1/probe.py`, `.x1/legacy_k.py`, `.x1/patch_distance.py` and `.x1/envelope.py` as *investigative artifacts*, preserving existing outputs before any rerun. Follow `VALIDATION_EXPERIMENTS.md` X1 and U1 for the six routes, four U1 lane identifiers, acceptance criteria and source locations. Compare the existing partial constructions in `hornlab_search/design/generators/grid.py`, `crowe_hv_area_aspect_v1.py`, and `tools/geometry/klangfilm_lame_hv_core.py`; read the Le Cléac’h shared-station research cited by U1 before selecting correspondence. Scripts and reports belong under `scratch/fable_architecture/` in task-specific dot-folders. Do not run solves, pytest, process control or git mutations, and do not modify source, configs, queues, `runs/`, or `examples/`.
+
+Preserve counterexamples: extended throats whose driven plane is not the first station; unequal rib lengths and rollback lips; nonuniform polar sampling; corners and morphs that a single section exponent plus diagonal term cannot represent; shells that set the envelope; and interpolation paths that appear smooth only because a surrogate averages. Check whether a claimed neutral layer actually reproduces the original surface and metadata. Keep geometric validity, intended physical construction and solved acoustic success separate; equal area does not prove equal loading or directivity. Do not change a split or threshold after seeing results, and report partial or inconclusive outcomes instead of substituting a more favorable test.

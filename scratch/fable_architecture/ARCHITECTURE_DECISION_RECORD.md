@@ -1,6 +1,7 @@
 # ARCHITECTURE_DECISION_RECORD — Hornfab discovery architecture
 
-> **Results update, 2026-11-16 23:15.** Decisions D1–D10 in §2 stand. The recommendation in §1 and
+> **Results update, 2026-11-16 23:15.** D1–D10 in §2 are historical recommendations; their
+> empirical premises and any proposed implementation require current validation and owner decisions. The recommendation in §1 and
 > the open-decision table in §3 are overtaken: see `LOW_COST_AGENT_HANDOFF.md` §1, §4 and §5 for
 > the current position and experiment results, and `UNIVERSAL_HORN_FAMILY.md` for the generator
 > direction (layered backbone with pluggable specialist laws) that replaces "specialist engines plus
@@ -15,8 +16,7 @@
 **Superseded in part.** `ARCHITECTURE_SYNTHESIS.md` (written after this record) demotes the
 canonical surface layer from "preferred architecture" to an input adapter, and names
 response-model-centred discovery as the preferred engine with "construct, then correct" as the
-alternative. Where §1 and §6 below differ from the synthesis, the synthesis wins. Decisions D1–D10
-in §2 stand.
+alternative. Where §1 and §6 below differ from the synthesis, the synthesis wins. The decisions in §2 remain historical proposals.
 
 Evidence labels: **[measured]** computed from stored runs or meshes; **[verified]** read in code;
 **[inferred]** my reasoning; **[literature]** published, untested here.
@@ -59,8 +59,8 @@ the lanes, option G-B in the review), possibly searched in a learned mode space 
 | D4 | Surrogates should model response curves (beamwidth, DI, impedance), not J. | Survives objective changes (v7 → v9); J is recomputed from curves **[inferred]** |
 | D5 | Cross-family sharing happens through geometry computed on the surface, never through raw knob vectors. | Knob spaces are incomparable **[verified]**; M4 |
 | D6 | No automatic change of brief, envelope, objective version, source model, fidelity or search bounds, under any supervisor. Propose only. | Owner constraints; review §4.3 |
-| D7 | The 600 × 480 × 480 home brief is unchanged. Size questions are priced by similarity rescoring first. | Owner decision; free and exact for the scaled shape **[measured]** |
-| D8 | Constrained freeform surfaces and learned neural shape embeddings are out of scope until an adjoint solver or roughly ten times more data exists. | 30–100 dims without gradients; 10⁴–10⁵ examples needed **[literature]** |
+| D7 | The 600 × 480 × 480 home brief is unchanged. Size questions are priced by similarity rescoring first. | Owner decision; similarity rescore is a model-based approximation subject to source and frequency limitations |
+| D8 | Constrained freeform surfaces and learned neural shape embeddings are out of scope until an adjoint solver or roughly ten times more data exists. | data and computational requirements are uncertain; no validated universal sample threshold |
 | D9 | A supervisor acts on J only after J has a published noise floor. Until then the watchdog is a safety net. | Screen/verify gap 0.17 J among the best designs **[measured]** |
 | D10 | Owner-requested families are never cut by an allocation policy; they sit on a protected list. | Standing owner instruction |
 
@@ -71,7 +71,7 @@ the lanes, option G-B in the review), possibly searched in a learned mode space 
 | # | Open decision | Experiment | What would settle it |
 |---|---|---|---|
 | O1 | Can every non-CAD engine emit the canonical surface without losing geometry or source information? | X1 | Deviation and metadata checks in the X1 brief |
-| O2 | Deformation modules (keep families) versus a backbone (replace them) for H/V control | X2, then X1 part C | Module authority ≥ 3° on at least two base engines keeps modules; otherwise the backbone moves up |
+| O2 | Deformation modules (keep families) versus a backbone (replace them) for H/V control | X2, then X1 part C | Use the full X2 authority, validity and redundancy criteria; inconclusive tests do not select the backbone |
 | O3 | Is cross-family transfer real, or sibling-lane leakage? | X3 | Held-out-engine skill thresholds in the X3 brief |
 | O4 | Which knobs to fix, link or free in future searches | X4 | Agreement between geometric and acoustic evidence |
 | O5 | Whether lane racing or any portfolio policy saves compute | X5 | Savings that survive seed-leakage and censoring corrections |
@@ -84,7 +84,7 @@ the lanes, option G-B in the review), possibly searched in a learned mode space 
 - **X1 fails:** two or more engines cannot be sampled to within tolerance, or the surface loses
   source or shell information that changes the acoustics. Then the layer is not a common language
   and the choice falls back to per-family tooling.
-- **X3 fails under held-out-engine validation:** transfer was sibling leakage. The layer still
+- **X3 fails under held-out-engine validation:** the tested representation and model did not transfer under that split; sibling leakage, domain shift and representation limitations remain competing explanations. The layer still
   serves validity and sensitivity, but the surrogate, lane selection and unified acquisition lose
   their basis.
 - **X2 shows modules lack authority while a backbone reproduces existing designs (X1 part C):**

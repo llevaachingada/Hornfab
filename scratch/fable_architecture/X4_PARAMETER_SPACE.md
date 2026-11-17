@@ -1,5 +1,11 @@
 # X4 — parameter-space intelligence: preliminary, incomplete
 
+## Refresh at corpus HEAD `01560e5`
+
+The later five-lane follow-up below supersedes the original two-lane coverage description: it includes three native lanes and two generated lanes, while three other generated recipes failed rematerialization. The numerical results remain historical results from `207f97a`, not a new run. The subsequently committed [X1 report](X1_ROUND_TRIP.md) confirms that its sampled surfaces are experimental: exact throat preservation, topology, mesh agreement and the full convergence contract remain unverified. Therefore full numerical rank of the normalized columns is not evidence that the physical parameterization is independent or suitable for a production search.
+
+The acoustic script uses five random train/test splits within each time subset, bootstraps only the training rows, and permutes the held-out rows. Its reported ranges are across five fitted replicates, not confidence intervals; correlated optimization trajectories can still appear on both sides of each random split. It takes the frequency mask from the first eligible row, so identical frequency grids across included rows are an unverified prerequisite. The early/late overlap is descriptive and does not satisfy the required label-agreement gate. No new CPU experiment was run for this refresh.
+
 Recorded 2026-11-16 at HEAD `207f97a29e2f2f31a366da95e882f9b48761ab00`. No solves, mesh builds, changes to configs or tracked files. The X1 sampler is experimental and its round-trip contract has not been validated; all geometric numbers below are provisional. This is not sufficient evidence for parameter-space changes.
 
 ## Geometric checks
@@ -13,7 +19,7 @@ The X1 `sample` routine was applied to CPU-native materialized surfaces for two 
 
 In the fold-warm samples, pairs whose normalized columns exceeded .95 in absolute cosine at least once include `a_deg`/`k`, `n`/`s`, `n`/`q`, `q`/`s`, and `az_a_cos_amp`/`az_fold_h_deg`. No such pair occurred among the eight ext-throat knobs at these samples. This is a local observation, not a link recommendation. The raw sampler has not been demonstrated convergent for each knob and the necessary box-corner, throat-region, maxima and constraint-margin checks are missing. A low RMS movement for a 1%-range step does not meet the brief’s definition of inactivity everywhere.
 
-The three required GRID/GEN-FF lane geometry Jacobians have not been implemented: X1 reported resolver failures for some Klangfilm samples, and it is not yet established how to perturb generator knobs while preserving the intended recipe. No meshes were built. Known conditional recoveries (`n/q` at `s=0`, `s1/s2`, morph target/exponent, guiding curve, `rot_deg`) were not systematically tested. No labels or agreement rates from Parts C/D are established.
+At this initial stage the generated-lane Jacobians and conditional checks were incomplete; see the later five-lane follow-up for subsequent results. No meshes were built. No labels or agreement rates from Parts C/D are established.
 
 ## Limitations and permitted use
 

@@ -1,5 +1,7 @@
 # MESH_FIDELITY_PAIRS
 
+> **Context refresh at `01560e5`:** These historical pairings do not isolate mesh convergence: frequency support and other solve conditions can co-vary, several rows share designs, and only two displayed pairs have either J below 5. Their 0.109 J sample SD is not a validated mesh-error distribution or noise floor. Screen and verify study pairs here use the same mesh, so frequency verification does not establish mesh convergence. No new calculations or solves were run for this refresh.
+
 - Repo HEAD at run: `aa11b6268b02708ae9a270aa14e8fe877ce1d15a`
 - Timestamp: `2026-11-16T21:37:30-0500`
 - Read-only against `runs/` and `dataset/`; no solve, mesher, GPU, queue or config write.
@@ -19,7 +21,7 @@
 
 ## Delta table
 
-| # | design | mesh A (dof) | mesh B (dof) | DOF B/A | J A | J B | dJ (B-A) | d cov | d rip | d di | d dislope | d flat | d load | d distd | d diag | d flat_cv | target |
+| # | design | mesh A (dof) | mesh B (dof) | larger/smaller DOF | J A | J B | dJ (B-A) | d cov | d rip | d di | d dislope | d flat | d load | d distd | d diag | d flat_cv | target |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | 1 | `3b41ac7d5589` | `4a225538d6a2` (1605) | `98ac8fae1f15` (1605) | 1.000 | 4.751 | 4.913 | +0.162 | +0.062 | +0.005 | +0.074 | +0.053 | +0.015 | +0.051 | +0.014 | -0.018 | -0.027 | 75x45 700-4500 |
 | 2 | `5b7ada586de1` | `4a225538d6a2` (2191) | `98ac8fae1f15` (2191) | 1.000 | 4.910 | 4.918 | +0.008 | -0.025 | +0.007 | +0.077 | -0.012 | -0.005 | +0.001 | -0.018 | +0.038 | -0.013 | 75x45 700-4500 |

@@ -1,5 +1,7 @@
 # FREQUENCY_BUDGET
 
+> **Context refresh at `01560e5`:** These are historical interpolated-score comparisons on 58 selected study pairs, not an independently solved 58-frequency ground truth or an accepted frequency budget. The 22-point SD below measures deviation from the interpolated 29-point baseline, not physical error or a validated 0.10 J noise floor; the baseline itself shifts substantially against the stored-grid score. The later [E3 replay](E3_FREQUENCY_STAGING.md) saved 0.124% of frequency calls under one conservative staging rule, with elapsed savings unmeasured. Grid-independent scoring and matched fidelity validation remain open. No new calculations were run for this refresh.
+
 - Repo HEAD at run: `aa11b6268b02708ae9a270aa14e8fe877ce1d15a`
 - Timestamp: `2026-11-16T22:01:05-0500`
 - Read-only; no solve, mesher, GPU, queue or config write.
@@ -15,8 +17,7 @@
   baseline, PCHIP gives sd **0.588 / 0.545 / 0.305 / 0.198 / 0.133 / 0.104** and top-28 
   Spearman **0.428 / 0.668 / 0.921 / 0.935 / 0.910 / 0.931** for 8 / 10 / 12 / 15 / 18 / 22 
   points. That isolates the frequency count from the 29 -> 58 grid cost in the tables below; 
-  ~22 points reaches sd ~0.10. The rational-pressure interpolant is not usable at any of 
-  these counts.
+  22 points gives sd 0.104 against that interpolated baseline in this sample. The tested rational-pressure interpolant shows large score errors at these counts; this does not rule out other pressure interpolation methods.
 
 ## (a) Dense-grid comparison (screen 18 -> 58 vs verify 29 -> 58, PCHIP)
 

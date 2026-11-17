@@ -1,8 +1,9 @@
 # ARCHITECTURE_SYNTHESIS — final high-effort pass and decision record
 
 > **Results update, 2026-11-16 23:15.** Experiments run after this was written did not support its
-> two candidate spines. E1: response-level modelling showed no advantage over modelling the score
-> (10 versus 9.5 reveals), though either model beat the order actually used by about 3×. E2: the
+> two candidate spines. E1: response-level modelling showed no advantage over modelling the
+> coverage-plus-DI proxy (10 versus 9.5 valid-design reveals in a fixed historical candidate pool;
+> actual order was 29.75). This is not full-J or campaign-cost evidence. E2: the
 > "construct, then correct" inverse step was worse than no change. E3: staged frequencies saved
 > 0.1 %. Treat §3–§5 as hypotheses that were tested and mostly not confirmed. Current position and
 > all results: `LOW_COST_AGENT_HANDOFF.md` §1 and §4. The plain-language guide in §8 remains a
@@ -30,16 +31,16 @@ Reconsidered from that question, the measurements say three things I under-used:
 
 1. **Discovery today is done by whoever writes the seed.** Lane rank after 16 rows predicts final
    rank at 0.90, and the campaign's best design appeared at attempt 55 of 2,853 **[measured, M6]**.
-   The optimizers polish; they do not discover. The best lane's advantage is a human idea (an
+   This retrospective association does not establish that optimizers only polish or that the seed caused the outcome. The best lane's advantage is a human idea (an
    azimuthal wall-angle law giving independent H and V angles), not a search result.
 2. **Each solve returns a response curve, and the search throws almost all of it away.** CMA-ES and
    the scalar GP see one number, J. But J = g(r(x)): r is the expensive response, g is the known,
    cheap scoring function. The response varies in about six independent ways **[M1]** and is
    predictable from geometry **[M4]**. An optimizer that models r uses roughly six pieces of
    information per solve where today's uses one.
-3. **The solver is deterministic; the "noise" is made by scalarizing on a sparse grid.** The 0.17 J
+3. **Frequency-grid sampling contributes to score variation; the total numerical and mesh error is not established.** The 0.17 J
    screen/verify gap comes from sampling a curve at different frequencies, on the same mesh
-   **[measured]**. Working at response level sidesteps most of it.
+   **[measured]**. Response-level modelling does not by itself eliminate sampling or fidelity error.
 
 ---
 
@@ -52,7 +53,7 @@ Reconsidered from that question, the measurements say three things I under-used:
 | A BEM solve is atomic, so early stopping cannot apply (dossier E10) | Cost is per frequency (about 0.4 s to 45 s each **[dossier]**); frequencies are independent linear solves | Evaluate a few discriminating frequencies first and abandon hopeless candidates; choose *which* frequencies as part of the experiment |
 | The lane (family × config) is the unit of exploration and allocation | Lanes are human seeds plus local polish; candidates from any generator cost milliseconds on CPU | Screen very large multi-generator candidate pools with a model; solve only the selected few |
 | Data belongs to a brief | A response is a property of the geometry and source, not of the brief | One response database for all briefs; only the scoring and acquisition are brief-specific |
-| Refusals are a search tax to be learned around | Validity and envelope are exactly computable on CPU before any solve | Filter the pool exactly; no refusal ever consumes budget or needs a feasibility model |
+| Refusals are a search tax to be learned around | Some validity and envelope checks are computable on CPU, but their coverage and estimator fidelity are not established | Improve preflight and measure remaining refusals and false exclusions |
 | Beamwidth and DI are the natural model outputs | Beamwidth is a threshold crossing and jumps when a lobe appears; pressure is smooth in geometry | Model the polar response in a smooth basis (angular harmonics by frequency) and derive beamwidth afterwards |
 | Only far-field results are worth storing | Surface pressure from the same solve shows *where* on the wall each frequency's behaviour is set | Shape-sensitivity diagnostics, and a physical basis for deformation modules. Speculative; needs the solver to export it |
 | A supervisor coordinates optimizers | With one model and one value-per-cost rule, "which family, which optimizer, which fidelity" are one decision | The supervisor shrinks to governance: budget, safety, approvals |
@@ -65,8 +66,8 @@ Reconsidered from that question, the measurements say three things I under-used:
 
 - **Candidate sources (keep every typology).** All existing generators, plus deformation modules
   applied to their outputs, emit candidates on CPU. Typologies are preserved exactly as generators.
-- **Exact pre-filter.** Validity, envelope, throat fit and printability are computed on the sampled
-  surface. Invalid candidates are never solved.
+- **Proposed pre-filter.** Test validity, envelope, throat fit and printability on sampled
+  surfaces; completeness and false refusals require validation.
 - **One forward model.** Geometry (canonical descriptors, wavelength-scaled) → response (a
   handful of smooth components), probabilistic, shared across engines, with a small per-lane
   residual where data is dense.
@@ -86,7 +87,7 @@ r over everything that can be generated, not by local distributions inside hand-
 
 **What it unlocks that the current architecture cannot.**
 - Exploration between and beyond lanes: the pool spans every engine and every module at once.
-- No compute lost to refusals or to candidates that a few frequencies show are hopeless.
+- Potentially fewer refusals or unnecessary frequency solves, if preflight and staging prove reliable.
 - Every brief, and every future objective version, served by the same data and model.
 - A direct answer to "what is achievable in this envelope": the image of the valid pool under the
   model, with uncertainty.

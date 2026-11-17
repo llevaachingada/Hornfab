@@ -2,14 +2,14 @@
 
 > **Results update, 2026-11-16 23:15.** Stricter tests weakened the predictor's case. X3: with a
 > whole engine held out, horizontal-plane skill stayed below 0.6 and ranking inside an unseen lane
-> fell to 0.49. E1: predicting response curves gave no advantage over predicting the score. X5:
+> fell to 0.49. E1: response curves gave no advantage over predicting the coverage-plus-DI proxy in the fixed-pool replay; full J was not tested. X5:
 > lane racing saved nothing after corrections. Hook A (lane ordering) remains the only plausible
 > use and is itself unconfirmed under sibling-excluded splits. Any replay must use the DI rule in
 > `LOW_COST_AGENT_HANDOFF.md` §2; the scripts cited here predate that fix but use stored metrics,
 > not regenerated ones.
 
-**Written:** 2026-11-16. **Code read at** `main` @ `207f97a`. **Status:** explanation and proposal.
-Nothing here is implemented, and no tracked file was changed. Measurements are from stored runs
+**Written:** 2026-11-16. **Code read at** `main` @ `207f97a`. **Status:** historical explanation and proposal; the research corpus is now tracked.
+The proposed predictor workflow is not established as implemented. Measurements are from stored runs
 (scripts `.fable/an3.py`, `an5.py`, `an7.py`). This expands "Change 1" to "Change 3" of
 `ARCHITECTURE_SYNTHESIS.md` §8.
 
@@ -19,8 +19,7 @@ Nothing here is implemented, and no tracked file was changed. Measurements are f
 
 The predictor is a fast statistical model that looks at a horn's **shape** and estimates its
 **response curves** (beamwidth against frequency in both planes, directivity index, and later
-throat loading) without running a simulation. Its job is not to replace simulations. Its job is to
-decide **which horns are worth simulating**: which family to start with, which starting shape to
+throat loading) without running a simulation. Its job is not to replace simulations. Its proposed job is to inform **which horns are worth simulating**: which family to start with, which starting shape to
 give CMA-ES, and which candidates to skip. Every design that matters is still solved by the real
 solver, and only solved results are ever reported as acoustics.
 
@@ -31,8 +30,8 @@ solver, and only solved results are ever reported as acoustics.
 | Input | One lane's knob values | One run's knob values | Shape measurements taken from the surface (same for every family) |
 | Output | Metric curves and a validity flag | The score J | Response curves; J is computed afterwards with the normal scorer |
 | Learns from | One family's dataset | The current run only | Every solved horn of every family |
-| Works for a brand-new lane | No: needs that lane's data first | No: starts empty each run | Yes: that is its purpose |
-| Scoring supported | Objective v1 only (`surrogate/capability.py`; kept v1-only by decision of 2026-11-13) | Whatever the run uses | Any objective version, because scoring is applied to predicted curves |
+| Works for a brand-new lane | No: needs that lane's data first | No: starts empty each run | Intended use; strict generalization remains unverified |
+| Scoring supported | Objective v1 only (`surrogate/capability.py`; kept v1-only by decision of 2026-11-13) | Whatever the run uses | Only objectives whose required predicted fields and compatible scoring semantics are available and validated |
 | Model | Neural network ensemble (needs torch) | Linear-quadratic model inside pycma | Tree ensemble to start (scikit-learn, trains in seconds) |
 | Wiring that exists | `surrogate train / propose / round` CLI; acceptance gates; proposals file solved through the normal path | Config key; CMA uses it internally | None yet; it can reuse the first column's proposals-and-round path |
 
@@ -54,13 +53,10 @@ the horizontal plane and 12 in the vertical plane. The intended version uses the
 `CANONICAL_SURFACE_CONTRACT.md` §7 (wall angles, section area and aspect along the wall, lip
 radius), optionally expressed in wavelengths so one model covers all frequencies.
 
-**3.3 Outputs.** Beamwidth in H and V and directivity index at each frequency. To be added and
-tested: throat resistance curve (needed for the loading term), in-coverage ripple, on-axis
-response.
+**3.3 Outputs.** Beamwidth in H and V and directivity index at each frequency. X3 subsequently tested stored throat resistance, in-coverage ripple and on-axis response retrospectively; transfer varied sharply by engine and target.
 
 **3.4 From prediction to score.** The predicted curves are passed to the same scoring code that
-scores real solves. Changing the objective, for example to the range-plus-constancy scoring in
-`SCORING_RANGE_PROPOSAL.md`, needs no retraining.
+scores real solves. A new objective can reuse predictions only if all required fields, frequency coverage and scoring conventions are supported; otherwise model or data changes and validation are needed.
 
 **3.5 Knowing when not to trust it.** Two safeguards:
 - *Distance check.* If a candidate's shape is farther from every training shape than almost all
@@ -88,7 +84,7 @@ error ≤ 2.0°, DI error ≤ 0.3 dB, on ≥ 500 held-out designs.
 | Beamwidth error | ≤ 2.0° | 4.0–4.5° | Fails |
 | DI error | ≤ 0.3 dB | 0.4 dB | Fails |
 | Rank correlation inside an unseen lane | ≥ 0.90 | 0.77 median | Fails |
-| Ranking whole lanes against each other | (no gate) | 0.90–0.96 | Useful |
+| Ranking whole lanes against each other | (no gate) | 0.90–0.96 | Preliminary; siblings not excluded |
 | Engine group never seen | (no gate) | Skill 0.18–0.71, error 8–16° | Weak |
 
 **So the predictor must not be used to replace solves, and I am not proposing that.** It is
@@ -138,15 +134,15 @@ exists.
 | **E. Pool ranking for BoTorch** | Rank or thin the candidate pool before the GP sees it, and supply a prior for a lane with few rows | The finite candidate pool (`hornlab_search/bo/data.py:1068`, `build_candidate_pool`) | A pre-ranked pool | Medium: interacts with the study package pins |
 
 **What I would switch on first, and why.** Hook A only, as a written proposal the owner approves.
-It is the one use the stored data supports (§6), it leaves every optimizer untouched, and it only
-changes the order of jobs. Hooks B and C are cheap to wire but unproven: the replay in §6 could
+It is a candidate for further evaluation (§6); it leaves every optimizer untouched and only
+changes the order of jobs. The existing lane-order measurement is not a validated deployment gate. Hooks B and C are cheap to wire but unproven: the replay in §6 could
 not show the predictor choosing better designs than random picks. They should be tried next as a
 small, approved experiment, not adopted. D and E change optimizer behaviour and should wait until
 the ledger shows the predictor passing its gates for a sustained period.
 
 ## 6. Would it have helped? A replay on stored data **[measured]**
 
-**Lane ordering (hook A): supported.** Trained on other lanes, the predictor ranks lanes it has
+**Lane ordering (hook A): preliminary and unconfirmed.** Trained on other lanes, the predictor ranks lanes it has
 never seen at rank correlation 0.90 (lane median) and 0.96 (lane best decile), and identifies 6 of
 the true top 8 lanes (`.fable/an5.py`). Sibling lanes were *not* excluded in that run, so treat it
 as an upper estimate.
@@ -202,7 +198,7 @@ had 4.36.
 | Need | Why | State |
 |---|---|---|
 | Shape measurements for a candidate *before* it is solved | The tested version read them from stored meshes, which exist only after meshing | Either build the mesh without solving (seconds per candidate on CPU, fine for hundreds) or sample the surface directly (milliseconds, needs experiment X1) |
-| Loading in the outputs | The score includes throat loading; the tested predictor does not predict it | Untested; impedance is stored with every response (experiment X3, part C) |
+| Loading in the outputs | The score includes throat loading | X3 tested stored resistance retrospectively; held-out-engine results were mixed and do not validate a deployed predictor |
 | Proof it survives stricter tests | Sibling lanes inflate the numbers | Experiments X3 and E1 |
 | Trustworthy score differences | Choosing "better" candidates needs differences larger than the scoring noise | Scoring work R1–R4, with another agent |
 | A proposals format that carries generator designs | The existing round validates `family` and `params`; grid and rolled designs carry a generator recipe | To check in X1 |
@@ -261,3 +257,59 @@ all. This is the only clean test of hooks B and C.
 
 **Do not** report any predicted value as an acoustic result, and do not tune the model after
 looking at the held-out lanes.
+
+
+## 11. Continuation decisions and evidence boundaries
+
+**Decision now:** continue research, not deployment. A is a proposal for owner-reviewed ordering
+only if its stricter replay is informative; the existing 0.90–0.96 lane ranking allowed sibling
+information into training. B and C have not beaten a credible random baseline; D, E, automatic
+pruning and allocation have no demonstrated justification. The gates in §4 are proposed decision
+criteria, not measured guarantees. Fix the criteria and comparison protocol before inspecting held-out
+results; a passing retrospective screen still needs an approved prospective test.
+
+**Read the evidence at its actual scope.** E1 compared response and scalar models on a
+coverage-plus-DI proxy in ten lanes using a fixed historical candidate pool: median 10 versus 9.5
+valid-design reveals, with an eight-reveal initial floor. It excluded failed attempts and does not
+measure GPU time or prospective CMA trajectories. The proxy-best row was in the full-J top decile
+in only six lanes; full-J and term-level error remain open. E2's failed inverse recovered historical
+geometry from two-plane profiles, with global PCA leaking unsupervised test-distribution information;
+it does not rule out another geometry reaching a response target. E3's conservative bound saved
+0.1% of frequency evaluations on stored rows, not wall-clock time; incremental response and cache
+semantics are not established. None of these results validates a predictor-driven solver shortcut.
+
+**Separate the three generalization questions.** X3's lane holdout, provisional sibling-group
+holdout, and whole-engine holdout answer increasingly demanding questions and have different test
+populations and training-mean baselines. Its two-plane input gave median within-lane coverage rank
+0.761, 0.720, and 0.489 respectively; horizontal skill was below 0.6 for every held-out engine.
+Additional stored loading, ripple and on-axis targets had mixed transfer. Training-only similarity
+augmentation improved its paired retrospective baseline but still missed the H-plane line; it
+assumes physical similarity and does not prove transfer with the same driver. Whole-surface and
+explicit wavelength-scaled representations, complete construction/seed/warm-start lineage, and
+solve-value estimates remain open. Do not infer that leakage alone explains poor transfer.
+
+**P1 execution sequence.** First complete X1's provenance and surface validation (handoff A1),
+then inventory available rows and construction ancestry. Reproduce the existing 19-lane result
+before changing the model. Freeze family groupings, splits, metrics, budgets and random seeds; fit
+preprocessing, feature selection, model and any augmentation on training folds only. Remove
+matching design hashes and all known siblings before augmentation; report unresolved ancestry and
+repeat under whole-engine holdout. Use identical candidate eligibility and solve budgets for
+predictor, actual first rows and repeated random draws, with uncertainty and per-lane outcomes.
+Historical optimizer-selected pools are biased; identify genuinely independent initial Sobol/pool
+rows and report counts and provenance, leaving a lane untested if fewer than 30 qualify. Report
+coverage-plus-DI separately from full J, hold frequency grid and objective fixed, and use the
+parity-exact DI replay rule in the handoff. If required response fields or compatible scoring are
+missing, mark full-J prediction unavailable rather than silently scoring a partial substitute.
+Report both valid reveals and, where records permit, attempts including refusals and cache hits;
+neither is an estimate of GPU time without measured cost.
+
+**Governance and failure modes.** Model predictions and ensemble spread are hypotheses, not
+solved acoustics or calibrated uncertainty. Distance rejection and ledger-based demotion in §3
+are proposed safeguards requiring implementation and validation; they do not establish safety
+outside training support. Preserve random or ordinary-search comparisons to detect feedback bias.
+X5's corrected availability replay saved 0% in a non-discriminating case, and its counterfactual
+default watchdog would have stopped the eventual winner before its best result; lineage and actual
+overrides are incomplete. Keep watchdog decisions human-reviewed, never cut owner-requested
+families, and do not change bounds, fidelity, queue or optimizer from these results. Any BEM test,
+including P1's 40-solve proposal, requires owner approval; a prospective protocol should specify
+matched budgets, baselines, protected families, measured cost, stopping and reporting beforehand.

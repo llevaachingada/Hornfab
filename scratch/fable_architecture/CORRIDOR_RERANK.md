@@ -1,10 +1,12 @@
 # CORRIDOR_RERANK
 
+> **Context refresh at `01560e5`:** The [S1 replay](S1_RANGE_SCORING.md) uses a different H corridor, an additional constancy term and separate original-objective cohorts; its 3/20 overlaps are not directly interchangeable with this report's 4/20 against a common v7 baseline. Both are retrospective rankings of available observations, not validation of a winning design or owner approval of a scoring brief. Same-term v9 point-versus-corridor comparison and grid-independent scoring remain open. No new replay was run for this refresh.
+
 - Repo HEAD at run: `207f97a29e2f2f31a366da95e882f9b48761ab00`
 - Timestamp: `2026-11-16T22:59:09-0500`
 - Read-only against `runs/`; no solve, mesher, GPU, queue or config write.
 - Scope: **3414** ok rows from **75** landscape runs / **35** configs (80x50, 600x480x480, 2026-11-15 onward).
-- v7 baseline: the standard landscape brief `room_landscape_80x50_700_hf1440_v7` applied to every row (not each row's own variant). Metrics are read from each design's stored `metrics.json`; their `di_db` is the sin(theta)-weighted theta-phi balloon DI recorded by the solve path (parity-exact against the stored J).
+- v7 baseline: the standard landscape brief `room_landscape_80x50_700_hf1440_v7` applied to every row (not each row's own variant). Metrics are read from each design's stored `metrics.json`; their `di_db` is the sin(theta)-weighted theta-phi balloon DI recorded by the solve path. The common-brief re-score need not equal each row's stored J when its original brief differs.
 - v9 candidates are **placeholders awaiting the owner's choice**; they live under `.tmp/v9_candidates/`, not `examples/`. Only the V onset differs (700 / 1,000 / 1,250 Hz); H is 60-90 deg from 700 Hz in all three. `cov_below_f0: one_sided` means a wide pattern below onset is free while a narrow one is charged.
 - v9 J is **not numerically comparable** to v7 J: the term sets differ (v9 drops weighted `di`/`distd`, adds `di_roughness`, and scores a corridor). Only ranks and overlaps are compared.
 
@@ -16,7 +18,7 @@
 | V onset 1000 Hz | 3414 | 4/20 | 0.292 | 0 |
 | V onset 1250 Hz | 3414 | 4/20 | 0.294 | 0 |
 
-**Reading (important confound).** All three candidate top-20 sets are the **same 20 rows**; the V onset only shifts their v9 J by <0.05 and swaps the last two positions. The 4/20 overlap with v7 is therefore **not** caused by the corridor onset. It is driven by the v9 term-set change: v9 drops weighted `di` and `distd`, adds `di_roughness`, and scores the corridor instead of a point target. The clearest evidence is that two `hl__osse_rrect_morph_v7` rows ranked **461** and **497** under v7 enter the v9 top 20; their v7 J is dominated by terms v9 does not weight. Literal answer: corridor **presence** (v9 vs v7) is a first-order change (top 20 moves to 4/20 overlap), while the **V-onset choice** is a refinement (top 20 unchanged). Do not attribute the movement to the corridor shape alone, because this test does not hold the term set constant.
+**Reading (important confound).** All three candidate top-20 sets are the **same 20 rows**; the V onset only shifts their v9 J by <0.05 and swaps the last two positions. The 4/20 overlap with v7 cannot be attributed to the onset choice in this sample. The comparison changes several features at once: v9 drops weighted `di` and `distd`, adds `di_roughness`, and scores a corridor instead of a point target. Two `hl__osse_rrect_morph_v7` rows ranked **461** and **497** under v7 enter the v9 top 20; their v7 J is dominated by terms v9 does not weight. The combined score change strongly reranks this cohort, but this comparison cannot identify the corridor's independent contribution; onset sensitivity outside this selected top 20 may differ.
 
 ### Candidate V onset 700 Hz
 

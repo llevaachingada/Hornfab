@@ -2,14 +2,18 @@
 
 > **Results update, 2026-11-16 23:15.** Later experiments qualify three of the measurements here.
 > M3 ("8 modes, 1.2 mm") holds for two wall profiles only; on whole surfaces 8 modes give
-> 1.4–2.3 mm and 16 give 0.3–0.7 mm (X1). M4 (transfer) fails the strict held-out-engine pass
-> lines (X3). M6 (racing) shows no saving once seeded lanes are merged (X5). The preference for
+> 1.4–2.3 mm and 16 give 0.3–0.7 mm in an exploratory in-sample fit to five lanes (X1), not a
+> validated whole-surface reconstruction. M4 (transfer) misses the strict held-out-engine success
+> lines on the tested inputs (X3). In X5's conservative availability replay all policies tie at
+> the target because only the eventual winner was observed as available before reaching it; this
+> does not establish that racing generally saves nothing. The preference for
 > deformation modules (G-D) is withdrawn in `UNIVERSAL_HORN_FAMILY.md`. Current position:
 > `LOW_COST_AGENT_HANDOFF.md`.
 
 **Date:** 2026-11-16 (late). **Tree:** `main` @ `f0dd019`. **Mode:** read-only discovery. No solve,
 mesher run, queue or tracked-file change. New files are this document and five analysis scripts in
-the git-ignored `scratch/fable_architecture/.fable/`.
+`scratch/fable_architecture/.fable/`. Historical tracking description: the corpus was subsequently
+committed; current HEAD when this context was refreshed is `01560e5`.
 
 **Scope.** This is the broader comparison requested after the first pass: geometry representation,
 adaptive campaign management, intelligent parameter spaces, transfer of acoustic knowledge, and

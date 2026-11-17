@@ -38,7 +38,7 @@ The GEN-FF CD pool is dominated by a single lane; clustered trajectories and une
 
 ## Siblings, verdicts and limitations
 
-X3's provisional name-based sibling map groups versions, smooth twins, sp controls, rr reference/pucker and Klangfilm axis variants. In the expanded data, no such sibling group spans engine groups, so the strictly other-engine training used in Parts B and C already excludes those named siblings; the sibling-excluded numbers are therefore the same. Seed-parameter verification of that map remains outstanding. Part A trains on the target lane alone and has no sibling training data.
+X3's provisional name-based sibling map groups versions, smooth twins, sp controls, rr reference/pucker and Klangfilm axis variants. In the expanded data, no such sibling group spans engine groups, so the strictly other-engine training used in Parts B and C already excludes those named siblings; the sibling-excluded numbers are therefore the same. Subsequent seed checks found exact nonempty seed matches for the biradial smooth twins and Le Cleach Iwata AR smooth twins; other grouped pairs did not have exact nonempty matches. Different seeds do not establish independent lineage, and warm-start and partial-seed provenance remain unaudited (see `.e2/sibling_seeds.txt` and `X3_TRANSFER.md`). Part A trains on the target lane alone and has no sibling training data.
 
 - Part A: **not met**. Median response 10 versus scalar 9.5 and actual 29.75; it is not at most half both.
 - Part B: **not met**. Median decreases from 10 to 9.75, 2.5%, below 20%.
@@ -47,3 +47,7 @@ X3's provisional name-based sibling map groups versions, smooth twins, sp contro
 - No prospective BEM stage was run. A new pool and owner-approved matched solves would be needed to test selection outside historical trajectories.
 
 Reproduce: `.venv/Scripts/python.exe scratch/fable_architecture/.e1/extract.py`, then `.e1/replay.py`, then `.e1/summarize.py` from the repository root. `results.json` records individual starts; `descriptors.pkl` contains original row metadata and descriptors; `parity.py` checks complete-score replay. Sibling groups and mapping are described in `X3_TRANSFER.md` and `.x3/strict.py`.
+
+## Context after the broader research pass
+
+`X3_TRANSFER.md` reports additional held-out-engine tests: profile-based horizontal-beamwidth skill remains below its 0.6 threshold for each engine, and transfer of impedance and ripple varies by engine. Those tests use different targets and models and do not replace this proxy replay. The handoff's A3 follow-up remains open: evaluate full J using the parity-exact harness, whole-surface descriptors after X1, and term-level response error. It cannot yet attribute this replay's outcome to a particular limitation. The corrected R2 finding that frequency interpolation alone shifts J also means any full-J comparison must hold the scoring grid and replay parity fixed.

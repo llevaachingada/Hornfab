@@ -1,5 +1,37 @@
 # CONTINUITY
 
+## 2026-11-17 - Fable X1 contract tests finished (N1): two or more lanes fail inner-wall agreement; U1 gated
+
+- Runbook N1 completed on 60 stored designs (10 per lane) at HEAD `01560e5`; the §0 replay parity
+  check returned 0.0 (n=17). Read-only CPU work: no mesh build, solve, queue or config change.
+  Report `scratch/fable_architecture/X1_CONTRACT_TESTS.md`; scripts and records in
+  `scratch/fable_architecture/.n1/`; one row added to `LOW_COST_AGENT_HANDOFF.md` §10.
+- **The X1 failure condition is met.** At the contract-minimum record (65 wall stations × 31
+  azimuths = 3° step), inner-wall mesh agreement passes ext-throat (10/10, worst p99 0.158 mm), ATH
+  morph (10/10, 0.850) and biradial (10/10, 0.142), but fails rolled (0/10, 1.696) and Crowe
+  (0/10, 1.870), and one Klangfilm design (9/10, 1.457). Determinism is 60/60 in separate
+  processes; refinement passes 30/30 on the three testable lanes (worst 0.198 mm).
+- Causes, measured. Rolled is a record-resolution effect: 49 azimuths passes 10/10 (p99
+  0.36–0.59) and 65 stations are sufficient; 31 azimuths aliases the relief. Crowe's native
+  25 × 41 point grid already sits at p99 1.07 mm from the stored mesh (mesher surface fit, not
+  sampling); the 31-azimuth chords add ~0.7 mm. Klangfilm's failing design does not match its
+  stored mesh even at native/dense sampling, and the ten selected recipes carry digest
+  `e3a1f4a3…` rather than the current legacy-bridge `ea5026…` (the addendum's verified digest
+  belongs to a different run).
+- Envelope: biradial width/height is +1.9…+3.5 mm (normal-offset outer surface versus the mesh's
+  sharp mouth rim); Crowe is −0.3…−1.6 mm and ext-throat +0.65…+1.41 mm on H; every depth deficit
+  is the rear closure at `z = −t` and is within 1 mm after that correction except one ATH design
+  (+1.04). Metadata is complete except ATH wall thickness, termination kind for the three
+  native/freeform lanes, and the resolved source-cap shape fields.
+- **Stopped and handed back per the runbook.** N2 (protected families/lineage), N3 (v9 grid
+  independence), N4 (U1) and N5 (U2/U3) were not run; N4/N5 also depend on N1. Next actions are
+  recorded in the report: raise the rolled record to ≥49 azimuths, decide a Crowe tolerance from
+  the ~1.1 mm mesher fit floor, resolve the Klangfilm run/provenance and the failing design, and
+  revisit the mouth-rim envelope method.
+- Corpus housekeeping committed with this entry: the 2026-11-16 23:40 report/handoff reconciliation
+  that was still in the working tree (`A4`, `A5`, `A9`, X1 addendum context and the 40-report
+  index updates). No implementation, objective, queue or GPU state changed.
+
 ## 2026-11-16 - Agent-orchestration review: sessions are slow because of prompt size, not agent count
 
 - Review filed at [`AGENT_ORCHESTRATION_REVIEW_2026-11-16.md`](AGENT_ORCHESTRATION_REVIEW_2026-11-16.md).

@@ -1,5 +1,24 @@
 # ISSUES
 
+## 2026-11-17 - Fable X1: inner-wall agreement fails on two or more lanes; U1 blocked
+
+- OPEN (research, before U1): the contract-minimum surface record (65 stations × 31 azimuths) does
+  not meet the pre-declared inner-wall line for rolled (0/10, p99 1.696 mm; 49 azimuths passes
+  10/10) or Crowe (0/10, p99 1.870 mm; native-point/mesher-fit floor ~1.07 mm), and one Klangfilm
+  design fails at native and dense sampling (p99 1.46 mm).
+- OPEN (provenance): the ten selected Klangfilm recipes carry saved digest `e3a1f4a3…`, while the
+  current legacy bridge returns `ea5026…`; the addendum's verified digest belongs to a different
+  run. The surface rebuild is byte-identical between the two kernel copies; the digest-covered
+  companion files changed.
+- OPEN (contract method): the literal runbook 4b nearest-surface rule scores mouth-rim nodes as
+  inner; a topology (sharp-crease) or signed-position separation is required. The envelope method
+  also needs a mouth-rim rule (biradial +1.9…+3.5 mm on width/height).
+- DONE: six-lane N1 table (`scratch/fable_architecture/X1_CONTRACT_TESTS.md`); determinism 60/60;
+  refinement 30/30 on the three testable lanes; depth deficits traced to the rear closure at
+  `z = −t`. One row added to `LOW_COST_AGENT_HANDOFF.md` §10.
+- NOTE: N2–N5 were not run because the X1 stop condition was met. No code, config, solve, queue or
+  GPU state changed.
+
 ## 2026-11-16 - Agent-orchestration review filed; no issue closed (docs-only)
 
 - DONE: [`AGENT_ORCHESTRATION_REVIEW_2026-11-16.md`](AGENT_ORCHESTRATION_REVIEW_2026-11-16.md)
