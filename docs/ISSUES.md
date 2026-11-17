@@ -148,10 +148,12 @@
   evidence-truth view models (calibration sections, `not recorded`, proposal explanation, target
   integrity, TuRBO/Pareto payloads). Focused suites green (51 tests + node checks + lifecycle +
   compileall); live GPU search untouched.
-- OPEN (P1 polish): `gui/static/study_results.js` lacks a DOM-stub lifecycle test — the
-  `tests/gui_study_lifecycle.mjs` harness imports sources as data URLs and cannot resolve relative
-  imports for module files; extend it with a stub-resolver (including the `three` import map) or a
-  sibling harness before treating study_results coverage as test-bound like `studies.js`.
+- LANDED (P1 polish, 2026-11-17): `tests/gui_study_results_lifecycle.mjs` + pytest wrapper import
+  the real module graph from disk (relative imports resolve on a file-URL import; `three` stays a
+  lazy dynamic import behind view3d/balloon fallbacks), covering mount → default selection →
+  Inspect click → detail/geometry/acoustics fetches + pushState selection + inspector repaint, and
+  missing-artifact rows stating their reason. Both harnesses green; closed the study_results
+  test-bound gap.
 - OPEN (zero-solve parity): the legacy authoring Execute tab still renders a "Solve in 3D" button
   that `tests/gui_study_lifecycle.mjs` pins by exact string; Results surface is clean. Decide
   whether to rename/demote there too and update the pinned test in the same commit.
