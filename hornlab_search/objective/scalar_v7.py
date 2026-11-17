@@ -79,7 +79,9 @@ __all__ = ["objective_v7", "V7Params", "V7_WEIGHTED_KEYS", "V7_ALL_KEYS", "V7_DE
 V7_EXTRA_WEIGHTED_KEYS = ("flat_cv",)
 V7_WEIGHTED_KEYS = V4_WEIGHTED_KEYS + V7_EXTRA_WEIGHTED_KEYS
 #: C1 diagnostics: extra, NEVER weighted, but part of the stored key set.
-V7_DIAGNOSTIC_KEYS = ("lfp20_hz", "lfp50_hz", "rez_min_from_fx", "f11_hz", "loaded_hi_hz")
+#: ``oa_excess_raw`` (H12, 2026-11-16): 0.0 when the opt-in is off; measured value when on.
+V7_DIAGNOSTIC_KEYS = ("lfp20_hz", "lfp50_hz", "rez_min_from_fx", "f11_hz", "loaded_hi_hz",
+                      "oa_excess_raw")
 V7_ALL_KEYS = V4_ALL_KEYS + V7_EXTRA_WEIGHTED_KEYS + V7_DIAGNOSTIC_KEYS
 #: v4's defaults plus a silent (zero-weight) flat_cv; load stays 0.0 unless the brief asks.
 V7_DEFAULT_WEIGHTS = {**V4_DEFAULT_WEIGHTS, "flat_cv": 0.0}
@@ -87,7 +89,8 @@ V7_DEFAULT_WEIGHTS = {**V4_DEFAULT_WEIGHTS, "flat_cv": 0.0}
 _COV_BELOW_F0 = ("mask", "one_sided")
 _DIAG_REFERENCES = ("round",)
 _BLOCK_KEYS = {"version", "tolerances", "cov_narrow_ratio", "cov_below_f0", "diag_reference",
-               "loaded_re_z", "lfp_re_z", "lfp_crossover_ratio", "bw8k_floor", "flat_band", "cov_v_weight"}
+               "loaded_re_z", "lfp_re_z", "lfp_crossover_ratio", "bw8k_floor", "flat_band",
+               "cov_v_weight", "oa_excess_tol"}
 #: ``flat`` frequency set (2026-11-14, docs/research/ONAXIS_WEIGHTING_2026-11-14.md): "band" (the
 #: legacy default: every in-band frequency, so a brief whose band_lo sits below its crossover f0
 #: scores the horn's own roll-off under the XO, which the woofer covers) or "scored" (only
@@ -97,6 +100,9 @@ _FLAT_BANDS = ("band", "scored")
 FLAT_CV_BAND_HI_HZ = 3000.0
 #: The C3 floor is measured at or below this frequency (Hz).
 BW8K_HZ = 8000.0
+#: One-sided off-axis excess threshold (dB, 2026-11-16, H12): SPL(theta) must not exceed
+#: SPL(0) + this value within the coverage window. Applied when ``oa_excess_tol`` is set.
+_OA_EXCESS_THRESHOLD_DB = 0.5
 
 
 @dataclass(frozen=True)
@@ -115,6 +121,11 @@ class V7Params:
     #: Opt-in (2026-11-15, owner: "vertical dispersion matters less than horizontal to my ears"):
     #: the vertical plane's share of ``cov`` is multiplied by this. 1.0 = legacy (never emitted).
     cov_v_weight: float = 1.0
+    #: Opt-in (2026-11-16, H12): one-sided off-axis excess penalty in dB. When set, the mean of
+    #: max(0, SPL(theta) - SPL(0) - 0.5 dB) over scored in-band frequencies and all H/V angles
+    #: within ±coverage/2 is computed and added to J after dividing by this tolerance. ``None``
+    #: = off (never emitted), so absent configs keep their exact block and config_sha.
+    oa_excess_tol: float | None = None
 
     @classmethod
     def from_block(cls, block: dict) -> "V7Params":
@@ -169,9 +180,17 @@ class V7Params:
                     or not math.isfinite(float(v)) or not float(v) > 0.0:
                 raise ValueError(f"objective.{key} must be a finite number > 0, got {v!r}")
             constants[key] = float(v)
+        oa_excess_tol = block.get("oa_excess_tol", None)
+        if oa_excess_tol is not None:
+            if isinstance(oa_excess_tol, bool) or not isinstance(oa_excess_tol, (int, float)) \
+                    or not math.isfinite(float(oa_excess_tol)) or not float(oa_excess_tol) > 0.0:
+                raise ValueError(
+                    f"objective.oa_excess_tol must be a finite number > 0, got {oa_excess_tol!r}")
+            oa_excess_tol = float(oa_excess_tol)
         return cls(tolerances=clean, cov_narrow_ratio=float(ratio), cov_below_f0=str(below),
                    diag_reference=str(ref), flat_band=str(flat_band),
-                   cov_v_weight=float(cov_v_weight), **constants)
+                   cov_v_weight=float(cov_v_weight), oa_excess_tol=oa_excess_tol,
+                   **constants)
 
     def to_block(self) -> dict:
         """The normalised mapping stored in the config (so ``config_sha`` covers every choice).
@@ -187,6 +206,8 @@ class V7Params:
             out["flat_band"] = self.flat_band
         if self.cov_v_weight != 1.0:
             out["cov_v_weight"] = self.cov_v_weight
+        if self.oa_excess_tol is not None:
+            out["oa_excess_tol"] = self.oa_excess_tol
         return out
 
 
@@ -378,6 +399,67 @@ def _flat_cv_term(metrics, target: Target, f: np.ndarray, weight: float) -> floa
         return NAN_TERM_FILL
 
 
+# ------------------------------------------------------------------ H12 off-axis excess (2026-11-16)
+
+
+def _oa_excess_term(resp, target: Target, f: np.ndarray, score: np.ndarray) -> float:
+    """Mean off-axis excess (H + V planes) inside the coverage window and scored band.
+
+    For each scored in-band frequency: for each H and V angle within ±coverage/2,
+    accumulates max(0, SPL(θ) - SPL(0°) - 0.5 dB). Returns the mean over all such
+    samples. Uses :func:`_cut_arrays` so its in-loop cost matches the coverage term.
+    Returns ``NAN_TERM_FILL`` when no scored frequencies or in-window angles are usable.
+    """
+    cuts = _cut_arrays(resp, f.size)
+    if cuts is None:
+        return NAN_TERM_FILL
+    ha, va, sh_arr, sv_arr = cuts
+    scored_idx = np.nonzero(score)[0]
+    if scored_idx.size == 0:
+        return NAN_TERM_FILL
+
+    ha_arr = np.asarray(ha, dtype=float)
+    va_arr = np.asarray(va, dtype=float)
+    sh = np.asarray(sh_arr, dtype=float)   # (n_freqs, n_h_angles)
+    sv = np.asarray(sv_arr, dtype=float)   # (n_freqs, n_v_angles)
+
+    h_zero = np.nonzero(ha_arr == 0.0)[0]
+    v_zero = np.nonzero(va_arr == 0.0)[0]
+    if h_zero.size == 0 or v_zero.size == 0:
+        return NAN_TERM_FILL
+    hz, vz = int(h_zero[0]), int(v_zero[0])
+
+    cov_h_half = float(target.coverage_h_deg) / 2.0
+    cov_v_half = float(target.coverage_v_deg) / 2.0
+    h_in = np.abs(ha_arr) <= cov_h_half
+    v_in = np.abs(va_arr) <= cov_v_half
+
+    excess_sum = 0.0
+    n_ok = 0
+    for fi in scored_idx:
+        h_row = sh[fi]
+        v_row = sv[fi]
+        if not (np.isfinite(h_row[hz]) and np.isfinite(v_row[vz])):
+            continue
+        on_h = h_row[hz]
+        on_v = v_row[vz]
+
+        h_ok = h_in & np.isfinite(h_row)
+        exc_h = np.maximum(0.0, h_row[h_ok] - on_h - _OA_EXCESS_THRESHOLD_DB)
+        excess_sum += float(exc_h.sum())
+        n_ok += int(h_ok.sum())
+
+        v_ok = v_in & np.isfinite(v_row)
+        exc_v = np.maximum(0.0, v_row[v_ok] - on_v - _OA_EXCESS_THRESHOLD_DB)
+        excess_sum += float(exc_v.sum())
+        n_ok += int(v_ok.sum())
+
+    if n_ok == 0:
+        return NAN_TERM_FILL
+    result = excess_sum / n_ok
+    return float(result) if math.isfinite(result) else NAN_TERM_FILL
+
+
 # ------------------------------------------------------------------ C3 / C5 coverage
 
 
@@ -550,6 +632,19 @@ def _objective_v7(metrics, resp, ok, target: Target, weights, params: V7Params):
     if not all(math.isfinite(v) for v in t.values()):
         return _v5_penalty(PENALTY_FAILED, n_in_band=int(raw["n_in_band"]))
     total = sum(w[k] * t[k] for k in V7_WEIGHTED_KEYS)
+
+    # H12 (2026-11-16): opt-in off-axis excess penalty. Unmeasurable excess (NAN_TERM_FILL =
+    # no resp or no in-window angles) is skipped, not penalised. Only a real finite measurement
+    # < NAN_TERM_FILL adds to total (the fill sentinel is 30.0 and physically realistic excess
+    # from a horn is never that large; check explicitly to avoid adding the sentinel value).
+    oa_excess_raw = 0.0
+    if params.oa_excess_tol is not None:
+        _raw_oa = _oa_excess_term(resp, target, f, score)
+        if math.isfinite(_raw_oa) and _raw_oa < NAN_TERM_FILL:
+            oa_excess_raw = _raw_oa
+            total += oa_excess_raw / params.oa_excess_tol
+        # NAN_TERM_FILL → unmeasurable; oa_excess_raw stays 0.0 in the diagnostic
+
     if not math.isfinite(total):
         return _v5_penalty(PENALTY_FAILED, n_in_band=int(raw["n_in_band"]))
     t["penalty"] = 0.0
@@ -557,7 +652,10 @@ def _objective_v7(metrics, resp, ok, target: Target, weights, params: V7Params):
     t["n_nan"] = raw["n_nan"]
     t["n_in_band"] = raw["n_in_band"]
     t["di_estimated"] = raw["di_estimated"]
-    for k in V7_DIAGNOSTIC_KEYS:
+    # C1 diagnostics (from _load_v7)
+    for k in ("lfp20_hz", "lfp50_hz", "rez_min_from_fx", "f11_hz", "loaded_hi_hz"):
         t[k] = float(diag[k])
+    # H12 diagnostic: 0.0 when opt-in is off; measured value when on
+    t["oa_excess_raw"] = oa_excess_raw
     assert set(t) == set(V7_ALL_KEYS)
     return float(total), t

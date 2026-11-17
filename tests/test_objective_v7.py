@@ -84,7 +84,7 @@ def test_v7_key_set_is_v4_plus_flat_cv_and_the_diagnostics():
     assert V7_WEIGHTED_KEYS == V4_WEIGHTED_KEYS + ("flat_cv",)
     assert set(V7_ALL_KEYS) == set(V4_ALL_KEYS) | {"flat_cv"} | set(V7_DIAGNOSTIC_KEYS)
     assert V7_DIAGNOSTIC_KEYS == ("lfp20_hz", "lfp50_hz", "rez_min_from_fx", "f11_hz",
-                                  "loaded_hi_hz")
+                                  "loaded_hi_hz", "oa_excess_raw")  # H12 added oa_excess_raw
     assert V7_DEFAULT_WEIGHTS == {**W, "distd": 0.0, "diag": 0.0, "flat_cv": 0.0}
 
 
@@ -434,6 +434,86 @@ def test_target_v_halves_are_validated_together_and_against_the_total():
     ok = _asym_target()
     assert ok.coverage_v_up_deg == 15.0 and ok.coverage_v_down_deg == -45.0
 
+
+# ------------------------------------------------------------------ H12 oa_excess_tol opt-in
+
+
+def _oa_response(f: np.ndarray, h_excess_db: float = 0.0, v_excess_db: float = 0.0,
+                 cov: float = 90.0):
+    """Fake Response whose on-axis SPL = 0 dB and off-axis SPL = on-axis + excess (flat across angles)."""
+    ang = np.array([-cov, -cov / 2, 0.0, cov / 2, cov])
+    spl_h = np.full((f.size, ang.size), h_excess_db, dtype=float)
+    spl_v = np.full((f.size, ang.size), v_excess_db, dtype=float)
+    # On-axis (index 2) is 0.0 â€” others are relative excess
+    spl_h[:, 2] = 0.0
+    spl_v[:, 2] = 0.0
+    return SimpleNamespace(freqs_hz=np.asarray(f, dtype=float),
+                           h_angles_deg=ang.copy(), v_angles_deg=ang.copy(),
+                           spl_h_db=spl_h, spl_v_db=spl_v, axis_index=2)
+
+
+def test_oa_excess_disabled_by_default_oa_excess_raw_is_zero():
+    """When oa_excess_tol is absent (None), oa_excess_raw stays 0.0."""
+    t = _target(coverage_h_deg=90.0, coverage_v_deg=60.0)
+    f = np.array([400.0, 800.0, 1600.0, 3200.0])
+    m = _metrics(f, t)
+    resp = _oa_response(f, h_excess_db=2.0, v_excess_db=2.0)   # large excess â€” but tol is None
+    p = _params()                                                  # oa_excess_tol = None
+    assert p.oa_excess_tol is None
+    _, terms = objective_v7(m, resp, True, t, ONES, p)
+    assert terms["oa_excess_raw"] == pytest.approx(0.0)
+
+
+def test_oa_excess_tol_validation():
+    """oa_excess_tol must be a finite number > 0."""
+    with pytest.raises(ValueError, match="oa_excess_tol"):
+        _params(oa_excess_tol=0.0)
+    with pytest.raises(ValueError, match="oa_excess_tol"):
+        _params(oa_excess_tol=-1.0)
+    with pytest.raises(ValueError, match="oa_excess_tol"):
+        _params(oa_excess_tol=True)
+    with pytest.raises(ValueError, match="oa_excess_tol"):
+        _params(oa_excess_tol=float("nan"))
+
+
+def test_oa_excess_tol_config_sha_safe():
+    """to_block() must NOT emit oa_excess_tol when it is None â€” config_sha must stay identical."""
+    p_default = _params()
+    block = p_default.to_block()
+    assert "oa_excess_tol" not in block
+
+
+def test_oa_excess_tol_emitted_when_set():
+    """to_block() emits oa_excess_tol when set."""
+    p = _params(oa_excess_tol=0.5)
+    block = p.to_block()
+    assert block["oa_excess_tol"] == pytest.approx(0.5)
+
+
+def test_oa_excess_fires_when_off_axis_exceeds_threshold():
+    """With oa_excess_tol set, angles inside coverage window that exceed on-axis + 0.5 dB contribute."""
+    t = _target(coverage_h_deg=90.0, coverage_v_deg=60.0, f0_hz=300.0, band_lo_hz=300.0)
+    f = np.array([400.0, 800.0, 1600.0])
+    m = _metrics(f, t)
+    # 1.5 dB off-axis excess: threshold is 0.5 dB, so net excess = 1.0 dB per sample
+    resp = _oa_response(f, h_excess_db=1.5, v_excess_db=1.5, cov=90.0)
+    p = _params(oa_excess_tol=0.5)
+    _, terms_no_resp = objective_v7(m, None, True, t, ONES, p)
+    # no resp â†’ _oa_excess_term returns NAN_TERM_FILL â†’ skipped â†’ oa_excess_raw stays 0.0
+    assert terms_no_resp["oa_excess_raw"] == pytest.approx(0.0)
+    _, terms = objective_v7(m, resp, True, t, ONES, p)
+    assert terms["oa_excess_raw"] > 0.0
+
+
+def test_oa_excess_zero_when_below_threshold():
+    """When off-axis excess is below 0.5 dB the oa_excess_raw term is 0.0 (threshold is one-sided)."""
+    t = _target(coverage_h_deg=90.0, coverage_v_deg=60.0, f0_hz=300.0, band_lo_hz=300.0)
+    f = np.array([400.0, 800.0, 1600.0])
+    m = _metrics(f, t)
+    resp = _oa_response(f, h_excess_db=0.3, v_excess_db=0.3, cov=90.0)
+    p = _params(oa_excess_tol=0.5)
+    _, terms = objective_v7(m, resp, True, t, ONES, p)
+    assert terms["oa_excess_raw"] == pytest.approx(0.0)
 
 # ------------------------------------------------------------------ failures + dispatch
 
