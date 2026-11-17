@@ -1,5 +1,20 @@
 # CONTINUITY
 
+## 2026-11-17 (senior pass, code) - Stage 0 WP 0.1 refusal taxonomy and WP 0.4 parity replay landed
+
+- WP 0.1 (`search/evaluate.py`): post-mesh envelope violations are now kind `invalid_envelope`
+  with error text `post_mesh: ...` (3 sites; were `invalid_geometry`); family errors such as
+  `GeneratorError: invalid_envelope: ...` now map to `invalid_envelope` through
+  `_generator_error_kind` (was a bare `startswith`). New rows only; penalty values unchanged
+  (graded penalty falls back to the flat value without an overshoot). `tests/test_search_refusal_taxonomy.py`.
+- WP 0.4 (`objective/replay.py`): replay dispatches objective v9 (V9Params, objective_v9,
+  resolve_v9_weights) and regenerates metrics with production `metrics_from_response`
+  (sin-theta balloon DI) instead of plain `compute_metrics`. `tests/test_obj_replay_v9_parity.py`.
+- Merged the helper lane's WP 0.3/0.6/0.7 (cohort gate by declared version; night-runner restart
+  idempotency; watchdog best_J and outcome counts).
+- Tests (Linux container, system Python): new + replay + v9 suites green; refusal-kind suites green
+  except 11 mesh tests that fail identically without these changes (libGLU missing for gmsh here).
+
 ## 2026-11-17 - Stage-0 fixes WP 0.3 / 0.6 / 0.7 (offline, no GPU, no solves)
 
 - **WP 0.6** `tools/run_campaign_night.py`: `run_night` seeds `done` from an existing

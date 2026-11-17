@@ -1,5 +1,12 @@
 # ISSUES
 
+## 2026-11-17 - Stage 0: WP 0.1 and WP 0.4 done
+
+- DONE: WP 0.1 refusal taxonomy (post-mesh envelope and prefixed generator envelope errors coded
+  `invalid_envelope`); WP 0.4 replay dispatches v9 with production DI. WP 0.3/0.6/0.7 merged.
+- OPEN: real-mesh verification of 0.1 on the Windows machine (gmsh needs libGLU, absent here);
+  parity check of 0.4 against stored v9 rows (needs `runs/`); WP 0.2, 0.5, 0.8, 0.9 and stage 3.1.
+
 ## 2026-11-17 - Stage-0 WP 0.3 / 0.6 / 0.7 implemented (offline)
 
 - DONE: night-runner restart idempotency (0.6); watchdog stop `best_J` + per-kind outcome counts (0.7);

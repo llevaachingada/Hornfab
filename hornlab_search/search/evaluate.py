@@ -23,6 +23,7 @@ from __future__ import annotations
 import dataclasses
 import functools
 import json
+import re
 import logging
 import os
 import subprocess
@@ -74,6 +75,21 @@ KIND_EXC = "exception"
 #: ``invalid_envelope`` is a function of the design params the generator built from a brief, so its
 #: marker carries the brief hash as well (replay-validity, see ``_compute``).
 DETERMINISTIC_KINDS = (KIND_INVALID, KIND_INVALID_ENV, KIND_TOO_LARGE)
+
+
+def _generator_error_kind(text: str) -> str:
+    """Kind for a deterministic generator error text (stage 0 WP 0.1, 2026-11-17).
+
+    Family adapters report ``"GeneratorError: invalid_envelope: ..."``; the old
+    ``startswith("invalid_envelope")`` test missed that prefix and coded envelope refusals as
+    geometry. Leading ``SomeError:`` / ``generator:`` labels are stripped before the test."""
+    t = str(text).strip()
+    while True:
+        m = re.match(r"^(?:[A-Za-z_][A-Za-z0-9_]*Error|generator)\s*:\s*", t)
+        if not m:
+            break
+        t = t[m.end():]
+    return KIND_INVALID_ENV if t.startswith("invalid_envelope") else KIND_INVALID
 
 #: WP8: the only band-split mesh policy name (rides SolveSpec.extra and the record provenance).
 BAND_SPLIT_POLICY = "band_split_v1"
@@ -1227,12 +1243,13 @@ def _compute_band_split(design, cfg, mode, mspec, sspec, design_dir, backend, ct
             # KIND_INVALID like the recipe step does so they are deterministic, memoized and
             # never re-run. build_grid_mesh itself keeps raising bare GeneratorError
             # (tests/test_mesh_grid_build.py pins that contract).
-            st["kind"], st["err"] = KIND_INVALID, f"generator: {exc}"
+            st["kind"], st["err"] = _generator_error_kind(str(exc)), f"generator: {exc}"
             return
         why = envelope_violation(bmesh, getattr(cfg, "brief", None))
         if why:
             # Brief-dependent, NOT a pure function of (design, mesh spec): never failure-cached.
-            st["kind"], st["err"], st["no_marker"] = KIND_INVALID, why, True
+            st["kind"], st["err"], st["no_marker"] = KIND_INVALID_ENV, f"post_mesh: {why}", True
+            st["envelope_stage"] = "post_mesh"   # WP 0.1: was coded invalid_geometry
             return
         if _round_throat_gate_active(cfg, ctx):   # v7 always on; other versions opt in via brief gates (B.5)
             try:
@@ -1444,7 +1461,7 @@ def _compute_meh(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx,
         st["kind"], st["err"] = KIND_TOO_LARGE, str(exc)
         return
     except GeneratorError as exc:
-        st["kind"], st["err"] = KIND_INVALID, f"generator: {exc}"
+        st["kind"], st["err"] = _generator_error_kind(str(exc)), f"generator: {exc}"
         return
     st["mesh"] = mesh
     st["area"], st["grid"] = _grid_info(design_dir)
@@ -1453,7 +1470,8 @@ def _compute_meh(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx,
     st["cad"] = ({k: cad.get(k) for k in CAD_ECHO_KEYS} if cad else _cad_info(design_dir))
     why = envelope_violation(mesh, brief)
     if why:
-        st["kind"], st["err"], st["no_marker"] = KIND_INVALID, why, True
+        st["kind"], st["err"], st["no_marker"] = KIND_INVALID_ENV, f"post_mesh: {why}", True
+        st["envelope_stage"] = "post_mesh"   # WP 0.1: was coded invalid_geometry
         return
 
     resp = None
@@ -1559,7 +1577,7 @@ def _compute(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx, st)
             log.warning("failure marker %s unreadable: %s", marker, exc)
     if GENERATOR_ERROR_KEY in design.params:            # typology knobs gave no legal horn
         gerr = str(design.params[GENERATOR_ERROR_KEY])
-        env_kind = KIND_INVALID_ENV if gerr.startswith("invalid_envelope") else KIND_INVALID
+        env_kind = _generator_error_kind(gerr)
         st["kind"], st["err"] = env_kind, f"generator: {gerr}"
         return
     if meh_block_of(cfg) is not None:
@@ -1585,7 +1603,7 @@ def _compute(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx, st)
         # in-build_grid_mesh re-checks (self-approach guard, rows/symmetry pairing) raised
         # GeneratorError outside the mesh error-mapping and were landing as kind 'exception'
         # (flat, un-memoized, retried). Deterministic generator errors are invalid_geometry.
-        st["kind"], st["err"] = KIND_INVALID, f"generator: {exc}"
+        st["kind"], st["err"] = _generator_error_kind(str(exc)), f"generator: {exc}"
         return
     st["mesh"] = mesh
     st["area"], st["grid"] = _grid_info(design_dir)
@@ -1593,7 +1611,8 @@ def _compute(design, cfg, mode, mspec, sspec, key, design_dir, backend, ctx, st)
     why = envelope_violation(mesh, getattr(cfg, "brief", None))
     if why:
         # Brief-dependent, NOT a pure function of (design, mesh spec): never failure-cached.
-        st["kind"], st["err"], st["no_marker"] = KIND_INVALID, why, True
+        st["kind"], st["err"], st["no_marker"] = KIND_INVALID_ENV, f"post_mesh: {why}", True
+        st["envelope_stage"] = "post_mesh"   # WP 0.1: was coded invalid_geometry
         return
 
     # C4 (objective v7, was "v5" on the hardened branch): the driven throat must be the brief driver's round exit. The refusal is

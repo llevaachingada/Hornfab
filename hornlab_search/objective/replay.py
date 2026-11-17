@@ -49,6 +49,7 @@ from typing import Any
 import numpy as np
 
 from ..metrics.compute import compute_metrics
+from .scalar_v9 import V9Params, objective_v9, resolve_v9_weights
 from ..targets.spec import Target
 from ..types import MetricSet, Response
 from .scalar import objective as _objective_v1
@@ -137,7 +138,7 @@ REASONS = {
     R_BAND_NOT_COVERED: "no stored frequency lies inside the requested target band",
     R_F0_NOT_COVERED: "no stored frequency lies at/above the requested f0 inside the band",
     R_UNSUPPORTED_OBJECTIVE: "objective version is not in objective.versions.SUPPORTED_OBJECTIVE_VERSIONS",
-    R_REPLAY_VERSION_UNSUPPORTED: "this replay adapter currently dispatches only objective versions 1-4",
+    R_REPLAY_VERSION_UNSUPPORTED: "this replay adapter dispatches only objective versions 1-4, 7 and 9",
     R_METRIC_ARRAY: "a stored metric array is missing or has the wrong shape",
     R_NO_SCORE_CONFIG: "no weights/objective block (brief or explicit override) were supplied",
     R_NO_TARGET: "no target was available from the record, the brief or an explicit override",
@@ -175,6 +176,16 @@ class Brief:
                       "name": self.name, "version": self.objective_version})
 
 
+
+def _parity_metrics(response: Response, target: Target) -> MetricSet:
+    """Regenerate metrics exactly as production does (stage 0 WP 0.4, 2026-11-17).
+
+    Production scores ``search.evaluate.metrics_from_response``: the solver balloon is a
+    theta-phi grid, so DI needs sin(theta) quadrature. Plain ``compute_metrics`` assumes
+    equal-area samples and was measured wrong by up to 8 dB DI / 7.2 J on stored rows."""
+    from ..search.evaluate import metrics_from_response   # lazy: evaluate imports objective
+    return metrics_from_response(response, target)
+
 def _params_from_block(version: int, block: dict | None):
     """Validate the canonical scoring parameters without copying score mathematics."""
     if version == 7:
@@ -187,6 +198,10 @@ def _params_from_block(version: int, block: dict | None):
         if isinstance(block, V4Params):
             return block
         return V4Params.from_block(dict(block))
+    if version == 9:
+        if block is None:
+            raise ValueError("objective v9 needs its objective block (tolerances)")
+        return block if isinstance(block, V9Params) else V9Params.from_block(dict(block))
     return None
 
 
@@ -568,10 +583,15 @@ def _dispatch(version: int, metrics: MetricSet, response: Response | None, targe
         return objective_v4(metrics, response, True, target, weights, params)
     if version == 7:
         return objective_v7(metrics, response, True, target, weights, params)
+    if version == 9:
+        return objective_v9(metrics, response, True, target, weights, params)
     raise ValueError(f"no replay dispatch for objective version {version}")
 
 
-def _weight_for(version: int, weights: dict, key: str) -> float:
+def _weight_for(version: int, weights: dict, key: str, params=None) -> float:
+    if version == 9:
+        return float(resolve_v9_weights(weights, params if isinstance(params, V9Params) else None)
+                     .get(key, 0.0))
     if version == 7:
         return float(resolve_v7_weights(weights).get(key, 0.0))
     if version == 4:
@@ -647,7 +667,7 @@ def _replay_core(
     if not is_supported_objective_version(version):
         return _refuse(meta, arrays, response, stored_metrics, requested_target, brief, version,
                        weights, block, R_UNSUPPORTED_OBJECTIVE)
-    if version not in (1, 2, 3, 4, 7):
+    if version not in (1, 2, 3, 4, 7, 9):
         return _refuse(meta, arrays, response, stored_metrics, requested_target, brief, version,
                        weights, block, R_REPLAY_VERSION_UNSUPPORTED)
 
@@ -691,13 +711,13 @@ def _replay_core(
         if not allow_metric_regeneration:
             return _refuse(meta, arrays, response, stored_metrics, requested_target, brief,
                            version, weights, block, R_METRIC_REGEN_DISABLED)
-        metrics = compute_metrics(response, requested_target)
+        metrics = _parity_metrics(response, requested_target)
         metric_source = "regenerated"
     elif stored_metrics is not None:
         metrics = stored_metrics
         reasons.extend(stored_metric_reasons)
     elif response is not None:
-        metrics = compute_metrics(response, requested_target)
+        metrics = _parity_metrics(response, requested_target)
         metric_source = "regenerated"
         reasons.append(R_NO_METRICS)
     else:
