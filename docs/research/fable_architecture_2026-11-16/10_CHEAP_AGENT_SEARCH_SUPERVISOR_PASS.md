@@ -1,0 +1,27 @@
+# Cheap-agent assignment 10: adaptive watchdog, switching and queue-policy audit
+
+**Role:** bounded, low-cost, read-only specialist investigator working for the main local parent agent. Read `AGENTS.md` and current local status first. This adds to, and should share findings with, the existing constraints/optimizer investigators from `01_CHEAP_AGENT_DISPATCH.md`; it does **not** require spawning four *more* agents. No Fable-level agent or paid model delegation is implied.
+
+## Mission
+
+Collect reliable evidence for a possible *adaptive scientific search supervisor*, not a premature specification for an auto-switcher. Audit the existing safety watchdog, live queue and advisory optimizer logic and decide which questions need Fable's reasoning. Consider that the highest-return intervention might be better geometry validity, reusable data, objective calibration, choice of fidelity, or experiment scheduling rather than method switching.
+
+## Required read-only sources and tasks
+
+1. **Current state and control surfaces:** Confirm local commit/dirty changes/active jobs without modifying anything. Read `tools/run_campaign_night.py` watchdog and queue reload sections; `tools/night_status.py`; `tools/night_queue/queue.ps1`; `tests/test_night_runner_watchdog.py`; `tests/test_night_runner_live.py`; `docs/queue/HOME_18H_PLAN_2026-11-16.md`. Record exact flag names, threshold defaults, runner exclusions, resume behavior, queue controls, admission gates and which features exist only in the current uncommitted tree.
+2. **Failure segmentation:** Follow `search/outcomes.py`, `search/evaluate.py`, `search/cma.py`, `search/cma_me.py`, `tools/analysis/walls.py`, and `optimizer_switch.py`. Analyze whether current aggregate `not ok` or objective >=900 masks geometry, envelope, physical resource, transient backend, score/metric or cache states. Report actual rates only from readable logs with denominators and source IDs.
+3. **Time-ordered watchdog replay:** Select representative historical run logs with normal completion, watchdog stop, resume and heavily refusing typology, plus at least one useful QD run if available. At each proposed stop point use only rows known *then*, track first trigger, elapsed time/actual BEM calls if available, verified gain and archive gain up to that point, subsequent recorded continuation, and estimated unobserved counterfactual **as unknown**. No arbitrary summary that redefines later rows as a better earlier decision.
+4. **Optimizer-switch eligibility:** Read `bo/policy.py`, `bo/data.py`, `bo/cohort.py`, `bo/encoding.py`, `bo/turbo.py`, `bo/pareto.py`, `studies/production.py`, `docs/queue/HOME_OPTIMIZER_COMPARISON_2026-11-16.md` and `MATCHED_HOME_PROTOCOL_2026-11-16.md`. For each representative run state which next policy is actually executable using *strictly eligible* data, correct geometry adapters and matching solve/score/source IDs; identify missing data, costs and biases. Do not equate raw valid rows with BO readiness.
+5. **Bounds and geometry action audit:** Classify each bound reached as likely arbitrary experimental box, intrinsic analytic law, source/throat/symmetry limit, manufacturing envelope, hardware cap or unverified. Identify a CPU-only *proposed* check for safe widening and how re-encoding from raw physical parameters avoids silently reusing an old normalized vector. Do not edit the actual bounds.
+6. **Scheduler interfaces:** Find smallest seam for a future *read-only shadow* advisor and what would be needed for a safe between-jobs adapter. Evaluate atomic YAML editing, approval/admission hashes, idempotency, completed-ID protection, lock ownership, one GPU solve and second CPU lane, and recovery after crashes. Separate documented functionality from untested claims.
+7. **External decision research:** Compare at least one primary source each for CMA restarts, trust-region BO, cost-aware/portfolio scheduling and anytime algorithm evaluation. Note when the external method's assumptions fail for geometry feasibility, stateful optimizers, different physical solve costs, and limited training data. Present a simpler baseline.
+
+## Output in the same ignored dossier directory
+
+- `SEARCH_CONTROL_MAP.md`: code/line-linked execution interfaces and exactly what exists; explicit local HEAD/status.
+- `WATCHDOG_REPLAY.md`: time-ordered table per observed run, trigger validity, false-positive/unknown classification and relevant actual resource expense. No invented counterfactual outcomes.
+- `SWITCH_ADMISSION_MATRIX.md`: CMA restart, scalar BO, TuRBO, Pareto, QD, geometry-only exploration, verify and stop alternatives with exact compatibility/readiness gates.
+- `SUPERVISOR_OPTIONS.md`: compare (1) keep watchdog, (2) shadow advisor, (3) policy scheduler, (4) racing/bandit/portfolio, (5) geometry/cost-aware learning or deferring all automation. State evidence **against** each.
+- `ADAPTIVE_UNKNOWNS.md`: 3–8 questions whose answers would plausibly change Fable's architecture choice, plus highest-value falsifying tests and low-cost data needed.
+
+For every source claim provide `path:line` / Git SHA or exact run record ID, whether code/test/empirical/inference, limitations, and contradiction where present. Append a concise section to the parent dossier `INDEX.md`; do not proliferate competing ledgers. Do not implement policy, write tracked docs, mutate queues, start or stop runners, run GPU/BEM, or modify thresholds to force favorable results. All artifacts are new ignored notes only.

@@ -14,8 +14,10 @@ envelope-vs-GPU boundary, the conservative generic-GRID extent estimate (realise
 unmeasured), construction-vs-name diversity, v7's point target inside the owner's 60-90/40-60
 range, the in-flight v9 corridor objective, optimizer/cohort reality, and the watchdog replay.
 The full 15-file evidence dossier is tracked in
-[research/fable_architecture_2026-11-16/](research/fable_architecture_2026-11-16/INDEX.md)
-(working copy in the git-ignored `scratch/fable_architecture/`). No code, solve or queue change.
+[research/fable_architecture_2026-11-16/](research/fable_architecture_2026-11-16/INDEX.md), and the
+v3 handoff source documents (`00_START_HERE` … `11_ACCEPTANCE_AND_EXPERIMENT_PROTOCOL`, including
+`03_FABLE_DISCOVERY.md`) are co-located in the same folder (working copy in the git-ignored
+`scratch/fable_architecture/`). No code, solve or queue change.
 
 
 [Klangfilm-Lame H/V throat audit and Phase A implementation (2026-11-16)](evidence/KLANGFILM_HV_THROAT_AUDIT.md):

@@ -14,6 +14,8 @@
   objective currently imports a missing `targets/profile.py`); whether the 600x480x480 mm envelope
   is product truth or a hypothesis; whether a shared geometry representation is worth its cost;
   whether an adaptive search supervisor is premature while scoring is contested.
+- NOTE: the 12 v3 handoff source documents (`00_START_HERE` ... `11_ACCEPTANCE_AND_EXPERIMENT_PROTOCOL`,
+  including `03_FABLE_DISCOVERY.md`) are co-located in `docs/research/fable_architecture_2026-11-16/`.
 - NOTE: the refusal taxonomy is unreliable for policy use - post-mesh envelope and prefixed family
   `invalid_envelope` errors both surface as `invalid_geometry` (`evaluate.py:1546,1580`), and the
   graded infeasibility penalty is unreachable for native families. No fix was applied.

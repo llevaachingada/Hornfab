@@ -1,9 +1,33 @@
 # Fable architecture evidence dossier (2026-11-16)
 
-This folder is the **full 15-file read-only evidence dossier** prepared for a later Fable
-discovery/decision pass, mirrored verbatim from the local git-ignored working copy
-(`scratch/fable_architecture/`). Internal references to `scratch/fable_architecture/…` in these
-files refer to that working copy; the file names here are identical.
+This folder holds **both** the v3 handoff source documents and the full 15-file read-only evidence
+dossier prepared for a later Fable discovery/decision pass. The dossier was mirrored verbatim from
+the local git-ignored working copy (`scratch/fable_architecture/`); internal references to
+`scratch/fable_architecture/…` in those files refer to that working copy, and the file names here
+are identical.
+
+## Handoff source documents (v3 package)
+
+The 12 source documents of the v3 handoff package were **moved here** from
+`C:\Users\hunte\Downloads\Hornfab_Fable_Architecture_Handoff_2026-11-16_v3\hornfab_fable_handoff\`
+on 2026-11-16 so the brief and its evidence live in one tracked folder:
+
+- [`00_START_HERE.md`](00_START_HERE.md) — process and scope; start here for the handoff.
+- [`01_CHEAP_AGENT_DISPATCH.md`](01_CHEAP_AGENT_DISPATCH.md) — the investigator assignments used.
+- [`02_EVIDENCE_FORMAT.md`](02_EVIDENCE_FORMAT.md) — output contract and acceptance checklist.
+- [`03_FABLE_DISCOVERY.md`](03_FABLE_DISCOVERY.md) — first Fable pass (broad discovery).
+- [`04_TARGETED_RESEARCH_LOOP.md`](04_TARGETED_RESEARCH_LOOP.md) — optional gap-closure loop.
+- [`05_FABLE_FINAL_SPEC.md`](05_FABLE_FINAL_SPEC.md) — second Fable pass (decision + tickets).
+- [`06_REPO_FINDINGS_AND_SOURCE_MAP.md`](06_REPO_FINDINGS_AND_SOURCE_MAP.md) — prior review; verify
+  against the live tree (several claims were stale).
+- [`07_IMPLEMENT_AND_VALIDATE.md`](07_IMPLEMENT_AND_VALIDATE.md) — implementation/integration brief.
+- [`08_OPTION_EXPLORATORY_SIZE_AND_FEASIBILITY.md`](08_OPTION_EXPLORATORY_SIZE_AND_FEASIBILITY.md)
+- [`09_OPTION_ADAPTIVE_SEARCH_SUPERVISOR.md`](09_OPTION_ADAPTIVE_SEARCH_SUPERVISOR.md)
+- [`10_CHEAP_AGENT_SEARCH_SUPERVISOR_PASS.md`](10_CHEAP_AGENT_SEARCH_SUPERVISOR_PASS.md)
+- [`11_ACCEPTANCE_AND_EXPERIMENT_PROTOCOL.md`](11_ACCEPTANCE_AND_EXPERIMENT_PROTOCOL.md)
+
+Internal relative references between those documents remain valid inside this folder. Their
+"current repo" claims are historical relative to the snapshot bullets below.
 
 - **Snapshot of record:** `main` @ `601be8ceeb48f1750bb4f3f6c1fdc682967c8b94`, observed
   2026-11-16T20:43:51-05:00.
@@ -18,6 +42,9 @@ files refer to that working copy; the file names here are identical.
 
 ## Reading order
 
+0. [`00_START_HERE.md`](00_START_HERE.md) → [`03_FABLE_DISCOVERY.md`](03_FABLE_DISCOVERY.md) for
+   the discovery pass, then [`05_FABLE_FINAL_SPEC.md`](05_FABLE_FINAL_SPEC.md) when the evidence is
+   sufficient.
 1. [`INDEX.md`](INDEX.md) — read first: question, snapshot, top findings, contradictions, six
    unranked routes, v3 supervisor section.
 2. [`SOURCE_INDEX.md`](SOURCE_INDEX.md) — paths, SHAs, hashes, run artifacts, method, non-mutation

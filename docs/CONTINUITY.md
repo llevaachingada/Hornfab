@@ -9,6 +9,9 @@
   `docs/research/FABLE_DISCOVERY_EVIDENCE_HANDOFF_2026-11-16.md`.
 - The git-ignored `scratch/fable_architecture/` copy remains the working copy; the tracked folder is
   a verbatim mirror for GitHub review (README records provenance and reading order).
+- The 12 v3 handoff source documents (`00_START_HERE.md` … `11_ACCEPTANCE_AND_EXPERIMENT_PROTOCOL.md`,
+  including `03_FABLE_DISCOVERY.md`) were moved from the Downloads package into the same tracked
+  folder, so the brief, its options and the evidence dossier are co-located.
 - Snapshot of record `601be8c`; the tree advanced to `0750a30` during the pass and
   `git diff --stat 601be8c..0750a30` over every cited path is empty. The checkout is 12 commits
   ahead of the handoff's `origin/main = 2c0e2928`.
