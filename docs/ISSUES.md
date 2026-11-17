@@ -1,5 +1,20 @@
 # ISSUES
 
+## 2026-11-16 (23:30) - BoTorch round 2 LAUNCHED (ath14/corelaw/hvlaw, 25 screens each); readout open
+
+- LAUNCHED: night `bo_multityp_r2_2026-11-16` detached (controller pid 41600, 22:03:34), admission
+  packet `docs/queue/bo_multityp_r2_2026-11-16.admission.json` = owner release record for the
+  three remaining staged arms; plan/readout rules `docs/queue/BO_MULTITYPOLOGY_PLAN_2026-11-16.md`
+  §5 (per-arm: cohort-baseline screen J vs arm best; never pooled; SCREEN-ONLY by design — no
+  verified finalist).
+- OPEN (readout, after the night drains): `tools/night_status.py` + plan §5 metrics per arm +
+  hifi_rescore on winners; GUI arms populate under Bayes → Studies.
+- OPEN (from §7 of the plan, unchanged by this release): Crowe/rolled/rounded-rect typologies need
+  cohorts (~25 CMA screens each) to reach the 100-row BoTorch floor; the atlas cohort stays
+  ineligible (BEM pin mismatch); Crowe bridge study-worker install is separate work.
+- NOTE: screen-only arms are directional (owner decision 2026-11-15 stands); use
+  `comparison-25`-style budgets for any decision-bearing rerun.
+
 ## 2026-11-16 (23:20) - v9 CLOSED: all gates G0-G13 green; production default unchanged
 
 - DONE: full v9 implementation + registration (opt-in only) — schema (`targets/profile.py` + spec fields), `objective/scalar_v9.py`, dispatch (`9: _score_v9`), config requirements + first-anchor feasibility, catalog/cohorts/dataset identity, scoring_view profile display truth, GUI corridor display (G13 chart==scorer exact), schema test file, anchor-below-f0 + corridor>=2 rule fixes, 260-test wave + full filtered suite green.

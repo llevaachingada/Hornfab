@@ -1,5 +1,30 @@
 # CONTINUITY
 
+## 2026-11-16 (23:30) - OWNER RELEASE + LAUNCH: BoTorch typology round 2 (ath14, corelaw, hvlaw; 25 screens each)
+
+- The owner released the 2026-11-15 17:15 solve hold for these three arms and asked for BoTorch runs
+  now ("can we run some BoTorch stuff right now that will actually populate the GUI and get more
+  typologies — we've started up the 80x60 threshold"), recorded in
+  `docs/queue/bo_multityp_r2_2026-11-16.admission.json`.
+- Round-2 night `bo_multityp_r2_2026-11-16` (file: `docs/queue/`, launched copy: `runs/nights/`)
+  runs the three remaining staged arms of `BO_MULTITYPOLOGY_PLAN_2026-11-16.md`: ath14 (ATH-core
+  14 in, 219 rows, d=14), corelaw (ext throat + core-law, 206 rows, d=9), hvlaw (landscape
+  80x60/50 ext throat + H/V law, 136 rows, d=8) — each `comparison-25x0` (25 screens + 0 verify,
+  the standing screen-only decision for exploratory arms). The cov arm did NOT rerun: its
+  authorised pilot (2026-11-15, comparison-25 25+6) already holds 26 observations in
+  `runs/bo_multityp_2026-11-16/bo_cov_s71001`.
+- Gates before launch (all green): `preflight_arms.py` exit 0 on the three arms (`ready: true`,
+  cohort pins match the execution interpreter, rows 219/206/136, budget {25,0,25,150});
+  `run_campaign_night.py --night ... --admission ... --dry-run` → "admission accepted: 7 job(s)";
+  `hornlab-search doctor` 11/11 PASS (0 BEAT hosts alive; baseline VRAM 1637 MiB); GPU lane free
+  (`runs/.gpu.lock` free, no runner processes; home_day2 queue finished 20:48). Launched detached
+  22:03:34 (controller pid 41600, `launch_detached.ps1` → `queue.ps1 -Nights bo_multityp_r2_2026-11-16
+  -Admission docs/queue/bo_multityp_r2_2026-11-16.admission.json`). Runner log:
+  `runs/nights/queue_bo_multityp_r2.log`, per-job logs `runs/nights/bo_multityp_r2_2026-11-16/`.
+- Readout plan stays as written in §5 of the plan (baseline = best cohort screen J; win condition =
+  arm best beating the cohort baseline; per arm, never pooled). Screens are screen J — no verified
+  finalist by design; GUI populates under Bayes → Studies as observations accumulate.
+
 ## 2026-11-16 (23:20 local) - v9 FINAL: G13 corridor display green, full filtered suite green, consolidation commit
 
 - Final gates: **G0-G13 all pass**. G13 (GUI chart==scorer equality) — `tests/test_gui_corridor_v9.py`

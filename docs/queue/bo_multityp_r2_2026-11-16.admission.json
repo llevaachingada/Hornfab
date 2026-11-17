@@ -1,0 +1,44 @@
+{
+  "night": "bo_multityp_r2_2026-11-16",
+  "note": "Round-2 admission packet for the BoTorch typology campaign: the three remaining staged arms (ath14, corelaw, hvlaw). The cov arm already ran (authorised pilot 2026-11-15 20:08, comparison-25 25+6, root runs/bo_multityp_2026-11-16/bo_cov_s71001, 26 observations) and is deliberately excluded. Passing this packet to run_campaign_night.py --admission is the release record for this exact job set; regenerating the night file requires regenerating this packet.",
+  "prepared": "2026-11-16",
+  "plan": "docs/queue/BO_MULTITYPOLOGY_PLAN_2026-11-16.md",
+  "budget_profile": "comparison-25x0",
+  "budget": {
+    "screen_calls": 25,
+    "verify_calls": 0,
+    "total_calls": 25,
+    "attempts": 150
+  },
+  "owner_release": "2026-11-16 ~22:00: owner asked for BoTorch runs now to populate the GUI with more typologies on the 80x60 threshold; recorded as the release of the 2026-11-15 17:15 hold for these three screen-only exploratory arms (v7)."
+  ,
+  "arms": {
+    "ath_core_14in": {
+      "task": "p80x60__ath_core_14in_home700_v7",
+      "rows": 219,
+      "d": 14,
+      "seed": 71002
+    },
+    "ext_throat_corelaw": {
+      "task": "p80x60__ext_throat_corelaw_v7",
+      "rows": 206,
+      "d": 9,
+      "seed": 71003
+    },
+    "ext_throat_hvlaw": {
+      "task": "hl__ext_throat_hvlaw_v7",
+      "rows": 136,
+      "d": 8,
+      "seed": 71004
+    }
+  },
+  "allowed_job_ids": [
+    "preflight",
+    "prep_ath14",
+    "bo_ath14",
+    "prep_corelaw",
+    "bo_corelaw",
+    "prep_hvlaw",
+    "bo_hvlaw"
+  ]
+}
