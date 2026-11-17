@@ -1,0 +1,79 @@
+name: hl__klangfilm_lame_curved_v1_w1
+family: FREEFORM
+brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml
+generator:
+  name: grid
+  rows:
+    type: klangfilm_lame
+  n_phi: 19
+  n_s: 64
+  wall_thickness_mm: 3.0
+  seed_policy: explicit
+  span: quarter
+seed_params:
+  g_fc_hz: 383.955192689
+  g_aspect: 1.5191243431
+  g_lame_p: 5.2193275163
+  g_end_frac: 0.6006687966
+  g_rim_sweep_ratio: 0.1547654689
+  g_morph_frac: 0.6
+  g_source_blend_ratio: 0.0
+  g_entry_half_angle_deg: 2.0
+bounds:
+  g_fc_hz:
+    lo: 300.0
+    hi: 800.0
+  g_aspect:
+    lo: 1.15
+    hi: 2.3
+  g_lame_p:
+    lo: 2.5
+    hi: 5.5
+  g_end_frac:
+    lo: 0.54
+    hi: 1.05
+  g_rim_sweep_ratio:
+    lo: 0.135
+    hi: 0.3
+  g_morph_frac:
+    lo: 0.6
+    hi: 0.6
+    search: false
+  g_source_blend_ratio:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  g_entry_half_angle_deg:
+    lo: 2.0
+    hi: 2.0
+    search: false
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.25
+  seed: 1234
+  budget: 200
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: resample_strict
+  budget_counts: valid
+  max_attempts: 500
+  error_policy: retry_same_then_stop
+description: HOME LANDSCAPE Klangfilm-Lame curved-cap horn (derived, source blend
+  off), smooth brief

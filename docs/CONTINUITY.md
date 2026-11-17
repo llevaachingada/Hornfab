@@ -122,6 +122,22 @@
 - The an7 published result reproduces exactly on its own sample (0.55 / 0.43 / 0.30; 12/19, 9/19),
   which validates the pipeline; the replay differs only in sample, split map and lane order.
 
+## 2026-11-17 06:4x - Owner-directed walls scan: 13 walls-relieved 200-solve continuations queued
+
+- Ran tools/analysis/walls.py across every run of the last ~3 days (81 runs, 41 distinct configs,
+  grouped by config name; walls of the family's most recent run). 14 families produced widen
+  proposals and 13 walls-relieved successors were generated (`examples/typologies/walls_relieved/*/
+  *_w1.yaml`: seed = the family's best J genes, bounds moved exactly per the walls tool's
+  widen_hi/widen_lo, budget 200 valid, resample_strict) and appended as jobs 28-40 of
+  `cd_rrect_2026-11-17`. Each was preflighted; only non-HARD configs were appended. The klangfilm
+  c200 family is excluded from the auto-generator because a hand-built c200w covers it MORE Widely
+  (adds negative rim_sweep and the end_frac roll cap 1.55 at owner direction).
+- walls found (family -> wall -> relief): lecleach ctrl/fc540/T_narrow (g_stop_deg pinned low
+  -> widened), tritonia (s.lo -> widened), crowe es600 (widen per report), ext_throat_hvlaw_cov,
+  klangfilm base (fc/aspect per walls), corelaw14, fold_warm, rosse r120/r50 (per-run boxes),
+  lecleach_iwata smooth, rrect r50/r120 boxes, sp_control. Detailed per-family tables in
+  `scratch/walls_continuations/` and `runs/nights/refresh/walls_<ts>.md`.
+
 ## 2026-11-17 02:5x - CORRECTION: fat banked cohorts DO exist; atlas 300-solve TuRBO arms queued
 
 - Owner pushed back on the "max 231 banked rows" claim and was right: the 2026-10-13/30 campaigns have

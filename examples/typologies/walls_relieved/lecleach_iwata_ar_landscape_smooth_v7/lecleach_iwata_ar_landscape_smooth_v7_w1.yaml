@@ -1,0 +1,64 @@
+name: hl__lecleach_iwata_ar_landscape_smooth_v7_w1
+family: FREEFORM
+brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml
+generator:
+  name: grid
+  rows:
+    type: iwata_ar
+  n_phi: 15
+  n_s: 32
+  seed_policy: explicit
+  wall_thickness_mm: 3.0
+seed_params:
+  g_fc_hz: 459.548623885
+  g_T: 0.5972994087
+  g_stop_deg: 110.8003176084
+  g_ar_m: 1.1670538433
+  g_ar_p: 1.0155604755
+bounds:
+  g_fc_hz:
+    lo: 300.0
+    hi: 900.0
+  g_T:
+    lo: 0.4
+    hi: 0.9
+  g_stop_deg:
+    lo: 60.0
+    hi: 200.0
+  g_ar_m:
+    lo: 1.0
+    hi: 2.4
+  g_ar_p:
+    lo: 0.5
+    hi: 2.0
+description: 'HOME LANDSCAPE 80Hx50V: Le Cleach march + area-preserving landscape
+  aspect ratio from a round 1.4in throat, no K-law | SMOOTH brief (narrowing family)'
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+  rear_res_factor: 1.5
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.2
+  seed: 1234
+  budget: 200
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: resample_strict
+  budget_counts: valid
+  max_attempts: 500
+  error_policy: retry_same_then_stop
