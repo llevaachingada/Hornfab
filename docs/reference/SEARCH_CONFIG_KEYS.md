@@ -15,6 +15,13 @@ All keys are OPT-IN: absent key = the pre-day-B behaviour byte for byte (pinned 
   semantics: every non-cached evaluation counts, refusals included) or `valid` (only VALID
   evaluations consume budget; the deterministic refusals - invalid_geometry / invalid_envelope /
   mesh_too_large - are free).
+- **Counting rules (verified in `search/cma.py` `budget_count` / `budget_exhausted`, WP 0.8):**
+  a cache hit (`ev.cached`) consumes NO budget and writes no counter in EITHER mode. In `new`,
+  every non-cached evaluation consumes one unit, including deterministic refusals (a refused
+  candidate is a non-cached attempt). In `valid`, only non-error evaluations consume budget and
+  deterministic refusals (`DETERMINISTIC_KINDS`) are free; solve / metrics failures still consume
+  budget (the machine hiccupped, the design was not refused). Do not read "budget including cache
+  outcomes" as cache hits costing budget: they do not.
 - **Detail:** With `budget_counts: valid`, `search.max_attempts` (a positive integer, default
   `4 x budget`) is the hard ceiling on new attempts so a box that refuses everything still stops.
   pycma's fitness-range stops (tolfun / tolfunhist / tolflatfitness) are suppressed in `valid`

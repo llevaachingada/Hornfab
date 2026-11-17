@@ -262,4 +262,26 @@ class GeneratedSpace:
             return None
         return {"name": self.gen.get("name", "typology"), "spec": copy.deepcopy(self.gen),
                 "knobs": knobs, "brief": self.brief.get("name"), "brief_hash": brief_hash(self.brief),
-                "derived": generator_info(self.gen, knobs, self.brief)}
+                "derived": generator_info(self.gen, knobs, self.brief),
+                # WP 0.9 (2026-11-17): additive, NON-identity recipe metadata (never hashed).
+                "recipe_meta": self._recipe_meta(d, knobs)}
+
+    def _recipe_meta(self, d: Design, knobs: dict) -> dict:
+        """Termination kind, mesher wall thickness and resolved source cap; never raises."""
+        from .recipe_meta import recipe_metadata
+        mounting = self.brief.get("mounting")
+        mounting = mounting if isinstance(mounting, dict) and mounting else None
+        inner = meta = None
+        block = d.params.get("grid") if isinstance(d.params, dict) else None
+        if isinstance(block, dict):
+            try:
+                if "rows" in block:
+                    spec = {k: v for k, v in block.items() if k != "knobs"}
+                    inner, meta = grid_gen.rows_grid_points(spec, block.get("knobs") or {}, self.brief)
+                else:
+                    spec = {k: block[k] for k in grid_gen.GRID_SPEC_KEYS if k in block}
+                    inner, meta = grid_gen.grid_points(spec, block.get("knobs") or {}, self.brief)
+            except Exception:  # noqa: BLE001 - metadata only
+                inner = meta = None
+        return recipe_metadata(d, mounting=mounting, gen={"spec": self.gen}, grid_inner=inner,
+                               grid_meta=meta)

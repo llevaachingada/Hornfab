@@ -1,5 +1,29 @@
 # CONTINUITY
 
+## 2026-11-17 05:0x - Stage 0 WP 0.8 (doc truths + E-012 guard) and WP 0.9 (recipe metadata, additive)
+
+- **WP 0.8.** `tools/night_queue/queue.ps1` header corrected: a started night IS live-reloaded
+  (reorder / insert / remove, PAUSE / STOP; `run_campaign_night.py` ~1233-1250; only `--no-live`
+  reads once). `budget_counts` semantics written in `docs/reference/SEARCH_CONFIG_KEYS.md` from
+  `search/cma.py`: cache hits are free in both modes, refusals consume budget under `new`, are free
+  under `valid`, solve/metrics failures always consume. `flat` (ddof=2, `metrics/smoothness.py`) vs
+  `flat_cv` (ddof=0, `objective/scalar_v7.py`) documented in the new
+  `docs/reference/OBJECTIVE_STD_CONVENTIONS.md` (docstring note in `smoothness.py`); NO math changed
+  and no objective code touched. E-012 guarded: `design/families.py` `to_mesher_config` now refuses a
+  design `mode` key that contradicts `brief.mounting` (GeometryInvalidError) instead of silently
+  overwriting the enclosure flip; freestanding runs and all shipped configs are byte-identical.
+- **WP 0.9 (metadata only; digest rule still owner-pending).** New `design/recipe_meta.py`;
+  `GeneratedSpace.provenance` now carries `recipe_meta` (schema `recipe_meta_v2`: termination kind
+  where knowable else explicit `None`, wall thickness the mesher actually uses with its source -
+  mesher default 6.0 mm freestanding / 0 enclosure, grid route 3.0 mm - and source-cap
+  shape/radius/curvature/angle, radius resolved only on the point-grid route). It is NOT an input of
+  `Design.hash()`, mesh/solve hash or `config_sha` (tested), and `evaluate.py` copies only a fixed key
+  list into dataset provenance. Gap: plain-family (non-generator) designs have no generator block, so
+  they get no metadata until `search/evaluate.py` `_persist` calls `recipe_metadata` (other agent's
+  file; request in NOTES_FOR_SENIOR).
+- Tests: `tests/test_design_recipe_meta.py` (7). gmsh-dependent tests fail in this container
+  (libGLU missing) as before; no GPU.
+
 ## 2026-11-17 04:1x - Lane review of the Fable corpus handed to the senior reviewer (not a senior decision)
 
 - The **lower-cost continuation lane agent** (not Fable, not the owner) reviewed all 54 documents in
