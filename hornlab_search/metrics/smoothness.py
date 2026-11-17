@@ -94,7 +94,10 @@ def band_flatness_detrended_db(freqs_hz, on_axis_db) -> float:
     """On-axis roughness after removing the drive tilt (Report 1 F2).
 
     A straight line is fitted to ``on_axis_db`` versus ``log2(f)`` using only finite points with
-    ``f > 0``; the SAMPLE std of the residual (``ddof=2``) is returned. Fewer than four usable
+    ``f > 0``; the SAMPLE std of the residual (``ddof=2``) is returned. (Note, WP 0.8: the v7
+    ``flat_cv`` term in ``objective/scalar_v7.py`` uses the POPULATION std, ``ddof=0``; the two are
+    deliberately not unified because stored J values are immutable. See
+    ``docs/reference/OBJECTIVE_STD_CONVENTIONS.md``.) Fewer than four usable
     points returns ``nan``.
 
     The unit-normal-acceleration drive makes absolute on-axis level fall roughly 6 dB/octave; that

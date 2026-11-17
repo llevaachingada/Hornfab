@@ -18,8 +18,11 @@ Example:
 
 To CHANGE a queued order: stop only this controller (taskkill /PID <controller>, never /T: its child runner
 must keep going) and launch a new one that waits on the runner it left behind (-WaitPid <runner pid>).
-A night file a runner already started is read once at start: appending jobs to it does nothing - put them
-in a new night file.
+CORRECTION (WP 0.8, 2026-11-17): a STARTED night file IS live-reloaded. The runner re-reads it before every
+job (unless started with --no-live), so you can reorder, insert, remove or change jobs that have not started
+(a job id that already ran is never re-run; the running job is never interrupted) and hold/end the night with a
+PAUSE / STOP file or top-level pause: / stop: keys. See tools/run_campaign_night.py (live-queue block, ~1233-1250).
+Only a night run with --no-live reads its file once.
 #>
 param(
     [Parameter(Mandatory = $true)][string]$Nights,      # comma list of night names (runs\nights\<name>.yaml)

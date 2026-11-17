@@ -891,7 +891,7 @@ def _validate_budget_counts(value, where: str) -> str:
     """B.4 (day 2026-11-12): ``search.budget_counts`` selects what consumes the budget.
 
     ``new`` (default) is today's semantics: every NON-CACHED evaluation consumes one budget
-    unit, refusals included. ``valid`` makes the budget count only VALID evaluations: the
+    unit, refusals included (cache hits are free in both modes). ``valid`` makes the budget count only VALID evaluations: the
     deterministic refusals (invalid_geometry / invalid_envelope / mesh_too_large) do not
     consume budget, and a hard ceiling ``search.max_attempts`` (default 4 x budget) stops an
     all-refusing box. Exact tokens; anything else is a typo and is refused."""

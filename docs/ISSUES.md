@@ -71,6 +71,14 @@
   record module (needs an owner path assignment for the new module).
 - PARKED with reopen conditions: U1-bis, cross-family predictor, supervisor acting on J, QD-first,
   oversize exploration, frequency staging, adjoint freeform (plan §9).
+## 2026-11-17 - Stage 0 WP 0.8 / WP 0.9 (metadata) implemented
+
+- DONE: WP 0.8 doc truths (queue.ps1 live-reload comment, `budget_counts` rules, ddof note in
+  `docs/reference/OBJECTIVE_STD_CONVENTIONS.md`) and the E-012 `mode` guard with test.
+- DONE: WP 0.9 additive recipe metadata (`design/recipe_meta.py`, generator provenance block).
+- OPEN: `search/evaluate.py` `_persist` should write `recipe_metadata` for non-generator designs
+  (file owned by another agent; NOTES_FOR_SENIOR). OPEN (owner): the `record_digest` /
+  `kernel_sha256` rule and envelope convention; legacy-bridge classification (rest of WP 0.9).
 
 ## 2026-11-17 - Lane review of the Fable corpus delivered; decisions reserved to the senior reviewer and owner
 

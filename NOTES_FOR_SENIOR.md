@@ -1092,3 +1092,12 @@ Bayesian jobs; GPU hosts cleared after each of the 3 diagnostics (VRAM back to d
   gate for night queues (warn today, fail under --strict/HORNLAB_GPU_LOCK=refuse nights).
 - No GPU job was interrupted when this entry was written (live b3 run `e4f90d` proceeded through
   the commit; git mutations only).
+
+## 2026-11-17 - WP 0.9: wire `recipe_metadata` into `evaluate._persist` (file not mine)
+
+`hornlab_search/design/recipe_meta.py::recipe_metadata(design, mounting=mounting_of(cfg))` exists and is
+already written into `design.json["generator"]["recipe_meta"]` for generator designs (via
+`GeneratedSpace.provenance`). Plain-family designs have no generator block. Requested change in
+`search/evaluate.py` `_persist` (after `dj` is built): `dj["recipe_meta"] = recipe_metadata(ev.design, mounting=st.get("mounting"))`
+when `st.get("generator")` is falsy. Additive key only; `design_hash` is unaffected.
+
