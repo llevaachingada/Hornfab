@@ -34,6 +34,7 @@ from ..metrics.loudness import Z_HALF, Z_LOADED, horn_loudness
 from ..objective import WEIGHTED_KEYS, weighted_terms
 from ..search.evaluate import error_kind, mouth_dims_m, read_ndjson
 from ..solve import cache as solve_cache
+from ..targets.scoring_view import build_scoring_view, measured_di_slope
 from ..targets.spec import Target
 from ..targets.venue import feasibility_report
 from ..types import MeshResult
@@ -90,9 +91,13 @@ def _nan(x) -> np.ndarray:
 
 
 def _svg_lines(series, *, width=620, height=250, xlabel="", ylabel="", xlog=False, vlines=(),
-               band=None, hlines=(), title="", ylim=None) -> str:
+               band=None, hlines=(), title="", ylim=None, ref_lines=()) -> str:
     """Inline-SVG line chart. series: dicts with x, y, label, color, step (bool), dash (bool),
-    points (bool). vlines: (x, label, color). band: (x0, x1) shaded. hlines: (y, label, color)."""
+    points (bool). vlines: (x, label, color). band: (x0, x1) shaded. hlines: (y, label, color).
+    ref_lines: dicts with pts [[x, y], ...], label, color (css, optional) and dash (bool,
+    optional). They are thin polylines (width 1.2, dasharray "2 3", or "4 3" when dash) with the
+    label set just past the LAST point, right-anchored; their points extend the axis range like
+    ``hlines`` do so a target/floor line is never clipped."""
     ml, mr, mt, mb = 52, 12, 22, 40
     pw, ph = width - ml - mr, height - mt - mb
     xs, ys = [], []
@@ -105,6 +110,16 @@ def _svg_lines(series, *, width=620, height=250, xlabel="", ylabel="", xlog=Fals
         ys.extend(s["_y"].tolist())
     xs += [v[0] for v in vlines if np.isfinite(v[0]) and (v[0] > 0 or not xlog)]
     ys += [h[0] for h in hlines if np.isfinite(h[0])]
+    for ref in ref_lines:
+        for p in ref.get("pts") or ():
+            try:
+                rx, ry = float(p[0]), float(p[1])
+            except (TypeError, ValueError, IndexError):
+                continue
+            if np.isfinite(ry):
+                ys.append(ry)
+            if np.isfinite(rx) and (rx > 0 or not xlog):
+                xs.append(rx)
     if not xs or not ys:
         return '<p class="muted">(no finite data to plot)</p>'
     x0, x1 = min(xs), max(xs)
@@ -173,6 +188,27 @@ def _svg_lines(series, *, width=620, height=250, xlabel="", ylabel="", xlog=Fals
         if s.get("points"):
             for a, b in zip(x, y):
                 o.append(f'<circle cx="{X(a):.1f}" cy="{Y(b):.1f}" r="2.2" fill="{col}"/>')
+    for ref in ref_lines:
+        pts = []
+        for p in ref.get("pts") or ():
+            try:
+                rx, ry = float(p[0]), float(p[1])
+            except (TypeError, ValueError, IndexError):
+                continue
+            if np.isfinite(rx) and np.isfinite(ry) and (rx > 0 or not xlog):
+                pts.append((X(rx), Y(ry)))
+        if len(pts) < 2:
+            continue
+        col = ref.get("color") or "#6b6b6b"
+        dash = "4 3" if ref.get("dash") else "2 3"
+        xy = " ".join(f"{a:.1f},{b:.1f}" for a, b in pts)
+        o.append(f'<polyline fill="none" stroke="{col}" stroke-width="1.2" '
+                 f'stroke-dasharray="{dash}" points="{xy}"/>')
+        label = ref.get("label") or ""
+        if label:
+            lx, ly = pts[-1]
+            o.append(f'<text x="{lx:.1f}" y="{ly - 3:.1f}" text-anchor="end" class="tick" '
+                     f'fill="{col}">{_html.escape(str(label))}</text>')
     o.append(f'<text x="{ml + pw / 2}" y="{height - 4}" text-anchor="middle" class="axl">'
              f'{_html.escape(xlabel)}</text>')
     o.append(f'<text x="12" y="{mt + ph / 2}" text-anchor="middle" class="axl" '
@@ -258,8 +294,217 @@ def noise_floor(run: dict) -> dict:
             "complete": all(i.get("value_db") is not None for i in items)}
 
 
-def _design_figures(run_dir: Path, row: dict, target: Target, family: str, bounds: dict) -> dict:
-    """PNG figures and SVG charts for one design. Never raises: a missing response gives a note."""
+def _report_objective_version(cfg: Config | None, run: dict) -> int:
+    """The run's objective version, mirroring ``gui/data.py::run_objective_version``.
+
+    The committed config's ``objective.version`` (top level or inside the embedded brief) wins;
+    otherwise the ``run.json`` sidecar, otherwise v1. A malformed/bool value is v1, never a guess.
+    """
+    obj = None
+    if cfg is not None:
+        obj = (cfg.raw or {}).get("objective")
+        if not isinstance(obj, dict):
+            obj = (cfg.brief or {}).get("objective")
+    version = obj.get("version") if isinstance(obj, dict) else None
+    if version is None:
+        version = run.get("objective_version")
+    if isinstance(version, bool):
+        return 1
+    try:
+        return int(version) if version is not None else 1
+    except (TypeError, ValueError):
+        return 1
+
+
+def _scoring_view_inputs(cfg: Config | None, weights: dict, run: dict) -> dict | None:
+    """The immutable scoring inputs, resolved once per report.
+
+    ``_design_figures`` rebuilds the per-design :func:`build_scoring_view` payload from this small
+    bundle and the row's own metrics (the 8 kHz floor and v6 onset are per-design). ``None`` when
+    there is no committed config, so every old caller keeps the pre-scoring-view behaviour.
+    """
+    if cfg is None:
+        return None
+    raw_objective = (cfg.raw or {}).get("objective")
+    if not isinstance(raw_objective, dict):
+        raw_objective = (cfg.brief or {}).get("objective")
+    return {
+        "target_raw": dict(cfg.target_raw or {}),
+        "objective_raw": dict(raw_objective) if isinstance(raw_objective, dict) else {},
+        "weights": dict(weights or {}),
+        "version": _report_objective_version(cfg, run),
+    }
+
+
+def _design_scoring_view(inputs: dict | None, row: dict, metrics: dict | None) -> dict | None:
+    """Per-design scoring view built from the report's resolved inputs, else ``None``.
+
+    ``None`` for an old caller (no inputs), a row with no metrics, or an unsupported objective
+    version: all of those keep the original figures byte-identical. Never raises.
+    """
+    if not isinstance(inputs, dict) or not isinstance(metrics, dict):
+        return None
+    try:
+        view = build_scoring_view(
+            inputs.get("target_raw"), inputs.get("objective_raw"), inputs.get("weights"),
+            inputs.get("version"),
+            design_scalars=metrics.get("scalars"), design_params=row.get("params"),
+            freqs_hz=metrics.get("freqs_hz"), bw_h_deg=metrics.get("bw_h_deg"),
+            bw_v_deg=metrics.get("bw_v_deg"), di_db=metrics.get("di_db"),
+        )
+    except Exception:  # noqa: BLE001 - a display helper must never break the report
+        return None
+    if not isinstance(view, dict) or not isinstance(view.get("coverage"), dict):
+        return None
+    return view
+
+
+def _beamwidth_ref_lines(sv: dict, band: tuple[float, float]) -> list[dict]:
+    """Scored-range target lines (plus one-sided bounds and the 8 kHz floors) for the BW chart."""
+    cov = sv.get("coverage") if isinstance(sv, dict) else None
+    if not isinstance(cov, dict):
+        return []
+    x_lo, x_hi = float(band[0]), float(band[1])
+    h_deg, v_deg = cov.get("h_deg"), cov.get("v_deg")
+    h_lo, v_lo = cov.get("h_lo_hz"), cov.get("v_lo_hz")
+    up, down = cov.get("coverage_v_up_deg"), cov.get("coverage_v_down_deg")
+    refs: list[dict] = []
+
+    def flat(lo, y, label, color, dash=False):
+        try:
+            lo, y = float(lo), float(y)
+        except (TypeError, ValueError):
+            return
+        if not (math.isfinite(lo) and math.isfinite(y)) or x_hi <= lo:
+            return
+        refs.append({"pts": [[max(lo, x_lo), y], [x_hi, y]], "label": label,
+                     "color": color, "dash": dash})
+
+    if h_deg is not None and h_lo is not None:
+        flat(h_lo, h_deg, f"target H {_fmt(h_deg)}°", PALETTE[0])
+    if up is not None and down is not None and v_lo is not None:
+        # v7 C5: two signed vertical edges, not one total-angle line.
+        flat(v_lo, up, f"target V up {_fmt(up)}°", PALETTE[1])
+        flat(v_lo, down, f"target V down {_fmt(down)}°", PALETTE[1], dash=True)
+    elif v_deg is not None and v_lo is not None:
+        flat(v_lo, v_deg, f"target V {_fmt(v_deg)}°", PALETTE[1])
+    if cov.get("below_mode") == "one_sided":
+        # The flat target IS the one-sided lower bound below onset: show it full width, unlabelled
+        # so it does not overprint the scored-range label. The chart title states the mode.
+        if h_deg is not None:
+            refs.append({"pts": [[x_lo, float(h_deg)], [x_hi, float(h_deg)]],
+                         "label": "", "color": PALETTE[0], "dash": True})
+        if up is None and v_deg is not None:
+            refs.append({"pts": [[x_lo, float(v_deg)], [x_hi, float(v_deg)]],
+                         "label": "", "color": PALETTE[1], "dash": True})
+    floor = sv.get("bw8k_floor")
+    if isinstance(floor, dict):
+        for y, label, color in (
+            (floor.get("floor_h_deg"), f"8k floor {_fmt(floor.get('floor_h_deg'))}°", "#7f9cc0"),
+            (floor.get("floor_v_deg"), f"8k floor {_fmt(floor.get('floor_v_deg'))}°", "#c98f86"),
+        ):
+            try:
+                y = float(y)
+            except (TypeError, ValueError):
+                continue
+            if math.isfinite(y):
+                refs.append({"pts": [[x_lo, y], [x_hi, y]], "label": label,
+                             "color": color, "dash": True})
+    return refs
+
+
+def _beamwidth_title(sv: dict, band: tuple[float, float]) -> str:
+    """``beamwidth`` plus the below-onset truth note (only when there really is a region below)."""
+    title = "beamwidth"
+    cov = sv.get("coverage") if isinstance(sv, dict) else None
+    if not isinstance(cov, dict):
+        return title
+    try:
+        below = float(cov.get("h_lo_hz")) > float(band[0]) * (1.0 + 1e-9)
+    except (TypeError, ValueError):
+        below = False
+    if not below:
+        return title
+    if cov.get("below_mode") == "mask":
+        return title + " — below f0: not scored"
+    if cov.get("below_mode") == "one_sided":
+        return title + " — below onset: wide free (one-sided)"
+    return title
+
+
+def _di_anchor_level(freqs, di_db, sv: dict, band: tuple[float, float]) -> float | None:
+    """Display-only intercept: mean of the first two in-band measured DI samples, else nearest."""
+    try:
+        f = np.asarray(freqs, dtype=float).ravel()
+        d = np.asarray(di_db, dtype=float).ravel()
+    except (TypeError, ValueError):
+        return None
+    if f.size == 0 or d.size != f.size:
+        return None
+    cov = sv.get("coverage") or {}
+    lo = cov.get("h_lo_hz")
+    try:
+        lo = float(band[0]) if lo is None else max(float(lo), float(band[0]))
+        hi = float(band[1])
+    except (TypeError, ValueError):
+        return None
+    ok = np.isfinite(f) & np.isfinite(d) & (f >= lo) & (f <= hi)
+    if not ok.any():
+        return None
+    first = d[ok][:2]
+    return float(np.mean(first))
+
+
+def _di_target_ref_lines(sv: dict, band: tuple[float, float], freqs, di_db):
+    """``(hlines, ref_lines)`` for the DI chart, or ``([], [])`` when the view cannot say."""
+    di = sv.get("di") if isinstance(sv, dict) else None
+    if not isinstance(di, dict):
+        return [], []
+    hlines = []
+    if di.get("level_scored") and di.get("level_db") is not None:
+        hlines.append((float(di["level_db"]),
+                       f"target DI {_fmt(di['level_db'])} ({di.get('level_source')})", PALETTE[2]))
+    refs = []
+    if di.get("slope_scored"):
+        try:
+            anchor = float(di.get("anchor_hz"))
+            slope = float(di.get("slope_db_per_dec"))
+            hi = float(band[1])
+        except (TypeError, ValueError):
+            anchor = slope = hi = None
+        level = _di_anchor_level(freqs, di_db, sv, band)
+        if anchor is not None and slope is not None and hi is not None and level is not None \
+                and math.isfinite(anchor) and math.isfinite(slope) and math.isfinite(hi) \
+                and 0.0 < anchor < hi:
+            y_hi = level + slope * math.log10(hi / anchor)
+            refs.append({"pts": [[anchor, level], [hi, y_hi]],
+                         "label": f"slope target {_fmt(slope)} dB/dec (display-only intercept)",
+                         "color": PALETTE[2], "dash": True})
+    return hlines, refs
+
+
+def _di_title(sv: dict, m: dict, target: Target, freqs, di_db) -> str:
+    """DI chart title with the scored-band fitted slope and the DI-not-scored note."""
+    sl = m.get("scalars", {}).get("di_slope_db_per_dec")
+    title = (f"Directivity index (source: {m['di_source']}; slope "
+             f"{_fmt(sl)} dB/decade, target {_fmt(target.di_slope_target)}")
+    di = sv.get("di") if isinstance(sv, dict) else None
+    if not isinstance(di, dict):
+        return title + ")"
+    cov = sv.get("coverage") or {}
+    title += f"; scored-band slope {_fmt(measured_di_slope(freqs, di_db, cov.get('h_lo_hz')))}"
+    title += ")"
+    if not di.get("level_scored") and not di.get("slope_scored"):
+        title += ", DI not scored this brief"
+    return title
+
+
+def _design_figures(run_dir: Path, row: dict, target: Target, family: str, bounds: dict,
+                    scoring_view: dict | None = None) -> dict:
+    """PNG figures and SVG charts for one design. Never raises: a missing response gives a note.
+
+    ``scoring_view`` is the small input bundle from :func:`_scoring_view_inputs`; ``None`` keeps
+    every pre-2026-11-16 figure byte-identical (no scoring-truth reference lines)."""
     import hornlab_plots as hp
     out = {"pngs": [], "svgs": [], "note": "", "loud": ""}
     r = None
@@ -277,23 +522,41 @@ def _design_figures(run_dir: Path, row: dict, target: Target, family: str, bound
         if v is not None and np.isfinite(v):
             vl.append((float(v), lab, col))
     band = (target.band_lo_hz, target.band_hi_hz)
+    sv = _design_scoring_view(scoring_view, row, m)
     if m:
-        out["svgs"].append(("Beamwidth (-6 dB, total included angle)", _svg_lines(
-            [{"x": f, "y": _nan(m["bw_h_deg"]), "label": "horizontal", "color": PALETTE[0], "points": True},
-             {"x": f, "y": _nan(m["bw_v_deg"]), "label": "vertical", "color": PALETTE[1], "points": True}],
-            xlabel="frequency (Hz)", ylabel="degrees", xlog=True, vlines=vl, band=band,
-            hlines=[(target.coverage_h_deg, "target H", PALETTE[0]),
-                    (target.coverage_v_deg, "target V", PALETTE[1])], title="beamwidth")))
+        bw_series = [{"x": f, "y": _nan(m["bw_h_deg"]), "label": "horizontal",
+                      "color": PALETTE[0], "points": True},
+                     {"x": f, "y": _nan(m["bw_v_deg"]), "label": "vertical",
+                      "color": PALETTE[1], "points": True}]
+        if sv is not None:
+            out["svgs"].append((_beamwidth_title(sv, band), _svg_lines(
+                bw_series, xlabel="frequency (Hz)", ylabel="degrees", xlog=True, vlines=vl,
+                band=band, ref_lines=_beamwidth_ref_lines(sv, band), title="beamwidth")))
+        else:
+            out["svgs"].append(("Beamwidth (-6 dB, total included angle)", _svg_lines(
+                bw_series, xlabel="frequency (Hz)", ylabel="degrees", xlog=True, vlines=vl,
+                band=band, hlines=[(target.coverage_h_deg, "target H", PALETTE[0]),
+                                   (target.coverage_v_deg, "target V", PALETTE[1])],
+                title="beamwidth")))
         sl = m.get("scalars", {}).get("di_slope_db_per_dec")
-        di_t = target.di_target_db
-        if di_t is None:
-            from ..objective.terms import di_target
-            di_t = di_target(target)
-        out["svgs"].append((f"Directivity index (source: {m['di_source']}; slope "
-                            f"{_fmt(sl)} dB/decade, target {_fmt(target.di_slope_target)})", _svg_lines(
-            [{"x": f, "y": _nan(m["di_db"]), "label": "DI", "color": PALETTE[2], "points": True}],
-            xlabel="frequency (Hz)", ylabel="dB", xlog=True, vlines=vl, band=band,
-            hlines=[(di_t, "target DI", PALETTE[2])], title="directivity index")))
+        di_series = [{"x": f, "y": _nan(m["di_db"]), "label": "DI", "color": PALETTE[2],
+                      "points": True}]
+        if sv is not None:
+            di_hlines, di_refs = _di_target_ref_lines(sv, band, f, _nan(m["di_db"]))
+            out["svgs"].append((_di_title(sv, m, target, f, _nan(m["di_db"])), _svg_lines(
+                di_series, xlabel="frequency (Hz)", ylabel="dB", xlog=True, vlines=vl, band=band,
+                hlines=di_hlines, ref_lines=di_refs, title="directivity index")))
+        else:
+            di_t = target.di_target_db
+            if di_t is None:
+                from ..objective.terms import di_target
+                di_t = di_target(target)
+            out["svgs"].append((f"Directivity index (source: {m['di_source']}; slope "
+                                f"{_fmt(sl)} dB/decade, target {_fmt(target.di_slope_target)})",
+                                _svg_lines(di_series, xlabel="frequency (Hz)", ylabel="dB", xlog=True,
+                                           vlines=vl, band=band,
+                                           hlines=[(di_t, "target DI", PALETTE[2])],
+                                           title="directivity index")))
     if r is not None:
         try:
             ax = r.axis_index
