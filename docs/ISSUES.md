@@ -1,5 +1,13 @@
 # ISSUES
 
+## 2026-11-17 - Stage 4 WP 4.1 CPU stage done on a seed host
+
+- DONE: record-edit module + real point-grid meshes for control and 7 variants (biradial seed).
+- OPEN (owner): U3 host pick after the same run on the best stored biradial / ext-throat designs
+  (needs `runs/`); WP 4.2 (2 solves) and B2 (12-16 solves) need C6 approval.
+- OPEN (pre-existing): `tests/test_mesh_build_grid.py::test_grid_self_approach_classifies_invalid_geometry_and_is_memoized`
+  fails at `1d6ebc8` too (EvalContext.solve_cache_root is None).
+
 ## 2026-11-17 - Stage 1 WP 1.2 done (dense-grid scoring)
 
 - DONE: opt-in v9 `score_grid`. OPEN: reproduce N3's 58-pair numbers with the packaged path on the

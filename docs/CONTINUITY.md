@@ -1,5 +1,18 @@
 # CONTINUITY
 
+## 2026-11-17 (senior pass, code) - Stage 4 WP 4.1: U3 freedoms as record edits, meshed for real
+
+- New `hornlab_search/geometry/edits.py`: pinned-throat radial edits; the seven U3 variants; U2
+  validity; `record_to_grid` hand-off. Installed libGLU in the container so gmsh runs: control
+  plus all seven variants of the biradial seed build real point-grid meshes.
+- CPU result (`scratch/fable_architecture/U3_RECORD_EDITS_CPU_2026-11-17.md`): all 8 valid; vertical
+  timing reaches 460/480 mm (failure line not met); 3/7 variants reach >= 5 mm RMS outside the last
+  5 % (termination split is lip-confined; steering small on this seed). Line not moved.
+- Tests: `tests/test_geometry_edits.py` 9 passed (one real-mesh test, `requires_mesher`).
+- With gmsh available, re-ran the 11 mesh tests that failed earlier: all pass except
+  `test_grid_self_approach_classifies_invalid_geometry_and_is_memoized`, which fails identically
+  at `1d6ebc8` (pre-existing: the test's context has no solve cache root).
+
 ## 2026-11-17 (senior pass, code) - Stage 1 WP 1.2: dense-grid score identity for objective v9
 
 - New `hornlab_search/metrics/dense_grid.py` (A4/N3 method packaged: PCHIP in log f, uniform
