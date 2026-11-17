@@ -1,5 +1,10 @@
 # ISSUES
 
+## 2026-11-17 - Stage 0 WP 0.2 done (generator links)
+
+- DONE: `search.links` for generator-block configs (knob-space links). Unblocks coupling for the
+  grid/rolled/Klangfilm families (stage 5.1).
+
 ## 2026-11-17 - Stage 0: WP 0.1 and WP 0.4 done
 
 - DONE: WP 0.1 refusal taxonomy (post-mesh envelope and prefixed generator envelope errors coded

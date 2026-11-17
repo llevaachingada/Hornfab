@@ -193,7 +193,23 @@ class GeneratedSpace:
         knobs = dict(self.seed_knobs)
         for k, xi in zip(keys, x):
             knobs[k] = round(self.bounds[k].from_unit(float(xi)), _ROUND_DECIMALS)
-        return knobs
+        return self.apply_knob_links(knobs)
+
+    #: ``search.links`` resolved for this space (stage 0 WP 0.2, 2026-11-17); None = no links.
+    links: dict | None = None
+
+    def apply_knob_links(self, knobs: dict) -> dict:
+        """Compute linked generator knobs from their parents in KNOB space (before
+        ``materialize``): ``v = scale * parent + offset`` clipped to ``[min, max]``. Without
+        links the same dict is returned (default path byte-identical)."""
+        if not self.links:
+            return knobs
+        out = dict(knobs)
+        for knob in sorted(self.links):
+            spec = self.links[knob]
+            v = float(out[spec["from"]]) * float(spec["scale"]) + float(spec["offset"])
+            out[knob] = round(min(max(v, float(spec["min"])), float(spec["max"])), _ROUND_DECIMALS)
+        return out
 
     def design_from_knobs(self, knobs: dict) -> Design:
         try:

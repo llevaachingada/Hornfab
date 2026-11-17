@@ -1,5 +1,13 @@
 # CONTINUITY
 
+## 2026-11-17 (senior pass, code) - Stage 0 WP 0.2: search.links now work with generator blocks
+
+- `GeneratedSpace.apply_knob_links` applies links in KNOB space before `materialize`;
+  `search.links.reduce_space` builds a reduced GeneratedSpace (linked knobs leave the CMA
+  dimension, seed recomputed); `apply_links` is a no-op on generator designs; the config refusal
+  is lifted. No links = byte-identical default. The old "refused" test is replaced by real
+  hypex-config tests. `tests/test_search_links.py` + neighbours: 88 passed.
+
 ## 2026-11-17 (senior pass, code) - Stage 0 WP 0.1 refusal taxonomy and WP 0.4 parity replay landed
 
 - WP 0.1 (`search/evaluate.py`): post-mesh envelope violations are now kind `invalid_envelope`

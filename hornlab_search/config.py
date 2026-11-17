@@ -1464,10 +1464,7 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
     search.max_attempts = _validate_max_attempts(search.max_attempts, f"{where}:search")
     if "links" not in raw["search"]:
         search.links = None
-    elif raw.get("generator") is not None:
-        raise ConfigError(f"{where}:search.links: linked knobs are not supported with a "
-                          f"generator block")
-    else:
+    else:   # WP 0.2 (2026-11-17): generator blocks link in knob space (GeneratedSpace)
         search.links = _validate_search_links(search.links, f"{where}:search.links",
                                               raw.get("bounds") or {})
     if "warm_start" not in raw["search"]:
