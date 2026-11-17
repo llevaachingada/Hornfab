@@ -1,5 +1,10 @@
 # ISSUES
 
+## 2026-11-17 - WP 4.2/4.3 runnable (needs GPU + owner approval)
+
+- DONE: record body family + U3 job writer. OPEN (owner C6): approve ~2 + 12-16 solves; pick the host
+  design (best stored biradial or ext-throat) and run `tools/analysis/u3_jobs.py` on it.
+
 ## 2026-11-17 - Evidence driver ready for the owner's machine
 
 - OPEN (owner, Windows): `.venv\\Scripts\\python.exe tools\\analysis\\senior_plan_evidence.py --runs-glob "runs\\2026111*" --u3-lane hl__biradial_es_style_v7 --u3-lane hl__ext_throat_hvlaw_v7 [--brief <v9 brief>]`.

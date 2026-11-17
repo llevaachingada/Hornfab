@@ -1,5 +1,18 @@
 # CONTINUITY
 
+## 2026-11-17 (senior pass, code) - WP 4.2/4.3 made runnable: explicit record body + U3 job writer
+
+- New `design/generators/record_body.py`: `rows.type: canonical_record_v2` recipes carry the record
+  points inline with their digest; resolve/validate re-check the digest (a silent geometry change
+  is refused). Registered in the explicit-body tuples of `grid.py` and `mesh/build.py`.
+- New `tools/analysis/u3_jobs.py`: for `runs/<run>/designs/<hash>` writes `control.yaml` + 7 variant
+  configs (seed = record body) and `manifest.json` (digests, validity, reach, margins). A control
+  config loads and meshes to the host's box (560 x 350 mm on the biradial seed).
+- GPU next (owner C6): `hornlab-search run --config <out>\\control.yaml` at verify fidelity, compare
+  with the stored response (WP 4.2 rule: mean BW within 1 deg per band, dJ within the floor); only
+  then the 7 variants (WP 4.3). Tests: 2 new + 1 mesher test pass; grid/generated suites unchanged
+  (the one pre-existing failure only).
+
 ## 2026-11-17 (senior pass, code) - One-command evidence driver for the Windows checkout
 
 - New `tools/analysis/senior_plan_evidence.py`: record shadow + rescore + floor + U3 CPU variants on

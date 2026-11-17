@@ -1,0 +1,90 @@
+"""Explicit canonical-record body: solve a contract-v2 record as-is (senior plan WP 4.2/4.3).
+
+A grid recipe whose ``rows.type`` is ``canonical_record_v2`` carries the record's inner points
+inline plus its digest. Resolving it re-checks the digest of the points (provenance gated on the
+GEOMETRY, senior review §4.2) and builds the freestanding outer shell with the same
+``grid.grid_outer_points`` the generic route uses. Nothing is re-derived from knobs, so the solved
+surface is exactly the (possibly edited) record: the unedited record is the WP 4.2 control, the
+U3 variants (``geometry.edits``) are the WP 4.3 arms.
+"""
+from __future__ import annotations
+
+import hashlib
+
+import numpy as np
+
+from .registry import GeneratorError
+
+KIND = "canonical_record_v2"
+SAMPLER_VERSION = "record-v2.0"
+
+
+def is_family_spec(spec) -> bool:
+    return (isinstance(spec, dict) and isinstance(spec.get("rows"), dict)
+            and spec["rows"].get("type") == KIND)
+
+
+def points_digest(inner: np.ndarray, sampler_version: str = SAMPLER_VERSION) -> str:
+    """Identical to ``geometry.record.SurfaceRecord.digest`` for the same array."""
+    h = hashlib.sha256()
+    h.update(f"{sampler_version}|{inner.shape}".encode())
+    h.update(np.ascontiguousarray(inner, dtype="<f8").tobytes())
+    return h.hexdigest()
+
+
+def spec_from_record(rec, *, wall_thickness_mm: float, source_auto_angle_deg: float,
+                     name: str = "grid") -> dict:
+    """The grid recipe for a :class:`geometry.record.SurfaceRecord` (inline points)."""
+    inner = np.asarray(rec.inner, dtype=float)
+    return {"name": name, "n_phi": int(inner.shape[0]), "n_s": int(inner.shape[1]),
+            "wall_thickness_mm": float(wall_thickness_mm),
+            "rows": {"type": KIND, "implementation_sha256": points_digest(inner, rec.sampler_version),
+                     "sampler_version": rec.sampler_version,
+                     "source_auto_angle_deg": float(source_auto_angle_deg),
+                     "edit": (rec.meta or {}).get("edit"),
+                     "points": inner.tolist()}}
+
+
+def design_params(spec, knobs, brief) -> dict:
+    return {"grid": dict(spec)}
+
+
+def resolve_grid(block, brief) -> dict:
+    from . import grid
+    rows = block.get("rows") or {}
+    try:
+        inner = np.asarray(rows["points"], dtype=float)
+    except (KeyError, TypeError, ValueError) as exc:
+        raise GeneratorError(f"{KIND}: rows.points missing or malformed") from exc
+    if inner.ndim != 3 or inner.shape[2] != 3 or not np.all(np.isfinite(inner)):
+        raise GeneratorError(f"{KIND}: points must be finite (n_phi, n_s, 3), got {inner.shape}")
+    want = rows.get("implementation_sha256")
+    got = points_digest(inner, str(rows.get("sampler_version") or SAMPLER_VERSION))
+    if want != got:
+        raise GeneratorError(f"{KIND}: point digest {got[:12]} != recorded {str(want)[:12]}")
+    if (brief or {}).get("mounting"):
+        raise GeneratorError(f"{KIND}: explicit record bodies are freestanding only in this pass")
+    t = float(block.get("wall_thickness_mm", 3.0))
+    outer = grid.grid_outer_points(inner, t)
+    angle = float(rows.get("source_auto_angle_deg", 0.0))
+    if not abs(angle) > 1e-9:
+        raise GeneratorError(f"{KIND}: source_auto_angle_deg must be nonzero")
+    meta = {"quarter": True, "row_span": "quarter", "source_auto_angle_deg": angle,
+            "mouth_w_mm": float(2.0 * np.max(np.abs(outer[:, :, 0]))),
+            "mouth_h_mm": float(2.0 * np.max(np.abs(outer[:, :, 1]))),
+            "x_span_mm": float(np.max(outer[:, :, 2]) - min(0.0, float(np.min(outer[:, :, 2])))),
+            "record_digest": got, "edit": rows.get("edit")}
+    return {"inner_points": inner, "outer_points": outer, "meta": meta, "wall_thickness_mm": t}
+
+
+def validate_grid_params(block) -> None:
+    """Structural check used by FREEFORM validation (digest re-checked, no brief needed)."""
+    rows = (block or {}).get("rows") or {}
+    try:
+        inner = np.asarray(rows["points"], dtype=float)
+    except (KeyError, TypeError, ValueError) as exc:
+        raise GeneratorError(f"{KIND}: rows.points missing or malformed") from exc
+    if inner.ndim != 3 or inner.shape[2] != 3:
+        raise GeneratorError(f"{KIND}: points must be (n_phi, n_s, 3)")
+    if points_digest(inner, str(rows.get("sampler_version") or SAMPLER_VERSION)) != rows.get("implementation_sha256"):
+        raise GeneratorError(f"{KIND}: point digest does not match the recorded digest")
