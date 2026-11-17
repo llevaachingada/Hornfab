@@ -1,5 +1,13 @@
 # Hornfab discovery architecture — evidence dossier (READ THIS FIRST)
 
+> **Senior decisions and plan (2026-11-17), read these first now:**
+> `FABLE_SENIOR_REVIEW_2026-11-17.md` (verdict on the lane review, the reserved generator and
+> search decisions, corrections, owner decision cards) and
+> `ARCHITECTURE_AND_STAGED_PLAN_2026-11-17.md` (target architecture, stages 0-8 with gates, GPU
+> budget, and how each work package becomes an implementation task file). They take precedence
+> over `LOW_COST_AGENT_HANDOFF.md` and every position document below; result files still outrank
+> all position documents on facts.
+
 > **Current navigation and evidence:** start with `LOW_COST_AGENT_HANDOFF.md` and the individual result reports. The dossier below records a historical snapshot, not current repository state. At observed HEAD `01560e5`, v9 and `targets/profile.py` are tracked and version 9 is registered; the snapshot finding that v9 was unimportable is historical. Concurrent report edits may be present. The experimental corpus was committed in `207f97a` and `01560e5`; reproduction scripts may overwrite tracked artifacts.
 
 **Prepared:** 2026-11-16, read-only research pass. **Repo:** `C:\Users\hunte\Hrns\hornlab-search`
@@ -277,6 +285,11 @@ verify rank stability, held-out GP ranking at 100–231 rows, and refusal-margin
 | `X4_PARAMETER_SPACE.md` | X4: five-lane exploratory parameter-space checks; sampler and classification gates remain open |
 | `X5_ALLOCATION.md` | X5: corrected allocation replay — policy comparison degenerate at the stated target |
 | `fable_zero_gpu_checks.py` | the zero-GPU reproduction checks named in the reports |
+| `LANE_REVIEW_FOR_FABLE_2026-11-17.md` | lower-cost lane's corpus review handed to the senior reviewer |
+| `X1_ACCEPTANCE_TABLE.md` | consolidated X1 per-test verdict (ruled by the senior review: accepted for geometry, open for metadata) |
+| `OWNER_DECISIONS_2026-11-17.md` | owner options menu C1-C6 (options only) |
+| `FABLE_SENIOR_REVIEW_2026-11-17.md` | **senior verdict**: confirm/amend/overrule table, corrections C-1..C-5, reserved decisions SD-1..SD-8, owner decision cards, supersession register |
+| `ARCHITECTURE_AND_STAGED_PLAN_2026-11-17.md` | **target architecture and staged plan**: layers, contracts, stages 0-8 with work packages and exit gates, GPU budget, invariants, task-file template and readiness |
 
 ## Tracked digest
 

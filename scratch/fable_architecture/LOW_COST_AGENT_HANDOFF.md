@@ -427,3 +427,23 @@ New findings worth carrying into the plan:
 - Sampled and stored bounding boxes differ by up to 3.5 mm on the biradial lane, while the envelope
   check uses a 0.5 mm tolerance. Designs near the size limit may be judged differently before and
   after meshing.
+
+## 12. Senior decision after U1 and the lane review (2026-11-17, high-thinking reviewer)
+
+The reserved decisions are taken in `FABLE_SENIOR_REVIEW_2026-11-17.md`; the staged plan that
+replaces the §7 outline is `ARCHITECTURE_AND_STAGED_PLAN_2026-11-17.md`. Both now take precedence
+over this file. In short:
+
+- **Generator:** plural specialist generators, one shared description (canonical record v2). No
+  unified backbone or common carrier; U2 closed; B3 and B5 withdrawn; U1-bis deferred with a
+  reopen condition and a predeclared parameter cap.
+- **New freedoms:** U3 is re-based. Freedoms are first tested as record edits through the
+  point-grid route, after a new record-route equivalence check (2 solves); only freedoms that pass
+  the unchanged ≥3° rule are built, inside the specialist whose construction carries them.
+- **Search:** BoTorch within lanes, CMA-ES to build rows, seeding from stored bests; no
+  cross-family model; watchdog stays a reviewed safety net.
+- **Corrections:** "80×50 is physically unreachable" is a measured observation, not physics
+  (KH-001); constancy is a brief-declared CD intent, never a family default; the noise floor is
+  per score identity; the Klangfilm Phase B result (construction-level freedoms move the beam
+  25-40°) is now in the record; A4, A5, A9 and the X1 addendum reports are not in git.
+- **§2 rules remain binding** for scratch research in this folder.

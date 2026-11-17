@@ -8,6 +8,16 @@ and the preserved [supplied compilation](knowledge/imported/HornFab_Research_Kno
 Existing research remains in place; imported recommendations are not implementation mandates.
 
 
+[Fable senior review and architecture plan (2026-11-17)](../scratch/fable_architecture/FABLE_SENIOR_REVIEW_2026-11-17.md):
+senior verdict on the lane review (confirm/amend/overrule), corrections to the record, and the reserved
+decisions: plural specialist generators with one shared description (canonical record v2), no unified
+backbone, new freedoms tested on the record before any are built, search inside lanes, watchdog as a
+safety net; owner decision cards for C1-C6. The target architecture, stages 0-8 with gates, GPU budget
+(about 34-38 solves before matched reruns) and the task-file conversion guide are in
+[ARCHITECTURE_AND_STAGED_PLAN_2026-11-17.md](../scratch/fable_architecture/ARCHITECTURE_AND_STAGED_PLAN_2026-11-17.md).
+Docs only; no code, solve or queue change.
+
+
 [Fable discovery architecture evidence handoff (2026-11-16)](research/FABLE_DISCOVERY_EVIDENCE_HANDOFF_2026-11-16.md):
 read-only dossier prepared for a later discovery/decision pass - refusal-taxonomy miscoding, the
 envelope-vs-GPU boundary, the conservative generic-GRID extent estimate (realised effect

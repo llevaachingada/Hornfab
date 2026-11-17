@@ -9,6 +9,13 @@
 > open until the owner (and, for the generator direction and the staged plan, the senior reviewer)
 > takes it.
 
+> **SENIOR ADDENDUM (2026-11-17).** `FABLE_SENIOR_REVIEW_2026-11-17.md` §2 C-1 corrects the C1
+> framing below: the low-band vertical shortfall is measured on sampled designs, and the Keele
+> relation is a scoped Bi-Radial heuristic (`docs/knowledge/claims/KH-001_keele_mouth_heuristic.md`),
+> so "the physics argument" should read "a heuristic consistent with the measurement". §4 of that
+> file repackages C1-C6 with what each choice changes in the plan and adds recommendations for the
+> no-solve items and the solve order (C1-C4 still carry no recommendation).
+
 ## C1 — Coverage target: point or corridor?
 
 | Option | What it means | Evidence for and against |

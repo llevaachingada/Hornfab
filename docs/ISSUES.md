@@ -1,5 +1,29 @@
 # ISSUES
 
+## 2026-11-17 - Fable senior review: reserved decisions taken; architecture and staged plan written
+
+- DONE (senior reviewer): lane review confirmed/amended item by item; generator direction decided
+  (plural specialist generators, one shared description; no unified backbone); search design decided
+  (within-lane BoTorch/CMA-ES, no cross-family model); staged plan written with gates.
+  `scratch/fable_architecture/FABLE_SENIOR_REVIEW_2026-11-17.md`,
+  `scratch/fable_architecture/ARCHITECTURE_AND_STAGED_PLAN_2026-11-17.md`. Docs only.
+- CLOSED: the 2026-11-17 lane-review OPEN item "senior reviewer: confirm, amend or overrule; write the
+  staged plan; decide the generator direction". U2 closed; B3 and B5 withdrawn.
+- OPEN (owner): C1-C4 scoring values for the home brief; C5 protected-list confirmation (4 lanes with
+  no request evidence); C6 solve budget (B1 20, record-route equivalence 2, B2 12-16, B6 owner's
+  choice); provenance rule; envelope convention; U3 host pick (ext-throat or biradial) after the CPU
+  variant stage.
+- OPEN (owner): commit `A4_GRID_INDEPENDENT_SCORE.md`, `A5_SOLVER_CALL_TIMING.md`,
+  `A9_CORRIDOR_VS_TERM_SET.md`, `X1_ADDENDUM_KLANGFILM_PROVENANCE.md` and their `.a4/`/`.a9/` script
+  folders from the Windows checkout; the handoff cites them but no commit contains them.
+- OPEN (implementation, ready for task files): stage 0 WP 0.1-0.8 (outcome taxonomy and prefix bug at
+  `search/evaluate.py:1562`; generator `search.links`; cohort gate by score identity; parity-exact v9
+  replay; GRID extent false-refusal count; night-runner restart idempotency; watchdog best_J and
+  outcome classes; doc truths), WP 1.2 dense-grid score identity, WP 2.1 fidelity tiers, WP 3.1-3.2
+  record module (needs an owner path assignment for the new module).
+- PARKED with reopen conditions: U1-bis, cross-family predictor, supervisor acting on J, QD-first,
+  oversize exploration, frequency staging, adjoint freeform (plan §9).
+
 ## 2026-11-17 - Lane review of the Fable corpus delivered; decisions reserved to the senior reviewer and owner
 
 - DONE (lane agent, lower-cost): full-corpus review handed to the senior reviewer

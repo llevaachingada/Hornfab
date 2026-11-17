@@ -12,6 +12,11 @@
 > `scratch/fable_architecture/` (read directly or via four read-only digest lanes) plus this lane's
 > own measured results.
 
+> **SENIOR VERDICT (2026-11-17).** Confirmed in substance, with amendments, in
+> `FABLE_SENIOR_REVIEW_2026-11-17.md` §1 (item-by-item table). Amended: §2.1 fallback (test
+> freedoms on the record before building per-lane modules), U1-bis (deferred), §6 staging
+> (replaced by `ARCHITECTURE_AND_STAGED_PLAN_2026-11-17.md`).
+
 ## 0. How this was read
 
 The spine (`ARCHITECTURE_DECISION_RECORD.md`, `UNIVERSAL_HORN_FAMILY.md` §1–2/§7–8,

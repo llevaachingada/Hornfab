@@ -1,5 +1,35 @@
 # CONTINUITY
 
+## 2026-11-17 (senior pass) - Fable senior review: generator decision taken, architecture and staged plan written
+
+- **Senior (high-thinking) reviewer pass** picking up for Fable; not the owner. Docs only, HEAD
+  `1d6ebc8`: no code, config, queue, solve, mesh build or pytest. Two new documents in
+  `scratch/fable_architecture/`: `FABLE_SENIOR_REVIEW_2026-11-17.md` and
+  `ARCHITECTURE_AND_STAGED_PLAN_2026-11-17.md`; they now take precedence over the handoff.
+- **Lane review confirmed in substance.** Amended: U3 freedoms are tested as canonical-record edits
+  through the point-grid route (after a new 2-solve record-route equivalence check) before any are
+  built, and then only inside the specialist whose construction carries them; U1-bis deferred with a
+  reopen condition and a predeclared parameter cap; X1 ruled accepted for geometry, open for metadata.
+- **Reserved decisions taken:** plural specialist generators, one shared description (record v2); no
+  unified backbone or common carrier; U2 closed, B3/B5 withdrawn; no cross-family model (BoTorch within
+  lanes, CMA-ES builds rows, seeds from stored bests); watchdog stays a reviewed safety net; B1 design
+  selection decoupled from the owner's scoring choice (union of v7 and v9-placeholder top fives).
+- **Corrections registered:** "80x50 is physically unreachable" is a measured observation on sampled
+  designs, not physics (KH-001 scopes Keele to Bi-Radial); constancy is a brief-declared CD intent,
+  never a family default (owner lock: no classification by family name); the noise floor is per score
+  identity (v9 0.113 J vs v9+constancy 0.205 J at the top, N3); the Klangfilm Phase B result
+  (construction-level core moved the beam 25-40 deg; b3_soft 6.401 -> 2.819) was missing from the
+  corpus; `A4_GRID_INDEPENDENT_SCORE.md`, `A5_SOLVER_CALL_TIMING.md`, `A9_CORRIDOR_VS_TERM_SET.md`
+  and `X1_ADDENDUM_KLANGFILM_PROVENANCE.md` are cited but not in git.
+- **Plan:** stages 0-8 with exit gates. Stage 0 (nine truth fixes, all re-verified live at HEAD) and
+  the record module (stage 3.1) are ready to become task files now with no owner input. GPU before
+  matched reruns: B1 20 + equivalence 2 + B2 12-16 = 34-38 solves.
+- **Owner decisions open:** C1-C4 scoring (cards say what each changes; no recommendation, per the
+  standing instruction), C5 protected list, C6 budget (recommended order B1, equivalence, B2, B6),
+  provenance rule (recommended: gate on a record digest of the generated surface, keep the kernel
+  digest informational), envelope convention (recommended: record acoustic and build boxes; brief
+  names which one gates), commit the four missing reports.
+
 ## 2026-11-17 04:1x - Lane review of the Fable corpus handed to the senior reviewer (not a senior decision)
 
 - The **lower-cost continuation lane agent** (not Fable, not the owner) reviewed all 54 documents in
