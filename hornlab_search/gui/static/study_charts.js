@@ -1,6 +1,6 @@
 // Study-page BO charts.  Pure view of bounded JSON from /api/studies/<id>/<phase>;
 // no score math and no fetch here.  The page passes the panel's `data.bo` object.
-import { chart, catColor, fmt, niceTicks } from "./charts.js";
+import { chart, catColor, el, fmt, niceTicks } from "./charts.js";
 
 const RUN_ID = /^study-[0-9a-f]{16}$/;
 const HASH = /^[0-9a-f]{6,64}$/;
@@ -64,6 +64,14 @@ export function paretoLimits(view) {
   for (const point of points) {
     if (finite(point?.coverage_deg)) xs.push(point.coverage_deg);
     if (finite(point?.ripple_db)) ys.push(point.ripple_db);
+  }
+  for (const point of (Array.isArray(view?.excluded_points) ? view.excluded_points : [])) {
+    if (finite(point?.coverage_deg)) xs.push(point.coverage_deg);
+    if (finite(point?.ripple_db)) ys.push(point.ripple_db);
+  }
+  for (const point of (Array.isArray(view?.predicted) ? view.predicted : [])) {
+    if (finite(point?.coverage_deg?.mean)) xs.push(point.coverage_deg.mean);
+    if (finite(point?.ripple_db?.mean)) ys.push(point.ripple_db.mean);
   }
   if (finite(view?.reference?.limits?.[0])) xs.push(view.reference.limits[0]);
   if (finite(view?.reference?.limits?.[1])) ys.push(view.reference.limits[1]);
@@ -198,21 +206,38 @@ function drawPareto(svg, view) {
   const limits = paretoLimits(view);
   if (!limits) return;
   const points = Array.isArray(view.points) ? view.points : [];
+  const finitePair = point => Number.isFinite(Number(point?.[0])) && Number.isFinite(Number(point?.[1]));
   const groups = [
     { source: "training", color: color("--muted", "#8a96a0"), r: 2.2, opacity: 0.6 },
     { source: "screen", color: color("--accent", "#2a78d6"), r: 3.0, opacity: 0.85 },
     { source: "nondominated", color: color("--best", "#1baf7a"), r: 3.4, opacity: 0.95 },
     { source: "finalist", color: color("--warn", "#eda100"), r: 4.4, opacity: 1 },
   ];
+  const nondominated = (Array.isArray(view.nondominated) && view.nondominated.length)
+    ? view.nondominated : points.filter(point => point.nondominated === true);
   const series = groups.map(group => ({
-    pts: points.filter(point => {
-      if (group.source === "nondominated") return point.nondominated === true;
+    pts: (group.source === "nondominated" ? nondominated : points).filter(point => {
+      if (group.source === "nondominated") return true;
       if (group.source === "finalist") return point.finalist === true;
       return point.source === group.source && point.nondominated !== true;
-    }).map(point => [point.coverage_deg, point.ripple_db]),
+    }).map(point => [point.coverage_deg, point.ripple_db]).filter(finitePair),
     dots: true, r: group.r, opacity: group.opacity, color: group.color,
   }));
+  const excluded = (Array.isArray(view.excluded_points) ? view.excluded_points : [])
+    .map(point => [point.coverage_deg, point.ripple_db]).filter(finitePair);
+  if (excluded.length) {
+    series.push({ pts: excluded, dots: true, r: 2.1, opacity: 0.55, color: color("--bad", "#b23a3a") });
+  }
+  const predicted = (Array.isArray(view.predicted) ? view.predicted : []).map(point => [
+    point?.coverage_deg?.mean, point?.ripple_db?.mean,
+  ]).filter(finitePair);
+  if (predicted.length) {
+    series.push({ pts: predicted, dots: true, r: 2.6, opacity: 0.55, color: color("--label", "#667") });
+  }
   const reference = view.reference || {};
+  const axes = view.frontier_axes && typeof view.frontier_axes === "object" ? view.frontier_axes : {};
+  const xUnit = axes.units?.[0] || "deg";
+  const yUnit = axes.units?.[1] || "dB";
   const vlines = finite(reference.limits?.[0])
     ? [{ x: reference.limits[0], color: color("--label", "#667"), dash: true }] : [];
   const hlines = finite(reference.limits?.[1])
@@ -221,9 +246,9 @@ function drawPareto(svg, view) {
     W: 520, H: 300, xlim: limits.xlim, ylim: limits.ylim,
     xticks: niceTicks(limits.xlim[0], limits.xlim[1], 5),
     yticks: niceTicks(limits.ylim[0], limits.ylim[1], 5),
-    xlabel: "coverage error (deg)", ylabel: "ripple error (dB)",
+    xlabel: `coverage error (${xUnit})`, ylabel: `ripple (${yUnit})`,
     series, vlines, hlines,
-    ariaLabel: "Measured coverage error against ripple error; nondominated and finalist points highlighted",
+    ariaLabel: "Measured coverage error against ripple; nondominated, finalist, excluded and predicted points are separate marks",
   });
 }
 
@@ -412,10 +437,17 @@ export function drawStudyCharts(root, panel) {
   const convergence = find("convergence");
   if (convergence) drawConvergence(convergence, bo.convergence);
   const calibration = find("calibration");
-  if (calibration) drawCalibration(calibration, bo.calibration);
+  if (calibration) {
+    const seq = bo.calibration?.sequential_validation;
+    drawCalibration(calibration, seq
+      ? { ...seq, status: bo.calibration?.status || "partial" }
+      : bo.calibration);
+  }
   const loo = find("calibration_loo");
-  if (loo) drawLoo(loo, bo.calibration?.loo);
-  const sliceList = Array.isArray(bo.sensitivity?.slices) ? bo.sensitivity.slices : [];
+  if (loo) drawLoo(loo, bo.calibration?.efficient_loo_cv || bo.calibration?.loo);
+  const sliceList = Array.isArray(bo.sensitivity?.posterior_slices?.items)
+    ? bo.sensitivity.posterior_slices.items
+    : (Array.isArray(bo.sensitivity?.slices) ? bo.sensitivity.slices : []);
   root.querySelectorAll('svg[data-study-slice]').forEach(node => {
     const slice = sliceList.find(item => item.key === node.getAttribute("data-study-slice"));
     if (slice) drawSlice(node, slice);
@@ -423,9 +455,106 @@ export function drawStudyCharts(root, panel) {
   const pareto = find("pareto");
   if (pareto) drawPareto(pareto, bo.pareto);
   const paretoHv = find("pareto_hv");
-  if (paretoHv) drawParetoHv(paretoHv, bo.pareto?.diagnostics);
+  if (paretoHv) {
+    const diag = bo.pareto?.diagnostics;
+    const trace = diag?.available === true ? diag.hv_trace
+      : (Array.isArray(bo.pareto?.hypervolume_trace) ? bo.pareto.hypervolume_trace : null);
+    drawParetoHv(paretoHv, trace ? { available: true, hv_trace: trace } : diag);
+  }
   const trust = find("trust_region");
   if (trust) drawTrustRegion(trust, bo.trust_region);
   const space = find("design_space");
   if (space) drawDesignSpace(space, bo.design_space);
+}
+
+// ── Identity-based point picking (P1) ─────────────────────────────────────────────
+// A plotted mark is actionable only when it carries a stable identity (design_hash or
+// solve_id).  The click handler receives that identity, never the canvas pixel position, so
+// a hit ring can move with the chart while the inspector opens the same physical design.
+
+/** The data→viewBox transform `chart()` used for its most recent draw of `svg`, or null. */
+function markerScale(svg) {
+  const opts = svg?._chartOpts;
+  if (!opts || !Array.isArray(opts.xlim) || !Array.isArray(opts.ylim)) return null;
+  const W = svg._chartW || opts.W || 460;
+  const H = opts.H || 240;
+  const m = { l: 44, r: 12, t: opts.ylabel ? 20 : 10, b: 32 };
+  const tx = opts.xlog ? v => Math.log10(v) : v => v;
+  const ty = opts.ylog ? v => (v != null && v > 0 ? Math.log10(v) : null) : v => v;
+  const x0 = tx(opts.xlim[0]), x1 = tx(opts.xlim[1]);
+  const y0 = ty(opts.ylim[0]), y1 = ty(opts.ylim[1]);
+  if (![x0, x1, y0, y1].every(v => typeof v === "number" && Number.isFinite(v))) return null;
+  if (x1 === x0 || y1 === y0) return null;
+  const X = v => m.l + (tx(v) - x0) / (x1 - x0) * (W - m.l - m.r);
+  const Y = v => {
+    const tv = ty(v);
+    return tv == null ? null : H - m.b - (tv - y0) / (y1 - y0) * (H - m.t - m.b);
+  };
+  return { X, Y };
+}
+
+/**
+ * Draw an identity-bearing hit layer over a chart already drawn by `chart()`.
+ *
+ * `points` are plot rows with `x`/`y` (or coverage/ripple) plus an optional `design_hash`
+ * and/or `solve_id`.  Points with an identity get a focusable ring and call
+ * `onSelect({designHash, solveId, point})`; points without one are drawn as a small hollow
+ * marker and counted, so the caller can say "N training points have no resolvable design
+ * hash" instead of silently making them un-clickable.  Pure DOM; no fetch and no score math.
+ */
+export function addIdentityMarkers(svg, points, onSelect, { r = 9 } = {}) {
+  if (!svg || typeof svg.querySelector !== "function" || !Array.isArray(points)) {
+    return { resolved: 0, unresolved: 0 };
+  }
+  const scale = markerScale(svg);
+  if (!scale) return { resolved: 0, unresolved: 0 };
+  const existing = svg.querySelector("g[data-res-point-layer]");
+  if (existing) existing.remove();
+  const layer = el("g", { "data-res-point-layer": "1", class: "res-point-layer" }, svg);
+  const accent = color("--accent", "#0d6e7a");
+  const muted = color("--muted", "#5a6873");
+  let resolved = 0, unresolved = 0;
+  for (const point of points) {
+    if (!point || typeof point !== "object") continue;
+    const x = Number(point.x ?? point.coverage_deg);
+    const y = Number(point.y ?? point.ripple_db);
+    if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+    const cx = scale.X(x), cy = scale.Y(y);
+    if (!Number.isFinite(cx) || !Number.isFinite(cy)) continue;
+    const designHash = typeof point.designHash === "string" ? point.designHash
+      : (typeof point.design_hash === "string" ? point.design_hash : null);
+    const solveId = typeof point.solveId === "string" ? point.solveId
+      : (typeof point.solve_id === "string" ? point.solve_id : null);
+    if (!designHash && !solveId) {
+      unresolved += 1;
+      el("circle", {
+        cx, cy, r: 3, fill: "none", stroke: muted, "stroke-width": 1,
+        "stroke-dasharray": "2 2", "stroke-opacity": 0.8, "aria-hidden": "true",
+      }, layer);
+      continue;
+    }
+    resolved += 1;
+    const identity = designHash ? `design ${designHash}` : `solve ${solveId}`;
+    const group = el("g", {
+      class: "res-point-hit", tabindex: "0", role: "button",
+      "data-design-hash": designHash || "", "data-solve-id": solveId || "",
+      "aria-label": `Open ${identity} in the horn inspector`,
+      style: "cursor:pointer",
+    }, layer);
+    el("circle", { cx, cy, r: r + 4, fill: "transparent", stroke: "none" }, group);
+    el("circle", {
+      cx, cy, r, fill: "none", stroke: accent, "stroke-width": 1.2, "stroke-opacity": 0.55,
+    }, group);
+    const title = el("title", {}, group);
+    title.textContent = `${identity}${finite(point.j) ? ` · J ${fmt(point.j)}` : ""}`;
+    const choose = event => {
+      if (event) { event.preventDefault(); event.stopPropagation(); }
+      if (typeof onSelect === "function") onSelect({ designHash, solveId, point });
+    };
+    group.addEventListener("click", choose);
+    group.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") choose(event);
+    });
+  }
+  return { resolved, unresolved };
 }

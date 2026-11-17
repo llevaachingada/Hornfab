@@ -31,11 +31,24 @@ MAX_RUN_BYTES = 16 * 1024 * 1024
 RUN_ID_RE = __import__("re").compile(r"^study-[0-9a-f]{16}$")
 HASH_RE = __import__("re").compile(r"^[0-9a-f]{6,64}$")
 
+#: Marker for a diagnostics/model field an older study never recorded.  Never a zero/fill.
+NOT_RECORDED = "not recorded"
+MODEL_SENSITIVITY_NOTE = "model sensitivity, not a proven physical effect"
+SLICE_ANCHOR_NOTE = "other knobs held at incumbent"
+ACQUISITION_NOTE = ("acquisition value is an optimizer ranking signal, not measured horn "
+                    "quality and not a probability of success")
+DESIGNATION_VALUES = ("exploration", "exploitation", "fallback")
+STATUS_LABELS = {
+    "analysis": "whether this view could be computed from recorded evidence",
+    "artifact_validation": "artifact registration/validation status (not physical success)",
+    "physical": "measured/verified/refused physical outcome (not artifact validation)",
+}
+
 PHASE_VIEWS = {
     "overview": ("run",),
-    "data": ("run", "data_summary", "design_space"),
+    "data": ("run", "data_summary", "target_integrity", "design_space"),
     "explain": ("run", "calibration", "sensitivity", "design_space"),
-    "propose": ("run",),
+    "propose": ("run", "proposal_explanation"),
     "execute": ("run", "convergence", "trust_region", "pareto"),
     "decide": ("run", "pareto", "verification"),
 }
@@ -107,6 +120,80 @@ def _active_keys(manifest: Mapping | None) -> list[str]:
     if not isinstance(keys, list):
         return []
     return [str(k) for k in keys if isinstance(k, str) and k][:64]
+
+
+# --------------------------------------------------------------------------- evidence helpers
+
+
+def _artifact_status(meta: Mapping | None) -> str:
+    """Artifact registration/validation status, kept separate from physical success."""
+    if not isinstance(meta, Mapping):
+        return NOT_RECORDED
+    return str(meta.get("status") or NOT_RECORDED)
+
+
+def _status_kinds(analysis_status: str, *, artifact_status=None, physical: Any = NOT_RECORDED) -> dict:
+    """Three distinct status dimensions; a validation ``unknown`` is not physical failure."""
+    return {
+        "analysis": analysis_status,
+        "artifact_validation": artifact_status or NOT_RECORDED,
+        "physical": physical,
+        "labels": dict(STATUS_LABELS),
+    }
+
+
+def _physical_counts(observations: Iterable[Mapping]) -> dict:
+    measured = verified = refused = 0
+    for row in observations:
+        result = _mapping(row.get("result"))
+        kind = result.get("kind")
+        outcome = str(result.get("outcome") or "")
+        if outcome in ("cheap_refusal", "refused", "refusal"):
+            refused += 1
+            continue
+        if result.get("eligible") is True and _finite(result.get("observed_j")) is not None:
+            if kind == "verify":
+                verified += 1
+            elif kind == "screen":
+                measured += 1
+    if measured or verified or refused:
+        parts = []
+        if measured:
+            parts.append(f"measured:{measured}")
+        if verified:
+            parts.append(f"verified:{verified}")
+        if refused:
+            parts.append(f"refused:{refused}")
+        return {"measured": measured, "verified": verified, "refused": refused,
+                "summary": ", ".join(parts)}
+    return {"measured": 0, "verified": 0, "refused": 0, "summary": NOT_RECORDED}
+
+
+def _model_provenance(meta, content, *, retrospective: bool, source: str) -> dict:
+    """Which model revision/time supplied a prediction, and whether it was refit later."""
+    content = _mapping(content)
+    return {
+        "source": source,
+        "artifact_sha256": (meta or {}).get("sha256") if isinstance(meta, Mapping) else None,
+        "artifact_revision": (meta or {}).get("revision") if isinstance(meta, Mapping) else None,
+        "generated_utc": _clip_text(content.get("generated_utc"), 64),
+        "model_revision": _int(content.get("model_revision") or content.get("revision")),
+        "training_set_id": _clip_text(content.get("training_set_id"), 80),
+        "model_policy": _clip_text(content.get("model_policy") or content.get("policy"), 80),
+        "retrospective": bool(retrospective),
+        "prediction_source": content.get("prediction_source"),
+        "note": _clip_text(content.get("retrospective_note"), 500) if retrospective else None,
+    }
+
+
+def _designation(selection_reason, fallback) -> str:
+    """Constraint: only exploration | exploitation | fallback are ever returned."""
+    if fallback is True:
+        return "fallback"
+    text = str(selection_reason or "").lower()
+    if "explor" in text or "maximin" in text:
+        return "exploration"
+    return "exploitation"
 
 
 # --------------------------------------------------------------------------- artifact reads
@@ -184,14 +271,20 @@ def _pareto_metrics(service, study_id):
     return _artifact(service, study_id, "pareto_metrics", max_bytes=4_000_000)
 
 
-def _diagnostics(service, study_id):
-    """The optional ``diagnostics`` artifact; ``(content_or_None, can_compute)``."""
-    content, _meta, _reason = _artifact(service, study_id, "diagnostics", max_bytes=1_000_000)
+def _diagnostics_artifact(service, study_id):
+    """``(content_or_None, can_compute, metadata, reason)`` for the diagnostics artifact."""
+    content, meta, reason = _artifact(service, study_id, "diagnostics", max_bytes=1_000_000)
     if isinstance(content, Mapping) and content.get("schema") == "study-model-diagnostics-v1" \
             and content.get("status", "ok") == "ok":
-        return content, True
+        return content, True, meta, None
     arrays, _why = _training_arrays(service, study_id)
-    return None, arrays is not None
+    return None, arrays is not None, meta, reason
+
+
+def _diagnostics(service, study_id):
+    """The optional ``diagnostics`` artifact; ``(content_or_None, can_compute)``."""
+    content, can_compute, _meta, _reason = _diagnostics_artifact(service, study_id)
+    return content, can_compute
 
 
 def _verification(service, study_id):
@@ -460,6 +553,157 @@ def _spearman(xs: list[float], ys: list[float]) -> float | None:
     return round(numerator / (dx * dy), 4)
 
 
+def _residual_stats(points: Iterable[Mapping]) -> dict:
+    """Error statistics of recorded predictions vs later measurements (J units)."""
+    pairs = []
+    for point in points:
+        predicted, measured = _finite(point.get("predicted")), _finite(point.get("measured"))
+        if predicted is not None and measured is not None:
+            pairs.append(measured - predicted)
+    if not pairs:
+        return {"n": 0, "rmse": None, "mae": None, "mean_error": None}
+    return {"n": len(pairs),
+            "rmse": round(math.sqrt(sum(v * v for v in pairs) / len(pairs)), 6),
+            "mae": round(sum(abs(v) for v in pairs) / len(pairs), 6),
+            "mean_error": round(sum(pairs) / len(pairs), 6)}
+
+
+def _nearest_training(training: Mapping | None, manifest: Mapping | None, vector,
+                      *, k: int = 5) -> dict:
+    """Nearest recorded training rows to a normalized candidate vector, by L2 distance."""
+    if training is None:
+        return {"available": False, "status": NOT_RECORDED, "items": [],
+                "reason": "the training arrays are not recorded"}
+    try:
+        v = np.asarray(vector, dtype=float).reshape(-1)
+        X = np.asarray(training.get("X"), dtype=float)
+        J = np.asarray(training.get("J"), dtype=float).reshape(-1)
+    except (TypeError, ValueError):
+        return {"available": False, "status": NOT_RECORDED, "items": [],
+                "reason": "the candidate active vector is not recorded"}
+    if X.ndim != 2 or v.shape != (X.shape[1],) or not np.isfinite(v).all():
+        return {"available": False, "status": NOT_RECORDED, "items": [],
+                "reason": "the candidate vector does not match the training dimension"}
+    distance = np.sqrt(((X - v) ** 2).sum(axis=1))
+    ids = manifest.get("ids") if isinstance(manifest, Mapping) else None
+    identities = _mapping(_mapping(manifest).get("meta")).get("identities")
+    identities = _mapping(identities)
+    order = np.argsort(distance, kind="stable")[:max(1, int(k))]
+    items = []
+    for index in order:
+        ident = _mapping(identities.get(str(ids[index]))) if isinstance(ids, list) \
+            and index < len(ids) else {}
+        items.append({
+            "id": str(ids[index]) if isinstance(ids, list) and index < len(ids) else None,
+            "distance_l2": round(float(distance[index]), 6),
+            "j": _finite(J[index]) if index < len(J) else None,
+            "design_hash": ident.get("design_hash"),
+            "geometry_hash": ident.get("geometry_hash"),
+        })
+    return {"available": True, "status": "recorded", "items": items,
+            "distance_metric": "L2 in the model's normalized active space"}
+
+
+def _incumbent_from_observations(observations: Iterable[Mapping]) -> dict | None:
+    """Best eligible measured screen row recorded in results (params + vector identity)."""
+    best = None
+    for row in observations:
+        result = _mapping(row.get("result"))
+        if result.get("kind") != "screen" or result.get("eligible") is not True:
+            continue
+        j = _finite(result.get("observed_j"))
+        if j is None:
+            continue
+        candidate = _mapping(row.get("candidate"))
+        params = result.get("params") if isinstance(result.get("params"), Mapping) \
+            else candidate.get("params")
+        vector = candidate.get("active_vector") or candidate.get("x")
+        if best is None or j < best["j"]:
+            best = {"j": j, "params": dict(params) if isinstance(params, Mapping) else None,
+                    "x": list(vector) if isinstance(vector, (list, tuple)) else None,
+                    "design_hash": candidate.get("design_hash") or result.get("design_hash")}
+    return best
+
+
+def _param_delta(candidate_params, incumbent_params) -> dict:
+    if not isinstance(candidate_params, Mapping) or not isinstance(incumbent_params, Mapping):
+        return {"available": False, "status": NOT_RECORDED, "items": [],
+                "reason": "candidate and incumbent parameters are not both recorded"}
+    items = []
+    for key in sorted(set(candidate_params) | set(incumbent_params)):
+        before, after = _finite(incumbent_params.get(key)), _finite(candidate_params.get(key))
+        if before is None or after is None:
+            continue
+        items.append({"key": str(key), "incumbent": before, "candidate": after,
+                      "delta": round(after - before, 9)})
+    return {"available": bool(items), "status": "recorded" if items else NOT_RECORDED,
+            "items": items, "note": "candidate minus incumbent"}
+
+
+def _inside_box(vector, box) -> bool | None:
+    try:
+        v = np.asarray(vector, dtype=float).reshape(-1)
+        lo = np.asarray(box.get("lo"), dtype=float).reshape(-1)
+        hi = np.asarray(box.get("hi"), dtype=float).reshape(-1)
+    except (TypeError, ValueError, AttributeError):
+        return None
+    if v.shape != lo.shape or v.shape != hi.shape or not np.isfinite(v).all():
+        return None
+    return bool(np.all(v >= lo - 1e-9) and np.all(v <= hi + 1e-9))
+
+
+def _slice_payload(item: Mapping) -> dict | None:
+    """One 1-D posterior slice in real parameter units, with the invalid-combination flag."""
+    item = _mapping(item)
+    xs, mean, sd = item.get("x"), item.get("j_mean"), item.get("j_sd")
+    if not (isinstance(xs, list) and isinstance(mean, list) and isinstance(sd, list)
+            and len(xs) == len(mean) == len(sd) and 2 <= len(xs) <= 200):
+        return None
+    means = [_finite(v) for v in mean]
+    sds = [_finite(v) for v in sd]
+    lower = [_finite(v) for v in item.get("j_lower") or []]
+    upper = [_finite(v) for v in item.get("j_upper") or []]
+    if len(lower) != len(means):
+        lower = [None if m is None or s is None else round(m - 2.0 * s, 9)
+                 for m, s in zip(means, sds)]
+    if len(upper) != len(means):
+        upper = [None if m is None or s is None else round(m + 2.0 * s, 9)
+                 for m, s in zip(means, sds)]
+    feasibility = _mapping(item.get("feasibility"))
+    warning = {
+        "checked": feasibility.get("checked") is True,
+        "status": str(feasibility.get("status") or "unknown"),
+        "invalid_count": _int(feasibility.get("invalid_count")),
+        "reason": _clip_text(feasibility.get("reason"), 400) or
+        ("cheap feasibility was not evaluated for this slice; a 1-D slice can pass through "
+         "geometrically invalid combinations"),
+    }
+    return {
+        "key": _clip_text(item.get("key"), 80),
+        "x": [_finite(v) for v in xs], "x_unit": [_finite(v) for v in item.get("x_unit") or []],
+        "j_mean": means, "j_sd": sds, "j_lower": lower, "j_upper": upper,
+        "anchor_x": _finite(item.get("anchor_x")),
+        "anchor_x_unit": _finite(item.get("anchor_x_unit")),
+        "anchor_j_mean": _finite(item.get("anchor_j_mean")),
+        "unit": item.get("unit") or item.get("x_unit"),
+        "feasibility_warning": warning,
+        "labels": {"x": "parameter value in real units",
+                   "j_mean": "model-predicted J",
+                   "band": "mean ±2σ model credible interval",
+                   "anchor": SLICE_ANCHOR_NOTE,
+                   "caveat": MODEL_SENSITIVITY_NOTE,
+                   "invalid": "a 1-D slice may pass through geometrically invalid combinations"},
+    }
+
+
+def _frontier_axes() -> dict:
+    """The Pareto frontier is coverage(deg) × ripple(dB); J is never an axis."""
+    return {"x": "coverage_deg", "y": "ripple_db", "units": ["deg", "dB"],
+            "direction": "minimize",
+            "note": ("J is a separate scalar ranking shown beside each point; it is not a "
+                     "frontier axis, and acoustics-vs-size is not a recorded dimension.")}
+
+
 def _nondominated(points: list[dict]) -> None:
     """Mark ``point['nondominated']`` for 2-D minimisation (coverage, ripple)."""
     for point in points:
@@ -525,7 +769,7 @@ def _normalise_reference(reference: Mapping | None) -> dict | None:
 
 def convergence_view(service, study, *, runs_root, root=None, comparison=None) -> dict:
     sid = study["id"]
-    results, _meta, reason = _results(service, sid)
+    results, results_meta, reason = _results(service, sid)
     if results is None:
         return _view("missing", reason or "run results are not available")
     manifest, _meta, _reason = _manifest(service, sid)
@@ -616,12 +860,18 @@ def convergence_view(service, study, *, runs_root, root=None, comparison=None) -
                       "has_screen": bool(run_dir and ((run_dir / "screen" / "search.ndjson").is_file()
                                                        or (run_dir / "search.ndjson").is_file())),
                       "has_verify": bool(paths["verify_dir"] and (paths["verify_dir"] / "search.ndjson").is_file())},
+                 status_kinds=_status_kinds(status,
+                                            artifact_status=_artifact_status(results_meta),
+                                            physical=_physical_counts(_observations(results))),
                  notes=notes)
 
 
-def _calibration_core(service, study) -> dict:
+def _calibration_core(service, study, *, results=None) -> dict:
     sid = study["id"]
-    results, _meta, reason = _results(service, sid)
+    if results is None:
+        results, _meta, reason = _results(service, sid)
+    else:
+        reason = None
     if results is None:
         return _view("missing", reason or "run results are not available")
     observations = _observations(results)
@@ -712,63 +962,237 @@ def _calibration_core(service, study) -> dict:
                  notes=["Predicted values are model credible intervals, never measured J."])
 
 
+def _sequential_validation(service, study, view) -> dict:
+    """Out-of-sample tracking of proposals against their subsequent screen measurements.
+
+    Clearly named and separated from :func:`_loo_section` so the frontend cannot blur a
+    sequential proposal check with LOO on the original training cohort.
+    """
+    points = [p for p in (view.get("points") or []) if isinstance(p, Mapping)]
+    n = len(points)
+    pairs = [(_finite(p.get("predicted")), _finite(p.get("measured"))) for p in points]
+    xs = [a for a, b in pairs if a is not None and b is not None]
+    ys = [b for a, b in pairs if a is not None and b is not None]
+    coverage = _finite(view.get("coverage"))
+    interval_label = _clip_text(view.get("interval_label"), 300) or "model credible interval"
+    model, model_meta, _reason = _model(service, study["id"])
+    proposal, proposal_meta, _reason = _proposal(service, study["id"])
+    provenance = _model_provenance(
+        model_meta, model, retrospective=False,
+        source="study model/proposal artifacts recorded when the candidate was proposed")
+    provenance["proposal_generated_utc"] = _clip_text(_mapping(proposal).get("generated_utc"), 64)
+    provenance["proposal_artifact_sha256"] = (_mapping(proposal_meta).get("sha256")
+                                              if isinstance(proposal_meta, Mapping) else None)
+    return {
+        "label": "Sequential proposals vs subsequently measured J",
+        "source": "recorded proposal prediction joined to its later screen measurement",
+        "out_of_sample": True,
+        "n": n,
+        "n_with_interval": sum(1 for p in points
+                               if p.get("lower") is not None and p.get("upper") is not None),
+        "points": points[:MAX_TABLE],
+        "physical": list(view.get("physical") or [])[:MAX_TABLE],
+        "coverage": coverage,
+        "coverage_percent": round(coverage * 100.0, 2) if coverage is not None else None,
+        "rank_correlation": _spearman(xs, ys),
+        "error": _residual_stats(points),
+        "interval_label": interval_label,
+        "interval_evidence": {
+            "declared_interval": interval_label,
+            "claimed_level": 0.95,
+            # A small sequential sample never proves 95% calibration, so it is not claimed.
+            "calibrated_95_supported": False,
+            "empirical_coverage": coverage,
+            "n": n,
+            "basis": ("share of measured J inside each recorded per-proposal interval "
+                      "(tracking statistic, not calibration proof)" if n else NOT_RECORDED),
+            "note": ("±2σ is the model's credible interval; it is not presented as a calibrated "
+                     "95% interval unless the recorded evidence supports that."),
+        },
+        "model_provenance": provenance,
+        "notes": ["Predicted values are model credible intervals, never measured J.",
+                  "This section tracks later proposals; it is not the training-cohort LOO."],
+    }
+
+
+def _loo_section(can_compute, diag, diag_meta, clean, loo, summary) -> dict:
+    """Efficient LOO on the original training cohort, explicitly not sequential tracking."""
+    provenance = (_model_provenance(
+        diag_meta, diag, retrospective=True,
+        source="diagnostics artifact: refit of the stored training set") if diag else
+        {"available": False, "status": NOT_RECORDED, "retrospective": None,
+         "note": "no model diagnostics artifact is recorded for this study"})
+    if not diag or not clean:
+        return {"label": "Efficient leave-one-out on the original training cohort",
+                "source": "diagnostics artifact (efficient_loo_cv, no refit per row)",
+                "out_of_sample": False, "available": False, "status": NOT_RECORDED,
+                "can_compute": bool(can_compute), "n": NOT_RECORDED, "rows": [],
+                "truncated": NOT_RECORDED, "summary": NOT_RECORDED, "method": NOT_RECORDED,
+                "rank_correlation": NOT_RECORDED, "error": NOT_RECORDED,
+                "interval_evidence": {"status": NOT_RECORDED,
+                                      "calibrated_95_supported": False,
+                                      "note": "not recorded; compute model diagnostics first"},
+                "model_provenance": provenance}
+    evidence = dict(_mapping(loo.get("interval_evidence")))
+    evidence.setdefault("calibrated_95_supported", False)
+    coverage95 = _finite(summary.get("coverage_95"))
+    return {
+        "label": _clip_text(loo.get("label"), 300) or
+        "Efficient leave-one-out on the original training cohort",
+        "source": "diagnostics artifact (efficient_loo_cv, no refit per row)",
+        "out_of_sample": False, "available": True, "status": "recorded",
+        "can_compute": True, "n": len(clean), "rows": clean,
+        "truncated": bool(loo.get("truncated")), "summary": dict(summary),
+        "method": _clip_text(loo.get("method"), 300),
+        "rank_correlation": _finite(summary.get("spearman")),
+        "coverage_95_percent": (round(coverage95 * 100.0, 2)
+                                if coverage95 is not None else None),
+        "error": _mapping(loo.get("error")) or {"rmse": _finite(summary.get("rmse")),
+                                                "mae": None, "mean_error": None},
+        "cohort": _clip_text(loo.get("cohort"), 300),
+        "interval_evidence": evidence,
+        "model_provenance": provenance,
+        "notes": ["Leave-one-out on the original training cohort; hyperparameters held fixed.",
+                  "Not sequential tracking of later proposal predictions."],
+    }
+
+
 def calibration_view(service, study) -> dict:
-    """Predicted-vs-measured half plus, when diagnosed, a "LOO on training data" half."""
-    view = _calibration_core(service, study)
-    diag, can_compute = _diagnostics(service, study["id"])
+    """Two named sections: sequential proposal tracking and training-cohort efficient LOO."""
+    sid = study["id"]
+    results, results_meta, _reason = _results(service, sid)
+    view = _calibration_core(service, study, results=results)
+    diag, can_compute, diag_meta, _diag_reason = _diagnostics_artifact(service, sid)
+    observations = _observations(results) if isinstance(results, Mapping) else []
+    counts = _physical_counts(observations)
     loo = _mapping(diag.get("loo")) if diag else {}
-    rows = loo.get("rows") if isinstance(loo.get("rows"), list) else []
-    if diag and rows:
-        clean = []
-        for row in rows[:400]:
-            row = _mapping(row)
-            obs, mean, sd = _finite(row.get("j_obs")), _finite(row.get("j_mean")), _finite(row.get("j_sd"))
-            if obs is None or mean is None:
-                continue
-            clean.append({"id": _clip_text(row.get("id"), 80), "j_obs": obs, "j_mean": mean, "j_sd": sd})
+    summary = _mapping(loo.get("summary"))
+    rows_value = loo.get("rows")
+    rows = rows_value if isinstance(rows_value, list) else []
+    clean = []
+    for row in rows[:400]:
+        row = _mapping(row)
+        obs, mean, sd = _finite(row.get("j_obs")), _finite(row.get("j_mean")), _finite(row.get("j_sd"))
+        if obs is None or mean is None:
+            continue
+        clean.append({"id": _clip_text(row.get("id"), 80), "j_obs": obs, "j_mean": mean, "j_sd": sd})
+    if diag and clean:
+        # Legacy shape kept for the existing renderer; the named section below is unambiguous.
         view["loo"] = {"available": True, "n": len(clean), "rows": clean,
-                       "truncated": bool(loo.get("truncated")),
-                       "summary": dict(_mapping(loo.get("summary"))),
+                       "truncated": bool(loo.get("truncated")), "summary": dict(summary),
                        "method": _clip_text(loo.get("method"), 300)}
         if view.get("status") == "missing":
             view["status"] = "partial"
             view.pop("reason", None)
     else:
         view["loo"] = {"available": False, "can_compute": bool(can_compute)}
+    view["sections"] = {
+        "sequential_validation": ("proposals joined to their subsequent screen measurements "
+                                  "(out-of-sample tracking)"),
+        "efficient_loo_cv": ("leave-one-out on the original training cohort (hyperparameters "
+                             "held fixed)"),
+    }
+    view["sequential_validation"] = _sequential_validation(service, study, view)
+    view["efficient_loo_cv"] = _loo_section(can_compute, diag, diag_meta, clean, loo, summary)
+    view["status_kinds"] = _status_kinds(
+        view.get("status", "missing"),
+        artifact_status=_artifact_status(results_meta),
+        physical=counts)
+    view["diagnostics"] = ({"available": True, "status": "recorded",
+                            "can_compute": True,
+                            "model_provenance": view["efficient_loo_cv"]["model_provenance"]}
+                           if diag else
+                           {"available": False, "status": NOT_RECORDED,
+                            "can_compute": bool(can_compute),
+                            "model_provenance": view["efficient_loo_cv"]["model_provenance"]})
+    view["notes"] = list(view.get("notes") or []) + [
+        "The two sections are not interchangeable: sequential tracking is out-of-sample; "
+        "efficient LOO is on the original training cohort."]
     return view
+
+
+def model_performance_view(service, study) -> dict:
+    """Alias whose name matches the frontend's Model-performance panel."""
+    return calibration_view(service, study)
+
+
+def _sensitivity_status(service, study, view, diag_meta) -> dict:
+    results, _meta, _reason = _results(service, study["id"])
+    counts = _physical_counts(_observations(results)) if isinstance(results, Mapping) else \
+        {"summary": NOT_RECORDED}
+    return _status_kinds(view.get("status", "missing"),
+                         artifact_status=_artifact_status(diag_meta),
+                         physical=counts)
 
 
 def sensitivity_view(service, study) -> dict:
     view = _sensitivity_core(service, study)
-    diag, can_compute = _diagnostics(service, study["id"])
-    per_key = _mapping(_mapping(diag.get("slices")).get("per_key")) if diag else {}
-    if not per_key:
-        view["diagnostics"] = {"available": False, "can_compute": bool(can_compute)}
+    diag, can_compute, diag_meta, diag_reason = _diagnostics_artifact(service, study["id"])
+    if not diag:
+        view["diagnostics"] = {"available": False, "can_compute": bool(can_compute),
+                               "status": NOT_RECORDED,
+                               "reason": diag_reason or "no model diagnostics are recorded"}
+        # Old studies never fabricated diagnostics; say so for every missing field.
+        for field in ("hyperparameters", "relevance", "posterior_slices", "loo", "pareto"):
+            view.setdefault(field, NOT_RECORDED)
+        view["knobs"] = view.get("knobs") or []
+        view["slices"] = view.get("slices") or []
+        view["status_kinds"] = _sensitivity_status(service, study, view, diag_meta)
         return view
+    slices_block = _mapping(diag.get("slices"))
+    per_key = _mapping(slices_block.get("per_key"))
     slices = []
     for key, item in list(per_key.items())[:24]:
-        item = _mapping(item)
-        xs, ms, sds = (item.get(k) for k in ("x", "j_mean", "j_sd"))
-        if not (isinstance(xs, list) and isinstance(ms, list) and isinstance(sds, list)
-                and len(xs) == len(ms) == len(sds) and 2 <= len(xs) <= 100):
-            continue
-        slices.append({"key": _clip_text(key, 80), "x": [_finite(v) for v in xs],
-                       "j_mean": [_finite(v) for v in ms], "j_sd": [_finite(v) for v in sds],
-                       "anchor_x": _finite(item.get("anchor_x")), "unit": item.get("unit") or item.get("x_unit")})
-    view["diagnostics"] = {"available": bool(slices), "can_compute": bool(can_compute),
-                           "anchor": _clip_text(_mapping(diag.get("slices")).get("anchor"), 80),
-                           "grid_n": _int(_mapping(diag.get("slices")).get("grid_n"))}
+        payload = _slice_payload({**dict(_mapping(item)), "key": key})
+        if payload is not None:
+            slices.append(payload)
+    relevance = [dict(_mapping(r)) for r in (diag.get("relevance") or [])
+                 if isinstance(r, Mapping) and r.get("key")]
+    by_key = {str(r["key"]): r for r in relevance}
+    if view.get("knobs"):
+        for knob in view["knobs"]:
+            item = by_key.get(str(knob.get("key")), {})
+            knob["rank"] = _int(item.get("rank"))
+            knob["at_bound"] = item.get("at_bound") if isinstance(item.get("at_bound"), bool) else None
+            knob["inv_lengthscale"] = _finite(item.get("inv_lengthscale"))
+            knob["meaning"] = MODEL_SENSITIVITY_NOTE
+    view["diagnostics"] = {
+        "available": bool(slices), "can_compute": True, "status": "recorded",
+        "anchor": _clip_text(slices_block.get("anchor"), 80),
+        "grid_n": _int(slices_block.get("grid_n")),
+        "model_provenance": _model_provenance(
+            diag_meta, diag, retrospective=True,
+            source="diagnostics artifact: refit of the stored training set"),
+    }
+    view["hyperparameters"] = (dict(_mapping(diag.get("hyperparameters")))
+                               if isinstance(diag.get("hyperparameters"), Mapping)
+                               else NOT_RECORDED)
+    view["relevance"] = relevance[:MAX_TABLE]
+    view["posterior_slices"] = {
+        "available": bool(slices),
+        "anchor": "incumbent",
+        "other_knobs": SLICE_ANCHOR_NOTE,
+        "labels": {"caveat": MODEL_SENSITIVITY_NOTE},
+        "items": slices,
+    }
     view["slices"] = slices
+    view["labels"] = {"knobs": MODEL_SENSITIVITY_NOTE, "slices": SLICE_ANCHOR_NOTE}
     if view.get("status") == "missing":
-        relevance = [r for r in (diag.get("relevance") or []) if isinstance(r, Mapping)]
-        total = sum(_finite(r.get("inv_lengthscale")) or 0.0 for r in relevance)
+        relevance_nonzero = [r for r in relevance
+                             if (_finite(r.get("inv_lengthscale")) or 0.0) > 0]
+        total = sum(_finite(r.get("inv_lengthscale")) or 0.0 for r in relevance_nonzero)
         if total > 0:
-            view["knobs"] = [{"key": _clip_text(r.get("key"), 80),
-                              "lengthscale": None,
-                              "importance": round((_finite(r.get("inv_lengthscale")) or 0.0) / total, 6)}
-                             for r in relevance[:MAX_TABLE]]
+            view["knobs"] = [{"key": _clip_text(r.get("key"), 80), "lengthscale": None,
+                              "importance": round((_finite(r.get("inv_lengthscale")) or 0.0) / total, 6),
+                              "rank": _int(r.get("rank")),
+                              "at_bound": r.get("at_bound") if isinstance(r.get("at_bound"), bool) else None,
+                              "inv_lengthscale": _finite(r.get("inv_lengthscale")),
+                              "meaning": MODEL_SENSITIVITY_NOTE}
+                             for r in relevance_nonzero[:MAX_TABLE]]
             view["status"] = "partial"
             view.pop("reason", None)
+    view["status_kinds"] = _sensitivity_status(service, study, view, diag_meta)
+    view["model_provenance"] = view["diagnostics"]["model_provenance"]
     return view
 
 
@@ -821,12 +1245,13 @@ def trust_region_view(service, study) -> dict:
         return _view("not_applicable", f"Current policy is {policy}; trust region applies to turbo only.",
                      policy=policy)
     sid = study["id"]
-    results, _meta, reason = _results(service, sid)
-    proposal, _meta, _reason = _proposal(service, sid)
+    results, results_meta, reason = _results(service, sid)
+    proposal, _proposal_meta, _reason = _proposal(service, sid)
     records = []
     if isinstance(proposal, Mapping) and isinstance(proposal.get("trust_region"), Mapping):
         records.append(proposal["trust_region"])
-    for row in _observations(results):
+    observations = _observations(results)
+    for row in observations:
         candidate = _mapping(row.get("candidate"))
         record = candidate.get("trust_region")
         if isinstance(record, Mapping):
@@ -837,16 +1262,39 @@ def trust_region_view(service, study) -> dict:
         if index is not None:
             unique[index] = record
     records = [unique[key] for key in sorted(unique)]
+    counts = _physical_counts(observations)
     if not records:
         return _view("missing", reason or "No trust-region state is recorded for this run.",
-                     policy=policy)
-    series = []
+                     policy=policy,
+                     status_kinds=_status_kinds("missing",
+                                                artifact_status=_artifact_status(results_meta),
+                                                physical=counts))
+    series, attempts, events = [], [], []
+    previous_length = None
     latest = None
-    for index, record in enumerate(records):
+    for record in records:
+        index = _int(record.get("proposal_index"))
         state = _mapping(record.get("state_after"))
         length = _finite(state.get("length"))
+        step = {
+            "proposal_index": index,
+            "length": length,
+            "iteration": _int(state.get("iteration")),
+            "success_counter": _int(state.get("success_counter")),
+            "failure_counter": _int(state.get("failure_counter")),
+            "status": state.get("status") or NOT_RECORDED,
+            "change": None,
+        }
         if length is not None:
-            series.append([index, length])
+            step["change"] = ("expansion" if previous_length is not None
+                              and length > previous_length * (1 + 1e-9) else
+                              "shrink" if previous_length is not None
+                              and length < previous_length * (1 - 1e-9) else None)
+            events.append({"proposal_index": index, "kind": step["change"],
+                           "from": previous_length, "to": length})
+            series.append([index if index is not None else len(series), length])
+            previous_length = length
+        attempts.append(step)
         latest = record
     state = _mapping(latest.get("state_after")) if latest is not None else {}
     budget = _budget(service, sid)
@@ -858,18 +1306,92 @@ def trust_region_view(service, study) -> dict:
     length = _finite(state.get("length"))
     collapsed = state.get("status") == "collapsed" or (length is not None and length < 0.5 ** 7)
     box = _mapping(latest.get("box")) if latest is not None else {}
+    keys = _active_keys(manifest)
+    lo_value, hi_value, weight_value = box.get("lo"), box.get("hi"), box.get("weights")
+    lo_values = lo_value if isinstance(lo_value, list) else []
+    hi_values = hi_value if isinstance(hi_value, list) else []
+    weights = weight_value if isinstance(weight_value, list) else []
+    if not keys:
+        keys = [f"x{i}" for i in range(max(len(lo_values), len(hi_values)))]
+    bounds = []
+    for index, key in enumerate(keys[:MAX_TABLE]):
+        lo = _finite(lo_values[index]) if index < len(lo_values) else None
+        hi = _finite(hi_values[index]) if index < len(hi_values) else None
+        bounds.append({
+            "key": key, "lo": lo, "hi": hi,
+            "width": round(hi - lo, 9) if lo is not None and hi is not None else None,
+            "weight": _finite(weights[index]) if index < len(weights) else None,
+            "space": "normalized active space", "global": {"lo": 0.0, "hi": 1.0},
+        })
+    center = state.get("center") if isinstance(state.get("center"), list) else None
+    training, _reason = _training_arrays(service, sid)
+    nearest = _nearest_training(training, manifest, center, k=1) if center else \
+        {"available": False, "status": NOT_RECORDED, "items": []}
+    nearest_item = (nearest.get("items") or [None])[0] if nearest.get("available") else None
+    center_identity = ({
+        "resolved": bool(nearest_item and (nearest_item.get("distance_l2") or 0.0) <= 1e-6),
+        "id": (nearest_item or {}).get("id"),
+        "design_hash": (nearest_item or {}).get("design_hash"),
+        "geometry_hash": (nearest_item or {}).get("geometry_hash"),
+        "distance_l2": (nearest_item or {}).get("distance_l2"),
+        "basis": "nearest training row to the normalized trust-region centre",
+    } if center else {"resolved": False, "status": NOT_RECORDED})
+    latest_box = {"lo": lo_values, "hi": hi_values}
+    inside = outside = unknown = 0
+    proposals = []
+    for row in observations:
+        candidate = _mapping(row.get("candidate"))
+        result = _mapping(row.get("result"))
+        record = _mapping(candidate.get("trust_region"))
+        vector = candidate.get("active_vector") or candidate.get("x")
+        if vector is None:
+            continue
+        proposal_box = _mapping(record.get("box"))
+        used_box = proposal_box if proposal_box.get("lo") and proposal_box.get("hi") else latest_box
+        flag = _inside_box(vector, used_box)
+        if flag is None:
+            unknown += 1
+        elif flag:
+            inside += 1
+        else:
+            outside += 1
+        proposals.append({
+            "proposal_index": _int(record.get("proposal_index")),
+            "design_hash": candidate.get("design_hash") or result.get("design_hash"),
+            "inside": flag,
+            "box_source": "proposal" if proposal_box.get("lo") else "latest",
+        })
     return _view("ready", None, policy=policy, length_series=series,
+                 length_over_attempts=attempts[:MAX_SERIES],
+                 expansion_steps=[e for e in events if e["kind"] == "expansion"][:MAX_SERIES],
+                 shrink_steps=[e for e in events if e["kind"] == "shrink"][:MAX_SERIES],
                  length_bounds=state.get("length_bounds"),
-                 active_keys=_active_keys(manifest),
+                 active_keys=keys,
                  success_counter=_int(state.get("success_counter")),
                  failure_counter=_int(state.get("failure_counter")),
                  iteration=_int(state.get("iteration")),
+                 center=center,
+                 center_identity=center_identity,
                  box={"lo": box.get("lo"), "hi": box.get("hi"), "weights": box.get("weights")}
                  if box else None,
+                 normalized_parameter_bounds=bounds,
+                 proposals=proposals[:MAX_POINTS],
+                 proposals_inside=inside, proposals_outside=outside, proposals_unknown=unknown,
                  terminal={"collapsed": bool(collapsed),
-                           "reason": state.get("terminal_reason")},
-                 budget={"used": screens, "total": total},
-                 notes=["A collapsed box means converged, not failed. Unspent budget is reported."])
+                           "status": state.get("status") or NOT_RECORDED,
+                           "reason": state.get("terminal_reason"),
+                           "label": "converged" if collapsed else "active",
+                           "note": ("A collapsed box means the local search converged; it is "
+                                    "not necessarily global convergence.")},
+                 budget={"used": screens, "total": total,
+                         "unspent": (max(0, total - screens)
+                                     if total is not None and screens is not None else None),
+                         "unspent_note": "unspent budget stays visible after a terminal state"},
+                 status_kinds=_status_kinds("ready",
+                                            artifact_status=_artifact_status(results_meta),
+                                            physical=counts),
+                 notes=["A collapsed box means converged, not failed. Unspent budget is reported.",
+                        "The centre is linked to its recorded design identity when resolvable."])
 
 
 def pareto_view(service, study, *, runs_root=None) -> dict:
@@ -878,7 +1400,7 @@ def pareto_view(service, study, *, runs_root=None) -> dict:
         return _view("not_applicable", f"Current policy is {policy}; the frontier applies to pareto only.",
                      policy=policy)
     sid = study["id"]
-    payload, _meta, reason = _pareto_metrics(service, sid)
+    payload, payload_meta, reason = _pareto_metrics(service, sid)
     if payload is None:
         return _view("missing", reason or "pareto_metrics artifact is not available")
     reference = _normalise_reference(payload.get("reference"))
@@ -940,11 +1462,27 @@ def pareto_view(service, study, *, runs_root=None) -> dict:
         if key not in deduped:
             deduped[key] = point
     points = list(deduped.values())[:MAX_POINTS]
+    excluded_points = []
+    excluded_value = payload.get("excluded")
+    if isinstance(excluded_value, Mapping):
+        for oid, item in list(excluded_value.items())[:MAX_POINTS]:
+            item = _mapping(item)
+            excluded_points.append({
+                "observation_id": str(oid),
+                "status": item.get("status") or NOT_RECORDED,
+                "reason": _clip_text(item.get("reason"), 300),
+                "coverage_deg": _finite(item.get("coverage_deg")),
+                "ripple_db": _finite(item.get("ripple_db")),
+            })
     if not points:
         return _view("partial", "No measured coverage/ripple rows are available yet.",
-                     reference=reference, notes=[payload.get("reference_policy")])
-    if reference is not None:
-        _nondominated(points)
+                     reference=reference, frontier_axes=_frontier_axes(),
+                     excluded_points=excluded_points,
+                     notes=[payload.get("reference_policy")])
+    _nondominated(points)
+    nondominated = [{"observation_id": p.get("observation_id"), "design_hash": p.get("design_hash"),
+                     "coverage_deg": p.get("coverage_deg"), "ripple_db": p.get("ripple_db"),
+                     "j": p.get("j")} for p in points if p.get("nondominated")]
     hv = _hypervolume(points, reference["limits"]) if reference else None
     predicted = []
     for row in _observations(results):
@@ -955,6 +1493,7 @@ def pareto_view(service, study, *, runs_root=None) -> dict:
             rip_pred = _mapping(pred.get("ripple_db"))
             predicted.append({
                 "design_hash": candidate.get("design_hash"),
+                "source": "predicted", "measured": False,
                 "coverage_deg": {k: _finite(cov_pred.get(k)) for k in ("mean", "lower", "upper")},
                 "ripple_db": {k: _finite(rip_pred.get(k)) for k in ("mean", "lower", "upper")},
             })
@@ -968,20 +1507,247 @@ def pareto_view(service, study, *, runs_root=None) -> dict:
         notes.extend(str(x) for x in payload["limitations"][:6])
     status = "ready" if reference is not None and points else "partial"
     paths = _run_paths(runs_root, service, sid) if runs_root is not None else {}
-    diag, can_compute = _diagnostics(service, sid)
+    diag, can_compute, diag_meta, _diag_reason = _diagnostics_artifact(service, sid)
     diag_pareto = _mapping(diag.get("pareto")) if diag else {}
     front_ids = [str(x) for x in diag_pareto.get("front_ids", [])[:MAX_POINTS]] \
         if isinstance(diag_pareto.get("front_ids"), list) else None
     hv_trace = [[_int(r.get("seq")), _finite(r.get("hv"))] for r in diag_pareto.get("hv_trace", [])[:MAX_SERIES]
                 if isinstance(r, Mapping)] if isinstance(diag_pareto.get("hv_trace"), list) else None
-    diagnostics = ({"available": True, "front_ids": front_ids, "hv_trace": hv_trace}
-                   if front_ids is not None or hv_trace is not None
-                   else {"available": False, "can_compute": bool(can_compute)})
-    return _view(status, None, reference=reference, points=points, hypervolume=hv, diagnostics=diagnostics,
+    diagnostics = ({"available": True, "front_ids": front_ids, "hv_trace": hv_trace,
+                    "model_provenance": _model_provenance(
+                        diag_meta, diag, retrospective=True,
+                        source="diagnostics artifact: refit of the stored training set")}
+                   if diag and (front_ids is not None or hv_trace is not None)
+                   else {"available": False, "can_compute": bool(can_compute),
+                         "status": NOT_RECORDED if not diag else "recorded"})
+    counts = _physical_counts(_observations(results))
+    return _view(status, None, reference=reference, frozen_reference=reference,
+                 reference_policy=payload.get("reference_policy"),
+                 frontier_axes=_frontier_axes(),
+                 points=points, hypervolume=hv, diagnostics=diagnostics,
+                 hypervolume_trace=hv_trace,
+                 nondominated=nondominated[:MAX_POINTS],
+                 excluded_points=excluded_points[:MAX_TABLE],
                  n_complete=_int(payload.get("n_complete")), n_excluded=_int(payload.get("n_excluded")),
                  predicted=predicted[:MAX_TABLE], metric_policy=payload.get("metric_policy"),
+                 status_kinds=_status_kinds(status,
+                                            artifact_status=_artifact_status(payload_meta),
+                                            physical=counts),
                  run_id=paths.get("run_id"),
-                 notes=notes)
+                 notes=notes + ["Predicted points are separated from measured points.",
+                                "J is displayed beside each point; the frontier axes are "
+                                "coverage error (deg) and ripple (dB)."])
+
+
+def _predicted_block(predicted) -> dict | str:
+    predicted = _mapping(predicted)
+    mean = _finite(predicted.get("j_mean"))
+    if mean is not None:
+        return {"kind": "scalar_j", "j_mean": mean,
+                "j_lower": _finite(predicted.get("j_lower")),
+                "j_upper": _finite(predicted.get("j_upper")),
+                "y_sd": _finite(predicted.get("y_sd")),
+                "interval_label": _clip_text(predicted.get("interval_label"), 300) or
+                "model credible interval",
+                "nonphysical": predicted.get("nonphysical") if
+                isinstance(predicted.get("nonphysical"), bool) else None,
+                "flags": list(predicted.get("flags") or [])[:20]}
+    objectives = []
+    for name, unit in (("coverage_deg", "deg"), ("ripple_db", "dB")):
+        item = _mapping(predicted.get(name))
+        if item:
+            objectives.append({"name": name, "unit": unit,
+                               "mean": _finite(item.get("mean")),
+                               "lower": _finite(item.get("lower")),
+                               "upper": _finite(item.get("upper")),
+                               "interval_label": _clip_text(item.get("interval"), 300) or
+                               "model credible interval"})
+    if objectives:
+        return {"kind": "physical_objectives", "objectives": objectives,
+                "note": "predicted physical objective intervals, never measured values"}
+    return NOT_RECORDED
+
+
+def proposal_explanation_view(service, study, *, runs_root=None) -> dict:
+    """Why the current candidate was proposed, from recorded artifacts only."""
+    sid = study["id"]
+    policy = _policy(study)
+    proposal, proposal_meta, reason = _proposal(service, sid)
+    if not isinstance(proposal, Mapping):
+        return _view("missing", reason or "proposal artifact is not available", policy=policy,
+                     status_kinds=_status_kinds("missing"))
+    results, _results_meta, _reason = _results(service, sid)
+    observations = _observations(results)
+    model, model_meta, _reason = _model(service, sid)
+    manifest, _meta, _reason = _manifest(service, sid)
+    training, _reason = _training_arrays(service, sid)
+    candidate = _mapping(proposal.get("candidate")) or _mapping(proposal.get("proposal"))
+    predicted = _predicted_block(proposal.get("predicted"))
+    acquisition = _mapping(proposal.get("acquisition"))
+    selection_reason = proposal.get("selection_reason") or acquisition.get("selection_reason")
+    fallback = proposal.get("fallback") is True
+    designation = _designation(selection_reason, fallback)
+    trusted = _mapping(candidate.get("trust_region")) or _mapping(proposal.get("trust_region"))
+    index = _int(proposal.get("proposal_index") or candidate.get("proposal_index")
+                 or trusted.get("proposal_index"))
+    index_source = "proposal artifact"
+    if index is None:
+        identity = candidate.get("candidate_id") or candidate.get("design_hash")
+        for position, row in enumerate(observations):
+            c = _mapping(row.get("candidate"))
+            r = _mapping(row.get("result"))
+            if identity and identity in (c.get("candidate_id"), c.get("design_hash"),
+                                         r.get("design_hash")):
+                index = position
+                index_source = "position of the matching results observation"
+                break
+    vector = candidate.get("active_vector") or candidate.get("x")
+    nearest = _nearest_training(training, manifest, vector, k=5)
+    incumbent = _incumbent_from_observations(observations)
+    delta = _param_delta(candidate.get("params"),
+                         incumbent.get("params") if incumbent else None)
+    vector_delta = {"available": False, "status": NOT_RECORDED, "items": []}
+    if incumbent and incumbent.get("x") is not None and isinstance(vector, (list, tuple)):
+        try:
+            a = np.asarray(incumbent["x"], dtype=float).reshape(-1)
+            b = np.asarray(vector, dtype=float).reshape(-1)
+            if a.shape == b.shape:
+                vector_delta = {"available": True, "status": "recorded",
+                                "distance_l2": round(float(np.sqrt(((b - a) ** 2).sum())), 6),
+                                "note": "normalized active-space distance to the incumbent"}
+        except (TypeError, ValueError):
+            pass
+    acq_value = _finite(acquisition.get("value"))
+    acquisition_payload = {
+        "value": acq_value,
+        "units": _clip_text(acquisition.get("units"), 300),
+        "rank": 1 if acq_value is not None else NOT_RECORDED,
+        "rank_basis": ("the selected candidate maximized the recorded acquisition score among "
+                       "the scored legal candidates" if acq_value is not None else NOT_RECORDED),
+        "n_candidates": _int(acquisition.get("n_candidates")),
+        "chunks": _int(acquisition.get("chunks")),
+        "acq_seed": _int(acquisition.get("acq_seed")),
+        "is_ranking_signal": True,
+        "meaning": ACQUISITION_NOTE,
+    }
+    checks = _mapping(candidate.get("checks"))
+    model_version = {
+        "artifact_sha256": (model_meta or {}).get("sha256") if isinstance(model_meta, Mapping) else None,
+        "artifact_revision": (model_meta or {}).get("revision") if isinstance(model_meta, Mapping) else None,
+        "status": _mapping(model).get("status") or NOT_RECORDED,
+        "policy": _mapping(model).get("policy") or proposal.get("proposal_policy") or policy,
+        "generated_utc": _clip_text(_mapping(model).get("generated_utc"), 64),
+        "library_versions": dict(_mapping(_mapping(model).get("library_versions"))),
+        "hyperparameters_recorded": isinstance(_mapping(model).get("hyperparameters"), Mapping),
+        "retrospective": False,
+    }
+    counts = _physical_counts(observations)
+    analysis = "ready" if proposal.get("status") in (None, "ok") else str(proposal.get("status"))
+    return _view(analysis, None,
+                 policy=proposal.get("proposal_policy") or policy,
+                 proposal_index=index if index is not None else NOT_RECORDED,
+                 proposal_index_source=index_source if index is not None else NOT_RECORDED,
+                 model_version=model_version,
+                 model_provenance=_model_provenance(
+                     model_meta, model, retrospective=False,
+                     source="model/proposal artifacts recorded when the candidate was proposed"),
+                 acquisition=acquisition_payload,
+                 predicted=predicted,
+                 predicted_objectives=(predicted.get("objectives")
+                                       if isinstance(predicted, Mapping) else NOT_RECORDED),
+                 selection_reason=_clip_text(selection_reason, 500) or NOT_RECORDED,
+                 fallback=fallback,
+                 designation=designation,
+                 designation_values=list(DESIGNATION_VALUES),
+                 nearest_training_designs=nearest,
+                 cheap_check_feasibility={
+                     "checks": dict(checks) if checks else NOT_RECORDED,
+                     "status": _clip_text(candidate.get("status"), 300) or NOT_RECORDED,
+                     "note": ("cheap checks only; mesh/acoustic eligibility is unknown until a "
+                              "solve is measured"),
+                 },
+                 parameter_delta_vs_incumbent=delta,
+                 active_vector_delta_vs_incumbent=vector_delta,
+                 incumbent=({"j": incumbent["j"], "design_hash": incumbent.get("design_hash")}
+                            if incumbent else NOT_RECORDED),
+                 candidate_identity={"candidate_id": candidate.get("candidate_id"),
+                                     "design_hash": candidate.get("design_hash"),
+                                     "geometry_hash": candidate.get("geometry_hash")},
+                 status_kinds=_status_kinds(analysis,
+                                            artifact_status=_artifact_status(proposal_meta),
+                                            physical=counts),
+                 notes=["Acquisition values are ranking signals, not measured horn quality.",
+                        "Predicted J is a model credible interval, never a measured result.",
+                        "Designation is constrained to exploration, exploitation or fallback."])
+
+
+def _scalar_target(value) -> dict | None:
+    """Bounded JSON copy of a recorded resolved target (scalars and scalar lists only)."""
+    if not isinstance(value, Mapping) or not value:
+        return None
+    out = {}
+    for key, item in list(value.items())[:MAX_TABLE]:
+        if not isinstance(key, str):
+            continue
+        if isinstance(item, bool):
+            out[key] = item
+        elif isinstance(item, (int, float)):
+            out[key] = _finite(item)
+        elif isinstance(item, str):
+            out[key] = _clip_text(item, 200)
+        elif isinstance(item, (list, tuple)) and len(item) <= MAX_SERIES:
+            if all(isinstance(v, (int, float)) and not isinstance(v, bool) for v in item):
+                out[key] = [_finite(v) for v in item]
+    return out or None
+
+
+def acoustic_target_integrity_view(service, study) -> dict:
+    """The resolved scoring target recorded with the snapshot, never a typology guess."""
+    sid = study["id"]
+    snapshot, snapshot_meta, reason = _snapshot(service, sid)
+    if snapshot is None:
+        return _view("missing", reason or "snapshot artifact is not available",
+                     scoring_target_available=False,
+                     reason_code="scoring_target_unavailable", target=NOT_RECORDED,
+                     objective_version=None,
+                     note="no recorded scoring target; it is not derived from the typology name")
+    task = _mapping(snapshot.get("task"))
+    target = _scalar_target(task.get("resolved_target"))
+    objective_version = _int(task.get("objective_version"))
+    identity = {
+        "objective_version": objective_version,
+        "brief_name": _clip_text(task.get("brief_name"), 200),
+        "brief_sha256": _clip_text(task.get("brief_sha256"), 80),
+        "config_name": _clip_text(task.get("config_name"), 200),
+        "config_sha256": _clip_text(task.get("config_sha256"), 80),
+    }
+    if target is None:
+        return _view("missing", "scoring target unavailable",
+                     scoring_target_available=False,
+                     reason_code="scoring_target_unavailable", target=NOT_RECORDED,
+                     target_identity=identity,
+                     source="snapshot.task.resolved_target",
+                     status_kinds=_status_kinds("missing",
+                                                artifact_status=_artifact_status(snapshot_meta),
+                                                physical=NOT_RECORDED),
+                     note=("the resolved target the scorer used was not recorded; it is not "
+                           "fabricated from the typology/family name"))
+    return _view("ready", None,
+                 scoring_target_available=True, target=target,
+                 target_identity=identity,
+                 source="snapshot.task.resolved_target (the target the scorer actually used)",
+                 separate_from_measurements=True,
+                 labels={
+                     "target": "scoring target used by the objective",
+                     "measured": "measured response curves (kept separate)",
+                     "tolerance": "tolerance region (kept separate when recorded)",
+                 },
+                 status_kinds=_status_kinds("ready",
+                                            artifact_status=_artifact_status(snapshot_meta),
+                                            physical=NOT_RECORDED),
+                 notes=["Targets are the scorer's resolved values, never a typology-based guess.",
+                        "Actual curves, target curves and tolerance regions stay separately "
+                        "legend-labelled."])
 
 
 def design_space_view(service, study) -> dict:
@@ -1036,8 +1802,8 @@ def design_space_view(service, study) -> dict:
 
 def data_summary_view(service, study, *, runs_root=None) -> dict:
     sid = study["id"]
-    snapshot, _meta, reason = _snapshot(service, sid)
-    manifest, _meta, _reason = _manifest(service, sid)
+    snapshot, snapshot_meta, reason = _snapshot(service, sid)
+    manifest, manifest_meta, _reason = _manifest(service, sid)
     budget = _budget(service, sid)
     paths = _run_paths(runs_root, service, sid) if runs_root is not None else {}
     if snapshot is None and manifest is None:
@@ -1063,21 +1829,31 @@ def data_summary_view(service, study, *, runs_root=None) -> dict:
                          "failed": scores.get("failed")},
                  budget=budget.get("budget"), budget_profile=budget.get("budget_profile"),
                  run_id=paths.get("run_id"),
+                 status_kinds=_status_kinds(
+                     "ready",
+                     artifact_status=(_artifact_status(snapshot_meta)
+                                      if _artifact_status(snapshot_meta) != NOT_RECORDED
+                                      else _artifact_status(manifest_meta)),
+                     physical=NOT_RECORDED),
                  notes=["Excluded rows are listed by id in the training manifest; no row is filled."])
 
 
 def verification_view(service, study) -> dict:
     sid = study["id"]
-    verification, _meta, reason = _verification(service, sid)
+    verification, verification_meta, reason = _verification(service, sid)
     if verification is None:
         return _view("missing", reason or "No verification artifact is recorded.")
     selection = _mapping(verification.get("selection"))
+    verified = list(verification.get("verified_geometry_ids") or ())
     return _view("ready", None,
                  finalists=list(selection.get("finalists") or ())[:MAX_TABLE],
                  audits=list(selection.get("audits") or ())[:MAX_TABLE],
-                 verified_geometry_ids=list(verification.get("verified_geometry_ids") or ())[:MAX_TABLE],
+                 verified_geometry_ids=verified[:MAX_TABLE],
                  shortfall=selection.get("shortfall"), audit_shortfall=selection.get("audit_shortfall"),
-                 artifact_status=verification.get("status"))
+                 artifact_status=verification.get("status"),
+                 status_kinds=_status_kinds(
+                     "ready", artifact_status=_artifact_status(verification_meta),
+                     physical=(f"verified:{len(verified)}" if verified else NOT_RECORDED)))
 
 
 # --------------------------------------------------------------------------- comparison specs
@@ -1242,9 +2018,11 @@ def bo_views(service, study, *, phase: str, runs_root=None, root=None) -> dict:
     runners = {
         "run": lambda: _run_links(service, study, runs_root),
         "data_summary": lambda: data_summary_view(service, study, runs_root=runs_root),
+        "target_integrity": lambda: acoustic_target_integrity_view(service, study),
         "design_space": lambda: design_space_view(service, study),
         "calibration": lambda: calibration_view(service, study),
         "sensitivity": lambda: sensitivity_view(service, study),
+        "proposal_explanation": lambda: proposal_explanation_view(service, study, runs_root=runs_root),
         "convergence": lambda: convergence_view(service, study, runs_root=runs_root, root=root),
         "trust_region": lambda: trust_region_view(service, study),
         "pareto": lambda: pareto_view(service, study, runs_root=runs_root),
@@ -1288,7 +2066,10 @@ def _run_links(service, study, runs_root) -> dict:
 
 
 __all__ = [
-    "PHASE_VIEWS", "bo_views", "calibration_view", "convergence_view", "data_summary_view",
-    "design_space_view", "find_comparison_spec", "load_comparison_specs", "method_board_view",
-    "pareto_view", "sensitivity_view", "trust_region_view", "verification_view",
+    "ACQUISITION_NOTE", "DESIGNATION_VALUES", "MODEL_SENSITIVITY_NOTE", "NOT_RECORDED",
+    "PHASE_VIEWS", "SLICE_ANCHOR_NOTE", "acoustic_target_integrity_view", "bo_views",
+    "calibration_view", "convergence_view", "data_summary_view", "design_space_view",
+    "find_comparison_spec", "load_comparison_specs", "method_board_view",
+    "model_performance_view", "pareto_view", "proposal_explanation_view", "sensitivity_view",
+    "trust_region_view", "verification_view",
 ]

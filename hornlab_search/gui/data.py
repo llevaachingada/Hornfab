@@ -626,6 +626,19 @@ def design_curves(run_dir: Path, h: str, tier: str = "screen") -> dict | None:
         d = run_dir / "verify" / "designs" / h
     else:
         d = run_dir / "designs" / h
+    return design_curves_at(d, run_dir, h)
+
+
+def design_curves_at(design_dir: Path, config_dir: Path, h: str) -> dict | None:
+    """The :func:`design_curves` payload for an already-resolved design directory.
+
+    ``design_dir`` is ``<run>/designs/<hash>`` or a study tier's ``<tier>/designs/<hash>``;
+    ``config_dir`` supplies the immutable job config (target/objective) for the additive scoring
+    view.  This is the same reader as :func:`design_curves`; it only takes the directory explicitly
+    so a study package's already-validated folder can be read without a timestamp run id.  It never
+    solves, meshes or mutates anything.
+    """
+    d = Path(design_dir)
     m = _read_json(d / "metrics.json")
     if m is None:
         return None
@@ -657,7 +670,7 @@ def design_curves(run_dir: Path, h: str, tier: str = "screen") -> dict | None:
     # P0 scoring truth (2026-11-16): the actual scored masks/constants/floors this run's immutable
     # config implies for THIS design. Purely additive; every existing key and J are unchanged, and
     # the keys are omitted when the raw target/objective or the scored band is unavailable.
-    score = _design_score_window(run_dir, m, out["params"])
+    score = _design_score_window(config_dir, m, out["params"])
     if score is not None:
         out["score_window"] = score
         lo = score.get("h_lo_hz")
@@ -1378,13 +1391,24 @@ def mesh_surface(runs: Path, run_id: str, h: str, tier: str = "screen",
         design_dir = d / "verify" / "designs" / h
     else:
         design_dir = d / "designs" / h
+    return mesh_surface_at(design_dir, d, h, max_tris=max_tris, error_label=run_id)
+
+
+def mesh_surface_at(design_dir: Path, run_dir: Path, h: str, *,
+                    max_tris: int = 60000, error_label: str | None = None) -> dict:
+    """The :func:`mesh_surface` payload for an already-resolved design directory.
+
+    ``run_dir`` supplies the recorded quadrant fallbacks (``search.ndjson`` / ``config.yaml``);
+    for a study tier it is that tier's folder.  Reads only the stored ``mesh.msh`` and metadata.
+    """
+    design_dir = Path(design_dir)
     nt = mesh_nodes_tris(design_dir / "mesh.msh")
     if nt is None:
-        raise FileNotFoundError(f"{run_id}/{h}/mesh.msh")
+        raise FileNotFoundError(f"{error_label}/{h}/mesh.msh" if error_label else f"{h}/mesh.msh")
     pts, tris = nt
     meta = _read_json(design_dir / "mesh_meta.json") or {}
-    q = (meta.get("result") or {}).get("quadrants") or _row_quadrants(d, h) \
-        or (_config(d).get("mesh") or {}).get("quadrants")
+    q = (meta.get("result") or {}).get("quadrants") or _row_quadrants(run_dir, h) \
+        or (_config(run_dir).get("mesh") or {}).get("quadrants")
     snap_axes = {"1": (0, 1), "14": (0,), "12": (1,)}.get(str(q), ())
     out_pts, out_tris, decimated = _cluster_decimate(pts, tris, max_tris, snap_axes)
     out = {"quadrants": str(q or "1234"), "n_tris": int(len(tris)),
@@ -1476,6 +1500,17 @@ def balloon(runs: Path, run_id: str, h: str, tier: str = "screen") -> dict:
         p = d / "designs" / h / "response.npz"
     if not p.is_file():
         raise FileNotFoundError(f"{run_id}/{h}/response.npz")
+    return balloon_at(p, d / "designs" / h, run_id=run_id, design=h)
+
+
+def balloon_at(response_path: Path, label_dir: Path, *, run_id: str | None,
+               design: str) -> dict:
+    """The :func:`balloon` payload for an already-resolved ``response.npz``.
+
+    ``label_dir`` is the design directory that owns the label (for a study tier that is
+    ``<tier>/designs/<hash>``).  Reads only the stored arrays; it never solves or interpolates.
+    """
+    p = Path(response_path)
     try:
         with np.load(p, allow_pickle=False) as z:
             freqs = np.asarray(z["freqs_hz"], float)
@@ -1502,7 +1537,7 @@ def balloon(runs: Path, run_id: str, h: str, tier: str = "screen") -> dict:
         above = np.where(np.isfinite(raw), raw, -np.inf).max(axis=1)
     above = np.where(np.isfinite(above), above, np.nan)
     return clean({
-        "run_id": run_id, "design": h, "label": _balloon_label(d / "designs" / h),
+        "run_id": run_id, "design": design, "label": _balloon_label(Path(label_dir)),
         "freqs_hz": _rnd(freqs, 1),
         "balloon_grid": [nT, nP],
         "layout": str(meta.get("balloon_layout") or ""),

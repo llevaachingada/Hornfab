@@ -1,5 +1,34 @@
 # ISSUES
 
+## 2026-11-16 - BoTorch GUI source-audit handoff: core implemented; P3 + browser acceptance open
+
+- DONE (per `docs/research/BO_GUI_SOURCE_AUDIT_HANDOFF_2026-11-16.md`; CONTINUITY same date): P0
+  read-only observation→physical-artifact bridge with GET-only API and zero-BEM guard; P1
+  Results/Horns/Explore workspace with durable URL selection and cost-framed verify action; P2
+  evidence-truth view models (calibration sections, `not recorded`, proposal explanation, target
+  integrity, TuRBO/Pareto payloads). Focused suites green (51 tests + node checks + lifecycle +
+  compileall); live GPU search untouched.
+- OPEN (P1 polish): `gui/static/study_results.js` lacks a DOM-stub lifecycle test — the
+  `tests/gui_study_lifecycle.mjs` harness imports sources as data URLs and cannot resolve relative
+  imports for module files; extend it with a stub-resolver (including the `three` import map) or a
+  sibling harness before treating study_results coverage as test-bound like `studies.js`.
+- OPEN (zero-solve parity): the legacy authoring Execute tab still renders a "Solve in 3D" button
+  that `tests/gui_study_lifecycle.mjs` pins by exact string; Results surface is clean. Decide
+  whether to rename/demote there too and update the pinned test in the same commit.
+- OPEN (P3, not started): cross-method comparison arm (objective/brief/source parity gates, no
+  shared J ranking), incumbent-geometry evolution viewer from stored snapshots only, payload-budget
+  audit (keep heavy mesh/curve data off the 128 KB phase panel), and the numerical GPU/CPU verify
+  metrics separation.
+- OPEN (acceptance, needs an eyes-on/browser pass): acceptance tests 3, 9-10 of the handoff
+  (cross-method visual equivalence on symmetry quadrants/rolled mouths; ordinary CMA
+  Runs/Elites/Evolution/Verify/Balloon/Sandbox regression in a real browser; desktop/mobile +
+  light/dark + screen-reader labels).
+- NOTE: a concurrent v9-registration break (`SUPPORTED_OBJECTIVE_VERSIONS` vs
+  `_OBJECTIVE_SCORERS` disagreement) briefly made `search.evaluate` import raise and forced a
+  temporary removal of one zero-BEM monkeypatch from `tests/test_gui_study_designs_resolver.py`;
+  the concurrent session completed the v9 wiring the same evening and the guard was restored
+  (19/19 resolver tests green).
+
 ## 2026-11-16 - Fable architecture evidence dossier delivered; decision items open
 
 - DONE (read-only): 15-file dossier tracked at `docs/research/fable_architecture_2026-11-16/`;

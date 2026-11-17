@@ -14,6 +14,7 @@ import { viewTypologySandbox } from "./sandbox.js";
 import { viewUmap } from "./umap.js";
 import { viewVerify } from "./verify.js";
 import { mountStudy, mountStudyList } from "./studies.js";
+import { mountStudyResults } from "./study_results.js";
 import { drawStudyCharts } from "./study_charts.js";
 import { mountCompareMethods } from "./compare_methods.js";
 
@@ -163,6 +164,29 @@ const studyApi = {
   getStudy: (id, {root, signal}) => studyRequest(`/api/studies/${encodeURIComponent(id)}${studyQuery(root)}`, {signal}),
   getPanel: (id, phase, {root, signal}) => studyRequest(`/api/studies/${encodeURIComponent(id)}/${encodeURIComponent(phase)}${studyQuery(root)}`, {signal}),
   getArtifact: (id, artifact, {root, signal}) => studyRequest(`/api/studies/${encodeURIComponent(id)}/artifacts/${encodeURIComponent(artifact)}${studyQuery(root)}`, {signal}),
+  // P1 observation bridge (Lane A contract).  Read-only GETs; a missing endpoint/file surfaces
+  // as a normal request error with `status`, which the Results workspace renders as absence.
+  getObservations: (id, {page = 1, pageSize = 50, sort = "best_j", root, signal} = {}) => {
+    const params = new URLSearchParams({page: String(page), page_size: String(pageSize), sort: String(sort)});
+    if (root) params.set("root", root);
+    return studyRequest(`/api/studies/${encodeURIComponent(id)}/observations?${params}`, {signal});
+  },
+  getObservation: (id, solveId, {root, signal} = {}) => studyRequest(`/api/studies/${encodeURIComponent(id)}/observations/${encodeURIComponent(solveId)}${studyQuery(root)}`, {signal}),
+  getObservationGeometry: (id, solveId, {tier = "screen", root, signal} = {}) => {
+    const params = new URLSearchParams({tier: String(tier)});
+    if (root) params.set("root", root);
+    return studyRequest(`/api/studies/${encodeURIComponent(id)}/observations/${encodeURIComponent(solveId)}/geometry?${params}`, {signal});
+  },
+  getObservationAcoustics: (id, solveId, {tier = "screen", root, signal} = {}) => {
+    const params = new URLSearchParams({tier: String(tier)});
+    if (root) params.set("root", root);
+    return studyRequest(`/api/studies/${encodeURIComponent(id)}/observations/${encodeURIComponent(solveId)}/acoustics?${params}`, {signal});
+  },
+  getObservationBalloon: (id, solveId, {tier = "screen", root, signal} = {}) => {
+    const params = new URLSearchParams({tier: String(tier)});
+    if (root) params.set("root", root);
+    return studyRequest(`/api/studies/${encodeURIComponent(id)}/observations/${encodeURIComponent(solveId)}/balloon?${params}`, {signal});
+  },
   action: (id, kind, payload, {root, signal}) => {
     const paths = {decision:"decision", revise:"revise", analyze:"jobs", propose:"jobs", diagnose:"jobs", solve_design:"jobs", package:"package", launch:"launch", cancel:"cancel", queue_study:"queue", create_child:"child"};
     if (!paths[kind]) throw new Error("This action is not available");
@@ -178,7 +202,7 @@ const comparisonApi = {
 
 // Study links carry an optional phase segment; a legacy or hand-typed link without one lands on
 // Overview, and an old `?phase=` keeps working. Ids are opaque [A-Za-z0-9_-] tokens.
-const STUDY_LINK_PHASES = new Set(["live", "overview", "data", "explain", "propose", "execute", "decide"]);
+const STUDY_LINK_PHASES = new Set(["live", "overview", "data", "explain", "propose", "execute", "decide", "results", "horns", "explore"]);
 function studyLinkHash(id, phase, query) {
   const params = new URLSearchParams(query || "");
   const wanted = phase || params.get("phase");
@@ -212,6 +236,7 @@ const ROUTES = [
   { re: /^#\/bayes\/study\/([^\/?#]+)(?:\?(.*))?$/, query: true,
     fn: m => { location.hash = studyLinkHash(m[1], null, m[2]); } },
   { re: /^#\/bayes\/studies$/,       fn: () => { disposeStudy = mountStudyList(ROOT, {api:studyApi, onCreated: s => { location.hash = `#/bayes/study/${encodeURIComponent(s.id)}/overview${s.root ? `?root=${encodeURIComponent(s.root)}` : ""}`; }}); } },
+  { re: /^#\/bayes\/study\/([^\/?#]+)\/(results|horns|explore)(?:\?(.*))?$/, query: true, fn: m => { const query = m[3] || ""; const root = new URLSearchParams(query).get("root"); disposeStudy = mountStudyResults(ROOT, {studyId:decodeURIComponent(m[1]), tab:m[2], query, api:studyApi, rootId:root, onError:error => console.error("study results", error)}); } },
   { re: /^#\/bayes\/study\/([^\/?#]+)\/(live|overview|data|explain|propose|execute|decide)(?:\?(.*))?$/, query: true, fn: m => { const root = new URLSearchParams(m[3] || "").get("root"); const phase = m[2]; disposeStudy = mountStudy(ROOT, {studyId:decodeURIComponent(m[1]), phase, api:studyApi, rootId:root, drawCharts:drawStudyCharts, pollMs: phase === "live" ? 10000 : 5000, onError:error => console.error("study panel", error)}); } },
   { re: /^#\/bayes\/board$/,         fn: () => { disposeStudy = mountCompareMethods(ROOT, {api:comparisonApi}); } },
   { re: /^#\/analysis$/,                fn: () => viewAnalysis() },

@@ -30,6 +30,43 @@ DEFAULT_PORT = 8765
 _LOG = logging.getLogger(__name__)
 
 
+def _q_int(q: dict, key: str, default: int) -> int:
+    raw = (q.get(key) or [None])[0]
+    if raw in (None, ""):
+        return default
+    try:
+        return int(raw)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{key} must be an integer") from exc
+
+
+def _q_str(q: dict, key: str, default: str) -> str:
+    raw = (q.get(key) or [None])[0]
+    return default if raw in (None, "") else str(raw)
+
+
+def _q_list(q: dict, key: str) -> list[str]:
+    out: list[str] = []
+    for item in q.get(key) or []:
+        for part in str(item).split(","):
+            part = part.strip()
+            if part:
+                out.append(part)
+    return out
+
+
+def _q_bool(q: dict, key: str, default: bool | None = None):
+    raw = (q.get(key) or [None])[0]
+    if raw in (None, ""):
+        return default
+    value = str(raw).strip().lower()
+    if value in ("1", "true", "yes", "on"):
+        return True
+    if value in ("0", "false", "no", "off"):
+        return False
+    raise ValueError(f"{key} must be a boolean")
+
+
 class App:
     def __init__(self, root: Path, runs: Path | None = None, analysis_dir: Path | None = None,
                  study_service=None, study_jobs=None, study_runs=None, study_launcher=None,
@@ -224,6 +261,33 @@ class App:
             root_id = (q.get("root") or [None])[0]
             item, service, study = index.resolve(parts[1], root_id)
             study = {**study, "root": item["id"], "root_label": item["label"]}
+            if len(parts) >= 3 and parts[2] == "observations":
+                # Read-only observation -> persisted physical-artifact bridge. GET only: these
+                # handlers never touch the CPU/solve/verify job bridges (see study_designs.py).
+                from . import study_designs as SD
+                if len(parts) == 3:
+                    return SD.observations(
+                        index, parts[1], root_id=root_id, runs_root=self.runs,
+                        page=_q_int(q, "page", 1),
+                        page_size=_q_int(q, "page_size", 25),
+                        sort=_q_str(q, "sort", "best_j"),
+                        q=_q_str(q, "q", "") or None,
+                        state=_q_list(q, "state") or None,
+                        verified=_q_bool(q, "verified"),
+                        new_incumbent=_q_bool(q, "new_incumbent"),
+                        pareto=_q_bool(q, "pareto"),
+                        nondominated=_q_bool(q, "nondominated"),
+                        include_predicted=bool(_q_bool(q, "include_predicted", False)))
+                if len(parts) == 4:
+                    return SD.observation_detail(index, parts[1], parts[3],
+                                                 root_id=root_id, runs_root=self.runs)
+                if len(parts) == 5 and parts[4] in ("geometry", "acoustics", "balloon"):
+                    tier = _q_str(q, "tier", "screen")
+                    handler = {"geometry": SD.geometry, "acoustics": SD.acoustics,
+                               "balloon": SD.balloon}[parts[4]]
+                    return handler(index, parts[1], parts[3], root_id=root_id,
+                                   runs_root=self.runs, tier=tier)
+                raise FileNotFoundError(path)
             if len(parts) == 2:
                 return study
             if len(parts) == 3 and parts[2] == "jobs":

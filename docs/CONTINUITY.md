@@ -1,5 +1,60 @@
 # CONTINUITY
 
+## 2026-11-16 (22:05) - BoTorch GUI source-audit handoff implemented (P0+P1+P2 core; CPU only, no GPU, no queue change)
+
+- Handoff moved into the repo: `docs/research/BO_GUI_SOURCE_AUDIT_HANDOFF_2026-11-16.md` (source
+  audit of public main `2c0e2928`); INDEX row added. Three parallel lanes implemented it against
+  the canonical checkout; a live GPU screen search ran untouched throughout (GUI-only, CPU test
+  lanes only; no solve, no queue file, no lock touched).
+- **P0 read-only bridge** (`gui/study_designs.py`, new) + `gui/data.py` directory readers
+  (`design_curves_at` / `mesh_surface_at` / `balloon_at`) + `gui/server.py` GET routes: a BoTorch
+  study observation now resolves through `StudyIndex` + the study's own package sha to
+  `runs/study-<package16>/{screen,verify}/designs/<hash>/` with tier allowlist, path containment,
+  identity checks and typed states (`measured|geometry_only|predicted_only|missing_artifact|
+  unsupported_geometry|stale`, each with reasons). Listing supports `sort=best_j|worst_j|attempt|
+  seq|screen_j|verified_j`, `q=`, `state=/verified=/new_incumbent=/pareto=/nondominated=/
+  include_predicted=` filters, converged identities arrays, and per-row dimensions/descriptors/
+  family/new_incumbent/pareto facts (never guessed). Geometry is the stored mesh or a clearly
+  labelled no-BEM preview (`source:"stored_mesh"` vs `preview` notice); unsupported families return
+  `unsupported_geometry`, never a fake radial horn. Zero-BEM guard: GET-route test monkeypatches
+  `get_backend`, `search.evaluate.evaluate`, `studies.production.execute_study/launch_study` and
+  both job bridges to raise; 19/19 resolver tests (incl. a 219-observation pagination-union
+  fixture) green.
+- **P1 Results workspace** (`gui/static/study_results.js` new; `studies.js`/`study_charts.js`/
+  `app.js`/`app.css` extended): `#/bayes/study/<id>/{results,horns,explore}` — Overview with best
+  VERIFIED and best SCREEN never merged; Horns = full observations table (pagination, search,
+  sorts, filters, design grouping with attempt evidence, screen-vs-verify side-by-side); Explore =
+  PCA/Pareto clickable by `solve_id`/`design_hash` (hollow markers for unresolvable points);
+  inspector reuses `view3d.js`/`balloon.js`/`charts.js`/`verify.js` panels; selection is the URL
+  identity `?root&solve&tier&design` (best-verified → best-screen → labelled predicted-only
+  defaults; never silent "Unknown"); "Solve in 3D" is demoted in the Results surface to a
+  confirmed, cost-framed "Verify at higher fidelity…" fallback. Raw artifact dumps moved to a
+  collapsed Advanced section with semantic cards and renamed status kinds.
+- **P2 evidence truth + model panels** (`bo/diagnostics.py` presentation fields,
+  `gui/data_bo.py` view models): `sequential_validation` and `efficient_loo_cv` rendered as two
+  named sections with explicit `interval_evidence` (±2σ never labelled calibrated 95% without
+  recorded coverage evidence); missing diagnostics read `"not recorded"`; `proposal_explanation`
+  (policy/index/acquisition-as-ranking-signal/designation), `target_integrity` ("scoring target
+  unavailable" verbatim, never a typology guess), real-unit posterior slices with
+  `feasibility_warning`, TuRBO centre identity/inside-outside/unspent budget, Pareto
+  `frontier_axes` (deg/dB only; J stays a per-point scalar), `excluded_points`,
+  `hypervolume_trace`, predicted points marked, and `retrospective` provenance for refit
+  predictions. Frontend renders all of these (Lane C handoff list consumed in full).
+- **Verification (pasted):** focused lane suite
+  `tests/test_gui_study_designs_resolver.py + test_bo_data_p2.py + test_gui_bo_views.py +
+  test_gui_study_index.py + test_gui_study_solves_view.py + test_gui_study_lifecycle.py` → exit 0
+  (51 tests); `node --check` on all four static JS modules exit 0; `node tests/gui_study_lifecycle.mjs
+  ...` → "study lifecycle ok"; `compileall -q hornlab_search\gui hornlab_search\bo` exit 0; broader
+  GUI set (studies_api/integration_phases/balloon/verify_data/scoring_view) exit 0. Read-only spot
+  check against real fixture `runs/bo_vs_cma_2026-11-15/bo_s31001` (Lane A): 60 measured
+  observations listed, verify-tier geometry/balloon resolved, no `runs/` write.
+- **Remaining (documented, not hidden):** `study_results.js` has no DOM-stub lifecycle test (the
+  `.mjs` harness cannot resolve relative imports for module files; it covers `studies.js` only);
+  the legacy authoring Execute tab still carries the lifecycle-test-pinned "Solve in 3D" button
+  (primary Results surface is clean); P3 (cross-method comparison arm, incumbent-evolution viewer,
+  payload-budget audit) not started; browser-level acceptance tests (visual equivalence,
+  desktop/mobile, screen-reader labels) still need an eyes-on pass. See ISSUES same date.
+
 ## 2026-11-16 (21:10 local) - Fable discovery evidence dossier delivered and tracked (read-only)
 
 - Delivered the v3 handoff's cheap-agent research pass as a 15-file evidence dossier, now tracked

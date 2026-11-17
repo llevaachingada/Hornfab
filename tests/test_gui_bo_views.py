@@ -6,6 +6,8 @@ import numpy as np
 import pytest
 
 from hornlab_search.gui.data_bo import (
+    DESIGNATION_VALUES,
+    NOT_RECORDED,
     bo_views,
     calibration_view,
     convergence_view,
@@ -13,6 +15,7 @@ from hornlab_search.gui.data_bo import (
     design_space_view,
     method_board_view,
     pareto_view,
+    proposal_explanation_view,
     sensitivity_view,
     trust_region_view,
     verification_view,
@@ -197,11 +200,16 @@ def test_views_are_derived_from_recorded_rows(tmp_path):
     assert calibration["status"] == "ready" and calibration["n"] == 3
     assert 0 <= calibration["coverage"] <= 1
     assert calibration["spearman"] is not None
+    assert calibration["sequential_validation"]["out_of_sample"] is True
+    assert calibration["sequential_validation"]["n"] == 3
+    assert calibration["efficient_loo_cv"]["status"] == NOT_RECORDED
 
     sensitivity = sensitivity_view(service, study)
     assert sensitivity["status"] == "ready"
     assert [k["key"] for k in sensitivity["knobs"]][0] == "L_mm"
     assert sum(k["importance"] for k in sensitivity["knobs"]) == pytest.approx(1.0)
+    assert sensitivity["diagnostics"]["status"] == NOT_RECORDED
+    assert sensitivity["posterior_slices"] == NOT_RECORDED
 
     data = data_summary_view(service, study, runs_root=runs)
     assert data["status"] == "ready" and data["objective_version"] == 7
@@ -324,9 +332,25 @@ def test_diagnostics_artifact_feeds_loo_and_slices(tmp_path):
     cal = calibration_view(service, study)
     assert cal["loo"]["available"] is True and cal["loo"]["n"] == 3
     assert cal["loo"]["summary"]["coverage_95"] == 1.0
+    assert cal["efficient_loo_cv"]["available"] is True
     sens = sensitivity_view(service, study)
     assert sens["diagnostics"]["available"] is True
     assert sens["slices"][0]["key"] == "k1" and len(sens["slices"][0]["x"]) == 3
+    assert sens["posterior_slices"]["items"][0]["j_lower"][0] == pytest.approx(0.8)
+    assert sens["posterior_slices"]["items"][0]["feasibility_warning"]["status"] == "unknown"
+
+
+def test_proposal_explanation_prefers_recorded_pick_evidence(tmp_path):
+    service, study, _runs = _fixture(tmp_path)
+    view = proposal_explanation_view(service, study)
+    assert view["status"] == "ready"
+    assert view["designation"] in DESIGNATION_VALUES
+    assert view["acquisition"]["is_ranking_signal"] is True
+    assert view["predicted"]["j_lower"] == 2.0 and view["predicted"]["j_upper"] == 4.0
+    assert view["nearest_training_designs"]["available"] is True
+    assert view["status_kinds"]["artifact_validation"] == "available"
+    propose = bo_views(service, study, phase="propose", runs_root=_runs)
+    assert "proposal_explanation" in propose
 
 
 def test_pareto_view_prefers_diagnostics_front_and_hv_trace(tmp_path):

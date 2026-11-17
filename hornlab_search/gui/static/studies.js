@@ -3,9 +3,12 @@
 export const STUDY_PHASES = ["overview", "data", "explain", "propose", "execute", "decide"];
 // "live" is a view over the execute panel (same backend data), shown as a tab only when a package exists.
 export const LIVE_PHASE = "live";
-const ROUTE_PHASES = [LIVE_PHASE, ...STUDY_PHASES];
+// P1 Results workspace: read-only review of the stored observations.  The three tabs share the
+// existing `#/bayes/study/<id>` route family; the old authoring phases stay untouched.
+export const RESULT_PHASES = ["results", "horns", "explore"];
+const ROUTE_PHASES = [LIVE_PHASE, ...STUDY_PHASES, ...RESULT_PHASES];
 const LIVE_POLL_MS = 10000;
-const PHASE_LABELS = {live: "Live", overview: "Overview", data: "Data", explain: "Explain", propose: "Propose", execute: "Run & Verify", decide: "Decide"};
+const PHASE_LABELS = {live: "Live", overview: "Overview", data: "Data", explain: "Explain", propose: "Propose", execute: "Run & Verify", decide: "Decide", results: "Results", horns: "Horns", explore: "Explore"};
 const STATES = {
   missing: "Evidence is missing. Prepare the required input before continuing.",
   stale: "This evidence belongs to an older revision. Refresh it before continuing.",
@@ -370,23 +373,64 @@ function renderConvergence(view) {
     `${mixed}${chartBlock("convergence", "Best recorded J by solve index for each optimiser arm")}${incumbent}${rows ? `<div class="tbl-scroll"><table><thead><tr><th>Arm</th><th>Method</th><th class="r">Screens</th><th class="r">Best J</th><th class="r">Best verify J</th><th class="r">Screens to target</th></tr></thead><tbody>${rows}</tbody></table></div><p class="bo-scroll-hint">Scroll horizontally for all columns →</p>` : ""}<p class="muted">The line is best-so-far; individual solves outside the visible J range are omitted so the useful band stays readable. Screen J is reported but does not decide. Verify J is the comparison endpoint.</p>`);
 }
 
-function renderCalibration(view) {
-  if (!view) return "";
-  const points = Array.isArray(view.points) ? view.points : [];
+function modelProvenanceHtml(prov) {
+  if (!prov || typeof prov !== "object") return "";
+  const bits = [];
+  if (prov.retrospective === true) bits.push("retrospective refit");
+  if (prov.retrospective === false) bits.push("recorded at proposal time");
+  if (prov.model_revision != null) bits.push(`model revision ${prov.model_revision}`);
+  if (prov.generated_utc) bits.push(String(prov.generated_utc));
+  if (prov.artifact_sha256) bits.push(`sha ${String(prov.artifact_sha256).slice(0, 12)}…`);
+  const note = prov.note ? ` — ${prov.note}` : "";
+  return `<p class="muted">Model provenance: ${esc(bits.join(" · ") || "not recorded")}${esc(note)}</p>`;
+}
+
+function intervalEvidenceHtml(evidence, fallbackLabel = "model credible interval") {
+  const ev = evidence && typeof evidence === "object" ? evidence : {};
+  const supported = ev.calibrated_95_supported === true;
+  const note = ev.note || (supported
+    ? "The recorded evidence supports a calibrated 95 % interval."
+    : `${fallbackLabel} is not presented as a calibrated 95 % interval unless the recorded evidence supports it.`);
+  return `<p class="muted">${esc(note)}</p>`;
+}
+
+function renderSequentialValidation(seq) {
+  const points = Array.isArray(seq.points) ? seq.points : [];
   const rows = points.slice(0, 50).map(point => `<tr><td class="mono">${esc(point.solve_id)}</td><td class="r mono">${fmtNum(point.predicted)}</td><td class="r mono">[${fmtNum(point.lower)}, ${fmtNum(point.upper)}]</td><td class="r mono">${fmtNum(point.measured)}</td><td>${point.inside ? '<span class="pill good">inside</span>' : '<span class="pill warn">outside</span>'}</td></tr>`).join("");
-  const stats = `<p><span class="pill">n ${fmtNum(view.n, 0)}</span>${view.coverage != null ? ` <span class="pill">coverage ${fmtNum(view.coverage * 100, 1)} %</span>` : ""}${view.spearman != null ? ` <span class="pill">rank ρ ${fmtNum(view.spearman, 3)}</span>` : ""}</p>`;
-  return boPanel("calibration", "Predicted vs measured J", view,
-    `${chartBlock("calibration", "Predicted model J against measured screen J with the y equals x guide")}${stats}<p class="muted">${esc(view.interval_label || "Model credible interval")}</p>${rows ? `<div class="tbl-scroll"><table><thead><tr><th>Solve</th><th class="r">Predicted</th><th class="r">Interval</th><th class="r">Measured</th><th>Coverage</th></tr></thead><tbody>${rows}</tbody></table></div><p class="bo-scroll-hint">Scroll horizontally for all columns →</p>` : ""}${renderLoo(view.loo)}`);
+  const ev = seq.interval_evidence || {};
+  const supported = ev.calibrated_95_supported === true;
+  const coverage = seq.coverage_percent != null ? seq.coverage_percent : (seq.coverage != null ? seq.coverage * 100 : null);
+  const chips = `<p><span class="pill">n ${fmtNum(seq.n, 0)}</span> <span class="pill">out of sample</span>${coverage != null ? ` <span class="pill">inside recorded interval ${fmtNum(coverage, 1)} %</span>` : ""}${seq.rank_correlation != null ? ` <span class="pill">rank ρ ${fmtNum(seq.rank_correlation, 3)}</span>` : ""}${supported ? ' <span class="pill good">calibrated 95 % supported</span>' : ""}</p>`;
+  return `<h4>Sequential validation</h4><p class="muted">${esc(seq.label || "Proposals vs subsequently measured J")}</p>${chartBlock("calibration", "Predicted model J against measured screen J with the y equals x guide")}${chips}<p class="muted">${esc(seq.interval_label || "Model credible interval")}</p>${intervalEvidenceHtml(ev, seq.interval_label || "Model credible interval")}${rows ? `<div class="tbl-scroll"><table><thead><tr><th>Solve</th><th class="r">Predicted</th><th class="r">Interval</th><th class="r">Measured</th><th>Inside</th></tr></thead><tbody>${rows}</tbody></table></div><p class="bo-scroll-hint">Scroll horizontally for all columns →</p>` : ""}${modelProvenanceHtml(seq.model_provenance)}`;
 }
 
 function renderLoo(loo) {
   if (!loo) return "";
   if (loo.available !== true) {
-    return loo.can_compute ? `<p class="muted">LOO on training data: not computed yet. Use “Compute model diagnostics” in the actions above.</p>` : "";
+    const ev = loo.interval_evidence || {};
+    return `<h4>Efficient LOO on the training cohort</h4><p class="muted">${loo.can_compute ? "Not computed yet. Use “Compute model diagnostics” in the actions above." : "Not recorded."}</p>${intervalEvidenceHtml(ev, "The LOO interval")}${modelProvenanceHtml(loo.model_provenance)}`;
   }
-  const sm = loo.summary || {};
-  const chips = `<p><span class="pill">n ${fmtNum(loo.n, 0)}${loo.truncated ? " (truncated)" : ""}</span>${sm.coverage_95 != null ? ` <span class="pill">±2σ coverage ${fmtNum(sm.coverage_95 * 100, 1)} %</span>` : ""}${sm.spearman != null ? ` <span class="pill">rank ρ ${fmtNum(sm.spearman, 3)}</span>` : ""}${sm.rmse != null ? ` <span class="pill">RMSE ${fmtNum(sm.rmse, 3)}</span>` : ""}</p>`;
-  return `<h4>LOO on training data</h4>${chartBlock("calibration_loo", "Leave-one-out predicted J against observed J with whiskers")}${chips}<p class="muted">${esc(loo.method || "Leave-one-out from the fitted model; no refit per row.")}</p>`;
+  const sm = loo.summary && typeof loo.summary === "object" ? loo.summary : {};
+  const ev = loo.interval_evidence || {};
+  const supported = ev.calibrated_95_supported === true;
+  const coverage = loo.coverage_95_percent != null ? loo.coverage_95_percent : (sm.coverage_95 != null ? sm.coverage_95 * 100 : null);
+  const chips = `<p><span class="pill">n ${fmtNum(loo.n, 0)}${loo.truncated ? " (truncated)" : ""}</span>${coverage != null ? ` <span class="pill">inside ±2σ ${fmtNum(coverage, 1)} %</span>` : ""}${loo.rank_correlation != null ? ` <span class="pill">rank ρ ${fmtNum(loo.rank_correlation, 3)}</span>` : (sm.spearman != null ? ` <span class="pill">rank ρ ${fmtNum(sm.spearman, 3)}</span>` : "")}${sm.rmse != null ? ` <span class="pill">RMSE ${fmtNum(sm.rmse, 3)}</span>` : ""}${supported ? ' <span class="pill good">calibrated 95 % supported</span>' : ""}</p>`;
+  return `<h4>Efficient LOO on the training cohort</h4><p class="muted">${esc(loo.label || "Leave-one-out on the original training cohort")}</p>${chartBlock("calibration_loo", "Leave-one-out predicted J against observed J with whiskers")}${chips}<p class="muted">${esc(loo.method || "Leave-one-out from the fitted model; no refit per row.")}</p>${intervalEvidenceHtml(ev, "The LOO interval")}${modelProvenanceHtml(loo.model_provenance)}`;
+}
+
+function renderCalibration(view) {
+  if (!view) return "";
+  const seq = view.sequential_validation && typeof view.sequential_validation === "object" ? view.sequential_validation : null;
+  const loo = view.efficient_loo_cv && typeof view.efficient_loo_cv === "object" ? view.efficient_loo_cv : null;
+  if (seq || loo) {
+    return boPanel("calibration", "Model performance", view,
+      `${seq ? renderSequentialValidation(seq) : ""}${renderLoo(loo || view.loo)}<p class="muted">These are two different checks and are not interchangeable: sequential validation tracks later proposals out of sample; efficient LOO is on the original training cohort with hyperparameters held fixed.</p>`);
+  }
+  const points = Array.isArray(view.points) ? view.points : [];
+  const rows = points.slice(0, 50).map(point => `<tr><td class="mono">${esc(point.solve_id)}</td><td class="r mono">${fmtNum(point.predicted)}</td><td class="r mono">[${fmtNum(point.lower)}, ${fmtNum(point.upper)}]</td><td class="r mono">${fmtNum(point.measured)}</td><td>${point.inside ? '<span class="pill good">inside</span>' : '<span class="pill warn">outside</span>'}</td></tr>`).join("");
+  const stats = `<p><span class="pill">n ${fmtNum(view.n, 0)}</span>${view.coverage != null ? ` <span class="pill">inside recorded interval ${fmtNum(view.coverage * 100, 1)} %</span>` : ""}${view.spearman != null ? ` <span class="pill">rank ρ ${fmtNum(view.spearman, 3)}</span>` : ""}</p>`;
+  return boPanel("calibration", "Predicted vs measured J", view,
+    `${chartBlock("calibration", "Predicted model J against measured screen J with the y equals x guide")}${stats}<p class="muted">${esc(view.interval_label || "Model credible interval")}</p>${rows ? `<div class="tbl-scroll"><table><thead><tr><th>Solve</th><th class="r">Predicted</th><th class="r">Interval</th><th class="r">Measured</th><th>Inside</th></tr></thead><tbody>${rows}</tbody></table></div><p class="bo-scroll-hint">Scroll horizontally for all columns →</p>` : ""}${renderLoo(view.loo)}`);
 }
 
 // Knob keys arrive as identifiers (throat_ext_angle_deg, az_a_cos_amp).  A slice caption reads
@@ -402,15 +446,33 @@ function knobName(key) {
   return unit ? `${body} (${unit})` : body;
 }
 
+function feasibilityWarningHtml(warning) {
+  if (!warning || typeof warning !== "object") return "";
+  const status = String(warning.status || "unknown");
+  const cls = status === "warned" ? "warn" : status === "clear" ? "good" : "";
+  const detail = warning.reason || (status === "unknown"
+    ? "cheap feasibility was not evaluated for this slice; a 1-D slice can pass through geometrically invalid combinations"
+    : "");
+  return `<p class="muted"><span class="pill ${cls}">feasibility: ${esc(status)}</span>${warning.invalid_count != null ? ` · ${fmtNum(warning.invalid_count, 0)} invalid` : ""}${detail ? ` — ${esc(detail)}` : ""}</p>`;
+}
+
 function renderSlices(view) {
-  const slices = Array.isArray(view.slices) ? view.slices : [];
+  const block = view.posterior_slices && typeof view.posterior_slices === "object" ? view.posterior_slices : null;
+  const slices = Array.isArray(block?.items) ? block.items : (Array.isArray(view.slices) ? view.slices : []);
   if (!slices.length) {
     return view.diagnostics?.can_compute ? `<p class="muted">1-D model slices: not computed yet. Use “Compute model diagnostics” in the actions above.</p>` : "";
   }
+  const labels = (block?.labels && typeof block.labels === "object" ? block.labels : {}) || (view.labels || {});
+  const caveat = labels.caveat || "how strongly the model thinks J changes with each knob; a model belief, not a measurement";
+  const anchor = labels.anchor || block?.other_knobs || "other knobs are held at the incumbent";
   // One name per small multiple: the figure caption.  The chart itself draws no second axis label.
   const cells = slices.map(item => {
     const name = knobName(item.key);
-    return `<figure class="study-chart"><svg data-study-slice="${esc(item.key)}" role="img" aria-label="${esc(`Model J along ${name}; the shaded band is ±2σ around the model mean and the tick marks the incumbent`)}"></svg><figcaption class="bo-slice-label">${esc(name)}</figcaption></figure>`;
+    const warning = item.feasibility_warning;
+    const itemLabels = item.labels && typeof item.labels === "object" ? item.labels : {};
+    const itemCaveat = itemLabels.caveat || caveat;
+    const itemAnchor = itemLabels.anchor || anchor;
+    return `<figure class="study-chart"><svg data-study-slice="${esc(item.key)}" role="img" aria-label="${esc(`Model J along ${name}; the shaded band is ±2σ around the model mean and the tick marks the incumbent`)}"></svg><figcaption class="bo-slice-label">${esc(name)}</figcaption>${feasibilityWarningHtml(warning)}<p class="muted">${esc(itemCaveat)}</p><p class="muted">${esc(itemAnchor)}</p></figure>`;
   }).join("");
   return `<h4>Model slices through the incumbent</h4><div class="bo-slices">${cells}</div><p class="muted">Line is the model mean, the shaded band is ±2σ, the vertical tick is the incumbent.</p>`;
 }
@@ -422,25 +484,45 @@ function renderSensitivity(view) {
     const pct = Math.max(0, Math.min(100, Math.round((Number(knob.importance) || 0) * 100)));
     return `<div class="bo-bar-row"><span class="bo-bar-label mono">${esc(knob.key)}</span><div class="bo-bar-track" aria-hidden="true"><i style="width:${pct}%"></i></div><span class="bo-bar-value mono">${pct} %</span><span class="muted mono">ℓ ${fmtNum(knob.lengthscale, 3)}</span></div>`;
   }).join("");
+  const caveat = view.labels?.knobs || view.posterior_slices?.labels?.caveat || "Relative knob sensitivity is 1/lengthscale, normalized; it describes the model, not a proven acoustic effect.";
   return boPanel("sensitivity", "How strongly J reacts to each knob", view,
-    `<div class="bo-bars">${rows}</div><p class="muted">Relative knob sensitivity is 1/lengthscale, normalized; it describes the model, not a proven acoustic effect. Engine: ${esc(view.engine?.engine || "—")} ${esc(view.engine?.torch || "")}</p>${renderSlices(view)}`);
+    `<div class="bo-bars">${rows}</div><p class="muted">${esc(caveat)} Engine: ${esc(view.engine?.engine || "—")} ${esc(view.engine?.torch || "")}</p>${renderSlices(view)}`);
 }
 
 function renderTrustRegion(view) {
   if (!view) return "";
-  const collapsed = view.terminal?.collapsed === true;
-  const latest = collapsed ? '<p><span class="pill good">converged (box collapsed)</span> This is a good stop, not an error.</p>' : "";
-  const counters = `<p><span class="pill">L ${fmtNum(view.length_series?.at(-1)?.[1], 4)}</span> <span class="pill">successes ${fmtNum(view.success_counter, 0)}</span> <span class="pill">failures ${fmtNum(view.failure_counter, 0)}</span>${view.budget?.used != null ? ` <span class="pill">screens ${fmtNum(view.budget.used, 0)}${view.budget.total != null ? ` / ${fmtNum(view.budget.total, 0)}` : ""}</span>` : ""}</p>`;
-  const box = view.box;
-  const keys = Array.isArray(view.active_keys) ? view.active_keys : [];
-  const bars = box && Array.isArray(box.lo) && Array.isArray(box.hi) ? box.lo.map((lo, index) => {
-    const hi = Number(box.hi[index]);
+  const terminal = view.terminal && typeof view.terminal === "object" ? view.terminal : {};
+  const terminalLabel = terminal.label || (terminal.collapsed === true ? "converged" : "active");
+  const latest = `<p><span class="pill ${terminal.collapsed ? "good" : ""}">${esc(terminalLabel)}</span> ${esc(terminal.note || (terminal.collapsed ? "A collapsed box means local convergence; it is not necessarily global convergence." : "The trust region is still active."))}</p>`;
+  const changes = Array.isArray(view.length_over_attempts) ? view.length_over_attempts.filter(step => step && step.change) : [];
+  const changeChips = changes.slice(-12).map(step => `<span class="pill ${step.change === "expansion" ? "good" : "warn"}">${esc(step.change)} @ ${esc(fmtNum(step.proposal_index, 0))}</span>`).join(" ");
+  const counters = `<p><span class="pill">L ${fmtNum(view.length_series?.at(-1)?.[1], 4)}</span> <span class="pill">successes ${fmtNum(view.success_counter, 0)}</span> <span class="pill">failures ${fmtNum(view.failure_counter, 0)}</span>${view.budget?.used != null ? ` <span class="pill">screens ${fmtNum(view.budget.used, 0)}${view.budget.total != null ? ` / ${fmtNum(view.budget.total, 0)}` : ""}</span>` : ""}${view.budget?.unspent != null ? ` <span class="pill">unspent ${fmtNum(view.budget.unspent, 0)}</span>` : ""}</p>`;
+  const proposalCounts = `<p><span class="pill">inside ${fmtNum(view.proposals_inside, 0)}</span> <span class="pill">outside ${fmtNum(view.proposals_outside, 0)}</span>${view.proposals_unknown ? ` <span class="pill warn">unknown ${fmtNum(view.proposals_unknown, 0)}</span>` : ""}</p>`;
+  const expansion = Array.isArray(view.expansion_steps) ? view.expansion_steps : [];
+  const shrink = Array.isArray(view.shrink_steps) ? view.shrink_steps : [];
+  const stepText = (expansion.length || shrink.length)
+    ? `<p class="muted"><span class="pill good">${fmtNum(expansion.length, 0)} expansions</span> <span class="pill warn">${fmtNum(shrink.length, 0)} shrinks</span>${changeChips ? ` ${changeChips}` : ""}</p>` : "";
+  const center = view.center_identity && typeof view.center_identity === "object" ? view.center_identity : null;
+  const centerHtml = center
+    ? `<p class="muted">Centre identity: ${center.resolved
+      ? `<span class="mono">${esc(center.design_hash || center.id || "—")}</span>${center.geometry_hash ? ` · geometry <span class="mono">${esc(center.geometry_hash)}</span>` : ""}${center.distance_l2 != null ? ` · distance ${fmtNum(center.distance_l2, 4)}` : ""}`
+      : esc(center.status || "not resolved against a training row")}</p>`
+    : "";
+  const bounds = Array.isArray(view.normalized_parameter_bounds) ? view.normalized_parameter_bounds : [];
+  const bars = bounds.length ? bounds.map(item => {
+    const lo = Number(item.lo), hi = Number(item.hi);
+    if (!Number.isFinite(lo) || !Number.isFinite(hi)) return "";
+    const left = Math.max(0, Math.min(1, lo)) * 100;
+    const width = Math.max(0, Math.min(1, hi) - Math.min(1, lo)) * 100;
+    return `<div class="bo-bar-row"><span class="bo-bar-label mono">${esc(item.key)}</span><div class="bo-box-track" aria-hidden="true"><i style="left:${left}%;width:${width}%"></i></div><span class="bo-bar-value mono">${fmtNum(lo, 2)}–${fmtNum(hi, 2)}</span><span class="muted mono">${esc(item.space || "normalized")}</span></div>`;
+  }).join("") : (view.box && Array.isArray(view.box.lo) && Array.isArray(view.box.hi) ? view.box.lo.map((lo, index) => {
+    const hi = Number(view.box.hi[index]);
     const left = Math.max(0, Math.min(1, Number(lo))) * 100;
     const width = Math.max(0, Math.min(1, hi) - Math.min(1, Number(lo))) * 100;
-    return `<div class="bo-bar-row"><span class="bo-bar-label mono">${esc(keys[index] || `knob_${index + 1}`)}</span><div class="bo-box-track" aria-hidden="true"><i style="left:${left}%;width:${width}%"></i></div><span class="bo-bar-value mono">${fmtNum(lo, 2)}–${fmtNum(hi, 2)}</span></div>`;
-  }).join("") : "";
+    return `<div class="bo-bar-row"><span class="bo-bar-label mono">${esc(Array.isArray(view.active_keys) ? view.active_keys[index] : `knob_${index + 1}`)}</span><div class="bo-box-track" aria-hidden="true"><i style="left:${left}%;width:${width}%"></i></div><span class="bo-bar-value mono">${fmtNum(lo, 2)}–${fmtNum(hi, 2)}</span></div>`;
+  }).join("") : "");
   return boPanel("trust_region", "Trust region (TuRBO)", view,
-    `${chartBlock("trust_region", "Trust-region length over proposals, with the collapse floor and maximum")}${latest}${counters}${bars ? `<div class="bo-bars">${bars}</div>` : ""}<p class="muted">A collapsed box means the local search has converged. Unspent budget stays visible.</p>`);
+    `${chartBlock("trust_region", "Trust-region length over proposals, with the collapse floor and maximum")}${latest}${counters}${proposalCounts}${stepText}${centerHtml}${bars ? `<div class="bo-bars">${bars}</div>` : ""}<p class="muted">A collapsed box means the local search has converged; it is not necessarily global convergence. Unspent budget stays visible.</p>`);
 }
 
 // The diagnostics artifact's pareto block lists its front by training-row id.  A Pareto row
@@ -468,7 +550,7 @@ function diagnosticsHvTrace(diag) {
 
 /** Model-diagnostics half of the Pareto card: front size, then the hypervolume trace. */
 function renderParetoDiagnostics(diag, front, trace) {
-  if (!diag || diag.available !== true) return "";
+  if ((!diag || diag.available !== true) && !trace.length) return "";
   const nFront = front ? front.size : null;
   const rowsSeen = trace.length ? trace[trace.length - 1][0] : null;
   const summary = nFront == null ? "" :
@@ -483,24 +565,36 @@ function renderPareto(view, study, phase, rootId) {
   if (!view) return "";
   const reference = view.reference || {};
   const limits = reference.limits || [];
-  const points = (Array.isArray(view.points) ? view.points : []).filter(point => point.nondominated);
-  // Absent or unavailable diagnostics must leave every string below exactly as it was.
+  const axes = view.frontier_axes && typeof view.frontier_axes === "object" ? view.frontier_axes : {};
+  const xUnit = axes.units?.[0] || "deg";
+  const yUnit = axes.units?.[1] || "dB";
+  const points = Array.isArray(view.nondominated) && view.nondominated.length
+    ? view.nondominated
+    : (Array.isArray(view.points) ? view.points : []).filter(point => point.nondominated);
+  const excluded = Array.isArray(view.excluded_points) ? view.excluded_points : [];
+  const predicted = Array.isArray(view.predicted) ? view.predicted : [];
   const diag = view.diagnostics && typeof view.diagnostics === "object" ? view.diagnostics : null;
   const diagnosticsOn = diag?.available === true;
   const front = diagnosticsOn ? paretoFrontIds(diag) : null;
   const trace = diagnosticsOn ? diagnosticsHvTrace(diag) : [];
+  const hvTrace = trace.length ? trace : (Array.isArray(view.hypervolume_trace) ? diagnosticsHvTrace({hv_trace: view.hypervolume_trace}) : []);
   const rows = points.slice(0, 50).map(point => {
     const link = studyDesignLink(view.run_id || view.run?.run_id || "", point.design_hash, study.id, phase, rootId || study.root);
     const design = point.design_hash ? (link ? `<a class="mono" href="${esc(link)}">${esc(point.design_hash)}</a>` : `<span class="mono">${esc(point.design_hash)}</span>`) : "—";
-    // The marker sits beside the row's own identity, so it stays visible when the table scrolls
-    // sideways on a phone and never needs a column of its own.
     const onFront = onDiagnosticsFront(point, front) ? ' <span class="pill">model front</span>' : "";
     return `<tr><td>${design}${onFront}</td><td class="r mono">${fmtNum(point.coverage_deg, 3)}</td><td class="r mono">${fmtNum(point.ripple_db, 3)}</td><td class="r mono">${fmtNum(point.j)}</td><td>${point.finalist ? '<span class="pill good">finalist</span>' : ""}</td></tr>`;
   }).join("");
-  const metrics = `<p>${view.hypervolume != null ? `<span class="pill">hypervolume ${fmtNum(view.hypervolume, 4)}</span>` : ""} ${limits.length === 2 ? `<span class="pill">reference ${fmtNum(limits[0])} deg × ${fmtNum(limits[1])} dB</span>` : ""} ${view.n_complete != null ? `<span class="pill">complete ${fmtNum(view.n_complete, 0)}</span>` : ""}${view.n_excluded ? ` <span class="pill warn">excluded ${fmtNum(view.n_excluded, 0)}</span>` : ""}</p>`;
-  const diagnostics = diagnosticsOn ? renderParetoDiagnostics(diag, front, trace) : "";
+  const excludedRows = excluded.slice(0, 25).map(point => `<tr><td class="mono">${esc(point.observation_id || "—")}</td><td>${esc(point.status || "not recorded")}</td><td class="r mono">${fmtNum(point.coverage_deg, 3)}</td><td class="r mono">${fmtNum(point.ripple_db, 3)}</td><td class="muted">${esc(point.reason || "—")}</td></tr>`).join("");
+  const predictedRows = predicted.slice(0, 25).map(point => {
+    const cov = point.coverage_deg && typeof point.coverage_deg === "object" ? point.coverage_deg : {};
+    const rip = point.ripple_db && typeof point.ripple_db === "object" ? point.ripple_db : {};
+    return `<tr><td class="mono">${esc(point.design_hash || "—")}</td><td class="r mono">${fmtNum(cov.mean, 3)}</td><td class="r mono">${fmtNum(rip.mean, 3)}</td><td><span class="pill warn">model prediction, not measured</span></td></tr>`;
+  }).join("");
+  const metrics = `<p>${view.hypervolume != null ? `<span class="pill">hypervolume ${fmtNum(view.hypervolume, 4)}</span>` : ""} ${limits.length === 2 ? `<span class="pill">reference ${fmtNum(limits[0])} ${esc(xUnit)} × ${fmtNum(limits[1])} ${esc(yUnit)}</span>` : ""} ${view.n_complete != null ? `<span class="pill">complete ${fmtNum(view.n_complete, 0)}</span>` : ""}${view.n_excluded ? ` <span class="pill warn">excluded ${fmtNum(view.n_excluded, 0)}</span>` : ""}</p>`;
+  const axesNote = `<p class="muted">Frontier axes: ${esc(axes.note || `coverage (${xUnit}) × ripple (${yUnit}); J is a per-point scalar, never an axis.`)}</p>`;
+  const diagnostics = (diagnosticsOn || hvTrace.length) ? renderParetoDiagnostics(diag, front, hvTrace) : "";
   return boPanel("pareto", "Coverage × ripple frontier", view,
-    `${chartBlock("pareto", "Measured coverage error against ripple error; nondominated and finalist points highlighted")}${metrics}${diagnostics}${rows ? `<div class="tbl-scroll"><table><thead><tr><th>Design</th><th class="r">Coverage error (deg)</th><th class="r">Ripple error (dB)</th><th class="r">J</th><th>Verify</th></tr></thead><tbody>${rows}</tbody></table></div><p class="bo-scroll-hint">Scroll horizontally for all columns →</p>` : ""}<p class="muted">Coverage is plain physical coverage error (owner decision 2026-11-15); J is shown beside it. Training uses frontier/crowding; rows beyond the frozen reference still train but add no hypervolume.</p>`);
+    `${chartBlock("pareto", `Measured coverage error (${xUnit}) against ripple (${yUnit}); nondominated, excluded and predicted points are separate marks`)}${metrics}${axesNote}${diagnostics}${rows ? `<div class="tbl-scroll"><table><thead><tr><th>Design</th><th class="r">Coverage (${esc(xUnit)})</th><th class="r">Ripple (${esc(yUnit)})</th><th class="r">J</th><th>Verify</th></tr></thead><tbody>${rows}</tbody></table></div><p class="bo-scroll-hint">Scroll horizontally for all columns →</p>` : ""}${excludedRows ? `<details class="an-details"><summary>Excluded points (${fmtNum(excluded.length, 0)})</summary><div class="tbl-scroll"><table><thead><tr><th>Observation</th><th>Status</th><th class="r">Coverage</th><th class="r">Ripple</th><th>Reason</th></tr></thead><tbody>${excludedRows}</tbody></table></div></details>` : ""}${predictedRows ? `<details class="an-details"><summary>Predicted points (${fmtNum(predicted.length, 0)}) — not measured</summary><div class="tbl-scroll"><table><thead><tr><th>Design</th><th class="r">Coverage mean</th><th class="r">Ripple mean</th><th>Evidence</th></tr></thead><tbody>${predictedRows}</tbody></table></div></details>` : ""}<p class="muted">Coverage is plain physical coverage error (owner decision 2026-11-15); J is shown beside it. Training uses frontier/crowding; rows beyond the frozen reference still train but add no hypervolume. Predicted points are never plotted as measured.</p>`);
 }
 
 function renderDesignSpace(view) {
@@ -518,6 +612,81 @@ function renderDataSummary(view) {
   const keys = Array.isArray(training.active_keys) ? training.active_keys : [];
   return boPanel("data_summary", "Training data", view,
     `<p><span class="pill">n ${fmtNum(training.n, 0)}</span> <span class="pill">minimum ${fmtNum(training.n_min, 0)}</span>${training.n_eligible != null ? ` <span class="pill">eligible ${fmtNum(training.n_eligible, 0)}</span>` : ""}${view.objective_version != null ? ` <span class="pill">objective v${esc(view.objective_version)}</span>` : ""}${training.excluded_ids ? ` <span class="pill warn">excluded ${fmtNum(training.excluded_ids, 0)}</span>` : ""}</p>${keys.length ? `<p class="muted">Knobs: ${keys.map(key => `<span class="mono">${esc(key)}</span>`).join(", ")}</p>` : ""}${training.subset_policy ? `<p class="muted">Subset: ${esc(training.subset_policy)}</p>` : ""}${sourceBits ? `<ul class="bo-notes">${sourceBits}</ul>` : ""}`);
+}
+
+function renderTargetIntegrity(view) {
+  if (!view) return "";
+  const available = view.scoring_target_available === true;
+  const identity = view.target_identity && typeof view.target_identity === "object" ? view.target_identity : {};
+  const target = view.target && typeof view.target === "object" ? view.target : null;
+  const labels = view.labels && typeof view.labels === "object" ? view.labels : {};
+  const identityBits = [
+    identity.objective_version != null ? `objective v${esc(identity.objective_version)}` : null,
+    identity.brief_name ? `brief ${esc(identity.brief_name)}` : null,
+    identity.config_name ? `config ${esc(identity.config_name)}` : null,
+  ].filter(Boolean);
+  const targetRows = target
+    ? Object.entries(target).filter(([, value]) => value != null)
+      .slice(0, 40)
+      .map(([key, value]) => `<dt>${esc(label(key))}</dt><dd class="mono">${esc(typeof value === "object" ? JSON.stringify(value).slice(0, 200) : value)}</dd>`).join("")
+    : "";
+  const legend = [
+    labels.target ? `<span class="pill">target: ${esc(labels.target)}</span>` : "",
+    labels.measured ? `<span class="pill">measured: ${esc(labels.measured)}</span>` : "",
+    labels.tolerance ? `<span class="pill">tolerance: ${esc(labels.tolerance)}</span>` : "",
+  ].filter(Boolean).join(" ");
+  return boPanel("target_integrity", "Scoring target integrity", view,
+    `${available ? "" : '<p class="alert warn"><strong>scoring target unavailable</strong></p>'}<p class="muted">${esc(view.source || (available ? "recorded scorer target" : "no recorded scoring target; it is not derived from the typology name"))}</p>${identityBits.length ? `<p class="muted">${identityBits.join(" · ")}</p>` : ""}${available && targetRows ? `<dl class="bo-artifact-dl">${targetRows}</dl>` : ""}${available ? `<p class="muted">${esc(view.separate_from_measurements ? "Target curves are kept separate from measured curves." : "Target and measured values are separate; they are never merged.")}</p>` : ""}${legend ? `<p class="bo-tag-row">${legend}</p>` : ""}${view.note ? `<p class="muted">${esc(view.note)}</p>` : ""}`);
+}
+
+function statusKindsHtml(statusKinds) {
+  if (!statusKinds || typeof statusKinds !== "object") return "";
+  const physical = statusKinds.physical && typeof statusKinds.physical === "object"
+    ? (statusKinds.physical.summary || JSON.stringify(statusKinds.physical).slice(0, 160))
+    : statusKinds.physical;
+  const labels = statusKinds.labels && typeof statusKinds.labels === "object" ? statusKinds.labels : {};
+  const bits = [
+    statusKinds.analysis != null ? `<span class="pill">analysis: ${esc(label(String(statusKinds.analysis)))}</span>` : "",
+    statusKinds.artifact_validation != null ? `<span class="pill">artifact validation: ${esc(label(String(statusKinds.artifact_validation)))}</span>` : "",
+    physical != null ? `<span class="pill">physical: ${esc(String(physical))}</span>` : "",
+  ].filter(Boolean);
+  if (!bits.length) return "";
+  return `<p class="bo-tag-row" title="${esc(Object.values(labels).join(" · "))}">${bits.join(" ")}</p>`;
+}
+
+function renderProposalExplanation(view) {
+  if (!view) return "";
+  const acq = view.acquisition && typeof view.acquisition === "object" ? view.acquisition : {};
+  const predicted = view.predicted && typeof view.predicted === "object" ? view.predicted : null;
+  const nearest = view.nearest_training_designs && typeof view.nearest_training_designs === "object" ? view.nearest_training_designs : {};
+  const nearestRows = Array.isArray(nearest.items) ? nearest.items.slice(0, 6).map(item => `<tr><td class="mono">${esc(item.id || item.design_hash || "—")}</td><td class="r mono">${fmtNum(item.distance_l2, 5)}</td><td class="r mono">${fmtNum(item.j)}</td><td class="mono">${esc(item.design_hash || "—")}</td></tr>`).join("") : "";
+  const delta = view.parameter_delta_vs_incumbent && typeof view.parameter_delta_vs_incumbent === "object" ? view.parameter_delta_vs_incumbent : {};
+  const deltaRows = Array.isArray(delta.items) ? delta.items.slice(0, 20).map(item => `<tr><td class="mono">${esc(item.key)}</td><td class="r mono">${fmtNum(item.incumbent, 4)}</td><td class="r mono">${fmtNum(item.candidate, 4)}</td><td class="r mono">${fmtNum(item.delta, 4)}</td></tr>`).join("") : "";
+  const checks = view.cheap_check_feasibility && typeof view.cheap_check_feasibility === "object" ? view.cheap_check_feasibility : {};
+  const checkBits = checks.checks && typeof checks.checks === "object"
+    ? Object.entries(checks.checks).map(([key, value]) => `<span class="pill ${value === true ? "good" : value === false ? "warn" : ""}">${esc(label(key))}: ${esc(value === true ? "ok" : value === false ? "failed" : String(value))}</span>`).join(" ") : esc(checks.status || "not recorded");
+  const model = view.model_version && typeof view.model_version === "object" ? view.model_version : {};
+  const modelBits = [
+    model.status ? `status ${model.status}` : null,
+    model.policy ? `policy ${model.policy}` : null,
+    model.generated_utc ? String(model.generated_utc) : null,
+    model.artifact_sha256 ? `sha ${String(model.artifact_sha256).slice(0, 12)}…` : null,
+    model.hyperparameters_recorded === true ? "hyperparameters recorded" : null,
+  ].filter(Boolean);
+  const predictedHtml = predicted
+    ? `<p><span class="pill">model credible interval</span> ${fmtNum(predicted.j_mean)}${predicted.j_lower != null && predicted.j_upper != null ? ` [${fmtNum(predicted.j_lower)}, ${fmtNum(predicted.j_upper)}]` : ""}${predicted.interval_label ? ` · ${esc(predicted.interval_label)}` : ""}</p><p class="muted">Predicted J is model output, never a measured result.</p>`
+    : `<p class="muted">Predicted J: ${esc(typeof view.predicted === "string" ? view.predicted : "not recorded")}</p>`;
+  return boPanel("proposal_explanation", "Why this candidate was proposed", view,
+    `${statusKindsHtml(view.status_kinds)}<p><span class="pill">policy ${esc(view.policy || "—")}</span> <span class="pill">proposal ${esc(view.proposal_index ?? "—")}</span><span class="pill ${view.designation === "fallback" ? "warn" : ""}">${esc(view.designation || "not recorded")}</span>${view.fallback === true ? ' <span class="pill warn">fallback</span>' : ""}</p>
+    <p class="muted">${esc(view.selection_reason || "Selection reason not recorded")}</p>
+    ${predictedHtml}
+    ${acq.value != null || acq.rank != null ? `<p><span class="pill">acquisition ${acq.value != null ? fmtNum(acq.value) : "—"}${acq.units ? ` ${esc(acq.units)}` : ""}</span>${acq.rank != null ? ` <span class="pill">rank ${fmtNum(acq.rank, 0)}</span>` : ""}${acq.is_ranking_signal ? ' <span class="pill warn">ranking signal only</span>' : ""}</p><p class="muted">${esc(acq.meaning || "Acquisition values are ranking signals, not probabilities or measured horn quality.")}</p>` : ""}
+    ${modelBits.length ? `<p class="muted">Model: ${modelBits.map(esc).join(" · ")}</p>` : ""}
+    ${modelProvenanceHtml(view.model_provenance)}
+    <p class="muted">Cheap checks: ${checkBits}${checks.note ? ` — ${esc(checks.note)}` : ""}</p>
+    ${nearestRows ? `<h4>Nearest training designs</h4><div class="tbl-scroll"><table><thead><tr><th>Training id</th><th class="r">Distance (L2)</th><th class="r">J</th><th>Design hash</th></tr></thead><tbody>${nearestRows}</tbody></table></div>` : `<p class="muted">Nearest training designs: ${esc(nearest.reason || nearest.status || "not recorded")}</p>`}
+    ${deltaRows ? `<h4>Parameter delta vs incumbent</h4><div class="tbl-scroll"><table><thead><tr><th>Knob</th><th class="r">Incumbent</th><th class="r">Candidate</th><th class="r">Delta</th></tr></thead><tbody>${deltaRows}</tbody></table></div><p class="bo-scroll-hint">Scroll horizontally for all columns →</p>` : ""}
+    ${view.active_vector_delta_vs_incumbent?.available === true ? `<p class="muted">Active-space distance to incumbent: ${fmtNum(view.active_vector_delta_vs_incumbent.distance_l2, 5)}</p>` : ""}`);
 }
 
 function renderBoVerification(view) {
@@ -548,7 +717,11 @@ function renderBo(phase, data, study, rootId) {
   }
   if (phase === "data") {
     if (present(bo.data_summary)) chunks.push(renderDataSummary(bo.data_summary));
+    if (present(bo.target_integrity)) chunks.push(renderTargetIntegrity(bo.target_integrity));
     if (present(bo.design_space)) chunks.push(renderDesignSpace(bo.design_space));
+  }
+  if (phase === "propose") {
+    if (present(bo.proposal_explanation)) chunks.push(renderProposalExplanation(bo.proposal_explanation));
   }
   if (phase === "decide") {
     if (present(bo.pareto)) chunks.push(renderPareto(bo.pareto, study, phase, rootId));
@@ -616,6 +789,48 @@ function renderLive(data, selected) {
   return `<div class="bo-kpis" role="list" aria-label="Live KPIs">${kpis}</div>${convergence}${pickHtml}`;
 }
 
+// P1: the three status families are different questions and must not share one badge.
+//   * artifact validation  -> the stored byte-level view (ready / unknown / stale / missing)
+//   * physical solve       -> measured / verified / refused, from the ledger and solves table
+//   * analysis availability-> recorded / not recorded, never "invalid"
+function semanticCard(name, value, detail = "") {
+  return `<div class="study-semantic-card" role="listitem"><span class="study-semantic-label">${esc(name)}</span><strong>${esc(value)}</strong>${detail ? `<span class="muted">${detail}</span>` : ""}</div>`;
+}
+
+function renderSemanticSummary(phase, data, status) {
+  const solves = data?.solves && typeof data.solves === "object" ? data.solves : null;
+  const progress = data?.progress && typeof data.progress === "object" ? data.progress : null;
+  const counts = data?.call_counts && typeof data.call_counts === "object" ? data.call_counts : null;
+  const physical = [];
+  if (solves) {
+    if (finiteOrNull(solves.n_measured) != null) physical.push(`${fmtNum(solves.n_measured, 0)} measured`);
+    if (finiteOrNull(solves.n_refused) != null) physical.push(`${fmtNum(solves.n_refused, 0)} refused`);
+  }
+  if (progress) {
+    if (finiteOrNull(progress.verified) != null) physical.push(`${fmtNum(progress.verified, 0)} verified`);
+    if (finiteOrNull(progress.refused) != null) physical.push(`${fmtNum(progress.refused, 0)} cheap refusals`);
+  }
+  if (counts) {
+    if (finiteOrNull(counts.screen_calls) != null) physical.push(`${fmtNum(counts.screen_calls, 0)} screen calls`);
+    if (finiteOrNull(counts.verify_calls) != null) physical.push(`${fmtNum(counts.verify_calls, 0)} verify calls`);
+  }
+  const cards = [
+    semanticCard("Artifact validation", label(status), STATES[status] ? safeText(STATES[status], 160) : ""),
+    semanticCard("Physical solves", physical.length ? physical.join(" · ") : "not recorded",
+      physical.length ? "" : "No measured/verify rows are present in this panel."),
+  ];
+  if (["explain", "propose", "execute", "decide"].includes(phase)) {
+    const loo = data?.bo?.calibration?.loo;
+    const diag = data?.bo?.sensitivity?.diagnostics;
+    const recorded = loo?.available === true || diag?.available === true;
+    const canCompute = loo?.can_compute === true || diag?.can_compute === true;
+    cards.push(semanticCard("Analysis availability",
+      recorded ? "model diagnostics recorded" : "not recorded",
+      recorded ? "" : (canCompute ? "A CPU diagnostics job can compute it; no BEM solve is needed." : "The stored artifacts do not include model diagnostics.")));
+  }
+  return `<div class="study-semantic-cards" role="list" aria-label="Status summary">${cards.join("")}</div>`;
+}
+
 export function renderStudyPanel(study, panel, selected = null, notice = "", state = {}) {
   if (!study || !ID.test(study.id || "") || !ROUTE_PHASES.includes(panel?.phase)) throw new Error("Invalid study view");
   const phase = panel.phase;
@@ -630,7 +845,8 @@ export function renderStudyPanel(study, panel, selected = null, notice = "", sta
   const linkPhase = isLive ? "execute" : phase;
   const hasPackage = state?.hasPackage === true || packagedStudies.has(study.id) || hasPackageData(data);
   const liveTab = hasPackage ? `<a href="${esc(studyRoute(study.id, LIVE_PHASE, study.root || null))}"${isLive ? ' aria-current="page"' : ""}>${esc(PHASE_LABELS[LIVE_PHASE])}</a>` : "";
-  const tabs = [liveTab, ...STUDY_PHASES.map(p => `<a href="${esc(studyRoute(study.id, p, study.root || null))}"${p === phase ? ' aria-current="page"' : ""}>${esc(PHASE_LABELS[p])}</a>`)].filter(Boolean).join(" · ");
+  const resultsTab = `<a href="${esc(studyRoute(study.id, "results", study.root || null))}"${RESULT_PHASES.includes(phase) ? ' aria-current="page"' : ""}>${esc(PHASE_LABELS.results)}</a>`;
+  const tabs = [liveTab, resultsTab, ...STUDY_PHASES.map(p => `<a href="${esc(studyRoute(study.id, p, study.root || null))}"${p === phase ? ' aria-current="page"' : ""}>${esc(PHASE_LABELS[p])}</a>`)].filter(Boolean).join(" · ");
   const actionHtml = actions.map(({action: a, index: i}) => {
     const outcomes = Array.isArray(a.allowed_outcomes) ? a.allowed_outcomes.filter(x => ["inconclusive", "accept", "reject"].includes(x)) : ["inconclusive", "accept", "reject"];
     const inputs = a.kind === "decision" ? `<label>Decision <select data-study-field="outcome">${outcomes.map(x => `<option value="${x}">${esc(label(x))}</option>`).join("")}</select></label><label>Rationale <textarea data-study-field="rationale" maxlength="4000"></textarea></label>` : a.kind === "save_draft" ? `<label>Study question <input data-study-field="question" maxlength="500"></label>` : a.kind === "create_child" ? `<label>Child study question <input data-study-field="question" maxlength="500"></label><label>Child policy <select data-study-field="policy"><option value="scalar">scalar</option><option value="turbo">turbo (trust region)</option><option value="pareto">coverage-ripple</option></select></label>` : "";
@@ -644,15 +860,25 @@ export function renderStudyPanel(study, panel, selected = null, notice = "", sta
   const solvesHtml = phase === "execute" || phase === "decide" ? renderSolves(data, phase, study) : "";
   const boHtml = renderBo(phase, data, study, study.root || null);
   const artifactHtml = phase === "decide" ? renderArtifacts(data, renderState) : "";
+  const semanticHtml = renderSemanticSummary(phase, data, status);
+  // Raw phase payloads stay reachable for provenance, but never dominate the default view.
+  const advancedHtml = `<details class="study-advanced"><summary>Advanced — raw artifact data</summary><p class="muted">Bounded preview of the stored phase payload. Identities are the source of truth; long lists and hashes are collapsed here on purpose.</p>${display(visibleData)}</details>`;
   const bodyHtml = isLive
     ? renderLive(data, selected)
-    : `${candidateHtml}${executeHtml}${solvesHtml}${boHtml}${policyHtml}${["propose", "execute"].includes(phase) ? `<details><summary>${phase === "propose" ? "Proposal" : "Execution"} details and diagnostics</summary>${display(visibleData)}</details>` : display(visibleData)}`;
+    : `${semanticHtml}${candidateHtml}${executeHtml}${solvesHtml}${boHtml}${policyHtml}${advancedHtml}`;
+  const selectedHorn = selected || data.selected_horn || null;
+  const hasSolveRows = Array.isArray(data?.solves?.rows) && data.solves.rows.length > 0;
+  const asideBody = selectedHorn
+    ? display(selectedHorn)
+    : hasSolveRows
+      ? `<p class="muted">An explicit selection is not recorded on this authoring tab. Open <a href="${esc(studyRoute(study.id, "horns", study.root || null))}">Results → Horns</a> for the default best verified / screen horn.</p>`
+      : '<p class="muted">No horn is recorded yet.</p>';
   return `<section class="study-workspace" aria-label="Study workspace"><header><p><a href="#/bayes/studies">Bayes</a> / Studies</p><h1>${esc(study.name || study.question || study.spec?.question || "Study")}</h1><p>Revision ${esc(study.revision)} · ${esc(study.status || "unknown")} · ${esc(study.protocol || "bo-study-v1.1")}${study.root_label ? ` · ${esc(study.root_label)}` : ""}</p><nav aria-label="Study phases">${tabs}</nav></header>
   ${notice ? `<p role="alert">${esc(notice)}</p>` : ""}
-  <p role="status"><strong>${esc(label(status))}</strong>${STATES[status] ? `: ${esc(STATES[status])}` : ""}</p>
+  <p role="status"><strong>Artifact validation: ${esc(label(status))}</strong>${STATES[status] ? `: ${esc(STATES[status])}` : ""}</p>
   ${Array.isArray(panel.reasons) && panel.reasons.length ? display(panel.reasons) : ""}
-  <div class="study-layout"><main><h2>${esc(PHASE_LABELS[phase])}</h2>${bodyHtml}${artifactHtml}<h3>Provenance</h3>${display(panel.provenance || null)}${selector}<p>${renderLinks(data, study.id, linkPhase, study.root || null)}</p></main>
-  <aside aria-label="Selected horn"><h2>Selected horn</h2><p>Predicted, screen, and verified results are distinct.</p>${display(selected || data.selected_horn || null)}${renderLinks(selected, study.id, linkPhase, study.root || null)}</aside></div>
+  <div class="study-layout"><main><h2>${esc(PHASE_LABELS[phase])}</h2>${bodyHtml}${artifactHtml}<details class="study-advanced"><summary>Provenance and raw identities</summary><h3>Provenance</h3>${display(panel.provenance || null)}</details>${selector}<p>${renderLinks(data, study.id, linkPhase, study.root || null)}</p></main>
+  <aside aria-label="Selected horn"><h2>Selected horn</h2><p>Predicted, screen, and verified results are distinct.</p>${asideBody}${renderLinks(selected, study.id, linkPhase, study.root || null)}</aside></div>
   <section aria-label="Next action"><h2>Next action</h2>${actionHtml || '<p class="muted">No action is currently available.</p>'}</section>
   <p><a href="/api/studies/${encodeURIComponent(study.id)}/export" download="study-${esc(study.id)}.json">Export study record and artifact identities</a></p>
   <p class="muted">Acquisition values are technical ranking diagnostics, not horn quality. No chart selection starts a solve.</p></section>`;
