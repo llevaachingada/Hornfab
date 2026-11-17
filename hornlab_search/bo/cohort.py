@@ -50,7 +50,7 @@ def _canonical(value):
     return json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False)
 
 
-def validate_cohort(rows, *, d: int) -> CohortResult:
+def validate_cohort(rows, *, d: int, objective_version=None) -> CohortResult:
     """Validate the whole requested cohort, returning no observations on any refusal.
 
     Each row contains ``catalog`` (S0 full record), ``replay`` (R0 result with
@@ -65,6 +65,14 @@ def validate_cohort(rows, *, d: int) -> CohortResult:
     must use namespaces ``s0.backend``, ``s0.fidelity``, ``s0.grid_hash`` and
     ``s0.dependency_hash`` respectively, with values equal to the S0 record.
     Any missing source is ``capability_missing``; a conflict is ``incompatible``.
+
+    Objective identity (WP 0.3): rows pool only when their R0 ``objective_version`` agrees
+    with the cohort's declared version. The cohort declares it with ``objective_version``;
+    when omitted the first row declares it. A missing or mixed version is ``incompatible``
+    (the former hard-coded ``!= 4`` refusal; a uniform v4 cohort is accepted exactly as
+    before and a uniform v7 cohort is no longer refused). The score identity itself
+    (target, weights, ``metric_source`` and the ``score_policy``/``metric_policy`` claims)
+    is already compared across rows below, so version plus those fields is the identity.
     """
     if not isinstance(d, int) or isinstance(d, bool) or d < 1:
         return CohortResult("capability_missing", ("invalid encoding dimension",))
@@ -72,6 +80,7 @@ def validate_cohort(rows, *, d: int) -> CohortResult:
     if not rows:
         return CohortResult("capability_missing", ("empty cohort",))
     expected = None
+    cohort_version = None if objective_version is None else str(objective_version)
     observations = []
     seen_ids = set()
     physical = {}
@@ -93,8 +102,18 @@ def validate_cohort(rows, *, d: int) -> CohortResult:
             return CohortResult("incompatible", (f"{prefix}: S0/R0 source join mismatch",))
         if r.get("status") != "exact_complete" or r.get("complete") is not True or c.get("ok") is not True:
             return CohortResult("incompatible", (f"{prefix}: replay or source is not complete",))
-        if r.get("objective_version") != 4:
-            return CohortResult("incompatible", (f"{prefix}: objective is not v4",))
+        row_version = r.get("objective_version")
+        if isinstance(row_version, bool) or not _known(row_version):
+            return CohortResult("incompatible", (f"{prefix}: objective version missing",))
+        if cohort_version is None:
+            cohort_version = str(row_version)
+        if str(row_version) != cohort_version:
+            return CohortResult("incompatible", (
+                f"{prefix}: objective version {row_version!r} != cohort v{cohort_version}",))
+        cat_version = c.get("objective_version")
+        if _known(cat_version) and str(cat_version) != cohort_version:
+            return CohortResult("incompatible", (
+                f"{prefix}: S0 objective version {cat_version!r} != cohort v{cohort_version}",))
         for key in ("physical_id", "metric_id", "score_id", "design_hash", "metric_source"):
             if not _known(r.get(key)):
                 return CohortResult("capability_missing", (f"{prefix}: R0 {key} missing",))

@@ -323,11 +323,13 @@ class JobResult:
     backend: str | None = None
     status: str = STATUS_FAILED
     attempts: int = 1
+    #: WP 0.7: per-kind row counts of the stopped run's search.ndjson (watchdog stops only).
+    outcome_counts: dict | None = None
 
     def to_dict(self) -> dict:
         """The exact one-line ``summary.jsonl`` schema (existing key order is intentional; new
         keys are additive and appended)."""
-        return {
+        out = {
             "id": self.id,
             "start": self.start,
             "end": self.end,
@@ -344,6 +346,9 @@ class JobResult:
             "status": self.status,
             "attempts": self.attempts,
         }
+        if self.outcome_counts is not None:
+            out["outcome_counts"] = dict(self.outcome_counts)
+        return out
 
 
 # ------------------------------------------------------------------ pure helpers
@@ -776,6 +781,31 @@ def parse_best_j(log_text: str) -> float | None:
         return None
 
 
+#: Row ``kind`` -> reported outcome class (WP 0.7); anything else non-ok is ``other``.
+OUTCOME_KINDS = ("ok", "invalid_geometry", "invalid_envelope", "mesh_too_large", "solve_failed", "other")
+
+
+def summarize_ndjson(rows: list[dict]) -> tuple[float | None, dict]:
+    """``(best_J, outcome_counts)`` from search rows: best_J is the lowest finite objective among
+    ``ok`` rows (``None`` if there is none); counts are reported separately per outcome kind."""
+    import math
+    counts = {k: 0 for k in OUTCOME_KINDS}
+    best: float | None = None
+    for r in rows:
+        if not isinstance(r, dict):
+            continue
+        if r.get("ok"):
+            counts["ok"] += 1
+            obj = r.get("objective")
+            if isinstance(obj, (int, float)) and not isinstance(obj, bool) and math.isfinite(obj):
+                if best is None or obj < best:
+                    best = float(obj)
+            continue
+        kind = str(r.get("kind") or str(r.get("error") or "").split(":", 1)[0]).strip()
+        counts[kind if kind in OUTCOME_KINDS and kind != "ok" else "other"] += 1
+    return best, counts
+
+
 def count_evals(ndjson_path: Path | str) -> int:
     """Count evaluation rows in ``search.ndjson`` (non-empty lines). 0 when absent."""
     try:
@@ -1165,6 +1195,7 @@ def _run_one(plan: NightPlan, job: Job, *, night_dir: Path, runner, repo_root: P
     run_dir: Path | None = None
     evals = 0
     best_j: float | None = None
+    outcome_counts: dict | None = None
     status = classify_status(exit_code, timed_out, log_text)
 
     if timed_out:
@@ -1190,6 +1221,12 @@ def _run_one(plan: NightPlan, job: Job, *, night_dir: Path, runner, repo_root: P
             elif job.kind == "search":
                 note_parts.append("search.ndjson missing")
         best_j = parse_best_j(log_text)
+        if status == STATUS_WATCHDOG and run_dir is not None:
+            # WP 0.7: a watchdog stop prints no final summary; recompute from the run's own rows.
+            wd_best, outcome_counts = summarize_ndjson(_read_ndjson(run_dir / "search.ndjson"))
+            if best_j is None:
+                best_j = wd_best
+            note_parts.append("outcomes " + " ".join(f"{k}={v}" for k, v in outcome_counts.items()))
         if best_j is None and job.kind == "search":
             note_parts.append("best J not in log")
     if peak is not None:
@@ -1212,6 +1249,7 @@ def _run_one(plan: NightPlan, job: Job, *, night_dir: Path, runner, repo_root: P
         backend=backend_of(job),
         status=status,
         attempts=int(attempts),
+        outcome_counts=outcome_counts,
     )
 
 
@@ -1286,6 +1324,32 @@ def _write_queue_state(night_dir: Path, plan: NightPlan, done: list[str], runnin
     os.replace(tmp, night_dir / "queue_state.json")
 
 
+def _load_done(night_dir: Path, plan: NightPlan, queue_log: Path | None = None) -> list[str]:
+    """WP 0.6: job ids a previous runner of this night already finished (``queue_state.json``).
+
+    Absent file -> ``[]`` silently. Unreadable/malformed or another night's file -> ``[]`` with a
+    warning, i.e. the historical behaviour.
+    """
+    path = night_dir / "queue_state.json"
+    if not path.is_file():
+        return []
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        ids = data.get("done")
+        if not isinstance(ids, list) or not all(isinstance(i, str) for i in ids):
+            raise ValueError("'done' is not a list of job ids")
+        if data.get("night") not in (None, plan.night):
+            raise ValueError(f"state is for night {data.get('night')!r}, not {plan.night!r}")
+    except Exception as exc:  # noqa: BLE001 - a bad state file must not stop the night
+        msg = f"queue_state.json unreadable ({type(exc).__name__}: {exc}); starting with no jobs done"
+        print(f"WARNING: {msg}", file=sys.stderr)
+        if queue_log is not None:
+            with contextlib.suppress(Exception):
+                write_queue_line(queue_log, f"WARN {msg}")
+        return []
+    return list(dict.fromkeys(ids))
+
+
 def run_night(plan: NightPlan, *, dry_run: bool = False, only: str | None = None,
               repo_root: Path | str | None = None,
               runs_root: Path | str | None = None,
@@ -1349,7 +1413,9 @@ def run_night(plan: NightPlan, *, dry_run: bool = False, only: str | None = None
     poll = float(CONTROL_POLL_S if control_poll_s is None else control_poll_s)
     allowed = set(admission.get("allowed_job_ids") or ()) if admission else None
     current = plan
-    done: list[str] = []
+    done: list[str] = [] if only is not None else _load_done(night_dir, plan, queue_log)
+    if done:
+        write_queue_line(queue_log, f"RESUME: {len(done)} job(s) already done, not re-run: {', '.join(done)}")
     skipped: set[str] = set()
     reload_error: list = []
 

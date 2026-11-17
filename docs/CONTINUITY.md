@@ -1,5 +1,21 @@
 # CONTINUITY
 
+## 2026-11-17 - Stage-0 fixes WP 0.3 / 0.6 / 0.7 (offline, no GPU, no solves)
+
+- **WP 0.6** `tools/run_campaign_night.py`: `run_night` seeds `done` from an existing
+  `queue_state.json` (same night only; not with `--only`), so a restarted runner never re-runs a
+  finished job. Absent file: unchanged; unreadable/foreign file: warning, unchanged behaviour.
+- **WP 0.7** same file: a watchdog stop now recomputes `best_J` from that run's `search.ndjson`
+  (lowest finite objective among ok rows) and adds an additive `outcome_counts` field
+  (ok / invalid_geometry / invalid_envelope / mesh_too_large / solve_failed / other) plus a note.
+  Historical `summary.jsonl` rows are not rewritten; other records gain no new keys. The
+  `pin_min_valid` / `pin_frac` / `pin_count` exposure part of the plan row is not done here.
+- **WP 0.3** `hornlab_search/bo/cohort.py`: the hard `objective_version != 4` gate is now an
+  identity check: R0 `objective_version` must be known and equal across rows (or equal to the
+  optional `objective_version=` argument), and equal to S0's when S0 stores one. v4 cohorts behave
+  as before; uniform v7 cohorts pool; mixed/missing refuse as `incompatible`. Target, weights,
+  `metric_source` and score/metric policy claims were already compared across rows.
+  Tests: `tests/test_night_runner_restart_and_stop_truth.py`, additions in `tests/test_bo_cohort_gate.py`.
 ## 2026-11-17 (senior pass) - Fable senior review: generator decision taken, architecture and staged plan written
 
 - **Senior (high-thinking) reviewer pass** picking up for Fable; not the owner. Docs only, HEAD

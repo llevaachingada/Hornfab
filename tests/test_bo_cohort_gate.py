@@ -72,3 +72,32 @@ def test_partial_and_conflicting_physical_provenance_refuse():
     b = row(1)
     b["replay"]["physical_id"] = a["replay"]["physical_id"]
     assert validate_cohort([a, b], d=2).status == "incompatible"
+
+
+def _versioned(i, v):
+    r = row(i)
+    r["replay"]["objective_version"] = v
+    return r
+
+
+def test_uniform_v7_cohort_pools_like_v4():
+    assert validate_cohort([_versioned(0, 7), _versioned(1, 7)], d=2).ok
+    assert validate_cohort([_versioned(0, 4), _versioned(1, 4)], d=2).ok
+
+
+def test_mixed_objective_versions_refuse_with_named_reason():
+    result = validate_cohort([_versioned(0, 4), _versioned(1, 7)], d=2)
+    assert result.status == "incompatible" and not result.observations
+    assert "objective version" in result.reasons[0]
+
+
+def test_declared_cohort_version_is_enforced_and_missing_refuses():
+    assert validate_cohort([_versioned(0, 7)], d=2, objective_version=7).ok
+    assert validate_cohort([_versioned(0, 7)], d=2, objective_version=4).status == "incompatible"
+    assert validate_cohort([_versioned(0, None)], d=2).status == "incompatible"
+
+
+def test_catalog_objective_version_must_agree_when_present():
+    a = _versioned(0, 7)
+    a["catalog"]["objective_version"] = 4
+    assert validate_cohort([a], d=2).status == "incompatible"
