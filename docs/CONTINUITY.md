@@ -110,6 +110,15 @@
   (primary Results surface is clean); P3 (cross-method comparison arm, incumbent-evolution viewer,
   payload-budget audit) not started; browser-level acceptance tests (visual equivalence,
   desktop/mobile, screen-reader labels) still need an eyes-on pass. See ISSUES same date.
+- **Follow-up same evening (owner live GUI pass):** the studies list showed empty smoke arms
+  (staged, never launched) identically to populated ones, so the Studies page looked "empty".
+  `studies.js::mountStudyList` now lazily loads per-study observation counts in bounded chunks
+  (6/round-trip, `api.getObservations`, abort-on-dispose, graceful `? unknown` state) and renders
+  honest chips: `● N measured` / `○ not launched`. CSS in `app.css` (existing tokens only).
+  Validated: `node --check` exit 0; `tests/gui_study_lifecycle.mjs` → "study lifecycle ok"; GUI
+  serves fresh (`no-store` static handler, no restart needed). Implemented directly by the
+  orchestrator — the fixer/designer subagent lanes were unavailable this session (provider
+  `Insufficient Balance` on two consecutive launches).
 
 ## 2026-11-16 (21:10 local) - Fable discovery evidence dossier delivered and tracked (read-only)
 

@@ -1453,3 +1453,8 @@ input:not([type=checkbox]):not([type=radio]):not([type=range]), select { min-hei
 .bo-artifact-dl { display:grid; grid-template-columns:minmax(140px,auto) minmax(0,1fr); gap:2px 12px; margin:6px 0; }
 .bo-artifact-dl dt { color:var(--label); font-size:0.78rem; font-weight:600; }
 .bo-artifact-dl dd { margin:0; min-width:0; overflow-wrap:anywhere; font-size:0.82rem; }
+
+/* -- Study list observation chips (lazy per-row counts) ---------- */
+.study-obs-chip { display:inline-block; margin-left:8px; padding:0 8px; border:1px solid var(--rule); border-radius:999px; font-size:0.72rem; line-height:1.7; white-space:nowrap; vertical-align:1px; }
+.study-obs-measured { color:var(--accent); border-color:var(--accent); }
+.study-obs-notlaunched, .study-obs-unknown { color:var(--muted); }

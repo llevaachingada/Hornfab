@@ -1083,7 +1083,7 @@ export function mountStudy(root, {studyId, phase = "overview", api, pollMs = 500
 
 export function renderStudyList(studies, notice = "") {
   if (!Array.isArray(studies) || studies.length > 100) throw new Error("Invalid study list");
-  const rows = studies.map(s => ID.test(s?.id || "") ? `<li><a href="${esc(studyRoute(s.id, LIVE_PHASE, s.root || null))}">${esc(s.name || s.question || s.id)}</a> · revision ${esc(s.revision ?? "unknown")} · ${esc(s.status || "draft")}${s.root_label ? ` · <span class="muted mono">${esc(s.root_label)}</span>` : ""}</li>` : "").join("");
+  const rows = studies.map(s => ID.test(s?.id || "") ? `<li><a href="${esc(studyRoute(s.id, LIVE_PHASE, s.root || null))}">${esc(s.name || s.question || s.id)}</a> · revision ${esc(s.revision ?? "unknown")} · ${esc(s.status || "draft")}${s.root_label ? ` · <span class="muted mono">${esc(s.root_label)}</span>` : ""}<span class="study-obs-chip" data-obs-chip="${esc(s.id)}" hidden></span></li>` : "").join("");
   return `<section aria-label="Studies"><h1>Studies</h1><p><a href="#/analysis">Analysis reports</a> · <a href="#/bayes/board">Method board</a></p>${notice ? `<p role="alert">${esc(notice)}</p>` : ""}<h2>Existing studies</h2>${rows ? `<ul>${rows}</ul>` : "<p>No studies are available.</p>"}<h2>New draft</h2><form data-study-create><label>Study question <input name="question" maxlength="500" required></label><label>Horn task <select name="task"><option value="p80x60__osse_ext_throat_home700_v7_seed5678">Home 80 × 60 / 700 Hz — current solver cohort, seed 5678 (v7)</option><option value="p80x60__osse_ext_throat_home700_v7">Home 80 × 60 / 700 Hz — original cohort (v7)</option><option value="native__ath_core_v4">Frozen native ATH validation (v4)</option></select></label><fieldset><legend>Compatible measured cohort (explicit paths for home task)</legend><label>Offline scores JSON <input name="scores_json"></label><label>Catalog CSV <input name="catalog_csv"></label><label>Dataset directory <input name="dataset_root"></label><label>Candidate pool JSON (optional) <input name="pool_json"></label></fieldset><button type="submit">Save draft</button></form></section>`;
 }
 
@@ -1092,7 +1092,38 @@ export function mountStudyList(root, {api, onError = () => {}, onCreated = () =>
   if (!root || !api || typeof api.listStudies !== "function") throw new Error("Invalid study list mount");
   const controller = new AbortController();
   let disposed = false, busy = false, list = [], notice = "", pending = null;
-  const draw = () => { if (!disposed) root.innerHTML = renderStudyList(list, notice); };
+  // Observation chips (loaded lazily, bounded concurrency): which studies have measured designs.
+  const obsState = new Map();
+  const fillObsChips = () => {
+    if (disposed || typeof root.querySelectorAll !== "function") return;
+    root.querySelectorAll("[data-obs-chip]").forEach(el => {
+      const value = obsState.get(el.getAttribute("data-obs-chip"));
+      if (!value) return;
+      el.hidden = false;
+      el.className = value.className;
+      el.textContent = value.label;
+    });
+  };
+  const loadObsCounts = async () => {
+    if (disposed || typeof api.getObservations !== "function") return;
+    const ids = (Array.isArray(list) ? list : []).filter(s => ID.test(s?.id || "")).map(s => ({id: s.id, root: s.root || null}));
+    for (let i = 0; i < ids.length; i += 6) {
+      if (disposed) return;
+      await Promise.allSettled(ids.slice(i, i + 6).map(async ({id, root: studyRoot}) => {
+        let payload = null;
+        try { payload = await api.getObservations(id, {page: 1, pageSize: 1, root: studyRoot, signal: controller.signal}); }
+        catch (error) { if (error?.name === "AbortError") return; payload = null; }
+        if (disposed) return;
+        const measured = Number.isFinite(Number(payload?.states?.measured)) ? Number(payload.states.measured)
+          : payload?.status === "ok" ? Number(payload?.n_total ?? 0) : NaN;
+        if (!Number.isFinite(measured)) obsState.set(id, {className: "study-obs-chip study-obs-unknown", label: "? unknown"});
+        else if (measured > 0) obsState.set(id, {className: "study-obs-chip study-obs-measured", label: `● ${String(measured)} measured`});
+        else obsState.set(id, {className: "study-obs-chip study-obs-notlaunched", label: "○ not launched"});
+      }));
+      fillObsChips();
+    }
+  };
+  const draw = () => { if (!disposed) { root.innerHTML = renderStudyList(list, notice); fillObsChips(); } };
   const load = async () => {
     try {
       const rows = await api.listStudies({signal: controller.signal});
@@ -1100,6 +1131,7 @@ export function mountStudyList(root, {api, onError = () => {}, onCreated = () =>
       list = Array.isArray(rows) ? rows : rows.studies;
       if (!Array.isArray(list) || list.length > 100) throw new Error("Invalid study list");
       draw();
+      void loadObsCounts();
     } catch (error) {
       if (disposed || error?.name === "AbortError") return;
       notice = "Studies could not be loaded. Check the service status."; onError(error); draw();
