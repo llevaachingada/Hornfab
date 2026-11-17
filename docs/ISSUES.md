@@ -1,5 +1,10 @@
 # ISSUES
 
+## 2026-11-17 - Stage 3 WP 3.3/3.4 tool landed
+
+- DONE: record shadow gate + history-record tool. OPEN: run it over the ~75 home-landscape runs on
+  the Windows checkout and read the disagreement counts before any gate switch.
+
 ## 2026-11-17 - Stage 0 WP 0.5 done (GRID extent)
 
 - DONE: per-plane GRID extent estimate; false refusals 3 -> 1 of 64, no admitted design violates.

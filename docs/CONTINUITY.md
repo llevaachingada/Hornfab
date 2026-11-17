@@ -1,5 +1,15 @@
 # CONTINUITY
 
+## 2026-11-17 (senior pass, code) - Stage 3 WP 3.3/3.4: record shadow gate tool
+
+- New `tools/analysis/record_shadow.py`: offline shadow of a record-based envelope gate. For each
+  design in the given runs it rebuilds the record (pre-mesh refusals re-materialised from
+  `_knobs`), writes digest/descriptors/margins (acoustic and build-box) to `records.jsonl`, and
+  counts disagreements with the stored outcome. No hot-path change; the switch stays an owner
+  decision after the report. `tests/test_tools_analysis_record_shadow.py` 2 passed.
+- To run on history (Windows, needs `runs/`):
+  `.venv\Scripts\python.exe tools\analysis\record_shadow.py runs\<run> ... --out scratch\rec_shadow`.
+
 ## 2026-11-17 (senior pass, code) - Stage 0 WP 0.5: GRID extent false refusals measured and fixed
 
 - T4 (`scratch/fable_architecture/.t4/t4.py`, gmsh, no solve; 64 Sobol knob vectors per config):
