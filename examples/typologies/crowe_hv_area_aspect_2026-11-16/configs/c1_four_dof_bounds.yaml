@@ -1,0 +1,58 @@
+# OWNER-GATED SEARCH BOX (CROWE-inspired V2A four-DOF forward area/aspect family).
+# Implementation: hornlab_search/design/generators/crowe_hv_area_aspect_v1.py.
+# Research: docs/research/typologies/CROWE_V2A_THROAT_TRANSITION_ADDENDUM_2026-11-16.md.
+#
+# NOT QUEUED. The V2A addendum authorises no new solve; this file only makes the four-variable
+# Phase-1 box concrete and loadable. Exactly four search dimensions:
+#   height_v_active_mm, L_forward_mm, area_mid_bias, aspect_timing_u50.
+# width_h_active_mm / p_mouth / throat_round_hold_mm are fixed in the generator block and are
+# refused if put in bounds. The fixed 20 mm hold (c2) and p=2.2 (c3) are discrete A/Bs, not knobs.
+name: crowe_aa__c1_v2a_four_dof_bounds
+family: FREEFORM
+brief_file: ../../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml
+generator:
+  name: crowe_hv_area_aspect_v1
+  n_anchors: 29
+  wall_thickness_mm: 3.0
+  width_h_active_mm: 580.0
+  p_mouth: 3.25
+  throat_round_hold_mm: 0.0
+  seed_policy: explicit
+seed_params:
+  height_v_active_mm: 474.0
+  L_forward_mm: 300.0
+  area_mid_bias: 0.0
+  aspect_timing_u50: 0.5
+bounds:
+  height_v_active_mm: {lo: 300.0, hi: 474.0}
+  L_forward_mm: {lo: 220.0, hi: 340.0}
+  area_mid_bias: {lo: -0.15, hi: 0.15}
+  aspect_timing_u50: {lo: 0.35, hi: 0.65}
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.2
+  seed: 1234
+  budget: 200
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+  budget_counts: valid
+  max_attempts: 300
+description: OWNER-GATED CROWE V2A four-DOF box (height, length, area bias, aspect timing); not queued, no solve authorised

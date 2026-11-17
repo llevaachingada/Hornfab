@@ -1,5 +1,17 @@
 # ISSUES
 
+## 2026-11-16 - V2A four-DOF geometry landed; acoustic gates and T0 open
+
+- DONE (CPU geometry): four-DOF generator + c0-c3 configs + section/Jacobian tools + 17 focused
+  tests; no solve, queue or objective change.
+- OPEN (T0): identify the screenshot's saved design ID/config/mesh hash, capture ridges
+  on/off/true wireframe and physical sections. The in-repo source check confirms
+  `view3d.js` `buildRidgeGeometry` is a display overlay; do not change geometry to hide a line.
+- OPEN (owner): authorise the 40-80 candidate mesh DOE and the four-variable acoustic campaign.
+  The V2A addendum authorises no new solve.
+- OPEN: Phase 2 returned lip/roll, rim setback, X crease, independent area-late/aspect-mid/late
+  and a driver-informed source study; no knob is registered until implemented and tested.
+
 ## 2026-11-16 - Research library cleanup complete
 
 - DONE: knowledge navigation, family applicability references, supplied research/source

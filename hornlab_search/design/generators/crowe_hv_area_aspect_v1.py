@@ -1,49 +1,58 @@
-"""CROWE-inspired H/V area+aspect waveguide family, forward flare only (schema v1).
+"""CROWE-inspired H/V area+aspect waveguide family, forward flare only (schema v1, V2A contract).
 
-This is the forward, no-return geometry described in
-``docs/research/typologies/CROWE_HV_AREA_ASPECT_RESEARCH_V2_2026-11-16.md`` section 7. It is a
-versioned typology generator: ``generator.name: crowe_hv_area_aspect_v1`` materialises ordinary
-FREEFORM H/V meridians plus superellipse cross-section stations, so the existing mesher builds
-every surface and the frozen Family contract is untouched.
+V2A addendum:
+``docs/research/typologies/CROWE_V2A_THROAT_TRANSITION_ADDENDUM_2026-11-16.md``. It supersedes the
+V2 senior research and the earlier chat's 15-40 mm circular-hold rule on throat transition and
+parameter count.
 
-Primary coordinates on the forward section, ``u = z / L`` in ``[0, 1]``:
+Exactly four search dimensions (``PARAM_KEYS``):
 
-* ``log A(u)`` -- cross-sectional area law. It is the unique quadratic through
-  ``A(0) = pi r0^2`` and ``A(1) = C(p_mouth) (W/2) (H/2)`` whose initial slope equals the driver
-  exit tangent ``da/dz(0) = db/dz(0) = tan(exit_angle)``. The normalized initial slope ``m0``
-  must lie in ``[0, 2]``; a steeper driver/depth combination has no monotone member of this
-  family and is refused rather than silently distorted.
-* ``log R(u)`` -- aspect law ``R = a / b``. It is exactly 1 for the first ``round_throat_mm``
-  (the owner's 15-40 mm near-throat rule), then develops through a C2 smootherstep with
-  localized mid/late perturbations. Both wall tangents therefore start equal and the near-throat
-  section is exactly circular, not merely close to it.
-* ``p(u)`` -- superellipse exponent, exactly 2 for the first ``round_throat_mm`` (area expands
-  before the section becomes boxy) and ``p_mouth`` at the mouth through the same C2 gate. No
-  ridge/crease exists in v1; the X crease is Phase 2 and its onset is a separate 20-40% knob.
+* ``height_v_active_mm`` -- true vertical aperture budget.
+* ``L_forward_mm`` -- forward acoustic section length.
+* ``area_mid_bias`` -- one interior log-area bias (normalized -0.15..+0.15) whose C2 window and
+  first two derivatives vanish at both ends.
+* ``aspect_timing_u50`` -- the physical forward-depth fraction where half of the H/V aspect
+  development has happened; one timing coordinate replacing aspect-mid/late onset/rate knobs.
 
-At every station the superellipse ``(|x|/a)^p + (|y|/b)^p = 1`` has enclosed area
-``A = C(p) a b`` and aspect ``R = a / b``; the generator inverts those exactly:
+Fixed generator-block values (not search dimensions):
 
-    a = sqrt(A R / C(p)),    b = sqrt(A / (R C(p))),
-    C(p) = 4 Gamma(1 + 1/p)^2 / Gamma(1 + 2/p).
+* ``width_h_active_mm`` -- held at a production reference (~560-580 mm) for the vertical study.
+* ``p_mouth`` -- fixed provisional ~3-3.5; compare p=2.2 vs 3.5 as a paired A/B config.
+* ``throat_round_hold_mm`` -- fixed 0 by default (ATH CORE starts the smooth morph at the throat);
+  a 20 mm expanding-circular hold config exists for the T2 A/B. It is never a search knob.
 
-The mid/late knobs are normalized log-area and log-aspect perturbations with C2 compact windows
-that are exactly zero at both ends, so the requested mouth W/H and the source tangent are
-preserved by construction. The realised surface is sampled and refused if either forward radius
-is non-positive or non-monotone.
+Construction on ``u = z/L_forward`` in ``[0, 1]``:
 
-Not implemented here (Phase 2 in the research document; no knob is registered without an
-implemented effect): returned lip/roll, rim setback, the X crease, ``p_progress_start/rate``,
-the throat-length source-uncertainty study, and any objective/search default change.
+```
+A(0) = pi r0^2,   A(1) = C(p_mouth) (W/2) (H/2)
+log A(u) = log A(0) + log(A(1)/A(0)) * [m0 u + (1 - m0) u^2] + area_mid_bias * B_A(u)
+m0 = (L * 2 tan(exit_angle) / r0) / log(A(1)/A(0)),   0 <= m0 <= 2
+S_R(u) = smootherstep(u/a) / smootherstep(1/a),  with a solved so S_R(u50) = 0.5
+log R(u) = log(W/H) * S_R(u)
+p(u) = 2 + (p_mouth - 2) * S_R(u)
+a = sqrt(A R / C(p)),   b = sqrt(A / (R C(p))),
+C(p) = 4 Gamma(1 + 1/p)^2 / Gamma(1 + 2/p)
+```
+
+``S_R`` is monotone and C2: zero first and second derivatives at u=0 and u=1. The area law's
+initial slope equals the driver-exit tangent, so ``a'(0) = b'(0) = tan(exit_angle)`` while
+``R'(0) = p'(0) = 0``. For a fixed positive throat hold, the gate is shifted to
+``S_R((u-h)/(1-h))``; the section is exactly circular over the hold and remains C2 at its boundary.
+
+Not implemented here (Phase 2, no knob registered): returned lip/roll, rim setback, X crease,
+independent area-late / aspect-mid / aspect-late knobs, throat-angle search, objective/search
+default changes.
 """
 from __future__ import annotations
 
 import hashlib
 import math
+from functools import lru_cache
 from pathlib import Path
 
 import numpy as np
 import scipy
+from scipy.optimize import brentq
 
 from ._lame_cap_v1 import flat_lame_area
 from .registry import GeneratorError
@@ -51,44 +60,40 @@ from .registry import GeneratorError
 KIND = "crowe_hv_area_aspect_v1"
 SCHEMA = "crowe-hv-area-aspect-v1"
 
-#: Active Phase 1 coordinates (the research document's 7-9 rank-pruned dimensions).
+#: The four V2A search dimensions.
 PARAM_KEYS = frozenset({
-    "L_forward_mm",
-    "width_h_active_mm",
     "height_v_active_mm",
-    "area_mid_rate",
-    "area_late_rate",
-    "aspect_mid",
-    "aspect_late",
-    "p_mouth",
-    "round_throat_mm",
+    "L_forward_mm",
+    "area_mid_bias",
+    "aspect_timing_u50",
 })
 
-#: Fixed generator-block keys (not search dimensions). ``seed_policy`` is a config directive.
-GEN_KEYS = frozenset({"name", "n_anchors", "wall_thickness_mm", "seed_policy"})
+#: Fixed generator-block keys. ``seed_policy`` is a config directive, not geometry.
+GEN_KEYS = frozenset({
+    "name",
+    "n_anchors",
+    "wall_thickness_mm",
+    "width_h_active_mm",
+    "p_mouth",
+    "throat_round_hold_mm",
+    "seed_policy",
+})
 SHAPE_KEYS = PARAM_KEYS | (GEN_KEYS - {"name", "seed_policy"})
-
-#: Normalized log perturbation amplitudes. The public knobs are rates in [-1, 1]; the physical
-#: amplitude lives here so a knob's meaning cannot drift with a config edit.
-AREA_MID_AMPLITUDE = 0.25
-AREA_LATE_AMPLITUDE = 0.20
-ASPECT_MID_AMPLITUDE = 0.20
-ASPECT_LATE_AMPLITUDE = 0.18
 
 #: Module-level physical limits. Search priors (narrower) live in the YAML configs.
 _BOUNDS = {
+    "area_mid_bias": (-0.15, 0.15),
+    "aspect_timing_u50": (0.15, 0.75),
     "p_mouth": (2.0, 5.0),
-    "area_mid_rate": (-1.0, 1.0),
-    "area_late_rate": (-1.0, 1.0),
-    "aspect_mid": (-1.0, 1.0),
-    "aspect_late": (-1.0, 1.0),
-    "round_throat_mm": (10.0, 90.0),
+    "throat_round_hold_mm": (0.0, 200.0),
     "wall_thickness_mm": (0.5, 12.0),
 }
 
 _N_ANCHORS_MIN = 9
 _N_ANCHORS_MAX = 32          # also the mesher's crossSections maximum
 _DENSE = 2049
+_U50_LIMIT = 0.79           # half point of smootherstep(u/a) as a -> infinity is 2^(-1/3)
+DEFAULT_CUTS_MM = (0.0, 5.0, 10.0, 20.0, 40.0, 60.0, 100.0)
 
 
 def is_family_spec(spec) -> bool:
@@ -135,6 +140,9 @@ def _shape(gen, knobs) -> dict:
     shape = {**{k: gen[k] for k in GEN_KEYS - {"name", "seed_policy"} if k in gen}, **knobs}
     shape.setdefault("n_anchors", 29)
     shape.setdefault("wall_thickness_mm", 3.0)
+    shape.setdefault("width_h_active_mm", 580.0)
+    shape.setdefault("p_mouth", 3.25)
+    shape.setdefault("throat_round_hold_mm", 0.0)
     _validate_shape(shape)
     return shape
 
@@ -154,8 +162,13 @@ def _validate_shape(shape) -> None:
     for key, (lo, hi) in _BOUNDS.items():
         if not lo <= float(shape[key]) <= hi:
             raise GeneratorError(f"{key} must be in [{lo}, {hi}], got {shape[key]}")
-    if float(shape["round_throat_mm"]) >= float(shape["L_forward_mm"]):
-        raise GeneratorError("round_throat_mm must be shorter than L_forward_mm")
+    if not 0.0 < float(shape["aspect_timing_u50"]) < _U50_LIMIT:
+        raise GeneratorError(f"aspect_timing_u50 must be in (0, {_U50_LIMIT})")
+    hold = float(shape["throat_round_hold_mm"])
+    if hold >= 0.5 * float(shape["L_forward_mm"]):
+        raise GeneratorError("throat_round_hold_mm must be shorter than half of L_forward_mm")
+    if hold > 0.0 and float(shape["aspect_timing_u50"]) <= hold / float(shape["L_forward_mm"]):
+        raise GeneratorError("aspect_timing_u50 must lie beyond the fixed throat hold")
     n = shape["n_anchors"]
     if int(n) != n or not _N_ANCHORS_MIN <= int(n) <= _N_ANCHORS_MAX:
         raise GeneratorError(
@@ -167,21 +180,42 @@ def _smootherstep(x):
     return t * t * t * (10.0 + t * (-15.0 + 6.0 * t))
 
 
-def _windows(u):
-    """C2 compact mid/late windows, exactly zero at both ends (peak normalized to 1)."""
+@lru_cache(maxsize=128)
+def _smootherstep_scale(u50: float) -> float:
+    """Solve ``smootherstep(u50/a) / smootherstep(1/a) = 0.5`` for the timing scale a."""
+    if not 0.0 < u50 < _U50_LIMIT:
+        raise GeneratorError(f"aspect_timing_u50 must be in (0, {_U50_LIMIT}), got {u50}")
+
+    def f(a):
+        return float(_smootherstep(u50 / a) / _smootherstep(1.0 / a)) - 0.5
+
+    return float(brentq(f, 1e-4, 1e3, xtol=1e-14, rtol=1e-14))
+
+
+def _timing(u, u50: float):
+    """Normalized C2 timing law with exact half point u50 and zero end derivatives."""
+    a = _smootherstep_scale(float(u50))
+    return _smootherstep(np.asarray(u, dtype=float) / a) / _smootherstep(1.0 / a)
+
+
+def _aspect_gate(u, u50: float, hold_u: float):
+    """Timing law, optionally after a fixed expanding-circular hold (C2 at the boundary)."""
     u = np.asarray(u, dtype=float)
-    mid = (4.0 * u * (1.0 - u)) ** 4
-    late = np.where((u > 0.0) & (u < 1.0),
-                    (u / 0.8) ** 12 * ((1.0 - u) / 0.2) ** 3, 0.0)
-    return mid, late
+    if hold_u > 0.0:
+        raw = (float(u50) - hold_u) / (1.0 - hold_u)
+        s = np.clip((u - hold_u) / (1.0 - hold_u), 0.0, 1.0)
+        return _timing(s, raw)
+    return _timing(u, float(u50))
+
+
+def _area_mid_window(u):
+    """C3 compact mid-area basis: value and first two derivatives are zero at both ends."""
+    u = np.asarray(u, dtype=float)
+    return (4.0 * u * (1.0 - u)) ** 4
 
 
 def evaluate(shape, brief, u) -> dict:
-    """Evaluate the continuous law at ``u`` in [0, 1]; mm, mm^2, dimensionless.
-
-    ``a_mm`` and ``b_mm`` are the H and V inner semi-axes. ``area_mm2`` is exactly
-    ``C(p) a b`` by construction, and ``aspect`` is exactly ``R``.
-    """
+    """Evaluate the continuous V2A law at ``u`` in [0, 1]; mm, mm^2, dimensionless."""
     _validate_shape(shape)
     driver = _driver(brief)
     r0 = driver["exit_radius_mm"]
@@ -208,18 +242,12 @@ def evaluate(shape, brief, u) -> dict:
             f"m0={m0:.6f} must be in [0, 2]; use a gentler exit angle, shorter depth, or a "
             "different family")
     base = m0 * u + (1.0 - m0) * u * u
-    mid, late = _windows(u)
     log_area = (math.log(area0) + delta * base
-                + float(shape["area_mid_rate"]) * AREA_MID_AMPLITUDE * mid
-                + float(shape["area_late_rate"]) * AREA_LATE_AMPLITUDE * late)
-    # Owner rules 1-3: the section is exactly circular for round_throat_mm (a/b = 1, p = 2),
-    # while the area law keeps expanding. Aspect and section-shape development share one C2 gate,
-    # so tangent and curvature are continuous at the gate and at the mouth.
-    u_round = float(shape["round_throat_mm"]) / length
-    gate = _smootherstep((u - u_round) / (1.0 - u_round))
-    log_aspect = (math.log(width / height)
-                  + float(shape["aspect_mid"]) * ASPECT_MID_AMPLITUDE * mid
-                  + float(shape["aspect_late"]) * ASPECT_LATE_AMPLITUDE * late) * gate
+                + float(shape["area_mid_bias"]) * _area_mid_window(u))
+    hold_u = float(shape["throat_round_hold_mm"]) / length
+    u50 = float(shape["aspect_timing_u50"])
+    gate = _aspect_gate(u, u50, hold_u)
+    log_aspect = math.log(width / height) * gate
     p = 2.0 + (p_mouth - 2.0) * gate
     area = np.exp(log_area)
     aspect = np.exp(log_aspect)
@@ -235,11 +263,15 @@ def evaluate(shape, brief, u) -> dict:
         "aspect": aspect,
         "log_area": log_area,
         "log_aspect": log_aspect,
+        "aspect_gate": gate,
         "area_throat_mm2": area0,
         "area_mouth_mm2": area1,
         "area_ratio": area1 / area0,
         "m0": m0,
         "delta_log_area": delta,
+        "u50": u50,
+        "hold_u": hold_u,
+        "smootherstep_scale": _smootherstep_scale(u50) if hold_u == 0.0 else None,
     }
 
 
@@ -249,8 +281,8 @@ def _check_forward(law) -> None:
             raise GeneratorError(f"{name} forward radius must be finite and positive")
         if np.any(np.diff(radii) <= 0.0):
             raise GeneratorError(
-                f"{name} forward radius is not strictly increasing; the area/aspect "
-                "perturbations are too strong for this parent")
+                f"{name} forward radius is not strictly increasing; the area bias or timing "
+                "is incompatible with this parent")
 
 
 def _check_shape_geometry(shape, brief) -> dict:
@@ -270,7 +302,7 @@ def _rows(z, radii, angles):
 
 
 def materialize(gen, knobs, brief) -> dict:
-    """Generator block + knobs -> ordinary FREEFORM params (H/V meridians + stations)."""
+    """Generator block + four knobs -> ordinary FREEFORM params (H/V meridians + stations)."""
     shape = _shape(gen, knobs)
     driver = _driver(brief)
     r0 = driver["exit_radius_mm"]
@@ -298,19 +330,16 @@ def materialize(gen, knobs, brief) -> dict:
                 "throatAngleDeg": round(float(angles[0]), 6),
                 "mouthAngleDeg": round(float(angles[-1]), 6)}
 
+    hold_u = float(shape["throat_round_hold_mm"]) / length
     stations = [{"t": 0.0, "shape": "circle"}]
-    u_round = float(shape["round_throat_mm"]) / length
-    if u_round > 1e-9:
-        # Explicit end of the exact round-throat zone. Nudge it off an anchor station: the
-        # mesher refuses semantic axial features closer than 1e-7 in normalized t.
-        t_round = u_round + (2e-6 if float(np.min(np.abs(u - u_round))) < 1e-6 else 0.0)
-        stations.append({"t": round(float(t_round), 6), "shape": "superellipse",
-                         "exponent": 2.0})
-    # Interior stations sit halfway between meridian anchors, so no station coincides with an
-    # anchor; their exponents sample the same C2 p(u) gate.
+    if hold_u > 1e-9:
+        # Fixed expanding-circular hold end. Nudge it off an anchor station: the mesher refuses
+        # semantic axial features closer than 1e-7 in normalized t.
+        t_hold = hold_u + (2e-6 if float(np.min(np.abs(u - hold_u))) < 1e-6 else 0.0)
+        stations.append({"t": round(float(t_hold), 6), "shape": "superellipse", "exponent": 2.0})
     for i in range(len(u) - 1):
         t_mid = 0.5 * (u[i] + u[i + 1])
-        if t_mid <= u_round + 1e-9:
+        if t_mid <= hold_u + 1e-9:
             continue
         stations.append({"t": round(float(t_mid), 6), "shape": "superellipse",
                          "exponent": round(float(np.interp(t_mid, u, anchors["p"])), 6)})
@@ -324,29 +353,26 @@ def materialize(gen, knobs, brief) -> dict:
     }
 
 
-def _station(u, law, i, slope_h, slope_v):
-    return {
-        "u": round(float(u), 6),
-        "z_mm": round(float(law["z_mm"][i]), 4),
-        "a_mm": round(float(law["a_mm"][i]), 4),
-        "b_mm": round(float(law["b_mm"][i]), 4),
-        "area_mm2": round(float(law["area_mm2"][i]), 3),
-        "aspect": round(float(law["aspect"][i]), 6),
-        "p": round(float(law["p"][i]), 6),
-        "wall_h_deg": round(float(np.degrees(np.arctan(slope_h[i]))), 4),
-        "wall_v_deg": round(float(np.degrees(np.arctan(slope_v[i]))), 4),
-    }
+def _slope_curvature(law):
+    z = law["z_mm"]
 
+    def slope(r):
+        return np.gradient(r, z, edge_order=2)
 
-DEFAULT_CUTS_MM = (0.0, 5.0, 10.0, 20.0, 40.0, 80.0)
+    def curvature(r):
+        rp = slope(r)
+        rpp = np.gradient(rp, z, edge_order=2)
+        return np.abs(rpp) / (1.0 + rp * rp) ** 1.5
+
+    return slope(law["a_mm"]), slope(law["b_mm"]), curvature(law["a_mm"]), curvature(law["b_mm"])
 
 
 def section_cuts(gen, knobs, brief, stations_mm=DEFAULT_CUTS_MM) -> list[dict]:
-    """Section cuts at physical z stations: area, aspect, roundness, tangent, curvature.
+    """Physical-section table: area, aspect, roundness, wall tangent and meridian curvature.
 
-    The owner's review stations (0/5/10/20/40/80 mm) are the default. Curvature is the planar
-    meridian curvature ``|r''| / (1 + r'^2)^(3/2)`` in 1/mm, evaluated on the dense law and
-    interpolated. This is a geometry measurement, not a mesh or acoustic result.
+    The default stations are the V2A review set 0/5/10/20/40/60/100 mm. ``inside_round_hold``
+    refers only to the fixed ``throat_round_hold_mm`` (0 by default); there is no universal
+    15-40 mm rule. Curvature is ``|r''|/(1+r'^2)^(3/2)`` in 1/mm.
     """
     shape = _shape(gen, knobs)
     length = float(shape["L_forward_mm"])
@@ -357,20 +383,8 @@ def section_cuts(gen, knobs, brief, stations_mm=DEFAULT_CUTS_MM) -> list[dict]:
     law = evaluate(shape, brief, u)
     dense = evaluate(shape, brief, np.linspace(0.0, 1.0, _DENSE))
     z = dense["z_mm"]
-
-    def slope(r):
-        return np.gradient(r, z, edge_order=2)
-
-    def curvature(r):
-        rp = slope(r)
-        rpp = np.gradient(rp, z, edge_order=2)
-        return np.abs(rpp) / (1.0 + rp * rp) ** 1.5
-
-    slope_h = slope(dense["a_mm"])
-    slope_v = slope(dense["b_mm"])
-    kappa_h = curvature(dense["a_mm"])
-    kappa_v = curvature(dense["b_mm"])
-    round_mm = float(shape["round_throat_mm"])
+    slope_h, slope_v, kappa_h, kappa_v = _slope_curvature(dense)
+    hold_mm = float(shape["throat_round_hold_mm"])
     rows = []
     for i, z_mm in enumerate(stations):
         rows.append({
@@ -381,51 +395,80 @@ def section_cuts(gen, knobs, brief, stations_mm=DEFAULT_CUTS_MM) -> list[dict]:
             "area_ratio_to_throat": round(float(law["area_mm2"][i] / law["area_throat_mm2"]), 6),
             "aspect": round(float(law["aspect"][i]), 6),
             "p": round(float(law["p"][i]), 6),
+            "aspect_gate": round(float(law["aspect_gate"][i]), 6),
             "wall_h_deg": round(float(np.degrees(np.arctan(np.interp(z_mm, z, slope_h)))), 4),
             "wall_v_deg": round(float(np.degrees(np.arctan(np.interp(z_mm, z, slope_v)))), 4),
             "curvature_h_1_per_mm": round(float(np.interp(z_mm, z, kappa_h)), 8),
             "curvature_v_1_per_mm": round(float(np.interp(z_mm, z, kappa_v)), 8),
-            "inside_round_throat": bool(z_mm <= round_mm + 1e-9),
+            "inside_round_hold": bool(z_mm <= hold_mm + 1e-9),
         })
     return rows
 
 
-def _roundness_summary(shape, brief) -> dict:
+def _throat_smoothness(shape, brief) -> dict:
     length = float(shape["L_forward_mm"])
-    round_mm = float(shape["round_throat_mm"])
-    u = np.linspace(0.0, round_mm / length, 999)
-    law = evaluate(shape, brief, u)
+    u50 = float(shape["aspect_timing_u50"])
+    hold_u = float(shape["throat_round_hold_mm"]) / length
+    law = evaluate(shape, brief, np.array([0.0, 5.0 / length, 10.0 / length,
+                                           20.0 / length, u50]))
+    first20 = law["z_mm"] <= 20.0 + 1e-12
     return {
-        "round_throat_mm": round_mm,
-        "max_abs_aspect_minus_1": round(float(np.max(np.abs(law["aspect"] - 1.0))), 12),
-        "max_abs_p_minus_2": round(float(np.max(np.abs(law["p"] - 2.0))), 12),
-        "max_abs_a_minus_b_mm": round(float(np.max(np.abs(law["a_mm"] - law["b_mm"]))), 9),
-        "area_ratio_at_round_throat": round(float(np.interp(round_mm, law["z_mm"],
-                                                            law["area_mm2"]) / law["area_throat_mm2"]), 6),
+        "aspect_at_5mm": round(float(law["aspect"][1]), 9),
+        "aspect_at_10mm": round(float(law["aspect"][2]), 9),
+        "aspect_at_20mm": round(float(law["aspect"][3]), 9),
+        "p_at_5mm": round(float(law["p"][1]), 9),
+        "p_at_10mm": round(float(law["p"][2]), 9),
+        "p_at_20mm": round(float(law["p"][3]), 9),
+        "max_abs_aspect_minus_1_over_first_20mm": round(
+            float(np.max(np.abs(law["aspect"][first20] - 1.0))), 12),
+        "max_abs_p_minus_2_over_first_20mm": round(
+            float(np.max(np.abs(law["p"][first20] - 2.0))), 12),
+        "aspect_timing_u50": u50,
+        "gate_at_u50": round(float(law["aspect_gate"][-1]), 12),
+        "fixed_throat_round_hold_mm": float(shape["throat_round_hold_mm"]),
+        "hold_fraction": round(float(hold_u), 9),
+        "derived_smootherstep_scale": (None if hold_u > 0.0
+                                       else round(float(_smootherstep_scale(u50)), 9)),
     }
 
 
 def info(gen, knobs, brief) -> dict:
-    """JSON-safe report of the law, the realised anchors and the deferred Phase 2 items."""
+    """JSON-safe report of the V2A law, fixed values, fixed values and deferred Phase 2 items."""
     shape = _shape(gen, knobs)
     driver = _driver(brief)
     u = np.linspace(0.0, 1.0, _DENSE)
     law = evaluate(shape, brief, u)
-    slope_h = np.gradient(law["a_mm"], law["z_mm"], edge_order=2)
-    slope_v = np.gradient(law["b_mm"], law["z_mm"], edge_order=2)
-    picks = [0.0, 0.25, 0.5, 0.75, 1.0]
-    index = [int(np.argmin(np.abs(u - p))) for p in picks]
+    slope_h, slope_v, _, _ = _slope_curvature(law)
+    u50 = float(shape["aspect_timing_u50"])
+    i50 = int(np.argmin(np.abs(u - u50)))
+    i0 = 0
+    i1 = len(u) - 1
     margin = float(min(np.diff(law["a_mm"]).min(), np.diff(law["b_mm"]).min()))
     return {
         "kind": KIND,
         "schema": SCHEMA,
         "implementation_sha256": implementation_digest(),
         "construction_label": (
-            SCHEMA + ": forward area/aspect superellipse; our construction, not Crowe CAD; "
-            "no returned lip or X crease"),
+            SCHEMA + ": forward area/aspect superellipse; V2A four-variable contract; our "
+            "construction, not Crowe CAD; no returned lip or X crease"),
         "source_tangent_is_assumption": True,
         "source_angle_deg_is_assumption": True,
         "driver": driver,
+        "search_keys": sorted(PARAM_KEYS),
+        "fixed": {
+            "width_h_active_mm": float(shape["width_h_active_mm"]),
+            "p_mouth": float(shape["p_mouth"]),
+            "throat_round_hold_mm": float(shape["throat_round_hold_mm"]),
+            "n_anchors": int(shape["n_anchors"]),
+            "wall_thickness_mm": float(shape["wall_thickness_mm"]),
+        },
+        "aspect_timing": {
+            "u50": u50,
+            "u50_z_mm": round(float(u50 * float(shape["L_forward_mm"])), 4),
+            "gate_at_u50": round(float(law["aspect_gate"][i50]), 12),
+            "derived_smootherstep_scale": law["smootherstep_scale"],
+            "fixed_round_hold_mm": float(shape["throat_round_hold_mm"]),
+        },
         "forward": {
             "L_mm": float(shape["L_forward_mm"]),
             "width_h_mm": float(shape["width_h_active_mm"]),
@@ -439,56 +482,44 @@ def info(gen, knobs, brief) -> dict:
             "p_mouth": float(shape["p_mouth"]),
             "m0": float(law["m0"]),
             "delta_log_area": float(law["delta_log_area"]),
+            "area_mid_bias": float(shape["area_mid_bias"]),
         },
         "throat": {
             "r0_mm": driver["exit_radius_mm"],
             "exit_angle_deg": driver["exit_angle_deg"],
-            "tangent_h_deg": round(float(np.degrees(np.arctan(slope_h[0]))), 6),
-            "tangent_v_deg": round(float(np.degrees(np.arctan(slope_v[0]))), 6),
-            "area_mm2": float(law["area_mm2"][0]),
-            "aspect": float(law["aspect"][0]),
-            "p": float(law["p"][0]),
+            "tangent_h_deg": round(float(np.degrees(np.arctan(slope_h[i0]))), 6),
+            "tangent_v_deg": round(float(np.degrees(np.arctan(slope_v[i0]))), 6),
+            "area_mm2": float(law["area_mm2"][i0]),
+            "aspect": float(law["aspect"][i0]),
+            "p": float(law["p"][i0]),
         },
         "mouth": {
-            "tangent_h_deg": round(float(np.degrees(np.arctan(slope_h[-1]))), 6),
-            "tangent_v_deg": round(float(np.degrees(np.arctan(slope_v[-1]))), 6),
-            "area_mm2": float(law["area_mm2"][-1]),
-            "aspect": float(law["aspect"][-1]),
-            "p": float(law["p"][-1]),
+            "tangent_h_deg": round(float(np.degrees(np.arctan(slope_h[i1]))), 6),
+            "tangent_v_deg": round(float(np.degrees(np.arctan(slope_v[i1]))), 6),
+            "area_mm2": float(law["area_mm2"][i1]),
+            "aspect": float(law["aspect"][i1]),
+            "p": float(law["p"][i1]),
         },
-        "stations": [_station(u[i], law, i, slope_h, slope_v) for i in index],
-        "perturbations": {
-            "area_mid_rate": float(shape["area_mid_rate"]),
-            "area_late_rate": float(shape["area_late_rate"]),
-            "aspect_mid": float(shape["aspect_mid"]),
-            "aspect_late": float(shape["aspect_late"]),
-            "area_mid_amplitude": AREA_MID_AMPLITUDE,
-            "area_late_amplitude": AREA_LATE_AMPLITUDE,
-            "aspect_mid_amplitude": ASPECT_MID_AMPLITUDE,
-            "aspect_late_amplitude": ASPECT_LATE_AMPLITUDE,
-        },
-        "n_anchors": int(shape["n_anchors"]),
-        "round_throat_mm": float(shape["round_throat_mm"]),
-        "roundness": _roundness_summary(shape, brief),
+        "throat_smoothness": _throat_smoothness(shape, brief),
         "section_cuts_mm": section_cuts(
             gen, knobs, brief,
             tuple(s for s in DEFAULT_CUTS_MM if s <= float(shape["L_forward_mm"]))),
-        "wall_thickness_mm": float(shape["wall_thickness_mm"]),
         "min_forward_radius_margin_mm": margin,
         "deferred_phase2": ["returned_lip_roll", "rim_setback", "x_crease",
-                            "p_progress_start_rate", "throat_blend_length_study"],
+                            "independent_area_late", "independent_aspect_mid_late",
+                            "throat_blend_length_study"],
         "not_claimed": ["acoustic readiness", "Crowe CAD equivalence", "roll geometry",
-                        "X-crease geometry", "full-system performance"],
+                        "X-crease geometry", "full-system performance", "BO readiness"],
     }
 
 
 def validate_search_config(gen, seed, bounds, brief) -> None:
-    """Validate the seed and every bound endpoint before a search is allowed to start."""
+    """Validate the seed and every bound endpoint; enforce the V2A four-variable contract."""
     shape = _shape(gen, seed)
     _check_shape_geometry(shape, brief)
     if set(bounds) != PARAM_KEYS:
         raise GeneratorError(
-            f"every {KIND} knob needs an explicit matching bound; "
+            f"V2A exposes exactly four search dimensions {sorted(PARAM_KEYS)}; "
             f"missing={sorted(PARAM_KEYS - set(bounds))}, "
             f"unknown={sorted(set(bounds) - PARAM_KEYS)}")
     for key in PARAM_KEYS:
@@ -503,3 +534,75 @@ def validate_search_config(gen, seed, bounds, brief) -> None:
             raise GeneratorError(f"{key}: a fixed bound must have lo == hi")
         for endpoint in (bound.lo, bound.hi):
             _check_shape_geometry(_shape(gen, {**seed, key: float(endpoint)}), brief)
+
+
+def _descriptors(gen, knobs, brief) -> np.ndarray:
+    """Dimensionless/physical surface descriptors used by the T2 identifiability check."""
+    shape = _shape(gen, knobs)
+    length = float(shape["L_forward_mm"])
+    u = np.array([0.5, 0.8])
+    law = evaluate(shape, brief, u)
+    dense = evaluate(shape, brief, np.linspace(0.0, 1.0, 501))
+    slope_h, slope_v, kappa_h, _ = _slope_curvature(dense)
+    z = dense["z_mm"]
+    z5, z8 = 0.5 * length, 0.8 * length
+    return np.array([
+        law["area_mm2"][0],
+        law["aspect"][0],
+        law["p"][0],
+        np.degrees(np.arctan(np.interp(z5, z, slope_h))),
+        law["area_mm2"][1],
+        law["aspect"][1],
+        law["p"][1],
+        np.degrees(np.arctan(np.interp(z8, z, slope_v))),
+        float(np.interp(z5, z, kappa_h)) * length,
+        float(shape["height_v_active_mm"]),
+        float(law["area_mouth_mm2"]),
+        float(shape["width_h_active_mm"] / shape["height_v_active_mm"]),
+        float(shape["aspect_timing_u50"]) * length,
+    ], dtype=float)
+
+
+def identifiability_report(gen, knobs, bounds, brief, delta: float = 0.1) -> dict:
+    """T2 law-level Jacobian: normalized +-delta box perturbations -> SVD rank and collinearity."""
+    validate_search_config(gen, knobs, bounds, brief)
+    base = _descriptors(gen, knobs, brief)
+    labels = ["area_mid_mm2", "aspect_mid", "p_mid", "wall_h_mid", "area_late_mm2",
+              "aspect_late", "p_late", "wall_v_late", "curvature_mid_xL", "mouth_h_mm",
+              "mouth_area_mm2", "mouth_aspect", "timing_station_mm"]
+    scale = np.maximum(np.abs(base), 1e-9)
+    columns = {}
+    for key in sorted(PARAM_KEYS):
+        bound = bounds[key]
+        step = float(delta) * (float(bound.hi) - float(bound.lo))
+        if step <= 0.0:
+            step = 1e-6
+        plus = min(float(bound.hi), float(knobs[key]) + step)
+        minus = max(float(bound.lo), float(knobs[key]) - step)
+        if plus == minus:
+            columns[key] = np.zeros_like(base)
+            continue
+        dp = (_descriptors(gen, {**knobs, key: plus}, brief)
+              - _descriptors(gen, {**knobs, key: minus}, brief))
+        # Normalized +-delta box Jacobian: relative descriptor change per unit normalized
+        # coordinate. This keeps variables with different physical units comparable.
+        columns[key] = dp / scale / (2.0 * float(delta))
+    keys = sorted(columns)
+    matrix = np.column_stack([columns[k] for k in keys])
+    _, s, _ = np.linalg.svd(matrix, full_matrices=False)
+    rank = int(np.sum(s > 1e-6 * max(float(s[0]), 1e-12)))
+    practical = int(np.sum(s > 0.01 * max(float(s[0]), 1e-12)))
+    norm = np.linalg.norm(matrix, axis=0)
+    cosine = np.abs(matrix.T @ matrix) / np.maximum(np.outer(norm, norm), 1e-12)
+    np.fill_diagonal(cosine, 0.0)
+    weak = [k for k, n in zip(keys, norm) if n < 0.01 * max(float(norm.max()), 1e-12)]
+    return {
+        "keys": keys,
+        "descriptors": labels,
+        "singular_values": [float(v) for v in s],
+        "effective_rank": rank,
+        "practical_rank": practical,
+        "weak_keys": weak,
+        "max_pairwise_abs_cosine": float(np.max(cosine)),
+        "column_norms": {k: float(v) for k, v in zip(keys, norm)},
+    }

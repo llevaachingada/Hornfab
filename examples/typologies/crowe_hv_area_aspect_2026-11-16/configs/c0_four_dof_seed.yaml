@@ -1,0 +1,60 @@
+# GEOMETRY DIAGNOSTIC ONLY (CROWE-inspired V2A four-DOF forward area/aspect family).
+# Implementation: hornlab_search/design/generators/crowe_hv_area_aspect_v1.py.
+# Research: docs/research/typologies/CROWE_V2A_THROAT_TRANSITION_ADDENDUM_2026-11-16.md
+# (supersedes the V2 15-40 mm circular-hold rule on throat transition and parameter count).
+#
+# c0 = the V2A seed: exactly four continuous search coordinates are exposed; every bound here is
+# fixed. width_h_active_mm, p_mouth and throat_round_hold_mm live in the generator block and are
+# NOT search dimensions. throat_round_hold_mm is 0 (the ATH CORE-style smooth throat start);
+# c2_round20_ab.yaml is the fixed 20 mm expanding-circular A/B.
+# Not queued. No solve is authorised. Section cuts:
+#   tools/geometry/crowe_hv_area_aspect_sections.py --config <this file>
+name: crowe_aa__c0_v2a_seed
+family: FREEFORM
+brief_file: ../../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml
+generator:
+  name: crowe_hv_area_aspect_v1
+  n_anchors: 29
+  wall_thickness_mm: 3.0
+  width_h_active_mm: 580.0
+  p_mouth: 3.25
+  throat_round_hold_mm: 0.0
+  seed_policy: explicit
+seed_params:
+  height_v_active_mm: 474.0
+  L_forward_mm: 300.0
+  area_mid_bias: 0.0
+  aspect_timing_u50: 0.5
+bounds:
+  height_v_active_mm: {lo: 474.0, hi: 474.0, search: false}
+  L_forward_mm: {lo: 300.0, hi: 300.0, search: false}
+  area_mid_bias: {lo: 0.0, hi: 0.0, search: false}
+  aspect_timing_u50: {lo: 0.5, hi: 0.5, search: false}
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.2
+  seed: 1234
+  budget: 60
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+  budget_counts: valid
+  max_attempts: 150
+description: GEOMETRY DIAGNOSTIC CROWE V2A four-DOF seed, 580x474x300, hold 0, p 3.25, no solves

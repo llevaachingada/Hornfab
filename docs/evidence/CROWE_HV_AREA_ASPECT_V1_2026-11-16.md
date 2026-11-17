@@ -4,6 +4,14 @@ Research: [`docs/research/typologies/CROWE_HV_AREA_ASPECT_RESEARCH_V2_2026-11-16
 This note records what was implemented, what was measured, and what remains unproven. **No BEM
 solve, GPU job, CMA/BoTorch run or acoustic claim is in this note.**
 
+> **Superseded for throat transition and parameter count by V2A (2026-11-16).** The 15-40 mm
+> circular-hold rule recorded below is withdrawn by the
+> [V2A addendum](../research/typologies/CROWE_V2A_THROAT_TRANSITION_ADDENDUM_2026-11-16.md).
+> The current implementation exposes four search dimensions and fixes the hold at 0 (with a
+> 20 mm A/B). The c0/c1 diagnostic configs were renamed to `c0_four_dof_seed.yaml` /
+> `c1_four_dof_bounds.yaml`; the section-cut numbers below are historical V1 evidence. Current
+> evidence: [`CROWE_HV_AREA_ASPECT_V2A_2026-11-16.md`](CROWE_HV_AREA_ASPECT_V2A_2026-11-16.md).
+
 ## What landed
 
 - `hornlab_search/design/generators/crowe_hv_area_aspect_v1.py` — versioned FREEFORM generator

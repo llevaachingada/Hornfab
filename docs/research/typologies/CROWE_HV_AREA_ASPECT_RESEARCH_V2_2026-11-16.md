@@ -13,6 +13,15 @@
 > change. The implementation's exact identities, source-tangent construction, validity domain and
 > open acoustic gates are recorded in
 > `docs/evidence/CROWE_HV_AREA_ASPECT_V1_2026-11-16.md`.
+>
+> **V2A update (2026-11-16).** The companion
+> [`CROWE_V2A_THROAT_TRANSITION_ADDENDUM_2026-11-16.md`](CROWE_V2A_THROAT_TRANSITION_ADDENDUM_2026-11-16.md)
+> supersedes this document on throat transition and parameter count. The implementation now exposes
+> exactly four search dimensions (`height_v_active_mm`, `L_forward_mm`, `area_mid_bias`,
+> `aspect_timing_u50`); `width_h_active_mm`, `p_mouth` and `throat_round_hold_mm` are fixed
+> generator-block values. The 15-40 mm circular-hold rule is withdrawn. Current evidence:
+> [`docs/evidence/CROWE_HV_AREA_ASPECT_V2A_2026-11-16.md`](../../evidence/CROWE_HV_AREA_ASPECT_V2A_2026-11-16.md).
+> No solve was launched.
 
 ## Executive decision
 

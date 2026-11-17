@@ -1,5 +1,28 @@
 # CONTINUITY
 
+## 2026-11-16 - V2A four-DOF parameter hardening (CPU geometry only; no solve, nothing queued)
+
+- Owner supplied the V2A addendum; moved to
+  `docs/research/typologies/CROWE_V2A_THROAT_TRANSITION_ADDENDUM_2026-11-16.md`. It supersedes V2
+  on throat transition and parameter count; the 15-40 mm circular-hold rule is withdrawn.
+- `crowe_hv_area_aspect_v1` now exposes exactly four search dimensions:
+  `height_v_active_mm`, `L_forward_mm`, `area_mid_bias`, `aspect_timing_u50`.
+  `width_h_active_mm` (580), `p_mouth` (3.25) and `throat_round_hold_mm` (0) are fixed
+  generator-block values; c2 (20 mm hold) and c3 (p 2.2) are fixed A/B configs, not knobs.
+- Timing law: normalized C2 smootherstep `S_R(u)` with exact half point `u50` and zero end
+  derivatives; `log R = log(W/H) S_R`; `p = 2 + (p_mouth-2) S_R`. The area bias is a C3 compact
+  window. `A = C(p) ab`, `R = a/b` and the driver-exit source tangent are preserved exactly.
+- c0 cuts: at 20 mm area 1.102x while |aspect-1| = 5.4e-4 and |p-2| = 3.3e-3; at 40 mm area
+  1.261x, p 2.024; at 100 mm p 2.262. c2's fixed 20 mm hold is exactly circular through 20 mm and
+  C2 at its boundary.
+- T2 law-level Jacobian: practical rank 4 at three parents, no weak keys, max |cosine| 0.633.
+- Real 8 kHz quarter mesh of c0: 8,318 tris, bad_open_edges 0, non-manifold 0, driven plane
+  36.000 x 36.000 mm, `fits_exit(36) = True`.
+- Tests: 17 in `tests/test_design_generators_crowe_hv_area_aspect.py` green. Section and Jacobian
+  tools added. No BEM, GPU, queue, objective or historical family change.
+- T0 screenshot audit remains open (no design ID/mesh hash supplied); the in-repo source check
+  confirms `view3d.js` `buildRidgeGeometry` is a display overlay, not physical ridge geometry.
+
 ## 2026-11-16 - Research library and acoustic-grounding skills integrated
 
 - Added `docs/knowledge/README.md`, source catalog/metadata, eight compact family cards,

@@ -8,12 +8,14 @@ and the preserved [supplied compilation](knowledge/imported/HornFab_Research_Kno
 Existing research remains in place; imported recommendations are not implementation mandates.
 
 
-[CROWE-inspired H/V area/aspect v1 research (2026-11-16)](research/typologies/CROWE_HV_AREA_ASPECT_RESEARCH_V2_2026-11-16.md):
-senior research and the forward area/aspect construction; the document's Phase 1 is implemented as
-`crowe_hv_area_aspect_v1` (geometry-only, no solves). [Implementation evidence](evidence/CROWE_HV_AREA_ASPECT_V1_2026-11-16.md):
-exact area/aspect identities, the owner's 0/5/10/20/40/80 mm section cuts, the 8 kHz quarter-mesh
-result, 500/500 lawful search-box samples, and the deferred Phase 2 items (roll, X crease, rim
-setback, throat-length study, objective changes).
+[CROWE-inspired H/V area/aspect v1 research and V2A hardening (2026-11-16)](research/typologies/CROWE_HV_AREA_ASPECT_RESEARCH_V2_2026-11-16.md):
+senior research plus the [V2A throat-transition/parameter addendum](research/typologies/CROWE_V2A_THROAT_TRANSITION_ADDENDUM_2026-11-16.md),
+which supersedes it on throat transition and parameter count. The implementation is
+`crowe_hv_area_aspect_v1` with exactly four search dimensions (geometry-only, no solves).
+[Implementation evidence](evidence/CROWE_HV_AREA_ASPECT_V2A_2026-11-16.md): exact identities,
+0/5/10/20/40/60/100 mm section cuts, the fixed 20 mm hold A/B, T2 practical rank 4, the 8 kHz
+quarter mesh, and the deferred Phase 2 items (roll, X crease, rim setback, throat-length study,
+objective changes). The earlier V1 evidence note is retained with a supersession header.
 
 [HF1440 12-seed supplied gallery and verification](research/typologies/hf1440_diverse_2026-11-16/RESULTS.md): distinct existing-code J seeds and K preview shapes, compatibility and CPU preflight results.
 
