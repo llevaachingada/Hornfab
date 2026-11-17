@@ -1,0 +1,39 @@
+{
+ "proposal": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\fable_architecture\\space_cards\\proposals\\20261114T015916Z-screen-db8e2f\\config__space_v1.yaml",
+ "notes": [
+  "REVIEW a0_deg: whole range moves the surface <= 0.97 mm (below the ~1 mm mesher fit): CMA spends a dimension on mesh noise (not fixed; pass --fix-weak or widen by hand)",
+  "fixed morph_exponent at its seed (moves no surface point at any sampled point)",
+  "REVIEW sigma0: no tested value kept the predicted bad rate <= 15 %"
+ ],
+ "before": {
+  "searched": 15,
+  "box": {
+   "ok": 33,
+   "outside": 62,
+   "refused": 1
+  },
+  "sigma": {
+   "0.05": 0.375,
+   "0.10": 0.5416666666666666,
+   "0.15": 0.5625,
+   "0.20": 0.625,
+   "0.25": 0.8125
+  }
+ },
+ "after": {
+  "searched": 14,
+  "box": {
+   "ok": 11,
+   "outside": 20,
+   "refused": 1
+  },
+  "sigma": {
+   "0.05": 0.16666666666666666,
+   "0.10": 0.625,
+   "0.15": 0.8333333333333334,
+   "0.20": 0.5,
+   "0.25": 0.75
+  },
+  "seed_shift_max_mm": 0.0
+ }
+}

@@ -418,7 +418,68 @@
   "inside_frac": 1.0,
   "constraint": "sum_k g_k * x_k >= -intercept (x in unit coordinates)"
  },
- "data": {},
+ "data": {
+  "walls": {
+   "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261116T193501Z-screen-f008ad",
+   "family": "FREEFORM",
+   "top_decile_n": 11,
+   "walls": [],
+   "proposal": [],
+   "wall_rel": 0.03,
+   "wall_frac": 0.5,
+   "note": "proposals are inputs for Group B 'narrow', never automatic config changes"
+  },
+  "links": {
+   "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261116T193501Z-screen-f008ad",
+   "family": "FREEFORM",
+   "top_decile_n": 11,
+   "pairs": [],
+   "cma_directions": [
+    {
+     "rank": 1,
+     "eigenvalue": 1.9386837694863228,
+     "fraction": 0.25154298866833874,
+     "keys": [
+      "h_a_deg",
+      "v_a_deg",
+      "h_rm_mm"
+     ],
+     "loadings": {
+      "h_a_deg": -0.6056112409414145,
+      "v_a_deg": -0.46599311601161836,
+      "h_rm_mm": 0.46573696038133816
+     }
+    },
+    {
+     "rank": 2,
+     "eigenvalue": 1.3302001774103787,
+     "fraction": 0.17259262878216491,
+     "keys": [
+      "L_mm",
+      "mouth_exponent"
+     ],
+     "loadings": {
+      "L_mm": -0.6970971399834823,
+      "mouth_exponent": -0.44343910864757596
+     }
+    },
+    {
+     "rank": 3,
+     "eigenvalue": 0.9930574788745686,
+     "fraction": 0.12884857762116678,
+     "keys": [
+      "v_a_deg",
+      "h_rm_mm"
+     ],
+     "loadings": {
+      "v_a_deg": -0.6434530342927522,
+      "h_rm_mm": -0.6258803760045372
+     }
+    }
+   ],
+   "proposed_links": []
+  }
+ },
  "recommendations": [
   {
    "knob": "*",

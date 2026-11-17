@@ -701,40 +701,269 @@
   "inside_frac": 0.9278350515463918,
   "constraint": "sum_k g_k * x_k >= -intercept (x in unit coordinates)"
  },
- "data": {},
+ "data": {
+  "walls": {
+   "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261117T001240Z-screen-7b664f",
+   "family": "OSSE",
+   "top_decile_n": 3,
+   "walls": [
+    {
+     "key": "morph_width_mm",
+     "lo": 300.0,
+     "hi": 590.0,
+     "frac_lo": 0.0,
+     "frac_hi": 1.0,
+     "wall_lo": false,
+     "wall_hi": true
+    },
+    {
+     "key": "a_deg",
+     "lo": 38.0,
+     "hi": 52.0,
+     "frac_lo": 0.3333333333333333,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "az_fold_v_width_deg",
+     "lo": 18.0,
+     "hi": 24.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.3333333333333333,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "s",
+     "lo": 0.35,
+     "hi": 1.0,
+     "frac_lo": 0.3333333333333333,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "L_mm",
+     "lo": 160.0,
+     "hi": 400.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "a0_deg",
+     "lo": 1.0,
+     "hi": 5.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "az_fold_v_deg",
+     "lo": -11.0,
+     "hi": -6.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "k",
+     "lo": 0.6,
+     "hi": 1.6,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "morph_corner_mm",
+     "lo": 8.0,
+     "hi": 60.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "morph_height_mm",
+     "lo": 200.0,
+     "hi": 480.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "morph_rate",
+     "lo": 1.2,
+     "hi": 3.5,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "n",
+     "lo": 5.0,
+     "hi": 9.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "q",
+     "lo": 0.98,
+     "hi": 1.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    }
+   ],
+   "proposal": [
+    {
+     "key": "L_mm",
+     "action": "narrow",
+     "new_lo": 191.39097,
+     "new_hi": 309.317790525,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "a0_deg",
+     "action": "narrow",
+     "new_lo": 1.0,
+     "new_hi": 1.9179448241,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "a_deg",
+     "action": "narrow",
+     "new_lo": 38.0,
+     "new_hi": 44.490481,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "az_fold_v_deg",
+     "action": "narrow",
+     "new_lo": -9.8154488737,
+     "new_hi": -7.868304999999999,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "az_fold_v_width_deg",
+     "action": "narrow",
+     "new_lo": 22.419705,
+     "new_hi": 24.0,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "k",
+     "action": "narrow",
+     "new_lo": 1.105848,
+     "new_hi": 1.4697140518,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "morph_corner_mm",
+     "action": "narrow",
+     "new_lo": 19.146848335599998,
+     "new_hi": 37.651374000000004,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "morph_height_mm",
+     "action": "narrow",
+     "new_lo": 342.957774,
+     "new_hi": 449.9616739978,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "morph_rate",
+     "action": "narrow",
+     "new_lo": 1.282715,
+     "new_hi": 1.8322250794,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "morph_width_mm",
+     "action": "widen_hi",
+     "new_lo": 300.0,
+     "new_hi": 649.0,
+     "reason": "100% of the top decile within 3% of hi; widen candidate (+10%), gated by physical safety"
+    },
+    {
+     "key": "n",
+     "action": "narrow",
+     "new_lo": 7.964281000000001,
+     "new_hi": 8.9800413416,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "q",
+     "action": "narrow",
+     "new_lo": 0.9860763461,
+     "new_hi": 0.9932338783,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "s",
+     "action": "narrow",
+     "new_lo": 0.35,
+     "new_hi": 0.656727,
+     "reason": "top-decile span padded 5%"
+    }
+   ],
+   "wall_rel": 0.03,
+   "wall_frac": 0.5,
+   "note": "proposals are inputs for Group B 'narrow', never automatic config changes"
+  },
+  "links": {
+   "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261117T001240Z-screen-7b664f",
+   "family": "OSSE",
+   "top_decile_n": 3,
+   "pairs": [],
+   "cma_directions": [],
+   "proposed_links": []
+  }
+ },
  "recommendations": [
   {
    "knob": "n",
-   "action": "link",
-   "why": "surface direction parallel to s (|cos| 0.986)",
+   "action": "link_rejected_by_data",
+   "why": "surface direction parallel to s (|cos| 0.986); rejected: the empirical links payload has no same-sign matching pair",
    "proposal": {
     "from": "s",
     "scale": -2.8316478179699796,
     "offset": 9.931872022467948
    },
-   "data_agrees": "unknown"
+   "data_agrees": false
   },
   {
    "knob": "q",
-   "action": "link",
-   "why": "surface direction parallel to s (|cos| 0.986)",
+   "action": "link_rejected_by_data",
+   "why": "surface direction parallel to s (|cos| 0.986); rejected: the empirical links payload has no same-sign matching pair",
    "proposal": {
     "from": "s",
     "scale": 0.037309147994517664,
     "offset": 0.9686126224748262
    },
-   "data_agrees": "unknown"
+   "data_agrees": false
   },
   {
    "knob": "a0_deg",
-   "action": "link",
-   "why": "surface direction parallel to k (|cos| 0.965)",
+   "action": "link_rejected_by_data",
+   "why": "surface direction parallel to k (|cos| 0.965); rejected: the empirical links payload has no same-sign matching pair",
    "proposal": {
     "from": "k",
     "scale": -0.4673015942767349,
     "offset": 1.6756666131415754
    },
-   "data_agrees": "unknown"
+   "data_agrees": false
   },
   {
    "knob": "*",

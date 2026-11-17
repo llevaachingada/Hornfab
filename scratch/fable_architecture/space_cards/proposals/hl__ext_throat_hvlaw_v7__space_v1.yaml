@@ -1,4 +1,4 @@
-# PROPOSED by tools/analysis/space_propose.py from scratch/fable_architecture/space_cards/hl__ext_throat_hvlaw_v7.json
+# PROPOSED by tools/analysis/space_propose.py from scratch\fable_architecture\space_cards\hl__ext_throat_hvlaw_v7.json
 # Review before use; the original config is unchanged. Changes:
 #   - sigma0 0.2 -> 0.1
 #   - REVIEW joint envelope constraint (not expressible in config): envelope binds jointly; linear margin model R^2 0.91, sign right 91%, only 43% of the box inside
@@ -215,4 +215,4 @@ search:
   infeasible_penalty: graded
 description: 'HOME LANDSCAPE 80Hx50V: OSSE ext-throat + per-direction wall angle (cosine
   law, wider H than V), no mouth morph (the mouth follows the walls), no K-law sizing'
-brief_file: examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
+brief_file: examples\briefs\home_landscape_2026-11-15\room_landscape_80x50_700_hf1440_v7.yaml

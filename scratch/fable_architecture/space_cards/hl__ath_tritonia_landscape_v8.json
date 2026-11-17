@@ -707,18 +707,263 @@
   "inside_frac": 1.0,
   "constraint": "sum_k g_k * x_k >= -intercept (x in unit coordinates)"
  },
- "data": {},
+ "data": {
+  "walls": {
+   "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261116T054705Z-screen-570bc6",
+   "family": "OSSE",
+   "top_decile_n": 4,
+   "walls": [
+    {
+     "key": "az_a_cos_amp",
+     "lo": -16.0,
+     "hi": -13.5,
+     "frac_lo": 0.5,
+     "frac_hi": 0.0,
+     "wall_lo": true,
+     "wall_hi": false
+    },
+    {
+     "key": "morph_width_mm",
+     "lo": 330.0,
+     "hi": 590.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.25,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "L_mm",
+     "lo": 140.0,
+     "hi": 400.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "a0_deg",
+     "lo": 5.0,
+     "hi": 11.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "a_deg",
+     "lo": 44.0,
+     "hi": 56.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "az_fold_v_deg",
+     "lo": -31.0,
+     "hi": -27.5,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "az_fold_v_width_deg",
+     "lo": 21.5,
+     "hi": 25.5,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "k",
+     "lo": 0.9,
+     "hi": 1.3,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "morph_corner_mm",
+     "lo": 10.0,
+     "hi": 30.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "morph_height_mm",
+     "lo": 250.0,
+     "hi": 480.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "morph_rate",
+     "lo": 1.2,
+     "hi": 2.1,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "n",
+     "lo": 4.0,
+     "hi": 7.5,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "q",
+     "lo": 0.97,
+     "hi": 0.995,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "s",
+     "lo": 0.92,
+     "hi": 1.04,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    }
+   ],
+   "proposal": [
+    {
+     "key": "L_mm",
+     "action": "narrow",
+     "new_lo": 143.9946646531,
+     "new_hi": 196.1291755838,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "a0_deg",
+     "action": "narrow",
+     "new_lo": 5.390362521,
+     "new_hi": 7.8790439001,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "a_deg",
+     "action": "narrow",
+     "new_lo": 47.768641529599996,
+     "new_hi": 53.4619694256,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "az_a_cos_amp",
+     "action": "widen_lo",
+     "new_lo": -17.6,
+     "new_hi": -13.5,
+     "reason": "50% of the top decile within 3% of lo; widen candidate (-10%), gated by physical safety"
+    },
+    {
+     "key": "az_fold_v_deg",
+     "action": "narrow",
+     "new_lo": -29.1684266813,
+     "new_hi": -27.5353015588,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "az_fold_v_width_deg",
+     "action": "narrow",
+     "new_lo": 21.5685776661,
+     "new_hi": 24.0584577469,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "k",
+     "action": "narrow",
+     "new_lo": 1.0401246389,
+     "new_hi": 1.2486323598,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "morph_corner_mm",
+     "action": "narrow",
+     "new_lo": 14.3200495701,
+     "new_hi": 23.8959806642,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "morph_height_mm",
+     "action": "narrow",
+     "new_lo": 313.8654690964,
+     "new_hi": 362.3817736274,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "morph_rate",
+     "action": "narrow",
+     "new_lo": 1.423141578,
+     "new_hi": 1.8901334011,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "morph_width_mm",
+     "action": "narrow",
+     "new_lo": 462.8289985412,
+     "new_hi": 590.0,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "n",
+     "action": "narrow",
+     "new_lo": 5.7519627617,
+     "new_hi": 7.058767867799999,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "q",
+     "action": "narrow",
+     "new_lo": 0.9755513651000001,
+     "new_hi": 0.9872925627,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "s",
+     "action": "narrow",
+     "new_lo": 0.9463823022,
+     "new_hi": 0.9916633088,
+     "reason": "top-decile span padded 5%"
+    }
+   ],
+   "wall_rel": 0.03,
+   "wall_frac": 0.5,
+   "note": "proposals are inputs for Group B 'narrow', never automatic config changes"
+  },
+  "links": {
+   "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261116T054705Z-screen-570bc6",
+   "family": "OSSE",
+   "top_decile_n": 4,
+   "pairs": [],
+   "cma_directions": [],
+   "proposed_links": []
+  }
+ },
  "recommendations": [
   {
    "knob": "s",
-   "action": "link",
-   "why": "surface direction parallel to q (|cos| 0.991)",
+   "action": "link_rejected_by_data",
+   "why": "surface direction parallel to q (|cos| 0.991); rejected: the empirical links payload has no same-sign matching pair",
    "proposal": {
     "from": "q",
     "scale": 0.8121966490908422,
     "offset": 0.16388668705178877
    },
-   "data_agrees": "unknown"
+   "data_agrees": false
   },
   {
    "knob": "*",

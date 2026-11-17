@@ -315,7 +315,24 @@
   "inside_frac": 1.0,
   "constraint": "sum_k g_k * x_k >= -intercept (x in unit coordinates)"
  },
- "data": {},
+ "data": {
+  "walls": {
+   "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261116T035949Z-screen-3e49ce",
+   "family": "FREEFORM",
+   "top_decile_n": 0,
+   "walls": [],
+   "proposal": [],
+   "note": "fewer than 10 valid rows: no top decile (schema.md)"
+  },
+  "links": {
+   "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261116T035949Z-screen-3e49ce",
+   "family": "FREEFORM",
+   "top_decile_n": 0,
+   "pairs": [],
+   "cma_directions": [],
+   "proposed_links": []
+  }
+ },
  "recommendations": [
   {
    "knob": "g_fc_hz",

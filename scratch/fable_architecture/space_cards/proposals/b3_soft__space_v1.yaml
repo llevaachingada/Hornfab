@@ -1,9 +1,8 @@
-# PROPOSED by tools/analysis/space_propose.py from scratch/fable_architecture/space_cards/b3_soft.json
+# PROPOSED by tools/analysis/space_propose.py from scratch\fable_architecture\space_cards\b3_soft.json
 # Review before use; the original config is unchanged. Changes:
-#   - g_theta_h1_deg.hi 60.0 -> 55.3
 name: klangfilm_hv_core__b3_soft__space_v1
 family: FREEFORM
-brief_file: examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml
+brief_file: examples\briefs\home_landscape_2026-11-15\room_landscape_80x50_700_hf1440_v7_smooth.yaml
 generator:
   name: grid
   rows:
@@ -110,7 +109,7 @@ bounds:
     search: true
   g_theta_h1_deg:
     lo: 36.5
-    hi: 55.3
+    hi: 60.0
     search: true
   g_theta_v0_deg:
     lo: 4.2

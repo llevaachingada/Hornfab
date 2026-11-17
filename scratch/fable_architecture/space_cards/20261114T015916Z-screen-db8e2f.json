@@ -738,7 +738,24 @@
   "inside_frac": 0.3541666666666667,
   "constraint": "sum_k g_k * x_k >= -intercept (x in unit coordinates)"
  },
- "data": {},
+ "data": {
+  "walls": {
+   "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261117T061046Z-studyverify-7d4e48",
+   "family": "OSSE",
+   "top_decile_n": 0,
+   "walls": [],
+   "proposal": [],
+   "note": "fewer than 10 valid rows: no top decile (schema.md)"
+  },
+  "links": {
+   "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261117T061046Z-studyverify-7d4e48",
+   "family": "OSSE",
+   "top_decile_n": 0,
+   "pairs": [],
+   "cma_directions": [],
+   "proposed_links": []
+  }
+ },
  "recommendations": [
   {
    "knob": "a0_deg",
@@ -766,14 +783,14 @@
   },
   {
    "knob": "a0_deg",
-   "action": "link",
-   "why": "surface direction parallel to k (|cos| 0.974)",
+   "action": "link_rejected_by_data",
+   "why": "surface direction parallel to k (|cos| 0.974); rejected: the empirical links payload has no same-sign matching pair",
    "proposal": {
     "from": "k",
     "scale": -0.008222372764950265,
     "offset": 2.0082223727649504
    },
-   "data_agrees": "unknown"
+   "data_agrees": false
   },
   {
    "knob": "*",

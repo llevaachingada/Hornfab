@@ -27,5 +27,5 @@ Envelope margin model: R^2 0.70, sign agreement 97%, inside 100%, binding {'dept
 
 ## Recommendations (not applied)
 
-- **link** `s`: surface direction parallel to q (|cos| 0.991); data_agrees=unknown; proposal `{"from": "q", "scale": 0.8121966490908422, "offset": 0.16388668705178877}`
+- **link_rejected_by_data** `s`: surface direction parallel to q (|cos| 0.991); rejected: the empirical links payload has no same-sign matching pair; data_agrees=false; proposal `{"from": "q", "scale": 0.8121966490908422, "offset": 0.16388668705178877}`
 - **sigma0** `*`: predicted bad-candidate rate <= 15% from the seed; proposal `{"max_safe_sigma0": 0.25}`

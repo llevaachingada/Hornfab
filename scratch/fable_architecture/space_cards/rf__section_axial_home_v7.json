@@ -418,7 +418,156 @@
   "inside_frac": 0.956989247311828,
   "constraint": "sum_k g_k * x_k >= -intercept (x in unit coordinates)"
  },
- "data": {},
+ "data": {
+  "walls": {
+   "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261116T020629Z-screen-0d29d7",
+   "family": "FREEFORM",
+   "top_decile_n": 3,
+   "walls": [
+    {
+     "key": "g_width_mm",
+     "lo": 480.0,
+     "hi": 600.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.6666666666666666,
+     "wall_lo": false,
+     "wall_hi": true
+    },
+    {
+     "key": "g_axial_v_mm",
+     "lo": 0.0,
+     "hi": 14.0,
+     "frac_lo": 0.3333333333333333,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_junction_power",
+     "lo": 16.0,
+     "hi": 48.0,
+     "frac_lo": 0.3333333333333333,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_axial_h_mm",
+     "lo": 0.0,
+     "hi": 12.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_crown_mm",
+     "lo": 10.0,
+     "hi": 40.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_depth_mm",
+     "lo": 170.0,
+     "hi": 300.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_h_depth_scale",
+     "lo": 0.9,
+     "hi": 1.1,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_height_mm",
+     "lo": 220.0,
+     "hi": 420.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    }
+   ],
+   "proposal": [
+    {
+     "key": "g_axial_h_mm",
+     "action": "narrow",
+     "new_lo": 2.1757728275,
+     "new_hi": 7.379796794100001,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_axial_v_mm",
+     "action": "narrow",
+     "new_lo": 0.0,
+     "new_hi": 7.4416747344,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_crown_mm",
+     "action": "narrow",
+     "new_lo": 30.4679906893,
+     "new_hi": 38.4516373629,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_depth_mm",
+     "action": "narrow",
+     "new_lo": 250.7200308126,
+     "new_hi": 276.5332186823,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_h_depth_scale",
+     "action": "narrow",
+     "new_lo": 1.0332443487,
+     "new_hi": 1.1,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_height_mm",
+     "action": "narrow",
+     "new_lo": 256.826321143,
+     "new_hi": 314.3993125169,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_junction_power",
+     "action": "narrow",
+     "new_lo": 16.0,
+     "new_hi": 28.128919182,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_width_mm",
+     "action": "widen_hi",
+     "new_lo": 480.0,
+     "new_hi": 660.0,
+     "reason": "67% of the top decile within 3% of hi; widen candidate (+10%), gated by physical safety"
+    }
+   ],
+   "wall_rel": 0.03,
+   "wall_frac": 0.5,
+   "note": "proposals are inputs for Group B 'narrow', never automatic config changes"
+  },
+  "links": {
+   "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261116T020629Z-screen-0d29d7",
+   "family": "FREEFORM",
+   "top_decile_n": 3,
+   "pairs": [],
+   "cma_directions": [],
+   "proposed_links": []
+  }
+ },
  "recommendations": [
   {
    "knob": "*",

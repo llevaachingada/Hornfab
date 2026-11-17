@@ -37,6 +37,6 @@ Envelope margin model: R^2 0.63, sign agreement 85%, inside 86%, binding {'width
 
 - **fix** `morph_exponent`: moves no surface point at any sampled point
 - **check_condition** `morph_fixed`: active at some sampled points only: its effect depends on another knob (split the lane or link the condition)
-- **link** `morph_fixed`: surface direction parallel to morph_rate (|cos| 0.996); data_agrees=unknown; proposal `{"from": "morph_rate", "scale": 0.0227371302871827, "offset": -0.0682113908615481}`
-- **link** `n`: surface direction parallel to s (|cos| 0.985); data_agrees=unknown; proposal `{"from": "s", "scale": -6.30387272264386, "offset": 8.112710905850701}`
+- **link_rejected_by_data** `morph_fixed`: surface direction parallel to morph_rate (|cos| 0.996); rejected: the empirical links payload has no same-sign matching pair; data_agrees=false; proposal `{"from": "morph_rate", "scale": 0.0227371302871827, "offset": -0.0682113908615481}`
+- **link_rejected_by_data** `n`: surface direction parallel to s (|cos| 0.985); rejected: the empirical links payload has no same-sign matching pair; data_agrees=false; proposal `{"from": "s", "scale": -6.30387272264386, "offset": 8.112710905850701}`
 - **sigma0** `*`: predicted bad-candidate rate <= 15% from the seed; proposal `{"max_safe_sigma0": 0.05}`

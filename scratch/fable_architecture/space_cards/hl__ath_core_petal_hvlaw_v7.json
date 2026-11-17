@@ -606,29 +606,670 @@
   "inside_frac": 0.6288659793814433,
   "constraint": "sum_k g_k * x_k >= -intercept (x in unit coordinates)"
  },
- "data": {},
+ "data": {
+  "walls": {
+   "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261115T152510Z-screen-a504f6",
+   "family": "OSSE",
+   "top_decile_n": 5,
+   "walls": [
+    {
+     "key": "az_a_cos_pow",
+     "lo": 1.0,
+     "hi": 6.0,
+     "frac_lo": 0.4,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "n",
+     "lo": 2.0,
+     "hi": 10.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.2,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "q",
+     "lo": 0.9,
+     "hi": 1.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.2,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "L_mm",
+     "lo": 160.0,
+     "hi": 340.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "a0_deg",
+     "lo": 1.0,
+     "hi": 3.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "a_deg",
+     "lo": 12.0,
+     "hi": 36.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "az_a_cos_amp",
+     "lo": 0.0,
+     "hi": 25.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "az_a_sf_amp",
+     "lo": 0.0,
+     "hi": 8.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "az_s_cos2_amp",
+     "lo": -0.25,
+     "hi": 0.5,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "k",
+     "lo": 0.3,
+     "hi": 3.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "s",
+     "lo": 0.2,
+     "hi": 1.2,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    }
+   ],
+   "proposal": [
+    {
+     "key": "L_mm",
+     "action": "narrow",
+     "new_lo": 206.5235330515,
+     "new_hi": 308.2151900973,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "a0_deg",
+     "action": "narrow",
+     "new_lo": 1.6567480373999999,
+     "new_hi": 2.6972098551,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "a_deg",
+     "action": "narrow",
+     "new_lo": 27.7466073593,
+     "new_hi": 36.0,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "az_a_cos_amp",
+     "action": "narrow",
+     "new_lo": 3.8646328001,
+     "new_hi": 11.3945476917,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "az_a_cos_pow",
+     "action": "narrow",
+     "new_lo": 1.0,
+     "new_hi": 2.2346098938,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "az_a_sf_amp",
+     "action": "narrow",
+     "new_lo": 1.0320660299000002,
+     "new_hi": 5.458342631700001,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "az_s_cos2_amp",
+     "action": "narrow",
+     "new_lo": -0.1257103943,
+     "new_hi": 0.2468766735,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "k",
+     "action": "narrow",
+     "new_lo": 1.1205908831,
+     "new_hi": 2.1411381346000002,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "n",
+     "action": "narrow",
+     "new_lo": 7.2691596573999995,
+     "new_hi": 10.0,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "q",
+     "action": "narrow",
+     "new_lo": 0.9546684928,
+     "new_hi": 1.0,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "s",
+     "action": "narrow",
+     "new_lo": 0.411287324,
+     "new_hi": 0.8144931841,
+     "reason": "top-decile span padded 5%"
+    }
+   ],
+   "wall_rel": 0.03,
+   "wall_frac": 0.5,
+   "note": "proposals are inputs for Group B 'narrow', never automatic config changes"
+  },
+  "links": {
+   "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261115T152510Z-screen-a504f6",
+   "family": "OSSE",
+   "top_decile_n": 5,
+   "pairs": [
+    {
+     "a": "L_mm",
+     "b": "az_a_cos_pow",
+     "rho": 0.8999999999999998,
+     "fit": {
+      "scale": 0.005957167504924504,
+      "offset": -0.2715015322456308,
+      "r2": 0.23197340611275397
+     }
+    },
+    {
+     "a": "L_mm",
+     "b": "az_s_cos2_amp",
+     "rho": 0.8999999999999998,
+     "fit": {
+      "scale": 0.001606301825570236,
+      "offset": -0.35532849224991286,
+      "r2": 0.22032503052119345
+     }
+    },
+    {
+     "a": "a_deg",
+     "b": "az_a_cos_pow",
+     "rho": -0.8999999999999998,
+     "fit": {
+      "scale": -0.1267118118054986,
+      "offset": 5.448778000724072,
+      "r2": 0.7782178469179207
+     }
+    },
+    {
+     "a": "a_deg",
+     "b": "az_s_cos2_amp",
+     "rho": -0.8999999999999998,
+     "fit": {
+      "scale": -0.028312241638480017,
+      "offset": 0.9959227265399286,
+      "r2": 0.5075355349496198
+     }
+    },
+    {
+     "a": "L_mm",
+     "b": "a_deg",
+     "rho": -0.7999999999999999,
+     "fit": {
+      "scale": -0.0617583718733878,
+      "offset": 49.06122524275111,
+      "r2": 0.5143790445394674
+     }
+    },
+    {
+     "a": "az_a_cos_pow",
+     "b": "az_s_cos2_amp",
+     "rho": 0.7999999999999999,
+     "fit": {
+      "scale": 0.09856044404325459,
+      "offset": -0.05781241162940216,
+      "r2": 0.126898433308553
+     }
+    },
+    {
+     "a": "k",
+     "b": "q",
+     "rho": -0.7999999999999999,
+     "fit": {
+      "scale": -0.03782073636514612,
+      "offset": 1.043992875098347,
+      "r2": 0.544091117767963
+     }
+    },
+    {
+     "a": "k",
+     "b": "s",
+     "rho": 0.7999999999999999,
+     "fit": {
+      "scale": 0.2988222092369938,
+      "offset": 0.08833453579156963,
+      "r2": 0.5715887466753389
+     }
+    },
+    {
+     "a": "n",
+     "b": "s",
+     "rho": 0.7999999999999999,
+     "fit": {
+      "scale": 0.11645496120804136,
+      "offset": -0.4223819879789897,
+      "r2": 0.5729578915191997
+     }
+    },
+    {
+     "a": "a0_deg",
+     "b": "az_s_cos2_amp",
+     "rho": -0.7,
+     "fit": {
+      "scale": -0.27734938432600875,
+      "offset": 0.6281622134178888,
+      "r2": 0.7692419341631569
+     }
+    },
+    {
+     "a": "a_deg",
+     "b": "az_a_sf_amp",
+     "rho": -0.7,
+     "fit": {
+      "scale": -0.35396062587106886,
+      "offset": 14.593193218895273,
+      "r2": 0.413404726202271
+     }
+    },
+    {
+     "a": "az_a_cos_amp",
+     "b": "az_s_cos2_amp",
+     "rho": -0.7,
+     "fit": {
+      "scale": -0.03275694629426014,
+      "offset": 0.32838736205531294,
+      "r2": 0.3583161741268682
+     }
+    },
+    {
+     "a": "az_a_cos_amp",
+     "b": "k",
+     "rho": 0.7,
+     "fit": {
+      "scale": 0.10561562620033532,
+      "offset": 0.8687852958672025,
+      "r2": 0.47867250544311113
+     }
+    },
+    {
+     "a": "az_a_cos_pow",
+     "b": "n",
+     "rho": 0.7,
+     "fit": {
+      "scale": 1.3976719050942519,
+      "offset": 6.908348915270023,
+      "r2": 0.49686129773010124
+     }
+    },
+    {
+     "a": "az_a_cos_pow",
+     "b": "s",
+     "rho": 0.7,
+     "fit": {
+      "scale": 0.23838719558181495,
+      "offset": 0.2829810012028477,
+      "r2": 0.6106568920318827
+     }
+    },
+    {
+     "a": "k",
+     "b": "n",
+     "rho": 0.7,
+     "fit": {
+      "scale": 1.9928576310089352,
+      "offset": 5.358322664231492,
+      "r2": 0.6017329009157603
+     }
+    },
+    {
+     "a": "q",
+     "b": "s",
+     "rho": -0.7,
+     "fit": {
+      "scale": -4.886661582788717,
+      "offset": 5.383478728507901,
+      "r2": 0.4018562963601874
+     }
+    },
+    {
+     "a": "L_mm",
+     "b": "az_a_cos_amp",
+     "rho": -0.6,
+     "fit": {
+      "scale": -0.026240023506800908,
+      "offset": 14.816006686726872,
+      "r2": 0.17606716753457996
+     }
+    },
+    {
+     "a": "L_mm",
+     "b": "n",
+     "rho": 0.6,
+     "fit": {
+      "scale": 0.009175411817017583,
+      "offset": 6.303262679958492,
+      "r2": 0.13996982045066753
+     }
+    },
+    {
+     "a": "a_deg",
+     "b": "az_a_cos_amp",
+     "rho": 0.6,
+     "fit": {
+      "scale": 0.35237837437817066,
+      "offset": -3.661684897933584,
+      "r2": 0.2354381532648644
+     }
+    },
+    {
+     "a": "a_deg",
+     "b": "n",
+     "rho": -0.6,
+     "fit": {
+      "scale": -0.19348145273828743,
+      "offset": 15.05882418572451,
+      "r2": 0.46149857294911967
+     }
+    },
+    {
+     "a": "az_a_sf_amp",
+     "b": "q",
+     "rho": 0.6,
+     "fit": {
+      "scale": 0.004461005107148715,
+      "offset": 0.9662597481238137,
+      "r2": 0.18666034365143336
+     }
+    }
+   ],
+   "cma_directions": [
+    {
+     "rank": 1,
+     "eigenvalue": 1.3886880937568429,
+     "fraction": 0.13010278291852864,
+     "keys": [
+      "az_a_sf_amp",
+      "az_a_cos_pow",
+      "a_deg"
+     ],
+     "loadings": {
+      "az_a_sf_amp": -0.5196745563748131,
+      "az_a_cos_pow": -0.4408609989228426,
+      "a_deg": 0.3968205607749524
+     }
+    },
+    {
+     "rank": 2,
+     "eigenvalue": 1.360620870829,
+     "fraction": 0.1274732336135956,
+     "keys": [
+      "a_deg",
+      "az_a_cos_amp",
+      "n"
+     ],
+     "loadings": {
+      "a_deg": 0.5782255944278054,
+      "az_a_cos_amp": -0.5355607989455898,
+      "n": 0.36726185782270426
+     }
+    },
+    {
+     "rank": 3,
+     "eigenvalue": 1.1928476745785317,
+     "fraction": 0.11175497417905883,
+     "keys": [
+      "L_mm",
+      "az_s_cos2_amp",
+      "s"
+     ],
+     "loadings": {
+      "L_mm": 0.566673771253469,
+      "az_s_cos2_amp": -0.422720352792893,
+      "s": 0.36934675826303787
+     }
+    }
+   ],
+   "proposed_links": [
+    {
+     "knob_b": "az_a_cos_pow",
+     "knob_a": "a_deg",
+     "scale": -0.1267118118054986,
+     "offset": 5.448778000724072,
+     "r2": 0.7782178469179207,
+     "source": "rho_top_decile"
+    },
+    {
+     "knob_b": "az_s_cos2_amp",
+     "knob_a": "a0_deg",
+     "scale": -0.27734938432600875,
+     "offset": 0.6281622134178888,
+     "r2": 0.7692419341631569,
+     "source": "rho_top_decile"
+    },
+    {
+     "knob_b": "s",
+     "knob_a": "az_a_cos_pow",
+     "scale": 0.23838719558181495,
+     "offset": 0.2829810012028477,
+     "r2": 0.6106568920318827,
+     "source": "rho_top_decile"
+    },
+    {
+     "knob_b": "n",
+     "knob_a": "k",
+     "scale": 1.9928576310089352,
+     "offset": 5.358322664231492,
+     "r2": 0.6017329009157603,
+     "source": "rho_top_decile"
+    },
+    {
+     "knob_b": "s",
+     "knob_a": "n",
+     "scale": 0.11645496120804136,
+     "offset": -0.4223819879789897,
+     "r2": 0.5729578915191997,
+     "source": "rho_top_decile"
+    },
+    {
+     "knob_b": "s",
+     "knob_a": "k",
+     "scale": 0.2988222092369938,
+     "offset": 0.08833453579156963,
+     "r2": 0.5715887466753389,
+     "source": "rho_top_decile"
+    },
+    {
+     "knob_b": "q",
+     "knob_a": "k",
+     "scale": -0.03782073636514612,
+     "offset": 1.043992875098347,
+     "r2": 0.544091117767963,
+     "source": "rho_top_decile"
+    },
+    {
+     "knob_b": "a_deg",
+     "knob_a": "L_mm",
+     "scale": -0.0617583718733878,
+     "offset": 49.06122524275111,
+     "r2": 0.5143790445394674,
+     "source": "rho_top_decile"
+    },
+    {
+     "knob_b": "az_s_cos2_amp",
+     "knob_a": "a_deg",
+     "scale": -0.028312241638480017,
+     "offset": 0.9959227265399286,
+     "r2": 0.5075355349496198,
+     "source": "rho_top_decile"
+    },
+    {
+     "knob_b": "n",
+     "knob_a": "az_a_cos_pow",
+     "scale": 1.3976719050942519,
+     "offset": 6.908348915270023,
+     "r2": 0.49686129773010124,
+     "source": "rho_top_decile"
+    },
+    {
+     "knob_b": "k",
+     "knob_a": "az_a_cos_amp",
+     "scale": 0.10561562620033532,
+     "offset": 0.8687852958672025,
+     "r2": 0.47867250544311113,
+     "source": "rho_top_decile"
+    },
+    {
+     "knob_b": "n",
+     "knob_a": "a_deg",
+     "scale": -0.19348145273828743,
+     "offset": 15.05882418572451,
+     "r2": 0.46149857294911967,
+     "source": "rho_top_decile"
+    },
+    {
+     "knob_b": "az_a_sf_amp",
+     "knob_a": "a_deg",
+     "scale": -0.35396062587106886,
+     "offset": 14.593193218895273,
+     "r2": 0.413404726202271,
+     "source": "rho_top_decile"
+    },
+    {
+     "knob_b": "s",
+     "knob_a": "q",
+     "scale": -4.886661582788717,
+     "offset": 5.383478728507901,
+     "r2": 0.4018562963601874,
+     "source": "rho_top_decile"
+    },
+    {
+     "knob_b": "az_s_cos2_amp",
+     "knob_a": "az_a_cos_amp",
+     "scale": -0.03275694629426014,
+     "offset": 0.32838736205531294,
+     "r2": 0.3583161741268682,
+     "source": "rho_top_decile"
+    },
+    {
+     "knob_b": "az_a_cos_amp",
+     "knob_a": "a_deg",
+     "scale": 0.35237837437817066,
+     "offset": -3.661684897933584,
+     "r2": 0.2354381532648644,
+     "source": "rho_top_decile"
+    },
+    {
+     "knob_b": "az_a_cos_pow",
+     "knob_a": "L_mm",
+     "scale": 0.005957167504924504,
+     "offset": -0.2715015322456308,
+     "r2": 0.23197340611275397,
+     "source": "rho_top_decile"
+    },
+    {
+     "knob_b": "az_s_cos2_amp",
+     "knob_a": "L_mm",
+     "scale": 0.001606301825570236,
+     "offset": -0.35532849224991286,
+     "r2": 0.22032503052119345,
+     "source": "rho_top_decile"
+    },
+    {
+     "knob_b": "q",
+     "knob_a": "az_a_sf_amp",
+     "scale": 0.004461005107148715,
+     "offset": 0.9662597481238137,
+     "r2": 0.18666034365143336,
+     "source": "rho_top_decile"
+    },
+    {
+     "knob_b": "az_a_cos_amp",
+     "knob_a": "L_mm",
+     "scale": -0.026240023506800908,
+     "offset": 14.816006686726872,
+     "r2": 0.17606716753457996,
+     "source": "rho_top_decile"
+    },
+    {
+     "knob_b": "n",
+     "knob_a": "L_mm",
+     "scale": 0.009175411817017583,
+     "offset": 6.303262679958492,
+     "r2": 0.13996982045066753,
+     "source": "rho_top_decile"
+    },
+    {
+     "knob_b": "az_s_cos2_amp",
+     "knob_a": "az_a_cos_pow",
+     "scale": 0.09856044404325459,
+     "offset": -0.05781241162940216,
+     "r2": 0.126898433308553,
+     "source": "rho_top_decile"
+    }
+   ]
+  }
+ },
  "recommendations": [
   {
    "knob": "q",
-   "action": "link",
-   "why": "surface direction parallel to s (|cos| 0.994)",
+   "action": "link_rejected_by_data",
+   "why": "surface direction parallel to s (|cos| 0.994); rejected: the empirical links payload has no same-sign matching pair",
    "proposal": {
     "from": "s",
     "scale": 0.14971671194333722,
     "offset": 0.8745675510289141
    },
-   "data_agrees": "unknown"
+   "data_agrees": false
   },
   {
    "knob": "az_a_sf_amp",
-   "action": "link",
-   "why": "surface direction parallel to a_deg (|cos| 0.984)",
+   "action": "link_rejected_by_data",
+   "why": "surface direction parallel to a_deg (|cos| 0.984); rejected: the empirical links payload has no same-sign matching pair",
    "proposal": {
     "from": "a_deg",
     "scale": 0.1207411840326426,
     "offset": 0.10221158321657775
    },
-   "data_agrees": "unknown"
+   "data_agrees": false
   },
   {
    "knob": "q",

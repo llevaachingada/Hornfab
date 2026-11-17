@@ -1,0 +1,38 @@
+{
+ "proposal": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\fable_architecture\\space_cards\\proposals\\atlas__core_law\\atlas__core_law__space_v1.yaml",
+ "notes": [
+  "sigma0 0.25 -> 0.05",
+  "REVIEW joint envelope constraint (not expressible in config): envelope binds jointly; linear margin model R^2 0.78, sign right 83%, only 44% of the box inside"
+ ],
+ "before": {
+  "searched": 17,
+  "box": {
+   "ok": 32,
+   "outside": 42,
+   "refused": 22
+  },
+  "sigma": {
+   "0.05": 0.08333333333333333,
+   "0.10": 0.2916666666666667,
+   "0.15": 0.25,
+   "0.20": 0.5208333333333334,
+   "0.25": 0.5833333333333334
+  }
+ },
+ "after": {
+  "searched": 17,
+  "box": {
+   "ok": 10,
+   "outside": 15,
+   "refused": 7
+  },
+  "sigma": {
+   "0.05": 0.08333333333333333,
+   "0.10": 0.3333333333333333,
+   "0.15": 0.375,
+   "0.20": 0.4583333333333333,
+   "0.25": 0.5
+  },
+  "seed_shift_max_mm": 0.0
+ }
+}

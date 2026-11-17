@@ -915,40 +915,57 @@
   "inside_frac": 0.44,
   "constraint": "sum_k g_k * x_k >= -intercept (x in unit coordinates)"
  },
- "data": {},
+ "data": {
+  "walls": {
+   "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\elites_20261030_core_law",
+   "family": "OSSE",
+   "top_decile_n": 0,
+   "walls": [],
+   "proposal": [],
+   "note": "fewer than 10 valid rows: no top decile (schema.md)"
+  },
+  "links": {
+   "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\elites_20261030_core_law",
+   "family": "OSSE",
+   "top_decile_n": 0,
+   "pairs": [],
+   "cma_directions": [],
+   "proposed_links": []
+  }
+ },
  "recommendations": [
   {
    "knob": "a_deg",
-   "action": "link",
-   "why": "surface direction parallel to az_a_sf_amp (|cos| 0.998)",
+   "action": "link_rejected_by_data",
+   "why": "surface direction parallel to az_a_sf_amp (|cos| 0.998); rejected: the empirical links payload has no same-sign matching pair",
    "proposal": {
     "from": "az_a_sf_amp",
     "scale": 0.3398779068206161,
     "offset": -6.895726738721564
    },
-   "data_agrees": "unknown"
+   "data_agrees": false
   },
   {
    "knob": "morph_fixed",
-   "action": "link",
-   "why": "surface direction parallel to morph_rate (|cos| 0.987)",
+   "action": "link_rejected_by_data",
+   "why": "surface direction parallel to morph_rate (|cos| 0.987); rejected: the empirical links payload has no same-sign matching pair",
    "proposal": {
     "from": "morph_rate",
     "scale": 0.032745927214854385,
     "offset": -0.09823778164456315
    },
-   "data_agrees": "unknown"
+   "data_agrees": false
   },
   {
    "knob": "az_n_cos2_amp",
-   "action": "link",
-   "why": "surface direction parallel to az_s_cos2_amp (|cos| 0.986)",
+   "action": "link_rejected_by_data",
+   "why": "surface direction parallel to az_s_cos2_amp (|cos| 0.986); rejected: the empirical links payload has no same-sign matching pair",
    "proposal": {
     "from": "az_s_cos2_amp",
     "scale": -2.464330096480417,
     "offset": 2.066795922190496
    },
-   "data_agrees": "unknown"
+   "data_agrees": false
   },
   {
    "knob": "*",

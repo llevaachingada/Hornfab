@@ -1,0 +1,70 @@
+{
+ "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261114T223630Z-screen-86e077",
+ "family": "FREEFORM",
+ "top_decile_n": 15,
+ "pairs": [
+  {
+   "a": "g_T",
+   "b": "g_fc_hz",
+   "rho": -0.7107142857142856,
+   "fit": {
+    "scale": -244.5354458531114,
+    "offset": 797.3231743162853,
+    "r2": 0.4433369585022179
+   }
+  }
+ ],
+ "cma_directions": [
+  {
+   "rank": 1,
+   "eigenvalue": 1.6311140215905544,
+   "fraction": 0.926123596611684,
+   "keys": [
+    "g_T",
+    "g_fc_hz"
+   ],
+   "loadings": {
+    "g_T": -0.9897464897853603,
+    "g_fc_hz": 0.14256800788853205
+   }
+  },
+  {
+   "rank": 2,
+   "eigenvalue": 0.0950637968530426,
+   "fraction": 0.053975886592680204,
+   "keys": [
+    "g_fc_hz",
+    "g_stop_deg"
+   ],
+   "loadings": {
+    "g_fc_hz": 0.9696403255361145,
+    "g_stop_deg": -0.2019503872784712
+   }
+  },
+  {
+   "rank": 3,
+   "eigenvalue": 0.03504933045763894,
+   "fraction": 0.01990051679563588,
+   "keys": [
+    "g_stop_deg",
+    "g_fc_hz"
+   ],
+   "loadings": {
+    "g_stop_deg": 0.9793568256737799,
+    "g_fc_hz": 0.19867562060030008
+   }
+  }
+ ],
+ "proposed_links": [
+  {
+   "knob_b": "g_fc_hz",
+   "knob_a": "g_T",
+   "scale": -244.5354458531114,
+   "offset": 797.3231743162853,
+   "r2": 0.4433369585022179,
+   "source": "rho_top_decile"
+  }
+ ],
+ "tool": "links",
+ "generated_utc": "2026-11-17T20:55:44Z"
+}

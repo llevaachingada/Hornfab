@@ -1,0 +1,54 @@
+{
+ "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261116T090751Z-screen-37b115",
+ "family": "FREEFORM",
+ "top_decile_n": 15,
+ "pairs": [],
+ "cma_directions": [
+  {
+   "rank": 1,
+   "eigenvalue": 1.644885675398885,
+   "fraction": 0.2359997470052186,
+   "keys": [
+    "mouth_exponent",
+    "h_n",
+    "L_mm"
+   ],
+   "loadings": {
+    "mouth_exponent": 0.5400435977237598,
+    "h_n": 0.5224577724328079,
+    "L_mm": -0.4236857640690416
+   }
+  },
+  {
+   "rank": 2,
+   "eigenvalue": 1.1818186810856979,
+   "fraction": 0.16956127341471947,
+   "keys": [
+    "h_a_deg",
+    "v_n",
+    "mouth_exponent"
+   ],
+   "loadings": {
+    "h_a_deg": 0.6391210188976556,
+    "v_n": -0.48493596408628703,
+    "mouth_exponent": -0.47027078737255634
+   }
+  },
+  {
+   "rank": 3,
+   "eigenvalue": 0.9307770312867709,
+   "fraction": 0.13354310709081835,
+   "keys": [
+    "h_rm_mm",
+    "L_mm"
+   ],
+   "loadings": {
+    "h_rm_mm": 0.8041492458769119,
+    "L_mm": -0.38768058699081615
+   }
+  }
+ ],
+ "proposed_links": [],
+ "tool": "links",
+ "generated_utc": "2026-11-17T20:55:45Z"
+}

@@ -1,0 +1,293 @@
+{
+ "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261115T150043Z-screen-d1ebf6",
+ "family": "OSSE",
+ "top_decile_n": 7,
+ "pairs": [
+  {
+   "a": "a0_deg",
+   "b": "throat_ext_angle_deg",
+   "rho": 1.0,
+   "fit": {
+    "scale": 0.9999999999999994,
+    "offset": -4.981342719042518e-16,
+    "r2": 1.0
+   }
+  },
+  {
+   "a": "a_deg",
+   "b": "az_a_cos_pow",
+   "rho": 0.8214285714285715,
+   "fit": {
+    "scale": 0.28063803940467547,
+    "offset": -5.448152682439275,
+    "r2": 0.7513516128500467
+   }
+  },
+  {
+   "a": "a_deg",
+   "b": "az_a_cos_amp",
+   "rho": -0.7500000000000002,
+   "fit": {
+    "scale": -0.8256235610657974,
+    "offset": 39.26331575206426,
+    "r2": 0.6993830568697472
+   }
+  },
+  {
+   "a": "az_s_cos2_amp",
+   "b": "r0_mm",
+   "rho": 0.7500000000000002,
+   "fit": {
+    "scale": 15.621275833893211,
+    "offset": 26.075836474470886,
+    "r2": 0.5267815523854004
+   }
+  },
+  {
+   "a": "r0_mm",
+   "b": "throat_ext_length_mm",
+   "rho": 0.7500000000000002,
+   "fit": {
+    "scale": 8.429173198533382,
+    "offset": -106.98366553277515,
+    "r2": 0.69912973177526
+   }
+  },
+  {
+   "a": "L_mm",
+   "b": "s",
+   "rho": -0.7142857142857144,
+   "fit": {
+    "scale": -0.006601929910597424,
+    "offset": 2.011099380760528,
+    "r2": 0.42902792390653144
+   }
+  },
+  {
+   "a": "a0_deg",
+   "b": "r0_mm",
+   "rho": 0.7142857142857144,
+   "fit": {
+    "scale": 2.0289972935994594,
+    "offset": 16.819808792927684,
+    "r2": 0.6017545008231293
+   }
+  },
+  {
+   "a": "r0_mm",
+   "b": "throat_ext_angle_deg",
+   "rho": 0.7142857142857144,
+   "fit": {
+    "scale": 0.29657728116315596,
+    "offset": -3.5832092681641785,
+    "r2": 0.6017545008231299
+   }
+  },
+  {
+   "a": "L_mm",
+   "b": "a_deg",
+   "rho": 0.642857142857143,
+   "fit": {
+    "scale": 0.10930459793437594,
+    "offset": 6.355997933204023,
+    "r2": 0.0853130210529075
+   }
+  },
+  {
+   "a": "az_a_cos_amp",
+   "b": "az_a_cos_pow",
+   "rho": -0.642857142857143,
+   "fit": {
+    "scale": -0.19906052658726017,
+    "offset": 5.850064618041756,
+    "r2": 0.3684423079524879
+   }
+  },
+  {
+   "a": "az_a_cos_amp",
+   "b": "r0_mm",
+   "rho": 0.642857142857143,
+   "fit": {
+    "scale": 0.2883459012644467,
+    "offset": 19.78668299352942,
+    "r2": 0.2676703139392066
+   }
+  },
+  {
+   "a": "az_a_cos_amp",
+   "b": "throat_ext_length_mm",
+   "rho": 0.642857142857143,
+   "fit": {
+    "scale": 2.4595129597519603,
+    "offset": 59.38015304151264,
+    "r2": 0.1916278780198325
+   }
+  },
+  {
+   "a": "az_a_cos_pow",
+   "b": "r0_mm",
+   "rho": -0.6071428571428572,
+   "fit": {
+    "scale": -1.100644356810915,
+    "offset": 27.232352850548754,
+    "r2": 0.41943770551846116
+   }
+  },
+  {
+   "a": "az_s_cos2_amp",
+   "b": "throat_ext_length_mm",
+   "rho": 0.6071428571428572,
+   "fit": {
+    "scale": 186.21053249742744,
+    "offset": 120.13479804466917,
+    "r2": 0.7365357919987897
+   }
+  }
+ ],
+ "cma_directions": [
+  {
+   "rank": 2,
+   "eigenvalue": 1.1081328360276625,
+   "fraction": 0.1444355909596683,
+   "keys": [
+    "s",
+    "az_a_cos_amp",
+    "L_mm"
+   ],
+   "loadings": {
+    "s": -0.7038156237744407,
+    "az_a_cos_amp": 0.42149225219256503,
+    "L_mm": -0.35968933126246455
+   }
+  },
+  {
+   "rank": 3,
+   "eigenvalue": 1.0379320987402891,
+   "fraction": 0.13528552821786438,
+   "keys": [
+    "az_s_cos2_amp",
+    "throat_ext_length_mm"
+   ],
+   "loadings": {
+    "az_s_cos2_amp": 0.6987996345047769,
+    "throat_ext_length_mm": -0.45413542676484375
+   }
+  }
+ ],
+ "proposed_links": [
+  {
+   "knob_b": "throat_ext_angle_deg",
+   "knob_a": "a0_deg",
+   "scale": 0.9999999999999994,
+   "offset": -4.981342719042518e-16,
+   "r2": 1.0,
+   "source": "rho_top_decile"
+  },
+  {
+   "knob_b": "az_a_cos_pow",
+   "knob_a": "a_deg",
+   "scale": 0.28063803940467547,
+   "offset": -5.448152682439275,
+   "r2": 0.7513516128500467,
+   "source": "rho_top_decile"
+  },
+  {
+   "knob_b": "throat_ext_length_mm",
+   "knob_a": "az_s_cos2_amp",
+   "scale": 186.21053249742744,
+   "offset": 120.13479804466917,
+   "r2": 0.7365357919987897,
+   "source": "rho_top_decile"
+  },
+  {
+   "knob_b": "az_a_cos_amp",
+   "knob_a": "a_deg",
+   "scale": -0.8256235610657974,
+   "offset": 39.26331575206426,
+   "r2": 0.6993830568697472,
+   "source": "rho_top_decile"
+  },
+  {
+   "knob_b": "throat_ext_length_mm",
+   "knob_a": "r0_mm",
+   "scale": 8.429173198533382,
+   "offset": -106.98366553277515,
+   "r2": 0.69912973177526,
+   "source": "rho_top_decile"
+  },
+  {
+   "knob_b": "throat_ext_angle_deg",
+   "knob_a": "r0_mm",
+   "scale": 0.29657728116315596,
+   "offset": -3.5832092681641785,
+   "r2": 0.6017545008231299,
+   "source": "rho_top_decile"
+  },
+  {
+   "knob_b": "r0_mm",
+   "knob_a": "a0_deg",
+   "scale": 2.0289972935994594,
+   "offset": 16.819808792927684,
+   "r2": 0.6017545008231293,
+   "source": "rho_top_decile"
+  },
+  {
+   "knob_b": "r0_mm",
+   "knob_a": "az_s_cos2_amp",
+   "scale": 15.621275833893211,
+   "offset": 26.075836474470886,
+   "r2": 0.5267815523854004,
+   "source": "rho_top_decile"
+  },
+  {
+   "knob_b": "s",
+   "knob_a": "L_mm",
+   "scale": -0.006601929910597424,
+   "offset": 2.011099380760528,
+   "r2": 0.42902792390653144,
+   "source": "rho_top_decile"
+  },
+  {
+   "knob_b": "r0_mm",
+   "knob_a": "az_a_cos_pow",
+   "scale": -1.100644356810915,
+   "offset": 27.232352850548754,
+   "r2": 0.41943770551846116,
+   "source": "rho_top_decile"
+  },
+  {
+   "knob_b": "az_a_cos_pow",
+   "knob_a": "az_a_cos_amp",
+   "scale": -0.19906052658726017,
+   "offset": 5.850064618041756,
+   "r2": 0.3684423079524879,
+   "source": "rho_top_decile"
+  },
+  {
+   "knob_b": "r0_mm",
+   "knob_a": "az_a_cos_amp",
+   "scale": 0.2883459012644467,
+   "offset": 19.78668299352942,
+   "r2": 0.2676703139392066,
+   "source": "rho_top_decile"
+  },
+  {
+   "knob_b": "throat_ext_length_mm",
+   "knob_a": "az_a_cos_amp",
+   "scale": 2.4595129597519603,
+   "offset": 59.38015304151264,
+   "r2": 0.1916278780198325,
+   "source": "rho_top_decile"
+  },
+  {
+   "knob_b": "a_deg",
+   "knob_a": "L_mm",
+   "scale": 0.10930459793437594,
+   "offset": 6.355997933204023,
+   "r2": 0.0853130210529075,
+   "source": "rho_top_decile"
+  }
+ ],
+ "tool": "links",
+ "generated_utc": "2026-11-17T20:55:45Z"
+}

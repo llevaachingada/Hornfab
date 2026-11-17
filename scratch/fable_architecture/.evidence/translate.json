@@ -1,0 +1,72 @@
+{
+ "biradial_best -> hl__osse_rrect_fold_warm_v7": {
+  "ok": true,
+  "residual_rms_scaled": 31.774337913541817,
+  "residual_by_key": {
+   "mouth_width_mm": 7.329499794650474e-06,
+   "mouth_height_mm": -4.7173000439215684e-06,
+   "depth_mm": 83.01985898519487,
+   "h_wall_angle_mouth_deg": -1.45326170982446,
+   "v_wall_angle_mouth_deg": 0.23359621106858697,
+   "h_halfwidth_mid_mm": -11.495030636505234,
+   "v_halfwidth_mid_mm": 6.376566228355713
+  },
+  "history": [
+   43.87739081604388,
+   32.214137769997706,
+   32.03211615029854,
+   31.845792715540938,
+   31.776474492756616,
+   31.774337913541817
+  ],
+  "reason": null
+ },
+ "biradial_best -> hl__ext_throat_hvlaw_v7": {
+  "ok": true,
+  "residual_rms_scaled": 11.583061301809913,
+  "residual_by_key": {
+   "mouth_width_mm": 4.544841037356491,
+   "mouth_height_mm": 15.823412941764616,
+   "depth_mm": 17.908249726700006,
+   "h_wall_angle_mouth_deg": 4.9479788831419995,
+   "v_wall_angle_mouth_deg": 16.72808960444825,
+   "h_halfwidth_mid_mm": -5.314214481850399,
+   "v_halfwidth_mid_mm": -3.8571266500508727
+  },
+  "history": [
+   55.02002581011554,
+   42.65708874670681,
+   19.87785740340031,
+   12.64042959460784,
+   11.583061301809913
+  ],
+  "reason": null
+ },
+ "tritonia_v9_best -> hl__biradial_es_style_v7": {
+  "ok": true,
+  "residual_rms_scaled": 4.162655833835052,
+  "residual_by_key": {
+   "mouth_width_mm": -0.3646123061000708,
+   "mouth_height_mm": 0.6487203311999679,
+   "depth_mm": -1.9567245580583403,
+   "h_wall_angle_mouth_deg": -5.695208007876374,
+   "v_wall_angle_mouth_deg": -5.666255145012414,
+   "h_halfwidth_mid_mm": 7.200604327184124,
+   "v_halfwidth_mid_mm": -0.7216852781683798
+  },
+  "history": [
+   31.31926767319908,
+   4.294334049110672,
+   4.271764218488916,
+   4.248224821041475,
+   4.219530644258848,
+   4.200587272923293,
+   4.1906296484346335,
+   4.181482921698879,
+   4.173841045644798,
+   4.16753247101297,
+   4.162655833835052
+  ],
+  "reason": null
+ }
+}

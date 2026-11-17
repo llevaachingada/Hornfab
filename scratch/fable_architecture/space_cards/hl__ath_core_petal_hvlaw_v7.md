@@ -24,8 +24,8 @@ Envelope margin model: R^2 0.81, sign agreement 82%, inside 63%, binding {'heigh
 
 ## Recommendations (not applied)
 
-- **link** `q`: surface direction parallel to s (|cos| 0.994); data_agrees=unknown; proposal `{"from": "s", "scale": 0.14971671194333722, "offset": 0.8745675510289141}`
-- **link** `az_a_sf_amp`: surface direction parallel to a_deg (|cos| 0.984); data_agrees=unknown; proposal `{"from": "a_deg", "scale": 0.1207411840326426, "offset": 0.10221158321657775}`
+- **link_rejected_by_data** `q`: surface direction parallel to s (|cos| 0.994); rejected: the empirical links payload has no same-sign matching pair; data_agrees=false; proposal `{"from": "s", "scale": 0.14971671194333722, "offset": 0.8745675510289141}`
+- **link_rejected_by_data** `az_a_sf_amp`: surface direction parallel to a_deg (|cos| 0.984); rejected: the empirical links payload has no same-sign matching pair; data_agrees=false; proposal `{"from": "a_deg", "scale": 0.1207411840326426, "offset": 0.10221158321657775}`
 - **rebound** `q`: edge slice mostly refused/outside while the middle is not; proposal `{"lower_hi_to_unit": 0.8}`
 - **sigma0** `*`: predicted bad-candidate rate <= 15% from the seed; proposal `{"max_safe_sigma0": 0.05}`
 - **constraint** `*`: envelope binds jointly; linear margin model R^2 0.81, sign right 82%, only 63% of the box inside; proposal `{"intercept_mm": 622.6322108617214, "gradient_mm_per_range": {"L_mm": -404.3298887609985, "a0_deg": -20.838726425393276, "a_deg": -306.82161042957387, "az_a_cos_amp": -282.9386877317305, "az_a_cos_pow": 21.692234122247697, "az_a_sf_amp": -96.69233134092049, "az_s_cos2_amp": -88.71925005858478, "k": 29.845806430886057, "n": 200.7425446046785, "q": -99.14565116197846, "s": -195.04768932044223}}`

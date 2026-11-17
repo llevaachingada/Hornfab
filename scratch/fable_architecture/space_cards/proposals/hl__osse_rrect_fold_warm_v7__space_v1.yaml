@@ -1,8 +1,6 @@
-# PROPOSED by tools/analysis/space_propose.py from scratch/fable_architecture/space_cards/hl__osse_rrect_fold_warm_v7.json
+# PROPOSED by tools/analysis/space_propose.py from scratch\fable_architecture\space_cards\hl__osse_rrect_fold_warm_v7.json
 # Review before use; the original config is unchanged. Changes:
-#   - fixed a0_deg at its seed (whole range moves the surface <= 0.39 mm (below the ~1 mm mesher fit): CMA spends a dimension on mesh noise)
-#   - linked n = -4.24584 * s + 10.03136
-#   - linked k = -0.093273 * a_deg + 6.198556
+#   - fixed a0_deg at its seed (whole range moves the surface <= 0.42 mm (below the ~1 mm mesher fit): CMA spends a dimension on mesh noise)
 bounds:
   L_mm:
     lo: 228.712
@@ -127,7 +125,7 @@ bounds:
   az_fold_h_width_deg:
     lo: 8.0
     hi: 40.0
-brief_file: examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
+brief_file: examples\briefs\home_landscape_2026-11-15\room_landscape_80x50_700_hf1440_v7.yaml
 description: 'WARM START: hl__osse_rrect_morph_v7 best (J 3.992, runs/20261115T154322Z-screen-07bea2)
   + meridian fold searched'
 family: OSSE
@@ -150,15 +148,6 @@ search:
   tolfun: 0.001
   budget_counts: valid
   max_attempts: 200
-  links:
-    n:
-      from: s
-      scale: -4.24584
-      offset: 10.03136
-    k:
-      from: a_deg
-      scale: -0.093273
-      offset: 6.198556
 seed_params:
   L_mm: 255.830467
   a0_deg: 2.302789

@@ -22,6 +22,11 @@ safety net; owner decision cards for C1-C6. The target architecture, stages 0-8 
 [ARCHITECTURE_AND_STAGED_PLAN_2026-11-17.md](../scratch/fable_architecture/ARCHITECTURE_AND_STAGED_PLAN_2026-11-17.md).
 Docs only; no code, solve or queue change.
 
+[Owner decisions packet (2026-11-17)](../scratch/fable_architecture/OWNER_DECISIONS_PACKET_2026-11-17.md):
+C1-C6 with what each choice changes, the stage-5 proposal table (12 changed, 17 no-change), the
+categorical split, cross-family seeding residuals, the frequency counts actually in use, and the six
+new defects. Evidence only; nothing applied.
+
 [First-session verification evidence (2026-11-17)](../scratch/fable_architecture/EVIDENCE_VERIFY_2026-11-17.md):
 the Windows-checkout run of the handoff §2 tests (187 passed), the full offline suite and its 8-failure
 triage, the U3 CPU validity tables on both candidate hosts, the record-shadow counts over 22 lane runs

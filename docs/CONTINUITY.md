@@ -1,5 +1,27 @@
 # CONTINUITY
 
+## 2026-11-17 (local orchestrator, stage 5) - Data agreement rejects every geometric link; 29 proposals
+
+- `space_card.recommend()` now carries `data_agrees` from `links.py` on each lane's latest run. Of 20
+  link proposals with a real run behind them, **all 20 are `false`** (`hl__crowe_x_osse_cd_v7`
+  `g_wrap_deg`, `hl__osse_rrect_fold_warm_v7` `n`/`k`, the tritonia/twinray/ath/atlas pairs, ...).
+  The links in the already-reviewed Crowe and fold-warm proposals are therefore **withdrawn**;
+  the fold-warm `a0_deg` fix (18 -> 17, seed shift 0) remains. Only the `_w1` variant keeps its
+  links, flagged `unknown` (no run) and needing a run or a 2-run A/B.
+- 29 proposals in `scratch/fable_architecture/space_cards/proposals/` (12 apply a change, 17 are
+  "no change justified"); originals untouched, nothing applied. Biggest: `atlas__ath_core`
+  14 -> 13 keys with `L_mm.hi 520 -> 436.8`, `a_deg.hi 80 -> 66` (box outside 37/96 -> 4/32);
+  `atlas__core_law` sigma0 0.25 -> 0.05; `hl__lecleach_iwata_ar_landscape_smooth_v7` two bound
+  raises + sigma0 0.20 -> 0.10. Every proposal keeps the incumbent seed (seed shift 0.0 mm).
+- `b3_soft`: the senior-pass `g_theta_h1_deg.hi 60 -> 55.3` trim does NOT reproduce at the handoff's
+  96-point box (top slice 9/19 = 47 %, under the trigger); it is sampling-sensitive and now needs
+  owner judgement rather than an automatic trim.
+- `OWNER_DECISIONS_PACKET_2026-11-17.md`: C1-C6 with what each changes, the proposal table, the
+  categorical split (ath_core + 4 rear_density -> 3 configs each = 15 files), cross-family residuals
+  (biradial -> fold-warm RMS 31.8, depth 83 mm away; tritonia_v9 -> biradial RMS 4.2), and the
+  frequency counts actually in use (screen 12 / verify 25 / final 36).
+- No config, brief, bound, envelope or queue changed; no GPU job started.
+
 ## 2026-11-17 (local orchestrator) - First-session verification on the Windows checkout
 
 - Branch `ccr-260b4b76-fi6b8j` (PR #67). Handoff §2 test list: **187 passed** (log

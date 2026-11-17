@@ -544,18 +544,365 @@
   "inside_frac": 1.0,
   "constraint": "sum_k g_k * x_k >= -intercept (x in unit coordinates)"
  },
- "data": {},
+ "data": {
+  "walls": {
+   "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261116T152544Z-screen-5f7d93",
+   "family": "FREEFORM",
+   "top_decile_n": 7,
+   "walls": [
+    {
+     "key": "g_s",
+     "lo": 0.2,
+     "hi": 0.45,
+     "frac_lo": 0.0,
+     "frac_hi": 0.42857142857142855,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_sf_ab",
+     "lo": 0.7,
+     "hi": 0.9,
+     "frac_lo": 0.0,
+     "frac_hi": 0.42857142857142855,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_a_v_deg",
+     "lo": 20.0,
+     "hi": 28.0,
+     "frac_lo": 0.14285714285714285,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_r_lip_mm",
+     "lo": 8.0,
+     "hi": 30.0,
+     "frac_lo": 0.14285714285714285,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_sf_amt",
+     "lo": 0.15,
+     "hi": 0.38,
+     "frac_lo": 0.14285714285714285,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_L_mm",
+     "lo": 200.0,
+     "hi": 285.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_a_h_deg",
+     "lo": 33.0,
+     "hi": 40.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_n",
+     "lo": 1.8,
+     "hi": 3.2,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_wrap_deg",
+     "lo": 80.0,
+     "hi": 160.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    }
+   ],
+   "proposal": [
+    {
+     "key": "g_L_mm",
+     "action": "narrow",
+     "new_lo": 240.1019876645,
+     "new_hi": 277.7541038736,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_a_h_deg",
+     "action": "narrow",
+     "new_lo": 34.1717276531,
+     "new_hi": 36.9326910926,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_a_v_deg",
+     "action": "narrow",
+     "new_lo": 20.0,
+     "new_hi": 23.664067156799998,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_n",
+     "action": "narrow",
+     "new_lo": 2.073998,
+     "new_hi": 2.6437626749,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_r_lip_mm",
+     "action": "narrow",
+     "new_lo": 8.0,
+     "new_hi": 20.332024805,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_s",
+     "action": "narrow",
+     "new_lo": 0.377335,
+     "new_hi": 0.45,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_sf_ab",
+     "action": "narrow",
+     "new_lo": 0.7801486691,
+     "new_hi": 0.9,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_sf_amt",
+     "action": "narrow",
+     "new_lo": 0.15,
+     "new_hi": 0.250769,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_wrap_deg",
+     "action": "narrow",
+     "new_lo": 80.4728460352,
+     "new_hi": 124.8812625926,
+     "reason": "top-decile span padded 5%"
+    }
+   ],
+   "wall_rel": 0.03,
+   "wall_frac": 0.5,
+   "note": "proposals are inputs for Group B 'narrow', never automatic config changes"
+  },
+  "links": {
+   "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261116T152544Z-screen-5f7d93",
+   "family": "FREEFORM",
+   "top_decile_n": 7,
+   "pairs": [
+    {
+     "a": "g_a_h_deg",
+     "b": "g_n",
+     "rho": -0.7500000000000002,
+     "fit": {
+      "scale": -0.15957146949268003,
+      "offset": 8.12644008826081,
+      "r2": 0.4481635325223665
+     }
+    },
+    {
+     "a": "g_a_v_deg",
+     "b": "g_sf_ab",
+     "rho": -0.7500000000000002,
+     "fit": {
+      "scale": -0.01964471461070961,
+      "offset": 1.301050481721126,
+      "r2": 0.2901508753096239
+     }
+    },
+    {
+     "a": "g_s",
+     "b": "g_sf_ab",
+     "rho": 0.7500000000000002,
+     "fit": {
+      "scale": 0.8275712882621664,
+      "offset": 0.5083635582506136,
+      "r2": 0.20960677330042143
+     }
+    },
+    {
+     "a": "g_L_mm",
+     "b": "g_r_lip_mm",
+     "rho": -0.7142857142857144,
+     "fit": {
+      "scale": -0.2750790739523528,
+      "offset": 85.60513188230827,
+      "r2": 0.4186566296522044
+     }
+    },
+    {
+     "a": "g_L_mm",
+     "b": "g_sf_ab",
+     "rho": 0.7142857142857144,
+     "fit": {
+      "scale": 0.002821627672528527,
+      "offset": 0.12856015413349703,
+      "r2": 0.499172585982397
+     }
+    },
+    {
+     "a": "g_n",
+     "b": "g_s",
+     "rho": 0.6785714285714287,
+     "fit": {
+      "scale": 0.1087920927034652,
+      "offset": 0.16865700490227967,
+      "r2": 0.8183372704813522
+     }
+    },
+    {
+     "a": "g_s",
+     "b": "g_sf_amt",
+     "rho": -0.6785714285714287,
+     "fit": {
+      "scale": -1.0442709085772746,
+      "offset": 0.6432822975613157,
+      "r2": 0.6018796423983471
+     }
+    },
+    {
+     "a": "g_n",
+     "b": "g_sf_ab",
+     "rho": 0.642857142857143,
+     "fit": {
+      "scale": 0.11783621304366595,
+      "offset": 0.5810772290962489,
+      "r2": 0.29382565040134034
+     }
+    },
+    {
+     "a": "g_r_lip_mm",
+     "b": "g_wrap_deg",
+     "rho": -0.642857142857143,
+     "fit": {
+      "scale": -2.0939597062212623,
+      "offset": 129.41642968693466,
+      "r2": 0.339407983330383
+     }
+    },
+    {
+     "a": "g_r_lip_mm",
+     "b": "g_sf_ab",
+     "rho": -0.6071428571428572,
+     "fit": {
+      "scale": -0.006223442082409166,
+      "offset": 0.9507314823165057,
+      "r2": 0.43890421668214163
+     }
+    }
+   ],
+   "cma_directions": [],
+   "proposed_links": [
+    {
+     "knob_b": "g_s",
+     "knob_a": "g_n",
+     "scale": 0.1087920927034652,
+     "offset": 0.16865700490227967,
+     "r2": 0.8183372704813522,
+     "source": "rho_top_decile"
+    },
+    {
+     "knob_b": "g_sf_amt",
+     "knob_a": "g_s",
+     "scale": -1.0442709085772746,
+     "offset": 0.6432822975613157,
+     "r2": 0.6018796423983471,
+     "source": "rho_top_decile"
+    },
+    {
+     "knob_b": "g_sf_ab",
+     "knob_a": "g_L_mm",
+     "scale": 0.002821627672528527,
+     "offset": 0.12856015413349703,
+     "r2": 0.499172585982397,
+     "source": "rho_top_decile"
+    },
+    {
+     "knob_b": "g_n",
+     "knob_a": "g_a_h_deg",
+     "scale": -0.15957146949268003,
+     "offset": 8.12644008826081,
+     "r2": 0.4481635325223665,
+     "source": "rho_top_decile"
+    },
+    {
+     "knob_b": "g_sf_ab",
+     "knob_a": "g_r_lip_mm",
+     "scale": -0.006223442082409166,
+     "offset": 0.9507314823165057,
+     "r2": 0.43890421668214163,
+     "source": "rho_top_decile"
+    },
+    {
+     "knob_b": "g_r_lip_mm",
+     "knob_a": "g_L_mm",
+     "scale": -0.2750790739523528,
+     "offset": 85.60513188230827,
+     "r2": 0.4186566296522044,
+     "source": "rho_top_decile"
+    },
+    {
+     "knob_b": "g_wrap_deg",
+     "knob_a": "g_r_lip_mm",
+     "scale": -2.0939597062212623,
+     "offset": 129.41642968693466,
+     "r2": 0.339407983330383,
+     "source": "rho_top_decile"
+    },
+    {
+     "knob_b": "g_sf_ab",
+     "knob_a": "g_n",
+     "scale": 0.11783621304366595,
+     "offset": 0.5810772290962489,
+     "r2": 0.29382565040134034,
+     "source": "rho_top_decile"
+    },
+    {
+     "knob_b": "g_sf_ab",
+     "knob_a": "g_a_v_deg",
+     "scale": -0.01964471461070961,
+     "offset": 1.301050481721126,
+     "r2": 0.2901508753096239,
+     "source": "rho_top_decile"
+    },
+    {
+     "knob_b": "g_sf_ab",
+     "knob_a": "g_s",
+     "scale": 0.8275712882621664,
+     "offset": 0.5083635582506136,
+     "r2": 0.20960677330042143,
+     "source": "rho_top_decile"
+    }
+   ]
+  }
+ },
  "recommendations": [
   {
    "knob": "g_wrap_deg",
-   "action": "link",
-   "why": "surface direction parallel to g_r_lip_mm (|cos| 0.964)",
+   "action": "link_rejected_by_data",
+   "why": "surface direction parallel to g_r_lip_mm (|cos| 0.964); rejected: the empirical links payload has no same-sign matching pair",
    "proposal": {
     "from": "g_r_lip_mm",
     "scale": 1.4936322256210983,
     "offset": 58.77680962105438
    },
-   "data_agrees": "unknown"
+   "data_agrees": false
   },
   {
    "knob": "g_L_mm",

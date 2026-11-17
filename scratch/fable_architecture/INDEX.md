@@ -320,3 +320,11 @@ force-added on owner instruction, so subsequent edits here now show up in `git s
 - `space_cards/` - 29 lane cards + `shared_map.md` + `summary.json` (`--points 8 --box 96 --sigma-n 48`).
 - `.evidence/verify_20261117/` - raw logs and JSON behind the note (`pytest_targeted.log`,
   `u3_cpu.json`, `record_shadow_recent/summary.json`, `space_cards_run/batch*.log`).
+- `OWNER_DECISIONS_PACKET_2026-11-17.md` - the decision set (C1-C6, provenance, envelope, U3 host)
+  with the stage-5 proposal table, the categorical split, the cross-family residuals and the
+  frequency counts; evidence only, nothing applied.
+- `space_cards/proposals/` - 29 `__space_v1` proposals (12 changed, 17 no-change). The four reviewed
+  earlier are flat files; the rest sit in one subdirectory per lane. Links survive only where
+  `links.py` does not disagree (`data_agrees` true/unknown) - all run-backed links were withdrawn.
+- `.evidence/links/<lane>/` - the `links.py` report behind each card's `data_agrees`.
+- `.evidence/translate.json` - cross-family seeding residuals (`match_descriptors`).

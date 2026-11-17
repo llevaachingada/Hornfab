@@ -233,7 +233,136 @@
   "inside_frac": 1.0,
   "constraint": "sum_k g_k * x_k >= -intercept (x in unit coordinates)"
  },
- "data": {},
+ "data": {
+  "walls": {
+   "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261114T223630Z-screen-86e077",
+   "family": "FREEFORM",
+   "top_decile_n": 15,
+   "walls": [
+    {
+     "key": "g_stop_deg",
+     "lo": 120.0,
+     "hi": 240.0,
+     "frac_lo": 1.0,
+     "frac_hi": 0.0,
+     "wall_lo": true,
+     "wall_hi": false
+    },
+    {
+     "key": "g_T",
+     "lo": 0.3,
+     "hi": 1.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_fc_hz",
+     "lo": 540.0,
+     "hi": 1200.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    }
+   ],
+   "proposal": [
+    {
+     "key": "g_T",
+     "action": "narrow",
+     "new_lo": 0.5513193786,
+     "new_hi": 0.7085242709,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_fc_hz",
+     "action": "narrow",
+     "new_lo": 593.164871963,
+     "new_hi": 696.9810467809,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_stop_deg",
+     "action": "widen_lo",
+     "new_lo": 108.0,
+     "new_hi": 240.0,
+     "reason": "100% of the top decile within 3% of lo; widen candidate (-10%), gated by physical safety"
+    }
+   ],
+   "wall_rel": 0.03,
+   "wall_frac": 0.5,
+   "note": "proposals are inputs for Group B 'narrow', never automatic config changes"
+  },
+  "links": {
+   "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261114T223630Z-screen-86e077",
+   "family": "FREEFORM",
+   "top_decile_n": 15,
+   "pairs": [
+    {
+     "a": "g_T",
+     "b": "g_fc_hz",
+     "rho": -0.7107142857142856,
+     "fit": {
+      "scale": -244.5354458531114,
+      "offset": 797.3231743162853,
+      "r2": 0.4433369585022179
+     }
+    }
+   ],
+   "cma_directions": [
+    {
+     "rank": 1,
+     "eigenvalue": 1.6311140215905544,
+     "fraction": 0.926123596611684,
+     "keys": [
+      "g_T",
+      "g_fc_hz"
+     ],
+     "loadings": {
+      "g_T": -0.9897464897853603,
+      "g_fc_hz": 0.14256800788853205
+     }
+    },
+    {
+     "rank": 2,
+     "eigenvalue": 0.0950637968530426,
+     "fraction": 0.053975886592680204,
+     "keys": [
+      "g_fc_hz",
+      "g_stop_deg"
+     ],
+     "loadings": {
+      "g_fc_hz": 0.9696403255361145,
+      "g_stop_deg": -0.2019503872784712
+     }
+    },
+    {
+     "rank": 3,
+     "eigenvalue": 0.03504933045763894,
+     "fraction": 0.01990051679563588,
+     "keys": [
+      "g_stop_deg",
+      "g_fc_hz"
+     ],
+     "loadings": {
+      "g_stop_deg": 0.9793568256737799,
+      "g_fc_hz": 0.19867562060030008
+     }
+    }
+   ],
+   "proposed_links": [
+    {
+     "knob_b": "g_fc_hz",
+     "knob_a": "g_T",
+     "scale": -244.5354458531114,
+     "offset": 797.3231743162853,
+     "r2": 0.4433369585022179,
+     "source": "rho_top_decile"
+    }
+   ]
+  }
+ },
  "recommendations": [
   {
    "knob": "g_T",

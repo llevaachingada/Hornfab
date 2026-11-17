@@ -1,0 +1,84 @@
+{
+ "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261116T043544Z-screen-dd15d8",
+ "family": "FREEFORM",
+ "top_decile_n": 6,
+ "pairs": [
+  {
+   "a": "g_crown_mm",
+   "b": "g_height_mm",
+   "rho": -0.8857142857142858,
+   "fit": {
+    "scale": -1.4692946694587998,
+    "offset": 354.15830758321397,
+    "r2": 0.16643196476058442
+   }
+  },
+  {
+   "a": "g_depth_mm",
+   "b": "g_width_mm",
+   "rho": 0.8285714285714287,
+   "fit": {
+    "scale": 0.49811172793763664,
+    "offset": 448.7405297826394,
+    "r2": 0.11240399536257994
+   }
+  },
+  {
+   "a": "g_axial_h_mm",
+   "b": "g_crown_mm",
+   "rho": -0.7714285714285715,
+   "fit": {
+    "scale": -1.8070696769407144,
+    "offset": 46.37975198143188,
+    "r2": 0.8074096096366078
+   }
+  },
+  {
+   "a": "g_h_depth_scale",
+   "b": "g_junction_power",
+   "rho": -0.6,
+   "fit": {
+    "scale": -114.12711583196737,
+    "offset": 147.56021314934648,
+    "r2": 0.09421553819931483
+   }
+  }
+ ],
+ "cma_directions": [],
+ "proposed_links": [
+  {
+   "knob_b": "g_crown_mm",
+   "knob_a": "g_axial_h_mm",
+   "scale": -1.8070696769407144,
+   "offset": 46.37975198143188,
+   "r2": 0.8074096096366078,
+   "source": "rho_top_decile"
+  },
+  {
+   "knob_b": "g_height_mm",
+   "knob_a": "g_crown_mm",
+   "scale": -1.4692946694587998,
+   "offset": 354.15830758321397,
+   "r2": 0.16643196476058442,
+   "source": "rho_top_decile"
+  },
+  {
+   "knob_b": "g_width_mm",
+   "knob_a": "g_depth_mm",
+   "scale": 0.49811172793763664,
+   "offset": 448.7405297826394,
+   "r2": 0.11240399536257994,
+   "source": "rho_top_decile"
+  },
+  {
+   "knob_b": "g_junction_power",
+   "knob_a": "g_h_depth_scale",
+   "scale": -114.12711583196737,
+   "offset": 147.56021314934648,
+   "r2": 0.09421553819931483,
+   "source": "rho_top_decile"
+  }
+ ],
+ "tool": "links",
+ "generated_utc": "2026-11-17T20:55:46Z"
+}

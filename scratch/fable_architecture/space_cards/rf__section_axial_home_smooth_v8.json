@@ -376,7 +376,214 @@
   "inside_frac": 0.9479166666666666,
   "constraint": "sum_k g_k * x_k >= -intercept (x in unit coordinates)"
  },
- "data": {},
+ "data": {
+  "walls": {
+   "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261116T043544Z-screen-dd15d8",
+   "family": "FREEFORM",
+   "top_decile_n": 6,
+   "walls": [
+    {
+     "key": "g_h_depth_scale",
+     "lo": 0.9,
+     "hi": 1.1,
+     "frac_lo": 0.0,
+     "frac_hi": 0.6666666666666666,
+     "wall_lo": false,
+     "wall_hi": true
+    },
+    {
+     "key": "g_width_mm",
+     "lo": 480.0,
+     "hi": 600.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.6666666666666666,
+     "wall_lo": false,
+     "wall_hi": true
+    },
+    {
+     "key": "g_crown_mm",
+     "lo": 10.0,
+     "hi": 43.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.5,
+     "wall_lo": false,
+     "wall_hi": true
+    },
+    {
+     "key": "g_depth_mm",
+     "lo": 170.0,
+     "hi": 300.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.16666666666666666,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_axial_h_mm",
+     "lo": 0.0,
+     "hi": 12.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_height_mm",
+     "lo": 220.0,
+     "hi": 420.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_junction_power",
+     "lo": 16.0,
+     "hi": 48.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    }
+   ],
+   "proposal": [
+    {
+     "key": "g_axial_h_mm",
+     "action": "narrow",
+     "new_lo": 0.9195688192,
+     "new_hi": 6.6626470636,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_crown_mm",
+     "action": "widen_hi",
+     "new_lo": 10.0,
+     "new_hi": 47.300000000000004,
+     "reason": "50% of the top decile within 3% of hi; widen candidate (+10%), gated by physical safety"
+    },
+    {
+     "key": "g_depth_mm",
+     "action": "narrow",
+     "new_lo": 270.3975137949,
+     "new_hi": 300.0,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_h_depth_scale",
+     "action": "widen_hi",
+     "new_lo": 0.9,
+     "new_hi": 1.2100000000000002,
+     "reason": "67% of the top decile within 3% of hi; widen candidate (+10%), gated by physical safety"
+    },
+    {
+     "key": "g_height_mm",
+     "action": "narrow",
+     "new_lo": 268.8051204923,
+     "new_hi": 323.9629668092,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_junction_power",
+     "action": "narrow",
+     "new_lo": 16.1994398736,
+     "new_hi": 33.1243354527,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_width_mm",
+     "action": "widen_hi",
+     "new_lo": 480.0,
+     "new_hi": 660.0,
+     "reason": "67% of the top decile within 3% of hi; widen candidate (+10%), gated by physical safety"
+    }
+   ],
+   "wall_rel": 0.03,
+   "wall_frac": 0.5,
+   "note": "proposals are inputs for Group B 'narrow', never automatic config changes"
+  },
+  "links": {
+   "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261116T043544Z-screen-dd15d8",
+   "family": "FREEFORM",
+   "top_decile_n": 6,
+   "pairs": [
+    {
+     "a": "g_crown_mm",
+     "b": "g_height_mm",
+     "rho": -0.8857142857142858,
+     "fit": {
+      "scale": -1.4692946694587998,
+      "offset": 354.15830758321397,
+      "r2": 0.16643196476058442
+     }
+    },
+    {
+     "a": "g_depth_mm",
+     "b": "g_width_mm",
+     "rho": 0.8285714285714287,
+     "fit": {
+      "scale": 0.49811172793763664,
+      "offset": 448.7405297826394,
+      "r2": 0.11240399536257994
+     }
+    },
+    {
+     "a": "g_axial_h_mm",
+     "b": "g_crown_mm",
+     "rho": -0.7714285714285715,
+     "fit": {
+      "scale": -1.8070696769407144,
+      "offset": 46.37975198143188,
+      "r2": 0.8074096096366078
+     }
+    },
+    {
+     "a": "g_h_depth_scale",
+     "b": "g_junction_power",
+     "rho": -0.6,
+     "fit": {
+      "scale": -114.12711583196737,
+      "offset": 147.56021314934648,
+      "r2": 0.09421553819931483
+     }
+    }
+   ],
+   "cma_directions": [],
+   "proposed_links": [
+    {
+     "knob_b": "g_crown_mm",
+     "knob_a": "g_axial_h_mm",
+     "scale": -1.8070696769407144,
+     "offset": 46.37975198143188,
+     "r2": 0.8074096096366078,
+     "source": "rho_top_decile"
+    },
+    {
+     "knob_b": "g_height_mm",
+     "knob_a": "g_crown_mm",
+     "scale": -1.4692946694587998,
+     "offset": 354.15830758321397,
+     "r2": 0.16643196476058442,
+     "source": "rho_top_decile"
+    },
+    {
+     "knob_b": "g_width_mm",
+     "knob_a": "g_depth_mm",
+     "scale": 0.49811172793763664,
+     "offset": 448.7405297826394,
+     "r2": 0.11240399536257994,
+     "source": "rho_top_decile"
+    },
+    {
+     "knob_b": "g_junction_power",
+     "knob_a": "g_h_depth_scale",
+     "scale": -114.12711583196737,
+     "offset": 147.56021314934648,
+     "r2": 0.09421553819931483,
+     "source": "rho_top_decile"
+    }
+   ]
+  }
+ },
  "recommendations": [
   {
    "knob": "*",

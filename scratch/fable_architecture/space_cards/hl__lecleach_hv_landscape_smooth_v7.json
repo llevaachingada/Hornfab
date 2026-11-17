@@ -303,7 +303,92 @@
   "inside_frac": 1.0,
   "constraint": "sum_k g_k * x_k >= -intercept (x in unit coordinates)"
  },
- "data": {},
+ "data": {
+  "walls": {
+   "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261116T040651Z-screen-e53ae9",
+   "family": "FREEFORM",
+   "top_decile_n": 3,
+   "walls": [
+    {
+     "key": "g_T",
+     "lo": 0.4,
+     "hi": 0.9,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_fc_h_hz",
+     "lo": 300.0,
+     "hi": 800.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_fc_v_hz",
+     "lo": 450.0,
+     "hi": 1400.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_stop_deg",
+     "lo": 150.0,
+     "hi": 240.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    }
+   ],
+   "proposal": [
+    {
+     "key": "g_T",
+     "action": "narrow",
+     "new_lo": 0.44222934519999996,
+     "new_hi": 0.6908739808000001,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_fc_h_hz",
+     "action": "narrow",
+     "new_lo": 300.0,
+     "new_hi": 403.4748603878,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_fc_v_hz",
+     "action": "narrow",
+     "new_lo": 572.1085764602,
+     "new_hi": 891.9034090058,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_stop_deg",
+     "action": "narrow",
+     "new_lo": 161.5679683944,
+     "new_hi": 237.5167778407,
+     "reason": "top-decile span padded 5%"
+    }
+   ],
+   "wall_rel": 0.03,
+   "wall_frac": 0.5,
+   "note": "proposals are inputs for Group B 'narrow', never automatic config changes"
+  },
+  "links": {
+   "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261116T040651Z-screen-e53ae9",
+   "family": "FREEFORM",
+   "top_decile_n": 3,
+   "pairs": [],
+   "cma_directions": [],
+   "proposed_links": []
+  }
+ },
  "recommendations": [
   {
    "knob": "*",

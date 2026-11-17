@@ -1,12 +1,11 @@
-# PROPOSED by tools/analysis/space_propose.py from scratch/fable_architecture/space_cards/hl__crowe_x_osse_cd_v7.json
+# PROPOSED by tools/analysis/space_propose.py from scratch\fable_architecture\space_cards\hl__crowe_x_osse_cd_v7.json
 # Review before use; the original config is unchanged. Changes:
-#   - linked g_wrap_deg = 1.500956 * g_r_lip_mm + 58.642899
 #   - g_L_mm.hi 285.0 -> 268.0
 #   - g_s.hi 0.45 -> 0.4
 #   - REVIEW sigma0: no tested value kept the predicted bad rate <= 15 %
 name: hl__crowe_x_osse_cd_v7__space_v1
 family: FREEFORM
-brief_file: examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
+brief_file: examples\briefs\home_landscape_2026-11-15\room_landscape_80x50_700_hf1440_v7.yaml
 generator:
   name: grid
   rows:
@@ -111,10 +110,5 @@ search:
   infeasible_penalty: graded
   budget_counts: valid
   max_attempts: 220
-  links:
-    g_wrap_deg:
-      from: g_r_lip_mm
-      scale: 1.500956
-      offset: 58.642899
 description: 'HOME: Crowe ES-style X (bow-tie creases, rolled lip) on a constant-directivity
   OSSE throat; labelled hypothesis shape, not Crowe geometry'

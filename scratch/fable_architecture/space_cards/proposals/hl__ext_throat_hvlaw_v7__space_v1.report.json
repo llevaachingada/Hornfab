@@ -1,5 +1,5 @@
 {
- "proposal": "scratch/fable_architecture/space_cards/proposals/hl__ext_throat_hvlaw_v7__space_v1.yaml",
+ "proposal": "scratch\\fable_architecture\\space_cards\\proposals\\hl__ext_throat_hvlaw_v7__space_v1.yaml",
  "notes": [
   "sigma0 0.2 -> 0.1",
   "REVIEW joint envelope constraint (not expressible in config): envelope binds jointly; linear margin model R^2 0.91, sign right 91%, only 43% of the box inside"

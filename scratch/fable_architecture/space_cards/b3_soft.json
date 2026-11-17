@@ -605,7 +605,318 @@
   "inside_frac": 1.0,
   "constraint": "sum_k g_k * x_k >= -intercept (x in unit coordinates)"
  },
- "data": {},
+ "data": {
+  "walls": {
+   "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261117T071329Z-screen-e4f90d",
+   "family": "FREEFORM",
+   "top_decile_n": 11,
+   "walls": [
+    {
+     "key": "g_theta_h1_deg",
+     "lo": 36.5,
+     "hi": 60.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.5454545454545454,
+     "wall_lo": false,
+     "wall_hi": true
+    },
+    {
+     "key": "g_theta_v1_deg",
+     "lo": 21.3,
+     "hi": 39.5,
+     "frac_lo": 0.0,
+     "frac_hi": 0.5454545454545454,
+     "wall_lo": false,
+     "wall_hi": true
+    },
+    {
+     "key": "g_lame_p_mouth",
+     "lo": 2.1,
+     "hi": 3.9,
+     "frac_lo": 0.0,
+     "frac_hi": 0.18181818181818182,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_beak_v_projection_mm",
+     "lo": 0.0,
+     "hi": 5.0,
+     "frac_lo": 0.09090909090909091,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_lame_end_frac",
+     "lo": 0.665,
+     "hi": 0.99,
+     "frac_lo": 0.0,
+     "frac_hi": 0.09090909090909091,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_theta_h0_deg",
+     "lo": 4.9,
+     "hi": 9.1,
+     "frac_lo": 0.09090909090909091,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_beak_diagonal_mm",
+     "lo": -5.0,
+     "hi": 5.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_beak_h_setback_mm",
+     "lo": 0.0,
+     "hi": 10.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_beak_start_frac",
+     "lo": 0.85,
+     "hi": 0.99,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_core_length_mm",
+     "lo": 238.0,
+     "hi": 442.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_lame_start_frac",
+     "lo": 0.14,
+     "hi": 0.26,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_theta_v0_deg",
+     "lo": 4.2,
+     "hi": 7.8,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    }
+   ],
+   "proposal": [
+    {
+     "key": "g_beak_diagonal_mm",
+     "action": "narrow",
+     "new_lo": -2.6091975841,
+     "new_hi": 2.8410475398,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_beak_h_setback_mm",
+     "action": "narrow",
+     "new_lo": 1.1905896506,
+     "new_hi": 5.5992719475,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_beak_start_frac",
+     "action": "narrow",
+     "new_lo": 0.9199457521,
+     "new_hi": 0.9808937253,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_beak_v_projection_mm",
+     "action": "narrow",
+     "new_lo": 0.0,
+     "new_hi": 1.6299660867,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_core_length_mm",
+     "action": "narrow",
+     "new_lo": 272.34390281500004,
+     "new_hi": 341.56626112509997,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_lame_end_frac",
+     "action": "narrow",
+     "new_lo": 0.7973979373,
+     "new_hi": 0.99,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_lame_p_mouth",
+     "action": "narrow",
+     "new_lo": 3.4276874119,
+     "new_hi": 3.9,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_lame_start_frac",
+     "action": "narrow",
+     "new_lo": 0.1725921144,
+     "new_hi": 0.2409699421,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_theta_h0_deg",
+     "action": "narrow",
+     "new_lo": 4.9,
+     "new_hi": 7.7070253006,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_theta_h1_deg",
+     "action": "widen_hi",
+     "new_lo": 36.5,
+     "new_hi": 66.0,
+     "reason": "55% of the top decile within 3% of hi; widen candidate (+10%), gated by physical safety"
+    },
+    {
+     "key": "g_theta_v0_deg",
+     "action": "narrow",
+     "new_lo": 4.9997006167,
+     "new_hi": 7.778117796999999,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_theta_v1_deg",
+     "action": "widen_hi",
+     "new_lo": 21.3,
+     "new_hi": 43.45,
+     "reason": "55% of the top decile within 3% of hi; widen candidate (+10%), gated by physical safety"
+    }
+   ],
+   "wall_rel": 0.03,
+   "wall_frac": 0.5,
+   "note": "proposals are inputs for Group B 'narrow', never automatic config changes"
+  },
+  "links": {
+   "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261117T071329Z-screen-e4f90d",
+   "family": "FREEFORM",
+   "top_decile_n": 11,
+   "pairs": [
+    {
+     "a": "g_beak_diagonal_mm",
+     "b": "g_lame_start_frac",
+     "rho": 0.7272727272727273,
+     "fit": {
+      "scale": 0.007169111085567777,
+      "offset": 0.1995416685811749,
+      "r2": 0.3862392671728674
+     }
+    },
+    {
+     "a": "g_beak_h_setback_mm",
+     "b": "g_beak_v_projection_mm",
+     "rho": -0.7272727272727273,
+     "fit": {
+      "scale": -0.23112029831040254,
+      "offset": 1.5085797279984081,
+      "r2": 0.49544113939205436
+     }
+    },
+    {
+     "a": "g_beak_v_projection_mm",
+     "b": "g_theta_h0_deg",
+     "rho": -0.6818181818181819,
+     "fit": {
+      "scale": -0.98637203071153,
+      "offset": 7.293234525081056,
+      "r2": 0.31954107289980893
+     }
+    }
+   ],
+   "cma_directions": [
+    {
+     "rank": 1,
+     "eigenvalue": 2.60759199449604,
+     "fraction": 0.20750283718722023,
+     "keys": [
+      "g_theta_v1_deg",
+      "g_lame_p_mouth",
+      "g_beak_v_projection_mm"
+     ],
+     "loadings": {
+      "g_theta_v1_deg": -0.5753342553809678,
+      "g_lame_p_mouth": -0.49324978722525314,
+      "g_beak_v_projection_mm": 0.3833565173547581
+     }
+    },
+    {
+     "rank": 2,
+     "eigenvalue": 1.1576291596592876,
+     "fraction": 0.09211998485460318,
+     "keys": [
+      "g_theta_v0_deg",
+      "g_beak_diagonal_mm"
+     ],
+     "loadings": {
+      "g_theta_v0_deg": -0.738744034886079,
+      "g_beak_diagonal_mm": 0.4017376868107444
+     }
+    },
+    {
+     "rank": 3,
+     "eigenvalue": 1.1106085731017898,
+     "fraction": 0.08837825488400872,
+     "keys": [
+      "g_beak_h_setback_mm",
+      "g_beak_start_frac"
+     ],
+     "loadings": {
+      "g_beak_h_setback_mm": -0.7092779907018777,
+      "g_beak_start_frac": 0.5463186402290834
+     }
+    }
+   ],
+   "proposed_links": [
+    {
+     "knob_b": "g_beak_v_projection_mm",
+     "knob_a": "g_beak_h_setback_mm",
+     "scale": -0.23112029831040254,
+     "offset": 1.5085797279984081,
+     "r2": 0.49544113939205436,
+     "source": "rho_top_decile"
+    },
+    {
+     "knob_b": "g_lame_start_frac",
+     "knob_a": "g_beak_diagonal_mm",
+     "scale": 0.007169111085567777,
+     "offset": 0.1995416685811749,
+     "r2": 0.3862392671728674,
+     "source": "rho_top_decile"
+    },
+    {
+     "knob_b": "g_theta_h0_deg",
+     "knob_a": "g_beak_v_projection_mm",
+     "scale": -0.98637203071153,
+     "offset": 7.293234525081056,
+     "r2": 0.31954107289980893,
+     "source": "rho_top_decile"
+    }
+   ]
+  }
+ },
  "recommendations": [
   {
    "knob": "*",

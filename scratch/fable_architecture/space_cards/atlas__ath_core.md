@@ -28,7 +28,7 @@ Envelope margin model: R^2 0.57, sign agreement 79%, inside 61%, binding {'depth
 ## Recommendations (not applied)
 
 - **fix** `morph_exponent`: moves no surface point at any sampled point
-- **link** `k`: surface direction parallel to a_deg (|cos| 0.987); data_agrees=unknown; proposal `{"from": "a_deg", "scale": -0.007597397735362253, "offset": 1.1838570251957665}`
+- **link_rejected_by_data** `k`: surface direction parallel to a_deg (|cos| 0.987); rejected: the empirical links payload has no same-sign matching pair; data_agrees=false; proposal `{"from": "a_deg", "scale": -0.007597397735362253, "offset": 1.1838570251957665}`
 - **rebound** `L_mm`: edge slice mostly refused/outside while the middle is not; proposal `{"lower_hi_to_unit": 0.8}`
 - **rebound** `a_deg`: edge slice mostly refused/outside while the middle is not; proposal `{"lower_hi_to_unit": 0.8}`
 - **sigma0** `*`: predicted bad-candidate rate <= 15% from the seed; proposal `{"max_safe_sigma0": null}`

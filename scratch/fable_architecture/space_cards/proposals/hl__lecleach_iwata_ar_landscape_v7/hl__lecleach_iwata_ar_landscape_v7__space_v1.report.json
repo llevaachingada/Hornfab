@@ -1,0 +1,35 @@
+{
+ "proposal": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\fable_architecture\\space_cards\\proposals\\hl__lecleach_iwata_ar_landscape_v7\\hl__lecleach_iwata_ar_landscape_v7__space_v1.yaml",
+ "notes": [],
+ "before": {
+  "searched": 4,
+  "box": {
+   "ok": 94,
+   "outside": 0,
+   "refused": 2
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0,
+   "0.15": 0.0,
+   "0.20": 0.0,
+   "0.25": 0.020833333333333332
+  }
+ },
+ "after": {
+  "searched": 4,
+  "box": {
+   "ok": 32,
+   "outside": 0,
+   "refused": 0
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0,
+   "0.15": 0.0,
+   "0.20": 0.0,
+   "0.25": 0.0
+  },
+  "seed_shift_max_mm": 0.0
+ }
+}

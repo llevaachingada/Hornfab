@@ -483,7 +483,156 @@
   "inside_frac": 1.0,
   "constraint": "sum_k g_k * x_k >= -intercept (x in unit coordinates)"
  },
- "data": {},
+ "data": {
+  "walls": {
+   "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261116T022328Z-screen-87354c",
+   "family": "FREEFORM",
+   "top_decile_n": 3,
+   "walls": [
+    {
+     "key": "g_sf_amt",
+     "lo": 0.4,
+     "hi": 0.8,
+     "frac_lo": 0.3333333333333333,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_L_mm",
+     "lo": 210.0,
+     "hi": 240.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_a_h_deg",
+     "lo": 32.0,
+     "hi": 36.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_a_v_deg",
+     "lo": 32.0,
+     "hi": 36.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_n",
+     "lo": 1.8,
+     "hi": 2.4,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_r_lip_mm",
+     "lo": 18.0,
+     "hi": 30.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_s",
+     "lo": 0.25,
+     "hi": 0.4,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_wrap_deg",
+     "lo": 90.0,
+     "hi": 150.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    }
+   ],
+   "proposal": [
+    {
+     "key": "g_L_mm",
+     "action": "narrow",
+     "new_lo": 222.3345420137,
+     "new_hi": 227.1345482628,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_a_h_deg",
+     "action": "narrow",
+     "new_lo": 32.6532715412,
+     "new_hi": 34.8702516211,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_a_v_deg",
+     "action": "narrow",
+     "new_lo": 32.4086973832,
+     "new_hi": 33.3364022219,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_n",
+     "action": "narrow",
+     "new_lo": 2.0214681931,
+     "new_hi": 2.1427349022,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_r_lip_mm",
+     "action": "narrow",
+     "new_lo": 20.512547755499998,
+     "new_hi": 27.8707355758,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_s",
+     "action": "narrow",
+     "new_lo": 0.2751634127,
+     "new_hi": 0.3264793434,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_sf_amt",
+     "action": "narrow",
+     "new_lo": 0.4,
+     "new_hi": 0.48759613970000004,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_wrap_deg",
+     "action": "narrow",
+     "new_lo": 110.5454424774,
+     "new_hi": 130.6108096123,
+     "reason": "top-decile span padded 5%"
+    }
+   ],
+   "wall_rel": 0.03,
+   "wall_frac": 0.5,
+   "note": "proposals are inputs for Group B 'narrow', never automatic config changes"
+  },
+  "links": {
+   "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261116T022328Z-screen-87354c",
+   "family": "FREEFORM",
+   "top_decile_n": 3,
+   "pairs": [],
+   "cma_directions": [],
+   "proposed_links": []
+  }
+ },
  "recommendations": [
   {
    "knob": "*",

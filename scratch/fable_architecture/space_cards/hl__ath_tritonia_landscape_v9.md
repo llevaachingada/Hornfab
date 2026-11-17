@@ -27,6 +27,6 @@ Envelope margin model: R^2 0.69, sign agreement 96%, inside 100%, binding {'heig
 
 ## Recommendations (not applied)
 
-- **link** `s`: surface direction parallel to q (|cos| 0.990); data_agrees=unknown; proposal `{"from": "q", "scale": 0.7879502501437736, "offset": 0.18752052497585858}`
-- **link** `k`: surface direction parallel to a_deg (|cos| 0.966); data_agrees=unknown; proposal `{"from": "a_deg", "scale": -0.005859586782283339, "offset": 1.463877576127471}`
+- **link_rejected_by_data** `s`: surface direction parallel to q (|cos| 0.990); rejected: the empirical links payload has no same-sign matching pair; data_agrees=false; proposal `{"from": "q", "scale": 0.7879502501437736, "offset": 0.18752052497585858}`
+- **link_rejected_by_data** `k`: surface direction parallel to a_deg (|cos| 0.966); rejected: the empirical links payload has no same-sign matching pair; data_agrees=false; proposal `{"from": "a_deg", "scale": -0.005859586782283339, "offset": 1.463877576127471}`
 - **sigma0** `*`: predicted bad-candidate rate <= 15% from the seed; proposal `{"max_safe_sigma0": 0.25}`

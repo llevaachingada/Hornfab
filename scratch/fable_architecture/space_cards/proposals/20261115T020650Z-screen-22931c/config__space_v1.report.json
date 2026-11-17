@@ -1,0 +1,38 @@
+{
+ "proposal": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\fable_architecture\\space_cards\\proposals\\20261115T020650Z-screen-22931c\\config__space_v1.yaml",
+ "notes": [
+  "fixed morph_exponent at its seed (moves no surface point at any sampled point)",
+  "sigma0 0.15 -> 0.1"
+ ],
+ "before": {
+  "searched": 18,
+  "box": {
+   "ok": 18,
+   "outside": 50,
+   "refused": 28
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.125,
+   "0.15": 0.3958333333333333,
+   "0.20": 0.5416666666666666,
+   "0.25": 0.5625
+  }
+ },
+ "after": {
+  "searched": 17,
+  "box": {
+   "ok": 11,
+   "outside": 13,
+   "refused": 8
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.041666666666666664,
+   "0.15": 0.4166666666666667,
+   "0.20": 0.375,
+   "0.25": 0.6666666666666666
+  },
+  "seed_shift_max_mm": 0.0
+ }
+}

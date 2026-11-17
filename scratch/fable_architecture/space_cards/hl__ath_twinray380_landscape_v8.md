@@ -26,7 +26,7 @@ Envelope margin model: R^2 0.68, sign agreement 91%, inside 93%, binding {'width
 
 ## Recommendations (not applied)
 
-- **link** `n`: surface direction parallel to s (|cos| 0.986); data_agrees=unknown; proposal `{"from": "s", "scale": -2.8316478179699796, "offset": 9.931872022467948}`
-- **link** `q`: surface direction parallel to s (|cos| 0.986); data_agrees=unknown; proposal `{"from": "s", "scale": 0.037309147994517664, "offset": 0.9686126224748262}`
-- **link** `a0_deg`: surface direction parallel to k (|cos| 0.965); data_agrees=unknown; proposal `{"from": "k", "scale": -0.4673015942767349, "offset": 1.6756666131415754}`
+- **link_rejected_by_data** `n`: surface direction parallel to s (|cos| 0.986); rejected: the empirical links payload has no same-sign matching pair; data_agrees=false; proposal `{"from": "s", "scale": -2.8316478179699796, "offset": 9.931872022467948}`
+- **link_rejected_by_data** `q`: surface direction parallel to s (|cos| 0.986); rejected: the empirical links payload has no same-sign matching pair; data_agrees=false; proposal `{"from": "s", "scale": 0.037309147994517664, "offset": 0.9686126224748262}`
+- **link_rejected_by_data** `a0_deg`: surface direction parallel to k (|cos| 0.965); rejected: the empirical links payload has no same-sign matching pair; data_agrees=false; proposal `{"from": "k", "scale": -0.4673015942767349, "offset": 1.6756666131415754}`
 - **sigma0** `*`: predicted bad-candidate rate <= 15% from the seed; proposal `{"max_safe_sigma0": 0.25}`

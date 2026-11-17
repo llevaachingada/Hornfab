@@ -1,0 +1,40 @@
+{
+ "proposal": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\fable_architecture\\space_cards\\proposals\\atlas__ath_core\\atlas__ath_core__space_v1.yaml",
+ "notes": [
+  "fixed morph_exponent at its seed (moves no surface point at any sampled point)",
+  "L_mm.hi 520.0 -> 436.8",
+  "a_deg.hi 80.0 -> 66.0",
+  "REVIEW sigma0: no tested value kept the predicted bad rate <= 15 %"
+ ],
+ "before": {
+  "searched": 14,
+  "box": {
+   "ok": 57,
+   "outside": 37,
+   "refused": 2
+  },
+  "sigma": {
+   "0.05": 0.25,
+   "0.10": 0.2708333333333333,
+   "0.15": 0.4583333333333333,
+   "0.20": 0.5208333333333334,
+   "0.25": 0.4791666666666667
+  }
+ },
+ "after": {
+  "searched": 13,
+  "box": {
+   "ok": 28,
+   "outside": 4,
+   "refused": 0
+  },
+  "sigma": {
+   "0.05": 0.16666666666666666,
+   "0.10": 0.375,
+   "0.15": 0.375,
+   "0.20": 0.4583333333333333,
+   "0.25": 0.4166666666666667
+  },
+  "seed_shift_max_mm": 0.0
+ }
+}

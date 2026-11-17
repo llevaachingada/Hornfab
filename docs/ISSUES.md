@@ -1,5 +1,19 @@
 # ISSUES
 
+## 2026-11-17 - Stage-5 proposals: data rejects every run-backed geometric link
+
+- DONE: `data_agrees` attached to all 29 cards from `links.py` on the latest run; 20/20 run-backed
+  links disagree. The Crowe `g_wrap_deg` and fold-warm `n`/`k` links in the reviewed proposals are
+  WITHDRAWN. OPEN (owner C5/§2): review the remaining proposal changes.
+- OPEN (owner): `b3_soft`'s `g_theta_h1_deg.hi 60 -> 55.3` trim is sampling-sensitive (fires at a
+  64-point box, not at 96: top slice 47 %). Decide on the older evidence or wait.
+- OPEN (owner): the `_w1` fold-warm proposal keeps two links with `data_agrees: unknown` (no run);
+  needs a run or a 2-run A/B before approval.
+- OPEN (owner): `hl__crowe_x_osse_cd_v7` has **no tested sigma0 with predicted bad rate ≤ 15 %**
+  (23/96 box points refused); its bounds trim is a candidate but the lane is refusal-dominated.
+- OPEN (owner): categorical split for `ath_core.yaml` + 4 `rear_density` `ath_like_rear*` (3 configs
+  per source, 15 files) - see `OWNER_DECISIONS_PACKET_2026-11-17.md` §3.
+
 ## 2026-11-17 - Verification findings (local orchestrator, Windows checkout)
 
 - OPEN (owner): **12 `examples/typologies/walls_relieved/*/*_w1.yaml` do not load.** `brief_file:

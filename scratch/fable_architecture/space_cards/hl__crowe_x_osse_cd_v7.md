@@ -22,7 +22,7 @@ Envelope margin model: R^2 0.98, sign agreement 100%, inside 100%, binding {'hei
 
 ## Recommendations (not applied)
 
-- **link** `g_wrap_deg`: surface direction parallel to g_r_lip_mm (|cos| 0.964); data_agrees=unknown; proposal `{"from": "g_r_lip_mm", "scale": 1.4936322256210983, "offset": 58.77680962105438}`
+- **link_rejected_by_data** `g_wrap_deg`: surface direction parallel to g_r_lip_mm (|cos| 0.964); rejected: the empirical links payload has no same-sign matching pair; data_agrees=false; proposal `{"from": "g_r_lip_mm", "scale": 1.4936322256210983, "offset": 58.77680962105438}`
 - **rebound** `g_L_mm`: edge slice mostly refused/outside while the middle is not; proposal `{"lower_hi_to_unit": 0.8}`
 - **rebound** `g_s`: edge slice mostly refused/outside while the middle is not; proposal `{"lower_hi_to_unit": 0.8}`
 - **sigma0** `*`: predicted bad-candidate rate <= 15% from the seed; proposal `{"max_safe_sigma0": null}`

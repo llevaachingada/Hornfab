@@ -1,7 +1,6 @@
 {
- "proposal": "scratch/fable_architecture/space_cards/proposals/hl__crowe_x_osse_cd_v7__space_v1.yaml",
+ "proposal": "scratch\\fable_architecture\\space_cards\\proposals\\hl__crowe_x_osse_cd_v7__space_v1.yaml",
  "notes": [
-  "linked g_wrap_deg = 1.500956 * g_r_lip_mm + 58.642899",
   "g_L_mm.hi 285.0 -> 268.0",
   "g_s.hi 0.45 -> 0.4",
   "REVIEW sigma0: no tested value kept the predicted bad rate <= 15 %"
@@ -9,32 +8,32 @@
  "before": {
   "searched": 9,
   "box": {
-   "ok": 49,
+   "ok": 73,
    "outside": 0,
-   "refused": 15
+   "refused": 23
   },
   "sigma": {
-   "0.05": 0.46875,
-   "0.10": 0.5625,
+   "0.05": 0.5,
+   "0.10": 0.4791666666666667,
    "0.15": 0.4375,
-   "0.20": 0.5,
-   "0.25": 0.46875
+   "0.20": 0.5208333333333334,
+   "0.25": 0.5208333333333334
   }
  },
  "after": {
-  "searched": 8,
+  "searched": 9,
   "box": {
    "ok": 30,
    "outside": 0,
    "refused": 2
   },
   "sigma": {
-   "0.05": 0.5416666666666666,
-   "0.10": 0.20833333333333334,
-   "0.15": 0.20833333333333334,
-   "0.20": 0.4166666666666667,
-   "0.25": 0.5416666666666666
+   "0.05": 0.4583333333333333,
+   "0.10": 0.4166666666666667,
+   "0.15": 0.2916666666666667,
+   "0.20": 0.4583333333333333,
+   "0.25": 0.4166666666666667
   },
-  "seed_shift_max_mm": 1.049875049691155e-06
+  "seed_shift_max_mm": 0.0
  }
 }

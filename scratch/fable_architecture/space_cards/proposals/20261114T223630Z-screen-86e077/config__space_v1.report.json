@@ -1,0 +1,37 @@
+{
+ "proposal": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\fable_architecture\\space_cards\\proposals\\20261114T223630Z-screen-86e077\\config__space_v1.yaml",
+ "notes": [
+  "g_T.lo 0.3 -> 0.44"
+ ],
+ "before": {
+  "searched": 3,
+  "box": {
+   "ok": 77,
+   "outside": 0,
+   "refused": 19
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0,
+   "0.15": 0.0625,
+   "0.20": 0.10416666666666667,
+   "0.25": 0.125
+  }
+ },
+ "after": {
+  "searched": 3,
+  "box": {
+   "ok": 29,
+   "outside": 0,
+   "refused": 3
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0,
+   "0.15": 0.0,
+   "0.20": 0.08333333333333333,
+   "0.25": 0.125
+  },
+  "seed_shift_max_mm": 0.0
+ }
+}

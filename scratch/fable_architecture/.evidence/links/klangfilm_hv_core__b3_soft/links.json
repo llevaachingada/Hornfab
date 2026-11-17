@@ -1,0 +1,108 @@
+{
+ "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261117T071329Z-screen-e4f90d",
+ "family": "FREEFORM",
+ "top_decile_n": 11,
+ "pairs": [
+  {
+   "a": "g_beak_diagonal_mm",
+   "b": "g_lame_start_frac",
+   "rho": 0.7272727272727273,
+   "fit": {
+    "scale": 0.007169111085567777,
+    "offset": 0.1995416685811749,
+    "r2": 0.3862392671728674
+   }
+  },
+  {
+   "a": "g_beak_h_setback_mm",
+   "b": "g_beak_v_projection_mm",
+   "rho": -0.7272727272727273,
+   "fit": {
+    "scale": -0.23112029831040254,
+    "offset": 1.5085797279984081,
+    "r2": 0.49544113939205436
+   }
+  },
+  {
+   "a": "g_beak_v_projection_mm",
+   "b": "g_theta_h0_deg",
+   "rho": -0.6818181818181819,
+   "fit": {
+    "scale": -0.98637203071153,
+    "offset": 7.293234525081056,
+    "r2": 0.31954107289980893
+   }
+  }
+ ],
+ "cma_directions": [
+  {
+   "rank": 1,
+   "eigenvalue": 2.60759199449604,
+   "fraction": 0.20750283718722023,
+   "keys": [
+    "g_theta_v1_deg",
+    "g_lame_p_mouth",
+    "g_beak_v_projection_mm"
+   ],
+   "loadings": {
+    "g_theta_v1_deg": -0.5753342553809678,
+    "g_lame_p_mouth": -0.49324978722525314,
+    "g_beak_v_projection_mm": 0.3833565173547581
+   }
+  },
+  {
+   "rank": 2,
+   "eigenvalue": 1.1576291596592876,
+   "fraction": 0.09211998485460318,
+   "keys": [
+    "g_theta_v0_deg",
+    "g_beak_diagonal_mm"
+   ],
+   "loadings": {
+    "g_theta_v0_deg": -0.738744034886079,
+    "g_beak_diagonal_mm": 0.4017376868107444
+   }
+  },
+  {
+   "rank": 3,
+   "eigenvalue": 1.1106085731017898,
+   "fraction": 0.08837825488400872,
+   "keys": [
+    "g_beak_h_setback_mm",
+    "g_beak_start_frac"
+   ],
+   "loadings": {
+    "g_beak_h_setback_mm": -0.7092779907018777,
+    "g_beak_start_frac": 0.5463186402290834
+   }
+  }
+ ],
+ "proposed_links": [
+  {
+   "knob_b": "g_beak_v_projection_mm",
+   "knob_a": "g_beak_h_setback_mm",
+   "scale": -0.23112029831040254,
+   "offset": 1.5085797279984081,
+   "r2": 0.49544113939205436,
+   "source": "rho_top_decile"
+  },
+  {
+   "knob_b": "g_lame_start_frac",
+   "knob_a": "g_beak_diagonal_mm",
+   "scale": 0.007169111085567777,
+   "offset": 0.1995416685811749,
+   "r2": 0.3862392671728674,
+   "source": "rho_top_decile"
+  },
+  {
+   "knob_b": "g_theta_h0_deg",
+   "knob_a": "g_beak_v_projection_mm",
+   "scale": -0.98637203071153,
+   "offset": 7.293234525081056,
+   "r2": 0.31954107289980893,
+   "source": "rho_top_decile"
+  }
+ ],
+ "tool": "links",
+ "generated_utc": "2026-11-17T20:55:44Z"
+}
