@@ -55,6 +55,40 @@ The path is absolute on purpose: relative `skills` entries resolve against the a
 directory, which differs between the umbrella root and subdirectories. If the repository moves,
 update this one line.
 
+## Active preset (`opencode-go-max`)
+
+The active preset is **`opencode-go-max`**, a HornLab-specific copy of the `deepseek-flash-max`
+tiers routed entirely to the OpenCode Go provider:
+
+| Agent | Model (primary, fallback) | Variant |
+|---|---|---|
+| orchestrator | `opencode-go/deepseek-v4.1-flash`, `opencode-go/glm-5.3-flash` | max |
+| oracle | `opencode-go/glm-5.3-flash`, `opencode-go/deepseek-v4.1-flash` | max |
+| fixer / librarian / designer / council / observer | `opencode-go/deepseek-v4.1-flash`, `opencode-go/glm-5.3-flash` | high |
+| explorer | `opencode-go/deepseek-v4.1-flash`, `opencode-go/glm-5.3-flash` | low |
+
+It is defined in **two** files because OpenCode's project-config walk stops at the git boundary:
+
+- `hornlab-search/.opencode/oh-my-opencode-slim.json` — canonical (applies when launched in the repo).
+- `Hrns/.opencode/oh-my-opencode-slim.json` — umbrella mirror (applies when launched in `Hrns`).
+
+**Keep the two preset blocks identical.** Root `agents.*` entries (`skills_remove`, fixer/designer
+HornLab skill grants) belong in the canonical file; the umbrella copy carries the same
+`skills_remove` so the isolation holds there too.
+
+`opencode-go/deepseek-v4.1-flash` is the primary model. On 2026-11-17 the Go workspace refused it
+with "hosted outside Europe and the United States"; the owner set **Settings › Privacy › Regions**
+to **Global** in the Go console, and it now loads skills normally (verified with a live run). If the
+region setting is ever reverted, the `glm-5.3-flash` fallback keeps the lanes alive.
+
+Verify the active preset:
+
+```powershell
+opencode debug agent orchestrator   # expect providerID opencode-go, modelID deepseek-v4.1-flash, variant max
+opencode run --dir C:\Users\hunte\Hrns\hornlab-search "PING: reply exactly PING-OK"
+# the banner must read: > orchestrator · glm-5.3-flash
+```
+
 ## Nested `AGENTS.md` timing (why the umbrella file front-loads orientation)
 
 Starting in `Hrns`, OpenCode loads upward `AGENTS.md` files immediately but injects

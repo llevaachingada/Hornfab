@@ -1,7 +1,69 @@
 {
   "$schema": "https://unpkg.com/oh-my-opencode-slim@latest/oh-my-opencode-slim.schema.json",
-  "preset": "deepseek-flash-max",
+  "preset": "opencode-go-max",
+  "presets": {
+    "opencode-go-max": {
+      "orchestrator": {
+        "model": ["opencode-go/deepseek-v4.1-flash", "opencode-go/glm-5.3-flash"],
+        "variant": "max",
+        "skills": ["*"],
+        "mcps": ["*", "!context7"]
+      },
+      "oracle": {
+        "model": ["opencode-go/glm-5.3-flash", "opencode-go/deepseek-v4.1-flash"],
+        "variant": "max",
+        "skills": ["simplify"],
+        "mcps": []
+      },
+      "fixer": {
+        "model": ["opencode-go/deepseek-v4.1-flash", "opencode-go/glm-5.3-flash"],
+        "variant": "high",
+        "skills": [],
+        "mcps": []
+      },
+      "explorer": {
+        "model": ["opencode-go/deepseek-v4.1-flash", "opencode-go/glm-5.3-flash"],
+        "variant": "low",
+        "skills": [],
+        "mcps": []
+      },
+      "librarian": {
+        "model": ["opencode-go/deepseek-v4.1-flash", "opencode-go/glm-5.3-flash"],
+        "variant": "high",
+        "skills": [],
+        "mcps": ["websearch", "context7", "gh_grep"]
+      },
+      "designer": {
+        "model": ["opencode-go/deepseek-v4.1-flash", "opencode-go/glm-5.3-flash"],
+        "variant": "high",
+        "skills": [],
+        "mcps": []
+      },
+      "council": {
+        "model": ["opencode-go/deepseek-v4.1-flash", "opencode-go/glm-5.3-flash"],
+        "variant": "high",
+        "skills": [],
+        "mcps": []
+      },
+      "observer": {
+        "model": ["opencode-go/deepseek-v4.1-flash", "opencode-go/glm-5.3-flash"],
+        "variant": "high",
+        "skills": [],
+        "mcps": []
+      }
+    }
+  },
   "agents": {
+    "orchestrator": {
+      "skills_remove": [
+        "rbassist-cloud-desktop-clickthrough",
+        "rbassist-desktop-snapshot",
+        "rbassist-native-qt-design-contract",
+        "rbassist-pyside-design-system-refactor",
+        "rbassist-pyside-gui-fixer",
+        "rbassist-real-pyside-validation"
+      ]
+    },
     "fixer": {
       "skills": [
         "hornlab-gpu-job",

@@ -1,5 +1,41 @@
 # CONTINUITY
 
+## 2026-11-17 (later) - OpenCode Go preset active for HornLab; ping suite 8/8; availability and isolation verified
+
+- **Active preset is now `opencode-go-max`** (owner instruction: the `deepseek-flash-max` tiers on
+  the OpenCode Go provider). Per-agent variants, skills and MCP grants match `deepseek-flash-max`:
+  `opencode-go/deepseek-v4.1-flash` for orchestrator, fixer, explorer, librarian, designer, council
+  and observer, `opencode-go/glm-5.3-flash` for oracle, each with the other as fallback. The preset
+  is defined in `hornlab-search/.opencode/oh-my-opencode-slim.json` and mirrored in
+  `Hrns/.opencode/oh-my-opencode-slim.json` (the project walk stops at the git boundary, so the
+  umbrella needs its own copy). Verified with `opencode debug agent orchestrator`
+  (`providerID=opencode-go`, `modelID=deepseek-v4.1-flash`, `variant=max`) and live runs.
+- **Go region.** `opencode-go/deepseek-v4.1-flash` first refused with "hosted outside Europe and
+  the United States". The owner set Settings > Privacy > Regions to Global in the Go console; the
+  model now loads skills (live: `PING-DS OK`). The workspace key was refreshed in
+  `~/.local/share/opencode/auth.json` (type `api`); **no key material is in the repository**.
+- **Ping suite, 8/8.** New `tools/agent/ping_agents.py` (static by default; `--live` makes model
+  calls). Static: all 8 `hornlab-*` skills discoverable from both the repo and `Hrns` (26 skills),
+  config parses, no rbassist skill granted to the HornLab orchestrator. Live: the orchestrator loads
+  `hornlab-gpu-job`; a delegated fixer loads it; and the HornLab prompt reports
+  `PING-ISOLATION: (no); rbassist skills: (none)`. Per-agent checks: designer loads
+  `hornlab-render`; explorer has no skill tool (grant matrix enforced); a `Hrns` session loads
+  `hornlab-acoustic-grounding`. Evidence: `docs/evidence/AGENT_PING_2026-11-17.md`.
+- **Availability defect the pings exposed.** The DeepSeek provider is out of balance. With
+  single-model agents the delegated lanes failed (`No model fallback chain for fixer`); adding a
+  fallback list was not enough (`Model fallback did not recover`); reordering the same-tier arrays
+  to put a working provider first fixed delegation. That was availability, not retiering: no
+  variant changed. rbassist's presets still put DeepSeek first, so its delegated lanes remain
+  blocked until that balance is restored or those arrays are reordered.
+- **Prompt isolation, verified live.** Global appends are project-neutral; rbassist rules live in
+  `C:/Users/hunte/Music/rbassist-merge-cloud-local/.opencode/oh-my-opencode-slim/` and are mirrored
+  there because plugin appends replace rather than concatenate. The HornLab orchestrator denies the
+  six globally installed rbassist skills via `skills_remove` (the files are not deleted).
+- Also added: `docs/AGENT_BOOTSTRAP_CONTAINER.md` (umbrella bootstrap, skill registration, preset
+  table), `docs/LOG_ARCHIVAL_PROPOSAL_2026-11-17.md` (rotation proposal, not approved), and the ping
+  harness. No solve, test, queue or GPU state was started or changed; the running
+  `home18_a_2026-11-16` lane was not touched.
+
 ## 2026-11-17 - ROSSE-RECT: g_b hover clarified and negative floor enabled; 120-run paused, 50-run live
 
 - **GUI/doc:** the `g_b` hover on the `hl__rosse_rect_cd_v7` sandbox page now states the R-OSSE

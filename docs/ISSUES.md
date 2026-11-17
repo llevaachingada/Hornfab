@@ -1,5 +1,25 @@
 # ISSUES
 
+## 2026-11-17 - Agent pings 8/8; OpenCode Go preset active; rbassist child lanes still blocked
+
+- DONE: `tools/agent/ping_agents.py` added; `--live` suite passes 8/8. Static checks cover both
+  workspaces (skills, config, orchestrator grants); live checks cover the orchestrator, a delegated
+  fixer and prompt isolation. Evidence: `docs/evidence/AGENT_PING_2026-11-17.md`.
+- DONE: active preset `opencode-go-max` (`deepseek-flash-max` tiers on OpenCode Go), selected in the
+  repo and in the `Hrns` umbrella mirror. Verified `opencode-go/deepseek-v4.1-flash` at variant max
+  and live skill loads.
+- DONE: the HornLab orchestrator no longer lists rbassist skills (`skills_remove`; live check
+  `PING-ISOLATION: (no); rbassist skills: (none)`).
+- OPEN (owner): the DeepSeek-direct account balance is exhausted. HornLab no longer depends on it,
+  but rbassist presets still put `deepseek/*` first, so its delegated lanes fail until the balance is
+  restored or those arrays are reordered.
+- OPEN (blocked on the above): P2 model/variant pilot - six representative tasks, correctness first,
+  then latency, cost, retries. No variant was changed by this pass.
+- OPEN (owner): living-log archival policy (`docs/LOG_ARCHIVAL_PROPOSAL_2026-11-17.md`);
+  container-fallback file approval; whether to retire the duplicated global rbassist skills.
+- NOTE: the refreshed OpenCode Go key is stored only in `~/.local/share/opencode/auth.json`; no key
+  material is in the repository or any committed file.
+
 ## 2026-11-17 - ROSSE-RECT b-term negative floor + GUI hover; owner run choice open
 
 - DONE: `g_b` GUI hover now explains the R-OSSE axial bow and sign convention; catalog regenerated

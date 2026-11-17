@@ -646,9 +646,37 @@ Two further factual corrections to this document, found while implementing:
    - Backups of every edited user/project config and prompt are in
      `~/.config/opencode/backups/2026-11-17-agent-scope/`.
 
+### Availability defect found by the ping suite (2026-11-17)
+
+The first delegation ping failed with `Insufficient Balance` and `No model fallback chain for
+fixer`. The shared preset had single-model agents and the DeepSeek account is out of balance, so
+every delegated lane was dead. Adding a fallback list was not sufficient: the plugin switched the
+child session to `ollama-cloud/deepseek-v4.1-flash` and then produced no generation
+(`Model fallback did not recover`). The working fix is provider order — the same-tier arrays now put
+`ollama-cloud/deepseek-v4.1-flash:1017` first and keep `deepseek/deepseek-flash` as the fallback. No
+tier, variant or routing change; this is availability, not retiering. Evidence and the repeatable
+harness are in `docs/evidence/AGENT_PING_2026-11-17.md` and `tools/agent/ping_agents.py`.
+
+**Isolation completed.** `skills_remove` in both HornLab project configs (umbrella and repo) denies
+the six globally installed rbassist skills to the HornLab orchestrator. Live check: the orchestrator
+now reports `rbassist skills: (none)`; before the change it listed them in its inventory. The global
+skill files were **not** deleted, because the rbassist workspace still needs them.
+
+**Owner follow-up (same day).** After this pass the owner set the OpenCode Go workspace region to
+**Global**, supplied a refreshed Go API key (stored in the OpenCode credential store, not in the
+repo), and asked for the `deepseek-flash-max` tiers on Go. The active preset is now
+**`opencode-go-max`**: identical per-agent variants, skills and MCP grants to `deepseek-flash-max`,
+with `opencode-go/deepseek-v4.1-flash` for the flash tier and `opencode-go/glm-5.3-flash` for
+oracle — all on the OpenCode Go provider. It is selected in both
+`hornlab-search/.opencode/oh-my-opencode-slim.json` and the `Hrns` umbrella mirror. Verified:
+`debug agent orchestrator` resolves to `opencode-go/deepseek-v4.1-flash` at variant `max`, and live
+orchestrator and delegated-fixer pings both load `hornlab-gpu-job`. The DeepSeek-direct provider is
+out of balance and is no longer in the HornLab preset path.
+
 ### Deferred, with reasons
 
-- **P2 model/variant pilot.** No model change was made. Protocol: after P0/P1 have run for a week,
+- **P2 model/variant pilot.** No tier or variant change was made; only provider order changed, for
+  availability (see above). Protocol: after P0/P1 have run for a week,
   compare on the same six representative tasks (small edit, GUI lookup, cross-module fix, acoustic
   scoring review, queued GPU study status, independent audit): `flash/max` vs `flash/high`
   orchestrator; `flash/high` vs `flash/medium` on mechanical fixer jobs; and available `oracle`
@@ -667,10 +695,13 @@ Two further factual corrections to this document, found while implementing:
 
 ### Open items for the owner
 
-1. Approve or reject the container fallback files (`Hrns/AGENTS.md`, `Hrns/.opencode/opencode.jsonc`)
+1. Restore the DeepSeek balance, or accept the current provider order. rbassist's own presets are
+   still deepseek-first, so its delegated lanes remain blocked until one of the two happens.
+2. Approve or reject the container fallback files (`Hrns/AGENTS.md`, `Hrns/.opencode/opencode.jsonc`)
    as machine-local, non-versioned artifacts.
-2. Decide whether the duplicated global rbassist skills should be retired after one rbassist
-   session confirms the project copies suffice.
-3. Schedule the P2 pilot, and name the six representative tasks (or accept the list above).
-4. Decide the living-log archival policy when convenient; it affects the push rule, not the code.
+3. Decide whether the duplicated global rbassist skills should be retired after one rbassist
+   session confirms the project copies suffice (they are now denied in HornLab either way).
+4. Schedule the P2 pilot, and name the six representative tasks (or accept the list above).
+5. Decide the living-log archival policy when convenient — proposal in
+   `docs/LOG_ARCHIVAL_PROPOSAL_2026-11-17.md`; it affects the push rule, not the code.
 
