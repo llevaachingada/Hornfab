@@ -1,0 +1,39 @@
+{
+ "proposal": "scratch/fable_architecture/space_cards/proposals/hl__osse_rrect_fold_warm_v7__space_v1.yaml",
+ "notes": [
+  "fixed a0_deg at its seed (whole range moves the surface <= 0.39 mm (below the ~1 mm mesher fit): CMA spends a dimension on mesh noise)",
+  "linked n = -4.24584 * s + 10.03136",
+  "linked k = -0.093273 * a_deg + 6.198556"
+ ],
+ "before": {
+  "searched": 18,
+  "box": {
+   "ok": 64,
+   "outside": 0,
+   "refused": 0
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0,
+   "0.15": 0.0,
+   "0.20": 0.0,
+   "0.25": 0.0
+  }
+ },
+ "after": {
+  "searched": 15,
+  "box": {
+   "ok": 32,
+   "outside": 0,
+   "refused": 0
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0,
+   "0.15": 0.0,
+   "0.20": 0.0,
+   "0.25": 0.0
+  },
+  "seed_shift_max_mm": 0.0
+ }
+}

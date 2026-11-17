@@ -32,8 +32,6 @@ Envelope margin model: R^2 1.00, sign agreement 100%, inside 100%, binding {'wid
 ## Recommendations (not applied)
 
 - **fix_or_widen** `a0_deg`: whole range moves the surface <= 0.39 mm (below the ~1 mm mesher fit): CMA spends a dimension on mesh noise
-- **link** `a_deg`: surface direction parallel to k (|cos| 0.982); proposal `{"from": "k", "scale": -10.29330988644193, "offset": 65.34030674157415}`
-- **link** `n`: surface direction parallel to q (|cos| 0.968); proposal `{"from": "q", "scale": -27.97404807928285, "offset": 32.695845840443575}`
 - **link** `n`: surface direction parallel to s (|cos| 0.990); proposal `{"from": "s", "scale": -4.2458400706679, "offset": 10.031360466838851}`
-- **link** `q`: surface direction parallel to s (|cos| 0.986); proposal `{"from": "s", "scale": 0.14335215071014032, "offset": 0.8186333550718957}`
+- **link** `k`: surface direction parallel to a_deg (|cos| 0.982); proposal `{"from": "a_deg", "scale": -0.0932729283913537, "offset": 6.198555610200865}`
 - **sigma0** `*`: predicted bad-candidate rate <= 15% from the seed; proposal `{"max_safe_sigma0": 0.25}`

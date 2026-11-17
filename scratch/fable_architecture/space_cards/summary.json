@@ -1,36 +1,34 @@
 {
  "cards": [
-  "hl__ext_throat_hvlaw_v7",
-  "hl__biradial_es_style_v7",
-  "klangfilm_hv_core__b3_soft",
+  "hl__osse_rrect_fold_warm_v7",
   "hl__crowe_x_osse_cd_v7",
-  "hl__osse_rrect_fold_warm_v7"
+  "hl__ext_throat_hvlaw_v7",
+  "klangfilm_hv_core__b3_soft",
+  "hl__biradial_es_style_v7"
  ],
  "failures": [],
  "recommendations": {
+  "hl__osse_rrect_fold_warm_v7": [
+   "fix_or_widen:a0_deg",
+   "link:n",
+   "link:k",
+   "sigma0:*"
+  ],
+  "hl__crowe_x_osse_cd_v7": [
+   "link:g_wrap_deg",
+   "rebound:g_L_mm",
+   "rebound:g_s",
+   "sigma0:*"
+  ],
   "hl__ext_throat_hvlaw_v7": [
    "sigma0:*",
    "constraint:*"
-  ],
-  "hl__biradial_es_style_v7": [
-   "sigma0:*"
   ],
   "klangfilm_hv_core__b3_soft": [
    "rebound:g_theta_h1_deg",
    "sigma0:*"
   ],
-  "hl__crowe_x_osse_cd_v7": [
-   "link:g_r_lip_mm",
-   "rebound:g_L_mm",
-   "rebound:g_s",
-   "sigma0:*"
-  ],
-  "hl__osse_rrect_fold_warm_v7": [
-   "fix_or_widen:a0_deg",
-   "link:a_deg",
-   "link:n",
-   "link:n",
-   "link:q",
+  "hl__biradial_es_style_v7": [
    "sigma0:*"
   ]
  }

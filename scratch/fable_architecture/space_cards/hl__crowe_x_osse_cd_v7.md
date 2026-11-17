@@ -18,11 +18,11 @@ Config `examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yam
 | `g_sf_amt` | active | 36.04 | 10.77 | - | 0.28 / 1.00 |
 | `g_wrap_deg` | active | 20.18 | 11.51 | g_r_lip_mm | 1.00 / 1.00 |
 
-Envelope margin model: R^2 0.97, sign agreement 100%, inside 100%, binding {'height_mm': 5, 'width_mm': 45}
+Envelope margin model: R^2 0.97, sign agreement 100%, inside 100%, binding {'width_mm': 45, 'height_mm': 5}
 
 ## Recommendations (not applied)
 
-- **link** `g_r_lip_mm`: surface direction parallel to g_wrap_deg (|cos| 0.969); proposal `{"from": "g_wrap_deg", "scale": 0.5301389056322042, "offset": -27.3535688237531}`
+- **link** `g_wrap_deg`: surface direction parallel to g_r_lip_mm (|cos| 0.969); proposal `{"from": "g_r_lip_mm", "scale": 1.5009558185718768, "offset": 58.64289902754894}`
 - **rebound** `g_L_mm`: edge slice mostly refused/outside while the middle is not; proposal `{"lower_hi_to_unit": 0.8}`
 - **rebound** `g_s`: edge slice mostly refused/outside while the middle is not; proposal `{"lower_hi_to_unit": 0.8}`
 - **sigma0** `*`: predicted bad-candidate rate <= 15% from the seed; proposal `{"max_safe_sigma0": null}`

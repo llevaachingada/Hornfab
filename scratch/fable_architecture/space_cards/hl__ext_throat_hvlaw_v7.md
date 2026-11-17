@@ -17,7 +17,7 @@ Config `examples/typologies/home_landscape_2026-11-15/hl__ext_throat_hvlaw_v7.ya
 | `throat_ext_angle_deg` | active | 9.42 | 2.78 | - | 1.00 / 1.00 |
 | `throat_ext_length_mm` | active | 160.00 | 106.48 | - | 1.00 / 1.00 |
 
-Envelope margin model: R^2 0.91, sign agreement 91%, inside 43%, binding {'height_mm': 8, 'width_mm': 43, 'depth_mm': 14}
+Envelope margin model: R^2 0.91, sign agreement 91%, inside 43%, binding {'width_mm': 43, 'depth_mm': 14, 'height_mm': 8}
 
 ## Recommendations (not applied)
 

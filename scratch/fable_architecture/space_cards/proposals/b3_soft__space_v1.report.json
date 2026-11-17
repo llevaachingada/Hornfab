@@ -1,0 +1,37 @@
+{
+ "proposal": "scratch/fable_architecture/space_cards/proposals/b3_soft__space_v1.yaml",
+ "notes": [
+  "g_theta_h1_deg.hi 60.0 -> 55.3"
+ ],
+ "before": {
+  "searched": 12,
+  "box": {
+   "ok": 54,
+   "outside": 0,
+   "refused": 10
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0,
+   "0.15": 0.0625,
+   "0.20": 0.0625,
+   "0.25": 0.21875
+  }
+ },
+ "after": {
+  "searched": 12,
+  "box": {
+   "ok": 28,
+   "outside": 0,
+   "refused": 4
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0,
+   "0.15": 0.0,
+   "0.20": 0.08333333333333333,
+   "0.25": 0.041666666666666664
+  },
+  "seed_shift_max_mm": 0.0
+ }
+}

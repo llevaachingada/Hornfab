@@ -412,9 +412,9 @@
   "r2": 0.9060005443651933,
   "sign_agreement": 0.9076923076923077,
   "binding_axis_counts": {
-   "height_mm": 8,
    "width_mm": 43,
-   "depth_mm": 14
+   "depth_mm": 14,
+   "height_mm": 8
   },
   "inside_frac": 0.4307692307692308,
   "constraint": "sum_k g_k * x_k >= -intercept (x in unit coordinates)"

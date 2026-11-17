@@ -284,12 +284,16 @@
   },
   "links": [
    {
-    "follower": "g_r_lip_mm",
-    "from": "g_wrap_deg",
-    "scale": 0.5301389056322042,
-    "offset": -27.3535688237531,
+    "follower": "g_wrap_deg",
+    "from": "g_r_lip_mm",
+    "scale": 1.5009558185718768,
+    "offset": 58.64289902754894,
     "median_abs_cos": 0.9692422426036245,
-    "note": "geometric redundancy at the sampled points; confirm with data links (tools/analysis/links.py) before applying"
+    "authority_mm": {
+     "follower": 11.505409306711382,
+     "leader": 24.166012230065725
+    },
+    "note": "geometric redundancy at the sampled points; confirm with data links (tools/analysis/links.py) and acoustics before applying"
    }
   ],
   "feasible_from_seed": {
@@ -520,8 +524,8 @@
   "r2": 0.9693989155769024,
   "sign_agreement": 1.0,
   "binding_axis_counts": {
-   "height_mm": 5,
-   "width_mm": 45
+   "width_mm": 45,
+   "height_mm": 5
   },
   "inside_frac": 1.0,
   "constraint": "sum_k g_k * x_k >= -intercept (x in unit coordinates)"
@@ -529,13 +533,13 @@
  "data": {},
  "recommendations": [
   {
-   "knob": "g_r_lip_mm",
+   "knob": "g_wrap_deg",
    "action": "link",
-   "why": "surface direction parallel to g_wrap_deg (|cos| 0.969)",
+   "why": "surface direction parallel to g_r_lip_mm (|cos| 0.969)",
    "proposal": {
-    "from": "g_wrap_deg",
-    "scale": 0.5301389056322042,
-    "offset": -27.3535688237531
+    "from": "g_r_lip_mm",
+    "scale": 1.5009558185718768,
+    "offset": 58.64289902754894
    }
   },
   {

@@ -21,7 +21,7 @@ Config `examples/typologies/klangfilm_hv_2026-11-16/configs/b3_soft.yaml`; famil
 | `g_theta_v0_deg` | active | 14.14 | 7.55 | - | 1.00 / 1.00 |
 | `g_theta_v1_deg` | active | 81.40 | 30.10 | - | 1.00 / 1.00 |
 
-Envelope margin model: R^2 0.93, sign agreement 100%, inside 100%, binding {'height_mm': 2, 'width_mm': 18, 'depth_mm': 35}
+Envelope margin model: R^2 0.93, sign agreement 100%, inside 100%, binding {'width_mm': 18, 'depth_mm': 35, 'height_mm': 2}
 
 ## Recommendations (not applied)
 

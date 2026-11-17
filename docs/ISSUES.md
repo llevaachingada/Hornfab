@@ -1,5 +1,10 @@
 # ISSUES
 
+## 2026-11-17 - Handoff to the local orchestrator
+
+- OPEN (orchestrator): follow `ORCHESTRATOR_HANDOFF_2026-11-17.md` §2-§4.
+- OPEN (owner): review the four `__space_v1` proposals.
+
 ## 2026-11-17 - Stage 5 core landed (parameter spaces)
 
 - DONE: sensitivity module, space cards, proposals. OPEN (orchestrator, local): cards for every

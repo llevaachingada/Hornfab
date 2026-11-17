@@ -8,6 +8,11 @@ and the preserved [supplied compilation](knowledge/imported/HornFab_Research_Kno
 Existing research remains in place; imported recommendations are not implementation mandates.
 
 
+[Orchestrator handoff for the senior plan (2026-11-17)](../scratch/fable_architecture/ORCHESTRATOR_HANDOFF_2026-11-17.md):
+how a lower-cost local orchestrator continues the plan: rules, what exists, first-session verification,
+the stage-5 parameter-space workflow (space cards, proposals, constraint-aware filtering, links agreement,
+categoricals, cross-family seeding), the ordered remaining tasks, owner decisions, and the first proposals.
+
 [Fable senior review and architecture plan (2026-11-17)](../scratch/fable_architecture/FABLE_SENIOR_REVIEW_2026-11-17.md):
 senior verdict on the lane review (confirm/amend/overrule), corrections to the record, and the reserved
 decisions: plural specialist generators with one shared description (canonical record v2), no unified

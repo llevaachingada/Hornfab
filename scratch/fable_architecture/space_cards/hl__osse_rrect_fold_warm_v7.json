@@ -481,36 +481,28 @@
   },
   "links": [
    {
-    "follower": "a_deg",
-    "from": "k",
-    "scale": -10.29330988644193,
-    "offset": 65.34030674157415,
-    "median_abs_cos": 0.9822439969512167,
-    "note": "geometric redundancy at the sampled points; confirm with data links (tools/analysis/links.py) before applying"
-   },
-   {
-    "follower": "n",
-    "from": "q",
-    "scale": -27.97404807928285,
-    "offset": 32.695845840443575,
-    "median_abs_cos": 0.9677018500994462,
-    "note": "geometric redundancy at the sampled points; confirm with data links (tools/analysis/links.py) before applying"
-   },
-   {
     "follower": "n",
     "from": "s",
     "scale": -4.2458400706679,
     "offset": 10.031360466838851,
     "median_abs_cos": 0.9898916497527426,
-    "note": "geometric redundancy at the sampled points; confirm with data links (tools/analysis/links.py) before applying"
+    "authority_mm": {
+     "follower": 0.7429226542095155,
+     "leader": 1.416075906976479
+    },
+    "note": "geometric redundancy at the sampled points; confirm with data links (tools/analysis/links.py) and acoustics before applying"
    },
    {
-    "follower": "q",
-    "from": "s",
-    "scale": 0.14335215071014032,
-    "offset": 0.8186333550718957,
-    "median_abs_cos": 0.9861687467237946,
-    "note": "geometric redundancy at the sampled points; confirm with data links (tools/analysis/links.py) before applying"
+    "follower": "k",
+    "from": "a_deg",
+    "scale": -0.0932729283913537,
+    "offset": 6.198555610200865,
+    "median_abs_cos": 0.9822439969512167,
+    "authority_mm": {
+     "follower": 3.1444625945336964,
+     "leader": 5.775632985244552
+    },
+    "note": "geometric redundancy at the sampled points; confirm with data links (tools/analysis/links.py) and acoustics before applying"
    }
   ],
   "feasible_from_seed": {
@@ -926,26 +918,6 @@
    }
   },
   {
-   "knob": "a_deg",
-   "action": "link",
-   "why": "surface direction parallel to k (|cos| 0.982)",
-   "proposal": {
-    "from": "k",
-    "scale": -10.29330988644193,
-    "offset": 65.34030674157415
-   }
-  },
-  {
-   "knob": "n",
-   "action": "link",
-   "why": "surface direction parallel to q (|cos| 0.968)",
-   "proposal": {
-    "from": "q",
-    "scale": -27.97404807928285,
-    "offset": 32.695845840443575
-   }
-  },
-  {
    "knob": "n",
    "action": "link",
    "why": "surface direction parallel to s (|cos| 0.990)",
@@ -956,13 +928,13 @@
    }
   },
   {
-   "knob": "q",
+   "knob": "k",
    "action": "link",
-   "why": "surface direction parallel to s (|cos| 0.986)",
+   "why": "surface direction parallel to a_deg (|cos| 0.982)",
    "proposal": {
-    "from": "s",
-    "scale": 0.14335215071014032,
-    "offset": 0.8186333550718957
+    "from": "a_deg",
+    "scale": -0.0932729283913537,
+    "offset": 6.198555610200865
    }
   },
   {

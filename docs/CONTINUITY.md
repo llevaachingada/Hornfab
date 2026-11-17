@@ -1,5 +1,13 @@
 # CONTINUITY
 
+## 2026-11-17 (senior pass) - Orchestrator handoff + first parameter-space proposals
+
+- `scratch/fable_architecture/ORCHESTRATOR_HANDOFF_2026-11-17.md`: rules, inventory, first-session
+  verification commands, stage-5 workflow, ordered remaining tasks, owner decisions.
+- Proposals (not applied) in `scratch/fable_architecture/space_cards/proposals/`: Crowe 9 -> 8 knobs,
+  bad box share 23 % -> 6 %; ext-throat sigma0 0.20 -> 0.10 (predicted bad 34 % -> 12.5 % at 0.15);
+  fold-warm 18 -> 15 knobs; b3_soft one bound trimmed. Seed shift 0 on all four.
+
 ## 2026-11-17 (senior pass, code) - Shared-descriptor translation between families
 
 - New `hornlab_search/geometry/translate.py`: seed family B from family A's shared descriptors

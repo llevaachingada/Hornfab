@@ -17,7 +17,7 @@ Config `examples/typologies/home_landscape_2026-11-15/hl__biradial_es_style_v7.y
 | `v_n` | active | 13.77 | 6.24 | - | 1.00 / 1.00 |
 | `v_rm_mm` | active | 74.54 | 29.03 | - | 1.00 / 1.00 |
 
-Envelope margin model: R^2 0.80, sign agreement 100%, inside 100%, binding {'height_mm': 13, 'width_mm': 52}
+Envelope margin model: R^2 0.80, sign agreement 100%, inside 100%, binding {'width_mm': 52, 'height_mm': 13}
 
 ## Recommendations (not applied)
 
