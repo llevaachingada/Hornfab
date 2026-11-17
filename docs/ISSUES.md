@@ -1,5 +1,11 @@
 # ISSUES
 
+## 2026-11-17 - Stage 0 WP 0.5 done (GRID extent)
+
+- DONE: per-plane GRID extent estimate; false refusals 3 -> 1 of 64, no admitted design violates.
+- OPEN (pre-existing, not ours): `tests/test_gui_preview_shape.py` plughorn-face and
+  typology-link tests fail at `1d6ebc8`.
+
 ## 2026-11-17 - Stage 4 WP 4.1 CPU stage done on a seed host
 
 - DONE: record-edit module + real point-grid meshes for control and 7 variants (biradial seed).

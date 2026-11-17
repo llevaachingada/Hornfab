@@ -1,5 +1,17 @@
 # CONTINUITY
 
+## 2026-11-17 (senior pass, code) - Stage 0 WP 0.5: GRID extent false refusals measured and fixed
+
+- T4 (`scratch/fable_architecture/.t4/t4.py`, gmsh, no solve; 64 Sobol knob vectors per config):
+  `grid_ellipse_mod` had 3/3 pre-mesh envelope refusals that the real mesh fits (false refusals),
+  0 misses; `grid_ellipse` 0/0. On the home landscape brief these bounds never reach the box, and
+  no home lane uses the generic radial GRID route, so the realised loss on home campaigns is ~0.
+- Fix (`design/generators/grid.py::envelope_extents`): width/height per plane
+  (`2(max r cos phi + t)`, `2(max r sin phi + t)`) instead of `2(max r + t)` on both. Re-measured:
+  1 false refusal left (1.5 % over by the estimate; the radius-field mouth modulation), 0 misses.
+- Tests touching the estimator: 267 passed; 3 failures all pre-existing at `1d6ebc8`
+  (`test_grid_self_approach...`, two `test_gui_preview_shape` tests).
+
 ## 2026-11-17 (senior pass, code) - Stage 4 WP 4.1: U3 freedoms as record edits, meshed for real
 
 - New `hornlab_search/geometry/edits.py`: pinned-throat radial edits; the seven U3 variants; U2
