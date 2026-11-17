@@ -15,7 +15,10 @@
 - OPEN (owner): require `implementation_sha256` on every grid-row recipe. Lecleach stores none, and
   its H/V realization changed in `d6c9abd` after both stored runs, so its 48 stored designs cannot
   be rebuilt from their recipes at HEAD.
-- OPEN: N3 (v9 grid independence) still running at this commit. U2/U3 not started.
+- DONE (N3): v9 J converges at 58 dense points (sd 0.032/0.019); with constancy it needs 116
+  (0.058/0.014 all/best-28). Residual from 18 solved frequencies: 0.113 (J_v9) / 0.205 (with
+  constancy) at the top. `N3_GRID_INDEPENDENCE_V9.md`.
+- OPEN: U2/U3 not started (gated on N4).
 - NOTE: no family cut recommended; Crowe, Le Cleac'h and Klangfilm remain owner-protected.
 - NOTE: `configs/b3_soft.yaml` remains another lane's uncommitted Phase B edit.
 

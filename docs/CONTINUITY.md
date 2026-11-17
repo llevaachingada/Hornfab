@@ -24,6 +24,20 @@
   cutoff 14:30. Measured-rate budget ~6.5-8.5 h of the 12 h allowance; the file is LIVE-editable to
   append a third TuRBO arm (ath_core_14in, 219 rows) while it runs.
 
+## 2026-11-17 - N3: v9 J converges at 58 dense points; with constancy it needs 116
+
+- 58 study pairs, v9 corridor plus the strict constancy cost (`.s1/replay.py`, weight 1 H / 0.5 V).
+  J_v9: dense 58 → 116 changes it by sd 0.032 (all) / 0.019 (best 28), rank 0.999/0.997; 116 → 232 by
+  0.012/0.008 - inside A4's 0.05 comparison line. Residual from 18 vs 29 solved frequencies: sd 0.193
+  all / 0.113 at the top, rank 0.953 (A4's v7 size).
+- J_v9 + constancy is not converged at 58 points (sd 0.175 all / 0.055 top) and needs 116 (0.058 /
+  0.014); its 18-vs-29 residual is 0.370 all / 0.205 top. Constancy is ~55 % of the augmented level
+  and J-independent; the H fitted level (~69.5 deg) never reaches the upper clip, so the [60,80] and
+  [60,90] windows are identical on this cohort.
+- Residual carried by `flat_cv`, `load`, `flat` (as A4 found for v7), not `rip`. A4's best-28 set is
+  reproduced 28/28 at 0.00 J; the v9 best-28 overlaps it 25/28. Report
+  `scratch/fable_architecture/N3_GRID_INDEPENDENCE_V9.md`.
+
 ## 2026-11-17 - Fable architecture: contract v2 passes all six lanes; the layered backbone fails U1
 
 - **N1b, contract v2 (65 stations x 61 azimuths):** all six contract lanes pass Test 2 on the
