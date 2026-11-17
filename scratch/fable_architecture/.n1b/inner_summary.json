@@ -1,0 +1,78 @@
+{
+ "hl__ext_throat_hvlaw_v7": {
+  "n": 10,
+  "native_floor_p99": 0.06799009910907312,
+  "record_p99": 0.10766807595544449,
+  "threshold": 1.0,
+  "median_max": 0.016271594854582478,
+  "pass_lane": true,
+  "pass_per_design": 10,
+  "hand_back": false
+ },
+ "hl__ath_tritonia_landscape_v9": {
+  "n": 10,
+  "native_floor_p99": 0.047692799879709966,
+  "record_p99": 0.24656869303016785,
+  "threshold": 1.0,
+  "median_max": 0.019459398936440477,
+  "pass_lane": true,
+  "pass_per_design": 10,
+  "hand_back": false
+ },
+ "hl__crowe_x_osse_cd_v7": {
+  "n": 10,
+  "native_floor_p99": 1.1604478870318553,
+  "record_p99": 1.352976858956975,
+  "threshold": 1.4505598587898192,
+  "median_max": 0.053100167123956266,
+  "pass_lane": true,
+  "pass_per_design": 10,
+  "hand_back": false
+ },
+ "rf__section_axial_home_v7": {
+  "n": 10,
+  "native_floor_p99": 0.5554693203929899,
+  "record_p99": 0.8562889926504255,
+  "threshold": 1.0,
+  "median_max": 0.04702675282805842,
+  "pass_lane": true,
+  "pass_per_design": 10,
+  "hand_back": false
+ },
+ "hl__klangfilm_lame_curved_v1": {
+  "n": 10,
+  "native_floor_p99": 1.1160202969886674,
+  "record_p99": 1.1551942436016545,
+  "threshold": 1.3950253712358343,
+  "median_max": 0.13905807344685656,
+  "pass_lane": true,
+  "pass_per_design": 10,
+  "hand_back": false
+ },
+ "hl__biradial_es_style_v7": {
+  "n": 10,
+  "native_floor_p99": 0.04666366093981749,
+  "record_p99": 0.10060068916277409,
+  "threshold": 1.0,
+  "median_max": 0.0057763023378086965,
+  "pass_lane": true,
+  "pass_per_design": 10,
+  "hand_back": false
+ },
+ "hl__lecleach_hv_landscape_smooth_v7": {
+  "n": 10,
+  "reproducible": false,
+  "n_not_reproducible": 9,
+  "not_reproducible": [
+   "01e11c10387c",
+   "031e9f5464fd",
+   "2c3fa011926f",
+   "372d25730c4e",
+   "3d4731536ab0",
+   "487c98a11b51",
+   "4de57049aa1c",
+   "4eebb20d92af",
+   "657cf8a788c0"
+  ]
+ }
+}

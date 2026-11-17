@@ -1,5 +1,37 @@
 # CONTINUITY
 
+## 2026-11-17 - Fable architecture: contract v2 passes all six lanes; the layered backbone fails U1
+
+- **N1b, contract v2 (65 stations x 61 azimuths):** all six contract lanes pass Test 2 on the
+  native-floor rule, 10/10 each, medians <= 0.14 mm - ext-throat 0.108 mm record p99 (native floor
+  0.068), ATH morph 0.247 (0.048), Crowe 1.353 (1.160, threshold 1.451), rolled 0.856 (0.555),
+  Klangfilm 1.155 (1.116), biradial 0.101 (0.047). The 61-azimuth record removes N1's rolled and
+  Crowe failures. Provenance gate: the 72 Klangfilm designs carrying digest `e3a1f4a3...` (N1's ten
+  included) are not reproducible at HEAD and were excluded; ten digest-verified replacements pass
+  10/10; rolled's 51 recipes match HEAD; Crowe/native lanes store no digest. Envelope: stored box =
+  mesh box in 70/70; every depth deficit is the rear closure exactly; biradial's +1.9...+3.5 mm is
+  the generator's outward `outer_points` shell, absent from the meshed box (which equals the inner
+  sheet in 10/10); 0 of 309 stored biradial designs sit within 3.5 mm of the 600 W / 480 H limits.
+  A seventh lane added for N4, lecleach, is **not rebuildable at HEAD**: `d6c9abd` changed its H/V
+  realization after both stored runs, and its recipes carry no implementation digest.
+- **N4, U1 layered reproduction (failure line met; handed back):** three ribs + one superellipse per
+  station with exact psi reproduces every rib to <= 6e-14 mm but misses the surface by 48.26 mm
+  (ext-throat), 3.43 (biradial), 29.90 (Crowe), 48.25 (rolled), 3.88 (Klangfilm) - 0/5 at <= 0.5 mm,
+  5/5 above 2 mm. Cause is the section law, not azimuth sampling: the 45-degree radius forces a
+  near-rectangular exponent that overshoots 30-60 degrees. Extra ribs with a Pchip blend: 5 ribs ->
+  1.00-27.08 mm, 9 -> 0.25-11.43 (only ext reaches 0.5), 17 -> 0.12-3.36. Psi splines through 4/6/8
+  control values are worse (8.97-208.11 mm). Rolled substituted for lecleach; U2/U3 not run.
+- **N2, A11 protected families and lineage:** 21 lanes - 17 carry owner-request evidence (4
+  family-level), 4 have no request found (ext-throat H/V-law and OSSE rounded-rect carry owner
+  *drop* evidence). All 75 runs classified, 0 unknown: 58 hand-written seed, 16 best design of an
+  earlier run, 1 warm start (ATH v9); 15 of 17 parented runs seeded within 0.17 J. No family is
+  recommended for cutting.
+- Reports: `scratch/fable_architecture/X1B_CONTRACT_V2.md`, `U1_LAYERED_REPRODUCTION.md`,
+  `A11_PROTECTED_AND_LINEAGE.md`; scripts in `.n1b/`, `.n2/`, `.u1/`. N3 (v9 grid independence) was
+  still running at this commit.
+- NOTE: `examples/typologies/klangfilm_hv_2026-11-16/configs/b3_soft.yaml` is another lane's
+  uncommitted Phase B edit and was left untouched.
+
 ## 2026-11-17 - Klangfilm comparison mesh-converged: the A0-B3 H gap is structural
 
 - Both reference horns were re-solved at `epw 9` (A0 16394 dofs, B3 6757 dofs, vs 7449 / 3087 at epw 6):

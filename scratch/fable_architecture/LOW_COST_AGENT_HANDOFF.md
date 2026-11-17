@@ -376,6 +376,9 @@ earlier one differ, this section is newer.
 | **A9** corridor versus term set | Complete | Term-set change alone keeps 6 of the top 20 but leaves lane order unchanged. Corridor coverage alone keeps 11 of 20 and changes the leading lane (`ext_throat_hvlaw` first → fourth; `osse_rrect` lanes lead). Corridor mode cuts the ripple term to about 3 % of its point-mode value | `A9_CORRIDOR_VS_TERM_SET.md` |
 | **X1 addendum** Klangfilm provenance | Resolved | The stored Klangfilm digest is reproduced exactly by the legacy bridge's digest function at HEAD `207f97a`. Stored designs are rebuildable with verified provenance through `tools/geometry/klangfilm_lame.py`; the current adapter refuses them only because it accepts a newer schema | `X1_ADDENDUM_KLANGFILM_PROVENANCE.md` |
 | **N1** finish X1: five contract tests on six lanes | Complete; **stop condition met** | 60 designs (10 per lane). Determinism 60/60; refinement 30/30 on the three testable lanes (worst 0.198 mm). Inner-wall agreement at the contract-minimum 65×31 record: ext-throat 10/10 (p99 0.158), ATH morph 10/10 (0.850), biradial 10/10 (0.142); **rolled 0/10 (1.696; 49 azimuths passes, p99 0.36–0.59)**, **Crowe 0/10 (1.870; native-point floor ~1.07, mesher fit)**, Klangfilm 9/10 (one design 1.457; saved digest `e3a1f4a3…` ≠ current `ea5026…`). Envelope W/H fails on biradial (+1.9…+3.5) and partly on ext/Crowe; every depth deficit is the rear closure at z=−t. Two or more lanes fail Test 2, so N2–N5 were not run | `X1_CONTRACT_TESTS.md` |
+| **N1b** contract v2 Test 2 and Test 3 | Complete; **no hand-back** | 65 stations × 61 azimuths; native floor measured per lane. All six contract lanes pass v2 rule 2, 10/10 each, medians ≤0.14 mm: ext 0.108 (floor 0.068), ATH 0.247 (0.048), Crowe 1.353 (1.160, thr 1.451), rolled 0.856 (0.555), Klangfilm 1.155 (1.116), biradial 0.101 (0.047). 61 azimuths removes N1's rolled and Crowe failures. Provenance: 72 Klangfilm designs (all `e3a1f4a3…`, incl. N1's ten) are not reproducible at HEAD and were excluded; ten digest-verified replacements pass 10/10; rolled's 51 recipes match HEAD; Crowe/native lanes store no digest. Envelope: stored box = mesh box in 70/70; every depth deficit is the rear closure exactly; biradial's +1.9…+3.5 mm is the generator's outward `outer_points` shell, which is not in the meshed box (meshed box = inner-sheet box in 10/10); **0 of 309 stored biradial designs within 3.5 mm of 600 W / 480 H**. Lecleach (added for N4) is not rebuildable at HEAD: `d6c9abd` changed its H/V realization after both stored runs, and its recipes store no digest | `X1B_CONTRACT_V2.md` |
+| **N4** U1 layered reproduction | Complete; **failure line met; handed back** | Best valid design of five lanes (rolled substitutes for lecleach). Three ribs + one superellipse per station, exact ψ (rib identity ≤6e-14 mm). Own-rib worst: ext 48.26, biradial 3.43, Crowe 29.90, rolled 48.25, Klangfilm 3.88 mm → **0/5 at ≤0.5 mm, 5/5 above 2 mm**. Cause: the 45° radius forces a near-rectangular exponent that overshoots 30–60° by up to 48 mm; the section is not in the superellipse family (36–46/65 stations clipped at p=16 on three lanes). Extra azimuth ribs with a Pchip blend: 5 → 1.00–27.08, 9 → 0.25–11.43 (only ext reaches 0.5), 17 → 0.12–3.36. ψ splines through 4/6/8 values are worse (8.97–208.11 mm): ψ turns too fast at the lip. Mesh difference is 1–2 orders smaller, so not the cause. U2/U3 not run | `U1_LAYERED_REPRODUCTION.md` |
+| **N2** protected families and run lineage | Complete | 21 lanes: **17 carry owner-request evidence** (4 of them family-level only), **4 no evidence found**. Of the four, ext-throat H/V-law and OSSE rounded-rect carry owner *drop* evidence, not a request; no family is recommended for cutting. Lineage: **75/75 runs classified, 0 unknown** — 58 hand-written seed, 16 best design of an earlier run, 1 warm start (ATH v9, from 12eb61+570bc6); **15 of 17** parented runs are seeded within 0.17 J (exceptions: fold-added 0a228d +0.30 J, H-only A/B de1861 +0.26 J). Strict 1e-6 seed matching is too tight for recorded seeds; five documented seeds needed config comments and would otherwise be unknown. dd15d8's seeded verdict is cross-brief (mechanical, not acoustic continuity) | `A11_PROTECTED_AND_LINEAGE.md` |
 
 **Consequences for the task list in §6.**
 - A4, A5 and A9 are done. A4 must be repeated under whatever objective the owner chooses; the
@@ -395,3 +398,19 @@ earlier one differ, this section is newer.
   listening window or only inside the corridor width.
 - Stage 0 (truth fixes) should include a rule for recipes written by older adapters or bridge
   tools, so that history stays rebuildable.
+
+## 11. Decision after N1 (2026-11-17, high-thinking reviewer)
+
+N1 met its stop condition at the contract's minimum sampling. The causes are measured and are
+instrument settings: 3° azimuth sampling is too coarse for rolled relief (passes at 49 azimuths),
+the Crowe corner sits at the mesher's own fit error (about 1.1 mm), and one Klangfilm design has an
+unverified digest. **The canonical surface idea is not overturned.** The contract is amended
+(`CANONICAL_SURFACE_CONTRACT.md` §12, contract v2) and the runbook has an addendum with task N1b.
+N2 and N3 were never dependent on N1 and should run now.
+
+New findings worth carrying into the plan:
+- For cornered sections the solved mesh departs from the designed surface by about 1 mm. The mesh
+  is what was solved; the generator is what was designed.
+- Sampled and stored bounding boxes differ by up to 3.5 mm on the biradial lane, while the envelope
+  check uses a 0.5 mm tolerance. Designs near the size limit may be judged differently before and
+  after meshing.

@@ -1,0 +1,939 @@
+[
+ {
+  "run": "20261115T143219Z-screen-d3a1bb",
+  "config": "hl__ext_throat_hvlaw_v7",
+  "brief": "cd",
+  "start": "2026-11-15T14:32:53Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 33,
+  "matches": []
+ },
+ {
+  "run": "20261115T150043Z-screen-d1ebf6",
+  "config": "hl__ext_throat_hvlaw_v7",
+  "brief": "cd",
+  "start": "2026-11-15T15:01:09Z",
+  "algorithm": "cma",
+  "seed": 5678,
+  "warm_start": null,
+  "seed_param_count": 33,
+  "matches": []
+ },
+ {
+  "run": "20261115T152510Z-screen-a504f6",
+  "config": "hl__ath_core_petal_hvlaw_v7",
+  "brief": "cd",
+  "start": "2026-11-15T15:25:45Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 31,
+  "matches": []
+ },
+ {
+  "run": "20261115T154322Z-screen-07bea2",
+  "config": "hl__osse_rrect_morph_v7",
+  "brief": "cd",
+  "start": "2026-11-15T15:44:02Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 31,
+  "matches": []
+ },
+ {
+  "run": "20261115T161238Z-screen-1b1b6e",
+  "config": "hl__es_style_rollback_v7",
+  "brief": "cd",
+  "start": "2026-11-15T16:13:09Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 5,
+  "matches": []
+ },
+ {
+  "run": "20261115T162331Z-screen-2ac841",
+  "config": "hl__biradial_es_style_v7",
+  "brief": "cd",
+  "start": "2026-11-15T16:23:55Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 7,
+  "matches": []
+ },
+ {
+  "run": "20261115T162516Z-screen-e31b23",
+  "config": "hl__lecleach_iwata_ar_landscape_v7",
+  "brief": "cd",
+  "start": "2026-11-15T16:25:42Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 5,
+  "matches": []
+ },
+ {
+  "run": "20261115T163824Z-screen-d4a7c4",
+  "config": "rr__reference_v7",
+  "brief": "cd",
+  "start": "2026-11-15T16:39:03Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 12,
+  "matches": []
+ },
+ {
+  "run": "20261115T164910Z-screen-f94955",
+  "config": "rr__pucker_hv_moderate_v7",
+  "brief": "cd",
+  "start": "2026-11-15T16:49:50Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 12,
+  "matches": []
+ },
+ {
+  "run": "20261115T165937Z-screen-4d8a33",
+  "config": "rr__pucker_hv_strong_v7",
+  "brief": "cd",
+  "start": "2026-11-15T17:00:16Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 12,
+  "matches": []
+ },
+ {
+  "run": "20261115T171150Z-screen-d66ffb",
+  "config": "rr__crowe_panel_es600_v7",
+  "brief": "cd",
+  "start": "2026-11-15T17:12:23Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 7,
+  "matches": []
+ },
+ {
+  "run": "20261115T180109Z-screen-0f2ab5",
+  "config": "sp__control_v7",
+  "brief": "cd",
+  "start": "2026-11-15T18:01:45Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 12,
+  "matches": []
+ },
+ {
+  "run": "20261115T181250Z-screen-1e22a5",
+  "config": "sp__moderate_v7",
+  "brief": "cd",
+  "start": "2026-11-15T18:13:25Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 12,
+  "matches": []
+ },
+ {
+  "run": "20261115T182340Z-screen-35c541",
+  "config": "sp__strong_v7",
+  "brief": "cd",
+  "start": "2026-11-15T18:24:13Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 12,
+  "matches": []
+ },
+ {
+  "run": "20261115T194455Z-screen-bf9fc8",
+  "config": "rr__crowe_panel_es600_v7",
+  "brief": "cd",
+  "start": "2026-11-15T19:45:14Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 7,
+  "matches": []
+ },
+ {
+  "run": "20261115T205453Z-screen-32f7c4",
+  "config": "hl__crowe_panel_home_v7",
+  "brief": "cd",
+  "start": "2026-11-15T20:55:48Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 7,
+  "matches": []
+ },
+ {
+  "run": "20261115T213849Z-screen-c35ad4",
+  "config": "hl__crowe_panel_home_v7",
+  "brief": "cd",
+  "start": "2026-11-15T21:39:18Z",
+  "algorithm": "cma",
+  "seed": 5678,
+  "warm_start": null,
+  "seed_param_count": 7,
+  "matches": []
+ },
+ {
+  "run": "20261116T001222Z-screen-b25d61",
+  "config": "hl__rolled_es_spiral_v7",
+  "brief": "cd",
+  "start": "2026-11-16T00:13:08Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 12,
+  "matches": []
+ },
+ {
+  "run": "20261116T003142Z-screen-981f59",
+  "config": "hl__rolled_es_spiral_v7",
+  "brief": "cd",
+  "start": "2026-11-16T00:32:12Z",
+  "algorithm": "cma",
+  "seed": 5678,
+  "warm_start": null,
+  "seed_param_count": 12,
+  "matches": []
+ },
+ {
+  "run": "20261116T005943Z-screen-20db0d",
+  "config": "rf__rect_radial_wide_v7",
+  "brief": "cd",
+  "start": "2026-11-16T01:00:32Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 16,
+  "matches": []
+ },
+ {
+  "run": "20261116T015510Z-screen-e75ec8",
+  "config": "rf__section_axial_home_v7",
+  "brief": "cd",
+  "start": "2026-11-16T01:55:59Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 14,
+  "matches": []
+ },
+ {
+  "run": "20261116T020629Z-screen-0d29d7",
+  "config": "rf__section_axial_home_v7",
+  "brief": "cd",
+  "start": "2026-11-16T02:06:48Z",
+  "algorithm": "cma",
+  "seed": 5678,
+  "warm_start": null,
+  "seed_param_count": 14,
+  "matches": []
+ },
+ {
+  "run": "20261116T021728Z-screen-3943f0",
+  "config": "hl__crowe_x_square_v7",
+  "brief": "cd",
+  "start": "2026-11-16T02:18:26Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 15,
+  "matches": []
+ },
+ {
+  "run": "20261116T022328Z-screen-87354c",
+  "config": "hl__crowe_x_square_v7",
+  "brief": "cd",
+  "start": "2026-11-16T02:23:58Z",
+  "algorithm": "cma",
+  "seed": 5678,
+  "warm_start": null,
+  "seed_param_count": 15,
+  "matches": []
+ },
+ {
+  "run": "20261116T025728Z-screen-cd60f7",
+  "config": "hl__ext_throat_hvlaw_v8",
+  "brief": "cd",
+  "start": "2026-11-16T02:58:30Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 33,
+  "matches": []
+ },
+ {
+  "run": "20261116T030920Z-screen-5d1082",
+  "config": "hl__osse_rrect_morph_v8",
+  "brief": "cd",
+  "start": "2026-11-16T03:10:18Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 31,
+  "matches": []
+ },
+ {
+  "run": "20261116T034337Z-screen-eeef98",
+  "config": "hl__lecleach_iwata_ar_landscape_smooth_v7",
+  "brief": "smooth",
+  "start": "2026-11-16T03:44:00Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 5,
+  "matches": []
+ },
+ {
+  "run": "20261116T035652Z-screen-e30021",
+  "config": "hl__ath_tritonia_landscape_v7",
+  "brief": "cd",
+  "start": "2026-11-16T03:58:17Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 27,
+  "matches": []
+ },
+ {
+  "run": "20261116T035949Z-screen-3e49ce",
+  "config": "hl__lecleach_iwata_ar_landscape_smooth_v7",
+  "brief": "smooth",
+  "start": "2026-11-16T04:00:31Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 5,
+  "matches": []
+ },
+ {
+  "run": "20261116T040157Z-screen-402831",
+  "config": "hl__lecleach_hv_landscape_smooth_v7",
+  "brief": "smooth",
+  "start": "2026-11-16T04:02:36Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 5,
+  "matches": []
+ },
+ {
+  "run": "20261116T040651Z-screen-e53ae9",
+  "config": "hl__lecleach_hv_landscape_smooth_v7",
+  "brief": "smooth",
+  "start": "2026-11-16T04:07:28Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 5,
+  "matches": []
+ },
+ {
+  "run": "20261116T041232Z-screen-b5380a",
+  "config": "hl__ath_tritonia_landscape_v7",
+  "brief": "cd",
+  "start": "2026-11-16T04:13:00Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 27,
+  "matches": [
+   {
+    "run": "20261116T035652Z-screen-e30021",
+    "config": "hl__ath_tritonia_landscape_v7",
+    "best_J": 32.76420061605191,
+    "shared_keys": 27,
+    "same_config": true
+   }
+  ]
+ },
+ {
+  "run": "20261116T043544Z-screen-dd15d8",
+  "config": "rf__section_axial_home_smooth_v8",
+  "brief": "smooth",
+  "start": "2026-11-16T04:36:27Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 14,
+  "matches": []
+ },
+ {
+  "run": "20261116T044917Z-screen-12eb61",
+  "config": "hl__ath_tritonia_landscape_v8",
+  "brief": "cd",
+  "start": "2026-11-16T04:50:17Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 30,
+  "matches": []
+ },
+ {
+  "run": "20261116T052759Z-screen-44001e",
+  "config": "hl__ath_twinray380_landscape_v8",
+  "brief": "cd",
+  "start": "2026-11-16T05:28:38Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 27,
+  "matches": []
+ },
+ {
+  "run": "20261116T054705Z-screen-570bc6",
+  "config": "hl__ath_tritonia_landscape_v8",
+  "brief": "cd",
+  "start": "2026-11-16T05:47:24Z",
+  "algorithm": "cma",
+  "seed": 5678,
+  "warm_start": null,
+  "seed_param_count": 30,
+  "matches": []
+ },
+ {
+  "run": "20261116T060140Z-screen-679c6f",
+  "config": "hl__ath_twinray380_landscape_v8",
+  "brief": "cd",
+  "start": "2026-11-16T06:01:59Z",
+  "algorithm": "cma",
+  "seed": 5678,
+  "warm_start": null,
+  "seed_param_count": 27,
+  "matches": []
+ },
+ {
+  "run": "20261116T061215Z-screen-058f0d",
+  "config": "hl__biradial_es_style_v7",
+  "brief": "cd",
+  "start": "2026-11-16T06:12:54Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 10,
+  "matches": []
+ },
+ {
+  "run": "20261116T064438Z-screen-8defc1",
+  "config": "hl__rosse_rect_cd_v7",
+  "brief": "cd",
+  "start": "2026-11-16T06:45:14Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 12,
+  "matches": []
+ },
+ {
+  "run": "20261116T065413Z-screen-a70423",
+  "config": "hl__crowe_x_osse_cd_v7",
+  "brief": "cd",
+  "start": "2026-11-16T06:54:58Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 15,
+  "matches": []
+ },
+ {
+  "run": "20261116T071520Z-screen-1c8608",
+  "config": "hl__biradial_es_style_v7",
+  "brief": "cd",
+  "start": "2026-11-16T07:15:39Z",
+  "algorithm": "cma",
+  "seed": 5678,
+  "warm_start": null,
+  "seed_param_count": 10,
+  "matches": []
+ },
+ {
+  "run": "20261116T073857Z-screen-7b9313",
+  "config": "hl__rosse_rect_cd_v7",
+  "brief": "cd",
+  "start": "2026-11-16T07:39:17Z",
+  "algorithm": "cma",
+  "seed": 5678,
+  "warm_start": null,
+  "seed_param_count": 12,
+  "matches": []
+ },
+ {
+  "run": "20261116T074832Z-screen-620f81",
+  "config": "hl__crowe_x_osse_cd_v7",
+  "brief": "cd",
+  "start": "2026-11-16T07:48:52Z",
+  "algorithm": "cma",
+  "seed": 5678,
+  "warm_start": null,
+  "seed_param_count": 15,
+  "matches": []
+ },
+ {
+  "run": "20261116T081139Z-screen-63158a",
+  "config": "hl__biradial_es_style_smooth_v7",
+  "brief": "smooth",
+  "start": "2026-11-16T08:11:58Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 10,
+  "matches": []
+ },
+ {
+  "run": "20261116T085415Z-screen-0a228d",
+  "config": "hl__osse_rrect_fold_warm_v7",
+  "brief": "cd",
+  "start": "2026-11-16T08:54:59Z",
+  "algorithm": "cma",
+  "seed": 5678,
+  "warm_start": null,
+  "seed_param_count": 35,
+  "matches": []
+ },
+ {
+  "run": "20261116T090751Z-screen-37b115",
+  "config": "hl__biradial_es_style_v7",
+  "brief": "cd",
+  "start": "2026-11-16T09:08:10Z",
+  "algorithm": "cma",
+  "seed": 9012,
+  "warm_start": null,
+  "seed_param_count": 10,
+  "matches": []
+ },
+ {
+  "run": "20261116T093400Z-screen-56681d",
+  "config": "hl__rosse_rect_cd_v7",
+  "brief": "cd",
+  "start": "2026-11-16T09:34:20Z",
+  "algorithm": "cma",
+  "seed": 9012,
+  "warm_start": null,
+  "seed_param_count": 12,
+  "matches": []
+ },
+ {
+  "run": "20261116T095336Z-screen-7fc9b7",
+  "config": "hl__crowe_x_osse_cd_v7",
+  "brief": "cd",
+  "start": "2026-11-16T09:53:56Z",
+  "algorithm": "cma",
+  "seed": 9012,
+  "warm_start": null,
+  "seed_param_count": 15,
+  "matches": []
+ },
+ {
+  "run": "20261116T130335Z-screen-ab4fb9",
+  "config": "hl__osse_rrect_fold_warm_v7",
+  "brief": "cd",
+  "start": "2026-11-16T13:04:16Z",
+  "algorithm": "cma",
+  "seed": 9012,
+  "warm_start": null,
+  "seed_param_count": 35,
+  "matches": [
+   {
+    "run": "20261116T085415Z-screen-0a228d",
+    "config": "hl__osse_rrect_fold_warm_v7",
+    "best_J": 3.7618985691139892,
+    "shared_keys": 35,
+    "same_config": true
+   }
+  ]
+ },
+ {
+  "run": "20261116T131710Z-screen-f1a263",
+  "config": "hl__osse_rrect_fold_warm_v7",
+  "brief": "cd",
+  "start": "2026-11-16T13:17:28Z",
+  "algorithm": "cma",
+  "seed": 3456,
+  "warm_start": null,
+  "seed_param_count": 35,
+  "matches": [
+   {
+    "run": "20261116T130335Z-screen-ab4fb9",
+    "config": "hl__osse_rrect_fold_warm_v7",
+    "best_J": 3.7618608911411444,
+    "shared_keys": 35,
+    "same_config": true
+   }
+  ]
+ },
+ {
+  "run": "20261116T145634Z-screen-e4c778",
+  "config": "hl__rosse_rect_cd_v7",
+  "brief": "cd",
+  "start": "2026-11-16T14:57:22Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 12,
+  "matches": [
+   {
+    "run": "20261116T093400Z-screen-56681d",
+    "config": "hl__rosse_rect_cd_v7",
+    "best_J": 4.891541281798778,
+    "shared_keys": 12,
+    "same_config": true
+   }
+  ]
+ },
+ {
+  "run": "20261116T150941Z-screen-0e777a",
+  "config": "hl__rosse_rect_cd_v7",
+  "brief": "cd",
+  "start": "2026-11-16T15:10:02Z",
+  "algorithm": "cma",
+  "seed": 5678,
+  "warm_start": null,
+  "seed_param_count": 12,
+  "matches": [
+   {
+    "run": "20261116T145634Z-screen-e4c778",
+    "config": "hl__rosse_rect_cd_v7",
+    "best_J": 4.890773063595839,
+    "shared_keys": 12,
+    "same_config": true
+   }
+  ]
+ },
+ {
+  "run": "20261116T152544Z-screen-5f7d93",
+  "config": "hl__crowe_x_osse_cd_v7",
+  "brief": "cd",
+  "start": "2026-11-16T15:26:28Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 15,
+  "matches": [
+   {
+    "run": "20261116T074832Z-screen-620f81",
+    "config": "hl__crowe_x_osse_cd_v7",
+    "best_J": 5.3441625675651725,
+    "shared_keys": 15,
+    "same_config": true
+   }
+  ]
+ },
+ {
+  "run": "20261116T153619Z-screen-c221aa",
+  "config": "hl__osse_rrect_fold_warm_v7",
+  "brief": "cd",
+  "start": "2026-11-16T15:36:38Z",
+  "algorithm": "cma",
+  "seed": 85012,
+  "warm_start": null,
+  "seed_param_count": 35,
+  "matches": [
+   {
+    "run": "20261116T130335Z-screen-ab4fb9",
+    "config": "hl__osse_rrect_fold_warm_v7",
+    "best_J": 3.7618608911411444,
+    "shared_keys": 35,
+    "same_config": true
+   }
+  ]
+ },
+ {
+  "run": "20261116T173311Z-screen-96f899",
+  "config": "hl__ath_twinray380_landscape_v8",
+  "brief": "cd",
+  "start": "2026-11-16T17:34:00Z",
+  "algorithm": "cma",
+  "seed": 9012,
+  "warm_start": null,
+  "seed_param_count": 27,
+  "matches": [
+   {
+    "run": "20261116T052759Z-screen-44001e",
+    "config": "hl__ath_twinray380_landscape_v8",
+    "best_J": 5.516751001610187,
+    "shared_keys": 27,
+    "same_config": true
+   }
+  ]
+ },
+ {
+  "run": "20261116T193501Z-screen-f008ad",
+  "config": "hl__biradial_es_style_smooth_v7",
+  "brief": "smooth",
+  "start": "2026-11-16T19:35:23Z",
+  "algorithm": "cma",
+  "seed": 5678,
+  "warm_start": null,
+  "seed_param_count": 10,
+  "matches": []
+ },
+ {
+  "run": "20261116T205942Z-screen-8b22b5",
+  "config": "hl__klangfilm_lame_curved_v1",
+  "brief": "smooth",
+  "start": "2026-11-16T21:00:22Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 8,
+  "matches": []
+ },
+ {
+  "run": "20261116T211549Z-screen-efe311",
+  "config": "hl__klangfilm_lame_curved_v1",
+  "brief": "smooth",
+  "start": "2026-11-16T21:16:25Z",
+  "algorithm": "cma",
+  "seed": 11001,
+  "warm_start": null,
+  "seed_param_count": 8,
+  "matches": []
+ },
+ {
+  "run": "20261116T211730Z-screen-7f3f2d",
+  "config": "hl__klangfilm_lame_curved_v1",
+  "brief": "smooth",
+  "start": "2026-11-16T21:18:10Z",
+  "algorithm": "cma",
+  "seed": 11011,
+  "warm_start": null,
+  "seed_param_count": 8,
+  "matches": []
+ },
+ {
+  "run": "20261116T211824Z-screen-45c843",
+  "config": "hl__klangfilm_lame_curved_v1",
+  "brief": "smooth",
+  "start": "2026-11-16T21:18:43Z",
+  "algorithm": "cma",
+  "seed": 11021,
+  "warm_start": null,
+  "seed_param_count": 8,
+  "matches": []
+ },
+ {
+  "run": "20261116T213830Z-screen-51fcfe",
+  "config": "hl__klangfilm_lame_curved_v1",
+  "brief": "smooth",
+  "start": "2026-11-16T21:39:07Z",
+  "algorithm": "cma",
+  "seed": 11002,
+  "warm_start": null,
+  "seed_param_count": 8,
+  "matches": []
+ },
+ {
+  "run": "20261116T214706Z-screen-c2febb",
+  "config": "hl__klangfilm_lame_curved_v1",
+  "brief": "smooth",
+  "start": "2026-11-16T21:47:50Z",
+  "algorithm": "cma",
+  "seed": 11003,
+  "warm_start": null,
+  "seed_param_count": 8,
+  "matches": []
+ },
+ {
+  "run": "20261116T220542Z-screen-cceac4",
+  "config": "hl__klangfilm_lame_curved_v1",
+  "brief": "smooth",
+  "start": "2026-11-16T22:06:28Z",
+  "algorithm": "cma",
+  "seed": 11004,
+  "warm_start": null,
+  "seed_param_count": 8,
+  "matches": []
+ },
+ {
+  "run": "20261116T221948Z-screen-7491e0",
+  "config": "hl__klangfilm_lame_curved_v1",
+  "brief": "smooth",
+  "start": "2026-11-16T22:20:23Z",
+  "algorithm": "cma",
+  "seed": 11031,
+  "warm_start": null,
+  "seed_param_count": 8,
+  "matches": []
+ },
+ {
+  "run": "20261116T222251Z-screen-91ddfb",
+  "config": "hl__klangfilm_lame_curved_v1",
+  "brief": "smooth",
+  "start": "2026-11-16T22:23:29Z",
+  "algorithm": "cma",
+  "seed": 11041,
+  "warm_start": null,
+  "seed_param_count": 8,
+  "matches": []
+ },
+ {
+  "run": "20261116T222556Z-screen-a2e7c7",
+  "config": "hl__klangfilm_lame_curved_v1",
+  "brief": "smooth",
+  "start": "2026-11-16T22:26:38Z",
+  "algorithm": "cma",
+  "seed": 11051,
+  "warm_start": null,
+  "seed_param_count": 8,
+  "matches": []
+ },
+ {
+  "run": "20261116T223230Z-screen-ac9b75",
+  "config": "hl__klangfilm_lame_curved_v1",
+  "brief": "smooth",
+  "start": "2026-11-16T22:33:02Z",
+  "algorithm": "cma",
+  "seed": 11005,
+  "warm_start": null,
+  "seed_param_count": 8,
+  "matches": []
+ },
+ {
+  "run": "20261116T224336Z-screen-55f39d",
+  "config": "hl__klangfilm_lame_curved_v1",
+  "brief": "smooth",
+  "start": "2026-11-16T22:44:07Z",
+  "algorithm": "cma",
+  "seed": 11006,
+  "warm_start": null,
+  "seed_param_count": 8,
+  "matches": []
+ },
+ {
+  "run": "20261116T225543Z-screen-6acf41",
+  "config": "hl__klangfilm_lame_curved_v1",
+  "brief": "smooth",
+  "start": "2026-11-16T22:56:15Z",
+  "algorithm": "cma",
+  "seed": 11007,
+  "warm_start": null,
+  "seed_param_count": 8,
+  "matches": []
+ },
+ {
+  "run": "20261116T230549Z-screen-e70608",
+  "config": "hl__klangfilm_lame_curved_v1",
+  "brief": "smooth",
+  "start": "2026-11-16T23:06:18Z",
+  "algorithm": "cma",
+  "seed": 11008,
+  "warm_start": null,
+  "seed_param_count": 8,
+  "matches": []
+ },
+ {
+  "run": "20261117T001240Z-screen-7b664f",
+  "config": "hl__ath_twinray380_landscape_v8",
+  "brief": "cd",
+  "start": "2026-11-17T00:13:40Z",
+  "algorithm": "cma",
+  "seed": 9012,
+  "warm_start": null,
+  "seed_param_count": 27,
+  "matches": [
+   {
+    "run": "20261116T173311Z-screen-96f899",
+    "config": "hl__ath_twinray380_landscape_v8",
+    "best_J": 5.179381865873163,
+    "shared_keys": 27,
+    "same_config": true
+   }
+  ]
+ },
+ {
+  "run": "20261117T003115Z-screen-4f7cd5",
+  "config": "hl__ath_tritonia_landscape_v9",
+  "brief": "cd",
+  "start": "2026-11-17T00:32:19Z",
+  "algorithm": "cma",
+  "seed": 89001,
+  "warm_start": {
+   "from_runs": [
+    "runs/20261116T044917Z-screen-12eb61",
+    "runs/20261116T054705Z-screen-570bc6"
+   ],
+   "top_k": 10,
+   "sigma_from_spread": true,
+   "allow_cross_brief": false
+  },
+  "seed_param_count": 30,
+  "matches": [
+   {
+    "run": "20261116T044917Z-screen-12eb61",
+    "config": "hl__ath_tritonia_landscape_v8",
+    "best_J": 5.691901189403092,
+    "shared_keys": 30,
+    "same_config": false
+   }
+  ]
+ },
+ {
+  "run": "20261117T015442Z-screen-0afda0",
+  "config": "klangfilm_hv__a0_exact_incumbent_control",
+  "brief": "smooth",
+  "start": "2026-11-17T01:55:55Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 14,
+  "matches": [
+   {
+    "run": "20261116T205942Z-screen-8b22b5",
+    "config": "hl__klangfilm_lame_curved_v1",
+    "best_J": 8.439049239022415,
+    "shared_keys": 8,
+    "same_config": false
+   }
+  ]
+ },
+ {
+  "run": "20261117T015600Z-screen-de1861",
+  "config": "klangfilm_hv__a1_h_only_single_axis",
+  "brief": "smooth",
+  "start": "2026-11-17T01:56:53Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 14,
+  "matches": [
+   {
+    "run": "20261116T205942Z-screen-8b22b5",
+    "config": "hl__klangfilm_lame_curved_v1",
+    "best_J": 8.439049239022415,
+    "shared_keys": 8,
+    "same_config": false
+   }
+  ]
+ },
+ {
+  "run": "20261117T015658Z-screen-7ffaad",
+  "config": "klangfilm_hv__a2_v_only_single_axis",
+  "brief": "smooth",
+  "start": "2026-11-17T01:57:52Z",
+  "algorithm": "cma",
+  "seed": 1234,
+  "warm_start": null,
+  "seed_param_count": 14,
+  "matches": [
+   {
+    "run": "20261116T205942Z-screen-8b22b5",
+    "config": "hl__klangfilm_lame_curved_v1",
+    "best_J": 8.439049239022415,
+    "shared_keys": 8,
+    "same_config": false
+   }
+  ]
+ }
+]

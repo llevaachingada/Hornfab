@@ -1,5 +1,24 @@
 # ISSUES
 
+## 2026-11-17 - Fable: layered backbone fails U1; generator decision open
+
+- DONE: N1b contract v2 - six lanes pass Test 2 at 65x61 on the native-floor rule; 72 Klangfilm
+  designs excluded by digest (`e3a1f4a3` not reproducible at HEAD) and ten verified replacements
+  pass; envelope depth is the rear closure exactly; 0/309 stored biradial designs near the size
+  limits. N2 lineage - 75/75 runs classified, 0 unknown, 17 of 21 lanes owner-evidenced. N4 U1 -
+  0/5 lanes at <= 0.5 mm, 5/5 above 2 mm.
+- OPEN (owner): N4 hand-back. Either redesign the layered section and depth laws (two exponents,
+  rounded-rectangle section, curvature-placed psi knots) or accept the canonical record as the
+  description and drop the compact-backbone claim. U2/U3 stay gated.
+- OPEN (owner): contract v2 envelope definition - mesh-built inner sheet or generator outer shell.
+  Biradial differs by +1.9...+3.5 mm and the two conventions disagree.
+- OPEN (owner): require `implementation_sha256` on every grid-row recipe. Lecleach stores none, and
+  its H/V realization changed in `d6c9abd` after both stored runs, so its 48 stored designs cannot
+  be rebuilt from their recipes at HEAD.
+- OPEN: N3 (v9 grid independence) still running at this commit. U2/U3 not started.
+- NOTE: no family cut recommended; Crowe, Le Cleac'h and Klangfilm remain owner-protected.
+- NOTE: `configs/b3_soft.yaml` remains another lane's uncommitted Phase B edit.
+
 ## 2026-11-17 - Klangfilm convergence check passed; Phase B verdict stands
 
 - DONE: epw-9 re-solves of A0 (16394 dofs) and B3 (6757 dofs); every gate-relevant quantity moves
