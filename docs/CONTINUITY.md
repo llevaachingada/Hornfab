@@ -1,5 +1,14 @@
 # CONTINUITY
 
+## 2026-11-17 (senior pass, code) - Stage 5 WP 5.2: categorical knobs in continuous boxes are flagged
+
+- `config.categorical_searched_keys` + a load-time WARNING when a native config searches
+  `morph_target` / `morph_allow_shrinkage` / `gcurve_type` inside a continuous box (rounded =
+  staircase for CMA/BoTorch). Warning, not refusal, so running configs are untouched. Shipped
+  configs that trigger it: `examples/typologies/ath_core.yaml` and the four
+  `examples/studies/rear_density_2026-11-13/ath_like_rear*.yaml` (`morph_target`). Recommended
+  (owner): split them into one config per morph target.
+
 ## 2026-11-17 (senior pass, code) - Stage 7 WP 7.1: protected lanes as data; watchdog only advises on them
 
 - `examples/protected_lanes.yaml` (status: proposed, awaiting owner C5): the A11 lanes with

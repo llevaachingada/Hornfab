@@ -398,3 +398,12 @@ def test_band_split_valid_edges_normalized_and_enter_solve_extra(tmp_path):
     extra = solve_spec("screen", cfg).extra
     assert extra["mesh_policy"] == "band_split_v1"
     assert extra["band_edges_hz"] == [2000.0, 3000.0]
+
+
+def test_categorical_searched_keys_are_flagged_wp52():
+    """Senior plan WP 5.2 (2026-11-17): a categorical key in a searched continuous box warns."""
+    from hornlab_search.config import categorical_searched_keys
+    b = {"morph_target": {"lo": 0, "hi": 3}, "gcurve_type": {"lo": 1, "hi": 1},
+         "morph_allow_shrinkage": {"lo": 0, "hi": 1, "search": False}, "s": {"lo": 0, "hi": 1}}
+    assert categorical_searched_keys(b) == ["morph_target"]
+    assert categorical_searched_keys(b, native=False) == []

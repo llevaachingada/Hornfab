@@ -1608,6 +1608,10 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
     for k, b in bounds.items():
         if "lo" not in b or "hi" not in b:
             raise ConfigError(f"{where}: bounds.{k} needs lo and hi")
+    for k in categorical_searched_keys(bounds, gen is None):
+        log.warning("%s: bounds.%s is a CATEGORICAL key searched inside a continuous box "
+                    "(values are rounded; the optimizer sees a staircase). Prefer one config "
+                    "per category (senior plan WP 5.2).", where, k)
 
     # 2026-10-29 owner retarget: surface the applied brief's driver exit radius on the TYPED target
     # only (not on ``raw``), so the objective can derive the DRIVER-EXIT f11 when the brief has no
@@ -1640,6 +1644,19 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
         mounting=mounting_cfg,
         objective_params=objective_params,
     )
+
+
+#: Native-family integer keys whose values are CATEGORIES, not quantities (WP 5.2, 2026-11-17).
+CATEGORICAL_KEYS = frozenset({"morph_target", "morph_allow_shrinkage", "gcurve_type"})
+
+
+def categorical_searched_keys(bounds: dict, native: bool = True) -> list[str]:
+    """Searched bounds on categorical keys (native families only; generator knobs are floats)."""
+    if not native:
+        return []
+    return sorted(k for k, b in (bounds or {}).items()
+                  if k in CATEGORICAL_KEYS and isinstance(b, dict) and b.get("search", True)
+                  and float(b.get("hi", 0)) > float(b.get("lo", 0)))
 
 
 # ------------------------------------------------------------------ specs

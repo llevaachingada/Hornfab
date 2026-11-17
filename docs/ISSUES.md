@@ -1,5 +1,9 @@
 # ISSUES
 
+## 2026-11-17 - Stage 5 WP 5.2 warning landed
+
+- OPEN (owner): split `ath_core.yaml` and the 4 `ath_like_rear*` study configs per `morph_target`.
+
 ## 2026-11-17 - Stage 7 WP 7.1 done (protected lanes)
 
 - DONE: protected-lane file + advisory-only watchdog for listed lanes.
