@@ -1,0 +1,18 @@
+batch 2: 16 configs
+OK hl__biradial_es_style_v7 446s
+OK hl__lecleach_iwata_ar_landscape_smooth_v7 37s
+FAIL rr__pucker_hv_strong_v7 GeometryInvalidError: generator seed is not a legal horn: unknown rows type 'rolled_rect_pucker' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])
+FAIL hl__rolled_es_spiral_v7 GeometryInvalidError: generator seed is not a legal horn: unknown rows type 'rolled_rect_pucker' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])
+OK hl__crowe_x_square_v7 487s
+OK hl__ath_tritonia_landscape_v8 251s
+FAIL hl__rosse_rect_cd_v7 GeometryInvalidError: generator seed is not a legal horn: unknown rows type 'rosse_rect' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])
+FAIL hl__klangfilm_lame_curved_v1 GeometryInvalidError: generator seed is not a legal horn: unknown rows type 'klangfilm_lame' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])
+OK a1_h_only_single_axis 257s
+FAIL hl__rosse_rect_cd_v7_r100w GeometryInvalidError: generator seed is not a legal horn: unknown rows type 'rosse_rect' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])
+OK atlas__ath_core 270s
+OK 20261114T220720Z-screen-88d19c 231s
+FAIL lecleach_fc540_w1 ConfigError: lecleach_fc540_w1.yaml: brief_file '../../briefs/lecleach_rollback_1in_v6.yaml' could not be found; tried relative to config dir (C:\Users\hunte\Hrns\hornlab-search\examples\typologies\walls_relieved\lecleach_fc540) and repo root. Use an absolute path or a path relative to the config file.
+FAIL crowe_panel_es600_v7_w1 ConfigError: crowe_panel_es600_v7_w1.yaml: brief_file '../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml' could not be found; tried relative to config dir (C:\Users\hunte\Hrns\hornlab-search\examples\typologies\walls_relieved\crowe_panel_es600_v7) and repo root. Use an absolute path or a path relative to the config file.
+FAIL ath_core14_corelaw_v7_w1 ConfigError: ath_core14_corelaw_v7_w1.yaml: brief_file '../../briefs/print_80x60_2026-11-13/room_80x60_700_hf1440_v7.yaml' could not be found; tried relative to config dir (C:\Users\hunte\Hrns\hornlab-search\examples\typologies\walls_relieved\ath_core14_corelaw_v7) and repo root. Use an absolute path or a path relative to the config file.
+FAIL lecleach_iwata_ar_landscape_smooth_v7_w1 ConfigError: lecleach_iwata_ar_landscape_smooth_v7_w1.yaml: brief_file '../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml' could not be found; tried relative to config dir (C:\Users\hunte\Hrns\hornlab-search\examples\typologies\walls_relieved\lecleach_iwata_ar_landscape_smooth_v7) and repo root. Use an absolute path or a path relative to the config file.
+batch done

@@ -1,5 +1,5 @@
 {
- "config": "examples/typologies/home_landscape_2026-11-15/hl__biradial_es_style_v7.yaml",
+ "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\home_landscape_2026-11-15\\hl__biradial_es_style_v7.yaml",
  "name": "hl__biradial_es_style_v7",
  "family": "FREEFORM",
  "generator": true,
@@ -24,8 +24,8 @@
    "v_n",
    "v_rm_mm"
   ],
-  "n_points": 7,
-  "legal_points": 7,
+  "n_points": 9,
+  "legal_points": 9,
   "refused_points": [],
   "record_points": 3965,
   "effective_dimension": {
@@ -38,8 +38,8 @@
    "L_mm": {
     "label": "active",
     "active_frac": 1.0,
-    "median_rms_mm_per_range": 50.85932367573102,
-    "max_rms_mm_per_range": 53.00442107019876,
+    "median_rms_mm_per_range": 51.1163418949248,
+    "max_rms_mm_per_range": 53.004421070198774,
     "median_max_disp_mm_per_range": 99.99999999999991,
     "coupled_with": [],
     "descriptor_per_range": {
@@ -47,20 +47,20 @@
      "mouth_height_mm": 0.0,
      "depth_mm": 99.99999999999991,
      "h_wall_angle_mouth_deg": -19.564308329150066,
-     "v_wall_angle_mouth_deg": -19.283745102851295,
-     "diag_wall_angle_mouth_deg": -18.74463452918638,
+     "v_wall_angle_mouth_deg": -18.877465195582115,
+     "diag_wall_angle_mouth_deg": -17.7109869319194,
      "mouth_aspect": 0.0,
      "mouth_area_mm2": 0.0,
-     "h_halfwidth_mid_mm": 12.59329483618181,
-     "v_halfwidth_mid_mm": 11.46536595768558
+     "h_halfwidth_mid_mm": 12.593294836180744,
+     "v_halfwidth_mid_mm": 7.846906500885346
     },
     "failed_points": 0
    },
    "h_a_deg": {
     "label": "active",
     "active_frac": 1.0,
-    "median_rms_mm_per_range": 4.574810628416285,
-    "max_rms_mm_per_range": 6.3230332314027935,
+    "median_rms_mm_per_range": 4.574810628416284,
+    "max_rms_mm_per_range": 6.323033231402821,
     "median_max_disp_mm_per_range": 13.497582636073783,
     "coupled_with": [],
     "descriptor_per_range": {
@@ -68,74 +68,74 @@
      "mouth_height_mm": 0.0,
      "depth_mm": 0.0,
      "h_wall_angle_mouth_deg": -5.22482655340752,
-     "v_wall_angle_mouth_deg": -2.416431783558435e-05,
-     "diag_wall_angle_mouth_deg": -1.1177689112681568,
+     "v_wall_angle_mouth_deg": -6.088880510901617e-06,
+     "diag_wall_angle_mouth_deg": -1.117768911261229,
      "mouth_aspect": 0.0,
      "mouth_area_mm2": 0.0,
      "h_halfwidth_mid_mm": 8.812763490059432,
-     "v_halfwidth_mid_mm": 0.0004547964088885688
+     "v_halfwidth_mid_mm": 8.406023717100189e-05
     },
     "failed_points": 0
    },
    "h_n": {
     "label": "active",
     "active_frac": 1.0,
-    "median_rms_mm_per_range": 4.071932223765429,
-    "max_rms_mm_per_range": 7.5782959500938345,
-    "median_max_disp_mm_per_range": 13.604212683145551,
+    "median_rms_mm_per_range": 4.071932223765419,
+    "max_rms_mm_per_range": 7.578295950093824,
+    "median_max_disp_mm_per_range": 13.604212683145782,
     "coupled_with": [],
     "descriptor_per_range": {
-     "mouth_width_mm": 0.0,
+     "mouth_width_mm": -2.8421709430403983e-12,
      "mouth_height_mm": 0.0,
      "depth_mm": 0.0,
-     "h_wall_angle_mouth_deg": 10.949921441417834,
-     "v_wall_angle_mouth_deg": 2.391784850175325e-05,
-     "diag_wall_angle_mouth_deg": 2.0373637681924333,
-     "mouth_aspect": 0.0,
+     "h_wall_angle_mouth_deg": 10.667309106696626,
+     "v_wall_angle_mouth_deg": 1.550124473226334e-06,
+     "diag_wall_angle_mouth_deg": 2.0373637681958083,
+     "mouth_aspect": -5.551115123125778e-15,
      "mouth_area_mm2": 0.0,
-     "h_halfwidth_mid_mm": -5.21515237534373,
-     "v_halfwidth_mid_mm": -0.0013012890935470967
+     "h_halfwidth_mid_mm": -5.360062323039474,
+     "v_halfwidth_mid_mm": -0.00045994658464110205
     },
     "failed_points": 0
    },
    "h_rm_mm": {
     "label": "active",
     "active_frac": 1.0,
-    "median_rms_mm_per_range": 9.716083683977617,
-    "max_rms_mm_per_range": 10.528920007280455,
+    "median_rms_mm_per_range": 9.716083683977576,
+    "max_rms_mm_per_range": 10.528920007280451,
     "median_max_disp_mm_per_range": 32.17587634329538,
     "coupled_with": [],
     "descriptor_per_range": {
      "mouth_width_mm": 63.99999999999858,
      "mouth_height_mm": 0.0,
      "depth_mm": 0.0,
-     "h_wall_angle_mouth_deg": 6.261740813940259,
-     "v_wall_angle_mouth_deg": 6.41600124140495e-06,
-     "diag_wall_angle_mouth_deg": 1.4990235038286657,
-     "mouth_aspect": 0.17108437046429695,
+     "h_wall_angle_mouth_deg": 6.261740813945588,
+     "v_wall_angle_mouth_deg": 5.265157199119126e-07,
+     "diag_wall_angle_mouth_deg": 1.5542819403808747,
+     "mouth_aspect": 0.16822724510573425,
      "mouth_area_mm2": 21971.522579936725,
-     "h_halfwidth_mid_mm": 10.183513202692046,
-     "v_halfwidth_mid_mm": -2.9441157067822107e-06
+     "h_halfwidth_mid_mm": 10.183513202693112,
+     "v_halfwidth_mid_mm": -1.7461952594999258e-05
     },
     "failed_points": 0
    },
    "mouth_exponent": {
     "label": "active",
     "active_frac": 1.0,
-    "median_rms_mm_per_range": 14.727997651550327,
-    "max_rms_mm_per_range": 22.094412894668316,
+    "median_rms_mm_per_range": 14.727997651550634,
+    "max_rms_mm_per_range": 25.3526833903208,
     "median_max_disp_mm_per_range": 51.64562178549975,
     "coupled_with": [],
     "descriptor_per_range": {
      "mouth_width_mm": 0.0,
      "mouth_height_mm": 0.0,
      "depth_mm": 0.0,
-     "h_wall_angle_mouth_deg": 0.0,
-     "v_wall_angle_mouth_deg": 0.0,
-     "diag_wall_angle_mouth_deg": 3.3084352662932273,
+     "h_wall_angle_mouth_deg": 3.907985046680548e-12,
+     "v_wall_angle_mouth_deg": 3.197442310920448e-12,
+     "diag_wall_angle_mouth_deg": 3.920717133796355,
      "mouth_aspect": 0.0,
-     "mouth_area_mm2": 31295.40860890408,
-     "h_halfwidth_mid_mm": 7.105427357600996e-13,
+     "mouth_area_mm2": 31295.408608905534,
+     "h_halfwidth_mid_mm": 0.0,
      "v_halfwidth_mid_mm": -7.105427357600996e-13
     },
     "failed_points": 0
@@ -143,50 +143,50 @@
    "v_a_deg": {
     "label": "active",
     "active_frac": 1.0,
-    "median_rms_mm_per_range": 7.294778717230661,
-    "max_rms_mm_per_range": 10.940868489915491,
-    "median_max_disp_mm_per_range": 14.220701386902768,
+    "median_rms_mm_per_range": 7.294778717230638,
+    "max_rms_mm_per_range": 10.940868489915498,
+    "median_max_disp_mm_per_range": 14.649233312853053,
     "coupled_with": [],
     "descriptor_per_range": {
      "mouth_width_mm": 0.0,
      "mouth_height_mm": 0.0,
      "depth_mm": 0.0,
      "h_wall_angle_mouth_deg": -8.660267170057515e-07,
-     "v_wall_angle_mouth_deg": -8.565198024291824,
-     "diag_wall_angle_mouth_deg": -6.035641556675126,
+     "v_wall_angle_mouth_deg": -6.384494414616521,
+     "diag_wall_angle_mouth_deg": -4.903558790845426,
      "mouth_aspect": 0.0,
      "mouth_area_mm2": 0.0,
-     "h_halfwidth_mid_mm": -0.0005860408577973425,
-     "v_halfwidth_mid_mm": 10.957215168888945
+     "h_halfwidth_mid_mm": -0.0003540194342122046,
+     "v_halfwidth_mid_mm": 11.495809845515842
     },
     "failed_points": 0
    },
    "v_n": {
     "label": "active",
     "active_frac": 1.0,
-    "median_rms_mm_per_range": 6.240429282668158,
-    "max_rms_mm_per_range": 11.573847557267754,
-    "median_max_disp_mm_per_range": 13.769886723699704,
+    "median_rms_mm_per_range": 6.240429282668152,
+    "max_rms_mm_per_range": 11.573847557267763,
+    "median_max_disp_mm_per_range": 13.769886723699509,
     "coupled_with": [],
     "descriptor_per_range": {
      "mouth_width_mm": 0.0,
-     "mouth_height_mm": 0.0,
+     "mouth_height_mm": 1.4210854715201992e-12,
      "depth_mm": 0.0,
-     "h_wall_angle_mouth_deg": 7.127573198317806e-07,
-     "v_wall_angle_mouth_deg": 14.077219374084736,
-     "diag_wall_angle_mouth_deg": 10.183935454893058,
-     "mouth_aspect": 0.0,
-     "mouth_area_mm2": 7.27595761418342e-10,
-     "h_halfwidth_mid_mm": 0.0010004763510096373,
-     "v_halfwidth_mid_mm": -7.689483527049391
+     "h_wall_angle_mouth_deg": 7.127514578542106e-07,
+     "v_wall_angle_mouth_deg": 14.07721937409344,
+     "diag_wall_angle_mouth_deg": 10.183935454891815,
+     "mouth_aspect": -5.551115123125778e-15,
+     "mouth_area_mm2": 0.0,
+     "h_halfwidth_mid_mm": 0.0007239876133269264,
+     "v_halfwidth_mid_mm": -7.689483527049746
     },
     "failed_points": 0
    },
    "v_rm_mm": {
     "label": "active",
     "active_frac": 1.0,
-    "median_rms_mm_per_range": 29.032875061888152,
-    "max_rms_mm_per_range": 30.32547338433899,
+    "median_rms_mm_per_range": 28.400164169812346,
+    "max_rms_mm_per_range": 30.325473384339027,
     "median_max_disp_mm_per_range": 74.54135299571622,
     "coupled_with": [],
     "descriptor_per_range": {
@@ -194,12 +194,12 @@
      "mouth_height_mm": 135.99999999999983,
      "depth_mm": 0.0,
      "h_wall_angle_mouth_deg": 4.867754199722187e-07,
-     "v_wall_angle_mouth_deg": 20.366063096661346,
-     "diag_wall_angle_mouth_deg": 15.542483108690249,
-     "mouth_aspect": -0.5672292492713832,
-     "mouth_area_mm2": 68393.1830645742,
-     "h_halfwidth_mid_mm": 2.612212597341569e-05,
-     "v_halfwidth_mid_mm": 15.084794926896802
+     "v_wall_angle_mouth_deg": 19.927173335770103,
+     "diag_wall_angle_mouth_deg": 12.733364698639871,
+     "mouth_aspect": -0.49585835076353346,
+     "mouth_area_mm2": 68393.18306457202,
+     "h_halfwidth_mid_mm": -4.296163211847666e-05,
+     "v_halfwidth_mid_mm": 15.653063878028192
     },
     "failed_points": 0
    }
@@ -257,9 +257,9 @@
   }
  },
  "box": {
-  "n": 64,
+  "n": 96,
   "counts": {
-   "ok": 64,
+   "ok": 96,
    "outside": 0,
    "refused": 0
   },
@@ -344,76 +344,76 @@
    "bad_rate": 0.0,
    "refused": 0,
    "outside": 0,
-   "n": 32
+   "n": 48
   },
   "0.10": {
    "bad_rate": 0.0,
    "refused": 0,
    "outside": 0,
-   "n": 32
+   "n": 48
   },
   "0.15": {
    "bad_rate": 0.0,
    "refused": 0,
    "outside": 0,
-   "n": 32
+   "n": 48
   },
   "0.20": {
    "bad_rate": 0.0,
    "refused": 0,
    "outside": 0,
-   "n": 32
+   "n": 48
   },
   "0.25": {
    "bad_rate": 0.0,
    "refused": 0,
    "outside": 0,
-   "n": 32
+   "n": 48
   }
  },
  "margin_model": {
   "available": true,
-  "n_legal": 65,
-  "intercept_mm": 70.5010287200393,
+  "n_legal": 97,
+  "intercept_mm": 67.97943361809328,
   "gradient": {
    "L_mm": {
-    "mm_per_range": 0.2754371168820554,
-    "mm_per_knob_unit": 0.002754371168820554
+    "mm_per_range": 0.36395098080818045,
+    "mm_per_knob_unit": 0.0036395098080818046
    },
    "h_a_deg": {
-    "mm_per_range": 1.5235289376694372,
-    "mm_per_knob_unit": 0.30470578753388744
+    "mm_per_range": -3.3119935380757637,
+    "mm_per_knob_unit": -0.6623987076151527
    },
    "h_n": {
-    "mm_per_range": -2.613727432904773,
-    "mm_per_knob_unit": -0.6534318582261932
+    "mm_per_range": 0.026447821325412235,
+    "mm_per_knob_unit": 0.006611955331353059
    },
    "h_rm_mm": {
-    "mm_per_range": -50.391823982051655,
-    "mm_per_knob_unit": -1.5747444994391142
+    "mm_per_range": -50.82489147411197,
+    "mm_per_knob_unit": -1.5882778585659991
    },
    "mouth_exponent": {
-    "mm_per_range": 0.5639645404210085,
-    "mm_per_knob_unit": 0.20141590729321734
+    "mm_per_range": 3.2845037724052872,
+    "mm_per_knob_unit": 1.173037061573317
    },
    "v_a_deg": {
-    "mm_per_range": 0.3604555092383264,
-    "mm_per_knob_unit": 0.06007591820638774
+    "mm_per_range": 2.6631544142879884,
+    "mm_per_knob_unit": 0.44385906904799804
    },
    "v_n": {
-    "mm_per_range": 4.246651726043223,
-    "mm_per_knob_unit": 1.0616629315108057
+    "mm_per_range": 5.3996446520429,
+    "mm_per_knob_unit": 1.349911163010725
    },
    "v_rm_mm": {
-    "mm_per_range": -19.11540321415982,
-    "mm_per_knob_unit": -0.28110887079646796
+    "mm_per_range": -17.266201072643803,
+    "mm_per_knob_unit": -0.2539147216565265
    }
   },
-  "r2": 0.796486830201992,
+  "r2": 0.8083361419857575,
   "sign_agreement": 1.0,
   "binding_axis_counts": {
-   "width_mm": 52,
-   "height_mm": 13
+   "height_mm": 20,
+   "width_mm": 77
   },
   "inside_frac": 1.0,
   "constraint": "sum_k g_k * x_k >= -intercept (x in unit coordinates)"

@@ -1,0 +1,11 @@
+﻿........................................................................ [ 38%]
+........................................................................ [ 77%]
+...........................................                              [100%]
+============================== warnings summary ===============================
+tests/test_geometry_sensitivity.py::test_analyze_space_labels_and_effective_dimension
+tests/test_geometry_sensitivity.py::test_space_card_and_proposal_round_trip
+  C:\Users\hunte\Hrns\hornlab-search\hornlab_search\geometry\sensitivity.py:226: UserWarning: The balance properties of Sobol' points require n to be a power of 2.
+    pts += list(qmc.Sobol(k, seed=seed).random(n))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+187 passed, 2 warnings in 40.50s

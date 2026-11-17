@@ -1,5 +1,5 @@
 {
- "config": "examples/typologies/home_landscape_2026-11-15/hl__osse_rrect_fold_warm_v7.yaml",
+ "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\home_landscape_2026-11-15\\hl__osse_rrect_fold_warm_v7.yaml",
  "name": "hl__osse_rrect_fold_warm_v7",
  "family": "OSSE",
  "generator": false,
@@ -44,8 +44,8 @@
    "q",
    "s"
   ],
-  "n_points": 7,
-  "legal_points": 7,
+  "n_points": 9,
+  "legal_points": 9,
   "refused_points": [],
   "record_points": 3965,
   "effective_dimension": {
@@ -58,8 +58,8 @@
    "L_mm": {
     "label": "active",
     "active_frac": 1.0,
-    "median_rms_mm_per_range": 22.988772047656468,
-    "max_rms_mm_per_range": 23.568644353368583,
+    "median_rms_mm_per_range": 22.98877204765616,
+    "max_rms_mm_per_range": 23.81161321559639,
     "median_max_disp_mm_per_range": 44.73862839812877,
     "coupled_with": [],
     "descriptor_per_range": {
@@ -67,46 +67,46 @@
      "mouth_height_mm": 0.0,
      "depth_mm": 44.73862839812877,
      "h_wall_angle_mouth_deg": -3.9298783424975134,
-     "v_wall_angle_mouth_deg": -3.8067226955732245,
-     "diag_wall_angle_mouth_deg": -4.413198207515736,
+     "v_wall_angle_mouth_deg": -3.806722695584238,
+     "diag_wall_angle_mouth_deg": -4.413198207510762,
      "mouth_aspect": 0.0,
      "mouth_area_mm2": 0.0,
-     "h_halfwidth_mid_mm": 4.929756219763344,
-     "v_halfwidth_mid_mm": 7.065934207523832
+     "h_halfwidth_mid_mm": 4.929756219764765,
+     "v_halfwidth_mid_mm": 5.971647221983817
     },
     "failed_points": 0
    },
    "a0_deg": {
     "label": "weak",
     "active_frac": 1.0,
-    "median_rms_mm_per_range": 0.21530940839487056,
-    "max_rms_mm_per_range": 0.23866745074127146,
-    "median_max_disp_mm_per_range": 0.3863026594880068,
+    "median_rms_mm_per_range": 0.21664489505725001,
+    "max_rms_mm_per_range": 0.24721093032922273,
+    "median_max_disp_mm_per_range": 0.4247933540940792,
     "coupled_with": [],
     "descriptor_per_range": {
      "mouth_width_mm": 0.0,
      "mouth_height_mm": 0.0,
      "depth_mm": 0.0,
-     "h_wall_angle_mouth_deg": -0.034658999824799225,
-     "v_wall_angle_mouth_deg": -0.07392434826058995,
-     "diag_wall_angle_mouth_deg": -0.036004674732836826,
+     "h_wall_angle_mouth_deg": -0.03465899982302287,
+     "v_wall_angle_mouth_deg": -0.07392434825952414,
+     "diag_wall_angle_mouth_deg": -0.036004674732126284,
      "mouth_aspect": 0.0,
      "mouth_area_mm2": 0.0,
-     "h_halfwidth_mid_mm": 0.23628723374642369,
-     "v_halfwidth_mid_mm": 0.34506719977720446
+     "h_halfwidth_mid_mm": 0.23628723374429206,
+     "v_halfwidth_mid_mm": 0.36976249666036404
     },
     "failed_points": 0
    },
    "a_deg": {
     "label": "active",
     "active_frac": 1.0,
-    "median_rms_mm_per_range": 5.775632985244552,
-    "max_rms_mm_per_range": 6.595649198203959,
-    "median_max_disp_mm_per_range": 10.156481664348046,
+    "median_rms_mm_per_range": 5.775632985244526,
+    "max_rms_mm_per_range": 6.595649198203954,
+    "median_max_disp_mm_per_range": 10.156481664348455,
     "coupled_with": [
      {
       "knob": "k",
-      "median_abs_cos": 0.9822439969512144,
+      "median_abs_cos": 0.9822439969512248,
       "frac_points_coupled": 1.0
      }
     ],
@@ -114,33 +114,33 @@
      "mouth_width_mm": 0.0,
      "mouth_height_mm": 0.0,
      "depth_mm": 0.0,
-     "h_wall_angle_mouth_deg": -1.659767714735237,
-     "v_wall_angle_mouth_deg": -2.079177820802867,
-     "diag_wall_angle_mouth_deg": -1.9936142225102298,
+     "h_wall_angle_mouth_deg": -1.6597677147291974,
+     "v_wall_angle_mouth_deg": -2.0791778208032223,
+     "diag_wall_angle_mouth_deg": -1.9936142225041902,
      "mouth_aspect": 0.0,
      "mouth_area_mm2": 0.0,
-     "h_halfwidth_mid_mm": 6.4759432947266,
-     "v_halfwidth_mid_mm": 6.194046024102912
+     "h_halfwidth_mid_mm": 6.475943294725534,
+     "v_halfwidth_mid_mm": 6.031219682440358
     },
     "failed_points": 0
    },
    "az_a_cos_amp": {
     "label": "active",
     "active_frac": 1.0,
-    "median_rms_mm_per_range": 3.290324827354427,
-    "max_rms_mm_per_range": 4.616984421229772,
-    "median_max_disp_mm_per_range": 8.447386531225181,
+    "median_rms_mm_per_range": 3.290324827354432,
+    "max_rms_mm_per_range": 4.616984421229771,
+    "median_max_disp_mm_per_range": 8.447386531225792,
     "coupled_with": [],
     "descriptor_per_range": {
      "mouth_width_mm": 0.0,
      "mouth_height_mm": 0.0,
      "depth_mm": 0.0,
-     "h_wall_angle_mouth_deg": -1.616568712137578,
+     "h_wall_angle_mouth_deg": -1.616568712140065,
      "v_wall_angle_mouth_deg": 0.0,
-     "diag_wall_angle_mouth_deg": -1.062340111177206,
+     "diag_wall_angle_mouth_deg": -1.0623401111729427,
      "mouth_aspect": 0.0,
      "mouth_area_mm2": 0.0,
-     "h_halfwidth_mid_mm": 6.307395357777778,
+     "h_halfwidth_mid_mm": 6.3073953577788435,
      "v_halfwidth_mid_mm": 0.0
     },
     "failed_points": 0
@@ -148,9 +148,9 @@
    "az_a_cos_pow": {
     "label": "active",
     "active_frac": 1.0,
-    "median_rms_mm_per_range": 2.9247938949590235,
-    "max_rms_mm_per_range": 3.639444520629481,
-    "median_max_disp_mm_per_range": 7.644793654234302,
+    "median_rms_mm_per_range": 2.388288999992629,
+    "max_rms_mm_per_range": 3.639444520629427,
+    "median_max_disp_mm_per_range": 6.202188192045897,
     "coupled_with": [],
     "descriptor_per_range": {
      "mouth_width_mm": 0.0,
@@ -158,7 +158,7 @@
      "depth_mm": 0.0,
      "h_wall_angle_mouth_deg": 0.0,
      "v_wall_angle_mouth_deg": 0.0,
-     "diag_wall_angle_mouth_deg": 1.2026535349047405,
+     "diag_wall_angle_mouth_deg": 1.2026535349086485,
      "mouth_aspect": 0.0,
      "mouth_area_mm2": 0.0,
      "h_halfwidth_mid_mm": 0.0,
@@ -169,20 +169,20 @@
    "az_fold_h_deg": {
     "label": "active",
     "active_frac": 1.0,
-    "median_rms_mm_per_range": 8.931548004044167,
-    "max_rms_mm_per_range": 16.744158004482742,
-    "median_max_disp_mm_per_range": 34.81999820609787,
+    "median_rms_mm_per_range": 9.298847134120562,
+    "max_rms_mm_per_range": 16.74415800448276,
+    "median_max_disp_mm_per_range": 34.81999820609792,
     "coupled_with": [],
     "descriptor_per_range": {
      "mouth_width_mm": 0.0,
      "mouth_height_mm": 0.0,
      "depth_mm": 0.0,
-     "h_wall_angle_mouth_deg": -6.73655418223617,
+     "h_wall_angle_mouth_deg": -6.736554182236525,
      "v_wall_angle_mouth_deg": 0.0,
-     "diag_wall_angle_mouth_deg": -0.9285534502033946,
+     "diag_wall_angle_mouth_deg": -0.9285534502044605,
      "mouth_aspect": 0.0,
      "mouth_area_mm2": 0.0,
-     "h_halfwidth_mid_mm": 26.281202100303577,
+     "h_halfwidth_mid_mm": 26.281202100301446,
      "v_halfwidth_mid_mm": 0.0
     },
     "failed_points": 0
@@ -190,9 +190,9 @@
    "az_fold_h_width_deg": {
     "label": "active",
     "active_frac": 1.0,
-    "median_rms_mm_per_range": 6.245916173658126,
-    "max_rms_mm_per_range": 13.592613805706641,
-    "median_max_disp_mm_per_range": 18.920049720764816,
+    "median_rms_mm_per_range": 6.2459161736581175,
+    "max_rms_mm_per_range": 13.59261380570665,
+    "median_max_disp_mm_per_range": 18.92004972076536,
     "coupled_with": [],
     "descriptor_per_range": {
      "mouth_width_mm": 0.0,
@@ -200,7 +200,7 @@
      "depth_mm": 0.0,
      "h_wall_angle_mouth_deg": 0.0,
      "v_wall_angle_mouth_deg": 0.0,
-     "diag_wall_angle_mouth_deg": 0.769847058581518,
+     "diag_wall_angle_mouth_deg": 0.7698470585800969,
      "mouth_aspect": 0.0,
      "mouth_area_mm2": 0.0,
      "h_halfwidth_mid_mm": 0.0,
@@ -211,30 +211,30 @@
    "az_fold_v_deg": {
     "label": "active",
     "active_frac": 1.0,
-    "median_rms_mm_per_range": 23.027989559897097,
-    "max_rms_mm_per_range": 30.837656413977957,
-    "median_max_disp_mm_per_range": 79.27907358296773,
+    "median_rms_mm_per_range": 23.02798955989712,
+    "max_rms_mm_per_range": 30.83765641397799,
+    "median_max_disp_mm_per_range": 79.2790735829674,
     "coupled_with": [],
     "descriptor_per_range": {
      "mouth_width_mm": 0.0,
      "mouth_height_mm": 0.0,
      "depth_mm": 0.0,
      "h_wall_angle_mouth_deg": 0.0,
-     "v_wall_angle_mouth_deg": -19.558903418383604,
-     "diag_wall_angle_mouth_deg": -0.5972794921166974,
+     "v_wall_angle_mouth_deg": -19.55890341838467,
+     "diag_wall_angle_mouth_deg": -0.5972794921145658,
      "mouth_aspect": 0.0,
      "mouth_area_mm2": 0.0,
      "h_halfwidth_mid_mm": 0.0,
-     "v_halfwidth_mid_mm": 58.65775760704283
+     "v_halfwidth_mid_mm": 57.205945111996165
     },
     "failed_points": 0
    },
    "az_fold_v_width_deg": {
     "label": "active",
     "active_frac": 1.0,
-    "median_rms_mm_per_range": 8.659654478299883,
-    "max_rms_mm_per_range": 25.255919808298362,
-    "median_max_disp_mm_per_range": 27.69065845907418,
+    "median_rms_mm_per_range": 6.2779032464704505,
+    "max_rms_mm_per_range": 25.255919808298437,
+    "median_max_disp_mm_per_range": 21.50769610464245,
     "coupled_with": [],
     "descriptor_per_range": {
      "mouth_width_mm": 0.0,
@@ -242,7 +242,7 @@
      "depth_mm": 0.0,
      "h_wall_angle_mouth_deg": 0.0,
      "v_wall_angle_mouth_deg": 0.0,
-     "diag_wall_angle_mouth_deg": 0.4536511429368058,
+     "diag_wall_angle_mouth_deg": 0.6080628916244278,
      "mouth_aspect": 0.0,
      "mouth_area_mm2": 0.0,
      "h_halfwidth_mid_mm": 0.0,
@@ -253,20 +253,20 @@
    "az_s_cos2_amp": {
     "label": "active",
     "active_frac": 1.0,
-    "median_rms_mm_per_range": 0.4235570411999352,
-    "max_rms_mm_per_range": 0.5224425531928453,
-    "median_max_disp_mm_per_range": 1.4796623448049135,
+    "median_rms_mm_per_range": 0.42355704119990084,
+    "max_rms_mm_per_range": 0.5224425531929184,
+    "median_max_disp_mm_per_range": 1.4300250301845348,
     "coupled_with": [],
     "descriptor_per_range": {
      "mouth_width_mm": 0.0,
      "mouth_height_mm": 0.0,
      "depth_mm": 0.0,
-     "h_wall_angle_mouth_deg": 1.120319615539955,
+     "h_wall_angle_mouth_deg": 1.1203196155388893,
      "v_wall_angle_mouth_deg": 0.0,
-     "diag_wall_angle_mouth_deg": 0.6501761512925691,
+     "diag_wall_angle_mouth_deg": 0.6205840886046589,
      "mouth_aspect": 0.0,
      "mouth_area_mm2": 0.0,
-     "h_halfwidth_mid_mm": -0.23150349213238977,
+     "h_halfwidth_mid_mm": -0.23150349213167923,
      "v_halfwidth_mid_mm": 0.0
     },
     "failed_points": 0
@@ -274,13 +274,13 @@
    "k": {
     "label": "active",
     "active_frac": 1.0,
-    "median_rms_mm_per_range": 3.1444625945336964,
-    "max_rms_mm_per_range": 3.3718904867392934,
-    "median_max_disp_mm_per_range": 5.266563394502912,
+    "median_rms_mm_per_range": 3.144462594533679,
+    "max_rms_mm_per_range": 3.371890486739292,
+    "median_max_disp_mm_per_range": 5.251464438452428,
     "coupled_with": [
      {
       "knob": "a_deg",
-      "median_abs_cos": 0.9822439969512144,
+      "median_abs_cos": 0.9822439969512248,
       "frac_points_coupled": 1.0
      }
     ],
@@ -288,22 +288,22 @@
      "mouth_width_mm": 0.0,
      "mouth_height_mm": 0.0,
      "depth_mm": 0.0,
-     "h_wall_angle_mouth_deg": 0.71779735765638,
-     "v_wall_angle_mouth_deg": 0.9440338202363554,
-     "diag_wall_angle_mouth_deg": 0.8097204932244751,
+     "h_wall_angle_mouth_deg": 0.7177973576560247,
+     "v_wall_angle_mouth_deg": 0.9440338202399081,
+     "diag_wall_angle_mouth_deg": 0.8097204932205672,
      "mouth_aspect": 0.0,
      "mouth_area_mm2": 0.0,
-     "h_halfwidth_mid_mm": -3.7938853104819223,
-     "v_halfwidth_mid_mm": -3.9315044113596507
+     "h_halfwidth_mid_mm": -3.7938853104833434,
+     "v_halfwidth_mid_mm": -3.663106035762095
     },
     "failed_points": 0
    },
    "morph_corner_mm": {
     "label": "active",
     "active_frac": 1.0,
-    "median_rms_mm_per_range": 0.9702316153364609,
-    "max_rms_mm_per_range": 1.207631939161962,
-    "median_max_disp_mm_per_range": 6.8444133661854245,
+    "median_rms_mm_per_range": 0.970231615336152,
+    "max_rms_mm_per_range": 1.2076319391615618,
+    "median_max_disp_mm_per_range": 6.844413366186193,
     "coupled_with": [],
     "descriptor_per_range": {
      "mouth_width_mm": 0.0,
@@ -311,9 +311,9 @@
      "depth_mm": 0.0,
      "h_wall_angle_mouth_deg": 0.0,
      "v_wall_angle_mouth_deg": 0.0,
-     "diag_wall_angle_mouth_deg": 0.003130334553347322,
+     "diag_wall_angle_mouth_deg": 0.001131357371164653,
      "mouth_aspect": 0.0,
-     "mouth_area_mm2": -1011.9498726409793,
+     "mouth_area_mm2": -1011.9498726395241,
      "h_halfwidth_mid_mm": 0.0,
      "v_halfwidth_mid_mm": 0.0
     },
@@ -322,62 +322,62 @@
    "morph_height_mm": {
     "label": "active",
     "active_frac": 1.0,
-    "median_rms_mm_per_range": 7.992133913433775,
-    "max_rms_mm_per_range": 8.375524346087243,
+    "median_rms_mm_per_range": 8.15028625827206,
+    "max_rms_mm_per_range": 8.375524346086909,
     "median_max_disp_mm_per_range": 26.386905005315086,
     "coupled_with": [],
     "descriptor_per_range": {
      "mouth_width_mm": 0.0,
-     "mouth_height_mm": 33.5999999999984,
+     "mouth_height_mm": 33.599999999999824,
      "depth_mm": 0.0,
      "h_wall_angle_mouth_deg": 0.0,
-     "v_wall_angle_mouth_deg": 2.023349831708644,
+     "v_wall_angle_mouth_deg": 2.0233498317121965,
      "diag_wall_angle_mouth_deg": 2.1907348233916917,
      "mouth_aspect": -0.12218420606108216,
      "mouth_area_mm2": 19110.591605611244,
      "h_halfwidth_mid_mm": 0.0,
-     "v_halfwidth_mid_mm": 3.5206949799750444
+     "v_halfwidth_mid_mm": 3.5206949799739786
     },
     "failed_points": 0
    },
    "morph_rate": {
     "label": "active",
     "active_frac": 1.0,
-    "median_rms_mm_per_range": 2.133898164453794,
-    "max_rms_mm_per_range": 2.812578400193207,
-    "median_max_disp_mm_per_range": 6.630603881318444,
+    "median_rms_mm_per_range": 2.0812453021772486,
+    "max_rms_mm_per_range": 2.8125784001932064,
+    "median_max_disp_mm_per_range": 6.354706515741019,
     "coupled_with": [],
     "descriptor_per_range": {
      "mouth_width_mm": 0.0,
      "mouth_height_mm": 0.0,
      "depth_mm": 0.0,
-     "h_wall_angle_mouth_deg": 0.8967803915748355,
-     "v_wall_angle_mouth_deg": -1.4901736628733162,
-     "diag_wall_angle_mouth_deg": 0.17231475579251293,
+     "h_wall_angle_mouth_deg": 1.0406013752628942,
+     "v_wall_angle_mouth_deg": 0.19419575003603012,
+     "diag_wall_angle_mouth_deg": 0.365048186705863,
      "mouth_aspect": 0.0,
      "mouth_area_mm2": 0.0,
-     "h_halfwidth_mid_mm": -1.2103048063483601,
-     "v_halfwidth_mid_mm": 0.9388481462877953
+     "h_halfwidth_mid_mm": -1.2103048063480049,
+     "v_halfwidth_mid_mm": -0.09008292674810284
     },
     "failed_points": 0
    },
    "morph_width_mm": {
     "label": "active",
     "active_frac": 1.0,
-    "median_rms_mm_per_range": 5.09795015039185,
-    "max_rms_mm_per_range": 5.189220564642054,
-    "median_max_disp_mm_per_range": 16.544809642041457,
+    "median_rms_mm_per_range": 5.097950150391901,
+    "max_rms_mm_per_range": 5.2143788135200335,
+    "median_max_disp_mm_per_range": 16.353297676795346,
     "coupled_with": [],
     "descriptor_per_range": {
      "mouth_width_mm": 28.800000000001067,
      "mouth_height_mm": 0.0,
      "depth_mm": 0.0,
-     "h_wall_angle_mouth_deg": 1.2118564257669104,
+     "h_wall_angle_mouth_deg": 1.2118564257686868,
      "v_wall_angle_mouth_deg": 0.0,
-     "diag_wall_angle_mouth_deg": -0.002759527508189305,
+     "diag_wall_angle_mouth_deg": -0.0009973700322518644,
      "mouth_aspect": 0.07296376265368835,
-     "mouth_area_mm2": 11397.074781858833,
-     "h_halfwidth_mid_mm": 4.641467736825432,
+     "mouth_area_mm2": 11397.074781857378,
+     "h_halfwidth_mid_mm": 4.6414677368257875,
      "v_halfwidth_mid_mm": 0.0
     },
     "failed_points": 0
@@ -385,18 +385,18 @@
    "n": {
     "label": "active",
     "active_frac": 1.0,
-    "median_rms_mm_per_range": 0.7429226542095155,
-    "max_rms_mm_per_range": 1.1750965997877922,
-    "median_max_disp_mm_per_range": 1.7446716884726028,
+    "median_rms_mm_per_range": 0.7183249691732686,
+    "max_rms_mm_per_range": 1.1750965997877176,
+    "median_max_disp_mm_per_range": 1.7304944588741424,
     "coupled_with": [
      {
       "knob": "q",
-      "median_abs_cos": 0.9677018500994476,
+      "median_abs_cos": 0.967701850099426,
       "frac_points_coupled": 1.0
      },
      {
       "knob": "s",
-      "median_abs_cos": 0.9898916497527439,
+      "median_abs_cos": 0.9898916497527629,
       "frac_points_coupled": 1.0
      }
     ],
@@ -404,31 +404,31 @@
      "mouth_width_mm": 0.0,
      "mouth_height_mm": 0.0,
      "depth_mm": 0.0,
-     "h_wall_angle_mouth_deg": -0.8486793677395347,
-     "v_wall_angle_mouth_deg": -1.5322450555803615,
-     "diag_wall_angle_mouth_deg": -1.1611203181804075,
+     "h_wall_angle_mouth_deg": -0.7003682570267948,
+     "v_wall_angle_mouth_deg": -1.2548871544343132,
+     "diag_wall_angle_mouth_deg": -1.037058873984619,
      "mouth_aspect": 0.0,
      "mouth_area_mm2": 0.0,
-     "h_halfwidth_mid_mm": 0.3400561363086752,
-     "v_halfwidth_mid_mm": 0.43251644539488115
+     "h_halfwidth_mid_mm": 0.32245980911156397,
+     "v_halfwidth_mid_mm": 0.43251644539434825
     },
     "failed_points": 0
    },
    "q": {
     "label": "active",
     "active_frac": 1.0,
-    "median_rms_mm_per_range": 2.009559836049119,
-    "max_rms_mm_per_range": 2.5732254448006686,
-    "median_max_disp_mm_per_range": 5.5868139279869515,
+    "median_rms_mm_per_range": 2.0095598360492413,
+    "max_rms_mm_per_range": 2.573225444800745,
+    "median_max_disp_mm_per_range": 5.453551106396895,
     "coupled_with": [
      {
       "knob": "n",
-      "median_abs_cos": 0.9677018500994476,
+      "median_abs_cos": 0.967701850099426,
       "frac_points_coupled": 1.0
      },
      {
       "knob": "s",
-      "median_abs_cos": 0.9861687467237925,
+      "median_abs_cos": 0.985244036587245,
       "frac_points_coupled": 1.0
      }
     ],
@@ -436,31 +436,31 @@
      "mouth_width_mm": 0.0,
      "mouth_height_mm": 0.0,
      "depth_mm": 0.0,
-     "h_wall_angle_mouth_deg": 3.459830881019953,
-     "v_wall_angle_mouth_deg": 7.893881630452519,
-     "diag_wall_angle_mouth_deg": 4.640892246314361,
+     "h_wall_angle_mouth_deg": 3.459830881018532,
+     "v_wall_angle_mouth_deg": 5.916765460723278,
+     "diag_wall_angle_mouth_deg": 4.18840022964062,
      "mouth_aspect": 0.0,
      "mouth_area_mm2": 0.0,
-     "h_halfwidth_mid_mm": -0.3284105413953852,
-     "v_halfwidth_mid_mm": -0.17487858739571022
+     "h_halfwidth_mid_mm": -0.32841054139502995,
+     "v_halfwidth_mid_mm": -0.17487858739677603
     },
     "failed_points": 0
    },
    "s": {
     "label": "active",
     "active_frac": 1.0,
-    "median_rms_mm_per_range": 1.416075906976479,
-    "max_rms_mm_per_range": 1.8148719821545876,
-    "median_max_disp_mm_per_range": 3.3516393634188915,
+    "median_rms_mm_per_range": 1.416075906976559,
+    "max_rms_mm_per_range": 1.8148719821546366,
+    "median_max_disp_mm_per_range": 3.351639363417075,
     "coupled_with": [
      {
       "knob": "n",
-      "median_abs_cos": 0.9898916497527439,
+      "median_abs_cos": 0.9898916497527629,
       "frac_points_coupled": 1.0
      },
      {
       "knob": "q",
-      "median_abs_cos": 0.9861687467237925,
+      "median_abs_cos": 0.985244036587245,
       "frac_points_coupled": 1.0
      }
     ],
@@ -468,13 +468,13 @@
      "mouth_width_mm": 0.0,
      "mouth_height_mm": 0.0,
      "depth_mm": 0.0,
-     "h_wall_angle_mouth_deg": 2.111754400052133,
-     "v_wall_angle_mouth_deg": 3.3664316469668134,
-     "diag_wall_angle_mouth_deg": 2.4529314732415464,
+     "h_wall_angle_mouth_deg": 2.1117544000471593,
+     "v_wall_angle_mouth_deg": 3.197162002830822,
+     "diag_wall_angle_mouth_deg": 2.341806699037716,
      "mouth_aspect": 0.0,
      "mouth_area_mm2": 0.0,
      "h_halfwidth_mid_mm": -0.4363738846837602,
-     "v_halfwidth_mid_mm": -0.40116706956645454
+     "v_halfwidth_mid_mm": -0.40116706956503345
     },
     "failed_points": 0
    }
@@ -483,24 +483,24 @@
    {
     "follower": "n",
     "from": "s",
-    "scale": -4.2458400706679,
-    "offset": 10.031360466838851,
-    "median_abs_cos": 0.9898916497527426,
+    "scale": -3.966362221114989,
+    "offset": 9.751522929293564,
+    "median_abs_cos": 0.9898916497527614,
     "authority_mm": {
-     "follower": 0.7429226542095155,
-     "leader": 1.416075906976479
+     "follower": 0.7183249691732686,
+     "leader": 1.416075906976559
     },
     "note": "geometric redundancy at the sampled points; confirm with data links (tools/analysis/links.py) and acoustics before applying"
    },
    {
     "follower": "k",
     "from": "a_deg",
-    "scale": -0.0932729283913537,
-    "offset": 6.198555610200865,
-    "median_abs_cos": 0.9822439969512167,
+    "scale": -0.09393825458525228,
+    "offset": 6.224170810380439,
+    "median_abs_cos": 0.982243996951222,
     "authority_mm": {
-     "follower": 3.1444625945336964,
-     "leader": 5.775632985244552
+     "follower": 3.144462594533679,
+     "leader": 5.775632985244526
     },
     "note": "geometric redundancy at the sampled points; confirm with data links (tools/analysis/links.py) and acoustics before applying"
    }
@@ -617,9 +617,9 @@
   }
  },
  "box": {
-  "n": 64,
+  "n": 96,
   "counts": {
-   "ok": 64,
+   "ok": 96,
    "outside": 0,
    "refused": 0
   },
@@ -794,115 +794,115 @@
    "bad_rate": 0.0,
    "refused": 0,
    "outside": 0,
-   "n": 32
+   "n": 48
   },
   "0.10": {
    "bad_rate": 0.0,
    "refused": 0,
    "outside": 0,
-   "n": 32
+   "n": 48
   },
   "0.15": {
    "bad_rate": 0.0,
    "refused": 0,
    "outside": 0,
-   "n": 32
+   "n": 48
   },
   "0.20": {
    "bad_rate": 0.0,
    "refused": 0,
    "outside": 0,
-   "n": 32
+   "n": 48
   },
   "0.25": {
    "bad_rate": 0.0,
    "refused": 0,
    "outside": 0,
-   "n": 32
+   "n": 48
   }
  },
  "margin_model": {
   "available": true,
-  "n_legal": 65,
-  "intercept_mm": 40.470999999978076,
+  "n_legal": 97,
+  "intercept_mm": 40.47099999997808,
   "gradient": {
    "L_mm": {
-    "mm_per_range": -1.0476254792430818e-11,
-    "mm_per_knob_unit": -2.4250589797293565e-13
+    "mm_per_range": -2.41051623106614e-12,
+    "mm_per_knob_unit": -5.5798986830234734e-14
    },
    "a0_deg": {
-    "mm_per_range": -5.127970913115302e-12,
-    "mm_per_knob_unit": -1.0683272735656878e-11
+    "mm_per_range": -4.462091157025275e-12,
+    "mm_per_knob_unit": -9.296023243802657e-12
    },
    "a_deg": {
-    "mm_per_range": -5.443902783881473e-12,
-    "mm_per_knob_unit": -1.4728377208704825e-12
+    "mm_per_range": -7.857601806476691e-12,
+    "mm_per_knob_unit": -2.12585947905327e-12
    },
    "az_a_cos_amp": {
-    "mm_per_range": -8.168825142939488e-12,
-    "mm_per_knob_unit": -2.2691180952609692e-12
+    "mm_per_range": 1.2405239983152406e-12,
+    "mm_per_knob_unit": 3.445899995320113e-13
    },
    "az_a_cos_pow": {
-    "mm_per_range": 1.0160238661294999e-11,
-    "mm_per_knob_unit": 8.466865551079165e-12
+    "mm_per_range": 8.326682885416193e-12,
+    "mm_per_knob_unit": 6.938902404513494e-12
    },
    "az_fold_h_deg": {
-    "mm_per_range": -1.2119547323823424e-12,
-    "mm_per_knob_unit": -8.079698215882282e-14
+    "mm_per_range": 1.318915590993466e-11,
+    "mm_per_knob_unit": 8.792770606623106e-13
    },
    "az_fold_h_width_deg": {
-    "mm_per_range": 4.31485917646874e-12,
-    "mm_per_knob_unit": 1.3483934926464814e-13
+    "mm_per_range": -5.411320808287675e-12,
+    "mm_per_knob_unit": -1.6910377525898984e-13
    },
    "az_fold_v_deg": {
-    "mm_per_range": 1.1073186665723181e-11,
-    "mm_per_knob_unit": 3.163767618778052e-13
+    "mm_per_range": 2.739891809978678e-12,
+    "mm_per_knob_unit": 7.828262314224795e-14
    },
    "az_fold_v_width_deg": {
-    "mm_per_range": -1.7610269680326516e-11,
-    "mm_per_knob_unit": -5.503209275102036e-13
+    "mm_per_range": -1.7248318947220908e-11,
+    "mm_per_knob_unit": -5.390099671006534e-13
    },
    "az_s_cos2_amp": {
-    "mm_per_range": 1.6270026022184507e-11,
-    "mm_per_knob_unit": 1.2778443987138722e-10
+    "mm_per_range": 4.737731458893054e-12,
+    "mm_per_knob_unit": 3.72100425598713e-11
    },
    "k": {
-    "mm_per_range": 6.889731166736689e-12,
-    "mm_per_knob_unit": 1.0632301183235637e-11
+    "mm_per_range": 8.719639875186697e-12,
+    "mm_per_knob_unit": 1.3456234375288119e-11
    },
    "morph_corner_mm": {
-    "mm_per_range": 3.3368727944852404e-11,
-    "mm_per_knob_unit": 2.0426123384641812e-12
+    "mm_per_range": 2.0259828434273286e-11,
+    "mm_per_knob_unit": 1.2401724034373318e-12
    },
    "morph_height_mm": {
-    "mm_per_range": -1.2999791378680141e-11,
-    "mm_per_knob_unit": -3.868985529369087e-13
+    "mm_per_range": -1.2464262721120062e-11,
+    "mm_per_knob_unit": -3.709602000333349e-13
    },
    "morph_rate": {
-    "mm_per_range": 2.8091967542893175e-12,
-    "mm_per_knob_unit": 2.3409972952410985e-12
+    "mm_per_range": 3.3144551057664578e-12,
+    "mm_per_knob_unit": 2.762045921472049e-12
    },
    "morph_width_mm": {
-    "mm_per_range": -28.799999999997993,
-    "mm_per_knob_unit": -0.9999999999999319
+    "mm_per_range": -28.799999999996636,
+    "mm_per_knob_unit": -0.9999999999998848
    },
    "n": {
-    "mm_per_range": -1.836671515818662e-11,
-    "mm_per_knob_unit": -9.565997478222198e-12
+    "mm_per_range": 1.5663791730184218e-12,
+    "mm_per_knob_unit": 8.158224859470947e-13
    },
    "q": {
-    "mm_per_range": 7.325789047046104e-12,
-    "mm_per_knob_unit": 3.0524121029358877e-10
+    "mm_per_range": -3.3190591746878885e-12,
+    "mm_per_knob_unit": -1.3829413227866255e-10
    },
    "s": {
-    "mm_per_range": 2.5435235617309505e-11,
-    "mm_per_knob_unit": 1.0598014840545633e-10
+    "mm_per_range": 2.369349161313039e-11,
+    "mm_per_knob_unit": 9.872288172137668e-11
    }
   },
   "r2": 1.0,
   "sign_agreement": 1.0,
   "binding_axis_counts": {
-   "width_mm": 65
+   "width_mm": 97
   },
   "inside_frac": 1.0,
   "constraint": "sum_k g_k * x_k >= -intercept (x in unit coordinates)"
@@ -912,9 +912,9 @@
   {
    "knob": "a0_deg",
    "action": "fix_or_widen",
-   "why": "whole range moves the surface <= 0.39 mm (below the ~1 mm mesher fit): CMA spends a dimension on mesh noise",
+   "why": "whole range moves the surface <= 0.42 mm (below the ~1 mm mesher fit): CMA spends a dimension on mesh noise",
    "evidence": {
-    "median_max_disp_mm_per_range": 0.3863026594880068
+    "median_max_disp_mm_per_range": 0.4247933540940792
    }
   },
   {
@@ -923,9 +923,10 @@
    "why": "surface direction parallel to s (|cos| 0.990)",
    "proposal": {
     "from": "s",
-    "scale": -4.2458400706679,
-    "offset": 10.031360466838851
-   }
+    "scale": -3.966362221114989,
+    "offset": 9.751522929293564
+   },
+   "data_agrees": "unknown"
   },
   {
    "knob": "k",
@@ -933,9 +934,10 @@
    "why": "surface direction parallel to a_deg (|cos| 0.982)",
    "proposal": {
     "from": "a_deg",
-    "scale": -0.0932729283913537,
-    "offset": 6.198555610200865
-   }
+    "scale": -0.09393825458525228,
+    "offset": 6.224170810380439
+   },
+   "data_agrees": "unknown"
   },
   {
    "knob": "*",

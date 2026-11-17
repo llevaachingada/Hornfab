@@ -22,6 +22,12 @@ safety net; owner decision cards for C1-C6. The target architecture, stages 0-8 
 [ARCHITECTURE_AND_STAGED_PLAN_2026-11-17.md](../scratch/fable_architecture/ARCHITECTURE_AND_STAGED_PLAN_2026-11-17.md).
 Docs only; no code, solve or queue change.
 
+[First-session verification evidence (2026-11-17)](../scratch/fable_architecture/EVIDENCE_VERIFY_2026-11-17.md):
+the Windows-checkout run of the handoff §2 tests (187 passed), the full offline suite and its 8-failure
+triage, the U3 CPU validity tables on both candidate hosts, the record-shadow counts over 22 lane runs
+(0 `record_inside_but_refused`), and the stage-5 space-card batch (29 built, 22 blocked by two
+pre-existing config/route defects). Every number is quoted from a log or JSON in the same folder tree.
+
 
 [Fable discovery architecture evidence handoff (2026-11-16)](research/FABLE_DISCOVERY_EVIDENCE_HANDOFF_2026-11-16.md):
 read-only dossier prepared for a later discovery/decision pass - refusal-taxonomy miscoding, the

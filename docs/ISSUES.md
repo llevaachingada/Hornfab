@@ -1,5 +1,30 @@
 # ISSUES
 
+## 2026-11-17 - Verification findings (local orchestrator, Windows checkout)
+
+- OPEN (owner): **12 `examples/typologies/walls_relieved/*/*_w1.yaml` do not load.** `brief_file:
+  '../../briefs/...'` resolves to `examples/typologies/briefs/`; the briefs are at `examples/briefs/`,
+  so the path is one `../` short. These are 12 jobs queued in `cd_rrect_2026-11-17`; they will fail at
+  config load. Pre-existing (`530f4cc`). No config edited - a config change needs owner approval.
+- OPEN (orchestrator/owner): **10 generator-route lanes cannot be space-carded** -
+  `DesignSpace.from_config` refuses `rows` types `rosse_rect`, `rolled_rect`,
+  `rolled_rect_pucker`, `crowe_panel`, `klangfilm_lame` ("unknown rows type") while the mesher
+  registry accepts them; those lanes run only through `tools/geometry/*_cli.py`. Pre-existing
+  (`main:hornlab_search/design/generators/grid.py:914-916`).
+- OPEN: **record shadow could not build a record for 429 / 2055 designs** (`route: null`),
+  concentrated in `rosse_rect` r120/r50 and the two `klangfilm_lame` runs. A `record_gate` switch
+  cannot be proposed for those lanes until `record_for_design` covers their routes.
+- OPEN: **the one-command evidence driver is ~10 h on the full `runs\2026111*` glob** (native route
+  ~3-4 s per design). This pass used a bounded 22-run set (the live lanes) instead.
+- OPEN (owner): the handoff's "three known pre-existing failures" is incomplete - `main` also fails
+  `tests/test_objective_v8.py::test_v8_key_set_is_v4_minus_load_plus_the_extras`,
+  `tests/test_b8_lanes_bounded_gui.py::test_study_modules_have_no_host_cleanup_or_process_kill_paths`
+  and the two `tests/test_night_bo_arm_wrapper.py` tests. All four files are unchanged on this branch.
+- DONE: the two branch-caused test failures are repaired (`test_targets` excludes the WP 7.1 data
+  file; `test_search_qd_failure_isolation` asserts the WP 0.2 linked-space reduction).
+- DONE: `search.record_gate`, `space_card` `data_agrees`, `--mode finalist` wiring (all opt-in;
+  `screen`/`verify`/`final` unchanged).
+
 ## 2026-11-17 - Acoustic-truth master plan WP0-WP3 landed
 
 - DONE: master plan `docs/research/HORNFAB_ACOUSTIC_TRUTH_MASTER_PLAN_2026-11-17.md` + index links;

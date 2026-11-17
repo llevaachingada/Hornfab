@@ -1,0 +1,370 @@
+{
+ "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\home_landscape_2026-11-15\\hl__lecleach_iwata_ar_landscape_smooth_v7.yaml",
+ "name": "hl__lecleach_iwata_ar_landscape_smooth_v7",
+ "family": "FREEFORM",
+ "generator": true,
+ "keys": [
+  "g_T",
+  "g_ar_m",
+  "g_ar_p",
+  "g_fc_hz",
+  "g_stop_deg"
+ ],
+ "geometry": {
+  "keys": [
+   "g_T",
+   "g_ar_m",
+   "g_ar_p",
+   "g_fc_hz",
+   "g_stop_deg"
+  ],
+  "n_points": 9,
+  "legal_points": 7,
+  "refused_points": [
+   {
+    "x": [
+     0.2526910062879324,
+     0.9008385706692934,
+     0.9235329013317823,
+     0.26755227241665125,
+     0.04343085736036301
+    ],
+    "reason": "base point is not a legal record: generator: GeneratorError: iwata_ar rows: stop_deg must be in [90, 240], got 66.0803200305"
+   },
+   {
+    "x": [
+     0.5439047589898109,
+     0.6487157056108117,
+     0.5934331975877285,
+     0.09190483670681715,
+     0.9630213649943471
+    ],
+    "reason": "base point is not a legal record: generator: invalid_envelope: estimated outside the brief envelope (max relative overshoot 0.2177)"
+   }
+  ],
+  "record_points": 3965,
+  "effective_dimension": {
+   "median": 5.0,
+   "min": 5,
+   "max": 5,
+   "searched": 5
+  },
+  "knobs": {
+   "g_T": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 20.7780022597648,
+    "max_rms_mm_per_range": 27.6436825960167,
+    "median_max_disp_mm_per_range": 35.16334747078309,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": 16.178590143910284,
+     "mouth_height_mm": 7.4945722000691655,
+     "depth_mm": -32.24873048855414,
+     "h_wall_angle_mouth_deg": 5.085852488816655,
+     "v_wall_angle_mouth_deg": 7.853098128123641,
+     "diag_wall_angle_mouth_deg": 7.381244450596463,
+     "mouth_aspect": 0.0,
+     "mouth_area_mm2": 4044.641405514809,
+     "h_halfwidth_mid_mm": 9.704662744612227,
+     "v_halfwidth_mid_mm": 6.548630687468381
+    },
+    "failed_points": 0
+   },
+   "g_ar_m": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 22.299598791744963,
+    "max_rms_mm_per_range": 43.056489206064846,
+    "median_max_disp_mm_per_range": 66.82708090835513,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": 133.65416181671026,
+     "mouth_height_mm": -94.91252986278771,
+     "depth_mm": -0.00969141465034795,
+     "h_wall_angle_mouth_deg": -6.639883662970896,
+     "v_wall_angle_mouth_deg": 8.828841632031718,
+     "diag_wall_angle_mouth_deg": 5.171792166072815,
+     "mouth_aspect": 1.3999999999999964,
+     "mouth_area_mm2": -159.51338483591812,
+     "h_halfwidth_mid_mm": 31.758801859668054,
+     "v_halfwidth_mid_mm": -21.337594189844832
+    },
+    "failed_points": 0
+   },
+   "g_ar_p": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 1.7805439219928814,
+    "max_rms_mm_per_range": 5.20402730092825,
+    "median_max_disp_mm_per_range": 4.153079659538876,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": 0.0,
+     "mouth_height_mm": 0.0,
+     "depth_mm": -0.004184503996285118,
+     "h_wall_angle_mouth_deg": -1.6802539849074103,
+     "v_wall_angle_mouth_deg": 3.5699522747876262,
+     "diag_wall_angle_mouth_deg": 1.0385980327463065,
+     "mouth_aspect": 0.0,
+     "mouth_area_mm2": 0.0,
+     "h_halfwidth_mid_mm": -3.1833897395973283,
+     "v_halfwidth_mid_mm": 2.938416566735211
+    },
+    "failed_points": 0
+   },
+   "g_fc_hz": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 156.29414500524513,
+    "max_rms_mm_per_range": 412.6919880240185,
+    "median_max_disp_mm_per_range": 274.04714025133535,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": -287.2944733879931,
+     "mouth_height_mm": -160.80484966781995,
+     "depth_mm": -232.65153352769994,
+     "h_wall_angle_mouth_deg": 6.490783008381133,
+     "v_wall_angle_mouth_deg": 16.30283740491692,
+     "diag_wall_angle_mouth_deg": 13.230675623916007,
+     "mouth_aspect": 0.0,
+     "mouth_area_mm2": -82985.8000314379,
+     "h_halfwidth_mid_mm": -30.617317849442543,
+     "v_halfwidth_mid_mm": -15.021806739513352
+    },
+    "failed_points": 0
+   },
+   "g_stop_deg": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 43.431473157913395,
+    "max_rms_mm_per_range": 72.29602901667164,
+    "median_max_disp_mm_per_range": 90.60034440210244,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": 160.53871990611825,
+     "mouth_height_mm": 96.05113490578879,
+     "depth_mm": 0.5754365713539039,
+     "h_wall_angle_mouth_deg": 108.92960641154941,
+     "v_wall_angle_mouth_deg": 134.91570059033637,
+     "diag_wall_angle_mouth_deg": 131.96737197781408,
+     "mouth_aspect": 5.551115123125778e-15,
+     "mouth_area_mm2": 48148.484055001565,
+     "h_halfwidth_mid_mm": 32.61918520199635,
+     "v_halfwidth_mid_mm": 14.96793903887904
+    },
+    "failed_points": 0
+   }
+  },
+  "links": [],
+  "feasible_from_seed": {
+   "g_T": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   },
+   "g_ar_m": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   },
+   "g_ar_p": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   },
+   "g_fc_hz": {
+    "lo_frac": 0.859375,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0373828125,
+    "feasible_unit_hi": 1.0
+   },
+   "g_stop_deg": {
+    "lo_frac": 0.40625,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.21544642857142854,
+    "feasible_unit_hi": 1.0
+   }
+  }
+ },
+ "box": {
+  "n": 96,
+  "counts": {
+   "ok": 63,
+   "outside": 0,
+   "refused": 33
+  },
+  "ok_frac": 0.65625,
+  "per_knob": {
+   "g_T": {
+    "bad_rate_by_slice": [
+     0.3,
+     0.3888888888888889,
+     0.35,
+     0.3684210526315789,
+     0.3157894736842105
+    ]
+   },
+   "g_ar_m": {
+    "bad_rate_by_slice": [
+     0.2631578947368421,
+     0.35,
+     0.2631578947368421,
+     0.42105263157894735,
+     0.42105263157894735
+    ]
+   },
+   "g_ar_p": {
+    "bad_rate_by_slice": [
+     0.3157894736842105,
+     0.3684210526315789,
+     0.35,
+     0.3333333333333333,
+     0.35
+    ]
+   },
+   "g_fc_hz": {
+    "bad_rate_by_slice": [
+     0.8421052631578947,
+     0.2631578947368421,
+     0.15789473684210525,
+     0.25,
+     0.21052631578947367
+    ],
+    "raise_lo_to_unit": 0.2
+   },
+   "g_stop_deg": {
+    "bad_rate_by_slice": [
+     1.0,
+     0.15,
+     0.1111111111111111,
+     0.25,
+     0.21052631578947367
+    ],
+    "raise_lo_to_unit": 0.2
+   }
+  }
+ },
+ "sigma": {
+  "0.05": {
+   "bad_rate": 0.0,
+   "refused": 0,
+   "outside": 0,
+   "n": 48
+  },
+  "0.10": {
+   "bad_rate": 0.020833333333333332,
+   "refused": 1,
+   "outside": 0,
+   "n": 48
+  },
+  "0.15": {
+   "bad_rate": 0.20833333333333334,
+   "refused": 10,
+   "outside": 0,
+   "n": 48
+  },
+  "0.20": {
+   "bad_rate": 0.3125,
+   "refused": 15,
+   "outside": 0,
+   "n": 48
+  },
+  "0.25": {
+   "bad_rate": 0.4166666666666667,
+   "refused": 20,
+   "outside": 0,
+   "n": 48
+  }
+ },
+ "margin_model": {
+  "available": true,
+  "n_legal": 64,
+  "intercept_mm": 101.2698861556869,
+  "gradient": {
+   "g_T": {
+    "mm_per_range": -11.987854342896313,
+    "mm_per_knob_unit": -23.975708685792625
+   },
+   "g_ar_m": {
+    "mm_per_range": -43.05553409266389,
+    "mm_per_knob_unit": -30.75395292333135
+   },
+   "g_ar_p": {
+    "mm_per_range": -16.384889850200775,
+    "mm_per_knob_unit": -10.92325990013385
+   },
+   "g_fc_hz": {
+    "mm_per_range": 318.2728711920083,
+    "mm_per_knob_unit": 0.5304547853200139
+   },
+   "g_stop_deg": {
+    "mm_per_range": -85.35672656183475,
+    "mm_per_knob_unit": -0.6096909040131053
+   }
+  },
+  "r2": 0.8927043377917843,
+  "sign_agreement": 1.0,
+  "binding_axis_counts": {
+   "height_mm": 25,
+   "width_mm": 39
+  },
+  "inside_frac": 1.0,
+  "constraint": "sum_k g_k * x_k >= -intercept (x in unit coordinates)"
+ },
+ "data": {},
+ "recommendations": [
+  {
+   "knob": "g_fc_hz",
+   "action": "rebound",
+   "why": "edge slice mostly refused/outside while the middle is not",
+   "proposal": {
+    "raise_lo_to_unit": 0.2
+   },
+   "evidence": {
+    "bad_rate_by_slice": [
+     0.8421052631578947,
+     0.2631578947368421,
+     0.15789473684210525,
+     0.25,
+     0.21052631578947367
+    ]
+   }
+  },
+  {
+   "knob": "g_stop_deg",
+   "action": "rebound",
+   "why": "edge slice mostly refused/outside while the middle is not",
+   "proposal": {
+    "raise_lo_to_unit": 0.2
+   },
+   "evidence": {
+    "bad_rate_by_slice": [
+     1.0,
+     0.15,
+     0.1111111111111111,
+     0.25,
+     0.21052631578947367
+    ]
+   }
+  },
+  {
+   "knob": "*",
+   "action": "sigma0",
+   "why": "predicted bad-candidate rate <= 15% from the seed",
+   "proposal": {
+    "max_safe_sigma0": 0.1
+   },
+   "evidence": {
+    "0.05": 0.0,
+    "0.10": 0.020833333333333332,
+    "0.15": 0.20833333333333334,
+    "0.20": 0.3125,
+    "0.25": 0.4166666666666667
+   }
+  }
+ ]
+}

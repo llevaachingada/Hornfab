@@ -311,3 +311,12 @@ records; only the stored-data replays and the watchdog replay are reproductions.
 lane's work was observed and preserved, never overwritten. **Tracking state changed after the pass
 closed:** `.gitignore:9` (`/scratch/`) still ignores the folder by default, but this subtree was
 force-added on owner instruction, so subsequent edits here now show up in `git status`.
+
+## Local orchestrator pass (2026-11-17)
+
+- `EVIDENCE_VERIFY_2026-11-17.md` - what the Windows checkout actually returned for handoff §2:
+  tests, full-suite triage, U3 CPU tables, record-shadow counts, space-card batch and the 22 configs
+  that could not be carded, with the source log/JSON named under each block.
+- `space_cards/` - 29 lane cards + `shared_map.md` + `summary.json` (`--points 8 --box 96 --sigma-n 48`).
+- `.evidence/verify_20261117/` - raw logs and JSON behind the note (`pytest_targeted.log`,
+  `u3_cpu.json`, `record_shadow_recent/summary.json`, `space_cards_run/batch*.log`).

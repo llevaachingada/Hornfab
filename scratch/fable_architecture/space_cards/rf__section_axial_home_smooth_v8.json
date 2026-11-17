@@ -1,0 +1,397 @@
+{
+ "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\rolled_family_2026-11-15\\rf__section_axial_home_smooth_v8.yaml",
+ "name": "rf__section_axial_home_smooth_v8",
+ "family": "FREEFORM",
+ "generator": true,
+ "keys": [
+  "g_axial_h_mm",
+  "g_crown_mm",
+  "g_depth_mm",
+  "g_h_depth_scale",
+  "g_height_mm",
+  "g_junction_power",
+  "g_width_mm"
+ ],
+ "geometry": {
+  "keys": [
+   "g_axial_h_mm",
+   "g_crown_mm",
+   "g_depth_mm",
+   "g_h_depth_scale",
+   "g_height_mm",
+   "g_junction_power",
+   "g_width_mm"
+  ],
+  "n_points": 9,
+  "legal_points": 9,
+  "refused_points": [],
+  "record_points": 3965,
+  "effective_dimension": {
+   "median": 7.0,
+   "min": 7,
+   "max": 7,
+   "searched": 7
+  },
+  "knobs": {
+   "g_axial_h_mm": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 2.2784551424985677,
+    "max_rms_mm_per_range": 2.4440828887925274,
+    "median_max_disp_mm_per_range": 13.23761999200474,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": -0.008288882165174975,
+     "mouth_height_mm": 0.0,
+     "depth_mm": 0.0,
+     "h_wall_angle_mouth_deg": -1.259944726668748,
+     "v_wall_angle_mouth_deg": 0.0,
+     "diag_wall_angle_mouth_deg": 0.004422584812857617,
+     "mouth_aspect": 0.0,
+     "mouth_area_mm2": 0.0,
+     "h_halfwidth_mid_mm": 4.297104796322056,
+     "v_halfwidth_mid_mm": 0.0
+    },
+    "failed_points": 0
+   },
+   "g_crown_mm": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 9.610026654950358,
+    "max_rms_mm_per_range": 13.053489695299726,
+    "median_max_disp_mm_per_range": 48.26122575893423,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": -0.039453732313177135,
+     "mouth_height_mm": 0.0,
+     "depth_mm": -0.00838981717166121,
+     "h_wall_angle_mouth_deg": -0.030433240105764953,
+     "v_wall_angle_mouth_deg": 0.0,
+     "diag_wall_angle_mouth_deg": 3.712115328477236,
+     "mouth_aspect": -1.2938761173586487e-09,
+     "mouth_area_mm2": -11397.26280137619,
+     "h_halfwidth_mid_mm": -0.012031463857198322,
+     "v_halfwidth_mid_mm": -0.026090849462434538
+    },
+    "failed_points": 0
+   },
+   "g_depth_mm": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 78.28571091201536,
+    "max_rms_mm_per_range": 81.75483378240243,
+    "median_max_disp_mm_per_range": 135.50722319109752,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": -0.4747560212365438,
+     "mouth_height_mm": 0.0,
+     "depth_mm": 129.97971813209392,
+     "h_wall_angle_mouth_deg": -15.740790438654514,
+     "v_wall_angle_mouth_deg": 0.0,
+     "diag_wall_angle_mouth_deg": -1.1484515528344719,
+     "mouth_aspect": 0.0,
+     "mouth_area_mm2": 0.0,
+     "h_halfwidth_mid_mm": -14.19437377153726,
+     "v_halfwidth_mid_mm": -13.686316048261547
+    },
+    "failed_points": 0
+   },
+   "g_h_depth_scale": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 15.179058518416996,
+    "max_rms_mm_per_range": 18.14275339523722,
+    "median_max_disp_mm_per_range": 34.28061597541059,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": -0.06267193516009678,
+     "mouth_height_mm": 0.0,
+     "depth_mm": 0.019210738317099168,
+     "h_wall_angle_mouth_deg": -5.5018132122860655,
+     "v_wall_angle_mouth_deg": 0.0,
+     "diag_wall_angle_mouth_deg": -0.18952532906908443,
+     "mouth_aspect": 0.0,
+     "mouth_area_mm2": 0.0,
+     "h_halfwidth_mid_mm": -5.05870946441718,
+     "v_halfwidth_mid_mm": 4.517427708605477
+    },
+    "failed_points": 0
+   },
+   "g_height_mm": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 63.24222576541785,
+    "max_rms_mm_per_range": 74.82511114945636,
+    "median_max_disp_mm_per_range": 178.88493769063126,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": -0.009193144208552445,
+     "mouth_height_mm": 199.99999999999983,
+     "depth_mm": 0.05137878783330055,
+     "h_wall_angle_mouth_deg": 0.5803829634153596,
+     "v_wall_angle_mouth_deg": 0.0,
+     "diag_wall_angle_mouth_deg": 3.2190522103796577,
+     "mouth_aspect": -1.0313490858635024,
+     "mouth_area_mm2": 102495.10855346589,
+     "h_halfwidth_mid_mm": 0.5927114400513739,
+     "v_halfwidth_mid_mm": 32.05415478981874
+    },
+    "failed_points": 0
+   },
+   "g_junction_power": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 0.9844141290058707,
+    "max_rms_mm_per_range": 4.231100690022143,
+    "median_max_disp_mm_per_range": 6.724693840627809,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": 0.05642701631813902,
+     "mouth_height_mm": 0.0,
+     "depth_mm": -0.00011140465190351269,
+     "h_wall_angle_mouth_deg": 6.562986527569587e-05,
+     "v_wall_angle_mouth_deg": 0.0,
+     "diag_wall_angle_mouth_deg": -0.0016784185156382121,
+     "mouth_aspect": 2.8590185774390887e-09,
+     "mouth_area_mm2": 509.19561234622915,
+     "h_halfwidth_mid_mm": -0.00012515801017798356,
+     "v_halfwidth_mid_mm": -0.000304208468904221
+    },
+    "failed_points": 0
+   },
+   "g_width_mm": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 20.610627779417996,
+    "max_rms_mm_per_range": 26.01859488725744,
+    "median_max_disp_mm_per_range": 63.30950033066551,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": 120.13496321017942,
+     "mouth_height_mm": 0.0,
+     "depth_mm": 0.004825359968663248,
+     "h_wall_angle_mouth_deg": 6.670817506384446,
+     "v_wall_angle_mouth_deg": 0.0,
+     "diag_wall_angle_mouth_deg": -1.148933839142784,
+     "mouth_aspect": 0.3515971918869151,
+     "mouth_area_mm2": 32983.36720610893,
+     "h_halfwidth_mid_mm": 34.66853317046464,
+     "v_halfwidth_mid_mm": 0.8819591009405762
+    },
+    "failed_points": 0
+   }
+  },
+  "links": [],
+  "feasible_from_seed": {
+   "g_axial_h_mm": {
+    "lo_frac": 0.0,
+    "hi_frac": 0.0,
+    "feasible_unit_lo": 0.5650000000000001,
+    "feasible_unit_hi": 0.5650000000000001
+   },
+   "g_crown_mm": {
+    "lo_frac": 0.0,
+    "hi_frac": 0.0,
+    "feasible_unit_lo": 0.7930303030303031,
+    "feasible_unit_hi": 0.7930303030303031
+   },
+   "g_depth_mm": {
+    "lo_frac": 0.0,
+    "hi_frac": 0.0,
+    "feasible_unit_lo": 0.7692307692307693,
+    "feasible_unit_hi": 0.7692307692307693
+   },
+   "g_h_depth_scale": {
+    "lo_frac": 0.0,
+    "hi_frac": 0.0,
+    "feasible_unit_lo": 0.7149999999999993,
+    "feasible_unit_hi": 0.7149999999999993
+   },
+   "g_height_mm": {
+    "lo_frac": 0.0,
+    "hi_frac": 0.0,
+    "feasible_unit_lo": 0.2934999999999999,
+    "feasible_unit_hi": 0.2934999999999999
+   },
+   "g_junction_power": {
+    "lo_frac": 0.0,
+    "hi_frac": 0.0,
+    "feasible_unit_lo": 0.00031250000000004885,
+    "feasible_unit_hi": 0.00031250000000004885
+   },
+   "g_width_mm": {
+    "lo_frac": 1.0,
+    "hi_frac": 0.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 0.9933333333333337
+   }
+  }
+ },
+ "box": {
+  "n": 96,
+  "counts": {
+   "ok": 91,
+   "outside": 4,
+   "refused": 1
+  },
+  "ok_frac": 0.9479166666666666,
+  "per_knob": {
+   "g_axial_h_mm": {
+    "bad_rate_by_slice": [
+     0.0,
+     0.05263157894736842,
+     0.05,
+     0.05263157894736842,
+     0.10526315789473684
+    ]
+   },
+   "g_crown_mm": {
+    "bad_rate_by_slice": [
+     0.1,
+     0.05555555555555555,
+     0.05263157894736842,
+     0.0,
+     0.05263157894736842
+    ]
+   },
+   "g_depth_mm": {
+    "bad_rate_by_slice": [
+     0.0,
+     0.0,
+     0.10526315789473684,
+     0.05263157894736842,
+     0.10526315789473684
+    ]
+   },
+   "g_h_depth_scale": {
+    "bad_rate_by_slice": [
+     0.05263157894736842,
+     0.0,
+     0.10526315789473684,
+     0.05263157894736842,
+     0.05263157894736842
+    ]
+   },
+   "g_height_mm": {
+    "bad_rate_by_slice": [
+     0.0,
+     0.05,
+     0.05555555555555555,
+     0.1,
+     0.05263157894736842
+    ]
+   },
+   "g_junction_power": {
+    "bad_rate_by_slice": [
+     0.1111111111111111,
+     0.0,
+     0.05555555555555555,
+     0.09523809523809523,
+     0.0
+    ]
+   },
+   "g_width_mm": {
+    "bad_rate_by_slice": [
+     0.05,
+     0.0,
+     0.0,
+     0.0,
+     0.21052631578947367
+    ]
+   }
+  }
+ },
+ "sigma": {
+  "0.05": {
+   "bad_rate": 0.7916666666666666,
+   "refused": 0,
+   "outside": 38,
+   "n": 48
+  },
+  "0.10": {
+   "bad_rate": 0.5833333333333334,
+   "refused": 0,
+   "outside": 28,
+   "n": 48
+  },
+  "0.15": {
+   "bad_rate": 0.5833333333333334,
+   "refused": 0,
+   "outside": 28,
+   "n": 48
+  },
+  "0.20": {
+   "bad_rate": 0.5416666666666666,
+   "refused": 0,
+   "outside": 26,
+   "n": 48
+  },
+  "0.25": {
+   "bad_rate": 0.6875,
+   "refused": 0,
+   "outside": 33,
+   "n": 48
+  }
+ },
+ "margin_model": {
+  "available": true,
+  "n_legal": 96,
+  "intercept_mm": 116.6301584987511,
+  "gradient": {
+   "g_axial_h_mm": {
+    "mm_per_range": -4.216469049589151,
+    "mm_per_knob_unit": -0.35137242079909586
+   },
+   "g_crown_mm": {
+    "mm_per_range": -0.8008797685842417,
+    "mm_per_knob_unit": -0.024269083896492172
+   },
+   "g_depth_mm": {
+    "mm_per_range": -0.9497343395527036,
+    "mm_per_knob_unit": -0.007305648765790027
+   },
+   "g_h_depth_scale": {
+    "mm_per_range": -0.9084157879926575,
+    "mm_per_knob_unit": -4.542078939963286
+   },
+   "g_height_mm": {
+    "mm_per_range": -7.343832156986132,
+    "mm_per_knob_unit": -0.036719160784930656
+   },
+   "g_junction_power": {
+    "mm_per_range": 0.8136622684261283,
+    "mm_per_knob_unit": 0.02542694588831651
+   },
+   "g_width_mm": {
+    "mm_per_range": -113.98723380961667,
+    "mm_per_knob_unit": -0.9498936150801389
+   }
+  },
+  "r2": 0.9755364865742566,
+  "sign_agreement": 1.0,
+  "binding_axis_counts": {
+   "width_mm": 89,
+   "height_mm": 7
+  },
+  "inside_frac": 0.9479166666666666,
+  "constraint": "sum_k g_k * x_k >= -intercept (x in unit coordinates)"
+ },
+ "data": {},
+ "recommendations": [
+  {
+   "knob": "*",
+   "action": "sigma0",
+   "why": "predicted bad-candidate rate <= 15% from the seed",
+   "proposal": {
+    "max_safe_sigma0": null
+   },
+   "evidence": {
+    "0.05": 0.7916666666666666,
+    "0.10": 0.5833333333333334,
+    "0.15": 0.5833333333333334,
+    "0.20": 0.5416666666666666,
+    "0.25": 0.6875
+   }
+  }
+ ]
+}

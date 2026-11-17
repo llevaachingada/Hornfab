@@ -1,0 +1,19 @@
+batch 0: 17 configs
+OK hl__ath_core_petal_hvlaw_v7 92s
+OK hl__biradial_es_style_smooth_v7 451s
+FAIL rr__reference_v7 GeometryInvalidError: generator seed is not a legal horn: unknown rows type 'rolled_rect' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])
+FAIL rr__crowe_panel_es600_v7 GeometryInvalidError: generator seed is not a legal horn: unknown rows type 'crowe_panel' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])
+OK rf__section_axial_home_v7 140s
+OK hl__lecleach_hv_landscape_smooth_v7 100s
+OK hl__ath_tritonia_landscape_v9 203s
+OK hl__crowe_x_osse_cd_v7 383s
+OK hl__klangfilm_lame_curved_v1_c200 606s
+OK a2_v_only_single_axis 265s
+FAIL hl__rosse_rect_cd_v7_r50_refine GeometryInvalidError: generator seed is not a legal horn: unknown rows type 'rosse_rect' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])
+OK 20261115T020650Z-screen-22931c 3769s
+OK 20261114T223630Z-screen-86e077 254s
+FAIL lecleach_fc540_T_narrow_w1 ConfigError: lecleach_fc540_T_narrow_w1.yaml: brief_file '../../briefs/lecleach_rollback_1in_v6.yaml' could not be found; tried relative to config dir (C:\Users\hunte\Hrns\hornlab-search\examples\typologies\walls_relieved\lecleach_fc540_T_narrow) and repo root. Use an absolute path or a path relative to the config file.
+FAIL ext_throat_hvlaw_cov_v7_w1 ConfigError: ext_throat_hvlaw_cov_v7_w1.yaml: brief_file '../../briefs/print_80x60_2026-11-13/room_80x60_700_hf1440_v7_cov.yaml' could not be found; tried relative to config dir (C:\Users\hunte\Hrns\hornlab-search\examples\typologies\walls_relieved\ext_throat_hvlaw_cov_v7) and repo root. Use an absolute path or a path relative to the config file.
+OK osse_rrect_fold_warm_v7_w1 434s
+FAIL rosse_rect_cd_v7_r50_refine_w1 ConfigError: rosse_rect_cd_v7_r50_refine_w1.yaml: brief_file '../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_rosse_rect_v7.yaml' could not be found; tried relative to config dir (C:\Users\hunte\Hrns\hornlab-search\examples\typologies\walls_relieved\rosse_rect_cd_v7_r50_refine) and repo root. Use an absolute path or a path relative to the config file.
+batch done

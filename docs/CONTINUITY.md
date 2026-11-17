@@ -1,5 +1,34 @@
 # CONTINUITY
 
+## 2026-11-17 (local orchestrator) - First-session verification on the Windows checkout
+
+- Branch `ccr-260b4b76-fi6b8j` (PR #67). Handoff §2 test list: **187 passed** (log
+  `scratch/fable_architecture/.evidence/verify_20261117/pytest_targeted.log`). Full offline suite:
+  **8 failed / 4557 passed / 22 skipped**. Triage: 2 load flakes (both pass alone), 4 pre-existing on
+  `main` and NOT in the handoff's list of three (`test_objective_v8` `oa_excess_raw` from `4db1453`;
+  `gui/study_jobs.py` Popen; 2 `run_bo_arm` wrapper tests - those files are unchanged on this branch),
+  2 branch-caused and repaired (`protected_lanes.yaml` in the brief glob; the QD generator-links test
+  now asserts the WP 0.2 reduction instead of the removed refusal).
+- Code (opt-in/additive, verified by the orchestrator): `search.record_gate: shadow|resample`
+  (absent = today; shadow adds exactly `record_margin_mm` + `record_gate_agrees`; resample replaces an
+  outside-record candidate before evaluation, seed never replaced, strict path untouched);
+  `space_card.recommend()` `data_agrees` (no `link` action when the data disagrees);
+  `--mode finalist` wired in `cli.py` (run/search/export-step) and GUI `SEARCH_MODES`, with
+  `screen`/`verify`/`final` specs pinned unchanged.
+- Evidence `scratch/fable_architecture/EVIDENCE_VERIFY_2026-11-17.md`: U3 CPU 8/8 variants mesh on both
+  candidate hosts; record shadow over the 22 most recent lane runs (2055 designs) = **0
+  `record_inside_but_refused`**, 28 `record_outside_but_ok`, 429 `record_failed` (all `route: null`,
+  concentrated in rosse_rect r120/r50 and the two klangfilm_lame runs).
+- Stage 5 cards: 29 cards + `shared_map.md` + `summary.json` in
+  `scratch/fable_architecture/space_cards/`. 22 configs could not be built: 12
+  `examples/typologies/walls_relieved/*/*_w1.yaml` have `brief_file: '../../briefs/...'` one `../`
+  short (12 queued live-night jobs - flagged, not edited); 10 generator-route lanes are refused by
+  `DesignSpace.from_config` (`unknown rows type` for rosse_rect/rolled_rect/rolled_rect_pucker/
+  crowe_panel/klangfilm_lame) although the mesher registry accepts them (pre-existing).
+- Committed the four reports that existed only on this machine: `A4_GRID_INDEPENDENT_SCORE.md`,
+  `A5_SOLVER_CALL_TIMING.md`, `A9_CORRIDOR_VS_TERM_SET.md`, `X1_ADDENDUM_KLANGFILM_PROVENANCE.md`
+  and the `.a4/` + `.a9/` script/output folders (force-added past `/scratch/`).
+
 ## 2026-11-17 — Acoustic-truth master plan: WP0–WP3 implemented (CPU/read-only, no GPU)
 
 - Owner master plan saved at `docs/research/HORNFAB_ACOUSTIC_TRUTH_MASTER_PLAN_2026-11-17.md` (+ INDEX /
