@@ -1,0 +1,1670 @@
+{
+  "cd_diagnostic": {
+    "J_CD_cached": 17.589146092718465,
+    "WARNING": "DIAGNOSTIC, NOT the v7 objective. The cached run used di_slope_target=+5 dB/dec with no DI weight; do not compare J across objectives.",
+    "band_hz_used": [
+      1370.35,
+      4832.36
+    ],
+    "cached_metrics_path": "runs\\20261116T205942Z-screen-8b22b5\\designs\\786caa6b08d7\\metrics.json",
+    "di_max_db": 13.353718762974939,
+    "di_mean_db": 11.643011832431883,
+    "di_min_db": 8.81757092983199,
+    "di_range_db": 4.536147833142948,
+    "di_source": "balloon",
+    "f_break_observations": {
+      "f_break_h_hz": 586.4925768850987,
+      "f_break_v_hz": 1948.0509796198112,
+      "f_load_hz": 643.33,
+      "note": "f_break_h/f_break_v are cached reductions of the beamwidth curves; the J_CD_cached band starts at 1200 Hz, above both break points, so the whole diagnostic band is in the post-break narrowing region"
+    },
+    "mean_e_h_sq": 2.4416527134453085,
+    "mean_e_v_sq": 12.987199371955422,
+    "n_bands": 9,
+    "per_band": [
+      {
+        "bw_h_deg": 84.48678772477291,
+        "bw_v_deg": 110.45326563447188,
+        "di_db": 8.81757092983199,
+        "e_h": 0.5608484655966137,
+        "e_v": 7.5566582043089845,
+        "freq_hz": 1370.35
+      },
+      {
+        "bw_h_deg": 80.07892855078566,
+        "bw_v_deg": 94.17335543170083,
+        "di_db": 9.741574483031952,
+        "e_h": 0.009866068848207732,
+        "e_v": 5.521669428962603,
+        "freq_hz": 1763.18
+      },
+      {
+        "bw_h_deg": 72.63793426889866,
+        "bw_v_deg": 78.70094855140222,
+        "di_db": 10.893939095141768,
+        "e_h": -0.9202582163876674,
+        "e_v": 3.5876185689252775,
+        "freq_hz": 2268.63
+      },
+      {
+        "bw_h_deg": 67.89086371018568,
+        "bw_v_deg": 72.41521384194805,
+        "di_db": 11.529508059299774,
+        "e_h": -1.5136420362267895,
+        "e_v": 2.8019017302435056,
+        "freq_hz": 2573.0
+      },
+      {
+        "bw_h_deg": 64.71807592490953,
+        "bw_v_deg": 67.02584715624056,
+        "di_db": 12.05744503260092,
+        "e_h": -1.910240509386309,
+        "e_v": 2.12823089453007,
+        "freq_hz": 2918.96
+      },
+      {
+        "bw_h_deg": 62.80405570775666,
+        "bw_v_deg": 62.59519081687708,
+        "di_db": 12.496223904079976,
+        "e_h": -2.1494930365304175,
+        "e_v": 1.5743988521096348,
+        "freq_hz": 3311.0
+      },
+      {
+        "bw_h_deg": 63.55772307195246,
+        "bw_v_deg": 58.6467337977232,
+        "di_db": 12.816463722951914,
+        "e_h": -2.0552846160059426,
+        "e_v": 1.0808417247154,
+        "freq_hz": 3755.72
+      },
+      {
+        "bw_h_deg": 65.66439429692238,
+        "bw_v_deg": 54.75931207780825,
+        "di_db": 13.080662501973721,
+        "e_h": -1.7919507128847023,
+        "e_v": 0.5949140097260308,
+        "freq_hz": 4260.0
+      },
+      {
+        "bw_h_deg": 66.57139208125582,
+        "bw_v_deg": 51.61943293302539,
+        "di_db": 13.353718762974939,
+        "e_h": -1.6785759898430221,
+        "e_v": 0.2024291166281733,
+        "freq_hz": 4832.36
+      }
+    ],
+    "policy": {
+      "J": "mean(e_h^2) + mean(e_v^2) + Var(DI)",
+      "band_hz": [
+        1200.0,
+        5600.0
+      ],
+      "band_inclusive": true,
+      "e_h": "(BW_H_deg - 80) / 8",
+      "e_v": "(BW_V_deg - 50) / 8",
+      "kind": "DIAGNOSTIC (NOT the v7 objective)",
+      "name": "J_CD_cached",
+      "objective_note": "cached run config used di_slope_target = +5 dB/dec with no DI weight; J values are NOT comparable across objectives and are not a score",
+      "source": "runs/20261116T205942Z-screen-8b22b5/designs/786caa6b08d7/metrics.json",
+      "target_h_deg": 80.0,
+      "target_v_deg": 50.0,
+      "tau_deg": 8.0,
+      "tolerance_deg": 8.0,
+      "variance": "population variance (ddof=0) over the selected bands"
+    },
+    "var_di": 2.160294007317735
+  },
+  "envelope_mm": {
+    "depth": 480.0,
+    "height": 480.0,
+    "width": 600.0
+  },
+  "environment": {
+    "numpy": "2.5.4",
+    "python": "3.12.10",
+    "pyyaml": "6.0.3"
+  },
+  "input_sha256": {
+    "examples\\typologies\\klangfilm_hv_2026-11-16\\configs\\a0.yaml": "670aa89515987e8dbf2b0bd6cd8a94ac4bc06a9da5f358769c7017d82601352b",
+    "examples\\typologies\\klangfilm_hv_2026-11-16\\configs\\a1.yaml": "c9a6009bf714805a6ece090077066d854a6b09a14608e4e3e9823eb1466d455e",
+    "examples\\typologies\\klangfilm_hv_2026-11-16\\configs\\a2.yaml": "fc256f0976ab1c5c71dc02c1d10074e2944e324a265a338a08158e37527fd178",
+    "examples\\typologies\\klangfilm_hv_2026-11-16\\configs\\a3.yaml": "d736bf4d557a623d05395c8413b7b37aa94b5df61d34ed0bdc541ba4c5d3b53b",
+    "examples\\typologies\\klangfilm_hv_2026-11-16\\configs\\a3b.yaml": "dec49342a09deb78de21e627644fe26fd50c6d9a07ceb9c5c438afa452b4ef71",
+    "examples\\typologies\\klangfilm_hv_2026-11-16\\configs\\a4.yaml": "7b4130aa03bc0fe37161901971af9d161941d491122f307805c159790891f412",
+    "examples\\typologies\\klangfilm_hv_2026-11-16\\configs\\a4b.yaml": "37ef5a9d730ae95b3a2ab54992ea8957ad7a189ed43bc0441624b62406cb58bd",
+    "examples\\typologies\\klangfilm_hv_2026-11-16\\configs\\a5.yaml": "c80ee224d72e10920fbdab6893c422d3010348e5aa75668ed0994d19ff69ef43",
+    "runs\\20261116T205942Z-screen-8b22b5\\designs\\786caa6b08d7\\metrics.json": "d1407c9a4ed7c66ec8c203861e935e6ce399753f382bf2c7fe741fac9d003d68",
+    "tools\\geometry\\klangfilm_lame.py": "728615be2a9f4070010f4cd4df448fc0ed322eaf74830fe3368083f0cd6d087e",
+    "tools\\geometry\\klangfilm_lame_hv.py": "cbb23cc02d9b5d135e1ec46b4d0f3fdac68f8120c313b1a8ffe8e360672bea02",
+    "tools\\geometry\\lame_cap.py": "9f0f06091d34fdb3b3499a1852432b74b3305aa6242c645c5452e7550484c9ae"
+  },
+  "kind": "klangfilm_lame_hv_cd",
+  "schema": "klangfilm-lame-hv-v1",
+  "scope": "Phase A Klangfilm-Lame H/V entrance experiment: sampled inner quarter surfaces only. No meshing, BEM, GPU, shell, curvature, intersection, acoustic or readiness claim.",
+  "seed_order": [
+    "a0",
+    "a1",
+    "a2",
+    "a3",
+    "a3b",
+    "a4",
+    "a4b",
+    "a5"
+  ],
+  "seed_rows": [
+    {
+      "D": 233.67867209041165,
+      "H": 260.7347272164977,
+      "W": 541.2721522018749,
+      "delta_vs_a0_h": 0.0,
+      "delta_vs_a0_v": 0.0,
+      "envelope_outer": {
+        "depth": 236.67867209041165,
+        "height": 266.7347272164977,
+        "width": 547.2721522018749
+      },
+      "envelope_within": true,
+      "p_02": 2.644600385496789,
+      "p_05": 4.9333035600166015,
+      "p_08": 5.0063549541,
+      "p_throat": 2.0,
+      "q0": 1.0,
+      "q15": 1.015139959802393,
+      "q5": 1.0007201368325807,
+      "rejection_reason": null,
+      "seed": "a0",
+      "status": "accepted",
+      "target_h": null,
+      "target_v": null,
+      "theta_mesh_h": 9.77032751392544,
+      "theta_mesh_v": 9.408156242540654,
+      "theta_model_h": 9.463126942517452,
+      "theta_model_v": 9.437828485828561
+    },
+    {
+      "D": 233.680039050845,
+      "H": 260.7353326764391,
+      "W": 541.273409106197,
+      "delta_vs_a0_h": 0.12164709317591615,
+      "delta_vs_a0_v": 0.992997105638878,
+      "envelope_outer": {
+        "depth": 236.680039050845,
+        "height": 266.7353326764391,
+        "width": 547.273409106197
+      },
+      "envelope_within": true,
+      "p_02": 2.644600385496789,
+      "p_05": 4.9333035600166015,
+      "p_08": 5.0063549541,
+      "p_throat": 2.0,
+      "q0": 1.0,
+      "q15": 1.0609974108365634,
+      "q5": 1.0216556236647742,
+      "rejection_reason": null,
+      "seed": "a1",
+      "status": "accepted",
+      "target_h": 10.0,
+      "target_v": 5.0,
+      "theta_mesh_h": 10.204401774018484,
+      "theta_mesh_v": 5.832817627077878,
+      "theta_model_h": 10.0,
+      "theta_model_v": 5.0
+    },
+    {
+      "D": 233.67860237993776,
+      "H": 260.73469634003743,
+      "W": 541.2720881038997,
+      "delta_vs_a0_h": 1.0422850686479102,
+      "delta_vs_a0_v": 0.992997105638878,
+      "envelope_outer": {
+        "depth": 236.67860237993776,
+        "height": 266.73469634003743,
+        "width": 547.2720881038997
+      },
+      "envelope_within": true,
+      "p_02": 2.644600385496789,
+      "p_05": 4.9333035600166015,
+      "p_08": 5.0063549541,
+      "p_throat": 2.0,
+      "q0": 1.0,
+      "q15": 1.0983692157511442,
+      "q5": 1.0389361576958234,
+      "rejection_reason": null,
+      "seed": "a2",
+      "status": "accepted",
+      "target_h": 14.0,
+      "target_v": 5.0,
+      "theta_mesh_h": 13.437937002937272,
+      "theta_mesh_v": 5.830524126385487,
+      "theta_model_h": 14.0,
+      "theta_model_v": 5.0
+    },
+    {
+      "reason": "V forward radius shrinks below the throat radius",
+      "seed": "a3",
+      "status": "rejected"
+    },
+    {
+      "D": 233.66670144264555,
+      "H": 260.72942512616726,
+      "W": 541.2611453295839,
+      "delta_vs_a0_h": 17.916743496372007,
+      "delta_vs_a0_v": 0.8894263019040451,
+      "envelope_outer": {
+        "depth": 236.66670144264555,
+        "height": 266.72942512616726,
+        "width": 547.2611453295839
+      },
+      "envelope_within": true,
+      "p_02": 2.644600385496789,
+      "p_05": 4.9333035600166015,
+      "p_08": 5.0063549541,
+      "p_throat": 2.0,
+      "q0": 1.0,
+      "q15": 1.0972158833674617,
+      "q5": 1.016353676128024,
+      "rejection_reason": null,
+      "seed": "a3b",
+      "status": "accepted",
+      "target_h": 9.0,
+      "target_v": 6.0,
+      "theta_mesh_h": 10.771348267459894,
+      "theta_mesh_v": 6.553181842430409,
+      "theta_model_h": 9.0,
+      "theta_model_v": 6.000000000000001
+    },
+    {
+      "reason": "V forward radius shrinks below the throat radius",
+      "seed": "a4",
+      "status": "rejected"
+    },
+    {
+      "D": 233.67076201121472,
+      "H": 260.73122365050506,
+      "W": 541.2648789754603,
+      "delta_vs_a0_h": 7.9376349729946725,
+      "delta_vs_a0_v": 1.214474929011491,
+      "envelope_outer": {
+        "depth": 236.67076201121472,
+        "height": 266.73122365050506,
+        "width": 547.2648789754603
+      },
+      "envelope_within": true,
+      "p_02": 2.644600385496789,
+      "p_05": 4.9333035600166015,
+      "p_08": 5.0063549541,
+      "p_throat": 2.0,
+      "q0": 1.0,
+      "q15": 1.0961985074385834,
+      "q5": 1.0236394390102936,
+      "rejection_reason": null,
+      "seed": "a4b",
+      "status": "accepted",
+      "target_h": 9.0,
+      "target_v": 4.0,
+      "theta_mesh_h": 10.321325627385882,
+      "theta_mesh_v": 5.028237507539349,
+      "theta_model_h": 9.0,
+      "theta_model_v": 4.0
+    },
+    {
+      "D": 256.0270620369418,
+      "H": 377.30739655805615,
+      "W": 622.5572043207926,
+      "delta_vs_a0_h": 100.59277839163802,
+      "delta_vs_a0_v": 37.64640553215297,
+      "envelope_outer": {
+        "depth": 259.0270620369418,
+        "height": 383.30739655805615,
+        "width": 628.5572043207926
+      },
+      "envelope_within": false,
+      "p_02": 2.483134534726444,
+      "p_05": 3.981239153126705,
+      "p_08": 4.0,
+      "p_throat": 2.0,
+      "q0": 1.0,
+      "q15": 1.066082394791088,
+      "q5": 1.0226032564853957,
+      "rejection_reason": null,
+      "seed": "a5",
+      "status": "accepted",
+      "target_h": 11.0,
+      "target_v": 6.0,
+      "theta_mesh_h": 11.214828647134949,
+      "theta_mesh_v": 6.55804094861362,
+      "theta_model_h": 11.0,
+      "theta_model_v": 6.000000000000001
+    }
+  ],
+  "seeds": [
+    {
+      "brief_path": "examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7_smooth.yaml",
+      "config_path": "examples\\typologies\\klangfilm_hv_2026-11-16\\configs\\a0.yaml",
+      "config_sha256": "670aa89515987e8dbf2b0bd6cd8a94ac4bc06a9da5f358769c7017d82601352b",
+      "convergence": null,
+      "deviation_vs_a0": {
+        "abscissa": "A0 monotonic forward z stations, linear interpolation",
+        "max_abs_a_minus_a0_mm": 0.0,
+        "max_abs_b_minus_b0_mm": 0.0,
+        "note": "a5 also changes parent genes, so its deviation is not a single-knob measure; a1..a4b share the parent genes with A0"
+      },
+      "diagnostics": {
+        "area_mode": "curved_cap_ratio_locked",
+        "axial_turns_whole_profile": 1,
+        "cap_area_resid_max": 4.607536574496862e-11,
+        "core_join_mm": null,
+        "core_mode": "legacy",
+        "delta_h_max_mm": 0.0,
+        "delta_v_max_mm": 0.0,
+        "depth_mm": 233.67867209041165,
+        "exit_angle_deg_is_assumption": true,
+        "finite": true,
+        "forward_z_strictly_increasing": true,
+        "lame_p_at_throat": 2.0,
+        "lame_p_by_forward_fraction": {
+          "0.0": 2.0,
+          "0.2": 2.644600385496789,
+          "0.5": 4.9333035600166015,
+          "0.8": 5.0063549541
+        },
+        "max_height_mm": 260.7347272164977,
+        "max_width_mm": 541.2721522018749,
+        "mesh_halfangle_h_deg": 9.77032751392544,
+        "mesh_halfangle_v_deg": 9.408156242540654,
+        "min_radius_ratio_to_throat": 1.0748921337378752,
+        "q_at_0": 1.0,
+        "q_at_15mm": 1.015139959802393,
+        "q_at_5mm": 1.0007201368325807,
+        "raw_parent_halfangle_deg": 9.366904409320387,
+        "schema": "klangfilm-lame-hv-v1",
+        "semi_axes_by_z": {
+          "0.5": {
+            "a_mm": 18.08334055105662,
+            "b_mm": 18.083113663476272
+          },
+          "1": {
+            "a_mm": 18.166681102113238,
+            "b_mm": 18.16622732695254
+          },
+          "10": {
+            "a_mm": 19.740958056416453,
+            "b_mm": 19.64409378166067
+          },
+          "15": {
+            "a_mm": 20.694057525208077,
+            "b_mm": 20.385423039830272
+          },
+          "20": {
+            "a_mm": 21.728064678040095,
+            "b_mm": 21.01817384191355
+          },
+          "5": {
+            "a_mm": 18.846678146607278,
+            "b_mm": 18.833115726300516
+          }
+        },
+        "slope_h_deg_by_z": {
+          "0.5": 9.408094784937083,
+          "1": 9.455767020853964,
+          "10": 10.453171377712474,
+          "15": 11.202427447364732,
+          "20": 12.194567461614417,
+          "5": 9.856093879090716
+        },
+        "slope_v_deg_by_z": {
+          "0.5": 9.422943918221334,
+          "1": 9.435837644111775,
+          "10": 8.877004873178885,
+          "15": 7.863251295226542,
+          "20": 6.574211919573233,
+          "5": 9.4180851321863
+        },
+        "source_angle_is_assumption": true,
+        "theta_base_h_deg": 9.463126942517452,
+        "theta_base_v_deg": 9.437828485828561,
+        "theta_model_h_deg": 9.463126942517452,
+        "theta_model_v_deg": 9.437828485828561,
+        "throat_radius_mm": 18.0,
+        "throat_radius_spread_mm": 3.552713678800501e-15,
+        "wall_halfangle_h_deg": 9.463126942517452,
+        "wall_halfangle_h_target_deg": null,
+        "wall_halfangle_v_deg": 9.437828485828561,
+        "wall_halfangle_v_target_deg": null,
+        "z_forward_mm": 183.96239614705803
+      },
+      "envelope": {
+        "exceeded": [],
+        "inner_sampled_mm": {
+          "depth": 233.67867209041165,
+          "height": 260.7347272164977,
+          "width": 541.2721522018749
+        },
+        "limits_mm": {
+          "depth": 480.0,
+          "height": 480.0,
+          "width": 600.0
+        },
+        "method": "sampled_conservative_estimate",
+        "note": "inner sampled quarter-grid reflected on symmetry planes + wall thickness; not a mesh certificate",
+        "outer_estimate_mm": {
+          "depth": 236.67867209041165,
+          "height": 266.7347272164977,
+          "width": 547.2721522018749
+        },
+        "within": true
+      },
+      "grid_sha256": "7e80214c3b280209a7b99769de086f621796282f555b69efa6bd16436a97cbb6",
+      "grid_shape": [
+        19,
+        65,
+        3
+      ],
+      "legacy_control": {
+        "bit_exact": true,
+        "hv_grid_sha256": "7e80214c3b280209a7b99769de086f621796282f555b69efa6bd16436a97cbb6",
+        "legacy_grid_sha256": "7e80214c3b280209a7b99769de086f621796282f555b69efa6bd16436a97cbb6",
+        "note": "cd_core_blend = 0 must reproduce klangfilm_lame-v1 bit-for-bit"
+      },
+      "meta": {
+        "area_mode": "curved_cap_ratio_locked",
+        "construction_label": "klangfilm-lame-hv-v1: parent klangfilm-lame-v1 forward core + independent H/V entrance slopes (Phase A; no beak, no Phase B CD core)",
+        "core_info": {
+          "core_blend": 0.0,
+          "core_join_mm": null,
+          "delta_h_max_mm": 0.0,
+          "delta_v_max_mm": 0.0,
+          "legacy": true,
+          "theta_base_h_deg": 9.463126942517452,
+          "theta_base_v_deg": 9.437828485828561,
+          "z_forward_mm": null
+        },
+        "core_mode": "legacy",
+        "kind": "klangfilm_lame_hv_cd",
+        "r0_mm": 220.81634846231228,
+        "schema": "klangfilm-lame-hv-v1"
+      },
+      "rejection_reason": null,
+      "seed": "a0",
+      "shape": {
+        "aspect": 2.0759495982,
+        "cd_core_blend": 0.0,
+        "core_join_fraction": 0.65,
+        "end_frac": 1.7953432921,
+        "entry_half_angle_deg": 2.0,
+        "fc_hz": 494.4393461867,
+        "h_mid_gain_mm": 0.0,
+        "lame_p": 5.0063549541,
+        "morph_frac": 0.3,
+        "n_phi": 19,
+        "n_s": 64,
+        "rim_sweep_ratio": 0.004898754,
+        "source_blend_ratio": 0.0,
+        "theta_h0_deg": 9.4,
+        "theta_v0_deg": 9.4,
+        "v_mid_gain_mm": 0.0,
+        "wall_thickness_mm": 3.0
+      },
+      "status": "accepted"
+    },
+    {
+      "brief_path": "examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7_smooth.yaml",
+      "config_path": "examples\\typologies\\klangfilm_hv_2026-11-16\\configs\\a1.yaml",
+      "config_sha256": "c9a6009bf714805a6ece090077066d854a6b09a14608e4e3e9823eb1466d455e",
+      "convergence": {
+        "base": {
+          "max_height_mm": 260.7353326764391,
+          "max_width_mm": 541.273409106197,
+          "mesh_halfangle_h_deg": 10.204401774018484,
+          "mesh_halfangle_v_deg": 5.832817627077878,
+          "theta_model_h_deg": 10.0,
+          "theta_model_v_deg": 5.0,
+          "throat_radius_spread_mm": 3.552713678800501e-15
+        },
+        "base_n_phi": 19,
+        "base_n_s": 64,
+        "delta_n_phi_37_vs_base": {
+          "max_height_mm": 0.0,
+          "max_width_mm": 0.0,
+          "mesh_minus_model_h_deg": 0.2044017740184838,
+          "mesh_minus_model_v_deg": 0.832817627077878,
+          "throat_radius_spread_mm": 3.552713678800501e-15
+        },
+        "delta_n_s_128_vs_base": {
+          "max_height_mm": 0.034779853894349344,
+          "max_width_mm": 0.07220122371734305,
+          "mesh_minus_model_h_deg": 0.04244833086428201,
+          "mesh_minus_model_v_deg": 0.4807571226859526,
+          "throat_radius_spread_mm": 0.0
+        },
+        "mesh_chord_abs_error_deg": {
+          "n_s_128_h": 0.04244833086428201,
+          "n_s_128_v": 0.4807571226859526,
+          "n_s_64_h": 0.2044017740184838,
+          "n_s_64_v": 0.832817627077878
+        },
+        "n_phi_37": {
+          "max_height_mm": 260.7353326764391,
+          "max_width_mm": 541.273409106197,
+          "mesh_halfangle_h_deg": 10.204401774018484,
+          "mesh_halfangle_v_deg": 5.832817627077878,
+          "theta_model_h_deg": 10.0,
+          "theta_model_v_deg": 5.0,
+          "throat_radius_spread_mm": 7.105427357601002e-15
+        },
+        "n_s_128": {
+          "max_height_mm": 260.77011253033345,
+          "max_width_mm": 541.3456103299144,
+          "mesh_halfangle_h_deg": 10.042448330864282,
+          "mesh_halfangle_v_deg": 5.480757122685953,
+          "theta_model_h_deg": 10.0,
+          "theta_model_v_deg": 5.0,
+          "throat_radius_spread_mm": 3.552713678800501e-15
+        },
+        "trend": "mesh H chord moves toward the model angle with n_s 64 -> 128",
+        "trend_toward_model_h": true,
+        "trend_toward_model_v": true,
+        "trend_v": "mesh V chord moves toward the model angle with n_s 64 -> 128"
+      },
+      "deviation_vs_a0": {
+        "abscissa": "A0 monotonic forward z stations, linear interpolation",
+        "max_abs_a_minus_a0_mm": 0.12164709317591615,
+        "max_abs_b_minus_b0_mm": 0.992997105638878,
+        "note": "a5 also changes parent genes, so its deviation is not a single-knob measure; a1..a4b share the parent genes with A0"
+      },
+      "diagnostics": {
+        "area_mode": "deformed_after_cap_lock",
+        "axial_turns_whole_profile": 1,
+        "cap_area_resid_max": 4.607536574496862e-11,
+        "core_join_mm": 119.57555749558772,
+        "core_mode": "hv_throat_phase_a",
+        "delta_h_max_mm": 0.12164709317591713,
+        "delta_v_max_mm": 0.9929971056388781,
+        "depth_mm": 233.680039050845,
+        "exit_angle_deg_is_assumption": true,
+        "finite": true,
+        "forward_z_strictly_increasing": true,
+        "lame_p_at_throat": 2.0,
+        "lame_p_by_forward_fraction": {
+          "0.0": 2.0,
+          "0.2": 2.644600385496789,
+          "0.5": 4.9333035600166015,
+          "0.8": 5.0063549541
+        },
+        "max_height_mm": 260.7353326764391,
+        "max_width_mm": 541.273409106197,
+        "mesh_halfangle_h_deg": 10.204401774018484,
+        "mesh_halfangle_v_deg": 5.832817627077878,
+        "min_radius_ratio_to_throat": 1.0463727678770176,
+        "q_at_0": 1.0,
+        "q_at_15mm": 1.0609974108365634,
+        "q_at_5mm": 1.0216556236647742,
+        "raw_parent_halfangle_deg": 9.366904409320387,
+        "schema": "klangfilm-lame-hv-v1",
+        "semi_axes_by_z": {
+          "0.5": {
+            "a_mm": 18.087907472139392,
+            "b_mm": 18.04583419136989
+          },
+          "1": {
+            "a_mm": 18.17581494427878,
+            "b_mm": 18.091668382739787
+          },
+          "10": {
+            "a_mm": 19.81498783018056,
+            "b_mm": 19.039793677485125
+          },
+          "15": {
+            "a_mm": 20.79082162304231,
+            "b_mm": 19.595544165041265
+          },
+          "20": {
+            "a_mm": 21.839339550176412,
+            "b_mm": 20.109844484615152
+          },
+          "5": {
+            "a_mm": 18.888893652855728,
+            "b_mm": 18.488513365295734
+          }
+        },
+        "slope_h_deg_by_z": {
+          "0.5": 9.93138276129222,
+          "1": 9.966173259138126,
+          "10": 10.752337864669617,
+          "15": 11.405398392336322,
+          "20": 12.316341618347437,
+          "5": 10.266553938593011
+        },
+        "slope_v_deg_by_z": {
+          "0.5": 5.099706587254114,
+          "1": 5.219136375354733,
+          "10": 6.394384018310086,
+          "15": 6.166037104325195,
+          "20": 5.544901877323147,
+          "5": 6.0254694403832465
+        },
+        "source_angle_is_assumption": true,
+        "theta_base_h_deg": 9.463126942517452,
+        "theta_base_v_deg": 9.437828485828561,
+        "theta_model_h_deg": 10.0,
+        "theta_model_v_deg": 5.0,
+        "throat_radius_mm": 18.0,
+        "throat_radius_spread_mm": 3.552713678800501e-15,
+        "wall_halfangle_h_deg": 9.971544618976218,
+        "wall_halfangle_h_target_deg": 10.0,
+        "wall_halfangle_v_deg": 5.237573571236222,
+        "wall_halfangle_v_target_deg": 5.0,
+        "z_forward_mm": 183.96239614705803
+      },
+      "envelope": {
+        "exceeded": [],
+        "inner_sampled_mm": {
+          "depth": 233.680039050845,
+          "height": 260.7353326764391,
+          "width": 541.273409106197
+        },
+        "limits_mm": {
+          "depth": 480.0,
+          "height": 480.0,
+          "width": 600.0
+        },
+        "method": "sampled_conservative_estimate",
+        "note": "inner sampled quarter-grid reflected on symmetry planes + wall thickness; not a mesh certificate",
+        "outer_estimate_mm": {
+          "depth": 236.680039050845,
+          "height": 266.7353326764391,
+          "width": 547.273409106197
+        },
+        "within": true
+      },
+      "grid_sha256": "d3be6ba0471e27f45a2cbbdb5927ba815c02ddb720a9256a6424a998a45c5f54",
+      "grid_shape": [
+        19,
+        65,
+        3
+      ],
+      "meta": {
+        "area_mode": "deformed_after_cap_lock",
+        "construction_label": "klangfilm-lame-hv-v1: parent klangfilm-lame-v1 forward core + independent H/V entrance slopes (Phase A; no beak, no Phase B CD core)",
+        "core_info": {
+          "core_blend": 1.0,
+          "core_join_mm": 119.57555749558772,
+          "delta_h_max_mm": 0.12164709317591713,
+          "delta_v_max_mm": 0.9929971056388781,
+          "legacy": false,
+          "rollback_stations": 186,
+          "theta_base_h_deg": 9.463126942517452,
+          "theta_base_v_deg": 9.437828485828561,
+          "turn_index": 131,
+          "z_forward_mm": 183.96239614705803
+        },
+        "core_mode": "hv_throat_phase_a",
+        "kind": "klangfilm_lame_hv_cd",
+        "r0_mm": 220.81634846231228,
+        "schema": "klangfilm-lame-hv-v1"
+      },
+      "rejection_reason": null,
+      "seed": "a1",
+      "shape": {
+        "aspect": 2.0759495982,
+        "cd_core_blend": 1.0,
+        "core_join_fraction": 0.65,
+        "end_frac": 1.7953432921,
+        "entry_half_angle_deg": 2.0,
+        "fc_hz": 494.4393461867,
+        "h_mid_gain_mm": 0.0,
+        "lame_p": 5.0063549541,
+        "morph_frac": 0.3,
+        "n_phi": 19,
+        "n_s": 64,
+        "rim_sweep_ratio": 0.004898754,
+        "source_blend_ratio": 0.0,
+        "theta_h0_deg": 10.0,
+        "theta_v0_deg": 5.0,
+        "v_mid_gain_mm": 0.0,
+        "wall_thickness_mm": 3.0
+      },
+      "status": "accepted"
+    },
+    {
+      "brief_path": "examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7_smooth.yaml",
+      "config_path": "examples\\typologies\\klangfilm_hv_2026-11-16\\configs\\a2.yaml",
+      "config_sha256": "fc256f0976ab1c5c71dc02c1d10074e2944e324a265a338a08158e37527fd178",
+      "convergence": {
+        "base": {
+          "max_height_mm": 260.73469634003743,
+          "max_width_mm": 541.2720881038997,
+          "mesh_halfangle_h_deg": 13.437937002937272,
+          "mesh_halfangle_v_deg": 5.830524126385487,
+          "theta_model_h_deg": 14.0,
+          "theta_model_v_deg": 5.0,
+          "throat_radius_spread_mm": 3.552713678800501e-15
+        },
+        "base_n_phi": 19,
+        "base_n_s": 64,
+        "delta_n_phi_37_vs_base": {
+          "max_height_mm": 0.0,
+          "max_width_mm": 0.0,
+          "mesh_minus_model_h_deg": -0.5620629970627284,
+          "mesh_minus_model_v_deg": 0.8305241263854866,
+          "throat_radius_spread_mm": 3.552713678800501e-15
+        },
+        "delta_n_s_128_vs_base": {
+          "max_height_mm": 0.03563131905843875,
+          "max_width_mm": 0.07396882248269776,
+          "mesh_minus_model_h_deg": -0.3582497586845843,
+          "mesh_minus_model_v_deg": 0.4793947707616599,
+          "throat_radius_spread_mm": 0.0
+        },
+        "mesh_chord_abs_error_deg": {
+          "n_s_128_h": 0.3582497586845843,
+          "n_s_128_v": 0.4793947707616599,
+          "n_s_64_h": 0.5620629970627284,
+          "n_s_64_v": 0.8305241263854866
+        },
+        "n_phi_37": {
+          "max_height_mm": 260.73469634003743,
+          "max_width_mm": 541.2720881038997,
+          "mesh_halfangle_h_deg": 13.437937002937272,
+          "mesh_halfangle_v_deg": 5.830524126385487,
+          "theta_model_h_deg": 14.0,
+          "theta_model_v_deg": 5.0,
+          "throat_radius_spread_mm": 7.105427357601002e-15
+        },
+        "n_s_128": {
+          "max_height_mm": 260.77032765909587,
+          "max_width_mm": 541.3460569263824,
+          "mesh_halfangle_h_deg": 13.641750241315416,
+          "mesh_halfangle_v_deg": 5.47939477076166,
+          "theta_model_h_deg": 14.0,
+          "theta_model_v_deg": 5.0,
+          "throat_radius_spread_mm": 3.552713678800501e-15
+        },
+        "trend": "mesh H chord moves toward the model angle with n_s 64 -> 128",
+        "trend_toward_model_h": true,
+        "trend_toward_model_v": true,
+        "trend_v": "mesh V chord moves toward the model angle with n_s 64 -> 128"
+      },
+      "deviation_vs_a0": {
+        "abscissa": "A0 monotonic forward z stations, linear interpolation",
+        "max_abs_a_minus_a0_mm": 1.0422850686479102,
+        "max_abs_b_minus_b0_mm": 0.992997105638878,
+        "note": "a5 also changes parent genes, so its deviation is not a single-knob measure; a1..a4b share the parent genes with A0"
+      },
+      "diagnostics": {
+        "area_mode": "deformed_after_cap_lock",
+        "axial_turns_whole_profile": 1,
+        "cap_area_resid_max": 4.607536574496862e-11,
+        "core_join_mm": 119.57555749558772,
+        "core_mode": "hv_throat_phase_a",
+        "delta_h_max_mm": 1.0422850686479095,
+        "delta_v_max_mm": 0.9929971056388781,
+        "depth_mm": 233.67860237993776,
+        "exit_angle_deg_is_assumption": true,
+        "finite": true,
+        "forward_z_strictly_increasing": true,
+        "lame_p_at_throat": 2.0,
+        "lame_p_by_forward_fraction": {
+          "0.0": 2.0,
+          "0.2": 2.644600385496789,
+          "0.5": 4.9333035600166015,
+          "0.8": 5.0063549541
+        },
+        "max_height_mm": 260.73469634003743,
+        "max_width_mm": 541.2720881038997,
+        "mesh_halfangle_h_deg": 13.437937002937272,
+        "mesh_halfangle_v_deg": 5.830524126385487,
+        "min_radius_ratio_to_throat": 1.0461422254353485,
+        "q_at_0": 1.0,
+        "q_at_15mm": 1.0983692157511442,
+        "q_at_5mm": 1.0389361576958234,
+        "raw_parent_halfangle_deg": 9.366904409320387,
+        "schema": "klangfilm-lame-hv-v1",
+        "semi_axes_by_z": {
+          "0.5": {
+            "a_mm": 18.122470410472022,
+            "b_mm": 18.04583419136989
+          },
+          "1": {
+            "a_mm": 18.24494082094405,
+            "b_mm": 18.091668382739787
+          },
+          "10": {
+            "a_mm": 20.375252931988435,
+            "b_mm": 19.039793677485125
+          },
+          "15": {
+            "a_mm": 21.523142476773284,
+            "b_mm": 19.595544165041265
+          },
+          "20": {
+            "a_mm": 22.68147946762053,
+            "b_mm": 20.109844484615152
+          },
+          "5": {
+            "a_mm": 19.208385037248227,
+            "b_mm": 18.488513365295734
+          }
+        },
+        "slope_h_deg_by_z": {
+          "0.5": 13.83222113527827,
+          "1": 13.772349487253981,
+          "10": 12.996260400841917,
+          "15": 12.931800413295077,
+          "20": 13.234214367922094,
+          "5": 13.335914639596222
+        },
+        "slope_v_deg_by_z": {
+          "0.5": 5.099706587254114,
+          "1": 5.219136375354733,
+          "10": 6.394384018310086,
+          "15": 6.166037104325195,
+          "20": 5.544901877323147,
+          "5": 6.0254694403832465
+        },
+        "source_angle_is_assumption": true,
+        "theta_base_h_deg": 9.463126942517452,
+        "theta_base_v_deg": 9.437828485828561,
+        "theta_model_h_deg": 14.0,
+        "theta_model_v_deg": 5.0,
+        "throat_radius_mm": 18.0,
+        "throat_radius_spread_mm": 3.552713678800501e-15,
+        "wall_halfangle_h_deg": 13.763101934006263,
+        "wall_halfangle_h_target_deg": 14.0,
+        "wall_halfangle_v_deg": 5.237573571236222,
+        "wall_halfangle_v_target_deg": 5.0,
+        "z_forward_mm": 183.96239614705803
+      },
+      "envelope": {
+        "exceeded": [],
+        "inner_sampled_mm": {
+          "depth": 233.67860237993776,
+          "height": 260.73469634003743,
+          "width": 541.2720881038997
+        },
+        "limits_mm": {
+          "depth": 480.0,
+          "height": 480.0,
+          "width": 600.0
+        },
+        "method": "sampled_conservative_estimate",
+        "note": "inner sampled quarter-grid reflected on symmetry planes + wall thickness; not a mesh certificate",
+        "outer_estimate_mm": {
+          "depth": 236.67860237993776,
+          "height": 266.73469634003743,
+          "width": 547.2720881038997
+        },
+        "within": true
+      },
+      "grid_sha256": "98613ab87eb8d3b585837bc4eb6ed69b2e9def1de237de941287beff745ecd08",
+      "grid_shape": [
+        19,
+        65,
+        3
+      ],
+      "meta": {
+        "area_mode": "deformed_after_cap_lock",
+        "construction_label": "klangfilm-lame-hv-v1: parent klangfilm-lame-v1 forward core + independent H/V entrance slopes (Phase A; no beak, no Phase B CD core)",
+        "core_info": {
+          "core_blend": 1.0,
+          "core_join_mm": 119.57555749558772,
+          "delta_h_max_mm": 1.0422850686479095,
+          "delta_v_max_mm": 0.9929971056388781,
+          "legacy": false,
+          "rollback_stations": 186,
+          "theta_base_h_deg": 9.463126942517452,
+          "theta_base_v_deg": 9.437828485828561,
+          "turn_index": 131,
+          "z_forward_mm": 183.96239614705803
+        },
+        "core_mode": "hv_throat_phase_a",
+        "kind": "klangfilm_lame_hv_cd",
+        "r0_mm": 220.81634846231228,
+        "schema": "klangfilm-lame-hv-v1"
+      },
+      "rejection_reason": null,
+      "seed": "a2",
+      "shape": {
+        "aspect": 2.0759495982,
+        "cd_core_blend": 1.0,
+        "core_join_fraction": 0.65,
+        "end_frac": 1.7953432921,
+        "entry_half_angle_deg": 2.0,
+        "fc_hz": 494.4393461867,
+        "h_mid_gain_mm": 0.0,
+        "lame_p": 5.0063549541,
+        "morph_frac": 0.3,
+        "n_phi": 19,
+        "n_s": 64,
+        "rim_sweep_ratio": 0.004898754,
+        "source_blend_ratio": 0.0,
+        "theta_h0_deg": 14.0,
+        "theta_v0_deg": 5.0,
+        "v_mid_gain_mm": 0.0,
+        "wall_thickness_mm": 3.0
+      },
+      "status": "accepted"
+    },
+    {
+      "brief_path": "examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7_smooth.yaml",
+      "config_path": "examples\\typologies\\klangfilm_hv_2026-11-16\\configs\\a3.yaml",
+      "config_sha256": "d736bf4d557a623d05395c8413b7b37aa94b5df61d34ed0bdc541ba4c5d3b53b",
+      "envelope": null,
+      "grid_sha256": null,
+      "rejection_reason": "V forward radius shrinks below the throat radius",
+      "rejection_type": "ValueError",
+      "seed": "a3",
+      "shape": {
+        "aspect": 2.0759495982,
+        "cd_core_blend": 1.0,
+        "core_join_fraction": 0.75,
+        "end_frac": 1.7953432921,
+        "entry_half_angle_deg": 2.0,
+        "fc_hz": 494.4393461867,
+        "h_mid_gain_mm": 18.0,
+        "lame_p": 5.0063549541,
+        "morph_frac": 0.3,
+        "n_phi": 19,
+        "n_s": 64,
+        "rim_sweep_ratio": 0.004898754,
+        "source_blend_ratio": 0.0,
+        "theta_h0_deg": 9.0,
+        "theta_v0_deg": 6.0,
+        "v_mid_gain_mm": -8.0,
+        "wall_thickness_mm": 3.0
+      },
+      "status": "rejected"
+    },
+    {
+      "brief_path": "examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7_smooth.yaml",
+      "config_path": "examples\\typologies\\klangfilm_hv_2026-11-16\\configs\\a3b.yaml",
+      "config_sha256": "dec49342a09deb78de21e627644fe26fd50c6d9a07ceb9c5c438afa452b4ef71",
+      "convergence": {
+        "base": {
+          "max_height_mm": 260.72942512616726,
+          "max_width_mm": 541.2611453295839,
+          "mesh_halfangle_h_deg": 10.771348267459894,
+          "mesh_halfangle_v_deg": 6.553181842430409,
+          "theta_model_h_deg": 9.0,
+          "theta_model_v_deg": 6.000000000000001,
+          "throat_radius_spread_mm": 3.552713678800501e-15
+        },
+        "base_n_phi": 19,
+        "base_n_s": 64,
+        "delta_n_phi_37_vs_base": {
+          "max_height_mm": 0.0,
+          "max_width_mm": 0.0,
+          "mesh_minus_model_h_deg": 1.771348267459894,
+          "mesh_minus_model_v_deg": 0.5531818424304085,
+          "throat_radius_spread_mm": 3.552713678800501e-15
+        },
+        "delta_n_s_128_vs_base": {
+          "max_height_mm": 0.04268459303625605,
+          "max_width_mm": 0.08861106376286898,
+          "mesh_minus_model_h_deg": 0.534105938006185,
+          "mesh_minus_model_v_deg": 0.33229426415394414,
+          "throat_radius_spread_mm": 0.0
+        },
+        "mesh_chord_abs_error_deg": {
+          "n_s_128_h": 0.534105938006185,
+          "n_s_128_v": 0.33229426415394414,
+          "n_s_64_h": 1.771348267459894,
+          "n_s_64_v": 0.5531818424304085
+        },
+        "n_phi_37": {
+          "max_height_mm": 260.72942512616726,
+          "max_width_mm": 541.2611453295839,
+          "mesh_halfangle_h_deg": 10.771348267459894,
+          "mesh_halfangle_v_deg": 6.553181842430409,
+          "theta_model_h_deg": 9.0,
+          "theta_model_v_deg": 6.000000000000001,
+          "throat_radius_spread_mm": 7.105427357601002e-15
+        },
+        "n_s_128": {
+          "max_height_mm": 260.7721097192035,
+          "max_width_mm": 541.3497563933468,
+          "mesh_halfangle_h_deg": 9.534105938006185,
+          "mesh_halfangle_v_deg": 6.332294264153945,
+          "theta_model_h_deg": 9.0,
+          "theta_model_v_deg": 6.000000000000001,
+          "throat_radius_spread_mm": 3.552713678800501e-15
+        },
+        "trend": "mesh H chord moves toward the model angle with n_s 64 -> 128",
+        "trend_toward_model_h": true,
+        "trend_toward_model_v": true,
+        "trend_v": "mesh V chord moves toward the model angle with n_s 64 -> 128"
+      },
+      "deviation_vs_a0": {
+        "abscissa": "A0 monotonic forward z stations, linear interpolation",
+        "max_abs_a_minus_a0_mm": 17.916743496372007,
+        "max_abs_b_minus_b0_mm": 0.8894263019040451,
+        "note": "a5 also changes parent genes, so its deviation is not a single-knob measure; a1..a4b share the parent genes with A0"
+      },
+      "diagnostics": {
+        "area_mode": "deformed_after_cap_lock",
+        "axial_turns_whole_profile": 1,
+        "cap_area_resid_max": 4.607536574496862e-11,
+        "core_join_mm": 137.97179711029352,
+        "core_mode": "hv_throat_phase_a",
+        "delta_h_max_mm": 17.916743496372003,
+        "delta_v_max_mm": 0.8894263019040457,
+        "depth_mm": 233.66670144264555,
+        "exit_angle_deg_is_assumption": true,
+        "finite": true,
+        "forward_z_strictly_increasing": true,
+        "lame_p_at_throat": 2.0,
+        "lame_p_by_forward_fraction": {
+          "0.0": 2.0,
+          "0.2": 2.644600385496789,
+          "0.5": 4.9333035600166015,
+          "0.8": 5.0063549541
+        },
+        "max_height_mm": 260.72942512616726,
+        "max_width_mm": 541.2611453295839,
+        "mesh_halfangle_h_deg": 10.771348267459894,
+        "mesh_halfangle_v_deg": 6.553181842430409,
+        "min_radius_ratio_to_throat": 1.0519970398350917,
+        "q_at_0": 1.0,
+        "q_at_15mm": 1.0972158833674617,
+        "q_at_5mm": 1.016353676128024,
+        "raw_parent_halfangle_deg": 9.366904409320387,
+        "schema": "klangfilm-lame-hv-v1",
+        "semi_axes_by_z": {
+          "0.5": {
+            "a_mm": 18.080354493488844,
+            "b_mm": 18.05396152204687
+          },
+          "1": {
+            "a_mm": 18.16070898697769,
+            "b_mm": 18.107923044093738
+          },
+          "10": {
+            "a_mm": 20.033356938811984,
+            "b_mm": 19.15748485700312
+          },
+          "15": {
+            "a_mm": 21.655073978977427,
+            "b_mm": 19.736383976247144
+          },
+          "20": {
+            "a_mm": 23.826215911699624,
+            "b_mm": 20.254769468591814
+          },
+          "5": {
+            "a_mm": 18.86426630517525,
+            "b_mm": 18.56073013583416
+          }
+        },
+        "slope_h_deg_by_z": {
+          "0.5": 8.900071361709124,
+          "1": 9.099158922227321,
+          "10": 15.492661213015875,
+          "15": 20.728042052203204,
+          "20": 25.930246320007644,
+          "5": 11.17155720061351
+        },
+        "slope_v_deg_by_z": {
+          "0.5": 6.061683207395086,
+          "1": 6.146586442804336,
+          "10": 6.773727460081971,
+          "15": 6.312798334909177,
+          "20": 5.507055476797185,
+          "5": 6.687933306766499
+        },
+        "source_angle_is_assumption": true,
+        "theta_base_h_deg": 9.463126942517452,
+        "theta_base_v_deg": 9.437828485828561,
+        "theta_model_h_deg": 9.0,
+        "theta_model_v_deg": 6.000000000000001,
+        "throat_radius_mm": 18.0,
+        "throat_radius_spread_mm": 3.552713678800501e-15,
+        "wall_halfangle_h_deg": 9.129880530934294,
+        "wall_halfangle_h_target_deg": 9.0,
+        "wall_halfangle_v_deg": 6.1596939949122795,
+        "wall_halfangle_v_target_deg": 6.0,
+        "z_forward_mm": 183.96239614705803
+      },
+      "envelope": {
+        "exceeded": [],
+        "inner_sampled_mm": {
+          "depth": 233.66670144264555,
+          "height": 260.72942512616726,
+          "width": 541.2611453295839
+        },
+        "limits_mm": {
+          "depth": 480.0,
+          "height": 480.0,
+          "width": 600.0
+        },
+        "method": "sampled_conservative_estimate",
+        "note": "inner sampled quarter-grid reflected on symmetry planes + wall thickness; not a mesh certificate",
+        "outer_estimate_mm": {
+          "depth": 236.66670144264555,
+          "height": 266.72942512616726,
+          "width": 547.2611453295839
+        },
+        "within": true
+      },
+      "grid_sha256": "78e951391fc030da0aad4754886647d1660c19eae2a7f6986f6aca1293122bd4",
+      "grid_shape": [
+        19,
+        65,
+        3
+      ],
+      "meta": {
+        "area_mode": "deformed_after_cap_lock",
+        "construction_label": "klangfilm-lame-hv-v1: parent klangfilm-lame-v1 forward core + independent H/V entrance slopes (Phase A; no beak, no Phase B CD core)",
+        "core_info": {
+          "core_blend": 1.0,
+          "core_join_mm": 137.97179711029352,
+          "delta_h_max_mm": 17.916743496372003,
+          "delta_v_max_mm": 0.8894263019040457,
+          "legacy": false,
+          "rollback_stations": 186,
+          "theta_base_h_deg": 9.463126942517452,
+          "theta_base_v_deg": 9.437828485828561,
+          "turn_index": 131,
+          "z_forward_mm": 183.96239614705803
+        },
+        "core_mode": "hv_throat_phase_a",
+        "kind": "klangfilm_lame_hv_cd",
+        "r0_mm": 220.81634846231228,
+        "schema": "klangfilm-lame-hv-v1"
+      },
+      "rejection_reason": null,
+      "seed": "a3b",
+      "shape": {
+        "aspect": 2.0759495982,
+        "cd_core_blend": 1.0,
+        "core_join_fraction": 0.75,
+        "end_frac": 1.7953432921,
+        "entry_half_angle_deg": 2.0,
+        "fc_hz": 494.4393461867,
+        "h_mid_gain_mm": 18.0,
+        "lame_p": 5.0063549541,
+        "morph_frac": 0.3,
+        "n_phi": 19,
+        "n_s": 64,
+        "rim_sweep_ratio": 0.004898754,
+        "source_blend_ratio": 0.0,
+        "theta_h0_deg": 9.0,
+        "theta_v0_deg": 6.0,
+        "v_mid_gain_mm": 0.0,
+        "wall_thickness_mm": 3.0
+      },
+      "status": "accepted"
+    },
+    {
+      "brief_path": "examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7_smooth.yaml",
+      "config_path": "examples\\typologies\\klangfilm_hv_2026-11-16\\configs\\a4.yaml",
+      "config_sha256": "7b4130aa03bc0fe37161901971af9d161941d491122f307805c159790891f412",
+      "envelope": null,
+      "grid_sha256": null,
+      "rejection_reason": "V forward radius shrinks below the throat radius",
+      "rejection_type": "ValueError",
+      "seed": "a4",
+      "shape": {
+        "aspect": 2.0759495982,
+        "cd_core_blend": 1.0,
+        "core_join_fraction": 0.65,
+        "end_frac": 1.7953432921,
+        "entry_half_angle_deg": 2.0,
+        "fc_hz": 494.4393461867,
+        "h_mid_gain_mm": 8.0,
+        "lame_p": 5.0063549541,
+        "morph_frac": 0.3,
+        "n_phi": 19,
+        "n_s": 64,
+        "rim_sweep_ratio": 0.004898754,
+        "source_blend_ratio": 0.0,
+        "theta_h0_deg": 9.0,
+        "theta_v0_deg": 4.0,
+        "v_mid_gain_mm": -14.0,
+        "wall_thickness_mm": 3.0
+      },
+      "status": "rejected"
+    },
+    {
+      "brief_path": "examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7_smooth.yaml",
+      "config_path": "examples\\typologies\\klangfilm_hv_2026-11-16\\configs\\a4b.yaml",
+      "config_sha256": "37ef5a9d730ae95b3a2ab54992ea8957ad7a189ed43bc0441624b62406cb58bd",
+      "convergence": {
+        "base": {
+          "max_height_mm": 260.73122365050506,
+          "max_width_mm": 541.2648789754603,
+          "mesh_halfangle_h_deg": 10.321325627385882,
+          "mesh_halfangle_v_deg": 5.028237507539349,
+          "theta_model_h_deg": 9.0,
+          "theta_model_v_deg": 4.0,
+          "throat_radius_spread_mm": 3.552713678800501e-15
+        },
+        "base_n_phi": 19,
+        "base_n_s": 64,
+        "delta_n_phi_37_vs_base": {
+          "max_height_mm": 0.0,
+          "max_width_mm": 0.0,
+          "mesh_minus_model_h_deg": 1.3213256273858818,
+          "mesh_minus_model_v_deg": 1.028237507539349,
+          "throat_radius_spread_mm": 3.552713678800501e-15
+        },
+        "delta_n_s_128_vs_base": {
+          "max_height_mm": 0.04027803446689404,
+          "max_width_mm": 0.08361516946774827,
+          "mesh_minus_model_h_deg": 0.41153448659246195,
+          "mesh_minus_model_v_deg": 0.5839225811566404,
+          "throat_radius_spread_mm": 0.0
+        },
+        "mesh_chord_abs_error_deg": {
+          "n_s_128_h": 0.41153448659246195,
+          "n_s_128_v": 0.5839225811566404,
+          "n_s_64_h": 1.3213256273858818,
+          "n_s_64_v": 1.028237507539349
+        },
+        "n_phi_37": {
+          "max_height_mm": 260.73122365050506,
+          "max_width_mm": 541.2648789754603,
+          "mesh_halfangle_h_deg": 10.321325627385882,
+          "mesh_halfangle_v_deg": 5.028237507539349,
+          "theta_model_h_deg": 9.0,
+          "theta_model_v_deg": 4.0,
+          "throat_radius_spread_mm": 7.105427357601002e-15
+        },
+        "n_s_128": {
+          "max_height_mm": 260.77150168497195,
+          "max_width_mm": 541.348494144928,
+          "mesh_halfangle_h_deg": 9.411534486592462,
+          "mesh_halfangle_v_deg": 4.58392258115664,
+          "theta_model_h_deg": 9.0,
+          "theta_model_v_deg": 4.0,
+          "throat_radius_spread_mm": 3.552713678800501e-15
+        },
+        "trend": "mesh H chord moves toward the model angle with n_s 64 -> 128",
+        "trend_toward_model_h": true,
+        "trend_toward_model_v": true,
+        "trend_v": "mesh V chord moves toward the model angle with n_s 64 -> 128"
+      },
+      "deviation_vs_a0": {
+        "abscissa": "A0 monotonic forward z stations, linear interpolation",
+        "max_abs_a_minus_a0_mm": 7.9376349729946725,
+        "max_abs_b_minus_b0_mm": 1.214474929011491,
+        "note": "a5 also changes parent genes, so its deviation is not a single-knob measure; a1..a4b share the parent genes with A0"
+      },
+      "diagnostics": {
+        "area_mode": "deformed_after_cap_lock",
+        "axial_turns_whole_profile": 1,
+        "cap_area_resid_max": 4.607536574496862e-11,
+        "core_join_mm": 119.57555749558772,
+        "core_mode": "hv_throat_phase_a",
+        "delta_h_max_mm": 7.937634972994673,
+        "delta_v_max_mm": 1.214474929011492,
+        "depth_mm": 233.67076201121472,
+        "exit_angle_deg_is_assumption": true,
+        "finite": true,
+        "forward_z_strictly_increasing": true,
+        "lame_p_at_throat": 2.0,
+        "lame_p_by_forward_fraction": {
+          "0.0": 2.0,
+          "0.2": 2.644600385496789,
+          "0.5": 4.9333035600166015,
+          "0.8": 5.0063549541
+        },
+        "max_height_mm": 260.73122365050506,
+        "max_width_mm": 541.2648789754603,
+        "mesh_halfangle_h_deg": 10.321325627385882,
+        "mesh_halfangle_v_deg": 5.028237507539349,
+        "min_radius_ratio_to_throat": 1.0399382403707464,
+        "q_at_0": 1.0,
+        "q_at_15mm": 1.0961985074385834,
+        "q_at_5mm": 1.0236394390102936,
+        "raw_parent_halfangle_deg": 9.366904409320387,
+        "schema": "klangfilm-lame-hv-v1",
+        "semi_axes_by_z": {
+          "0.5": {
+            "a_mm": 18.08007051191134,
+            "b_mm": 18.037519387337017
+          },
+          "1": {
+            "a_mm": 18.160141023822682,
+            "b_mm": 18.075038774674034
+          },
+          "10": {
+            "a_mm": 19.913037071213644,
+            "b_mm": 18.90501073504086
+          },
+          "15": {
+            "a_mm": 21.287484168805108,
+            "b_mm": 19.419369780521052
+          },
+          "20": {
+            "a_mm": 23.020171968175458,
+            "b_mm": 19.907250934425036
+          },
+          "5": {
+            "a_mm": 18.84689449807916,
+            "b_mm": 18.411653341826383
+          }
+        },
+        "slope_h_deg_by_z": {
+          "0.5": 8.920562059614422,
+          "1": 9.074410936715537,
+          "10": 13.665623027369389,
+          "15": 17.2544614427419,
+          "20": 20.778677841781626,
+          "5": 10.621040618512438
+        },
+        "slope_v_deg_by_z": {
+          "0.5": 4.125674695354962,
+          "1": 4.269204707252856,
+          "10": 5.837019314925554,
+          "15": 5.785897380790848,
+          "20": 5.314810517816059,
+          "5": 5.262098428545247
+        },
+        "source_angle_is_assumption": true,
+        "theta_base_h_deg": 9.463126942517452,
+        "theta_base_v_deg": 9.437828485828561,
+        "theta_model_h_deg": 9.0,
+        "theta_model_v_deg": 4.0,
+        "throat_radius_mm": 18.0,
+        "throat_radius_spread_mm": 3.552713678800501e-15,
+        "wall_halfangle_h_deg": 9.09815513068687,
+        "wall_halfangle_h_target_deg": 9.0,
+        "wall_halfangle_v_deg": 4.291362520862233,
+        "wall_halfangle_v_target_deg": 4.0,
+        "z_forward_mm": 183.96239614705803
+      },
+      "envelope": {
+        "exceeded": [],
+        "inner_sampled_mm": {
+          "depth": 233.67076201121472,
+          "height": 260.73122365050506,
+          "width": 541.2648789754603
+        },
+        "limits_mm": {
+          "depth": 480.0,
+          "height": 480.0,
+          "width": 600.0
+        },
+        "method": "sampled_conservative_estimate",
+        "note": "inner sampled quarter-grid reflected on symmetry planes + wall thickness; not a mesh certificate",
+        "outer_estimate_mm": {
+          "depth": 236.67076201121472,
+          "height": 266.73122365050506,
+          "width": 547.2648789754603
+        },
+        "within": true
+      },
+      "grid_sha256": "a6772cc29476cf9307b8e22a31ca82bcd83e78e02bfb74f94b6842a930841eae",
+      "grid_shape": [
+        19,
+        65,
+        3
+      ],
+      "meta": {
+        "area_mode": "deformed_after_cap_lock",
+        "construction_label": "klangfilm-lame-hv-v1: parent klangfilm-lame-v1 forward core + independent H/V entrance slopes (Phase A; no beak, no Phase B CD core)",
+        "core_info": {
+          "core_blend": 1.0,
+          "core_join_mm": 119.57555749558772,
+          "delta_h_max_mm": 7.937634972994673,
+          "delta_v_max_mm": 1.214474929011492,
+          "legacy": false,
+          "rollback_stations": 186,
+          "theta_base_h_deg": 9.463126942517452,
+          "theta_base_v_deg": 9.437828485828561,
+          "turn_index": 131,
+          "z_forward_mm": 183.96239614705803
+        },
+        "core_mode": "hv_throat_phase_a",
+        "kind": "klangfilm_lame_hv_cd",
+        "r0_mm": 220.81634846231228,
+        "schema": "klangfilm-lame-hv-v1"
+      },
+      "rejection_reason": null,
+      "seed": "a4b",
+      "shape": {
+        "aspect": 2.0759495982,
+        "cd_core_blend": 1.0,
+        "core_join_fraction": 0.65,
+        "end_frac": 1.7953432921,
+        "entry_half_angle_deg": 2.0,
+        "fc_hz": 494.4393461867,
+        "h_mid_gain_mm": 8.0,
+        "lame_p": 5.0063549541,
+        "morph_frac": 0.3,
+        "n_phi": 19,
+        "n_s": 64,
+        "rim_sweep_ratio": 0.004898754,
+        "source_blend_ratio": 0.0,
+        "theta_h0_deg": 9.0,
+        "theta_v0_deg": 4.0,
+        "v_mid_gain_mm": 0.0,
+        "wall_thickness_mm": 3.0
+      },
+      "status": "accepted"
+    },
+    {
+      "brief_path": "examples\\briefs\\home_landscape_2026-11-15\\room_landscape_80x50_700_hf1440_v7_smooth.yaml",
+      "config_path": "examples\\typologies\\klangfilm_hv_2026-11-16\\configs\\a5.yaml",
+      "config_sha256": "c80ee224d72e10920fbdab6893c422d3010348e5aa75668ed0994d19ff69ef43",
+      "convergence": {
+        "base": {
+          "max_height_mm": 377.30739655805615,
+          "max_width_mm": 622.5572043207926,
+          "mesh_halfangle_h_deg": 11.214828647134949,
+          "mesh_halfangle_v_deg": 6.55804094861362,
+          "theta_model_h_deg": 11.0,
+          "theta_model_v_deg": 6.000000000000001,
+          "throat_radius_spread_mm": 3.552713678800501e-15
+        },
+        "base_n_phi": 19,
+        "base_n_s": 64,
+        "delta_n_phi_37_vs_base": {
+          "max_height_mm": 0.0,
+          "max_width_mm": 0.0,
+          "mesh_minus_model_h_deg": 0.21482864713494898,
+          "mesh_minus_model_v_deg": 0.5580409486136189,
+          "throat_radius_spread_mm": 3.552713678800501e-15
+        },
+        "delta_n_s_128_vs_base": {
+          "max_height_mm": 0.0,
+          "max_width_mm": 0.0,
+          "mesh_minus_model_h_deg": -0.026727130794879983,
+          "mesh_minus_model_v_deg": 0.24933010266385924,
+          "throat_radius_spread_mm": 0.0
+        },
+        "mesh_chord_abs_error_deg": {
+          "n_s_128_h": 0.026727130794879983,
+          "n_s_128_v": 0.24933010266385924,
+          "n_s_64_h": 0.21482864713494898,
+          "n_s_64_v": 0.5580409486136189
+        },
+        "n_phi_37": {
+          "max_height_mm": 377.30739655805615,
+          "max_width_mm": 622.5572043207926,
+          "mesh_halfangle_h_deg": 11.214828647134949,
+          "mesh_halfangle_v_deg": 6.55804094861362,
+          "theta_model_h_deg": 11.0,
+          "theta_model_v_deg": 6.000000000000001,
+          "throat_radius_spread_mm": 7.105427357601002e-15
+        },
+        "n_s_128": {
+          "max_height_mm": 377.30739655805615,
+          "max_width_mm": 622.5572043207926,
+          "mesh_halfangle_h_deg": 10.97327286920512,
+          "mesh_halfangle_v_deg": 6.24933010266386,
+          "theta_model_h_deg": 11.0,
+          "theta_model_v_deg": 6.000000000000001,
+          "throat_radius_spread_mm": 3.552713678800501e-15
+        },
+        "trend": "mesh H chord moves toward the model angle with n_s 64 -> 128",
+        "trend_toward_model_h": true,
+        "trend_toward_model_v": true,
+        "trend_v": "mesh V chord moves toward the model angle with n_s 64 -> 128"
+      },
+      "deviation_vs_a0": {
+        "abscissa": "A0 monotonic forward z stations, linear interpolation",
+        "max_abs_a_minus_a0_mm": 100.59277839163802,
+        "max_abs_b_minus_b0_mm": 37.64640553215297,
+        "note": "a5 also changes parent genes, so its deviation is not a single-knob measure; a1..a4b share the parent genes with A0"
+      },
+      "diagnostics": {
+        "area_mode": "deformed_after_cap_lock",
+        "axial_turns_whole_profile": 1,
+        "cap_area_resid_max": 4.0795478106758765e-11,
+        "core_join_mm": 166.43159709159858,
+        "core_mode": "hv_throat_phase_a",
+        "delta_h_max_mm": 12.632984224395843,
+        "delta_v_max_mm": 5.702970348902018,
+        "depth_mm": 256.0270620369418,
+        "exit_angle_deg_is_assumption": true,
+        "finite": true,
+        "forward_z_strictly_increasing": true,
+        "lame_p_at_throat": 2.0,
+        "lame_p_by_forward_fraction": {
+          "0.0": 2.0,
+          "0.2": 2.483134534726444,
+          "0.5": 3.981239153126705,
+          "0.8": 4.0
+        },
+        "max_height_mm": 377.30739655805615,
+        "max_width_mm": 622.5572043207926,
+        "mesh_halfangle_h_deg": 11.214828647134949,
+        "mesh_halfangle_v_deg": 6.55804094861362,
+        "min_radius_ratio_to_throat": 1.0508877938331231,
+        "q_at_0": 1.0,
+        "q_at_15mm": 1.066082394791088,
+        "q_at_5mm": 1.0226032564853957,
+        "raw_parent_halfangle_deg": 7.570555208407217,
+        "schema": "klangfilm-lame-hv-v1",
+        "semi_axes_by_z": {
+          "0.5": {
+            "a_mm": 18.096330945337645,
+            "b_mm": 18.05352765199724
+          },
+          "1": {
+            "a_mm": 18.19266189067529,
+            "b_mm": 18.10705530399448
+          },
+          "10": {
+            "a_mm": 20.025228963622375,
+            "b_mm": 19.186413358848082
+          },
+          "15": {
+            "a_mm": 21.230879101503277,
+            "b_mm": 19.914857618170995
+          },
+          "20": {
+            "a_mm": 22.62960418131428,
+            "b_mm": 20.738643310695483
+          },
+          "5": {
+            "a_mm": 18.972000773772592,
+            "b_mm": 18.552650457008927
+          }
+        },
+        "slope_h_deg_by_z": {
+          "0.5": 10.839991597324936,
+          "1": 10.878634108118984,
+          "10": 12.643464939956093,
+          "15": 14.555531439592746,
+          "20": 16.729908072684697,
+          "5": 11.323362106696244
+        },
+        "slope_v_deg_by_z": {
+          "0.5": 5.977095010492599,
+          "1": 6.056304061944384,
+          "10": 7.7391993535926655,
+          "15": 8.825735195202348,
+          "20": 9.856267543778753,
+          "5": 6.7252822440798985
+        },
+        "source_angle_is_assumption": true,
+        "theta_base_h_deg": 7.647740190018484,
+        "theta_base_v_deg": 7.635902843404012,
+        "theta_model_h_deg": 11.0,
+        "theta_model_v_deg": 6.000000000000001,
+        "throat_radius_mm": 18.0,
+        "throat_radius_spread_mm": 3.552713678800501e-15,
+        "wall_halfangle_h_deg": 10.905096085727065,
+        "wall_halfangle_h_target_deg": 11.0,
+        "wall_halfangle_v_deg": 6.110544027371346,
+        "wall_halfangle_v_target_deg": 6.0,
+        "z_forward_mm": 256.04861091015164
+      },
+      "envelope": {
+        "exceeded": [
+          "width"
+        ],
+        "inner_sampled_mm": {
+          "depth": 256.0270620369418,
+          "height": 377.30739655805615,
+          "width": 622.5572043207926
+        },
+        "limits_mm": {
+          "depth": 480.0,
+          "height": 480.0,
+          "width": 600.0
+        },
+        "method": "sampled_conservative_estimate",
+        "note": "inner sampled quarter-grid reflected on symmetry planes + wall thickness; not a mesh certificate",
+        "outer_estimate_mm": {
+          "depth": 259.0270620369418,
+          "height": 383.30739655805615,
+          "width": 628.5572043207926
+        },
+        "within": false
+      },
+      "grid_sha256": "46c953266d860d9eac7f95fa8b052d473a4123885838d6f4ae2d98cbe295e859",
+      "grid_shape": [
+        19,
+        65,
+        3
+      ],
+      "meta": {
+        "area_mode": "deformed_after_cap_lock",
+        "construction_label": "klangfilm-lame-hv-v1: parent klangfilm-lame-v1 forward core + independent H/V entrance slopes (Phase A; no beak, no Phase B CD core)",
+        "core_info": {
+          "core_blend": 1.0,
+          "core_join_mm": 166.43159709159858,
+          "delta_h_max_mm": 12.632984224395843,
+          "delta_v_max_mm": 5.702970348902018,
+          "legacy": false,
+          "rollback_stations": 165,
+          "theta_base_h_deg": 7.647740190018484,
+          "theta_base_v_deg": 7.635902843404012,
+          "turn_index": 152,
+          "z_forward_mm": 256.04861091015164
+        },
+        "core_mode": "hv_throat_phase_a",
+        "kind": "klangfilm_lame_hv_cd",
+        "r0_mm": 272.9507274026005,
+        "schema": "klangfilm-lame-hv-v1"
+      },
+      "rejection_reason": null,
+      "seed": "a5",
+      "shape": {
+        "aspect": 1.65,
+        "cd_core_blend": 1.0,
+        "core_join_fraction": 0.65,
+        "end_frac": 1.2,
+        "entry_half_angle_deg": 2.0,
+        "fc_hz": 400.0,
+        "h_mid_gain_mm": 12.0,
+        "lame_p": 4.0,
+        "morph_frac": 0.3,
+        "n_phi": 19,
+        "n_s": 64,
+        "rim_sweep_ratio": 0.1,
+        "source_blend_ratio": 0.0,
+        "theta_h0_deg": 11.0,
+        "theta_v0_deg": 6.0,
+        "v_mid_gain_mm": 6.0,
+        "wall_thickness_mm": 3.0
+      },
+      "status": "accepted"
+    }
+  ]
+}

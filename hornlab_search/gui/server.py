@@ -437,6 +437,9 @@ class App:
             out["rows"] = D.clean(compare_metrics(*ms))
         except ValueError as exc:
             return {"error": str(exc), **out}
+        # P0 scoring truth: each side's own scored-target view (never overlaid; the compare
+        # view shows both when the scored briefs differ). Additive; absent stays absent.
+        out.update(D.compare_scoring_views(self.runs, a, b))
         return out
 
     def post(self, path: str, body: dict) -> object:

@@ -173,7 +173,15 @@ def _narrow_ratio(raw_objective: Mapping, default: float = 2.0) -> float:
 
 def _resolve_v6_fc_hz(raw_objective: Mapping, design_scalars, design_params,
                       f0_hz: float | None, band_lo_hz: float) -> float:
-    """Mirror ``scalar_v6.resolve_fc_hz`` including the per-design metric-scalar sources."""
+    """Mirror ``scalar_v6.resolve_fc_hz`` EXACTLY.
+
+    The scorer reads only the objective block's explicit ``fc_hz`` and the design's
+    ``metrics.scalars`` (``fc_hz`` / ``g_fc_hz``, then the brief ``f0``). It never reads
+    the generator knobs in ``design.json`` — live-run evidence
+    (``runs/20261112T113047Z-screen-24053e``, two stored rows) shows varying ``g_fc_hz``
+    leaves every scored onset at ``f_pattern = pattern_beta * f0`` because no scalar key
+    is stored. ``design_params`` is therefore accepted for API stability but deliberately
+    unread here, so the GUI can never show a pattern onset the scorer did not use."""
     fc = _num(raw_objective.get("fc_hz"), positive=True)
     if fc is not None:
         return fc
@@ -183,20 +191,6 @@ def _resolve_v6_fc_hz(raw_objective: Mapping, design_scalars, design_params,
         fc = _num(scalars.get(key), positive=True)
         if fc is not None:
             return fc
-
-    params = _as_mapping(design_params)
-    for path in (("g_fc_hz",), ("grid", "g_fc_hz"), ("knobs", "g_fc_hz")):
-        node = params
-        found = True
-        for key in path:
-            if not isinstance(node, Mapping) or key not in node:
-                found = False
-                break
-            node = node[key]
-        if found:
-            fc = _num(node, positive=True)
-            if fc is not None:
-                return fc
 
     if f0_hz is not None:
         return f0_hz

@@ -391,12 +391,13 @@ def _beamwidth_ref_lines(sv: dict, band: tuple[float, float]) -> list[dict]:
     if cov.get("below_mode") == "one_sided":
         # The flat target IS the one-sided lower bound below onset: show it full width, unlabelled
         # so it does not overprint the scored-range label. The chart title states the mode.
+        # Inserted first so the scored-range solid line is drawn on top above the onset.
         if h_deg is not None:
-            refs.append({"pts": [[x_lo, float(h_deg)], [x_hi, float(h_deg)]],
-                         "label": "", "color": PALETTE[0], "dash": True})
+            refs.insert(0, {"pts": [[x_lo, float(h_deg)], [x_hi, float(h_deg)]],
+                            "label": "", "color": PALETTE[0], "dash": True})
         if up is None and v_deg is not None:
-            refs.append({"pts": [[x_lo, float(v_deg)], [x_hi, float(v_deg)]],
-                         "label": "", "color": PALETTE[1], "dash": True})
+            refs.insert(0, {"pts": [[x_lo, float(v_deg)], [x_hi, float(v_deg)]],
+                            "label": "", "color": PALETTE[1], "dash": True})
     floor = sv.get("bw8k_floor")
     if isinstance(floor, dict):
         for y, label, color in (
@@ -414,8 +415,8 @@ def _beamwidth_ref_lines(sv: dict, band: tuple[float, float]) -> list[dict]:
 
 
 def _beamwidth_title(sv: dict, band: tuple[float, float]) -> str:
-    """``beamwidth`` plus the below-onset truth note (only when there really is a region below)."""
-    title = "beamwidth"
+    """The beamwidth title plus the below-onset truth note (only when there is a region below)."""
+    title = "Beamwidth (-6 dB, total included angle)"
     cov = sv.get("coverage") if isinstance(sv, dict) else None
     if not isinstance(cov, dict):
         return title
@@ -478,7 +479,8 @@ def _di_target_ref_lines(sv: dict, band: tuple[float, float], freqs, di_db):
                 and 0.0 < anchor < hi:
             y_hi = level + slope * math.log10(hi / anchor)
             refs.append({"pts": [[anchor, level], [hi, y_hi]],
-                         "label": f"slope target {_fmt(slope)} dB/dec (display-only intercept)",
+                         "label": (f"slope target {_fmt(slope)} dB/dec "
+                                   "(display-only intercept at measured DI)"),
                          "color": PALETTE[2], "dash": True})
     return hlines, refs
 
@@ -734,6 +736,7 @@ def build_report(run_dir, out=None, top_n: int = 5, *, store=None, figures: bool
     rows = read_ndjson(run_dir / "search.ndjson")
     target = Target.from_dict(cfg.target_raw) if cfg else Target(75.0, 45.0, 700.0, 5000.0, None)
     weights = dict(cfg.weights) if cfg else {}
+    scoring_inputs = _scoring_view_inputs(cfg, weights, run)
     bounds = _bounds(cfg)
     family = (cfg.family if cfg else run.get("family")) or (rows[0]["family"] if rows else "?")
     ok_rows = [r for r in rows if r.get("ok")]
@@ -785,7 +788,7 @@ def build_report(run_dir, out=None, top_n: int = 5, *, store=None, figures: bool
 
     # ---- convergence + terms
     convergence = _convergence(rows, seed_row)
-    designs = _designs(show, run_dir, target, weights, bounds, family, figures)
+    designs = _designs(show, run_dir, target, weights, bounds, family, figures, scoring_inputs)
     term_rows = [(f"{d['label']} {d['hash'][:6]}", d["weighted"]) for d in designs]
     term_bars = _svg_stacked(term_rows, list(WEIGHTED_KEYS) + ["penalty"]) if designs else \
         '<p class="muted">no designs to show</p>'
@@ -903,7 +906,8 @@ def _convergence(rows, seed_row) -> str:
                       hlines=hl, ylim=ylim, title="convergence")
 
 
-def _designs(show, run_dir, target, weights, bounds, family, figures) -> list[dict]:
+def _designs(show, run_dir, target, weights, bounds, family, figures,
+             scoring_view: dict | None = None) -> list[dict]:
     out = []
     for label, row in show:
         terms = row.get("terms") or {}
@@ -936,7 +940,7 @@ def _designs(show, run_dir, target, weights, bounds, family, figures) -> list[di
                                              row.get("symmetry_plane"), {}, tuple(row["bbox_m"]), 0.0))
             d["mouth"] = f"{mw:.3f} x {mh:.3f}"
         if figures and row.get("ok"):
-            f = _design_figures(run_dir, row, target, family, bounds)
+            f = _design_figures(run_dir, row, target, family, bounds, scoring_view)
             d["pngs"], d["svgs"], d["note"] = f["pngs"], [(t, Markup(s)) for t, s in f["svgs"]], f["note"]
             d["loud"] = Markup(f.get("loud", ""))
         out.append(d)

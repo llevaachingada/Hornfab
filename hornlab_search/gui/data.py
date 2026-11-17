@@ -3632,8 +3632,8 @@ def preview_shape(root: Path, config_name: str, q: dict) -> dict:
             # (2) GRID/ROWS: the config's own march arrays. NO grid block into the preview.
             gspec = gen
             wall_mm = float(gspec.get("wall_thickness_mm", 3.0))
-            from hornlab_search.design.generators import rolled_family, klangfilm_lame_family, lecleach_swept_hv
-            family = next((f for f in (rolled_family, klangfilm_lame_family, lecleach_swept_hv)
+            from hornlab_search.design.generators import rolled_family, klangfilm_lame_family, klangfilm_lame_hv_family, lecleach_swept_hv
+            family = next((f for f in (rolled_family, klangfilm_lame_family, klangfilm_lame_hv_family, lecleach_swept_hv)
                            if is_rows and f.is_family_spec(gspec)), None)
             if family is not None:
                 # Versioned families own both sheets; preview the same body as meshing.

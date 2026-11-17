@@ -6331,7 +6331,8 @@ async function viewRunDetail(id) {
   }
   // Mean measured DI over the scored band — the declared display-only intercept of the slope guide.
   function meanDiScored(lo) {
-    const pairs = F.map((f, i) => [f, (B.di || [])[i]]).filter(([f, v]) => v != null && isFinite(v) && (lo == null || f >= lo));
+    const src = (B.di && B.di.some(v => v != null)) ? B.di : (S.di || []);
+    const pairs = F.map((f, i) => [f, src[i]]).filter(([f, v]) => v != null && isFinite(v) && (lo == null || f >= lo));
     if (!pairs.length) return null;
     return pairs.reduce((a, [, v]) => a + v, 0) / pairs.length;
   }

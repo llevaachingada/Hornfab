@@ -1,0 +1,81 @@
+# GEOMETRY DIAGNOSTIC ONLY (Phase A Klangfilm-Lame H/V throat core, schema klangfilm-lame-hv-v1).
+# Kernel: tools/geometry/klangfilm_lame_hv.py. Parent (read-only): tools/geometry/klangfilm_lame.py.
+# a5 = different mouth aspect: a distinctly different parent (fc 400, aspect 1.65, lame_p 4.0, end_frac 1.20,
+# rim_sweep_ratio 0.10) with blend 1.0, true wall half-angles 11 deg H / 6 deg V, positive mid spreads +12/+6 mm,
+# join 0.65. Tests whether the entrance deformation travels across the parent-gene space.
+# This seed EXCEEDS the 600 x 480 x 480 production envelope (622.6 mm wide), so it carries the family's
+# versioned report-only size policy: the geometry stays materialisable and the violation is recorded in
+# meta.envelope_violations for an honest enlarged-envelope discovery report. Nothing is clipped, and a
+# search still refuses report_only (use enforce or a widened brief).
+# H/V angles are wall half-angles, not beamwidth halves. Every bound is fixed (search: false).
+name: klangfilm_hv__a5_different_mouth_aspect
+family: FREEFORM
+brief_file: ../../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml
+generator:
+  name: grid
+  rows:
+    type: klangfilm_lame_hv_cd
+  n_phi: 19
+  n_s: 64
+  wall_thickness_mm: 3.0
+  seed_policy: explicit
+  span: quarter
+  size_policy: report_only
+seed_params:
+  g_fc_hz: 400.0
+  g_aspect: 1.65
+  g_lame_p: 4.0
+  g_end_frac: 1.2
+  g_rim_sweep_ratio: 0.1
+  g_morph_frac: 0.3
+  g_source_blend_ratio: 0.0
+  g_entry_half_angle_deg: 2.0
+  g_cd_core_blend: 1.0
+  g_theta_h0_deg: 11.0
+  g_theta_v0_deg: 6.0
+  g_h_mid_gain_mm: 12.0
+  g_v_mid_gain_mm: 6.0
+  g_core_join_fraction: 0.65
+bounds:
+  g_fc_hz: {lo: 400.0, hi: 400.0, search: false}
+  g_aspect: {lo: 1.65, hi: 1.65, search: false}
+  g_lame_p: {lo: 4.0, hi: 4.0, search: false}
+  g_end_frac: {lo: 1.2, hi: 1.2, search: false}
+  g_rim_sweep_ratio: {lo: 0.1, hi: 0.1, search: false}
+  g_morph_frac: {lo: 0.3, hi: 0.3, search: false}
+  g_source_blend_ratio: {lo: 0.0, hi: 0.0, search: false}
+  g_entry_half_angle_deg: {lo: 2.0, hi: 2.0, search: false}
+  g_cd_core_blend: {lo: 1.0, hi: 1.0, search: false}
+  g_theta_h0_deg: {lo: 11.0, hi: 11.0, search: false}
+  g_theta_v0_deg: {lo: 6.0, hi: 6.0, search: false}
+  g_h_mid_gain_mm: {lo: 12.0, hi: 12.0, search: false}
+  g_v_mid_gain_mm: {lo: 6.0, hi: 6.0, search: false}
+  g_core_join_fraction: {lo: 0.65, hi: 0.65, search: false}
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.25
+  seed: 1234
+  budget: 60
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+  budget_counts: valid
+  max_attempts: 150
+description: GEOMETRY DIAGNOSTIC Klangfilm-Lame H/V Phase A a5 different mouth aspect (fc 400, 11/6 deg walls, +12/+6)

@@ -134,8 +134,8 @@ class GeneratedSpace:
         self.gen = dict(gen)
         self.brief = dict(brief)
         self.bounds = dict(bounds)
-        from .generators import rolled_family, klangfilm_lame_family, lecleach_swept_hv
-        for family in (rolled_family, klangfilm_lame_family, lecleach_swept_hv):
+        from .generators import rolled_family, klangfilm_lame_family, klangfilm_lame_hv_family, lecleach_swept_hv
+        for family in (rolled_family, klangfilm_lame_family, klangfilm_lame_hv_family, lecleach_swept_hv):
             if family.is_family_spec(self.gen):
                 family.validate_search_config(self.gen, seed_knobs, self.bounds, self.brief)
                 break
@@ -224,9 +224,9 @@ class GeneratedSpace:
     def knobs_for(self, d: Design) -> dict | None:
         k = self._knobs_by_hash.get(d.hash())
         if k is None:
-            from .generators import rolled_family, klangfilm_lame_family, lecleach_swept_hv
+            from .generators import rolled_family, klangfilm_lame_family, klangfilm_lame_hv_family, lecleach_swept_hv
             block = d.params.get('grid') if isinstance(d.params, dict) else None
-            for family in (rolled_family, klangfilm_lame_family, lecleach_swept_hv):
+            for family in (rolled_family, klangfilm_lame_family, klangfilm_lame_hv_family, lecleach_swept_hv):
                 if family.is_family_spec(block) and family.is_family_spec(self.gen):
                     family.resolve_grid(block, self.brief)
                     candidate = block.get('knobs')

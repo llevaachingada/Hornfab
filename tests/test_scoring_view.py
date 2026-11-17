@@ -220,15 +220,17 @@ def test_v6_fc_precedence_order():
     # 2) metric scalar fc_hz beats g_fc_hz.
     win = SV.score_window(target, obj, 6, design_scalars={"fc_hz": 700.0, "g_fc_hz": 900.0})
     assert win["fc_hz"] == 700.0
-    # 3) metric scalar g_fc_hz.
+    # 3) metric scalar g_fc_hz (the scorer reads scalars only — generator knobs are NOT a source;
+    #    live-run evidence runs/20261112T113047Z-screen-24053e: metrics never store g_fc_hz).
     win = SV.score_window(target, obj, 6, design_scalars={"g_fc_hz": 900.0})
     assert win["fc_hz"] == 900.0
-    # 4) design params g_fc_hz, flat then nested under grid / knobs.
-    assert SV.score_window(target, obj, 6, design_params={"g_fc_hz": 800.0})["fc_hz"] == 800.0
+    # 4) design.json params g_fc_hz is DELIBERATELY unread (the scorer never sees it —
+    #    scalar_v6.resolve_fc_hz order is params.fc_hz -> metrics.scalars -> f0 -> band_lo),
+    #    so a per-design generator knob must never produce a scored onset the scorer did not use.
+    assert SV.score_window(target, obj, 6, design_params={"g_fc_hz": 800.0})["fc_hz"] == 1200.0
     assert SV.score_window(
-        target, obj, 6, design_params={"grid": {"g_fc_hz": 810.0}})["fc_hz"] == 810.0
-    assert SV.score_window(
-        target, obj, 6, design_params={"knobs": {"g_fc_hz": 820.0}})["fc_hz"] == 820.0
+        target, obj, 6,
+        design_params={"grid": {"knobs": {"g_fc_hz": 622.8556566221}}})["fc_hz"] == 1200.0
     # 5) target f0 when no design source exists.
     win = SV.score_window(target, obj, 6, design_scalars={}, design_params={})
     assert win["fc_hz"] == 1200.0
@@ -238,6 +240,21 @@ def test_v6_fc_precedence_order():
     no_f0.pop("f0_hz")
     win = SV.score_window(no_f0, obj, 6)
     assert win["fc_hz"] == 350.0
+
+
+def test_v6_real_run_onset_is_f0_not_generator_knob():
+    """Live-run truth (deliverable-1 evidence, runs/20261112T113047Z-screen-24053e): metrics
+    scalars carry no fc_hz/g_fc_hz key, so the scorer resolves fc = f0 = 1200 -> f_pattern
+    1920 for every design, even though design.json knobs carry g_fc_hz ~623. The view must
+    reproduce 1920, never a knob-derived onset."""
+    target = dict(TARGET, f0_hz=1200.0)
+    obj = {"version": 6, "pattern_beta": 1.6, "cov_below_f0": "one_sided"}
+    win = SV.score_window(target, obj, 6,
+                          design_scalars={"di_mean_db": 9.7},   # real scalar set has no fc keys
+                          design_params={"grid": {"knobs": {"g_fc_hz": 622.8556566221}}})
+    assert win["fc_hz"] == 1200.0
+    assert win["f_pattern_hz"] == pytest.approx(1920.0)
+    assert win["below_mode"] == "one_sided"
 
 
 def test_v6_invalid_fc_sources_fall_through():
