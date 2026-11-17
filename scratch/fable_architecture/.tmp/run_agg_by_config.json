@@ -1,0 +1,3555 @@
+{
+ "None": {
+  "kinds": {},
+  "mode": {
+   "null": 8
+  },
+  "objver": [],
+  "ok": 0,
+  "rows": 0,
+  "runs": 8
+ },
+ "abl_m_rate2": {
+  "kinds": {
+   "<none>": 2
+  },
+  "mode": {
+   "screen": 1,
+   "verify": 1
+  },
+  "objver": [
+   3
+  ],
+  "ok": 2,
+  "rows": 2,
+  "runs": 2
+ },
+ "abl_m_rate4": {
+  "kinds": {
+   "<none>": 3
+  },
+  "mode": {
+   "screen": 3,
+   "verify": 1
+  },
+  "objver": [
+   3
+  ],
+  "ok": 3,
+  "rows": 3,
+  "runs": 4
+ },
+ "abl_m_rate8": {
+  "kinds": {
+   "<none>": 2
+  },
+  "mode": {
+   "screen": 1,
+   "verify": 1
+  },
+  "objver": [
+   3
+  ],
+  "ok": 2,
+  "rows": 2,
+  "runs": 2
+ },
+ "abl_s0_control": {
+  "kinds": {
+   "<none>": 4
+  },
+  "mode": {
+   "screen": 4,
+   "verify": 2
+  },
+  "objver": [
+   3
+  ],
+  "ok": 4,
+  "rows": 4,
+  "runs": 6
+ },
+ "abl_s1_lip12_a3": {
+  "kinds": {
+   "<none>": 3
+  },
+  "mode": {
+   "screen": 2,
+   "verify": 1
+  },
+  "objver": [
+   3
+  ],
+  "ok": 3,
+  "rows": 3,
+  "runs": 3
+ },
+ "abl_s1_lip12_a6": {
+  "kinds": {
+   "<none>": 2
+  },
+  "mode": {
+   "screen": 1,
+   "verify": 1
+  },
+  "objver": [
+   3
+  ],
+  "ok": 2,
+  "rows": 2,
+  "runs": 2
+ },
+ "abl_s1_lip6_a3": {
+  "kinds": {
+   "<none>": 2
+  },
+  "mode": {
+   "screen": 1,
+   "verify": 1
+  },
+  "objver": [
+   3
+  ],
+  "ok": 2,
+  "rows": 2,
+  "runs": 2
+ },
+ "abl_s2_wall12_a3": {
+  "kinds": {
+   "<none>": 2
+  },
+  "mode": {
+   "screen": 1,
+   "verify": 1
+  },
+  "objver": [
+   3
+  ],
+  "ok": 2,
+  "rows": 2,
+  "runs": 2
+ },
+ "ath_a0_control": {
+  "kinds": {
+   "<none>": 2
+  },
+  "mode": {
+   "screen": 1,
+   "verify": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 2,
+  "rows": 2,
+  "runs": 2
+ },
+ "ath_a1_core": {
+  "kinds": {
+   "<none>": 3
+  },
+  "mode": {
+   "screen": 2,
+   "verify": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 3,
+  "rows": 3,
+  "runs": 3
+ },
+ "ath_a1_cos_only": {
+  "kinds": {
+   "<none>": 2,
+   "invalid_geometry": 1
+  },
+  "mode": {
+   "screen": 2,
+   "verify": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 2,
+  "rows": 3,
+  "runs": 3
+ },
+ "ath_a1_sf_only": {
+  "kinds": {
+   "<none>": 2
+  },
+  "mode": {
+   "screen": 1,
+   "verify": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 2,
+  "rows": 2,
+  "runs": 2
+ },
+ "ath_a2_hex": {
+  "kinds": {
+   "invalid_geometry": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 0,
+  "rows": 1,
+  "runs": 1
+ },
+ "ath_a2_oct": {
+  "kinds": {
+   "<none>": 2
+  },
+  "mode": {
+   "screen": 1,
+   "verify": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 2,
+  "rows": 2,
+  "runs": 2
+ },
+ "atlas__ath_core": {
+  "kinds": {
+   "<none>": 1438,
+   "invalid_geometry": 173,
+   "mesh_too_large": 114,
+   "solve_failed": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 1438,
+  "rows": 1726,
+  "runs": 1
+ },
+ "atlas__core_law": {
+  "kinds": {
+   "<none>": 766,
+   "invalid_geometry": 397,
+   "mesh_too_large": 137,
+   "solve_failed": 2
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   4
+  ],
+  "ok": 766,
+  "rows": 1302,
+  "runs": 2
+ },
+ "atlas__hyb_osse_h_hypex_v": {
+  "kinds": {
+   "<none>": 1121,
+   "invalid_envelope": 6,
+   "invalid_geometry": 298
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   4
+  ],
+  "ok": 1121,
+  "rows": 1425,
+  "runs": 2
+ },
+ "atlas__osse_ext_throat": {
+  "kinds": {
+   "<none>": 281,
+   "invalid_geometry": 120
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   7
+  ],
+  "ok": 281,
+  "rows": 401,
+  "runs": 1
+ },
+ "b1t__lecleach_iwata_ar": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   3
+  ],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "b1t__lecleach_iwata_ar_v4": {
+  "kinds": {
+   "<none>": 199,
+   "invalid_envelope": 5
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   4
+  ],
+  "ok": 199,
+  "rows": 204,
+  "runs": 2
+ },
+ "b1t__rosse_morph": {
+  "kinds": {
+   "<none>": 15,
+   "invalid_geometry": 17
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   3
+  ],
+  "ok": 15,
+  "rows": 32,
+  "runs": 2
+ },
+ "b1t__rosse_morph_round_v4": {
+  "kinds": {
+   "invalid_geometry": 12,
+   "mesh_too_large": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 0,
+  "rows": 13,
+  "runs": 1
+ },
+ "b1t__rosse_morph_v4": {
+  "kinds": {
+   "<none>": 150,
+   "invalid_geometry": 60,
+   "mesh_too_large": 1
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   4
+  ],
+  "ok": 150,
+  "rows": 211,
+  "runs": 2
+ },
+ "b1t__salmon_x_signed": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   3
+  ],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "b1t__salmon_x_signed_v4": {
+  "kinds": {
+   "<none>": 173,
+   "invalid_envelope": 30,
+   "invalid_geometry": 1
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   4
+  ],
+  "ok": 173,
+  "rows": 204,
+  "runs": 2
+ },
+ "b1w__biradial_keele": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   3
+  ],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "b1w__biradial_keele_v4": {
+  "kinds": {
+   "<none>": 2,
+   "invalid_geometry": 10
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   4
+  ],
+  "ok": 2,
+  "rows": 12,
+  "runs": 2
+ },
+ "b1w__osse_baseline": {
+  "kinds": {
+   "<none>": 26,
+   "invalid_geometry": 6
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   3
+  ],
+  "ok": 26,
+  "rows": 32,
+  "runs": 2
+ },
+ "b1w__osse_baseline_v4": {
+  "kinds": {
+   "<none>": 159,
+   "invalid_geometry": 59
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   4
+  ],
+  "ok": 159,
+  "rows": 218,
+  "runs": 2
+ },
+ "b1w__osse_ext_throat_seed5678": {
+  "kinds": {
+   "<none>": 83,
+   "invalid_geometry": 18
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   7
+  ],
+  "ok": 83,
+  "rows": 101,
+  "runs": 1
+ },
+ "b1w__osse_ext_throat_v5": {
+  "kinds": {
+   "<none>": 85,
+   "invalid_geometry": 16
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   7
+  ],
+  "ok": 85,
+  "rows": 101,
+  "runs": 2
+ },
+ "b2t__lecleach_iwata_ar": {
+  "kinds": {
+   "<none>": 22,
+   "invalid_envelope": 10
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   3
+  ],
+  "ok": 22,
+  "rows": 32,
+  "runs": 2
+ },
+ "b2t__lecleach_iwata_ar_v4": {
+  "kinds": {
+   "<none>": 161,
+   "invalid_envelope": 63
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   4
+  ],
+  "ok": 161,
+  "rows": 224,
+  "runs": 2
+ },
+ "b2t__rosse_morph": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   3
+  ],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "b2t__rosse_morph_round_v4": {
+  "kinds": {
+   "invalid_geometry": 11,
+   "mesh_too_large": 2
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 0,
+  "rows": 13,
+  "runs": 1
+ },
+ "b2t__rosse_morph_v4": {
+  "kinds": {
+   "<none>": 144,
+   "invalid_geometry": 88,
+   "mesh_too_large": 5,
+   "solve_failed": 8
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   4
+  ],
+  "ok": 144,
+  "rows": 245,
+  "runs": 2
+ },
+ "b2t__salmon_elliptical": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   3
+  ],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "b2t__salmon_elliptical_v4": {
+  "kinds": {
+   "<none>": 185,
+   "invalid_envelope": 19
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   4
+  ],
+  "ok": 185,
+  "rows": 204,
+  "runs": 2
+ },
+ "b2w__hyb_osse_h_hypex_v": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   3
+  ],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "b2w__hyb_osse_h_hypex_v_v4": {
+  "kinds": {
+   "<none>": 138,
+   "invalid_envelope": 19,
+   "invalid_geometry": 47
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   4
+  ],
+  "ok": 138,
+  "rows": 204,
+  "runs": 2
+ },
+ "b2w__osse_baseline": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   3
+  ],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "b2w__osse_baseline_v4": {
+  "kinds": {
+   "<none>": 128,
+   "invalid_geometry": 75
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   4
+  ],
+  "ok": 128,
+  "rows": 203,
+  "runs": 2
+ },
+ "b3a__ath_core_14in": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   3
+  ],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "b3a__ath_core_14in_v4": {
+  "kinds": {
+   "<none>": 77,
+   "invalid_geometry": 56,
+   "mesh_too_large": 1
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   4
+  ],
+  "ok": 77,
+  "rows": 134,
+  "runs": 2
+ },
+ "b3a__biradial_keele": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   3
+  ],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "b3a__biradial_keele_v4": {
+  "kinds": {
+   "<none>": 169,
+   "invalid_geometry": 35
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   4
+  ],
+  "ok": 169,
+  "rows": 204,
+  "runs": 2
+ },
+ "b3a__lecleach_rollback": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   3
+  ],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "b3a__lecleach_rollback_v4": {
+  "kinds": {
+   "<none>": 196,
+   "invalid_envelope": 8
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   4
+  ],
+  "ok": 196,
+  "rows": 204,
+  "runs": 2
+ },
+ "b3a__osse_ext_throat_72x72_600_v5": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   7
+  ],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "b3a__osse_ext_throat_75x60_600_v5": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   7
+  ],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "b3a__osse_ext_throat_80x80_600_seed5678": {
+  "kinds": {
+   "<none>": 96,
+   "invalid_geometry": 14
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   7
+  ],
+  "ok": 96,
+  "rows": 110,
+  "runs": 1
+ },
+ "b3a__osse_ext_throat_80x80_600_v5": {
+  "kinds": {
+   "<none>": 211
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   7
+  ],
+  "ok": 211,
+  "rows": 211,
+  "runs": 2
+ },
+ "b3a__osse_ext_throat_seed5678": {
+  "kinds": {
+   "<none>": 100,
+   "invalid_geometry": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   7
+  ],
+  "ok": 100,
+  "rows": 101,
+  "runs": 1
+ },
+ "b3a__osse_ext_throat_v5": {
+  "kinds": {
+   "<none>": 192,
+   "invalid_geometry": 13
+  },
+  "mode": {
+   "screen": 2,
+   "verify": 4
+  },
+  "objver": [
+   7
+  ],
+  "ok": 192,
+  "rows": 205,
+  "runs": 6
+ },
+ "b3a__rosse_morph": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   3
+  ],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "b3a__rosse_morph_round_v4": {
+  "kinds": {
+   "<none>": 112,
+   "invalid_geometry": 14,
+   "mesh_too_large": 3,
+   "solve_failed": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 112,
+  "rows": 130,
+  "runs": 1
+ },
+ "b3a__rosse_morph_v4": {
+  "kinds": {
+   "<none>": 106,
+   "invalid_geometry": 43,
+   "mesh_too_large": 14
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   4
+  ],
+  "ok": 106,
+  "rows": 163,
+  "runs": 2
+ },
+ "b3bt__lecleach_iwata_ar": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   3
+  ],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "b3bt__lecleach_iwata_ar_v4": {
+  "kinds": {
+   "<none>": 195,
+   "invalid_envelope": 9
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   4
+  ],
+  "ok": 195,
+  "rows": 204,
+  "runs": 2
+ },
+ "b3bt__osse_ext_throat_seed5678": {
+  "kinds": {
+   "<none>": 83,
+   "invalid_geometry": 18
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   7
+  ],
+  "ok": 83,
+  "rows": 101,
+  "runs": 1
+ },
+ "b3bt__osse_ext_throat_v5": {
+  "kinds": {
+   "<none>": 116,
+   "invalid_geometry": 26
+  },
+  "mode": {
+   "screen": 3,
+   "verify": 4
+  },
+  "objver": [
+   7
+  ],
+  "ok": 116,
+  "rows": 142,
+  "runs": 7
+ },
+ "b3bt__rosse_morph": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   3
+  ],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "b3bt__rosse_morph_round_v4": {
+  "kinds": {
+   "<none>": 68,
+   "invalid_geometry": 12
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 68,
+  "rows": 80,
+  "runs": 1
+ },
+ "b3bt__rosse_morph_v4": {
+  "kinds": {
+   "<none>": 126,
+   "invalid_geometry": 29,
+   "mesh_too_large": 8
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   4
+  ],
+  "ok": 126,
+  "rows": 163,
+  "runs": 2
+ },
+ "b3bt__salmon_x_signed": {
+  "kinds": {
+   "<none>": 13,
+   "invalid_envelope": 16,
+   "invalid_geometry": 3
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   3
+  ],
+  "ok": 13,
+  "rows": 32,
+  "runs": 2
+ },
+ "b3bt__salmon_x_signed_v4": {
+  "kinds": {
+   "<none>": 150,
+   "invalid_envelope": 58,
+   "invalid_geometry": 5
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   4
+  ],
+  "ok": 150,
+  "rows": 213,
+  "runs": 2
+ },
+ "b3bw__biradial_keele": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   3
+  ],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "b3bw__biradial_keele_v4": {
+  "kinds": {
+   "<none>": 2,
+   "invalid_geometry": 10
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   4
+  ],
+  "ok": 2,
+  "rows": 12,
+  "runs": 2
+ },
+ "b3bw__hyb_osse_h_hypex_v": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   3
+  ],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "b3bw__hyb_osse_h_hypex_v_v4": {
+  "kinds": {
+   "<none>": 134,
+   "invalid_envelope": 10,
+   "invalid_geometry": 60
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   4
+  ],
+  "ok": 134,
+  "rows": 204,
+  "runs": 2
+ },
+ "biradial_keele": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   1
+  ],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "blend_conical_exponential": {
+  "kinds": {
+   "<none>": 120
+  },
+  "mode": {
+   "screen": 3
+  },
+  "objver": [],
+  "ok": 120,
+  "rows": 120,
+  "runs": 3
+ },
+ "blend_osse_tractrix": {
+  "kinds": {
+   "<none>": 354,
+   "invalid_geometry": 69
+  },
+  "mode": {
+   "screen": 5,
+   "verify": 1
+  },
+  "objver": [],
+  "ok": 354,
+  "rows": 423,
+  "runs": 6
+ },
+ "chanterelle__golden_search_v4": {
+  "kinds": {
+   "<none>": 36,
+   "mesh_too_large": 5
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 36,
+  "rows": 41,
+  "runs": 1
+ },
+ "chanterelle__golden_v4": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "chanterelle__ruffled_search_v4": {
+  "kinds": {
+   "<none>": 41
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 41,
+  "rows": 41,
+  "runs": 1
+ },
+ "chanterelle__ruffled_v4": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "chanterelle__trumpet_search_v4": {
+  "kinds": {
+   "<none>": 40,
+   "mesh_too_large": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 40,
+  "rows": 41,
+  "runs": 1
+ },
+ "chanterelle__trumpet_v4": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "cone_plughorn__evo2sh_wide": {
+  "kinds": {
+   "<none>": 5,
+   "invalid_geometry": 7
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   1
+  ],
+  "ok": 5,
+  "rows": 12,
+  "runs": 1
+ },
+ "cone_plughorn__evo7sh_narrow": {
+  "kinds": {
+   "<none>": 9,
+   "invalid_geometry": 4
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   1
+  ],
+  "ok": 9,
+  "rows": 13,
+  "runs": 2
+ },
+ "cone_plughorn__morph_narrow_10in": {
+  "kinds": {
+   "<none>": 12,
+   "solve_failed": 1
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   1
+  ],
+  "ok": 12,
+  "rows": 13,
+  "runs": 2
+ },
+ "cone_plughorn__morph_narrow_12in": {
+  "kinds": {
+   "<none>": 9,
+   "invalid_geometry": 4
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   1
+  ],
+  "ok": 9,
+  "rows": 13,
+  "runs": 2
+ },
+ "cone_plughorn__morph_wide_8in": {
+  "kinds": {
+   "<none>": 15,
+   "invalid_geometry": 1
+  },
+  "mode": {
+   "screen": 4
+  },
+  "objver": [
+   1
+  ],
+  "ok": 15,
+  "rows": 16,
+  "runs": 4
+ },
+ "conical": {
+  "kinds": {
+   "<none>": 203
+  },
+  "mode": {
+   "screen": 7
+  },
+  "objver": [
+   1
+  ],
+  "ok": 203,
+  "rows": 203,
+  "runs": 7
+ },
+ "conical_a16": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "conical_a48": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "control__osse_morph_b1w": {
+  "kinds": {
+   "<none>": 41,
+   "invalid_geometry": 21
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   3
+  ],
+  "ok": 41,
+  "rows": 62,
+  "runs": 2
+ },
+ "control__osse_morph_b1w_round_v4": {
+  "kinds": {
+   "<none>": 70,
+   "invalid_geometry": 10
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 70,
+  "rows": 80,
+  "runs": 1
+ },
+ "control__osse_morph_b1w_v4": {
+  "kinds": {
+   "<none>": 175,
+   "invalid_geometry": 41
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   4
+  ],
+  "ok": 175,
+  "rows": 216,
+  "runs": 2
+ },
+ "crease__core_law": {
+  "kinds": {
+   "<none>": 45,
+   "invalid_geometry": 17,
+   "mesh_too_large": 6
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   3
+  ],
+  "ok": 45,
+  "rows": 68,
+  "runs": 2
+ },
+ "crease__core_law_v4": {
+  "kinds": {
+   "<none>": 175,
+   "invalid_geometry": 34,
+   "mesh_too_large": 5
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   4
+  ],
+  "ok": 175,
+  "rows": 214,
+  "runs": 2
+ },
+ "crease__osse_b1w": {
+  "kinds": {
+   "<none>": 45,
+   "invalid_geometry": 17
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   3
+  ],
+  "ok": 45,
+  "rows": 62,
+  "runs": 2
+ },
+ "crease__osse_b1w_round_v4": {
+  "kinds": {
+   "<none>": 58,
+   "invalid_geometry": 22
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 58,
+  "rows": 80,
+  "runs": 1
+ },
+ "crease__osse_b1w_v4": {
+  "kinds": {
+   "<none>": 220,
+   "invalid_geometry": 130
+  },
+  "mode": {
+   "screen": 4
+  },
+  "objver": [
+   4
+  ],
+  "ok": 220,
+  "rows": 350,
+  "runs": 4
+ },
+ "exponential": {
+  "kinds": {
+   "<none>": 501
+  },
+  "mode": {
+   "screen": 7
+  },
+  "objver": [],
+  "ok": 501,
+  "rows": 501,
+  "runs": 7
+ },
+ "exponential_a16": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "exponential_a48": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "fid_ang145": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "verify": 1
+  },
+  "objver": [
+   3
+  ],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "fid_dist8m": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "verify": 1
+  },
+  "objver": [
+   3
+  ],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "fid_epw10": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "verify": 1
+  },
+  "objver": [
+   3
+  ],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "fid_epw6": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "verify": 1
+  },
+  "objver": [
+   3
+  ],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "freeform_hv": {
+  "kinds": {
+   "<none>": 760,
+   "invalid_geometry": 2
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [],
+  "ok": 760,
+  "rows": 762,
+  "runs": 2
+ },
+ "freeform_narrow880": {
+  "kinds": {
+   "<none>": 8
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   3
+  ],
+  "ok": 8,
+  "rows": 8,
+  "runs": 1
+ },
+ "freeform_sculpt": {
+  "kinds": {
+   "<none>": 7351,
+   "invalid_geometry": 65
+  },
+  "mode": {
+   "screen": 42
+  },
+  "objver": [
+   1,
+   2
+  ],
+  "ok": 7351,
+  "rows": 7416,
+  "runs": 42
+ },
+ "freeform_sculpt_symcheck_full": {
+  "kinds": {
+   "<none>": 2
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   1
+  ],
+  "ok": 2,
+  "rows": 2,
+  "runs": 2
+ },
+ "freeform_sculpt_symcheck_quarter": {
+  "kinds": {
+   "<none>": 2
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   1
+  ],
+  "ok": 2,
+  "rows": 2,
+  "runs": 2
+ },
+ "gcurve__osse_b1w": {
+  "kinds": {
+   "<none>": 3,
+   "invalid_geometry": 12,
+   "mesh_too_large": 3
+  },
+  "mode": {
+   "screen": 7
+  },
+  "objver": [
+   3
+  ],
+  "ok": 3,
+  "rows": 18,
+  "runs": 7
+ },
+ "gcurve__osse_b1w_v4": {
+  "kinds": {
+   "<none>": 140,
+   "invalid_geometry": 63
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   4
+  ],
+  "ok": 140,
+  "rows": 203,
+  "runs": 2
+ },
+ "grid_ellipse": {
+  "kinds": {
+   "<none>": 5
+  },
+  "mode": {
+   "screen": 5
+  },
+  "objver": [
+   1
+  ],
+  "ok": 5,
+  "rows": 5,
+  "runs": 5
+ },
+ "grid_ellipse_mod": {
+  "kinds": {
+   "<none>": 53
+  },
+  "mode": {
+   "screen": 7
+  },
+  "objver": [
+   1,
+   3
+  ],
+  "ok": 53,
+  "rows": 53,
+  "runs": 7
+ },
+ "hl__ath_core_petal_hvlaw_v7": {
+  "kinds": {
+   "<none>": 46,
+   "invalid_geometry": 34
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   7
+  ],
+  "ok": 46,
+  "rows": 80,
+  "runs": 1
+ },
+ "hl__ath_tritonia_landscape_v7": {
+  "kinds": {
+   "<none>": 15,
+   "invalid_geometry": 6
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   7
+  ],
+  "ok": 15,
+  "rows": 21,
+  "runs": 2
+ },
+ "hl__ath_tritonia_landscape_v8": {
+  "kinds": {
+   "<none>": 112,
+   "invalid_geometry": 1
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   7
+  ],
+  "ok": 112,
+  "rows": 113,
+  "runs": 2
+ },
+ "hl__ath_tritonia_landscape_v9": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   7
+  ],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "hl__ath_twinray380_landscape_v8": {
+  "kinds": {
+   "<none>": 161,
+   "invalid_geometry": 5
+  },
+  "mode": {
+   "screen": 4
+  },
+  "objver": [
+   7
+  ],
+  "ok": 161,
+  "rows": 166,
+  "runs": 4
+ },
+ "hl__biradial_es_style_smooth_v7": {
+  "kinds": {
+   "<none>": 214
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   7
+  ],
+  "ok": 214,
+  "rows": 214,
+  "runs": 2
+ },
+ "hl__biradial_es_style_v7": {
+  "kinds": {
+   "<none>": 309,
+   "invalid_envelope": 2,
+   "invalid_geometry": 17
+  },
+  "mode": {
+   "screen": 4
+  },
+  "objver": [
+   7
+  ],
+  "ok": 309,
+  "rows": 328,
+  "runs": 4
+ },
+ "hl__crowe_panel_home_v7": {
+  "kinds": {
+   "<none>": 158
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   7
+  ],
+  "ok": 158,
+  "rows": 158,
+  "runs": 2
+ },
+ "hl__crowe_x_osse_cd_v7": {
+  "kinds": {
+   "<none>": 202,
+   "invalid_envelope": 56
+  },
+  "mode": {
+   "screen": 4
+  },
+  "objver": [
+   7
+  ],
+  "ok": 202,
+  "rows": 258,
+  "runs": 4
+ },
+ "hl__crowe_x_square_v7": {
+  "kinds": {
+   "<none>": 31,
+   "invalid_envelope": 20
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   7
+  ],
+  "ok": 31,
+  "rows": 51,
+  "runs": 2
+ },
+ "hl__es_style_rollback_v7": {
+  "kinds": {
+   "<none>": 79,
+   "invalid_envelope": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   7
+  ],
+  "ok": 79,
+  "rows": 80,
+  "runs": 1
+ },
+ "hl__ext_throat_hvlaw_v7": {
+  "kinds": {
+   "<none>": 137,
+   "invalid_geometry": 64
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   7
+  ],
+  "ok": 137,
+  "rows": 201,
+  "runs": 2
+ },
+ "hl__ext_throat_hvlaw_v8": {
+  "kinds": {
+   "<none>": 24,
+   "invalid_geometry": 22
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   7
+  ],
+  "ok": 24,
+  "rows": 46,
+  "runs": 1
+ },
+ "hl__klangfilm_lame_curved_v1": {
+  "kinds": {
+   "<none>": 417,
+   "invalid_geometry": 121
+  },
+  "mode": {
+   "screen": 14
+  },
+  "objver": [
+   7
+  ],
+  "ok": 417,
+  "rows": 538,
+  "runs": 14
+ },
+ "hl__lecleach_hv_landscape_smooth_v7": {
+  "kinds": {
+   "<none>": 41,
+   "invalid_envelope": 5,
+   "invalid_geometry": 2
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   7
+  ],
+  "ok": 41,
+  "rows": 48,
+  "runs": 2
+ },
+ "hl__lecleach_iwata_ar_landscape_smooth_v7": {
+  "kinds": {
+   "<none>": 89,
+   "invalid_geometry": 2
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   7
+  ],
+  "ok": 89,
+  "rows": 91,
+  "runs": 2
+ },
+ "hl__lecleach_iwata_ar_landscape_v7": {
+  "kinds": {
+   "<none>": 80
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   7
+  ],
+  "ok": 80,
+  "rows": 80,
+  "runs": 1
+ },
+ "hl__osse_rrect_fold_warm_v7": {
+  "kinds": {
+   "<none>": 248
+  },
+  "mode": {
+   "screen": 4
+  },
+  "objver": [
+   7
+  ],
+  "ok": 248,
+  "rows": 248,
+  "runs": 4
+ },
+ "hl__osse_rrect_morph_v7": {
+  "kinds": {
+   "<none>": 75,
+   "invalid_geometry": 5
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   7
+  ],
+  "ok": 75,
+  "rows": 80,
+  "runs": 1
+ },
+ "hl__osse_rrect_morph_v8": {
+  "kinds": {
+   "<none>": 32,
+   "invalid_geometry": 8
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   7
+  ],
+  "ok": 32,
+  "rows": 40,
+  "runs": 1
+ },
+ "hl__rolled_es_spiral_v7": {
+  "kinds": {
+   "<none>": 61
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   7
+  ],
+  "ok": 61,
+  "rows": 61,
+  "runs": 2
+ },
+ "hl__rosse_rect_cd_v7": {
+  "kinds": {
+   "<none>": 254,
+   "invalid_geometry": 2
+  },
+  "mode": {
+   "screen": 5
+  },
+  "objver": [
+   7
+  ],
+  "ok": 254,
+  "rows": 256,
+  "runs": 5
+ },
+ "hyb_osse_h_hypex_v": {
+  "kinds": {
+   "<none>": 396,
+   "invalid_geometry": 54
+  },
+  "mode": {
+   "screen": 5
+  },
+  "objver": [
+   3
+  ],
+  "ok": 396,
+  "rows": 450,
+  "runs": 5
+ },
+ "hyb_osse_h_tractrix_v": {
+  "kinds": {
+   "<none>": 64,
+   "invalid_geometry": 16
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [],
+  "ok": 64,
+  "rows": 80,
+  "runs": 2
+ },
+ "hybrid__ns_60x40_deep_v4": {
+  "kinds": {
+   "<none>": 27,
+   "invalid_envelope": 13
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 27,
+  "rows": 40,
+  "runs": 1
+ },
+ "hybrid__ns_72x44_v4": {
+  "kinds": {
+   "<none>": 32,
+   "invalid_envelope": 8
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 32,
+  "rows": 40,
+  "runs": 1
+ },
+ "hybrid__os_curl_v4": {
+  "kinds": {
+   "<none>": 37,
+   "invalid_envelope": 3
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 37,
+  "rows": 40,
+  "runs": 1
+ },
+ "hybrid__os_deepflute_v4": {
+  "kinds": {
+   "<none>": 33,
+   "invalid_envelope": 7
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 33,
+  "rows": 40,
+  "runs": 1
+ },
+ "hybrid__os_ruffle_v4": {
+  "kinds": {
+   "<none>": 39,
+   "invalid_envelope": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 39,
+  "rows": 40,
+  "runs": 1
+ },
+ "hybrid__osse_flare_curl_v4": {
+  "kinds": {
+   "<none>": 38,
+   "invalid_envelope": 2
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 38,
+  "rows": 40,
+  "runs": 1
+ },
+ "hybrid__sf_star6_v4": {
+  "kinds": {
+   "<none>": 30,
+   "invalid_envelope": 10
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 30,
+  "rows": 40,
+  "runs": 1
+ },
+ "hybrid__sf_x4_v4": {
+  "kinds": {
+   "<none>": 39,
+   "invalid_envelope": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 39,
+  "rows": 40,
+  "runs": 1
+ },
+ "hypex": {
+  "kinds": {
+   "<none>": 420
+  },
+  "mode": {
+   "screen": 5
+  },
+  "objver": [],
+  "ok": 420,
+  "rows": 420,
+  "runs": 5
+ },
+ "icw_rollback": {
+  "kinds": {
+   "<none>": 100
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [],
+  "ok": 100,
+  "rows": 100,
+  "runs": 2
+ },
+ "icw_termination": {
+  "kinds": {
+   "<none>": 1756,
+   "invalid_geometry": 47,
+   "mesh_too_large": 24
+  },
+  "mode": {
+   "screen": 5
+  },
+  "objver": [],
+  "ok": 1756,
+  "rows": 1827,
+  "runs": 5
+ },
+ "joint__crease_core_law": {
+  "kinds": {
+   "<none>": 70,
+   "invalid_geometry": 27,
+   "mesh_too_large": 7
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   3
+  ],
+  "ok": 70,
+  "rows": 104,
+  "runs": 1
+ },
+ "lecleach_asym_odd": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   1
+  ],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "lecleach_f90": {
+  "kinds": {
+   "<none>": 34,
+   "invalid_geometry": 9
+  },
+  "mode": {
+   "screen": 4
+  },
+  "objver": [
+   1
+  ],
+  "ok": 34,
+  "rows": 43,
+  "runs": 4
+ },
+ "lecleach_iwata_ar": {
+  "kinds": {
+   "<none>": 63,
+   "invalid_geometry": 18
+  },
+  "mode": {
+   "screen": 5
+  },
+  "objver": [
+   1,
+   2,
+   3
+  ],
+  "ok": 63,
+  "rows": 81,
+  "runs": 5
+ },
+ "lecleach_rollback": {
+  "kinds": {
+   "<none>": 1082,
+   "exception": 5,
+   "invalid_geometry": 39
+  },
+  "mode": {
+   "screen": 7
+  },
+  "objver": [
+   1,
+   6
+  ],
+  "ok": 1082,
+  "rows": 1126,
+  "runs": 7
+ },
+ "lecleach_toroidal": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   1
+  ],
+  "ok": 1,
+  "rows": 1,
+  "runs": 2
+ },
+ "meh_t1_search": {
+  "kinds": {
+   "<none>": 31,
+   "invalid_geometry": 11,
+   "mesh_too_large": 4,
+   "solve_failed": 7
+  },
+  "mode": {
+   "screen": 3
+  },
+  "objver": [
+   5
+  ],
+  "ok": 31,
+  "rows": 53,
+  "runs": 3
+ },
+ "meh_t2a_search": {
+  "kinds": {
+   "<none>": 38,
+   "invalid_geometry": 3,
+   "mesh_too_large": 13,
+   "solve_failed": 14
+  },
+  "mode": {
+   "screen": 4
+  },
+  "objver": [
+   5
+  ],
+  "ok": 38,
+  "rows": 68,
+  "runs": 4
+ },
+ "native__ath_core": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   3
+  ],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "native__ath_core_v4": {
+  "kinds": {
+   "<none>": 391,
+   "invalid_geometry": 14
+  },
+  "mode": {
+   "screen": 3
+  },
+  "objver": [
+   4
+  ],
+  "ok": 391,
+  "rows": 405,
+  "runs": 3
+ },
+ "native__ath_core_v4_narrow": {
+  "kinds": {
+   "<none>": 217,
+   "invalid_geometry": 3,
+   "mesh_too_large": 2
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   4
+  ],
+  "ok": 217,
+  "rows": 222,
+  "runs": 2
+ },
+ "native__ath_twinray_380": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   3
+  ],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "native__ath_twinray_380_v4": {
+  "kinds": {
+   "<none>": 124,
+   "invalid_geometry": 81
+  },
+  "mode": {
+   "screen": 2,
+   "verify": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 124,
+  "rows": 205,
+  "runs": 3
+ },
+ "native__lecleach_asym_odd": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   3
+  ],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "native__lecleach_asym_odd_v4": {
+  "kinds": {
+   "<none>": 204
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   4
+  ],
+  "ok": 204,
+  "rows": 204,
+  "runs": 2
+ },
+ "native__lecleach_rollback": {
+  "kinds": {
+   "<none>": 75
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   3
+  ],
+  "ok": 75,
+  "rows": 75,
+  "runs": 2
+ },
+ "native__lecleach_rollback_v4": {
+  "kinds": {
+   "<none>": 218
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   4
+  ],
+  "ok": 218,
+  "rows": 218,
+  "runs": 2
+ },
+ "osse_axi": {
+  "kinds": {
+   "<none>": 411,
+   "invalid_geometry": 17
+  },
+  "mode": {
+   "screen": 9,
+   "verify": 2
+  },
+  "objver": [
+   1
+  ],
+  "ok": 411,
+  "rows": 428,
+  "runs": 11
+ },
+ "osse_axi_fusedcuda": {
+  "kinds": {
+   "<none>": 2
+  },
+  "mode": {
+   "screen": 1,
+   "verify": 1
+  },
+  "objver": [
+   1
+  ],
+  "ok": 2,
+  "rows": 2,
+  "runs": 2
+ },
+ "osse_baseline": {
+  "kinds": {
+   "<none>": 3438,
+   "invalid_geometry": 30,
+   "mesh_too_large": 436,
+   "solve_failed": 21
+  },
+  "mode": {
+   "screen": 9
+  },
+  "objver": [
+   1
+  ],
+  "ok": 3438,
+  "rows": 3925,
+  "runs": 9
+ },
+ "osse_baseline_open40": {
+  "kinds": {
+   "<none>": 16,
+   "invalid_geometry": 16,
+   "mesh_too_large": 8
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   1
+  ],
+  "ok": 16,
+  "rows": 40,
+  "runs": 1
+ },
+ "osse_baseline_wide50": {
+  "kinds": {
+   "<none>": 39,
+   "mesh_too_large": 12
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   1
+  ],
+  "ok": 39,
+  "rows": 51,
+  "runs": 1
+ },
+ "p80x60__ath_core14_corelaw_v7": {
+  "kinds": {
+   "<none>": 89,
+   "invalid_geometry": 11
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   7
+  ],
+  "ok": 89,
+  "rows": 100,
+  "runs": 1
+ },
+ "p80x60__ath_core_14in_home700_v7": {
+  "kinds": {
+   "<none>": 457,
+   "invalid_geometry": 63,
+   "mesh_too_large": 11,
+   "solve_failed": 1
+  },
+  "mode": {
+   "screen": 9
+  },
+  "objver": [
+   7
+  ],
+  "ok": 457,
+  "rows": 532,
+  "runs": 9
+ },
+ "p80x60__ext_throat_cmacmp_v7": {
+  "kinds": {
+   "<none>": 123,
+   "invalid_geometry": 59
+  },
+  "mode": {
+   "screen": 3
+  },
+  "objver": [
+   7
+  ],
+  "ok": 123,
+  "rows": 182,
+  "runs": 3
+ },
+ "p80x60__ext_throat_corelaw_v7": {
+  "kinds": {
+   "<none>": 208,
+   "invalid_geometry": 93,
+   "mesh_too_large": 1
+  },
+  "mode": {
+   "screen": 3
+  },
+  "objver": [
+   7
+  ],
+  "ok": 208,
+  "rows": 302,
+  "runs": 3
+ },
+ "p80x60__ext_throat_hvlaw_cov_v7": {
+  "kinds": {
+   "<none>": 232,
+   "invalid_geometry": 9
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   7
+  ],
+  "ok": 232,
+  "rows": 241,
+  "runs": 2
+ },
+ "p80x60__osse_ext_throat_700_v7": {
+  "kinds": {
+   "<none>": 4
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   7
+  ],
+  "ok": 4,
+  "rows": 4,
+  "runs": 1
+ },
+ "p80x60__osse_ext_throat_home700_v7": {
+  "kinds": {
+   "<none>": 231,
+   "invalid_geometry": 34
+  },
+  "mode": {
+   "screen": 8
+  },
+  "objver": [
+   7
+  ],
+  "ok": 231,
+  "rows": 265,
+  "runs": 8
+ },
+ "p80x60__osse_ext_throat_home700_v7_seed5678": {
+  "kinds": {
+   "<none>": 185,
+   "invalid_geometry": 15
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   7
+  ],
+  "ok": 185,
+  "rows": 200,
+  "runs": 1
+ },
+ "perturbed_osse_hv": {
+  "kinds": {
+   "<none>": 938,
+   "invalid_geometry": 428
+  },
+  "mode": {
+   "screen": 7,
+   "verify": 2
+  },
+  "objver": [
+   1,
+   3
+  ],
+  "ok": 938,
+  "rows": 1366,
+  "runs": 9
+ },
+ "perturbed_tractrix": {
+  "kinds": {
+   "<none>": 237,
+   "invalid_geometry": 3
+  },
+  "mode": {
+   "screen": 3
+  },
+  "objver": [],
+  "ok": 237,
+  "rows": 240,
+  "runs": 3
+ },
+ "petal_os__clover_v4": {
+  "kinds": {
+   "<none>": 28,
+   "invalid_envelope": 2
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 28,
+  "rows": 30,
+  "runs": 1
+ },
+ "petal_os__ns_60x40_deep_soft_v4": {
+  "kinds": {
+   "<none>": 14,
+   "invalid_envelope": 16
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 14,
+  "rows": 30,
+  "runs": 1
+ },
+ "petal_os__rosette12_v4": {
+  "kinds": {
+   "<none>": 23,
+   "invalid_envelope": 7
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 23,
+  "rows": 30,
+  "runs": 1
+ },
+ "petal_os__star6_mild_v4": {
+  "kinds": {
+   "<none>": 27,
+   "invalid_envelope": 3
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 27,
+  "rows": 30,
+  "runs": 1
+ },
+ "petal_os__union_soft_flute_v4": {
+  "kinds": {
+   "<none>": 25,
+   "invalid_envelope": 5
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 25,
+  "rows": 30,
+  "runs": 1
+ },
+ "petal_os__union_soft_v4": {
+  "kinds": {
+   "<none>": 27,
+   "invalid_envelope": 3
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 27,
+  "rows": 30,
+  "runs": 1
+ },
+ "petal_os__x4_mild_v4": {
+  "kinds": {
+   "<none>": 30
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 30,
+  "rows": 30,
+  "runs": 1
+ },
+ "qtw_waveguide": {
+  "kinds": {
+   "<none>": 42,
+   "invalid_envelope": 2,
+   "invalid_geometry": 7
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   1,
+   3
+  ],
+  "ok": 42,
+  "rows": 51,
+  "runs": 2
+ },
+ "quatrefoil__fold_xin_v4": {
+  "kinds": {
+   "<none>": 40
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 40,
+  "rows": 40,
+  "runs": 1
+ },
+ "quatrefoil__fold_xout_v4": {
+  "kinds": {
+   "<none>": 40
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 40,
+  "rows": 40,
+  "runs": 1
+ },
+ "quatrefoil__union_noflute_v4": {
+  "kinds": {
+   "<none>": 40
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 40,
+  "rows": 40,
+  "runs": 1
+ },
+ "quatrefoil__union_v4": {
+  "kinds": {
+   "<none>": 40
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 40,
+  "rows": 40,
+  "runs": 1
+ },
+ "rf__rect_radial_wide_v7": {
+  "kinds": {
+   "<none>": 2
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   7
+  ],
+  "ok": 2,
+  "rows": 2,
+  "runs": 1
+ },
+ "rf__section_axial_home_smooth_v8": {
+  "kinds": {
+   "<none>": 55
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   7
+  ],
+  "ok": 55,
+  "rows": 55,
+  "runs": 1
+ },
+ "rf__section_axial_home_v7": {
+  "kinds": {
+   "<none>": 51
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   7
+  ],
+  "ok": 51,
+  "rows": 51,
+  "runs": 2
+ },
+ "ridge__ath_core_law8_v4": {
+  "kinds": {
+   "<none>": 69,
+   "invalid_geometry": 25,
+   "mesh_too_large": 6
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 69,
+  "rows": 100,
+  "runs": 1
+ },
+ "ripple__salmon_flute10_s125_b1t_v4": {
+  "kinds": {
+   "<none>": 79,
+   "invalid_envelope": 20,
+   "invalid_geometry": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 79,
+  "rows": 100,
+  "runs": 1
+ },
+ "ripple__salmon_flute6_s125_b1t_v4": {
+  "kinds": {
+   "<none>": 80,
+   "invalid_envelope": 20
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 80,
+  "rows": 100,
+  "runs": 1
+ },
+ "ripple__salmon_flute8_b1t_v4": {
+  "kinds": {
+   "<none>": 70,
+   "invalid_envelope": 30
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 70,
+  "rows": 100,
+  "runs": 1
+ },
+ "ripple__salmon_flute8_s125_b1t_v4": {
+  "kinds": {
+   "<none>": 76,
+   "invalid_envelope": 24
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 76,
+  "rows": 100,
+  "runs": 1
+ },
+ "ripple__salmon_x_flute6_s125_b1t_v4": {
+  "kinds": {
+   "<none>": 88,
+   "invalid_envelope": 12
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 88,
+  "rows": 100,
+  "runs": 1
+ },
+ "ripple__salmon_x_flute8_b1t_v4": {
+  "kinds": {
+   "<none>": 76,
+   "invalid_envelope": 22,
+   "invalid_geometry": 2
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 76,
+  "rows": 100,
+  "runs": 1
+ },
+ "ripple__salmon_x_flute8_s125_b1t_v4": {
+  "kinds": {
+   "<none>": 69,
+   "invalid_envelope": 30,
+   "invalid_geometry": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 69,
+  "rows": 100,
+  "runs": 1
+ },
+ "room__osse_ext_throat_shelf_seed5678": {
+  "kinds": {
+   "<none>": 83,
+   "invalid_geometry": 18
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   7
+  ],
+  "ok": 83,
+  "rows": 101,
+  "runs": 1
+ },
+ "room__osse_ext_throat_shelf_v5": {
+  "kinds": {
+   "<none>": 180,
+   "invalid_geometry": 21
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   7
+  ],
+  "ok": 180,
+  "rows": 201,
+  "runs": 2
+ },
+ "rosse_baseline": {
+  "kinds": {
+   "<none>": 636,
+   "invalid_geometry": 219,
+   "mesh_too_large": 28
+  },
+  "mode": {
+   "screen": 5,
+   "verify": 1
+  },
+  "objver": [],
+  "ok": 636,
+  "rows": 883,
+  "runs": 6
+ },
+ "rr__crowe_panel_es600_v7": {
+  "kinds": {
+   "<none>": 160
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   7
+  ],
+  "ok": 160,
+  "rows": 160,
+  "runs": 2
+ },
+ "rr__pucker_hv_moderate_v7": {
+  "kinds": {
+   "<none>": 32
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   7
+  ],
+  "ok": 32,
+  "rows": 32,
+  "runs": 1
+ },
+ "rr__pucker_hv_strong_v7": {
+  "kinds": {
+   "<none>": 32
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   7
+  ],
+  "ok": 32,
+  "rows": 32,
+  "runs": 1
+ },
+ "rr__reference_v7": {
+  "kinds": {
+   "<none>": 32
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   7
+  ],
+  "ok": 32,
+  "rows": 32,
+  "runs": 1
+ },
+ "sab__core_law_narrow24k": {
+  "kinds": {
+   "<none>": 142,
+   "invalid_geometry": 59
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   4
+  ],
+  "ok": 142,
+  "rows": 201,
+  "runs": 1
+ },
+ "sab__core_law_wide24k": {
+  "kinds": {
+   "<none>": 131,
+   "invalid_geometry": 69,
+   "mesh_too_large": 7
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   4
+  ],
+  "ok": 131,
+  "rows": 207,
+  "runs": 2
+ },
+ "sab__lecleach_ctrl": {
+  "kinds": {
+   "<none>": 285,
+   "invalid_geometry": 16
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   6
+  ],
+  "ok": 285,
+  "rows": 301,
+  "runs": 2
+ },
+ "sab__lecleach_fc540": {
+  "kinds": {
+   "<none>": 267,
+   "invalid_geometry": 35
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   6
+  ],
+  "ok": 267,
+  "rows": 302,
+  "runs": 2
+ },
+ "sab__lecleach_fc540_T_narrow": {
+  "kinds": {
+   "<none>": 302
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   6
+  ],
+  "ok": 302,
+  "rows": 302,
+  "runs": 2
+ },
+ "salmon_elliptical": {
+  "kinds": {
+   "<none>": 70,
+   "exception": 7,
+   "invalid_envelope": 17,
+   "invalid_geometry": 18,
+   "mesh_too_large": 14
+  },
+  "mode": {
+   "screen": 9
+  },
+  "objver": [
+   1,
+   2,
+   3
+  ],
+  "ok": 70,
+  "rows": 126,
+  "runs": 9
+ },
+ "salmon_ripple12": {
+  "kinds": {
+   "invalid_geometry": 9,
+   "mesh_too_large": 4
+  },
+  "mode": {
+   "screen": 4
+  },
+  "objver": [
+   1,
+   3
+  ],
+  "ok": 0,
+  "rows": 13,
+  "runs": 4
+ },
+ "salmon_saddle": {
+  "kinds": {
+   "<none>": 59,
+   "exception": 14,
+   "invalid_envelope": 53,
+   "invalid_geometry": 30,
+   "mesh_too_large": 46
+  },
+  "mode": {
+   "screen": 7
+  },
+  "objver": [
+   1,
+   2,
+   3
+  ],
+  "ok": 59,
+  "rows": 202,
+  "runs": 7
+ },
+ "salmon_x_shape": {
+  "kinds": {
+   "<none>": 77,
+   "exception": 37,
+   "invalid_envelope": 26,
+   "invalid_geometry": 24,
+   "mesh_too_large": 32
+  },
+  "mode": {
+   "screen": 11
+  },
+  "objver": [
+   1,
+   2
+  ],
+  "ok": 77,
+  "rows": 196,
+  "runs": 11
+ },
+ "salmon_x_signed": {
+  "kinds": {
+   "<none>": 35,
+   "invalid_geometry": 14,
+   "mesh_too_large": 12
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [
+   1,
+   3
+  ],
+  "ok": 35,
+  "rows": 61,
+  "runs": 2
+ },
+ "search_smoke": {
+  "kinds": {
+   "<none>": 115,
+   "invalid_geometry": 2,
+   "mesh_too_large": 13
+  },
+  "mode": {
+   "screen": 2
+  },
+  "objver": [],
+  "ok": 115,
+  "rows": 130,
+  "runs": 2
+ },
+ "sp__control_v7": {
+  "kinds": {
+   "<none>": 48
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   7
+  ],
+  "ok": 48,
+  "rows": 48,
+  "runs": 1
+ },
+ "sp__moderate_v7": {
+  "kinds": {
+   "<none>": 47,
+   "invalid_geometry": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   7
+  ],
+  "ok": 47,
+  "rows": 48,
+  "runs": 1
+ },
+ "sp__strong_v7": {
+  "kinds": {
+   "<none>": 47,
+   "invalid_geometry": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   7
+  ],
+  "ok": 47,
+  "rows": 48,
+  "runs": 1
+ },
+ "spherical_salmon": {
+  "kinds": {
+   "<none>": 4
+  },
+  "mode": {
+   "screen": 4
+  },
+  "objver": [
+   1
+  ],
+  "ok": 4,
+  "rows": 4,
+  "runs": 4
+ },
+ "splice_osse_tractrix": {
+  "kinds": {
+   "<none>": 5
+  },
+  "mode": {
+   "screen": 5
+  },
+  "objver": [
+   1
+  ],
+  "ok": 5,
+  "rows": 5,
+  "runs": 5
+ },
+ "stageA_macro__crease_core_law": {
+  "kinds": {
+   "<none>": 19,
+   "invalid_geometry": 2
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   3
+  ],
+  "ok": 19,
+  "rows": 21,
+  "runs": 1
+ },
+ "stageB_shape__crease_core_law": {
+  "kinds": {
+   "<none>": 15,
+   "invalid_geometry": 6
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   3
+  ],
+  "ok": 15,
+  "rows": 21,
+  "runs": 1
+ },
+ "stageC_polish__crease_core_law": {
+  "kinds": {
+   "<none>": 21
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   3
+  ],
+  "ok": 21,
+  "rows": 21,
+  "runs": 1
+ },
+ "throat_adapter": {
+  "kinds": {
+   "<none>": 400
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [],
+  "ok": 400,
+  "rows": 400,
+  "runs": 1
+ },
+ "throatblend_hypex": {
+  "kinds": {
+   "<none>": 4
+  },
+  "mode": {
+   "screen": 4
+  },
+  "objver": [
+   1
+  ],
+  "ok": 4,
+  "rows": 4,
+  "runs": 4
+ },
+ "tractrix": {
+  "kinds": {
+   "<none>": 121
+  },
+  "mode": {
+   "screen": 3
+  },
+  "objver": [],
+  "ok": 121,
+  "rows": 121,
+  "runs": 3
+ },
+ "tractrix_a16": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "tractrix_a48": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "wp11_gpu_bipop": {
+  "kinds": {
+   "<none>": 52,
+   "invalid_geometry": 1,
+   "mesh_too_large": 7
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   1
+  ],
+  "ok": 52,
+  "rows": 60,
+  "runs": 1
+ },
+ "wp11_gpu_bipop_fired": {
+  "kinds": {
+   "<none>": 41,
+   "invalid_geometry": 1,
+   "mesh_too_large": 9
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   1
+  ],
+  "ok": 41,
+  "rows": 51,
+  "runs": 1
+ },
+ "wp11_gpu_cma_me": {
+  "kinds": {
+   "<none>": 47,
+   "mesh_too_large": 13
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   1
+  ],
+  "ok": 47,
+  "rows": 60,
+  "runs": 1
+ },
+ "wp11_gpu_ipop": {
+  "kinds": {
+   "<none>": 52,
+   "invalid_geometry": 1,
+   "mesh_too_large": 7
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   1
+  ],
+  "ok": 52,
+  "rows": 60,
+  "runs": 1
+ },
+ "wp14_multicell_3x3_cpu_near": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   1
+  ],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ },
+ "wp14_multicell_3x3_cpu_plain": {
+  "kinds": {},
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   1
+  ],
+  "ok": 0,
+  "rows": 0,
+  "runs": 1
+ },
+ "wp14_multicell_3x3_cuda": {
+  "kinds": {
+   "<none>": 1
+  },
+  "mode": {
+   "screen": 1
+  },
+  "objver": [
+   1
+  ],
+  "ok": 1,
+  "rows": 1,
+  "runs": 1
+ }
+}

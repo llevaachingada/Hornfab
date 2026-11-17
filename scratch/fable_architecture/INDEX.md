@@ -1,0 +1,250 @@
+# Hornfab discovery architecture — evidence dossier (READ THIS FIRST)
+
+**Prepared:** 2026-11-16, read-only research pass. **Repo:** `C:\Users\hunte\Hrns\hornlab-search`
+(canonical checkout). **Snapshot of record:** `main` @
+`601be8ceeb48f1750bb4f3f6c1fdc682967c8b94`, observed 2026-11-16T20:43:51-05:00.
+**`origin/main` is `2c0e2928…`; local main is 11 commits ahead of the handoff's snapshot.**
+A concurrent lane was committing and editing throughout; a Julia solve and night queue were live.
+Nothing was modified except this ignored `scratch/fable_architecture/` folder.
+
+**Snapshot drift at dossier close (2026-11-16T20:46:32-05:00):** HEAD is now
+`0750a3053875e9060e92af1a2b44f21a4efdc110` (one further commit, a CROWE V2A timing-law fix).
+`git diff --stat 601be8c..0750a30` over **all cited paths** (`search/`, `bo/`, `targets/`,
+`objective/`, the cited `design/` modules, `dataset/`, the runner, `tools/analysis/`, the home
+brief) is empty, so every citation remains valid. Local main is now **12 commits ahead** of
+`origin/main`. The snapshot of record stays `601be8c`; re-read the tree before acting.
+
+**The question:** what representation of horn designs, design goals, feasibility constraints and
+search process will discover more acoustically excellent, diverse, feasible horns per unit of
+compute, while retaining the value of existing results?
+
+**What this is not:** a final architecture. No route below is recommended. Every headline is
+evidence with a status; interpretation is marked as such. Where the repository and the handoff
+disagree, the repository at `601be8c` wins.
+
+---
+
+## Top findings (highest decision value first)
+
+1. **The refusal taxonomy is not trustworthy as a geometry/envelope split.** A post-mesh envelope
+   violation is returned as `invalid_geometry` (`search/evaluate.py:1580`), and a family
+   `GeneratorError` whose text begins `"GeneratorError: invalid_envelope…"` fails the
+   `startswith` test and is also coded geometry (`evaluate.py:1546`). Any statistic that counts
+   `invalid_geometry` as "bad shape" over-counts geometry and under-counts the owner envelope.
+   Consequence: the graded penalty is unreachable for native families
+   (`evaluate.py:1046-1052`, `objective/terms.py:101-115`).
+
+2. **On the current home brief the binding wall is envelope/geometry, not GPU.** Parsing 53 runs
+   from 2026-11-16: 2,538 attempts → 2,249 complete non-cached BEM solves (88.6 %), 81 pre-mesh
+   `invalid_envelope`, 169 `invalid_geometry` (26 of them actually post-mesh envelope), **zero**
+   `mesh_too_large` / `solve_failed` / `metrics_failed`. The 2026-11-14 "694/2,728 ≈ 25 % never
+   reached the solver" is a historical 2026-11-12 record from a lower DOF-cap era, not a current
+   rate.
+
+3. **The generic-GRID pre-mesh extent estimate is conservative on both axes, but realised false
+   refusals are unmeasured.** `grid.envelope_extents` returns `W = H = 2(max_φ radius + wall)` for
+   the generic radial route (`design/generators/grid.py:2989-3020`), so an asymmetric section's
+   smaller axis is over-reported, and a positive estimate is a hard pre-mesh refusal
+   (`design/generated.py:210-221`). Rows, generated-FREEFORM, family and CAD routes use per-plane
+   methods. **No measurement in this pass shows that a refused candidate would have meshed.**
+
+4. **Catalogue "diversity" is mostly names, carries and briefs, not engines.** The distinct
+   engines are OSSE, R-OSSE, ICW, FREEFORM, the point-grid builder and CAD STEP. `spherical_wave`
+   is `lecleach(T=1)`; `salmon_axisym` is `salmon_elliptical` with `fc=fc_h`; generator `osse` is
+   native OSSE resampled; `native__ath_core_v4` vs `…2in_v5` differ only by brief/name. A master
+   typology over these names would not add physics.
+
+5. **Composability stops before the meshed surface.** The generator emits exactly two
+   cross-section stations (`design/generators/registry.py:315-332`); arbitrary stations exist only
+   in native FREEFORM. `morph_target` is a categorical forced into a rounded continuous box
+   (`families.py:73`, `space.py:148-152`); ICW `termination` cannot be searched at all
+   (`families.py:238-239`); an active guiding curve replaces `a_deg`
+   (`profile_formulas.py:389-393`). `search.links` explicitly refuses generator blocks
+   (`search/links.py:36-37`) — so the proposed "couple the knobs with links" remedy is unavailable
+   for exactly the grid/rolled/KlangFilm families that need it.
+
+6. **The objective is an exact point target inside a stated owner range.** v7 is
+   `J = Σ w_k raw_k/tol_k` over nine scalar terms (`objective/scalar_v7.py:549-552`); the only
+   local operators are the one-sided 8 kHz floor and the `load` window minimum. The brief demands
+   80 H × 50 V at every scored frequency while its own comment says 80/50 is the centre of
+   **60–90 H / 40–60 V** (brief L8 vs L28-29). Flat DI is soft (tol 9 ⇒ +5 dB/dec ≈ 2.78);
+   off-axis leakage outside coverage, true rear energy and arbitrary-plane polar smoothness are
+   unscored; SPDI/listening-window are report-only.
+
+7. **A corridor objective (v9) is already in flight — but the snapshot is incomplete.** An
+   untracked `objective/scalar_v9.py` (561 lines, dated 2026-11-17) implements frequency-dependent
+   H/V coverage profiles, detrended DI roughness and an optional HF floor, and
+   `objective/versions.py` is modified to list 9 as supported. It imports
+   `hornlab_search.targets.profile`, **which does not exist in this snapshot**, so v9 is not
+   importable today. The "goal regions" alternative is therefore under active construction, not
+   hypothetical; do not evaluate it as a proposal only.
+
+8. **Reuse is response-anchored and identity-gated.** `physical_solve_id` / `analysis_id` /
+   `score_id` / `study_id` separate solve, metric, score and study (`dataset/identity_v2.py`).
+   Objective and DSP re-scores are free within stored frequencies/angles; new geometry, source,
+   symmetry or frequency support requires a solve. Two "cohort" gates disagree: the strict
+   `bo/cohort.py` refuses `objective_version != 4`, while `bo/data.py` and production accept v7.
+   The DSP rerank evidence is one run / 32 designs (v7 #1 → rank 12), a sensitivity demonstration,
+   not a universal perceptual ranking.
+
+9. **Optimizer capability is narrower than the documentation suggests.** Five policies exist;
+   only scalar, TuRBO and Pareto are production-executable; there is **no in-run policy switch**,
+   and changing the policy invalidates the prepared package. Scalar BO is one `SingleTaskGP` over
+   one frozen task; refusals are excluded from training; no multi-task/cross-family sharing; no
+   constraint output. Encoding is 1–20 **continuous** dims and refuses discrete/categorical keys
+   and historical clipping. `n_min = max(16, 2(d+1))`, a 4096-point pool, and a separate ≥100-row
+   study floor. A prepared package can be unexecutable: `bo_cov_s71001` has 18/155 code pins
+   differing and an expired deadline.
+
+10. **The watchdog is a safety net, not a scientist.** Its bad-outcome test is
+    `(not ok) or non-finite(J) or J >= 900` (`tools/run_campaign_night.py:166-168`), merging five
+    outcome classes that `search/outcomes.py` deliberately separates; it never watches BoTorch
+    study, verify or cohort jobs (`:97-98`); `pin_min_valid`/`pin_frac`/`pin_count` are hard-coded
+    and **not** public YAML (only `pin_ignore` is). Replaying it: 5/6 stop reasons reproduce
+    exactly, but a QD run would have been killed at row 25 and in reality reached best 6.636 and a
+    5/324 archive; two `no gain` stops discarded later gains of 2.4 % and 4.7 %. All 38
+    watchdog-stopped summary rows have `best_J: null`.
+
+11. **Live-reload and queue controls are committed and tested — and one doc contradicts them.**
+    Reorder/insert/remove, PAUSE/STOP, admission and "finished IDs never rerun within the process"
+    all exist (`run_campaign_night.py:1232-1422`, two test files). `queue.ps1:21-22` still says a
+    started night is read once. **Idempotency is per-process only**: `done` starts empty and
+    `queue_state.json` is never read back, so a restart can double-run a finished job.
+
+12. **No adaptive-policy claim has been validated here.** The historical BO-vs-CMA gap is
+    confounded (BO: 185 prior rows, size-pre-checked pool, 60/60/60 valid screens; CMA: one start,
+    31/44/46 valid, 14–29 refusals). Every supervisor option has concrete evidence against it;
+    the safest default while score truth is contested is: keep the watchdog as a safety net, keep
+    the advisor read-only, do not auto-switch, and spend the next cheap work on validity, data and
+    objective.
+
+---
+
+## Important contradictions and stale claims (preserved, not resolved by guessing)
+
+| Claim in circulation | Status at `601be8c` |
+|---|---|
+| Handoff: remote main `2c0e2928` describes the checkout | Local main is 11 commits ahead; a live lane was still editing |
+| `grid.py` is 2,813 lines | 3,020 lines; `envelope_extents` at L2989 (earlier count skipped blank lines) |
+| "25 % never reached the solver" is current | Historical 2026-11-12 record; 2026-11-16 window is 88.6 % complete-BEM, 0 resource faults |
+| BoTorch learns from refusals | False here: refusals are excluded from training |
+| The graded infeasibility penalty applies generally | Unreachable for native families; generated-FREEFORM only |
+| `queue.ps1` says a started night is read once | Contradicted by committed live-reload code and tests |
+| "Nothing committed" for runner live-reload (HOME_18H) | Stale; all of it is committed |
+| The BO stack supports v7 / refuses v7 | Both true at different gates (`bo/data.py` vs `bo/cohort.py`, `bo/metrics.py`) |
+| CMA budget "including cache outcomes" | Cache hits are free (`budget_counts: new`); refusals consume budget |
+| `flat` and `flat_cv` use the same dispersion | `flat` ddof=2, `flat_cv` ddof=0 — undocumented inconsistency |
+| "FREEFORM refuses morph + non-elliptical section" | Search-layer policy, not a mesher refusal |
+
+---
+
+## Candidate architecture routes (unranked; may combine; none preselected)
+
+1. **Minimal unification + truth fixes (control).** Keep the families; fix the envelope/geometry
+   classification, the family-error prefix bug, the conservative grid estimate (if Q1 shows a
+   realised loss), generator-aware `links`, and the v4/v7 cohort split. Cheapest; does not recover
+   genuinely oversized designs or add new physics.
+2. **Hierarchical composable geometry grammar.** Meridian/azimuth expression grammar with typed
+   units and declared `active_when` predicates; dormancy becomes data instead of per-family
+   tables. Expressive over H/V asymmetry, blends, splices, lips and folds; risks a DSL with silent
+   no-ops and evaluation cost, and still cannot express a boolean multi-entry topology.
+3. **Shared constrained body representation (freeform/point-grid + body graph).** One body model
+   with declared throat, envelope, self-intersection and convexity constraints; families become
+   initializers. The only route that naturally covers rollback, asymmetric/swept surfaces and
+   multi-entry; loses published-family parameterization and needs new mesher/fork capability.
+4. **Quality-diversity-first repertoire, paired with a region objective.** Treat the deliverable
+   as a menu of coverage/ripple/size trade-offs rather than one scalar winner; needs a meaningful
+   descriptor (the current default is achieved H/V beamwidth) and enough solves to populate an
+   archive (existing evidence: 10/324 cells at 200 solves).
+5. **Optimizer portfolio / adaptive supervisor.** Only after Q3–Q5 show screen-J is a stable
+   proxy and equality-of-information experiments are affordable. Current code has no state
+   migration between policies, packages are invalidated by policy changes, and arms are
+   non-stationary with unequal valid-row budgets.
+6. **Separate over-envelope acoustic exploration (include or rule out).** Not justified by current
+   evidence: no acoustic datum exists for any oversize design; the code conservatism (finding 3)
+   may explain some refusals and must be measured first; an exploratory campaign would need a new
+   versioned brief, matched source/frequency/metric identities, re-optimization at the HF1440
+   throat, a DOF/cost ceiling and owner approval. A watchdog must never silently convert the
+   600 mm production brief into an oversize one. Fable may legitimately allocate **zero** GPU time
+   to this.
+
+**Decision levers the size evidence actually exposes:** (a) keep 600×480×480 and fix the
+measurement; (b) widen the product envelope — an owner decision; (c) widen the search box only —
+does not touch envelope refusals; (d) change the construction so the horn fits — needs
+generator-aware coupling first.
+
+---
+
+## What Fable needs to decide (not what the dossier decides)
+
+- Is the dominant loss **false refusal**, **valid oversize pruning**, **tight parameterization**,
+  **a point objective that misstates the owner's region**, or **unstable acoustic ranking**? The
+  evidence permits several; it does not rank them.
+- Should the deliverable be a scalar winner, a feasible-region menu, a repertoire, or a dataset of
+  reusable responses?
+- Is a shared geometry representation worth its cost relative to the cheap truth fixes?
+- Should size be hard, soft, report-only, constrained or multiobjective — and different by use case?
+- Is an adaptive supervisor premature while the objective is under active revision (v9 in flight)?
+
+**Open questions, cheap tests and the unchosen-counterfactual limits are in
+`OPEN_QUESTIONS.md`.** The three zero-GPU tests that would most change the decision: screen-vs-
+verify rank stability, held-out GP ranking at 100–231 rows, and refusal-margin learnability.
+
+---
+
+## v3: search supervision and experimental resource allocation
+
+- **What exists:** a committed search watchdog (30 s poll; refusal-rate, no-gain, stall and
+  bound-pin rules; exit 75; partial rows preserved), a committed live queue (reorder/insert/
+  remove, PAUSE/STOP, admission, last-good YAML), and a read-only advisory
+  (`tools/analysis/optimizer_switch.py`). It does **not** watch BO studies, and there is no policy
+  controller.
+- **What the replay shows:** 5/6 historical stops reproduce; the refusal rule would have killed a
+  productive QD run at row 25; `no gain` stops discarded 2.4 % and 4.7 % later gains; the exact
+  stop row is poll-timing dependent (±1–2 rows); archive state at the trigger is unknown.
+- **What is missing for any switch:** no state migration (TuRBO trust state, Pareto metric
+  observations, CMA warm start are different artifacts), no common cost unit (screen calls vs new
+  candidates vs valid rows), packages invalidated by policy/pin changes, and no equal-information
+  experiment.
+- **Options compared:** keep watchdog + better reports; shadow-mode advisor; bounded between-job
+  controller; portfolio/racing; geometry/cost-aware experiment design; defer automation. Evidence
+  **against** each is in `SUPERVISOR_OPTIONS.md`; the switch gates are in
+  `SWITCH_ADMISSION_MATRIX.md`; decision-changing unknowns are in `ADAPTIVE_UNKNOWNS.md`.
+- **Bottom line:** the highest-return next spend is validity/data/objective work, not an
+  auto-switcher. A supervisor, if built, should start as a read-only shadow with a predeclared
+  decision rule and a held-out evaluation period.
+
+---
+
+## File map
+
+| File | What it answers |
+|---|---|
+| `SOURCE_INDEX.md` | exact paths, SHAs, hashes, timestamps, run artifacts, method |
+| `GEOMETRY_AND_PARAMETER_MAP.md` | families vs constructions vs presets; parameter semantics/units/activity/coupling; composition breaks; existing analyzers; five unranked representations |
+| `FAILURE_AND_BOUNDARY_AUDIT.md` | refusal categories with denominators; five boundaries; classification; what optimizers learn; proposed (unrun) experiments |
+| `SIZE_FEASIBILITY_EVIDENCE.md` | every envelope enforcement point by route; the conservative grid estimate; BO pool vs production; cost curve; size levers |
+| `OPTIMIZATION_AND_BRIEF_AUDIT.md` | v7 term-by-term; target precision; goal-region alternatives; zero-GPU reuse matrix; rerank/QD evidence limits |
+| `OPTIMIZER_AND_SWITCH_SECTION.md` | implemented vs documented optimizers; GP sharing rules; v4/v7 gates; TuRBO/Pareto/CMA/QD; unequal-information comparison |
+| `EXTERNAL_EVIDENCE.md` | 13 primary sources with transfer conditions and failure modes |
+| `SEARCH_CONTROL_MAP.md` | runner flags/thresholds/exclusions/resume/queue/locks/idempotency/shadow seam |
+| `WATCHDOG_REPLAY.md` | time-ordered replay of representative runs; counterfactual limits |
+| `SWITCH_ADMISSION_MATRIX.md` | seven run states × next-policy admissibility under strict eligibility |
+| `SUPERVISOR_OPTIONS.md` | six options, evidence against each, simpler baseline |
+| `ADAPTIVE_UNKNOWNS.md` | seven decision-changing questions + falsifying tests |
+| `EVIDENCE_LEDGER.md` | 59 atomic status-labelled claims with counters and follow-ups |
+| `OPEN_QUESTIONS.md` | prioritized gaps: architecture-changing, cheap tests, original-thought questions |
+
+## Tracked digest
+
+The repository carries a condensed, tracked version of this dossier at
+`docs/research/FABLE_DISCOVERY_EVIDENCE_HANDOFF_2026-11-16.md`, committed as `3ad8b1d` and pushed to
+`origin/main`. The 15 evidence files here remain the full record and stay git-ignored.
+
+## Safety / compliance
+
+No tracked file, config, cache, queue or process was modified; no GPU/BEM solve, mesher run,
+pytest, git mutation, process kill or lane lock occurred. `scratch/fable_architecture/` is
+git-ignored (`.gitignore:9`). Historical numbers are labelled as records; only the two NDJSON
+aggregations and the watchdog replay are reproductions. The concurrent lane's work was observed
+and preserved, never overwritten.

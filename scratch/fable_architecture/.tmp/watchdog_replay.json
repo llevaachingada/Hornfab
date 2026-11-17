@@ -1,0 +1,1190 @@
+[
+ {
+  "run": "20261116T081139Z-screen-63158a",
+  "label": "normal_complete_biradial_smooth",
+  "total_rows": 107,
+  "base": 0,
+  "wd": {
+   "min_attempts": 25,
+   "refusal_window": 30,
+   "refusal_max": 0.3,
+   "no_gain_valid": 30,
+   "stall_valid": 40,
+   "min_rel_improve": 0.005
+  },
+  "bounds": [
+   "L_mm",
+   "h_a_deg",
+   "v_a_deg",
+   "h_rm_mm",
+   "v_rm_mm",
+   "h_n",
+   "v_n",
+   "mouth_exponent"
+  ],
+  "first_trigger": null,
+  "checkpoints": [
+   {
+    "row_count": 10,
+    "ts": "2026-11-16T08:12:03Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 10,
+     "unique": 10,
+     "ok": 10,
+     "ok_unique": 10,
+     "cached": 10,
+     "solved_here": 0,
+     "best": 5.735338272391844
+    }
+   },
+   {
+    "row_count": 20,
+    "ts": "2026-11-16T08:15:10Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 20,
+     "unique": 20,
+     "ok": 20,
+     "ok_unique": 20,
+     "cached": 11,
+     "solved_here": 9,
+     "best": 5.583381814427698
+    }
+   },
+   {
+    "row_count": 30,
+    "ts": "2026-11-16T08:18:17Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 30,
+     "unique": 30,
+     "ok": 30,
+     "ok_unique": 30,
+     "cached": 11,
+     "solved_here": 19,
+     "best": 5.583381814427698
+    }
+   },
+   {
+    "row_count": 40,
+    "ts": "2026-11-16T08:21:32Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 40,
+     "unique": 40,
+     "ok": 40,
+     "ok_unique": 40,
+     "cached": 11,
+     "solved_here": 29,
+     "best": 5.583381814427698
+    }
+   },
+   {
+    "row_count": 50,
+    "ts": "2026-11-16T08:24:47Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 50,
+     "unique": 50,
+     "ok": 50,
+     "ok_unique": 50,
+     "cached": 11,
+     "solved_here": 39,
+     "best": 5.530314117644051
+    }
+   },
+   {
+    "row_count": 60,
+    "ts": "2026-11-16T08:27:55Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 60,
+     "unique": 60,
+     "ok": 60,
+     "ok_unique": 60,
+     "cached": 11,
+     "solved_here": 49,
+     "best": 5.47946805698291
+    }
+   },
+   {
+    "row_count": 80,
+    "ts": "2026-11-16T08:33:57Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 80,
+     "unique": 80,
+     "ok": 80,
+     "ok_unique": 80,
+     "cached": 11,
+     "solved_here": 69,
+     "best": 5.144909998179107
+    }
+   },
+   {
+    "row_count": 100,
+    "ts": "2026-11-16T08:40:17Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 100,
+     "unique": 100,
+     "ok": 100,
+     "ok_unique": 100,
+     "cached": 11,
+     "solved_here": 89,
+     "best": 5.144909998179107
+    }
+   }
+  ],
+  "final_stats": {
+   "attempts": 107,
+   "unique": 107,
+   "ok": 107,
+   "ok_unique": 107,
+   "cached": 11,
+   "solved_here": 96,
+   "best": 5.114349700482953
+  }
+ },
+ {
+  "run": "20261116T095336Z-screen-7fc9b7",
+  "label": "watchdog_refusal_crowex",
+  "total_rows": 28,
+  "base": 0,
+  "wd": {
+   "min_attempts": 25,
+   "refusal_window": 30,
+   "refusal_max": 0.3,
+   "no_gain_valid": 30,
+   "stall_valid": 40,
+   "min_rel_improve": 0.005
+  },
+  "bounds": [
+   "g_a_h_deg",
+   "g_a_v_deg",
+   "g_L_mm",
+   "g_s",
+   "g_n",
+   "g_r_lip_mm",
+   "g_wrap_deg",
+   "g_sf_ab",
+   "g_sf_amt"
+  ],
+  "first_trigger": {
+   "row_index": 27,
+   "verdict": "refusal rate 32% over the last 28 attempts > 30%",
+   "ts": "2026-11-16T10:00:52Z",
+   "stats": {
+    "attempts": 28,
+    "unique": 28,
+    "ok": 19,
+    "ok_unique": 19,
+    "cached": 1,
+    "solved_here": 18,
+    "best": 5.6911339378643095
+   }
+  },
+  "checkpoints": [
+   {
+    "row_count": 10,
+    "ts": "2026-11-16T09:56:35Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 10,
+     "unique": 10,
+     "ok": 8,
+     "ok_unique": 8,
+     "cached": 1,
+     "solved_here": 7,
+     "best": 5.878884039769697
+    }
+   },
+   {
+    "row_count": 20,
+    "ts": "2026-11-16T09:59:19Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 20,
+     "unique": 20,
+     "ok": 15,
+     "ok_unique": 15,
+     "cached": 1,
+     "solved_here": 14,
+     "best": 5.741717815666043
+    }
+   },
+   {
+    "row_count": 28,
+    "ts": "2026-11-16T10:00:52Z",
+    "verdict": "refusal rate 32% over the last 28 attempts > 30%",
+    "stats": {
+     "attempts": 28,
+     "unique": 28,
+     "ok": 19,
+     "ok_unique": 19,
+     "cached": 1,
+     "solved_here": 18,
+     "best": 5.6911339378643095
+    }
+   }
+  ],
+  "final_stats": {
+   "attempts": 28,
+   "unique": 28,
+   "ok": 19,
+   "ok_unique": 19,
+   "cached": 1,
+   "solved_here": 18,
+   "best": 5.6911339378643095
+  }
+ },
+ {
+  "run": "20261116T044917Z-screen-12eb61",
+  "label": "watchdog_boundpin_tritonia",
+  "total_rows": 74,
+  "base": 0,
+  "wd": {
+   "min_attempts": 25,
+   "refusal_window": 30,
+   "refusal_max": 0.3,
+   "no_gain_valid": 30,
+   "stall_valid": 40,
+   "min_rel_improve": 0.005
+  },
+  "bounds": [
+   "L_mm",
+   "a0_deg",
+   "a_deg",
+   "k",
+   "az_a_cos_amp",
+   "az_fold_v_deg",
+   "az_fold_v_width_deg",
+   "morph_corner_mm",
+   "morph_height_mm",
+   "morph_rate",
+   "morph_width_mm",
+   "n",
+   "q",
+   "s"
+  ],
+  "first_trigger": {
+   "row_index": 73,
+   "verdict": "bound-pinned: 3/6 of the top 6 sit at the low limit of morph_rate [1.2, 2.1] - widen the box and requeue",
+   "ts": "2026-11-16T05:27:53Z",
+   "stats": {
+    "attempts": 74,
+    "unique": 74,
+    "ok": 73,
+    "ok_unique": 73,
+    "cached": 0,
+    "solved_here": 73,
+    "best": 5.691901189403092
+   }
+  },
+  "checkpoints": [
+   {
+    "row_count": 10,
+    "ts": "2026-11-16T04:54:38Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 10,
+     "unique": 10,
+     "ok": 10,
+     "ok_unique": 10,
+     "cached": 0,
+     "solved_here": 10,
+     "best": 12.617517342967718
+    }
+   },
+   {
+    "row_count": 20,
+    "ts": "2026-11-16T04:59:22Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 20,
+     "unique": 20,
+     "ok": 20,
+     "ok_unique": 20,
+     "cached": 0,
+     "solved_here": 20,
+     "best": 8.114914528487768
+    }
+   },
+   {
+    "row_count": 30,
+    "ts": "2026-11-16T05:04:27Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 30,
+     "unique": 30,
+     "ok": 30,
+     "ok_unique": 30,
+     "cached": 0,
+     "solved_here": 30,
+     "best": 6.46956927056916
+    }
+   },
+   {
+    "row_count": 40,
+    "ts": "2026-11-16T05:09:05Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 40,
+     "unique": 40,
+     "ok": 40,
+     "ok_unique": 40,
+     "cached": 0,
+     "solved_here": 40,
+     "best": 5.9362145756930715
+    }
+   },
+   {
+    "row_count": 50,
+    "ts": "2026-11-16T05:14:09Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 50,
+     "unique": 50,
+     "ok": 50,
+     "ok_unique": 50,
+     "cached": 0,
+     "solved_here": 50,
+     "best": 5.9362145756930715
+    }
+   },
+   {
+    "row_count": 60,
+    "ts": "2026-11-16T05:19:32Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 60,
+     "unique": 60,
+     "ok": 60,
+     "ok_unique": 60,
+     "cached": 0,
+     "solved_here": 60,
+     "best": 5.9362145756930715
+    }
+   },
+   {
+    "row_count": 74,
+    "ts": "2026-11-16T05:27:53Z",
+    "verdict": "bound-pinned: 3/6 of the top 6 sit at the low limit of morph_rate [1.2, 2.1] - widen the box and requeue",
+    "stats": {
+     "attempts": 74,
+     "unique": 74,
+     "ok": 73,
+     "ok_unique": 73,
+     "cached": 0,
+     "solved_here": 73,
+     "best": 5.691901189403092
+    }
+   }
+  ],
+  "final_stats": {
+   "attempts": 74,
+   "unique": 74,
+   "ok": 73,
+   "ok_unique": 73,
+   "cached": 0,
+   "solved_here": 73,
+   "best": 5.691901189403092
+  }
+ },
+ {
+  "run": "20261116T071520Z-screen-1c8608",
+  "label": "watchdog_stall_biradial",
+  "total_rows": 71,
+  "base": 0,
+  "wd": {
+   "min_attempts": 25,
+   "refusal_window": 30,
+   "refusal_max": 0.3,
+   "no_gain_valid": 30,
+   "stall_valid": 40,
+   "min_rel_improve": 0.005
+  },
+  "bounds": [
+   "L_mm",
+   "h_a_deg",
+   "v_a_deg",
+   "h_rm_mm",
+   "v_rm_mm",
+   "h_n",
+   "v_n",
+   "mouth_exponent"
+  ],
+  "first_trigger": {
+   "row_index": 70,
+   "verdict": "stalled: best J 6.482 improved < 0.5% over the last 40 valid evals",
+   "ts": "2026-11-16T07:38:36Z",
+   "stats": {
+    "attempts": 71,
+    "unique": 71,
+    "ok": 71,
+    "ok_unique": 71,
+    "cached": 1,
+    "solved_here": 70,
+    "best": 6.482252764115206
+   }
+  },
+  "checkpoints": [
+   {
+    "row_count": 10,
+    "ts": "2026-11-16T07:18:35Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 10,
+     "unique": 10,
+     "ok": 10,
+     "ok_unique": 10,
+     "cached": 1,
+     "solved_here": 9,
+     "best": 6.978600513414159
+    }
+   },
+   {
+    "row_count": 20,
+    "ts": "2026-11-16T07:21:50Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 20,
+     "unique": 20,
+     "ok": 20,
+     "ok_unique": 20,
+     "cached": 1,
+     "solved_here": 19,
+     "best": 6.834977673183062
+    }
+   },
+   {
+    "row_count": 30,
+    "ts": "2026-11-16T07:24:58Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 30,
+     "unique": 30,
+     "ok": 30,
+     "ok_unique": 30,
+     "cached": 1,
+     "solved_here": 29,
+     "best": 6.768761621889252
+    }
+   },
+   {
+    "row_count": 40,
+    "ts": "2026-11-16T07:28:26Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 40,
+     "unique": 40,
+     "ok": 40,
+     "ok_unique": 40,
+     "cached": 1,
+     "solved_here": 39,
+     "best": 6.482252764115206
+    }
+   },
+   {
+    "row_count": 50,
+    "ts": "2026-11-16T07:31:45Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 50,
+     "unique": 50,
+     "ok": 50,
+     "ok_unique": 50,
+     "cached": 1,
+     "solved_here": 49,
+     "best": 6.482252764115206
+    }
+   },
+   {
+    "row_count": 60,
+    "ts": "2026-11-16T07:35:03Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 60,
+     "unique": 60,
+     "ok": 60,
+     "ok_unique": 60,
+     "cached": 1,
+     "solved_here": 59,
+     "best": 6.482252764115206
+    }
+   },
+   {
+    "row_count": 71,
+    "ts": "2026-11-16T07:38:36Z",
+    "verdict": "stalled: best J 6.482 improved < 0.5% over the last 40 valid evals",
+    "stats": {
+     "attempts": 71,
+     "unique": 71,
+     "ok": 71,
+     "ok_unique": 71,
+     "cached": 1,
+     "solved_here": 70,
+     "best": 6.482252764115206
+    }
+   }
+  ],
+  "final_stats": {
+   "attempts": 71,
+   "unique": 71,
+   "ok": 71,
+   "ok_unique": 71,
+   "cached": 1,
+   "solved_here": 70,
+   "best": 6.482252764115206
+  }
+ },
+ {
+  "run": "20261116T145634Z-screen-e4c778",
+  "label": "watchdog_nogain_rosse",
+  "total_rows": 76,
+  "base": 0,
+  "wd": {
+   "min_attempts": 25,
+   "refusal_window": 30,
+   "refusal_max": 0.3,
+   "no_gain_valid": 30,
+   "stall_valid": 40,
+   "min_rel_improve": 0.005
+  },
+  "bounds": [
+   "g_width_mm",
+   "g_height_mm",
+   "g_rect_exponent",
+   "g_a_h_deg",
+   "g_a_v_deg",
+   "g_k",
+   "g_r",
+   "g_b",
+   "g_tmax"
+  ],
+  "first_trigger": {
+   "row_index": 31,
+   "verdict": "no gain: after 30 valid evals the best is still the seed (J 4.891)",
+   "ts": "2026-11-16T15:09:19Z",
+   "stats": {
+    "attempts": 32,
+    "unique": 32,
+    "ok": 30,
+    "ok_unique": 30,
+    "cached": 0,
+    "solved_here": 30,
+    "best": 4.890773063595839
+   }
+  },
+  "checkpoints": [
+   {
+    "row_count": 10,
+    "ts": "2026-11-16T15:01:09Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 10,
+     "unique": 10,
+     "ok": 10,
+     "ok_unique": 10,
+     "cached": 0,
+     "solved_here": 10,
+     "best": 4.890773063595839
+    }
+   },
+   {
+    "row_count": 20,
+    "ts": "2026-11-16T15:04:50Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 20,
+     "unique": 20,
+     "ok": 19,
+     "ok_unique": 19,
+     "cached": 0,
+     "solved_here": 19,
+     "best": 4.890773063595839
+    }
+   },
+   {
+    "row_count": 30,
+    "ts": "2026-11-16T15:08:34Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 30,
+     "unique": 30,
+     "ok": 28,
+     "ok_unique": 28,
+     "cached": 0,
+     "solved_here": 28,
+     "best": 4.890773063595839
+    }
+   },
+   {
+    "row_count": 32,
+    "ts": "2026-11-16T15:09:19Z",
+    "verdict": "no gain: after 30 valid evals the best is still the seed (J 4.891)",
+    "stats": {
+     "attempts": 32,
+     "unique": 32,
+     "ok": 30,
+     "ok_unique": 30,
+     "cached": 0,
+     "solved_here": 30,
+     "best": 4.890773063595839
+    }
+   },
+   {
+    "row_count": 40,
+    "ts": "2026-11-16T20:46:47Z",
+    "verdict": "no gain: after 38 valid evals the best is still the seed (J 4.891)",
+    "stats": {
+     "attempts": 40,
+     "unique": 40,
+     "ok": 38,
+     "ok_unique": 38,
+     "cached": 0,
+     "solved_here": 38,
+     "best": 4.890773063595839
+    }
+   },
+   {
+    "row_count": 50,
+    "ts": "2026-11-16T20:49:55Z",
+    "verdict": "no gain: after 48 valid evals the best is still the seed (J 4.891)",
+    "stats": {
+     "attempts": 50,
+     "unique": 50,
+     "ok": 48,
+     "ok_unique": 48,
+     "cached": 0,
+     "solved_here": 48,
+     "best": 4.890773063595839
+    }
+   },
+   {
+    "row_count": 60,
+    "ts": "2026-11-16T20:53:32Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 60,
+     "unique": 60,
+     "ok": 58,
+     "ok_unique": 58,
+     "cached": 0,
+     "solved_here": 58,
+     "best": 4.845051738908967
+    }
+   }
+  ],
+  "final_stats": {
+   "attempts": 76,
+   "unique": 76,
+   "ok": 74,
+   "ok_unique": 74,
+   "cached": 0,
+   "solved_here": 74,
+   "best": 4.660628399240937
+  }
+ },
+ {
+  "run": "20261116T054705Z-screen-570bc6",
+  "label": "heavily_refusing_salmon_saddle",
+  "total_rows": 39,
+  "base": 0,
+  "wd": {
+   "min_attempts": 25,
+   "refusal_window": 30,
+   "refusal_max": 0.3,
+   "no_gain_valid": 30,
+   "stall_valid": 40,
+   "min_rel_improve": 0.005
+  },
+  "bounds": [
+   "L_mm",
+   "a0_deg",
+   "a_deg",
+   "k",
+   "az_a_cos_amp",
+   "az_fold_v_deg",
+   "az_fold_v_width_deg",
+   "morph_corner_mm",
+   "morph_height_mm",
+   "morph_rate",
+   "morph_width_mm",
+   "n",
+   "q",
+   "s"
+  ],
+  "first_trigger": {
+   "row_index": 38,
+   "verdict": "bound-pinned: 3/6 of the top 6 sit at the low limit of az_a_cos_amp [-16, -13.5] - widen the box and requeue",
+   "ts": "2026-11-16T06:01:33Z",
+   "stats": {
+    "attempts": 39,
+    "unique": 39,
+    "ok": 39,
+    "ok_unique": 39,
+    "cached": 1,
+    "solved_here": 38,
+    "best": 6.6028628282614825
+   }
+  },
+  "checkpoints": [
+   {
+    "row_count": 10,
+    "ts": "2026-11-16T05:50:55Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 10,
+     "unique": 10,
+     "ok": 10,
+     "ok_unique": 10,
+     "cached": 1,
+     "solved_here": 9,
+     "best": 14.739563253289036
+    }
+   },
+   {
+    "row_count": 20,
+    "ts": "2026-11-16T05:54:58Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 20,
+     "unique": 20,
+     "ok": 20,
+     "ok_unique": 20,
+     "cached": 1,
+     "solved_here": 19,
+     "best": 11.644682210804215
+    }
+   },
+   {
+    "row_count": 30,
+    "ts": "2026-11-16T05:58:31Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 30,
+     "unique": 30,
+     "ok": 30,
+     "ok_unique": 30,
+     "cached": 1,
+     "solved_here": 29,
+     "best": 7.022220804232382
+    }
+   },
+   {
+    "row_count": 39,
+    "ts": "2026-11-16T06:01:33Z",
+    "verdict": "bound-pinned: 3/6 of the top 6 sit at the low limit of az_a_cos_amp [-16, -13.5] - widen the box and requeue",
+    "stats": {
+     "attempts": 39,
+     "unique": 39,
+     "ok": 39,
+     "ok_unique": 39,
+     "cached": 1,
+     "solved_here": 38,
+     "best": 6.6028628282614825
+    }
+   }
+  ],
+  "final_stats": {
+   "attempts": 39,
+   "unique": 39,
+   "ok": 39,
+   "ok_unique": 39,
+   "cached": 1,
+   "solved_here": 38,
+   "best": 6.6028628282614825
+  }
+ },
+ {
+  "run": "20261112T110126Z-screen-c414b1",
+  "label": "qd_cma_me_osse",
+  "total_rows": 401,
+  "base": 0,
+  "wd": {
+   "min_attempts": 25,
+   "refusal_window": 30,
+   "refusal_max": 0.3,
+   "no_gain_valid": 30,
+   "stall_valid": 40,
+   "min_rel_improve": 0.005
+  },
+  "bounds": [
+   "a_deg",
+   "L_mm",
+   "s",
+   "throat_ext_length_mm",
+   "throat_ext_angle_deg",
+   "morph_rate"
+  ],
+  "first_trigger": {
+   "row_index": 24,
+   "verdict": "refusal rate 36% over the last 25 attempts > 30%",
+   "ts": "2026-11-12T11:05:06Z",
+   "stats": {
+    "attempts": 25,
+    "unique": 25,
+    "ok": 16,
+    "ok_unique": 16,
+    "cached": 1,
+    "solved_here": 15,
+    "best": 7.4420728234234685
+   }
+  },
+  "checkpoints": [
+   {
+    "row_count": 10,
+    "ts": "2026-11-12T11:03:14Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 10,
+     "unique": 10,
+     "ok": 8,
+     "ok_unique": 8,
+     "cached": 1,
+     "solved_here": 7,
+     "best": 7.4420728234234685
+    }
+   },
+   {
+    "row_count": 20,
+    "ts": "2026-11-12T11:04:28Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 20,
+     "unique": 20,
+     "ok": 13,
+     "ok_unique": 13,
+     "cached": 1,
+     "solved_here": 12,
+     "best": 7.4420728234234685
+    }
+   },
+   {
+    "row_count": 25,
+    "ts": "2026-11-12T11:05:06Z",
+    "verdict": "refusal rate 36% over the last 25 attempts > 30%",
+    "stats": {
+     "attempts": 25,
+     "unique": 25,
+     "ok": 16,
+     "ok_unique": 16,
+     "cached": 1,
+     "solved_here": 15,
+     "best": 7.4420728234234685
+    }
+   },
+   {
+    "row_count": 30,
+    "ts": "2026-11-12T11:06:00Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 30,
+     "unique": 30,
+     "ok": 21,
+     "ok_unique": 21,
+     "cached": 1,
+     "solved_here": 20,
+     "best": 7.4420728234234685
+    }
+   },
+   {
+    "row_count": 40,
+    "ts": "2026-11-12T11:07:23Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 40,
+     "unique": 40,
+     "ok": 29,
+     "ok_unique": 29,
+     "cached": 1,
+     "solved_here": 28,
+     "best": 7.4420728234234685
+    }
+   },
+   {
+    "row_count": 50,
+    "ts": "2026-11-12T11:08:53Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 50,
+     "unique": 50,
+     "ok": 36,
+     "ok_unique": 36,
+     "cached": 1,
+     "solved_here": 35,
+     "best": 7.161084018251189
+    }
+   },
+   {
+    "row_count": 60,
+    "ts": "2026-11-12T11:10:38Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 60,
+     "unique": 60,
+     "ok": 45,
+     "ok_unique": 45,
+     "cached": 1,
+     "solved_here": 44,
+     "best": 7.161084018251189
+    }
+   },
+   {
+    "row_count": 80,
+    "ts": "2026-11-12T11:13:31Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 80,
+     "unique": 80,
+     "ok": 58,
+     "ok_unique": 58,
+     "cached": 1,
+     "solved_here": 57,
+     "best": 6.636102849109874
+    }
+   },
+   {
+    "row_count": 100,
+    "ts": "2026-11-12T11:16:05Z",
+    "verdict": "refusal rate 50% over the last 30 attempts > 30%",
+    "stats": {
+     "attempts": 100,
+     "unique": 100,
+     "ok": 69,
+     "ok_unique": 69,
+     "cached": 1,
+     "solved_here": 68,
+     "best": 6.636102849109874
+    }
+   },
+   {
+    "row_count": 120,
+    "ts": "2026-11-12T11:18:55Z",
+    "verdict": "refusal rate 33% over the last 30 attempts > 30%",
+    "stats": {
+     "attempts": 120,
+     "unique": 120,
+     "ok": 83,
+     "ok_unique": 83,
+     "cached": 1,
+     "solved_here": 82,
+     "best": 6.636102849109874
+    }
+   }
+  ],
+  "final_stats": {
+   "attempts": 401,
+   "unique": 401,
+   "ok": 281,
+   "ok_unique": 281,
+   "cached": 1,
+   "solved_here": 280,
+   "best": 6.636102849109874
+  }
+ },
+ {
+  "run": "20261116T130335Z-screen-ab4fb9",
+  "label": "resume_leg1_nogain",
+  "total_rows": 77,
+  "base": 0,
+  "wd": {
+   "min_attempts": 25,
+   "refusal_window": 30,
+   "refusal_max": 0.3,
+   "no_gain_valid": 30,
+   "stall_valid": 40,
+   "min_rel_improve": 0.005
+  },
+  "bounds": [
+   "L_mm",
+   "a0_deg",
+   "a_deg",
+   "az_a_cos_amp",
+   "az_a_cos_pow",
+   "az_s_cos2_amp",
+   "k",
+   "morph_corner_mm",
+   "morph_height_mm",
+   "morph_rate",
+   "morph_width_mm",
+   "n",
+   "q",
+   "s",
+   "az_fold_v_deg",
+   "az_fold_v_width_deg",
+   "az_fold_h_deg",
+   "az_fold_h_width_deg"
+  ],
+  "first_trigger": {
+   "row_index": 29,
+   "verdict": "no gain: after 30 valid evals the best is still the seed (J 3.762)",
+   "ts": "2026-11-16T13:16:46Z",
+   "stats": {
+    "attempts": 30,
+    "unique": 30,
+    "ok": 30,
+    "ok_unique": 30,
+    "cached": 0,
+    "solved_here": 30,
+    "best": 3.7618608911411444
+   }
+  },
+  "checkpoints": [
+   {
+    "row_count": 10,
+    "ts": "2026-11-16T13:07:17Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 10,
+     "unique": 10,
+     "ok": 10,
+     "ok_unique": 10,
+     "cached": 0,
+     "solved_here": 10,
+     "best": 3.7618608911411444
+    }
+   },
+   {
+    "row_count": 20,
+    "ts": "2026-11-16T13:12:08Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 20,
+     "unique": 20,
+     "ok": 20,
+     "ok_unique": 20,
+     "cached": 0,
+     "solved_here": 20,
+     "best": 3.7618608911411444
+    }
+   },
+   {
+    "row_count": 30,
+    "ts": "2026-11-16T13:16:46Z",
+    "verdict": "no gain: after 30 valid evals the best is still the seed (J 3.762)",
+    "stats": {
+     "attempts": 30,
+     "unique": 30,
+     "ok": 30,
+     "ok_unique": 30,
+     "cached": 0,
+     "solved_here": 30,
+     "best": 3.7618608911411444
+    }
+   }
+  ],
+  "final_stats": {
+   "attempts": 77,
+   "unique": 77,
+   "ok": 77,
+   "ok_unique": 77,
+   "cached": 0,
+   "solved_here": 77,
+   "best": 3.6732664312779115
+  }
+ },
+ {
+  "run": "20261116T130335Z-screen-ab4fb9",
+  "label": "resume_leg2_new_rows",
+  "total_rows": 77,
+  "base": 30,
+  "wd": {
+   "min_attempts": 25,
+   "refusal_window": 30,
+   "refusal_max": 0.3,
+   "no_gain_valid": 30,
+   "stall_valid": 60,
+   "min_rel_improve": 0.005
+  },
+  "bounds": [
+   "L_mm",
+   "a0_deg",
+   "a_deg",
+   "az_a_cos_amp",
+   "az_a_cos_pow",
+   "az_s_cos2_amp",
+   "k",
+   "morph_corner_mm",
+   "morph_height_mm",
+   "morph_rate",
+   "morph_width_mm",
+   "n",
+   "q",
+   "s",
+   "az_fold_v_deg",
+   "az_fold_v_width_deg",
+   "az_fold_h_deg",
+   "az_fold_h_width_deg"
+  ],
+  "first_trigger": {
+   "row_index": 75,
+   "verdict": "bound-pinned: 3/6 of the top 6 sit at the high limit of az_s_cos2_amp [-0.25, -0.122676] - widen the box and requeue",
+   "ts": "2026-11-16T20:27:32Z",
+   "stats": {
+    "attempts": 76,
+    "unique": 76,
+    "ok": 76,
+    "ok_unique": 76,
+    "cached": 0,
+    "solved_here": 76,
+    "best": 3.6732664312779115
+   }
+  },
+  "checkpoints": [
+   {
+    "row_count": 40,
+    "ts": "2026-11-16T20:15:46Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 40,
+     "unique": 40,
+     "ok": 40,
+     "ok_unique": 40,
+     "cached": 0,
+     "solved_here": 40,
+     "best": 3.7618608911411444
+    }
+   },
+   {
+    "row_count": 47,
+    "ts": "2026-11-16T20:18:06Z",
+    "verdict": null,
+    "stats": {
+     "attempts": 47,
+     "unique": 47,
+     "ok": 47,
+     "ok_unique": 47,
+     "cached": 0,
+     "solved_here": 47,
+     "best": 3.7618608911411444
+    }
+   },
+   {
+    "row_count": 76,
+    "ts": "2026-11-16T20:27:32Z",
+    "verdict": "bound-pinned: 3/6 of the top 6 sit at the high limit of az_s_cos2_amp [-0.25, -0.122676] - widen the box and requeue",
+    "stats": {
+     "attempts": 76,
+     "unique": 76,
+     "ok": 76,
+     "ok_unique": 76,
+     "cached": 0,
+     "solved_here": 76,
+     "best": 3.6732664312779115
+    }
+   }
+  ],
+  "final_stats": {
+   "attempts": 77,
+   "unique": 77,
+   "ok": 77,
+   "ok_unique": 77,
+   "cached": 0,
+   "solved_here": 77,
+   "best": 3.6732664312779115
+  }
+ }
+]
