@@ -1,5 +1,10 @@
 # ISSUES
 
+## 2026-11-17 - Stage 1 WP 1.1 done (constancy mechanism)
+
+- DONE: opt-in v9 constancy term (off by default). OPEN (owner C2): strict, slope-limited or none
+  for the home brief; the slope bound if slope-limited.
+
 ## 2026-11-17 - Stage 3 WP 3.1/3.2 landed (record module)
 
 - DONE: `hornlab_search/geometry/record.py` + 11 offline tests.

@@ -1,5 +1,15 @@
 # CONTINUITY
 
+## 2026-11-17 (senior pass, code) - Stage 1 WP 1.1: opt-in constancy term in objective v9
+
+- `objective.constancy: {mode: strict|slope, weight, tolerance[, slope_max_deg_per_decade]}`,
+  ABSENT by default (J unchanged; terms carry `constancy: 0.0`, like `hf_floor`). Declared by a
+  brief only, never from a family name. Strict reproduces S1's formula exactly
+  (`mean(d^2)/25` == raw/100 at tolerance 0.25); slope mode forgives a steady narrowing up to the
+  declared deg/decade. Counted in `worst_valid_v9_j`. Owner decision C2 picks whether any home
+  brief turns it on. Tests: v9 + GUI corridor + replay + config suites 73 passed (the pinned
+  optional-key test now lists `constancy`).
+
 ## 2026-11-17 (senior pass, code) - Stage 3 WP 3.1/3.2: canonical surface record module
 
 - New `hornlab_search/geometry/record.py`: the N1b/X4-validated contract-v2 sampler packaged
