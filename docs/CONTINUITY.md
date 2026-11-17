@@ -1,5 +1,34 @@
 # CONTINUITY
 
+## 2026-11-16 (21:05 local) - Fairness re-score + RFC amendment delivered (P1 v9 enters gated implementation)
+
+- Deliverable 4/1 (owner-ordered matched re-score): `docs/evidence/CROWE_KLANGFILM_BRIEF_RESCORE_2026-11-17.md`
+  + deterministic script `scratch/rescore_crowe_klangfilm_20261117.py` (results JSON alongside, scratch is gitignored).
+  Crowe ES-600 `22365b569be9` and Klangfilm-Lame `491efb2132b8` best designs re-scored from their STORED
+  `response.npz` under BOTH landscape v7 briefs; identity replays reproduce stored J EXACTLY (Δ = 0.0 both; Crowe
+  16.918176135266869, Klangfilm 8.923616737684702); grid match asserted. 2x2: Crowe 16.92 base / 6.84 smooth;
+  Klangfilm 22.78 base / 8.92 smooth. Findings: ~50% of each base J is the CD assumption (`dislope`+`di`), the 8 kHz
+  floor contributes 14.5-28.4% of base `cov` (Crowe raw 1.4708, Klangfilm 4.3438), and under the smooth brief `diag`
+  becomes Crowe's largest term (2.941 of 6.836, 43%). Method guard: use
+  `search/evaluate.py::metrics_from_response` (sin-theta quadrature) — raw `compute_metrics` mis-weights the
+  theta-phi balloon (up to ~6.9 dB DI over-read; identity replay missed ~4.6 J before the correction; documented).
+- RFC amended, append-only: `docs/research/typologies/NON_CD_OBJECTIVE_PROFILE_RFC_2026-11-16.md` §Amendment
+  2026-11-17 implements the owner's review: direction approved, the 12 defaults NOT blanket-approved:
+  (1) `mode:` split — `corridor` refuses degenerate `min==max` (refusal names plane+anchor), constant profiles are
+  explicit `mode: target` (quadratic vs `preferred_deg`; G11 pins per-anchor equality to legacy cov within 1e-12);
+  (2) `objective.bw8k_floor` REFUSED in v9 (error names both keys) — the profile `min_deg` is the narrow-side HF
+  constraint, and any extra HF penalty exists ONLY as explicit independently weighted `objective.hf_floor
+  {hz,h_deg,v_deg,weight,tolerance}` (absent by default); (3) effective per-plane onset = max(first_anchor, f0_plane),
+  anchors below the plane f0 REFUSED; below-onset behaviour stays `cov_below_f0` unchanged; (4) v6 stays
+  byte-identical; a future owner-gated v10 `loading_profile` imports v6's pure terms (`load_near`/`z_smooth`) with
+  `cov_pat->cov_profile`, `di_roughness` in; v6 J never ranked against v9/v10 J; (5) GUI corridor display
+  (v9+ runs): scored min/max band + dashed edges, dotted NON-penalized `preferred` centreline, `hf_floor` lines
+  labelled with their weight, G13 charts==scorer. Owner-locked: diag unweighted but reported; `distd` weight 0
+  (computed, never redefined); H/V anchors declared independently; `di_roughness` kept; historical J immutable;
+  production defaults untouched. Gates extended to G0-G13; v9 registration ONLY after all gates pass with pasted
+  output.
+- INDEX rows updated (amendment note + re-score evidence).
+
 ## 2026-11-16 - Klangfilm-Lame independent H/V throat core (Phase A) landed; Phase B gated
 
 - Gate 0 audit `docs/evidence/KLANGFILM_HV_THROAT_AUDIT.md`: the canonical incumbent is the 494.439 Hz

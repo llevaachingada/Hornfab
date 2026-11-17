@@ -574,3 +574,171 @@ brief-declared `dislope` target with a transparent weight — never a universal 
 - [ ] §5 `di_roughness` definition + fixture
 - [ ] §6 P2 ordered gates
 - [ ] §7 Open decisions (12 defaults proposed)
+
+---
+
+## Amendment 2026-11-17 (owner review)
+
+**Status:** dated append-only amendment to §2.1/§2.4/§4.4/§4.5/§4.8/§6/§7. No earlier section is
+rewritten or deleted; where this amendment and an earlier section disagree, this amendment governs v9.
+`[verified]` the owner approved the **P1 direction** — versioned v9, frequency-dependent H/V soft
+corridors, detrended `di_roughness`, no automatic typology classification, historical scores preserved —
+and **explicitly rejected blanket approval of the twelve §7 defaults**, ordering the five reconciliations
+below **before any v9 registration**. Docs-only; no code, no tests, no GPU, no queue change. This file is
+again the only repo artifact written by this pass.
+
+### A. Owner decisions now locked
+
+- **`diag` is unweighted but always reported.** Default weight `0.0`, `diag_mode: off`; measured
+  diagonal beamwidths, crossing counts and multilobe flags are **always emitted as diagnostics** and
+  never weighted unless a brief explicitly writes `diag_mode: round`. Confirms §4.5.
+- **`distd` weight is zero.** The term is **still computed and reported** with its exact v7 math
+  (`std(DI)`, `[verified]` `scalar_v7.py:537-542`) and is **NEVER redefined**; `di_roughness` is the
+  honest residual signal (§5). Confirms §4.8/§5.2.
+- **H/V anchor profiles are declared independently per plane** and are **never derived from DI**. The
+  pattern is a first-class target input; DI is neither a source nor a constraint for it (§1.1, §2.4
+  rule 9, handoff line 50).
+- **`di_roughness` is retained exactly as specified in §5** — OLS `a + b·log10(f)` unweighted,
+  population `std(ddof=0)`, ≥ 3 finite samples, default weight `1.0`, tolerance `1.0 dB`; cosmetic
+  changes are not approved.
+- **No classification by family name.** No scorer, loader or feasibility path may select a mode, curve
+  or version from a geometry/family label; `profile_mode` stays advisory metadata (§1.2).
+- **Historical J is immutable.** No stored `total`, terms row, dataset record byte, `config_sha`, solve
+  hash or `score_identity` for versions ≤ 7 or for v6/v7 runs changes (`[verified]` `record.py:179-188`).
+- **Production defaults are unchanged.** No default brief, queue snapshot or running config is edited by
+  this lane or by v9 registration work.
+- **v9 is NOT registered** until the amended gates G0–G13 (§G) pass **with pasted output**; until then
+  v9 is importable-but-unregistered, exactly like v8 (`[verified]` `scalar_v8.py:1-13`, `versions.py:20`).
+
+### B. Reconciliation 1 — constant profile (`min == max`): split the corridor into two modes
+
+`[proposed]` §2.1's single `mode: frequency_envelope` selector and §7 #11 ("constant profile counts as
+CD, allowed") are **resolved by splitting the mode**, because a degenerate corridor would silently turn
+a soft envelope into a hard equality target:
+
+- **`mode: corridor`** — the soft envelope of §4.2. **REQUIRES strict `min_deg < max_deg` at every
+  anchor** (this is §2.4 rule 8, now a hard refusal). Validation refuses a degenerate `min == max`
+  corridor, **naming the exact path — plane and anchor index** (e.g.
+  `target.coverage_profile.h[2]: min_deg must be < max_deg`) — because a zero-width corridor has no
+  permitted envelope and would become a point-equality target, which is **forbidden** in corridor mode.
+  `preferred_deg` stays inside `[min_deg, max_deg]`.
+- **`mode: target`** — the parallel, explicit constant-target mode. Cost is the **quadratic error against
+  `preferred_deg` at each anchor** (log-linear interpolation, clamped, §4.1), i.e. the **legacy
+  per-anchor constant target** (v7 `cov` shape). In this mode `min_deg`/`max_deg` are **optional** and,
+  when present, are legal only as `min = max = preferred_deg`; omitting both is the ordinary case. A
+  target-mode anchor whose `min`/`max` disagree with `preferred_deg` is refused (corridor keys carry no
+  meaning in a non-corridor mode).
+
+Target-mode validation rules (`[proposed]`, repo strict-key/style — every refusal names the exact path):
+
+1. `mode` equals `target`; `interpolation` equals `log_frequency`.
+2. **≥ 1 anchor** per plane (≥ 2 still recommended; **one anchor is the G11 case** and reproduces the
+   legacy single constant target exactly).
+3. Anchor keys ⊆ `{hz, preferred_deg, min_deg, max_deg}`; **`hz` and `preferred_deg` are required**.
+4. `hz` finite, `> 0`, **strictly ascending**, within `[band_lo_hz, band_hi_hz]`, and **≥ the plane's
+   `f0`** (§D).
+5. `preferred_deg` finite, `> 0`.
+6. `min_deg`/`max_deg` either both omitted or both present and **equal to `preferred_deg`**.
+7. H and V are independent: different anchors/counts permitted; no cross-plane constraint.
+
+Target-mode cost per scored frequency `f` and plane: `d = |bw(f) − pref(f)|`, `cost = d²/100`,
+normalised by `tolerances.cov_profile` and combined with the v7 plane split (`mean_H + cov_v_weight ·
+mean_V`, `[verified]` `scalar_v7.py:503-505`) — identical shape to §4.2 with `min = max = preferred`.
+Constant CD is therefore expressed as **`mode: target`**, never as a degenerate corridor.
+The **G11** gate (below) proves the plumbing is behaviour-preserving.
+
+### C. Reconciliation 2 — corridor `min` vs the 8 kHz floor: no double-counting
+
+`[proposed]` In v9 the envelope's interpolated **`min_deg` IS the narrow-side HF constraint**; there is
+no second, independent `0.75 × flat` floor silently stacked on top of it (§4.4). To make double-charging
+impossible rather than merely discouraged:
+
+- **The legacy `objective.bw8k_floor` key is REFUSED in any v9 brief** — `ConfigError` **naming both
+  keys**, i.e. that `objective.bw8k_floor` is invalid with v9 and that the profile `min_deg` is the
+  narrow-side constraint. One narrowing signal, one charge.
+- An **extra** HF penalty beyond the corridor exists **only** through a new, explicit, independently
+  weighted term:
+
+  ```yaml
+  objective:
+    hf_floor: {hz: 8000, h_deg: 60.0, v_deg: 37.5, weight: 0.5, tolerance: 1.0}  # default: absent
+  ```
+
+  `hf_floor` is **absent by default = no extra penalty**; when present it is its **own weighted term**
+  (own weight, own tolerance, own raw = one-sided narrow-only `(dh²+dv²)/100` at the highest solved
+  `f ≤ min(hz, band_hi)`), reported separately. It is never folded into `cov_profile`.
+- **Evidence for why this matters (`[measured]` proof table):** the base CD brief's `bw8k_floor: 0.75`
+  yields floors **60° H / 37.5° V**, and the Crowe ES-600 run's raw floor penalty is **1.471** on top of
+  `cov` (`[measured]` `NON_CD_SCORE_TRUTH_TABLE_2026-11-16.md` run 4: best BW 48.10°/35.18°, floor
+  60°/37.5°) — the same order as a substantial `cov` term. If v9 stacked that legacy floor on a corridor
+  `min`, a narrowing design would be charged twice for the same physics. The refusal above closes it.
+
+### D. Reconciliation 3 — first anchor vs `f0_hz` / `f0_v_hz`: one effective onset
+
+`[proposed]` The **effective per-plane profile onset is `max(first_anchor_hz, f0_plane)`**, where
+`f0_plane` is `f0_hz` for H and `f0_v_hz` for V (falling back to `f0_hz`/`band_lo` per existing rules).
+
+- **Validation REFUSES any anchor below its plane's `f0`** — an anchor below the scoring floor could
+  never be scored and would pretend a guarantee the scorer does not apply. The refusal **names
+  `target.coverage_profile.h[0].hz` / `target.coverage_profile.v[0].hz` (the offending plane's anchor
+  path and index) and the plane's `f0`**, so the fix is unambiguous.
+- **Below the onset**, behaviour is governed by the **existing `cov_below_f0` `mask`/`one_sided` rule
+  unchanged** (`[verified]` `scalar_v7.py:410-449`); the profile does not invent a new below-onset
+  semantics.
+- **Feasibility checks use the first anchor** (§4.6/§7 #7): the owner-declared onset is the lowest
+  anchor `hz`, reported against `f0_h`/`f0_v` and the physics-limited onset. No silent clamp.
+
+### E. Reconciliation 4 — loading-oriented v6 families: keep v6 byte-identical, defer to v10
+
+`[proposed]` Le Cléac'h/JMLC loading-first briefs get profile-aware scoring **without touching
+historical v6**:
+
+- **v6 stays byte-identical** — `load_near`, `z_smooth`, `cov_pat`, `di_rise`, weights, tolerances,
+  stored J, `score_identity` and record bytes are untouched (`[verified]` `scalar_v6.py:193-343`).
+- A **future v10 `loading_profile`** = v6 re-expressed through **imported pure term functions**:
+  `load_near` and `z_smooth` imported **unchanged** from `scalar_v6`; `cov_pat` replaced by
+  `cov_profile` (§4.2 / §B); `di_roughness` replacing the `di_rise` companion. This is a new identity,
+  not an edit to v6.
+- **Never rank a v6 J against a v9/v10 J** (different terms and normalisation; §3.3).
+- **v10 work is itself owner-gated and is NOT part of the current v9 implementation scope.** §4.7's
+  "v9 does not absorb v6" stands; v10 is named here only so the reconciliation is recorded.
+
+### F. Reconciliation 5 — GUI corridor display (P0 follow-up, v9+ runs only)
+
+`[proposed]` For **v9 and later runs only**, the P0 read-only `scoring_view` helper emits **profile
+arrays** — scored frequencies plus per-plane `preferred`/`min`/`max` — so presentation matches the
+scorer, never a hypothetical curve:
+
+- **Beamwidth charts:** draw the **scored corridor band between `min` and `max`** (the scored region),
+  **shaded distinctly** from the legacy visual ±10% guide; the **corridor edges are dashed** (the scored
+  constraints); the **`preferred` centreline is a clearly-labelled NON-PENALIZED dotted line inside the
+  corridor** — label text "preferred — not penalized inside the corridor".
+- **Floor lines only when `hf_floor` is declared**, and **always labelled with its weight**
+  (e.g. `hf_floor w=0.5`); absent `hf_floor` ⇒ no floor line.
+- **Isobar / globe:** corridor edges **dashed** + `preferred` **dotted**, on scored frequencies only;
+  no phantom guide through unscored/one-sided regions (`[verified]` handoff lines 19-20, 43-47).
+- **G13** pins scorer↔chart equality; a chart that disagrees with the scorer is a gate failure, not a
+  cosmetic bug.
+- Versions ≤ 7 keep the P0 truthful-flat rendering exactly; this amendment adds v9+ branches only.
+
+### G. Amended gates (keep G0–G10, add G11–G13)
+
+`[proposed]` **G0–G10 are kept unchanged** (§6). Three gates are added; all run in the same offline/
+filtered-hygiene regime as §6:
+
+| # | Gate | Pass condition | Evidence source |
+|---|---|---|---|
+| G11 | **Target-mode equivalence** | a **one-anchor `mode: target`** brief scores **identical J** to the **equivalent legacy constant-cov synthetic case** **within `1e-12`** (the comparator is the §G11 synthetic case with the same weights/tolerances and symmetric `narrow_ratio = 1.0`, so only the plumbing is under test) | §B; §4.2; `[verified]` `scalar_v7.py:503-505` |
+| G12 | **Double-count refusal** | a v9 brief carrying **`objective.bw8k_floor`** is **refused** with the error **naming both keys** (§C); a v9 brief carrying the explicit independently-weighted **`objective.hf_floor`** is accepted and reports it as its own term | §C; handoff line 64 |
+| G13 | **GUI/scorer equality** | the BW-chart corridor polylines, isobar and globe curves **equal the scorer arrays at every solved frequency**, including **one-sided below-onset windows** and **per-plane onsets**; corridor edges match `min`/`max`, the dotted line matches `preferred`, and floor lines appear only when `hf_floor` is declared | §F; handoff P2 line 75 |
+
+`[verified]` G11's one-anchor case is only meaningful because §B allows **≥ 1 anchor in `mode: target`**
+(the corridor mode still requires ≥ 2, §2.4 rule 5). G12 and G13 are new-behaviour gates and do not
+weaken any existing assertion.
+
+**Closing statement (`[proposed]`, normative).** Registration — `versions.py` dispatch branch,
+`config.py` objective validator (`_validate_objective_block` / `V9Params.from_block`), and any production
+default — happens **ONLY after G0–G13 all pass with pasted terminal output**. Until then, v9 stays
+**importable-but-unregistered, exactly like v8** (`[verified]` `scalar_v8.py:1-13`, `versions.py:20`).
+No default brief, queue snapshot, running config or stored J is touched by this amendment or by v9
+development work prior to that gate.
